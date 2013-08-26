@@ -1,344 +1,220 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: CEPH Erasure Encoding + OSD Scalability
-Date: Sun, 25 Aug 2013 13:49:24 +0200
-Message-ID: <5219EF44.7050603@dachary.org>
-References: <3472A07E6605974CBC9BC573F1BC02E494B06990@PLOXCHG04.cern.ch> <51D73960.3070303@dachary.org> <CAGhffvx5-xmprT-vL1VNrz12+pJSikg1WsUqy_JRdW0JNm5auQ@mail.gmail.com> <51D8827E.8030906@dachary.org> <3472A07E6605974CBC9BC573F1BC02E494B06E64@PLOXCHG04.cern.ch> <5211F508.3030706@dachary.org> <CAGhffvwB87a+1294BjmPrfu0a9hYdu17N-eHOvYCHWMXDLcJmA@mail.gmail.com> <521698D8.5020009@dachary.org> <CAGhffvxW9sG5LtcF-tU1YGkCMAQUfh2WW_3N=f=-vWs48vyxkQ@mail.gmail.com> <52190C65.2090204@dachary.org>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enig579D16364CE9B58E77AF1B99"
+From: ceph branch robot <nobody@ceph.com>
+Subject: ceph branch status
+Date: Mon, 26 Aug 2013 08:00:20 -0700 (PDT)
+Message-ID: <20130826150020.C6543281E5C@teuthology.front.sepia.ceph.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([86.65.39.20]:58594 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756240Ab3HYLt3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 25 Aug 2013 07:49:29 -0400
-In-Reply-To: <52190C65.2090204@dachary.org>
+Received: from gw.sepia.ceph.com ([64.90.32.34]:26495 "EHLO
+	teuthology.front.sepia.ceph.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1751725Ab3HZPAg (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 26 Aug 2013 11:00:36 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andreas-Joachim Peters <andreas.joachim.peters@cern.ch>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig579D16364CE9B58E77AF1B99
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+-- All Branches --
 
+Alfredo Deza <alfredo.deza@inktank.com>
+	2013-08-22 16:40:38 -0400   wip-5900
 
+Dan Mick <dan.mick@inktank.com>
+	2012-12-18 12:27:36 -0800   wip-rbd-striping
+	2013-07-16 23:00:06 -0700   wip-5634
 
-On 24/08/2013 21:41, Loic Dachary wrote:
->=20
->=20
-> On 24/08/2013 15:30, Andreas-Joachim Peters wrote:
->> Hi Loic,=20
->> I will start to review =20
->=20
-> Cool :-)
->=20
-> ...maybe you can briefly explain few things beforehand:
->>
->> 1) the buffer management  .... who allocates the output buffers for th=
-e encoding? Are they always malloced or does it use some generic CEPH buf=
-fer recyling functionality?=20
->=20
-> The output bufferlist is allocated by the pluing and it is the responsi=
-bility of the caller to deallocate them. I will write doxygen documentati=
-on
-> https://github.com/ceph/ceph/pull/518/files#r5966727
+David Zafman <david.zafman@inktank.com>
+	2013-01-28 20:26:34 -0800   wip-wireshark-zafman
+	2013-03-22 18:14:10 -0700   wip-snap-test-fix
 
-Hi Andreas,
+Gary Lowell <gary.lowell@inktank.com>
+	2013-07-23 17:00:07 -0700   wip-build-test
+	2013-08-13 10:45:14 -0700   last
 
-The documentation added today in
-https://github.com/dachary/ceph/blob/wip-5878/src/osd/ErasureCodeInterfac=
-e.h
-will hopefully clarify things. It requires an understanding of https://gi=
-thub.com/ceph/ceph/blob/master/src/include/buffer.h
+Gary Lowell <glowell@inktank.com>
+	2013-01-28 22:49:45 -0800   wip-3930
+	2013-02-05 19:29:11 -0800   wip.cppchecker
+	2013-02-10 22:21:52 -0800   wip-3955
+	2013-02-26 19:28:48 -0800   wip-system-leveldb
+	2013-03-01 18:55:35 -0800   wip-da-spec-1
+	2013-03-19 11:28:15 -0700   wip-3921
+	2013-04-11 23:00:05 -0700   wip-init-radosgw
+	2013-04-17 23:30:11 -0700   wip-4725
+	2013-04-21 22:06:37 -0700   wip-4752
+	2013-04-22 14:11:37 -0700   wip-4632
+	2013-05-31 11:20:40 -0700   wip-doc-prereq
+	2013-06-06 22:31:54 -0700   wip-build-doc
+	2013-08-09 23:19:14 -0700   wip-libglobal
 
-Let me know if you have more questions.
+Greg Farnum <greg@inktank.com>
+	2013-02-13 14:46:38 -0800   wip-mds-snap-fix
+	2013-02-22 19:57:53 -0800   wip-4248-snapid-journaling
+	2013-05-02 12:41:24 -0700   wip-optracker-4354
+	2013-08-23 10:14:03 -0700   wip-6029
 
->=20
->> 2) do you support to retrieve partial blocks or only the full 4M block=
-? are decoded blocks cached for some time?
->=20
-> This is outside of the scope of https://github.com/ceph/ceph/pull/518/f=
-iles : the plugin can handle encode/decode of 128 bytes or 4M in the same=
- way.
->=20
->> 3) do you want to tune the 2+1 basic code for performance or is it jus=
-t proof of concept? If yes, then you should move over the encoding buffer=
- with *ptr++ and use the largest available vector size for the used platf=
-orm to perform XOR operations. I will send you an improved version of the=
- loop if you want ...
->=20
-> The 2+1 is just a proof of concept. I completed a first implementation =
-of the jerasure plugin https://github.com/ceph/ceph/pull/538/files which =
-is meant to be used as a default.=20
->=20
->> 4) if you are interested I can write also code for a (3+3) plugin whic=
-h tolerates 2-3 lost stripes. (one has to add P3=3DA^B^C to my [3,2] prop=
-osal). Atleast it reduces the overhead from 3-fold replication from 300% =
-=3D> 200% ...
->=20
-> It would be great to have such a plugin :-)
->=20
->> 5) will you add CRC32C checksums to the blocks (4M block or 4k pages?)=
- or will this be a CEPH generic functionality for any kind of block?
->=20
-> The idea is to have a CRC32C checksum per object / shard ( as described=
- in http://ceph.com/docs/master/dev/osd_internals/erasure_coding/#glossar=
-y ) : it is the only way for scrubbing to figure out if a given shard is =
-not corrupted and not too expensive since erasure coded pool only support=
- full writes + append and not partial writes that would require to re-cal=
-culate the CRC32C for the whole shard each time one byte is changed.
->=20
->> 6) do you put a kind of header or magic into the encoded blocks to ver=
-ify that your input blocks are actually corresponding?
->=20
-> This has not been decided yet but I think it would be sensible to use t=
-he object attributes ( either xattr or leveldb ) to store meta informatio=
-n instead of creating a file format specifically designed for erasure cod=
-e.
->=20
-> Cheers
->=20
->> Cheers Andreas.
->>
->>
->>
->>
->> On Fri, Aug 23, 2013 at 1:03 AM, Loic Dachary <loic@dachary.org <mailt=
-o:loic@dachary.org>> wrote:
->>
->>
->>
->>     On 22/08/2013 23:42, Andreas-Joachim Peters wrote:> Hi Loic,
->>     > sorry for the late reply, I was on vacation ...  you are right, =
-I did a simple logical mistake since I assumed you loose only the data st=
-ripes but never the parity stripes which is a very wrong assumption.
->>     >
->>     > So for testing you probably could just implement (2+1) and then =
-move to jerasure or dual parity (4+2) where you build horizontal and diag=
-onal parities.
->>     >
->>
->>     Hi Andreas,
->>
->>     That's what I did :-) It would be great if you could review the pr=
-oposed implementation at https://github.com/ceph/ceph/pull/518/files . I'=
-ll keep working on https://github.com/dachary/ceph/commit/83845a66ae1cba6=
-3c122c0ef7658b97b474c2bd2 tomorrow to create the jerasure plugin but it's=
- not ready for review yet.
->>
->>     Cheers
->>
->>     > Cheers Andreas.
->>     >
->>     >
->>     >
->>     >
->>     >
->>     > On Mon, Aug 19, 2013 at 12:35 PM, Loic Dachary <loic@dachary.org=
- <mailto:loic@dachary.org> <mailto:loic@dachary.org <mailto:loic@dachary.=
-org>>> wrote:
->>     >
->>     >     Hi Andreas,
->>     >
->>     >     Trying to write minimal code as you suggested, for an exampl=
-e plugin. My first attempt at writing an erasure coding function. I don't=
- get how you can rebuild P1 + A from P2 + B + C. I must be missing someth=
-ing obvious :-)
->>     >
->>     >     Cheers
->>     >
->>     >     On 07/07/2013 23:04, Andreas Joachim Peters wrote:
->>     >     >
->>     >     > Hi Loic,
->>     >     > I don't think there is a better generic implementation. Ju=
-st made a benchmark .. the Jerasure library with algorithm 'cauchy_good' =
-gives 1.1 GB/s (Xeon 2.27 GHz) on a single core for a 4+2 encoding w=3D32=
-=2E Just to give a feeling if you do 10+4 it is 300 MB/s .... there is a =
-specialized implementation in QFS (Hadoop in C++) for (M+3) ... for curio=
-sity I will make a benchmark with this to compare with Jerasure ...
->>     >     >
->>     >     > In any case I would do an optimized implementation for 3+2=
- which would be probably the most performant implementation having the sa=
-me reliability like standard 3-fold replication in CEPH using only 53% of=
- the space.
->>     >     >
->>     >     > 3+2 is trivial since you encode (A,B,C) with only two pari=
-ty operations
->>     >     > P1 =3D A^B
->>     >     > P2 =3D B^C
->>     >     > and reconstruct with one or two parity operations:
->>     >     > A =3D P1^B
->>     >     > B =3D P1^A
->>     >     > B =3D P2^C
->>     >     > C =3D P2^B
->>     >     > aso.
->>     >     >
->>     >     > You can write this as a simple loop using advanced vector =
-extensions on Intel (AVX). I can paste a benchmark tomorrow.
->>     >     >
->>     >     > Considering the crc32c-intel code you added ... I would pr=
-ovide a function which provides a crc32c checksum and detects if it can d=
-o it using SSE4.2 or implements just the standard algorithm e.g if you ru=
-n in a virtual machine you need this emulation ...
->>     >     >
->>     >     > Cheers Andreas.
->>     >     > ________________________________________
->>     >     > From: Loic Dachary [loic@dachary.org <mailto:loic@dachary.=
-org> <mailto:loic@dachary.org <mailto:loic@dachary.org>>]
->>     >     > Sent: 06 July 2013 22:47
->>     >     > To: Andreas Joachim Peters
->>     >     > Cc: ceph-devel@vger.kernel.org <mailto:ceph-devel@vger.ker=
-nel.org> <mailto:ceph-devel@vger.kernel.org <mailto:ceph-devel@vger.kerne=
-l.org>>
->>     >     > Subject: Re: CEPH Erasure Encoding + OSD Scalability
->>     >     >
->>     >     > Hi Andreas,
->>     >     >
->>     >     > Since it looks like we're going to use jerasure-1.2, we wi=
-ll be able to try (C)RS using
->>     >     >
->>     >     > https://github.com/tsuraan/Jerasure/blob/master/src/cauchy=
-=2Ec
->>     >     > https://github.com/tsuraan/Jerasure/blob/master/src/cauchy=
-=2Eh
->>     >     >
->>     >     > Do you know of a better / faster implementation ? Is there=
- a tradeoff between (C)RS and RS ?
->>     >     >
->>     >     > Cheers
->>     >     >
->>     >     > On 06/07/2013 15:43, Andreas-Joachim Peters wrote:
->>     >     >> HI Loic,
->>     >     >> (C)RS stands for the Cauchy Reed-Solomon codes which are =
-based on pure parity operations, while the standard Reed-Solomon codes ne=
-ed more multiplications and are slower.
->>     >     >>
->>     >     >> Considering the checksumming ... for comparison the CRC32=
- code from libz run's on a 8-core Xeon at ~730 MB/s for small block sizes=
- while SSE4.2 CRC32C checksum run's at ~2GByte/s.
->>     >     >>
->>     >     >> Cheers Andreas.
->>     >     >>
->>     >     >>
->>     >     >>
->>     >     >>
->>     >     >> On Fri, Jul 5, 2013 at 11:23 PM, Loic Dachary <loic@dacha=
-ry.org <mailto:loic@dachary.org> <mailto:loic@dachary.org <mailto:loic@da=
-chary.org>> <mailto:loic@dachary.org <mailto:loic@dachary.org> <mailto:lo=
-ic@dachary.org <mailto:loic@dachary.org>>>> wrote:
->>     >     >>
->>     >     >>     Hi Andreas,
->>     >     >>
->>     >     >>     On 04/07/2013 23:01, Andreas Joachim Peters wrote:> H=
-i Loic,
->>     >     >>     > thanks for the responses!
->>     >     >>     >
->>     >     >>     > Maybe this is useful for your erasure code discussi=
-on:
->>     >     >>     >
->>     >     >>     > as an example in our RS implementation we chunk a d=
-ata block of e.g. 4M into 4 data chunks of 1M. Then we create a 2 parity =
-chunks.
->>     >     >>     >
->>     >     >>     > Data & parity chunks are split into 4k blocks and t=
-hese 4k blocks get a CRC32C block checksum each (SSE4.2 CPU extension =3D=
-> MIT library or BTRFS). This creates 0.1% volume overhead (4 bytes per 4=
-096 bytes) - nothing compared to the parity overhead ...
->>     >     >>     >
->>     >     >>     > You can now easily detect data corruption using the=
- local checksums and avoid to read any parity information and (C)RS decod=
-ing if there is no corruption detected. Moreover CRC32C computation is di=
-stributed over several (in this case 4) machines while (C)RS decoding wou=
-ld run on a single machine where you assemble a block ... and CRC32C is f=
-aster than (C)RS decoding (with SSE4.2) ...
->>     >     >>
->>     >     >>     What does (C)RS mean ? (C)Reed-Solomon ?
->>     >     >>
->>     >     >>     > In our case we write this checksum information sepa=
-rate from the original data ... while in a block-based storage like CEPH =
-it would be probably inlined in the data chunk.
->>     >     >>     > If an OSD detects to run on BRTFS or ZFS one could =
-disable automatically the CRC32C code.
->>     >     >>
->>     >     >>     Nice. I did not know that was built-in :-)
->>     >     >>     https://github.com/dachary/ceph/blob/wip-4929/doc/dev=
-/osd_internals/erasure-code.rst#scrubbing
->>     >     >>
->>     >     >>     > (wouldn't CRC32C be also useful for normal CEPH blo=
-ck replication? )
->>     >     >>
->>     >     >>     I don't know the details of scrubbing but it seems CR=
-C is already used by deep scrubbing
->>     >     >>
->>     >     >>     https://github.com/ceph/ceph/blob/master/src/osd/PG.c=
-c#L2731
->>     >     >>
->>     >     >>     Cheers
->>     >     >>
->>     >     >>     > As far as I know with the RS CODEC we use you can e=
-ither miss stripes (data =3D0) in the decoding process but you cannot inj=
-ect corrupted stripes into the decoding process, so the block checksummin=
-g is important.
->>     >     >>     >
->>     >     >>     > Cheers Andreas.
->>     >     >>
->>     >     >>     --
->>     >     >>     Lo=EFc Dachary, Artisan Logiciel Libre
->>     >     >>     All that is necessary for the triumph of evil is that=
- good people do nothing.
->>     >     >>
->>     >     >>
->>     >     >
->>     >     > --
->>     >     > Lo=EFc Dachary, Artisan Logiciel Libre
->>     >     > All that is necessary for the triumph of evil is that good=
- people do nothing.
->>     >     >
->>     >     > --
->>     >     > To unsubscribe from this list: send the line "unsubscribe =
-ceph-devel" in
->>     >     > the body of a message to majordomo@vger.kernel.org <mailto=
-:majordomo@vger.kernel.org> <mailto:majordomo@vger.kernel.org <mailto:maj=
-ordomo@vger.kernel.org>>
->>     >     > More majordomo info at  http://vger.kernel.org/majordomo-i=
-nfo.html
->>     >     >
->>     >
->>     >     --
->>     >     Lo=EFc Dachary, Artisan Logiciel Libre
->>     >     All that is necessary for the triumph of evil is that good p=
-eople do nothing.
->>     >
->>     >
->>
->>     --
->>     Lo=EFc Dachary, Artisan Logiciel Libre
->>     All that is necessary for the triumph of evil is that good people =
-do nothing.
->>
->>
->=20
+James Page <james.page@ubuntu.com>
+	2013-02-27 22:50:38 +0000   wip-debhelper-8
 
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-All that is necessary for the triumph of evil is that good people do noth=
-ing.
+Joao Eduardo Luis <jecluis@gmail.com>
+	2013-08-12 11:21:29 -0700   wip-store-tool.cuttlefish
+	2013-08-24 14:16:11 +0100   wip-5909
+
+Joao Eduardo Luis <joao.luis@inktank.com>
+	2013-04-18 00:01:24 +0100   wip-4521-tool
+	2013-04-22 15:14:28 +0100   wip-4748
+	2013-04-24 16:42:11 +0100   wip-4521
+	2013-04-30 18:45:22 +0100   wip-mon-compact-dbg
+	2013-05-21 01:46:13 +0100   wip-monstoretool-foo
+	2013-05-31 16:26:02 +0100   wip-mon-cache-first-last-committed
+	2013-05-31 21:00:28 +0100   wip-mon-trim-b
+	2013-07-20 04:30:59 +0100   wip-mon-caps-test
+	2013-07-23 16:21:46 +0100   wip-5704-cuttlefish
+	2013-07-23 17:35:59 +0100   wip-5704
+	2013-08-02 22:54:42 +0100   wip-5648
+	2013-08-12 10:26:29 -0700   wip-store-tool
+
+Joe Buck <jbbuck@gmail.com>
+	2013-05-02 16:32:33 -0700   wip-buck-add-terasort
+	2013-07-31 23:28:46 -0700   wip-buck-rgw-teuth
+
+John Wilkins <john.wilkins@inktank.com>
+	2012-12-21 15:14:37 -0800   wip-mon-docs
+	2013-07-31 18:00:50 -0700   wip-doc-rados-python-api
+
+Josh Durgin <josh.durgin@inktank.com>
+	2013-03-01 14:45:23 -0800   wip-rbd-workunit-debug
+	2013-04-29 14:32:00 -0700   wip-rbd-close-image
+	2013-07-25 18:44:10 -0700   wip-5488-2
+	2013-08-14 15:51:04 -0700   wip-5970
+	2013-08-21 16:31:56 -0700   bobtail
+
+Loic Dachary <loic@dachary.org>
+	2013-08-18 18:28:31 +0200   wip-5878
+	2013-08-21 09:20:22 +0200   wip-5510
+
+Noah Watkins <noahwatkins@gmail.com>
+	2013-01-05 11:58:38 -0800   wip-localized-read-tests
+	2013-07-21 12:01:01 -0700   wip-osx-upstream
+	2013-08-05 13:50:36 -0700   wip-port
+	2013-08-25 08:58:27 -0700   cls-lua
+
+Roald van Loon <roaldvanloon@gmail.com>
+	2012-12-24 22:26:56 +0000   wip-dout
+
+Sage Weil <sage@inktank.com>
+	2012-07-14 17:40:21 -0700   wip-osd-redirect
+	2012-11-30 13:47:27 -0800   wip-osd-readhole
+	2012-12-07 14:38:46 -0800   wip-osd-alloc
+	2013-01-29 13:46:02 -0800   wip-readdir
+	2013-02-11 07:05:15 -0800   wip-sim-journal-clone
+	2013-04-18 13:51:36 -0700   argonaut
+	2013-06-02 21:21:09 -0700   wip-fuse-bobtail
+	2013-06-04 22:43:04 -0700   wip-osd-push
+	2013-06-18 17:00:00 -0700   wip-mon-refs
+	2013-06-21 17:59:58 -0700   wip-rgw-vstart
+	2013-06-28 12:54:08 -0700   wip-mds-snap
+	2013-07-01 17:48:09 -0700   wip-5021
+	2013-07-06 09:22:29 -0700   wip-mds-lazyio-cuttlefish
+	2013-07-06 13:00:51 -0700   wip-mds-lazyio-cuttlefish-minimal
+	2013-07-12 08:50:24 -0700   wip-libcephfs
+	2013-07-18 16:59:03 -0700   wip-refs
+	2013-07-19 21:13:09 -0700   wip-5692
+	2013-07-20 09:02:40 -0700   wip-5695
+	2013-07-21 17:16:10 -0700   wip-5672
+	2013-07-21 19:58:12 -0700   wip-before
+	2013-07-21 22:03:19 -0700   wip-cuttlefish-osdmap
+	2013-07-22 22:31:46 -0700   wip-5039
+	2013-07-23 09:46:55 -0700   wip-5488
+	2013-07-27 08:20:41 -0700   wip-5754
+	2013-08-02 15:47:32 -0700   wip-5648-b
+	2013-08-04 09:38:49 -0700   wip-mon-skip-auth-cuttlefish
+	2013-08-04 22:25:03 -0700   wip-5869
+	2013-08-05 14:10:27 -0700   wip-mon-global-id
+	2013-08-08 22:49:58 -0700   wip-fuse
+	2013-08-09 21:24:08 -0700   wip-ceph-disk
+	2013-08-11 15:18:31 -0700   wip-crush
+	2013-08-13 13:13:30 -0700   wip-5919
+	2013-08-13 14:39:34 -0700   wip-5955
+	2013-08-14 22:16:46 -0700   wip-5973
+	2013-08-15 18:04:24 -0700   wip-neon-crc32c
+	2013-08-22 17:46:45 -0700   wip-monc-leak
+	2013-08-23 08:15:56 -0700   cuttlefish
+	2013-08-23 15:37:18 -0700   dumpling
+	2013-08-23 17:11:15 -0700   wip-6036
+	2013-08-23 22:20:55 -0700   wip-cache-stall
+	2013-08-24 14:04:09 -0700   wip-5924
+
+Sam Lang <sam.lang@inktank.com>
+	2012-11-27 15:01:58 -0600   wip-mtime-incr
+
+Samuel Just <sam.just@inktank.com>
+	2013-06-06 11:51:04 -0700   wip_bench_num
+	2013-06-06 13:08:51 -0700   wip_5238_cuttlefish
+	2013-06-17 14:50:53 -0700   wip-log-rewrite-sam
+	2013-06-19 14:54:13 -0700   wip_cuttlefish_compact_on_startup
+	2013-06-19 19:46:06 -0700   wip_observer
+	2013-07-23 14:04:29 -0700   wip-cuttlefish-next
+	2013-08-15 15:35:26 -0700   wip-5985
+	2013-08-19 00:04:13 -0700   wip-dumpling-pglog-undirty
+	2013-08-21 13:02:04 -0700   wip-5869-DNM
+	2013-08-22 11:19:52 -0700   wip-dumpling-perf
+
+Yehuda Sadeh <yehuda@inktank.com>
+	2012-11-16 11:09:34 -0800   wip-mongoose
+	2012-12-07 13:40:12 -0800   wip-rgw-dr
+	2012-12-13 18:09:37 -0800   wip-2169
+	2013-02-12 09:40:12 -0800   wip-json-decode
+	2013-02-22 15:04:37 -0800   wip-4247
+	2013-02-22 16:19:37 -0800   wip-rgw-zone
+	2013-02-26 18:01:46 -0800   wip-cls-version
+	2013-02-28 09:56:43 -0800   wip-librados-exec
+	2013-03-07 09:46:49 -0800   wip-4363
+	2013-03-07 09:47:56 -0800   wip-4363-next
+	2013-03-07 11:38:06 -0800   wip-4247-bobtail
+	2013-03-12 12:56:01 -0700   wip-4425
+	2013-03-13 10:13:29 -0700   wip-4425-next
+	2013-03-22 11:01:02 -0700   wip-rgw-zone-2
+	2013-03-22 11:29:49 -0700   wip-rgw-zone-3
+	2013-04-15 12:32:48 -0700   wip-rgw-bucketlog
+	2013-04-22 13:01:20 -0700   wip-4776-bobtail
+	2013-04-23 09:26:33 -0700   wip-4755
+	2013-04-26 09:41:39 -0700   wip-4760
+	2013-05-02 22:08:37 -0700   wip-4716
+	2013-05-06 14:41:10 -0700   wip-rgw-bucketlog-2
+	2013-05-07 14:03:04 -0700   wip-4600-bobtail
+	2013-05-07 14:03:37 -0700   wip-4600-argonaut
+	2013-05-14 12:44:21 -0700   wip-rgw-bucketlog-3
+	2013-05-16 09:08:46 -0700   wip-5073-2
+	2013-05-22 21:34:52 -0700   wip-5152
+	2013-05-30 09:34:21 -0700   wip-5204
+	2013-05-30 13:04:27 -0700   wip-5209
+	2013-06-14 14:53:54 -0700   wip-5362
+	2013-06-20 13:38:47 -0700   wip-rgw-geo-enovance
+	2013-06-25 15:30:44 -0700   wip-rgw-geo-bucketinstance
+	2013-06-26 11:36:59 -0700   wip-5455
+	2013-06-29 00:25:32 -0700   wip-rgw-geo-2-replicalog2
+	2013-06-29 21:04:39 -0700   wip-rgw-geo-3
+	2013-07-08 18:55:19 -0700   rgw-next-libcurl
+	2013-07-22 14:46:30 -0700   wip-5664
+	2013-07-29 10:52:22 -0700   wip-5789
+	2013-07-29 10:54:02 -0700   wip-5793
+	2013-07-29 10:58:30 -0700   wip-5770
+	2013-07-30 13:53:53 -0700   wip-5808
+	2013-07-31 10:48:15 -0700   wip-rgw-next
+	2013-08-01 13:20:19 -0700   wip-5831
+	2013-08-01 18:23:49 -0700   wip-5810
+	2013-08-05 11:38:27 -0700   wip-5875
+	2013-08-12 10:38:17 -0700   wip-5931-next
+	2013-08-12 10:39:59 -0700   wip-5931-cuttlefish
+	2013-08-12 10:41:46 -0700   wip-5931-bobtail
+	2013-08-15 11:00:05 -0700   wip-5978
+	2013-08-16 18:19:02 -0700   wip-rgw-papercuts
+	2013-08-19 16:56:27 -0700   wip-6056
+	2013-08-22 13:38:55 -0700   wip-6078
+	2013-08-23 15:39:20 -0700   wip-6111
+	2013-08-25 17:57:23 -0700   wip-5374
+
+caleb miles <caselim@gmail.com>
+	2013-01-07 07:39:02 -0500   wip-3735
 
 
---------------enig579D16364CE9B58E77AF1B99
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with undefined - http://www.enigmail.net/
-
-iEYEARECAAYFAlIZ70QACgkQ8dLMyEl6F22E7gCfaUQEjCp9+ULW1ay3gewEJFEa
-QOYAnjKxL8BPYd3GG7J1Uig3ZsS5zdMK
-=H3cX
------END PGP SIGNATURE-----
-
---------------enig579D16364CE9B58E77AF1B99--
+Grouped by committer, ordered by commit time stamp.
