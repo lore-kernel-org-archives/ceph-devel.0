@@ -1,64 +1,66 @@
-From: Alex Elder <alex.elder@linaro.org>
-Subject: Re: [PATCH 02/15] rbd: convert bus code to use bus_groups
-Date: Tue, 27 Aug 2013 07:35:32 -0500
-Message-ID: <521C9D14.7090502@linaro.org>
-References: <1377293081-10957-1-git-send-email-gregkh@linuxfoundation.org> <1377293081-10957-2-git-send-email-gregkh@linuxfoundation.org>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: is it possible to set up debug env for ceph?
+Date: Tue, 27 Aug 2013 08:14:27 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1308270812500.2000@cobra.newdream.net>
+References: <2013082717200507206612@163.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1377293081-10957-2-git-send-email-gregkh@linuxfoundation.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: linux-kernel@vger.kernel.org, Yehuda Sadeh <yehuda@inktank.com>, Sage Weil <sage@inktank.com>, Alex Elder <elder@inktank.com>, ceph-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1652583222-1377616467=:2000"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:49743 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751808Ab3H0PO2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 27 Aug 2013 11:14:28 -0400
+In-Reply-To: <2013082717200507206612@163.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: =?ISO-2022-JP?Q?=1B$BP$=3FM=1B=28J?= <ylyy-1985@163.com>
+Cc: ceph-devel@vger.kernel.org
 
-On 08/23/2013 04:24 PM, Greg Kroah-Hartman wrote:
-> The bus_attrs field of struct bus_type is going away soon, dev_groups
-> should be used instead.  This converts the RBD bus code to use the
-> correct field.
-> 
-> Cc: Yehuda Sadeh <yehuda@inktank.com>
-> Cc: Sage Weil <sage@inktank.com>
-> Cc: Alex Elder <elder@inktank.com>
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-Looks reasonable to me.
+--557981400-1652583222-1377616467=:2000
+Content-Type: TEXT/PLAIN; charset=ISO-8859-15
+Content-Transfer-Encoding: quoted-printable
 
-Acked-by: Alex Elder <elder@linaro.org>
+[adding ceph-devel]
 
-> Cc: <ceph-devel@vger.kernel.org>
-> Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-> ---
->  drivers/block/rbd.c | 14 +++++++++-----
->  1 file changed, 9 insertions(+), 5 deletions(-)
-> 
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 4ad2ad9a..191cd177 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -397,15 +397,19 @@ static ssize_t rbd_remove(struct bus_type *bus, const char *buf,
->  static int rbd_dev_image_probe(struct rbd_device *rbd_dev, bool mapping);
->  static void rbd_spec_put(struct rbd_spec *spec);
->  
-> -static struct bus_attribute rbd_bus_attrs[] = {
-> -	__ATTR(add, S_IWUSR, NULL, rbd_add),
-> -	__ATTR(remove, S_IWUSR, NULL, rbd_remove),
-> -	__ATTR_NULL
-> +static BUS_ATTR(add, S_IWUSR, NULL, rbd_add);
-> +static BUS_ATTR(remove, S_IWUSR, NULL, rbd_remove);
-> +
-> +static struct attribute *rbd_bus_attrs[] = {
-> +	&bus_attr_add.attr,
-> +	&bus_attr_remove.attr,
-> +	NULL,
->  };
-> +ATTRIBUTE_GROUPS(rbd_bus);
->  
->  static struct bus_type rbd_bus_type = {
->  	.name		= "rbd",
-> -	.bus_attrs	= rbd_bus_attrs,
-> +	.bus_groups	= rbd_bus_groups,
->  };
->  
->  static void rbd_root_dev_release(struct device *dev)
-> 
+On Tue, 27 Aug 2013, ?? wrote:
+> hi, sage,
+> =A0
+> Sorry to trouble you, recently I started to use ceph to deploy a TB clu=
+ster,
+> and it works with 10 osds and I love the S3=A0APIs! Thank god for your =
+job and
+> hope this project long live!
+> I wonder if it is possible to set up a env to debug the source code? fi=
+rst I
+> am not so familiar with c++, can you point me out to some solutions wit=
+h
+> tools=A0or some docs, or some blogs? :)
+
+You can build from source and get a test cluster going with
+
+ git clone git://github.com/ceph/ceph
+ cd ceph
+ git submodule update --init
+ ./do_autogen.sh
+ make
+ cd src
+ mkdir out dev
+ ./vstart.sh -d -n
+
+vstart sets up a simple cluster in the current directory which is suitabl=
+e=20
+for development and testing.  Commands like
+
+ ./init-ceph restart osd
+ ./ceph -s
+
+all work.
+
+Good luck!
+sage
+
+
+--557981400-1652583222-1377616467=:2000--
