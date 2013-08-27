@@ -1,80 +1,69 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH] cleanup: removed last references to g_conf from auth
-Date: Tue, 27 Aug 2013 08:19:40 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1308270819060.2000@cobra.newdream.net>
-References: <CAN04cT65Dd0q-VcKgmr56JrZkt9dKv3Qkv-1aKHtgUydrV10ow@mail.gmail.com> <1377596997-973-1-git-send-email-roaldvanloon@gmail.com> <CAN04cT5w+PrNAaigYeRGQftm6axzQf3SaD4jW+C9jrhwn1TxKw@mail.gmail.com>
+Subject: Re: [ceph-users] Ceph + Xen - RBD io hang
+Date: Tue, 27 Aug 2013 08:27:50 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1308270827280.2000@cobra.newdream.net>
+References: <521C8368.6040102@zynstra.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:49811 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:49951 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752378Ab3H0PTk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 27 Aug 2013 11:19:40 -0400
-In-Reply-To: <CAN04cT5w+PrNAaigYeRGQftm6axzQf3SaD4jW+C9jrhwn1TxKw@mail.gmail.com>
+	with ESMTP id S1753449Ab3H0P1u (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 27 Aug 2013 11:27:50 -0400
+In-Reply-To: <521C8368.6040102@zynstra.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Roald van Loon <roaldvanloon@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: James Dingwall <james.dingwall@zynstra.com>
+Cc: ceph-users@lists.ceph.com, ceph-devel@vger.kernel.org
 
-On Tue, 27 Aug 2013, Roald van Loon wrote:
-> Sorry, the format-patch of the first email was screwed up (tried to
-> copy/paste the email because git was compiled without perl and hence
-> had no send-email support... should have known that would go haywire)
+Hi James,
 
-Ha, no problem.  Applied now, thanks!
+Can you post the contents of the hung task warning so we can see where it 
+is stuck?
 
+Thanks!
 sage
 
+
+On Tue, 27 Aug 2013, James Dingwall wrote:
+
+> Hi,
 > 
-> Roald
+> I am doing some experimentation with Ceph and Xen (on the same host) and I'm
+> experiencing some problems with the rbd device that I'm using as the block
+> device.  My environment is:
 > 
-> On Tue, Aug 27, 2013 at 11:49 AM, Roald J. van Loon
-> <roaldvanloon@gmail.com> wrote:
-> > Trivial cleanup. There were still 3 references to g_conf in CephxKeyServer.
-> > Replaced them in favor of cct->_conf.
-> >
-> > Signed-off-by: Roald J. van Loon <roaldvanloon@gmail.com>
-> > ---
-> >  src/auth/cephx/CephxKeyServer.cc | 6 +++---
-> >  1 file changed, 3 insertions(+), 3 deletions(-)
-> >
-> > diff --git a/src/auth/cephx/CephxKeyServer.cc b/src/auth/cephx/CephxKeyServer.cc
-> > index e0c8174..e57b557 100644
-> > --- a/src/auth/cephx/CephxKeyServer.cc
-> > +++ b/src/auth/cephx/CephxKeyServer.cc
-> > @@ -163,7 +163,7 @@ bool KeyServer::_check_rotating_secrets()
-> >      ldout(cct, 10) << __func__ << " added " << added << dendl;
-> >      data.rotating_ver++;
-> >      //data.next_rotating_time = ceph_clock_now(cct);
-> > -    //data.next_rotating_time += MIN(g_conf->auth_mon_ticket_ttl, g_conf->auth_service_ticket_ttl);
-> > +    //data.next_rotating_time += MIN(cct->_conf->auth_mon_ticket_ttl, cct->_conf->auth_service_ticket_ttl);
-> >      _dump_rotating_secrets();
-> >      return true;
-> >    }
-> > @@ -191,7 +191,7 @@ int KeyServer::_rotate_secret(uint32_t service_id)
-> >    RotatingSecrets& r = data.rotating_secrets[service_id];
-> >    int added = 0;
-> >    utime_t now = ceph_clock_now(cct);
-> > -  double ttl = service_id == CEPH_ENTITY_TYPE_AUTH ? g_conf->auth_mon_ticket_ttl : g_conf->auth_service_ticket_ttl;
-> > +  double ttl = service_id == CEPH_ENTITY_TYPE_AUTH ? cct->_conf->auth_mon_ticket_ttl : cct->_conf->auth_service_ticket_ttl;
-> >
-> >    while (r.need_new_secrets(now)) {
-> >      ExpiringCryptoKey ek;
-> > @@ -424,7 +424,7 @@ int KeyServer::_build_session_auth_info(uint32_t service_id, CephXServiceTicketI
-> >  {
-> >    info.service_id = service_id;
-> >    info.ticket = auth_ticket_info.ticket;
-> > -  info.ticket.init_timestamps(ceph_clock_now(cct), g_conf->auth_service_ticket_ttl);
-> > +  info.ticket.init_timestamps(ceph_clock_now(cct), cct->_conf->auth_service_ticket_ttl);
-> >
-> >    generate_secret(info.session_key);
-> >
-> > --
-> > 1.7.12.4
-> >
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 2 node Ceph 0.67.2 cluster, 4x OSD (btrfs) and 1x mon
+> Xen 4.3.0
+> Kernel 3.10.9
+> 
+> The domU I'm trying to build is from the Ubuntu 13.04 desktop release.  When I
+> pass through the rbd (format 1 or 2) device as phy:/dev/rbd/rbd/ubuntu-test
+> then the domU has no problems reading data from it, the test I ran was:
+> 
+> for i in $(seq 0 1023) ; do
+>     dd if=/dev/xvda of=/dev/null bs=4k count=1024 skip=$(($i * 4))
+> done
+> 
+> However writing data causes the domU to hang while while i is still in single
+> figures but it doesn't seem consistent about the exact value.
+> for i in $(seq 0 1023) ; do
+>     dd of=/dev/xvda of=/dev/zero bs=4k count=1024 seek=$(($i * 4))
+> done
+> 
+> eventually the kernel in the domU will print a hung task warning.  I have
+> tried the domU as pv and hvm (with xen_platform_pci = 1 and 0) but have the
+> same behaviour in both cases.  Once this state is triggered on the rbd device
+> then any interaction with it in dom0 will result in the same hang.  I'm
+> assuming that there is some unfavourable interaction between ceph/rbd and
+> blkback but I haven't found anything in the dom0 logs so I would like to know
+> if anyone has some suggestions about where to start trying to hunt this down.
+> 
+> Thanks,
+> James
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 > 
 > 
