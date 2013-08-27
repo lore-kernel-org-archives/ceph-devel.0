@@ -1,97 +1,64 @@
 From: Alex Elder <alex.elder@linaro.org>
-Subject: Re: [PATCH] rbd: fix I/O error propagation for reads
-Date: Tue, 27 Aug 2013 07:29:46 -0500
-Message-ID: <521C9BBA.7070404@linaro.org>
-References: <1377567242-25736-1-git-send-email-josh.durgin@inktank.com>
+Subject: Re: [PATCH 02/15] rbd: convert bus code to use bus_groups
+Date: Tue, 27 Aug 2013 07:35:32 -0500
+Message-ID: <521C9D14.7090502@linaro.org>
+References: <1377293081-10957-1-git-send-email-gregkh@linuxfoundation.org> <1377293081-10957-2-git-send-email-gregkh@linuxfoundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f169.google.com ([209.85.223.169]:37542 "EHLO
-	mail-ie0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751763Ab3H0M3h (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 27 Aug 2013 08:29:37 -0400
-Received: by mail-ie0-f169.google.com with SMTP id 10so7408555ied.0
-        for <ceph-devel@vger.kernel.org>; Tue, 27 Aug 2013 05:29:37 -0700 (PDT)
-In-Reply-To: <1377567242-25736-1-git-send-email-josh.durgin@inktank.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1377293081-10957-2-git-send-email-gregkh@linuxfoundation.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: linux-kernel@vger.kernel.org, Yehuda Sadeh <yehuda@inktank.com>, Sage Weil <sage@inktank.com>, Alex Elder <elder@inktank.com>, ceph-devel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-On 08/26/2013 08:34 PM, Josh Durgin wrote:
-> When a request returns an error, the driver needs to report the entire
-> extent of the request as completed.  Writes already did this, since
-
-You're right.  The block layer needs to "consume" the bytes in this
-portion of the image request whether or not they were completed
-successfully.
-
-This looks good to me.
-
-Reviewed-by: Alex Elder <elder@linaro.org>
-
-> they always set xferred = length, but reads were skipping that step if
-> an error other than -ENOENT occurred.  Instead, rbd would end up
-> passing 0 xferred to blk_end_request(), which would always report
-> needing more data.  This resulted in an assert failing when more data
-> was required by the block layer, but all the object requests were
-> done:
+On 08/23/2013 04:24 PM, Greg Kroah-Hartman wrote:
+> The bus_attrs field of struct bus_type is going away soon, dev_groups
+> should be used instead.  This converts the RBD bus code to use the
+> correct field.
 > 
-> [ 1868.719077] rbd: obj_request read result -108 xferred 0
-> [ 1868.719077]
-> [ 1868.719518] end_request: I/O error, dev rbd1, sector 0
-> [ 1868.719739]
-> [ 1868.719739] Assertion failure in rbd_img_obj_callback() at line 1736:
-> [ 1868.719739]
-> [ 1868.719739]   rbd_assert(more ^ (which == img_request->obj_request_count));
-> 
-> Without this assert, reads that hit errors would hang forever, since
-> the block layer considered them incomplete.
-> 
-> Fixes: http://tracker.ceph.com/issues/5647
-> Signed-off-by: Josh Durgin <josh.durgin@inktank.com>
+> Cc: Yehuda Sadeh <yehuda@inktank.com>
+> Cc: Sage Weil <sage@inktank.com>
+> Cc: Alex Elder <elder@inktank.com>
+
+Looks reasonable to me.
+
+Acked-by: Alex Elder <elder@linaro.org>
+
+> Cc: <ceph-devel@vger.kernel.org>
+> Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 > ---
->  drivers/block/rbd.c |   14 +++++++-------
->  1 files changed, 7 insertions(+), 7 deletions(-)
+>  drivers/block/rbd.c | 14 +++++++++-----
+>  1 file changed, 9 insertions(+), 5 deletions(-)
 > 
 > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 0d669ae..f8fd7d3 100644
+> index 4ad2ad9a..191cd177 100644
 > --- a/drivers/block/rbd.c
 > +++ b/drivers/block/rbd.c
-> @@ -1557,11 +1557,12 @@ rbd_img_obj_request_read_callback(struct rbd_obj_request *obj_request)
->  		obj_request, obj_request->img_request, obj_request->result,
->  		xferred, length);
->  	/*
-> -	 * ENOENT means a hole in the image.  We zero-fill the
-> -	 * entire length of the request.  A short read also implies
-> -	 * zero-fill to the end of the request.  Either way we
-> -	 * update the xferred count to indicate the whole request
-> -	 * was satisfied.
-> +	 * ENOENT means a hole in the image.  We zero-fill the entire
-> +	 * length of the request.  A short read also implies zero-fill
-> +	 * to the end of the request.  An error requires the whole
-> +	 * length of the request to be reported finished with an error
-> +	 * to the block layer.  In each case we update the xferred
-> +	 * count to indicate the whole request was satisfied.
->  	 */
->  	rbd_assert(obj_request->type != OBJ_REQUEST_NODATA);
->  	if (obj_request->result == -ENOENT) {
-> @@ -1570,14 +1571,13 @@ rbd_img_obj_request_read_callback(struct rbd_obj_request *obj_request)
->  		else
->  			zero_pages(obj_request->pages, 0, length);
->  		obj_request->result = 0;
-> -		obj_request->xferred = length;
->  	} else if (xferred < length && !obj_request->result) {
->  		if (obj_request->type == OBJ_REQUEST_BIO)
->  			zero_bio_chain(obj_request->bio_list, xferred);
->  		else
->  			zero_pages(obj_request->pages, xferred, length);
-> -		obj_request->xferred = length;
->  	}
-> +	obj_request->xferred = length;
->  	obj_request_done_set(obj_request);
->  }
+> @@ -397,15 +397,19 @@ static ssize_t rbd_remove(struct bus_type *bus, const char *buf,
+>  static int rbd_dev_image_probe(struct rbd_device *rbd_dev, bool mapping);
+>  static void rbd_spec_put(struct rbd_spec *spec);
 >  
+> -static struct bus_attribute rbd_bus_attrs[] = {
+> -	__ATTR(add, S_IWUSR, NULL, rbd_add),
+> -	__ATTR(remove, S_IWUSR, NULL, rbd_remove),
+> -	__ATTR_NULL
+> +static BUS_ATTR(add, S_IWUSR, NULL, rbd_add);
+> +static BUS_ATTR(remove, S_IWUSR, NULL, rbd_remove);
+> +
+> +static struct attribute *rbd_bus_attrs[] = {
+> +	&bus_attr_add.attr,
+> +	&bus_attr_remove.attr,
+> +	NULL,
+>  };
+> +ATTRIBUTE_GROUPS(rbd_bus);
+>  
+>  static struct bus_type rbd_bus_type = {
+>  	.name		= "rbd",
+> -	.bus_attrs	= rbd_bus_attrs,
+> +	.bus_groups	= rbd_bus_groups,
+>  };
+>  
+>  static void rbd_root_dev_release(struct device *dev)
 > 
-
