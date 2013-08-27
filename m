@@ -1,33 +1,68 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: linux-next: Tree for Aug 27 (ceph)
-Date: Tue, 27 Aug 2013 12:29:40 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1308271229230.24783@cobra.newdream.net>
-References: <20130827203008.1c54283d628ef706f51a866a@canb.auug.org.au> <521CF7D6.5090807@infradead.org>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-next-owner@vger.kernel.org>
-In-Reply-To: <521CF7D6.5090807@infradead.org>
-Sender: linux-next-owner@vger.kernel.org
-To: Randy Dunlap <rdunlap@infradead.org>
-Cc: Stephen Rothwell <sfr@canb.auug.org.au>, linux-next@vger.kernel.org, linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: [PATCH] rbd: fix buffer size for writes to images with snapshots
+Date: Tue, 27 Aug 2013 15:06:55 -0700
+Message-ID: <1377641215-29459-1-git-send-email-josh.durgin@inktank.com>
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail.hq.newdream.net ([66.33.206.127]:47510 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751879Ab3H0WTo (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 27 Aug 2013 18:19:44 -0400
+Received: from mail.hq.newdream.net (localhost [127.0.0.1])
+	by mail.hq.newdream.net (Postfix) with ESMTP id E6D5A26403
+	for <ceph-devel@vger.kernel.org>; Tue, 27 Aug 2013 15:23:29 -0700 (PDT)
+Received: from vit.ops.newdream.net (unknown [38.122.20.226])
+	by mail.hq.newdream.net (Postfix) with ESMTPSA id D8AF9263F5
+	for <ceph-devel@vger.kernel.org>; Tue, 27 Aug 2013 15:23:29 -0700 (PDT)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Tue, 27 Aug 2013, Randy Dunlap wrote:
-> On 08/27/13 03:30, Stephen Rothwell wrote:
-> > Hi all,
-> > 
-> > I should know better than to take time off around -rc7 :-)
-> > 
-> > Changes since 20130822:
-> > 
-> 
-> on i386:
-> 
-> fs/built-in.o: In function `ceph_fallocate':
-> file.c:(.text+0x20b171): undefined reference to `__divdi3'
+rbd_osd_req_create() needs to know the snapshot context size to create
+a buffer large enough to send it with the message front. It gets this
+from the img_request, which was not set for the obj_request yet. This
+resulted in trying to write past the end of the front payload, hitting
+this BUG:
 
-I've fixed this up in the ceph tree.
+libceph: BUG_ON(p > msg->front.iov_base + msg->front.iov_len);
 
-Thanks!
-sage
+Fix this by associating the obj_request with its img_request
+immediately after it's created, before the osd request is created.
+
+Fixes: http://tracker.ceph.com/issues/5760
+Suggested-by: Alex Elder <alex.elder@linaro.org>
+Signed-off-by: Josh Durgin <josh.durgin@inktank.com>
+---
+ drivers/block/rbd.c |   10 +++++-----
+ 1 files changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index f8fd7d3..80f787b 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -2203,6 +2203,11 @@ static int rbd_img_request_fill(struct rbd_img_request *img_request,
+ 		rbd_segment_name_free(object_name);
+ 		if (!obj_request)
+ 			goto out_unwind;
++		/*
++		 * set obj_request->img_request before creating the
++		 * osd_request so that it gets the right snapc
++		 */
++		rbd_img_obj_request_add(img_request, obj_request);
  
+ 		if (type == OBJ_REQUEST_BIO) {
+ 			unsigned int clone_size;
+@@ -2244,11 +2249,6 @@ static int rbd_img_request_fill(struct rbd_img_request *img_request,
+ 					obj_request->pages, length,
+ 					offset & ~PAGE_MASK, false, false);
+ 
+-		/*
+-		 * set obj_request->img_request before formatting
+-		 * the osd_request so that it gets the right snapc
+-		 */
+-		rbd_img_obj_request_add(img_request, obj_request);
+ 		if (write_request)
+ 			rbd_osd_req_format_write(obj_request);
+ 		else
+-- 
+1.7.2.5
+
