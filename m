@@ -1,30 +1,106 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: trivial bug in aio_write
-Date: Tue, 27 Aug 2013 08:31:07 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1308270831000.2000@cobra.newdream.net>
-References: <6035A0D088A63A46850C3988ED045A4B664AFC7D@BITCOM1.int.sbss.com.au>
+Subject: Re: [PATCH] rbd: fix I/O error propagation for reads
+Date: Tue, 27 Aug 2013 08:36:35 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1308270834060.2000@cobra.newdream.net>
+References: <1377567242-25736-1-git-send-email-josh.durgin@inktank.com> <521C9BBA.7070404@linaro.org>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:50049 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:50157 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753877Ab3H0PbH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 27 Aug 2013 11:31:07 -0400
-In-Reply-To: <6035A0D088A63A46850C3988ED045A4B664AFC7D@BITCOM1.int.sbss.com.au>
+	with ESMTP id S1752130Ab3H0Pgg (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 27 Aug 2013 11:36:36 -0400
+In-Reply-To: <521C9BBA.7070404@linaro.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: James Harper <james.harper@bendigoit.com.au>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Alex Elder <alex.elder@linaro.org>
+Cc: Josh Durgin <josh.durgin@inktank.com>, ceph-devel@vger.kernel.org
 
-It's not; I've pushed a fix.  Thanks!
+On Tue, 27 Aug 2013, Alex Elder wrote:
+> On 08/26/2013 08:34 PM, Josh Durgin wrote:
+> > When a request returns an error, the driver needs to report the entire
+> > extent of the request as completed.  Writes already did this, since
+> 
+> You're right.  The block layer needs to "consume" the bytes in this
+> portion of the image request whether or not they were completed
+> successfully.
+> 
+> This looks good to me.
+> 
+> Reviewed-by: Alex Elder <elder@linaro.org>
 
+This one should go to Linus for 3.11.  I added this tot he testing branch 
+and put a CC stable for 3.10 in there.. is that the right set of kernels 
+to backport to?
+
+Thanks!
 sage
 
-On Tue, 27 Aug 2013, James Harper wrote:
-
-> In internal.cc function aio_write, the ldout(cct, ...) statement writes out &buf instead of buf. I assume this is not intentional.
+ > 
+> > they always set xferred = length, but reads were skipping that step if
+> > an error other than -ENOENT occurred.  Instead, rbd would end up
+> > passing 0 xferred to blk_end_request(), which would always report
+> > needing more data.  This resulted in an assert failing when more data
+> > was required by the block layer, but all the object requests were
+> > done:
+> > 
+> > [ 1868.719077] rbd: obj_request read result -108 xferred 0
+> > [ 1868.719077]
+> > [ 1868.719518] end_request: I/O error, dev rbd1, sector 0
+> > [ 1868.719739]
+> > [ 1868.719739] Assertion failure in rbd_img_obj_callback() at line 1736:
+> > [ 1868.719739]
+> > [ 1868.719739]   rbd_assert(more ^ (which == img_request->obj_request_count));
+> > 
+> > Without this assert, reads that hit errors would hang forever, since
+> > the block layer considered them incomplete.
+> > 
+> > Fixes: http://tracker.ceph.com/issues/5647
+> > Signed-off-by: Josh Durgin <josh.durgin@inktank.com>
+> > ---
+> >  drivers/block/rbd.c |   14 +++++++-------
+> >  1 files changed, 7 insertions(+), 7 deletions(-)
+> > 
+> > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> > index 0d669ae..f8fd7d3 100644
+> > --- a/drivers/block/rbd.c
+> > +++ b/drivers/block/rbd.c
+> > @@ -1557,11 +1557,12 @@ rbd_img_obj_request_read_callback(struct rbd_obj_request *obj_request)
+> >  		obj_request, obj_request->img_request, obj_request->result,
+> >  		xferred, length);
+> >  	/*
+> > -	 * ENOENT means a hole in the image.  We zero-fill the
+> > -	 * entire length of the request.  A short read also implies
+> > -	 * zero-fill to the end of the request.  Either way we
+> > -	 * update the xferred count to indicate the whole request
+> > -	 * was satisfied.
+> > +	 * ENOENT means a hole in the image.  We zero-fill the entire
+> > +	 * length of the request.  A short read also implies zero-fill
+> > +	 * to the end of the request.  An error requires the whole
+> > +	 * length of the request to be reported finished with an error
+> > +	 * to the block layer.  In each case we update the xferred
+> > +	 * count to indicate the whole request was satisfied.
+> >  	 */
+> >  	rbd_assert(obj_request->type != OBJ_REQUEST_NODATA);
+> >  	if (obj_request->result == -ENOENT) {
+> > @@ -1570,14 +1571,13 @@ rbd_img_obj_request_read_callback(struct rbd_obj_request *obj_request)
+> >  		else
+> >  			zero_pages(obj_request->pages, 0, length);
+> >  		obj_request->result = 0;
+> > -		obj_request->xferred = length;
+> >  	} else if (xferred < length && !obj_request->result) {
+> >  		if (obj_request->type == OBJ_REQUEST_BIO)
+> >  			zero_bio_chain(obj_request->bio_list, xferred);
+> >  		else
+> >  			zero_pages(obj_request->pages, xferred, length);
+> > -		obj_request->xferred = length;
+> >  	}
+> > +	obj_request->xferred = length;
+> >  	obj_request_done_set(obj_request);
+> >  }
+> >  
+> > 
 > 
-> James
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
