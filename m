@@ -1,32 +1,94 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH v5] Ceph: Punch hole support for kernel client
-Date: Tue, 27 Aug 2013 16:38:04 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1308271637280.24783@cobra.newdream.net>
-References: <1376538704-6659-1-git-send-email-liwang@ubuntukylin.com> <20130827163555.99ef8be3dacd5bd5eadcac8c@linux-foundation.org>
+From: "Yan, Zheng" <ukernel@gmail.com>
+Subject: Re: [PATCH] reinstate ceph cluster_snap support
+Date: Wed, 28 Aug 2013 08:54:31 +0800
+Message-ID: <CAAM7YA=9A37Paf3+NjM3hYD5Ro2tu0hkUwLrLt_aLtzBmky-aQ@mail.gmail.com>
+References: <orob8qt7kf.fsf@livre.home>
+	<alpine.DEB.2.00.1308231715500.28981@cobra.newdream.net>
+	<ortxifi1cs.fsf@livre.home>
+	<alpine.DEB.2.00.1308271515500.24783@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20130827163555.99ef8be3dacd5bd5eadcac8c@linux-foundation.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: Li Wang <liwang@ubuntukylin.com>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, Yunchuan Wen <yunchuanwen@ubuntukylin.com>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-lb0-f177.google.com ([209.85.217.177]:65068 "EHLO
+	mail-lb0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753051Ab3H1Ayd (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 27 Aug 2013 20:54:33 -0400
+Received: by mail-lb0-f177.google.com with SMTP id p5so3175175lbi.36
+        for <ceph-devel@vger.kernel.org>; Tue, 27 Aug 2013 17:54:32 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.00.1308271515500.24783@cobra.newdream.net>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: Alexandre Oliva <oliva@gnu.org>, sam.just@inktank.com, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tue, 27 Aug 2013, Andrew Morton wrote:
-> On Thu, 15 Aug 2013 11:51:44 +0800 Li Wang <liwang@ubuntukylin.com> wrote:
-> 
-> > This patch implements fallocate and punch hole support for Ceph kernel client.
-> 
-> i386 allmodconfig:
-> 
-> ERROR: "__divdi3" [fs/ceph/ceph.ko] undefined!
-> make[1]: *** [__modpost] Error 1
-> make: *** [modules] Error 2
-> 
-> 
-> Due to a 64-bit divide in ceph_zero_objects()
+On Wed, Aug 28, 2013 at 6:21 AM, Sage Weil <sage@inktank.com> wrote:
+> Hi,
+>
+> On Sat, 24 Aug 2013, Alexandre Oliva wrote:
+>> On Aug 23, 2013, Sage Weil <sage@inktank.com> wrote:
+>>
+>> > FWIW Alexandre, this feature was never really complete.  For it to work,
+>> > we also need to snapshot the monitors, and roll them back as well.
+>>
+>> That depends on what's expected from the feature, actually.
+>>
+>> One use is to roll back a single osd, and for that, the feature works
+>> just fine.  Of course, for that one doesn't need the multi-osd snapshots
+>> to be mutually consistent, but it's still convenient to be able to take
+>> a global snapshot with a single command.
+>>
+>> Another use is to roll back the entire cluster to an earlier state, and
+>> for that, you *probably* want to roll back the monitors too, although it
+>> doesn't seem like this is strictly necessary, unless some significant
+>> configuration changes occurrend in the cluster since the snapshot was
+>> taken, and you want to roll back those too.
+>>
+>> In my experience, rolling back only osds has worked just fine, with the
+>> exception of cases in which the snapshot is much too old, and the mons
+>> have already expired osdmaps after the last one the osd got when the
+>> snapshot was taken.  For this one case, I have a patch that enables the
+>> osd to rejoin the cluster in spite of the expired osdmaps, which has
+>> always worked for me, but I understand there may be exceptional cluster
+>> reconfigurations in which this wouldn't have worked.
+>>
+>>
+>> As for snapshotting monitors...  I suppose the way to go is to start a
+>> store.db dump in background, instead of taking a btrfs snapshot, since
+>> the store.db is not created as a subvolume.  That said, it would make
+>> some sense to make it so, to make it trivially snapshottable.
+>>
+>>
+>> Anyway, I found a problem in the earlier patch: when I added a new disk
+>> to my cluster this morning, it tried to iterate over osdmaps that were
+>> not available (e.g. the long-gone osdmap 1), and crashed.
+>>
+>> Here's a fixed version, that makes sure we don't start the iteration
+>> before m->get_first().
+>
+> In principle, we can add this back in.  I think it needs a few changes,
+> though.
+>
+> First, FileStore::snapshot() needs to pause and drain the workqueue before
+> taking the snapshot, similar to what is done with the sync sequence.
+> Otherwise it isn't a transactionally consistent snapshot and may tear some
+> update.  Because it is draining the work queue, it *might* also need to
+> drop some locks, but I'm hopeful that that isn't necessary.
+>
+> Second, the call in handle_osd_map() should probably go in the loop a bit
+> further down that is consuming maps.  It probably won't matter most of the
+> time, but I'm paranoid about corner conditions.  It also avoids iterating
+> over the new OSDMaps multiple times in the common case where there is no
+> cluster_snap (a minor win).
+>
+> Finally, eventually we should make this do a checkpoint on the mons too.
+> We can add the osd snapping back in first, but before this can/should
+> really be used the mons need to be snapshotted as well.  Probably that's
+> just adding in a snapshot() method to MonitorStore.h and doing either a
+> leveldb snap or making a full copy of store.db... I forget what leveldb is
+> capable of here.
+>
 
-Yep, fix is in the ceph-client.git master branch now and should get picked 
-up by the next -next.
+I think we also need to snapshot the osd journal
 
-sage
+Regards
+Yan, Zheng
