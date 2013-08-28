@@ -1,48 +1,39 @@
 From: Sage Weil <sage@inktank.com>
-Subject: RE: debugging librbd async
-Date: Wed, 28 Aug 2013 08:45:57 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1308280845040.1984@cobra.newdream.net>
-References: <6035A0D088A63A46850C3988ED045A4B66498C5D@BITCOM1.int.sbss.com.au> <alpine.DEB.2.00.1308152206200.1479@cobra.newdream.net> <6035A0D088A63A46850C3988ED045A4B66498DAD@BITCOM1.int.sbss.com.au> <alpine.DEB.2.00.1308152242310.1479@cobra.newdream.net>
- <6035A0D088A63A46850C3988ED045A4B66498EC6@BITCOM1.int.sbss.com.au> <alpine.DEB.2.00.1308160856010.26808@cobra.newdream.net> <6035A0D088A63A46850C3988ED045A4B6649D242@BITCOM1.int.sbss.com.au>
- <6035A0D088A63A46850C3988ED045A4B664B16E7@BITCOM1.int.sbss.com.au>
+Subject: Re: Blueprint:  Add LevelDB support to ceph cluster backend store
+Date: Wed, 28 Aug 2013 09:17:17 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1308280914440.24640@cobra.newdream.net>
+References: <C0D1D705-4B4F-4189-ACBF-4C39D80984DA@gmail.com> <alpine.DEB.2.00.1307302251510.24945@cobra.newdream.net> <D1BCFB84-8694-461C-A81B-2A7E1E8CF4D4@gmail.com> <alpine.DEB.2.00.1308271600400.24783@cobra.newdream.net>
+ <CBA55763-B513-486B-BA73-5995F5A9EE02@gmail.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:33926 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:34235 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752737Ab3H1Pp6 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 28 Aug 2013 11:45:58 -0400
-In-Reply-To: <6035A0D088A63A46850C3988ED045A4B664B16E7@BITCOM1.int.sbss.com.au>
+	with ESMTP id S1752956Ab3H1QRR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 28 Aug 2013 12:17:17 -0400
+In-Reply-To: <CBA55763-B513-486B-BA73-5995F5A9EE02@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: James Harper <james.harper@bendigoit.com.au>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "Sylvain Munaut (s.munaut@whatever-company.com)" <s.munaut@whatever-company.com>
+To: Haomai Wang <haomaiwang@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, 28 Aug 2013, James Harper wrote:
-> Still having crashes with the rbd module for blktap. I think I can't get 
-> consistent debugging info out of librbd. When it writes to a file the 
-> logging is buffered so the tail is always missing. When it logs to 
-> syslog I thought I was getting everything but now I'm not so sure.
+On Wed, 28 Aug 2013, Haomai Wang wrote:
+> 
+> On Aug 28, 2013, at 7:01 AM, Sage Weil <sage@inktank.com> wrote:
+> 
+> > Hi Haomai,
+> > 
+> > I just wanted to check in to see if things have progressed at all since we 
+> > talked at CDS.  If you have any questions or there is anything I can 
+> > help with, let me know!  I'd love to see this alternative backend make it 
+> > into Emperor.
+> Yes, I'm ready to do it. May I ask about how to register bp to redmine? Is it
+> true to do it directly? Can I follow a example bp?
 
-You can disable buffering with
-
- log max recent = 0
-
-That should catch everything!
-
-> What is the best way to ensure that each log message gets flushed to the 
-> logfile? I'm looking now but a hint would get the job done faster!
+There is no magic connection between the blueprints and redmine (yet).  
+Just create a redmine account (if you haven't already) and open a Feature 
+ticket, and cut&paste or link back to the blueprint.  (I've added you to 
+the developer group which lets you do a nubmer of things that you couldn't 
+before.
 
 sage
-
-
-> 
-> Thanks
-> 
-> James
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
