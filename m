@@ -1,31 +1,46 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: [PATCH 0/3] shutdown race and debug fix
-Date: Wed, 28 Aug 2013 23:24:04 -0700
-Message-ID: <1377757447-23515-1-git-send-email-josh.durgin@inktank.com>
+From: Sylvain Munaut <s.munaut@whatever-company.com>
+Subject: radosgw 0.67.2 update -> "ERROR: failed to initialize watch"
+Date: Thu, 29 Aug 2013 11:53:48 +0200
+Message-ID: <CAF6-1L66AG8a1N0ujFvAbYYgXTZ41ug6HtiLvPY8c_AEriHXAw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:35212 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755339Ab3H2Ggh (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Aug 2013 02:36:37 -0400
+Received: from mail-pa0-f54.google.com ([209.85.220.54]:46941 "EHLO
+	mail-pa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754900Ab3H2Jxt (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Aug 2013 05:53:49 -0400
+Received: by mail-pa0-f54.google.com with SMTP id kx10so710324pab.13
+        for <ceph-devel@vger.kernel.org>; Thu, 29 Aug 2013 02:53:48 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Josh Durgin <josh.durgin@inktank.com>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-These patches fix a race in rbd shutdown and a null deref when
-debugging is enabled. They're also available in the wip-rbd-bugs branch
-of ceph-client.git.
+Hi,
 
-Josh Durgin (3):
-  rbd: fix null dereference in dout
-  libceph: add function to ensure notifies are complete
-  rbd: close remove vs. notify race leading to use-after-free
+I just updated our test cluster to 0.67.2+ (latest dumpling branch) (
+from 0.61.x ) and radosgw refuses to start.
 
- drivers/block/rbd.c             |   33 +++++++++++++++++++++++++++------
- include/linux/ceph/osd_client.h |    2 ++
- net/ceph/osd_client.c           |   11 +++++++++++
- 3 files changed, 40 insertions(+), 6 deletions(-)
 
--- 
-1.7.2.5
+2013-08-29 11:46:34.915552 7ffccbc3d780  0 ceph version
+0.67.2-19-gc81bc5b (c81bc5b59dda37f54c02039ca3d5aada64076624), process
+lt-radosgw, pid 30404
+2013-08-29 11:46:34.915598 7ffccbc3d780 -1 WARNING: libcurl doesn't
+support curl_multi_wait()
+2013-08-29 11:46:34.915612 7ffccbc3d780 -1 WARNING: cross zone /
+region transfer performance may be affected
+2013-08-29 11:46:34.935674 7ffcb2ffd700  2
+RGWDataChangesLog::ChangesRenewThread: start
+2013-08-29 11:46:34.937337 7ffccbc3d780 -1 ERROR: failed to initialize watch
+2013-08-29 11:46:34.939135 7ffccbc3d780 -1 Couldn't init storage
+provider (RADOS)
 
+in RGWRados::init_watch(), it seems that :
+
+const char *control_pool = zone.control_pool.name.c_str()
+
+returns an empty string which is really suspect ...
+
+
+Cheers,
+
+    Sylvain
