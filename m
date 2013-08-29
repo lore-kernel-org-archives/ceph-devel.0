@@ -1,16 +1,17 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH 1/3] rbd: fix null dereference in dout
-Date: Thu, 29 Aug 2013 07:46:29 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1308290746230.10144@cobra.newdream.net>
-References: <1377757447-23515-1-git-send-email-josh.durgin@inktank.com> <1377757447-23515-2-git-send-email-josh.durgin@inktank.com>
+Subject: Re: [PATCH 2/3] libceph: add function to ensure notifies are
+ complete
+Date: Thu, 29 Aug 2013 07:46:40 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1308290746320.10144@cobra.newdream.net>
+References: <1377757447-23515-1-git-send-email-josh.durgin@inktank.com> <1377757447-23515-3-git-send-email-josh.durgin@inktank.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:44286 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:44290 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754580Ab3H2Oq3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Aug 2013 10:46:29 -0400
-In-Reply-To: <1377757447-23515-2-git-send-email-josh.durgin@inktank.com>
+	with ESMTP id S1754580Ab3H2Oqk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Aug 2013 10:46:40 -0400
+In-Reply-To: <1377757447-23515-3-git-send-email-josh.durgin@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Josh Durgin <josh.durgin@inktank.com>
@@ -20,37 +21,57 @@ Reviewed-by: Sage Weil <sage@inktank.com>
 
 On Wed, 28 Aug 2013, Josh Durgin wrote:
 
-> The order parameter is sometimes NULL in _rbd_dev_v2_snap_size(), but
-> the dout() always derefences it. Move this to another dout() protected
-> by a check that order is non-NULL.
+> Without a way to flush the osd client's notify workqueue, a watch
+> event that is unregistered could continue receiving callbacks
+> indefinitely.
+> 
+> Unregistering the event simply means no new notifies are added to the
+> queue, but there may still be events in the queue that will call the
+> watch callback for the event. If the queue is flushed after the event
+> is unregistered, the caller can be sure no more watch callbacks will
+> occur for the canceled watch.
 > 
 > Signed-off-by: Josh Durgin <josh.durgin@inktank.com>
 > ---
->  drivers/block/rbd.c |    8 +++++---
->  1 files changed, 5 insertions(+), 3 deletions(-)
+>  include/linux/ceph/osd_client.h |    2 ++
+>  net/ceph/osd_client.c           |   11 +++++++++++
+>  2 files changed, 13 insertions(+), 0 deletions(-)
 > 
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 80f787b..fef3687 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -3702,12 +3702,14 @@ static int _rbd_dev_v2_snap_size(struct rbd_device *rbd_dev, u64 snap_id,
->  	if (ret < sizeof (size_buf))
->  		return -ERANGE;
+> diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
+> index ce6df39..8f47625 100644
+> --- a/include/linux/ceph/osd_client.h
+> +++ b/include/linux/ceph/osd_client.h
+> @@ -335,6 +335,8 @@ extern int ceph_osdc_wait_request(struct ceph_osd_client *osdc,
+>  				  struct ceph_osd_request *req);
+>  extern void ceph_osdc_sync(struct ceph_osd_client *osdc);
 >  
-> -	if (order)
-> +	if (order) {
->  		*order = size_buf.order;
-> +		dout("  order %u", (unsigned int)*order);
-> +	}
->  	*snap_size = le64_to_cpu(size_buf.size);
+> +extern void ceph_osdc_flush_notifies(struct ceph_osd_client *osdc);
+> +
+>  extern int ceph_osdc_readpages(struct ceph_osd_client *osdc,
+>  			       struct ceph_vino vino,
+>  			       struct ceph_file_layout *layout,
+> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+> index 1606f74..2b4b32a 100644
+> --- a/net/ceph/osd_client.c
+> +++ b/net/ceph/osd_client.c
+> @@ -2216,6 +2216,17 @@ void ceph_osdc_sync(struct ceph_osd_client *osdc)
+>  EXPORT_SYMBOL(ceph_osdc_sync);
 >  
-> -	dout("  snap_id 0x%016llx order = %u, snap_size = %llu\n",
-> -		(unsigned long long)snap_id, (unsigned int)*order,
-> +	dout("  snap_id 0x%016llx snap_size = %llu\n",
-> +		(unsigned long long)snap_id,
->  		(unsigned long long)*snap_size);
->  
->  	return 0;
+>  /*
+> + * Call all pending notify callbacks - for use after a watch is
+> + * unregistered, to make sure no more callbacks for it will be invoked
+> + */
+> +extern void ceph_osdc_flush_notifies(struct ceph_osd_client *osdc)
+> +{
+> +	flush_workqueue(osdc->notify_wq);
+> +}
+> +EXPORT_SYMBOL(ceph_osdc_flush_notifies);
+> +
+> +
+> +/*
+>   * init, shutdown
+>   */
+>  int ceph_osdc_init(struct ceph_osd_client *osdc, struct ceph_client *client)
 > -- 
 > 1.7.2.5
 > 
