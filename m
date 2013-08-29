@@ -1,59 +1,78 @@
 From: Alex Elder <alex.elder@linaro.org>
-Subject: Re: [PATCH 1/3] rbd: fix null dereference in dout
-Date: Thu, 29 Aug 2013 09:26:24 -0500
-Message-ID: <521F5A10.90608@linaro.org>
-References: <1377757447-23515-1-git-send-email-josh.durgin@inktank.com> <1377757447-23515-2-git-send-email-josh.durgin@inktank.com>
+Subject: Re: [PATCH] rbd: fix buffer size for writes to images with snapshots
+Date: Thu, 29 Aug 2013 09:31:55 -0500
+Message-ID: <521F5B5B.40205@linaro.org>
+References: <1377641215-29459-1-git-send-email-josh.durgin@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oa0-f51.google.com ([209.85.219.51]:58840 "EHLO
-	mail-oa0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753001Ab3H2O0Z (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Aug 2013 10:26:25 -0400
-Received: by mail-oa0-f51.google.com with SMTP id h1so647682oag.10
-        for <ceph-devel@vger.kernel.org>; Thu, 29 Aug 2013 07:26:24 -0700 (PDT)
-In-Reply-To: <1377757447-23515-2-git-send-email-josh.durgin@inktank.com>
+Received: from mail-oa0-f47.google.com ([209.85.219.47]:63887 "EHLO
+	mail-oa0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753266Ab3H2Ob4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Aug 2013 10:31:56 -0400
+Received: by mail-oa0-f47.google.com with SMTP id g12so656778oah.6
+        for <ceph-devel@vger.kernel.org>; Thu, 29 Aug 2013 07:31:55 -0700 (PDT)
+In-Reply-To: <1377641215-29459-1-git-send-email-josh.durgin@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Josh Durgin <josh.durgin@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-On 08/29/2013 01:24 AM, Josh Durgin wrote:
-> The order parameter is sometimes NULL in _rbd_dev_v2_snap_size(), but
-> the dout() always derefences it. Move this to another dout() protected
-> by a check that order is non-NULL.
+On 08/27/2013 05:06 PM, Josh Durgin wrote:
+> rbd_osd_req_create() needs to know the snapshot context size to create
+> a buffer large enough to send it with the message front. It gets this
+> from the img_request, which was not set for the obj_request yet. This
+> resulted in trying to write past the end of the front payload, hitting
+> this BUG:
+> 
+> libceph: BUG_ON(p > msg->front.iov_base + msg->front.iov_len);
+> 
+> Fix this by associating the obj_request with its img_request
+> immediately after it's created, before the osd request is created.
+> 
+> Fixes: http://tracker.ceph.com/issues/5760
+> Suggested-by: Alex Elder <alex.elder@linaro.org>
 
-Looks good.
+I must have suggested it in e-mail...  I guess I should have updated
+the bug.
+
+This looks good.
 
 Reviewed-by: Alex Elder <elder@linaro.org>
 
 > Signed-off-by: Josh Durgin <josh.durgin@inktank.com>
 > ---
->  drivers/block/rbd.c |    8 +++++---
->  1 files changed, 5 insertions(+), 3 deletions(-)
+>  drivers/block/rbd.c |   10 +++++-----
+>  1 files changed, 5 insertions(+), 5 deletions(-)
 > 
 > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 80f787b..fef3687 100644
+> index f8fd7d3..80f787b 100644
 > --- a/drivers/block/rbd.c
 > +++ b/drivers/block/rbd.c
-> @@ -3702,12 +3702,14 @@ static int _rbd_dev_v2_snap_size(struct rbd_device *rbd_dev, u64 snap_id,
->  	if (ret < sizeof (size_buf))
->  		return -ERANGE;
+> @@ -2203,6 +2203,11 @@ static int rbd_img_request_fill(struct rbd_img_request *img_request,
+>  		rbd_segment_name_free(object_name);
+>  		if (!obj_request)
+>  			goto out_unwind;
+> +		/*
+> +		 * set obj_request->img_request before creating the
+> +		 * osd_request so that it gets the right snapc
+> +		 */
+> +		rbd_img_obj_request_add(img_request, obj_request);
 >  
-> -	if (order)
-> +	if (order) {
->  		*order = size_buf.order;
-> +		dout("  order %u", (unsigned int)*order);
-> +	}
->  	*snap_size = le64_to_cpu(size_buf.size);
+>  		if (type == OBJ_REQUEST_BIO) {
+>  			unsigned int clone_size;
+> @@ -2244,11 +2249,6 @@ static int rbd_img_request_fill(struct rbd_img_request *img_request,
+>  					obj_request->pages, length,
+>  					offset & ~PAGE_MASK, false, false);
 >  
-> -	dout("  snap_id 0x%016llx order = %u, snap_size = %llu\n",
-> -		(unsigned long long)snap_id, (unsigned int)*order,
-> +	dout("  snap_id 0x%016llx snap_size = %llu\n",
-> +		(unsigned long long)snap_id,
->  		(unsigned long long)*snap_size);
->  
->  	return 0;
+> -		/*
+> -		 * set obj_request->img_request before formatting
+> -		 * the osd_request so that it gets the right snapc
+> -		 */
+> -		rbd_img_obj_request_add(img_request, obj_request);
+>  		if (write_request)
+>  			rbd_osd_req_format_write(obj_request);
+>  		else
 > 
 
