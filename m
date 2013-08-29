@@ -1,26 +1,25 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH 2/3] libceph: add function to ensure notifies are
- complete
-Date: Thu, 29 Aug 2013 07:46:40 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1308290746320.10144@cobra.newdream.net>
+From: Alex Elder <alex.elder@linaro.org>
+Subject: Re: [PATCH 2/3] libceph: add function to ensure notifies are complete
+Date: Thu, 29 Aug 2013 10:21:49 -0500
+Message-ID: <521F670D.7000205@linaro.org>
 References: <1377757447-23515-1-git-send-email-josh.durgin@inktank.com> <1377757447-23515-3-git-send-email-josh.durgin@inktank.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:44290 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754580Ab3H2Oqk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Aug 2013 10:46:40 -0400
+Received: from mail-ob0-f169.google.com ([209.85.214.169]:39046 "EHLO
+	mail-ob0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752447Ab3H2PVu (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Aug 2013 11:21:50 -0400
+Received: by mail-ob0-f169.google.com with SMTP id es8so630925obc.28
+        for <ceph-devel@vger.kernel.org>; Thu, 29 Aug 2013 08:21:49 -0700 (PDT)
 In-Reply-To: <1377757447-23515-3-git-send-email-josh.durgin@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Josh Durgin <josh.durgin@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-Reviewed-by: Sage Weil <sage@inktank.com>
-
-On Wed, 28 Aug 2013, Josh Durgin wrote:
-
+On 08/29/2013 01:24 AM, Josh Durgin wrote:
 > Without a way to flush the osd client's notify workqueue, a watch
 > event that is unregistered could continue receiving callbacks
 > indefinitely.
@@ -30,7 +29,11 @@ On Wed, 28 Aug 2013, Josh Durgin wrote:
 > watch callback for the event. If the queue is flushed after the event
 > is unregistered, the caller can be sure no more watch callbacks will
 > occur for the canceled watch.
-> 
+
+Looks good.
+
+Reviewed-by: Alex Elder <elder@linaro.org>
+
 > Signed-off-by: Josh Durgin <josh.durgin@inktank.com>
 > ---
 >  include/linux/ceph/osd_client.h |    2 ++
@@ -72,12 +75,5 @@ On Wed, 28 Aug 2013, Josh Durgin wrote:
 >   * init, shutdown
 >   */
 >  int ceph_osdc_init(struct ceph_osd_client *osdc, struct ceph_client *client)
-> -- 
-> 1.7.2.5
 > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+
