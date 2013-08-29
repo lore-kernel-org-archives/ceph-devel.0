@@ -1,143 +1,223 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 3/3] rbd: close remove vs. notify race leading to use-after-free
-Date: Thu, 29 Aug 2013 11:36:06 -0700
-Message-ID: <521F9496.7040103@inktank.com>
-References: <1377757447-23515-1-git-send-email-josh.durgin@inktank.com> <1377757447-23515-4-git-send-email-josh.durgin@inktank.com> <alpine.DEB.2.00.1308290743380.10144@cobra.newdream.net>
+From: Yehuda Sadeh <yehuda@inktank.com>
+Subject: Re: radosgw 0.67.2 update -> "ERROR: failed to initialize watch"
+Date: Thu, 29 Aug 2013 13:06:58 -0700
+Message-ID: <CABBk=J-OUyvRSyoN8pc_4-GmE-XbRwjEAHMyC=9kAGhzbbgD4g@mail.gmail.com>
+References: <CAF6-1L66AG8a1N0ujFvAbYYgXTZ41ug6HtiLvPY8c_AEriHXAw@mail.gmail.com>
+	<CAF6-1L67azE9qJpsmFWAPdjD+yd9WmPKRoLxGe9pS5GDnHE=pQ@mail.gmail.com>
+	<CAF6-1L7z8i4NfYT4NC8ymFo1p1WTkxxdi2==AUFtEA_7J1fK1w@mail.gmail.com>
+	<CABBk=J9TgfADOStKVct8Gbut+T1nuBO+jCdHL5L3mjRWamyBrg@mail.gmail.com>
+	<CAF6-1L6i=fwrSo5dmsyrLRiYjy-5UzmO4dzWnX-drLx=TkXZ=g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f44.google.com ([209.85.160.44]:45300 "EHLO
-	mail-pb0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756672Ab3H2SiO (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Aug 2013 14:38:14 -0400
-Received: by mail-pb0-f44.google.com with SMTP id xa7so818858pbc.31
-        for <ceph-devel@vger.kernel.org>; Thu, 29 Aug 2013 11:38:13 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1308290743380.10144@cobra.newdream.net>
+Received: from mail-vb0-f47.google.com ([209.85.212.47]:57726 "EHLO
+	mail-vb0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756919Ab3H2UG7 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Aug 2013 16:06:59 -0400
+Received: by mail-vb0-f47.google.com with SMTP id h10so674542vbh.34
+        for <ceph-devel@vger.kernel.org>; Thu, 29 Aug 2013 13:06:58 -0700 (PDT)
+In-Reply-To: <CAF6-1L6i=fwrSo5dmsyrLRiYjy-5UzmO4dzWnX-drLx=TkXZ=g@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Sylvain Munaut <s.munaut@whatever-company.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 08/29/2013 07:46 AM, Sage Weil wrote:
-> On Wed, 28 Aug 2013, Josh Durgin wrote:
->> Removing a device deallocates the disk, unschedules the watch, and
->> finally cleans up the rbd_dev structure. rbd_dev_refresh(), called
->> from the watch callback, updates the disk size and rbd_dev
->> structure. With no locking between them, rbd_dev_refresh() may use the
->> device or rbd_dev after they've been freed.
->>
->> To fix this, use the header_rwsem to protect all the work
->> rbd_dev_refresh() does, and take it exclusively in rbd_remove() where
->> the block device is released and the watch is canceled.
->> rbd_bus_del_dev() ends up releasing the block device, so no requests
->> to the device remain after this. This makes all the work in
->> rbd_dev_refresh() unnecessary, as well as race-prone, so skip it if
->> the watch has been canceled.
->>
->> Finally, flush the osd client's notify queue before deallocating the
->> rbd dev, so that any callbacks remaining can read rbd_dev->watch_event
->> safely. No more notifies can enter the queue at this point since the
->> watch has been canceled.
->>
->> Fixes: http://tracker.ceph.com/issues/5636
->> Signed-off-by: Josh Durgin <josh.durgin@inktank.com>
->> ---
->>   drivers/block/rbd.c |   25 ++++++++++++++++++++++---
->>   1 files changed, 22 insertions(+), 3 deletions(-)
->>
->> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
->> index fef3687..63e1590 100644
->> --- a/drivers/block/rbd.c
->> +++ b/drivers/block/rbd.c
->> @@ -3327,10 +3327,13 @@ static void rbd_exists_validate(struct rbd_device *rbd_dev)
->>   static int rbd_dev_refresh(struct rbd_device *rbd_dev)
->>   {
->>   	u64 mapping_size;
->> -	int ret;
->> +	int ret = 0;
->>
->>   	rbd_assert(rbd_image_format_valid(rbd_dev->image_format));
->>   	down_write(&rbd_dev->header_rwsem);
->> +	if (!rbd_dev->watch_event)
->> +		goto out;
->> +
->>   	mapping_size = rbd_dev->mapping.size;
->>   	if (rbd_dev->image_format == 1)
->>   		ret = rbd_dev_v1_header_info(rbd_dev);
->> @@ -3340,7 +3343,6 @@ static int rbd_dev_refresh(struct rbd_device *rbd_dev)
->>   	/* If it's a mapped snapshot, validate its EXISTS flag */
->>
->>   	rbd_exists_validate(rbd_dev);
->> -	up_write(&rbd_dev->header_rwsem);
->>
->>   	if (mapping_size != rbd_dev->mapping.size) {
->>   		sector_t size;
->> @@ -3350,7 +3352,8 @@ static int rbd_dev_refresh(struct rbd_device *rbd_dev)
->>   		set_capacity(rbd_dev->disk, size);
->>   		revalidate_disk(rbd_dev->disk);
->>   	}
->> -
->> +out:
->> +	up_write(&rbd_dev->header_rwsem);
->>   	return ret;
->>   }
->>
->> @@ -5159,10 +5162,26 @@ static ssize_t rbd_remove(struct bus_type *bus,
->>   	if (ret < 0 || already)
->>   		return ret;
->>
->> +	/*
->> +	 * take header semaphore while destroying the device and
->> +	 * canceling the watch so that device destruction will
->> +	 * not race with device updates from the watch callback
->> +	 */
->> +	down_write(&rbd_dev->header_rwsem);
->>   	rbd_bus_del_dev(rbd_dev);
->>   	ret = rbd_dev_header_watch_sync(rbd_dev, false);
->> +	up_write(&rbd_dev->header_rwsem);
+Just pushed a f
+
+On Thu, Aug 29, 2013 at 7:24 AM, Sylvain Munaut
+<s.munaut@whatever-company.com> wrote:
+> It's a local commit. We have a few patches that implement features we
+> need but that weren't accepted upstream. (and yes, I checked they had
+> no influence on the issue at hand).
 >
-> If I'm reading thsi right, we're holding the rwsem exclusively, and
-> blocking the workqueue, for the duration of the osd request to remove the
-> watch.  It worries me to block up the workqueue for that long (possibly
-> for other images).  I don't think it will deadlock, but if hte cluster is
-> unhealthy this one request could take a while.
+> The latest commit from the ceph repo is 39adc0195e6016ce36828885515be1bffbc10ae1
 >
-> What we if we just add a separate flag "shutting down" and use that
-> instead of the rbd_dev->watch_event?  Then we can up_write prior to the
-> watch removal call...
-
-Due to the lock inversion Alex mentioned, I'll use a separate mutex and
-flag. Since we're draining the notify queue after this, only
-rbd_bus_del_dev() needs to be protected from running at the same time -
-canceling the watch doesn't matter for correctness.
-
-Josh
-
-> sage
+> Cheers,
+>
+>     Sylvain
 >
 >
->> +
->>   	if (ret)
->>   		rbd_warn(rbd_dev, "failed to cancel watch event (%d)\n", ret);
->> +
->> +	/*
->> +	 * flush remaing watch callbacks - these don't update anything
->> +	 * anymore since rbd_dev->watch_event is NULL, but it avoids
->> +	 * the watch callback using a freed rbd_dev
->> +	 */
->> +	dout("%s: flushing notifies", __func__);
->> +	ceph_osdc_flush_notifies(&rbd_dev->rbd_client->client->osdc);
->>   	rbd_dev_image_release(rbd_dev);
->>   	module_put(THIS_MODULE);
->>
->> --
->> 1.7.2.5
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> On Thu, Aug 29, 2013 at 4:15 PM, Yehuda Sadeh <yehuda@inktank.com> wrote:
+>> What's commit c81bc5b59dda37f54c02039ca3d5aada64076624? I don't see it
+>> on the ceph github repository.
 >>
 >>
-
+>>
+>> On Thu, Aug 29, 2013 at 5:59 AM, Sylvain Munaut
+>> <s.munaut@whatever-company.com> wrote:
+>>> I tried going back to a src/rgw/ directory as it is in the 0.67.2
+>>> release, but didn't start either.
+>>>
+>>> (failed to init storage).
+>>>
+>>> Finally I disabled the cache for now and it seem to have started properly.
+>>>
+>>> On Thu, Aug 29, 2013 at 1:50 PM, Sylvain Munaut
+>>> <s.munaut@whatever-company.com> wrote:
+>>>> I reverted commit a4cca31c82bf0e84272e01eb1b3188dfdb5b5615 and then I got :
+>>>>
+>>>> 2013-08-29 13:32:44.430574 7f55402a7780  0 ceph version
+>>>> 0.67.2-19-gc81bc5b (c81bc5b59dda37f54c02039ca3d5aada64076624), process
+>>>> lt-radosgw, pid 30786
+>>>> 2013-08-29 13:32:44.430608 7f55402a7780 -1 WARNING: libcurl doesn't
+>>>> support curl_multi_wait()
+>>>> 2013-08-29 13:32:44.430619 7f55402a7780 -1 WARNING: cross zone /
+>>>> region transfer performance may be affected
+>>>> 2013-08-29 13:32:44.451041 7f552f6fd700  2
+>>>> RGWDataChangesLog::ChangesRenewThread: start
+>>>> 2013-08-29 13:32:44.453327 7f55402a7780 10 cache get:
+>>>> name=.rgw+.pools.avail : miss
+>>>> 2013-08-29 13:32:44.457216 7f55402a7780 10 cache put: name=.rgw+.pools.avail
+>>>> 2013-08-29 13:32:44.457256 7f55402a7780 10 adding .rgw+.pools.avail to
+>>>> cache LRU end
+>>>> 2013-08-29 13:32:44.458385 7f55402a7780 -1 error storing zone params:
+>>>> (1) Operation not permitted
+>>>> 2013-08-29 13:32:44.460492 7f55402a7780 -1 Couldn't init storage
+>>>> provider (RADOS)
+>>>>
+>>>>
+>>>> So I tried creating .rgw.root pool manually (even though the docs in
+>>>> http://ceph.com/docs/next/radosgw/config/ don't list it) and that went
+>>>> to :
+>>>>
+>>>>
+>>>> 2013-08-29 13:45:37.454387 7f46da40b780  0 ceph version
+>>>> 0.67.2-19-gc81bc5b (c81bc5b59dda37f54c02039ca3d5aada64076624), process
+>>>> lt-radosgw, pid 31234
+>>>> 2013-08-29 13:45:37.454433 7f46da40b780 -1 WARNING: libcurl doesn't
+>>>> support curl_multi_wait()
+>>>> 2013-08-29 13:45:37.454446 7f46da40b780 -1 WARNING: cross zone /
+>>>> region transfer performance may be affected
+>>>> 2013-08-29 13:45:37.473025 7f46c97fa700  2
+>>>> RGWDataChangesLog::ChangesRenewThread: start
+>>>> 2013-08-29 13:45:37.473499 7f46da40b780 20 get_obj_state:
+>>>> rctx=0xdb2cd0 obj=.rgw.root:default.region state=0xdaffc8
+>>>> s->prefetch_data=0
+>>>> 2013-08-29 13:45:37.473531 7f46da40b780 10 cache get:
+>>>> name=.rgw.root+default.region : miss
+>>>> 2013-08-29 13:45:37.487496 7f46da40b780 10 cache put:
+>>>> name=.rgw.root+default.region
+>>>> 2013-08-29 13:45:37.487548 7f46da40b780 10 adding
+>>>> .rgw.root+default.region to cache LRU end
+>>>> 2013-08-29 13:45:37.487626 7f46da40b780 10 cache get:
+>>>> name=.rgw+.pools.avail : miss
+>>>> 2013-08-29 13:45:37.491370 7f46da40b780 10 cache put: name=.rgw+.pools.avail
+>>>> 2013-08-29 13:45:37.491393 7f46da40b780 10 adding .rgw+.pools.avail to
+>>>> cache LRU end
+>>>> 2013-08-29 13:45:37.491448 7f46da40b780  0 PN: .rgw.root OID: zone_info.default
+>>>> 2013-08-29 13:45:37.531675 7f46da40b780 10 cache put:
+>>>> name=.rgw.root+zone_info.default
+>>>> 2013-08-29 13:45:37.531697 7f46da40b780 10 adding
+>>>> .rgw.root+zone_info.default to cache LRU end
+>>>> *** Caught signal (Floating point exception) **
+>>>>  in thread 7f46da40b780
+>>>>  ceph version 0.67.2-19-gc81bc5b (c81bc5b59dda37f54c02039ca3d5aada64076624)
+>>>>  1: /home/whatever/ceph/src/.libs/lt-radosgw() [0x573bfa]
+>>>>  2: (()+0xfcb0) [0x7f46d8d3acb0]
+>>>>  3: (RGWRados::pick_control_oid(std::string const&,
+>>>> std::string&)+0x35) [0x4dd855]
+>>>>  4: (RGWRados::distribute(std::string const&,
+>>>> ceph::buffer::list&)+0x3f) [0x4dd91f]
+>>>>  5: (RGWCache<RGWRados>::distribute_cache(std::string const&,
+>>>> rgw_obj&, ObjectCacheInfo&, int)+0x3d7) [0x510b37]
+>>>>  6: (RGWCache<RGWRados>::put_obj_meta_impl(void*, rgw_obj&, unsigned
+>>>> long, long*, std::map<std::string, ceph::buffer::list,
+>>>> std::less<std::string>, std::allocator<std::pair<std::string const,
+>>>> ceph::buffer::list> > >&, RGWObjCategory, int, std::map<std::string,
+>>>> ceph::buffer::list, std::less<std::string>,
+>>>> std::allocator<std::pair<std::string const, ceph::buffer::list> > >*,
+>>>> ceph::buffer::list const*, RGWObjManifest*, std::string const*,
+>>>> std::list<std::string, std::allocator<std::string> >*, bool,
+>>>> RGWObjVersionTracker*, long)+0x2ab) [0x511dab]
+>>>>  7: (RGWRados::put_obj_meta(void*, rgw_obj&, unsigned long,
+>>>> std::map<std::string, ceph::buffer::list, std::less<std::string>,
+>>>> std::allocator<std::pair<std::string const, ceph::buffer::list> > >&,
+>>>> RGWObjCategory, int, RGWRados::PutObjMetaExtraParams&)+0x6f)
+>>>> [0x500e0f]
+>>>>  8: (rgw_put_system_obj(RGWRados*, rgw_bucket&, std::string&, char
+>>>> const*, unsigned long, bool, RGWObjVersionTracker*, long,
+>>>> std::map<std::string, ceph::buffer::list, std::less<std::string>,
+>>>> std::allocator<std::pair<std::string const, ceph::buffer::list> >
+>>>>>*)+0x2c4) [0x4daba4]
+>>>>  9: (RGWZoneParams::store_info(CephContext*, RGWRados*,
+>>>> RGWRegion&)+0x17c) [0x4e40dc]
+>>>>  10: (RGWRegion::create_default()+0x487) [0x4ed5f7]
+>>>>  11: (RGWRegion::init(CephContext*, RGWRados*, bool)+0x108) [0x4edb38]
+>>>>  12: (RGWRados::init_complete()+0x32) [0x4efd82]
+>>>>  13: (RGWStoreManager::init_storage_provider(CephContext*,
+>>>> bool)+0x621) [0x4e98c1]
+>>>>  14: (main()+0x441) [0x4579c1]
+>>>>  15: (__libc_start_main()+0xed) [0x7f46d7a4d76d]
+>>>>  16: /home/whatever/ceph/src/.libs/lt-radosgw() [0x459789]
+>>>> 2013-08-29 13:45:37.555982 7f46da40b780 -1 *** Caught signal (Floating
+>>>> point exception) **
+>>>>  in thread 7f46da40b780
+>>>>
+>>>>
+>>>> Cheers,
+>>>>
+>>>>     Sylvain
+>>>>
+>>>>
+>>>> On Thu, Aug 29, 2013 at 11:53 AM, Sylvain Munaut
+>>>> <s.munaut@whatever-company.com> wrote:
+>>>>> Hi,
+>>>>>
+>>>>> I just updated our test cluster to 0.67.2+ (latest dumpling branch) (
+>>>>> from 0.61.x ) and radosgw refuses to start.
+>>>>>
+>>>>>
+>>>>> 2013-08-29 11:46:34.915552 7ffccbc3d780  0 ceph version
+>>>>> 0.67.2-19-gc81bc5b (c81bc5b59dda37f54c02039ca3d5aada64076624), process
+>>>>> lt-radosgw, pid 30404
+>>>>> 2013-08-29 11:46:34.915598 7ffccbc3d780 -1 WARNING: libcurl doesn't
+>>>>> support curl_multi_wait()
+>>>>> 2013-08-29 11:46:34.915612 7ffccbc3d780 -1 WARNING: cross zone /
+>>>>> region transfer performance may be affected
+>>>>> 2013-08-29 11:46:34.935674 7ffcb2ffd700  2
+>>>>> RGWDataChangesLog::ChangesRenewThread: start
+>>>>> 2013-08-29 11:46:34.937337 7ffccbc3d780 -1 ERROR: failed to initialize watch
+>>>>> 2013-08-29 11:46:34.939135 7ffccbc3d780 -1 Couldn't init storage
+>>>>> provider (RADOS)
+>>>>>
+>>>>> in RGWRados::init_watch(), it seems that :
+>>>>>
+>>>>> const char *control_pool = zone.control_pool.name.c_str()
+>>>>>
+>>>>> returns an empty string which is really suspect ...
+>>>>>
+>>>>>
+>>>>> Cheers,
+>>>>>
+>>>>>     Sylvain
+>>>>
+>>>>
+>>>>
+>>>> --
+>>>> Sylvain Munaut
+>>>> Whatever s.a.
+>>>> Rue Fond Cattelain 5
+>>>> 1435 Mont-Saint-Guibert
+>>>> Fixed line: +32 10 23.59.30
+>>>
+>>>
+>>>
+>>> --
+>>> Sylvain Munaut
+>>> Whatever s.a.
+>>> Rue Fond Cattelain 5
+>>> 1435 Mont-Saint-Guibert
+>>> Fixed line: +32 10 23.59.30
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
+>
+> --
+> Sylvain Munaut
+> Whatever s.a.
+> Rue Fond Cattelain 5
+> 1435 Mont-Saint-Guibert
+> Fixed line: +32 10 23.59.30
