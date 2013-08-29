@@ -1,48 +1,57 @@
-From: Joe Perches <joe@perches.com>
-Subject: [PATCH 5/6] ceph: Convert kmem_cache_alloc(...GFP_ZERO) to kmem_cache_zalloc
-Date: Thu, 29 Aug 2013 13:11:09 -0700
-Message-ID: <a67358bbb2f7d191cac51493a9207ba301439f4b.1377806578.git.joe@perches.com>
-References: <cover.1377806578.git.joe@perches.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <cover.1377806578.git.joe@perches.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+From: Sage Weil <sage@inktank.com>
+Subject: better temp objects
+Date: Thu, 29 Aug 2013 13:40:58 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1308291331130.24783@cobra.newdream.net>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:47917 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754354Ab3H2Uk7 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Aug 2013 16:40:59 -0400
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: sam.just@inktank.com
+Cc: greg.farnum@inktank.com, ceph-devel@vger.kernel.org
 
-The helper exists, might as well use it instead of __GFP_ZERO.
+Here's what I'm thinking:
 
-Signed-off-by: Joe Perches <joe@perches.com>
----
- fs/ceph/dir.c  | 2 +-
- fs/ceph/file.c | 2 +-
- 2 files changed, 2 insertions(+), 2 deletions(-)
+Above the ObjectStore, we clear everything from temp on restart anyway.
 
-diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-index 868b61d..c10bc70 100644
---- a/fs/ceph/dir.c
-+++ b/fs/ceph/dir.c
-@@ -40,7 +40,7 @@ int ceph_init_dentry(struct dentry *dentry)
- 	if (dentry->d_fsdata)
- 		return 0;
- 
--	di = kmem_cache_alloc(ceph_dentry_cachep, GFP_NOFS | __GFP_ZERO);
-+	di = kmem_cache_zalloc(ceph_dentry_cachep, GFP_NOFS);
- 	if (!di)
- 		return -ENOMEM;          /* oh well */
- 
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index 20d0222..1b5f8ec 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -75,7 +75,7 @@ static int ceph_init_file(struct inode *inode, struct file *file, int fmode)
- 	case S_IFDIR:
- 		dout("init_file %p %p 0%o (regular)\n", inode, file,
- 		     inode->i_mode);
--		cf = kmem_cache_alloc(ceph_file_cachep, GFP_NOFS | __GFP_ZERO);
-+		cf = kmem_cache_zalloc(ceph_file_cachep, GFP_NOFS);
- 		if (cf == NULL) {
- 			ceph_put_fmode(ceph_inode(inode), fmode); /* clean up */
- 			return -ENOMEM;
--- 
-1.8.1.2.459.gbcd45b4.dirty
+We always write bits of a temp object in pieces, and then at the end 
+copy/move it into the main collection.  
+
+On replay, we should *only* do that final move/rename if the temp object 
+was replayed in its entirety.
+
+So:
+
+- clear out temp collections in the filestore on startup.
+
+- give temp objects unique names so that they don't collide with non-temp 
+object fd caching (or whatever else).  for the DBObjectMap part there is 
+probably some futzing though to make this work right.
+
+- add a new 'move_from_temp' type operation that renames an object a temp 
+(coll_t::is_temp()) collection to a non-temp one.  it will succeed iff the 
+temp source exists.
+
+- all operations that write to temp objects fail if the object doesn't 
+already exist, except an explicit 'create' op
+
+- all transactions the osds generate that write to temp object start with 
+that explicit create.
+
+The combination of these thigns means that we will only have a temp source 
+for the move_from_temp op if it is complete.  Which I think means we can 
+avoid any of the fsync guard stuff entirely.
+
+The DBObjectMap I'm very fuzzy on, so I suspect that's where the tricky 
+part will be.  Maybe the temp object name includes the intended hobject_t 
+in it somewhere, or something, so that the rename can be reflected 
+in leveldb at the end.
+
+Thoughts?  Maybe we can do a quick hangout this afternoon to make sure 
+this will work before I start putting it together...
+
+sage
