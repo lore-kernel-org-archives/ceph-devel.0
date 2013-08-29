@@ -1,43 +1,48 @@
 From: Joe Perches <joe@perches.com>
-Subject: [PATCH 0/6] treewide: kmem_cache_alloc GFP_ZERO cleanups
-Date: Thu, 29 Aug 2013 13:11:04 -0700
-Message-ID: <cover.1377806578.git.joe@perches.com>
-Return-path: <owner-linux-aio@kvack.org>
-Sender: owner-linux-aio@kvack.org
+Subject: [PATCH 5/6] ceph: Convert kmem_cache_alloc(...GFP_ZERO) to kmem_cache_zalloc
+Date: Thu, 29 Aug 2013 13:11:09 -0700
+Message-ID: <a67358bbb2f7d191cac51493a9207ba301439f4b.1377806578.git.joe@perches.com>
+References: <cover.1377806578.git.joe@perches.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <cover.1377806578.git.joe@perches.com>
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org
-Cc: intel-gfx@lists.freedesktop.org, dri-devel@lists.freedesktop.org, linux-fsdevel@vger.kernel.org, linux-aio@kvack.org, ceph-devel@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, linux-mm@kvack.org
+Cc: Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-Just a few cleanups to use zalloc style calls and reduce
-the uses of __GFP_ZERO for kmem_cache_alloc[_node] uses.
+The helper exists, might as well use it instead of __GFP_ZERO.
 
-Use the more kernel normal zalloc style.
+Signed-off-by: Joe Perches <joe@perches.com>
+---
+ fs/ceph/dir.c  | 2 +-
+ fs/ceph/file.c | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
 
-Joe Perches (6):
-  slab/block: Add and use kmem_cache_zalloc_node
-  block: Convert kmem_cache_alloc(...GFP_ZERO) to kmem_cache_zalloc
-  i915_gem: Convert kmem_cache_alloc(...GFP_ZERO) to kmem_cache_zalloc
-  aio: Convert kmem_cache_alloc(...GFP_ZERO) to kmem_cache_zalloc
-  ceph: Convert kmem_cache_alloc(...GFP_ZERO) to kmem_cache_zalloc
-  f2fs: Convert kmem_cache_alloc(...GFP_ZERO) to kmem_cache_zalloc
-
- block/blk-core.c                |  3 +--
- block/blk-integrity.c           |  3 +--
- block/blk-ioc.c                 |  6 ++----
- block/cfq-iosched.c             | 10 ++++------
- drivers/gpu/drm/i915/i915_gem.c |  2 +-
- fs/aio.c                        |  2 +-
- fs/ceph/dir.c                   |  2 +-
- fs/ceph/file.c                  |  2 +-
- fs/f2fs/super.c                 |  2 +-
- include/linux/slab.h            |  5 +++++
- 10 files changed, 18 insertions(+), 19 deletions(-)
-
+diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+index 868b61d..c10bc70 100644
+--- a/fs/ceph/dir.c
++++ b/fs/ceph/dir.c
+@@ -40,7 +40,7 @@ int ceph_init_dentry(struct dentry *dentry)
+ 	if (dentry->d_fsdata)
+ 		return 0;
+ 
+-	di = kmem_cache_alloc(ceph_dentry_cachep, GFP_NOFS | __GFP_ZERO);
++	di = kmem_cache_zalloc(ceph_dentry_cachep, GFP_NOFS);
+ 	if (!di)
+ 		return -ENOMEM;          /* oh well */
+ 
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index 20d0222..1b5f8ec 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -75,7 +75,7 @@ static int ceph_init_file(struct inode *inode, struct file *file, int fmode)
+ 	case S_IFDIR:
+ 		dout("init_file %p %p 0%o (regular)\n", inode, file,
+ 		     inode->i_mode);
+-		cf = kmem_cache_alloc(ceph_file_cachep, GFP_NOFS | __GFP_ZERO);
++		cf = kmem_cache_zalloc(ceph_file_cachep, GFP_NOFS);
+ 		if (cf == NULL) {
+ 			ceph_put_fmode(ceph_inode(inode), fmode); /* clean up */
+ 			return -ENOMEM;
 -- 
 1.8.1.2.459.gbcd45b4.dirty
-
---
-To unsubscribe, send a message with 'unsubscribe linux-aio' in
-the body to majordomo@kvack.org.  For more info on Linux AIO,
-see: http://www.kvack.org/aio/
-Don't email: <a href=mailto:"aart@kvack.org">aart@kvack.org</a>
