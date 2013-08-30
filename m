@@ -1,93 +1,53 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: How Might a Full-Text Searching Capability be Integrated with Ceph?
-Date: Thu, 29 Aug 2013 19:57:17 -0700
-Message-ID: <CAPYLRzjbAUj72ovanNJdCwOmwOhVX9cAUk8UTg0PjsHZ_DC9QA@mail.gmail.com>
-References: <018901cea474$23119700$6934c500$@internode.net.au>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: Questions about mds locks
+Date: Thu, 29 Aug 2013 20:58:17 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1308292050140.12241@cobra.newdream.net>
+References: <CAMm-wcJ13NDMXfNymURbgaHvGF42Py2fKJHSSAwBLs=Qif3_8w@mail.gmail.com> <CAPYLRzgZ53bp4UfZ5n65nnuJmEiQwDpT8-jmLAEo8exL7kXp+g@mail.gmail.com> <CAMm-wcJRcByTO0RzRnvYJJ2Hv8QM+cRfAG5Ue6sCa2gnVpNH7g@mail.gmail.com>
+ <CAPYLRzgimoABj+NWpMF9HUW31wu9zDVhCco24O4wnP8LRV0EaA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f45.google.com ([209.85.215.45]:40812 "EHLO
-	mail-la0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752282Ab3H3C5S convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Aug 2013 22:57:18 -0400
-Received: by mail-la0-f45.google.com with SMTP id eh20so1090126lab.32
-        for <ceph-devel@vger.kernel.org>; Thu, 29 Aug 2013 19:57:17 -0700 (PDT)
-In-Reply-To: <018901cea474$23119700$6934c500$@internode.net.au>
+Received: from cobra.newdream.net ([66.33.216.30]:51273 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755444Ab3H3D6S (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Aug 2013 23:58:18 -0400
+In-Reply-To: <CAPYLRzgimoABj+NWpMF9HUW31wu9zDVhCco24O4wnP8LRV0EaA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Kevin Frey <kevin.frey@internode.net.au>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <greg@inktank.com>
+Cc: Dong Yuan <yuandong1222@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, Aug 28, 2013 at 9:56 PM, Kevin Frey <kevin.frey@internode.net.a=
-u> wrote:
-> Hello All,
->
-> This is my first post to the list, and my question is very general to
-> encourage discussion (perhaps derision).
->
-> I am the team-leader involved with the development of an application =
-of
-> which one common capability is a =93document management=94 like facil=
-ity that
-> permits a user to =93attach=94 (in a logical sense) files to given da=
-ta records
-> in the database. The kinds of files being attached would be Microsoft=
- Word
-> documents, spreadsheets, PDF files, and so on. For various reasons we=
- don=92t
-> store these files in the SQL database but instead in an associated fi=
-le
-> store.
->
-> This file store is not very large at present (a few hundred Gb perhap=
-s) and
-> the storage methodology is fairly na=EFve in the sense it stores onto=
- a single
-> volume using RAID as the =93durability=94 component.
->
-> Our file store effectively does two things for us however: act as a b=
-asic
-> store for the files; provides the feed for a full-text indexing syste=
-m so
-> that the files can be searched on.
->
-> Ceph is a product I=92ve been following for a while now and I have no=
- question
-> it can handle the storage aspect, but my question relates to how I wo=
-uld
-> achieve my second requirement?
->
-> From what I=92ve read, CephFS is not =93production ready=94 but one o=
-bvious
-> strategy to achieve a searchable database would be to just expose the=
- whole
-> directory namespace (or a single pool?) via CephFS and point a standa=
-rd file
-> indexing product at it. Would this work? Would it be a good or a bad =
-idea
-> (ignoring the status of CephFS itself).
->
-> Or would you suggest something that is perhaps more tightly integrate=
-d with
-> the RADOS object store? I need to be wary of not putting myself in th=
-e
-> position of having to write an entire file indexing suite also in ter=
-ms of
-> weighing up design possibilities.
+> > I noticed that states is organized into groups even in one state
+> > machine.Using simplelock state machine as an example which I am most
+> > familiar with. In simplelock state machine, There are four groups
+> > (LOCK_REMOTEXLOCK is not used anymore, right?) and three stable
+> > states: LOCK_SYNC, LOCK_LOCK and LOCK_EXCL. In my opinion, the
+> > semantic of these three stable states is:
+> >
+> > LOCK_SYNC: normal state, everyone can read or readlock while no one
+> > want wrlock and xlock.
+> Right.
+> 
+> > LOCK_LOCK: shared lock? I can't get it.
+> Hrm. I'm not sure ? Sage?
 
-Hmm. This is a difficult question since you're basically asking how to
-stick an index on top of an object store. :) Ignoring its readiness,
-CephFS is a pretty normal filesystem so it should work fine under your
-indexing product. Depending on your pipeline it might also be
-appropriate to write from your app directly into the RADOS object
-store via librados, and when you do that send a copy of the object to
-some indexer in order to not have to do scans (or just queue up the
-object for indexing, or whatever).
--Greg
-Software Engineer #42 @ http://inktank.com | http://ceph.com
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Yes, it's confusing.  These are better thought of as state machines 
+controlling whether you are allowed to lock--not locks themselves.
+
+SYNC - any replica can rdlock, nobody can wrlock (shared write) or xlock (exlusive)
+LOCK - nobody can rdlock; only primary mds can wrlock or xlock
+XLOCK - somebody is holding an xlock
+MIX - any replica can wrlock; nobody can rdlock or xlock
+
+XLOCK is treated as unstable because as soon as the xlock is released we 
+transition away from that state to XLOCKDONE and then to some other state, 
+depending on who is waiting for what locks and various other factors.  The 
+xlock states are quite confusing; I would start with the others.
+
+The other thing to keep in mind is that these states *also* control what 
+capability bits (on inodes) or leases (on dentries) we are allowed to 
+issue to clients.  Renaming a bunch of these types (e.g., 
+s/LOCK_/ACCESSMODE_/) would probably go a long way toward making this more 
+approachable.
+
+sage
