@@ -1,53 +1,64 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: Questions about mds locks
-Date: Thu, 29 Aug 2013 20:58:17 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1308292050140.12241@cobra.newdream.net>
-References: <CAMm-wcJ13NDMXfNymURbgaHvGF42Py2fKJHSSAwBLs=Qif3_8w@mail.gmail.com> <CAPYLRzgZ53bp4UfZ5n65nnuJmEiQwDpT8-jmLAEo8exL7kXp+g@mail.gmail.com> <CAMm-wcJRcByTO0RzRnvYJJ2Hv8QM+cRfAG5Ue6sCa2gnVpNH7g@mail.gmail.com>
- <CAPYLRzgimoABj+NWpMF9HUW31wu9zDVhCco24O4wnP8LRV0EaA@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Jerasure 1.2A plugin for Ceph
+Date: Fri, 30 Aug 2013 10:20:14 +0200
+Message-ID: <522055BE.2040200@dachary.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig6B56F69F824BEAB8592B5B70"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:51273 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755444Ab3H3D6S (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Aug 2013 23:58:18 -0400
-In-Reply-To: <CAPYLRzgimoABj+NWpMF9HUW31wu9zDVhCco24O4wnP8LRV0EaA@mail.gmail.com>
+Received: from smtp.dmail.dachary.org ([86.65.39.20]:48556 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754543Ab3H3IUR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 30 Aug 2013 04:20:17 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: Dong Yuan <yuandong1222@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: "James S. Plank" <plank@cs.utk.edu>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-> > I noticed that states is organized into groups even in one state
-> > machine.Using simplelock state machine as an example which I am most
-> > familiar with. In simplelock state machine, There are four groups
-> > (LOCK_REMOTEXLOCK is not used anymore, right?) and three stable
-> > states: LOCK_SYNC, LOCK_LOCK and LOCK_EXCL. In my opinion, the
-> > semantic of these three stable states is:
-> >
-> > LOCK_SYNC: normal state, everyone can read or readlock while no one
-> > want wrlock and xlock.
-> Right.
-> 
-> > LOCK_LOCK: shared lock? I can't get it.
-> Hrm. I'm not sure ? Sage?
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig6B56F69F824BEAB8592B5B70
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-Yes, it's confusing.  These are better thought of as state machines 
-controlling whether you are allowed to lock--not locks themselves.
+Hi James,
 
-SYNC - any replica can rdlock, nobody can wrlock (shared write) or xlock (exlusive)
-LOCK - nobody can rdlock; only primary mds can wrlock or xlock
-XLOCK - somebody is holding an xlock
-MIX - any replica can wrlock; nobody can rdlock or xlock
+The first version of the jerasure 1.2A plugin for Ceph is complete at
 
-XLOCK is treated as unstable because as soon as the xlock is released we 
-transition away from that state to XLOCKDONE and then to some other state, 
-depending on who is waiting for what locks and various other factors.  The 
-xlock states are quite confusing; I would start with the others.
+https://github.com/ceph/ceph/pull/538#commits-pushed-763275e
 
-The other thing to keep in mind is that these states *also* control what 
-capability bits (on inodes) or leases (on dentries) we are allowed to 
-issue to clients.  Renaming a bunch of these types (e.g., 
-s/LOCK_/ACCESSMODE_/) would probably go a long way toward making this more 
-approachable.
+This commit introduces the main part:
+ErasureCodeJerasure: base class for jerasure ErasureCodeInterface
+https://github.com/dachary/ceph/commit/76d2842358465e560a4929d60131762f8c=
+93804f
 
-sage
+and each technique is derived from it in six successive commits, starting=
+ from here
+ErasureCodeJerasure: define technique ReedSolomonVandermonde
+
+It would be great if you could take a look and let us know if you see any=
+thing odd.
+
+Cheers
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+All that is necessary for the triumph of evil is that good people do noth=
+ing.
+
+
+--------------enig6B56F69F824BEAB8592B5B70
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.19 (GNU/Linux)
+Comment: Using GnuPG with undefined - http://www.enigmail.net/
+
+iEYEARECAAYFAlIgVb4ACgkQ8dLMyEl6F21NCgCdHytbTwaQAlq4SEXe7OVF/1Pq
+xXYAnRNoXA+hVIft0o1cK7tYFuXkdDUh
+=Khen
+-----END PGP SIGNATURE-----
+
+--------------enig6B56F69F824BEAB8592B5B70--
