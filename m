@@ -1,38 +1,35 @@
-From: Damien Churchill <damoxc@gmail.com>
-Subject: collectd plugin with cuttlefish
-Date: Fri, 30 Aug 2013 13:04:45 +0100
-Message-ID: <CAFtEh-fCrPCx19BkG-CN7KP=ag3czMbZ=xQuHKOecMsUF2Z36g@mail.gmail.com>
+From: Dominik Mostowiec <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: ceph s3 allowed characters
+Date: Fri, 30 Aug 2013 15:52:11 +0200
+Message-ID: <CAMNMNTxn3DCbVAnvY1K7PE7Z1oWy-4nM_XKT92+xYEBxKzd=Yg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f51.google.com ([209.85.220.51]:54235 "EHLO
-	mail-pa0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754951Ab3H3MEp (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 30 Aug 2013 08:04:45 -0400
-Received: by mail-pa0-f51.google.com with SMTP id lf1so2238951pab.24
-        for <ceph-devel@vger.kernel.org>; Fri, 30 Aug 2013 05:04:45 -0700 (PDT)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
 Hi,
+I got err (400) from radosgw on request:
+2013-08-30 08:09:19.396812 7f3b307c0700  2 req 3070:0.000150::POST
+/dysk/files/test.test%40op.pl/DOMIWENT%202013/DW%202013_03_27/PROJEKTY%202012/ZB%20KROL/Szko%C5%82a%20%C5%81aziska%20ZB%20KROL/sala-%A3aziska_Dolne_PB-0_went_15_11_06%20Layout1%20%283%29.pdf::http
+status=400
+2013-08-30 08:09:34.851892 7f3b55ffb700 10
+s->object=files/test.test-FWhLrETftxM@public.gmane.org/DOMIWENT 2013/Damian
+DW/dw/Specyfikacja istotnych warunk<F3>w zam<F3>wienia.doc
+s->bucket=dysk
 
-Has anything changed with the admin socket that would prevent the
-collectd plugin (compiled against 5.3.1 using the patches submitted to
-the collectd ML) from gathering stats? I've recompiled collectd with
---enable-debug and receive the following output in the log:
+What is allowed range of chars in url in radosgw?
 
-ceph_init
-name=mon_ceph1, asok_path=/var/run/ceph/ceph-mon.ceph1.asok
-entering cconn_main_loop(request_type = 0)
-did cconn_prepare(name=mon_ceph1,i=0,st=1)
-cconn_handle_event(name=mon_ceph1,state=1,amt=0,ret=4)
-did cconn_prepare(name=mon_ceph1,i=0,st=2)
-did cconn_prepare(name=mon_ceph1,i=0,st=2)
-ERROR: cconn_main_loop: timed out.
-cconn_main_loop: reached all Ceph daemons :)
-Initialization of plugin `ceph' failed with status -110. Plugin will
-be unloaded.
-plugin_unregister_read: Marked `ceph' for removal.
-
-Thanks in advance!
+-- 
+Regards
+Dominik
