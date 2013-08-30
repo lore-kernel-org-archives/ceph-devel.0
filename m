@@ -1,64 +1,38 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Jerasure 1.2A plugin for Ceph
-Date: Fri, 30 Aug 2013 10:20:14 +0200
-Message-ID: <522055BE.2040200@dachary.org>
+From: Sylvain Munaut <s.munaut@whatever-company.com>
+Subject: Re: radosgw 0.67.2 update -> "ERROR: failed to initialize watch"
+Date: Fri, 30 Aug 2013 10:40:33 +0200
+Message-ID: <CAF6-1L7qMw1Bp=La=+TsC-dhEX5EJSMJPxjOZnbfkzNALXmZUA@mail.gmail.com>
+References: <CAF6-1L66AG8a1N0ujFvAbYYgXTZ41ug6HtiLvPY8c_AEriHXAw@mail.gmail.com>
+	<CAF6-1L67azE9qJpsmFWAPdjD+yd9WmPKRoLxGe9pS5GDnHE=pQ@mail.gmail.com>
+	<CAF6-1L7z8i4NfYT4NC8ymFo1p1WTkxxdi2==AUFtEA_7J1fK1w@mail.gmail.com>
+	<CABBk=J9TgfADOStKVct8Gbut+T1nuBO+jCdHL5L3mjRWamyBrg@mail.gmail.com>
+	<CAF6-1L6i=fwrSo5dmsyrLRiYjy-5UzmO4dzWnX-drLx=TkXZ=g@mail.gmail.com>
+	<CABBk=J-OUyvRSyoN8pc_4-GmE-XbRwjEAHMyC=9kAGhzbbgD4g@mail.gmail.com>
+	<CAC-hyiHoHf7aZCyt2x7xgigD5+jfey3b57R1kDQA2X0qnFNFBg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enig6B56F69F824BEAB8592B5B70"
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([86.65.39.20]:48556 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754543Ab3H3IUR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 30 Aug 2013 04:20:17 -0400
+Received: from mail-pb0-f45.google.com ([209.85.160.45]:58319 "EHLO
+	mail-pb0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752529Ab3H3Ikd (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 30 Aug 2013 04:40:33 -0400
+Received: by mail-pb0-f45.google.com with SMTP id mc17so1596525pbc.4
+        for <ceph-devel@vger.kernel.org>; Fri, 30 Aug 2013 01:40:33 -0700 (PDT)
+In-Reply-To: <CAC-hyiHoHf7aZCyt2x7xgigD5+jfey3b57R1kDQA2X0qnFNFBg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "James S. Plank" <plank@cs.utk.edu>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Yehuda Sadeh <yehuda@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig6B56F69F824BEAB8592B5B70
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
-
-Hi James,
-
-The first version of the jerasure 1.2A plugin for Ceph is complete at
-
-https://github.com/ceph/ceph/pull/538#commits-pushed-763275e
-
-This commit introduces the main part:
-ErasureCodeJerasure: base class for jerasure ErasureCodeInterface
-https://github.com/dachary/ceph/commit/76d2842358465e560a4929d60131762f8c=
-93804f
-
-and each technique is derived from it in six successive commits, starting=
- from here
-ErasureCodeJerasure: define technique ReedSolomonVandermonde
-
-It would be great if you could take a look and let us know if you see any=
-thing odd.
-
-Cheers
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-All that is necessary for the triumph of evil is that good people do noth=
-ing.
+Hi,
 
 
---------------enig6B56F69F824BEAB8592B5B70
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+> I just pushed a fix to wip-6161, can you verify that it fixes the issue
+> for you?
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with undefined - http://www.enigmail.net/
+Thanks, I'll give it a shot on monday, I'm out of the office at the moment.
 
-iEYEARECAAYFAlIgVb4ACgkQ8dLMyEl6F21NCgCdHytbTwaQAlq4SEXe7OVF/1Pq
-xXYAnRNoXA+hVIft0o1cK7tYFuXkdDUh
-=Khen
------END PGP SIGNATURE-----
 
---------------enig6B56F69F824BEAB8592B5B70--
+Cheers,
+
+    Sylvain
