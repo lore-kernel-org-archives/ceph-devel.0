@@ -1,48 +1,49 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: libvirt: Using rbd_create3 to create format 2 images
-Date: Fri, 30 Aug 2013 20:38:46 +0200
-Message-ID: <5220E6B6.7030008@42on.com>
-References: <5220691A.1080604@42on.com> <5220B988.9060906@inktank.com>
+From: "Jimmy Lu [ Storage ]" <jlu-ZXvpkYn067l8UrSeD/g0lQ@public.gmane.org>
+Subject: ceph install
+Date: Fri, 30 Aug 2013 18:46:55 +0000
+Message-ID: <CE4635EA.6E0D4%jlu@yahoo-inc.com>
+References: <CAMNMNTyUucZ2ZZu_KwfX2mz77Zx45Lf1j9xRYRNDJWdgF1LkPw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from websrv.42on.com ([31.25.102.167]:58403 "EHLO websrv.42on.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753131Ab3H3Sis (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 30 Aug 2013 14:38:48 -0400
-In-Reply-To: <5220B988.9060906@inktank.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAMNMNTyUucZ2ZZu_KwfX2mz77Zx45Lf1j9xRYRNDJWdgF1LkPw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Language: en-US
+Content-ID: <E6BA20D9A5D8FA4BAD8444FB1E34129F-Un7Qja14ibOxRHTZ4l5qPBupM2+RrINj@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On 08/30/2013 05:26 PM, Josh Durgin wrote:
-> On 08/30/2013 02:42 AM, Wido den Hollander wrote:
->> Hi,
->>
->> I created the attached patch to have libvirt create images with format 2
->> by default, this would simplify the CloudStack code and could also help
->> other projects.
->>
->> The problem with libvirt is that there is no mechanism to supply
->> information like order, features, stripe unit and count to the
->> rbd_create3 method, so it's now hardcoded in libvirt.
->>
->> Any comments on this patch before I fire it of to the libvirt guys?
->
-> Seems ok to me. They might want you to detect whether the function is
-> there and compile without it if librbd doesn't support it (rbd_create3
-> first appeared in bobtail).
->
+Hello ceph-users,
 
-Good one. Although I don't think anybody is still running Argonaut I'll 
-do a version check of librbd and switch to rbd_create if needed.
+I am new to Ceph and would like to bring up a 5-node cluster for my PoC. I
+am doing an installation from below link and ran into a problem. I am not
+so sure how to deal with it. Can someone please shed some light?
+
+http://ceph.com/docs/master/install/rpm/
+
+[root@cleverloadgen16 ceph]# ceph auth add client.radosgw.gateway
+--in-file=/etc/ceph/keyring.radosgw.gateway
+unable to find any monitors in conf. please specify monitors via -m
+monaddr or -c ceph.conf
+Error connecting to cluster: ObjectNotFound
+
+[root@cleverloadgen16 ceph]# cat keyring.radosgw.gateway
+[client.radosgw.gateway]
+	key = AQCC4yBSyMWQGBAADS7j7DnIZeGAZiaJFaM8Xw==
+	caps mon = "allow rw"
+	caps osd = "allow rwx"
+[root@cleverloadgen16 ceph]#
 
 
--- 
-Wido den Hollander
-42on B.V.
-
-Phone: +31 (0)20 700 9902
-Skype: contact42on
+Thanks,
+jimmy
