@@ -1,115 +1,119 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: better temp objects
-Date: Fri, 30 Aug 2013 00:29:44 +0200
-Message-ID: <521FCB58.4080607@dachary.org>
-References: <alpine.DEB.2.00.1308291331130.24783@cobra.newdream.net>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enig1B66D179E166DE6E732D0417"
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: [PATCH v2 1/3] rbd: fix use-after free of rbd_dev->disk
+Date: Thu, 29 Aug 2013 17:57:06 -0700
+Message-ID: <1377824228-14632-1-git-send-email-josh.durgin@inktank.com>
+References: <1377757447-23515-4-git-send-email-josh.durgin@inktank.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([86.65.39.20]:55639 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752431Ab3H2W3r (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Aug 2013 18:29:47 -0400
-In-Reply-To: <alpine.DEB.2.00.1308291331130.24783@cobra.newdream.net>
+Received: from mail.hq.newdream.net ([66.33.206.127]:39827 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752103Ab3H3BJd (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Aug 2013 21:09:33 -0400
+Received: from mail.hq.newdream.net (localhost [127.0.0.1])
+	by mail.hq.newdream.net (Postfix) with ESMTP id 60A0626391
+	for <ceph-devel@vger.kernel.org>; Thu, 29 Aug 2013 18:13:27 -0700 (PDT)
+Received: from vit.ops.newdream.net (unknown [38.122.20.226])
+	by mail.hq.newdream.net (Postfix) with ESMTPSA id 4C2CD26389
+	for <ceph-devel@vger.kernel.org>; Thu, 29 Aug 2013 18:13:27 -0700 (PDT)
+In-Reply-To: <1377757447-23515-4-git-send-email-josh.durgin@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: sam.just@inktank.com, greg.farnum@inktank.com, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig1B66D179E166DE6E732D0417
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Removing a device deallocates the disk, unschedules the watch, and
+finally cleans up the rbd_dev structure. rbd_dev_refresh(), called
+from the watch callback, updates the disk size and rbd_dev
+structure. With no locking between them, rbd_dev_refresh() may use the
+device or rbd_dev after they've been freed.
 
-Hi Sage,
+To fix this, add a shutting_down flag and a mutex protecting it to rbd_dev.
+Take the mutex and check whether the flag is set before using rbd_dev->disk.
+Move this disk-updating to a separate function as well.
 
-What is the temp collection used for ? Is there a thread / document I cou=
-ld read to learn about it or a piece of code that is mainly about it ?
+Fixes: http://tracker.ceph.com/issues/5636
+Signed-off-by: Josh Durgin <josh.durgin@inktank.com>
+---
+ drivers/block/rbd.c |   39 +++++++++++++++++++++++++++++++++------
+ 1 files changed, 33 insertions(+), 6 deletions(-)
 
-Cheers
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index fef3687..8ab3362b 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -343,6 +343,9 @@ struct rbd_device {
+ 	struct ceph_osd_event   *watch_event;
+ 	struct rbd_obj_request	*watch_request;
+ 
++	bool			shutting_down;	/* rbd_remove() in progress */
++	struct mutex		shutdown_lock;	/* protects shutting_down */
++
+ 	struct rbd_spec		*parent_spec;
+ 	u64			parent_overlap;
+ 	atomic_t		parent_ref;
+@@ -3324,6 +3327,24 @@ static void rbd_exists_validate(struct rbd_device *rbd_dev)
+ 		clear_bit(RBD_DEV_FLAG_EXISTS, &rbd_dev->flags);
+ }
+ 
++static void rbd_dev_update_size(struct rbd_device *rbd_dev)
++{
++	sector_t size;
++
++	mutex_lock(&rbd_dev->shutdown_lock);
++	/*
++	 * If the device is being removed, rbd_dev->disk has
++	 * been destroyed, so don't try to update its size
++	 */
++	if (!rbd_dev->shutting_down) {
++		size = (sector_t)rbd_dev->mapping.size / SECTOR_SIZE;
++		dout("setting size to %llu sectors", (unsigned long long)size);
++		set_capacity(rbd_dev->disk, size);
++		revalidate_disk(rbd_dev->disk);
++	}
++	mutex_unlock(&rbd_dev->shutdown_lock);
++}
++
+ static int rbd_dev_refresh(struct rbd_device *rbd_dev)
+ {
+ 	u64 mapping_size;
+@@ -3343,12 +3364,7 @@ static int rbd_dev_refresh(struct rbd_device *rbd_dev)
+ 	up_write(&rbd_dev->header_rwsem);
+ 
+ 	if (mapping_size != rbd_dev->mapping.size) {
+-		sector_t size;
+-
+-		size = (sector_t)rbd_dev->mapping.size / SECTOR_SIZE;
+-		dout("setting size to %llu sectors", (unsigned long long)size);
+-		set_capacity(rbd_dev->disk, size);
+-		revalidate_disk(rbd_dev->disk);
++		rbd_dev_update_size(rbd_dev);
+ 	}
+ 
+ 	return ret;
+@@ -3656,6 +3672,8 @@ static struct rbd_device *rbd_dev_create(struct rbd_client *rbdc,
+ 	atomic_set(&rbd_dev->parent_ref, 0);
+ 	INIT_LIST_HEAD(&rbd_dev->node);
+ 	init_rwsem(&rbd_dev->header_rwsem);
++	mutex_init(&rbd_dev->shutdown_lock);
++	rbd_dev->shutting_down = false;
+ 
+ 	rbd_dev->spec = spec;
+ 	rbd_dev->rbd_client = rbdc;
+@@ -5159,7 +5177,16 @@ static ssize_t rbd_remove(struct bus_type *bus,
+ 	if (ret < 0 || already)
+ 		return ret;
+ 
++	/*
++	 * hold shutdown_lock while destroying the device so that
++	 * device destruction will not race with device updates from
++	 * the watch callback
++	 */
++	mutex_lock(&rbd_dev->shutdown_lock);
++	rbd_dev->shutting_down = true;
+ 	rbd_bus_del_dev(rbd_dev);
++	mutex_unlock(&rbd_dev->shutdown_lock);
++
+ 	ret = rbd_dev_header_watch_sync(rbd_dev, false);
+ 	if (ret)
+ 		rbd_warn(rbd_dev, "failed to cancel watch event (%d)\n", ret);
+-- 
+1.7.2.5
 
-On 29/08/2013 22:40, Sage Weil wrote:
-> Here's what I'm thinking:
->=20
-> Above the ObjectStore, we clear everything from temp on restart anyway.=
-
->=20
-> We always write bits of a temp object in pieces, and then at the end=20
-> copy/move it into the main collection. =20
->=20
-> On replay, we should *only* do that final move/rename if the temp objec=
-t=20
-> was replayed in its entirety.
->=20
-> So:
->=20
-> - clear out temp collections in the filestore on startup.
->=20
-> - give temp objects unique names so that they don't collide with non-te=
-mp=20
-> object fd caching (or whatever else).  for the DBObjectMap part there i=
-s=20
-> probably some futzing though to make this work right.
->=20
-> - add a new 'move_from_temp' type operation that renames an object a te=
-mp=20
-> (coll_t::is_temp()) collection to a non-temp one.  it will succeed iff =
-the=20
-> temp source exists.
->=20
-> - all operations that write to temp objects fail if the object doesn't =
-
-> already exist, except an explicit 'create' op
->=20
-> - all transactions the osds generate that write to temp object start wi=
-th=20
-> that explicit create.
->=20
-> The combination of these thigns means that we will only have a temp sou=
-rce=20
-> for the move_from_temp op if it is complete.  Which I think means we ca=
-n=20
-> avoid any of the fsync guard stuff entirely.
->=20
-> The DBObjectMap I'm very fuzzy on, so I suspect that's where the tricky=
-=20
-> part will be.  Maybe the temp object name includes the intended hobject=
-_t=20
-> in it somewhere, or something, so that the rename can be reflected=20
-> in leveldb at the end.
->=20
-> Thoughts?  Maybe we can do a quick hangout this afternoon to make sure =
-
-> this will work before I start putting it together...
->=20
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-All that is necessary for the triumph of evil is that good people do noth=
-ing.
-
-
---------------enig1B66D179E166DE6E732D0417
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with undefined - http://www.enigmail.net/
-
-iEYEARECAAYFAlIfy1gACgkQ8dLMyEl6F22OxQCeMfaZl1RVsKB+EV/IKO/qWIzq
-s2cAnjQMO2aX/zkqVS7VHyVDww7idBUC
-=uMGD
------END PGP SIGNATURE-----
-
---------------enig1B66D179E166DE6E732D0417--
