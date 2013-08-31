@@ -1,55 +1,53 @@
-From: James Harper <james.harper@bendigoit.com.au>
-Subject: RE: debugging librbd async - valgrind memtest hit
-Date: Fri, 30 Aug 2013 23:39:00 +0000
-Message-ID: <6035A0D088A63A46850C3988ED045A4B664B6EA2@BITCOM1.int.sbss.com.au>
-References: <6035A0D088A63A46850C3988ED045A4B664B63F0@BITCOM1.int.sbss.com.au>
- <alpine.DEB.2.00.1308300820380.24783@cobra.newdream.net>
+From: Dan Mick <dan.mick@inktank.com>
+Subject: Re: collectd plugin with cuttlefish
+Date: Fri, 30 Aug 2013 17:38:44 -0700
+Message-ID: <52213B14.4030604@inktank.com>
+References: <CAFtEh-fCrPCx19BkG-CN7KP=ag3czMbZ=xQuHKOecMsUF2Z36g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp2.bendigoit.com.au ([203.16.207.99]:43073 "EHLO
-	smtp2.bendigoit.com.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752523Ab3H3XjT convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 30 Aug 2013 19:39:19 -0400
-In-Reply-To: <alpine.DEB.2.00.1308300820380.24783@cobra.newdream.net>
-Content-Language: en-US
+Received: from mail-pd0-f170.google.com ([209.85.192.170]:50963 "EHLO
+	mail-pd0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752725Ab3HaAir (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 30 Aug 2013 20:38:47 -0400
+Received: by mail-pd0-f170.google.com with SMTP id x10so2488803pdj.15
+        for <ceph-devel@vger.kernel.org>; Fri, 30 Aug 2013 17:38:47 -0700 (PDT)
+In-Reply-To: <CAFtEh-fCrPCx19BkG-CN7KP=ag3czMbZ=xQuHKOecMsUF2Z36g@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "Sylvain Munaut (s.munaut@whatever-company.com)" <s.munaut@whatever-company.com>
+To: Damien Churchill <damoxc@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-> 
-> On Fri, 30 Aug 2013, James Harper wrote:
-> > I finally got a valgrind memtest hit... output attached below email. I
-> > recompiled all of tapdisk and ceph without any -O options (thought I had
-> > already...) and it seems to have done the trick
-> 
-> What version is this?  The line numbers don't seem to match up with my
-> source tree.
+It's a bit surprising that it broke with cuttlefish; something might 
+have happened in dumpling, but we wouldn't expect changes in cuttlefish.
+It looks like collectd just couldn't talk to the monitor properly.
+Maybe look at the mon's log and see what it thinks it saw?
 
-0.67.2, but I've peppered it with debug prints
-
-> > Basically it looks like an instance of AioRead is being accessed after
-> > being free'd. I need some hints on what api behaviour by the tapdisk
-> > driver could be causing this to happen in librbd...
-> 
-> It looks like refcounting for the AioCompletion is off.  My first guess
-> would be premature (or extra) calls to rados_aio_release or
-> AioCompletion::release().
-> 
-> I did a quick look at the code and it looks like aio_read() is carrying a
-> ref for the AioComplete for the entire duration of the function, so it
-> should not be disappearing (and taking the AioRead request struct with it)
-> until well after where the invalid read is.  Maybe there is an error path
-> somewhere what is dropping a ref it shouldn't?
-> 
-
-I'll see if I can find a way to track that. It's the c->get() and c->put() that track this right?
- 
-The crash seems a little bit different every time, so it could still be something stomping on memory, eg overwriting the ref count or something.
-
-Thanks
-
-James
-
+On 08/30/2013 05:04 AM, Damien Churchill wrote:
+> Hi,
+>
+> Has anything changed with the admin socket that would prevent the
+> collectd plugin (compiled against 5.3.1 using the patches submitted to
+> the collectd ML) from gathering stats? I've recompiled collectd with
+> --enable-debug and receive the following output in the log:
+>
+> ceph_init
+> name=mon_ceph1, asok_path=/var/run/ceph/ceph-mon.ceph1.asok
+> entering cconn_main_loop(request_type = 0)
+> did cconn_prepare(name=mon_ceph1,i=0,st=1)
+> cconn_handle_event(name=mon_ceph1,state=1,amt=0,ret=4)
+> did cconn_prepare(name=mon_ceph1,i=0,st=2)
+> did cconn_prepare(name=mon_ceph1,i=0,st=2)
+> ERROR: cconn_main_loop: timed out.
+> cconn_main_loop: reached all Ceph daemons :)
+> Initialization of plugin `ceph' failed with status -110. Plugin will
+> be unloaded.
+> plugin_unregister_read: Marked `ceph' for removal.
+>
+> Thanks in advance!
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
