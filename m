@@ -1,88 +1,70 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: libvirt: Removing RBD volumes with snapshots, auto purge or not?
-Date: Sat, 31 Aug 2013 14:23:11 +0200
-Message-ID: <5221E02F.5060205@42on.com>
-References: <52138CEF.8010109@42on.com> <5213DBC3.1080009@inktank.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: Random build errors - uninitialized integers
+Date: Sat, 31 Aug 2013 14:05:31 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1308311026130.13911@cobra.newdream.net>
+References: <CAN04cT5F6AxJR+hNuujR4AghUQ2cFYBGbCgAA=6J0FGtYMpMkw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from websrv.42on.com ([31.25.102.167]:58888 "EHLO websrv.42on.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752975Ab3HaMXO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sat, 31 Aug 2013 08:23:14 -0400
-In-Reply-To: <5213DBC3.1080009@inktank.com>
+Received: from cobra.newdream.net ([66.33.216.30]:39335 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755288Ab3HaVFb (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 31 Aug 2013 17:05:31 -0400
+In-Reply-To: <CAN04cT5F6AxJR+hNuujR4AghUQ2cFYBGbCgAA=6J0FGtYMpMkw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Roald van Loon <roaldvanloon@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-On 08/20/2013 11:12 PM, Josh Durgin wrote:
-> On 08/20/2013 08:36 AM, Wido den Hollander wrote:
->> Hi,
->>
->> The current [0] libvirt storage pool code simply calls "rbd_remove"
->> without anything else.
->>
->> As far as I know rbd_remove will fail if the image still has snapshots,
->> you have to remove those snapshots first before you can remove the image.
->>
->> The problem is that libvirt's storage pools do not support listing
->> snapshots, so we can't integrate that.
->
-> libvirt's storage pools don't have any concept of snapshots, which is
-> the real problem. Ideally they would have functions to at least create,
-> list and delete snapshots (and probably rollback and create a volume
-> from a snapshot too).
->
->> Libvirt however has a flag you can pass down to tell you want the device
->> to be zeroed.
->>
->> The normal procedure is that the device is filled with zeros before
->> actually removing it.
->>
->> I was thinking about "abusing" this flag to use it as a snap purge for
->> RBD.
->>
->> So a regular volume removal will call only rbd_remove, but when the flag
->> VIR_STORAGE_VOL_DELETE_ZEROED is passed it will purge all snapshots
->> prior to calling rbd_remove.
->
-> I don't think we should reinterpret the flag like that. A new flag
-> for that purpose could work, but since libvirt storage pools don't
-> manage snapshots at all right now I'd rather CloudStack delete the
-> snapshots via librbd, since it's the service creating them in this case.
-> You could see what the libvirt devs think about a new flag though.
->
+[adding ceph-devel to cc]
 
-CloudStack currently does that: 
-https://git-wip-us.apache.org/repos/asf?p=cloudstack.git;a=blob;f=plugins/hypervisors/kvm/src/com/cloud/hypervisor/kvm/storage/LibvirtStorageAdaptor.java;h=719a03d60d07e2fd76b779e02a052e7e18a66877;hb=master#l702
+Hi Roald!
 
-I'll ask the libvirt guys about this later, but there is some big 
-latency on their mailinglist and I have two outstanding questions. I'll 
-wait for those before starting about this.
+On Sat, 31 Aug 2013, Roald van Loon wrote:
+> Hi Sage,
+> 
+> As you know I'm working on doing a cleanup of the automake files. I
+> found a rather weird issue related to integer types causing completely
+> random build errors - on some system configs more often than on
+> others. I'm mailing them because you might want to cherry-pick the
+> fixes.
+> 
+> >From what I could trace, I found at least two distinct issues;
+> 
+> 1) The header src/include/inttypes.h sometimes clutters the system's
+> <inttypes.h>, especially when it is included in files in src/include
+> as 'include "inttypes.h"' - files which are included in different
+> order from other different headers/source files, causing unexpected
+> and unreproducible behaviour. Next to that, we sometimes assume an
+> include <inttypes.h> always includes <stdint.h>, which is not true on
+> some systems (even though C99 says so).
+> 
+> 2) Sometimes, out of the blue, random tests fail (especially dencoder
+> test). I traced this to some uninitialized integers.
+> 
+> I prevented the first from happening by renaming inttypes.h ->
+> int_types.h (which is more consistent with the types-files naming in
+> Ceph anyway), and adding extra guards in it to make sure the right
+> types exists (especially the PRI*64 macros are not defined on all
+> systems). See: https://github.com/ceph/ceph/blob/c872eca5c20386748804f7cbc6e7bddf1fff2c69/src/include/int_types.h
 
->> Another way would be to always purge snapshots, but I'm afraid that
->> could make somebody very unhappy at some point.
->
-> I agree this would be too unsafe for a default. It seems that's what
-> the LVM storage pool does now, maybe because it doesn't expect
-> snapshots to be used.
->
->> Currently "virsh" doesn't support flags, but that could be fixed in a
->> different patch.
->
-> No backend actually uses the flags yet either.
->
+Looks good.  The #include ordering has always been fragile with the endian 
+conversion types; anything we can do to make it less prone to error is 
+great.
+ 
+> Regarding the second, I found two cases causing random ceph-dencoder
+> test failures;
+> 
+> Here; https://github.com/ceph/ceph/commit/730539a06a0632c08cb4419ad8318984c6d9ef37
+> And here; https://github.com/ceph/ceph/commit/dc8aa53a94fab0effdc3830620dbd6295d3824e2#diff-2
+> 
+> As I said, you might want to cherry-pick them, or you might want to
+> leave this in this branch and merge it later. Let me know what you
+> think.
 
-True, but support is in there for usage of such flags. So why not use it?
+Good catch.  I've cherry-picked the first, and just the MonitorDBStore::Op 
+part to next.  I think the header changes should stay in your branch until 
+it is ready to go.  It appears to be getting closer, though!
 
-> Josh
-
-
--- 
-Wido den Hollander
-42on B.V.
-
-Phone: +31 (0)20 700 9902
-Skype: contact42on
+Thanks!
+sage
