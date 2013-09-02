@@ -1,40 +1,26 @@
-From: Sylvain Munaut <s.munaut@whatever-company.com>
-Subject: Re: radosgw 0.67.2 update -> "ERROR: failed to initialize watch"
-Date: Mon, 2 Sep 2013 17:14:16 +0200
-Message-ID: <CAF6-1L7hiN7WJ4WAiwjvRd1LNY2GjbYSS5tAkxYu9u7CuHv6Ww@mail.gmail.com>
-References: <CAF6-1L66AG8a1N0ujFvAbYYgXTZ41ug6HtiLvPY8c_AEriHXAw@mail.gmail.com>
-	<CAF6-1L67azE9qJpsmFWAPdjD+yd9WmPKRoLxGe9pS5GDnHE=pQ@mail.gmail.com>
-	<CAF6-1L7z8i4NfYT4NC8ymFo1p1WTkxxdi2==AUFtEA_7J1fK1w@mail.gmail.com>
-	<CABBk=J9TgfADOStKVct8Gbut+T1nuBO+jCdHL5L3mjRWamyBrg@mail.gmail.com>
-	<CAF6-1L6i=fwrSo5dmsyrLRiYjy-5UzmO4dzWnX-drLx=TkXZ=g@mail.gmail.com>
-	<CABBk=J-OUyvRSyoN8pc_4-GmE-XbRwjEAHMyC=9kAGhzbbgD4g@mail.gmail.com>
-	<CAC-hyiHoHf7aZCyt2x7xgigD5+jfey3b57R1kDQA2X0qnFNFBg@mail.gmail.com>
-	<CAF6-1L7qMw1Bp=La=+TsC-dhEX5EJSMJPxjOZnbfkzNALXmZUA@mail.gmail.com>
+From: Oleg Krasnianskiy <oleg.krasnianskiy@gmail.com>
+Subject: Developing osd plugins
+Date: Mon, 2 Sep 2013 20:32:24 +0300
+Message-ID: <CA+CdmLZ1HKHWAw4+AG15Ud1yAEBF+DvUaP+6KwCexpXx8yBWJQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f177.google.com ([209.85.192.177]:64810 "EHLO
-	mail-pd0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757140Ab3IBPOR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Sep 2013 11:14:17 -0400
-Received: by mail-pd0-f177.google.com with SMTP id y10so4849408pdj.36
-        for <ceph-devel@vger.kernel.org>; Mon, 02 Sep 2013 08:14:17 -0700 (PDT)
-In-Reply-To: <CAF6-1L7qMw1Bp=La=+TsC-dhEX5EJSMJPxjOZnbfkzNALXmZUA@mail.gmail.com>
+Received: from mail-ve0-f169.google.com ([209.85.128.169]:40503 "EHLO
+	mail-ve0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755419Ab3IBRcZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Sep 2013 13:32:25 -0400
+Received: by mail-ve0-f169.google.com with SMTP id db10so3425899veb.0
+        for <ceph-devel@vger.kernel.org>; Mon, 02 Sep 2013 10:32:24 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh <yehuda@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Yehuda,
+Hi all
 
+I've been playing with osd plugins and I can't figure out how to load one.
+There is a loadclass.sh script but it seems quite outdated.
+I tried to copy .so to /usr/lib/rados-classes on all nodes and restart
+ceph cluster, but it didn't help, rados_exec returns -95, I haven't
+yet found the constant for the value.
 
->> I just pushed a fix to wip-6161, can you verify that it fixes the issue
->> for you?
-
-The fix wip-6161 branch seem to fix the problem for me. I was able to
-re-enable the cache and have radosgw start (and seemingly work
-properly).
-
-Cheers,
-
-    Sylvain
+Thanks for any help!
