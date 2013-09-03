@@ -1,99 +1,88 @@
 From: Alex Elder <alex.elder@linaro.org>
-Subject: Re: [PATCH] rbd: ignore unmapped snapshots that no longer exist
-Date: Tue, 03 Sep 2013 08:29:55 -0500
-Message-ID: <5225E453.1080403@linaro.org>
-References: <1377829140-13635-1-git-send-email-josh.durgin@inktank.com>
+Subject: Re: [PATCH 1/2] ceph: remove ceph_lookup_inode()
+Date: Tue, 03 Sep 2013 08:40:31 -0500
+Message-ID: <5225E6CF.2060306@linaro.org>
+References: <1378106394-14481-1-git-send-email-zheng.z.yan@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f176.google.com ([209.85.223.176]:34039 "EHLO
+Received: from mail-ie0-f176.google.com ([209.85.223.176]:55295 "EHLO
 	mail-ie0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759989Ab3ICN3u (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Sep 2013 09:29:50 -0400
-Received: by mail-ie0-f176.google.com with SMTP id s9so10051832iec.21
-        for <ceph-devel@vger.kernel.org>; Tue, 03 Sep 2013 06:29:50 -0700 (PDT)
-In-Reply-To: <1377829140-13635-1-git-send-email-josh.durgin@inktank.com>
+	with ESMTP id S932966Ab3ICNkZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Sep 2013 09:40:25 -0400
+Received: by mail-ie0-f176.google.com with SMTP id s9so9781158iec.7
+        for <ceph-devel@vger.kernel.org>; Tue, 03 Sep 2013 06:40:25 -0700 (PDT)
+In-Reply-To: <1378106394-14481-1-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: "Yan, Zheng" <zheng.z.yan@intel.com>
+Cc: ceph-devel@vger.kernel.org, sage@inktank.com
 
-On 08/29/2013 09:19 PM, Josh Durgin wrote:
-> This prevents erroring out while adding a device when a snapshot
-> unrelated to the current mapping is deleted between reading the
-> snapshot context and reading the snapshot names. If the mapped
-> snapshot name is not found an error still occurs as usual.
+On 09/02/2013 02:19 AM, Yan, Zheng wrote:
+> From: "Yan, Zheng" <zheng.z.yan@intel.com>
+> 
+> commit 6f60f889 (ceph: fix freeing inode vs removing session caps race)
+> introduced ceph_lookup_inode(). But there is already a ceph_find_inode()
+> which provides similar function. So remove ceph_lookup_inode(), use
+> ceph_find_inode() instead.
+> 
+> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
 
-I mention something about a one of your comments, but even so
-this looks good to me, so for this patch:
+Looks good.
 
 Reviewed-by: Alex Elder <elder@linaro.org>
 
-However, in looking at this, I found something else that probably
-should be resolved.
-
-Note that rbd_dev_spec_update() calls rbd_snap_name(), but it
-only checks its return value for NULL.  This test needs to be
-*at least* changed to test IS_ERR_OR_NULL(), but I think it
-would be better to do the change I suggest next, and make this
-spot just use IS_ERR().
-
-Right now rbd_dev_v1_snap_name() just returns NULL if any error
-occurs.  It should be made to return a pointer-coded-error like
-its v2 counterpart function does.  It would look something like:
-
-static const char *rbd_dev_v1_snap_name(struct rbd_device *rbd_dev,
-                                        u64 snap_id)
-{
-        u32 which;
-	const char *snap_name;
-
-        which = rbd_dev_snap_index(rbd_dev, snap_id);
-        if (which == BAD_SNAP_INDEX)
-                return ERR_PTR(-ENOENT);
-
-	snap_name = _rbd_dev_v1_snap_name(rbd_dev, which);
-
-	return snap_name ? snap_name : ERR_PTR(-ENOMEM);
-}
-
-I'd make this change myself but at the moment I'm not set up
-to be able to rigorously test it, so I'm just suggesting it
-to you and hoping for the best...
-
-					-Alex
-
-
-> Signed-off-by: Josh Durgin <josh.durgin@inktank.com>
 > ---
->  drivers/block/rbd.c |    9 +++++++--
->  1 files changed, 7 insertions(+), 2 deletions(-)
+>  fs/ceph/inode.c      | 8 --------
+>  fs/ceph/mds_client.c | 2 +-
+>  fs/ceph/super.h      | 2 --
+>  3 files changed, 1 insertion(+), 11 deletions(-)
 > 
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 0e83a10..545ceff 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -4077,8 +4077,13 @@ static u64 rbd_v2_snap_id_by_name(struct rbd_device *rbd_dev, const char *name)
+> diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+> index eae41cd..8549a48 100644
+> --- a/fs/ceph/inode.c
+> +++ b/fs/ceph/inode.c
+> @@ -62,14 +62,6 @@ struct inode *ceph_get_inode(struct super_block *sb, struct ceph_vino vino)
+>  	return inode;
+>  }
 >  
->  		snap_id = snapc->snaps[which];
->  		snap_name = rbd_dev_v2_snap_name(rbd_dev, snap_id);
-> -		if (IS_ERR(snap_name))
-> -			break;
-> +		if (IS_ERR(snap_name)) {
-> +			/* ignore no-longer existing snapshots */
-
-I feel like this comment doesn't really capture why it might be
-normal and acceptable for a snapshot to no longer exist.  (At
-least mention that it would be due to a race?)
-
-> +			if (PTR_ERR(snap_name) == -ENOENT)
-> +				continue;
-> +			else
-> +				break;
-> +		}
->  		found = !strcmp(name, snap_name);
->  		kfree(snap_name);
->  	}
+> -struct inode *ceph_lookup_inode(struct super_block *sb, struct ceph_vino vino)
+> -{
+> -	struct inode *inode;
+> -	ino_t t = ceph_vino_to_ino(vino);
+> -	inode = ilookup5_nowait(sb, t, ceph_ino_compare, &vino);
+> -	return inode;
+> -}
+> -
+>  /*
+>   * get/constuct snapdir inode for a given directory
+>   */
+> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+> index 603786b..b7bda5d 100644
+> --- a/fs/ceph/mds_client.c
+> +++ b/fs/ceph/mds_client.c
+> @@ -1054,7 +1054,7 @@ static void remove_session_caps(struct ceph_mds_session *session)
+>  			vino = cap->ci->i_vino;
+>  			spin_unlock(&session->s_cap_lock);
+>  
+> -			inode = ceph_lookup_inode(sb, vino);
+> +			inode = ceph_find_inode(sb, vino);
+>  			iput(inode);
+>  
+>  			spin_lock(&session->s_cap_lock);
+> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+> index bb23ef6..6014b0a 100644
+> --- a/fs/ceph/super.h
+> +++ b/fs/ceph/super.h
+> @@ -694,8 +694,6 @@ extern void ceph_destroy_inode(struct inode *inode);
+>  
+>  extern struct inode *ceph_get_inode(struct super_block *sb,
+>  				    struct ceph_vino vino);
+> -extern struct inode *ceph_lookup_inode(struct super_block *sb,
+> -				       struct ceph_vino vino);
+>  extern struct inode *ceph_get_snapdir(struct inode *parent);
+>  extern int ceph_fill_file_size(struct inode *inode, int issued,
+>  			       u32 truncate_seq, u64 truncate_size, u64 size);
 > 
 
