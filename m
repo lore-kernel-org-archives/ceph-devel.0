@@ -1,34 +1,36 @@
 From: Sage Weil <sage@inktank.com>
 Subject: Re: Developing osd plugins
-Date: Tue, 3 Sep 2013 07:35:29 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1309030734100.32126@cobra.newdream.net>
-References: <CA+CdmLZ1HKHWAw4+AG15Ud1yAEBF+DvUaP+6KwCexpXx8yBWJQ@mail.gmail.com>
+Date: Tue, 3 Sep 2013 09:31:05 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1309030930490.25704@cobra.newdream.net>
+References: <CA+CdmLZ1HKHWAw4+AG15Ud1yAEBF+DvUaP+6KwCexpXx8yBWJQ@mail.gmail.com> <alpine.DEB.2.00.1309030734100.32126@cobra.newdream.net> <CA+CdmLa-7GNtW1CL1-TCZwBzmsYpiTy2sy6aFWkO=uaoa_LsJw@mail.gmail.com>
+ <alpine.DEB.2.00.1309030929380.1073@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:60500 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:33243 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752558Ab3ICOfa (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Sep 2013 10:35:30 -0400
-In-Reply-To: <CA+CdmLZ1HKHWAw4+AG15Ud1yAEBF+DvUaP+6KwCexpXx8yBWJQ@mail.gmail.com>
+	with ESMTP id S1760164Ab3ICQbF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Sep 2013 12:31:05 -0400
+In-Reply-To: <alpine.DEB.2.00.1309030929380.1073@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Oleg Krasnianskiy <oleg.krasnianskiy@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: ceph-devel@vger.kernel.org
 
-On Mon, 2 Sep 2013, Oleg Krasnianskiy wrote:
-> Hi all
+[oops, added back ceph-devel to cc list]
+
+On Tue, 3 Sep 2013, Sage Weil wrote:
+
+> On Tue, 3 Sep 2013, Oleg Krasnianskiy wrote:
+> > Thanks, the problem was I exported the wrong symbol - class_init
+> > instead of the __cls_init.
+> > But I have one more question - what's the proper way to deploy the plugin?
+> > Should I copy the .so to every host and then restart all osds one by one?
 > 
-> I've been playing with osd plugins and I can't figure out how to load one.
-> There is a loadclass.sh script but it seems quite outdated.
-> I tried to copy .so to /usr/lib/rados-classes on all nodes and restart
-> ceph cluster, but it didn't help, rados_exec returns -95, I haven't
-> yet found the constant for the value.
+> You need to handle the distribution of the .so, yes.  However, you do not 
+> need to restart the OSD--it will be loaded on demand the first time it is 
+> used.  Note, however, that it won't be reloaded of the .so file changes; 
+> in that case you'll need to restart the daemon.
 > 
-> Thanks for any help!
-
-With 0.67.x and later the classes are now loaded on startup.  You should 
-see an error message in /var/log/ceph/ceph-osd.*.log indicating why it was 
-unable to load (usually a missing symbol or something).
-
-sage
+> sage
+> 
