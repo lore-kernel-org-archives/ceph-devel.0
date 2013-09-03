@@ -1,247 +1,57 @@
-From: Milosz Tanski <milosz@adfin.com>
-Subject: Re: [PATCH 4/5] fscache: netfs function for cleanup post readpages
-Date: Tue, 3 Sep 2013 13:24:21 -0400
-Message-ID: <CANP1eJE_so8fj4OhkBWS-kCAoa4CWj+sJc=SioCo42SYRAcjTA@mail.gmail.com>
-References: <cover.1375999914.git.milosz@adfin.com>
-	<b5506ec6c293011dc880ae70cc1f0111e1512ff6.1375999914.git.milosz@adfin.com>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: libvirt: Using rbd_create3 to create format 2 images
+Date: Tue, 03 Sep 2013 11:23:10 -0700
+Message-ID: <5226290E.1000303@inktank.com>
+References: <5220691A.1080604@42on.com> <5220B988.9060906@inktank.com> <5220E6B6.7030008@42on.com> <5224A784.4030606@42on.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <b5506ec6c293011dc880ae70cc1f0111e1512ff6.1375999914.git.milosz@adfin.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: ceph-devel <ceph-devel@vger.kernel.org>
-Cc: Sage Weil <sage@inktank.com>, "Yan, Zheng" <zheng.z.yan@intel.com>, David Howells <dhowells@redhat.com>, "linux-cachefs@redhat.com" <linux-cachefs@redhat.com>, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, linux-kernel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-pa0-f54.google.com ([209.85.220.54]:58092 "EHLO
+	mail-pa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755694Ab3ICSZZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Sep 2013 14:25:25 -0400
+Received: by mail-pa0-f54.google.com with SMTP id kx10so6787259pab.41
+        for <ceph-devel@vger.kernel.org>; Tue, 03 Sep 2013 11:25:24 -0700 (PDT)
+In-Reply-To: <5224A784.4030606@42on.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Wido den Hollander <wido@42on.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-I just wanted to follow up on this patch (and number 5) in the series.
-The backtrace I posted originally is not correct backtrace from this
-particular issue. The new one I attached at the bottom of this email
-is the right one. The backtrace I posted is a that only Ceph
-experiences in ceph_readpages because it directly returns the pages.
-However, the patch I posted is still valid and still address a real
-problem. The only issue was the wrong backtrace.
+On 09/02/2013 07:58 AM, Wido den Hollander wrote:
+> On 08/30/2013 08:38 PM, Wido den Hollander wrote:
+>> On 08/30/2013 05:26 PM, Josh Durgin wrote:
+>>> On 08/30/2013 02:42 AM, Wido den Hollander wrote:
+>>>> Hi,
+>>>>
+>>>> I created the attached patch to have libvirt create images with
+>>>> format 2
+>>>> by default, this would simplify the CloudStack code and could also help
+>>>> other projects.
+>>>>
+>>>> The problem with libvirt is that there is no mechanism to supply
+>>>> information like order, features, stripe unit and count to the
+>>>> rbd_create3 method, so it's now hardcoded in libvirt.
+>>>>
+>>>> Any comments on this patch before I fire it of to the libvirt guys?
+>>>
+>>> Seems ok to me. They might want you to detect whether the function is
+>>> there and compile without it if librbd doesn't support it (rbd_create3
+>>> first appeared in bobtail).
+>>>
+>>
+>> Good one. Although I don't think anybody is still running Argonaut I'll
+>> do a version check of librbd and switch to rbd_create if needed.
+>>
+>>
+> What do you think of the attached patch Josh?
 
-The fixed is between Ceph and Fscache interaction when called from
-readahed code path. I also investigated the other filesystems (CIFS
-and NFS) and they are also susceptible to the same issue.
+It be a bit cleaner to make a helper to call the rbd_create() or
+rbd_create3() so you only need one check of LIBRBD_VERSION_CODE.
 
-In any case the correct backtrace to company the patch for review is
-in this email.
+It looks like v0.55 was the first release which contained rbd_create3(),
+and the version code for that is 261, so the version code check is off
+by one.
 
-- Milosz
-
-=BB 12:20:34.896 Aug 9 16:20:38 betanode2 kernel: [11121126.824267] BUG=
-:
-Bad page state in process petabucket pfn:407aed
-=BB 12:20:34.896 Aug 9 16:20:38 betanode2 kernel: [11121126.824273]
-page:ffffea00101ebb40 count:0 mapcount:0 mapping: (null) index:0x9cb
-=BB 12:20:34.896 Aug 9 16:20:38 betanode2 kernel: [11121126.824278] pag=
-e
-flags: 0x200000000001000(private_2)
-=BB 12:20:34.896 Aug 9 16:20:38 betanode2 kernel: [11121126.824282]
-Modules linked in: ceph libceph cachefiles ghash_clmulni_intel
-aesni_intel ablk_helper cryptd lrw gf128mul glue_helper aes_x86_64
-microcode auth_rpcgss oid_registry nfsv4 nfs fscache lockd sunrpc
-raid10 raid456 async_pq async_xor async_memcpy async_raid6_recov
-async_tx raid1 raid0 multipath linear btrfs raid6_pq lzo_compress xor
-zlib_deflate libcrc32c
-=BB 12:20:34.896 Aug 9 16:20:38 betanode2 kernel: [11121126.824297] CPU=
-:
-1 PID: 32527 Comm: petabucket Tainted: G B 3.10.0-virtual #45
-=BB 12:20:34.896 Aug 9 16:20:38 betanode2 kernel: [11121126.824298]
-0000000000000001 ffff880424341a48 ffffffff815523f2 ffff880424341a68
-=BB 12:20:34.896 Aug 9 16:20:38 betanode2 kernel: [11121126.824300]
-ffffffff8111def7 0000000000000001 ffffea00101ebb40 ffff880424341aa8
-=BB 12:20:34.896 Aug 9 16:20:38 betanode2 kernel: [11121126.824302]
-ffffffff8111e49e ffffffff81132ce9 ffffea00101ebb40 0200000000001000
-=BB 12:20:34.896 Aug 9 16:20:38 betanode2 kernel: [11121126.824304] Cal=
-l Trace:
-=BB 12:20:34.896 Aug 9 16:20:38 betanode2 kernel: [11121126.824307]
-[<ffffffff815523f2>] dump_stack+0x19/0x1b
-=BB 12:20:34.896 Aug 9 16:20:38 betanode2 kernel: [11121126.824309]
-[<ffffffff8111def7>] bad_page+0xc7/0x120
-=BB 12:20:34.896 Aug 9 16:20:38 betanode2 kernel: [11121126.824312]
-[<ffffffff8111e49e>] free_pages_prepare+0x10e/0x120
-=BB 12:20:34.896 Aug 9 16:20:38 betanode2 kernel: [11121126.824314]
-[<ffffffff81132ce9>] ? zone_statistics+0x99/0xc0
-=BB 12:20:34.896 Aug 9 16:20:38 betanode2 kernel: [11121126.824316]
-[<ffffffff8111fc80>] free_hot_cold_page+0x40/0x170
-=BB 12:20:34.896 Aug 9 16:20:38 betanode2 kernel: [11121126.824318]
-[<ffffffff81123507>] __put_single_page+0x27/0x30
-=BB 12:20:34.896 Aug 9 16:20:38 betanode2 kernel: [11121126.824320]
-[<ffffffff81123df5>] put_page+0x25/0x40
-=BB 12:20:34.896 Aug 9 16:20:38 betanode2 kernel: [11121126.824321]
-[<ffffffff81123e66>] put_pages_list+0x56/0x70
-=BB 12:20:34.896 Aug 9 16:20:38 betanode2 kernel: [11121126.824324]
-[<ffffffff81122a98>] __do_page_cache_readahead+0x1b8/0x260
-=BB 12:20:34.896 Aug 9 16:20:38 betanode2 kernel: [11121126.824327]
-[<ffffffff81122ea1>] ra_submit+0x21/0x30
-=BB 12:20:34.896 Aug 9 16:20:38 betanode2 kernel: [11121126.824329]
-[<ffffffff81118f64>] filemap_fault+0x254/0x490
-=BB 12:20:34.896 Aug 9 16:20:38 betanode2 kernel: [11121126.824332]
-[<ffffffff8113a74f>] __do_fault+0x6f/0x4e0
-=BB 12:20:34.896 Aug 9 16:20:38 betanode2 kernel: [11121126.824334]
-[<ffffffff81004ec2>] ? xen_mc_flush+0xb2/0x1c0
-=BB 12:20:34.896 Aug 9 16:20:38 betanode2 kernel: [11121126.824336]
-[<ffffffff8113d856>] handle_pte_fault+0xf6/0x930
-=BB 12:20:34.896 Aug 9 16:20:38 betanode2 kernel: [11121126.824339]
-[<ffffffff81008c33>] ? pte_mfn_to_pfn+0x93/0x110
-=BB 12:20:34.896 Aug 9 16:20:38 betanode2 kernel: [11121126.824341]
-[<ffffffff81008cce>] ? xen_pmd_val+0xe/0x10
-=BB 12:20:34.896 Aug 9 16:20:38 betanode2 kernel: [11121126.824343]
-[<ffffffff81005469>] ? __raw_callee_save_xen_pmd_val+0x11/0x1e
-=BB 12:20:34.896 Aug 9 16:20:38 betanode2 kernel: [11121126.824346]
-[<ffffffff8113f361>] handle_mm_fault+0x251/0x370
-=BB 12:20:34.896 Aug 9 16:20:38 betanode2 kernel: [11121126.824348]
-[<ffffffff8155bffa>] __do_page_fault+0x1aa/0x550
-=BB 12:20:34.896 Aug 9 16:20:38 betanode2 kernel: [11121126.824350]
-[<ffffffff81004ec2>] ? xen_mc_flush+0xb2/0x1c0
-=BB 12:20:34.896 Aug 9 16:20:38 betanode2 kernel: [11121126.824352]
-[<ffffffff8100483d>] ? xen_clts+0x8d/0x190
-=BB 12:20:34.896 Aug 9 16:20:38 betanode2 kernel: [11121126.824354]
-[<ffffffff8155c3ae>] do_page_fault+0xe/0x10
-=BB 12:20:34.896 Aug 9 16:20:38 betanode2 kernel: [11121126.824357]
-[<ffffffff81558818>] page_fault+0x28/0x30
-
-On Wed, Aug 21, 2013 at 5:30 PM, Milosz Tanski <milosz@adfin.com> wrote=
-:
-> Currently the fscache code expect the netfs to call fscache_readpages=
-_or_alloc
-> inside the aops readpages callback. It marks all the pages in the lis=
-t provided
-> by readahead with PgPrivate2. In the cases that the netfs fails to re=
-ad all the
-> pages (which is legal) it ends up returning to the readahead and trig=
-gering a
-> BUG. This happens because the page list still contains marked pages.
->
-> This patch implements a simple fscache_readpages_cancel function that=
- the netfs
-> should call before returning from readpages. It will revoke the pages=
- from the
-> underlying cache backend and unmark them.
->
-> This addresses this BUG being triggered by netfs code:
->
-> [12410647.597278] BUG: Bad page state in process petabucket  pfn:3d50=
-4e
-> [12410647.597292] page:ffffea000f541380 count:0 mapcount:0 mapping:
->         (null) index:0x0
-> [12410647.597298] page flags: 0x200000000001000(private_2)
->
-> ...
->
-> [12410647.597334] Call Trace:
-> [12410647.597345]  [<ffffffff815523f2>] dump_stack+0x19/0x1b
-> [12410647.597356]  [<ffffffff8111def7>] bad_page+0xc7/0x120
-> [12410647.597359]  [<ffffffff8111e49e>] free_pages_prepare+0x10e/0x12=
-0
-> [12410647.597361]  [<ffffffff8111fc80>] free_hot_cold_page+0x40/0x170
-> [12410647.597363]  [<ffffffff81123507>] __put_single_page+0x27/0x30
-> [12410647.597365]  [<ffffffff81123df5>] put_page+0x25/0x40
-> [12410647.597376]  [<ffffffffa02bdcf9>] ceph_readpages+0x2e9/0x6e0 [c=
-eph]
-> [12410647.597379]  [<ffffffff81122a8f>] __do_page_cache_readahead+0x1=
-af/0x260
-> [12410647.597382]  [<ffffffff81122ea1>] ra_submit+0x21/0x30
-> [12410647.597384]  [<ffffffff81118f64>] filemap_fault+0x254/0x490
-> [12410647.597387]  [<ffffffff8113a74f>] __do_fault+0x6f/0x4e0
-> [12410647.597391]  [<ffffffff810125bd>] ? __switch_to+0x16d/0x4a0
-> [12410647.597395]  [<ffffffff810865ba>] ? finish_task_switch+0x5a/0xc=
-0
-> [12410647.597398]  [<ffffffff8113d856>] handle_pte_fault+0xf6/0x930
-> [12410647.597401]  [<ffffffff81008c33>] ? pte_mfn_to_pfn+0x93/0x110
-> [12410647.597403]  [<ffffffff81008cce>] ? xen_pmd_val+0xe/0x10
-> [12410647.597405]  [<ffffffff81005469>] ? __raw_callee_save_xen_pmd_v=
-al+0x11/0x1e
-> [12410647.597407]  [<ffffffff8113f361>] handle_mm_fault+0x251/0x370
-> [12410647.597411]  [<ffffffff812b0ac4>] ? call_rwsem_down_read_failed=
-+0x14/0x30
-> [12410647.597414]  [<ffffffff8155bffa>] __do_page_fault+0x1aa/0x550
-> [12410647.597418]  [<ffffffff8108011d>] ? up_write+0x1d/0x20
-> [12410647.597422]  [<ffffffff8113141c>] ? vm_mmap_pgoff+0xbc/0xe0
-> [12410647.597425]  [<ffffffff81143bb8>] ? SyS_mmap_pgoff+0xd8/0x240
-> [12410647.597427]  [<ffffffff8155c3ae>] do_page_fault+0xe/0x10
-> [12410647.597431]  [<ffffffff81558818>] page_fault+0x28/0x30
->
-> Signed-off-by: Milosz Tanski <milosz@adfin.com>
-> ---
->  fs/fscache/page.c       | 16 ++++++++++++++++
->  include/linux/fscache.h | 22 ++++++++++++++++++++++
->  2 files changed, 38 insertions(+)
->
-> diff --git a/fs/fscache/page.c b/fs/fscache/page.c
-> index d479ab3..0cc3153 100644
-> --- a/fs/fscache/page.c
-> +++ b/fs/fscache/page.c
-> @@ -1132,3 +1132,19 @@ void __fscache_uncache_all_inode_pages(struct =
-fscache_cookie *cookie,
->         _leave("");
->  }
->  EXPORT_SYMBOL(__fscache_uncache_all_inode_pages);
-> +
-> +/**
-> + * Unmark pages allocate in the readahead code path (via:
-> + * fscache_readpages_or_alloc) after delegating to the base filesyst=
-em
-> + */
-> +void __fscache_readpages_cancel(struct fscache_cookie *cookie,
-> +                               struct list_head *pages)
-> +{
-> +       struct page *page;
-> +
-> +       list_for_each_entry(page, pages, lru) {
-> +               if (PageFsCache(page))
-> +                       __fscache_uncache_page(cookie, page);
-> +       }
-> +}
-> +EXPORT_SYMBOL(__fscache_readpages_cancel);
-> diff --git a/include/linux/fscache.h b/include/linux/fscache.h
-> index 7a49e8f..c324177 100644
-> --- a/include/linux/fscache.h
-> +++ b/include/linux/fscache.h
-> @@ -209,6 +209,8 @@ extern bool __fscache_maybe_release_page(struct f=
-scache_cookie *, struct page *,
->                                          gfp_t);
->  extern void __fscache_uncache_all_inode_pages(struct fscache_cookie =
-*,
->                                               struct inode *);
-> +extern void __fscache_readpages_cancel(struct fscache_cookie *cookie=
-,
-> +                                      struct list_head *pages);
->
->  /**
->   * fscache_register_netfs - Register a filesystem as desiring cachin=
-g services
-> @@ -719,4 +721,24 @@ void fscache_uncache_all_inode_pages(struct fsca=
-che_cookie *cookie,
->                 __fscache_uncache_all_inode_pages(cookie, inode);
->  }
->
-> +/**
-> + * fscache_readpages_cancel
-> + * @cookie: The cookie representing the inode's cache object.
-> + * @pages: The netfs pages that we canceled write on in readpages()
-> + *
-> + * Uncache/unreserve the pages reserved earlier in readpages() via
-> + * fscache_readpages_or_alloc(). In most successful caches in readpa=
-ges() this
-> + * doesn't do anything. In cases when the underlying netfs's readahe=
-ad failed
-> + * we need to cleanup the pagelist (unmark and uncache).
-> + *
-> + * This function may sleep (if it's calling to the cache backend).
-> + */
-> +static inline
-> +void fscache_readpages_cancel(struct fscache_cookie *cookie,
-> +                             struct list_head *pages)
-> +{
-> +       if (fscache_cookie_valid(cookie))
-> +               __fscache_readpages_cancel(cookie, pages);
-> +}
-> +
->  #endif /* _LINUX_FSCACHE_H */
-> --
-> 1.8.1.2
->
+Josh
