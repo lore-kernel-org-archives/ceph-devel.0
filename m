@@ -1,84 +1,148 @@
-From: Milosz Tanski <milosz@adfin.com>
-Subject: Re: [PATCH 0/2] Fscache cleanup and fix
-Date: Mon, 2 Sep 2013 13:44:47 -0400
-Message-ID: <CANP1eJGZuSKNhY-ZB9akM8Gi3pntosT4W9VdvQ6VfewnXiTzHw@mail.gmail.com>
-References: <cover.1377644443.git.milosz@adfin.com>
-	<alpine.DEB.2.00.1308271632300.24783@cobra.newdream.net>
+From: majianpeng <majianpeng@gmail.com>
+Subject: [PATCH 1/2] ceph: Implement readv/preadv for sync operation.
+Date: Tue, 3 Sep 2013 16:52:10 +0800
+Message-ID: <201309031652087109940@gmail.com>
+Reply-To: majianpeng <majianpeng@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f170.google.com ([209.85.212.170]:38509 "EHLO
-	mail-wi0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756329Ab3IBRos (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Sep 2013 13:44:48 -0400
-Received: by mail-wi0-f170.google.com with SMTP id cb5so1271992wib.3
-        for <ceph-devel@vger.kernel.org>; Mon, 02 Sep 2013 10:44:47 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1308271632300.24783@cobra.newdream.net>
+Received: from mail-pd0-f176.google.com ([209.85.192.176]:56139 "EHLO
+	mail-pd0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759796Ab3ICIwM (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Sep 2013 04:52:12 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: David Howells <dhowells@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, "Yan, Zheng" <zheng.z.yan@intel.com>, Sage Weil <sage@inktank.com>, "linux-cachefs@redhat.com" <linux-cachefs@redhat.com>
+To: sage <sage@inktank.com>
+Cc: =?us-ascii?B?WWFuLCBaaGVuZw==?= <zheng.z.yan@intel.com>, ceph-devel <ceph-devel@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>
 
-David,
+Rm9yIHJlYWR2L3ByZWFkdiBzeW5jLW9wZXJhdG9pbiwgY2VwaCBvbmx5IGRvIHRoZSBmaXJzdCBp
+b3YuDQpJdCBkb24ndCB0aGluayBvdGhlciBpb3ZzLk5vdyBpbXBsZW1lbnQgdGhpcy4NCg0KU2ln
+bmVkLW9mZi1ieTogSmlhbnBlbmcgTWEgPG1hamlhbnBlbmdAZ21haWwuY29tPg0KLS0tDQogZnMv
+Y2VwaC9maWxlLmMgfCAxNzUgKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysr
+Ky0tLS0tLS0tLS0tLS0tLS0tDQogMSBmaWxlIGNoYW5nZWQsIDEyMyBpbnNlcnRpb25zKCspLCA1
+MiBkZWxldGlvbnMoLSkNCg0KZGlmZiAtLWdpdCBhL2ZzL2NlcGgvZmlsZS5jIGIvZnMvY2VwaC9m
+aWxlLmMNCmluZGV4IDNkZTg5ODIuLjdkNmEzZWUgMTAwNjQ0DQotLS0gYS9mcy9jZXBoL2ZpbGUu
+Yw0KKysrIGIvZnMvY2VwaC9maWxlLmMNCkBAIC00MDgsNTEgKzQwOCw5NSBAQCBtb3JlOg0KICAq
+DQogICogSWYgdGhlIHJlYWQgc3BhbnMgb2JqZWN0IGJvdW5kYXJ5LCBqdXN0IGRvIG11bHRpcGxl
+IHJlYWRzLg0KICAqLw0KLXN0YXRpYyBzc2l6ZV90IGNlcGhfc3luY19yZWFkKHN0cnVjdCBmaWxl
+ICpmaWxlLCBjaGFyIF9fdXNlciAqZGF0YSwNCi0JCQkgICAgICB1bnNpZ25lZCBsZW4sIGxvZmZf
+dCAqcG9mZiwgaW50ICpjaGVja2VvZikNCitzdGF0aWMgc3NpemVfdCBjZXBoX3N5bmNfcmVhZChz
+dHJ1Y3Qga2lvY2IgKmlvY2IsIHN0cnVjdCBpb3ZlYyAqaW92LA0KKwkJCSAgICAgIHVuc2lnbmVk
+IGxvbmcgbnJfc2VncywgaW50ICpjaGVja2VvZikNCiB7DQorCXN0cnVjdCBmaWxlICpmaWxlID0g
+aW9jYi0+a2lfZmlscDsNCiAJc3RydWN0IGlub2RlICppbm9kZSA9IGZpbGVfaW5vZGUoZmlsZSk7
+DQogCXN0cnVjdCBwYWdlICoqcGFnZXM7DQotCXU2NCBvZmYgPSAqcG9mZjsNCi0JaW50IG51bV9w
+YWdlcywgcmV0Ow0KKwl1NjQgb2ZmID0gaW9jYi0+a2lfcG9zOw0KKwlpbnQgbnVtX3BhZ2VzLCBy
+ZXQsIGk7DQogDQotCWRvdXQoInN5bmNfcmVhZCBvbiBmaWxlICVwICVsbHV+JXUgJXNcbiIsIGZp
+bGUsIG9mZiwgbGVuLA0KKwlkb3V0KCJzeW5jX3JlYWQgb24gZmlsZSAlcCAlbGx1fiV1ICVzXG4i
+LCBmaWxlLCBvZmYsDQorCSAgICAgKHVuc2lnbmVkKWlvY2ItPmtpX2xlZnQsDQogCSAgICAgKGZp
+bGUtPmZfZmxhZ3MgJiBPX0RJUkVDVCkgPyAiT19ESVJFQ1QiIDogIiIpOw0KLQ0KLQlpZiAoZmls
+ZS0+Zl9mbGFncyAmIE9fRElSRUNUKSB7DQotCQludW1fcGFnZXMgPSBjYWxjX3BhZ2VzX2Zvcigo
+dW5zaWduZWQgbG9uZylkYXRhLCBsZW4pOw0KLQkJcGFnZXMgPSBjZXBoX2dldF9kaXJlY3RfcGFn
+ZV92ZWN0b3IoZGF0YSwgbnVtX3BhZ2VzLCB0cnVlKTsNCi0JfSBlbHNlIHsNCi0JCW51bV9wYWdl
+cyA9IGNhbGNfcGFnZXNfZm9yKG9mZiwgbGVuKTsNCi0JCXBhZ2VzID0gY2VwaF9hbGxvY19wYWdl
+X3ZlY3RvcihudW1fcGFnZXMsIEdGUF9OT0ZTKTsNCi0JfQ0KLQlpZiAoSVNfRVJSKHBhZ2VzKSkN
+Ci0JCXJldHVybiBQVFJfRVJSKHBhZ2VzKTsNCi0NCiAJLyoNCiAJICogZmx1c2ggYW55IHBhZ2Ug
+Y2FjaGUgcGFnZXMgaW4gdGhpcyByYW5nZS4gIHRoaXMNCiAJICogd2lsbCBtYWtlIGNvbmN1cnJl
+bnQgbm9ybWFsIGFuZCBzeW5jIGlvIHNsb3csDQogCSAqIGJ1dCBpdCB3aWxsIGF0IGxlYXN0IGJl
+aGF2ZSBzZW5zaWJseSB3aGVuIHRoZXkgYXJlDQogCSAqIGluIHNlcXVlbmNlLg0KIAkgKi8NCi0J
+cmV0ID0gZmlsZW1hcF93cml0ZV9hbmRfd2FpdChpbm9kZS0+aV9tYXBwaW5nKTsNCisJcmV0ID0g
+ZmlsZW1hcF93cml0ZV9hbmRfd2FpdF9yYW5nZShpbm9kZS0+aV9tYXBwaW5nLCBvZmYsDQorCQkJ
+CQkJb2ZmICsgaW9jYi0+a2lfbGVmdCk7DQogCWlmIChyZXQgPCAwKQ0KLQkJZ290byBkb25lOw0K
+LQ0KLQlyZXQgPSBzdHJpcGVkX3JlYWQoaW5vZGUsIG9mZiwgbGVuLCBwYWdlcywgbnVtX3BhZ2Vz
+LCBjaGVja2VvZiwNCi0JCQkgICBmaWxlLT5mX2ZsYWdzICYgT19ESVJFQ1QsDQotCQkJICAgKHVu
+c2lnbmVkIGxvbmcpZGF0YSAmIH5QQUdFX01BU0spOw0KKwkJcmV0dXJuIHJldDsNCiANCi0JaWYg
+KHJldCA+PSAwICYmIChmaWxlLT5mX2ZsYWdzICYgT19ESVJFQ1QpID09IDApDQotCQlyZXQgPSBj
+ZXBoX2NvcHlfcGFnZV92ZWN0b3JfdG9fdXNlcihwYWdlcywgZGF0YSwgb2ZmLCByZXQpOw0KLQlp
+ZiAocmV0ID49IDApDQotCQkqcG9mZiA9IG9mZiArIHJldDsNCisJaWYgKGZpbGUtPmZfZmxhZ3Mg
+JiBPX0RJUkVDVCkgew0KKwkJZm9yIChpID0gMDsgaSA8IG5yX3NlZ3M7IGkrKykgew0KKwkJCXZv
+aWQgX191c2VyICpkYXRhID0gaW92W2ldLmlvdl9iYXNlOw0KKwkJCXNpemVfdCBsZW4gPSBpb3Zb
+aV0uaW92X2xlbjsNCisNCisJCQludW1fcGFnZXMgPSBjYWxjX3BhZ2VzX2ZvcigodW5zaWduZWQg
+bG9uZylkYXRhLCBsZW4pOw0KKwkJCXBhZ2VzID0gY2VwaF9nZXRfZGlyZWN0X3BhZ2VfdmVjdG9y
+KGRhdGEsDQorCQkJCQkJCSAgICBudW1fcGFnZXMsIHRydWUpOw0KKwkJCWlmIChJU19FUlIocGFn
+ZXMpKQ0KKwkJCQlyZXR1cm4gUFRSX0VSUihwYWdlcyk7DQorDQorCQkJcmV0ID0gc3RyaXBlZF9y
+ZWFkKGlub2RlLCBvZmYsIGxlbiwNCisJCQkJCSAgIHBhZ2VzLCBudW1fcGFnZXMsIGNoZWNrZW9m
+LA0KKwkJCQkJICAgMSwgKHVuc2lnbmVkIGxvbmcpZGF0YSAmIH5QQUdFX01BU0spOw0KKwkJCWNl
+cGhfcHV0X3BhZ2VfdmVjdG9yKHBhZ2VzLCBudW1fcGFnZXMsIHRydWUpOw0KKw0KKwkJCWlmIChy
+ZXQgPD0gMCkNCisJCQkJYnJlYWs7DQorCQkJb2ZmICs9IHJldDsNCisJCQlpZiAocmV0IDwgbGVu
+KQ0KKwkJCQlicmVhazsNCisJCX0NCisJCWlmIChvZmYgPiBpb2NiLT5raV9wb3MpIHsNCisJCQly
+ZXQgPSBvZmYgLSBpb2NiLT5raV9wb3M7DQorCQkJaW9jYi0+a2lfcG9zID0gb2ZmOw0KKwkJCWlv
+Y2ItPmtpX2xlZnQgLT0gcmV0Ow0KKwkJfQ0KKwl9IGVsc2Ugew0KKwkJc2l6ZV90IGxlbiA9IGlv
+Y2ItPmtpX2xlZnQ7DQogDQotZG9uZToNCi0JaWYgKGZpbGUtPmZfZmxhZ3MgJiBPX0RJUkVDVCkN
+Ci0JCWNlcGhfcHV0X3BhZ2VfdmVjdG9yKHBhZ2VzLCBudW1fcGFnZXMsIHRydWUpOw0KLQllbHNl
+DQorCQludW1fcGFnZXMgPSBjYWxjX3BhZ2VzX2ZvcihvZmYsIGxlbik7DQorCQlwYWdlcyA9IGNl
+cGhfYWxsb2NfcGFnZV92ZWN0b3IobnVtX3BhZ2VzLCBHRlBfTk9GUyk7DQorCQlpZiAoSVNfRVJS
+KHBhZ2VzKSkNCisJCQlyZXR1cm4gUFRSX0VSUihwYWdlcyk7DQorCQlyZXQgPSBzdHJpcGVkX3Jl
+YWQoaW5vZGUsIG9mZiwgbGVuLCBwYWdlcywNCisJCQkJCW51bV9wYWdlcywgY2hlY2tlb2YsIDAs
+IDApOw0KKwkJbGVuID0gcmV0Ow0KKwkJaWYgKGxlbikgew0KKwkJCWludCBpLCBsLCBrID0gMDsN
+CisJCQlzaXplX3QgbGVmdCA9IGxlbjsNCisNCisJCQlmb3IgKGkgPSAwOyBpIDwgbnJfc2VncyAm
+JiBsZWZ0OyBpKyspIHsNCisJCQkJdm9pZCBfX3VzZXIgKmRhdGEgPSBpb3ZbaV0uaW92X2Jhc2U7
+DQorCQkJCWwgPSBtaW4obGVmdCwgaW92W2ldLmlvdl9sZW4pOw0KKwkJCQlyZXQgPSBjZXBoX2Nv
+cHlfcGFnZV92ZWN0b3JfdG9fdXNlcigmcGFnZXNba10sDQorCQkJCQkJCQkgICAgZGF0YSwgb2Zm
+LA0KKwkJCQkJCQkJICAgIGwpOw0KKwkJCQlpZiAocmV0ID4gMCkgew0KKwkJCQkJbGVmdCAtPSBy
+ZXQ7DQorCQkJCQlvZmYgKz0gcmV0Ow0KKwkJCQkJayA9IGNhbGNfcGFnZXNfZm9yKGlvY2ItPmtp
+X3BvcywNCisJCQkJCQkJICAgbGVuIC0gbGVmdCArIDEpIC0gMTsNCisJCQkJCUJVR19PTihrID49
+IG51bV9wYWdlcyAmJiBsZWZ0KTsNCisJCQkJfSBlbHNlDQorCQkJCQlicmVhazsNCisJCQl9DQor
+DQorCQkJaWYgKGxlZnQgPT0gMCkgew0KKwkJCQlpb2NiLT5raV9wb3MgKz0gbGVuOw0KKwkJCQlp
+b2NiLT5raV9sZWZ0IC09IGxlbjsNCisJCQkJcmV0ID0gbGVuOw0KKwkJCX0NCisJCX0NCiAJCWNl
+cGhfcmVsZWFzZV9wYWdlX3ZlY3RvcihwYWdlcywgbnVtX3BhZ2VzKTsNCisJfQ0KKw0KIAlkb3V0
+KCJzeW5jX3JlYWQgcmVzdWx0ICVkXG4iLCByZXQpOw0KIAlyZXR1cm4gcmV0Ow0KIH0NCkBAIC02
+NDcsNTUgKzY5MSw4MiBAQCBzdGF0aWMgc3NpemVfdCBjZXBoX2Fpb19yZWFkKHN0cnVjdCBraW9j
+YiAqaW9jYiwgY29uc3Qgc3RydWN0IGlvdmVjICppb3YsDQogew0KIAlzdHJ1Y3QgZmlsZSAqZmls
+cCA9IGlvY2ItPmtpX2ZpbHA7DQogCXN0cnVjdCBjZXBoX2ZpbGVfaW5mbyAqZmkgPSBmaWxwLT5w
+cml2YXRlX2RhdGE7DQotCWxvZmZfdCAqcHBvcyA9ICZpb2NiLT5raV9wb3M7DQotCXNpemVfdCBs
+ZW4gPSBpb3YtPmlvdl9sZW47DQorCXNpemVfdCBsZW4gPSBpb2NiLT5raV9sZWZ0Ow0KIAlzdHJ1
+Y3QgaW5vZGUgKmlub2RlID0gZmlsZV9pbm9kZShmaWxwKTsNCiAJc3RydWN0IGNlcGhfaW5vZGVf
+aW5mbyAqY2kgPSBjZXBoX2lub2RlKGlub2RlKTsNCi0Jdm9pZCBfX3VzZXIgKmJhc2UgPSBpb3Yt
+Pmlvdl9iYXNlOw0KIAlzc2l6ZV90IHJldDsNCiAJaW50IHdhbnQsIGdvdCA9IDA7DQogCWludCBj
+aGVja2VvZiA9IDAsIHJlYWQgPSAwOw0KIA0KKw0KIAlkb3V0KCJhaW9fcmVhZCAlcCAlbGx4LiVs
+bHggJWxsdX4ldSB0cnlpbmcgdG8gZ2V0IGNhcHMgb24gJXBcbiIsDQogCSAgICAgaW5vZGUsIGNl
+cGhfdmlub3AoaW5vZGUpLCBwb3MsICh1bnNpZ25lZClsZW4sIGlub2RlKTsNCi1hZ2FpbjoNCisN
+CiAJaWYgKGZpLT5mbW9kZSAmIENFUEhfRklMRV9NT0RFX0xBWlkpDQogCQl3YW50ID0gQ0VQSF9D
+QVBfRklMRV9DQUNIRSB8IENFUEhfQ0FQX0ZJTEVfTEFaWUlPOw0KIAllbHNlDQogCQl3YW50ID0g
+Q0VQSF9DQVBfRklMRV9DQUNIRTsNCiAJcmV0ID0gY2VwaF9nZXRfY2FwcyhjaSwgQ0VQSF9DQVBf
+RklMRV9SRCwgd2FudCwgJmdvdCwgLTEpOw0KIAlpZiAocmV0IDwgMCkNCi0JCWdvdG8gb3V0Ow0K
+KwkJcmV0dXJuIHJldDsNCisNCiAJZG91dCgiYWlvX3JlYWQgJXAgJWxseC4lbGx4ICVsbHV+JXUg
+Z290IGNhcCByZWZzIG9uICVzXG4iLA0KIAkgICAgIGlub2RlLCBjZXBoX3Zpbm9wKGlub2RlKSwg
+cG9zLCAodW5zaWduZWQpbGVuLA0KIAkgICAgIGNlcGhfY2FwX3N0cmluZyhnb3QpKTsNCiANCiAJ
+aWYgKChnb3QgJiAoQ0VQSF9DQVBfRklMRV9DQUNIRXxDRVBIX0NBUF9GSUxFX0xBWllJTykpID09
+IDAgfHwNCiAJICAgIChpb2NiLT5raV9maWxwLT5mX2ZsYWdzICYgT19ESVJFQ1QpIHx8DQotCSAg
+ICAoZmktPmZsYWdzICYgQ0VQSF9GX1NZTkMpKQ0KKwkgICAgKGZpLT5mbGFncyAmIENFUEhfRl9T
+WU5DKSkgew0KKwkJdW5zaWduZWQgbG9uZyBjdXJyX3NlZyA9IDA7DQorCQlzdHJ1Y3QgaW92ZWMg
+Kmlvdl9jbG9uZTsNCisNCisJCWlvdl9jbG9uZSA9IGttYWxsb2MobnJfc2VncyAqIHNpemVvZihz
+dHJ1Y3QgaW92ZWMpLCBHRlBfS0VSTkVMKTsNCisJCWlmIChpb3ZfY2xvbmUgPT0gTlVMTCkgew0K
+KwkJCXJldCA9IC1FTk9NRU07DQorCQkJZ290byBvdXQ7DQorCQl9DQorCQltZW1jcHkoaW92X2Ns
+b25lLCBpb3YsIG5yX3NlZ3MgKiBzaXplb2Yoc3RydWN0IGlvdmVjKSk7DQorYWdhaW46DQogCQkv
+KiBobW0sIHRoaXMgaXNuJ3QgcmVhbGx5IGFzeW5jLi4uICovDQotCQlyZXQgPSBjZXBoX3N5bmNf
+cmVhZChmaWxwLCBiYXNlLCBsZW4sIHBwb3MsICZjaGVja2VvZik7DQotCWVsc2UNCi0JCXJldCA9
+IGdlbmVyaWNfZmlsZV9haW9fcmVhZChpb2NiLCBpb3YsIG5yX3NlZ3MsIHBvcyk7DQorCQlyZXQg
+PSBjZXBoX3N5bmNfcmVhZChpb2NiLCAmaW92X2Nsb25lW2N1cnJfc2VnXSwNCisJCQkJCW5yX3Nl
+Z3MgLSBjdXJyX3NlZywgJmNoZWNrZW9mKTsNCisNCisJCWlmIChjaGVja2VvZiAmJiByZXQgPj0g
+MCkgew0KKwkJCWludCBzdGF0cmV0ID0gY2VwaF9kb19nZXRhdHRyKGlub2RlLA0KKwkJCQkJCSAg
+ICAgIENFUEhfU1RBVF9DQVBfU0laRSk7DQorDQorCQkJLyogaGl0IEVPRiBvciBob2xlPyAqLw0K
+KwkJCWlmIChzdGF0cmV0ID09IDAgJiYgaW9jYi0+a2lfcG9zIDwgaW5vZGUtPmlfc2l6ZSAmJg0K
+KwkJCQlpb2NiLT5raV9sZWZ0KSB7DQorCQkJCXNpemVfdCB0bXAgPSAwOw0KKwkJCQlkb3V0KCIl
+cyBzeW5jX3JlYWQgaGl0IGhvbGUsIHBwb3MgJWxsZCA8IHNpemUgJWxsZCINCisJCQkJICAgICAi
+LCByZWFkaW5nIG1vcmVcbiIsIF9fZnVuY19fLCBpb2NiLT5raV9wb3MsDQorCQkJCSAgICAgaW5v
+ZGUtPmlfc2l6ZSk7DQorDQorCQkJCXJlYWQgKz0gcmV0Ow0KKwkJCQlmb3IgKDsgY3Vycl9zZWcg
+PCBucl9zZWdzOyBjdXJyX3NlZysrKSB7DQorCQkJCQlpZiAoKHRtcCArIGlvdl9jbG9uZVtjdXJy
+X3NlZ10uaW92X2xlbikNCisJCQkJCQk+IHJldCkNCisJCQkJCQlicmVhazsNCisJCQkJCXRtcCAr
+PSBpb3ZfY2xvbmVbY3Vycl9zZWddLmlvdl9sZW47DQorCQkJCX0NCisNCisJCQkJQlVHX09OKGN1
+cnJfc2VnID09IG5yX3NlZ3MpOw0KKwkJCQlpb3ZfY2xvbmVbY3Vycl9zZWddLmlvdl9iYXNlICs9
+IHJldCAtIHRtcDsNCisJCQkJaW92X2Nsb25lW2N1cnJfc2VnXS5pb3ZfbGVuIC09IHJldCAtIHRt
+cDsNCisJCQkJY2hlY2tlb2YgPSAwOw0KKwkJCQlnb3RvIGFnYWluOw0KKwkJCX0NCisJCX0NCisJ
+CWtmcmVlKGlvdl9jbG9uZSk7DQogDQorCX0gZWxzZQ0KKwkJcmV0ID0gZ2VuZXJpY19maWxlX2Fp
+b19yZWFkKGlvY2IsIGlvdiwgbnJfc2VncywgcG9zKTsNCiBvdXQ6DQogCWRvdXQoImFpb19yZWFk
+ICVwICVsbHguJWxseCBkcm9wcGluZyBjYXAgcmVmcyBvbiAlcyA9ICVkXG4iLA0KIAkgICAgIGlu
+b2RlLCBjZXBoX3Zpbm9wKGlub2RlKSwgY2VwaF9jYXBfc3RyaW5nKGdvdCksIChpbnQpcmV0KTsN
+CiAJY2VwaF9wdXRfY2FwX3JlZnMoY2ksIGdvdCk7DQogDQotCWlmIChjaGVja2VvZiAmJiByZXQg
+Pj0gMCkgew0KLQkJaW50IHN0YXRyZXQgPSBjZXBoX2RvX2dldGF0dHIoaW5vZGUsIENFUEhfU1RB
+VF9DQVBfU0laRSk7DQotDQotCQkvKiBoaXQgRU9GIG9yIGhvbGU/ICovDQotCQlpZiAoc3RhdHJl
+dCA9PSAwICYmICpwcG9zIDwgaW5vZGUtPmlfc2l6ZSkgew0KLQkJCWRvdXQoImFpb19yZWFkIHN5
+bmNfcmVhZCBoaXQgaG9sZSwgcHBvcyAlbGxkIDwgc2l6ZSAlbGxkLCByZWFkaW5nIG1vcmVcbiIs
+ICpwcG9zLCBpbm9kZS0+aV9zaXplKTsNCi0JCQlyZWFkICs9IHJldDsNCi0JCQliYXNlICs9IHJl
+dDsNCi0JCQlsZW4gLT0gcmV0Ow0KLQkJCWNoZWNrZW9mID0gMDsNCi0JCQlnb3RvIGFnYWluOw0K
+LQkJfQ0KLQl9DQogCWlmIChyZXQgPj0gMCkNCiAJCXJldCArPSByZWFkOw0KIA0KLS0gDQoxLjgu
+MS4yDQo=
 
-I wanted to follow on this since I haven't heard any comments on this
-in the last few weeks. I imagine that you were on vacation in August.
-
-Best,
-- Milosz
-
-On Tue, Aug 27, 2013 at 7:35 PM, Sage Weil <sage@inktank.com> wrote:
-> Thanks, Milosz!
->
-> I've pulled these into the testing branch and squashed them into the
-> existing commits.
->
-> David, I'm still not sure whether the fscache patches should go in through
-> the Ceph tree or via your tree; either way I think they need your ACK.
->
-> https://github.com/ceph/ceph-client/commit/e78fae9b8e0e762114df0cbe718a2ad7c49a18e7
-> https://github.com/ceph/ceph-client/commit/8151f62a34cc01c9de040722aa7eff85f3092156
-> https://github.com/ceph/ceph-client/commit/341158ee87d950f2bcf73e56d0db7b57bbe500a7
->
-> Thanks!
-> sage
->
->
-> On Tue, 27 Aug 2013, Milosz Tanski wrote:
->
->> Sage,
->>
->> These are the changes you requested. I eliminated the use of ifdefs in the C
->> code. It's all self contained in cache.[ch] and in the case of it being
->> disabled becomes a nop.
->>
->> Also, I found a small bug where we would not free the invalidate queue on
->> unmount. It's split into it's own commit.
->>
->> Finally, I saw that you had a hard time building it without the kernel flag
->> enabled. So I made sure to test a config with fscache for Ceph disabled right
->> before sping things.
->>
->> The commits are from my branch (which is based on top of the main testing
->> branch) from my repo:
->>
->>     https://adfin@bitbucket.org/adfin/linux-fs.git branch: wip-ceph-fscache
->>
->> Best,
->> - Milosz
->>
->> Milosz Tanski (2):
->>   ceph: Do not leak fscache workqueue
->>   ceph: fscache cleanup
->>
->>  fs/ceph/cache.c | 90 ++++++++++++++++++++++++++++++++++++++++++++++++++-------
->>  fs/ceph/cache.h | 68 +++++++++++++++++++------------------------
->>  fs/ceph/inode.c | 61 +-------------------------------------
->>  fs/ceph/super.c | 22 ++++----------
->>  fs/ceph/super.h |  1 -
->>  5 files changed, 115 insertions(+), 127 deletions(-)
->>
->> --
->> 1.8.1.2
->>
->>
