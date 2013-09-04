@@ -1,7 +1,7 @@
 From: Milosz Tanski <milosz@adfin.com>
 Subject: Re: [PATCH 2/5] new fscache interface to check cache consistency
-Date: Wed, 4 Sep 2013 15:41:48 -0400
-Message-ID: <CANP1eJFmMNEr9orps6Dd983sp6QmMfBsMT+dY1CvZ+u0nXKf4w@mail.gmail.com>
+Date: Wed, 4 Sep 2013 18:02:57 -0400
+Message-ID: <CANP1eJEK-_C9XhrzXByQtUTGzq3qikNjT7feCispajSGw8zNJQ@mail.gmail.com>
 References: <cover.1375999914.git.milosz@adfin.com>
 	<306cbe63f85921ad40b00e3c7071be19cb6adf04.1375999914.git.milosz@adfin.com>
 	<18832.1378311843@warthog.procyon.org.uk>
@@ -9,37 +9,43 @@ References: <cover.1375999914.git.milosz@adfin.com>
 	<18284.1378315570@warthog.procyon.org.uk>
 	<CANP1eJEo_dNyYU+ZdvrwKfFPihig9m-Yf_-bUoXym-MF5bGnQg@mail.gmail.com>
 	<16226.1378318400@warthog.procyon.org.uk>
+	<CANP1eJFmMNEr9orps6Dd983sp6QmMfBsMT+dY1CvZ+u0nXKf4w@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-we0-f172.google.com ([74.125.82.172]:36251 "EHLO
-	mail-we0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755066Ab3IDTlu (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Sep 2013 15:41:50 -0400
-Received: by mail-we0-f172.google.com with SMTP id n5so842131wev.17
-        for <ceph-devel@vger.kernel.org>; Wed, 04 Sep 2013 12:41:49 -0700 (PDT)
-In-Reply-To: <16226.1378318400@warthog.procyon.org.uk>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CANP1eJFmMNEr9orps6Dd983sp6QmMfBsMT+dY1CvZ+u0nXKf4w@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
 To: David Howells <dhowells@redhat.com>
 Cc: Hongyi Jia <jiayisuse@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>, "Yan, Zheng" <zheng.z.yan@intel.com>, "linux-cachefs@redhat.com" <linux-cachefs@redhat.com>, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, linux-kernel@vger.kernel.org
-
-On Wed, Sep 4, 2013 at 2:13 PM, David Howells <dhowells@redhat.com> wrote:
-> Milosz Tanski <milosz@adfin.com> wrote:
->
->> Is it as simple as stick a mutex at the top of the
->> __fscache_check_consistency function before we try to find the object?
->
-> You can lock a mutex in a function, but where are you actually going to place
-> the mutex struct?  And what other code is going to take it?  To do this, you'd
-> have to place the mutex struct in fscache_cookie.  The problem is that you
-> have to protect the pointer from fscache_cookie to fscache_object - so placing
-> the mutex in fscache_object doesn't help.
+List-Id: ceph-devel.vger.kernel.org
 
 David,
 
-I meant lock cookie->lock inside of __fscache_check_consistency in the
-beginning of the function. I don't see the need to push this into the
-netfs code.
+Is there anyway I can call you at (at your desk) during EST hours. I'd
+like to talk this part through since I think we're going a bit in
+circles. I'd like to get this fixed so we can submit the fscache for
+Ceph code for the upstream kernel in the merge window.
 
-- Milosz
+Best,
+-- Milosz
+
+On Wed, Sep 4, 2013 at 3:41 PM, Milosz Tanski <milosz@adfin.com> wrote:
+> On Wed, Sep 4, 2013 at 2:13 PM, David Howells <dhowells@redhat.com> wrote:
+>> Milosz Tanski <milosz@adfin.com> wrote:
+>>
+>>> Is it as simple as stick a mutex at the top of the
+>>> __fscache_check_consistency function before we try to find the object?
+>>
+>> You can lock a mutex in a function, but where are you actually going to place
+>> the mutex struct?  And what other code is going to take it?  To do this, you'd
+>> have to place the mutex struct in fscache_cookie.  The problem is that you
+>> have to protect the pointer from fscache_cookie to fscache_object - so placing
+>> the mutex in fscache_object doesn't help.
+>
+> David,
+>
+> I meant lock cookie->lock inside of __fscache_check_consistency in the
+> beginning of the function. I don't see the need to push this into the
+> netfs code.
+>
+> - Milosz
