@@ -1,48 +1,56 @@
-From: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: [PATCHv4 0/5] ceph: persistent caching with fscache
-Date: Wed, 4 Sep 2013 09:25:35 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1309040923080.1073@cobra.newdream.net>
-References: <alpine.DEB.2.00.1308212203320.1479@cobra.newdream.net> <cover.1375999914.git.milosz@adfin.com> <17341.1378309753@warthog.procyon.org.uk> <alpine.DEB.2.00.1309040851080.27503@cobra.newdream.net>
+From: Milosz Tanski <milosz@adfin.com>
+Subject: Re: [PATCH 2/5] new fscache interface to check cache consistency
+Date: Wed, 4 Sep 2013 12:48:44 -0400
+Message-ID: <CANP1eJFKGD_h6rcWMWpxp3yOD+rz6p2P0B+2CTcy1taDwM9rdg@mail.gmail.com>
+References: <cover.1375999914.git.milosz@adfin.com>
+	<306cbe63f85921ad40b00e3c7071be19cb6adf04.1375999914.git.milosz@adfin.com>
+	<18832.1378311843@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.00.1309040851080.27503-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
-Sender: linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Milosz Tanski <milosz-B5zB6C1i6pkAvxtiuMwx3w@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, zheng.z.yan-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-cachefs-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <18832.1378311843@warthog.procyon.org.uk>
+Sender: linux-kernel-owner@vger.kernel.org
+To: David Howells <dhowells@redhat.com>
+Cc: Hongyi Jia <jiayisuse@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>, "Yan, Zheng" <zheng.z.yan@intel.com>, "linux-cachefs@redhat.com" <linux-cachefs@redhat.com>, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, linux-kernel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-On Wed, 4 Sep 2013, Sage Weil wrote:
-> Hi David!
-> 
-> On Wed, 4 Sep 2013, David Howells wrote:
-> > Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org> wrote:
-> > 
-> > > David, are the fscache patches here ready for the next merge window?  Do 
-> > > you have a preference for whose tree they go through?
-> > 
-> > There's only one problem - patch 1 needs to come _after_ patch 2 to avoid
-> > breaking git bisect.  Plus these patches 2 and 4 extend the fscache API
-> > without adjusting the documentation - but that can be added later.
-> > 
-> > And I think Milosz deserves a beer (or other poison of his choice;-) for
-> > finding a longstanding irritating bug.
-> > 
-> > I think AFS, CIFS, NFS and 9P all need patching too, but I can attend to that.
-> > 
-> > Should I take the patches through my tree?  Then I can make the adjustments.
-> 
-> Sure.  Do you want the Ceph patches as well, or just the fscache bits?  
-> I'll repost the latest version, as it's gotten several fixes squashed in.
+David,
 
-The full series is here:
+If the cache is withdrawn and we're starting anew I would consider
+that to okay. I would consider an empty page cache for a cookie to be
+consistent since there's nothing stale that I can read. Unless there's
+another synchronization issue that I'm missing in fscache.
 
- git://github.com/ceph/ceph-client wip-fscache
- https://github.com/ceph/ceph-client/commits/wip-fscache
+Thanks,
+- Milosz
 
-Thanks!
-sage
---
-To unsubscribe from this list: send the line "unsubscribe linux-nfs" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On Wed, Sep 4, 2013 at 12:24 PM, David Howells <dhowells@redhat.com> wrote:
+> Hongyi Jia <jiayisuse@gmail.com> wrote:
+>
+>> +bool __fscache_check_consistency(struct fscache_cookie *cookie)
+>> +{
+>> +     struct fscache_object *object;
+>> +
+>> +     if (cookie->def->type != FSCACHE_COOKIE_TYPE_DATAFILE)
+>> +             return false;
+>> +
+>> +     if (hlist_empty(&cookie->backing_objects))
+>> +             return false;
+>> +
+>> +     object = hlist_entry(cookie->backing_objects.first,
+>> +                     struct fscache_object, cookie_link);
+>> +
+>> +     return object->cache->ops->check_consistency(object);
+>> +}
+>
+> Hmmm...  This isn't actually safe.  You have to either:
+>
+>  (1) hold cookie->lock whilst touching the object pointer when coming from the
+>      netfs side, or:
+>
+>  (2) set up an operation to do this (as, say, __fscache_alloc_page() does).
+>
+> The problem is that you have nothing to defend against the object being
+> withdrawn by the cache under you.
+>
+> David
