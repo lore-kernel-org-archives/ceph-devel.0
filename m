@@ -1,33 +1,103 @@
-From: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCHv4 0/5] ceph: persistent caching with fscache
-Date: Wed, 04 Sep 2013 16:49:13 +0100
-Message-ID: <17341.1378309753@warthog.procyon.org.uk>
-References: <alpine.DEB.2.00.1308212203320.1479@cobra.newdream.net> <cover.1375999914.git.milosz@adfin.com>
-Return-path: <linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.00.1308212203320.1479-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
-Sender: linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Cc: dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Milosz Tanski <milosz-B5zB6C1i6pkAvxtiuMwx3w@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, zheng.z.yan-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-cachefs-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+From: Sage Weil <sage@inktank.com>
+Subject: [GIT PULL] Ceph updates for 3.12 (part 1)
+Date: Wed, 4 Sep 2013 08:50:43 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1309032220020.4018@cobra.newdream.net>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: torvalds@vger.kernel.org
+Cc: linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org> wrote:
+Hi Linus,
 
-> David, are the fscache patches here ready for the next merge window?  Do 
-> you have a preference for whose tree they go through?
+Please pull this first batch of Ceph updates for 3.12 from
 
-There's only one problem - patch 1 needs to come _after_ patch 2 to avoid
-breaking git bisect.  Plus these patches 2 and 4 extend the fscache API
-without adjusting the documentation - but that can be added later.
+  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
 
-And I think Milosz deserves a beer (or other poison of his choice;-) for
-finding a longstanding irritating bug.
+This first batch include several important RBD bug fixes (more coming in 
+part 2), hole punch support, several different cleanups in the page cache 
+interactions, improvements in the truncate code (new truncate mutex to 
+avoid shenanigans with i_mutex), and a series of fixes in the synchronous 
+striping read/write code.  On top of that is a random collection of small 
+fixes all across the tree (error code checks and error path cleanup, 
+obsolete wq flags, etc.).
 
-I think AFS, CIFS, NFS and 9P all need patching too, but I can attend to that.
+A second batch of patches will include fscache support for Ceph (waiting 
+on some dependent fixes in the fscache code and an ACK from David) and a 
+second batch of RBD bug fixes that didn't get tested and reviewed in time 
+for 3.11.  Hopefully later this week.
 
-Should I take the patches through my tree?  Then I can make the adjustments.
+Thanks!
+sage
 
-David
---
-To unsubscribe from this list: send the line "unsubscribe linux-nfs" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+----------------------------------------------------------------
+Dan Carpenter (4):
+      ceph: cleanup types in striped_read()
+      libceph: fix error handling in handle_reply()
+      libceph: potential NULL dereference in ceph_osdc_handle_map()
+      libceph: create_singlethread_workqueue() doesn't return ERR_PTRs
+
+Jingoo Han (1):
+      block: rbd: use NULL instead of 0
+
+Josh Durgin (3):
+      rbd: fix I/O error propagation for reads
+      rbd: fix buffer size for writes to images with snapshots
+      rbd: fix null dereference in dout
+
+Li Wang (2):
+      ceph: punch hole support
+      ceph: remove useless variable revoked_rdcache
+
+Milosz Tanski (2):
+      ceph: Remove bogus check in invalidatepage
+      ceph: cleanup the logic in ceph_invalidatepage
+
+Nathaniel Yazdani (1):
+      ceph: fix null pointer dereference
+
+Sage Weil (4):
+      ceph: replace hold_mutex flag with goto
+      Merge remote-tracking branch 'linus/master' into testing
+      ceph: fix fallocate division
+      libceph: use pg_num_mask instead of pgp_num_mask for pg.seed calc
+
+Sha Zhengju (1):
+      ceph: use vfs __set_page_dirty_nobuffers interface instead of doing it inside filesystem
+
+Tejun Heo (1):
+      ceph: WQ_NON_REENTRANT is meaningless and going away
+
+Yan, Zheng (6):
+      ceph: drop CAP_LINK_SHARED when sending "link" request to MDS
+      ceph: wake up writer if vmtruncate work get blocked
+      ceph: trim deleted inode
+      ceph: fix freeing inode vs removing session caps race
+      ceph: introduce i_truncate_mutex
+      ceph: fix request max size
+
+majianpeng (7):
+      ceph: Don't forget the 'up_read(&osdc->map_sem)' if met error.
+      libceph: unregister request in __map_request failed and nofail == false
+      ceph: Don't use ceph-sync-mode for synchronous-fs.
+      ceph: Add check returned value on func ceph_calc_ceph_pg.
+      ceph: Move the place for EOLDSNAPC handle in ceph_aio_write to easily understand
+      ceph: fix bugs about handling short-read for sync read mode.
+      ceph: allow sync_read/write return partial successed size of read/write.
+
+ drivers/block/rbd.c   |   36 ++++---
+ fs/ceph/addr.c        |   76 +++++--------
+ fs/ceph/caps.c        |   68 +++++++++---
+ fs/ceph/dir.c         |    2 +
+ fs/ceph/file.c        |  282 +++++++++++++++++++++++++++++++++++++++++--------
+ fs/ceph/inode.c       |   40 +++++--
+ fs/ceph/ioctl.c       |   12 ++-
+ fs/ceph/mds_client.c  |   34 ++++++
+ fs/ceph/super.h       |    3 +
+ net/ceph/messenger.c  |    2 +-
+ net/ceph/osd_client.c |   27 +++--
+ net/ceph/osdmap.c     |    2 +-
+ 12 files changed, 438 insertions(+), 146 deletions(-)
