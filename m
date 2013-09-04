@@ -1,78 +1,45 @@
-From: Sage Weil <sage@inktank.com>
-Subject: v0.68 released
-Date: Wed, 4 Sep 2013 11:32:51 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1309041131130.2327@cobra.newdream.net>
+From: Milosz Tanski <milosz@adfin.com>
+Subject: Re: [PATCH 2/5] new fscache interface to check cache consistency
+Date: Wed, 4 Sep 2013 15:41:48 -0400
+Message-ID: <CANP1eJFmMNEr9orps6Dd983sp6QmMfBsMT+dY1CvZ+u0nXKf4w@mail.gmail.com>
+References: <cover.1375999914.git.milosz@adfin.com>
+	<306cbe63f85921ad40b00e3c7071be19cb6adf04.1375999914.git.milosz@adfin.com>
+	<18832.1378311843@warthog.procyon.org.uk>
+	<CANP1eJFKGD_h6rcWMWpxp3yOD+rz6p2P0B+2CTcy1taDwM9rdg@mail.gmail.com>
+	<18284.1378315570@warthog.procyon.org.uk>
+	<CANP1eJEo_dNyYU+ZdvrwKfFPihig9m-Yf_-bUoXym-MF5bGnQg@mail.gmail.com>
+	<16226.1378318400@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:47726 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754446Ab3IDScw (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Sep 2013 14:32:52 -0400
+Received: from mail-we0-f172.google.com ([74.125.82.172]:36251 "EHLO
+	mail-we0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755066Ab3IDTlu (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Sep 2013 15:41:50 -0400
+Received: by mail-we0-f172.google.com with SMTP id n5so842131wev.17
+        for <ceph-devel@vger.kernel.org>; Wed, 04 Sep 2013 12:41:49 -0700 (PDT)
+In-Reply-To: <16226.1378318400@warthog.procyon.org.uk>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org, ceph-users@ceph.com
+To: David Howells <dhowells@redhat.com>
+Cc: Hongyi Jia <jiayisuse@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>, "Yan, Zheng" <zheng.z.yan@intel.com>, "linux-cachefs@redhat.com" <linux-cachefs@redhat.com>, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, linux-kernel@vger.kernel.org
 
-Our first development release after Dumpling has arrived! It includes a 
-lot of small cleanups and documentation improvements, as well as the first 
-blueprint from the Emperor CDS to land (support for ZFS). There are also 
-new sample implementations for RADOS classes (cls_hello) and a sample 
-librados application (hello_world) to help developers and users get 
-started.
+On Wed, Sep 4, 2013 at 2:13 PM, David Howells <dhowells@redhat.com> wrote:
+> Milosz Tanski <milosz@adfin.com> wrote:
+>
+>> Is it as simple as stick a mutex at the top of the
+>> __fscache_check_consistency function before we try to find the object?
+>
+> You can lock a mutex in a function, but where are you actually going to place
+> the mutex struct?  And what other code is going to take it?  To do this, you'd
+> have to place the mutex struct in fscache_cookie.  The problem is that you
+> have to protect the pointer from fscache_cookie to fscache_object - so placing
+> the mutex in fscache_object doesn't help.
 
-Notable changes since v0.67:
+David,
 
- * ceph-fuse: fix problem with readahead vs truncate race (Yan, Zheng)
- * ceph-post-file: new command to easily share logs or other files with 
-   ceph devs
- * ceph: parse CEPH_ARGS env variable
- * librados: fix async aio completion wakeup
- * librados: hello_world example (Greg Farnum)
- * librados: sync calls now return on commit (instead of ack) (Greg 
-   Farnum)
- * mds: fix mds rejoin with legacy parent backpointer xattrs (Alexandre 
-   Oliva)
- * mds: fix rare restart/failure race during fs creation
- * mds: notify clients about deleted files (so they can release from their 
-   cache) (Yan, Zheng)
- * mds: several bug fixes with clustered mds (Yan, Zheng)
- * mon: allow logging level of cluster log (/var/log/ceph/ceph.log) to be 
-   adjusted
- * mon: do not expose uncommitted state from 'osd crush {add,set} ...' 
-   (Joao Luis)
- * mon: fix byte counts (off by factor of 4) (Dan Mick, Joao Luis)
- * mon: fix paxos corner case
- * mon: modify 'auth add' semantics to make a bit more sense (Joao Luis)
- * mon: new 'osd perf' command to dump recent performance information 
-   (Samuel Just)
- * mon: new and improved 'ceph -s' or 'ceph status' command (more info, 
-   easier to read)
- * monc: fix small memory leak
- * new wireshark patches pulled into the tree (Kevin Jones)
- * objecter: fix possible hang when cluster is unpaused (Josh Durgin)
- * osd: 'osd recover clone overlap limit' option to limit cloning during 
-   recovery (Samuel Just)
- * osd: cls_hello OSD class example
- * osd: experiemental support for ZFS (zfsonlinux.org) (Yan, Zheng)
- * osd: instrument peering states (David Zafman)
- * osd: properly enforce RD/WR flags for rados classes
- * osd: remove old pg log on upgrade (Samuel Just)
- * rgw: complete in-progress requests before shutting down
- * rgw: fix S3 auth with response-* query string params (Sylvain Munaut, 
-   Yehuda Sadeh)
- * sysvinit: add condrestart command (Dan van der Ster)
+I meant lock cookie->lock inside of __fscache_check_consistency in the
+beginning of the function. I don't see the need to push this into the
+netfs code.
 
-For more information please refer to the complete release notes:
-
- * http://ceph.com/docs/master/release-notes/#v0-68
-
-Meanwhile, the v0.69 development has just gone into feature freeze and 
-includes some preliminary infrastructure and groundwork for the RADOS 
-tiering functionality (initially, cache pools).
-
-You can get v0.68 from the usual locations:
-
- * Git at git://github.com/ceph/ceph.git
- * Tarball at http://ceph.com/download/ceph-0.68.tar.gz
- * For Debian/Ubuntu packages, see http://ceph.com/docs/master/install/debian
- * For RPMs, see http://ceph.com/docs/master/install/rpm
+- Milosz
