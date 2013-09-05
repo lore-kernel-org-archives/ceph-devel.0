@@ -1,138 +1,291 @@
-From: "Matt W. Benjamin" <matt@linuxbox.com>
-Subject: Re: wip-libcephfs-rebased-v65 ready for pull
-Date: Wed, 4 Sep 2013 22:42:43 -0400 (EDT)
-Message-ID: <432921236.178.1378348963552.JavaMail.root@thunderbeast.private.linuxbox.com>
-References: <alpine.DEB.2.00.1309041758470.16076@cobra.newdream.net>
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: Re: [PATCH 1/2] ceph: Implement readv/preadv for sync operation.
+Date: Thu, 05 Sep 2013 10:51:20 +0800
+Message-ID: <5227F1A8.7080402@intel.com>
+References: <201309031652087109940@gmail.com>,  <52272E1D.9090908@intel.com> <201309050828216701631@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from aa.linuxbox.com ([69.128.83.226]:2226 "EHLO aa.linuxbox.com"
+Received: from mga02.intel.com ([134.134.136.20]:9164 "EHLO mga02.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1762639Ab3IECsw (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 4 Sep 2013 22:48:52 -0400
-In-Reply-To: <alpine.DEB.2.00.1309041758470.16076@cobra.newdream.net>
+	id S1752504Ab3IECvl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 4 Sep 2013 22:51:41 -0400
+In-Reply-To: <201309050828216701631@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: majianpeng <majianpeng@gmail.com>
+Cc: sage <sage@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>
 
-Hi,
-
-Ok, I'll review this in the am.
-
-Thanks for the heads up,
-
-Matt
-
------ "Sage Weil" <sage@inktank.com> wrote:
-
-> Hi Matt,
+On 09/05/2013 08:28 AM, majianpeng wrote:
+>> On 09/03/2013 04:52 PM, majianpeng wrote:
+>>> For readv/preadv sync-operatoin, ceph only do the first iov.
+>>> It don't think other iovs.Now implement this.
+>>>
+>>> Signed-off-by: Jianpeng Ma <majianpeng@gmail.com>
+>>> ---
+>>>  fs/ceph/file.c | 175 ++++++++++++++++++++++++++++++++++++++++-----------------
+>>>  1 file changed, 123 insertions(+), 52 deletions(-)
+>>>
+>>> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+>>> index 3de8982..7d6a3ee 100644
+>>> --- a/fs/ceph/file.c
+>>> +++ b/fs/ceph/file.c
+>>> @@ -408,51 +408,95 @@ more:
+>>>   *
+>>>   * If the read spans object boundary, just do multiple reads.
+>>>   */
+>>> -static ssize_t ceph_sync_read(struct file *file, char __user *data,
+>>> -			      unsigned len, loff_t *poff, int *checkeof)
+>>> +static ssize_t ceph_sync_read(struct kiocb *iocb, struct iovec *iov,
+>>> +			      unsigned long nr_segs, int *checkeof)
+>>>  {
+>>> +	struct file *file = iocb->ki_filp;
+>>>  	struct inode *inode = file_inode(file);
+>>>  	struct page **pages;
+>>> -	u64 off = *poff;
+>>> -	int num_pages, ret;
+>>> +	u64 off = iocb->ki_pos;
+>>> +	int num_pages, ret, i;
+>>>  
+>>> -	dout("sync_read on file %p %llu~%u %s\n", file, off, len,
+>>> +	dout("sync_read on file %p %llu~%u %s\n", file, off,
+>>> +	     (unsigned)iocb->ki_left,
+>>>  	     (file->f_flags & O_DIRECT) ? "O_DIRECT" : "");
+>>> -
+>>> -	if (file->f_flags & O_DIRECT) {
+>>> -		num_pages = calc_pages_for((unsigned long)data, len);
+>>> -		pages = ceph_get_direct_page_vector(data, num_pages, true);
+>>> -	} else {
+>>> -		num_pages = calc_pages_for(off, len);
+>>> -		pages = ceph_alloc_page_vector(num_pages, GFP_NOFS);
+>>> -	}
+>>> -	if (IS_ERR(pages))
+>>> -		return PTR_ERR(pages);
+>>> -
+>>>  	/*
+>>>  	 * flush any page cache pages in this range.  this
+>>>  	 * will make concurrent normal and sync io slow,
+>>>  	 * but it will at least behave sensibly when they are
+>>>  	 * in sequence.
+>>>  	 */
+>>> -	ret = filemap_write_and_wait(inode->i_mapping);
+>>> +	ret = filemap_write_and_wait_range(inode->i_mapping, off,
+>>> +						off + iocb->ki_left);
+>>>  	if (ret < 0)
+>>> -		goto done;
+>>> -
+>>> -	ret = striped_read(inode, off, len, pages, num_pages, checkeof,
+>>> -			   file->f_flags & O_DIRECT,
+>>> -			   (unsigned long)data & ~PAGE_MASK);
+>>> +		return ret;
+>>>  
+>>> -	if (ret >= 0 && (file->f_flags & O_DIRECT) == 0)
+>>> -		ret = ceph_copy_page_vector_to_user(pages, data, off, ret);
+>>> -	if (ret >= 0)
+>>> -		*poff = off + ret;
+>>> +	if (file->f_flags & O_DIRECT) {
+>>> +		for (i = 0; i < nr_segs; i++) {
+>>> +			void __user *data = iov[i].iov_base;
+>>> +			size_t len = iov[i].iov_len;
+>>> +
+>>> +			num_pages = calc_pages_for((unsigned long)data, len);
+>>> +			pages = ceph_get_direct_page_vector(data,
+>>> +							    num_pages, true);
+>>> +			if (IS_ERR(pages))
+>>> +				return PTR_ERR(pages);
+>>> +
+>>> +			ret = striped_read(inode, off, len,
+>>> +					   pages, num_pages, checkeof,
+>>> +					   1, (unsigned long)data & ~PAGE_MASK);
+>>> +			ceph_put_page_vector(pages, num_pages, true);
+>>> +
+>>> +			if (ret <= 0)
+>>> +				break;
+>>> +			off += ret;
+>>> +			if (ret < len)
+>>> +				break;
+>>> +		}
+>>> +		if (off > iocb->ki_pos) {
+>>> +			ret = off - iocb->ki_pos;
+>>> +			iocb->ki_pos = off;
+>>> +			iocb->ki_left -= ret;
+>>> +		}
+>>> +	} else {
+>>> +		size_t len = iocb->ki_left;
+>>>  
+>>> -done:
+>>> -	if (file->f_flags & O_DIRECT)
+>>> -		ceph_put_page_vector(pages, num_pages, true);
+>>> -	else
+>>> +		num_pages = calc_pages_for(off, len);
+>>> +		pages = ceph_alloc_page_vector(num_pages, GFP_NOFS);
+>>> +		if (IS_ERR(pages))
+>>> +			return PTR_ERR(pages);
+>>> +		ret = striped_read(inode, off, len, pages,
+>>> +					num_pages, checkeof, 0, 0);
+>>> +		len = ret;
+>>> +		if (len) {
+>>> +			int i, l, k = 0;
+>>> +			size_t left = len;
+>>> +
+>>> +			for (i = 0; i < nr_segs && left; i++) {
+>>> +				void __user *data = iov[i].iov_base;
+>>> +				l = min(left, iov[i].iov_len);
+>>> +				ret = ceph_copy_page_vector_to_user(&pages[k],
+>>> +								    data, off,
+>>> +								    l);
+>>> +				if (ret > 0) {
+>>> +					left -= ret;
+>>> +					off += ret;
+>>> +					k = calc_pages_for(iocb->ki_pos,
+>>> +							   len - left + 1) - 1;
+>>> +					BUG_ON(k >= num_pages && left);
+>>> +				} else
+>>> +					break;
+>>> +			}
+>>> +
+>>> +			if (left == 0) {
+>>> +				iocb->ki_pos += len;
+>>> +				iocb->ki_left -= len;
+>>> +				ret = len;
+>>> +			}
+>>
+>> If user program provides invalid buffer to readv syscall. 'left' can be larger than 0.
+>> For this case, we should return size of data that were successfully copied
+> Ok, we should add this code, before "if (left == 0)"
+> left = len - left;
 > 
-> I've just rebased wip-libcephfs on master and will be kicking off some
+>>
+>>> +		}
+>>>  		ceph_release_page_vector(pages, num_pages);
+>>> +	}
+>>> +
+>>>  	dout("sync_read result %d\n", ret);
+>>>  	return ret;
+>>>  }
+>>> @@ -647,55 +691,82 @@ static ssize_t ceph_aio_read(struct kiocb *iocb, const struct iovec *iov,
+>>>  {
+>>>  	struct file *filp = iocb->ki_filp;
+>>>  	struct ceph_file_info *fi = filp->private_data;
+>>> -	loff_t *ppos = &iocb->ki_pos;
+>>> -	size_t len = iov->iov_len;
+>>> +	size_t len = iocb->ki_left;
+>>>  	struct inode *inode = file_inode(filp);
+>>>  	struct ceph_inode_info *ci = ceph_inode(inode);
+>>> -	void __user *base = iov->iov_base;
+>>>  	ssize_t ret;
+>>>  	int want, got = 0;
+>>>  	int checkeof = 0, read = 0;
+>>>  
+>>> +
+>>>  	dout("aio_read %p %llx.%llx %llu~%u trying to get caps on %p\n",
+>>>  	     inode, ceph_vinop(inode), pos, (unsigned)len, inode);
+>>> -again:
+>>> +
+>>>  	if (fi->fmode & CEPH_FILE_MODE_LAZY)
+>>>  		want = CEPH_CAP_FILE_CACHE | CEPH_CAP_FILE_LAZYIO;
+>>>  	else
+>>>  		want = CEPH_CAP_FILE_CACHE;
+>>>  	ret = ceph_get_caps(ci, CEPH_CAP_FILE_RD, want, &got, -1);
+>>>  	if (ret < 0)
+>>> -		goto out;
+>>> +		return ret;
+>>> +
+>>>  	dout("aio_read %p %llx.%llx %llu~%u got cap refs on %s\n",
+>>>  	     inode, ceph_vinop(inode), pos, (unsigned)len,
+>>>  	     ceph_cap_string(got));
+>>>  
+>>>  	if ((got & (CEPH_CAP_FILE_CACHE|CEPH_CAP_FILE_LAZYIO)) == 0 ||
+>>>  	    (iocb->ki_filp->f_flags & O_DIRECT) ||
+>>> -	    (fi->flags & CEPH_F_SYNC))
+>>> +	    (fi->flags & CEPH_F_SYNC)) {
+>>> +		unsigned long curr_seg = 0;
+>>> +		struct iovec *iov_clone;
+>>> +
+>>> +		iov_clone = kmalloc(nr_segs * sizeof(struct iovec), GFP_KERNEL);
+>>> +		if (iov_clone == NULL) {
+>>> +			ret = -ENOMEM;
+>>> +			goto out;
+>>> +		}
+>>> +		memcpy(iov_clone, iov, nr_segs * sizeof(struct iovec));
+>>
+>> why do we need to clone the iov ?
+>>
+> I noticed in patch2,you asked the same question.
+> The reason is i need modify iov,but the iov is const.So i only clone it.
+> Or should you have better method?
 > 
-> tests shortly.  Please take a look at let me know if there is anything
-> 
-> missing or if you've run into any issues since this branch was
-> prepared.  
-> If everything looks okay I'd like to pull it in this week.
-> 
-> Thanks!
-> sage
-> 
-> 
-> On Thu, 11 Jul 2013, Matt W. Benjamin wrote:
-> 
-> > Hi Sage,
-> > 
-> > It's up to you folks.  If the next window works better, let's just
-> enter it early.
-> > 
-> > Matt
-> > 
-> > ----- "Sage Weil" <sage@inktank.com> wrote:
-> > 
-> > > Hi,
-> > > 
-> > > I've rebased this on master, and cherry-picked the fixes from Ilya
-> on
-> > > top.  
-> > > The exception is the xattr changes, which turned out to be an MDS
-> bug
-> > > 
-> > > turned by up the unit test.
-> > > 
-> > > Is there a particular need for this to be in dumpling?  I'm
-> inclined
-> > > to 
-> > > delay a release to avoid potentially destabliizing things this
-> late in
-> > > the 
-> > > game.
-> > > 
-> > > Thanks!
-> > > sage
-> > > 
-> > > 
-> > > On Wed, 10 Jul 2013, Matt W. Benjamin wrote:
-> > > 
-> > > > Hi,
-> > > > 
-> > > > We tracked down the refcount issue found Sat., and have
-> > > rebased/pushed wip-libcephfs-rebased-v65
-> > > > with the fix.
-> > > > 
-> > > > Thanks!
-> > > > 
-> > > > Matt
-> > > > 
-> > > > -- 
-> > > > Matt Benjamin
-> > > > The Linux Box
-> > > > 206 South Fifth Ave. Suite 150
-> > > > Ann Arbor, MI  48104
-> > > > 
-> > > > http://linuxbox.com
-> > > > 
-> > > > tel.  734-761-4689 
-> > > > fax.  734-769-8938 
-> > > > cel.  734-216-5309 
-> > > > --
-> > > > To unsubscribe from this list: send the line "unsubscribe
-> > > ceph-devel" in
-> > > > the body of a message to majordomo@vger.kernel.org
-> > > > More majordomo info at 
-> http://vger.kernel.org/majordomo-info.html
-> > > > 
-> > > >
-> > 
-> > -- 
-> > Matt Benjamin
-> > The Linux Box
-> > 206 South Fifth Ave. Suite 150
-> > Ann Arbor, MI  48104
-> > 
-> > http://linuxbox.com
-> > 
-> > tel.  734-761-4689 
-> > fax.  734-769-8938 
-> > cel.  734-216-5309 
-> > 
-> > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
-> in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
--- 
-Matt Benjamin
-The Linux Box
-206 South Fifth Ave. Suite 150
-Ann Arbor, MI  48104
+use iov iterator. see generic_file_buffered_write()
 
-http://linuxbox.com
+Regards
+Yan, Zheng
 
-tel.  734-761-4689 
-fax.  734-769-8938 
-cel.  734-216-5309 
+>> Regards
+>> Yan, Zheng
+>>
+>>> +again:
+>>>  		/* hmm, this isn't really async... */
+>>> -		ret = ceph_sync_read(filp, base, len, ppos, &checkeof);
+>>> -	else
+>>> -		ret = generic_file_aio_read(iocb, iov, nr_segs, pos);
+>>> +		ret = ceph_sync_read(iocb, &iov_clone[curr_seg],
+>>> +					nr_segs - curr_seg, &checkeof);
+>>> +
+>>> +		if (checkeof && ret >= 0) {
+>>> +			int statret = ceph_do_getattr(inode,
+>>> +						      CEPH_STAT_CAP_SIZE);
+>>> +
+>>> +			/* hit EOF or hole? */
+>>> +			if (statret == 0 && iocb->ki_pos < inode->i_size &&
+>>> +				iocb->ki_left) {
+>>> +				size_t tmp = 0;
+>>> +				dout("%s sync_read hit hole, ppos %lld < size %lld"
+>>> +				     ", reading more\n", __func__, iocb->ki_pos,
+>>> +				     inode->i_size);
+>>> +
+>>> +				read += ret;
+>>> +				for (; curr_seg < nr_segs; curr_seg++) {
+>>> +					if ((tmp + iov_clone[curr_seg].iov_len)
+>>> +						> ret)
+>>> +						break;
+>>> +					tmp += iov_clone[curr_seg].iov_len;
+>>> +				}
+>>> +
+>>> +				BUG_ON(curr_seg == nr_segs);
+>>> +				iov_clone[curr_seg].iov_base += ret - tmp;
+>>> +				iov_clone[curr_seg].iov_len -= ret - tmp;
+>>> +				checkeof = 0;
+>>> +				goto again;
+>>> +			}
+>>> +		}
+>>> +		kfree(iov_clone);
+>>>  
+>>> +	} else
+>>> +		ret = generic_file_aio_read(iocb, iov, nr_segs, pos);
+>>>  out:
+>>>  	dout("aio_read %p %llx.%llx dropping cap refs on %s = %d\n",
+>>>  	     inode, ceph_vinop(inode), ceph_cap_string(got), (int)ret);
+>>>  	ceph_put_cap_refs(ci, got);
+>>>  
+>>> -	if (checkeof && ret >= 0) {
+>>> -		int statret = ceph_do_getattr(inode, CEPH_STAT_CAP_SIZE);
+>>> -
+>>> -		/* hit EOF or hole? */
+>>> -		if (statret == 0 && *ppos < inode->i_size) {
+>>> -			dout("aio_read sync_read hit hole, ppos %lld < size %lld, reading more\n", *ppos, inode->i_size);
+>>> -			read += ret;
+>>> -			base += ret;
+>>> -			len -= ret;
+>>> -			checkeof = 0;
+>>> -			goto again;
+>>> -		}
+>>> -	}
+>>>  	if (ret >= 0)
+>>>  		ret += read;
+>>>  
+>>>
+>>
+> 
+
