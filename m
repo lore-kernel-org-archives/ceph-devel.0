@@ -1,99 +1,112 @@
-From: =?EUC-KR?B?wMzB1sfl?= <kirrie-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: v0.68 released
-Date: Thu, 5 Sep 2013 14:11:17 +0900
-Message-ID: <CAPvW-GVnPFwT6xjxtAuuGYKccuHP0Kctcw=u4rbgHXbB=EooxQ@mail.gmail.com>
-References: <alpine.DEB.2.00.1309041131130.2327@cobra.newdream.net>
-	<CAPvW-GXq5Z85ookp3NnL6MRQOGSg+CaDTS32fGaUdUgxED=QmA@mail.gmail.com>
-	<5227F3FB.3000200@inktank.com>
+From: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>
+Subject: Ceph-deploy (git from today) fails to create osd on host that does
+ not have a mon
+Date: Thu, 05 Sep 2013 17:56:32 +1200
+Message-ID: <52281D10.9090507@catalyst.net.nz>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============1759726439=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <5227F3FB.3000200-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Dan Mick <dan.mick-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
-
---===============1759726439==
-Content-Type: multipart/alternative; boundary=089e0160c1a0b065ca04e59bf314
-
---089e0160c1a0b065ca04e59bf314
-Content-Type: text/plain; charset=EUC-KR
-Content-Transfer-Encoding: quoted-printable
-
-My fault. I was looking stable repo.
-
-I've been watching my every step since 1995.
-http://kirrie.pe.kr
-
-
-2013/9/5 Dan Mick <dan.mick-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-
-> Where are you looking?  ceph.com/debian-testing has 0.68
->
->
-> On 09/04/2013 07:12 PM, =C0=CC=C1=D6=C7=E5 wrote:
->
->> Debian/Ubuntu packages is still 0.67.2.
->>
->>
-> --
-> Dan Mick, Filesystem Engineering
-> Inktank Storage, Inc.   http://inktank.com
-> Ceph docs: http://ceph.com/docs
->
-
---089e0160c1a0b065ca04e59bf314
-Content-Type: text/html; charset=EUC-KR
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"ltr">My fault. I was looking stable repo.</div><div class=3D"gm=
-ail_extra"><br clear=3D"all"><div><div dir=3D"ltr">I&#39;ve been watching m=
-y every step since 1995.<br><a href=3D"http://kirrie.pe.kr" target=3D"_blan=
-k">http://kirrie.pe.kr</a></div>
-</div>
-<br><br><div class=3D"gmail_quote">2013/9/5 Dan Mick <span dir=3D"ltr">&lt;=
-<a href=3D"mailto:dan.mick-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org" target=3D"_blank">dan.mick@inktank.=
-com</a>&gt;</span><br><blockquote class=3D"gmail_quote" style=3D"margin:0 0=
- 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">
-Where are you looking? &nbsp;<a href=3D"http://ceph.com/debian-testing" tar=
-get=3D"_blank">ceph.com/debian-testing</a> has 0.68<div class=3D"HOEnZb"><d=
-iv class=3D"h5"><br>
-<br>
-On 09/04/2013 07:12 PM, =C0=CC=C1=D6=C7=E5 wrote:<br>
-<blockquote class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:1p=
-x #ccc solid;padding-left:1ex">
-Debian/Ubuntu packages is still 0.67.2.<br>
-<br>
-</blockquote>
-<br></div></div><span class=3D"HOEnZb"><font color=3D"#888888">
--- <br>
-Dan Mick, Filesystem Engineering<br>
-Inktank Storage, Inc. &nbsp; <a href=3D"http://inktank.com" target=3D"_blan=
-k">http://inktank.com</a><br>
-Ceph docs: <a href=3D"http://ceph.com/docs" target=3D"_blank">http://ceph.c=
-om/docs</a><br>
-</font></span></blockquote></div><br></div>
-
---089e0160c1a0b065ca04e59bf314--
-
---===============1759726439==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from bertrand.catalyst.net.nz ([202.78.240.40]:46736 "EHLO
+	mail.catalyst.net.nz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754801Ab3IEF4l (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Sep 2013 01:56:41 -0400
+Received: from localhost (localhost [127.0.0.1])
+	by mail.catalyst.net.nz (Postfix) with ESMTP id C642E678C1
+	for <ceph-devel@vger.kernel.org>; Thu,  5 Sep 2013 17:56:37 +1200 (NZST)
+Received: from mail.catalyst.net.nz ([127.0.0.1])
+	by localhost (bertrand.catalyst.net.nz [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id 5Ns4ibPlkHQ8 for <ceph-devel@vger.kernel.org>;
+	Thu,  5 Sep 2013 17:56:36 +1200 (NZST)
+Received: from [IPv6:2404:130:0:1000:222:4dff:fe88:a586] (unknown [IPv6:2404:130:0:1000:222:4dff:fe88:a586])
+	(Authenticated sender: mark.kirkwood)
+	by mail.catalyst.net.nz (Postfix) with ESMTPSA id 9036732DF7
+	for <ceph-devel@vger.kernel.org>; Thu,  5 Sep 2013 17:56:32 +1200 (NZST)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+Setup:
 
---===============1759726439==--
+hosts: ceph1, ceph2
+
+Command steps:
+
+$ ceph-deploy new ceph1
+$ ceph-deploy mon create ceph1
+$ ceph-deploy gatherkeys ceph1
+$ ceph-deploy disk zap ceph1:/dev/vdb
+$ ceph-deploy disk zap ceph1:/dev/vdc
+$ ceph-deploy disk zap ceph2:/dev/vdb
+$ ceph-deploy disk zap ceph2:/dev/vdc
+$ ceph-deploy osd create ceph1:/dev/vdb:/dev/vdc
+$ ceph-deploy osd create ceph2:/dev/vdb:/dev/vdc
+
+The last command complains:
+
+[ceph_deploy.osd][DEBUG ] Preparing cluster ceph disks 
+ceph2:/dev/vdb:/dev/vdc
+[ceph_deploy.osd][INFO  ] Distro info: Ubuntu 12.04 precise
+[ceph_deploy.osd][DEBUG ] Deploying osd to ceph2
+[ceph2][INFO  ] write cluster configuration to /etc/ceph/{cluster}.conf
+[ceph2][INFO  ] keyring file does not exist, creating one at: 
+/var/lib/ceph/bootstrap-osd/ceph.keyring
+[ceph2][INFO  ] create mon keyring file
+[ceph2][ERROR ] Traceback (most recent call last):
+[ceph2][ERROR ]   File 
+"/home/markir/develop/python/ceph-deploy/ceph_deploy/util/decorators.py", line 
+10, in inner
+[ceph2][ERROR ]   File 
+"/home/markir/develop/python/ceph-deploy/ceph_deploy/osd.py", line 14, 
+in write_keyring
+[ceph2][ERROR ] NameError: global name 'key' is not defined
+[ceph2][INFO  ] Running command: udevadm trigger --subsystem-match=block 
+--action=add
+[ceph_deploy.osd][DEBUG ] Preparing host ceph2 disk /dev/vdb journal 
+/dev/vdc activate True
+[ceph2][INFO  ] Running command: ceph-disk-prepare --cluster ceph -- 
+/dev/vdb /dev/vdc
+[ceph2][INFO  ] Information: Moved requested sector from 34 to 2048 in
+[ceph2][INFO  ] order to align on 2048-sector boundaries.
+[ceph2][INFO  ] The operation has completed successfully.
+[ceph2][INFO  ] Information: Moved requested sector from 34 to 2048 in
+[ceph2][INFO  ] order to align on 2048-sector boundaries.
+[ceph2][INFO  ] The operation has completed successfully.
+[ceph2][INFO  ] meta-data=/dev/vdb1              isize=2048 agcount=4, 
+agsize=327615 blks
+[ceph2][INFO  ]          =                       sectsz=512 attr=2, 
+projid32bit=0
+[ceph2][INFO  ] data     =                       bsize=4096 
+blocks=1310459, imaxpct=25
+[ceph2][INFO  ]          =                       sunit=0 swidth=0 blks
+[ceph2][INFO  ] naming   =version 2              bsize=4096 ascii-ci=0
+[ceph2][INFO  ] log      =internal log           bsize=4096 blocks=2560, 
+version=2
+[ceph2][INFO  ]          =                       sectsz=512 sunit=0 
+blks, lazy-count=1
+[ceph2][INFO  ] realtime =none                   extsz=4096 blocks=0, 
+rtextents=0
+[ceph2][INFO  ] The operation has completed successfully.
+[ceph2][ERROR ] WARNING:ceph-disk:OSD will not be hot-swappable if 
+journal is not the same device as the osd data
+[ceph2][INFO  ] Running command: udevadm trigger --subsystem-match=block 
+--action=add
+[ceph_deploy.osd][DEBUG ] Host ceph2 is now ready for osd use.
+
+
+And the osd is not created successfully:
+
+$ ceph -w
+   cluster 66b96359-771c-467e-9f9a-060d82ab6a0c
+    health HEALTH_WARN 192 pgs degraded; 192 pgs stuck unclean
+    monmap e1: 1 mons at {ceph1=192.168.122.21:6789/0}, election epoch 
+2, quorum 0 ceph1
+    osdmap e5: 1 osds: 1 up, 1 in
+     pgmap v9: 192 pgs: 192 active+degraded; 0 bytes data, 34964 KB 
+used, 5074 MB / 5108 MB avail
+    mdsmap e1: 0/0/1 up
+
+
+Regards
+
+Mark
