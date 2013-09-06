@@ -1,64 +1,70 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: teuthology and jenkins
-Date: Fri, 06 Sep 2013 15:07:34 +0200
-Message-ID: <5229D396.3010601@dachary.org>
+From: Milosz Tanski <milosz@adfin.com>
+Subject: Re: [next:master 3628/3827] include/linux/ceph/ceph_debug.h:4:0:
+ warning: "pr_fmt" redefined
+Date: Fri, 6 Sep 2013 11:02:08 -0400
+Message-ID: <CANP1eJEMxsX7UtBTrE1wxTN1OTOCrcntH5gcCO4BtbYjqptb=Q@mail.gmail.com>
+References: <522994e2.0osx2YtC5R+dhrq7%fengguang.wu@intel.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enig81833D0D6D901CDC2702C057"
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:55003 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750707Ab3IFNRj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Sep 2013 09:17:39 -0400
-Received: from [10.9.0.6] (openvpn.novalocal [10.145.3.13])
-	by smtp.dmail.dachary.org (Postfix) with ESMTPS id 1F2ED26395
-	for <ceph-devel@vger.kernel.org>; Fri,  6 Sep 2013 15:07:35 +0200 (CEST)
+Received: from mail-we0-f175.google.com ([74.125.82.175]:55002 "EHLO
+	mail-we0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751350Ab3IFPCK (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Sep 2013 11:02:10 -0400
+Received: by mail-we0-f175.google.com with SMTP id q59so3126545wes.34
+        for <ceph-devel@vger.kernel.org>; Fri, 06 Sep 2013 08:02:08 -0700 (PDT)
+In-Reply-To: <522994e2.0osx2YtC5R+dhrq7%fengguang.wu@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: kbuild test robot <fengguang.wu@intel.com>
+Cc: Sage Weil <sage@inktank.com>, kbuild-all@01.org, ceph-devel <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig81833D0D6D901CDC2702C057
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+I'm looking into this warning now.
 
-Hi,
-
-I've explored the idea to use jenkins as a remplacement for the queue + a=
-rchive mechanism of teuthology. It turns out to be jenkins weak point. As=
- Robert Colins ( who recently wrote a HOWTO on how to replicated the CI i=
-nfrastrcture of OpenStack and is confident someone could do the same with=
-in a couple of days https://review.openstack.org/#/c/45346/ ) puts it:
-
-"OpenStack uses jenkins for it's core capabilities - running tests in a w=
-ork environment, and replaces the scheduler, archiver etc with their own =
-to avoid scaking issues with the naive approaches jenkins has".
-
-Robert further suggested that using the OpenStack CI infrastructure would=
- be a good pick for Ceph.
-
-Cheers
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-All that is necessary for the triumph of evil is that good people do noth=
-ing.H
-
-
-
---------------enig81833D0D6D901CDC2702C057
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with undefined - http://www.enigmail.net/
-
-iEYEARECAAYFAlIp05YACgkQ8dLMyEl6F22vXQCfRHTHhAFSCOFu3M597fw25dL4
-RmQAnR9HI9R9Q44DcvXAQ/XZU98SfsBw
-=JoQQ
------END PGP SIGNATURE-----
-
---------------enig81833D0D6D901CDC2702C057--
+On Fri, Sep 6, 2013 at 4:40 AM, kbuild test robot
+<fengguang.wu@intel.com> wrote:
+> tree:   git://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git master
+> head:   1a4082f8c32a7f27ecb2f803c7324bf47ab07280
+> commit: cb0963fcf836232447e11f42ded9733612e4c63f [3628/3827] ceph: use fscache as a local presisent cache
+> config: make ARCH=x86_64 allmodconfig
+>
+> All warnings:
+>
+>    In file included from fs/ceph/super.h:4:0,
+>                     from fs/ceph/cache.c:26:
+>>> include/linux/ceph/ceph_debug.h:4:0: warning: "pr_fmt" redefined [enabled by default]
+>     #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
+>     ^
+>    In file included from include/linux/kernel.h:13:0,
+>                     from include/asm-generic/bug.h:13,
+>                     from arch/x86/include/asm/bug.h:38,
+>                     from include/linux/bug.h:4,
+>                     from include/linux/thread_info.h:11,
+>                     from include/linux/preempt.h:9,
+>                     from include/linux/spinlock.h:50,
+>                     from include/linux/wait.h:7,
+>                     from include/linux/fs.h:6,
+>                     from include/linux/fscache.h:21,
+>                     from fs/ceph/cache.c:24:
+>    include/linux/printk.h:206:0: note: this is the location of the previous definition
+>     #define pr_fmt(fmt) fmt
+>     ^
+>
+> vim +/pr_fmt +4 include/linux/ceph/ceph_debug.h
+>
+>      1  #ifndef _FS_CEPH_DEBUG_H
+>      2  #define _FS_CEPH_DEBUG_H
+>      3
+>    > 4  #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
+>      5
+>      6  #ifdef CONFIG_CEPH_LIB_PRETTYDEBUG
+>      7
+>      8  /*
+>      9   * wrap pr_debug to include a filename:lineno prefix on each line.
+>     10   * this incurs some overhead (kernel size and execution time) due to
+>     11   * the extra function call at each call site.
+>     12   */
+>
+> ---
+> 0-DAY kernel build testing backend              Open Source Technology Center
+> http://lists.01.org/mailman/listinfo/kbuild                 Intel Corporation
