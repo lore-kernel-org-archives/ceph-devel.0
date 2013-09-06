@@ -1,137 +1,63 @@
 From: Sage Weil <sage@inktank.com>
-Subject: [GIT PULL] Ceph updates for 3.12 (take 2)
-Date: Fri, 6 Sep 2013 13:15:15 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1309061308030.4938@cobra.newdream.net>
+Subject: Re: [ceph-users] CephFS test-case
+Date: Fri, 6 Sep 2013 16:22:36 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1309061611580.18150@cobra.newdream.net>
+References: <CACSYr9TsjHq9uWx816aPrW0SDYqwhfyfVkfcR0L-jsk-XcH9Ag@mail.gmail.com> <alpine.DEB.2.00.1309060825410.2805@cobra.newdream.net> <CACSYr9RcSbX8qhTA3QCsFOT0qLi4x5hVqCitwHzdVOASx_UNsA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-Sender: linux-fsdevel-owner@vger.kernel.org
-To: torvalds@linux-foundation.org
-Cc: linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org, linux-fsdevel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:46897 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750763Ab3IFXWh (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Sep 2013 19:22:37 -0400
+In-Reply-To: <CACSYr9RcSbX8qhTA3QCsFOT0qLi4x5hVqCitwHzdVOASx_UNsA@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Nigel Williams <nigel.d.williams@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hi Linus,
+[re-adding ceph-devel]
 
-Please pull the following Ceph updates from
+On Sat, 7 Sep 2013, Nigel Williams wrote:
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
+> On Sat, Sep 7, 2013 at 1:27 AM, Sage Weil <sage@inktank.com> wrote:
+> > It sounds like the problem is cluster B's pools have too few PGs, making
+> > the data distribution get all out of whack.
+> 
+> Agree, it was too few PGs, I have no re-adjusted and it is busy
+> backfilling and evening out the data-distribution across the OSDs.
+> 
+> My overall point is that the out-of-the-box defaults don't provide a
+> stable test-deployment (whereas older versions like 0.61 did), and so
+> minimally perhaps ceph-deploy needs to have a stab at choosing a
+> workable value of PGs? or alternatively the health warning could
+> include a note about PGs being too low.
 
-This includes both the first pile of Ceph patches (which I sent to 
-torvalds@vger, sigh) and a few new patches that add support for fscache 
-for Ceph.  That includes a few fscache core fixes that David Howells asked 
-go through the Ceph tree.  (Thanks go to Milosz Tanski for putting this 
-feature together.)
+I agree; this is a general problem that we need to come up with a better 
+solution to.
 
-This first batch of patches (included here) had (has) several important 
-RBD bug fixes, hole punch support, several different cleanups in the page 
-cache interactions, improvements in the truncate code (new truncate mutex 
-to avoid shenanigans with i_mutex), and a series of fixes in the 
-synchronous striping read/write code.  On top of that is a random 
-collection of small fixes all across the tree (error code checks and error 
-path cleanup, obsolete wq flags, etc.).
+One idea:
 
-Thanks!
+- make ceph health warn when the pg distribution looks "bad"
+	- too few pgs relative the # of osds
+	- too many objects in a pool relative to the # of pgs and the 
+	  above
+
+(We'll need to be a little creative to make thresholds that make sense.)
+
+If we have an interactive ceph-deploy new, we can also estimate how big 
+the cluster will get and make a more sensible starting count.  I like that 
+less, though, as it potentially confusing and has more room for user 
+error.
+
 sage
 
 
-
-----------------------------------------------------------------
-Dan Carpenter (4):
-      ceph: cleanup types in striped_read()
-      libceph: fix error handling in handle_reply()
-      libceph: potential NULL dereference in ceph_osdc_handle_map()
-      libceph: create_singlethread_workqueue() doesn't return ERR_PTRs
-
-David Howells (3):
-      FS-Cache: Add interface to check consistency of a cached object
-      CacheFiles: Implement interface to check cache consistency
-      FS-Cache: Fix heading in documentation
-
-Jingoo Han (1):
-      block: rbd: use NULL instead of 0
-
-Josh Durgin (3):
-      rbd: fix I/O error propagation for reads
-      rbd: fix buffer size for writes to images with snapshots
-      rbd: fix null dereference in dout
-
-Li Wang (2):
-      ceph: punch hole support
-      ceph: remove useless variable revoked_rdcache
-
-Milosz Tanski (10):
-      ceph: Remove bogus check in invalidatepage
-      ceph: cleanup the logic in ceph_invalidatepage
-      fscache: Netfs function for cleanup post readpages
-      Merge tag 'fscache-fixes-for-ceph' into wip-fscache
-      ceph: use fscache as a local presisent cache
-      ceph: clean PgPrivate2 on returning from readpages
-      ceph: ceph_readpage_to_fscache didn't check if marked
-      ceph: page still marked private_2
-      ceph: Do not do invalidate if the filesystem is mounted nofsc
-      ceph: trivial buildbot warnings fix
-
-Nathaniel Yazdani (1):
-      ceph: fix null pointer dereference
-
-Sage Weil (4):
-      ceph: replace hold_mutex flag with goto
-      Merge remote-tracking branch 'linus/master' into testing
-      ceph: fix fallocate division
-      libceph: use pg_num_mask instead of pgp_num_mask for pg.seed calc
-
-Sha Zhengju (1):
-      ceph: use vfs __set_page_dirty_nobuffers interface instead of doing it inside filesystem
-
-Tejun Heo (1):
-      ceph: WQ_NON_REENTRANT is meaningless and going away
-
-Yan, Zheng (8):
-      ceph: drop CAP_LINK_SHARED when sending "link" request to MDS
-      ceph: wake up writer if vmtruncate work get blocked
-      ceph: trim deleted inode
-      ceph: fix freeing inode vs removing session caps race
-      ceph: introduce i_truncate_mutex
-      ceph: fix request max size
-      ceph: remove ceph_lookup_inode()
-      ceph: use d_invalidate() to invalidate aliases
-
-majianpeng (7):
-      ceph: Don't forget the 'up_read(&osdc->map_sem)' if met error.
-      libceph: unregister request in __map_request failed and nofail == false
-      ceph: Don't use ceph-sync-mode for synchronous-fs.
-      ceph: Add check returned value on func ceph_calc_ceph_pg.
-      ceph: Move the place for EOLDSNAPC handle in ceph_aio_write to easily understand
-      ceph: fix bugs about handling short-read for sync read mode.
-      ceph: allow sync_read/write return partial successed size of read/write.
-
- Documentation/filesystems/caching/backend-api.txt |   9 +
- Documentation/filesystems/caching/netfs-api.txt   |  37 +-
- drivers/block/rbd.c                               |  36 +-
- fs/cachefiles/interface.c                         |  26 ++
- fs/cachefiles/internal.h                          |   1 +
- fs/cachefiles/xattr.c                             |  36 ++
- fs/ceph/Kconfig                                   |   9 +
- fs/ceph/Makefile                                  |   1 +
- fs/ceph/addr.c                                    | 116 ++++---
- fs/ceph/cache.c                                   | 398 ++++++++++++++++++++++
- fs/ceph/cache.h                                   | 159 +++++++++
- fs/ceph/caps.c                                    |  87 ++++-
- fs/ceph/dir.c                                     |   2 +
- fs/ceph/file.c                                    | 299 +++++++++++++---
- fs/ceph/inode.c                                   |  46 ++-
- fs/ceph/ioctl.c                                   |  12 +-
- fs/ceph/mds_client.c                              |  34 ++
- fs/ceph/super.c                                   |  35 +-
- fs/ceph/super.h                                   |  17 +
- fs/fscache/cookie.c                               |  71 ++++
- fs/fscache/internal.h                             |   6 +
- fs/fscache/page.c                                 |  71 ++--
- include/linux/fscache-cache.h                     |   4 +
- include/linux/fscache.h                           |  42 +++
- net/ceph/messenger.c                              |   2 +-
- net/ceph/osd_client.c                             |  27 +-
- net/ceph/osdmap.c                                 |   2 +-
- 27 files changed, 1396 insertions(+), 189 deletions(-)
- create mode 100644 fs/ceph/cache.c
- create mode 100644 fs/ceph/cache.h
+> 
+> >  ceph osd dump | grep ^pool
+> > say, and how many OSDs do you have?
+> 
+> I assume you mean PGs, it was the default (192?) and changing it to
+> 400 seems to have helped. There are 12 OSDs (4 per server, 3 servers).
+> 
+> 
