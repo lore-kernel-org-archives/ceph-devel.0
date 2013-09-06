@@ -1,46 +1,59 @@
-From: Noah Watkins <noah.watkins@inktank.com>
-Subject: Re: subdir-objects
-Date: Fri, 6 Sep 2013 10:27:52 -0700
-Message-ID: <CA+Hcz59qJgWY2gukY8h-=c_HXj5Dxj-UCEHrEnBXZKEckWEgJg@mail.gmail.com>
-References: <CAN04cT5zbp2oe9QvcbnQ4W=7ByA1UybzPEGGWvngjLogsqFaWA@mail.gmail.com>
-	<CA+Hcz5-uxiNMQiNXKfbETiQG0D6-nUrbV5oGpmMqn8oWi4DwGw@mail.gmail.com>
-	<alpine.DEB.2.00.1308211340020.28981@cobra.newdream.net>
-	<CAN04cT74h7QjWhOCQqc3e7HM__qaw+BrbaCy3NW_ZzC1xzX4Kg@mail.gmail.com>
+From: Milosz Tanski <milosz@adfin.com>
+Subject: Re: [PATCH 0/8] ceph: fscache support & upstream changes
+Date: Fri, 6 Sep 2013 15:02:46 -0400
+Message-ID: <CANP1eJFMdcsgSwVO9jhYQwn2C+19db1uy5=du7yYFbmiB6em0A@mail.gmail.com>
+References: <cover.1378418255.git.milosz@adfin.com>
+	<alpine.DEB.2.00.1309051555250.1073@cobra.newdream.net>
+	<CANP1eJEk=eRmq1F+yYWB53spgifbU+zzKGdmKw6BGfx8SknkrA@mail.gmail.com>
+	<18764.1378483142@warthog.procyon.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ve0-f174.google.com ([209.85.128.174]:62068 "EHLO
-	mail-ve0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750721Ab3IFR1x (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Sep 2013 13:27:53 -0400
-Received: by mail-ve0-f174.google.com with SMTP id jy13so1819386veb.33
-        for <ceph-devel@vger.kernel.org>; Fri, 06 Sep 2013 10:27:52 -0700 (PDT)
-In-Reply-To: <CAN04cT74h7QjWhOCQqc3e7HM__qaw+BrbaCy3NW_ZzC1xzX4Kg@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Roald van Loon <roaldvanloon@gmail.com>
-Cc: Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <18764.1378483142@warthog.procyon.org.uk>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Sage Weil <sage@inktank.com>
+Cc: sprabhu@redhat.com, ceph-devel <ceph-devel@vger.kernel.org>, "Yan, Zheng" <zheng.z.yan@intel.com>, Hongyi Jia <jiayisuse@gmail.com>, "linux-cachefs@redhat.com" <linux-cachefs@redhat.com>, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, linux-kernel@vger.kernel.org, David Howells <dhowells@redhat.com>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi Roald,
+Sage,
 
-Sage just pointed me at your wip-automake branch. I also just pushed
-up a branch, make-refactor, that I was hacking on a bit. Not sure how
-much overlap there is, or if my approach is bogus, but I thought I'd
-point it out to see if there is anything that can be combined :)
+I've taken David's latest changes and per his request merged his
+'fscache-fixes-for-ceph' tag then applied my changes on top of that.
+In addition to the pervious changes I also added a fix for the
+warnings the linux-next build bot found.
 
--Noah
+I've given the results a quick test to make sure it builds, boots and
+runs okay. The code is located in my repository:
 
-On Wed, Aug 21, 2013 at 2:01 PM, Roald van Loon <roaldvanloon@gmail.com> wrote:
-> On Wed, Aug 21, 2013 at 10:41 PM, Sage Weil <sage@inktank.com> wrote:
->> Yes, the Makefile.am is in dire need of from TLC from someone who knows a
->> bit of autotools-fu.  It is only this way because in the beginning I
->> didn't know any better.
+  https://adfin@bitbucket.org/adfin/linux-fs.git in the wip-fscache-v2 branch
+
+I hope that this is the final go for now and thanks for everyone's patience.
+
+ - Milosz
+
+On Fri, Sep 6, 2013 at 11:59 AM, David Howells <dhowells@redhat.com> wrote:
+> Milosz Tanski <milosz@adfin.com> wrote:
 >
-> Well, my average knowledge of autotools could at least fix this
-> particular issue and clean up a bit more. It's a start I guess and
-> helps me to continue my RGW things.
+>> After running this for a day on some loaded machines I ran into what
+>> looks like an old issue with the new code. I remember you saw an issue
+>> that manifested it self in a similar way a while back.
+>>
+>> [13837253.462779] FS-Cache: Assertion failed
+>> [13837253.462782] 3 == 5 is false
+>> [13837253.462807] ------------[ cut here ]------------
+>> [13837253.462811] kernel BUG at fs/fscache/operation.c:414!
 >
-> I'll send out a pull request when I've found some time to implement
-> and test this.
+> Bah.
 >
-> Roald
+> I forgot to call fscache_op_complete().  Patch updated and repushed.
+>
+> Btw, I've reordered the patches to put the CIFS patch last.  Can you merge the
+> patches prior to the CIFS commit from my branch rather than cherry picking
+> them so that if they go via two different routes, GIT will handle the merge
+> correctly?  I've stuck a tag on it (fscache-fixes-for-ceph) to make that
+> easier for you.
+>
+> I've also asked another RH engineer to try doing some basic testing on the
+> CIFS stuff - which may validate the fscache_readpages_cancel patch.
+>
+> David
