@@ -1,95 +1,135 @@
-From: majianpeng <majianpeng@gmail.com>
-Subject: Re: Re: [PATCH 2/2] ceph: Implement writev/pwritev for sync operation.
-Date: Fri, 6 Sep 2013 08:46:31 +0800
-Message-ID: <201309060846283230053@gmail.com>
-References: <201309031652122920661@gmail.com>,
-	<5227339C.5010706@intel.com>
-Reply-To: majianpeng <majianpeng@gmail.com>
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: Re: [PATCH 2/2] ceph: Implement writev/pwritev for sync operation.
+Date: Fri, 06 Sep 2013 09:09:33 +0800
+Message-ID: <52292B4D.2000708@intel.com>
+References: <201309031652122920661@gmail.com>,  <5227339C.5010706@intel.com> <201309060846283230053@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="iso-8859-1"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f53.google.com ([209.85.220.53]:64267 "EHLO
-	mail-pa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752467Ab3IFAqd (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Sep 2013 20:46:33 -0400
+Received: from mga02.intel.com ([134.134.136.20]:57706 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753484Ab3IFBJf (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 5 Sep 2013 21:09:35 -0400
+In-Reply-To: <201309060846283230053@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?iso-8859-1?B?WWFuLCBaaGVuZw==?= <zheng.z.yan@intel.com>
+To: majianpeng <majianpeng@gmail.com>
 Cc: sage <sage@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>
 
-PkhpLA0KPg0KPlRoYW5rIHlvdSBmb3IgdGhlIHBhdGNoLg0KPg0KPk9uIDA5LzAzLzIwMTMgMDQ6
-NTIgUE0sIG1hamlhbnBlbmcgd3JvdGU6DQo+PiBGb3Igd3JpdGV2L3B3cml0ZXYgc3luYy1vcGVy
-YXRvaW4sIGNlcGggb25seSBkbyB0aGUgZmlyc3QgaW92Lg0KPj4gSXQgZG9uJ3QgdGhpbmsgb3Ro
-ZXIgaW92cy5Ob3cgaW1wbGVtZW50IHRoaXMuDQo+PiBJIGRpdmlkZWQgdGhlIHdyaXRlLXN5bmMt
-b3BlcmF0aW9uIGludG8gdHdvIGZ1bmN0aW9ucy5PbmUgZm9yDQo+PiBkaXJlY3Qtd3JpdGUsb3Ro
-ZXIgZm9yIG5vbmUtZGlyZWN0LXN5bmMtd3JpdGUuVGhpcyBpcyBiZWNhdXNlIGZvcg0KPj4gbm9u
-ZS1kaXJlY3Qtc3luYy13cml0ZSB3ZSBjYW4gbWVyZ2UgaW92cyB0byBvbmUuQnV0IGZvciBkaXJl
-Y3Qtd3JpdGUsDQo+PiB3ZSBjYW4ndCBtZXJnZSBpb3ZzLg0KPj4gDQo+PiBTaWduZWQtb2ZmLWJ5
-OiBKaWFucGVuZyBNYSA8bWFqaWFucGVuZ0BnbWFpbC5jb20+DQo+PiAtLS0NCj4+ICBmcy9jZXBo
-L2ZpbGUuYyB8IDMyOCArKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysr
-LS0tLS0tLS0tLS0tLS0NCj4+ICAxIGZpbGUgY2hhbmdlZCwgMjQ4IGluc2VydGlvbnMoKyksIDgw
-IGRlbGV0aW9ucygtKQ0KPj4gDQo+PiBkaWZmIC0tZ2l0IGEvZnMvY2VwaC9maWxlLmMgYi9mcy9j
-ZXBoL2ZpbGUuYw0KPj4gaW5kZXggN2Q2YTNlZS4uNDJjOTdiMyAxMDA2NDQNCj4+IC0tLSBhL2Zz
-L2NlcGgvZmlsZS5jDQo+PiArKysgYi9mcy9jZXBoL2ZpbGUuYw0KPj4gQEAgLTUzMywxNyArNTMz
-LDE5IEBAIHN0YXRpYyB2b2lkIGNlcGhfc3luY193cml0ZV91bnNhZmUoc3RydWN0IGNlcGhfb3Nk
-X3JlcXVlc3QgKnJlcSwgYm9vbCB1bnNhZmUpDQo+PiAgCX0NCj4+ICB9DQo+PiAgDQo+PiArDQo+
-PiAgLyoNCj4+IC0gKiBTeW5jaHJvbm91cyB3cml0ZSwgc3RyYWlnaHQgZnJvbSBfX3VzZXIgcG9p
-bnRlciBvciB1c2VyIHBhZ2VzIChpZg0KPj4gLSAqIE9fRElSRUNUKS4NCj4+ICsgKiBTeW5jaHJv
-bm91cyB3cml0ZSwgc3RyYWlnaHQgZnJvbSBfX3VzZXIgcG9pbnRlciBvciB1c2VyIHBhZ2VzLg0K
-Pj4gICAqDQo+PiAgICogSWYgd3JpdGUgc3BhbnMgb2JqZWN0IGJvdW5kYXJ5LCBqdXN0IGRvIG11
-bHRpcGxlIHdyaXRlcy4gIChGb3IgYQ0KPj4gICAqIGNvcnJlY3QgYXRvbWljIHdyaXRlLCB3ZSBz
-aG91bGQgZS5nLiB0YWtlIHdyaXRlIGxvY2tzIG9uIGFsbA0KPj4gICAqIG9iamVjdHMsIHJvbGxi
-YWNrIG9uIGZhaWx1cmUsIGV0Yy4pDQo+PiAgICovDQo+PiAtc3RhdGljIHNzaXplX3QgY2VwaF9z
-eW5jX3dyaXRlKHN0cnVjdCBmaWxlICpmaWxlLCBjb25zdCBjaGFyIF9fdXNlciAqZGF0YSwNCj4+
-IC0JCQkgICAgICAgc2l6ZV90IGxlZnQsIGxvZmZfdCBwb3MsIGxvZmZfdCAqcHBvcykNCj4+ICtz
-dGF0aWMgc3NpemVfdA0KPj4gK2NlcGhfc3luY19kaXJlY3Rfd3JpdGUoc3RydWN0IGtpb2NiICpp
-b2NiLCBjb25zdCBzdHJ1Y3QgaW92ZWMgKmlvdiwNCj4+ICsJCSAgICAgICB1bnNpZ25lZCBsb25n
-IG5yX3NlZ3MsIHNpemVfdCBjb3VudCkNCj4+ICB7DQo+PiArCXN0cnVjdCBmaWxlICpmaWxlID0g
-aW9jYi0+a2lfZmlscDsNCj4+ICAJc3RydWN0IGlub2RlICppbm9kZSA9IGZpbGVfaW5vZGUoZmls
-ZSk7DQo+PiAgCXN0cnVjdCBjZXBoX2lub2RlX2luZm8gKmNpID0gY2VwaF9pbm9kZShpbm9kZSk7
-DQo+PiAgCXN0cnVjdCBjZXBoX2ZzX2NsaWVudCAqZnNjID0gY2VwaF9pbm9kZV90b19jbGllbnQo
-aW5vZGUpOw0KPj4gQEAgLTU1Nyw1OSArNTU5LDU1IEBAIHN0YXRpYyBzc2l6ZV90IGNlcGhfc3lu
-Y193cml0ZShzdHJ1Y3QgZmlsZSAqZmlsZSwgY29uc3QgY2hhciBfX3VzZXIgKmRhdGEsDQo+PiAg
-CWludCB3cml0dGVuID0gMDsNCj4+ICAJaW50IGZsYWdzOw0KPj4gIAlpbnQgY2hlY2tfY2FwcyA9
-IDA7DQo+PiAtCWludCBwYWdlX2FsaWduLCBpb19hbGlnbjsNCj4+IC0JdW5zaWduZWQgbG9uZyBi
-dWZfYWxpZ247DQo+PiAtCWludCByZXQ7DQo+PiArCWludCBwYWdlX2FsaWduOw0KPj4gKwlpbnQg
-cmV0LCBpOw0KPj4gIAlzdHJ1Y3QgdGltZXNwZWMgbXRpbWUgPSBDVVJSRU5UX1RJTUU7DQo+PiAt
-CWJvb2wgb3duX3BhZ2VzID0gZmFsc2U7DQo+PiArCWxvZmZfdCBwb3MgPSBpb2NiLT5raV9wb3M7
-DQo+PiAgDQo+PiAgCWlmIChjZXBoX3NuYXAoZmlsZV9pbm9kZShmaWxlKSkgIT0gQ0VQSF9OT1NO
-QVApDQo+PiAgCQlyZXR1cm4gLUVST0ZTOw0KPj4gIA0KPj4gLQlkb3V0KCJzeW5jX3dyaXRlIG9u
-IGZpbGUgJXAgJWxsZH4ldSAlc1xuIiwgZmlsZSwgcG9zLA0KPj4gLQkgICAgICh1bnNpZ25lZCls
-ZWZ0LCAoZmlsZS0+Zl9mbGFncyAmIE9fRElSRUNUKSA/ICJPX0RJUkVDVCIgOiAiIik7DQo+PiAr
-CWRvdXQoInN5bmNfZGlyZWN0X3dyaXRlIG9uIGZpbGUgJXAgJWxsZH4ldVxuIiwgZmlsZSwgcG9z
-LA0KPj4gKwkgICAgICh1bnNpZ25lZCljb3VudCk7DQo+PiAgDQo+PiAtCXJldCA9IGZpbGVtYXBf
-d3JpdGVfYW5kX3dhaXRfcmFuZ2UoaW5vZGUtPmlfbWFwcGluZywgcG9zLCBwb3MgKyBsZWZ0KTsN
-Cj4+ICsJcmV0ID0gZmlsZW1hcF93cml0ZV9hbmRfd2FpdF9yYW5nZShpbm9kZS0+aV9tYXBwaW5n
-LCBwb3MsIHBvcyArIGNvdW50KTsNCj4+ICAJaWYgKHJldCA8IDApDQo+PiAgCQlyZXR1cm4gcmV0
-Ow0KPj4gIA0KPj4gIAlyZXQgPSBpbnZhbGlkYXRlX2lub2RlX3BhZ2VzMl9yYW5nZShpbm9kZS0+
-aV9tYXBwaW5nLA0KPj4gIAkJCQkJICAgIHBvcyA+PiBQQUdFX0NBQ0hFX1NISUZULA0KPj4gLQkJ
-CQkJICAgIChwb3MgKyBsZWZ0KSA+PiBQQUdFX0NBQ0hFX1NISUZUKTsNCj4+ICsJCQkJCSAgICAo
-cG9zICsgY291bnQpID4+IFBBR0VfQ0FDSEVfU0hJRlQpOw0KPj4gIAlpZiAocmV0IDwgMCkNCj4+
-ICAJCWRvdXQoImludmFsaWRhdGVfaW5vZGVfcGFnZXMyX3JhbmdlIHJldHVybmVkICVkXG4iLCBy
-ZXQpOw0KPj4gIA0KPj4gIAlmbGFncyA9IENFUEhfT1NEX0ZMQUdfT1JERVJTTkFQIHwNCj4+ICAJ
-CUNFUEhfT1NEX0ZMQUdfT05ESVNLIHwNCj4+ICAJCUNFUEhfT1NEX0ZMQUdfV1JJVEU7DQo+PiAt
-CWlmICgoZmlsZS0+Zl9mbGFncyAmIChPX1NZTkN8T19ESVJFQ1QpKSA9PSAwKQ0KPj4gLQkJZmxh
-Z3MgfD0gQ0VQSF9PU0RfRkxBR19BQ0s7DQo+PiAtCWVsc2UNCj4+IC0JCW51bV9vcHMrKzsJLyog
-QWxzbyBpbmNsdWRlIGEgJ3N0YXJ0c3luYycgY29tbWFuZC4gKi8NCj4+ICsJbnVtX29wcysrOwkv
-KiBBbHNvIGluY2x1ZGUgYSAnc3RhcnRzeW5jJyBjb21tYW5kLiAqLw0KPj4gIA0KPj4gLQkvKg0K
-Pj4gLQkgKiB3ZSBtYXkgbmVlZCB0byBkbyBtdWx0aXBsZSB3cml0ZXMgaGVyZSBpZiB3ZSBzcGFu
-IGFuIG9iamVjdA0KPj4gLQkgKiBib3VuZGFyeS4gIHRoaXMgaXNuJ3QgYXRvbWljLCB1bmZvcnR1
-bmF0ZWx5LiAgOigNCj4+IC0JICovDQo+PiAtbW9yZToNCj4+IC0JaW9fYWxpZ24gPSBwb3MgJiB+
-UEFHRV9NQVNLOw0KPj4gLQlidWZfYWxpZ24gPSAodW5zaWduZWQgbG9uZylkYXRhICYgflBBR0Vf
-TUFTSzsNCj4+IC0JbGVuID0gbGVmdDsNCj4+ICsJZm9yIChpID0gMDsgaSA8IG5yX3NlZ3MgJiYg
-Y291bnQ7IGkrKykgew0KPg0KPlBPU0lYIHJlcXVpcmVzIHRoYXQgd3JpdGUgc3lzY2FsbCBpcyBh
-dG9taWMuIEkgbWVhbnMgd2Ugc2hvdWxkIGFsbG9jYXRlIGEgc2luZ2xlIE9TRCByZXF1ZXN0DQo+
-Zm9yIGFsbCBidWZmZXIgc2VnbWVudHMgdGhhdCBiZWxvbmcgdG8gdGhlIHNhbWUgb2JqZWN0Lg0K
-Pg0KSSB0aGluayB3ZSBjb3VsZCBub3QuDQpGb3IgZGlyZWN0IHdyaXRlLCB3ZSB1c2UgY2VwaF9n
-ZXRfZGlyZWN0X3BhZ2VfdmVjdG9yIHRvIGdldCBwYWdlcy4NCkdpdmVuIGlvdjEgYW5kIGlvdjIg
-YXJlIGluIHRoZSBzYW1lIG9iamVjdC4gQnV0IHdlIGNhbid0IG1ha2UgdGhlIHBhZ2VzIG9mIGlv
-djEvMiB0byBqb2luIHRvZ2V0aGVyLg0KQmVjYXVzZSBmb3IgY2VwaCBwYWdlX3ZlY3RvcixpdCBv
-bmx5IHJlY29yZCB0aGUgb2Zmc2V0IG9mIGZpcnN0IHBhZ2UuDQoNCk9yIGFtIGkgbWlzc2luZyBz
-b21ldGhpbmc/DQpNYXliZSB3ZSBjYW4gdXNlIGNlcGggcGFnZWxpc3QgYnV0IGl0IHdpbGwgY29w
-eSBkYXRhLg0KDQpUaGFua3MhDQpKaWFucGVuZyBNYQ0KPlJlZ2FyZHMNCj5ZYW4sIFpoZW5nDQo=
+On 09/06/2013 08:46 AM, majianpeng wrote:
+>> Hi,
+>>
+>> Thank you for the patch.
+>>
+>> On 09/03/2013 04:52 PM, majianpeng wrote:
+>>> For writev/pwritev sync-operatoin, ceph only do the first iov.
+>>> It don't think other iovs.Now implement this.
+>>> I divided the write-sync-operation into two functions.One for
+>>> direct-write,other for none-direct-sync-write.This is because for
+>>> none-direct-sync-write we can merge iovs to one.But for direct-write,
+>>> we can't merge iovs.
+>>>
+>>> Signed-off-by: Jianpeng Ma <majianpeng@gmail.com>
+>>> ---
+>>>  fs/ceph/file.c | 328 +++++++++++++++++++++++++++++++++++++++++++--------------
+>>>  1 file changed, 248 insertions(+), 80 deletions(-)
+>>>
+>>> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+>>> index 7d6a3ee..42c97b3 100644
+>>> --- a/fs/ceph/file.c
+>>> +++ b/fs/ceph/file.c
+>>> @@ -533,17 +533,19 @@ static void ceph_sync_write_unsafe(struct ceph_osd_request *req, bool unsafe)
+>>>  	}
+>>>  }
+>>>  
+>>> +
+>>>  /*
+>>> - * Synchronous write, straight from __user pointer or user pages (if
+>>> - * O_DIRECT).
+>>> + * Synchronous write, straight from __user pointer or user pages.
+>>>   *
+>>>   * If write spans object boundary, just do multiple writes.  (For a
+>>>   * correct atomic write, we should e.g. take write locks on all
+>>>   * objects, rollback on failure, etc.)
+>>>   */
+>>> -static ssize_t ceph_sync_write(struct file *file, const char __user *data,
+>>> -			       size_t left, loff_t pos, loff_t *ppos)
+>>> +static ssize_t
+>>> +ceph_sync_direct_write(struct kiocb *iocb, const struct iovec *iov,
+>>> +		       unsigned long nr_segs, size_t count)
+>>>  {
+>>> +	struct file *file = iocb->ki_filp;
+>>>  	struct inode *inode = file_inode(file);
+>>>  	struct ceph_inode_info *ci = ceph_inode(inode);
+>>>  	struct ceph_fs_client *fsc = ceph_inode_to_client(inode);
+>>> @@ -557,59 +559,55 @@ static ssize_t ceph_sync_write(struct file *file, const char __user *data,
+>>>  	int written = 0;
+>>>  	int flags;
+>>>  	int check_caps = 0;
+>>> -	int page_align, io_align;
+>>> -	unsigned long buf_align;
+>>> -	int ret;
+>>> +	int page_align;
+>>> +	int ret, i;
+>>>  	struct timespec mtime = CURRENT_TIME;
+>>> -	bool own_pages = false;
+>>> +	loff_t pos = iocb->ki_pos;
+>>>  
+>>>  	if (ceph_snap(file_inode(file)) != CEPH_NOSNAP)
+>>>  		return -EROFS;
+>>>  
+>>> -	dout("sync_write on file %p %lld~%u %s\n", file, pos,
+>>> -	     (unsigned)left, (file->f_flags & O_DIRECT) ? "O_DIRECT" : "");
+>>> +	dout("sync_direct_write on file %p %lld~%u\n", file, pos,
+>>> +	     (unsigned)count);
+>>>  
+>>> -	ret = filemap_write_and_wait_range(inode->i_mapping, pos, pos + left);
+>>> +	ret = filemap_write_and_wait_range(inode->i_mapping, pos, pos + count);
+>>>  	if (ret < 0)
+>>>  		return ret;
+>>>  
+>>>  	ret = invalidate_inode_pages2_range(inode->i_mapping,
+>>>  					    pos >> PAGE_CACHE_SHIFT,
+>>> -					    (pos + left) >> PAGE_CACHE_SHIFT);
+>>> +					    (pos + count) >> PAGE_CACHE_SHIFT);
+>>>  	if (ret < 0)
+>>>  		dout("invalidate_inode_pages2_range returned %d\n", ret);
+>>>  
+>>>  	flags = CEPH_OSD_FLAG_ORDERSNAP |
+>>>  		CEPH_OSD_FLAG_ONDISK |
+>>>  		CEPH_OSD_FLAG_WRITE;
+>>> -	if ((file->f_flags & (O_SYNC|O_DIRECT)) == 0)
+>>> -		flags |= CEPH_OSD_FLAG_ACK;
+>>> -	else
+>>> -		num_ops++;	/* Also include a 'startsync' command. */
+>>> +	num_ops++;	/* Also include a 'startsync' command. */
+>>>  
+>>> -	/*
+>>> -	 * we may need to do multiple writes here if we span an object
+>>> -	 * boundary.  this isn't atomic, unfortunately.  :(
+>>> -	 */
+>>> -more:
+>>> -	io_align = pos & ~PAGE_MASK;
+>>> -	buf_align = (unsigned long)data & ~PAGE_MASK;
+>>> -	len = left;
+>>> +	for (i = 0; i < nr_segs && count; i++) {
+>>
+>> POSIX requires that write syscall is atomic. I means we should allocate a single OSD request
+>> for all buffer segments that belong to the same object.
+>>
+> I think we could not.
+> For direct write, we use ceph_get_direct_page_vector to get pages.
+> Given iov1 and iov2 are in the same object. But we can't make the pages of iov1/2 to join together.
+> Because for ceph page_vector,it only record the offset of first page.
+> 
+> Or am i missing something?
+> Maybe we can use ceph pagelist but it will copy data.
+> 
+
+I'm wrong with the direct IO case (ext4 doesn't guarantee atomicity in direct write). But please keep
+buffered write atomic.
+
+Regards
+Yan, Zheng
 
