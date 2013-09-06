@@ -1,95 +1,102 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH 0/8] ceph: fscache support & upstream changes
-Date: Thu, 5 Sep 2013 16:00:06 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1309051555250.1073@cobra.newdream.net>
-References: <cover.1378418255.git.milosz@adfin.com>
+From: Chris Dunlop <chris@onthe.net.au>
+Subject: OSD crash during repair
+Date: Fri, 6 Sep 2013 10:04:09 +1000
+Message-ID: <20130906000409.GA10181@onthe.net.au>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-In-Reply-To: <cover.1378418255.git.milosz@adfin.com>
-Sender: linux-fsdevel-owner@vger.kernel.org
-To: Milosz Tanski <milosz@adfin.com>
-Cc: ceph-devel@vger.kernel.org, zheng.z.yan@intel.com, dhowells@redhat.com, jiayisuse@gmail.com, linux-cachefs@redhat.com, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from smtp1.onthe.net.au ([203.22.196.249]:42549 "EHLO
+	smtp1.onthe.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755177Ab3IFAJg (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Sep 2013 20:09:36 -0400
+Received: from localhost (localhost [127.0.0.1])
+	by smtp1.onthe.net.au (Postfix) with ESMTP id 3836B61531
+	for <ceph-devel@vger.kernel.org>; Fri,  6 Sep 2013 10:04:14 +1000 (EST)
+Received: from smtp1.onthe.net.au ([127.0.0.1])
+	by localhost (smtp1.onthe.net.au [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id Ngr0SezkfZ9h for <ceph-devel@vger.kernel.org>;
+	Fri,  6 Sep 2013 10:04:11 +1000 (EST)
+Received: from o1.private.otn.net.au (o1.private.onthe.net.au [10.200.63.41])
+	by smtp1.onthe.net.au (Postfix) with ESMTP id 5E7F261556
+	for <ceph-devel@vger.kernel.org>; Fri,  6 Sep 2013 10:04:10 +1000 (EST)
+Received: from achates.office.onthe.net.au (achates-gw1-vpn.private.onthe.net.au [10.9.1.8])
+	by o1.private.otn.net.au (Postfix) with ESMTP id 6183C858E6
+	for <ceph-devel@vger.kernel.org>; Fri,  6 Sep 2013 10:04:09 +1000 (EST)
+Content-Disposition: inline
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Thu, 5 Sep 2013, Milosz Tanski wrote:
-> Hey gang I think this should be final revision of these changes. The changes 
-> are:
-> 
->  * David rewrote the cookie validity check (that originally was written by
->    Hongyi Jia). You might have seen some emails flying about doing it the
->    right way.
->  * I added crash fix when for Ceph filesystems mounted with nofsc (default)
->    when fscache is compiled into Ceph. Previously it would crash trying to
->    enqueue invalidate checks in the work queue because we didn't initialize
->    if the mount had fscache disabled.
-> 
-> I've tested both changes on my cluster. You can get get these changes from my
-> branch in bitbucket. It contains the upstream wip-fscache branch rebased with
-> David's rewrite of Hongyi Jia's changes.
-> 
-> The branch is located at.
-> 
->   https://bitbucket.org/adfin/linux-fs.git in the wip-fscahce branch
-> 
-> Finally, David requested that this patchset go through the Ceph tree. The tree
-> should have all the proper sign off from David. I also CC'ed him so he can give
-> his final okay.
-> 
-> Best,
->  - Milosz
+G'day,
 
-I've pulled this into ceph-client.git master.  If this looks good to you, 
-David, I'll send it all to Linus (along with the current set of RBD fixes, 
-once they are ready).
+I'm getting an OSD crash on 0.56.7-1~bpo70+1 whilst trying to repair an OSD:
 
-Thanks!
-sage
+http://tracker.ceph.com/issues/6233
 
+----
+ceph version 0.56.7 (14f23ab86b0058a8651895b3dc972a29459f3a33)
+ 1: /usr/bin/ceph-osd() [0x8530a2]
+ 2: (()+0xf030) [0x7f541ca39030]
+ 3: (gsignal()+0x35) [0x7f541b132475]
+ 4: (abort()+0x180) [0x7f541b1356f0]
+ 5: (_gnu_cxx::_verbose_terminate_handler()+0x11d) [0x7f541b98789d]
+ 6: (()+0x63996) [0x7f541b985996]
+ 7: (()+0x639c3) [0x7f541b9859c3]
+ 8: (()+0x63bee) [0x7f541b985bee]
+ 9: (ceph::buffer::list::iterator::copy(unsigned int, char*)+0x127) [0x8fa9a7]
+ 10: (object_info_t::decode(ceph::buffer::list::iterator&)+0x29) [0x95b579]
+ 11: (object_info_t::object_info_t(ceph::buffer::list&)+0x180) [0x695ec0]
+ 12: (PG::repair_object(hobject_t const&, ScrubMap::object*, int, int)+0xc7) [0x7646b7]
+ 13: (PG::scrub_process_inconsistent()+0x9bd) [0x76534d]
+ 14: (PG::scrub_finish()+0x4f) [0x76587f]
+ 15: (PG::chunky_scrub(ThreadPool::TPHandle&)+0x10d6) [0x76cb96]
+ 16: (PG::scrub(ThreadPool::TPHandle&)+0x138) [0x76d7e8]
+ 17: (OSD::ScrubWQ::_process(PG*, ThreadPool::TPHandle&)+0xf) [0x70515f]
+ 18: (ThreadPool::worker(ThreadPool::WorkThread*)+0x992) [0x8f0542]
+ 19: (ThreadPool::WorkThread::entry()+0x10) [0x8f14d0]
+ 20: (()+0x6b50) [0x7f541ca30b50]
+ 21: (clone()+0x6d) [0x7f541b1daa7d]
+ NOTE: a copy of the executable, or `objdump -rdS &lt;executable&gt;` is needed to interpret this.
+----
 
-> 
-> David Howells (2):
->   FS-Cache: Add interface to check consistency of a cached object
->   CacheFiles: Implement interface to check cache consistency
-> 
-> Milosz Tanski (6):
->   fscache: Netfs function for cleanup post readpages
->   ceph: use fscache as a local presisent cache
->   ceph: clean PgPrivate2 on returning from readpages
->   ceph: ceph_readpage_to_fscache didn't check if marked
->   ceph: page still marked private_2
->   ceph: Do not do invalidate if the filesystem is mounted nofsc
-> 
->  Documentation/filesystems/caching/backend-api.txt |    9 +
->  Documentation/filesystems/caching/netfs-api.txt   |   35 +-
->  fs/cachefiles/interface.c                         |   26 ++
->  fs/cachefiles/internal.h                          |    1 +
->  fs/cachefiles/xattr.c                             |   36 ++
->  fs/ceph/Kconfig                                   |    9 +
->  fs/ceph/Makefile                                  |    1 +
->  fs/ceph/addr.c                                    |   40 ++-
->  fs/ceph/cache.c                                   |  400 +++++++++++++++++++++
->  fs/ceph/cache.h                                   |  157 ++++++++
->  fs/ceph/caps.c                                    |   19 +-
->  fs/ceph/file.c                                    |   17 +
->  fs/ceph/inode.c                                   |   14 +-
->  fs/ceph/super.c                                   |   35 +-
->  fs/ceph/super.h                                   |   16 +
->  fs/fscache/cookie.c                               |   69 ++++
->  fs/fscache/internal.h                             |    6 +
->  fs/fscache/page.c                                 |   71 ++--
->  include/linux/fscache-cache.h                     |    4 +
->  include/linux/fscache.h                           |   42 +++
->  20 files changed, 965 insertions(+), 42 deletions(-)
->  create mode 100644 fs/ceph/cache.c
->  create mode 100644 fs/ceph/cache.h
-> 
-> -- 
-> 1.7.9.5
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+This occurs as a result of:
+
+# ceph pg dump | grep inconsistent
+2.12    2723    0       0       0       11311299072     159189  159189  active+clean+inconsistent       2013-09-06 09:35:47.512119      20117'690441    20120'7914185   [6,7]   [6,7]   20021'675967    2013-09-03 15:58:12.459188      19384'665404    2013-08-28 12:42:07.490877
+# ceph pg repair 2.12
+
+Looking at PG::repair_object per line 12 of the backtrace, I can see a
+dout(10) which should tell me the problem object:
+
+----
+src/osd/PG.cc:
+void PG::repair_object(const hobject_t& soid, ScrubMap::object *po, int bad_peer, int ok_peer)
+{
+  dout(10) << "repair_object " << soid << " bad_peer osd." << bad_peer << " ok_peer osd." << ok_peer << dendl;
+  ...
+}
+----
+
+The 'ceph pg dump' output above tells me the primary osd is '6', so I
+can increase the logging level to 10 on osd.6 to get the debug output,
+and repair again:
+
+# ceph osd tell 6 injectargs '--debug_osd 0/10'
+# ceph pg repair 2.12
+
+I get the same OSD crash, but this time it logs the dout from above,
+which shows the problem object:
+
+    -1> 2013-09-06 09:34:45.142224 7f0ae94bd700 10 osd.6 pg_epoch: 20117 pg[2.12( v 20117'690441 (20117'689440,20117'690441] local-les=20115 n=2722 ec=1 les/c 20115/20115 20108/20112/20112) [6,7] r=0 lpr=20112 mlcod 20117'690440 active+scrubbing+deep+repair] repair_object 56987a12/rb.0.17d9b.2ae8944a.000000001e11/head//2 bad_peer osd.7 ok_peer osd.6
+     0> 2013-09-06 09:34:45.206621 7f0ae94bd700 -1 *** Caught signal (Aborted) **
+
+So...
+
+Firstly, is anyone interested in further investigating the problem to
+fix the crash behaviour?
+
+And, what's the best way to fix the pool?
+
+Cheers,
+
+Chris
