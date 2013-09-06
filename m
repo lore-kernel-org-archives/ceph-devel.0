@@ -1,135 +1,110 @@
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: Re: [PATCH 2/2] ceph: Implement writev/pwritev for sync operation.
-Date: Fri, 06 Sep 2013 09:09:33 +0800
-Message-ID: <52292B4D.2000708@intel.com>
-References: <201309031652122920661@gmail.com>,  <5227339C.5010706@intel.com> <201309060846283230053@gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: OSD crash during repair
+Date: Thu, 5 Sep 2013 19:38:47 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1309051937410.6929@cobra.newdream.net>
+References: <20130906000409.GA10181@onthe.net.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:57706 "EHLO mga02.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753484Ab3IFBJf (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 5 Sep 2013 21:09:35 -0400
-In-Reply-To: <201309060846283230053@gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:36747 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753832Ab3IFCir (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Sep 2013 22:38:47 -0400
+In-Reply-To: <20130906000409.GA10181@onthe.net.au>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: majianpeng <majianpeng@gmail.com>
-Cc: sage <sage@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>
+To: Chris Dunlop <chris@onthe.net.au>
+Cc: ceph-devel@vger.kernel.org
 
-On 09/06/2013 08:46 AM, majianpeng wrote:
->> Hi,
->>
->> Thank you for the patch.
->>
->> On 09/03/2013 04:52 PM, majianpeng wrote:
->>> For writev/pwritev sync-operatoin, ceph only do the first iov.
->>> It don't think other iovs.Now implement this.
->>> I divided the write-sync-operation into two functions.One for
->>> direct-write,other for none-direct-sync-write.This is because for
->>> none-direct-sync-write we can merge iovs to one.But for direct-write,
->>> we can't merge iovs.
->>>
->>> Signed-off-by: Jianpeng Ma <majianpeng@gmail.com>
->>> ---
->>>  fs/ceph/file.c | 328 +++++++++++++++++++++++++++++++++++++++++++--------------
->>>  1 file changed, 248 insertions(+), 80 deletions(-)
->>>
->>> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
->>> index 7d6a3ee..42c97b3 100644
->>> --- a/fs/ceph/file.c
->>> +++ b/fs/ceph/file.c
->>> @@ -533,17 +533,19 @@ static void ceph_sync_write_unsafe(struct ceph_osd_request *req, bool unsafe)
->>>  	}
->>>  }
->>>  
->>> +
->>>  /*
->>> - * Synchronous write, straight from __user pointer or user pages (if
->>> - * O_DIRECT).
->>> + * Synchronous write, straight from __user pointer or user pages.
->>>   *
->>>   * If write spans object boundary, just do multiple writes.  (For a
->>>   * correct atomic write, we should e.g. take write locks on all
->>>   * objects, rollback on failure, etc.)
->>>   */
->>> -static ssize_t ceph_sync_write(struct file *file, const char __user *data,
->>> -			       size_t left, loff_t pos, loff_t *ppos)
->>> +static ssize_t
->>> +ceph_sync_direct_write(struct kiocb *iocb, const struct iovec *iov,
->>> +		       unsigned long nr_segs, size_t count)
->>>  {
->>> +	struct file *file = iocb->ki_filp;
->>>  	struct inode *inode = file_inode(file);
->>>  	struct ceph_inode_info *ci = ceph_inode(inode);
->>>  	struct ceph_fs_client *fsc = ceph_inode_to_client(inode);
->>> @@ -557,59 +559,55 @@ static ssize_t ceph_sync_write(struct file *file, const char __user *data,
->>>  	int written = 0;
->>>  	int flags;
->>>  	int check_caps = 0;
->>> -	int page_align, io_align;
->>> -	unsigned long buf_align;
->>> -	int ret;
->>> +	int page_align;
->>> +	int ret, i;
->>>  	struct timespec mtime = CURRENT_TIME;
->>> -	bool own_pages = false;
->>> +	loff_t pos = iocb->ki_pos;
->>>  
->>>  	if (ceph_snap(file_inode(file)) != CEPH_NOSNAP)
->>>  		return -EROFS;
->>>  
->>> -	dout("sync_write on file %p %lld~%u %s\n", file, pos,
->>> -	     (unsigned)left, (file->f_flags & O_DIRECT) ? "O_DIRECT" : "");
->>> +	dout("sync_direct_write on file %p %lld~%u\n", file, pos,
->>> +	     (unsigned)count);
->>>  
->>> -	ret = filemap_write_and_wait_range(inode->i_mapping, pos, pos + left);
->>> +	ret = filemap_write_and_wait_range(inode->i_mapping, pos, pos + count);
->>>  	if (ret < 0)
->>>  		return ret;
->>>  
->>>  	ret = invalidate_inode_pages2_range(inode->i_mapping,
->>>  					    pos >> PAGE_CACHE_SHIFT,
->>> -					    (pos + left) >> PAGE_CACHE_SHIFT);
->>> +					    (pos + count) >> PAGE_CACHE_SHIFT);
->>>  	if (ret < 0)
->>>  		dout("invalidate_inode_pages2_range returned %d\n", ret);
->>>  
->>>  	flags = CEPH_OSD_FLAG_ORDERSNAP |
->>>  		CEPH_OSD_FLAG_ONDISK |
->>>  		CEPH_OSD_FLAG_WRITE;
->>> -	if ((file->f_flags & (O_SYNC|O_DIRECT)) == 0)
->>> -		flags |= CEPH_OSD_FLAG_ACK;
->>> -	else
->>> -		num_ops++;	/* Also include a 'startsync' command. */
->>> +	num_ops++;	/* Also include a 'startsync' command. */
->>>  
->>> -	/*
->>> -	 * we may need to do multiple writes here if we span an object
->>> -	 * boundary.  this isn't atomic, unfortunately.  :(
->>> -	 */
->>> -more:
->>> -	io_align = pos & ~PAGE_MASK;
->>> -	buf_align = (unsigned long)data & ~PAGE_MASK;
->>> -	len = left;
->>> +	for (i = 0; i < nr_segs && count; i++) {
->>
->> POSIX requires that write syscall is atomic. I means we should allocate a single OSD request
->> for all buffer segments that belong to the same object.
->>
-> I think we could not.
-> For direct write, we use ceph_get_direct_page_vector to get pages.
-> Given iov1 and iov2 are in the same object. But we can't make the pages of iov1/2 to join together.
-> Because for ceph page_vector,it only record the offset of first page.
+Hi Chris,
+
+What is the inconsistency that scrub reports in the log?  My guess is that 
+the simplest way to resolve this is to remove whichever copy you decide is 
+invalid, but it depends on what the inconstency it is trying/failing to 
+repair is.
+
+Thanks!
+sage
+
+
+On Fri, 6 Sep 2013, Chris Dunlop wrote:
+
+> G'day,
 > 
-> Or am i missing something?
-> Maybe we can use ceph pagelist but it will copy data.
+> I'm getting an OSD crash on 0.56.7-1~bpo70+1 whilst trying to repair an OSD:
 > 
-
-I'm wrong with the direct IO case (ext4 doesn't guarantee atomicity in direct write). But please keep
-buffered write atomic.
-
-Regards
-Yan, Zheng
-
+> http://tracker.ceph.com/issues/6233
+> 
+> ----
+> ceph version 0.56.7 (14f23ab86b0058a8651895b3dc972a29459f3a33)
+>  1: /usr/bin/ceph-osd() [0x8530a2]
+>  2: (()+0xf030) [0x7f541ca39030]
+>  3: (gsignal()+0x35) [0x7f541b132475]
+>  4: (abort()+0x180) [0x7f541b1356f0]
+>  5: (_gnu_cxx::_verbose_terminate_handler()+0x11d) [0x7f541b98789d]
+>  6: (()+0x63996) [0x7f541b985996]
+>  7: (()+0x639c3) [0x7f541b9859c3]
+>  8: (()+0x63bee) [0x7f541b985bee]
+>  9: (ceph::buffer::list::iterator::copy(unsigned int, char*)+0x127) [0x8fa9a7]
+>  10: (object_info_t::decode(ceph::buffer::list::iterator&)+0x29) [0x95b579]
+>  11: (object_info_t::object_info_t(ceph::buffer::list&)+0x180) [0x695ec0]
+>  12: (PG::repair_object(hobject_t const&, ScrubMap::object*, int, int)+0xc7) [0x7646b7]
+>  13: (PG::scrub_process_inconsistent()+0x9bd) [0x76534d]
+>  14: (PG::scrub_finish()+0x4f) [0x76587f]
+>  15: (PG::chunky_scrub(ThreadPool::TPHandle&)+0x10d6) [0x76cb96]
+>  16: (PG::scrub(ThreadPool::TPHandle&)+0x138) [0x76d7e8]
+>  17: (OSD::ScrubWQ::_process(PG*, ThreadPool::TPHandle&)+0xf) [0x70515f]
+>  18: (ThreadPool::worker(ThreadPool::WorkThread*)+0x992) [0x8f0542]
+>  19: (ThreadPool::WorkThread::entry()+0x10) [0x8f14d0]
+>  20: (()+0x6b50) [0x7f541ca30b50]
+>  21: (clone()+0x6d) [0x7f541b1daa7d]
+>  NOTE: a copy of the executable, or `objdump -rdS &lt;executable&gt;` is needed to interpret this.
+> ----
+> 
+> This occurs as a result of:
+> 
+> # ceph pg dump | grep inconsistent
+> 2.12    2723    0       0       0       11311299072     159189  159189  active+clean+inconsistent       2013-09-06 09:35:47.512119      20117'690441    20120'7914185   [6,7]   [6,7]   20021'675967    2013-09-03 15:58:12.459188      19384'665404    2013-08-28 12:42:07.490877
+> # ceph pg repair 2.12
+> 
+> Looking at PG::repair_object per line 12 of the backtrace, I can see a
+> dout(10) which should tell me the problem object:
+> 
+> ----
+> src/osd/PG.cc:
+> void PG::repair_object(const hobject_t& soid, ScrubMap::object *po, int bad_peer, int ok_peer)
+> {
+>   dout(10) << "repair_object " << soid << " bad_peer osd." << bad_peer << " ok_peer osd." << ok_peer << dendl;
+>   ...
+> }
+> ----
+> 
+> The 'ceph pg dump' output above tells me the primary osd is '6', so I
+> can increase the logging level to 10 on osd.6 to get the debug output,
+> and repair again:
+> 
+> # ceph osd tell 6 injectargs '--debug_osd 0/10'
+> # ceph pg repair 2.12
+> 
+> I get the same OSD crash, but this time it logs the dout from above,
+> which shows the problem object:
+> 
+>     -1> 2013-09-06 09:34:45.142224 7f0ae94bd700 10 osd.6 pg_epoch: 20117 pg[2.12( v 20117'690441 (20117'689440,20117'690441] local-les=20115 n=2722 ec=1 les/c 20115/20115 20108/20112/20112) [6,7] r=0 lpr=20112 mlcod 20117'690440 active+scrubbing+deep+repair] repair_object 56987a12/rb.0.17d9b.2ae8944a.000000001e11/head//2 bad_peer osd.7 ok_peer osd.6
+>      0> 2013-09-06 09:34:45.206621 7f0ae94bd700 -1 *** Caught signal (Aborted) **
+> 
+> So...
+> 
+> Firstly, is anyone interested in further investigating the problem to
+> fix the crash behaviour?
+> 
+> And, what's the best way to fix the pool?
+> 
+> Cheers,
+> 
+> Chris
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
