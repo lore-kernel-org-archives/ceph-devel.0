@@ -1,108 +1,146 @@
-From: Chris Dunlop <chris@onthe.net.au>
-Subject: Re: OSD crash during repair
-Date: Fri, 6 Sep 2013 15:34:32 +1000
-Message-ID: <20130906053432.GA18760@onthe.net.au>
-References: <20130906000409.GA10181@onthe.net.au>
- <alpine.DEB.2.00.1309051937410.6929@cobra.newdream.net>
- <20130906025004.GA15642@onthe.net.au>
- <alpine.DEB.2.00.1309051952200.6929@cobra.newdream.net>
- <20130906031221.GA16201@onthe.net.au>
+From: majianpeng <majianpeng@gmail.com>
+Subject: [PATCH V2 1/2] ceph: Implement readv/preadv for sync operation.
+Date: Fri, 6 Sep 2013 16:48:27 +0800
+Message-ID: <201309061648229668212@gmail.com>
+Reply-To: majianpeng <majianpeng@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp1.onthe.net.au ([203.22.196.249]:38249 "EHLO
-	smtp1.onthe.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750726Ab3IFFei (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Sep 2013 01:34:38 -0400
-Content-Disposition: inline
-In-Reply-To: <20130906031221.GA16201@onthe.net.au>
+Received: from mail-pd0-f182.google.com ([209.85.192.182]:46716 "EHLO
+	mail-pd0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750748Ab3IFIsa (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Sep 2013 04:48:30 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: sage <sage@inktank.com>, =?us-ascii?B?WWFuLCBaaGVuZw==?= <zheng.z.yan@intel.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>
 
-On Fri, Sep 06, 2013 at 01:12:21PM +1000, Chris Dunlop wrote:
-> On Thu, Sep 05, 2013 at 07:55:52PM -0700, Sage Weil wrote:
->> On Fri, 6 Sep 2013, Chris Dunlop wrote:
->>> Hi Sage,
->>> 
->>> Does this answer your question?
->>> 
->>> 2013-09-06 09:30:19.813811 7f0ae8cbc700  0 log [INF] : applying configuration change: internal_safe_to_start_threads = 'true'
->>> 2013-09-06 09:33:28.303658 7f0ae94bd700  0 log [ERR] : 2.12 osd.7: soid 56987a12/rb.0.17d9b.2ae8944a.000000001e11/head//2 extra attr _, extra attr snapset
->>> 2013-09-06 09:33:28.303685 7f0ae94bd700  0 log [ERR] : repair 2.12 56987a12/rb.0.17d9b.2ae8944a.000000001e11/head//2 no 'snapset' attr
->>> 2013-09-06 09:34:45.138468 7f0ae94bd700  0 log [ERR] : 2.12 repair stat mismatch, got 2722/2723 objects, 339/339 clones, 11307104768/11311299072 bytes.
->>> 2013-09-06 09:34:45.142215 7f0ae94bd700  0 log [ERR] : 2.12 repair 0 missing, 1 inconsistent objects
->>> 2013-09-06 09:34:45.206621 7f0ae94bd700 -1 *** Caught signal (Aborted) **
->>> 
->>> I've just attached the full 'debug_osd 0/10' log to the bug report.
->> 
->> This suggests to me that the object on osd.6 is missing those xattrs; can 
->> you confirm with getfattr -d on the in osd.6's data directory?
-> 
-> I haven't yet wrapped my head around how to translate an oid
-> like those above into a underlying file system object. What 
-> directory should I be looking at?
+Rm9yIHJlYWR2L3ByZWFkdiBzeW5jLW9wZXJhdG9pbiwgY2VwaCBvbmx5IGRvIHRoZSBmaXJzdCBp
+b3YuDQpJdCBkb24ndCB0aGluayBvdGhlciBpb3ZzLk5vdyBpbXBsZW1lbnQgdGhpcy4NCg0KVjI6
+DQogIC1hZGQgZ2VuZXJpY19zZWdtZW50X2NoZWNrcw0KICAtdXNpbmcgc3RydWN0IGlvdl9pdGVy
+IHJlcGxhY2UgY2xvbmluZyB0aGUgaW92cy4NCiAgLXJldHVybiBwcmV2aW91cyBzdWNjZXNzZnVs
+bHkgY29waWVkIGlmIGNlcGhfY29weV9wYWdlX3ZlY3Rvcl90b191c2VyDQogICBtZXQgZXJyb3Iu
+DQoNClNpZ25lZC1vZmYtYnk6IEppYW5wZW5nIE1hIDxtYWppYW5wZW5nQGdtYWlsLmNvbT4NCi0t
+LQ0KIGZzL2NlcGgvZmlsZS5jIHwgMTc0ICsrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysr
+KysrKysrKystLS0tLS0tLS0tLS0tLS0tLQ0KIDEgZmlsZSBjaGFuZ2VkLCAxMjMgaW5zZXJ0aW9u
+cygrKSwgNTEgZGVsZXRpb25zKC0pDQoNCmRpZmYgLS1naXQgYS9mcy9jZXBoL2ZpbGUuYyBiL2Zz
+L2NlcGgvZmlsZS5jDQppbmRleCAzZGU4OTgyLi4xYzI4YzUyIDEwMDY0NA0KLS0tIGEvZnMvY2Vw
+aC9maWxlLmMNCisrKyBiL2ZzL2NlcGgvZmlsZS5jDQpAQCAtNDA4LDUxICs0MDgsMTA5IEBAIG1v
+cmU6DQogICoNCiAgKiBJZiB0aGUgcmVhZCBzcGFucyBvYmplY3QgYm91bmRhcnksIGp1c3QgZG8g
+bXVsdGlwbGUgcmVhZHMuDQogICovDQotc3RhdGljIHNzaXplX3QgY2VwaF9zeW5jX3JlYWQoc3Ry
+dWN0IGZpbGUgKmZpbGUsIGNoYXIgX191c2VyICpkYXRhLA0KLQkJCSAgICAgIHVuc2lnbmVkIGxl
+biwgbG9mZl90ICpwb2ZmLCBpbnQgKmNoZWNrZW9mKQ0KK3N0YXRpYyBzc2l6ZV90IGNlcGhfc3lu
+Y19yZWFkKHN0cnVjdCBraW9jYiAqaW9jYiwgc3RydWN0IGlvdl9pdGVyICppLA0KKwkJCQlpbnQg
+KmNoZWNrZW9mKQ0KIHsNCisJc3RydWN0IGZpbGUgKmZpbGUgPSBpb2NiLT5raV9maWxwOw0KIAlz
+dHJ1Y3QgaW5vZGUgKmlub2RlID0gZmlsZV9pbm9kZShmaWxlKTsNCiAJc3RydWN0IHBhZ2UgKipw
+YWdlczsNCi0JdTY0IG9mZiA9ICpwb2ZmOw0KLQlpbnQgbnVtX3BhZ2VzLCByZXQ7DQorCXU2NCBv
+ZmYgPSBpb2NiLT5raV9wb3M7DQorCWludCBudW1fcGFnZXMsIHJldCwgbjsNCiANCi0JZG91dCgi
+c3luY19yZWFkIG9uIGZpbGUgJXAgJWxsdX4ldSAlc1xuIiwgZmlsZSwgb2ZmLCBsZW4sDQorCWRv
+dXQoInN5bmNfcmVhZCBvbiBmaWxlICVwICVsbHV+JXUgJXNcbiIsIGZpbGUsIG9mZiwNCisJICAg
+ICAodW5zaWduZWQpaW9jYi0+a2lfbGVmdCwNCiAJICAgICAoZmlsZS0+Zl9mbGFncyAmIE9fRElS
+RUNUKSA/ICJPX0RJUkVDVCIgOiAiIik7DQotDQotCWlmIChmaWxlLT5mX2ZsYWdzICYgT19ESVJF
+Q1QpIHsNCi0JCW51bV9wYWdlcyA9IGNhbGNfcGFnZXNfZm9yKCh1bnNpZ25lZCBsb25nKWRhdGEs
+IGxlbik7DQotCQlwYWdlcyA9IGNlcGhfZ2V0X2RpcmVjdF9wYWdlX3ZlY3RvcihkYXRhLCBudW1f
+cGFnZXMsIHRydWUpOw0KLQl9IGVsc2Ugew0KLQkJbnVtX3BhZ2VzID0gY2FsY19wYWdlc19mb3Io
+b2ZmLCBsZW4pOw0KLQkJcGFnZXMgPSBjZXBoX2FsbG9jX3BhZ2VfdmVjdG9yKG51bV9wYWdlcywg
+R0ZQX05PRlMpOw0KLQl9DQotCWlmIChJU19FUlIocGFnZXMpKQ0KLQkJcmV0dXJuIFBUUl9FUlIo
+cGFnZXMpOw0KLQ0KIAkvKg0KIAkgKiBmbHVzaCBhbnkgcGFnZSBjYWNoZSBwYWdlcyBpbiB0aGlz
+IHJhbmdlLiAgdGhpcw0KIAkgKiB3aWxsIG1ha2UgY29uY3VycmVudCBub3JtYWwgYW5kIHN5bmMg
+aW8gc2xvdywNCiAJICogYnV0IGl0IHdpbGwgYXQgbGVhc3QgYmVoYXZlIHNlbnNpYmx5IHdoZW4g
+dGhleSBhcmUNCiAJICogaW4gc2VxdWVuY2UuDQogCSAqLw0KLQlyZXQgPSBmaWxlbWFwX3dyaXRl
+X2FuZF93YWl0KGlub2RlLT5pX21hcHBpbmcpOw0KKwlyZXQgPSBmaWxlbWFwX3dyaXRlX2FuZF93
+YWl0X3JhbmdlKGlub2RlLT5pX21hcHBpbmcsIG9mZiwNCisJCQkJCQlvZmYgKyBpb2NiLT5raV9s
+ZWZ0KTsNCiAJaWYgKHJldCA8IDApDQotCQlnb3RvIGRvbmU7DQorCQlyZXR1cm4gcmV0Ow0KIA0K
+LQlyZXQgPSBzdHJpcGVkX3JlYWQoaW5vZGUsIG9mZiwgbGVuLCBwYWdlcywgbnVtX3BhZ2VzLCBj
+aGVja2VvZiwNCi0JCQkgICBmaWxlLT5mX2ZsYWdzICYgT19ESVJFQ1QsDQotCQkJICAgKHVuc2ln
+bmVkIGxvbmcpZGF0YSAmIH5QQUdFX01BU0spOw0KKwlpZiAoZmlsZS0+Zl9mbGFncyAmIE9fRElS
+RUNUKSB7DQorCQlmb3IgKG4gPSAwOyBuIDwgaS0+bnJfc2VnczsgbisrKSB7DQorCQkJdm9pZCBf
+X3VzZXIgKmRhdGEgPSBpLT5pb3Zbbl0uaW92X2Jhc2U7DQorCQkJc2l6ZV90IGxlbiA9IGktPmlv
+dltuXS5pb3ZfbGVuOw0KKw0KKwkJCWlmIChuID09IDApIHsNCisJCQkJbGVuIC09ICBpLT5pb3Zf
+b2Zmc2V0Ow0KKwkJCQlkYXRhICs9IGktPmlvdl9vZmZzZXQ7DQorCQkJfQ0KKw0KKwkJCW51bV9w
+YWdlcyA9IGNhbGNfcGFnZXNfZm9yKCh1bnNpZ25lZCBsb25nKWRhdGEsIGxlbik7DQorCQkJcGFn
+ZXMgPSBjZXBoX2dldF9kaXJlY3RfcGFnZV92ZWN0b3IoZGF0YSwNCisJCQkJCQkJICAgIG51bV9w
+YWdlcywgdHJ1ZSk7DQorCQkJaWYgKElTX0VSUihwYWdlcykpDQorCQkJCXJldHVybiBQVFJfRVJS
+KHBhZ2VzKTsNCisNCisJCQlyZXQgPSBzdHJpcGVkX3JlYWQoaW5vZGUsIG9mZiwgbGVuLA0KKwkJ
+CQkJICAgcGFnZXMsIG51bV9wYWdlcywgY2hlY2tlb2YsDQorCQkJCQkgICAxLCAodW5zaWduZWQg
+bG9uZylkYXRhICYgflBBR0VfTUFTSyk7DQorCQkJY2VwaF9wdXRfcGFnZV92ZWN0b3IocGFnZXMs
+IG51bV9wYWdlcywgdHJ1ZSk7DQorDQorCQkJaWYgKHJldCA8PSAwKQ0KKwkJCQlicmVhazsNCisJ
+CQlvZmYgKz0gcmV0Ow0KKwkJCWlmIChyZXQgPCBsZW4pDQorCQkJCWJyZWFrOw0KKwkJfQ0KIA0K
+LQlpZiAocmV0ID49IDAgJiYgKGZpbGUtPmZfZmxhZ3MgJiBPX0RJUkVDVCkgPT0gMCkNCi0JCXJl
+dCA9IGNlcGhfY29weV9wYWdlX3ZlY3Rvcl90b191c2VyKHBhZ2VzLCBkYXRhLCBvZmYsIHJldCk7
+DQotCWlmIChyZXQgPj0gMCkNCi0JCSpwb2ZmID0gb2ZmICsgcmV0Ow0KKwkJaWYgKG9mZiA+IGlv
+Y2ItPmtpX3Bvcykgew0KKwkJCXJldCA9IG9mZiAtIGlvY2ItPmtpX3BvczsNCisJCQlpb2NiLT5r
+aV9wb3MgPSBvZmY7DQorCQkJaW9jYi0+a2lfbGVmdCAtPSByZXQ7DQorCQl9DQorCX0gZWxzZSB7
+DQorCQlzaXplX3QgbGVuID0gaW9jYi0+a2lfbGVmdDsNCiANCi1kb25lOg0KLQlpZiAoZmlsZS0+
+Zl9mbGFncyAmIE9fRElSRUNUKQ0KLQkJY2VwaF9wdXRfcGFnZV92ZWN0b3IocGFnZXMsIG51bV9w
+YWdlcywgdHJ1ZSk7DQotCWVsc2UNCisJCW51bV9wYWdlcyA9IGNhbGNfcGFnZXNfZm9yKG9mZiwg
+bGVuKTsNCisJCXBhZ2VzID0gY2VwaF9hbGxvY19wYWdlX3ZlY3RvcihudW1fcGFnZXMsIEdGUF9O
+T0ZTKTsNCisJCWlmIChJU19FUlIocGFnZXMpKQ0KKwkJCXJldHVybiBQVFJfRVJSKHBhZ2VzKTsN
+CisJCXJldCA9IHN0cmlwZWRfcmVhZChpbm9kZSwgb2ZmLCBsZW4sIHBhZ2VzLA0KKwkJCQkJbnVt
+X3BhZ2VzLCBjaGVja2VvZiwgMCwgMCk7DQorCQlsZW4gPSByZXQ7DQorCQlpZiAobGVuKSB7DQor
+CQkJaW50IGwsIGsgPSAwOw0KKwkJCXNpemVfdCBsZWZ0ID0gbGVuOw0KKw0KKwkJCWZvciAobiA9
+IDA7IG4gPCBpLT5ucl9zZWdzICYmIGxlZnQ7IG4rKykgew0KKwkJCQl2b2lkIF9fdXNlciAqZGF0
+YSA9IGktPmlvdltuXS5pb3ZfYmFzZTsNCisJCQkJbCA9IG1pbihsZWZ0LCBpLT5pb3Zbbl0uaW92
+X2xlbik7DQorDQorCQkJCWlmIChuID09IDApIHsNCisJCQkJCWRhdGEgKz0gaS0+aW92X29mZnNl
+dDsNCisJCQkJCWwgPSBtaW4oaS0+aW92WzBdLmlvdl9sZW4gLSBpLT5pb3Zfb2Zmc2V0LA0KKwkJ
+CQkJCWxlZnQpOw0KKwkJCQl9DQorDQorCQkJCXJldCA9IGNlcGhfY29weV9wYWdlX3ZlY3Rvcl90
+b191c2VyKCZwYWdlc1trXSwNCisJCQkJCQkJCSAgICBkYXRhLCBvZmYsDQorCQkJCQkJCQkgICAg
+bCk7DQorCQkJCWlmIChyZXQgPiAwKSB7DQorCQkJCQlsZWZ0IC09IHJldDsNCisJCQkJCW9mZiAr
+PSByZXQ7DQorCQkJCQlrID0gY2FsY19wYWdlc19mb3IoaW9jYi0+a2lfcG9zLA0KKwkJCQkJCQkg
+ICBsZW4gLSBsZWZ0ICsgMSkgLSAxOw0KKwkJCQkJQlVHX09OKGsgPj0gbnVtX3BhZ2VzICYmIGxl
+ZnQpOw0KKwkJCQl9IGVsc2UNCisJCQkJCWJyZWFrOw0KKwkJCX0NCisNCisJCQlsZW4gLT0gbGVm
+dDsNCisJCQlpZiAobGVuID4gMCkgew0KKwkJCQlpb2NiLT5raV9wb3MgKz0gbGVuOw0KKwkJCQlp
+b2NiLT5raV9sZWZ0IC09IGxlbjsNCisJCQkJcmV0ID0gbGVuOw0KKwkJCX0NCisJCX0NCiAJCWNl
+cGhfcmVsZWFzZV9wYWdlX3ZlY3RvcihwYWdlcywgbnVtX3BhZ2VzKTsNCisJfQ0KKw0KIAlkb3V0
+KCJzeW5jX3JlYWQgcmVzdWx0ICVkXG4iLCByZXQpOw0KIAlyZXR1cm4gcmV0Ow0KIH0NCkBAIC02
+NDcsNTUgKzcwNSw2OSBAQCBzdGF0aWMgc3NpemVfdCBjZXBoX2Fpb19yZWFkKHN0cnVjdCBraW9j
+YiAqaW9jYiwgY29uc3Qgc3RydWN0IGlvdmVjICppb3YsDQogew0KIAlzdHJ1Y3QgZmlsZSAqZmls
+cCA9IGlvY2ItPmtpX2ZpbHA7DQogCXN0cnVjdCBjZXBoX2ZpbGVfaW5mbyAqZmkgPSBmaWxwLT5w
+cml2YXRlX2RhdGE7DQotCWxvZmZfdCAqcHBvcyA9ICZpb2NiLT5raV9wb3M7DQotCXNpemVfdCBs
+ZW4gPSBpb3YtPmlvdl9sZW47DQorCXNpemVfdCBsZW4gPSAwOw0KIAlzdHJ1Y3QgaW5vZGUgKmlu
+b2RlID0gZmlsZV9pbm9kZShmaWxwKTsNCiAJc3RydWN0IGNlcGhfaW5vZGVfaW5mbyAqY2kgPSBj
+ZXBoX2lub2RlKGlub2RlKTsNCi0Jdm9pZCBfX3VzZXIgKmJhc2UgPSBpb3YtPmlvdl9iYXNlOw0K
+IAlzc2l6ZV90IHJldDsNCiAJaW50IHdhbnQsIGdvdCA9IDA7DQogCWludCBjaGVja2VvZiA9IDAs
+IHJlYWQgPSAwOw0KIA0KKw0KIAlkb3V0KCJhaW9fcmVhZCAlcCAlbGx4LiVsbHggJWxsdX4ldSB0
+cnlpbmcgdG8gZ2V0IGNhcHMgb24gJXBcbiIsDQogCSAgICAgaW5vZGUsIGNlcGhfdmlub3AoaW5v
+ZGUpLCBwb3MsICh1bnNpZ25lZClsZW4sIGlub2RlKTsNCi1hZ2FpbjoNCisNCisJcmV0ID0gZ2Vu
+ZXJpY19zZWdtZW50X2NoZWNrcyhpb3YsICZucl9zZWdzLCAmbGVuLCBWRVJJRllfV1JJVEUpOw0K
+KwlpZiAocmV0KQ0KKwkJcmV0dXJuIHJldDsNCisNCiAJaWYgKGZpLT5mbW9kZSAmIENFUEhfRklM
+RV9NT0RFX0xBWlkpDQogCQl3YW50ID0gQ0VQSF9DQVBfRklMRV9DQUNIRSB8IENFUEhfQ0FQX0ZJ
+TEVfTEFaWUlPOw0KIAllbHNlDQogCQl3YW50ID0gQ0VQSF9DQVBfRklMRV9DQUNIRTsNCiAJcmV0
+ID0gY2VwaF9nZXRfY2FwcyhjaSwgQ0VQSF9DQVBfRklMRV9SRCwgd2FudCwgJmdvdCwgLTEpOw0K
+IAlpZiAocmV0IDwgMCkNCi0JCWdvdG8gb3V0Ow0KKwkJcmV0dXJuIHJldDsNCisNCiAJZG91dCgi
+YWlvX3JlYWQgJXAgJWxseC4lbGx4ICVsbHV+JXUgZ290IGNhcCByZWZzIG9uICVzXG4iLA0KIAkg
+ICAgIGlub2RlLCBjZXBoX3Zpbm9wKGlub2RlKSwgcG9zLCAodW5zaWduZWQpbGVuLA0KIAkgICAg
+IGNlcGhfY2FwX3N0cmluZyhnb3QpKTsNCiANCiAJaWYgKChnb3QgJiAoQ0VQSF9DQVBfRklMRV9D
+QUNIRXxDRVBIX0NBUF9GSUxFX0xBWllJTykpID09IDAgfHwNCiAJICAgIChpb2NiLT5raV9maWxw
+LT5mX2ZsYWdzICYgT19ESVJFQ1QpIHx8DQotCSAgICAoZmktPmZsYWdzICYgQ0VQSF9GX1NZTkMp
+KQ0KKwkgICAgKGZpLT5mbGFncyAmIENFUEhfRl9TWU5DKSkgew0KKwkJc3RydWN0IGlvdl9pdGVy
+IGk7DQorDQorCQlpb2NiLT5raV9sZWZ0ID0gbGVuOw0KKwkJaW92X2l0ZXJfaW5pdCgmaSwgaW92
+LCBucl9zZWdzLCBsZW4sIDApOw0KK2FnYWluOg0KIAkJLyogaG1tLCB0aGlzIGlzbid0IHJlYWxs
+eSBhc3luYy4uLiAqLw0KLQkJcmV0ID0gY2VwaF9zeW5jX3JlYWQoZmlscCwgYmFzZSwgbGVuLCBw
+cG9zLCAmY2hlY2tlb2YpOw0KLQllbHNlDQorCQlyZXQgPSBjZXBoX3N5bmNfcmVhZChpb2NiLCAm
+aSwgJmNoZWNrZW9mKTsNCisNCisJCWlmIChjaGVja2VvZiAmJiByZXQgPj0gMCkgew0KKwkJCWlu
+dCBzdGF0cmV0ID0gY2VwaF9kb19nZXRhdHRyKGlub2RlLA0KKwkJCQkJCSAgICAgIENFUEhfU1RB
+VF9DQVBfU0laRSk7DQorDQorCQkJLyogaGl0IEVPRiBvciBob2xlPyAqLw0KKwkJCWlmIChzdGF0
+cmV0ID09IDAgJiYgaW9jYi0+a2lfcG9zIDwgaW5vZGUtPmlfc2l6ZSAmJg0KKwkJCQlpb2NiLT5r
+aV9sZWZ0KSB7DQorCQkJCWRvdXQoInN5bmNfcmVhZCBoaXQgaG9sZSwgcHBvcyAlbGxkIDwgc2l6
+ZSAlbGxkIg0KKwkJCQkgICAgICIsIHJlYWRpbmcgbW9yZVxuIiwgaW9jYi0+a2lfcG9zLA0KKwkJ
+CQkgICAgIGlub2RlLT5pX3NpemUpOw0KKw0KKwkJCQlyZWFkICs9IHJldDsNCisJCQkJaW92X2l0
+ZXJfYWR2YW5jZSgmaSwgcmV0KTsNCisJCQkJY2hlY2tlb2YgPSAwOw0KKwkJCQlnb3RvIGFnYWlu
+Ow0KKwkJCX0NCisJCX0NCisNCisJfSBlbHNlDQogCQlyZXQgPSBnZW5lcmljX2ZpbGVfYWlvX3Jl
+YWQoaW9jYiwgaW92LCBucl9zZWdzLCBwb3MpOw0KIA0KLW91dDoNCiAJZG91dCgiYWlvX3JlYWQg
+JXAgJWxseC4lbGx4IGRyb3BwaW5nIGNhcCByZWZzIG9uICVzID0gJWRcbiIsDQogCSAgICAgaW5v
+ZGUsIGNlcGhfdmlub3AoaW5vZGUpLCBjZXBoX2NhcF9zdHJpbmcoZ290KSwgKGludClyZXQpOw0K
+IAljZXBoX3B1dF9jYXBfcmVmcyhjaSwgZ290KTsNCiANCi0JaWYgKGNoZWNrZW9mICYmIHJldCA+
+PSAwKSB7DQotCQlpbnQgc3RhdHJldCA9IGNlcGhfZG9fZ2V0YXR0cihpbm9kZSwgQ0VQSF9TVEFU
+X0NBUF9TSVpFKTsNCi0NCi0JCS8qIGhpdCBFT0Ygb3IgaG9sZT8gKi8NCi0JCWlmIChzdGF0cmV0
+ID09IDAgJiYgKnBwb3MgPCBpbm9kZS0+aV9zaXplKSB7DQotCQkJZG91dCgiYWlvX3JlYWQgc3lu
+Y19yZWFkIGhpdCBob2xlLCBwcG9zICVsbGQgPCBzaXplICVsbGQsIHJlYWRpbmcgbW9yZVxuIiwg
+KnBwb3MsIGlub2RlLT5pX3NpemUpOw0KLQkJCXJlYWQgKz0gcmV0Ow0KLQkJCWJhc2UgKz0gcmV0
+Ow0KLQkJCWxlbiAtPSByZXQ7DQotCQkJY2hlY2tlb2YgPSAwOw0KLQkJCWdvdG8gYWdhaW47DQot
+CQl9DQotCX0NCiAJaWYgKHJldCA+PSAwKQ0KIAkJcmV0ICs9IHJlYWQ7DQogDQotLSANCjEuOC4x
+LjINCg==
 
-Found it:
-
-b5# cd /var/lib/ceph/osd/ceph-6/current
-b5# find 2.12* | grep -i 17d9b.2ae8944a.000000001e11
-2.12_head/DIR_2/DIR_1/DIR_A/rb.0.17d9b.2ae8944a.000000001e11__head_56987A12__2
-b5# getfattr -d 2.12_head/DIR_2/DIR_1/DIR_A/rb.0.17d9b.2ae8944a.000000001e11__head_56987A12__2
-<<< ...crickets... >>>
-
-vs.
-
-b4# cd /var/lib/ceph/osd/ceph-7/current
-b4# getfattr -d 2.12_head/DIR_2/DIR_1/DIR_A/rb.0.17d9b.2ae8944a.000000001e11__head_56987A12__2
-# file: 2.12_head/DIR_2/DIR_1/DIR_A/rb.0.17d9b.2ae8944a.000000001e11__head_56987A12__2
-user.ceph._=0sCgjhAAAABANBAAAAAAAAACAAAAByYi4wLjE3ZDliLjJhZTg5NDRhLjAwMDAwMDAwMWUxMf7/////////EnqYVgAAAAAAAgAAAAAAAAAEAxAAAAACAAAAAAAAAP////8AAAAAAAAAAEInCgAAAAAAuEsAAEEnCgAAAAAAuEsAAAICFQAAAAgTmwEAAAAAAHD1AgAAAAAAAAAAAAAAQAAAAAAAyY4dUpjCTSACAhUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABCJwoAAAAAALhLAAAA
-user.ceph.snapset=0sAgIZAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAA==
-
->> If that is indeed the case, you should be able to move the object out of 
->> the way (don't delete it, just in case) and then do the repair.  The osd.6 
->> should recover by copying the object from osd.7 (which has the needed 
->> xattrs).  Bobtail is smart enough to recover missing objects but not to 
->> recover just missing xattrs.
-> 
-> Do you want me to hold off on any repairs to allow tracking down
-> the crash, or is the current code sufficiently different that
-> there's little point?
-
-Repaired! ...but why does it take multiple rounds?
-
-b5# mv 2.12_head/DIR_2/DIR_1/DIR_A/rb.0.17d9b.2ae8944a.000000001e11__head_56987A12__2 ..
-
-b5# ceph pg repair 2.12
-b5# while ceph -s | grep -q scrubbing; do sleep 60; done
-b5# tail /var/log/ceph/ceph-osd.6.log
-2013-09-06 15:02:13.751160 7f6ccc5ae700  0 log [ERR] : 2.12 osd.6 missing 56987a12/rb.0.17d9b.2ae8944a.000000001e11/head//2
-2013-09-06 15:04:15.286711 7f6ccc5ae700  0 log [ERR] : 2.12 repair stat mismatch, got 2723/2724 objects, 339/339 clones, 11311299072/11315493376 bytes.
-2013-09-06 15:04:15.286766 7f6ccc5ae700  0 log [ERR] : 2.12 repair 1 missing, 0 inconsistent objects
-2013-09-06 15:04:15.286823 7f6ccc5ae700  0 log [ERR] : 2.12 repair 2 errors, 2 fixed
-2013-09-06 15:04:20.778377 7f6ccc5ae700  0 log [ERR] : 2.12 scrub stat mismatch, got 2724/2723 objects, 339/339 clones, 11315493376/11311299072 bytes.
-2013-09-06 15:04:20.778383 7f6ccc5ae700  0 log [ERR] : 2.12 scrub 1 errors
-
-b5# ceph pg dump | grep inconsistent
-2.12    2723    0       0       0       11311299072     159103  159103  active+clean+inconsistent       2013-09-06 15:04:20.778413      20121'690883    20128'7941893   [6,7]   [6,7]   20121'690883    2013-09-06 15:04:20.778387      20121'690883    2013-09-06 15:04:15.286835
-
-b5# ceph pg repair 2.12
-b5# while ceph -s | grep -q scrubbing; do sleep 60; done
-b5# tail /var/log/ceph/ceph-osd.6.log
-2013-09-06 15:07:30.461959 7f6ccc5ae700  0 log [ERR] : 2.12 repair stat mismatch, got 2724/2723 objects, 339/339 clones, 11315493376/11311299072 bytes.
-2013-09-06 15:07:30.461991 7f6ccc5ae700  0 log [ERR] : 2.12 repair 1 errors, 1 fixed
-
-b5# ceph pg dump | grep inconsistent
-2.12    2724    0       0       0       11315493376     159580  159580  active+clean+inconsistent       2013-09-06 15:07:30.462039      20129'690886    20128'7942171   [6,7]   [6,7]   20129'690886    2013-09-06 15:07:30.461995      20129'690886    2013-09-06 15:07:30.461995
-
-b5# ceph pg repair 2.12
-b5# while ceph -s | grep -q scrubbing; do sleep 60; done
-b5# tail /var/log/ceph/ceph-osd.6.log
-2013-09-06 15:09:36.993049 7f6ccc5ae700  0 log [INF] : 2.12 repair ok, 0 fixed
-
-# ceph pg dump | grep inconsistent
-<<< ...crickets... >>>
-
-
-Chris
