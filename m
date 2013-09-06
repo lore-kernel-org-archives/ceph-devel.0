@@ -1,102 +1,95 @@
-From: Chris Dunlop <chris@onthe.net.au>
-Subject: OSD crash during repair
-Date: Fri, 6 Sep 2013 10:04:09 +1000
-Message-ID: <20130906000409.GA10181@onthe.net.au>
+From: majianpeng <majianpeng@gmail.com>
+Subject: Re: Re: [PATCH 2/2] ceph: Implement writev/pwritev for sync operation.
+Date: Fri, 6 Sep 2013 08:46:31 +0800
+Message-ID: <201309060846283230053@gmail.com>
+References: <201309031652122920661@gmail.com>,
+	<5227339C.5010706@intel.com>
+Reply-To: majianpeng <majianpeng@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain;
+	charset="iso-8859-1"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp1.onthe.net.au ([203.22.196.249]:42549 "EHLO
-	smtp1.onthe.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755177Ab3IFAJg (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Sep 2013 20:09:36 -0400
-Received: from localhost (localhost [127.0.0.1])
-	by smtp1.onthe.net.au (Postfix) with ESMTP id 3836B61531
-	for <ceph-devel@vger.kernel.org>; Fri,  6 Sep 2013 10:04:14 +1000 (EST)
-Received: from smtp1.onthe.net.au ([127.0.0.1])
-	by localhost (smtp1.onthe.net.au [127.0.0.1]) (amavisd-new, port 10024)
-	with ESMTP id Ngr0SezkfZ9h for <ceph-devel@vger.kernel.org>;
-	Fri,  6 Sep 2013 10:04:11 +1000 (EST)
-Received: from o1.private.otn.net.au (o1.private.onthe.net.au [10.200.63.41])
-	by smtp1.onthe.net.au (Postfix) with ESMTP id 5E7F261556
-	for <ceph-devel@vger.kernel.org>; Fri,  6 Sep 2013 10:04:10 +1000 (EST)
-Received: from achates.office.onthe.net.au (achates-gw1-vpn.private.onthe.net.au [10.9.1.8])
-	by o1.private.otn.net.au (Postfix) with ESMTP id 6183C858E6
-	for <ceph-devel@vger.kernel.org>; Fri,  6 Sep 2013 10:04:09 +1000 (EST)
-Content-Disposition: inline
+Received: from mail-pa0-f53.google.com ([209.85.220.53]:64267 "EHLO
+	mail-pa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752467Ab3IFAqd (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Sep 2013 20:46:33 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: =?iso-8859-1?B?WWFuLCBaaGVuZw==?= <zheng.z.yan@intel.com>
+Cc: sage <sage@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>
 
-G'day,
+PkhpLA0KPg0KPlRoYW5rIHlvdSBmb3IgdGhlIHBhdGNoLg0KPg0KPk9uIDA5LzAzLzIwMTMgMDQ6
+NTIgUE0sIG1hamlhbnBlbmcgd3JvdGU6DQo+PiBGb3Igd3JpdGV2L3B3cml0ZXYgc3luYy1vcGVy
+YXRvaW4sIGNlcGggb25seSBkbyB0aGUgZmlyc3QgaW92Lg0KPj4gSXQgZG9uJ3QgdGhpbmsgb3Ro
+ZXIgaW92cy5Ob3cgaW1wbGVtZW50IHRoaXMuDQo+PiBJIGRpdmlkZWQgdGhlIHdyaXRlLXN5bmMt
+b3BlcmF0aW9uIGludG8gdHdvIGZ1bmN0aW9ucy5PbmUgZm9yDQo+PiBkaXJlY3Qtd3JpdGUsb3Ro
+ZXIgZm9yIG5vbmUtZGlyZWN0LXN5bmMtd3JpdGUuVGhpcyBpcyBiZWNhdXNlIGZvcg0KPj4gbm9u
+ZS1kaXJlY3Qtc3luYy13cml0ZSB3ZSBjYW4gbWVyZ2UgaW92cyB0byBvbmUuQnV0IGZvciBkaXJl
+Y3Qtd3JpdGUsDQo+PiB3ZSBjYW4ndCBtZXJnZSBpb3ZzLg0KPj4gDQo+PiBTaWduZWQtb2ZmLWJ5
+OiBKaWFucGVuZyBNYSA8bWFqaWFucGVuZ0BnbWFpbC5jb20+DQo+PiAtLS0NCj4+ICBmcy9jZXBo
+L2ZpbGUuYyB8IDMyOCArKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysr
+LS0tLS0tLS0tLS0tLS0NCj4+ICAxIGZpbGUgY2hhbmdlZCwgMjQ4IGluc2VydGlvbnMoKyksIDgw
+IGRlbGV0aW9ucygtKQ0KPj4gDQo+PiBkaWZmIC0tZ2l0IGEvZnMvY2VwaC9maWxlLmMgYi9mcy9j
+ZXBoL2ZpbGUuYw0KPj4gaW5kZXggN2Q2YTNlZS4uNDJjOTdiMyAxMDA2NDQNCj4+IC0tLSBhL2Zz
+L2NlcGgvZmlsZS5jDQo+PiArKysgYi9mcy9jZXBoL2ZpbGUuYw0KPj4gQEAgLTUzMywxNyArNTMz
+LDE5IEBAIHN0YXRpYyB2b2lkIGNlcGhfc3luY193cml0ZV91bnNhZmUoc3RydWN0IGNlcGhfb3Nk
+X3JlcXVlc3QgKnJlcSwgYm9vbCB1bnNhZmUpDQo+PiAgCX0NCj4+ICB9DQo+PiAgDQo+PiArDQo+
+PiAgLyoNCj4+IC0gKiBTeW5jaHJvbm91cyB3cml0ZSwgc3RyYWlnaHQgZnJvbSBfX3VzZXIgcG9p
+bnRlciBvciB1c2VyIHBhZ2VzIChpZg0KPj4gLSAqIE9fRElSRUNUKS4NCj4+ICsgKiBTeW5jaHJv
+bm91cyB3cml0ZSwgc3RyYWlnaHQgZnJvbSBfX3VzZXIgcG9pbnRlciBvciB1c2VyIHBhZ2VzLg0K
+Pj4gICAqDQo+PiAgICogSWYgd3JpdGUgc3BhbnMgb2JqZWN0IGJvdW5kYXJ5LCBqdXN0IGRvIG11
+bHRpcGxlIHdyaXRlcy4gIChGb3IgYQ0KPj4gICAqIGNvcnJlY3QgYXRvbWljIHdyaXRlLCB3ZSBz
+aG91bGQgZS5nLiB0YWtlIHdyaXRlIGxvY2tzIG9uIGFsbA0KPj4gICAqIG9iamVjdHMsIHJvbGxi
+YWNrIG9uIGZhaWx1cmUsIGV0Yy4pDQo+PiAgICovDQo+PiAtc3RhdGljIHNzaXplX3QgY2VwaF9z
+eW5jX3dyaXRlKHN0cnVjdCBmaWxlICpmaWxlLCBjb25zdCBjaGFyIF9fdXNlciAqZGF0YSwNCj4+
+IC0JCQkgICAgICAgc2l6ZV90IGxlZnQsIGxvZmZfdCBwb3MsIGxvZmZfdCAqcHBvcykNCj4+ICtz
+dGF0aWMgc3NpemVfdA0KPj4gK2NlcGhfc3luY19kaXJlY3Rfd3JpdGUoc3RydWN0IGtpb2NiICpp
+b2NiLCBjb25zdCBzdHJ1Y3QgaW92ZWMgKmlvdiwNCj4+ICsJCSAgICAgICB1bnNpZ25lZCBsb25n
+IG5yX3NlZ3MsIHNpemVfdCBjb3VudCkNCj4+ICB7DQo+PiArCXN0cnVjdCBmaWxlICpmaWxlID0g
+aW9jYi0+a2lfZmlscDsNCj4+ICAJc3RydWN0IGlub2RlICppbm9kZSA9IGZpbGVfaW5vZGUoZmls
+ZSk7DQo+PiAgCXN0cnVjdCBjZXBoX2lub2RlX2luZm8gKmNpID0gY2VwaF9pbm9kZShpbm9kZSk7
+DQo+PiAgCXN0cnVjdCBjZXBoX2ZzX2NsaWVudCAqZnNjID0gY2VwaF9pbm9kZV90b19jbGllbnQo
+aW5vZGUpOw0KPj4gQEAgLTU1Nyw1OSArNTU5LDU1IEBAIHN0YXRpYyBzc2l6ZV90IGNlcGhfc3lu
+Y193cml0ZShzdHJ1Y3QgZmlsZSAqZmlsZSwgY29uc3QgY2hhciBfX3VzZXIgKmRhdGEsDQo+PiAg
+CWludCB3cml0dGVuID0gMDsNCj4+ICAJaW50IGZsYWdzOw0KPj4gIAlpbnQgY2hlY2tfY2FwcyA9
+IDA7DQo+PiAtCWludCBwYWdlX2FsaWduLCBpb19hbGlnbjsNCj4+IC0JdW5zaWduZWQgbG9uZyBi
+dWZfYWxpZ247DQo+PiAtCWludCByZXQ7DQo+PiArCWludCBwYWdlX2FsaWduOw0KPj4gKwlpbnQg
+cmV0LCBpOw0KPj4gIAlzdHJ1Y3QgdGltZXNwZWMgbXRpbWUgPSBDVVJSRU5UX1RJTUU7DQo+PiAt
+CWJvb2wgb3duX3BhZ2VzID0gZmFsc2U7DQo+PiArCWxvZmZfdCBwb3MgPSBpb2NiLT5raV9wb3M7
+DQo+PiAgDQo+PiAgCWlmIChjZXBoX3NuYXAoZmlsZV9pbm9kZShmaWxlKSkgIT0gQ0VQSF9OT1NO
+QVApDQo+PiAgCQlyZXR1cm4gLUVST0ZTOw0KPj4gIA0KPj4gLQlkb3V0KCJzeW5jX3dyaXRlIG9u
+IGZpbGUgJXAgJWxsZH4ldSAlc1xuIiwgZmlsZSwgcG9zLA0KPj4gLQkgICAgICh1bnNpZ25lZCls
+ZWZ0LCAoZmlsZS0+Zl9mbGFncyAmIE9fRElSRUNUKSA/ICJPX0RJUkVDVCIgOiAiIik7DQo+PiAr
+CWRvdXQoInN5bmNfZGlyZWN0X3dyaXRlIG9uIGZpbGUgJXAgJWxsZH4ldVxuIiwgZmlsZSwgcG9z
+LA0KPj4gKwkgICAgICh1bnNpZ25lZCljb3VudCk7DQo+PiAgDQo+PiAtCXJldCA9IGZpbGVtYXBf
+d3JpdGVfYW5kX3dhaXRfcmFuZ2UoaW5vZGUtPmlfbWFwcGluZywgcG9zLCBwb3MgKyBsZWZ0KTsN
+Cj4+ICsJcmV0ID0gZmlsZW1hcF93cml0ZV9hbmRfd2FpdF9yYW5nZShpbm9kZS0+aV9tYXBwaW5n
+LCBwb3MsIHBvcyArIGNvdW50KTsNCj4+ICAJaWYgKHJldCA8IDApDQo+PiAgCQlyZXR1cm4gcmV0
+Ow0KPj4gIA0KPj4gIAlyZXQgPSBpbnZhbGlkYXRlX2lub2RlX3BhZ2VzMl9yYW5nZShpbm9kZS0+
+aV9tYXBwaW5nLA0KPj4gIAkJCQkJICAgIHBvcyA+PiBQQUdFX0NBQ0hFX1NISUZULA0KPj4gLQkJ
+CQkJICAgIChwb3MgKyBsZWZ0KSA+PiBQQUdFX0NBQ0hFX1NISUZUKTsNCj4+ICsJCQkJCSAgICAo
+cG9zICsgY291bnQpID4+IFBBR0VfQ0FDSEVfU0hJRlQpOw0KPj4gIAlpZiAocmV0IDwgMCkNCj4+
+ICAJCWRvdXQoImludmFsaWRhdGVfaW5vZGVfcGFnZXMyX3JhbmdlIHJldHVybmVkICVkXG4iLCBy
+ZXQpOw0KPj4gIA0KPj4gIAlmbGFncyA9IENFUEhfT1NEX0ZMQUdfT1JERVJTTkFQIHwNCj4+ICAJ
+CUNFUEhfT1NEX0ZMQUdfT05ESVNLIHwNCj4+ICAJCUNFUEhfT1NEX0ZMQUdfV1JJVEU7DQo+PiAt
+CWlmICgoZmlsZS0+Zl9mbGFncyAmIChPX1NZTkN8T19ESVJFQ1QpKSA9PSAwKQ0KPj4gLQkJZmxh
+Z3MgfD0gQ0VQSF9PU0RfRkxBR19BQ0s7DQo+PiAtCWVsc2UNCj4+IC0JCW51bV9vcHMrKzsJLyog
+QWxzbyBpbmNsdWRlIGEgJ3N0YXJ0c3luYycgY29tbWFuZC4gKi8NCj4+ICsJbnVtX29wcysrOwkv
+KiBBbHNvIGluY2x1ZGUgYSAnc3RhcnRzeW5jJyBjb21tYW5kLiAqLw0KPj4gIA0KPj4gLQkvKg0K
+Pj4gLQkgKiB3ZSBtYXkgbmVlZCB0byBkbyBtdWx0aXBsZSB3cml0ZXMgaGVyZSBpZiB3ZSBzcGFu
+IGFuIG9iamVjdA0KPj4gLQkgKiBib3VuZGFyeS4gIHRoaXMgaXNuJ3QgYXRvbWljLCB1bmZvcnR1
+bmF0ZWx5LiAgOigNCj4+IC0JICovDQo+PiAtbW9yZToNCj4+IC0JaW9fYWxpZ24gPSBwb3MgJiB+
+UEFHRV9NQVNLOw0KPj4gLQlidWZfYWxpZ24gPSAodW5zaWduZWQgbG9uZylkYXRhICYgflBBR0Vf
+TUFTSzsNCj4+IC0JbGVuID0gbGVmdDsNCj4+ICsJZm9yIChpID0gMDsgaSA8IG5yX3NlZ3MgJiYg
+Y291bnQ7IGkrKykgew0KPg0KPlBPU0lYIHJlcXVpcmVzIHRoYXQgd3JpdGUgc3lzY2FsbCBpcyBh
+dG9taWMuIEkgbWVhbnMgd2Ugc2hvdWxkIGFsbG9jYXRlIGEgc2luZ2xlIE9TRCByZXF1ZXN0DQo+
+Zm9yIGFsbCBidWZmZXIgc2VnbWVudHMgdGhhdCBiZWxvbmcgdG8gdGhlIHNhbWUgb2JqZWN0Lg0K
+Pg0KSSB0aGluayB3ZSBjb3VsZCBub3QuDQpGb3IgZGlyZWN0IHdyaXRlLCB3ZSB1c2UgY2VwaF9n
+ZXRfZGlyZWN0X3BhZ2VfdmVjdG9yIHRvIGdldCBwYWdlcy4NCkdpdmVuIGlvdjEgYW5kIGlvdjIg
+YXJlIGluIHRoZSBzYW1lIG9iamVjdC4gQnV0IHdlIGNhbid0IG1ha2UgdGhlIHBhZ2VzIG9mIGlv
+djEvMiB0byBqb2luIHRvZ2V0aGVyLg0KQmVjYXVzZSBmb3IgY2VwaCBwYWdlX3ZlY3RvcixpdCBv
+bmx5IHJlY29yZCB0aGUgb2Zmc2V0IG9mIGZpcnN0IHBhZ2UuDQoNCk9yIGFtIGkgbWlzc2luZyBz
+b21ldGhpbmc/DQpNYXliZSB3ZSBjYW4gdXNlIGNlcGggcGFnZWxpc3QgYnV0IGl0IHdpbGwgY29w
+eSBkYXRhLg0KDQpUaGFua3MhDQpKaWFucGVuZyBNYQ0KPlJlZ2FyZHMNCj5ZYW4sIFpoZW5nDQo=
 
-I'm getting an OSD crash on 0.56.7-1~bpo70+1 whilst trying to repair an OSD:
-
-http://tracker.ceph.com/issues/6233
-
-----
-ceph version 0.56.7 (14f23ab86b0058a8651895b3dc972a29459f3a33)
- 1: /usr/bin/ceph-osd() [0x8530a2]
- 2: (()+0xf030) [0x7f541ca39030]
- 3: (gsignal()+0x35) [0x7f541b132475]
- 4: (abort()+0x180) [0x7f541b1356f0]
- 5: (_gnu_cxx::_verbose_terminate_handler()+0x11d) [0x7f541b98789d]
- 6: (()+0x63996) [0x7f541b985996]
- 7: (()+0x639c3) [0x7f541b9859c3]
- 8: (()+0x63bee) [0x7f541b985bee]
- 9: (ceph::buffer::list::iterator::copy(unsigned int, char*)+0x127) [0x8fa9a7]
- 10: (object_info_t::decode(ceph::buffer::list::iterator&)+0x29) [0x95b579]
- 11: (object_info_t::object_info_t(ceph::buffer::list&)+0x180) [0x695ec0]
- 12: (PG::repair_object(hobject_t const&, ScrubMap::object*, int, int)+0xc7) [0x7646b7]
- 13: (PG::scrub_process_inconsistent()+0x9bd) [0x76534d]
- 14: (PG::scrub_finish()+0x4f) [0x76587f]
- 15: (PG::chunky_scrub(ThreadPool::TPHandle&)+0x10d6) [0x76cb96]
- 16: (PG::scrub(ThreadPool::TPHandle&)+0x138) [0x76d7e8]
- 17: (OSD::ScrubWQ::_process(PG*, ThreadPool::TPHandle&)+0xf) [0x70515f]
- 18: (ThreadPool::worker(ThreadPool::WorkThread*)+0x992) [0x8f0542]
- 19: (ThreadPool::WorkThread::entry()+0x10) [0x8f14d0]
- 20: (()+0x6b50) [0x7f541ca30b50]
- 21: (clone()+0x6d) [0x7f541b1daa7d]
- NOTE: a copy of the executable, or `objdump -rdS &lt;executable&gt;` is needed to interpret this.
-----
-
-This occurs as a result of:
-
-# ceph pg dump | grep inconsistent
-2.12    2723    0       0       0       11311299072     159189  159189  active+clean+inconsistent       2013-09-06 09:35:47.512119      20117'690441    20120'7914185   [6,7]   [6,7]   20021'675967    2013-09-03 15:58:12.459188      19384'665404    2013-08-28 12:42:07.490877
-# ceph pg repair 2.12
-
-Looking at PG::repair_object per line 12 of the backtrace, I can see a
-dout(10) which should tell me the problem object:
-
-----
-src/osd/PG.cc:
-void PG::repair_object(const hobject_t& soid, ScrubMap::object *po, int bad_peer, int ok_peer)
-{
-  dout(10) << "repair_object " << soid << " bad_peer osd." << bad_peer << " ok_peer osd." << ok_peer << dendl;
-  ...
-}
-----
-
-The 'ceph pg dump' output above tells me the primary osd is '6', so I
-can increase the logging level to 10 on osd.6 to get the debug output,
-and repair again:
-
-# ceph osd tell 6 injectargs '--debug_osd 0/10'
-# ceph pg repair 2.12
-
-I get the same OSD crash, but this time it logs the dout from above,
-which shows the problem object:
-
-    -1> 2013-09-06 09:34:45.142224 7f0ae94bd700 10 osd.6 pg_epoch: 20117 pg[2.12( v 20117'690441 (20117'689440,20117'690441] local-les=20115 n=2722 ec=1 les/c 20115/20115 20108/20112/20112) [6,7] r=0 lpr=20112 mlcod 20117'690440 active+scrubbing+deep+repair] repair_object 56987a12/rb.0.17d9b.2ae8944a.000000001e11/head//2 bad_peer osd.7 ok_peer osd.6
-     0> 2013-09-06 09:34:45.206621 7f0ae94bd700 -1 *** Caught signal (Aborted) **
-
-So...
-
-Firstly, is anyone interested in further investigating the problem to
-fix the crash behaviour?
-
-And, what's the best way to fix the pool?
-
-Cheers,
-
-Chris
