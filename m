@@ -1,148 +1,148 @@
-From: "Matt W. Benjamin" <matt@linuxbox.com>
-Subject: Re: subdir-objects
-Date: Sat, 7 Sep 2013 20:36:11 -0400 (EDT)
-Message-ID: <1692710180.24.1378600571331.JavaMail.root@thunderbeast.private.linuxbox.com>
-References: <CA+Hcz58E7OKaGto0pF_ZYoge-FcDLtc66cbqx9a9+z-=Op3YWQ@mail.gmail.com>
+From: Milosz Tanski <milosz@adfin.com>
+Subject: Re: [PATCH 0/8] ceph: fscache support & upstream changes
+Date: Sat, 7 Sep 2013 23:07:39 -0400
+Message-ID: <CANP1eJFtF7sRJkqg0xGqNjEzbz29GWywB8DAjfGFzDhCPSfjcg@mail.gmail.com>
+References: <cover.1378418255.git.milosz@adfin.com>
+	<alpine.DEB.2.00.1309051555250.1073@cobra.newdream.net>
+	<CANP1eJEk=eRmq1F+yYWB53spgifbU+zzKGdmKw6BGfx8SknkrA@mail.gmail.com>
+	<18764.1378483142@warthog.procyon.org.uk>
+	<CANP1eJFMdcsgSwVO9jhYQwn2C+19db1uy5=du7yYFbmiB6em0A@mail.gmail.com>
+	<alpine.DEB.2.00.1309061302300.12830@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from aa.linuxbox.com ([69.128.83.226]:1082 "EHLO aa.linuxbox.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750980Ab3IHAgQ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sat, 7 Sep 2013 20:36:16 -0400
-In-Reply-To: <CA+Hcz58E7OKaGto0pF_ZYoge-FcDLtc66cbqx9a9+z-=Op3YWQ@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Noah Watkins <noah.watkins@inktank.com>
-Cc: Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org, Roald van Loon <roaldvanloon@gmail.com>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <alpine.DEB.2.00.1309061302300.12830@cobra.newdream.net>
+Sender: linux-kernel-owner@vger.kernel.org
+To: David Howells <dhowells@redhat.com>
+Cc: sprabhu@redhat.com, ceph-devel <ceph-devel@vger.kernel.org>, "Yan, Zheng" <zheng.z.yan@intel.com>, Hongyi Jia <jiayisuse@gmail.com>, "linux-cachefs@redhat.com" <linux-cachefs@redhat.com>, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, linux-kernel@vger.kernel.org, Sage Weil <sage@inktank.com>
+List-Id: ceph-devel.vger.kernel.org
 
-Thanks for doing this.  Also in the same interest of building Ceph faster, we've
-been experimenting with a CMake translation of the current AM build.  I have no
-idea yet if it will be any help ;).
+David,
 
-Matt
+I ran into another issue that caused one my machines to hang on a
+bunch of tasks and then hard lock. Here's the backtrace of the hang:
 
------ "Noah Watkins" <noah.watkins@inktank.com> wrote:
+INFO: task kworker/1:2:4214 blocked for more than 120 seconds.
+"echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+kworker/1:2     D ffff880443513fc0     0  4214      2 0x00000000
+Workqueue: ceph-msgr con_work [libceph]
+ ffff88042b093868 0000000000000246 ffff88042b8e5bc0 ffffffff81569fc6
+ ffff88042c51dbc0 ffff88042b093fd8 ffff88042b093fd8 ffff88042b093fd8
+ ffff88042c518000 ffff88042c51dbc0 ffff8804266b8d10 ffff8804439d7188
+Call Trace:
+ [<ffffffff81569fc6>] ? _raw_spin_unlock_irqrestore+0x16/0x20
+ [<ffffffffa0016570>] ? fscache_wait_bit_interruptible+0x30/0x30 [fscache]
+ [<ffffffff81568d09>] schedule+0x29/0x70
+ [<ffffffffa001657e>] fscache_wait_atomic_t+0xe/0x20 [fscache]
+ [<ffffffff815665cf>] out_of_line_wait_on_atomic_t+0x9f/0xe0
+ [<ffffffff81083560>] ? autoremove_wake_function+0x40/0x40
+ [<ffffffffa0015a9c>] __fscache_relinquish_cookie+0x15c/0x310 [fscache]
+ [<ffffffffa00a4fae>] ceph_fscache_unregister_inode_cookie+0x3e/0x50 [ceph]
+ [<ffffffffa007e373>] ceph_destroy_inode+0x33/0x200 [ceph]
+ [<ffffffff811c13ae>] ? __fsnotify_inode_delete+0xe/0x10
+ [<ffffffff8119ba1c>] destroy_inode+0x3c/0x70
+ [<ffffffff8119bb69>] evict+0x119/0x1b0
+ [<ffffffff8119c3f3>] iput+0x103/0x190
+ [<ffffffffa009aaed>] iterate_session_caps+0x7d/0x240 [ceph]
+ [<ffffffffa009b170>] ? remove_session_caps_cb+0x270/0x270 [ceph]
+ [<ffffffffa00a1fc5>] dispatch+0x725/0x1b40 [ceph]
+ [<ffffffff81459466>] ? kernel_recvmsg+0x46/0x60
+ [<ffffffffa002c0e8>] ? ceph_tcp_recvmsg+0x48/0x60 [libceph]
+ [<ffffffffa002ecbe>] try_read+0xc1e/0x1e70 [libceph]
+ [<ffffffffa0030015>] con_work+0x105/0x1920 [libceph]
+ [<ffffffff8100349e>] ? xen_end_context_switch+0x1e/0x30
+ [<ffffffff8108dbca>] ? finish_task_switch+0x5a/0xc0
+ [<ffffffff8107aa59>] process_one_work+0x179/0x490
+ [<ffffffff8107bf5b>] worker_thread+0x11b/0x370
+ [<ffffffff8107be40>] ? manage_workers.isra.21+0x2e0/0x2e0
+ [<ffffffff81082a80>] kthread+0xc0/0xd0
+ [<ffffffff81010000>] ? perf_trace_xen_mmu_set_pud+0xd0/0xd0
+ [<ffffffff810829c0>] ? flush_kthread_worker+0xb0/0xb0
+ [<ffffffff81572cec>] ret_from_fork+0x7c/0xb0
+ [<ffffffff810829c0>] ? flush_kthread_worker+0xb0/0xb0
 
-> I'm so excited to have a refactored automake setup :)
-> 
-> I was just looking through build-refactor, and it doesn't really look
-> like there is much that could be reused for the non-recrusive
-> approach. I'll leave it up for a few days, just in case.
-> 
-> On Sat, Sep 7, 2013 at 1:11 PM, Roald van Loon
-> <roaldvanloon@gmail.com> wrote:
-> > On Sat, Sep 7, 2013 at 7:47 PM, Noah Watkins
-> <noah.watkins@inktank.com> wrote:
-> >> Oh, and one question about the non-recursive approach. If I stick
-> a
-> >> Makefile.am in the test/ directory I can do things like:
-> >>
-> >>   LDADD = all-the-test-dependencies
-> >>
-> >> and then avoid redundant per-target primaries like test_LDADD =
-> (deps)
-> >> $(LDADD), because it applies to everything in the Makefile.
-> >>
-> >> Is that possible with the include approach, or would a naked LDADD
-> in
-> >> an included Makefile fragment affect all the targets in the file
-> >> including it?
-> >
-> > LDADD = xyz would indeed affect all targets. However, it's not
-> > something you want to do anyway; using an _LDADD at a target is
-> less
-> > confusing and less prone to errors because you know exactly what
-> > libraries a target needs.
-> >
-> > For instance, in test/Makefile.am you can have a debug target
-> > depending on libglobal, which has dependencies set by libglobal
-> > itself;
-> >
-> > CEPH_GLOBAL = $(LIBGLOBAL) $(PTHREAD_LIBS) -lm $(CRYPTO_LIBS)
-> $(EXTRALIBS)
-> >
-> > And then in test/Makefile.am;
-> >
-> > ceph_test_crypto_SOURCES = test/testcrypto.cc
-> > ceph_test_crypto_LDADD = $(CEPH_GLOBAL)
-> > bin_DEBUGPROGRAMS += ceph_test_crypto
-> >
-> > And a unittest also depending on libosd;
-> >
-> > unittest_pglog_SOURCES = test/osd/TestPGLog.cc
-> > unittest_pglog_LDADD = $(LIBOSD) $(CEPH_GLOBAL)
-> > check_PROGRAMS += unittest_pglog
-> >
-> > However, libosd requires libos and libosdc, but that dependency is
-> set
-> > by libosd;
-> >
-> > LIBOSD += $(LIBOSDC) $(LIBOS)
-> >
-> > This way, you have the dependencies in the right place. With
-> recusive
-> > builds you'll need an "LDADD = libosd.la libosdc.la libos.la
-> > libglobal.la $(PTHREAD_LIBS) -lm $(CRYPTO_LIBS) $(EXTRALIBS)", so
-> > basically you're setting the dependencies of the required libraries
-> in
-> > the makefile requiring those libraries, which is IMHO way to
-> complex.
-> >
-> >>> I think the benefits of using recursive builds are that it may be
-> >>> familiar to the most people, it reflects the methods/suggestions
-> in
-> >>> the automake manual, and, most importantly, it would seem that its
-> use
-> >>> forces good decomposition where as a non-recursive approach relies
-> on
-> >>> guidelines that are easily broken.
-> >
-> > I don't know how which method is more familiar, but I personally
-> think
-> > that anyone understanding recursive automake is capable of
-> > understanding a simple include :-)
-> >
-> > The decomposition is a valid argument. I think that there are some
-> > libraries which might benefit from complete separation, like
-> librados
-> > and a "libceph_client" or something like it. Those can be
-> separated,
-> > but most other can't. The mon, mds, os, and osd subdirs have
-> > inter-dependencies for instance.
-> >
-> > We might need to restructure the source tree anyway because at some
-> > points it has grown messy (for instance, libcommon including stuff
-> > from mds, mon but also from include). However, I think implementing
-> a
-> > recursive automake right now forces us to do two things at once;
-> > cleanup the makefiles and do some restructuring in the subdirs. I
-> > personally think it's best to start with cleaning up makefiles and
-> use
-> > an include per subdir, so we can restructure the subdirs into
-> > segregated libraries later on.
-> >
-> > So I all boils down to; what to do first :-) Because I agree some
-> > things are better of with recursive builds, but it might be wise
-> not
-> > to do that before we have revisited the source tree layout.
-> >
-> > Roald
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
-> in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+It looks like it's waiting for the the cookie's n_active to drop down
+to 0 ... but it isn't. After spending a bunch of hours reading the
+code, then having a some beers (it is Saturday night after all), then
+looking at code again... I think that the
+__fscache_check_consistency() function increments the n_active counter
+but never lowers it. I think the solution to this is the bellow diff
+but I'm not a 100% sure. Can you let me know if I'm on the right
+track... of it's beer googles?
 
--- 
-Matt Benjamin
-The Linux Box
-206 South Fifth Ave. Suite 150
-Ann Arbor, MI  48104
+diff --git a/fs/fscache/cookie.c b/fs/fscache/cookie.c
+index 318e843..b2a86e3 100644
+--- a/fs/fscache/cookie.c
++++ b/fs/fscache/cookie.c
+@@ -586,7 +586,8 @@ int __fscache_check_consistency(struct
+fscache_cookie *cookie)
 
-http://linuxbox.com
+        fscache_operation_init(op, NULL, NULL);
+        op->flags = FSCACHE_OP_MYTHREAD |
+-               (1 << FSCACHE_OP_WAITING);
++               (1 << FSCACHE_OP_WAITING) |
++               (1 << FSCACHE_OP_UNUSE_COOKIE);
 
-tel.  734-761-4689 
-fax.  734-769-8938 
-cel.  734-216-5309 
+        spin_lock(&cookie->lock);
+
+Thanks,
+- Milosz
+
+On Fri, Sep 6, 2013 at 4:03 PM, Sage Weil <sage@inktank.com> wrote:
+> On Fri, 6 Sep 2013, Milosz Tanski wrote:
+>> Sage,
+>>
+>> I've taken David's latest changes and per his request merged his
+>> 'fscache-fixes-for-ceph' tag then applied my changes on top of that.
+>> In addition to the pervious changes I also added a fix for the
+>> warnings the linux-next build bot found.
+>>
+>> I've given the results a quick test to make sure it builds, boots and
+>> runs okay. The code is located in my repository:
+>>
+>>   https://adfin@bitbucket.org/adfin/linux-fs.git in the wip-fscache-v2 branch
+>>
+>> I hope that this is the final go for now and thanks for everyone's patience.
+>
+> Looks good; I'll send this to Linus along with the other ceph patches
+> shortly.
+>
+> Thanks, everyone!
+> sage
+>
+>
+>>
+>>  - Milosz
+>>
+>> On Fri, Sep 6, 2013 at 11:59 AM, David Howells <dhowells@redhat.com> wrote:
+>> > Milosz Tanski <milosz@adfin.com> wrote:
+>> >
+>> >> After running this for a day on some loaded machines I ran into what
+>> >> looks like an old issue with the new code. I remember you saw an issue
+>> >> that manifested it self in a similar way a while back.
+>> >>
+>> >> [13837253.462779] FS-Cache: Assertion failed
+>> >> [13837253.462782] 3 == 5 is false
+>> >> [13837253.462807] ------------[ cut here ]------------
+>> >> [13837253.462811] kernel BUG at fs/fscache/operation.c:414!
+>> >
+>> > Bah.
+>> >
+>> > I forgot to call fscache_op_complete().  Patch updated and repushed.
+>> >
+>> > Btw, I've reordered the patches to put the CIFS patch last.  Can you merge the
+>> > patches prior to the CIFS commit from my branch rather than cherry picking
+>> > them so that if they go via two different routes, GIT will handle the merge
+>> > correctly?  I've stuck a tag on it (fscache-fixes-for-ceph) to make that
+>> > easier for you.
+>> >
+>> > I've also asked another RH engineer to try doing some basic testing on the
+>> > CIFS stuff - which may validate the fscache_readpages_cancel patch.
+>> >
+>> > David
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-fsdevel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
