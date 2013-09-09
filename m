@@ -1,150 +1,106 @@
 From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH v2 1/3] rbd: fix use-after free of rbd_dev->disk
-Date: Mon, 09 Sep 2013 00:30:15 -0700
-Message-ID: <522D7907.9070106@inktank.com>
-References: <1377757447-23515-4-git-send-email-josh.durgin@inktank.com> <1377824228-14632-1-git-send-email-josh.durgin@inktank.com> <5225D915.3080509@linaro.org>
+Subject: Re: [PATCH] rbd: ignore unmapped snapshots that no longer exist
+Date: Mon, 09 Sep 2013 00:31:31 -0700
+Message-ID: <522D7953.70909@inktank.com>
+References: <1377829140-13635-1-git-send-email-josh.durgin@inktank.com> <5225E453.1080403@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oa0-f49.google.com ([209.85.219.49]:37123 "EHLO
-	mail-oa0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750819Ab3IIHaV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Sep 2013 03:30:21 -0400
-Received: by mail-oa0-f49.google.com with SMTP id i7so6156416oag.8
-        for <ceph-devel@vger.kernel.org>; Mon, 09 Sep 2013 00:30:21 -0700 (PDT)
-In-Reply-To: <5225D915.3080509@linaro.org>
+Received: from mail-oa0-f53.google.com ([209.85.219.53]:38659 "EHLO
+	mail-oa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750987Ab3IIHbc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Sep 2013 03:31:32 -0400
+Received: by mail-oa0-f53.google.com with SMTP id k18so6117508oag.40
+        for <ceph-devel@vger.kernel.org>; Mon, 09 Sep 2013 00:31:31 -0700 (PDT)
+In-Reply-To: <5225E453.1080403@linaro.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <alex.elder@linaro.org>
 Cc: ceph-devel@vger.kernel.org
 
-On 09/03/2013 05:41 AM, Alex Elder wrote:
-> On 08/29/2013 07:57 PM, Josh Durgin wrote:
->> Removing a device deallocates the disk, unschedules the watch, and
->> finally cleans up the rbd_dev structure. rbd_dev_refresh(), called
->> from the watch callback, updates the disk size and rbd_dev
->> structure. With no locking between them, rbd_dev_refresh() may use the
->> device or rbd_dev after they've been freed.
->>
->> To fix this, add a shutting_down flag and a mutex protecting it to rbd_dev.
->> Take the mutex and check whether the flag is set before using rbd_dev->disk.
->> Move this disk-updating to a separate function as well.
->>
->> Fixes: http://tracker.ceph.com/issues/5636
->> Signed-off-by: Josh Durgin <josh.durgin@inktank.com>
+On 09/03/2013 06:29 AM, Alex Elder wrote:
+> On 08/29/2013 09:19 PM, Josh Durgin wrote:
+>> This prevents erroring out while adding a device when a snapshot
+>> unrelated to the current mapping is deleted between reading the
+>> snapshot context and reading the snapshot names. If the mapped
+>> snapshot name is not found an error still occurs as usual.
 >
-> A few comments below.  I don't think you need the shutting_down
-> flag after all.  If you disagree, say so.  Either way though,
-> this looks good to me.
-
-You're right, the extra lock turned out to be unnecessary.
-Holding during revalidate_disk() also created a lock inversion
-(since rbd_open() is called with bdev->lock held), so I've reworked
-this in v3.
-
-Thanks for the reviews!
-Josh
-
+> I mention something about a one of your comments, but even so
+> this looks good to me, so for this patch:
+>
 > Reviewed-by: Alex Elder <elder@linaro.org>
 >
+> However, in looking at this, I found something else that probably
+> should be resolved.
+>
+> Note that rbd_dev_spec_update() calls rbd_snap_name(), but it
+> only checks its return value for NULL.  This test needs to be
+> *at least* changed to test IS_ERR_OR_NULL(), but I think it
+> would be better to do the change I suggest next, and make this
+> spot just use IS_ERR().
+>
+> Right now rbd_dev_v1_snap_name() just returns NULL if any error
+> occurs.  It should be made to return a pointer-coded-error like
+> its v2 counterpart function does.  It would look something like:
+>
+> static const char *rbd_dev_v1_snap_name(struct rbd_device *rbd_dev,
+>                                          u64 snap_id)
+> {
+>          u32 which;
+> 	const char *snap_name;
+>
+>          which = rbd_dev_snap_index(rbd_dev, snap_id);
+>          if (which == BAD_SNAP_INDEX)
+>                  return ERR_PTR(-ENOENT);
+>
+> 	snap_name = _rbd_dev_v1_snap_name(rbd_dev, which);
+>
+> 	return snap_name ? snap_name : ERR_PTR(-ENOMEM);
+> }
+>
+> I'd make this change myself but at the moment I'm not set up
+> to be able to rigorously test it, so I'm just suggesting it
+> to you and hoping for the best...
+
+This is 4/5 in the series I just posted. The caller needed to be fixed
+too, unsurprisingly.
+
+Josh
+
+> 					-Alex
+>
+>
+>> Signed-off-by: Josh Durgin <josh.durgin@inktank.com>
 >> ---
->>   drivers/block/rbd.c |   39 +++++++++++++++++++++++++++++++++------
->>   1 files changed, 33 insertions(+), 6 deletions(-)
+>>   drivers/block/rbd.c |    9 +++++++--
+>>   1 files changed, 7 insertions(+), 2 deletions(-)
 >>
 >> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
->> index fef3687..8ab3362b 100644
+>> index 0e83a10..545ceff 100644
 >> --- a/drivers/block/rbd.c
 >> +++ b/drivers/block/rbd.c
->> @@ -343,6 +343,9 @@ struct rbd_device {
->>   	struct ceph_osd_event   *watch_event;
->>   	struct rbd_obj_request	*watch_request;
+>> @@ -4077,8 +4077,13 @@ static u64 rbd_v2_snap_id_by_name(struct rbd_device *rbd_dev, const char *name)
 >>
->> +	bool			shutting_down;	/* rbd_remove() in progress */
+>>   		snap_id = snapc->snaps[which];
+>>   		snap_name = rbd_dev_v2_snap_name(rbd_dev, snap_id);
+>> -		if (IS_ERR(snap_name))
+>> -			break;
+>> +		if (IS_ERR(snap_name)) {
+>> +			/* ignore no-longer existing snapshots */
 >
-> You could use a new rbd_dev_flags value for this.
+> I feel like this comment doesn't really capture why it might be
+> normal and acceptable for a snapshot to no longer exist.  (At
+> least mention that it would be due to a race?)
 >
-> In fact, now that I'm looking at this, I think the REMOVING flag
-> is already sufficient to indicate that bit of state.  (Sorry I
-> didn't see this before.)
->
-> You would still want the mutex so the shutdown won't happen until
-> an underway size update completed.  (Or you could add another
-> UPDATING_SIZE flag, but I think the mutex is better in this case.)
->
->> +	struct mutex		shutdown_lock;	/* protects shutting_down */
->> +
->>   	struct rbd_spec		*parent_spec;
->>   	u64			parent_overlap;
->>   	atomic_t		parent_ref;
->> @@ -3324,6 +3327,24 @@ static void rbd_exists_validate(struct rbd_device *rbd_dev)
->>   		clear_bit(RBD_DEV_FLAG_EXISTS, &rbd_dev->flags);
->>   }
->>
->> +static void rbd_dev_update_size(struct rbd_device *rbd_dev)
->> +{
->> +	sector_t size;
->> +
->> +	mutex_lock(&rbd_dev->shutdown_lock);
->> +	/*
->> +	 * If the device is being removed, rbd_dev->disk has
->> +	 * been destroyed, so don't try to update its size
->> +	 */
->> +	if (!rbd_dev->shutting_down) {
->> +		size = (sector_t)rbd_dev->mapping.size / SECTOR_SIZE;
->> +		dout("setting size to %llu sectors", (unsigned long long)size);
->> +		set_capacity(rbd_dev->disk, size);
->
-> Is it true you don't hit that locking problem because of the new mutex?
->
->> +		revalidate_disk(rbd_dev->disk);
->> +	}
->> +	mutex_unlock(&rbd_dev->shutdown_lock);
->> +}
->> +
->>   static int rbd_dev_refresh(struct rbd_device *rbd_dev)
->>   {
->>   	u64 mapping_size;
->> @@ -3343,12 +3364,7 @@ static int rbd_dev_refresh(struct rbd_device *rbd_dev)
->>   	up_write(&rbd_dev->header_rwsem);
->>
->>   	if (mapping_size != rbd_dev->mapping.size) {
->> -		sector_t size;
->> -
->> -		size = (sector_t)rbd_dev->mapping.size / SECTOR_SIZE;
->> -		dout("setting size to %llu sectors", (unsigned long long)size);
->> -		set_capacity(rbd_dev->disk, size);
->> -		revalidate_disk(rbd_dev->disk);
->> +		rbd_dev_update_size(rbd_dev);
+>> +			if (PTR_ERR(snap_name) == -ENOENT)
+>> +				continue;
+>> +			else
+>> +				break;
+>> +		}
+>>   		found = !strcmp(name, snap_name);
+>>   		kfree(snap_name);
 >>   	}
->>
->>   	return ret;
->> @@ -3656,6 +3672,8 @@ static struct rbd_device *rbd_dev_create(struct rbd_client *rbdc,
->>   	atomic_set(&rbd_dev->parent_ref, 0);
->>   	INIT_LIST_HEAD(&rbd_dev->node);
->>   	init_rwsem(&rbd_dev->header_rwsem);
->> +	mutex_init(&rbd_dev->shutdown_lock);
->> +	rbd_dev->shutting_down = false;
->>
->>   	rbd_dev->spec = spec;
->>   	rbd_dev->rbd_client = rbdc;
->> @@ -5159,7 +5177,16 @@ static ssize_t rbd_remove(struct bus_type *bus,
->>   	if (ret < 0 || already)
->>   		return ret;
->>
->> +	/*
->> +	 * hold shutdown_lock while destroying the device so that
->> +	 * device destruction will not race with device updates from
->> +	 * the watch callback
->> +	 */
->> +	mutex_lock(&rbd_dev->shutdown_lock);
->> +	rbd_dev->shutting_down = true;
->>   	rbd_bus_del_dev(rbd_dev);
->> +	mutex_unlock(&rbd_dev->shutdown_lock);
->> +
->>   	ret = rbd_dev_header_watch_sync(rbd_dev, false);
->>   	if (ret)
->>   		rbd_warn(rbd_dev, "failed to cancel watch event (%d)\n", ret);
 >>
 >
 
