@@ -1,62 +1,58 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH 0/8] ceph: fscache support & upstream changes
-Date: Mon, 9 Sep 2013 10:44:53 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1309091042520.18214@cobra.newdream.net>
-References: <cover.1378418255.git.milosz@adfin.com> <alpine.DEB.2.00.1309051555250.1073@cobra.newdream.net> <CANP1eJEk=eRmq1F+yYWB53spgifbU+zzKGdmKw6BGfx8SknkrA@mail.gmail.com> <18764.1378483142@warthog.procyon.org.uk> <CANP1eJFMdcsgSwVO9jhYQwn2C+19db1uy5=du7yYFbmiB6em0A@mail.gmail.com>
- <alpine.DEB.2.00.1309061302300.12830@cobra.newdream.net> <CANP1eJFtF7sRJkqg0xGqNjEzbz29GWywB8DAjfGFzDhCPSfjcg@mail.gmail.com> <CANP1eJF9oyfTWL1up38cEFyQFZQU51v1Yo1wZqFYxN2qkvc7gQ@mail.gmail.com> <13625.1378721932@warthog.procyon.org.uk>
- <CANP1eJG=Eq5w6XdFmrm+xxv7N3BVJgZ0+SxcCTpc45HSKH7DFA@mail.gmail.com>
+From: Milosz Tanski <milosz@adfin.com>
+Subject: [PATCH] fscache: check consistency does not decrement refcount
+Date: Mon, 9 Sep 2013 14:28:57 -0400
+Message-ID: <fd69f2052bc16d5a5de0104ca00ccc59478e3569.1378750714.git.milosz@adfin.com>
+References: <alpine.DEB.2.00.1309091042520.18214@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CANP1eJG=Eq5w6XdFmrm+xxv7N3BVJgZ0+SxcCTpc45HSKH7DFA@mail.gmail.com>
+Content-Disposition: inline
+In-Reply-To: <alpine.DEB.2.00.1309091042520.18214@cobra.newdream.net>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Milosz Tanski <milosz@adfin.com>
-Cc: David Howells <dhowells@redhat.com>, sprabhu@redhat.com, ceph-devel <ceph-devel@vger.kernel.org>, "Yan, Zheng" <zheng.z.yan@intel.com>, Hongyi Jia <jiayisuse@gmail.com>, "linux-cachefs@redhat.com" <linux-cachefs@redhat.com>, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, linux-kernel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+Cc: sage@inktank.com, dhowells@redhat.com, zheng.z.yan@intel.com, linux-cachefs@redhat.com, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-On Mon, 9 Sep 2013, Milosz Tanski wrote:
-> David,
-> 
-> I guess that's really a better question for Sage. He sent my branch
-> (which includes your changes) plus a whole slew of things over to
-> Linus. I'm going guess that a small follow on patch is simplest but
-> I'll let him comment.
-> 
-> Here's the original pull request:
-> http://marc.info/?l=linux-kernel&m=137849853203101&w=2
+__fscache_check_consistency() does not decrement the count of operations
+active after it finishes in the success case. This leads to a hung tasks on
+cookie de-registration (commonly in inode eviction).
 
-...and Linus just merged it a few minutes ago.  This'll have to be a 
-separate patch.  Sorry!
+INFO: task kworker/1:2:4214 blocked for more than 120 seconds.
+kworker/1:2     D ffff880443513fc0     0  4214      2 0x00000000
+Workqueue: ceph-msgr con_work [libceph]
+  ...
+Call Trace:
+ [<ffffffff81569fc6>] ? _raw_spin_unlock_irqrestore+0x16/0x20
+ [<ffffffffa0016570>] ? fscache_wait_bit_interruptible+0x30/0x30 [fscache]
+ [<ffffffff81568d09>] schedule+0x29/0x70
+ [<ffffffffa001657e>] fscache_wait_atomic_t+0xe/0x20 [fscache]
+ [<ffffffff815665cf>] out_of_line_wait_on_atomic_t+0x9f/0xe0
+ [<ffffffff81083560>] ? autoremove_wake_function+0x40/0x40
+ [<ffffffffa0015a9c>] __fscache_relinquish_cookie+0x15c/0x310 [fscache]
+ [<ffffffffa00a4fae>] ceph_fscache_unregister_inode_cookie+0x3e/0x50 [ceph]
+ [<ffffffffa007e373>] ceph_destroy_inode+0x33/0x200 [ceph]
+ [<ffffffff811c13ae>] ? __fsnotify_inode_delete+0xe/0x10
+ [<ffffffff8119ba1c>] destroy_inode+0x3c/0x70
+ [<ffffffff8119bb69>] evict+0x119/0x1b0
 
-I have another pile of Ceph fixes that I will be sending in a week or so; 
-let me know if you want me include the fix there.
+Signed-off-by: Milosz Tanski <milosz@adfin.com>
+---
+ fs/fscache/cookie.c |    3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-Thanks!
-sage
-
-> 
-> Also, so far after making this change everything is peachy and theres
-> no other regressions.
-> 
-> P.S: This is a resend because I did no hit reply to ALL, sorry for the
-> spam David.
-> 
-> On Mon, Sep 9, 2013 at 6:18 AM, David Howells <dhowells@redhat.com> wrote:
-> > Milosz Tanski <milosz@adfin.com> wrote:
-> >
-> >> I think that change does the trick. I had it running on the same
-> >> machine for 5 hours and had the kernel forcefully drop some of the
-> >> inodes in the cache (via drop caches) without a crash. I'll send a
-> >> proper patch email after you take a look and make sure I did the right
-> >> thing.
-> >
-> > Do you mind if I roll your change directly into my patch and reissue the set?
-> > Or would you rather have an extra patch at this time?
-> >
-> > David
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-fsdevel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+diff --git a/fs/fscache/cookie.c b/fs/fscache/cookie.c
+index 318e843..b2a86e3 100644
+--- a/fs/fscache/cookie.c
++++ b/fs/fscache/cookie.c
+@@ -586,7 +586,8 @@ int __fscache_check_consistency(struct fscache_cookie *cookie)
+ 
+ 	fscache_operation_init(op, NULL, NULL);
+ 	op->flags = FSCACHE_OP_MYTHREAD |
+-		(1 << FSCACHE_OP_WAITING);
++		(1 << FSCACHE_OP_WAITING) |
++		(1 << FSCACHE_OP_UNUSE_COOKIE);
+ 
+ 	spin_lock(&cookie->lock);
+ 
+-- 
+1.7.9.5
