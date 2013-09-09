@@ -1,67 +1,81 @@
-From: Milosz Tanski <milosz@adfin.com>
-Subject: Re: [PATCH] fscache: check consistency does not decrement refcount
-Date: Mon, 9 Sep 2013 14:54:23 -0400
-Message-ID: <CANP1eJHQhmYZomguVobCkkuvBK=JG8wzbJxMmgipSvJHF8vaQg@mail.gmail.com>
-References: <alpine.DEB.2.00.1309091042520.18214@cobra.newdream.net>
-	<fd69f2052bc16d5a5de0104ca00ccc59478e3569.1378750714.git.milosz@adfin.com>
+From: Chris Dunlop <chris@onthe.net.au>
+Subject: OSD repair: on disk size does not match object info size
+Date: Tue, 10 Sep 2013 09:16:43 +1000
+Message-ID: <20130909231643.GA31877@onthe.net.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <fd69f2052bc16d5a5de0104ca00ccc59478e3569.1378750714.git.milosz@adfin.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: David Howells <dhowells@redhat.com>
-Cc: Sage Weil <sage@inktank.com>, "Yan, Zheng" <zheng.z.yan@intel.com>, "linux-cachefs@redhat.com" <linux-cachefs@redhat.com>, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, linux-kernel@vger.kernel.org, ceph-devel <ceph-devel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from smtp1.onthe.net.au ([203.22.196.249]:36068 "EHLO
+	smtp1.onthe.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755756Ab3IIXQ6 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Sep 2013 19:16:58 -0400
+Received: from localhost (localhost [127.0.0.1])
+	by smtp1.onthe.net.au (Postfix) with ESMTP id 49BCE6127E
+	for <ceph-devel@vger.kernel.org>; Tue, 10 Sep 2013 09:16:54 +1000 (EST)
+Received: from smtp1.onthe.net.au ([127.0.0.1])
+	by localhost (smtp1.onthe.net.au [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id d6U6TeajPhWl for <ceph-devel@vger.kernel.org>;
+	Tue, 10 Sep 2013 09:16:49 +1000 (EST)
+Received: from o1.private.otn.net.au (o1.private.onthe.net.au [10.200.63.41])
+	by smtp1.onthe.net.au (Postfix) with ESMTP id AD5C7611C0
+	for <ceph-devel@vger.kernel.org>; Tue, 10 Sep 2013 09:16:44 +1000 (EST)
+Received: from achates.office.onthe.net.au (achates-gw1-vpn.private.onthe.net.au [10.9.1.8])
+	by o1.private.otn.net.au (Postfix) with ESMTP id D925E80240
+	for <ceph-devel@vger.kernel.org>; Tue, 10 Sep 2013 09:16:43 +1000 (EST)
+Content-Disposition: inline
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-David,
+G'day,
 
-Can I get a sign off on this?
+On 0.56.7-1~bpo70+1 I'm getting:
 
-Thanks,
-- Milosz
+# ceph pg dump | grep inconsistent
+013-09-10-08:39:59 2.bc        2776    0       0       0       11521799680     162063  162063  active+clean+inconsistent       2013-09-10 08:38:38.482302      20512'699877    20360'13461026  [6,0]   [6,0]   20512'699877    2013-09-10 08:38:38.482264      20512'699877     2013-09-10 08:38:38.482264
 
-On Mon, Sep 9, 2013 at 2:28 PM, Milosz Tanski <milosz@adfin.com> wrote:
-> __fscache_check_consistency() does not decrement the count of operations
-> active after it finishes in the success case. This leads to a hung tasks on
-> cookie de-registration (commonly in inode eviction).
->
-> INFO: task kworker/1:2:4214 blocked for more than 120 seconds.
-> kworker/1:2     D ffff880443513fc0     0  4214      2 0x00000000
-> Workqueue: ceph-msgr con_work [libceph]
->   ...
-> Call Trace:
->  [<ffffffff81569fc6>] ? _raw_spin_unlock_irqrestore+0x16/0x20
->  [<ffffffffa0016570>] ? fscache_wait_bit_interruptible+0x30/0x30 [fscache]
->  [<ffffffff81568d09>] schedule+0x29/0x70
->  [<ffffffffa001657e>] fscache_wait_atomic_t+0xe/0x20 [fscache]
->  [<ffffffff815665cf>] out_of_line_wait_on_atomic_t+0x9f/0xe0
->  [<ffffffff81083560>] ? autoremove_wake_function+0x40/0x40
->  [<ffffffffa0015a9c>] __fscache_relinquish_cookie+0x15c/0x310 [fscache]
->  [<ffffffffa00a4fae>] ceph_fscache_unregister_inode_cookie+0x3e/0x50 [ceph]
->  [<ffffffffa007e373>] ceph_destroy_inode+0x33/0x200 [ceph]
->  [<ffffffff811c13ae>] ? __fsnotify_inode_delete+0xe/0x10
->  [<ffffffff8119ba1c>] destroy_inode+0x3c/0x70
->  [<ffffffff8119bb69>] evict+0x119/0x1b0
->
-> Signed-off-by: Milosz Tanski <milosz@adfin.com>
-> ---
->  fs/fscache/cookie.c |    3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
->
-> diff --git a/fs/fscache/cookie.c b/fs/fscache/cookie.c
-> index 318e843..b2a86e3 100644
-> --- a/fs/fscache/cookie.c
-> +++ b/fs/fscache/cookie.c
-> @@ -586,7 +586,8 @@ int __fscache_check_consistency(struct fscache_cookie *cookie)
->
->         fscache_operation_init(op, NULL, NULL);
->         op->flags = FSCACHE_OP_MYTHREAD |
-> -               (1 << FSCACHE_OP_WAITING);
-> +               (1 << FSCACHE_OP_WAITING) |
-> +               (1 << FSCACHE_OP_UNUSE_COOKIE);
->
->         spin_lock(&cookie->lock);
->
-> --
-> 1.7.9.5
->
+# ceph pg repair 2.bc
+instructing pg 2.bc on osd.6 to repair
+
+# tail /var/log/ceph/ceph-osd.6.log
+2013-09-10 08:17:25.557926 7fef09c14700  0 log [ERR] : repair 2.bc 89ebebc/rbd_data.13a0c74b0dc51.00000000000107ec/head//2 on disk size (4194304) does not match object info size (4104192)
+2013-09-10 08:17:27.316112 7fef09c14700  0 log [ERR] : 2.bc repair 1 errors, 0 fixed
+
+# ls -l 'ceph-6/current/2.bc_head/DIR_C/DIR_B/DIR_E/rbd\udata.13a0c74b0dc51.00000000000107ec__head_089EBEBC__2'
+-rw-r--r-- 1 root root 4194304 Sep  8 21:01 ceph-6/current/2.bc_head/DIR_C/DIR_B/DIR_E/rbd\udata.13a0c74b0dc51.00000000000107ec__head_089EBEBC__2
+# ls -l 'ceph-0/current/2.bc_head/DIR_C/DIR_B/DIR_E/rbd\udata.13a0c74b0dc51.00000000000107ec__head_089EBEBC__2'
+-rw-r--r-- 1 root root 4194304 Sep  8 21:01 ceph-0/current/2.bc_head/DIR_C/DIR_B/DIR_E/rbd\udata.13a0c74b0dc51.00000000000107ec__head_089EBEBC__2
+
+One possible solution would be to simply truncate the objects down to the
+object info size, as recommended in this case:
+
+http://www.spinics.net/lists/ceph-users/msg00793.html
+
+However I'm a little concerned about that solution as the on-disk size is
+exactly 4MB, which I think is the expected size of these objects, and matches
+the size of all the other objects in the same directory, and the "extra" data
+looks a little interesting, with "FILE0" blocks in there (what are those?):
+
+# cd /var/lib/ceph/osd/ceph-6/current/2.bc_head/DIR_C/DIR_B/DIR_E/
+# dd if='rbd\udata.13a0c74b0dc51.00000000000107ec__head_089EBEBC__2' bs=1024 skip=4008 | od -c
+0000000   F   I   L   E   0  \0 003  \0 312   j   o   o  \0  \0  \0  \0
+0000020 001  \0 001  \0   8  \0 001  \0   X 001  \0  \0  \0 004  \0  \0
+0000040  \0  \0  \0  \0  \0  \0  \0  \0 006  \0  \0  \0 310   p 017  \0
+0000060 002  \0  \0  \0  \0  \0  \0  \0 020  \0  \0  \0   `  \0  \0  \0
+...
+0002000   F   I   L   E   0  \0 003  \0 002   k   o   o  \0  \0  \0  \0
+0002020 001  \0 001  \0   8  \0 001  \0   X 001  \0  \0  \0 004  \0  \0
+0002040  \0  \0  \0  \0  \0  \0  \0  \0 006  \0  \0  \0 311   p 017  \0
+0002060 002  \0  \0  \0  \0  \0  \0  \0 020  \0  \0  \0   `  \0  \0  \0
+...
+0004000   F   I   L   E   0  \0 003  \0 023   r   o   o  \0  \0  \0  \0
+0004020 001  \0 001  \0   8  \0 001  \0   X 001  \0  \0  \0 004  \0  \0
+0004040  \0  \0  \0  \0  \0  \0  \0  \0 006  \0  \0  \0 312   p 017  \0
+0004060 002  \0  \0  \0  \0  \0  \0  \0 020  \0  \0  \0   `  \0  \0  \0
+
+Is it safe to simply truncate this object, or what other solutions might
+be applicable?
+
+Cheers,
+
+Chris
