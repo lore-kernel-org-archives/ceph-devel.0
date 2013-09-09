@@ -1,67 +1,81 @@
 From: Alex Elder <alex.elder@linaro.org>
-Subject: Re: [PATCH v3 4/5] rbd: ignore unmapped snapshots that no longer
- exist
-Date: Mon, 09 Sep 2013 08:47:57 -0500
-Message-ID: <522DD18D.6020705@linaro.org>
-References: <1378711022-20158-1-git-send-email-josh.durgin@inktank.com> <1378711022-20158-5-git-send-email-josh.durgin@inktank.com>
+Subject: Re: [PATCH v3 5/5] rbd: fix error handling from rbd_snap_name()
+Date: Mon, 09 Sep 2013 08:49:07 -0500
+Message-ID: <522DD1D3.2040805@linaro.org>
+References: <1378711022-20158-1-git-send-email-josh.durgin@inktank.com> <1378711022-20158-6-git-send-email-josh.durgin@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f180.google.com ([209.85.214.180]:49807 "EHLO
-	mail-ob0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751012Ab3IINrw (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Sep 2013 09:47:52 -0400
-Received: by mail-ob0-f180.google.com with SMTP id va7so965908obc.39
-        for <ceph-devel@vger.kernel.org>; Mon, 09 Sep 2013 06:47:52 -0700 (PDT)
-In-Reply-To: <1378711022-20158-5-git-send-email-josh.durgin@inktank.com>
+Received: from mail-oa0-f43.google.com ([209.85.219.43]:44159 "EHLO
+	mail-oa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751359Ab3IINtD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Sep 2013 09:49:03 -0400
+Received: by mail-oa0-f43.google.com with SMTP id i10so6440681oag.2
+        for <ceph-devel@vger.kernel.org>; Mon, 09 Sep 2013 06:49:02 -0700 (PDT)
+In-Reply-To: <1378711022-20158-6-git-send-email-josh.durgin@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Josh Durgin <josh.durgin@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
 On 09/09/2013 02:17 AM, Josh Durgin wrote:
-> This prevents erroring out while adding a device when a snapshot
-> unrelated to the current mapping is deleted between reading the
-> snapshot context and reading the snapshot names. If the mapped
-> snapshot name is not found an error still occurs as usual.
+> rbd_snap_name() calls rbd_dev_v{1,2}_snap_name() depending on the
+> format of the image. The format 1 version returns NULL on error, which
+> is handled by the caller. The format 2 version returns an ERR_PTR,
+> which the caller of rbd_snap_name() does not expect.
+> 
+> Fortunately this is unlikely to occur in practice because
+> rbd_snap_id_by_name() is called before rbd_snap_name(). This would hit
+> similar errors to rbd_snap_name() (like the snapshot not existing) and
+> return early, so rbd_snap_name() would not hit an error unless the
+> snapshot was removed between the two calls or memory was exhausted.
+> 
+> Use an ERR_PTR in rbd_dev_v1_snap_name() so that the specific error
+> can be propagated, and it is consistent with rbd_dev_v2_snap_name().
+> Handle the ERR_PTR in the only rbd_snap_name() caller.
 
-This looks good.
-
-In fact, you could even go as far as ignoring errors
-altogether.  This function is determining the name associated
-with a snapshot id, and doubles as an existence check.  We
-need to look at the whole list to know that the snapshot
-id doesn't exist, so errors along the way are just a distraction.
-
-(But don't bother changing it, what you have is good.)
+Looks good.
 
 Reviewed-by: Alex Elder <elder@linaro.org>
 
+> Suggested-by: Alex Elder <alex.elder@linaro.org>
 > Signed-off-by: Josh Durgin <josh.durgin@inktank.com>
 > ---
->  drivers/block/rbd.c |    9 +++++++--
->  1 files changed, 7 insertions(+), 2 deletions(-)
+>  drivers/block/rbd.c |   10 ++++++----
+>  1 files changed, 6 insertions(+), 4 deletions(-)
 > 
 > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index fe5767a..226fa04 100644
+> index 226fa04..16384b7 100644
 > --- a/drivers/block/rbd.c
 > +++ b/drivers/block/rbd.c
-> @@ -4078,8 +4078,13 @@ static u64 rbd_v2_snap_id_by_name(struct rbd_device *rbd_dev, const char *name)
+> @@ -927,12 +927,14 @@ static const char *rbd_dev_v1_snap_name(struct rbd_device *rbd_dev,
+>  					u64 snap_id)
+>  {
+>  	u32 which;
+> +	const char *snap_name;
 >  
->  		snap_id = snapc->snaps[which];
->  		snap_name = rbd_dev_v2_snap_name(rbd_dev, snap_id);
-> -		if (IS_ERR(snap_name))
-> -			break;
-> +		if (IS_ERR(snap_name)) {
-> +			/* ignore no-longer existing snapshots */
-> +			if (PTR_ERR(snap_name) == -ENOENT)
-> +				continue;
-> +			else
-> +				break;
-> +		}
->  		found = !strcmp(name, snap_name);
->  		kfree(snap_name);
+>  	which = rbd_dev_snap_index(rbd_dev, snap_id);
+>  	if (which == BAD_SNAP_INDEX)
+> -		return NULL;
+> +		return ERR_PTR(-ENOENT);
+>  
+> -	return _rbd_dev_v1_snap_name(rbd_dev, which);
+> +	snap_name = _rbd_dev_v1_snap_name(rbd_dev, which);
+> +	return snap_name ? snap_name : ERR_PTR(-ENOMEM);
+>  }
+>  
+>  static const char *rbd_snap_name(struct rbd_device *rbd_dev, u64 snap_id)
+> @@ -4163,8 +4165,8 @@ static int rbd_dev_spec_update(struct rbd_device *rbd_dev)
+>  	/* Look up the snapshot name, and make a copy */
+>  
+>  	snap_name = rbd_snap_name(rbd_dev, spec->snap_id);
+> -	if (!snap_name) {
+> -		ret = -ENOMEM;
+> +	if (IS_ERR(snap_name)) {
+> +		ret = PTR_ERR(snap_name);
+>  		goto out_err;
 >  	}
+>  
 > 
 
