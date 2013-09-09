@@ -1,44 +1,45 @@
-From: David Howells <dhowells@redhat.com>
-Subject: Re: [PATCH 0/8] ceph: fscache support & upstream
-	changes
-Date: Mon, 09 Sep 2013 11:18:52 +0100
-Message-ID: <13625.1378721932@warthog.procyon.org.uk>
-References: <CANP1eJF9oyfTWL1up38cEFyQFZQU51v1Yo1wZqFYxN2qkvc7gQ@mail.gmail.com>
-	<cover.1378418255.git.milosz@adfin.com>
-	<alpine.DEB.2.00.1309051555250.1073@cobra.newdream.net>
-	<CANP1eJEk=eRmq1F+yYWB53spgifbU+zzKGdmKw6BGfx8SknkrA@mail.gmail.com>
-	<18764.1378483142@warthog.procyon.org.uk>
-	<CANP1eJFMdcsgSwVO9jhYQwn2C+19db1uy5=du7yYFbmiB6em0A@mail.gmail.com>
-	<alpine.DEB.2.00.1309061302300.12830@cobra.newdream.net>
-	<CANP1eJFtF7sRJkqg0xGqNjEzbz29GWywB8DAjfGFzDhCPSfjcg@mail.gmail.com>
+From: Roald van Loon <roaldvanloon@gmail.com>
+Subject: Re: subdir-objects
+Date: Mon, 9 Sep 2013 13:47:22 +0200
+Message-ID: <CAN04cT75xpt2iGpEmsfXYTeCfttyPAmnagvQVa59ZzwowX0Dfw@mail.gmail.com>
+References: <CAN04cT5zbp2oe9QvcbnQ4W=7ByA1UybzPEGGWvngjLogsqFaWA@mail.gmail.com>
+	<CA+Hcz5-uxiNMQiNXKfbETiQG0D6-nUrbV5oGpmMqn8oWi4DwGw@mail.gmail.com>
+	<alpine.DEB.2.00.1308211340020.28981@cobra.newdream.net>
+	<CAN04cT74h7QjWhOCQqc3e7HM__qaw+BrbaCy3NW_ZzC1xzX4Kg@mail.gmail.com>
+	<CA+Hcz59qJgWY2gukY8h-=c_HXj5Dxj-UCEHrEnBXZKEckWEgJg@mail.gmail.com>
+	<CAN04cT6FOspeq0NEN798ChLAJUuXsV2cFnzDLbQVNj0=pO6PPw@mail.gmail.com>
+	<CA+Hcz5_JRZVWn6iohEyy7iTnHTGH=tbqd+MrxaDwWbD_p3V_cQ@mail.gmail.com>
+	<CA+Hcz5-BgMzomAeGna8bMGjMv4Y2MsknBaSrmHEQHB-0-yFzCQ@mail.gmail.com>
+	<CAN04cT4P4ELASm1VoxmHKaje8DHiCpB-bSyMWugjOo19k6j4hg@mail.gmail.com>
+	<alpine.DEB.2.00.1309071335580.8602@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-cachefs-bounces@redhat.com>
-In-Reply-To: <CANP1eJF9oyfTWL1up38cEFyQFZQU51v1Yo1wZqFYxN2qkvc7gQ@mail.gmail.com>
-List-Unsubscribe: <https://www.redhat.com/mailman/options/linux-cachefs>,
-	<mailto:linux-cachefs-request@redhat.com?subject=unsubscribe>
-List-Archive: <https://www.redhat.com/archives/linux-cachefs>
-List-Post: <mailto:linux-cachefs@redhat.com>
-List-Help: <mailto:linux-cachefs-request@redhat.com?subject=help>
-List-Subscribe: <https://www.redhat.com/mailman/listinfo/linux-cachefs>,
-	<mailto:linux-cachefs-request@redhat.com?subject=subscribe>
-Sender: linux-cachefs-bounces@redhat.com
-Errors-To: linux-cachefs-bounces@redhat.com
-To: Milosz Tanski <milosz@adfin.com>
-Cc: Sage Weil <sage@inktank.com>, linux-kernel@vger.kernel.org, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, "linux-cachefs@redhat.com" <linux-cachefs@redhat.com>, sprabhu@redhat.com, "Yan,
-	Zheng" <zheng.z.yan@intel.com>, ceph-devel <ceph-devel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ob0-f182.google.com ([209.85.214.182]:43655 "EHLO
+	mail-ob0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752271Ab3IILrX (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Sep 2013 07:47:23 -0400
+Received: by mail-ob0-f182.google.com with SMTP id wo10so5715355obc.41
+        for <ceph-devel@vger.kernel.org>; Mon, 09 Sep 2013 04:47:23 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.00.1309071335580.8602@cobra.newdream.net>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: Noah Watkins <noah.watkins@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Milosz Tanski <milosz@adfin.com> wrote:
+On Sat, Sep 7, 2013 at 10:39 PM, Sage Weil <sage@inktank.com> wrote:
+> I'm particularly keen on doing what we can to reduce build time.  I also
+> agree there is a fair bit of tree restructuring that needs to be done.
+> (For example, libcommon.la is huge and includes lots of stuff that most
+> targets don't actually need; breaking this into smaller pieces would
+> probably help.)
 
-> I think that change does the trick. I had it running on the same
-> machine for 5 hours and had the kernel forcefully drop some of the
-> inodes in the cache (via drop caches) without a crash. I'll send a
-> proper patch email after you take a look and make sure I did the right
-> thing.
+I've made some notes while cleaning up the automake stuff. It's on the
+wiki as a blueprint now so people can contribute and hopefully it will
+start a discussion about this;
 
-Do you mind if I roll your change directly into my patch and reissue the set?
-Or would you rather have an extra patch at this time?
+http://wiki.ceph.com/01Planning/02Blueprints/Emperor/Source_tree_restructuring
 
-David
+Feel free to add/comment!
+
+Roald
