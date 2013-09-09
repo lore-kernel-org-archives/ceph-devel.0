@@ -1,84 +1,150 @@
 From: Josh Durgin <josh.durgin@inktank.com>
-Subject: [PATCH v3 2/5] rbd: make rbd_obj_notify_ack() synchronous
-Date: Mon,  9 Sep 2013 00:16:59 -0700
-Message-ID: <1378711022-20158-3-git-send-email-josh.durgin@inktank.com>
-References: <1378711022-20158-1-git-send-email-josh.durgin@inktank.com>
+Subject: Re: [PATCH v2 1/3] rbd: fix use-after free of rbd_dev->disk
+Date: Mon, 09 Sep 2013 00:30:15 -0700
+Message-ID: <522D7907.9070106@inktank.com>
+References: <1377757447-23515-4-git-send-email-josh.durgin@inktank.com> <1377824228-14632-1-git-send-email-josh.durgin@inktank.com> <5225D915.3080509@linaro.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:50656 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751128Ab3IIH2T (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Sep 2013 03:28:19 -0400
-Received: from mail.hq.newdream.net (localhost [127.0.0.1])
-	by mail.hq.newdream.net (Postfix) with ESMTP id DE89926480
-	for <ceph-devel@vger.kernel.org>; Mon,  9 Sep 2013 00:32:53 -0700 (PDT)
-Received: from vit.ops.newdream.net (unknown [38.122.20.226])
-	by mail.hq.newdream.net (Postfix) with ESMTPSA id D341D26470
-	for <ceph-devel@vger.kernel.org>; Mon,  9 Sep 2013 00:32:53 -0700 (PDT)
-In-Reply-To: <1378711022-20158-1-git-send-email-josh.durgin@inktank.com>
+Received: from mail-oa0-f49.google.com ([209.85.219.49]:37123 "EHLO
+	mail-oa0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750819Ab3IIHaV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Sep 2013 03:30:21 -0400
+Received: by mail-oa0-f49.google.com with SMTP id i7so6156416oag.8
+        for <ceph-devel@vger.kernel.org>; Mon, 09 Sep 2013 00:30:21 -0700 (PDT)
+In-Reply-To: <5225D915.3080509@linaro.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Alex Elder <alex.elder@linaro.org>
+Cc: ceph-devel@vger.kernel.org
 
-The only user of rbd_obj_notify_ack() is rbd_watch_cb(). It used
-asynchronously with no tracking of when the notify ack completes, so
-it may still be in progress when the osd_client is shut down.  This
-results in a BUG() since the osd client assumes no requests are in
-flight when it stops. Since all notifies are flushed before the
-osd_client is stopped, waiting for the notify ack to complete before
-returning from the watch callback ensures there are no notify acks in
-flight during shutdown.
+On 09/03/2013 05:41 AM, Alex Elder wrote:
+> On 08/29/2013 07:57 PM, Josh Durgin wrote:
+>> Removing a device deallocates the disk, unschedules the watch, and
+>> finally cleans up the rbd_dev structure. rbd_dev_refresh(), called
+>> from the watch callback, updates the disk size and rbd_dev
+>> structure. With no locking between them, rbd_dev_refresh() may use the
+>> device or rbd_dev after they've been freed.
+>>
+>> To fix this, add a shutting_down flag and a mutex protecting it to rbd_dev.
+>> Take the mutex and check whether the flag is set before using rbd_dev->disk.
+>> Move this disk-updating to a separate function as well.
+>>
+>> Fixes: http://tracker.ceph.com/issues/5636
+>> Signed-off-by: Josh Durgin <josh.durgin@inktank.com>
+>
+> A few comments below.  I don't think you need the shutting_down
+> flag after all.  If you disagree, say so.  Either way though,
+> this looks good to me.
 
-Rename rbd_obj_notify_ack() to rbd_obj_notify_ack_sync() to reflect
-its new synchronous nature.
+You're right, the extra lock turned out to be unnecessary.
+Holding during revalidate_disk() also created a lock inversion
+(since rbd_open() is called with bdev->lock held), so I've reworked
+this in v3.
 
-Signed-off-by: Josh Durgin <josh.durgin@inktank.com>
----
- drivers/block/rbd.c |   11 ++++++-----
- 1 files changed, 6 insertions(+), 5 deletions(-)
+Thanks for the reviews!
+Josh
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index bf89e34..9e5f07f 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -2808,7 +2808,7 @@ out_err:
- 	obj_request_done_set(obj_request);
- }
- 
--static int rbd_obj_notify_ack(struct rbd_device *rbd_dev, u64 notify_id)
-+static int rbd_obj_notify_ack_sync(struct rbd_device *rbd_dev, u64 notify_id)
- {
- 	struct rbd_obj_request *obj_request;
- 	struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
-@@ -2823,16 +2823,17 @@ static int rbd_obj_notify_ack(struct rbd_device *rbd_dev, u64 notify_id)
- 	obj_request->osd_req = rbd_osd_req_create(rbd_dev, false, obj_request);
- 	if (!obj_request->osd_req)
- 		goto out;
--	obj_request->callback = rbd_obj_request_put;
- 
- 	osd_req_op_watch_init(obj_request->osd_req, 0, CEPH_OSD_OP_NOTIFY_ACK,
- 					notify_id, 0, 0);
- 	rbd_osd_req_format_read(obj_request);
- 
- 	ret = rbd_obj_request_submit(osdc, obj_request);
--out:
- 	if (ret)
--		rbd_obj_request_put(obj_request);
-+		goto out;
-+	ret = rbd_obj_request_wait(obj_request);
-+out:
-+	rbd_obj_request_put(obj_request);
- 
- 	return ret;
- }
-@@ -2852,7 +2853,7 @@ static void rbd_watch_cb(u64 ver, u64 notify_id, u8 opcode, void *data)
- 	if (ret)
- 		rbd_warn(rbd_dev, "header refresh error (%d)\n", ret);
- 
--	rbd_obj_notify_ack(rbd_dev, notify_id);
-+	rbd_obj_notify_ack_sync(rbd_dev, notify_id);
- }
- 
- /*
--- 
-1.7.2.5
+> Reviewed-by: Alex Elder <elder@linaro.org>
+>
+>> ---
+>>   drivers/block/rbd.c |   39 +++++++++++++++++++++++++++++++++------
+>>   1 files changed, 33 insertions(+), 6 deletions(-)
+>>
+>> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+>> index fef3687..8ab3362b 100644
+>> --- a/drivers/block/rbd.c
+>> +++ b/drivers/block/rbd.c
+>> @@ -343,6 +343,9 @@ struct rbd_device {
+>>   	struct ceph_osd_event   *watch_event;
+>>   	struct rbd_obj_request	*watch_request;
+>>
+>> +	bool			shutting_down;	/* rbd_remove() in progress */
+>
+> You could use a new rbd_dev_flags value for this.
+>
+> In fact, now that I'm looking at this, I think the REMOVING flag
+> is already sufficient to indicate that bit of state.  (Sorry I
+> didn't see this before.)
+>
+> You would still want the mutex so the shutdown won't happen until
+> an underway size update completed.  (Or you could add another
+> UPDATING_SIZE flag, but I think the mutex is better in this case.)
+>
+>> +	struct mutex		shutdown_lock;	/* protects shutting_down */
+>> +
+>>   	struct rbd_spec		*parent_spec;
+>>   	u64			parent_overlap;
+>>   	atomic_t		parent_ref;
+>> @@ -3324,6 +3327,24 @@ static void rbd_exists_validate(struct rbd_device *rbd_dev)
+>>   		clear_bit(RBD_DEV_FLAG_EXISTS, &rbd_dev->flags);
+>>   }
+>>
+>> +static void rbd_dev_update_size(struct rbd_device *rbd_dev)
+>> +{
+>> +	sector_t size;
+>> +
+>> +	mutex_lock(&rbd_dev->shutdown_lock);
+>> +	/*
+>> +	 * If the device is being removed, rbd_dev->disk has
+>> +	 * been destroyed, so don't try to update its size
+>> +	 */
+>> +	if (!rbd_dev->shutting_down) {
+>> +		size = (sector_t)rbd_dev->mapping.size / SECTOR_SIZE;
+>> +		dout("setting size to %llu sectors", (unsigned long long)size);
+>> +		set_capacity(rbd_dev->disk, size);
+>
+> Is it true you don't hit that locking problem because of the new mutex?
+>
+>> +		revalidate_disk(rbd_dev->disk);
+>> +	}
+>> +	mutex_unlock(&rbd_dev->shutdown_lock);
+>> +}
+>> +
+>>   static int rbd_dev_refresh(struct rbd_device *rbd_dev)
+>>   {
+>>   	u64 mapping_size;
+>> @@ -3343,12 +3364,7 @@ static int rbd_dev_refresh(struct rbd_device *rbd_dev)
+>>   	up_write(&rbd_dev->header_rwsem);
+>>
+>>   	if (mapping_size != rbd_dev->mapping.size) {
+>> -		sector_t size;
+>> -
+>> -		size = (sector_t)rbd_dev->mapping.size / SECTOR_SIZE;
+>> -		dout("setting size to %llu sectors", (unsigned long long)size);
+>> -		set_capacity(rbd_dev->disk, size);
+>> -		revalidate_disk(rbd_dev->disk);
+>> +		rbd_dev_update_size(rbd_dev);
+>>   	}
+>>
+>>   	return ret;
+>> @@ -3656,6 +3672,8 @@ static struct rbd_device *rbd_dev_create(struct rbd_client *rbdc,
+>>   	atomic_set(&rbd_dev->parent_ref, 0);
+>>   	INIT_LIST_HEAD(&rbd_dev->node);
+>>   	init_rwsem(&rbd_dev->header_rwsem);
+>> +	mutex_init(&rbd_dev->shutdown_lock);
+>> +	rbd_dev->shutting_down = false;
+>>
+>>   	rbd_dev->spec = spec;
+>>   	rbd_dev->rbd_client = rbdc;
+>> @@ -5159,7 +5177,16 @@ static ssize_t rbd_remove(struct bus_type *bus,
+>>   	if (ret < 0 || already)
+>>   		return ret;
+>>
+>> +	/*
+>> +	 * hold shutdown_lock while destroying the device so that
+>> +	 * device destruction will not race with device updates from
+>> +	 * the watch callback
+>> +	 */
+>> +	mutex_lock(&rbd_dev->shutdown_lock);
+>> +	rbd_dev->shutting_down = true;
+>>   	rbd_bus_del_dev(rbd_dev);
+>> +	mutex_unlock(&rbd_dev->shutdown_lock);
+>> +
+>>   	ret = rbd_dev_header_watch_sync(rbd_dev, false);
+>>   	if (ret)
+>>   		rbd_warn(rbd_dev, "failed to cancel watch event (%d)\n", ret);
+>>
+>
 
