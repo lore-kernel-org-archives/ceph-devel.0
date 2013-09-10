@@ -1,82 +1,99 @@
-From: Sage Weil <sage@inktank.com>
+From: Chris Dunlop <chris@onthe.net.au>
 Subject: Re: OSD repair: on disk size does not match object info size
-Date: Mon, 9 Sep 2013 16:30:33 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1309091627100.23522@cobra.newdream.net>
+Date: Tue, 10 Sep 2013 10:01:45 +1000
+Message-ID: <20130910000145.GA857@onthe.net.au>
 References: <20130909231643.GA31877@onthe.net.au>
+ <alpine.DEB.2.00.1309091627100.23522@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:52423 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756032Ab3IIXae (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Sep 2013 19:30:34 -0400
-In-Reply-To: <20130909231643.GA31877@onthe.net.au>
+Received: from smtp1.onthe.net.au ([203.22.196.249]:43473 "EHLO
+	smtp1.onthe.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755729Ab3IJACb (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Sep 2013 20:02:31 -0400
+Content-Disposition: inline
+In-Reply-To: <alpine.DEB.2.00.1309091627100.23522@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Chris Dunlop <chris@onthe.net.au>
+To: Sage Weil <sage@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-On Tue, 10 Sep 2013, Chris Dunlop wrote:
-> G'day,
+On Mon, Sep 09, 2013 at 04:30:33PM -0700, Sage Weil wrote:
+> On Tue, 10 Sep 2013, Chris Dunlop wrote:
+>> G'day,
+>> 
+>> On 0.56.7-1~bpo70+1 I'm getting:
+>> 
+>> # ceph pg dump | grep inconsistent
+>> 013-09-10-08:39:59 2.bc        2776    0       0       0       11521799680     162063  162063  active+clean+inconsistent       2013-09-10 08:38:38.482302      20512'699877    20360'13461026  [6,0]   [6,0]   20512'699877    2013-09-10 08:38:38.482264      20512'699877     2013-09-10 08:38:38.482264
+>> 
+>> # ceph pg repair 2.bc
+>> instructing pg 2.bc on osd.6 to repair
+>> 
+>> # tail /var/log/ceph/ceph-osd.6.log
+>> 2013-09-10 08:17:25.557926 7fef09c14700  0 log [ERR] : repair 2.bc 89ebebc/rbd_data.13a0c74b0dc51.00000000000107ec/head//2 on disk size (4194304) does not match object info size (4104192)
+>> 2013-09-10 08:17:27.316112 7fef09c14700  0 log [ERR] : 2.bc repair 1 errors, 0 fixed
+>> 
+>> # ls -l 'ceph-6/current/2.bc_head/DIR_C/DIR_B/DIR_E/rbd\udata.13a0c74b0dc51.00000000000107ec__head_089EBEBC__2'
+>> -rw-r--r-- 1 root root 4194304 Sep  8 21:01 ceph-6/current/2.bc_head/DIR_C/DIR_B/DIR_E/rbd\udata.13a0c74b0dc51.00000000000107ec__head_089EBEBC__2
+>> # ls -l 'ceph-0/current/2.bc_head/DIR_C/DIR_B/DIR_E/rbd\udata.13a0c74b0dc51.00000000000107ec__head_089EBEBC__2'
+>> -rw-r--r-- 1 root root 4194304 Sep  8 21:01 ceph-0/current/2.bc_head/DIR_C/DIR_B/DIR_E/rbd\udata.13a0c74b0dc51.00000000000107ec__head_089EBEBC__2
+>> 
+>> One possible solution would be to simply truncate the objects down to the
+>> object info size, as recommended in this case:
+>> 
+>> http://www.spinics.net/lists/ceph-users/msg00793.html
+>> 
+>> However I'm a little concerned about that solution as the on-disk size is
+>> exactly 4MB, which I think is the expected size of these objects, and matches
+>> the size of all the other objects in the same directory, and the "extra" data
+>> looks a little interesting, with "FILE0" blocks in there (what are those?):
+>> 
+>> # cd /var/lib/ceph/osd/ceph-6/current/2.bc_head/DIR_C/DIR_B/DIR_E/
+>> # dd if='rbd\udata.13a0c74b0dc51.00000000000107ec__head_089EBEBC__2' bs=1024 skip=4008 | od -c
+>> 0000000   F   I   L   E   0  \0 003  \0 312   j   o   o  \0  \0  \0  \0
+>> 0000020 001  \0 001  \0   8  \0 001  \0   X 001  \0  \0  \0 004  \0  \0
+>> 0000040  \0  \0  \0  \0  \0  \0  \0  \0 006  \0  \0  \0 310   p 017  \0
+>> 0000060 002  \0  \0  \0  \0  \0  \0  \0 020  \0  \0  \0   `  \0  \0  \0
+>> ...
+>> 0002000   F   I   L   E   0  \0 003  \0 002   k   o   o  \0  \0  \0  \0
+>> 0002020 001  \0 001  \0   8  \0 001  \0   X 001  \0  \0  \0 004  \0  \0
+>> 0002040  \0  \0  \0  \0  \0  \0  \0  \0 006  \0  \0  \0 311   p 017  \0
+>> 0002060 002  \0  \0  \0  \0  \0  \0  \0 020  \0  \0  \0   `  \0  \0  \0
+>> ...
+>> 0004000   F   I   L   E   0  \0 003  \0 023   r   o   o  \0  \0  \0  \0
+>> 0004020 001  \0 001  \0   8  \0 001  \0   X 001  \0  \0  \0 004  \0  \0
+>> 0004040  \0  \0  \0  \0  \0  \0  \0  \0 006  \0  \0  \0 312   p 017  \0
+>> 0004060 002  \0  \0  \0  \0  \0  \0  \0 020  \0  \0  \0   `  \0  \0  \0
+>> 
+>> Is it safe to simply truncate this object, or what other solutions might
+>> be applicable?
 > 
-> On 0.56.7-1~bpo70+1 I'm getting:
+> The alternative is to edit the xattr.  That's harder, but better.  You'll 
+> want grab the user.ceph._ xattr, change the the one instance of 4104192 to 
+> 4194304, and then reset it.  You can use
 > 
-> # ceph pg dump | grep inconsistent
-> 013-09-10-08:39:59 2.bc        2776    0       0       0       11521799680     162063  162063  active+clean+inconsistent       2013-09-10 08:38:38.482302      20512'699877    20360'13461026  [6,0]   [6,0]   20512'699877    2013-09-10 08:38:38.482264      20512'699877     2013-09-10 08:38:38.482264
-> 
-> # ceph pg repair 2.bc
-> instructing pg 2.bc on osd.6 to repair
-> 
-> # tail /var/log/ceph/ceph-osd.6.log
-> 2013-09-10 08:17:25.557926 7fef09c14700  0 log [ERR] : repair 2.bc 89ebebc/rbd_data.13a0c74b0dc51.00000000000107ec/head//2 on disk size (4194304) does not match object info size (4104192)
-> 2013-09-10 08:17:27.316112 7fef09c14700  0 log [ERR] : 2.bc repair 1 errors, 0 fixed
-> 
-> # ls -l 'ceph-6/current/2.bc_head/DIR_C/DIR_B/DIR_E/rbd\udata.13a0c74b0dc51.00000000000107ec__head_089EBEBC__2'
-> -rw-r--r-- 1 root root 4194304 Sep  8 21:01 ceph-6/current/2.bc_head/DIR_C/DIR_B/DIR_E/rbd\udata.13a0c74b0dc51.00000000000107ec__head_089EBEBC__2
-> # ls -l 'ceph-0/current/2.bc_head/DIR_C/DIR_B/DIR_E/rbd\udata.13a0c74b0dc51.00000000000107ec__head_089EBEBC__2'
-> -rw-r--r-- 1 root root 4194304 Sep  8 21:01 ceph-0/current/2.bc_head/DIR_C/DIR_B/DIR_E/rbd\udata.13a0c74b0dc51.00000000000107ec__head_089EBEBC__2
-> 
-> One possible solution would be to simply truncate the objects down to the
-> object info size, as recommended in this case:
-> 
-> http://www.spinics.net/lists/ceph-users/msg00793.html
-> 
-> However I'm a little concerned about that solution as the on-disk size is
-> exactly 4MB, which I think is the expected size of these objects, and matches
-> the size of all the other objects in the same directory, and the "extra" data
-> looks a little interesting, with "FILE0" blocks in there (what are those?):
-> 
-> # cd /var/lib/ceph/osd/ceph-6/current/2.bc_head/DIR_C/DIR_B/DIR_E/
-> # dd if='rbd\udata.13a0c74b0dc51.00000000000107ec__head_089EBEBC__2' bs=1024 skip=4008 | od -c
-> 0000000   F   I   L   E   0  \0 003  \0 312   j   o   o  \0  \0  \0  \0
-> 0000020 001  \0 001  \0   8  \0 001  \0   X 001  \0  \0  \0 004  \0  \0
-> 0000040  \0  \0  \0  \0  \0  \0  \0  \0 006  \0  \0  \0 310   p 017  \0
-> 0000060 002  \0  \0  \0  \0  \0  \0  \0 020  \0  \0  \0   `  \0  \0  \0
-> ...
-> 0002000   F   I   L   E   0  \0 003  \0 002   k   o   o  \0  \0  \0  \0
-> 0002020 001  \0 001  \0   8  \0 001  \0   X 001  \0  \0  \0 004  \0  \0
-> 0002040  \0  \0  \0  \0  \0  \0  \0  \0 006  \0  \0  \0 311   p 017  \0
-> 0002060 002  \0  \0  \0  \0  \0  \0  \0 020  \0  \0  \0   `  \0  \0  \0
-> ...
-> 0004000   F   I   L   E   0  \0 003  \0 023   r   o   o  \0  \0  \0  \0
-> 0004020 001  \0 001  \0   8  \0 001  \0   X 001  \0  \0  \0 004  \0  \0
-> 0004040  \0  \0  \0  \0  \0  \0  \0  \0 006  \0  \0  \0 312   p 017  \0
-> 0004060 002  \0  \0  \0  \0  \0  \0  \0 020  \0  \0  \0   `  \0  \0  \0
-> 
-> Is it safe to simply truncate this object, or what other solutions might
-> be applicable?
+>  ceph-dencoder type object_info_t import /tmp/xattrfile decode dump_json
+>
+> to verify that it decodes properly before and after you make the edit.  I 
+> like the 'attr' tool for getting/setting xattrs.
 
-The alternative is to edit the xattr.  That's harder, but better.  You'll 
-want grab the user.ceph._ xattr, change the the one instance of 4104192 to 
-4194304, and then reset it.  You can use
+Can ceph-dencoder import the (modified) json and write out the
+encoded binary suitable for setting in the xattr?
 
- ceph-dencoder type object_info_t import /tmp/xattrfile decode dump_json
+If not, what encoding is the xattr, so I can work out what I
+need to do to make the change?
 
-to verify that it decodes properly before and after you make the edit.  I 
-like the 'attr' tool for getting/setting xattrs.
+# getfattr -n user.ceph._ 'ceph-6/current/2.bc_head/DIR_C/DIR_B/DIR_E/rbd\udata.13a0c74b0dc51.00000000000107ec__head_089EBEBC__2'
+getfattr: Removing leading '/' from absolute path names
+# file: ceph-6/current/2.bc_head/DIR_C/DIR_B/DIR_E/rbd\134udata.13a0c74b0dc51.00000000000107ec__head_089EBEBC__2
+user.ceph._=0sCgjoAAAABANIAAAAAAAAACcAAAByYmRfZGF0YS4xM2EwYzc0YjBkYzUxLjAwMDAwMDAwMDAwMTA3ZWP+/////////7y+nggAAAAAAAIAAAAAAAAABAMQAAAAAgAAAAAAAAD/////AAAAAAAAAACrqgoAAAAAADJPAAB6dwoAAAAAADBOAAACAhUAAAAIS2YBAAAAAADm+g0fAAAAAAAAAAAAoD4AAAAAABlZLFIAh2IgAgIVAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAq6oKAAAAAAAyTwAAAA==
 
-Is this still bobtail?  We haven't seen this sort of corruption since 
-then.
+> Is this still bobtail?  We haven't seen this sort of corruption since 
+> then.
 
-Thanks!
-sage
+Yup. I'll upgrade once the cluster settles down cleanly!
+
+Cheers,
+
+Chris.
