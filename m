@@ -1,78 +1,60 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Teuthology queuing & archiving (was: teuthology and jenkins)
-Date: Tue, 10 Sep 2013 18:32:56 +0200
-Message-ID: <522F49B8.6070103@dachary.org>
-References: <5229D396.3010601@dachary.org>
+From: Milosz Tanski <milosz@adfin.com>
+Subject: Re: [PATCH] fscache: check consistency does not decrement refcount
+Date: Tue, 10 Sep 2013 12:45:11 -0400
+Message-ID: <CANP1eJFy+dtwEVYbyTtYbH+CeXGfUDbUkaf-_YsJAn_VLvK4pg@mail.gmail.com>
+References: <alpine.DEB.2.00.1309091042520.18214@cobra.newdream.net>
+	<fd69f2052bc16d5a5de0104ca00ccc59478e3569.1378750714.git.milosz@adfin.com>
+	<16357.1378816473@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enigFE80C0CFBCFC48920492DF39"
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:58953 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752646Ab3IJQc7 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Sep 2013 12:32:59 -0400
-Received: from [10.9.0.6] (openvpn.novalocal [10.145.3.13])
-	by smtp.dmail.dachary.org (Postfix) with ESMTPS id 3BF3D26394
-	for <ceph-devel@vger.kernel.org>; Tue, 10 Sep 2013 18:32:57 +0200 (CEST)
-In-Reply-To: <5229D396.3010601@dachary.org>
+Received: from mail-wg0-f48.google.com ([74.125.82.48]:61402 "EHLO
+	mail-wg0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751207Ab3IJQpM (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Sep 2013 12:45:12 -0400
+Received: by mail-wg0-f48.google.com with SMTP id n12so4358319wgh.3
+        for <ceph-devel@vger.kernel.org>; Tue, 10 Sep 2013 09:45:11 -0700 (PDT)
+In-Reply-To: <16357.1378816473@warthog.procyon.org.uk>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, "Yan, Zheng" <zheng.z.yan@intel.com>, "linux-cachefs@redhat.com" <linux-cachefs@redhat.com>, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, linux-kernel@vger.kernel.org, David Howells <dhowells@redhat.com>
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enigFE80C0CFBCFC48920492DF39
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Sage,
 
-Hi,
+Can you submit to the upstream next in your next round of fixes (with
+David's ack).
 
-In the context of the OpenStack CI, James E. Blair wrote http://git.opens=
-tack.org/cgit/openstack-infra/nodepool/tree/ which is described in the No=
-depool part of http://amo-probos.org/post/15 It seems a good an minimal c=
-andidate to provision machines. I'm on irc.freenode.net#openstack-infra w=
-here all these tools are discussed and will try to understand more about =
-"gear".
+Thanks,
+- Milosz
 
-Cheers
+P.S: Thanks David.
 
-On 06/09/2013 15:07, Loic Dachary wrote:
-> Hi,
->=20
-> I've explored the idea to use jenkins as a remplacement for the queue +=
- archive mechanism of teuthology. It turns out to be jenkins weak point. =
-As Robert Colins ( who recently wrote a HOWTO on how to replicated the CI=
- infrastrcture of OpenStack and is confident someone could do the same wi=
-thin a couple of days https://review.openstack.org/#/c/45346/ ) puts it:
->=20
-> "OpenStack uses jenkins for it's core capabilities - running tests in a=
- work environment, and replaces the scheduler, archiver etc with their ow=
-n to avoid scaking issues with the naive approaches jenkins has".
->=20
-> Robert further suggested that using the OpenStack CI infrastructure wou=
-ld be a good pick for Ceph.
->=20
-> Cheers
->=20
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-All that is necessary for the triumph of evil is that good people do noth=
-ing.
-
-
---------------enigFE80C0CFBCFC48920492DF39
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with undefined - http://www.enigmail.net/
-
-iEYEARECAAYFAlIvSbgACgkQ8dLMyEl6F20sxQCbBkCxi4ITUmWY1r7IMuvPqQJw
-s5oAoLG1qYLajFfRdaX/gatA1PqCw2n7
-=Kwlx
------END PGP SIGNATURE-----
-
---------------enigFE80C0CFBCFC48920492DF39--
+On Tue, Sep 10, 2013 at 8:34 AM, David Howells <dhowells@redhat.com> wrote:
+> Milosz Tanski <milosz@adfin.com> wrote:
+>
+>> __fscache_check_consistency() does not decrement the count of operations
+>> active after it finishes in the success case. This leads to a hung tasks on
+>> cookie de-registration (commonly in inode eviction).
+>>
+>> INFO: task kworker/1:2:4214 blocked for more than 120 seconds.
+>> kworker/1:2     D ffff880443513fc0     0  4214      2 0x00000000
+>> Workqueue: ceph-msgr con_work [libceph]
+>>   ...
+>> Call Trace:
+>>  [<ffffffff81569fc6>] ? _raw_spin_unlock_irqrestore+0x16/0x20
+>>  [<ffffffffa0016570>] ? fscache_wait_bit_interruptible+0x30/0x30 [fscache]
+>>  [<ffffffff81568d09>] schedule+0x29/0x70
+>>  [<ffffffffa001657e>] fscache_wait_atomic_t+0xe/0x20 [fscache]
+>>  [<ffffffff815665cf>] out_of_line_wait_on_atomic_t+0x9f/0xe0
+>>  [<ffffffff81083560>] ? autoremove_wake_function+0x40/0x40
+>>  [<ffffffffa0015a9c>] __fscache_relinquish_cookie+0x15c/0x310 [fscache]
+>>  [<ffffffffa00a4fae>] ceph_fscache_unregister_inode_cookie+0x3e/0x50 [ceph]
+>>  [<ffffffffa007e373>] ceph_destroy_inode+0x33/0x200 [ceph]
+>>  [<ffffffff811c13ae>] ? __fsnotify_inode_delete+0xe/0x10
+>>  [<ffffffff8119ba1c>] destroy_inode+0x3c/0x70
+>>  [<ffffffff8119bb69>] evict+0x119/0x1b0
+>>
+>> Signed-off-by: Milosz Tanski <milosz@adfin.com>
+>
+> Acked-by: David Howells <dhowells@redhat.com>
