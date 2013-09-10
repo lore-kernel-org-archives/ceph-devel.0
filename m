@@ -1,127 +1,144 @@
-From: Chris Dunlop <chris@onthe.net.au>
-Subject: Re: OSD repair: on disk size does not match object info size
-Date: Tue, 10 Sep 2013 10:40:37 +1000
-Message-ID: <20130910004037.GA2080@onthe.net.au>
-References: <20130909231643.GA31877@onthe.net.au>
- <alpine.DEB.2.00.1309091627100.23522@cobra.newdream.net>
- <20130910000145.GA857@onthe.net.au>
- <alpine.DEB.2.00.1309091712430.23522@cobra.newdream.net>
+From: majianpeng <majianpeng@gmail.com>
+Subject: [PATCH V3 1/2] ceph: Implement readv/preadv for sync operation.
+Date: Tue, 10 Sep 2013 10:04:29 +0800
+Message-ID: <201309101004260763874@gmail.com>
+Reply-To: majianpeng <majianpeng@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp1.onthe.net.au ([203.22.196.249]:60737 "EHLO
-	smtp1.onthe.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755756Ab3IJAlH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Sep 2013 20:41:07 -0400
-Content-Disposition: inline
-In-Reply-To: <alpine.DEB.2.00.1309091712430.23522@cobra.newdream.net>
+Received: from mail-pa0-f44.google.com ([209.85.220.44]:49459 "EHLO
+	mail-pa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751122Ab3IJCEq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Sep 2013 22:04:46 -0400
+Received: by mail-pa0-f44.google.com with SMTP id fz6so7054428pac.3
+        for <ceph-devel@vger.kernel.org>; Mon, 09 Sep 2013 19:04:46 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: sage <sage@inktank.com>
+Cc: =?us-ascii?B?WWFuLCBaaGVuZw==?= <zheng.z.yan@intel.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Mon, Sep 09, 2013 at 05:14:14PM -0700, Sage Weil wrote:
-> On Tue, 10 Sep 2013, Chris Dunlop wrote:
->> On Mon, Sep 09, 2013 at 04:30:33PM -0700, Sage Weil wrote:
->>> On Tue, 10 Sep 2013, Chris Dunlop wrote:
->>>> G'day,
->>>> 
->>>> On 0.56.7-1~bpo70+1 I'm getting:
->>>> 
->>>> # ceph pg dump | grep inconsistent
->>>> 013-09-10-08:39:59 2.bc        2776    0       0       0       11521799680     162063  162063  active+clean+inconsistent       2013-09-10 08:38:38.482302      20512'699877    20360'13461026  [6,0]   [6,0]   20512'699877    2013-09-10 08:38:38.482264      20512'699877     2013-09-10 08:38:38.482264
->>>> 
->>>> # ceph pg repair 2.bc
->>>> instructing pg 2.bc on osd.6 to repair
->>>> 
->>>> # tail /var/log/ceph/ceph-osd.6.log
->>>> 2013-09-10 08:17:25.557926 7fef09c14700  0 log [ERR] : repair 2.bc 89ebebc/rbd_data.13a0c74b0dc51.00000000000107ec/head//2 on disk size (4194304) does not match object info size (4104192)
->>>> 2013-09-10 08:17:27.316112 7fef09c14700  0 log [ERR] : 2.bc repair 1 errors, 0 fixed
->>>> 
->>>> # ls -l 'ceph-6/current/2.bc_head/DIR_C/DIR_B/DIR_E/rbd\udata.13a0c74b0dc51.00000000000107ec__head_089EBEBC__2'
->>>> -rw-r--r-- 1 root root 4194304 Sep  8 21:01 ceph-6/current/2.bc_head/DIR_C/DIR_B/DIR_E/rbd\udata.13a0c74b0dc51.00000000000107ec__head_089EBEBC__2
->>>> # ls -l 'ceph-0/current/2.bc_head/DIR_C/DIR_B/DIR_E/rbd\udata.13a0c74b0dc51.00000000000107ec__head_089EBEBC__2'
->>>> -rw-r--r-- 1 root root 4194304 Sep  8 21:01 ceph-0/current/2.bc_head/DIR_C/DIR_B/DIR_E/rbd\udata.13a0c74b0dc51.00000000000107ec__head_089EBEBC__2
->>>> 
->>>> One possible solution would be to simply truncate the objects down to the
->>>> object info size, as recommended in this case:
->>>> 
->>>> http://www.spinics.net/lists/ceph-users/msg00793.html
->>>> 
->>>> However I'm a little concerned about that solution as the on-disk size is
->>>> exactly 4MB, which I think is the expected size of these objects, and matches
->>>> the size of all the other objects in the same directory, and the "extra" data
->>>> looks a little interesting, with "FILE0" blocks in there (what are those?):
->>>> 
->>>> # cd /var/lib/ceph/osd/ceph-6/current/2.bc_head/DIR_C/DIR_B/DIR_E/
->>>> # dd if='rbd\udata.13a0c74b0dc51.00000000000107ec__head_089EBEBC__2' bs=1024 skip=4008 | od -c
->>>> 0000000   F   I   L   E   0  \0 003  \0 312   j   o   o  \0  \0  \0  \0
->>>> 0000020 001  \0 001  \0   8  \0 001  \0   X 001  \0  \0  \0 004  \0  \0
->>>> 0000040  \0  \0  \0  \0  \0  \0  \0  \0 006  \0  \0  \0 310   p 017  \0
->>>> 0000060 002  \0  \0  \0  \0  \0  \0  \0 020  \0  \0  \0   `  \0  \0  \0
->>>> ...
->>>> 0002000   F   I   L   E   0  \0 003  \0 002   k   o   o  \0  \0  \0  \0
->>>> 0002020 001  \0 001  \0   8  \0 001  \0   X 001  \0  \0  \0 004  \0  \0
->>>> 0002040  \0  \0  \0  \0  \0  \0  \0  \0 006  \0  \0  \0 311   p 017  \0
->>>> 0002060 002  \0  \0  \0  \0  \0  \0  \0 020  \0  \0  \0   `  \0  \0  \0
->>>> ...
->>>> 0004000   F   I   L   E   0  \0 003  \0 023   r   o   o  \0  \0  \0  \0
->>>> 0004020 001  \0 001  \0   8  \0 001  \0   X 001  \0  \0  \0 004  \0  \0
->>>> 0004040  \0  \0  \0  \0  \0  \0  \0  \0 006  \0  \0  \0 312   p 017  \0
->>>> 0004060 002  \0  \0  \0  \0  \0  \0  \0 020  \0  \0  \0   `  \0  \0  \0
->>>> 
->>>> Is it safe to simply truncate this object, or what other solutions might
->>>> be applicable?
->>> 
->>> The alternative is to edit the xattr.  That's harder, but better.  You'll 
->>> want grab the user.ceph._ xattr, change the the one instance of 4104192 to 
->>> 4194304, and then reset it.  You can use
->>> 
->>>  ceph-dencoder type object_info_t import /tmp/xattrfile decode dump_json
->>>
->>> to verify that it decodes properly before and after you make the edit.  I 
->>> like the 'attr' tool for getting/setting xattrs.
->> 
->> Can ceph-dencoder import the (modified) json and write out the
->> encoded binary suitable for setting in the xattr?
-> 
-> It can't, sadly.
->  
->> If not, what encoding is the xattr, so I can work out what I
->> need to do to make the change?
-> 
-> It's little-endian.  So 'printf "%x\n" $badsize' and look for that value 
-> with hexedit or whatever, and check your work with ceph-dencoder.
+Rm9yIHJlYWR2L3ByZWFkdiBzeW5jLW9wZXJhdG9pbiwgY2VwaCBvbmx5IGRvIHRoZSBmaXJzdCBp
+b3YuDQpJdCBkb24ndCB0aGluayBvdGhlciBpb3ZzLk5vdyBpbXBsZW1lbnQgdGhpcy4NCg0KVjM6
+IA0KICAgbW9kaWZ5IHNvbWUgYnVnLg0KVjI6DQogIC1hZGQgZ2VuZXJpY19zZWdtZW50X2NoZWNr
+cw0KICAtdXNpbmcgc3RydWN0IGlvdl9pdGVyIHJlcGxhY2UgY2xvbmluZyB0aGUgaW92cy4NCiAg
+LXJldHVybiBwcmV2aW91cyBzdWNjZXNzZnVsbHkgY29waWVkIGlmIGNlcGhfY29weV9wYWdlX3Zl
+Y3Rvcl90b191c2VyDQogICBtZXQgZXJyb3IuDQoNCg0KU2lnbmVkLW9mZi1ieTogSmlhbnBlbmcg
+TWEgPG1hamlhbnBlbmdAZ21haWwuY29tPg0KUmV2aWV3ZWQtYnk6IFlhbiwgWmhlbmcgPHpoZW5n
+LnoueWFuQGludGVsLmNvbT4NCi0tLQ0KIGZzL2NlcGgvZmlsZS5jIHwgMTU3ICsrKysrKysrKysr
+KysrKysrKysrKysrKysrKysrKysrKysrKysrLS0tLS0tLS0tLS0tLS0tLS0tLQ0KIDEgZmlsZSBj
+aGFuZ2VkLCAxMDYgaW5zZXJ0aW9ucygrKSwgNTEgZGVsZXRpb25zKC0pDQoNCmRpZmYgLS1naXQg
+YS9mcy9jZXBoL2ZpbGUuYyBiL2ZzL2NlcGgvZmlsZS5jDQppbmRleCAzZGU4OTgyLi44ZjIwZWI0
+IDEwMDY0NA0KLS0tIGEvZnMvY2VwaC9maWxlLmMNCisrKyBiL2ZzL2NlcGgvZmlsZS5jDQpAQCAt
+NDA4LDUxICs0MDgsOTQgQEAgbW9yZToNCiAgKg0KICAqIElmIHRoZSByZWFkIHNwYW5zIG9iamVj
+dCBib3VuZGFyeSwganVzdCBkbyBtdWx0aXBsZSByZWFkcy4NCiAgKi8NCi1zdGF0aWMgc3NpemVf
+dCBjZXBoX3N5bmNfcmVhZChzdHJ1Y3QgZmlsZSAqZmlsZSwgY2hhciBfX3VzZXIgKmRhdGEsDQot
+CQkJICAgICAgdW5zaWduZWQgbGVuLCBsb2ZmX3QgKnBvZmYsIGludCAqY2hlY2tlb2YpDQorc3Rh
+dGljIHNzaXplX3QgY2VwaF9zeW5jX3JlYWQoc3RydWN0IGtpb2NiICppb2NiLCBzdHJ1Y3QgaW92
+X2l0ZXIgKmksDQorCQkJCWludCAqY2hlY2tlb2YpDQogew0KKwlzdHJ1Y3QgZmlsZSAqZmlsZSA9
+IGlvY2ItPmtpX2ZpbHA7DQogCXN0cnVjdCBpbm9kZSAqaW5vZGUgPSBmaWxlX2lub2RlKGZpbGUp
+Ow0KIAlzdHJ1Y3QgcGFnZSAqKnBhZ2VzOw0KLQl1NjQgb2ZmID0gKnBvZmY7DQorCXU2NCBvZmYg
+PSBpb2NiLT5raV9wb3M7DQogCWludCBudW1fcGFnZXMsIHJldDsNCiANCi0JZG91dCgic3luY19y
+ZWFkIG9uIGZpbGUgJXAgJWxsdX4ldSAlc1xuIiwgZmlsZSwgb2ZmLCBsZW4sDQorCWRvdXQoInN5
+bmNfcmVhZCBvbiBmaWxlICVwICVsbHV+JXUgJXNcbiIsIGZpbGUsIG9mZiwNCisJICAgICAodW5z
+aWduZWQpaW9jYi0+a2lfbGVmdCwNCiAJICAgICAoZmlsZS0+Zl9mbGFncyAmIE9fRElSRUNUKSA/
+ICJPX0RJUkVDVCIgOiAiIik7DQotDQotCWlmIChmaWxlLT5mX2ZsYWdzICYgT19ESVJFQ1QpIHsN
+Ci0JCW51bV9wYWdlcyA9IGNhbGNfcGFnZXNfZm9yKCh1bnNpZ25lZCBsb25nKWRhdGEsIGxlbik7
+DQotCQlwYWdlcyA9IGNlcGhfZ2V0X2RpcmVjdF9wYWdlX3ZlY3RvcihkYXRhLCBudW1fcGFnZXMs
+IHRydWUpOw0KLQl9IGVsc2Ugew0KLQkJbnVtX3BhZ2VzID0gY2FsY19wYWdlc19mb3Iob2ZmLCBs
+ZW4pOw0KLQkJcGFnZXMgPSBjZXBoX2FsbG9jX3BhZ2VfdmVjdG9yKG51bV9wYWdlcywgR0ZQX05P
+RlMpOw0KLQl9DQotCWlmIChJU19FUlIocGFnZXMpKQ0KLQkJcmV0dXJuIFBUUl9FUlIocGFnZXMp
+Ow0KLQ0KIAkvKg0KIAkgKiBmbHVzaCBhbnkgcGFnZSBjYWNoZSBwYWdlcyBpbiB0aGlzIHJhbmdl
+LiAgdGhpcw0KIAkgKiB3aWxsIG1ha2UgY29uY3VycmVudCBub3JtYWwgYW5kIHN5bmMgaW8gc2xv
+dywNCiAJICogYnV0IGl0IHdpbGwgYXQgbGVhc3QgYmVoYXZlIHNlbnNpYmx5IHdoZW4gdGhleSBh
+cmUNCiAJICogaW4gc2VxdWVuY2UuDQogCSAqLw0KLQlyZXQgPSBmaWxlbWFwX3dyaXRlX2FuZF93
+YWl0KGlub2RlLT5pX21hcHBpbmcpOw0KKwlyZXQgPSBmaWxlbWFwX3dyaXRlX2FuZF93YWl0X3Jh
+bmdlKGlub2RlLT5pX21hcHBpbmcsIG9mZiwNCisJCQkJCQlvZmYgKyBpb2NiLT5raV9sZWZ0KTsN
+CiAJaWYgKHJldCA8IDApDQotCQlnb3RvIGRvbmU7DQotDQotCXJldCA9IHN0cmlwZWRfcmVhZChp
+bm9kZSwgb2ZmLCBsZW4sIHBhZ2VzLCBudW1fcGFnZXMsIGNoZWNrZW9mLA0KLQkJCSAgIGZpbGUt
+PmZfZmxhZ3MgJiBPX0RJUkVDVCwNCi0JCQkgICAodW5zaWduZWQgbG9uZylkYXRhICYgflBBR0Vf
+TUFTSyk7DQorCQlyZXR1cm4gcmV0Ow0KIA0KLQlpZiAocmV0ID49IDAgJiYgKGZpbGUtPmZfZmxh
+Z3MgJiBPX0RJUkVDVCkgPT0gMCkNCi0JCXJldCA9IGNlcGhfY29weV9wYWdlX3ZlY3Rvcl90b191
+c2VyKHBhZ2VzLCBkYXRhLCBvZmYsIHJldCk7DQotCWlmIChyZXQgPj0gMCkNCi0JCSpwb2ZmID0g
+b2ZmICsgcmV0Ow0KKwlpZiAoZmlsZS0+Zl9mbGFncyAmIE9fRElSRUNUKSB7DQorCQl3aGlsZSAo
+aW92X2l0ZXJfY291bnQoaSkpIHsNCisJCQl2b2lkIF9fdXNlciAqZGF0YSA9IGktPmlvdlswXS5p
+b3ZfYmFzZSArIGktPmlvdl9vZmZzZXQ7DQorCQkJc2l6ZV90IGxlbiA9IGktPmlvdlswXS5pb3Zf
+bGVuIC0gaS0+aW92X29mZnNldDsNCisNCisJCQludW1fcGFnZXMgPSBjYWxjX3BhZ2VzX2Zvcigo
+dW5zaWduZWQgbG9uZylkYXRhLCBsZW4pOw0KKwkJCXBhZ2VzID0gY2VwaF9nZXRfZGlyZWN0X3Bh
+Z2VfdmVjdG9yKGRhdGEsDQorCQkJCQkJCSAgICBudW1fcGFnZXMsIHRydWUpOw0KKwkJCWlmIChJ
+U19FUlIocGFnZXMpKQ0KKwkJCQlyZXR1cm4gUFRSX0VSUihwYWdlcyk7DQorDQorCQkJcmV0ID0g
+c3RyaXBlZF9yZWFkKGlub2RlLCBvZmYsIGxlbiwNCisJCQkJCSAgIHBhZ2VzLCBudW1fcGFnZXMs
+IGNoZWNrZW9mLA0KKwkJCQkJICAgMSwgKHVuc2lnbmVkIGxvbmcpZGF0YSAmIH5QQUdFX01BU0sp
+Ow0KKwkJCWNlcGhfcHV0X3BhZ2VfdmVjdG9yKHBhZ2VzLCBudW1fcGFnZXMsIHRydWUpOw0KKw0K
+KwkJCWlmIChyZXQgPD0gMCkNCisJCQkJYnJlYWs7DQorCQkJb2ZmICs9IHJldDsNCisJCQlpZiAo
+cmV0IDwgbGVuKQ0KKwkJCQlicmVhazsNCisJCQlpb3ZfaXRlcl9hZHZhbmNlKGksIHJldCk7DQor
+CQl9DQorCX0gZWxzZSB7DQorCQlzaXplX3QgbGVuID0gaW9jYi0+a2lfbGVmdDsNCiANCi1kb25l
+Og0KLQlpZiAoZmlsZS0+Zl9mbGFncyAmIE9fRElSRUNUKQ0KLQkJY2VwaF9wdXRfcGFnZV92ZWN0
+b3IocGFnZXMsIG51bV9wYWdlcywgdHJ1ZSk7DQotCWVsc2UNCisJCW51bV9wYWdlcyA9IGNhbGNf
+cGFnZXNfZm9yKG9mZiwgbGVuKTsNCisJCXBhZ2VzID0gY2VwaF9hbGxvY19wYWdlX3ZlY3Rvcihu
+dW1fcGFnZXMsIEdGUF9OT0ZTKTsNCisJCWlmIChJU19FUlIocGFnZXMpKQ0KKwkJCXJldHVybiBQ
+VFJfRVJSKHBhZ2VzKTsNCisJCXJldCA9IHN0cmlwZWRfcmVhZChpbm9kZSwgb2ZmLCBsZW4sIHBh
+Z2VzLA0KKwkJCQkJbnVtX3BhZ2VzLCBjaGVja2VvZiwgMCwgMCk7DQorCQlpZiAocmV0ID4gMCkg
+ew0KKwkJCWludCBsLCBrID0gMDsNCisJCQlzaXplX3QgbGVmdCA9IGxlbiA9IHJldDsNCisNCisJ
+CQl3aGlsZSAobGVmdCkgew0KKwkJCQl2b2lkIF9fdXNlciAqZGF0YSA9IGktPmlvdlswXS5pb3Zf
+YmFzZQ0KKwkJCQkJCQkrIGktPmlvdl9vZmZzZXQ7DQorCQkJCWwgPSBtaW4oaS0+aW92WzBdLmlv
+dl9sZW4gLSBpLT5pb3Zfb2Zmc2V0LA0KKwkJCQkJbGVmdCk7DQorDQorCQkJCXJldCA9IGNlcGhf
+Y29weV9wYWdlX3ZlY3Rvcl90b191c2VyKCZwYWdlc1trXSwNCisJCQkJCQkJCSAgICBkYXRhLCBv
+ZmYsDQorCQkJCQkJCQkgICAgbCk7DQorCQkJCWlmIChyZXQgPiAwKSB7DQorCQkJCQlpb3ZfaXRl
+cl9hZHZhbmNlKGksIHJldCk7DQorCQkJCQlsZWZ0IC09IHJldDsNCisJCQkJCW9mZiArPSByZXQ7
+DQorCQkJCQlrID0gY2FsY19wYWdlc19mb3IoaW9jYi0+a2lfcG9zLA0KKwkJCQkJCQkgICBsZW4g
+LSBsZWZ0ICsgMSkgLSAxOw0KKwkJCQkJQlVHX09OKGsgPj0gbnVtX3BhZ2VzICYmIGxlZnQpOw0K
+KwkJCQl9IGVsc2UNCisJCQkJCWJyZWFrOw0KKwkJCX0NCisJCX0NCiAJCWNlcGhfcmVsZWFzZV9w
+YWdlX3ZlY3RvcihwYWdlcywgbnVtX3BhZ2VzKTsNCisJfQ0KKw0KKwlpZiAob2ZmID4gaW9jYi0+
+a2lfcG9zKSB7DQorCQlyZXQgPSBvZmYgLSBpb2NiLT5raV9wb3M7DQorCQlpb2NiLT5raV9wb3Mg
+PSBvZmY7DQorCQlpb2NiLT5raV9sZWZ0IC09IHJldDsNCisJfQ0KKw0KIAlkb3V0KCJzeW5jX3Jl
+YWQgcmVzdWx0ICVkXG4iLCByZXQpOw0KIAlyZXR1cm4gcmV0Ow0KIH0NCkBAIC02NDcsNTUgKzY5
+MCw2NyBAQCBzdGF0aWMgc3NpemVfdCBjZXBoX2Fpb19yZWFkKHN0cnVjdCBraW9jYiAqaW9jYiwg
+Y29uc3Qgc3RydWN0IGlvdmVjICppb3YsDQogew0KIAlzdHJ1Y3QgZmlsZSAqZmlscCA9IGlvY2It
+PmtpX2ZpbHA7DQogCXN0cnVjdCBjZXBoX2ZpbGVfaW5mbyAqZmkgPSBmaWxwLT5wcml2YXRlX2Rh
+dGE7DQotCWxvZmZfdCAqcHBvcyA9ICZpb2NiLT5raV9wb3M7DQotCXNpemVfdCBsZW4gPSBpb3Yt
+Pmlvdl9sZW47DQorCXNpemVfdCBsZW4gPSAwOw0KIAlzdHJ1Y3QgaW5vZGUgKmlub2RlID0gZmls
+ZV9pbm9kZShmaWxwKTsNCiAJc3RydWN0IGNlcGhfaW5vZGVfaW5mbyAqY2kgPSBjZXBoX2lub2Rl
+KGlub2RlKTsNCi0Jdm9pZCBfX3VzZXIgKmJhc2UgPSBpb3YtPmlvdl9iYXNlOw0KIAlzc2l6ZV90
+IHJldDsNCiAJaW50IHdhbnQsIGdvdCA9IDA7DQogCWludCBjaGVja2VvZiA9IDAsIHJlYWQgPSAw
+Ow0KIA0KIAlkb3V0KCJhaW9fcmVhZCAlcCAlbGx4LiVsbHggJWxsdX4ldSB0cnlpbmcgdG8gZ2V0
+IGNhcHMgb24gJXBcbiIsDQogCSAgICAgaW5vZGUsIGNlcGhfdmlub3AoaW5vZGUpLCBwb3MsICh1
+bnNpZ25lZClsZW4sIGlub2RlKTsNCi1hZ2FpbjoNCisNCisJcmV0ID0gZ2VuZXJpY19zZWdtZW50
+X2NoZWNrcyhpb3YsICZucl9zZWdzLCAmbGVuLCBWRVJJRllfV1JJVEUpOw0KKwlpZiAocmV0KQ0K
+KwkJcmV0dXJuIHJldDsNCisNCiAJaWYgKGZpLT5mbW9kZSAmIENFUEhfRklMRV9NT0RFX0xBWlkp
+DQogCQl3YW50ID0gQ0VQSF9DQVBfRklMRV9DQUNIRSB8IENFUEhfQ0FQX0ZJTEVfTEFaWUlPOw0K
+IAllbHNlDQogCQl3YW50ID0gQ0VQSF9DQVBfRklMRV9DQUNIRTsNCiAJcmV0ID0gY2VwaF9nZXRf
+Y2FwcyhjaSwgQ0VQSF9DQVBfRklMRV9SRCwgd2FudCwgJmdvdCwgLTEpOw0KIAlpZiAocmV0IDwg
+MCkNCi0JCWdvdG8gb3V0Ow0KKwkJcmV0dXJuIHJldDsNCisNCiAJZG91dCgiYWlvX3JlYWQgJXAg
+JWxseC4lbGx4ICVsbHV+JXUgZ290IGNhcCByZWZzIG9uICVzXG4iLA0KIAkgICAgIGlub2RlLCBj
+ZXBoX3Zpbm9wKGlub2RlKSwgcG9zLCAodW5zaWduZWQpbGVuLA0KIAkgICAgIGNlcGhfY2FwX3N0
+cmluZyhnb3QpKTsNCiANCiAJaWYgKChnb3QgJiAoQ0VQSF9DQVBfRklMRV9DQUNIRXxDRVBIX0NB
+UF9GSUxFX0xBWllJTykpID09IDAgfHwNCiAJICAgIChpb2NiLT5raV9maWxwLT5mX2ZsYWdzICYg
+T19ESVJFQ1QpIHx8DQotCSAgICAoZmktPmZsYWdzICYgQ0VQSF9GX1NZTkMpKQ0KKwkgICAgKGZp
+LT5mbGFncyAmIENFUEhfRl9TWU5DKSkgew0KKwkJc3RydWN0IGlvdl9pdGVyIGk7DQorDQorCQlp
+b2NiLT5raV9sZWZ0ID0gbGVuOw0KKwkJaW92X2l0ZXJfaW5pdCgmaSwgaW92LCBucl9zZWdzLCBs
+ZW4sIDApOw0KK2FnYWluOg0KIAkJLyogaG1tLCB0aGlzIGlzbid0IHJlYWxseSBhc3luYy4uLiAq
+Lw0KLQkJcmV0ID0gY2VwaF9zeW5jX3JlYWQoZmlscCwgYmFzZSwgbGVuLCBwcG9zLCAmY2hlY2tl
+b2YpOw0KLQllbHNlDQorCQlyZXQgPSBjZXBoX3N5bmNfcmVhZChpb2NiLCAmaSwgJmNoZWNrZW9m
+KTsNCisNCisJCWlmIChjaGVja2VvZiAmJiByZXQgPj0gMCkgew0KKwkJCWludCBzdGF0cmV0ID0g
+Y2VwaF9kb19nZXRhdHRyKGlub2RlLA0KKwkJCQkJCSAgICAgIENFUEhfU1RBVF9DQVBfU0laRSk7
+DQorDQorCQkJLyogaGl0IEVPRiBvciBob2xlPyAqLw0KKwkJCWlmIChzdGF0cmV0ID09IDAgJiYg
+aW9jYi0+a2lfcG9zIDwgaW5vZGUtPmlfc2l6ZSAmJg0KKwkJCQlpb2NiLT5raV9sZWZ0KSB7DQor
+CQkJCWRvdXQoInN5bmNfcmVhZCBoaXQgaG9sZSwgcHBvcyAlbGxkIDwgc2l6ZSAlbGxkIg0KKwkJ
+CQkgICAgICIsIHJlYWRpbmcgbW9yZVxuIiwgaW9jYi0+a2lfcG9zLA0KKwkJCQkgICAgIGlub2Rl
+LT5pX3NpemUpOw0KKw0KKwkJCQlyZWFkICs9IHJldDsNCisJCQkJY2hlY2tlb2YgPSAwOw0KKwkJ
+CQlnb3RvIGFnYWluOw0KKwkJCX0NCisJCX0NCisNCisJfSBlbHNlDQogCQlyZXQgPSBnZW5lcmlj
+X2ZpbGVfYWlvX3JlYWQoaW9jYiwgaW92LCBucl9zZWdzLCBwb3MpOw0KIA0KLW91dDoNCiAJZG91
+dCgiYWlvX3JlYWQgJXAgJWxseC4lbGx4IGRyb3BwaW5nIGNhcCByZWZzIG9uICVzID0gJWRcbiIs
+DQogCSAgICAgaW5vZGUsIGNlcGhfdmlub3AoaW5vZGUpLCBjZXBoX2NhcF9zdHJpbmcoZ290KSwg
+KGludClyZXQpOw0KIAljZXBoX3B1dF9jYXBfcmVmcyhjaSwgZ290KTsNCiANCi0JaWYgKGNoZWNr
+ZW9mICYmIHJldCA+PSAwKSB7DQotCQlpbnQgc3RhdHJldCA9IGNlcGhfZG9fZ2V0YXR0cihpbm9k
+ZSwgQ0VQSF9TVEFUX0NBUF9TSVpFKTsNCi0NCi0JCS8qIGhpdCBFT0Ygb3IgaG9sZT8gKi8NCi0J
+CWlmIChzdGF0cmV0ID09IDAgJiYgKnBwb3MgPCBpbm9kZS0+aV9zaXplKSB7DQotCQkJZG91dCgi
+YWlvX3JlYWQgc3luY19yZWFkIGhpdCBob2xlLCBwcG9zICVsbGQgPCBzaXplICVsbGQsIHJlYWRp
+bmcgbW9yZVxuIiwgKnBwb3MsIGlub2RlLT5pX3NpemUpOw0KLQkJCXJlYWQgKz0gcmV0Ow0KLQkJ
+CWJhc2UgKz0gcmV0Ow0KLQkJCWxlbiAtPSByZXQ7DQotCQkJY2hlY2tlb2YgPSAwOw0KLQkJCWdv
+dG8gYWdhaW47DQotCQl9DQotCX0NCiAJaWYgKHJldCA+PSAwKQ0KIAkJcmV0ICs9IHJlYWQ7DQog
+DQotLSANCjEuOC4xLjINCg==
 
-OK, for the record:
-
-# printf '%x\n' 4104192
-3ea000
-# printf '%x\n' 4194304
-400000
-# attr -q -g ceph._ 'rbd\udata.13a0c74b0dc51.00000000000107ec__head_089EBEBC__2' > /tmp/attr.1
-## Note: reversed bytes
-# xxd /tmp/attr.1 | sed 's/a03e/0040/' | xxd -r > /tmp/attr.2
-# diff -u \
-  <(ceph-dencoder type object_info_t import /tmp/attr.1 decode dump_json) \
-  <(ceph-dencoder type object_info_t import /tmp/attr.2 decode dump_json)
---- /dev/fd/63  2013-09-10 10:28:59.882470249 +1000
-+++ /dev/fd/62  2013-09-10 10:28:59.882470249 +1000
-@@ -9,7 +9,7 @@
-   "version": "20274'699051",
-   "prior_version": "20016'685946",
-   "last_reqid": "client.91723.0:521009894",
--  "size": 4104192,
-+  "size": 4194304,
-   "mtime": "2013-09-08 21:01:45.543328",
-   "lost": 0,
-   "wrlock_by": "unknown.0.0:0",
-# attr -s ceph._ 'rbd\udata.13a0c74b0dc51.00000000000107ec__head_089EBEBC__2' < /tmp/attr.2
-
-(And repeat the 'attr -s' on the secondary storage)
-
-...and repairing again!
-
-Thanks for your help.
-
-Chris.
