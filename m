@@ -1,93 +1,93 @@
-From: David Howells <dhowells@redhat.com>
-Subject: [PATCH] CacheFiles: Fix memory leak in cachefiles_check_auxdata
- error paths
-Date: Wed, 11 Sep 2013 16:38:32 +0100
-Message-ID: <20130911153832.19151.65721.stgit@warthog.procyon.org.uk>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Jerasure 1.2A plugin for Ceph
+Date: Wed, 11 Sep 2013 17:40:13 +0200
+Message-ID: <52308EDD.5020100@dachary.org>
+References: <522055BE.2040200@dachary.org> <CFA250A5-F536-4C28-AC69-10C7F2B6DD39@cs.utk.edu>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig1CB4E1523728676543FD275F"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:13080 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752981Ab3IKPih (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 11 Sep 2013 11:38:37 -0400
+Received: from smtp.dmail.dachary.org ([91.121.254.229]:60028 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754834Ab3IKPkO (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Sep 2013 11:40:14 -0400
+In-Reply-To: <CFA250A5-F536-4C28-AC69-10C7F2B6DD39@cs.utk.edu>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: milosz@adfin.com
-Cc: ceph-devel@vger.kernel.org, linux-cachefs@redhat.com, linux-kernel@vger.kernel.org, Hongyi Jia <jiayisuse@gmail.com>, Josh Boyer <jwboyer@fedoraproject.org>
+To: James Plank <plank@cs.utk.edu>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-From: Josh Boyer <jwboyer@redhat.com>
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig1CB4E1523728676543FD275F
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-In cachefiles_check_auxdata(), we allocate auxbuf but fail to free it if we get
-determine there's an error or that the data is stale.
+[cc'ing the devel mailing list]
 
-Further, assigning the output of vfs_getxattr() to auxbuf->len gives problems
-with checking for errors as auxbuf->len is a u16.  We don't actually need to
-set auxbuf->len, so keep the length in a variable for now.  We shouldn't need
-to check the upper limit of the buffer as an overflow there should be
-indicated by -ERANGE.
+Hi James,
 
-Whilst we're at it, fscache_check_aux() returns an enum value, not an int, so
-assign it to an appropriately typed variable rather than to ret.
+Thanks for the positive feedback :-) I found the API fairly straightforwa=
+rd and I don't see what could be improved. However, I've learnt about era=
+sure code and designed the Ceph plugin abstract API mostly by studying je=
+rasure. I'm probably biased : let hear what others have to suggest.
 
-Signed-off-by: Josh Boyer <jwboyer@fedoraproject.org>
-Signed-off-by: David Howells <dhowells@redhat.com>
-cc: Hongyi Jia <jiayisuse@gmail.com>
-cc: Milosz Tanski <milosz@adfin.com>
----
+Cheers
 
- fs/cachefiles/xattr.c |   29 +++++++++++++++--------------
- 1 file changed, 15 insertions(+), 14 deletions(-)
+On 11/09/2013 17:04, James Plank wrote:
+> Hi Loic -- I took a scan, and it looks like a nice usage of the library=
+=2E  Here's a question -- for the next revision of jerasure, are there an=
+y functionalities that you would like to see, that would make your life a=
+s a developer easier?  Thanks!  Jim
+> ----------
+>=20
+> On Aug 30, 2013, at 4:20 AM, Loic Dachary wrote:
+>=20
+>> Hi James,
+>>
+>> The first version of the jerasure 1.2A plugin for Ceph is complete at
+>>
+>> https://github.com/ceph/ceph/pull/538#commits-pushed-763275e
+>>
+>> This commit introduces the main part:
+>> ErasureCodeJerasure: base class for jerasure ErasureCodeInterface
+>> https://github.com/dachary/ceph/commit/76d2842358465e560a4929d60131762=
+f8c93804f
+>>
+>> and each technique is derived from it in six successive commits, start=
+ing from here
+>> ErasureCodeJerasure: define technique ReedSolomonVandermonde
+>>
+>> It would be great if you could take a look and let us know if you see =
+anything odd.
+>>
+>> Cheers
+>>
+>> --=20
+>> Lo=EFc Dachary, Artisan Logiciel Libre
+>> All that is necessary for the triumph of evil is that good people do n=
+othing.
+>>
+>=20
 
-diff --git a/fs/cachefiles/xattr.c b/fs/cachefiles/xattr.c
-index 34c88b8..12b0eef 100644
---- a/fs/cachefiles/xattr.c
-+++ b/fs/cachefiles/xattr.c
-@@ -162,8 +162,9 @@ int cachefiles_update_object_xattr(struct cachefiles_object *object,
- int cachefiles_check_auxdata(struct cachefiles_object *object)
- {
- 	struct cachefiles_xattr *auxbuf;
-+	enum fscache_checkaux validity;
- 	struct dentry *dentry = object->dentry;
--	unsigned int dlen;
-+	ssize_t xlen;
- 	int ret;
- 
- 	ASSERT(dentry);
-@@ -174,22 +175,22 @@ int cachefiles_check_auxdata(struct cachefiles_object *object)
- 	if (!auxbuf)
- 		return -ENOMEM;
- 
--	auxbuf->len = vfs_getxattr(dentry, cachefiles_xattr_cache,
--				   &auxbuf->type, 512 + 1);
--	if (auxbuf->len < 1)
--		return -ESTALE;
--
--	if (auxbuf->type != object->fscache.cookie->def->type)
--		return -ESTALE;
-+	xlen = vfs_getxattr(dentry, cachefiles_xattr_cache,
-+			    &auxbuf->type, 512 + 1);
-+	ret = -ESTALE;
-+	if (xlen < 1 ||
-+	    auxbuf->type != object->fscache.cookie->def->type)
-+		goto error;
- 
--	dlen = auxbuf->len - 1;
--	ret = fscache_check_aux(&object->fscache, &auxbuf->data, dlen);
-+	xlen--;
-+	validity = fscache_check_aux(&object->fscache, &auxbuf->data, xlen);
-+	if (validity != FSCACHE_CHECKAUX_OKAY)
-+		goto error;
- 
-+	ret = 0;
-+error:
- 	kfree(auxbuf);
--	if (ret != FSCACHE_CHECKAUX_OKAY)
--		return -ESTALE;
--
--	return 0;
-+	return ret;
- }
- 
- /*
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+All that is necessary for the triumph of evil is that good people do noth=
+ing.
 
+
+--------------enig1CB4E1523728676543FD275F
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.19 (GNU/Linux)
+Comment: Using GnuPG with undefined - http://www.enigmail.net/
+
+iEYEARECAAYFAlIwjt0ACgkQ8dLMyEl6F20ZrQCfRAF1DGN08S35SYfsYGWYx7Qv
+nh0An2ifLQUjBVdKUpwD9FET3YLmUxhQ
+=dYs9
+-----END PGP SIGNATURE-----
+
+--------------enig1CB4E1523728676543FD275F--
