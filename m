@@ -1,38 +1,43 @@
-From: Patrick McGarry <patrick-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Subject: Launching #ceph-devel
-Date: Thu, 12 Sep 2013 19:38:37 -0400
-Message-ID: <CAP8Oy=+NtxTWPq9jYv=wkAtHDzjrWQ9D4oYO8C8q5_WC9Ovn_Q@mail.gmail.com>
+From: James Harper <james.harper@bendigoit.com.au>
+Subject: RE: still crashes with tapdisk rbd
+Date: Thu, 12 Sep 2013 23:50:02 +0000
+Message-ID: <6035A0D088A63A46850C3988ED045A4B664E7BDE@BITCOM1.int.sbss.com.au>
+References: <6035A0D088A63A46850C3988ED045A4B664DF854@BITCOM1.int.sbss.com.au>
+ <alpine.DEB.2.00.1309120726120.23229@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Transfer-Encoding: 8BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from smtp1.bendigoit.com.au ([203.16.224.4]:46680 "EHLO
+	smtp1.bendigoit.com.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756834Ab3ILXuN convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 12 Sep 2013 19:50:13 -0400
+In-Reply-To: <alpine.DEB.2.00.1309120726120.23229@cobra.newdream.net>
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Greetings and salutations!
+> 
+> There isn't a simple magic string I can point to except for struct
+> ceph_msg_header, but I doubt that will help, since it is reading the
+> headers and message bodies into different buffers.
 
-We have been blessed with an abundance of Ceph-related discussion on
-IRC and as a result have decided to split off those discussions which
-are strictly related to the development of Ceph to a new Channel.
+Ok thanks.
 
-Enter #ceph-devel (still on OFTC): http://ceph.com/resources/mailing-list-irc/
+> I forget: are you able
+> to reproduce any of this with debugging enabled?  I would suggest adding
+> pointers to the debug statements in msg/Pipe.cc to narrow down what is
+> using some of this memory.
 
-We would love for those folks hacking on Ceph to join us and partake
-of all manner of Ceph-fu.  Happy patching!
+I'll have a look. gdb is useless as it crashes most of the time and when it doesn't it doesn't give me a stack trace. The only way I can do anything is via another machine running a newer gdb (debian Jessie instead of Wheezy), but even then it still gets confused about threads sometimes.
 
+> You might also want to just look at read_message, connect, and accept in
+> Pipe.cc as I think those are the only places where data is read off the
+> network into a buffer/struct on the stack.
+> 
 
-Best Regards,
+Thanks for the pointers.
 
-Patrick McGarry
-Director, Community || Inktank
-http://ceph.com  ||  http://inktank.com
-@scuttlemonkey || @ceph || @inktank
+James
