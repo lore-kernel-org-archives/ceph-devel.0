@@ -1,91 +1,46 @@
-From: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: many report failed after mon election
-Date: Thu, 12 Sep 2013 19:38:17 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1309121937230.16175@cobra.newdream.net>
-References: <CAMNMNTwCMewLfTXsZHotCzqBy_sKFtCkqEjCt88-Z3O5Ta8bJw@mail.gmail.com>
+From: James Harper <james.harper@bendigoit.com.au>
+Subject: RE: still crashes with tapdisk rbd
+Date: Fri, 13 Sep 2013 09:19:50 +0000
+Message-ID: <6035A0D088A63A46850C3988ED045A4B664E895A@BITCOM1.int.sbss.com.au>
+References: <6035A0D088A63A46850C3988ED045A4B664DF854@BITCOM1.int.sbss.com.au>
+ <alpine.DEB.2.00.1309120726120.23229@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAMNMNTwCMewLfTXsZHotCzqBy_sKFtCkqEjCt88-Z3O5Ta8bJw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Dominik Mostowiec <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
-
-On Thu, 12 Sep 2013, Dominik Mostowiec wrote:
-> Hi,
-> Today i have some issues with ceph cluster.
-> After new mon election many osd has been marked failed.
-> Some time later osd boot and i think recover because meny slow request appear.
-> Cluster come back after about 20minutes.
-
-Was there some other event that triggered the mon election?  There's not 
-much here to go on except that several elections were called and by 
-different monitors, which suggests something was not quite right.
-
-sage
-
+Content-Transfer-Encoding: 8BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from smtp2.bendigoit.com.au ([203.16.207.99]:57288 "EHLO
+	smtp2.bendigoit.com.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751670Ab3IMJUK convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Sep 2013 05:20:10 -0400
+In-Reply-To: <alpine.DEB.2.00.1309120726120.23229@cobra.newdream.net>
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
 > 
-> cluster:
-> ceph version 0.56.6
-> 6 servers x 26 osd
+> You might also want to just look at read_message, connect, and accept in
+> Pipe.cc as I think those are the only places where data is read off the
+> network into a buffer/struct on the stack.
 > 
-> 2013-09-12 07:11:40.920384 mon.1 10.177.64.5:6789/0 353 : [INF] mon.3
-> calling new monitor election
-> 2013-09-12 07:12:40.992532 mon.3 10.177.64.7:6789/0 364 : [INF] mon.4
-> calling new monitor election
-> 2013-09-12 07:12:41.024954 mon.4 10.177.64.8:6789/0 360 : [INF] mon.2
-> calling new monitor election
-> 2013-09-12 07:13:02.782203 mon.2 10.177.64.6:6789/0 336 : [INF] mon.1
-> calling new monitor election
-> 2013-09-12 07:13:02.783778 mon.3 10.177.64.7:6789/0 366 : [INF] mon.4
-> calling new monitor election
-> 2013-09-12 07:13:10.852842 mon.3 10.177.64.7:6789/0 367 : [INF] mon.4
-> calling new monitor election
-> 2013-09-12 16:17:09.484277 mon.4 10.177.64.8:6789/0 363 : [INF] mon.2
-> calling new monitor election
-> 2013-09-12 16:17:09.497337 mon.3 10.177.64.7:6789/0 368 : [INF] mon.4
-> calling new monitor election
-> 2013-09-12 16:17:09.523787 mon.0 10.177.64.4:6789/0 4369021 : [INF]
-> mon.0 calling new monitor election
-> 2013-09-12 16:17:14.525282 mon.0 10.177.64.4:6789/0 4369022 : [INF]
-> mon.0@0 won leader election with quorum 0,1,2,3,4
-> ...
-> 2013-09-12 16:17:14.689555 mon.0 10.177.64.4:6789/0 4369027 : [DBG]
-> osd.130 10.177.64.9:6801/1401 reported failed by osd.121
-> 10.177.64.7:6909/29496
-> 2013-09-12 16:17:14.689584 mon.0 10.177.64.4:6789/0 4369028 : [DBG]
-> osd.131 10.177.64.9:6810/2435 reported failed by osd.121
-> 10.177.64.7:6909/29496
-> 2013-09-12 16:17:14.689600 mon.0 10.177.64.4:6789/0 4369029 : [DBG]
-> osd.132 10.177.64.9:6846/2885 reported failed by osd.121
-> 10.177.64.7:6909/29496
-> 2013-09-12 16:17:14.689615 mon.0 10.177.64.4:6789/0 4369030 : [DBG]
-> osd.134 10.177.64.9:6855/3223 reported failed by osd.121
-> 10.177.64.7:6909/29496
-> 2013-09-12 16:17:14.689630 mon.0 10.177.64.4:6789/0 4369031 : [DBG]
-> osd.136 10.177.64.9:6865/3559 reported failed by osd.121
-> 10.177.64.7:6909/29496
-> 2013-09-12 16:17:14.689645 mon.0 10.177.64.4:6789/0 4369032 : [DBG]
-> osd.141 10.177.64.9:6904/4259 reported failed by osd.121
-> 10.177.64.7:6909/29496
-> 
-> -- 
-> Pozdrawiam
-> Dominik
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+
+After adding the following to the [client] section of the config file the problem seems to have gone away, or at least I haven't been able to reproduce it where previously I had figured out a way to reproduce it reliably:
+
+[client]
+ms rwthread stack bytes = 8388608
+
+It seems that ceph uses a stack size of 1M in the absence of the above. I'm not sure if the original problem was a stack overflow and this fixes it, or if I'm just working around it by making the stack bigger...
+
+Previously I'd created a wrapper around pthread_cond_wait, and had that wrapper:
+. allocate a large (256KB when stack size was 1MB) array on the stack
+. fill that array with increasing values (1, 2, 3, etc)
+. protect the memory pages (whole pages only) in that array with mprotect
+. call pthread_cond_wait proper
+. unprotect the pages
+. check the array to make sure it was still intact
+
+It appears to pretty much always be the writer wait thread whose stack was being corrupted on wait, but nothing ever tripped up the above, and a lot of the time the above would itself crash half way through filling up the structure, always on a page boundary. Does gcc use a guard page on the stack?
+
+James
+
