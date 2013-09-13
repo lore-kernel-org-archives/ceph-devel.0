@@ -1,115 +1,217 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Call for participants : teuthology weekly meeting
-Date: Fri, 13 Sep 2013 13:44:57 +0200
-Message-ID: <5232FAB9.1090701@dachary.org>
-References: <52028301.70301@dachary.org> <520A2D0E.9060709@dachary.org>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [Ceph-qa] 3 failed, 51 passed in
+ teuthology-2013-09-11_23:01:12-fs-master-testing-basic-plana
+Date: Fri, 13 Sep 2013 08:01:04 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1309130800310.27240@cobra.newdream.net>
+References: <20130913065626.D4A4F2812A3@teuthology.front.sepia.ceph.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enig5DA52AB4ABC6A0A23F9B7285"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:33819 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750842Ab3IMLo7 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Sep 2013 07:44:59 -0400
-Received: from [10.9.0.6] (openvpn.novalocal [10.145.3.13])
-	by smtp.dmail.dachary.org (Postfix) with ESMTPS id ADA2B26394
-	for <ceph-devel@vger.kernel.org>; Fri, 13 Sep 2013 13:44:57 +0200 (CEST)
-In-Reply-To: <520A2D0E.9060709@dachary.org>
+Received: from cobra.newdream.net ([66.33.216.30]:36938 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932093Ab3IMPBF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Sep 2013 11:01:05 -0400
+In-Reply-To: <20130913065626.D4A4F2812A3@teuthology.front.sepia.ceph.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: ceph-qa <ceph-qa@ceph.com>
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig5DA52AB4ABC6A0A23F9B7285
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+afaict the tcmalloc gitbuidler is building against tcmalloc again.  this 
+probably got broken by the Makefile refactor?
 
-Hi,
+s
 
-Zack Cerza who is the driving force behind teuthology kindly accepted to =
-hold the first teuthology meeting=20
+On Thu, 12 Sep 2013, teuthworker@teuthology.front.sepia.ceph.com wrote:
 
-      thursday 19th september 2013, 6pm Paris/Berlin time / 9am Los Angel=
-es time.=20
-
-Now that #ceph-devel is live we will use it as a back-channel. There is n=
-o formal agenda except : "I want my own teuthology!" ;-) It will be timeb=
-oxed to one hour max and the communication channel ( mumble, phone confer=
-ence ... ) will be announced on #ceph-devel half an hour before ( my nick=
- is loicd ).
-
-Cheers
-
-On 13/08/2013 14:56, Loic Dachary wrote:
-> Hi Ceph,
->=20
-> Teuthology was successfully installed & run as described here:
->=20
-> http://dachary.org/?p=3D2204
->=20
-> with only two minor glitches:
->=20
-> "teuthology : ulimit: error" http://thread.gmane.org/gmane.comp.file-sy=
-stems.ceph.devel/16421
-> "do not check the jobid if check-locks is False" https://github.com/cep=
-h/teuthology/pull/27
->=20
-> Cheers
->=20
-> On 07/08/2013 19:25, Loic Dachary wrote:
->> Hi Ceph,
->>
->> During the Emperor summit this week, running and installing teuthology=
- with a minimum effort was discussed ( see http://youtu.be/hrQuYzyXvVg?t=3D=
-1h21m49s and http://pad.ceph.com/p/cds-teuthology ) I've installed it onc=
-e, back in January 2013 and that was not too difficult but required a few=
- hours and exchanging a few mails. More importantly, I soon discovered th=
-at the Inktank developers are modifying teuthology quite often and don't =
-really have the bandwidth to make sure any third party can install or upg=
-rade. It is still very much a tool internal to inktank.
->>
->> There are a number of Ceph developers who, like me, would like to be a=
-ble to run teuthology on their own machines. But none of us has the time =
-to make that happen on his / her own. However, if we get together, we may=
- be able to do it. The trick is to keep up with Inktank changes and we ma=
-y have found a way : meet online with the Inktank's teuthology developers=
- on a weekly basis to bridge the gap. That would not be forever : just un=
-til there are enough teuthology users and Inktank is just one of them.
->>
->> Of course that will require some work on our part ( non Inktank employ=
-ees ) but the overall benefit of running integration tests is worth it. A=
-t least it's enough incentive for me to dedicate at least 4 hours on a we=
-ekly basis.=20
->>
->> This is an open discussion, nothing is set except the commitment of In=
-ktank to participate in these meetings and my own commitment of at least =
-4 hours / week i.e. half a day doing just this. Including the meeting  ;-=
-)
->>
->> Who's willing to join this effort ? Do you think there is a better way=
- ?
->>
->=20
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-All that is necessary for the triumph of evil is that good people do noth=
-ing.
-
-
---------------enig5DA52AB4ABC6A0A23F9B7285
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with undefined - http://www.enigmail.net/
-
-iEYEARECAAYFAlIy+rkACgkQ8dLMyEl6F20dIQCdFXyRB5olsDmG29zJ9g9+DhGH
-XloAn3YRlV1XkrKs7ZIiKrrStYatHhoX
-=fmjs
------END PGP SIGNATURE-----
-
---------------enig5DA52AB4ABC6A0A23F9B7285--
+> Test Run: teuthology-2013-09-11_23:01:12-fs-master-testing-basic-plana
+> =================================================================
+> logs:   http://qa-proxy.ceph.com/teuthology/teuthology-2013-09-11_23:01:12-fs-master-testing-basic-plana/
+> failed: 3
+> hung:   0
+> passed: 51
+> 
+> Failed
+> =================================================================
+> [30719]  fs/verify/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_suites_dbench.yaml validater/valgrind.yaml}
+> -----------------------------------------------------------------
+> time:   2713s
+> log:    http://qa-proxy.ceph.com/teuthology/teuthology-2013-09-11_23:01:12-fs-master-testing-basic-plana/30719/
+> 
+>     saw valgrind issues
+> 
+> [30723]  fs/verify/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/libcephfs_interface_tests.yaml validater/valgrind.yaml}
+> -----------------------------------------------------------------
+> time:   783s
+> log:    http://qa-proxy.ceph.com/teuthology/teuthology-2013-09-11_23:01:12-fs-master-testing-basic-plana/30723/
+> 
+>     saw valgrind issues
+> 
+> [30721]  fs/verify/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_suites_fsstress.yaml validater/valgrind.yaml}
+> -----------------------------------------------------------------
+> time:   15816s
+> log:    http://qa-proxy.ceph.com/teuthology/teuthology-2013-09-11_23:01:12-fs-master-testing-basic-plana/30721/
+> 
+>     saw valgrind issues
+> 
+> 
+> Passed
+> =================================================================
+> [30675] fs/basic/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_suites_ffsb.yaml}
+> time:    1210s
+> 
+> [30674] fs/basic/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_suites_dbench.yaml}
+> time:    2209s
+> 
+> [30677] fs/basic/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_suites_fsx.yaml}
+> time:    3669s
+> 
+> [30676] fs/basic/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_suites_fsstress.yaml}
+> time:    649s
+> 
+> [30671] fs/basic/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_misc.yaml}
+> time:    16092s
+> 
+> [30670] fs/basic/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_kernel_untar_build.yaml}
+> time:    9462s
+> 
+> [30673] fs/basic/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_suites_blogbench.yaml}
+> time:    758s
+> 
+> [30672] fs/basic/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_misc_test_o_trunc.yaml}
+> time:    3166s
+> 
+> [30712] fs/thrash/{ceph/base.yaml ceph-thrash/default.yaml clusters/mds-1active-1standby.yaml fs/btrfs.yaml msgr-failures/osd-mds-delay.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_trivial_sync.yaml}
+> time:    193s
+> 
+> [30713] fs/traceless/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_suites_blogbench.yaml traceless/50pc.yaml}
+> time:    715s
+> 
+> [30710] fs/thrash/{ceph/base.yaml ceph-thrash/default.yaml clusters/mds-1active-1standby.yaml fs/btrfs.yaml msgr-failures/osd-mds-delay.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_suites_fsstress.yaml}
+> time:    601s
+> 
+> [30711] fs/thrash/{ceph/base.yaml ceph-thrash/default.yaml clusters/mds-1active-1standby.yaml fs/btrfs.yaml msgr-failures/osd-mds-delay.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_suites_pjd.yaml}
+> time:    459s
+> 
+> [30679] fs/basic/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_suites_iogen.yaml}
+> time:    889s
+> 
+> [30678] fs/basic/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_suites_fsync.yaml}
+> time:    229s
+> 
+> [30714] fs/traceless/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_suites_dbench.yaml traceless/50pc.yaml}
+> time:    2183s
+> 
+> [30715] fs/traceless/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_suites_ffsb.yaml traceless/50pc.yaml}
+> time:    1153s
+> 
+> [30688] fs/multiclient/{clusters/three_clients.yaml fs/btrfs.yaml mount/ceph-fuse.yaml tasks/mdtest.yaml}
+> time:    529s
+> 
+> [30689] fs/multiclient/{clusters/two_clients.yaml fs/btrfs.yaml mount/ceph-fuse.yaml tasks/ior-shared-file.yaml}
+> time:    144s
+> 
+> [30680] fs/basic/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_suites_iozone.yaml}
+> time:    753s
+> 
+> [30681] fs/basic/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_suites_pjd.yaml}
+> time:    370s
+> 
+> [30682] fs/basic/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_suites_tiobench.yaml}
+> time:    477s
+> 
+> [30683] fs/basic/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_suites_truncate_delay.yaml}
+> time:    157s
+> 
+> [30684] fs/basic/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_trivial_sync.yaml}
+> time:    154s
+> 
+> [30685] fs/basic/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/libcephfs_interface_tests.yaml}
+> time:    250s
+> 
+> [30686] fs/basic/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/libcephfs_java.yaml}
+> time:    172s
+> 
+> [30687] fs/multiclient/{clusters/three_clients.yaml fs/btrfs.yaml mount/ceph-fuse.yaml tasks/ior-shared-file.yaml}
+> time:    160s
+> 
+> [30722] fs/verify/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/libcephfs_interface_tests.yaml validater/lockdep.yaml}
+> time:    275s
+> 
+> [30720] fs/verify/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_suites_fsstress.yaml validater/lockdep.yaml}
+> time:    654s
+> 
+> [30718] fs/verify/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_suites_dbench.yaml validater/lockdep.yaml}
+> time:    2186s
+> 
+> [30709] fs/thrash/{ceph/base.yaml ceph-thrash/default.yaml clusters/mds-1active-1standby.yaml fs/btrfs.yaml msgr-failures/none.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_trivial_sync.yaml}
+> time:    155s
+> 
+> [30708] fs/thrash/{ceph/base.yaml ceph-thrash/default.yaml clusters/mds-1active-1standby.yaml fs/btrfs.yaml msgr-failures/none.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_suites_pjd.yaml}
+> time:    442s
+> 
+> [30701] fs/samba/{clusters/samba-basic.yaml fs/btrfs.yaml install/install.yaml mount/native.yaml workload/cifs-tiobench.yaml}
+> time:    568s
+> 
+> [30700] fs/samba/{clusters/samba-basic.yaml fs/btrfs.yaml install/install.yaml mount/native.yaml workload/cifs-fsstress.yaml}
+> time:    434s
+> 
+> [30703] fs/samba/{clusters/samba-basic.yaml fs/btrfs.yaml install/install.yaml mount/noceph.yaml workload/cifs-dbench.yaml}
+> time:    1635s
+> 
+> [30702] fs/samba/{clusters/samba-basic.yaml fs/btrfs.yaml install/install.yaml mount/native.yaml workload/smbtorture.yaml}
+> time:    2470s
+> 
+> [30705] fs/samba/{clusters/samba-basic.yaml fs/btrfs.yaml install/install.yaml mount/noceph.yaml workload/cifs-tiobench.yaml}
+> time:    262s
+> 
+> [30704] fs/samba/{clusters/samba-basic.yaml fs/btrfs.yaml install/install.yaml mount/noceph.yaml workload/cifs-fsstress.yaml}
+> time:    227s
+> 
+> [30707] fs/thrash/{ceph/base.yaml ceph-thrash/default.yaml clusters/mds-1active-1standby.yaml fs/btrfs.yaml msgr-failures/none.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_suites_fsstress.yaml}
+> time:    1114s
+> 
+> [30706] fs/samba/{clusters/samba-basic.yaml fs/btrfs.yaml install/install.yaml mount/noceph.yaml workload/smbtorture.yaml}
+> time:    2045s
+> 
+> [30716] fs/traceless/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_suites_fsstress.yaml traceless/50pc.yaml}
+> time:    700s
+> 
+> [30699] fs/samba/{clusters/samba-basic.yaml fs/btrfs.yaml install/install.yaml mount/native.yaml workload/cifs-dbench.yaml}
+> time:    1739s
+> 
+> [30698] fs/samba/{clusters/samba-basic.yaml fs/btrfs.yaml install/install.yaml mount/kclient.yaml workload/smbtorture.yaml}
+> time:    2079s
+> 
+> [30697] fs/samba/{clusters/samba-basic.yaml fs/btrfs.yaml install/install.yaml mount/kclient.yaml workload/cifs-tiobench.yaml}
+> time:    484s
+> 
+> [30696] fs/samba/{clusters/samba-basic.yaml fs/btrfs.yaml install/install.yaml mount/kclient.yaml workload/cifs-fsstress.yaml}
+> time:    519s
+> 
+> [30695] fs/samba/{clusters/samba-basic.yaml fs/btrfs.yaml install/install.yaml mount/kclient.yaml workload/cifs-dbench.yaml}
+> time:    1681s
+> 
+> [30694] fs/samba/{clusters/samba-basic.yaml fs/btrfs.yaml install/install.yaml mount/fuse.yaml workload/smbtorture.yaml}
+> time:    2192s
+> 
+> [30693] fs/samba/{clusters/samba-basic.yaml fs/btrfs.yaml install/install.yaml mount/fuse.yaml workload/cifs-tiobench.yaml}
+> time:    595s
+> 
+> [30692] fs/samba/{clusters/samba-basic.yaml fs/btrfs.yaml install/install.yaml mount/fuse.yaml workload/cifs-fsstress.yaml}
+> time:    812s
+> 
+> [30691] fs/samba/{clusters/samba-basic.yaml fs/btrfs.yaml install/install.yaml mount/fuse.yaml workload/cifs-dbench.yaml}
+> time:    1726s
+> 
+> [30690] fs/multiclient/{clusters/two_clients.yaml fs/btrfs.yaml mount/ceph-fuse.yaml tasks/mdtest.yaml}
+> time:    452s
+> 
+> [30717] fs/traceless/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_suites_tiobench.yaml traceless/50pc.yaml}
+> time:    439s
+> _______________________________________________
+> Ceph-qa mailing list
+> Ceph-qa@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-qa-ceph.com
+> 
+> 
