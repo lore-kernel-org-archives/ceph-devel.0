@@ -1,234 +1,336 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [Ceph-qa] 3 failed, 51 passed in
- teuthology-2013-09-11_23:01:12-fs-master-testing-basic-plana
-Date: Fri, 13 Sep 2013 11:37:47 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1309131137410.1004@cobra.newdream.net>
-References: <20130913065626.D4A4F2812A3@teuthology.front.sepia.ceph.com> <alpine.DEB.2.00.1309130800310.27240@cobra.newdream.net> <CAN04cT4Dfa6S5J_2py58pkq-q9isopoYgxSZO4bG0aPdSs7pkg@mail.gmail.com>
+From: "=?UTF-8?B?TGx1w61zIFDDoG1pZXMgaSBKdcOhcmV6?=" <llpamies@pamies.cat>
+Subject: Re: compilation error
+Date: Fri, 13 Sep 2013 12:04:17 -0700
+Message-ID: <CAKD2hyFs4MM5ezmFFpUUpueOc397THmO0--JY4fAkNtfeBLEYw@mail.gmail.com>
+References: <CAKD2hyHbXtgGy9JNJVckuMOOkvvkcESujv89ciQszKUGPrtmog@mail.gmail.com>
+	<CAN04cT6NrzAAYOWvzpDkfvk_wuY3oFMPQrrkqQx789UZHjurUw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: multipart/mixed; boundary=089e010d9e7272697804e648858e
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:38777 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753958Ab3IMShu (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Sep 2013 14:37:50 -0400
-In-Reply-To: <CAN04cT4Dfa6S5J_2py58pkq-q9isopoYgxSZO4bG0aPdSs7pkg@mail.gmail.com>
+Received: from mail-yh0-f54.google.com ([209.85.213.54]:43917 "EHLO
+	mail-yh0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751601Ab3IMTEU (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Sep 2013 15:04:20 -0400
+Received: by mail-yh0-f54.google.com with SMTP id z20so768492yhz.27
+        for <ceph-devel@vger.kernel.org>; Fri, 13 Sep 2013 12:04:19 -0700 (PDT)
+Received: by mail-ie0-f177.google.com with SMTP id qd12so3236232ieb.8
+        for <ceph-devel@vger.kernel.org>; Fri, 13 Sep 2013 12:04:17 -0700 (PDT)
+In-Reply-To: <CAN04cT6NrzAAYOWvzpDkfvk_wuY3oFMPQrrkqQx789UZHjurUw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Roald van Loon <roaldvanloon@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, ceph-qa <ceph-qa@ceph.com>
+Cc: =?UTF-8?B?TGx1w61zIFDDoG1pZXMgaSBKdcOhcmV6?= <llpamies@pamies.cat>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-yep, i think so!
+--089e010d9e7272697804e648858e
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 
-On Fri, 13 Sep 2013, Roald van Loon wrote:
+Hi Roald,
 
+I'm using git version 1.8.1.2, and run a plain "./configure" with no extra =
+args.
+
+Thank you.
+
+On Fri, Sep 13, 2013 at 11:23 AM, Roald van Loon <roaldvanloon@gmail.com> w=
+rote:
 > Hi,
-> 
-> I assume this is fixed by #594?
-> 
+>
+> I haven't seen this error before. What's your git version? And could
+> you give us your configure command, config.status file and the output
+> of a make V=3D1?
+>
 > Roald
-> 
-> On Fri, Sep 13, 2013 at 5:01 PM, Sage Weil <sage@inktank.com> wrote:
-> > afaict the tcmalloc gitbuidler is building against tcmalloc again.  this
-> > probably got broken by the Makefile refactor?
-> >
-> > s
-> >
-> > On Thu, 12 Sep 2013, teuthworker@teuthology.front.sepia.ceph.com wrote:
-> >
-> >> Test Run: teuthology-2013-09-11_23:01:12-fs-master-testing-basic-plana
-> >> =================================================================
-> >> logs:   http://qa-proxy.ceph.com/teuthology/teuthology-2013-09-11_23:01:12-fs-master-testing-basic-plana/
-> >> failed: 3
-> >> hung:   0
-> >> passed: 51
-> >>
-> >> Failed
-> >> =================================================================
-> >> [30719]  fs/verify/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_suites_dbench.yaml validater/valgrind.yaml}
-> >> -----------------------------------------------------------------
-> >> time:   2713s
-> >> log:    http://qa-proxy.ceph.com/teuthology/teuthology-2013-09-11_23:01:12-fs-master-testing-basic-plana/30719/
-> >>
-> >>     saw valgrind issues
-> >>
-> >> [30723]  fs/verify/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/libcephfs_interface_tests.yaml validater/valgrind.yaml}
-> >> -----------------------------------------------------------------
-> >> time:   783s
-> >> log:    http://qa-proxy.ceph.com/teuthology/teuthology-2013-09-11_23:01:12-fs-master-testing-basic-plana/30723/
-> >>
-> >>     saw valgrind issues
-> >>
-> >> [30721]  fs/verify/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_suites_fsstress.yaml validater/valgrind.yaml}
-> >> -----------------------------------------------------------------
-> >> time:   15816s
-> >> log:    http://qa-proxy.ceph.com/teuthology/teuthology-2013-09-11_23:01:12-fs-master-testing-basic-plana/30721/
-> >>
-> >>     saw valgrind issues
-> >>
-> >>
-> >> Passed
-> >> =================================================================
-> >> [30675] fs/basic/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_suites_ffsb.yaml}
-> >> time:    1210s
-> >>
-> >> [30674] fs/basic/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_suites_dbench.yaml}
-> >> time:    2209s
-> >>
-> >> [30677] fs/basic/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_suites_fsx.yaml}
-> >> time:    3669s
-> >>
-> >> [30676] fs/basic/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_suites_fsstress.yaml}
-> >> time:    649s
-> >>
-> >> [30671] fs/basic/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_misc.yaml}
-> >> time:    16092s
-> >>
-> >> [30670] fs/basic/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_kernel_untar_build.yaml}
-> >> time:    9462s
-> >>
-> >> [30673] fs/basic/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_suites_blogbench.yaml}
-> >> time:    758s
-> >>
-> >> [30672] fs/basic/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_misc_test_o_trunc.yaml}
-> >> time:    3166s
-> >>
-> >> [30712] fs/thrash/{ceph/base.yaml ceph-thrash/default.yaml clusters/mds-1active-1standby.yaml fs/btrfs.yaml msgr-failures/osd-mds-delay.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_trivial_sync.yaml}
-> >> time:    193s
-> >>
-> >> [30713] fs/traceless/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_suites_blogbench.yaml traceless/50pc.yaml}
-> >> time:    715s
-> >>
-> >> [30710] fs/thrash/{ceph/base.yaml ceph-thrash/default.yaml clusters/mds-1active-1standby.yaml fs/btrfs.yaml msgr-failures/osd-mds-delay.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_suites_fsstress.yaml}
-> >> time:    601s
-> >>
-> >> [30711] fs/thrash/{ceph/base.yaml ceph-thrash/default.yaml clusters/mds-1active-1standby.yaml fs/btrfs.yaml msgr-failures/osd-mds-delay.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_suites_pjd.yaml}
-> >> time:    459s
-> >>
-> >> [30679] fs/basic/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_suites_iogen.yaml}
-> >> time:    889s
-> >>
-> >> [30678] fs/basic/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_suites_fsync.yaml}
-> >> time:    229s
-> >>
-> >> [30714] fs/traceless/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_suites_dbench.yaml traceless/50pc.yaml}
-> >> time:    2183s
-> >>
-> >> [30715] fs/traceless/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_suites_ffsb.yaml traceless/50pc.yaml}
-> >> time:    1153s
-> >>
-> >> [30688] fs/multiclient/{clusters/three_clients.yaml fs/btrfs.yaml mount/ceph-fuse.yaml tasks/mdtest.yaml}
-> >> time:    529s
-> >>
-> >> [30689] fs/multiclient/{clusters/two_clients.yaml fs/btrfs.yaml mount/ceph-fuse.yaml tasks/ior-shared-file.yaml}
-> >> time:    144s
-> >>
-> >> [30680] fs/basic/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_suites_iozone.yaml}
-> >> time:    753s
-> >>
-> >> [30681] fs/basic/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_suites_pjd.yaml}
-> >> time:    370s
-> >>
-> >> [30682] fs/basic/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_suites_tiobench.yaml}
-> >> time:    477s
-> >>
-> >> [30683] fs/basic/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_suites_truncate_delay.yaml}
-> >> time:    157s
-> >>
-> >> [30684] fs/basic/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_trivial_sync.yaml}
-> >> time:    154s
-> >>
-> >> [30685] fs/basic/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/libcephfs_interface_tests.yaml}
-> >> time:    250s
-> >>
-> >> [30686] fs/basic/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/libcephfs_java.yaml}
-> >> time:    172s
-> >>
-> >> [30687] fs/multiclient/{clusters/three_clients.yaml fs/btrfs.yaml mount/ceph-fuse.yaml tasks/ior-shared-file.yaml}
-> >> time:    160s
-> >>
-> >> [30722] fs/verify/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/libcephfs_interface_tests.yaml validater/lockdep.yaml}
-> >> time:    275s
-> >>
-> >> [30720] fs/verify/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_suites_fsstress.yaml validater/lockdep.yaml}
-> >> time:    654s
-> >>
-> >> [30718] fs/verify/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_suites_dbench.yaml validater/lockdep.yaml}
-> >> time:    2186s
-> >>
-> >> [30709] fs/thrash/{ceph/base.yaml ceph-thrash/default.yaml clusters/mds-1active-1standby.yaml fs/btrfs.yaml msgr-failures/none.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_trivial_sync.yaml}
-> >> time:    155s
-> >>
-> >> [30708] fs/thrash/{ceph/base.yaml ceph-thrash/default.yaml clusters/mds-1active-1standby.yaml fs/btrfs.yaml msgr-failures/none.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_suites_pjd.yaml}
-> >> time:    442s
-> >>
-> >> [30701] fs/samba/{clusters/samba-basic.yaml fs/btrfs.yaml install/install.yaml mount/native.yaml workload/cifs-tiobench.yaml}
-> >> time:    568s
-> >>
-> >> [30700] fs/samba/{clusters/samba-basic.yaml fs/btrfs.yaml install/install.yaml mount/native.yaml workload/cifs-fsstress.yaml}
-> >> time:    434s
-> >>
-> >> [30703] fs/samba/{clusters/samba-basic.yaml fs/btrfs.yaml install/install.yaml mount/noceph.yaml workload/cifs-dbench.yaml}
-> >> time:    1635s
-> >>
-> >> [30702] fs/samba/{clusters/samba-basic.yaml fs/btrfs.yaml install/install.yaml mount/native.yaml workload/smbtorture.yaml}
-> >> time:    2470s
-> >>
-> >> [30705] fs/samba/{clusters/samba-basic.yaml fs/btrfs.yaml install/install.yaml mount/noceph.yaml workload/cifs-tiobench.yaml}
-> >> time:    262s
-> >>
-> >> [30704] fs/samba/{clusters/samba-basic.yaml fs/btrfs.yaml install/install.yaml mount/noceph.yaml workload/cifs-fsstress.yaml}
-> >> time:    227s
-> >>
-> >> [30707] fs/thrash/{ceph/base.yaml ceph-thrash/default.yaml clusters/mds-1active-1standby.yaml fs/btrfs.yaml msgr-failures/none.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_suites_fsstress.yaml}
-> >> time:    1114s
-> >>
-> >> [30706] fs/samba/{clusters/samba-basic.yaml fs/btrfs.yaml install/install.yaml mount/noceph.yaml workload/smbtorture.yaml}
-> >> time:    2045s
-> >>
-> >> [30716] fs/traceless/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_suites_fsstress.yaml traceless/50pc.yaml}
-> >> time:    700s
-> >>
-> >> [30699] fs/samba/{clusters/samba-basic.yaml fs/btrfs.yaml install/install.yaml mount/native.yaml workload/cifs-dbench.yaml}
-> >> time:    1739s
-> >>
-> >> [30698] fs/samba/{clusters/samba-basic.yaml fs/btrfs.yaml install/install.yaml mount/kclient.yaml workload/smbtorture.yaml}
-> >> time:    2079s
-> >>
-> >> [30697] fs/samba/{clusters/samba-basic.yaml fs/btrfs.yaml install/install.yaml mount/kclient.yaml workload/cifs-tiobench.yaml}
-> >> time:    484s
-> >>
-> >> [30696] fs/samba/{clusters/samba-basic.yaml fs/btrfs.yaml install/install.yaml mount/kclient.yaml workload/cifs-fsstress.yaml}
-> >> time:    519s
-> >>
-> >> [30695] fs/samba/{clusters/samba-basic.yaml fs/btrfs.yaml install/install.yaml mount/kclient.yaml workload/cifs-dbench.yaml}
-> >> time:    1681s
-> >>
-> >> [30694] fs/samba/{clusters/samba-basic.yaml fs/btrfs.yaml install/install.yaml mount/fuse.yaml workload/smbtorture.yaml}
-> >> time:    2192s
-> >>
-> >> [30693] fs/samba/{clusters/samba-basic.yaml fs/btrfs.yaml install/install.yaml mount/fuse.yaml workload/cifs-tiobench.yaml}
-> >> time:    595s
-> >>
-> >> [30692] fs/samba/{clusters/samba-basic.yaml fs/btrfs.yaml install/install.yaml mount/fuse.yaml workload/cifs-fsstress.yaml}
-> >> time:    812s
-> >>
-> >> [30691] fs/samba/{clusters/samba-basic.yaml fs/btrfs.yaml install/install.yaml mount/fuse.yaml workload/cifs-dbench.yaml}
-> >> time:    1726s
-> >>
-> >> [30690] fs/multiclient/{clusters/two_clients.yaml fs/btrfs.yaml mount/ceph-fuse.yaml tasks/mdtest.yaml}
-> >> time:    452s
-> >>
-> >> [30717] fs/traceless/{clusters/fixed-3.yaml fs/btrfs.yaml overrides/whitelist_wrongly_marked_down.yaml tasks/cfuse_workunit_suites_tiobench.yaml traceless/50pc.yaml}
-> >> time:    439s
-> >> _______________________________________________
-> >> Ceph-qa mailing list
-> >> Ceph-qa@lists.ceph.com
-> >> http://lists.ceph.com/listinfo.cgi/ceph-qa-ceph.com
-> >>
-> >>
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+>
+> On Fri, Sep 13, 2013 at 6:06 PM, Llu=C3=ADs P=C3=A0mies i Ju=C3=A1rez
+> <llpamies@pamies.cat> wrote:
+>> Hello,
+>>
+>> I'm having problems to compile the main git branch. I tried compiling
+>> from a new clone, and I get the same error. I attach a dump of the
+>> error. Does anyone else have this problem?
+>>
+>> --
+>> Llu=C3=ADs P=C3=A0mies i Ju=C3=A1rez
+>> http://lluis.pamies.cat
+
+
+
+--=20
+Llu=C3=ADs P=C3=A0mies i Ju=C3=A1rez
+http://lluis.pamies.cat
+
+--089e010d9e7272697804e648858e
+Content-Type: text/plain; charset=US-ASCII; name="makedump.txt"
+Content-Disposition: attachment; filename="makedump.txt"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_hljryuw10
+
+dXNlcm5hbWVAbWFjaGluZTp+L1Byb2plY3RzL2NlcGgkIG1ha2UgVj0xCk1ha2luZyBhbGwgaW4g
+LgptYWtlWzFdOiBFbnRlcmluZyBkaXJlY3RvcnkgYC9ob21lL3VzZXJuYW1lL1Byb2plY3RzL2Nl
+cGgnCm1ha2VbMV06IE5vdGhpbmcgdG8gYmUgZG9uZSBmb3IgYGFsbC1hbScuCm1ha2VbMV06IExl
+YXZpbmcgZGlyZWN0b3J5IGAvaG9tZS91c2VybmFtZS9Qcm9qZWN0cy9jZXBoJwpNYWtpbmcgYWxs
+IGluIHNyYwptYWtlWzFdOiBFbnRlcmluZyBkaXJlY3RvcnkgYC9ob21lL3VzZXJuYW1lL1Byb2pl
+Y3RzL2NlcGgvc3JjJwptYWtlICBhbGwtcmVjdXJzaXZlCm1ha2VbMl06IEVudGVyaW5nIGRpcmVj
+dG9yeSBgL2hvbWUvdXNlcm5hbWUvUHJvamVjdHMvY2VwaC9zcmMnCk1ha2luZyBhbGwgaW4gb2Nm
+Cm1ha2VbM106IEVudGVyaW5nIGRpcmVjdG9yeSBgL2hvbWUvdXNlcm5hbWUvUHJvamVjdHMvY2Vw
+aC9zcmMvb2NmJwptYWtlWzNdOiBOb3RoaW5nIHRvIGJlIGRvbmUgZm9yIGBhbGwnLgptYWtlWzNd
+OiBMZWF2aW5nIGRpcmVjdG9yeSBgL2hvbWUvdXNlcm5hbWUvUHJvamVjdHMvY2VwaC9zcmMvb2Nm
+JwpNYWtpbmcgYWxsIGluIGphdmEKbWFrZVszXTogRW50ZXJpbmcgZGlyZWN0b3J5IGAvaG9tZS91
+c2VybmFtZS9Qcm9qZWN0cy9jZXBoL3NyYy9qYXZhJwptYWtlICBhbGwtYW0KbWFrZVs0XTogRW50
+ZXJpbmcgZGlyZWN0b3J5IGAvaG9tZS91c2VybmFtZS9Qcm9qZWN0cy9jZXBoL3NyYy9qYXZhJwpt
+YWtlWzRdOiBOb3RoaW5nIHRvIGJlIGRvbmUgZm9yIGBhbGwtYW0nLgptYWtlWzRdOiBMZWF2aW5n
+IGRpcmVjdG9yeSBgL2hvbWUvdXNlcm5hbWUvUHJvamVjdHMvY2VwaC9zcmMvamF2YScKbWFrZVsz
+XTogTGVhdmluZyBkaXJlY3RvcnkgYC9ob21lL3VzZXJuYW1lL1Byb2plY3RzL2NlcGgvc3JjL2ph
+dmEnCm1ha2VbM106IEVudGVyaW5nIGRpcmVjdG9yeSBgL2hvbWUvdXNlcm5hbWUvUHJvamVjdHMv
+Y2VwaC9zcmMnCi4vY2hlY2tfdmVyc2lvbiAuLy5naXRfdmVyc2lvbgouLy5naXRfdmVyc2lvbiBp
+cyB1cCB0byBkYXRlLgovYmluL2Jhc2ggLi4vbGlidG9vbCAgLS10YWc9Q1hYICAgLS1tb2RlPWxp
+bmsgZysrIC1EX19DRVBIX18gLURfRklMRV9PRkZTRVRfQklUUz02NCAtRF9SRUVOVFJBTlQgLURf
+VEhSRUFEX1NBRkUgLURfX1NURENfRk9STUFUX01BQ1JPUyAtRF9HTlVfU09VUkNFIC1yZHluYW1p
+YyAtV2FsbCAtV3R5cGUtbGltaXRzIC1XaWdub3JlZC1xdWFsaWZpZXJzIC1XaW5pdC1zZWxmIC1X
+cG9pbnRlci1hcml0aCAtV2Vycm9yPWZvcm1hdC1zZWN1cml0eSAtZm5vLXN0cmljdC1hbGlhc2lu
+ZyAtZnNpZ25lZC1jaGFyIC1EQ0VQSF9MSUJESVI9XCIvdXNyL2xvY2FsL2xpYlwiIC1Xbm9uLXZp
+cnR1YWwtZHRvciAtV25vLWludmFsaWQtb2Zmc2V0b2YgLVdzdHJpY3QtbnVsbC1zZW50aW5lbCAg
+IC1mbm8tYnVpbHRpbi1tYWxsb2MgLWZuby1idWlsdGluLWNhbGxvYyAtZm5vLWJ1aWx0aW4tcmVh
+bGxvYyAtZm5vLWJ1aWx0aW4tZnJlZSAtZm5vLXZhci10cmFja2luZy1hc3NpZ25tZW50cyAtZyAt
+TzIgLVdsLC0tYXMtbmVlZGVkIC1sYXRvbWljX29wcyAgLW8gY2VwaC1kZW5jb2RlciB0ZXN0L2Vu
+Y29kaW5nL2NlcGhfZGVuY29kZXItY2VwaF9kZW5jb2Rlci5vICBsaWJvc2QubGEgbGlib3NkYy5s
+YSBsaWJvcy5sYSAtbGFpbyAgLWxsZXZlbGRiIC1sc25hcHB5IGxpYnBlcmZnbHVlLmxhIC1sdGNt
+YWxsb2MgbGlibWRzLmxhIGxpYnBlcmZnbHVlLmxhIC1sdGNtYWxsb2MgbGlibW9uLmxhIGxpYnBl
+cmZnbHVlLmxhIC1sdGNtYWxsb2MgIGxpYmdsb2JhbC5sYSAtbHB0aHJlYWQgLWxtIC1sY3J5cHRv
+KysgICAtbHV1aWQgLWxtIC1sa2V5dXRpbHMgIC1scnQgICAtbGJvb3N0X3RocmVhZC1tdCAtbGxl
+dmVsZGIgLWxzbmFwcHkgCmxpYnRvb2w6IGxpbms6IGcrKyAtRF9fQ0VQSF9fIC1EX0ZJTEVfT0ZG
+U0VUX0JJVFM9NjQgLURfUkVFTlRSQU5UIC1EX1RIUkVBRF9TQUZFIC1EX19TVERDX0ZPUk1BVF9N
+QUNST1MgLURfR05VX1NPVVJDRSAtcmR5bmFtaWMgLVdhbGwgLVd0eXBlLWxpbWl0cyAtV2lnbm9y
+ZWQtcXVhbGlmaWVycyAtV2luaXQtc2VsZiAtV3BvaW50ZXItYXJpdGggLVdlcnJvcj1mb3JtYXQt
+c2VjdXJpdHkgLWZuby1zdHJpY3QtYWxpYXNpbmcgLWZzaWduZWQtY2hhciAtRENFUEhfTElCRElS
+PVwiL3Vzci9sb2NhbC9saWJcIiAtV25vbi12aXJ0dWFsLWR0b3IgLVduby1pbnZhbGlkLW9mZnNl
+dG9mIC1Xc3RyaWN0LW51bGwtc2VudGluZWwgLWZuby1idWlsdGluLW1hbGxvYyAtZm5vLWJ1aWx0
+aW4tY2FsbG9jIC1mbm8tYnVpbHRpbi1yZWFsbG9jIC1mbm8tYnVpbHRpbi1mcmVlIC1mbm8tdmFy
+LXRyYWNraW5nLWFzc2lnbm1lbnRzIC1nIC1PMiAtV2wsLS1hcy1uZWVkZWQgLW8gY2VwaC1kZW5j
+b2RlciB0ZXN0L2VuY29kaW5nL2NlcGhfZGVuY29kZXItY2VwaF9kZW5jb2Rlci5vICAvdXNyL2xp
+Yi9saWJhdG9taWNfb3BzLmEgLi8ubGlicy9saWJvc2QuYSAuLy5saWJzL2xpYm9zZGMuYSAuLy5s
+aWJzL2xpYm9zLmEgLi8ubGlicy9saWJtZHMuYSAuLy5saWJzL2xpYm1vbi5hIC1sYWlvIC4vLmxp
+YnMvbGlicGVyZmdsdWUuYSAtbHRjbWFsbG9jIC4vLmxpYnMvbGliZ2xvYmFsLmEgLWxwdGhyZWFk
+IC1sY3J5cHRvKysgLWx1dWlkIC1sbSAtbGtleXV0aWxzIC1scnQgLWxib29zdF90aHJlYWQtbXQg
+LWxsZXZlbGRiIC1sc25hcHB5CnRlc3QvZW5jb2RpbmcvY2VwaF9kZW5jb2Rlci1jZXBoX2RlbmNv
+ZGVyLm86IEluIGZ1bmN0aW9uIGBEZW5jb2RlckJhc2U8cmFkb3M6OmNsczo6bG9jazo6bG9ja2Vy
+X2lkX3Q+OjpnZW5lcmF0ZSgpJzoKL2hvbWUvdXNlcm5hbWUvUHJvamVjdHMvY2VwaC9zcmMvdGVz
+dC9lbmNvZGluZy9jZXBoX2RlbmNvZGVyLmNjOjg3OiB1bmRlZmluZWQgcmVmZXJlbmNlIHRvIGBy
+YWRvczo6Y2xzOjpsb2NrOjpsb2NrZXJfaWRfdDo6Z2VuZXJhdGVfdGVzdF9pbnN0YW5jZXMoc3Rk
+OjpsaXN0PHJhZG9zOjpjbHM6OmxvY2s6OmxvY2tlcl9pZF90Kiwgc3RkOjphbGxvY2F0b3I8cmFk
+b3M6OmNsczo6bG9jazo6bG9ja2VyX2lkX3QqPiA+JiknCnRlc3QvZW5jb2RpbmcvY2VwaF9kZW5j
+b2Rlci1jZXBoX2RlbmNvZGVyLm86IEluIGZ1bmN0aW9uIGBEZW5jb2RlckJhc2U8cmFkb3M6OmNs
+czo6bG9jazo6bG9ja2VyX2lkX3Q+OjpkdW1wKGNlcGg6OkZvcm1hdHRlciopJzoKL2hvbWUvdXNl
+cm5hbWUvUHJvamVjdHMvY2VwaC9zcmMvdGVzdC9lbmNvZGluZy9jZXBoX2RlbmNvZGVyLmNjOjgz
+OiB1bmRlZmluZWQgcmVmZXJlbmNlIHRvIGByYWRvczo6Y2xzOjpsb2NrOjpsb2NrZXJfaWRfdDo6
+ZHVtcChjZXBoOjpGb3JtYXR0ZXIqKSBjb25zdCcKdGVzdC9lbmNvZGluZy9jZXBoX2RlbmNvZGVy
+LWNlcGhfZGVuY29kZXIubzogSW4gZnVuY3Rpb24gYERlbmNvZGVyQmFzZTxyYWRvczo6Y2xzOjps
+b2NrOjpsb2NrZXJfaW5mb190Pjo6Z2VuZXJhdGUoKSc6Ci9ob21lL3VzZXJuYW1lL1Byb2plY3Rz
+L2NlcGgvc3JjL3Rlc3QvZW5jb2RpbmcvY2VwaF9kZW5jb2Rlci5jYzo4NzogdW5kZWZpbmVkIHJl
+ZmVyZW5jZSB0byBgcmFkb3M6OmNsczo6bG9jazo6bG9ja2VyX2luZm9fdDo6Z2VuZXJhdGVfdGVz
+dF9pbnN0YW5jZXMoc3RkOjpsaXN0PHJhZG9zOjpjbHM6OmxvY2s6OmxvY2tlcl9pbmZvX3QqLCBz
+dGQ6OmFsbG9jYXRvcjxyYWRvczo6Y2xzOjpsb2NrOjpsb2NrZXJfaW5mb190Kj4gPiYpJwp0ZXN0
+L2VuY29kaW5nL2NlcGhfZGVuY29kZXItY2VwaF9kZW5jb2Rlci5vOiBJbiBmdW5jdGlvbiBgRGVu
+Y29kZXJCYXNlPHJhZG9zOjpjbHM6OmxvY2s6OmxvY2tlcl9pbmZvX3Q+OjpkdW1wKGNlcGg6OkZv
+cm1hdHRlciopJzoKL2hvbWUvdXNlcm5hbWUvUHJvamVjdHMvY2VwaC9zcmMvdGVzdC9lbmNvZGlu
+Zy9jZXBoX2RlbmNvZGVyLmNjOjgzOiB1bmRlZmluZWQgcmVmZXJlbmNlIHRvIGByYWRvczo6Y2xz
+Ojpsb2NrOjpsb2NrZXJfaW5mb190OjpkdW1wKGNlcGg6OkZvcm1hdHRlciopIGNvbnN0Jwp0ZXN0
+L2VuY29kaW5nL2NlcGhfZGVuY29kZXItY2VwaF9kZW5jb2Rlci5vOiBJbiBmdW5jdGlvbiBgRGVu
+Y29kZXJCYXNlPGNsc19sb2NrX2xvY2tfb3A+OjpnZW5lcmF0ZSgpJzoKL2hvbWUvdXNlcm5hbWUv
+UHJvamVjdHMvY2VwaC9zcmMvdGVzdC9lbmNvZGluZy9jZXBoX2RlbmNvZGVyLmNjOjg3OiB1bmRl
+ZmluZWQgcmVmZXJlbmNlIHRvIGBjbHNfbG9ja19sb2NrX29wOjpnZW5lcmF0ZV90ZXN0X2luc3Rh
+bmNlcyhzdGQ6Omxpc3Q8Y2xzX2xvY2tfbG9ja19vcCosIHN0ZDo6YWxsb2NhdG9yPGNsc19sb2Nr
+X2xvY2tfb3AqPiA+JiknCnRlc3QvZW5jb2RpbmcvY2VwaF9kZW5jb2Rlci1jZXBoX2RlbmNvZGVy
+Lm86IEluIGZ1bmN0aW9uIGBEZW5jb2RlckJhc2U8Y2xzX2xvY2tfbG9ja19vcD46OmR1bXAoY2Vw
+aDo6Rm9ybWF0dGVyKiknOgovaG9tZS91c2VybmFtZS9Qcm9qZWN0cy9jZXBoL3NyYy90ZXN0L2Vu
+Y29kaW5nL2NlcGhfZGVuY29kZXIuY2M6ODM6IHVuZGVmaW5lZCByZWZlcmVuY2UgdG8gYGNsc19s
+b2NrX2xvY2tfb3A6OmR1bXAoY2VwaDo6Rm9ybWF0dGVyKikgY29uc3QnCnRlc3QvZW5jb2Rpbmcv
+Y2VwaF9kZW5jb2Rlci1jZXBoX2RlbmNvZGVyLm86IEluIGZ1bmN0aW9uIGBEZW5jb2RlckJhc2U8
+Y2xzX2xvY2tfdW5sb2NrX29wPjo6Z2VuZXJhdGUoKSc6Ci9ob21lL3VzZXJuYW1lL1Byb2plY3Rz
+L2NlcGgvc3JjL3Rlc3QvZW5jb2RpbmcvY2VwaF9kZW5jb2Rlci5jYzo4NzogdW5kZWZpbmVkIHJl
+ZmVyZW5jZSB0byBgY2xzX2xvY2tfdW5sb2NrX29wOjpnZW5lcmF0ZV90ZXN0X2luc3RhbmNlcyhz
+dGQ6Omxpc3Q8Y2xzX2xvY2tfdW5sb2NrX29wKiwgc3RkOjphbGxvY2F0b3I8Y2xzX2xvY2tfdW5s
+b2NrX29wKj4gPiYpJwp0ZXN0L2VuY29kaW5nL2NlcGhfZGVuY29kZXItY2VwaF9kZW5jb2Rlci5v
+OiBJbiBmdW5jdGlvbiBgRGVuY29kZXJCYXNlPGNsc19sb2NrX3VubG9ja19vcD46OmR1bXAoY2Vw
+aDo6Rm9ybWF0dGVyKiknOgovaG9tZS91c2VybmFtZS9Qcm9qZWN0cy9jZXBoL3NyYy90ZXN0L2Vu
+Y29kaW5nL2NlcGhfZGVuY29kZXIuY2M6ODM6IHVuZGVmaW5lZCByZWZlcmVuY2UgdG8gYGNsc19s
+b2NrX3VubG9ja19vcDo6ZHVtcChjZXBoOjpGb3JtYXR0ZXIqKSBjb25zdCcKdGVzdC9lbmNvZGlu
+Zy9jZXBoX2RlbmNvZGVyLWNlcGhfZGVuY29kZXIubzogSW4gZnVuY3Rpb24gYERlbmNvZGVyQmFz
+ZTxjbHNfbG9ja19icmVha19vcD46OmdlbmVyYXRlKCknOgovaG9tZS91c2VybmFtZS9Qcm9qZWN0
+cy9jZXBoL3NyYy90ZXN0L2VuY29kaW5nL2NlcGhfZGVuY29kZXIuY2M6ODc6IHVuZGVmaW5lZCBy
+ZWZlcmVuY2UgdG8gYGNsc19sb2NrX2JyZWFrX29wOjpnZW5lcmF0ZV90ZXN0X2luc3RhbmNlcyhz
+dGQ6Omxpc3Q8Y2xzX2xvY2tfYnJlYWtfb3AqLCBzdGQ6OmFsbG9jYXRvcjxjbHNfbG9ja19icmVh
+a19vcCo+ID4mKScKdGVzdC9lbmNvZGluZy9jZXBoX2RlbmNvZGVyLWNlcGhfZGVuY29kZXIubzog
+SW4gZnVuY3Rpb24gYERlbmNvZGVyQmFzZTxjbHNfbG9ja19icmVha19vcD46OmR1bXAoY2VwaDo6
+Rm9ybWF0dGVyKiknOgovaG9tZS91c2VybmFtZS9Qcm9qZWN0cy9jZXBoL3NyYy90ZXN0L2VuY29k
+aW5nL2NlcGhfZGVuY29kZXIuY2M6ODM6IHVuZGVmaW5lZCByZWZlcmVuY2UgdG8gYGNsc19sb2Nr
+X2JyZWFrX29wOjpkdW1wKGNlcGg6OkZvcm1hdHRlciopIGNvbnN0Jwp0ZXN0L2VuY29kaW5nL2Nl
+cGhfZGVuY29kZXItY2VwaF9kZW5jb2Rlci5vOiBJbiBmdW5jdGlvbiBgRGVuY29kZXJCYXNlPGNs
+c19sb2NrX2dldF9pbmZvX29wPjo6Z2VuZXJhdGUoKSc6Ci9ob21lL3VzZXJuYW1lL1Byb2plY3Rz
+L2NlcGgvc3JjL3Rlc3QvZW5jb2RpbmcvY2VwaF9kZW5jb2Rlci5jYzo4NzogdW5kZWZpbmVkIHJl
+ZmVyZW5jZSB0byBgY2xzX2xvY2tfZ2V0X2luZm9fb3A6OmdlbmVyYXRlX3Rlc3RfaW5zdGFuY2Vz
+KHN0ZDo6bGlzdDxjbHNfbG9ja19nZXRfaW5mb19vcCosIHN0ZDo6YWxsb2NhdG9yPGNsc19sb2Nr
+X2dldF9pbmZvX29wKj4gPiYpJwp0ZXN0L2VuY29kaW5nL2NlcGhfZGVuY29kZXItY2VwaF9kZW5j
+b2Rlci5vOiBJbiBmdW5jdGlvbiBgRGVuY29kZXJCYXNlPGNsc19sb2NrX2dldF9pbmZvX29wPjo6
+ZHVtcChjZXBoOjpGb3JtYXR0ZXIqKSc6Ci9ob21lL3VzZXJuYW1lL1Byb2plY3RzL2NlcGgvc3Jj
+L3Rlc3QvZW5jb2RpbmcvY2VwaF9kZW5jb2Rlci5jYzo4MzogdW5kZWZpbmVkIHJlZmVyZW5jZSB0
+byBgY2xzX2xvY2tfZ2V0X2luZm9fb3A6OmR1bXAoY2VwaDo6Rm9ybWF0dGVyKikgY29uc3QnCnRl
+c3QvZW5jb2RpbmcvY2VwaF9kZW5jb2Rlci1jZXBoX2RlbmNvZGVyLm86IEluIGZ1bmN0aW9uIGBE
+ZW5jb2RlckJhc2U8Y2xzX2xvY2tfZ2V0X2luZm9fcmVwbHk+OjpnZW5lcmF0ZSgpJzoKL2hvbWUv
+dXNlcm5hbWUvUHJvamVjdHMvY2VwaC9zcmMvdGVzdC9lbmNvZGluZy9jZXBoX2RlbmNvZGVyLmNj
+Ojg3OiB1bmRlZmluZWQgcmVmZXJlbmNlIHRvIGBjbHNfbG9ja19nZXRfaW5mb19yZXBseTo6Z2Vu
+ZXJhdGVfdGVzdF9pbnN0YW5jZXMoc3RkOjpsaXN0PGNsc19sb2NrX2dldF9pbmZvX3JlcGx5Kiwg
+c3RkOjphbGxvY2F0b3I8Y2xzX2xvY2tfZ2V0X2luZm9fcmVwbHkqPiA+JiknCnRlc3QvZW5jb2Rp
+bmcvY2VwaF9kZW5jb2Rlci1jZXBoX2RlbmNvZGVyLm86IEluIGZ1bmN0aW9uIGBEZW5jb2RlckJh
+c2U8Y2xzX2xvY2tfZ2V0X2luZm9fcmVwbHk+OjpkdW1wKGNlcGg6OkZvcm1hdHRlciopJzoKL2hv
+bWUvdXNlcm5hbWUvUHJvamVjdHMvY2VwaC9zcmMvdGVzdC9lbmNvZGluZy9jZXBoX2RlbmNvZGVy
+LmNjOjgzOiB1bmRlZmluZWQgcmVmZXJlbmNlIHRvIGBjbHNfbG9ja19nZXRfaW5mb19yZXBseTo6
+ZHVtcChjZXBoOjpGb3JtYXR0ZXIqKSBjb25zdCcKdGVzdC9lbmNvZGluZy9jZXBoX2RlbmNvZGVy
+LWNlcGhfZGVuY29kZXIubzogSW4gZnVuY3Rpb24gYERlbmNvZGVyQmFzZTxjbHNfbG9ja19saXN0
+X2xvY2tzX3JlcGx5Pjo6Z2VuZXJhdGUoKSc6Ci9ob21lL3VzZXJuYW1lL1Byb2plY3RzL2NlcGgv
+c3JjL3Rlc3QvZW5jb2RpbmcvY2VwaF9kZW5jb2Rlci5jYzo4NzogdW5kZWZpbmVkIHJlZmVyZW5j
+ZSB0byBgY2xzX2xvY2tfbGlzdF9sb2Nrc19yZXBseTo6Z2VuZXJhdGVfdGVzdF9pbnN0YW5jZXMo
+c3RkOjpsaXN0PGNsc19sb2NrX2xpc3RfbG9ja3NfcmVwbHkqLCBzdGQ6OmFsbG9jYXRvcjxjbHNf
+bG9ja19saXN0X2xvY2tzX3JlcGx5Kj4gPiYpJwp0ZXN0L2VuY29kaW5nL2NlcGhfZGVuY29kZXIt
+Y2VwaF9kZW5jb2Rlci5vOiBJbiBmdW5jdGlvbiBgRGVuY29kZXJCYXNlPGNsc19sb2NrX2xpc3Rf
+bG9ja3NfcmVwbHk+OjpkdW1wKGNlcGg6OkZvcm1hdHRlciopJzoKL2hvbWUvdXNlcm5hbWUvUHJv
+amVjdHMvY2VwaC9zcmMvdGVzdC9lbmNvZGluZy9jZXBoX2RlbmNvZGVyLmNjOjgzOiB1bmRlZmlu
+ZWQgcmVmZXJlbmNlIHRvIGBjbHNfbG9ja19saXN0X2xvY2tzX3JlcGx5OjpkdW1wKGNlcGg6OkZv
+cm1hdHRlciopIGNvbnN0Jwp0ZXN0L2VuY29kaW5nL2NlcGhfZGVuY29kZXItY2VwaF9kZW5jb2Rl
+ci5vOiBJbiBmdW5jdGlvbiBgRGVuY29kZXJCYXNlPGNsc19yZXBsaWNhX2xvZ19pdGVtX21hcmtl
+cj46OmdlbmVyYXRlKCknOgovaG9tZS91c2VybmFtZS9Qcm9qZWN0cy9jZXBoL3NyYy90ZXN0L2Vu
+Y29kaW5nL2NlcGhfZGVuY29kZXIuY2M6ODc6IHVuZGVmaW5lZCByZWZlcmVuY2UgdG8gYGNsc19y
+ZXBsaWNhX2xvZ19pdGVtX21hcmtlcjo6Z2VuZXJhdGVfdGVzdF9pbnN0YW5jZXMoc3RkOjpsaXN0
+PGNsc19yZXBsaWNhX2xvZ19pdGVtX21hcmtlciosIHN0ZDo6YWxsb2NhdG9yPGNsc19yZXBsaWNh
+X2xvZ19pdGVtX21hcmtlcio+ID4mKScKdGVzdC9lbmNvZGluZy9jZXBoX2RlbmNvZGVyLWNlcGhf
+ZGVuY29kZXIubzogSW4gZnVuY3Rpb24gYERlbmNvZGVyQmFzZTxjbHNfcmVwbGljYV9sb2dfaXRl
+bV9tYXJrZXI+OjpkdW1wKGNlcGg6OkZvcm1hdHRlciopJzoKL2hvbWUvdXNlcm5hbWUvUHJvamVj
+dHMvY2VwaC9zcmMvdGVzdC9lbmNvZGluZy9jZXBoX2RlbmNvZGVyLmNjOjgzOiB1bmRlZmluZWQg
+cmVmZXJlbmNlIHRvIGBjbHNfcmVwbGljYV9sb2dfaXRlbV9tYXJrZXI6OmR1bXAoY2VwaDo6Rm9y
+bWF0dGVyKikgY29uc3QnCnRlc3QvZW5jb2RpbmcvY2VwaF9kZW5jb2Rlci1jZXBoX2RlbmNvZGVy
+Lm86IEluIGZ1bmN0aW9uIGBEZW5jb2RlckJhc2U8Y2xzX3JlcGxpY2FfbG9nX3Byb2dyZXNzX21h
+cmtlcj46OmdlbmVyYXRlKCknOgovaG9tZS91c2VybmFtZS9Qcm9qZWN0cy9jZXBoL3NyYy90ZXN0
+L2VuY29kaW5nL2NlcGhfZGVuY29kZXIuY2M6ODc6IHVuZGVmaW5lZCByZWZlcmVuY2UgdG8gYGNs
+c19yZXBsaWNhX2xvZ19wcm9ncmVzc19tYXJrZXI6OmdlbmVyYXRlX3Rlc3RfaW5zdGFuY2VzKHN0
+ZDo6bGlzdDxjbHNfcmVwbGljYV9sb2dfcHJvZ3Jlc3NfbWFya2VyKiwgc3RkOjphbGxvY2F0b3I8
+Y2xzX3JlcGxpY2FfbG9nX3Byb2dyZXNzX21hcmtlcio+ID4mKScKdGVzdC9lbmNvZGluZy9jZXBo
+X2RlbmNvZGVyLWNlcGhfZGVuY29kZXIubzogSW4gZnVuY3Rpb24gYERlbmNvZGVyQmFzZTxjbHNf
+cmVwbGljYV9sb2dfcHJvZ3Jlc3NfbWFya2VyPjo6ZHVtcChjZXBoOjpGb3JtYXR0ZXIqKSc6Ci9o
+b21lL3VzZXJuYW1lL1Byb2plY3RzL2NlcGgvc3JjL3Rlc3QvZW5jb2RpbmcvY2VwaF9kZW5jb2Rl
+ci5jYzo4MzogdW5kZWZpbmVkIHJlZmVyZW5jZSB0byBgY2xzX3JlcGxpY2FfbG9nX3Byb2dyZXNz
+X21hcmtlcjo6ZHVtcChjZXBoOjpGb3JtYXR0ZXIqKSBjb25zdCcKdGVzdC9lbmNvZGluZy9jZXBo
+X2RlbmNvZGVyLWNlcGhfZGVuY29kZXIubzogSW4gZnVuY3Rpb24gYERlbmNvZGVyQmFzZTxjbHNf
+cmVwbGljYV9sb2dfYm91bmQ+OjpnZW5lcmF0ZSgpJzoKL2hvbWUvdXNlcm5hbWUvUHJvamVjdHMv
+Y2VwaC9zcmMvdGVzdC9lbmNvZGluZy9jZXBoX2RlbmNvZGVyLmNjOjg3OiB1bmRlZmluZWQgcmVm
+ZXJlbmNlIHRvIGBjbHNfcmVwbGljYV9sb2dfYm91bmQ6OmdlbmVyYXRlX3Rlc3RfaW5zdGFuY2Vz
+KHN0ZDo6bGlzdDxjbHNfcmVwbGljYV9sb2dfYm91bmQqLCBzdGQ6OmFsbG9jYXRvcjxjbHNfcmVw
+bGljYV9sb2dfYm91bmQqPiA+JiknCnRlc3QvZW5jb2RpbmcvY2VwaF9kZW5jb2Rlci1jZXBoX2Rl
+bmNvZGVyLm86IEluIGZ1bmN0aW9uIGBEZW5jb2RlckJhc2U8Y2xzX3JlcGxpY2FfbG9nX2JvdW5k
+Pjo6ZHVtcChjZXBoOjpGb3JtYXR0ZXIqKSc6Ci9ob21lL3VzZXJuYW1lL1Byb2plY3RzL2NlcGgv
+c3JjL3Rlc3QvZW5jb2RpbmcvY2VwaF9kZW5jb2Rlci5jYzo4MzogdW5kZWZpbmVkIHJlZmVyZW5j
+ZSB0byBgY2xzX3JlcGxpY2FfbG9nX2JvdW5kOjpkdW1wKGNlcGg6OkZvcm1hdHRlciopIGNvbnN0
+Jwp0ZXN0L2VuY29kaW5nL2NlcGhfZGVuY29kZXItY2VwaF9kZW5jb2Rlci5vOiBJbiBmdW5jdGlv
+biBgRGVuY29kZXJCYXNlPGNsc19yZXBsaWNhX2xvZ19kZWxldGVfbWFya2VyX29wPjo6Z2VuZXJh
+dGUoKSc6Ci9ob21lL3VzZXJuYW1lL1Byb2plY3RzL2NlcGgvc3JjL3Rlc3QvZW5jb2RpbmcvY2Vw
+aF9kZW5jb2Rlci5jYzo4NzogdW5kZWZpbmVkIHJlZmVyZW5jZSB0byBgY2xzX3JlcGxpY2FfbG9n
+X2RlbGV0ZV9tYXJrZXJfb3A6OmdlbmVyYXRlX3Rlc3RfaW5zdGFuY2VzKHN0ZDo6bGlzdDxjbHNf
+cmVwbGljYV9sb2dfZGVsZXRlX21hcmtlcl9vcCosIHN0ZDo6YWxsb2NhdG9yPGNsc19yZXBsaWNh
+X2xvZ19kZWxldGVfbWFya2VyX29wKj4gPiYpJwp0ZXN0L2VuY29kaW5nL2NlcGhfZGVuY29kZXIt
+Y2VwaF9kZW5jb2Rlci5vOiBJbiBmdW5jdGlvbiBgRGVuY29kZXJCYXNlPGNsc19yZXBsaWNhX2xv
+Z19kZWxldGVfbWFya2VyX29wPjo6ZHVtcChjZXBoOjpGb3JtYXR0ZXIqKSc6Ci9ob21lL3VzZXJu
+YW1lL1Byb2plY3RzL2NlcGgvc3JjL3Rlc3QvZW5jb2RpbmcvY2VwaF9kZW5jb2Rlci5jYzo4Mzog
+dW5kZWZpbmVkIHJlZmVyZW5jZSB0byBgY2xzX3JlcGxpY2FfbG9nX2RlbGV0ZV9tYXJrZXJfb3A6
+OmR1bXAoY2VwaDo6Rm9ybWF0dGVyKikgY29uc3QnCnRlc3QvZW5jb2RpbmcvY2VwaF9kZW5jb2Rl
+ci1jZXBoX2RlbmNvZGVyLm86IEluIGZ1bmN0aW9uIGBEZW5jb2RlckJhc2U8Y2xzX3JlcGxpY2Ff
+bG9nX3NldF9tYXJrZXJfb3A+OjpnZW5lcmF0ZSgpJzoKL2hvbWUvdXNlcm5hbWUvUHJvamVjdHMv
+Y2VwaC9zcmMvdGVzdC9lbmNvZGluZy9jZXBoX2RlbmNvZGVyLmNjOjg3OiB1bmRlZmluZWQgcmVm
+ZXJlbmNlIHRvIGBjbHNfcmVwbGljYV9sb2dfc2V0X21hcmtlcl9vcDo6Z2VuZXJhdGVfdGVzdF9p
+bnN0YW5jZXMoc3RkOjpsaXN0PGNsc19yZXBsaWNhX2xvZ19zZXRfbWFya2VyX29wKiwgc3RkOjph
+bGxvY2F0b3I8Y2xzX3JlcGxpY2FfbG9nX3NldF9tYXJrZXJfb3AqPiA+JiknCnRlc3QvZW5jb2Rp
+bmcvY2VwaF9kZW5jb2Rlci1jZXBoX2RlbmNvZGVyLm86IEluIGZ1bmN0aW9uIGBEZW5jb2RlckJh
+c2U8Y2xzX3JlcGxpY2FfbG9nX3NldF9tYXJrZXJfb3A+OjpkdW1wKGNlcGg6OkZvcm1hdHRlciop
+JzoKL2hvbWUvdXNlcm5hbWUvUHJvamVjdHMvY2VwaC9zcmMvdGVzdC9lbmNvZGluZy9jZXBoX2Rl
+bmNvZGVyLmNjOjgzOiB1bmRlZmluZWQgcmVmZXJlbmNlIHRvIGBjbHNfcmVwbGljYV9sb2dfc2V0
+X21hcmtlcl9vcDo6ZHVtcChjZXBoOjpGb3JtYXR0ZXIqKSBjb25zdCcKdGVzdC9lbmNvZGluZy9j
+ZXBoX2RlbmNvZGVyLWNlcGhfZGVuY29kZXIubzogSW4gZnVuY3Rpb24gYERlbmNvZGVyQmFzZTxj
+bHNfcmVwbGljYV9sb2dfZ2V0X2JvdW5kc19vcD46OmdlbmVyYXRlKCknOgovaG9tZS91c2VybmFt
+ZS9Qcm9qZWN0cy9jZXBoL3NyYy90ZXN0L2VuY29kaW5nL2NlcGhfZGVuY29kZXIuY2M6ODc6IHVu
+ZGVmaW5lZCByZWZlcmVuY2UgdG8gYGNsc19yZXBsaWNhX2xvZ19nZXRfYm91bmRzX29wOjpnZW5l
+cmF0ZV90ZXN0X2luc3RhbmNlcyhzdGQ6Omxpc3Q8Y2xzX3JlcGxpY2FfbG9nX2dldF9ib3VuZHNf
+b3AqLCBzdGQ6OmFsbG9jYXRvcjxjbHNfcmVwbGljYV9sb2dfZ2V0X2JvdW5kc19vcCo+ID4mKScK
+dGVzdC9lbmNvZGluZy9jZXBoX2RlbmNvZGVyLWNlcGhfZGVuY29kZXIubzogSW4gZnVuY3Rpb24g
+YERlbmNvZGVyQmFzZTxjbHNfcmVwbGljYV9sb2dfZ2V0X2JvdW5kc19vcD46OmR1bXAoY2VwaDo6
+Rm9ybWF0dGVyKiknOgovaG9tZS91c2VybmFtZS9Qcm9qZWN0cy9jZXBoL3NyYy90ZXN0L2VuY29k
+aW5nL2NlcGhfZGVuY29kZXIuY2M6ODM6IHVuZGVmaW5lZCByZWZlcmVuY2UgdG8gYGNsc19yZXBs
+aWNhX2xvZ19nZXRfYm91bmRzX29wOjpkdW1wKGNlcGg6OkZvcm1hdHRlciopIGNvbnN0Jwp0ZXN0
+L2VuY29kaW5nL2NlcGhfZGVuY29kZXItY2VwaF9kZW5jb2Rlci5vOiBJbiBmdW5jdGlvbiBgRGVu
+Y29kZXJCYXNlPGNsc19yZXBsaWNhX2xvZ19nZXRfYm91bmRzX3JldD46OmdlbmVyYXRlKCknOgov
+aG9tZS91c2VybmFtZS9Qcm9qZWN0cy9jZXBoL3NyYy90ZXN0L2VuY29kaW5nL2NlcGhfZGVuY29k
+ZXIuY2M6ODc6IHVuZGVmaW5lZCByZWZlcmVuY2UgdG8gYGNsc19yZXBsaWNhX2xvZ19nZXRfYm91
+bmRzX3JldDo6Z2VuZXJhdGVfdGVzdF9pbnN0YW5jZXMoc3RkOjpsaXN0PGNsc19yZXBsaWNhX2xv
+Z19nZXRfYm91bmRzX3JldCosIHN0ZDo6YWxsb2NhdG9yPGNsc19yZXBsaWNhX2xvZ19nZXRfYm91
+bmRzX3JldCo+ID4mKScKdGVzdC9lbmNvZGluZy9jZXBoX2RlbmNvZGVyLWNlcGhfZGVuY29kZXIu
+bzogSW4gZnVuY3Rpb24gYERlbmNvZGVyQmFzZTxjbHNfcmVwbGljYV9sb2dfZ2V0X2JvdW5kc19y
+ZXQ+OjpkdW1wKGNlcGg6OkZvcm1hdHRlciopJzoKL2hvbWUvdXNlcm5hbWUvUHJvamVjdHMvY2Vw
+aC9zcmMvdGVzdC9lbmNvZGluZy9jZXBoX2RlbmNvZGVyLmNjOjgzOiB1bmRlZmluZWQgcmVmZXJl
+bmNlIHRvIGBjbHNfcmVwbGljYV9sb2dfZ2V0X2JvdW5kc19yZXQ6OmR1bXAoY2VwaDo6Rm9ybWF0
+dGVyKikgY29uc3QnCnRlc3QvZW5jb2RpbmcvY2VwaF9kZW5jb2Rlci1jZXBoX2RlbmNvZGVyLm86
+IEluIGZ1bmN0aW9uIGBEZW5jb2RlckJhc2U8Y2xzX3JlZmNvdW50X2dldF9vcD46OmdlbmVyYXRl
+KCknOgovaG9tZS91c2VybmFtZS9Qcm9qZWN0cy9jZXBoL3NyYy90ZXN0L2VuY29kaW5nL2NlcGhf
+ZGVuY29kZXIuY2M6ODc6IHVuZGVmaW5lZCByZWZlcmVuY2UgdG8gYGNsc19yZWZjb3VudF9nZXRf
+b3A6OmdlbmVyYXRlX3Rlc3RfaW5zdGFuY2VzKHN0ZDo6bGlzdDxjbHNfcmVmY291bnRfZ2V0X29w
+Kiwgc3RkOjphbGxvY2F0b3I8Y2xzX3JlZmNvdW50X2dldF9vcCo+ID4mKScKdGVzdC9lbmNvZGlu
+Zy9jZXBoX2RlbmNvZGVyLWNlcGhfZGVuY29kZXIubzogSW4gZnVuY3Rpb24gYERlbmNvZGVyQmFz
+ZTxjbHNfcmVmY291bnRfZ2V0X29wPjo6ZHVtcChjZXBoOjpGb3JtYXR0ZXIqKSc6Ci9ob21lL3Vz
+ZXJuYW1lL1Byb2plY3RzL2NlcGgvc3JjL3Rlc3QvZW5jb2RpbmcvY2VwaF9kZW5jb2Rlci5jYzo4
+MzogdW5kZWZpbmVkIHJlZmVyZW5jZSB0byBgY2xzX3JlZmNvdW50X2dldF9vcDo6ZHVtcChjZXBo
+OjpGb3JtYXR0ZXIqKSBjb25zdCcKdGVzdC9lbmNvZGluZy9jZXBoX2RlbmNvZGVyLWNlcGhfZGVu
+Y29kZXIubzogSW4gZnVuY3Rpb24gYERlbmNvZGVyQmFzZTxjbHNfcmVmY291bnRfcHV0X29wPjo6
+Z2VuZXJhdGUoKSc6Ci9ob21lL3VzZXJuYW1lL1Byb2plY3RzL2NlcGgvc3JjL3Rlc3QvZW5jb2Rp
+bmcvY2VwaF9kZW5jb2Rlci5jYzo4NzogdW5kZWZpbmVkIHJlZmVyZW5jZSB0byBgY2xzX3JlZmNv
+dW50X3B1dF9vcDo6Z2VuZXJhdGVfdGVzdF9pbnN0YW5jZXMoc3RkOjpsaXN0PGNsc19yZWZjb3Vu
+dF9wdXRfb3AqLCBzdGQ6OmFsbG9jYXRvcjxjbHNfcmVmY291bnRfcHV0X29wKj4gPiYpJwp0ZXN0
+L2VuY29kaW5nL2NlcGhfZGVuY29kZXItY2VwaF9kZW5jb2Rlci5vOiBJbiBmdW5jdGlvbiBgRGVu
+Y29kZXJCYXNlPGNsc19yZWZjb3VudF9wdXRfb3A+OjpkdW1wKGNlcGg6OkZvcm1hdHRlciopJzoK
+L2hvbWUvdXNlcm5hbWUvUHJvamVjdHMvY2VwaC9zcmMvdGVzdC9lbmNvZGluZy9jZXBoX2RlbmNv
+ZGVyLmNjOjgzOiB1bmRlZmluZWQgcmVmZXJlbmNlIHRvIGBjbHNfcmVmY291bnRfcHV0X29wOjpk
+dW1wKGNlcGg6OkZvcm1hdHRlciopIGNvbnN0Jwp0ZXN0L2VuY29kaW5nL2NlcGhfZGVuY29kZXIt
+Y2VwaF9kZW5jb2Rlci5vOiBJbiBmdW5jdGlvbiBgRGVuY29kZXJCYXNlPGNsc19yZWZjb3VudF9y
+ZWFkX29wPjo6Z2VuZXJhdGUoKSc6Ci9ob21lL3VzZXJuYW1lL1Byb2plY3RzL2NlcGgvc3JjL3Rl
+c3QvZW5jb2RpbmcvY2VwaF9kZW5jb2Rlci5jYzo4NzogdW5kZWZpbmVkIHJlZmVyZW5jZSB0byBg
+Y2xzX3JlZmNvdW50X3JlYWRfb3A6OmdlbmVyYXRlX3Rlc3RfaW5zdGFuY2VzKHN0ZDo6bGlzdDxj
+bHNfcmVmY291bnRfcmVhZF9vcCosIHN0ZDo6YWxsb2NhdG9yPGNsc19yZWZjb3VudF9yZWFkX29w
+Kj4gPiYpJwp0ZXN0L2VuY29kaW5nL2NlcGhfZGVuY29kZXItY2VwaF9kZW5jb2Rlci5vOiBJbiBm
+dW5jdGlvbiBgRGVuY29kZXJCYXNlPGNsc19yZWZjb3VudF9yZWFkX29wPjo6ZHVtcChjZXBoOjpG
+b3JtYXR0ZXIqKSc6Ci9ob21lL3VzZXJuYW1lL1Byb2plY3RzL2NlcGgvc3JjL3Rlc3QvZW5jb2Rp
+bmcvY2VwaF9kZW5jb2Rlci5jYzo4MzogdW5kZWZpbmVkIHJlZmVyZW5jZSB0byBgY2xzX3JlZmNv
+dW50X3JlYWRfb3A6OmR1bXAoY2VwaDo6Rm9ybWF0dGVyKikgY29uc3QnCnRlc3QvZW5jb2Rpbmcv
+Y2VwaF9kZW5jb2Rlci1jZXBoX2RlbmNvZGVyLm86IEluIGZ1bmN0aW9uIGBEZW5jb2RlckJhc2U8
+Y2xzX3JlZmNvdW50X3JlYWRfcmV0Pjo6Z2VuZXJhdGUoKSc6Ci9ob21lL3VzZXJuYW1lL1Byb2pl
+Y3RzL2NlcGgvc3JjL3Rlc3QvZW5jb2RpbmcvY2VwaF9kZW5jb2Rlci5jYzo4NzogdW5kZWZpbmVk
+IHJlZmVyZW5jZSB0byBgY2xzX3JlZmNvdW50X3JlYWRfcmV0OjpnZW5lcmF0ZV90ZXN0X2luc3Rh
+bmNlcyhzdGQ6Omxpc3Q8Y2xzX3JlZmNvdW50X3JlYWRfcmV0Kiwgc3RkOjphbGxvY2F0b3I8Y2xz
+X3JlZmNvdW50X3JlYWRfcmV0Kj4gPiYpJwp0ZXN0L2VuY29kaW5nL2NlcGhfZGVuY29kZXItY2Vw
+aF9kZW5jb2Rlci5vOiBJbiBmdW5jdGlvbiBgRGVuY29kZXJCYXNlPGNsc19yZWZjb3VudF9yZWFk
+X3JldD46OmR1bXAoY2VwaDo6Rm9ybWF0dGVyKiknOgovaG9tZS91c2VybmFtZS9Qcm9qZWN0cy9j
+ZXBoL3NyYy90ZXN0L2VuY29kaW5nL2NlcGhfZGVuY29kZXIuY2M6ODM6IHVuZGVmaW5lZCByZWZl
+cmVuY2UgdG8gYGNsc19yZWZjb3VudF9yZWFkX3JldDo6ZHVtcChjZXBoOjpGb3JtYXR0ZXIqKSBj
+b25zdCcKdGVzdC9lbmNvZGluZy9jZXBoX2RlbmNvZGVyLWNlcGhfZGVuY29kZXIubzogSW4gZnVu
+Y3Rpb24gYERlbmNvZGVyQmFzZTxjbHNfcmVmY291bnRfc2V0X29wPjo6Z2VuZXJhdGUoKSc6Ci9o
+b21lL3VzZXJuYW1lL1Byb2plY3RzL2NlcGgvc3JjL3Rlc3QvZW5jb2RpbmcvY2VwaF9kZW5jb2Rl
+ci5jYzo4NzogdW5kZWZpbmVkIHJlZmVyZW5jZSB0byBgY2xzX3JlZmNvdW50X3NldF9vcDo6Z2Vu
+ZXJhdGVfdGVzdF9pbnN0YW5jZXMoc3RkOjpsaXN0PGNsc19yZWZjb3VudF9zZXRfb3AqLCBzdGQ6
+OmFsbG9jYXRvcjxjbHNfcmVmY291bnRfc2V0X29wKj4gPiYpJwp0ZXN0L2VuY29kaW5nL2NlcGhf
+ZGVuY29kZXItY2VwaF9kZW5jb2Rlci5vOiBJbiBmdW5jdGlvbiBgRGVuY29kZXJCYXNlPGNsc19y
+ZWZjb3VudF9zZXRfb3A+OjpkdW1wKGNlcGg6OkZvcm1hdHRlciopJzoKL2hvbWUvdXNlcm5hbWUv
+UHJvamVjdHMvY2VwaC9zcmMvdGVzdC9lbmNvZGluZy9jZXBoX2RlbmNvZGVyLmNjOjgzOiB1bmRl
+ZmluZWQgcmVmZXJlbmNlIHRvIGBjbHNfcmVmY291bnRfc2V0X29wOjpkdW1wKGNlcGg6OkZvcm1h
+dHRlciopIGNvbnN0Jwpjb2xsZWN0MjogZXJyb3I6IGxkIHJldHVybmVkIDEgZXhpdCBzdGF0dXMK
+bWFrZVszXTogKioqIFtjZXBoLWRlbmNvZGVyXSBFcnJvciAxCm1ha2VbM106IExlYXZpbmcgZGly
+ZWN0b3J5IGAvaG9tZS91c2VybmFtZS9Qcm9qZWN0cy9jZXBoL3NyYycKbWFrZVsyXTogKioqIFth
+bGwtcmVjdXJzaXZlXSBFcnJvciAxCm1ha2VbMl06IExlYXZpbmcgZGlyZWN0b3J5IGAvaG9tZS91
+c2VybmFtZS9Qcm9qZWN0cy9jZXBoL3NyYycKbWFrZVsxXTogKioqIFthbGxdIEVycm9yIDIKbWFr
+ZVsxXTogTGVhdmluZyBkaXJlY3RvcnkgYC9ob21lL3VzZXJuYW1lL1Byb2plY3RzL2NlcGgvc3Jj
+JwptYWtlOiAqKiogW2FsbC1yZWN1cnNpdmVdIEVycm9yIDEK
+--089e010d9e7272697804e648858e--
