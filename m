@@ -1,104 +1,37 @@
-From: Guangliang Zhao <guangliang@unitedstack.com>
-Subject: [PATCH] rbd: add ioctl for rbd
-Date: Mon, 16 Sep 2013 13:42:33 +0800
-Message-ID: <1379310153-8799-1-git-send-email-guangliang@unitedstack.com>
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f41.google.com ([209.85.220.41]:37202 "EHLO
-	mail-pa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752384Ab3IPFmk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Sep 2013 01:42:40 -0400
-Received: by mail-pa0-f41.google.com with SMTP id bj1so4957652pad.0
-        for <ceph-devel@vger.kernel.org>; Sun, 15 Sep 2013 22:42:37 -0700 (PDT)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: josh.durgin@inktank.com, alex.elder@linaro.org, lucienchao@gmail.com
+From: Guang <yguang11-/E1597aS9LQAvxtiuMwx3w@public.gmane.org>
+Subject: Deploy a Ceph cluster to play around with
+Date: Mon, 16 Sep 2013 21:13:56 +0800
+Message-ID: <29A25BA6-872E-410A-95B8-F188A63BA505@yahoo.com>
+Mime-Version: 1.0 (Apple Message framework v1283)
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-When running the following commands:
-    [root@ceph0 mnt]# blockdev --setro /dev/rbd2
-    [root@ceph0 mnt]# blockdev --getro /dev/rbd2
-    0
+Hello ceph-users, ceph-devel,
+Nice to meet you in the community!
+Today I tried to deploy a Ceph cluster to play around with the API, and during the deployment, i have a couple of questions which may need you help:
+  1) How many hosts do I need if I want to deploy a cluster with RadosGW (so that I can try with the S3 API)? Is it 3 OSD + 1 Mon + 1 GW =  5 hosts on minimum?
 
-The block setro didn't take effect, it is because
-the rbd doesn't support ioctl of block driver.
+  2) I have a list of hardwares, however, my host only have 1 disk with two partitions, one for boot and another for LVM members, is it possible to deploy an OSD on such hardware (e.g. make a partition with ext4)? Or I will need another disk to do so?
 
-This resolves:
-	http://tracker.ceph.com/issues/6265
+-bash-4.1$ ceph-deploy disk list myserver.com
+[ceph_deploy.osd][INFO  ] Distro info: RedHatEnterpriseServer 6.3 Santiago
+[ceph_deploy.osd][DEBUG ] Listing disks on myserver.com...
+[repl101.mobstor.gq1.yahoo.com][INFO  ] Running command: ceph-disk list
+[repl101.mobstor.gq1.yahoo.com][INFO  ] /dev/sda :
+[repl101.mobstor.gq1.yahoo.com][INFO  ]  /dev/sda1 other, ext4, mounted on /boot
+[repl101.mobstor.gq1.yahoo.com][INFO  ]  /dev/sda2 other, LVM2_member
 
-Signed-off-by: Guangliang Zhao <guangliang@unitedstack.com>
----
- drivers/block/rbd.c |   54 +++++++++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 54 insertions(+)
-
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 2f00778..9f2057a 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -508,10 +508,64 @@ static void rbd_release(struct gendisk *disk, fmode_t mode)
- 	put_device(&rbd_dev->dev);
- }
- 
-+static int rbd_ioctl(struct block_device *bdev, fmode_t mode,
-+			unsigned int cmd, unsigned long arg)
-+{
-+	struct rbd_device *rbd_dev = bdev->bd_disk->private_data;
-+	int ro, ret = 0;
-+
-+	BUG_ON(!rbd_dev);
-+	spin_lock_irq(&rbd_dev->lock);
-+	if (rbd_dev->open_count > 1) {
-+		spin_unlock_irq(&rbd_dev->lock);
-+		ret = -EBUSY;
-+		goto out;
-+	}
-+	spin_unlock_irq(&rbd_dev->lock);
-+
-+	switch (cmd) {
-+	case BLKROSET:
-+		if (get_user(ro, (int __user *)(arg))) {
-+			ret = -EFAULT;
-+			goto out;
-+		}
-+
-+		/* Snapshot doesn't allow to write*/
-+		if (rbd_dev->spec->snap_id != CEPH_NOSNAP && ro) {
-+			ret = -EROFS;
-+			goto out;
-+		}
-+
-+		if (rbd_dev->mapping.read_only != ro) {
-+			rbd_dev->mapping.read_only = ro;
-+			goto out;
-+		}
-+
-+		break;
-+	default:
-+		ret = -EINVAL;
-+	}
-+
-+out:
-+	return ret;
-+}
-+
-+#ifdef CONFIG_COMPAT
-+static int rbd_compat_ioctl(struct block_device *bdev, fmode_t mode,
-+				unsigned int cmd, unsigned long arg)
-+{
-+	return rbd_ioctl(bdev, mode, cmd, arg);
-+}
-+#endif /* CONFIG_COMPAT */
-+
- static const struct block_device_operations rbd_bd_ops = {
- 	.owner			= THIS_MODULE,
- 	.open			= rbd_open,
- 	.release		= rbd_release,
-+	.ioctl			= rbd_ioctl,
-+#ifdef CONFIG_COMPAT
-+	.compat_ioctl		= rbd_compat_ioctl,
-+#endif
- };
- 
- /*
--- 
-1.7.9.5
-
+Thanks,
+Guang
