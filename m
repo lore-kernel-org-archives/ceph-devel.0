@@ -1,13 +1,10 @@
-From: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: Stripping rados-classes libraries
-Date: Mon, 16 Sep 2013 16:58:53 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1309161657240.30751@cobra.newdream.net>
-References: <CAPud5_7BBuLosENwPLcOmGNWbTocGozwBKDye7zqJFh+cGRW1Q@mail.gmail.com>
+From: =?GBK?B?xfQ=?= <wkp4666-KN7UnAbNpbg@public.gmane.org>
+Subject: radosgw bucket question
+Date: Tue, 17 Sep 2013 10:21:23 +0800 (CST)
+Message-ID: <15706d59.2c5d.14129b8dea8.Coremail.wkp4666@126.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED;
-	BOUNDARY="557981400-1661890144-1379375933=:30751"
+Content-Type: multipart/mixed; boundary="===============2045124882=="
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAPud5_7BBuLosENwPLcOmGNWbTocGozwBKDye7zqJFh+cGRW1Q-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
@@ -17,43 +14,44 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Nick Bartos <nick-F4aKxGU1lFqkHkcT6e4Xnw@public.gmane.org>
-Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+--===============2045124882==
+Content-Type: multipart/alternative;
+	boundary="----=_Part_41632_350015306.1379384483495"
 
---557981400-1661890144-1379375933=:30751
-Content-Type: TEXT/PLAIN; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+------=_Part_41632_350015306.1379384483495
+Content-Type: text/plain; charset=GBK
+Content-Transfer-Encoding: 7bit
 
-[added ceph-devel]
+ 
 
-On Mon, 16 Sep 2013, Nick Bartos wrote:
-> Which symbols need to be kept when stripping the libraries in rados-cla=
-sses?
-> I found this e-mail from 2010:
->=20
-> http://comments.gmane.org/gmane.comp.file-systems.ceph.devel/1543
->=20
-> Is it still just symbols that start with __cls_ that need to be kept?
->=20
-> We compile ceph with debug symbols and strip them out for later debuggi=
-ng.
-> =A0I was excluding stripping the files in rados-classes for < 0.67, how=
-ever in
-> 0.67.3 the files have gotten so big with the debug info we're going to =
-have
-> to strip what we can out of the files we ship.
+hi
+    So what am I doing wrong? when i run commond:
+radosgw-admin bucket list --uid=johdone   the return is []
+and the commond
+radosgw-admin bucket list --uid=wkp4666 the return is []
+and the commond
+radosgw-admin bucket list    the return  is [mybucket1, mybucket2]
+mybucket1's owner is johdone  , and when i try create a mybucket1 for user wkp4666 the result is 409,
+both two users caps is
 
-I'm pretty sure that stripping all but __cls_ should do the trick.  If yo=
-u=20
-run into problems, let us know!
+    "caps" : [{"type": "usages", "perm":"*"}
+                   {"type":"users", "perm":"*"}
+                 ]
+does anyone face the same question ? how can i save the question!!!
 
-sage
+------=_Part_41632_350015306.1379384483495
+Content-Type: text/html; charset=GBK
+Content-Transfer-Encoding: 7bit
 
---557981400-1661890144-1379375933=:30751
+<div style="line-height:1.7;color:#000000;font-size:14px;font-family:arial"><div><div>&nbsp;<br><br>hi <br>&nbsp;&nbsp;&nbsp; So what am I doing wrong? when i run commond:<br><i>radosgw-admin bucket list --uid=johdone&nbsp;&nbsp;</i><b> the return is</b><i> []</i><br>and the commond <br><i>radosgw-admin bucket list --uid=wkp4666 <b>t</b></i><b><i>he</i> return is </b><i>[]</i><br>and the commond <br><i>radosgw-admin bucket list&nbsp;&nbsp;&nbsp; </i><b>the return&nbsp; is </b>[mybucket1, mybucket2]<br><i>mybucket1's</i> owner is <i>johdone&nbsp; , </i>and when i try create a <i>mybucket1</i> for user wkp4666 the result is 409<b>,<br>both two users caps is <br></b><pre>    "caps" : [{"type": "usages", "perm":"*"}<br>                   {"type":"users", "perm":"*"}<br>                 ]</pre>
+ does anyone face the same question ? how can i save the question!!!<br></div></div></div><br><br><span title="neteasefooter"><span id="netease_mail_footer"></span></span>
+------=_Part_41632_350015306.1379384483495--
+
+
+--===============2045124882==
 Content-Type: text/plain; charset="us-ascii"
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7bit
@@ -64,4 +62,4 @@ ceph-users mailing list
 ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 
---557981400-1661890144-1379375933=:30751--
+--===============2045124882==--
