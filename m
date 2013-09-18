@@ -1,132 +1,73 @@
-From: Guangliang Zhao <guangliang@unitedstack.com>
-Subject: [PATCH v3] rbd: add ioctl for rbd
-Date: Wed, 18 Sep 2013 14:35:51 +0800
-Message-ID: <1379486151-8939-1-git-send-email-guangliang@unitedstack.com>
+From: Alfredo Deza <alfredo.deza@inktank.com>
+Subject: [ANN] ceph-deploy 1.2.5 released!
+Date: Wed, 18 Sep 2013 09:48:02 -0400
+Message-ID: <CANtztVw9SSJ1E3N=q_aZULEMkc4_YFbi01hKr11K1+1D5guuAw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f49.google.com ([209.85.220.49]:51583 "EHLO
-	mail-pa0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751738Ab3IRGgF (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Sep 2013 02:36:05 -0400
-Received: by mail-pa0-f49.google.com with SMTP id ld10so7848701pab.22
-        for <ceph-devel@vger.kernel.org>; Tue, 17 Sep 2013 23:36:04 -0700 (PDT)
+Received: from mail-ob0-f178.google.com ([209.85.214.178]:50156 "EHLO
+	mail-ob0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751556Ab3IRNsD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Sep 2013 09:48:03 -0400
+Received: by mail-ob0-f178.google.com with SMTP id uy5so7368894obc.37
+        for <ceph-devel@vger.kernel.org>; Wed, 18 Sep 2013 06:48:02 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: sage@inktank.com, josh.durgin@inktank.com, alex.elder@linaro.org, lucienchao@gmail.com
+To: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-When running the following commands:
-    [root@ceph0 mnt]# blockdev --setro /dev/rbd1
-    [root@ceph0 mnt]# blockdev --getro /dev/rbd1
-    0
+Hi all,
 
-The block setro didn't take effect, it is because
-the rbd doesn't support ioctl of block driver.
+There is a new release of ceph-deploy, the easy ceph deployment tool.
 
-The results with this patch:
-root@ceph-client01:~# rbd map img
-root@ceph-client01:~# blockdev --getro /dev/rbd1
-0
-root@ceph-client01:~# cat /sys/block/rbd1/ro
-0
-root@ceph-client01:~# blockdev --setro /dev/rbd1
-root@ceph-client01:~# blockdev --getro /dev/rbd1
-1
-root@ceph-client01:~# cat /sys/block/rbd1/ro
-1
-root@ceph-client01:~# dd if=/dev/zero of=/dev/rbd1 count=1
-dd: opening `/dev/rbd1': Read-only file system`
-root@ceph-client01:~# blockdev --setrw /dev/rbd1
-root@ceph-client01:~# blockdev --getro /dev/rbd1
-0
-root@ceph-client01:~# cat /sys/block/rbd1/ro
-0
-root@ceph-client01:~# dd if=/dev/zero of=/dev/rbd1 count=1
-1+0 records in
-1+0 records out
-512 bytes (512 B) copied, 0.14989 s, 3.4 kB/s
+There were a good amount of bug fixes into this release and a wealth
+of improvements. Thanks
+to all of you who contributed patches and issues, and thanks to Dmitry
+Borodaenko and
+Andrew Woodward for extensively testing and reporting problems before
+this release went out.
 
-This resolves:
-	http://tracker.ceph.com/issues/6265
+Installation instructions: https://github.com/ceph/ceph-deploy#installation
 
-Signed-off-by: Guangliang Zhao <guangliang@unitedstack.com>
----
- drivers/block/rbd.c |   59 +++++++++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 59 insertions(+)
+This is the list of all fixes that went into this release which can
+also be found in the CHANGELOG.rst file in ceph-deploy's git repo:
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 2f00778..fea826d 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -508,10 +508,69 @@ static void rbd_release(struct gendisk *disk, fmode_t mode)
- 	put_device(&rbd_dev->dev);
- }
- 
-+static int rbd_ioctl_set_ro(struct rbd_device *rbd_dev, unsigned long arg)
-+{
-+	int val;
-+	bool ro;
-+
-+	if (get_user(val, (int __user *)(arg)))
-+		return -EFAULT;
-+
-+	ro = val ? true : false;
-+	/* Snapshot doesn't allow to write*/
-+	if (rbd_dev->spec->snap_id != CEPH_NOSNAP && !ro)
-+		return -EROFS;
-+
-+	if (rbd_dev->mapping.read_only != ro) {
-+		rbd_dev->mapping.read_only = ro;
-+		set_disk_ro(rbd_dev->disk, ro ? 1 : 0);
-+	}
-+
-+	return 0;
-+}
-+
-+static int rbd_ioctl(struct block_device *bdev, fmode_t mode,
-+			unsigned int cmd, unsigned long arg)
-+{
-+	struct rbd_device *rbd_dev = bdev->bd_disk->private_data;
-+	int ret = 0;
-+
-+	spin_lock_irq(&rbd_dev->lock);
-+	/* prevent others open this device */
-+	if (rbd_dev->open_count > 1) {
-+		ret = -EBUSY;
-+		goto out;
-+	}
-+
-+	switch (cmd) {
-+	case BLKROSET:
-+		ret = rbd_ioctl_set_ro(rbd_dev, arg);
-+		break;
-+	default:
-+		ret = -ENOTTY;
-+	}
-+
-+out:
-+	spin_unlock_irq(&rbd_dev->lock);
-+	return ret;
-+}
-+
-+#ifdef CONFIG_COMPAT
-+static int rbd_compat_ioctl(struct block_device *bdev, fmode_t mode,
-+				unsigned int cmd, unsigned long arg)
-+{
-+	return rbd_ioctl(bdev, mode, cmd, arg);
-+}
-+#endif /* CONFIG_COMPAT */
-+
- static const struct block_device_operations rbd_bd_ops = {
- 	.owner			= THIS_MODULE,
- 	.open			= rbd_open,
- 	.release		= rbd_release,
-+	.ioctl			= rbd_ioctl,
-+#ifdef CONFIG_COMPAT
-+	.compat_ioctl		= rbd_compat_ioctl,
-+#endif
- };
- 
- /*
--- 
-1.7.9.5
+* Improve ``osd help`` menu with path information
+* Really discourage the use of ``ceph-deploy new [IP]``
+* Fix hanging remote requests
+* Add ``mon status`` output when creating monitors
+* Fix Debian install issue (wrong parameter order) (Thanks Sayid Munawar)
+* ``osd`` commands will be more verbose when deploying them
+* Issue a warning when provided hosts do not match ``hostname -s`` remotely
+* Create two flags for altering/not-altering source repos at install time:
+  ``--adjust-repos`` and ``--no-adjust-repos``
+* Do not do any ``sudo`` commands if user is root
+* Use ``mon status`` for every ``mon`` deployment and detect problems with
+  monitors.
+* Allow to specify ``host:fqdn/ip`` for all mon commands (Thanks Dmitry
+  Borodaenko)
+* Be consistent for hostname detection (Thanks Dmitry Borodaenko)
+* Fix hanging problem on remote hosts
 
+Highlights
+--------------
+* Dumpling users will benefit from better status information from each
+monitor when deploying.
+* 2 new flags to enable/disable adding source repositories when
+installing (``--adjust-repos`` and ``--no-adjust-repos``) that
+  should help environments that have custom repos (or that are
+prevented to going to the internet).
+* Much better OSD output! This will improve debugging as there is now
+capturing of every step on remote hosts.
+
+
+Make sure you update!
+
+Thanks,
+
+
+Alfredo
+
+p.s. What happened to 1.2.4? As we released this we found there was a
+problem with mon commands that could hang
+so even though 1.2.4 was released we decided to cut another release
+with the fix.
