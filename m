@@ -1,73 +1,60 @@
-From: Sage Weil <sage@inktank.com>
-Subject: v0.69 released
-Date: Wed, 18 Sep 2013 13:21:16 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1309181314230.30792@cobra.newdream.net>
+From: Rutger ter Borg <rutger@terborg.net>
+Subject: Re: Rados and user-provided buffers
+Date: Wed, 18 Sep 2013 22:31:15 +0200
+Message-ID: <l1d2ib$hnd$1@ger.gmane.org>
+References: <l1d0jr$jqa$1@ger.gmane.org> <alpine.DEB.2.00.1309181259060.30792@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:35997 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752758Ab3IRUVQ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Sep 2013 16:21:16 -0400
+Received: from plane.gmane.org ([80.91.229.3]:35953 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751627Ab3IRUb1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 18 Sep 2013 16:31:27 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1VMOPG-0007r6-FI
+	for ceph-devel@vger.kernel.org; Wed, 18 Sep 2013 22:31:26 +0200
+Received: from 77-173-143-102.ip.telfort.nl ([77.173.143.102])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Wed, 18 Sep 2013 22:31:26 +0200
+Received: from rutger by 77-173-143-102.ip.telfort.nl with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Wed, 18 Sep 2013 22:31:26 +0200
+In-Reply-To: <alpine.DEB.2.00.1309181259060.30792@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org, ceph-users@ceph.com
+To: ceph-devel@vger.kernel.org
 
-Our v0.69 development release of Ceph is ready!  The most notable 
-user-facing new feature is probably improved support for CORS in the 
-radosgw.  There has also been a lot of new work going into the tree behind 
-the scenes on the OSD that is laying the groundwork for tiering and cache 
-pools.  As part of this, some of the librados API semantics have been 
-tightened up.
+On 2013-09-18 22:01, Sage Weil wrote:
+>
+> The read-into-existing-buffer is only wired up properly for the C
+> interface.  For the C++ it isn't generally necessary: we allocate and read
+> the data off the network,a nd pass the reference directly back to the user
+> without making another copy.  The 2010 thread is about similarly avoiding
+> such a copy for the C API.  We didn't contemplate the situation where you
+> specifically want the bytes to go to a particular address via C++.  If
+> that's what you need, the C++ API needs to be extended, or you can just
+> use the C call for that case.
+>
+> sage
+>
 
-Notable changes:
+Hey Sage,
 
- * build cleanly under clang (Christophe Courtaut)
- * common: migrate SharedPtrRegistry to use boost::shared_ptr<> (Loic 
-   Dachary)
- * doc: erasure coding design notes (Loic Dachary)
- * improved intel-optimized crc32c support (~8x faster on my laptop!)
- * librados: get_version64() method for C++ API
- * mds: fix locking deadlock (David Disseldorp)
- * mon, osd: initial CLI for configuring tiering
- * mon: allow cap strings with . to be unquoted
- * mon: continue to discover peer addr info during election phase
- * mon: fix 'osd crush move ...' command for buckets (Joao Luis)
- * mon: warn when mon data stores grow very large (Joao Luis)
- * objecter, librados: redirect requests based on cache tier config
- * osd, librados: add new COPY_FROM rados operation
- * osd, librados: add new COPY_GET rados operations (used by COPY_FROM)
- * osd: add 'osd heartbeat min healthy ratio' configurable (was hard-coded 
-   at 33%)
- * osd: add option to disable pg log debug code (which burns CPU)
- * osd: allow cap strings with . to be unquoted
- * osd: fix version value returned by various operations (Greg Farnum)
- * osd: infrastructure to copy objects from other OSDs
- * osd: use fdatasync(2) instead of fsync(2) to improve performance (Sam 
-   Just)
- * rgw: fix major CPU utilization bug with internal caching (Yehuda Sadeh, 
-   Mark Nelson)
- * rgw: fix ordering of write operations (preventing data loss on crash) 
-   (Yehuda Sadeh)
- * rgw: fix ordering of writes for mulitpart upload (Yehuda Sadeh)
- * rgw: fix various CORS bugs (Yehuda Sadeh)
- * rgw: improve help output (Christophe Courtaut)
- * rgw: validate S3 tokens against keystone (Roald J. van Loon)
- * rgw: wildcard support for keystone roles (Christophe Courtaut)
- * sysvinit radosgw: fix status return code (Danny Al-Gaaf)
- * sysvinit rbdmap: fix error 'service rbdmap stop' (Laurent Barbe)
+my particular use case is a pager that uses Rados as a backend. Striping 
+of pages works identical to the striping mechanism of Ceph. Reads and 
+writes of multiple pages may be combined into one aio_ call with one 
+bufferlist. Pages are allocated by the pager.
 
-For more information, please see:
+AFAICT, the C call provides reading into a contiguous buffer, whereas I 
+would like to read into a bufferlist. What would need to be done to add 
+support for this in rados?
 
- * http://ceph.com/docs/master/release-notes/#v0-69
+Thanks,
 
-Work on tiering and erasure coding (and related refactoring) continues in 
-ernest.
+Rutger
 
-You can get v0.69 from the usual locations:
 
- * Git at git://github.com/ceph/ceph.git
- * Tarball at http://ceph.com/download/ceph-0.69.tar.gz
- * For Debian/Ubuntu packages, see http://ceph.com/docs/master/install/debian
- * For RPMs, see http://ceph.com/docs/master/install/rpm
- 
+
