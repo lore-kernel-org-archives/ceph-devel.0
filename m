@@ -1,73 +1,46 @@
-From: Alfredo Deza <alfredo.deza@inktank.com>
-Subject: [ANN] ceph-deploy 1.2.5 released!
-Date: Wed, 18 Sep 2013 09:48:02 -0400
-Message-ID: <CANtztVw9SSJ1E3N=q_aZULEMkc4_YFbi01hKr11K1+1D5guuAw@mail.gmail.com>
+From: Gregory Farnum <greg-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: About ceph testing
+Date: Wed, 18 Sep 2013 10:57:53 -0700
+Message-ID: <CAPYLRzgXYWEuToCDmShGuVJHFxwpLvzQbbR2VnOC08Eamtz1NA@mail.gmail.com>
+References: <CAGkCoNJQFM1-7o8XR_d7eUXYjjwXQhgEK5GWNUMwyAzN7u03Uw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f178.google.com ([209.85.214.178]:50156 "EHLO
-	mail-ob0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751556Ab3IRNsD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Sep 2013 09:48:03 -0400
-Received: by mail-ob0-f178.google.com with SMTP id uy5so7368894obc.37
-        for <ceph-devel@vger.kernel.org>; Wed, 18 Sep 2013 06:48:02 -0700 (PDT)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAGkCoNJQFM1-7o8XR_d7eUXYjjwXQhgEK5GWNUMwyAzN7u03Uw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: david zhang <zhang.david2011-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Loic Dachary <loic-cLsNCMjd+0JAfugRpC6u6w@public.gmane.org>
+Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi all,
+On Tue, Sep 17, 2013 at 10:07 PM, david zhang <zhang.david2011-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+> Hi ceph-users,
+>
+> Previously I sent one mail to ask for help on ceph unit test and function
+> test. Thanks to one of your guys, I got replied about unit test.
+>
+> Since we are planning to use ceph, but with strict quality bar inside, we
+> have to evaluate and test the major features we want to use by ourselves. In
+> order to avoid reduplicated work and accelerate ceph adaption, could you
+> please share us any information about ceph testing, such as test strategy,
+> test plan, function & performance test, etc?
+>
+> Looking forward to your reply. Thanks so much.
 
-There is a new release of ceph-deploy, the easy ceph deployment tool.
-
-There were a good amount of bug fixes into this release and a wealth
-of improvements. Thanks
-to all of you who contributed patches and issues, and thanks to Dmitry
-Borodaenko and
-Andrew Woodward for extensively testing and reporting problems before
-this release went out.
-
-Installation instructions: https://github.com/ceph/ceph-deploy#installation
-
-This is the list of all fixes that went into this release which can
-also be found in the CHANGELOG.rst file in ceph-deploy's git repo:
-
-* Improve ``osd help`` menu with path information
-* Really discourage the use of ``ceph-deploy new [IP]``
-* Fix hanging remote requests
-* Add ``mon status`` output when creating monitors
-* Fix Debian install issue (wrong parameter order) (Thanks Sayid Munawar)
-* ``osd`` commands will be more verbose when deploying them
-* Issue a warning when provided hosts do not match ``hostname -s`` remotely
-* Create two flags for altering/not-altering source repos at install time:
-  ``--adjust-repos`` and ``--no-adjust-repos``
-* Do not do any ``sudo`` commands if user is root
-* Use ``mon status`` for every ``mon`` deployment and detect problems with
-  monitors.
-* Allow to specify ``host:fqdn/ip`` for all mon commands (Thanks Dmitry
-  Borodaenko)
-* Be consistent for hostname detection (Thanks Dmitry Borodaenko)
-* Fix hanging problem on remote hosts
-
-Highlights
---------------
-* Dumpling users will benefit from better status information from each
-monitor when deploying.
-* 2 new flags to enable/disable adding source repositories when
-installing (``--adjust-repos`` and ``--no-adjust-repos``) that
-  should help environments that have custom repos (or that are
-prevented to going to the internet).
-* Much better OSD output! This will improve debugging as there is now
-capturing of every step on remote hosts.
-
-
-Make sure you update!
-
-Thanks,
-
-
-Alfredo
-
-p.s. What happened to 1.2.4? As we released this we found there was a
-problem with mon commands that could hang
-so even though 1.2.4 was released we decided to cut another release
-with the fix.
+You'll want to investigate our teuthology framework and the qa suites
+we've set up (https://github.com/ceph/teuthology,
+https://github.com/ceph/ceph-qa-suite), as well as the qa subdirectory
+of the main Ceph repo. Loic and a few other users on the dev list have
+gotten involved with this and I believe he's trying to set up meetings
+and info sessions for Inktank-external people to help make teuthology
+more usable.
+-Greg
+Software Engineer #42 @ http://inktank.com | http://ceph.com
