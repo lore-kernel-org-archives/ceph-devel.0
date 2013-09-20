@@ -1,13 +1,13 @@
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: [PATCH 1/3] ceph: remove outdated frag information
-Date: Sat, 21 Sep 2013 06:44:38 +0800
-Message-ID: <1379717080-15626-2-git-send-email-zheng.z.yan@intel.com>
+Subject: [PATCH 2/3] ceph: handle frag mismatch between readdir request and reply
+Date: Sat, 21 Sep 2013 06:44:39 +0800
+Message-ID: <1379717080-15626-3-git-send-email-zheng.z.yan@intel.com>
 References: <1379717080-15626-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
 Received: from mga02.intel.com ([134.134.136.20]:46406 "EHLO mga02.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751936Ab3ITWoy (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 20 Sep 2013 18:44:54 -0400
+	id S1752674Ab3ITWo4 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 20 Sep 2013 18:44:56 -0400
 In-Reply-To: <1379717080-15626-1-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -16,70 +16,98 @@ Cc: sage@inktank.com, "Yan, Zheng" <zheng.z.yan@intel.com>
 
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-If directory fragments change, fill_inode() inserts new frags into
-the fragtree, but it does not remove outdated frags from the fragtree.
-This patch fixes it.
+If client has outdated directory fragments information, it may request
+readdir an non-existent directory fragment. In this case, the MDS finds
+an approximate directory fragment and sends its contents back to the
+client. When receiving a reply with fragment that is different than the
+requested one, the client need to reset the 'readdir offset'.
 
 Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
 ---
- fs/ceph/inode.c | 32 ++++++++++++++++++++++++++++----
- 1 file changed, 28 insertions(+), 4 deletions(-)
+ fs/ceph/dir.c        | 11 ++++++++++-
+ fs/ceph/inode.c      | 15 +++++++++++++--
+ fs/ceph/mds_client.c |  3 +--
+ 3 files changed, 24 insertions(+), 5 deletions(-)
 
+diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+index 868b61d..2a0bcae 100644
+--- a/fs/ceph/dir.c
++++ b/fs/ceph/dir.c
+@@ -352,8 +352,18 @@ more:
+ 		}
+ 
+ 		/* note next offset and last dentry name */
++		rinfo = &req->r_reply_info;
++		if (le32_to_cpu(rinfo->dir_dir->frag) != frag) {
++			frag = le32_to_cpu(rinfo->dir_dir->frag);
++			if (ceph_frag_is_leftmost(frag))
++				fi->next_offset = 2;
++			else
++				fi->next_offset = 0;
++			off = fi->next_offset;
++		}
+ 		fi->offset = fi->next_offset;
+ 		fi->last_readdir = req;
++		fi->frag = frag;
+ 
+ 		if (req->r_reply_info.dir_end) {
+ 			kfree(fi->last_name);
+@@ -363,7 +373,6 @@ more:
+ 			else
+ 				fi->next_offset = 0;
+ 		} else {
+-			rinfo = &req->r_reply_info;
+ 			err = note_last_dentry(fi,
+ 				       rinfo->dir_dname[rinfo->dir_nr-1],
+ 				       rinfo->dir_dname_len[rinfo->dir_nr-1]);
 diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index 8549a48..cf12ea6 100644
+index cf12ea6..833a4d5 100644
 --- a/fs/ceph/inode.c
 +++ b/fs/ceph/inode.c
-@@ -577,6 +577,8 @@ static int fill_inode(struct inode *inode,
- 	int issued = 0, implemented;
- 	struct timespec mtime, atime, ctime;
- 	u32 nsplits;
-+	struct ceph_inode_frag *frag;
-+	struct rb_node *rb_node;
- 	struct ceph_buffer *xattr_blob = NULL;
- 	int err = 0;
- 	int queue_trunc = 0;
-@@ -751,15 +753,37 @@ no_change:
- 	/* FIXME: move me up, if/when version reflects fragtree changes */
- 	nsplits = le32_to_cpu(info->fragtree.nsplits);
- 	mutex_lock(&ci->i_fragtree_mutex);
-+	rb_node = rb_first(&ci->i_fragtree);
- 	for (i = 0; i < nsplits; i++) {
- 		u32 id = le32_to_cpu(info->fragtree.splits[i].frag);
--		struct ceph_inode_frag *frag = __get_or_create_frag(ci, id);
--
--		if (IS_ERR(frag))
--			continue;
-+		frag = NULL;
-+		while (rb_node) {
-+			frag = rb_entry(rb_node, struct ceph_inode_frag, node);
-+			if (ceph_frag_compare(frag->frag, id) >= 0) {
-+				if (frag->frag != id)
-+					frag = NULL;
-+				else
-+					rb_node = rb_next(rb_node);
-+				break;
-+			}
-+			rb_node = rb_next(rb_node);
-+			rb_erase(&frag->node, &ci->i_fragtree);
-+			kfree(frag);
-+		}
-+		if (!frag) {
-+			frag = __get_or_create_frag(ci, id);
-+			if (IS_ERR(frag))
-+				continue;
-+		}
- 		frag->split_by = le32_to_cpu(info->fragtree.splits[i].by);
- 		dout(" frag %x split by %d\n", frag->frag, frag->split_by);
- 	}
-+	while (rb_node) {
-+		frag = rb_entry(rb_node, struct ceph_inode_frag, node);
-+		rb_node = rb_next(rb_node);
-+		rb_erase(&frag->node, &ci->i_fragtree);
-+		kfree(frag);
+@@ -1274,8 +1274,19 @@ int ceph_readdir_prepopulate(struct ceph_mds_request *req,
+ 	int err = 0, i;
+ 	struct inode *snapdir = NULL;
+ 	struct ceph_mds_request_head *rhead = req->r_request->front.iov_base;
+-	u64 frag = le32_to_cpu(rhead->args.readdir.frag);
+ 	struct ceph_dentry_info *di;
++	u64 r_readdir_offset = req->r_readdir_offset;
++	u32 frag = le32_to_cpu(rhead->args.readdir.frag);
++
++	if (le32_to_cpu(rinfo->dir_dir->frag) != frag) {
++		dout("readdir_prepopulate got new frag %x -> %x\n",
++		     frag, le32_to_cpu(rinfo->dir_dir->frag));
++		frag = le32_to_cpu(rinfo->dir_dir->frag);
++		if (ceph_frag_is_leftmost(frag))
++			r_readdir_offset = 2;
++		else
++			r_readdir_offset = 0;
 +	}
- 	mutex_unlock(&ci->i_fragtree_mutex);
  
- 	/* were we issued a capability? */
+ 	if (req->r_aborted)
+ 		return readdir_prepopulate_inodes_only(req, session);
+@@ -1339,7 +1350,7 @@ retry_lookup:
+ 		}
+ 
+ 		di = dn->d_fsdata;
+-		di->offset = ceph_make_fpos(frag, i + req->r_readdir_offset);
++		di->offset = ceph_make_fpos(frag, i + r_readdir_offset);
+ 
+ 		/* inode */
+ 		if (dn->d_inode) {
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index b7bda5d..f51ab26 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -2238,8 +2238,7 @@ static void handle_reply(struct ceph_mds_session *session, struct ceph_msg *msg)
+ 	err = ceph_fill_trace(mdsc->fsc->sb, req, req->r_session);
+ 	if (err == 0) {
+ 		if (result == 0 && (req->r_op == CEPH_MDS_OP_READDIR ||
+-				    req->r_op == CEPH_MDS_OP_LSSNAP) &&
+-		    rinfo->dir_nr)
++				    req->r_op == CEPH_MDS_OP_LSSNAP))
+ 			ceph_readdir_prepopulate(req, req->r_session);
+ 		ceph_unreserve_caps(mdsc, &req->r_caps_reservation);
+ 	}
 -- 
 1.8.1.4
 
