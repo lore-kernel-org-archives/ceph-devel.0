@@ -1,151 +1,76 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: CEPH Erasure Encoding + OSD Scalability
-Date: Fri, 20 Sep 2013 18:49:51 +0200
-Message-ID: <523C7CAF.1020101@dachary.org>
-References: <-7369304096744919226@unknownmsgid> <3472A07E6605974CBC9BC573F1BC02E4A527147E@PLOXCHG03.cern.ch> <523C40B7.5060902@dachary.org> <alpine.DEB.2.00.1309200835110.25752@cobra.newdream.net>
+From: Somnath Roy <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>
+Subject: Scaling radosgw module
+Date: Fri, 20 Sep 2013 21:57:46 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F0FC4A8A7@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enig4D6DD579FF3E90B5DFB9203A"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:40440 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752204Ab3ITQty (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 20 Sep 2013 12:49:54 -0400
-In-Reply-To: <alpine.DEB.2.00.1309200835110.25752@cobra.newdream.net>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig4D6DD579FF3E90B5DFB9203A
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>, "yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org" <yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Anirban Ray <Anirban.Ray-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
 Hi,
+I am running Ceph on a 3 node cluster and each of my server node is running 10 OSDs, one for each disk. I have one admin node and all the nodes are connected with 2 X 10G network. One network is for cluster and other one configured as public network.
 
-This is a first attempt at avoiding unnecessary copy:
+All the OSD journals are on SSDs.
 
-https://github.com/dachary/ceph/blob/03445a5926cd073c11cd8693fb110729e40f=
-35fa/src/osd/ErasureCodePluginJerasure/ErasureCodeJerasure.cc#L66
+I started with rados bench command to benchmark the read performance of this Cluster on a large pool (~10K PGs) and found that each rados client has a limitation. Each client can only drive up to a certain mark. Each server  node cpu utilization shows it is  around 85-90% idle and the admin node (from where rados client is running) is around ~80-85% idle. I am trying with 4K object size.
 
-I'm not sure how it could be made more readable / terse with bufferlist i=
-terators. Any kind of hint would be welcome :-)
+I started running more clients on the admin node and the performance is scaling till it hits the client cpu limit. Server still has the cpu of 30-35% idle.
 
-Cheers
+Now, I am behind radosgw and in one of the server node I installed the required modules like apache, fastcgi, radosgw etc.  I configured swift bench and started benchmarking. Here is my swift-bench job script.
 
-On 20/09/2013 17:36, Sage Weil wrote:
-> On Fri, 20 Sep 2013, Loic Dachary wrote:
->> Hi Andreas,
->>
->> Great work on these benchmarks ! It's definitely an incentive to impro=
-ve as much as possible. Could you push / send the scripts and sequence of=
- operations you've used ? I'll reproduce this locally while getting rid o=
-f the extra copy. It would be useful to capture that into a script that c=
-an be conveniently run from the teuthology integrations tests to check ag=
-ainst performance regressions.
->>
->> Regarding the 3P implementation, in my opinion it would be very valuab=
-le for some people who prefer low CPU consumption. And I'm eager to see m=
-ore than one plugin in the erasure code plugin directory ;-)
->=20
-> One way to approach this might be to make a bufferlist 'multi-iterator'=
-=20
-> that you give you bufferlist::iterator's and will give you back a pair =
-of=20
-> points and length for each contiguous segment.  This would capture the =
-
-> annoying iterator details and let the user focus on processing chunks t=
-hat=20
-> are as large as possible.
->=20
-> sage
->=20
->=20
->  >=20
->> Cheers
->>
->> On 20/09/2013 13:35, Andreas Joachim Peters wrote:
->>> Hi Loic,=20
->>>
->>> I have now some benchmarks on a Xeon 2.27 GHz 4-core with gcc 4.4 (-O=
-2) for ENCODING based on the CEPH Jerasure port.
->>> I measured for objects from 128k to 512 MB with random contents (if y=
-ou encode 1 GB objects you see slow downs due to caching inefficiencies .=
-=2E.), otherwise results are stable for the given object sizes.
->>>
->>> I quote only the benchmark for ErasureCodeJerasureReedSolomonRAID6 (3=
-,2) , the other are significantly slower (2-3x slower) and my 3P(3,2,1) i=
-mplementation providing the same redundancy level like RS-Raid6[3,2] (dou=
-ble disk failure) but using more space (66% vs 100% overhead).
->>>
->>> The effect of out.c_str() is significant ( contributes with factor 2 =
-slow-down for the best jerasure algorithm for [3,2] ).
->>>
->>> Averaged results for Objects Size 4MB:
->>>
->>> 1) Erasure CRS [3,2] - 2.6 ms buffer preparation (out.c_str()) - 2.4 =
-ms encoding =3D> ~780 MB/s
->>> 2) 3P [3,2,1] - 0,005 ms buffer preparation (3P adjusts the padding i=
-n the algorithm) - 0.87ms encoding =3D> ~4.4 GB/s
->>>
->>> I think it pays off to avoid the copy in the encoding if it does not =
-matter for the buffer handling upstream and pad only the last chunk.
->>>
->>> Last thing I tested is how performances scales with number of cores r=
-unning 4 tests in parallel:
->>>
->>> Jerasure (3,2) limits at ~2,0 GB/s for a 4-core CPU (Xeon 2.27 GHz).
->>> 3P(3,2,1) limits ~8 GB/s for a 4-core CPU (Xeon 2.27 GHz).
->>>
->>> I also implemented the decoding for 3P, but didn't test yet all recon=
-struction cases. There is probably room for improvements using AVX suppor=
-t for XOR operations in both implementations.
->>>
->>> Before I invest more time, do think it is useful to have this fast 3P=
- algorithm for double disk failures with 100% space overhead? Because I b=
-elieve that people will always optimize for space and would rather use so=
-mething like (10,2) even if the performance degrades and CPU consumption =
-goes up?!? Let me know, no problem in any case!
->>>
->>> Finally I tested some combinations for ErasureCodeJerasureReedSolomon=
-RAID6:
->>>
->>> (3,2) (4,2) (6,2) (8,2) (10,2) they all run around 780-800 MB/s
->>>
->>> Cheers Andreas.
->>>
->>>
->>>
->>>
->>>
->>
->> --=20
->> Lo?c Dachary, Artisan Logiciel Libre
->> All that is necessary for the triumph of evil is that good people do n=
-othing.
->>
->>
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-All that is necessary for the triumph of evil is that good people do noth=
-ing.
+[bench]
+auth = http://<my-server>/auth
+user = somroy:swift
+key = UbJl9o+OPnzGaRbgqkS9OtPQ01TkAXAeA9RmVzVt
+concurrency = 64
+object_size = 4096
+num_objects = 1000
+num_gets = 200000
+delete = yes
+auth_version = 1.0
 
 
---------------enig4D6DD579FF3E90B5DFB9203A
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+First of all,  the read performance I am getting with one radosgw is more than 5x slower than what I am getting with one rbd client or one rados bench client. Is this expected ? Here is my ceph.conf radosgw config option.
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with undefined - http://www.enigmail.net/
+[client.radosgw.gateway]
+host = emsserver1
+keyring = /etc/ceph/keyring.radosgw.gateway
+rgw_socket_path = /tmp/radosgw.sock
+log_file = /var/log/ceph/radosgw.log
+rgw_dns_name = <ip>
+rgw_ops_log_rados = false
+debug_rgw = 0
+rgw_thread_pool_size = 300
 
-iEYEARECAAYFAlI8fK8ACgkQ8dLMyEl6F21iiQCgrqWrV6gu+KUH87qx+W7JxMDK
-4XUAnj+VZY0KUxTqljiJMYEEJ49vlG1l
-=2R4p
------END PGP SIGNATURE-----
+The server node (where radosgw is also present) avg cpu utilization is very low (~75-80% idle). Out of the ~20% consumption, I saw radosgw is consuming bulk of the cpu in the node and ceph-osds are not much. The other two server node is ~95% idle ; 10 ceph-osds are consuming this of total 5% of cpu !!
 
---------------enig4D6DD579FF3E90B5DFB9203A--
+So, clearly, I am not able to generate much load on the cluster.
+So, I tried to run multiple swift-bench instances with the same job , all hitting the single radosgw instance. I saw no improvement on the performance, each instance iops is almost now = (single instance iop/number of swift-bench instance). The aggregated iops is remaining almost same as of single instance.
+
+This means we are hitting the single client instance limit here too.
+My question is, for all the requests radosgw is opening only single client connection to the object store ?
+If so, is there any configuration like 'noshare' option in case of rbd that Josh pointed out in my earlier mail ?
+
+If not, how a single radosgw instance will scale ?
+
+Appreciate, if anybody can help me on this.
+
+Thanks & Regards
+Somnath
+
+________________________________
+
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
