@@ -1,39 +1,54 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [ceph-users] Scaling RBD module
-Date: Thu, 19 Sep 2013 12:23:37 -0700
-Message-ID: <523B4F39.9080109@inktank.com>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F0FC4A040@SACMBXIP01.sdcorp.global.sandisk.com> <523A4EFB.8040601@inktank.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F0FC4A6AF@SACMBXIP01.sdcorp.global.sandisk.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: [ceph-users] Scaling RBD module
+Date: Fri, 20 Sep 2013 00:03:12 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F0FC4A738@SACMBXIP01.sdcorp.global.sandisk.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F0FC4A040@SACMBXIP01.sdcorp.global.sandisk.com>
+ <523A4EFB.8040601@inktank.com>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F0FC4A6AF@SACMBXIP01.sdcorp.global.sandisk.com>
+ <523B4F39.9080109@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f175.google.com ([209.85.192.175]:39904 "EHLO
-	mail-pd0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751822Ab3IST0M (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Sep 2013 15:26:12 -0400
-Received: by mail-pd0-f175.google.com with SMTP id q10so8746410pdj.20
-        for <ceph-devel@vger.kernel.org>; Thu, 19 Sep 2013 12:26:12 -0700 (PDT)
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F0FC4A6AF@SACMBXIP01.sdcorp.global.sandisk.com>
+Received: from tx2ehsobe004.messaging.microsoft.com ([65.55.88.14]:59730 "EHLO
+	tx2outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753886Ab3ITADb convert rfc822-to-8bit
+	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 19 Sep 2013 20:03:31 -0400
+In-Reply-To: <523B4F39.9080109@inktank.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
+To: Josh Durgin <josh.durgin@inktank.com>
 Cc: Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Anirban Ray <Anirban.Ray@sandisk.com>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
+
+Thanks Josh !
+I am able to successfully add this noshare option in the image mapping now. Looking at dmesg output, I found that was indeed the secret key problem. Block performance is scaling now.
+
+Regards
+Somnath
+
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Josh Durgin
+Sent: Thursday, September 19, 2013 12:24 PM
+To: Somnath Roy
+Cc: Sage Weil; ceph-devel@vger.kernel.org; Anirban Ray; ceph-users@lists.ceph.com
+Subject: Re: [ceph-users] Scaling RBD module
 
 On 09/19/2013 12:04 PM, Somnath Roy wrote:
 > Hi Josh,
 > Thanks for the information. I am trying to add the following but hitting some permission issue.
 >
-> root@emsclient:/etc# echo <mon-1>:6789,<mon-2>:6789,<mon-3>:6789 name=admin,key=client.admin,noshare test_rbd ceph_block_test' > /sys/bus/rbd/add
+> root@emsclient:/etc# echo <mon-1>:6789,<mon-2>:6789,<mon-3>:6789 
+> name=admin,key=client.admin,noshare test_rbd ceph_block_test' > 
+> /sys/bus/rbd/add
 > -bash: echo: write error: Operation not permitted
 
-If you check dmesg, it will probably show an error trying to
-authenticate to the cluster.
+If you check dmesg, it will probably show an error trying to authenticate to the cluster.
 
-Instead of key=client.admin, you can pass the base64 secret value as
-shown in 'ceph auth list' with the secret=XXXXXXXXXXXXXXXXXXXXX option.
+Instead of key=client.admin, you can pass the base64 secret value as shown in 'ceph auth list' with the secret=XXXXXXXXXXXXXXXXXXXXX option.
 
-BTW, there's a ticket for adding the noshare option to rbd map so using
-the sysfs interface like this is never necessary:
+BTW, there's a ticket for adding the noshare option to rbd map so using the sysfs interface like this is never necessary:
 
 http://tracker.ceph.com/issues/6264
 
@@ -68,19 +83,17 @@ Josh
 > Here is the mount information....
 >
 > root@emsclient:/etc# mount
-> /dev/mapper/emsclient--vg-root on / type ext4 (rw,errors=remount-ro)
-> proc on /proc type proc (rw,noexec,nosuid,nodev)
-> sysfs on /sys type sysfs (rw,noexec,nosuid,nodev)
-> none on /sys/fs/cgroup type tmpfs (rw)
-> none on /sys/fs/fuse/connections type fusectl (rw)
-> none on /sys/kernel/debug type debugfs (rw)
-> none on /sys/kernel/security type securityfs (rw)
-> udev on /dev type devtmpfs (rw,mode=0755)
-> devpts on /dev/pts type devpts (rw,noexec,nosuid,gid=5,mode=0620)
+> /dev/mapper/emsclient--vg-root on / type ext4 (rw,errors=remount-ro) 
+> proc on /proc type proc (rw,noexec,nosuid,nodev) sysfs on /sys type 
+> sysfs (rw,noexec,nosuid,nodev) none on /sys/fs/cgroup type tmpfs (rw) 
+> none on /sys/fs/fuse/connections type fusectl (rw) none on 
+> /sys/kernel/debug type debugfs (rw) none on /sys/kernel/security type 
+> securityfs (rw) udev on /dev type devtmpfs (rw,mode=0755) devpts on 
+> /dev/pts type devpts (rw,noexec,nosuid,gid=5,mode=0620)
 > tmpfs on /run type tmpfs (rw,noexec,nosuid,size=10%,mode=0755)
 > none on /run/lock type tmpfs (rw,noexec,nosuid,nodev,size=5242880)
-> none on /run/shm type tmpfs (rw,nosuid,nodev)
-> none on /run/user type tmpfs (rw,noexec,nosuid,nodev,size=104857600,mode=0755)
+> none on /run/shm type tmpfs (rw,nosuid,nodev) none on /run/user type 
+> tmpfs (rw,noexec,nosuid,nodev,size=104857600,mode=0755)
 > /dev/sda1 on /boot type ext2 (rw)
 > /dev/mapper/emsclient--vg-home on /home type ext4 (rw)
 >
@@ -94,7 +107,8 @@ Josh
 > From: Josh Durgin [mailto:josh.durgin@inktank.com]
 > Sent: Wednesday, September 18, 2013 6:10 PM
 > To: Somnath Roy
-> Cc: Sage Weil; ceph-devel@vger.kernel.org; Anirban Ray; ceph-users@lists.ceph.com
+> Cc: Sage Weil; ceph-devel@vger.kernel.org; Anirban Ray; 
+> ceph-users@lists.ceph.com
 > Subject: Re: [ceph-users] Scaling RBD module
 >
 > On 09/17/2013 03:30 PM, Somnath Roy wrote:
@@ -145,7 +159,8 @@ Josh
 >
 > Once you've used rbd map once on a machine, the kernel will already have the auth key stored, and you can use:
 >
-> echo '1.2.3.4:6789 name=admin,key=client.admin,noshare poolname imagename' > /sys/bus/rbd/add
+> echo '1.2.3.4:6789 name=admin,key=client.admin,noshare poolname 
+> imagename' > /sys/bus/rbd/add
 >
 > Where 1.2.3.4:6789 is the address of a monitor, and you're connecting as client.admin.
 >
@@ -159,4 +174,8 @@ Josh
 > PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
 >
 >
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
 
