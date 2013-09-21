@@ -1,27 +1,33 @@
-From: "Hefty, Sean" <sean.hefty-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: RE: [ceph-users] Help needed porting Ceph to RSockets
-Date: Fri, 20 Sep 2013 23:47:46 +0000
-Message-ID: <1828884A29C6694DAF28B7E6B8A8237388CD7E04@ORSMSX109.amr.corp.intel.com>
-References: <1828884A29C6694DAF28B7E6B8A8237388CA7C88@ORSMSX109.amr.corp.intel.com>
- <20130910154847.3fb7dd02@doppio>
+From: Dan Mick <dan.mick@inktank.com>
+Subject: erasure coding / jerasure: topic of interest?
+Date: Fri, 20 Sep 2013 22:22:59 -0700
+Message-ID: <523D2D33.1030407@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-rdma-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20130910154847.3fb7dd02@doppio>
-Content-Language: en-US
-Sender: linux-rdma-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Andreas Bluemle <andreas.bluemle-jy6uzZffzV0b1SvskN2V4Q@public.gmane.org>
-Cc: Matthew Anderson <manderson8787-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-rdma-u79uwXL29TY76Z2rM5mHXA@public.gmane.org (linux-rdma-u79uwXL29TY76Z2rM5mHXA@public.gmane.org)" <linux-rdma-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:59508 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752039Ab3IUFXE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 21 Sep 2013 01:23:04 -0400
+Received: by mail-pb0-f46.google.com with SMTP id rq2so1165058pbb.19
+        for <ceph-devel@vger.kernel.org>; Fri, 20 Sep 2013 22:23:02 -0700 (PDT)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
+Cc: Loic Dachary <loic@dachary.org>
 
-> I would not call these workarounds a real fix, but they should point
-> out the problems which I am trying to solve.
+At SDC this week, Ethan Miller presented about some work he has done 
+along with others including Jim Plank, who also was involved with 
+jerasure; it seems like this work may be useful for optimizing the
+erasure code calculations on Intel CPUs, at least:
 
-Thanks for the update.  I haven't had the time to investigate this, but did want to at least acknowledge that this hasn't gotten lost.
+http://bitbucket.org/ethanmiller/gf-complete
 
-- Sean
---
-To unsubscribe from this list: send the line "unsubscribe linux-rdma" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Paper here: http://web.eecs.utk.edu/~plank/plank/papers/FAST-2013-GF.pdf
+looks very much like the presentation Ethan gave at the conference.
+
+-- 
+Dan Mick, Filesystem Engineering
+Inktank Storage, Inc.	http://inktank.com
+Ceph docs: http://ceph.com/docs
