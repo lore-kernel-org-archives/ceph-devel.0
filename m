@@ -1,216 +1,268 @@
-From: Alex Elder <alex.elder@linaro.org>
-Subject: Re: [PATCH v3] rbd: add ioctl for rbd
-Date: Sat, 21 Sep 2013 10:53:47 -0500
-Message-ID: <523DC10B.1080504@linaro.org>
-References: <1379486151-8939-1-git-send-email-guangliang@unitedstack.com>
+From: "Yan, Zheng" <ukernel@gmail.com>
+Subject: Re: [PATCH V4 1/2] ceph: Implement readv/preadv for sync operation.
+Date: Sun, 22 Sep 2013 10:04:10 +0800
+Message-ID: <CAAM7YAkCQ1Jkd9B=C4mZT0109=-LXPcBYSo34j2EA4QMsmky5Q@mail.gmail.com>
+References: <201309121325129235088@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f172.google.com ([209.85.223.172]:40433 "EHLO
-	mail-ie0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751857Ab3IUPxq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 21 Sep 2013 11:53:46 -0400
-Received: by mail-ie0-f172.google.com with SMTP id x13so3322351ief.31
-        for <ceph-devel@vger.kernel.org>; Sat, 21 Sep 2013 08:53:45 -0700 (PDT)
-In-Reply-To: <1379486151-8939-1-git-send-email-guangliang@unitedstack.com>
+Received: from mail-la0-f47.google.com ([209.85.215.47]:52080 "EHLO
+	mail-la0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752531Ab3IVCEM (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 21 Sep 2013 22:04:12 -0400
+Received: by mail-la0-f47.google.com with SMTP id eo20so1492699lab.34
+        for <ceph-devel@vger.kernel.org>; Sat, 21 Sep 2013 19:04:11 -0700 (PDT)
+In-Reply-To: <201309121325129235088@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Guangliang Zhao <guangliang@unitedstack.com>
-Cc: ceph-devel@vger.kernel.org, sage@inktank.com, josh.durgin@inktank.com, alex.elder@linaro.org, lucienchao@gmail.com
+To: majianpeng <majianpeng@gmail.com>
+Cc: sage <sage@inktank.com>, "Yan, Zheng" <zheng.z.yan@intel.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On 09/18/2013 01:35 AM, Guangliang Zhao wrote:
-> When running the following commands:
->     [root@ceph0 mnt]# blockdev --setro /dev/rbd1
->     [root@ceph0 mnt]# blockdev --getro /dev/rbd1
->     0
-> 
-> The block setro didn't take effect, it is because
-> the rbd doesn't support ioctl of block driver.
-
-Nicely done.
-
-I have a couple small comments below, and one simple
-change that needs to be made.
-
-I also point out another issue about the use of
-the spinlock to protect against read-only state
-changes; I'd like Josh to weigh in on how he thinks
-it might best be handled.
-
-Provided you make the simple change, and Josh has no
-problem with the read-only state thing:
-
-Reviewed-by: Alex Elder <elder@linaro.org>
-
-The required change is something Josh mentioned.  In
-rbd_request_fn(), the variable read_only is defined
-and assigned at the top of the function.  That line
-needs to be inside the while loop, to ensure that
-the most up-to-date value is used (in case it gets
-changed between requests).
-
-> The results with this patch:
-> root@ceph-client01:~# rbd map img
-> root@ceph-client01:~# blockdev --getro /dev/rbd1
-> 0
-> root@ceph-client01:~# cat /sys/block/rbd1/ro
-> 0
-> root@ceph-client01:~# blockdev --setro /dev/rbd1
-> root@ceph-client01:~# blockdev --getro /dev/rbd1
-> 1
-> root@ceph-client01:~# cat /sys/block/rbd1/ro
-> 1
-> root@ceph-client01:~# dd if=/dev/zero of=/dev/rbd1 count=1
-> dd: opening `/dev/rbd1': Read-only file system`
-> root@ceph-client01:~# blockdev --setrw /dev/rbd1
-> root@ceph-client01:~# blockdev --getro /dev/rbd1
-> 0
-> root@ceph-client01:~# cat /sys/block/rbd1/ro
-> 0
-> root@ceph-client01:~# dd if=/dev/zero of=/dev/rbd1 count=1
-> 1+0 records in
-> 1+0 records out
-> 512 bytes (512 B) copied, 0.14989 s, 3.4 kB/s
-
-I don't necessarily want to see all this testing output
-in the commit description (a summary would suffice).  As
-Josh suggested, some sort of test script to validate all
-of this would be much appreciated.  It can be very simple:
-- map rbd device
-- run "blockdev --getro" on it, and verify it reports 0
-- run "blockdev --setro" and verify it is now read-only
-... and so on.
-
-Tests we suggested, which I expect will pass but I
-don't see evidence of it in your description above:
-- verify changing the state (setro or setrw) fails on
-  a device that's already open (e.g. mounted) (EBUSY)
-- verify setro on a snapshot that's mounted (EBUSY)
-- verify setrw on a non-snapshot image that is mapped
-  read-only (EROFS)
-- verify setrw on a snapshot fails (EROFS)
-
-> This resolves:
-> 	http://tracker.ceph.com/issues/6265
-> 
-> Signed-off-by: Guangliang Zhao <guangliang@unitedstack.com>
+On Thu, Sep 12, 2013 at 1:25 PM, majianpeng <majianpeng@gmail.com> wrote:
+> For readv/preadv sync-operatoin, ceph only do the first iov.
+> It don't think other iovs.Now implement this.
+>
+> V4:
+>         modify one bug.
+> V3:
+>    modify some bug.
+> V2:
+>   -add generic_segment_checks
+>   -using struct iov_iter replace cloning the iovs.
+>   -return previous successfully copied if ceph_copy_page_vector_to_user
+>    met error.
+>
+>
+> Signed-off-by: Jianpeng Ma <majianpeng@gmail.com>
+> Reviewed-by: Yan, Zheng <zheng.z.yan@intel.com>
 > ---
->  drivers/block/rbd.c |   59 +++++++++++++++++++++++++++++++++++++++++++++++++++
->  1 file changed, 59 insertions(+)
-> 
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 2f00778..fea826d 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -508,10 +508,69 @@ static void rbd_release(struct gendisk *disk, fmode_t mode)
->  	put_device(&rbd_dev->dev);
+>   fs/ceph/file.c | 157 ++++++++++++++++++++++++++++++++++++++-------------------
+>  1 file changed, 106 insertions(+), 51 deletions(-)
+>
+> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+> index 3de8982..bc7fa52 100644
+> --- a/fs/ceph/file.c
+> +++ b/fs/ceph/file.c
+> @@ -408,51 +408,94 @@ more:
+>   *
+>   * If the read spans object boundary, just do multiple reads.
+>   */
+> -static ssize_t ceph_sync_read(struct file *file, char __user *data,
+> -                             unsigned len, loff_t *poff, int *checkeof)
+> +static ssize_t ceph_sync_read(struct kiocb *iocb, struct iov_iter *i,
+> +                               int *checkeof)
+>  {
+> +       struct file *file = iocb->ki_filp;
+>         struct inode *inode = file_inode(file);
+>         struct page **pages;
+> -       u64 off = *poff;
+> +       u64 off = iocb->ki_pos;
+>         int num_pages, ret;
+>
+> -       dout("sync_read on file %p %llu~%u %s\n", file, off, len,
+> +       dout("sync_read on file %p %llu~%u %s\n", file, off,
+> +            (unsigned)iocb->ki_left,
+>              (file->f_flags & O_DIRECT) ? "O_DIRECT" : "");
+> -
+> -       if (file->f_flags & O_DIRECT) {
+> -               num_pages = calc_pages_for((unsigned long)data, len);
+> -               pages = ceph_get_direct_page_vector(data, num_pages, true);
+> -       } else {
+> -               num_pages = calc_pages_for(off, len);
+> -               pages = ceph_alloc_page_vector(num_pages, GFP_NOFS);
+> -       }
+> -       if (IS_ERR(pages))
+> -               return PTR_ERR(pages);
+> -
+>         /*
+>          * flush any page cache pages in this range.  this
+>          * will make concurrent normal and sync io slow,
+>          * but it will at least behave sensibly when they are
+>          * in sequence.
+>          */
+> -       ret = filemap_write_and_wait(inode->i_mapping);
+> +       ret = filemap_write_and_wait_range(inode->i_mapping, off,
+> +                                               off + iocb->ki_left);
+>         if (ret < 0)
+> -               goto done;
+> -
+> -       ret = striped_read(inode, off, len, pages, num_pages, checkeof,
+> -                          file->f_flags & O_DIRECT,
+> -                          (unsigned long)data & ~PAGE_MASK);
+> +               return ret;
+>
+> -       if (ret >= 0 && (file->f_flags & O_DIRECT) == 0)
+> -               ret = ceph_copy_page_vector_to_user(pages, data, off, ret);
+> -       if (ret >= 0)
+> -               *poff = off + ret;
+> +       if (file->f_flags & O_DIRECT) {
+> +               while (iov_iter_count(i)) {
+> +                       void __user *data = i->iov[0].iov_base + i->iov_offset;
+> +                       size_t len = i->iov[0].iov_len - i->iov_offset;
+> +
+> +                       num_pages = calc_pages_for((unsigned long)data, len);
+> +                       pages = ceph_get_direct_page_vector(data,
+> +                                                           num_pages, true);
+> +                       if (IS_ERR(pages))
+> +                               return PTR_ERR(pages);
+> +
+> +                       ret = striped_read(inode, off, len,
+> +                                          pages, num_pages, checkeof,
+> +                                          1, (unsigned long)data & ~PAGE_MASK);
+> +                       ceph_put_page_vector(pages, num_pages, true);
+> +
+> +                       if (ret <= 0)
+> +                               break;
+> +                       off += ret;
+> +                       iov_iter_advance(i, ret);
+> +                       if (ret < len)
+> +                               break;
+> +               }
+> +       } else {
+> +               size_t len = iocb->ki_left;
+>
+> -done:
+> -       if (file->f_flags & O_DIRECT)
+> -               ceph_put_page_vector(pages, num_pages, true);
+> -       else
+> +               num_pages = calc_pages_for(off, len);
+> +               pages = ceph_alloc_page_vector(num_pages, GFP_NOFS);
+> +               if (IS_ERR(pages))
+> +                       return PTR_ERR(pages);
+> +               ret = striped_read(inode, off, len, pages,
+> +                                       num_pages, checkeof, 0, 0);
+> +               if (ret > 0) {
+> +                       int l, k = 0;
+> +                       size_t left = len = ret;
+> +
+> +                       while (left) {
+> +                               void __user *data = i->iov[0].iov_base
+> +                                                       + i->iov_offset;
+> +                               l = min(i->iov[0].iov_len - i->iov_offset,
+> +                                       left);
+> +
+> +                               ret = ceph_copy_page_vector_to_user(&pages[k],
+> +                                                                   data, off,
+> +                                                                   l);
+> +                               if (ret > 0) {
+> +                                       iov_iter_advance(i, ret);
+> +                                       left -= ret;
+> +                                       off += ret;
+> +                                       k = calc_pages_for(iocb->ki_pos,
+> +                                                          len - left + 1) - 1;
+> +                                       BUG_ON(k >= num_pages && left);
+> +                               } else
+> +                                       break;
+> +                       }
+> +               }
+>                 ceph_release_page_vector(pages, num_pages);
+> +       }
+> +
+> +       if (off > iocb->ki_pos) {
+> +               ret = off - iocb->ki_pos;
+> +               iocb->ki_pos = off;
+> +               iocb->ki_left -= ret;
+> +       }
+> +
+>         dout("sync_read result %d\n", ret);
+>         return ret;
 >  }
->  
-> +static int rbd_ioctl_set_ro(struct rbd_device *rbd_dev, unsigned long arg)
-> +{
-> +	int val;
-> +	bool ro;
+> @@ -647,55 +690,67 @@ static ssize_t ceph_aio_read(struct kiocb *iocb, const struct iovec *iov,
+>  {
+>         struct file *filp = iocb->ki_filp;
+>         struct ceph_file_info *fi = filp->private_data;
+> -       loff_t *ppos = &iocb->ki_pos;
+> -       size_t len = iov->iov_len;
+> +       size_t len = 0;
+>         struct inode *inode = file_inode(filp);
+>         struct ceph_inode_info *ci = ceph_inode(inode);
+> -       void __user *base = iov->iov_base;
+>         ssize_t ret;
+>         int want, got = 0;
+>         int checkeof = 0, read = 0;
+>
+>         dout("aio_read %p %llx.%llx %llu~%u trying to get caps on %p\n",
+>              inode, ceph_vinop(inode), pos, (unsigned)len, inode);
+> -again:
 > +
-> +	if (get_user(val, (int __user *)(arg)))
-> +		return -EFAULT;
+> +       ret = generic_segment_checks(iov, &nr_segs, &len, VERIFY_WRITE);
+> +       if (ret)
+> +               return ret;
 > +
-> +	ro = val ? true : false;
-> +	/* Snapshot doesn't allow to write*/
-> +	if (rbd_dev->spec->snap_id != CEPH_NOSNAP && !ro)
-> +		return -EROFS;
+>         if (fi->fmode & CEPH_FILE_MODE_LAZY)
+>                 want = CEPH_CAP_FILE_CACHE | CEPH_CAP_FILE_LAZYIO;
+>         else
+>                 want = CEPH_CAP_FILE_CACHE;
+>         ret = ceph_get_caps(ci, CEPH_CAP_FILE_RD, want, &got, -1);
+>         if (ret < 0)
+> -               goto out;
+> +               return ret;
 > +
-> +	if (rbd_dev->mapping.read_only != ro) {
-> +		rbd_dev->mapping.read_only = ro;
-> +		set_disk_ro(rbd_dev->disk, ro ? 1 : 0);
-
-This is interesting.  Josh mentioned that the set_device_ro()
-call you had here previously was not needed, because the generic
-ioctl code handled it.
-
-But I believe calling set_disk_ro() (which triggers a udev event)
-is the right thing to do, even though rbd doesn't support partitions.
-In fact, it might be more appropriate for the generic code to call
-that using bdev->bd_disk.  Hmmm.  (I don't have time to look into
-this any further right now, maybe if someone thinks it's worth
-pursuing they can do so.)
-
-In the mean time this does more than set_device_ro(), and the
-redundancy is harmless.  HOWEVER I believe that calling
-this while holding the spinlock will cause locking problems
-(or may just be a bad idea).  I don't know for sure; let
-lockdep be your guide.
-
-> +	}
+>         dout("aio_read %p %llx.%llx %llu~%u got cap refs on %s\n",
+>              inode, ceph_vinop(inode), pos, (unsigned)len,
+>              ceph_cap_string(got));
+>
+>         if ((got & (CEPH_CAP_FILE_CACHE|CEPH_CAP_FILE_LAZYIO)) == 0 ||
+>             (iocb->ki_filp->f_flags & O_DIRECT) ||
+> -           (fi->flags & CEPH_F_SYNC))
+> +           (fi->flags & CEPH_F_SYNC)) {
+> +               struct iov_iter i;
 > +
-> +	return 0;
-> +}
+> +               iocb->ki_left = len;
+> +               iov_iter_init(&i, iov, nr_segs, len, 0);
+> +again:
+>                 /* hmm, this isn't really async... */
+> -               ret = ceph_sync_read(filp, base, len, ppos, &checkeof);
+> -       else
+> +               ret = ceph_sync_read(iocb, &i, &checkeof);
 > +
-> +static int rbd_ioctl(struct block_device *bdev, fmode_t mode,
-> +			unsigned int cmd, unsigned long arg)
-> +{
-> +	struct rbd_device *rbd_dev = bdev->bd_disk->private_data;
-> +	int ret = 0;
-> +
-> +	spin_lock_irq(&rbd_dev->lock);
-> +	/* prevent others open this device */
+> +               if (checkeof && ret >= 0) {
+> +                       int statret = ceph_do_getattr(inode,
+> +                                                     CEPH_STAT_CAP_SIZE);
 
-I think indicating something more like "make sure we hold the only
-reference to this device" would make it clear why you're checking
-against 1 rather than 0.
+It's wrong to move getattr to here. because getattr while holding Fr
+cap can cause hang.
 
-> +	if (rbd_dev->open_count > 1) {
-> +		ret = -EBUSY;
-> +		goto out;
-> +	}
-
-You are adding a new ability to change a fundamental state
-for an image.  You're using the spinlock now to protect
-the read-only state, where previously it was only used to
-protect the open count and REMOVING state/flag.  This
-may mean you should check the read_only flag in rbd_open()
-inside the spinlock there.  And you may need to call the
-set_device_ro() there under protection of that lock.
-
-As I mentioned above, holding the lock could also lead
-to a problem when calling outside code (set_disk_ro()).
-If that's the case you may need to devise a different
-(possibly additional) way to protect this.
-
-Josh, please offer your insights.
+Regards
+Yan, Zheng
 
 > +
-> +	switch (cmd) {
-> +	case BLKROSET:
-> +		ret = rbd_ioctl_set_ro(rbd_dev, arg);
-> +		break;
-> +	default:
-> +		ret = -ENOTTY;
-> +	}
+> +                       /* hit EOF or hole? */
+> +                       if (statret == 0 && iocb->ki_pos < inode->i_size &&
+> +                               iocb->ki_left) {
+> +                               dout("sync_read hit hole, ppos %lld < size %lld"
+> +                                    ", reading more\n", iocb->ki_pos,
+> +                                    inode->i_size);
 > +
-> +out:
-> +	spin_unlock_irq(&rbd_dev->lock);
-> +	return ret;
-> +}
+> +                               read += ret;
+> +                               checkeof = 0;
+> +                               goto again;
+> +                       }
+> +               }
 > +
-> +#ifdef CONFIG_COMPAT
-> +static int rbd_compat_ioctl(struct block_device *bdev, fmode_t mode,
-> +				unsigned int cmd, unsigned long arg)
-> +{
-> +	return rbd_ioctl(bdev, mode, cmd, arg);
-> +}
-> +#endif /* CONFIG_COMPAT */
-> +
->  static const struct block_device_operations rbd_bd_ops = {
->  	.owner			= THIS_MODULE,
->  	.open			= rbd_open,
->  	.release		= rbd_release,
-> +	.ioctl			= rbd_ioctl,
-> +#ifdef CONFIG_COMPAT
-> +	.compat_ioctl		= rbd_compat_ioctl,
-> +#endif
->  };
->  
->  /*
-> 
-
+> +       } else
+>                 ret = generic_file_aio_read(iocb, iov, nr_segs, pos);
+>
+> -out:
+>         dout("aio_read %p %llx.%llx dropping cap refs on %s = %d\n",
+>              inode, ceph_vinop(inode), ceph_cap_string(got), (int)ret);
+>         ceph_put_cap_refs(ci, got);
+>
+> -       if (checkeof && ret >= 0) {
+> -               int statret = ceph_do_getattr(inode, CEPH_STAT_CAP_SIZE);
+> -
+> -               /* hit EOF or hole? */
+> -               if (statret == 0 && *ppos < inode->i_size) {
+> -                       dout("aio_read sync_read hit hole, ppos %lld < size %lld, reading more\n", *ppos, inode->i_size);
+> -                       read += ret;
+> -                       base += ret;
+> -                       len -= ret;
+> -                       checkeof = 0;
+> -                       goto again;
+> -               }
+> -       }
+>         if (ret >= 0)
+>                 ret += read;
+>
+> --
+> 1.8.1.2
