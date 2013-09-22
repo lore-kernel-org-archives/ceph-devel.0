@@ -1,128 +1,177 @@
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: [PATCH 3/3] ceph: handle race between cap reconnect and cap release
-Date: Sun, 22 Sep 2013 12:46:52 +0800
-Message-ID: <1379825212-10438-3-git-send-email-zheng.z.yan@intel.com>
-References: <1379825212-10438-1-git-send-email-zheng.z.yan@intel.com>
+From: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>
+Subject: RE: CEPH Erasure Encoding + OSD Scalability
+Date: Sun, 22 Sep 2013 07:26:32 +0000
+Message-ID: <3472A07E6605974CBC9BC573F1BC02E4A52727FF@PLOXCHG03.cern.ch>
+References: <-7369304096744919226@unknownmsgid>
+ <3472A07E6605974CBC9BC573F1BC02E4A527147E@PLOXCHG03.cern.ch>
+ <523C40B7.5060902@dachary.org>
+ <alpine.DEB.2.00.1309200835110.25752@cobra.newdream.net>
+ <523C7CAF.1020101@dachary.org>,<523DB725.2070104@dachary.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:53405 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752306Ab3IVErS (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 22 Sep 2013 00:47:18 -0400
-In-Reply-To: <1379825212-10438-1-git-send-email-zheng.z.yan@intel.com>
+Received: from cernmx32.cern.ch ([137.138.144.178]:39773 "EHLO
+	CERNMX32.cern.ch" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752273Ab3IVH0f convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 22 Sep 2013 03:26:35 -0400
+In-Reply-To: <523DB725.2070104@dachary.org>
+Content-Language: en-GB
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: sage@inktank.com, "Yan, Zheng" <zheng.z.yan@intel.com>
+To: Loic Dachary <loic@dachary.org>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Hi Loic,=20
+I run a benchmark with the changed code tomorrow ... I actually had to =
+insert some of my realtime benchmark macro's into your Jerasure code to=
+ see the different time fractions between buffer preparation & encoding=
+ step, but for you QA suite it is probably enough to get a total value =
+after your fix. I will send you a program sampling the performance at d=
+ifferent buffer sizes and encoding types.
 
-When a cap get released while composing the cap reconnect message.
-We should skip queuing the release message if the cap hasn't been
-added to the cap reconnect message.
+I changed my code to use vector operations (128-bit XOR's) and it gives=
+ another 10% gain. I also want to try out if it makes sense to do the C=
+RC32C computation in-line in the encoding step and compare it with the =
+two step procedure first encoding all blocks, then CRC32C on all blocks=
+=2E
 
-Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
----
- fs/ceph/caps.c       |  4 +++-
- fs/ceph/mds_client.c | 21 ++++++++++++++++++---
- fs/ceph/mds_client.h |  1 +
- 3 files changed, 22 insertions(+), 4 deletions(-)
+Cheers Andreas.
 
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index d2d6e40..acc8564 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -909,7 +909,9 @@ void __ceph_remove_cap(struct ceph_cap *cap, bool queue_release)
- 
- 	/* remove from session list */
- 	spin_lock(&session->s_cap_lock);
--	if (queue_release)
-+	if (queue_release &&
-+	    (!session->s_cap_reconnect ||
-+	     cap->cap_gen == session->s_cap_gen))
- 		__queue_cap_release(session, ci->i_vino.ino, cap->cap_id,
- 				    cap->mseq, cap->issue_seq);
- 
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 6b4ed35..30397a6 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -444,6 +444,7 @@ static struct ceph_mds_session *register_session(struct ceph_mds_client *mdsc,
- 	INIT_LIST_HEAD(&s->s_waiting);
- 	INIT_LIST_HEAD(&s->s_unsafe);
- 	s->s_num_cap_releases = 0;
-+	s->s_cap_reconnect = 0;
- 	s->s_cap_iterator = NULL;
- 	INIT_LIST_HEAD(&s->s_cap_releases);
- 	INIT_LIST_HEAD(&s->s_cap_releases_done);
-@@ -1415,7 +1416,6 @@ static void discard_cap_releases(struct ceph_mds_client *mdsc,
- 	unsigned num;
- 
- 	dout("discard_cap_releases mds%d\n", session->s_mds);
--	spin_lock(&session->s_cap_lock);
- 
- 	/* zero out the in-progress message */
- 	msg = list_first_entry(&session->s_cap_releases,
-@@ -1442,8 +1442,6 @@ static void discard_cap_releases(struct ceph_mds_client *mdsc,
- 		msg->front.iov_len = sizeof(*head);
- 		list_add(&msg->list_head, &session->s_cap_releases);
- 	}
--
--	spin_unlock(&session->s_cap_lock);
- }
- 
- /*
-@@ -2488,6 +2486,7 @@ static int encode_caps_cb(struct inode *inode, struct ceph_cap *cap,
- 	cap->seq = 0;        /* reset cap seq */
- 	cap->issue_seq = 0;  /* and issue_seq */
- 	cap->mseq = 0;       /* and migrate_seq */
-+	cap->cap_gen = cap->session->s_cap_gen;
- 
- 	if (recon_state->flock) {
- 		rec.v2.cap_id = cpu_to_le64(cap->cap_id);
-@@ -2611,8 +2610,20 @@ static void send_mds_reconnect(struct ceph_mds_client *mdsc,
- 	dout("session %p state %s\n", session,
- 	     session_state_name(session->s_state));
- 
-+	spin_lock(&session->s_gen_ttl_lock);
-+	session->s_cap_gen++;
-+	spin_unlock(&session->s_gen_ttl_lock);
-+
-+	spin_lock(&session->s_cap_lock);
-+	/*
-+	 * notify __ceph_remove_cap() that we are composing cap reconnect.
-+	 * If a cap get released before being added to the cap reconnect,
-+	 * __ceph_remove_cap() should skip queuing cap release.
-+	 */
-+	session->s_cap_reconnect = 1;
- 	/* drop old cap expires; we're about to reestablish that state */
- 	discard_cap_releases(mdsc, session);
-+	spin_unlock(&session->s_cap_lock);
- 
- 	/* traverse this session's caps */
- 	s_nr_caps = session->s_nr_caps;
-@@ -2627,6 +2638,10 @@ static void send_mds_reconnect(struct ceph_mds_client *mdsc,
- 	if (err < 0)
- 		goto fail;
- 
-+	spin_lock(&session->s_cap_lock);
-+	session->s_cap_reconnect = 0;
-+	spin_unlock(&session->s_cap_lock);
-+
- 	/*
- 	 * snaprealms.  we provide mds with the ino, seq (version), and
- 	 * parent for all of our realms.  If the mds has any newer info,
-diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-index c2a19fb..4c053d0 100644
---- a/fs/ceph/mds_client.h
-+++ b/fs/ceph/mds_client.h
-@@ -132,6 +132,7 @@ struct ceph_mds_session {
- 	struct list_head  s_caps;     /* all caps issued by this session */
- 	int               s_nr_caps, s_trim_caps;
- 	int               s_num_cap_releases;
-+	int		  s_cap_reconnect;
- 	struct list_head  s_cap_releases; /* waiting cap_release messages */
- 	struct list_head  s_cap_releases_done; /* ready to send */
- 	struct ceph_cap  *s_cap_iterator;
--- 
-1.8.1.4
 
+
+________________________________________
+=46rom: Loic Dachary [loic@dachary.org]
+Sent: 21 September 2013 17:11
+To: Andreas Joachim Peters
+Cc: ceph-devel@vger.kernel.org
+Subject: Re: CEPH Erasure Encoding + OSD Scalability
+
+Hi Andreas,
+
+It's probably too soon to be smart about reducing the number of copies,=
+ but you're right : this copy is not necessary. The following pull requ=
+est gets rid of it:
+
+https://github.com/ceph/ceph/pull/615
+
+Cheers
+
+On 20/09/2013 18:49, Loic Dachary wrote:
+> Hi,
+>
+> This is a first attempt at avoiding unnecessary copy:
+>
+> https://github.com/dachary/ceph/blob/03445a5926cd073c11cd8693fb110729=
+e40f35fa/src/osd/ErasureCodePluginJerasure/ErasureCodeJerasure.cc#L66
+>
+> I'm not sure how it could be made more readable / terse with bufferli=
+st iterators. Any kind of hint would be welcome :-)
+>
+> Cheers
+>
+> On 20/09/2013 17:36, Sage Weil wrote:
+>> On Fri, 20 Sep 2013, Loic Dachary wrote:
+>>> Hi Andreas,
+>>>
+>>> Great work on these benchmarks ! It's definitely an incentive to im=
+prove as much as possible. Could you push / send the scripts and sequen=
+ce of operations you've used ? I'll reproduce this locally while gettin=
+g rid of the extra copy. It would be useful to capture that into a scri=
+pt that can be conveniently run from the teuthology integrations tests =
+to check against performance regressions.
+>>>
+>>> Regarding the 3P implementation, in my opinion it would be very val=
+uable for some people who prefer low CPU consumption. And I'm eager to =
+see more than one plugin in the erasure code plugin directory ;-)
+>>
+>> One way to approach this might be to make a bufferlist 'multi-iterat=
+or'
+>> that you give you bufferlist::iterator's and will give you back a pa=
+ir of
+>> points and length for each contiguous segment.  This would capture t=
+he
+>> annoying iterator details and let the user focus on processing chunk=
+s that
+>> are as large as possible.
+>>
+>> sage
+>>
+>>
+>>  >
+>>> Cheers
+>>>
+>>> On 20/09/2013 13:35, Andreas Joachim Peters wrote:
+>>>> Hi Loic,
+>>>>
+>>>> I have now some benchmarks on a Xeon 2.27 GHz 4-core with gcc 4.4 =
+(-O2) for ENCODING based on the CEPH Jerasure port.
+>>>> I measured for objects from 128k to 512 MB with random contents (i=
+f you encode 1 GB objects you see slow downs due to caching inefficienc=
+ies ...), otherwise results are stable for the given object sizes.
+>>>>
+>>>> I quote only the benchmark for ErasureCodeJerasureReedSolomonRAID6=
+ (3,2) , the other are significantly slower (2-3x slower) and my 3P(3,2=
+,1) implementation providing the same redundancy level like RS-Raid6[3,=
+2] (double disk failure) but using more space (66% vs 100% overhead).
+>>>>
+>>>> The effect of out.c_str() is significant ( contributes with factor=
+ 2 slow-down for the best jerasure algorithm for [3,2] ).
+>>>>
+>>>> Averaged results for Objects Size 4MB:
+>>>>
+>>>> 1) Erasure CRS [3,2] - 2.6 ms buffer preparation (out.c_str()) - 2=
+=2E4 ms encoding =3D> ~780 MB/s
+>>>> 2) 3P [3,2,1] - 0,005 ms buffer preparation (3P adjusts the paddin=
+g in the algorithm) - 0.87ms encoding =3D> ~4.4 GB/s
+>>>>
+>>>> I think it pays off to avoid the copy in the encoding if it does n=
+ot matter for the buffer handling upstream and pad only the last chunk.
+>>>>
+>>>> Last thing I tested is how performances scales with number of core=
+s running 4 tests in parallel:
+>>>>
+>>>> Jerasure (3,2) limits at ~2,0 GB/s for a 4-core CPU (Xeon 2.27 GHz=
+).
+>>>> 3P(3,2,1) limits ~8 GB/s for a 4-core CPU (Xeon 2.27 GHz).
+>>>>
+>>>> I also implemented the decoding for 3P, but didn't test yet all re=
+construction cases. There is probably room for improvements using AVX s=
+upport for XOR operations in both implementations.
+>>>>
+>>>> Before I invest more time, do think it is useful to have this fast=
+ 3P algorithm for double disk failures with 100% space overhead? Becaus=
+e I believe that people will always optimize for space and would rather=
+ use something like (10,2) even if the performance degrades and CPU con=
+sumption goes up?!? Let me know, no problem in any case!
+>>>>
+>>>> Finally I tested some combinations for ErasureCodeJerasureReedSolo=
+monRAID6:
+>>>>
+>>>> (3,2) (4,2) (6,2) (8,2) (10,2) they all run around 780-800 MB/s
+>>>>
+>>>> Cheers Andreas.
+>>>>
+>>>>
+>>>>
+>>>>
+>>>>
+>>>
+>>> --
+>>> Lo?c Dachary, Artisan Logiciel Libre
+>>> All that is necessary for the triumph of evil is that good people d=
+o nothing.
+>>>
+>>>
+>
+
+--
+Lo=EFc Dachary, Artisan Logiciel Libre
+All that is necessary for the triumph of evil is that good people do no=
+thing.
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
