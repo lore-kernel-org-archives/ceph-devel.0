@@ -1,209 +1,730 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: CEPH Erasure Encoding + OSD Scalability
-Date: Sun, 22 Sep 2013 11:41:52 +0200
-Message-ID: <523EBB60.4000702@dachary.org>
-References: <-7369304096744919226@unknownmsgid> <3472A07E6605974CBC9BC573F1BC02E4A527147E@PLOXCHG03.cern.ch> <523C40B7.5060902@dachary.org> <alpine.DEB.2.00.1309200835110.25752@cobra.newdream.net> <523C7CAF.1020101@dachary.org>,<523DB725.2070104@dachary.org> <3472A07E6605974CBC9BC573F1BC02E4A52727FF@PLOXCHG03.cern.ch>
+From: Mark Nelson <mark.nelson@inktank.com>
+Subject: Re: [ceph-users] Ceph write performance and my Dell R515's
+Date: Sun, 22 Sep 2013 07:40:24 -0500
+Message-ID: <523EE538.3020101@inktank.com>
+References: <cb37eba1f3b24d5190cc6195c5ab8ad7@onqbne-ex01.onq.com.au>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enig2B9B65317D7670C54B22E3C9"
+Content-Type: text/plain; charset=windows-1252;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:41646 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752609Ab3IVJlz (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 22 Sep 2013 05:41:55 -0400
-In-Reply-To: <3472A07E6605974CBC9BC573F1BC02E4A52727FF@PLOXCHG03.cern.ch>
+Received: from mail-ie0-f176.google.com ([209.85.223.176]:34198 "EHLO
+	mail-ie0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752879Ab3IVMkd (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 22 Sep 2013 08:40:33 -0400
+Received: by mail-ie0-f176.google.com with SMTP id as1so4407182iec.21
+        for <ceph-devel@vger.kernel.org>; Sun, 22 Sep 2013 05:40:32 -0700 (PDT)
+In-Reply-To: <cb37eba1f3b24d5190cc6195c5ab8ad7@onqbne-ex01.onq.com.au>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig2B9B65317D7670C54B22E3C9
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+On 09/22/2013 03:12 AM, Quenten Grasso wrote:
+>
+> Hi All,
+>
+> I=92m finding my write performance is less than I would have expected=
+=2E=20
+> After spending some considerable amount of time testing several=20
+> different configurations I can never seems to break over ~360mb/s=20
+> write even when using tmpfs for journaling.
+>
+> So I=92ve purchased 3x Dell R515=92s with 1 x AMD 6C CPU with 12 x 3T=
+B SAS=20
+> & 2 x 100GB Intel DC S3700 SSD=92s & 32GB Ram with the Perc H710p Rai=
+d=20
+> controller and Dual Port 10GBE Network Cards.
+>
+> So first up I realise the SSD=92s were a mistake, I should have bough=
+t=20
+> the 200GB Ones as they have considerably better write though put of=20
+> ~375 Mb/s vs 200 Mb/s
+>
+> So to our Nodes Configuration,
+>
+> 2 x 3TB disks in Raid1 for OS/MON & 1 partition for OSD, 12 Disks in =
+a=20
+> Single each in a Raid0 (like a JBOD Fashion) with a 1MB Stripe size,
+>
+> (Stripe size this part was particularly important because I found the=
+=20
+> stripe size matters considerably even on a single disk raid0. contrar=
+y=20
+> to what you might read on the internet)
+>
+> Also each disk is configured with (write back cache) is enabled and=20
+> (read head) disabled.
+>
+> For Networking, All nodes are connected via LACP bond with L3 hashing=
+=20
+> and using iperf I can get up to 16gbit/s tx and rx between the nodes.
+>
+> OS: Ubuntu 12.04.3 LTS w/ Kernel 3.10.12-031012-generic (had to=20
+> upgrade kernel due to 10Gbit Intel NIC=92s driver issues)
+>
+> So this gives me 11 OSD=92s & 2 SSD=92s Per Node.
+>
 
-Hi Andreas,
+I'm a bit leery about that 1 OSD on the RAID1. It may be fine, but you=20
+definitely will want to do some investigation to make sure that OSD=20
+isn't holding the other ones back. iostat or collectl might be useful,=20
+along with the ceph osd admin socket and the dump_ops_in_flight and=20
+dump_historic_ops commands.
 
-That sounds reasonable. Would you be so kind as to send a patch with your=
- changes ? I'll rework it into something that fits the test infrastructur=
-e of Ceph.
+> Next I=92ve tried several different configurations which I=92ll brief=
+ly=20
+> describe 2 of which below,
+>
+> 1)Cluster Configuration 1,
+>
+> 33 OSD=92s with 6x SSD=92s as Journals, w/ 15GB Journals on SSD.
+>
+> # ceph osd pool create benchmark1 1800 1800
+>
+> # rados bench -p benchmark1 180 write --no-cleanup
+>
+> --------------------------------------------------
+>
+> Maintaining 16 concurrent writes of 4194304 bytes for up to 180=20
+> seconds or 0 objects
+>
+> Total time run: 180.250417
+>
+> Total writes made: 10152
+>
+> Write size: 4194304
+>
+> Bandwidth (MB/sec): 225.287
+>
+> Stddev Bandwidth: 35.0897
+>
+> Max bandwidth (MB/sec): 312
+>
+> Min bandwidth (MB/sec): 0
+>
+> Average Latency: 0.284054
+>
+> Stddev Latency: 0.199075
+>
+> Max latency: 1.46791
+>
+> Min latency: 0.038512
+>
+> --------------------------------------------------
+>
 
-Cheers
+What was your pool replication set to?
 
-On 22/09/2013 09:26, Andreas Joachim Peters wrote:
-> Hi Loic,=20
-> I run a benchmark with the changed code tomorrow ... I actually had to =
-insert some of my realtime benchmark macro's into your Jerasure code to s=
-ee the different time fractions between buffer preparation & encoding ste=
-p, but for you QA suite it is probably enough to get a total value after =
-your fix. I will send you a program sampling the performance at different=
- buffer sizes and encoding types.
->=20
-> I changed my code to use vector operations (128-bit XOR's) and it gives=
- another 10% gain. I also want to try out if it makes sense to do the CRC=
-32C computation in-line in the encoding step and compare it with the two =
-step procedure first encoding all blocks, then CRC32C on all blocks.
->=20
-> Cheers Andreas.
->=20
->=20
->=20
-> ________________________________________
-> From: Loic Dachary [loic@dachary.org]
-> Sent: 21 September 2013 17:11
-> To: Andreas Joachim Peters
-> Cc: ceph-devel@vger.kernel.org
-> Subject: Re: CEPH Erasure Encoding + OSD Scalability
->=20
-> Hi Andreas,
->=20
-> It's probably too soon to be smart about reducing the number of copies,=
- but you're right : this copy is not necessary. The following pull reques=
-t gets rid of it:
->=20
-> https://github.com/ceph/ceph/pull/615
->=20
-> Cheers
->=20
-> On 20/09/2013 18:49, Loic Dachary wrote:
->> Hi,
->>
->> This is a first attempt at avoiding unnecessary copy:
->>
->> https://github.com/dachary/ceph/blob/03445a5926cd073c11cd8693fb110729e=
-40f35fa/src/osd/ErasureCodePluginJerasure/ErasureCodeJerasure.cc#L66
->>
->> I'm not sure how it could be made more readable / terse with bufferlis=
-t iterators. Any kind of hint would be welcome :-)
->>
->> Cheers
->>
->> On 20/09/2013 17:36, Sage Weil wrote:
->>> On Fri, 20 Sep 2013, Loic Dachary wrote:
->>>> Hi Andreas,
->>>>
->>>> Great work on these benchmarks ! It's definitely an incentive to imp=
-rove as much as possible. Could you push / send the scripts and sequence =
-of operations you've used ? I'll reproduce this locally while getting rid=
- of the extra copy. It would be useful to capture that into a script that=
- can be conveniently run from the teuthology integrations tests to check =
-against performance regressions.
->>>>
->>>> Regarding the 3P implementation, in my opinion it would be very valu=
-able for some people who prefer low CPU consumption. And I'm eager to see=
- more than one plugin in the erasure code plugin directory ;-)
->>>
->>> One way to approach this might be to make a bufferlist 'multi-iterato=
-r'
->>> that you give you bufferlist::iterator's and will give you back a pai=
-r of
->>> points and length for each contiguous segment.  This would capture th=
-e
->>> annoying iterator details and let the user focus on processing chunks=
- that
->>> are as large as possible.
->>>
->>> sage
->>>
->>>
->>>  >
->>>> Cheers
->>>>
->>>> On 20/09/2013 13:35, Andreas Joachim Peters wrote:
->>>>> Hi Loic,
->>>>>
->>>>> I have now some benchmarks on a Xeon 2.27 GHz 4-core with gcc 4.4 (=
--O2) for ENCODING based on the CEPH Jerasure port.
->>>>> I measured for objects from 128k to 512 MB with random contents (if=
- you encode 1 GB objects you see slow downs due to caching inefficiencies=
- ...), otherwise results are stable for the given object sizes.
->>>>>
->>>>> I quote only the benchmark for ErasureCodeJerasureReedSolomonRAID6 =
-(3,2) , the other are significantly slower (2-3x slower) and my 3P(3,2,1)=
- implementation providing the same redundancy level like RS-Raid6[3,2] (d=
-ouble disk failure) but using more space (66% vs 100% overhead).
->>>>>
->>>>> The effect of out.c_str() is significant ( contributes with factor =
-2 slow-down for the best jerasure algorithm for [3,2] ).
->>>>>
->>>>> Averaged results for Objects Size 4MB:
->>>>>
->>>>> 1) Erasure CRS [3,2] - 2.6 ms buffer preparation (out.c_str()) - 2.=
-4 ms encoding =3D> ~780 MB/s
->>>>> 2) 3P [3,2,1] - 0,005 ms buffer preparation (3P adjusts the padding=
- in the algorithm) - 0.87ms encoding =3D> ~4.4 GB/s
->>>>>
->>>>> I think it pays off to avoid the copy in the encoding if it does no=
-t matter for the buffer handling upstream and pad only the last chunk.
->>>>>
->>>>> Last thing I tested is how performances scales with number of cores=
- running 4 tests in parallel:
->>>>>
->>>>> Jerasure (3,2) limits at ~2,0 GB/s for a 4-core CPU (Xeon 2.27 GHz)=
-=2E
->>>>> 3P(3,2,1) limits ~8 GB/s for a 4-core CPU (Xeon 2.27 GHz).
->>>>>
->>>>> I also implemented the decoding for 3P, but didn't test yet all rec=
-onstruction cases. There is probably room for improvements using AVX supp=
-ort for XOR operations in both implementations.
->>>>>
->>>>> Before I invest more time, do think it is useful to have this fast =
-3P algorithm for double disk failures with 100% space overhead? Because I=
- believe that people will always optimize for space and would rather use =
-something like (10,2) even if the performance degrades and CPU consumptio=
-n goes up?!? Let me know, no problem in any case!
->>>>>
->>>>> Finally I tested some combinations for ErasureCodeJerasureReedSolom=
-onRAID6:
->>>>>
->>>>> (3,2) (4,2) (6,2) (8,2) (10,2) they all run around 780-800 MB/s
->>>>>
->>>>> Cheers Andreas.
->>>>>
->>>>>
->>>>>
->>>>>
->>>>>
->>>>
->>>> --
->>>> Lo?c Dachary, Artisan Logiciel Libre
->>>> All that is necessary for the triumph of evil is that good people do=
- nothing.
->>>>
->>>>
->>
->=20
-> --
-> Lo=EFc Dachary, Artisan Logiciel Libre
-> All that is necessary for the triumph of evil is that good people do no=
-thing.
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+> # rados bench -p benchmark1 180 seq
+>
+> -------------------------------------------------
+>
+> Total time run: 43.782554
+>
+> Total reads made: 10120
+>
+> Read size: 4194304
+>
+> Bandwidth (MB/sec): 924.569
+>
+> Average Latency: 0.0691903
+>
+> Max latency: 0.262542
+>
+> Min latency: 0.015756
+>
+> -------------------------------------------------
+>
+> In this configuration I found my write performance suffers a lot to=20
+> the SSD=92s seem to be a bottleneck and my write performance using ra=
+dos=20
+> bench was around 224-230mb/s
+>
+> 2)Cluster Configuration 2,
+>
+> 33 OSD=92s with 1Gbyte Journals on tmpfs.
+>
+> # ceph osd pool create benchmark1 1800 1800
+>
+> # rados bench -p benchmark1 180 write --no-cleanup
+>
+> --------------------------------------------------
+>
+> Maintaining 16 concurrent writes of 4194304 bytes for up to 180=20
+> seconds or 0 objects
+>
+> Total time run: 180.044669
+>
+> Total writes made: 15328
+>
+> Write size: 4194304
+>
+> Bandwidth (MB/sec): 340.538
+>
+> Stddev Bandwidth: 26.6096
+>
+> Max bandwidth (MB/sec): 380
+>
+> Min bandwidth (MB/sec): 0
+>
+> Average Latency: 0.187916
+>
+> Stddev Latency: 0.0102989
+>
+> Max latency: 0.336581
+>
+> Min latency: 0.034475
+>
+> --------------------------------------------------
+>
+
+Definitely low, especially with journals on tmpfs. :( How are the CPUs=20
+doing at this point? We have some R515s in our lab, and they definitely=
+=20
+are slow too. Ours have 7 OSD disks and 1 Dell branded SSD (usually=20
+unused) each and can do about ~150MB/s writes per system. It's actually=
+=20
+a puzzle we've been trying to solve for quite some time.
+
+Some thoughts:
+
+Could the expander backplane be having issues due to having to tunnel=20
+STP for the SATA SSDs (or potentially be causing expander wide resets)?=
+=20
+Could the H700 (and apparently H710) be doing something unusual that th=
+e=20
+stock LSI firmware handles better? We replaced the H700 with an Areca=20
+1880 and definitely saw changes in performance (better large IO=20
+throughput and worse IOPS), but the performance was still much lower=20
+than in a supermicro node with no expanders in the backplane using=20
+either an LSI 2208 or Areca 1880.
+
+Things you might want to try:
+
+- single node tests, and if you have an alternate controller you can=20
+try, seeing if that works better.
+- removing the S3700s from the chassis entirely and retry the tmpfs=20
+journal tests.
+- Since the H710 is SAS2208 based, you may be able to use megacli to se=
+t=20
+it into JBOD mode and see if that works any better (it may if you are=20
+using SSD or tmpfs backed journals).
+
+MegaCli -AdpSetProp -EnableJBOD -val -aN|-a0,1,2|-aALL
+MegaCli -PDMakeJBOD -PhysDrv[E0:S0,E1:S1,...] -aN|-a0,1,2|-aALL
+
+> # rados bench -p benchmark1 180 seq
+>
+> -------------------------------------------------
+>
+> Total time run: 76.481303
+>
+> Total reads made: 15328
+>
+> Read size: 4194304
+>
+> Bandwidth (MB/sec): 801.660
+>
+> Average Latency: 0.079814
+>
+> Max latency: 0.317827
+>
+> Min latency: 0.016857
+>
+> -------------------------------------------------
+>
+> Now it seems there is no bottleneck for journaling as we are using=20
+> tmpfs, however still less then what I would expect write speed the sa=
+s=20
+> disks are barely busy via iostat..
+>
+> So I thought it might be a disk bus throughput issue.
+>
+> Next I completed some dd tests=85
+>
+> This below is in a script dd-x.sh which executes the 11 readers or=20
+> writers at once.
+>
+> dd if=3D/dev/zero of=3D/srv/ceph/osd.0/ddfile bs=3D32k count=3D100k o=
+flag=3Ddirect &
+>
+> dd if=3D/dev/zero of=3D/srv/ceph/osd.1/ddfile bs=3D32k count=3D100k o=
+flag=3Ddirect &
+>
+> dd if=3D/dev/zero of=3D/srv/ceph/osd.2/ddfile bs=3D32k count=3D100k o=
+flag=3Ddirect &
+>
+> dd if=3D/dev/zero of=3D/srv/ceph/osd.3/ddfile bs=3D32k count=3D100k o=
+flag=3Ddirect &
+>
+> dd if=3D/dev/zero of=3D/srv/ceph/osd.4/ddfile bs=3D32k count=3D100k o=
+flag=3Ddirect &
+>
+> dd if=3D/dev/zero of=3D/srv/ceph/osd.5/ddfile bs=3D32k count=3D100k o=
+flag=3Ddirect &
+>
+> dd if=3D/dev/zero of=3D/srv/ceph/osd.6/ddfile bs=3D32k count=3D100k o=
+flag=3Ddirect &
+>
+> dd if=3D/dev/zero of=3D/srv/ceph/osd.7/ddfile bs=3D32k count=3D100k o=
+flag=3Ddirect &
+>
+> dd if=3D/dev/zero of=3D/srv/ceph/osd.8/ddfile bs=3D32k count=3D100k o=
+flag=3Ddirect &
+>
+> dd if=3D/dev/zero of=3D/srv/ceph/osd.9/ddfile bs=3D32k count=3D100k o=
+flag=3Ddirect &
+>
+> dd if=3D/dev/zero of=3D/srv/ceph/osd.10/ddfile bs=3D32k count=3D100k=20
+> oflag=3Ddirect &
+>
+> this gives me aggregated write throughput of around 1,135 MB/s Write.
+>
+> Simular script now to test reads,
+>
+> dd if=3D/srv/ceph/osd.0/ddfile of=3D/dev/null bs=3D32k count=3D100k i=
+flag=3Ddirect &
+>
+> dd if=3D/srv/ceph/osd.1/ddfile of=3D/dev/null bs=3D32k count=3D100k i=
+flag=3Ddirect &
+>
+> dd if=3D/srv/ceph/osd.2/ddfile of=3D/dev/null bs=3D32k count=3D100k i=
+flag=3Ddirect &
+>
+> dd if=3D/srv/ceph/osd.3/ddfile of=3D/dev/null bs=3D32k count=3D100k i=
+flag=3Ddirect &
+>
+> dd if=3D/srv/ceph/osd.4/ddfile of=3D/dev/null bs=3D32k count=3D100k i=
+flag=3Ddirect &
+>
+> dd if=3D/srv/ceph/osd.5/ddfile of=3D/dev/null bs=3D32k count=3D100k i=
+flag=3Ddirect &
+>
+> dd if=3D/srv/ceph/osd.6/ddfile of=3D/dev/null bs=3D32k count=3D100k i=
+flag=3Ddirect &
+>
+> dd if=3D/srv/ceph/osd.7/ddfile of=3D/dev/null bs=3D32k count=3D100k i=
+flag=3Ddirect &
+>
+> dd if=3D/srv/ceph/osd.8/ddfile of=3D/dev/null bs=3D32k count=3D100k i=
+flag=3Ddirect &
+>
+> dd if=3D/srv/ceph/osd.9/ddfile of=3D/dev/null bs=3D32k count=3D100k i=
+flag=3Ddirect &
+>
+> dd if=3D/srv/ceph/osd.10/ddfile of=3D/dev/null bs=3D32k count=3D100k=20
+> iflag=3Ddirect &
+>
+> this gives me aggregated read throughput of around 1,382 MB/s Read.
+>
+> Next I=92ll lower the block size to show the results,
+>
+> dd if=3D/dev/zero of=3D/srv/ceph/osd.0/ddfile bs=3D4k count=3D100k of=
+lag=3Ddirect &
+>
+> dd if=3D/dev/zero of=3D/srv/ceph/osd.1/ddfile bs=3D4k count=3D100k of=
+lag=3Ddirect &
+>
+> dd if=3D/dev/zero of=3D/srv/ceph/osd.2/ddfile bs=3D4k count=3D100k of=
+lag=3Ddirect &
+>
+> dd if=3D/dev/zero of=3D/srv/ceph/osd.3/ddfile bs=3D4k count=3D100k of=
+lag=3Ddirect &
+>
+> dd if=3D/dev/zero of=3D/srv/ceph/osd.4/ddfile bs=3D4k count=3D100k of=
+lag=3Ddirect &
+>
+> dd if=3D/dev/zero of=3D/srv/ceph/osd.5/ddfile bs=3D4k count=3D100k of=
+lag=3Ddirect &
+>
+> dd if=3D/dev/zero of=3D/srv/ceph/osd.6/ddfile bs=3D4k count=3D100k of=
+lag=3Ddirect &
+>
+> dd if=3D/dev/zero of=3D/srv/ceph/osd.7/ddfile bs=3D4k count=3D100k of=
+lag=3Ddirect &
+>
+> dd if=3D/dev/zero of=3D/srv/ceph/osd.8/ddfile bs=3D4k count=3D100k of=
+lag=3Ddirect &
+>
+> dd if=3D/dev/zero of=3D/srv/ceph/osd.9/ddfile bs=3D4k count=3D100k of=
+lag=3Ddirect &
+>
+> dd if=3D/dev/zero of=3D/srv/ceph/osd.10/ddfile bs=3D4k count=3D100k o=
+flag=3Ddirect &
+>
+> this gives me aggregated write throughput of around 300 MB/s Write.
+>
+> dd if=3D/srv/ceph/osd.0/ddfile of=3D/dev/null bs=3D4k count=3D100k if=
+lag=3Ddirect &
+>
+> dd if=3D/srv/ceph/osd.1/ddfile of=3D/dev/null bs=3D4k count=3D100k if=
+lag=3Ddirect &
+>
+> dd if=3D/srv/ceph/osd.2/ddfile of=3D/dev/null bs=3D4k count=3D100k if=
+lag=3Ddirect &
+>
+> dd if=3D/srv/ceph/osd.3/ddfile of=3D/dev/null bs=3D4k count=3D100k if=
+lag=3Ddirect &
+>
+> dd if=3D/srv/ceph/osd.4/ddfile of=3D/dev/null bs=3D4k count=3D100k if=
+lag=3Ddirect &
+>
+> dd if=3D/srv/ceph/osd.5/ddfile of=3D/dev/null bs=3D4k count=3D100k if=
+lag=3Ddirect &
+>
+> dd if=3D/srv/ceph/osd.6/ddfile of=3D/dev/null bs=3D4k count=3D100k if=
+lag=3Ddirect &
+>
+> dd if=3D/srv/ceph/osd.7/ddfile of=3D/dev/null bs=3D4k count=3D100k if=
+lag=3Ddirect &
+>
+> dd if=3D/srv/ceph/osd.8/ddfile of=3D/dev/null bs=3D4k count=3D100k if=
+lag=3Ddirect &
+>
+> dd if=3D/srv/ceph/osd.9/ddfile of=3D/dev/null bs=3D4k count=3D100k if=
+lag=3Ddirect &
+>
+> dd if=3D/srv/ceph/osd.10/ddfile of=3D/dev/null bs=3D4k count=3D100k i=
+flag=3Ddirect &
+>
+> this gives me aggregated read throughput of around 430 MB/s Read,
+>
+> This is my ceph.conf, only difference between the configs is the=20
+> journal dio =3D false
+>
+> ----------------
+>
+> [global]
+>
+> auth cluster required =3D cephx
+>
+> auth service required =3D cephx
+>
+> auth client required =3D cephx
+>
+> public network =3D 10.100.96.0/24
+>
+> cluster network =3D 10.100.128.0/24
+>
+> journal dio =3D false
+>
+> [mon]
+>
+> mon data =3D /var/ceph/mon.$id
+>
+> [mon.a]
+>
+> host =3D rbd01
+>
+> mon addr =3D 10.100.96.10:6789
+>
+> [mon.b]
+>
+> host =3D rbd02
+>
+> mon addr =3D 10.100.96.11:6789
+>
+> [mon.c]
+>
+> host =3D rbd03
+>
+> mon addr =3D 10.100.96.12:6789
+>
+> [osd]
+>
+> osd data =3D /srv/ceph/osd.$id
+>
+> osd journal size =3D 1000
+>
+> osd mkfs type =3D xfs
+>
+> osd mkfs options xfs =3D "-f"
+>
+> osd mount options xfs =3D=20
+> "rw,noexec,nodev,noatime,nodiratime,barrier=3D0,inode64,logbufs=3D8,l=
+ogbsize=3D256k"
+>
+> [osd.0]
+>
+> host =3D rbd01
+>
+> osd journal =3D /tmp/tmpfs/osd.$id
+>
+> devs =3D /dev/sda5
+>
+> [osd.1]
+>
+> host =3D rbd01
+>
+> osd journal =3D /tmp/tmpfs/osd.$id
+>
+> devs =3D /dev/sdb2
+>
+> [osd.2]
+>
+> host =3D rbd01
+>
+> osd journal =3D /tmp/tmpfs/osd.$id
+>
+> devs =3D /dev/sdc2
+>
+> [osd.3]
+>
+> host =3D rbd01
+>
+> osd journal =3D /tmp/tmpfs/osd.$id
+>
+> devs =3D /dev/sdd2
+>
+> [osd.4]
+>
+> host =3D rbd01
+>
+> osd journal =3D /tmp/tmpfs/osd.$id
+>
+> devs =3D /dev/sde2
+>
+> [osd.5]
+>
+> host =3D rbd01
+>
+> osd journal =3D /tmp/tmpfs/osd.$id
+>
+> devs =3D /dev/sdf2
+>
+> [osd.6]
+>
+> host =3D rbd01
+>
+> osd journal =3D /tmp/tmpfs/osd.$id
+>
+> devs =3D /dev/sdg2
+>
+> [osd.7]
+>
+> host =3D rbd01
+>
+> osd journal =3D /tmp/tmpfs/osd.$id
+>
+> devs =3D /dev/sdh2
+>
+> [osd.8]
+>
+> host =3D rbd01
+>
+> osd journal =3D /tmp/tmpfs/osd.$id
+>
+> devs =3D /dev/sdi2
+>
+> [osd.9]
+>
+> host =3D rbd01
+>
+> osd journal =3D /tmp/tmpfs/osd.$id
+>
+> devs =3D /dev/sdj2
+>
+> [osd.10]
+>
+> host =3D rbd01
+>
+> osd journal =3D /tmp/tmpfs/osd.$id
+>
+> devs =3D /dev/sdk2
+>
+> [osd.11]
+>
+> host =3D rbd02
+>
+> osd journal =3D /tmp/tmpfs/osd.$id
+>
+> devs =3D /dev/sda5
+>
+> [osd.12]
+>
+> host =3D rbd02
+>
+> osd journal =3D /tmp/tmpfs/osd.$id
+>
+> devs =3D /dev/sdb2
+>
+> [osd.13]
+>
+> host =3D rbd02
+>
+> osd journal =3D /tmp/tmpfs/osd.$id
+>
+> devs =3D /dev/sdc2
+>
+> [osd.14]
+>
+> host =3D rbd02
+>
+> osd journal =3D /tmp/tmpfs/osd.$id
+>
+> devs =3D /dev/sdd2
+>
+> [osd.15]
+>
+> host =3D rbd02
+>
+> osd journal =3D /tmp/tmpfs/osd.$id
+>
+> devs =3D /dev/sde2
+>
+> [osd.16]
+>
+> host =3D rbd02
+>
+> osd journal =3D /tmp/tmpfs/osd.$id
+>
+> devs =3D /dev/sdf2
+>
+> [osd.17]
+>
+> host =3D rbd02
+>
+> osd journal =3D /tmp/tmpfs/osd.$id
+>
+> devs =3D /dev/sdg2
+>
+> [osd.18]
+>
+> host =3D rbd02
+>
+> osd journal =3D /tmp/tmpfs/osd.$id
+>
+> devs =3D /dev/sdh2
+>
+> [osd.19]
+>
+> host =3D rbd02
+>
+> osd journal =3D /tmp/tmpfs/osd.$id
+>
+> devs =3D /dev/sdi2
+>
+> [osd.20]
+>
+> host =3D rbd02
+>
+> osd journal =3D /tmp/tmpfs/osd.$id
+>
+> devs =3D /dev/sdj2
+>
+> [osd.21]
+>
+> host =3D rbd02
+>
+> osd journal =3D /tmp/tmpfs/osd.$id
+>
+> devs =3D /dev/sdk2
+>
+> [osd.22]
+>
+> host =3D rbd03
+>
+> osd journal =3D /tmp/tmpfs/osd.$id
+>
+> devs =3D /dev/sda5
+>
+> [osd.23]
+>
+> host =3D rbd03
+>
+> osd journal =3D /tmp/tmpfs/osd.$id
+>
+> devs =3D /dev/sdb2
+>
+> [osd.24]
+>
+> host =3D rbd03
+>
+> osd journal =3D /tmp/tmpfs/osd.$id
+>
+> devs =3D /dev/sdc2
+>
+> [osd.25]
+>
+> host =3D rbd03
+>
+> osd journal =3D /tmp/tmpfs/osd.$id
+>
+> devs =3D /dev/sdd2
+>
+> [osd.26]
+>
+> host =3D rbd03
+>
+> osd journal =3D /tmp/tmpfs/osd.$id
+>
+> devs =3D /dev/sde2
+>
+> [osd.27]
+>
+> host =3D rbd03
+>
+> osd journal =3D /tmp/tmpfs/osd.$id
+>
+> devs =3D /dev/sdf2
+>
+> [osd.28]
+>
+> host =3D rbd03
+>
+> osd journal =3D /tmp/tmpfs/osd.$id
+>
+> devs =3D /dev/sdg2
+>
+> [osd.29]
+>
+> host =3D rbd03
+>
+> osd journal =3D /tmp/tmpfs/osd.$id
+>
+> devs =3D /dev/sdh2
+>
+> [osd.30]
+>
+> host =3D rbd03
+>
+> osd journal =3D /tmp/tmpfs/osd.$id
+>
+> devs =3D /dev/sdi2
+>
+> [osd.31]
+>
+> host =3D rbd03
+>
+> osd journal =3D /tmp/tmpfs/osd.$id
+>
+> devs =3D /dev/sdj2
+>
+> [osd.32]
+>
+> host =3D rbd03
+>
+> osd journal =3D /tmp/tmpfs/osd.$id
+>
+> devs =3D /dev/sdk2
+>
+> ---------------------
+>
+> Any Ideas?
+>
+> Cheers,
+>
+> Quenten
+>
+>
+>
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-All that is necessary for the triumph of evil is that good people do noth=
-ing.
-
-
---------------enig2B9B65317D7670C54B22E3C9
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with undefined - http://www.enigmail.net/
-
-iEYEARECAAYFAlI+u2AACgkQ8dLMyEl6F23uNgCffrKhSznRasnaczWPTZiErt4j
-SsIAn2yxM5xlnflClfL0ImViS0kbOC81
-=m/La
------END PGP SIGNATURE-----
-
---------------enig2B9B65317D7670C54B22E3C9--
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
