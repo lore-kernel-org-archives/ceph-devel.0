@@ -1,70 +1,38 @@
-From: Sage Weil <sage@inktank.com>
-Subject: RE: Object Write Latency
-Date: Mon, 23 Sep 2013 09:19:43 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1309230916011.6797@cobra.newdream.net>
-References: <3472A07E6605974CBC9BC573F1BC02E4A52724A9@PLOXCHG03.cern.ch> <alpine.DEB.2.00.1309200830040.25752@cobra.newdream.net>, <CABZ+qqnXbycX4C_brF4eiRVb0PeA4SKf2kW_d3g8RYxwD6xFDg@mail.gmail.com>
- <3472A07E6605974CBC9BC573F1BC02E4A52736BE@PLOXCHG03.cern.ch>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: crc32 for erasure code
+Date: Mon, 23 Sep 2013 09:59:17 -0700
+Message-ID: <CAPYLRzib=_3JdtZdrAr0xHbAXCcR--ZJHX1cMR1oRvADBwpCWA@mail.gmail.com>
+References: <523FFD1B.4030801@dachary.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:59009 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752332Ab3IWQTn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Sep 2013 12:19:43 -0400
-In-Reply-To: <3472A07E6605974CBC9BC573F1BC02E4A52736BE@PLOXCHG03.cern.ch>
+Received: from mail-we0-f181.google.com ([74.125.82.181]:53439 "EHLO
+	mail-we0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752950Ab3IWQ7T convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Sep 2013 12:59:19 -0400
+Received: by mail-we0-f181.google.com with SMTP id p61so3206845wes.26
+        for <ceph-devel@vger.kernel.org>; Mon, 23 Sep 2013 09:59:17 -0700 (PDT)
+In-Reply-To: <523FFD1B.4030801@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>
-Cc: Dan van der Ster <dan@vanderster.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Mon, 23 Sep 2013, Andreas Joachim Peters wrote:
-> We deployed 3 OSDs with an EXT4 using RapidDisk in-memory.
-> 
-> The FS does 140k/s append+sync and the latency is now:
-> 
-> ~1 ms for few byte objects with single replica
-> ~2 ms for few byte objects three replica  (instead of 65-80ms)
-> 
-> This gives probably the base-line of the best you can do with the 
-> current implementation.
-> 
-> ==> the 80ms are probably just a 'feature' of the hardware (JBOD 
-> disks/controller) and we might try to find some tuning parameters to 
-> improve the latency slightly.
-> 
-> Could you just explain how the async api functions (is_complete, 
-> is_safe) map to the three states
-> 
-> 1) object is transferred from client to all OSDs and is present in memory there
+On Mon, Sep 23, 2013 at 1:34 AM, Loic Dachary <loic@dachary.org> wrote:
+> Hi,
+>
+> Unless I'm mistaken, ceph_crc32() is currently used in master via the crc32c() method of bufferlist to:
+>
+> * encode_with_checksum/decode_with_checksum a PGLog entry
+> * Message::decode_message/Message::encode_message a message via calc_*_crc
+> * FileJournal::do_read_entry/FileJournal::prepare_single_write a journal entry
+> * for information in the report monitory command ( Monitor.cc )
+>
+> Erasure coded chunks ( i.e. files ) will need checksums. Should this be implemented as an optional feature in ceph/src/os/FileStore.{h,cc} ? If the underlying filesystem does not provide this feature, FileStore would call ceph_crc32 each time the object is modified. A verification method would be exposed and used when scrubbing erasure coded pools.
 
-Nothing happens yet..
-
-> 2) object is written to the OSD journal
-
-Client gets a COMMIT, which implies ACK
-
-> 3) object is committed from OSD journal to the OSD filesystem
-
-OSD now allows subsequent reads, or read/modify/write operations.
-
-> Is it correct that the object is visible by clients only when 3) has 
-> happened?
-
-Yeah.
-
-The ACK (operation is serialized and visible) vs COMMIT (operation is now 
-durable) was conceived under the assumption that the serialized+visible 
-step would be cheaper than making it durable.  This is the case for btrfs.  
-Because of this, the COMMIT message implies ACK, so the client will see 
-either ACK + COMMIT or COMMIT, but never COMMIT + ACK.
-
-For ext4 and xfs, we need to do write-ahead journaling just for 
-consistency, so the commit happens first.
-
-Hope that helps!
-
-I still think you should look at the logs for the JBOD hardware to see 
-where the time is spent; it sounds like there is room for improvement.
-
-sage
-
+You mean should checksums be optional in the FileStore, or should we
+provide a plugin framework for using things other than crc32, or...?
+:)
+-Greg
+Software Engineer #42 @ http://inktank.com | http://ceph.com
