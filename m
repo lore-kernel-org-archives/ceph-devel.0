@@ -1,50 +1,66 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: Hiding auth key string for the qemu process
-Date: Mon, 23 Sep 2013 01:23:29 -0700
-Message-ID: <523FFA81.8000101@inktank.com>
-References: <CABYiri_WXi-CCtJBJZSsy7t8MsX6kVdq=OHKiRmS+kDhekhyiw@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: crc32 for erasure code
+Date: Mon, 23 Sep 2013 10:34:35 +0200
+Message-ID: <523FFD1B.4030801@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig0D6E65A0E32A6A10A0BB809C"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oa0-f43.google.com ([209.85.219.43]:43352 "EHLO
-	mail-oa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753418Ab3IWIXb (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Sep 2013 04:23:31 -0400
-Received: by mail-oa0-f43.google.com with SMTP id f4so309300oah.30
-        for <ceph-devel@vger.kernel.org>; Mon, 23 Sep 2013 01:23:31 -0700 (PDT)
-In-Reply-To: <CABYiri_WXi-CCtJBJZSsy7t8MsX6kVdq=OHKiRmS+kDhekhyiw@mail.gmail.com>
+Received: from smtp.dmail.dachary.org ([91.121.254.229]:42433 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753224Ab3IWIor (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Sep 2013 04:44:47 -0400
+Received: from [10.9.0.6] (openvpn.novalocal [10.145.3.13])
+	by smtp.dmail.dachary.org (Postfix) with ESMTPS id 741D426395
+	for <ceph-devel@vger.kernel.org>; Mon, 23 Sep 2013 10:44:44 +0200 (CEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andrey Korolyov <andrey@xdel.ru>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On 09/22/2013 12:54 PM, Andrey Korolyov wrote:
-> Hello,
->
-> Since it was a long time from enabling cephx by default and we may
-> think that everyone using it, is seems worthy to introduce bits of
-> code hiding the key from cmdline. First applicable place for such
-> improvement is most-likely OpenStack envs with their sparse security
-> and usage of admin key as default one.
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig0D6E65A0E32A6A10A0BB809C
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-I doubt most people are using the admin keyring, since the docs for
-openstack show different users for images and volumes, but it's worth
-tackling this again.
+Hi,
 
-Basically this requires changing QEMU and making libvirt use the new 
-interface when it's available. There was some discussion [1] and an rfc
-[2] a while back regarding this. The same approach of modifying the
-bdrv_set_key command should work, but IIRC there was a complication
-that could be corrected. QEMU attempted to read the device size before
-pausing the vm and waiting for the password (cephx secret in this
-case), but with rbd the size isn't available until after the driver has
-the secret with which to connect to the cluster. If the vm were paused
-before the size of the disk was read, the patches would be simpler.
+Unless I'm mistaken, ceph_crc32() is currently used in master via the crc=
+32c() method of bufferlist to:
 
-It's probably not too hard to rework those patches if anyone's
-interested in picking them up.
+* encode_with_checksum/decode_with_checksum a PGLog entry
+* Message::decode_message/Message::encode_message a message via calc_*_cr=
+c=20
+* FileJournal::do_read_entry/FileJournal::prepare_single_write a journal =
+entry
+* for information in the report monitory command ( Monitor.cc )
 
-Josh
+Erasure coded chunks ( i.e. files ) will need checksums. Should this be i=
+mplemented as an optional feature in ceph/src/os/FileStore.{h,cc} ? If th=
+e underlying filesystem does not provide this feature, FileStore would ca=
+ll ceph_crc32 each time the object is modified. A verification method wou=
+ld be exposed and used when scrubbing erasure coded pools.
 
-[1] http://www.redhat.com/archives/libvir-list/2011-October/msg00998.html
-[2] http://lists.gnu.org/archive/html/qemu-devel/2011-11/msg01337.html
+Cheers
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+All that is necessary for the triumph of evil is that good people do noth=
+ing.
+
+
+--------------enig0D6E65A0E32A6A10A0BB809C
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.19 (GNU/Linux)
+Comment: Using GnuPG with undefined - http://www.enigmail.net/
+
+iEYEARECAAYFAlI//RsACgkQ8dLMyEl6F23aCACgti0q5nyD5XZu6DUjknEq63QT
+sRcAn1ixLMq/Fk+ox8W1lu4e7gleOHdr
+=IJz0
+-----END PGP SIGNATURE-----
+
+--------------enig0D6E65A0E32A6A10A0BB809C--
