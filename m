@@ -1,50 +1,55 @@
-From: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>
-Subject: RE: CEPH Erasure Encoding + OSD Scalability
-Date: Sun, 22 Sep 2013 23:00:12 +0000
-Message-ID: <3472A07E6605974CBC9BC573F1BC02E4A527352B@PLOXCHG03.cern.ch>
+From: majianpeng <majianpeng@gmail.com>
+Subject: [PATCH] ceph: fix sync read eof check deadlock
+Date: Mon, 23 Sep 2013 09:39:23 +0800
+Message-ID: <201309230939212660680@gmail.com>
+Reply-To: majianpeng <majianpeng@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cernmx32.cern.ch ([137.138.144.178]:14599 "EHLO
-	CERNMX32.cern.ch" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752393Ab3IVXAR convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 22 Sep 2013 19:00:17 -0400
-Content-Language: en-GB
+Received: from mail-pd0-f182.google.com ([209.85.192.182]:58979 "EHLO
+	mail-pd0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752880Ab3IWBj2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 22 Sep 2013 21:39:28 -0400
+Received: by mail-pd0-f182.google.com with SMTP id r10so2614022pdi.27
+        for <ceph-devel@vger.kernel.org>; Sun, 22 Sep 2013 18:39:27 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: sage <sage@inktank.com>
+Cc: =?us-ascii?B?WWFuLCBaaGVuZw==?= <zheng.z.yan@intel.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Loic, 
-I was applying the changes and the 
-situation improves, however there is still one important thing which 
-actually dominated all the measurements which were needing larger packet
- sizes (everything besides Raid6):
+QXMgWWFuLFpoZW5nIHNhaWQsIGNvbW1pdCAwOTEzNDQ0MjA4ZGIgaW50cnVvZHVjZSBhIGJ1Zzoi
+Z2V0YXR0ciBuZWVkIHRvDQoicmVhZCBsb2NrIiBpbm9kZSdzIGZpbGVsb2NrLiBCdXQgdGhlIGxv
+Y2sgY2FuIGJlIGluIHVuc3RhYmxlIHN0YXRlLg0KdGhlIGdldGF0dHIgcmVxdWVzdCB3YWl0cyBm
+b3IgbG9jaydzIHN0YXRlIHRvIGJlY29tZSBzdGFibGUsIHRoZSBsb2NrDQp3YWl0cyBmb3IgY2xp
+ZW50IHRvIHJlbGVhc2UgRnIgY2FwLiINCg0KQ29tbWl0IDZhMDI2NTg5YmEzMzMxODVjNDY2Yzkw
+IHJlc29sdmVkIHRoZSBzYW1lIGJ1ZyBhbHNvLg0KQmVmb3JlIGRvaW5nIGdldGF0dHIsIGl0IG11
+c3QgcHV0IHRoZSBjYXBzIHdoaWNoIGFscmVhZHkgaG9sZCBhdm9pZA0KZGVhZGxvY2suDQoNClJl
+cG9ydGVkLWJ5OiBZYW4sIFpoZW5nIDx6aGVuZy56LnlhbkBpbnRlbC5jb20+DQpTaWduZWQtb2Zm
+LWJ5OiBKaWFucGVuZyBNYSA8bWFqaWFucGVuZ0BnbWFpbC5jb20+DQotLS0NCiBmcy9jZXBoL2Zp
+bGUuYyB8IDI1ICsrKysrKysrKysrKysrKysrKysrLS0tLS0NCiAxIGZpbGUgY2hhbmdlZCwgMjAg
+aW5zZXJ0aW9ucygrKSwgNSBkZWxldGlvbnMoLSkNCg0KZGlmZiAtLWdpdCBhL2ZzL2NlcGgvZmls
+ZS5jIGIvZnMvY2VwaC9maWxlLmMNCmluZGV4IDdkYTM1YzcuLmJjMDBhY2UgMTAwNjQ0DQotLS0g
+YS9mcy9jZXBoL2ZpbGUuYw0KKysrIGIvZnMvY2VwaC9maWxlLmMNCkBAIC04MzksNyArODM5LDE1
+IEBAIGFnYWluOg0KIAkJcmV0ID0gY2VwaF9zeW5jX3JlYWQoaW9jYiwgJmksICZjaGVja2VvZik7
+DQogDQogCQlpZiAoY2hlY2tlb2YgJiYgcmV0ID49IDApIHsNCi0JCQlpbnQgc3RhdHJldCA9IGNl
+cGhfZG9fZ2V0YXR0cihpbm9kZSwNCisJCQlpbnQgc3RhdHJldDsNCisJCQkvKg0KKwkJCSAqQmVm
+b3JlIGdldGF0dHIsaXQgc2hvdWxkIHB1dCBjYXBzIGF2b2lkDQorCQkJICpkZWFkbG9jay4NCisJ
+CQkgKi8NCisJCQljZXBoX3B1dF9jYXBfcmVmcyhjaSwgZ290KTsNCisJCQlnb3QgPSAwOw0KKw0K
+KwkJCXN0YXRyZXQgPSBjZXBoX2RvX2dldGF0dHIoaW5vZGUsDQogCQkJCQkJICAgICAgQ0VQSF9T
+VEFUX0NBUF9TSVpFKTsNCiANCiAJCQkvKiBoaXQgRU9GIG9yIGhvbGU/ICovDQpAQCAtODUxLDE2
+ICs4NTksMjMgQEAgYWdhaW46DQogDQogCQkJCXJlYWQgKz0gcmV0Ow0KIAkJCQljaGVja2VvZiA9
+IDA7DQotCQkJCWdvdG8gYWdhaW47DQorCQkJCXJldCA9IGNlcGhfZ2V0X2NhcHMoY2ksIENFUEhf
+Q0FQX0ZJTEVfUkQsDQorCQkJCQkJCXdhbnQsICZnb3QsIC0xKTsNCisJCQkJaWYgKHJldCA8IDAp
+DQorCQkJCQlyZXQgPSAwOw0KKwkJCQllbHNlDQorCQkJCQlnb3RvIGFnYWluOw0KIAkJCX0NCiAJ
+CX0NCiANCiAJfSBlbHNlDQogCQlyZXQgPSBnZW5lcmljX2ZpbGVfYWlvX3JlYWQoaW9jYiwgaW92
+LCBucl9zZWdzLCBwb3MpOw0KIA0KLQlkb3V0KCJhaW9fcmVhZCAlcCAlbGx4LiVsbHggZHJvcHBp
+bmcgY2FwIHJlZnMgb24gJXMgPSAlZFxuIiwNCi0JICAgICBpbm9kZSwgY2VwaF92aW5vcChpbm9k
+ZSksIGNlcGhfY2FwX3N0cmluZyhnb3QpLCAoaW50KXJldCk7DQotCWNlcGhfcHV0X2NhcF9yZWZz
+KGNpLCBnb3QpOw0KKwlpZiAoZ290KSB7DQorCQlkb3V0KCJhaW9fcmVhZCAlcCAlbGx4LiVsbHgg
+ZHJvcHBpbmcgY2FwIHJlZnMgb24gJXMgPSAlZFxuIiwNCisJCSAgICAgaW5vZGUsIGNlcGhfdmlu
+b3AoaW5vZGUpLCBjZXBoX2NhcF9zdHJpbmcoZ290KSwgKGludClyZXQpOw0KKwkJY2VwaF9wdXRf
+Y2FwX3JlZnMoY2ksIGdvdCk7DQorCX0NCiANCiAJaWYgKHJldCA+PSAwKQ0KIAkJcmV0ICs9IHJl
+YWQ7DQotLSANCjEuOC40LXJjMA0K
 
-                     pad_in_length(unsigned in_length)
-
-
-The implementation is sort of 'unlucky' and slow when one increases the packetsize.
-
-   while (in_length%(k*w*packetsize*sizeof(int)) != 0)
-      in_length++;
-
-better do like this:
-
-  alignment = k*w*packetsize*sizeof(int);
-  in_length += (alignment - (in_length%alignment);
-
-E.g. for the CauchyGood algorithm one should increase the packetsize and when changing the pad_in_length 
-implementation one get's excellent (pure encoding) performance for (3+2) : 2.6 GB/s and it scales well with the number of core's to > 8 GB/s.
-
-I compared this with the output of the 'encode' example of the jerasure
- example and it gives the same result for (3+2), so that looks now good 
-and consistent! (10,4) is ~ 610 MB/s.
-
-... 
-Finally the description of Jerasure 2.0 looks really great and will probably shift all the performance problems upstream  ;-)
-
-Do you evt. want to add support into the plugin for local parities (like Xorbas does) to improve the disk draining performance?
-
-Cheers Andreas.
