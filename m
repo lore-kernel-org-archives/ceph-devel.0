@@ -1,105 +1,126 @@
-From: majianpeng <majianpeng@gmail.com>
-Subject: Re: Re: [RESEND PATCH V5] ceph:Implement readv/preadv for sync operation
-Date: Tue, 24 Sep 2013 17:22:59 +0800
-Message-ID: <2013092417225780957916@gmail.com>
-References: <201309241605181783589@gmail.com>,
-	<52414FB1.8060607@intel.com>
-Reply-To: majianpeng <majianpeng@gmail.com>
+From: Dan van der Ster <dan@vanderster.com>
+Subject: Re: Object Write Latency
+Date: Tue, 24 Sep 2013 12:04:42 +0200
+Message-ID: <CABZ+qqmzumXyncc3R6gOA4dzutto99eCUPOd7EG3TgNG9-=SyA@mail.gmail.com>
+References: <3472A07E6605974CBC9BC573F1BC02E4A52724A9@PLOXCHG03.cern.ch>
+ <CAPYLRziY9YVXp+zW8dS9+dN-r24AXXG84wx0ZgQFtpX2C1Pnfg@mail.gmail.com>
+ <CABZ+qqnHf9NG5JirYNtT6LUEbzo52U43Arooo5-CNXR2SPPKaA@mail.gmail.com>
+ <alpine.DEB.2.00.1309231115520.7394@cobra.newdream.net> <CABZ+qq=Pj0oQ3nUUh3T_mTnpXSUd93uLzX955bHx6MY+fek9YQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="iso-8859-1"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f53.google.com ([209.85.160.53]:42161 "EHLO
-	mail-pb0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753618Ab3IXJXY (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 24 Sep 2013 05:23:24 -0400
-Received: by mail-pb0-f53.google.com with SMTP id up15so4332668pbc.12
-        for <ceph-devel@vger.kernel.org>; Tue, 24 Sep 2013 02:23:23 -0700 (PDT)
+Received: from mail-bk0-f42.google.com ([209.85.214.42]:41010 "EHLO
+	mail-bk0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753194Ab3IXKFY (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 24 Sep 2013 06:05:24 -0400
+Received: by mail-bk0-f42.google.com with SMTP id my10so1678883bkb.29
+        for <ceph-devel@vger.kernel.org>; Tue, 24 Sep 2013 03:05:23 -0700 (PDT)
+Received: by mail-lb0-f176.google.com with SMTP id y6so3602014lbh.35
+        for <ceph-devel@vger.kernel.org>; Tue, 24 Sep 2013 03:05:22 -0700 (PDT)
+In-Reply-To: <CABZ+qq=Pj0oQ3nUUh3T_mTnpXSUd93uLzX955bHx6MY+fek9YQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?iso-8859-1?B?WWFuLCBaaGVuZw==?= <zheng.z.yan@intel.com>
-Cc: sage <sage@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: Gregory Farnum <greg@inktank.com>, Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Pk9uIDA5LzI0LzIwMTMgMDQ6MDUgUE0sIG1hamlhbnBlbmcgd3JvdGU6DQo+PiBkaWZmIC0tZ2l0
-IGEvZnMvY2VwaC9maWxlLmMgYi9mcy9jZXBoL2ZpbGUuYw0KPj4gaW5kZXggM2RlODk4Mi4uNTQy
-MmQ4ZSAxMDA2NDQNCj4+IC0tLSBhL2ZzL2NlcGgvZmlsZS5jDQo+PiArKysgYi9mcy9jZXBoL2Zp
-bGUuYw0KPj4gQEAgLTQwOCw1MSArNDA4LDk0IEBAIG1vcmU6DQo+PiAgICoNCj4+ICAgKiBJZiB0
-aGUgcmVhZCBzcGFucyBvYmplY3QgYm91bmRhcnksIGp1c3QgZG8gbXVsdGlwbGUgcmVhZHMuDQo+
-PiAgICovDQo+PiAtc3RhdGljIHNzaXplX3QgY2VwaF9zeW5jX3JlYWQoc3RydWN0IGZpbGUgKmZp
-bGUsIGNoYXIgX191c2VyICpkYXRhLA0KPj4gLQkJCSAgICAgIHVuc2lnbmVkIGxlbiwgbG9mZl90
-ICpwb2ZmLCBpbnQgKmNoZWNrZW9mKQ0KPj4gK3N0YXRpYyBzc2l6ZV90IGNlcGhfc3luY19yZWFk
-KHN0cnVjdCBraW9jYiAqaW9jYiwgc3RydWN0IGlvdl9pdGVyICppLA0KPj4gKwkJCQlpbnQgKmNo
-ZWNrZW9mKQ0KPj4gIHsNCj4+ICsJc3RydWN0IGZpbGUgKmZpbGUgPSBpb2NiLT5raV9maWxwOw0K
-Pj4gIAlzdHJ1Y3QgaW5vZGUgKmlub2RlID0gZmlsZV9pbm9kZShmaWxlKTsNCj4+ICAJc3RydWN0
-IHBhZ2UgKipwYWdlczsNCj4+IC0JdTY0IG9mZiA9ICpwb2ZmOw0KPj4gKwl1NjQgb2ZmID0gaW9j
-Yi0+a2lfcG9zOw0KPj4gIAlpbnQgbnVtX3BhZ2VzLCByZXQ7DQo+PiAgDQo+PiAtCWRvdXQoInN5
-bmNfcmVhZCBvbiBmaWxlICVwICVsbHV+JXUgJXNcbiIsIGZpbGUsIG9mZiwgbGVuLA0KPj4gKwlk
-b3V0KCJzeW5jX3JlYWQgb24gZmlsZSAlcCAlbGx1fiV1ICVzXG4iLCBmaWxlLCBvZmYsDQo+PiAr
-CSAgICAgKHVuc2lnbmVkKWlvY2ItPmtpX2xlZnQsDQo+PiAgCSAgICAgKGZpbGUtPmZfZmxhZ3Mg
-JiBPX0RJUkVDVCkgPyAiT19ESVJFQ1QiIDogIiIpOw0KPj4gLQ0KPj4gLQlpZiAoZmlsZS0+Zl9m
-bGFncyAmIE9fRElSRUNUKSB7DQo+PiAtCQludW1fcGFnZXMgPSBjYWxjX3BhZ2VzX2ZvcigodW5z
-aWduZWQgbG9uZylkYXRhLCBsZW4pOw0KPj4gLQkJcGFnZXMgPSBjZXBoX2dldF9kaXJlY3RfcGFn
-ZV92ZWN0b3IoZGF0YSwgbnVtX3BhZ2VzLCB0cnVlKTsNCj4+IC0JfSBlbHNlIHsNCj4+IC0JCW51
-bV9wYWdlcyA9IGNhbGNfcGFnZXNfZm9yKG9mZiwgbGVuKTsNCj4+IC0JCXBhZ2VzID0gY2VwaF9h
-bGxvY19wYWdlX3ZlY3RvcihudW1fcGFnZXMsIEdGUF9OT0ZTKTsNCj4+IC0JfQ0KPj4gLQlpZiAo
-SVNfRVJSKHBhZ2VzKSkNCj4+IC0JCXJldHVybiBQVFJfRVJSKHBhZ2VzKTsNCj4+IC0NCj4+ICAJ
-LyoNCj4+ICAJICogZmx1c2ggYW55IHBhZ2UgY2FjaGUgcGFnZXMgaW4gdGhpcyByYW5nZS4gIHRo
-aXMNCj4+ICAJICogd2lsbCBtYWtlIGNvbmN1cnJlbnQgbm9ybWFsIGFuZCBzeW5jIGlvIHNsb3cs
-DQo+PiAgCSAqIGJ1dCBpdCB3aWxsIGF0IGxlYXN0IGJlaGF2ZSBzZW5zaWJseSB3aGVuIHRoZXkg
-YXJlDQo+PiAgCSAqIGluIHNlcXVlbmNlLg0KPj4gIAkgKi8NCj4+IC0JcmV0ID0gZmlsZW1hcF93
-cml0ZV9hbmRfd2FpdChpbm9kZS0+aV9tYXBwaW5nKTsNCj4+ICsJcmV0ID0gZmlsZW1hcF93cml0
-ZV9hbmRfd2FpdF9yYW5nZShpbm9kZS0+aV9tYXBwaW5nLCBvZmYsDQo+PiArCQkJCQkJb2ZmICsg
-aW9jYi0+a2lfbGVmdCk7DQo+PiAgCWlmIChyZXQgPCAwKQ0KPj4gLQkJZ290byBkb25lOw0KPj4g
-LQ0KPj4gLQlyZXQgPSBzdHJpcGVkX3JlYWQoaW5vZGUsIG9mZiwgbGVuLCBwYWdlcywgbnVtX3Bh
-Z2VzLCBjaGVja2VvZiwNCj4+IC0JCQkgICBmaWxlLT5mX2ZsYWdzICYgT19ESVJFQ1QsDQo+PiAt
-CQkJICAgKHVuc2lnbmVkIGxvbmcpZGF0YSAmIH5QQUdFX01BU0spOw0KPj4gKwkJcmV0dXJuIHJl
-dDsNCj4+ICANCj4+IC0JaWYgKHJldCA+PSAwICYmIChmaWxlLT5mX2ZsYWdzICYgT19ESVJFQ1Qp
-ID09IDApDQo+PiAtCQlyZXQgPSBjZXBoX2NvcHlfcGFnZV92ZWN0b3JfdG9fdXNlcihwYWdlcywg
-ZGF0YSwgb2ZmLCByZXQpOw0KPj4gLQlpZiAocmV0ID49IDApDQo+PiAtCQkqcG9mZiA9IG9mZiAr
-IHJldDsNCj4+ICsJaWYgKGZpbGUtPmZfZmxhZ3MgJiBPX0RJUkVDVCkgew0KPj4gKwkJd2hpbGUg
-KGlvdl9pdGVyX2NvdW50KGkpKSB7DQo+PiArCQkJdm9pZCBfX3VzZXIgKmRhdGEgPSBpLT5pb3Zb
-MF0uaW92X2Jhc2UgKyBpLT5pb3Zfb2Zmc2V0Ow0KPj4gKwkJCXNpemVfdCBsZW4gPSBpLT5pb3Zb
-MF0uaW92X2xlbiAtIGktPmlvdl9vZmZzZXQ7DQo+PiArDQo+PiArCQkJbnVtX3BhZ2VzID0gY2Fs
-Y19wYWdlc19mb3IoKHVuc2lnbmVkIGxvbmcpZGF0YSwgbGVuKTsNCj4+ICsJCQlwYWdlcyA9IGNl
-cGhfZ2V0X2RpcmVjdF9wYWdlX3ZlY3RvcihkYXRhLA0KPj4gKwkJCQkJCQkgICAgbnVtX3BhZ2Vz
-LCB0cnVlKTsNCj4+ICsJCQlpZiAoSVNfRVJSKHBhZ2VzKSkNCj4+ICsJCQkJcmV0dXJuIFBUUl9F
-UlIocGFnZXMpOw0KPj4gKw0KPj4gKwkJCXJldCA9IHN0cmlwZWRfcmVhZChpbm9kZSwgb2ZmLCBs
-ZW4sDQo+PiArCQkJCQkgICBwYWdlcywgbnVtX3BhZ2VzLCBjaGVja2VvZiwNCj4+ICsJCQkJCSAg
-IDEsICh1bnNpZ25lZCBsb25nKWRhdGEgJiB+UEFHRV9NQVNLKTsNCj4+ICsJCQljZXBoX3B1dF9w
-YWdlX3ZlY3RvcihwYWdlcywgbnVtX3BhZ2VzLCB0cnVlKTsNCj4+ICsNCj4+ICsJCQlpZiAocmV0
-IDw9IDApDQo+PiArCQkJCWJyZWFrOw0KPj4gKwkJCW9mZiArPSByZXQ7DQo+PiArCQkJaW92X2l0
-ZXJfYWR2YW5jZShpLCByZXQpOw0KPj4gKwkJCWlmIChyZXQgPCBsZW4pDQo+PiArCQkJCWJyZWFr
-Ow0KPj4gKwkJfQ0KPj4gKwl9IGVsc2Ugew0KPj4gKwkJc2l6ZV90IGxlbiA9IGlvY2ItPmtpX2xl
-ZnQ7DQo+PiAgDQo+PiAtZG9uZToNCj4+IC0JaWYgKGZpbGUtPmZfZmxhZ3MgJiBPX0RJUkVDVCkN
-Cj4+IC0JCWNlcGhfcHV0X3BhZ2VfdmVjdG9yKHBhZ2VzLCBudW1fcGFnZXMsIHRydWUpOw0KPj4g
-LQllbHNlDQo+PiArCQludW1fcGFnZXMgPSBjYWxjX3BhZ2VzX2ZvcihvZmYsIGxlbik7DQo+PiAr
-CQlwYWdlcyA9IGNlcGhfYWxsb2NfcGFnZV92ZWN0b3IobnVtX3BhZ2VzLCBHRlBfTk9GUyk7DQo+
-PiArCQlpZiAoSVNfRVJSKHBhZ2VzKSkNCj4+ICsJCQlyZXR1cm4gUFRSX0VSUihwYWdlcyk7DQo+
-PiArCQlyZXQgPSBzdHJpcGVkX3JlYWQoaW5vZGUsIG9mZiwgbGVuLCBwYWdlcywNCj4+ICsJCQkJ
-CW51bV9wYWdlcywgY2hlY2tlb2YsIDAsIDApOw0KPj4gKwkJaWYgKHJldCA+IDApIHsNCj4+ICsJ
-CQlpbnQgbCwgayA9IDA7DQo+PiArCQkJc2l6ZV90IGxlZnQgPSBsZW4gPSByZXQ7DQo+PiArDQo+
-PiArCQkJd2hpbGUgKGxlZnQpIHsNCj4+ICsJCQkJdm9pZCBfX3VzZXIgKmRhdGEgPSBpLT5pb3Zb
-MF0uaW92X2Jhc2UNCj4+ICsJCQkJCQkJKyBpLT5pb3Zfb2Zmc2V0Ow0KPj4gKwkJCQlsID0gbWlu
-KGktPmlvdlswXS5pb3ZfbGVuIC0gaS0+aW92X29mZnNldCwNCj4+ICsJCQkJCWxlZnQpOw0KPj4g
-Kw0KPj4gKwkJCQlyZXQgPSBjZXBoX2NvcHlfcGFnZV92ZWN0b3JfdG9fdXNlcigmcGFnZXNba10s
-DQo+PiArCQkJCQkJCQkgICAgZGF0YSwgb2ZmLA0KPj4gKwkJCQkJCQkJICAgIGwpOw0KPj4gKwkJ
-CQlpZiAocmV0ID4gMCkgew0KPj4gKwkJCQkJaW92X2l0ZXJfYWR2YW5jZShpLCByZXQpOw0KPj4g
-KwkJCQkJbGVmdCAtPSByZXQ7DQo+PiArCQkJCQlvZmYgKz0gcmV0Ow0KPj4gKwkJCQkJayA9IGNh
-bGNfcGFnZXNfZm9yKGlvY2ItPmtpX3BvcywNCj4+ICsJCQkJCQkJICAgbGVuIC0gbGVmdCArIDEp
-IC0gMTsNCj4+ICsJCQkJCUJVR19PTihrID49IG51bV9wYWdlcyAmJiBsZWZ0KTsNCj4+ICsJCQkJ
-fSBlbHNlDQo+PiArCQkJCQlicmVhazsNCj4+ICsJCQl9DQo+PiArCQl9DQo+PiAgCQljZXBoX3Jl
-bGVhc2VfcGFnZV92ZWN0b3IocGFnZXMsIG51bV9wYWdlcyk7DQo+PiArCX0NCj4+ICsNCj4+ICsJ
-aWYgKG9mZiA+IGlvY2ItPmtpX3Bvcykgew0KPj4gKwkJcmV0ID0gb2ZmIC0gaW9jYi0+a2lfcG9z
-Ow0KPj4gKwkJaW9jYi0+a2lfcG9zID0gb2ZmOw0KPj4gKwkJaW9jYi0+a2lfbGVmdCAtPSByZXQ7
-DQo+PiArCX0NCj4+ICsNCj4+ICAJZG91dCgic3luY19yZWFkIHJlc3VsdCAlZFxuIiwgcmV0KTsN
-Cj4+ICAJcmV0dXJuIHJldDsNCj4+ICB9DQo+PiBAQCAtNjQ3LDE3ICs2OTAsMTYgQEAgc3RhdGlj
-IHNzaXplX3QgY2VwaF9haW9fcmVhZChzdHJ1Y3Qga2lvY2IgKmlvY2IsIGNvbnN0IHN0cnVjdCBp
-b3ZlYyAqaW92LA0KPj4gIHsNCj4+ICAJc3RydWN0IGZpbGUgKmZpbHAgPSBpb2NiLT5raV9maWxw
-Ow0KPj4gIAlzdHJ1Y3QgY2VwaF9maWxlX2luZm8gKmZpID0gZmlscC0+cHJpdmF0ZV9kYXRhOw0K
-Pj4gLQlsb2ZmX3QgKnBwb3MgPSAmaW9jYi0+a2lfcG9zOw0KPj4gLQlzaXplX3QgbGVuID0gaW92
-LT5pb3ZfbGVuOw0KPj4gKwlzaXplX3QgbGVuID0gMDsNCj4NCj5sZW4gPSBpb2NiLT5raV9sZWZ0
-Ow0KQmVjYXVzZSBjb21taXQgNzNhNzA3NWUzZjZlYzYzZGMzNTkwNjRlLCByZW1vdmUgdGhlICJp
-b2NiLT5raV9sZWZ0ID0gbGVuIiBpbiBmdW5jIGRvX3N5bmNfcmVhZC4NClNvIHVzaW5nIGlvY2It
-PmtpX25ieXRlcy4NCg0KVGhhbmtzIQ0KSmlhbnBlbmcgTWE=
+Some more tests...
 
+~journal in XFS:
+[root@p05151113777233 fio]# time dd if=/dev/zero
+of=/var/lib/ceph/osd/osd.1045/testtest bs=512 count=1 conv=fsync
+1+0 records in
+1+0 records out
+512 bytes (512 B) copied, 0.0423365 s, 12.1 kB/s
+
+real 0m0.044s
+user 0m0.000s
+sys 0m0.001s
+
+
+~directio via the FS
+[root@p05151113777233 fio]# time dd if=/dev/zero
+of=/var/lib/ceph/osd/osd.1045/testtest bs=512 count=1
+oflag=direct,dsync
+1+0 records in
+1+0 records out
+512 bytes (512 B) copied, 0.0426422 s, 12.0 kB/s
+
+real 0m0.044s
+user 0m0.000s
+sys 0m0.001s
+
+
+~directio to the bdev seems to be faster (a few attempts below):
+
+[root@p05151113760120 ~]# time dd if=/dev/zero of=/dev/sdo1 bs=512
+count=1 seek=$(($RANDOM*1000)) oflag=direct,dsync
+1+0 records in
+1+0 records out
+512 bytes (512 B) copied, 0.0113362 s, 45.2 kB/s
+
+real 0m0.013s
+user 0m0.001s
+sys 0m0.001s
+[root@p05151113760120 ~]# time dd if=/dev/zero of=/dev/sdo1 bs=512
+count=1 seek=$(($RANDOM*1000)) oflag=direct,dsync
+1+0 records in
+1+0 records out
+512 bytes (512 B) copied, 0.0129222 s, 39.6 kB/s
+
+real 0m0.014s
+user 0m0.001s
+sys 0m0.000s
+[root@p05151113760120 ~]# time dd if=/dev/zero of=/dev/sdo1 bs=512
+count=1 seek=$(($RANDOM*1000)) oflag=direct,dsync
+1+0 records in
+1+0 records out
+512 bytes (512 B) copied, 0.00484823 s, 106 kB/s
+
+real 0m0.006s
+user 0m0.001s
+sys 0m0.001s
+[root@p05151113760120 ~]#
+[root@p05151113760120 ~]# time dd if=/dev/zero of=/dev/sdo1 bs=512
+count=1 seek=$(($RANDOM*1000)) oflag=direct,dsync
+1+0 records in
+1+0 records out
+512 bytes (512 B) copied, 0.00441663 s, 116 kB/s
+
+real 0m0.006s
+user 0m0.001s
+sys 0m0.001s
+
+
+So it looks like I really should try those O_DIRECT journals on a
+separate partition.
+
+Cheers, Dan
+
+On Tue, Sep 24, 2013 at 11:13 AM, Dan van der Ster <dan@vanderster.com> wrote:
+> On Mon, Sep 23, 2013 at 8:18 PM, Sage Weil <sage@inktank.com> wrote:
+>> You
+>> might try measuring that directly and comparing it to the 33ms
+>> append+fsync that you previously saw.
+>
+> dd with fsync is quite slow...
+>
+> [root@p05151113777233 fio]# time dd if=/dev/zero
+> of=/var/lib/ceph/osd/osd.1045/testtest bs=5 count=1
+> 1+0 records in
+> 1+0 records out
+> 5 bytes (5 B) copied, 8.884e-05 s, 56.3 kB/s
+>
+> real 0m0.001s
+> user 0m0.000s
+> sys 0m0.001s
+>
+>
+> [root@p05151113777233 fio]# time dd if=/dev/zero
+> of=/var/lib/ceph/osd/osd.1045/testtest bs=5 count=1 conv=fsync
+> 1+0 records in
+> 1+0 records out
+> 5 bytes (5 B) copied, 0.0435103 s, 0.1 kB/s
+>
+> real 0m0.045s
+> user 0m0.001s
+> sys 0m0.001s
