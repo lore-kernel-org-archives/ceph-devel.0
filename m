@@ -1,1582 +1,557 @@
-From: David Zafman <david.zafman@inktank.com>
-Subject: Re: 4 failed, 298 passed in dzafman-2013-09-23_17:50:06-rados-wip-5862-testing-basic-plana
-Date: Tue, 24 Sep 2013 12:24:32 -0700
-Message-ID: <9CF58714-945B-4B98-9E6B-FEDB7598294E@inktank.com>
-References: <20130924054800.98114281785@teuthology.front.sepia.ceph.com> <5C49DD20-37BB-4462-9DE1-E9CBE94076E5@inktank.com> <alpine.DEB.2.00.1309241202150.25142@cobra.newdream.net>
-Mime-Version: 1.0 (Mac OS X Mail 6.6 \(1510\))
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f170.google.com ([209.85.214.170]:54376 "EHLO
-	mail-ob0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751301Ab3IXTYh convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 24 Sep 2013 15:24:37 -0400
-Received: by mail-ob0-f170.google.com with SMTP id va2so5578014obc.1
-        for <ceph-devel@vger.kernel.org>; Tue, 24 Sep 2013 12:24:36 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1309241202150.25142@cobra.newdream.net>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Samuel Just <sam.just@inktank.com>, ceph-devel@vger.kernel.org
+From: Travis Rhoden <trhoden-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: Scaling RBD module
+Date: Tue, 24 Sep 2013 17:09:33 -0400
+Message-ID: <CACkq2mrfO+eFCYaEdoTQpJ2tOoDyVCkedSMAAztnQVYPBsv7gw@mail.gmail.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F0FC4A040@SACMBXIP01.sdcorp.global.sandisk.com>
+	<523A4EFB.8040601@inktank.com>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F0FC4A6AF@SACMBXIP01.sdcorp.global.sandisk.com>
+	<523B4F39.9080109@inktank.com>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F0FC4A738@SACMBXIP01.sdcorp.global.sandisk.com>
+Mime-Version: 1.0
+Content-Type: multipart/mixed; boundary="===============1792789244=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F0FC4A738-cXZ6iGhjG0il5HHZYNR2WTJ2aSJ780jGSxCzGc5ayCJWk0Htik3J/w@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: Josh Durgin <josh.durgin-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Anirban Ray <Anirban.Ray-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
+
+--===============1792789244==
+Content-Type: multipart/alternative; boundary=001a11335194d964b404e7278e8c
+
+--001a11335194d964b404e7278e8c
+Content-Type: text/plain; charset=ISO-8859-1
+
+This "noshare" option may have just helped me a ton -- I sure wish I would
+have asked similar questions sooner, because I have seen the same failure
+to scale.  =)
+
+One question -- when using the "noshare" option (or really, even without
+it) are there any practical limits on the number of RBDs that can be
+mounted?  I have servers with ~100 RBDs on them each, and am wondering if I
+switch them all over to using "noshare" if anything is going to blow up,
+use a ton more memory, etc.  Even without noshare, are there any known
+limits to how many RBDs can be mapped?
+
+Thanks!
+
+ - Travis
 
 
-The osd.4 crash in 13443 is bug #5951:
+On Thu, Sep 19, 2013 at 8:03 PM, Somnath Roy <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>wrote:
 
-2013-09-23 21:23:28.378428 1034e700  0 filestore(/var/lib/ceph/osd/ceph-4)  error (17) File exists not handled on operation 20 (6579.0.0, or op 0, counting from 0)
-2013-09-23 21:23:28.862204 1034e700  0 filestore(/var/lib/ceph/osd/ceph-4) unexpected error code
-2013-09-23 21:23:28.864816 1034e700  0 filestore(/var/lib/ceph/osd/ceph-4)  transaction dump:
-{ "ops": [
-        { "op_num": 0,
-          "op_name": "mkcoll",
-          "collection": "4.6_head"},
-        { "op_num": 1,
-          "op_name": "collection_setattr",
-          "collection": "4.6_head",
-          "name": "info",
-          "length": 1},
-        { "op_num": 2,
-          "op_name": "omap_setkeys",
-          "collection": "meta",
-          "oid": "16ef7597\/infos\/head\/\/-1",
-          "attr_lens": { "4.6_biginfo": 125,
-              "4.6_epoch": 4,
-              "4.6_info": 576}},
-        { "op_num": 3,
-          "op_name": "touch",
-          "collection": "meta",
-          "oid": "1039d44e\/pglog_4.6\/0\/\/-1"},
-        { "op_num": 4,
-          "op_name": "omap_rmkeys",
-          "collection": "meta",
-          "oid": "1039d44e\/pglog_4.6\/0\/\/-1"},
-        { "op_num": 5,
-          "op_name": "omap_setkeys",
-          "collection": "meta",
-          "oid": "1039d44e\/pglog_4.6\/0\/\/-1",
-          "attr_lens": {}}]}
+> Thanks Josh !
+> I am able to successfully add this noshare option in the image mapping
+> now. Looking at dmesg output, I found that was indeed the secret key
+> problem. Block performance is scaling now.
+>
+> Regards
+> Somnath
+>
+> -----Original Message-----
+> From: ceph-devel-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org [mailto:
+> ceph-devel-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org] On Behalf Of Josh Durgin
+> Sent: Thursday, September 19, 2013 12:24 PM
+> To: Somnath Roy
+> Cc: Sage Weil; ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; Anirban Ray;
+> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> Subject: Re: [ceph-users] Scaling RBD module
+>
+> On 09/19/2013 12:04 PM, Somnath Roy wrote:
+> > Hi Josh,
+> > Thanks for the information. I am trying to add the following but hitting
+> some permission issue.
+> >
+> > root@emsclient:/etc# echo <mon-1>:6789,<mon-2>:6789,<mon-3>:6789
+> > name=admin,key=client.admin,noshare test_rbd ceph_block_test' >
+> > /sys/bus/rbd/add
+> > -bash: echo: write error: Operation not permitted
+>
+> If you check dmesg, it will probably show an error trying to authenticate
+> to the cluster.
+>
+> Instead of key=client.admin, you can pass the base64 secret value as shown
+> in 'ceph auth list' with the secret=XXXXXXXXXXXXXXXXXXXXX option.
+>
+> BTW, there's a ticket for adding the noshare option to rbd map so using
+> the sysfs interface like this is never necessary:
+>
+> http://tracker.ceph.com/issues/6264
+>
+> Josh
+>
+> > Here is the contents of rbd directory..
+> >
+> > root@emsclient:/sys/bus/rbd# ll
+> > total 0
+> > drwxr-xr-x  4 root root    0 Sep 19 11:59 ./
+> > drwxr-xr-x 30 root root    0 Sep 13 11:41 ../
+> > --w-------  1 root root 4096 Sep 19 11:59 add
+> > drwxr-xr-x  2 root root    0 Sep 19 12:03 devices/
+> > drwxr-xr-x  2 root root    0 Sep 19 12:03 drivers/
+> > -rw-r--r--  1 root root 4096 Sep 19 12:03 drivers_autoprobe
+> > --w-------  1 root root 4096 Sep 19 12:03 drivers_probe
+> > --w-------  1 root root 4096 Sep 19 12:03 remove
+> > --w-------  1 root root 4096 Sep 19 11:59 uevent
+> >
+> >
+> > I checked even if I am logged in as root , I can't write anything on
+> /sys.
+> >
+> > Here is the Ubuntu version I am using..
+> >
+> > root@emsclient:/etc# lsb_release -a
+> > No LSB modules are available.
+> > Distributor ID: Ubuntu
+> > Description:    Ubuntu 13.04
+> > Release:        13.04
+> > Codename:       raring
+> >
+> > Here is the mount information....
+> >
+> > root@emsclient:/etc# mount
+> > /dev/mapper/emsclient--vg-root on / type ext4 (rw,errors=remount-ro)
+> > proc on /proc type proc (rw,noexec,nosuid,nodev) sysfs on /sys type
+> > sysfs (rw,noexec,nosuid,nodev) none on /sys/fs/cgroup type tmpfs (rw)
+> > none on /sys/fs/fuse/connections type fusectl (rw) none on
+> > /sys/kernel/debug type debugfs (rw) none on /sys/kernel/security type
+> > securityfs (rw) udev on /dev type devtmpfs (rw,mode=0755) devpts on
+> > /dev/pts type devpts (rw,noexec,nosuid,gid=5,mode=0620)
+> > tmpfs on /run type tmpfs (rw,noexec,nosuid,size=10%,mode=0755)
+> > none on /run/lock type tmpfs (rw,noexec,nosuid,nodev,size=5242880)
+> > none on /run/shm type tmpfs (rw,nosuid,nodev) none on /run/user type
+> > tmpfs (rw,noexec,nosuid,nodev,size=104857600,mode=0755)
+> > /dev/sda1 on /boot type ext2 (rw)
+> > /dev/mapper/emsclient--vg-home on /home type ext4 (rw)
+> >
+> >
+> > Any idea what went wrong here ?
+> >
+> > Thanks & Regards
+> > Somnath
+> >
+> > -----Original Message-----
+> > From: Josh Durgin [mailto:josh.durgin-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org]
+> > Sent: Wednesday, September 18, 2013 6:10 PM
+> > To: Somnath Roy
+> > Cc: Sage Weil; ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; Anirban Ray;
+> > ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> > Subject: Re: [ceph-users] Scaling RBD module
+> >
+> > On 09/17/2013 03:30 PM, Somnath Roy wrote:
+> >> Hi,
+> >> I am running Ceph on a 3 node cluster and each of my server node is
+> running 10 OSDs, one for each disk. I have one admin node and all the nodes
+> are connected with 2 X 10G network. One network is for cluster and other
+> one configured as public network.
+> >>
+> >> Here is the status of my cluster.
+> >>
+> >> ~/fio_test# ceph -s
+> >>
+> >>     cluster b2e0b4db-6342-490e-9c28-0aadf0188023
+> >>      health HEALTH_WARN clock skew detected on mon. <server-name-2>,
+> mon. <server-name-3>
+> >>      monmap e1: 3 mons at {<server-name-1>=xxx.xxx.xxx.xxx:6789/0,
+> <server-name-2>=xxx.xxx.xxx.xxx:6789/0,
+> <server-name-3>=xxx.xxx.xxx.xxx:6789/0}, election epoch 64, quorum 0,1,2
+> <server-name-1>,<server-name-2>,<server-name-3>
+> >>      osdmap e391: 30 osds: 30 up, 30 in
+> >>       pgmap v5202: 30912 pgs: 30912 active+clean; 8494 MB data, 27912
+> MB used, 11145 GB / 11172 GB avail
+> >>      mdsmap e1: 0/0/1 up
+> >>
+> >>
+> >> I started with rados bench command to benchmark the read performance of
+> this Cluster on a large pool (~10K PGs) and found that each rados client
+> has a limitation. Each client can only drive up to a certain mark. Each
+> server  node cpu utilization shows it is  around 85-90% idle and the admin
+> node (from where rados client is running) is around ~80-85% idle. I am
+> trying with 4K object size.
+> >
+> > Note that rados bench with 4k objects is different from rbd with
+> 4k-sized I/Os - rados bench sends each request to a new object, while rbd
+> objects are 4M by default.
+> >
+> >> Now, I started running more clients on the admin node and the
+> performance is scaling till it hits the client cpu limit. Server still has
+> the cpu of 30-35% idle. With small object size I must say that the ceph per
+> osd cpu utilization is not promising!
+> >>
+> >> After this, I started testing the rados block interface with kernel rbd
+> module from my admin node.
+> >> I have created 8 images mapped on the pool having around 10K PGs and I
+> am not able to scale up the performance by running fio (either by creating
+> a software raid or running on individual /dev/rbd* instances). For example,
+> running multiple fio instances (one in /dev/rbd1 and the other in
+> /dev/rbd2)  the performance I am getting is half of what I am getting if
+> running one instance. Here is my fio job script.
+> >>
+> >> [random-reads]
+> >> ioengine=libaio
+> >> iodepth=32
+> >> filename=/dev/rbd1
+> >> rw=randread
+> >> bs=4k
+> >> direct=1
+> >> size=2G
+> >> numjobs=64
+> >>
+> >> Let me know if I am following the proper procedure or not.
+> >>
+> >> But, If my understanding is correct, kernel rbd module is acting as a
+> client to the cluster and in one admin node I can run only one of such
+> kernel instance.
+> >> If so, I am then limited to the client bottleneck that I stated
+> earlier. The cpu utilization of the server side is around 85-90% idle, so,
+> it is clear that client is not driving.
+> >>
+> >> My question is, is there any way to hit the cluster  with more client
+> from a single box while testing the rbd module ?
+> >
+> > You can run multiple librbd instances easily (for example with multiple
+> runs of the rbd bench-write command).
+> >
+> > The kernel rbd driver uses the same rados client instance for multiple
+> block devices by default. There's an option (noshare) to use a new rados
+> client instance for a newly mapped device, but it's not exposed by the rbd
+> cli. You need to use the sysfs interface that 'rbd map' uses instead.
+> >
+> > Once you've used rbd map once on a machine, the kernel will already have
+> the auth key stored, and you can use:
+> >
+> > echo '1.2.3.4:6789 name=admin,key=client.admin,noshare poolname
+> > imagename' > /sys/bus/rbd/add
+> >
+> > Where 1.2.3.4:6789 is the address of a monitor, and you're connecting
+> as client.admin.
+> >
+> > You can use 'rbd unmap' as usual.
+> >
+> > Josh
+> >
+> >
+> > ________________________________
+> >
+> > PLEASE NOTE: The information contained in this electronic mail message
+> is intended only for the use of the designated recipient(s) named above. If
+> the reader of this message is not the intended recipient, you are hereby
+> notified that you have received this message in error and that any review,
+> dissemination, distribution, or copying of this message is strictly
+> prohibited. If you have received this communication in error, please notify
+> the sender by telephone or e-mail (as shown above) immediately and destroy
+> any and all copies of this message in your possession (whether hard copies
+> or electronically stored copies).
+> >
+> >
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org More majordomo info at
+>  http://vger.kernel.org/majordomo-info.html
+>
+>
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>
 
-2013-09-23 21:23:28.959220 1a282700  5 osd.4 pg_epoch: 424 pg[32.0( empty local-les=424 n=0 ec=96 les/c 400/400 419/419/419) [4,1] r=0 lpr=419 pi=364-418/6 mlcod 0'0 active] enter
- Started/Primary/Active/Activating
-2013-09-23 21:23:29.116768 1034e700 -1 os/FileStore.cc: In function 'unsigned int FileStore::_do_transaction(ObjectStore::Transaction&, uint64_t, int)' thread 1034e700 time 2013-0
- 9-23 21:23:28.920055
-os/FileStore.cc: 2461: FAILED assert(0 == "unexpected error")
+--001a11335194d964b404e7278e8c
+Content-Type: text/html; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
- ceph version 0.69-220-g4f7526a (4f7526a785692795ee29f7101b8b18482b4c6e11)
- 1: (FileStore::_do_transaction(ObjectStore::Transaction&, unsigned long, int)+0xffc) [0x72473c]
- 2: (FileStore::_do_transactions(std::list<ObjectStore::Transaction*, std::allocator<ObjectStore::Transaction*> >&, unsigned long, ThreadPool::TPHandle*)+0x71) [0x72b241]
- 3: (FileStore::_do_op(FileStore::OpSequencer*, ThreadPool::TPHandle&)+0x291) [0x72b4f1]
- 4: (ThreadPool::worker(ThreadPool::WorkThread*)+0x4e6) [0x93da36]
- 5: (ThreadPool::WorkThread::entry()+0x10) [0x93f840]
- 6: (()+0x7e9a) [0x503be9a]
- 7: (clone()+0x6d) [0x6c71ccd]
- NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
+<div dir=3D"ltr"><div>This &quot;noshare&quot; option may have just helped =
+me a ton -- I sure wish I would have asked similar questions sooner, becaus=
+e I have seen the same failure to scale.=A0 =3D)<br><br>One question -- whe=
+n using the &quot;noshare&quot; option (or really, even without it) are the=
+re any practical limits on the number of RBDs that can be mounted?=A0 I hav=
+e servers with ~100 RBDs on them each, and am wondering if I switch them al=
+l over to using &quot;noshare&quot; if anything is going to blow up, use a =
+ton more memory, etc.=A0 Even without noshare, are there any known limits t=
+o how many RBDs can be mapped?<br>
 
-David Zafman
-Senior Developer
-http://www.inktank.com
+<br>Thanks!<br><br></div>=A0- Travis<br></div><div class=3D"gmail_extra"><b=
+r><br><div class=3D"gmail_quote">On Thu, Sep 19, 2013 at 8:03 PM, Somnath R=
+oy <span dir=3D"ltr">&lt;<a href=3D"mailto:Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org" target=
+=3D"_blank">Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org</a>&gt;</span> wrote:<br>
 
-On Sep 24, 2013, at 12:03 PM, Sage Weil <sage@inktank.com> wrote:
+<blockquote class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:1p=
+x #ccc solid;padding-left:1ex">Thanks Josh !<br>
+I am able to successfully add this noshare option in the image mapping now.=
+ Looking at dmesg output, I found that was indeed the secret key problem. B=
+lock performance is scaling now.<br>
+<br>
+Regards<br>
+Somnath<br>
+<div><div class=3D"h5"><br>
+-----Original Message-----<br>
+From: <a href=3D"mailto:ceph-devel-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org">ceph-devel-owner@=
+vger.kernel.org</a> [mailto:<a href=3D"mailto:ceph-devel-owner-u79uwXL29TasMV2rI37PzA@public.gmane.org=
+org">ceph-devel-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org</a>] On Behalf Of Josh Durgin<br>
+Sent: Thursday, September 19, 2013 12:24 PM<br>
+To: Somnath Roy<br>
+Cc: Sage Weil; <a href=3D"mailto:ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org">ceph-devel@vge=
+r.kernel.org</a>; Anirban Ray; <a href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org"=
+>ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a><br>
+Subject: Re: [ceph-users] Scaling RBD module<br>
+<br>
+On 09/19/2013 12:04 PM, Somnath Roy wrote:<br>
+&gt; Hi Josh,<br>
+&gt; Thanks for the information. I am trying to add the following but hitti=
+ng some permission issue.<br>
+&gt;<br>
+&gt; root@emsclient:/etc# echo &lt;mon-1&gt;:6789,&lt;mon-2&gt;:6789,&lt;mo=
+n-3&gt;:6789<br>
+&gt; name=3Dadmin,key=3Dclient.admin,noshare test_rbd ceph_block_test&#39; =
+&gt;<br>
+&gt; /sys/bus/rbd/add<br>
+&gt; -bash: echo: write error: Operation not permitted<br>
+<br>
+If you check dmesg, it will probably show an error trying to authenticate t=
+o the cluster.<br>
+<br>
+Instead of key=3Dclient.admin, you can pass the base64 secret value as show=
+n in &#39;ceph auth list&#39; with the secret=3DXXXXXXXXXXXXXXXXXXXXX optio=
+n.<br>
+<br>
+BTW, there&#39;s a ticket for adding the noshare option to rbd map so using=
+ the sysfs interface like this is never necessary:<br>
+<br>
+<a href=3D"http://tracker.ceph.com/issues/6264" target=3D"_blank">http://tr=
+acker.ceph.com/issues/6264</a><br>
+<br>
+Josh<br>
+<br>
+&gt; Here is the contents of rbd directory..<br>
+&gt;<br>
+&gt; root@emsclient:/sys/bus/rbd# ll<br>
+&gt; total 0<br>
+&gt; drwxr-xr-x =A04 root root =A0 =A00 Sep 19 11:59 ./<br>
+&gt; drwxr-xr-x 30 root root =A0 =A00 Sep 13 11:41 ../<br>
+&gt; --w------- =A01 root root 4096 Sep 19 11:59 add<br>
+&gt; drwxr-xr-x =A02 root root =A0 =A00 Sep 19 12:03 devices/<br>
+&gt; drwxr-xr-x =A02 root root =A0 =A00 Sep 19 12:03 drivers/<br>
+&gt; -rw-r--r-- =A01 root root 4096 Sep 19 12:03 drivers_autoprobe<br>
+&gt; --w------- =A01 root root 4096 Sep 19 12:03 drivers_probe<br>
+&gt; --w------- =A01 root root 4096 Sep 19 12:03 remove<br>
+&gt; --w------- =A01 root root 4096 Sep 19 11:59 uevent<br>
+&gt;<br>
+&gt;<br>
+&gt; I checked even if I am logged in as root , I can&#39;t write anything =
+on /sys.<br>
+&gt;<br>
+&gt; Here is the Ubuntu version I am using..<br>
+&gt;<br>
+&gt; root@emsclient:/etc# lsb_release -a<br>
+&gt; No LSB modules are available.<br>
+&gt; Distributor ID: Ubuntu<br>
+&gt; Description: =A0 =A0Ubuntu 13.04<br>
+&gt; Release: =A0 =A0 =A0 =A013.04<br>
+&gt; Codename: =A0 =A0 =A0 raring<br>
+&gt;<br>
+&gt; Here is the mount information....<br>
+&gt;<br>
+&gt; root@emsclient:/etc# mount<br>
+&gt; /dev/mapper/emsclient--vg-root on / type ext4 (rw,errors=3Dremount-ro)=
+<br>
+&gt; proc on /proc type proc (rw,noexec,nosuid,nodev) sysfs on /sys type<br=
+>
+&gt; sysfs (rw,noexec,nosuid,nodev) none on /sys/fs/cgroup type tmpfs (rw)<=
+br>
+&gt; none on /sys/fs/fuse/connections type fusectl (rw) none on<br>
+&gt; /sys/kernel/debug type debugfs (rw) none on /sys/kernel/security type<=
+br>
+&gt; securityfs (rw) udev on /dev type devtmpfs (rw,mode=3D0755) devpts on<=
+br>
+&gt; /dev/pts type devpts (rw,noexec,nosuid,gid=3D5,mode=3D0620)<br>
+&gt; tmpfs on /run type tmpfs (rw,noexec,nosuid,size=3D10%,mode=3D0755)<br>
+&gt; none on /run/lock type tmpfs (rw,noexec,nosuid,nodev,size=3D5242880)<b=
+r>
+&gt; none on /run/shm type tmpfs (rw,nosuid,nodev) none on /run/user type<b=
+r>
+&gt; tmpfs (rw,noexec,nosuid,nodev,size=3D104857600,mode=3D0755)<br>
+&gt; /dev/sda1 on /boot type ext2 (rw)<br>
+&gt; /dev/mapper/emsclient--vg-home on /home type ext4 (rw)<br>
+&gt;<br>
+&gt;<br>
+&gt; Any idea what went wrong here ?<br>
+&gt;<br>
+&gt; Thanks &amp; Regards<br>
+&gt; Somnath<br>
+&gt;<br>
+&gt; -----Original Message-----<br>
+&gt; From: Josh Durgin [mailto:<a href=3D"mailto:josh.durgin-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org">j=
+osh.durgin-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org</a>]<br>
+&gt; Sent: Wednesday, September 18, 2013 6:10 PM<br>
+&gt; To: Somnath Roy<br>
+&gt; Cc: Sage Weil; <a href=3D"mailto:ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org">ceph-deve=
+l@vger.kernel.org</a>; Anirban Ray;<br>
+&gt; <a href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org=
+</a><br>
+&gt; Subject: Re: [ceph-users] Scaling RBD module<br>
+&gt;<br>
+&gt; On 09/17/2013 03:30 PM, Somnath Roy wrote:<br>
+&gt;&gt; Hi,<br>
+&gt;&gt; I am running Ceph on a 3 node cluster and each of my server node i=
+s running 10 OSDs, one for each disk. I have one admin node and all the nod=
+es are connected with 2 X 10G network. One network is for cluster and other=
+ one configured as public network.<br>
 
-> On Tue, 24 Sep 2013, David Zafman wrote:
->> 
->> Rados suite test run results for wip-5862.  2 "scrub mismatch" from mon
->> (known problem).  2 are valgrind issues found with mds and osd. 
-> 
-> What is the osd valgrind failure?  And the osd.4 crash on 13443?
-> 
-> (Note that the teuthology.log will include message about valgrind issues 
-> found in the mds log, but does not generate an actual error about it.)
-> 
-> Thanks!
-> sage
-> 
-> 
->> 
->> David Zafman
->> Senior Developer
->> http://www.inktank.com
->> 
->> Begin forwarded message:
->> 
->>      From: teuthworker@teuthology.front.sepia.ceph.com
->> Subject: 4 failed, 298 passed in
->> dzafman-2013-09-23_17:50:06-rados-wip-5862-testing-basic-plana
->> Date: September 23, 2013 10:48:00 PM PDT
->> To: david.zafman@inktank.com
->> 
->> Test Run:
->> dzafman-2013-09-23_17:50:06-rados-wip-5862-testing-basic-plana
->> =================================================================
->> logs:  http://qa-proxy.ceph.com/teuthology/dzafman-2013-09-23_17:50:06-rados-wip
->> -5862-testing-basic-plana/
->> failed: 4
->> hung:   0
->> passed: 298
->> 
->> Failed
->> =================================================================
->> [13187]  rados/monthrash/{ceph/ceph.yaml clusters/3-mons.yaml
->> fs/xfs.yaml msgr-failures/mon-delay.yaml
->> thrashers/force-sync-many.yaml workloads/snaps-few-objects.yaml}
->> -----------------------------------------------------------------
->> time:   2095s
->> log:   http://qa-proxy.ceph.com/teuthology/dzafman-2013-09-23_17:50:06-rados-wi
->> p-5862-testing-basic-plana/13187/
->> 
->>    "2013-09-23 18:22:37.805204 mon.0 10.214.132.24:6789/0 514 : [ERR]
->> scrub
->>    mismatch" in cluster log
->> 
->> [13449]  rados/verify/{1thrash/none.yaml clusters/fixed-2.yaml
->> fs/btrfs.yaml msgr-failures/few.yaml tasks/rados_api_tests.yaml
->> validater/valgrind.yaml}
->> -----------------------------------------------------------------
->> time:   1067s
->> log:   http://qa-proxy.ceph.com/teuthology/dzafman-2013-09-23_17:50:06-rados-wi
->> p-5862-testing-basic-plana/13449/
->> 
->>    saw valgrind issues
->> 
->> [13443]  rados/verify/{1thrash/default.yaml clusters/fixed-2.yaml
->> fs/btrfs.yaml msgr-failures/few.yaml tasks/rados_api_tests.yaml
->> validater/valgrind.yaml}
->> -----------------------------------------------------------------
->> time:   1307s
->> log:   http://qa-proxy.ceph.com/teuthology/dzafman-2013-09-23_17:50:06-rados-wi
->> p-5862-testing-basic-plana/13443/
->> 
->>    timed out waiting for admin_socket to appear after osd.4 restart
->> 
->> [13227]  rados/monthrash/{ceph/ceph.yaml clusters/9-mons.yaml
->> fs/xfs.yaml msgr-failures/mon-delay.yaml
->> thrashers/force-sync-many.yaml workloads/snaps-few-objects.yaml}
->> -----------------------------------------------------------------
->> time:   2374s
->> log:   http://qa-proxy.ceph.com/teuthology/dzafman-2013-09-23_17:50:06-rados-wi
->> p-5862-testing-basic-plana/13227/
->> 
->>    "2013-09-23 18:41:57.370588 mon.0 10.214.132.34:6789/0 20 : [ERR]
->> scrub
->>    mismatch" in cluster log
->> 
->> 
->> Passed
->> =================================================================
->> [13329] rados/thrash/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/osd-delay.yaml thrashers/mapgap.yaml
->> workloads/readwrite.yaml}
->> time:    1327s
->> 
->> [13414] rados/thrash/{clusters/fixed-2.yaml fs/xfs.yaml
->> msgr-failures/few.yaml thrashers/pggrow.yaml
->> workloads/snaps-few-objects.yaml}
->> time:    1926s
->> 
->> [13278] rados/singleton/{all/mon-thrasher.yaml fs/btrfs.yaml
->> msgr-failures/few.yaml}
->> time:    811s
->> 
->> [13368] rados/thrash/{clusters/fixed-2.yaml fs/ext4.yaml
->> msgr-failures/osd-delay.yaml thrashers/default.yaml
->> workloads/admin_socket_objecter_requests.yaml}
->> time:    322s
->> 
->> [13359] rados/thrash/{clusters/fixed-2.yaml fs/ext4.yaml
->> msgr-failures/few.yaml thrashers/morepggrow.yaml
->> workloads/readwrite.yaml}
->> time:    1529s
->> 
->> [13403] rados/thrash/{clusters/fixed-2.yaml fs/xfs.yaml
->> msgr-failures/few.yaml thrashers/mapgap.yaml
->> workloads/snaps-many-objects.yaml}
->> time:    1651s
->> 
->> [13402] rados/thrash/{clusters/fixed-2.yaml fs/xfs.yaml
->> msgr-failures/few.yaml thrashers/mapgap.yaml
->> workloads/snaps-few-objects.yaml}
->> time:    1878s
->> 
->> [13405] rados/thrash/{clusters/fixed-2.yaml fs/xfs.yaml
->> msgr-failures/few.yaml thrashers/morepggrow.yaml
->> workloads/rados_api_tests.yaml}
->> time:    836s
->> 
->> [13404] rados/thrash/{clusters/fixed-2.yaml fs/xfs.yaml
->> msgr-failures/few.yaml thrashers/morepggrow.yaml
->> workloads/admin_socket_objecter_requests.yaml}
->> time:    243s
->> 
->> [13407] rados/thrash/{clusters/fixed-2.yaml fs/xfs.yaml
->> msgr-failures/few.yaml thrashers/morepggrow.yaml
->> workloads/readwrite.yaml}
->> time:    1249s
->> 
->> [13358] rados/thrash/{clusters/fixed-2.yaml fs/ext4.yaml
->> msgr-failures/few.yaml thrashers/morepggrow.yaml
->> workloads/radosbench.yaml}
->> time:    3144s
->> 
->> [13360] rados/thrash/{clusters/fixed-2.yaml fs/ext4.yaml
->> msgr-failures/few.yaml thrashers/morepggrow.yaml
->> workloads/snaps-few-objects.yaml}
->> time:    1994s
->> 
->> [13361] rados/thrash/{clusters/fixed-2.yaml fs/ext4.yaml
->> msgr-failures/few.yaml thrashers/morepggrow.yaml
->> workloads/snaps-many-objects.yaml}
->> time:    1894s
->> 
->> [13362] rados/thrash/{clusters/fixed-2.yaml fs/ext4.yaml
->> msgr-failures/few.yaml thrashers/pggrow.yaml
->> workloads/admin_socket_objecter_requests.yaml}
->> time:    276s
->> 
->> [13363] rados/thrash/{clusters/fixed-2.yaml fs/ext4.yaml
->> msgr-failures/few.yaml thrashers/pggrow.yaml
->> workloads/rados_api_tests.yaml}
->> time:    966s
->> 
->> [13364] rados/thrash/{clusters/fixed-2.yaml fs/ext4.yaml
->> msgr-failures/few.yaml thrashers/pggrow.yaml
->> workloads/radosbench.yaml}
->> time:    2300s
->> 
->> [13365] rados/thrash/{clusters/fixed-2.yaml fs/ext4.yaml
->> msgr-failures/few.yaml thrashers/pggrow.yaml workloads/readwrite.yaml}
->> time:    1374s
->> 
->> [13366] rados/thrash/{clusters/fixed-2.yaml fs/ext4.yaml
->> msgr-failures/few.yaml thrashers/pggrow.yaml
->> workloads/snaps-few-objects.yaml}
->> time:    2202s
->> 
->> [13367] rados/thrash/{clusters/fixed-2.yaml fs/ext4.yaml
->> msgr-failures/few.yaml thrashers/pggrow.yaml
->> workloads/snaps-many-objects.yaml}
->> time:    1945s
->> 
->> [13386] rados/thrash/{clusters/fixed-2.yaml fs/ext4.yaml
->> msgr-failures/osd-delay.yaml thrashers/pggrow.yaml
->> workloads/admin_socket_objecter_requests.yaml}
->> time:    279s
->> 
->> [13387] rados/thrash/{clusters/fixed-2.yaml fs/ext4.yaml
->> msgr-failures/osd-delay.yaml thrashers/pggrow.yaml
->> workloads/rados_api_tests.yaml}
->> time:    988s
->> 
->> [13295] rados/singleton-nomsgr/{all/objectcacher-stress.yaml}
->> time:    1144s
->> 
->> [13243] rados/monthrash/{ceph/ceph.yaml clusters/9-mons.yaml
->> fs/xfs.yaml msgr-failures/mon-delay.yaml thrashers/sync.yaml
->> workloads/snaps-few-objects.yaml}
->> time:    2400s
->> 
->> [13242] rados/monthrash/{ceph/ceph.yaml clusters/9-mons.yaml
->> fs/xfs.yaml msgr-failures/mon-delay.yaml thrashers/sync.yaml
->> workloads/rados_mon_workunits.yaml}
->> time:    445s
->> 
->> [13168] rados/monthrash/{ceph/ceph.yaml clusters/3-mons.yaml
->> fs/xfs.yaml msgr-failures/few.yaml thrashers/many.yaml
->> workloads/rados_5925.yaml}
->> time:    200s
->> 
->> [13169] rados/monthrash/{ceph/ceph.yaml clusters/3-mons.yaml
->> fs/xfs.yaml msgr-failures/few.yaml thrashers/many.yaml
->> workloads/rados_api_tests.yaml}
->> time:    1455s
->> 
->> [13247] rados/multimon/{clusters/21.yaml msgr-failures/many.yaml
->> tasks/mon_clock_no_skews.yaml}
->> time:    186s
->> 
->> [13246] rados/multimon/{clusters/21.yaml msgr-failures/few.yaml
->> tasks/mon_recovery.yaml}
->> time:    888s
->> 
->> [13245] rados/multimon/{clusters/21.yaml msgr-failures/few.yaml
->> tasks/mon_clock_with_skews.yaml}
->> time:    191s
->> 
->> [13244] rados/multimon/{clusters/21.yaml msgr-failures/few.yaml
->> tasks/mon_clock_no_skews.yaml}
->> time:    171s
->> 
->> [13162] rados/basic/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/many.yaml tasks/rados_workunit_loadgen_mix.yaml}
->> time:    1454s
->> 
->> [13163] rados/basic/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/many.yaml tasks/rados_workunit_loadgen_mostlyread.yaml}
->> time:    6072s
->> 
->> [13160] rados/basic/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/many.yaml tasks/rados_stress_watch.yaml}
->> time:    469s
->> 
->> [13161] rados/basic/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/many.yaml tasks/rados_workunit_loadgen_big.yaml}
->> time:    2034s
->> 
->> [13166] rados/monthrash/{ceph/ceph.yaml clusters/3-mons.yaml
->> fs/xfs.yaml msgr-failures/few.yaml thrashers/force-sync-many.yaml
->> workloads/rados_mon_workunits.yaml}
->> time:    795s
->> 
->> [13167] rados/monthrash/{ceph/ceph.yaml clusters/3-mons.yaml
->> fs/xfs.yaml msgr-failures/few.yaml thrashers/force-sync-many.yaml
->> workloads/snaps-few-objects.yaml}
->> time:    2350s
->> 
->> [13164] rados/monthrash/{ceph/ceph.yaml clusters/3-mons.yaml
->> fs/xfs.yaml msgr-failures/few.yaml thrashers/force-sync-many.yaml
->> workloads/rados_5925.yaml}
->> time:    271s
->> 
->> [13165] rados/monthrash/{ceph/ceph.yaml clusters/3-mons.yaml
->> fs/xfs.yaml msgr-failures/few.yaml thrashers/force-sync-many.yaml
->> workloads/rados_api_tests.yaml}
->> time:    1082s
->> 
->> [13199] rados/monthrash/{ceph/ceph.yaml clusters/3-mons.yaml
->> fs/xfs.yaml msgr-failures/mon-delay.yaml thrashers/sync-many.yaml
->> workloads/snaps-few-objects.yaml}
->> time:    2158s
->> 
->> [13412] rados/thrash/{clusters/fixed-2.yaml fs/xfs.yaml
->> msgr-failures/few.yaml thrashers/pggrow.yaml
->> workloads/radosbench.yaml}
->> time:    2124s
->> 
->> [13413] rados/thrash/{clusters/fixed-2.yaml fs/xfs.yaml
->> msgr-failures/few.yaml thrashers/pggrow.yaml workloads/readwrite.yaml}
->> time:    1461s
->> 
->> [13410] rados/thrash/{clusters/fixed-2.yaml fs/xfs.yaml
->> msgr-failures/few.yaml thrashers/pggrow.yaml
->> workloads/admin_socket_objecter_requests.yaml}
->> time:    285s
->> 
->> [13198] rados/monthrash/{ceph/ceph.yaml clusters/3-mons.yaml
->> fs/xfs.yaml msgr-failures/mon-delay.yaml thrashers/sync-many.yaml
->> workloads/rados_mon_workunits.yaml}
->> time:    378s
->> 
->> [13416] rados/thrash/{clusters/fixed-2.yaml fs/xfs.yaml
->> msgr-failures/osd-delay.yaml thrashers/default.yaml
->> workloads/admin_socket_objecter_requests.yaml}
->> time:    261s
->> 
->> [13417] rados/thrash/{clusters/fixed-2.yaml fs/xfs.yaml
->> msgr-failures/osd-delay.yaml thrashers/default.yaml
->> workloads/rados_api_tests.yaml}
->> time:    912s
->> 
->> [13389] rados/thrash/{clusters/fixed-2.yaml fs/ext4.yaml
->> msgr-failures/osd-delay.yaml thrashers/pggrow.yaml
->> workloads/readwrite.yaml}
->> time:    1405s
->> 
->> [13415] rados/thrash/{clusters/fixed-2.yaml fs/xfs.yaml
->> msgr-failures/few.yaml thrashers/pggrow.yaml
->> workloads/snaps-many-objects.yaml}
->> time:    1909s
->> 
->> [13319] rados/thrash/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/few.yaml thrashers/pggrow.yaml
->> workloads/snaps-many-objects.yaml}
->> time:    2043s
->> 
->> [13323] rados/thrash/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/osd-delay.yaml thrashers/default.yaml
->> workloads/readwrite.yaml}
->> time:    1258s
->> 
->> [13419] rados/thrash/{clusters/fixed-2.yaml fs/xfs.yaml
->> msgr-failures/osd-delay.yaml thrashers/default.yaml
->> workloads/readwrite.yaml}
->> time:    1244s
->> 
->> [13318] rados/thrash/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/few.yaml thrashers/pggrow.yaml
->> workloads/snaps-few-objects.yaml}
->> time:    1883s
->> 
->> [13157] rados/basic/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/many.yaml tasks/rados_api_tests.yaml}
->> time:    1056s
->> 
->> [13156] rados/basic/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/few.yaml tasks/rados_workunit_loadgen_mostlyread.yaml}
->> time:    6006s
->> 
->> [13155] rados/basic/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/few.yaml tasks/rados_workunit_loadgen_mix.yaml}
->> time:    1477s
->> 
->> [13154] rados/basic/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/few.yaml tasks/rados_workunit_loadgen_big.yaml}
->> time:    2115s
->> 
->> [13153] rados/basic/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/few.yaml tasks/rados_stress_watch.yaml}
->> time:    449s
->> 
->> [13152] rados/basic/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/few.yaml tasks/rados_python.yaml}
->> time:    461s
->> 
->> [13151] rados/basic/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/few.yaml tasks/rados_cls_all.yaml}
->> time:    360s
->> 
->> [13150] rados/basic/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/few.yaml tasks/rados_api_tests.yaml}
->> time:    1063s
->> 
->> [13248] rados/multimon/{clusters/21.yaml msgr-failures/many.yaml
->> tasks/mon_clock_with_skews.yaml}
->> time:    203s
->> 
->> [13314] rados/thrash/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/few.yaml thrashers/pggrow.yaml
->> workloads/admin_socket_objecter_requests.yaml}
->> time:    286s
->> 
->> [13317] rados/thrash/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/few.yaml thrashers/pggrow.yaml workloads/readwrite.yaml}
->> time:    1199s
->> 
->> [13316] rados/thrash/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/few.yaml thrashers/pggrow.yaml
->> workloads/radosbench.yaml}
->> time:    2858s
->> 
->> [13311] rados/thrash/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/few.yaml thrashers/morepggrow.yaml
->> workloads/readwrite.yaml}
->> time:    1359s
->> 
->> [13310] rados/thrash/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/few.yaml thrashers/morepggrow.yaml
->> workloads/radosbench.yaml}
->> time:    2978s
->> 
->> [13159] rados/basic/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/many.yaml tasks/rados_python.yaml}
->> time:    545s
->> 
->> [13158] rados/basic/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/many.yaml tasks/rados_cls_all.yaml}
->> time:    537s
->> 
->> [13395] rados/thrash/{clusters/fixed-2.yaml fs/xfs.yaml
->> msgr-failures/few.yaml thrashers/default.yaml
->> workloads/readwrite.yaml}
->> time:    1420s
->> 
->> [13193] rados/monthrash/{ceph/ceph.yaml clusters/3-mons.yaml
->> fs/xfs.yaml msgr-failures/mon-delay.yaml thrashers/one.yaml
->> workloads/rados_api_tests.yaml}
->> time:    1305s
->> 
->> [13397] rados/thrash/{clusters/fixed-2.yaml fs/xfs.yaml
->> msgr-failures/few.yaml thrashers/default.yaml
->> workloads/snaps-many-objects.yaml}
->> time:    1918s
->> 
->> [13396] rados/thrash/{clusters/fixed-2.yaml fs/xfs.yaml
->> msgr-failures/few.yaml thrashers/default.yaml
->> workloads/snaps-few-objects.yaml}
->> time:    1910s
->> 
->> [13258] rados/multimon/{clusters/6.yaml msgr-failures/few.yaml
->> tasks/mon_recovery.yaml}
->> time:    400s
->> 
->> [13259] rados/multimon/{clusters/6.yaml msgr-failures/many.yaml
->> tasks/mon_clock_no_skews.yaml}
->> time:    171s
->> 
->> [13393] rados/thrash/{clusters/fixed-2.yaml fs/xfs.yaml
->> msgr-failures/few.yaml thrashers/default.yaml
->> workloads/rados_api_tests.yaml}
->> time:    876s
->> 
->> [13219] rados/monthrash/{ceph/ceph.yaml clusters/9-mons.yaml
->> fs/xfs.yaml msgr-failures/few.yaml thrashers/sync-many.yaml
->> workloads/snaps-few-objects.yaml}
->> time:    2475s
->> 
->> [13254] rados/multimon/{clusters/3.yaml msgr-failures/many.yaml
->> tasks/mon_clock_with_skews.yaml}
->> time:    152s
->> 
->> [13255] rados/multimon/{clusters/3.yaml msgr-failures/many.yaml
->> tasks/mon_recovery.yaml}
->> time:    404s
->> 
->> [13256] rados/multimon/{clusters/6.yaml msgr-failures/few.yaml
->> tasks/mon_clock_no_skews.yaml}
->> time:    162s
->> 
->> [13257] rados/multimon/{clusters/6.yaml msgr-failures/few.yaml
->> tasks/mon_clock_with_skews.yaml}
->> time:    177s
->> 
->> [13250] rados/multimon/{clusters/3.yaml msgr-failures/few.yaml
->> tasks/mon_clock_no_skews.yaml}
->> time:    173s
->> 
->> [13251] rados/multimon/{clusters/3.yaml msgr-failures/few.yaml
->> tasks/mon_clock_with_skews.yaml}
->> time:    153s
->> 
->> [13252] rados/multimon/{clusters/3.yaml msgr-failures/few.yaml
->> tasks/mon_recovery.yaml}
->> time:    410s
->> 
->> [13253] rados/multimon/{clusters/3.yaml msgr-failures/many.yaml
->> tasks/mon_clock_no_skews.yaml}
->> time:    149s
->> 
->> [13322] rados/thrash/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/osd-delay.yaml thrashers/default.yaml
->> workloads/radosbench.yaml}
->> time:    2535s
->> 
->> [13398] rados/thrash/{clusters/fixed-2.yaml fs/xfs.yaml
->> msgr-failures/few.yaml thrashers/mapgap.yaml
->> workloads/admin_socket_objecter_requests.yaml}
->> time:    308s
->> 
->> [13288] rados/singleton/{all/rest-api.yaml fs/btrfs.yaml
->> msgr-failures/few.yaml}
->> time:    203s
->> 
->> [13409] rados/thrash/{clusters/fixed-2.yaml fs/xfs.yaml
->> msgr-failures/few.yaml thrashers/morepggrow.yaml
->> workloads/snaps-many-objects.yaml}
->> time:    1692s
->> 
->> [13313] rados/thrash/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/few.yaml thrashers/morepggrow.yaml
->> workloads/snaps-many-objects.yaml}
->> time:    1892s
->> 
->> [13429] rados/thrash/{clusters/fixed-2.yaml fs/xfs.yaml
->> msgr-failures/osd-delay.yaml thrashers/morepggrow.yaml
->> workloads/rados_api_tests.yaml}
->> time:    842s
->> 
->> [13408] rados/thrash/{clusters/fixed-2.yaml fs/xfs.yaml
->> msgr-failures/few.yaml thrashers/morepggrow.yaml
->> workloads/snaps-few-objects.yaml}
->> time:    2001s
->> 
->> [13427] rados/thrash/{clusters/fixed-2.yaml fs/xfs.yaml
->> msgr-failures/osd-delay.yaml thrashers/mapgap.yaml
->> workloads/snaps-many-objects.yaml}
->> time:    1642s
->> 
->> [13315] rados/thrash/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/few.yaml thrashers/pggrow.yaml
->> workloads/rados_api_tests.yaml}
->> time:    857s
->> 
->> [13425] rados/thrash/{clusters/fixed-2.yaml fs/xfs.yaml
->> msgr-failures/osd-delay.yaml thrashers/mapgap.yaml
->> workloads/readwrite.yaml}
->> time:    1208s
->> 
->> [13312] rados/thrash/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/few.yaml thrashers/morepggrow.yaml
->> workloads/snaps-few-objects.yaml}
->> time:    1905s
->> 
->> [13423] rados/thrash/{clusters/fixed-2.yaml fs/xfs.yaml
->> msgr-failures/osd-delay.yaml thrashers/mapgap.yaml
->> workloads/rados_api_tests.yaml}
->> time:    862s
->> 
->> [13422] rados/thrash/{clusters/fixed-2.yaml fs/xfs.yaml
->> msgr-failures/osd-delay.yaml thrashers/mapgap.yaml
->> workloads/admin_socket_objecter_requests.yaml}
->> time:    256s
->> 
->> [13421] rados/thrash/{clusters/fixed-2.yaml fs/xfs.yaml
->> msgr-failures/osd-delay.yaml thrashers/default.yaml
->> workloads/snaps-many-objects.yaml}
->> time:    1793s
->> 
->> [13420] rados/thrash/{clusters/fixed-2.yaml fs/xfs.yaml
->> msgr-failures/osd-delay.yaml thrashers/default.yaml
->> workloads/snaps-few-objects.yaml}
->> time:    1926s
->> 
->> [13442] rados/verify/{1thrash/default.yaml clusters/fixed-2.yaml
->> fs/btrfs.yaml msgr-failures/few.yaml tasks/rados_api_tests.yaml
->> validater/lockdep.yaml}
->> time:    877s
->> 
->> [13451] rados/verify/{1thrash/none.yaml clusters/fixed-2.yaml
->> fs/btrfs.yaml msgr-failures/few.yaml tasks/rados_cls_all.yaml
->> validater/valgrind.yaml}
->> time:    396s
->> 
->> [13308] rados/thrash/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/few.yaml thrashers/morepggrow.yaml
->> workloads/admin_socket_objecter_requests.yaml}
->> time:    241s
->> 
->> [13309] rados/thrash/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/few.yaml thrashers/morepggrow.yaml
->> workloads/rados_api_tests.yaml}
->> time:    744s
->> 
->> [13306] rados/thrash/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/few.yaml thrashers/mapgap.yaml
->> workloads/snaps-few-objects.yaml}
->> time:    1787s
->> 
->> [13307] rados/thrash/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/few.yaml thrashers/mapgap.yaml
->> workloads/snaps-many-objects.yaml}
->> time:    1836s
->> 
->> [13304] rados/thrash/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/few.yaml thrashers/mapgap.yaml
->> workloads/radosbench.yaml}
->> time:    2162s
->> 
->> [13305] rados/thrash/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/few.yaml thrashers/mapgap.yaml workloads/readwrite.yaml}
->> time:    1282s
->> 
->> [13302] rados/thrash/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/few.yaml thrashers/mapgap.yaml
->> workloads/admin_socket_objecter_requests.yaml}
->> time:    261s
->> 
->> [13303] rados/thrash/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/few.yaml thrashers/mapgap.yaml
->> workloads/rados_api_tests.yaml}
->> time:    718s
->> 
->> [13300] rados/thrash/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/few.yaml thrashers/default.yaml
->> workloads/snaps-few-objects.yaml}
->> time:    1910s
->> 
->> [13301] rados/thrash/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/few.yaml thrashers/default.yaml
->> workloads/snaps-many-objects.yaml}
->> time:    1772s
->> 
->> [13229] rados/monthrash/{ceph/ceph.yaml clusters/9-mons.yaml
->> fs/xfs.yaml msgr-failures/mon-delay.yaml thrashers/many.yaml
->> workloads/rados_api_tests.yaml}
->> time:    1458s
->> 
->> [13228] rados/monthrash/{ceph/ceph.yaml clusters/9-mons.yaml
->> fs/xfs.yaml msgr-failures/mon-delay.yaml thrashers/many.yaml
->> workloads/rados_5925.yaml}
->> time:    221s
->> 
->> [13384] rados/thrash/{clusters/fixed-2.yaml fs/ext4.yaml
->> msgr-failures/osd-delay.yaml thrashers/morepggrow.yaml
->> workloads/snaps-few-objects.yaml}
->> time:    2184s
->> 
->> [13385] rados/thrash/{clusters/fixed-2.yaml fs/ext4.yaml
->> msgr-failures/osd-delay.yaml thrashers/morepggrow.yaml
->> workloads/snaps-many-objects.yaml}
->> time:    1953s
->> 
->> [13382] rados/thrash/{clusters/fixed-2.yaml fs/ext4.yaml
->> msgr-failures/osd-delay.yaml thrashers/morepggrow.yaml
->> workloads/radosbench.yaml}
->> time:    2330s
->> 
->> [13383] rados/thrash/{clusters/fixed-2.yaml fs/ext4.yaml
->> msgr-failures/osd-delay.yaml thrashers/morepggrow.yaml
->> workloads/readwrite.yaml}
->> time:    1607s
->> 
->> [13380] rados/thrash/{clusters/fixed-2.yaml fs/ext4.yaml
->> msgr-failures/osd-delay.yaml thrashers/morepggrow.yaml
->> workloads/admin_socket_objecter_requests.yaml}
->> time:    304s
->> 
->> [13381] rados/thrash/{clusters/fixed-2.yaml fs/ext4.yaml
->> msgr-failures/osd-delay.yaml thrashers/morepggrow.yaml
->> workloads/rados_api_tests.yaml}
->> time:    1147s
->> 
->> [13221] rados/monthrash/{ceph/ceph.yaml clusters/9-mons.yaml
->> fs/xfs.yaml msgr-failures/few.yaml thrashers/sync.yaml
->> workloads/rados_api_tests.yaml}
->> time:    1125s
->> 
->> [13220] rados/monthrash/{ceph/ceph.yaml clusters/9-mons.yaml
->> fs/xfs.yaml msgr-failures/few.yaml thrashers/sync.yaml
->> workloads/rados_5925.yaml}
->> time:    299s
->> 
->> [13223] rados/monthrash/{ceph/ceph.yaml clusters/9-mons.yaml
->> fs/xfs.yaml msgr-failures/few.yaml thrashers/sync.yaml
->> workloads/snaps-few-objects.yaml}
->> time:    2388s
->> 
->> [13222] rados/monthrash/{ceph/ceph.yaml clusters/9-mons.yaml
->> fs/xfs.yaml msgr-failures/few.yaml thrashers/sync.yaml
->> workloads/rados_mon_workunits.yaml}
->> time:    433s
->> 
->> [13225] rados/monthrash/{ceph/ceph.yaml clusters/9-mons.yaml
->> fs/xfs.yaml msgr-failures/mon-delay.yaml
->> thrashers/force-sync-many.yaml workloads/rados_api_tests.yaml}
->> time:    1084s
->> 
->> [13224] rados/monthrash/{ceph/ceph.yaml clusters/9-mons.yaml
->> fs/xfs.yaml msgr-failures/mon-delay.yaml
->> thrashers/force-sync-many.yaml workloads/rados_5925.yaml}
->> time:    277s
->> 
->> [13388] rados/thrash/{clusters/fixed-2.yaml fs/ext4.yaml
->> msgr-failures/osd-delay.yaml thrashers/pggrow.yaml
->> workloads/radosbench.yaml}
->> time:    3196s
->> 
->> [13226] rados/monthrash/{ceph/ceph.yaml clusters/9-mons.yaml
->> fs/xfs.yaml msgr-failures/mon-delay.yaml
->> thrashers/force-sync-many.yaml workloads/rados_mon_workunits.yaml}
->> time:    458s
->> 
->> [13392] rados/thrash/{clusters/fixed-2.yaml fs/xfs.yaml
->> msgr-failures/few.yaml thrashers/default.yaml
->> workloads/admin_socket_objecter_requests.yaml}
->> time:    223s
->> 
->> [13438] rados/thrash/{clusters/fixed-2.yaml fs/xfs.yaml
->> msgr-failures/osd-delay.yaml thrashers/pggrow.yaml
->> workloads/snaps-few-objects.yaml}
->> time:    1898s
->> 
->> [13439] rados/thrash/{clusters/fixed-2.yaml fs/xfs.yaml
->> msgr-failures/osd-delay.yaml thrashers/pggrow.yaml
->> workloads/snaps-many-objects.yaml}
->> time:    1833s
->> 
->> [13430] rados/thrash/{clusters/fixed-2.yaml fs/xfs.yaml
->> msgr-failures/osd-delay.yaml thrashers/morepggrow.yaml
->> workloads/radosbench.yaml}
->> time:    2315s
->> 
->> [13431] rados/thrash/{clusters/fixed-2.yaml fs/xfs.yaml
->> msgr-failures/osd-delay.yaml thrashers/morepggrow.yaml
->> workloads/readwrite.yaml}
->> time:    1446s
->> 
->> [13432] rados/thrash/{clusters/fixed-2.yaml fs/xfs.yaml
->> msgr-failures/osd-delay.yaml thrashers/morepggrow.yaml
->> workloads/snaps-few-objects.yaml}
->> time:    1941s
->> 
->> [13433] rados/thrash/{clusters/fixed-2.yaml fs/xfs.yaml
->> msgr-failures/osd-delay.yaml thrashers/morepggrow.yaml
->> workloads/snaps-many-objects.yaml}
->> time:    1854s
->> 
->> [13434] rados/thrash/{clusters/fixed-2.yaml fs/xfs.yaml
->> msgr-failures/osd-delay.yaml thrashers/pggrow.yaml
->> workloads/admin_socket_objecter_requests.yaml}
->> time:    239s
->> 
->> [13435] rados/thrash/{clusters/fixed-2.yaml fs/xfs.yaml
->> msgr-failures/osd-delay.yaml thrashers/pggrow.yaml
->> workloads/rados_api_tests.yaml}
->> time:    889s
->> 
->> [13436] rados/thrash/{clusters/fixed-2.yaml fs/xfs.yaml
->> msgr-failures/osd-delay.yaml thrashers/pggrow.yaml
->> workloads/radosbench.yaml}
->> time:    2498s
->> 
->> [13437] rados/thrash/{clusters/fixed-2.yaml fs/xfs.yaml
->> msgr-failures/osd-delay.yaml thrashers/pggrow.yaml
->> workloads/readwrite.yaml}
->> time:    1365s
->> 
->> [13339] rados/thrash/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/osd-delay.yaml thrashers/pggrow.yaml
->> workloads/rados_api_tests.yaml}
->> time:    759s
->> 
->> [13338] rados/thrash/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/osd-delay.yaml thrashers/pggrow.yaml
->> workloads/admin_socket_objecter_requests.yaml}
->> time:    234s
->> 
->> [13369] rados/thrash/{clusters/fixed-2.yaml fs/ext4.yaml
->> msgr-failures/osd-delay.yaml thrashers/default.yaml
->> workloads/rados_api_tests.yaml}
->> time:    944s
->> 
->> [13333] rados/thrash/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/osd-delay.yaml thrashers/morepggrow.yaml
->> workloads/rados_api_tests.yaml}
->> time:    760s
->> 
->> [13332] rados/thrash/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/osd-delay.yaml thrashers/morepggrow.yaml
->> workloads/admin_socket_objecter_requests.yaml}
->> time:    232s
->> 
->> [13331] rados/thrash/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/osd-delay.yaml thrashers/mapgap.yaml
->> workloads/snaps-many-objects.yaml}
->> time:    1724s
->> 
->> [13330] rados/thrash/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/osd-delay.yaml thrashers/mapgap.yaml
->> workloads/snaps-few-objects.yaml}
->> time:    1860s
->> 
->> [13337] rados/thrash/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/osd-delay.yaml thrashers/morepggrow.yaml
->> workloads/snaps-many-objects.yaml}
->> time:    1645s
->> 
->> [13336] rados/thrash/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/osd-delay.yaml thrashers/morepggrow.yaml
->> workloads/snaps-few-objects.yaml}
->> time:    1897s
->> 
->> [13335] rados/thrash/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/osd-delay.yaml thrashers/morepggrow.yaml
->> workloads/readwrite.yaml}
->> time:    1322s
->> 
->> [13334] rados/thrash/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/osd-delay.yaml thrashers/morepggrow.yaml
->> workloads/radosbench.yaml}
->> time:    3000s
->> 
->> [13238] rados/monthrash/{ceph/ceph.yaml clusters/9-mons.yaml
->> fs/xfs.yaml msgr-failures/mon-delay.yaml thrashers/sync-many.yaml
->> workloads/rados_mon_workunits.yaml}
->> time:    421s
->> 
->> [13239] rados/monthrash/{ceph/ceph.yaml clusters/9-mons.yaml
->> fs/xfs.yaml msgr-failures/mon-delay.yaml thrashers/sync-many.yaml
->> workloads/snaps-few-objects.yaml}
->> time:    2525s
->> 
->> [13232] rados/monthrash/{ceph/ceph.yaml clusters/9-mons.yaml
->> fs/xfs.yaml msgr-failures/mon-delay.yaml thrashers/one.yaml
->> workloads/rados_5925.yaml}
->> time:    254s
->> 
->> [13233] rados/monthrash/{ceph/ceph.yaml clusters/9-mons.yaml
->> fs/xfs.yaml msgr-failures/mon-delay.yaml thrashers/one.yaml
->> workloads/rados_api_tests.yaml}
->> time:    1515s
->> 
->> [13230] rados/monthrash/{ceph/ceph.yaml clusters/9-mons.yaml
->> fs/xfs.yaml msgr-failures/mon-delay.yaml thrashers/many.yaml
->> workloads/rados_mon_workunits.yaml}
->> time:    481s
->> 
->> [13231] rados/monthrash/{ceph/ceph.yaml clusters/9-mons.yaml
->> fs/xfs.yaml msgr-failures/mon-delay.yaml thrashers/many.yaml
->> workloads/snaps-few-objects.yaml}
->> time:    3058s
->> 
->> [13236] rados/monthrash/{ceph/ceph.yaml clusters/9-mons.yaml
->> fs/xfs.yaml msgr-failures/mon-delay.yaml thrashers/sync-many.yaml
->> workloads/rados_5925.yaml}
->> time:    308s
->> 
->> [13237] rados/monthrash/{ceph/ceph.yaml clusters/9-mons.yaml
->> fs/xfs.yaml msgr-failures/mon-delay.yaml thrashers/sync-many.yaml
->> workloads/rados_api_tests.yaml}
->> time:    1161s
->> 
->> [13234] rados/monthrash/{ceph/ceph.yaml clusters/9-mons.yaml
->> fs/xfs.yaml msgr-failures/mon-delay.yaml thrashers/one.yaml
->> workloads/rados_mon_workunits.yaml}
->> time:    440s
->> 
->> [13235] rados/monthrash/{ceph/ceph.yaml clusters/9-mons.yaml
->> fs/xfs.yaml msgr-failures/mon-delay.yaml thrashers/one.yaml
->> workloads/snaps-few-objects.yaml}
->> time:    3006s
->> 
->> [13406] rados/thrash/{clusters/fixed-2.yaml fs/xfs.yaml
->> msgr-failures/few.yaml thrashers/morepggrow.yaml
->> workloads/radosbench.yaml}
->> time:    2481s
->> 
->> [13440] rados/verify/{1thrash/default.yaml clusters/fixed-2.yaml
->> fs/btrfs.yaml msgr-failures/few.yaml tasks/mon_recovery.yaml
->> validater/lockdep.yaml}
->> time:    392s
->> 
->> [13324] rados/thrash/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/osd-delay.yaml thrashers/default.yaml
->> workloads/snaps-few-objects.yaml}
->> time:    1913s
->> 
->> [13325] rados/thrash/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/osd-delay.yaml thrashers/default.yaml
->> workloads/snaps-many-objects.yaml}
->> time:    1742s
->> 
->> [13326] rados/thrash/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/osd-delay.yaml thrashers/mapgap.yaml
->> workloads/admin_socket_objecter_requests.yaml}
->> time:    333s
->> 
->> [13327] rados/thrash/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/osd-delay.yaml thrashers/mapgap.yaml
->> workloads/rados_api_tests.yaml}
->> time:    761s
->> 
->> [13320] rados/thrash/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/osd-delay.yaml thrashers/default.yaml
->> workloads/admin_socket_objecter_requests.yaml}
->> time:    249s
->> 
->> [13321] rados/thrash/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/osd-delay.yaml thrashers/default.yaml
->> workloads/rados_api_tests.yaml}
->> time:    801s
->> 
->> [13289] rados/singleton/{all/rest-api.yaml fs/btrfs.yaml
->> msgr-failures/many.yaml}
->> time:    180s
->> 
->> [13279] rados/singleton/{all/mon-thrasher.yaml fs/btrfs.yaml
->> msgr-failures/many.yaml}
->> time:    820s
->> 
->> [13287] rados/singleton/{all/peer.yaml fs/btrfs.yaml
->> msgr-failures/many.yaml}
->> time:    309s
->> 
->> [13286] rados/singleton/{all/peer.yaml fs/btrfs.yaml
->> msgr-failures/few.yaml}
->> time:    162s
->> 
->> [13285] rados/singleton/{all/osd-recovery.yaml fs/btrfs.yaml
->> msgr-failures/many.yaml}
->> time:    258s
->> 
->> [13284] rados/singleton/{all/osd-recovery.yaml fs/btrfs.yaml
->> msgr-failures/few.yaml}
->> time:    242s
->> 
->> [13283] rados/singleton/{all/osd-recovery-incomplete.yaml
->> fs/btrfs.yaml msgr-failures/many.yaml}
->> time:    1303s
->> 
->> [13282] rados/singleton/{all/osd-recovery-incomplete.yaml
->> fs/btrfs.yaml msgr-failures/few.yaml}
->> time:    1347s
->> 
->> [13281] rados/singleton/{all/osd-backfill.yaml fs/btrfs.yaml
->> msgr-failures/many.yaml}
->> time:    201s
->> 
->> [13280] rados/singleton/{all/osd-backfill.yaml fs/btrfs.yaml
->> msgr-failures/few.yaml}
->> time:    263s
->> 
->> [13207] rados/monthrash/{ceph/ceph.yaml clusters/9-mons.yaml
->> fs/xfs.yaml msgr-failures/few.yaml thrashers/force-sync-many.yaml
->> workloads/snaps-few-objects.yaml}
->> time:    2241s
->> 
->> [13206] rados/monthrash/{ceph/ceph.yaml clusters/9-mons.yaml
->> fs/xfs.yaml msgr-failures/few.yaml thrashers/force-sync-many.yaml
->> workloads/rados_mon_workunits.yaml}
->> time:    508s
->> 
->> [13205] rados/monthrash/{ceph/ceph.yaml clusters/9-mons.yaml
->> fs/xfs.yaml msgr-failures/few.yaml thrashers/force-sync-many.yaml
->> workloads/rados_api_tests.yaml}
->> time:    1202s
->> 
->> [13204] rados/monthrash/{ceph/ceph.yaml clusters/9-mons.yaml
->> fs/xfs.yaml msgr-failures/few.yaml thrashers/force-sync-many.yaml
->> workloads/rados_5925.yaml}
->> time:    304s
->> 
->> [13203] rados/monthrash/{ceph/ceph.yaml clusters/3-mons.yaml
->> fs/xfs.yaml msgr-failures/mon-delay.yaml thrashers/sync.yaml
->> workloads/snaps-few-objects.yaml}
->> time:    2039s
->> 
->> [13202] rados/monthrash/{ceph/ceph.yaml clusters/3-mons.yaml
->> fs/xfs.yaml msgr-failures/mon-delay.yaml thrashers/sync.yaml
->> workloads/rados_mon_workunits.yaml}
->> time:    675s
->> 
->> [13201] rados/monthrash/{ceph/ceph.yaml clusters/3-mons.yaml
->> fs/xfs.yaml msgr-failures/mon-delay.yaml thrashers/sync.yaml
->> workloads/rados_api_tests.yaml}
->> time:    1177s
->> 
->> [13200] rados/monthrash/{ceph/ceph.yaml clusters/3-mons.yaml
->> fs/xfs.yaml msgr-failures/mon-delay.yaml thrashers/sync.yaml
->> workloads/rados_5925.yaml}
->> time:    278s
->> 
->> [13445] rados/verify/{1thrash/default.yaml clusters/fixed-2.yaml
->> fs/btrfs.yaml msgr-failures/few.yaml tasks/rados_cls_all.yaml
->> validater/valgrind.yaml}
->> time:    440s
->> 
->> [13444] rados/verify/{1thrash/default.yaml clusters/fixed-2.yaml
->> fs/btrfs.yaml msgr-failures/few.yaml tasks/rados_cls_all.yaml
->> validater/lockdep.yaml}
->> time:    348s
->> 
->> [13447] rados/verify/{1thrash/none.yaml clusters/fixed-2.yaml
->> fs/btrfs.yaml msgr-failures/few.yaml tasks/mon_recovery.yaml
->> validater/valgrind.yaml}
->> time:    525s
->> 
->> [13446] rados/verify/{1thrash/none.yaml clusters/fixed-2.yaml
->> fs/btrfs.yaml msgr-failures/few.yaml tasks/mon_recovery.yaml
->> validater/lockdep.yaml}
->> time:    454s
->> 
->> [13441] rados/verify/{1thrash/default.yaml clusters/fixed-2.yaml
->> fs/btrfs.yaml msgr-failures/few.yaml tasks/mon_recovery.yaml
->> validater/valgrind.yaml}
->> time:    549s
->> 
->> [13241] rados/monthrash/{ceph/ceph.yaml clusters/9-mons.yaml
->> fs/xfs.yaml msgr-failures/mon-delay.yaml thrashers/sync.yaml
->> workloads/rados_api_tests.yaml}
->> time:    1274s
->> 
->> [13209] rados/monthrash/{ceph/ceph.yaml clusters/9-mons.yaml
->> fs/xfs.yaml msgr-failures/few.yaml thrashers/many.yaml
->> workloads/rados_api_tests.yaml}
->> time:    1526s
->> 
->> [13208] rados/monthrash/{ceph/ceph.yaml clusters/9-mons.yaml
->> fs/xfs.yaml msgr-failures/few.yaml thrashers/many.yaml
->> workloads/rados_5925.yaml}
->> time:    241s
->> 
->> [13411] rados/thrash/{clusters/fixed-2.yaml fs/xfs.yaml
->> msgr-failures/few.yaml thrashers/pggrow.yaml
->> workloads/rados_api_tests.yaml}
->> time:    802s
->> 
->> [13240] rados/monthrash/{ceph/ceph.yaml clusters/9-mons.yaml
->> fs/xfs.yaml msgr-failures/mon-delay.yaml thrashers/sync.yaml
->> workloads/rados_5925.yaml}
->> time:    318s
->> 
->> [13371] rados/thrash/{clusters/fixed-2.yaml fs/ext4.yaml
->> msgr-failures/osd-delay.yaml thrashers/default.yaml
->> workloads/readwrite.yaml}
->> time:    1508s
->> 
->> [13428] rados/thrash/{clusters/fixed-2.yaml fs/xfs.yaml
->> msgr-failures/osd-delay.yaml thrashers/morepggrow.yaml
->> workloads/admin_socket_objecter_requests.yaml}
->> time:    257s
->> 
->> [13401] rados/thrash/{clusters/fixed-2.yaml fs/xfs.yaml
->> msgr-failures/few.yaml thrashers/mapgap.yaml workloads/readwrite.yaml}
->> time:    1265s
->> 
->> [13450] rados/verify/{1thrash/none.yaml clusters/fixed-2.yaml
->> fs/btrfs.yaml msgr-failures/few.yaml tasks/rados_cls_all.yaml
->> validater/lockdep.yaml}
->> time:    272s
->> 
->> [13298] rados/thrash/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/few.yaml thrashers/default.yaml
->> workloads/radosbench.yaml}
->> time:    3243s
->> 
->> [13299] rados/thrash/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/few.yaml thrashers/default.yaml
->> workloads/readwrite.yaml}
->> time:    1422s
->> 
->> [13353] rados/thrash/{clusters/fixed-2.yaml fs/ext4.yaml
->> msgr-failures/few.yaml thrashers/mapgap.yaml workloads/readwrite.yaml}
->> time:    1460s
->> 
->> [13352] rados/thrash/{clusters/fixed-2.yaml fs/ext4.yaml
->> msgr-failures/few.yaml thrashers/mapgap.yaml
->> workloads/radosbench.yaml}
->> time:    2159s
->> 
->> [13355] rados/thrash/{clusters/fixed-2.yaml fs/ext4.yaml
->> msgr-failures/few.yaml thrashers/mapgap.yaml
->> workloads/snaps-many-objects.yaml}
->> time:    1724s
->> 
->> [13354] rados/thrash/{clusters/fixed-2.yaml fs/ext4.yaml
->> msgr-failures/few.yaml thrashers/mapgap.yaml
->> workloads/snaps-few-objects.yaml}
->> time:    1957s
->> 
->> [13357] rados/thrash/{clusters/fixed-2.yaml fs/ext4.yaml
->> msgr-failures/few.yaml thrashers/morepggrow.yaml
->> workloads/rados_api_tests.yaml}
->> time:    859s
->> 
->> [13356] rados/thrash/{clusters/fixed-2.yaml fs/ext4.yaml
->> msgr-failures/few.yaml thrashers/morepggrow.yaml
->> workloads/admin_socket_objecter_requests.yaml}
->> time:    244s
->> 
->> [13290] rados/singleton/{all/thrash-rados.yaml fs/btrfs.yaml
->> msgr-failures/few.yaml}
->> time:    791s
->> 
->> [13291] rados/singleton/{all/thrash-rados.yaml fs/btrfs.yaml
->> msgr-failures/many.yaml}
->> time:    821s
->> 
->> [13292] rados/singleton-nomsgr/{all/filejournal.yaml}
->> time:    181s
->> 
->> [13293]
->> rados/singleton-nomsgr/{all/filestore-idempotent-aio-journal.yaml}
->> time:    7518s
->> 
->> [13294] rados/singleton-nomsgr/{all/filestore-idempotent.yaml}
->> time:    8612s
->> 
->> [13249] rados/multimon/{clusters/21.yaml msgr-failures/many.yaml
->> tasks/mon_recovery.yaml}
->> time:    881s
->> 
->> [13296] rados/thrash/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/few.yaml thrashers/default.yaml
->> workloads/admin_socket_objecter_requests.yaml}
->> time:    253s
->> 
->> [13297] rados/thrash/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/few.yaml thrashers/default.yaml
->> workloads/rados_api_tests.yaml}
->> time:    816s
->> 
->> [13210] rados/monthrash/{ceph/ceph.yaml clusters/9-mons.yaml
->> fs/xfs.yaml msgr-failures/few.yaml thrashers/many.yaml
->> workloads/rados_mon_workunits.yaml}
->> time:    391s
->> 
->> [13211] rados/monthrash/{ceph/ceph.yaml clusters/9-mons.yaml
->> fs/xfs.yaml msgr-failures/few.yaml thrashers/many.yaml
->> workloads/snaps-few-objects.yaml}
->> time:    3040s
->> 
->> [13212] rados/monthrash/{ceph/ceph.yaml clusters/9-mons.yaml
->> fs/xfs.yaml msgr-failures/few.yaml thrashers/one.yaml
->> workloads/rados_5925.yaml}
->> time:    225s
->> 
->> [13213] rados/monthrash/{ceph/ceph.yaml clusters/9-mons.yaml
->> fs/xfs.yaml msgr-failures/few.yaml thrashers/one.yaml
->> workloads/rados_api_tests.yaml}
->> time:    1384s
->> 
->> [13214] rados/monthrash/{ceph/ceph.yaml clusters/9-mons.yaml
->> fs/xfs.yaml msgr-failures/few.yaml thrashers/one.yaml
->> workloads/rados_mon_workunits.yaml}
->> time:    418s
->> 
->> [13215] rados/monthrash/{ceph/ceph.yaml clusters/9-mons.yaml
->> fs/xfs.yaml msgr-failures/few.yaml thrashers/one.yaml
->> workloads/snaps-few-objects.yaml}
->> time:    2987s
->> 
->> [13216] rados/monthrash/{ceph/ceph.yaml clusters/9-mons.yaml
->> fs/xfs.yaml msgr-failures/few.yaml thrashers/sync-many.yaml
->> workloads/rados_5925.yaml}
->> time:    294s
->> 
->> [13217] rados/monthrash/{ceph/ceph.yaml clusters/9-mons.yaml
->> fs/xfs.yaml msgr-failures/few.yaml thrashers/sync-many.yaml
->> workloads/rados_api_tests.yaml}
->> time:    1265s
->> 
->> [13218] rados/monthrash/{ceph/ceph.yaml clusters/9-mons.yaml
->> fs/xfs.yaml msgr-failures/few.yaml thrashers/sync-many.yaml
->> workloads/rados_mon_workunits.yaml}
->> time:    405s
->> 
->> [13192] rados/monthrash/{ceph/ceph.yaml clusters/3-mons.yaml
->> fs/xfs.yaml msgr-failures/mon-delay.yaml thrashers/one.yaml
->> workloads/rados_5925.yaml}
->> time:    462s
->> 
->> [13191] rados/monthrash/{ceph/ceph.yaml clusters/3-mons.yaml
->> fs/xfs.yaml msgr-failures/mon-delay.yaml thrashers/many.yaml
->> workloads/snaps-few-objects.yaml}
->> time:    2665s
->> 
->> [13190] rados/monthrash/{ceph/ceph.yaml clusters/3-mons.yaml
->> fs/xfs.yaml msgr-failures/mon-delay.yaml thrashers/many.yaml
->> workloads/rados_mon_workunits.yaml}
->> time:    382s
->> 
->> [13197] rados/monthrash/{ceph/ceph.yaml clusters/3-mons.yaml
->> fs/xfs.yaml msgr-failures/mon-delay.yaml thrashers/sync-many.yaml
->> workloads/rados_api_tests.yaml}
->> time:    1144s
->> 
->> [13196] rados/monthrash/{ceph/ceph.yaml clusters/3-mons.yaml
->> fs/xfs.yaml msgr-failures/mon-delay.yaml thrashers/sync-many.yaml
->> workloads/rados_5925.yaml}
->> time:    547s
->> 
->> [13195] rados/monthrash/{ceph/ceph.yaml clusters/3-mons.yaml
->> fs/xfs.yaml msgr-failures/mon-delay.yaml thrashers/one.yaml
->> workloads/snaps-few-objects.yaml}
->> time:    2714s
->> 
->> [13194] rados/monthrash/{ceph/ceph.yaml clusters/3-mons.yaml
->> fs/xfs.yaml msgr-failures/mon-delay.yaml thrashers/one.yaml
->> workloads/rados_mon_workunits.yaml}
->> time:    399s
->> 
->> [13391] rados/thrash/{clusters/fixed-2.yaml fs/ext4.yaml
->> msgr-failures/osd-delay.yaml thrashers/pggrow.yaml
->> workloads/snaps-many-objects.yaml}
->> time:    1956s
->> 
->> [13448] rados/verify/{1thrash/none.yaml clusters/fixed-2.yaml
->> fs/btrfs.yaml msgr-failures/few.yaml tasks/rados_api_tests.yaml
->> validater/lockdep.yaml}
->> time:    720s
->> 
->> [13426] rados/thrash/{clusters/fixed-2.yaml fs/xfs.yaml
->> msgr-failures/osd-delay.yaml thrashers/mapgap.yaml
->> workloads/snaps-few-objects.yaml}
->> time:    1833s
->> 
->> [13346] rados/thrash/{clusters/fixed-2.yaml fs/ext4.yaml
->> msgr-failures/few.yaml thrashers/default.yaml
->> workloads/radosbench.yaml}
->> time:    3037s
->> 
->> [13347] rados/thrash/{clusters/fixed-2.yaml fs/ext4.yaml
->> msgr-failures/few.yaml thrashers/default.yaml
->> workloads/readwrite.yaml}
->> time:    1379s
->> 
->> [13400] rados/thrash/{clusters/fixed-2.yaml fs/xfs.yaml
->> msgr-failures/few.yaml thrashers/mapgap.yaml
->> workloads/radosbench.yaml}
->> time:    2830s
->> 
->> [13394] rados/thrash/{clusters/fixed-2.yaml fs/xfs.yaml
->> msgr-failures/few.yaml thrashers/default.yaml
->> workloads/radosbench.yaml}
->> time:    3258s
->> 
->> [13418] rados/thrash/{clusters/fixed-2.yaml fs/xfs.yaml
->> msgr-failures/osd-delay.yaml thrashers/default.yaml
->> workloads/radosbench.yaml}
->> time:    2363s
->> 
->> [13344] rados/thrash/{clusters/fixed-2.yaml fs/ext4.yaml
->> msgr-failures/few.yaml thrashers/default.yaml
->> workloads/admin_socket_objecter_requests.yaml}
->> time:    261s
->> 
->> [13345] rados/thrash/{clusters/fixed-2.yaml fs/ext4.yaml
->> msgr-failures/few.yaml thrashers/default.yaml
->> workloads/rados_api_tests.yaml}
->> time:    927s
->> 
->> [13390] rados/thrash/{clusters/fixed-2.yaml fs/ext4.yaml
->> msgr-failures/osd-delay.yaml thrashers/pggrow.yaml
->> workloads/snaps-few-objects.yaml}
->> time:    2411s
->> 
->> [13184] rados/monthrash/{ceph/ceph.yaml clusters/3-mons.yaml
->> fs/xfs.yaml msgr-failures/mon-delay.yaml
->> thrashers/force-sync-many.yaml workloads/rados_5925.yaml}
->> time:    271s
->> 
->> [13185] rados/monthrash/{ceph/ceph.yaml clusters/3-mons.yaml
->> fs/xfs.yaml msgr-failures/mon-delay.yaml
->> thrashers/force-sync-many.yaml workloads/rados_api_tests.yaml}
->> time:    1361s
->> 
->> [13186] rados/monthrash/{ceph/ceph.yaml clusters/3-mons.yaml
->> fs/xfs.yaml msgr-failures/mon-delay.yaml
->> thrashers/force-sync-many.yaml workloads/rados_mon_workunits.yaml}
->> time:    389s
->> 
->> [13341] rados/thrash/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/osd-delay.yaml thrashers/pggrow.yaml
->> workloads/readwrite.yaml}
->> time:    1393s
->> 
->> [13180] rados/monthrash/{ceph/ceph.yaml clusters/3-mons.yaml
->> fs/xfs.yaml msgr-failures/few.yaml thrashers/sync.yaml
->> workloads/rados_5925.yaml}
->> time:    505s
->> 
->> [13181] rados/monthrash/{ceph/ceph.yaml clusters/3-mons.yaml
->> fs/xfs.yaml msgr-failures/few.yaml thrashers/sync.yaml
->> workloads/rados_api_tests.yaml}
->> time:    1314s
->> 
->> [13182] rados/monthrash/{ceph/ceph.yaml clusters/3-mons.yaml
->> fs/xfs.yaml msgr-failures/few.yaml thrashers/sync.yaml
->> workloads/rados_mon_workunits.yaml}
->> time:    479s
->> 
->> [13183] rados/monthrash/{ceph/ceph.yaml clusters/3-mons.yaml
->> fs/xfs.yaml msgr-failures/few.yaml thrashers/sync.yaml
->> workloads/snaps-few-objects.yaml}
->> time:    2152s
->> 
->> [13348] rados/thrash/{clusters/fixed-2.yaml fs/ext4.yaml
->> msgr-failures/few.yaml thrashers/default.yaml
->> workloads/snaps-few-objects.yaml}
->> time:    1911s
->> 
->> [13349] rados/thrash/{clusters/fixed-2.yaml fs/ext4.yaml
->> msgr-failures/few.yaml thrashers/default.yaml
->> workloads/snaps-many-objects.yaml}
->> time:    2113s
->> 
->> [13188] rados/monthrash/{ceph/ceph.yaml clusters/3-mons.yaml
->> fs/xfs.yaml msgr-failures/mon-delay.yaml thrashers/many.yaml
->> workloads/rados_5925.yaml}
->> time:    210s
->> 
->> [13189] rados/monthrash/{ceph/ceph.yaml clusters/3-mons.yaml
->> fs/xfs.yaml msgr-failures/mon-delay.yaml thrashers/many.yaml
->> workloads/rados_api_tests.yaml}
->> time:    1403s
->> 
->> [13276] rados/singleton/{all/mon-config-keys.yaml fs/btrfs.yaml
->> msgr-failures/few.yaml}
->> time:    466s
->> 
->> [13342] rados/thrash/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/osd-delay.yaml thrashers/pggrow.yaml
->> workloads/snaps-few-objects.yaml}
->> time:    1833s
->> 
->> [13424] rados/thrash/{clusters/fixed-2.yaml fs/xfs.yaml
->> msgr-failures/osd-delay.yaml thrashers/mapgap.yaml
->> workloads/radosbench.yaml}
->> time:    2304s
->> 
->> [13277] rados/singleton/{all/mon-config-keys.yaml fs/btrfs.yaml
->> msgr-failures/many.yaml}
->> time:    451s
->> 
->> [13265] rados/multimon/{clusters/9.yaml msgr-failures/many.yaml
->> tasks/mon_clock_no_skews.yaml}
->> time:    176s
->> 
->> [13264] rados/multimon/{clusters/9.yaml msgr-failures/few.yaml
->> tasks/mon_recovery.yaml}
->> time:    545s
->> 
->> [13267] rados/multimon/{clusters/9.yaml msgr-failures/many.yaml
->> tasks/mon_recovery.yaml}
->> time:    515s
->> 
->> [13266] rados/multimon/{clusters/9.yaml msgr-failures/many.yaml
->> tasks/mon_clock_with_skews.yaml}
->> time:    173s
->> 
->> [13261] rados/multimon/{clusters/6.yaml msgr-failures/many.yaml
->> tasks/mon_recovery.yaml}
->> time:    466s
->> 
->> [13260] rados/multimon/{clusters/6.yaml msgr-failures/many.yaml
->> tasks/mon_clock_with_skews.yaml}
->> time:    167s
->> 
->> [13263] rados/multimon/{clusters/9.yaml msgr-failures/few.yaml
->> tasks/mon_clock_with_skews.yaml}
->> time:    177s
->> 
->> [13262] rados/multimon/{clusters/9.yaml msgr-failures/few.yaml
->> tasks/mon_clock_no_skews.yaml}
->> time:    191s
->> 
->> [13269] rados/singleton/{all/admin-socket.yaml fs/btrfs.yaml
->> msgr-failures/many.yaml}
->> time:    117s
->> 
->> [13268] rados/singleton/{all/admin-socket.yaml fs/btrfs.yaml
->> msgr-failures/few.yaml}
->> time:    117s
->> 
->> [13343] rados/thrash/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/osd-delay.yaml thrashers/pggrow.yaml
->> workloads/snaps-many-objects.yaml}
->> time:    1701s
->> 
->> [13379] rados/thrash/{clusters/fixed-2.yaml fs/ext4.yaml
->> msgr-failures/osd-delay.yaml thrashers/mapgap.yaml
->> workloads/snaps-many-objects.yaml}
->> time:    1767s
->> 
->> [13378] rados/thrash/{clusters/fixed-2.yaml fs/ext4.yaml
->> msgr-failures/osd-delay.yaml thrashers/mapgap.yaml
->> workloads/snaps-few-objects.yaml}
->> time:    1967s
->> 
->> [13377] rados/thrash/{clusters/fixed-2.yaml fs/ext4.yaml
->> msgr-failures/osd-delay.yaml thrashers/mapgap.yaml
->> workloads/readwrite.yaml}
->> time:    1301s
->> 
->> [13376] rados/thrash/{clusters/fixed-2.yaml fs/ext4.yaml
->> msgr-failures/osd-delay.yaml thrashers/mapgap.yaml
->> workloads/radosbench.yaml}
->> time:    3180s
->> 
->> [13375] rados/thrash/{clusters/fixed-2.yaml fs/ext4.yaml
->> msgr-failures/osd-delay.yaml thrashers/mapgap.yaml
->> workloads/rados_api_tests.yaml}
->> time:    905s
->> 
->> [13374] rados/thrash/{clusters/fixed-2.yaml fs/ext4.yaml
->> msgr-failures/osd-delay.yaml thrashers/mapgap.yaml
->> workloads/admin_socket_objecter_requests.yaml}
->> time:    318s
->> 
->> [13373] rados/thrash/{clusters/fixed-2.yaml fs/ext4.yaml
->> msgr-failures/osd-delay.yaml thrashers/default.yaml
->> workloads/snaps-many-objects.yaml}
->> time:    1913s
->> 
->> [13372] rados/thrash/{clusters/fixed-2.yaml fs/ext4.yaml
->> msgr-failures/osd-delay.yaml thrashers/default.yaml
->> workloads/snaps-few-objects.yaml}
->> time:    2092s
->> 
->> [13340] rados/thrash/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/osd-delay.yaml thrashers/pggrow.yaml
->> workloads/radosbench.yaml}
->> time:    2672s
->> 
->> [13370] rados/thrash/{clusters/fixed-2.yaml fs/ext4.yaml
->> msgr-failures/osd-delay.yaml thrashers/default.yaml
->> workloads/radosbench.yaml}
->> time:    2708s
->> 
->> [13351] rados/thrash/{clusters/fixed-2.yaml fs/ext4.yaml
->> msgr-failures/few.yaml thrashers/mapgap.yaml
->> workloads/rados_api_tests.yaml}
->> time:    921s
->> 
->> [13399] rados/thrash/{clusters/fixed-2.yaml fs/xfs.yaml
->> msgr-failures/few.yaml thrashers/mapgap.yaml
->> workloads/rados_api_tests.yaml}
->> time:    753s
->> 
->> [13328] rados/thrash/{clusters/fixed-2.yaml fs/btrfs.yaml
->> msgr-failures/osd-delay.yaml thrashers/mapgap.yaml
->> workloads/radosbench.yaml}
->> time:    3182s
->> 
->> [13350] rados/thrash/{clusters/fixed-2.yaml fs/ext4.yaml
->> msgr-failures/few.yaml thrashers/mapgap.yaml
->> workloads/admin_socket_objecter_requests.yaml}
->> time:    275s
->> 
->> [13179] rados/monthrash/{ceph/ceph.yaml clusters/3-mons.yaml
->> fs/xfs.yaml msgr-failures/few.yaml thrashers/sync-many.yaml
->> workloads/snaps-few-objects.yaml}
->> time:    2196s
->> 
->> [13178] rados/monthrash/{ceph/ceph.yaml clusters/3-mons.yaml
->> fs/xfs.yaml msgr-failures/few.yaml thrashers/sync-many.yaml
->> workloads/rados_mon_workunits.yaml}
->> time:    413s
->> 
->> [13274] rados/singleton/{all/lost-unfound.yaml fs/btrfs.yaml
->> msgr-failures/few.yaml}
->> time:    186s
->> 
->> [13275] rados/singleton/{all/lost-unfound.yaml fs/btrfs.yaml
->> msgr-failures/many.yaml}
->> time:    215s
->> 
->> [13272] rados/singleton/{all/dump-stuck.yaml fs/btrfs.yaml
->> msgr-failures/few.yaml}
->> time:    222s
->> 
->> [13273] rados/singleton/{all/dump-stuck.yaml fs/btrfs.yaml
->> msgr-failures/many.yaml}
->> time:    240s
->> 
->> [13270] rados/singleton/{all/cephtool.yaml fs/btrfs.yaml
->> msgr-failures/few.yaml}
->> time:    347s
->> 
->> [13271] rados/singleton/{all/cephtool.yaml fs/btrfs.yaml
->> msgr-failures/many.yaml}
->> time:    367s
->> 
->> [13171] rados/monthrash/{ceph/ceph.yaml clusters/3-mons.yaml
->> fs/xfs.yaml msgr-failures/few.yaml thrashers/many.yaml
->> workloads/snaps-few-objects.yaml}
->> time:    2857s
->> 
->> [13170] rados/monthrash/{ceph/ceph.yaml clusters/3-mons.yaml
->> fs/xfs.yaml msgr-failures/few.yaml thrashers/many.yaml
->> workloads/rados_mon_workunits.yaml}
->> time:    724s
->> 
->> [13173] rados/monthrash/{ceph/ceph.yaml clusters/3-mons.yaml
->> fs/xfs.yaml msgr-failures/few.yaml thrashers/one.yaml
->> workloads/rados_api_tests.yaml}
->> time:    1300s
->> 
->> [13172] rados/monthrash/{ceph/ceph.yaml clusters/3-mons.yaml
->> fs/xfs.yaml msgr-failures/few.yaml thrashers/one.yaml
->> workloads/rados_5925.yaml}
->> time:    216s
->> 
->> [13175] rados/monthrash/{ceph/ceph.yaml clusters/3-mons.yaml
->> fs/xfs.yaml msgr-failures/few.yaml thrashers/one.yaml
->> workloads/snaps-few-objects.yaml}
->> time:    2867s
->> 
->> [13174] rados/monthrash/{ceph/ceph.yaml clusters/3-mons.yaml
->> fs/xfs.yaml msgr-failures/few.yaml thrashers/one.yaml
->> workloads/rados_mon_workunits.yaml}
->> time:    699s
->> 
->> [13177] rados/monthrash/{ceph/ceph.yaml clusters/3-mons.yaml
->> fs/xfs.yaml msgr-failures/few.yaml thrashers/sync-many.yaml
->> workloads/rados_api_tests.yaml}
->> time:    1168s
->> 
->> [13176] rados/monthrash/{ceph/ceph.yaml clusters/3-mons.yaml
->> fs/xfs.yaml msgr-failures/few.yaml thrashers/sync-many.yaml
->> workloads/rados_5925.yaml}
->> time:    527s
->> 
->> 
->> 
 
+&gt;&gt;<br>
+&gt;&gt; Here is the status of my cluster.<br>
+&gt;&gt;<br>
+&gt;&gt; ~/fio_test# ceph -s<br>
+&gt;&gt;<br>
+&gt;&gt; =A0 =A0 cluster b2e0b4db-6342-490e-9c28-0aadf0188023<br>
+&gt;&gt; =A0 =A0 =A0health HEALTH_WARN clock skew detected on mon. &lt;serv=
+er-name-2&gt;, mon. &lt;server-name-3&gt;<br>
+&gt;&gt; =A0 =A0 =A0monmap e1: 3 mons at {&lt;server-name-1&gt;=3Dxxx.xxx.x=
+xx.xxx:6789/0, &lt;server-name-2&gt;=3Dxxx.xxx.xxx.xxx:6789/0, &lt;server-n=
+ame-3&gt;=3Dxxx.xxx.xxx.xxx:6789/0}, election epoch 64, quorum 0,1,2 &lt;se=
+rver-name-1&gt;,&lt;server-name-2&gt;,&lt;server-name-3&gt;<br>
+
+
+&gt;&gt; =A0 =A0 =A0osdmap e391: 30 osds: 30 up, 30 in<br>
+&gt;&gt; =A0 =A0 =A0 pgmap v5202: 30912 pgs: 30912 active+clean; 8494 MB da=
+ta, 27912 MB used, 11145 GB / 11172 GB avail<br>
+&gt;&gt; =A0 =A0 =A0mdsmap e1: 0/0/1 up<br>
+&gt;&gt;<br>
+&gt;&gt;<br>
+&gt;&gt; I started with rados bench command to benchmark the read performan=
+ce of this Cluster on a large pool (~10K PGs) and found that each rados cli=
+ent has a limitation. Each client can only drive up to a certain mark. Each=
+ server =A0node cpu utilization shows it is =A0around 85-90% idle and the a=
+dmin node (from where rados client is running) is around ~80-85% idle. I am=
+ trying with 4K object size.<br>
+
+
+&gt;<br>
+&gt; Note that rados bench with 4k objects is different from rbd with 4k-si=
+zed I/Os - rados bench sends each request to a new object, while rbd object=
+s are 4M by default.<br>
+&gt;<br>
+&gt;&gt; Now, I started running more clients on the admin node and the perf=
+ormance is scaling till it hits the client cpu limit. Server still has the =
+cpu of 30-35% idle. With small object size I must say that the ceph per osd=
+ cpu utilization is not promising!<br>
+
+
+&gt;&gt;<br>
+&gt;&gt; After this, I started testing the rados block interface with kerne=
+l rbd module from my admin node.<br>
+&gt;&gt; I have created 8 images mapped on the pool having around 10K PGs a=
+nd I am not able to scale up the performance by running fio (either by crea=
+ting a software raid or running on individual /dev/rbd* instances). For exa=
+mple, running multiple fio instances (one in /dev/rbd1 and the other in /de=
+v/rbd2) =A0the performance I am getting is half of what I am getting if run=
+ning one instance. Here is my fio job script.<br>
+
+
+&gt;&gt;<br>
+&gt;&gt; [random-reads]<br>
+&gt;&gt; ioengine=3Dlibaio<br>
+&gt;&gt; iodepth=3D32<br>
+&gt;&gt; filename=3D/dev/rbd1<br>
+&gt;&gt; rw=3Drandread<br>
+&gt;&gt; bs=3D4k<br>
+&gt;&gt; direct=3D1<br>
+&gt;&gt; size=3D2G<br>
+&gt;&gt; numjobs=3D64<br>
+&gt;&gt;<br>
+&gt;&gt; Let me know if I am following the proper procedure or not.<br>
+&gt;&gt;<br>
+&gt;&gt; But, If my understanding is correct, kernel rbd module is acting a=
+s a client to the cluster and in one admin node I can run only one of such =
+kernel instance.<br>
+&gt;&gt; If so, I am then limited to the client bottleneck that I stated ea=
+rlier. The cpu utilization of the server side is around 85-90% idle, so, it=
+ is clear that client is not driving.<br>
+&gt;&gt;<br>
+&gt;&gt; My question is, is there any way to hit the cluster =A0with more c=
+lient from a single box while testing the rbd module ?<br>
+&gt;<br>
+&gt; You can run multiple librbd instances easily (for example with multipl=
+e runs of the rbd bench-write command).<br>
+&gt;<br>
+&gt; The kernel rbd driver uses the same rados client instance for multiple=
+ block devices by default. There&#39;s an option (noshare) to use a new rad=
+os client instance for a newly mapped device, but it&#39;s not exposed by t=
+he rbd cli. You need to use the sysfs interface that &#39;rbd map&#39; uses=
+ instead.<br>
+
+
+&gt;<br>
+&gt; Once you&#39;ve used rbd map once on a machine, the kernel will alread=
+y have the auth key stored, and you can use:<br>
+&gt;<br>
+&gt; echo &#39;<a href=3D"http://1.2.3.4:6789" target=3D"_blank">1.2.3.4:67=
+89</a> name=3Dadmin,key=3Dclient.admin,noshare poolname<br>
+&gt; imagename&#39; &gt; /sys/bus/rbd/add<br>
+&gt;<br>
+&gt; Where <a href=3D"http://1.2.3.4:6789" target=3D"_blank">1.2.3.4:6789</=
+a> is the address of a monitor, and you&#39;re connecting as client.admin.<=
+br>
+&gt;<br>
+&gt; You can use &#39;rbd unmap&#39; as usual.<br>
+&gt;<br>
+&gt; Josh<br>
+&gt;<br>
+&gt;<br>
+&gt; ________________________________<br>
+&gt;<br>
+&gt; PLEASE NOTE: The information contained in this electronic mail message=
+ is intended only for the use of the designated recipient(s) named above. I=
+f the reader of this message is not the intended recipient, you are hereby =
+notified that you have received this message in error and that any review, =
+dissemination, distribution, or copying of this message is strictly prohibi=
+ted. If you have received this communication in error, please notify the se=
+nder by telephone or e-mail (as shown above) immediately and destroy any an=
+d all copies of this message in your possession (whether hard copies or ele=
+ctronically stored copies).<br>
+
+
+&gt;<br>
+&gt;<br>
+<br>
+</div></div>--<br>
+To unsubscribe from this list: send the line &quot;unsubscribe ceph-devel&q=
+uot; in the body of a message to <a href=3D"mailto:majordomo-u79uwXL29TaqPxH82wqD4g@public.gmane.org=
+g">majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org</a> More majordomo info at =A0<a href=3D"http:=
+//vger.kernel.org/majordomo-info.html" target=3D"_blank">http://vger.kernel=
+.org/majordomo-info.html</a><br>
+
+
+<div class=3D"HOEnZb"><div class=3D"h5"><br>
+<br>
+_______________________________________________<br>
+ceph-users mailing list<br>
+<a href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a><=
+br>
+<a href=3D"http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com" target=
+=3D"_blank">http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com</a><br>
+</div></div></blockquote></div><br></div>
+
+--001a11335194d964b404e7278e8c--
+
+--===============1792789244==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============1792789244==--
