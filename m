@@ -1,129 +1,148 @@
-From: "Yan, Zheng" <ukernel@gmail.com>
-Subject: Re: Re: [PATCH] ceph: fix sync read eof check deadlock
-Date: Tue, 24 Sep 2013 13:29:02 +0800
-Message-ID: <CAAM7YAnu+oZ+kXEiSFSSbo-mrjnghkg_N0FgnSDFe=FhQB=XQA@mail.gmail.com>
-References: <201309230939212660680@gmail.com>
-	<CAAM7YA=bg=T0s3kagEquXfSdnxWT2-4Yv6863dhVhuTW0MNQjg@mail.gmail.com>
-	<201309241043226589572@gmail.com>
+From: majianpeng <majianpeng@gmail.com>
+Subject: [RESEND PATCH V5] ceph:Implement readv/preadv for sync operation
+Date: Tue, 24 Sep 2013 16:05:20 +0800
+Message-ID: <201309241605181783589@gmail.com>
+Reply-To: majianpeng <majianpeng@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f42.google.com ([209.85.215.42]:41110 "EHLO
-	mail-la0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750714Ab3IXF3E (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 24 Sep 2013 01:29:04 -0400
-Received: by mail-la0-f42.google.com with SMTP id ep20so3332163lab.29
-        for <ceph-devel@vger.kernel.org>; Mon, 23 Sep 2013 22:29:02 -0700 (PDT)
-In-Reply-To: <201309241043226589572@gmail.com>
+Received: from mail-pa0-f47.google.com ([209.85.220.47]:38220 "EHLO
+	mail-pa0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750783Ab3IXIFZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 24 Sep 2013 04:05:25 -0400
+Received: by mail-pa0-f47.google.com with SMTP id kp14so3368595pab.34
+        for <ceph-devel@vger.kernel.org>; Tue, 24 Sep 2013 01:05:25 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: majianpeng <majianpeng@gmail.com>
-Cc: sage <sage@inktank.com>, "Yan, Zheng" <zheng.z.yan@intel.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: sage <sage@inktank.com>
+Cc: =?us-ascii?B?WWFuLCBaaGVuZw==?= <zheng.z.yan@intel.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tue, Sep 24, 2013 at 10:43 AM, majianpeng <majianpeng@gmail.com> wrote:
->>On Mon, Sep 23, 2013 at 9:39 AM, majianpeng <majianpeng@gmail.com> wrote:
->>> As Yan,Zheng said, commit 0913444208db intruoduce a bug:"getattr need to
->>> "read lock" inode's filelock. But the lock can be in unstable state.
->>> the getattr request waits for lock's state to become stable, the lock
->>> waits for client to release Fr cap."
->>>
->>> Commit 6a026589ba333185c466c90 resolved the same bug also.
->>> Before doing getattr, it must put the caps which already hold avoid
->>> deadlock.
->>>
->>> Reported-by: Yan, Zheng <zheng.z.yan@intel.com>
->>> Signed-off-by: Jianpeng Ma <majianpeng@gmail.com>
->>> ---
->>>  fs/ceph/file.c | 25 ++++++++++++++++++++-----
->>>  1 file changed, 20 insertions(+), 5 deletions(-)
->>>
->>> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
->>> index 7da35c7..bc00ace 100644
->>> --- a/fs/ceph/file.c
->>> +++ b/fs/ceph/file.c
->>> @@ -839,7 +839,15 @@ again:
->>>                 ret = ceph_sync_read(iocb, &i, &checkeof);
->>>
->>>                 if (checkeof && ret >= 0) {
->>> -                       int statret = ceph_do_getattr(inode,
->>> +                       int statret;
->>> +                       /*
->>> +                        *Before getattr,it should put caps avoid
->>> +                        *deadlock.
->>> +                        */
->>> +                       ceph_put_cap_refs(ci, got);
->>> +                       got = 0;
->>> +
->>> +                       statret = ceph_do_getattr(inode,
->>>                                                       CEPH_STAT_CAP_SIZE);
->>>
->>>                         /* hit EOF or hole? */
->>> @@ -851,16 +859,23 @@ again:
->>>
->>>                                 read += ret;
->>>                                 checkeof = 0;
->>> -                               goto again;
->>> +                               ret = ceph_get_caps(ci, CEPH_CAP_FILE_RD,
->>> +                                                       want, &got, -1);
->>> +                               if (ret < 0)
->>> +                                       ret = 0;
->>> +                               else
->>> +                                       goto again;
->>
->>I think we should try getting Frc caps here, because mds may issue Fc
->>cap to the client while requesting the size.
->>
-> Yes,it maybe get Fc.My though whether or not, the later read only using sync_mode.
+Rm9yIHJlYWR2L3ByZWFkdiBzeW5jLW9wZXJhdG9pbiwgY2VwaCBvbmx5IGRvIHRoZSBmaXJzdCBp
+b3YuDQpJdCBkb24ndCB0aGluayBvdGhlciBpb3ZzLk5vdyBpbXBsZW1lbnQgdGhpcy4NCg0KVjU6
+DQogIC1iZWZvcmUgZ2V0YXR0cixpdCBtdXN0IHB1dCBjYXBzIHdoaWNoIGFscmVhZHkgaG9sZGVk
+IGF2b2lkIGRlYWRsb2NrLg0KICAtb25seSBkbyBnZW5lcmljX3NlZ21lbnRfY2hlY2tzIGZvciBz
+eW5jLXJlYWQgYXZvaWQgZG8gYWdhaW4gaW4gZnVuYw0KICAgZ2VuZXJpY19maWxlX2Fpb19yZWFk
+DQpWNDoNCiAgLW1vZGlmeSBvbmUgYnVnLg0KVjM6DQogIC1tb2RpZnkgc29tZSBidWcuDQpWMjoN
+CiAgLWFkZCBnZW5lcmljX3NlZ21lbnRfY2hlY2tzDQogIC11c2luZyBzdHJ1Y3QgaW92X2l0ZXIg
+cmVwbGFjZSBjbG9uaW5nIHRoZSBpb3ZzLg0KICAtcmV0dXJuIHByZXZpb3VzIHN1Y2Nlc3NmdWxs
+eSBjb3BpZWQgaWYgY2VwaF9jb3B5X3BhZ2VfdmVjdG9yX3RvX3VzZXINCiAgIG1ldCBlcnJvci4N
+Cg0KU2lnbmVkLW9mZi1ieTogSmlhbnBlbmcgTWEgPG1hamlhbnBlbmdAZ21haWwuY29tPg0KLS0t
+DQogZnMvY2VwaC9maWxlLmMgfCAxNDkgKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysr
+KysrKysrKystLS0tLS0tLS0tLS0tLS0tDQogMSBmaWxlIGNoYW5nZWQsIDEwNyBpbnNlcnRpb25z
+KCspLCA0MiBkZWxldGlvbnMoLSkNCg0KZGlmZiAtLWdpdCBhL2ZzL2NlcGgvZmlsZS5jIGIvZnMv
+Y2VwaC9maWxlLmMNCmluZGV4IDNkZTg5ODIuLjU0MjJkOGUgMTAwNjQ0DQotLS0gYS9mcy9jZXBo
+L2ZpbGUuYw0KKysrIGIvZnMvY2VwaC9maWxlLmMNCkBAIC00MDgsNTEgKzQwOCw5NCBAQCBtb3Jl
+Og0KICAqDQogICogSWYgdGhlIHJlYWQgc3BhbnMgb2JqZWN0IGJvdW5kYXJ5LCBqdXN0IGRvIG11
+bHRpcGxlIHJlYWRzLg0KICAqLw0KLXN0YXRpYyBzc2l6ZV90IGNlcGhfc3luY19yZWFkKHN0cnVj
+dCBmaWxlICpmaWxlLCBjaGFyIF9fdXNlciAqZGF0YSwNCi0JCQkgICAgICB1bnNpZ25lZCBsZW4s
+IGxvZmZfdCAqcG9mZiwgaW50ICpjaGVja2VvZikNCitzdGF0aWMgc3NpemVfdCBjZXBoX3N5bmNf
+cmVhZChzdHJ1Y3Qga2lvY2IgKmlvY2IsIHN0cnVjdCBpb3ZfaXRlciAqaSwNCisJCQkJaW50ICpj
+aGVja2VvZikNCiB7DQorCXN0cnVjdCBmaWxlICpmaWxlID0gaW9jYi0+a2lfZmlscDsNCiAJc3Ry
+dWN0IGlub2RlICppbm9kZSA9IGZpbGVfaW5vZGUoZmlsZSk7DQogCXN0cnVjdCBwYWdlICoqcGFn
+ZXM7DQotCXU2NCBvZmYgPSAqcG9mZjsNCisJdTY0IG9mZiA9IGlvY2ItPmtpX3BvczsNCiAJaW50
+IG51bV9wYWdlcywgcmV0Ow0KIA0KLQlkb3V0KCJzeW5jX3JlYWQgb24gZmlsZSAlcCAlbGx1fiV1
+ICVzXG4iLCBmaWxlLCBvZmYsIGxlbiwNCisJZG91dCgic3luY19yZWFkIG9uIGZpbGUgJXAgJWxs
+dX4ldSAlc1xuIiwgZmlsZSwgb2ZmLA0KKwkgICAgICh1bnNpZ25lZClpb2NiLT5raV9sZWZ0LA0K
+IAkgICAgIChmaWxlLT5mX2ZsYWdzICYgT19ESVJFQ1QpID8gIk9fRElSRUNUIiA6ICIiKTsNCi0N
+Ci0JaWYgKGZpbGUtPmZfZmxhZ3MgJiBPX0RJUkVDVCkgew0KLQkJbnVtX3BhZ2VzID0gY2FsY19w
+YWdlc19mb3IoKHVuc2lnbmVkIGxvbmcpZGF0YSwgbGVuKTsNCi0JCXBhZ2VzID0gY2VwaF9nZXRf
+ZGlyZWN0X3BhZ2VfdmVjdG9yKGRhdGEsIG51bV9wYWdlcywgdHJ1ZSk7DQotCX0gZWxzZSB7DQot
+CQludW1fcGFnZXMgPSBjYWxjX3BhZ2VzX2ZvcihvZmYsIGxlbik7DQotCQlwYWdlcyA9IGNlcGhf
+YWxsb2NfcGFnZV92ZWN0b3IobnVtX3BhZ2VzLCBHRlBfTk9GUyk7DQotCX0NCi0JaWYgKElTX0VS
+UihwYWdlcykpDQotCQlyZXR1cm4gUFRSX0VSUihwYWdlcyk7DQotDQogCS8qDQogCSAqIGZsdXNo
+IGFueSBwYWdlIGNhY2hlIHBhZ2VzIGluIHRoaXMgcmFuZ2UuICB0aGlzDQogCSAqIHdpbGwgbWFr
+ZSBjb25jdXJyZW50IG5vcm1hbCBhbmQgc3luYyBpbyBzbG93LA0KIAkgKiBidXQgaXQgd2lsbCBh
+dCBsZWFzdCBiZWhhdmUgc2Vuc2libHkgd2hlbiB0aGV5IGFyZQ0KIAkgKiBpbiBzZXF1ZW5jZS4N
+CiAJICovDQotCXJldCA9IGZpbGVtYXBfd3JpdGVfYW5kX3dhaXQoaW5vZGUtPmlfbWFwcGluZyk7
+DQorCXJldCA9IGZpbGVtYXBfd3JpdGVfYW5kX3dhaXRfcmFuZ2UoaW5vZGUtPmlfbWFwcGluZywg
+b2ZmLA0KKwkJCQkJCW9mZiArIGlvY2ItPmtpX2xlZnQpOw0KIAlpZiAocmV0IDwgMCkNCi0JCWdv
+dG8gZG9uZTsNCi0NCi0JcmV0ID0gc3RyaXBlZF9yZWFkKGlub2RlLCBvZmYsIGxlbiwgcGFnZXMs
+IG51bV9wYWdlcywgY2hlY2tlb2YsDQotCQkJICAgZmlsZS0+Zl9mbGFncyAmIE9fRElSRUNULA0K
+LQkJCSAgICh1bnNpZ25lZCBsb25nKWRhdGEgJiB+UEFHRV9NQVNLKTsNCisJCXJldHVybiByZXQ7
+DQogDQotCWlmIChyZXQgPj0gMCAmJiAoZmlsZS0+Zl9mbGFncyAmIE9fRElSRUNUKSA9PSAwKQ0K
+LQkJcmV0ID0gY2VwaF9jb3B5X3BhZ2VfdmVjdG9yX3RvX3VzZXIocGFnZXMsIGRhdGEsIG9mZiwg
+cmV0KTsNCi0JaWYgKHJldCA+PSAwKQ0KLQkJKnBvZmYgPSBvZmYgKyByZXQ7DQorCWlmIChmaWxl
+LT5mX2ZsYWdzICYgT19ESVJFQ1QpIHsNCisJCXdoaWxlIChpb3ZfaXRlcl9jb3VudChpKSkgew0K
+KwkJCXZvaWQgX191c2VyICpkYXRhID0gaS0+aW92WzBdLmlvdl9iYXNlICsgaS0+aW92X29mZnNl
+dDsNCisJCQlzaXplX3QgbGVuID0gaS0+aW92WzBdLmlvdl9sZW4gLSBpLT5pb3Zfb2Zmc2V0Ow0K
+Kw0KKwkJCW51bV9wYWdlcyA9IGNhbGNfcGFnZXNfZm9yKCh1bnNpZ25lZCBsb25nKWRhdGEsIGxl
+bik7DQorCQkJcGFnZXMgPSBjZXBoX2dldF9kaXJlY3RfcGFnZV92ZWN0b3IoZGF0YSwNCisJCQkJ
+CQkJICAgIG51bV9wYWdlcywgdHJ1ZSk7DQorCQkJaWYgKElTX0VSUihwYWdlcykpDQorCQkJCXJl
+dHVybiBQVFJfRVJSKHBhZ2VzKTsNCisNCisJCQlyZXQgPSBzdHJpcGVkX3JlYWQoaW5vZGUsIG9m
+ZiwgbGVuLA0KKwkJCQkJICAgcGFnZXMsIG51bV9wYWdlcywgY2hlY2tlb2YsDQorCQkJCQkgICAx
+LCAodW5zaWduZWQgbG9uZylkYXRhICYgflBBR0VfTUFTSyk7DQorCQkJY2VwaF9wdXRfcGFnZV92
+ZWN0b3IocGFnZXMsIG51bV9wYWdlcywgdHJ1ZSk7DQorDQorCQkJaWYgKHJldCA8PSAwKQ0KKwkJ
+CQlicmVhazsNCisJCQlvZmYgKz0gcmV0Ow0KKwkJCWlvdl9pdGVyX2FkdmFuY2UoaSwgcmV0KTsN
+CisJCQlpZiAocmV0IDwgbGVuKQ0KKwkJCQlicmVhazsNCisJCX0NCisJfSBlbHNlIHsNCisJCXNp
+emVfdCBsZW4gPSBpb2NiLT5raV9sZWZ0Ow0KIA0KLWRvbmU6DQotCWlmIChmaWxlLT5mX2ZsYWdz
+ICYgT19ESVJFQ1QpDQotCQljZXBoX3B1dF9wYWdlX3ZlY3RvcihwYWdlcywgbnVtX3BhZ2VzLCB0
+cnVlKTsNCi0JZWxzZQ0KKwkJbnVtX3BhZ2VzID0gY2FsY19wYWdlc19mb3Iob2ZmLCBsZW4pOw0K
+KwkJcGFnZXMgPSBjZXBoX2FsbG9jX3BhZ2VfdmVjdG9yKG51bV9wYWdlcywgR0ZQX05PRlMpOw0K
+KwkJaWYgKElTX0VSUihwYWdlcykpDQorCQkJcmV0dXJuIFBUUl9FUlIocGFnZXMpOw0KKwkJcmV0
+ID0gc3RyaXBlZF9yZWFkKGlub2RlLCBvZmYsIGxlbiwgcGFnZXMsDQorCQkJCQludW1fcGFnZXMs
+IGNoZWNrZW9mLCAwLCAwKTsNCisJCWlmIChyZXQgPiAwKSB7DQorCQkJaW50IGwsIGsgPSAwOw0K
+KwkJCXNpemVfdCBsZWZ0ID0gbGVuID0gcmV0Ow0KKw0KKwkJCXdoaWxlIChsZWZ0KSB7DQorCQkJ
+CXZvaWQgX191c2VyICpkYXRhID0gaS0+aW92WzBdLmlvdl9iYXNlDQorCQkJCQkJCSsgaS0+aW92
+X29mZnNldDsNCisJCQkJbCA9IG1pbihpLT5pb3ZbMF0uaW92X2xlbiAtIGktPmlvdl9vZmZzZXQs
+DQorCQkJCQlsZWZ0KTsNCisNCisJCQkJcmV0ID0gY2VwaF9jb3B5X3BhZ2VfdmVjdG9yX3RvX3Vz
+ZXIoJnBhZ2VzW2tdLA0KKwkJCQkJCQkJICAgIGRhdGEsIG9mZiwNCisJCQkJCQkJCSAgICBsKTsN
+CisJCQkJaWYgKHJldCA+IDApIHsNCisJCQkJCWlvdl9pdGVyX2FkdmFuY2UoaSwgcmV0KTsNCisJ
+CQkJCWxlZnQgLT0gcmV0Ow0KKwkJCQkJb2ZmICs9IHJldDsNCisJCQkJCWsgPSBjYWxjX3BhZ2Vz
+X2Zvcihpb2NiLT5raV9wb3MsDQorCQkJCQkJCSAgIGxlbiAtIGxlZnQgKyAxKSAtIDE7DQorCQkJ
+CQlCVUdfT04oayA+PSBudW1fcGFnZXMgJiYgbGVmdCk7DQorCQkJCX0gZWxzZQ0KKwkJCQkJYnJl
+YWs7DQorCQkJfQ0KKwkJfQ0KIAkJY2VwaF9yZWxlYXNlX3BhZ2VfdmVjdG9yKHBhZ2VzLCBudW1f
+cGFnZXMpOw0KKwl9DQorDQorCWlmIChvZmYgPiBpb2NiLT5raV9wb3MpIHsNCisJCXJldCA9IG9m
+ZiAtIGlvY2ItPmtpX3BvczsNCisJCWlvY2ItPmtpX3BvcyA9IG9mZjsNCisJCWlvY2ItPmtpX2xl
+ZnQgLT0gcmV0Ow0KKwl9DQorDQogCWRvdXQoInN5bmNfcmVhZCByZXN1bHQgJWRcbiIsIHJldCk7
+DQogCXJldHVybiByZXQ7DQogfQ0KQEAgLTY0NywxNyArNjkwLDE2IEBAIHN0YXRpYyBzc2l6ZV90
+IGNlcGhfYWlvX3JlYWQoc3RydWN0IGtpb2NiICppb2NiLCBjb25zdCBzdHJ1Y3QgaW92ZWMgKmlv
+diwNCiB7DQogCXN0cnVjdCBmaWxlICpmaWxwID0gaW9jYi0+a2lfZmlscDsNCiAJc3RydWN0IGNl
+cGhfZmlsZV9pbmZvICpmaSA9IGZpbHAtPnByaXZhdGVfZGF0YTsNCi0JbG9mZl90ICpwcG9zID0g
+JmlvY2ItPmtpX3BvczsNCi0Jc2l6ZV90IGxlbiA9IGlvdi0+aW92X2xlbjsNCisJc2l6ZV90IGxl
+biA9IDA7DQogCXN0cnVjdCBpbm9kZSAqaW5vZGUgPSBmaWxlX2lub2RlKGZpbHApOw0KIAlzdHJ1
+Y3QgY2VwaF9pbm9kZV9pbmZvICpjaSA9IGNlcGhfaW5vZGUoaW5vZGUpOw0KLQl2b2lkIF9fdXNl
+ciAqYmFzZSA9IGlvdi0+aW92X2Jhc2U7DQogCXNzaXplX3QgcmV0Ow0KIAlpbnQgd2FudCwgZ290
+ID0gMDsNCiAJaW50IGNoZWNrZW9mID0gMCwgcmVhZCA9IDA7DQogDQogCWRvdXQoImFpb19yZWFk
+ICVwICVsbHguJWxseCAlbGx1fiV1IHRyeWluZyB0byBnZXQgY2FwcyBvbiAlcFxuIiwNCiAJICAg
+ICBpbm9kZSwgY2VwaF92aW5vcChpbm9kZSksIHBvcywgKHVuc2lnbmVkKWxlbiwgaW5vZGUpOw0K
+Kw0KIGFnYWluOg0KIAlpZiAoZmktPmZtb2RlICYgQ0VQSF9GSUxFX01PREVfTEFaWSkNCiAJCXdh
+bnQgPSBDRVBIX0NBUF9GSUxFX0NBQ0hFIHwgQ0VQSF9DQVBfRklMRV9MQVpZSU87DQpAQCAtNjY1
+LDM4ICs3MDcsNjEgQEAgYWdhaW46DQogCQl3YW50ID0gQ0VQSF9DQVBfRklMRV9DQUNIRTsNCiAJ
+cmV0ID0gY2VwaF9nZXRfY2FwcyhjaSwgQ0VQSF9DQVBfRklMRV9SRCwgd2FudCwgJmdvdCwgLTEp
+Ow0KIAlpZiAocmV0IDwgMCkNCi0JCWdvdG8gb3V0Ow0KKwkJcmV0dXJuIHJldDsNCisNCiAJZG91
+dCgiYWlvX3JlYWQgJXAgJWxseC4lbGx4ICVsbHV+JXUgZ290IGNhcCByZWZzIG9uICVzXG4iLA0K
+IAkgICAgIGlub2RlLCBjZXBoX3Zpbm9wKGlub2RlKSwgcG9zLCAodW5zaWduZWQpbGVuLA0KIAkg
+ICAgIGNlcGhfY2FwX3N0cmluZyhnb3QpKTsNCiANCiAJaWYgKChnb3QgJiAoQ0VQSF9DQVBfRklM
+RV9DQUNIRXxDRVBIX0NBUF9GSUxFX0xBWllJTykpID09IDAgfHwNCiAJICAgIChpb2NiLT5raV9m
+aWxwLT5mX2ZsYWdzICYgT19ESVJFQ1QpIHx8DQotCSAgICAoZmktPmZsYWdzICYgQ0VQSF9GX1NZ
+TkMpKQ0KKwkgICAgKGZpLT5mbGFncyAmIENFUEhfRl9TWU5DKSkgew0KKwkJc3RydWN0IGlvdl9p
+dGVyIGk7DQorDQorCQlpZiAoIXJlYWQpIHsNCisJCQlyZXQgPSBnZW5lcmljX3NlZ21lbnRfY2hl
+Y2tzKGlvdiwgJm5yX3NlZ3MsDQorCQkJCQkJCSZsZW4sIFZFUklGWV9XUklURSk7DQorCQkJaWYg
+KHJldCkNCisJCQkJZ290byBvdXQ7DQorCQl9DQorDQorCQlpb2NiLT5raV9sZWZ0ID0gbGVuOw0K
+KwkJaW92X2l0ZXJfaW5pdCgmaSwgaW92LCBucl9zZWdzLCBsZW4sIHJlYWQpOw0KIAkJLyogaG1t
+LCB0aGlzIGlzbid0IHJlYWxseSBhc3luYy4uLiAqLw0KLQkJcmV0ID0gY2VwaF9zeW5jX3JlYWQo
+ZmlscCwgYmFzZSwgbGVuLCBwcG9zLCAmY2hlY2tlb2YpOw0KLQllbHNlDQorCQlyZXQgPSBjZXBo
+X3N5bmNfcmVhZChpb2NiLCAmaSwgJmNoZWNrZW9mKTsNCisJfSBlbHNlIHsNCisJCS8qDQorCQkg
+KiBXZSBjYW4ndCBtb2RpZnkgdGhlIGNvbnRlbnQgb2YgaW92LA0KKwkJICogc28gd2Ugb25seSBy
+ZWFkIGZyb20gYmVnaW5uaW5nLg0KKwkJICovDQorCQlpZiAocmVhZCkNCisJCQlpb2NiLT5raV9w
+b3MgPSBwb3M7DQogCQlyZXQgPSBnZW5lcmljX2ZpbGVfYWlvX3JlYWQoaW9jYiwgaW92LCBucl9z
+ZWdzLCBwb3MpOw0KLQ0KKwl9DQogb3V0Og0KIAlkb3V0KCJhaW9fcmVhZCAlcCAlbGx4LiVsbHgg
+ZHJvcHBpbmcgY2FwIHJlZnMgb24gJXMgPSAlZFxuIiwNCiAJICAgICBpbm9kZSwgY2VwaF92aW5v
+cChpbm9kZSksIGNlcGhfY2FwX3N0cmluZyhnb3QpLCAoaW50KXJldCk7DQogCWNlcGhfcHV0X2Nh
+cF9yZWZzKGNpLCBnb3QpOw0KIA0KIAlpZiAoY2hlY2tlb2YgJiYgcmV0ID49IDApIHsNCi0JCWlu
+dCBzdGF0cmV0ID0gY2VwaF9kb19nZXRhdHRyKGlub2RlLCBDRVBIX1NUQVRfQ0FQX1NJWkUpOw0K
+KwkJaW50IHN0YXRyZXQgPSBjZXBoX2RvX2dldGF0dHIoaW5vZGUsDQorCQkJCQkgICAgICBDRVBI
+X1NUQVRfQ0FQX1NJWkUpOw0KIA0KIAkJLyogaGl0IEVPRiBvciBob2xlPyAqLw0KLQkJaWYgKHN0
+YXRyZXQgPT0gMCAmJiAqcHBvcyA8IGlub2RlLT5pX3NpemUpIHsNCi0JCQlkb3V0KCJhaW9fcmVh
+ZCBzeW5jX3JlYWQgaGl0IGhvbGUsIHBwb3MgJWxsZCA8IHNpemUgJWxsZCwgcmVhZGluZyBtb3Jl
+XG4iLCAqcHBvcywgaW5vZGUtPmlfc2l6ZSk7DQorCQlpZiAoc3RhdHJldCA9PSAwICYmIGlvY2It
+PmtpX3BvcyA8IGlub2RlLT5pX3NpemUgJiYNCisJCQlpb2NiLT5raV9sZWZ0KSB7DQorCQkJZG91
+dCgic3luY19yZWFkIGhpdCBob2xlLCBwcG9zICVsbGQgPCBzaXplICVsbGQiDQorCQkJICAgICAi
+LCByZWFkaW5nIG1vcmVcbiIsIGlvY2ItPmtpX3BvcywNCisJCQkgICAgIGlub2RlLT5pX3NpemUp
+Ow0KKw0KIAkJCXJlYWQgKz0gcmV0Ow0KLQkJCWJhc2UgKz0gcmV0Ow0KIAkJCWxlbiAtPSByZXQ7
+DQogCQkJY2hlY2tlb2YgPSAwOw0KIAkJCWdvdG8gYWdhaW47DQogCQl9DQogCX0NCi0JaWYgKHJl
+dCA+PSAwKQ0KKw0KKwlpZiAocmV0ID4gMCkNCiAJCXJldCArPSByZWFkOw0KIA0KIAlyZXR1cm4g
+cmV0Ow0KLS0gDQoxLjguNC1yYzANCg==
 
-I don't see any reason for not doing buffered read when we succeed in
-getting Fc cap. Buffered read is much faster than the sync read, we
-should use it if possible.
-
-> The reason:
-> A:for requesting size only for sync-read not cache-read
-> B:By the original, it will make the cache-read to do the same thing which sync-read alread done.
-
-For buffered read, 'checkeof' be false, so the requesting size code
-should never get executed.
-
->
-> Thanks!
-> Jianpeng Ma
->>Your previous patch moved the getattr code to here. please revert the
->>code to its original shape. I think it does the right thing.
->>
-
-Another reason I prefer the original code is that it prints message
-for getting/releasing caps.
-
-Sage dropped your readv patch from the test branch (writev is still
-in), please update and re-send the patch.
-
-Regards
-Yan, Zheng
-
->>
->>
->>>                         }
->>>                 }
->>>
->>>         } else
->>>                 ret = generic_file_aio_read(iocb, iov, nr_segs, pos);
->>>
->>> -       dout("aio_read %p %llx.%llx dropping cap refs on %s = %d\n",
->>> -            inode, ceph_vinop(inode), ceph_cap_string(got), (int)ret);
->>> -       ceph_put_cap_refs(ci, got);
->>> +       if (got) {
->>> +               dout("aio_read %p %llx.%llx dropping cap refs on %s = %d\n",
->>> +                    inode, ceph_vinop(inode), ceph_cap_string(got), (int)ret);
->>> +               ceph_put_cap_refs(ci, got);
->>> +       }
->>
->>
->>
->>
->>>
->>>         if (ret >= 0)
->>>                 ret += read;
->>> --
->>> 1.8.4-rc0
