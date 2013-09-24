@@ -1,157 +1,162 @@
-From: majianpeng <majianpeng@gmail.com>
-Subject: Re: Re: [RESEND PATCH V5] ceph:Implement readv/preadv for sync operation
-Date: Tue, 24 Sep 2013 16:54:07 +0800
-Message-ID: <2013092416540511006313@gmail.com>
-References: <201309241605181783589@gmail.com>,
-	<52414FB1.8060607@intel.com>
-Reply-To: majianpeng <majianpeng@gmail.com>
+From: Dan van der Ster <dan@vanderster.com>
+Subject: Re: Object Write Latency
+Date: Tue, 24 Sep 2013 10:55:27 +0200
+Message-ID: <CABZ+qqkfo6v3TBY4vpvTGba8+L1y3k2xBU5oAHpARxMC91zZjg@mail.gmail.com>
+References: <3472A07E6605974CBC9BC573F1BC02E4A52724A9@PLOXCHG03.cern.ch>
+ <alpine.DEB.2.00.1309200830040.25752@cobra.newdream.net> <CABZ+qqnXbycX4C_brF4eiRVb0PeA4SKf2kW_d3g8RYxwD6xFDg@mail.gmail.com>
+ <3472A07E6605974CBC9BC573F1BC02E4A52736BE@PLOXCHG03.cern.ch>
+ <5240666E.7010009@inktank.com> <3472A07E6605974CBC9BC573F1BC02E4A527376E@PLOXCHG03.cern.ch>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="iso-8859-1"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f49.google.com ([209.85.160.49]:47797 "EHLO
-	mail-pb0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750752Ab3IXIyK (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 24 Sep 2013 04:54:10 -0400
-Received: by mail-pb0-f49.google.com with SMTP id xb4so4252983pbc.8
-        for <ceph-devel@vger.kernel.org>; Tue, 24 Sep 2013 01:54:10 -0700 (PDT)
+Received: from mail-bk0-f42.google.com ([209.85.214.42]:42683 "EHLO
+	mail-bk0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753935Ab3IXI4K (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 24 Sep 2013 04:56:10 -0400
+Received: by mail-bk0-f42.google.com with SMTP id my10so1582158bkb.15
+        for <ceph-devel@vger.kernel.org>; Tue, 24 Sep 2013 01:56:08 -0700 (PDT)
+Received: by mail-lb0-f180.google.com with SMTP id q8so3484223lbi.25
+        for <ceph-devel@vger.kernel.org>; Tue, 24 Sep 2013 01:56:07 -0700 (PDT)
+In-Reply-To: <3472A07E6605974CBC9BC573F1BC02E4A527376E@PLOXCHG03.cern.ch>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?iso-8859-1?B?WWFuLCBaaGVuZw==?= <zheng.z.yan@intel.com>
-Cc: sage <sage@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>
+Cc: Mark Nelson <mark.nelson@inktank.com>, Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Pk9uIDA5LzI0LzIwMTMgMDQ6MDUgUE0sIG1hamlhbnBlbmcgd3JvdGU6DQo+PiBkaWZmIC0tZ2l0
-IGEvZnMvY2VwaC9maWxlLmMgYi9mcy9jZXBoL2ZpbGUuYw0KPj4gaW5kZXggM2RlODk4Mi4uNTQy
-MmQ4ZSAxMDA2NDQNCj4+IC0tLSBhL2ZzL2NlcGgvZmlsZS5jDQo+PiArKysgYi9mcy9jZXBoL2Zp
-bGUuYw0KPj4gQEAgLTQwOCw1MSArNDA4LDk0IEBAIG1vcmU6DQo+PiAgICoNCj4+ICAgKiBJZiB0
-aGUgcmVhZCBzcGFucyBvYmplY3QgYm91bmRhcnksIGp1c3QgZG8gbXVsdGlwbGUgcmVhZHMuDQo+
-PiAgICovDQo+PiAtc3RhdGljIHNzaXplX3QgY2VwaF9zeW5jX3JlYWQoc3RydWN0IGZpbGUgKmZp
-bGUsIGNoYXIgX191c2VyICpkYXRhLA0KPj4gLQkJCSAgICAgIHVuc2lnbmVkIGxlbiwgbG9mZl90
-ICpwb2ZmLCBpbnQgKmNoZWNrZW9mKQ0KPj4gK3N0YXRpYyBzc2l6ZV90IGNlcGhfc3luY19yZWFk
-KHN0cnVjdCBraW9jYiAqaW9jYiwgc3RydWN0IGlvdl9pdGVyICppLA0KPj4gKwkJCQlpbnQgKmNo
-ZWNrZW9mKQ0KPj4gIHsNCj4+ICsJc3RydWN0IGZpbGUgKmZpbGUgPSBpb2NiLT5raV9maWxwOw0K
-Pj4gIAlzdHJ1Y3QgaW5vZGUgKmlub2RlID0gZmlsZV9pbm9kZShmaWxlKTsNCj4+ICAJc3RydWN0
-IHBhZ2UgKipwYWdlczsNCj4+IC0JdTY0IG9mZiA9ICpwb2ZmOw0KPj4gKwl1NjQgb2ZmID0gaW9j
-Yi0+a2lfcG9zOw0KPj4gIAlpbnQgbnVtX3BhZ2VzLCByZXQ7DQo+PiAgDQo+PiAtCWRvdXQoInN5
-bmNfcmVhZCBvbiBmaWxlICVwICVsbHV+JXUgJXNcbiIsIGZpbGUsIG9mZiwgbGVuLA0KPj4gKwlk
-b3V0KCJzeW5jX3JlYWQgb24gZmlsZSAlcCAlbGx1fiV1ICVzXG4iLCBmaWxlLCBvZmYsDQo+PiAr
-CSAgICAgKHVuc2lnbmVkKWlvY2ItPmtpX2xlZnQsDQo+PiAgCSAgICAgKGZpbGUtPmZfZmxhZ3Mg
-JiBPX0RJUkVDVCkgPyAiT19ESVJFQ1QiIDogIiIpOw0KPj4gLQ0KPj4gLQlpZiAoZmlsZS0+Zl9m
-bGFncyAmIE9fRElSRUNUKSB7DQo+PiAtCQludW1fcGFnZXMgPSBjYWxjX3BhZ2VzX2ZvcigodW5z
-aWduZWQgbG9uZylkYXRhLCBsZW4pOw0KPj4gLQkJcGFnZXMgPSBjZXBoX2dldF9kaXJlY3RfcGFn
-ZV92ZWN0b3IoZGF0YSwgbnVtX3BhZ2VzLCB0cnVlKTsNCj4+IC0JfSBlbHNlIHsNCj4+IC0JCW51
-bV9wYWdlcyA9IGNhbGNfcGFnZXNfZm9yKG9mZiwgbGVuKTsNCj4+IC0JCXBhZ2VzID0gY2VwaF9h
-bGxvY19wYWdlX3ZlY3RvcihudW1fcGFnZXMsIEdGUF9OT0ZTKTsNCj4+IC0JfQ0KPj4gLQlpZiAo
-SVNfRVJSKHBhZ2VzKSkNCj4+IC0JCXJldHVybiBQVFJfRVJSKHBhZ2VzKTsNCj4+IC0NCj4+ICAJ
-LyoNCj4+ICAJICogZmx1c2ggYW55IHBhZ2UgY2FjaGUgcGFnZXMgaW4gdGhpcyByYW5nZS4gIHRo
-aXMNCj4+ICAJICogd2lsbCBtYWtlIGNvbmN1cnJlbnQgbm9ybWFsIGFuZCBzeW5jIGlvIHNsb3cs
-DQo+PiAgCSAqIGJ1dCBpdCB3aWxsIGF0IGxlYXN0IGJlaGF2ZSBzZW5zaWJseSB3aGVuIHRoZXkg
-YXJlDQo+PiAgCSAqIGluIHNlcXVlbmNlLg0KPj4gIAkgKi8NCj4+IC0JcmV0ID0gZmlsZW1hcF93
-cml0ZV9hbmRfd2FpdChpbm9kZS0+aV9tYXBwaW5nKTsNCj4+ICsJcmV0ID0gZmlsZW1hcF93cml0
-ZV9hbmRfd2FpdF9yYW5nZShpbm9kZS0+aV9tYXBwaW5nLCBvZmYsDQo+PiArCQkJCQkJb2ZmICsg
-aW9jYi0+a2lfbGVmdCk7DQo+PiAgCWlmIChyZXQgPCAwKQ0KPj4gLQkJZ290byBkb25lOw0KPj4g
-LQ0KPj4gLQlyZXQgPSBzdHJpcGVkX3JlYWQoaW5vZGUsIG9mZiwgbGVuLCBwYWdlcywgbnVtX3Bh
-Z2VzLCBjaGVja2VvZiwNCj4+IC0JCQkgICBmaWxlLT5mX2ZsYWdzICYgT19ESVJFQ1QsDQo+PiAt
-CQkJICAgKHVuc2lnbmVkIGxvbmcpZGF0YSAmIH5QQUdFX01BU0spOw0KPj4gKwkJcmV0dXJuIHJl
-dDsNCj4+ICANCj4+IC0JaWYgKHJldCA+PSAwICYmIChmaWxlLT5mX2ZsYWdzICYgT19ESVJFQ1Qp
-ID09IDApDQo+PiAtCQlyZXQgPSBjZXBoX2NvcHlfcGFnZV92ZWN0b3JfdG9fdXNlcihwYWdlcywg
-ZGF0YSwgb2ZmLCByZXQpOw0KPj4gLQlpZiAocmV0ID49IDApDQo+PiAtCQkqcG9mZiA9IG9mZiAr
-IHJldDsNCj4+ICsJaWYgKGZpbGUtPmZfZmxhZ3MgJiBPX0RJUkVDVCkgew0KPj4gKwkJd2hpbGUg
-KGlvdl9pdGVyX2NvdW50KGkpKSB7DQo+PiArCQkJdm9pZCBfX3VzZXIgKmRhdGEgPSBpLT5pb3Zb
-MF0uaW92X2Jhc2UgKyBpLT5pb3Zfb2Zmc2V0Ow0KPj4gKwkJCXNpemVfdCBsZW4gPSBpLT5pb3Zb
-MF0uaW92X2xlbiAtIGktPmlvdl9vZmZzZXQ7DQo+PiArDQo+PiArCQkJbnVtX3BhZ2VzID0gY2Fs
-Y19wYWdlc19mb3IoKHVuc2lnbmVkIGxvbmcpZGF0YSwgbGVuKTsNCj4+ICsJCQlwYWdlcyA9IGNl
-cGhfZ2V0X2RpcmVjdF9wYWdlX3ZlY3RvcihkYXRhLA0KPj4gKwkJCQkJCQkgICAgbnVtX3BhZ2Vz
-LCB0cnVlKTsNCj4+ICsJCQlpZiAoSVNfRVJSKHBhZ2VzKSkNCj4+ICsJCQkJcmV0dXJuIFBUUl9F
-UlIocGFnZXMpOw0KPj4gKw0KPj4gKwkJCXJldCA9IHN0cmlwZWRfcmVhZChpbm9kZSwgb2ZmLCBs
-ZW4sDQo+PiArCQkJCQkgICBwYWdlcywgbnVtX3BhZ2VzLCBjaGVja2VvZiwNCj4+ICsJCQkJCSAg
-IDEsICh1bnNpZ25lZCBsb25nKWRhdGEgJiB+UEFHRV9NQVNLKTsNCj4+ICsJCQljZXBoX3B1dF9w
-YWdlX3ZlY3RvcihwYWdlcywgbnVtX3BhZ2VzLCB0cnVlKTsNCj4+ICsNCj4+ICsJCQlpZiAocmV0
-IDw9IDApDQo+PiArCQkJCWJyZWFrOw0KPj4gKwkJCW9mZiArPSByZXQ7DQo+PiArCQkJaW92X2l0
-ZXJfYWR2YW5jZShpLCByZXQpOw0KPj4gKwkJCWlmIChyZXQgPCBsZW4pDQo+PiArCQkJCWJyZWFr
-Ow0KPj4gKwkJfQ0KPj4gKwl9IGVsc2Ugew0KPj4gKwkJc2l6ZV90IGxlbiA9IGlvY2ItPmtpX2xl
-ZnQ7DQo+PiAgDQo+PiAtZG9uZToNCj4+IC0JaWYgKGZpbGUtPmZfZmxhZ3MgJiBPX0RJUkVDVCkN
-Cj4+IC0JCWNlcGhfcHV0X3BhZ2VfdmVjdG9yKHBhZ2VzLCBudW1fcGFnZXMsIHRydWUpOw0KPj4g
-LQllbHNlDQo+PiArCQludW1fcGFnZXMgPSBjYWxjX3BhZ2VzX2ZvcihvZmYsIGxlbik7DQo+PiAr
-CQlwYWdlcyA9IGNlcGhfYWxsb2NfcGFnZV92ZWN0b3IobnVtX3BhZ2VzLCBHRlBfTk9GUyk7DQo+
-PiArCQlpZiAoSVNfRVJSKHBhZ2VzKSkNCj4+ICsJCQlyZXR1cm4gUFRSX0VSUihwYWdlcyk7DQo+
-PiArCQlyZXQgPSBzdHJpcGVkX3JlYWQoaW5vZGUsIG9mZiwgbGVuLCBwYWdlcywNCj4+ICsJCQkJ
-CW51bV9wYWdlcywgY2hlY2tlb2YsIDAsIDApOw0KPj4gKwkJaWYgKHJldCA+IDApIHsNCj4+ICsJ
-CQlpbnQgbCwgayA9IDA7DQo+PiArCQkJc2l6ZV90IGxlZnQgPSBsZW4gPSByZXQ7DQo+PiArDQo+
-PiArCQkJd2hpbGUgKGxlZnQpIHsNCj4+ICsJCQkJdm9pZCBfX3VzZXIgKmRhdGEgPSBpLT5pb3Zb
-MF0uaW92X2Jhc2UNCj4+ICsJCQkJCQkJKyBpLT5pb3Zfb2Zmc2V0Ow0KPj4gKwkJCQlsID0gbWlu
-KGktPmlvdlswXS5pb3ZfbGVuIC0gaS0+aW92X29mZnNldCwNCj4+ICsJCQkJCWxlZnQpOw0KPj4g
-Kw0KPj4gKwkJCQlyZXQgPSBjZXBoX2NvcHlfcGFnZV92ZWN0b3JfdG9fdXNlcigmcGFnZXNba10s
-DQo+PiArCQkJCQkJCQkgICAgZGF0YSwgb2ZmLA0KPj4gKwkJCQkJCQkJICAgIGwpOw0KPj4gKwkJ
-CQlpZiAocmV0ID4gMCkgew0KPj4gKwkJCQkJaW92X2l0ZXJfYWR2YW5jZShpLCByZXQpOw0KPj4g
-KwkJCQkJbGVmdCAtPSByZXQ7DQo+PiArCQkJCQlvZmYgKz0gcmV0Ow0KPj4gKwkJCQkJayA9IGNh
-bGNfcGFnZXNfZm9yKGlvY2ItPmtpX3BvcywNCj4+ICsJCQkJCQkJICAgbGVuIC0gbGVmdCArIDEp
-IC0gMTsNCj4+ICsJCQkJCUJVR19PTihrID49IG51bV9wYWdlcyAmJiBsZWZ0KTsNCj4+ICsJCQkJ
-fSBlbHNlDQo+PiArCQkJCQlicmVhazsNCj4+ICsJCQl9DQo+PiArCQl9DQo+PiAgCQljZXBoX3Jl
-bGVhc2VfcGFnZV92ZWN0b3IocGFnZXMsIG51bV9wYWdlcyk7DQo+PiArCX0NCj4+ICsNCj4+ICsJ
-aWYgKG9mZiA+IGlvY2ItPmtpX3Bvcykgew0KPj4gKwkJcmV0ID0gb2ZmIC0gaW9jYi0+a2lfcG9z
-Ow0KPj4gKwkJaW9jYi0+a2lfcG9zID0gb2ZmOw0KPj4gKwkJaW9jYi0+a2lfbGVmdCAtPSByZXQ7
-DQo+PiArCX0NCj4+ICsNCj4+ICAJZG91dCgic3luY19yZWFkIHJlc3VsdCAlZFxuIiwgcmV0KTsN
-Cj4+ICAJcmV0dXJuIHJldDsNCj4+ICB9DQo+PiBAQCAtNjQ3LDE3ICs2OTAsMTYgQEAgc3RhdGlj
-IHNzaXplX3QgY2VwaF9haW9fcmVhZChzdHJ1Y3Qga2lvY2IgKmlvY2IsIGNvbnN0IHN0cnVjdCBp
-b3ZlYyAqaW92LA0KPj4gIHsNCj4+ICAJc3RydWN0IGZpbGUgKmZpbHAgPSBpb2NiLT5raV9maWxw
-Ow0KPj4gIAlzdHJ1Y3QgY2VwaF9maWxlX2luZm8gKmZpID0gZmlscC0+cHJpdmF0ZV9kYXRhOw0K
-Pj4gLQlsb2ZmX3QgKnBwb3MgPSAmaW9jYi0+a2lfcG9zOw0KPj4gLQlzaXplX3QgbGVuID0gaW92
-LT5pb3ZfbGVuOw0KPj4gKwlzaXplX3QgbGVuID0gMDsNCj4NCj5sZW4gPSBpb2NiLT5raV9sZWZ0
-Ow0KWWVzLCB0aGUgZG91dCBuZWVkIHRoaXMuDQoNCj4NCj4+ICAJc3RydWN0IGlub2RlICppbm9k
-ZSA9IGZpbGVfaW5vZGUoZmlscCk7DQo+PiAgCXN0cnVjdCBjZXBoX2lub2RlX2luZm8gKmNpID0g
-Y2VwaF9pbm9kZShpbm9kZSk7DQo+PiAtCXZvaWQgX191c2VyICpiYXNlID0gaW92LT5pb3ZfYmFz
-ZTsNCj4+ICAJc3NpemVfdCByZXQ7DQo+PiAgCWludCB3YW50LCBnb3QgPSAwOw0KPj4gIAlpbnQg
-Y2hlY2tlb2YgPSAwLCByZWFkID0gMDsNCj4+ICANCj4NCj5JIHRoaW5rIHdlIHNob3VsZCBwdXQg
-bGFiZWwgJ2FnYWluJyBoZXJlLg0KT2sNCg0KPg0KPj4gIAlkb3V0KCJhaW9fcmVhZCAlcCAlbGx4
-LiVsbHggJWxsdX4ldSB0cnlpbmcgdG8gZ2V0IGNhcHMgb24gJXBcbiIsDQo+PiAgCSAgICAgaW5v
-ZGUsIGNlcGhfdmlub3AoaW5vZGUpLCBwb3MsICh1bnNpZ25lZClsZW4sIGlub2RlKTsNCj4+ICsN
-Cj4+ICBhZ2FpbjoNCj4+ICAJaWYgKGZpLT5mbW9kZSAmIENFUEhfRklMRV9NT0RFX0xBWlkpDQo+
-PiAgCQl3YW50ID0gQ0VQSF9DQVBfRklMRV9DQUNIRSB8IENFUEhfQ0FQX0ZJTEVfTEFaWUlPOw0K
-Pj4gQEAgLTY2NSwzOCArNzA3LDYxIEBAIGFnYWluOg0KPj4gIAkJd2FudCA9IENFUEhfQ0FQX0ZJ
-TEVfQ0FDSEU7DQo+PiAgCXJldCA9IGNlcGhfZ2V0X2NhcHMoY2ksIENFUEhfQ0FQX0ZJTEVfUkQs
-IHdhbnQsICZnb3QsIC0xKTsNCj4+ICAJaWYgKHJldCA8IDApDQo+PiAtCQlnb3RvIG91dDsNCj4+
-ICsJCXJldHVybiByZXQ7DQo+PiArDQo+PiAgCWRvdXQoImFpb19yZWFkICVwICVsbHguJWxseCAl
-bGx1fiV1IGdvdCBjYXAgcmVmcyBvbiAlc1xuIiwNCj4+ICAJICAgICBpbm9kZSwgY2VwaF92aW5v
-cChpbm9kZSksIHBvcywgKHVuc2lnbmVkKWxlbiwNCj4+ICAJICAgICBjZXBoX2NhcF9zdHJpbmco
-Z290KSk7DQo+PiAgDQo+PiAgCWlmICgoZ290ICYgKENFUEhfQ0FQX0ZJTEVfQ0FDSEV8Q0VQSF9D
-QVBfRklMRV9MQVpZSU8pKSA9PSAwIHx8DQo+PiAgCSAgICAoaW9jYi0+a2lfZmlscC0+Zl9mbGFn
-cyAmIE9fRElSRUNUKSB8fA0KPj4gLQkgICAgKGZpLT5mbGFncyAmIENFUEhfRl9TWU5DKSkNCj4+
-ICsJICAgIChmaS0+ZmxhZ3MgJiBDRVBIX0ZfU1lOQykpIHsNCj4+ICsJCXN0cnVjdCBpb3ZfaXRl
-ciBpOw0KPj4gKw0KPj4gKwkJaWYgKCFyZWFkKSB7DQo+PiArCQkJcmV0ID0gZ2VuZXJpY19zZWdt
-ZW50X2NoZWNrcyhpb3YsICZucl9zZWdzLA0KPj4gKwkJCQkJCQkmbGVuLCBWRVJJRllfV1JJVEUp
-Ow0KPj4gKwkJCWlmIChyZXQpDQo+PiArCQkJCWdvdG8gb3V0Ow0KPj4gKwkJfQ0KPj4gKw0KPj4g
-KwkJaW9jYi0+a2lfbGVmdCA9IGxlbjsNCj4NCj5pb2NiLT5raV9sZWZ0ID0gbGVuIC0gcmVhZCA/
-DQpCZWZvcmUgZ290byBhZ2FpbiwgaSBsZXQgJ2xlbiAtPSByZXQnLg0KbGVuIG1lYW4gdGhlIGxl
-ZnQgc2l6ZS4NCj4NCj4NCj4+ICsJCWlvdl9pdGVyX2luaXQoJmksIGlvdiwgbnJfc2VncywgbGVu
-LCByZWFkKTsNCj4+ICAJCS8qIGhtbSwgdGhpcyBpc24ndCByZWFsbHkgYXN5bmMuLi4gKi8NCj4+
-IC0JCXJldCA9IGNlcGhfc3luY19yZWFkKGZpbHAsIGJhc2UsIGxlbiwgcHBvcywgJmNoZWNrZW9m
-KTsNCj4+IC0JZWxzZQ0KPj4gKwkJcmV0ID0gY2VwaF9zeW5jX3JlYWQoaW9jYiwgJmksICZjaGVj
-a2VvZik7DQo+PiArCX0gZWxzZSB7DQo+PiArCQkvKg0KPj4gKwkJICogV2UgY2FuJ3QgbW9kaWZ5
-IHRoZSBjb250ZW50IG9mIGlvdiwNCj4+ICsJCSAqIHNvIHdlIG9ubHkgcmVhZCBmcm9tIGJlZ2lu
-bmluZy4NCj4+ICsJCSAqLw0KPj4gKwkJaWYgKHJlYWQpDQo+PiArCQkJaW9jYi0+a2lfcG9zID0g
-cG9zOw0KPg0KPmZvcmdldCB0byBzZXQgJ3JlYWQnIHRvIDAgPw0KV2hlbiBkZWZpbmUgcmVhZCwg
-aSBzZXQgcmVhZCA9IDAuDQogID5pbnQgY2hlY2tlb2YgPSAwLCByZWFkID0gMDsNCj4NCj4NCj4+
-ICAJCXJldCA9IGdlbmVyaWNfZmlsZV9haW9fcmVhZChpb2NiLCBpb3YsIG5yX3NlZ3MsIHBvcyk7
-DQo+PiAtDQo+PiArCX0NCj4+ICBvdXQ6DQo+PiAgCWRvdXQoImFpb19yZWFkICVwICVsbHguJWxs
-eCBkcm9wcGluZyBjYXAgcmVmcyBvbiAlcyA9ICVkXG4iLA0KPj4gIAkgICAgIGlub2RlLCBjZXBo
-X3Zpbm9wKGlub2RlKSwgY2VwaF9jYXBfc3RyaW5nKGdvdCksIChpbnQpcmV0KTsNCj4+ICAJY2Vw
-aF9wdXRfY2FwX3JlZnMoY2ksIGdvdCk7DQo+PiAgDQo+PiAgCWlmIChjaGVja2VvZiAmJiByZXQg
-Pj0gMCkgew0KPj4gLQkJaW50IHN0YXRyZXQgPSBjZXBoX2RvX2dldGF0dHIoaW5vZGUsIENFUEhf
-U1RBVF9DQVBfU0laRSk7DQo+PiArCQlpbnQgc3RhdHJldCA9IGNlcGhfZG9fZ2V0YXR0cihpbm9k
-ZSwNCj4+ICsJCQkJCSAgICAgIENFUEhfU1RBVF9DQVBfU0laRSk7DQo+PiAgDQo+PiAgCQkvKiBo
-aXQgRU9GIG9yIGhvbGU/ICovDQo+PiAtCQlpZiAoc3RhdHJldCA9PSAwICYmICpwcG9zIDwgaW5v
-ZGUtPmlfc2l6ZSkgew0KPj4gLQkJCWRvdXQoImFpb19yZWFkIHN5bmNfcmVhZCBoaXQgaG9sZSwg
-cHBvcyAlbGxkIDwgc2l6ZSAlbGxkLCByZWFkaW5nIG1vcmVcbiIsICpwcG9zLCBpbm9kZS0+aV9z
-aXplKTsNCj4+ICsJCWlmIChzdGF0cmV0ID09IDAgJiYgaW9jYi0+a2lfcG9zIDwgaW5vZGUtPmlf
-c2l6ZSAmJg0KPj4gKwkJCWlvY2ItPmtpX2xlZnQpIHsNCj4+ICsJCQlkb3V0KCJzeW5jX3JlYWQg
-aGl0IGhvbGUsIHBwb3MgJWxsZCA8IHNpemUgJWxsZCINCj4+ICsJCQkgICAgICIsIHJlYWRpbmcg
-bW9yZVxuIiwgaW9jYi0+a2lfcG9zLA0KPj4gKwkJCSAgICAgaW5vZGUtPmlfc2l6ZSk7DQo+PiAr
-DQo+PiAgCQkJcmVhZCArPSByZXQ7DQo+PiAtCQkJYmFzZSArPSByZXQ7DQo+PiAgCQkJbGVuIC09
-IHJldDsNCj4+ICAJCQljaGVja2VvZiA9IDA7DQo+PiAgCQkJZ290byBhZ2FpbjsNCj4+ICAJCX0N
-Cj4+ICAJfQ0KPj4gLQlpZiAocmV0ID49IDApDQo+PiArDQo+PiArCWlmIChyZXQgPiAwKQ0KPj4g
-IAkJcmV0ICs9IHJlYWQ7DQo+DQo+d2hhdCBpcyB0aGUgcHVycG9zZSBvZiB0aGlzIGNoYW5nZSA/
-DQpTb3JyeSwgaSBtYWtlIGEgbWlzdGFrZS4NCg0KPg0KPlJlZ2FyZHMNCj5ZYW4sIFpoZW5nDQo+
-PiAgDQo+PiAgCXJldHVybiByZXQ7DQo+PiAtLSANCj4=
+Hi,
+Yes, the journal is a file on same XFS partition as the data.
 
+I have some results from a rados bench to a single-copy pool on the JBOD disks.
+
+[root@p05151113777233 ~]# rados bench -p test 30 write -t 1 -b 5
+...
+ Total time run:         30.027296
+Total writes made:      612
+Write size:             5
+Bandwidth (MB/sec):     0.000
+
+Stddev Bandwidth:       1.92864e-05
+Max bandwidth (MB/sec): 0.000119209
+Min bandwidth (MB/sec): 0
+Average Latency:        0.0490627
+Stddev Latency:         0.0197453
+Max latency:            0.136101
+Min latency:            0.003991
+
+The osd log and dump of historic ops are here:
+ http://box.cern.ch/owncloud/public.php?service=files&t=a53c229bab2179c9e1a03899a859129f
+
+The logs are quite verbose for me, but the journal do_write latencies
+certainly stand out:
+
+2013-09-24 10:28:52.853011 7f03b78dd700 20 journal do_write latency 0.044686
+2013-09-24 10:28:56.610670 7f03b78dd700 20 journal do_write latency 0.025085
+2013-09-24 10:29:09.273017 7f03b78dd700 20 journal do_write latency 0.031082
+2013-09-24 10:29:22.703697 7f03b78dd700 20 journal do_write latency 0.045090
+
+If you confirm that that really is the journal write+sync latency (and
+not including the final commit to disk in that time), then I'll find
+some new boxes where I can try out the direct IO to a partitioned
+journal.
+
+Cheers, Dan
+
+
+On Mon, Sep 23, 2013 at 11:40 PM, Andreas Joachim Peters
+<Andreas.Joachim.Peters@cern.ch> wrote:
+> Here is the output for one write_full on the in-memory OSD (the others look more or less the same e.g. most time is waiting for op_applied/op_commit):
+>
+> { "description": "osd_op(client.1764910.0:1 eos-root--0 [writefull 0~5] 15.fef59585 e3818)",
+>           "rmw_flags": 4,
+>           "received_at": "2013-09-23 23:33:16.536547",
+>           "age": "3.698191",
+>           "duration": "0.002225",
+>           "flag_point": "commit sent; apply or cleanup",
+>           "client_info": { "client": "client.1764910",
+>               "tid": 1},
+>           "events": [
+>                 { "time": "2013-09-23 23:33:16.536706",
+>                   "event": "waiting_for_osdmap"},
+>                 { "time": "2013-09-23 23:33:16.536807",
+>                   "event": "reached_pg"},
+>                 { "time": "2013-09-23 23:33:16.536915",
+>                   "event": "started"},
+>                 { "time": "2013-09-23 23:33:16.536936",
+>                   "event": "started"},
+>                 { "time": "2013-09-23 23:33:16.537029",
+>                   "event": "waiting for subops from [1056,1057]"},
+>                 { "time": "2013-09-23 23:33:16.537110",
+>                   "event": "commit_queued_for_journal_write"},
+>                 { "time": "2013-09-23 23:33:16.537158",
+>                   "event": "write_thread_in_journal_buffer"},
+>                 { "time": "2013-09-23 23:33:16.537242",
+>                   "event": "journaled_completion_queued"},
+>                 { "time": "2013-09-23 23:33:16.537269",
+>                   "event": "op_commit"},
+>                 { "time": "2013-09-23 23:33:16.538547",
+>                   "event": "sub_op_commit_rec"},
+>                 { "time": "2013-09-23 23:33:16.538573",
+>                   "event": "op_applied"},
+>                 { "time": "2013-09-23 23:33:16.538715",
+>                   "event": "sub_op_commit_rec"},
+>                 { "time": "2013-09-23 23:33:16.538754",
+>                   "event": "commit_sent"},
+>                 { "time": "2013-09-23 23:33:16.538772",
+>                   "event": "done"}]},
+>
+> We should probably look at the same output for the JBOD configuration ...
+>
+> Cheers Andreas.
+>
+> ________________________________________
+> From: Mark Nelson [mark.nelson@inktank.com]
+> Sent: 23 September 2013 18:03
+> To: Andreas Joachim Peters
+> Cc: Dan van der Ster; Sage Weil; ceph-devel@vger.kernel.org
+> Subject: Re: Object Write Latency
+>
+> On 09/23/2013 10:38 AM, Andreas Joachim Peters wrote:
+>> We deployed 3 OSDs with an EXT4 using RapidDisk in-memory.
+>>
+>> The FS does 140k/s append+sync and the latency is now:
+>>
+>> ~1 ms for few byte objects with single replica
+>> ~2 ms for few byte objects three replica  (instead of 65-80ms)
+>
+> Interesting!  If you look at the slowest operations in the ceph admin
+> socket now with dump_historic_ops, where are those operations spending
+> their time?
+>
+>>
+>> This gives probably the base-line of the best you can do with the current implementation.
+>>
+>> ==> the 80ms are probably just a 'feature' of the hardware (JBOD disks/controller) and we might try to find some tuning parameters to improve the latency slightly.
+>
+> Hardware definitely plays a huge part in terms of Ceph performance.  You
+> can run Ceph on just about anything, but it's surprising how different
+> two roughly similar systems can perform.
+>
+>>
+>> Could you just explain how the async api functions (is_complete, is_safe) map to the three states
+>>
+>> 1) object is transferred from client to all OSDs and is present in memory there
+>> 2) object is written to the OSD journal
+>> 3) object is committed from OSD journal to the OSD filesystem
+>>
+>> Is it correct that the object is visible by clients only when 3) has happened?
+>
+> Yes, afaik.
+>
+>>
+>> Thanks for your help,
+>> Andreas.
+>>
+>>
+>>
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>
