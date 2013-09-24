@@ -1,115 +1,141 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: rgw quota
-Date: Mon, 23 Sep 2013 16:47:11 -0700
-Message-ID: <CABBk=J9cZTkjiQzf663zUpgoAidBJns87CMcOB78VfVzeavErw@mail.gmail.com>
-References: <CABBk=J_XYE8Pz7ZDLATVaw9atniZjZmJgv2FiEMmN3xZEp6RBQ@mail.gmail.com>
-	<alpine.DEB.2.00.1309231602470.7394@cobra.newdream.net>
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: Re: [PATCH 3/3] ceph: handle race between cap reconnect and cap release
+Date: Tue, 24 Sep 2013 09:05:51 +0800
+Message-ID: <5240E56F.9030508@intel.com>
+References: <1379825212-10438-1-git-send-email-zheng.z.yan@intel.com> <1379825212-10438-3-git-send-email-zheng.z.yan@intel.com> <alpine.DEB.2.00.1309230729140.19555@cobra.newdream.net> <CAAM7YA=apJ-jJy3iHVrW3O-_nhXvkYFUTKBv73kD-B-RoY47Dg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vb0-f44.google.com ([209.85.212.44]:50377 "EHLO
-	mail-vb0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750703Ab3IWXrM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Sep 2013 19:47:12 -0400
-Received: by mail-vb0-f44.google.com with SMTP id e13so2893803vbg.31
-        for <ceph-devel@vger.kernel.org>; Mon, 23 Sep 2013 16:47:11 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1309231602470.7394@cobra.newdream.net>
+Received: from mga02.intel.com ([134.134.136.20]:33055 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752125Ab3IXBFw (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 23 Sep 2013 21:05:52 -0400
+In-Reply-To: <CAAM7YA=apJ-jJy3iHVrW3O-_nhXvkYFUTKBv73kD-B-RoY47Dg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@inktank.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Mon, Sep 23, 2013 at 4:11 PM, Sage Weil <sage@inktank.com> wrote:
-> On Mon, 23 Sep 2013, Yehuda Sadeh wrote:
->> Real short description of rgw quota feature implementation as was discussed:
->>
->> 1. Implement per-bucket quota
->>
->>  - we already have a per-bucket total info
->>  - cache per-bucket info in rgw
->>  - define per-bucket max (can set default per system, per user, per bucket)
->>  - define a threshold for which operations are synchronous (e.g., 90%)
->>  - if bucket crossed soft threshold then before each write, update
->> internal cache, check that not crossed hard limit
->>  - update internal cache with approximated bucket info after write
->>  - if not crossed soft threshold then use a ttl to determine when to
->> re-read the bucket info
->>      - should reuse data log mechanism for that
->
-> Sounds good.  What would the TTL be?
+updated patch. add comments for the locking, no function changes.
 
-configurable, should be in the order of minutes.
->
->> 2. per-user quota
->>
->>  - create a new user objclass
->>  - move user bucket-list omap operations to objclass
->>  - add a new namespace to user info omap
->
-> add attr version to indicate whether to do a format-upgrade on the
-> object content?
+---
+From d40facb3df480994ab6575a1ce90b645123b1f92 Mon Sep 17 00:00:00 2001
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Date: Sun, 22 Sep 2013 11:08:14 +0800
+Subject: [PATCH] ceph: handle race between cap reconnect and cap release
 
-Not really required, we can do that in the same way we introduced
-extra data to the bucket index omap. We define a single char prefix
-for new entries from the set of chars that were not allowed to be used
-up until now (the buckets names can only contain specific set of
-chars). E.g., prefixing all new data with 0x80.
+When a cap get released while composing the cap reconnect message.
+We should skip queuing the release message if the cap hasn't been
+added to the cap reconnect message.
 
->
->>  - add user objclass functions:
->>     - set buckets info
->>     - get total
->>     - update per-bucket info
->>  - per-user ttl should determine when to re-examine all user buckets.
->> This should only be used if user have had data modification since last
->> time all buckets were checked.
->
-> is there an existing way to know whehter there has been a modification?
->
+Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+---
+ fs/ceph/caps.c       |  8 +++++++-
+ fs/ceph/mds_client.c | 21 ++++++++++++++++++---
+ fs/ceph/mds_client.h |  1 +
+ 3 files changed, 26 insertions(+), 4 deletions(-)
 
-Maybe we can read the bucket index mtime for that. In any case we
-should have some versioning within the bucket index, though I'm not
-sure it's readily exported.
+diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+index d2d6e40..3c0a4bd 100644
+--- a/fs/ceph/caps.c
++++ b/fs/ceph/caps.c
+@@ -909,7 +909,13 @@ void __ceph_remove_cap(struct ceph_cap *cap, bool queue_release)
+ 
+ 	/* remove from session list */
+ 	spin_lock(&session->s_cap_lock);
+-	if (queue_release)
++	/*
++	 * s_cap_reconnect is protected by s_cap_lock. no one changes
++	 * s_cap_gen while session is in the reconnect state.
++	 */
++	if (queue_release &&
++	    (!session->s_cap_reconnect ||
++	     cap->cap_gen == session->s_cap_gen))
+ 		__queue_cap_release(session, ci->i_vino.ino, cap->cap_id,
+ 				    cap->mseq, cap->issue_seq);
+ 
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index 6b4ed35..30397a6 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -444,6 +444,7 @@ static struct ceph_mds_session *register_session(struct ceph_mds_client *mdsc,
+ 	INIT_LIST_HEAD(&s->s_waiting);
+ 	INIT_LIST_HEAD(&s->s_unsafe);
+ 	s->s_num_cap_releases = 0;
++	s->s_cap_reconnect = 0;
+ 	s->s_cap_iterator = NULL;
+ 	INIT_LIST_HEAD(&s->s_cap_releases);
+ 	INIT_LIST_HEAD(&s->s_cap_releases_done);
+@@ -1415,7 +1416,6 @@ static void discard_cap_releases(struct ceph_mds_client *mdsc,
+ 	unsigned num;
+ 
+ 	dout("discard_cap_releases mds%d\n", session->s_mds);
+-	spin_lock(&session->s_cap_lock);
+ 
+ 	/* zero out the in-progress message */
+ 	msg = list_first_entry(&session->s_cap_releases,
+@@ -1442,8 +1442,6 @@ static void discard_cap_releases(struct ceph_mds_client *mdsc,
+ 		msg->front.iov_len = sizeof(*head);
+ 		list_add(&msg->list_head, &session->s_cap_releases);
+ 	}
+-
+-	spin_unlock(&session->s_cap_lock);
+ }
+ 
+ /*
+@@ -2488,6 +2486,7 @@ static int encode_caps_cb(struct inode *inode, struct ceph_cap *cap,
+ 	cap->seq = 0;        /* reset cap seq */
+ 	cap->issue_seq = 0;  /* and issue_seq */
+ 	cap->mseq = 0;       /* and migrate_seq */
++	cap->cap_gen = cap->session->s_cap_gen;
+ 
+ 	if (recon_state->flock) {
+ 		rec.v2.cap_id = cpu_to_le64(cap->cap_id);
+@@ -2611,8 +2610,20 @@ static void send_mds_reconnect(struct ceph_mds_client *mdsc,
+ 	dout("session %p state %s\n", session,
+ 	     session_state_name(session->s_state));
+ 
++	spin_lock(&session->s_gen_ttl_lock);
++	session->s_cap_gen++;
++	spin_unlock(&session->s_gen_ttl_lock);
++
++	spin_lock(&session->s_cap_lock);
++	/*
++	 * notify __ceph_remove_cap() that we are composing cap reconnect.
++	 * If a cap get released before being added to the cap reconnect,
++	 * __ceph_remove_cap() should skip queuing cap release.
++	 */
++	session->s_cap_reconnect = 1;
+ 	/* drop old cap expires; we're about to reestablish that state */
+ 	discard_cap_releases(mdsc, session);
++	spin_unlock(&session->s_cap_lock);
+ 
+ 	/* traverse this session's caps */
+ 	s_nr_caps = session->s_nr_caps;
+@@ -2627,6 +2638,10 @@ static void send_mds_reconnect(struct ceph_mds_client *mdsc,
+ 	if (err < 0)
+ 		goto fail;
+ 
++	spin_lock(&session->s_cap_lock);
++	session->s_cap_reconnect = 0;
++	spin_unlock(&session->s_cap_lock);
++
+ 	/*
+ 	 * snaprealms.  we provide mds with the ino, seq (version), and
+ 	 * parent for all of our realms.  If the mds has any newer info,
+diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
+index c2a19fb..4c053d0 100644
+--- a/fs/ceph/mds_client.h
++++ b/fs/ceph/mds_client.h
+@@ -132,6 +132,7 @@ struct ceph_mds_session {
+ 	struct list_head  s_caps;     /* all caps issued by this session */
+ 	int               s_nr_caps, s_trim_caps;
+ 	int               s_num_cap_releases;
++	int		  s_cap_reconnect;
+ 	struct list_head  s_cap_releases; /* waiting cap_release messages */
+ 	struct list_head  s_cap_releases_done; /* ready to send */
+ 	struct ceph_cap  *s_cap_iterator;
+-- 
+1.8.1.4
 
-> i was thinking:
->
->  - objclass function set_refresh_stamp(now + some interval) to indicate
-> that we may modify a particular bucket that is covered by a quota
-
-Not sure about the 'we may modify a particular bucket' here. As we're
-now looking at the per-user overall info, so there's no sense for
-setting that on a per-bucket. What this should indicate is that the
-bucket info is fresh enough that there's really no need to re-examine
-it.
-
-
->  - if the refresh stamp has expired, an(other) rgw should refresh the
-> stats for that bucket in the user info omap
-
-There's no such async mechanism that'll trigger this operation. This
-is only going to be triggered on ad-hoc basis when new write requests
-arrive.
-
->    - if there have been no changes since the last refresh, don't reset of
-> the refresh in the future but zero it out instead (i.e., mark the bucket
-> idle)
-
-Well, we actually look at it probably when we're just about to write
-new data into the bucket. Does setting the bucket idle make sense?
-Also, is the added idle state really worth the added complexity?
-I was thinking of having a per-user last modified field within the
-user info. If that's behind the last complete scan timestamp then we
-wouldn't need to do a complete re-scan.
-
->
-> ?
->
->>  - cache per-user total in gateway
->>  - if crossed soft threshold switch to sync mode (like in the bucket case)
->>  - touched buckets should be updated periodically (in the user buckets list)
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
