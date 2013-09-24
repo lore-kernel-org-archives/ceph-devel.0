@@ -1,84 +1,264 @@
-From: majianpeng <majianpeng@gmail.com>
-Subject: Re: Re: [PATCH] ceph: fix sync read eof check deadlock
-Date: Tue, 24 Sep 2013 10:43:26 +0800
-Message-ID: <201309241043226589572@gmail.com>
-References: <201309230939212660680@gmail.com>,
-	<CAAM7YA=bg=T0s3kagEquXfSdnxWT2-4Yv6863dhVhuTW0MNQjg@mail.gmail.com>
-Reply-To: majianpeng <majianpeng@gmail.com>
+From: Guangliang Zhao <lucienchao@gmail.com>
+Subject: Re: [PATCH v3] rbd: add ioctl for rbd
+Date: Tue, 24 Sep 2013 11:06:57 +0800
+Message-ID: <20130924030657.GA8545@x230>
+References: <1379486151-8939-1-git-send-email-guangliang@unitedstack.com>
+ <523DC10B.1080504@linaro.org>
+ <523FF68B.80203@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="iso-8859-1"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:38945 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752706Ab3IXCna (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Sep 2013 22:43:30 -0400
-Received: by mail-pb0-f46.google.com with SMTP id rq2so3977392pbb.33
-        for <ceph-devel@vger.kernel.org>; Mon, 23 Sep 2013 19:43:29 -0700 (PDT)
+Received: from mail-pa0-f46.google.com ([209.85.220.46]:63527 "EHLO
+	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752529Ab3IXDHD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Sep 2013 23:07:03 -0400
+Received: by mail-pa0-f46.google.com with SMTP id fa1so4364868pad.19
+        for <ceph-devel@vger.kernel.org>; Mon, 23 Sep 2013 20:07:02 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <523FF68B.80203@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?iso-8859-1?B?WWFuLCBaaGVuZw==?= <ukernel@gmail.com>
-Cc: sage <sage@inktank.com>, =?iso-8859-1?B?WWFuLCBaaGVuZw==?= <zheng.z.yan@intel.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Josh Durgin <josh.durgin@inktank.com>
+Cc: Alex Elder <alex.elder@linaro.org>, Guangliang Zhao <guangliang@unitedstack.com>, ceph-devel@vger.kernel.org, sage@inktank.com, lucienchao@gmail.com
 
-Pk9uIE1vbiwgU2VwIDIzLCAyMDEzIGF0IDk6MzkgQU0sIG1hamlhbnBlbmcgPG1hamlhbnBlbmdA
-Z21haWwuY29tPiB3cm90ZToNCj4+IEFzIFlhbixaaGVuZyBzYWlkLCBjb21taXQgMDkxMzQ0NDIw
-OGRiIGludHJ1b2R1Y2UgYSBidWc6ImdldGF0dHIgbmVlZCB0bw0KPj4gInJlYWQgbG9jayIgaW5v
-ZGUncyBmaWxlbG9jay4gQnV0IHRoZSBsb2NrIGNhbiBiZSBpbiB1bnN0YWJsZSBzdGF0ZS4NCj4+
-IHRoZSBnZXRhdHRyIHJlcXVlc3Qgd2FpdHMgZm9yIGxvY2sncyBzdGF0ZSB0byBiZWNvbWUgc3Rh
-YmxlLCB0aGUgbG9jaw0KPj4gd2FpdHMgZm9yIGNsaWVudCB0byByZWxlYXNlIEZyIGNhcC4iDQo+
-Pg0KPj4gQ29tbWl0IDZhMDI2NTg5YmEzMzMxODVjNDY2YzkwIHJlc29sdmVkIHRoZSBzYW1lIGJ1
-ZyBhbHNvLg0KPj4gQmVmb3JlIGRvaW5nIGdldGF0dHIsIGl0IG11c3QgcHV0IHRoZSBjYXBzIHdo
-aWNoIGFscmVhZHkgaG9sZCBhdm9pZA0KPj4gZGVhZGxvY2suDQo+Pg0KPj4gUmVwb3J0ZWQtYnk6
-IFlhbiwgWmhlbmcgPHpoZW5nLnoueWFuQGludGVsLmNvbT4NCj4+IFNpZ25lZC1vZmYtYnk6IEpp
-YW5wZW5nIE1hIDxtYWppYW5wZW5nQGdtYWlsLmNvbT4NCj4+IC0tLQ0KPj4gIGZzL2NlcGgvZmls
-ZS5jIHwgMjUgKysrKysrKysrKysrKysrKysrKystLS0tLQ0KPj4gIDEgZmlsZSBjaGFuZ2VkLCAy
-MCBpbnNlcnRpb25zKCspLCA1IGRlbGV0aW9ucygtKQ0KPj4NCj4+IGRpZmYgLS1naXQgYS9mcy9j
-ZXBoL2ZpbGUuYyBiL2ZzL2NlcGgvZmlsZS5jDQo+PiBpbmRleCA3ZGEzNWM3Li5iYzAwYWNlIDEw
-MDY0NA0KPj4gLS0tIGEvZnMvY2VwaC9maWxlLmMNCj4+ICsrKyBiL2ZzL2NlcGgvZmlsZS5jDQo+
-PiBAQCAtODM5LDcgKzgzOSwxNSBAQCBhZ2FpbjoNCj4+ICAgICAgICAgICAgICAgICByZXQgPSBj
-ZXBoX3N5bmNfcmVhZChpb2NiLCAmaSwgJmNoZWNrZW9mKTsNCj4+DQo+PiAgICAgICAgICAgICAg
-ICAgaWYgKGNoZWNrZW9mICYmIHJldCA+PSAwKSB7DQo+PiAtICAgICAgICAgICAgICAgICAgICAg
-ICBpbnQgc3RhdHJldCA9IGNlcGhfZG9fZ2V0YXR0cihpbm9kZSwNCj4+ICsgICAgICAgICAgICAg
-ICAgICAgICAgIGludCBzdGF0cmV0Ow0KPj4gKyAgICAgICAgICAgICAgICAgICAgICAgLyoNCj4+
-ICsgICAgICAgICAgICAgICAgICAgICAgICAqQmVmb3JlIGdldGF0dHIsaXQgc2hvdWxkIHB1dCBj
-YXBzIGF2b2lkDQo+PiArICAgICAgICAgICAgICAgICAgICAgICAgKmRlYWRsb2NrLg0KPj4gKyAg
-ICAgICAgICAgICAgICAgICAgICAgICovDQo+PiArICAgICAgICAgICAgICAgICAgICAgICBjZXBo
-X3B1dF9jYXBfcmVmcyhjaSwgZ290KTsNCj4+ICsgICAgICAgICAgICAgICAgICAgICAgIGdvdCA9
-IDA7DQo+PiArDQo+PiArICAgICAgICAgICAgICAgICAgICAgICBzdGF0cmV0ID0gY2VwaF9kb19n
-ZXRhdHRyKGlub2RlLA0KPj4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgQ0VQSF9TVEFUX0NBUF9TSVpFKTsNCj4+DQo+PiAgICAgICAgICAgICAg
-ICAgICAgICAgICAvKiBoaXQgRU9GIG9yIGhvbGU/ICovDQo+PiBAQCAtODUxLDE2ICs4NTksMjMg
-QEAgYWdhaW46DQo+Pg0KPj4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICByZWFkICs9
-IHJldDsNCj4+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgY2hlY2tlb2YgPSAwOw0K
-Pj4gLSAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBnb3RvIGFnYWluOw0KPj4gKyAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICByZXQgPSBjZXBoX2dldF9jYXBzKGNpLCBDRVBIX0NB
-UF9GSUxFX1JELA0KPj4gKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICB3YW50LCAmZ290LCAtMSk7DQo+PiArICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgIGlmIChyZXQgPCAwKQ0KPj4gKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgIHJldCA9IDA7DQo+PiArICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGVs
-c2UNCj4+ICsgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBnb3RvIGFnYWlu
-Ow0KPg0KPkkgdGhpbmsgd2Ugc2hvdWxkIHRyeSBnZXR0aW5nIEZyYyBjYXBzIGhlcmUsIGJlY2F1
-c2UgbWRzIG1heSBpc3N1ZSBGYw0KPmNhcCB0byB0aGUgY2xpZW50IHdoaWxlIHJlcXVlc3Rpbmcg
-dGhlIHNpemUuDQo+DQpZZXMsaXQgbWF5YmUgZ2V0IEZjLk15IHRob3VnaCB3aGV0aGVyIG9yIG5v
-dCwgdGhlIGxhdGVyIHJlYWQgb25seSB1c2luZyBzeW5jX21vZGUuDQpUaGUgcmVhc29uOg0KQTpm
-b3IgcmVxdWVzdGluZyBzaXplIG9ubHkgZm9yIHN5bmMtcmVhZCBub3QgY2FjaGUtcmVhZA0KQjpC
-eSB0aGUgb3JpZ2luYWwsIGl0IHdpbGwgbWFrZSB0aGUgY2FjaGUtcmVhZCB0byBkbyB0aGUgc2Ft
-ZSB0aGluZyB3aGljaCBzeW5jLXJlYWQgYWxyZWFkIGRvbmUuDQoNClRoYW5rcyENCkppYW5wZW5n
-IE1hDQo+WW91ciBwcmV2aW91cyBwYXRjaCBtb3ZlZCB0aGUgZ2V0YXR0ciBjb2RlIHRvIGhlcmUu
-IHBsZWFzZSByZXZlcnQgdGhlDQo+Y29kZSB0byBpdHMgb3JpZ2luYWwgc2hhcGUuIEkgdGhpbmsg
-aXQgZG9lcyB0aGUgcmlnaHQgdGhpbmcuDQo+DQo+DQo+UmVnYXJkcw0KPllhbiwgWmhlbmcNCj4N
-Cj4NCj4+ICAgICAgICAgICAgICAgICAgICAgICAgIH0NCj4+ICAgICAgICAgICAgICAgICB9DQo+
-Pg0KPj4gICAgICAgICB9IGVsc2UNCj4+ICAgICAgICAgICAgICAgICByZXQgPSBnZW5lcmljX2Zp
-bGVfYWlvX3JlYWQoaW9jYiwgaW92LCBucl9zZWdzLCBwb3MpOw0KPj4NCj4+IC0gICAgICAgZG91
-dCgiYWlvX3JlYWQgJXAgJWxseC4lbGx4IGRyb3BwaW5nIGNhcCByZWZzIG9uICVzID0gJWRcbiIs
-DQo+PiAtICAgICAgICAgICAgaW5vZGUsIGNlcGhfdmlub3AoaW5vZGUpLCBjZXBoX2NhcF9zdHJp
-bmcoZ290KSwgKGludClyZXQpOw0KPj4gLSAgICAgICBjZXBoX3B1dF9jYXBfcmVmcyhjaSwgZ290
-KTsNCj4+ICsgICAgICAgaWYgKGdvdCkgew0KPj4gKyAgICAgICAgICAgICAgIGRvdXQoImFpb19y
-ZWFkICVwICVsbHguJWxseCBkcm9wcGluZyBjYXAgcmVmcyBvbiAlcyA9ICVkXG4iLA0KPj4gKyAg
-ICAgICAgICAgICAgICAgICAgaW5vZGUsIGNlcGhfdmlub3AoaW5vZGUpLCBjZXBoX2NhcF9zdHJp
-bmcoZ290KSwgKGludClyZXQpOw0KPj4gKyAgICAgICAgICAgICAgIGNlcGhfcHV0X2NhcF9yZWZz
-KGNpLCBnb3QpOw0KPj4gKyAgICAgICB9DQo+DQo+DQo+DQo+DQo+Pg0KPj4gICAgICAgICBpZiAo
-cmV0ID49IDApDQo+PiAgICAgICAgICAgICAgICAgcmV0ICs9IHJlYWQ7DQo+PiAtLQ0KPj4gMS44
-LjQtcmMw
+On Mon, Sep 23, 2013 at 01:06:35AM -0700, Josh Durgin wrote:
+> On 09/21/2013 08:53 AM, Alex Elder wrote:
+> >On 09/18/2013 01:35 AM, Guangliang Zhao wrote:
+> >>When running the following commands:
+> >>     [root@ceph0 mnt]# blockdev --setro /dev/rbd1
+> >>     [root@ceph0 mnt]# blockdev --getro /dev/rbd1
+> >>     0
+> >>
+> >>The block setro didn't take effect, it is because
+> >>the rbd doesn't support ioctl of block driver.
+> >
+> >Nicely done.
+> >
+> >I have a couple small comments below, and one simple
+> >change that needs to be made.
+> >
+> >I also point out another issue about the use of
+> >the spinlock to protect against read-only state
+> >changes; I'd like Josh to weigh in on how he thinks
+> >it might best be handled.
+> >
+> >Provided you make the simple change, and Josh has no
+> >problem with the read-only state thing:
+> >
+> >Reviewed-by: Alex Elder <elder@linaro.org>
+> >
+> >The required change is something Josh mentioned.  In
+> >rbd_request_fn(), the variable read_only is defined
+> >and assigned at the top of the function.  That line
+> >needs to be inside the while loop, to ensure that
+> >the most up-to-date value is used (in case it gets
+> >changed between requests).
 
+Sorry, forgot it.
+
+> >
+> >>The results with this patch:
+> >>root@ceph-client01:~# rbd map img
+> >>root@ceph-client01:~# blockdev --getro /dev/rbd1
+> >>0
+> >>root@ceph-client01:~# cat /sys/block/rbd1/ro
+> >>0
+> >>root@ceph-client01:~# blockdev --setro /dev/rbd1
+> >>root@ceph-client01:~# blockdev --getro /dev/rbd1
+> >>1
+> >>root@ceph-client01:~# cat /sys/block/rbd1/ro
+> >>1
+> >>root@ceph-client01:~# dd if=/dev/zero of=/dev/rbd1 count=1
+> >>dd: opening `/dev/rbd1': Read-only file system`
+> >>root@ceph-client01:~# blockdev --setrw /dev/rbd1
+> >>root@ceph-client01:~# blockdev --getro /dev/rbd1
+> >>0
+> >>root@ceph-client01:~# cat /sys/block/rbd1/ro
+> >>0
+> >>root@ceph-client01:~# dd if=/dev/zero of=/dev/rbd1 count=1
+> >>1+0 records in
+> >>1+0 records out
+> >>512 bytes (512 B) copied, 0.14989 s, 3.4 kB/s
+> >
+> >I don't necessarily want to see all this testing output
+> >in the commit description (a summary would suffice).  As
+> >Josh suggested, some sort of test script to validate all
+> >of this would be much appreciated.  It can be very simple:
+> >- map rbd device
+> >- run "blockdev --getro" on it, and verify it reports 0
+> >- run "blockdev --setro" and verify it is now read-only
+> >... and so on.
+> >
+> >Tests we suggested, which I expect will pass but I
+> >don't see evidence of it in your description above:
+> >- verify changing the state (setro or setrw) fails on
+> >   a device that's already open (e.g. mounted) (EBUSY)
+> >- verify setro on a snapshot that's mounted (EBUSY)
+> >- verify setrw on a non-snapshot image that is mapped
+> >   read-only (EROFS)
+
+All of above have been tested manually, and I also think it should be 
+better if add these scripts into qa/rbd/rbd.sh
+
+> 
+> To be clear, you have to use the sysfs interface with the 'ro' option
+> to test this case, rather than using the 'rbd map' command, which
+> has no way to pass the 'ro' or 'rw' options.
+> 
+> The syntax is documented in Documentation/ABI/testing/sysfs-bus-rbd.
+
+Thanks.
+
+BTW, I have submitted a patch for it, and "rbd map" could map readonly
+device soon.
+
+> 
+> >- verify setrw on a snapshot fails (EROFS)
+> >
+> >>This resolves:
+> >>	http://tracker.ceph.com/issues/6265
+> >>
+> >>Signed-off-by: Guangliang Zhao <guangliang@unitedstack.com>
+> >>---
+> >>  drivers/block/rbd.c |   59 +++++++++++++++++++++++++++++++++++++++++++++++++++
+> >>  1 file changed, 59 insertions(+)
+> >>
+> >>diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> >>index 2f00778..fea826d 100644
+> >>--- a/drivers/block/rbd.c
+> >>+++ b/drivers/block/rbd.c
+> >>@@ -508,10 +508,69 @@ static void rbd_release(struct gendisk *disk, fmode_t mode)
+> >>  	put_device(&rbd_dev->dev);
+> >>  }
+> >>
+> >>+static int rbd_ioctl_set_ro(struct rbd_device *rbd_dev, unsigned long arg)
+> >>+{
+> >>+	int val;
+> >>+	bool ro;
+> >>+
+> >>+	if (get_user(val, (int __user *)(arg)))
+> >>+		return -EFAULT;
+> >>+
+> >>+	ro = val ? true : false;
+> >>+	/* Snapshot doesn't allow to write*/
+> >>+	if (rbd_dev->spec->snap_id != CEPH_NOSNAP && !ro)
+> >>+		return -EROFS;
+> >>+
+> >>+	if (rbd_dev->mapping.read_only != ro) {
+> >>+		rbd_dev->mapping.read_only = ro;
+> >>+		set_disk_ro(rbd_dev->disk, ro ? 1 : 0);
+> >
+> >This is interesting.  Josh mentioned that the set_device_ro()
+> >call you had here previously was not needed, because the generic
+> >ioctl code handled it.
+> >
+> >But I believe calling set_disk_ro() (which triggers a udev event)
+> >is the right thing to do, even though rbd doesn't support partitions.
+> >In fact, it might be more appropriate for the generic code to call
+> >that using bdev->bd_disk.  Hmmm.  (I don't have time to look into
+> >this any further right now, maybe if someone thinks it's worth
+> >pursuing they can do so.)
+> >
+> >In the mean time this does more than set_device_ro(), and the
+> >redundancy is harmless.  HOWEVER I believe that calling
+> >this while holding the spinlock will cause locking problems
+> >(or may just be a bad idea).  I don't know for sure; let
+> >lockdep be your guide.
+> 
+> I'm not sure about this either, it'd be good to verify it's
+> ok by running with lockdep.
+
+I have turned on the lockdep, and I couldn't see anything related with
+rbd in /proc/lockdep and dmesg, so I think that should be OK.
+
+> 
+> >>+	}
+> >>+
+> >>+	return 0;
+> >>+}
+> >>+
+> >>+static int rbd_ioctl(struct block_device *bdev, fmode_t mode,
+> >>+			unsigned int cmd, unsigned long arg)
+> >>+{
+> >>+	struct rbd_device *rbd_dev = bdev->bd_disk->private_data;
+> >>+	int ret = 0;
+> >>+
+> >>+	spin_lock_irq(&rbd_dev->lock);
+> >>+	/* prevent others open this device */
+> >
+> >I think indicating something more like "make sure we hold the only
+> >reference to this device" would make it clear why you're checking
+> >against 1 rather than 0.
+> >
+> >>+	if (rbd_dev->open_count > 1) {
+> >>+		ret = -EBUSY;
+> >>+		goto out;
+> >>+	}
+> >
+> >You are adding a new ability to change a fundamental state
+> >for an image.  You're using the spinlock now to protect
+> >the read-only state, where previously it was only used to
+> >protect the open count and REMOVING state/flag.  This
+> >may mean you should check the read_only flag in rbd_open()
+> >inside the spinlock there.  And you may need to call the
+> >set_device_ro() there under protection of that lock.
+> >
+> >As I mentioned above, holding the lock could also lead
+> >to a problem when calling outside code (set_disk_ro()).
+> >If that's the case you may need to devise a different
+> >(possibly additional) way to protect this.
+> >
+> >Josh, please offer your insights.
+> 
+> I think with the current structure (rbd_open() calling set_device_ro())
+> protecting this with a spinlock won't cause a lock inversion, since
+> rbd_open() is not called with the bdev lock held.
+> 
+> With the change to rbd_request_fn() Alex mentioned, could you verify
+> it has no problems with lockdep enabled? If so, it looks good to me.
+
+All of the changes and lockdep enabled.
+
+> 
+> Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
+> 
+> >>+
+> >>+	switch (cmd) {
+> >>+	case BLKROSET:
+> >>+		ret = rbd_ioctl_set_ro(rbd_dev, arg);
+> >>+		break;
+> >>+	default:
+> >>+		ret = -ENOTTY;
+> >>+	}
+> >>+
+> >>+out:
+> >>+	spin_unlock_irq(&rbd_dev->lock);
+> >>+	return ret;
+> >>+}
+> >>+
+> >>+#ifdef CONFIG_COMPAT
+> >>+static int rbd_compat_ioctl(struct block_device *bdev, fmode_t mode,
+> >>+				unsigned int cmd, unsigned long arg)
+> >>+{
+> >>+	return rbd_ioctl(bdev, mode, cmd, arg);
+> >>+}
+> >>+#endif /* CONFIG_COMPAT */
+> >>+
+> >>  static const struct block_device_operations rbd_bd_ops = {
+> >>  	.owner			= THIS_MODULE,
+> >>  	.open			= rbd_open,
+> >>  	.release		= rbd_release,
+> >>+	.ioctl			= rbd_ioctl,
+> >>+#ifdef CONFIG_COMPAT
+> >>+	.compat_ioctl		= rbd_compat_ioctl,
+> >>+#endif
+> >>  };
+> >>
+> >>  /*
+> >>
+> >
+> 
+
+-- 
+Best regards,
+Guangliang
