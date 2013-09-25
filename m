@@ -1,58 +1,36 @@
-From: Milosz Tanski <milosz@adfin.com>
-Subject: [PATCH] ceph: hung on ceph fscache invalidate in some cases
-Date: Wed, 25 Sep 2013 11:18:14 -0400
-Message-ID: <20130925151811.GA32800@gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: userspace lockdep
+Date: Wed, 25 Sep 2013 09:08:02 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1309250905130.12717@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-Sender: linux-kernel-owner@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:56003 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754373Ab3IYQID (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 25 Sep 2013 12:08:03 -0400
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id E44BC8047B
+	for <ceph-devel@vger.kernel.org>; Wed, 25 Sep 2013 09:08:02 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id C0F848047B
+	for <ceph-devel@vger.kernel.org>; Wed, 25 Sep 2013 09:08:02 -0700 (PDT)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
-Cc: sage@inktank.com, zheng.z.yan@intel.com, dhowells@redhat.com, linux-cachefs@redhat.com, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
 
-In some cases I'm on my ceph client cluster I'm seeing hunk kernel tasks in
-the invalidate page code path. This is due to the fact that we don't check if
-the page is marked as cache before calling fscache_wait_on_page_write().
+http://lwn.net/Articles/536363/
 
-This is the log from the hang
+Sasha Levin put together a userland LD_PRELOAD wrapper around the Linux 
+kernel lockdep.  Colin's Locksmith is also linked from the comments.
 
-INFO: task XXXXXX:12034 blocked for more than 120 seconds.
-"echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
- ...
-Call Trace:
-[<ffffffff81568d09>] schedule+0x29/0x70
-[<ffffffffa01d4cbd>] __fscache_wait_on_page_write+0x6d/0xb0 [fscache]
-[<ffffffff81083520>] ? add_wait_queue+0x60/0x60
-[<ffffffffa029a3e9>] ceph_invalidate_fscache_page+0x29/0x50 [ceph]
-[<ffffffffa027df00>] ceph_invalidatepage+0x70/0x190 [ceph]
-[<ffffffff8112656f>] ? delete_from_page_cache+0x5f/0x70
-[<ffffffff81133cab>] truncate_inode_page+0x8b/0x90
-[<ffffffff81133ded>] truncate_inode_pages_range.part.12+0x13d/0x620
-[<ffffffff8113431d>] truncate_inode_pages_range+0x4d/0x60
-[<ffffffff811343b5>] truncate_inode_pages+0x15/0x20
-[<ffffffff8119bbf6>] evict+0x1a6/0x1b0
-[<ffffffff8119c3f3>] iput+0x103/0x190
- ...
+It's been a while since I looked at locksmith, but I seem to remember 
+thinking that there was something that ceph's lockdep does that 
+wasn't captured (class-based instead of instance-based graph?).
 
-Signed-off-by: Milosz Tanski <milosz@adfin.com>
----
- fs/ceph/cache.c |    3 +++
- 1 file changed, 3 insertions(+)
+In any case, if anyone is interested in this stuff, it may be possible to 
+use one of these libraries and rip out our kludgey lockdep implementation.  
+That would be nice!
 
-diff --git a/fs/ceph/cache.c b/fs/ceph/cache.c
-index 6bfe65e..360b622 100644
---- a/fs/ceph/cache.c
-+++ b/fs/ceph/cache.c
-@@ -324,6 +324,9 @@ void ceph_invalidate_fscache_page(struct inode* inode, struct page *page)
- {
- 	struct ceph_inode_info *ci = ceph_inode(inode);
- 
-+	if (!PageFsCache(page))
-+		return;
-+
- 	fscache_wait_on_page_write(ci->fscache, page);
- 	fscache_uncache_page(ci->fscache, page);
- }
--- 
-1.7.9.5
+sage
+
