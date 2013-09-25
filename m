@@ -1,78 +1,77 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Ceph users meetup
-Date: Wed, 25 Sep 2013 17:27:37 +0200
-Message-ID: <524300E9.2050102@dachary.org>
-References: <5242A48C.80407@dachary.org> <CABZ+qqkGX50B4JjL8CVdJcnGazvsAUCG-F2pDiRpChMG22bmtw@mail.gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH] ceph: hung on ceph fscache invalidate in some cases
+Date: Wed, 25 Sep 2013 10:45:50 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1309251045070.12714@cobra.newdream.net>
+References: <20130925151811.GA32800@gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enigEAD8189BDEEAF6FED01329FF"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:45266 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750840Ab3IYQX4 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 25 Sep 2013 12:23:56 -0400
-In-Reply-To: <CABZ+qqkGX50B4JjL8CVdJcnGazvsAUCG-F2pDiRpChMG22bmtw@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Dan van der Ster <dan@vanderster.com>
-Cc: Patrick McGarry <patrick@inktank.com>, ERIC MOURGAYA VIRAPATRIN <eric.mourgaya-virapatrin@arkea.com>, Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20130925151811.GA32800@gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Milosz Tanski <milosz@adfin.com>
+Cc: ceph-devel@vger.kernel.org, zheng.z.yan@intel.com, dhowells@redhat.com, linux-cachefs@redhat.com, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enigEAD8189BDEEAF6FED01329FF
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Applied this to the ceph-client.git master branch.  I'll send this 
+upstream shortly after it gets some testing and/or any other fixes pile 
+up.
+
+Thanks!
+sage
 
 
 
-On 25/09/2013 16:08, Dan van der Ster wrote:
-> I'd probably be interested, but naive question.. how would this be
-> different from the Ceph Days?
+On Wed, 25 Sep 2013, Milosz Tanski wrote:
 
-I would like to see and participate in a community driven event. On a lar=
-ger scale I guess it's the same difference as OSCON versus FOSDEM. If a m=
-eetup is organized in your town you can go after work, almost no need to =
-plan in advance. Going to FOSDEM is designed to be cheap ( travel & accom=
-modation ) and probably easier for people working in universities or empl=
-oyees brave enough to take a two days vacations to attend because their c=
-ompany does not see the benefit ( yet ;-)=20
-
-> On Wed, Sep 25, 2013 at 10:53 AM, Loic Dachary <loic@dachary.org> wrote=
-:
->> Hi Eric & Patrick,
->>
->> Yesterday morning Eric suggested that organizing a ceph user meetup wo=
-uld be great and proposed his help to make it happen. Although I'd be ver=
-y happy to attend a france based meetup, it may make sense to also organi=
-ze a Europe wide meetup. For instance it would be great to have a Ceph ro=
-om during FOSDEM ( http://fosdem.org/ february 2014 ).
->>
->> Cheers
->>
->> --
->> Lo=EFc Dachary, Artisan Logiciel Libre
->> All that is necessary for the triumph of evil is that good people do n=
-othing.
->>
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-All that is necessary for the triumph of evil is that good people do noth=
-ing.
-
-
---------------enigEAD8189BDEEAF6FED01329FF
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with undefined - http://www.enigmail.net/
-
-iEYEARECAAYFAlJDAOoACgkQ8dLMyEl6F2245gCeLkCxifqsy2wMZsHpql9kb0oO
-Y9oAnRsF3aS+piBdiiE3CzsZUNzgFgro
-=/zBR
------END PGP SIGNATURE-----
-
---------------enigEAD8189BDEEAF6FED01329FF--
+> In some cases I'm on my ceph client cluster I'm seeing hunk kernel tasks in
+> the invalidate page code path. This is due to the fact that we don't check if
+> the page is marked as cache before calling fscache_wait_on_page_write().
+> 
+> This is the log from the hang
+> 
+> INFO: task XXXXXX:12034 blocked for more than 120 seconds.
+> "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+>  ...
+> Call Trace:
+> [<ffffffff81568d09>] schedule+0x29/0x70
+> [<ffffffffa01d4cbd>] __fscache_wait_on_page_write+0x6d/0xb0 [fscache]
+> [<ffffffff81083520>] ? add_wait_queue+0x60/0x60
+> [<ffffffffa029a3e9>] ceph_invalidate_fscache_page+0x29/0x50 [ceph]
+> [<ffffffffa027df00>] ceph_invalidatepage+0x70/0x190 [ceph]
+> [<ffffffff8112656f>] ? delete_from_page_cache+0x5f/0x70
+> [<ffffffff81133cab>] truncate_inode_page+0x8b/0x90
+> [<ffffffff81133ded>] truncate_inode_pages_range.part.12+0x13d/0x620
+> [<ffffffff8113431d>] truncate_inode_pages_range+0x4d/0x60
+> [<ffffffff811343b5>] truncate_inode_pages+0x15/0x20
+> [<ffffffff8119bbf6>] evict+0x1a6/0x1b0
+> [<ffffffff8119c3f3>] iput+0x103/0x190
+>  ...
+> 
+> Signed-off-by: Milosz Tanski <milosz@adfin.com>
+> ---
+>  fs/ceph/cache.c |    3 +++
+>  1 file changed, 3 insertions(+)
+> 
+> diff --git a/fs/ceph/cache.c b/fs/ceph/cache.c
+> index 6bfe65e..360b622 100644
+> --- a/fs/ceph/cache.c
+> +++ b/fs/ceph/cache.c
+> @@ -324,6 +324,9 @@ void ceph_invalidate_fscache_page(struct inode* inode, struct page *page)
+>  {
+>  	struct ceph_inode_info *ci = ceph_inode(inode);
+>  
+> +	if (!PageFsCache(page))
+> +		return;
+> +
+>  	fscache_wait_on_page_write(ci->fscache, page);
+>  	fscache_uncache_page(ci->fscache, page);
+>  }
+> -- 
+> 1.7.9.5
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
