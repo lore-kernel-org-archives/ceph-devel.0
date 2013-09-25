@@ -1,77 +1,52 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH] ceph: hung on ceph fscache invalidate in some cases
-Date: Wed, 25 Sep 2013 10:45:50 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1309251045070.12714@cobra.newdream.net>
-References: <20130925151811.GA32800@gmail.com>
+From: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>
+Subject: RE: CEPH Erasure Encoding + OSD Scalability
+Date: Wed, 25 Sep 2013 18:33:08 +0000
+Message-ID: <3472A07E6605974CBC9BC573F1BC02E4A5273DD6@PLOXCHG03.cern.ch>
+References: <3472A07E6605974CBC9BC573F1BC02E4A527352B@PLOXCHG03.cern.ch>,<523FED54.8040208@dachary.org>
+ <3472A07E6605974CBC9BC573F1BC02E4A52736D1@PLOXCHG03.cern.ch>,<5242FDDC.3060504@dachary.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20130925151811.GA32800@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Milosz Tanski <milosz@adfin.com>
-Cc: ceph-devel@vger.kernel.org, zheng.z.yan@intel.com, dhowells@redhat.com, linux-cachefs@redhat.com, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cernmx32.cern.ch ([137.138.144.178]:6996 "EHLO CERNMX32.cern.ch"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755381Ab3IYSdN convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 25 Sep 2013 14:33:13 -0400
+In-Reply-To: <5242FDDC.3060504@dachary.org>
+Content-Language: en-GB
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Applied this to the ceph-client.git master branch.  I'll send this 
-upstream shortly after it gets some testing and/or any other fixes pile 
-up.
+Yes, sure. I actually thought the same in the meanwhile ...  I have some questions:
 
-Thanks!
-sage
+Q: Can/should it stay in the framework of google test's or you would prefer just a plain executable ?
+
+I have added local parity support to your erasure class adding a new argument: "erasure-code-lp" and
+two new methods:
+
+localparity_encode(...)
+localparity_decode(...)
+
+I made a more complex benchmark of (8,2) + 2 local parities (1^2^3^4, 5^6^7^8) which benchmarks performance of encoding/decoding as speed & effective write-latency for three cases (each for liberation & cauchy_good codecs):
+
+1 (8,2)
+2 (8,2,lp=2)
+3 (8,2,lp=2) + crc32c (blocks)
+
+and several failure scenarios ... single, double, triple disk failures. Probably the best is if I make all this parameters configurable. 
+
+Q: For the local parity implementation .... shall I inherit from your erasure plugin and overwrite the encode/decode method or you would consider a patch to the original class?
+
+I have also a 128-bit XOR implementation for the local parities. This will work with new gcc's & clang compilers ... 
+
+Q: Which compilers/platforms are supported by CEPH? Is there a minimal GCC version?
+
+Q: is there some policy restricting comments within code? In general I see very few or no comments within the code ..
+
+Cheers Andreas.
 
 
 
-On Wed, 25 Sep 2013, Milosz Tanski wrote:
 
-> In some cases I'm on my ceph client cluster I'm seeing hunk kernel tasks in
-> the invalidate page code path. This is due to the fact that we don't check if
-> the page is marked as cache before calling fscache_wait_on_page_write().
-> 
-> This is the log from the hang
-> 
-> INFO: task XXXXXX:12034 blocked for more than 120 seconds.
-> "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
->  ...
-> Call Trace:
-> [<ffffffff81568d09>] schedule+0x29/0x70
-> [<ffffffffa01d4cbd>] __fscache_wait_on_page_write+0x6d/0xb0 [fscache]
-> [<ffffffff81083520>] ? add_wait_queue+0x60/0x60
-> [<ffffffffa029a3e9>] ceph_invalidate_fscache_page+0x29/0x50 [ceph]
-> [<ffffffffa027df00>] ceph_invalidatepage+0x70/0x190 [ceph]
-> [<ffffffff8112656f>] ? delete_from_page_cache+0x5f/0x70
-> [<ffffffff81133cab>] truncate_inode_page+0x8b/0x90
-> [<ffffffff81133ded>] truncate_inode_pages_range.part.12+0x13d/0x620
-> [<ffffffff8113431d>] truncate_inode_pages_range+0x4d/0x60
-> [<ffffffff811343b5>] truncate_inode_pages+0x15/0x20
-> [<ffffffff8119bbf6>] evict+0x1a6/0x1b0
-> [<ffffffff8119c3f3>] iput+0x103/0x190
->  ...
-> 
-> Signed-off-by: Milosz Tanski <milosz@adfin.com>
-> ---
->  fs/ceph/cache.c |    3 +++
->  1 file changed, 3 insertions(+)
-> 
-> diff --git a/fs/ceph/cache.c b/fs/ceph/cache.c
-> index 6bfe65e..360b622 100644
-> --- a/fs/ceph/cache.c
-> +++ b/fs/ceph/cache.c
-> @@ -324,6 +324,9 @@ void ceph_invalidate_fscache_page(struct inode* inode, struct page *page)
->  {
->  	struct ceph_inode_info *ci = ceph_inode(inode);
->  
-> +	if (!PageFsCache(page))
-> +		return;
-> +
->  	fscache_wait_on_page_write(ci->fscache, page);
->  	fscache_uncache_page(ci->fscache, page);
->  }
-> -- 
-> 1.7.9.5
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
