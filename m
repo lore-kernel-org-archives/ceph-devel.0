@@ -1,248 +1,152 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: [ceph-users] radosgw-admin unable to list or store user info
- after upgrade
-Date: Thu, 26 Sep 2013 12:08:31 -0700
-Message-ID: <CABBk=J-vHkabYa-CtFifsGjYSC=NXb0vj-OHjHfjWDihQ=quUQ@mail.gmail.com>
-References: <COL127-W34D4DAB91223FFC16BB19AEA280@phx.gbl>
-	<CABBk=J84Kn0UckHuoUBzG74_8aq0Ypw3TVR+_cEJd6x2pzb+zw@mail.gmail.com>
-	<COL127-W26197D457BE7EDC96D2D52EA280@phx.gbl>
-	<CABBk=J8qaRE_ukaeoE27JaLWi5j2AC1LZjowcqKYRiv+hKNeZg@mail.gmail.com>
-	<COL127-W34AD6465595C4C58FF4555EA280@phx.gbl>
-	<CABBk=J_d_R2-SRMSFqPCUQyfE1cjRMhvzZmVDLUe8mc9WhEq=Q@mail.gmail.com>
-	<COL127-W456670A24CA4604718E456EA280@phx.gbl>
-	<CABBk=J9iDcrK+TGVn4hAPRD3=vTfxHgA8rkBSDY7uC8vNJGYxQ@mail.gmail.com>
-	<COL127-W4916A1F6B99688B0983BAFEA280@phx.gbl>
-	<CABBk=J-XO=nYuSp6dKvAH+mB7vBN_qPKHu1ON-R=j0wEMith-Q@mail.gmail.com>
-	<COL127-W417EB18595F560BBE3ED14EA280@phx.gbl>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: CEPH Erasure Encoding + OSD Scalability
+Date: Thu, 26 Sep 2013 21:18:18 +0200
+Message-ID: <5244887A.80503@dachary.org>
+References: <3472A07E6605974CBC9BC573F1BC02E4A527352B@PLOXCHG03.cern.ch> <523FED54.8040208@dachary.org> <3472A07E6605974CBC9BC573F1BC02E4A52736D1@PLOXCHG03.cern.ch> <5242FDDC.3060504@dachary.org> <3472A07E6605974CBC9BC573F1BC02E4A5273DD6@PLOXCHG03.cern.ch> <52433014.3030109@dachary.org> <CAGhffvz1TYYLoqn0tps1HiLObSCv7H0ZNVgOd0raicGqgRuukA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig429DE20268F73A93A1C8311D"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vb0-f51.google.com ([209.85.212.51]:37579 "EHLO
-	mail-vb0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750856Ab3IZTId (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Sep 2013 15:08:33 -0400
-Received: by mail-vb0-f51.google.com with SMTP id x16so1160788vbf.24
-        for <ceph-devel@vger.kernel.org>; Thu, 26 Sep 2013 12:08:32 -0700 (PDT)
-In-Reply-To: <COL127-W417EB18595F560BBE3ED14EA280@phx.gbl>
+Received: from smtp.dmail.dachary.org ([91.121.254.229]:46534 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753656Ab3IZTS0 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Sep 2013 15:18:26 -0400
+In-Reply-To: <CAGhffvz1TYYLoqn0tps1HiLObSCv7H0ZNVgOd0raicGqgRuukA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mike O'Toole <mike.otoole@outlook.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Andreas-Joachim Peters <andreas.joachim.peters@cern.ch>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-There's a mismatch between the installed objclasses to the osd
-run-time environment. Did you restart the osds after the upgrade?
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig429DE20268F73A93A1C8311D
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-On Thu, Sep 26, 2013 at 11:03 AM, Mike O'Toole <mike.otoole@outlook.com> wrote:
->
-> OK, looks like here is the error.
->
-> 2013-09-26 13:25:13.955291 7f6e46fb4700  0 _load_class could not open class
-> /usr/lib/rados-classes/libcls_version.so (dlopen failed):
-> /usr/lib/rados-classes/libcls_version.so: undefined symbol:
-> _Z19cls_gen_rand_base64Pci
-> 2013-09-26 13:25:13.960017 7f6e46fb4700  0 _load_class could not open class
-> /usr/lib/rados-classes/libcls_version.so (dlopen failed):
-> /usr/lib/rados-classes/libcls_version.so: undefined symbol:
-> _Z19cls_gen_rand_base64Pci
->
->
->> Date: Thu, 26 Sep 2013 10:47:01 -0700
->
->> Subject: Re: [ceph-users] radosgw-admin unable to list or store user info
->> after upgrade
->> From: yehuda@inktank.com
->> To: mike.otoole@outlook.com; ceph-users@lists.ceph.com
->>
->> The osd returns some unexpected error:
->>
->> 2013-09-26 13:25:17.651552 7ff13cd0b700 1 -- 10.10.2.55:0/1005496 <==
->> osd.2 10.10.2.200:6800/4790 5 ==== osd_op_reply(25 bob
->> [call,getxattrs,stat] ack = -5 (Input/output error)) v4 ==== 186+0+0
->> (4137529543 0 0) 0x7ff120002490 con 0xa6a380
->>
->> Is there a matching osd log for that? I'd need to have the osd.2 log
->> for that (if specifying the admin2 user).
->>
->> On Thu, Sep 26, 2013 at 10:29 AM, Mike O'Toole <mike.otoole@outlook.com>
->> wrote:
->> > I thought that command would return a list of users. I get the same
->> > issue
->> > when I supply a --uid
->> >
->> > Here are two attached test cases.
->> >
->> > 1. (User Info) radosgw-admin user info --uid=admin2 --debug-ms=1 and
->> > --debug-rgw=20 --debug-objecter=20 &> $HOME/radosgw_admin2_user_info.out
->> > 2. (User Create) radosgw-admin user create --uid=bob
->> > --display-name="Bob"
->> > --debug-ms=1 and --debug-rgw=20 --debug-objecter=20 &>
->> > $HOME/radosgw_user_create.out
->> >
->> >
->> >> Date: Thu, 26 Sep 2013 10:02:51 -0700
->> >
->> >> Subject: Re: [ceph-users] radosgw-admin unable to list or store user
->> >> info
->> >> after upgrade
->> >> From: yehuda@inktank.com
->> >> To: mike.otoole@outlook.com; ceph-devel@vger.kernel.org
->> >>
->> >> On Thu, Sep 26, 2013 at 9:41 AM, Mike O'Toole <mike.otoole@outlook.com>
->> >> wrote:
->> >> > Sure,
->> >> >
->> >> > I issued: radosgw-admin user info --debug-ms=1 and --debug-rgw=20
->> >> > --debug-objecter=20 &> $HOME/radosgw_user_info.out
->> >>
->> >> You missed --uid=bob here. The error message is a bit confusing but
->> >> this is expected.
->> >>
->> >> >
->> >> > log info attached.
->> >> >
->> >> >
->> >> >> Date: Thu, 26 Sep 2013 09:34:45 -0700
->> >> >
->> >> >> Subject: Re: [ceph-users] radosgw-admin unable to list or store user
->> >> >> info
->> >> >> after upgrade
->> >> >> From: yehuda@inktank.com
->> >> >> To: mike.otoole@outlook.com; ceph-users@lists.ceph.com
->> >> >
->> >> >>
->> >> >> Are you sure you ran the same radosgw-admin command? the log shows a
->> >> >> different error message. Can you re-run it with also (besides the
->> >> >> --debug-ms=1 and --debug-rgw=20) also with --debug-objecter=20?
->> >> >>
->> >> >> On Thu, Sep 26, 2013 at 9:09 AM, Mike O'Toole
->> >> >> <mike.otoole@outlook.com>
->> >> >> wrote:
->> >> >> > radosgw-admin zone get
->> >> >> > { "domain_root": ".rgw",
->> >> >> > "control_pool": ".rgw.control",
->> >> >> > "gc_pool": ".rgw.gc",
->> >> >> > "log_pool": ".log",
->> >> >> > "intent_log_pool": ".intent-log",
->> >> >> > "usage_log_pool": ".usage",
->> >> >> > "user_keys_pool": ".users",
->> >> >> > "user_email_pool": ".users.email",
->> >> >> > "user_swift_pool": ".users.swift",
->> >> >> > "user_uid_pool": ".users.uid",
->> >> >> > "system_key": { "access_key": "",
->> >> >> > "secret_key": ""},
->> >> >> > "placement_pools": []}
->> >> >> >
->> >> >> > rados lspools
->> >> >> > data
->> >> >> > metadata
->> >> >> > rbd
->> >> >> > .rgw
->> >> >> > .rgw.gc
->> >> >> > .rgw.control
->> >> >> > .users.uid
->> >> >> > .users
->> >> >> > .users.email
->> >> >> > .rgw.buckets
->> >> >> > .log
->> >> >> > .usage
->> >> >> > .rgw.root
->> >> >> >
->> >> >> >
->> >> >> >> Date: Thu, 26 Sep 2013 09:05:08 -0700
->> >> >> >
->> >> >> >> Subject: Re: [ceph-users] radosgw-admin unable to list or store
->> >> >> >> user
->> >> >> >> info
->> >> >> >> after upgrade
->> >> >> >> From: yehuda@inktank.com
->> >> >> >> To: mike.otoole@outlook.com; ceph-devel@vger.kernel.org
->> >> >> >
->> >> >> >>
->> >> >> >> What do the following return?
->> >> >> >>
->> >> >> >> $ radosgw-admin zone get
->> >> >> >>
->> >> >> >> $ rados lspools
->> >> >> >>
->> >> >> >>
->> >> >> >>
->> >> >> >> On Thu, Sep 26, 2013 at 8:13 AM, Mike O'Toole
->> >> >> >> <mike.otoole@outlook.com>
->> >> >> >> wrote:
->> >> >> >> > Coming through the admin ops rest inteface I get the following
->> >> >> >> > log
->> >> >> >> > info:
->> >> >> >> > ET
->> >> >> >> >
->> >> >> >> > application/x-www-form-urlencoded; charset=utf-8
->> >> >> >> > Thu, 26 Sep 2013 15:08:34 GMT
->> >> >> >> > /admin/user
->> >> >> >> > 2013-09-26 11:08:34.449849 7ffbe67dc700 15 calculated
->> >> >> >> > digest=5vI0b/Ytn+XaSehRsqRu5PmNUBc=
->> >> >> >> > 2013-09-26 11:08:34.449854 7ffbe67dc700 15
->> >> >> >> > auth_sign=5vI0b/Ytn+XaSehRsqRu5PmNUBc=
->> >> >> >> > 2013-09-26 11:08:34.449855 7ffbe67dc700 15 compare=0
->> >> >> >> > 2013-09-26 11:08:34.449861 7ffbe67dc700 2 req 2:0.008683::GET
->> >> >> >> > /admin/user:get_user_info:reading permissions
->> >> >> >> > 2013-09-26 11:08:34.449867 7ffbe67dc700 2 req 2:0.008690::GET
->> >> >> >> > /admin/user:get_user_info:verifying op mask
->> >> >> >> > 2013-09-26 11:08:34.449871 7ffbe67dc700 20 required_mask= 0
->> >> >> >> > user.op_mask=7
->> >> >> >> > 2013-09-26 11:08:34.449873 7ffbe67dc700 2 req 2:0.008696::GET
->> >> >> >> > /admin/user:get_user_info:verifying op permissions
->> >> >> >> > 2013-09-26 11:08:34.449878 7ffbe67dc700 2 req 2:0.008701::GET
->> >> >> >> > /admin/user:get_user_info:verifying op params
->> >> >> >> > 2013-09-26 11:08:34.449881 7ffbe67dc700 2 req 2:0.008704::GET
->> >> >> >> > /admin/user:get_user_info:executing
->> >> >> >> > 2013-09-26 11:08:34.449916 7ffbe67dc700 20 get_obj_state:
->> >> >> >> > rctx=0x7ffc0c008ad0 obj=.users.uid:admin2 state=0x7ffc0c008b98
->> >> >> >> > s->prefetch_data=0
->> >> >> >> > 2013-09-26 11:08:34.449927 7ffbe67dc700 10 moving
->> >> >> >> > .users.uid+admin2
->> >> >> >> > to
->> >> >> >> > cache
->> >> >> >> > LRU end
->> >> >> >> > 2013-09-26 11:08:34.449930 7ffbe67dc700 10 cache get:
->> >> >> >> > name=.users.uid+admin2
->> >> >> >> > : type miss (requested=22, cached=7)
->> >> >> >> > 2013-09-26 11:08:34.451617 7ffbe67dc700 2 req 2:0.010439::GET
->> >> >> >> > /admin/user:get_user_info:http status=404
->> >> >> >> >
->> >> >> >> > Ive attached the log generated by the radosgw-admin user info
->> >> >> >> > command
->> >> >> >> >
->> >> >> >> >
->> >> >> >> >> Date: Thu, 26 Sep 2013 07:51:42 -0700
->> >> >> >> >> Subject: Re: [ceph-users] radosgw-admin unable to list or
->> >> >> >> >> store
->> >> >> >> >> user
->> >> >> >> >> info
->> >> >> >> >> after upgrade
->> >> >> >> >> From: yehuda@inktank.com
->> >> >> >> >> To: mike.otoole@outlook.com
->> >> >> >> >> CC: ceph-users@ceph.com
->> >> >> >> >
->> >> >> >> >>
->> >> >> >> >> On Thu, Sep 26, 2013 at 7:42 AM, Mike O'Toole
->> >> >> >> >> <mike.otoole@outlook.com>
->> >> >> >> >> wrote:
->> >> >> >> >> > After upgrading from Cuddlefish to Dumpling I am no longer
->> >> >> >> >> > able
->> >> >> >> >> > to
->> >> >> >> >> > obtain
->> >> >> >> >> > user information from the rados gateway.
->> >> >> >> >> >
->> >> >> >> >> > radosgw-admin user info
->> >> >> >> >> > could not fetch user info: no user info saved
->> >> >> >> >> >
->> >> >> >> >> >
->> >> >> >> >> > radosgw-admin user create --uid=bob --display-name="bob"
->> >> >> >> >> > could not create user: unable to create user, unable to
->> >> >> >> >> > store
->> >> >> >> >> > user
->> >> >> >> >> > info
->> >> >> >> >>
->> >> >> >> >> What does the gateway log show? Try running the same command
->> >> >> >> >> with
->> >> >> >> >> --debug-rgw=20 --debug-ms=1 --log-to-stderr
->> >> >> >> >>
->> >> >> >> >> Yehuda
+[re-adding ceph-devel to the cc]
+
+On 26/09/2013 20:36, Andreas-Joachim Peters wrote:> Hi Loic,
+> today I forked he CEPH repository and will commit my changes to my GitH=
+ub fork asap ... (I am not familiar with GitHub in particular).
+> I was finalizing the minimim_to_decode function today with test cases (=
+it is more sophisticated in this case ...) ... I didn't fully get what th=
+e 'with cost' function is supposed to do diffrent from the one without co=
+st?
+
+I'd be happy to explain if=20
+https://github.com/ceph/ceph/blob/master/src/osd/ErasureCodeInterface.h#L=
+131
+is unclear. Would you be so kind as to tell me what is confusing in the d=
+escription ?=20
+
+>=20
+>=20
+> Cheers Andreas.
+>=20
+> On Wed, Sep 25, 2013 at 8:48 PM, Loic Dachary <loic@dachary.org <mailto=
+:loic@dachary.org>> wrote:
+>=20
+>=20
+>=20
+>     On 25/09/2013 20:33, Andreas Joachim Peters wrote:> Yes, sure. I ac=
+tually thought the same in the meanwhile ...  I have some questions:
+>     >
+>     > Q: Can/should it stay in the framework of google test's or you wo=
+uld prefer just a plain executable ?
+>     >
+>=20
+>     A plain executable would make sense. An simple example from src/tes=
+t/Makefile.am :
+>=20
+>     ceph_test_trans_SOURCES =3D test/test_trans.cc
+>     ceph_test_trans_LDADD =3D $(LIBOS) $(CEPH_GLOBAL)
+>     bin_DEBUGPROGRAMS +=3D ceph_test_trans
+>=20
+>=20
+>     > I have added local parity support to your erasure class adding a =
+new argument: "erasure-code-lp" and
+>     > two new methods:
+>     >
+>     > localparity_encode(...)
+>     > localparity_decode(...)
+>     >
+>     > I made a more complex benchmark of (8,2) + 2 local parities (1^2^=
+3^4, 5^6^7^8) which benchmarks performance of encoding/decoding as speed =
+& effective write-latency for three cases (each for liberation & cauchy_g=
+ood codecs):
+>     >
+>     > 1 (8,2)
+>     > 2 (8,2,lp=3D2)
+>     > 3 (8,2,lp=3D2) + crc32c (blocks)
+>     >
+>     > and several failure scenarios ... single, double, triple disk fai=
+lures. Probably the best is if I make all this parameters configurable.
+>=20
+>     Great :-) Do you have a public git repository where I could clone t=
+his & give it a try ?
+>=20
+>     > Q: For the local parity implementation .... shall I inherit from =
+your erasure plugin and overwrite the encode/decode method or you would c=
+onsider a patch to the original class?
+>=20
+>     It is a perfect timing for a patch to the original class.
+>=20
+>     > I have also a 128-bit XOR implementation for the local parities. =
+This will work with new gcc's & clang compilers ...
+>     >
+>     > Q: Which compilers/platforms are supported by CEPH? Is there a mi=
+nimal GCC version?
+>=20
+>     You can see all supported platforms here:
+>=20
+>     http://ceph.com/gitbuilder.cgi
+>=20
+>     I don't think the GCC version shows in the logs but you can probabl=
+y figure it out from the corresponding distribution.
+>=20
+>     > Q: is there some policy restricting comments within code? In gene=
+ral I see very few or no comments within the code ..
+>=20
+>     :-) The mon code tends to be more heavily commented than the osd co=
+de (IMO) but I'm not aware of any policy. When I feel the need to comment=
+, I write a unit test. If the unit test is difficult, I tend to comment t=
+o clarify its purpose. The problem with comments is that they quickly bec=
+ome obsolete and/or misleading. That being said, I don't think anyone wil=
+l object if you heavily comment your code.
+>=20
+>     Cheers
+>=20
+>     > Cheers Andreas.
+>     >
+>     >
+>     >
+>     >
+>=20
+>     --
+>     Lo=EFc Dachary, Artisan Logiciel Libre
+>     All that is necessary for the triumph of evil is that good people d=
+o nothing.
+>=20
+>=20
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+All that is necessary for the triumph of evil is that good people do noth=
+ing.
+
+
+--------------enig429DE20268F73A93A1C8311D
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.19 (GNU/Linux)
+Comment: Using GnuPG with undefined - http://www.enigmail.net/
+
+iEYEARECAAYFAlJEiHoACgkQ8dLMyEl6F23E5ACgsAadF1WWUJBmoLAZDXz8oyMb
+g9UAoKDOTyzr1UvojOV3UBClHqL/Drr+
+=MVdB
+-----END PGP SIGNATURE-----
+
+--------------enig429DE20268F73A93A1C8311D--
