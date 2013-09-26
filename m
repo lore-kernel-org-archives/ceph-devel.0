@@ -1,7 +1,7 @@
 From: Somnath Roy <Somnath.Roy@sandisk.com>
 Subject: RE: [ceph-users] Scaling radosgw module
-Date: Thu, 26 Sep 2013 22:58:38 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F199236CF@SACMBXIP01.sdcorp.global.sandisk.com>
+Date: Thu, 26 Sep 2013 23:00:39 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F199236E3@SACMBXIP01.sdcorp.global.sandisk.com>
 References: <755F6B91B3BE364F9BCA11EA3F9E0C6F0FC4A8A7@SACMBXIP01.sdcorp.global.sandisk.com>
  <523CC62E.3070407@inktank.com>
  <755F6B91B3BE364F9BCA11EA3F9E0C6F0FC4A8C9@SACMBXIP01.sdcorp.global.sandisk.com>
@@ -10,21 +10,35 @@ References: <755F6B91B3BE364F9BCA11EA3F9E0C6F0FC4A8A7@SACMBXIP01.sdcorp.global.s
  <5244B605.5020002@inktank.com>
  <755F6B91B3BE364F9BCA11EA3F9E0C6F199236AA@SACMBXIP01.sdcorp.global.sandisk.com>
  <5244BA04.2070702@inktank.com>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F199236CF@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from ch1ehsobe005.messaging.microsoft.com ([216.32.181.185]:57346
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754436Ab3IZW6o convert rfc822-to-8bit
+Received: from co9ehsobe005.messaging.microsoft.com ([207.46.163.28]:58769
+	"EHLO co9outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754321Ab3IZXAn convert rfc822-to-8bit
 	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 26 Sep 2013 18:58:44 -0400
-In-Reply-To: <5244BA04.2070702@inktank.com>
+	Thu, 26 Sep 2013 19:00:43 -0400
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F199236CF@SACMBXIP01.sdcorp.global.sandisk.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Mark Nelson <mark.nelson@inktank.com>
 Cc: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Anirban Ray <Anirban.Ray@sandisk.com>
+
+Mark,
+One more thing, all my test is with rgw cache enabled , disabling the cache the performance is around 3x slower.
+
+Thanks & Regards
+Somnath
+
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Somnath Roy
+Sent: Thursday, September 26, 2013 3:59 PM
+To: Mark Nelson
+Cc: ceph-users@lists.ceph.com; ceph-devel@vger.kernel.org; Anirban Ray
+Subject: RE: [ceph-users] Scaling radosgw module
 
 Nope...With one client hitting the radaosgw , the daemon cpu usage is going up till 400-450% i.e taking in avg 4 core..In one client scenario, the server node (having radosgw + osds) cpu usage is ~80% idle and out of the 20% usage bulk is consumed by radosgw.
 
@@ -32,7 +46,7 @@ Thanks & Regards
 Somnath
 
 -----Original Message-----
-From: Mark Nelson [mailto:mark.nelson@inktank.com] 
+From: Mark Nelson [mailto:mark.nelson@inktank.com]
 Sent: Thursday, September 26, 2013 3:50 PM
 To: Somnath Roy
 Cc: ceph-users@lists.ceph.com; ceph-devel@vger.kernel.org; Anirban Ray
@@ -142,6 +156,7 @@ On 09/26/2013 05:40 PM, Somnath Roy wrote:
 >>>> Hi,
 >>>> I am running Ceph on a 3 node cluster and each of my server node is running 10 OSDs, one for each disk. I have one admin node and all the nodes are connected with 2 X 10G network. One network is for cluster and other one configured as public network.
 
+
 >>>>
 >>>> All the OSD journals are on SSDs.
 >>>>
@@ -215,5 +230,9 @@ On 09/26/2013 05:40 PM, Somnath Roy wrote:
 > info at  http://vger.kernel.org/majordomo-info.html
 >
 >
+
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
 
