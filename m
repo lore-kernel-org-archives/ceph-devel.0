@@ -1,158 +1,279 @@
-From: majianpeng <majianpeng@gmail.com>
-Subject: [RESEND PATCH V7] ceph:Implement readv/preadv for sync operation
-Date: Thu, 26 Sep 2013 14:42:17 +0800
-Message-ID: <201309261442153908722@gmail.com>
-Reply-To: majianpeng <majianpeng@gmail.com>
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: Re: [RESEND PATCH V7] ceph:Implement readv/preadv for sync operation
+Date: Thu, 26 Sep 2013 15:19:11 +0800
+Message-ID: <5243DFEF.9040409@intel.com>
+References: <201309261442153908722@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="us-ascii"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f45.google.com ([209.85.220.45]:62855 "EHLO
-	mail-pa0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752054Ab3IZGmW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Sep 2013 02:42:22 -0400
-Received: by mail-pa0-f45.google.com with SMTP id rd3so881146pab.4
-        for <ceph-devel@vger.kernel.org>; Wed, 25 Sep 2013 23:42:21 -0700 (PDT)
+Received: from mga11.intel.com ([192.55.52.93]:59060 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755483Ab3IZHTN (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 26 Sep 2013 03:19:13 -0400
+In-Reply-To: <201309261442153908722@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: sage <sage@inktank.com>, =?us-ascii?B?WWFuLCBaaGVuZw==?= <zheng.z.yan@intel.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Stephen Rothwell <sfr@canb.auug.org.au>
+To: majianpeng <majianpeng@gmail.com>
+Cc: sage <sage@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>, Stephen Rothwell <sfr@canb.auug.org.au>
 
-Rm9yIHJlYWR2L3ByZWFkdiBzeW5jLW9wZXJhdG9pbiwgY2VwaCBvbmx5IGRvIHRoZSBmaXJzdCBp
-b3YuDQpJdCBkb24ndCB0aGluayBvdGhlciBpb3ZzLk5vdyBpbXBsZW1lbnQgdGhpcy4NCg0KVjc6
-DQogICBCZWNhdXNlIGNvbW1pdCA3M2E3MDc1ZTNmNmVjNjNkYyByZW1vdmUgdGhlIGtpX2xlZnQg
-b2Ygc3RydWN0IGlvY2IuDQogICBTbyByZXdyaXRlIHRoaXMgcGF0Y2guIFRlc3Qgb24gdjMuMTIt
-cmMyLCBpdCBsb29rcyBnb29kLg0KVjY6DQogICBGaXggc29tZSBidWdzOw0KVjU6DQogIC1iZWZv
-cmUgZ2V0YXR0cixpdCBtdXN0IHB1dCBjYXBzIHdoaWNoIGFscmVhZHkgaG9sZGVkIGF2b2lkIGRl
-YWRsb2NrLg0KICAtb25seSBkbyBnZW5lcmljX3NlZ21lbnRfY2hlY2tzIGZvciBzeW5jLXJlYWQg
-YXZvaWQgZG8gYWdhaW4gaW4gZnVuYw0KICAgZ2VuZXJpY19maWxlX2Fpb19yZWFkDQpWNDoNCiAg
-LW1vZGlmeSBvbmUgYnVnLg0KVjM6DQogIC1tb2RpZnkgc29tZSBidWdzLg0KVjI6DQogIC1hZGQg
-Z2VuZXJpY19zZWdtZW50X2NoZWNrcw0KICAtdXNpbmcgc3RydWN0IGlvdl9pdGVyIHJlcGxhY2Ug
-Y2xvbmluZyB0aGUgaW92cy4NCiAgLXJldHVybiBwcmV2aW91cyBzdWNjZXNzZnVsbHkgY29waWVk
-IGlmIGNlcGhfY29weV9wYWdlX3ZlY3Rvcl90b191c2VyDQogICBtZXQgZXJyb3IuDQoNClNpZ25l
-ZC1vZmYtYnk6IEppYW5wZW5nIE1hIDxtYWppYW5wZW5nQGdtYWlsLmNvbT4NCi0tLQ0KIGZzL2Nl
-cGgvZmlsZS5jIHwgMTYyICsrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysr
-LS0tLS0tLS0tLS0tLS0tLQ0KIDEgZmlsZSBjaGFuZ2VkLCAxMTYgaW5zZXJ0aW9ucygrKSwgNDYg
-ZGVsZXRpb25zKC0pDQoNCmRpZmYgLS1naXQgYS9mcy9jZXBoL2ZpbGUuYyBiL2ZzL2NlcGgvZmls
-ZS5jDQppbmRleCAzZGU4OTgyLi5jOTQ1NjIxIDEwMDY0NA0KLS0tIGEvZnMvY2VwaC9maWxlLmMN
-CisrKyBiL2ZzL2NlcGgvZmlsZS5jDQpAQCAtNDA4LDUxICs0MDgsOTIgQEAgbW9yZToNCiAgKg0K
-ICAqIElmIHRoZSByZWFkIHNwYW5zIG9iamVjdCBib3VuZGFyeSwganVzdCBkbyBtdWx0aXBsZSBy
-ZWFkcy4NCiAgKi8NCi1zdGF0aWMgc3NpemVfdCBjZXBoX3N5bmNfcmVhZChzdHJ1Y3QgZmlsZSAq
-ZmlsZSwgY2hhciBfX3VzZXIgKmRhdGEsDQotCQkJICAgICAgdW5zaWduZWQgbGVuLCBsb2ZmX3Qg
-KnBvZmYsIGludCAqY2hlY2tlb2YpDQorc3RhdGljIHNzaXplX3QgY2VwaF9zeW5jX3JlYWQoc3Ry
-dWN0IGtpb2NiICppb2NiLCBzdHJ1Y3QgaW92X2l0ZXIgKmksDQorCQkJCWludCAqY2hlY2tlb2Yp
-DQogew0KKwlzdHJ1Y3QgZmlsZSAqZmlsZSA9IGlvY2ItPmtpX2ZpbHA7DQogCXN0cnVjdCBpbm9k
-ZSAqaW5vZGUgPSBmaWxlX2lub2RlKGZpbGUpOw0KIAlzdHJ1Y3QgcGFnZSAqKnBhZ2VzOw0KLQl1
-NjQgb2ZmID0gKnBvZmY7DQorCXU2NCBvZmYgPSBpb2NiLT5raV9wb3M7DQogCWludCBudW1fcGFn
-ZXMsIHJldDsNCisJc2l6ZV90IGxlbiA9IGktPmNvdW50Ow0KIA0KLQlkb3V0KCJzeW5jX3JlYWQg
-b24gZmlsZSAlcCAlbGx1fiV1ICVzXG4iLCBmaWxlLCBvZmYsIGxlbiwNCisJZG91dCgic3luY19y
-ZWFkIG9uIGZpbGUgJXAgJWxsdX4ldSAlc1xuIiwgZmlsZSwgb2ZmLA0KKwkgICAgICh1bnNpZ25l
-ZClsZW4sDQogCSAgICAgKGZpbGUtPmZfZmxhZ3MgJiBPX0RJUkVDVCkgPyAiT19ESVJFQ1QiIDog
-IiIpOw0KLQ0KLQlpZiAoZmlsZS0+Zl9mbGFncyAmIE9fRElSRUNUKSB7DQotCQludW1fcGFnZXMg
-PSBjYWxjX3BhZ2VzX2ZvcigodW5zaWduZWQgbG9uZylkYXRhLCBsZW4pOw0KLQkJcGFnZXMgPSBj
-ZXBoX2dldF9kaXJlY3RfcGFnZV92ZWN0b3IoZGF0YSwgbnVtX3BhZ2VzLCB0cnVlKTsNCi0JfSBl
-bHNlIHsNCi0JCW51bV9wYWdlcyA9IGNhbGNfcGFnZXNfZm9yKG9mZiwgbGVuKTsNCi0JCXBhZ2Vz
-ID0gY2VwaF9hbGxvY19wYWdlX3ZlY3RvcihudW1fcGFnZXMsIEdGUF9OT0ZTKTsNCi0JfQ0KLQlp
-ZiAoSVNfRVJSKHBhZ2VzKSkNCi0JCXJldHVybiBQVFJfRVJSKHBhZ2VzKTsNCi0NCiAJLyoNCiAJ
-ICogZmx1c2ggYW55IHBhZ2UgY2FjaGUgcGFnZXMgaW4gdGhpcyByYW5nZS4gIHRoaXMNCiAJICog
-d2lsbCBtYWtlIGNvbmN1cnJlbnQgbm9ybWFsIGFuZCBzeW5jIGlvIHNsb3csDQogCSAqIGJ1dCBp
-dCB3aWxsIGF0IGxlYXN0IGJlaGF2ZSBzZW5zaWJseSB3aGVuIHRoZXkgYXJlDQogCSAqIGluIHNl
-cXVlbmNlLg0KIAkgKi8NCi0JcmV0ID0gZmlsZW1hcF93cml0ZV9hbmRfd2FpdChpbm9kZS0+aV9t
-YXBwaW5nKTsNCisJcmV0ID0gZmlsZW1hcF93cml0ZV9hbmRfd2FpdF9yYW5nZShpbm9kZS0+aV9t
-YXBwaW5nLCBvZmYsDQorCQkJCQkJb2ZmICsgbGVuKTsNCiAJaWYgKHJldCA8IDApDQotCQlnb3Rv
-IGRvbmU7DQorCQlyZXR1cm4gcmV0Ow0KIA0KLQlyZXQgPSBzdHJpcGVkX3JlYWQoaW5vZGUsIG9m
-ZiwgbGVuLCBwYWdlcywgbnVtX3BhZ2VzLCBjaGVja2VvZiwNCi0JCQkgICBmaWxlLT5mX2ZsYWdz
-ICYgT19ESVJFQ1QsDQotCQkJICAgKHVuc2lnbmVkIGxvbmcpZGF0YSAmIH5QQUdFX01BU0spOw0K
-KwlpZiAoZmlsZS0+Zl9mbGFncyAmIE9fRElSRUNUKSB7DQorCQl3aGlsZSAoaW92X2l0ZXJfY291
-bnQoaSkpIHsNCisJCQl2b2lkIF9fdXNlciAqZGF0YSA9IGktPmlvdlswXS5pb3ZfYmFzZSArIGkt
-Pmlvdl9vZmZzZXQ7DQorCQkJc2l6ZV90IGxlbiA9IGktPmlvdlswXS5pb3ZfbGVuIC0gaS0+aW92
-X29mZnNldDsNCisNCisJCQludW1fcGFnZXMgPSBjYWxjX3BhZ2VzX2ZvcigodW5zaWduZWQgbG9u
-ZylkYXRhLCBsZW4pOw0KKwkJCXBhZ2VzID0gY2VwaF9nZXRfZGlyZWN0X3BhZ2VfdmVjdG9yKGRh
-dGEsDQorCQkJCQkJCSAgICBudW1fcGFnZXMsIHRydWUpOw0KKwkJCWlmIChJU19FUlIocGFnZXMp
-KQ0KKwkJCQlyZXR1cm4gUFRSX0VSUihwYWdlcyk7DQorDQorCQkJcmV0ID0gc3RyaXBlZF9yZWFk
-KGlub2RlLCBvZmYsIGxlbiwNCisJCQkJCSAgIHBhZ2VzLCBudW1fcGFnZXMsIGNoZWNrZW9mLA0K
-KwkJCQkJICAgMSwgKHVuc2lnbmVkIGxvbmcpZGF0YSAmIH5QQUdFX01BU0spOw0KKwkJCWNlcGhf
-cHV0X3BhZ2VfdmVjdG9yKHBhZ2VzLCBudW1fcGFnZXMsIHRydWUpOw0KKw0KKwkJCWlmIChyZXQg
-PD0gMCkNCisJCQkJYnJlYWs7DQorCQkJb2ZmICs9IHJldDsNCisJCQlpb3ZfaXRlcl9hZHZhbmNl
-KGksIHJldCk7DQorCQkJaWYgKHJldCA8IGxlbikNCisJCQkJYnJlYWs7DQorCQl9DQorCX0gZWxz
-ZSB7DQorCQludW1fcGFnZXMgPSBjYWxjX3BhZ2VzX2ZvcihvZmYsIGxlbik7DQorCQlwYWdlcyA9
-IGNlcGhfYWxsb2NfcGFnZV92ZWN0b3IobnVtX3BhZ2VzLCBHRlBfTk9GUyk7DQorCQlpZiAoSVNf
-RVJSKHBhZ2VzKSkNCisJCQlyZXR1cm4gUFRSX0VSUihwYWdlcyk7DQorCQlyZXQgPSBzdHJpcGVk
-X3JlYWQoaW5vZGUsIG9mZiwgbGVuLCBwYWdlcywNCisJCQkJCW51bV9wYWdlcywgY2hlY2tlb2Ys
-IDAsIDApOw0KKwkJaWYgKHJldCA+IDApIHsNCisJCQlpbnQgbCwgayA9IDA7DQorCQkJc2l6ZV90
-IGxlZnQgPSBsZW4gPSByZXQ7DQorDQorCQkJd2hpbGUgKGxlZnQpIHsNCisJCQkJdm9pZCBfX3Vz
-ZXIgKmRhdGEgPSBpLT5pb3ZbMF0uaW92X2Jhc2UNCisJCQkJCQkJKyBpLT5pb3Zfb2Zmc2V0Ow0K
-KwkJCQlsID0gbWluKGktPmlvdlswXS5pb3ZfbGVuIC0gaS0+aW92X29mZnNldCwNCisJCQkJCWxl
-ZnQpOw0KKw0KKwkJCQlyZXQgPSBjZXBoX2NvcHlfcGFnZV92ZWN0b3JfdG9fdXNlcigmcGFnZXNb
-a10sDQorCQkJCQkJCQkgICAgZGF0YSwgb2ZmLA0KKwkJCQkJCQkJICAgIGwpOw0KKwkJCQlpZiAo
-cmV0ID4gMCkgew0KKwkJCQkJaW92X2l0ZXJfYWR2YW5jZShpLCByZXQpOw0KKwkJCQkJbGVmdCAt
-PSByZXQ7DQorCQkJCQlvZmYgKz0gcmV0Ow0KKwkJCQkJayA9IGNhbGNfcGFnZXNfZm9yKGlvY2It
-PmtpX3BvcywNCisJCQkJCQkJICAgbGVuIC0gbGVmdCArIDEpIC0gMTsNCisJCQkJCUJVR19PTihr
-ID49IG51bV9wYWdlcyAmJiBsZWZ0KTsNCisJCQkJfSBlbHNlDQorCQkJCQlicmVhazsNCisJCQl9
-DQorCQl9DQorCQljZXBoX3JlbGVhc2VfcGFnZV92ZWN0b3IocGFnZXMsIG51bV9wYWdlcyk7DQor
-CX0NCiANCi0JaWYgKHJldCA+PSAwICYmIChmaWxlLT5mX2ZsYWdzICYgT19ESVJFQ1QpID09IDAp
-DQotCQlyZXQgPSBjZXBoX2NvcHlfcGFnZV92ZWN0b3JfdG9fdXNlcihwYWdlcywgZGF0YSwgb2Zm
-LCByZXQpOw0KLQlpZiAocmV0ID49IDApDQotCQkqcG9mZiA9IG9mZiArIHJldDsNCisJaWYgKG9m
-ZiA+IGlvY2ItPmtpX3Bvcykgew0KKwkJcmV0ID0gb2ZmIC0gaW9jYi0+a2lfcG9zOw0KKwkJaW9j
-Yi0+a2lfcG9zID0gb2ZmOw0KKwl9DQogDQotZG9uZToNCi0JaWYgKGZpbGUtPmZfZmxhZ3MgJiBP
-X0RJUkVDVCkNCi0JCWNlcGhfcHV0X3BhZ2VfdmVjdG9yKHBhZ2VzLCBudW1fcGFnZXMsIHRydWUp
-Ow0KLQllbHNlDQotCQljZXBoX3JlbGVhc2VfcGFnZV92ZWN0b3IocGFnZXMsIG51bV9wYWdlcyk7
-DQogCWRvdXQoInN5bmNfcmVhZCByZXN1bHQgJWRcbiIsIHJldCk7DQogCXJldHVybiByZXQ7DQog
-fQ0KQEAgLTY0Nyw1NSArNjg4LDg0IEBAIHN0YXRpYyBzc2l6ZV90IGNlcGhfYWlvX3JlYWQoc3Ry
-dWN0IGtpb2NiICppb2NiLCBjb25zdCBzdHJ1Y3QgaW92ZWMgKmlvdiwNCiB7DQogCXN0cnVjdCBm
-aWxlICpmaWxwID0gaW9jYi0+a2lfZmlscDsNCiAJc3RydWN0IGNlcGhfZmlsZV9pbmZvICpmaSA9
-IGZpbHAtPnByaXZhdGVfZGF0YTsNCi0JbG9mZl90ICpwcG9zID0gJmlvY2ItPmtpX3BvczsNCi0J
-c2l6ZV90IGxlbiA9IGlvdi0+aW92X2xlbjsNCisJc2l6ZV90IGxlbiA9IGlvY2ItPmtpX25ieXRl
-czsNCiAJc3RydWN0IGlub2RlICppbm9kZSA9IGZpbGVfaW5vZGUoZmlscCk7DQogCXN0cnVjdCBj
-ZXBoX2lub2RlX2luZm8gKmNpID0gY2VwaF9pbm9kZShpbm9kZSk7DQotCXZvaWQgX191c2VyICpi
-YXNlID0gaW92LT5pb3ZfYmFzZTsNCiAJc3NpemVfdCByZXQ7DQogCWludCB3YW50LCBnb3QgPSAw
-Ow0KIAlpbnQgY2hlY2tlb2YgPSAwLCByZWFkID0gMDsNCiANCithZ2FpbjoNCiAJZG91dCgiYWlv
-X3JlYWQgJXAgJWxseC4lbGx4ICVsbHV+JXUgdHJ5aW5nIHRvIGdldCBjYXBzIG9uICVwXG4iLA0K
-LQkgICAgIGlub2RlLCBjZXBoX3Zpbm9wKGlub2RlKSwgcG9zLCAodW5zaWduZWQpbGVuLCBpbm9k
-ZSk7DQotYWdhaW46DQorCSAgICAgaW5vZGUsIGNlcGhfdmlub3AoaW5vZGUpLCBpb2NiLT5raV9w
-b3MsICh1bnNpZ25lZClsZW4sIGlub2RlKTsNCisNCiAJaWYgKGZpLT5mbW9kZSAmIENFUEhfRklM
-RV9NT0RFX0xBWlkpDQogCQl3YW50ID0gQ0VQSF9DQVBfRklMRV9DQUNIRSB8IENFUEhfQ0FQX0ZJ
-TEVfTEFaWUlPOw0KIAllbHNlDQogCQl3YW50ID0gQ0VQSF9DQVBfRklMRV9DQUNIRTsNCiAJcmV0
-ID0gY2VwaF9nZXRfY2FwcyhjaSwgQ0VQSF9DQVBfRklMRV9SRCwgd2FudCwgJmdvdCwgLTEpOw0K
-IAlpZiAocmV0IDwgMCkNCi0JCWdvdG8gb3V0Ow0KLQlkb3V0KCJhaW9fcmVhZCAlcCAlbGx4LiVs
-bHggJWxsdX4ldSBnb3QgY2FwIHJlZnMgb24gJXNcbiIsDQotCSAgICAgaW5vZGUsIGNlcGhfdmlu
-b3AoaW5vZGUpLCBwb3MsICh1bnNpZ25lZClsZW4sDQotCSAgICAgY2VwaF9jYXBfc3RyaW5nKGdv
-dCkpOw0KKwkJcmV0dXJuIHJldDsNCiANCiAJaWYgKChnb3QgJiAoQ0VQSF9DQVBfRklMRV9DQUNI
-RXxDRVBIX0NBUF9GSUxFX0xBWllJTykpID09IDAgfHwNCiAJICAgIChpb2NiLT5raV9maWxwLT5m
-X2ZsYWdzICYgT19ESVJFQ1QpIHx8DQotCSAgICAoZmktPmZsYWdzICYgQ0VQSF9GX1NZTkMpKQ0K
-KwkgICAgKGZpLT5mbGFncyAmIENFUEhfRl9TWU5DKSkgew0KKwkJc3RydWN0IGlvdl9pdGVyIGk7
-DQorDQorCQlkb3V0KCJhaW9fc3luY19yZWFkICVwICVsbHguJWxseCAlbGx1fiV1IGdvdCBjYXAg
-cmVmcyBvbiAlc1xuIiwNCisJCSAgICAgaW5vZGUsIGNlcGhfdmlub3AoaW5vZGUpLCBpb2NiLT5r
-aV9wb3MsICh1bnNpZ25lZClsZW4sDQorCQkgICAgIGNlcGhfY2FwX3N0cmluZyhnb3QpKTsNCisN
-CisJCWlmICghcmVhZCkgew0KKwkJCXJldCA9IGdlbmVyaWNfc2VnbWVudF9jaGVja3MoaW92LCAm
-bnJfc2VncywNCisJCQkJCQkJJmxlbiwgVkVSSUZZX1dSSVRFKTsNCisJCQlpZiAocmV0KQ0KKwkJ
-CQlnb3RvIG91dDsNCisJCX0NCisNCisJCWlvdl9pdGVyX2luaXQoJmksIGlvdiwgbnJfc2Vncywg
-bGVuLCByZWFkKTsNCisNCiAJCS8qIGhtbSwgdGhpcyBpc24ndCByZWFsbHkgYXN5bmMuLi4gKi8N
-Ci0JCXJldCA9IGNlcGhfc3luY19yZWFkKGZpbHAsIGJhc2UsIGxlbiwgcHBvcywgJmNoZWNrZW9m
-KTsNCi0JZWxzZQ0KLQkJcmV0ID0gZ2VuZXJpY19maWxlX2Fpb19yZWFkKGlvY2IsIGlvdiwgbnJf
-c2VncywgcG9zKTsNCisJCXJldCA9IGNlcGhfc3luY19yZWFkKGlvY2IsICZpLCAmY2hlY2tlb2Yp
-Ow0KKwl9IGVsc2Ugew0KKwkJLyoNCisJCSAqIFdlIGNhbid0IG1vZGlmeSB0aGUgY29udGVudCBv
-ZiBpb3YsDQorCQkgKiBzbyB3ZSBvbmx5IHJlYWQgZnJvbSBiZWdpbm5pbmcuDQorCQkgKi8NCisJ
-CWlmIChyZWFkKSB7DQorCQkJaW9jYi0+a2lfcG9zID0gcG9zOw0KKwkJCWxlbiA9IGlvY2ItPmtp
-X25ieXRlczsNCisJCQlyZWFkID0gMDsNCisJCX0NCisJCWRvdXQoImFpb19yZWFkICVwICVsbHgu
-JWxseCAlbGx1fiV1IGdvdCBjYXAgcmVmcyBvbiAlc1xuIiwNCisJCSAgICAgaW5vZGUsIGNlcGhf
-dmlub3AoaW5vZGUpLCBwb3MsICh1bnNpZ25lZClsZW4sDQorCQkgICAgIGNlcGhfY2FwX3N0cmlu
-Zyhnb3QpKTsNCiANCisJCXJldCA9IGdlbmVyaWNfZmlsZV9haW9fcmVhZChpb2NiLCBpb3YsIG5y
-X3NlZ3MsIHBvcyk7DQorCX0NCiBvdXQ6DQogCWRvdXQoImFpb19yZWFkICVwICVsbHguJWxseCBk
-cm9wcGluZyBjYXAgcmVmcyBvbiAlcyA9ICVkXG4iLA0KIAkgICAgIGlub2RlLCBjZXBoX3Zpbm9w
-KGlub2RlKSwgY2VwaF9jYXBfc3RyaW5nKGdvdCksIChpbnQpcmV0KTsNCiAJY2VwaF9wdXRfY2Fw
-X3JlZnMoY2ksIGdvdCk7DQogDQogCWlmIChjaGVja2VvZiAmJiByZXQgPj0gMCkgew0KLQkJaW50
-IHN0YXRyZXQgPSBjZXBoX2RvX2dldGF0dHIoaW5vZGUsIENFUEhfU1RBVF9DQVBfU0laRSk7DQor
-CQlpbnQgc3RhdHJldCA9IGNlcGhfZG9fZ2V0YXR0cihpbm9kZSwNCisJCQkJCSAgICAgIENFUEhf
-U1RBVF9DQVBfU0laRSk7DQogDQogCQkvKiBoaXQgRU9GIG9yIGhvbGU/ICovDQotCQlpZiAoc3Rh
-dHJldCA9PSAwICYmICpwcG9zIDwgaW5vZGUtPmlfc2l6ZSkgew0KLQkJCWRvdXQoImFpb19yZWFk
-IHN5bmNfcmVhZCBoaXQgaG9sZSwgcHBvcyAlbGxkIDwgc2l6ZSAlbGxkLCByZWFkaW5nIG1vcmVc
-biIsICpwcG9zLCBpbm9kZS0+aV9zaXplKTsNCisJCWlmIChzdGF0cmV0ID09IDAgJiYgaW9jYi0+
-a2lfcG9zIDwgaW5vZGUtPmlfc2l6ZSAmJg0KKwkJCXJldCA8IGxlbikgew0KKwkJCWRvdXQoInN5
-bmNfcmVhZCBoaXQgaG9sZSwgcHBvcyAlbGxkIDwgc2l6ZSAlbGxkIg0KKwkJCSAgICAgIiwgcmVh
-ZGluZyBtb3JlXG4iLCBpb2NiLT5raV9wb3MsDQorCQkJICAgICBpbm9kZS0+aV9zaXplKTsNCisN
-CiAJCQlyZWFkICs9IHJldDsNCi0JCQliYXNlICs9IHJldDsNCiAJCQlsZW4gLT0gcmV0Ow0KIAkJ
-CWNoZWNrZW9mID0gMDsNCiAJCQlnb3RvIGFnYWluOw0KIAkJfQ0KIAl9DQorDQogCWlmIChyZXQg
-Pj0gMCkNCiAJCXJldCArPSByZWFkOw0KIA0KLS0gDQoxLjguNC1yYzANCg==
+Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+
+On 09/26/2013 02:42 PM, majianpeng wrote:
+> For readv/preadv sync-operatoin, ceph only do the first iov.
+> It don't think other iovs.Now implement this.
+> 
+> V7:
+>    Because commit 73a7075e3f6ec63dc remove the ki_left of struct iocb.
+>    So rewrite this patch. Test on v3.12-rc2, it looks good.
+> V6:
+>    Fix some bugs;
+> V5:
+>   -before getattr,it must put caps which already holded avoid deadlock.
+>   -only do generic_segment_checks for sync-read avoid do again in func
+>    generic_file_aio_read
+> V4:
+>   -modify one bug.
+> V3:
+>   -modify some bugs.
+> V2:
+>   -add generic_segment_checks
+>   -using struct iov_iter replace cloning the iovs.
+>   -return previous successfully copied if ceph_copy_page_vector_to_user
+>    met error.
+> 
+> Signed-off-by: Jianpeng Ma <majianpeng@gmail.com>
+> ---
+>  fs/ceph/file.c | 162 +++++++++++++++++++++++++++++++++++++++++----------------
+>  1 file changed, 116 insertions(+), 46 deletions(-)
+> 
+> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+> index 3de8982..c945621 100644
+> --- a/fs/ceph/file.c
+> +++ b/fs/ceph/file.c
+> @@ -408,51 +408,92 @@ more:
+>   *
+>   * If the read spans object boundary, just do multiple reads.
+>   */
+> -static ssize_t ceph_sync_read(struct file *file, char __user *data,
+> -			      unsigned len, loff_t *poff, int *checkeof)
+> +static ssize_t ceph_sync_read(struct kiocb *iocb, struct iov_iter *i,
+> +				int *checkeof)
+>  {
+> +	struct file *file = iocb->ki_filp;
+>  	struct inode *inode = file_inode(file);
+>  	struct page **pages;
+> -	u64 off = *poff;
+> +	u64 off = iocb->ki_pos;
+>  	int num_pages, ret;
+> +	size_t len = i->count;
+>  
+> -	dout("sync_read on file %p %llu~%u %s\n", file, off, len,
+> +	dout("sync_read on file %p %llu~%u %s\n", file, off,
+> +	     (unsigned)len,
+>  	     (file->f_flags & O_DIRECT) ? "O_DIRECT" : "");
+> -
+> -	if (file->f_flags & O_DIRECT) {
+> -		num_pages = calc_pages_for((unsigned long)data, len);
+> -		pages = ceph_get_direct_page_vector(data, num_pages, true);
+> -	} else {
+> -		num_pages = calc_pages_for(off, len);
+> -		pages = ceph_alloc_page_vector(num_pages, GFP_NOFS);
+> -	}
+> -	if (IS_ERR(pages))
+> -		return PTR_ERR(pages);
+> -
+>  	/*
+>  	 * flush any page cache pages in this range.  this
+>  	 * will make concurrent normal and sync io slow,
+>  	 * but it will at least behave sensibly when they are
+>  	 * in sequence.
+>  	 */
+> -	ret = filemap_write_and_wait(inode->i_mapping);
+> +	ret = filemap_write_and_wait_range(inode->i_mapping, off,
+> +						off + len);
+>  	if (ret < 0)
+> -		goto done;
+> +		return ret;
+>  
+> -	ret = striped_read(inode, off, len, pages, num_pages, checkeof,
+> -			   file->f_flags & O_DIRECT,
+> -			   (unsigned long)data & ~PAGE_MASK);
+> +	if (file->f_flags & O_DIRECT) {
+> +		while (iov_iter_count(i)) {
+> +			void __user *data = i->iov[0].iov_base + i->iov_offset;
+> +			size_t len = i->iov[0].iov_len - i->iov_offset;
+> +
+> +			num_pages = calc_pages_for((unsigned long)data, len);
+> +			pages = ceph_get_direct_page_vector(data,
+> +							    num_pages, true);
+> +			if (IS_ERR(pages))
+> +				return PTR_ERR(pages);
+> +
+> +			ret = striped_read(inode, off, len,
+> +					   pages, num_pages, checkeof,
+> +					   1, (unsigned long)data & ~PAGE_MASK);
+> +			ceph_put_page_vector(pages, num_pages, true);
+> +
+> +			if (ret <= 0)
+> +				break;
+> +			off += ret;
+> +			iov_iter_advance(i, ret);
+> +			if (ret < len)
+> +				break;
+> +		}
+> +	} else {
+> +		num_pages = calc_pages_for(off, len);
+> +		pages = ceph_alloc_page_vector(num_pages, GFP_NOFS);
+> +		if (IS_ERR(pages))
+> +			return PTR_ERR(pages);
+> +		ret = striped_read(inode, off, len, pages,
+> +					num_pages, checkeof, 0, 0);
+> +		if (ret > 0) {
+> +			int l, k = 0;
+> +			size_t left = len = ret;
+> +
+> +			while (left) {
+> +				void __user *data = i->iov[0].iov_base
+> +							+ i->iov_offset;
+> +				l = min(i->iov[0].iov_len - i->iov_offset,
+> +					left);
+> +
+> +				ret = ceph_copy_page_vector_to_user(&pages[k],
+> +								    data, off,
+> +								    l);
+> +				if (ret > 0) {
+> +					iov_iter_advance(i, ret);
+> +					left -= ret;
+> +					off += ret;
+> +					k = calc_pages_for(iocb->ki_pos,
+> +							   len - left + 1) - 1;
+> +					BUG_ON(k >= num_pages && left);
+> +				} else
+> +					break;
+> +			}
+> +		}
+> +		ceph_release_page_vector(pages, num_pages);
+> +	}
+>  
+> -	if (ret >= 0 && (file->f_flags & O_DIRECT) == 0)
+> -		ret = ceph_copy_page_vector_to_user(pages, data, off, ret);
+> -	if (ret >= 0)
+> -		*poff = off + ret;
+> +	if (off > iocb->ki_pos) {
+> +		ret = off - iocb->ki_pos;
+> +		iocb->ki_pos = off;
+> +	}
+>  
+> -done:
+> -	if (file->f_flags & O_DIRECT)
+> -		ceph_put_page_vector(pages, num_pages, true);
+> -	else
+> -		ceph_release_page_vector(pages, num_pages);
+>  	dout("sync_read result %d\n", ret);
+>  	return ret;
+>  }
+> @@ -647,55 +688,84 @@ static ssize_t ceph_aio_read(struct kiocb *iocb, const struct iovec *iov,
+>  {
+>  	struct file *filp = iocb->ki_filp;
+>  	struct ceph_file_info *fi = filp->private_data;
+> -	loff_t *ppos = &iocb->ki_pos;
+> -	size_t len = iov->iov_len;
+> +	size_t len = iocb->ki_nbytes;
+>  	struct inode *inode = file_inode(filp);
+>  	struct ceph_inode_info *ci = ceph_inode(inode);
+> -	void __user *base = iov->iov_base;
+>  	ssize_t ret;
+>  	int want, got = 0;
+>  	int checkeof = 0, read = 0;
+>  
+> +again:
+>  	dout("aio_read %p %llx.%llx %llu~%u trying to get caps on %p\n",
+> -	     inode, ceph_vinop(inode), pos, (unsigned)len, inode);
+> -again:
+> +	     inode, ceph_vinop(inode), iocb->ki_pos, (unsigned)len, inode);
+> +
+>  	if (fi->fmode & CEPH_FILE_MODE_LAZY)
+>  		want = CEPH_CAP_FILE_CACHE | CEPH_CAP_FILE_LAZYIO;
+>  	else
+>  		want = CEPH_CAP_FILE_CACHE;
+>  	ret = ceph_get_caps(ci, CEPH_CAP_FILE_RD, want, &got, -1);
+>  	if (ret < 0)
+> -		goto out;
+> -	dout("aio_read %p %llx.%llx %llu~%u got cap refs on %s\n",
+> -	     inode, ceph_vinop(inode), pos, (unsigned)len,
+> -	     ceph_cap_string(got));
+> +		return ret;
+>  
+>  	if ((got & (CEPH_CAP_FILE_CACHE|CEPH_CAP_FILE_LAZYIO)) == 0 ||
+>  	    (iocb->ki_filp->f_flags & O_DIRECT) ||
+> -	    (fi->flags & CEPH_F_SYNC))
+> +	    (fi->flags & CEPH_F_SYNC)) {
+> +		struct iov_iter i;
+> +
+> +		dout("aio_sync_read %p %llx.%llx %llu~%u got cap refs on %s\n",
+> +		     inode, ceph_vinop(inode), iocb->ki_pos, (unsigned)len,
+> +		     ceph_cap_string(got));
+> +
+> +		if (!read) {
+> +			ret = generic_segment_checks(iov, &nr_segs,
+> +							&len, VERIFY_WRITE);
+> +			if (ret)
+> +				goto out;
+> +		}
+> +
+> +		iov_iter_init(&i, iov, nr_segs, len, read);
+> +
+>  		/* hmm, this isn't really async... */
+> -		ret = ceph_sync_read(filp, base, len, ppos, &checkeof);
+> -	else
+> -		ret = generic_file_aio_read(iocb, iov, nr_segs, pos);
+> +		ret = ceph_sync_read(iocb, &i, &checkeof);
+> +	} else {
+> +		/*
+> +		 * We can't modify the content of iov,
+> +		 * so we only read from beginning.
+> +		 */
+> +		if (read) {
+> +			iocb->ki_pos = pos;
+> +			len = iocb->ki_nbytes;
+> +			read = 0;
+> +		}
+> +		dout("aio_read %p %llx.%llx %llu~%u got cap refs on %s\n",
+> +		     inode, ceph_vinop(inode), pos, (unsigned)len,
+> +		     ceph_cap_string(got));
+>  
+> +		ret = generic_file_aio_read(iocb, iov, nr_segs, pos);
+> +	}
+>  out:
+>  	dout("aio_read %p %llx.%llx dropping cap refs on %s = %d\n",
+>  	     inode, ceph_vinop(inode), ceph_cap_string(got), (int)ret);
+>  	ceph_put_cap_refs(ci, got);
+>  
+>  	if (checkeof && ret >= 0) {
+> -		int statret = ceph_do_getattr(inode, CEPH_STAT_CAP_SIZE);
+> +		int statret = ceph_do_getattr(inode,
+> +					      CEPH_STAT_CAP_SIZE);
+>  
+>  		/* hit EOF or hole? */
+> -		if (statret == 0 && *ppos < inode->i_size) {
+> -			dout("aio_read sync_read hit hole, ppos %lld < size %lld, reading more\n", *ppos, inode->i_size);
+> +		if (statret == 0 && iocb->ki_pos < inode->i_size &&
+> +			ret < len) {
+> +			dout("sync_read hit hole, ppos %lld < size %lld"
+> +			     ", reading more\n", iocb->ki_pos,
+> +			     inode->i_size);
+> +
+>  			read += ret;
+> -			base += ret;
+>  			len -= ret;
+>  			checkeof = 0;
+>  			goto again;
+>  		}
+>  	}
+> +
+>  	if (ret >= 0)
+>  		ret += read;
+>  
+> 
 
