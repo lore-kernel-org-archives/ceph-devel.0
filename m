@@ -1,245 +1,157 @@
-From: <mike.otoole@outlook.com>
-Subject: Re: [ceph-users] radosgw-admin unable to list or store user info
- after upgrade
-Date: Thu, 26 Sep 2013 18:07:34 -0400
-Message-ID: <COL401-EAS84BAF74C69F80AA0CE460AEA280@phx.gbl>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: [ceph-users] Scaling radosgw module
+Date: Thu, 26 Sep 2013 22:15:17 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F1992368C@SACMBXIP01.sdcorp.global.sandisk.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F0FC4A8A7@SACMBXIP01.sdcorp.global.sandisk.com>
+ <523CC62E.3070407@inktank.com>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F0FC4A8C9@SACMBXIP01.sdcorp.global.sandisk.com>
+ <523CD3FC.9010603@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from col0-omc3-s14.col0.hotmail.com ([65.55.34.152]:33764 "EHLO
-	col0-omc3-s14.col0.hotmail.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754420Ab3IZWNq convert rfc822-to-8bit
+Received: from ch1ehsobe001.messaging.microsoft.com ([216.32.181.181]:36894
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754163Ab3IZWPX convert rfc822-to-8bit
 	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 26 Sep 2013 18:13:46 -0400
+	Thu, 26 Sep 2013 18:15:23 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh <yehuda@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Mark Nelson <mark.nelson@inktank.com>
+Cc: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Anirban Ray <Anirban.Ray@sandisk.com>
 
-Thanks, it appears I missed that step on that host. Shouldn't the ceph deply utility take care of that step?
+Hi Mark, 
+FYI, I tried with wip-6286-dumpling release and the results are the same for me. The radosgw throughput is around ~6x slower than the single rados bench output!
+ Any other suggestion ?
 
---- Original Message ---
+Thanks & Regards
+Somnath
+-----Original Message-----
+From: Somnath Roy 
+Sent: Friday, September 20, 2013 4:08 PM
+To: 'Mark Nelson'
+Cc: ceph-users@lists.ceph.com
+Subject: RE: [ceph-users] Scaling radosgw module
 
-From: "Yehuda Sadeh" <yehuda@inktank.com>
-Sent: September 26, 2013 3:08 PM
-To: "Mike O'Toole" <mike.otoole@outlook.com>, "ceph-devel" <ceph-devel@vger.kernel.org>
-Subject: Re: [ceph-users] radosgw-admin unable to list or store user info after upgrade
+Hi Mark,
+It's a test cluster and I will try with the new release. 
+As I mentioned in the mail, I think number of rados client instance is the limitation. Could you please let me know how many rados client instance the radosgw daemon is instantiating ? Is it configurable somehow ?
 
-There's a mismatch between the installed objclasses to the osd
-run-time environment. Did you restart the osds after the upgrade?
+Thanks & Regards
+Somnath
 
-On Thu, Sep 26, 2013 at 11:03 AM, Mike O'Toole <mike.otoole@outlook.com> wrote:
+-----Original Message-----
+From: Mark Nelson [mailto:mark.nelson@inktank.com]
+Sent: Friday, September 20, 2013 4:02 PM
+To: Somnath Roy
+Cc: ceph-users@lists.ceph.com
+Subject: Re: [ceph-users] Scaling radosgw module
+
+On 09/20/2013 05:49 PM, Somnath Roy wrote:
+> Hi Mark,
+> Thanks for your quick response.
+> I tried adding the 'num_container = 100' in the job file and found that the performance actually decreasing with that option. I am getting around 1K less iops after putting this. Another observation is that in order to get back the earlier iops I need to restart the radosgw service. Just removing the num_container option from the job file and running swift-bench again is not helping. It seems something radosgw service is caching here.
+
+Interesting, that means you aren't being limited by a single container index only residing on 1 OSD.  Eventually that might be a limitation, but not here apparently.
+
 >
-> OK, looks like here is the error.
+> Regarding object size, I have tried with larger object size as well but iops are much lower in those cases.
+
+Yeah, the larger the object size the lower the iops, but potentially the higher the MB/s throughput.
+
 >
-> 2013-09-26 13:25:13.955291 7f6e46fb4700  0 _load_class could not open class
-> /usr/lib/rados-classes/libcls_version.so (dlopen failed):
-> /usr/lib/rados-classes/libcls_version.so: undefined symbol:
-> _Z19cls_gen_rand_base64Pci
-> 2013-09-26 13:25:13.960017 7f6e46fb4700  0 _load_class could not open class
-> /usr/lib/rados-classes/libcls_version.so (dlopen failed):
-> /usr/lib/rados-classes/libcls_version.so: undefined symbol:
-> _Z19cls_gen_rand_base64Pci
+> Regarding moving it to the ceph wip branch, can I just upgrade from dumpling ?
+
+Yes, it's actually just dumpling with a minor code change, however given that it's development code I would not recommend doing this if the cluster is in production.
+
 >
+> Thanks & Regards
+> Somnath
 >
->> Date: Thu, 26 Sep 2013 10:47:01 -0700
+> -----Original Message-----
+> From: ceph-users-bounces@lists.ceph.com [mailto:ceph-users-bounces@lists.ceph.com] On Behalf Of Mark Nelson
+> Sent: Friday, September 20, 2013 3:03 PM
+> To: ceph-users@lists.ceph.com
+> Subject: Re: [ceph-users] Scaling radosgw module
 >
->> Subject: Re: [ceph-users] radosgw-admin unable to list or store user info
->> after upgrade
->> From: yehuda@inktank.com
->> To: mike.otoole@outlook.com; ceph-users@lists.ceph.com
+> Hi,
+>
+> A couple of things that might be worth trying:
+>
+> use multiple containers in swift-bench.  Newer versions should support this.  Also, if this is a test cluster, you may want to try the ceph
+> wip-6286 branch as we have a rather major performance improvement in it when dealing with small objects.
+>
+> Beyond that, we are currently investigating performance slowdowns due to OSD directory splitting behavior that can crop up with many (millions) of objects.  This we think has potentially been hitting a couple of folks that have very large object collections.
+>
+> Thanks,
+> Mark
+>
+> On 09/20/2013 04:57 PM, Somnath Roy wrote:
+>> Hi,
+>> I am running Ceph on a 3 node cluster and each of my server node is running 10 OSDs, one for each disk. I have one admin node and all the nodes are connected with 2 X 10G network. One network is for cluster and other one configured as public network.
 >>
->> The osd returns some unexpected error:
+>> All the OSD journals are on SSDs.
 >>
->> 2013-09-26 13:25:17.651552 7ff13cd0b700 1 -- 10.10.2.55:0/1005496 <==
->> osd.2 10.10.2.200:6800/4790 5 ==== osd_op_reply(25 bob
->> [call,getxattrs,stat] ack = -5 (Input/output error)) v4 ==== 186+0+0
->> (4137529543 0 0) 0x7ff120002490 con 0xa6a380
+>> I started with rados bench command to benchmark the read performance of this Cluster on a large pool (~10K PGs) and found that each rados client has a limitation. Each client can only drive up to a certain mark. Each server  node cpu utilization shows it is  around 85-90% idle and the admin node (from where rados client is running) is around ~80-85% idle. I am trying with 4K object size.
 >>
->> Is there a matching osd log for that? I'd need to have the osd.2 log
->> for that (if specifying the admin2 user).
+>> I started running more clients on the admin node and the performance is scaling till it hits the client cpu limit. Server still has the cpu of 30-35% idle.
 >>
->> On Thu, Sep 26, 2013 at 10:29 AM, Mike O'Toole <mike.otoole@outlook.com>
->> wrote:
->> > I thought that command would return a list of users. I get the same
->> > issue
->> > when I supply a --uid
->> >
->> > Here are two attached test cases.
->> >
->> > 1. (User Info) radosgw-admin user info --uid=admin2 --debug-ms=1 and
->> > --debug-rgw=20 --debug-objecter=20 &> $HOME/radosgw_admin2_user_info.out
->> > 2. (User Create) radosgw-admin user create --uid=bob
->> > --display-name="Bob"
->> > --debug-ms=1 and --debug-rgw=20 --debug-objecter=20 &>
->> > $HOME/radosgw_user_create.out
->> >
->> >
->> >> Date: Thu, 26 Sep 2013 10:02:51 -0700
->> >
->> >> Subject: Re: [ceph-users] radosgw-admin unable to list or store user
->> >> info
->> >> after upgrade
->> >> From: yehuda@inktank.com
->> >> To: mike.otoole@outlook.com; ceph-devel@vger.kernel.org
->> >>
->> >> On Thu, Sep 26, 2013 at 9:41 AM, Mike O'Toole <mike.otoole@outlook.com>
->> >> wrote:
->> >> > Sure,
->> >> >
->> >> > I issued: radosgw-admin user info --debug-ms=1 and --debug-rgw=20
->> >> > --debug-objecter=20 &> $HOME/radosgw_user_info.out
->> >>
->> >> You missed --uid=bob here. The error message is a bit confusing but
->> >> this is expected.
->> >>
->> >> >
->> >> > log info attached.
->> >> >
->> >> >
->> >> >> Date: Thu, 26 Sep 2013 09:34:45 -0700
->> >> >
->> >> >> Subject: Re: [ceph-users] radosgw-admin unable to list or store user
->> >> >> info
->> >> >> after upgrade
->> >> >> From: yehuda@inktank.com
->> >> >> To: mike.otoole@outlook.com; ceph-users@lists.ceph.com
->> >> >
->> >> >>
->> >> >> Are you sure you ran the same radosgw-admin command? the log shows a
->> >> >> different error message. Can you re-run it with also (besides the
->> >> >> --debug-ms=1 and --debug-rgw=20) also with --debug-objecter=20?
->> >> >>
->> >> >> On Thu, Sep 26, 2013 at 9:09 AM, Mike O'Toole
->> >> >> <mike.otoole@outlook.com>
->> >> >> wrote:
->> >> >> > radosgw-admin zone get
->> >> >> > { "domain_root": ".rgw",
->> >> >> > "control_pool": ".rgw.control",
->> >> >> > "gc_pool": ".rgw.gc",
->> >> >> > "log_pool": ".log",
->> >> >> > "intent_log_pool": ".intent-log",
->> >> >> > "usage_log_pool": ".usage",
->> >> >> > "user_keys_pool": ".users",
->> >> >> > "user_email_pool": ".users.email",
->> >> >> > "user_swift_pool": ".users.swift",
->> >> >> > "user_uid_pool": ".users.uid",
->> >> >> > "system_key": { "access_key": "",
->> >> >> > "secret_key": ""},
->> >> >> > "placement_pools": []}
->> >> >> >
->> >> >> > rados lspools
->> >> >> > data
->> >> >> > metadata
->> >> >> > rbd
->> >> >> > .rgw
->> >> >> > .rgw.gc
->> >> >> > .rgw.control
->> >> >> > .users.uid
->> >> >> > .users
->> >> >> > .users.email
->> >> >> > .rgw.buckets
->> >> >> > .log
->> >> >> > .usage
->> >> >> > .rgw.root
->> >> >> >
->> >> >> >
->> >> >> >> Date: Thu, 26 Sep 2013 09:05:08 -0700
->> >> >> >
->> >> >> >> Subject: Re: [ceph-users] radosgw-admin unable to list or store
->> >> >> >> user
->> >> >> >> info
->> >> >> >> after upgrade
->> >> >> >> From: yehuda@inktank.com
->> >> >> >> To: mike.otoole@outlook.com; ceph-devel@vger.kernel.org
->> >> >> >
->> >> >> >>
->> >> >> >> What do the following return?
->> >> >> >>
->> >> >> >> $ radosgw-admin zone get
->> >> >> >>
->> >> >> >> $ rados lspools
->> >> >> >>
->> >> >> >>
->> >> >> >>
->> >> >> >> On Thu, Sep 26, 2013 at 8:13 AM, Mike O'Toole
->> >> >> >> <mike.otoole@outlook.com>
->> >> >> >> wrote:
->> >> >> >> > Coming through the admin ops rest inteface I get the following
->> >> >> >> > log
->> >> >> >> > info:
->> >> >> >> > ET
->> >> >> >> >
->> >> >> >> > application/x-www-form-urlencoded; charset=utf-8
->> >> >> >> > Thu, 26 Sep 2013 15:08:34 GMT
->> >> >> >> > /admin/user
->> >> >> >> > 2013-09-26 11:08:34.449849 7ffbe67dc700 15 calculated
->> >> >> >> > digest=5vI0b/Ytn+XaSehRsqRu5PmNUBc=
->> >> >> >> > 2013-09-26 11:08:34.449854 7ffbe67dc700 15
->> >> >> >> > auth_sign=5vI0b/Ytn+XaSehRsqRu5PmNUBc=
->> >> >> >> > 2013-09-26 11:08:34.449855 7ffbe67dc700 15 compare=0
->> >> >> >> > 2013-09-26 11:08:34.449861 7ffbe67dc700 2 req 2:0.008683::GET
->> >> >> >> > /admin/user:get_user_info:reading permissions
->> >> >> >> > 2013-09-26 11:08:34.449867 7ffbe67dc700 2 req 2:0.008690::GET
->> >> >> >> > /admin/user:get_user_info:verifying op mask
->> >> >> >> > 2013-09-26 11:08:34.449871 7ffbe67dc700 20 required_mask= 0
->> >> >> >> > user.op_mask=7
->> >> >> >> > 2013-09-26 11:08:34.449873 7ffbe67dc700 2 req 2:0.008696::GET
->> >> >> >> > /admin/user:get_user_info:verifying op permissions
->> >> >> >> > 2013-09-26 11:08:34.449878 7ffbe67dc700 2 req 2:0.008701::GET
->> >> >> >> > /admin/user:get_user_info:verifying op params
->> >> >> >> > 2013-09-26 11:08:34.449881 7ffbe67dc700 2 req 2:0.008704::GET
->> >> >> >> > /admin/user:get_user_info:executing
->> >> >> >> > 2013-09-26 11:08:34.449916 7ffbe67dc700 20 get_obj_state:
->> >> >> >> > rctx=0x7ffc0c008ad0 obj=.users.uid:admin2 state=0x7ffc0c008b98
->> >> >> >> > s->prefetch_data=0
->> >> >> >> > 2013-09-26 11:08:34.449927 7ffbe67dc700 10 moving
->> >> >> >> > .users.uid+admin2
->> >> >> >> > to
->> >> >> >> > cache
->> >> >> >> > LRU end
->> >> >> >> > 2013-09-26 11:08:34.449930 7ffbe67dc700 10 cache get:
->> >> >> >> > name=.users.uid+admin2
->> >> >> >> > : type miss (requested=22, cached=7)
->> >> >> >> > 2013-09-26 11:08:34.451617 7ffbe67dc700 2 req 2:0.010439::GET
->> >> >> >> > /admin/user:get_user_info:http status=404
->> >> >> >> >
->> >> >> >> > Ive attached the log generated by the radosgw-admin user info
->> >> >> >> > command
->> >> >> >> >
->> >> >> >> >
->> >> >> >> >> Date: Thu, 26 Sep 2013 07:51:42 -0700
->> >> >> >> >> Subject: Re: [ceph-users] radosgw-admin unable to list or
->> >> >> >> >> store
->> >> >> >> >> user
->> >> >> >> >> info
->> >> >> >> >> after upgrade
->> >> >> >> >> From: yehuda@inktank.com
->> >> >> >> >> To: mike.otoole@outlook.com
->> >> >> >> >> CC: ceph-users@ceph.com
->> >> >> >> >
->> >> >> >> >>
->> >> >> >> >> On Thu, Sep 26, 2013 at 7:42 AM, Mike O'Toole
->> >> >> >> >> <mike.otoole@outlook.com>
->> >> >> >> >> wrote:
->> >> >> >> >> > After upgrading from Cuddlefish to Dumpling I am no longer
->> >> >> >> >> > able
->> >> >> >> >> > to
->> >> >> >> >> > obtain
->> >> >> >> >> > user information from the rados gateway.
->> >> >> >> >> >
->> >> >> >> >> > radosgw-admin user info
->> >> >> >> >> > could not fetch user info: no user info saved
->> >> >> >> >> >
->> >> >> >> >> >
->> >> >> >> >> > radosgw-admin user create --uid=bob --display-name="bob"
->> >> >> >> >> > could not create user: unable to create user, unable to
->> >> >> >> >> > store
->> >> >> >> >> > user
->> >> >> >> >> > info
->> >> >> >> >>
->> >> >> >> >> What does the gateway log show? Try running the same command
->> >> >> >> >> with
->> >> >> >> >> --debug-rgw=20 --debug-ms=1 --log-to-stderr
->> >> >> >> >>
->> >> >> >> >> Yehuda
+>> Now, I am behind radosgw and in one of the server node I installed the required modules like apache, fastcgi, radosgw etc.  I configured swift bench and started benchmarking. Here is my swift-bench job script.
+>>
+>> [bench]
+>> auth = http://<my-server>/auth
+>> user = somroy:swift
+>> key = UbJl9o+OPnzGaRbgqkS9OtPQ01TkAXAeA9RmVzVt
+>> concurrency = 64
+>> object_size = 4096
+>> num_objects = 1000
+>> num_gets = 200000
+>> delete = yes
+>> auth_version = 1.0
+>>
+>>
+>> First of all,  the read performance I am getting with one radosgw is more than 5x slower than what I am getting with one rbd client or one rados bench client. Is this expected ? Here is my ceph.conf radosgw config option.
+>>
+>> [client.radosgw.gateway]
+>> host = emsserver1
+>> keyring = /etc/ceph/keyring.radosgw.gateway rgw_socket_path =
+>> /tmp/radosgw.sock log_file = /var/log/ceph/radosgw.log rgw_dns_name =
+>> <ip> rgw_ops_log_rados = false debug_rgw = 0 rgw_thread_pool_size =
+>> 300
+>>
+>> The server node (where radosgw is also present) avg cpu utilization is very low (~75-80% idle). Out of the ~20% consumption, I saw radosgw is consuming bulk of the cpu in the node and ceph-osds are not much. The other two server node is ~95% idle ; 10 ceph-osds are consuming this of total 5% of cpu !!
+>>
+>> So, clearly, I am not able to generate much load on the cluster.
+>> So, I tried to run multiple swift-bench instances with the same job , all hitting the single radosgw instance. I saw no improvement on the performance, each instance iops is almost now = (single instance iop/number of swift-bench instance). The aggregated iops is remaining almost same as of single instance.
+>>
+>> This means we are hitting the single client instance limit here too.
+>> My question is, for all the requests radosgw is opening only single client connection to the object store ?
+>> If so, is there any configuration like 'noshare' option in case of rbd that Josh pointed out in my earlier mail ?
+>>
+>> If not, how a single radosgw instance will scale ?
+>>
+>> Appreciate, if anybody can help me on this.
+>>
+>> Thanks & Regards
+>> Somnath
+>>
+>> ________________________________
+>>
+>> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+>>
+>>
+>> _______________________________________________
+>> ceph-users mailing list
+>> ceph-users@lists.ceph.com
+>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>>
+>
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>
+>
+
+
