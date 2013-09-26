@@ -1,23 +1,42 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: [ceph-users] Scaling radosgw module
-Date: Thu, 26 Sep 2013 17:49:40 -0500
-Message-ID: <5244BA04.2070702@inktank.com>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F0FC4A8A7@SACMBXIP01.sdcorp.global.sandisk.com> <523CC62E.3070407@inktank.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F0FC4A8C9@SACMBXIP01.sdcorp.global.sandisk.com> <523CD3FC.9010603@inktank.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F1992368C@SACMBXIP01.sdcorp.global.sandisk.com> <5244B605.5020002@inktank.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F199236AA@SACMBXIP01.sdcorp.global.sandisk.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: [ceph-users] Scaling radosgw module
+Date: Thu, 26 Sep 2013 22:58:38 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F199236CF@SACMBXIP01.sdcorp.global.sandisk.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F0FC4A8A7@SACMBXIP01.sdcorp.global.sandisk.com>
+ <523CC62E.3070407@inktank.com>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F0FC4A8C9@SACMBXIP01.sdcorp.global.sandisk.com>
+ <523CD3FC.9010603@inktank.com>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F1992368C@SACMBXIP01.sdcorp.global.sandisk.com>
+ <5244B605.5020002@inktank.com>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F199236AA@SACMBXIP01.sdcorp.global.sandisk.com>
+ <5244BA04.2070702@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f177.google.com ([209.85.223.177]:58303 "EHLO
-	mail-ie0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754512Ab3IZWtm (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Sep 2013 18:49:42 -0400
-Received: by mail-ie0-f177.google.com with SMTP id qd12so2338128ieb.36
-        for <ceph-devel@vger.kernel.org>; Thu, 26 Sep 2013 15:49:42 -0700 (PDT)
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F199236AA@SACMBXIP01.sdcorp.global.sandisk.com>
+Received: from ch1ehsobe005.messaging.microsoft.com ([216.32.181.185]:57346
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754436Ab3IZW6o convert rfc822-to-8bit
+	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 26 Sep 2013 18:58:44 -0400
+In-Reply-To: <5244BA04.2070702@inktank.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
+To: Mark Nelson <mark.nelson@inktank.com>
 Cc: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Anirban Ray <Anirban.Ray@sandisk.com>
+
+Nope...With one client hitting the radaosgw , the daemon cpu usage is going up till 400-450% i.e taking in avg 4 core..In one client scenario, the server node (having radosgw + osds) cpu usage is ~80% idle and out of the 20% usage bulk is consumed by radosgw.
+
+Thanks & Regards
+Somnath
+
+-----Original Message-----
+From: Mark Nelson [mailto:mark.nelson@inktank.com] 
+Sent: Thursday, September 26, 2013 3:50 PM
+To: Somnath Roy
+Cc: ceph-users@lists.ceph.com; ceph-devel@vger.kernel.org; Anirban Ray
+Subject: Re: [ceph-users] Scaling radosgw module
 
 Ah, that's very good to know!
 
@@ -34,7 +53,8 @@ On 09/26/2013 05:40 PM, Somnath Roy wrote:
 > Somnath
 >
 > -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
+> From: ceph-devel-owner@vger.kernel.org 
+> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
 > Sent: Thursday, September 26, 2013 3:33 PM
 > To: Somnath Roy
 > Cc: ceph-users@lists.ceph.com; ceph-devel@vger.kernel.org; Anirban Ray
@@ -42,7 +62,9 @@ On 09/26/2013 05:40 PM, Somnath Roy wrote:
 >
 > It's kind of annoying, but it may be worth setting up a 2nd RGW server and seeing if having two copies of the benchmark going at the same time on two separate RGW servers increases aggregate throughput.
 >
-> Also, it may be worth tracking down latencies with messenger debugging enabled, but I'm afraid I'm pretty bogged down right now and probably wouldn't be able to look at it for a while. :(
+> Also, it may be worth tracking down latencies with messenger debugging 
+> enabled, but I'm afraid I'm pretty bogged down right now and probably 
+> wouldn't be able to look at it for a while. :(
 >
 > Mark
 >
@@ -96,7 +118,7 @@ On 09/26/2013 05:40 PM, Somnath Roy wrote:
 >>> Somnath
 >>>
 >>> -----Original Message-----
->>> From: ceph-users-bounces@lists.ceph.com
+>>> From: ceph-users-bounces@lists.ceph.com 
 >>> [mailto:ceph-users-bounces@lists.ceph.com] On Behalf Of Mark Nelson
 >>> Sent: Friday, September 20, 2013 3:03 PM
 >>> To: ceph-users@lists.ceph.com
@@ -106,8 +128,8 @@ On 09/26/2013 05:40 PM, Somnath Roy wrote:
 >>>
 >>> A couple of things that might be worth trying:
 >>>
->>> use multiple containers in swift-bench.  Newer versions should
->>> support this.  Also, if this is a test cluster, you may want to try
+>>> use multiple containers in swift-bench.  Newer versions should 
+>>> support this.  Also, if this is a test cluster, you may want to try 
 >>> the ceph
 >>> wip-6286 branch as we have a rather major performance improvement in it when dealing with small objects.
 >>>
@@ -119,6 +141,7 @@ On 09/26/2013 05:40 PM, Somnath Roy wrote:
 >>> On 09/20/2013 04:57 PM, Somnath Roy wrote:
 >>>> Hi,
 >>>> I am running Ceph on a 3 node cluster and each of my server node is running 10 OSDs, one for each disk. I have one admin node and all the nodes are connected with 2 X 10G network. One network is for cluster and other one configured as public network.
+
 >>>>
 >>>> All the OSD journals are on SSDs.
 >>>>
@@ -144,9 +167,9 @@ On 09/26/2013 05:40 PM, Somnath Roy wrote:
 >>>>
 >>>> [client.radosgw.gateway]
 >>>> host = emsserver1
->>>> keyring = /etc/ceph/keyring.radosgw.gateway rgw_socket_path =
->>>> /tmp/radosgw.sock log_file = /var/log/ceph/radosgw.log rgw_dns_name
->>>> = <ip> rgw_ops_log_rados = false debug_rgw = 0 rgw_thread_pool_size
+>>>> keyring = /etc/ceph/keyring.radosgw.gateway rgw_socket_path = 
+>>>> /tmp/radosgw.sock log_file = /var/log/ceph/radosgw.log rgw_dns_name 
+>>>> = <ip> rgw_ops_log_rados = false debug_rgw = 0 rgw_thread_pool_size 
 >>>> =
 >>>> 300
 >>>>
@@ -187,7 +210,10 @@ On 09/26/2013 05:40 PM, Somnath Roy wrote:
 >>
 >
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> in the body of a message to majordomo@vger.kernel.org More majordomo 
+> info at  http://vger.kernel.org/majordomo-info.html
 >
 >
+
 
