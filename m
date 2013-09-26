@@ -1,112 +1,50 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: bloom filter thoughts
-Date: Thu, 26 Sep 2013 08:20:39 -0500
-Message-ID: <524434A7.9020001@inktank.com>
-References: <alpine.DEB.2.00.1309251629090.12717@cobra.newdream.net>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: Bug about issue 5883
+Date: Thu, 26 Sep 2013 08:36:01 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1309260834280.12714@cobra.newdream.net>
+References: <CAMm-wc+8GJyE1Bj6t06N+1T2c+cSzZFnSOG4qg7SSxf_6VQcCQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f174.google.com ([209.85.220.174]:60385 "EHLO
-	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756754Ab3IZNUm (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Sep 2013 09:20:42 -0400
-Received: by mail-vc0-f174.google.com with SMTP id gd11so815368vcb.33
-        for <ceph-devel@vger.kernel.org>; Thu, 26 Sep 2013 06:20:41 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1309251629090.12717@cobra.newdream.net>
+Received: from cobra.newdream.net ([66.33.216.30]:39605 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751158Ab3IZPgB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Sep 2013 11:36:01 -0400
+In-Reply-To: <CAMm-wc+8GJyE1Bj6t06N+1T2c+cSzZFnSOG4qg7SSxf_6VQcCQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Dong Yuan <yuandong1222@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 09/25/2013 07:34 PM, Sage Weil wrote:
-> I spent some time on the plane playing with bloom filters.  We're looking
-> at using these on the OSD to (more) efficiently keep track of which
-> objects have (probably) been touched in recent history.  This can then be
-> used by the caching and tiering code to identify objects that have
-> (definitely) not been touched that should be demoted or purged from a
-> given tier.
+Hi,
 
-You know this is making me want to work on my photon mapping engine 
-again instead of running benchmarks for Bryan. :P  Anyway, this seems 
-like a great use case.  Are there any other places we want to fast 
-intersection tests where we could use these?  k-nearest-neighbor 
-searches would be tons of fun to do too if we only had a use case!
+On Thu, 26 Sep 2013, Dong Yuan wrote:
+> Hello, Sage.
+> 
+> I meet the same bug as #5883. It is happy to know that the bug is
+> fixed, but although I spent lots of time to try to get why, I still
+> couldn't understand the reason.
+> 
+> Is there any race conditions? Or which threads? I guess the threads
+> about this bug are Pipe.reader and DispatchQueue.entry, But I am not
+> sure.
 
->
-> The false positive probility (in our case, probability we'll think an
-> object has been touched when it actually hasn't) is dependent on size of
-> the bloom filter and the number of insertions.
->
-> When you create the bloom_filter, you tell it how many insertions you
-> expect to do and what fpp you want and it sizes itself.  For ~1% fpp, it
-> costs just over 1 byte per insertion.
+First, we need to carry the ref through teh function in case another 
+thread (reader *or* writer) gets a socket error and tears down the socket.
 
-It's been a long time since I looked at bloom filters, but isn't this 
-also affected by the number of hash functions used?  Are we going to try 
-to have it auto-select the number?
+Second, we need to hold mds_lock to avoid races with other mds code when 
+looking at the Session*.
 
->
-> wip-bloom has some cleanups and unit tests that test the false positive
-> behavior.
->
-> A few issues/notes:
->
-> - If we build a sequence of filters covering intervals of time, this let's
-> us estimate "atime".  However, if we have N filters of 1/Nth the size, our
-> total_ffp = N * fpp, so each bin's bloom needs to be 1/Nth as big with
-> 1/Nth the desired fpp.  In my simple test, going from 1 to 16 bins moves
-> the bloom_filter size from 20 KB to 32 KB (that's 16k insertions and
-> target_ffp of .01).
->
-> - In the OSD, we won't necessarily know how many insertions a bin will
-> have.  The user inputs will/should be something like:
->   - target fpp
->   - time interval we want to record/estimate over (say, 1 day)
-> and we'll need to translate that into a particular sized bloom.  We
-> probably need to estimate that based on recent pg workload/activity.  If
-> we have a filter that "fills up" quickly, the next one will be bigger.  If
-> we have an unfull one after some period of time, we can compress/fold it
-> down into a smaller filter (a convenient trick) and start the next smaller
-> one.
+Hope that helps!
+sage
 
-So basically we try to keep a running log of the PG activity so we can 
-guess as to how big future filters should be, and if our guess is short 
-we move on and make the next one bigger, but if we overshot we compress 
-it into a smaller filter and make the next one smaller?  I think this is 
-exactly what you said but I want to make sure I got it. :)
-
->
-> I suggest the pg_pool_t get:
->
->   uint8_t bloom_fpp_pow;  //< desired false positive rate == 2^(-bloom_fpp_pow)
->   uint16_t bloom_period;  //< period for that false positive rate (seconds)
->   uint16_t bloom_bins;    //< the approx "resolution" we want
->   uint16_t bloom_max;     //< how many periods we retain history for
->
-> which would make the OSD try to create a new filter roughly every
-> (period/bins) seconds with some simple estimation.
->
-> Other thoughts on the OSD side stuff:
->
-> - The past history of filters may be large.  I suggest we stick them in an
-> omap object that lives with the PG and is recovered/backfilled but that
-> needs to happen in a way that is out of band wrt to other objects.  It
-> should get scrubbed.
-
-Any guesses as to how large this will get yet?  It's too early in the 
-morning for me to do math...
-
->
-> - Before anything is trimmed from the pg log it needs to be added to the
-> currently-accumulating bloom filter.  We can delay this until (well) after
-> last_complete_on_disk so that we never have to worry about divergent
-> entries.
->
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-
+> 
+> Maybe you can give me more details.
+> 
+> Thank you very much.
+> 
+> -- 
+> Dong Yuan
+> Email:yuandong1222@gmail.com
+> 
+> 
