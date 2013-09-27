@@ -1,49 +1,55 @@
-From: Mark Nelson <mark.nelson-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: Scaling radosgw module
-Date: Fri, 27 Sep 2013 13:50:10 -0500
-Message-ID: <5245D362.8040900@inktank.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: [ceph-users] Scaling radosgw module
+Date: Fri, 27 Sep 2013 18:56:41 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F199237E7@SACMBXIP01.sdcorp.global.sandisk.com>
 References: <755F6B91B3BE364F9BCA11EA3F9E0C6F0FC4A8A7@SACMBXIP01.sdcorp.global.sandisk.com>
-	<523CC62E.3070407@inktank.com>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F0FC4A8C9@SACMBXIP01.sdcorp.global.sandisk.com>
-	<523CD3FC.9010603@inktank.com>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F1992368C@SACMBXIP01.sdcorp.global.sandisk.com>
-	<5244B605.5020002@inktank.com>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F199236AA@SACMBXIP01.sdcorp.global.sandisk.com>
-	<5244BA04.2070702@inktank.com>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F199236CF@SACMBXIP01.sdcorp.global.sandisk.com>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F199236E3@SACMBXIP01.sdcorp.global.sandisk.com>
-	<CABBk=J9a_kFFJOnJpOHS+0RGXXQ5y7JPFYGguXVdP2NsKd1J4w@mail.gmail.com>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F1992370D@SACMBXIP01.sdcorp.global.sandisk.com>
+ <523CC62E.3070407@inktank.com>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F0FC4A8C9@SACMBXIP01.sdcorp.global.sandisk.com>
+ <523CD3FC.9010603@inktank.com>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F1992368C@SACMBXIP01.sdcorp.global.sandisk.com>
+ <5244B605.5020002@inktank.com>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F199236AA@SACMBXIP01.sdcorp.global.sandisk.com>
+ <5244BA04.2070702@inktank.com>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F199236CF@SACMBXIP01.sdcorp.global.sandisk.com>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F199236E3@SACMBXIP01.sdcorp.global.sandisk.com>
+ <CABBk=J9a_kFFJOnJpOHS+0RGXXQ5y7JPFYGguXVdP2NsKd1J4w@mail.gmail.com>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F1992370D@SACMBXIP01.sdcorp.global.sandisk.com>
+ <5245D362.8040900@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F1992370D-cXZ6iGhjG0il5HHZYNR2WTJ2aSJ780jGSxCzGc5ayCJWk0Htik3J/w@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Somnath Roy <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, Anirban Ray <Anirban.Ray-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from co1ehsobe002.messaging.microsoft.com ([216.32.180.185]:13083
+	"EHLO co1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754636Ab3I0S4q convert rfc822-to-8bit
+	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 27 Sep 2013 14:56:46 -0400
+In-Reply-To: <5245D362.8040900@inktank.com>
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Mark Nelson <mark.nelson@inktank.com>
+Cc: Yehuda Sadeh <yehuda@inktank.com>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, Anirban Ray <Anirban.Ray@sandisk.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+
+Yes, I understand that..
+I tried with thread pool size of 300 (default 100, I believe). I am in process of running perf on radosgw as well as on osds for profiling.
+BTW,  let me know if any particular ceph component  you want me to focus.
+
+Thanks & Regards
+Somnath
+
+-----Original Message-----
+From: Mark Nelson [mailto:mark.nelson@inktank.com] 
+Sent: Friday, September 27, 2013 11:50 AM
+To: Somnath Roy
+Cc: Yehuda Sadeh; ceph-users@lists.ceph.com; Anirban Ray; ceph-devel@vger.kernel.org
+Subject: Re: [ceph-users] Scaling radosgw module
 
 Hi Somnath,
 
-With SSDs, you almost certainly are going to be running into bottlenecks 
-on the RGW side... Maybe even fastcgi or apache depending on the machine 
-and how things are configured.  Unfortunately this is probably one of 
-the more complex performance optimization scenarios in the Ceph world 
-and is going to require figuring out exactly where things are slowing down.
+With SSDs, you almost certainly are going to be running into bottlenecks on the RGW side... Maybe even fastcgi or apache depending on the machine and how things are configured.  Unfortunately this is probably one of the more complex performance optimization scenarios in the Ceph world and is going to require figuring out exactly where things are slowing down.
 
-I don't remember if you've done this already, but you could try 
-increasing the number of radosgw threads and try to throw more 
-concurrency at the problem, but other than that it's probably going to 
-come down to profiling, and lots of it. :)
+I don't remember if you've done this already, but you could try increasing the number of radosgw threads and try to throw more concurrency at the problem, but other than that it's probably going to come down to profiling, and lots of it. :)
 
 Mark
 
@@ -55,15 +61,16 @@ On 09/26/2013 07:04 PM, Somnath Roy wrote:
 > Somnath
 >
 > -----Original Message-----
-> From: Yehuda Sadeh [mailto:yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org]
+> From: Yehuda Sadeh [mailto:yehuda@inktank.com]
 > Sent: Thursday, September 26, 2013 4:48 PM
 > To: Somnath Roy
-> Cc: Mark Nelson; ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org; Anirban Ray; ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> Cc: Mark Nelson; ceph-users@lists.ceph.com; Anirban Ray; 
+> ceph-devel@vger.kernel.org
 > Subject: Re: [ceph-users] Scaling radosgw module
 >
 > You specify the relative performance, but what the actual numbers that you're seeing? How many GETs per second, and how many PUTs per second do you see?
 >
-> On Thu, Sep 26, 2013 at 4:00 PM, Somnath Roy <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org> wrote:
+> On Thu, Sep 26, 2013 at 4:00 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
 >> Mark,
 >> One more thing, all my test is with rgw cache enabled , disabling the cache the performance is around 3x slower.
 >>
@@ -71,11 +78,12 @@ On 09/26/2013 07:04 PM, Somnath Roy wrote:
 >> Somnath
 >>
 >> -----Original Message-----
->> From: ceph-devel-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
->> [mailto:ceph-devel-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org] On Behalf Of Somnath Roy
+>> From: ceph-devel-owner@vger.kernel.org 
+>> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Somnath Roy
 >> Sent: Thursday, September 26, 2013 3:59 PM
 >> To: Mark Nelson
->> Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org; ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; Anirban Ray
+>> Cc: ceph-users@lists.ceph.com; ceph-devel@vger.kernel.org; Anirban 
+>> Ray
 >> Subject: RE: [ceph-users] Scaling radosgw module
 >>
 >> Nope...With one client hitting the radaosgw , the daemon cpu usage is going up till 400-450% i.e taking in avg 4 core..In one client scenario, the server node (having radosgw + osds) cpu usage is ~80% idle and out of the 20% usage bulk is consumed by radosgw.
@@ -84,10 +92,11 @@ On 09/26/2013 07:04 PM, Somnath Roy wrote:
 >> Somnath
 >>
 >> -----Original Message-----
->> From: Mark Nelson [mailto:mark.nelson-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org]
+>> From: Mark Nelson [mailto:mark.nelson@inktank.com]
 >> Sent: Thursday, September 26, 2013 3:50 PM
 >> To: Somnath Roy
->> Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org; ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; Anirban Ray
+>> Cc: ceph-users@lists.ceph.com; ceph-devel@vger.kernel.org; Anirban 
+>> Ray
 >> Subject: Re: [ceph-users] Scaling radosgw module
 >>
 >> Ah, that's very good to know!
@@ -105,18 +114,18 @@ On 09/26/2013 07:04 PM, Somnath Roy wrote:
 >>> Somnath
 >>>
 >>> -----Original Message-----
->>> From: ceph-devel-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
->>> [mailto:ceph-devel-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org] On Behalf Of Mark Nelson
+>>> From: ceph-devel-owner@vger.kernel.org 
+>>> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
 >>> Sent: Thursday, September 26, 2013 3:33 PM
 >>> To: Somnath Roy
->>> Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org; ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; Anirban
+>>> Cc: ceph-users@lists.ceph.com; ceph-devel@vger.kernel.org; Anirban 
 >>> Ray
 >>> Subject: Re: [ceph-users] Scaling radosgw module
 >>>
 >>> It's kind of annoying, but it may be worth setting up a 2nd RGW server and seeing if having two copies of the benchmark going at the same time on two separate RGW servers increases aggregate throughput.
 >>>
->>> Also, it may be worth tracking down latencies with messenger
->>> debugging enabled, but I'm afraid I'm pretty bogged down right now
+>>> Also, it may be worth tracking down latencies with messenger 
+>>> debugging enabled, but I'm afraid I'm pretty bogged down right now 
 >>> and probably wouldn't be able to look at it for a while. :(
 >>>
 >>> Mark
@@ -132,7 +141,7 @@ On 09/26/2013 07:04 PM, Somnath Roy wrote:
 >>>> From: Somnath Roy
 >>>> Sent: Friday, September 20, 2013 4:08 PM
 >>>> To: 'Mark Nelson'
->>>> Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+>>>> Cc: ceph-users@lists.ceph.com
 >>>> Subject: RE: [ceph-users] Scaling radosgw module
 >>>>
 >>>> Hi Mark,
@@ -143,10 +152,10 @@ On 09/26/2013 07:04 PM, Somnath Roy wrote:
 >>>> Somnath
 >>>>
 >>>> -----Original Message-----
->>>> From: Mark Nelson [mailto:mark.nelson-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org]
+>>>> From: Mark Nelson [mailto:mark.nelson@inktank.com]
 >>>> Sent: Friday, September 20, 2013 4:02 PM
 >>>> To: Somnath Roy
->>>> Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+>>>> Cc: ceph-users@lists.ceph.com
 >>>> Subject: Re: [ceph-users] Scaling radosgw module
 >>>>
 >>>> On 09/20/2013 05:49 PM, Somnath Roy wrote:
@@ -171,19 +180,20 @@ On 09/26/2013 07:04 PM, Somnath Roy wrote:
 >>>>> Somnath
 >>>>>
 >>>>> -----Original Message-----
->>>>> From: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
->>>>> [mailto:ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org] On Behalf Of Mark Nelson
+>>>>> From: ceph-users-bounces@lists.ceph.com 
+>>>>> [mailto:ceph-users-bounces@lists.ceph.com] On Behalf Of Mark 
+>>>>> Nelson
 >>>>> Sent: Friday, September 20, 2013 3:03 PM
->>>>> To: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+>>>>> To: ceph-users@lists.ceph.com
 >>>>> Subject: Re: [ceph-users] Scaling radosgw module
 >>>>>
 >>>>> Hi,
 >>>>>
 >>>>> A couple of things that might be worth trying:
 >>>>>
->>>>> use multiple containers in swift-bench.  Newer versions should
->>>>> support this.  Also, if this is a test cluster, you may want to try
->>>>> the ceph
+>>>>> use multiple containers in swift-bench.  Newer versions should 
+>>>>> support this.  Also, if this is a test cluster, you may want to 
+>>>>> try the ceph
 >>>>> wip-6286 branch as we have a rather major performance improvement in it when dealing with small objects.
 >>>>>
 >>>>> Beyond that, we are currently investigating performance slowdowns due to OSD directory splitting behavior that can crop up with many (millions) of objects.  This we think has potentially been hitting a couple of folks that have very large object collections.
@@ -221,9 +231,9 @@ On 09/26/2013 07:04 PM, Somnath Roy wrote:
 >>>>>>
 >>>>>> [client.radosgw.gateway]
 >>>>>> host = emsserver1
->>>>>> keyring = /etc/ceph/keyring.radosgw.gateway rgw_socket_path =
->>>>>> /tmp/radosgw.sock log_file = /var/log/ceph/radosgw.log
->>>>>> rgw_dns_name = <ip> rgw_ops_log_rados = false debug_rgw = 0
+>>>>>> keyring = /etc/ceph/keyring.radosgw.gateway rgw_socket_path = 
+>>>>>> /tmp/radosgw.sock log_file = /var/log/ceph/radosgw.log 
+>>>>>> rgw_dns_name = <ip> rgw_ops_log_rados = false debug_rgw = 0 
 >>>>>> rgw_thread_pool_size =
 >>>>>> 300
 >>>>>>
@@ -250,13 +260,13 @@ On 09/26/2013 07:04 PM, Somnath Roy wrote:
 >>>>>>
 >>>>>> _______________________________________________
 >>>>>> ceph-users mailing list
->>>>>> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+>>>>>> ceph-users@lists.ceph.com
 >>>>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 >>>>>>
 >>>>>
 >>>>> _______________________________________________
 >>>>> ceph-users mailing list
->>>>> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+>>>>> ceph-users@lists.ceph.com
 >>>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 >>>>>
 >>>>>
@@ -265,7 +275,7 @@ On 09/26/2013 07:04 PM, Somnath Roy wrote:
 >>>
 >>> --
 >>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->>> in the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org More majordomo
+>>> in the body of a message to majordomo@vger.kernel.org More majordomo 
 >>> info at  http://vger.kernel.org/majordomo-info.html
 >>>
 >>>
@@ -273,13 +283,15 @@ On 09/26/2013 07:04 PM, Somnath Roy wrote:
 >>
 >> --
 >> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->> in the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org More majordomo
+>> in the body of a message to majordomo@vger.kernel.org More majordomo 
 >> info at  http://vger.kernel.org/majordomo-info.html
 >>
 >>
 >> _______________________________________________
 >> ceph-users mailing list
->> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+>> ceph-users@lists.ceph.com
 >> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 >
 >
+
+
