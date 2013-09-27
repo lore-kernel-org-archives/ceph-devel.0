@@ -1,84 +1,96 @@
-From: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [GIT PULL] NFS/FS-Cache: Fix crash from accidentally starting caching whilst writing
-Date: Fri, 27 Sep 2013 18:54:22 +0100
-Message-ID: <32376.1380304462@warthog.procyon.org.uk>
-Return-path: <linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Trond.Myklebust-HgOvQuBEEgTQT0dZR+AlfA@public.gmane.org, steved-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
-Cc: dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-cachefs-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+From: Mike Dawson <mike.dawson-ffsCFlcjuZBWk0Htik3J/w@public.gmane.org>
+Subject: Re: RBD Snap removal priority
+Date: Fri, 27 Sep 2013 14:05:26 -0400
+Message-ID: <5245C8E6.9000305@cloudapt.com>
+References: <CACkq2mqCDvuRdCV-=gEwVNEke-UchOqSsNA=+z-Tux5xWhsa9w@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CACkq2mqCDvuRdCV-=gEwVNEke-UchOqSsNA=+z-Tux5xWhsa9w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: Travis Rhoden <trhoden-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
+[cc ceph-devel]
 
-Hi Trond,
+Travis,
 
-Can you pull these commits to fix an issue with NFS whereby caching can be
-enabled on a file that is open for writing by subsequently opening it for
-reading.  This can be made to crash by opening it for writing again if you're
-quick enough.
+RBD doesn't behave well when Ceph maintainance operations create spindle 
+contention (i.e. 100% util from iostat). More about that below.
 
-The gist of the patchset is that the cookie should be acquired at inode
-creation only and subsequently enabled and disabled as appropriate (which
-dispenses with the backing objects when they're not needed).
+Do you run XFS under your OSDs? If so, can you check for extent 
+fragmentation? Should be something like:
 
-The extra synchronisation that NFS does can then be dispensed with as it is
-thenceforth managed by FS-Cache.
+xfs_db -c frag -r /dev/sdb1
 
-Could you send these on to Linus?
+We recently saw a fragmentation factors of over 80%, with lots of ino's 
+having hundreds of extents. After 24 hours+ of defrag'ing, we got it 
+under control, but we're seeing the fragmentation factor grow by ~1.5% 
+daily. We experienced spindle contention issues even after the defrag.
 
-This likely will need fixing also in CIFS and 9P also once the FS-Cache
-changes are upstream.  AFS and Ceph are probably safe.
+
+
+Sage, Sam, etc,
+
+I think the real issue is Ceph has several states where it performs what 
+I would call "maintanance operations" that saturate the underlying 
+storage without properly yielding to client i/o (which should have a 
+higher priority).
+
+I have experienced or seen reports of Ceph maintainance affecting rbd 
+client i/o in many ways:
+
+- QEMU/RBD Client I/O Stalls or Halts Due to Spindle Contention from 
+Ceph Maintainance [1]
+- Recovery and/or Backfill Cause QEMU/RBD Reads to Hang [2]
+- rbd snap rm (Travis' report below)
+
+[1] http://tracker.ceph.com/issues/6278
+[2] http://tracker.ceph.com/issues/6333
+
+I think this family of issues speak to the need for Ceph to have more 
+visibility into the underlying storage's limitations (especially spindle 
+contention) when performing known expensive maintainance operations.
 
 Thanks,
-David
----
-The following changes since commit 2457aaf73a97a97c8596ed3903bd09601976f3bc:
+Mike Dawson
 
-  Merge tag 'pm+acpi-3.12-rc2' of git://git.kernel.org/pub/scm/linux/kernel/git/rafael/linux-pm (2013-09-20 15:17:14 -0700)
-
-are available in the git repository at:
-
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/dhowells/linux-fs.git fscache
-
-for you to fetch changes up to f1fe29b4a02d0805aa7d0ff6b73410a9f9316d69:
-
-  NFS: Use i_writecount to control whether to get an fscache cookie in nfs_open() (2013-09-27 18:40:25 +0100)
-
-----------------------------------------------------------------
-(from the branch description for fscache local branch)
-
-clone of "master"
-----------------------------------------------------------------
-David Howells (3):
-      FS-Cache: Add use/unuse/wake cookie wrappers
-      FS-Cache: Provide the ability to enable/disable cookies
-      NFS: Use i_writecount to control whether to get an fscache cookie in nfs_open()
-
- Documentation/filesystems/caching/netfs-api.txt |  73 +++++++--
- fs/9p/cache.c                                   |   6 +-
- fs/afs/cell.c                                   |   2 +-
- fs/afs/inode.c                                  |   2 +-
- fs/afs/vlocation.c                              |   3 +-
- fs/afs/volume.c                                 |   2 +-
- fs/cachefiles/interface.c                       |   2 +-
- fs/ceph/cache.c                                 |   4 +-
- fs/cifs/fscache.c                               |   8 +-
- fs/fscache/cookie.c                             | 193 ++++++++++++++++------
- fs/fscache/fsdef.c                              |   1 +
- fs/fscache/netfs.c                              |   1 +
- fs/fscache/object.c                             |   7 +-
- fs/fscache/page.c                               |  59 +++++--
- fs/nfs/dir.c                                    |   2 +-
- fs/nfs/fscache.c                                | 202 +++++++-----------------
- fs/nfs/fscache.h                                |  18 +--
- fs/nfs/inode.c                                  |   6 +-
- fs/nfs/nfs4file.c                               |   2 +-
- include/linux/fs.h                              |   5 +
- include/linux/fscache-cache.h                   |  50 +++---
- include/linux/fscache.h                         | 113 +++++++++++--
- include/linux/nfs_fs.h                          |   8 +-
- 23 files changed, 464 insertions(+), 305 deletions(-)
---
-To unsubscribe from this list: send the line "unsubscribe linux-nfs" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On 9/27/2013 12:25 PM, Travis Rhoden wrote:
+> Hello everyone,
+>
+> I'm running a Cuttlefish cluster that hosts a lot of RBDs.  I recently
+> removed a snapshot of a large one (rbd snap rm -- 12TB), and I noticed
+> that all of the clients had markedly decreased performance.  Looking
+> at iostat on the OSD nodes had most disks pegged at 100% util.
+>
+> I know there are thread priorities that can be set for clients vs
+> recovery, but I'm not sure what deleting a snapshot falls under.  I
+> couldn't really find anything relevant.  Is there anything I can tweak
+> to lower the priority of such an operation?  I didn't need it to
+> complete fast, as "rbd snap rm" returns immediately and the actual
+> deletion is done asynchronously.  I'd be fine with it taking longer at
+> a lower priority, but as it stands now it brings my cluster to a crawl
+> and is causing issues with several VMs.
+>
+> I see an "osd snap trim thread timeout" option in the docs -- Is the
+> operation occuring here what you would call snap trimming?  If so, any
+> chance of adding an option for "osd snap trim priority" just like
+> there is for osd client op and osd recovery op?
+>
+> Hope what I am saying makes sense...
+>
+>   - Travis
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>
