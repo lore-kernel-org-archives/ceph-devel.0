@@ -1,14 +1,14 @@
 From: Dan Carpenter <dan.carpenter@oracle.com>
-Subject: re: ceph: handle frag mismatch between readdir request and reply
-Date: Sat, 28 Sep 2013 12:35:58 +0300
-Message-ID: <20130928093558.GB26611@elgon.mountain>
+Subject: re: ceph: remove outdated frag information
+Date: Sat, 28 Sep 2013 12:37:49 +0300
+Message-ID: <20130928093749.GC26611@elgon.mountain>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from aserp1040.oracle.com ([141.146.126.69]:50506 "EHLO
-	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752533Ab3I1JgK (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 28 Sep 2013 05:36:10 -0400
+Received: from userp1040.oracle.com ([156.151.31.81]:25915 "EHLO
+	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752533Ab3I1JiB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 28 Sep 2013 05:38:01 -0400
 Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -17,46 +17,41 @@ Cc: ceph-devel@vger.kernel.org
 
 Hello Yan, Zheng,
 
-This is a semi-automatic email about new static checker warnings.
-
-The patch d1813cc074de: "ceph: handle frag mismatch between readdir 
-request and reply" from Sep 18, 2013, leads to the following Smatch 
-complaint:
-
-fs/ceph/inode.c:1312 ceph_readdir_prepopulate()
-	 warn: variable dereferenced before check 'rinfo->dir_dir' (see line 1298)
+The patch 947c4a83bd2f: "ceph: remove outdated frag information" from 
+Sep 18, 2013, leads to the following
+static checker warning: "fs/ceph/inode.c:788 fill_inode()
+	 warn: 'frag' was already freed."
 
 fs/ceph/inode.c
-  1291          if (le32_to_cpu(rinfo->dir_dir->frag) != frag) {
-                                ^^^^^^^^^^^^^^^^^^^^
-Patch introduces a dereference.
+   769                  frag = NULL;
+   770                  while (rb_node) {
+   771                          frag = rb_entry(rb_node, struct ceph_inode_frag, node);
+   772                          if (ceph_frag_compare(frag->frag, id) >= 0) {
+   773                                  if (frag->frag != id)
+   774                                          frag = NULL;
+   775                                  else
+   776                                          rb_node = rb_next(rb_node);
+   777                                  break;
+   778                          }
+   779                          rb_node = rb_next(rb_node);
+   780                          rb_erase(&frag->node, &ci->i_fragtree);
+   781                          kfree(frag);
+                                ^^^^^^^^^^^
+kfree here.
 
-  1292                  dout("readdir_prepopulate got new frag %x -> %x\n",
-  1293                       frag, le32_to_cpu(rinfo->dir_dir->frag));
-  1294                  frag = le32_to_cpu(rinfo->dir_dir->frag);
-  1295                  if (ceph_frag_is_leftmost(frag))
-  1296                          r_readdir_offset = 2;
-  1297			else
-  1298				r_readdir_offset = 0;
-  1299		}
-  1300	
-  1301		if (req->r_aborted)
-  1302			return readdir_prepopulate_inodes_only(req, session);
-  1303	
-  1304		if (le32_to_cpu(rinfo->head->op) == CEPH_MDS_OP_LSSNAP) {
-  1305			snapdir = ceph_get_snapdir(parent->d_inode);
-  1306			parent = d_find_alias(snapdir);
-  1307			dout("readdir_prepopulate %d items under SNAPDIR dn %p\n",
-  1308			     rinfo->dir_nr, parent);
-  1309		} else {
-  1310			dout("readdir_prepopulate %d items under dn %p\n",
-  1311			     rinfo->dir_nr, parent);
-  1312			if (rinfo->dir_dir)
-                            ^^^^^^^^^^^^^^
-Old check.
+   782                  }
+   783                  if (!frag) {
+   784                          frag = __get_or_create_frag(ci, id);
+   785                          if (IS_ERR(frag))
+   786                                  continue;
+   787                  }
+   788                  frag->split_by = le32_to_cpu(info->fragtree.splits[i].by);
+                        ^^^^^^^^^^^^^^
+Potential use after free.
 
-  1313				ceph_fill_dirfrag(parent->d_inode, rinfo->dir_dir);
-  1314		}
+   789                  dout(" frag %x split by %d\n", frag->frag, frag->split_by);
+
 
 regards,
 dan carpenter
+
