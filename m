@@ -1,64 +1,81 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH 1/2] ceph: check rinfo->dir_dir before dereferencing
- it.
-Date: Mon, 30 Sep 2013 14:55:12 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1309301453180.12714@cobra.newdream.net>
-References: <1380371685-11577-1-git-send-email-zheng.z.yan@intel.com>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: [PATCH] fix librados aio read buffer handling
+Date: Mon, 30 Sep 2013 15:52:08 -0700
+Message-ID: <524A0098.4060005@inktank.com>
+References: <l2bire$iue$1@ger.gmane.org> <alpine.DEB.2.00.1309300834080.12714@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:57633 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755859Ab3I3VzN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Sep 2013 17:55:13 -0400
-In-Reply-To: <1380371685-11577-1-git-send-email-zheng.z.yan@intel.com>
+Received: from mail-oa0-f46.google.com ([209.85.219.46]:39651 "EHLO
+	mail-oa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754531Ab3I3WwG (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Sep 2013 18:52:06 -0400
+Received: by mail-oa0-f46.google.com with SMTP id k14so4229948oag.19
+        for <ceph-devel@vger.kernel.org>; Mon, 30 Sep 2013 15:52:05 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.00.1309300834080.12714@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zheng.z.yan@intel.com>
-Cc: ceph-devel@vger.kernel.org, dan.carpenter@oracle.com
+To: Sage Weil <sage@inktank.com>, Rutger ter Borg <rutger@terborg.net>
+Cc: ceph-devel@vger.kernel.org
 
-Hi Yan,
+On 09/30/2013 08:38 AM, Sage Weil wrote:
+> On Mon, 30 Sep 2013, Rutger ter Borg wrote:
+>>
+>> Dear all,
+>>
+>> please find attached a patch that enables a user to pass user-owned buffers
+>> into librados' aio_read. The patch (against dumpling) removes the buf and pbl
+>> data members in AioCompletionImpl.
+>>
+>> * The 'buf' argument to read() used to be passed into AioCompletionImpl, and
+>> the results would be copied back after reading. This is replaced with the
+>> creation of a static buffer of that buf.
+>>
+>> * The pbl argument in AioCompletionImpl is removed.
+>>
+>> The patch is tested against an application using librados. I've assumed that
+>> 'pbl' in
+>>
+>> aio_read( ...., pbl, )
+>>
+>> is allocated by the user. It may even speed things up: a buffer copy is
+>> prevented.
+>
+> I am a little worried that one path of aio_read uses c->bl and the other
+> doesn't, but that probably is no big deal provided it is noted in the
+> structure definition.
 
-I squashed these two patches into the commits they fix.  master and 
-testing branches are updated+rebased.
+It does clean up the existing usage, where the destination may be
+c->buf or c->pbl though.
 
-NOTE: I've been treating these branches as a patch queue and rebase as 
-needed.  If anyone is using the ceph-client.git tree as a basis for 
-development and is disrupted by this, let me know!
+> My larger concern is that we're about to do some major changes in the
+> messenger and other code to use splice/tee/vmsplice to avoid copies
+> to/from userspace when possible.  That will involve removing some of the
+> currently 'use the existing buffer' code.  I'm hoping it will work out
+> that in the librados case we just carry the kernel pages around a bit
+> longer and delay the final copy into userspace, but it's hard to say until
+> the code gets written.  Josh plans to start working on it this week.
+>
+> Josh, do you think we should apply this now or wait until we see where
+> things end up?
 
-sage
+I'm fine applying this now (with one fix). It's a nice cleanup
+even if things change more soon.
 
+For the C interface, the return value stored in the AioCompletionImpl
+needs to be the length read, so the caller can tell if a short read
+occurred (this is only possible when trying to read past the end of an
+object). This was being set in C_aio_Ack::finish(), but was removed by
+this patch.
 
+One thing I'm not sure about is whether the bufferlist is guaranteed
+not to be split anywhere in the lower levels. rados_read()
+accounts for this case:
 
-On Sat, 28 Sep 2013, Yan, Zheng wrote:
+     if (bl.c_str() != buf)
+       bl.copy(0, bl.length(), buf);
 
-> From: "Yan, Zheng" <zheng.z.yan@intel.com>
-> 
-> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
-> ---
->  fs/ceph/inode.c | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
-> 
-> diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-> index 49d4de0..6f0a35c 100644
-> --- a/fs/ceph/inode.c
-> +++ b/fs/ceph/inode.c
-> @@ -1288,7 +1288,8 @@ int ceph_readdir_prepopulate(struct ceph_mds_request *req,
->  	u64 r_readdir_offset = req->r_readdir_offset;
->  	u32 frag = le32_to_cpu(rhead->args.readdir.frag);
->  
-> -	if (le32_to_cpu(rinfo->dir_dir->frag) != frag) {
-> +	if (rinfo->dir_dir &&
-> +	    le32_to_cpu(rinfo->dir_dir->frag) != frag) {
->  		dout("readdir_prepopulate got new frag %x -> %x\n",
->  		     frag, le32_to_cpu(rinfo->dir_dir->frag));
->  		frag = le32_to_cpu(rinfo->dir_dir->frag);
-> -- 
-> 1.8.1.4
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+Sage, is that actually necessary?
+
+Josh
