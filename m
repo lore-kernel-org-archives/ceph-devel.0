@@ -1,47 +1,35 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: Performance results on inline data support
-Date: Mon, 30 Sep 2013 07:39:37 -0500
-Message-ID: <52497109.8030206@inktank.com>
-References: <5249377C.8030003@ubuntukylin.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+From: David Howells <dhowells@redhat.com>
+Subject: Re: hung task on page invalidate
+Date: Mon, 30 Sep 2013 14:56:04 +0100
+Message-ID: <5858.1380549364@warthog.procyon.org.uk>
+References: <CANP1eJGJMDB8hgegvncmsiXh3LtT029JWCs7rhaC=3P3GU97kQ@mail.gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f175.google.com ([209.85.223.175]:57398 "EHLO
-	mail-ie0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754044Ab3I3Mjf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Sep 2013 08:39:35 -0400
-Received: by mail-ie0-f175.google.com with SMTP id e14so10141489iej.34
-        for <ceph-devel@vger.kernel.org>; Mon, 30 Sep 2013 05:39:35 -0700 (PDT)
-In-Reply-To: <5249377C.8030003@ubuntukylin.com>
+Received: from mx1.redhat.com ([209.132.183.28]:49759 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754044Ab3I3N4I (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 30 Sep 2013 09:56:08 -0400
+In-Reply-To: <CANP1eJGJMDB8hgegvncmsiXh3LtT029JWCs7rhaC=3P3GU97kQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Li Wang <liwang@ubuntukylin.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>
+To: Milosz Tanski <milosz@adfin.com>
+Cc: dhowells@redhat.com, "linux-cachefs@redhat.com" <linux-cachefs@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, Franklin Cheung <franklin.cheung@adfin.com>
 
-On 09/30/2013 03:34 AM, Li Wang wrote:
-> Hi,
->    We did a performance test on inline data support, the Ceph cluster is
-> composed of 1 MDS, 1 MON, 6 OSD on a HPC cluster. The program is simple,
-> there are 1000 - 3000 files with each being 1KB. The program repeated
-> the following processes on each file: open(), read(), close(). The total
-> time is measured with/without inline data support. The results are as
-> follows (seconds),
->
-> #files  without    with
-> 1000    17.3674      8.7186
-> 2000    35.4848      17.7646
-> 3000    53.2164      26.4374
+Milosz Tanski <milosz@adfin.com> wrote:
 
-Excellent job!  Looks like this could make a big difference for certain 
-workloads.  How much data can it store before it switches away from 
-inlining the data?
+> In my test cluster I started seeing an issue when the fscache get
+> stuck waiting on pending writes when doing page invalidate. The
+> problem happens because it looks like the page never leaves the
+> cookie->store page tree.
+> 
+> I've been reading the different code paths in fscache/page.c to
+> understand why this could be the case, but on first look it looks like
+> it does the correct thing. Do you have any ideas what could be causing
+> this / where to look for the smoking gun.
+> 
+> I've only begun to see this recently, I think our work load on the
+> test cluster changed a bit and it's been showing up more.
 
->
-> Cheers,
-> Li Wang
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+The most likely answer is that there's a race whereby a page is added to the
+store tree, but the write-out operation isn't rescheduled.
 
+David
