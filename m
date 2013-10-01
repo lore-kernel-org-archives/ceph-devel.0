@@ -1,50 +1,52 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: [PATCH 2/2] rbd: only set disk to read-only once
-Date: Mon, 30 Sep 2013 22:15:59 -0700
-Message-ID: <1380604559-5331-3-git-send-email-josh.durgin@inktank.com>
-References: <1379993136-29246-1-git-send-email-guangliang@unitedstack.com>
+From: Li Wang <liwang@ubuntukylin.com>
+Subject: Re: Performance results on inline data support
+Date: Tue, 01 Oct 2013 22:21:52 +0800
+Message-ID: <524ADA80.30700@ubuntukylin.com>
+References: <5249377C.8030003@ubuntukylin.com> <52497109.8030206@inktank.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:55869 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751093Ab3JAF7p (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 1 Oct 2013 01:59:45 -0400
-In-Reply-To: <1379993136-29246-1-git-send-email-guangliang@unitedstack.com>
+Received: from m199-177.yeah.net ([123.58.177.199]:45842 "EHLO
+	m199-177.yeah.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753422Ab3JAOVz (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 1 Oct 2013 10:21:55 -0400
+In-Reply-To: <52497109.8030206@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Josh Durgin <josh.durgin@inktank.com>
+To: Mark Nelson <mark.nelson@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>
 
-rbd_open(), called every time the device is opened, calls
-set_device_ro().  There's no reason to set the device read-only or
-read-write every time it is opened. Just do this once during device
-setup, using set_disk_ro() instead because the struct block_device
-isn't available to us there.
+Currently it is 4KB, but we will implement it as a tunable parameter.
 
-Signed-off-by: Josh Durgin <josh.durgin@inktank.com>
----
- drivers/block/rbd.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
+Cheers,
+Li Wang
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index b3b1b57..fc3ebd9 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -490,7 +490,6 @@ static int rbd_open(struct block_device *bdev, fmode_t mode)
- 		return -ENOENT;
- 
- 	(void) get_device(&rbd_dev->dev);
--	set_device_ro(bdev, rbd_dev->mapping.read_only);
- 
- 	return 0;
- }
-@@ -4949,6 +4948,7 @@ static int rbd_dev_device_setup(struct rbd_device *rbd_dev)
- 	if (ret)
- 		goto err_out_disk;
- 	set_capacity(rbd_dev->disk, rbd_dev->mapping.size / SECTOR_SIZE);
-+	set_disk_ro(rbd_dev->disk, rbd_dev->mapping.read_only);
- 
- 	ret = rbd_bus_add_dev(rbd_dev);
- 	if (ret)
--- 
-1.7.2.5
-
+On 09/30/2013 08:39 PM, Mark Nelson wrote:
+> On 09/30/2013 03:34 AM, Li Wang wrote:
+>> Hi,
+>>    We did a performance test on inline data support, the Ceph cluster is
+>> composed of 1 MDS, 1 MON, 6 OSD on a HPC cluster. The program is simple,
+>> there are 1000 - 3000 files with each being 1KB. The program repeated
+>> the following processes on each file: open(), read(), close(). The total
+>> time is measured with/without inline data support. The results are as
+>> follows (seconds),
+>>
+>> #files  without    with
+>> 1000    17.3674      8.7186
+>> 2000    35.4848      17.7646
+>> 3000    53.2164      26.4374
+>
+> Excellent job!  Looks like this could make a big difference for certain
+> workloads.  How much data can it store before it switches away from
+> inlining the data?
+>
+>>
+>> Cheers,
+>> Li Wang
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
