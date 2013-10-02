@@ -1,17 +1,17 @@
 From: Loic Dachary <loic@dachary.org>
 Subject: Re: CEPH Erasure Encoding + OSD Scalability
-Date: Wed, 02 Oct 2013 12:04:01 +0200
-Message-ID: <524BEF91.2050608@dachary.org>
+Date: Wed, 02 Oct 2013 12:15:43 +0200
+Message-ID: <524BF24F.6050300@dachary.org>
 References: <3472A07E6605974CBC9BC573F1BC02E4A527352B@PLOXCHG03.cern.ch> <523FED54.8040208@dachary.org> <3472A07E6605974CBC9BC573F1BC02E4A52736D1@PLOXCHG03.cern.ch> <5242FDDC.3060504@dachary.org> <3472A07E6605974CBC9BC573F1BC02E4A5273DD6@PLOXCHG03.cern.ch> <52433014.3030109@dachary.org> <CAGhffvz1TYYLoqn0tps1HiLObSCv7H0ZNVgOd0raicGqgRuukA@mail.gmail.com>,<5244887A.80503@dachary.org> <3472A07E6605974CBC9BC573F1BC02E4A52741F6@PLOXCHG03.cern.ch>,<52455279.1020702@dachary.org> <3472A07E6605974CBC9BC573F1BC02E4A5278DA2@PLOXCHG03.cern.ch>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="txggQWgQ1XKxGFGxOMfkT0e00F2kBaMiT"
+ boundary="x6h3E8J9CUw6Xjjc8kvLRSqurpNSUKvA9"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:51503 "EHLO
+Received: from smtp.dmail.dachary.org ([91.121.254.229]:51516 "EHLO
 	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752973Ab3JBKEE (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Oct 2013 06:04:04 -0400
+	with ESMTP id S1753089Ab3JBKPq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Oct 2013 06:15:46 -0400
 In-Reply-To: <3472A07E6605974CBC9BC573F1BC02E4A5278DA2@PLOXCHG03.cern.ch>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -19,11 +19,25 @@ To: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
 This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---txggQWgQ1XKxGFGxOMfkT0e00F2kBaMiT
+--x6h3E8J9CUw6Xjjc8kvLRSqurpNSUKvA9
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: quoted-printable
 
-Cool :-) Could you create a pull request so I can review it ?
+Hi Andreas,
+
+You should include the Copyright holder. If you are a Cern employee it wi=
+ll probably look like this:
+
+Copyright (C) 2013 CERN <????@cern.ch>
+Author: Andreas Joachim Peters <andreas.joachim.peters@cern.ch>
+
+unless your contract specifies otherwise. If you are not an employee you =
+should update to
+
+Copyright (C) 2013 Andreas Joachim Peters <andreas.joachim.peters@cern.ch=
+>
+
+unless there is a contract (freelance or ...) that specifies otherwise.
 
 Cheers
 
@@ -263,7 +277,7 @@ All that is necessary for the triumph of evil is that good people do noth=
 ing.
 
 
---txggQWgQ1XKxGFGxOMfkT0e00F2kBaMiT
+--x6h3E8J9CUw6Xjjc8kvLRSqurpNSUKvA9
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -272,9 +286,9 @@ Content-Disposition: attachment; filename="signature.asc"
 Version: GnuPG v2.0.19 (GNU/Linux)
 Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
 
-iEYEARECAAYFAlJL75IACgkQ8dLMyEl6F23eGwCeJd5qmdeKG2dEMGIjsrrMpTZm
-5w4AoLeSItsMZHPNv5HvpgFuapXD/wUG
-=udJa
+iEYEARECAAYFAlJL8lAACgkQ8dLMyEl6F21v8gCfaRDMqCBu9MnJRYH62sO8QKTF
+OZ8An1fp/3jnGYiPZGEne+MQ1+61C9z/
+=suXP
 -----END PGP SIGNATURE-----
 
---txggQWgQ1XKxGFGxOMfkT0e00F2kBaMiT--
+--x6h3E8J9CUw6Xjjc8kvLRSqurpNSUKvA9--
