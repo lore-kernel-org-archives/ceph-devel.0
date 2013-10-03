@@ -1,66 +1,74 @@
-From: Sage Weil <sage@inktank.com>
-Subject: a couple hot/cold classification storage papers
-Date: Thu, 3 Oct 2013 13:21:29 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1310031248350.6800@cobra.newdream.net>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+From: David Zafman <dzafman@gmail.com>
+Subject: xattr limits
+Date: Thu, 3 Oct 2013 16:21:49 -0700
+Message-ID: <C1F9D079-3D19-4A39-872A-0CAF8EA3866F@gmail.com>
+Mime-Version: 1.0 (Mac OS X Mail 6.6 \(1510\))
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:45360 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754884Ab3JCUV3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Oct 2013 16:21:29 -0400
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 323C280079
-	for <ceph-devel@vger.kernel.org>; Thu,  3 Oct 2013 13:21:29 -0700 (PDT)
-Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 102DB80079
-	for <ceph-devel@vger.kernel.org>; Thu,  3 Oct 2013 13:21:29 -0700 (PDT)
+Received: from mail-oa0-f51.google.com ([209.85.219.51]:51391 "EHLO
+	mail-oa0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751634Ab3JCXVy convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Oct 2013 19:21:54 -0400
+Received: by mail-oa0-f51.google.com with SMTP id h16so3080386oag.24
+        for <ceph-devel@vger.kernel.org>; Thu, 03 Oct 2013 16:21:53 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-
-http://131.107.65.14/pubs/176690/ColdDataClassification-icde2013-cr.pdf
-
- - identify hot/cold records for an in-memory database
- - in-memory lru is discarded ot of hand due to overhead
- - they do a simple log (or log a sample of say 10% of accesses) an 
-present various algorithms for estimating K hottests items from that.
- - their 'backward' algorithm scans the log in reverse chronological 
-order.  once it figures out no further items can be found that compete 
-with what is hottest so far it can terminate early.
- - they seem to assume that every record is in the log, or that anything 
-not in the log is already known cold and not of interest.  so, not quite 
-the same problem as us unless we log for all time.
-
-Thought: 
- We could only trim a hitset/bloom filter/whatever once every hash key 
- that appears in that set but not later sets has been demoted/purged.  In 
- our case, that could mean:
-
-  - initial pass that enumerates all object and pushes untouched stuff (as 
-    we've previosly discussed)
-  - thereafter, the agent scans from 0..2^32 and enumerates any hash 
-    values appearing in the oldest sets but not newer ones and only pushes those 
-    down.
-
- Not sure how tractable that might be.  If we explicitly listed object 
- names in each hitset it would certainly work.
-
----
-
-http://dmclab.hanyang.ac.kr/wikidata/ssd/2012_ssd_seminar/MSST_2011/HotDataIdentification_DongchulPark_MSST_2011.pdf
-
- - identify hot data in an SSD
- - bloom filters because DRAM is precious (and mostly needed for FTL)
- - round-robin set of bloom filters
-  - estimate both frequency (how many bf's does it appear in) and recency 
-    (oldest/newest access)
-
-Thoughts:
- - Any DRAM not spent on hot/cold tracking is spent on caching, which 
-   improves performance.
- - We could use counting bloom filters.  Although that may not be that 
-   useful if we have multiple bins and can count how many bins accesses
-   appear in.
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
 
+I want to record with the ceph-devel archive results from testing limit=
+s of xattrs for Linux filesystems used with Ceph.
+
+Script that creates xattrs with name user.test1, user.test2, =85. on a =
+single file
+3.10 linux kernel
+
+ext4 =20
+value bytes       number of entries
+    1               148
+   16             103
+  256          14
+  512            7
+  1024         3
+4036          1=20
+Beyond this immediately get ENOSPC
+
+btrfs   =20
+value bytes       number of entries
+ 8       		 10k
+16       		10k
+32        		 10k
+64        		 10k
+128     		 10k
+256       		 10k
+512        		10k  slow but worked 1,000,000 got completely hung for min=
+utes at a time during removal strace showed no forward progress
+1024        	 10k
+2048        	 10k
+ 3096          	 10k
+Beyond this you start getting ENOSPC after fewer entries
+
+xfs (limit entries due to xfs crash with 10k entries)
+value bytes       number of entries
+1   			1k
+8   			 1k
+16   			 1k
+32  			 1k
+64   		        1k
+128   		 1k
+256 			1k
+512  		 1k
+1024 		1k
+2048  		 1k
+4096   		 1k
+8192   		 1k
+16384   		 1k
+32768   		 1k
+65536   		 1k
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
