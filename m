@@ -1,71 +1,35 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: Large time shift causes OSD to hit suicide timeout and ABRT
-Date: Thu, 3 Oct 2013 08:54:11 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1310030853410.25705@cobra.newdream.net>
-References: <CABYiri-jcRj8oyS2ne4r+g6yHEXyaraXDpxzcFXbynoVJzNFtQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+From: David Howells <dhowells@redhat.com>
+Subject: Re: hung task on page invalidate
+Date: Thu, 03 Oct 2013 17:43:20 +0100
+Message-ID: <24718.1380818600@warthog.procyon.org.uk>
+References: <CANP1eJEpH-0_XhYmk3YUXt9aovQFTj3j1=YErXEVJiHm0Ceuzg@mail.gmail.com> <CANP1eJGJMDB8hgegvncmsiXh3LtT029JWCs7rhaC=3P3GU97kQ@mail.gmail.com> <CAAM7YAkPRtcu=QFA1n-aO0sDdAp1mKX_YZjgtOg04EhNA26kFw@mail.gmail.com> <CANP1eJGu6nWgqLkBAAEEtvW8zJ4r5X+KJN3iiCMnN3x_mTkWaw@mail.gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:42555 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754069Ab3JCPyM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Oct 2013 11:54:12 -0400
-In-Reply-To: <CABYiri-jcRj8oyS2ne4r+g6yHEXyaraXDpxzcFXbynoVJzNFtQ@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:51974 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754003Ab3JCQnZ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 3 Oct 2013 12:43:25 -0400
+In-Reply-To: <CANP1eJEpH-0_XhYmk3YUXt9aovQFTj3j1=YErXEVJiHm0Ceuzg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andrey Korolyov <andrey@xdel.ru>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Milosz Tanski <milosz@adfin.com>
+Cc: dhowells@redhat.com, "Yan, Zheng" <ukernel@gmail.com>, "linux-cachefs@redhat.com" <linux-cachefs@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, Franklin Cheung <franklin.cheung@adfin.com>
 
-On Thu, 3 Oct 2013, Andrey Korolyov wrote:
-> Hello,
-> 
-> Not sure if this matches any real-world problem:
-> 
-> step time server 192.168.10.125 offset 30763065.968946 sec
+Milosz Tanski <milosz@adfin.com> wrote:
 
-Heh.. yeah, we use timestamps in lots o fplaces for things like timeouts.  
-Small time steps are fine but big ones can easily cause problems.
+> Stores : ops=10257 run=67477 pgs=57220 rxd=62216 olm=14
 
-sage
+I think this line probably shows the problem.  The olm=14 indicates that 14
+pages were found over the store limit set on the object.  Look in
+fscache_write_op() for:
 
+	if (page->index > op->store_limit) {
+		fscache_stat(&fscache_n_store_pages_over_limit);
+		goto superseded;
+	}
 
-> 
-> #0  0x00007f2d0294d405 in raise () from /lib/x86_64-linux-gnu/libc.so.6
-> #1  0x00007f2d02950b5b in abort () from /lib/x86_64-linux-gnu/libc.so.6
-> #2  0x00007f2d0324b875 in __gnu_cxx::__verbose_terminate_handler() ()
-> from /usr/lib/x86_64-linux-gnu/libstdc++.so.6
-> #3  0x00007f2d03249996 in ?? () from /usr/lib/x86_64-linux-gnu/libstdc++.so.6
-> #4  0x00007f2d032499c3 in std::terminate() () from
-> /usr/lib/x86_64-linux-gnu/libstdc++.so.6
-> #5  0x00007f2d03249bee in __cxa_throw () from
-> /usr/lib/x86_64-linux-gnu/libstdc++.so.6
-> #6  0x000000000090d2fa in ceph::__ceph_assert_fail (assertion=0xa38ab1
-> "0 == \"hit suicide timeout\"", file=<optimized out>, line=79,
->     func=0xa38c60 "bool
-> ceph::HeartbeatMap::_check(ceph::heartbeat_handle_d*, const char*,
-> time_t)") at common/assert.cc:77
-> #7  0x000000000087914b in ceph::HeartbeatMap::_check
-> (this=this@entry=0x35b40e0, h=h@entry=0x36d1050,
-> who=who@entry=0xa38aef "reset_timeout", now=now@entry=1380797379)
->     at common/HeartbeatMap.cc:79
-> #8  0x000000000087940e in ceph::HeartbeatMap::reset_timeout
-> (this=0x35b40e0, h=0x36d1050, grace=15, suicide_grace=150) at
-> common/HeartbeatMap.cc:89
-> #9  0x000000000070ada7 in OSD::process_peering_events (this=0x3750000,
-> pgs=..., handle=...) at osd/OSD.cc:6808
-> #10 0x000000000074c2e4 in OSD::PeeringWQ::_process (this=<optimized
-> out>, pgs=..., handle=...) at osd/OSD.h:869
-> #11 0x0000000000903dca in ThreadPool::worker (this=0x3750478,
-> wt=0x4ef6fa80) at common/WorkQueue.cc:119
-> #12 0x0000000000905070 in ThreadPool::WorkThread::entry
-> (this=<optimized out>) at common/WorkQueue.h:316
-> #13 0x00007f2d046c2e9a in start_thread () from
-> /lib/x86_64-linux-gnu/libpthread.so.0
-> #14 0x00007f2d02a093dd in clone () from /lib/x86_64-linux-gnu/libc.so.6
-> #15 0x0000000000000000 in ?? ()
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+If we find a page that's over the store limit, we immediately abandon the
+storage attempt - which is wrong.  We need to do something similar to
+fscache_end_page_write() but clearing COOKIE_PENDING_TAG - and then we need to
+continue and clear all pages over the limit.
+
+David
