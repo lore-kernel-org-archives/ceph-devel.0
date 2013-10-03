@@ -1,94 +1,56 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: thought on storing bloom (hit) info
-Date: Wed, 2 Oct 2013 17:36:22 -0700
-Message-ID: <CAPYLRzj9S7JfP-E78-yKsfmnDStkd5+N7Rf1uK2pUiPEDd_KYw@mail.gmail.com>
-References: <alpine.DEB.2.00.1310021654060.12714@cobra.newdream.net>
-	<CAPYLRzh06oKo1Ch74GU_Lx9buZDKmp7extv9g53W7FhatFwMfA@mail.gmail.com>
-	<alpine.DEB.2.00.1310021711580.12714@cobra.newdream.net>
+From: Andrey Korolyov <andrey@xdel.ru>
+Subject: Large time shift causes OSD to hit suicide timeout and ABRT
+Date: Thu, 3 Oct 2013 15:01:52 +0400
+Message-ID: <CABYiri-jcRj8oyS2ne4r+g6yHEXyaraXDpxzcFXbynoVJzNFtQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f50.google.com ([74.125.82.50]:38395 "EHLO
-	mail-wg0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753777Ab3JCAgY (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Oct 2013 20:36:24 -0400
-Received: by mail-wg0-f50.google.com with SMTP id f12so1724189wgh.5
-        for <ceph-devel@vger.kernel.org>; Wed, 02 Oct 2013 17:36:22 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1310021711580.12714@cobra.newdream.net>
+Received: from mail-vc0-f174.google.com ([209.85.220.174]:48348 "EHLO
+	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752421Ab3JCLG5 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Oct 2013 07:06:57 -0400
+Received: by mail-vc0-f174.google.com with SMTP id gd11so868632vcb.5
+        for <ceph-devel@vger.kernel.org>; Thu, 03 Oct 2013 04:06:56 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Samuel Just <sam.just@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, Oct 2, 2013 at 5:19 PM, Sage Weil <sage@inktank.com> wrote:
-> On Wed, 2 Oct 2013, Gregory Farnum wrote:
->> On Wed, Oct 2, 2013 at 5:02 PM, Sage Weil <sage@inktank.com> wrote:
->> > If we make this a special internal object we need to complicate recovery
->> > and namespacing to keep is separate from user data.  We also need to
->> > implement a new API for retrieving, trimming, and so forth.
->> >
->> > Instead, we could just store the in-progress and completed bloom filters
->> > (or even explicit hit list) as regular rados objects in a separate
->> > namespace.  The namespace could be '.ceph' or similar by default, but
->> > configurable in case the user wants something different for some reason.
->> >
->> > Normal recovery should work unmodified.
->> >
->> > The normal rados API could be used to fetch (or even delete) old info.
->> >
->> > I think the main challenge is making an object_locator_t that maps cleanly
->> > into a specific PG so that a particular object is always stored exactly
->> > with the PG.  This should be a pretty easy change to object_locator_t.
->> > In the mapping process, all we're doing is hashing the key string and
->> > mixing in the pool hash; here we'd just be able to specify the resulting
->> > value explicitly.
->> >
->> > Thoughts?
->> > sage
->>
->> PG splitting?
->
-> Old objects stay with the parent.  A clever user could look pg parent
-> bloom filters if they are looking back in time past the split.
->
-> On merge multiple children would end up in the combined PG.  We'd
-> need to include the pgid in the object name to avoid having multiple
-> objects with the same name and different locators.
->
->> That and other internal mechanisms are already going to need to treat
->> it as a special object. I think recovery will as well; what happens if
->> we're serving up writes during a long-running recovery but haven't
->> gotten to recovering that object yet when we need to persist?
->
-> In the simplest case these objects would be created once and never
-> modified, in which case nothing would prevent them from being created.
-> If they are past the backfill position, backfill targets wouldn't get a
-> copy, just like with normal writes.
->
-> On (librados) read, we'd recover it immediately, just as we do with normal
-> objects.
->
-> In the bloom filter case, being limited to immutable objects should be
-> fine.  Maybe this would work for other future features that need to store
-> extra stuff with the PG, but I'm unsure what that would be right now.
-> (Maybe index objects if we ever index on select xattrs?)
+Hello,
 
-Oh, so storing each hourly filter (or whatever) as its own object,
-rather than as an aggregate. I don't particularly mind hiding a
-special namespace from people (we already take over ".snap" in CephFS
-and nobody cares about that); I think we should probably do that for
-non-admin users.
+Not sure if this matches any real-world problem:
 
-> In any case, this seems simpler than special casing a bunch of recovery
-> and backend namespaces for special hidden objects and setting up new APIs
-> to access them.  OTOH, it doesn't give users absolute reign over their
-> namespaces by hiding system objects.  That is seeming less important to
-> me now than it once did, though.
+step time server 192.168.10.125 offset 30763065.968946 sec
 
-Yeah, I have no problem with that, and if we're doing immutable
-write-once objects I think this should work fine. I just have concerns
-if we extend it to special write-many objects, which I suspect will be
-harder (though perhaps the normal object dependency recovery
-algorithms would handle it naturally).
--Greg
-Software Engineer #42 @ http://inktank.com | http://ceph.com
+#0  0x00007f2d0294d405 in raise () from /lib/x86_64-linux-gnu/libc.so.6
+#1  0x00007f2d02950b5b in abort () from /lib/x86_64-linux-gnu/libc.so.6
+#2  0x00007f2d0324b875 in __gnu_cxx::__verbose_terminate_handler() ()
+from /usr/lib/x86_64-linux-gnu/libstdc++.so.6
+#3  0x00007f2d03249996 in ?? () from /usr/lib/x86_64-linux-gnu/libstdc++.so.6
+#4  0x00007f2d032499c3 in std::terminate() () from
+/usr/lib/x86_64-linux-gnu/libstdc++.so.6
+#5  0x00007f2d03249bee in __cxa_throw () from
+/usr/lib/x86_64-linux-gnu/libstdc++.so.6
+#6  0x000000000090d2fa in ceph::__ceph_assert_fail (assertion=0xa38ab1
+"0 == \"hit suicide timeout\"", file=<optimized out>, line=79,
+    func=0xa38c60 "bool
+ceph::HeartbeatMap::_check(ceph::heartbeat_handle_d*, const char*,
+time_t)") at common/assert.cc:77
+#7  0x000000000087914b in ceph::HeartbeatMap::_check
+(this=this@entry=0x35b40e0, h=h@entry=0x36d1050,
+who=who@entry=0xa38aef "reset_timeout", now=now@entry=1380797379)
+    at common/HeartbeatMap.cc:79
+#8  0x000000000087940e in ceph::HeartbeatMap::reset_timeout
+(this=0x35b40e0, h=0x36d1050, grace=15, suicide_grace=150) at
+common/HeartbeatMap.cc:89
+#9  0x000000000070ada7 in OSD::process_peering_events (this=0x3750000,
+pgs=..., handle=...) at osd/OSD.cc:6808
+#10 0x000000000074c2e4 in OSD::PeeringWQ::_process (this=<optimized
+out>, pgs=..., handle=...) at osd/OSD.h:869
+#11 0x0000000000903dca in ThreadPool::worker (this=0x3750478,
+wt=0x4ef6fa80) at common/WorkQueue.cc:119
+#12 0x0000000000905070 in ThreadPool::WorkThread::entry
+(this=<optimized out>) at common/WorkQueue.h:316
+#13 0x00007f2d046c2e9a in start_thread () from
+/lib/x86_64-linux-gnu/libpthread.so.0
+#14 0x00007f2d02a093dd in clone () from /lib/x86_64-linux-gnu/libc.so.6
+#15 0x0000000000000000 in ?? ()
