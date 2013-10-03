@@ -1,148 +1,168 @@
-From: Darren Birkett <darren.birkett-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: OpenStack Grizzly Authentication (Keystone PKI)
- with RADOS Gateway
-Date: Thu, 3 Oct 2013 12:45:57 +0100
-Message-ID: <CAHX4EnNCUXU=PtXWGJZVgaBTKFup56bWCySGX9m6jkRDAotxRg@mail.gmail.com>
-References: <CADgBPFDkw7aoVwXumn+O6ZgfEKsnDtPsYx7zONzMQ6m4Rk++Yg@mail.gmail.com>
-Reply-To: darren.birkett-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
+From: Mark Brown <broonie@kernel.org>
+Subject: Build failure after merge of ceph tree
+Date: Thu, 3 Oct 2013 13:09:57 +0100
+Message-ID: <20131003120957.GK27287@sirena.org.uk>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0094032853=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CADgBPFDkw7aoVwXumn+O6ZgfEKsnDtPsYx7zONzMQ6m4Rk++Yg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Amit Vijairania <amit.vijairania-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
-
---===============0094032853==
-Content-Type: multipart/alternative; boundary=001a11c380b0a5137a04e7d4badc
-
---001a11c380b0a5137a04e7d4badc
-Content-Type: text/plain; charset=ISO-8859-1
-
-Hi Amit,
-
-It can, but at the moment there is some issue with keystone token caching
-(in Dumpling), so every auth call hits keystone and does not cache the
-token.
-
-See here:
-
-http://www.spinics.net/lists/ceph-users/msg04531.html
-
-and here:
-
-http://tracker.ceph.com/issues/6360
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="6THr7QwYWIbrk6Kt"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cassiel.sirena.org.uk ([80.68.93.111]:43281 "EHLO
+	cassiel.sirena.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753453Ab3JCMKM (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Oct 2013 08:10:12 -0400
+Content-Disposition: inline
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@inktank.com>, Jianpeng Ma <majianpeng@gmail.com>, Zheng Yan <zheng.z.yan@intel.com>, Zach Brown <zab@zabbo.net>, Dave Kleikamp <dave.kleikamp@oracle.com>
+Cc: ceph-devel@vger.kernel.org, linux-next@vger.kernel.org, linux-kernel@vger.kernel.org, Thierry Reding <thierry.reding@gmail.com>
 
 
-Thanks
-
-Darren
-
-
-
-On 28 September 2013 03:24, Amit Vijairania <amit.vijairania-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>wrote:
-
-> Hello!
->
-> Does RADOS Gateway supports or integrates with OpenStack (Grizzly)
-> Authentication (Keystone PKI)?
->
-> Can RADOS Gateway use PKI tokens to conduct user token verification
-> without explicit calls to Keystone.
->
-> Thanks!
-> Amit
->
-> Amit Vijairania  |  978.319.3684
-> --*--
->
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->
->
-
---001a11c380b0a5137a04e7d4badc
-Content-Type: text/html; charset=ISO-8859-1
+--6THr7QwYWIbrk6Kt
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-<div dir=3D"ltr"><font face=3D"arial, helvetica, sans-serif">Hi Amit,</font=
-><div><font face=3D"arial, helvetica, sans-serif"><br></font></div><div><fo=
-nt face=3D"arial, helvetica, sans-serif">It can, but at the moment there is=
- some issue with keystone token caching (in Dumpling), so every auth call h=
-its keystone and does not cache the token.</font></div>
-<div><font face=3D"arial, helvetica, sans-serif"><br></font></div><div><fon=
-t face=3D"arial, helvetica, sans-serif">See here:</font></div><div><font fa=
-ce=3D"arial, helvetica, sans-serif"><br></font></div><div><font face=3D"ari=
-al, helvetica, sans-serif"><a href=3D"http://www.spinics.net/lists/ceph-use=
-rs/msg04531.html">http://www.spinics.net/lists/ceph-users/msg04531.html</a>=
-<br>
-</font></div><div><font face=3D"arial, helvetica, sans-serif"><br></font></=
-div><div><font face=3D"arial, helvetica, sans-serif">and here:</font></div>=
-<div><pre><font color=3D"#000000" face=3D"arial, helvetica, sans-serif"><a =
-href=3D"http://tracker.ceph.com/issues/6360">http://tracker.ceph.com/issues=
-/6360</a></font></pre>
-<pre><font color=3D"#000000" face=3D"arial, helvetica, sans-serif"><br></fo=
-nt></pre><pre><font color=3D"#000000" face=3D"arial, helvetica, sans-serif"=
->Thanks</font></pre><pre><font color=3D"#000000" face=3D"arial, helvetica, =
-sans-serif">Darren</font></pre>
-</div><div class=3D"gmail_extra"><font face=3D"arial, helvetica, sans-serif=
-"><br><br></font><div class=3D"gmail_quote"><font face=3D"arial, helvetica,=
- sans-serif">On 28 September 2013 03:24, Amit Vijairania <span dir=3D"ltr">=
-&lt;<a href=3D"mailto:amit.vijairania-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org" target=3D"_blank">amit.vij=
-airania-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org</a>&gt;</span> wrote:<br>
-</font><blockquote class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-=
-left:1px #ccc solid;padding-left:1ex"><div dir=3D"ltr"><font face=3D"arial,=
- helvetica, sans-serif">Hello!</font><div><font face=3D"arial, helvetica, s=
-ans-serif"><br>
-</font></div><div><font face=3D"arial, helvetica, sans-serif">Does RADOS Ga=
-teway supports or integrates with OpenStack (Grizzly) Authentication (Keyst=
-one PKI)?</font></div>
-<div><font color=3D"#000000" face=3D"arial, helvetica, sans-serif"><br></fo=
-nt></div><div><font face=3D"arial, helvetica, sans-serif"><font color=3D"#0=
-00000">Can RADOS Gateway=A0use PKI tokens to conduct user token verificatio=
-n without explicit calls to Keystone.</font></font></div>
+After merging the ceph tree into -next an x86 allmodconfig build fails
+with:
 
-<div><font face=3D"arial, helvetica, sans-serif"><font color=3D"#000000"><b=
-r></font></font></div><div><font face=3D"arial, helvetica, sans-serif"><fon=
-t color=3D"#000000">Thanks!</font></font></div><div><font face=3D"arial, he=
-lvetica, sans-serif"><font color=3D"#000000">Amit<span class=3D"HOEnZb"><fo=
-nt color=3D"#888888"><br clear=3D"all">
+fs/ceph/file.c: In function =E2=80=98ceph_sync_read=E2=80=99:
+fs/ceph/file.c:437:25: error: =E2=80=98struct iov_iter=E2=80=99 has no memb=
+er named =E2=80=98iov=E2=80=99
+    void __user *data =3D i->iov[0].iov_base + i->iov_offset;
+                         ^
+fs/ceph/file.c:438:18: error: =E2=80=98struct iov_iter=E2=80=99 has no memb=
+er named =E2=80=98iov=E2=80=99
+    size_t len =3D i->iov[0].iov_len - i->iov_offset;
+                  ^
+fs/ceph/file.c:470:26: error: =E2=80=98struct iov_iter=E2=80=99 has no memb=
+er named =E2=80=98iov=E2=80=99
+     void __user *data =3D i->iov[0].iov_base
+                          ^
+In file included from include/linux/cache.h:4:0,
+                 from include/linux/time.h:4,
+                 from include/linux/stat.h:18,
+                 from include/linux/module.h:10,
+                 from fs/ceph/file.c:3:
+fs/ceph/file.c:472:14: error: =E2=80=98struct iov_iter=E2=80=99 has no memb=
+er named =E2=80=98iov=E2=80=99
+     l =3D min(i->iov[0].iov_len - i->iov_offset,
+              ^
+include/linux/kernel.h:670:9: note: in definition of macro =E2=80=98min=E2=
+=80=99
+  typeof(x) _min1 =3D (x);   \
+         ^
+fs/ceph/file.c:472:14: error: =E2=80=98struct iov_iter=E2=80=99 has no memb=
+er named =E2=80=98iov=E2=80=99
+     l =3D min(i->iov[0].iov_len - i->iov_offset,
+              ^
+include/linux/kernel.h:670:21: note: in definition of macro =E2=80=98min=E2=
+=80=99
+  typeof(x) _min1 =3D (x);   \
+                     ^
+include/linux/kernel.h:672:17: warning: comparison of distinct pointer type=
+s lacks a cast [enabled by default]
+  (void) (&_min1 =3D=3D &_min2);  \
+                 ^
+fs/ceph/file.c:472:9: note: in expansion of macro =E2=80=98min=E2=80=99
+     l =3D min(i->iov[0].iov_len - i->iov_offset,
+         ^
+fs/ceph/file.c: In function =E2=80=98ceph_sync_direct_write=E2=80=99:
+fs/ceph/file.c:586:24: error: =E2=80=98struct iov_iter=E2=80=99 has no memb=
+er named =E2=80=98iov=E2=80=99
+   void __user *data =3D i.iov->iov_base + i.iov_offset;
+                        ^
+fs/ceph/file.c:587:14: error: =E2=80=98struct iov_iter=E2=80=99 has no memb=
+er named =E2=80=98iov=E2=80=99
+   u64 len =3D i.iov->iov_len - i.iov_offset;
+              ^
+make[2]: *** [fs/ceph/file.o] Error 1
+make[2]: *** Waiting for unfinished jobs....
+make[1]: *** [fs/ceph] Error 2
 
-</font></span></font><span class=3D"HOEnZb"><font color=3D"#888888"><div><d=
-iv dir=3D"ltr"><br>Amit Vijairania =A0| =A0<a href=3D"tel:978.319.3684" val=
-ue=3D"+19783193684" target=3D"_blank">978.319.3684</a><br>--*--</div></div>
-</font></span></font></div></div>
-<font face=3D"arial, helvetica, sans-serif"><br>___________________________=
-____________________<br>
-ceph-users mailing list<br>
-<a href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a><=
-br>
-<a href=3D"http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com" target=
-=3D"_blank">http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com</a><br>
-<br></font></blockquote></div><br></div></div>
+caused by commits 53d028160 (ceph: implement readv/preadv for sync
+operation) and 2f0a7a180 (ceph: Implement writev/pwritev for sync
+operation) interacting with commit f6794d33a5ec ("iov_iter: hide iovec
+details behind ops function pointers") from the aio-direct tree.
 
---001a11c380b0a5137a04e7d4badc--
+I extended Stephen's previous fix to this:
 
---===============0094032853==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
+=46rom 577435f0a97e67b735f355aef0ef55732814818c Mon Sep 17 00:00:00 2001
+=46rom: Mark Brown <broonie@linaro.org>
+Date: Thu, 3 Oct 2013 13:05:20 +0100
+Subject: [PATCH] ceph: Fix up for iov_iter changes
 
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+Extend an earlier fixup by Stephen Rothwell.
 
---===============0094032853==--
+Signed-off-by: Mark Brown <broonie@linaro.org>
+---
+ fs/ceph/file.c | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index c4419e8..37b5b5c 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -434,8 +434,8 @@ static ssize_t ceph_sync_read(struct kiocb *iocb, struc=
+t iov_iter *i,
+=20
+ 	if (file->f_flags & O_DIRECT) {
+ 		while (iov_iter_count(i)) {
+-			void __user *data =3D i->iov[0].iov_base + i->iov_offset;
+-			size_t len =3D i->iov[0].iov_len - i->iov_offset;
++			void __user *data =3D iov_iter_iovec(i)->iov_base + i->iov_offset;
++			size_t len =3D iov_iter_iovec(i)->iov_len - i->iov_offset;
+=20
+ 			num_pages =3D calc_pages_for((unsigned long)data, len);
+ 			pages =3D ceph_get_direct_page_vector(data,
+@@ -467,9 +467,9 @@ static ssize_t ceph_sync_read(struct kiocb *iocb, struc=
+t iov_iter *i,
+ 			size_t left =3D len =3D ret;
+=20
+ 			while (left) {
+-				void __user *data =3D i->iov[0].iov_base
++				void __user *data =3D iov_iter_iovec(i)->iov_base
+ 							+ i->iov_offset;
+-				l =3D min(i->iov[0].iov_len - i->iov_offset,
++				l =3D min(iov_iter_iovec(i)->iov_len - i->iov_offset,
+ 					left);
+=20
+ 				ret =3D ceph_copy_page_vector_to_user(&pages[k],
+@@ -583,8 +583,8 @@ ceph_sync_direct_write(struct kiocb *iocb, const struct=
+ iovec *iov,
+ 	iov_iter_init(&i, iov, nr_segs, count, 0);
+=20
+ 	while (iov_iter_count(&i) > 0) {
+-		void __user *data =3D i.iov->iov_base + i.iov_offset;
+-		u64 len =3D i.iov->iov_len - i.iov_offset;
++		void __user *data =3D iov_iter_iovec(&i)->iov_base + i.iov_offset;
++		u64 len =3D iov_iter_iovec(&i)->iov_len - i.iov_offset;
+=20
+ 		page_align =3D (unsigned long)data & ~PAGE_MASK;
+=20
+--=20
+1.8.4.rc3
+
+
+--6THr7QwYWIbrk6Kt
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.21 (GNU/Linux)
+
+iQIcBAEBAgAGBQJSTV6RAAoJELSic+t+oim9e48QAJpajHmo8BBWPAabl3Hhu2nP
++UmtLIUQsRtCr4Xh14s3u2DYXXIga3JwuZEgjLnbMVCpm0oTHR/PWsxSzxWZJ/2c
+TcIbpmwX6DQ8K6n0dN6SQk3LprVgsUsvs4CVWAewXe+J6nm7zOxD0bzQilKTOYHr
+acwcXvJDkkkPFXBsqaF23IRfZ60qWZ+fKDKa0SooKuZwCH+QvPP5EZPzA7yYE2nH
+n62fdfPPcNE1oBT4swaXHamdo1vlJriA0Pmsjq8ByK7mVvQsffTE9t2ykY7JQ9Av
+nSst1r7ldB21vaIQ5j7QQwI2vxx1t5XPqlPldzqDlBUwPQIhqTJ7jNDUSBJRNxH+
+u3jLVNa1O3b7k1kXBYqwNmYjeN7wdumS7P9xWwq2G7TQ/EUxFBA7iHz0iEYmPmfC
+QWpv5DhsqSCjBkE9AOWxjNTc17jeAiOC+8bTsCosrDViP+BxPnE0XgdflP917QSr
+hTlEVxgwRt8gHlTWf6J6EPg4wvva0ds6abadfQHieJayU8YHt35kjS3VtsAHGm5n
+U+o3DpkC+gJm3U4Z5iHP+N8X851rR76MnCD5n/qm8WPazvcpvno5LvRBHcwXxNDj
+y2fm5oEOAS3t8len9zmKEsrokAR9Kg7KU05CueS8M8Se3FluzD3ZOOVpDS2ucSqE
+ZW1R+J+xj/S0B/FkdgNi
+=SD2O
+-----END PGP SIGNATURE-----
+
+--6THr7QwYWIbrk6Kt--
