@@ -1,56 +1,148 @@
-From: Andrey Korolyov <andrey@xdel.ru>
-Subject: Large time shift causes OSD to hit suicide timeout and ABRT
-Date: Thu, 3 Oct 2013 15:01:52 +0400
-Message-ID: <CABYiri-jcRj8oyS2ne4r+g6yHEXyaraXDpxzcFXbynoVJzNFtQ@mail.gmail.com>
+From: Darren Birkett <darren.birkett-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: OpenStack Grizzly Authentication (Keystone PKI)
+ with RADOS Gateway
+Date: Thu, 3 Oct 2013 12:45:57 +0100
+Message-ID: <CAHX4EnNCUXU=PtXWGJZVgaBTKFup56bWCySGX9m6jkRDAotxRg@mail.gmail.com>
+References: <CADgBPFDkw7aoVwXumn+O6ZgfEKsnDtPsYx7zONzMQ6m4Rk++Yg@mail.gmail.com>
+Reply-To: darren.birkett-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f174.google.com ([209.85.220.174]:48348 "EHLO
-	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752421Ab3JCLG5 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Oct 2013 07:06:57 -0400
-Received: by mail-vc0-f174.google.com with SMTP id gd11so868632vcb.5
-        for <ceph-devel@vger.kernel.org>; Thu, 03 Oct 2013 04:06:56 -0700 (PDT)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: multipart/mixed; boundary="===============0094032853=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CADgBPFDkw7aoVwXumn+O6ZgfEKsnDtPsYx7zONzMQ6m4Rk++Yg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: Amit Vijairania <amit.vijairania-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-Hello,
+--===============0094032853==
+Content-Type: multipart/alternative; boundary=001a11c380b0a5137a04e7d4badc
 
-Not sure if this matches any real-world problem:
+--001a11c380b0a5137a04e7d4badc
+Content-Type: text/plain; charset=ISO-8859-1
 
-step time server 192.168.10.125 offset 30763065.968946 sec
+Hi Amit,
 
-#0  0x00007f2d0294d405 in raise () from /lib/x86_64-linux-gnu/libc.so.6
-#1  0x00007f2d02950b5b in abort () from /lib/x86_64-linux-gnu/libc.so.6
-#2  0x00007f2d0324b875 in __gnu_cxx::__verbose_terminate_handler() ()
-from /usr/lib/x86_64-linux-gnu/libstdc++.so.6
-#3  0x00007f2d03249996 in ?? () from /usr/lib/x86_64-linux-gnu/libstdc++.so.6
-#4  0x00007f2d032499c3 in std::terminate() () from
-/usr/lib/x86_64-linux-gnu/libstdc++.so.6
-#5  0x00007f2d03249bee in __cxa_throw () from
-/usr/lib/x86_64-linux-gnu/libstdc++.so.6
-#6  0x000000000090d2fa in ceph::__ceph_assert_fail (assertion=0xa38ab1
-"0 == \"hit suicide timeout\"", file=<optimized out>, line=79,
-    func=0xa38c60 "bool
-ceph::HeartbeatMap::_check(ceph::heartbeat_handle_d*, const char*,
-time_t)") at common/assert.cc:77
-#7  0x000000000087914b in ceph::HeartbeatMap::_check
-(this=this@entry=0x35b40e0, h=h@entry=0x36d1050,
-who=who@entry=0xa38aef "reset_timeout", now=now@entry=1380797379)
-    at common/HeartbeatMap.cc:79
-#8  0x000000000087940e in ceph::HeartbeatMap::reset_timeout
-(this=0x35b40e0, h=0x36d1050, grace=15, suicide_grace=150) at
-common/HeartbeatMap.cc:89
-#9  0x000000000070ada7 in OSD::process_peering_events (this=0x3750000,
-pgs=..., handle=...) at osd/OSD.cc:6808
-#10 0x000000000074c2e4 in OSD::PeeringWQ::_process (this=<optimized
-out>, pgs=..., handle=...) at osd/OSD.h:869
-#11 0x0000000000903dca in ThreadPool::worker (this=0x3750478,
-wt=0x4ef6fa80) at common/WorkQueue.cc:119
-#12 0x0000000000905070 in ThreadPool::WorkThread::entry
-(this=<optimized out>) at common/WorkQueue.h:316
-#13 0x00007f2d046c2e9a in start_thread () from
-/lib/x86_64-linux-gnu/libpthread.so.0
-#14 0x00007f2d02a093dd in clone () from /lib/x86_64-linux-gnu/libc.so.6
-#15 0x0000000000000000 in ?? ()
+It can, but at the moment there is some issue with keystone token caching
+(in Dumpling), so every auth call hits keystone and does not cache the
+token.
+
+See here:
+
+http://www.spinics.net/lists/ceph-users/msg04531.html
+
+and here:
+
+http://tracker.ceph.com/issues/6360
+
+
+Thanks
+
+Darren
+
+
+
+On 28 September 2013 03:24, Amit Vijairania <amit.vijairania-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>wrote:
+
+> Hello!
+>
+> Does RADOS Gateway supports or integrates with OpenStack (Grizzly)
+> Authentication (Keystone PKI)?
+>
+> Can RADOS Gateway use PKI tokens to conduct user token verification
+> without explicit calls to Keystone.
+>
+> Thanks!
+> Amit
+>
+> Amit Vijairania  |  978.319.3684
+> --*--
+>
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>
+>
+
+--001a11c380b0a5137a04e7d4badc
+Content-Type: text/html; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><font face=3D"arial, helvetica, sans-serif">Hi Amit,</font=
+><div><font face=3D"arial, helvetica, sans-serif"><br></font></div><div><fo=
+nt face=3D"arial, helvetica, sans-serif">It can, but at the moment there is=
+ some issue with keystone token caching (in Dumpling), so every auth call h=
+its keystone and does not cache the token.</font></div>
+<div><font face=3D"arial, helvetica, sans-serif"><br></font></div><div><fon=
+t face=3D"arial, helvetica, sans-serif">See here:</font></div><div><font fa=
+ce=3D"arial, helvetica, sans-serif"><br></font></div><div><font face=3D"ari=
+al, helvetica, sans-serif"><a href=3D"http://www.spinics.net/lists/ceph-use=
+rs/msg04531.html">http://www.spinics.net/lists/ceph-users/msg04531.html</a>=
+<br>
+</font></div><div><font face=3D"arial, helvetica, sans-serif"><br></font></=
+div><div><font face=3D"arial, helvetica, sans-serif">and here:</font></div>=
+<div><pre><font color=3D"#000000" face=3D"arial, helvetica, sans-serif"><a =
+href=3D"http://tracker.ceph.com/issues/6360">http://tracker.ceph.com/issues=
+/6360</a></font></pre>
+<pre><font color=3D"#000000" face=3D"arial, helvetica, sans-serif"><br></fo=
+nt></pre><pre><font color=3D"#000000" face=3D"arial, helvetica, sans-serif"=
+>Thanks</font></pre><pre><font color=3D"#000000" face=3D"arial, helvetica, =
+sans-serif">Darren</font></pre>
+</div><div class=3D"gmail_extra"><font face=3D"arial, helvetica, sans-serif=
+"><br><br></font><div class=3D"gmail_quote"><font face=3D"arial, helvetica,=
+ sans-serif">On 28 September 2013 03:24, Amit Vijairania <span dir=3D"ltr">=
+&lt;<a href=3D"mailto:amit.vijairania-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org" target=3D"_blank">amit.vij=
+airania-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org</a>&gt;</span> wrote:<br>
+</font><blockquote class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-=
+left:1px #ccc solid;padding-left:1ex"><div dir=3D"ltr"><font face=3D"arial,=
+ helvetica, sans-serif">Hello!</font><div><font face=3D"arial, helvetica, s=
+ans-serif"><br>
+</font></div><div><font face=3D"arial, helvetica, sans-serif">Does RADOS Ga=
+teway supports or integrates with OpenStack (Grizzly) Authentication (Keyst=
+one PKI)?</font></div>
+<div><font color=3D"#000000" face=3D"arial, helvetica, sans-serif"><br></fo=
+nt></div><div><font face=3D"arial, helvetica, sans-serif"><font color=3D"#0=
+00000">Can RADOS Gateway=A0use PKI tokens to conduct user token verificatio=
+n without explicit calls to Keystone.</font></font></div>
+
+<div><font face=3D"arial, helvetica, sans-serif"><font color=3D"#000000"><b=
+r></font></font></div><div><font face=3D"arial, helvetica, sans-serif"><fon=
+t color=3D"#000000">Thanks!</font></font></div><div><font face=3D"arial, he=
+lvetica, sans-serif"><font color=3D"#000000">Amit<span class=3D"HOEnZb"><fo=
+nt color=3D"#888888"><br clear=3D"all">
+
+</font></span></font><span class=3D"HOEnZb"><font color=3D"#888888"><div><d=
+iv dir=3D"ltr"><br>Amit Vijairania =A0| =A0<a href=3D"tel:978.319.3684" val=
+ue=3D"+19783193684" target=3D"_blank">978.319.3684</a><br>--*--</div></div>
+</font></span></font></div></div>
+<font face=3D"arial, helvetica, sans-serif"><br>___________________________=
+____________________<br>
+ceph-users mailing list<br>
+<a href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a><=
+br>
+<a href=3D"http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com" target=
+=3D"_blank">http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com</a><br>
+<br></font></blockquote></div><br></div></div>
+
+--001a11c380b0a5137a04e7d4badc--
+
+--===============0094032853==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============0094032853==--
