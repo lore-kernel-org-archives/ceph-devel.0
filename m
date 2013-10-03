@@ -1,69 +1,29 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Weekly teuthology meeting #3
-Date: Thu, 03 Oct 2013 21:00:04 +0200
-Message-ID: <524DBEB4.5030302@dachary.org>
+From: Aijaz Lending <yin01@aijaz527.onmicrosoft.com>
+Subject: looking for loan
+Date: Fri, 4 Oct 2013 01:33:51 +0530
+Message-ID: <ad3194ad-ed29-4669-ac23-7c9c7d786543@HKXPR02MB213.apcprd02.prod.outlook.com>
+Reply-To: <sg.loan.sg@outlook.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="A1uxEt0nsNuWJUFlUTl62AlMR9UARbVQO"
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:53213 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754397Ab3JCTAH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Oct 2013 15:00:07 -0400
-Received: from [10.9.0.6] (openvpn.novalocal [10.145.3.13])
-	by smtp.dmail.dachary.org (Postfix) with ESMTPS id 8E83626394
-	for <ceph-devel@vger.kernel.org>; Thu,  3 Oct 2013 21:00:05 +0200 (CEST)
+Received: from emea01-db3-ndr.ptr.protection.outlook.com ([157.56.120.102]:48375
+	"EHLO emea01-db3-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1755215Ab3JCUEa convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Oct 2013 16:04:30 -0400
+Content-Description: Mail message body
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Recipients <yin01@aijaz527.onmicrosoft.com>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---A1uxEt0nsNuWJUFlUTl62AlMR9UARbVQO
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Do you have a firm or company that need loan to start up a business or need,personal loan, Debt consolidation? For more information,Contact us now for a guarantee loan with low interest rate. We will provide you with loan to meet your needs. For more information contact us with the following information's.
+Full name:
+country:
+Address:
+Phone Number:
+Amount needed:
+Duration of loan:
 
-Hi,
-
-Today 8pm paris time / CEST was the thrid teuthology meeting. The general=
- idea of these meetings is to get together developers using teuthology ( =
-or willing to use teuthology ) outside of Inktank and people using it ins=
-ide inktank. The goal is to help transition from an internal tool to some=
-thing that's installable and upgradeable by any Ceph developer.=20
-
-The next meeting will be held 6pm paris time / CEST wednesday october 9th=
-, 2013. The IRC channel is irc.oftc.net#ceph-devel and the conference roo=
-m is mumble.upstream-university.org ( http://www.mumble.com/mumble-downlo=
-ad.php ). It is timeboxed to one hour.
-
-This edition will be immediately after the Ceph day http://cephdaylondon-=
-eorg.eventbrite.com/ and I'll do my best to recruit participants :-)
-
-Cheers
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-All that is necessary for the triumph of evil is that good people do noth=
-ing.
-
-
-
-
-
-
-
---A1uxEt0nsNuWJUFlUTl62AlMR9UARbVQO
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlJNvrUACgkQ8dLMyEl6F23VKwCeJ2lWsXm/NwRaFs9ShtkcqXJP
-qcYAn1YFvpZ88QNCYjd5/uwP5JhMgXAZ
-=sj0V
------END PGP SIGNATURE-----
-
---A1uxEt0nsNuWJUFlUTl62AlMR9UARbVQO--
+sg.loan.sg@outlook.com
+Kind regards
