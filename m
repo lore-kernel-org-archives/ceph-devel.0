@@ -1,107 +1,66 @@
-From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: xattr limits
-Date: Fri, 4 Oct 2013 04:16:40 -0700
-Message-ID: <20131004111640.GA22948@infradead.org>
-References: <C1F9D079-3D19-4A39-872A-0CAF8EA3866F@gmail.com>
- <524E59FC.9030903@dachary.org>
- <31BF914D-D406-428E-8671-0005901E10E6@inktank.com>
+From: KOSAKI Motohiro <kosaki.motohiro@gmail.com>
+Subject: Re: [PATCH 0/26] get_user_pages() cleanup
+Date: Fri, 04 Oct 2013 16:31:14 -0400
+Message-ID: <524F2592.1040305@gmail.com>
+References: <1380724087-13927-1-git-send-email-jack@suse.cz> <20131002162009.GA5778@infradead.org> <20131002202941.GF16998@quack.suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from bombadil.infradead.org ([198.137.202.9]:52439 "EHLO
-	bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752741Ab3JDLQm (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Oct 2013 07:16:42 -0400
-Content-Disposition: inline
-In-Reply-To: <31BF914D-D406-428E-8671-0005901E10E6@inktank.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: David Zafman <david.zafman@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Loic Dachary <loic@dachary.org>, xfs@oss.sgi.com
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <20131002202941.GF16998@quack.suse.cz>
+Sender: owner-linux-mm@kvack.org
+To: Jan Kara <jack@suse.cz>
+Cc: Christoph Hellwig <hch@infradead.org>, LKML <linux-kernel@vger.kernel.org>, linux-mm@kvack.org, Alexander Viro <viro@zeniv.linux.org.uk>, Andreas Dilger <andreas.dilger@intel.com>, Andy Walls <awalls@md.metrocast.net>, Arnd Bergmann <arnd@arndb.de>, Benjamin LaHaise <bcrl@kvack.org>, ceph-devel@vger.kernel.org, Dan Williams <dan.j.williams@intel.com>, David Airlie <airlied@linux.ie>, dri-devel@lists.freedesktop.org, Gleb Natapov <gleb@redhat.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, hpdd-discuss@ml01.01.org, Jarod Wilson <jarod@wilsonet.com>, Jayant Mangalampalli <jayant.mangalampalli@intel.com>, Jean-Christophe Plagniol-Villard <plagnioj@jcrosoft.com>, Jesper Nilsson <jesper.nilsson@axis.com>, Kai Makisara <Kai.Makisara@kolumbus.fi>, kvm@vger.kernel.org, Laurent Pinchart <laurent.pinchart@ideasonboard.com>, linux-aio@kvack.org, linux-cris-kernel@
+List-Id: ceph-devel.vger.kernel.org
 
-Might be good to send the crash report to the XFS list..
+(10/2/13 4:29 PM), Jan Kara wrote:
+> On Wed 02-10-13 09:20:09, Christoph Hellwig wrote:
+>> On Wed, Oct 02, 2013 at 04:27:41PM +0200, Jan Kara wrote:
+>>>    Hello,
+>>>
+>>>    In my quest for changing locking around page faults to make things easier for
+>>> filesystems I found out get_user_pages() users could use a cleanup.  The
+>>> knowledge about necessary locking for get_user_pages() is in tons of places in
+>>> drivers and quite a few of them actually get it wrong (don't have mmap_sem when
+>>> calling get_user_pages() or hold mmap_sem when calling copy_from_user() in the
+>>> surrounding code). Rather often this actually doesn't seem necessary. This
+>>> patch series converts lots of places to use either get_user_pages_fast()
+>>> or a new simple wrapper get_user_pages_unlocked() to remove the knowledge
+>>> of mmap_sem from the drivers. I'm still looking into converting a few remaining
+>>> drivers (most notably v4l2) which are more complex.
+>>
+>> Even looking over the kerneldoc comment next to it I still fail to
+>> understand when you'd want to use get_user_pages_fast and when not.
+>    AFAIU get_user_pages_fast() should be used
+> 1) if you don't need any special get_user_pages() arguments (like calling
+>     it for mm of a different process, forcing COW, or similar).
+> 2) you don't expect pages to be unmapped (then get_user_pages_fast() is
+> actually somewhat slower because it walks page tables twice).
 
-On Thu, Oct 03, 2013 at 11:54:29PM -0700, David Zafman wrote:
-> 
-> Here is the test script:
-> 
+If target page point to anon or private mapping pages, get_user_pages_fast()
+is fork unsafe. O_DIRECT man pages describe a bit about this.
 
 
-> 
-> David Zafman
-> Senior Developer
-> http://www.inktank.com
-> 
-> 
-> 
-> 
-> On Oct 3, 2013, at 11:02 PM, Loic Dachary <loic@dachary.org> wrote:
-> 
-> > Hi David,
-> > 
-> > Would you mind attaching the script to the mail for completness ? It's a useful thing to have :-)
-> > 
-> > Cheers
-> > 
-> > On 04/10/2013 01:21, David Zafman wrote:
-> >> 
-> >> I want to record with the ceph-devel archive results from testing limits of xattrs for Linux filesystems used with Ceph.
-> >> 
-> >> Script that creates xattrs with name user.test1, user.test2, ?. on a single file
-> >> 3.10 linux kernel
-> >> 
-> >> ext4  
-> >> value bytes       number of entries
-> >>    1               148
-> >>   16             103
-> >>  256          14
-> >>  512            7
-> >>  1024         3
-> >> 4036          1 
-> >> Beyond this immediately get ENOSPC
-> >> 
-> >> btrfs    
-> >> value bytes       number of entries
-> >> 8       		 10k
-> >> 16       		10k
-> >> 32        		 10k
-> >> 64        		 10k
-> >> 128     		 10k
-> >> 256       		 10k
-> >> 512        		10k  slow but worked 1,000,000 got completely hung for minutes at a time during removal strace showed no forward progress
-> >> 1024        	 10k
-> >> 2048        	 10k
-> >> 3096          	 10k
-> >> Beyond this you start getting ENOSPC after fewer entries
-> >> 
-> >> xfs (limit entries due to xfs crash with 10k entries)
-> >> value bytes       number of entries
-> >> 1   			1k
-> >> 8   			 1k
-> >> 16   			 1k
-> >> 32  			 1k
-> >> 64   		        1k
-> >> 128   		 1k
-> >> 256 			1k
-> >> 512  		 1k
-> >> 1024 		1k
-> >> 2048  		 1k
-> >> 4096   		 1k
-> >> 8192   		 1k
-> >> 16384   		 1k
-> >> 32768   		 1k
-> >> 65536   		 1k
-> >> 
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >> the body of a message to majordomo@vger.kernel.org
-> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >> 
-> > 
-> > -- 
-> > Lo?c Dachary, Artisan Logiciel Libre
-> > All that is necessary for the triumph of evil is that good people do nothing.
-> > 
-> 
+see http://man7.org/linux/man-pages/man2/open.2.html
 
----end quoted text---
+>       O_DIRECT I/Os should never be run concurrently with the fork(2)
+>       system call, if the memory buffer is a private mapping (i.e., any
+>       mapping created with the mmap(2) MAP_PRIVATE flag; this includes
+>       memory allocated on the heap and statically allocated buffers).  Any
+>       such I/Os, whether submitted via an asynchronous I/O interface or
+>       from another thread in the process, should be completed before
+>       fork(2) is called.  Failure to do so can result in data corruption
+>       and undefined behavior in parent and child processes.  This
+>       restriction does not apply when the memory buffer for the O_DIRECT
+>       I/Os was created using shmat(2) or mmap(2) with the MAP_SHARED flag.
+>       Nor does this restriction apply when the memory buffer has been
+>       advised as MADV_DONTFORK with madvise(2), ensuring that it will not
+>       be available to the child after fork(2).
+
+Thanks.
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
