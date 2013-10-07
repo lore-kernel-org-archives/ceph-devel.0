@@ -1,88 +1,85 @@
-From: Jan Kara <jack@suse.cz>
-Subject: Re: [PATCH 0/26] get_user_pages() cleanup
-Date: Mon, 7 Oct 2013 23:18:22 +0200
-Message-ID: <20131007211822.GF30441@quack.suse.cz>
-References: <1380724087-13927-1-git-send-email-jack@suse.cz>
- <20131002162009.GA5778@infradead.org>
- <20131002202941.GF16998@quack.suse.cz>
- <524F2592.1040305@gmail.com>
- <524F282B.2080809@gmail.com>
+From: "hjwsm1989@gmail.com" <hjwsm1989@gmail.com>
+Subject: Re: ceph on ubuntu and centos
+Date: Tue, 08 Oct 2013 06:16:53 +0800
+Message-ID: <h1bx0us4fo0wk19p44aeacb9.1381184213956@email.android.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <owner-linux-aio@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <524F282B.2080809@gmail.com>
-Sender: owner-linux-aio@kvack.org
-To: KOSAKI Motohiro <kosaki.motohiro@gmail.com>
-Cc: Jan Kara <jack@suse.cz>, Christoph Hellwig <hch@infradead.org>, LKML <linux-kernel@vger.kernel.org>, linux-mm@kvack.org, Alexander Viro <viro@zeniv.linux.org.uk>, Andreas Dilger <andreas.dilger@intel.com>, Andy Walls <awalls@md.metrocast.net>, Arnd Bergmann <arnd@arndb.de>, Benjamin LaHaise <bcrl@kvack.org>, ceph-devel@vger.kernel.org, Dan Williams <dan.j.williams@intel.com>, David Airlie <airlied@linux.ie>, dri-devel@lists.freedesktop.org, Gleb Natapov <gleb@redhat.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, hpdd-discuss@ml01.01.org, Jarod Wilson <jarod@wilsonet.com>, Jayant Mangalampalli <jayant.mangalampalli@intel.com>, Jean-Christophe Plagniol-Villard <plagnioj@jcrosoft.com>, Jesper Nilsson <jesper.nilsson@axis.com>, Kai Makisara <Kai.Makisara@kolumbus.fi>, kvm@vger.kernel.org, Laurent Pinchart <laurent.pinchart@ideasonboard.com>, linux-aio@kvack.orgl
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: base64
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-pb0-f47.google.com ([209.85.160.47]:52998 "EHLO
+	mail-pb0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751266Ab3JGWRF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Oct 2013 18:17:05 -0400
+Received: by mail-pb0-f47.google.com with SMTP id rr4so7735828pbb.34
+        for <ceph-devel@vger.kernel.org>; Mon, 07 Oct 2013 15:17:04 -0700 (PDT)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Samuel Just <sam.just@inktank.com>
+Cc: huangyellowhuang <huangyellowhuang@163.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Fri 04-10-13 16:42:19, KOSAKI Motohiro wrote:
-> (10/4/13 4:31 PM), KOSAKI Motohiro wrote:
-> >(10/2/13 4:29 PM), Jan Kara wrote:
-> >>On Wed 02-10-13 09:20:09, Christoph Hellwig wrote:
-> >>>On Wed, Oct 02, 2013 at 04:27:41PM +0200, Jan Kara wrote:
-> >>>>    Hello,
-> >>>>
-> >>>>    In my quest for changing locking around page faults to make things easier for
-> >>>>filesystems I found out get_user_pages() users could use a cleanup.  The
-> >>>>knowledge about necessary locking for get_user_pages() is in tons of places in
-> >>>>drivers and quite a few of them actually get it wrong (don't have mmap_sem when
-> >>>>calling get_user_pages() or hold mmap_sem when calling copy_from_user() in the
-> >>>>surrounding code). Rather often this actually doesn't seem necessary. This
-> >>>>patch series converts lots of places to use either get_user_pages_fast()
-> >>>>or a new simple wrapper get_user_pages_unlocked() to remove the knowledge
-> >>>>of mmap_sem from the drivers. I'm still looking into converting a few remaining
-> >>>>drivers (most notably v4l2) which are more complex.
-> >>>
-> >>>Even looking over the kerneldoc comment next to it I still fail to
-> >>>understand when you'd want to use get_user_pages_fast and when not.
-> >>    AFAIU get_user_pages_fast() should be used
-> >>1) if you don't need any special get_user_pages() arguments (like calling
-> >>     it for mm of a different process, forcing COW, or similar).
-> >>2) you don't expect pages to be unmapped (then get_user_pages_fast() is
-> >>actually somewhat slower because it walks page tables twice).
-> >
-> >If target page point to anon or private mapping pages, get_user_pages_fast()
-> >is fork unsafe. O_DIRECT man pages describe a bit about this.
-> >
-> >
-> >see http://man7.org/linux/man-pages/man2/open.2.html
-> >
-> >>       O_DIRECT I/Os should never be run concurrently with the fork(2)
-> >>       system call, if the memory buffer is a private mapping (i.e., any
-> >>       mapping created with the mmap(2) MAP_PRIVATE flag; this includes
-> >>       memory allocated on the heap and statically allocated buffers).  Any
-> >>       such I/Os, whether submitted via an asynchronous I/O interface or
-> >>       from another thread in the process, should be completed before
-> >>       fork(2) is called.  Failure to do so can result in data corruption
-> >>       and undefined behavior in parent and child processes.  This
-> >>       restriction does not apply when the memory buffer for the O_DIRECT
-> >>       I/Os was created using shmat(2) or mmap(2) with the MAP_SHARED flag.
-> >>       Nor does this restriction apply when the memory buffer has been
-> >>       advised as MADV_DONTFORK with madvise(2), ensuring that it will not
-> >>       be available to the child after fork(2).
-> 
-> IMHO, get_user_pages_fast() should be renamed to get_user_pages_quirk(). Its
-> semantics is not equal to get_user_pages(). When someone simply substitute
-> get_user_pages() to get_user_pages_fast(), they might see huge trouble.
-  I forgot about this speciality (and actually comments didn't remind me
-:(). But thinking about this some more get_user_pages_fast() seems as save
-as get_user_pages() in presence of threads sharing mm, doesn't it? Because
-while get_user_pages() are working, other thread can happilly trigger COW
-on some of the pages and thus get_user_pages() can return pages some of
-which are invisible in our mm by the time get_user_pages() returns. So
-although in practice I agree problems of get_user_pages_fast() with fork(2)
-are more visible, in essence they are still present with clone(2) and
-get_user_pages().
+dGhhbmtzIGZvciB5b3VyIHJlcGx5ICEKdGhlIHVidW50dSBpcyAzLjgsY2VudG9zIGtlcm5lbCB2
+ZXJzaW9uIGlzIDIuNi4zMi4Kd2hpY2ggc2V0dGluZyBpdGVtIHNob3VsZCB3ZSBjaGFuZ2UgdG8g
+Z2V0ICB0aGUgc21vdGggd3JpdGUgc3BlZWQgPwp3ZSB0cmllZCB0dW5lICBzb21lIHBhcmFtZXRl
+cnM6Cm9zZCBvcCB0aHJlYWRzPSA4CmZpbGVzdG9yZSBvcCB0aHJlYWRzID0gOApmaWxlc3RvcmUg
+bWF4IG9wIHF1ZXVlID0gMzAKd2hpY2ggb25lIHdpbGwgaGF2ZSB0aGUgbGFyZ2VzdCBlZmZlY3Qg
+b24gcGVyZm9ybWFuY2U/Cgp0aGFua3MKClNhbXVlbCBKdXN0IDxzYW0uanVzdEBpbmt0YW5rLmNv
+bT7nvJblhpnvvJoKCj5JbnRlcmVzdGluZyEgIFdoYXQga2VybmVsIHZlcnNpb25zIHdlcmUgcnVu
+bmluZyBvbiB0aGUgMTMuMTAgYW5kCj5jZW50b3MgNi40IGNsdXN0ZXJzPwo+LVNhbQo+Cj5PbiBG
+cmksIE9jdCA0LCAyMDEzIGF0IDY6MzMgUE0sIGh1YW5neWVsbG93aHVhbmcKPjxodWFuZ3llbGxv
+d2h1YW5nQDE2My5jb20+IHdyb3RlOgo+PiBIaSxhbGwKPj4gV2UgdGVzdCB0aGUgY2VwaCB2ZXJz
+aW9uIDAuNjkgKDZjYTZmMmY5Zjc1NDAzMWY0YWNkYjk3MWI3MWM5MmM5NzYyZTE4YzMpIG9uCj4+
+IFVidW50dSBzZXJ2ZXIgMTMuMTAgYW5kIGNlbnRvcyA2LjQgZmluYWwKPj4gT3VyIGNsdXN0ZXIg
+Y29uZmlndXJhdGlvbjoKPj4gMyBob3N0IG1hY2hpbmUsIGVhY2ggcnVucyAzIE9TRHModXNlIFhG
+UyBhcyBiYWNrZW5kIGZzKSxNT04gYW5kIE1EUyBydW5zIG9uCj4+IG9uZSBvZiB0aGUgdGhyZWUg
+aG9zdCwKPj4gV2UgaGF2ZSBvbmUgS0NsaWVudCBvbiBVYnVudHUgc2VydmVyIDEzLjEwCj4+Cj4+
+IFRoZSBjbHVzdGVyIHJ1bnMgb24gVWJ1bnR1IHdvcmtzIGZpbmUgYW5kIGEgZmV3IOKAmHNsb3cg
+cmVxdWVzdHPigJkgbXNncywgYWJvdXQKPj4gMTAwTUIvcyB3cml0ZSBzcGVlZC4KPj4gQnV0IHRo
+ZSBjbHVzdGVyIHJ1bnMgb24gY2VudG9zIGlzIHZlcnkgYmFkLCBhdmcgMzBNQi9zIHdyaXRlIHNw
+ZWVkLCBtYW55IG9zZAo+PiByZXF1ZXN0cyBzbG93Ogo+PiAyMDEzLTEwLTA1IDA4OjM1OjA5Ljkz
+MTE0NSBtb24uMCBbSU5GXSBwZ21hcCB2OTI4OiAxOTIgcGdzOiAxOTIgYWN0aXZlK2NsZWFuCj4+
+IDsgNTA4NzMgTUIgZGF0YSwgMTAxNzE2IE1CIHVzZWQsIDEzODU3IEdCIC8gMTM5NTYgR0IgYXZh
+aWw7IDExNSBNQi9zIHdyLCAyOAo+PiBvcC9zCj4+IDIwMTMtMTAtMDUgMDg6MzU6MTIuMDg3NjE0
+IG1vbi4wIFtJTkZdIHBnbWFwIHY5Mjk6IDE5MiBwZ3M6IDE5MiBhY3RpdmUrY2xlYW4KPj4gOyA1
+MDkwMSBNQiBkYXRhLCAxMDE3ODAgTUIgdXNlZCwgMTM4NTcgR0IgLyAxMzk1NiBHQiBhdmFpbDsg
+MzI1OTMgS0IvcyB3ciwgOAo+PiAgb3Avcwo+PiAyMDEzLTEwLTA1IDA4OjM1OjAzLjk2Mzk3OSBv
+c2QuMCBbV1JOXSAzNyBzbG93IHJlcXVlc3RzLCAxIGluY2x1ZGVkIGJlbG93OyBvCj4+IGxkZXN0
+IGJsb2NrZWQgZm9yID4gNzk4LjIzNTk2MiBzZWNzCj4+IDIwMTMtMTAtMDUgMDg6MzU6MDMuOTYz
+OTg0IG9zZC4wIFtXUk5dIHNsb3cgcmVxdWVzdCAyNDAuODMxMDc4IHNlY29uZHMgb2xkLAo+PiBy
+ZWNlaXZlZCBhdCAyMDEzLTEwLTA1IDA4OjMxOjAzLjEzMjgzNjogb3NkX29wKG1kcy4wLjE6Mzc1
+IDIwMC4wMDAwMDAwMCBbd3JpCj4+IHRlZnVsbCAwfjg0XSAxLjg0NGYzNDk0IGU0NykgdjQgY3Vy
+cmVudGx5IG5vIGZsYWcgcG9pbnRzIHJlYWNoZWQKPj4gMjAxMy0xMC0wNSAwODozNTowOC45NjUx
+MzQgb3NkLjAgW1dSTl0gMzcgc2xvdyByZXF1ZXN0cywgMSBpbmNsdWRlZCBiZWxvdzsgbwo+PiBs
+ZGVzdCBibG9ja2VkIGZvciA+IDgwMy4yMzcxMjcgc2Vjcwo+PiAyMDEzLTEwLTA1IDA4OjM1OjA4
+Ljk2NTEzOSBvc2QuMCBbV1JOXSBzbG93IHJlcXVlc3QgNDgwLjMxMjYxOCBzZWNvbmRzIG9sZCwK
+Pj4gcmVjZWl2ZWQgYXQgMjAxMy0xMC0wNSAwODoyNzowOC42NTI0NjE6IG9zZF9vcChtZHMuMC4x
+OjMwNyAyMDAuMDAwMDAwMDAgW3dyaQo+PiB0ZWZ1bGwgMH44NF0gMS44NDRmMzQ5NCBlNDcpIHY0
+IGN1cnJlbnRseSBubyBmbGFnIHBvaW50cyByZWFjaGVkCj4+IDIwMTMtMTAtMDUgMDg6MzU6MTAu
+OTY1NjE5IG9zZC4wIFtXUk5dIDM3IHNsb3cgcmVxdWVzdHMsIDEgaW5jbHVkZWQgYmVsb3c7IG8K
+Pj4gbGRlc3QgYmxvY2tlZCBmb3IgPiA4MDUuMjM3NjAwIHNlY3MKPj4gMjAxMy0xMC0wNSAwODoz
+NToxMC45NjU2MjQgb3NkLjAgW1dSTl0gc2xvdyByZXF1ZXN0IDEyMC45NDY2NTIgc2Vjb25kcyBv
+bGQsCj4+IHJlY2VpdmVkIGF0IDIwMTMtMTAtMDUgMDg6MzM6MTAuMDE4OTAwOiBvc2Rfb3AobWRz
+LjAuMTo0MDQgMjAwLjAwMDAwMDAwIFt3cmkKPj4gdGVmdWxsIDB+ODRdIDEuODQ0ZjM0OTQgZTQ3
+KSB2NCBjdXJyZW50bHkgbm8gZmxhZyBwb2ludHMgcmVhY2hlZAo+PiAyMDEzLTEwLTA1IDA4OjM1
+OjExLjk2NTk4NiBvc2QuMCBbV1JOXSAzNyBzbG93IHJlcXVlc3RzLCAxIGluY2x1ZGVkIGJlbG93
+OyBvCj4+IGxkZXN0IGJsb2NrZWQgZm9yID4gODA2LjIzNzgwMCBzZWNzCj4+IDIwMTMtMTAtMDUg
+MDg6MzU6MTEuOTY1OTkyIG9zZC4wIFtXUk5dIHNsb3cgcmVxdWVzdCA2MC40NzQzMTQgc2Vjb25k
+cyBvbGQsIHIKPj4gZWNlaXZlZCBhdCAyMDEzLTEwLTA1IDA4OjM0OjExLjQ5MTQzODogb3NkX29w
+KG1kcy4wLjE6NDMwIDIwMC4wMDAwMDAwMCBbd3JpdAo+PiBlZnVsbCAwfjg0XSAxLjg0NGYzNDk0
+IGU0NykgdjQgY3VycmVudGx5IG5vIGZsYWcgcG9pbnRzIHJlYWNoZWQKPj4KPj4gQW5kIHdlIG5l
+ZWQgdG8gYnVpbGQgYSBjbHVzdGVyIGhhdmUgNCBob3N0cywgZWFjaCBoYXMgMTggT1NEcyBhbmQg
+MSBrY2xpZW50LAo+PiBldmVyeSBrY2xpZW50IHNlcnZlciBhcyBzYW1iYSBzZXJ2ZXIgdGhhdCBz
+ZXJ2ZXMgNCBzYW1iYSBjbGllbnRzLgo+PiAxKSBXaGljaCBsaW51eCBkaXN0cnVidGlvbiBzaG91
+bGQgd2UgdXNlZD8gQ2VudG9zIG9yIFVidW50dT8KPj4gMikgV2hhdCByZXN1bHRzIGluIGNlcGgg
+cGVyZm9ybWFuY2VzIHNvIGxhcmdlIG9uIGRpZmZlcmVudCBkaXN0cmlidXRpb24/Cj4+IDMpIEl0
+IHNlZW1zIHRoZSBib3R0bGVuZWNrIGlzIHVuZGVybGF5ZXIgZnMgY2FuIG5vdCBoYW5kbGUgcmVx
+dWVzdHMgZmFzdCBhcwo+PiBjZXBoIGV4cGVjdCwgYmMgdGhlIOKAmHNsb3cgcmVxdWVzdHPigJkg
+c2hvd3MgaWYgYSByZXF1ZXN0IGRvZXMgbm90IGhhbmRsZSBhZnRlcgo+PiAzMHMuCj4+Cj4+IFRo
+YW5rcyEKPj4KPj4KPj4KPj4gLS0KPj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNl
+bmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluCj4+IHRoZSBib2R5IG9mIGEg
+bWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnCj4+IE1vcmUgbWFqb3Jkb21vIGlu
+Zm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbAo+LS0KPlRv
+IHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBj
+ZXBoLWRldmVsIiBpbgo+dGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtl
+cm5lbC5vcmcKPk1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcv
+bWFqb3Jkb21vLWluZm8uaHRtbAo=
 
-								Honza
--- 
-Jan Kara <jack@suse.cz>
-SUSE Labs, CR
-
---
-To unsubscribe, send a message with 'unsubscribe linux-aio' in
-the body to majordomo@kvack.org.  For more info on Linux AIO,
-see: http://www.kvack.org/aio/
-Don't email: <a href=mailto:"aart@kvack.org">aart@kvack.org</a>
