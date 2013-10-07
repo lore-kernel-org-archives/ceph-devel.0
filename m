@@ -1,99 +1,144 @@
-From: "Matt W. Benjamin" <matt@linuxbox.com>
-Subject: Re: wip-libcephfs-emp-rb
-Date: Mon, 7 Oct 2013 19:48:29 -0400 (EDT)
-Message-ID: <567038737.154.1381189709014.JavaMail.root@thunderbeast.private.linuxbox.com>
-References: <0E0D6667-6E38-420E-8FF7-751350482313@inktank.com>
+From: Samuel Just <sam.just@inktank.com>
+Subject: Re: ceph on ubuntu and centos
+Date: Mon, 7 Oct 2013 16:54:44 -0700
+Message-ID: <CA+4uBUaCeK8+kDg-GCf+C2UVeo9Kah=732J1B++S0EZHUqYdXA@mail.gmail.com>
+References: <h1bx0us4fo0wk19p44aeacb9.1381184213956@email.android.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from aa.linuxbox.com ([69.128.83.226]:1884 "EHLO aa.linuxbox.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751630Ab3JGXsd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 7 Oct 2013 19:48:33 -0400
-In-Reply-To: <0E0D6667-6E38-420E-8FF7-751350482313@inktank.com>
+Received: from mail-ee0-f49.google.com ([74.125.83.49]:43552 "EHLO
+	mail-ee0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753524Ab3JGXyq convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Oct 2013 19:54:46 -0400
+Received: by mail-ee0-f49.google.com with SMTP id d41so3607895eek.36
+        for <ceph-devel@vger.kernel.org>; Mon, 07 Oct 2013 16:54:45 -0700 (PDT)
+In-Reply-To: <h1bx0us4fo0wk19p44aeacb9.1381184213956@email.android.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: David Zafman <david.zafman@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: "hjwsm1989@gmail.com" <hjwsm1989@gmail.com>
+Cc: huangyellowhuang <huangyellowhuang@163.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi David,
+You might try
+osd client message size cap =3D 26214400
+osd client message cap =3D 25.
 
-I'll have a loot.
+osd op threads =3D 8 and filestore op threads =3D 8 might also be good.
+Let us know what you find!
 
-Matt
+Sounds like the the kernel is the most obvious candidate for slowness
+on Centos 6.4, is there a 3.0+ kernel around for Centos 6.4 you could
+try?
+-Sam
 
------ "David Zafman" <david.zafman@inktank.com> wrote:
-
-> I rebased wip-libcephfs and pushed as wip-libcephfs-emp-rb so that we
-> can get this in to the Emperor release. Sage mentioned that he had hit
-> a fuse problem in the wip-libcephfs branch, so apparently the problem
-> is still present. Have you run into this bug in your testing? Are you
-> testing with these modification to Ceph?
-> 
-> 
-> 
-> 2013-10-04T10:39:01.664
-> INFO:teuthology.task.workunit.client.0.out:[10.214.132.22]: CC
-> kernel/softirq.o
-> 2013-10-04T10:39:02.059
-> INFO:teuthology.task.ceph-fuse.ceph-fuse.0.err:[10.214.132.22]: ***
-> Caught signal (Segmentation fault) **
-> 2013-10-04T10:39:02.059
-> INFO:teuthology.task.ceph-fuse.ceph-fuse.0.err:[10.214.132.22]: in
-> thread 7f57fa316780
-> 2013-10-04T10:39:02.073
-> INFO:teuthology.task.ceph-fuse.ceph-fuse.0.err:[10.214.132.22]: ceph
-> version 0.69-500-g09f4df0 (09f4df02a866230b19539b03061f4abc5ab47ae2)
-> 2013-10-04T10:39:02.073
-> INFO:teuthology.task.ceph-fuse.ceph-fuse.0.err:[10.214.132.22]: 1:
-> ceph-fuse() [0x5e0d1a]
-> 2013-10-04T10:39:02.073
-> INFO:teuthology.task.ceph-fuse.ceph-fuse.0.err:[10.214.132.22]: 2:
-> (()+0xfcb0) [0x7f57f9cc5cb0]
-> 2013-10-04T10:39:02.073
-> INFO:teuthology.task.ceph-fuse.ceph-fuse.0.err:[10.214.132.22]: 3:
-> (Client::_get_inodeno(Inode*)+0) [0x52dd10]
-> 2013-10-04T10:39:02.073
-> INFO:teuthology.task.ceph-fuse.ceph-fuse.0.err:[10.214.132.22]: 4:
-> (Client::ll_forget(Inode*, int)+0x4a) [0x538d1a]
-> 2013-10-04T10:39:02.074
-> INFO:teuthology.task.ceph-fuse.ceph-fuse.0.err:[10.214.132.22]: 5:
-> ceph-fuse() [0x52a1c5]
-> 2013-10-04T10:39:02.074
-> INFO:teuthology.task.ceph-fuse.ceph-fuse.0.err:[10.214.132.22]: 6:
-> (fuse_session_loop()+0x75) [0x7f57f9ee3d65]
-> 2013-10-04T10:39:02.074
-> INFO:teuthology.task.ceph-fuse.ceph-fuse.0.err:[10.214.132.22]: 7:
-> (main()+0x84c) [0x5266fc]
-> 2013-10-04T10:39:02.074
-> INFO:teuthology.task.ceph-fuse.ceph-fuse.0.err:[10.214.132.22]: 8:
-> (__libc_start_main()+0xed) [0x7f57f83f576d]
-> 2013-10-04T10:39:02.074
-> INFO:teuthology.task.ceph-fuse.ceph-fuse.0.err:[10.214.132.22]: 9:
-> ceph-fuse() [0x527c99]
-> 2013-10-04T10:39:02.074
-> INFO:teuthology.task.ceph-fuse.ceph-fuse.0.err:[10.214.132.22]:
-> 2013-10-04 10:39:02.072487 7f57fa316780 -1 *** Caught signal
-> (Segmentation fault) **
-> 2013-10-04T10:39:02.074
-> INFO:teuthology.task.ceph-fuse.ceph-fuse.0.err:[10.214.132.22]: in
-> thread 7f57fa316780
-> 
-> 
-> 
-> David Zafman
-> Senior Developer
-> http://www.inktank.com
-
--- 
-Matt Benjamin
-The Linux Box
-206 South Fifth Ave. Suite 150
-Ann Arbor, MI  48104
-
-http://linuxbox.com
-
-tel.  734-761-4689 
-fax.  734-769-8938 
-cel.  734-216-5309 
+On Mon, Oct 7, 2013 at 3:16 PM, hjwsm1989@gmail.com <hjwsm1989@gmail.co=
+m> wrote:
+> thanks for your reply !
+> the ubuntu is 3.8,centos kernel version is 2.6.32.
+> which setting item should we change to get  the smoth write speed ?
+> we tried tune  some parameters:
+> osd op threads=3D 8
+> filestore op threads =3D 8
+> filestore max op queue =3D 30
+> which one will have the largest effect on performance?
+>
+> thanks
+>
+> Samuel Just <sam.just@inktank.com>=E7=BC=96=E5=86=99=EF=BC=9A
+>
+>>Interesting!  What kernel versions were running on the 13.10 and
+>>centos 6.4 clusters?
+>>-Sam
+>>
+>>On Fri, Oct 4, 2013 at 6:33 PM, huangyellowhuang
+>><huangyellowhuang@163.com> wrote:
+>>> Hi,all
+>>> We test the ceph version 0.69 (6ca6f2f9f754031f4acdb971b71c92c9762e=
+18c3) on
+>>> Ubuntu server 13.10 and centos 6.4 final
+>>> Our cluster configuration:
+>>> 3 host machine, each runs 3 OSDs(use XFS as backend fs),MON and MDS=
+ runs on
+>>> one of the three host,
+>>> We have one KClient on Ubuntu server 13.10
+>>>
+>>> The cluster runs on Ubuntu works fine and a few =E2=80=98slow reque=
+sts=E2=80=99 msgs, about
+>>> 100MB/s write speed.
+>>> But the cluster runs on centos is very bad, avg 30MB/s write speed,=
+ many osd
+>>> requests slow:
+>>> 2013-10-05 08:35:09.931145 mon.0 [INF] pgmap v928: 192 pgs: 192 act=
+ive+clean
+>>> ; 50873 MB data, 101716 MB used, 13857 GB / 13956 GB avail; 115 MB/=
+s wr, 28
+>>> op/s
+>>> 2013-10-05 08:35:12.087614 mon.0 [INF] pgmap v929: 192 pgs: 192 act=
+ive+clean
+>>> ; 50901 MB data, 101780 MB used, 13857 GB / 13956 GB avail; 32593 K=
+B/s wr, 8
+>>>  op/s
+>>> 2013-10-05 08:35:03.963979 osd.0 [WRN] 37 slow requests, 1 included=
+ below; o
+>>> ldest blocked for > 798.235962 secs
+>>> 2013-10-05 08:35:03.963984 osd.0 [WRN] slow request 240.831078 seco=
+nds old,
+>>> received at 2013-10-05 08:31:03.132836: osd_op(mds.0.1:375 200.0000=
+0000 [wri
+>>> tefull 0~84] 1.844f3494 e47) v4 currently no flag points reached
+>>> 2013-10-05 08:35:08.965134 osd.0 [WRN] 37 slow requests, 1 included=
+ below; o
+>>> ldest blocked for > 803.237127 secs
+>>> 2013-10-05 08:35:08.965139 osd.0 [WRN] slow request 480.312618 seco=
+nds old,
+>>> received at 2013-10-05 08:27:08.652461: osd_op(mds.0.1:307 200.0000=
+0000 [wri
+>>> tefull 0~84] 1.844f3494 e47) v4 currently no flag points reached
+>>> 2013-10-05 08:35:10.965619 osd.0 [WRN] 37 slow requests, 1 included=
+ below; o
+>>> ldest blocked for > 805.237600 secs
+>>> 2013-10-05 08:35:10.965624 osd.0 [WRN] slow request 120.946652 seco=
+nds old,
+>>> received at 2013-10-05 08:33:10.018900: osd_op(mds.0.1:404 200.0000=
+0000 [wri
+>>> tefull 0~84] 1.844f3494 e47) v4 currently no flag points reached
+>>> 2013-10-05 08:35:11.965986 osd.0 [WRN] 37 slow requests, 1 included=
+ below; o
+>>> ldest blocked for > 806.237800 secs
+>>> 2013-10-05 08:35:11.965992 osd.0 [WRN] slow request 60.474314 secon=
+ds old, r
+>>> eceived at 2013-10-05 08:34:11.491438: osd_op(mds.0.1:430 200.00000=
+000 [writ
+>>> efull 0~84] 1.844f3494 e47) v4 currently no flag points reached
+>>>
+>>> And we need to build a cluster have 4 hosts, each has 18 OSDs and 1=
+ kclient,
+>>> every kclient server as samba server that serves 4 samba clients.
+>>> 1) Which linux distrubtion should we used? Centos or Ubuntu?
+>>> 2) What results in ceph performances so large on different distribu=
+tion?
+>>> 3) It seems the bottleneck is underlayer fs can not handle requests=
+ fast as
+>>> ceph expect, bc the =E2=80=98slow requests=E2=80=99 shows if a requ=
+est does not handle after
+>>> 30s.
+>>>
+>>> Thanks!
+>>>
+>>>
+>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
+l" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>--
+>>To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+>>the body of a message to majordomo@vger.kernel.org
+>>More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
