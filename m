@@ -1,57 +1,31 @@
-From: Ben Myers <bpm@sgi.com>
-Subject: Re: RESEND: xattr issue with 3.11 kernel
-Date: Mon, 7 Oct 2013 15:38:35 -0500
-Message-ID: <20131007203835.GY1935@sgi.com>
-References: <ED5C1C84-614E-4EBB-A966-BBCD9CE89373@inktank.com>
-	<20131004210411.GJ4446@dastard>
-	<6ECC8063-935A-4DD6-A460-4B7D8AE24271@inktank.com>
-	<20131005032112.GM4446@dastard>
+From: "Dr. Mack Nellie" <notiffication@notiffication872.onmicrosoft.com>
+Subject: I am expecting your urgent response
+Date: Tue, 8 Oct 2013 02:45:36 +0530
+Message-ID: <950912a8-637d-48c8-903d-700b536b26eb@SIXPR04MB014.apcprd04.prod.outlook.com>
+Reply-To: <dr.macknellie@barid.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <xfs-bounces@oss.sgi.com>
-Content-Disposition: inline
-In-Reply-To: <20131005032112.GM4446@dastard>
-List-Unsubscribe: <http://oss.sgi.com/mailman/options/xfs>,
-	<mailto:xfs-request@oss.sgi.com?subject=unsubscribe>
-List-Archive: <http://oss.sgi.com/pipermail/xfs>
-List-Post: <mailto:xfs@oss.sgi.com>
-List-Help: <mailto:xfs-request@oss.sgi.com?subject=help>
-List-Subscribe: <http://oss.sgi.com/mailman/listinfo/xfs>,
-	<mailto:xfs-request@oss.sgi.com?subject=subscribe>
-Errors-To: xfs-bounces@oss.sgi.com
-Sender: xfs-bounces@oss.sgi.com
-To: Dave Chinner <david@fromorbit.com>
-Cc: David Zafman <david.zafman@inktank.com>, ceph-devel@vger.kernel.org, xfs@oss.sgi.com
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from emea01-db3-ndr.ptr.protection.outlook.com ([157.56.120.104]:64526
+	"EHLO emea01-db3-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752687Ab3JGVPw convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Oct 2013 17:15:52 -0400
+Content-Description: Mail message body
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Recipients <notiffication@notiffication872.onmicrosoft.com>
 
-Hi Dave & Dave,
 
-On Sat, Oct 05, 2013 at 01:21:12PM +1000, Dave Chinner wrote:
-> On Fri, Oct 04, 2013 at 03:16:05PM -0700, David Zafman wrote:
-> > 
-> > Dave,
-> > 
-> > The 3.12-rc3 kernel passed my test.  Thanks for the quick response.
-> 
-> Good to hear.
-> 
-> ....
-> 
-> > > You are probably hitting the problem fixed in commit 997def2 ("xfs:
-> > > fix node forward in xfs_node_toosmall") which went into 3.12-rc3.
-> > > Can you test that this fixes your problem, ad if so, we'll need to
-> > > push it back to -stable kernels..
-> 
-> Ben, can you push this fix back to the -stable kernels
-> that require it?
 
-Sure.  IIRC it needs to go back to 3.10, but I'll double check...
+ Compliment of the day.
+ 
+I am Dr. Mack Nellie. I am looking for a reliable Indian partner that understands the India local language and English as well; I have a business proposal that will benefit both of us outside our individual professions.
+Kindly contact me for the supply details on my personal email address;  dr.macknellie@yahoo.co.nz  I will furnish you with more details as soon as I receive your mail.
+I am expecting your urgent response   
 
-Thanks,
-	Ben
-
-_______________________________________________
-xfs mailing list
-xfs@oss.sgi.com
-http://oss.sgi.com/mailman/listinfo/xfs
+Regards 
+Dr. Mack Nellie
+Tel: +447014245023 
+E-Mail(dr.macknellie@barid.com)
