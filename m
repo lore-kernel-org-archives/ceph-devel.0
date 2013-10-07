@@ -1,85 +1,45 @@
-From: "hjwsm1989@gmail.com" <hjwsm1989@gmail.com>
-Subject: Re: ceph on ubuntu and centos
-Date: Tue, 08 Oct 2013 06:16:53 +0800
-Message-ID: <h1bx0us4fo0wk19p44aeacb9.1381184213956@email.android.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: base64
+From: David Zafman <david.zafman@inktank.com>
+Subject: wip-libcephfs-emp-rb
+Date: Mon, 7 Oct 2013 16:08:36 -0700
+Message-ID: <E22D788C-3F58-460D-B455-47CFC2EE983B@inktank.com>
+Mime-Version: 1.0 (Mac OS X Mail 6.6 \(1510\))
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f47.google.com ([209.85.160.47]:52998 "EHLO
-	mail-pb0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751266Ab3JGWRF (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Oct 2013 18:17:05 -0400
-Received: by mail-pb0-f47.google.com with SMTP id rr4so7735828pbb.34
-        for <ceph-devel@vger.kernel.org>; Mon, 07 Oct 2013 15:17:04 -0700 (PDT)
+Received: from mail-oa0-f54.google.com ([209.85.219.54]:64873 "EHLO
+	mail-oa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751197Ab3JGXIk convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Oct 2013 19:08:40 -0400
+Received: by mail-oa0-f54.google.com with SMTP id n5so7184776oag.27
+        for <ceph-devel@vger.kernel.org>; Mon, 07 Oct 2013 16:08:40 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sam.just@inktank.com>
-Cc: huangyellowhuang <huangyellowhuang@163.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Matt Benjamin <matt@linuxbox.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-dGhhbmtzIGZvciB5b3VyIHJlcGx5ICEKdGhlIHVidW50dSBpcyAzLjgsY2VudG9zIGtlcm5lbCB2
-ZXJzaW9uIGlzIDIuNi4zMi4Kd2hpY2ggc2V0dGluZyBpdGVtIHNob3VsZCB3ZSBjaGFuZ2UgdG8g
-Z2V0ICB0aGUgc21vdGggd3JpdGUgc3BlZWQgPwp3ZSB0cmllZCB0dW5lICBzb21lIHBhcmFtZXRl
-cnM6Cm9zZCBvcCB0aHJlYWRzPSA4CmZpbGVzdG9yZSBvcCB0aHJlYWRzID0gOApmaWxlc3RvcmUg
-bWF4IG9wIHF1ZXVlID0gMzAKd2hpY2ggb25lIHdpbGwgaGF2ZSB0aGUgbGFyZ2VzdCBlZmZlY3Qg
-b24gcGVyZm9ybWFuY2U/Cgp0aGFua3MKClNhbXVlbCBKdXN0IDxzYW0uanVzdEBpbmt0YW5rLmNv
-bT7nvJblhpnvvJoKCj5JbnRlcmVzdGluZyEgIFdoYXQga2VybmVsIHZlcnNpb25zIHdlcmUgcnVu
-bmluZyBvbiB0aGUgMTMuMTAgYW5kCj5jZW50b3MgNi40IGNsdXN0ZXJzPwo+LVNhbQo+Cj5PbiBG
-cmksIE9jdCA0LCAyMDEzIGF0IDY6MzMgUE0sIGh1YW5neWVsbG93aHVhbmcKPjxodWFuZ3llbGxv
-d2h1YW5nQDE2My5jb20+IHdyb3RlOgo+PiBIaSxhbGwKPj4gV2UgdGVzdCB0aGUgY2VwaCB2ZXJz
-aW9uIDAuNjkgKDZjYTZmMmY5Zjc1NDAzMWY0YWNkYjk3MWI3MWM5MmM5NzYyZTE4YzMpIG9uCj4+
-IFVidW50dSBzZXJ2ZXIgMTMuMTAgYW5kIGNlbnRvcyA2LjQgZmluYWwKPj4gT3VyIGNsdXN0ZXIg
-Y29uZmlndXJhdGlvbjoKPj4gMyBob3N0IG1hY2hpbmUsIGVhY2ggcnVucyAzIE9TRHModXNlIFhG
-UyBhcyBiYWNrZW5kIGZzKSxNT04gYW5kIE1EUyBydW5zIG9uCj4+IG9uZSBvZiB0aGUgdGhyZWUg
-aG9zdCwKPj4gV2UgaGF2ZSBvbmUgS0NsaWVudCBvbiBVYnVudHUgc2VydmVyIDEzLjEwCj4+Cj4+
-IFRoZSBjbHVzdGVyIHJ1bnMgb24gVWJ1bnR1IHdvcmtzIGZpbmUgYW5kIGEgZmV3IOKAmHNsb3cg
-cmVxdWVzdHPigJkgbXNncywgYWJvdXQKPj4gMTAwTUIvcyB3cml0ZSBzcGVlZC4KPj4gQnV0IHRo
-ZSBjbHVzdGVyIHJ1bnMgb24gY2VudG9zIGlzIHZlcnkgYmFkLCBhdmcgMzBNQi9zIHdyaXRlIHNw
-ZWVkLCBtYW55IG9zZAo+PiByZXF1ZXN0cyBzbG93Ogo+PiAyMDEzLTEwLTA1IDA4OjM1OjA5Ljkz
-MTE0NSBtb24uMCBbSU5GXSBwZ21hcCB2OTI4OiAxOTIgcGdzOiAxOTIgYWN0aXZlK2NsZWFuCj4+
-IDsgNTA4NzMgTUIgZGF0YSwgMTAxNzE2IE1CIHVzZWQsIDEzODU3IEdCIC8gMTM5NTYgR0IgYXZh
-aWw7IDExNSBNQi9zIHdyLCAyOAo+PiBvcC9zCj4+IDIwMTMtMTAtMDUgMDg6MzU6MTIuMDg3NjE0
-IG1vbi4wIFtJTkZdIHBnbWFwIHY5Mjk6IDE5MiBwZ3M6IDE5MiBhY3RpdmUrY2xlYW4KPj4gOyA1
-MDkwMSBNQiBkYXRhLCAxMDE3ODAgTUIgdXNlZCwgMTM4NTcgR0IgLyAxMzk1NiBHQiBhdmFpbDsg
-MzI1OTMgS0IvcyB3ciwgOAo+PiAgb3Avcwo+PiAyMDEzLTEwLTA1IDA4OjM1OjAzLjk2Mzk3OSBv
-c2QuMCBbV1JOXSAzNyBzbG93IHJlcXVlc3RzLCAxIGluY2x1ZGVkIGJlbG93OyBvCj4+IGxkZXN0
-IGJsb2NrZWQgZm9yID4gNzk4LjIzNTk2MiBzZWNzCj4+IDIwMTMtMTAtMDUgMDg6MzU6MDMuOTYz
-OTg0IG9zZC4wIFtXUk5dIHNsb3cgcmVxdWVzdCAyNDAuODMxMDc4IHNlY29uZHMgb2xkLAo+PiBy
-ZWNlaXZlZCBhdCAyMDEzLTEwLTA1IDA4OjMxOjAzLjEzMjgzNjogb3NkX29wKG1kcy4wLjE6Mzc1
-IDIwMC4wMDAwMDAwMCBbd3JpCj4+IHRlZnVsbCAwfjg0XSAxLjg0NGYzNDk0IGU0NykgdjQgY3Vy
-cmVudGx5IG5vIGZsYWcgcG9pbnRzIHJlYWNoZWQKPj4gMjAxMy0xMC0wNSAwODozNTowOC45NjUx
-MzQgb3NkLjAgW1dSTl0gMzcgc2xvdyByZXF1ZXN0cywgMSBpbmNsdWRlZCBiZWxvdzsgbwo+PiBs
-ZGVzdCBibG9ja2VkIGZvciA+IDgwMy4yMzcxMjcgc2Vjcwo+PiAyMDEzLTEwLTA1IDA4OjM1OjA4
-Ljk2NTEzOSBvc2QuMCBbV1JOXSBzbG93IHJlcXVlc3QgNDgwLjMxMjYxOCBzZWNvbmRzIG9sZCwK
-Pj4gcmVjZWl2ZWQgYXQgMjAxMy0xMC0wNSAwODoyNzowOC42NTI0NjE6IG9zZF9vcChtZHMuMC4x
-OjMwNyAyMDAuMDAwMDAwMDAgW3dyaQo+PiB0ZWZ1bGwgMH44NF0gMS44NDRmMzQ5NCBlNDcpIHY0
-IGN1cnJlbnRseSBubyBmbGFnIHBvaW50cyByZWFjaGVkCj4+IDIwMTMtMTAtMDUgMDg6MzU6MTAu
-OTY1NjE5IG9zZC4wIFtXUk5dIDM3IHNsb3cgcmVxdWVzdHMsIDEgaW5jbHVkZWQgYmVsb3c7IG8K
-Pj4gbGRlc3QgYmxvY2tlZCBmb3IgPiA4MDUuMjM3NjAwIHNlY3MKPj4gMjAxMy0xMC0wNSAwODoz
-NToxMC45NjU2MjQgb3NkLjAgW1dSTl0gc2xvdyByZXF1ZXN0IDEyMC45NDY2NTIgc2Vjb25kcyBv
-bGQsCj4+IHJlY2VpdmVkIGF0IDIwMTMtMTAtMDUgMDg6MzM6MTAuMDE4OTAwOiBvc2Rfb3AobWRz
-LjAuMTo0MDQgMjAwLjAwMDAwMDAwIFt3cmkKPj4gdGVmdWxsIDB+ODRdIDEuODQ0ZjM0OTQgZTQ3
-KSB2NCBjdXJyZW50bHkgbm8gZmxhZyBwb2ludHMgcmVhY2hlZAo+PiAyMDEzLTEwLTA1IDA4OjM1
-OjExLjk2NTk4NiBvc2QuMCBbV1JOXSAzNyBzbG93IHJlcXVlc3RzLCAxIGluY2x1ZGVkIGJlbG93
-OyBvCj4+IGxkZXN0IGJsb2NrZWQgZm9yID4gODA2LjIzNzgwMCBzZWNzCj4+IDIwMTMtMTAtMDUg
-MDg6MzU6MTEuOTY1OTkyIG9zZC4wIFtXUk5dIHNsb3cgcmVxdWVzdCA2MC40NzQzMTQgc2Vjb25k
-cyBvbGQsIHIKPj4gZWNlaXZlZCBhdCAyMDEzLTEwLTA1IDA4OjM0OjExLjQ5MTQzODogb3NkX29w
-KG1kcy4wLjE6NDMwIDIwMC4wMDAwMDAwMCBbd3JpdAo+PiBlZnVsbCAwfjg0XSAxLjg0NGYzNDk0
-IGU0NykgdjQgY3VycmVudGx5IG5vIGZsYWcgcG9pbnRzIHJlYWNoZWQKPj4KPj4gQW5kIHdlIG5l
-ZWQgdG8gYnVpbGQgYSBjbHVzdGVyIGhhdmUgNCBob3N0cywgZWFjaCBoYXMgMTggT1NEcyBhbmQg
-MSBrY2xpZW50LAo+PiBldmVyeSBrY2xpZW50IHNlcnZlciBhcyBzYW1iYSBzZXJ2ZXIgdGhhdCBz
-ZXJ2ZXMgNCBzYW1iYSBjbGllbnRzLgo+PiAxKSBXaGljaCBsaW51eCBkaXN0cnVidGlvbiBzaG91
-bGQgd2UgdXNlZD8gQ2VudG9zIG9yIFVidW50dT8KPj4gMikgV2hhdCByZXN1bHRzIGluIGNlcGgg
-cGVyZm9ybWFuY2VzIHNvIGxhcmdlIG9uIGRpZmZlcmVudCBkaXN0cmlidXRpb24/Cj4+IDMpIEl0
-IHNlZW1zIHRoZSBib3R0bGVuZWNrIGlzIHVuZGVybGF5ZXIgZnMgY2FuIG5vdCBoYW5kbGUgcmVx
-dWVzdHMgZmFzdCBhcwo+PiBjZXBoIGV4cGVjdCwgYmMgdGhlIOKAmHNsb3cgcmVxdWVzdHPigJkg
-c2hvd3MgaWYgYSByZXF1ZXN0IGRvZXMgbm90IGhhbmRsZSBhZnRlcgo+PiAzMHMuCj4+Cj4+IFRo
-YW5rcyEKPj4KPj4KPj4KPj4gLS0KPj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNl
-bmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluCj4+IHRoZSBib2R5IG9mIGEg
-bWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnCj4+IE1vcmUgbWFqb3Jkb21vIGlu
-Zm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbAo+LS0KPlRv
-IHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBj
-ZXBoLWRldmVsIiBpbgo+dGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtl
-cm5lbC5vcmcKPk1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcv
-bWFqb3Jkb21vLWluZm8uaHRtbAo=
+
+I rebased wip-libcephfs and pushed as wip-libcephfs-emp-rb so that we can get this in to the Emperor release.  Sage mentioned that he had hit a fuse problem in the wip-libcephfs branch, so apparently the problem is still present.  Have you run into this bug in your testing?  Are you testing with these modification to Ceph?
+
+2013-10-04T10:39:01.664 INFO:teuthology.task.workunit.client.0.out:[10.214.132.22]:   CC      kernel/softirq.o
+2013-10-04T10:39:02.059 INFO:teuthology.task.ceph-fuse.ceph-fuse.0.err:[10.214.132.22]: *** Caught signal (Segmentation fault) **
+2013-10-04T10:39:02.059 INFO:teuthology.task.ceph-fuse.ceph-fuse.0.err:[10.214.132.22]:  in thread 7f57fa316780
+2013-10-04T10:39:02.073 INFO:teuthology.task.ceph-fuse.ceph-fuse.0.err:[10.214.132.22]:  ceph version 0.69-500-g09f4df0 (09f4df02a866230b19539b03061f4abc5ab47ae2)
+2013-10-04T10:39:02.073 INFO:teuthology.task.ceph-fuse.ceph-fuse.0.err:[10.214.132.22]:  1: ceph-fuse() [0x5e0d1a]
+2013-10-04T10:39:02.073 INFO:teuthology.task.ceph-fuse.ceph-fuse.0.err:[10.214.132.22]:  2: (()+0xfcb0) [0x7f57f9cc5cb0]
+2013-10-04T10:39:02.073 INFO:teuthology.task.ceph-fuse.ceph-fuse.0.err:[10.214.132.22]:  3: (Client::_get_inodeno(Inode*)+0) [0x52dd10]
+2013-10-04T10:39:02.073 INFO:teuthology.task.ceph-fuse.ceph-fuse.0.err:[10.214.132.22]:  4: (Client::ll_forget(Inode*, int)+0x4a) [0x538d1a]
+2013-10-04T10:39:02.074 INFO:teuthology.task.ceph-fuse.ceph-fuse.0.err:[10.214.132.22]:  5: ceph-fuse() [0x52a1c5]
+2013-10-04T10:39:02.074 INFO:teuthology.task.ceph-fuse.ceph-fuse.0.err:[10.214.132.22]:  6: (fuse_session_loop()+0x75) [0x7f57f9ee3d65]
+2013-10-04T10:39:02.074 INFO:teuthology.task.ceph-fuse.ceph-fuse.0.err:[10.214.132.22]:  7: (main()+0x84c) [0x5266fc]
+2013-10-04T10:39:02.074 INFO:teuthology.task.ceph-fuse.ceph-fuse.0.err:[10.214.132.22]:  8: (__libc_start_main()+0xed) [0x7f57f83f576d]
+2013-10-04T10:39:02.074 INFO:teuthology.task.ceph-fuse.ceph-fuse.0.err:[10.214.132.22]:  9: ceph-fuse() [0x527c99]
+2013-10-04T10:39:02.074 INFO:teuthology.task.ceph-fuse.ceph-fuse.0.err:[10.214.132.22]: 2013-10-04 10:39:02.072487 7f57fa316780 -1 *** Caught signal (Segmentation fault) **
+2013-10-04T10:39:02.074 INFO:teuthology.task.ceph-fuse.ceph-fuse.0.err:[10.214.132.22]:  in thread 7f57fa316780
+
+David Zafman
+Senior Developer
+http://www.inktank.com
+
+
+
 
