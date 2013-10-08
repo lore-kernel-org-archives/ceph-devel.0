@@ -1,58 +1,108 @@
-From: Oleg Krasnianskiy <oleg.krasnianskiy@gmail.com>
-Subject: Re: rados_clone_range for different pgs
-Date: Tue, 8 Oct 2013 17:40:05 +0300
-Message-ID: <CA+CdmLYG3m8VdG0dFsPE19BOi3SyLLBkss8JT20my3CebfQC_Q@mail.gmail.com>
-References: <CA+CdmLbW+Tb2Wz1+DNJ4yFZ7-gDG1XsPfvKGZ-H5iJZQJ=QvZw@mail.gmail.com>
-	<alpine.DEB.2.00.1308020615420.15391@cobra.newdream.net>
+From: =?UTF-8?Q?S=C3=A9bastien_Han?= <sebastien.han@enovance.com>
+Subject: =?UTF-8?Q?Re=3A_OpenStack_and_ceph_integration_with_puppet?=
+Date: Tue, 8 Oct 2013 16:47:29 +0200
+Message-ID: <etPan.52541b01.d34b6a8.167b7@leseb-mba.local>
+References: <525413DE.9090405@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f175.google.com ([209.85.223.175]:56699 "EHLO
-	mail-ie0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754128Ab3JHOkH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Oct 2013 10:40:07 -0400
-Received: by mail-ie0-f175.google.com with SMTP id aq17so38015iec.20
-        for <ceph-devel@vger.kernel.org>; Tue, 08 Oct 2013 07:40:07 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1308020615420.15391@cobra.newdream.net>
+Received: from mxi1.enovance.com ([94.143.114.217]:43519 "EHLO
+	mxi1.enovance.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755610Ab3JHOrc convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Oct 2013 10:47:32 -0400
+In-Reply-To: <525413DE.9090405@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>, Loic Dachary <loic@dachary.org>
+Cc: Dan Bode <bodepd@gmail.com>
 
-We use ceph to store huge files stripped into small (4mb) objects.
-Due to the fact that files can be changed unpredictably (data
-insertion/modification/deletion in any part of a file), we have to
-copy parts of the objects and it is done via the client.
-I see the following ways to solve this problem:
- - implement a client that is launched on the same host as the source
-osd, that will handle the copy process
- - add functionality to the osd, so it can do copy to other osds
+Hi Lo=C3=AFc,
 
-Which way best suits with the ceph ideology?
+Actually they are some steps that might be automated such as:
 
-2013/8/2 Sage Weil <sage@inktank.com>:
-> Hi Oleg,
->
-> On Fri, 2 Aug 2013, Oleg Krasnianskiy wrote:
->> Hi
->>
->> I have asked this question in ceph-users, but did not get any
->> response, so I'll test my luck again, but with ceph-devel =)
->
-> Sorry about that!
->
->> Is there any way to copy part of one object into another one if they
->> reside in different pgs?
->> There is rados_clone_range, but it requires both objects to be inside one pg.
->
-> There is no way currently.  The clone_range can only (reliably) work on an
-> OSD if it is stored with the same locator key; otherwise you have a ~R/N
-> chance of that happening (where N is the number of OSDs, R is the number
-> of replicas), which isn't worth optimizing for.  If the objects aren't
-> stored together, you need to read and then write the data; this avoids
-> adding additional complexity to the OSD for minimal gain.
->
-> Do you have a use-case in mind where this functionality is important?
->
-> sage
->
+* set the virsh secret
+* create both glance and cinder pools
+
+Please take a look at:
+
+*=C2=A0https://github.com/dontalton/puppet-cephdeploy/blob/master/manif=
+ests/init.pp#L121
+*=C2=A0https://github.com/dontalton/puppet-cephdeploy/blob/master/manif=
+ests/osd.pp#L73
+
+=46or the rest this might be already done but your puppet manifests.
+Please also note that=C2=A0http://ceph.com/docs/next/rbd/rbd-openstack/=
+ will need some updates for OpenStack Havana.
+
+=E2=80=93=E2=80=93=E2=80=93=E2=80=93
+S=C3=A9bastien Han
+Cloud Engineer
+
+"Always give 100%. Unless you're giving blood.=E2=80=9D
+
+Phone:=C2=A0+33 (0)1 49 70 99 72
+Mail:=C2=A0sebastien.han@enovance.com
+Address :=C2=A010, rue de la Victoire - 75009 Paris
+Web :=C2=A0www.enovance.com=C2=A0-=C2=A0Twitter :=C2=A0@enovance
+
+On October 8, 2013 at 4:18:00 PM, Loic Dachary (loic@dachary.org) wrote=
+:
+
+Hi Ceph, =20
+
+Binding ceph to cinder and glance using puppet requires three steps: =20
+
+* Deploy ceph ( with ceph-deploy, puppet, chef ... ) =20
+
+* Follow the ceph documentation instructions ( valid for both cinder an=
+d glance ) =20
+
+http://ceph.com/docs/next/rbd/rbd-openstack/ =20
+
+* Part of the above instructions can be skipped if the following are us=
+ed =20
+
+https://github.com/stackforge/puppet-glance/blob/stable/grizzly/manifes=
+ts/backend/rbd.pp =20
+https://github.com/stackforge/puppet-cinder/blob/stable/grizzly/manifes=
+ts/volume/rbd.pp =20
+
+They take care of installing a package on the glance and cinder node an=
+d writing the cinder and glance config files. =20
+
+* Upgrading the librbd on the compute hosts to match the version of the=
+ cluster ( ubuntu precise has bobtail but you may want at least cuttlef=
+ish ) =20
+
+I would be delighted to know if there is a simpler way. If not, would i=
+t make sense to provide the puppet master with the IP of the monitors a=
+nd admin rights so that it can automate http://ceph.com/docs/next/rbd/r=
+bd-openstack/ ? =20
+
+* install ceph-common on cinder hosts and python-ceph on glance hosts =20
+* set the monitor addresses =20
+* copy the keyring to cinder / glance =20
+* create the client.volumes / client.images users ( support <=3D 0.53 ?=
+ ) =20
+* upgrade the librbd package on the compute hosts to the version matchi=
+ng the cluster =20
+* virsh secret-set-value the volume key on each compute host =20
+* reload glance/nova/cinder where appropriate =20
+
+The puppet master could even refresh the list of monitors from time to =
+time and update the cinder/glance nodes accordingly. And it could do th=
+e right thing depending on the target openstack version and ceph versio=
+n. =20
+
+Thoughts ? =20
+
+-- =20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre =20
+All that is necessary for the triumph of evil is that good people do no=
+thing.
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
