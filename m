@@ -1,76 +1,82 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: mds stuck in clientreplay state after failover
-Date: Wed, 9 Oct 2013 10:31:42 -0700
-Message-ID: <CAPYLRzhOME-xn5Da35YhmSYKDJwDHNqWo2+fe++7obnqRkDuZQ@mail.gmail.com>
-References: <CAMm-wcKj8nOHj739wMy07=hi2-6hqW77FSauT9ObgrsMPuGn1w@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Weekly teuthology meeting #3
+Date: Wed, 09 Oct 2013 19:09:26 +0100
+Message-ID: <52559BD6.1080203@dachary.org>
+References: <524DBEB4.5030302@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="EtMjS2pV9xN3d9QJBv2qg203SRMphamfd"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f41.google.com ([209.85.215.41]:46849 "EHLO
-	mail-la0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754956Ab3JIRbo (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Oct 2013 13:31:44 -0400
-Received: by mail-la0-f41.google.com with SMTP id ec20so1016369lab.0
-        for <ceph-devel@vger.kernel.org>; Wed, 09 Oct 2013 10:31:43 -0700 (PDT)
-In-Reply-To: <CAMm-wcKj8nOHj739wMy07=hi2-6hqW77FSauT9ObgrsMPuGn1w@mail.gmail.com>
+Received: from smtp.dmail.dachary.org ([91.121.254.229]:58485 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752059Ab3JISJ3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Oct 2013 14:09:29 -0400
+Received: from [10.9.0.6] (openvpn.novalocal [10.145.3.13])
+	by smtp.dmail.dachary.org (Postfix) with ESMTPS id 9291C26394
+	for <ceph-devel@vger.kernel.org>; Wed,  9 Oct 2013 20:09:27 +0200 (CEST)
+In-Reply-To: <524DBEB4.5030302@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dong Yuan <yuandong1222@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-Right now the best way to deal with this is unfortunately to get logs
-and figure out what operation got blocked. Can you add
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--EtMjS2pV9xN3d9QJBv2qg203SRMphamfd
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-debug mds = 20
-debug ms = 1
-debug journaler = 20
+Hi Ceph,
 
-to your mds config, restart, and then search through/post that log
-somewhere we can check it out? (It will be large.)
--Greg
-Software Engineer #42 @ http://inktank.com | http://ceph.com
+I missed the #4 teuthology meeting. My excuse ( not a good one I admit ;-=
+) is timezone confusion. Being at the Ceph day in London I forgot there a=
+ one hour difference until it was literally too late. I created a poll to=
+ decide for the date / hour of the next meeting:
 
-On Tue, Oct 8, 2013 at 10:21 PM, Dong Yuan <yuandong1222@gmail.com> wrote:
-> I think I found a bug about the clientreply of mds. (different from #4742)
->
-> After failover, the standby mds begin to recover and enter the
-> clientreply state and never moves to the next state(Active).
->
-> I gdbed the mds process by gcore and found that the main thread
-> (dispatch thread) is idle and  mdcache->active_request is empty, but
-> mds->replay_queue still has one element, that is strange.
->
-> From the code, replay_queue has all requests which need to be
-> replayed. When the mds enters clientreplay state,
-> MDS::queue_one_replay will be called to pick a requect from the
-> replay_queue and put the request into finished_queue. So the replay
-> operation begins to work.
->
-> After the first replay request has finished,  MDS::queue_one_replay
-> should be called again to deal with the next replay request. There are
-> three paths to do this:
-> 1) Server::journal_and_reply
-> 2) MDCache::reqeust_cleanup
-> 3) Server::handle_client_request
->
-> But it seems that no path called the MDS::queue_one_replay method. As
-> a result,  the mds stuck in clientreplay state.
->
-> Maybe there is a request process path which will never use the above
-> three methed. But I can't find the previous request while it seems to
-> completed and cleaned up from the MDCache.
->
-> There is any one has some idea about these problem?
->
-> I can give more details if needed. I have the core dump but it is too
-> big (300MB+) to upload.
->
-> Thanks for any help.
->
-> --
-> Dong Yuan
-> Email:yuandong1222@gmail.com
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+     http://framadate.org/studs.php?sondage=3Diyawpvvq76omrh5p
+
+Greetings from the London Ceph days : it has been fantastic :-) http://ce=
+phdaylondon.eventbrite.com/
+
+Cheers
+
+On 03/10/2013 20:00, Loic Dachary wrote:
+> Hi,
+>=20
+> Today 8pm paris time / CEST was the thrid teuthology meeting. The gener=
+al idea of these meetings is to get together developers using teuthology =
+( or willing to use teuthology ) outside of Inktank and people using it i=
+nside inktank. The goal is to help transition from an internal tool to so=
+mething that's installable and upgradeable by any Ceph developer.=20
+>=20
+> The next meeting will be held 6pm paris time / CEST wednesday october 9=
+th, 2013. The IRC channel is irc.oftc.net#ceph-devel and the conference r=
+oom is mumble.upstream-university.org ( http://www.mumble.com/mumble-down=
+load.php ). It is timeboxed to one hour.
+>=20
+> This edition will be immediately after the Ceph day http://cephdaylondo=
+n-eorg.eventbrite.com/ and I'll do my best to recruit participants :-)
+>=20
+> Cheers
+>=20
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+All that is necessary for the triumph of evil is that good people do noth=
+ing.
+
+
+--EtMjS2pV9xN3d9QJBv2qg203SRMphamfd
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.19 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEUEARECAAYFAlJVm9YACgkQ8dLMyEl6F20hZgCTBeVmTXOgf1q0p+P9mMf46wOD
+NwCgrWrfwIu2qI8y2so8HmT4bXZq7XI=
+=Aw1G
+-----END PGP SIGNATURE-----
+
+--EtMjS2pV9xN3d9QJBv2qg203SRMphamfd--
