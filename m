@@ -1,82 +1,41 @@
-From: Loic Dachary <loic@dachary.org>
+From: Dmitry Borodaenko <dborodaenko@mirantis.com>
 Subject: Re: OpenStack and ceph integration with puppet
-Date: Wed, 09 Oct 2013 22:46:26 +0100
-Message-ID: <5255CEB2.8080809@dachary.org>
-References: <525413DE.9090405@dachary.org> <57ED724085B72141BB091CF1314E471F01769708@xmb-rcd-x15.cisco.com>
+Date: Wed, 9 Oct 2013 16:58:38 -0700
+Message-ID: <CAM0pNLMibwuWzc=E_PVj+0PzFjbjnkOX6xy3R0N-gbHMf0NGOA@mail.gmail.com>
+References: <525413DE.9090405@dachary.org>
+	<etPan.52541b01.d34b6a8.167b7@leseb-mba.local>
+	<525448E7.5040604@dachary.org>
+	<CAM0pNLPi_un=2EQ+V+Lp+gifTTr0aTNHHQPGfq8xe3wb-huq2g@mail.gmail.com>
+	<5255CAFE.10304@dachary.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="WPXHtju0ejWJn1Q3oBPJAJlLFdNuvlF1H"
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:58676 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751854Ab3JIVq3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Oct 2013 17:46:29 -0400
-In-Reply-To: <57ED724085B72141BB091CF1314E471F01769708@xmb-rcd-x15.cisco.com>
+Received: from mail-wg0-f54.google.com ([74.125.82.54]:56555 "EHLO
+	mail-wg0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756941Ab3JIX6k (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Oct 2013 19:58:40 -0400
+Received: by mail-wg0-f54.google.com with SMTP id m15so1637174wgh.33
+        for <ceph-devel@vger.kernel.org>; Wed, 09 Oct 2013 16:58:38 -0700 (PDT)
+In-Reply-To: <5255CAFE.10304@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Don Talton (dotalton)" <dotalton@cisco.com>, Ceph Development <ceph-devel@vger.kernel.org>
-Cc: Dan Bode <bodepd@gmail.com>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Dan Bode <bodepd@gmail.com>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---WPXHtju0ejWJn1Q3oBPJAJlLFdNuvlF1H
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+On Wed, Oct 9, 2013 at 2:30 PM, Loic Dachary <loic@dachary.org> wrote:
+>> https://github.com/Mirantis/fuel/blob/master/deployment/puppet/cinder/manifests/volume/ceph.pp
+>
+> The
+>
+> "ceph auth get-or-create ..."
+>
+> looks like a worthy contribution to
+>
+> https://github.com/stackforge/puppet-cinder/blob/master/manifests/volume/rbd.pp
+>
+> Is there a reason why it would not be relevant in this context ?
 
+No, it's definitely relevant, take it if you like it :)
 
-
-On 08/10/2013 16:20, Don Talton (dotalton) wrote:> Hi Loic,=20
->=20
-
-> We utilize stackforge's puppet modules to do our heavy lifting, includi=
-ng p-openstack, p-cinder, p-glance. There are dependency chains so that s=
-ervices will be restarted after configuration changes are made. Since man=
-y of our customers don't allow their baremetal  nodes Internet access, we=
-'ve added the packages to our APT repo to avoid the version issues with u=
-sing either stock or public packages.
->=20
-> You can probably find some other useful code the https://github.com/Cis=
-coSystems/ repo, including what is needed to cohabitate MON/OSD nodes wit=
-h OpenStack service nodes (https://github.com/CiscoSystems/puppet-coe/tre=
-e/grizzly/manifests/ceph) and more. The primary orchestration is in grizz=
-ly-manifests. You can see HOWTOs for different deployment scenarios here:=
- http://docwiki.cisco.com/wiki/OpenStack:Ceph-COI-Installation.=20
->=20
-> Hope this helps some!
-
-It does and it's great that all this is documented :-) Although there are=
- a few modules around, re-using ceph-deploy seems to be the preferred met=
-hod. I wonder what Alfredo would suggest. From a previous discussion we h=
-ad I think he will suggest to use ceph-disk directly + cli / rest call in=
-stead. Looking at=20
-
-https://github.com/ceph/ceph-deploy/blob/master/ceph_deploy/new.py
-https://github.com/ceph/ceph-deploy/blob/master/ceph_deploy/mon.py
-etc.
-
-the layer provided by ceph-deploy is indeed thin. But is it something tha=
-t needs to be duplicated in a puppet module ?
-
-Cheers
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-All that is necessary for the triumph of evil is that good people do noth=
-ing.
-
-
---WPXHtju0ejWJn1Q3oBPJAJlLFdNuvlF1H
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlJVzrMACgkQ8dLMyEl6F20AWgCgxTOLPjyJiaALdMOrvRLB0i6M
-1+QAn3xg/tNYtTu7QfOCYqO6IGm0s18Y
-=+Arh
------END PGP SIGNATURE-----
-
---WPXHtju0ejWJn1Q3oBPJAJlLFdNuvlF1H--
+-- 
+Dmitry Borodaenko
