@@ -1,123 +1,67 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Weekly teuthology meeting #3
-Date: Thu, 10 Oct 2013 21:22:57 +0200
-Message-ID: <5256FE91.2040706@dachary.org>
-References: <524DBEB4.5030302@dachary.org> <52559BD6.1080203@dachary.org> <5255ADA6.9070909@cloudapt.com> <5255C3BC.5080404@dachary.org>
+From: Wido den Hollander <wido@42on.com>
+Subject: Re: Blocking rados_* calls
+Date: Thu, 10 Oct 2013 22:47:34 +0200
+Message-ID: <52571266.4060303@42on.com>
+References: <52569498.2090109@42on.com> <alpine.DEB.2.00.1310100644130.18301@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="7TXNDhr96afMUbIGgbl6rh5mIpubmagxw"
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:59741 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753313Ab3JJTXA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Oct 2013 15:23:00 -0400
-Received: from [10.9.0.6] (openvpn.novalocal [10.145.3.13])
-	by smtp.dmail.dachary.org (Postfix) with ESMTPS id CAE5D26394
-	for <ceph-devel@vger.kernel.org>; Thu, 10 Oct 2013 21:22:57 +0200 (CEST)
-In-Reply-To: <5255C3BC.5080404@dachary.org>
+Received: from websrv.42on.com ([31.25.102.167]:40149 "EHLO websrv.42on.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755542Ab3JJUri (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 10 Oct 2013 16:47:38 -0400
+In-Reply-To: <alpine.DEB.2.00.1310100644130.18301@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---7TXNDhr96afMUbIGgbl6rh5mIpubmagxw
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
-
-Hi,
-
-The next meeting will be held=20
-
-   8pm Paris time / CEST wednesday october 16th, 2013
-
-The IRC channel is irc.oftc.net#ceph-devel and the conference room is mum=
-ble.upstream-university.org ( http://www.mumble.com/mumble-download.php )=
-=2E It is timeboxed to one hour.
-
-Cheers
-
-On 09/10/2013 22:59, Loic Dachary wrote:
->=20
->=20
-> On 09/10/2013 20:25, Mike Dawson wrote:> Loic,
+On 10/10/2013 03:45 PM, Sage Weil wrote:
+> On Thu, 10 Oct 2013, Wido den Hollander wrote:
+>> Hi,
 >>
->> Zack, Tamil, and I were on the call. I started experimenting with Teut=
-hology this week, so most of the meeting covered topics around attempting=
- to gather and analyze performance metrics associated with Teuthology tes=
-t runs.
+>> Currently librados blocks all calls when something is not working inside the
+>> Ceph cluster.
 >>
->> I voted and recorded that I can attend any of the proposed times.
->=20
-> I'm so glad it happened despite our ( Christophe and myself ) failure t=
-o attend :-D
->=20
-> I'll wait 48h before announcing the next meeting.
->=20
-> Cheers
->=20
->> Thanks,
+>> This is common practice for fopen(), fread() and fwrite(), but I'm running
+>> into a use-case where I think the rados_connect() should not block
+>> indefinitely.
 >>
->> Mike Dawson
->> Co-Founder, Cloudapt LLC
+>> The use-case here is the RBD storage pool in libvirt. When for whatever reason
+>> libvirt is not able to connect to the Ceph cluster libvirt will simply block
+>> and wait on rados_connect() to complete.
 >>
+>> This causes libvirt not being able to report new statistics about the RBD
+>> storage pool, which causes issues again for the applications using it.
 >>
->> On 10/9/2013 2:09 PM, Loic Dachary wrote:
->>> Hi Ceph,
->>>
->>> I missed the #4 teuthology meeting. My excuse ( not a good one I admi=
-t ;-) is timezone confusion. Being at the Ceph day in London I forgot the=
-re a one hour difference until it was literally too late. I created a pol=
-l to decide for the date / hour of the next meeting:
->>>
->>>       http://framadate.org/studs.php?sondage=3Diyawpvvq76omrh5p
->>>
->>> Greetings from the London Ceph days : it has been fantastic :-) http:=
-//cephdaylondon.eventbrite.com/
->>>
->>> Cheers
->>>
->>> On 03/10/2013 20:00, Loic Dachary wrote:
->>>> Hi,
->>>>
->>>> Today 8pm paris time / CEST was the thrid teuthology meeting. The ge=
-neral idea of these meetings is to get together developers using teutholo=
-gy ( or willing to use teuthology ) outside of Inktank and people using i=
-t inside inktank. The goal is to help transition from an internal tool to=
- something that's installable and upgradeable by any Ceph developer.
->>>>
->>>> The next meeting will be held 6pm paris time / CEST wednesday octobe=
-r 9th, 2013. The IRC channel is irc.oftc.net#ceph-devel and the conferenc=
-e room is mumble.upstream-university.org ( http://www.mumble.com/mumble-d=
-ownload.php ). It is timeboxed to one hour.
->>>>
->>>> This edition will be immediately after the Ceph day http://cephdaylo=
-ndon-eorg.eventbrite.com/ and I'll do my best to recruit participants :-)=
+>> Would it be an idea that you can configure librados not to block indefinitely
+>> and return for example ETIMEDOUT?
+>>
+>> By default librados could stay blocking like it's now so nothing changes for
+>> existing users.
+>
+> Yeah I think this is definitely doable.  The simplest would be to have a
+> configurable (or configurables) that are set via rados_conf_set() (or put
+> in the config).  There are several timeouts there already, but I think
+> they don't capture the entire connect sequence.
+>
+> Want to open a feature ticket?
 
->>>>
->>>> Cheers
->>>>
->>>
->=20
+Done!
 
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-All that is necessary for the triumph of evil is that good people do noth=
-ing.
+http://tracker.ceph.com/issues/6507
+
+Wido
+
+>
+> sage
+>
 
 
---7TXNDhr96afMUbIGgbl6rh5mIpubmagxw
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+-- 
+Wido den Hollander
+42on B.V.
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlJW/pEACgkQ8dLMyEl6F22DfACfT5lWpKEhdPzSAdmTaR3RGUyz
-N6MAoMJsaqHLr3P8Ji1Jl9QVVKp44Kfz
-=rXTB
------END PGP SIGNATURE-----
-
---7TXNDhr96afMUbIGgbl6rh5mIpubmagxw--
+Phone: +31 (0)20 700 9902
+Skype: contact42on
