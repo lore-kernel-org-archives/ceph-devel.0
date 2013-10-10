@@ -1,88 +1,63 @@
-From: "Yan, Zheng" <ukernel@gmail.com>
-Subject: Re: mds stuck in clientreplay state after failover
-Date: Thu, 10 Oct 2013 09:00:29 +0800
-Message-ID: <CAAM7YAnAue2y9anrdUMPmY1z4XoiUggXgaP5Zf8+UaYt+QKzuw@mail.gmail.com>
-References: <CAMm-wcKj8nOHj739wMy07=hi2-6hqW77FSauT9ObgrsMPuGn1w@mail.gmail.com>
-	<CAPYLRzhOME-xn5Da35YhmSYKDJwDHNqWo2+fe++7obnqRkDuZQ@mail.gmail.com>
+From: Niklas Goerke <niklas@niklasgoerke.de>
+Subject: PG distribution scattered
+Date: Thu, 10 Oct 2013 11:22:40 +0200
+Message-ID: <4120b8bc5ae688af65d616f5a487e9bd@niklasgoerke.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8;
+ format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f171.google.com ([209.85.217.171]:38401 "EHLO
-	mail-lb0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754640Ab3JJBAb (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Oct 2013 21:00:31 -0400
-Received: by mail-lb0-f171.google.com with SMTP id u14so1487858lbd.16
-        for <ceph-devel@vger.kernel.org>; Wed, 09 Oct 2013 18:00:30 -0700 (PDT)
-In-Reply-To: <CAPYLRzhOME-xn5Da35YhmSYKDJwDHNqWo2+fe++7obnqRkDuZQ@mail.gmail.com>
+Received: from niklasgoerke.de ([46.38.232.61]:39497 "EHLO niklasgoerke.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751598Ab3JJJ3x (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 10 Oct 2013 05:29:53 -0400
+Received: from mail.niklasgoerke.de (localhost.localdomain [127.0.0.1])
+	by niklasgoerke.de (Postfix) with ESMTP id 7EA2A28DE021
+	for <ceph-devel@vger.kernel.org>; Thu, 10 Oct 2013 09:22:40 +0000 (UTC)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>, Dong Yuan <yuandong1222@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Thu, Oct 10, 2013 at 1:31 AM, Gregory Farnum <greg@inktank.com> wrote:
-> Right now the best way to deal with this is unfortunately to get logs
-> and figure out what operation got blocked. Can you add
->
-> debug mds = 20
-> debug ms = 1
-> debug journaler = 20
->
-> to your mds config, restart, and then search through/post that log
-> somewhere we can check it out? (It will be large.)
-> -Greg
-> Software Engineer #42 @ http://inktank.com | http://ceph.com
->
-> On Tue, Oct 8, 2013 at 10:21 PM, Dong Yuan <yuandong1222@gmail.com> wrote:
->> I think I found a bug about the clientreply of mds. (different from #4742)
->>
->> After failover, the standby mds begin to recover and enter the
->> clientreply state and never moves to the next state(Active).
->>
->> I gdbed the mds process by gcore and found that the main thread
->> (dispatch thread) is idle and  mdcache->active_request is empty, but
->> mds->replay_queue still has one element, that is strange.
->>
->> From the code, replay_queue has all requests which need to be
->> replayed. When the mds enters clientreplay state,
->> MDS::queue_one_replay will be called to pick a requect from the
->> replay_queue and put the request into finished_queue. So the replay
->> operation begins to work.
->>
->> After the first replay request has finished,  MDS::queue_one_replay
->> should be called again to deal with the next replay request. There are
->> three paths to do this:
->> 1) Server::journal_and_reply
->> 2) MDCache::reqeust_cleanup
->> 3) Server::handle_client_request
->>
->> But it seems that no path called the MDS::queue_one_replay method. As
->> a result,  the mds stuck in clientreplay state.
->>
->> Maybe there is a request process path which will never use the above
->> three methed. But I can't find the previous request while it seems to
->> completed and cleaned up from the MDCache.
->>
->> There is any one has some idea about these problem?
+Hi there
 
-could you please check if MDCache::open is true?
+I'm currently evaluating ceph and started filling my cluster for the 
+first time. After filling it up to about 75%, it reported some OSDs 
+being "near-full".
+After some evaluation I found that the PGs are not distributed evenly 
+over all the osds.
 
-Regards
-Yan, Zheng
+My Setup:
+* Two Hosts with 45 Disks each --> 90 OSDs
+* Only one newly created pool with 4500 PGs and a Replica Size of 2 --> 
+should be about 100 PGs per OSD
 
->>
->> I can give more details if needed. I have the core dump but it is too
->> big (300MB+) to upload.
->>
->> Thanks for any help.
->>
->> --
->> Dong Yuan
->> Email:yuandong1222@gmail.com
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+What I found was that one OSD only had 72 PGs, while another had 123 
+PGs [1]. That means that - if I did the math correctly - I can only fill 
+the cluster to about 81%, because thats when the first OSD is completely 
+full[2].
+
+I did some experimenting and found, that if I add another pool with 
+4500 PGs, each OSD will have exacly doubled the amount of PGs as with 
+one pool. So this is not an accident (tried it multiple times). On 
+another test-cluster with 4 Hosts and 15 Disks each, the Distribution 
+was similarly worse. I also tried that on a different cluster and got 
+very similar results.
+
+To me it looks like the rjenkins algorithm is not working as it - in my 
+opinion - should be.
+
+Am I doing anything wrong?
+Is this behaviour to be expected?
+Can I do something about it?
+
+Thank you very much in advance
+Niklas
+
+P.S.: I did ask on ceph-users before:
+http://comments.gmane.org/gmane.comp.file-systems.ceph.user/4317
+http://comments.gmane.org/gmane.comp.file-systems.ceph.user/4496
+
+[1] I built a small script that will parse pgdump and output the amount 
+of pgs on each osd: http://pastebin.com/5ZVqhy5M
+[2] I know I should not fill my cluster completely but I'm talking 
+about theory and adding a margin only makes it worse.
