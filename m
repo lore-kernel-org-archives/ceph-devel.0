@@ -1,18 +1,16 @@
-From: Samuel Cozannet <samuel.cozannet@h-t-solutions.com>
+From: Samuel COZANNET <samnco@gmail.com>
 Subject: Erasure Coding & Homomorphic Codes
-Date: Fri, 11 Oct 2013 12:48:56 +0200
-Message-ID: <CAG0JQVc4Jqz82oqZ=87nORnHuTxUdhY2=+GTLtP83Naxo=OGAw@mail.gmail.com>
-Reply-To: samuelc@doremitechno.org
+Date: Fri, 11 Oct 2013 12:43:47 +0200
+Message-ID: <CAB31d=39kOv6VD8SwjO-QF-e6jqZY+zHKSOf_1guVAiQdc0qPA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from eu1sys200aog120.obsmtp.com ([207.126.144.149]:47604 "EHLO
-	eu1sys200aog120.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753445Ab3JKKtT (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 11 Oct 2013 06:49:19 -0400
-Received: by mail-vc0-f176.google.com with SMTP id ik5so629750vcb.21
-        for <ceph-devel@vger.kernel.org>; Fri, 11 Oct 2013 03:49:16 -0700 (PDT)
+Received: from mail-pd0-f169.google.com ([209.85.192.169]:46438 "EHLO
+	mail-pd0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758019Ab3JKKoH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Oct 2013 06:44:07 -0400
+Received: by mail-pd0-f169.google.com with SMTP id r10so4043752pdi.0
+        for <ceph-devel@vger.kernel.org>; Fri, 11 Oct 2013 03:44:07 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
