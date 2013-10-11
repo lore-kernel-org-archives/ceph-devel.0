@@ -1,58 +1,136 @@
-From: Samuel COZANNET <samnco@gmail.com>
-Subject: Erasure Coding & Homomorphic Codes
-Date: Fri, 11 Oct 2013 12:43:47 +0200
-Message-ID: <CAB31d=39kOv6VD8SwjO-QF-e6jqZY+zHKSOf_1guVAiQdc0qPA@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Ceph and puppet and OpenStack : open conference call
+Date: Fri, 11 Oct 2013 16:47:55 +0200
+Message-ID: <52580F9B.3080607@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="5XfGaCvsEtHQ94O7DdRdeQnXiwOkbh4oe"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f169.google.com ([209.85.192.169]:46438 "EHLO
-	mail-pd0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758019Ab3JKKoH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Oct 2013 06:44:07 -0400
-Received: by mail-pd0-f169.google.com with SMTP id r10so4043752pdi.0
-        for <ceph-devel@vger.kernel.org>; Fri, 11 Oct 2013 03:44:07 -0700 (PDT)
+Received: from smtp.dmail.dachary.org ([91.121.254.229]:60668 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752244Ab3JKOr6 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Oct 2013 10:47:58 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-Dear Ceph,
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--5XfGaCvsEtHQ94O7DdRdeQnXiwOkbh4oe
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-While discussing @cephdays London about Erasure Coding, one of the
-main drawbacks of the technology seemed to be the trade off between
-size and computation requirements even on small footprint operations
-(concat, append...)
+Hi Ceph,
 
-One of my colleagues is currently working on homomorphic encryption,
-which is basically a way to encrypt content that provides a very
-useful feature: operations made on encrypted content reflects on
-unencrypted content.
+What about we discuss the state of Ceph deployment in the context of pupp=
+et and / or OpenStack ? If nothing else, it will be a good opportunity fo=
+r all people actively working in this area to touch base. The proposed ag=
+enda is to list and possibly clarify the existing methods and maybe find =
+ways to share the effort.
 
-Say for example that A and B are the unencrypted objects, A' and B'
-the encrypted objects, and C = F(A,B) the result of an function
-applying on A and B that is homomorphic. Then C' = F(A', B').
-A simple example of that would be concatenation. If I have 2 strings A
-and B, then decrypting A+B has the same value as A'+B'.
+The conference call details are a the end of the mail and it will be time=
+boxed to 30 minutes. There are a number of projects and I made a short li=
+st below to avoid confusion during the call. Feel free to edit / add if I=
+ misreprensented you or the project you're associated with ;-)
 
-Anyway this made me think that object storage might benefit from such
-application if and only if the same principles were also working for
-erasure codes and form "Homomorphic Erasure Coding".
+Cheers
 
-Lucky me there seem to be some papers around related to such
-application of homomorphic codes:
-http://arxiv.org/abs/1008.0064 (pdf: http://arxiv.org/pdf/1008.0064.pdf)
-http://blog.notdot.net/2012/08/Damn-Cool-Algorithms-Homomorphic-Hashing
-http://www.pdl.cmu.edu/PDL-FTP/SelfStar/podc07.pdf
-Or any result on duckduckgo of research
-https://duckduckgo.com/?q=homorphic+erasure+code
+* deploy ceph : ceph-deploy
 
-Not being a coder nor mathematician myself I may of course repeat
-something trivial for you guys (and in that case I apologize) but it
-seems to me such codes would dramatically improve simple operations on
-erasure coded objects, and would make sense...
+  for test / POC purposes
+  https://github.com/ceph/ceph-deploy
 
-It's also my first message to the list, let me know if there is any
-policy I didn't follow, I'd be happy to comply to best practices...
+  maintainer: Alfredo Deza
 
-Hope this opens new ideas...
-Best,
-Samuel Cozannet
+* deploy ceph with puppet : puppet-cephdeploy
+
+  relies on ceph-deploy
+  https://github.com/dontalton/puppet-cephdeploy/
+
+  maintainer: Don Talton
+
+* deploy ceph with puppet : puppet-ceph
+
+  developped in 2012 but still useful
+  https://github.com/enovance/puppet-ceph
+
+  maintainer: community
+
+* ceph + openstack : ceph docs
+
+  manual integration
+  http://ceph.com/docs/next/rbd/rbd-openstack/
+   maintainer: John Wilkins + Josh Durgin
+
+* ceph + openstack with puppet : stackforge
+
+  https://github.com/stackforge/puppet-glance/blob/stable/grizzly/manifes=
+ts/backend/rbd.pp
+  https://github.com/stackforge/puppet-cinder/blob/stable/grizzly/manifes=
+ts/volume/rbd.pp
+
+  maintainer: community
+
+* ceph + openstack with puppet : COI
+
+  targeting Cisco use case
+  https://github.com/CiscoSystems/puppet-coe/tree/grizzly/manifests/ceph
+  http://docwiki.cisco.com/wiki/OpenStack:Ceph-COI-Installation
+
+  maintainer : Don Talton + Robert Starmer
+
+* ceph + openstack with puppet : mirantis
+
+  in the context of Fuel
+  https://github.com/Mirantis/fuel/tree/master/deployment/puppet/ceph
+  https://github.com/Mirantis/fuel/blob/master/deployment/puppet/cinder/m=
+anifests/volume/ceph.pp
+  https://github.com/Mirantis/fuel/blob/master/deployment/puppet/glance/m=
+anifests/backend/ceph.pp
+
+  maintainer : Andrew Woodward
+
+* openstack with puppet : openstack-installer
+
+  data driven approach to deploy OpenStack
+  https://github.com/CiscoSystems/openstack-installer/
+
+  maintainer: Robert Starmer + Dan Bode
+
+
+16:30-17:00 UTC / 12:30-13:00 US-Eastern / 10:30-11:00 US-Mountain 09:30-=
+10:00 US-Pacific / 18:30-19:00 Europe-Central
+
+San Jose, CA: +1.408.525.6800 RTP: +1.919.392.3330 US/Canada: +1.866.432.=
+9903 United Kingdom: +44.20.8824.0117 India: +91.80.4350.1111 Germany: +4=
+9.619.6773.9002 Japan: +81.3.5763.9394 China: +86.10.8515.5666
+
+Room code: 208324756
+Access code: 208324756
+
+Cheers
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+All that is necessary for the triumph of evil is that good people do noth=
+ing.
+
+
+
+
+
+--5XfGaCvsEtHQ94O7DdRdeQnXiwOkbh4oe
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.19 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlJYD5wACgkQ8dLMyEl6F20DnACZAYT0U9L6CjX/TpG5R3MacTrO
+nZAAoJH2nGZUs85FP0A8XfT50hjMsPjl
+=1j4o
+-----END PGP SIGNATURE-----
+
+--5XfGaCvsEtHQ94O7DdRdeQnXiwOkbh4oe--
