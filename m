@@ -1,29 +1,47 @@
-From: David Howells <dhowells@redhat.com>
-Subject: Re: hung task on page invalidate
-Date: Fri, 11 Oct 2013 23:45:28 +0100
-Message-ID: <7092.1381531528@warthog.procyon.org.uk>
-References: <CANP1eJGYkrW1gUBf7D0_petBTPUgtnUG6Uc=WhUTY-rcYd4=aQ@mail.gmail.com> <CANP1eJGJMDB8hgegvncmsiXh3LtT029JWCs7rhaC=3P3GU97kQ@mail.gmail.com> <CAAM7YAkPRtcu=QFA1n-aO0sDdAp1mKX_YZjgtOg04EhNA26kFw@mail.gmail.com> <CANP1eJGu6nWgqLkBAAEEtvW8zJ4r5X+KJN3iiCMnN3x_mTkWaw@mail.gmail.com> <CANP1eJEpH-0_XhYmk3YUXt9aovQFTj3j1=YErXEVJiHm0Ceuzg@mail.gmail.com> <24718.1380818600@warthog.procyon.org.uk>
+From: Justin Erenkrantz <justin@erenkrantz.com>
+Subject: Re: Ceph and puppet and OpenStack : open conference call
+Date: Sat, 12 Oct 2013 07:20:19 -0400
+Message-ID: <CAOGLoJNEtxyRoGV8sLpUMvgfiJxJ9UfDVs5yjN2yhY42z1OOFw@mail.gmail.com>
+References: <52580F9B.3080607@dachary.org>
+	<525816D8.3000609@dachary.org>
+	<CAHX4EnM8C=wy+ixFQu5XJOGo6=6gW6NfkU6=oC7s66X0+UTbWQ@mail.gmail.com>
+	<52581A06.2000706@dachary.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:38029 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752273Ab3JKWpd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 11 Oct 2013 18:45:33 -0400
-In-Reply-To: <CANP1eJGYkrW1gUBf7D0_petBTPUgtnUG6Uc=WhUTY-rcYd4=aQ@mail.gmail.com>
+Received: from mail-ea0-f171.google.com ([209.85.215.171]:60084 "EHLO
+	mail-ea0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751741Ab3JLLUU (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 12 Oct 2013 07:20:20 -0400
+Received: by mail-ea0-f171.google.com with SMTP id n15so2374088ead.2
+        for <ceph-devel@vger.kernel.org>; Sat, 12 Oct 2013 04:20:19 -0700 (PDT)
+In-Reply-To: <52581A06.2000706@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Milosz Tanski <milosz@adfin.com>
-Cc: dhowells@redhat.com, "Yan, Zheng" <ukernel@gmail.com>, "linux-cachefs@redhat.com" <linux-cachefs@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, Franklin Cheung <franklin.cheung@adfin.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Milosz Tanski <milosz@adfin.com> wrote:
+On Fri, Oct 11, 2013 at 11:32 AM, Loic Dachary <loic@dachary.org> wrote:
+>
+>
+> On 11/10/2013 17:25, Darren Birkett wrote:
+>> Hi Loic,
+>>
+>> I wonder is it also worth discussing the state of the 'official' chef cookbooks?
+>>
+>> https://github.com/ceph/ceph-cookbooks
+>>
+>> We're interested in these at Rackspace, since we already deploy OpenStack using our own chef cookbooks:
+>>
+>> https://github.com/rcbops/chef-cookbooks
+>>
+>> We plan on pulling in the ceph cookbooks for the rados cluster deployments, and we have some working POC code inside our other recipes to do the OpenStack specific config for RBD.
+>>
+>> - Darren
+>
+> I suspect there is a fragmentation of the work with Chef and probably Salt, Ansible etc. I've not done any research in this area though. Don't you think it deserves a separate discussion ?
 
-> The patch that you sent me in private last week solved this issue and
-> I haven't experienced it. I haven't seen the patch go into your
-> linus-fs.git tree, so I don't know if you submitted the fix upstream
-> to the linux kernel. So I'm following up to see if you plan are
-> sending to mainline since it'll benefit all the fscache enabled
-> filesystems.
+At Bloomberg, we use Chef to build out our OpenStack/Ceph (and more!) clusters:
 
-Sorry, been fighting keyrings problems and computer problems.  I'll try to get
-round to it on Monday.
+https://github.com/bloomberg/chef-bcpc
 
-David
+Cheers.  -- justin
