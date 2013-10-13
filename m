@@ -1,64 +1,56 @@
-From: Patrick McGarry <patrick-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Subject: Blueprint Submission Open for "Firefly"
-Date: Sun, 13 Oct 2013 11:34:57 -0400
-Message-ID: <CAP8Oy=JhrpooSucDk6vrv+iZTUM-TLKYnStW61wMyUW4xXQYcg@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: script for light weight testing of ceph
+Date: Sun, 13 Oct 2013 20:42:15 +0200
+Message-ID: <525AE987.8090907@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="EVu086M4oWOLW0xeDPaMP0Ej0j0R88iGK"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from smtp.dmail.dachary.org ([91.121.254.229]:34021 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754971Ab3JMSmS (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 13 Oct 2013 14:42:18 -0400
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Dan Bode <dan@puppetlabs.com>, "Robert Starmer (starmer)" <starmer@cisco.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
+
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--EVu086M4oWOLW0xeDPaMP0Ej0j0R88iGK
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: quoted-printable
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
 
-Greetings Ceph* denizens,
+Hi,
 
-Our next Ceph Developer Summit (CDS) is swiftly approaching! Having
-spoken with many of you at various events (Ceph Days, Meetups, etc) I
-know there are quite a few great ideas and project stubs floating
-around out there.  The time has come to start putting them down on
-paper in order to get them on the agenda for the Firefly summit.
+Today I wrote a script ( http://dachary.org/wp-uploads/2013/10/micro-osd.=
+txt ) to quickly configure and spawn a ceph cluster for test purposes ( u=
+nder 5 seconds ). The details are explained at http://dachary.org/?p=3D23=
+74 . It could be useful for the ceph related work done with openstack-ins=
+taller. I plan to use it to create a variation of https://github.com/Cisc=
+oSystems/openstack-installer/blob/master/tests/basic_test.sh that enables=
+ ceph instead of a iscsi / lvm cinder backend.
 
-If you have an idea for a feature, fix, integration, or
-whizbang-doohickey=99 please do the following:
+Cheers
 
-1) Go here: http://wiki.ceph.com/01Planning/02Blueprints/Firefly
-
-2) Log in / create account (google auth)
-
-3) Click "New Page"
-
-4) Select the "Blueprint" template
-
-5) Fill in the appropriate information (as much as you can) including
-your name as the current interested party
-
-6) Keep a weather eye out for the schedule (which will be posted soon
-on the blog and lists) and attend CDS to discuss your idea!
-
-That's it.  Don't worry if you aren't going to be the one to build the
-entire thing.  This process has been used in the past as a recruiting
-tool to drum up interest around a particular feature idea.  Some of
-our most successful feature work has come from community-driven
-efforts around a blueprint.
-
-If you have any questions feel free to ask me here, via
-'community-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org', or on irc (scuttlemonkey on
-irc.oftc.net/ceph).  I look forward to some great ideas and another
-bang-up CDS.  Thanks!
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+All that is necessary for the triumph of evil is that good people do noth=
+ing.
 
 
+--EVu086M4oWOLW0xeDPaMP0Ej0j0R88iGK
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
-Best Regards,
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.19 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
 
-Patrick McGarry
-Director, Community || Inktank
-http://ceph.com  ||  http://inktank.com
-@scuttlemonkey || @ceph || @inktank
+iEYEARECAAYFAlJa6YcACgkQ8dLMyEl6F21HfgCfX4n+XZi3yrYw5n+Fjw3G9XTV
+6MIAn2hOccsPBXASjt6ucEkaSI+AB90i
+=pVts
+-----END PGP SIGNATURE-----
+
+--EVu086M4oWOLW0xeDPaMP0Ej0j0R88iGK--
