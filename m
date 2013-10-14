@@ -1,97 +1,110 @@
-From: "alan.zhang" <alan.zhang@linuxwind.org>
-Subject: qemu-kvm with rbd mem slow leak
-Date: Mon, 14 Oct 2013 02:42:23 +0000
-Message-ID: <0c551c01392760f2ebfb0d98baebe07b@linuxwind.org>
+From: Dominik Mostowiec <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: osd down after server failure
+Date: Mon, 14 Oct 2013 08:31:03 +0200
+Message-ID: <CAMNMNTyZx6JDDF2y_3L6zPM7Gf81CatR2WrrSmKaLuABHKQJoA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
- format=flowed
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from li497-87.members.linode.com ([106.187.102.87]:44995 "EHLO
-	www.linuxwind.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755705Ab3JNCul (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 13 Oct 2013 22:50:41 -0400
-Received: from localhost (localhost [127.0.0.1])
-	by www.linuxwind.org (Postfix) with ESMTP id 9713C12DF6
-	for <ceph-devel@vger.kernel.org>; Mon, 14 Oct 2013 02:42:25 +0000 (UTC)
-Received: from www.linuxwind.org ([127.0.0.1])
-	by localhost (www.linuxwind.org [127.0.0.1]) (amavisd-new, port 10024)
-	with ESMTP id fOTCxrmxMyP7 for <ceph-devel@vger.kernel.org>;
-	Mon, 14 Oct 2013 02:42:24 +0000 (UTC)
-Received: from mail.linuxwind.org (localhost [127.0.0.1])
-	by www.linuxwind.org (Postfix) with ESMTPA id 369B612D77
-	for <ceph-devel@vger.kernel.org>; Mon, 14 Oct 2013 02:42:23 +0000 (UTC)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-CPU: Intel(R) Xeon(R) CPU           E5620  @ 2.40GHz *2
-MEM: 32GB
-KVM: qemu-kvm-0.12.1.2-2.355.el6.2.cuttlefish.async.x86_64
-Host: CentOS 6.4, kernel 2.6.32-358.14.1.el6.x86_64
-Guest: CentOS 6.4, kernel 2.6.32-279.14.1.el6.x86_64
-Ceph: ceph version 0.67.4 (ad85b8bfafea6232d64cb7ba76a8b6e8252fa0c7)
-Opennebula: 4.2
+Hi,
+I had server failure that starts from one disk failure:
+Oct 14 03:25:04 s3-10-177-64-6 kernel: [1027237.023986] sd 4:2:26:0:
+[sdaa] Unhandled error code
+Oct 14 03:25:04 s3-10-177-64-6 kernel: [1027237.023990] sd 4:2:26:0:
+[sdaa]  Result: hostbyte=DID_ERROR driverbyte=DRIVER_OK
+Oct 14 03:25:04 s3-10-177-64-6 kernel: [1027237.023995] sd 4:2:26:0:
+[sdaa] CDB: Read(10): 28 00 00 00 00 d0 00 00 10 00
+Oct 14 03:25:04 s3-10-177-64-6 kernel: [1027237.024005] end_request:
+I/O error, dev sdaa, sector 208
+Oct 14 03:25:04 s3-10-177-64-6 kernel: [1027237.024744] XFS (sdaa):
+metadata I/O error: block 0xd0 ("xfs_trans_read_buf") error 5 buf
+count 8192
+Oct 14 03:25:04 s3-10-177-64-6 kernel: [1027237.025879] XFS (sdaa):
+xfs_imap_to_bp: xfs_trans_read_buf() returned error 5.
+Oct 14 03:25:28 s3-10-177-64-6 kernel: [1027260.820288] XFS (sdaa):
+metadata I/O error: block 0xd0 ("xfs_trans_read_buf") error 5 buf
+count 8192
+Oct 14 03:25:28 s3-10-177-64-6 kernel: [1027260.821194] XFS (sdaa):
+xfs_imap_to_bp: xfs_trans_read_buf() returned error 5.
+Oct 14 03:25:32 s3-10-177-64-6 kernel: [1027264.667851] XFS (sdaa):
+metadata I/O error: block 0xd0 ("xfs_trans_read_buf") error 5 buf
+count 8192
 
+this caused that the server has been unresponsive.
 
-top -M info:
-top - 10:35:31 up 7 days,  9:19,  1 user,  load average: 0.85, 1.63, 
-1.40
-Tasks: 454 total,   2 running, 452 sleeping,   0 stopped,   0 zombie
-Cpu(s):  8.5%us,  6.6%sy,  0.0%ni, 84.2%id,  0.6%wa,  0.0%hi,  0.0%si,  
-0.0%st
-Mem:  32865800k total, 32191072k used,   674728k free,    59984k 
-buffers
-Swap: 10485752k total, 10134076k used,   351676k free,  3474176k cached
+After server restart 3 of 26 osd on it are down.
+In ceph-osd log after "debug osd = 10" and restart is:
 
-   PID USER      PR  NI  VIRT  RES  SHR S %CPU %MEM    TIME+  COMMAND
-20135 oneadmin  20   0 6381m 3.4g 9120 S  2.3 10.8 104:00.48 qemu-kvm
-29171 oneadmin  20   0 6452m 3.2g 9072 S  2.0 10.2 168:02.06 qemu-kvm
-  8857 oneadmin  20   0 6338m 2.9g 4504 S  2.3  9.3 289:14.48 qemu-kvm
-12283 oneadmin  20   0 6591m 2.9g 4464 S  1.3  9.2 268:57.30 qemu-kvm
-  6612 oneadmin  20   0 5050m 2.0g 4472 S 12.9  6.3 191:23.51 qemu-kvm
-12006 oneadmin  20   0 5532m 1.9g 4468 S  4.3  6.1 236:43.50 qemu-kvm
-  7216 oneadmin  20   0 3600m 1.9g 4680 S  1.3  6.1 159:40.53 qemu-kvm
-10602 oneadmin  20   0 5333m 1.6g 4636 S  1.3  5.1 208:54.52 qemu-kvm
-13162 oneadmin  20   0 3400m 989m 4528 S 50.3  3.1   4151:19 qemu-kvm
-  5273 oneadmin  20   0 5168m 842m 4464 S  5.3  2.6 468:20.65 qemu-kvm
-  6287 oneadmin  20   0 3150m 761m 4472 S 37.4  2.4 150:32.89 qemu-kvm
-  6081 root      20   0 1732m 504m 5744 S  6.3  1.6 243:17.00 ceph-osd
-11729 oneadmin  20   0 3541m 498m 4468 S  0.7  1.6  66:48.52 qemu-kvm
-12503 oneadmin  20   0 3832m 428m 9336 S  0.3  1.3  19:58.78 qemu-kvm
+2013-10-14 06:21:23.141936 7fdeb4872700 -1 osd.47 43203 *** Got signal
+Terminated ***
+2013-10-14 06:21:23.142141 7fdeb4872700 -1 osd.47 43203  pausing thread pools
+2013-10-14 06:21:23.142146 7fdeb4872700 -1 osd.47 43203  flushing io
+2013-10-14 06:21:25.406187 7f02690f9780  0
+filestore(/vol0/data/osd.47) mount FIEMAP ioctl is supported and
+appears to work
+2013-10-14 06:21:25.406204 7f02690f9780  0
+filestore(/vol0/data/osd.47) mount FIEMAP ioctl is disabled via
+'filestore fiemap' config option
+2013-10-14 06:21:25.406557 7f02690f9780  0
+filestore(/vol0/data/osd.47) mount did NOT detect btrfs
+2013-10-14 06:21:25.412617 7f02690f9780  0
+filestore(/vol0/data/osd.47) mount syncfs(2) syscall fully supported
+(by glibc and kernel)
+2013-10-14 06:21:25.412831 7f02690f9780  0
+filestore(/vol0/data/osd.47) mount found snaps <>
+2013-10-14 06:21:25.415798 7f02690f9780  0
+filestore(/vol0/data/osd.47) mount: enabling WRITEAHEAD journal mode:
+btrfs not detected
+2013-10-14 06:21:26.078377 7f02690f9780  2 osd.47 0 mounting
+/vol0/data/osd.47 /vol0/data/osd.47/journal
+2013-10-14 06:21:26.080872 7f02690f9780  0
+filestore(/vol0/data/osd.47) mount FIEMAP ioctl is supported and
+appears to work
+2013-10-14 06:21:26.080885 7f02690f9780  0
+filestore(/vol0/data/osd.47) mount FIEMAP ioctl is disabled via
+'filestore fiemap' config option
+2013-10-14 06:21:26.081289 7f02690f9780  0
+filestore(/vol0/data/osd.47) mount did NOT detect btrfs
+2013-10-14 06:21:26.087524 7f02690f9780  0
+filestore(/vol0/data/osd.47) mount syncfs(2) syscall fully supported
+(by glibc and kernel)
+2013-10-14 06:21:26.087582 7f02690f9780  0
+filestore(/vol0/data/osd.47) mount found snaps <>
+2013-10-14 06:21:26.089614 7f02690f9780  0
+filestore(/vol0/data/osd.47) mount: enabling WRITEAHEAD journal mode:
+btrfs not detected
+2013-10-14 06:21:26.726676 7f02690f9780  2 osd.47 0 boot
+2013-10-14 06:21:26.726773 7f02690f9780 10 osd.47 0 read_superblock
+sb(16773c25-5054-4451-bf9f-efc1f7f21b89 osd.47
+63cf7d70-99cb-0ab1-4006-00000000002f e43203 [41261,43203]
+lci=[43194,43203])
+2013-10-14 06:21:26.726862 7f02690f9780 10 osd.47 0 add_map_bl 43203 82622 bytes
+2013-10-14 06:21:26.727184 7f02690f9780 10 osd.47 43203 load_pgs
+2013-10-14 06:21:26.727643 7f02690f9780 10 osd.47 43203 load_pgs
+ignoring unrecognized meta
+2013-10-14 06:21:26.727681 7f02690f9780 10 osd.47 43203 load_pgs
+3.df1_TEMP clearing temp
 
+osd.47 is still down, I put it out from cluster.
+47      1                               osd.47  down    0
 
-such as 20135 process command line:
-ps -ef | grep 20135
-oneadmin 20135     1  2 Oct11 ?        01:44:01 /usr/libexec/qemu-kvm 
--name one-18 -S -M rhel6.4.0 -enable-kvm -m 2048 -smp 
-2,sockets=2,cores=1,threads=1 -uuid c40fe8a4-f4fa-9e02-cf2d-6eaaf5062440 
--nodefconfig -nodefaults -chardev 
-socket,id=charmonitor,path=/var/lib/libvirt/qemu/one-18.monitor,server,nowait 
--mon chardev=charmonitor,id=monitor,mode=control -rtc base=utc 
--no-shutdown -device piix3-usb-uhci,id=usb,bus=pci.0,addr=0x1.0x2 -drive 
-file=rbd:one/one-0-18-0:auth_supported=none,if=none,id=drive-virtio-disk0,format=raw,cache=none 
--device 
-virtio-blk-pci,scsi=off,bus=pci.0,addr=0x4,drive=drive-virtio-disk0,id=virtio-disk0,bootindex=1 
--drive 
-file=rbd:one/one-2:auth_supported=none,if=none,id=drive-virtio-disk1,format=raw,cache=none 
--device 
-virtio-blk-pci,scsi=off,bus=pci.0,addr=0x5,drive=drive-virtio-disk1,id=virtio-disk1 
--drive 
-file=/var/lib/one/datastores/0/18/disk.1,if=none,media=cdrom,id=drive-ide0-0-0,readonly=on,format=raw 
--device ide-drive,bus=ide.0,unit=0,drive=drive-ide0-0-0,id=ide0-0-0 
--netdev tap,fd=22,id=hostnet0,vhost=on,vhostfd=27 -device 
-virtio-net-pci,netdev=hostnet0,id=net0,mac=02:00:c0:a8:0a:3b,bus=pci.0,addr=0x3 
--chardev pty,id=charserial0 -device 
-isa-serial,chardev=charserial0,id=serial0 -vnc 0.0.0.0:18 -vga cirrus 
--device virtio-balloon-pci,id=balloon0,bus=pci.0,addr=0x6
+How can I check what is wrong?
 
-I have only give it 2GB,but as you see, VIRT/RES (6381m/3.4g).
-
-I think it must be mem leak.
-
-could any one give me a hand?
+ceph -v
+ceph version 0.56.6 (95a0bda7f007a33b0dc7adf4b330778fa1e5d70c)
 
 -- 
-Talk is cheap,lead by example.
-Blog: https://www.linuxwind.org
+Pozdrawiam
+Dominik
