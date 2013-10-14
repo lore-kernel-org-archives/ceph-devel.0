@@ -1,32 +1,50 @@
-From: John McClean <jmcclean@linkedin.com>
-Subject: Re: geo replication
-Date: Mon, 14 Oct 2013 17:24:39 +0000 (UTC)
-Message-ID: <loom.20131014T192231-185@post.gmane.org>
-References: <CAJH6TXjnUTdjwi-dW6kV-2WEf58-B=gx1ubnep30x_0Td5JHTw@mail.gmail.com> <50EDE1D3.3080803@inktank.com> <CAJH6TXjBdr3oEZOF4pV9Eo0pR_OcwQ8eGXFjDqwZpbZF+8uNVw@mail.gmail.com> <CAPYLRzg19ZokeCVLEi9UdzLKTP4eOqJKfHBSPhi36fSK+d08eg@mail.gmail.com>
+From: Randy Dunlap <rdunlap@infradead.org>
+Subject: Re: linux-next: Tree for Oct 14 (ceph)
+Date: Mon, 14 Oct 2013 13:51:09 -0700
+Message-ID: <525C593D.4080607@infradead.org>
+References: <1381762088-18880-1-git-send-email-treding@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:51255 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756362Ab3JNRuG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 14 Oct 2013 13:50:06 -0400
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1VVmHL-0001td-Rv
-	for ceph-devel@vger.kernel.org; Mon, 14 Oct 2013 19:50:04 +0200
-Received: from dagmar1.corp.linkedin.com ([69.28.149.129])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Mon, 14 Oct 2013 19:50:03 +0200
-Received: from jmcclean by dagmar1.corp.linkedin.com with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Mon, 14 Oct 2013 19:50:03 +0200
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1381762088-18880-1-git-send-email-treding@nvidia.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Thierry Reding <thierry.reding@gmail.com>, linux-next@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Mark Brown <broonie@kernel.org>, ceph-devel@vger.kernel.org, Sage Weil <sage@inktank.com>
+List-Id: ceph-devel.vger.kernel.org
 
-Is there any more information on an ETA?
+On 10/14/13 07:48, Thierry Reding wrote:
+> Hi all,
+> 
+> I've uploaded today's linux-next tree to the master branch of the
+> repository below:
+> 
+>         git://gitorious.org/thierryreding/linux-next.git
+> 
+> A next-20131014 tag is also provided for convenience.
+> 
+> Gained a few conflicts, but nothing too exciting. x86 and ARM default
+> configurations build fine. There were some build failures unrelated to
+> the merge, most of which I fixed and added as patches on top of the
+> final merge.
+
+on i386:
+
+fs/ceph/file.c: In function 'ceph_sync_read':
+fs/ceph/file.c:437:25: error: 'struct iov_iter' has no member named 'iov'
+fs/ceph/file.c:438:18: error: 'struct iov_iter' has no member named 'iov'
+fs/ceph/file.c:470:26: error: 'struct iov_iter' has no member named 'iov'
+fs/ceph/file.c:472:9: error: 'struct iov_iter' has no member named 'iov'
+fs/ceph/file.c:472:9: error: 'struct iov_iter' has no member named 'iov'
+fs/ceph/file.c:472:9: warning: comparison of distinct pointer types lacks a cast [enabled by default]
+fs/ceph/file.c: In function 'ceph_sync_direct_write':
+fs/ceph/file.c:586:24: error: 'struct iov_iter' has no member named 'iov'
+fs/ceph/file.c:587:14: error: 'struct iov_iter' has no member named 'iov'
+fs/ceph/file.c: In function 'ceph_sync_write':
+fs/ceph/file.c:737:18: warning: comparison of distinct pointer types lacks a cast [enabled by default]
 
 
 
+
+-- 
+~Randy
