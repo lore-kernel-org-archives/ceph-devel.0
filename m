@@ -1,42 +1,153 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: geo replication
-Date: Mon, 14 Oct 2013 16:24:01 -0700
-Message-ID: <CAPYLRzhecivND4XEL1gv_gdefxcgTyaxWdjS09bLJhP=ZdJaog@mail.gmail.com>
-References: <CAJH6TXjnUTdjwi-dW6kV-2WEf58-B=gx1ubnep30x_0Td5JHTw@mail.gmail.com>
-	<50EDE1D3.3080803@inktank.com>
-	<CAJH6TXjBdr3oEZOF4pV9Eo0pR_OcwQ8eGXFjDqwZpbZF+8uNVw@mail.gmail.com>
-	<CAPYLRzg19ZokeCVLEi9UdzLKTP4eOqJKfHBSPhi36fSK+d08eg@mail.gmail.com>
-	<loom.20131014T192231-185@post.gmane.org>
+From: Dong Yuan <yuandong1222@gmail.com>
+Subject: Re: osd down after server failure
+Date: Tue, 15 Oct 2013 08:33:43 +0800
+Message-ID: <CAMm-wcLV5k_cEDJSuV_duahiJPbCNtpriDHw___tP1DPQGNztA@mail.gmail.com>
+References: <CAMNMNTyZx6JDDF2y_3L6zPM7Gf81CatR2WrrSmKaLuABHKQJoA@mail.gmail.com>
+	<CAMNMNTwyoQDNhS-RwWR0=wPmC7hsUjAvi-eftr3MwVm=sL7fvA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f54.google.com ([74.125.82.54]:44142 "EHLO
-	mail-wg0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757366Ab3JNXYD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Oct 2013 19:24:03 -0400
-Received: by mail-wg0-f54.google.com with SMTP id c11so2216704wgh.9
-        for <ceph-devel@vger.kernel.org>; Mon, 14 Oct 2013 16:24:01 -0700 (PDT)
-In-Reply-To: <loom.20131014T192231-185@post.gmane.org>
+Received: from mail-we0-f181.google.com ([74.125.82.181]:49324 "EHLO
+	mail-we0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752529Ab3JOAdp (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Oct 2013 20:33:45 -0400
+Received: by mail-we0-f181.google.com with SMTP id t60so7886121wes.12
+        for <ceph-devel@vger.kernel.org>; Mon, 14 Oct 2013 17:33:43 -0700 (PDT)
+In-Reply-To: <CAMNMNTwyoQDNhS-RwWR0=wPmC7hsUjAvi-eftr3MwVm=sL7fvA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John McClean <jmcclean@linkedin.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Dominik Mostowiec <dominikmostowiec@gmail.com>
+Cc: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Unfortunately RADOS geo-replication has not moved up the backlog yet.
-Happily, RGW geo-replication has been discussed a fair bit at Ceph
-Developer Summits etc (you can check them and the issue tracker out if
-you want some of the nitty-gritty) and you will hear more about it
-soon. :)
--Greg
-Software Engineer #42 @ http://inktank.com | http://ceph.com
+From your informantion, the osd log ended with "
+2013-10-14 06:21:26.727681 7f02690f9780 10 osd.47 43203 load_pgs
+3.df1_TEMP clearing temp"
 
 
-On Mon, Oct 14, 2013 at 10:24 AM, John McClean <jmcclean@linkedin.com> wrote:
-> Is there any more information on an ETA?
+That means the osd is loading all PG directories from the disk. If
+there is any I/O error (disk or xfs error), the process couldn't
+finished.
+
+Suggest restart with debug osd = 20 or use xfs_check to check the
+osd.47 local filesystem.
+
+On 14 October 2013 15:40, Dominik Mostowiec <dominikmostowiec@gmail.com> wrote:
+> Hi
+> I have found somthing.
+> After restart time was wrong on server (+2hours) before ntp has fixed it.
+> I restarted this 3 osd - it not helps.
+> It is possible that ceph banned this osd? Or after start with wrong
+> time osd has broken hi's filestore?
+>
+> --
+> Regards
+> Dominik
+>
+>
+> 2013/10/14 Dominik Mostowiec <dominikmostowiec@gmail.com>:
+>> Hi,
+>> I had server failure that starts from one disk failure:
+>> Oct 14 03:25:04 s3-10-177-64-6 kernel: [1027237.023986] sd 4:2:26:0:
+>> [sdaa] Unhandled error code
+>> Oct 14 03:25:04 s3-10-177-64-6 kernel: [1027237.023990] sd 4:2:26:0:
+>> [sdaa]  Result: hostbyte=DID_ERROR driverbyte=DRIVER_OK
+>> Oct 14 03:25:04 s3-10-177-64-6 kernel: [1027237.023995] sd 4:2:26:0:
+>> [sdaa] CDB: Read(10): 28 00 00 00 00 d0 00 00 10 00
+>> Oct 14 03:25:04 s3-10-177-64-6 kernel: [1027237.024005] end_request:
+>> I/O error, dev sdaa, sector 208
+>> Oct 14 03:25:04 s3-10-177-64-6 kernel: [1027237.024744] XFS (sdaa):
+>> metadata I/O error: block 0xd0 ("xfs_trans_read_buf") error 5 buf
+>> count 8192
+>> Oct 14 03:25:04 s3-10-177-64-6 kernel: [1027237.025879] XFS (sdaa):
+>> xfs_imap_to_bp: xfs_trans_read_buf() returned error 5.
+>> Oct 14 03:25:28 s3-10-177-64-6 kernel: [1027260.820288] XFS (sdaa):
+>> metadata I/O error: block 0xd0 ("xfs_trans_read_buf") error 5 buf
+>> count 8192
+>> Oct 14 03:25:28 s3-10-177-64-6 kernel: [1027260.821194] XFS (sdaa):
+>> xfs_imap_to_bp: xfs_trans_read_buf() returned error 5.
+>> Oct 14 03:25:32 s3-10-177-64-6 kernel: [1027264.667851] XFS (sdaa):
+>> metadata I/O error: block 0xd0 ("xfs_trans_read_buf") error 5 buf
+>> count 8192
+>>
+>> this caused that the server has been unresponsive.
+>>
+>> After server restart 3 of 26 osd on it are down.
+>> In ceph-osd log after "debug osd = 10" and restart is:
+>>
+>> 2013-10-14 06:21:23.141936 7fdeb4872700 -1 osd.47 43203 *** Got signal
+>> Terminated ***
+>> 2013-10-14 06:21:23.142141 7fdeb4872700 -1 osd.47 43203  pausing thread pools
+>> 2013-10-14 06:21:23.142146 7fdeb4872700 -1 osd.47 43203  flushing io
+>> 2013-10-14 06:21:25.406187 7f02690f9780  0
+>> filestore(/vol0/data/osd.47) mount FIEMAP ioctl is supported and
+>> appears to work
+>> 2013-10-14 06:21:25.406204 7f02690f9780  0
+>> filestore(/vol0/data/osd.47) mount FIEMAP ioctl is disabled via
+>> 'filestore fiemap' config option
+>> 2013-10-14 06:21:25.406557 7f02690f9780  0
+>> filestore(/vol0/data/osd.47) mount did NOT detect btrfs
+>> 2013-10-14 06:21:25.412617 7f02690f9780  0
+>> filestore(/vol0/data/osd.47) mount syncfs(2) syscall fully supported
+>> (by glibc and kernel)
+>> 2013-10-14 06:21:25.412831 7f02690f9780  0
+>> filestore(/vol0/data/osd.47) mount found snaps <>
+>> 2013-10-14 06:21:25.415798 7f02690f9780  0
+>> filestore(/vol0/data/osd.47) mount: enabling WRITEAHEAD journal mode:
+>> btrfs not detected
+>> 2013-10-14 06:21:26.078377 7f02690f9780  2 osd.47 0 mounting
+>> /vol0/data/osd.47 /vol0/data/osd.47/journal
+>> 2013-10-14 06:21:26.080872 7f02690f9780  0
+>> filestore(/vol0/data/osd.47) mount FIEMAP ioctl is supported and
+>> appears to work
+>> 2013-10-14 06:21:26.080885 7f02690f9780  0
+>> filestore(/vol0/data/osd.47) mount FIEMAP ioctl is disabled via
+>> 'filestore fiemap' config option
+>> 2013-10-14 06:21:26.081289 7f02690f9780  0
+>> filestore(/vol0/data/osd.47) mount did NOT detect btrfs
+>> 2013-10-14 06:21:26.087524 7f02690f9780  0
+>> filestore(/vol0/data/osd.47) mount syncfs(2) syscall fully supported
+>> (by glibc and kernel)
+>> 2013-10-14 06:21:26.087582 7f02690f9780  0
+>> filestore(/vol0/data/osd.47) mount found snaps <>
+>> 2013-10-14 06:21:26.089614 7f02690f9780  0
+>> filestore(/vol0/data/osd.47) mount: enabling WRITEAHEAD journal mode:
+>> btrfs not detected
+>> 2013-10-14 06:21:26.726676 7f02690f9780  2 osd.47 0 boot
+>> 2013-10-14 06:21:26.726773 7f02690f9780 10 osd.47 0 read_superblock
+>> sb(16773c25-5054-4451-bf9f-efc1f7f21b89 osd.47
+>> 63cf7d70-99cb-0ab1-4006-00000000002f e43203 [41261,43203]
+>> lci=[43194,43203])
+>> 2013-10-14 06:21:26.726862 7f02690f9780 10 osd.47 0 add_map_bl 43203 82622 bytes
+>> 2013-10-14 06:21:26.727184 7f02690f9780 10 osd.47 43203 load_pgs
+>> 2013-10-14 06:21:26.727643 7f02690f9780 10 osd.47 43203 load_pgs
+>> ignoring unrecognized meta
+>> 2013-10-14 06:21:26.727681 7f02690f9780 10 osd.47 43203 load_pgs
+>> 3.df1_TEMP clearing temp
+>>
+>> osd.47 is still down, I put it out from cluster.
+>> 47      1                               osd.47  down    0
+>>
+>> How can I check what is wrong?
+>>
+>> ceph -v
+>> ceph version 0.56.6 (95a0bda7f007a33b0dc7adf4b330778fa1e5d70c)
+>>
+>> --
+>> Pozdrawiam
+>> Dominik
 >
 >
 >
 > --
+> Pozdrawiam
+> Dominik
+> --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
+-- 
+Dong Yuan
+Email:yuandong1222@gmail.com
