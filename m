@@ -1,153 +1,173 @@
-From: Dong Yuan <yuandong1222@gmail.com>
-Subject: Re: osd down after server failure
-Date: Tue, 15 Oct 2013 08:33:43 +0800
-Message-ID: <CAMm-wcLV5k_cEDJSuV_duahiJPbCNtpriDHw___tP1DPQGNztA@mail.gmail.com>
-References: <CAMNMNTyZx6JDDF2y_3L6zPM7Gf81CatR2WrrSmKaLuABHKQJoA@mail.gmail.com>
-	<CAMNMNTwyoQDNhS-RwWR0=wPmC7hsUjAvi-eftr3MwVm=sL7fvA@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Ceph and puppet and OpenStack : open conference call
+Date: Tue, 15 Oct 2013 17:39:57 +0200
+Message-ID: <525D61CD.5010707@dachary.org>
+References: <52580F9B.3080607@dachary.org> <525816D8.3000609@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="pp2L9IJ5d0VaiSvLxKroWNsWQkovNP77k"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-we0-f181.google.com ([74.125.82.181]:49324 "EHLO
-	mail-we0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752529Ab3JOAdp (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Oct 2013 20:33:45 -0400
-Received: by mail-we0-f181.google.com with SMTP id t60so7886121wes.12
-        for <ceph-devel@vger.kernel.org>; Mon, 14 Oct 2013 17:33:43 -0700 (PDT)
-In-Reply-To: <CAMNMNTwyoQDNhS-RwWR0=wPmC7hsUjAvi-eftr3MwVm=sL7fvA@mail.gmail.com>
+Received: from smtp.dmail.dachary.org ([91.121.254.229]:36128 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753696Ab3JOPkA (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Oct 2013 11:40:00 -0400
+Received: from [10.9.0.6] (openvpn.novalocal [10.145.3.13])
+	by smtp.dmail.dachary.org (Postfix) with ESMTPS id 170D026398
+	for <ceph-devel@vger.kernel.org>; Tue, 15 Oct 2013 17:39:58 +0200 (CEST)
+In-Reply-To: <525816D8.3000609@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dominik Mostowiec <dominikmostowiec@gmail.com>
-Cc: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-From your informantion, the osd log ended with "
-2013-10-14 06:21:26.727681 7f02690f9780 10 osd.47 43203 load_pgs
-3.df1_TEMP clearing temp"
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--pp2L9IJ5d0VaiSvLxKroWNsWQkovNP77k
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
+Hi,
 
-That means the osd is loading all PG directories from the disk. If
-there is any I/O error (disk or xfs error), the process couldn't
-finished.
+The call was rescheduled one hour later. It is now:
 
-Suggest restart with debug osd = 20 or use xfs_check to check the
-osd.47 local filesystem.
+17:30-18:00 UTC / 13:30-14:00 US-Eastern / 11:30-12:00 US-Mountain 10:30-=
+11:00 US-Pacific / 19:30-20:00 Europe-Central
 
-On 14 October 2013 15:40, Dominik Mostowiec <dominikmostowiec@gmail.com> wrote:
-> Hi
-> I have found somthing.
-> After restart time was wrong on server (+2hours) before ntp has fixed it.
-> I restarted this 3 osd - it not helps.
-> It is possible that ceph banned this osd? Or after start with wrong
-> time osd has broken hi's filestore?
->
-> --
-> Regards
-> Dominik
->
->
-> 2013/10/14 Dominik Mostowiec <dominikmostowiec@gmail.com>:
->> Hi,
->> I had server failure that starts from one disk failure:
->> Oct 14 03:25:04 s3-10-177-64-6 kernel: [1027237.023986] sd 4:2:26:0:
->> [sdaa] Unhandled error code
->> Oct 14 03:25:04 s3-10-177-64-6 kernel: [1027237.023990] sd 4:2:26:0:
->> [sdaa]  Result: hostbyte=DID_ERROR driverbyte=DRIVER_OK
->> Oct 14 03:25:04 s3-10-177-64-6 kernel: [1027237.023995] sd 4:2:26:0:
->> [sdaa] CDB: Read(10): 28 00 00 00 00 d0 00 00 10 00
->> Oct 14 03:25:04 s3-10-177-64-6 kernel: [1027237.024005] end_request:
->> I/O error, dev sdaa, sector 208
->> Oct 14 03:25:04 s3-10-177-64-6 kernel: [1027237.024744] XFS (sdaa):
->> metadata I/O error: block 0xd0 ("xfs_trans_read_buf") error 5 buf
->> count 8192
->> Oct 14 03:25:04 s3-10-177-64-6 kernel: [1027237.025879] XFS (sdaa):
->> xfs_imap_to_bp: xfs_trans_read_buf() returned error 5.
->> Oct 14 03:25:28 s3-10-177-64-6 kernel: [1027260.820288] XFS (sdaa):
->> metadata I/O error: block 0xd0 ("xfs_trans_read_buf") error 5 buf
->> count 8192
->> Oct 14 03:25:28 s3-10-177-64-6 kernel: [1027260.821194] XFS (sdaa):
->> xfs_imap_to_bp: xfs_trans_read_buf() returned error 5.
->> Oct 14 03:25:32 s3-10-177-64-6 kernel: [1027264.667851] XFS (sdaa):
->> metadata I/O error: block 0xd0 ("xfs_trans_read_buf") error 5 buf
->> count 8192
+Phone numbers : http://www.cisco.com/web/about/doing_business/conferencin=
+g/index.html
+
+Room code: 208324756
+Access code: 208324756
+
+Cheers
+
+On 11/10/2013 17:18, Loic Dachary wrote:
+> Someone kindly pointed out that I did not mention the day :-) Here are =
+the complete informations:
+>=20
+> Tuesday 15th October 2013
+>=20
+> 16:30-17:00 UTC / 12:30-13:00 US-Eastern / 10:30-11:00 US-Mountain 09:3=
+0-10:00 US-Pacific / 18:30-19:00 Europe-Central
+>=20
+> San Jose, CA: +1.408.525.6800 RTP: +1.919.392.3330 US/Canada: +1.866.43=
+2.9903 United Kingdom: +44.20.8824.0117 India: +91.80.4350.1111 Germany: =
++49.619.6773.9002 Japan: +81.3.5763.9394 China: +86.10.8515.5666
+>=20
+> Room code: 208324756
+> Access code: 208324756
+>=20
+> On 11/10/2013 16:47, Loic Dachary wrote:
+>> Hi Ceph,
 >>
->> this caused that the server has been unresponsive.
+>> What about we discuss the state of Ceph deployment in the context of p=
+uppet and / or OpenStack ? If nothing else, it will be a good opportunity=
+ for all people actively working in this area to touch base. The proposed=
+ agenda is to list and possibly clarify the existing methods and maybe fi=
+nd ways to share the effort.
 >>
->> After server restart 3 of 26 osd on it are down.
->> In ceph-osd log after "debug osd = 10" and restart is:
+>> The conference call details are a the end of the mail and it will be t=
+imeboxed to 30 minutes. There are a number of projects and I made a short=
+ list below to avoid confusion during the call. Feel free to edit / add i=
+f I misreprensented you or the project you're associated with ;-)
 >>
->> 2013-10-14 06:21:23.141936 7fdeb4872700 -1 osd.47 43203 *** Got signal
->> Terminated ***
->> 2013-10-14 06:21:23.142141 7fdeb4872700 -1 osd.47 43203  pausing thread pools
->> 2013-10-14 06:21:23.142146 7fdeb4872700 -1 osd.47 43203  flushing io
->> 2013-10-14 06:21:25.406187 7f02690f9780  0
->> filestore(/vol0/data/osd.47) mount FIEMAP ioctl is supported and
->> appears to work
->> 2013-10-14 06:21:25.406204 7f02690f9780  0
->> filestore(/vol0/data/osd.47) mount FIEMAP ioctl is disabled via
->> 'filestore fiemap' config option
->> 2013-10-14 06:21:25.406557 7f02690f9780  0
->> filestore(/vol0/data/osd.47) mount did NOT detect btrfs
->> 2013-10-14 06:21:25.412617 7f02690f9780  0
->> filestore(/vol0/data/osd.47) mount syncfs(2) syscall fully supported
->> (by glibc and kernel)
->> 2013-10-14 06:21:25.412831 7f02690f9780  0
->> filestore(/vol0/data/osd.47) mount found snaps <>
->> 2013-10-14 06:21:25.415798 7f02690f9780  0
->> filestore(/vol0/data/osd.47) mount: enabling WRITEAHEAD journal mode:
->> btrfs not detected
->> 2013-10-14 06:21:26.078377 7f02690f9780  2 osd.47 0 mounting
->> /vol0/data/osd.47 /vol0/data/osd.47/journal
->> 2013-10-14 06:21:26.080872 7f02690f9780  0
->> filestore(/vol0/data/osd.47) mount FIEMAP ioctl is supported and
->> appears to work
->> 2013-10-14 06:21:26.080885 7f02690f9780  0
->> filestore(/vol0/data/osd.47) mount FIEMAP ioctl is disabled via
->> 'filestore fiemap' config option
->> 2013-10-14 06:21:26.081289 7f02690f9780  0
->> filestore(/vol0/data/osd.47) mount did NOT detect btrfs
->> 2013-10-14 06:21:26.087524 7f02690f9780  0
->> filestore(/vol0/data/osd.47) mount syncfs(2) syscall fully supported
->> (by glibc and kernel)
->> 2013-10-14 06:21:26.087582 7f02690f9780  0
->> filestore(/vol0/data/osd.47) mount found snaps <>
->> 2013-10-14 06:21:26.089614 7f02690f9780  0
->> filestore(/vol0/data/osd.47) mount: enabling WRITEAHEAD journal mode:
->> btrfs not detected
->> 2013-10-14 06:21:26.726676 7f02690f9780  2 osd.47 0 boot
->> 2013-10-14 06:21:26.726773 7f02690f9780 10 osd.47 0 read_superblock
->> sb(16773c25-5054-4451-bf9f-efc1f7f21b89 osd.47
->> 63cf7d70-99cb-0ab1-4006-00000000002f e43203 [41261,43203]
->> lci=[43194,43203])
->> 2013-10-14 06:21:26.726862 7f02690f9780 10 osd.47 0 add_map_bl 43203 82622 bytes
->> 2013-10-14 06:21:26.727184 7f02690f9780 10 osd.47 43203 load_pgs
->> 2013-10-14 06:21:26.727643 7f02690f9780 10 osd.47 43203 load_pgs
->> ignoring unrecognized meta
->> 2013-10-14 06:21:26.727681 7f02690f9780 10 osd.47 43203 load_pgs
->> 3.df1_TEMP clearing temp
+>> Cheers
 >>
->> osd.47 is still down, I put it out from cluster.
->> 47      1                               osd.47  down    0
+>> * deploy ceph : ceph-deploy
 >>
->> How can I check what is wrong?
+>>   for test / POC purposes
+>>   https://github.com/ceph/ceph-deploy
 >>
->> ceph -v
->> ceph version 0.56.6 (95a0bda7f007a33b0dc7adf4b330778fa1e5d70c)
+>>   maintainer: Alfredo Deza
 >>
->> --
->> Pozdrawiam
->> Dominik
->
->
->
-> --
-> Pozdrawiam
-> Dominik
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> * deploy ceph with puppet : puppet-cephdeploy
+>>
+>>   relies on ceph-deploy
+>>   https://github.com/dontalton/puppet-cephdeploy/
+>>
+>>   maintainer: Don Talton
+>>
+>> * deploy ceph with puppet : puppet-ceph
+>>
+>>   developped in 2012 but still useful
+>>   https://github.com/enovance/puppet-ceph
+>>
+>>   maintainer: community
+>>
+>> * ceph + openstack : ceph docs
+>>
+>>   manual integration
+>>   http://ceph.com/docs/next/rbd/rbd-openstack/
+>>    maintainer: John Wilkins + Josh Durgin
+>>
+>> * ceph + openstack with puppet : stackforge
+>>
+>>   https://github.com/stackforge/puppet-glance/blob/stable/grizzly/mani=
+fests/backend/rbd.pp
+>>   https://github.com/stackforge/puppet-cinder/blob/stable/grizzly/mani=
+fests/volume/rbd.pp
+>>
+>>   maintainer: community
+>>
+>> * ceph + openstack with puppet : COI
+>>
+>>   targeting Cisco use case
+>>   https://github.com/CiscoSystems/puppet-coe/tree/grizzly/manifests/ce=
+ph
+>>   http://docwiki.cisco.com/wiki/OpenStack:Ceph-COI-Installation
+>>
+>>   maintainer : Don Talton + Robert Starmer
+>>
+>> * ceph + openstack with puppet : mirantis
+>>
+>>   in the context of Fuel
+>>   https://github.com/Mirantis/fuel/tree/master/deployment/puppet/ceph
+>>   https://github.com/Mirantis/fuel/blob/master/deployment/puppet/cinde=
+r/manifests/volume/ceph.pp
+>>   https://github.com/Mirantis/fuel/blob/master/deployment/puppet/glanc=
+e/manifests/backend/ceph.pp
+>>
+>>   maintainer : Andrew Woodward
+>>
+>> * openstack with puppet : openstack-installer
+>>
+>>   data driven approach to deploy OpenStack
+>>   https://github.com/CiscoSystems/openstack-installer/
+>>
+>>   maintainer: Robert Starmer + Dan Bode
+>>
+>>
+>> 16:30-17:00 UTC / 12:30-13:00 US-Eastern / 10:30-11:00 US-Mountain 09:=
+30-10:00 US-Pacific / 18:30-19:00 Europe-Central
+>>
+>> San Jose, CA: +1.408.525.6800 RTP: +1.919.392.3330 US/Canada: +1.866.4=
+32.9903 United Kingdom: +44.20.8824.0117 India: +91.80.4350.1111 Germany:=
+ +49.619.6773.9002 Japan: +81.3.5763.9394 China: +86.10.8515.5666
+>>
+>> Room code: 208324756
+>> Access code: 208324756
+>>
+>> Cheers
+>>
+>=20
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+All that is necessary for the triumph of evil is that good people do noth=
+ing.
 
 
+--pp2L9IJ5d0VaiSvLxKroWNsWQkovNP77k
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
--- 
-Dong Yuan
-Email:yuandong1222@gmail.com
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.19 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlJdYc0ACgkQ8dLMyEl6F21GRQCfbYIpLejB5nWpuDHJ9Gcd9Z3/
+HDUAn3Q6BPRsb1SbJrHcOJFAzBLLHZb+
+=FcV2
+-----END PGP SIGNATURE-----
+
+--pp2L9IJ5d0VaiSvLxKroWNsWQkovNP77k--
