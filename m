@@ -1,54 +1,59 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: Efficiently scan all objects in a rados pool/namespace
-Date: Wed, 16 Oct 2013 08:51:31 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1310160849360.29488@cobra.newdream.net>
-References: <loom.20131016T060803-617@post.gmane.org>
+Subject: Re: Ceph puppet module
+Date: Wed, 16 Oct 2013 09:02:22 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1310160901350.22271@cobra.newdream.net>
+References: <525E47AA.8060006@dachary.org> <CABZ+qqmxKFeEDfiCu8i1_sn9TZCD4_-p8+2+XFaj=+kQq_Jnvw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:55061 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:55196 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752336Ab3JPPvc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Oct 2013 11:51:32 -0400
-In-Reply-To: <loom.20131016T060803-617@post.gmane.org>
+	with ESMTP id S1760597Ab3JPQCX (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Oct 2013 12:02:23 -0400
+In-Reply-To: <CABZ+qqmxKFeEDfiCu8i1_sn9TZCD4_-p8+2+XFaj=+kQq_Jnvw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Amit Tiwary <tiwaryamt@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Dan van der Ster <dan@vanderster.com>
+Cc: Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>, Dan Bode <bodepd@gmail.com>
 
-On Wed, 16 Oct 2013, Amit Tiwary wrote:
-> We are using ceph version 0.56.6, librados C++ APIs and have more than 750 
-> million objects in a single pool. Objects are named as "domain-name_file-
-> name".
-> 
-> We are unable to ascertain in what order objects are listed with the command 
-> "rados -p poolname ls". They are neither ordered on objectname, nor size or 
-> mtime.
-> 
-> Q1) Is there any way we can control the way objects are scanned/listed in a 
-> pool with the below librados c++ code? We are interested in getting list of 
-> objects sorted or grouped by object name
->     librados::ObjectIterator it = ioctx.objects_begin();
->     for (; it != ioctx.objects_end(); ++it)
->         ...
+On Wed, 16 Oct 2013, Dan van der Ster wrote:
+> Hi,
+> We would support this. The enovance module is a good starting point if
+> you will accept something that doesn't yet use all the udev magic.
 
-They are ordered by hash(object name).
+My only concern is that it may be challenging to make a smooth transition 
+from the old-style to new-style udev goodness.  Something to consider!
 
-> Q2) In near future, if we upgrade and make use of namespaces (i.e make 
-> domain-name as namespace and store all objects of a particular domain in that 
-> namespace); would scanning of objects in a namespace be efficient than 
-> current scenario where we have to scan the entire pool to fetch all objects?
-
-The namespaces do not improve object listing efficiency; it is still 
-O(size of the pool).
- 
-> Q3) Do you any other recommendations on top of your mind that can improve 
-> time required to scan all objects of pool/namespace?
-
-If you need efficient queries by name prefix (or whatever else) you need 
-to maintain some sort of seperate index.  Radosgw does this for the S3 
-interface by using key/value objects for each bucket.  The kvstore class 
-implements a btree on top of such objects to provide improved scalability.
-
-Hope that helps!
 sage
+
+
+> Cheers, Dan
+> CERN IT
+> 
+> On Wed, Oct 16, 2013 at 10:00 AM, Loic Dachary <loic@dachary.org> wrote:
+> > Hi Ceph,
+> >
+> > How about creating
+> >
+> > https://github.com/ceph/puppet-ceph
+> >
+> > to federate the development efforts for a puppet module exclusively focused on deploying / maintaining a Ceph cluster ? It looks like we are at a point in time where the fragmentation of the work created a desire for a central place. And the https://github.com/ceph/ seems agreeable to everyone involved.
+> >
+> > The discussion initialy started on Ceph + OpenStack + puppet but it seems sensible to separate the OpenStack specific part and host it on https://github.com/stackforge/
+> >
+> > The full thread that leads to this proposal is at:
+> >
+> > https://groups.google.com/a/puppetlabs.com/d/msg/puppet-openstack/ibnrmXBAxVg/Y3Z3e6sZoa4J
+> >
+> > Cheers
+> >
+> > --
+> > Lo?c Dachary, Artisan Logiciel Libre
+> > All that is necessary for the triumph of evil is that good people do nothing.
+> >
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
