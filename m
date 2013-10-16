@@ -1,61 +1,93 @@
-From: Alfredo Deza <alfredo.deza@inktank.com>
-Subject: Re: [ceph-users] Missing Dependency for ceph-deploy 1.2.7
-Date: Wed, 16 Oct 2013 10:38:21 -0400
-Message-ID: <CANtztVzgqbtByx_cnxSq=V5QBKrK3hb0=cE9rnQz1u=VZeMi3w@mail.gmail.com>
-References: <E0E280CCE0E1A44898C992A9190D929A53D4B7@MBX01-TPM.mimos.local>
+From: Ugis <ugis22-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: poor read performance on rbd+LVM, LVM overload
+Date: Wed, 16 Oct 2013 17:46:14 +0300
+Message-ID: <CAE63xUO1jhgxQoRbJU-8+j-cxRB7QEspu=JWvekp9ExzFmnjSA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f174.google.com ([209.85.214.174]:62844 "EHLO
-	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755790Ab3JPOiW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Oct 2013 10:38:22 -0400
-Received: by mail-ob0-f174.google.com with SMTP id wm4so649778obc.33
-        for <ceph-devel@vger.kernel.org>; Wed, 16 Oct 2013 07:38:22 -0700 (PDT)
-In-Reply-To: <E0E280CCE0E1A44898C992A9190D929A53D4B7@MBX01-TPM.mimos.local>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Luke Jing Yuan <jyluke@mimos.my>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: linux-lvm-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Tue, Oct 15, 2013 at 9:54 PM, Luke Jing Yuan <jyluke@mimos.my> wrote:
-> Hi,
->
-> I am trying to install/upgrade to 1.2.7 but Ubuntu (Precise) is complaining about unmet dependency which seemed to be python-pushy 0.5.3 which seemed to be missing. Am I correct to assume so?
+Hello ceph&LVM communities!
 
-That is odd, we still have pushy packages available for the version
-that you are having issues with, see:
-http://ceph.com/debian-dumpling/pool/main/p/python-pushy/
+I noticed very slow reads from xfs mount that is on ceph
+client(rbd+gpt partition+LVM PV + xfs on LE)
+To find a cause I created another rbd in the same pool, formatted it
+straight away with xfs, mounted.
 
-It might be that you need to update your repos?
->
-> Regards,
-> Luke
->
-> ------------------------------------------------------------------
-> -
-> -
-> DISCLAIMER:
->
-> This e-mail (including any attachments) is for the addressee(s)
-> only and may contain confidential information. If you are not the
-> intended recipient, please note that any dealing, review,
-> distribution, printing, copying or use of this e-mail is strictly
-> prohibited. If you have received this email in error, please notify
-> the sender  immediately and delete the original message.
-> MIMOS Berhad is a research and development institution under
-> the purview of the Malaysian Ministry of Science, Technology and
-> Innovation. Opinions, conclusions and other information in this e-
-> mail that do not relate to the official business of MIMOS Berhad
-> and/or its subsidiaries shall be understood as neither given nor
-> endorsed by MIMOS Berhad and/or its subsidiaries and neither
-> MIMOS Berhad nor its subsidiaries accepts responsibility for the
-> same. All liability arising from or in connection with computer
-> viruses and/or corrupted e-mails is excluded to the fullest extent
-> permitted by law.
->
->
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users@lists.ceph.com
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+Write performance for both xfs mounts is similar ~12MB/s
+
+reads with "dd if=/mnt/somefile bs=1M | pv | dd of=/dev/null" as follows:
+with LVM ~4MB/s
+pure xfs ~30MB/s
+
+Watched performance while doing reads with atop. In LVM case atop
+shows LVM overloaded:
+LVM | s-LV_backups  | busy     95% |  read   21515 | write      0  |
+KiB/r      4 |               | KiB/w      0 |  MBr/s   4.20 | MBw/s
+0.00  | avq     1.00 |  avio 0.85 ms |
+
+client kernel 3.10.10
+ceph version 0.67.4
+
+My considerations:
+I have expanded rbd under LVM couple of times(accordingly expanding
+gpt partition, PV,VG,LV, xfs afterwards), but that should have no
+impact on performance(tested clean rbd+LVM, same read performance as
+for expanded one).
+
+As with device-mapper, after LVM is initialized it is just a small
+table with LE->PE  mapping that should reside in close CPU cache.
+I am guessing this could be related to old CPU used, probably caching
+near CPU does not work well(I tested also local HDDs with/without LVM
+and got read speed ~13MB/s vs 46MB/s with atop showing same overload
+in  LVM case).
+
+What could make so great difference when LVM is used and what/how to
+tune? As write performance does not differ, DM extent lookup should
+not be lagging, where is the trick?
+
+CPU used:
+# cat /proc/cpuinfo
+processor       : 0
+vendor_id       : GenuineIntel
+cpu family      : 15
+model           : 4
+model name      : Intel(R) Xeon(TM) CPU 3.20GHz
+stepping        : 10
+microcode       : 0x2
+cpu MHz         : 3200.077
+cache size      : 2048 KB
+physical id     : 0
+siblings        : 2
+core id         : 0
+cpu cores       : 1
+apicid          : 0
+initial apicid  : 0
+fpu             : yes
+fpu_exception   : yes
+cpuid level     : 5
+wp              : yes
+flags           : fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge
+mca cmov pat pse36 clflush dts acpi mmx fxsr ss
+                                                       e sse2 ss ht tm
+pbe syscall nx lm constant_tsc pebs bts nopl pni dtes64 monitor ds_cpl
+cid cx16 xtpr lahf_lm
+bogomips        : 6400.15
+clflush size    : 64
+cache_alignment : 128
+address sizes   : 36 bits physical, 48 bits virtual
+power management:
+
+Br,
+Ugis
