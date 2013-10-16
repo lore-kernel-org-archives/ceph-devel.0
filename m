@@ -1,46 +1,61 @@
-From: Dan van der Ster <dan@vanderster.com>
-Subject: Re: Ceph puppet module
-Date: Wed, 16 Oct 2013 15:55:15 +0200
-Message-ID: <CABZ+qq=6eZFuqY+0Zpnr8Ax_o2exosQ2EkGr_MBWi4M1Ps=kOg@mail.gmail.com>
-References: <525E47AA.8060006@dachary.org> <CABZ+qqmxKFeEDfiCu8i1_sn9TZCD4_-p8+2+XFaj=+kQq_Jnvw@mail.gmail.com>
- <etPan.525e76f3.8edbdab.d059@leseb-mba.local>
+From: Alfredo Deza <alfredo.deza@inktank.com>
+Subject: Re: [ceph-users] Missing Dependency for ceph-deploy 1.2.7
+Date: Wed, 16 Oct 2013 10:38:21 -0400
+Message-ID: <CANtztVzgqbtByx_cnxSq=V5QBKrK3hb0=cE9rnQz1u=VZeMi3w@mail.gmail.com>
+References: <E0E280CCE0E1A44898C992A9190D929A53D4B7@MBX01-TPM.mimos.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bk0-f49.google.com ([209.85.214.49]:64895 "EHLO
-	mail-bk0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934526Ab3JPNz6 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Oct 2013 09:55:58 -0400
-Received: by mail-bk0-f49.google.com with SMTP id w14so279192bkz.36
-        for <ceph-devel@vger.kernel.org>; Wed, 16 Oct 2013 06:55:57 -0700 (PDT)
-Received: by mail-la0-f44.google.com with SMTP id ep20so500332lab.17
-        for <ceph-devel@vger.kernel.org>; Wed, 16 Oct 2013 06:55:55 -0700 (PDT)
-In-Reply-To: <etPan.525e76f3.8edbdab.d059@leseb-mba.local>
+Received: from mail-ob0-f174.google.com ([209.85.214.174]:62844 "EHLO
+	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755790Ab3JPOiW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Oct 2013 10:38:22 -0400
+Received: by mail-ob0-f174.google.com with SMTP id wm4so649778obc.33
+        for <ceph-devel@vger.kernel.org>; Wed, 16 Oct 2013 07:38:22 -0700 (PDT)
+In-Reply-To: <E0E280CCE0E1A44898C992A9190D929A53D4B7@MBX01-TPM.mimos.local>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-8859-1?Q?S=E9bastien_Han?= <sebastien.han@enovance.com>
-Cc: Loic Dachary <loic@dachary.org>, Dan Bode <bodepd@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Luke Jing Yuan <jyluke@mimos.my>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
 
-Hi,
-
-On Wed, Oct 16, 2013 at 1:22 PM, S=E9bastien Han
-<sebastien.han@enovance.com> wrote:
-> Hi Dan,
+On Tue, Oct 15, 2013 at 9:54 PM, Luke Jing Yuan <jyluke@mimos.my> wrote:
+> Hi,
 >
-> During the cephdays you mentioned that you were about to redistribute=
- all the changes you=92ve made on puppet-ceph to the enovance repo.
-> It would be great to merge both before starting anything.
+> I am trying to install/upgrade to 1.2.7 but Ubuntu (Precise) is complaining about unmet dependency which seemed to be python-pushy 0.5.3 which seemed to be missing. Am I correct to assume so?
+
+That is odd, we still have pushy packages available for the version
+that you are having issues with, see:
+http://ceph.com/debian-dumpling/pool/main/p/python-pushy/
+
+It might be that you need to update your repos?
 >
-> What=92s the progress?
-
-I don't think this will happen before mid-November, based on upcoming
-work and travel. But I honestly don't think our changes should block
-the move of puppet-ceph to ceph.com
-
-Cheers, Dan
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Regards,
+> Luke
+>
+> ------------------------------------------------------------------
+> -
+> -
+> DISCLAIMER:
+>
+> This e-mail (including any attachments) is for the addressee(s)
+> only and may contain confidential information. If you are not the
+> intended recipient, please note that any dealing, review,
+> distribution, printing, copying or use of this e-mail is strictly
+> prohibited. If you have received this email in error, please notify
+> the sender  immediately and delete the original message.
+> MIMOS Berhad is a research and development institution under
+> the purview of the Malaysian Ministry of Science, Technology and
+> Innovation. Opinions, conclusions and other information in this e-
+> mail that do not relate to the official business of MIMOS Berhad
+> and/or its subsidiaries shall be understood as neither given nor
+> endorsed by MIMOS Berhad and/or its subsidiaries and neither
+> MIMOS Berhad nor its subsidiaries accepts responsibility for the
+> same. All liability arising from or in connection with computer
+> viruses and/or corrupted e-mails is excluded to the fullest extent
+> permitted by law.
+>
+>
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
