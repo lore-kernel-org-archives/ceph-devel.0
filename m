@@ -1,113 +1,211 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: poor read performance on rbd+LVM, LVM overload
-Date: Wed, 16 Oct 2013 09:16:32 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1310160914360.22271@cobra.newdream.net>
-References: <CAE63xUO1jhgxQoRbJU-8+j-cxRB7QEspu=JWvekp9ExzFmnjSA@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Ceph and puppet and OpenStack : open conference call
+Date: Wed, 16 Oct 2013 21:26:34 +0200
+Message-ID: <525EE86A.7030407@dachary.org>
+References: <52580F9B.3080607@dachary.org> <525816D8.3000609@dachary.org> <525D61CD.5010707@dachary.org> <525EE69C.7090602@bisect.de>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="krGql5xMvXUl3ljkl4xnS6tgj2cA0G8or"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:55464 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751724Ab3JPQQd (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Oct 2013 12:16:33 -0400
-In-Reply-To: <CAE63xUO1jhgxQoRbJU-8+j-cxRB7QEspu=JWvekp9ExzFmnjSA@mail.gmail.com>
+Received: from smtp.dmail.dachary.org ([91.121.254.229]:37534 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754052Ab3JPT0g (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Oct 2013 15:26:36 -0400
+In-Reply-To: <525EE69C.7090602@bisect.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ugis <ugis22@gmail.com>
-Cc: linux-lvm@redhat.com, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@ceph.com" <ceph-users@ceph.com>
+To: Danny Al-Gaaf <danny.al-gaaf@bisect.de>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi,
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--krGql5xMvXUl3ljkl4xnS6tgj2cA0G8or
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-On Wed, 16 Oct 2013, Ugis wrote:
-> Hello ceph&LVM communities!
-> 
-> I noticed very slow reads from xfs mount that is on ceph
-> client(rbd+gpt partition+LVM PV + xfs on LE)
-> To find a cause I created another rbd in the same pool, formatted it
-> straight away with xfs, mounted.
-> 
-> Write performance for both xfs mounts is similar ~12MB/s
-> 
-> reads with "dd if=/mnt/somefile bs=1M | pv | dd of=/dev/null" as follows:
-> with LVM ~4MB/s
-> pure xfs ~30MB/s
-> 
-> Watched performance while doing reads with atop. In LVM case atop
-> shows LVM overloaded:
-> LVM | s-LV_backups  | busy     95% |  read   21515 | write      0  |
-> KiB/r      4 |               | KiB/w      0 |  MBr/s   4.20 | MBw/s
-> 0.00  | avq     1.00 |  avio 0.85 ms |
-> 
-> client kernel 3.10.10
-> ceph version 0.67.4
-> 
-> My considerations:
-> I have expanded rbd under LVM couple of times(accordingly expanding
-> gpt partition, PV,VG,LV, xfs afterwards), but that should have no
-> impact on performance(tested clean rbd+LVM, same read performance as
-> for expanded one).
-> 
-> As with device-mapper, after LVM is initialized it is just a small
-> table with LE->PE  mapping that should reside in close CPU cache.
-> I am guessing this could be related to old CPU used, probably caching
-> near CPU does not work well(I tested also local HDDs with/without LVM
-> and got read speed ~13MB/s vs 46MB/s with atop showing same overload
-> in  LVM case).
-> 
-> What could make so great difference when LVM is used and what/how to
-> tune? As write performance does not differ, DM extent lookup should
-> not be lagging, where is the trick?
+Hi Danny,
 
-My first guess is that LVM is shifting the content of hte device such that 
-it no longer aligns well with the RBD striping (by default, 4MB).  The 
-non-aligned reads/writes would need to touch two objects instead of 
-one, and dd is generally doing these synchronously (i.e., lots of 
-waiting).
+There was a thread to figure out a central place to work on puppet ceph m=
+odules. It's still undecided, you're very welcome to contribute :-)
 
-I'm not sure what options LVM provides for aligning things to the 
-underlying storage...
+https://groups.google.com/a/puppetlabs.com/forum/#!topic/puppet-openstack=
+/ibnrmXBAxVg
 
-sage
+My preference is for having puppet-ceph under the umbrella of stackforge.=
+=20
+
+Cheers
+
+On 16/10/2013 21:18, Danny Al-Gaaf wrote:
+> Hi,
+>=20
+> I've overseen this call, sorry. Is there any meeting results or a log?
+>=20
+> I asked because we (Deutsche Telekom AG) forked our puppet-ceph module
+> from the enovance puppet-ceph (deploying ceph without ceph-deploy) and
+> we plan to contribute our code back to the community into the source
+> project.
+>=20
+> You can find our code here:
+> https://github.com/TelekomCloud/puppet-ceph/tree/rc/eisbrecher
+>=20
+> Or the basic changes without RadosGW support in my repo:
+> https://github.com/dalgaaf/puppet-ceph/tree/feature/wip-da-rework-and-s=
+implify
+>=20
+> If you have any questions about the code, ask me since I didn't update
+> the documentation to reflect the new code yet.
+>=20
+> Regards,
+>=20
+> Danny
+>=20
+> Am 15.10.2013 17:39, schrieb Loic Dachary:
+>> Hi,
+>>
+>> The call was rescheduled one hour later. It is now:
+>>
+>> 17:30-18:00 UTC / 13:30-14:00 US-Eastern / 11:30-12:00 US-Mountain 10:=
+30-11:00 US-Pacific / 19:30-20:00 Europe-Central
+>>
+>> Phone numbers : http://www.cisco.com/web/about/doing_business/conferen=
+cing/index.html
+>>
+>> Room code: 208324756
+>> Access code: 208324756
+>>
+>> Cheers
+>>
+>> On 11/10/2013 17:18, Loic Dachary wrote:
+>>> Someone kindly pointed out that I did not mention the day :-) Here ar=
+e the complete informations:
+>>>
+>>> Tuesday 15th October 2013
+>>>
+>>> 16:30-17:00 UTC / 12:30-13:00 US-Eastern / 10:30-11:00 US-Mountain 09=
+:30-10:00 US-Pacific / 18:30-19:00 Europe-Central
+>>>
+>>> San Jose, CA: +1.408.525.6800 RTP: +1.919.392.3330 US/Canada: +1.866.=
+432.9903 United Kingdom: +44.20.8824.0117 India: +91.80.4350.1111 Germany=
+: +49.619.6773.9002 Japan: +81.3.5763.9394 China: +86.10.8515.5666
+>>>
+>>> Room code: 208324756
+>>> Access code: 208324756
+>>>
+>>> On 11/10/2013 16:47, Loic Dachary wrote:
+>>>> Hi Ceph,
+>>>>
+>>>> What about we discuss the state of Ceph deployment in the context of=
+ puppet and / or OpenStack ? If nothing else, it will be a good opportuni=
+ty for all people actively working in this area to touch base. The propos=
+ed agenda is to list and possibly clarify the existing methods and maybe =
+find ways to share the effort.
+>>>>
+>>>> The conference call details are a the end of the mail and it will be=
+ timeboxed to 30 minutes. There are a number of projects and I made a sho=
+rt list below to avoid confusion during the call. Feel free to edit / add=
+ if I misreprensented you or the project you're associated with ;-)
+>>>>
+>>>> Cheers
+>>>>
+>>>> * deploy ceph : ceph-deploy
+>>>>
+>>>>   for test / POC purposes
+>>>>   https://github.com/ceph/ceph-deploy
+>>>>
+>>>>   maintainer: Alfredo Deza
+>>>>
+>>>> * deploy ceph with puppet : puppet-cephdeploy
+>>>>
+>>>>   relies on ceph-deploy
+>>>>   https://github.com/dontalton/puppet-cephdeploy/
+>>>>
+>>>>   maintainer: Don Talton
+>>>>
+>>>> * deploy ceph with puppet : puppet-ceph
+>>>>
+>>>>   developped in 2012 but still useful
+>>>>   https://github.com/enovance/puppet-ceph
+>>>>
+>>>>   maintainer: community
+>>>>
+>>>> * ceph + openstack : ceph docs
+>>>>
+>>>>   manual integration
+>>>>   http://ceph.com/docs/next/rbd/rbd-openstack/
+>>>>    maintainer: John Wilkins + Josh Durgin
+>>>>
+>>>> * ceph + openstack with puppet : stackforge
+>>>>
+>>>>   https://github.com/stackforge/puppet-glance/blob/stable/grizzly/ma=
+nifests/backend/rbd.pp
+>>>>   https://github.com/stackforge/puppet-cinder/blob/stable/grizzly/ma=
+nifests/volume/rbd.pp
+>>>>
+>>>>   maintainer: community
+>>>>
+>>>> * ceph + openstack with puppet : COI
+>>>>
+>>>>   targeting Cisco use case
+>>>>   https://github.com/CiscoSystems/puppet-coe/tree/grizzly/manifests/=
+ceph
+>>>>   http://docwiki.cisco.com/wiki/OpenStack:Ceph-COI-Installation
+>>>>
+>>>>   maintainer : Don Talton + Robert Starmer
+>>>>
+>>>> * ceph + openstack with puppet : mirantis
+>>>>
+>>>>   in the context of Fuel
+>>>>   https://github.com/Mirantis/fuel/tree/master/deployment/puppet/cep=
+h
+>>>>   https://github.com/Mirantis/fuel/blob/master/deployment/puppet/cin=
+der/manifests/volume/ceph.pp
+>>>>   https://github.com/Mirantis/fuel/blob/master/deployment/puppet/gla=
+nce/manifests/backend/ceph.pp
+>>>>
+>>>>   maintainer : Andrew Woodward
+>>>>
+>>>> * openstack with puppet : openstack-installer
+>>>>
+>>>>   data driven approach to deploy OpenStack
+>>>>   https://github.com/CiscoSystems/openstack-installer/
+>>>>
+>>>>   maintainer: Robert Starmer + Dan Bode
+>>>>
+>>>>
+>>>> 16:30-17:00 UTC / 12:30-13:00 US-Eastern / 10:30-11:00 US-Mountain 0=
+9:30-10:00 US-Pacific / 18:30-19:00 Europe-Central
+>>>>
+>>>> San Jose, CA: +1.408.525.6800 RTP: +1.919.392.3330 US/Canada: +1.866=
+=2E432.9903 United Kingdom: +44.20.8824.0117 India: +91.80.4350.1111 Germ=
+any: +49.619.6773.9002 Japan: +81.3.5763.9394 China: +86.10.8515.5666
+>>>>
+>>>> Room code: 208324756
+>>>> Access code: 208324756
+>>>>
+>>>> Cheers
+>>>>
+>>>
+>>
+>=20
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+All that is necessary for the triumph of evil is that good people do noth=
+ing.
 
 
-> 
-> CPU used:
-> # cat /proc/cpuinfo
-> processor       : 0
-> vendor_id       : GenuineIntel
-> cpu family      : 15
-> model           : 4
-> model name      : Intel(R) Xeon(TM) CPU 3.20GHz
-> stepping        : 10
-> microcode       : 0x2
-> cpu MHz         : 3200.077
-> cache size      : 2048 KB
-> physical id     : 0
-> siblings        : 2
-> core id         : 0
-> cpu cores       : 1
-> apicid          : 0
-> initial apicid  : 0
-> fpu             : yes
-> fpu_exception   : yes
-> cpuid level     : 5
-> wp              : yes
-> flags           : fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge
-> mca cmov pat pse36 clflush dts acpi mmx fxsr ss
->                                                        e sse2 ss ht tm
-> pbe syscall nx lm constant_tsc pebs bts nopl pni dtes64 monitor ds_cpl
-> cid cx16 xtpr lahf_lm
-> bogomips        : 6400.15
-> clflush size    : 64
-> cache_alignment : 128
-> address sizes   : 36 bits physical, 48 bits virtual
-> power management:
-> 
-> Br,
-> Ugis
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+--krGql5xMvXUl3ljkl4xnS6tgj2cA0G8or
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.19 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlJe6GoACgkQ8dLMyEl6F23UDgCgryFYO8XDa6UaneDnNT1/Krpi
+7yMAni9Ia2uyWTDTmWy8D8mXDcAi5IcO
+=mf2M
+-----END PGP SIGNATURE-----
+
+--krGql5xMvXUl3ljkl4xnS6tgj2cA0G8or--
