@@ -1,66 +1,37 @@
-From: "Don Talton (dotalton)" <dotalton@cisco.com>
-Subject: RE: Ceph puppet module
-Date: Thu, 17 Oct 2013 21:19:44 +0000
-Message-ID: <57ED724085B72141BB091CF1314E471F017774DE@xmb-rcd-x15.cisco.com>
-References: <525E47AA.8060006@dachary.org>
-	<CABZ+qqmxKFeEDfiCu8i1_sn9TZCD4_-p8+2+XFaj=+kQq_Jnvw@mail.gmail.com>
- <CACEfbZghTwxVAhVv4=gUbPffj3CyrNh5rXjZVPHsKMJuLUoH=A@mail.gmail.com>
+From: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
+Subject: Re: Ceph puppet module
+Date: Fri, 18 Oct 2013 00:15:51 +0200
+Message-ID: <52606197.4030702@bisect.de>
+References: <525E47AA.8060006@dachary.org>	<CABZ+qqmxKFeEDfiCu8i1_sn9TZCD4_-p8+2+XFaj=+kQq_Jnvw@mail.gmail.com> <CACEfbZghTwxVAhVv4=gUbPffj3CyrNh5rXjZVPHsKMJuLUoH=A@mail.gmail.com>
+Reply-To: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from rcdn-iport-7.cisco.com ([173.37.86.78]:21198 "EHLO
-	rcdn-iport-7.cisco.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1762699Ab3JQVTq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Oct 2013 17:19:46 -0400
+Received: from wp188.webpack.hosteurope.de ([80.237.132.195]:36409 "EHLO
+	wp188.webpack.hosteurope.de" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1757974Ab3JQWPx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 17 Oct 2013 18:15:53 -0400
 In-Reply-To: <CACEfbZghTwxVAhVv4=gUbPffj3CyrNh5rXjZVPHsKMJuLUoH=A@mail.gmail.com>
-Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andrew Woodward <xarses@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
+Cc: Andrew Woodward <xarses@gmail.com>
 
-VGhpcyBpcyBvbmUgb2YgdGhlIHJlYXNvbnMgQ2lzY28gcHVzaGVkIHRvIGNyZWF0ZSBwdXBwZXQt
-Y2VwaGRlcGxveSAoQXBhY2hlIDIuMCkuIEkgYWdyZWUgd2l0aCB5b3VyIHNlbnRpbWVudCwgYW5k
-IHRoaW5rIHRoYXQgQXBhY2hlIDIuMCBpcyBpZGVhbC4NCg0KPiAtLS0tLU9yaWdpbmFsIE1lc3Nh
-Z2UtLS0tLQ0KPiBGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRv
-OmNlcGgtZGV2ZWwtDQo+IG93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIEFuZHJl
-dyBXb29kd2FyZA0KPiBTZW50OiBUaHVyc2RheSwgT2N0b2JlciAxNywgMjAxMyAxOjI5IFBNDQo+
-IENjOiBDZXBoIERldmVsb3BtZW50DQo+IFN1YmplY3Q6IFJlOiBDZXBoIHB1cHBldCBtb2R1bGUN
-Cj4gDQo+IFdlIG5lZWQgdG8gaGF2ZSBhIHJlYXNvbmFibGUgbGljZW5zZSBvbiB0aGlzIHByZWZl
-cmFibHkgQXBhY2hlIDIuMC4NCj4gdGhlIGVub3ZhbmNlIG1vZHVsZSBpcyBBR1BMIHdoaWNoIGNh
-bid0IGNvbWUgaW4gY29udGFjdCB3aXRoIG5lYXJseQ0KPiBhbnl0aGluZyB3aXRoIG91dCBjYXVz
-aW5nIG1hc3NpdmUgbGljZW5zZSBpc3N1ZXMuIFN0YXJ0aW5nIHdpdGggYW55IG9mIHRoZQ0KPiBl
-bm92YW5jZSBjb2RlIGlzIGEgTm9uLXN0YXJ0ZXIgYXMgaXQgd2lsbCByZXF1aXJlIHRoZSBBR1BM
-IExpY2Vuc2UuDQo+IA0KPiBPbiBXZWQsIE9jdCAxNiwgMjAxMyBhdCAyOjM2IEFNLCBEYW4gdmFu
-IGRlciBTdGVyIDxkYW5AdmFuZGVyc3Rlci5jb20+DQo+IHdyb3RlOg0KPiA+IEhpLA0KPiA+IFdl
-IHdvdWxkIHN1cHBvcnQgdGhpcy4gVGhlIGVub3ZhbmNlIG1vZHVsZSBpcyBhIGdvb2Qgc3RhcnRp
-bmcgcG9pbnQgaWYNCj4gPiB5b3Ugd2lsbCBhY2NlcHQgc29tZXRoaW5nIHRoYXQgZG9lc24ndCB5
-ZXQgdXNlIGFsbCB0aGUgdWRldiBtYWdpYy4NCj4gPiBDaGVlcnMsIERhbg0KPiA+IENFUk4gSVQN
-Cj4gPg0KPiA+IE9uIFdlZCwgT2N0IDE2LCAyMDEzIGF0IDEwOjAwIEFNLCBMb2ljIERhY2hhcnkg
-PGxvaWNAZGFjaGFyeS5vcmc+IHdyb3RlOg0KPiA+PiBIaSBDZXBoLA0KPiA+Pg0KPiA+PiBIb3cg
-YWJvdXQgY3JlYXRpbmcNCj4gPj4NCj4gPj4gaHR0cHM6Ly9naXRodWIuY29tL2NlcGgvcHVwcGV0
-LWNlcGgNCj4gPj4NCj4gPj4gdG8gZmVkZXJhdGUgdGhlIGRldmVsb3BtZW50IGVmZm9ydHMgZm9y
-IGEgcHVwcGV0IG1vZHVsZSBleGNsdXNpdmVseQ0KPiBmb2N1c2VkIG9uIGRlcGxveWluZyAvIG1h
-aW50YWluaW5nIGEgQ2VwaCBjbHVzdGVyID8gSXQgbG9va3MgbGlrZSB3ZSBhcmUgYXQgYQ0KPiBw
-b2ludCBpbiB0aW1lIHdoZXJlIHRoZSBmcmFnbWVudGF0aW9uIG9mIHRoZSB3b3JrIGNyZWF0ZWQg
-YSBkZXNpcmUgZm9yIGENCj4gY2VudHJhbCBwbGFjZS4gQW5kIHRoZSBodHRwczovL2dpdGh1Yi5j
-b20vY2VwaC8gc2VlbXMgYWdyZWVhYmxlIHRvDQo+IGV2ZXJ5b25lIGludm9sdmVkLg0KPiA+Pg0K
-PiA+PiBUaGUgZGlzY3Vzc2lvbiBpbml0aWFseSBzdGFydGVkIG9uIENlcGggKyBPcGVuU3RhY2sg
-KyBwdXBwZXQgYnV0IGl0DQo+ID4+IHNlZW1zIHNlbnNpYmxlIHRvIHNlcGFyYXRlIHRoZSBPcGVu
-U3RhY2sgc3BlY2lmaWMgcGFydCBhbmQgaG9zdCBpdCBvbg0KPiA+PiBodHRwczovL2dpdGh1Yi5j
-b20vc3RhY2tmb3JnZS8NCj4gPj4NCj4gPj4gVGhlIGZ1bGwgdGhyZWFkIHRoYXQgbGVhZHMgdG8g
-dGhpcyBwcm9wb3NhbCBpcyBhdDoNCj4gPj4NCj4gPj4gaHR0cHM6Ly9ncm91cHMuZ29vZ2xlLmNv
-bS9hL3B1cHBldGxhYnMuY29tL2QvbXNnL3B1cHBldC0NCj4gb3BlbnN0YWNrL2libg0KPiA+PiBy
-bVhCQXhWZy9ZM1ozZTZzWm9hNEoNCj4gPj4NCj4gPj4gQ2hlZXJzDQo+ID4+DQo+ID4+IC0tDQo+
-ID4+IExvxI9jIERhY2hhcnksIEFydGlzYW4gTG9naWNpZWwgTGlicmUNCj4gPj4gQWxsIHRoYXQg
-aXMgbmVjZXNzYXJ5IGZvciB0aGUgdHJpdW1waCBvZiBldmlsIGlzIHRoYXQgZ29vZCBwZW9wbGUg
-ZG8gbm90aGluZy4NCj4gPj4NCj4gPiAtLQ0KPiA+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBs
-aXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIg0KPiA+IGluIHRoZSBi
-b2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUNCj4gbWFq
-b3Jkb21vDQo+ID4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5m
-by5odG1sDQo+IA0KPiANCj4gDQo+IC0tDQo+IElmIGdvb2dsZSBoYXMgZG9uZSBpdCwgR29vZ2xl
-IGRpZCBpdCByaWdodCENCj4gLS0NCj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNl
-bmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluIHRoZQ0KPiBib2R5IG9mIGEg
-bWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIGluZm8g
-YXQNCj4gaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo=
+Am 17.10.2013 22:29, schrieb Andrew Woodward:
+> We need to have a reasonable license on this preferably Apache 2.0.
+> the enovance module is AGPL which can't come in contact with nearly
+> anything with out causing massive license issues. Starting with any of
+> the enovance code is a Non-starter as it will require the AGPL
+> License.
+
+I agree with the Apache license.
+
+Would it be an option to ask enovance (and the contributers) to
+relicense under Apache v2.0? I would be happy to do that for my
+contributions.
+
+Danny
+
+
