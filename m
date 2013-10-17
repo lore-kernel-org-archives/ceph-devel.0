@@ -1,81 +1,55 @@
-From: Andrew Woodward <xarses@gmail.com>
-Subject: Re: Ceph puppet module
-Date: Thu, 17 Oct 2013 13:29:28 -0700
-Message-ID: <CACEfbZghTwxVAhVv4=gUbPffj3CyrNh5rXjZVPHsKMJuLUoH=A@mail.gmail.com>
-References: <525E47AA.8060006@dachary.org>
-	<CABZ+qqmxKFeEDfiCu8i1_sn9TZCD4_-p8+2+XFaj=+kQq_Jnvw@mail.gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: v0.61.9 Cuttlefish released
+Date: Thu, 17 Oct 2013 13:29:35 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1310171323330.16583@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f175.google.com ([209.85.217.175]:65340 "EHLO
-	mail-lb0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1762348Ab3JQU3a convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Oct 2013 16:29:30 -0400
-Received: by mail-lb0-f175.google.com with SMTP id y6so2334696lbh.6
-        for <ceph-devel@vger.kernel.org>; Thu, 17 Oct 2013 13:29:28 -0700 (PDT)
-In-Reply-To: <CABZ+qqmxKFeEDfiCu8i1_sn9TZCD4_-p8+2+XFaj=+kQq_Jnvw@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:42479 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1762335Ab3JQU3g (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Oct 2013 16:29:36 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org, ceph-users@ceph.com
 
-We need to have a reasonable license on this preferably Apache 2.0.
-the enovance module is AGPL which can't come in contact with nearly
-anything with out causing massive license issues. Starting with any of
-the enovance code is a Non-starter as it will require the AGPL
-License.
+This point release resolves several low to medium-impact bugs across the 
+code base, and fixes a performance problem (CPU utilization) with radosgw. 
+We recommend that all production cuttlefish users upgrade.
 
-On Wed, Oct 16, 2013 at 2:36 AM, Dan van der Ster <dan@vanderster.com> =
-wrote:
-> Hi,
-> We would support this. The enovance module is a good starting point i=
-f
-> you will accept something that doesn't yet use all the udev magic.
-> Cheers, Dan
-> CERN IT
->
-> On Wed, Oct 16, 2013 at 10:00 AM, Loic Dachary <loic@dachary.org> wro=
-te:
->> Hi Ceph,
->>
->> How about creating
->>
->> https://github.com/ceph/puppet-ceph
->>
->> to federate the development efforts for a puppet module exclusively =
-focused on deploying / maintaining a Ceph cluster ? It looks like we ar=
-e at a point in time where the fragmentation of the work created a desi=
-re for a central place. And the https://github.com/ceph/ seems agreeabl=
-e to everyone involved.
->>
->> The discussion initialy started on Ceph + OpenStack + puppet but it =
-seems sensible to separate the OpenStack specific part and host it on h=
-ttps://github.com/stackforge/
->>
->> The full thread that leads to this proposal is at:
->>
->> https://groups.google.com/a/puppetlabs.com/d/msg/puppet-openstack/ib=
-nrmXBAxVg/Y3Z3e6sZoa4J
->>
->> Cheers
->>
->> --
->> Lo=C4=8Fc Dachary, Artisan Logiciel Libre
->> All that is necessary for the triumph of evil is that good people do=
- nothing.
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Notable changes:
 
+ * ceph, ceph-authtool: fix help (Danny Al-Gaaf)
+ * ceph-disk: partprobe after creating journal partition
+ * ceph-disk: specific fs type when mounting (Alfredo Deza)
+ * ceph-fuse: fix bug when compiled against old versions
+ * ceph-fuse: fix use-after-free in caching code (Yan, Zheng)
+ * ceph-fuse: misc caching bugs
+ * ceph.spec: remove incorrect mod_fcgi dependency (Gary Lowell)
+ * crush: fix name caching
+ * librbd: fix bug when unpausing cluster (Josh Durgin)
+ * mds: fix LAZYIO lock hang
+ * mds: fix bug in file size recovery (after client crash)
+ * mon: fix paxos recovery corner case
+ * osd: fix exponential backoff for slow request warnings (Loic Dachary)
+ * osd: fix readdir_r usage
+ * osd: fix startup for long-stopped OSDs
+ * rgw: avoid std::list::size() to avoid wasting CPU cycles (Yehuda Sadeh)
+ * rgw: drain pending requests during write (fixes data safety issue) 
+   (Yehuda Sadeh)
+ * rgw: fix authenticated users group ACL check (Yehuda Sadeh)
+ * rgw: fix bug in POST (Yehuda Sadeh)
+ * rgw: fix sysvinit script status command, return value (Danny Al-Gaaf)
+ * rgw: reduce default log level (Yehuda Sadeh)
 
+For more detailed information, see
 
---=20
-If google has done it, Google did it right!
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+ * http://ceph.com/docs/master/release-notes/#v0-61-9-cuttlefish
+ * http://ceph.com/docs/master/_downloads/v0.61.9.txt
+
+You can get v0.61.9 from the usual locations:
+
+ * Git at git://github.com/ceph/ceph.git
+ * Tarball at http://ceph.com/download/ceph-0.61.9.tar.gz
+ * For Debian/Ubuntu packages, see http://ceph.com/docs/master/install/debian
+ * For RPMs, see http://ceph.com/docs/master/install/rpm
