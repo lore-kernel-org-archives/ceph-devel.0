@@ -1,50 +1,100 @@
-From: "=?UTF-8?B?TGx1w61zIFDDoG1pZXMgaSBKdcOhcmV6?=" <llpamies@pamies.cat>
-Subject: PGBackend: Multiple PG implementations.
-Date: Fri, 18 Oct 2013 16:05:46 -0700
-Message-ID: <CAKD2hyG6giBDQ0ue9hD723Eq0Bk+1rAKgb9NzdjHJBW5DoRxdQ@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: PGBackend: Multiple PG implementations.
+Date: Sat, 19 Oct 2013 01:16:37 +0200
+Message-ID: <5261C155.8000500@dachary.org>
+References: <CAKD2hyG6giBDQ0ue9hD723Eq0Bk+1rAKgb9NzdjHJBW5DoRxdQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="aPi3HQcQrRuAlj8jDDPUs9xFoNkFVMu8I"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oa0-f51.google.com ([209.85.219.51]:44010 "EHLO
-	mail-oa0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757406Ab3JRXFs (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Oct 2013 19:05:48 -0400
-Received: by mail-oa0-f51.google.com with SMTP id h1so2099828oag.24
-        for <ceph-devel@vger.kernel.org>; Fri, 18 Oct 2013 16:05:47 -0700 (PDT)
-Received: from mail-ie0-x22a.google.com (mail-ie0-x22a.google.com [2607:f8b0:4001:c03::22a])
-        by mx.google.com with ESMTPSA id b5sm8620090obj.8.2013.10.18.16.05.46
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
-        Fri, 18 Oct 2013 16:05:46 -0700 (PDT)
-Received: by mail-ie0-f170.google.com with SMTP id at1so7916354iec.29
-        for <ceph-devel@vger.kernel.org>; Fri, 18 Oct 2013 16:05:46 -0700 (PDT)
+Received: from smtp.dmail.dachary.org ([91.121.254.229]:39866 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754832Ab3JRXQj (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Oct 2013 19:16:39 -0400
+In-Reply-To: <CAKD2hyG6giBDQ0ue9hD723Eq0Bk+1rAKgb9NzdjHJBW5DoRxdQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: =?UTF-8?B?TGx1w61zIFDDoG1pZXMgaSBKdcOhcmV6?= <llpamies@pamies.cat>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hello,
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--aPi3HQcQrRuAlj8jDDPUs9xFoNkFVMu8I
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 
-I was looking at the work done to re-architecture the OSD backend.
-Since it seems that it allows now to have more than one PG
-implementation I decided to subclass PG and PGBackend to create an
-alternative implementation to ReplicatedPG and ReplicatedBackend.
-However, I noticed a couple of problems:
+Hi Llu=C3=ADs,
 
-* All methods in watch.h and watch.cc expect ReplicatedPG objects
-instead of generic PG objects.
-* New pools created in the OSDMonitor are created as replicated pools
-(g_pool_t::TYPE_REP). This is a hardcoded value.
+David Zafman and Samuel Just are working to re-architecture the core of C=
+eph so that and ErasureCodedBackend can be implemented. You can browse th=
+eir commits to see what they are up to. The transcript of the last CDS su=
+mmit will also give you a general view of the direction in which it is he=
+ading :=20
 
-I made a few changes to solve these two issues that allowed me to have
-more than one PG implementation running without problems. You can find
-the changes here:
+http://wiki.ceph.com/01Planning/CDS/Emperor/Transcript_:_Erasure_coded_st=
+orage_backend_%28step_2%29
 
-https://github.com/ceph/ceph/pull/744
+and a more recent interview of Samuel Just will give you a short update :=
 
-Are these changes useful for the re-architecture of the OSD ?
 
-PS: Implementing and running an alternative PG requires other changes
-in the CrushCompiler and other header files.
+http://dachary.org/?p=3D2320
 
-Best,
-Lluis
+I'm not the best qualified to comment on the generic part of your patches=
+, but I think it overlaps with the work being done.
+
+Cheers
+
+On 19/10/2013 01:05, Llu=C3=ADs P=C3=A0mies i Ju=C3=A1rez wrote:
+> Hello,
+>=20
+> I was looking at the work done to re-architecture the OSD backend.
+> Since it seems that it allows now to have more than one PG
+> implementation I decided to subclass PG and PGBackend to create an
+> alternative implementation to ReplicatedPG and ReplicatedBackend.
+> However, I noticed a couple of problems:
+>=20
+> * All methods in watch.h and watch.cc expect ReplicatedPG objects
+> instead of generic PG objects.
+> * New pools created in the OSDMonitor are created as replicated pools
+> (g_pool_t::TYPE_REP). This is a hardcoded value.
+>=20
+> I made a few changes to solve these two issues that allowed me to have
+> more than one PG implementation running without problems. You can find
+> the changes here:
+>=20
+> https://github.com/ceph/ceph/pull/744
+>=20
+> Are these changes useful for the re-architecture of the OSD ?
+>=20
+> PS: Implementing and running an alternative PG requires other changes
+> in the CrushCompiler and other header files.
+>=20
+> Best,
+> Lluis
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+All that is necessary for the triumph of evil is that good people do noth=
+ing.
+
+
+--aPi3HQcQrRuAlj8jDDPUs9xFoNkFVMu8I
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.19 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlJhwVUACgkQ8dLMyEl6F21xawCZAePgNLvNg/pIFDwpYwfLsL/B
+RgcAnjj5a82bZPUWC/r8w4tzIuFH/rSe
+=kaTX
+-----END PGP SIGNATURE-----
+
+--aPi3HQcQrRuAlj8jDDPUs9xFoNkFVMu8I--
