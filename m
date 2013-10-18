@@ -1,34 +1,100 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: [RFC PATCH] ceph: add acl for cephfs
-Date: Fri, 18 Oct 2013 10:10:47 -0700
-Message-ID: <CAPYLRzi5XMc0uadx7n+8nqKbfhw8yAcBu6wiX_0-NBN0DXGkBA@mail.gmail.com>
-References: <1381998446-30085-1-git-send-email-lucienchao@gmail.com>
-	<525FDA9E.8030304@ubuntukylin.com>
+From: Sage Weil <sage@inktank.com>
+Subject: v0.71 released
+Date: Fri, 18 Oct 2013 10:46:45 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1310181043540.5995@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-we0-f169.google.com ([74.125.82.169]:39631 "EHLO
-	mail-we0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756234Ab3JRRKs (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Oct 2013 13:10:48 -0400
-Received: by mail-we0-f169.google.com with SMTP id q58so4120446wes.0
-        for <ceph-devel@vger.kernel.org>; Fri, 18 Oct 2013 10:10:47 -0700 (PDT)
-In-Reply-To: <525FDA9E.8030304@ubuntukylin.com>
+Received: from cobra.newdream.net ([66.33.216.30]:53634 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756445Ab3JRRqq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Oct 2013 13:46:46 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Li Wang <liwang@ubuntukylin.com>
-Cc: Guangliang Zhao <lucienchao@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "Yan, Zheng" <zheng.z.yan@intel.com>, Sage Weil <sage@inktank.com>
+To: ceph-devel@vger.kernel.org, ceph-users@ceph.com
 
-Isn't the UID/GID mismatch a generic problem when using CephFS? ;)
+This development release includes a significant amount of new code and 
+refactoring, as well as a lot of preliminary functionality that will be 
+needed for erasure coding and tiering support. There are also several 
+significant patch sets improving this with the MDS.
 
-I've got this patch in my queue as well if nobody else beats me to it.
--Greg
-Software Engineer #42 @ http://inktank.com | http://ceph.com
+Upgrading:
 
+ * The MDS now disallows snapshots by default as they are not
+   considered stable.  The command 'ceph mds set allow_snaps' will
+   enable them.
+ * For clusters that were created before v0.44 (pre-argonaut, Spring
+   2012) and store radosgw data, the auto-upgrade from TMAP to OMAP
+   objects has been disabled.  Before upgrading, make sure that any
+   buckets created on pre-argonaut releases have been modified (e.g.,
+   by PUTing and then DELETEing an object from each bucket).  Any
+   cluster created with argonaut (v0.48) or a later release or not
+   using radosgw never relied on the automatic conversion and is not
+   affected by this change.
+ * Any direct users of the 'tmap' portion of the librados API should be
+   aware that the automatic tmap -> omap conversion functionality has
+   been removed.
+ * Most output that used K or KB (e.g., for kilobyte) now uses a
+   lower-case k to match the official SI convention.  Any scripts that
+   parse output and check for an upper-case K will need to be modified.
 
-On Thu, Oct 17, 2013 at 5:39 AM, Li Wang <liwang@ubuntukylin.com> wrote:
-> Hi,
->   I did not take a careful look at the code. But it seems to me that for
-> Ceph, the same directory could be mounted to different clients with totally
-> different uid/gid, not aware of each other. The ACL won't make much sense
-> and may not work properly.
+Notable changes:
+
+ * build: Makefile refactor (Roald J. van Loon)
+ * ceph-disk: fix journal preallocation
+ * ceph-fuse: trim deleted inodes from cache (Yan, Zheng)
+ * ceph-fuse: use newer fuse api (Jianpeng Ma)
+ * ceph-kvstore-tool: new tool for working with leveldb (copy, crc) (Joao 
+   Luis)
+ * common: bloom_filter improvements, cleanups
+ * common: correct SI is kB not KB (Dan Mick)
+ * common: misc portability fixes (Noah Watkins)
+ * hadoop: removed old version of shim to avoid confusing users (Noah 
+   Watkins)
+ * librados: fix installed header #includes (Dan Mick)
+ * librbd, ceph-fuse: avoid some sources of ceph-fuse, rbd cache stalls
+ * mds: fix LOOKUPSNAP bug
+ * mds: fix standby-replay when we fall behind (Yan, Zheng)
+ * mds: fix stray directory purging (Yan, Zheng)
+ * mon: disallow CephFS snapshots until 'ceph mds set allow_new_snaps' 
+   (Greg Farnum)
+ * mon, osd: improve osdmap trimming logic (Samuel Just)
+ * mon: kv properties for pools to support EC (Loic Dachary)
+ * mon: some auth check cleanups (Joao Luis)
+ * mon: track per-pool stats (Joao Luis)
+ * mon: warn about pools with bad pg_num
+ * osd: automatically detect proper xattr limits (David Zafman)
+ * osd: avoid extra copy in erasure coding reference implementation (Loic 
+   Dachary)
+ * osd: basic cache pool redirects (Greg Farnum)
+ * osd: basic whiteout, dirty flag support (not yet used)
+ * osd: clean up and generalize copy-from code (Greg Farnum)
+ * osd: erasure coding doc updates (Loic Dachary)
+ * osd: erasure coding plugin infrastructure, tests (Loic Dachary)
+ * osd: fix RWORDER flags
+ * osd: fix exponential backoff of slow request warnings (Loic Dachary)
+ * osd: generalized temp object infrastructure
+ * osd: ghobject_t infrastructure for EC (David Zafman)
+ * osd: improvements for compatset support and storage (David Zafman)
+ * osd: misc copy-from improvements
+ * osd: opportunistic crc checking on stored data (off by default)
+ * osd: refactor recovery using PGBackend (Samuel Just)
+ * osd: remove old magical tmap->omap conversion
+ * pybind: fix blacklisting nonce (Loic Dachary)
+ * rgw: default log level is now more reasonable (Yehuda Sadeh)
+ * rgw: fix acl group check (Yehuda Sadeh)
+ * sysvinit: fix shutdown order (mons last) (Alfredo Deza)
+
+We have now frozen the code for v0.72 Emperor, and the next sprint or two 
+will be focused primarily on stability and testing (paritcularly the 
+upgrade path).  There is also still a lot of ongoing development work in 
+flight for the erasure coding and tiering that is coming in Firefly, but 
+that code may sit outside of master for a bit longer while we harden 
+things.
+
+You can get v0.71 from the usual places:
+
+ * Git at git://github.com/ceph/ceph.git
+ * Tarball at http://ceph.com/download/ceph-0.71.tar.gz
+ * For Debian/Ubuntu packages, see http://ceph.com/docs/master/install/debian
+ * For RPMs, see http://ceph.com/docs/master/install/rpm
