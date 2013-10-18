@@ -1,42 +1,63 @@
-From: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
-Subject: Re: git clone from ceph missig files and dirs under src/libs3/
-Date: Fri, 18 Oct 2013 11:35:22 +0200
-Message-ID: <526100DA.4060508@bisect.de>
-References: <002201cecbe3$5cdec0c0$169c4240$@gmail.com>
-Reply-To: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
+From: Dominik Mostowiec <dominikmostowiec@gmail.com>
+Subject: issues when bucket index deep-scrubbing
+Date: Fri, 18 Oct 2013 13:01:54 +0200
+Message-ID: <CAMNMNTyRDoQX=ytzF-jporD3uTpaUiJqTXEzqYGetqUerJ5=-g@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from wp188.webpack.hosteurope.de ([80.237.132.195]:36311 "EHLO
-	wp188.webpack.hosteurope.de" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751961Ab3JRJf2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 18 Oct 2013 05:35:28 -0400
-In-Reply-To: <002201cecbe3$5cdec0c0$169c4240$@gmail.com>
+Received: from mail-qe0-f47.google.com ([209.85.128.47]:37409 "EHLO
+	mail-qe0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752956Ab3JRLBz (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Oct 2013 07:01:55 -0400
+Received: by mail-qe0-f47.google.com with SMTP id b4so1624152qen.6
+        for <ceph-devel@vger.kernel.org>; Fri, 18 Oct 2013 04:01:54 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: hjwsm1989-gmail <hjwsm1989@gmail.com>, ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Am 18.10.2013 11:20, schrieb hjwsm1989-gmail:
-> Hi,all
-> I get ceph from git@github.com:ceph/ceph.git
-> But when I try to build rpm package from the master branch,
-> It runs error like : No target to Make.
-> I found there are no file or dirs under src/libs3/ in my mater and next
-> branch.(all my branchs are uptodate)
-> But those files exists from the ceph-0.71.tar.gz download from ceph.com.
-> 
-> Thanks!
+Hi,
+I plan to shard my largest bucket because of issues of deep-scrubbing
+(when PG which index for this bucket is stored on is deep-scrubbed, it
+appears many slow requests and OSD grows in memory - after latest
+scrub it grows up to 9G).
 
-Please checkout the README:
+I trying to found why large bucket index make issues when it is scrubbed.
+On test cluster:
+radosgw-admin bucket stats --bucket=test1-XX
+{ "bucket": "test1-XX",
+  "pool": ".rgw.buckets",
+  "index_pool": ".rgw.buckets",
+  "id": "default.4211.2",
+...
 
+I guess index is in object .dir.default.4211.2. (pool: .rgw.buckets)
 
-Building Ceph
-=============
+rados -p .rgw.buckets get .dir.default.4211.2 -
+<empty>
 
-To prepare the source tree after it has been git cloned,
+But:
+rados -p .rgw.buckets listomapkeys .dir.default.4211.2
+test_file_2.txt
+test_file_2_11.txt
+test_file_3.txt
+test_file_4.txt
+test_file_5.txt
 
-        $ git submodule update --init
+I guess that list of files are stored in leveldb not in one large file.
+'omap' files are stored in {osd_dir}/current/omap/, the largest file
+that i found in this directory (on production) have 8.8M.
 
-Danny
+I'm a little confused.
+
+How list of files (for bucket) is stored?
+If list of objects in bucket is splitted on many small files in
+leveldb that large bucket (with many files) should not cause larger
+latency in PUT new object.
+Scrubbing also should not be a problem i think ...
+
+What you think about using a sharding to split big buckets into the
+smalest one to avoid the problems with big indexes?
+
+--
+Regards
+Dominik
