@@ -1,100 +1,85 @@
-From: Sage Weil <sage@inktank.com>
-Subject: v0.71 released
-Date: Fri, 18 Oct 2013 10:46:45 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1310181043540.5995@cobra.newdream.net>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: issues when bucket index deep-scrubbing
+Date: Fri, 18 Oct 2013 12:00:38 -0700
+Message-ID: <CAPYLRzjFRn=SHOs5JiEqGow0hgnbOEMkqrqwTi9W0cX4EAe=KA@mail.gmail.com>
+References: <CAMNMNTyRDoQX=ytzF-jporD3uTpaUiJqTXEzqYGetqUerJ5=-g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:53634 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756445Ab3JRRqq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Oct 2013 13:46:46 -0400
+Received: from mail-wg0-f45.google.com ([74.125.82.45]:43272 "EHLO
+	mail-wg0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756597Ab3JRTAk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Oct 2013 15:00:40 -0400
+Received: by mail-wg0-f45.google.com with SMTP id z12so4290966wgg.24
+        for <ceph-devel@vger.kernel.org>; Fri, 18 Oct 2013 12:00:38 -0700 (PDT)
+In-Reply-To: <CAMNMNTyRDoQX=ytzF-jporD3uTpaUiJqTXEzqYGetqUerJ5=-g@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org, ceph-users@ceph.com
+To: Dominik Mostowiec <dominikmostowiec@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-This development release includes a significant amount of new code and 
-refactoring, as well as a lot of preliminary functionality that will be 
-needed for erasure coding and tiering support. There are also several 
-significant patch sets improving this with the MDS.
+On Fri, Oct 18, 2013 at 4:01 AM, Dominik Mostowiec
+<dominikmostowiec@gmail.com> wrote:
+> Hi,
+> I plan to shard my largest bucket because of issues of deep-scrubbing
+> (when PG which index for this bucket is stored on is deep-scrubbed, it
+> appears many slow requests and OSD grows in memory - after latest
+> scrub it grows up to 9G).
+>
+> I trying to found why large bucket index make issues when it is scrubbed.
+> On test cluster:
+> radosgw-admin bucket stats --bucket=test1-XX
+> { "bucket": "test1-XX",
+>   "pool": ".rgw.buckets",
+>   "index_pool": ".rgw.buckets",
+>   "id": "default.4211.2",
+> ...
+>
+> I guess index is in object .dir.default.4211.2. (pool: .rgw.buckets)
+>
+> rados -p .rgw.buckets get .dir.default.4211.2 -
+> <empty>
+>
+> But:
+> rados -p .rgw.buckets listomapkeys .dir.default.4211.2
+> test_file_2.txt
+> test_file_2_11.txt
+> test_file_3.txt
+> test_file_4.txt
+> test_file_5.txt
+>
+> I guess that list of files are stored in leveldb not in one large file.
+> 'omap' files are stored in {osd_dir}/current/omap/, the largest file
+> that i found in this directory (on production) have 8.8M.
+>
+> I'm a little confused.
+>
+> How list of files (for bucket) is stored?
 
-Upgrading:
+The index is stored as a bunch of omap entries in a single object.
 
- * The MDS now disallows snapshots by default as they are not
-   considered stable.  The command 'ceph mds set allow_snaps' will
-   enable them.
- * For clusters that were created before v0.44 (pre-argonaut, Spring
-   2012) and store radosgw data, the auto-upgrade from TMAP to OMAP
-   objects has been disabled.  Before upgrading, make sure that any
-   buckets created on pre-argonaut releases have been modified (e.g.,
-   by PUTing and then DELETEing an object from each bucket).  Any
-   cluster created with argonaut (v0.48) or a later release or not
-   using radosgw never relied on the automatic conversion and is not
-   affected by this change.
- * Any direct users of the 'tmap' portion of the librados API should be
-   aware that the automatic tmap -> omap conversion functionality has
-   been removed.
- * Most output that used K or KB (e.g., for kilobyte) now uses a
-   lower-case k to match the official SI convention.  Any scripts that
-   parse output and check for an upper-case K will need to be modified.
+> If list of objects in bucket is splitted on many small files in
+> leveldb that large bucket (with many files) should not cause larger
+> latency in PUT new object.
 
-Notable changes:
+That's not quite how it works. Leveldb has a custom storage format in
+which it stores sets of keys based on both time of update and the
+value of the key, so the size of the individual files in its directory
+has no correlation to the number or size of any given set of entries.
 
- * build: Makefile refactor (Roald J. van Loon)
- * ceph-disk: fix journal preallocation
- * ceph-fuse: trim deleted inodes from cache (Yan, Zheng)
- * ceph-fuse: use newer fuse api (Jianpeng Ma)
- * ceph-kvstore-tool: new tool for working with leveldb (copy, crc) (Joao 
-   Luis)
- * common: bloom_filter improvements, cleanups
- * common: correct SI is kB not KB (Dan Mick)
- * common: misc portability fixes (Noah Watkins)
- * hadoop: removed old version of shim to avoid confusing users (Noah 
-   Watkins)
- * librados: fix installed header #includes (Dan Mick)
- * librbd, ceph-fuse: avoid some sources of ceph-fuse, rbd cache stalls
- * mds: fix LOOKUPSNAP bug
- * mds: fix standby-replay when we fall behind (Yan, Zheng)
- * mds: fix stray directory purging (Yan, Zheng)
- * mon: disallow CephFS snapshots until 'ceph mds set allow_new_snaps' 
-   (Greg Farnum)
- * mon, osd: improve osdmap trimming logic (Samuel Just)
- * mon: kv properties for pools to support EC (Loic Dachary)
- * mon: some auth check cleanups (Joao Luis)
- * mon: track per-pool stats (Joao Luis)
- * mon: warn about pools with bad pg_num
- * osd: automatically detect proper xattr limits (David Zafman)
- * osd: avoid extra copy in erasure coding reference implementation (Loic 
-   Dachary)
- * osd: basic cache pool redirects (Greg Farnum)
- * osd: basic whiteout, dirty flag support (not yet used)
- * osd: clean up and generalize copy-from code (Greg Farnum)
- * osd: erasure coding doc updates (Loic Dachary)
- * osd: erasure coding plugin infrastructure, tests (Loic Dachary)
- * osd: fix RWORDER flags
- * osd: fix exponential backoff of slow request warnings (Loic Dachary)
- * osd: generalized temp object infrastructure
- * osd: ghobject_t infrastructure for EC (David Zafman)
- * osd: improvements for compatset support and storage (David Zafman)
- * osd: misc copy-from improvements
- * osd: opportunistic crc checking on stored data (off by default)
- * osd: refactor recovery using PGBackend (Samuel Just)
- * osd: remove old magical tmap->omap conversion
- * pybind: fix blacklisting nonce (Loic Dachary)
- * rgw: default log level is now more reasonable (Yehuda Sadeh)
- * rgw: fix acl group check (Yehuda Sadeh)
- * sysvinit: fix shutdown order (mons last) (Alfredo Deza)
+> Scrubbing also should not be a problem i think ...
 
-We have now frozen the code for v0.72 Emperor, and the next sprint or two 
-will be focused primarily on stability and testing (paritcularly the 
-upgrade path).  There is also still a lot of ongoing development work in 
-flight for the erasure coding and tiering that is coming in Firefly, but 
-that code may sit outside of master for a bit longer while we harden 
-things.
+The problem you're running into is that scrubbing is done on an
+object-by-object basis, and so the OSD is reading all of the keys
+associated with that object out of leveldb, and processing them, at
+once. This number can be very much larger than the 8MB file you've
+found in the leveldb directory, as discussed above.
 
-You can get v0.71 from the usual places:
+> What you think about using a sharding to split big buckets into the
+> smalest one to avoid the problems with big indexes?
 
- * Git at git://github.com/ceph/ceph.git
- * Tarball at http://ceph.com/download/ceph-0.71.tar.gz
- * For Debian/Ubuntu packages, see http://ceph.com/docs/master/install/debian
- * For RPMs, see http://ceph.com/docs/master/install/rpm
+That is definitely the obvious next step, but it's a non-trivial
+amount of work and hasn't yet been started on by anybody. This is
+probably a good subject for a CDS blueprint!
+-Greg
+Software Engineer #42 @ http://inktank.com | http://ceph.com
