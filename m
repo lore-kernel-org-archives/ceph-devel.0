@@ -1,72 +1,46 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Weekly teuthology meeting #5
-Date: Sat, 19 Oct 2013 14:39:06 +0200
-Message-ID: <52627D6A.4000107@dachary.org>
+From: "hjwsm1989-gmail" <hjwsm1989@gmail.com>
+Subject: set mds message priority to MSG_PRIO_HIGH
+Date: Sat, 19 Oct 2013 20:58:46 +0800
+Message-ID: <004001ceccca$f7e0fba0$e7a2f2e0$@gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="FfesvWAIJSPNGOdmHrL11ThjAh6vh88Cl"
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:40259 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752128Ab3JSMjI (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 19 Oct 2013 08:39:08 -0400
-Received: from [10.9.0.6] (openvpn.novalocal [10.145.3.13])
-	by smtp.dmail.dachary.org (Postfix) with ESMTPS id 0E88226398
-	for <ceph-devel@vger.kernel.org>; Sat, 19 Oct 2013 14:39:07 +0200 (CEST)
+Received: from mail-pa0-f48.google.com ([209.85.220.48]:39952 "EHLO
+	mail-pa0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752052Ab3JSM67 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 19 Oct 2013 08:58:59 -0400
+Received: by mail-pa0-f48.google.com with SMTP id bj1so5813474pad.7
+        for <ceph-devel@vger.kernel.org>; Sat, 19 Oct 2013 05:58:59 -0700 (PDT)
+Received: from huangjun ([111.173.83.95])
+        by mx.google.com with ESMTPSA id ry4sm11629046pab.4.2013.10.19.05.58.54
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
+        Sat, 19 Oct 2013 05:58:57 -0700 (PDT)
+Content-Language: zh-cn
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---FfesvWAIJSPNGOdmHrL11ThjAh6vh88Cl
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Hi, 
+I'm testing ceph with samba.
+I have 20 OSD nodes on 4 hosts
+dy01:1MON, 5 OSDs, 1 samba server
+dy02: 1MDS, 5OSDs, 1 samba server
+dy03: 5 OSDs, 1 samba server
+dy04:5 OSDs, 1 samba server
+every samba server exports the ceph kclient mount point.
 
-Hi,
+When I set 3 samba clients connect to a samba server(dy01), and each write a
+single 18GB file, gets 110MB/s speed each.
+But when I use 4 clients, the cluster will report 'slow request' msg, and
+this time I list files in samba client dir, it gets stuck.
+And the test tool reports frame losing.
+For the list operation related to MDS, I think the MDS op messages should
+have higher priority than clients op.
+Have I understood correctly? 
 
-Wednesday 16th, Ocotber 2013 8pm paris time / CEST was the fifth teutholo=
-gy meeting. The general idea of these meetings is to get together develop=
-ers using teuthology ( or willing to use teuthology ) outside of Inktank =
-and people using it inside inktank. The goal is to help transition from a=
-n internal tool to something that's installable and upgradeable by any Ce=
-ph developer.=20
-The next meeting will be held=20
-
-  8pm paris time / CEST wednesday october 23th, 2013.=20
-
-The IRC channel is irc.oftc.net#ceph-devel and the conference room is mum=
-ble.upstream-university.org ( http://www.mumble.com/mumble-download.php )=
-=2E It is timeboxed to one hour.
-
-Cheers
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-All that is necessary for the triumph of evil is that good people do noth=
-ing.
+thanks
 
 
-
-
-
-
-
-
-
-
---FfesvWAIJSPNGOdmHrL11ThjAh6vh88Cl
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlJifWoACgkQ8dLMyEl6F211CgCcDCNZYk6rI43osQaysWm66Y25
-3icAn39YKLCLEehOavGzl8027EaQYUlr
-=qt+V
------END PGP SIGNATURE-----
-
---FfesvWAIJSPNGOdmHrL11ThjAh6vh88Cl--
