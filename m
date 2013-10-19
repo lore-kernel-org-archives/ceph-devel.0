@@ -1,61 +1,72 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: poor read performance on rbd+LVM, LVM overload
-Date: Fri, 18 Oct 2013 17:01:27 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1310181657151.19763@cobra.newdream.net>
-References: <CAE63xUO1jhgxQoRbJU-8+j-cxRB7QEspu=JWvekp9ExzFmnjSA@mail.gmail.com> <alpine.DEB.2.00.1310160914360.22271@cobra.newdream.net> <20131017151828.GB28859@redhat.com> <CAE63xUPtovZwGq=4Xseq3DJ+uAyGJJmYbO70ry=WJqqGcBamRA@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Weekly teuthology meeting #5
+Date: Sat, 19 Oct 2013 14:39:06 +0200
+Message-ID: <52627D6A.4000107@dachary.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="FfesvWAIJSPNGOdmHrL11ThjAh6vh88Cl"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:57502 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753679Ab3JSAB1 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Oct 2013 20:01:27 -0400
-In-Reply-To: <CAE63xUPtovZwGq=4Xseq3DJ+uAyGJJmYbO70ry=WJqqGcBamRA@mail.gmail.com>
+Received: from smtp.dmail.dachary.org ([91.121.254.229]:40259 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752128Ab3JSMjI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 19 Oct 2013 08:39:08 -0400
+Received: from [10.9.0.6] (openvpn.novalocal [10.145.3.13])
+	by smtp.dmail.dachary.org (Postfix) with ESMTPS id 0E88226398
+	for <ceph-devel@vger.kernel.org>; Sat, 19 Oct 2013 14:39:07 +0200 (CEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ugis <ugis22@gmail.com>
-Cc: Mike Snitzer <snitzer@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@ceph.com" <ceph-users@ceph.com>, linux-lvm@redhat.com
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Fri, 18 Oct 2013, Ugis wrote:
-> > Ugis, please provide the output of:
-> >
-> > RBD_DEVICE=<rbd device name>
-> > pvs -o pe_start $RBD_DEVICE
-> > cat /sys/block/$RBD_DEVICE/queue/minimum_io_size
-> > cat /sys/block/$RBD_DEVICE/queue/optimal_io_size
-> >
-> > The 'pvs' command will tell you where LVM aligned the start of the data
-> > area (which follows the LVM metadata area).  Hopefully it reflects what
-> > was published in sysfs for rbd's striping.
-> 
-> output follows:
-> #pvs -o pe_start /dev/rbd1p1
->   1st PE
->     4.00m
-> # cat /sys/block/rbd1/queue/minimum_io_size
-> 4194304
-> # cat /sys/block/rbd1/queue/optimal_io_size
-> 4194304
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--FfesvWAIJSPNGOdmHrL11ThjAh6vh88Cl
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-Well, the parameters are being set at least.  Mike, is it possible that 
-having minimum_io_size set to 4m is causing some read amplification 
-in LVM, translating a small read into a complete fetch of the PE (or 
-somethinga long those lines)?
+Hi,
 
-Ugis, if your cluster is on the small side, it might be interesting to see 
-what requests the client is generated in the LVM and non-LVM case by 
-setting 'debug ms = 1' on the osds (e.g., ceph tell osd.* injectargs 
-'--debug-ms 1') and then looking at the osd_op messages that appear in 
-/var/log/ceph/ceph-osd*.log.  It may be obvious that the IO pattern is 
-different.
+Wednesday 16th, Ocotber 2013 8pm paris time / CEST was the fifth teutholo=
+gy meeting. The general idea of these meetings is to get together develop=
+ers using teuthology ( or willing to use teuthology ) outside of Inktank =
+and people using it inside inktank. The goal is to help transition from a=
+n internal tool to something that's installable and upgradeable by any Ce=
+ph developer.=20
+The next meeting will be held=20
 
-> Seems correct in terms of ceph-LVM io parameter negotiation? I wonded
-> about gpt header+PV metadata - it makes some shift starting from ceph
-> 1st block beginning. Does this mean that all following LVM 4m data
-> blocks are shifted by this part and span 2 ceph objects?
-> If so, performance will be affected.
+  8pm paris time / CEST wednesday october 23th, 2013.=20
 
-I'm no LVM expert, but I would guess that LVM is aligning things properly 
-based on the above device properties...
+The IRC channel is irc.oftc.net#ceph-devel and the conference room is mum=
+ble.upstream-university.org ( http://www.mumble.com/mumble-download.php )=
+=2E It is timeboxed to one hour.
 
-sage
+Cheers
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+All that is necessary for the triumph of evil is that good people do noth=
+ing.
+
+
+
+
+
+
+
+
+
+
+--FfesvWAIJSPNGOdmHrL11ThjAh6vh88Cl
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.19 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlJifWoACgkQ8dLMyEl6F211CgCcDCNZYk6rI43osQaysWm66Y25
+3icAn39YKLCLEehOavGzl8027EaQYUlr
+=qt+V
+-----END PGP SIGNATURE-----
+
+--FfesvWAIJSPNGOdmHrL11ThjAh6vh88Cl--
