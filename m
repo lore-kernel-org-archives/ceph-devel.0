@@ -1,100 +1,61 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: PGBackend: Multiple PG implementations.
-Date: Sat, 19 Oct 2013 01:16:37 +0200
-Message-ID: <5261C155.8000500@dachary.org>
-References: <CAKD2hyG6giBDQ0ue9hD723Eq0Bk+1rAKgb9NzdjHJBW5DoRxdQ@mail.gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: poor read performance on rbd+LVM, LVM overload
+Date: Fri, 18 Oct 2013 17:01:27 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1310181657151.19763@cobra.newdream.net>
+References: <CAE63xUO1jhgxQoRbJU-8+j-cxRB7QEspu=JWvekp9ExzFmnjSA@mail.gmail.com> <alpine.DEB.2.00.1310160914360.22271@cobra.newdream.net> <20131017151828.GB28859@redhat.com> <CAE63xUPtovZwGq=4Xseq3DJ+uAyGJJmYbO70ry=WJqqGcBamRA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="aPi3HQcQrRuAlj8jDDPUs9xFoNkFVMu8I"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:39866 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754832Ab3JRXQj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Oct 2013 19:16:39 -0400
-In-Reply-To: <CAKD2hyG6giBDQ0ue9hD723Eq0Bk+1rAKgb9NzdjHJBW5DoRxdQ@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:57502 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753679Ab3JSAB1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Oct 2013 20:01:27 -0400
+In-Reply-To: <CAE63xUPtovZwGq=4Xseq3DJ+uAyGJJmYbO70ry=WJqqGcBamRA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?B?TGx1w61zIFDDoG1pZXMgaSBKdcOhcmV6?= <llpamies@pamies.cat>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Ugis <ugis22@gmail.com>
+Cc: Mike Snitzer <snitzer@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@ceph.com" <ceph-users@ceph.com>, linux-lvm@redhat.com
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---aPi3HQcQrRuAlj8jDDPUs9xFoNkFVMu8I
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+On Fri, 18 Oct 2013, Ugis wrote:
+> > Ugis, please provide the output of:
+> >
+> > RBD_DEVICE=<rbd device name>
+> > pvs -o pe_start $RBD_DEVICE
+> > cat /sys/block/$RBD_DEVICE/queue/minimum_io_size
+> > cat /sys/block/$RBD_DEVICE/queue/optimal_io_size
+> >
+> > The 'pvs' command will tell you where LVM aligned the start of the data
+> > area (which follows the LVM metadata area).  Hopefully it reflects what
+> > was published in sysfs for rbd's striping.
+> 
+> output follows:
+> #pvs -o pe_start /dev/rbd1p1
+>   1st PE
+>     4.00m
+> # cat /sys/block/rbd1/queue/minimum_io_size
+> 4194304
+> # cat /sys/block/rbd1/queue/optimal_io_size
+> 4194304
 
-Hi Llu=C3=ADs,
+Well, the parameters are being set at least.  Mike, is it possible that 
+having minimum_io_size set to 4m is causing some read amplification 
+in LVM, translating a small read into a complete fetch of the PE (or 
+somethinga long those lines)?
 
-David Zafman and Samuel Just are working to re-architecture the core of C=
-eph so that and ErasureCodedBackend can be implemented. You can browse th=
-eir commits to see what they are up to. The transcript of the last CDS su=
-mmit will also give you a general view of the direction in which it is he=
-ading :=20
+Ugis, if your cluster is on the small side, it might be interesting to see 
+what requests the client is generated in the LVM and non-LVM case by 
+setting 'debug ms = 1' on the osds (e.g., ceph tell osd.* injectargs 
+'--debug-ms 1') and then looking at the osd_op messages that appear in 
+/var/log/ceph/ceph-osd*.log.  It may be obvious that the IO pattern is 
+different.
 
-http://wiki.ceph.com/01Planning/CDS/Emperor/Transcript_:_Erasure_coded_st=
-orage_backend_%28step_2%29
+> Seems correct in terms of ceph-LVM io parameter negotiation? I wonded
+> about gpt header+PV metadata - it makes some shift starting from ceph
+> 1st block beginning. Does this mean that all following LVM 4m data
+> blocks are shifted by this part and span 2 ceph objects?
+> If so, performance will be affected.
 
-and a more recent interview of Samuel Just will give you a short update :=
+I'm no LVM expert, but I would guess that LVM is aligning things properly 
+based on the above device properties...
 
-
-http://dachary.org/?p=3D2320
-
-I'm not the best qualified to comment on the generic part of your patches=
-, but I think it overlaps with the work being done.
-
-Cheers
-
-On 19/10/2013 01:05, Llu=C3=ADs P=C3=A0mies i Ju=C3=A1rez wrote:
-> Hello,
->=20
-> I was looking at the work done to re-architecture the OSD backend.
-> Since it seems that it allows now to have more than one PG
-> implementation I decided to subclass PG and PGBackend to create an
-> alternative implementation to ReplicatedPG and ReplicatedBackend.
-> However, I noticed a couple of problems:
->=20
-> * All methods in watch.h and watch.cc expect ReplicatedPG objects
-> instead of generic PG objects.
-> * New pools created in the OSDMonitor are created as replicated pools
-> (g_pool_t::TYPE_REP). This is a hardcoded value.
->=20
-> I made a few changes to solve these two issues that allowed me to have
-> more than one PG implementation running without problems. You can find
-> the changes here:
->=20
-> https://github.com/ceph/ceph/pull/744
->=20
-> Are these changes useful for the re-architecture of the OSD ?
->=20
-> PS: Implementing and running an alternative PG requires other changes
-> in the CrushCompiler and other header files.
->=20
-> Best,
-> Lluis
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-All that is necessary for the triumph of evil is that good people do noth=
-ing.
-
-
---aPi3HQcQrRuAlj8jDDPUs9xFoNkFVMu8I
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlJhwVUACgkQ8dLMyEl6F21xawCZAePgNLvNg/pIFDwpYwfLsL/B
-RgcAnjj5a82bZPUWC/r8w4tzIuFH/rSe
-=kaTX
------END PGP SIGNATURE-----
-
---aPi3HQcQrRuAlj8jDDPUs9xFoNkFVMu8I--
+sage
