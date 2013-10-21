@@ -1,62 +1,95 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: poor read performance on rbd+LVM, LVM overload
-Date: Mon, 21 Oct 2013 09:02:16 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1310210853140.29488@cobra.newdream.net>
-References: <CAE63xUO1jhgxQoRbJU-8+j-cxRB7QEspu=JWvekp9ExzFmnjSA@mail.gmail.com> <alpine.DEB.2.00.1310160914360.22271@cobra.newdream.net> <20131017151828.GB28859@redhat.com> <CAE63xUPtovZwGq=4Xseq3DJ+uAyGJJmYbO70ry=WJqqGcBamRA@mail.gmail.com>
- <alpine.DEB.2.00.1310181657151.19763@cobra.newdream.net> <CAE63xUO4ZrzObMFeQ=FXGFnqpwWsjCiiDr2_VhOt91h=djofYw@mail.gmail.com> <alpine.DEB.2.00.1310202051240.29488@cobra.newdream.net> <20131021141147.GA30189@infradead.org>
- <20131021150129.GA28099@redhat.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Removing disks / OSDs
+Date: Mon, 21 Oct 2013 18:15:05 +0200
+Message-ID: <52655309.8070500@dachary.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="h0GLv15PTpFaVbjK7cwaClq9mA3QmHfdP"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:58308 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750847Ab3JUQCQ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Oct 2013 12:02:16 -0400
-In-Reply-To: <20131021150129.GA28099@redhat.com>
+Received: from smtp.dmail.dachary.org ([91.121.254.229]:41779 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751051Ab3JUQPX (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Oct 2013 12:15:23 -0400
+Received: from [10.9.0.6] (openvpn.novalocal [10.145.3.13])
+	by smtp.dmail.dachary.org (Postfix) with ESMTPS id A228926396
+	for <ceph-devel@vger.kernel.org>; Mon, 21 Oct 2013 18:15:21 +0200 (CEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mike Snitzer <snitzer@redhat.com>
-Cc: Christoph Hellwig <hch@infradead.org>, elder@inktank.com, Ugis <ugis22@gmail.com>, linux-lvm@redhat.com, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@ceph.com" <ceph-users@ceph.com>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Mon, 21 Oct 2013, Mike Snitzer wrote:
-> On Mon, Oct 21 2013 at 10:11am -0400,
-> Christoph Hellwig <hch@infradead.org> wrote:
-> 
-> > On Sun, Oct 20, 2013 at 08:58:58PM -0700, Sage Weil wrote:
-> > > It looks like without LVM we're getting 128KB requests (which IIRC is 
-> > > typical), but with LVM it's only 4KB.  Unfortunately my memory is a bit 
-> > > fuzzy here, but I seem to recall a property on the request_queue or device 
-> > > that affected this.  RBD is currently doing
-> > 
-> > Unfortunately most device mapper modules still split all I/O into 4k
-> > chunks before handling them.  They rely on the elevator to merge them
-> > back together down the line, which isn't overly efficient but should at
-> > least provide larger segments for the common cases.
-> 
-> It isn't DM that splits the IO into 4K chunks; it is the VM subsystem
-> no?  Unless care is taken to assemble larger bios (higher up the IO
-> stack, e.g. in XFS), all buffered IO will come to bio-based DM targets
-> in $PAGE_SIZE granularity.
-> 
-> I would expect direct IO to before better here because it will make use
-> of bio_add_page to build up larger IOs.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--h0GLv15PTpFaVbjK7cwaClq9mA3QmHfdP
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-I do know that we regularly see 128 KB requests when we put XFS (or 
-whatever else) directly on top of /dev/rbd*.
+Hi Ceph,
 
-> Taking a step back, the rbd driver is exposing both the minimum_io_size
-> and optimal_io_size as 4M.  This symmetry will cause XFS to _not_ detect
-> the exposed limits as striping.  Therefore, AFAIK, XFS won't take steps
-> to respect the limits when it assembles its bios (via bio_add_page).
-> 
-> Sage, any reason why you don't use traditional raid geomtry based IO
-> limits?, e.g.:
-> 
-> minimum_io_size = raid chunk size
-> optimal_io_size = raid chunk size * N stripes (aka full stripe)
+In the context of the ceph puppet module ( https://wiki.openstack.org/wik=
+i/Puppet-openstack/ceph-blueprint ) I tried to think about what should be=
+ provided to deal with disks / OSDs when they are removed or moved around=
+=2E
 
-We are... by default we stripe 4M chunks across 4M objects.  You're 
-suggesting it would actually help to advertise a smaller minimim_io_size 
-(say, 1MB)?  This could easily be made tunable.
+Here is a possible scenario:
 
-sage
+* Machine A dies and contains OSD 42
+* ceph osd rm 42 is done to get rid of the OSD
+* ceph-prepare is called on a new disk and gets OSD id 42
+
+ceph/src/mon/OSDMonitor.cc
+
+    // allocate a new id
+    for (i=3D0; i < osdmap.get_max_osd(); i++) {
+      if (!osdmap.exists(i) &&
+	  pending_inc.new_up_client.count(i) =3D=3D 0 &&
+	  (pending_inc.new_state.count(i) =3D=3D 0 ||
+	   (pending_inc.new_state[i] & CEPH_OSD_EXISTS) =3D=3D 0))
+	goto done;
+    }
+
+* The disk of machine A is still good and is plugged into machine C
+* the udev logic sees it has the ceph magic uuid and contains a well form=
+ed osd file system and runs the osd daemon on it. The osd daemon fails an=
+d dies because its key does not match. It will try again and fail in the =
+same way when the machine reboots.
+
+If the osd id was not reused, the disk would find its way back in the clu=
+ster and be reused without manual intervention. Since ceph-disk uses the =
+osd uuid to create the disk, it does not matter that it has been removed =
+: https://github.com/ceph/ceph/blob/master/src/ceph-disk#L458 . I'm not s=
+ure to understand how the key that was previously registered is re-import=
+ed. If I understand correctly it is created with ceph-osd --mkkey https:/=
+/github.com/ceph/ceph/blob/master/src/ceph-disk#L1301 and stored in the o=
+sd tree at the location specified by --keyring https://github.com/ceph/ce=
+ph/blob/master/src/ceph-disk#L1307 .=20
+
+At this point my understanding is that (as long as OSD ids are not reused=
+), removing a disk or moving it from machine to machine, even over a long=
+ period of time does not require any action. The OSD id is an int which i=
+s probably large enough for any kind of cluster in the near future. The O=
+SD ids that are not used and not removed could be cleaned from time to ti=
+me to garbage collect the space they use.
+
+Please let me know if I've missed something :-)
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+All that is necessary for the triumph of evil is that good people do noth=
+ing.
+
+
+--h0GLv15PTpFaVbjK7cwaClq9mA3QmHfdP
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.19 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlJlUwkACgkQ8dLMyEl6F237PwCghKM5nX4hnQJO2Y3/E7jV8l1Q
+AkMAnj8/h5KRgYhle7Mj7fyeTSOzgx9A
+=9ygN
+-----END PGP SIGNATURE-----
+
+--h0GLv15PTpFaVbjK7cwaClq9mA3QmHfdP--
