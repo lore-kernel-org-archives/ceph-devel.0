@@ -1,68 +1,36 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Ceph deployment : ceph-deploy, puppet, chef, salt, ansible...
-Date: Mon, 21 Oct 2013 13:57:45 +0200
-Message-ID: <526516B9.9060700@dachary.org>
+From: Christoph Hellwig <hch@infradead.org>
+Subject: Re: poor read performance on rbd+LVM, LVM overload
+Date: Mon, 21 Oct 2013 07:11:47 -0700
+Message-ID: <20131021141147.GA30189@infradead.org>
+References: <CAE63xUO1jhgxQoRbJU-8+j-cxRB7QEspu=JWvekp9ExzFmnjSA@mail.gmail.com>
+ <alpine.DEB.2.00.1310160914360.22271@cobra.newdream.net>
+ <20131017151828.GB28859@redhat.com>
+ <CAE63xUPtovZwGq=4Xseq3DJ+uAyGJJmYbO70ry=WJqqGcBamRA@mail.gmail.com>
+ <alpine.DEB.2.00.1310181657151.19763@cobra.newdream.net>
+ <CAE63xUO4ZrzObMFeQ=FXGFnqpwWsjCiiDr2_VhOt91h=djofYw@mail.gmail.com>
+ <alpine.DEB.2.00.1310202051240.29488@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="exVTgQw8O4pQKGT3vVuJIp44LG2KhB1Ds"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:41517 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753171Ab3JUL5r (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Oct 2013 07:57:47 -0400
-Received: from [10.9.0.6] (openvpn.novalocal [10.145.3.13])
-	by smtp.dmail.dachary.org (Postfix) with ESMTPS id B365A26394
-	for <ceph-devel@vger.kernel.org>; Mon, 21 Oct 2013 13:57:45 +0200 (CEST)
+Received: from bombadil.infradead.org ([198.137.202.9]:39968 "EHLO
+	bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752707Ab3JUOLz (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Oct 2013 10:11:55 -0400
+Content-Disposition: inline
+In-Reply-To: <alpine.DEB.2.00.1310202051240.29488@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: Ugis <ugis22@gmail.com>, Mike Snitzer <snitzer@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@ceph.com" <ceph-users@ceph.com>, linux-lvm@redhat.com, elder@inktank.com
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---exVTgQw8O4pQKGT3vVuJIp44LG2KhB1Ds
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+On Sun, Oct 20, 2013 at 08:58:58PM -0700, Sage Weil wrote:
+> It looks like without LVM we're getting 128KB requests (which IIRC is 
+> typical), but with LVM it's only 4KB.  Unfortunately my memory is a bit 
+> fuzzy here, but I seem to recall a property on the request_queue or device 
+> that affected this.  RBD is currently doing
 
-Hi,
+Unfortunately most device mapper modules still split all I/O into 4k
+chunks before handling them.  They rely on the elevator to merge them
+back together down the line, which isn't overly efficient but should at
+least provide larger segments for the common cases.
 
-It would be great if we could discuss Ceph deployment and share our exper=
-ience accross configuration tools. The work in progress for the new puppe=
-t module ( https://wiki.openstack.org/wiki/Puppet-openstack/ceph-blueprin=
-t ) shows that it's worth discussing to find simple solutions. For instan=
-ce, with the logic in place to create a new osd ( https://github.com/ceph=
-/ceph/tree/master/src/upstart https://github.com/ceph/ceph/tree/master/ud=
-ev and https://github.com/ceph/ceph/blob/master/src/ceph-disk ) the confi=
-guration tool does not need to be concerned with OSD ids.
-
-A proposal was created for the next Ceph Developer Summit ( will happen l=
-ate november I think ):
-
-http://wiki.ceph.com/01Planning/02Blueprints/Firefly/Ceph_deployment_%3A_=
-ceph-deploy%2C_puppet%2C_chef%2C_salt%2C_ansible...
-
-Anyone interested can update the "Interested Parties" accordingly. I hope=
- there is enough interest and that it will be scheduled :-)
-
-Cheers
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-All that is necessary for the triumph of evil is that good people do noth=
-ing.
-
-
---exVTgQw8O4pQKGT3vVuJIp44LG2KhB1Ds
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlJlFrkACgkQ8dLMyEl6F222dACgrDa7wxUv8l2fk1DoCP5oUYVu
-XW4Anig1fOf+vjbrZDSryotAdpa+dP9s
-=EcMs
------END PGP SIGNATURE-----
-
---exVTgQw8O4pQKGT3vVuJIp44LG2KhB1Ds--
