@@ -1,91 +1,121 @@
 From: Gregory Farnum <greg@inktank.com>
-Subject: Re: Removing disks / OSDs
-Date: Mon, 21 Oct 2013 09:49:45 -0700
-Message-ID: <CAPYLRzjBmdewVvNVQd5JwnAAF2dv+q7Qk4qtzwQO7jVtpDGDRg@mail.gmail.com>
-References: <52655309.8070500@dachary.org>
+Subject: Re: issues when bucket index deep-scrubbing
+Date: Mon, 21 Oct 2013 09:53:42 -0700
+Message-ID: <CAPYLRzj=RuPn1-4=wTAkqGDu2tjZor-bh0r3eur99CiyQzrXGA@mail.gmail.com>
+References: <CAMNMNTyRDoQX=ytzF-jporD3uTpaUiJqTXEzqYGetqUerJ5=-g@mail.gmail.com>
+	<CAPYLRzjFRn=SHOs5JiEqGow0hgnbOEMkqrqwTi9W0cX4EAe=KA@mail.gmail.com>
+	<CAMNMNTzc6V90xg89Fi+yNk-Boq0oTM7JQys49qYDnjs5TOjg1Q@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f47.google.com ([74.125.82.47]:59838 "EHLO
-	mail-wg0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750937Ab3JUQtr convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Oct 2013 12:49:47 -0400
-Received: by mail-wg0-f47.google.com with SMTP id c11so6739623wgh.2
-        for <ceph-devel@vger.kernel.org>; Mon, 21 Oct 2013 09:49:45 -0700 (PDT)
-In-Reply-To: <52655309.8070500@dachary.org>
+Received: from mail-we0-f179.google.com ([74.125.82.179]:44088 "EHLO
+	mail-we0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750937Ab3JUQxo (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Oct 2013 12:53:44 -0400
+Received: by mail-we0-f179.google.com with SMTP id w61so6739407wes.38
+        for <ceph-devel@vger.kernel.org>; Mon, 21 Oct 2013 09:53:43 -0700 (PDT)
+In-Reply-To: <CAMNMNTzc6V90xg89Fi+yNk-Boq0oTM7JQys49qYDnjs5TOjg1Q@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Dominik Mostowiec <dominikmostowiec@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-I'm not quite sure what questions you're actually asking here...
-In general, the OSD is not removed from the system without explicit
-admin intervention. When it is removed, all traces of it should be
-zapped (including its key), so it can't reconnect.
-If it hasn't been removed, then indeed it will continue working
-properly even if moved to a different box.
+On Mon, Oct 21, 2013 at 2:26 AM, Dominik Mostowiec
+<dominikmostowiec@gmail.com> wrote:
+> Hi,
+> Thanks for your response.
+>
+>> That is definitely the obvious next step, but it's a non-trivial
+>> amount of work and hasn't yet been started on by anybody. This is
+>> probably a good subject for a CDS blueprint!
+> But we want to split our big bucket into the smallest ones. We want to
+> shard it before radosgw.
+> Do you think this is a good idea to make workaround of this problem
+> (big index issues)?
+
+Oh, yes, this is a good workaround.
+Sorry, I misread your initial post and thought you were discussing
+sharding the bucket index itself, rather than sharding across buckets
+in the application. :)
 -Greg
 Software Engineer #42 @ http://inktank.com | http://ceph.com
 
 
-On Mon, Oct 21, 2013 at 9:15 AM, Loic Dachary <loic@dachary.org> wrote:
-> Hi Ceph,
 >
-> In the context of the ceph puppet module ( https://wiki.openstack.org=
-/wiki/Puppet-openstack/ceph-blueprint ) I tried to think about what sho=
-uld be provided to deal with disks / OSDs when they are removed or move=
-d around.
+> Regards
+> Dominik
 >
-> Here is a possible scenario:
 >
-> * Machine A dies and contains OSD 42
-> * ceph osd rm 42 is done to get rid of the OSD
-> * ceph-prepare is called on a new disk and gets OSD id 42
 >
-> ceph/src/mon/OSDMonitor.cc
+> 2013/10/18 Gregory Farnum <greg@inktank.com>:
+>> On Fri, Oct 18, 2013 at 4:01 AM, Dominik Mostowiec
+>> <dominikmostowiec@gmail.com> wrote:
+>>> Hi,
+>>> I plan to shard my largest bucket because of issues of deep-scrubbing
+>>> (when PG which index for this bucket is stored on is deep-scrubbed, it
+>>> appears many slow requests and OSD grows in memory - after latest
+>>> scrub it grows up to 9G).
+>>>
+>>> I trying to found why large bucket index make issues when it is scrubbed.
+>>> On test cluster:
+>>> radosgw-admin bucket stats --bucket=test1-XX
+>>> { "bucket": "test1-XX",
+>>>   "pool": ".rgw.buckets",
+>>>   "index_pool": ".rgw.buckets",
+>>>   "id": "default.4211.2",
+>>> ...
+>>>
+>>> I guess index is in object .dir.default.4211.2. (pool: .rgw.buckets)
+>>>
+>>> rados -p .rgw.buckets get .dir.default.4211.2 -
+>>> <empty>
+>>>
+>>> But:
+>>> rados -p .rgw.buckets listomapkeys .dir.default.4211.2
+>>> test_file_2.txt
+>>> test_file_2_11.txt
+>>> test_file_3.txt
+>>> test_file_4.txt
+>>> test_file_5.txt
+>>>
+>>> I guess that list of files are stored in leveldb not in one large file.
+>>> 'omap' files are stored in {osd_dir}/current/omap/, the largest file
+>>> that i found in this directory (on production) have 8.8M.
+>>>
+>>> I'm a little confused.
+>>>
+>>> How list of files (for bucket) is stored?
+>>
+>> The index is stored as a bunch of omap entries in a single object.
+>>
+>>> If list of objects in bucket is splitted on many small files in
+>>> leveldb that large bucket (with many files) should not cause larger
+>>> latency in PUT new object.
+>>
+>> That's not quite how it works. Leveldb has a custom storage format in
+>> which it stores sets of keys based on both time of update and the
+>> value of the key, so the size of the individual files in its directory
+>> has no correlation to the number or size of any given set of entries.
+>>
+>>> Scrubbing also should not be a problem i think ...
+>>
+>> The problem you're running into is that scrubbing is done on an
+>> object-by-object basis, and so the OSD is reading all of the keys
+>> associated with that object out of leveldb, and processing them, at
+>> once. This number can be very much larger than the 8MB file you've
+>> found in the leveldb directory, as discussed above.
+>>
+>>> What you think about using a sharding to split big buckets into the
+>>> smalest one to avoid the problems with big indexes?
+>>
+>> That is definitely the obvious next step, but it's a non-trivial
+>> amount of work and hasn't yet been started on by anybody. This is
+>> probably a good subject for a CDS blueprint!
+>> -Greg
+>> Software Engineer #42 @ http://inktank.com | http://ceph.com
 >
->     // allocate a new id
->     for (i=3D0; i < osdmap.get_max_osd(); i++) {
->       if (!osdmap.exists(i) &&
->           pending_inc.new_up_client.count(i) =3D=3D 0 &&
->           (pending_inc.new_state.count(i) =3D=3D 0 ||
->            (pending_inc.new_state[i] & CEPH_OSD_EXISTS) =3D=3D 0))
->         goto done;
->     }
 >
-> * The disk of machine A is still good and is plugged into machine C
-> * the udev logic sees it has the ceph magic uuid and contains a well =
-formed osd file system and runs the osd daemon on it. The osd daemon fa=
-ils and dies because its key does not match. It will try again and fail=
- in the same way when the machine reboots.
->
-> If the osd id was not reused, the disk would find its way back in the=
- cluster and be reused without manual intervention. Since ceph-disk use=
-s the osd uuid to create the disk, it does not matter that it has been =
-removed : https://github.com/ceph/ceph/blob/master/src/ceph-disk#L458 .=
- I'm not sure to understand how the key that was previously registered =
-is re-imported. If I understand correctly it is created with ceph-osd -=
--mkkey https://github.com/ceph/ceph/blob/master/src/ceph-disk#L1301 and=
- stored in the osd tree at the location specified by --keyring https://=
-github.com/ceph/ceph/blob/master/src/ceph-disk#L1307 .
->
-> At this point my understanding is that (as long as OSD ids are not re=
-used), removing a disk or moving it from machine to machine, even over =
-a long period of time does not require any action. The OSD id is an int=
- which is probably large enough for any kind of cluster in the near fut=
-ure. The OSD ids that are not used and not removed could be cleaned fro=
-m time to time to garbage collect the space they use.
->
-> Please let me know if I've missed something :-)
 >
 > --
-> Lo=EFc Dachary, Artisan Logiciel Libre
-> All that is necessary for the triumph of evil is that good people do =
-nothing.
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Pozdrawiam
+> Dominik
