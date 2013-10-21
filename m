@@ -1,126 +1,91 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: Removing disks / OSDs
-Date: Mon, 21 Oct 2013 10:17:20 -0700
-Message-ID: <CAPYLRzjMR-4rf46OuQ46dt7Er+ebWhHuq=PFi0pcpFX45qcwdA@mail.gmail.com>
-References: <52655309.8070500@dachary.org>
-	<CAPYLRzjBmdewVvNVQd5JwnAAF2dv+q7Qk4qtzwQO7jVtpDGDRg@mail.gmail.com>
-	<52655CE6.9000203@dachary.org>
+From: Mike Snitzer <snitzer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: poor read performance on rbd+LVM, LVM overload
+Date: Mon, 21 Oct 2013 13:48:51 -0400
+Message-ID: <20131021174850.GA29416@redhat.com>
+References: <CAE63xUO1jhgxQoRbJU-8+j-cxRB7QEspu=JWvekp9ExzFmnjSA@mail.gmail.com>
+	<alpine.DEB.2.00.1310160914360.22271@cobra.newdream.net>
+	<20131017151828.GB28859@redhat.com>
+	<CAE63xUPtovZwGq=4Xseq3DJ+uAyGJJmYbO70ry=WJqqGcBamRA@mail.gmail.com>
+	<alpine.DEB.2.00.1310181657151.19763@cobra.newdream.net>
+	<CAE63xUO4ZrzObMFeQ=FXGFnqpwWsjCiiDr2_VhOt91h=djofYw@mail.gmail.com>
+	<alpine.DEB.2.00.1310202051240.29488@cobra.newdream.net>
+	<20131021141147.GA30189@infradead.org>
+	<20131021150129.GA28099@redhat.com>
+	<alpine.DEB.2.00.1310210853140.29488@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f49.google.com ([74.125.82.49]:35903 "EHLO
-	mail-wg0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751285Ab3JURRW convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Oct 2013 13:17:22 -0400
-Received: by mail-wg0-f49.google.com with SMTP id x12so6762834wgg.28
-        for <ceph-devel@vger.kernel.org>; Mon, 21 Oct 2013 10:17:21 -0700 (PDT)
-In-Reply-To: <52655CE6.9000203@dachary.org>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <alpine.DEB.2.00.1310210853140.29488-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Cc: Christoph Hellwig <hch-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, linux-lvm-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Mon, Oct 21, 2013 at 9:57 AM, Loic Dachary <loic@dachary.org> wrote:
->
->
-> On 21/10/2013 18:49, Gregory Farnum wrote:
->> I'm not quite sure what questions you're actually asking here...
->
-> I guess I was asking if my understanding was correct.
->
->> In general, the OSD is not removed from the system without explicit
->> admin intervention. When it is removed, all traces of it should be
->> zapped (including its key), so it can't reconnect.
->
-> Ok. So reusing osd ids is not an issue. If you reconnect a disk after=
- osd rm the id it had, you get what you deserve and you can zap the dis=
-k so that it is formated again. Is it what you mean ?
+On Mon, Oct 21 2013 at 12:02pm -0400,
+Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org> wrote:
 
-I was actually under the impression that "osd rm" would, itself, clear
-out the keys as well as the osd map state, but it does not do so. That
-looks like a serious bug! http://tracker.ceph.com/issues/6605
--Greg
+> On Mon, 21 Oct 2013, Mike Snitzer wrote:
+> > On Mon, Oct 21 2013 at 10:11am -0400,
+> > Christoph Hellwig <hch-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org> wrote:
+> > 
+> > > On Sun, Oct 20, 2013 at 08:58:58PM -0700, Sage Weil wrote:
+> > > > It looks like without LVM we're getting 128KB requests (which IIRC is 
+> > > > typical), but with LVM it's only 4KB.  Unfortunately my memory is a bit 
+> > > > fuzzy here, but I seem to recall a property on the request_queue or device 
+> > > > that affected this.  RBD is currently doing
+> > > 
+> > > Unfortunately most device mapper modules still split all I/O into 4k
+> > > chunks before handling them.  They rely on the elevator to merge them
+> > > back together down the line, which isn't overly efficient but should at
+> > > least provide larger segments for the common cases.
+> > 
+> > It isn't DM that splits the IO into 4K chunks; it is the VM subsystem
+> > no?  Unless care is taken to assemble larger bios (higher up the IO
+> > stack, e.g. in XFS), all buffered IO will come to bio-based DM targets
+> > in $PAGE_SIZE granularity.
+> > 
+> > I would expect direct IO to before better here because it will make use
+> > of bio_add_page to build up larger IOs.
+> 
+> I do know that we regularly see 128 KB requests when we put XFS (or 
+> whatever else) directly on top of /dev/rbd*.
 
->
->> If it hasn't been removed, then indeed it will continue working
->> properly even if moved to a different box.
->
-> Cool.
->
-> That makes it real simple from the point of view of tools like puppet=
- :-)
->
-> Cheers
->
->> -Greg
->> Software Engineer #42 @ http://inktank.com | http://ceph.com
->>
->>
->> On Mon, Oct 21, 2013 at 9:15 AM, Loic Dachary <loic@dachary.org> wro=
-te:
->>> Hi Ceph,
->>>
->>> In the context of the ceph puppet module ( https://wiki.openstack.o=
-rg/wiki/Puppet-openstack/ceph-blueprint ) I tried to think about what s=
-hould be provided to deal with disks / OSDs when they are removed or mo=
-ved around.
->>>
->>> Here is a possible scenario:
->>>
->>> * Machine A dies and contains OSD 42
->>> * ceph osd rm 42 is done to get rid of the OSD
->>> * ceph-prepare is called on a new disk and gets OSD id 42
->>>
->>> ceph/src/mon/OSDMonitor.cc
->>>
->>>     // allocate a new id
->>>     for (i=3D0; i < osdmap.get_max_osd(); i++) {
->>>       if (!osdmap.exists(i) &&
->>>           pending_inc.new_up_client.count(i) =3D=3D 0 &&
->>>           (pending_inc.new_state.count(i) =3D=3D 0 ||
->>>            (pending_inc.new_state[i] & CEPH_OSD_EXISTS) =3D=3D 0))
->>>         goto done;
->>>     }
->>>
->>> * The disk of machine A is still good and is plugged into machine C
->>> * the udev logic sees it has the ceph magic uuid and contains a wel=
-l formed osd file system and runs the osd daemon on it. The osd daemon =
-fails and dies because its key does not match. It will try again and fa=
-il in the same way when the machine reboots.
->>>
->>> If the osd id was not reused, the disk would find its way back in t=
-he cluster and be reused without manual intervention. Since ceph-disk u=
-ses the osd uuid to create the disk, it does not matter that it has bee=
-n removed : https://github.com/ceph/ceph/blob/master/src/ceph-disk#L458=
- . I'm not sure to understand how the key that was previously registere=
-d is re-imported. If I understand correctly it is created with ceph-osd=
- --mkkey https://github.com/ceph/ceph/blob/master/src/ceph-disk#L1301 a=
-nd stored in the osd tree at the location specified by --keyring https:=
-//github.com/ceph/ceph/blob/master/src/ceph-disk#L1307 .
->>>
->>> At this point my understanding is that (as long as OSD ids are not =
-reused), removing a disk or moving it from machine to machine, even ove=
-r a long period of time does not require any action. The OSD id is an i=
-nt which is probably large enough for any kind of cluster in the near f=
-uture. The OSD ids that are not used and not removed could be cleaned f=
-rom time to time to garbage collect the space they use.
->>>
->>> Please let me know if I've missed something :-)
->>>
->>> --
->>> Lo=EFc Dachary, Artisan Logiciel Libre
->>> All that is necessary for the triumph of evil is that good people d=
-o nothing.
->>>
->
-> --
-> Lo=EFc Dachary, Artisan Logiciel Libre
-> All that is necessary for the triumph of evil is that good people do =
-nothing.
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Should be pretty straight-forward to identify any limits that are
+different by walking sysfs/queue, e.g.:
+
+grep -r . /sys/block/rdbXXX/queue
+vs
+grep -r . /sys/block/dm-X/queue
+
+Could be there is an unexpected difference.  For instance, there was
+this fix recently: http://patchwork.usersys.redhat.com/patch/69661/
+
+> > Taking a step back, the rbd driver is exposing both the minimum_io_size
+> > and optimal_io_size as 4M.  This symmetry will cause XFS to _not_ detect
+> > the exposed limits as striping.  Therefore, AFAIK, XFS won't take steps
+> > to respect the limits when it assembles its bios (via bio_add_page).
+> > 
+> > Sage, any reason why you don't use traditional raid geomtry based IO
+> > limits?, e.g.:
+> > 
+> > minimum_io_size = raid chunk size
+> > optimal_io_size = raid chunk size * N stripes (aka full stripe)
+> 
+> We are... by default we stripe 4M chunks across 4M objects.  You're 
+> suggesting it would actually help to advertise a smaller minimim_io_size 
+> (say, 1MB)?  This could easily be made tunable.
+
+You're striping 4MB chunks across 4 million stripes?
+
+So the full stripe size in bytes is 17592186044416 (or 16TB)?  Yeah
+cannot see how XFS could make use of that ;)
