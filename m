@@ -1,65 +1,112 @@
-From: Josh Durgin <josh.durgin-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: poor read performance on rbd+LVM, LVM overload
-Date: Sun, 20 Oct 2013 11:21:24 -0700
-Message-ID: <52641F24.6000406@inktank.com>
-References: <CAE63xUO1jhgxQoRbJU-8+j-cxRB7QEspu=JWvekp9ExzFmnjSA@mail.gmail.com>	<alpine.DEB.2.00.1310160914360.22271@cobra.newdream.net>	<20131017151828.GB28859@redhat.com>	<CAE63xUPtovZwGq=4Xseq3DJ+uAyGJJmYbO70ry=WJqqGcBamRA@mail.gmail.com>	<alpine.DEB.2.00.1310181657151.19763@cobra.newdream.net>
-	<CAE63xUO4ZrzObMFeQ=FXGFnqpwWsjCiiDr2_VhOt91h=djofYw@mail.gmail.com>
+From: "Yan, Zheng" <ukernel@gmail.com>
+Subject: Re: [PATCH] mds: update backtrace when old format inode is touched
+Date: Mon, 21 Oct 2013 09:14:23 +0800
+Message-ID: <CAAM7YAn+Bui8EYo8tYcWFmq9ODbCjd1T8cRkBYqrsav7Coy0oA@mail.gmail.com>
+References: <1377222150-4238-1-git-send-email-zheng.z.yan@intel.com>
+	<CAPYLRzjwN-qT0KZnPE4rYp9N-A9Zg+eaxMXzS_9ct2GSX9PQCg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAE63xUO4ZrzObMFeQ=FXGFnqpwWsjCiiDr2_VhOt91h=djofYw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Ugis <ugis22-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, Mike Snitzer <snitzer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-lvm-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-la0-f42.google.com ([209.85.215.42]:42213 "EHLO
+	mail-la0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752081Ab3JUBOZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 20 Oct 2013 21:14:25 -0400
+Received: by mail-la0-f42.google.com with SMTP id ea20so979161lab.1
+        for <ceph-devel@vger.kernel.org>; Sun, 20 Oct 2013 18:14:23 -0700 (PDT)
+In-Reply-To: <CAPYLRzjwN-qT0KZnPE4rYp9N-A9Zg+eaxMXzS_9ct2GSX9PQCg@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Gregory Farnum <greg@inktank.com>
+Cc: "Yan, Zheng" <zheng.z.yan@intel.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 10/20/2013 08:18 AM, Ugis wrote:
->>> output follows:
->>> #pvs -o pe_start /dev/rbd1p1
->>>    1st PE
->>>      4.00m
->>> # cat /sys/block/rbd1/queue/minimum_io_size
->>> 4194304
->>> # cat /sys/block/rbd1/queue/optimal_io_size
->>> 4194304
+On Thu, Oct 17, 2013 at 7:35 AM, Gregory Farnum <greg@inktank.com> wrote:
+> I came across this patch while going through my email backlog and it
+> looks like we haven't pulled in this patch or anything like it. Did
+> you do something about this problem in a different way?
+> (The patch doesn't apply cleanly so I'll need to update it if this is
+> still what we've got.)
+
+I didn't do anything else about the issue. I updated the patch and
+sent a pull request
+github.com/ceph/ceph/pull/750
+
+Regards
+Yan, Zheng
+
+
+
+> -Greg
+> Software Engineer #42 @ http://inktank.com | http://ceph.com
+>
+>
+> On Thu, Aug 22, 2013 at 6:42 PM, Yan, Zheng <zheng.z.yan@intel.com> wrote:
+>> From: "Yan, Zheng" <zheng.z.yan@intel.com>
 >>
->> Well, the parameters are being set at least.  Mike, is it possible that
->> having minimum_io_size set to 4m is causing some read amplification
->> in LVM, translating a small read into a complete fetch of the PE (or
->> somethinga long those lines)?
+>> We updated inode format version to 7 when introducing inode backtrace.
+>> If we found a inode's format version < 7 when fetching the inode, set
+>> the inode's backtrace_version to 0, to indicate the inode's backtrace
+>> is out of data. When touching a inode with backtrace_version == 0, we
+>> also update its backtrace.
 >>
->> Ugis, if your cluster is on the small side, it might be interesting to see
->> what requests the client is generated in the LVM and non-LVM case by
->> setting 'debug ms = 1' on the osds (e.g., ceph tell osd.* injectargs
->> '--debug-ms 1') and then looking at the osd_op messages that appear in
->> /var/log/ceph/ceph-osd*.log.  It may be obvious that the IO pattern is
->> different.
+>> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+>> ---
+>>  src/mds/Locker.cc   | 4 ++++
+>>  src/mds/Server.cc   | 5 +++++
+>>  src/mds/mdstypes.cc | 2 ++
+>>  3 files changed, 11 insertions(+)
 >>
-> Sage, here follows debug output. I am no pro in reading this, but
-> seems read block size differ(or what is that number following ~ sign)?
-
-Yes, that's the I/O length. LVM is sending requests for 4k at a time,
-while plain kernel rbd is sending 128k.
-
-<request logs showing this>
-
-> How to proceed with tuning read performance on LVM? Is there some
-> chanage needed in code of ceph/LVM or my config needs to be tuned?
-> If what is shown in logs means 4k read block in LVM case - then it
-> seems I need to tell LVM(or xfs on top of LVM dictates read block
-> side?) that io block should be rather 4m?
-
-It's a client side issue of sending much smaller requests than it needs
-to. Check the queue minimum and optimal sizes for the lvm device - it
-sounds like they might be getting set to 4k for some reason.
-
-Josh
+>> diff --git a/src/mds/Locker.cc b/src/mds/Locker.cc
+>> index 99bd761..e274204 100644
+>> --- a/src/mds/Locker.cc
+>> +++ b/src/mds/Locker.cc
+>> @@ -2898,6 +2898,10 @@ bool Locker::_do_cap_update(CInode *in, Capability *cap,
+>>
+>>      wrlock_force(&in->xattrlock, mut);
+>>    }
+>> +
+>> +  // update backtrace for old format inode. (see inode_t::decode)
+>> +  if (pi->backtrace_version == 0)
+>> +    pi->update_backtrace();
+>>
+>>    mut->auth_pin(in);
+>>    mdcache->predirty_journal_parents(mut, &le->metablob, in, 0, PREDIRTY_PRIMARY, 0, follows);
+>> diff --git a/src/mds/Server.cc b/src/mds/Server.cc
+>> index 466d481..b50169e 100644
+>> --- a/src/mds/Server.cc
+>> +++ b/src/mds/Server.cc
+>> @@ -3207,6 +3207,11 @@ void Server::handle_client_setattr(MDRequest *mdr)
+>>
+>>    // log + wait
+>>    le->metablob.add_client_req(req->get_reqid(), req->get_oldest_client_tid());
+>> +
+>> +  // update backtrace for old format inode. (see inode_t::decode)
+>> +  if (pi->backtrace_version == 0)
+>> +    pi->update_backtrace();
+>> +
+>>    mdcache->predirty_journal_parents(mdr, &le->metablob, cur, 0, PREDIRTY_PRIMARY, false);
+>>    mdcache->journal_dirty_inode(mdr, &le->metablob, cur);
+>>
+>> diff --git a/src/mds/mdstypes.cc b/src/mds/mdstypes.cc
+>> index 6886786..f8ec549 100644
+>> --- a/src/mds/mdstypes.cc
+>> +++ b/src/mds/mdstypes.cc
+>> @@ -294,6 +294,8 @@ void inode_t::decode(bufferlist::iterator &p)
+>>      ::decode(backtrace_version, p);
+>>    if (struct_v >= 7)
+>>      ::decode(old_pools, p);
+>> +  else
+>> +    backtrace_version = 0; // note inode which has no backtrace
+>>
+>>    DECODE_FINISH(p);
+>>  }
+>> --
+>> 1.8.1.4
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
