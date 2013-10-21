@@ -1,7 +1,7 @@
 From: Mike Snitzer <snitzer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Subject: Re: poor read performance on rbd+LVM, LVM overload
-Date: Mon, 21 Oct 2013 11:01:29 -0400
-Message-ID: <20131021150129.GA28099@redhat.com>
+Date: Mon, 21 Oct 2013 11:06:05 -0400
+Message-ID: <20131021150605.GB28099@redhat.com>
 References: <CAE63xUO1jhgxQoRbJU-8+j-cxRB7QEspu=JWvekp9ExzFmnjSA@mail.gmail.com>
 	<alpine.DEB.2.00.1310160914360.22271@cobra.newdream.net>
 	<20131017151828.GB28859@redhat.com>
@@ -10,12 +10,13 @@ References: <CAE63xUO1jhgxQoRbJU-8+j-cxRB7QEspu=JWvekp9ExzFmnjSA@mail.gmail.com>
 	<CAE63xUO4ZrzObMFeQ=FXGFnqpwWsjCiiDr2_VhOt91h=djofYw@mail.gmail.com>
 	<alpine.DEB.2.00.1310202051240.29488@cobra.newdream.net>
 	<20131021141147.GA30189@infradead.org>
+	<20131021150129.GA28099@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20131021141147.GA30189-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
+In-Reply-To: <20131021150129.GA28099-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
@@ -29,35 +30,46 @@ To: Christoph Hellwig <hch-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
 Cc: linux-lvm-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On Mon, Oct 21 2013 at 10:11am -0400,
-Christoph Hellwig <hch-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org> wrote:
+On Mon, Oct 21 2013 at 11:01am -0400,
+Mike Snitzer <snitzer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
 
-> On Sun, Oct 20, 2013 at 08:58:58PM -0700, Sage Weil wrote:
-> > It looks like without LVM we're getting 128KB requests (which IIRC is 
-> > typical), but with LVM it's only 4KB.  Unfortunately my memory is a bit 
-> > fuzzy here, but I seem to recall a property on the request_queue or device 
-> > that affected this.  RBD is currently doing
+> On Mon, Oct 21 2013 at 10:11am -0400,
+> Christoph Hellwig <hch-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org> wrote:
 > 
-> Unfortunately most device mapper modules still split all I/O into 4k
-> chunks before handling them.  They rely on the elevator to merge them
-> back together down the line, which isn't overly efficient but should at
-> least provide larger segments for the common cases.
+> > On Sun, Oct 20, 2013 at 08:58:58PM -0700, Sage Weil wrote:
+> > > It looks like without LVM we're getting 128KB requests (which IIRC is 
+> > > typical), but with LVM it's only 4KB.  Unfortunately my memory is a bit 
+> > > fuzzy here, but I seem to recall a property on the request_queue or device 
+> > > that affected this.  RBD is currently doing
+> > 
+> > Unfortunately most device mapper modules still split all I/O into 4k
+> > chunks before handling them.  They rely on the elevator to merge them
+> > back together down the line, which isn't overly efficient but should at
+> > least provide larger segments for the common cases.
+> 
+> It isn't DM that splits the IO into 4K chunks; it is the VM subsystem
+> no?  Unless care is taken to assemble larger bios (higher up the IO
+> stack, e.g. in XFS), all buffered IO will come to bio-based DM targets
+> in $PAGE_SIZE granularity.
+> 
+> I would expect direct IO to before better here because it will make use
+> of bio_add_page to build up larger IOs.
 
-It isn't DM that splits the IO into 4K chunks; it is the VM subsystem
-no?  Unless care is taken to assemble larger bios (higher up the IO
-stack, e.g. in XFS), all buffered IO will come to bio-based DM targets
-in $PAGE_SIZE granularity.
-
-I would expect direct IO to before better here because it will make use
-of bio_add_page to build up larger IOs.
-
-Taking a step back, the rbd driver is exposing both the minimum_io_size
-and optimal_io_size as 4M.  This symmetry will cause XFS to _not_ detect
-the exposed limits as striping.  Therefore, AFAIK, XFS won't take steps
-to respect the limits when it assembles its bios (via bio_add_page).
-
-Sage, any reason why you don't use traditional raid geomtry based IO
-limits?, e.g.:
-
-minimum_io_size = raid chunk size
-optimal_io_size = raid chunk size * N stripes (aka full stripe)
+s/before/perform/ ;)
+ 
+> Taking a step back, the rbd driver is exposing both the minimum_io_size
+> and optimal_io_size as 4M.  This symmetry will cause XFS to _not_ detect
+> the exposed limits as striping.  Therefore, AFAIK, XFS won't take steps
+> to respect the limits when it assembles its bios (via bio_add_page).
+> 
+> Sage, any reason why you don't use traditional raid geomtry based IO
+> limits?, e.g.:
+> 
+> minimum_io_size = raid chunk size
+> optimal_io_size = raid chunk size * N stripes (aka full stripe)
+> 
+> _______________________________________________
+> linux-lvm mailing list
+> linux-lvm-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+> https://www.redhat.com/mailman/listinfo/linux-lvm
+> read the LVM HOW-TO at http://tldp.org/HOWTO/LVM-HOWTO/
