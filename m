@@ -1,147 +1,109 @@
-From: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: poor read performance on rbd+LVM, LVM overload
-Date: Sun, 20 Oct 2013 20:58:58 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1310202051240.29488@cobra.newdream.net>
-References: <CAE63xUO1jhgxQoRbJU-8+j-cxRB7QEspu=JWvekp9ExzFmnjSA@mail.gmail.com>
-	<alpine.DEB.2.00.1310160914360.22271@cobra.newdream.net>
-	<20131017151828.GB28859@redhat.com>
-	<CAE63xUPtovZwGq=4Xseq3DJ+uAyGJJmYbO70ry=WJqqGcBamRA@mail.gmail.com>
-	<alpine.DEB.2.00.1310181657151.19763@cobra.newdream.net>
-	<CAE63xUO4ZrzObMFeQ=FXGFnqpwWsjCiiDr2_VhOt91h=djofYw@mail.gmail.com>
+From: Dominik Mostowiec <dominikmostowiec@gmail.com>
+Subject: Re: issues when bucket index deep-scrubbing
+Date: Mon, 21 Oct 2013 11:26:42 +0200
+Message-ID: <CAMNMNTzc6V90xg89Fi+yNk-Boq0oTM7JQys49qYDnjs5TOjg1Q@mail.gmail.com>
+References: <CAMNMNTyRDoQX=ytzF-jporD3uTpaUiJqTXEzqYGetqUerJ5=-g@mail.gmail.com>
+	<CAPYLRzjFRn=SHOs5JiEqGow0hgnbOEMkqrqwTi9W0cX4EAe=KA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAE63xUO4ZrzObMFeQ=FXGFnqpwWsjCiiDr2_VhOt91h=djofYw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Ugis <ugis22-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, Mike Snitzer <snitzer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-lvm-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-qc0-f178.google.com ([209.85.216.178]:53319 "EHLO
+	mail-qc0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753511Ab3JUJ0m (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Oct 2013 05:26:42 -0400
+Received: by mail-qc0-f178.google.com with SMTP id x19so4311252qcw.37
+        for <ceph-devel@vger.kernel.org>; Mon, 21 Oct 2013 02:26:42 -0700 (PDT)
+In-Reply-To: <CAPYLRzjFRn=SHOs5JiEqGow0hgnbOEMkqrqwTi9W0cX4EAe=KA@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Gregory Farnum <greg@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Sun, 20 Oct 2013, Ugis wrote:
-> >> output follows:
-> >> #pvs -o pe_start /dev/rbd1p1
-> >>   1st PE
-> >>     4.00m
-> >> # cat /sys/block/rbd1/queue/minimum_io_size
-> >> 4194304
-> >> # cat /sys/block/rbd1/queue/optimal_io_size
-> >> 4194304
-> >
-> > Well, the parameters are being set at least.  Mike, is it possible that
-> > having minimum_io_size set to 4m is causing some read amplification
-> > in LVM, translating a small read into a complete fetch of the PE (or
-> > somethinga long those lines)?
-> >
-> > Ugis, if your cluster is on the small side, it might be interesting to see
-> > what requests the client is generated in the LVM and non-LVM case by
-> > setting 'debug ms = 1' on the osds (e.g., ceph tell osd.* injectargs
-> > '--debug-ms 1') and then looking at the osd_op messages that appear in
-> > /var/log/ceph/ceph-osd*.log.  It may be obvious that the IO pattern is
-> > different.
-> >
-> Sage, here follows debug output. I am no pro in reading this, but
-> seems read block size differ(or what is that number following ~ sign)?
+Hi,
+Thanks for your response.
 
-Yep, it's offset~length.  
+> That is definitely the obvious next step, but it's a non-trivial
+> amount of work and hasn't yet been started on by anybody. This is
+> probably a good subject for a CDS blueprint!
+But we want to split our big bucket into the smallest ones. We want to
+shard it before radosgw.
+Do you think this is a good idea to make workaround of this problem
+(big index issues)?
 
-It looks like without LVM we're getting 128KB requests (which IIRC is 
-typical), but with LVM it's only 4KB.  Unfortunately my memory is a bit 
-fuzzy here, but I seem to recall a property on the request_queue or device 
-that affected this.  RBD is currently doing
-
-	segment_size = rbd_obj_bytes(&rbd_dev->header);
-	blk_queue_max_hw_sectors(q, segment_size / SECTOR_SIZE);
-	blk_queue_max_segment_size(q, segment_size);
-	blk_queue_io_min(q, segment_size);
-	blk_queue_io_opt(q, segment_size);
-
-where segment_size is 4MB (so, much more than 128KB); maybe it has 
-something to do with how many smaller ios get coalesced a larger requests?
-
-In any case, something appears to be lost due to the pass through LVM, but 
-I'm not very familiar with the block layer code at all...  :/
-
-sage
+Regards
+Dominik
 
 
-> 
-> OSD.2 read with LVM:
-> 2013-10-20 16:59:05.307159 7f95acfa5700  1 -- x.x.x.x:6804/1944 -->
-> x.x.x.y:0/269199468 -- osd_op_reply(176566434
-> rbd_data.3ad974b0dc51.0000000000007cef [read 4083712~4096] ondisk = 0)
-> v4 -- ?+0 0xdc35c00 con 0xd9e4840
-> 2013-10-20 16:59:05.307655 7f95b27b0700  1 -- x.x.x.x:6804/1944 <==
-> client.38069 x.x.x.y:0/269199468 5548 ====
-> osd_op(client.38069.1:176566435 rbd_data.3ad974b0dc51.0000000000007cef
-> [read 4087808~4096] 4.5672f053 e6870) v4 ==== 177+0+0 (1554835253 0 0)
-> 0x12593d80 con 0xd9e4840
-> 2013-10-20 16:59:05.307824 7f95ac7a4700  1 -- x.x.x.x:6804/1944 -->
-> x.x.x.y:0/269199468 -- osd_op_reply(176566435
-> rbd_data.3ad974b0dc51.0000000000007cef [read 4087808~4096] ondisk = 0)
-> v4 -- ?+0 0xe24fc00 con 0xd9e4840
-> 2013-10-20 16:59:05.308316 7f95b27b0700  1 -- x.x.x.x:6804/1944 <==
-> client.38069 x.x.x.y:0/269199468 5549 ====
-> osd_op(client.38069.1:176566436 rbd_data.3ad974b0dc51.0000000000007cef
-> [read 4091904~4096] 4.5672f053 e6870) v4 ==== 177+0+0 (3467296840 0 0)
-> 0xe28f6c0 con 0xd9e4840
-> 2013-10-20 16:59:05.308499 7f95acfa5700  1 -- x.x.x.x:6804/1944 -->
-> x.x.x.y:0/269199468 -- osd_op_reply(176566436
-> rbd_data.3ad974b0dc51.0000000000007cef [read 4091904~4096] ondisk = 0)
-> v4 -- ?+0 0xdc35a00 con 0xd9e4840
-> 2013-10-20 16:59:05.308985 7f95b27b0700  1 -- x.x.x.x:6804/1944 <==
-> client.38069 x.x.x.y:0/269199468 5550 ====
-> osd_op(client.38069.1:176566437 rbd_data.3ad974b0dc51.0000000000007cef
-> [read 4096000~4096] 4.5672f053 e6870) v4 ==== 177+0+0 (3104591620 0 0)
-> 0xe0b46c0 con 0xd9e4840
-> 
-> OSD.2 read without LVM
-> 2013-10-20 17:03:13.730881 7f95ac7a4700  1 -- x.x.x.x:6804/1944 -->
-> x.x.x.y:0/269199468 -- osd_op_reply(176708854
-> rb.0.967b.238e1f29.000000000071 [read 2359296~131072] ondisk = 0) v4
-> -- ?+0 0x1019d200 con 0xd9e4840
-> 2013-10-20 17:03:13.731318 7f95b27b0700  1 -- x.x.x.x:6804/1944 <==
-> client.38069 x.x.x.y:0/269199468 18232 ====
-> osd_op(client.38069.1:176708855 rb.0.967b.238e1f29.000000000071 [read
-> 2490368~131072] 4.c0d1e4cb e6870) v4 ==== 170+0+0 (1987168552 0 0)
-> 0x171a7480 con 0xd9e4840
-> 2013-10-20 17:03:13.731664 7f95acfa5700  1 -- x.x.x.x:6804/1944 -->
-> x.x.x.y:0/269199468 -- osd_op_reply(176708855
-> rb.0.967b.238e1f29.000000000071 [read 2490368~131072] ondisk = 0) v4
-> -- ?+0 0x12b81200 con 0xd9e4840
-> 2013-10-20 17:03:13.733112 7f95b27b0700  1 -- x.x.x.x:6804/1944 <==
-> client.38069 x.x.x.y:0/269199468 18233 ====
-> osd_op(client.38069.1:176708856 rb.0.967b.238e1f29.000000000071 [read
-> 2621440~131072] 4.c0d1e4cb e6870) v4 ==== 170+0+0 (527551382 0 0)
-> 0x12593d80 con 0xd9e4840
-> 2013-10-20 17:03:13.733393 7f95ac7a4700  1 -- x.x.x.x:6804/1944 -->
-> x.x.x.y:0/269199468 -- osd_op_reply(176708856
-> rb.0.967b.238e1f29.000000000071 [read 2621440~131072] ondisk = 0) v4
-> -- ?+0 0xeba9000 con 0xd9e4840
-> 2013-10-20 17:03:13.733741 7f95b27b0700  1 -- x.x.x.x:6804/1944 <==
-> client.38069 x.x.x.y:0/269199468 18234 ====
-> osd_op(client.38069.1:176708857 rb.0.967b.238e1f29.000000000071 [read
-> 2752512~131072] 4.c0d1e4cb e6870) v4 ==== 170+0+0 (178955972 0 0)
-> 0xe0b4d80 con 0xd9e4840
-> 
-> How to proceed with tuning read performance on LVM? Is there some
-> chanage needed in code of ceph/LVM or my config needs to be tuned?
-> If what is shown in logs means 4k read block in LVM case - then it
-> seems I need to tell LVM(or xfs on top of LVM dictates read block
-> side?) that io block should be rather 4m?
-> 
-> Ugis
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+
+2013/10/18 Gregory Farnum <greg@inktank.com>:
+> On Fri, Oct 18, 2013 at 4:01 AM, Dominik Mostowiec
+> <dominikmostowiec@gmail.com> wrote:
+>> Hi,
+>> I plan to shard my largest bucket because of issues of deep-scrubbing
+>> (when PG which index for this bucket is stored on is deep-scrubbed, it
+>> appears many slow requests and OSD grows in memory - after latest
+>> scrub it grows up to 9G).
+>>
+>> I trying to found why large bucket index make issues when it is scrubbed.
+>> On test cluster:
+>> radosgw-admin bucket stats --bucket=test1-XX
+>> { "bucket": "test1-XX",
+>>   "pool": ".rgw.buckets",
+>>   "index_pool": ".rgw.buckets",
+>>   "id": "default.4211.2",
+>> ...
+>>
+>> I guess index is in object .dir.default.4211.2. (pool: .rgw.buckets)
+>>
+>> rados -p .rgw.buckets get .dir.default.4211.2 -
+>> <empty>
+>>
+>> But:
+>> rados -p .rgw.buckets listomapkeys .dir.default.4211.2
+>> test_file_2.txt
+>> test_file_2_11.txt
+>> test_file_3.txt
+>> test_file_4.txt
+>> test_file_5.txt
+>>
+>> I guess that list of files are stored in leveldb not in one large file.
+>> 'omap' files are stored in {osd_dir}/current/omap/, the largest file
+>> that i found in this directory (on production) have 8.8M.
+>>
+>> I'm a little confused.
+>>
+>> How list of files (for bucket) is stored?
+>
+> The index is stored as a bunch of omap entries in a single object.
+>
+>> If list of objects in bucket is splitted on many small files in
+>> leveldb that large bucket (with many files) should not cause larger
+>> latency in PUT new object.
+>
+> That's not quite how it works. Leveldb has a custom storage format in
+> which it stores sets of keys based on both time of update and the
+> value of the key, so the size of the individual files in its directory
+> has no correlation to the number or size of any given set of entries.
+>
+>> Scrubbing also should not be a problem i think ...
+>
+> The problem you're running into is that scrubbing is done on an
+> object-by-object basis, and so the OSD is reading all of the keys
+> associated with that object out of leveldb, and processing them, at
+> once. This number can be very much larger than the 8MB file you've
+> found in the leveldb directory, as discussed above.
+>
+>> What you think about using a sharding to split big buckets into the
+>> smalest one to avoid the problems with big indexes?
+>
+> That is definitely the obvious next step, but it's a non-trivial
+> amount of work and hasn't yet been started on by anybody. This is
+> probably a good subject for a CDS blueprint!
+> -Greg
+> Software Engineer #42 @ http://inktank.com | http://ceph.com
+
+
+
+-- 
+Pozdrawiam
+Dominik
