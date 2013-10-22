@@ -1,105 +1,44 @@
-From: Jeff Liu <jeff.liu@oracle.com>
-Subject: Re: xfs Warnings in syslog
-Date: Tue, 22 Oct 2013 21:01:10 +0800
-Message-ID: <52667716.5050703@oracle.com>
-References: <049e1508cbb35ecf7b38ea2dadddc6ec@niklasgoerke.de>
-	<52666FA8.4050101@oracle.com>
-	<CABYiri8CThqQ-E0MvB4=XbOt7jrQG_nw_2Sc7vt0VD_zbr_Ycw@mail.gmail.com>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: Removing disks / OSDs
+Date: Tue, 22 Oct 2013 10:26:32 -0700
+Message-ID: <CAPYLRzgxWEi1s0=-EtcbhpdS8H96KDm-NhxhScKOn18Y72DY5Q@mail.gmail.com>
+References: <52655309.8070500@dachary.org>
+	<CAPYLRzjBmdewVvNVQd5JwnAAF2dv+q7Qk4qtzwQO7jVtpDGDRg@mail.gmail.com>
+	<52661776.20803@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <xfs-bounces@oss.sgi.com>
-In-Reply-To: <CABYiri8CThqQ-E0MvB4=XbOt7jrQG_nw_2Sc7vt0VD_zbr_Ycw@mail.gmail.com>
-List-Unsubscribe: <http://oss.sgi.com/mailman/options/xfs>,
-	<mailto:xfs-request@oss.sgi.com?subject=unsubscribe>
-List-Archive: <http://oss.sgi.com/pipermail/xfs>
-List-Post: <mailto:xfs@oss.sgi.com>
-List-Help: <mailto:xfs-request@oss.sgi.com?subject=help>
-List-Subscribe: <http://oss.sgi.com/mailman/listinfo/xfs>,
-	<mailto:xfs-request@oss.sgi.com?subject=subscribe>
-Errors-To: xfs-bounces@oss.sgi.com
-Sender: xfs-bounces@oss.sgi.com
-To: Andrey Korolyov <andrey@xdel.ru>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Niklas Goerke <niklas@niklasgoerke.de>, "xfs@oss.sgi.com" <xfs@oss.sgi.com>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-wi0-f173.google.com ([209.85.212.173]:43269 "EHLO
+	mail-wi0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752787Ab3JVR0d convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Oct 2013 13:26:33 -0400
+Received: by mail-wi0-f173.google.com with SMTP id ey11so6083931wid.0
+        for <ceph-devel@vger.kernel.org>; Tue, 22 Oct 2013 10:26:32 -0700 (PDT)
+In-Reply-To: <52661776.20803@dachary.org>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-T24gMTAvMjIvMjAxMyAwODozNiBQTSwgQW5kcmV5IEtvcm9seW92IHdyb3RlOgoKPiBKdXN0IG15
-IHR3byBjZW50czoKPiAKPiBYRlMgaXMgYSBxdWl0ZSB1bnN0YWJsZSB3aXRoIENlcGggZXNwZWNp
-YWxseSBhbG9uZyB3aXRoIGhlYXZ5IENQVQo+IHVzYWdlIHVwIHRvIDMuNyhwcmltYXJpbHkgc29m
-dCBsb2NrdXBzKS4KCkknbSBub3QgdGhlIHJpZ2h0IHBlcnNvbiB0byBjbGFyaWZ5IHRoZSByZWFz
-b24gYXMgSSBvbmx5IGtuZXcgdGhhdApDZXBoIHJlY29tbWVuZCB0aGUgdXNlciB0byBkZXBsb3kg
-T1NEIGRhZW1vbiBvbiBYRlMuICBNYXliZSBzb21lb25lCmNhbiBoZWxwIHlvdSBvdXQgaWYgdGhv
-c2UgaXNzdWVzIGhhdmUgYmVlbiByZXBvcnRlZCB0byBYRlMgbGlzdCBhdAp0aGF0IHRpbWUuCgo+
-IEkgdXNlZCAzLjcgZm9yIGVpZ2h0IG1vbnRocwo+IGJlZm9yZSB1cGdyYWRlIG9uIHByb2R1Y3Rp
-b24gc3lzdGVtIGFuZCBpdCBwZXJmb3JtcyBqdXN0IHBlcmZlY3RseS4KClZlcnkgZ2xhZCB0byBo
-ZWFyIHRoYXQuCgpUaGFua3MsCi1KZWZmCgo+IAo+IE9uIFR1ZSwgT2N0IDIyLCAyMDEzIGF0IDE6
-MjkgUE0sIEplZmYgTGl1IDxqZWZmLmxpdUBvcmFjbGUuY29tPiB3cm90ZToKPj4gSGVsbG8sCj4+
-Cj4+IFNvIEl0J3MgYmV0dGVyIHRvIGFkZCBYRlMgbWFpbGluZyBsaXN0IHRvIHRoZSBDQy1saXN0
-LiA6KQo+Pgo+PiBJIHRoaW5rIHRoaXMgaXNzdWUgaGFzIGJlZW4gZml4ZWQgYnkgdXBzdHJlYW0g
-Y29tbWl0czoKPj4KPj4gRnJvbSBmZjlhMjhmNmMyNWQxOGE2MzVhYmNhYjFmNDlkYjY4MTA4MjAz
-ZGZiCj4+IEZyb206IEphbiBLYXJhIDxqYWNrQHN1c2UuY3o+Cj4+IERhdGU6IFRodSwgMTQgTWFy
-IDIwMTMgMTQ6MzA6NTQgKzAxMDAKPj4gU3ViamVjdDogW1BBVENIIDEvMV0geGZzOiBGaXggV0FS
-Tl9PTihkZWxhbGxvYykgaW4geGZzX3ZtX3JlbGVhc2VwYWdlKCkKPj4KPj4KPj4gVGhhbmtzLAo+
-PiAtSmVmZgo+Pgo+PiBPbiAxMC8yMi8yMDEzIDA3OjQ2IFBNLCBOaWtsYXMgR29lcmtlIHdyb3Rl
-Ogo+Pgo+Pj4gSGkKPj4+Cj4+PiBNeSBzeXNsb2cgYW5kIGRtZXNnIGFyZSBiZWluZyBmaWxsZWQg
-d2l0aCB0aGUgV2FybmluZ3MgYXR0YWNoZWQuCj4+PiBMb29raW5nIGF0IHRvZGF5cyBzeXNsb2cg
-SSBnb3QgdXAgdG8gMTEwMSBvZiB0aGVzZSB3YXJuaW5ncyBpbiB0aGUgdGltZQo+Pj4gZnJvbSAx
-MDo1MCB0byAxMToxMyAoYW5kIG9ubHkgaW4gdGhhdCB0aW1lLCBlbHNlIHRoZSBsb2cgd2FzIGNs
-ZWFuKS4gSQo+Pj4gZm91bmQgdGhlbSBvbiBhbGwgZm91ciBvZiBteSBPU0QgaG9zdHMsIGFsbCBh
-dCBhYm91dCB0aGUgc2FtZSB0aW1lLgo+Pj4gSSdtIHJ1bm5pbmcga2VybmVsIDMuMi4wLTQtYW1k
-NjQgb24gYSBkZWJpYW4gNy4wLiBDZXBoIGlzIG9uIHZlcnNpb24KPj4+IDAuNjcuNC4gSSBoYXZl
-IGdvdCAxNSBPU0RzIHBlciBPU0QgSG9zdC4KPj4+Cj4+PiBDZXBoIGRvZXMgbm90IHJlYWxseSBz
-ZWVtIHRvIGNhcmUgYWJvdXQgdGhpcywgc28gSSdtIG5vdCBzdXJlIHdoYXQgaXQgaXMKPj4+IGFs
-bCBhYm91dOKApgo+Pj4gU3RpbGwgdGhleSBhcmUgd2FybmluZ3MgaW4gc3lzbG9nIGFuZCBJIGhv
-cGUgeW91IGd1eXMgY2FuIHRlbGwgbWUgd2hhdAo+Pj4gd2VudCB3cm9uZyBoZXJlIGFuZCB3aGF0
-IEkgY2FuIGRvIGFib3V0IGl0Pwo+Pj4KPj4+IFRoYW5rIHlvdQo+Pj4gTmlrbGFzCj4+Pgo+Pj4K
-Pj4+IE9jdCAyMiAxMToxMToxOSBjcy1iaWdmb290MDYga2VybmVsOiBbOTc0NDY0OC4zODgwMThd
-IC0tLS0tLS0tLS0tLVsgY3V0Cj4+PiBoZXJlIF0tLS0tLS0tLS0tLS0KPj4+IE9jdCAyMiAxMTox
-MToxOSBjcy1iaWdmb290MDYga2VybmVsOiBbOTc0NDY0OC4zODgwMzBdIFdBUk5JTkc6IGF0Cj4+
-PiAvYnVpbGQvbGludXgtczV4Mm9FL2xpbnV4LTMuMi40Ni9mcy94ZnMveGZzX2FvcHMuYzoxMDkx
-Cj4+PiB4ZnNfdm1fcmVsZWFzZXBhZ2UrMHg3Ni8weDhlIFt4ZnNdKCkKPj4+IE9jdCAyMiAxMTox
-MToxOSBjcy1iaWdmb290MDYga2VybmVsOiBbOTc0NDY0OC4zODgwMzRdIEhhcmR3YXJlIG5hbWU6
-Cj4+PiBYOURSMy1GCj4+PiBPY3QgMjIgMTE6MTE6MTkgY3MtYmlnZm9vdDA2IGtlcm5lbDogWzk3
-NDQ2NDguMzg4MDM2XSBNb2R1bGVzIGxpbmtlZCBpbjoKPj4+IHhmcyBhdXRvZnM0IG5mc2QgbmZz
-IG5mc19hY2wgYXV0aF9ycGNnc3MgZnNjYWNoZSBsb2NrZCBzdW5ycGMgZXh0MyBqYmQKPj4+IGxv
-b3AgYWNwaV9jcHVmcmVxIG1wZXJmIGNvcmV0ZW1wIGNyYzMyY19pbnRlbCBnaGFzaF9jbG11bG5p
-X2ludGVsCj4+PiBzbmRfcGNtIGFlc25pX2ludGVsIHNuZF9wYWdlX2FsbG9jIGFlc194ODZfNjQg
-c25kX3RpbWVyIGFlc19nZW5lcmljIHMKPj4+IG5kIGNyeXB0ZCBzb3VuZGNvcmUgcGNzcGtyIHNi
-X2VkYWMgam95ZGV2IGV2ZGV2IGVkYWNfY29yZSBpVENPX3dkdAo+Pj4gaTJjX2k4MDEgaVRDT192
-ZW5kb3Jfc3VwcG9ydCBpMmNfY29yZSBpb2F0ZG1hIHByb2Nlc3NvciB0aGVybWFsX3N5cwo+Pj4g
-Y29udGFpbmVyIGJ1dHRvbiBleHQ0IGNyYzE2IGpiZDIgbWJjYWNoZSB1c2JoaWQgaGlkIHNlcyBl
-bmNsb3N1cmUgc2cKPj4+IHNkX21vZCBjcmNfdDEwZGlmIG1lZ2FyYWlkX3NhcyBlaGNpX2hjZCB1
-c2Jjb3JlIGlzY2kgbGlic2FzIHVzYl9jb21tb24gbGliYQo+Pj4gdGEgaXhnYmUgbWRpbyBzY3Np
-X3RyYW5zcG9ydF9zYXMgc2NzaV9tb2QgaWdiIGRjYSBbbGFzdCB1bmxvYWRlZDoKPj4+IHNjc2lf
-d2FpdF9zY2FuXQo+Pj4gT2N0IDIyIDExOjExOjE5IGNzLWJpZ2Zvb3QwNiBrZXJuZWw6IFs5NzQ0
-NjQ4LjM4ODA5M10gUGlkOiAzNDU5NjA1LAo+Pj4gY29tbTogY2VwaC1vc2QgVGFpbnRlZDogRyAg
-ICAgICAgVyAgICAzLjIuMC00LWFtZDY0ICMxIERlYmlhbiAzLjIuNDYtMQo+Pj4gT2N0IDIyIDEx
-OjExOjE5IGNzLWJpZ2Zvb3QwNiBrZXJuZWw6IFs5NzQ0NjQ4LjM4ODA5Nl0gQ2FsbCBUcmFjZToK
-Pj4+IE9jdCAyMiAxMToxMToxOSBjcy1iaWdmb290MDYga2VybmVsOiBbOTc0NDY0OC4zODgxMDJd
-Cj4+PiBbPGZmZmZmZmZmODEwNDZiNzU+XSA/IHdhcm5fc2xvd3BhdGhfY29tbW9uKzB4NzgvMHg4
-Ywo+Pj4gT2N0IDIyIDExOjExOjE5IGNzLWJpZ2Zvb3QwNiBrZXJuZWw6IFs5NzQ0NjQ4LjM4ODEx
-NV0KPj4+IFs8ZmZmZmZmZmZhMDQ4Yjk4Yz5dID8geGZzX3ZtX3JlbGVhc2VwYWdlKzB4NzYvMHg4
-ZSBbeGZzXQo+Pj4gT2N0IDIyIDExOjExOjE5IGNzLWJpZ2Zvb3QwNiBrZXJuZWw6IFs5NzQ0NjQ4
-LjM4ODEyMl0KPj4+IFs8ZmZmZmZmZmY4MTBiZWRjNT5dID8gaW52YWxpZGF0ZV9pbm9kZV9wYWdl
-KzB4NWUvMHg4MAo+Pj4gT2N0IDIyIDExOjExOjE5IGNzLWJpZ2Zvb3QwNiBrZXJuZWw6IFs5NzQ0
-NjQ4LjM4ODEyOV0KPj4+IFs8ZmZmZmZmZmY4MTBiZWU1ZD5dID8gaW52YWxpZGF0ZV9tYXBwaW5n
-X3BhZ2VzKzB4NzYvMHgxMDIKPj4+IE9jdCAyMiAxMToxMToxOSBjcy1iaWdmb290MDYga2VybmVs
-OiBbOTc0NDY0OC4zODgxMzVdCj4+PiBbPGZmZmZmZmZmODEwYjdiODM+XSA/IHN5c19mYWR2aXNl
-NjRfNjQrMHgxOWYvMHgxZTIKPj4+IE9jdCAyMiAxMToxMToxOSBjcy1iaWdmb290MDYga2VybmVs
-OiBbOTc0NDY0OC4zODgxNDBdCj4+PiBbPGZmZmZmZmZmODEzNTNiNTI+XSA/IHN5c3RlbV9jYWxs
-X2Zhc3RwYXRoKzB4MTYvMHgxYgo+Pj4gT2N0IDIyIDExOjExOjE5IGNzLWJpZ2Zvb3QwNiBrZXJu
-ZWw6IFs5NzQ0NjQ4LjM4ODE0NF0gLS0tWyBlbmQgdHJhY2UKPj4+IGU5NjQwZWQ2ZjgyZjA2NmQg
-XS0tLQo+Pj4gLS0KPj4+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBs
-aW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbgo+Pj4gdGhlIGJvZHkgb2YgYSBtZXNzYWdl
-IHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcKPj4+IE1vcmUgbWFqb3Jkb21vIGluZm8gYXQg
-IGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbAo+Pgo+Pgo+PiAtLQo+
-PiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3Jp
-YmUgY2VwaC1kZXZlbCIgaW4KPj4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2
-Z2VyLmtlcm5lbC5vcmcKPj4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2Vy
-bmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sCj4gLS0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRo
-aXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4KPiB0aGUg
-Ym9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZwo+IE1vcmUgbWFq
-b3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRt
-bAoKCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCnhmcyBt
-YWlsaW5nIGxpc3QKeGZzQG9zcy5zZ2kuY29tCmh0dHA6Ly9vc3Muc2dpLmNvbS9tYWlsbWFuL2xp
-c3RpbmZvL3hmcwo=
+On Mon, Oct 21, 2013 at 11:13 PM, Loic Dachary <loic@dachary.org> wrote:
+>
+>
+> On 21/10/2013 18:49, Gregory Farnum wrote:
+>> I'm not quite sure what questions you're actually asking here...
+>> In general, the OSD is not removed from the system without explicit
+>> admin intervention. When it is removed, all traces of it should be
+>> zapped (including its key), so it can't reconnect.
+>> If it hasn't been removed, then indeed it will continue working
+>> properly even if moved to a different box.
+>
+> If there is an external journal, the device containing the journal needs to be moved with the device containing the data. If I read ceph/src/upstart/ceph-osd.conf correctly, when the data device is plugged in the new machine it will fail to start because the journal is not there yet. When the journal device is plugged in, the ceph-osd.conf would be called because udev rule in ceph/udev/95-ceph-osd.rules call ceph-disk activate-journal.
+>
+> Is my understanding correct ?
+
+Well, after being wrong last time I'm a little reluctant to make
+pronouncements from memory, but that definitely sounds correct to me.
+:) If I were doing an audit I'd want to look at what happens if there
+is a wrong journal in the correct location, etc.
+-Greg
+Software Engineer #42 @ http://inktank.com | http://ceph.com
