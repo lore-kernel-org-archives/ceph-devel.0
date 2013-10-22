@@ -1,690 +1,77 @@
-From: "Yan, Zheng" <ukernel@gmail.com>
-Subject: Re: [RFC PATCH] ceph: add acl for cephfs
-Date: Tue, 22 Oct 2013 12:15:03 +0800
-Message-ID: <CAAM7YA=bKjNUGro5fYaUy2snn06u2aoNY_d5aAzC-R2abAH8jA@mail.gmail.com>
-References: <1381998446-30085-1-git-send-email-lucienchao@gmail.com>
-	<CAAM7YAnqZwrutVQ4N45U3zN_8M36EJfnsfqRCAR3UuSw6YaMPA@mail.gmail.com>
-	<20131021114657.GA3647@x230>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: set mds message priority to MSG_PRIO_HIGH
+Date: Mon, 21 Oct 2013 21:59:54 -0700
+Message-ID: <CAPYLRzhgCsM9r_xFbWG7HWj9QH68s7EOW-xUWC9ZAZZpJanGxw@mail.gmail.com>
+References: <004001ceccca$f7e0fba0$e7a2f2e0$@gmail.com>
+	<CAAM7YA=ZgFtX-PDPz_ULUsaCGnACu2_ARD23A7shxitAUeE2Gg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f181.google.com ([209.85.217.181]:42418 "EHLO
-	mail-lb0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750753Ab3JVEPG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Oct 2013 00:15:06 -0400
-Received: by mail-lb0-f181.google.com with SMTP id x18so4250126lbi.26
-        for <ceph-devel@vger.kernel.org>; Mon, 21 Oct 2013 21:15:03 -0700 (PDT)
-In-Reply-To: <20131021114657.GA3647@x230>
+Received: from mail-wi0-f172.google.com ([209.85.212.172]:33419 "EHLO
+	mail-wi0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750831Ab3JVE74 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Oct 2013 00:59:56 -0400
+Received: by mail-wi0-f172.google.com with SMTP id ez12so4981185wid.17
+        for <ceph-devel@vger.kernel.org>; Mon, 21 Oct 2013 21:59:54 -0700 (PDT)
+In-Reply-To: <CAAM7YA=ZgFtX-PDPz_ULUsaCGnACu2_ARD23A7shxitAUeE2Gg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <ukernel@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, "Yan, Zheng" <zheng.z.yan@intel.com>, Sage Weil <sage@inktank.com>
+To: "Yan, Zheng" <ukernel@gmail.com>
+Cc: hjwsm1989-gmail <hjwsm1989@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Mon, Oct 21, 2013 at 7:46 PM, Guangliang Zhao <lucienchao@gmail.com> wrote:
-> On Mon, Oct 21, 2013 at 11:07:08AM +0800, Yan, Zheng wrote:
->> On Thu, Oct 17, 2013 at 4:27 PM, Guangliang Zhao <lucienchao@gmail.com> wrote:
->
-> Hi Yan,
->
-> Thanks for your reviewing.
->
->> > Add ACL support for cephfs, any comments are appreciated.
->> >
->> > Signed-off-by: Guangliang Zhao <lucienchao@gmail.com>
->> > ---
->> >  fs/ceph/Kconfig  |   13 +++
->> >  fs/ceph/Makefile |    1 +
->> >  fs/ceph/acl.c    |  286 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
->> >  fs/ceph/dir.c    |    5 +
->> >  fs/ceph/inode.c  |   13 ++-
->> >  fs/ceph/super.c  |    4 +
->> >  fs/ceph/super.h  |   31 ++++++
->> >  fs/ceph/xattr.c  |   60 +++++++++---
->> >  8 files changed, 400 insertions(+), 13 deletions(-)
->> >  create mode 100644 fs/ceph/acl.c
->> >
->> > diff --git a/fs/ceph/Kconfig b/fs/ceph/Kconfig
->> > index ac9a2ef..264e9bf 100644
->> > --- a/fs/ceph/Kconfig
->> > +++ b/fs/ceph/Kconfig
->> > @@ -25,3 +25,16 @@ config CEPH_FSCACHE
->> >           caching support for Ceph clients using FS-Cache
->> >
->> >  endif
->> > +
->> > +config CEPH_FS_POSIX_ACL
->> > +       bool "Ceph POSIX Access Control Lists"
->> > +       depends on CEPH_FS
->> > +       select FS_POSIX_ACL
->> > +       help
->> > +         POSIX Access Control Lists (ACLs) support permissions for users and
->> > +         groups beyond the owner/group/world scheme.
->> > +
->> > +         To learn more about Access Control Lists, visit the POSIX ACLs for
->> > +         Linux website <http://acl.bestbits.at/>.
->> > +
->> > +         If you don't know what Access Control Lists are, say N
->> > diff --git a/fs/ceph/Makefile b/fs/ceph/Makefile
->> > index 32e3010..85a4230 100644
->> > --- a/fs/ceph/Makefile
->> > +++ b/fs/ceph/Makefile
->> > @@ -10,3 +10,4 @@ ceph-y := super.o inode.o dir.o file.o locks.o addr.o ioctl.o \
->> >         debugfs.o
->> >
->> >  ceph-$(CONFIG_CEPH_FSCACHE) += cache.o
->> > +ceph-$(CONFIG_CEPH_FS_POSIX_ACL) += acl.o
->> > diff --git a/fs/ceph/acl.c b/fs/ceph/acl.c
->> > new file mode 100644
->> > index 0000000..4d0c5e1
->> > --- /dev/null
->> > +++ b/fs/ceph/acl.c
->> > @@ -0,0 +1,286 @@
->> > +/*
->> > + * linux/fs/ceph/acl.c
->> > + *
->> > + * Copyright (C) 2013 Guangliang Zhao, <lucienchao@gmail.com>
->> > + *
->> > + * This program is free software; you can redistribute it and/or
->> > + * modify it under the terms of the GNU General Public
->> > + * License v2 as published by the Free Software Foundation.
->> > + *
->> > + * This program is distributed in the hope that it will be useful,
->> > + * but WITHOUT ANY WARRANTY; without even the implied warranty of
->> > + * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
->> > + * General Public License for more details.
->> > + *
->> > + * You should have received a copy of the GNU General Public
->> > + * License along with this program; if not, write to the
->> > + * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
->> > + * Boston, MA 021110-1307, USA.
->> > + */
->> > +
->> > +#include <linux/ceph/ceph_debug.h>
->> > +#include <linux/fs.h>
->> > +#include <linux/string.h>
->> > +#include <linux/xattr.h>
->> > +#include <linux/posix_acl_xattr.h>
->> > +#include <linux/posix_acl.h>
->> > +#include <linux/sched.h>
->> > +#include <linux/slab.h>
->> > +
->> > +#include "super.h"
->> > +
->> > +struct posix_acl *ceph_get_acl(struct inode *inode, int type)
->> > +{
->> > +       int size;
->> > +       const char *name;
->> > +       char *value = NULL;
->> > +       struct posix_acl *acl;
->> > +
->> > +       if (!IS_POSIXACL(inode))
->> > +               return NULL;
->> > +
->> > +       acl = get_cached_acl(inode, type);
->> > +       if (acl != ACL_NOT_CACHED)
->> > +               return acl;
->> > +
->> > +       switch (type) {
->> > +       case ACL_TYPE_ACCESS:
->> > +               name = POSIX_ACL_XATTR_ACCESS;
->> > +               break;
->> > +       case ACL_TYPE_DEFAULT:
->> > +               name = POSIX_ACL_XATTR_DEFAULT;
->> > +               break;
->> > +       default:
->> > +               BUG();
->> > +       }
->> > +
->> > +       size = __ceph_getxattr(inode, name, "", 0);
->> > +       if (size > 0) {
->> > +               value = kzalloc(size, GFP_NOFS);
->> > +               if (!value)
->> > +                       return ERR_PTR(-ENOMEM);
->> > +               size = __ceph_getxattr(inode, name, value, size);
->> > +       }
->> > +
->> > +       if (size > 0)
->> > +               acl = posix_acl_from_xattr(&init_user_ns, value, size);
->> > +       else if (size == -ERANGE || size == -ENODATA || size == 0)
->> > +               acl = NULL;
->> > +       else
->> > +               acl = ERR_PTR(-EIO);
->> > +
->> > +       kfree(value);
->> > +
->> > +       if (!IS_ERR(acl))
->> > +               set_cached_acl(inode, type, acl);
->> > +
->> > +       return acl;
->> > +}
->> > +
->> > +static int ceph_set_acl(struct dentry *dentry, struct inode *inode,
->> > +                               struct posix_acl *acl, int type)
->> > +{
->> > +       int ret = 0, size = 0;
->> > +       const char *name = NULL;
->> > +       char *value = NULL;
->> > +
->> > +       if (acl) {
->> > +               ret = posix_acl_valid(acl);
->> > +               if (ret < 0)
->> > +                       goto out;
->> > +       }
->> > +
->> > +       switch (type) {
->> > +       case ACL_TYPE_ACCESS:
->> > +               name = POSIX_ACL_XATTR_ACCESS;
->> > +               if (acl) {
->> > +                       ret = posix_acl_equiv_mode(acl, &inode->i_mode);
->> > +                       if (ret < 0)
->> > +                               goto out;
->> > +                       if (ret == 0)
->> > +                               acl = NULL;
->> > +               }
->> > +               break;
->> > +       case ACL_TYPE_DEFAULT:
->> > +               if (!S_ISDIR(inode->i_mode)) {
->> > +                       ret = acl ? -EINVAL : 0;
->> > +                       goto out;
->> > +               }
->> > +               name = POSIX_ACL_XATTR_DEFAULT;
->> > +               break;
->> > +       default:
->> > +               ret = -EINVAL;
->> > +               goto out;
->> > +       }
->> > +
->> > +       if (acl) {
->> > +               size = posix_acl_xattr_size(acl->a_count);
->> > +               value = kmalloc(size, GFP_NOFS);
->> > +               if (!value) {
->> > +                       ret = -ENOMEM;
->> > +                       goto out;
->> > +               }
->> > +
->> > +               ret = posix_acl_to_xattr(&init_user_ns, acl, value, size);
->> > +               if (ret < 0)
->> > +                       goto out_free;
->> > +       }
->> > +
->> > +       if (value)
->> > +               ret = __ceph_setxattr(dentry, name, value, size, 0);
->> > +       else
->> > +               ret = __ceph_removexattr(dentry, name);
->> > +
->> > +       if (ret)
->> > +               goto out_free;
->> > +
->> > +       set_cached_acl(inode, type, acl);
->> > +
->> > +out_free:
->> > +       kfree(value);
->> > +out:
->> > +       return ret;
->> > +}
->> > +
->> > +int ceph_init_acl(struct dentry *dentry, struct inode *inode, struct inode *dir)
->> > +{
->> > +       struct posix_acl *acl = NULL;
->> > +       int ret = 0;
->> > +
->> > +       if (!S_ISLNK(inode->i_mode)) {
->> > +               if (IS_POSIXACL(dir)) {
->> > +                       acl = ceph_get_acl(dir, ACL_TYPE_DEFAULT);
->> > +                       if (IS_ERR(acl)) {
->> > +                               ret = PTR_ERR(acl);
->> > +                               goto out;
->> > +                       }
->> > +               }
->> > +
->> > +               if (!acl)
->> > +                       inode->i_mode &= ~current_umask();
->> > +       }
->> > +
->> > +       if (IS_POSIXACL(dir) && acl) {
->> > +               if (S_ISDIR(inode->i_mode)) {
->> > +                       ret = ceph_set_acl(dentry, inode, acl,
->> > +                                               ACL_TYPE_DEFAULT);
->> > +                       if (ret)
->> > +                               goto out_release;
->> > +               }
->> > +               ret = posix_acl_create(&acl, GFP_NOFS, &inode->i_mode);
->> > +               if (ret < 0)
->> > +                       goto out;
->> > +               else if (ret > 0)
->> > +                       ret = ceph_set_acl(dentry, inode, acl, ACL_TYPE_ACCESS);
->> > +               else
->> > +                       cache_no_acl(inode);
->> > +       } else {
->> > +               cache_no_acl(inode);
->> > +       }
->> > +
->> > +out_release:
->> > +       posix_acl_release(acl);
->> > +out:
->> > +       return ret;
->> > +}
->> > +
->> > +int ceph_acl_chmod(struct dentry *dentry, struct inode *inode)
->> > +{
->> > +       struct posix_acl *acl;
->> > +       int ret = 0;
->> > +
->> > +       if (S_ISLNK(inode->i_mode)) {
->> > +               ret = -EOPNOTSUPP;
->> > +               goto out;
->> > +       }
->> > +
->> > +       if (!IS_POSIXACL(inode))
->> > +               goto out;
->> > +
->> > +       acl = ceph_get_acl(inode, ACL_TYPE_ACCESS);
->> > +       if (IS_ERR_OR_NULL(acl)) {
->> > +               ret = PTR_ERR(acl);
->> > +               goto out;
->> > +       }
->> > +
->> > +       ret = posix_acl_chmod(&acl, GFP_KERNEL, inode->i_mode);
->> > +       if (ret)
->> > +               goto out;
->> > +       ret = ceph_set_acl(dentry, inode, acl, ACL_TYPE_ACCESS);
->> > +       posix_acl_release(acl);
->> > +out:
->> > +       return ret;
->> > +}
->> > +
->> > +static int ceph_xattr_acl_get(struct dentry *dentry, const char *name,
->> > +                               void *value, size_t size, int type)
->> > +{
->> > +       struct posix_acl *acl;
->> > +       int ret = 0;
->> > +
->> > +       if (!IS_POSIXACL(dentry->d_inode))
->> > +               return -EOPNOTSUPP;
->> > +
->> > +       acl = ceph_get_acl(dentry->d_inode, type);
->> > +       if (IS_ERR(acl))
->> > +               return PTR_ERR(acl);
->> > +       if (acl == NULL)
->> > +               return -ENODATA;
->> > +
->> > +       ret = posix_acl_to_xattr(&init_user_ns, acl, value, size);
->> > +       posix_acl_release(acl);
->> > +
->> > +       return ret;
->> > +}
->> > +
->> > +static int ceph_xattr_acl_set(struct dentry *dentry, const char *name,
->> > +                       const void *value, size_t size, int flags, int type)
->> > +{
->> > +       int ret = 0;
->> > +       struct posix_acl *acl = NULL;
->> > +
->> > +       if (!inode_owner_or_capable(dentry->d_inode)) {
->> > +               ret = -EPERM;
->> > +               goto out;
->> > +       }
->> > +
->> > +       if (!IS_POSIXACL(dentry->d_inode)) {
->> > +               ret = -EOPNOTSUPP;
->> > +               goto out;
->> > +       }
->> > +
->> > +       if (value) {
->> > +               acl = posix_acl_from_xattr(&init_user_ns, value, size);
->> > +               if (IS_ERR(acl)) {
->> > +                       ret = PTR_ERR(acl);
->> > +                       goto out;
->> > +               }
->> > +
->> > +               if (acl) {
->> > +                       ret = posix_acl_valid(acl);
->> > +                       if (ret)
->> > +                               goto out_release;
->> > +               }
->> > +       }
->> > +
->> > +       ret = ceph_set_acl(dentry, dentry->d_inode, acl, type);
->> > +
->> > +out_release:
->> > +       posix_acl_release(acl);
->> > +out:
->> > +       return ret;
->> > +}
->> > +
->> > +const struct xattr_handler ceph_xattr_acl_default_handler = {
->> > +       .prefix = POSIX_ACL_XATTR_DEFAULT,
->> > +       .flags  = ACL_TYPE_DEFAULT,
->> > +       .get    = ceph_xattr_acl_get,
->> > +       .set    = ceph_xattr_acl_set,
->> > +};
->> > +
->> > +const struct xattr_handler ceph_xattr_acl_access_handler = {
->> > +       .prefix = POSIX_ACL_XATTR_ACCESS,
->> > +       .flags  = ACL_TYPE_ACCESS,
->> > +       .get    = ceph_xattr_acl_get,
->> > +       .set    = ceph_xattr_acl_set,
->> > +};
->> > diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
->> > index 2a0bcae..b629e9d 100644
->> > --- a/fs/ceph/dir.c
->> > +++ b/fs/ceph/dir.c
->> > @@ -693,6 +693,10 @@ static int ceph_mknod(struct inode *dir, struct dentry *dentry,
->> >         if (!err && !req->r_reply_info.head->is_dentry)
->> >                 err = ceph_handle_notrace_create(dir, dentry);
->> >         ceph_mdsc_put_request(req);
->> > +
->> > +       if (!err)
->> > +               err = ceph_init_acl(dentry, dentry->d_inode, dir);
->> > +
->> >         if (err)
->> >                 d_drop(dentry);
->> >         return err;
->> > @@ -1293,6 +1297,7 @@ const struct inode_operations ceph_dir_iops = {
->> >         .getxattr = ceph_getxattr,
->> >         .listxattr = ceph_listxattr,
->> >         .removexattr = ceph_removexattr,
->> > +       .get_acl = ceph_get_acl,
->> >         .mknod = ceph_mknod,
->> >         .symlink = ceph_symlink,
->> >         .mkdir = ceph_mkdir,
->> > diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
->> > index 2ae1381..fc21c56 100644
->> > --- a/fs/ceph/inode.c
->> > +++ b/fs/ceph/inode.c
->> > @@ -95,6 +95,7 @@ const struct inode_operations ceph_file_iops = {
->> >         .getxattr = ceph_getxattr,
->> >         .listxattr = ceph_listxattr,
->> >         .removexattr = ceph_removexattr,
->> > +       .get_acl = ceph_get_acl,
->> >  };
->> >
->> >
->> > @@ -1632,6 +1633,7 @@ static const struct inode_operations ceph_symlink_iops = {
->> >         .getxattr = ceph_getxattr,
->> >         .listxattr = ceph_listxattr,
->> >         .removexattr = ceph_removexattr,
->> > +       .get_acl = ceph_get_acl,
->> >  };
->> >
->> >  /*
->> > @@ -1702,9 +1704,11 @@ int ceph_setattr(struct dentry *dentry, struct iattr *attr)
->> >                      attr->ia_mode);
->> >                 if (issued & CEPH_CAP_AUTH_EXCL) {
->> >                         inode->i_mode = attr->ia_mode;
->> > -                       dirtied |= CEPH_CAP_AUTH_EXCL;
->> > +                       dirtied |= CEPH_CAP_AUTH_EXCL | CEPH_CAP_XATTR_EXCL;
->> > +                       ci->i_xattrs.dirty = true;
->> >                 } else if ((issued & CEPH_CAP_AUTH_SHARED) == 0 ||
->> >                            attr->ia_mode != inode->i_mode) {
->> > +                       inode->i_mode = attr->ia_mode;
->> >                         req->r_args.setattr.mode = cpu_to_le32(attr->ia_mode);
->> >                         mask |= CEPH_SETATTR_MODE;
->> >                         release |= CEPH_CAP_AUTH_SHARED;
+On Sat, Oct 19, 2013 at 7:14 AM, Yan, Zheng <ukernel@gmail.com> wrote:
+> On Sat, Oct 19, 2013 at 8:58 PM, hjwsm1989-gmail <hjwsm1989@gmail.com=
+> wrote:
+>> Hi,
+>> I'm testing ceph with samba.
+>> I have 20 OSD nodes on 4 hosts
+>> dy01:1MON, 5 OSDs, 1 samba server
+>> dy02: 1MDS, 5OSDs, 1 samba server
+>> dy03: 5 OSDs, 1 samba server
+>> dy04:5 OSDs, 1 samba server
+>> every samba server exports the ceph kclient mount point.
 >>
->> I think these changes are not needed. ceph_acl_chmod() below will
->> handle the xattr
->> change.
+>> When I set 3 samba clients connect to a samba server(dy01), and each=
+ write a
+>> single 18GB file, gets 110MB/s speed each.
+>> But when I use 4 clients, the cluster will report 'slow request' msg=
+, and
+>> this time I list files in samba client dir, it gets stuck.
+>> And the test tool reports frame losing.
+>> For the list operation related to MDS, I think the MDS op messages s=
+hould
+>> have higher priority than clients op.
+>> Have I understood correctly?
 >
-> Good catch :-).
+> Hi,
 >
-> This line(inode->i_mode = attr->ia_mode;) should be left here,
-> the function ceph_acl_chmod() need the new value of inode->i_mode.
+> I think you are right, the MDS needs higher priority. could you modif=
+y
+> the mds code
+> and re-test.
+>
+> In src/ceph_mds.cc, add
+> "messenger->set_default_send_priority(CEPH_MSG_PRIO_HIGH);"
+> after
+> "messenger->set_cluster_protocol(CEPH_MDS_PROTOCOL);"
+>
+> Regards
+> Yan, Zheng
 
-yes. please update the patch.
-
-Regards
-Yan, Zheng
-
->
->>
->> > @@ -1820,6 +1824,12 @@ int ceph_setattr(struct dentry *dentry, struct iattr *attr)
->> >         if (inode_dirty_flags)
->> >                 __mark_inode_dirty(inode, inode_dirty_flags);
->> >
->> > +       if (ia_valid & ATTR_MODE) {
->> > +               err = ceph_acl_chmod(dentry, inode);
->> > +               if (err)
->> > +                       goto out_put;
->> > +       }
->> > +
->> >         if (mask) {
->> >                 req->r_inode = inode;
->> >                 ihold(inode);
->> > @@ -1839,6 +1849,7 @@ int ceph_setattr(struct dentry *dentry, struct iattr *attr)
->> >         return err;
->> >  out:
->> >         spin_unlock(&ci->i_ceph_lock);
->> > +out_put:
->> >         ceph_mdsc_put_request(req);
->> >         return err;
->> >  }
->> > diff --git a/fs/ceph/super.c b/fs/ceph/super.c
->> > index e58bd4a..c6740e4 100644
->> > --- a/fs/ceph/super.c
->> > +++ b/fs/ceph/super.c
->> > @@ -819,7 +819,11 @@ static int ceph_set_super(struct super_block *s, void *data)
->> >
->> >         s->s_flags = fsc->mount_options->sb_flags;
->> >         s->s_maxbytes = 1ULL << 40;  /* temp value until we get mdsmap */
->> > +#ifdef CONFIG_CEPH_FS_POSIX_ACL
->> > +       s->s_flags |= MS_POSIXACL;
->> > +#endif
->> >
->> > +       s->s_xattr = ceph_xattr_handlers;
->> >         s->s_fs_info = fsc;
->> >         fsc->sb = s;
->> >
->> > diff --git a/fs/ceph/super.h b/fs/ceph/super.h
->> > index 8de94b5..37aba80 100644
->> > --- a/fs/ceph/super.h
->> > +++ b/fs/ceph/super.h
->> > @@ -725,6 +725,9 @@ extern int ceph_getattr(struct vfsmount *mnt, struct dentry *dentry,
->> >  /* xattr.c */
->> >  extern int ceph_setxattr(struct dentry *, const char *, const void *,
->> >                          size_t, int);
->> > +int __ceph_setxattr(struct dentry *, const char *, const void *, size_t, int);
->> > +ssize_t __ceph_getxattr(struct inode *, const char *, void *, size_t);
->> > +int __ceph_removexattr(struct dentry *, const char *);
->> >  extern ssize_t ceph_getxattr(struct dentry *, const char *, void *, size_t);
->> >  extern ssize_t ceph_listxattr(struct dentry *, char *, size_t);
->> >  extern int ceph_removexattr(struct dentry *, const char *);
->> > @@ -733,6 +736,34 @@ extern void __ceph_destroy_xattrs(struct ceph_inode_info *ci);
->> >  extern void __init ceph_xattr_init(void);
->> >  extern void ceph_xattr_exit(void);
->> >
->> > +/* acl.c */
->> > +extern const struct xattr_handler ceph_xattr_acl_access_handler;
->> > +extern const struct xattr_handler ceph_xattr_acl_default_handler;
->> > +extern const struct xattr_handler *ceph_xattr_handlers[];
->> > +
->> > +#ifdef CONFIG_CEPH_FS_POSIX_ACL
->> > +
->> > +struct posix_acl *ceph_get_acl(struct inode *, int);
->> > +int ceph_init_acl(struct dentry *, struct inode *, struct inode *);
->> > +int ceph_acl_chmod(struct dentry *, struct inode *);
->> > +
->> > +#else
->> > +
->> > +#define ceph_get_acl NULL
->> > +
->> > +static inline int ceph_init_acl(struct dentry *dentry, struct inode *inode,
->> > +                               struct inode *dir)
->> > +{
->> > +       return 0;
->> > +}
->> > +
->> > +static inline int ceph_acl_chmod(struct dentry *dentry, struct inode *inode)
->> > +{
->> > +       return 0;
->> > +}
->> > +
->> > +#endif
->> > +
->> >  /* caps.c */
->> >  extern const char *ceph_cap_string(int c);
->> >  extern void ceph_handle_caps(struct ceph_mds_session *session,
->> > diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
->> > index be661d8..c7581f3 100644
->> > --- a/fs/ceph/xattr.c
->> > +++ b/fs/ceph/xattr.c
->> > @@ -11,11 +11,24 @@
->> >  #define XATTR_CEPH_PREFIX "ceph."
->> >  #define XATTR_CEPH_PREFIX_LEN (sizeof (XATTR_CEPH_PREFIX) - 1)
->> >
->> > +/*
->> > + * List of handlers for synthetic system.* attributes. Other
->> > + * attributes are handled directly.
->> > + */
->> > +const struct xattr_handler *ceph_xattr_handlers[] = {
->> > +#ifdef CONFIG_CEPH_FS_POSIX_ACL
->> > +       &ceph_xattr_acl_access_handler,
->> > +       &ceph_xattr_acl_default_handler,
->> > +#endif
->> > +       NULL,
->> > +};
->> > +
->> >  static bool ceph_is_valid_xattr(const char *name)
->> >  {
->> >         return !strncmp(name, XATTR_CEPH_PREFIX, XATTR_CEPH_PREFIX_LEN) ||
->> >                !strncmp(name, XATTR_SECURITY_PREFIX,
->> >                         XATTR_SECURITY_PREFIX_LEN) ||
->> > +              !strncmp(name, XATTR_SYSTEM_PREFIX, XATTR_SYSTEM_PREFIX_LEN) ||
->> >                !strncmp(name, XATTR_TRUSTED_PREFIX, XATTR_TRUSTED_PREFIX_LEN) ||
->> >                !strncmp(name, XATTR_USER_PREFIX, XATTR_USER_PREFIX_LEN);
->> >  }
->> > @@ -663,10 +676,9 @@ void __ceph_build_xattrs_blob(struct ceph_inode_info *ci)
->> >         }
->> >  }
->> >
->> > -ssize_t ceph_getxattr(struct dentry *dentry, const char *name, void *value,
->> > +ssize_t __ceph_getxattr(struct inode *inode, const char *name, void *value,
->> >                       size_t size)
->> >  {
->> > -       struct inode *inode = dentry->d_inode;
->> >         struct ceph_inode_info *ci = ceph_inode(inode);
->> >         int err;
->> >         struct ceph_inode_xattr *xattr;
->> > @@ -675,7 +687,6 @@ ssize_t ceph_getxattr(struct dentry *dentry, const char *name, void *value,
->> >         if (!ceph_is_valid_xattr(name))
->> >                 return -ENODATA;
->> >
->> > -
->> >         /* let's see if a virtual xattr was requested */
->> >         vxattr = ceph_match_vxattr(inode, name);
->> >         if (vxattr && !(vxattr->exists_cb && !vxattr->exists_cb(ci))) {
->> > @@ -725,6 +736,15 @@ out:
->> >         return err;
->> >  }
->> >
->> > +ssize_t ceph_getxattr(struct dentry *dentry, const char *name, void *value,
->> > +                     size_t size)
->> > +{
->> > +       if (!strncmp(name, XATTR_SYSTEM_PREFIX, XATTR_SYSTEM_PREFIX_LEN))
->> > +               return generic_getxattr(dentry, name, value, size);
->> > +
->> > +       return __ceph_getxattr(dentry->d_inode, name, value, size);
->> > +}
->> > +
->> >  ssize_t ceph_listxattr(struct dentry *dentry, char *names, size_t size)
->> >  {
->> >         struct inode *inode = dentry->d_inode;
->> > @@ -863,8 +883,8 @@ out:
->> >         return err;
->> >  }
->> >
->> > -int ceph_setxattr(struct dentry *dentry, const char *name,
->> > -                 const void *value, size_t size, int flags)
->> > +int __ceph_setxattr(struct dentry *dentry, const char *name,
->> > +                       const void *value, size_t size, int flags)
->> >  {
->> >         struct inode *inode = dentry->d_inode;
->> >         struct ceph_vxattr *vxattr;
->> > @@ -879,9 +899,6 @@ int ceph_setxattr(struct dentry *dentry, const char *name,
->> >         struct ceph_inode_xattr *xattr = NULL;
->> >         int required_blob_size;
->> >
->> > -       if (ceph_snap(inode) != CEPH_NOSNAP)
->> > -               return -EROFS;
->> > -
->>
->> why remove this ?
->
-> Didn't remove, just move it to ceph_setxattr().
->
-> The function __ceph_setxattr() would only be called by ceph_setxattr() and
-> ceph_set_acl(), and there are 3 functions which will call it finally:
-> ceph_setxattr(), ceph_setattr()(because of ceph_acl_chmod), and ceph_mknode()
-> (because of ceph_init_acl). All of these functions would check it first when
-> running.
->
-> If move the check location, it could return immediately when handling snapshot.
->
->>
->> >         if (!ceph_is_valid_xattr(name))
->> >                 return -EOPNOTSUPP;
->> >
->> > @@ -958,6 +975,18 @@ out:
->> >         return err;
->> >  }
->> >
->> > +int ceph_setxattr(struct dentry *dentry, const char *name,
->> > +                 const void *value, size_t size, int flags)
->> > +{
->> > +       if (ceph_snap(dentry->d_inode) != CEPH_NOSNAP)
->> > +               return -EROFS;
->> > +
->> > +       if (!strncmp(name, XATTR_SYSTEM_PREFIX, XATTR_SYSTEM_PREFIX_LEN))
->> > +               return generic_setxattr(dentry, name, value, size, flags);
->> > +
->> > +       return __ceph_setxattr(dentry, name, value, size, flags);
->> > +}
->> > +
->> >  static int ceph_send_removexattr(struct dentry *dentry, const char *name)
->> >  {
->> >         struct ceph_fs_client *fsc = ceph_sb_to_client(dentry->d_sb);
->> > @@ -984,7 +1013,7 @@ static int ceph_send_removexattr(struct dentry *dentry, const char *name)
->> >         return err;
->> >  }
->> >
->> > -int ceph_removexattr(struct dentry *dentry, const char *name)
->> > +int __ceph_removexattr(struct dentry *dentry, const char *name)
->> >  {
->> >         struct inode *inode = dentry->d_inode;
->> >         struct ceph_vxattr *vxattr;
->> > @@ -994,9 +1023,6 @@ int ceph_removexattr(struct dentry *dentry, const char *name)
->> >         int required_blob_size;
->> >         int dirty;
->> >
->> > -       if (ceph_snap(inode) != CEPH_NOSNAP)
->> > -               return -EROFS;
->> > -
->>
->> ??
->
-> The same to above.
->
->>
->> Regards
->> Yan, Zheng
->>
->> >         if (!ceph_is_valid_xattr(name))
->> >                 return -EOPNOTSUPP;
->> >
->> > @@ -1053,3 +1079,13 @@ out:
->> >         return err;
->> >  }
->> >
->> > +int ceph_removexattr(struct dentry *dentry, const char *name)
->> > +{
->> > +       if (ceph_snap(dentry->d_inode) != CEPH_NOSNAP)
->> > +               return -EROFS;
->> > +
->> > +       if (!strncmp(name, XATTR_SYSTEM_PREFIX, XATTR_SYSTEM_PREFIX_LEN))
->> > +               return generic_removexattr(dentry, name);
->> > +
->> > +       return __ceph_removexattr(dentry, name);
->> > +}
->
-> --
-> Best regards,
-> Guangliang
+If this actually turns out to be useful, we'll want to briefly go
+through the code base and adjust the other levels =97 a quick grep
+indicates the MDS sets some traffic to LOW that should correspondingly
+be bumped up to NORMAL; the OSDs are currently using HIGH for acks and
+commits, but we probably want those messages to continue having a
+higher priority than any clients (MDS included) are setting messages
+at.
+(I'm not sure it actually will; I suspect what's happening here is
+just that 4 clients are passing some limit that 3 aren't.)
+-Greg
+Software Engineer #42 @ http://inktank.com | http://ceph.com
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
