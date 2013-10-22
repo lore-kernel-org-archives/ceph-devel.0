@@ -1,86 +1,80 @@
-From: =?GBK?B?xfQ=?= <wkp4666-KN7UnAbNpbg@public.gmane.org>
-Subject: update ceph brings errors
-Date: Tue, 22 Oct 2013 16:10:55 +0800 (CST)
-Message-ID: <53a59bc7.25d8f.141df377649.Coremail.wkp4666@126.com>
+From: Niklas Goerke <niklas@niklasgoerke.de>
+Subject: xfs Warnings in syslog
+Date: Tue, 22 Oct 2013 13:46:23 +0200
+Message-ID: <049e1508cbb35ecf7b38ea2dadddc6ec@niklasgoerke.de>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0968808311=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from niklasgoerke.de ([46.38.232.61]:34230 "EHLO niklasgoerke.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751714Ab3JVLq0 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 22 Oct 2013 07:46:26 -0400
+Received: from mail.niklasgoerke.de (localhost.localdomain [127.0.0.1])
+	by niklasgoerke.de (Postfix) with ESMTP id 1BAC028EA918
+	for <ceph-devel@vger.kernel.org>; Tue, 22 Oct 2013 11:46:24 +0000 (UTC)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
---===============0968808311==
-Content-Type: multipart/alternative;
-	boundary="----=_Part_563651_1120333455.1382429455945"
+Hi
 
-------=_Part_563651_1120333455.1382429455945
-Content-Type: text/plain; charset=GBK
-Content-Transfer-Encoding: 7bit
+My syslog and dmesg are being filled with the Warnings attached.
+Looking at todays syslog I got up to 1101 of these warnings in the time=
+=20
+from 10:50 to 11:13 (and only in that time, else the log was clean). I=20
+found them on all four of my OSD hosts, all at about the same time.
+I'm running kernel 3.2.0-4-amd64 on a debian 7.0. Ceph is on version=20
+0.67.4. I have got 15 OSDs per OSD Host.
 
- 
-Hi all!
-     I update my ceph verson form 0.56.3 to 0.62!  I install call dev pockage! and sucess build 0.62!
-but  when I used 0.62 init-ceph !  all osd can not restart!
+Ceph does not really seem to care about this, so I'm not sure what it=20
+is all about=E2=80=A6
+Still they are warnings in syslog and I hope you guys can tell me what=20
+went wrong here and what I can do about it?
 
-    it return   fail /use/local/bin/ceph-osd -i 0 --pid -file /var/run/osd.0.pid -c /tmp/fetched.ceph.conf.12035
-
-  and when I run that common
-   ** ERROR : unable to open OSD superblock on /data/osd.0:(2) No such file or directory
-
-  but when I use the init-ceph, which verson is 0.56.3, It is ok to start all osds!
-   but  the ceph -s
-   Health HEALTH_WARN mds cluster is degeaded; mds 1 is loggy
-    ....
-   mdsmap e188: 1/1/1 up (0=1=up:replay(laggy or crashed))
-
-    what is more!  I cant mount ceph !
-
-           #mount -t ceph 192.168.22.22:6789:/ /mnt/test
-          mount:192.168.22.22:/: cant read superblock
-
-    so     , what are the diferent in init-ceph between the verson 0.62 and verson 0.56.3.
- 
-     and how to slove my polblem!
-
-     think you !
-
-    peng
+Thank you
+Niklas
 
 
-
-
-
-
-
-
-
-------=_Part_563651_1120333455.1382429455945
-Content-Type: text/html; charset=GBK
-Content-Transfer-Encoding: 7bit
-
-<div style="line-height:1.7;color:#000000;font-size:14px;font-family:arial"><div><div>&nbsp;<br>Hi all!<br>&nbsp;&nbsp;&nbsp;&nbsp; I update my ceph verson form 0.56.3 to 0.62!&nbsp; I install call dev pockage! and sucess build 0.62!<br>but&nbsp; when I used 0.62 init-ceph !&nbsp; all osd can not restart!<br><br>&nbsp;&nbsp;&nbsp; it return&nbsp;&nbsp; fail /use/local/bin/ceph-osd -i 0 --pid -file /var/run/osd.0.pid -c /tmp/fetched.ceph.conf.12035<br><br>&nbsp; and when I run that common<br>&nbsp;&nbsp; ** ERROR : unable to open OSD superblock on /data/osd.0:(2) No such file or directory<br><br>&nbsp; but when I use the init-ceph, which verson is 0.56.3, It is ok to start all osds!<br>&nbsp;&nbsp; but&nbsp; the ceph -s<br>&nbsp;&nbsp; Health HEALTH_WARN mds cluster is degeaded; mds 1 is lo
- ggy<br>&nbsp;&nbsp;&nbsp; ....<br>&nbsp;&nbsp; mdsmap e188: 1/1/1 up (0=1=up:replay(laggy or crashed))<br><br>&nbsp;&nbsp;&nbsp; what is more!&nbsp; I cant mount ceph !<br><br>&nbsp;&nbsp;&n
- bsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #mount -t ceph 192.168.22.22:6789:/ /mnt/test<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; mount:192.168.22.22:/: cant read superblock<br><br>&nbsp; &nbsp; so &nbsp;&nbsp;&nbsp; , what are the diferent in init-ceph between the verson 0.62 and verson 0.56.3.<br>&nbsp; <br>&nbsp;&nbsp;&nbsp;&nbsp; and how to slove my polblem!<br><br>&nbsp;&nbsp;&nbsp;&nbsp; think you !<br><br>&nbsp;&nbsp;&nbsp; peng<br><br><br><br><br><br><br><br><br></div></div></div><br><br><span title="neteasefooter"><span id="netease_mail_footer"></span></span>
-------=_Part_563651_1120333455.1382429455945--
-
-
---===============0968808311==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============0968808311==--
+Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388018] ------------[ cut=
+=20
+here ]------------
+Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388030] WARNING: at=20
+/build/linux-s5x2oE/linux-3.2.46/fs/xfs/xfs_aops.c:1091=20
+xfs_vm_releasepage+0x76/0x8e [xfs]()
+Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388034] Hardware name:=20
+X9DR3-F
+Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388036] Modules linked=20
+in: xfs autofs4 nfsd nfs nfs_acl auth_rpcgss fscache lockd sunrpc ext3=20
+jbd loop acpi_cpufreq mperf coretemp crc32c_intel ghash_clmulni_intel=20
+snd_pcm aesni_intel snd_page_alloc aes_x86_64 snd_timer aes_generic s
+nd cryptd soundcore pcspkr sb_edac joydev evdev edac_core iTCO_wdt=20
+i2c_i801 iTCO_vendor_support i2c_core ioatdma processor thermal_sys=20
+container button ext4 crc16 jbd2 mbcache usbhid hid ses enclosure sg=20
+sd_mod crc_t10dif megaraid_sas ehci_hcd usbcore isci libsas usb_common=20
+liba
+ta ixgbe mdio scsi_transport_sas scsi_mod igb dca [last unloaded:=20
+scsi_wait_scan]
+Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388093] Pid: 3459605,=20
+comm: ceph-osd Tainted: G        W    3.2.0-4-amd64 #1 Debian 3.2.46-1
+Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388096] Call Trace:
+Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388102] =20
+[<ffffffff81046b75>] ? warn_slowpath_common+0x78/0x8c
+Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388115] =20
+[<ffffffffa048b98c>] ? xfs_vm_releasepage+0x76/0x8e [xfs]
+Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388122] =20
+[<ffffffff810bedc5>] ? invalidate_inode_page+0x5e/0x80
+Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388129] =20
+[<ffffffff810bee5d>] ? invalidate_mapping_pages+0x76/0x102
+Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388135] =20
+[<ffffffff810b7b83>] ? sys_fadvise64_64+0x19f/0x1e2
+Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388140] =20
+[<ffffffff81353b52>] ? system_call_fastpath+0x16/0x1b
+Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388144] ---[ end trace=20
+e9640ed6f82f066d ]---
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
