@@ -1,109 +1,93 @@
-From: Jeff Liu <jeff.liu@oracle.com>
+From: Andrey Korolyov <andrey@xdel.ru>
 Subject: Re: xfs Warnings in syslog
-Date: Tue, 22 Oct 2013 20:29:28 +0800
-Message-ID: <52666FA8.4050101@oracle.com>
+Date: Tue, 22 Oct 2013 13:36:56 +0100
+Message-ID: <CABYiri8CThqQ-E0MvB4=XbOt7jrQG_nw_2Sc7vt0VD_zbr_Ycw@mail.gmail.com>
 References: <049e1508cbb35ecf7b38ea2dadddc6ec@niklasgoerke.de>
+	<52666FA8.4050101@oracle.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from aserp1040.oracle.com ([141.146.126.69]:25726 "EHLO
-	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751884Ab3JVM2e (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Oct 2013 08:28:34 -0400
-In-Reply-To: <049e1508cbb35ecf7b38ea2dadddc6ec@niklasgoerke.de>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Niklas Goerke <niklas@niklasgoerke.de>
-Cc: ceph-devel@vger.kernel.org, "xfs@oss.sgi.com" <xfs@oss.sgi.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <xfs-bounces@oss.sgi.com>
+In-Reply-To: <52666FA8.4050101@oracle.com>
+List-Unsubscribe: <http://oss.sgi.com/mailman/options/xfs>,
+	<mailto:xfs-request@oss.sgi.com?subject=unsubscribe>
+List-Archive: <http://oss.sgi.com/pipermail/xfs>
+List-Post: <mailto:xfs@oss.sgi.com>
+List-Help: <mailto:xfs-request@oss.sgi.com?subject=help>
+List-Subscribe: <http://oss.sgi.com/mailman/listinfo/xfs>,
+	<mailto:xfs-request@oss.sgi.com?subject=subscribe>
+Errors-To: xfs-bounces@oss.sgi.com
+Sender: xfs-bounces@oss.sgi.com
+To: Jeff Liu <jeff.liu@oracle.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Niklas Goerke <niklas@niklasgoerke.de>, "xfs@oss.sgi.com" <xfs@oss.sgi.com>
+List-Id: ceph-devel.vger.kernel.org
 
-Hello,
-
-So It's better to add XFS mailing list to the CC-list. :)
-
-I think this issue has been fixed by upstream commits:
-
-=46rom ff9a28f6c25d18a635abcab1f49db68108203dfb
-=46rom: Jan Kara <jack@suse.cz>
-Date: Thu, 14 Mar 2013 14:30:54 +0100
-Subject: [PATCH 1/1] xfs: Fix WARN_ON(delalloc) in xfs_vm_releasepage()
-
-
-Thanks,
--Jeff
-
-On 10/22/2013 07:46 PM, Niklas Goerke wrote:
-
-> Hi
->=20
-> My syslog and dmesg are being filled with the Warnings attached.
-> Looking at todays syslog I got up to 1101 of these warnings in the ti=
-me
-> from 10:50 to 11:13 (and only in that time, else the log was clean). =
-I
-> found them on all four of my OSD hosts, all at about the same time.
-> I'm running kernel 3.2.0-4-amd64 on a debian 7.0. Ceph is on version
-> 0.67.4. I have got 15 OSDs per OSD Host.
->=20
-> Ceph does not really seem to care about this, so I'm not sure what it=
- is
-> all about=E2=80=A6
-> Still they are warnings in syslog and I hope you guys can tell me wha=
-t
-> went wrong here and what I can do about it?
->=20
-> Thank you
-> Niklas
->=20
->=20
-> Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388018] ------------[ c=
-ut
-> here ]------------
-> Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388030] WARNING: at
-> /build/linux-s5x2oE/linux-3.2.46/fs/xfs/xfs_aops.c:1091
-> xfs_vm_releasepage+0x76/0x8e [xfs]()
-> Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388034] Hardware name:
-> X9DR3-F
-> Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388036] Modules linked =
-in:
-> xfs autofs4 nfsd nfs nfs_acl auth_rpcgss fscache lockd sunrpc ext3 jb=
-d
-> loop acpi_cpufreq mperf coretemp crc32c_intel ghash_clmulni_intel
-> snd_pcm aesni_intel snd_page_alloc aes_x86_64 snd_timer aes_generic s
-> nd cryptd soundcore pcspkr sb_edac joydev evdev edac_core iTCO_wdt
-> i2c_i801 iTCO_vendor_support i2c_core ioatdma processor thermal_sys
-> container button ext4 crc16 jbd2 mbcache usbhid hid ses enclosure sg
-> sd_mod crc_t10dif megaraid_sas ehci_hcd usbcore isci libsas usb_commo=
-n liba
-> ta ixgbe mdio scsi_transport_sas scsi_mod igb dca [last unloaded:
-> scsi_wait_scan]
-> Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388093] Pid: 3459605,
-> comm: ceph-osd Tainted: G        W    3.2.0-4-amd64 #1 Debian 3.2.46-=
-1
-> Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388096] Call Trace:
-> Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388102]=20
-> [<ffffffff81046b75>] ? warn_slowpath_common+0x78/0x8c
-> Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388115]=20
-> [<ffffffffa048b98c>] ? xfs_vm_releasepage+0x76/0x8e [xfs]
-> Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388122]=20
-> [<ffffffff810bedc5>] ? invalidate_inode_page+0x5e/0x80
-> Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388129]=20
-> [<ffffffff810bee5d>] ? invalidate_mapping_pages+0x76/0x102
-> Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388135]=20
-> [<ffffffff810b7b83>] ? sys_fadvise64_64+0x19f/0x1e2
-> Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388140]=20
-> [<ffffffff81353b52>] ? system_call_fastpath+0x16/0x1b
-> Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388144] ---[ end trace
-> e9640ed6f82f066d ]---
-> --=20
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SnVzdCBteSB0d28gY2VudHM6CgpYRlMgaXMgYSBxdWl0ZSB1bnN0YWJsZSB3aXRoIENlcGggZXNw
+ZWNpYWxseSBhbG9uZyB3aXRoIGhlYXZ5IENQVQp1c2FnZSB1cCB0byAzLjcocHJpbWFyaWx5IHNv
+ZnQgbG9ja3VwcykuIEkgdXNlZCAzLjcgZm9yIGVpZ2h0IG1vbnRocwpiZWZvcmUgdXBncmFkZSBv
+biBwcm9kdWN0aW9uIHN5c3RlbSBhbmQgaXQgcGVyZm9ybXMganVzdCBwZXJmZWN0bHkuCgpPbiBU
+dWUsIE9jdCAyMiwgMjAxMyBhdCAxOjI5IFBNLCBKZWZmIExpdSA8amVmZi5saXVAb3JhY2xlLmNv
+bT4gd3JvdGU6Cj4gSGVsbG8sCj4KPiBTbyBJdCdzIGJldHRlciB0byBhZGQgWEZTIG1haWxpbmcg
+bGlzdCB0byB0aGUgQ0MtbGlzdC4gOikKPgo+IEkgdGhpbmsgdGhpcyBpc3N1ZSBoYXMgYmVlbiBm
+aXhlZCBieSB1cHN0cmVhbSBjb21taXRzOgo+Cj4gRnJvbSBmZjlhMjhmNmMyNWQxOGE2MzVhYmNh
+YjFmNDlkYjY4MTA4MjAzZGZiCj4gRnJvbTogSmFuIEthcmEgPGphY2tAc3VzZS5jej4KPiBEYXRl
+OiBUaHUsIDE0IE1hciAyMDEzIDE0OjMwOjU0ICswMTAwCj4gU3ViamVjdDogW1BBVENIIDEvMV0g
+eGZzOiBGaXggV0FSTl9PTihkZWxhbGxvYykgaW4geGZzX3ZtX3JlbGVhc2VwYWdlKCkKPgo+Cj4g
+VGhhbmtzLAo+IC1KZWZmCj4KPiBPbiAxMC8yMi8yMDEzIDA3OjQ2IFBNLCBOaWtsYXMgR29lcmtl
+IHdyb3RlOgo+Cj4+IEhpCj4+Cj4+IE15IHN5c2xvZyBhbmQgZG1lc2cgYXJlIGJlaW5nIGZpbGxl
+ZCB3aXRoIHRoZSBXYXJuaW5ncyBhdHRhY2hlZC4KPj4gTG9va2luZyBhdCB0b2RheXMgc3lzbG9n
+IEkgZ290IHVwIHRvIDExMDEgb2YgdGhlc2Ugd2FybmluZ3MgaW4gdGhlIHRpbWUKPj4gZnJvbSAx
+MDo1MCB0byAxMToxMyAoYW5kIG9ubHkgaW4gdGhhdCB0aW1lLCBlbHNlIHRoZSBsb2cgd2FzIGNs
+ZWFuKS4gSQo+PiBmb3VuZCB0aGVtIG9uIGFsbCBmb3VyIG9mIG15IE9TRCBob3N0cywgYWxsIGF0
+IGFib3V0IHRoZSBzYW1lIHRpbWUuCj4+IEknbSBydW5uaW5nIGtlcm5lbCAzLjIuMC00LWFtZDY0
+IG9uIGEgZGViaWFuIDcuMC4gQ2VwaCBpcyBvbiB2ZXJzaW9uCj4+IDAuNjcuNC4gSSBoYXZlIGdv
+dCAxNSBPU0RzIHBlciBPU0QgSG9zdC4KPj4KPj4gQ2VwaCBkb2VzIG5vdCByZWFsbHkgc2VlbSB0
+byBjYXJlIGFib3V0IHRoaXMsIHNvIEknbSBub3Qgc3VyZSB3aGF0IGl0IGlzCj4+IGFsbCBhYm91
+dOKApgo+PiBTdGlsbCB0aGV5IGFyZSB3YXJuaW5ncyBpbiBzeXNsb2cgYW5kIEkgaG9wZSB5b3Ug
+Z3V5cyBjYW4gdGVsbCBtZSB3aGF0Cj4+IHdlbnQgd3JvbmcgaGVyZSBhbmQgd2hhdCBJIGNhbiBk
+byBhYm91dCBpdD8KPj4KPj4gVGhhbmsgeW91Cj4+IE5pa2xhcwo+Pgo+Pgo+PiBPY3QgMjIgMTE6
+MTE6MTkgY3MtYmlnZm9vdDA2IGtlcm5lbDogWzk3NDQ2NDguMzg4MDE4XSAtLS0tLS0tLS0tLS1b
+IGN1dAo+PiBoZXJlIF0tLS0tLS0tLS0tLS0KPj4gT2N0IDIyIDExOjExOjE5IGNzLWJpZ2Zvb3Qw
+NiBrZXJuZWw6IFs5NzQ0NjQ4LjM4ODAzMF0gV0FSTklORzogYXQKPj4gL2J1aWxkL2xpbnV4LXM1
+eDJvRS9saW51eC0zLjIuNDYvZnMveGZzL3hmc19hb3BzLmM6MTA5MQo+PiB4ZnNfdm1fcmVsZWFz
+ZXBhZ2UrMHg3Ni8weDhlIFt4ZnNdKCkKPj4gT2N0IDIyIDExOjExOjE5IGNzLWJpZ2Zvb3QwNiBr
+ZXJuZWw6IFs5NzQ0NjQ4LjM4ODAzNF0gSGFyZHdhcmUgbmFtZToKPj4gWDlEUjMtRgo+PiBPY3Qg
+MjIgMTE6MTE6MTkgY3MtYmlnZm9vdDA2IGtlcm5lbDogWzk3NDQ2NDguMzg4MDM2XSBNb2R1bGVz
+IGxpbmtlZCBpbjoKPj4geGZzIGF1dG9mczQgbmZzZCBuZnMgbmZzX2FjbCBhdXRoX3JwY2dzcyBm
+c2NhY2hlIGxvY2tkIHN1bnJwYyBleHQzIGpiZAo+PiBsb29wIGFjcGlfY3B1ZnJlcSBtcGVyZiBj
+b3JldGVtcCBjcmMzMmNfaW50ZWwgZ2hhc2hfY2xtdWxuaV9pbnRlbAo+PiBzbmRfcGNtIGFlc25p
+X2ludGVsIHNuZF9wYWdlX2FsbG9jIGFlc194ODZfNjQgc25kX3RpbWVyIGFlc19nZW5lcmljIHMK
+Pj4gbmQgY3J5cHRkIHNvdW5kY29yZSBwY3Nwa3Igc2JfZWRhYyBqb3lkZXYgZXZkZXYgZWRhY19j
+b3JlIGlUQ09fd2R0Cj4+IGkyY19pODAxIGlUQ09fdmVuZG9yX3N1cHBvcnQgaTJjX2NvcmUgaW9h
+dGRtYSBwcm9jZXNzb3IgdGhlcm1hbF9zeXMKPj4gY29udGFpbmVyIGJ1dHRvbiBleHQ0IGNyYzE2
+IGpiZDIgbWJjYWNoZSB1c2JoaWQgaGlkIHNlcyBlbmNsb3N1cmUgc2cKPj4gc2RfbW9kIGNyY190
+MTBkaWYgbWVnYXJhaWRfc2FzIGVoY2lfaGNkIHVzYmNvcmUgaXNjaSBsaWJzYXMgdXNiX2NvbW1v
+biBsaWJhCj4+IHRhIGl4Z2JlIG1kaW8gc2NzaV90cmFuc3BvcnRfc2FzIHNjc2lfbW9kIGlnYiBk
+Y2EgW2xhc3QgdW5sb2FkZWQ6Cj4+IHNjc2lfd2FpdF9zY2FuXQo+PiBPY3QgMjIgMTE6MTE6MTkg
+Y3MtYmlnZm9vdDA2IGtlcm5lbDogWzk3NDQ2NDguMzg4MDkzXSBQaWQ6IDM0NTk2MDUsCj4+IGNv
+bW06IGNlcGgtb3NkIFRhaW50ZWQ6IEcgICAgICAgIFcgICAgMy4yLjAtNC1hbWQ2NCAjMSBEZWJp
+YW4gMy4yLjQ2LTEKPj4gT2N0IDIyIDExOjExOjE5IGNzLWJpZ2Zvb3QwNiBrZXJuZWw6IFs5NzQ0
+NjQ4LjM4ODA5Nl0gQ2FsbCBUcmFjZToKPj4gT2N0IDIyIDExOjExOjE5IGNzLWJpZ2Zvb3QwNiBr
+ZXJuZWw6IFs5NzQ0NjQ4LjM4ODEwMl0KPj4gWzxmZmZmZmZmZjgxMDQ2Yjc1Pl0gPyB3YXJuX3Ns
+b3dwYXRoX2NvbW1vbisweDc4LzB4OGMKPj4gT2N0IDIyIDExOjExOjE5IGNzLWJpZ2Zvb3QwNiBr
+ZXJuZWw6IFs5NzQ0NjQ4LjM4ODExNV0KPj4gWzxmZmZmZmZmZmEwNDhiOThjPl0gPyB4ZnNfdm1f
+cmVsZWFzZXBhZ2UrMHg3Ni8weDhlIFt4ZnNdCj4+IE9jdCAyMiAxMToxMToxOSBjcy1iaWdmb290
+MDYga2VybmVsOiBbOTc0NDY0OC4zODgxMjJdCj4+IFs8ZmZmZmZmZmY4MTBiZWRjNT5dID8gaW52
+YWxpZGF0ZV9pbm9kZV9wYWdlKzB4NWUvMHg4MAo+PiBPY3QgMjIgMTE6MTE6MTkgY3MtYmlnZm9v
+dDA2IGtlcm5lbDogWzk3NDQ2NDguMzg4MTI5XQo+PiBbPGZmZmZmZmZmODEwYmVlNWQ+XSA/IGlu
+dmFsaWRhdGVfbWFwcGluZ19wYWdlcysweDc2LzB4MTAyCj4+IE9jdCAyMiAxMToxMToxOSBjcy1i
+aWdmb290MDYga2VybmVsOiBbOTc0NDY0OC4zODgxMzVdCj4+IFs8ZmZmZmZmZmY4MTBiN2I4Mz5d
+ID8gc3lzX2ZhZHZpc2U2NF82NCsweDE5Zi8weDFlMgo+PiBPY3QgMjIgMTE6MTE6MTkgY3MtYmln
+Zm9vdDA2IGtlcm5lbDogWzk3NDQ2NDguMzg4MTQwXQo+PiBbPGZmZmZmZmZmODEzNTNiNTI+XSA/
+IHN5c3RlbV9jYWxsX2Zhc3RwYXRoKzB4MTYvMHgxYgo+PiBPY3QgMjIgMTE6MTE6MTkgY3MtYmln
+Zm9vdDA2IGtlcm5lbDogWzk3NDQ2NDguMzg4MTQ0XSAtLS1bIGVuZCB0cmFjZQo+PiBlOTY0MGVk
+NmY4MmYwNjZkIF0tLS0KPj4gLS0KPj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNl
+bmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluCj4+IHRoZSBib2R5IG9mIGEg
+bWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnCj4+IE1vcmUgbWFqb3Jkb21vIGlu
+Zm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbAo+Cj4KPiAt
+LQo+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNj
+cmliZSBjZXBoLWRldmVsIiBpbgo+IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9A
+dmdlci5rZXJuZWwub3JnCj4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2Vy
+bmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sCgpfX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fXwp4ZnMgbWFpbGluZyBsaXN0Cnhmc0Bvc3Muc2dpLmNvbQpodHRw
+Oi8vb3NzLnNnaS5jb20vbWFpbG1hbi9saXN0aW5mby94ZnMK
