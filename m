@@ -1,131 +1,109 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Removing disks / OSDs
-Date: Tue, 22 Oct 2013 08:13:10 +0200
-Message-ID: <52661776.20803@dachary.org>
-References: <52655309.8070500@dachary.org> <CAPYLRzjBmdewVvNVQd5JwnAAF2dv+q7Qk4qtzwQO7jVtpDGDRg@mail.gmail.com>
+From: Jeff Liu <jeff.liu@oracle.com>
+Subject: Re: xfs Warnings in syslog
+Date: Tue, 22 Oct 2013 20:29:28 +0800
+Message-ID: <52666FA8.4050101@oracle.com>
+References: <049e1508cbb35ecf7b38ea2dadddc6ec@niklasgoerke.de>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="8mQDpvJIEUGS1ajchA4GS2Pqg0UqWiATm"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:42828 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751372Ab3JVMM3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Oct 2013 08:12:29 -0400
-In-Reply-To: <CAPYLRzjBmdewVvNVQd5JwnAAF2dv+q7Qk4qtzwQO7jVtpDGDRg@mail.gmail.com>
+Received: from aserp1040.oracle.com ([141.146.126.69]:25726 "EHLO
+	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751884Ab3JVM2e (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Oct 2013 08:28:34 -0400
+In-Reply-To: <049e1508cbb35ecf7b38ea2dadddc6ec@niklasgoerke.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Niklas Goerke <niklas@niklasgoerke.de>
+Cc: ceph-devel@vger.kernel.org, "xfs@oss.sgi.com" <xfs@oss.sgi.com>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---8mQDpvJIEUGS1ajchA4GS2Pqg0UqWiATm
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Hello,
+
+So It's better to add XFS mailing list to the CC-list. :)
+
+I think this issue has been fixed by upstream commits:
+
+=46rom ff9a28f6c25d18a635abcab1f49db68108203dfb
+=46rom: Jan Kara <jack@suse.cz>
+Date: Thu, 14 Mar 2013 14:30:54 +0100
+Subject: [PATCH 1/1] xfs: Fix WARN_ON(delalloc) in xfs_vm_releasepage()
 
 
+Thanks,
+-Jeff
 
-On 21/10/2013 18:49, Gregory Farnum wrote:
-> I'm not quite sure what questions you're actually asking here...
-> In general, the OSD is not removed from the system without explicit
-> admin intervention. When it is removed, all traces of it should be
-> zapped (including its key), so it can't reconnect.
-> If it hasn't been removed, then indeed it will continue working
-> properly even if moved to a different box.
+On 10/22/2013 07:46 PM, Niklas Goerke wrote:
 
-If there is an external journal, the device containing the journal needs =
-to be moved with the device containing the data. If I read ceph/src/upsta=
-rt/ceph-osd.conf correctly, when the data device is plugged in the new ma=
-chine it will fail to start because the journal is not there yet. When th=
-e journal device is plugged in, the ceph-osd.conf would be called because=
- udev rule in ceph/udev/95-ceph-osd.rules call ceph-disk activate-journal=
-=2E
-
-Is my understanding correct ?
-
-Cheers
-
-> -Greg
-> Software Engineer #42 @ http://inktank.com | http://ceph.com
+> Hi
+>=20
+> My syslog and dmesg are being filled with the Warnings attached.
+> Looking at todays syslog I got up to 1101 of these warnings in the ti=
+me
+> from 10:50 to 11:13 (and only in that time, else the log was clean). =
+I
+> found them on all four of my OSD hosts, all at about the same time.
+> I'm running kernel 3.2.0-4-amd64 on a debian 7.0. Ceph is on version
+> 0.67.4. I have got 15 OSDs per OSD Host.
+>=20
+> Ceph does not really seem to care about this, so I'm not sure what it=
+ is
+> all about=E2=80=A6
+> Still they are warnings in syslog and I hope you guys can tell me wha=
+t
+> went wrong here and what I can do about it?
+>=20
+> Thank you
+> Niklas
 >=20
 >=20
-> On Mon, Oct 21, 2013 at 9:15 AM, Loic Dachary <loic@dachary.org> wrote:=
-
->> Hi Ceph,
->>
->> In the context of the ceph puppet module ( https://wiki.openstack.org/=
-wiki/Puppet-openstack/ceph-blueprint ) I tried to think about what should=
- be provided to deal with disks / OSDs when they are removed or moved aro=
-und.
->>
->> Here is a possible scenario:
->>
->> * Machine A dies and contains OSD 42
->> * ceph osd rm 42 is done to get rid of the OSD
->> * ceph-prepare is called on a new disk and gets OSD id 42
->>
->> ceph/src/mon/OSDMonitor.cc
->>
->>     // allocate a new id
->>     for (i=3D0; i < osdmap.get_max_osd(); i++) {
->>       if (!osdmap.exists(i) &&
->>           pending_inc.new_up_client.count(i) =3D=3D 0 &&
->>           (pending_inc.new_state.count(i) =3D=3D 0 ||
->>            (pending_inc.new_state[i] & CEPH_OSD_EXISTS) =3D=3D 0))
->>         goto done;
->>     }
->>
->> * The disk of machine A is still good and is plugged into machine C
->> * the udev logic sees it has the ceph magic uuid and contains a well f=
-ormed osd file system and runs the osd daemon on it. The osd daemon fails=
- and dies because its key does not match. It will try again and fail in t=
-he same way when the machine reboots.
->>
->> If the osd id was not reused, the disk would find its way back in the =
-cluster and be reused without manual intervention. Since ceph-disk uses t=
-he osd uuid to create the disk, it does not matter that it has been remov=
-ed : https://github.com/ceph/ceph/blob/master/src/ceph-disk#L458 . I'm no=
-t sure to understand how the key that was previously registered is re-imp=
-orted. If I understand correctly it is created with ceph-osd --mkkey http=
-s://github.com/ceph/ceph/blob/master/src/ceph-disk#L1301 and stored in th=
-e osd tree at the location specified by --keyring https://github.com/ceph=
-/ceph/blob/master/src/ceph-disk#L1307 .
->>
->> At this point my understanding is that (as long as OSD ids are not reu=
-sed), removing a disk or moving it from machine to machine, even over a l=
-ong period of time does not require any action. The OSD id is an int whic=
-h is probably large enough for any kind of cluster in the near future. Th=
-e OSD ids that are not used and not removed could be cleaned from time to=
- time to garbage collect the space they use.
->>
->> Please let me know if I've missed something :-)
->>
->> --
->> Lo=EFc Dachary, Artisan Logiciel Libre
->> All that is necessary for the triumph of evil is that good people do n=
-othing.
->>
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-All that is necessary for the triumph of evil is that good people do noth=
-ing.
+> Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388018] ------------[ c=
+ut
+> here ]------------
+> Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388030] WARNING: at
+> /build/linux-s5x2oE/linux-3.2.46/fs/xfs/xfs_aops.c:1091
+> xfs_vm_releasepage+0x76/0x8e [xfs]()
+> Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388034] Hardware name:
+> X9DR3-F
+> Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388036] Modules linked =
+in:
+> xfs autofs4 nfsd nfs nfs_acl auth_rpcgss fscache lockd sunrpc ext3 jb=
+d
+> loop acpi_cpufreq mperf coretemp crc32c_intel ghash_clmulni_intel
+> snd_pcm aesni_intel snd_page_alloc aes_x86_64 snd_timer aes_generic s
+> nd cryptd soundcore pcspkr sb_edac joydev evdev edac_core iTCO_wdt
+> i2c_i801 iTCO_vendor_support i2c_core ioatdma processor thermal_sys
+> container button ext4 crc16 jbd2 mbcache usbhid hid ses enclosure sg
+> sd_mod crc_t10dif megaraid_sas ehci_hcd usbcore isci libsas usb_commo=
+n liba
+> ta ixgbe mdio scsi_transport_sas scsi_mod igb dca [last unloaded:
+> scsi_wait_scan]
+> Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388093] Pid: 3459605,
+> comm: ceph-osd Tainted: G        W    3.2.0-4-amd64 #1 Debian 3.2.46-=
+1
+> Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388096] Call Trace:
+> Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388102]=20
+> [<ffffffff81046b75>] ? warn_slowpath_common+0x78/0x8c
+> Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388115]=20
+> [<ffffffffa048b98c>] ? xfs_vm_releasepage+0x76/0x8e [xfs]
+> Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388122]=20
+> [<ffffffff810bedc5>] ? invalidate_inode_page+0x5e/0x80
+> Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388129]=20
+> [<ffffffff810bee5d>] ? invalidate_mapping_pages+0x76/0x102
+> Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388135]=20
+> [<ffffffff810b7b83>] ? sys_fadvise64_64+0x19f/0x1e2
+> Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388140]=20
+> [<ffffffff81353b52>] ? system_call_fastpath+0x16/0x1b
+> Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388144] ---[ end trace
+> e9640ed6f82f066d ]---
+> --=20
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
 
-
-
---8mQDpvJIEUGS1ajchA4GS2Pqg0UqWiATm
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlJmF3cACgkQ8dLMyEl6F21ywwCfaSikUErVNyINM1uDGzEL3ghx
-v6sAnAjYfTWBLKHMdMHkC9O1Qgs9AFJd
-=kW2k
------END PGP SIGNATURE-----
-
---8mQDpvJIEUGS1ajchA4GS2Pqg0UqWiATm--
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
