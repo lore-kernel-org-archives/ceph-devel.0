@@ -1,65 +1,131 @@
-From: COMPANY <cmb005hp@libero.it>
-Subject: (unknown)
-Date: Tue, 22 Oct 2013 14:05:00 +0200 (CEST)
-Message-ID: <623573999.2109621382443500207.JavaMail.defaultUser@defaultHost>
-Reply-To: COMPANY <cmb005hp@libero.it>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Removing disks / OSDs
+Date: Tue, 22 Oct 2013 08:13:10 +0200
+Message-ID: <52661776.20803@dachary.org>
+References: <52655309.8070500@dachary.org> <CAPYLRzjBmdewVvNVQd5JwnAAF2dv+q7Qk4qtzwQO7jVtpDGDRg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: application/pdf; name="UK NATIONAL.pdf"
-Content-Transfer-Encoding: base64
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="8mQDpvJIEUGS1ajchA4GS2Pqg0UqWiATm"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from outrelay01.libero.it ([212.52.84.101]:39336 "EHLO
-	outrelay01.libero.it" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752166Ab3JVMFQ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Oct 2013 08:05:16 -0400
-Subject: 
-Content-Disposition: attachment; filename="UK NATIONAL.pdf"; size=2642
+Received: from smtp.dmail.dachary.org ([91.121.254.229]:42828 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751372Ab3JVMM3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Oct 2013 08:12:29 -0400
+In-Reply-To: <CAPYLRzjBmdewVvNVQd5JwnAAF2dv+q7Qk4qtzwQO7jVtpDGDRg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
+To: Gregory Farnum <greg@inktank.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-JVBERi0xLjMKJeLjz9MKMiAwIG9iago8PAovQ3JlYXRpb25EYXRlIChEOjIwMTMxMDA4MDkzMzE1
-LTA3JzAwJykKL01vZERhdGUgKEQ6MjAxMzEwMDgwOTMzMTUtMDcnMDAnKQovUHJvZHVjZXIgKEJD
-TCBlYXN5UERGIDcuMDAgXCgwMzUzXCkpCi9DcmVhdG9yIChlYXN5UERGIFNESyA3LjApCj4+CmVu
-ZG9iagoKOCAwIG9iagpbCjAgMCAwIDAgMCAwIDAgMCAwIDAgMCAwIDAgMCAwIDAKMCAwIDAgMCAw
-IDAgMCAwIDAgMCAwIDAgMCAwIDYwMCA2MDAKNjAwIDYwMCA2MDAgNjAwIDYwMCA2MDAgNjAwIDYw
-MCA2MDAgNjAwIDYwMCA2MDAgNjAwIDYwMCA2MDAgNjAwCjYwMCA2MDAgNjAwIDYwMCA2MDAgNjAw
-IDYwMCA2MDAgNjAwIDYwMCA2MDAgNjAwIDYwMCA2MDAgNjAwIDYwMAo2MDAgNjAwIDYwMCA2MDAg
-NjAwIDYwMCA2MDAgNjAwIDYwMCA2MDAgNjAwIDYwMCA2MDAgNjAwIDYwMCA2MDAKNjAwIDYwMCA2
-MDAgNjAwIDYwMCA2MDAgNjAwIDYwMCA2MDAgNjAwIDYwMCA2MDAgNjAwIDYwMCA2MDAgNjAwCjYw
-MCA2MDAgNjAwIDYwMCA2MDAgNjAwIDYwMCA2MDAgNjAwIDYwMCA2MDAgNjAwIDYwMCA2MDAgNjAw
-IDYwMAo2MDAgNjAwIDYwMCA2MDAgNjAwIDYwMCA2MDAgNjAwIDYwMCA2MDAgNjAwIDYwMCA2MDAg
-NjAwIDYwMCA2MDAKNjAwIDYwMCA2MDAgNjAwIDYwMCA2MDAgNjAwIDYwMCA2MDAgNjAwIDYwMCA2
-MDAgNjAwIDYwMCA2MDAgNjAwCjYwMCA2MDAgNjAwIDYwMCA2MDAgNjAwIDYwMCA2MDAgNjAwIDYw
-MCA2MDAgNjAwIDYwMCA2MDAgNjAwIDYwMAo2MDAgNjAwIDYwMCA2MDAgNjAwIDYwMCA2MDAgNjAw
-IDYwMCA2MDAgNjAwIDYwMCA2MDAgNjAwIDYwMCA2MDAKNjAwIDYwMCA2MDAgNjAwIDYwMCA2MDAg
-NjAwIDYwMCA2MDAgNjAwIDYwMCA2MDAgNjAwIDYwMCA2MDAgNjAwCjYwMCA2MDAgNjAwIDYwMCA2
-MDAgNjAwIDYwMCA2MDAgNjAwIDYwMCA2MDAgNjAwIDYwMCA2MDAgNjAwIDYwMAo2MDAgNjAwIDYw
-MCA2MDAgNjAwIDYwMCA2MDAgNjAwIDYwMCA2MDAgNjAwIDYwMCA2MDAgNjAwIDYwMCA2MDAKNjAw
-IDYwMCA2MDAgNjAwIDYwMCA2MDAgNjAwIDYwMCA2MDAgNjAwIDYwMCA2MDAgNjAwIDYwMCA2MDAg
-NjAwCjYwMCA2MDAgNjAwIDYwMCA2MDAgNjAwIDYwMCA2MDAgNjAwIDYwMCA2MDAgNjAwIDYwMCA2
-MDAgNjAwIDYwMApdCmVuZG9iagoKMSAwIG9iago8PAovQ291bnQgMAo+PgplbmRvYmoKCjMgMCBv
-YmoKPDwKL1R5cGUgL0NhdGFsb2cKL1BhZ2VzIDQgMCBSCj4+CmVuZG9iagoKMTAgMCBvYmoKPDwK
-L0xlbmd0aCAzNjMKL0ZpbHRlciAvRmxhdGVEZWNvZGUKPj4Kc3RyZWFtCnjabZHdboJAEIXveYpz
-CYmd7qJo0ysxYGNLweBaY2ovCGKlQWhAm/Ttyyw1/Ykhm7D5zpkzMztRxvVUOpBQO0MKcpybIUT7
-nf9HDkaypQfj2fSypIZ/SHLLHpgFVnlZZrVlD82e9QJ1bwhcSZK2Y0NtW/m6Ov2Wzzzsk4blWEUh
-1tFyYzKRPSFEe5iIO5rQfGNBe0oc9xmWD9oTumoWhW7AAEGklB+vNbiQbfqP7iywoN7+9+SG4ezJ
-jxcul4nXsIXsg8t4sbuii2M0WbnFZzuLTs7LXUWQbKEwOWRkExi4223dEPrf4JhXZVIwyI+fhAG5
-DF4zgkNRmjI4vWvVn9D+0OlChzTfV2WGkpXV5cZUhW7DrEnyAtOq1rOkRZIfGmxM3Vl3EyMm4yL/
-yCittAUb66ewTbYj+l3hMFI+5sFC2xd+6PFjsT2G56t2swttVxGiZawT9b5vkRZdKxw3Lhic43SM
-r4wv2dSa8gplbmRzdHJlYW0KZW5kb2JqCgo2IDAgb2JqCjw8Ci9UeXBlIC9QYWdlCi9QYXJlbnQg
-NCAwIFIKL01lZGlhQm94IFsgMCAwIDYxMiA3OTIgXQovUmVzb3VyY2VzIDw8Ci9Gb250IDw8Ci9G
-MTUgNyAwIFIKPj4KL1Byb2NTZXQgWy9QREYgL1RleHQgL0ltYWdlQiAvSW1hZ2VDXSA+PgovQ29u
-dGVudHMgMTAgMCBSCj4+CmVuZG9iagoKNCAwIG9iago8PAovVHlwZSAvUGFnZXMKL0tpZHMgWwo2
-IDAgUgpdCi9Db3VudCAxCj4+CmVuZG9iagoKOSAwIG9iago8PAovVHlwZSAvRm9udERlc2NyaXB0
-b3IKL0FzY2VudCA4MzMKL0NhcEhlaWdodCA3MDAKL0Rlc2NlbnQgLTMwMAovRmxhZ3MgMzMKL0Zv
-bnRCQm94IFswIC0zMDAgNjU5IDgzM10KL0l0YWxpY0FuZ2xlIDAKL1N0ZW1WIDAKL0ZvbnROYW1l
-IC9Db3VyaWVyTmV3UFNNVAo+PgplbmRvYmoKCjcgMCBvYmoKPDwKL1R5cGUgL0ZvbnQKL1N1YnR5
-cGUgL1RydWVUeXBlCi9CYXNlRm9udCAvQ291cmllck5ld1BTTVQKL0VuY29kaW5nIC9XaW5BbnNp
-RW5jb2RpbmcKL0ZpcnN0Q2hhciAwCi9MYXN0Q2hhciAyNTUKL0ZvbnREZXNjcmlwdG9yIDkgMCBS
-Ci9XaWR0aHMgOCAwIFIKPj4KZW5kb2JqCgo1IDAgb2JqCm51bGwKZW5kb2JqCgp4cmVmCjAgMTEK
-MDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAxMTYxIDAwMDAwIG4gCjAwMDAwMDAwMTUgMDAwMDAg
-biAKMDAwMDAwMTE5MiAwMDAwMCBuIAowMDAwMDAxODQ4IDAwMDAwIG4gCjAwMDAwMDIyNDkgMDAw
-MDAgbiAKMDAwMDAwMTY3OSAwMDAwMCBuIAowMDAwMDAyMDgwIDAwMDAwIG4gCjAwMDAwMDAxNzcg
-MDAwMDAgbiAKMDAwMDAwMTkwOCAwMDAwMCBuIAowMDAwMDAxMjQyIDAwMDAwIG4gCnRyYWlsZXIK
-PDwKL1NpemUgMTEKL1Jvb3QgMyAwIFIKL0luZm8gMiAwIFIKL0lEWzwzZjgxYTQ4ZDdjZjAxNDYw
-ZmQ0MjJkODRiNTUyYjY5Mj48M2Y4MWE0OGQ3Y2YwMTQ2MGZkNDIyZDg0YjU1MmI2OTI+XQo+Pgpz
-dGFydHhyZWYKMjI3MAolJUVPRgo=
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--8mQDpvJIEUGS1ajchA4GS2Pqg0UqWiATm
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
+
+
+
+On 21/10/2013 18:49, Gregory Farnum wrote:
+> I'm not quite sure what questions you're actually asking here...
+> In general, the OSD is not removed from the system without explicit
+> admin intervention. When it is removed, all traces of it should be
+> zapped (including its key), so it can't reconnect.
+> If it hasn't been removed, then indeed it will continue working
+> properly even if moved to a different box.
+
+If there is an external journal, the device containing the journal needs =
+to be moved with the device containing the data. If I read ceph/src/upsta=
+rt/ceph-osd.conf correctly, when the data device is plugged in the new ma=
+chine it will fail to start because the journal is not there yet. When th=
+e journal device is plugged in, the ceph-osd.conf would be called because=
+ udev rule in ceph/udev/95-ceph-osd.rules call ceph-disk activate-journal=
+=2E
+
+Is my understanding correct ?
+
+Cheers
+
+> -Greg
+> Software Engineer #42 @ http://inktank.com | http://ceph.com
+>=20
+>=20
+> On Mon, Oct 21, 2013 at 9:15 AM, Loic Dachary <loic@dachary.org> wrote:=
+
+>> Hi Ceph,
+>>
+>> In the context of the ceph puppet module ( https://wiki.openstack.org/=
+wiki/Puppet-openstack/ceph-blueprint ) I tried to think about what should=
+ be provided to deal with disks / OSDs when they are removed or moved aro=
+und.
+>>
+>> Here is a possible scenario:
+>>
+>> * Machine A dies and contains OSD 42
+>> * ceph osd rm 42 is done to get rid of the OSD
+>> * ceph-prepare is called on a new disk and gets OSD id 42
+>>
+>> ceph/src/mon/OSDMonitor.cc
+>>
+>>     // allocate a new id
+>>     for (i=3D0; i < osdmap.get_max_osd(); i++) {
+>>       if (!osdmap.exists(i) &&
+>>           pending_inc.new_up_client.count(i) =3D=3D 0 &&
+>>           (pending_inc.new_state.count(i) =3D=3D 0 ||
+>>            (pending_inc.new_state[i] & CEPH_OSD_EXISTS) =3D=3D 0))
+>>         goto done;
+>>     }
+>>
+>> * The disk of machine A is still good and is plugged into machine C
+>> * the udev logic sees it has the ceph magic uuid and contains a well f=
+ormed osd file system and runs the osd daemon on it. The osd daemon fails=
+ and dies because its key does not match. It will try again and fail in t=
+he same way when the machine reboots.
+>>
+>> If the osd id was not reused, the disk would find its way back in the =
+cluster and be reused without manual intervention. Since ceph-disk uses t=
+he osd uuid to create the disk, it does not matter that it has been remov=
+ed : https://github.com/ceph/ceph/blob/master/src/ceph-disk#L458 . I'm no=
+t sure to understand how the key that was previously registered is re-imp=
+orted. If I understand correctly it is created with ceph-osd --mkkey http=
+s://github.com/ceph/ceph/blob/master/src/ceph-disk#L1301 and stored in th=
+e osd tree at the location specified by --keyring https://github.com/ceph=
+/ceph/blob/master/src/ceph-disk#L1307 .
+>>
+>> At this point my understanding is that (as long as OSD ids are not reu=
+sed), removing a disk or moving it from machine to machine, even over a l=
+ong period of time does not require any action. The OSD id is an int whic=
+h is probably large enough for any kind of cluster in the near future. Th=
+e OSD ids that are not used and not removed could be cleaned from time to=
+ time to garbage collect the space they use.
+>>
+>> Please let me know if I've missed something :-)
+>>
+>> --
+>> Lo=EFc Dachary, Artisan Logiciel Libre
+>> All that is necessary for the triumph of evil is that good people do n=
+othing.
+>>
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+All that is necessary for the triumph of evil is that good people do noth=
+ing.
+
+
+
+
+--8mQDpvJIEUGS1ajchA4GS2Pqg0UqWiATm
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.19 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlJmF3cACgkQ8dLMyEl6F21ywwCfaSikUErVNyINM1uDGzEL3ghx
+v6sAnAjYfTWBLKHMdMHkC9O1Qgs9AFJd
+=kW2k
+-----END PGP SIGNATURE-----
+
+--8mQDpvJIEUGS1ajchA4GS2Pqg0UqWiATm--
