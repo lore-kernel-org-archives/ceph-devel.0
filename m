@@ -1,85 +1,83 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Removing disks / OSDs
-Date: Wed, 23 Oct 2013 08:29:43 +0200
-Message-ID: <52676CD7.50509@dachary.org>
-References: <52655309.8070500@dachary.org>	<CAPYLRzjBmdewVvNVQd5JwnAAF2dv+q7Qk4qtzwQO7jVtpDGDRg@mail.gmail.com>	<52661776.20803@dachary.org> <CAPYLRzgxWEi1s0=-EtcbhpdS8H96KDm-NhxhScKOn18Y72DY5Q@mail.gmail.com>
+From: =?GBK?B?xfQ=?= <wkp4666-KN7UnAbNpbg@public.gmane.org>
+Subject: errors cause by update ceph version(from 0.56.3 to
+	0.62)
+Date: Wed, 23 Oct 2013 16:12:34 +0800 (CST)
+Message-ID: <6a1302c7.834b.141e45f551d.Coremail.wkp4666@126.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="h3GmfHE8J0sgJKGTa7mrt2tib8ko1xfG1"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:43716 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751161Ab3JWG3t (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Oct 2013 02:29:49 -0400
-In-Reply-To: <CAPYLRzgxWEi1s0=-EtcbhpdS8H96KDm-NhxhScKOn18Y72DY5Q@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: multipart/mixed; boundary="===============0992168344=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---h3GmfHE8J0sgJKGTa7mrt2tib8ko1xfG1
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+--===============0992168344==
+Content-Type: multipart/alternative;
+	boundary="----=_Part_123092_61355759.1382515954973"
 
+------=_Part_123092_61355759.1382515954973
+Content-Type: text/plain; charset=GBK
+Content-Transfer-Encoding: 7bit
 
+|
+ 
 
-On 22/10/2013 19:26, Gregory Farnum wrote:
-> On Mon, Oct 21, 2013 at 11:13 PM, Loic Dachary <loic@dachary.org> wrote=
-:
->>
->>
->> On 21/10/2013 18:49, Gregory Farnum wrote:
->>> I'm not quite sure what questions you're actually asking here...
->>> In general, the OSD is not removed from the system without explicit
->>> admin intervention. When it is removed, all traces of it should be
->>> zapped (including its key), so it can't reconnect.
->>> If it hasn't been removed, then indeed it will continue working
->>> properly even if moved to a different box.
->>
->> If there is an external journal, the device containing the journal nee=
-ds to be moved with the device containing the data. If I read ceph/src/up=
-start/ceph-osd.conf correctly, when the data device is plugged in the new=
- machine it will fail to start because the journal is not there yet. When=
- the journal device is plugged in, the ceph-osd.conf would be called beca=
-use udev rule in ceph/udev/95-ceph-osd.rules call ceph-disk activate-jour=
-nal.
->>
->> Is my understanding correct ?
->=20
-> Well, after being wrong last time I'm a little reluctant to make
-> pronouncements from memory, but that definitely sounds correct to me.
-> :) If I were doing an audit I'd want to look at what happens if there
-> is a wrong journal in the correct location, etc.
+Hi all!
+  
+     now my ceph version is 0.62! yesday I update it from 0.56.3!
+     
+     I found  the init-ceph scrip in defferent ceph version has lots devfrents!
 
-Thanks. It makes things real simple from the configuration point of view =
-:-)
+    my ceph version is 0.62! what make me confuse is that I can not use the init-ceph,  which version is 0.62 ,  start my cluster. when I can user the init-ceph , which version is 0.52.3, start my cluster!  what is more !  the 0.62 vesion's init-ceph can break my osd map!  I should rebuild the cluter use the mkcephfs! when I run ceph osd tree , the result is break!
 
-Cheers
+    by the way!  I found that  if I would not clearn the /run/ceph/    , there will some wrong can not let cluster run well!
+    so , if I want to rebuilt the ceph cluster!
+       # umont /data/osd.id
+       # rm -rf /data/*
+       #rm -rf /run/ceph/*
+   
+ Any pointers would be appreciated!
 
-> -Greg
-> Software Engineer #42 @ http://inktank.com | http://ceph.com
->=20
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-All that is necessary for the triumph of evil is that good people do noth=
-ing.
+thinks!
+peng
 
 
---h3GmfHE8J0sgJKGTa7mrt2tib8ko1xfG1
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
 
-iEYEARECAAYFAlJnbNcACgkQ8dLMyEl6F23BcACeOkO1kXt6onnqINyRSlxtPlZF
-VZcAmQEp39OaW0qWRuNvEUTc5FqFn9Ep
-=tTMq
------END PGP SIGNATURE-----
 
---h3GmfHE8J0sgJKGTa7mrt2tib8ko1xfG1--
+|
+|
+|   |   |
+|
+------=_Part_123092_61355759.1382515954973
+Content-Type: text/html; charset=GBK
+Content-Transfer-Encoding: 7bit
+
+<div style="line-height:1.7;color:#000000;font-size:14px;font-family:arial"><table background="http://mimg.127.net/p/images/letter/201106/img1/lawn_b_bg.jpg" border="0" cellpadding="0" cellspacing="0" width="100%"><tbody><tr><td style="color:#3C580C;line-height:1.7;font-size:14px;padding:35px 25px 11px" height="376" valign="top"><div><stationery><div>&nbsp;<br><br>Hi all!<br>&nbsp;&nbsp; <br>&nbsp;&nbsp;&nbsp;&nbsp; now my ceph version is 0.62! yesday I update it from 0.56.3!<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+ <br>&nbsp;&nbsp;&nbsp;&nbsp; I found&nbsp; the init-ceph scrip in defferent ceph version has lots devfrents!<br><br>&nbsp;&nbsp;&nbsp; my ceph version is 0.62! what make me confuse is that I can not use the
+ init-ceph,&nbsp; which version is 0.62 ,&nbsp; start my cluster. when I can user 
+the init-ceph , which version is 0.52.3, start my cluster!&nbsp; what is more !&nbsp; the 0.62 vesion's init-ceph can break my osd map!&nbsp; I should rebuild the cluter use the mkcephfs! when I run ceph osd tree , the result is break!<br><br>&nbsp;&nbsp;&nbsp; by the way!&nbsp; I found that&nbsp; if I would not clearn the /run/ceph/ &nbsp;&nbsp; , there will some wrong can not let cluster run well!<br>&nbsp;&nbsp;&nbsp; so , if I want to rebuilt the ceph cluster! <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # umont /data/osd.id<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # rm -rf /data/*<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #rm -rf /run/ceph/*<br>&nbsp;&nbsp;&nbsp; <br>&nbsp;Any pointers would be appreciated!<br><br>thinks!<br>peng<br><br><br><br><br></div><stationery></stationery></stationery
+ ></div></td></tr><tr><td style="font-size:0;line-height:0" height="24"><table border="0" cellpadding="0" cellspacing="0" width="100%"><tbody><tr><td>&nbsp;</td><td background="http://mimg.12
+ 7.net/p/images/letter/201106/img1/lawn_b_cpyr.png" height="24" width="120">&nbsp;</td></tr></tbody></table></td></tr></tbody></table></div><br><br><span title="neteasefooter"><span id="netease_mail_footer"></span></span>
+------=_Part_123092_61355759.1382515954973--
+
+
+--===============0992168344==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============0992168344==--
