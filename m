@@ -1,9 +1,10 @@
-From: =?GBK?B?xfQ=?= <wkp4666-KN7UnAbNpbg@public.gmane.org>
-Subject: ceph osd can not restart
-Date: Wed, 23 Oct 2013 11:12:32 +0800 (CST)
-Message-ID: <2fc3e984.3ce0.141e34ca36d.Coremail.wkp4666@126.com>
+From: Gregory Farnum <greg-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Subject: CephFS & Project Manila (OpenStack)
+Date: Tue, 22 Oct 2013 20:41:10 -0700
+Message-ID: <CAPYLRzg09EhsztuTLBUzVzEpxtA54cEJsO95fj3f=jV+eD_ZBg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============1703958490=="
+Content-Type: text/plain; charset="windows-1252"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
@@ -14,75 +15,76 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+To: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
---===============1703958490==
-Content-Type: multipart/alternative;
-	boundary="----=_Part_56941_227131289.1382497952621"
+Hey all,
+The OpenStack community has spawned a newish "Project Manila", an
+effort spearheaded by NetApp to provide a file-sharing service
+analogous to Cinder, but for filesystems instead of block devices. The
+elevator pitch:
+Isn't it great how OpenStack lets you manage block devices for your
+hosts? Wouldn't you like OpenStack to manage your fileshare so that
+all your VMs can access your <x>? Project Manila lets you do that!
 
-------=_Part_56941_227131289.1382497952621
-Content-Type: text/plain; charset=GBK
-Content-Transfer-Encoding: 7bit
+There's a scattering of docs, mostly rooted at
+https://wiki.openstack.org/wiki/Shares_Service. Inktank and the
+community have expended a fair bit of effort on being good OpenStack
+citizens with rbd and rgw, so we're naturally interested in making
+CephFS work here. There are two different things we need for that to
+happen:
+1) Manila needs to support CephFS.
+2) CephFS needs to support multi-tenancy to some degree (probably more
+than it does right now).
 
-|
- hi all!
-      I have 12 nodes ceph clouster ( 1 mon 2mds 9osd).  today my osd.0 osd.3 osd.4  are down and can not restart them!
-osd.0 , osd.3, osd.4 are in the same host  which name is osd0!
+The multi-tenancy requirements in CephFS have been discussed to
+varying degrees in the past (eg,
+http://wiki.ceph.com/01Planning/02Blueprints/Dumpling/Client_Security_for_C=
+ephFS)
+and will require some work, but that's likely to come about as the
+filesystem improves without any special effort for Manila. More
+interesting at the moment is making sure that the Manila model works
+to use CephFS. There are a couple different possibilities which Manila
+developers have already envisioned for how filesystems might integrate
+(https://wiki.openstack.org/wiki/Manila/Manila_Storage_Integration_Patterns)
+:
 
-firstly,   here is the osd log:
-#tail -f /var/log/ceph/osd.0.log
-ceph version 0.62(***************************) , process ceph-osd, pid 20667
-**ERROR:unable to  open superblock on /data/osd.0 : (2) No such file or directory
+Option 1) The service plugs your filesystem's IP into the VM's network
+and provides direct IP access. For a shared box (like an NFS server)
+this is fairly straightforward and works well (*everything* has a
+working NFS client). It's more troublesome for CephFS, since we'd need
+to include access to many hosts, lots of operating systems don't
+include good CephFS clients by default, and the client is capable of
+forcing some service disruptions if they misbehave or disappear (most
+likely via lease timeouts), but it may not be impossible.
 
- secondly,   /data/osd.0   is exit :
-#ssh osd0 ls /data
-osd.0 osd.3 osd.4
+Option 2) The hypervisor mediates access to the FS via some
+pass-through filesystem (presumably P9 =97 Plan 9 FS, which QEMU/KVM is
+already prepared to work with). This works better for us; the
+hypervisor host can have a single CephFS mount that it shares
+selectively to client VMs or something.
 
-thirdly, I check the format  of osd !
+Option 3) An agent communicates with the client via a well-understood
+protocol (probably NFS) on their VLAN, and to the the backing
+filesystem on a different VLAN in the native protocol. This would also
+work for CephFS, but of course having to use a gateway agent (either
+on a per-tenant or per-many-tenants basis) is a bit of a bummer in
+terms of latency, etc.
 
-#mount
-...
-/dev/sda3 on /data/osd.0 type btrifs(rw noatime)
-/dev/sdb3 on /data/osd.3 type btrifs(rw noatime)
-/dev/sdb3 on /data/osd.4 type btrifs(rw noatime)
+Right now, unsurprisingly, the focus of the existing Manila developers
+is on Option 1: it's less work than the others and supports the most
+common storage protocols very well. But as mentioned, it would be a
+pretty poor fit for CephFS, which means if anybody wants to use Manila
+with CephFS anytime soon they need to come up with some development
+support. The project is getting moving now, so if you want to
+contribute to an OpenStack project this is a great time to get
+involved (they've already expressed enthusiasm for supporting
+alternative architectures from extra contributors), both with your own
+effort and to help keep alternative connection models in mind during
+planning. If you as a user would like to use both Manila and CephFS,
+you should tell both communities so that the developers know their
+efforts will be appreciated.
 
-
-It seems that all work is ok! but why can not resart  the osd in my cluster!
-Any pointers would be much appreciated!
-thanks!
-peng
-
-
-
-
-
-
-
-|
-|
-|   |   |
-|
-------=_Part_56941_227131289.1382497952621
-Content-Type: text/html; charset=GBK
-Content-Transfer-Encoding: 7bit
-
-<div style="line-height:1.7;color:#000000;font-size:14px;font-family:arial"><table background="http://mimg.127.net/p/images/letter/201106/img1/lawn_b_bg.jpg" border="0" cellpadding="0" cellspacing="0" width="100%"><tbody><tr><td style="color:#3C580C;line-height:1.7;font-size:14px;padding:35px 25px 11px" height="376" valign="top"><div><stationery><div>&nbsp;hi all!<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; I have 12 nodes ceph clouster ( 1 mon 2mds 9osd).&nbsp; today my osd.0 osd.3 osd.4&nbsp; are down and can not restart them!<br>osd.0 , osd.3, osd.4 are in the same host&nbsp; which name is osd0!<br><br>firstly, &nbsp; here is the osd log:<br><i>#tail -f /var/log/ceph/osd.0.log<br>ceph version 0.62(***************************) , process ceph-osd, pid 20667<br>**ERROR:unable to&nbsp; open superbloc
- k on /data/osd.0 : (2) No such file or directory</i><br><br>&nbsp;secondly, &nbsp; <i>/data/osd.0&nbsp;&nbsp; </i>is exit :<br><i>#ssh osd0 ls /data<br>osd.0 osd.3 osd.4</i><br><br>thirdly, 
- I check the format&nbsp; of osd !<br><br><i>#mount<br>...<br>/dev/sda3 on /data/osd.0 type btrifs(rw noatime)<br>/dev/sdb3 on /data/osd.3 type btrifs(rw noatime)<br>/dev/sdb3 on /data/osd.4 type btrifs(rw noatime)</i><br><br><br>It seems that all work is ok! but why can not resart&nbsp; the osd in my cluster!<br>Any pointers would be much appreciated!<br>thanks!<br>peng<br><br><br><br><br><br><br></div><stationery></stationery></stationery></div></td></tr><tr><td style="font-size:0;line-height:0" height="24"><table border="0" cellpadding="0" cellspacing="0" width="100%"><tbody><tr><td>&nbsp;</td><td background="http://mimg.127.net/p/images/letter/201106/img1/lawn_b_cpyr.png" height="24" width="120">&nbsp;</td></tr></tbody></table></td></tr></tbody></table></div><br><br><span title="neteas
- efooter"><span id="netease_mail_footer"></span></span>
-------=_Part_56941_227131289.1382497952621--
-
-
---===============1703958490==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============1703958490==--
+Anybody interested? :)
+-Greg
+Software Engineer #42 @ http://inktank.com | http://ceph.com
