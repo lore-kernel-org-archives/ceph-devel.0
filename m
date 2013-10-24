@@ -1,66 +1,64 @@
-From: Kyle Bader <kyle.bader@gmail.com>
-Subject: Re: [ceph-users] CephFS & Project Manila (OpenStack)
-Date: Wed, 23 Oct 2013 20:14:14 -0700
-Message-ID: <CAFMfnwo=QyBPaANWMvXKuxA8t4eg-FhwagbaveiTV6m3pgNwjw@mail.gmail.com>
-References: <CAPYLRzg09EhsztuTLBUzVzEpxtA54cEJsO95fj3f=jV+eD_ZBg@mail.gmail.com>
-	<CAFMfnwpemFVV65tqoZqU_4QRqsZ=SE=-81tgbHyxOSkYq1TdeA@mail.gmail.com>
-	<alpine.DEB.2.00.1310231802380.13915@cobra.newdream.net>
+From: Guangliang Zhao <lucienchao@gmail.com>
+Subject: Re: problem:add acl code to 3.4.66
+Date: Thu, 24 Oct 2013 12:04:32 +0800
+Message-ID: <20131024040432.GA3425@x230>
+References: <CAHHQodtsVw=GWk9ubbn+aWSeo_SjB2nXRw8ZHqD6W1wd2uR2kA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f177.google.com ([209.85.217.177]:61873 "EHLO
-	mail-lb0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753501Ab3JXDOQ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Oct 2013 23:14:16 -0400
-Received: by mail-lb0-f177.google.com with SMTP id u14so1381946lbd.8
-        for <ceph-devel@vger.kernel.org>; Wed, 23 Oct 2013 20:14:14 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1310231802380.13915@cobra.newdream.net>
+Received: from mail-pd0-f170.google.com ([209.85.192.170]:52466 "EHLO
+	mail-pd0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751020Ab3JXEEh (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Oct 2013 00:04:37 -0400
+Received: by mail-pd0-f170.google.com with SMTP id v10so1831232pde.1
+        for <ceph-devel@vger.kernel.org>; Wed, 23 Oct 2013 21:04:36 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <CAHHQodtsVw=GWk9ubbn+aWSeo_SjB2nXRw8ZHqD6W1wd2uR2kA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Gregory Farnum <greg@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>
+To: =?utf-8?B?5p2o5rab?= <koalainthetree8@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
->> This is going to get horribly ugly when you add neutron into the mix, so
->> much so I'd consider this option a non-starter. If someone is using
->> openvswitch to create network overlays to isolate each tenant I can't
->> imagine this ever working.
->
-> I'm not following here.  Are this only needed if ceph shares the same
-> subnet as the VM?  I don't know much about how these things work, but I
-> would expect that it would be possible to route IP traffic from a guest
-> network to the storage network (or anywhere else, for that matter)...
->
-> That aside, however, I think it would be a mistake to take the
-> availability of cephfs vs nfs clients as a reason alone for a particular
-> architectural approach.  One of the whole points of ceph is that we ignore
-> legacy when it doesn't make sense.  (Hence rbd, not iscsi; cephfs, not
-> [p]nfs.)
+On Thu, Oct 24, 2013 at 11:37:30AM +0800, =E6=9D=A8=E6=B6=9B wrote:
+> Hi, Guangliang Zhao
+>=20
+>=20
+>     Thanks for you great work!
+>  I am adding the acl function for kernel 3.4.66 now.
+>    and find some problems:
+>         1=E3=80=81I'm not sure which kernel your code is based on, so=
+ can you tell
+> me the exact version of your kernel.
 
-In an overlay world, physical VLANs have no relation to virtual
-networks. An overlay is literally encapsulating layer 2 inside layer 3
-and adding a VNI (virtual network identifier) and using tunnels
-(VxLAN, STT, GRE, etc) to connect VMs on disparate hypervisors that
-may not even have L2 connectivity to each other.  One of the core
-tenants of virtual networks is providing tenants the ability to have
-overlapping RFC1918 addressing, in this case you could have tenants
-already utilizing the addresses used by the NFS storage at the
-physical layer. Even if we could pretend that would never happen
-(namespaces or jails maybe?) you would still need to provision a
-distinct NFS IP per tenant and run a virtual switch that supports the
-tunneling protocol used by the overlay and the southbound API used by
-that overlays virtual switch to insert/remove flow information. The
-only alternative to embedding a myriad of different virtual switch
-protocols on the filer head would be to use a VTEP capable switch for
-encapsulation. I think there are only 1-2 vendors that ship these,
-Arista's 7150 and something in the Cumulus lineup.  Even if you could
-get past all this I'm somewhat terrified by the proposition of
-connecting the storage fabric to a tenant network, although this is
-much more acute concern for public clouds.
+Based on ceph client tree(git://github.com/ceph/ceph-client.git),
+commit is 53d028160f1affc6c3562e2d07bc352b53d51f2c
 
-Here's a good RFC wrt overlays if anyone is in dire need of bed time reading:
+>         2=E3=80=81I'm almost sure that we are using different kernals=
+ because I've
+> found some funtions with different parms such as "posix_acl_from_xatt=
+r" in
+> acl.c,It's parms are (const void *value, size_t size) in 3.4.66 ,not =
+like
+> your code.So do you have any suggestions about my current work?
 
-http://tools.ietf.org/html/draft-mity-nvo3-use-case-04
+The ACL code is still under reviewing, and I don't have enough time to
+handle other versions now :-(
 
--- 
+I think you should wait the final version and backport it.
 
-Kyle
+>=20
+>     I'm a Chinese programer.Thanks again for your help!
+>     Best wishes!
+>=20
+>=20
+>           Mike
+
+--=20
+Best regards,
+Guangliang
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
