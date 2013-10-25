@@ -1,244 +1,100 @@
 From: Loic Dachary <loic@dachary.org>
-Subject: Fwd: Re: Erasure Coding and Homomorphism
-Date: Fri, 25 Oct 2013 14:53:46 +0200
-Message-ID: <526A69DA.40805@dachary.org>
-References: <CAKt0SKFm6Rpz4CXE0YQD2mEL-wDfRWfeHj01ZWtMvh57PViOVQ@mail.gmail.com>
+Subject: Re: Removing disks / OSDs
+Date: Fri, 25 Oct 2013 15:11:09 +0200
+Message-ID: <526A6DED.8090202@dachary.org>
+References: <52655309.8070500@dachary.org> <CAPYLRzjBmdewVvNVQd5JwnAAF2dv+q7Qk4qtzwQO7jVtpDGDRg@mail.gmail.com> <52661776.20803@dachary.org> <CAPYLRzgxWEi1s0=-EtcbhpdS8H96KDm-NhxhScKOn18Y72DY5Q@mail.gmail.com> <alpine.DEB.2.00.1310221029580.29488@cobra.newdream.net> <5267D30D.9080201@dachary.org>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="2F5uG34DmmSPWOviChHHqS6vUhm4nlSGq"
+ boundary="Rgow8rom1EOKpQX7grKi107Up9MgJlbSE"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:46226 "EHLO
+Received: from smtp.dmail.dachary.org ([91.121.254.229]:46243 "EHLO
 	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751548Ab3JYMxs (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 25 Oct 2013 08:53:48 -0400
-In-Reply-To: <CAKt0SKFm6Rpz4CXE0YQD2mEL-wDfRWfeHj01ZWtMvh57PViOVQ@mail.gmail.com>
+	with ESMTP id S1754499Ab3JYNLL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 25 Oct 2013 09:11:11 -0400
+Received: from [10.9.0.6] (openvpn.novalocal [10.145.3.13])
+	by smtp.dmail.dachary.org (Postfix) with ESMTPS id 58DC326399
+	for <ceph-devel@vger.kernel.org>; Fri, 25 Oct 2013 15:11:09 +0200 (CEST)
+In-Reply-To: <5267D30D.9080201@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Ceph Development <ceph-devel@vger.kernel.org>
-Cc: Francois Helt <francois.helt@h-t-solutions.com>
 
 This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---2F5uG34DmmSPWOviChHHqS6vUhm4nlSGq
+--Rgow8rom1EOKpQX7grKi107Up9MgJlbSE
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: quoted-printable
 
+Hi,
 
-Forwarded on behalf of Francois Helt who is temporarily experiencing trou=
-bles with the mailing list subscription system.
+If a disk containing an OSD is moved to another host, it is entirely poss=
+ible that the objects it contains are violating a crush rule imposing tha=
+t no object is replicated on the same host. Will this be taken care of as=
+ a side effect of updating the place of the OSD in the map ( https://gith=
+ub.com/ceph/ceph/blob/v0.61.9/src/upstart/ceph-osd.conf#L29 ) ?=20
 
--------- Original Message --------
-Subject: 	Re: Erasure Coding and Homomorphism
-Date: 	Fri, 25 Oct 2013 10:43:57 +0200
-From: 	Francois Helt <francois.helt@h-t-solutions.com>
-To: 	James Plank <plank@cs.utk.edu>
-CC: 	Loic Dachary <loic@dachary.org>
+Cheers
 
+On 23/10/2013 15:45, Loic Dachary wrote:
+> Hi,
+>=20
+> As a conclusion to this thread and also because I realized that most pe=
+ople are unaware of the level of automation provided by ceph / udev, I ju=
+st posted a quick summary : http://dachary.org/?p=3D2428
+>=20
+> Cheers
+>=20
+> On 22/10/2013 19:31, Sage Weil wrote:
+>> On Tue, 22 Oct 2013, Gregory Farnum wrote:
+>>> On Mon, Oct 21, 2013 at 11:13 PM, Loic Dachary <loic@dachary.org> wro=
+te:
+>>>>
+>>>>
+>>>> On 21/10/2013 18:49, Gregory Farnum wrote:
+>>>>> I'm not quite sure what questions you're actually asking here...
+>>>>> In general, the OSD is not removed from the system without explicit=
 
+>>>>> admin intervention. When it is removed, all traces of it should be
+>>>>> zapped (including its key), so it can't reconnect.
+>>>>> If it hasn't been removed, then indeed it will continue working
+>>>>> properly even if moved to a different box.
+>>>>
+>>>> If there is an external journal, the device containing the journal n=
+eeds to be moved with the device containing the data. If I read ceph/src/=
+upstart/ceph-osd.conf correctly, when the data device is plugged in the n=
+ew machine it will fail to start because the journal is not there yet. Wh=
+en the journal device is plugged in, the ceph-osd.conf would be called be=
+cause udev rule in ceph/udev/95-ceph-osd.rules call ceph-disk activate-jo=
+urnal.
+>>>>
+>>>> Is my understanding correct ?
+>>>
+>>> Well, after being wrong last time I'm a little reluctant to make
+>>> pronouncements from memory, but that definitely sounds correct to me.=
 
-Hello
-a quick reaction.
-The papers are interesting indeed.
+>>
+>> Yep, that's how it's supposed to work.  The activate-journal piece is =
 
-Let me do a rough summary of what I understand and the application requir=
-ements I foresee
-A Client C is entrusting precious and large data to a Server S (or a Serv=
-ice company provinding long-term preservation in our case)
-The Client is able to generate Keys in such a way that, it is possible to=
- Challenge the Server to verify the presence of the whole data
-1) without having to retain the original data on the Client side,
-2) the Server being unable to forge a plausible answer
-3) with limited network traffic and with efficient data browsing
-Therefore it is a secure Verifiable Possession of the data by the Server
-It seems that there is also the possibility that the data is encrypted.
+>> somewhat recent though (I think maybe it wasn't in place for cuttlefis=
+h?).
+>>
+>>> :) If I were doing an audit I'd want to look at what happens if there=
 
-This is the first important point for our application:
-The Service provided for preserving data must be such that data is encryp=
-ted and (we) the Server is allways managing data blindly
-without the possibility to see it clearly - i.e. without the possibility =
-to make illegal copies of the content.
-
-The second point is also easy to foresee:
-The Server must also be able to check the integrity of data it is preserv=
-ing in order to fight data corruption.
-Erasure coding might be used in such a way that as soon as recovery of th=
-e data is becoming too difficult,
-there must be an action to regenerate the original data (always encrypted=
-) and redo the erasure coding.
-
-If data can be kept encrypted and secured in the described way there is t=
-he possibility for the Client
-to recover its data even if the Service company is going under.
-The Keys by the Client may serve as indictors for the data that the clien=
-t owns really.
-
-A third point is essential for our application:
-The erasure coding (and/or encryption if erasure coding is not enough to =
-prevent piracy) must be managed
-in such a way that it is progressive, the order of chunks of data is pres=
-erved..
-The data must be arranged keeping the original partition, at boudaries of=
- indicidual images or small group of images.
-It may be necessary (for the sake of preservation management) that indivi=
-dual images or group of images have to be replaced.
-It is    essential to avoid replacing a whole film if only a small portio=
-n is corrupted.
-Also it may happen that large file should be split in order to fit with b=
-ackups system sizes.
-
-I hope that I am clear enough
-Francois
-
-
-2013/10/18 James Plank <plank@cs.utk.edu <mailto:plank@cs.utk.edu>>
-
-    Hi Francois and Loic -- sorry to be so long in responding.  I'm swamp=
-ed as always.  Is the following paper something like what you're envision=
-ing?
-
-    http://web.njit.edu/~crix/publications/acm-tissec11a.pdf
-
-    I think the combination is a powerful one which has seen some applica=
-tion (I know about this one because I was on Osama Khan's phd committee).=
-  Perhaps the Store, Forget and Check paper by Ethan Miller does the same=
- thing -- it has been a few years since I have read it: http://www.ssrc.u=
-csc.edu/pub/schwarz06-icdcs.html
-
-    Are these having the flavor of what you are proposing?
-
-    Thanks and best wishes -- Jim
-    ----------
-
-    On Oct 11, 2013, at 11:36 AM, Francois Helt wrote:
-
->     Hello
->
->     to be a bit more precise and to show the interest of the combinatio=
-n of technologies, the idea is the following
->
->     Combining "Erasure coding" and "Homomorphic encryption" in order to=
-:
->     - Allow the preservation of cinematographic content with huge size =
-requirements
->     - Offer a fully secure service as the service provider will never s=
-ee the decrypted content
->     - use "homomorphic" coding allowing to work on, recover and manage =
-encrypted content
->
->     =20
->
->
->     2013/10/11 Loic Dachary <loic@dachary.org <mailto:loic@dachary.org>=
->
->
->         Hi James,
->
->         Please meet Fran=E7ois Helt who is best know for his work on im=
-age processing in the movie industry. It has been suggested that there ma=
-y be interesting intersections between "Homomorphism" and Erasure Coding.=
- Do you have an opinion on this topic ? It is entirely possible that my q=
-uestion does not make any sense :-) Hopefully Fran=E7ois will be able to =
-expand in a sensible way.
->
->         Cheers
->
->         P.S. I cc' the public mailing list ceph-devel in the hope that =
-people are willing to participate in this thread.
->
->         --
->         Lo=EFc Dachary, Artisan Logiciel Libre
->         All that is necessary for the triumph of evil is that good peop=
-le do nothing.
->
->
->
->
->     --=20
->     *Fran=E7ois Helt*
->     Chief Scientific Officer  | Highlands Technologies Solutions
->
->     francois.helt@h-t-solutions.com <mailto:nicolas.chiovini@h-t-soluti=
-ons.com>
->     www.h-t-solutions.com <http://www.h-t-solutions.com/>
->
->     <image002.jpg>
->
->     1900 route des Cr=EAtes - BP 298
->     06905 Sophia Antipolis Cedex, France
->
->     --------------------
->     P /!! Please consider the environment before printing this email !!=
-/
->
->     Disclaimer
->     Our company accepts no liability for the content of this email, or =
-for the consequences of any actions taken on the basis of the information=
- provided, unless that information is subsequently confirmed in writing. =
-If you are not the intended recipient you are notified that disclosing, c=
-opying, distributing or taking any action in reliance on the contents of =
-this information is strictly prohibited. Please notify the sender immedia=
-tely by e-mail if you have received this e-mail by mistake and delete thi=
-s e-mail from your system. E-mail transmission cannot be guaranteed to be=
- secure or error-free as information could be intercepted, corrupted, los=
-t, destroyed, arrive late or incomplete, or contain viruses. The sender t=
-herefore does not accept liability for any errors or omissions in the con=
-tents of this message, which arise as a result of e-mail transmission._ _=
-Sender immediately by e-mail if you have received this e-mail by mistake =
-and delete this e-mail from your system.
->     E-mail transmission cannot be guaranteed to be secure or error-free=
- as information could be intercepted, corrupted, lost, destroyed, arrive =
-late or incomplete, or contain viruses. The sender therefore does not acc=
-ept liability for any errors or omissions in the contents of this message=
-, which arise as a result of e-mail transmission.
->
->
-
-
-
+>>> is a wrong journal in the correct location, etc.
+>>
+>> The ceph-osd will fail on start because the uuid/fsid doesn't match.
+>>
+>> sage
+>>
+>=20
 
 --=20
-*Fran=E7ois Helt*
-Chief Scientific Officer  | Highlands Technologies Solutions
-
-francois.helt@h-t-solutions.com <mailto:nicolas.chiovini@h-t-solutions.co=
-m>
-www.h-t-solutions.com <http://www.h-t-solutions.com/>
-
-cid:part6.06030403.08020703@h-t-solutions.com
-
-1900 route des Cr=EAtes - BP 298
-06905 Sophia Antipolis Cedex, France
-
---------------------
-P /!! Please consider the environment before printing this email !!/
-
-Disclaimer
-Our company accepts no liability for the content of this email, or for th=
-e consequences of any actions taken on the basis of the information provi=
-ded, unless that information is subsequently confirmed in writing. If you=
- are not the intended recipient you are notified that disclosing, copying=
-, distributing or taking any action in reliance on the contents of this i=
-nformation is strictly prohibited. Please notify the sender immediately b=
-y e-mail if you have received this e-mail by mistake and delete this e-ma=
-il from your system. E-mail transmission cannot be guaranteed to be secur=
-e or error-free as information could be intercepted, corrupted, lost, des=
-troyed, arrive late or incomplete, or contain viruses. The sender therefo=
-re does not accept liability for any errors or omissions in the contents =
-of this message, which arise as a result of e-mail transmission._ _Sender=
- immediately by e-mail if you have received this e-mail by mistake and de=
-lete this e-mail from your system. E-mail
-transmission cannot be guaranteed to be secure or error-free as informati=
-on could be intercepted, corrupted, lost, destroyed, arrive late or incom=
-plete, or contain viruses. The sender therefore does not accept liability=
- for any errors or omissions in the contents of this message, which arise=
- as a result of e-mail transmission.
+Lo=EFc Dachary, Artisan Logiciel Libre
+All that is necessary for the triumph of evil is that good people do noth=
+ing.
 
 
-
-
-
-
---2F5uG34DmmSPWOviChHHqS6vUhm4nlSGq
+--Rgow8rom1EOKpQX7grKi107Up9MgJlbSE
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -247,9 +103,9 @@ Content-Disposition: attachment; filename="signature.asc"
 Version: GnuPG v2.0.19 (GNU/Linux)
 Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
 
-iEYEARECAAYFAlJqadoACgkQ8dLMyEl6F20LnQCgusOoKnhGIEMBn3P1HC95Ez6m
-CqAAn1r5sm+yMcL26/CJKa3caWC6JQ/i
-=TLEv
+iEYEARECAAYFAlJqbe0ACgkQ8dLMyEl6F23j2QCeK5ZOMNyz83U9wvM9b2eakLnN
+qg8AoIKYh1Aro/u72EzTJZznl0/1PnqL
+=XBzW
 -----END PGP SIGNATURE-----
 
---2F5uG34DmmSPWOviChHHqS6vUhm4nlSGq--
+--Rgow8rom1EOKpQX7grKi107Up9MgJlbSE--
