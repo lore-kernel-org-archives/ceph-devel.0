@@ -1,108 +1,156 @@
 From: Kent Overstreet <kmo@daterainc.com>
-Subject: [PATCH 16/23] rbd: Refactor bio cloning, don't clone biovecs
-Date: Tue, 29 Oct 2013 13:18:09 -0700
-Message-ID: <1383077896-4132-17-git-send-email-kmo@daterainc.com>
+Subject: [PATCH 14/23] ceph: Convert to immutable biovecs
+Date: Tue, 29 Oct 2013 13:18:07 -0700
+Message-ID: <1383077896-4132-15-git-send-email-kmo@daterainc.com>
 References: <1383077896-4132-1-git-send-email-kmo@daterainc.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1383077896-4132-1-git-send-email-kmo@daterainc.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: axboe@kernel.dk
-Cc: linux-kernel@vger.kernel.org, hch@infradead.org, tj@kernel.org, nab@linux-iscsi.org, Kent Overstreet <kmo@daterainc.com>, Yehuda Sadeh <yehuda@inktank.com>, Alex Elder <elder@inktank.com>, ceph-devel@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, hch@infradead.org, tj@kernel.org, nab@linux-iscsi.org, Kent Overstreet <kmo@daterainc.com>, Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-Now that we've got drivers converted to the new immutable bvec
-primitives, bio splitting becomes much easier. In a few patches,
-bio_clone() will be changed to share the old bio's bvec instead of
-copying it, and bio_split() will do exactly what's being done here.
+Now that we've got a mechanism for immutable biovecs -
+bi_iter.bi_bvec_done - we need to convert drivers to use primitives that
+respect it instead of using the bvec array directly.
 
 Signed-off-by: Kent Overstreet <kmo@daterainc.com>
 Cc: Jens Axboe <axboe@kernel.dk>
-Cc: Yehuda Sadeh <yehuda@inktank.com>
-Cc: Alex Elder <elder@inktank.com>
+Cc: Sage Weil <sage@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 ---
- drivers/block/rbd.c | 64 ++---------------------------------------------------
- 1 file changed, 2 insertions(+), 62 deletions(-)
+ include/linux/ceph/messenger.h |  4 ++--
+ net/ceph/messenger.c           | 43 +++++++++++++++++-------------------------
+ 2 files changed, 19 insertions(+), 28 deletions(-)
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 3241d5e..f2381e3 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -1173,73 +1173,13 @@ static struct bio *bio_clone_range(struct bio *bio_src,
- 					unsigned int len,
- 					gfp_t gfpmask)
+diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
+index 7c1420b..091fdb6 100644
+--- a/include/linux/ceph/messenger.h
++++ b/include/linux/ceph/messenger.h
+@@ -1,6 +1,7 @@
+ #ifndef __FS_CEPH_MESSENGER_H
+ #define __FS_CEPH_MESSENGER_H
+ 
++#include <linux/blk_types.h>
+ #include <linux/kref.h>
+ #include <linux/mutex.h>
+ #include <linux/net.h>
+@@ -119,8 +120,7 @@ struct ceph_msg_data_cursor {
+ #ifdef CONFIG_BLOCK
+ 		struct {				/* bio */
+ 			struct bio	*bio;		/* bio from list */
+-			unsigned int	vector_index;	/* vector from bio */
+-			unsigned int	vector_offset;	/* bytes from vector */
++			struct bvec_iter bvec_iter;
+ 		};
+ #endif /* CONFIG_BLOCK */
+ 		struct {				/* pages */
+diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+index 4a5df7b..18c039b 100644
+--- a/net/ceph/messenger.c
++++ b/net/ceph/messenger.c
+@@ -777,13 +777,12 @@ static void ceph_msg_data_bio_cursor_init(struct ceph_msg_data_cursor *cursor,
+ 
+ 	bio = data->bio;
+ 	BUG_ON(!bio);
+-	BUG_ON(!bio->bi_vcnt);
+ 
+ 	cursor->resid = min(length, data->bio_length);
+ 	cursor->bio = bio;
+-	cursor->vector_index = 0;
+-	cursor->vector_offset = 0;
+-	cursor->last_piece = length <= bio->bi_io_vec[0].bv_len;
++	cursor->bvec_iter = bio->bi_iter;
++	cursor->last_piece =
++		cursor->resid <= bio_iter_len(bio, cursor->bvec_iter);
+ }
+ 
+ static struct page *ceph_msg_data_bio_next(struct ceph_msg_data_cursor *cursor,
+@@ -792,71 +791,63 @@ static struct page *ceph_msg_data_bio_next(struct ceph_msg_data_cursor *cursor,
  {
--	struct bio_vec bv;
--	struct bvec_iter iter;
--	struct bvec_iter end_iter;
--	unsigned int resid;
--	unsigned int voff;
--	unsigned short vcnt;
+ 	struct ceph_msg_data *data = cursor->data;
  	struct bio *bio;
+-	struct bio_vec *bio_vec;
+-	unsigned int index;
++	struct bio_vec bio_vec;
  
--	/* Handle the easy case for the caller */
--
--	if (!offset && len == bio_src->bi_iter.bi_size)
--		return bio_clone(bio_src, gfpmask);
--
--	if (WARN_ON_ONCE(!len))
--		return NULL;
--	if (WARN_ON_ONCE(len > bio_src->bi_iter.bi_size))
--		return NULL;
--	if (WARN_ON_ONCE(offset > bio_src->bi_iter.bi_size - len))
--		return NULL;
--
--	/* Find first affected segment... */
--
--	resid = offset;
--	bio_for_each_segment(bv, bio_src, iter) {
--		if (resid < bv.bv_len)
--			break;
--		resid -= bv.bv_len;
--	}
--	voff = resid;
--
--	/* ...and the last affected segment */
--
--	resid += len;
--	__bio_for_each_segment(bv, bio_src, end_iter, iter) {
--		if (resid <= bv.bv_len)
--			break;
--		resid -= bv.bv_len;
--	}
--	vcnt = end_iter.bi_idx = iter.bi_idx + 1;
--
--	/* Build the clone */
--
--	bio = bio_alloc(gfpmask, (unsigned int) vcnt);
-+	bio = bio_clone(bio_src, gfpmask);
- 	if (!bio)
- 		return NULL;	/* ENOMEM */
+ 	BUG_ON(data->type != CEPH_MSG_DATA_BIO);
  
--	bio->bi_bdev = bio_src->bi_bdev;
--	bio->bi_iter.bi_sector = bio_src->bi_iter.bi_sector +
--		(offset >> SECTOR_SHIFT);
--	bio->bi_rw = bio_src->bi_rw;
--	bio->bi_flags |= 1 << BIO_CLONED;
--
--	/*
--	 * Copy over our part of the bio_vec, then update the first
--	 * and last (or only) entries.
--	 */
--	memcpy(&bio->bi_io_vec[0], &bio_src->bi_io_vec[iter.bi_idx],
--			vcnt * sizeof (struct bio_vec));
--	bio->bi_io_vec[0].bv_offset += voff;
--	if (vcnt > 1) {
--		bio->bi_io_vec[0].bv_len -= voff;
--		bio->bi_io_vec[vcnt - 1].bv_len = resid;
--	} else {
--		bio->bi_io_vec[0].bv_len = len;
--	}
--
--	bio->bi_vcnt = vcnt;
-+	bio_advance(bio, offset);
- 	bio->bi_iter.bi_size = len;
+ 	bio = cursor->bio;
+ 	BUG_ON(!bio);
  
- 	return bio;
+-	index = cursor->vector_index;
+-	BUG_ON(index >= (unsigned int) bio->bi_vcnt);
++	bio_vec = bio_iter_iovec(bio, cursor->bvec_iter);
+ 
+-	bio_vec = &bio->bi_io_vec[index];
+-	BUG_ON(cursor->vector_offset >= bio_vec->bv_len);
+-	*page_offset = (size_t) (bio_vec->bv_offset + cursor->vector_offset);
++	*page_offset = (size_t) bio_vec.bv_offset;
+ 	BUG_ON(*page_offset >= PAGE_SIZE);
+ 	if (cursor->last_piece) /* pagelist offset is always 0 */
+ 		*length = cursor->resid;
+ 	else
+-		*length = (size_t) (bio_vec->bv_len - cursor->vector_offset);
++		*length = (size_t) bio_vec.bv_len;
+ 	BUG_ON(*length > cursor->resid);
+ 	BUG_ON(*page_offset + *length > PAGE_SIZE);
+ 
+-	return bio_vec->bv_page;
++	return bio_vec.bv_page;
+ }
+ 
+ static bool ceph_msg_data_bio_advance(struct ceph_msg_data_cursor *cursor,
+ 					size_t bytes)
+ {
+ 	struct bio *bio;
+-	struct bio_vec *bio_vec;
+-	unsigned int index;
++	struct bio_vec bio_vec;
+ 
+ 	BUG_ON(cursor->data->type != CEPH_MSG_DATA_BIO);
+ 
+ 	bio = cursor->bio;
+ 	BUG_ON(!bio);
+ 
+-	index = cursor->vector_index;
+-	BUG_ON(index >= (unsigned int) bio->bi_vcnt);
+-	bio_vec = &bio->bi_io_vec[index];
++	bio_vec = bio_iter_iovec(bio, cursor->bvec_iter);
+ 
+ 	/* Advance the cursor offset */
+ 
+ 	BUG_ON(cursor->resid < bytes);
+ 	cursor->resid -= bytes;
+-	cursor->vector_offset += bytes;
+-	if (cursor->vector_offset < bio_vec->bv_len)
++
++	bio_advance_iter(bio, &cursor->bvec_iter, bytes);
++
++	if (bytes < bio_vec.bv_len)
+ 		return false;	/* more bytes to process in this segment */
+-	BUG_ON(cursor->vector_offset != bio_vec->bv_len);
+ 
+ 	/* Move on to the next segment, and possibly the next bio */
+ 
+-	if (++index == (unsigned int) bio->bi_vcnt) {
++	if (!cursor->bvec_iter.bi_size) {
+ 		bio = bio->bi_next;
+-		index = 0;
++		cursor->bvec_iter = bio->bi_iter;
+ 	}
+ 	cursor->bio = bio;
+-	cursor->vector_index = index;
+-	cursor->vector_offset = 0;
+ 
+ 	if (!cursor->last_piece) {
+ 		BUG_ON(!cursor->resid);
+ 		BUG_ON(!bio);
+ 		/* A short read is OK, so use <= rather than == */
+-		if (cursor->resid <= bio->bi_io_vec[index].bv_len)
++		if (cursor->resid <= bio_iter_len(bio, cursor->bvec_iter))
+ 			cursor->last_piece = true;
+ 	}
+ 
 -- 
 1.8.4.rc3
