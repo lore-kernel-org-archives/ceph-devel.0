@@ -1,55 +1,41 @@
-From: asomers@gmail.com
-Subject: Re: feedback on supporting libc++
-Date: Wed, 30 Oct 2013 10:13:00 -0600
-Message-ID: <CAOtMX2g5rdOzHoe73XGy=Yn3erMfuxHBuJCGsD3E2RLh+8c3mg@mail.gmail.com>
-References: <CA+Hcz5-8k3rnCaJJj3htb0F63V+fitoBtofCkGzJZ4a_j29K8Q@mail.gmail.com>
+From: Patrick McGarry <patrick-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Subject: Inktank Ceph Enterprise Launch
+Date: Wed, 30 Oct 2013 13:01:34 -0400
+Message-ID: <CAP8Oy=+CfOLQZq3X02zrE6sCLyJ_wKxiLeKX8v=PmpZQ3d_0QA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-we0-f177.google.com ([74.125.82.177]:37611 "EHLO
-	mail-we0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751371Ab3J3QNC (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Oct 2013 12:13:02 -0400
-Received: by mail-we0-f177.google.com with SMTP id x55so1498476wes.22
-        for <ceph-devel@vger.kernel.org>; Wed, 30 Oct 2013 09:13:00 -0700 (PDT)
-In-Reply-To: <CA+Hcz5-8k3rnCaJJj3htb0F63V+fitoBtofCkGzJZ4a_j29K8Q@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Noah Watkins <noah.watkins@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Gregory Farnum <greg@inktank.com>, Gregory Farnum <gregory.farnum@inktank.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-This approach is basically what Kyua did for libc++ compatibility.  It
-looks good.  The only things I don't like are the
-CEPH_HASH_NAMESPACE_{START,END} macros.  I'm personally not a fan of
-macros that change language syntax.  However, I can't come up with an
-alternative that doesn't involve either more C++11 features or more
-#ifdefs.
+Salutations Ceph-ers,
 
--Alan
+As many of you have noticed, Inktank has taken the wraps off the
+latest and greatest magic for enterprise customers.  Wanted to share a
+few thoughts from a community perspective on Ceph.com and answer any
+questions/concerns folks might have.
 
-On Tue, Oct 29, 2013 at 4:51 PM, Noah Watkins <noah.watkins@inktank.com> wrote:
-> Out of the box on OSX Mavericks libc++ [1] is being used as opposed to
-> libstdc++. One of the issues is that stuff from tr1 isn't available
-> (e.g. std::tr1::shared_ptr), as they have moved to std in c++11.
->
-> I'm looking for any feedback on this patch set, or if there is a
-> better way forward.
->
-> A set of patches on ceph.git:wip-libc++ [2] adds initial support (with
-> a couple temporary hacks). These patches are very similar to the
-> method used to support libc++ in mongodb.
->
-> Summary of changes:
->
->   std::tr1::shared/weak_ptr maps to ceph::shared/weak_ptr
->
->   hash_map/set maps to ceph::unordered_map/set
->
-> which will choose tr1::unordered_map/set over ext/hash_map/set.
->
-> [1] http://libcxx.llvm.org/
-> [2] https://github.com/ceph/ceph/compare/wip-libc%2B%2B
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+http://ceph.com/community/new-inktank-ceph-enterprise-builds-on-what-makes-ceph-great/
+
+Just to reiterate, there will be no changes/limitations to Ceph.  All
+Inktank contributions to Ceph will continue to be open source and
+useable.  If you have any questions feel free to direct them my way.
+Thanks.
+
+
+Best Regards,
+
+Patrick McGarry
+Director, Community || Inktank
+http://ceph.com  ||  http://inktank.com
+@scuttlemonkey || @ceph || @inktank
