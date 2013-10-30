@@ -1,62 +1,42 @@
-From: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Subject: 0.72-rc1 Emperor release candidate released
-Date: Wed, 30 Oct 2013 14:11:22 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1310301401500.1782@cobra.newdream.net>
+From: Sage Weil <sage@inktank.com>
+Subject: ceph-crush-location hook
+Date: Wed, 30 Oct 2013 14:17:21 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1310301412230.23435@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:50650 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752729Ab3J3VRV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Oct 2013 17:17:21 -0400
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org, ceph-users@ceph.com
 
-A release candidate for 0.72 emperor is ready!  This candidate squashes 
-the last of the blocker bugs and includes all of the functionality that 
-will be present in the final 0.72.  Looking back to dumpling, overall I 
-think we are also in much better shape than before: better overall 
-stability from our testing and much broader test coverage.
+There is a provsion in the startup scripts that will move your osd to the 
+correct position in the crush map on startup.  By default, this sets the 
+host based on hostname and then pulls in any fields defined in 'osd crush 
+location' in ceph.conf.
 
-Please test!
+This is useful but not sufficiently flexible for users who have multiple 
+types of devices and non-trivial crush trees.  I just merged a new helper 
+into master called ceph-crush-location that implements the above basic 
+behavior (and is now called by the sysvinit and upstart startup scripts).  
+However, you can now implement your own hook by setting 'osd crush 
+location hook = /path/to/my/script' and implement whatever logic you want.  
+The script just needs to output an appropriate list of key/value pairs 
+when called like so:
 
-Emperor will include several key improvements over dumpling:
+ $ ceph-crush-location --cluster ceph --id 0 --type osd
+ host=vapre root=default
 
- - improved crc32c performance (intel optimizations, caching)
- - mon: friendly warnings when pg counts are out of whack
- - mon: per-pool performance statistics
- - mon: stability and cpu utilization improvements
- - osd: improved interaction with backend file systems (lower latency)
- - osd, librados: new copy primitives (to support in-progress tiering 
-   work)
- - osd: lots of internal clean and refactoring (to support erasure coding)
- - rgw: bucket quotas
- - rgw: performance improvements
- - rgw: validate S3 tokens against keystone
- - mds: many many bug fixes and improvements (mostly from Yan, Zheng of 
-   Intel)
- - librados: new class and client example code
-
-The draft release notes can be found here:
-
- - http://ceph.com/docs/master/release-notes/
-
-You can get the emperor packages from the 'testing' rpm and deb locations:
-
- - http://ceph.com/debian-testing
- - http://ceph.com/rpm-testing
-
-We will also be putting them in the stable emperor locations shortly 
-(e.g., /debian-emperor).
-
-If you anticipate moving from dumpling to emperor, please try this release 
-on any test environment you have available.  If you are still running 
-cuttlefish or bobtail, upgrade to dumpling already!
+The other change is that the default hook checks either '$type crush 
+location' (e.g. osd crush location) or, if that is empty, 'crush 
+location'.  In the very near future the clients will also understand the 
+'crush location' option and use that for localizing their reads when 
+appropriate (e.g., for hadoop or read-only rbd images).  That means that 
+updating your chef/puppet/juju or other provisioning tools to define 
+'crush location' in /etc/ceph/ceph.conf will make all of this stuff Just 
+Work.
 
 sage
