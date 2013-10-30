@@ -1,55 +1,62 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: feedback on supporting libc++
-Date: Wed, 30 Oct 2013 12:02:24 -0700
-Message-ID: <527157C0.40802@inktank.com>
-References: <CA+Hcz5-8k3rnCaJJj3htb0F63V+fitoBtofCkGzJZ4a_j29K8Q@mail.gmail.com>
+From: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Subject: 0.72-rc1 Emperor release candidate released
+Date: Wed, 30 Oct 2013 14:11:22 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1310301401500.1782@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f177.google.com ([209.85.214.177]:42678 "EHLO
-	mail-ob0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751951Ab3J3TCO (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Oct 2013 15:02:14 -0400
-Received: by mail-ob0-f177.google.com with SMTP id vb8so1882759obc.8
-        for <ceph-devel@vger.kernel.org>; Wed, 30 Oct 2013 12:02:13 -0700 (PDT)
-In-Reply-To: <CA+Hcz5-8k3rnCaJJj3htb0F63V+fitoBtofCkGzJZ4a_j29K8Q@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Noah Watkins <noah.watkins@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Gregory Farnum <greg@inktank.com>, Gregory Farnum <gregory.farnum@inktank.com>
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-On 10/29/2013 03:51 PM, Noah Watkins wrote:
-> Out of the box on OSX Mavericks libc++ [1] is being used as opposed to
-> libstdc++. One of the issues is that stuff from tr1 isn't available
-> (e.g. std::tr1::shared_ptr), as they have moved to std in c++11.
->
-> I'm looking for any feedback on this patch set, or if there is a
-> better way forward.
->
-> A set of patches on ceph.git:wip-libc++ [2] adds initial support (with
-> a couple temporary hacks). These patches are very similar to the
-> method used to support libc++ in mongodb.
->
-> Summary of changes:
->
->    std::tr1::shared/weak_ptr maps to ceph::shared/weak_ptr
+A release candidate for 0.72 emperor is ready!  This candidate squashes 
+the last of the blocker bugs and includes all of the functionality that 
+will be present in the final 0.72.  Looking back to dumpling, overall I 
+think we are also in much better shape than before: better overall 
+stability from our testing and much broader test coverage.
 
-I'm fine with this approach in general, but we need to be careful about
-changing librados.h[pp], since that may break the ABI.
+Please test!
 
-We really should've hidden the entire implementation of ObjectIterator
-to begin with, but now we're stuck with it in librados.hpp. This branch
-changes a std::tr1::shared_ptr there to a ceph::shard_ptr, which looks
-unsafe to me. Could you check whether you can run 'rados ls' compiled
-against an old librados, but dynamically loading librados from this
-branch compiled in c++98 mode?
+Emperor will include several key improvements over dumpling:
 
-Josh
+ - improved crc32c performance (intel optimizations, caching)
+ - mon: friendly warnings when pg counts are out of whack
+ - mon: per-pool performance statistics
+ - mon: stability and cpu utilization improvements
+ - osd: improved interaction with backend file systems (lower latency)
+ - osd, librados: new copy primitives (to support in-progress tiering 
+   work)
+ - osd: lots of internal clean and refactoring (to support erasure coding)
+ - rgw: bucket quotas
+ - rgw: performance improvements
+ - rgw: validate S3 tokens against keystone
+ - mds: many many bug fixes and improvements (mostly from Yan, Zheng of 
+   Intel)
+ - librados: new class and client example code
 
->    hash_map/set maps to ceph::unordered_map/set
->
-> which will choose tr1::unordered_map/set over ext/hash_map/set.
->
-> [1] http://libcxx.llvm.org/
-> [2] https://github.com/ceph/ceph/compare/wip-libc%2B%2B
+The draft release notes can be found here:
 
+ - http://ceph.com/docs/master/release-notes/
+
+You can get the emperor packages from the 'testing' rpm and deb locations:
+
+ - http://ceph.com/debian-testing
+ - http://ceph.com/rpm-testing
+
+We will also be putting them in the stable emperor locations shortly 
+(e.g., /debian-emperor).
+
+If you anticipate moving from dumpling to emperor, please try this release 
+on any test environment you have available.  If you are still running 
+cuttlefish or bobtail, upgrade to dumpling already!
+
+sage
