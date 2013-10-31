@@ -1,86 +1,48 @@
-From: Joao Eduardo Luis <joao.luis@inktank.com>
-Subject: Re: testing ceph
-Date: Thu, 31 Oct 2013 10:55:56 +0000
-Message-ID: <5272373C.4020906@inktank.com>
-References: <DUB116-W8372DACD4F54B9145260E4E00B0@phx.gbl>
+From: Dominik Mostowiec <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: radosgw - complete_multipart errors
+Date: Thu, 31 Oct 2013 14:22:08 +0100
+Message-ID: <CAMNMNTx6TCaxUng6wFYHm_TECQzK9+y_G0dTimDauoci_ucu9w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-we0-f178.google.com ([74.125.82.178]:57358 "EHLO
-	mail-we0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754646Ab3JaKz6 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Oct 2013 06:55:58 -0400
-Received: by mail-we0-f178.google.com with SMTP id q59so2546207wes.9
-        for <ceph-devel@vger.kernel.org>; Thu, 31 Oct 2013 03:55:57 -0700 (PDT)
-In-Reply-To: <DUB116-W8372DACD4F54B9145260E4E00B0@phx.gbl>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: charles L <charlesboy009@hotmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On 10/31/2013 04:54 AM, charles L wrote:
-> Hi,
-> Pls is this a good setup for a production environment test of ceph? My focus is on the SSD ... should it be partitioned(sdf1,2 ,3,4) and shared by the four OSDs on a host? or is this a better configuration for the SSD to be just one partition(sdf1) while all osd uses that one partition?
-> my setup:
-> - 6 Servers with one 250gb boot disk for OS(sda),
-> four-2Tb Disks each for the OSDs i.e Total disks = 6x4 = 24 disks (sdb -sde)
-> and one-60GB SSD for Osd Journal(sdf).
-> -RAM = 32GB on each server with 2 GB network link.
-> hostname for servers: Server1 -Server6
+Hi,
+I have strange radosgw error:
 
-Charles,
+======
+2013-10-26 21:18:29.844676 7f637beaf700  0 setting object
+tag=_ZPeVs7d6W8GjU8qKr4dsilbGeo6NOgw
+2013-10-26 21:18:30.049588 7f637beaf700  0 WARNING: set_req_state_err
+err_no=125 resorting to 500
+2013-10-26 21:18:30.049738 7f637beaf700  2 req 61655:0.224186:s3:POST
+/testbucket/files/image%20%286%29.jpeg:complete_multipart:http
+status=500
+2013-10-26 21:18:30.049975 7f637beaf700  1 ====== req done
+req=0x11013d0 http_status=500 ======
 
-What you are describing on the ceph.conf below is definitely not a good 
-idea.  If you really want to use just one SSD and share it across 
-multiple OSDs, then you have two possible approaches:
+It's similar to: http://tracker.ceph.com/issues/5439
+This is the same bug?
+My ceph version:
+ceph version 0.56.6 (95a0bda7f007a33b0dc7adf4b330778fa1e5d70c)
 
-- partition that disk and assign a *different* partition to each OSD; or
-- keep only one partition, format it with some filesystem, and assign a 
-*different* journal file within that fs to each OSD.
+Bug (5439) is fixed.
+How to check (if I know commit
+"72d4351ea5a470051e428ffc5531acfc7d1c7b6f" ) which CEPH version have
+this fix.
+In latest bobtail - 0.56.7 it is fixed?
 
-What you are describing has you using the same partition for all OSDs. 
-This will likely create issues due to multiple OSDs writing and reading 
-from a single journal.  TBH I'm not familiar enough with the journal 
-mechanism to know whether the OSDs will detect that situation.
-
-   -Joao
-
->
-> [osd.0]
->   host = server1
-> devs = /dev/sdb
-> osd journal = /dev/sdf1
-> [osd.1]
-> host = server1
-> devs = /dev/sdc
-> osd journal = /dev/sdf2
->
-> [osd.3]
-> host = server1
-> devs = /dev/sdd
-> osd journal = /dev/sdf2
->
-> [osd.4]
-> host = server1
-> devs = /dev/sde
-> osd journal = /dev/sdf2
-> [osd.5]
-> host = server2
-> devs = /dev/sdb
-> osd journal = /dev/sdf2
-> ...
-> [osd.23]
-> host = server6
-> devs = /dev/sde
-> osd journal = /dev/sdf2
->
-> Thanks. 		 	   		  --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-
-
--- 
-Joao Eduardo Luis
-Software Engineer | http://inktank.com | http://ceph.com
+---
+Regards
+Dominik
