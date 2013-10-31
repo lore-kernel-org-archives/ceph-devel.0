@@ -1,60 +1,37 @@
-From: Li Wang <liwang@ubuntukylin.com>
-Subject: [PATCH] ceph: Update the pages in fscache in writepages() path
-Date: Fri,  1 Nov 2013 11:56:48 +0800
-Message-ID: <1383278208-4053-1-git-send-email-liwang@ubuntukylin.com>
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from m59-178.qiye.163.com ([123.58.178.59]:60884 "EHLO
-	m59-178.qiye.163.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751492Ab3KAD5I (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Oct 2013 23:57:08 -0400
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: linux-cachefs@redhat.com, Sage Weil <sage@inktank.com>, linux-kernel@vger.kernel.org, Li Wang <liwang@ubuntukylin.com>, Min Chen <minchen@ubuntukylin.com>, Yunchuan Wen <yunchuanwen@ubuntukylin.com>
+From: Ed Cashin <ecashin@coraid.com>
+Subject: Re: [PATCH 04/23] block: Abstract out bvec iterator
+Date: Thu, 31 Oct 2013 13:14:48 -0400
+Message-ID: <B60197FE-BC53-4EBA-8F78-02E4D9D31844@coraid.com>
+References: <1383077896-4132-1-git-send-email-kmo@daterainc.com>
+	<1383077896-4132-5-git-send-email-kmo@daterainc.com>
+Reply-To: device-mapper development <dm-devel@redhat.com>
+Mime-Version: 1.0 (Apple Message framework v1085)
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <dm-devel-bounces@redhat.com>
+In-Reply-To: <1383077896-4132-5-git-send-email-kmo@daterainc.com>
+List-Unsubscribe: <https://www.redhat.com/mailman/options/dm-devel>,
+	<mailto:dm-devel-request@redhat.com?subject=unsubscribe>
+List-Archive: <https://www.redhat.com/archives/dm-devel>
+List-Post: <mailto:dm-devel@redhat.com>
+List-Help: <mailto:dm-devel-request@redhat.com?subject=help>
+List-Subscribe: <https://www.redhat.com/mailman/listinfo/dm-devel>,
+	<mailto:dm-devel-request@redhat.com?subject=subscribe>
+Sender: dm-devel-bounces@redhat.com
+Errors-To: dm-devel-bounces@redhat.com
+To: Kent Overstreet <kmo@daterainc.com>
+Cc: Herton Ronaldo Krzesinski <herton.krzesinski@canonical.com>, Mike Snitzer <snitzer@redhat.com>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Paul Mackerras <paulus@samba.org>, Pavel Machek <pavel@ucw.cz>, Joshua Morris <josh.h.morris@us.ibm.com>, hch@infradead.org, Geert Uytterhoeven <geert@linux-m68k.org>, Mel Gorman <mgorman@suse.de>, Nitin Gupta <ngupta@vflare.org>, Len Brown <len.brown@intel.com>, Sage Weil <sage@inktank.com>, Joern Engel <joern@logfs.org>, Rusty Russell <rusty@rustcorp.com.au>, Sunil Mushran <sunil.mushran@gmail.com>, Alexander Viro <viro@zeniv.linux.org.uk>, Sadeh <yehuda@inktank.com>, Geoff Levand <geoff@infradead.org>, Jiri Kosina <jkosina@suse.cz>, linux-kernel@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>Joe Perches <joe>
+List-Id: ceph-devel.vger.kernel.org
 
-Currently, the pages in fscache only are updated in writepage() path,
-add the process in writepages().
+On Oct 29, 2013, at 4:17 PM, Kent Overstreet wrote:
 
-Signed-off-by: Min Chen <minchen@ubuntukylin.com>
-Signed-off-by: Li Wang <liwang@ubuntukylin.com>
-Signed-off-by: Yunchuan Wen <yunchuanwen@ubuntukylin.com>
----
- fs/ceph/addr.c |    8 +++++---
- 1 file changed, 5 insertions(+), 3 deletions(-)
+> Immutable biovecs are going to require an explicit iterator. To
+> implement immutable bvecs, a later patch is going to add a bi_bvec_done
+> member to this struct; for now, this patch effectively just renames
+> things.
 
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index 6df8bd4..cc57911 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -746,7 +746,7 @@ retry:
- 
- 	while (!done && index <= end) {
- 		int num_ops = do_sync ? 2 : 1;
--		unsigned i;
-+		unsigned i, j;
- 		int first;
- 		pgoff_t next;
- 		int pvec_pages, locked_pages;
-@@ -894,7 +894,6 @@ get_more_pages:
- 		if (!locked_pages)
- 			goto release_pvec_pages;
- 		if (i) {
--			int j;
- 			BUG_ON(!locked_pages || first < 0);
- 
- 			if (pvec_pages && i == pvec_pages &&
-@@ -924,7 +923,10 @@ get_more_pages:
- 
- 		osd_req_op_extent_osd_data_pages(req, 0, pages, len, 0,
- 							!!pool, false);
--
-+		for(j = 0; j < locked_pages; j++) {
-+			struct page *page = pages[j];
-+			ceph_readpage_to_fscache(inode, page);
-+		}		
- 		pages = NULL;	/* request message now owns the pages array */
- 		pool = NULL;
- 
+Ack.  These patches pass sanity-check testing, too, for aoe.
+
 -- 
-1.7.9.5
-
+  Ed Cashin
+  ecashin@coraid.com
