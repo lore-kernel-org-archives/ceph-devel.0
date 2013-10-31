@@ -1,76 +1,60 @@
 From: Sage Weil <sage@inktank.com>
-Subject: emperor, firefly
-Date: Thu, 31 Oct 2013 16:02:29 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1310311254570.20027@cobra.newdream.net>
+Subject: Re: coverity scan - a plea for help!
+Date: Thu, 31 Oct 2013 16:30:25 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1310311627020.5407@cobra.newdream.net>
+References: <alpine.DEB.2.00.1305090922300.4023@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:36565 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:36834 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751761Ab3JaXCa (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Oct 2013 19:02:30 -0400
+	with ESMTP id S1751635Ab3JaXaZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Oct 2013 19:30:25 -0400
 Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id F30B080060
-	for <ceph-devel@vger.kernel.org>; Thu, 31 Oct 2013 16:02:29 -0700 (PDT)
+	by cobra.newdream.net (Postfix) with ESMTP id AEFFC8004F
+	for <ceph-devel@vger.kernel.org>; Thu, 31 Oct 2013 16:30:25 -0700 (PDT)
 Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id CDA8080068
-	for <ceph-devel@vger.kernel.org>; Thu, 31 Oct 2013 16:02:29 -0700 (PDT)
+	by cobra.newdream.net (Postfix) with ESMTP id 8A4918004F
+	for <ceph-devel@vger.kernel.org>; Thu, 31 Oct 2013 16:30:25 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.00.1305090922300.4023@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Just wanted to take a moment to call out some of the great work that went 
-into emperor or is in progress for firely.  From the last CDS, completed 
-blueprints include:
+Hi everyone,
 
- - ceph osd zfs (Yan, Zheng).  This uses zfs snapshots the same way we use 
-   btrfs snapshots, allowing more efficient journaling.  ZFS doesn't have 
-   a 'clone' operation, so this doesn't get all of the efficiency advantages 
-   from btrfs.
+When I send this out several months ago, Danny Al-Gaaf stepped up and 
+submitted an amazing number of patches cleaning up the most concerning 
+issues that Coverity had picked up.  His attention has been directed 
+elsewhere more recently, but there are still a number of outstanding 
+issues in Coverity's tracker that are reasonably quick and easy to resolve 
+and will make our ability to identify newly introduced defects much 
+simpler.
 
- - radosgw bucket level quota (Yehuda Sadeh).  User-level quotas are up 
-   next!
+Coverity Scan makes it really easy to participate: just create an account 
+and I can grant you access to the Ceph project.  If you're interested in 
+contributing here (and it's an easy way to quickly start working with the 
+Ceph code), let me know!
 
- - teuthology bits (Zack Cerza et al).  Lots of the rough edges 
-   in teuthology have been filed down over this past cycle and Loic 
-   continues to organize weekly meetings to improve community usability.  
-   Queuing improvements, and perhaps most exciting is a whole new 
-   reporting framework from Alfredo and Zack that gathers results in a 
-   database and builds a dashboard on top of that.
-
- - ceph-deploy (Alfredo Deza).  Huge steps forward here on packaging 
-   (PyPi!), reliability/robustness (no more pushy), and the usability of 
-   the interface (simplified cluster/monitor creation, etc.).
-
-In progress blueprints:
-
- - erasure coding for rados (Loic Dachary, Samuel Just).  This is a huge 
-   piece of work but most of the erasure coding math is in place and the 
-   OSD refactoring work is on track for firefly!
-
- - mds inline data zupport (Li Wang).  These patches are pending review 
-   and a few revisions (and testing!)
-
- - increasing ceph portability (Noah Watkins).  Noah, along with Alan 
-   Somers, has been knocking down lots of the build and runtime issues on 
-   *BSD and OS X.  Most are sitting in wip-port or have already trickled 
-   into master.
-
- - cache pool overlay (Sage Weil, Greg Farnum): This work is also 
-   partially completed but on track for firefly.
-
- - librados/objecter, smarter localized reads: This is pending review but 
-   will make firefly.
-
- - leveldb osd backend (Hoamai Wang).  Last I hear this is in progress!
-
-These is just the items that were on the Emperor CDS agenda that have made 
-their way into my field of vision.  I'm looking forward to the firefly 
-summit in a couple weeks!  There will be several sessions to cover the 
-balance of the erasure coding and tiering work in detail (now that we're 
-in the thick of it and more clearly see the path forward), and naturally 
-some new blueprints as well.  If there are features or improvements you 
-have in mind, feel free to float them on the list for some pre-discussion 
-if you're not ready to write up a blueprint just yet.
-
+Thanks-
 sage
+
+
+On Thu, 9 May 2013, Sage Weil wrote:
+
+> We were added to coverity's awesome scan program a while back, which gives 
+> free access to their static analysis tool to open source projects.
+> 
+> Currently it identifies 421 issues.  We've already taken care of the ones 
+> that are highest impact, but the usefulness of periodic scans is limited 
+> until we can eliminate the noise from the remaining issues and easily see 
+> when new problems come up.
+> 
+> If anybody is interested in helping out in the cleanup effort, let me know 
+> and I'll share the login info.  This would provide significant value to 
+> our overall quality efforts and is a pretty easy way to make a meaningful 
+> contribution to the project without a huge investment in understanding the 
+> code and architecture!
+> 
+> sage
+> 
