@@ -1,129 +1,86 @@
-From: NeilBrown <neilb@suse.de>
-Subject: Re: [PATCH 04/23] block: Abstract out bvec iterator
-Date: Thu, 31 Oct 2013 14:29:36 +1100
-Message-ID: <20131031142936.63727342@notabene.brown>
-References: <1383077896-4132-1-git-send-email-kmo@daterainc.com>
-	<1383077896-4132-5-git-send-email-kmo@daterainc.com>
-Reply-To: device-mapper development <dm-devel@redhat.com>
+From: Joao Eduardo Luis <joao.luis@inktank.com>
+Subject: Re: testing ceph
+Date: Thu, 31 Oct 2013 10:55:56 +0000
+Message-ID: <5272373C.4020906@inktank.com>
+References: <DUB116-W8372DACD4F54B9145260E4E00B0@phx.gbl>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============5234300970751444966=="
-Return-path: <dm-devel-bounces@redhat.com>
-In-Reply-To: <1383077896-4132-5-git-send-email-kmo@daterainc.com>
-List-Unsubscribe: <https://www.redhat.com/mailman/options/dm-devel>,
-	<mailto:dm-devel-request@redhat.com?subject=unsubscribe>
-List-Archive: <https://www.redhat.com/archives/dm-devel>
-List-Post: <mailto:dm-devel@redhat.com>
-List-Help: <mailto:dm-devel-request@redhat.com?subject=help>
-List-Subscribe: <https://www.redhat.com/mailman/listinfo/dm-devel>,
-	<mailto:dm-devel-request@redhat.com?subject=subscribe>
-Sender: dm-devel-bounces@redhat.com
-Errors-To: dm-devel-bounces@redhat.com
-To: Kent Overstreet <kmo@daterainc.com>
-Cc: Dave Kleikamp <shaggy@kernel.org>, Jeremy Fitzhardinge <jeremy@goop.org>, Herton Ronaldo Krzesinski <herton.krzesinski@canonical.com>, Jan Beulich <jbeulich@suse.com>, "Ed L. Cashin" <ecashin@coraid.com>, "Michael S. Tsirkin" <mst@redhat.com>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Selvan Mani <smani@micron.com>, Namjae Jeon <namjae.jeon@samsung.com>, Heiko Carstens <heiko.carstens@de.ibm.com>, Chris Mason <chris.mason@fusionio.com>, dm-devel@redhat.com, Paul Mackerras <paulus@samba.org>, Pavel Machek <pavel@ucw.cz>, KONISHI Ryusuke <konishi.ryusuke@lab.ntt.co.jp>, Ian Campbell <Ian.Campbell@citrix.com>, Joshua Morris <josh.h.morris@us.ibm.com>, Alasdair Kergon <agk@redhat.com>, Nick Piggin <npiggin@kernel.dk>, Roger Pau =?UTF-8?B?TW9ubsOp?= <roger.pau@citrix.com>
-List-Id: ceph-devel.vger.kernel.org
-
---===============5234300970751444966==
-Content-Type: multipart/signed; micalg=PGP-SHA1;
-	boundary="Sig_/bF/+0261ZWlTgozZbA48+3r";
-	protocol="application/pgp-signature"
-
---Sig_/bF/+0261ZWlTgozZbA48+3r
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: quoted-printable
-
-On Tue, 29 Oct 2013 13:17:57 -0700 Kent Overstreet <kmo@daterainc.com> wrot=
-e:
-
-> Immutable biovecs are going to require an explicit iterator. To
-> implement immutable bvecs, a later patch is going to add a bi_bvec_done
-> member to this struct; for now, this patch effectively just renames
-> things.
->=20
-> Signed-off-by: Kent Overstreet <kmo@daterainc.com>
-
-
-> diff --git a/Documentation/block/biodoc.txt b/Documentation/block/biodoc.=
-txt
-> index 8df5e8e..2101e71 100644
-> --- a/Documentation/block/biodoc.txt
-> +++ b/Documentation/block/biodoc.txt
-> @@ -447,14 +447,13 @@ struct bio_vec {
->   * main unit of I/O for the block layer and lower layers (ie drivers)
->   */
->  struct bio {
-> -       sector_t            bi_sector;
->         struct bio          *bi_next;    /* request queue link */
->         struct block_device *bi_bdev;	/* target device */
->         unsigned long       bi_flags;    /* status, command, etc */
->         unsigned long       bi_rw;       /* low bits: r/w, high: priority=
- */
-> =20
->         unsigned int	bi_vcnt;     /* how may bio_vec's */
-> -       unsigned int	bi_idx;		/* current index into bio_vec array */
-> +       struct bvec_iter	bi_iter;	/* current index into bio_vec array */
-> =20
->         unsigned int	bi_size;     /* total size in bytes */
->         unsigned short 	bi_phys_segments; /* segments after physaddr coal=
-esce*/
-> @@ -480,7 +479,7 @@ With this multipage bio design:
->  - Code that traverses the req list can find all the segments of a bio
->    by using rq_for_each_segment.  This handles the fact that a request
->    has multiple bios, each of which can have multiple segments.
-> -- Drivers which can't process a large bio in one shot can use the bi_idx
-> +- Drivers which can't process a large bio in one shot can use the bi_iter
->    field to keep track of the next bio_vec entry to process.
->    (e.g a 1MB bio_vec needs to be handled in max 128kB chunks for IDE)
->    [TBD: Should preferably also have a bi_voffset and bi_vlen to avoid mo=
-difying
-> @@ -589,7 +588,7 @@ driver should not modify these values. The block laye=
-r sets up the
->  nr_sectors and current_nr_sectors fields (based on the corresponding
->  hard_xxx values and the number of bytes transferred) and updates it on
->  every transfer that invokes end_that_request_first. It does the same for=
- the
-> -buffer, bio, bio->bi_idx fields too.
-> +buffer, bio, bio->bi_iter fields too.
-> =20
->  The buffer field is just a virtual address mapping of the current segment
->  of the i/o buffer in cases where the buffer resides in low-memory. For h=
-igh
-
-Would it make sense to add some details of "bvec_iter" to this document?
-
-Or will that come later?
-
-NeilBrown
-
---Sig_/bF/+0261ZWlTgozZbA48+3r
-Content-Type: application/pgp-signature; name=signature.asc
-Content-Disposition: attachment; filename=signature.asc
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-
-iQIVAwUBUnHOoDnsnt1WYoG5AQKAog//cNxNO7n4EheLQg3FVtX4edv6npapiTlQ
-IuJ8LixK5hK5kx0hDsPaK78n6ZLs3DADc6/d3HtLc33L90l2WhWUMm8SiJowacKu
-HemHPkt/dmUGvCWL1eaoPA2TVAvrIELUCKaMjQOe6s1eAamthbINelirjFtBpj/p
-bX6KyU/eYMiBrS0QqpXE0oeOnUj1qrC0Too9qCGA9wKL8SIOXB8fZ4+kxi9qyYZk
-bShLMjvvkouYMq4wSnz9ZdekQIA0XjS8S8ui4idKXzwrXq23aJbJT/JTQ+tprXhN
-Wa2N4bwo/EI36xIvGsqx1eu1rmOqmYbJNi8rNt9Sbr5CM9tioeq3wkUKOiRMQznx
-NJnhkvzEhGZ/0IYp19HOSHCQooAE2gOltCHvv24MXks0BUT62w1KS2CKTY5BAsxU
-42aEqOXN5XW6hsl1GUz2csJn9/U03s+ifJZn9DlrNvSen7eQfFXXvJeE29JUVtuO
-i+/ePbxEbLNNGFDLH8qzTTSW+ikV034OljYBXUGtyJAwVzXIsP2kg4tfDAiSRhFk
-l8qYT8jWHfiknCbn4E0pZd3gcfqBpdk2zNlf7y6PhlDGumP6PCcb5hlSYM7TZK/g
-Y/xFRdI889P4aEIcePPVKYBcBFdcrj6SDvqp3S+G8MZgcvsQAv20MxqKPpESUVrT
-CTs9IhepD+0=
-=7uUB
------END PGP SIGNATURE-----
-
---Sig_/bF/+0261ZWlTgozZbA48+3r--
-
-
---===============5234300970751444966==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-we0-f178.google.com ([74.125.82.178]:57358 "EHLO
+	mail-we0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754646Ab3JaKz6 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Oct 2013 06:55:58 -0400
+Received: by mail-we0-f178.google.com with SMTP id q59so2546207wes.9
+        for <ceph-devel@vger.kernel.org>; Thu, 31 Oct 2013 03:55:57 -0700 (PDT)
+In-Reply-To: <DUB116-W8372DACD4F54B9145260E4E00B0@phx.gbl>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: charles L <charlesboy009@hotmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+
+On 10/31/2013 04:54 AM, charles L wrote:
+> Hi,
+> Pls is this a good setup for a production environment test of ceph? My focus is on the SSD ... should it be partitioned(sdf1,2 ,3,4) and shared by the four OSDs on a host? or is this a better configuration for the SSD to be just one partition(sdf1) while all osd uses that one partition?
+> my setup:
+> - 6 Servers with one 250gb boot disk for OS(sda),
+> four-2Tb Disks each for the OSDs i.e Total disks = 6x4 = 24 disks (sdb -sde)
+> and one-60GB SSD for Osd Journal(sdf).
+> -RAM = 32GB on each server with 2 GB network link.
+> hostname for servers: Server1 -Server6
+
+Charles,
+
+What you are describing on the ceph.conf below is definitely not a good 
+idea.  If you really want to use just one SSD and share it across 
+multiple OSDs, then you have two possible approaches:
+
+- partition that disk and assign a *different* partition to each OSD; or
+- keep only one partition, format it with some filesystem, and assign a 
+*different* journal file within that fs to each OSD.
+
+What you are describing has you using the same partition for all OSDs. 
+This will likely create issues due to multiple OSDs writing and reading 
+from a single journal.  TBH I'm not familiar enough with the journal 
+mechanism to know whether the OSDs will detect that situation.
+
+   -Joao
+
+>
+> [osd.0]
+>   host = server1
+> devs = /dev/sdb
+> osd journal = /dev/sdf1
+> [osd.1]
+> host = server1
+> devs = /dev/sdc
+> osd journal = /dev/sdf2
+>
+> [osd.3]
+> host = server1
+> devs = /dev/sdd
+> osd journal = /dev/sdf2
+>
+> [osd.4]
+> host = server1
+> devs = /dev/sde
+> osd journal = /dev/sdf2
+> [osd.5]
+> host = server2
+> devs = /dev/sdb
+> osd journal = /dev/sdf2
+> ...
+> [osd.23]
+> host = server6
+> devs = /dev/sde
+> osd journal = /dev/sdf2
+>
+> Thanks. 		 	   		  --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
 
 
---===============5234300970751444966==--
+-- 
+Joao Eduardo Luis
+Software Engineer | http://inktank.com | http://ceph.com
