@@ -1,29 +1,29 @@
-From: Li Wang <liwang@ubuntukylin.com>
+From: Xing Lin <xinglin@cs.utah.edu>
 Subject: Re: coverity scan - a plea for help!
-Date: Fri, 01 Nov 2013 08:38:52 +0800
-Message-ID: <5272F81C.80805@ubuntukylin.com>
+Date: Thu, 31 Oct 2013 19:58:46 -0600
+Message-ID: <52730AD6.3030607@cs.utah.edu>
 References: <alpine.DEB.2.00.1305090922300.4023@cobra.newdream.net> <alpine.DEB.2.00.1310311627020.5407@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from m59-178.qiye.163.com ([123.58.178.59]:49341 "EHLO
-	m59-178.qiye.163.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752397Ab3KAAi5 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Oct 2013 20:38:57 -0400
+Received: from mail-svr1.cs.utah.edu ([155.98.64.241]:34175 "EHLO
+	mail-svr1.cs.utah.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752910Ab3KACJn (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Oct 2013 22:09:43 -0400
 In-Reply-To: <alpine.DEB.2.00.1310311627020.5407@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
 
 Hi Sage,
-   If you trust, I think we can try this job.
 
-Cheers,
-Li Wang
+I would like to help here as well.
 
-On 11/01/2013 07:30 AM, Sage Weil wrote:
+Thanks,
+Xing
+
+On 10/31/2013 5:30 PM, Sage Weil wrote:
 > Hi everyone,
 >
 > When I send this out several months ago, Danny Al-Gaaf stepped up and
@@ -65,4 +65,4 @@ On 11/01/2013 07:30 AM, Sage Weil wrote:
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+
