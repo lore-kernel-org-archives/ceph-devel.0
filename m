@@ -1,40 +1,52 @@
 From: Patrick McGarry <patrick@inktank.com>
-Subject: CDS Firefly Schedule Posted
-Date: Fri, 1 Nov 2013 16:03:14 -0400
-Message-ID: <CAP8Oy=LGwKrz4Ec9B1-A+nNH1bN2FY1HC_ZTxAF6NO-DnSvDLA@mail.gmail.com>
+Subject: Ceph in your neighborhood
+Date: Fri, 1 Nov 2013 17:37:19 -0400
+Message-ID: <CAP8Oy=Jo47=TE0gSrSbjQMbF2Wkq+=NB-G8Ptq4ygwQ+KV+JJA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f54.google.com ([209.85.160.54]:48535 "EHLO
-	mail-pb0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752357Ab3KAUDP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Nov 2013 16:03:15 -0400
-Received: by mail-pb0-f54.google.com with SMTP id ro8so4723493pbb.41
-        for <ceph-devel@vger.kernel.org>; Fri, 01 Nov 2013 13:03:15 -0700 (PDT)
+Received: from mail-pd0-f176.google.com ([209.85.192.176]:35346 "EHLO
+	mail-pd0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751306Ab3KAVhU (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Nov 2013 17:37:20 -0400
+Received: by mail-pd0-f176.google.com with SMTP id g10so4319372pdj.7
+        for <ceph-devel@vger.kernel.org>; Fri, 01 Nov 2013 14:37:19 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, Ceph Devel <ceph-devel@vger.kernel.org>
 
-Greetings all,
+Forget Waldo, Ceph-heads are much more interesting when you find them!
 
-The final schedule for the upcoming Firefly Ceph Developer Summit is
-now posted.  Sorry it took a little bit longer to get it out to you,
-but we wanted to make sure we found a good slot that was less
-disruptive to people's holiday season.
+Just wanted to share some of the places (that WE know about) where
+Ceph experts might be venturing forth when they aren't sequestered in
+a secret lair writing such awesome code.  This is by no means a
+completely exhaustive list, and if you have shows, meetups, or other
+things to add please reply and tell us about them!
 
-http://ceph.com/community/ceph-developer-summit-firefly/
+2013
+04 Nov :: Santa Clara, CA - Cloud Expo 2013 West (Greg Farnum)
+04 Nov :: Hong Kong - OpenStack Summit 2013 (Ross Turk, Bryan
+Bogensberger, Jude Fitzgerald, Sage Weil)
+18 Nov :: Denver, CO - SC13 (Patrick McGarry, Ross Turk)
+20 Nov :: Amsterdam - CloudStack Collaboration Conference EU (Wido den
+Hollander)
 
-That said, blueprint submission will be open a little longer than
-originally anticipated (hooray!), so be sure to get your blueprints
-in.  I would really like to stress this next part:
+2014
+06 Jan :: Perth - Linux.conf.au (Sage Weil)
+01 Feb :: Brussels - FOSDEM (TBD)
+21 Feb :: Los Angeles, CA - Scale 12X
+19 Mar :: NYC, NY - Structure Data (TBD)
+19 Mar :: Greece - European Data Forum (TBD)
+03 Apr :: Rust, Germany - World Hosting Days (TBD)
+20 Jul :: Portland, OR - OSCON (TBD)
 
-*** Blueprints don't have to be finished plans for work! ***
+The 2014 events calendar is still in the process of getting ironed out
+so there may be changes to those.  There will definitely be a few
+additions as well as our plans solidify.  Once we move over to the new
+wiki I'll publish all of this data so that anyone attending a
+conference that wants to "talk Ceph" can meet up.
 
-We really like to gather all ideas, works-in-progress, and crazy
-schemes...even if it's only to document them for later aggregation.
-
-If anyone has question, comments, or anything for the good of the
-cause please send them my way.  Thanks.
+Shout if you have any questions.
 
 
 Best Regards,
