@@ -1,164 +1,82 @@
-From: Li Wang <liwang@ubuntukylin.com>
-Subject: [RFC PATCH] ceph: Write through cache support based on fscache
-Date: Fri,  1 Nov 2013 21:49:18 +0800
-Message-ID: <1383313758-9776-1-git-send-email-liwang@ubuntukylin.com>
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-Sender: linux-fsdevel-owner@vger.kernel.org
-To: ceph-devel@vger.kernel.org
-Cc: linux-cachefs@redhat.com, Sage Weil <sage@inktank.com>, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, Li Wang <liwang@ubuntukylin.com>, Min Chen <minchen@ubuntukylin.com>, Yunchuan Wen <yunchuanwen@ubuntukylin.com>
-List-Id: ceph-devel.vger.kernel.org
+From: Sage Weil <sage@inktank.com>
+Subject: Re: coverity scan - a plea for help!
+Date: Fri, 1 Nov 2013 08:49:46 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1311010847570.23435@cobra.newdream.net>
+References: <alpine.DEB.2.00.1305090922300.4023@cobra.newdream.net> <alpine.DEB.2.00.1310311627020.5407@cobra.newdream.net> <52730AD6.3030607@cs.utah.edu>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:43429 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752100Ab3KAPtr (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Nov 2013 11:49:47 -0400
+In-Reply-To: <52730AD6.3030607@cs.utah.edu>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Xing Lin <xinglin@cs.utah.edu>, Li Wang <liwang@ubuntukylin.com>
+Cc: ceph-devel@vger.kernel.org
 
-Currently, fscache only plays as read cache for ceph, this patch
-enables it plays as the write through cache as well. 
+Awesome!  You just need to create a user at
 
-A small trick to be discussed: if the writing to OSD finishes before
-the writing to fscache, the fscache writing is cancelled to avoid 
-slow down the writepages() process.
+https://scan.coverity.com/users/sign_up
 
-Signed-off-by: Min Chen <minchen@ubuntukylin.com>
-Signed-off-by: Li Wang <liwang@ubuntukylin.com>
-Signed-off-by: Yunchuan Wen <yunchuanwen@ubuntukylin.com>
----
- fs/ceph/addr.c  |   10 +++++++---
- fs/ceph/cache.c |   29 +++++++++++++++++++++++++++++
- fs/ceph/cache.h |   13 +++++++++++++
- 3 files changed, 49 insertions(+), 3 deletions(-)
+Once you log in, click 'add yourself to an open source project' on the 
+right to request access.
 
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index 6df8bd4..2465c49 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -506,7 +506,7 @@ static int writepage_nounlock(struct page *page, struct writeback_control *wbc)
- 	    CONGESTION_ON_THRESH(fsc->mount_options->congestion_kb))
- 		set_bdi_congested(&fsc->backing_dev_info, BLK_RW_ASYNC);
- 
--	ceph_readpage_to_fscache(inode, page);
-+	ceph_writepage_to_fscache(inode, page);
- 
- 	set_page_writeback(page);
- 	err = ceph_osdc_writepages(osdc, ceph_vino(inode),
-@@ -634,6 +634,7 @@ static void writepages_finish(struct ceph_osd_request *req,
- 		if ((issued & (CEPH_CAP_FILE_CACHE|CEPH_CAP_FILE_LAZYIO)) == 0)
- 			generic_error_remove_page(inode->i_mapping, page);
- 
-+		ceph_maybe_release_fscache_page(inode, page);
- 		unlock_page(page);
- 	}
- 	dout("%p wrote+cleaned %d pages\n", inode, wrote);
-@@ -746,7 +747,7 @@ retry:
- 
- 	while (!done && index <= end) {
- 		int num_ops = do_sync ? 2 : 1;
--		unsigned i;
-+		unsigned i, j;
- 		int first;
- 		pgoff_t next;
- 		int pvec_pages, locked_pages;
-@@ -894,7 +895,6 @@ get_more_pages:
- 		if (!locked_pages)
- 			goto release_pvec_pages;
- 		if (i) {
--			int j;
- 			BUG_ON(!locked_pages || first < 0);
- 
- 			if (pvec_pages && i == pvec_pages &&
-@@ -924,6 +924,10 @@ get_more_pages:
- 
- 		osd_req_op_extent_osd_data_pages(req, 0, pages, len, 0,
- 							!!pool, false);
-+		for (j = 0; j < locked_pages; j++) {
-+			struct page *page = pages[j];
-+			ceph_writepage_to_fscache(inode, page);
-+		}
- 
- 		pages = NULL;	/* request message now owns the pages array */
- 		pool = NULL;
-diff --git a/fs/ceph/cache.c b/fs/ceph/cache.c
-index 6bfe65e..6f928c4 100644
---- a/fs/ceph/cache.c
-+++ b/fs/ceph/cache.c
-@@ -320,6 +320,24 @@ void ceph_readpage_to_fscache(struct inode *inode, struct page *page)
- 		 fscache_uncache_page(ci->fscache, page);
- }
- 
-+void ceph_writepage_to_fscache(struct inode *inode, struct page *page)
-+{
-+	struct ceph_inode_info *ci = ceph_inode(inode);
-+	int ret;
-+
-+	if (!cache_valid(ci))
-+		return;
-+
-+	if (!PageFsCache(page)) {
-+		if (fscache_alloc_page(ci->fscache, page, GFP_KERNEL))
-+			return;
-+	}
-+
-+	if (fscache_write_page(ci->fscache, page, GFP_KERNEL))
-+		fscache_uncache_page(ci->fscache, page);
-+}
-+
-+
- void ceph_invalidate_fscache_page(struct inode* inode, struct page *page)
- {
- 	struct ceph_inode_info *ci = ceph_inode(inode);
-@@ -328,6 +346,17 @@ void ceph_invalidate_fscache_page(struct inode* inode, struct page *page)
- 	fscache_uncache_page(ci->fscache, page);
- }
- 
-+void ceph_maybe_release_fscache_page(struct inode *inode, struct page *page)
-+{
-+	struct ceph_inode_info *ci = ceph_inode(inode);
-+
-+	if (PageFsCache(page)) {
-+		if (!fscache_check_page_write(ci->fscache, page))
-+			fscache_maybe_release_page(ci->fscache,
-+						   page, GFP_KERNEL);
-+	}
-+}
-+
- void ceph_fscache_unregister_fs(struct ceph_fs_client* fsc)
- {
- 	if (fsc->revalidate_wq)
-diff --git a/fs/ceph/cache.h b/fs/ceph/cache.h
-index ba94940..aa02b7a 100644
---- a/fs/ceph/cache.h
-+++ b/fs/ceph/cache.h
-@@ -45,7 +45,9 @@ int ceph_readpages_from_fscache(struct inode *inode,
- 				struct list_head *pages,
- 				unsigned *nr_pages);
- void ceph_readpage_to_fscache(struct inode *inode, struct page *page);
-+void ceph_writepage_to_fscache(struct inode *inode, struct page *page);
- void ceph_invalidate_fscache_page(struct inode* inode, struct page *page);
-+void ceph_maybe_release_fscache_page(struct inode *inode, struct page *page);
- void ceph_queue_revalidate(struct inode *inode);
- 
- static inline void ceph_fscache_invalidate(struct inode *inode)
-@@ -127,6 +129,11 @@ static inline void ceph_readpage_to_fscache(struct inode *inode,
- {
- }
- 
-+static inline void ceph_writepage_to_fscache(struct inode *inode,
-+					     struct page *page)
-+{
-+}
-+
- static inline void ceph_fscache_invalidate(struct inode *inode)
- {
- }
-@@ -140,6 +147,12 @@ static inline void ceph_fscache_unregister_inode_cookie(struct ceph_inode_info*
- {
- }
- 
-+
-+static inline void ceph_maybe_release_fscache_page(struct inode *inode,
-+						   struct page *page)
-+{
-+}
-+
- static inline int ceph_release_fscache_page(struct page *page, gfp_t gfp)
- {
- 	return 1;
--- 
-1.7.9.5
+Thanks!
+sage
 
+
+On Thu, 31 Oct 2013, Xing Lin wrote:
+
+> Hi Sage,
+> 
+> I would like to help here as well.
+> 
+> Thanks,
+> Xing
+> 
+> On 10/31/2013 5:30 PM, Sage Weil wrote:
+> > Hi everyone,
+> > 
+> > When I send this out several months ago, Danny Al-Gaaf stepped up and
+> > submitted an amazing number of patches cleaning up the most concerning
+> > issues that Coverity had picked up.  His attention has been directed
+> > elsewhere more recently, but there are still a number of outstanding
+> > issues in Coverity's tracker that are reasonably quick and easy to resolve
+> > and will make our ability to identify newly introduced defects much
+> > simpler.
+> > 
+> > Coverity Scan makes it really easy to participate: just create an account
+> > and I can grant you access to the Ceph project.  If you're interested in
+> > contributing here (and it's an easy way to quickly start working with the
+> > Ceph code), let me know!
+> > 
+> > Thanks-
+> > sage
+> > 
+> > 
+> > On Thu, 9 May 2013, Sage Weil wrote:
+> > 
+> > > We were added to coverity's awesome scan program a while back, which gives
+> > > free access to their static analysis tool to open source projects.
+> > > 
+> > > Currently it identifies 421 issues.  We've already taken care of the ones
+> > > that are highest impact, but the usefulness of periodic scans is limited
+> > > until we can eliminate the noise from the remaining issues and easily see
+> > > when new problems come up.
+> > > 
+> > > If anybody is interested in helping out in the cleanup effort, let me know
+> > > and I'll share the login info.  This would provide significant value to
+> > > our overall quality efforts and is a pretty easy way to make a meaningful
+> > > contribution to the project without a huge investment in understanding the
+> > > code and architecture!
+> > > 
+> > > sage
+> > > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
