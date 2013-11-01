@@ -1,68 +1,60 @@
-From: Xing Lin <xinglin@cs.utah.edu>
-Subject: Re: coverity scan - a plea for help!
-Date: Thu, 31 Oct 2013 19:58:46 -0600
-Message-ID: <52730AD6.3030607@cs.utah.edu>
-References: <alpine.DEB.2.00.1305090922300.4023@cobra.newdream.net> <alpine.DEB.2.00.1310311627020.5407@cobra.newdream.net>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+From: Li Wang <liwang@ubuntukylin.com>
+Subject: [PATCH] ceph: Update the pages in fscache in writepages() path
+Date: Fri,  1 Nov 2013 11:56:48 +0800
+Message-ID: <1383278208-4053-1-git-send-email-liwang@ubuntukylin.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-svr1.cs.utah.edu ([155.98.64.241]:34175 "EHLO
-	mail-svr1.cs.utah.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752910Ab3KACJn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Oct 2013 22:09:43 -0400
-In-Reply-To: <alpine.DEB.2.00.1310311627020.5407@cobra.newdream.net>
+Received: from m59-178.qiye.163.com ([123.58.178.59]:60884 "EHLO
+	m59-178.qiye.163.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751492Ab3KAD5I (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Oct 2013 23:57:08 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+Cc: linux-cachefs@redhat.com, Sage Weil <sage@inktank.com>, linux-kernel@vger.kernel.org, Li Wang <liwang@ubuntukylin.com>, Min Chen <minchen@ubuntukylin.com>, Yunchuan Wen <yunchuanwen@ubuntukylin.com>
 
-Hi Sage,
+Currently, the pages in fscache only are updated in writepage() path,
+add the process in writepages().
 
-I would like to help here as well.
+Signed-off-by: Min Chen <minchen@ubuntukylin.com>
+Signed-off-by: Li Wang <liwang@ubuntukylin.com>
+Signed-off-by: Yunchuan Wen <yunchuanwen@ubuntukylin.com>
+---
+ fs/ceph/addr.c |    8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
 
-Thanks,
-Xing
-
-On 10/31/2013 5:30 PM, Sage Weil wrote:
-> Hi everyone,
->
-> When I send this out several months ago, Danny Al-Gaaf stepped up and
-> submitted an amazing number of patches cleaning up the most concerning
-> issues that Coverity had picked up.  His attention has been directed
-> elsewhere more recently, but there are still a number of outstanding
-> issues in Coverity's tracker that are reasonably quick and easy to resolve
-> and will make our ability to identify newly introduced defects much
-> simpler.
->
-> Coverity Scan makes it really easy to participate: just create an account
-> and I can grant you access to the Ceph project.  If you're interested in
-> contributing here (and it's an easy way to quickly start working with the
-> Ceph code), let me know!
->
-> Thanks-
-> sage
->
->
-> On Thu, 9 May 2013, Sage Weil wrote:
->
->> We were added to coverity's awesome scan program a while back, which gives
->> free access to their static analysis tool to open source projects.
->>
->> Currently it identifies 421 issues.  We've already taken care of the ones
->> that are highest impact, but the usefulness of periodic scans is limited
->> until we can eliminate the noise from the remaining issues and easily see
->> when new problems come up.
->>
->> If anybody is interested in helping out in the cleanup effort, let me know
->> and I'll share the login info.  This would provide significant value to
->> our overall quality efforts and is a pretty easy way to make a meaningful
->> contribution to the project without a huge investment in understanding the
->> code and architecture!
->>
->> sage
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index 6df8bd4..cc57911 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -746,7 +746,7 @@ retry:
+ 
+ 	while (!done && index <= end) {
+ 		int num_ops = do_sync ? 2 : 1;
+-		unsigned i;
++		unsigned i, j;
+ 		int first;
+ 		pgoff_t next;
+ 		int pvec_pages, locked_pages;
+@@ -894,7 +894,6 @@ get_more_pages:
+ 		if (!locked_pages)
+ 			goto release_pvec_pages;
+ 		if (i) {
+-			int j;
+ 			BUG_ON(!locked_pages || first < 0);
+ 
+ 			if (pvec_pages && i == pvec_pages &&
+@@ -924,7 +923,10 @@ get_more_pages:
+ 
+ 		osd_req_op_extent_osd_data_pages(req, 0, pages, len, 0,
+ 							!!pool, false);
+-
++		for(j = 0; j < locked_pages; j++) {
++			struct page *page = pages[j];
++			ceph_readpage_to_fscache(inode, page);
++		}		
+ 		pages = NULL;	/* request message now owns the pages array */
+ 		pool = NULL;
+ 
+-- 
+1.7.9.5
 
