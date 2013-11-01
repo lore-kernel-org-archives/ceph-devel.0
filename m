@@ -1,98 +1,141 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: emperor, firefly
-Date: Fri, 01 Nov 2013 09:54:47 +0100
-Message-ID: <52736C57.4080005@42on.com>
-References: <alpine.DEB.2.00.1310311254570.20027@cobra.newdream.net>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+From: Li Wang <liwang@ubuntukylin.com>
+Subject: [RFC PATCH] ceph: Capture stride readahead
+Date: Fri,  1 Nov 2013 17:31:46 +0800
+Message-ID: <1383298306-8492-1-git-send-email-liwang@ubuntukylin.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from websrv.42on.com ([31.25.102.167]:59344 "EHLO websrv.42on.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752151Ab3KAIyu (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 1 Nov 2013 04:54:50 -0400
-In-Reply-To: <alpine.DEB.2.00.1310311254570.20027@cobra.newdream.net>
+Received: from m53-178.qiye.163.com ([123.58.178.53]:48709 "EHLO
+	m53-178.qiye.163.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755270Ab3KAJb7 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Nov 2013 05:31:59 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+Cc: Sage Weil <sage@inktank.com>, Li Wang <liwang@ubuntukylin.com>, Yunchuan Wen <yunchuanwen@ubuntukylin.com>
 
-On 11/01/2013 12:02 AM, Sage Weil wrote:
-> Just wanted to take a moment to call out some of the great work that went
-> into emperor or is in progress for firely.  From the last CDS, completed
-> blueprints include:
->
->   - ceph osd zfs (Yan, Zheng).  This uses zfs snapshots the same way we use
->     btrfs snapshots, allowing more efficient journaling.  ZFS doesn't have
->     a 'clone' operation, so this doesn't get all of the efficiency advantages
->     from btrfs.
->
+Enable ceph to capture stride readahead, the algorithm is simple and
+straightforward: prefetch the next stripe if hit. In the future, it
+may be implemented as enabled only when user requests explicitly as a
+mount option.
 
-I haven't tried this yet, but it's on my todo. Looks really great, thanks!
+Signed-off-by: Yunchuan Wen <yunchuanwen@ubuntukylin.com>
+Signed-off-by: Li Wang <liwang@ubuntukylin.com>
+---
+ fs/ceph/file.c  |   60 ++++++++++++++++++++++++++++++++++++++++++++++++++++++-
+ fs/ceph/super.h |    8 ++++++++
+ 2 files changed, 67 insertions(+), 1 deletion(-)
 
->   - radosgw bucket level quota (Yehuda Sadeh).  User-level quotas are up
->     next!
->
-
-Also a great feature. This protects RGW systems against users filling up 
-a single bucket with millions of objects causing the RGW to become very 
-slow with listing.
-
-Amazon S3 has the same problem, the XML response simply becomes to large 
-when you have millions of objects in a bucket.
-
->   - teuthology bits (Zack Cerza et al).  Lots of the rough edges
->     in teuthology have been filed down over this past cycle and Loic
->     continues to organize weekly meetings to improve community usability.
->     Queuing improvements, and perhaps most exciting is a whole new
->     reporting framework from Alfredo and Zack that gathers results in a
->     database and builds a dashboard on top of that.
->
->   - ceph-deploy (Alfredo Deza).  Huge steps forward here on packaging
->     (PyPi!), reliability/robustness (no more pushy), and the usability of
->     the interface (simplified cluster/monitor creation, etc.).
->
-> In progress blueprints:
->
->   - erasure coding for rados (Loic Dachary, Samuel Just).  This is a huge
->     piece of work but most of the erasure coding math is in place and the
->     OSD refactoring work is on track for firefly!
->
->   - mds inline data zupport (Li Wang).  These patches are pending review
->     and a few revisions (and testing!)
->
->   - increasing ceph portability (Noah Watkins).  Noah, along with Alan
->     Somers, has been knocking down lots of the build and runtime issues on
->     *BSD and OS X.  Most are sitting in wip-port or have already trickled
->     into master.
->
->   - cache pool overlay (Sage Weil, Greg Farnum): This work is also
->     partially completed but on track for firefly.
->
->   - librados/objecter, smarter localized reads: This is pending review but
->     will make firefly.
->
->   - leveldb osd backend (Hoamai Wang).  Last I hear this is in progress!
->
-> These is just the items that were on the Emperor CDS agenda that have made
-> their way into my field of vision.  I'm looking forward to the firefly
-> summit in a couple weeks!  There will be several sessions to cover the
-> balance of the erasure coding and tiering work in detail (now that we're
-> in the thick of it and more clearly see the path forward), and naturally
-> some new blueprints as well.  If there are features or improvements you
-> have in mind, feel free to float them on the list for some pre-discussion
-> if you're not ready to write up a blueprint just yet.
->
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-
-
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index 3de8982..16a3981 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -9,6 +9,7 @@
+ #include <linux/writeback.h>
+ #include <linux/aio.h>
+ #include <linux/falloc.h>
++#include <linux/blkdev.h>
+ 
+ #include "super.h"
+ #include "mds_client.h"
+@@ -635,6 +636,60 @@ out:
+ 	return ret;
+ }
+ 
++static void ceph_stride_readahead(struct file *file, loff_t pos, size_t length)
++{
++	struct address_space *mapping = file->f_mapping;
++	struct ceph_file_info *fi = file->private_data;
++	struct ceph_file_stride_ra_info *info = &fi->stride;
++	struct blk_plug plug;
++	LIST_HEAD(page_pool);
++	loff_t next_pos;
++	pgoff_t start, end, page_idx;
++	unsigned int nr_pages = 0;
++
++	if (info->length != length)
++		goto skip;
++	if (pos != info->pos + info->stride)
++		goto skip;
++
++	next_pos = pos + info->stride;
++	start = next_pos >> PAGE_CACHE_SHIFT;
++	end = (next_pos + length - 1) >> PAGE_CACHE_SHIFT;
++	end = min(end, start + file->f_ra.ra_pages);
++
++	for (page_idx = start; page_idx <= end; ++page_idx) {
++		struct page *page;
++		
++		rcu_read_lock();
++		page = radix_tree_lookup(&mapping->page_tree, page_idx);
++		rcu_read_unlock();
++
++		if (page)
++			continue;
++
++		page = page_cache_alloc_readahead(mapping);
++		if (!page)
++			break;
++		page->index = page_idx;
++		list_add(&page->lru, &page_pool);
++
++		++nr_pages;
++	}
++
++	if (!nr_pages)
++		goto skip;
++
++	blk_start_plug(&plug);
++	mapping->a_ops->readpages(file, mapping, &page_pool, nr_pages);
++	put_pages_list(&page_pool);
++	blk_finish_plug(&plug);
++
++skip:
++	info->length = length;
++	info->stride = pos - info->pos;
++	info->pos = pos;
++}
++
+ /*
+  * Wrap generic_file_aio_read with checks for cap bits on the inode.
+  * Atomically grab references, so that those bits are not released
+@@ -675,8 +730,11 @@ again:
+ 	    (fi->flags & CEPH_F_SYNC))
+ 		/* hmm, this isn't really async... */
+ 		ret = ceph_sync_read(filp, base, len, ppos, &checkeof);
+-	else
++	else {
+ 		ret = generic_file_aio_read(iocb, iov, nr_segs, pos);
++		if (ret >= 0)
++			ceph_stride_readahead(filp, pos, iocb->ki_nbytes);
++	}
+ 
+ out:
+ 	dout("aio_read %p %llx.%llx dropping cap refs on %s = %d\n",
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index 6014b0a..72b4382 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -567,6 +567,12 @@ extern void ceph_reservation_status(struct ceph_fs_client *client,
+ #define CEPH_F_SYNC     1
+ #define CEPH_F_ATEND    2
+ 
++struct ceph_file_stride_ra_info {
++	loff_t pos;
++	size_t length;
++	loff_t stride;
++};
++
+ struct ceph_file_info {
+ 	short fmode;     /* initialized on open */
+ 	short flags;     /* CEPH_F_* */
+@@ -585,6 +591,8 @@ struct ceph_file_info {
+ 	/* used for -o dirstat read() on directory thing */
+ 	char *dir_info;
+ 	int dir_info_len;
++
++	struct ceph_file_stride_ra_info stride;
+ };
+ 
+ 
 -- 
-Wido den Hollander
-42on B.V.
+1.7.9.5
 
-Phone: +31 (0)20 700 9902
-Skype: contact42on
