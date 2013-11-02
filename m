@@ -1,52 +1,40 @@
-From: Sage Weil <sage@inktank.com>
-Subject: REBASED next, master !!!
-Date: Fri, 1 Nov 2013 16:29:53 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1311011625250.23435@cobra.newdream.net>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+From: Xing Lin <xinglin@cs.utah.edu>
+Subject: [PATCH] osd/erasurecode: Fix memory leak in jerasure_matrix_to_bitmatrix()
+Date: Sat,  2 Nov 2013 00:58:13 -0600
+Message-ID: <1383375493-2895-1-git-send-email-xinglin@cs.utah.edu>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:47375 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751639Ab3KAX3x (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Nov 2013 19:29:53 -0400
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 7BD818004F
-	for <ceph-devel@vger.kernel.org>; Fri,  1 Nov 2013 16:29:53 -0700 (PDT)
-Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 582958004F
-	for <ceph-devel@vger.kernel.org>; Fri,  1 Nov 2013 16:29:53 -0700 (PDT)
+Received: from rio.cs.utah.edu ([155.98.64.241]:40154 "EHLO
+	mail-svr1.cs.utah.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750770Ab3KBG6Q (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 2 Nov 2013 02:58:16 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
+Cc: sage@inktank.com, xinglin@cs.utah.edu
 
-There was a branching snafu a couple days back (the next/emperor branch 
-got all of master merged in after -rc1) that was most sanely cleaned up by 
-rebuilding the branches from that point.  Fortunately not too much has 
-gone in since then, so it wasn't too much.
+Free allocated memory before return because of NULL input
 
-HOWEVER, if you work based on master or next since then, take a careful 
-look at gitk and make sure your work is rebased on top of the *new* master 
-and next.  FYI that is usually done with:
+Signed-off-by: Xing Lin <xinglin@cs.utah.edu>
+---
+ src/osd/ErasureCodePluginJerasure/jerasure.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
 
- git checkout wip-foo
- git rebase --onto origin/next HEAD^
- git push origin -f wip-foo
+diff --git a/src/osd/ErasureCodePluginJerasure/jerasure.c b/src/osd/ErasureCodePluginJerasure/jerasure.c
+index 9efae02..1bb4b1d 100755
+--- a/src/osd/ErasureCodePluginJerasure/jerasure.c
++++ b/src/osd/ErasureCodePluginJerasure/jerasure.c
+@@ -276,7 +276,10 @@ int *jerasure_matrix_to_bitmatrix(int k, int m, int w, int *matrix)
+   int rowelts, rowindex, colindex, elt, i, j, l, x;
+ 
+   bitmatrix = talloc(int, k*m*w*w);
+-  if (matrix == NULL) { return NULL; }
++  if (matrix == NULL) {
++    free(bitmatrix);
++    return NULL; 
++  }
+ 
+   rowelts = k * w;
+   rowindex = 0;
+-- 
+1.8.3.4 (Apple Git-47)
 
-where HEAD^ can be replaced with whatever commit your work is 
-based off of.  (HEAD^ works for a single-patch branch.)
-
-I updated several branches already.. hopefully all of them in ceph.git.  
-Those include
-
- wip-6699
- wip-crush-location-doc
- wip-perf2
- wip-pipe
- wip-warnings
-
-Also, going forward, be careful to look at the commits and/or diff in pull 
-requests before merging to make sure we're not picking bits of the old 
-branches.
-
-Thanks!  Sorry for the confusion!
-sage
