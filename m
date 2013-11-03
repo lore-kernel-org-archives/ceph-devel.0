@@ -1,65 +1,69 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: PowerDNS backend for Rados Gateway to direct bucket traffic
-Date: Sun, 03 Nov 2013 15:15:26 +0100
-Message-ID: <52765A7E.9040306@42on.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+From: Xing <xinglin@cs.utah.edu>
+Subject: unable to compile
+Date: Sun, 3 Nov 2013 13:22:12 -0700
+Message-ID: <94B89671-08D2-49DB-837B-B0377DE8120C@cs.utah.edu>
+Mime-Version: 1.0 (Mac OS X Mail 7.0 \(1816\))
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from websrv.42on.com ([31.25.102.167]:33095 "EHLO websrv.42on.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753022Ab3KCOPa (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 3 Nov 2013 09:15:30 -0500
-Received: from [79.99.132.145] (unknown [79.99.132.145])
-	by websrv.42on.com (Postfix) with ESMTPSA id 3CFF8CBB8F
-	for <ceph-devel@vger.kernel.org>; Sun,  3 Nov 2013 15:15:27 +0100 (CET)
+Received: from rio.cs.utah.edu ([155.98.64.241]:59237 "EHLO
+	mail-svr1.cs.utah.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754512Ab3KCUWQ convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 3 Nov 2013 15:22:16 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: Xing <xinglin@cs.utah.edu>, Sage Weil <sage@inktank.com>
 
-Hi,
+Hi all,
 
-I'm playing with an idea, but I'm not sure if I'm taking the correct route.
+I was able to compile and run vstart.sh yesterday. When I merged the ceph master branch into my local master branch, I am not able to compile now. This issue seems to be related with boost but I have installed the libboost1.46-dev package. Any suggestions? thanks,
 
-When you create a bucket with Amazon S3 it's always reachable via 
-bucketname.s3.amazonaws.com.
+===
+the compiler complains the following code section.
 
-Depending on the region you created it in you'll get a different 
-response from their DNS servers directing you to the correct HTTP endpoint.
+// file layouts
+struct ceph_file_layout g_default_file_layout = {
+ .fl_stripe_unit = init_le32(1<<22),
+ .fl_stripe_count = init_le32(1),
+ .fl_object_size = init_le32(1<<22),
+ .fl_cas_hash = init_le32(0),
+ .fl_object_stripe_unit = init_le32(0),
+ .fl_unused = init_le32(-1),
+ .fl_pg_pool = init_le32(-1),
+};
 
-When you use the RGW with multiple regions you get a 301 redirect from a 
-region if the bucket is not located there.
+===make errors===
+common/config.cc:61:2: error: expected primary-expression before '.' token
+common/config.cc:61:20: warning: extended initializer lists only available with -std=c++0x or -std=gnu++0x [enabled by default]
+common/config.cc:62:2: error: expected primary-expression before '.' token
+common/config.cc:62:21: warning: extended initializer lists only available with -std=c++0x or -std=gnu++0x [enabled by default]
+common/config.cc:63:2: error: expected primary-expression before '.' token
+common/config.cc:63:20: warning: extended initializer lists only available with -std=c++0x or -std=gnu++0x [enabled by default]
+common/config.cc:64:2: error: expected primary-expression before '.' token
+common/config.cc:64:17: warning: extended initializer lists only available with -std=c++0x or -std=gnu++0x [enabled by default]
+common/config.cc:65:2: error: expected primary-expression before '.' token
+common/config.cc:65:27: warning: extended initializer lists only available with -std=c++0x or -std=gnu++0x [enabled by default]
+common/config.cc:66:2: error: expected primary-expression before '.' token
+common/config.cc:66:15: warning: extended initializer lists only available with -std=c++0x or -std=gnu++0x [enabled by default]
+common/config.cc:67:2: error: expected primary-expression before '.' token
+common/config.cc:67:16: warning: extended initializer lists only available with -std=c++0x or -std=gnu++0x [enabled by default]
 
-This 301 is extra TCP traffic and adds extra latency. You could 
-potentially have a developer who is mistaken and directs thousands of 
-requests to the wrong region which are all answered with 301 redirects. 
-A waste of resources.
+I am compiling ceph in a 64-bit ubuntu12-04 machine and gcc version is 4.6.3. 
 
-I've worked with PowerDNS a lot and it supports various backends and one 
-of them is the Pipe or HTTP (new!) backend [0]
+===gcc version===
+root@client:/mnt/ceph# gcc -v
+Using built-in specs.
+COLLECT_GCC=gcc
+COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-linux-gnu/4.6/lto-wrapper
+Target: x86_64-linux-gnu
+Configured with: ../src/configure -v --with-pkgversion='Ubuntu/Linaro 4.6.3-1ubuntu5' --with-bugurl=file:///usr/share/doc/gcc-4.6/README.Bugs --enable-languages=c,c++,fortran,objc,obj-c++ --prefix=/usr --program-suffix=-4.6 --enable-shared --enable-linker-build-id --with-system-zlib --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --with-gxx-include-dir=/usr/include/c++/4.6 --libdir=/usr/lib --enable-nls --with-sysroot=/ --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --enable-gnu-unique-object --enable-plugin --enable-objc-gc --disable-werror --with-arch-32=i686 --with-tune=generic --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu
+Thread model: posix
+gcc version 4.6.3 (Ubuntu/Linaro 4.6.3-1ubuntu5)
 
-It would be rather cool if you could have a global domainname like 
-"s3.amazonaws.com", but behind it you have multiple regions, but based 
-on the DNS request you do PowerDNS responds with a different CNAME.
+Thanks,
+Xing
 
-global: o.myobject.store
-EU:     eu.myobject.store
-US:     us.myobject.store
 
-Based on where the bucket is PowerDNS will respond with:
 
-CNAME bucket.eu.myobject.store
-or
-CNAME bucket.us.myobject.store
 
-Does it sound reasonable what I'm thinking of or am I completely wrong 
-about this?
-
-[0]: http://doc.powerdns.com/html/remotebackend.html
-
--- 
-Wido den Hollander
-42on B.V.
-
-Phone: +31 (0)20 700 9902
-Skype: contact42on
