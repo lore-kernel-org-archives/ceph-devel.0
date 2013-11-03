@@ -1,28 +1,51 @@
-From: Xing Lin <xinglin@cs.utah.edu>
-Subject: Re: unable to compile
-Date: Sun, 03 Nov 2013 15:33:57 -0700
-Message-ID: <5276CF55.2010304@cs.utah.edu>
-References: <94B89671-08D2-49DB-837B-B0377DE8120C@cs.utah.edu>	<B9B45B52-0660-492A-AC51-597D3D01C5D5@cs.utah.edu> <CAB2gnbUmdbyVsQLF=RibhiiCKKAZsMY=aokM+Ke7JcwLOTPQRQ@mail.gmail.com>
+From: Michael Sevilla <mikesevilla3@gmail.com>
+Subject: CephFS use cases + MDS limitations
+Date: Sun, 3 Nov 2013 15:53:37 -0800
+Message-ID: <CAD=PzHJTOnSw24egLutyGEFUZFEo6brcurpwyjmYZabvU_1aMw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-svr1.cs.utah.edu ([155.98.64.241]:60527 "EHLO
-	mail-svr1.cs.utah.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752048Ab3KCWdw (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 3 Nov 2013 17:33:52 -0500
-In-Reply-To: <CAB2gnbUmdbyVsQLF=RibhiiCKKAZsMY=aokM+Ke7JcwLOTPQRQ@mail.gmail.com>
+Received: from mail-pa0-f48.google.com ([209.85.220.48]:52414 "EHLO
+	mail-pa0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750856Ab3KCXxh convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 3 Nov 2013 18:53:37 -0500
+Received: by mail-pa0-f48.google.com with SMTP id kq14so6228128pab.21
+        for <ceph-devel@vger.kernel.org>; Sun, 03 Nov 2013 15:53:37 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Noah Watkins <noahwatkins@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>
+To: ceph-devel@vger.kernel.org
 
-Thanks, Noah!
+Hi Ceph community,
 
-Xing
+I=92d like to get a feel for some of the problems that CephFS users are
+encountering with single MDS deployments. There were requests for
+stable distributed metadata/MDS services [1] and I=92m guessing its
+because your workloads exhibit many, many metadata operations. Some of
+you mentioned opening many files in a directory for checkpointing,
+recursive stats on a directory, etc. [2] and I=92d like more details,
+such as:
+- workloads/applications that stress the MDS service that would cause
+you to call for multi-MDS support
+- use cases for the Ceph file system (I=92m not really too interested i=
+n
+users using CephFS to host VMs, since many of these use cases are
+migrating to RBD)
 
-On 11/3/2013 3:17 PM, Noah Watkins wrote:
-> Thanks for looking at this. Unless there is a good solution I think 
-> reverting it is ok as breaking the compile on a few platflorms is not 
-> ok. Ill be lookong at this tonight. 
+I=92m just trying to get an idea of what=92s out there and the problems
+CephFS users encounter as a result of a bottlenecked MDS (single node
+or cluster).
 
+Thanks!
+
+Michael
+
+[1] CephFS MDS Status Discussion,
+http://ceph.com/dev-notes/cephfs-mds-status-discussion/
+[2] CephFS First Product Release Discussion,
+http://thread.gmane.org/gmane.comp.file-systems.ceph.devel/13524
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
