@@ -1,37 +1,65 @@
-From: Xing <xinglin@cs.utah.edu>
-Subject: Re: [PATCH] test/libcephfs: free cmount after tests finishes
-Date: Sun, 3 Nov 2013 00:22:27 -0600
-Message-ID: <797FD699-11E8-4033-9A5E-B340CEB659AA@cs.utah.edu>
-References: <1383458758-4218-1-git-send-email-xinglin@cs.utah.edu> <alpine.DEB.2.00.1311022315440.5861@cobra.newdream.net>
-Mime-Version: 1.0 (Mac OS X Mail 7.0 \(1816\))
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+From: Wido den Hollander <wido@42on.com>
+Subject: PowerDNS backend for Rados Gateway to direct bucket traffic
+Date: Sun, 03 Nov 2013 15:15:26 +0100
+Message-ID: <52765A7E.9040306@42on.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-svr1.cs.utah.edu ([155.98.64.241]:51650 "EHLO
-	mail-svr1.cs.utah.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751250Ab3KCGWa convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 3 Nov 2013 01:22:30 -0500
-In-Reply-To: <alpine.DEB.2.00.1311022315440.5861@cobra.newdream.net>
+Received: from websrv.42on.com ([31.25.102.167]:33095 "EHLO websrv.42on.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753022Ab3KCOPa (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 3 Nov 2013 09:15:30 -0500
+Received: from [79.99.132.145] (unknown [79.99.132.145])
+	by websrv.42on.com (Postfix) with ESMTPSA id 3CFF8CBB8F
+	for <ceph-devel@vger.kernel.org>; Sun,  3 Nov 2013 15:15:27 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Xing <xinglin@cs.utah.edu>, ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Sage,
+Hi,
 
-Thanks for applying these two patches. I will try to accumulate more fixes and submit pull requests via github later. 
+I'm playing with an idea, but I'm not sure if I'm taking the correct route.
 
-Thanks,
-Xing
+When you create a bucket with Amazon S3 it's always reachable via 
+bucketname.s3.amazonaws.com.
 
-On Nov 3, 2013, at 12:17 AM, Sage Weil <sage@inktank.com> wrote:
+Depending on the region you created it in you'll get a different 
+response from their DNS servers directing you to the correct HTTP endpoint.
 
-> Applied this one too!
-> 
-> BTW, an easier workflow than sending patches to the list is to accumulate 
-> a batch of fixes in a branch and submit a pull request via github (at 
-> least if you're already a github user).  Whichever works well for you.
-> 
-> Thanks!
-> s
+When you use the RGW with multiple regions you get a 301 redirect from a 
+region if the bucket is not located there.
 
+This 301 is extra TCP traffic and adds extra latency. You could 
+potentially have a developer who is mistaken and directs thousands of 
+requests to the wrong region which are all answered with 301 redirects. 
+A waste of resources.
+
+I've worked with PowerDNS a lot and it supports various backends and one 
+of them is the Pipe or HTTP (new!) backend [0]
+
+It would be rather cool if you could have a global domainname like 
+"s3.amazonaws.com", but behind it you have multiple regions, but based 
+on the DNS request you do PowerDNS responds with a different CNAME.
+
+global: o.myobject.store
+EU:     eu.myobject.store
+US:     us.myobject.store
+
+Based on where the bucket is PowerDNS will respond with:
+
+CNAME bucket.eu.myobject.store
+or
+CNAME bucket.us.myobject.store
+
+Does it sound reasonable what I'm thinking of or am I completely wrong 
+about this?
+
+[0]: http://doc.powerdns.com/html/remotebackend.html
+
+-- 
+Wido den Hollander
+42on B.V.
+
+Phone: +31 (0)20 700 9902
+Skype: contact42on
