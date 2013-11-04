@@ -1,264 +1,595 @@
-From: ceph branch robot <nobody@ceph.com>
-Subject: ceph branch status
-Date: Mon,  4 Nov 2013 08:00:22 -0800 (PST)
-Message-ID: <20131104160022.AC191281524@teuthology.front.sepia.ceph.com>
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from gw.sepia.ceph.com ([64.90.32.34]:26495 "EHLO
-	teuthology.front.sepia.ceph.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1751707Ab3KDQAX (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Nov 2013 11:00:23 -0500
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+From: "Trivedi, Narendra" <Narendra.Trivedi-N6E5BMIblqrQT0dZR+AlfA@public.gmane.org>
+Subject: Re: testing ceph
+Date: Mon, 4 Nov 2013 15:56:17 +0000
+Message-ID: <776ECADDC3FA214BB89434DD0C805BB902764120@DC2EXCHMULTI1.savvis.ad.savvis.net>
+References: <DUB116-W8372DACD4F54B9145260E4E00B0@phx.gbl>,
+	<5272373C.4020906@inktank.com>
+	<DUB116-W91D38BDD6BED25D0F26267E0F60@phx.gbl>
+Mime-Version: 1.0
+Content-Type: multipart/mixed; boundary="===============1260095107=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <DUB116-W91D38BDD6BED25D0F26267E0F60-MsuGFMq8XAE@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: charles L <charlesboy009-PkbjNfxxIARBDgjK7y7TUQ@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
--- All Branches --
+--===============1260095107==
+Content-Language: en-US
+Content-Type: multipart/alternative;
+	boundary="_000_776ECADDC3FA214BB89434DD0C805BB902764120DC2EXCHMULTI1sa_"
 
-Alfredo Deza <alfredo@deza.pe>
-	2013-09-27 10:33:52 -0400   wip-5900
+--_000_776ECADDC3FA214BB89434DD0C805BB902764120DC2EXCHMULTI1sa_
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 
-Dan Mick <dan.mick@inktank.com>
-	2012-12-18 12:27:36 -0800   wip-rbd-striping
-	2013-07-16 23:00:06 -0700   wip-5634
+Bingo! A lot of people are getting this dreadful GenericErro and Failed to=
+ create 1 OSD. Does anyone know why despite /etc/ceph being there on each =
+node?  Also, FYI purgedata on multiple nodes doesn't work sometime i.e. it=
+ says it is uninstalled ceph and removed /etc/ceph from all nodes but they=
+ are there on all nodes except the first one (i.e. the first argument to t=
+he purgedata command ). Hence sometimes, I have to issue purgedata to indi=
+vidual nodes.
 
-David Zafman <david.zafman@inktank.com>
-	2013-01-28 20:26:34 -0800   wip-wireshark-zafman
-	2013-03-22 18:14:10 -0700   wip-snap-test-fix
-	2013-09-26 12:37:04 -0700   wip-compat-cuttlefish
-	2013-09-26 12:42:43 -0700   wip-compat-dumpling
-	2013-10-28 17:07:16 -0700   wip-5855
-	2013-10-29 11:34:19 -0700   wip-5855-next
-	2013-11-01 18:20:46 -0700   wip-flush-5855
+From: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org [mailto:ceph-users-bounces@lists.c=
+eph.com] On Behalf Of charles L
+Sent: Monday, November 04, 2013 9:26 AM
+To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; ceph-users-Qp0mS5GaXlQ@public.gmane.org
+Subject: Re: [ceph-users] testing ceph
 
-Gary Lowell <gary.lowell@inktank.com>
-	2013-07-23 17:00:07 -0700   wip-build-test
-	2013-09-27 11:46:26 -0700   wip-6020
-	2013-10-10 12:54:51 -0700   wip-5900-gl
-	2013-10-11 11:59:12 -0700   wip-lazy-cuttlefish-gl
-	2013-10-30 18:34:42 +0000   last
 
-Gary Lowell <glowell@inktank.com>
-	2013-02-05 19:29:11 -0800   wip.cppchecker
-	2013-02-10 22:21:52 -0800   wip-3955
-	2013-02-26 19:28:48 -0800   wip-system-leveldb
-	2013-03-01 18:55:35 -0800   wip-da-spec-1
-	2013-03-19 11:28:15 -0700   wip-3921
-	2013-04-11 23:00:05 -0700   wip-init-radosgw
-	2013-04-17 23:30:11 -0700   wip-4725
-	2013-04-21 22:06:37 -0700   wip-4752
-	2013-04-22 14:11:37 -0700   wip-4632
-	2013-05-31 11:20:40 -0700   wip-doc-prereq
-	2013-06-06 22:31:54 -0700   wip-build-doc
-	2013-09-12 15:00:53 -0700   wip-build-fixes
+ Pls can somebody help?  Im  getting this error.
 
-Greg Farnum <greg@inktank.com>
-	2013-02-13 14:46:38 -0800   wip-mds-snap-fix
-	2013-02-22 19:57:53 -0800   wip-4248-snapid-journaling
-	2013-09-19 18:15:00 -0700   wip-4354
-	2013-10-09 13:31:38 -0700   cuttlefish-4832
-	2013-10-25 14:12:41 -0700   wip-promote-copies
-	2013-11-01 16:33:37 -0700   wip-6673b
-
-James Page <james.page@ubuntu.com>
-	2013-02-27 22:50:38 +0000   wip-debhelper-8
-
-Joao Eduardo Luis <jecluis@gmail.com>
-	2013-08-12 11:21:29 -0700   wip-store-tool.cuttlefish
-	2013-10-30 12:34:38 +0000   wip-6683
-
-Joao Eduardo Luis <joao.luis@inktank.com>
-	2013-04-18 00:01:24 +0100   wip-4521-tool
-	2013-04-22 15:14:28 +0100   wip-4748
-	2013-04-24 16:42:11 +0100   wip-4521
-	2013-04-30 18:45:22 +0100   wip-mon-compact-dbg
-	2013-05-21 01:46:13 +0100   wip-monstoretool-foo
-	2013-05-31 16:26:02 +0100   wip-mon-cache-first-last-committed
-	2013-05-31 21:00:28 +0100   wip-mon-trim-b
-	2013-07-20 04:30:59 +0100   wip-mon-caps-test
-	2013-07-23 16:21:46 +0100   wip-5704-cuttlefish
-	2013-07-23 17:35:59 +0100   wip-5704
-	2013-08-02 22:54:42 +0100   wip-5648
-	2013-09-25 22:08:24 +0100   wip-6378
-	2013-10-10 14:06:59 +0100   wip-mon-set-pspool
-
-Joe Buck <jbbuck@gmail.com>
-	2013-05-02 16:32:33 -0700   wip-buck-add-terasort
-	2013-09-16 22:08:41 -0700   wip-buck-centos-misc
-
-John Wilkins <john.wilkins@inktank.com>
-	2013-07-31 18:00:50 -0700   wip-doc-rados-python-api
-	2013-10-31 14:47:49 -0700   wip-doc-install
-	2013-10-31 16:46:58 -0700   wip-doc-radosgw
-
-Josh Durgin <josh.durgin@inktank.com>
-	2013-03-01 14:45:23 -0800   wip-rbd-workunit-debug
-	2013-04-29 14:32:00 -0700   wip-rbd-close-image
-	2013-07-25 18:44:10 -0700   wip-5488-2
-	2013-08-14 15:51:04 -0700   wip-5970
-	2013-08-27 12:03:08 -0700   wip-krbd-workunits
-	2013-11-02 18:28:06 -0700   wip-rgw-replica-log-dumpling
-
-Matt Benjamin <matt@linuxbox.com>
-	2013-10-08 16:49:23 -0400   wip-libcephfs-emp-rb
-
-Noah Watkins <noahwatkins@gmail.com>
-	2013-01-05 11:58:38 -0800   wip-localized-read-tests
-	2013-07-21 12:01:01 -0700   wip-osx-upstream
-	2013-10-18 15:42:50 -0700   cls-lua
-	2013-10-30 13:30:21 -0700   emperor
-	2013-11-01 06:39:42 -0700   wip-libc++
-	2013-11-01 09:14:01 -0700   wip-port
-	2013-11-04 06:23:22 -0800   revert-struct-init
-
-Roald van Loon <roaldvanloon@gmail.com>
-	2012-12-24 22:26:56 +0000   wip-dout
-
-Sage Weil <sage@inktank.com>
-	2012-07-14 17:40:21 -0700   wip-osd-redirect
-	2012-11-30 13:47:27 -0800   wip-osd-readhole
-	2012-12-07 14:38:46 -0800   wip-osd-alloc
-	2013-01-29 13:46:02 -0800   wip-readdir
-	2013-02-11 07:05:15 -0800   wip-sim-journal-clone
-	2013-04-18 13:51:36 -0700   argonaut
-	2013-06-02 21:21:09 -0700   wip-fuse-bobtail
-	2013-06-04 22:43:04 -0700   wip-osd-push
-	2013-06-18 17:00:00 -0700   wip-mon-refs
-	2013-06-21 17:59:58 -0700   wip-rgw-vstart
-	2013-06-28 12:54:08 -0700   wip-mds-snap
-	2013-07-01 17:48:09 -0700   wip-5021
-	2013-07-06 09:22:29 -0700   wip-mds-lazyio-cuttlefish
-	2013-07-06 13:00:51 -0700   wip-mds-lazyio-cuttlefish-minimal
-	2013-07-08 14:52:10 -0700   wip-lazy-cuttlefish
-	2013-07-18 16:59:03 -0700   wip-refs
-	2013-07-19 21:13:09 -0700   wip-5692
-	2013-07-20 09:02:40 -0700   wip-5695
-	2013-07-21 17:16:10 -0700   wip-5672
-	2013-07-21 19:58:12 -0700   wip-before
-	2013-07-21 22:03:19 -0700   wip-cuttlefish-osdmap
-	2013-07-22 22:31:46 -0700   wip-5039
-	2013-07-23 09:46:55 -0700   wip-5488
-	2013-07-27 08:20:41 -0700   wip-5754
-	2013-08-02 15:47:32 -0700   wip-5648-b
-	2013-08-04 09:38:49 -0700   wip-mon-skip-auth-cuttlefish
-	2013-08-04 22:25:03 -0700   wip-5869
-	2013-08-05 14:10:27 -0700   wip-mon-global-id
-	2013-08-09 21:24:08 -0700   wip-ceph-disk
-	2013-08-14 22:16:46 -0700   wip-5973
-	2013-08-28 18:11:09 -0700   wip-libs3
-	2013-09-04 17:55:02 -0700   wip-libcephfs
-	2013-09-04 21:29:11 -0700   wip-intel-crc-workaround
-	2013-09-17 06:27:35 -0700   wip-inline
-	2013-09-19 06:15:56 -0700   wip-6336
-	2013-09-19 12:08:45 -0700   wip-neon-crc32c
-	2013-09-27 13:17:11 -0700   wip-test-falloc
-	2013-10-01 15:01:26 -0700   wip-foo
-	2013-10-05 21:09:29 -0700   wip-osd-bloom
-	2013-10-10 11:51:38 -0700   wip-rados-list
-	2013-10-14 16:02:30 -0700   wip-formatter-newlines
-	2013-10-15 15:07:22 -0700   bobtail
-	2013-10-21 09:53:14 -0700   wip-6591
-	2013-10-22 13:45:39 -0700   wip-tier
-	2013-10-25 16:23:17 -0700   cuttlefish
-	2013-10-28 21:30:11 -0700   wip-cache
-	2013-10-29 08:40:22 -0700   dumpling
-	2013-10-29 10:06:45 -0700   wip-osdmon-warnings
-	2013-10-29 16:10:16 -0700   wip-doc-error
-	2013-11-01 16:13:28 -0700   wip-6699
-	2013-11-01 16:21:27 -0700   wip-perf2
-	2013-11-01 16:42:46 -0700   wip-crush-location-doc
-	2013-11-01 16:45:01 -0700   wip-6698
-	2013-11-01 23:58:57 -0700   wip-6707
-	2013-11-02 21:21:39 -0700   wip-objectstore
-	2013-11-02 21:26:44 -0700   wip-crush
-
-Sam Lang <sam.lang@inktank.com>
-	2012-11-27 15:01:58 -0600   wip-mtime-incr
-
-Samuel Just <sam.just@inktank.com>
-	2013-06-06 11:51:04 -0700   wip_bench_num
-	2013-06-06 13:08:51 -0700   wip_5238_cuttlefish
-	2013-06-19 14:54:13 -0700   wip_cuttlefish_compact_on_startup
-	2013-06-19 19:46:06 -0700   wip_observer
-	2013-07-23 14:04:29 -0700   wip-cuttlefish-next
-	2013-08-15 15:35:26 -0700   wip-5985
-	2013-08-19 00:04:13 -0700   wip-dumpling-pglog-undirty
-	2013-08-26 23:19:47 -0700   wip-dumpling-log-assert
-	2013-08-27 15:40:28 -0700   wip-dumpling-perf2
-	2013-09-01 10:57:33 -0700   wip-5869-DNM
-	2013-09-19 12:52:53 -0700   wip-5992
-	2013-10-30 16:56:18 -0700   wip-6633
-	2013-10-30 17:07:23 -0700   wip-flush
-	2013-11-03 21:07:42 -0800   wip-6685
-
-Yehuda Sadeh <yehuda@inktank.com>
-	2012-11-16 11:09:34 -0800   wip-mongoose
-	2012-12-07 13:40:12 -0800   wip-rgw-dr
-	2012-12-13 18:09:37 -0800   wip-2169
-	2013-02-12 09:40:12 -0800   wip-json-decode
-	2013-02-22 15:04:37 -0800   wip-4247
-	2013-02-22 16:19:37 -0800   wip-rgw-zone
-	2013-02-26 18:01:46 -0800   wip-cls-version
-	2013-02-28 09:56:43 -0800   wip-librados-exec
-	2013-03-07 09:46:49 -0800   wip-4363
-	2013-03-07 09:47:56 -0800   wip-4363-next
-	2013-03-07 11:38:06 -0800   wip-4247-bobtail
-	2013-03-12 12:56:01 -0700   wip-4425
-	2013-03-13 10:13:29 -0700   wip-4425-next
-	2013-03-22 11:01:02 -0700   wip-rgw-zone-2
-	2013-03-22 11:29:49 -0700   wip-rgw-zone-3
-	2013-04-15 12:32:48 -0700   wip-rgw-bucketlog
-	2013-04-22 13:01:20 -0700   wip-4776-bobtail
-	2013-04-23 09:26:33 -0700   wip-4755
-	2013-04-26 09:41:39 -0700   wip-4760
-	2013-05-02 22:08:37 -0700   wip-4716
-	2013-05-06 14:41:10 -0700   wip-rgw-bucketlog-2
-	2013-05-07 14:03:04 -0700   wip-4600-bobtail
-	2013-05-07 14:03:37 -0700   wip-4600-argonaut
-	2013-05-16 09:08:46 -0700   wip-5073-2
-	2013-05-22 21:34:52 -0700   wip-5152
-	2013-05-30 09:34:21 -0700   wip-5204
-	2013-05-30 13:04:27 -0700   wip-5209
-	2013-06-14 14:53:54 -0700   wip-5362
-	2013-06-26 11:36:59 -0700   wip-5455
-	2013-06-29 00:25:32 -0700   wip-rgw-geo-2-replicalog2
-	2013-06-29 21:04:39 -0700   wip-rgw-geo-3
-	2013-07-08 18:55:19 -0700   rgw-next-libcurl
-	2013-07-22 14:46:30 -0700   wip-5664
-	2013-07-29 10:52:22 -0700   wip-5789
-	2013-07-29 10:54:02 -0700   wip-5793
-	2013-07-29 10:58:30 -0700   wip-5770
-	2013-07-30 13:53:53 -0700   wip-5808
-	2013-07-31 10:48:15 -0700   wip-rgw-next
-	2013-08-01 13:20:19 -0700   wip-5831
-	2013-08-01 18:23:49 -0700   wip-5810
-	2013-08-05 11:38:27 -0700   wip-5875
-	2013-08-15 11:00:05 -0700   wip-5978
-	2013-08-16 18:19:02 -0700   wip-rgw-papercuts
-	2013-08-19 16:56:27 -0700   wip-6056
-	2013-08-23 15:39:20 -0700   wip-6111
-	2013-08-25 17:57:23 -0700   wip-5374
-	2013-09-04 16:03:22 -0700   wip-6078-dumpling
-	2013-09-10 12:18:55 -0700   wip-6268-bobtail
-	2013-09-10 14:18:46 -0700   wip-6268
-	2013-09-11 13:46:31 -0700   wip-6175
-	2013-09-11 22:30:12 -0700   wip-6286
-	2013-09-12 10:22:08 -0700   wip-6286-dumpling
-	2013-09-12 14:32:17 -0700   wip-6294
-	2013-09-13 14:43:54 -0700   wip-6302
-	2013-09-16 16:05:55 -0700   wip-6176
-	2013-09-18 10:37:21 -0700   wip-6340
-	2013-09-20 14:04:47 -0700   wip-6360
-	2013-10-03 11:49:33 -0700   wip-6444
-	2013-10-04 13:00:26 -0700   wip-6462
-	2013-10-07 09:45:20 -0700   wip-rgw-write
-	2013-10-17 21:29:34 -0700   wip-apache-mod
-	2013-10-18 10:36:01 -0700   wip-3896
-	2013-10-25 17:16:34 -0700   wip-mongoose-test
-	2013-10-28 17:58:04 -0700   wip-mongoose-2
-	2013-10-30 10:31:11 -0700   wip-rgw-nxweb
-	2013-10-31 14:40:23 -0700   wip-bobtail-admin
-	2013-10-31 14:45:45 -0700   wip-5170
-	2013-11-01 21:09:09 -0700   wip-6152-dumpling
+ceph@CephAdmin:~$ ceph-deploy osd create server1:sda:/dev/sdj1
+[ceph_deploy.cli][INFO  ] Invoked (1.3): /usr/bin/ceph-deploy osd create s=
+erver1:sda:/dev/sdj1
+[ceph_deploy.osd][DEBUG ] Preparing cluster ceph disks server1:/dev/sda:/d=
+ev/sdj1
+[server1][DEBUG ] connected to host: server1
+[server1][DEBUG ] detect platform information from remote host
+[server1][DEBUG ] detect machine type
+[ceph_deploy.osd][INFO  ] Distro info: Ubuntu 12.04 precise
+[ceph_deploy.osd][DEBUG ] Deploying osd to server1
+[server1][DEBUG ] write cluster configuration to /etc/ceph/{cluster}.conf
+[server1][INFO  ] Running command: sudo udevadm trigger --subsystem-match=3D=
+block --action=3Dadd
+[ceph_deploy.osd][DEBUG ] Preparing host server1 disk /dev/sda journal /de=
+v/sdj1 activate True
+[server1][INFO  ] Running command: sudo ceph-disk-prepare --fs-type xfs --=
+cluster ceph -- /dev/sda /dev/sdj1
+[server1][ERROR ] WARNING:ceph-disk:OSD will not be hot-swappable if journ=
+al is not the same device as the osd data
+[server1][ERROR ] Could not create partition 1 from 34 to 2047
+[server1][ERROR ] Error encountered; not saving changes.
+[server1][ERROR ] ceph-disk: Error: Command '['sgdisk', '--largest-new=3D1=
+', '--change-name=3D1:ceph data', '--partition-guid=3D1:d3ca8a92-7ba5-412e=
+-abf5-06af958b788d', '--typecode=3D1:89c57f98-2fe5-4dc0-89c1-f3ad0ceff2be'=
+, '--', '/dev/sda']' returned non-zero exit status 4
+[server1][ERROR ] Traceback (most recent call last):
+[server1][ERROR ]   File "/usr/lib/python2.7/dist-packages/ceph_deploy/lib=
+/remoto/process.py", line 68, in run
+[server1][ERROR ]     reporting(conn, result, timeout)
+[server1][ERROR ]   File "/usr/lib/python2.7/dist-packages/ceph_deploy/lib=
+/remoto/log.py", line 13, in reporting
+[server1][ERROR ]     received =3D result.receive(timeout)
+[server1][ERROR ]   File "/usr/lib/python2.7/dist-packages/ceph_deploy/lib=
+/remoto/lib/execnet/gateway_base.py", line 455, in receive
+[server1][ERROR ]     raise self._getremoteerror() or EOFError()
+[server1][ERROR ] RemoteError: Traceback (most recent call last):
+[server1][ERROR ]   File "<string>", line 806, in executetask
+[server1][ERROR ]   File "", line 35, in _remote_run
+[server1][ERROR ] RuntimeError: command returned non-zero exit status: 1
+[server1][ERROR ]
+[server1][ERROR ]
+[ceph_deploy.osd][ERROR ] Failed to execute command: ceph-disk-prepare --f=
+s-type xfs --cluster ceph -- /dev/sda /dev/sdj1
+[ceph_deploy][ERROR ] GenericError: Failed to create 1 OSDs
 
 
 
-Grouped by committer, ordered by commit time stamp.
+
+
+
+> Date: Thu, 31 Oct 2013 10:55:56 +0000
+> From: joao.luis-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org<mailto:joao.luis-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+> To: charlesboy009-PkbjNfxxIARBDgjK7y7TUQ@public.gmane.org<mailto:charlesboy009-PkbjNfxxIARBDgjK7y7TUQ@public.gmane.org>; ceph-de=
+vel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org<mailto:ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+> Subject: Re: testing ceph
+>
+> On 10/31/2013 04:54 AM, charles L wrote:
+> > Hi,
+> > Pls is this a good setup for a production environment test of ceph? My=
+ focus is on the SSD ... should it be partitioned(sdf1,2 ,3,4) and shared =
+by the four OSDs on a host? or is this a better configuration for the SSD =
+to be just one partition(sdf1) while all osd uses that one partition?
+> > my setup:
+> > - 6 Servers with one 250gb boot disk for OS(sda),
+> > four-2Tb Disks each for the OSDs i.e Total disks =3D 6x4 =3D 24 disks =
+(sdb -sde)
+> > and one-60GB SSD for Osd Journal(sdf).
+> > -RAM =3D 32GB on each server with 2 GB network link.
+> > hostname for servers: Server1 -Server6
+>
+> Charles,
+>
+> What you are describing on the ceph.conf below is definitely not a good
+> idea. If you really want to use just one SSD and share it across
+> multiple OSDs, then you have two possible approaches:
+>
+> - partition that disk and assign a *different* partition to each OSD; or=
+
+> - keep only one partition, format it with some filesystem, and assign a
+> *different* journal file within that fs to each OSD.
+>
+> What you are describing has you using the same partition for all OSDs.
+> This will likely create issues due to multiple OSDs writing and reading
+> from a single journal. TBH I'm not familiar enough with the journal
+> mechanism to know whether the OSDs will detect that situation.
+>
+> -Joao
+>
+> >
+> > [osd.0]
+> > host =3D server1
+> > devs =3D /dev/sdb
+> > osd journal =3D /dev/sdf1
+> > [osd.1]
+> > host =3D server1
+> > devs =3D /dev/sdc
+> > osd journal =3D /dev/sdf2
+> >
+> > [osd.3]
+> > host =3D server1
+> > devs =3D /dev/sdd
+> > osd journal =3D /dev/sdf2
+> >
+> > [osd.4]
+> > host =3D server1
+> > devs =3D /dev/sde
+> > osd journal =3D /dev/sdf2
+> > [osd.5]
+> > host =3D server2
+> > devs =3D /dev/sdb
+> > osd journal =3D /dev/sdf2
+> > ...
+> > [osd.23]
+> > host =3D server6
+> > devs =3D /dev/sde
+> > osd journal =3D /dev/sdf2
+> >
+> > Thanks. --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" =
+in
+> > the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org<mailto:majordomo@vg=
+er.kernel.org>
+> > More majordomo info at http://vger.kernel.org/majordomo-info.html
+> >
+>
+>
+> --
+> Joao Eduardo Luis
+> Software Engineer | http://inktank.com | http://ceph.com
+
+This message contains information which may be confidential and/or privile=
+ged. Unless you are the intended recipient (or authorized to receive for t=
+he intended recipient), you may not read, use, copy or disclose to anyone =
+the message or any information contained in the message. If you have recei=
+ved the message in error, please advise the sender by reply e-mail and del=
+ete the message and any attachment(s) thereto without retaining any copies=
+.
+--_000_776ECADDC3FA214BB89434DD0C805BB902764120DC2EXCHMULTI1sa_
+Content-Type: text/html; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+
+<html xmlns:v=3D"urn:schemas-microsoft-com:vml" xmlns:o=3D"urn:schemas-mic=
+rosoft-com:office:office" xmlns:w=3D"urn:schemas-microsoft-com:office:word=
+" xmlns:m=3D"http://schemas.microsoft.com/office/2004/12/omml" xmlns=3D"ht=
+tp://www.w3.org/TR/REC-html40">
+<head>
+<meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3Dus-ascii=
+">
+<meta name=3D"Generator" content=3D"Microsoft Word 14 (filtered medium)">
+<style><!--
+/* Font Definitions */
+@font-face
+=09{font-family:Calibri;
+=09panose-1:2 15 5 2 2 2 4 3 2 4;}
+@font-face
+=09{font-family:Tahoma;
+=09panose-1:2 11 6 4 3 5 4 4 2 4;}
+/* Style Definitions */
+p.MsoNormal, li.MsoNormal, div.MsoNormal
+=09{margin:0in;
+=09margin-bottom:.0001pt;
+=09font-size:12.0pt;
+=09font-family:"Times New Roman","serif";}
+a:link, span.MsoHyperlink
+=09{mso-style-priority:99;
+=09color:blue;
+=09text-decoration:underline;}
+a:visited, span.MsoHyperlinkFollowed
+=09{mso-style-priority:99;
+=09color:purple;
+=09text-decoration:underline;}
+p
+=09{mso-style-priority:99;
+=09mso-margin-top-alt:auto;
+=09margin-right:0in;
+=09mso-margin-bottom-alt:auto;
+=09margin-left:0in;
+=09font-size:12.0pt;
+=09font-family:"Times New Roman","serif";}
+span.EmailStyle18
+=09{mso-style-type:personal-reply;
+=09font-family:"Calibri","sans-serif";
+=09color:#1F497D;}
+.MsoChpDefault
+=09{mso-style-type:export-only;
+=09font-size:10.0pt;}
+@page WordSection1
+=09{size:8.5in 11.0in;
+=09margin:1.0in 1.0in 1.0in 1.0in;}
+div.WordSection1
+=09{page:WordSection1;}
+--></style><!--[if gte mso 9]><xml>
+<o:shapedefaults v:ext=3D"edit" spidmax=3D"1026" />
+</xml><![endif]--><!--[if gte mso 9]><xml>
+<o:shapelayout v:ext=3D"edit">
+<o:idmap v:ext=3D"edit" data=3D"1" />
+</o:shapelayout></xml><![endif]-->
+</head>
+<body lang=3D"EN-US" link=3D"blue" vlink=3D"purple">
+<div class=3D"WordSection1">
+<p class=3D"MsoNormal"><span style=3D"font-size:11.0pt;font-family:&quot;C=
+alibri&quot;,&quot;sans-serif&quot;;color:#1F497D">Bingo! A lot of people =
+are getting this dreadful GenericErro and Failed to create 1 OSD. Does any=
+one know why despite /etc/ceph being there on each node? &nbsp;Also,
+ FYI purgedata on multiple nodes doesn&#8217;t work sometime i.e. it says =
+it is uninstalled ceph and removed /etc/ceph from all nodes but they are t=
+here on all nodes except the first one (i.e. the first argument to the pur=
+gedata command ). Hence sometimes, I have
+ to issue purgedata to individual nodes. <o:p></o:p></span></p>
+<p class=3D"MsoNormal"><span style=3D"font-size:11.0pt;font-family:&quot;C=
+alibri&quot;,&quot;sans-serif&quot;;color:#1F497D"><o:p>&nbsp;</o:p></span=
+></p>
+<div>
+<div style=3D"border:none;border-top:solid #B5C4DF 1.0pt;padding:3.0pt 0in=
+ 0in 0in">
+<p class=3D"MsoNormal"><b><span style=3D"font-size:10.0pt;font-family:&quo=
+t;Tahoma&quot;,&quot;sans-serif&quot;">From:</span></b><span style=3D"font=
+-size:10.0pt;font-family:&quot;Tahoma&quot;,&quot;sans-serif&quot;"> ceph-=
+users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org [mailto:ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org]
+<b>On Behalf Of </b>charles L<br>
+<b>Sent:</b> Monday, November 04, 2013 9:26 AM<br>
+<b>To:</b> ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; ceph-users-Qp0mS5GaXlQ@public.gmane.org<br>
+<b>Subject:</b> Re: [ceph-users] testing ceph<o:p></o:p></span></p>
+</div>
+</div>
+<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
+<div>
+<div>
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,&quo=
+t;sans-serif&quot;"><o:p>&nbsp;</o:p></span></p>
+</div>
+<div>
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,&quo=
+t;sans-serif&quot;">&nbsp;Pls can somebody help? &nbsp;Im &nbsp;getting th=
+is error.<o:p></o:p></span></p>
+</div>
+<div>
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,&quo=
+t;sans-serif&quot;"><o:p>&nbsp;</o:p></span></p>
+</div>
+<div>
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,&quo=
+t;sans-serif&quot;">ceph@CephAdmin:~$ ceph-deploy osd create server1:sda:/=
+dev/sdj1<o:p></o:p></span></p>
+</div>
+<div>
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,&quo=
+t;sans-serif&quot;">[ceph_deploy.cli][INFO &nbsp;] Invoked (1.3): /usr/bin=
+/ceph-deploy osd create server1:sda:/dev/sdj1<o:p></o:p></span></p>
+</div>
+<div>
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,&quo=
+t;sans-serif&quot;">[ceph_deploy.osd][DEBUG ] Preparing cluster ceph disks=
+ server1:/dev/sda:/dev/sdj1<o:p></o:p></span></p>
+</div>
+<div>
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,&quo=
+t;sans-serif&quot;">[server1][DEBUG ] connected to host: server1<o:p></o:p=
+></span></p>
+</div>
+<div>
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,&quo=
+t;sans-serif&quot;">[server1][DEBUG ] detect platform information from rem=
+ote host<o:p></o:p></span></p>
+</div>
+<div>
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,&quo=
+t;sans-serif&quot;">[server1][DEBUG ] detect machine type<o:p></o:p></span=
+></p>
+</div>
+<div>
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,&quo=
+t;sans-serif&quot;">[ceph_deploy.osd][INFO &nbsp;] Distro info: Ubuntu 12.=
+04 precise<o:p></o:p></span></p>
+</div>
+<div>
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,&quo=
+t;sans-serif&quot;">[ceph_deploy.osd][DEBUG ] Deploying osd to server1<o:p=
+></o:p></span></p>
+</div>
+<div>
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,&quo=
+t;sans-serif&quot;">[server1][DEBUG ] write cluster configuration to /etc/=
+ceph/{cluster}.conf<o:p></o:p></span></p>
+</div>
+<div>
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,&quo=
+t;sans-serif&quot;">[server1][INFO &nbsp;] Running command: sudo udevadm t=
+rigger --subsystem-match=3Dblock --action=3Dadd<o:p></o:p></span></p>
+</div>
+<div>
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,&quo=
+t;sans-serif&quot;">[ceph_deploy.osd][DEBUG ] Preparing host server1 disk =
+/dev/sda journal /dev/sdj1 activate True<o:p></o:p></span></p>
+</div>
+<div>
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,&quo=
+t;sans-serif&quot;">[server1][INFO &nbsp;] Running command: sudo ceph-disk=
+-prepare --fs-type xfs --cluster ceph -- /dev/sda /dev/sdj1<o:p></o:p></sp=
+an></p>
+</div>
+<div>
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,&quo=
+t;sans-serif&quot;">[server1][ERROR ] WARNING:ceph-disk:OSD will not be ho=
+t-swappable if journal is not the same device as the osd data<o:p></o:p></=
+span></p>
+</div>
+<div>
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,&quo=
+t;sans-serif&quot;">[server1][ERROR ] Could not create partition 1 from 34=
+ to 2047<o:p></o:p></span></p>
+</div>
+<div>
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,&quo=
+t;sans-serif&quot;">[server1][ERROR ] Error encountered; not saving change=
+s.<o:p></o:p></span></p>
+</div>
+<div>
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,&quo=
+t;sans-serif&quot;">[server1][ERROR ] ceph-disk: Error: Command '['sgdisk'=
+, '--largest-new=3D1', '--change-name=3D1:ceph data', '--partition-guid=3D=
+1:d3ca8a92-7ba5-412e-abf5-06af958b788d', '--typecode=3D1:89c57f98-2fe5-4dc=
+0-89c1-f3ad0ceff2be',
+ '--', '/dev/sda']' returned non-zero exit status 4<o:p></o:p></span></p>
+</div>
+<div>
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,&quo=
+t;sans-serif&quot;">[server1][ERROR ] Traceback (most recent call last):<o=
+:p></o:p></span></p>
+</div>
+<div>
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,&quo=
+t;sans-serif&quot;">[server1][ERROR ] &nbsp; File &quot;/usr/lib/python2.7=
+/dist-packages/ceph_deploy/lib/remoto/process.py&quot;, line 68, in run<o:=
+p></o:p></span></p>
+</div>
+<div>
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,&quo=
+t;sans-serif&quot;">[server1][ERROR ] &nbsp; &nbsp; reporting(conn, result=
+, timeout)<o:p></o:p></span></p>
+</div>
+<div>
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,&quo=
+t;sans-serif&quot;">[server1][ERROR ] &nbsp; File &quot;/usr/lib/python2.7=
+/dist-packages/ceph_deploy/lib/remoto/log.py&quot;, line 13, in reporting<=
+o:p></o:p></span></p>
+</div>
+<div>
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,&quo=
+t;sans-serif&quot;">[server1][ERROR ] &nbsp; &nbsp; received =3D result.re=
+ceive(timeout)<o:p></o:p></span></p>
+</div>
+<div>
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,&quo=
+t;sans-serif&quot;">[server1][ERROR ] &nbsp; File &quot;/usr/lib/python2.7=
+/dist-packages/ceph_deploy/lib/remoto/lib/execnet/gateway_base.py&quot;, l=
+ine 455, in receive<o:p></o:p></span></p>
+</div>
+<div>
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,&quo=
+t;sans-serif&quot;">[server1][ERROR ] &nbsp; &nbsp; raise self._getremotee=
+rror() or EOFError()<o:p></o:p></span></p>
+</div>
+<div>
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,&quo=
+t;sans-serif&quot;">[server1][ERROR ] RemoteError: Traceback (most recent =
+call last):<o:p></o:p></span></p>
+</div>
+<div>
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,&quo=
+t;sans-serif&quot;">[server1][ERROR ] &nbsp; File &quot;&lt;string&gt;&quo=
+t;, line 806, in executetask<o:p></o:p></span></p>
+</div>
+<div>
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,&quo=
+t;sans-serif&quot;">[server1][ERROR ] &nbsp; File &quot;&quot;, line 35, i=
+n _remote_run<o:p></o:p></span></p>
+</div>
+<div>
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,&quo=
+t;sans-serif&quot;">[server1][ERROR ] RuntimeError: command returned non-z=
+ero exit status: 1<o:p></o:p></span></p>
+</div>
+<div>
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,&quo=
+t;sans-serif&quot;">[server1][ERROR ]<o:p></o:p></span></p>
+</div>
+<div>
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,&quo=
+t;sans-serif&quot;">[server1][ERROR ]<o:p></o:p></span></p>
+</div>
+<div>
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,&quo=
+t;sans-serif&quot;">[ceph_deploy.osd][ERROR ] Failed to execute command: c=
+eph-disk-prepare --fs-type xfs --cluster ceph -- /dev/sda /dev/sdj1<o:p></=
+o:p></span></p>
+</div>
+<div>
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,&quo=
+t;sans-serif&quot;">[ceph_deploy][ERROR ] GenericError: Failed to create 1=
+ OSDs<o:p></o:p></span></p>
+</div>
+<div>
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,&quo=
+t;sans-serif&quot;"><o:p>&nbsp;</o:p></span></p>
+</div>
+<div>
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,&quo=
+t;sans-serif&quot;"><o:p>&nbsp;</o:p></span></p>
+</div>
+<div>
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,&quo=
+t;sans-serif&quot;"><o:p>&nbsp;</o:p></span></p>
+</div>
+<div>
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,&quo=
+t;sans-serif&quot;"><o:p>&nbsp;</o:p></span></p>
+</div>
+<div>
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,&quo=
+t;sans-serif&quot;"><o:p>&nbsp;</o:p></span></p>
+</div>
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,&quo=
+t;sans-serif&quot;"><o:p>&nbsp;</o:p></span></p>
+<div>
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,&quo=
+t;sans-serif&quot;">&gt; Date: Thu, 31 Oct 2013 10:55:56 &#43;0000<br>
+&gt; From: <a href=3D"mailto:joao.luis-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org">joao.luis-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org<=
+/a><br>
+&gt; To: <a href=3D"mailto:charlesboy009-PkbjNfxxIARBDgjK7y7TUQ@public.gmane.org">charlesboy009@hotmai=
+l.com</a>; <a href=3D"mailto:ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org">
+ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org</a><br>
+&gt; Subject: Re: testing ceph<br>
+&gt; <br>
+&gt; On 10/31/2013 04:54 AM, charles=20L wrote:<br>
+&gt; &gt; Hi,<br>
+&gt; &gt; Pls is this a good setup for a production environment test of ce=
+ph? My focus is on the SSD ... should it be partitioned(sdf1,2 ,3,4) and s=
+hared by the four OSDs on a host? or is this a better configuration for th=
+e SSD to be just one partition(sdf1) while
+ all osd uses that one partition?<br>
+&gt; &gt; my setup:<br>
+&gt; &gt; - 6 Servers with one 250gb boot disk for OS(sda),<br>
+&gt; &gt; four-2Tb Disks each for the OSDs i.e Total disks =3D 6x4 =3D 24 =
+disks (sdb -sde)<br>
+&gt; &gt; and one-60GB SSD for Osd Journal(sdf).<br>
+&gt; &gt; -RAM =3D 32GB on each server with 2 GB network link.<br>
+&gt; &gt; hostname for servers: Server1 -Server6<br>
+&gt; <br>
+&gt; Charles,<br>
+&gt; <br>
+&gt; What you are describing on the ceph.conf below is definitely not a go=
+od <br>
+&gt; idea. If you really want to use just one SSD and share it across <br>=
+
+&gt; multiple OSDs, then you have two possible approaches:<br>
+&gt; <br>
+&gt; - partition that disk and assign a *different* partition to each OSD;=
+ or<br>
+&gt; - keep only one partition, format it with some filesystem, and assign=
+ a <br>
+&gt; *different* journal file within that fs to each OSD.<br>
+&gt; <br>
+&gt; What you are describing has you using the same partition for all OSDs=
+. <br>
+&gt; This will likely create issues due to multiple OSDs writing and readi=
+ng <br>
+&gt; from a single journal. TBH I'm not familiar enough with the journal <=
+br>
+&gt; mechanism to know whether the OSDs will detect that situation.<br>
+&gt; <br>
+&gt; -Joao<br>
+&gt; <br>
+&gt; &gt;<br>
+&gt; &gt; [osd.0]<br>
+&gt; &gt; host =3D server1<br>
+&gt; &gt; devs =3D /dev/sdb<br>
+&gt; &gt; osd journal =3D /dev/sdf1<br>
+&gt; &gt; [osd.1]<br>
+&gt; &gt; host =3D server1<br>
+&gt; &gt; devs =3D /dev/sdc<br>
+&gt; &gt; osd journal =3D /dev/sdf2<br>
+&gt; &gt;<br>
+&gt; &gt; [osd.3]<br>
+&gt; &gt; host =3D server1<br>
+&gt; &gt; devs =3D /dev/sdd<br>
+&gt; &gt; osd journal =3D /dev/sdf2<br>
+&gt; &gt;<br>
+&gt; &gt; [osd.4]<br>
+&gt; &gt; host =3D server1<br>
+&gt; &gt; devs =3D /dev/sde<br>
+&gt; &gt; osd journal =3D /dev/sdf2<br>
+&gt; &gt; [osd.5]<br>
+&gt; &gt; host =3D server2<br>
+&gt; &gt; devs =3D /dev/sdb<br>
+&gt; &gt; osd journal =3D /dev/sdf2<br>
+&gt; &gt; ...<br>
+&gt; &gt; [osd.23]<br>
+&gt; &gt; host =3D server6<br>
+&gt; &gt; devs =3D /dev/sde<br>
+&gt; &gt; osd journal =3D /dev/sdf2<br>
+&gt; &gt;<br>
+&gt; &gt; Thanks. --<br>
+&gt; &gt; To unsubscribe from this list: send the line &quot;unsubscribe c=
+eph-devel&quot; in<br>
+&gt; &gt; the body of a message to <a href=3D"mailto:majordomo-u79uwXL29TZUIDd8j+nm9g@public.gmane.org=
+.org">majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org</a><br>
+&gt; &gt; More majordomo info at <a href=3D"http://vger.kernel.org/majordo=
+mo-info.html">http://vger.kernel.org/majordomo-info.html</a><br>
+&gt; &gt;<br>
+&gt; <br>
+&gt; <br>
+&gt; -- <br>
+&gt; Joao Eduardo Luis<br>
+&gt; Software Engineer | <a href=3D"http://inktank.com">http://inktank.com=
+</a> | <a href=3D"http://ceph.com">
+http://ceph.com</a><o:p></o:p></span></p>
+</div>
+</div>
+</div>
+<br clear=3D"both">
+This message contains information which may be confidential and/or privile=
+ged. Unless you are the intended recipient (or authorized to receive for t=
+he intended recipient), you may not read, use, copy or disclose to anyone =
+the message or any information contained in the message. If you have recei=
+ved the message in error, please advise the sender by reply e-mail and del=
+ete the message and any attachment(s) thereto without retaining any copies=
+.<BR>
+</body>
+</html>
+
+--_000_776ECADDC3FA214BB89434DD0C805BB902764120DC2EXCHMULTI1sa_--
+
+--===============1260095107==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============1260095107==--
