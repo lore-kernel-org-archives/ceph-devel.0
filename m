@@ -1,146 +1,49 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: [PATCH] osd/erasurecode: Fix memory leak in jerasure_matrix_to_bitmatrix()
-Date: Mon, 04 Nov 2013 22:29:32 +0800
-Message-ID: <5277AF4C.4080309@dachary.org>
-References: <1383375493-2895-1-git-send-email-xinglin@cs.utah.edu> <alpine.DEB.2.00.1311020002280.32481@cobra.newdream.net> <5274C2F1.3000406@dachary.org> <79B40C35CFBE75499839945586B8480B47F95666@FTRDMB02.rd.francetelecom.fr>
+From: Noah Watkins <noah.watkins@inktank.com>
+Subject: Re: unable to compile
+Date: Mon, 4 Nov 2013 06:34:52 -0800
+Message-ID: <CA+Hcz59N=3nREPQtYqdE-NKC_LXrK_E_nOzYG7VwvVQWGtMdJQ@mail.gmail.com>
+References: <94B89671-08D2-49DB-837B-B0377DE8120C@cs.utah.edu>
+	<B9B45B52-0660-492A-AC51-597D3D01C5D5@cs.utah.edu>
+	<CAB2gnbUmdbyVsQLF=RibhiiCKKAZsMY=aokM+Ke7JcwLOTPQRQ@mail.gmail.com>
+	<5276CF55.2010304@cs.utah.edu>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="hEOVB7IJNqb2spq4oNT3c47VB71bC9jow"
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:54812 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752937Ab3KDO3i (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Nov 2013 09:29:38 -0500
-In-Reply-To: <79B40C35CFBE75499839945586B8480B47F95666@FTRDMB02.rd.francetelecom.fr>
+Received: from mail-qe0-f41.google.com ([209.85.128.41]:57545 "EHLO
+	mail-qe0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753167Ab3KDOey (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Nov 2013 09:34:54 -0500
+Received: by mail-qe0-f41.google.com with SMTP id x7so4151997qeu.0
+        for <ceph-devel@vger.kernel.org>; Mon, 04 Nov 2013 06:34:52 -0800 (PST)
+In-Reply-To: <5276CF55.2010304@cs.utah.edu>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: philippe.raipin@orange.com
-Cc: ceph-devel@vger.kernel.org
+To: Xing Lin <xinglin@cs.utah.edu>
+Cc: Noah Watkins <noahwatkins@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---hEOVB7IJNqb2spq4oNT3c47VB71bC9jow
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+This pull request (https://github.com/ceph/ceph/pull/812) reverts the
+patch that changed the struct initialization. That is C99 style, but
+apparently it isn't common in compilers, and GNU has just added it as
+an extension.
 
+I don't have a better solution at the moment, but as Greg mentioned,
+perhaps detecting C++11 is an option, but that means a big nasty
+ifdef. Another solution might be to just put the struct initialization
+in a C file.
 
-
-On 04/11/2013 18:44, philippe.raipin@orange.com wrote:
-> Hi !
->=20
-> In this case, it should be more efficient to do the NULL check before t=
-he talloc (you'll save the free operation and a useless memory allocation=
-)
->=20
-
-Hi,
-
-The check is on bitmatrix actually ;-)
-
-Cheers
-
-> Cheers,
-> Philippe
->=20
->=20
-> -----Message d'origine-----
-> De : ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.ker=
-nel.org] De la part de Loic Dachary
-> Envoy=E9 : samedi 2 novembre 2013 10:17
-> =C0 : Sage Weil; Xing Lin
-> Cc : ceph-devel@vger.kernel.org
-> Objet : Re: [PATCH] osd/erasurecode: Fix memory leak in jerasure_matrix=
-_to_bitmatrix()
->=20
->=20
->=20
-> On 02/11/2013 08:03, Sage Weil wrote:
->> Hi!
+On Sun, Nov 3, 2013 at 2:33 PM, Xing Lin <xinglin@cs.utah.edu> wrote:
+> Thanks, Noah!
+>
+> Xing
+>
+> On 11/3/2013 3:17 PM, Noah Watkins wrote:
 >>
->> On Sat, 2 Nov 2013, Xing Lin wrote:
->>> Free allocated memory before return because of NULL input
->>>
->>> Signed-off-by: Xing Lin <xinglin@cs.utah.edu>
->>> ---
->>>  src/osd/ErasureCodePluginJerasure/jerasure.c | 5 ++++-
->>>  1 file changed, 4 insertions(+), 1 deletion(-)
->>>
->>> diff --git a/src/osd/ErasureCodePluginJerasure/jerasure.c=20
->>> b/src/osd/ErasureCodePluginJerasure/jerasure.c
->>> index 9efae02..1bb4b1d 100755
->>> --- a/src/osd/ErasureCodePluginJerasure/jerasure.c
->>> +++ b/src/osd/ErasureCodePluginJerasure/jerasure.c
->>> @@ -276,7 +276,10 @@ int *jerasure_matrix_to_bitmatrix(int k, int m, =
-int w, int *matrix)
->>>    int rowelts, rowindex, colindex, elt, i, j, l, x;
->>> =20
->>>    bitmatrix =3D talloc(int, k*m*w*w);
->>> -  if (matrix =3D=3D NULL) { return NULL; }
->>> +  if (matrix =3D=3D NULL) {
->>> +    free(bitmatrix);
->>> +    return NULL;
->>> +  }
->>
->> I have a feeling the author meant to say if (bitmatrix =3D=3D NULL), s=
-ince=20
->> all the other talloc calls in this file tend to be followed by a NULL =
-check?
->=20
-> Yes. Good catch Xing Lin :-)
->=20
-> Cheers
->=20
->>
->> sage
->>
->>
->>> =20
->>>    rowelts =3D k * w;
->>>    rowindex =3D 0;
->>> --
->>> 1.8.3.4 (Apple Git-47)
->>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
-=20
->>> in the body of a message to majordomo@vger.kernel.org More majordomo =
-
->>> info at  http://vger.kernel.org/majordomo-info.html
->>>
->>>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" =
-
->> in the body of a message to majordomo@vger.kernel.org More majordomo=20
->> info at  http://vger.kernel.org/majordomo-info.html
->>
->=20
+>> Thanks for looking at this. Unless there is a good solution I think
+>> reverting it is ok as breaking the compile on a few platflorms is not ok.
+>> Ill be lookong at this tonight.
+>
+>
 > --
-> Lo=EFc Dachary, Artisan Logiciel Libre
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-
-
---hEOVB7IJNqb2spq4oNT3c47VB71bC9jow
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.20 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlJ3r0wACgkQ8dLMyEl6F20FHQCfdzXwfN7ybPw6CPYSu+o71IHR
-nHoAnjGTPkknNR/7rxabYW2xIPpt9Q/I
-=qnmJ
------END PGP SIGNATURE-----
-
---hEOVB7IJNqb2spq4oNT3c47VB71bC9jow--
