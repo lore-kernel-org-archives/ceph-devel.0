@@ -1,135 +1,32 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH] ceph: Update the pages in fscache in writepages() path
-Date: Tue, 5 Nov 2013 15:56:11 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1311051543170.9474@cobra.newdream.net>
-References: <1383278208-4053-1-git-send-email-liwang@ubuntukylin.com> <CANP1eJH2ewpYyWe2Oo4OMMg2UB+RE8DBt=Xg-MUDo6uJ5aGcpg@mail.gmail.com>
+From: James Harper <james.harper@bendigoit.com.au>
+Subject: RE: writing a ceph cliente for MS windows
+Date: Tue, 5 Nov 2013 23:33:24 +0000
+Message-ID: <6035A0D088A63A46850C3988ED045A4B665DB5E4@BITCOM1.int.sbss.com.au>
+References: <52780140.6090409@kepler.cl>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CANP1eJH2ewpYyWe2Oo4OMMg2UB+RE8DBt=Xg-MUDo6uJ5aGcpg@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Milosz Tanski <milosz@adfin.com>
-Cc: Li Wang <liwang@ubuntukylin.com>, ceph-devel <ceph-devel@vger.kernel.org>, "linux-cachefs@redhat.com" <linux-cachefs@redhat.com>, linux-kernel@vger.kernel.org, Min Chen <minchen@ubuntukylin.com>, Yunchuan Wen <yunchuanwen@ubuntukylin.com>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from smtp1.bendigoit.com.au ([203.16.224.4]:59789 "EHLO
+	smtp1.bendigoit.com.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755558Ab3KEX6L convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Nov 2013 18:58:11 -0500
+In-Reply-To: <52780140.6090409@kepler.cl>
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Alphe Salas Michels <asalas@kepler.cl>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, 5 Nov 2013, Milosz Tanski wrote:
-> Li,
+> Good day developers!
 > 
-> First, sorry for the late reply on this.
+> I would like to propose to the one interested  work with me to develop a
+> ceph cliente for MS windows world, Basing us on dokanFS.
 > 
-> Currently fscache is only supported for files that are open in read
-> only mode. I originally was going to let fscache cache in the write
-> path as well as long as the file was open in with O_LAZY. I abandoned
-> that idea. When a user opens the file in O_LAZY we can cache things
-> locally with the assumption that the user will care of the
-> synchronization in some other manner. There is no way of invalidating
-> a subset of the pages in object cached by fscache, there is no way we
-> can make O_LAZY work well.
-> 
-> The ceph_readpage_to_fscache() in writepage has no effect and it
-> should be removed. ceph_readpage_to_fscache() calls cache_valid() to
-> see if it should perform the page save, and since the file can't have
-> a CACHE cap at the point in time it doesn't do it.
 
-(Hmm, Dusting off my understanding of fscache and reading 
-fs/ceph/cache.c; watch out!)  It looks like cache_valid is
+I've looked at porting the rbd client to windows a little while back. That would require a kernel driver and all the rbd stuff is C++ (windows kernel is strictly C) so it was looking like a lot of work. Porting the rbd kernel implementation from Linux would have been easier.
 
-static inline int cache_valid(struct ceph_inode_info *ci)
-{
-	return ((ceph_caps_issued(ci) & CEPH_CAP_FILE_CACHE) &&
-		(ci->i_fscache_gen == ci->i_rdcache_gen));
-}
+An alternative would be to write a fuse-like kernel driver that talks to a userspace implementation of librbd. That would have been slower though, and have some restrictions like no swap space and no booting (although booting would have been a hard problem to solve even with a kernel-only implementation...)
 
-and in the FILE_EXCL case, the MDS will issue CACHE|BUFFER caps.  But I 
-think the aux key (size+mtime) will prevent any use of the cache as soon 
-as the first write happens and mtime changes, right?
+Good luck!
 
-I think that in order to make this work, we need to fix/create a 
-file_version (or something similar) field in the (mds) inode_t to have 
-some useful value.  I.e., increment it any time
-
- - a different client/writer comes along
- - a file is modified by the mds (e.g., truncated or recovered)
-
-but allow it to otherwise remain the same as long as only a single client 
-is working with the file exclusively.  This will be more precise than the 
-(size, mtime) check that is currently used, and would remain valid when a 
-single client opens the same file for exclusive read/write multiple times 
-but there are no other intervening changes.
-
-Milosz, if that were in place, is there any reason not to wire up 
-writepage and allow the fscache to be used write-through?
-
-sage
-
-
-
-
-> 
-> Thanks,
-> - Milosz
-> 
-> On Thu, Oct 31, 2013 at 11:56 PM, Li Wang <liwang@ubuntukylin.com> wrote:
-> > Currently, the pages in fscache only are updated in writepage() path,
-> > add the process in writepages().
-> >
-> > Signed-off-by: Min Chen <minchen@ubuntukylin.com>
-> > Signed-off-by: Li Wang <liwang@ubuntukylin.com>
-> > Signed-off-by: Yunchuan Wen <yunchuanwen@ubuntukylin.com>
-> > ---
-> >  fs/ceph/addr.c |    8 +++++---
-> >  1 file changed, 5 insertions(+), 3 deletions(-)
-> >
-> > diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-> > index 6df8bd4..cc57911 100644
-> > --- a/fs/ceph/addr.c
-> > +++ b/fs/ceph/addr.c
-> > @@ -746,7 +746,7 @@ retry:
-> >
-> >         while (!done && index <= end) {
-> >                 int num_ops = do_sync ? 2 : 1;
-> > -               unsigned i;
-> > +               unsigned i, j;
-> >                 int first;
-> >                 pgoff_t next;
-> >                 int pvec_pages, locked_pages;
-> > @@ -894,7 +894,6 @@ get_more_pages:
-> >                 if (!locked_pages)
-> >                         goto release_pvec_pages;
-> >                 if (i) {
-> > -                       int j;
-> >                         BUG_ON(!locked_pages || first < 0);
-> >
-> >                         if (pvec_pages && i == pvec_pages &&
-> > @@ -924,7 +923,10 @@ get_more_pages:
-> >
-> >                 osd_req_op_extent_osd_data_pages(req, 0, pages, len, 0,
-> >                                                         !!pool, false);
-> > -
-> > +               for(j = 0; j < locked_pages; j++) {
-> > +                       struct page *page = pages[j];
-> > +                       ceph_readpage_to_fscache(inode, page);
-> > +               }
-> >                 pages = NULL;   /* request message now owns the pages array */
-> >                 pool = NULL;
-> >
-> > --
-> > 1.7.9.5
-> >
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
-> 
-> -- 
-> Milosz Tanski
-> CTO
-> 10 East 53rd Street, 37th floor
-> New York, NY 10022
-> 
-> p: 646-253-9055
-> e: milosz@adfin.com
-> 
-> 
+James
