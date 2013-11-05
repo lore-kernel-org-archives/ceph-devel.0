@@ -1,94 +1,135 @@
-From: Alphe Salas Michels <asalas@kepler.cl>
-Subject: Re: writing a ceph cliente for MS windows
-Date: Tue, 05 Nov 2013 19:31:41 -0300
-Message-ID: <527971CD.1010705@kepler.cl>
-References: <52780140.6090409@kepler.cl>	<alpine.DEB.2.00.1311050608020.17874@cobra.newdream.net>	<52792D7F.20500@kepler.cl>	<527967FD.1010205@kepler.cl> <CABBk=J8gfR0CDQ4fuHmXtkH5Fe3kKOGTi7YgixB7ZSL1JHkYXg@mail.gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH] ceph: Update the pages in fscache in writepages() path
+Date: Tue, 5 Nov 2013 15:56:11 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1311051543170.9474@cobra.newdream.net>
+References: <1383278208-4053-1-git-send-email-liwang@ubuntukylin.com> <CANP1eJH2ewpYyWe2Oo4OMMg2UB+RE8DBt=Xg-MUDo6uJ5aGcpg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f48.google.com ([209.85.216.48]:54319 "EHLO
-	mail-qa0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755589Ab3KEWbp (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Nov 2013 17:31:45 -0500
-Received: by mail-qa0-f48.google.com with SMTP id w8so1473505qac.7
-        for <ceph-devel@vger.kernel.org>; Tue, 05 Nov 2013 14:31:44 -0800 (PST)
-In-Reply-To: <CABBk=J8gfR0CDQ4fuHmXtkH5Fe3kKOGTi7YgixB7ZSL1JHkYXg@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh <yehuda@inktank.com>
-Cc: Sage Weil <sage@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CANP1eJH2ewpYyWe2Oo4OMMg2UB+RE8DBt=Xg-MUDo6uJ5aGcpg@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Milosz Tanski <milosz@adfin.com>
+Cc: Li Wang <liwang@ubuntukylin.com>, ceph-devel <ceph-devel@vger.kernel.org>, "linux-cachefs@redhat.com" <linux-cachefs@redhat.com>, linux-kernel@vger.kernel.org, Min Chen <minchen@ubuntukylin.com>, Yunchuan Wen <yunchuanwen@ubuntukylin.com>
+List-Id: ceph-devel.vger.kernel.org
 
-Hello sage and Yehuda,
-yes nwat told me that u64 was an alias for unsigned long which is=20
-default C compiler data type.
-I wasn't cautious.
+On Tue, 5 Nov 2013, Milosz Tanski wrote:
+> Li,
+> 
+> First, sorry for the late reply on this.
+> 
+> Currently fscache is only supported for files that are open in read
+> only mode. I originally was going to let fscache cache in the write
+> path as well as long as the file was open in with O_LAZY. I abandoned
+> that idea. When a user opens the file in O_LAZY we can cache things
+> locally with the assumption that the user will care of the
+> synchronization in some other manner. There is no way of invalidating
+> a subset of the pages in object cached by fscache, there is no way we
+> can make O_LAZY work well.
+> 
+> The ceph_readpage_to_fscache() in writepage has no effect and it
+> should be removed. ceph_readpage_to_fscache() calls cache_valid() to
+> see if it should perform the page save, and since the file can't have
+> a CACHE cap at the point in time it doesn't do it.
 
-I read some other things like the cygwin mount.cc /mount.h files ...=20
-they include cifs and nfs filetype things like samba too. We could=20
-integrate a new data type in it with our ceph-win32-client.
+(Hmm, Dusting off my understanding of fscache and reading 
+fs/ceph/cache.c; watch out!)  It looks like cache_valid is
 
-Obviously everyone would prefere something with a nice point and click=20
-window to setup their ceph-win32-client. But as a starter... maybe we=20
-could understand better the way windows handle file systems starting=20
-from cygwin/mount files.
+static inline int cache_valid(struct ceph_inode_info *ci)
+{
+	return ((ceph_caps_issued(ci) & CEPH_CAP_FILE_CACHE) &&
+		(ci->i_fscache_gen == ci->i_rdcache_gen));
+}
 
-Regards,
-signature
+and in the FILE_EXCL case, the MDS will issue CACHE|BUFFER caps.  But I 
+think the aux key (size+mtime) will prevent any use of the cache as soon 
+as the first write happens and mtime changes, right?
 
-*Alph=E9 Salas*
-Ingeniero T.I
+I think that in order to make this work, we need to fix/create a 
+file_version (or something similar) field in the (mds) inode_t to have 
+some useful value.  I.e., increment it any time
 
-asalas@kepler.cl*<http://www.kepler.cl>*
+ - a different client/writer comes along
+ - a file is modified by the mds (e.g., truncated or recovered)
 
-On 11/05/13 18:59, Yehuda Sadeh wrote:
-> On Tue, Nov 5, 2013 at 1:49 PM, Alphe Salas Michels<asalas@kepler.cl>=
-  wrote:
->> Hello sage,
->> I followed your lead and went a bit further in my source code readin=
-g and I
->> notice serveral problems:
->> first most of the id use in ceph osd_clients, mds_clients, mon_clien=
-t use
->> the data type u64 which will be a problem
->> as most of the windows in use are windows XP or Windows server 2003 =
-in 32
->> bits. As they are used for id tag for
->> things like snapshot pages (if I understand well) that can be a prob=
-lem for
->> a port no?
->>
->> What I read so far was
->> mount.ceph files > kernel/fs/ceph files which contains the mds_clien=
-t files
->> and the kernel ioctl interface ... >  include / linux / ceph  files =
-which
->> integrates libcephfs.h. and all the needed files
->>
->> there is three clients, there is auth.h a messenger, a msgpool, buff=
-er,
->> rados that depends on msgr that include in every aspect of the messa=
-ges
->> formation  one or more __le64 message.
->>
->> I m far from understanding the whole code and the interactions betwi=
-n all
->> the files and which we can skip and which we can keep.
->>
->> how can we translate those data type into 32bit in order for ceph cl=
-uster to
->> understand them and ceph-windows-client to transmit them?
-> It is possible to define 64 bit variables on 32 bit architectures. Th=
-e
-> compiler handles it for you.
->
-> Yehuda
->
->
+but allow it to otherwise remain the same as long as only a single client 
+is working with the file exclusively.  This will be more precise than the 
+(size, mtime) check that is currently used, and would remain valid when a 
+single client opens the same file for exclusive read/write multiple times 
+but there are no other intervening changes.
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Milosz, if that were in place, is there any reason not to wire up 
+writepage and allow the fscache to be used write-through?
+
+sage
+
+
+
+
+> 
+> Thanks,
+> - Milosz
+> 
+> On Thu, Oct 31, 2013 at 11:56 PM, Li Wang <liwang@ubuntukylin.com> wrote:
+> > Currently, the pages in fscache only are updated in writepage() path,
+> > add the process in writepages().
+> >
+> > Signed-off-by: Min Chen <minchen@ubuntukylin.com>
+> > Signed-off-by: Li Wang <liwang@ubuntukylin.com>
+> > Signed-off-by: Yunchuan Wen <yunchuanwen@ubuntukylin.com>
+> > ---
+> >  fs/ceph/addr.c |    8 +++++---
+> >  1 file changed, 5 insertions(+), 3 deletions(-)
+> >
+> > diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+> > index 6df8bd4..cc57911 100644
+> > --- a/fs/ceph/addr.c
+> > +++ b/fs/ceph/addr.c
+> > @@ -746,7 +746,7 @@ retry:
+> >
+> >         while (!done && index <= end) {
+> >                 int num_ops = do_sync ? 2 : 1;
+> > -               unsigned i;
+> > +               unsigned i, j;
+> >                 int first;
+> >                 pgoff_t next;
+> >                 int pvec_pages, locked_pages;
+> > @@ -894,7 +894,6 @@ get_more_pages:
+> >                 if (!locked_pages)
+> >                         goto release_pvec_pages;
+> >                 if (i) {
+> > -                       int j;
+> >                         BUG_ON(!locked_pages || first < 0);
+> >
+> >                         if (pvec_pages && i == pvec_pages &&
+> > @@ -924,7 +923,10 @@ get_more_pages:
+> >
+> >                 osd_req_op_extent_osd_data_pages(req, 0, pages, len, 0,
+> >                                                         !!pool, false);
+> > -
+> > +               for(j = 0; j < locked_pages; j++) {
+> > +                       struct page *page = pages[j];
+> > +                       ceph_readpage_to_fscache(inode, page);
+> > +               }
+> >                 pages = NULL;   /* request message now owns the pages array */
+> >                 pool = NULL;
+> >
+> > --
+> > 1.7.9.5
+> >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+> 
+> -- 
+> Milosz Tanski
+> CTO
+> 10 East 53rd Street, 37th floor
+> New York, NY 10022
+> 
+> p: 646-253-9055
+> e: milosz@adfin.com
+> 
+> 
