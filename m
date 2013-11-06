@@ -1,65 +1,65 @@
-From: Dominik Mostowiec <dominikmostowiec@gmail.com>
-Subject: Re: stopped backfilling process
-Date: Wed, 6 Nov 2013 07:08:01 +0100
-Message-ID: <CAMNMNTxKb+8S4Qqn4dW19gyNBkYzCdm6wYBKbdFP5f4hXQNeqg@mail.gmail.com>
-References: <CAMNMNTycwtKKstM8Egp-fSO4BQ-fQ=AYV_J1CdZQwMc-6wXe3Q@mail.gmail.com>
+From: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: Running on disks that lose their head
+Date: Wed, 6 Nov 2013 01:33:46 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1311060128510.24956@cobra.newdream.net>
+References: <52798E1D.9090807@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oa0-f45.google.com ([209.85.219.45]:57120 "EHLO
-	mail-oa0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750802Ab3KFGIC (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Nov 2013 01:08:02 -0500
-Received: by mail-oa0-f45.google.com with SMTP id i4so9812539oah.18
-        for <ceph-devel@vger.kernel.org>; Tue, 05 Nov 2013 22:08:01 -0800 (PST)
-In-Reply-To: <CAMNMNTycwtKKstM8Egp-fSO4BQ-fQ=AYV_J1CdZQwMc-6wXe3Q@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <52798E1D.9090807-cLsNCMjd+0JAfugRpC6u6w@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: Loic Dachary <loic-cLsNCMjd+0JAfugRpC6u6w@public.gmane.org>
+Cc: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi,
-This is s3/ceph cluster, .rgw.buckets has 3 copies of data.
-Many PG's are only on 2 OSD's and are marked as 'degraded'.
-Scrubbing can fix this on degraded object's?
+On Wed, 6 Nov 2013, Loic Dachary wrote:
+> Hi Ceph,
+> 
+> People from Western Digital suggested ways to better take advantage of 
+> the disk error reporting. They gave two examples that struck my 
+> imagination. First there are errors that look like the disk is dying ( 
+> read / write failures ) but it's only a transient problem and the driver 
+> should be able to make the difference by properly interpreting the 
+> available information. They said that the prolonged life you get if you 
+> don't decommission a disk that only has a transient error is 
 
-I don't have set tunables in cruch, mabye this can help (this is safe?)?
+This make me think we really need to build or integrate with some generic 
+SMART reporting infrastructure so that we can identify disks that are 
+failing or going to fail.  What to do with that information is another 
+question; initially I would lean toward just marking the disk out, but 
+there may be smarter alternatives to investigate.
 
---
-Regards
-Dominik
+> significant. The second example is when one head out of ten fails : 
+> disks can keep working with the nine remaining heads. Losing 1/10 of the 
+> disk is likely to result in a full re-install of the Ceph osd. But, 
+> again, the disk could keep going after that, with 9/10 of its original 
+> capacity. And Ceph is good at handling osd failures.
 
+Yeah...but if you lose 1/10 of a block device any existing local file 
+system is going to blow up.  I suspet this is something that newgangled 
+interfaces like Kinetic will be much better at.  Even then, though, it is 
+challenging for anything sitting above to cope with losing some random 
+subset of it's data underneath.  To a first approximation, for this to be 
+useful, the fs and disk would need to keep, say, all teh data in a 
+particular PG confined to a single platter, so that when a head goes the 
+other PGs are still fully intact and usage.  It is probably a long way to 
+get from here to there...
 
-
-2013/11/5 Dominik Mostowiec <dominikmostowiec@gmail.com>:
-> Hi,
-> After remove ( ceph osd out X) osd from one server ( 11 osd ) ceph
-> starts data migration process.
-> It stopped on:
-> 32424 pgs: 30635 active+clean, 191 active+remapped, 1596
-> active+degraded, 2 active+clean+scrubbing;
-> degraded (1.718%)
->
-> All osd with reweight==1 are UP.
->
-> ceph -v
-> ceph version 0.56.7 (14f23ab86b0058a8651895b3dc972a29459f3a33)
->
-> health details:
-> https://www.dropbox.com/s/149zvee2ump1418/health_details.txt
->
-> pg active+degraded query:
-> https://www.dropbox.com/s/46emswxd7s8xce1/pg_11.39_query.txt
-> pg active+remapped query:
-> https://www.dropbox.com/s/wij4uqh8qoz60fd/pg_16.2172_query.txt
->
-> Please help - how can we fix it?
->
-> --
-> Pozdrawiam
-> Dominik
-
-
-
--- 
-Pozdrawiam
-Dominik
+> All this is news to me and sounds really cool. But I'm sure there are 
+> people who already know about it and I'm eager to hear their opinion :-)
+> 
+> Cheers
+> 
+> -- 
+> Lo?c Dachary, Artisan Logiciel Libre
+> 
+> 
