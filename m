@@ -1,13 +1,14 @@
-From: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: Running on disks that lose their head
-Date: Wed, 6 Nov 2013 01:33:46 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1311060128510.24956@cobra.newdream.net>
-References: <52798E1D.9090807@dachary.org>
+From: Dominik Mostowiec <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: stopped backfilling process
+Date: Wed, 6 Nov 2013 10:37:20 +0100
+Message-ID: <CAMNMNTzX=sEAA8a9_DkNh1payabjXqCAvU=N84xdEZ1dAfyS0A@mail.gmail.com>
+References: <CAMNMNTycwtKKstM8Egp-fSO4BQ-fQ=AYV_J1CdZQwMc-6wXe3Q@mail.gmail.com>
+	<5279EF6E.8090808@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <52798E1D.9090807-cLsNCMjd+0JAfugRpC6u6w@public.gmane.org>
+In-Reply-To: <5279EF6E.8090808-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
@@ -17,49 +18,30 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Loic Dachary <loic-cLsNCMjd+0JAfugRpC6u6w@public.gmane.org>
-Cc: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: yy-nm <yxdyourself-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On Wed, 6 Nov 2013, Loic Dachary wrote:
-> Hi Ceph,
-> 
-> People from Western Digital suggested ways to better take advantage of 
-> the disk error reporting. They gave two examples that struck my 
-> imagination. First there are errors that look like the disk is dying ( 
-> read / write failures ) but it's only a transient problem and the driver 
-> should be able to make the difference by properly interpreting the 
-> available information. They said that the prolonged life you get if you 
-> don't decommission a disk that only has a transient error is 
-
-This make me think we really need to build or integrate with some generic 
-SMART reporting infrastructure so that we can identify disks that are 
-failing or going to fail.  What to do with that information is another 
-question; initially I would lean toward just marking the disk out, but 
-there may be smarter alternatives to investigate.
-
-> significant. The second example is when one head out of ten fails : 
-> disks can keep working with the nine remaining heads. Losing 1/10 of the 
-> disk is likely to result in a full re-install of the Ceph osd. But, 
-> again, the disk could keep going after that, with 9/10 of its original 
-> capacity. And Ceph is good at handling osd failures.
-
-Yeah...but if you lose 1/10 of a block device any existing local file 
-system is going to blow up.  I suspet this is something that newgangled 
-interfaces like Kinetic will be much better at.  Even then, though, it is 
-challenging for anything sitting above to cope with losing some random 
-subset of it's data underneath.  To a first approximation, for this to be 
-useful, the fs and disk would need to keep, say, all teh data in a 
-particular PG confined to a single platter, so that when a head goes the 
-other PGs are still fully intact and usage.  It is probably a long way to 
-get from here to there...
-
-> All this is news to me and sounds really cool. But I'm sure there are 
-> people who already know about it and I'm eager to hear their opinion :-)
-> 
-> Cheers
-> 
-> -- 
-> Lo?c Dachary, Artisan Logiciel Libre
-> 
-> 
+SSBob3BlIGl0IHdpbGwgaGVscC4KCmNydXNoOiBodHRwczovL3d3dy5kcm9wYm94LmNvbS9zL2lu
+cm1xM3Q0MG9tMjZ2Zi9jcnVzaC50eHQKY2VwaCBvc2QgZHVtcDogaHR0cHM6Ly93d3cuZHJvcGJv
+eC5jb20vcy9qc2J0N2l5cHlmbm5icW0vY2VwaF9vc2RfZHVtcC50eHQKCi0tClJlZ2FyZHMKRG9t
+aW5pawoKMjAxMy8xMS82IHl5LW5tIDx5eGR5b3Vyc2VsZkBnbWFpbC5jb20+Ogo+IE9uIDIwMTMv
+MTEvNSAyMjowMiwgRG9taW5payBNb3N0b3dpZWMgd3JvdGU6Cj4+Cj4+IEhpLAo+PiBBZnRlciBy
+ZW1vdmUgKCBjZXBoIG9zZCBvdXQgWCkgb3NkIGZyb20gb25lIHNlcnZlciAoIDExIG9zZCApIGNl
+cGgKPj4gc3RhcnRzIGRhdGEgbWlncmF0aW9uIHByb2Nlc3MuCj4+IEl0IHN0b3BwZWQgb246Cj4+
+IDMyNDI0IHBnczogMzA2MzUgYWN0aXZlK2NsZWFuLCAxOTEgYWN0aXZlK3JlbWFwcGVkLCAxNTk2
+Cj4+IGFjdGl2ZStkZWdyYWRlZCwgMiBhY3RpdmUrY2xlYW4rc2NydWJiaW5nOwo+PiBkZWdyYWRl
+ZCAoMS43MTglKQo+Pgo+PiBBbGwgb3NkIHdpdGggcmV3ZWlnaHQ9PTEgYXJlIFVQLgo+Pgo+PiBj
+ZXBoIC12Cj4+IGNlcGggdmVyc2lvbiAwLjU2LjcgKDE0ZjIzYWI4NmIwMDU4YTg2NTE4OTViM2Rj
+OTcyYTI5NDU5ZjNhMzMpCj4+Cj4+IGhlYWx0aCBkZXRhaWxzOgo+PiBodHRwczovL3d3dy5kcm9w
+Ym94LmNvbS9zLzE0OXp2ZWUydW1wMTQxOC9oZWFsdGhfZGV0YWlscy50eHQKPj4KPj4gcGcgYWN0
+aXZlK2RlZ3JhZGVkIHF1ZXJ5Ogo+PiBodHRwczovL3d3dy5kcm9wYm94LmNvbS9zLzQ2ZW1zd3hk
+N3M4eGNlMS9wZ18xMS4zOV9xdWVyeS50eHQKPj4gcGcgYWN0aXZlK3JlbWFwcGVkIHF1ZXJ5Ogo+
+PiBodHRwczovL3d3dy5kcm9wYm94LmNvbS9zL3dpajR1cWg4cW96NjBmZC9wZ18xNi4yMTcyX3F1
+ZXJ5LnR4dAo+Pgo+PiBQbGVhc2UgaGVscCAtIGhvdyBjYW4gd2UgZml4IGl0Pwo+Pgo+IGNhbiB5
+b3Ugc2hvdyAgeW91ciAgZGVjb2RlZCBjcnVzaG1hcD8gYW5kIG91dHB1dCBvZiAjY2VwaCBvc2Qg
+ZHVtcCA/Cj4KPiAtLS0KPiC0y7Xn19PTyrz+w7vT0LKhtr66zbbx0uLI7bz+o6zS8s6qIGF2YXN0
+ISC3wLKhtr6xo7uktKbT2rvutq/XtMysoaMKPiBodHRwOi8vd3d3LmF2YXN0LmNvbQo+CgoKCi0t
+IApQb3pkcmF3aWFtCkRvbWluaWsKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBo
+LmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5j
+b20K
