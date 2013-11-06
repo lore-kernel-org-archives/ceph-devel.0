@@ -1,53 +1,97 @@
-From: majianpeng <majianpeng@gmail.com>
-Subject: [PATCH] mkcephfs: Don't transfer absolute path of mkcephfs to other hosts.
-Date: Wed, 6 Nov 2013 09:25:09 +0800
-Message-ID: <201311060925048528111@gmail.com>
-Reply-To: majianpeng <majianpeng@gmail.com>
+From: Yunchuan Wen <yunchuanwen@ubuntukylin.com>
+Subject: Re: [PATCH] mkcephfs: Don't transfer absolute path of mkcephfs to
+ other hosts.
+Date: Wed, 6 Nov 2013 10:20:22 +0800
+Message-ID: <CAAb4LOzehV4BqqE0vNnSttin-JSMu=pRUrngyEEH9=BDKdkhSw@mail.gmail.com>
+References: <201311060925048528111@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f44.google.com ([209.85.160.44]:59007 "EHLO
-	mail-pb0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755636Ab3KFBZN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Nov 2013 20:25:13 -0500
-Received: by mail-pb0-f44.google.com with SMTP id rp8so2155868pbb.17
-        for <ceph-devel@vger.kernel.org>; Tue, 05 Nov 2013 17:25:13 -0800 (PST)
+Received: from m53-178.qiye.163.com ([123.58.178.53]:46013 "EHLO
+	m53-178.qiye.163.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751050Ab3KFCUh (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Nov 2013 21:20:37 -0500
+Received: from mail-bk0-f44.google.com (mail-bk0-f44.google.com [209.85.214.44])
+	by m53-178.qiye.163.com (HMail) with ESMTPSA id 25B7F1BF009B
+	for <ceph-devel@vger.kernel.org>; Wed,  6 Nov 2013 10:20:25 +0800 (CST)
+Received: by mail-bk0-f44.google.com with SMTP id mx11so1249538bkb.3
+        for <ceph-devel@vger.kernel.org>; Tue, 05 Nov 2013 18:20:22 -0800 (PST)
+In-Reply-To: <201311060925048528111@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: sage <sage@inktank.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: majianpeng <majianpeng@gmail.com>
+Cc: sage <sage@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>, Li Wang <liwang@ubuntukylin.com>
 
-V2hlbiBleGVjICdta2NlcGhmcyAtYSAtYyBjZXBoLmNvbmYnLGl0IHdpbGwgdHJhbnNmZXIgYWJz
-b2x1dGUgcGF0aCBvZg0KbWtjZXBoZnMgdG8gb3RoZXIgaG9zdHMuQnV0IGZvciBkaWZmZXJlbnQg
-aG9zdHMsIHRoZSBwYXRoIG9mIG1rY2VwaGZzDQptYXkgZGlmZmVyZW50Lkl0IHdpbGwgbWFrZSB0
-aGUgY29tbWFuZCBlcnJvci5UaGUgZXJyb3IgbWVzc2FnZSBpcw0KImJhc2g6IC4vbWtjZXBoZnM6
-IE5vIHN1Y2ggZmlsZSBvciBkaXJlY3RvcnkiLg0KU28gd2Ugc2hvdWxkIHRyYW5zZmVyIHRoZSBu
-YW1lIG1rY2VwaGZzIHRvIG90aGVyIGhvc3RzLkl0IHRob3NlIGhvc3RzLGl0DQp3aWxsIGF1dG9t
-YWljbHkgc2VhcmNoIGJ5IFBBVEguDQoNClNpZ25lZC1vZmYtYnk6IEppYW5wZW5nIE1hIDxtYWpp
-YW5wZW5nQGdtYWlsLmNvbT4NCi0tLQ0KIHNyYy9ta2NlcGhmcy5pbiB8IDE5ICsrKysrKysrKysr
-KysrKystLS0NCiAxIGZpbGUgY2hhbmdlZCwgMTYgaW5zZXJ0aW9ucygrKSwgMyBkZWxldGlvbnMo
-LSkNCg0KZGlmZiAtLWdpdCBhL3NyYy9ta2NlcGhmcy5pbiBiL3NyYy9ta2NlcGhmcy5pbg0KaW5k
-ZXggMjgzODU2OC4uYzVlNDFkOSAxMDA2NDQNCi0tLSBhL3NyYy9ta2NlcGhmcy5pbg0KKysrIGIv
-c3JjL21rY2VwaGZzLmluDQpAQCAtNDU1LDYgKzQ1NSw3IEBAIGZpDQogIyMjIGRvIGV2ZXJ5dGhp
-bmcgdmlhIHNzaCAjIyMNCiANCiBpZiBbICRhbGxob3N0cyAtZXEgMSBdOyB0aGVuDQorICAgIGxv
-Y2FsaG9zdD0kaG9zdG5hbWUNCiANCiAgICAgdmVyaWZ5X2NvbmYNCiANCkBAIC00OTgsMTAgKzQ5
-OSwxOCBAQCBpZiBbICRhbGxob3N0cyAtZXEgMSBdOyB0aGVuDQogCWZpDQogCQ0KIAlpZiBbICRt
-a2ZzIC1lcSAxIF0gJiYgWyAiJHR5cGUiID0gIm9zZCIgXTsgdGhlbg0KLQkgICAgZG9fcm9vdF9j
-bWQgIiQwIC1kICRyZGlyIC0tcHJlcGFyZS1vc2RmcyAkbmFtZSINCisJCWlmIFsgJGxvY2FsaG9z
-dCA9ICRob3N0IF07IHRoZW4NCisJCSAgICBkb19yb290X2NtZCAiJDAgLWQgJHJkaXIgLS1wcmVw
-YXJlLW9zZGZzICRuYW1lIg0KKwkJZWxzZQ0KKwkJICAgIGRvX3Jvb3RfY21kICIkKGJhc2VuYW1l
-ICQwKSAtZCAkcmRpciAtLXByZXBhcmUtb3NkZnMgJG5hbWUiDQorCQlmaQ0KIAlmaQ0KIA0KLQlk
-b19yb290X2NtZCAiJDAgLWQgJHJkaXIgLS1pbml0LWRhZW1vbiAkbmFtZSINCisJaWYgWyAkbG9j
-YWxob3N0ID0gJGhvc3QgXTsgdGhlbg0KKwkgICAgZG9fcm9vdF9jbWQgIiQwIC1kICRyZGlyIC0t
-aW5pdC1kYWVtb24gJG5hbWUiDQorCWVsc2UNCisJICAgIGRvX3Jvb3RfY21kICIkKGJhc2VuYW1l
-ICQwKSAtZCAkcmRpciAtLWluaXQtZGFlbW9uICRuYW1lIg0KKwlmaQ0KIA0KIAkjIGNvbGxlY3Qg
-dGhlIGtleQ0KIAlpZiBbIC1uICIkc3NoIiBdOyB0aGVuDQpAQCAtNTQ0LDcgKzU1MywxMSBAQCBp
-ZiBbICRhbGxob3N0cyAtZXEgMSBdOyB0aGVuDQogCSAgICBmaQ0KIAlmaQ0KIAkNCi0JZG9fcm9v
-dF9jbWQgIiQwIC1kICRyZGlyIC0taW5pdC1kYWVtb24gJG5hbWUiDQorCWlmIFsgJGxvY2FsaG9z
-dCA9ICRob3N0IF07IHRoZW4NCisJICAgIGRvX3Jvb3RfY21kICIkMCAtZCAkcmRpciAtLWluaXQt
-ZGFlbW9uICRuYW1lIg0KKwllbHNlDQorCSAgICBkb19yb290X2NtZCAiJChiYXNlbmFtZSAkMCkg
-LWQgJHJkaXIgLS1pbml0LWRhZW1vbiAkbmFtZSINCisJZmkNCiANCiAJaWYgWyAtbiAiJHNzaCIg
-XTsgdGhlbg0KIAkgICAgI2NsZWFudXAgbm8gbG9uZ2VyIG5lZWQgcmRpcg0KLS0gDQoxLjguNA==
+Hi Jianpeng,
+    I think this patch will work in the situation that 'mkcephfs' has
+been added to the $PATH of other hosts, but what about that 'mkcephfs'
+have been deployed to the same path in all cluster nodes, but NOT
+added to $PATH, then the original version will work, but now it not
+gotta work.
+   So my suggestion is, first check if the path $0 is valid or not on
+other hosts by using something like ' if [ -f $0 ]', if so, just go as
+now it is. Otherwise, remove other name components of the path, and
+try to use it.
 
+
+2013/11/6 majianpeng <majianpeng@gmail.com>:
+> When exec 'mkcephfs -a -c ceph.conf',it will transfer absolute path of
+> mkcephfs to other hosts.But for different hosts, the path of mkcephfs
+> may different.It will make the command error.The error message is
+> "bash: ./mkcephfs: No such file or directory".
+> So we should transfer the name mkcephfs to other hosts.It those hosts,it
+> will automaicly search by PATH.
+>
+> Signed-off-by: Jianpeng Ma <majianpeng@gmail.com>
+> ---
+>  src/mkcephfs.in | 19 ++++++++++++++++---
+>  1 file changed, 16 insertions(+), 3 deletions(-)
+>
+> diff --git a/src/mkcephfs.in b/src/mkcephfs.in
+> index 2838568..c5e41d9 100644
+> --- a/src/mkcephfs.in
+> +++ b/src/mkcephfs.in
+> @@ -455,6 +455,7 @@ fi
+>  ### do everything via ssh ###
+>
+>  if [ $allhosts -eq 1 ]; then
+> +    localhost=$hostname
+>
+>      verify_conf
+>
+> @@ -498,10 +499,18 @@ if [ $allhosts -eq 1 ]; then
+>         fi
+>
+>         if [ $mkfs -eq 1 ] && [ "$type" = "osd" ]; then
+> -           do_root_cmd "$0 -d $rdir --prepare-osdfs $name"
+> +               if [ $localhost = $host ]; then
+> +                   do_root_cmd "$0 -d $rdir --prepare-osdfs $name"
+> +               else
+> +                   do_root_cmd "$(basename $0) -d $rdir --prepare-osdfs $name"
+> +               fi
+>         fi
+>
+> -       do_root_cmd "$0 -d $rdir --init-daemon $name"
+> +       if [ $localhost = $host ]; then
+> +           do_root_cmd "$0 -d $rdir --init-daemon $name"
+> +       else
+> +           do_root_cmd "$(basename $0) -d $rdir --init-daemon $name"
+> +       fi
+>
+>         # collect the key
+>         if [ -n "$ssh" ]; then
+> @@ -544,7 +553,11 @@ if [ $allhosts -eq 1 ]; then
+>             fi
+>         fi
+>
+> -       do_root_cmd "$0 -d $rdir --init-daemon $name"
+> +       if [ $localhost = $host ]; then
+> +           do_root_cmd "$0 -d $rdir --init-daemon $name"
+> +       else
+> +           do_root_cmd "$(basename $0) -d $rdir --init-daemon $name"
+> +       fi
+>
+>         if [ -n "$ssh" ]; then
+>             #cleanup no longer need rdir
+> --
+> 1.8.4
