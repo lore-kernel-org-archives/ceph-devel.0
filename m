@@ -1,107 +1,65 @@
-From: Malcolm Haak <malcolm@sgi.com>
-Subject: Re: CephFS use cases + MDS limitations
-Date: Wed, 6 Nov 2013 15:40:30 +1000
-Message-ID: <5279D64E.7090603@sgi.com>
-References: <CAD=PzHJTOnSw24egLutyGEFUZFEo6brcurpwyjmYZabvU_1aMw@mail.gmail.com>
+From: Dominik Mostowiec <dominikmostowiec@gmail.com>
+Subject: Re: stopped backfilling process
+Date: Wed, 6 Nov 2013 07:08:01 +0100
+Message-ID: <CAMNMNTxKb+8S4Qqn4dW19gyNBkYzCdm6wYBKbdFP5f4hXQNeqg@mail.gmail.com>
+References: <CAMNMNTycwtKKstM8Egp-fSO4BQ-fQ=AYV_J1CdZQwMc-6wXe3Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay3.sgi.com ([192.48.152.1]:55613 "EHLO relay.sgi.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1750780Ab3KFFkg (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 6 Nov 2013 00:40:36 -0500
-In-Reply-To: <CAD=PzHJTOnSw24egLutyGEFUZFEo6brcurpwyjmYZabvU_1aMw@mail.gmail.com>
+Received: from mail-oa0-f45.google.com ([209.85.219.45]:57120 "EHLO
+	mail-oa0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750802Ab3KFGIC (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Nov 2013 01:08:02 -0500
+Received: by mail-oa0-f45.google.com with SMTP id i4so9812539oah.18
+        for <ceph-devel@vger.kernel.org>; Tue, 05 Nov 2013 22:08:01 -0800 (PST)
+In-Reply-To: <CAMNMNTycwtKKstM8Egp-fSO4BQ-fQ=AYV_J1CdZQwMc-6wXe3Q@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Michael Sevilla <mikesevilla3@gmail.com>, ceph-devel@vger.kernel.org
+To: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Michael,
+Hi,
+This is s3/ceph cluster, .rgw.buckets has 3 copies of data.
+Many PG's are only on 2 OSD's and are marked as 'degraded'.
+Scrubbing can fix this on degraded object's?
 
-I haven't seen any on-list replies yet, so I wasn't sure if this was th=
-e=20
-right place. But I'll just reply and somebody will let me know if I am=20
-wrong.
+I don't have set tunables in cruch, mabye this can help (this is safe?)?
 
-The use cases I have encountered, in my clustered computing universe,=20
-were implemented with a different proprietary clustered file system.=20
-These file-systems were being used as home folders or "shared scratch"=20
-space. And the specific issues occur when you have users who 'misbehave=
-'=20
-or have code that, by way of function create(and destroy) large numbers=
-=20
-of files. And in the process bog down file-system access for everybody.=
-=20
-I have not yet implemented ceph in production in this role but base=20
-testing shows it will encounter the same issues.
-
-While it is ideal to not do such things to a clustered file system, it=20
-would be nice to be able to dedicate an MDS to specific sub folders=20
-without having to create a whole separate sub-file-system/mount-point=20
-(as is the current procedure with other solutions).
-
-It would be really AWESOME to do this 'on the fly'. Having more than on=
-e=20
-MDS look after the whole file-system in an ACTIVE/ACTIVE fashion would=20
-be nice/ideal (as long as latency is not too negativity impacted), but=20
-really just being able to 'shard' the file-system up would be more than=
-=20
-sufficient to solve most of the issues I usually encounter. Having this=
-=20
-kind of functionality would be a 'killer feature' for this kind of work=
-load.
-
-I hope my wall of text makes sense. Please feel free to ping me with=20
-questions.
-
-Regards
-
-Malcolm Haak
-
-
-
-
-On 04/11/13 09:53, Michael Sevilla wrote:
-> Hi Ceph community,
->
-> I=92d like to get a feel for some of the problems that CephFS users a=
-re
-> encountering with single MDS deployments. There were requests for
-> stable distributed metadata/MDS services [1] and I=92m guessing its
-> because your workloads exhibit many, many metadata operations. Some o=
-f
-> you mentioned opening many files in a directory for checkpointing,
-> recursive stats on a directory, etc. [2] and I=92d like more details,
-> such as:
-> - workloads/applications that stress the MDS service that would cause
-> you to call for multi-MDS support
-> - use cases for the Ceph file system (I=92m not really too interested=
- in
-> users using CephFS to host VMs, since many of these use cases are
-> migrating to RBD)
->
-> I=92m just trying to get an idea of what=92s out there and the proble=
-ms
-> CephFS users encounter as a result of a bottlenecked MDS (single node
-> or cluster).
->
-> Thanks!
->
-> Michael
->
-> [1] CephFS MDS Status Discussion,
-> http://ceph.com/dev-notes/cephfs-mds-status-discussion/
-> [2] CephFS First Product Release Discussion,
-> http://thread.gmane.org/gmane.comp.file-systems.ceph.devel/13524
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
 --
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Regards
+Dominik
+
+
+
+2013/11/5 Dominik Mostowiec <dominikmostowiec@gmail.com>:
+> Hi,
+> After remove ( ceph osd out X) osd from one server ( 11 osd ) ceph
+> starts data migration process.
+> It stopped on:
+> 32424 pgs: 30635 active+clean, 191 active+remapped, 1596
+> active+degraded, 2 active+clean+scrubbing;
+> degraded (1.718%)
+>
+> All osd with reweight==1 are UP.
+>
+> ceph -v
+> ceph version 0.56.7 (14f23ab86b0058a8651895b3dc972a29459f3a33)
+>
+> health details:
+> https://www.dropbox.com/s/149zvee2ump1418/health_details.txt
+>
+> pg active+degraded query:
+> https://www.dropbox.com/s/46emswxd7s8xce1/pg_11.39_query.txt
+> pg active+remapped query:
+> https://www.dropbox.com/s/wij4uqh8qoz60fd/pg_16.2172_query.txt
+>
+> Please help - how can we fix it?
+>
+> --
+> Pozdrawiam
+> Dominik
+
+
+
+-- 
+Pozdrawiam
+Dominik
