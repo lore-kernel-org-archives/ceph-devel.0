@@ -1,191 +1,82 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: writing a ceph cliente for MS windows
-Date: Tue, 5 Nov 2013 16:00:27 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1311051556550.9474@cobra.newdream.net>
-References: <52780140.6090409@kepler.cl> <alpine.DEB.2.00.1311050608020.17874@cobra.newdream.net> <52792D7F.20500@kepler.cl>
+From: Loic Dachary <loic-cLsNCMjd+0JAfugRpC6u6w@public.gmane.org>
+Subject: Running on disks that lose their head
+Date: Wed, 06 Nov 2013 08:32:29 +0800
+Message-ID: <52798E1D.9090807@dachary.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:55315 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755373Ab3KFAA1 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Nov 2013 19:00:27 -0500
-In-Reply-To: <52792D7F.20500@kepler.cl>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Alphe Salas Michels <asalas@kepler.cl>
-Cc: ceph-devel@vger.kernel.org
+Content-Type: multipart/mixed; boundary="===============0276280618=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi Alphe,
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--===============0276280618==
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="lmcAITC30F70flkIOG12wmQfi922jCbOg"
 
-On Tue, 5 Nov 2013, Alphe Salas Michels wrote:
-> 
-> signature *Hi, Sage !
-> thank you for you enthousiast reply.
-> I sure want to make the best use of everything or anything previously done to
-> tend to
-> write ceph cliente for windows.
-> 
-> Apart using libre tools for building the future ceph cliente I am open to
-> anything.
-> I would recommand eclipse CDT or Code::BLocks they are based on mingwin open
-> and easyly enhanceable.**
-> 
-> more free tools can be found here:
-> http://www.freebyte.com/programming/cpp/#cppcompilers
-> 
-> 
-> I will read libcephfs source code and take some notes about the protocol.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--lmcAITC30F70flkIOG12wmQfi922jCbOg
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-I think you don't need to worry about hte protocol at all, since libcephs 
-implements it for you (and will capture any future changes).
+Hi Ceph,
 
-> I was more going from what I know and trying to track down how mount.ceph work
-> with the parameters passed to it.
-> since it point finally to Kernel/fs/ceph and that I don t really understand
-> how that module work and that it probably points to some other dependencies
-> Reading libcephfs source code could be a big gain of time.
+People from Western Digital suggested ways to better take advantage of th=
+e disk error reporting. They gave two examples that struck my imagination=
+=2E First there are errors that look like the disk is dying ( read / writ=
+e failures ) but it's only a transient problem and the driver should be a=
+ble to make the difference by properly interpreting the available informa=
+tion. They said that the prolonged life you get if you don't decommission=
+ a disk that only has a transient error is significant. The second exampl=
+e is when one head out of ten fails : disks can keep working with the nin=
+e remaining heads. Losing 1/10 of the disk is likely to result in a full =
+re-install of the Ceph osd. But, again, the disk could keep going after t=
+hat, with 9/10 of its original capacity. And Ceph is good at handling osd=
+ failures.
 
-(I would also ignore mount.ceph as everything it does it specific to 
-how Linux mounts work.)
+All this is news to me and sounds really cool. But I'm sure there are peo=
+ple who already know about it and I'm eager to hear their opinion :-)
 
-> basically on the protocol what is  need are:
-> 
-> 1) open and maintain a connection (socket open, auth, etc )
-> 2) retreive a map of directories and disk Quota (disk sizing Y TB free,  Z TB
-> total)
-> 3) procedure to send files / directories in a maner that it will allow our
-> client to fit ceph transmission protocols
-> (limit bandwith for stability?, limit connection amount?, limit cpu use?,
-> Cache for preparing data transfer (a FIFO cache)?)
-> 4)Procedure to retreive files / directory from ceph cluster
-> 5) Management copy/move files /Directories, FS stats, Connection Stats.
-> logging.
-> 
-> My idea to progress is to take those main bulletpoint in ceph protocol based
-> on general ideas of what ceph file system does and start identifying parts
-> from libcephfs to match those "needs".
+Cheers
 
-Instead, I would look at include/cephfs/libcephfs.h, the interface that 
-libcephfs provides, and try to map that to what the fuse layer expects.  
-There is both a path-based that I suspsect lends itself well to the 
-Windows interface and (very soon now) a handle based API that is targetted 
-at the Unix-style VFS layers.  I'm mostly guessing, though, since I've 
-never seen any low-level fs code in windows before.
-
-In this case, the analogous code for Linux should be client/fuse_ll.cc 
-itself (and not much else), although there will probably be a few tricks 
-necessary to map cleanly onto how the windows interfaces work.
-
-Does that make sense?
-
-Cheers!
-sage
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
 
 
-> 
-> Any suggestion and contributions are welcome.
-> 
-> 
-> *
-> On 11/05/13 11:23, Sage Weil wrote:
-> > Hi Alphe,
-> > 
-> > On Mon, 4 Nov 2013, Alphe Salas Michels wrote:
-> > > Good day developers!
-> > > 
-> > > I would like to propose to the one interested  work with me to develop a
-> > > ceph
-> > > cliente for MS windows world, Basing us on dokanFS.
-> > > 
-> > > My company is a ceph enthousiast that use on a dayly basis ceph and that
-> > > need
-> > > both transfer speed and big expendable and cheap storage.
-> > > My company is specialised in data recovery and we want to participate to
-> > > ceph
-> > > effort by bringing a ceph cliente for windows.
-> > Awesome!
-> > 
-> > > Our experience shows us that the best gateway is each clientes being its
-> > > own
-> > > gateway, instead of having a bottle neck server or a cluster of bottle
-> > > neck
-> > > servers as gateway (FTP, samba, SFTP,webdav, s3, etc..).
-> > > 
-> > > We already did some research in that domain.
-> > > 
-> > > Dokan FS is an intent  to write an opensource fuse like cliente for MS
-> > > windows.
-> > > 
-> > > More information on DOKANFS can be triggered here
-> > > http://dokan-dev.net/en/download/
-> > > 
-> > > Positive points of using DOKANFS.
-> > > 
-> > > - its opensourced and well licenced mit licence, gpl licence and lgpl
-> > > licence.
-> > > 
-> > > Negative point of using DOKAN FS.
-> > > - unreachable author
-> > > - Poor documentation . Dev comments in japanese.
-> > > - Work in progress so it is unstable and needs to be updated, debugged and
-> > > maintained by a MS Windows file system expert developper.
-> > I am not very familiar with windows storage APIs, but somebody told me
-> > at once point there were several interfaces against which a new file
-> > system could be implemented, everything from a full in-kernel driver to
-> > something that is explorer-based.  Are any of those suitable?  Using a
-> > potentially abandoned fuse-like layer makes me a bit nervous.
-> > 
-> > That said,
-> >   
-> > > I try past year to do a merge from ceph-fuse to dokanfs
-> > > here are what I learnt.
-> > > - Ceph-fuse and related source code is around 60 000 lines of code.
-> > > - Ceph protocol isn t documented so it is like trying to draw a map of
-> > > america
-> > > using only a sextan and a compass.
-> > > 
-> > > Those led me to those conclusions:
-> > > - I can t do it alone.
-> > > - It is easier to draw down the ceph protocol way to work from
-> > > kernel/fs/ceph
-> > > sources and mount.ceph
-> > > - Ceph depending libraries may be unexistant or not up to date in their
-> > > port
-> > > on MS Windows (cygwin)
-> > I think the most sane path should be to make libcephfs sufficiently
-> > portable to build on windows (or cygwin).  For the bits used by the
-> > client-side coe, I don't think there should be much in the way of
-> > dependencies, and the main challenge would be untangling the build for
-> > the necessary pieces out from the rest of Ceph.
-> > 
-> > Have you seen the wip-port portability work that is currently underway by
-> > Noah and Alan?  That may solve many of the cygwin problems you are seeing
-> > today.
-> > 
-> > > - MS file system specialist are hard do find in the "open source libre
-> > > world"
-> > > so I will try in the commercial world.
-> > > 
-> > > The commercial world has some problems too. They need ceph protocol draft
-> > > to
-> > > implemente it to their own product They will have licencing /commercial
-> > > politics that infringe lgpl, and hide that most of the work is done by
-> > > people
-> > > other than them. They will not participate in a financial way to ceph
-> > > enhancement and growth.
-> > I don't think reimplementing the client code is an efficient way forward.
-> > Unless the goal is a pure kernel implementation...but a significant
-> > ongoing investment in development resources would be needed for that going
-> > forward.  I suspect that is a challenge for a platform that does not
-> > typically rally that sort of community effort.
-> > 
-> > The easiest thing is of course just to use CIFS and Samba (which works
-> > today).  A fuse-like approach is probably a reasonably middle ground (both
-> > in initial effort and maintainability going forward)...
-> > 
-> > sage
-> > 
-> > 
-> 
-> 
+--lmcAITC30F70flkIOG12wmQfi922jCbOg
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.20 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEUEARECAAYFAlJ5jh0ACgkQ8dLMyEl6F210bQCY0jmiTY0sTWIOG6ZsYirT8YA6
+zACeLSGVU8/pMS+qvYucCygY9UrEYyI=
+=RFWX
+-----END PGP SIGNATURE-----
+
+--lmcAITC30F70flkIOG12wmQfi922jCbOg--
+
+--===============0276280618==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============0276280618==--
