@@ -1,26 +1,39 @@
 From: Sage Weil <sage@inktank.com>
-Subject: cache tier blueprint (part 2)
-Date: Thu, 7 Nov 2013 06:56:34 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1311070653290.17943@cobra.newdream.net>
+Subject: emperor leftovers
+Date: Thu, 7 Nov 2013 07:05:13 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1311070659420.17943@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:42327 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:42526 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751824Ab3KGO4f (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Nov 2013 09:56:35 -0500
+	with ESMTP id S1753626Ab3KGPFN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Nov 2013 10:05:13 -0500
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 810008044E
+	for <ceph-devel@vger.kernel.org>; Thu,  7 Nov 2013 07:05:13 -0800 (PST)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 7EC308044E
+	for <ceph-devel@vger.kernel.org>; Thu,  7 Nov 2013 07:05:13 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: greg@inktank.com, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-I typed up what I think is remaining for the cache tier work for firefly.  
-Greg, can you take a look?  I'm most likely missing a bunch of stuff here.
+There are several blueprints that were put together for emperor even 
+though we didn't have the developer time to actually do them.  For anyone 
+interested in getting involved in Ceph development, these may present an 
+easy way to get involved in the process.  If you're interested in 
+adopting any of these orphan blueprints, speak up and we can make sure it 
+gets onto the firefly CDS schedule.
 
- http://wiki.ceph.com/01Planning/02Blueprints/Emperor/rados_cache_pool_(part_2)
+In (very) approximate order of difficulty:
 
-This will be one of the meatier sessions at the upcoming CDS.  There will 
-be a fair bit of work not just on the OSD side but also in building 
-testing tools that exercise and validate the functionality, here, that 
-may be a great way for a new contributer to get involved and help out.
+http://wiki.ceph.com/01Planning/02Blueprints/Emperor/Source_tree_restructuring
+http://wiki.ceph.com/01Planning/02Blueprints/Emperor/rbd%3A_shared_read_cache
+http://wiki.ceph.com/01Planning/02Blueprints/Emperor/rbd%3A_namespace_support
+http://wiki.ceph.com/01Planning/02Blueprints/Emperor/rbd%3A_copy-on-read_for_clones
+http://wiki.ceph.com/01Planning/02Blueprints/Emperor/mds%3A_dumpability
+http://wiki.ceph.com/01Planning/02Blueprints/Emperor/osd%3A_clone_from_journal_on_btrfs
+http://wiki.ceph.com/01Planning/02Blueprints/Emperor/mds%3A_reduce_memory_consumption
 
 sage
