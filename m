@@ -1,39 +1,55 @@
-From: Sage Weil <sage@inktank.com>
-Subject: emperor leftovers
-Date: Thu, 7 Nov 2013 07:05:13 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1311070659420.17943@cobra.newdream.net>
+From: Loic Dachary <loic@dachary.org>
+Subject: Ceph & ZeroVM
+Date: Thu, 07 Nov 2013 19:33:37 +0800
+Message-ID: <527B7A91.3080408@dachary.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="25C1HEXUhxlna4vi3D63H1nPlKcxQUmOq"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:42526 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753626Ab3KGPFN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Nov 2013 10:05:13 -0500
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 810008044E
-	for <ceph-devel@vger.kernel.org>; Thu,  7 Nov 2013 07:05:13 -0800 (PST)
-Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 7EC308044E
-	for <ceph-devel@vger.kernel.org>; Thu,  7 Nov 2013 07:05:13 -0800 (PST)
+Received: from smtp.dmail.dachary.org ([91.121.254.229]:58816 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751083Ab3KGPHw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Nov 2013 10:07:52 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: sergei@litestack.com
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-There are several blueprints that were put together for emperor even 
-though we didn't have the developer time to actually do them.  For anyone 
-interested in getting involved in Ceph development, these may present an 
-easy way to get involved in the process.  If you're interested in 
-adopting any of these orphan blueprints, speak up and we can make sure it 
-gets onto the firefly CDS schedule.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--25C1HEXUhxlna4vi3D63H1nPlKcxQUmOq
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-In (very) approximate order of difficulty:
+HI Sergei,
 
-http://wiki.ceph.com/01Planning/02Blueprints/Emperor/Source_tree_restructuring
-http://wiki.ceph.com/01Planning/02Blueprints/Emperor/rbd%3A_shared_read_cache
-http://wiki.ceph.com/01Planning/02Blueprints/Emperor/rbd%3A_namespace_support
-http://wiki.ceph.com/01Planning/02Blueprints/Emperor/rbd%3A_copy-on-read_for_clones
-http://wiki.ceph.com/01Planning/02Blueprints/Emperor/mds%3A_dumpability
-http://wiki.ceph.com/01Planning/02Blueprints/Emperor/osd%3A_clone_from_journal_on_btrfs
-http://wiki.ceph.com/01Planning/02Blueprints/Emperor/mds%3A_reduce_memory_consumption
+I'm thinking ZeroVM could be run by a rados class. Let say there is a Zer=
+oVM aware class on each host running OSDs, the user could run it and prov=
+ide a "channel" to access the object. The channel would use the rados cla=
+ss API, if at all possible.
 
-sage
+Cheers
+
+P.S. quickly written in the bus to not forget about it before getting dru=
+nk in Hong Kong ;-)
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+
+
+
+--25C1HEXUhxlna4vi3D63H1nPlKcxQUmOq
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.20 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlJ7epEACgkQ8dLMyEl6F22yJQCfXDXHulFCo2aLSYbFwypW9Bhp
+R20AnA+Wyc+HqPI8SmeYlbZD2zd4o7oA
+=7CJP
+-----END PGP SIGNATURE-----
+
+--25C1HEXUhxlna4vi3D63H1nPlKcxQUmOq--
