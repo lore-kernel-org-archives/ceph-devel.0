@@ -1,109 +1,61 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: teuthology consumability
-Date: Thu, 07 Nov 2013 23:28:16 +0800
-Message-ID: <527BB190.2010302@dachary.org>
-References: <alpine.DEB.2.00.1311070711080.17943@cobra.newdream.net>
+From: Patrick McGarry <patrick@inktank.com>
+Subject: Re: emperor leftovers
+Date: Thu, 7 Nov 2013 10:30:33 -0500
+Message-ID: <CAP8Oy=Kw7U83RpMexwU2Ush_rjWYHwqQGX8cTLUMGbRhGGj_3Q@mail.gmail.com>
+References: <alpine.DEB.2.00.1311070659420.17943@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="RFc7XHtNXjNedsD2CvAhQhgJD3N2jjOI1"
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:58846 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752038Ab3KGP2X (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Nov 2013 10:28:23 -0500
-In-Reply-To: <alpine.DEB.2.00.1311070711080.17943@cobra.newdream.net>
+Received: from mail-pb0-f42.google.com ([209.85.160.42]:39734 "EHLO
+	mail-pb0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750867Ab3KGPae (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Nov 2013 10:30:34 -0500
+Received: by mail-pb0-f42.google.com with SMTP id jt11so745753pbb.29
+        for <ceph-devel@vger.kernel.org>; Thu, 07 Nov 2013 07:30:33 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.00.1311070659420.17943@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
-Cc: hugh.saunders@rackspace.co.uk
+To: Sage Weil <sage@inktank.com>
+Cc: Ceph Devel <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---RFc7XHtNXjNedsD2CvAhQhgJD3N2jjOI1
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+I have moved all of these to our new development "sideboard" [1] which
+can be used to store blueprints that don't make major releases.
+Alternately, if you have an idea and want help fleshing it out, this
+would be a great place to drop a blueprint for community
+collaboration.
+
+[1] http://wiki.ceph.com/01Planning/Sideboard
 
 
-Hi Sage,
 
-On 07/11/2013 23:21, Sage Weil wrote:
-> Hey all,
->=20
-> I've had a couple different conversations with week with organizations =
+Best Regards,
 
-> that want to ramp up their ceph development efforts, as a big piece of =
+Patrick McGarry
+Director, Community || Inktank
+http://ceph.com  ||  http://inktank.com
+@scuttlemonkey || @ceph || @inktank
 
-> that, spin up their own teuthology environments.  There has been a lot =
 
-> going on here, and I haven't been on the weekly calls, but I suspect=20
-> things that will help them move forward include:
->=20
-> - documenting a teuthology install-from-scratch.  this would include=20
-> setting up the databases, lock server, workers, etc., and will initiall=
-y=20
-> be long and ugly but will hopefully shrink over time.
->=20
-> - adding support for euca2ools or some other cloud client that does=20
-> openstack and ec2 for creating/destroying test machines.  hopefully mos=
-t=20
-> of the integration points are mapped out from the downburst integration=
-=20
-> work.
->=20
-
-I'm including Hugh Saunders on this thread : we discussed this topic duri=
-ng the OpenStack summit this week in relation to the associated ticket:
-
-http://tracker.ceph.com/issues/6502
-
-> - ongoing work to collapse the locking and queuing and reporting into a=
-=20
-> unified and/or cohesive service.
-
-It looks like it could be associated with http://wiki.ceph.com/01Planning=
-/02Blueprints/Firefly/Ceph-Brag for performance related tasks. Does that =
-sound sensible ? I'm midly drunk tonight and possibly writing nonsense ;-=
-)
-
-Cheers
-
->=20
-> I'm probably missing things and/or vastly oversimplifying, but hopefull=
-y=20
-> others can chime in an improve this list.  I think the better roadmap w=
-e=20
-> have here, the easier it will be for new people to come online and focu=
-s=20
-> their efforts where they will make the most difference.
->=20
-> Of course the upcomign CDS is a good place to discuss this, but somethi=
-ng=20
-> should be written down first to guide/frame that discussion.
->=20
+On Thu, Nov 7, 2013 at 10:05 AM, Sage Weil <sage@inktank.com> wrote:
+> There are several blueprints that were put together for emperor even
+> though we didn't have the developer time to actually do them.  For anyone
+> interested in getting involved in Ceph development, these may present an
+> easy way to get involved in the process.  If you're interested in
+> adopting any of these orphan blueprints, speak up and we can make sure it
+> gets onto the firefly CDS schedule.
+>
+> In (very) approximate order of difficulty:
+>
+> http://wiki.ceph.com/01Planning/02Blueprints/Emperor/Source_tree_restructuring
+> http://wiki.ceph.com/01Planning/02Blueprints/Emperor/rbd%3A_shared_read_cache
+> http://wiki.ceph.com/01Planning/02Blueprints/Emperor/rbd%3A_namespace_support
+> http://wiki.ceph.com/01Planning/02Blueprints/Emperor/rbd%3A_copy-on-read_for_clones
+> http://wiki.ceph.com/01Planning/02Blueprints/Emperor/mds%3A_dumpability
+> http://wiki.ceph.com/01Planning/02Blueprints/Emperor/osd%3A_clone_from_journal_on_btrfs
+> http://wiki.ceph.com/01Planning/02Blueprints/Emperor/mds%3A_reduce_memory_consumption
+>
 > sage
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-
-
---RFc7XHtNXjNedsD2CvAhQhgJD3N2jjOI1
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.20 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlJ7sZAACgkQ8dLMyEl6F21l2QCfZh/BVaMDYb5HRovP48sA0Li3
-PCAAnRQDKeZ4dNZp+95Fw8l79GwVeYNk
-=zn+0
------END PGP SIGNATURE-----
-
---RFc7XHtNXjNedsD2CvAhQhgJD3N2jjOI1--
