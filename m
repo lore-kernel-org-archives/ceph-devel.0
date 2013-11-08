@@ -1,87 +1,92 @@
-From: Cesar Mello <cmello@gmail.com>
-Subject: RE: emperor leftovers
-Date: Thu, 7 Nov 2013 18:38:53 -0800
-Message-ID: <3566795634879164586@unknownmsgid>
+From: Sage Weil <sage@inktank.com>
+Subject: Signed-off-by: and jenkins
+Date: Thu, 7 Nov 2013 20:16:15 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1311072013280.15297@cobra.newdream.net>
+References: <ceph/ceph/pull/794@github.com> <CABBk=J-ih=nPn7nJsgjM1EA4kwvZoBXxyFvHXB6Ax0SG02FB2A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-we0-f182.google.com ([74.125.82.182]:43304 "EHLO
-	mail-we0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756158Ab3KHCiz (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Nov 2013 21:38:55 -0500
-Received: by mail-we0-f182.google.com with SMTP id t61so1408551wes.27
-        for <ceph-devel@vger.kernel.org>; Thu, 07 Nov 2013 18:38:54 -0800 (PST)
+Received: from cobra.newdream.net ([66.33.216.30]:48523 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750923Ab3KHEQP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Nov 2013 23:16:15 -0500
+In-Reply-To: <CABBk=J-ih=nPn7nJsgjM1EA4kwvZoBXxyFvHXB6Ax0SG02FB2A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Matt W. Benjamin" <matt@linuxbox.com>, Noah Watkins <noah.watkins@inktank.com>
-Cc: Patrick McGarry <patrick@inktank.com>, Ceph Devel <ceph-devel@vger.kernel.org>, Noah Watkins <noahwatkins@gmail.com>, Sage Weil <sage@inktank.com>
+To: Yehuda Sadeh <yehuda@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Yes MSVC and straight win32 is the rock solid way to go. That's where I
-would put my late night effort to help.
+Tangential thought: we've set up Jenkins on other repos to do some basic 
+tests.  The plan is to do the same for the ceph.git, but the test of tests 
+is much more extensive (build tests, possibly teuthology tests).
 
-Best regards
-Mello
+I wonder if an easy first step would be a trivial test that just verifies 
+that everything has a Signed-off-by.  That would get jenkins into the 
+pipeline and we can build from there...
 
-Enviado pelo meu Windows Phone De: Matt W. Benjamin
-Enviada em: 07/11/2013 23:34
-Para: Noah Watkins
-Cc: Patrick McGarry; Ceph Devel; Noah Watkins; Sage Weil; Cesar Mello
-Assunto: Re: emperor leftovers
-Or, MSVC, frankly.
+[Background: every commit to ceph needs a 
 
------ "Matt W. Benjamin" <matt@linuxbox.com> wrote:
+ Signed-off-by: Name <email>
 
-> Yes.  But you may wish to think about mingwXX porting rather than
-> Cygwin,
-> if you prefer native results.
->
-> Matt
->
-> ----- "Noah Watkins" <noah.watkins@inktank.com> wrote:
->
-> > On Thu, Nov 7, 2013 at 5:15 PM, Sage Weil <sage@inktank.com> wrote:
-> >
-> > > curious if the discussion on windows portability is relevant here
-> or
-> > if
-> > > it's better treated as a separate but related effort.
-> >
-> > The kernel space talk that's been tossed around probably isn't
-> > relevant, but I'd be nice to learn about cygwin porting if anyone
-> has
-> > knowledge in this area.
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe
-> ceph-devel"
-> > in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+line to acknowledge/consent to the open source software license; see
+https://github.com/ceph/ceph/blob/master/SubmittingPatches
+]
+
+sage
+
+
+On Thu, 7 Nov 2013, Yehuda Sadeh wrote:
+
+> Hey,
+> 
+>   I wanted to backport that fix to dumpling, but just noticed that the
+> commits were missing a signed-off-by line. Can I add it?
+> 
+> Thanks,
+> Yehuda
+> 
+> 
+> ---------- Forwarded message ----------
+> From: Xiangyu (Ray) Lv <notifications@github.com>
+> Date: Wed, Oct 30, 2013 at 7:24 PM
+> Subject: [ceph] Put obj sometimes got 405 (#794)
+> To: ceph/ceph <ceph@noreply.github.com>
+> Cc: Yehuda Sadeh <yehuda@inktank.com>
+> 
+> 
+> Fixes:
+> 
+> Bug #6672 (http://tracker.ceph.com/issues/6672)
+> 
+> Original discussion at #783
+> Branch reviewed by @yehudasa.
+> 
+> ________________________________
+> 
+> You can merge this Pull Request by running
+> 
+>   git pull https://github.com/xylv/ceph put-obj-sometimes-got-405
+> 
+> Or view, comment on, or merge it at:
+> 
+>   https://github.com/ceph/ceph/pull/794
+> 
+> Commit Summary
+> 
+> [rgw] Set initialized to true after populating table in hex_to_num()
+> Wrap hex_to_num table into class HexTable
+> 
+> File Changes
+> 
+> M src/rgw/rgw_common.cc (20)
+> 
+> Patch Links:
+> 
+> https://github.com/ceph/ceph/pull/794.patch
+> https://github.com/ceph/ceph/pull/794.diff
 > --
-> Matt Benjamin
-> The Linux Box
-> 206 South Fifth Ave. Suite 150
-> Ann Arbor, MI  48104
->
-> http://linuxbox.com
->
-> tel.  734-761-4689
-> fax.  734-769-8938
-> cel.  734-216-5309
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
-> in
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
--- 
-Matt Benjamin
-The Linux Box
-206 South Fifth Ave. Suite 150
-Ann Arbor, MI  48104
-
-http://linuxbox.com
-
-tel.  734-761-4689
-fax.  734-769-8938
-cel.  734-216-5309
+> 
+> 
