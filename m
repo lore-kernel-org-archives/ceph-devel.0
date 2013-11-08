@@ -1,30 +1,52 @@
-From: Noah Watkins <noah.watkins@inktank.com>
+From: "Matt W. Benjamin" <matt@linuxbox.com>
 Subject: Re: emperor leftovers
-Date: Thu, 7 Nov 2013 17:29:04 -0800
-Message-ID: <CA+Hcz5_OkqvJenW4Zc2gYoEa7O=Mnf9Bbs5bp_46BEKQfTb6pA@mail.gmail.com>
-References: <alpine.DEB.2.00.1311070659420.17943@cobra.newdream.net>
-	<CAP8Oy=Kw7U83RpMexwU2Ush_rjWYHwqQGX8cTLUMGbRhGGj_3Q@mail.gmail.com>
-	<alpine.DEB.2.00.1311071709580.17943@cobra.newdream.net>
+Date: Thu, 7 Nov 2013 20:33:55 -0500 (EST)
+Message-ID: <1011485518.357.1383874435018.JavaMail.root@thunderbeast.private.linuxbox.com>
+References: <CA+Hcz5_OkqvJenW4Zc2gYoEa7O=Mnf9Bbs5bp_46BEKQfTb6pA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f47.google.com ([209.85.216.47]:40947 "EHLO
-	mail-qa0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752779Ab3KHB3F (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Nov 2013 20:29:05 -0500
-Received: by mail-qa0-f47.google.com with SMTP id w8so1188454qac.6
-        for <ceph-devel@vger.kernel.org>; Thu, 07 Nov 2013 17:29:04 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1311071709580.17943@cobra.newdream.net>
+Received: from aa.linuxbox.com ([69.128.83.226]:4365 "EHLO aa.linuxbox.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754236Ab3KHBeB (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 7 Nov 2013 20:34:01 -0500
+In-Reply-To: <CA+Hcz5_OkqvJenW4Zc2gYoEa7O=Mnf9Bbs5bp_46BEKQfTb6pA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>, Cesar Mello <cmello@gmail.com>
-Cc: Patrick McGarry <patrick@inktank.com>, Ceph Devel <ceph-devel@vger.kernel.org>, Noah Watkins <noahwatkins@gmail.com>
+To: Noah Watkins <noah.watkins@inktank.com>
+Cc: Patrick McGarry <patrick@inktank.com>, Ceph Devel <ceph-devel@vger.kernel.org>, Noah Watkins <noahwatkins@gmail.com>, Sage Weil <sage@inktank.com>, Cesar Mello <cmello@gmail.com>
 
-On Thu, Nov 7, 2013 at 5:15 PM, Sage Weil <sage@inktank.com> wrote:
+Yes.  But you may wish to think about mingwXX porting rather than Cygwin,
+if you prefer native results.
 
-> curious if the discussion on windows portability is relevant here or if
-> it's better treated as a separate but related effort.
+Matt
 
-The kernel space talk that's been tossed around probably isn't
-relevant, but I'd be nice to learn about cygwin porting if anyone has
-knowledge in this area.
+----- "Noah Watkins" <noah.watkins@inktank.com> wrote:
+
+> On Thu, Nov 7, 2013 at 5:15 PM, Sage Weil <sage@inktank.com> wrote:
+> 
+> > curious if the discussion on windows portability is relevant here or
+> if
+> > it's better treated as a separate but related effort.
+> 
+> The kernel space talk that's been tossed around probably isn't
+> relevant, but I'd be nice to learn about cygwin porting if anyone has
+> knowledge in this area.
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+> in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+-- 
+Matt Benjamin
+The Linux Box
+206 South Fifth Ave. Suite 150
+Ann Arbor, MI  48104
+
+http://linuxbox.com
+
+tel.  734-761-4689 
+fax.  734-769-8938 
+cel.  734-216-5309 
