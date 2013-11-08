@@ -1,147 +1,84 @@
-From: Niklas Goerke <niklas@niklasgoerke.de>
-Subject: Re: xfs Warnings in syslog
-Date: Fri, 08 Nov 2013 13:47:40 +0100
-Message-ID: <5c1ac60220546b99bf67bfed8f200fff@niklasgoerke.de>
-References: <049e1508cbb35ecf7b38ea2dadddc6ec@niklasgoerke.de>
- <52666FA8.4050101@oracle.com>
- <CABYiri8CThqQ-E0MvB4=XbOt7jrQG_nw_2Sc7vt0VD_zbr_Ycw@mail.gmail.com>
+From: "Yan, Zheng" <ukernel@gmail.com>
+Subject: Re: zero size file on cephfs
+Date: Fri, 8 Nov 2013 21:33:37 +0800
+Message-ID: <CAAM7YAkKwVnLiUvM40hkSqOhwdtjE=KALJj0D-x4Y79f3=RDcg@mail.gmail.com>
+References: <CAJiejCS_K2nKneJE9qXnRPH0uBJ8DrVaP+m1B5Ocp8jyDgNGuQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
-	format=flowed
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from niklasgoerke.de ([46.38.232.61]:51345 "EHLO niklasgoerke.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753126Ab3KHMro (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 8 Nov 2013 07:47:44 -0500
-In-Reply-To: <CABYiri8CThqQ-E0MvB4=XbOt7jrQG_nw_2Sc7vt0VD_zbr_Ycw@mail.gmail.com>
+Received: from mail-la0-f42.google.com ([209.85.215.42]:41000 "EHLO
+	mail-la0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751827Ab3KHNdi convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Nov 2013 08:33:38 -0500
+Received: by mail-la0-f42.google.com with SMTP id ep20so1763526lab.1
+        for <ceph-devel@vger.kernel.org>; Fri, 08 Nov 2013 05:33:37 -0800 (PST)
+In-Reply-To: <CAJiejCS_K2nKneJE9qXnRPH0uBJ8DrVaP+m1B5Ocp8jyDgNGuQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andrey Korolyov <andrey@xdel.ru>
-Cc: Jeff Liu <jeff.liu@oracle.com>, ceph-devel <ceph-devel@vger.kernel.org>, xfs@oss.sgi.com
+To: Drunkard Zhang <gongfan193@gmail.com>
+Cc: maillist-linux <ceph-devel@vger.kernel.org>
 
-I'm sorry for reporting back only now, but I did not get to try it out=20
-earlier.
-I upgraded one of my nodes to kernel 3.10 and the messages did not come=
-=20
-up yet. It seems the kernel upgrade did the job.
+sounds like caused by the file recover bug. The fix
+(https://github.com/ceph/ceph/commit/eb381ffc8db14f13a7c5e3528a109bf89a=
+7c5b31)
+is included in the 0.72 release.
 
-Thank you very much for your help!
+Regards
+Yan, Zheng
 
-On Tue, 22 Oct 2013 13:36:56 +0100, Andrey Korolyov wrote:
-> Just my two cents:
+
+On Fri, Nov 8, 2013 at 10:36 AM, Drunkard Zhang <gongfan193@gmail.com> =
+wrote:
+> Hi,
+>     I'm using cephfs for a while, it's great, but I found a serious p=
+roblem now.
 >
-> XFS is a quite unstable with Ceph especially along with heavy CPU
-> usage up to 3.7(primarily soft lockups). I used 3.7 for eight months
-> before upgrade on production system and it performs just perfectly.
+> My situation is simple: a lot of servers receive syslog to local disk=
+,
+> then mount ceph FS via kernel driver and move those received files to
+> ceph FS.
 >
-> On Tue, Oct 22, 2013 at 1:29 PM, Jeff Liu <jeff.liu@oracle.com>=20
-> wrote:
->> Hello,
->>
->> So It's better to add XFS mailing list to the CC-list. :)
->>
->> I think this issue has been fixed by upstream commits:
->>
->> From ff9a28f6c25d18a635abcab1f49db68108203dfb
->> From: Jan Kara <jack@suse.cz>
->> Date: Thu, 14 Mar 2013 14:30:54 +0100
->> Subject: [PATCH 1/1] xfs: Fix WARN_ON(delalloc) in=20
->> xfs_vm_releasepage()
->>
->>
->> Thanks,
->> -Jeff
->>
->> On 10/22/2013 07:46 PM, Niklas Goerke wrote:
->>
->>> Hi
->>>
->>> My syslog and dmesg are being filled with the Warnings attached.
->>> Looking at todays syslog I got up to 1101 of these warnings in the=20
->>> time
->>> from 10:50 to 11:13 (and only in that time, else the log was=20
->>> clean). I
->>> found them on all four of my OSD hosts, all at about the same time.
->>> I'm running kernel 3.2.0-4-amd64 on a debian 7.0. Ceph is on=20
->>> version
->>> 0.67.4. I have got 15 OSDs per OSD Host.
->>>
->>> Ceph does not really seem to care about this, so I'm not sure what=20
->>> it is
->>> all about=E2=80=A6
->>> Still they are warnings in syslog and I hope you guys can tell me=20
->>> what
->>> went wrong here and what I can do about it?
->>>
->>> Thank you
->>> Niklas
->>>
->>>
->>> Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388018] ------------[=
-=20
->>> cut
->>> here ]------------
->>> Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388030] WARNING: at
->>> /build/linux-s5x2oE/linux-3.2.46/fs/xfs/xfs_aops.c:1091
->>> xfs_vm_releasepage+0x76/0x8e [xfs]()
->>> Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388034] Hardware=20
->>> name:
->>> X9DR3-F
->>> Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388036] Modules=20
->>> linked in:
->>> xfs autofs4 nfsd nfs nfs_acl auth_rpcgss fscache lockd sunrpc ext3=20
->>> jbd
->>> loop acpi_cpufreq mperf coretemp crc32c_intel ghash_clmulni_intel
->>> snd_pcm aesni_intel snd_page_alloc aes_x86_64 snd_timer aes_generic=
-=20
->>> s
->>> nd cryptd soundcore pcspkr sb_edac joydev evdev edac_core iTCO_wdt
->>> i2c_i801 iTCO_vendor_support i2c_core ioatdma processor thermal_sys
->>> container button ext4 crc16 jbd2 mbcache usbhid hid ses enclosure=20
->>> sg
->>> sd_mod crc_t10dif megaraid_sas ehci_hcd usbcore isci libsas=20
->>> usb_common liba
->>> ta ixgbe mdio scsi_transport_sas scsi_mod igb dca [last unloaded:
->>> scsi_wait_scan]
->>> Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388093] Pid: 3459605,
->>> comm: ceph-osd Tainted: G        W    3.2.0-4-amd64 #1 Debian=20
->>> 3.2.46-1
->>> Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388096] Call Trace:
->>> Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388102]
->>> [<ffffffff81046b75>] ? warn_slowpath_common+0x78/0x8c
->>> Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388115]
->>> [<ffffffffa048b98c>] ? xfs_vm_releasepage+0x76/0x8e [xfs]
->>> Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388122]
->>> [<ffffffff810bedc5>] ? invalidate_inode_page+0x5e/0x80
->>> Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388129]
->>> [<ffffffff810bee5d>] ? invalidate_mapping_pages+0x76/0x102
->>> Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388135]
->>> [<ffffffff810b7b83>] ? sys_fadvise64_64+0x19f/0x1e2
->>> Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388140]
->>> [<ffffffff81353b52>] ? system_call_fastpath+0x16/0x1b
->>> Oct 22 11:11:19 cs-bigfoot06 kernel: [9744648.388144] ---[ end=20
->>> trace
->>> e9640ed6f82f066d ]---
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe=20
->>> ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe=20
->> ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Some days ago, I found my script missed some file while processing
+> data, then I noticed those files' size is zero. But it's impossible,
+> rsyslog won't generate file until data arrives, so I logged the file
+> size before mv, so here's one example from these exceptions:
+>
+> In log:
+> 2013-11-07 18:17:29 /scripts/log/collector: file size: 4910689
+> /gwbn/nat/20131107/dnsquery-pb24-192.168.156.60-by_squid79-20131107_1=
+7.log
+>
+> Zero size file on ceph FS:
+> -rw-r--r-- 1 root root     0 Jan  1  1970
+> dnsquery-pb24-192.168.156.60-by_squid79-20131107_17.log
+>
+> stat dnsquery-pb24-192.168.156.60-by_squid79-20131107_17.log
+>   File: =91dnsquery-pb24-192.168.156.60-by_squid79-20131107_17.log=92
+>   Size: 0             Blocks: 0          IO Block: 4194304 regular em=
+pty file
+> Device: 0h/0d    Inode: 1099518968218  Links: 1
+> Access: (0644/-rw-r--r--)  Uid: (    0/    root)   Gid: (    0/    ro=
+ot)
+> Access: 2013-11-07 17:00:00.167501860 +0800
+> Modify: 1970-01-01 08:00:00.000000000 +0800
+> Change: 2013-11-07 18:17:29.843558000 +0800
+>  Birth: -
+>
+> I'm running multiple versions of kernel, scales from 3.8.x to 3.11.6.
+> Most of the zero file event occurs on those servers with kernel
+> version of 3.10.[45], some on 3.8.6 and 3.11.4, I didn't tested all o=
+f
+> them, these is my running versions.
+>
+> I think the ceph FS kernel driver should sync before umount, isn't it
+> ? So what can I do to shoot this problem down ? And any advice of
+> temparory solution to avoid this, manually sync?
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
-=20
-> in
+ in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
