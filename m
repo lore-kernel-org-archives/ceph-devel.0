@@ -1,60 +1,39 @@
-From: Hugh Saunders <hugh@wherenow.org>
-Subject: Re: teuthology consumability
-Date: Fri, 8 Nov 2013 15:19:10 +0800
-Message-ID: <2A6E3DA2-2468-477C-B848-AAC90F99B19F@wherenow.org>
-References: <alpine.DEB.2.00.1311070711080.17943@cobra.newdream.net> <527BB190.2010302@dachary.org> <alpine.DEB.2.00.1311071700410.17943@cobra.newdream.net>
-Mime-Version: 1.0 (1.0)
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+From: Lan Tianyu <lantianyu1986@gmail.com>
+Subject: [PATCH] Throttle: Fix indention
+Date: Fri,  8 Nov 2013 15:32:33 +0800
+Message-ID: <1383895953-583-1-git-send-email-lantianyu1986@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f45.google.com ([209.85.220.45]:34269 "EHLO
-	mail-pa0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752490Ab3KHHZF convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Nov 2013 02:25:05 -0500
-Received: by mail-pa0-f45.google.com with SMTP id kp14so1808872pab.4
-        for <ceph-devel@vger.kernel.org>; Thu, 07 Nov 2013 23:25:04 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1311071700410.17943@cobra.newdream.net>
+Received: from mail-pd0-f175.google.com ([209.85.192.175]:63431 "EHLO
+	mail-pd0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751341Ab3KHHqj (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Nov 2013 02:46:39 -0500
+Received: by mail-pd0-f175.google.com with SMTP id g10so1799617pdj.34
+        for <ceph-devel@vger.kernel.org>; Thu, 07 Nov 2013 23:46:39 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Loic Dachary <loic@dachary.org>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: Lan Tianyu <lantianyu1986@gmail.com>
 
-On 8 Nov 2013, at 09:08, "Sage Weil" <sage@inktank.com> wrote:
-> 
->> On Thu, 7 Nov 2013, Loic Dachary wrote:
->> 
->> Hi Sage,
->> 
->>> On 07/11/2013 23:21, Sage Weil wrote:
->>> Hey all,
->>> 
->>> I've had a couple different conversations with week with organizations 
->>> that want to ramp up their ceph development efforts, as a big piece of 
->>> that, spin up their own teuthology environments.  There has been a lot 
->>> going on here, and I haven't been on the weekly calls, but I suspect 
->>> things that will help them move forward include:
->>> 
->>> - documenting a teuthology install-from-scratch.  this would include 
->>> setting up the databases, lock server, workers, etc., and will initially 
->>> be long and ugly but will hopefully shrink over time.
->>> 
->>> - adding support for euca2ools or some other cloud client that does 
->>> openstack and ec2 for creating/destroying test machines.  hopefully most 
->>> of the integration points are mapped out from the downburst integration 
->>> work.
->> 
->> I'm including Hugh Saunders on this thread : we discussed this topic 
->> during the OpenStack summit this week in relation to the associated 
->> ticket:
->> 
->> http://tracker.ceph.com/issues/6502
-> 
-> Great.  I would love to see someone sign up for this for the firefly cycle 
-> (and write up a quick blueprint).  :)
+Fix indention.
 
-Hi, I should have some time to look into teuthology next week. Haven't used it before so will take a while before I can contribute. However notes from setup as a new user should be helpful for docs. 
+Signed-off-by: Lan Tianyu <lantianyu1986@gmail.com>
+---
+ src/common/Throttle.h |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-After that can look at supporting openstack for test instances.
+diff --git a/src/common/Throttle.h b/src/common/Throttle.h
+index 6d03988..f261ee0 100644
+--- a/src/common/Throttle.h
++++ b/src/common/Throttle.h
+@@ -16,7 +16,7 @@ class Throttle {
+   CephContext *cct;
+   std::string name;
+   PerfCounters *logger;
+-	ceph::atomic_t count, max;
++  ceph::atomic_t count, max;
+   Mutex lock;
+   list<Cond*> cond;
+   bool use_perf;
+-- 
+1.7.9.5
 
---
-Hugh Saunders
