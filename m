@@ -1,54 +1,69 @@
-From: Milosz Tanski <milosz@adfin.com>
-Subject: Re: [PATCH] Ceph: allocate non-zero page to fscache in readpage()
-Date: Sat, 9 Nov 2013 10:19:31 -0500
-Message-ID: <CANP1eJHthD-Q_Xv=HPWQjsJTHvpP2fj-X_j7HgBXaz5YKQ2EAQ@mail.gmail.com>
-References: <1383963966-10888-1-git-send-email-liwang@ubuntukylin.com>
+From: Wido den Hollander <wido@42on.com>
+Subject: Re: PowerDNS backend for Rados Gateway to direct bucket traffic
+Date: Sat, 09 Nov 2013 16:46:00 +0100
+Message-ID: <527E58B8.9050503@42on.com>
+References: <52765A7E.9040306@42on.com> <CAFMfnwpa874DOywJwiwS0gYVaQ70cf4V6403KRrJUMM6NqX=wg@mail.gmail.com> <alpine.DEB.2.00.1311072036580.15297@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-In-Reply-To: <1383963966-10888-1-git-send-email-liwang@ubuntukylin.com>
-Sender: linux-fsdevel-owner@vger.kernel.org
-To: Li Wang <liwang@ubuntukylin.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, "linux-cachefs@redhat.com" <linux-cachefs@redhat.com>, Sage Weil <sage@inktank.com>, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, linux-kernel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from websrv.42on.com ([31.25.102.167]:43952 "EHLO websrv.42on.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753700Ab3KIPqD (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sat, 9 Nov 2013 10:46:03 -0500
+In-Reply-To: <alpine.DEB.2.00.1311072036580.15297@cobra.newdream.net>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@inktank.com>, Kyle Bader <kyle.bader@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Li, that's a good good catch.
+On 11/08/2013 05:37 AM, Sage Weil wrote:
+> I think this is a good path forward, FWIW.  Want to write up a blueprint,
+> Wido?  :)
+>
 
+Done! 
+http://wiki.ceph.com/01Planning/02Blueprints/Firefly/PowerDNS_backend_for_RGW
 
-On Fri, Nov 8, 2013 at 9:26 PM, Li Wang <liwang@ubuntukylin.com> wrote:
-> ceph_osdc_readpages() returns number of bytes read, currently,
-> the code only allocate full-zero page into fscache, this patch
-> fixes this.
+This really shouldn't be that much work. I'll try to write a small POC 
+in the coming weeks.
+
+Wido
+
+> sage
 >
-> Signed-off-by: Li Wang <liwang@ubuntukylin.com>
-> ---
->  fs/ceph/addr.c |    2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-> index 6df8bd4..1e561c0 100644
-> --- a/fs/ceph/addr.c
-> +++ b/fs/ceph/addr.c
-> @@ -216,7 +216,7 @@ static int readpage_nounlock(struct file *filp, struct page *page)
->         }
->         SetPageUptodate(page);
+> On Thu, 7 Nov 2013, Kyle Bader wrote:
 >
-> -       if (err == 0)
-> +       if (err >= 0)
->                 ceph_readpage_to_fscache(inode, page);
->
->  out:
+>>> Does it sound reasonable what I'm thinking of or am I completely wrong about
+>>> this?
+>>>
+>>> [0]: http://doc.powerdns.com/html/remotebackend.html
+>>
+>> I was considering exactly what your describe, not being a programmer
+>> though it was simply an idea. I could see myself using a powerdns
+>> backend for bucket mapping, all other ways I've considered seem very
+>> brittle. Let me know if you write it, I'd be willing to test it out.
+>>
+>> --
+>>
+>> Kyle
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
 > --
-> 1.7.9.5
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >
-
 
 
 -- 
-Milosz Tanski
-CTO
-10 East 53rd Street, 37th floor
-New York, NY 10022
+Wido den Hollander
+42on B.V.
 
-p: 646-253-9055
-e: milosz@adfin.com
+Phone: +31 (0)20 700 9902
+Skype: contact42on
