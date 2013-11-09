@@ -1,97 +1,119 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: cache tier blueprint (part 2)
-Date: Sat, 9 Nov 2013 09:59:52 -0800
-Message-ID: <CAPYLRzgw3BGFEy9GdJGMzXrmHGjssa-KEah4w1U5zK96oWpBSg@mail.gmail.com>
-References: <alpine.DEB.2.00.1311070653290.17943@cobra.newdream.net>
-	<CAPYLRzgmhso21XgOM8ZAvfr6Hcsuvbu0yd6g6NeNZcCOr_9Umw@mail.gmail.com>
-	<alpine.DEB.2.00.1311082219130.4750@cobra.newdream.net>
+From: Samuel Just <sam.just@inktank.com>
+Subject: Re: messenger refactor notes
+Date: Sat, 9 Nov 2013 10:13:36 -0800
+Message-ID: <CA+4uBUZ_W2_-e+BgVMCGBa=3uz2d5sieGyrHwRqa7_wK5pvbWA@mail.gmail.com>
+References: <alpine.DEB.2.00.1311090052130.8192@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f178.google.com ([209.85.212.178]:63146 "EHLO
-	mail-wi0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755594Ab3KIR7x convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 9 Nov 2013 12:59:53 -0500
-Received: by mail-wi0-f178.google.com with SMTP id hn9so694896wib.11
-        for <ceph-devel@vger.kernel.org>; Sat, 09 Nov 2013 09:59:52 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1311082219130.4750@cobra.newdream.net>
+Received: from mail-qc0-f175.google.com ([209.85.216.175]:56042 "EHLO
+	mail-qc0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750986Ab3KISNg (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 9 Nov 2013 13:13:36 -0500
+Received: by mail-qc0-f175.google.com with SMTP id e16so2840286qcx.20
+        for <ceph-devel@vger.kernel.org>; Sat, 09 Nov 2013 10:13:36 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.00.1311090052130.8192@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@inktank.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Fri, Nov 8, 2013 at 10:25 PM, Sage Weil <sage@inktank.com> wrote:
-> On Fri, 8 Nov 2013, Gregory Farnum wrote:
->> On Thu, Nov 7, 2013 at 6:56 AM, Sage Weil <sage@inktank.com> wrote:
->> > I typed up what I think is remaining for the cache tier work for f=
-irefly.
->> > Greg, can you take a look?  I'm most likely missing a bunch of stu=
-ff here.
->> >
->> >  http://wiki.ceph.com/01Planning/02Blueprints/Emperor/rados_cache_=
-pool_(part_2)
->> >
->> > This will be one of the meatier sessions at the upcoming CDS.  The=
-re will
->> > be a fair bit of work not just on the OSD side but also in buildin=
-g
->> > testing tools that exercise and validate the functionality, here, =
-that
->> > may be a great way for a new contributer to get involved and help =
-out.
->>
->> This looks reasonably complete to me as an enumeration of areas, but
->> is definitely targeted at the cache pool use case rather than demoti=
-ng
->> to cold storage. I'm not sure yet if we're going to want to use the
->> same agent/process/whatever in both use cases; do you want a separat=
-e
->> blueprint for that, or should we broaden this one?
->
-> I think they are going to be quite similar, so it seems simplest to j=
-ust
-> start with this use-case and keep in mind that it may need to general=
-ize
-> slightly.  To a first approximation, both are making some decision ab=
-out
-> when to flush/evict or demote based on how old the object is and/or h=
-ow
-> full the pool is.  It will probably be a pretty compact bit of logic,=
- so
-> I'm not too worried.
->
-> The other question for me is where we want to implement the agent.  T=
-he
-> logic is pretty simple, and it can operate entirely using the new lib=
-rados
-> calls.  I may be simpler to drive it from a thread inside ceph-osd
-> (simpler than managing a separate external daemon).  It might also be=
- easy
-> (and slightly more efficient) to plug into the scrub process.  It is
-> possible/likely that in the future we (or others) will want to constr=
-uct
-> more sophisticated policies using an external agent, but at this poin=
-t the
-> logic is simple enough that we can probably pick something simple and
-> still be able to easily change it up down the line...
+Currently, the messenger delivers messages to the Dispatcher
+implementation from a single thread (See src/msg/DispatchQueue.h/cc).
+My take away from the performance work so far is that we probably need
+client IO related messages to bypass the DispatchQueue bottleneck by
+allowing the thread reading the message to call directly into the
+Dispatcher.  wip-queueing is a very preliminary branch implementing
+this behavior for OSD ops and subops (note, this branch does not work
+yet!).  The main change is to add to the Dispatcher interface
+ms_can_fast_dispatch and ms_fast_dispatch.  This allows the dispatcher
+implementation to designate some messages as safe to dispatch in
+parallel without queueing.
+-Sam
 
-This is the big thing that worries me. I think that doing cold storage
-demotion as part of scrub is the natural way to go since we're already
-examining the objects, but a cache pool needs to be able to evict
-stuff on-demand, and certainly on a faster cycle than every day or two
-=97 so it needs to have a separate internal process.
-Maybe that means we do a heavier-weight cache pool eviction process
-first and use that for both, but I'm not sure we want to sandbox
-ourselves that way?
-
-We may also want to avoid giving external users access for the first
-implementation just so we can learn a little more about it before
-providing an API that we need to keep stable, although that thought
-just popped into my head.
--Greg
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On Sat, Nov 9, 2013 at 1:18 AM, Sage Weil <sage@inktank.com> wrote:
+> The SimpleMessenger implementation of the Messenger interface has grown
+> organically over many years and is one of the cruftier bits of code in
+> Ceph.  The idea of building a fresh implementation has come up several
+> times in the past, but is now attracting new interest due to a desire to
+> support alternative transports to TCP (infiniband!) and a desire to
+> improve performance for high-end ceph backends (flash).
+>
+> Here is a braindump that should hopefully help kickstart the process.
+>
+> See msg/Messenger.h for the abstract interface.
+>
+> Note that several bits of this are 'legacy': the send_message, mark_down,
+> and other entity_addr_t-based calls are more or less deprecated (although
+> a few callers remain).  New code uses get_connection() and the
+> Connection*-based calls.  Any effort should focus on these exclusively
+> (and on converting old code to use these as needed).
+>
+> The OSD client-side already uses the new Connection* interface.  The OSD
+> <-> OSD communication uses the old calls, but is already wrapped by
+> methods in OSDService and can be easily converted by adding a
+> hash_map<int,ConnectionRef> to that class.  There are some mark_down()
+> calls in OSD that probably need to be wrapped/moved along with that
+> change.
+>
+> As for how the implementation should probably be structured:
+>
+> The SimpleMessenger code uses 2 (!) threads per conection, which
+> is clearly not ideal.  The new approach should probably have a clearly
+> defined state model for each connection and be event driven.
+>
+> Connections can follow a few different modes:
+>
+>    - client/server lossy:  client always connects to server.  on
+>      transport error, we queue a notification on both ends and discard the
+>      connection state, close the socket, etc.
+>    - client/server lossless: client will transparently reconnect on
+>      failure.  flow and ordering of messages is preserved.  server will
+>      not initiate reconnect, but will preserve connection state (message
+>      sequence numbers) with the expectation that the client will
+>      reconnect and continue the bidirectional stream of messages.
+>    - lossless peer: nodes can connect to each other.  ordered flow of
+>      messages is preserved.
+>
+> For RADOS, client/server lossy is used between librados clients and OSDs.
+> This half of the data path and also the simplest to reason about; I
+> suggest starting here.
+>
+> The OSD to OSD communication is lossless peer.  This is more complicated
+> because the connection can be initiated from either end but the stream of
+> messages needs to unified into a single stream.  This is the root of all
+> of the weird connect_seq logic in SimpleMessenger (that is possibly best
+> ignored in favor of an alternative approach).  The OSDs will get unique
+> addresses when they start, but peers may discover a new map and open
+> connections to each other at slightly different times.. which means
+> accepting connections and potentially processing some messages before we
+> know whether the connection is valid or old.
+>
+> Again, because there is some nastiness there, I would probably ignore it
+> for now and focus on the client/server lossy mode as a first step.  Once
+> we have a nice model for modeling connection state and efficiently
+> servicing the network io, we can extend it to the other modes.  FWIW it is
+> easy to swap in a new Messenger implementation for just the client-facing
+> side of the OSD (for example); see ceph_osd.cc.  Same goes for the client
+> code (grep for SimpleMessenger in librados/*).
+>
+> The last bit is that we should make sure the transport component of this
+> is well abstracted.  For simplicity of development, I would suggest making
+> the very first prototype simply use TCP, but make sure the interface maps
+> well onto the capabilities of the high-performance transports that are
+> coming soon (whether its Accelio or verbs or rsockets or whatever seems
+> likely to come down the pike anytime soon).  Obviously this is up to
+> whoever is doing the work, though!  As long as it is possible to slot in
+> other transports without reimplementing this whole module again the next
+> time around, I will be happy.
+>
+> One other note: Sam and others have been doing some performance profiling
+> recently that points toward bottlenecks in the message delivery threads.
+> I'm not sure what the implications of those findings are (if any) for the
+> design of this new code.  Can someone who knows more than I do chime in?
+>
+> sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
