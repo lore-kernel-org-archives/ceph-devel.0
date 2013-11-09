@@ -1,37 +1,35 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: cache tier blueprint (part 2)
-Date: Fri, 8 Nov 2013 11:16:41 -0800
-Message-ID: <CAPYLRzgmhso21XgOM8ZAvfr6Hcsuvbu0yd6g6NeNZcCOr_9Umw@mail.gmail.com>
-References: <alpine.DEB.2.00.1311070653290.17943@cobra.newdream.net>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f41.google.com ([74.125.82.41]:36353 "EHLO
-	mail-wg0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757478Ab3KHTQm (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Nov 2013 14:16:42 -0500
-Received: by mail-wg0-f41.google.com with SMTP id b13so127580wgh.0
-        for <ceph-devel@vger.kernel.org>; Fri, 08 Nov 2013 11:16:41 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1311070653290.17943@cobra.newdream.net>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+From: Li Wang <liwang@ubuntukylin.com>
+Subject: [PATCH] Ceph: allocate non-zero page to fscache in readpage()
+Date: Sat,  9 Nov 2013 10:26:06 +0800
+Message-ID: <1383963966-10888-1-git-send-email-liwang@ubuntukylin.com>
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+Sender: linux-fsdevel-owner@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+Cc: linux-cachefs@redhat.com, Sage Weil <sage@inktank.com>, Milosz Tanski <milosz@adfin.com>, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, Li Wang <liwang@ubuntukylin.com>
+List-Id: ceph-devel.vger.kernel.org
 
-On Thu, Nov 7, 2013 at 6:56 AM, Sage Weil <sage@inktank.com> wrote:
-> I typed up what I think is remaining for the cache tier work for firefly.
-> Greg, can you take a look?  I'm most likely missing a bunch of stuff here.
->
->  http://wiki.ceph.com/01Planning/02Blueprints/Emperor/rados_cache_pool_(part_2)
->
-> This will be one of the meatier sessions at the upcoming CDS.  There will
-> be a fair bit of work not just on the OSD side but also in building
-> testing tools that exercise and validate the functionality, here, that
-> may be a great way for a new contributer to get involved and help out.
+ceph_osdc_readpages() returns number of bytes read, currently,
+the code only allocate full-zero page into fscache, this patch
+fixes this.
 
-This looks reasonably complete to me as an enumeration of areas, but
-is definitely targeted at the cache pool use case rather than demoting
-to cold storage. I'm not sure yet if we're going to want to use the
-same agent/process/whatever in both use cases; do you want a separate
-blueprint for that, or should we broaden this one?
--Greg
+Signed-off-by: Li Wang <liwang@ubuntukylin.com>
+---
+ fs/ceph/addr.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index 6df8bd4..1e561c0 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -216,7 +216,7 @@ static int readpage_nounlock(struct file *filp, struct page *page)
+ 	}
+ 	SetPageUptodate(page);
+ 
+-	if (err == 0)
++	if (err >= 0)
+ 		ceph_readpage_to_fscache(inode, page);
+ 
+ out:
+-- 
+1.7.9.5
+
