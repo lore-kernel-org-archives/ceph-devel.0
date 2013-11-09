@@ -1,37 +1,61 @@
-From: James Harper <james.harper@bendigoit.com.au>
-Subject: portability issue with gmtime method in utime_t
-Date: Sat, 9 Nov 2013 08:24:22 +0000
-Message-ID: <6035A0D088A63A46850C3988ED045A4B665E2149@BITCOM1.int.sbss.com.au>
+From: Sage Weil <sage@inktank.com>
+Subject: pending osd/rados branches
+Date: Sat, 9 Nov 2013 00:25:49 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1311082245120.4750@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp2.bendigoit.com.au ([203.16.207.99]:39894 "EHLO
-	smtp2.bendigoit.com.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756254Ab3KIIYd convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 9 Nov 2013 03:24:33 -0500
-Received: from bitcom1.int.sbss.com.au ([2002:cb10:e0fe:201:a5ca:4fd3:14f:ad5d])
-	by smtp2.bendigoit.com.au with esmtp (Exim 4.80)
-	(envelope-from <james.harper@bendigoit.com.au>)
-	id 1Vf3qI-0006sK-J1
-	for ceph-devel@vger.kernel.org; Sat, 09 Nov 2013 19:24:30 +1100
-Content-Language: en-US
+Received: from cobra.newdream.net ([66.33.216.30]:58730 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753319Ab3KIIZu (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 9 Nov 2013 03:25:50 -0500
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 0641F80079
+	for <ceph-devel@vger.kernel.org>; Sat,  9 Nov 2013 00:25:50 -0800 (PST)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 0386680079
+	for <ceph-devel@vger.kernel.org>; Sat,  9 Nov 2013 00:25:50 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-utime.h defines a utime_t class with a gmtime() method, and also calls the library function gmtime_r().
+There are several:
 
-mingw implements gmtime_r() as a macro in pthread.h that in turn calls gmtime(), and gcc bails because it gets confused about which is being called:
- 
-utime.h: In member function 'utime_t utime_t::round_to_minute()':
-utime.h:113:5: error: no matching function for call to 'utime_t::gmtime(time_t*)'
-utime.h:113:5: note: candidate is:
-utime.h:146:12: note: std::ostream& utime_t::gmtime(std::ostream&) const
-utime.h:146:12: note:   no known conversion for argument 1 from 'time_t* {aka long long int*}' to 'std::ostream& {aka std::basic_ostream<char>&}'
+wip-promote-copies (greg)
+	https://github.com/ceph/ceph/pull/705
+	looks good to me; my branches build on this.
+	Reviewed-by: Sage Weil <sage@inktank.com>
+	-> let's merge
 
-Same for asctime and localtime. I can work around it by creating a static method that in turn calls ::gmtime() etc, but I'm not sure that's the best way to do it.
+wip-rados-list (sage)
+	https://github.com/ceph/ceph/pull/710
+	updates to the object list api, and some cleanup/refactoring in 
+objecter.  will be needed for the agent to start iterating objects at 
+random points.
+	-> needs review, merge
 
-There's a bunch of other build errors in there too so it may be a lost cause...
+wip-tier (sage)
+	https://github.com/ceph/ceph/pull/745
+	adds HitSet infrastructure and tests
+	-> needs review, merge
 
-James
+wip-cache (sage)
+	https://github.com/ceph/ceph/pull/842
+	most of hte remaining bits (cache evict, flush)
+	-> needs review
+
+We should start integrating these quickly.  Unfortunately I'm not going to 
+be around to go back and forth with the review over the next two weeks 
+(vacation starts in 24 hrs or so and I will be only marginally available 
+during that period), and I suspect there will be a fair bit of feedback on 
+wip-cache in particular.  I suggest just going ahead and fixing things up 
+as appropriate, or if there are burning questions about wtf any of my 
+patches are doing fire me an email and sms.
+
+A few other unrelated branches that need review/merge:
+
+https://github.com/ceph/ceph/pull/785
+https://github.com/ceph/ceph/pull/841
+https://github.com/ceph/ceph/pull/798
+
+sage
