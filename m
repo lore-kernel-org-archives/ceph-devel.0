@@ -1,36 +1,37 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: libuuid vs boost uuid
-Date: Fri, 8 Nov 2013 22:43:44 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1311082238350.4750@cobra.newdream.net>
-References: <6035A0D088A63A46850C3988ED045A4B665E1FB8@BITCOM1.int.sbss.com.au>
+From: James Harper <james.harper@bendigoit.com.au>
+Subject: portability issue with gmtime method in utime_t
+Date: Sat, 9 Nov 2013 08:24:22 +0000
+Message-ID: <6035A0D088A63A46850C3988ED045A4B665E2149@BITCOM1.int.sbss.com.au>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:58324 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752385Ab3KIGno (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 9 Nov 2013 01:43:44 -0500
-In-Reply-To: <6035A0D088A63A46850C3988ED045A4B665E1FB8@BITCOM1.int.sbss.com.au>
+Received: from smtp2.bendigoit.com.au ([203.16.207.99]:39894 "EHLO
+	smtp2.bendigoit.com.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756254Ab3KIIYd convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 9 Nov 2013 03:24:33 -0500
+Received: from bitcom1.int.sbss.com.au ([2002:cb10:e0fe:201:a5ca:4fd3:14f:ad5d])
+	by smtp2.bendigoit.com.au with esmtp (Exim 4.80)
+	(envelope-from <james.harper@bendigoit.com.au>)
+	id 1Vf3qI-0006sK-J1
+	for ceph-devel@vger.kernel.org; Sat, 09 Nov 2013 19:24:30 +1100
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: James Harper <james.harper@bendigoit.com.au>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Sat, 9 Nov 2013, James Harper wrote:
-> Just out of curiosity (recent thread about windows port) I just had a 
-> quick go at compiling librados under mingw (win32 cross compile), and 
-> one of the errors that popped up was the lack of libuuid under mingw. 
-> Ceph appears to use libuuid, but I notice boost appears to include a 
-> uuid class too, and it seems that ceph already uses some of boost (which 
-> already builds under mingw).
-> 
-> Is there anything special about libuuid that would mean boost's uuid 
-> class couldn't replace it? And would it be better to still use ceph's 
-> uuid.h as a wrapper around the boost uuid class, or to modify ceph to 
-> use the boost uuid class directly?
+utime.h defines a utime_t class with a gmtime() method, and also calls the library function gmtime_r().
 
-Nice!  Boost uuid looks like it would work just fine.  It is probably 
-easier and less disruptive to use it from within the existing class in 
-include/uuid.h.
+mingw implements gmtime_r() as a macro in pthread.h that in turn calls gmtime(), and gcc bails because it gets confused about which is being called:
+ 
+utime.h: In member function 'utime_t utime_t::round_to_minute()':
+utime.h:113:5: error: no matching function for call to 'utime_t::gmtime(time_t*)'
+utime.h:113:5: note: candidate is:
+utime.h:146:12: note: std::ostream& utime_t::gmtime(std::ostream&) const
+utime.h:146:12: note:   no known conversion for argument 1 from 'time_t* {aka long long int*}' to 'std::ostream& {aka std::basic_ostream<char>&}'
 
-sage
+Same for asctime and localtime. I can work around it by creating a static method that in turn calls ::gmtime() etc, but I'm not sure that's the best way to do it.
+
+There's a bunch of other build errors in there too so it may be a lost cause...
+
+James
