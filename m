@@ -1,60 +1,49 @@
-From: Milosz Tanski <milosz-B5zB6C1i6pkAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH 0/7] Cifs and Ceph: Uncache single no-data page in readpage()
-Date: Mon, 11 Nov 2013 11:19:49 -0500
-Message-ID: <CANP1eJE9zGN1ort4DdEdvvG4MVneRnjh+MnrdHkyy==ruEBCnw@mail.gmail.com>
-References: <cover.1384183054.git.liwang@ubuntukylin.com>
+From: "Dave (Bob)" <dave@bob-the-boat.me.uk>
+Subject: Mourning the demise of mkcephfs
+Date: Mon, 11 Nov 2013 17:51:41 +0000
+Message-ID: <5281192D.4090707@bob-the-boat.me.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-cifs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <cover.1384183054.git.liwang-qfb7ZC4agRC9jIzG8Sm66w@public.gmane.org>
-Sender: linux-cifs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Li Wang <liwang-qfb7ZC4agRC9jIzG8Sm66w@public.gmane.org>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>, "linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx01.ip.uk.com ([81.2.115.98]:45776 "EHLO i01.ip.uk.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1754139Ab3KKSSt (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 11 Nov 2013 13:18:49 -0500
+Received: from [10.0.1.108]
+	by i01.ip.uk.com with esmtp (Exim 4.63)
+	(envelope-from <dave@bob-the-boat.me.uk>)
+	id 1VfvYN-0002Oo-Q3
+	for ceph-devel@vger.kernel.org; Mon, 11 Nov 2013 17:45:36 +0000
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Li,
+The utility mkcephfs seemed to work, it was very simple to use and
+apparently effective.
 
-I recommend you CC David Howells who maintains FSCache directly on your emails.
+It has been deprecated in favour of something called ceph-deploy, which
+does not work for me.
 
-Thanks,
-- Milosz
+I've ignored the deprecation messages until now, but in going from 70 to
+72 I find that mkcephfs has finally gone.
 
-On Mon, Nov 11, 2013 at 10:27 AM, Li Wang <liwang-qfb7ZC4agRC9jIzG8Sm66w@public.gmane.org> wrote:
-> Currently, the page allocated into fscache in readpage()
-> for Cifs and Ceph does not be uncached if no data read due
-> to io error. This patch fixes this. fscache_readpages_cancel()
-> is for this kind of job but taking list read * as input, so
-> a new routine take page * as input is introduced.
->
-> Li Wang (7):
->   Fscache: Introduce new API fscache_readpage_cancel()
->   Fscache: Implement uncaching single no-data page
->   Ceph: Introduce routine for uncaching single no-data page
->   Ceph: Uncaching no-data page in readpage()
->   Cifs: Introduce routine for uncaching single no-data page
->   Cifs: Implement uncaching single no-data page
->   Cifs: Uncaching no-data page in readpage()
->
->  fs/ceph/addr.c          |    1 +
->  fs/ceph/cache.h         |   13 +++++++++++++
->  fs/cifs/file.c          |    4 +++-
->  fs/cifs/fscache.c       |    7 +++++++
->  fs/cifs/fscache.h       |   13 +++++++++++++
->  fs/fscache/page.c       |    8 ++++++++
->  include/linux/fscache.h |   11 +++++++++++
->  7 files changed, 56 insertions(+), 1 deletion(-)
->
-> --
-> 1.7.9.5
->
+I have tried ceph-deploy, and it seems to be tied in to specific
+'distributions' in some way.
+
+It is unuseable for me at present, because it reports:
+
+[ceph_deploy][ERROR ] UnsupportedPlatform: Platform is not supported:
 
 
+I therefore need to go back to first principles, but the documentation
+seems to have dropped descriptions of driving ceph without smoke and
+mirrors.
 
--- 
-Milosz Tanski
-CTO
-10 East 53rd Street, 37th floor
-New York, NY 10022
+The direct approach may be more laborious, but at least it would not
+depend on anything except ceph itself.
 
-p: 646-253-9055
-e: milosz-B5zB6C1i6pkAvxtiuMwx3w@public.gmane.org
+Maybe I need to step back a version or two, set up my cluster with
+mkcephfs, then switch back to the latest to use it.
+
+I'll search the documentation again.
