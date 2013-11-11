@@ -1,93 +1,125 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: Returning the bucket name in RGW response
-Date: Mon, 11 Nov 2013 21:40:02 +0100
-Message-ID: <528140A2.2060909@42on.com>
-References: <527A9996.8050402@42on.com> <CABBk=J88dNmZUhAki0ZvCd1toG9qg=u9UP5UkeTm3WT_EqL7SA@mail.gmail.com>
+From: Milosz Tanski <milosz@adfin.com>
+Subject: Fwd: [PATCH] FS-Cache: Fix handling of an attempt to store a page
+ that is now beyond EOF
+Date: Mon, 11 Nov 2013 18:32:35 -0500
+Message-ID: <CANP1eJF0WKgGxv5zMP-syi7j07j2sW6mQon0PcS2QdytQyOYTg@mail.gmail.com>
+References: <20131111221804.23212.30560.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from websrv.42on.com ([31.25.102.167]:46478 "EHLO websrv.42on.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752471Ab3KKUkE (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 11 Nov 2013 15:40:04 -0500
-In-Reply-To: <CABBk=J88dNmZUhAki0ZvCd1toG9qg=u9UP5UkeTm3WT_EqL7SA@mail.gmail.com>
+Received: from mail-we0-f179.google.com ([74.125.82.179]:33537 "EHLO
+	mail-we0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752438Ab3KKXch (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Nov 2013 18:32:37 -0500
+Received: by mail-we0-f179.google.com with SMTP id x55so1272678wes.38
+        for <ceph-devel@vger.kernel.org>; Mon, 11 Nov 2013 15:32:36 -0800 (PST)
+In-Reply-To: <20131111221804.23212.30560.stgit@warthog.procyon.org.uk>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh <yehuda@inktank.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 11/06/2013 10:12 PM, Yehuda Sadeh wrote:
-> On Wed, Nov 6, 2013 at 11:33 AM, Wido den Hollander <wido@42on.com> wrote:
->> Hi,
->>
->> I'm working on a RGW setup where I'm using Varnish[0] to cache objects, but
->> when doing so you run into the problem that a lot of (cached) requests will
->> not reach the RGW itself so the accounting of traffic isn't correct.
->>
->> To overcome this I've been sending all the logs from Varnish to Logstash[1]
->> and into ElasticSearch and afterwards analyzing the logs in ElasticSearch to
->> find out how much traffic each bucket did.
->>
->> This method works, but it isn't safe enough. Since I'm currently parsing the
->> "Host" header to find out which bucket it was, but this isn't always safe
->> since users can CNAME.
->>
->> So I've been playing with the idea to add the "Rgwx-bucket" header to each
->> response which tells you which bucket the request was made to.
->>
->> In Varnish I can catch this response header and send it to Logstash so I
->> have a safer method of which requests was done by which bucket.
->>
->> I'm using Varnish, but you could do the same with nginx or any HTTP caching
->> proxy.
->>
->> Would it be an idea to add this to RGW? I have it running on my system and
->> it works fine, but it's currently a bit hacky.
->
-> Yeah, I don't see why not. As long as it's configurable.
->
->>
->> A config variable like "rgw expose bucket" could be false by default, but
->> when set to true RGW would send the response header with the bucket name.
->>
->> How does this sound?
->
->
-> Sounds good, just need to see the code now ...
->
+For those of you working on fscache.
 
-I did it way to complex until I looked at the code again today and came 
-up with a much simpler patch. It's in wip-rgw-expose-bucket now: 
-https://github.com/ceph/ceph/commit/f321471df2703ae706910757a133ab8a13803acb
 
-The dump_bucket_from_state method was already there, but it's not used 
-anywhere. So I modified it a bit to have it honor the configuration boolean.
+---------- Forwarded message ----------
+From: David Howells <dhowells@redhat.com>
+Date: Mon, Nov 11, 2013 at 5:18 PM
+Subject: [PATCH] FS-Cache: Fix handling of an attempt to store a page
+that is now beyond EOF
+To: torvalds@linux-foundation.org
+Cc: linux-cachefs@redhat.com, linux-kernel@vger.kernel.org, Milosz
+Tanski <milosz@adfin.com>
 
-It writes the header "Bucket" although we might want to change it to 
-Rgwx-Bucket or X-Bucket where I prefer the last one.
 
-The unwritten rule is that when you come up with custom header to prefix 
-it with "X-".
+Fix the handling of an attempt to store a page that is now beyond EOF.  This
+may happen, for example, if the page got pushed for storage before the netfs
+file got truncated on the server.  In such a case, we should just remove the
+excessive pages from the cookie->stores radix tree and wake up the waiter.
 
-How does this sound?
+This can be seen in /proc/fs/fscache/stats on this line:
 
-Wido
+        Stores : ops=350 run=1895 pgs=1545 rxd=1727 olm=9
 
->>
->> P.S.: When this is all up and running I'm planning to make a cool
->> presentation about this for the next Ceph day.
->>
->
-> Awesome!
->
-> Yehuda
->
+where olm=N has N > 0.
+
+Reported-by: Milosz Tanski <milosz@adfin.com>
+Signed-off-by: David Howells <dhowells@redhat.com>
+Acked-by: Milosz Tanski <milosz@adfin.com>
+---
+
+ fs/fscache/page.c |   37 ++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 36 insertions(+), 1 deletion(-)
+
+diff --git a/fs/fscache/page.c b/fs/fscache/page.c
+index 7f5c658af755..b4730cf52aec 100644
+--- a/fs/fscache/page.c
++++ b/fs/fscache/page.c
+@@ -755,6 +755,7 @@ static void fscache_write_op(struct fscache_operation *_op)
+        struct fscache_object *object = op->op.object;
+        struct fscache_cookie *cookie;
+        struct page *page;
++       pgoff_t index;
+        unsigned n;
+        void *results[1];
+        int ret;
+@@ -803,7 +804,7 @@ static void fscache_write_op(struct fscache_operation *_op)
+        _debug("gang %d [%lx]", n, page->index);
+        if (page->index > op->store_limit) {
+                fscache_stat(&fscache_n_store_pages_over_limit);
+-               goto superseded;
++               goto page_beyond_limit;
+        }
+
+        radix_tree_tag_set(&cookie->stores, page->index,
+@@ -829,6 +830,40 @@ static void fscache_write_op(struct fscache_operation *_op)
+        _leave("");
+        return;
+
++page_beyond_limit:
++       spin_unlock(&object->lock);
++
++page_beyond_limit_unlocked:
++       /* pages that are now beyond the end of the storage object must have
++        * their pending storage records cleared.
++        */
++       index = page->index;
++       radix_tree_tag_clear(&cookie->stores, page->index,
++                            FSCACHE_COOKIE_PENDING_TAG);
++       if (!radix_tree_tag_get(&cookie->stores, page->index,
++                               FSCACHE_COOKIE_STORING_TAG)) {
++               fscache_stat(&fscache_n_store_radix_deletes);
++               radix_tree_delete(&cookie->stores, page->index);
++               page_cache_release(page);
++       }
++       if (!need_resched()) {
++               n = radix_tree_gang_lookup_tag(&cookie->stores, results,
++                                              index + 1, 1,
++                                              FSCACHE_COOKIE_PENDING_TAG);
++               if (n == 1) {
++                       page = results[0];
++                       goto page_beyond_limit_unlocked;
++               }
++               spin_unlock(&cookie->stores_lock);
++               wake_up_bit(&cookie->flags, 0);
++       } else {
++               spin_unlock(&cookie->stores_lock);
++       }
++
++       fscache_enqueue_operation(&op->op);
++       _leave("");
++       return;
++
+ superseded:
+        /* this writer is going away and there aren't any more things to
+         * write */
+
 
 
 -- 
-Wido den Hollander
-42on B.V.
+Milosz Tanski
+CTO
+10 East 53rd Street, 37th floor
+New York, NY 10022
 
-Phone: +31 (0)20 700 9902
-Skype: contact42on
+p: 646-253-9055
+e: milosz@adfin.com
