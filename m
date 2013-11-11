@@ -1,76 +1,45 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: [PATCH] Ceph: allocate non-zero page to fscache
-	in readpage()
-Date: Sun, 10 Nov 2013 05:52:30 +0800
-Message-ID: <08e1e1e7-0187-4ef5-8019-c99b9d7c90a7@email.android.com>
-References: <1383963966-10888-1-git-send-email-liwang@ubuntukylin.com>
-	<CANP1eJHthD-Q_Xv=HPWQjsJTHvpP2fj-X_j7HgBXaz5YKQ2EAQ@mail.gmail.com>
+From: Ketor D <d.ketor@gmail.com>
+Subject: [PATCH]ceph:init-ceph can't start osds after using mkcephfs created cluster
+Date: Mon, 11 Nov 2013 19:44:47 +0800
+Message-ID: <CAM9_UU9RJouy7X0A296neNC_Jdm29tEra7aGb-GHFEuq9yrikw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-cachefs-bounces@redhat.com>
-In-Reply-To: <CANP1eJHthD-Q_Xv=HPWQjsJTHvpP2fj-X_j7HgBXaz5YKQ2EAQ@mail.gmail.com>
-List-Unsubscribe: <https://www.redhat.com/mailman/options/linux-cachefs>,
-	<mailto:linux-cachefs-request@redhat.com?subject=unsubscribe>
-List-Archive: <https://www.redhat.com/archives/linux-cachefs>
-List-Post: <mailto:linux-cachefs@redhat.com>
-List-Help: <mailto:linux-cachefs-request@redhat.com?subject=help>
-List-Subscribe: <https://www.redhat.com/mailman/listinfo/linux-cachefs>,
-	<mailto:linux-cachefs-request@redhat.com?subject=subscribe>
-Sender: linux-cachefs-bounces@redhat.com
-Errors-To: linux-cachefs-bounces@redhat.com
-To: Milosz Tanski <milosz@adfin.com>, Li Wang <liwang@ubuntukylin.com>
-Cc: "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, ceph-devel <ceph-devel@vger.kernel.org>, "linux-cachefs@redhat.com" <linux-cachefs@redhat.com>, Sage Weil <sage@inktank.com>, linux-kernel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-lb0-f171.google.com ([209.85.217.171]:44904 "EHLO
+	mail-lb0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752967Ab3KKLpT (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Nov 2013 06:45:19 -0500
+Received: by mail-lb0-f171.google.com with SMTP id x18so3380915lbi.30
+        for <ceph-devel@vger.kernel.org>; Mon, 11 Nov 2013 03:45:17 -0800 (PST)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Added to the testing branch.
+Hi Sage:
+        We always use mkcephfs to create out ceph cluster. Before
+0.72, all is ok.
+But in 0.72, we found the osds can't start up useing "service ceph -a
+start". After viewing the init-ceph.in script , I found that a return
+value errro caused osds can't startup.And if we modifiy a little code
+like 0.67.4 do, the osds can startup.
 
-Thanks!
+         Regards!
 
-Milosz Tanski <milosz@adfin.com> wrote:
->Li, that's a good good catch.
->
->
->On Fri, Nov 8, 2013 at 9:26 PM, Li Wang <liwang@ubuntukylin.com> wrote:
->> ceph_osdc_readpages() returns number of bytes read, currently,
->> the code only allocate full-zero page into fscache, this patch
->> fixes this.
->>
->> Signed-off-by: Li Wang <liwang@ubuntukylin.com>
->> ---
->>  fs/ceph/addr.c |    2 +-
->>  1 file changed, 1 insertion(+), 1 deletion(-)
->>
->> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
->> index 6df8bd4..1e561c0 100644
->> --- a/fs/ceph/addr.c
->> +++ b/fs/ceph/addr.c
->> @@ -216,7 +216,7 @@ static int readpage_nounlock(struct file *filp,
->struct page *page)
->>         }
->>         SetPageUptodate(page);
->>
->> -       if (err == 0)
->> +       if (err >= 0)
->>                 ceph_readpage_to_fscache(inode, page);
->>
->>  out:
->> --
->> 1.7.9.5
->>
->
->
->
->-- 
->Milosz Tanski
->CTO
->10 East 53rd Street, 37th floor
->New York, NY 10022
->
->p: 646-253-9055
->e: milosz@adfin.com
->--
->To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->in
->the body of a message to majordomo@vger.kernel.org
->More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Here is the patch:
+
+Signed-off-by: Ketor D <d.ketor@gmail.com>
+---
+diff --git "a/src/init-ceph.in" "b/src/init-ceph.in"
+index 7399abb..cf2eaa6 100644
+--- "a/src/init-ceph.in"
++++ "b/src/init-ceph.in"
+@@ -331,7 +331,8 @@ for name in $what; do
+  -- \
+  $id \
+  ${osd_weight:-${defaultweight:-1}} \
+- $osd_location"
++ $osd_location \
++ || :"
+  fi
+     fi
