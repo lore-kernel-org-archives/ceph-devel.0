@@ -1,124 +1,70 @@
-From: Ketor D <d.ketor@gmail.com>
-Subject: Re: Mourning the demise of mkcephfs
-Date: Tue, 12 Nov 2013 15:41:48 +0800
-Message-ID: <CAM9_UU-O0FTJyGdNqOGevKUYyU5B7rOavBajSR_j_L5OvVwD0A@mail.gmail.com>
-References: <5281192D.4090707@bob-the-boat.me.uk> <5281D734.3060807@42on.com>
+From: =?GBK?B?xfQ=?= <wkp4666-KN7UnAbNpbg@public.gmane.org>
+Subject: how to use rados_exec
+Date: Tue, 12 Nov 2013 17:05:37 +0800 (CST)
+Message-ID: <47c23d46.20e71.1424b8f1407.Coremail.wkp4666@126.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f181.google.com ([209.85.217.181]:42548 "EHLO
-	mail-lb0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752426Ab3KLHmT (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Nov 2013 02:42:19 -0500
-Received: by mail-lb0-f181.google.com with SMTP id x18so4283166lbi.12
-        for <ceph-devel@vger.kernel.org>; Mon, 11 Nov 2013 23:42:18 -0800 (PST)
-In-Reply-To: <5281D734.3060807@42on.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@42on.com>
-Cc: "Dave (Bob)" <dave@bob-the-boat.me.uk>, ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: multipart/mixed; boundary="===============1219298258=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi Bob:
-      mkcephfs is still usable in 0.72 with a little path.We are still
-using mkcephfs on 0.72 because ceph-deploy is not good enough.
+--===============1219298258==
+Content-Type: multipart/alternative;
+	boundary="----=_Part_491316_1118743052.1384247137287"
 
-You need to patch mkcephfs.in and init-ceph.in to do this.
+------=_Part_491316_1118743052.1384247137287
+Content-Type: text/plain; charset=GBK
+Content-Transfer-Encoding: base64
 
-The patch of mkcephfs.in is you need to modify three symbols:
-    BINDIR=/usr/bin
-    LIBDIR=/usr/lib64/ceph
-    ETCDIR=/etc/ceph
-to the real path in your system.
+IEhpIGFsbCEKICAgICAgIGxvbmcgdGltZSBubyBzZWUhCiAgICAgICBJICB3YW50IHRvIHVzZSB0
+aGUgZnVuY3Rpb24gcmFkb3NfZXhlYywgIGFuZCBJIGZvdW5kICB0aGUgY2xhc3MgY2xzX2NyeXB0
+by5jYyAgaW4gdGhlICBjb2RlIHNvdXJjZSBvZiBjZXBoOwpzbyBJICBydW4gdGhlIGZ1bnRpb24g
+bGlrZSB0aGlzOgoKICAgICAgIHJhZG9zX2V4ZWMoaW9jdHgsICJmb29fb2JqZWN0IiwgImNyeXB0
+byIgLCAibWQ1IiwgYnVmLCBzaXplb2YoYnVmKSxidWYyLCBzaXplb2YoYnVmMikgKQoKYW50IHRo
+ZSBmdW5jdGlvbiByZXR1cm4gICBvcGVyYXRpb24gbm90IHN1cHBvcnQhCgogICAgIEkgY2hlY2sg
+dGhlIHNvdXJjZSBvZiBjZXBoICwgYW5kIGZpbmQgdGhhdCAgY2xzX2NyeXB0by5jYyBpcyBub3Qg
+YnVpbGSho2hvdyBjYW4gSSBidWxpZCB0aGUgY2xhc3MgYW5kIHJ1biBpdCEK
+------=_Part_491316_1118743052.1384247137287
+Content-Type: text/html; charset=GBK
+Content-Transfer-Encoding: base64
 
-The patch of init-ceph.in is here:
-Signed-off-by: Ketor D <d.ketor@gmail.com>
----
-diff --git "a/src/init-ceph.in" "b/src/init-ceph.in"
-index 7399abb..cf2eaa6 100644
---- "a/src/init-ceph.in"
-+++ "b/src/init-ceph.in"
-@@ -331,7 +331,8 @@ for name in $what; do
-  -- \
-  $id \
-  ${osd_weight:-${defaultweight:-1}} \
-- $osd_location"
-+ $osd_location \
-+ || :"
-  fi
-     fi
+PGRpdiBzdHlsZT0ibGluZS1oZWlnaHQ6MS43O2NvbG9yOiMwMDAwMDA7Zm9udC1zaXplOjE0cHg7
+Zm9udC1mYW1pbHk6YXJpYWwiPjxkaXY+PGRpdj4mbmJzcDtIaSBhbGwhPGJyPiZuYnNwOyZuYnNw
+OyZuYnNwOyZuYnNwOyZuYnNwOyZuYnNwOyBsb25nIHRpbWUgbm8gc2VlITxicj4mbmJzcDsmbmJz
+cDsmbmJzcDsmbmJzcDsmbmJzcDsmbmJzcDsgSSZuYnNwOyB3YW50IHRvIHVzZSB0aGUgZnVuY3Rp
+b24gcmFkb3NfZXhlYywmbmJzcDsgYW5kIEkgZm91bmQmbmJzcDsgdGhlIGNsYXNzIGNsc19jcnlw
+dG8uY2MmbmJzcDsgaW4gdGhlJm5ic3A7IGNvZGUgc291cmNlIG9mIGNlcGg7PGJyPnNvIEkmbmJz
+cDsgcnVuIHRoZSBmdW50aW9uIGxpa2UgdGhpczo8YnI+PGJyPiZuYnNwOyZuYnNwOyZuYnNwOyZu
+YnNwOyZuYnNwOyZuYnNwOyByYWRvc19leGVjKGlvY3R4LCAiZm9vX29iamVjdCIsICJjcnlwdG8i
+ICwgIm1kNSIsIGJ1Ziwgc2l6ZW9mKGJ1ZiksYnVmMiwgc2l6ZW9mKGJ1ZjIpICk8YnI+PGJyPmFu
+dCB0aGUgZnVuY3Rpb24gcmV0dXJuJm5ic3A7Jm5ic3A7IDxzcGFuIHN0eWxlPSJjb2xvcjogcmdi
+KDI1NSwgMCwgMCk7Ij5vcGVyYXRpb24gbm90IHN1cHBvcnQ8L3NwYW4+ITxicj48YnI+Jm5ic3A7
+Jm5ic3A7Jm5ic3A7Jm5ic3A7IEkgY2hlY2sgdGhlIHNvdXJjZSBvZiBjZXBoICwgYW5kIGZpbmQg
+dGhhdCZuYnNwOyBjbHNfY3J5cHRvLmNjIGlzIG5vdCBidWlsZKGjaG93IGNhbiBJIGJ1bGlkIHRo
+ZSBjbGFzcyBhbmQgcnVuIGl0ITxicj48L2Rpdj48L2Rpdj48L2Rpdj48YnI+PGJyPjxzcGFuIHRp
+dGxlPSJuZXRlYXNlZm9vdGVyIj48c3BhbiBpZD0ibmV0ZWFzZV9tYWlsX2Zvb3RlciI+PC9zcGFu
+Pjwvc3Bhbj4=
+------=_Part_491316_1118743052.1384247137287--
 
-On Tue, Nov 12, 2013 at 3:22 PM, Wido den Hollander <wido@42on.com> wrote:
-> On 11/11/2013 06:51 PM, Dave (Bob) wrote:
->>
->> The utility mkcephfs seemed to work, it was very simple to use and
->> apparently effective.
->>
->> It has been deprecated in favour of something called ceph-deploy, which
->> does not work for me.
->>
->> I've ignored the deprecation messages until now, but in going from 70 to
->> 72 I find that mkcephfs has finally gone.
->>
->> I have tried ceph-deploy, and it seems to be tied in to specific
->> 'distributions' in some way.
->>
->> It is unuseable for me at present, because it reports:
->>
->> [ceph_deploy][ERROR ] UnsupportedPlatform: Platform is not supported:
->>
->>
->> I therefore need to go back to first principles, but the documentation
->> seems to have dropped descriptions of driving ceph without smoke and
->> mirrors.
->>
->> The direct approach may be more laborious, but at least it would not
->> depend on anything except ceph itself.
->>
->
-> I myself am not a very big fan of ceph-deploy as well. Most installations I
-> do are done by bootstrapping the monitors and osds manually.
->
-> I have some homebrew scripts for this, but I mainly use Puppet to make sure
-> all the packages and configuration is present on the nodes and afterwards
-> it's just a matter of adding the OSDs and formatting their disks once.
->
-> The guide to bootstrapping a monitor:
-> http://eu.ceph.com/docs/master/dev/mon-bootstrap/
->
-> When the monitor cluster is running you can start generating cephx keys for
-> the OSDs and add them to the cluster:
-> http://eu.ceph.com/docs/master/rados/operations/add-or-rm-osds/
->
-> I don't know if the docs are 100% correct. I've done this so many times that
-> I do a lot of things without even reading the docs, so there might be a typo
-> in it somewhere. If so, report it so it can be fixed.
->
-> Where I think that ceph-deploy works for a lot of people I fully understand
-> that some people just want to manually bootstrap a Ceph cluster from
-> scratch.
->
-> Wido
->
->
->> Maybe I need to step back a version or two, set up my cluster with
->> mkcephfs, then switch back to the latest to use it.
->>
->> I'll search the documentation again.
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->
->
-> --
-> Wido den Hollander
-> 42on B.V.
->
-> Phone: +31 (0)20 700 9902
-> Skype: contact42on
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+--===============1219298258==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============1219298258==--
