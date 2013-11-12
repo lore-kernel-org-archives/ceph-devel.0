@@ -1,40 +1,86 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: [RBD][OpenStack]The way to solve problem when boot VM and root disk size is specified
-Date: Tue, 12 Nov 2013 15:10:48 +0800
-Message-ID: <E7DD39A7-418B-4C08-98A2-8CB27AD18711@gmail.com>
-Mime-Version: 1.0 (Mac OS X Mail 7.0 \(1822\))
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+From: Wido den Hollander <wido@42on.com>
+Subject: Re: Mourning the demise of mkcephfs
+Date: Tue, 12 Nov 2013 08:22:28 +0100
+Message-ID: <5281D734.3060807@42on.com>
+References: <5281192D.4090707@bob-the-boat.me.uk>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f54.google.com ([209.85.220.54]:57098 "EHLO
-	mail-pa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755886Ab3KLHLQ convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Nov 2013 02:11:16 -0500
-Received: by mail-pa0-f54.google.com with SMTP id lj1so3127270pab.13
-        for <ceph-devel@vger.kernel.org>; Mon, 11 Nov 2013 23:11:15 -0800 (PST)
-Received: from [10.96.24.64] ([211.155.113.248])
-        by mx.google.com with ESMTPSA id lm2sm41451460pab.2.2013.11.11.23.11.03
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
-        Mon, 11 Nov 2013 23:11:14 -0800 (PST)
+Received: from websrv.42on.com ([31.25.102.167]:46792 "EHLO websrv.42on.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751959Ab3KLHWa (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 12 Nov 2013 02:22:30 -0500
+In-Reply-To: <5281192D.4090707@bob-the-boat.me.uk>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: "Dave (Bob)" <dave@bob-the-boat.me.uk>, ceph-devel@vger.kernel.org
 
-Hi all,
+On 11/11/2013 06:51 PM, Dave (Bob) wrote:
+> The utility mkcephfs seemed to work, it was very simple to use and
+> apparently effective.
+>
+> It has been deprecated in favour of something called ceph-deploy, which
+> does not work for me.
+>
+> I've ignored the deprecation messages until now, but in going from 70 to
+> 72 I find that mkcephfs has finally gone.
+>
+> I have tried ceph-deploy, and it seems to be tied in to specific
+> 'distributions' in some way.
+>
+> It is unuseable for me at present, because it reports:
+>
+> [ceph_deploy][ERROR ] UnsupportedPlatform: Platform is not supported:
+>
+>
+> I therefore need to go back to first principles, but the documentation
+> seems to have dropped descriptions of driving ceph without smoke and
+> mirrors.
+>
+> The direct approach may be more laborious, but at least it would not
+> depend on anything except ceph itself.
+>
 
-Now OpenStack Nova master branch still exists a bug when you boot a VM which root disk size is specified. The storage backend of Nova also is rbd. For example, you boot a VM and specify 10G as root disk size. But the image is only 1G. Then VM will be spawned and the root disk size will expands to 10G. The filesystem still is 1G.
+I myself am not a very big fan of ceph-deploy as well. Most 
+installations I do are done by bootstrapping the monitors and osds manually.
 
-Now I have a way to solve it. When we boot a VM and resize root disk size, we use "fuse-rbd" command to resize filesystem.
+I have some homebrew scripts for this, but I mainly use Puppet to make 
+sure all the packages and configuration is present on the nodes and 
+afterwards it's just a matter of adding the OSDs and formatting their 
+disks once.
 
-fuse-rbd -p pool -c /etc/ceph/ceph.conf /tmp-ceph-rbd
-cd /tmp-ceph-rbd
-resize2fs volume-xxxxxxxxxxx 
+The guide to bootstrapping a monitor: 
+http://eu.ceph.com/docs/master/dev/mon-bootstrap/
 
-It seemed to work but I want to know whether exists problems when many volumes in a pool. I'm not sure that too many volumes cause performance problem.
+When the monitor cluster is running you can start generating cephx keys 
+for the OSDs and add them to the cluster: 
+http://eu.ceph.com/docs/master/rados/operations/add-or-rm-osds/
 
-Best regards,
-Wheats
+I don't know if the docs are 100% correct. I've done this so many times 
+that I do a lot of things without even reading the docs, so there might 
+be a typo in it somewhere. If so, report it so it can be fixed.
+
+Where I think that ceph-deploy works for a lot of people I fully 
+understand that some people just want to manually bootstrap a Ceph 
+cluster from scratch.
+
+Wido
+
+> Maybe I need to step back a version or two, set up my cluster with
+> mkcephfs, then switch back to the latest to use it.
+>
+> I'll search the documentation again.
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
 
 
+-- 
+Wido den Hollander
+42on B.V.
 
+Phone: +31 (0)20 700 9902
+Skype: contact42on
