@@ -1,111 +1,58 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: Mourning the demise of mkcephfs
-Date: Tue, 12 Nov 2013 08:07:20 -0600
-Message-ID: <52823618.6000305@inktank.com>
-References: <5281192D.4090707@bob-the-boat.me.uk> <5281D734.3060807@42on.com> <52821D6F.9000602@bob-the-boat.me.uk> <52823397.3050905@inktank.com>
+From: Li Wang <liwang@ubuntukylin.com>
+Subject: [RFC] Ceph encryption support
+Date: Tue, 12 Nov 2013 22:10:31 +0800
+Message-ID: <528236D7.6020106@ubuntukylin.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f180.google.com ([209.85.223.180]:50485 "EHLO
-	mail-ie0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753073Ab3KLOHS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Nov 2013 09:07:18 -0500
-Received: by mail-ie0-f180.google.com with SMTP id qd12so1688472ieb.11
-        for <ceph-devel@vger.kernel.org>; Tue, 12 Nov 2013 06:07:17 -0800 (PST)
-In-Reply-To: <52823397.3050905@inktank.com>
+Received: from m53-178.qiye.163.com ([123.58.178.53]:58563 "EHLO
+	m53-178.qiye.163.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755361Ab3KLOKe (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Nov 2013 09:10:34 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Dave (Bob)" <dave@bob-the-boat.me.uk>
-Cc: Wido den Hollander <wido@42on.com>, ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>
 
-I forgot to mention you can change the ceph-init script in the packaged 
-version too if you don't want to compile ceph from source.  It's a very 
-easy modification and it should work fine afterwards.
+Hi,
+   We want to implement encryption support for Ceph.
+   Currently, we have the draft design,
 
-Mark
+1 When user mount a ceph directory for the first time, he can specify a 
+passphrase and the encryption algorithm and length of key etc. These 
+will be stored as extend attribute of the current root directory, of 
+course, with the passphrase being hashed several times, call it TOKEN.
+2 When user try to mount an encrypted directory, a passphrase is 
+required to given, then hash and compare with the stored TOKEN, if 
+equal, accept to mount, otherwise reject to mount.
+3 When a file is created, a random key (FEK, file encryption key) is 
+generated, and this key is encrypted by TOKEN, we get EFEK (encrypted 
+FEK), the EFEK and other encryption related information inherited from 
+the root directory are stored in the extend attribute of file.
+4 When a file is opened, retrieve the extend attribute, we get EFEK,
+use TOKEN to decrypt EFEK, get FEK, buffered in the inode
+5 When a file is read in readpage()/readpages(), the encrypted pages are 
+decrypted transparently by using FEK, and the plain data are sent to 
+application
+6 When a file is written in writepage()/writepages(), the pages are 
+encrypted transparently by using FEK, and then written to OSDs.
 
-On 11/12/2013 07:56 AM, Mark Nelson wrote:
-> FYI, I created a bug for this last week:
->
-> http://tracker.ceph.com/issues/6720
->
-> Mark
->
-> On 11/12/2013 06:22 AM, Dave (Bob) wrote:
->> On 12/11/2013 07:22, Wido den Hollander wrote:
->>> On 11/11/2013 06:51 PM, Dave (Bob) wrote:
->>>> The utility mkcephfs seemed to work, it was very simple to use and
->>>> apparently effective.
->>>>
->>>> It has been deprecated in favour of something called ceph-deploy, which
->>>> does not work for me.
->>>>
->>>> I've ignored the deprecation messages until now, but in going from
->>>> 70 to
->>>> 72 I find that mkcephfs has finally gone.
->>>>
->>>> I have tried ceph-deploy, and it seems to be tied in to specific
->>>> 'distributions' in some way.
->>>>
->>>> It is unuseable for me at present, because it reports:
->>>>
->>>> [ceph_deploy][ERROR ] UnsupportedPlatform: Platform is not supported:
->>>>
->>>>
->>>> I therefore need to go back to first principles, but the documentation
->>>> seems to have dropped descriptions of driving ceph without smoke and
->>>> mirrors.
->>>>
->>>> The direct approach may be more laborious, but at least it would not
->>>> depend on anything except ceph itself.
->>>>
->>>
->>> I myself am not a very big fan of ceph-deploy as well. Most
->>> installations I do are done by bootstrapping the monitors and osds
->>> manually.
->>>
->>> I have some homebrew scripts for this, but I mainly use Puppet to make
->>> sure all the packages and configuration is present on the nodes and
->>> afterwards it's just a matter of adding the OSDs and formatting their
->>> disks once.
->>>
->>> The guide to bootstrapping a monitor:
->>> http://eu.ceph.com/docs/master/dev/mon-bootstrap/
->>>
->>> When the monitor cluster is running you can start generating cephx
->>> keys for the OSDs and add them to the cluster:
->>> http://eu.ceph.com/docs/master/rados/operations/add-or-rm-osds/
->>>
->>> I don't know if the docs are 100% correct. I've done this so many
->>> times that I do a lot of things without even reading the docs, so
->>> there might be a typo in it somewhere. If so, report it so it can be
->>> fixed.
->>>
->>> Where I think that ceph-deploy works for a lot of people I fully
->>> understand that some people just want to manually bootstrap a Ceph
->>> cluster from scratch.
->>>
->>> Wido
->>>
->>>> Maybe I need to step back a version or two, set up my cluster with
->>>> mkcephfs, then switch back to the latest to use it.
->>>>
->>>> I'll search the documentation again.
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe
->>>> ceph-devel" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>
->>>
->>>
->> Thank you very much Wido.
->> David
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->
+Some points,
+1 We do client side encryption, the advantages are,
+   (1) The data over network are encrypted;
+   (2) OSDs are intended to do io intensive job, we donot wanna bother 
+them to do cpu intensive job, thus we can use cheap and low power machines
+   (3) The implementation is OSD transparent, and mostly MDS 
+transparent, enjoys the simplification.
+2 What about if no page cache?
+   Block cipher algorithm is more secure than stream cipher algorithm, 
+so we prefer the former. If no page cache, we have two choices, with 
+encryption enabled, the same file is not allowed by opened by the second 
+writer, alternatively, we enforce O_LAZYIO on the file, but application 
+is supposed to be aware of this.
 
+We plan to submit it as a blueprint for the incoming CDS, comments are 
+welcome.
+
+Cheers,
+Li Wang
