@@ -1,80 +1,144 @@
-From: Malcolm Haak <malcolm@sgi.com>
-Subject: Re: HSM
-Date: Tue, 12 Nov 2013 10:57:55 +1000
-Message-ID: <52817D13.1070004@sgi.com>
-References: <alpine.DEB.2.00.1311090027210.8192@cobra.newdream.net>	<528013F3.1010300@sgi.com>	<CAGd4Wr1qW-8rqF9EmpVc=-220rV6xnjFj2s6PT_UbhyPRpVX9Q@mail.gmail.com> <CAPYLRzjuhBAgTT2SPo+s5RkY32zT6ue-na_LzGY-9WKhscaL_w@mail.gmail.com>
+From: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>
+Subject: RE: CEPH Erasure Encoding + OSD Scalability
+Date: Tue, 12 Nov 2013 01:11:49 +0000
+Message-ID: <3472A07E6605974CBC9BC573F1BC02E4AE69CCB4@PLOXCHG03.cern.ch>
+References: <-7369304096744919226@unknownmsgid>
+ <3472A07E6605974CBC9BC573F1BC02E4A527147E@PLOXCHG03.cern.ch>
+ <523C40B7.5060902@dachary.org>
+ <alpine.DEB.2.00.1309200835110.25752@cobra.newdream.net>
+ <523C7CAF.1020101@dachary.org>,<523DB725.2070104@dachary.org>,<3472A07E6605974CBC9BC573F1BC02E4A52727FF@PLOXCHG03.cern.ch>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=Windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay3.sgi.com ([192.48.152.1]:51399 "EHLO relay.sgi.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1754065Ab3KLA6C (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 11 Nov 2013 19:58:02 -0500
-In-Reply-To: <CAPYLRzjuhBAgTT2SPo+s5RkY32zT6ue-na_LzGY-9WKhscaL_w@mail.gmail.com>
+Received: from cernmx11.cern.ch ([188.184.36.50]:39010 "EHLO CERNMX11.cern.ch"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752905Ab3KLBRK convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Nov 2013 20:17:10 -0500
+In-Reply-To: <3472A07E6605974CBC9BC573F1BC02E4A52727FF@PLOXCHG03.cern.ch>
+Content-Language: en-GB
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>, John Spray <john.spray@inktank.com>
-Cc: Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Gregory,
+Hi Loic,=20
+
+I am finally doing the benchmark tool and I found a bunch of wrong para=
+meter checks which can make the whole thing SEGV.
+
+All the RAID-6 codes have restrictions on the parameters but they are n=
+ot correctly enforced for Liberation & Blaum-Roth codes in the CEPH wra=
+pper class ... see text from PDF
+
+"Minimal Density RAID-6 codes are MDS codes based on binary matrices wh=
+ich satisfy a lower-bound on the number  of non-zero entries. Unlike Ca=
+uchy coding, the bit-matrix elements do not correspond to elements in G=
+=46 (2 w ). Instead, the bit-matrix itself has the proper MDS property.=
+ Minimal Density RAID-6 codes perform faster than Reed-Solomon and Cauc=
+hy Reed-Solomon codes for the same parameters. Liberation coding, Liber=
+8tion coding, and Blaum-Roth coding are three examples of this kind of =
+coding that are supported in jerasure.
+
+With each of these codes, m must be equal to two and k must be less tha=
+n or equal to w. The value of w has restrictions based on the code:
+
+=95 With Liberation coding, w must be a prime number [Pla08b].
+=95 With Blaum-Roth coding, w + 1 must be a prime number [BR99]. =95 Wi=
+th Liber8tion coding, w must equal 8 [Pla08a].
+
+=2E..
+
+Do you add this fixes?
+
+=46or the benchmark suite it runs currently 308 different configuration=
+s for the 2 algorithm which make sense from the performance point of vi=
+ew and provides this output:
 
 
-On 12/11/13 10:13, Gregory Farnum wrote:
-> On Mon, Nov 11, 2013 at 3:04 AM, John Spray <john.spray@inktank.com> wrote:
->> This is a really useful summary from Malcolm.
->>
->> In addition to the coordinator/copytool interface, there is the question of
->> where the policy engine gets its data from.  Lustre has the MDS changelog,
->> which Robinhood uses to replicate metadata into its MySQL database with all
->> the indices that it wants.
->
->> On Sun, Nov 10, 2013 at 11:17 PM, Malcolm Haak <malcolm@sgi.com> wrote:
->>> So there aren't really any hooks in that exports are triggered by the policy engine after a scan of the metadata, and the recalls are triggered when caps are requested on offline files
->
-> Wait, is the HSM using a changelog or is it just scanning the full
-> filesystem tree? Scanning the whole tree seems awfully expensive.
+# -----------------------------------------------------------------
+# Erasure Coding Benchmark - (C) CERN 2013 - Andreas.Joachim.Peters@cer=
+n.ch
+# Ram-Size=3D12614856704 Allocation-Size=3D100000000
+# -----------------------------------------------------------------
+# [ -BENCH- ] [       ] technique=3Dmemcpy                             =
+                               speed=3D5.408 [GB/s] latency=3D9.245 ms
+# [ -BENCH- ] [       ] technique=3Dd=3Da^b^c-xor                      =
+                                 speed=3D4.377 [GB/s] latency=3D17.136 =
+ms
+# [ -BENCH- ] [001/304] technique=3Dcauchy_good:k=3D05:m=3D2:w=3D8:lp=3D=
+0:packet=3D00064:size=3D50000000          speed=3D1.308 [GB/s] latency=3D=
+038	[ms] size-overhead=3D40	[%]
+=2E.
+=2E.
+# [ -BENCH- ] [304/304] technique=3Dliberation:k=3D24:m=3D2:w=3D29:lp=3D=
+2:packet=3D65536:size=3D50000000          speed=3D0.083 [GB/s] latency=3D=
+604	[ms] size-overhead=3D16	[%]
+# -----------------------------------------------------------------
+# Erasure Code Performance Summary::
+# -----------------------------------------------------------------
+# RAM:                   12.61 GB
+# Allocation-Size        0.10 GB
+# -----------------------------------------------------------------
+# Byte Initialization:   29.35 MB/s
+# Memcpy:                5.41 GB/s
+# Triple-XOR:            4.38 GB/s
+# -----------------------------------------------------------------
+# Fastest RAID6          2.72 GB/s liber8tion:k=3D06:m=3D2:w=3D8:lp=3D0=
+:packet=3D04096:size=3D50000000
+# Fastest Triple Failure 0.96 GB/s cauchy_good:k=3D06:m=3D3:w=3D8:lp=3D=
+0:packet=3D04096:size=3D50000000
+# Fastest Quadr. Failure 0.66 GB/s cauchy_good:k=3D06:m=3D4:w=3D8:lp=3D=
+0:packet=3D04096:size=3D50000000
+# -----------------------------------------------------------------
+# .................................................................
+# Top 1  RAID6          2.72 GB/s liber8tion:k=3D06:m=3D2:w=3D8:lp=3D0:=
+packet=3D04096:size=3D50000000
+# Top 2  RAID6          2.72 GB/s liber8tion:k=3D06:m=3D2:w=3D8:lp=3D0:=
+packet=3D16384:size=3D50000000
+# Top 3  RAID6          2.64 GB/s liber8tion:k=3D06:m=3D2:w=3D8:lp=3D0:=
+packet=3D65536:size=3D50000000
+# Top 4  RAID6          2.60 GB/s liberation:k=3D07:m=3D2:w=3D7:lp=3D0:=
+packet=3D16384:size=3D50000000
+# Top 5  RAID6          2.59 GB/s liberation:k=3D05:m=3D2:w=3D7:lp=3D0:=
+packet=3D04096:size=3D50000000
+# .................................................................
+# Top 1  Triple         0.96 GB/s cauchy_good:k=3D06:m=3D3:w=3D8:lp=3D0=
+:packet=3D04096:size=3D50000000
+# Top 2  Triple         0.94 GB/s cauchy_good:k=3D06:m=3D3:w=3D8:lp=3D0=
+:packet=3D16384:size=3D50000000
+# Top 3  Triple         0.93 GB/s cauchy_good:k=3D06:m=3D3:w=3D8:lp=3D0=
+:packet=3D65536:size=3D50000000
+# Top 4  Triple         0.89 GB/s cauchy_good:k=3D07:m=3D3:w=3D8:lp=3D0=
+:packet=3D04096:size=3D50000000
+# Top 5  Triple         0.87 GB/s cauchy_good:k=3D05:m=3D3:w=3D8:lp=3D0=
+:packet=3D04096:size=3D50000000
+# .................................................................
+# Top 1  Quadr.         0.66 GB/s cauchy_good:k=3D06:m=3D4:w=3D8:lp=3D0=
+:packet=3D04096:size=3D50000000
+# Top 2  Quadr.         0.65 GB/s cauchy_good:k=3D07:m=3D4:w=3D8:lp=3D0=
+:packet=3D04096:size=3D50000000
+# Top 3  Quadr.         0.64 GB/s cauchy_good:k=3D06:m=3D4:w=3D8:lp=3D0=
+:packet=3D16384:size=3D50000000
+# Top 4  Quadr.         0.64 GB/s cauchy_good:k=3D05:m=3D4:w=3D8:lp=3D0=
+:packet=3D04096:size=3D50000000
+# Top 5  Quadr.         0.64 GB/s cauchy_good:k=3D06:m=3D4:w=3D8:lp=3D0=
+:packet=3D65536:size=3D50000000
+# .................................................................
 
-While I can't speak at length about the LustreHSM, it may just use 
-incremental updates to its SQL database via metadata logs, I do know 
-that filesystem scans are done regularly in other HSM solutions. I also 
-know that the scan is multi-threaded and when backed by decent disks 
-does not take an excessive amount of time.
+It takes around 30 second on my box. I will add a measurement how the X=
+OR and the 3 top algorithms scale with the number of cores and make the=
+ object-size configurable from the command line. Anything else ? Shall =
+I add the possiblity to test a single user specified configuration via =
+command line arguments?
 
->
->> I don't know if CephFS MDS currently has a similar interface.
-> Well, the MDSes each have their journal of course, but more than that
-> we can stick whatever we want into the metadata and expose it via
-> virtual xattrs or whatever else.
-> -Greg
-> Software Engineer #42 @ http://inktank.com | http://ceph.com
->
->>
->> John
->>
->>
->> On Sun, Nov 10, 2013 at 11:17 PM, Malcolm Haak <malcolm@sgi.com> wrote:
->>>
->>> Hi All,
->>>
->>> If you are talking specifically about Lustre HSM, its really an interface to add HSM functionality by leveraging existing HSM's (DMF for example)
->>>
->>> So with Lustre HSM you have a policy engine that triggers the migrations out of the filesystem. Rules are based around size, last accessed and target state (online, dual and offline).
->>>
->>> There is a 'coordinator' process involved here as well, it (from what I understand) runs on MDS nodes. It handles the interaction with the copytool. The copytool is provided by the HSM solution you are acutally using.
->>>
->>> For recalls when caps are aquired on the MDS for an exported file the resposible MSD contacts the coordinator, which in-turn uses the copytool to pull the required file out of the HSM.
->>>
->>> In the Lustre HSM, the objects that make up a file are all recalled and the file, not the objects, are handed to the HSM.
->>>
->>> For Lustre all it needs to keep track of is the current state of the file and the correct ID to reqest from the HSM. This is done inside the normal metadata storage.
->>>
->>> So there aren't really any hooks in that exports are triggered by the policy engine after a scan of the metadata, and the recalls are triggered when caps are requested on offline files. Then its just standard POSIX blocking until the file is available.
->>>
->>> Most of the state and ID stuff could be stored as XATTRS in cephfs. I'm not as sure how to do it for other things but as long as you could store some kind of extended metadata about whole objects, it could use the same interfaces as well.
->>>
->>> Hope that was acutually helpful and not just an obvious rehash...
->>>
->>> Regards
->>>
->>> Malcolm Haak
+Cheers Andreas.
+
+
+
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
