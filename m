@@ -1,105 +1,157 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: [RFC] Ceph encryption support
-Date: Tue, 12 Nov 2013 09:58:08 -0800
-Message-ID: <CAPYLRzi3qK2+Hp9b--iJyjVtrjiNT08MPm1XnxO2eXfGOs2L6A@mail.gmail.com>
-References: <528236D7.6020106@ubuntukylin.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: CEPH Erasure Encoding + OSD Scalability
+Date: Tue, 12 Nov 2013 19:06:37 +0100
+Message-ID: <52826E2D.2040503@dachary.org>
+References: <-7369304096744919226@unknownmsgid> <3472A07E6605974CBC9BC573F1BC02E4A527147E@PLOXCHG03.cern.ch> <523C40B7.5060902@dachary.org> <alpine.DEB.2.00.1309200835110.25752@cobra.newdream.net> <523C7CAF.1020101@dachary.org>,<523DB725.2070104@dachary.org>,<3472A07E6605974CBC9BC573F1BC02E4A52727FF@PLOXCHG03.cern.ch> <3472A07E6605974CBC9BC573F1BC02E4AE69CCB4@PLOXCHG03.cern.ch>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f47.google.com ([74.125.82.47]:61283 "EHLO
-	mail-wg0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752778Ab3KLR6K convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Nov 2013 12:58:10 -0500
-Received: by mail-wg0-f47.google.com with SMTP id y10so2755843wgg.26
-        for <ceph-devel@vger.kernel.org>; Tue, 12 Nov 2013 09:58:09 -0800 (PST)
-In-Reply-To: <528236D7.6020106@ubuntukylin.com>
+Received: from smtp.dmail.dachary.org ([91.121.254.229]:35110 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754132Ab3KLSGj (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Nov 2013 13:06:39 -0500
+In-Reply-To: <3472A07E6605974CBC9BC573F1BC02E4AE69CCB4@PLOXCHG03.cern.ch>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Li Wang <liwang@ubuntukylin.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>
+To: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, Nov 12, 2013 at 6:10 AM, Li Wang <liwang@ubuntukylin.com> wrote=
-:
-> Hi,
->   We want to implement encryption support for Ceph.
->   Currently, we have the draft design,
->
-> 1 When user mount a ceph directory for the first time, he can specify=
- a
-> passphrase and the encryption algorithm and length of key etc. These =
-will be
-> stored as extend attribute of the current root directory, of course, =
-with
-> the passphrase being hashed several times, call it TOKEN.
-> 2 When user try to mount an encrypted directory, a passphrase is requ=
-ired to
-> given, then hash and compare with the stored TOKEN, if equal, accept =
-to
-> mount, otherwise reject to mount.
+Hi Andreas,
 
-How would this work? If I mount the root directory and then try to
-navigate down into an encrypted directory, when do I get asked for the
-passphrase?
+On 12/11/2013 02:11, Andreas Joachim Peters wrote:
+> Hi Loic,
+>=20
+> I am finally doing the benchmark tool and I found a bunch of wrong pa=
+rameter checks which can make the whole thing SEGV.
+>=20
+> All the RAID-6 codes have restrictions on the parameters but they are=
+ not correctly enforced for Liberation & Blaum-Roth codes in the CEPH w=
+rapper class ... see text from PDF
+>=20
+> "Minimal Density RAID-6 codes are MDS codes based on binary matrices =
+which satisfy a lower-bound on the number  of non-zero entries. Unlike =
+Cauchy coding, the bit-matrix elements do not correspond to elements in=
+ GF (2 w ). Instead, the bit-matrix itself has the proper MDS property.=
+ Minimal Density RAID-6 codes perform faster than Reed-Solomon and Cauc=
+hy Reed-Solomon codes for the same parameters. Liberation coding, Liber=
+8tion coding, and Blaum-Roth coding are three examples of this kind of =
+coding that are supported in jerasure.
+>=20
+> With each of these codes, m must be equal to two and k must be less t=
+han or equal to w. The value of w has restrictions based on the code:
+>=20
+> =95 With Liberation coding, w must be a prime number [Pla08b].
+> =95 With Blaum-Roth coding, w + 1 must be a prime number [BR99]. =95 =
+With Liber8tion coding, w must equal 8 [Pla08a].
+>=20
+> ...
+>=20
+> Do you add this fixes?
 
-> 3 When a file is created, a random key (FEK, file encryption key) is
-> generated, and this key is encrypted by TOKEN, we get EFEK (encrypted=
- FEK),
-> the EFEK and other encryption related information inherited from the =
-root
-> directory are stored in the extend attribute of file.
+Nice catch. I created and assigned to myself : http://tracker.ceph.com/=
+issues/6754
+>=20
+> For the benchmark suite it runs currently 308 different configuration=
+s for the 2 algorithm which make sense from the performance point of vi=
+ew and provides this output:
+>=20
+>=20
+> # -----------------------------------------------------------------
+> # Erasure Coding Benchmark - (C) CERN 2013 - Andreas.Joachim.Peters@c=
+ern.ch
+> # Ram-Size=3D12614856704 Allocation-Size=3D100000000
+> # -----------------------------------------------------------------
+> # [ -BENCH- ] [       ] technique=3Dmemcpy                           =
+                                 speed=3D5.408 [GB/s] latency=3D9.245 m=
+s
+> # [ -BENCH- ] [       ] technique=3Dd=3Da^b^c-xor                    =
+                                   speed=3D4.377 [GB/s] latency=3D17.13=
+6 ms
+> # [ -BENCH- ] [001/304] technique=3Dcauchy_good:k=3D05:m=3D2:w=3D8:lp=
+=3D0:packet=3D00064:size=3D50000000          speed=3D1.308 [GB/s] laten=
+cy=3D038	[ms] size-overhead=3D40	[%]
+> ..
+> ..
+> # [ -BENCH- ] [304/304] technique=3Dliberation:k=3D24:m=3D2:w=3D29:lp=
+=3D2:packet=3D65536:size=3D50000000          speed=3D0.083 [GB/s] laten=
+cy=3D604	[ms] size-overhead=3D16	[%]
+> # -----------------------------------------------------------------
+> # Erasure Code Performance Summary::
+> # -----------------------------------------------------------------
+> # RAM:                   12.61 GB
+> # Allocation-Size        0.10 GB
+> # -----------------------------------------------------------------
+> # Byte Initialization:   29.35 MB/s
+> # Memcpy:                5.41 GB/s
+> # Triple-XOR:            4.38 GB/s
+> # -----------------------------------------------------------------
+> # Fastest RAID6          2.72 GB/s liber8tion:k=3D06:m=3D2:w=3D8:lp=3D=
+0:packet=3D04096:size=3D50000000
+> # Fastest Triple Failure 0.96 GB/s cauchy_good:k=3D06:m=3D3:w=3D8:lp=3D=
+0:packet=3D04096:size=3D50000000
+> # Fastest Quadr. Failure 0.66 GB/s cauchy_good:k=3D06:m=3D4:w=3D8:lp=3D=
+0:packet=3D04096:size=3D50000000
+> # -----------------------------------------------------------------
+> # .................................................................
+> # Top 1  RAID6          2.72 GB/s liber8tion:k=3D06:m=3D2:w=3D8:lp=3D=
+0:packet=3D04096:size=3D50000000
+> # Top 2  RAID6          2.72 GB/s liber8tion:k=3D06:m=3D2:w=3D8:lp=3D=
+0:packet=3D16384:size=3D50000000
+> # Top 3  RAID6          2.64 GB/s liber8tion:k=3D06:m=3D2:w=3D8:lp=3D=
+0:packet=3D65536:size=3D50000000
+> # Top 4  RAID6          2.60 GB/s liberation:k=3D07:m=3D2:w=3D7:lp=3D=
+0:packet=3D16384:size=3D50000000
+> # Top 5  RAID6          2.59 GB/s liberation:k=3D05:m=3D2:w=3D7:lp=3D=
+0:packet=3D04096:size=3D50000000
+> # .................................................................
+> # Top 1  Triple         0.96 GB/s cauchy_good:k=3D06:m=3D3:w=3D8:lp=3D=
+0:packet=3D04096:size=3D50000000
+> # Top 2  Triple         0.94 GB/s cauchy_good:k=3D06:m=3D3:w=3D8:lp=3D=
+0:packet=3D16384:size=3D50000000
+> # Top 3  Triple         0.93 GB/s cauchy_good:k=3D06:m=3D3:w=3D8:lp=3D=
+0:packet=3D65536:size=3D50000000
+> # Top 4  Triple         0.89 GB/s cauchy_good:k=3D07:m=3D3:w=3D8:lp=3D=
+0:packet=3D04096:size=3D50000000
+> # Top 5  Triple         0.87 GB/s cauchy_good:k=3D05:m=3D3:w=3D8:lp=3D=
+0:packet=3D04096:size=3D50000000
+> # .................................................................
+> # Top 1  Quadr.         0.66 GB/s cauchy_good:k=3D06:m=3D4:w=3D8:lp=3D=
+0:packet=3D04096:size=3D50000000
+> # Top 2  Quadr.         0.65 GB/s cauchy_good:k=3D07:m=3D4:w=3D8:lp=3D=
+0:packet=3D04096:size=3D50000000
+> # Top 3  Quadr.         0.64 GB/s cauchy_good:k=3D06:m=3D4:w=3D8:lp=3D=
+0:packet=3D16384:size=3D50000000
+> # Top 4  Quadr.         0.64 GB/s cauchy_good:k=3D05:m=3D4:w=3D8:lp=3D=
+0:packet=3D04096:size=3D50000000
+> # Top 5  Quadr.         0.64 GB/s cauchy_good:k=3D06:m=3D4:w=3D8:lp=3D=
+0:packet=3D65536:size=3D50000000
+> # .................................................................
+>=20
+> It takes around 30 second on my box.=20
 
-So the hash is visible to clients who don't support encryption? Or do
-you want to hide it somehow?
 
-> 4 When a file is opened, retrieve the extend attribute, we get EFEK,
-> use TOKEN to decrypt EFEK, get FEK, buffered in the inode
-> 5 When a file is read in readpage()/readpages(), the encrypted pages =
-are
-> decrypted transparently by using FEK, and the plain data are sent to
-> application
-> 6 When a file is written in writepage()/writepages(), the pages are
-> encrypted transparently by using FEK, and then written to OSDs.
->
-> Some points,
-> 1 We do client side encryption, the advantages are,
->   (1) The data over network are encrypted;
->   (2) OSDs are intended to do io intensive job, we donot wanna bother=
- them
-> to do cpu intensive job, thus we can use cheap and low power machines
->   (3) The implementation is OSD transparent, and mostly MDS transpare=
-nt,
-> enjoys the simplification.
-> 2 What about if no page cache?
->   Block cipher algorithm is more secure than stream cipher algorithm,=
- so we
-> prefer the former. If no page cache, we have two choices, with encryp=
-tion
-> enabled, the same file is not allowed by opened by the second writer,
-> alternatively, we enforce O_LAZYIO on the file, but application is su=
-pposed
-> to be aware of this.
->
-> We plan to submit it as a blueprint for the incoming CDS, comments ar=
-e
-> welcome.
+That looks great :-) If I understand correctly, it means https://github=
+=2Ecom/ceph/ceph/pull/740 will no longer have benchmarks as they are mo=
+ved to a separate program. Correct ?
 
-This doesn't sound infeasible, but I'll welcome the details in a
-blueprint. :) The main thing I'm worried about is that if anybody
-breaks the TOKEN they have access to everything, and the hash is going
-to be available to anybody who wants to see it.
-When I've thought about this in the past I've tended more towards a
-system that uses time-based passcodes derived from a secret which the
-MDS and OSD share, which lets you do sharing without giving the client
-unlimited permissions on a file. But that requires a lot more
-modifications, and your system has some nice properties as well. You
-might also find
-https://www.usenix.org/system/files/conference/fast13/fast13-final142.p=
-df
-interesting =97 it's a very different approach, but people have done
-some thinking about distributed filesystem security before and it's
-always good to consider what's out there before starting. :)
--Greg
+> I will add a measurement how the XOR and the 3 top algorithms scale w=
+ith the number of cores and make the object-size configurable from the =
+command line. Anything else ?=20
+
+It would be convenient to run this from a "workunit" ( i.e. a script in=
+ ceph/qa/workunits/ ) so that it can later be run by teuthology integra=
+tion tests. That could be used to show regression.
+
+Shall I add the possiblity to test a single user specified configuratio=
+n via command line arguments?
+>=20
+I would need to play with it to comment usefully.
+
+Cheers
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
