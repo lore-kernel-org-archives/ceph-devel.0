@@ -1,125 +1,72 @@
-From: Milosz Tanski <milosz@adfin.com>
-Subject: Fwd: [PATCH] FS-Cache: Fix handling of an attempt to store a page
- that is now beyond EOF
-Date: Mon, 11 Nov 2013 18:32:35 -0500
-Message-ID: <CANP1eJF0WKgGxv5zMP-syi7j07j2sW6mQon0PcS2QdytQyOYTg@mail.gmail.com>
-References: <20131111221804.23212.30560.stgit@warthog.procyon.org.uk>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: HSM
+Date: Mon, 11 Nov 2013 16:13:12 -0800
+Message-ID: <CAPYLRzjuhBAgTT2SPo+s5RkY32zT6ue-na_LzGY-9WKhscaL_w@mail.gmail.com>
+References: <alpine.DEB.2.00.1311090027210.8192@cobra.newdream.net>
+	<528013F3.1010300@sgi.com>
+	<CAGd4Wr1qW-8rqF9EmpVc=-220rV6xnjFj2s6PT_UbhyPRpVX9Q@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-we0-f179.google.com ([74.125.82.179]:33537 "EHLO
-	mail-we0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752438Ab3KKXch (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Nov 2013 18:32:37 -0500
-Received: by mail-we0-f179.google.com with SMTP id x55so1272678wes.38
-        for <ceph-devel@vger.kernel.org>; Mon, 11 Nov 2013 15:32:36 -0800 (PST)
-In-Reply-To: <20131111221804.23212.30560.stgit@warthog.procyon.org.uk>
+Received: from mail-wg0-f50.google.com ([74.125.82.50]:48006 "EHLO
+	mail-wg0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753904Ab3KLANO (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Nov 2013 19:13:14 -0500
+Received: by mail-wg0-f50.google.com with SMTP id k14so3683926wgh.29
+        for <ceph-devel@vger.kernel.org>; Mon, 11 Nov 2013 16:13:13 -0800 (PST)
+In-Reply-To: <CAGd4Wr1qW-8rqF9EmpVc=-220rV6xnjFj2s6PT_UbhyPRpVX9Q@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: John Spray <john.spray@inktank.com>
+Cc: Malcolm Haak <malcolm@sgi.com>, Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-For those of you working on fscache.
+On Mon, Nov 11, 2013 at 3:04 AM, John Spray <john.spray@inktank.com> wrote:
+> This is a really useful summary from Malcolm.
+>
+> In addition to the coordinator/copytool interface, there is the question of
+> where the policy engine gets its data from.  Lustre has the MDS changelog,
+> which Robinhood uses to replicate metadata into its MySQL database with all
+> the indices that it wants.
 
+> On Sun, Nov 10, 2013 at 11:17 PM, Malcolm Haak <malcolm@sgi.com> wrote:
+>> So there aren't really any hooks in that exports are triggered by the policy engine after a scan of the metadata, and the recalls are triggered when caps are requested on offline files
 
----------- Forwarded message ----------
-From: David Howells <dhowells@redhat.com>
-Date: Mon, Nov 11, 2013 at 5:18 PM
-Subject: [PATCH] FS-Cache: Fix handling of an attempt to store a page
-that is now beyond EOF
-To: torvalds@linux-foundation.org
-Cc: linux-cachefs@redhat.com, linux-kernel@vger.kernel.org, Milosz
-Tanski <milosz@adfin.com>
+Wait, is the HSM using a changelog or is it just scanning the full
+filesystem tree? Scanning the whole tree seems awfully expensive.
 
+> I don't know if CephFS MDS currently has a similar interface.
+Well, the MDSes each have their journal of course, but more than that
+we can stick whatever we want into the metadata and expose it via
+virtual xattrs or whatever else.
+-Greg
+Software Engineer #42 @ http://inktank.com | http://ceph.com
 
-Fix the handling of an attempt to store a page that is now beyond EOF.  This
-may happen, for example, if the page got pushed for storage before the netfs
-file got truncated on the server.  In such a case, we should just remove the
-excessive pages from the cookie->stores radix tree and wake up the waiter.
-
-This can be seen in /proc/fs/fscache/stats on this line:
-
-        Stores : ops=350 run=1895 pgs=1545 rxd=1727 olm=9
-
-where olm=N has N > 0.
-
-Reported-by: Milosz Tanski <milosz@adfin.com>
-Signed-off-by: David Howells <dhowells@redhat.com>
-Acked-by: Milosz Tanski <milosz@adfin.com>
----
-
- fs/fscache/page.c |   37 ++++++++++++++++++++++++++++++++++++-
- 1 file changed, 36 insertions(+), 1 deletion(-)
-
-diff --git a/fs/fscache/page.c b/fs/fscache/page.c
-index 7f5c658af755..b4730cf52aec 100644
---- a/fs/fscache/page.c
-+++ b/fs/fscache/page.c
-@@ -755,6 +755,7 @@ static void fscache_write_op(struct fscache_operation *_op)
-        struct fscache_object *object = op->op.object;
-        struct fscache_cookie *cookie;
-        struct page *page;
-+       pgoff_t index;
-        unsigned n;
-        void *results[1];
-        int ret;
-@@ -803,7 +804,7 @@ static void fscache_write_op(struct fscache_operation *_op)
-        _debug("gang %d [%lx]", n, page->index);
-        if (page->index > op->store_limit) {
-                fscache_stat(&fscache_n_store_pages_over_limit);
--               goto superseded;
-+               goto page_beyond_limit;
-        }
-
-        radix_tree_tag_set(&cookie->stores, page->index,
-@@ -829,6 +830,40 @@ static void fscache_write_op(struct fscache_operation *_op)
-        _leave("");
-        return;
-
-+page_beyond_limit:
-+       spin_unlock(&object->lock);
-+
-+page_beyond_limit_unlocked:
-+       /* pages that are now beyond the end of the storage object must have
-+        * their pending storage records cleared.
-+        */
-+       index = page->index;
-+       radix_tree_tag_clear(&cookie->stores, page->index,
-+                            FSCACHE_COOKIE_PENDING_TAG);
-+       if (!radix_tree_tag_get(&cookie->stores, page->index,
-+                               FSCACHE_COOKIE_STORING_TAG)) {
-+               fscache_stat(&fscache_n_store_radix_deletes);
-+               radix_tree_delete(&cookie->stores, page->index);
-+               page_cache_release(page);
-+       }
-+       if (!need_resched()) {
-+               n = radix_tree_gang_lookup_tag(&cookie->stores, results,
-+                                              index + 1, 1,
-+                                              FSCACHE_COOKIE_PENDING_TAG);
-+               if (n == 1) {
-+                       page = results[0];
-+                       goto page_beyond_limit_unlocked;
-+               }
-+               spin_unlock(&cookie->stores_lock);
-+               wake_up_bit(&cookie->flags, 0);
-+       } else {
-+               spin_unlock(&cookie->stores_lock);
-+       }
-+
-+       fscache_enqueue_operation(&op->op);
-+       _leave("");
-+       return;
-+
- superseded:
-        /* this writer is going away and there aren't any more things to
-         * write */
-
-
-
--- 
-Milosz Tanski
-CTO
-10 East 53rd Street, 37th floor
-New York, NY 10022
-
-p: 646-253-9055
-e: milosz@adfin.com
+>
+> John
+>
+>
+> On Sun, Nov 10, 2013 at 11:17 PM, Malcolm Haak <malcolm@sgi.com> wrote:
+>>
+>> Hi All,
+>>
+>> If you are talking specifically about Lustre HSM, its really an interface to add HSM functionality by leveraging existing HSM's (DMF for example)
+>>
+>> So with Lustre HSM you have a policy engine that triggers the migrations out of the filesystem. Rules are based around size, last accessed and target state (online, dual and offline).
+>>
+>> There is a 'coordinator' process involved here as well, it (from what I understand) runs on MDS nodes. It handles the interaction with the copytool. The copytool is provided by the HSM solution you are acutally using.
+>>
+>> For recalls when caps are aquired on the MDS for an exported file the resposible MSD contacts the coordinator, which in-turn uses the copytool to pull the required file out of the HSM.
+>>
+>> In the Lustre HSM, the objects that make up a file are all recalled and the file, not the objects, are handed to the HSM.
+>>
+>> For Lustre all it needs to keep track of is the current state of the file and the correct ID to reqest from the HSM. This is done inside the normal metadata storage.
+>>
+>> So there aren't really any hooks in that exports are triggered by the policy engine after a scan of the metadata, and the recalls are triggered when caps are requested on offline files. Then its just standard POSIX blocking until the file is available.
+>>
+>> Most of the state and ID stuff could be stored as XATTRS in cephfs. I'm not as sure how to do it for other things but as long as you could store some kind of extended metadata about whole objects, it could use the same interfaces as well.
+>>
+>> Hope that was acutually helpful and not just an obvious rehash...
+>>
+>> Regards
+>>
+>> Malcolm Haak
