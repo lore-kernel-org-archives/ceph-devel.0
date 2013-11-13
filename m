@@ -1,66 +1,51 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Weekly teuthology meeting #9
-Date: Wed, 13 Nov 2013 21:05:42 +0100
-Message-ID: <5283DB96.5070800@dachary.org>
+From: Wido den Hollander <wido@42on.com>
+Subject: Building Ceph statically linked
+Date: Wed, 13 Nov 2013 21:22:21 +0100
+Message-ID: <5283DF7D.9080203@42on.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:36637 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756278Ab3KMUFo (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Nov 2013 15:05:44 -0500
-Received: from [10.9.0.6] (openvpn.novalocal [10.145.3.13])
-	by smtp.dmail.dachary.org (Postfix) with ESMTPS id 4002C26394
-	for <ceph-devel@vger.kernel.org>; Wed, 13 Nov 2013 21:05:43 +0100 (CET)
+Received: from websrv.42on.com ([31.25.102.167]:49427 "EHLO websrv.42on.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750919Ab3KMUWX (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 13 Nov 2013 15:22:23 -0500
+Received: from [79.99.132.145] (unknown [79.99.132.145])
+	by websrv.42on.com (Postfix) with ESMTPSA id EE14CC0183
+	for <ceph-devel@vger.kernel.org>; Wed, 13 Nov 2013 21:22:21 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
 Hi,
 
-Wednesday 13th, November 2013 8pm paris time / CEST was the ninth teuth=
-ology meeting. The general idea of these meetings is to get together de=
-velopers using teuthology ( or willing to use teuthology ) outside of I=
-nktank and people using it inside Inktank. The goal is to help transiti=
-on from an internal tool to something that's installable and upgradeabl=
-e by any Ceph developer. The next meeting will be held  =20
+While doing some tests I'm trying to build Ceph statically. I have a 
+bunch of machines where I run Ceph on for these test (mostly RGW now) 
+and I'm running into some library issues when switching from branches.
 
-8pm paris time / CEST Wednesday 20th November, 2013.=20
+To make my life a bit easier I tried compiling Ceph (especially RGW) 
+statically linked, but somehow I keep ending up with a dynamically 
+linked binary.
 
-The IRC channel is irc.oftc.net#ceph-devel and the conference room is m=
-umble.upstream-university.org ( http://www.mumble.com/mumble-download.p=
-hp ). It is timeboxed to one hour.
+What I tried:
 
-This is going to be the last meeting before the Ceph Developer Summit a=
-nd it is an opportunity to discuss what 	http://wiki.ceph.com/01Plannin=
-g/02Blueprints/Firefly/Test_Automation will be about
+$ env CXXFLAGS="-static" ./configure --enable-static --disable-shared
+$ make
 
-Cheers
+Usually that should spit out a static binary, but 'radosgw' is still 
+dynamic.
 
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-All that is necessary for the triumph of evil is that good people do no=
-thing.
+I'm not such a autoconf nor automake guru, so does anybody ever build 
+static binaries with Ceph?
 
+Yes, I'm aware they can become very large, but that's not my concern 
+right now. I just want to upload a binary to a machine, run it and see 
+if it does what I'm hoping it does and not having to worry about all the 
+dependencies being there and being the right version.
 
+-- 
+Wido den Hollander
+42on B.V.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Phone: +31 (0)20 700 9902
+Skype: contact42on
