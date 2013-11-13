@@ -1,44 +1,53 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [RBD][OpenStack]The way to solve problem when boot VM and root
- disk size is specified
-Date: Tue, 12 Nov 2013 18:58:16 -0800
-Message-ID: <5282EAC8.90902@inktank.com>
-References: <E7DD39A7-418B-4C08-98A2-8CB27AD18711@gmail.com>
+From: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>
+Subject: Re: Mourning the demise of mkcephfs
+Date: Wed, 13 Nov 2013 16:33:29 +1300
+Message-ID: <5282F309.2030104@catalyst.net.nz>
+References: <5281192D.4090707@bob-the-boat.me.uk> <CANtztVwJyK7C5LS1G3YCLh-0T0VODCsUuWE1ADz_PupJe4nAAQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f49.google.com ([209.85.220.49]:52771 "EHLO
-	mail-pa0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755544Ab3KMC70 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Nov 2013 21:59:26 -0500
-Received: by mail-pa0-f49.google.com with SMTP id lf10so2746287pab.8
-        for <ceph-devel@vger.kernel.org>; Tue, 12 Nov 2013 18:59:25 -0800 (PST)
-In-Reply-To: <E7DD39A7-418B-4C08-98A2-8CB27AD18711@gmail.com>
+Received: from bertrand.catalyst.net.nz ([202.78.240.40]:37888 "EHLO
+	mail.catalyst.net.nz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755867Ab3KMDdg (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Nov 2013 22:33:36 -0500
+In-Reply-To: <CANtztVwJyK7C5LS1G3YCLh-0T0VODCsUuWE1ADz_PupJe4nAAQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomaiwang@gmail.com>, ceph-devel@vger.kernel.org
+To: Alfredo Deza <alfredo.deza@inktank.com>, "Dave (Bob)" <dave@bob-the-boat.me.uk>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 11/11/2013 11:10 PM, Haomai Wang wrote:
-> Hi all,
+On 13/11/13 04:53, Alfredo Deza wrote:
+> On Mon, Nov 11, 2013 at 12:51 PM, Dave (Bob) <dave@bob-the-boat.me.uk> wrote:
 >
-> Now OpenStack Nova master branch still exists a bug when you boot a VM which root disk size is specified. The storage backend of Nova also is rbd. For example, you boot a VM and specify 10G as root disk size. But the image is only 1G. Then VM will be spawned and the root disk size will expands to 10G. The filesystem still is 1G.
+>> It is unuseable for me at present, because it reports:
+>>
+>> [ceph_deploy][ERROR ] UnsupportedPlatform: Platform is not supported:
+>>
+> That looks like a bug. For the past few months the log output of
+> ceph-deploy has tried to improve to give as much useful information
+> as possible.
 >
-> Now I have a way to solve it. When we boot a VM and resize root disk size, we use "fuse-rbd" command to resize filesystem.
+> To get to the bottom of this it would be super helpful to know what
+> distro you were attempting to connect to, what the actual command was,
+> and what version of ceph-deploy you were using.
 >
-> fuse-rbd -p pool -c /etc/ceph/ceph.conf /tmp-ceph-rbd
-> cd /tmp-ceph-rbd
-> resize2fs volume-xxxxxxxxxxx
+> Hopefully, with that information and the (possible) bug fix, it will
+> mean that more and more people find ceph-deploy as a robust solution
+> to get
+> a Ceph cluster up and running.
 >
-> It seemed to work but I want to know whether exists problems when many volumes in a pool. I'm not sure that too many volumes cause performance problem.
+>
 
-fuse-rbd has a 128 image limit at the moment. It's more of a prototype
-than something I'd recommend relying on.
+I believe he is using a self built (or heavily customized) Linux 
+installation - so distribution detection is not going to work in this 
+case. I'm wondering if there could be some sensible fall back for that, e.g:
 
-Interacting with an untrusted filesystem on a compute host is also a
-bit worrying from a security perspective. If you really need to resize
-the fs and can't use cloud-init, using libguestfs would be best. This
-isolates the operations into a vm, so the host kernel isn't interacting
-with untrusted filesystems.
+- refuse to install or purge
+- assume sysv init
 
-Josh
+so that ceph-deploy can 'do the best it can' in these situations. Thoughts?
+
+Cheers
+
+Mark
