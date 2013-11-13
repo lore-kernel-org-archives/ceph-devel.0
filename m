@@ -1,74 +1,64 @@
-From: Mike Dawson <mike.dawson@cloudapt.com>
-Subject: Re: Weekly teuthology meeting #8
-Date: Wed, 13 Nov 2013 13:54:38 -0500
-Message-ID: <D6827118-69CF-49F0-99A1-36AF10844404@cloudapt.com>
-References: <52838C75.8020409@dachary.org>
-Mime-Version: 1.0 (1.0)
-Content-Type: text/plain; charset=utf-8
+From: Loic Dachary <loic@dachary.org>
+Subject: Weekly teuthology meeting #9
+Date: Wed, 13 Nov 2013 21:05:42 +0100
+Message-ID: <5283DB96.5070800@dachary.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f180.google.com ([209.85.223.180]:40484 "EHLO
-	mail-ie0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756924Ab3KMSyk convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Nov 2013 13:54:40 -0500
-Received: by mail-ie0-f180.google.com with SMTP id qd12so1166211ieb.11
-        for <ceph-devel@vger.kernel.org>; Wed, 13 Nov 2013 10:54:40 -0800 (PST)
-In-Reply-To: <52838C75.8020409@dachary.org>
+Received: from smtp.dmail.dachary.org ([91.121.254.229]:36637 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756278Ab3KMUFo (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Nov 2013 15:05:44 -0500
+Received: from [10.9.0.6] (openvpn.novalocal [10.145.3.13])
+	by smtp.dmail.dachary.org (Postfix) with ESMTPS id 4002C26394
+	for <ceph-devel@vger.kernel.org>; Wed, 13 Nov 2013 21:05:43 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-Loic,
+Hi,
 
-I'm at a trade show today, and cannot join. Talk with you next week!
+Wednesday 13th, November 2013 8pm paris time / CEST was the ninth teuth=
+ology meeting. The general idea of these meetings is to get together de=
+velopers using teuthology ( or willing to use teuthology ) outside of I=
+nktank and people using it inside Inktank. The goal is to help transiti=
+on from an internal tool to something that's installable and upgradeabl=
+e by any Ceph developer. The next meeting will be held  =20
 
--Mike
+8pm paris time / CEST Wednesday 20th November, 2013.=20
 
-Sent from my iPhone
+The IRC channel is irc.oftc.net#ceph-devel and the conference room is m=
+umble.upstream-university.org ( http://www.mumble.com/mumble-download.p=
+hp ). It is timeboxed to one hour.
 
-On Nov 13, 2013, at 9:28 AM, Loic Dachary <loic@dachary.org> wrote:
+This is going to be the last meeting before the Ceph Developer Summit a=
+nd it is an opportunity to discuss what 	http://wiki.ceph.com/01Plannin=
+g/02Blueprints/Firefly/Test_Automation will be about
 
-> Hi,
->=20
-> Wednesday 6th, November 2013 8pm paris time / CEST was the eigth teut=
-hology meeting (3am Hong Kong time ;-). The general idea of these meeti=
-ngs is to get together developers using teuthology ( or willing to use =
-teuthology ) outside of Inktank and people using it inside Inktank. The=
- goal is to help transition from an internal tool to something that's i=
-nstallable and upgradeable by any Ceph developer. The next meeting will=
- be held=20
->  8pm paris time / CEST Wednesday 13th November, 2013.=20
-> The IRC channel is irc.oftc.net#ceph-devel and the conference room is=
- mumble.upstream-university.org ( http://www.mumble.com/mumble-download=
-=2Ephp ). It is timeboxed to one hour.
->=20
-> This is very short notice : I forgot to send the mail after the previ=
-ous meeting, probably because it was the middle of the night :-)=20
->=20
-> Cheers
->=20
-> --=20
-> Lo=C3=AFc Dachary, Artisan Logiciel Libre
-> All that is necessary for the triumph of evil is that good people do =
-nothing.
->=20
->=20
->=20
->=20
->=20
->=20
->=20
->=20
->=20
->=20
->=20
->=20
->=20
->=20
->=20
->=20
-> <signature.asc>
+Cheers
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+All that is necessary for the triumph of evil is that good people do no=
+thing.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
