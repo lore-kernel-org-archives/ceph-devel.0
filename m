@@ -1,73 +1,67 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Re: [RBD][OpenStack]The way to solve problem when boot VM and root disk size is specified
-Date: Wed, 13 Nov 2013 22:10:33 +0800
-Message-ID: <308D023A-C151-4F4C-ABC6-CA72D6853A43@gmail.com>
-References: <E7DD39A7-418B-4C08-98A2-8CB27AD18711@gmail.com> <5282EAC8.90902@inktank.com> <B688DDF9-C53E-46CC-ACC9-31E5B7EB24D6@gmail.com>
-Mime-Version: 1.0 (Mac OS X Mail 7.0 \(1822\))
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+From: Loic Dachary <loic@dachary.org>
+Subject: Weekly teuthology meeting #8
+Date: Wed, 13 Nov 2013 15:28:05 +0100
+Message-ID: <52838C75.8020409@dachary.org>
+Mime-Version: 1.0
+Content-Type: multipart/mixed;
+ boundary="------------090202040408000901040806"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f177.google.com ([209.85.192.177]:43104 "EHLO
-	mail-pd0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759080Ab3KMOLE convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Nov 2013 09:11:04 -0500
-Received: by mail-pd0-f177.google.com with SMTP id v10so456090pde.22
-        for <ceph-devel@vger.kernel.org>; Wed, 13 Nov 2013 06:11:02 -0800 (PST)
-In-Reply-To: <B688DDF9-C53E-46CC-ACC9-31E5B7EB24D6@gmail.com>
+Received: from smtp.dmail.dachary.org ([91.121.254.229]:36212 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753952Ab3KMO2I (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Nov 2013 09:28:08 -0500
+Received: from [10.9.0.6] (openvpn.novalocal [10.145.3.13])
+	by smtp.dmail.dachary.org (Postfix) with ESMTPS id 7C59A26394
+	for <ceph-devel@vger.kernel.org>; Wed, 13 Nov 2013 15:28:05 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
+This is a multi-part message in MIME format.
+--------------090202040408000901040806
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 8bit
 
-On Nov 13, 2013, at 9:14 PM, Haomai Wang <haomaiwang@gmail.com> wrote:
+Hi,
 
-> 
-> On Nov 13, 2013, at 10:58 AM, Josh Durgin <josh.durgin@inktank.com> wrote:
-> 
->> On 11/11/2013 11:10 PM, Haomai Wang wrote:
->>> Hi all,
->>> 
->>> Now OpenStack Nova master branch still exists a bug when you boot a VM which root disk size is specified. The storage backend of Nova also is rbd. For example, you boot a VM and specify 10G as root disk size. But the image is only 1G. Then VM will be spawned and the root disk size will expands to 10G. The filesystem still is 1G.
->>> 
->>> Now I have a way to solve it. When we boot a VM and resize root disk size, we use "fuse-rbd" command to resize filesystem.
->>> 
->>> fuse-rbd -p pool -c /etc/ceph/ceph.conf /tmp-ceph-rbd
->>> cd /tmp-ceph-rbd
->>> resize2fs volume-xxxxxxxxxxx
->>> 
->>> It seemed to work but I want to know whether exists problems when many volumes in a pool. I'm not sure that too many volumes cause performance problem.
->> 
->> fuse-rbd has a 128 image limit at the moment. It's more of a prototype
->> than something I'd recommend relying on.
->> 
->> Interacting with an untrusted filesystem on a compute host is also a
->> bit worrying from a security perspective. If you really need to resize
->> the fs and can't use cloud-init, using libguestfs would be best. This
->> isolates the operations into a vm, so the host kernel isn't interacting
->> with untrusted filesystems.
-> 
-> I expected libguestfs too. But the pity is that the python binding of
-> libguestfs doesn't support "protocol" argument, extra protocols such
-> as rbd can't be used.
+Wednesday 6th, November 2013 8pm paris time / CEST was the eigth teuthology meeting (3am Hong Kong time ;-). The general idea of these meetings is to get together developers using teuthology ( or willing to use teuthology ) outside of Inktank and people using it inside Inktank. The goal is to help transition from an internal tool to something that's installable and upgradeable by any Ceph developer. The next meeting will be held 
+  8pm paris time / CEST Wednesday 13th November, 2013. 
+The IRC channel is irc.oftc.net#ceph-devel and the conference room is mumble.upstream-university.org ( http://www.mumble.com/mumble-download.php ). It is timeboxed to one hour.
 
-Oh, sorry. Newer python-libguest supports it. Good news, thanks! :-)
+This is very short notice : I forgot to send the mail after the previous meeting, probably because it was the middle of the night :-) 
 
-> 
-> Maybe cloud-init is the proper choice. I just want to find a way let not
-> dependent to image.
-> 
->> 
->> Josh
-> 
-> Best regards,
-> Wheats
-> 
-> 
-> 
+Cheers
 
-Best regards,
-Wheats
+-- 
+Loïc Dachary, Artisan Logiciel Libre
+All that is necessary for the triumph of evil is that good people do nothing.
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--------------090202040408000901040806
+Content-Type: application/pgp-signature;
+ name="signature.asc"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment;
+ filename="signature.asc"
+
+LS0tLS1CRUdJTiBQR1AgU0lHTkFUVVJFLS0tLS0KVmVyc2lvbjogR251UEcgdjIuMC4yMCAo
+R05VL0xpbnV4KQpDb21tZW50OiBVc2luZyBHbnVQRyB3aXRoIFRodW5kZXJiaXJkIC0gaHR0
+cDovL3d3dy5lbmlnbWFpbC5uZXQvCgppRVlFQVJFQ0FBWUZBbEozQzdrQUNna1E4ZExNeUVs
+NkYyMldRZ0NnbDhQYUJiZ2Ruc3ZZLzZNdDlQQnlCeG12Ck1tY0FvTU1kblJmY0cvZ1VnWnpv
+VUFGU242WWJHY29mCj1adEdRCi0tLS0tRU5EIFBHUCBTSUdOQVRVUkUtLS0tLQoK
+--------------090202040408000901040806--
