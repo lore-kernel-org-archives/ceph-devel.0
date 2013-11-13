@@ -1,66 +1,47 @@
-From: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>
-Subject: Re: Mourning the demise of mkcephfs
-Date: Wed, 13 Nov 2013 16:54:35 +1300
-Message-ID: <5282F7FB.4070803@catalyst.net.nz>
-References: <5281192D.4090707@bob-the-boat.me.uk> <CANtztVwJyK7C5LS1G3YCLh-0T0VODCsUuWE1ADz_PupJe4nAAQ@mail.gmail.com> <5282F309.2030104@catalyst.net.nz>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+From: Li Wang <liwang@ubuntukylin.com>
+Subject: [PATCH] Ceph: Avoid data inconsistency due to d-cache aliasing in readpage()
+Date: Wed, 13 Nov 2013 15:22:14 +0800
+Message-ID: <1384327335-18812-1-git-send-email-liwang@ubuntukylin.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from bertrand.catalyst.net.nz ([202.78.240.40]:39806 "EHLO
-	mail.catalyst.net.nz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755867Ab3KMDyj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Nov 2013 22:54:39 -0500
-In-Reply-To: <5282F309.2030104@catalyst.net.nz>
+Received: from m53-178.qiye.163.com ([123.58.178.53]:36081 "EHLO
+	m53-178.qiye.163.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757480Ab3KMHdC (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Nov 2013 02:33:02 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alfredo Deza <alfredo.deza@inktank.com>, "Dave (Bob)" <dave@bob-the-boat.me.uk>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: Sage Weil <sage@inktank.com>, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, Li Wang <liwang@ubuntukylin.com>
 
-On 13/11/13 16:33, Mark Kirkwood wrote:
-> On 13/11/13 04:53, Alfredo Deza wrote:
->> On Mon, Nov 11, 2013 at 12:51 PM, Dave (Bob) 
->> <dave@bob-the-boat.me.uk> wrote:
->>
->>> It is unuseable for me at present, because it reports:
->>>
->>> [ceph_deploy][ERROR ] UnsupportedPlatform: Platform is not supported:
->>>
->> That looks like a bug. For the past few months the log output of
->> ceph-deploy has tried to improve to give as much useful information
->> as possible.
->>
->> To get to the bottom of this it would be super helpful to know what
->> distro you were attempting to connect to, what the actual command was,
->> and what version of ceph-deploy you were using.
->>
->> Hopefully, with that information and the (possible) bug fix, it will
->> mean that more and more people find ceph-deploy as a robust solution
->> to get
->> a Ceph cluster up and running.
->>
->>
->
-> I believe he is using a self built (or heavily customized) Linux 
-> installation - so distribution detection is not going to work in this 
-> case. I'm wondering if there could be some sensible fall back for 
-> that, e.g:
->
-> - refuse to install or purge
-> - assume sysv init
->
-> so that ceph-deploy can 'do the best it can' in these situations. 
-> Thoughts?
->
+If the length of data to be read in readpage() is exactly
+PAGE_CACHE_SIZE, the original code does not flush d-cache
+for data consistency after finishing reading. This patches fixes
+this.
 
-Ahem - replying to myself, sorry:
+Signed-off-by: Li Wang <liwang@ubuntukylin.com>
+---
+ fs/ceph/addr.c |    8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
 
-It might be just as easy to allow init to be specified as an option 
-(--init INITTYPE). As an aside, for my development (Ubuntu) workstation, 
-I'm building ceph from src and using ceph-deploy to install it - *but* 
-am switching init to sysv afterwards (I just prefer to use it for that 
-situation).
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index 6df8bd4..7b0000a 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -210,9 +210,13 @@ static int readpage_nounlock(struct file *filp, struct page *page)
+ 	if (err < 0) {
+ 		SetPageError(page);
+ 		goto out;
+-	} else if (err < PAGE_CACHE_SIZE) {
++	} else {
++		if (err < PAGE_CACHE_SIZE) {
+ 		/* zero fill remainder of page */
+-		zero_user_segment(page, err, PAGE_CACHE_SIZE);
++			zero_user_segment(page, err, PAGE_CACHE_SIZE);
++		} else {
++			flush_dcache_page(page);
++		}
+ 	}
+ 	SetPageUptodate(page);
+ 
+-- 
+1.7.9.5
 
-Cheers
-
-Mark
