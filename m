@@ -1,58 +1,49 @@
-From: "Yan, Zheng" <ukernel@gmail.com>
-Subject: Re: [PATCH] Ceph: Avoid data inconsistency due to d-cache aliasing in readpage()
-Date: Wed, 13 Nov 2013 21:19:12 +0800
-Message-ID: <CAAM7YA=1DXyW+tr8CcAidOw_Hqmq=2o7QhcKGQO93n8jY5qAdg@mail.gmail.com>
-References: <1384327335-18812-1-git-send-email-liwang@ubuntukylin.com>
+From: Alfredo Deza <alfredo.deza@inktank.com>
+Subject: [ANN] ceph-deploy 1.3.2 released!
+Date: Wed, 13 Nov 2013 08:29:41 -0500
+Message-ID: <CANtztVzZV9ZmHhDa0DnCDQgZCVZ+BRbZo-EMdhhJgaG5D-h+4w@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-In-Reply-To: <1384327335-18812-1-git-send-email-liwang@ubuntukylin.com>
-Sender: linux-fsdevel-owner@vger.kernel.org
-To: Li Wang <liwang@ubuntukylin.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ob0-f178.google.com ([209.85.214.178]:41355 "EHLO
+	mail-ob0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751490Ab3KMN3m (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Nov 2013 08:29:42 -0500
+Received: by mail-ob0-f178.google.com with SMTP id va2so412180obc.23
+        for <ceph-devel@vger.kernel.org>; Wed, 13 Nov 2013 05:29:41 -0800 (PST)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
 
-On Wed, Nov 13, 2013 at 3:22 PM, Li Wang <liwang@ubuntukylin.com> wrote:
-> If the length of data to be read in readpage() is exactly
-> PAGE_CACHE_SIZE, the original code does not flush d-cache
-> for data consistency after finishing reading. This patches fixes
-> this.
->
-> Signed-off-by: Li Wang <liwang@ubuntukylin.com>
-> ---
->  fs/ceph/addr.c |    8 ++++++--
->  1 file changed, 6 insertions(+), 2 deletions(-)
->
-> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-> index 6df8bd4..7b0000a 100644
-> --- a/fs/ceph/addr.c
-> +++ b/fs/ceph/addr.c
-> @@ -210,9 +210,13 @@ static int readpage_nounlock(struct file *filp, struct page *page)
->         if (err < 0) {
->                 SetPageError(page);
->                 goto out;
-> -       } else if (err < PAGE_CACHE_SIZE) {
-> +       } else {
-> +               if (err < PAGE_CACHE_SIZE) {
->                 /* zero fill remainder of page */
-> -               zero_user_segment(page, err, PAGE_CACHE_SIZE);
-> +                       zero_user_segment(page, err, PAGE_CACHE_SIZE);
-> +               } else {
-> +                       flush_dcache_page(page);
-> +               }
+Hi All,
 
-this doesn't make sense for me. why not call flush_dcache_page unconditionally?
+I'm happy to announce a new release of ceph-deploy, the easy
+deployment tool for Ceph.
 
-Regards
-Yan, Zheng
->         }
->         SetPageUptodate(page);
->
-> --
-> 1.7.9.5
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> Please read the FAQ at  http://www.tux.org/lkml/
+The only two (very important) changes made for this release are:
+
+* Automatic SSH key copying/generation for hosts that do not have keys
+setup when using `ceph-deploy new`
+
+* All installs will now use the latest stable release of Ceph:
+Emperor, unless otherwise specified.
+
+With this release we are now also building documentation (and
+publishing it!) with every change landing in master. Docs were not a
+high priority in the past few months because we wanted to make
+ceph-deploy more robust and easier to use, but we are now in a better
+place and so docs will get better as we make changes.
+
+The new documentation home is at:  http://ceph.com/ceph-deploy/docs/
+
+And the changelog for this release is:
+http://ceph.com/ceph-deploy/docs/changelog.html#id1
+
+The new SSH magic was also documented as part of the release and can
+be found here: http://ceph.com/ceph-deploy/docs/index.html#ssh-keys
+
+
+Thanks!
+
+
+Alfredo
