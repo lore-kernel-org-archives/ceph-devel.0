@@ -1,67 +1,69 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Weekly teuthology meeting #8
-Date: Wed, 13 Nov 2013 15:28:05 +0100
-Message-ID: <52838C75.8020409@dachary.org>
+From: Li Wang <liwang@ubuntukylin.com>
+Subject: Re: [PATCH] Ceph: Avoid data inconsistency due to d-cache aliasing
+ in readpage()
+Date: Wed, 13 Nov 2013 22:37:17 +0800
+Message-ID: <52838E9D.7010901@ubuntukylin.com>
+References: <1384327335-18812-1-git-send-email-liwang@ubuntukylin.com> <CAAM7YA=1DXyW+tr8CcAidOw_Hqmq=2o7QhcKGQO93n8jY5qAdg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed;
- boundary="------------090202040408000901040806"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:36212 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753952Ab3KMO2I (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Nov 2013 09:28:08 -0500
-Received: from [10.9.0.6] (openvpn.novalocal [10.145.3.13])
-	by smtp.dmail.dachary.org (Postfix) with ESMTPS id 7C59A26394
-	for <ceph-devel@vger.kernel.org>; Wed, 13 Nov 2013 15:28:05 +0100 (CET)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAAM7YA=1DXyW+tr8CcAidOw_Hqmq=2o7QhcKGQO93n8jY5qAdg@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Yan, Zheng" <ukernel@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-This is a multi-part message in MIME format.
---------------090202040408000901040806
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 8bit
+Hi Yan,
+   zero_user_segment() has invoked flush_dcache_page() for us, we donnot 
+wanna flush d-cache twice.
 
-Hi,
+Cheers,
+Li Wang
 
-Wednesday 6th, November 2013 8pm paris time / CEST was the eigth teuthology meeting (3am Hong Kong time ;-). The general idea of these meetings is to get together developers using teuthology ( or willing to use teuthology ) outside of Inktank and people using it inside Inktank. The goal is to help transition from an internal tool to something that's installable and upgradeable by any Ceph developer. The next meeting will be held 
-  8pm paris time / CEST Wednesday 13th November, 2013. 
-The IRC channel is irc.oftc.net#ceph-devel and the conference room is mumble.upstream-university.org ( http://www.mumble.com/mumble-download.php ). It is timeboxed to one hour.
-
-This is very short notice : I forgot to send the mail after the previous meeting, probably because it was the middle of the night :-) 
-
-Cheers
-
--- 
-Loïc Dachary, Artisan Logiciel Libre
-All that is necessary for the triumph of evil is that good people do nothing.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
---------------090202040408000901040806
-Content-Type: application/pgp-signature;
- name="signature.asc"
-Content-Transfer-Encoding: base64
-Content-Disposition: attachment;
- filename="signature.asc"
-
-LS0tLS1CRUdJTiBQR1AgU0lHTkFUVVJFLS0tLS0KVmVyc2lvbjogR251UEcgdjIuMC4yMCAo
-R05VL0xpbnV4KQpDb21tZW50OiBVc2luZyBHbnVQRyB3aXRoIFRodW5kZXJiaXJkIC0gaHR0
-cDovL3d3dy5lbmlnbWFpbC5uZXQvCgppRVlFQVJFQ0FBWUZBbEozQzdrQUNna1E4ZExNeUVs
-NkYyMldRZ0NnbDhQYUJiZ2Ruc3ZZLzZNdDlQQnlCeG12Ck1tY0FvTU1kblJmY0cvZ1VnWnpv
-VUFGU242WWJHY29mCj1adEdRCi0tLS0tRU5EIFBHUCBTSUdOQVRVUkUtLS0tLQoK
---------------090202040408000901040806--
+On 11/13/2013 09:19 PM, Yan, Zheng wrote:
+> On Wed, Nov 13, 2013 at 3:22 PM, Li Wang <liwang@ubuntukylin.com> wrote:
+>> If the length of data to be read in readpage() is exactly
+>> PAGE_CACHE_SIZE, the original code does not flush d-cache
+>> for data consistency after finishing reading. This patches fixes
+>> this.
+>>
+>> Signed-off-by: Li Wang <liwang@ubuntukylin.com>
+>> ---
+>>   fs/ceph/addr.c |    8 ++++++--
+>>   1 file changed, 6 insertions(+), 2 deletions(-)
+>>
+>> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+>> index 6df8bd4..7b0000a 100644
+>> --- a/fs/ceph/addr.c
+>> +++ b/fs/ceph/addr.c
+>> @@ -210,9 +210,13 @@ static int readpage_nounlock(struct file *filp, struct page *page)
+>>          if (err < 0) {
+>>                  SetPageError(page);
+>>                  goto out;
+>> -       } else if (err < PAGE_CACHE_SIZE) {
+>> +       } else {
+>> +               if (err < PAGE_CACHE_SIZE) {
+>>                  /* zero fill remainder of page */
+>> -               zero_user_segment(page, err, PAGE_CACHE_SIZE);
+>> +                       zero_user_segment(page, err, PAGE_CACHE_SIZE);
+>> +               } else {
+>> +                       flush_dcache_page(page);
+>> +               }
+>
+> this doesn't make sense for me. why not call flush_dcache_page unconditionally?
+>
+> Regards
+> Yan, Zheng
+>>          }
+>>          SetPageUptodate(page);
+>>
+>> --
+>> 1.7.9.5
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> Please read the FAQ at  http://www.tux.org/lkml/
+>
