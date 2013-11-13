@@ -1,72 +1,74 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: CDS blueprint: strong auth for cephfs
-Date: Wed, 13 Nov 2013 09:45:37 -0800
-Message-ID: <CAPYLRzgrDPUg91em1uXkCtqFfbS-2GP92stjmGtPUOmS+tRcTw@mail.gmail.com>
-References: <CABZ+qqkfhMFUskDheNrARKfyUPCRLref-O=kkw3ezqaZFnu6rw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+From: Mike Dawson <mike.dawson@cloudapt.com>
+Subject: Re: Weekly teuthology meeting #8
+Date: Wed, 13 Nov 2013 13:54:38 -0500
+Message-ID: <D6827118-69CF-49F0-99A1-36AF10844404@cloudapt.com>
+References: <52838C75.8020409@dachary.org>
+Mime-Version: 1.0 (1.0)
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f173.google.com ([209.85.212.173]:35716 "EHLO
-	mail-wi0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754025Ab3KMRpj convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Nov 2013 12:45:39 -0500
-Received: by mail-wi0-f173.google.com with SMTP id ey11so5677813wid.12
-        for <ceph-devel@vger.kernel.org>; Wed, 13 Nov 2013 09:45:38 -0800 (PST)
-In-Reply-To: <CABZ+qqkfhMFUskDheNrARKfyUPCRLref-O=kkw3ezqaZFnu6rw@mail.gmail.com>
+Received: from mail-ie0-f180.google.com ([209.85.223.180]:40484 "EHLO
+	mail-ie0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756924Ab3KMSyk convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Nov 2013 13:54:40 -0500
+Received: by mail-ie0-f180.google.com with SMTP id qd12so1166211ieb.11
+        for <ceph-devel@vger.kernel.org>; Wed, 13 Nov 2013 10:54:40 -0800 (PST)
+In-Reply-To: <52838C75.8020409@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dan van der Ster <dan@vanderster.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>, andrea.ieri@cern.ch, Arne Wiebalck <Arne.Wiebalck@cern.ch>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Wed, Nov 13, 2013 at 8:05 AM, Dan van der Ster <dan@vanderster.com> =
-wrote:
-> Hi all,
-> This mail is just to let you know that we've prepared a draft
-> blueprint related to adding strong(er) authn/authz to cephfs:
->
-> http://wiki.ceph.com/01Planning/02Blueprints/Firefly/Strong_AuthN_and=
-_AuthZ_for_CephFS
->
-> The main goal of the idea is that we'd like to be able to use CephFS
-> from untrusted clients:
->   - the CephX key gives full rw access to pools (e.g. data/metadata)
-> via rados; we cannot distribute this key to untrusted hosts.
->   - root on untrusted clients can forge their uid/gid and rm -rf /cep=
-hfs/*.
->
-> In the doc we've proposed one way to add authn/authz to the ceph
-> server side, but perhaps there is a simpler (more feasible in the
-> short term) solution which would enable us to allow untrusted cephfs
-> clients.
+Loic,
 
-You want to check out:
-http://wiki.ceph.com/01Planning/Sideboard/Client_Security_for_CephFS,
-the previous edition of the client security blueprint
-http://www.ssrc.ucsc.edu/Papers/leung-sc07.pdf, "Scalable Security for
-Petascale Parallel File Systems", which discusses one way of using
-MDS-granted permissions
-http://www.ssrc.ucsc.edu/Papers/li-fast13.pdf, "Horus: Fine-Grained
-Encryption-Based Security for Large-Scale Storage" is largely
-orthogonal in specifics but might inspire some other ides
+I'm at a trade show today, and cannot join. Talk with you next week!
 
-It looks to me like you've actually got two different blueprints
-there, though =96 "Allow Ceph clients to use Kerberos as an entry point=
-"
-and "Enable stronger CephFS security". You're going to need to discuss
-the MDS tickets in a lot more detail than you have there, though =97 fo=
-r
-instance, with your current description you'll need a shared secret
-between the OSD and MDS, and you'll need to expire the client extra
-keys, etc. You may want to consider skipping this in the first
-iteration and just implementing proper security on the MDS while
-relying on RADOS-level options to keep data secure (separate
-namespaces or pools for different users, and providing narrow caps to
-clients). That would also leave more time for some serious research
-into how to do a scalable implementation of any ticketing system we
-create.
--Greg
-Software Engineer #42 @ http://inktank.com | http://ceph.com
+-Mike
+
+Sent from my iPhone
+
+On Nov 13, 2013, at 9:28 AM, Loic Dachary <loic@dachary.org> wrote:
+
+> Hi,
+>=20
+> Wednesday 6th, November 2013 8pm paris time / CEST was the eigth teut=
+hology meeting (3am Hong Kong time ;-). The general idea of these meeti=
+ngs is to get together developers using teuthology ( or willing to use =
+teuthology ) outside of Inktank and people using it inside Inktank. The=
+ goal is to help transition from an internal tool to something that's i=
+nstallable and upgradeable by any Ceph developer. The next meeting will=
+ be held=20
+>  8pm paris time / CEST Wednesday 13th November, 2013.=20
+> The IRC channel is irc.oftc.net#ceph-devel and the conference room is=
+ mumble.upstream-university.org ( http://www.mumble.com/mumble-download=
+=2Ephp ). It is timeboxed to one hour.
+>=20
+> This is very short notice : I forgot to send the mail after the previ=
+ous meeting, probably because it was the middle of the night :-)=20
+>=20
+> Cheers
+>=20
+> --=20
+> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+> All that is necessary for the triumph of evil is that good people do =
+nothing.
+>=20
+>=20
+>=20
+>=20
+>=20
+>=20
+>=20
+>=20
+>=20
+>=20
+>=20
+>=20
+>=20
+>=20
+>=20
+>=20
+> <signature.asc>
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
