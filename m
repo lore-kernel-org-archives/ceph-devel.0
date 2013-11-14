@@ -1,138 +1,134 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: Mourning the demise of mkcephfs
-Date: Thu, 14 Nov 2013 08:25:18 -0600
-Message-ID: <5284DD4E.4080609@inktank.com>
-References: <5281192D.4090707@bob-the-boat.me.uk> <CANtztVwJyK7C5LS1G3YCLh-0T0VODCsUuWE1ADz_PupJe4nAAQ@mail.gmail.com> <5282F309.2030104@catalyst.net.nz> <5282F7FB.4070803@catalyst.net.nz> <5284C1C0.2080909@bob-the-boat.me.uk>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: CDS blueprint: strong auth for cephfs
+Date: Thu, 14 Nov 2013 07:55:32 -0800
+Message-ID: <CAPYLRzhKNT6Tx9LRV6bfHXpAsG1m3MhWriK-i-T+wSGfBVwh-A@mail.gmail.com>
+References: <CABZ+qqkfhMFUskDheNrARKfyUPCRLref-O=kkw3ezqaZFnu6rw@mail.gmail.com>
+	<CAPYLRzgrDPUg91em1uXkCtqFfbS-2GP92stjmGtPUOmS+tRcTw@mail.gmail.com>
+	<CABZ+qq=SQman+HPvKany0HigYrtMn766itdU_7ZsYm6SOaQzcQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f173.google.com ([209.85.223.173]:62845 "EHLO
-	mail-ie0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754113Ab3KNOZV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Nov 2013 09:25:21 -0500
-Received: by mail-ie0-f173.google.com with SMTP id x13so2823962ief.32
-        for <ceph-devel@vger.kernel.org>; Thu, 14 Nov 2013 06:25:20 -0800 (PST)
-In-Reply-To: <5284C1C0.2080909@bob-the-boat.me.uk>
+Received: from mail-we0-f176.google.com ([74.125.82.176]:62924 "EHLO
+	mail-we0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753503Ab3KNPze convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Nov 2013 10:55:34 -0500
+Received: by mail-we0-f176.google.com with SMTP id w62so2172003wes.35
+        for <ceph-devel@vger.kernel.org>; Thu, 14 Nov 2013 07:55:33 -0800 (PST)
+In-Reply-To: <CABZ+qq=SQman+HPvKany0HigYrtMn766itdU_7ZsYm6SOaQzcQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Dave (Bob)" <dave@bob-the-boat.me.uk>
-Cc: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>, Alfredo Deza <alfredo.deza@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Dan van der Ster <dan@vanderster.com>, Arne Wiebalck <Arne.Wiebalck@cern.ch>, Sage Weil <sage@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>, andrea.ieri@cern.ch
 
-On 11/14/2013 06:27 AM, Dave (Bob) wrote:
-> I would suggest that it is always dangerous to make assumptions.
-> If ceph-deploy needs some information, then this should be explicit, and
-> configurable.
-> If it needs to know whether initialisation is done by systemd, upstart,
-> or sysv init, then what is wrong with requesting a config option?
+On Thu, Nov 14, 2013 at 2:00 AM, Dan van der Ster <dan@vanderster.com> =
+wrote:
+> Hi Greg,
 >
-> As it happens, ceph-deploy doesn't seem to be what I require as a
-> mkcephfs replacement.
-> An earlier exchange with Mark suggests that it wants to involve itself
-> with the installation of software, and the configuration of startup
-> mechanisms.
+> On Wed, Nov 13, 2013 at 6:45 PM, Gregory Farnum <greg@inktank.com> wr=
+ote:
+>> On Wed, Nov 13, 2013 at 8:05 AM, Dan van der Ster <dan@vanderster.co=
+m> wrote:
+>>> Hi all,
+>>> This mail is just to let you know that we've prepared a draft
+>>> blueprint related to adding strong(er) authn/authz to cephfs:
+>>>
+>>> http://wiki.ceph.com/01Planning/02Blueprints/Firefly/Strong_AuthN_a=
+nd_AuthZ_for_CephFS
+>>>
+>>> The main goal of the idea is that we'd like to be able to use CephF=
+S
+>>> from untrusted clients:
+>>>   - the CephX key gives full rw access to pools (e.g. data/metadata=
+)
+>>> via rados; we cannot distribute this key to untrusted hosts.
+>>>   - root on untrusted clients can forge their uid/gid and rm -rf /c=
+ephfs/*.
+>>>
+>>> In the doc we've proposed one way to add authn/authz to the ceph
+>>> server side, but perhaps there is a simpler (more feasible in the
+>>> short term) solution which would enable us to allow untrusted cephf=
+s
+>>> clients.
+>>
+>> You want to check out:
+>> http://wiki.ceph.com/01Planning/Sideboard/Client_Security_for_CephFS=
+,
+>> the previous edition of the client security blueprint
+>
+> AFAICT, this would allow single users to mount a subtree on CephFS an=
+d
+> prevent them from writing where they are not permitted. But our
+> use-case is different: we want to mount /cephfs/ from shared
+> workstations and batch nodes to store personal home directories,
+> shared group areas, and read-only software areas. Managing per-user
+> keyrings and per-user mountpoints would become quickly unmanageable.
 
-I am not an expert on ceph-deploy by any means.  ceph-deploy can do 
-these thing (install software, startup, etc), but I don't think it 
-strictly has to.
+Ah, I hadn't gotten that from skimming the blueprint. So this isn't
+just about hooking into Kerberos when we do a mount, you want to
+dynamically retrieve different caps from the monitors as users log on,
+and have that single client choose between them based on who's making
+the request?
 
-> This is not what I want, and it is not any part of what mkcephfs did.
+>> the MDS tickets in a lot more detail than you have there, though =97=
+ for
+>> instance, with your current description you'll need a shared secret
+>> between the OSD and MDS, and you'll need to expire the client extra
 >
-> Given that I have ceph installed, and a bunch of disk drives, I need to
-> be able to drive the ceph applications appropriately to set up the
-> osd's, keys, and other required data so that I can start the
-> ceph-osd(s), the ceph-mon(s), and the ceph-mds(s) [which I can do by
-> typing! (and I can make systemd do it automatically if and when I find
-> that I'm ready for that)].
->
-> This is what mkcephfs did.
->
-> The original documentation site gave information on how to perform all
-> these operations manually. I am not sure that this information is still
-> available.
->
-> Whilst I can see that a kind of 'Windows installer' type of application
-> could be useful in some circumstances, it is not appropriate to delete
-> basic instructions and believe that what I referred to as a 'smoke and
-> mirrors' approach to operation is an adequate substitute.
->
-> There has been several helpful replies here, and I thank those people.
->
-> Please don't maintain the notion that some 'magic installer' is a proper
-> substitute for basic and comprehensive 'man pages' and other appropriate
-> documentation.
->
-> I have been tracking ceph development for many tens of revisions; I have
-> discovered the weakness of BTRFS for ceph (which I use in all cases
-> except for OSDs, where I take the advice and use XFS); I experiment with
-> different hardware configurations; I take advantage of all kernel
-> developments that improve disk I/O performance; I keep working with the
-> latest kernel and the latest ceph. I am really looking forward to being
-> able to rely on ceph, it is the answer to many prayers.
->
-> My test is to rsync a large amount of data (several terabytes) to a ceph
-> filesystem and for this to happen without hitch. When this happens, I'll
-> have confidence. Ceph stresses everything.
->
-> I think that this day is now very close.
->
-> Very warm regards,
-> David
->
-> On 13/11/2013 03:54, Mark Kirkwood wrote:
->> On 13/11/13 16:33, Mark Kirkwood wrote:
->>> On 13/11/13 04:53, Alfredo Deza wrote:
->>>> On Mon, Nov 11, 2013 at 12:51 PM, Dave (Bob)
->>>> <dave@bob-the-boat.me.uk> wrote:
->>>>
->>>>> It is unuseable for me at present, because it reports:
->>>>>
->>>>> [ceph_deploy][ERROR ] UnsupportedPlatform: Platform is not supported:
->>>>>
->>>> That looks like a bug. For the past few months the log output of
->>>> ceph-deploy has tried to improve to give as much useful information
->>>> as possible.
->>>>
->>>> To get to the bottom of this it would be super helpful to know what
->>>> distro you were attempting to connect to, what the actual command was,
->>>> and what version of ceph-deploy you were using.
->>>>
->>>> Hopefully, with that information and the (possible) bug fix, it will
->>>> mean that more and more people find ceph-deploy as a robust solution
->>>> to get
->>>> a Ceph cluster up and running.
->>>>
->>>>
->>>
->>> I believe he is using a self built (or heavily customized) Linux
->>> installation - so distribution detection is not going to work in this
->>> case. I'm wondering if there could be some sensible fall back for
->>> that, e.g:
->>>
->>> - refuse to install or purge
->>> - assume sysv init
->>>
->>> so that ceph-deploy can 'do the best it can' in these situations.
->>> Thoughts?
->>>
->>
->> Ahem - replying to myself, sorry:
->>
->> It might be just as easy to allow init to be specified as an option
->> (--init INITTYPE). As an aside, for my development (Ubuntu)
->> workstation, I'm building ceph from src and using ceph-deploy to
->> install it - *but* am switching init to sysv afterwards (I just prefer
->> to use it for that situation).
->>
->> Cheers
->>
->> Mark
->>
->>
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+> Right, the shared secret is the kerberos service key in our model.
 
+So the whole Ceph cluster has one shared service key, and they use
+that for securing everything that anybody does? (Sorry, that's
+probably an elementary question, but I haven't looked at Kerberos
+since Yehuda implemented the initial CephX auth.)
+
+>> keys, etc. You may want to consider skipping this in the first
+>> iteration and just implementing proper security on the MDS while
+>> relying on RADOS-level options to keep data secure (separate
+>> namespaces or pools for different users, and providing narrow caps t=
+o
+>> clients). That would also leave more time for some serious research
+>
+> It sounds like like you're referring to the Sideboard above, which
+> unless I'm wrong won't help for our (not uncommon?) use-case.
+
+Yeah. :/
+
+On Thu, Nov 14, 2013 at 5:13 AM, Arne Wiebalck <Arne.Wiebalck@cern.ch> =
+wrote:
+> It looks to me like Maat is already pretty close to what the use of C=
+ephFS on untrusted
+> clients would require.
+>
+> Any idea why Maat does not use a kerberized Ceph service and the corr=
+esponding
+> shared session keys? I think that could avoid the generation and dist=
+ribution of per
+> client keys and outsource the shared key negotation to a standardized=
+ mechanism
+> (and allow for integration with existing authN service infrastructure=
+s, of course).
+
+I do not. If I were placing bets, because it was a research project
+and they didn't have Kerberos set up already. ;) But they also discuss
+the security implications of using a single shared key, and discard it
+because they want the system to remain mostly secure if an attacker
+compromises a machine (and gets access to its keys).
+
+> Also, why was the Maat idea (which was apparently implemented, tested=
+ and
+> benchmarked) not integrated into mainline Ceph?
+
+By the time I arrived this was all history; you'll have to wait until
+Sage gets back for that one. I suspect he didn't like the performance
+enough and the trees had diverged non-trivially by the time Maat was
+in a useful state. But if you are brave, you can go back in time
+(couple years ago) and look for the "security" folder, which I think
+contained the Maat changes, and see what would be involved in
+extracting them. :)
+-Greg
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
