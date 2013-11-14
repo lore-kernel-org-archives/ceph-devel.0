@@ -1,85 +1,64 @@
-From: Gregory Farnum <greg@inktank.com>
+From: Alex Elsayed <eternaleye@gmail.com>
 Subject: Re: CDS blueprint: strong auth for cephfs
-Date: Thu, 14 Nov 2013 08:37:35 -0800
-Message-ID: <CAPYLRzh=DfpVx1Z04+XhbYY9yiyGD9HvG4rRp8=xi9B3SKb50A@mail.gmail.com>
-References: <CABZ+qqkfhMFUskDheNrARKfyUPCRLref-O=kkw3ezqaZFnu6rw@mail.gmail.com>
-	<CAPYLRzgrDPUg91em1uXkCtqFfbS-2GP92stjmGtPUOmS+tRcTw@mail.gmail.com>
-	<CABZ+qq=SQman+HPvKany0HigYrtMn766itdU_7ZsYm6SOaQzcQ@mail.gmail.com>
-	<CAPYLRzhKNT6Tx9LRV6bfHXpAsG1m3MhWriK-i-T+wSGfBVwh-A@mail.gmail.com>
-	<CABZ+qqnfkEOVH2QRM8fu95eGEVBZ8JHX-KLGRAca76AymXothg@mail.gmail.com>
+Date: Thu, 14 Nov 2013 12:09:41 -0800
+Message-ID: <l63als$lk4$1@ger.gmane.org>
+References: <CABZ+qqkfhMFUskDheNrARKfyUPCRLref-O=kkw3ezqaZFnu6rw@mail.gmail.com> <CAPYLRzgrDPUg91em1uXkCtqFfbS-2GP92stjmGtPUOmS+tRcTw@mail.gmail.com> <CABZ+qq=SQman+HPvKany0HigYrtMn766itdU_7ZsYm6SOaQzcQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7Bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f176.google.com ([209.85.217.176]:37446 "EHLO
-	mail-lb0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754481Ab3KNQhj convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Nov 2013 11:37:39 -0500
-Received: by mail-lb0-f176.google.com with SMTP id p9so1725631lbv.7
-        for <ceph-devel@vger.kernel.org>; Thu, 14 Nov 2013 08:37:38 -0800 (PST)
-In-Reply-To: <CABZ+qqnfkEOVH2QRM8fu95eGEVBZ8JHX-KLGRAca76AymXothg@mail.gmail.com>
+Received: from plane.gmane.org ([80.91.229.3]:39797 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756061Ab3KNUJz (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 14 Nov 2013 15:09:55 -0500
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1Vh3Ef-0001fl-OV
+	for ceph-devel@vger.kernel.org; Thu, 14 Nov 2013 21:09:53 +0100
+Received: from c-24-17-202-252.hsd1.wa.comcast.net ([24.17.202.252])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Thu, 14 Nov 2013 21:09:53 +0100
+Received: from eternaleye by c-24-17-202-252.hsd1.wa.comcast.net with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Thu, 14 Nov 2013 21:09:53 +0100
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dan van der Ster <dan@vanderster.com>
-Cc: Arne Wiebalck <Arne.Wiebalck@cern.ch>, Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>, andrea.ieri@cern.ch
+To: ceph-devel@vger.kernel.org
 
-On Thu, Nov 14, 2013 at 8:21 AM, Dan van der Ster <dan@vanderster.com> =
-wrote:
-> On Thu, Nov 14, 2013 at 4:55 PM, Gregory Farnum <greg@inktank.com> wr=
-ote:
->> Ah, I hadn't gotten that from skimming the blueprint. So this isn't
->> just about hooking into Kerberos when we do a mount, you want to
->> dynamically retrieve different caps from the monitors as users log o=
-n,
->> and have that single client choose between them based on who's makin=
-g
->> the request?
->
-> In our proposal the "additional capabilities" (which allow IOs with a
-> particular file/object) are encrypted and sent by the MDS to the
-> client who passes it on to the OSD for object IOs.
+Dan van der Ster wrote:
 
-I'm confused; if two different people are using the same client mount,
-the MDS can't distinguish between them unless the client is
-cooperating. Isn't that what you were saying it needs to do?
+> Hi Greg,
+<snip>
+> AFAICT, this would allow single users to mount a subtree on CephFS and
+> prevent them from writing where they are not permitted. But our
+> use-case is different: we want to mount /cephfs/ from shared
+> workstations and batch nodes to store personal home directories,
+> shared group areas, and read-only software areas. Managing per-user
+> keyrings and per-user mountpoints would become quickly unmanageable.
+<snip>
 
->>>> the MDS tickets in a lot more detail than you have there, though =97=
- for
->>>> instance, with your current description you'll need a shared secre=
-t
->>>> between the OSD and MDS, and you'll need to expire the client extr=
-a
->>>
->>> Right, the shared secret is the kerberos service key in our model.
->>
->> So the whole Ceph cluster has one shared service key, and they use
->> that for securing everything that anybody does? (Sorry, that's
->> probably an elementary question, but I haven't looked at Kerberos
->> since Yehuda implemented the initial CephX auth.)
->
-> We've used the shared service key in the past with other distributed
-> file systems. But perhaps the model can be changed to per-OSD/MDS
-> keys.
->
->> By the time I arrived this was all history; you'll have to wait unti=
-l
->> Sage gets back for that one. I suspect he didn't like the performanc=
-e
->> enough and the trees had diverged non-trivially by the time Maat was
->> in a useful state. But if you are brave, you can go back in time
->> (couple years ago) and look for the "security" folder, which I think
->> contained the Maat changes, and see what would be involved in
->> extracting them. :)
->
-> Is it this one?
->    https://github.com/ceph/ceph/tree/historic/aleung_mds_security/
+Actually, there are a number of ways this could be managed pretty reasonably 
+- eCryptfs, in particular, may be worth examining. It ships with a 
+pam_ecryptfs module that (on login) uses the login password to produce the 
+decryption key, and load it into the user's session keyring (which is then 
+associated with every process in that session, although I don't think 
+eCryptfs uses that). It then mounts the eCryptfs filesystem, and the kernel 
+uses the loaded key for decryption.
 
-Specifically the branches/aleung/security1/ folder in there. (This is
-all svn branches converted to a git repository, etc, so the
-organization is a bit weird.)
--Greg
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+If the credentials are only used on mount, something similar to pam_ecryptfs 
+could work, or a minimal module that _only_ loads the key followed by 
+pam_mount.
+
+If the credentials are handled on FS operations, then you'd be able to have 
+a single top-level mount with minimal privileges and then use the kernel 
+keyring on access.
+
+That also opens up using 'keyctl' to manually load the key into the user or 
+session keyring, or using trusted/encrypted keys to allow secure automated 
+mounts.
+
+In fact, trusted or encrypted keys could be very useful if someone wanted to 
+securely use Ceph as a rootfs - they'd make it possible to authenticate 
+mounts based on the hardware, not just the configuration.
+
