@@ -1,58 +1,76 @@
-From: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>
-Subject: Re: Mourning the demise of mkcephfs
-Date: Fri, 15 Nov 2013 10:56:40 +1300
-Message-ID: <52854718.7000804@catalyst.net.nz>
-References: <5281192D.4090707@bob-the-boat.me.uk> <CANtztVwJyK7C5LS1G3YCLh-0T0VODCsUuWE1ADz_PupJe4nAAQ@mail.gmail.com> <5282F309.2030104@catalyst.net.nz> <5282F7FB.4070803@catalyst.net.nz> <5284C1C0.2080909@bob-the-boat.me.uk> <5284DD4E.4080609@inktank.com>
+From: Dan van der Ster <dan@vanderster.com>
+Subject: Re: CDS blueprint: strong auth for cephfs
+Date: Fri, 15 Nov 2013 09:42:04 +0100
+Message-ID: <CABZ+qqkt3HskznC8etcbx5VhQu+SbnwOUh62oXn+c6O0Q4WWsw@mail.gmail.com>
+References: <CABZ+qqkfhMFUskDheNrARKfyUPCRLref-O=kkw3ezqaZFnu6rw@mail.gmail.com>
+ <CAPYLRzgrDPUg91em1uXkCtqFfbS-2GP92stjmGtPUOmS+tRcTw@mail.gmail.com>
+ <CABZ+qq=SQman+HPvKany0HigYrtMn766itdU_7ZsYm6SOaQzcQ@mail.gmail.com> <l63als$lk4$1@ger.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from bertrand.catalyst.net.nz ([202.78.240.40]:57479 "EHLO
-	mail.catalyst.net.nz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755641Ab3KNV4x (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Nov 2013 16:56:53 -0500
-In-Reply-To: <5284DD4E.4080609@inktank.com>
+Received: from mail-bk0-f49.google.com ([209.85.214.49]:63009 "EHLO
+	mail-bk0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752504Ab3KOImq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 15 Nov 2013 03:42:46 -0500
+Received: by mail-bk0-f49.google.com with SMTP id w14so1751062bkz.8
+        for <ceph-devel@vger.kernel.org>; Fri, 15 Nov 2013 00:42:45 -0800 (PST)
+Received: from mail-la0-x232.google.com (mail-la0-x232.google.com [2a00:1450:4010:c03::232])
+        by mx.google.com with ESMTPSA id l5sm6175743bko.7.2013.11.15.00.42.44
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
+        Fri, 15 Nov 2013 00:42:44 -0800 (PST)
+Received: by mail-la0-f50.google.com with SMTP id el20so2476451lab.37
+        for <ceph-devel@vger.kernel.org>; Fri, 15 Nov 2013 00:42:44 -0800 (PST)
+In-Reply-To: <l63als$lk4$1@ger.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mark.nelson@inktank.com>, "Dave (Bob)" <dave@bob-the-boat.me.uk>
-Cc: Alfredo Deza <alfredo.deza@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Alex Elsayed <eternaleye@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 15/11/13 03:25, Mark Nelson wrote:
-> On 11/14/2013 06:27 AM, Dave (Bob) wrote:
->> I would suggest that it is always dangerous to make assumptions.
->> If ceph-deploy needs some information, then this should be explicit, and
->> configurable.
->> If it needs to know whether initialisation is done by systemd, upstart,
->> or sysv init, then what is wrong with requesting a config option?
->>
->> As it happens, ceph-deploy doesn't seem to be what I require as a
->> mkcephfs replacement.
->> An earlier exchange with Mark suggests that it wants to involve itself
->> with the installation of software, and the configuration of startup
->> mechanisms.
+Hi Alex,
+The problem is that the cephx keyring would still be needed on
+untrusted hosts. With that, anyone can delete/corrupt the underlying
+objects (though they may be encrypted) using rados.
+Cheers, Dan
+
+On Thu, Nov 14, 2013 at 9:09 PM, Alex Elsayed <eternaleye@gmail.com> wrote:
+> Dan van der Ster wrote:
 >
-> I am not an expert on ceph-deploy by any means.  ceph-deploy can do 
-> these thing (install software, startup, etc), but I don't think it 
-> strictly has to.
+>> Hi Greg,
+> <snip>
+>> AFAICT, this would allow single users to mount a subtree on CephFS and
+>> prevent them from writing where they are not permitted. But our
+>> use-case is different: we want to mount /cephfs/ from shared
+>> workstations and batch nodes to store personal home directories,
+>> shared group areas, and read-only software areas. Managing per-user
+>> keyrings and per-user mountpoints would become quickly unmanageable.
+> <snip>
 >
->> This is not what I want, and it is not any part of what mkcephfs did.
->>
->> Given that I have ceph installed, and a bunch of disk drives, I need to
->> be able to drive the ceph applications appropriately to set up the
->> osd's, keys, and other required data so that I can start the
->> ceph-osd(s), the ceph-mon(s), and the ceph-mds(s) [which I can do by
->> typing! (and I can make systemd do it automatically if and when I find
->> that I'm ready for that)].
->>
->> This is what mkcephfs did.
->>
-
-As Mark said, you can do that with ceph-deploy.  It *will* try to start 
-the mon(s) and osd(s), but that is not usually a problem. I use 
-ceph-deploy on systems where I've built ceph from source with no 
-problems (actually once you get used to it, ceph-deploy is really very 
-easy to use, and I *now* find it more convenient than mkcephfs ever was).
-
-Cheers
-
-Mark
+> Actually, there are a number of ways this could be managed pretty reasonably
+> - eCryptfs, in particular, may be worth examining. It ships with a
+> pam_ecryptfs module that (on login) uses the login password to produce the
+> decryption key, and load it into the user's session keyring (which is then
+> associated with every process in that session, although I don't think
+> eCryptfs uses that). It then mounts the eCryptfs filesystem, and the kernel
+> uses the loaded key for decryption.
+>
+> If the credentials are only used on mount, something similar to pam_ecryptfs
+> could work, or a minimal module that _only_ loads the key followed by
+> pam_mount.
+>
+> If the credentials are handled on FS operations, then you'd be able to have
+> a single top-level mount with minimal privileges and then use the kernel
+> keyring on access.
+>
+> That also opens up using 'keyctl' to manually load the key into the user or
+> session keyring, or using trusted/encrypted keys to allow secure automated
+> mounts.
+>
+> In fact, trusted or encrypted keys could be very useful if someone wanted to
+> securely use Ceph as a rootfs - they'd make it possible to authenticate
+> mounts based on the hardware, not just the configuration.
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
