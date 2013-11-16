@@ -1,31 +1,48 @@
-From: James Harper <james.harper@bendigoit.com.au>
-Subject: does librbd actually need leveldb?
-Date: Sat, 16 Nov 2013 08:37:43 +0000
-Message-ID: <6035A0D088A63A46850C3988ED045A4B665EE988@BITCOM1.int.sbss.com.au>
+From: Wido den Hollander <wido@42on.com>
+Subject: Re: does librbd actually need leveldb?
+Date: Sat, 16 Nov 2013 09:42:12 +0100
+Message-ID: <52872FE4.5050003@42on.com>
+References: <6035A0D088A63A46850C3988ED045A4B665EE988@BITCOM1.int.sbss.com.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.bendigoit.com.au ([203.16.207.99]:54762 "EHLO
-	smtp2.bendigoit.com.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751601Ab3KPIht convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 16 Nov 2013 03:37:49 -0500
-Received: from bitcom1.int.sbss.com.au ([2002:cb10:e0fe:201:a5ca:4fd3:14f:ad5d])
-	by smtp2.bendigoit.com.au with esmtp (Exim 4.80)
-	(envelope-from <james.harper@bendigoit.com.au>)
-	id 1VhbNx-0007CW-Hn
-	for ceph-devel@vger.kernel.org; Sat, 16 Nov 2013 19:37:45 +1100
-Content-Language: en-US
+Received: from websrv.42on.com ([31.25.102.167]:54506 "EHLO websrv.42on.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751449Ab3KPImP (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sat, 16 Nov 2013 03:42:15 -0500
+In-Reply-To: <6035A0D088A63A46850C3988ED045A4B665EE988@BITCOM1.int.sbss.com.au>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: James Harper <james.harper@bendigoit.com.au>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Does librbd actually need leveldb?
+On 11/16/2013 09:37 AM, James Harper wrote:
+> Does librbd actually need leveldb?
+>
 
-And if so, does it need it in all cases?
+As far as I know, not. librbd is simply build on top of librados which 
+doesn't need leveldb as well.
 
-I'm trying to figure out what dependencies are required for librbd for win32, and leveldb doesn't build cleanly at first go.
+The monitors and OSDs use leveldb to store key/value pairs, but as far 
+as I know none of the libraries require leveldb.
 
-Thanks
+> And if so, does it need it in all cases?
+>
+> I'm trying to figure out what dependencies are required for librbd for win32, and leveldb doesn't build cleanly at first go.
+>
+> Thanks
+>
+> James
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
 
-James
+
+-- 
+Wido den Hollander
+42on B.V.
+
+Phone: +31 (0)20 700 9902
+Skype: contact42on
