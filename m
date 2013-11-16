@@ -1,31 +1,31 @@
-From: Samuel Just <sam.just@inktank.com>
-Subject: v0.72.1 released
-Date: Fri, 15 Nov 2013 11:58:49 -0800
-Message-ID: <CA+4uBUaDQ+6G12j_ze9eFNzfmOmuyiGO6JKfDqj2yCB3VSFAFQ@mail.gmail.com>
+From: James Harper <james.harper@bendigoit.com.au>
+Subject: does librbd actually need leveldb?
+Date: Sat, 16 Nov 2013 08:37:43 +0000
+Message-ID: <6035A0D088A63A46850C3988ED045A4B665EE988@BITCOM1.int.sbss.com.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f182.google.com ([209.85.216.182]:46007 "EHLO
-	mail-qc0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751446Ab3KOT6u (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 15 Nov 2013 14:58:50 -0500
-Received: by mail-qc0-f182.google.com with SMTP id n7so2386248qcx.41
-        for <ceph-devel@vger.kernel.org>; Fri, 15 Nov 2013 11:58:49 -0800 (PST)
+Received: from mail.bendigoit.com.au ([203.16.207.99]:54762 "EHLO
+	smtp2.bendigoit.com.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751601Ab3KPIht convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 16 Nov 2013 03:37:49 -0500
+Received: from bitcom1.int.sbss.com.au ([2002:cb10:e0fe:201:a5ca:4fd3:14f:ad5d])
+	by smtp2.bendigoit.com.au with esmtp (Exim 4.80)
+	(envelope-from <james.harper@bendigoit.com.au>)
+	id 1VhbNx-0007CW-Hn
+	for ceph-devel@vger.kernel.org; Sat, 16 Nov 2013 19:37:45 +1100
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This point release addresses issue #6761
-(http://tracker.ceph.com/issues/6761).  Upgrades to v0.72 can cause
-reads to begin returning ENFILE (Too many open files in system).
+Does librbd actually need leveldb?
 
-Changes:
-* osd: fix upgrade issue with object_info_t encodings
-* ceph_filestore_tool: add tool to repair osd stores affected by #6761
+And if so, does it need it in all cases?
 
-Users who have upgraded to Emperor and do not see this issue need not
-use the repair tool.
+I'm trying to figure out what dependencies are required for librbd for win32, and leveldb doesn't build cleanly at first go.
 
-For more detail and repair instructions for affected clusters:
-* http://ceph.com/docs/master/release-notes/#v0-72-1-emperor
--Sam
+Thanks
+
+James
