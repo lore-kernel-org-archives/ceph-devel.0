@@ -1,43 +1,46 @@
-From: Li Wang <liwang@ubuntukylin.com>
-Subject: [PATCH 2/2] mds: Release resource before return
-Date: Mon, 18 Nov 2013 15:40:19 +0800
-Message-ID: <29600d7aede767b7f10879bd858ec1003cadc477.1384760071.git.liwang@ubuntukylin.com>
-References: <cover.1384760071.git.liwang@ubuntukylin.com>
+From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Subject: Intel 520/530 SSD for ceph
+Date: Mon, 18 Nov 2013 14:38:42 +0100
+Message-ID: <528A1862.7010601@profihost.ag>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-15
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from m53-178.qiye.163.com ([123.58.178.53]:40048 "EHLO
-	m53-178.qiye.163.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751116Ab3KRHkl (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Nov 2013 02:40:41 -0500
-In-Reply-To: <cover.1384760071.git.liwang@ubuntukylin.com>
-In-Reply-To: <cover.1384760071.git.liwang@ubuntukylin.com>
-References: <cover.1384760071.git.liwang@ubuntukylin.com>
+Received: from mail-ph.de-nserver.de ([85.158.179.214]:45738 "EHLO
+	mail-ph.de-nserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750779Ab3KRNip (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Nov 2013 08:38:45 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Sage Weil <sage@inktank.com>, Li Wang <liwang@ubuntukylin.com>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
 
-Close file before return.
-Fix coverity issue: CID 1019571
+Hi guys,
 
-Signed-off-by: Li Wang <liwang@ubuntukylin.com>
-Reported-by: Xianxia Xiao <xianxiaxiao@ubuntukylin.com>
----
- src/mds/MDCache.cc |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+in the past we've used intel 520 ssds for ceph journal - this worked
+great and our experience was good.
 
-diff --git a/src/mds/MDCache.cc b/src/mds/MDCache.cc
-index ae59c26..17d4ce4 100644
---- a/src/mds/MDCache.cc
-+++ b/src/mds/MDCache.cc
-@@ -11731,7 +11731,7 @@ void MDCache::dump_cache(const char *fn)
-     std::string s = ss.str();
-     r = safe_write(fd, s.c_str(), s.length());
-     if (r < 0)
--      return;
-+      goto out;
- 
-     list<CDir*> dfs;
-     in->get_dirfrags(dfs);
--- 
-1.7.9.5
+Now they started to replace the 520 series with their new 530.
 
+When we did we were supriced by the ugly performance and i need some
+days to reproduce.
+
+While O_DIRECT works fine for both and the intel ssd 530 is even faster
+than the 520.
+
+O_DSYNC... see the results:
+
+~# dd if=randfile.gz of=/dev/sda bs=350k count=10000 oflag=direct,dsync
+3584000000 bytes (3,6 GB) copied, 22,287 s, 161 MB/s
+
+~# dd if=randfile.gz of=/dev/sdb bs=350k count=10000 oflag=direct,dsync
+3584000000 bytes (3,6 GB) copied, 136,505 s, 26,3 MB/s
+
+I used a blocksize of 350k as my graphes shows me that this is the
+average workload we have on the journal. But i also tried using fio,
+bigger blocksize, ... it stays the same.
+
+Does anybody have an idea? Without dsync both devices have around the
+same performance of 260MB/s.
+
+Greets,
+Stefan
