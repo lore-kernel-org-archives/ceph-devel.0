@@ -1,48 +1,59 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: does librbd actually need leveldb?
-Date: Sat, 16 Nov 2013 09:42:12 +0100
-Message-ID: <52872FE4.5050003@42on.com>
-References: <6035A0D088A63A46850C3988ED045A4B665EE988@BITCOM1.int.sbss.com.au>
+From: Chris Holcombe <xfactor973@gmail.com>
+Subject: MDS boot loop
+Date: Sun, 17 Nov 2013 17:55:04 -0800
+Message-ID: <CAGdUFVY+PsZ5Adso7mmjMSwYBNxa0PbRkMUDOmqLNOk9-TGM7Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from websrv.42on.com ([31.25.102.167]:54506 "EHLO websrv.42on.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751449Ab3KPImP (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sat, 16 Nov 2013 03:42:15 -0500
-In-Reply-To: <6035A0D088A63A46850C3988ED045A4B665EE988@BITCOM1.int.sbss.com.au>
+Received: from mail-qe0-f43.google.com ([209.85.128.43]:59196 "EHLO
+	mail-qe0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751599Ab3KRBzG (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 17 Nov 2013 20:55:06 -0500
+Received: by mail-qe0-f43.google.com with SMTP id 2so1402112qeb.16
+        for <ceph-devel@vger.kernel.org>; Sun, 17 Nov 2013 17:55:04 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: James Harper <james.harper@bendigoit.com.au>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On 11/16/2013 09:37 AM, James Harper wrote:
-> Does librbd actually need leveldb?
->
+I've noticed from time to time that my ceph-mds-a server will get
+stuck in a boot loop.  I see log messages like this:
 
-As far as I know, not. librbd is simply build on top of librados which 
-doesn't need leveldb as well.
+2013-11-17 20:42:42.476334 mon.0 [INF] osdmap e496905: 12 osds: 12 up, 12 in
+2013-11-17 20:42:42.566744 mon.0 [INF] mds.? 192.168.1.20:6803/4047 up:boot
+2013-11-17 20:42:42.566867 mon.0 [INF] mdsmap e488649: 1/1/1 up
+{0=dlceph01=up:active}, 2 up:standby
+2013-11-17 20:42:42.644621 mon.0 [INF] pgmap v2247917: 2232 pgs: 2232
+active+clean; 23785 MB data, 61294 MB used, 11053 GB / 11113 GB avail;
+45180B/s wr, 0op/s
+2013-11-17 20:42:43.295421 mon.0 [INF] osdmap e496906: 12 osds: 12 up, 12 in
+2013-11-17 20:42:43.371436 mon.0 [INF] mds.? 192.168.1.20:6809/7263 up:boot
+2013-11-17 20:42:43.371495 mon.0 [INF] mdsmap e488650: 1/1/1 up
+{0=dlceph01=up:active}, 2 up:standby
+2013-11-17 20:42:43.475032 mon.0 [INF] pgmap v2247918: 2232 pgs: 2232
+active+clean; 23785 MB data, 61294 MB used, 11053 GB / 11113 GB avail
+2013-11-17 20:42:43.629813 mon.0 [INF] osdmap e496907: 12 osds: 12 up, 12 in
+2013-11-17 20:42:43.697628 mon.0 [INF] mds.? 192.168.1.20:6804/26768 up:boot
+2013-11-17 20:42:43.697700 mon.0 [INF] mdsmap e488651: 1/1/1 up
+{0=dlceph01=up:active}, 2 up:standby
+2013-11-17 20:42:43.772643 mon.0 [INF] pgmap v2247919: 2232 pgs: 2232
+active+clean; 23785 MB data, 61294 MB used, 11053 GB / 11113 GB avail
+2013-11-17 20:42:44.866154 mon.0 [INF] pgmap v2247920: 2232 pgs: 2232
+active+clean; 23785 MB data, 61294 MB used, 11053 GB / 11113 GB avail
+2013-11-17 20:42:46.014768 mon.0 [INF] pgmap v2247921: 2232 pgs: 2232
+active+clean; 23785 MB data, 61295 MB used, 11053 GB / 11113 GB avail
+2013-11-17 20:42:46.484480 mon.0 [INF] osdmap e496908: 12 osds: 12 up, 12 in
+2013-11-17 20:42:46.561228 mon.0 [INF] mds.? 192.168.1.20:6803/4047 up:boot
+2013-11-17 20:42:46.561327 mon.0 [INF] mdsmap e488652: 1/1/1 up
+{0=dlceph01=up:active}, 2 up:standby
+2013-11-17 20:42:46.653518 mon.0 [INF] pgmap v2247922: 2232 pgs: 2232
+active+clean; 23785 MB data, 61296 MB used, 11053 GB / 11113 GB avail;
+44045B/s wr, 0op/s
 
-The monitors and OSDs use leveldb to store key/value pairs, but as far 
-as I know none of the libraries require leveldb.
 
-> And if so, does it need it in all cases?
->
-> I'm trying to figure out what dependencies are required for librbd for win32, and leveldb doesn't build cleanly at first go.
->
-> Thanks
->
-> James
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+After watching it do that for a few minutes and cephfs operations
+being extremely slow I kill -9 the ceph-mds processes on that host.  A
+few seconds later I see a reconnect message and all is fine again.
+Any idea why the mds servers are doing this?
 
-
--- 
-Wido den Hollander
-42on B.V.
-
-Phone: +31 (0)20 700 9902
-Skype: contact42on
+I'm running ubuntu 13.04 x64 with the latest dumpling version of ceph.
+ I have 3 mds servers, 1 is active and the other 2 are standby.
