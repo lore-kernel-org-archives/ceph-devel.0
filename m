@@ -1,59 +1,90 @@
-From: Chris Holcombe <xfactor973@gmail.com>
-Subject: MDS boot loop
-Date: Sun, 17 Nov 2013 17:55:04 -0800
-Message-ID: <CAGdUFVY+PsZ5Adso7mmjMSwYBNxa0PbRkMUDOmqLNOk9-TGM7Q@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+From: Noah Watkins <noah.watkins@inktank.com>
+Subject: RFC: object operation instruction set
+Date: Sun, 17 Nov 2013 18:37:20 -0800
+Message-ID: <BC963CDE-A36F-42EE-AC7D-6638D878BBCD@inktank.com>
+Mime-Version: 1.0 (Mac OS X Mail 7.0 \(1822\))
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qe0-f43.google.com ([209.85.128.43]:59196 "EHLO
-	mail-qe0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751599Ab3KRBzG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 17 Nov 2013 20:55:06 -0500
-Received: by mail-qe0-f43.google.com with SMTP id 2so1402112qeb.16
-        for <ceph-devel@vger.kernel.org>; Sun, 17 Nov 2013 17:55:04 -0800 (PST)
+Received: from mail-pb0-f52.google.com ([209.85.160.52]:38274 "EHLO
+	mail-pb0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750924Ab3KRChY convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 17 Nov 2013 21:37:24 -0500
+Received: by mail-pb0-f52.google.com with SMTP id wy17so4879436pbc.11
+        for <ceph-devel@vger.kernel.org>; Sun, 17 Nov 2013 18:37:23 -0800 (PST)
+Received: from [192.168.1.113] (c-50-131-197-174.hsd1.ca.comcast.net. [50.131.197.174])
+        by mx.google.com with ESMTPSA id hu10sm19762229pbc.11.2013.11.17.18.37.21
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
+        Sun, 17 Nov 2013 18:37:22 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Ceph Devel <ceph-devel@vger.kernel.org>
 
-I've noticed from time to time that my ceph-mds-a server will get
-stuck in a boot loop.  I see log messages like this:
+The ObjectOperation interface in librados is great for performing compo=
+und atomic operations. However, it doesn=92t seem to be capable of expr=
+essing more complex flows. Consider the following set of operations tha=
+t I one might want to run atomically to optionally initialize an xattr:
 
-2013-11-17 20:42:42.476334 mon.0 [INF] osdmap e496905: 12 osds: 12 up, 12 in
-2013-11-17 20:42:42.566744 mon.0 [INF] mds.? 192.168.1.20:6803/4047 up:boot
-2013-11-17 20:42:42.566867 mon.0 [INF] mdsmap e488649: 1/1/1 up
-{0=dlceph01=up:active}, 2 up:standby
-2013-11-17 20:42:42.644621 mon.0 [INF] pgmap v2247917: 2232 pgs: 2232
-active+clean; 23785 MB data, 61294 MB used, 11053 GB / 11113 GB avail;
-45180B/s wr, 0op/s
-2013-11-17 20:42:43.295421 mon.0 [INF] osdmap e496906: 12 osds: 12 up, 12 in
-2013-11-17 20:42:43.371436 mon.0 [INF] mds.? 192.168.1.20:6809/7263 up:boot
-2013-11-17 20:42:43.371495 mon.0 [INF] mdsmap e488650: 1/1/1 up
-{0=dlceph01=up:active}, 2 up:standby
-2013-11-17 20:42:43.475032 mon.0 [INF] pgmap v2247918: 2232 pgs: 2232
-active+clean; 23785 MB data, 61294 MB used, 11053 GB / 11113 GB avail
-2013-11-17 20:42:43.629813 mon.0 [INF] osdmap e496907: 12 osds: 12 up, 12 in
-2013-11-17 20:42:43.697628 mon.0 [INF] mds.? 192.168.1.20:6804/26768 up:boot
-2013-11-17 20:42:43.697700 mon.0 [INF] mdsmap e488651: 1/1/1 up
-{0=dlceph01=up:active}, 2 up:standby
-2013-11-17 20:42:43.772643 mon.0 [INF] pgmap v2247919: 2232 pgs: 2232
-active+clean; 23785 MB data, 61294 MB used, 11053 GB / 11113 GB avail
-2013-11-17 20:42:44.866154 mon.0 [INF] pgmap v2247920: 2232 pgs: 2232
-active+clean; 23785 MB data, 61294 MB used, 11053 GB / 11113 GB avail
-2013-11-17 20:42:46.014768 mon.0 [INF] pgmap v2247921: 2232 pgs: 2232
-active+clean; 23785 MB data, 61295 MB used, 11053 GB / 11113 GB avail
-2013-11-17 20:42:46.484480 mon.0 [INF] osdmap e496908: 12 osds: 12 up, 12 in
-2013-11-17 20:42:46.561228 mon.0 [INF] mds.? 192.168.1.20:6803/4047 up:boot
-2013-11-17 20:42:46.561327 mon.0 [INF] mdsmap e488652: 1/1/1 up
-{0=dlceph01=up:active}, 2 up:standby
-2013-11-17 20:42:46.653518 mon.0 [INF] pgmap v2247922: 2232 pgs: 2232
-active+clean; 23785 MB data, 61296 MB used, 11053 GB / 11113 GB avail;
-44045B/s wr, 0op/s
+   int ret =3D getxattr(=93foo=94)
+   if (ret < 0 && ret !=3D -ENODATA)
+     return ret;
 
+   if (ret =3D=3D -ENODATA)
+     /* do some initialization */
+   else
+     /* do something else */
 
-After watching it do that for a few minutes and cephfs operations
-being extremely slow I kill -9 the ceph-mds processes on that host.  A
-few seconds later I see a reconnect message and all is fine again.
-Any idea why the mds servers are doing this?
+As it stands, one would need to build a cls_xyz to do this. Alternative=
+ly, something like cls_lua could be used, but there is a lot of downsid=
+es to that. However, after building several cls_xyz modules, it is clea=
+r that the majority of the time is spent doing basic logic, moving some=
+ data around, and occasionally doing something like incrementing some c=
+ounters.
 
-I'm running ubuntu 13.04 x64 with the latest dumpling version of ceph.
- I have 3 mds servers, 1 is active and the other 2 are standby.
+I=92ve put a prototype solution up in github
+
+    `github.com/ceph/ceph.git obj_op_virt_machine`
+
+that adds control instructions into the ObjectOperation interface. Usin=
+g the interface I can express the above logic as follows:
+
+   ObjectReadOperation op;
+
+   // foo doesn=92t exist. the return value
+   // will be placed into a named register =93ret"
+   op.getxattr(=93foo=94, bl, NULL);
+
+   // jump to label if =93ret=94 register >=3D 0
+   op.ois_jge(=93ret=94, 0, =93has_attr=94);=20
+
+   // jump to label if =93ret=94 register =3D=3D 0
+   op.ois_jeq(=93ret=94, -ENODATA, =93no_attr=94);
+
+   // fall through to return any error in the
+   // =93ret=94 register. returns immediately
+   op.ois_ret(=93ret=94);
+
+   // define a label target
+   op.ois_label(=93has_attr=94);
+   /* =85 do some stuff =85 */
+   op.ois_ret(0);
+
+  // defines a label target
+  op.ois_label(=93no_attr=94);
+  /* =85 do initialization =85 */
+  op.ois_ret(0);
+
+  ioctx.operate(=93obj=94, &op);
+
+Using only a few instructions, we can get pretty good building blocks. =
+Adding a few to examine some data in primitive ways would add another l=
+evel of usefulness, too (e.g. atomic counter increment). And, this can =
+also be made safe by ensuring that jumps are always forward, removing a=
+ny problems like infinite loops.
+
+- Noah--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
