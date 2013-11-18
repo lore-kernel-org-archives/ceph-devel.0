@@ -1,49 +1,89 @@
-From: Dmitry Borodaenko <dborodaenko@mirantis.com>
-Subject: Re: HSM
-Date: Mon, 18 Nov 2013 11:22:21 -0800
-Message-ID: <CAM0pNLOiCVwRgWTzcXket+DJbSrDRew1wBvo0hVHO_1AvwDsGg@mail.gmail.com>
-References: <alpine.DEB.2.00.1311090027210.8192@cobra.newdream.net>
-	<3472A07E6605974CBC9BC573F1BC02E4AE69DEBF@PLOXCHG03.cern.ch>
+From: mdw-Jp3n8lUXroRWk0Htik3J/w@public.gmane.org
+Subject: Re: Intel 520/530 SSD for ceph
+Date: Mon, 18 Nov 2013 17:51:46 -0500
+Message-ID: <20131118225146.GA1043@soma.private.linuxbox.com>
+References: <528A1862.7010601@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f175.google.com ([209.85.214.175]:60823 "EHLO
-	mail-ob0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751724Ab3KRTWV convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Nov 2013 14:22:21 -0500
-Received: by mail-ob0-f175.google.com with SMTP id va2so7557576obc.34
-        for <ceph-devel@vger.kernel.org>; Mon, 18 Nov 2013 11:22:21 -0800 (PST)
-In-Reply-To: <3472A07E6605974CBC9BC573F1BC02E4AE69DEBF@PLOXCHG03.cern.ch>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>
-Cc: Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <528A1862.7010601-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: Stefan Priebe - Profihost AG <s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org>
+Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Tue, Nov 12, 2013 at 1:47 AM, Andreas Joachim Peters
-<Andreas.Joachim.Peters@cern.ch> wrote:
-> I think you need to support the following functionality to support HSM (file not block based):
->
-> 1 implement a trigger on file creation/modification/deletion
->
-> 2 store the additional HSM identifier for recall as a file attribute
->
-> 3 policy based purging of file related blocks (LRU cache etc.)
->
-> 4 implement an optional trigger to recall a purged file and block the IO (our experience is that automatic recalls are problematic for huge installations if the aggregation window for desired recalls is short since they create inefficient and chaotic access on tapes)
->
-> 5 either snapshot a file before migration, do an exclusive lock or freeze it to avoid modifications during migration (you need to have a unique enough identifier for a file, either inode/path + checksum or also inode/path + modification time works)
+On Mon, Nov 18, 2013 at 02:38:42PM +0100, Stefan Priebe - Profihost AG wrote:
+> Hi guys,
+> 
+> in the past we've used intel 520 ssds for ceph journal - this worked
+> great and our experience was good.
+> 
+> Now they started to replace the 520 series with their new 530.
+> 
+> When we did we were supriced by the ugly performance and i need some
+> days to reproduce.
+> 
+> While O_DIRECT works fine for both and the intel ssd 530 is even faster
+> than the 520.
+> 
+> O_DSYNC... see the results:
+> 
+> ~# dd if=randfile.gz of=/dev/sda bs=350k count=10000 oflag=direct,dsync
+> 3584000000 bytes (3,6 GB) copied, 22,287 s, 161 MB/s
+> 
+> ~# dd if=randfile.gz of=/dev/sdb bs=350k count=10000 oflag=direct,dsync
+> 3584000000 bytes (3,6 GB) copied, 136,505 s, 26,3 MB/s
+> 
+> I used a blocksize of 350k as my graphes shows me that this is the
+> average workload we have on the journal. But i also tried using fio,
+> bigger blocksize, ... it stays the same.
+> 
+> Does anybody have an idea? Without dsync both devices have around the
+> same performance of 260MB/s.
+> 
+> Greets,
+> Stefan
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-DMAPI seems to be the natural choice for items 1 & 4 above.
+You may actually be doing O_SYNC - recent kernels implement O_DSYNC,
+but glibc maps O_DSYNC into O_SYNC.  But since you're writing to the
+block device this won't matter much.
 
-> FYI: there was a paper about migration policy scanning performance by IBM two years ago:
-> http://domino.watson.ibm.com/library/CyberDig.nsf/papers/4A50C2D66A1F90F7852578E3005A2034/$File/rj10484.pdf
+I believe the effect of O_DIRECT by itself is just to bypass the buffer
+cache, which is not going to make much difference for your dd case.
+(It will mainly affect other applications that are also using the
+buffer cache...)
 
-An important omission in that paper is the exact ILM policy that was
-used to scan the file system. I strongly suspect that it was a
-catch-all policy that matches every file without examining any
-metadata. When you add conditions that check file metadata, scan time
-would increase, probably by a few orders of magnitude.
+O_SYNC should be causing the writes to block until a response
+is received from the disk.  Without O_SYNC, the writes will
+just queue operations and return - potentially very fast.
+Your dd is probably writing enough data that there is some
+throttling by the system as it runs out of disk buffers and
+has to wait for some previous data to be written to the drive,
+but the delay for any individual block is not likely to matter.
+With O_SYNC, you are measuring the delay for each block directly,
+and you have absolutely removed the ability for the disk to
+perform any sort of parallism.
+	[It's also conceivable the kernel is sending some form of write
+	barrier flag to the drive, which will slow it down further,
+	but I can't find any kernel logic that does this at a quick glance.]
+Sounds like the intel 530 is has a much larger block write latency,
+but can make up for it by performing more overlapped operations.
 
--- 
-Dmitry Borodaenko
+You might be able to vary this behavior by experimenting with sdparm,
+smartctl or other tools, or possibly with different microcode in the drive.
+
+				-Marcus Watts
