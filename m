@@ -1,65 +1,62 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: [ceph-users] Monitor upgrade issue when running "ceph osd pool
- set ..." commands
-Date: Tue, 19 Nov 2013 08:12:36 +0100
-Message-ID: <528B0F64.2010301@dachary.org>
-References: <CAPYLRzgn7EaC28ePFentZiZqbhv15ruoL=Dy2JXmCHPmj5yzVg@mail.gmail.com>
+From: Stefan Priebe <s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org>
+Subject: Re: Intel 520/530 SSD for ceph
+Date: Tue, 19 Nov 2013 09:02:41 +0100
+Message-ID: <528B1B21.1060203@profihost.ag>
+References: <528A1862.7010601@profihost.ag>
+	<20131118225146.GA1043@soma.private.linuxbox.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:42033 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750980Ab3KSHMi (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Nov 2013 02:12:38 -0500
-In-Reply-To: <CAPYLRzgn7EaC28ePFentZiZqbhv15ruoL=Dy2JXmCHPmj5yzVg@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <20131118225146.GA1043-Hsy7OnahZ0C224KT6AusD78MeWzc+u9DAL8bYrjMMd8@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: mdw-Jp3n8lUXroRWk0Htik3J/w@public.gmane.org
+Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
+Hi Marcus,
 
+Am 18.11.2013 23:51, schrieb mdw-Jp3n8lUXroRWk0Htik3J/w@public.gmane.org:
+> On Mon, Nov 18, 2013 at 02:38:42PM +0100, Stefan Priebe - Profihost AG wrote:
+> You may actually be doing O_SYNC - recent kernels implement O_DSYNC,
+> but glibc maps O_DSYNC into O_SYNC.  But since you're writing to the
+> block device this won't matter much.
 
-On 19/11/2013 03:19, Gregory Farnum wrote:
-> All,
->=20
-> We've just discovered an issue that impacts some users running any of
-> the "ceph osd pool set" family of commands while some of their
-> monitors are running Dumpling and some are running Emperor. Doing so
-> can result in the commands being interpreted incorrectly and your
-> cluster being accidentally misconfigured (eg, accidentally setting
-> extremely large pg_num values).
->=20
-> The solution is simple: don't run "ceph osd pool set" commands while
-> your monitors are running different versions. We will have a point
-> release out in the next few days to resolve this issue. For more
-> information, you can refer to http://tracker.ceph.com/issues/6796.
->=20
-> Relatedly, I'm proud to announce this issue was discovered by our
-> automated upgrade testing and we have not seen reports of it from any
-> users. Thank you to our dedicated Q/A developers and testers! :)
+No difference regarding O_DSYNC or O_SYNC the values are the same. Also 
+I'm using 3.10.19 as a kernel so it is recent enough.
 
-Hi Greg,
+> I believe the effect of O_DIRECT by itself is just to bypass the buffer
+> cache, which is not going to make much difference for your dd case.
+> (It will mainly affect other applications that are also using the
+> buffer cache...)
+ > O_SYNC should be causing the writes to block until a response
+ > is received from the disk.  Without O_SYNC, the writes will
+ > just queue operations and return - potentially very fast.
+ > Your dd is probably writing enough data that there is some
+ > throttling by the system as it runs out of disk buffers and
+ > has to wait for some previous data to be written to the drive,
+ > but the delay for any individual block is not likely to matter.
+ > With O_SYNC, you are measuring the delay for each block directly,
+ > and you have absolutely removed the ability for the disk to
+ > perform any sort of parallism.
 
-This is great news ! From the point of view of my compan ( and I suspec=
-t any company which is not Inktank ), the completness of the integratio=
-n tests ( do upgrade tests count as integration tests ? ) means both a =
-more robust product but also a framework to diagnose and fix problems t=
-hat are otherwise difficult to track down independently.
+That's correct but ceph uses O_DSYNC for his journal and may be other 
+stuff so it is important to have devices performing well with O_DSYNC.
 
-Cheers
+> Sounds like the intel 530 is has a much larger block write latency,
+> but can make up for it by performing more overlapped operations.
+>
+> You might be able to vary this behavior by experimenting with sdparm,
+> smartctl or other tools, or possibly with different microcode in the drive.
+Which values or which settings do you think of?
 
-> -Greg
-> Software Engineer #42 @ http://inktank.com | http://ceph.com
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users@lists.ceph.com
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->=20
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Greets
+Stefan
