@@ -1,240 +1,232 @@
-From: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>
-Subject: RE: CEPH Erasure Encoding + OSD Scalability
-Date: Tue, 19 Nov 2013 11:35:52 +0000
-Message-ID: <3472A07E6605974CBC9BC573F1BC02E4AE6A01C0@PLOXCHG03.cern.ch>
-References: <-7369304096744919226@unknownmsgid>
- <3472A07E6605974CBC9BC573F1BC02E4A527147E@PLOXCHG03.cern.ch>
- <523C40B7.5060902@dachary.org>
- <alpine.DEB.2.00.1309200835110.25752@cobra.newdream.net>
- <523C7CAF.1020101@dachary.org>,<523DB725.2070104@dachary.org>,<3472A07E6605974CBC9BC573F1BC02E4A52727FF@PLOXCHG03.cern.ch>
- <3472A07E6605974CBC9BC573F1BC02E4AE69CCB4@PLOXCHG03.cern.ch>,<52826E2D.2040503@dachary.org>
+From: Milosz Tanski <milosz@adfin.com>
+Subject: Re: [PATCH] ceph: Update the pages in fscache in
+	writepages() path
+Date: Tue, 19 Nov 2013 11:05:11 -0500
+Message-ID: <CANP1eJHsmD8nyV0inPViW8-LCwthSqig1RzCcE+16Qw4Kvj=Og@mail.gmail.com>
+References: <1383278208-4053-1-git-send-email-liwang@ubuntukylin.com>
+	<CANP1eJH2ewpYyWe2Oo4OMMg2UB+RE8DBt=Xg-MUDo6uJ5aGcpg@mail.gmail.com>
+	<alpine.DEB.2.00.1311051543170.9474@cobra.newdream.net>
+	<CANP1eJEF4UTr-UC3S5TWsD9p69_gwy5i4_OkAmg=_GUFHF3TBQ@mail.gmail.com>
+	<CAAM7YAkOLM_C-ydXQN9wpCXuHTJL1drOucdLdVNX1UB66uaXbA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=Windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cernmx11.cern.ch ([188.184.36.50]:28784 "EHLO CERNMX11.cern.ch"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751606Ab3KSLf4 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Nov 2013 06:35:56 -0500
-In-Reply-To: <52826E2D.2040503@dachary.org>
-Content-Language: en-GB
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-cachefs-bounces@redhat.com>
+In-Reply-To: <CAAM7YAkOLM_C-ydXQN9wpCXuHTJL1drOucdLdVNX1UB66uaXbA@mail.gmail.com>
+List-Unsubscribe: <https://www.redhat.com/mailman/options/linux-cachefs>,
+	<mailto:linux-cachefs-request@redhat.com?subject=unsubscribe>
+List-Archive: <https://www.redhat.com/archives/linux-cachefs>
+List-Post: <mailto:linux-cachefs@redhat.com>
+List-Help: <mailto:linux-cachefs-request@redhat.com?subject=help>
+List-Subscribe: <https://www.redhat.com/mailman/listinfo/linux-cachefs>,
+	<mailto:linux-cachefs-request@redhat.com?subject=subscribe>
+Sender: linux-cachefs-bounces@redhat.com
+Errors-To: linux-cachefs-bounces@redhat.com
+To: "Yan, Zheng" <ukernel@gmail.com>
+Cc: Min Chen <minchen@ubuntukylin.com>, Li Wang <liwang@ubuntukylin.com>, Sage Weil <sage@inktank.com>, linux-kernel@vger.kernel.org, "linux-cachefs@redhat.com" <linux-cachefs@redhat.com>, Yunchuan Wen <yunchuanwen@ubuntukylin.com>, ceph-devel <ceph-devel@vger.kernel.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi Loic et al,=A0
-Dan pointed me to this:
+Yan and Sage,
 
-http://sourceforge.net/p/snapraid/code/ci/master/tree/raid.c
+I've ran into this issue again on my test cluster. The client hangs
+all requests for a particular inode, I did a dump cache to see what's
+going... but I don't understand to enough to be able to read this line
+well enough.
 
-It has a very straight forward API and GPL license ...
+Can you guys help me read this, so I can further track down and
+hopefully fix this issue.
 
-The implementation seems more performant than the current Jerasure libr=
-ary probably due to the use of ssse3 extensions and slightly less flexi=
-bility.... maybe it is worth a plugin or to become "the" plugin? It see=
-ms also worth to rewrite the xoring function I use with the sse2 assemb=
-ler xor ...
+[inode 10000346eed [2,head]
+/petabucket/beta/17511b3d12466609785b6a0e34597431721d177240371c0a1a4e347a1605381b/advertiser_id.dict
+auth v214 ap=5+0 dirtyparent s=925 n(v0 b925 1=1+0) (ifile sync->mix)
+(iversion lock) cr={59947=0-4194304@1}
+caps={59947=pAsLsXsFr/pAsxXsxFxwb@26,60001=pAsLsXsFr/-@1,60655=pAsLsXsFr/pAsLsXsFscr/pFscr@36}
+| ptrwaiter=0 request=4 lock=1 caps=1 dirtyparent=1 dirty=1 waiter=1
+authpin=1 0x17dd6b70]
 
-It comes also with a nice benchmark tool, here are the results on my 's=
-tandard' Xeon for a 4MB block with 8 disks + parity disks ....:
+root@bnode-16a1ed7d:~# cat
+/sys/kernel/debug/ceph/e23a1bfc-8328-46bf-bc59-1209df3f5434.client60655/mdsc
+15659 mds0 getattr #10000346eed
+15679 mds0 getattr #10000346eed
+15710 mds0 getattr #10000346eed
+15922 mds0 getattr #10000346eed
 
-=2E/snapraid -T
-snapraid v5.0 by Andrea Mazzoleni, http://snapraid.sourceforge.net
-Compiler gcc 4.8.1
-CPU GenuineIntel, family 6, model 26, flags mmx sse2 ssse3 sse42
-Memory is little-endian 64-bit
-Support nanosecond timestamps with futimens()
-
-
-Speed test using 8 buffers of 524288 bytes, for a total of 4096 KiB.
-The reported value is the sustainable aggregate bandwidth of all data d=
-isks in MiB/s (not counting parity disks).
-
-Memory write speed using the C memset() function:
-=A0 memset =A0 15873
-
-CRC used to check the content file integrity:
-=A0 =A0table =A0 =A0 857
-=A0 =A0intel =A0 =A06689
-
-Hash used to check the data blocks integrity:
-=A0 =A0 =A0 =A0 =A0 =A0 best murmur3 spooky2
-=A0 =A0 hash spooky2 =A0 =A02987 =A0 =A06998
-
-RAID functions used for computing the parity with 'sync':
-=A0 =A0 =A0 =A0 =A0 =A0 best =A0 =A0int8 =A0 int32 =A0 int64 =A0 =A0sse=
-2 =A0 sse2e =A0 ssse3 =A0ssse3e
-=A0 =A0 par1 =A0 =A0sse2 =A0 =A0 =A0 =A0 =A0 =A06201 =A0 11080 =A0 1940=
-4
-=A0 =A0 par2 =A0 sse2e =A0 =A0 =A0 =A0 =A0 =A01851 =A0 =A03462 =A0 =A09=
-949 =A0 10359
-=A0 =A0 parz =A0 sse2e =A0 =A0 =A0 =A0 =A0 =A01134 =A0 =A02020 =A0 =A05=
-157 =A0 =A05738
-=A0 =A0 par3 =A0ssse3e =A0 =A0 421 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A04766 =A0 =A05225
-=A0 =A0 par4 =A0ssse3e =A0 =A0 303 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A03449 =A0 =A03844
-=A0 =A0 par5 =A0ssse3e =A0 =A0 241 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A02750 =A0 =A02830
-=A0 =A0 par6 =A0ssse3e =A0 =A0 198 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A02189 =A0 =A02261
-
-RAID functions used for recovering with 'fix':
-=A0 =A0 =A0 =A0 =A0 =A0 best =A0 =A0int8 =A0 ssse3
-=A0 =A0 rec1 =A0 ssse3 =A0 =A0 496 =A0 =A01029
-=A0 =A0 rec2 =A0 ssse3 =A0 =A0 208 =A0 =A0 477
-=A0 =A0 rec3 =A0 ssse3 =A0 =A0 =A051 =A0 =A0 261
-=A0 =A0 rec4 =A0 ssse3 =A0 =A0 =A033 =A0 =A0 170
-=A0 =A0 rec5 =A0 ssse3 =A0 =A0 =A022 =A0 =A0 112
-=A0 =A0 rec6 =A0 ssse3 =A0 =A0 =A016 =A0 =A0 =A086
-
-
-
-________________________________________
-=46rom: Loic Dachary [loic@dachary.org]
-Sent: 12 November 2013 19:06
-To: Andreas Joachim Peters
-Cc: ceph-devel@vger.kernel.org
-Subject: Re: CEPH Erasure Encoding + OSD Scalability
-
-Hi Andreas,
-
-On 12/11/2013 02:11, Andreas Joachim Peters wrote:
-> Hi Loic,
+On Wed, Nov 6, 2013 at 10:01 AM, Yan, Zheng <ukernel@gmail.com> wrote:
+> On Wed, Nov 6, 2013 at 9:41 PM, Milosz Tanski <milosz@adfin.com> wrote:
+>> Sage,
+>>
+>> I think the incrementing version counter on the whole is a neater
+>> solution then using size and mtime. If nothing else it's more explicit
+>> in the the read cache version. With what you suggested plus additional
+>> changes to the open code (where the cookie gets created) the
+>> write-through scenario should be correct.
+>>
+>> Sadly, my understanding of the MDS protocol is still not great. So
+>> when doing this in the first place I erred on the side of using what
+>> was already in place.
+>>
+>> In a kind of un-related question. Is there a debug hook in the kclient
+>> (or MDS for that matter) to dump the current file inodes (names) with
+>> issues caps and to which hosts. This would be very helpful for
+>> debugging, since from time to time I see a one of the clients get
+>> stuck in getattr (via mdsc debug log).
+>>
 >
-> I am finally doing the benchmark tool and I found a bunch of wrong pa=
-rameter checks which can make the whole thing SEGV.
+> "ceph mds tell \* dumpcache" dump the mds cache to a file. the dump
+> file contains caps information.
 >
-> All the RAID-6 codes have restrictions on the parameters but they are=
- not correctly enforced for Liberation & Blaum-Roth codes in the CEPH w=
-rapper class ... see text from PDF
+> Regards
+> Yan, Zheng
 >
-> "Minimal Density RAID-6 codes are MDS codes based on binary matrices =
-which satisfy a lower-bound on the number  of non-zero entries. Unlike =
-Cauchy coding, the bit-matrix elements do not correspond to elements in=
- GF (2 w ). Instead, the bit-matrix itself has the proper MDS property.=
- Minimal Density RAID-6 codes perform faster than Reed-Solomon and Cauc=
-hy Reed-Solomon codes for the same parameters. Liberation coding, Liber=
-8tion coding, and Blaum-Roth coding are three examples of this kind of =
-coding that are supported in jerasure.
->
-> With each of these codes, m must be equal to two and k must be less t=
-han or equal to w. The value of w has restrictions based on the code:
->
-> =95 With Liberation coding, w must be a prime number [Pla08b].
-> =95 With Blaum-Roth coding, w + 1 must be a prime number [BR99]. =95 =
-With Liber8tion coding, w must equal 8 [Pla08a].
->
-> ...
->
-> Do you add this fixes?
+>> Thanks,
+>> - Milosz
+>>
+>> On Tue, Nov 5, 2013 at 6:56 PM, Sage Weil <sage@inktank.com> wrote:
+>>> On Tue, 5 Nov 2013, Milosz Tanski wrote:
+>>>> Li,
+>>>>
+>>>> First, sorry for the late reply on this.
+>>>>
+>>>> Currently fscache is only supported for files that are open in read
+>>>> only mode. I originally was going to let fscache cache in the write
+>>>> path as well as long as the file was open in with O_LAZY. I abandoned
+>>>> that idea. When a user opens the file in O_LAZY we can cache things
+>>>> locally with the assumption that the user will care of the
+>>>> synchronization in some other manner. There is no way of invalidating
+>>>> a subset of the pages in object cached by fscache, there is no way we
+>>>> can make O_LAZY work well.
+>>>>
+>>>> The ceph_readpage_to_fscache() in writepage has no effect and it
+>>>> should be removed. ceph_readpage_to_fscache() calls cache_valid() to
+>>>> see if it should perform the page save, and since the file can't have
+>>>> a CACHE cap at the point in time it doesn't do it.
+>>>
+>>> (Hmm, Dusting off my understanding of fscache and reading
+>>> fs/ceph/cache.c; watch out!)  It looks like cache_valid is
+>>>
+>>> static inline int cache_valid(struct ceph_inode_info *ci)
+>>> {
+>>>         return ((ceph_caps_issued(ci) & CEPH_CAP_FILE_CACHE) &&
+>>>                 (ci->i_fscache_gen == ci->i_rdcache_gen));
+>>> }
+>>>
+>>> and in the FILE_EXCL case, the MDS will issue CACHE|BUFFER caps.  But I
+>>> think the aux key (size+mtime) will prevent any use of the cache as soon
+>>> as the first write happens and mtime changes, right?
+>>>
+>>> I think that in order to make this work, we need to fix/create a
+>>> file_version (or something similar) field in the (mds) inode_t to have
+>>> some useful value.  I.e., increment it any time
+>>>
+>>>  - a different client/writer comes along
+>>>  - a file is modified by the mds (e.g., truncated or recovered)
+>>>
+>>> but allow it to otherwise remain the same as long as only a single client
+>>> is working with the file exclusively.  This will be more precise than the
+>>> (size, mtime) check that is currently used, and would remain valid when a
+>>> single client opens the same file for exclusive read/write multiple times
+>>> but there are no other intervening changes.
+>>>
+>>> Milosz, if that were in place, is there any reason not to wire up
+>>> writepage and allow the fscache to be used write-through?
+>>>
+>>> sage
+>>>
+>>>
+>>>
+>>>
+>>>>
+>>>> Thanks,
+>>>> - Milosz
+>>>>
+>>>> On Thu, Oct 31, 2013 at 11:56 PM, Li Wang <liwang@ubuntukylin.com> wrote:
+>>>> > Currently, the pages in fscache only are updated in writepage() path,
+>>>> > add the process in writepages().
+>>>> >
+>>>> > Signed-off-by: Min Chen <minchen@ubuntukylin.com>
+>>>> > Signed-off-by: Li Wang <liwang@ubuntukylin.com>
+>>>> > Signed-off-by: Yunchuan Wen <yunchuanwen@ubuntukylin.com>
+>>>> > ---
+>>>> >  fs/ceph/addr.c |    8 +++++---
+>>>> >  1 file changed, 5 insertions(+), 3 deletions(-)
+>>>> >
+>>>> > diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+>>>> > index 6df8bd4..cc57911 100644
+>>>> > --- a/fs/ceph/addr.c
+>>>> > +++ b/fs/ceph/addr.c
+>>>> > @@ -746,7 +746,7 @@ retry:
+>>>> >
+>>>> >         while (!done && index <= end) {
+>>>> >                 int num_ops = do_sync ? 2 : 1;
+>>>> > -               unsigned i;
+>>>> > +               unsigned i, j;
+>>>> >                 int first;
+>>>> >                 pgoff_t next;
+>>>> >                 int pvec_pages, locked_pages;
+>>>> > @@ -894,7 +894,6 @@ get_more_pages:
+>>>> >                 if (!locked_pages)
+>>>> >                         goto release_pvec_pages;
+>>>> >                 if (i) {
+>>>> > -                       int j;
+>>>> >                         BUG_ON(!locked_pages || first < 0);
+>>>> >
+>>>> >                         if (pvec_pages && i == pvec_pages &&
+>>>> > @@ -924,7 +923,10 @@ get_more_pages:
+>>>> >
+>>>> >                 osd_req_op_extent_osd_data_pages(req, 0, pages, len, 0,
+>>>> >                                                         !!pool, false);
+>>>> > -
+>>>> > +               for(j = 0; j < locked_pages; j++) {
+>>>> > +                       struct page *page = pages[j];
+>>>> > +                       ceph_readpage_to_fscache(inode, page);
+>>>> > +               }
+>>>> >                 pages = NULL;   /* request message now owns the pages array */
+>>>> >                 pool = NULL;
+>>>> >
+>>>> > --
+>>>> > 1.7.9.5
+>>>> >
+>>>> > --
+>>>> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>> > the body of a message to majordomo@vger.kernel.org
+>>>> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>
+>>>>
+>>>>
+>>>> --
+>>>> Milosz Tanski
+>>>> CTO
+>>>> 10 East 53rd Street, 37th floor
+>>>> New York, NY 10022
+>>>>
+>>>> p: 646-253-9055
+>>>> e: milosz@adfin.com
+>>>>
+>>>>
+>>
+>>
+>>
+>> --
+>> Milosz Tanski
+>> CTO
+>> 10 East 53rd Street, 37th floor
+>> New York, NY 10022
+>>
+>> p: 646-253-9055
+>> e: milosz@adfin.com
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> Please read the FAQ at  http://www.tux.org/lkml/
 
-Nice catch. I created and assigned to myself : http://tracker.ceph.com/=
-issues/6754
->
-> For the benchmark suite it runs currently 308 different configuration=
-s for the 2 algorithm which make sense from the performance point of vi=
-ew and provides this output:
->
->
-> # -----------------------------------------------------------------
-> # Erasure Coding Benchmark - (C) CERN 2013 - Andreas.Joachim.Peters@c=
-ern.ch
-> # Ram-Size=3D12614856704 Allocation-Size=3D100000000
-> # -----------------------------------------------------------------
-> # [ -BENCH- ] [       ] technique=3Dmemcpy                           =
-                                 speed=3D5.408 [GB/s] latency=3D9.245 m=
-s
-> # [ -BENCH- ] [       ] technique=3Dd=3Da^b^c-xor                    =
-                                   speed=3D4.377 [GB/s] latency=3D17.13=
-6 ms
-> # [ -BENCH- ] [001/304] technique=3Dcauchy_good:k=3D05:m=3D2:w=3D8:lp=
-=3D0:packet=3D00064:size=3D50000000          speed=3D1.308 [GB/s] laten=
-cy=3D038    [ms] size-overhead=3D40   [%]
-> ..
-> ..
-> # [ -BENCH- ] [304/304] technique=3Dliberation:k=3D24:m=3D2:w=3D29:lp=
-=3D2:packet=3D65536:size=3D50000000          speed=3D0.083 [GB/s] laten=
-cy=3D604    [ms] size-overhead=3D16   [%]
-> # -----------------------------------------------------------------
-> # Erasure Code Performance Summary::
-> # -----------------------------------------------------------------
-> # RAM:                   12.61 GB
-> # Allocation-Size        0.10 GB
-> # -----------------------------------------------------------------
-> # Byte Initialization:   29.35 MB/s
-> # Memcpy:                5.41 GB/s
-> # Triple-XOR:            4.38 GB/s
-> # -----------------------------------------------------------------
-> # Fastest RAID6          2.72 GB/s liber8tion:k=3D06:m=3D2:w=3D8:lp=3D=
-0:packet=3D04096:size=3D50000000
-> # Fastest Triple Failure 0.96 GB/s cauchy_good:k=3D06:m=3D3:w=3D8:lp=3D=
-0:packet=3D04096:size=3D50000000
-> # Fastest Quadr. Failure 0.66 GB/s cauchy_good:k=3D06:m=3D4:w=3D8:lp=3D=
-0:packet=3D04096:size=3D50000000
-> # -----------------------------------------------------------------
-> # .................................................................
-> # Top 1  RAID6          2.72 GB/s liber8tion:k=3D06:m=3D2:w=3D8:lp=3D=
-0:packet=3D04096:size=3D50000000
-> # Top 2  RAID6          2.72 GB/s liber8tion:k=3D06:m=3D2:w=3D8:lp=3D=
-0:packet=3D16384:size=3D50000000
-> # Top 3  RAID6          2.64 GB/s liber8tion:k=3D06:m=3D2:w=3D8:lp=3D=
-0:packet=3D65536:size=3D50000000
-> # Top 4  RAID6          2.60 GB/s liberation:k=3D07:m=3D2:w=3D7:lp=3D=
-0:packet=3D16384:size=3D50000000
-> # Top 5  RAID6          2.59 GB/s liberation:k=3D05:m=3D2:w=3D7:lp=3D=
-0:packet=3D04096:size=3D50000000
-> # .................................................................
-> # Top 1  Triple         0.96 GB/s cauchy_good:k=3D06:m=3D3:w=3D8:lp=3D=
-0:packet=3D04096:size=3D50000000
-> # Top 2  Triple         0.94 GB/s cauchy_good:k=3D06:m=3D3:w=3D8:lp=3D=
-0:packet=3D16384:size=3D50000000
-> # Top 3  Triple         0.93 GB/s cauchy_good:k=3D06:m=3D3:w=3D8:lp=3D=
-0:packet=3D65536:size=3D50000000
-> # Top 4  Triple         0.89 GB/s cauchy_good:k=3D07:m=3D3:w=3D8:lp=3D=
-0:packet=3D04096:size=3D50000000
-> # Top 5  Triple         0.87 GB/s cauchy_good:k=3D05:m=3D3:w=3D8:lp=3D=
-0:packet=3D04096:size=3D50000000
-> # .................................................................
-> # Top 1  Quadr.         0.66 GB/s cauchy_good:k=3D06:m=3D4:w=3D8:lp=3D=
-0:packet=3D04096:size=3D50000000
-> # Top 2  Quadr.         0.65 GB/s cauchy_good:k=3D07:m=3D4:w=3D8:lp=3D=
-0:packet=3D04096:size=3D50000000
-> # Top 3  Quadr.         0.64 GB/s cauchy_good:k=3D06:m=3D4:w=3D8:lp=3D=
-0:packet=3D16384:size=3D50000000
-> # Top 4  Quadr.         0.64 GB/s cauchy_good:k=3D05:m=3D4:w=3D8:lp=3D=
-0:packet=3D04096:size=3D50000000
-> # Top 5  Quadr.         0.64 GB/s cauchy_good:k=3D06:m=3D4:w=3D8:lp=3D=
-0:packet=3D65536:size=3D50000000
-> # .................................................................
->
-> It takes around 30 second on my box.
 
 
-That looks great :-) If I understand correctly, it means https://github=
-=2Ecom/ceph/ceph/pull/740 will no longer have benchmarks as they are mo=
-ved to a separate program. Correct ?
+-- 
+Milosz Tanski
+CTO
+10 East 53rd Street, 37th floor
+New York, NY 10022
 
-> I will add a measurement how the XOR and the 3 top algorithms scale w=
-ith the number of cores and make the object-size configurable from the =
-command line. Anything else ?
-
-It would be convenient to run this from a "workunit" ( i.e. a script in=
- ceph/qa/workunits/ ) so that it can later be run by teuthology integra=
-tion tests. That could be used to show regression.
-
-Shall I add the possiblity to test a single user specified configuratio=
-n via command line arguments?
->
-I would need to play with it to comment usefully.
-
-Cheers
-
---
-Lo=EFc Dachary, Artisan Logiciel Libre
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+p: 646-253-9055
+e: milosz@adfin.com
