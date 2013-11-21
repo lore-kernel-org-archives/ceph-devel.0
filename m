@@ -1,148 +1,137 @@
 From: Li Wang <liwang@ubuntukylin.com>
 Subject: Re: [RFC] Ceph encryption support
-Date: Thu, 21 Nov 2013 11:50:10 +0800
-Message-ID: <528D82F2.1090007@ubuntukylin.com>
-References: <528236D7.6020106@ubuntukylin.com> <CAPYLRzi3qK2+Hp9b--iJyjVtrjiNT08MPm1XnxO2eXfGOs2L6A@mail.gmail.com>
+Date: Thu, 21 Nov 2013 15:01:11 +0800
+Message-ID: <528DAFB7.6020208@ubuntukylin.com>
+References: <528236D7.6020106@ubuntukylin.com> <l5ujbn$8jq$1@ger.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from m53-178.qiye.163.com ([123.58.178.53]:54100 "EHLO
-	m53-178.qiye.163.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751420Ab3KUDuO (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Nov 2013 22:50:14 -0500
-In-Reply-To: <CAPYLRzi3qK2+Hp9b--iJyjVtrjiNT08MPm1XnxO2eXfGOs2L6A@mail.gmail.com>
+Received: from m199-177.yeah.net ([123.58.177.199]:37740 "EHLO
+	m199-177.yeah.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750862Ab3KUHB0 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Nov 2013 02:01:26 -0500
+In-Reply-To: <l5ujbn$8jq$1@ger.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>, eternaleye@gmail.com
+To: Alex Elsayed <eternaleye@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hi Gregory,
+Hi Alex,
    Thanks for your comments.
 
-On 11/13/2013 01:58 AM, Gregory Farnum wrote:
-> On Tue, Nov 12, 2013 at 6:10 AM, Li Wang <liwang@ubuntukylin.com> wro=
-te:
+
+On 11/13/2013 09:07 AM, Alex Elsayed wrote:
+> Li Wang wrote:
+>
 >> Hi,
->>    We want to implement encryption support for Ceph.
->>    Currently, we have the draft design,
+>>     We want to implement encryption support for Ceph.
+>>     Currently, we have the draft design,
 >>
->> 1 When user mount a ceph directory for the first time, he can specif=
-y a
->> passphrase and the encryption algorithm and length of key etc. These=
- will be
->> stored as extend attribute of the current root directory, of course,=
- with
->> the passphrase being hashed several times, call it TOKEN.
->> 2 When user try to mount an encrypted directory, a passphrase is req=
-uired to
->> given, then hash and compare with the stored TOKEN, if equal, accept=
- to
->> mount, otherwise reject to mount.
->
-> How would this work? If I mount the root directory and then try to
-> navigate down into an encrypted directory, when do I get asked for th=
-e
-> passphrase?
->
-
-I think the duty of encryption is to protect the confidence of the=20
-content of files, that is, user cannot view the plain text if without=20
-valid password. But not to prevent user from navigating into the=20
-directory, even damage and delete the file, those are something should=20
-be done by access control (acl, selinux etc). So, our design for the=20
-initial version of encryption is that we donot care this, user could=20
-navigate into the encyrpted directory, so what, he will see all=20
-encrypted text, and the encrypted file name. This is also what eCryptfs=
-=20
-is doing, user could read/write/delete the encrypted file directly from=
-=20
-the lower file system, provided the access control allows him to do so.
-
+>> 1 When user mount a ceph directory for the first time, he can specify a
+>> passphrase and the encryption algorithm and length of key etc. These
+>> will be stored as extend attribute of the current root directory, of
+>> course, with the passphrase being hashed several times, call it TOKEN.
+>> 2 When user try to mount an encrypted directory, a passphrase is
+>> required to given, then hash and compare with the stored TOKEN, if
+>> equal, accept to mount, otherwise reject to mount.
 >> 3 When a file is created, a random key (FEK, file encryption key) is
->> generated, and this key is encrypted by TOKEN, we get EFEK (encrypte=
-d FEK),
->> the EFEK and other encryption related information inherited from the=
- root
->> directory are stored in the extend attribute of file.
->
-> So the hash is visible to clients who don't support encryption? Or do
-> you want to hide it somehow?
->
-
-So we plan to not to store Token at all. If you enter wrong pass phrase=
-,=20
-you could still mount the directory, but you will see encrypted text.=20
-This is basically what eCryptfs is doing. Maybe we could improve user=20
-experience a little bit by using HMAC on Token to get a hash value=20
-HToken to be stored. But HToken is only used to warn the valid user if=20
-he accidentally input wrong pass phrase.
-
-So in a word, we think that encryption is for protecting the current=20
-content of files, rather than preventing damaging/deleting the files,=20
-that is what access control is supposed to do. And, in any case, we=20
-could hardly prevent the user using old client (without encryption=20
-support) or manipulating rados directly to damage/delete the encrypted=20
-file. But one thing we do could consider is to use HMAC to warn the=20
-valid user that the file has been modified by other unauthorized person=
-=2E
-
+>> generated, and this key is encrypted by TOKEN, we get EFEK (encrypted
+>> FEK), the EFEK and other encryption related information inherited from
+>> the root directory are stored in the extend attribute of file.
 >> 4 When a file is opened, retrieve the extend attribute, we get EFEK,
 >> use TOKEN to decrypt EFEK, get FEK, buffered in the inode
->> 5 When a file is read in readpage()/readpages(), the encrypted pages=
- are
+>> 5 When a file is read in readpage()/readpages(), the encrypted pages are
 >> decrypted transparently by using FEK, and the plain data are sent to
 >> application
 >> 6 When a file is written in writepage()/writepages(), the pages are
 >> encrypted transparently by using FEK, and then written to OSDs.
->>
+>
+> Okay, this is sounding quite similar to eCryptfs so far. What that makes me
+> wonder is whether eCryptfs can be used, as it's a _stacked_ filesystem.
+>
+
+eCryptfs has many limitations, mainly due to the stacked filesystem 
+design. Linux VFS has no special support for stacked filesystem. The 
+lower file system is never aware of the existence of upper file system, 
+namely, eCryptfs. That will cause many problems from synchronization and 
+consistency, especially for network and distributed file system. That is 
+why eCryptfs can not work well on nfs, cifs, gfs etc. Basically, the 
+problem is that even lower file system has done the synchronization, it 
+will not notify eCryptfs. This also happens when you manipulate directly 
+on the lower filesystem. For Ceph, it has already automatically 
+synchronized the metadata while multiple clients operate the same file, 
+using eCryptfs, the application could not see the synchronization, since 
+eCryptfs has its own metadata cache, which is not synchronized. The 
+second is that eCryptfs maintains its own page cache, which typically 
+results in double-caching, consume much more memory.
+
 >> Some points,
 >> 1 We do client side encryption, the advantages are,
->>    (1) The data over network are encrypted;
->>    (2) OSDs are intended to do io intensive job, we donot wanna both=
-er them
->> to do cpu intensive job, thus we can use cheap and low power machine=
-s
->>    (3) The implementation is OSD transparent, and mostly MDS transpa=
-rent,
->> enjoys the simplification.
+>>     (1) The data over network are encrypted;
+>>     (2) OSDs are intended to do io intensive job, we donot wanna bother
+>> them to do cpu intensive job, thus we can use cheap and low power machines
+>>     (3) The implementation is OSD transparent, and mostly MDS
+>> transparent, enjoys the simplification.
+>
+> This, however, is potentially problematic. At-rest encryption of files and
+> encryption of moving data on the wire are different problems, and using one
+> to try and address the other can lead to significant issues - in particular,
+> this is why it is STRONGLY recommended not to rely on dm-crypt for security
+> on network block devices like iSCSI without encrypting the transport using
+> ipsec or similar.
+>
+
+Ok. To guarantee the data confidence during networking transportation, 
+it could set up the ipsec etc, that is not contradict with our plan, 
+just need two times of encryption.
+
 >> 2 What about if no page cache?
->>    Block cipher algorithm is more secure than stream cipher algorith=
-m, so we
->> prefer the former. If no page cache, we have two choices, with encry=
-ption
->> enabled, the same file is not allowed by opened by the second writer=
-,
->> alternatively, we enforce O_LAZYIO on the file, but application is s=
-upposed
->> to be aware of this.
->>
->> We plan to submit it as a blueprint for the incoming CDS, comments a=
-re
+>>     Block cipher algorithm is more secure than stream cipher algorithm,
+>> so we prefer the former. If no page cache, we have two choices, with
+>> encryption enabled, the same file is not allowed by opened by the second
+>> writer, alternatively, we enforce O_LAZYIO on the file, but application
+>> is supposed to be aware of this.
+>
+> "Block cipher algorithm is more secure than stream cipher algorithm" cannot
+> be taken as axiomatic. It being stated as such is something I find
+> worrisome.
+>
+> In particular, using AES in CTR mode (in which case it is essentially a
+> random-access stream cipher) is in a number circumstances considerably more
+> secure than AES in CBC mode. The stream ciphers Salsa20 and ChaCha are
+> believed to be strong as well. Weaknesses in RC4 aren't due to being a
+> stream cipher, but rather due to improper use (as in WEP, where the IVs were
+> handled improperly) or flaws in the specific cipher.
+>
+
+No problem, we do not quite care which cipher to use, as long as kernel 
+crypto API support, we can leave it the user's choice as eCryptfs does.
+
+> How are you intending to handle integrity? Do you intend to use a MAC (and
+> if so, PLEASE review the literature on mac-and-encrypt vs. mac-then-encrypt
+> vs. encrypt-then-mac), or do you plan on using an AEAD cipher mode such as
+> GCM (like eCryptfs does)? If your cipher mode uses IVs, how do you intend to
+> generate them?
+>
+> All of these have SIGNIFICANT security impact, and could lead to problems if
+> left unaddressed or addressed improperly.
+>
+
+Do we really need integrity, I think that is mainly used to detect the 
+unauthorized modification to the encrypted text. If need, we can 
+consider to use HMAC or GCM.
+
+>> We plan to submit it as a blueprint for the incoming CDS, comments are
 >> welcome.
+>>
+>> Cheers,
+>> Li Wang
 >
-> This doesn't sound infeasible, but I'll welcome the details in a
-> blueprint. :) The main thing I'm worried about is that if anybody
-> breaks the TOKEN they have access to everything, and the hash is goin=
-g
-> to be available to anybody who wants to see it.
-> When I've thought about this in the past I've tended more towards a
-> system that uses time-based passcodes derived from a secret which the
-> MDS and OSD share, which lets you do sharing without giving the clien=
-t
-> unlimited permissions on a file. But that requires a lot more
-> modifications, and your system has some nice properties as well. You
-> might also find
-> https://www.usenix.org/system/files/conference/fast13/fast13-final142=
-=2Epdf
-> interesting =97 it's a very different approach, but people have done
-> some thinking about distributed filesystem security before and it's
-> always good to consider what's out there before starting. :)
-> -Greg
 >
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
