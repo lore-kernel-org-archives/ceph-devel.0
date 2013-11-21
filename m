@@ -1,81 +1,29 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: possible bug in init-ceph.in
-Date: Thu, 21 Nov 2013 09:59:59 -0800
-Message-ID: <CAPYLRzjN4kS=6Rto02RvYvhS-iwQjT4ttM+Wb6YanDLRzCOiCQ@mail.gmail.com>
-References: <24E144B8C0207547AD09C467A8259F7559232FA2@lisa.maurer-it.com>
-	<528E4071.3070603@dachary.org>
-	<528E498A.8020102@dachary.org>
+From: David Dillow <dave@thedillows.org>
+Subject: Re: [PATCH 0/4] Add ceph root filesystem functionality and
+ documentation.
+Date: Thu, 21 Nov 2013 15:19:46 -0500
+Message-ID: <1385065186.18238.0.camel@frustration.ornl.gov>
+References: <1385000024-23463-1-git-send-email-mark.doffman@codethink.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f44.google.com ([74.125.82.44]:34914 "EHLO
-	mail-wg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751373Ab3KUSAB convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Nov 2013 13:00:01 -0500
-Received: by mail-wg0-f44.google.com with SMTP id k14so92411wgh.23
-        for <ceph-devel@vger.kernel.org>; Thu, 21 Nov 2013 10:00:00 -0800 (PST)
-In-Reply-To: <528E498A.8020102@dachary.org>
+Received: from mta01.ornl.gov ([128.219.177.14]:60772 "EHLO mta01.ornl.gov"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751923Ab3KUU3l (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 21 Nov 2013 15:29:41 -0500
+In-Reply-To: <1385000024-23463-1-git-send-email-mark.doffman@codethink.co.uk>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dietmar Maurer <dietmar@proxmox.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Loic Dachary <loic@dachary.org>
+To: mark.doffman@codethink.co.uk
+Cc: ceph-devel@vger.kernel.org, sage@inktank.com, netdev@vger.kernel.org, linux-kernel@vger.kernel.org, linux-nfs@vger.kernel.org, rob.taylor@codethink.co.uk
 
-Can we take that diff you provided as coming with a signed-off-by, as
-in the pull request Loic generated? :)
--Greg
-Software Engineer #42 @ http://inktank.com | http://ceph.com
+On Wed, 2013-11-20 at 20:13 -0600, mark.doffman@codethink.co.uk wrote:
+> The following patch series adds the ability to use a ceph distributed
+> file system as the root device. The functionality is similar to
+> NFS root but for the ceph filesystem.
 
+Why do this in the kernel vs in the initramfs? Dracut would be a more
+appropriate place, I think, as it has support for other network root
+devices already.
 
-On Thu, Nov 21, 2013 at 9:57 AM, Loic Dachary <loic@dachary.org> wrote:
-> Hi,
->
-> It turns out there was no pull request or bug report, sorry about tha=
-t. Here is the pull request with your patch included:
->
-> https://github.com/ceph/ceph/pull/861
->
-> Cheers
->
-> On 21/11/2013 18:18, Loic Dachary wrote:
->> Hi,
->>
->> I believe there is either a pull request or a ticket with this fix. =
-Definitely a typo ;-)
->>
->> Cheers
->>
->> On 21/11/2013 08:23, Dietmar Maurer wrote:
->>> http://ceph.com/git/?p=3Dceph.git;a=3Dblob;f=3Dsrc/init-ceph.in;h=3D=
-7399abb8f85855f2248c4afb22bf94f2e2f080a2;hb=3DHEAD
->>>
->>> line 320:
->>>
->>>       if [ "${update_crush:-1}" =3D "1" -o "{$update_crush:-1}" =3D=
- "true" ]; then
->>>
->>> looks strange to me. Maybe that should be:
->>>
->>> -            if [ "${update_crush:-1}" =3D "1" -o "{$update_crush:-=
-1}" =3D "true" ]; then
->>> +            if [ "${update_crush:-1}" =3D "1" -o "${update_crush:-=
-1}" =3D "true" ]; then
->>>
->>>
->>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
-l" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>
->
-> --
-> Lo=EFc Dachary, Artisan Logiciel Libre
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
