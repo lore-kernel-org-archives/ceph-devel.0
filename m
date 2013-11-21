@@ -1,62 +1,64 @@
-From: Malcolm Haak <malcolm@sgi.com>
-Subject: Re: HSM
-Date: Wed, 20 Nov 2013 22:09:03 +1000
-Message-ID: <528CA65F.7030709@sgi.com>
-References: <alpine.DEB.2.00.1311090027210.8192@cobra.newdream.net>	<3472A07E6605974CBC9BC573F1BC02E4AE69DEBF@PLOXCHG03.cern.ch> <CAM0pNLOiCVwRgWTzcXket+DJbSrDRew1wBvo0hVHO_1AvwDsGg@mail.gmail.com>
+From: mdw-Jp3n8lUXroRWk0Htik3J/w@public.gmane.org
+Subject: Re: Intel 520/530 SSD for ceph
+Date: Wed, 20 Nov 2013 19:29:36 -0500
+Message-ID: <20131121002936.GA15558@soma.private.linuxbox.com>
+References: <528A1862.7010601@profihost.ag>
+	<20131118225146.GA1043@soma.private.linuxbox.com>
+	<528B1B21.1060203@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay3.sgi.com ([192.48.152.1]:32985 "EHLO relay.sgi.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1753088Ab3KTMJJ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 20 Nov 2013 07:09:09 -0500
-In-Reply-To: <CAM0pNLOiCVwRgWTzcXket+DJbSrDRew1wBvo0hVHO_1AvwDsGg@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Dmitry Borodaenko <dborodaenko@mirantis.com>, Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>
-Cc: Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <528B1B21.1060203-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: Stefan Priebe <s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org>
+Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-It is, except it might not be.
+On Tue, Nov 19, 2013 at 09:02:41AM +0100, Stefan Priebe wrote:
+...
+> >You might be able to vary this behavior by experimenting with sdparm,
+> >smartctl or other tools, or possibly with different microcode in the drive.
+> Which values or which settings do you think of?
+...
 
-Dmapi only works if you are the one in charge of the HSM and the filesystem.
+Off-hand, I don't know.  Probably the first thing would be
+to compare the configuration of your 520 & 530; anything that's
+different is certainly worth investigating.
 
-So for example in a DMF solution the filesystem mounted with DMAPI 
-options is on your NFS head node. Your HSM solution is also installed 
-there.
+This should display all pages,
+	sdparm --all --long /dev/sdX
+the 520 only appears to have 3 pages, which can be fetched directly w/
+	sdparm --page=ca --long /dev/sdX
+	sdparm --page=co --long /dev/sdX
+	sdparm --page=rw --long /dev/sdX
 
-Things get a bit more odd when you look at DMAPI + Clustered systems. 
-You would need HSM agents on every client node If we are talking CephFS 
-that is.
+The sample machine I'm looking has an intel 520, and on ours,
+most options show as 0 except for
+  AWRE        1  [cha: n, def:  1]  Automatic write reallocation enabled
+  WCE         1  [cha: y, def:  1]  Write cache enable
+  DRA         1  [cha: n, def:  1]  Disable read ahead
+  GLTSD       1  [cha: n, def:  1]  Global logging target save disable
+  BTP        -1  [cha: n, def: -1]  Busy timeout period (100us)
+  ESTCT      30  [cha: n, def: 30]  Extended self test completion time (sec)
+Perhaps that's an interesting data point to compare with yours.
 
-This is also true with the Lustre solution. The Lustre clients have no 
-idea this stuff is happening. This is how it should work. It means the 
-current requirement for installed software on the bulk of your clients 
-is a working kernel or fuse module.
+Figuring out if you have up-to-date intel firmware appears to require
+burning and running an iso image from
+https://downloadcenter.intel.com/Detail_Desc.aspx?agr=Y&DwnldID=18455
 
-On 19/11/13 05:22, Dmitry Borodaenko wrote:
-> On Tue, Nov 12, 2013 at 1:47 AM, Andreas Joachim Peters
-> <Andreas.Joachim.Peters@cern.ch> wrote:
->> I think you need to support the following functionality to support HSM (file not block based):
->>
->> 1 implement a trigger on file creation/modification/deletion
->>
->> 2 store the additional HSM identifier for recall as a file attribute
->>
->> 3 policy based purging of file related blocks (LRU cache etc.)
->>
->> 4 implement an optional trigger to recall a purged file and block the IO (our experience is that automatic recalls are problematic for huge installations if the aggregation window for desired recalls is short since they create inefficient and chaotic access on tapes)
->>
->> 5 either snapshot a file before migration, do an exclusive lock or freeze it to avoid modifications during migration (you need to have a unique enough identifier for a file, either inode/path + checksum or also inode/path + modification time works)
->
-> DMAPI seems to be the natural choice for items 1 & 4 above.
->
->> FYI: there was a paper about migration policy scanning performance by IBM two years ago:
->> http://domino.watson.ibm.com/library/CyberDig.nsf/papers/4A50C2D66A1F90F7852578E3005A2034/$File/rj10484.pdf
->
-> An important omission in that paper is the exact ILM policy that was
-> used to scan the file system. I strongly suspect that it was a
-> catch-all policy that matches every file without examining any
-> metadata. When you add conditions that check file metadata, scan time
-> would increase, probably by a few orders of magnitude.
->
+The results of sdparm --page=<whatever> --long /dev/sdc
+show the intel firmware, but this labels it better:
+smartctl -i /dev/sdc
+Our 520 has firmware "400i" loaded.
+
+				-Marcus Watts
