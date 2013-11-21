@@ -1,64 +1,60 @@
-From: mdw-Jp3n8lUXroRWk0Htik3J/w@public.gmane.org
-Subject: Re: Intel 520/530 SSD for ceph
-Date: Wed, 20 Nov 2013 19:29:36 -0500
-Message-ID: <20131121002936.GA15558@soma.private.linuxbox.com>
-References: <528A1862.7010601@profihost.ag>
-	<20131118225146.GA1043@soma.private.linuxbox.com>
-	<528B1B21.1060203@profihost.ag>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <528B1B21.1060203-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Stefan Priebe <s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+From: mark.doffman@codethink.co.uk
+Subject: [PATCH 0/4] Add ceph root filesystem functionality and documentation.
+Date: Wed, 20 Nov 2013 20:13:40 -0600
+Message-ID: <1385000024-23463-1-git-send-email-mark.doffman@codethink.co.uk>
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from ducie-dc1.codethink.co.uk ([37.128.190.40]:54051 "EHLO
+	ducie-dc1.codethink.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753481Ab3KUCOF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Nov 2013 21:14:05 -0500
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: Mark Doffman <mark.doffman@codethink.co.uk>, sage@inktank.com, netdev@vger.kernel.org, linux-kernel@vger.kernel.org, linux-nfs@vger.kernel.org, rob.taylor@codethink.co.uk
 
-On Tue, Nov 19, 2013 at 09:02:41AM +0100, Stefan Priebe wrote:
-...
-> >You might be able to vary this behavior by experimenting with sdparm,
-> >smartctl or other tools, or possibly with different microcode in the drive.
-> Which values or which settings do you think of?
-...
+From: Mark Doffman <mark.doffman@codethink.co.uk>
 
-Off-hand, I don't know.  Probably the first thing would be
-to compare the configuration of your 520 & 530; anything that's
-different is certainly worth investigating.
+Hi All,
 
-This should display all pages,
-	sdparm --all --long /dev/sdX
-the 520 only appears to have 3 pages, which can be fetched directly w/
-	sdparm --page=ca --long /dev/sdX
-	sdparm --page=co --long /dev/sdX
-	sdparm --page=rw --long /dev/sdX
+The following patch series adds the ability to use a ceph distributed
+file system as the root device. The functionality is similar to
+NFS root but for the ceph filesystem.
 
-The sample machine I'm looking has an intel 520, and on ours,
-most options show as 0 except for
-  AWRE        1  [cha: n, def:  1]  Automatic write reallocation enabled
-  WCE         1  [cha: y, def:  1]  Write cache enable
-  DRA         1  [cha: n, def:  1]  Disable read ahead
-  GLTSD       1  [cha: n, def:  1]  Global logging target save disable
-  BTP        -1  [cha: n, def: -1]  Busy timeout period (100us)
-  ESTCT      30  [cha: n, def: 30]  Extended self test completion time (sec)
-Perhaps that's an interesting data point to compare with yours.
+The patch series adds a new root device option '/dev/ceph'.
+Configuration is passed either via a new kernel parameter 'cephroot'
+or DHCP option 17.
 
-Figuring out if you have up-to-date intel firmware appears to require
-burning and running an iso image from
-https://downloadcenter.intel.com/Detail_Desc.aspx?agr=Y&DwnldID=18455
+The patch series applies to v3.12-10714-gd085eb6
 
-The results of sdparm --page=<whatever> --long /dev/sdc
-show the intel firmware, but this labels it better:
-smartctl -i /dev/sdc
-Our 520 has firmware "400i" loaded.
+Thanks
 
-				-Marcus Watts
+Mark
+
+Mark Doffman (3):
+  init: Add a new root device option, the Ceph file system
+  cephroot: Add DHCP option 17 configuration to ceph root fs.
+  Reuse root_nfs_parse_addr() for NFS and CEPH
+
+Rob Taylor (1):
+  Documentation: Document the cephroot functionality
+
+ Documentation/filesystems/{ => ceph}/ceph.txt |   0
+ Documentation/filesystems/ceph/cephroot.txt   |  85 +++++++++++++
+ fs/ceph/Kconfig                               |  10 ++
+ fs/ceph/Makefile                              |   1 +
+ fs/ceph/root.c                                | 165 ++++++++++++++++++++++++++
+ fs/nfs/nfsroot.c                              |   4 +-
+ include/linux/ceph/ceph_root.h                |  10 ++
+ include/linux/nfs_fs.h                        |   2 +-
+ include/linux/root_dev.h                      |   1 +
+ init/do_mounts.c                              |  32 ++++-
+ net/ipv4/ipconfig.c                           |  16 ++-
+ 11 files changed, 317 insertions(+), 9 deletions(-)
+ rename Documentation/filesystems/{ => ceph}/ceph.txt (100%)
+ create mode 100644 Documentation/filesystems/ceph/cephroot.txt
+ create mode 100644 fs/ceph/root.c
+ create mode 100644 include/linux/ceph/ceph_root.h
+
+-- 
+1.8.4
+
