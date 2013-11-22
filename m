@@ -1,87 +1,72 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: RFC: object operation instruction set
-Date: Fri, 22 Nov 2013 14:54:42 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1311221448410.2298@cobra.newdream.net>
-References: <BC963CDE-A36F-42EE-AC7D-6638D878BBCD@inktank.com>
+Subject: Re: MDS boot loop
+Date: Fri, 22 Nov 2013 15:06:38 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1311221505490.2298@cobra.newdream.net>
+References: <CAGdUFVY+PsZ5Adso7mmjMSwYBNxa0PbRkMUDOmqLNOk9-TGM7Q@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:34240 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:34377 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755413Ab3KVWyn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Nov 2013 17:54:43 -0500
-In-Reply-To: <BC963CDE-A36F-42EE-AC7D-6638D878BBCD@inktank.com>
+	with ESMTP id S1755486Ab3KVXGj (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Nov 2013 18:06:39 -0500
+In-Reply-To: <CAGdUFVY+PsZ5Adso7mmjMSwYBNxa0PbRkMUDOmqLNOk9-TGM7Q@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Noah Watkins <noah.watkins@inktank.com>
-Cc: Ceph Devel <ceph-devel@vger.kernel.org>
+To: Chris Holcombe <xfactor973@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Sun, 17 Nov 2013, Noah Watkins wrote:
-> The ObjectOperation interface in librados is great for performing compound atomic operations. However, it doesn?t seem to be capable of expressing more complex flows. Consider the following set of operations that I one might want to run atomically to optionally initialize an xattr:
+On Sun, 17 Nov 2013, Chris Holcombe wrote:
+> I've noticed from time to time that my ceph-mds-a server will get
+> stuck in a boot loop.  I see log messages like this:
 > 
->    int ret = getxattr(?foo?)
->    if (ret < 0 && ret != -ENODATA)
->      return ret;
-> 
->    if (ret == -ENODATA)
->      /* do some initialization */
->    else
->      /* do something else */
-> 
-> As it stands, one would need to build a cls_xyz to do this. Alternatively, something like cls_lua could be used, but there is a lot of downsides to that. However, after building several cls_xyz modules, it is clear that the majority of the time is spent doing basic logic, moving some data around, and occasionally doing something like incrementing some counters.
-> 
-> I?ve put a prototype solution up in github
-> 
->     `github.com/ceph/ceph.git obj_op_virt_machine`
-> 
-> that adds control instructions into the ObjectOperation interface. Using the interface I can express the above logic as follows:
-> 
->    ObjectReadOperation op;
+> 2013-11-17 20:42:42.476334 mon.0 [INF] osdmap e496905: 12 osds: 12 up, 12 in
+> 2013-11-17 20:42:42.566744 mon.0 [INF] mds.? 192.168.1.20:6803/4047 up:boot
+> 2013-11-17 20:42:42.566867 mon.0 [INF] mdsmap e488649: 1/1/1 up
+> {0=dlceph01=up:active}, 2 up:standby
+> 2013-11-17 20:42:42.644621 mon.0 [INF] pgmap v2247917: 2232 pgs: 2232
+> active+clean; 23785 MB data, 61294 MB used, 11053 GB / 11113 GB avail;
+> 45180B/s wr, 0op/s
+> 2013-11-17 20:42:43.295421 mon.0 [INF] osdmap e496906: 12 osds: 12 up, 12 in
+> 2013-11-17 20:42:43.371436 mon.0 [INF] mds.? 192.168.1.20:6809/7263 up:boot
+> 2013-11-17 20:42:43.371495 mon.0 [INF] mdsmap e488650: 1/1/1 up
+> {0=dlceph01=up:active}, 2 up:standby
+> 2013-11-17 20:42:43.475032 mon.0 [INF] pgmap v2247918: 2232 pgs: 2232
+> active+clean; 23785 MB data, 61294 MB used, 11053 GB / 11113 GB avail
+> 2013-11-17 20:42:43.629813 mon.0 [INF] osdmap e496907: 12 osds: 12 up, 12 in
+> 2013-11-17 20:42:43.697628 mon.0 [INF] mds.? 192.168.1.20:6804/26768 up:boot
+> 2013-11-17 20:42:43.697700 mon.0 [INF] mdsmap e488651: 1/1/1 up
+> {0=dlceph01=up:active}, 2 up:standby
+> 2013-11-17 20:42:43.772643 mon.0 [INF] pgmap v2247919: 2232 pgs: 2232
+> active+clean; 23785 MB data, 61294 MB used, 11053 GB / 11113 GB avail
+> 2013-11-17 20:42:44.866154 mon.0 [INF] pgmap v2247920: 2232 pgs: 2232
+> active+clean; 23785 MB data, 61294 MB used, 11053 GB / 11113 GB avail
+> 2013-11-17 20:42:46.014768 mon.0 [INF] pgmap v2247921: 2232 pgs: 2232
+> active+clean; 23785 MB data, 61295 MB used, 11053 GB / 11113 GB avail
+> 2013-11-17 20:42:46.484480 mon.0 [INF] osdmap e496908: 12 osds: 12 up, 12 in
+> 2013-11-17 20:42:46.561228 mon.0 [INF] mds.? 192.168.1.20:6803/4047 up:boot
+> 2013-11-17 20:42:46.561327 mon.0 [INF] mdsmap e488652: 1/1/1 up
+> {0=dlceph01=up:active}, 2 up:standby
+> 2013-11-17 20:42:46.653518 mon.0 [INF] pgmap v2247922: 2232 pgs: 2232
+> active+clean; 23785 MB data, 61296 MB used, 11053 GB / 11113 GB avail;
+> 44045B/s wr, 0op/s
 
-Hmm.. I still have a hard time remembering what ObjectReadOperation vs 
-ObjectWriteOperation actually mean/enforce.  Especially for these types of 
-requests, which could be either (return useful data on read, or if checks 
-pass do a mutation).
-
->    // foo doesn?t exist. the return value
->    // will be placed into a named register ?ret"
->    op.getxattr(?foo?, bl, NULL);
-
-IIRC there is a per-op flag to ignore the return value (or rather, not 
-return immediately if it is <0).  
-
-This looks pretty handy!  I think we should be careful about extending 
-this interface until we have a pretty good picture of the use-cases, 
-though, and at least one user.
+That looks a bit like a mon problem, since the mdsmap status isn't 
+changing.  Can you do 'ceph mds dump 488652' and 'ceph mds dump 488651' 
+(or some other consecutive mdsmaps) to see what, if anything, is changing?
 
 sage
 
 > 
->    // jump to label if ?ret? register >= 0
->    op.ois_jge(?ret?, 0, ?has_attr?); 
 > 
->    // jump to label if ?ret? register == 0
->    op.ois_jeq(?ret?, -ENODATA, ?no_attr?);
+> After watching it do that for a few minutes and cephfs operations
+> being extremely slow I kill -9 the ceph-mds processes on that host.  A
+> few seconds later I see a reconnect message and all is fine again.
+> Any idea why the mds servers are doing this?
 > 
->    // fall through to return any error in the
->    // ?ret? register. returns immediately
->    op.ois_ret(?ret?);
-> 
->    // define a label target
->    op.ois_label(?has_attr?);
->    /* ? do some stuff ? */
->    op.ois_ret(0);
-> 
->   // defines a label target
->   op.ois_label(?no_attr?);
->   /* ? do initialization ? */
->   op.ois_ret(0);
-> 
->   ioctx.operate(?obj?, &op);
-> 
-> Using only a few instructions, we can get pretty good building blocks. Adding a few to examine some data in primitive ways would add another level of usefulness, too (e.g. atomic counter increment). And, this can also be made safe by ensuring that jumps are always forward, removing any problems like infinite loops.
-> 
-> - Noah--
+> I'm running ubuntu 13.04 x64 with the latest dumpling version of ceph.
+>  I have 3 mds servers, 1 is active and the other 2 are standby.
+> --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
