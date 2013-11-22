@@ -1,29 +1,28 @@
-From: David Dillow <dave@thedillows.org>
-Subject: Re: [PATCH 0/4] Add ceph root filesystem functionality and
- documentation.
-Date: Thu, 21 Nov 2013 15:19:46 -0500
-Message-ID: <1385065186.18238.0.camel@frustration.ornl.gov>
-References: <1385000024-23463-1-git-send-email-mark.doffman@codethink.co.uk>
+From: Dietmar Maurer <dietmar@proxmox.com>
+Subject: RE: possible bug in init-ceph.in
+Date: Fri, 22 Nov 2013 04:54:43 +0000
+Message-ID: <24E144B8C0207547AD09C467A8259F7559234167@lisa.maurer-it.com>
+References: <24E144B8C0207547AD09C467A8259F7559232FA2@lisa.maurer-it.com>
+	<528E4071.3070603@dachary.org>	<528E498A.8020102@dachary.org>
+ <CAPYLRzjN4kS=6Rto02RvYvhS-iwQjT4ttM+Wb6YanDLRzCOiCQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mta01.ornl.gov ([128.219.177.14]:60772 "EHLO mta01.ornl.gov"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751923Ab3KUU3l (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 21 Nov 2013 15:29:41 -0500
-In-Reply-To: <1385000024-23463-1-git-send-email-mark.doffman@codethink.co.uk>
+Received: from smtp.maurer-it.com ([94.136.31.133]:34622 "EHLO
+	proxmox.maurer-it.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753021Ab3KVEyt convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Nov 2013 23:54:49 -0500
+In-Reply-To: <CAPYLRzjN4kS=6Rto02RvYvhS-iwQjT4ttM+Wb6YanDLRzCOiCQ@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: mark.doffman@codethink.co.uk
-Cc: ceph-devel@vger.kernel.org, sage@inktank.com, netdev@vger.kernel.org, linux-kernel@vger.kernel.org, linux-nfs@vger.kernel.org, rob.taylor@codethink.co.uk
+To: Gregory Farnum <greg@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Loic Dachary <loic@dachary.org>
 
-On Wed, 2013-11-20 at 20:13 -0600, mark.doffman@codethink.co.uk wrote:
-> The following patch series adds the ability to use a ceph distributed
-> file system as the root device. The functionality is similar to
-> NFS root but for the ceph filesystem.
+> Can we take that diff you provided as coming with a signed-off-by, as in the pull
+> request Loic generated? :) 
+ 
+Sure.
 
-Why do this in the kernel vs in the initramfs? Dracut would be a more
-appropriate place, I think, as it has support for other network root
-devices already.
 
