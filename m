@@ -1,105 +1,38 @@
-From: Joao Eduardo Luis <joao.luis@inktank.com>
-Subject: Re: missing health status details
-Date: Fri, 22 Nov 2013 13:48:39 +0000
-Message-ID: <528F60B7.9080307@inktank.com>
-References: <24E144B8C0207547AD09C467A8259F7559234656@lisa.maurer-it.com>
+From: Mark Doffman <mark.doffman-4yDnlxn2s6sWdaTGBSpHTA@public.gmane.org>
+Subject: Re: [PATCH 0/4] Add ceph root filesystem functionality and documentation.
+Date: Fri, 22 Nov 2013 10:53:21 -0600
+Message-ID: <528F8C01.8020603@codethink.co.uk>
+References: <1385000024-23463-1-git-send-email-mark.doffman@codethink.co.uk> <1385065186.18238.0.camel@frustration.ornl.gov>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-we0-f172.google.com ([74.125.82.172]:60289 "EHLO
-	mail-we0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755627Ab3KVNsi (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Nov 2013 08:48:38 -0500
-Received: by mail-we0-f172.google.com with SMTP id t60so1155130wes.17
-        for <ceph-devel@vger.kernel.org>; Fri, 22 Nov 2013 05:48:37 -0800 (PST)
-In-Reply-To: <24E144B8C0207547AD09C467A8259F7559234656@lisa.maurer-it.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Dietmar Maurer <dietmar@proxmox.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Return-path: <linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1385065186.18238.0.camel-zHLflQxYYDO4Hhoo1DtQwJ9G+ZOsUmrO@public.gmane.org>
+Sender: linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: David Dillow <dave-i1Mk8JYDVaaSihdK6806/g@public.gmane.org>
+Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, rob.taylor-4yDnlxn2s6sWdaTGBSpHTA@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-Good catch.  Opened ticket 6850 on the tracker.
+On 11/21/2013 02:19 PM, David Dillow wrote:
+> On Wed, 2013-11-20 at 20:13 -0600, mark.doffman-4yDnlxn2s6sWdaTGBSpHTA@public.gmane.org wrote:
+>> The following patch series adds the ability to use a ceph distributed
+>> file system as the root device. The functionality is similar to
+>> NFS root but for the ceph filesystem.
+>
+> Why do this in the kernel vs in the initramfs? Dracut would be a more
+> appropriate place, I think, as it has support for other network root
+> devices already.
 
-http://tracker.ceph.com/issues/6850
+I don't know if its a good idea to require an initramfs for mounting a
+rootfs over the network. NFS root is currently in the kernel, and
+frequently used without an initramfs.
 
-   -Joao
-
-On 11/22/2013 10:21 AM, Dietmar Maurer wrote:
-> Just playing around, and detected this:
->
-> # ceph health -f json-pretty
->
-> { "summary": [],
->    "timechecks": { "epoch": 34,
->        "round": 40,
->        "round_status": "finished",
->        "mons": [
->              { "name": "1",
->                "skew": "0.000000",
->                "latency": "0.000000",
->                "health": "HEALTH_OK"},
->              { "name": "0",
->                "skew": "-0.000330",
->                "latency": "0.001454",
->                "health": "HEALTH_OK"},
->              { "name": "2",
->                "skew": "0.054170",
->                "latency": "0.000816",
->                "health": "HEALTH_WARN",
->                "details": "clock skew 0.0541703s > max 0.05s"}]},
->    "health": { "health_services": [
->              { "mons": [
->                      { "name": "1",
->                        "kb_total": 2064208,
->                        "kb_used": 1424964,
->                        "kb_avail": 534388,
->                        "avail_percent": 25,
->                        "last_updated": "2013-11-22 11:14:47.500872",
->                        "store_stats": { "bytes_total": 9524208,
->                            "bytes_sst": 8999282,
->                            "bytes_log": 458752,
->                            "bytes_misc": 66174,
->                            "last_updated": "0.000000"},
->                        "health": "HEALTH_WARN",
->                        "health_detail": "low disk space!"},
->                      { "name": "0",
->                        "kb_total": 2064208,
->                        "kb_used": 1249116,
->                        "kb_avail": 710236,
->                        "avail_percent": 34,
->                        "last_updated": "2013-11-22 11:14:53.498853",
->                        "store_stats": { "bytes_total": 10048528,
->                            "bytes_sst": 8999314,
->                            "bytes_log": 983040,
->                            "bytes_misc": 66174,
->                            "last_updated": "0.000000"},
->                        "health": "HEALTH_OK"},
->                      { "name": "2",
->                        "kb_total": 2064208,
->                        "kb_used": 1247084,
->                        "kb_avail": 712268,
->                        "avail_percent": 34,
->                        "last_updated": "2013-11-22 11:14:28.720368",
->                        "store_stats": { "bytes_total": 10048528,
->                            "bytes_sst": 8999314,
->                            "bytes_log": 983040,
->                            "bytes_misc": 66174,
->                            "last_updated": "0.000000"},
->                        "health": "HEALTH_OK"}]}]},
->    "overall_status": "HEALTH_WARN",
->    "detail": [
->          "mon.2 addr 192.168.3.13:6789\/0 clock skew 0.0541703s > max 0.05s (latency 0.000815989s)"]}
->
->
-> Why is "low disk space!" not included inside 'details'?
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+Booting from ceph using a root device is relatively simple compared to
+generating an initramfs and it has the possibility of producing smaller
+images for memory constrained devices.
 
 
--- 
-Joao Eduardo Luis
-Software Engineer | http://inktank.com | http://ceph.com
+--
+To unsubscribe from this list: send the line "unsubscribe linux-nfs" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
