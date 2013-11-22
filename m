@@ -1,63 +1,88 @@
-From: "Luo Shaobo (DSI)" <luosb@dsi.a-star.edu.sg>
-Subject: How to use the class Filer in Ceph
-Date: Fri, 22 Nov 2013 05:30:56 +0000
-Message-ID: <7061367AB47B6A4EAE551551A9A197330100F1DA@S3-EXCHMB04.shared-svc.local>
+From: Dietmar Maurer <dietmar@proxmox.com>
+Subject: missing health status details
+Date: Fri, 22 Nov 2013 10:21:28 +0000
+Message-ID: <24E144B8C0207547AD09C467A8259F7559234656@lisa.maurer-it.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from gw1.scei.a-star.edu.sg ([192.122.140.10]:53172 "EHLO
-	gw1.scei.a-star.edu.sg" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750726Ab3KVFbB (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Nov 2013 00:31:01 -0500
-Received: from S3-CAS05.shared-svc.local ([10.217.253.201])
-	by gw1.scei.a-star.edu.sg (8.14.5/8.14.5) with ESMTP id rAM5UwqN022439
-	for <ceph-devel@vger.kernel.org>; Fri, 22 Nov 2013 13:30:58 +0800
+Received: from smtp.maurer-it.com ([94.136.31.133]:51796 "EHLO
+	proxmox.maurer-it.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752567Ab3KVKVw convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Nov 2013 05:21:52 -0500
+Received: from proxmox.maurer-it.com (localhost.localdomain [127.0.0.1])
+	by proxmox.maurer-it.com (Proxmox) with ESMTP id C0D95271E827
+	for <ceph-devel@vger.kernel.org>; Fri, 22 Nov 2013 11:21:30 +0100 (CET)
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-RGVhciBBbGwsDQoNCiAgIEN1cnJlbnRseSwgSeKAmW0gdXNpbmcgdGhlIGNsYXNzIEZpbGVyIHRv
-IG9wZXJhdGUgdGhlIE9TRCBkaXJlY3RseS4gQW5kIGJlbG93IGxpc3QgdGhlIGNvZGVzLg0KVGhl
-IHdyaXRlX3RydW5jIHJvdXRpbmcgcmV0dXJuIHN1Y2Nlc3MsIGJ1dCBJIGNhbuKAmXQgcmVhZCBi
-YWNrIHRoZSBvYmplY3QsIGFuZCBJIGdvdCByID0gLTIsICAtRU5PRU5ULg0KV291bGQgYW55b25l
-IGhlbHAgbWUgdG8gYW5zd2VyIHRoZSBxdWVzdGlvbiB0aGF0IGhvdyB0byB1c2UgdGhvc2UgZnVu
-Y3Rpb25zPyAgVGhhbmtzIQ0KDQpUaGUgaW5wdXQgcGFyYW1ldGVycyBhcmU6DQppbi0+aW5vID0g
-MHgxMDAwMDAwMDAzNTsNCkluLT5sYXlvdXQuZmxfc3RyaXBlX3VuaXQgPSBzdHJpcGVfdW5pdCA9
-IDQxOTQzMDQ7DQpJbi0+bGF5b3V0LmZsX3N0cmlwZV9jb3VudCA9IHN0cmlwZV9jb3VudCA9IDE7
-DQpJbi0+bGF5b3V0LmZsX29iamVjdF9zaXplID0gb2JqZWN0X3NpemUgPSA0MTk0MzA0Ow0KSW4t
-PmxheW91dC5mbF9wZ19wb29sID0gMDsNCmluLT5zbmFwcmVhbG0gPSBuZXcgU25hcFJlYWxtKGlu
-LT5pbm8pOw0KaW4tPnNuYXByZWFsbS0+YnVpbGRfc25hcF9jb250ZXh0KCk7DQoNClRoZSB3cml0
-aW5nIGNvZGUgbG9va3MgbGlrZSB0aGlzLg0KICAgIE11dGV4IGZsb2NrKCJNQ2xpZW50Ojpfd3Jp
-dGUgZmxvY2siKTsNCiAgICBDb25kIGNvbmQ7DQogICAgYm9vbCBkb25lID0gZmFsc2U7DQogICAg
-Q29udGV4dCAqb25maW5pc2ggPSBuZXcgQ19TYWZlQ29uZCgmZmxvY2ssICZjb25kLCAmZG9uZSk7
-DQogICAgQ29udGV4dCAqb25zYWZlID0gbmV3IENfQ2xpZW50X1N5bmNDb21taXQodGhpcywgaW4p
-Ow0KDQogICAgdW5zYWZlX3N5bmNfd3JpdGUrKzsNCiAgICBnZXRfY2FwX3JlZihpbiwgQ0VQSF9D
-QVBfRklMRV9CVUZGRVIpOyAgLy8gcmVsZWFzZWQgYnkgb25zYWZlIGNhbGxiYWNrDQoNCiAgICBy
-ID0gZmlsZXItPndyaXRlX3RydW5jKGluLT5pbm8sICZpbi0+bGF5b3V0LCBpbi0+c25hcHJlYWxt
-LT5nZXRfc25hcF9jb250ZXh0KCksDQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICBvZmZzZXQsIHNpemUsIGJsLCBjZXBoX2Nsb2NrX25vdyhjY3QpLCAw
-LA0KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW4t
-PnRydW5jYXRlX3NpemUsIGluLT50cnVuY2F0ZV9zZXEsDQogICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICBvbmZpbmlzaCwgb25zYWZlKTsNCiAgICBpZiAo
-ciA8IDApDQogICAgICBnb3RvIGRvbmU7DQoNCiAgICBjbGllbnRfbG9jay5VbmxvY2soKTsNCiAg
-ICBmbG9jay5Mb2NrKCk7DQogICAgd2hpbGUgKCFkb25lKQ0KICAgICAgY29uZC5XYWl0KGZsb2Nr
-KTsNCuOAgGZsb2NrLlVubG9jaygpOw0K44CADQpUaGUgcmVhZGluZyBjb2RlIGxvb2tzIGxpa2Ug
-dGhpcy4NCg0KTXV0ZXggZmxvY2soIk1DbGllbnQ6Ol9yZWFkX3N5bmMgZmxvY2siKTsNCmJvb2wg
-ZG9uZSA9IGZhbHNlOw0KICAgIENvbnRleHQgKm9uZmluaXNoID0gbmV3IENfU2FmZUNvbmQoJmZs
-b2NrLCAmY29uZCwgJmRvbmUsICZyKTsNCiAgICBidWZmZXJsaXN0IHRibDsNCg0KICAgIGludCB3
-YW50ZWQgPSBsZWZ0Ow0KICAgIGZpbGVyLT5yZWFkX3RydW5jKGluLT5pbm8sICZpbi0+bGF5b3V0
-LCBpbi0+c25hcGlkLA0KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBwb3Ms
-IGxlZnQsICZ0YmwsIDAsDQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGlu
-LT50cnVuY2F0ZV9zaXplLCBpbi0+dHJ1bmNhdGVfc2VxLA0KICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICBvbmZpbmlzaCk7DQogICAgY2xpZW50X2xvY2suVW5sb2NrKCk7DQog
-ICAgZmxvY2suTG9jaygpOw0KICAgIHdoaWxlICghZG9uZSkNCiAgICAgIGNvbmQuV2FpdChmbG9j
-ayk7DQrjgIBmbG9jay5VbmxvY2soKTsNCg0KVGhvbWFzDQoNCuOAgA0K44CADQoNCl9fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fDQpUaGlzIGVtYWlsIGFuZCBhbnkgYXR0YWNobWVudHMg
-YXJlIGNvbmZpZGVudGlhbCBhbmQgbWF5IGJlIHByaXZpbGVnZWQuIElmIHlvdSBhcmUgbm90IHRo
-ZSBpbnRlbmRlZCByZWNpcGllbnQsIHBsZWFzZSBkZWxldGUgaXQgYW5kIG5vdGlmeSB1cyBpbW1l
-ZGlhdGVseS4gUGxlYXNlIGRvIG5vdCBjb3B5IG9yIHVzZSBpdCBmb3IgYW55IHB1cnBvc2UsIG9y
-IGRpc2Nsb3NlIGl0cyBjb250ZW50cyB0byBhbnkgb3RoZXIgcGVyc29uLiBUaGlzIGVtYWlsIGRv
-ZXMgbm90IGNvbnN0aXR1dGUgYSBjb250cmFjdCBvZmZlciwgYSBjb250cmFjdCBhbWVuZG1lbnQs
-IG9yIGFuIGFjY2VwdGFuY2Ugb2YgYSBjb250cmFjdCBvZmZlci4gVGhhbmsgeW91Lg0K
+Just playing around, and detected this:
+
+# ceph health -f json-pretty
+
+{ "summary": [],
+  "timechecks": { "epoch": 34,
+      "round": 40,
+      "round_status": "finished",
+      "mons": [
+            { "name": "1",
+              "skew": "0.000000",
+              "latency": "0.000000",
+              "health": "HEALTH_OK"},
+            { "name": "0",
+              "skew": "-0.000330",
+              "latency": "0.001454",
+              "health": "HEALTH_OK"},
+            { "name": "2",
+              "skew": "0.054170",
+              "latency": "0.000816",
+              "health": "HEALTH_WARN",
+              "details": "clock skew 0.0541703s > max 0.05s"}]},
+  "health": { "health_services": [
+            { "mons": [
+                    { "name": "1",
+                      "kb_total": 2064208,
+                      "kb_used": 1424964,
+                      "kb_avail": 534388,
+                      "avail_percent": 25,
+                      "last_updated": "2013-11-22 11:14:47.500872",
+                      "store_stats": { "bytes_total": 9524208,
+                          "bytes_sst": 8999282,
+                          "bytes_log": 458752,
+                          "bytes_misc": 66174,
+                          "last_updated": "0.000000"},
+                      "health": "HEALTH_WARN",
+                      "health_detail": "low disk space!"},
+                    { "name": "0",
+                      "kb_total": 2064208,
+                      "kb_used": 1249116,
+                      "kb_avail": 710236,
+                      "avail_percent": 34,
+                      "last_updated": "2013-11-22 11:14:53.498853",
+                      "store_stats": { "bytes_total": 10048528,
+                          "bytes_sst": 8999314,
+                          "bytes_log": 983040,
+                          "bytes_misc": 66174,
+                          "last_updated": "0.000000"},
+                      "health": "HEALTH_OK"},
+                    { "name": "2",
+                      "kb_total": 2064208,
+                      "kb_used": 1247084,
+                      "kb_avail": 712268,
+                      "avail_percent": 34,
+                      "last_updated": "2013-11-22 11:14:28.720368",
+                      "store_stats": { "bytes_total": 10048528,
+                          "bytes_sst": 8999314,
+                          "bytes_log": 983040,
+                          "bytes_misc": 66174,
+                          "last_updated": "0.000000"},
+                      "health": "HEALTH_OK"}]}]},
+  "overall_status": "HEALTH_WARN",
+  "detail": [
+        "mon.2 addr 192.168.3.13:6789\/0 clock skew 0.0541703s > max 0.05s (latency 0.000815989s)"]}
+
+
+Why is "low disk space!" not included inside 'details'?
+
