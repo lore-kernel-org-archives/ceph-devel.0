@@ -1,28 +1,63 @@
-From: Dietmar Maurer <dietmar@proxmox.com>
-Subject: RE: possible bug in init-ceph.in
-Date: Fri, 22 Nov 2013 04:54:43 +0000
-Message-ID: <24E144B8C0207547AD09C467A8259F7559234167@lisa.maurer-it.com>
-References: <24E144B8C0207547AD09C467A8259F7559232FA2@lisa.maurer-it.com>
-	<528E4071.3070603@dachary.org>	<528E498A.8020102@dachary.org>
- <CAPYLRzjN4kS=6Rto02RvYvhS-iwQjT4ttM+Wb6YanDLRzCOiCQ@mail.gmail.com>
+From: "Luo Shaobo (DSI)" <luosb@dsi.a-star.edu.sg>
+Subject: How to use the class Filer in Ceph
+Date: Fri, 22 Nov 2013 05:30:56 +0000
+Message-ID: <7061367AB47B6A4EAE551551A9A197330100F1DA@S3-EXCHMB04.shared-svc.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.maurer-it.com ([94.136.31.133]:34622 "EHLO
-	proxmox.maurer-it.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753021Ab3KVEyt convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Nov 2013 23:54:49 -0500
-In-Reply-To: <CAPYLRzjN4kS=6Rto02RvYvhS-iwQjT4ttM+Wb6YanDLRzCOiCQ@mail.gmail.com>
+Received: from gw1.scei.a-star.edu.sg ([192.122.140.10]:53172 "EHLO
+	gw1.scei.a-star.edu.sg" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750726Ab3KVFbB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Nov 2013 00:31:01 -0500
+Received: from S3-CAS05.shared-svc.local ([10.217.253.201])
+	by gw1.scei.a-star.edu.sg (8.14.5/8.14.5) with ESMTP id rAM5UwqN022439
+	for <ceph-devel@vger.kernel.org>; Fri, 22 Nov 2013 13:30:58 +0800
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Loic Dachary <loic@dachary.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-> Can we take that diff you provided as coming with a signed-off-by, as in the pull
-> request Loic generated? :) 
- 
-Sure.
-
-
+RGVhciBBbGwsDQoNCiAgIEN1cnJlbnRseSwgSeKAmW0gdXNpbmcgdGhlIGNsYXNzIEZpbGVyIHRv
+IG9wZXJhdGUgdGhlIE9TRCBkaXJlY3RseS4gQW5kIGJlbG93IGxpc3QgdGhlIGNvZGVzLg0KVGhl
+IHdyaXRlX3RydW5jIHJvdXRpbmcgcmV0dXJuIHN1Y2Nlc3MsIGJ1dCBJIGNhbuKAmXQgcmVhZCBi
+YWNrIHRoZSBvYmplY3QsIGFuZCBJIGdvdCByID0gLTIsICAtRU5PRU5ULg0KV291bGQgYW55b25l
+IGhlbHAgbWUgdG8gYW5zd2VyIHRoZSBxdWVzdGlvbiB0aGF0IGhvdyB0byB1c2UgdGhvc2UgZnVu
+Y3Rpb25zPyAgVGhhbmtzIQ0KDQpUaGUgaW5wdXQgcGFyYW1ldGVycyBhcmU6DQppbi0+aW5vID0g
+MHgxMDAwMDAwMDAzNTsNCkluLT5sYXlvdXQuZmxfc3RyaXBlX3VuaXQgPSBzdHJpcGVfdW5pdCA9
+IDQxOTQzMDQ7DQpJbi0+bGF5b3V0LmZsX3N0cmlwZV9jb3VudCA9IHN0cmlwZV9jb3VudCA9IDE7
+DQpJbi0+bGF5b3V0LmZsX29iamVjdF9zaXplID0gb2JqZWN0X3NpemUgPSA0MTk0MzA0Ow0KSW4t
+PmxheW91dC5mbF9wZ19wb29sID0gMDsNCmluLT5zbmFwcmVhbG0gPSBuZXcgU25hcFJlYWxtKGlu
+LT5pbm8pOw0KaW4tPnNuYXByZWFsbS0+YnVpbGRfc25hcF9jb250ZXh0KCk7DQoNClRoZSB3cml0
+aW5nIGNvZGUgbG9va3MgbGlrZSB0aGlzLg0KICAgIE11dGV4IGZsb2NrKCJNQ2xpZW50Ojpfd3Jp
+dGUgZmxvY2siKTsNCiAgICBDb25kIGNvbmQ7DQogICAgYm9vbCBkb25lID0gZmFsc2U7DQogICAg
+Q29udGV4dCAqb25maW5pc2ggPSBuZXcgQ19TYWZlQ29uZCgmZmxvY2ssICZjb25kLCAmZG9uZSk7
+DQogICAgQ29udGV4dCAqb25zYWZlID0gbmV3IENfQ2xpZW50X1N5bmNDb21taXQodGhpcywgaW4p
+Ow0KDQogICAgdW5zYWZlX3N5bmNfd3JpdGUrKzsNCiAgICBnZXRfY2FwX3JlZihpbiwgQ0VQSF9D
+QVBfRklMRV9CVUZGRVIpOyAgLy8gcmVsZWFzZWQgYnkgb25zYWZlIGNhbGxiYWNrDQoNCiAgICBy
+ID0gZmlsZXItPndyaXRlX3RydW5jKGluLT5pbm8sICZpbi0+bGF5b3V0LCBpbi0+c25hcHJlYWxt
+LT5nZXRfc25hcF9jb250ZXh0KCksDQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICBvZmZzZXQsIHNpemUsIGJsLCBjZXBoX2Nsb2NrX25vdyhjY3QpLCAw
+LA0KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW4t
+PnRydW5jYXRlX3NpemUsIGluLT50cnVuY2F0ZV9zZXEsDQogICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICBvbmZpbmlzaCwgb25zYWZlKTsNCiAgICBpZiAo
+ciA8IDApDQogICAgICBnb3RvIGRvbmU7DQoNCiAgICBjbGllbnRfbG9jay5VbmxvY2soKTsNCiAg
+ICBmbG9jay5Mb2NrKCk7DQogICAgd2hpbGUgKCFkb25lKQ0KICAgICAgY29uZC5XYWl0KGZsb2Nr
+KTsNCuOAgGZsb2NrLlVubG9jaygpOw0K44CADQpUaGUgcmVhZGluZyBjb2RlIGxvb2tzIGxpa2Ug
+dGhpcy4NCg0KTXV0ZXggZmxvY2soIk1DbGllbnQ6Ol9yZWFkX3N5bmMgZmxvY2siKTsNCmJvb2wg
+ZG9uZSA9IGZhbHNlOw0KICAgIENvbnRleHQgKm9uZmluaXNoID0gbmV3IENfU2FmZUNvbmQoJmZs
+b2NrLCAmY29uZCwgJmRvbmUsICZyKTsNCiAgICBidWZmZXJsaXN0IHRibDsNCg0KICAgIGludCB3
+YW50ZWQgPSBsZWZ0Ow0KICAgIGZpbGVyLT5yZWFkX3RydW5jKGluLT5pbm8sICZpbi0+bGF5b3V0
+LCBpbi0+c25hcGlkLA0KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBwb3Ms
+IGxlZnQsICZ0YmwsIDAsDQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGlu
+LT50cnVuY2F0ZV9zaXplLCBpbi0+dHJ1bmNhdGVfc2VxLA0KICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICBvbmZpbmlzaCk7DQogICAgY2xpZW50X2xvY2suVW5sb2NrKCk7DQog
+ICAgZmxvY2suTG9jaygpOw0KICAgIHdoaWxlICghZG9uZSkNCiAgICAgIGNvbmQuV2FpdChmbG9j
+ayk7DQrjgIBmbG9jay5VbmxvY2soKTsNCg0KVGhvbWFzDQoNCuOAgA0K44CADQoNCl9fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fDQpUaGlzIGVtYWlsIGFuZCBhbnkgYXR0YWNobWVudHMg
+YXJlIGNvbmZpZGVudGlhbCBhbmQgbWF5IGJlIHByaXZpbGVnZWQuIElmIHlvdSBhcmUgbm90IHRo
+ZSBpbnRlbmRlZCByZWNpcGllbnQsIHBsZWFzZSBkZWxldGUgaXQgYW5kIG5vdGlmeSB1cyBpbW1l
+ZGlhdGVseS4gUGxlYXNlIGRvIG5vdCBjb3B5IG9yIHVzZSBpdCBmb3IgYW55IHB1cnBvc2UsIG9y
+IGRpc2Nsb3NlIGl0cyBjb250ZW50cyB0byBhbnkgb3RoZXIgcGVyc29uLiBUaGlzIGVtYWlsIGRv
+ZXMgbm90IGNvbnN0aXR1dGUgYSBjb250cmFjdCBvZmZlciwgYSBjb250cmFjdCBhbWVuZG1lbnQs
+IG9yIGFuIGFjY2VwdGFuY2Ugb2YgYSBjb250cmFjdCBvZmZlci4gVGhhbmsgeW91Lg0K
