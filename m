@@ -1,60 +1,34 @@
-From: Tim Spriggs <tims@uahirise.org>
-Subject: Re: /etc/init.d/ceph vs upstart
-Date: Mon, 25 Nov 2013 12:01:41 -0700
-Message-ID: <CAEUrXvy6u3zWtJYhfsggaK_akW5eeb_Agm6eVa8Tipxjhpqb0Q@mail.gmail.com>
-References: <CAEUrXvweJa50=ZVFvWOknCSzO9NKvvxikYhn7-Mmz4NgvYAkTA@mail.gmail.com>
-	<CAEUrXvySMMz=HiXTTPY+d1i50XYSayuguMz8tLGH+_Z4PvJ9uw@mail.gmail.com>
-	<CAEUrXvyVN0y1WTAP5HeM2EEnONJu2UgHBdvQtENQzCELkhRvPA@mail.gmail.com>
+From: Patrick McGarry <patrick@inktank.com>
+Subject: CDS About to Begin
+Date: Mon, 25 Nov 2013 15:51:44 -0500
+Message-ID: <CAP8Oy=Ke6pqWA5hBR8HjkO1scWM_-h39gDNWPSx0bWXpCCQrQA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f174.google.com ([209.85.217.174]:63553 "EHLO
-	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756866Ab3KYTBm (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 25 Nov 2013 14:01:42 -0500
-Received: by mail-lb0-f174.google.com with SMTP id c11so3513019lbj.5
-        for <ceph-devel@vger.kernel.org>; Mon, 25 Nov 2013 11:01:41 -0800 (PST)
-In-Reply-To: <CAEUrXvyVN0y1WTAP5HeM2EEnONJu2UgHBdvQtENQzCELkhRvPA@mail.gmail.com>
+Received: from mail-pb0-f51.google.com ([209.85.160.51]:42377 "EHLO
+	mail-pb0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751565Ab3KYUvp (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 25 Nov 2013 15:51:45 -0500
+Received: by mail-pb0-f51.google.com with SMTP id up15so6601933pbc.10
+        for <ceph-devel@vger.kernel.org>; Mon, 25 Nov 2013 12:51:45 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>
 
-... ping
+Our first day of the online Ceph Developer Summit is about to begin.
+Connection info is as follows:
 
-On Thu, Nov 7, 2013 at 3:31 PM, Tim Spriggs <tims@uahirise.org> wrote:
-> Oops, I just realized I did the patch in the wrong direction :)
->
-> On Thu, Nov 7, 2013 at 3:06 PM, Tim Spriggs <tims@uahirise.org> wrote:
->> Hi All,
->>
->>   I am battling extraneous error messages from two sources:
->>
->>   logrotate which is run in cron.daily and has a definition from the
->> ceph package in /etc/logrotate.d. The message I get in an email from
->> every node once a day is:
->>
->> cat: /var/run/ceph/osd.3.pid: No such file or directory
->>
->> This comes up because upstart is actually running ceph-osd while the
->> init.d script expects a pidfile.
->>
->>
->>   /var/log/ceph/ceph-osd.$id.log which complains:
->>
->> ERROR: error converting store /var/lib/ceph/osd/ceph-3: (16) Device or
->> resource busy
->>
->> This happens on boot as well as on log rotation.
->>
->>
->> After talking with dmick on irc.oftc.net#ceph, I was alerted to the
->> fact that there are bits in upstart as well as the sysvinit style
->> script that attempt to only use one scheme or the other. However, the
->> logic seems wrong. Inside of ceph_common.sh, there is a function named
->> check_host which looks for /var/lib/ceph/$type/ceph-$id/sysvinit and
->> if it exists, it returns. If it doesn't exist, it just goes on to the
->> next check (which passes in my environment.) Instead, it should return
->> a non-0 value. Attached is an example patch.
->>
->> Thanks,
->> -Tim
+IRC: irc.oftc.net  #ceph-summit
+YouTube Stream: https://www.youtube.com/watch?v=DWK5RrNRhHU
+G+ Event Page: https://plus.google.com/b/100228383599142686318/events/ca4mb81hi3j57nvs9lrcm988m4s
+
+If you have questions I am 'scuttlemonkey' on irc, pmcgarry@gmail
+(xmpp), or this email.
+
+
+Best Regards,
+
+Patrick McGarry
+Director, Community || Inktank
+http://ceph.com  ||  http://inktank.com
+@scuttlemonkey || @ceph || @inktank
