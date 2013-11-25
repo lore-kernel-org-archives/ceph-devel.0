@@ -1,72 +1,36 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: /etc/init.d/ceph vs upstart
-Date: Mon, 25 Nov 2013 14:02:35 -0800
-Message-ID: <5293C8FB.4040709@inktank.com>
-References: <CAEUrXvweJa50=ZVFvWOknCSzO9NKvvxikYhn7-Mmz4NgvYAkTA@mail.gmail.com>	<CAEUrXvySMMz=HiXTTPY+d1i50XYSayuguMz8tLGH+_Z4PvJ9uw@mail.gmail.com>	<CAEUrXvyVN0y1WTAP5HeM2EEnONJu2UgHBdvQtENQzCELkhRvPA@mail.gmail.com> <CAEUrXvy6u3zWtJYhfsggaK_akW5eeb_Agm6eVa8Tipxjhpqb0Q@mail.gmail.com>
+From: Patrick McGarry <patrick-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Subject: CDS Day 1.2
+Date: Mon, 25 Nov 2013 18:48:38 -0500
+Message-ID: <CAP8Oy=K7syGXauaHx+r4w+aFBLqiLADG5oDmu62tsHgvS1qGrw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yh0-f42.google.com ([209.85.213.42]:63872 "EHLO
-	mail-yh0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751665Ab3KYWCi (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 25 Nov 2013 17:02:38 -0500
-Received: by mail-yh0-f42.google.com with SMTP id z6so3410931yhz.29
-        for <ceph-devel@vger.kernel.org>; Mon, 25 Nov 2013 14:02:38 -0800 (PST)
-In-Reply-To: <CAEUrXvy6u3zWtJYhfsggaK_akW5eeb_Agm6eVa8Tipxjhpqb0Q@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Tim Spriggs <tims@uahirise.org>, ceph-devel@vger.kernel.org
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On 11/25/2013 11:01 AM, Tim Spriggs wrote:
-> ... ping
->
-> On Thu, Nov 7, 2013 at 3:31 PM, Tim Spriggs <tims@uahirise.org> wrote:
->> Oops, I just realized I did the patch in the wrong direction :)
->>
->> On Thu, Nov 7, 2013 at 3:06 PM, Tim Spriggs <tims@uahirise.org> wrote:
->>> Hi All,
->>>
->>>    I am battling extraneous error messages from two sources:
->>>
->>>    logrotate which is run in cron.daily and has a definition from the
->>> ceph package in /etc/logrotate.d. The message I get in an email from
->>> every node once a day is:
->>>
->>> cat: /var/run/ceph/osd.3.pid: No such file or directory
->>>
->>> This comes up because upstart is actually running ceph-osd while the
->>> init.d script expects a pidfile.
->>>
->>>
->>>    /var/log/ceph/ceph-osd.$id.log which complains:
->>>
->>> ERROR: error converting store /var/lib/ceph/osd/ceph-3: (16) Device or
->>> resource busy
->>>
->>> This happens on boot as well as on log rotation.
->>>
->>>
->>> After talking with dmick on irc.oftc.net#ceph, I was alerted to the
->>> fact that there are bits in upstart as well as the sysvinit style
->>> script that attempt to only use one scheme or the other. However, the
->>> logic seems wrong. Inside of ceph_common.sh, there is a function named
->>> check_host which looks for /var/lib/ceph/$type/ceph-$id/sysvinit and
->>> if it exists, it returns. If it doesn't exist, it just goes on to the
->>> next check (which passes in my environment.) Instead, it should return
->>> a non-0 value. Attached is an example patch.
+For those of you wishing to tune in to the second half of CDS day one,
+please join us at:
 
-I think continuing if the host matches is intentional, so the init
-script continues working for daemons deployed before
-/var/lib/ceph/$type/ceph-$id/sysvinit or 
-/var/lib/ceph/$type/ceph-$id/upstart were used.
+https://www.youtube.com/watch?v=_kjjCAib_4E
 
-To maintain backwards compatibility, and prevent both upstart and 
-sysvinit from trying to manage the same daemons, I think we can exit
-if the file for the other init system is present, like this patch:
+The associated discussion is on irc.oftc.net on channel #ceph-summit
 
-https://github.com/ceph/ceph/commit/b1d260cabb90bb9155f18c8e38a1dca102e6466c
+If you have questions please feel free to contact me.
 
-Does this work for you?
 
-Josh
+Best Regards,
+
+Patrick McGarry
+Director, Community || Inktank
+http://ceph.com  ||  http://inktank.com
+@scuttlemonkey || @ceph || @inktank
