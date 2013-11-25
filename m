@@ -1,30 +1,36 @@
 From: Gregory Farnum <greg@inktank.com>
-Subject: Re: win32 build of librbd
-Date: Sun, 24 Nov 2013 22:06:11 -0800
-Message-ID: <CAPYLRzgoqetFZuO9crSQMM4T4+t4OYP3JrWQ45MfFdfv8SNZ2A@mail.gmail.com>
-References: <6035A0D088A63A46850C3988ED045A4B6660474A@BITCOM1.int.sbss.com.au>
+Subject: Re: possible bug in init-ceph.in
+Date: Sun, 24 Nov 2013 22:08:04 -0800
+Message-ID: <CAPYLRzjD_cx4ez725fS2quYrSVdVTC3FENxSP2jiuObN2WWBuw@mail.gmail.com>
+References: <24E144B8C0207547AD09C467A8259F7559232FA2@lisa.maurer-it.com>
+	<528E4071.3070603@dachary.org>
+	<528E498A.8020102@dachary.org>
+	<CAPYLRzjN4kS=6Rto02RvYvhS-iwQjT4ttM+Wb6YanDLRzCOiCQ@mail.gmail.com>
+	<24E144B8C0207547AD09C467A8259F7559234167@lisa.maurer-it.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f54.google.com ([74.125.82.54]:38699 "EHLO
-	mail-wg0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751131Ab3KYGGM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 25 Nov 2013 01:06:12 -0500
-Received: by mail-wg0-f54.google.com with SMTP id n12so2366507wgh.9
-        for <ceph-devel@vger.kernel.org>; Sun, 24 Nov 2013 22:06:11 -0800 (PST)
-In-Reply-To: <6035A0D088A63A46850C3988ED045A4B6660474A@BITCOM1.int.sbss.com.au>
+Received: from mail-wg0-f51.google.com ([74.125.82.51]:50353 "EHLO
+	mail-wg0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751131Ab3KYGIF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 25 Nov 2013 01:08:05 -0500
+Received: by mail-wg0-f51.google.com with SMTP id b13so499835wgh.18
+        for <ceph-devel@vger.kernel.org>; Sun, 24 Nov 2013 22:08:04 -0800 (PST)
+In-Reply-To: <24E144B8C0207547AD09C467A8259F7559234167@lisa.maurer-it.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: James Harper <james.harper@bendigoit.com.au>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Dietmar Maurer <dietmar@proxmox.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Loic Dachary <loic@dachary.org>
 
-On Sun, Nov 24, 2013 at 9:47 PM, James Harper
-<james.harper@bendigoit.com.au> wrote:
-> Does this list block attachments? I sent this through yesterday with the patch as an attachment but it doesn't appear to have arrived.
-
-Yes it does; Vger is pretty strict about the mail rules. Maybe just
-send a git url to pull from?
-
-Work sure sounds exciting!
+Merged; thanks guys.
 -Greg
 Software Engineer #42 @ http://inktank.com | http://ceph.com
+
+
+On Thu, Nov 21, 2013 at 8:54 PM, Dietmar Maurer <dietmar@proxmox.com> wrote:
+>> Can we take that diff you provided as coming with a signed-off-by, as in the pull
+>> request Loic generated? :)
+>
+> Sure.
+>
+>
