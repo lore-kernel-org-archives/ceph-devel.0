@@ -1,62 +1,30 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH]ceph:init-ceph can't start osds after using mkcephfs
- created cluster
-Date: Sun, 24 Nov 2013 22:04:58 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1311242202370.2298@cobra.newdream.net>
-References: <CAM9_UU9RJouy7X0A296neNC_Jdm29tEra7aGb-GHFEuq9yrikw@mail.gmail.com>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: win32 build of librbd
+Date: Sun, 24 Nov 2013 22:06:11 -0800
+Message-ID: <CAPYLRzgoqetFZuO9crSQMM4T4+t4OYP3JrWQ45MfFdfv8SNZ2A@mail.gmail.com>
+References: <6035A0D088A63A46850C3988ED045A4B6660474A@BITCOM1.int.sbss.com.au>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:59431 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751119Ab3KYGE7 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 25 Nov 2013 01:04:59 -0500
-In-Reply-To: <CAM9_UU9RJouy7X0A296neNC_Jdm29tEra7aGb-GHFEuq9yrikw@mail.gmail.com>
+Received: from mail-wg0-f54.google.com ([74.125.82.54]:38699 "EHLO
+	mail-wg0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751131Ab3KYGGM (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 25 Nov 2013 01:06:12 -0500
+Received: by mail-wg0-f54.google.com with SMTP id n12so2366507wgh.9
+        for <ceph-devel@vger.kernel.org>; Sun, 24 Nov 2013 22:06:11 -0800 (PST)
+In-Reply-To: <6035A0D088A63A46850C3988ED045A4B6660474A@BITCOM1.int.sbss.com.au>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ketor D <d.ketor@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: James Harper <james.harper@bendigoit.com.au>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Ketor,
+On Sun, Nov 24, 2013 at 9:47 PM, James Harper
+<james.harper@bendigoit.com.au> wrote:
+> Does this list block attachments? I sent this through yesterday with the patch as an attachment but it doesn't appear to have arrived.
 
-Can you tell what is making the ceph command fail at this point?  If the 
-mons are started before the OSDs, the crush map update ought to succeed...
+Yes it does; Vger is pretty strict about the mail rules. Maybe just
+send a git url to pull from?
 
-Thanks!
-sage
-
-On Mon, 11 Nov 2013, Ketor D wrote:
-
-> Hi Sage:
->         We always use mkcephfs to create out ceph cluster. Before
-> 0.72, all is ok.
-> But in 0.72, we found the osds can't start up useing "service ceph -a
-> start". After viewing the init-ceph.in script , I found that a return
-> value errro caused osds can't startup.And if we modifiy a little code
-> like 0.67.4 do, the osds can startup.
-> 
->          Regards!
-> 
-> Here is the patch:
-> 
-> Signed-off-by: Ketor D <d.ketor@gmail.com>
-> ---
-> diff --git "a/src/init-ceph.in" "b/src/init-ceph.in"
-> index 7399abb..cf2eaa6 100644
-> --- "a/src/init-ceph.in"
-> +++ "b/src/init-ceph.in"
-> @@ -331,7 +331,8 @@ for name in $what; do
->   -- \
->   $id \
->   ${osd_weight:-${defaultweight:-1}} \
-> - $osd_location"
-> + $osd_location \
-> + || :"
->   fi
->      fi
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+Work sure sounds exciting!
+-Greg
+Software Engineer #42 @ http://inktank.com | http://ceph.com
