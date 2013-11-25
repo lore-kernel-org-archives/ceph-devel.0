@@ -1,36 +1,72 @@
 From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 0/2] Fix resource leak
-Date: Mon, 25 Nov 2013 14:02:31 -0800
-Message-ID: <5293C8F7.8070108@inktank.com>
-References: <cover.1384760071.git.liwang@ubuntukylin.com>
+Subject: Re: /etc/init.d/ceph vs upstart
+Date: Mon, 25 Nov 2013 14:02:35 -0800
+Message-ID: <5293C8FB.4040709@inktank.com>
+References: <CAEUrXvweJa50=ZVFvWOknCSzO9NKvvxikYhn7-Mmz4NgvYAkTA@mail.gmail.com>	<CAEUrXvySMMz=HiXTTPY+d1i50XYSayuguMz8tLGH+_Z4PvJ9uw@mail.gmail.com>	<CAEUrXvyVN0y1WTAP5HeM2EEnONJu2UgHBdvQtENQzCELkhRvPA@mail.gmail.com> <CAEUrXvy6u3zWtJYhfsggaK_akW5eeb_Agm6eVa8Tipxjhpqb0Q@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yh0-f54.google.com ([209.85.213.54]:54420 "EHLO
-	mail-yh0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750830Ab3KYWCg (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 25 Nov 2013 17:02:36 -0500
-Received: by mail-yh0-f54.google.com with SMTP id z12so3341253yhz.13
-        for <ceph-devel@vger.kernel.org>; Mon, 25 Nov 2013 14:02:35 -0800 (PST)
-In-Reply-To: <cover.1384760071.git.liwang@ubuntukylin.com>
+Received: from mail-yh0-f42.google.com ([209.85.213.42]:63872 "EHLO
+	mail-yh0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751665Ab3KYWCi (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 25 Nov 2013 17:02:38 -0500
+Received: by mail-yh0-f42.google.com with SMTP id z6so3410931yhz.29
+        for <ceph-devel@vger.kernel.org>; Mon, 25 Nov 2013 14:02:38 -0800 (PST)
+In-Reply-To: <CAEUrXvy6u3zWtJYhfsggaK_akW5eeb_Agm6eVa8Tipxjhpqb0Q@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Li Wang <liwang@ubuntukylin.com>, ceph-devel@vger.kernel.org
-Cc: Sage Weil <sage@inktank.com>
+To: Tim Spriggs <tims@uahirise.org>, ceph-devel@vger.kernel.org
 
-On 11/17/2013 11:40 PM, Li Wang wrote:
-> Fix two coverity issues.
+On 11/25/2013 11:01 AM, Tim Spriggs wrote:
+> ... ping
 >
-> Li Wang (2):
->    rbd: Release resource before return
->    mds: Release resource before return
->
->   src/mds/MDCache.cc |    2 +-
->   src/rbd.cc         |    6 +++---
->   2 files changed, 4 insertions(+), 4 deletions(-)
+> On Thu, Nov 7, 2013 at 3:31 PM, Tim Spriggs <tims@uahirise.org> wrote:
+>> Oops, I just realized I did the patch in the wrong direction :)
+>>
+>> On Thu, Nov 7, 2013 at 3:06 PM, Tim Spriggs <tims@uahirise.org> wrote:
+>>> Hi All,
+>>>
+>>>    I am battling extraneous error messages from two sources:
+>>>
+>>>    logrotate which is run in cron.daily and has a definition from the
+>>> ceph package in /etc/logrotate.d. The message I get in an email from
+>>> every node once a day is:
+>>>
+>>> cat: /var/run/ceph/osd.3.pid: No such file or directory
+>>>
+>>> This comes up because upstart is actually running ceph-osd while the
+>>> init.d script expects a pidfile.
+>>>
+>>>
+>>>    /var/log/ceph/ceph-osd.$id.log which complains:
+>>>
+>>> ERROR: error converting store /var/lib/ceph/osd/ceph-3: (16) Device or
+>>> resource busy
+>>>
+>>> This happens on boot as well as on log rotation.
+>>>
+>>>
+>>> After talking with dmick on irc.oftc.net#ceph, I was alerted to the
+>>> fact that there are bits in upstart as well as the sysvinit style
+>>> script that attempt to only use one scheme or the other. However, the
+>>> logic seems wrong. Inside of ceph_common.sh, there is a function named
+>>> check_host which looks for /var/lib/ceph/$type/ceph-$id/sysvinit and
+>>> if it exists, it returns. If it doesn't exist, it just goes on to the
+>>> next check (which passes in my environment.) Instead, it should return
+>>> a non-0 value. Attached is an example patch.
 
-Applied both, thanks!
+I think continuing if the host matches is intentional, so the init
+script continues working for daemons deployed before
+/var/lib/ceph/$type/ceph-$id/sysvinit or 
+/var/lib/ceph/$type/ceph-$id/upstart were used.
+
+To maintain backwards compatibility, and prevent both upstart and 
+sysvinit from trying to manage the same daemons, I think we can exit
+if the file for the other init system is present, like this patch:
+
+https://github.com/ceph/ceph/commit/b1d260cabb90bb9155f18c8e38a1dca102e6466c
+
+Does this work for you?
 
 Josh
-
