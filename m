@@ -1,45 +1,32 @@
-From: Ali Maredia <ali@linuxbox.com>
-Subject: Building Ceph using CMake
-Date: Tue, 26 Nov 2013 17:06:51 -0500 (EST)
-Message-ID: <1553187460.169.1385503611236.JavaMail.root@thunderbeast.private.linuxbox.com>
-References: <824799450.167.1385503496759.JavaMail.root@thunderbeast.private.linuxbox.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+From: Noah Watkins <noah.watkins@inktank.com>
+Subject: Re: Building Ceph using CMake
+Date: Tue, 26 Nov 2013 14:45:11 -0800
+Message-ID: <3F1A3CCF-15AA-4502-862E-4BE487D396DE@inktank.com>
+References: <1553187460.169.1385503611236.JavaMail.root@thunderbeast.private.linuxbox.com>
+Mime-Version: 1.0 (Mac OS X Mail 7.0 \(1822\))
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from aa.linuxbox.com ([69.128.83.226]:3928 "EHLO aa.linuxbox.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754402Ab3KZWGx (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 26 Nov 2013 17:06:53 -0500
-Received: from thunderbeast.private.linuxbox.com (thunderbeast.private.linuxbox.com [10.1.1.55])
-	by aa.linuxbox.com (8.13.1/8.13.1/SuSE Linux 0.7) with ESMTP id rAQM6qqF032431
-	for <ceph-devel@vger.kernel.org>; Tue, 26 Nov 2013 17:06:52 -0500
-Received: from localhost (localhost.localdomain [127.0.0.1])
-	by thunderbeast.private.linuxbox.com (Postfix) with ESMTP id B773F3FC8497
-	for <ceph-devel@vger.kernel.org>; Tue, 26 Nov 2013 17:06:52 -0500 (EST)
-Received: from thunderbeast.private.linuxbox.com ([127.0.0.1])
-	by localhost (thunderbeast.private.linuxbox.com [127.0.0.1]) (amavisd-new, port 10024)
-	with ESMTP id hVUz7TmyeLv2 for <ceph-devel@vger.kernel.org>;
-	Tue, 26 Nov 2013 17:06:51 -0500 (EST)
-Received: from thunderbeast.private.linuxbox.com (thunderbeast.private.linuxbox.com [10.1.1.55])
-	by thunderbeast.private.linuxbox.com (Postfix) with ESMTP id 70BDD3FC848B
-	for <ceph-devel@vger.kernel.org>; Tue, 26 Nov 2013 17:06:51 -0500 (EST)
-In-Reply-To: <824799450.167.1385503496759.JavaMail.root@thunderbeast.private.linuxbox.com>
+Received: from mail-pb0-f48.google.com ([209.85.160.48]:49629 "EHLO
+	mail-pb0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753533Ab3KZWpL convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Nov 2013 17:45:11 -0500
+Received: by mail-pb0-f48.google.com with SMTP id md12so9026697pbc.35
+        for <ceph-devel@vger.kernel.org>; Tue, 26 Nov 2013 14:45:10 -0800 (PST)
+In-Reply-To: <1553187460.169.1385503611236.JavaMail.root@thunderbeast.private.linuxbox.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-
-Hi all,
-
-I'm a student working on a project to make ceph build faster and to help with efforts to port ceph to other platforms using cmake. 
-
-Using the cmake build, I have been able to build core ceph components in a little under 20 minutes. For in depth information on the work done so far there is a README.cmake file in the top-level ceph directory. Please try it out and I would love to get feedback on future editions and problems.
-
-You can find a branch cmake in the below repo.
-
-https://github.com/linuxbox2/linuxbox-ceph.git
+To: Ali Maredia <ali@linuxbox.com>
+Cc: Ceph Devel <ceph-devel@vger.kernel.org>
 
 
-Best,
+On Nov 26, 2013, at 2:06 PM, Ali Maredia <ali@linuxbox.com> wrote:
 
-Ali
+> Hi all,
+> 
+> I'm a student working on a project to make ceph build faster and to help with efforts to port ceph to other platforms using cmake. 
+
+CMake is awesome. Also, you might be interested in checking out the portability work going on at github.com/ceph/ceph wip-port.
+
+-Noah
+
