@@ -1,50 +1,45 @@
-From: Yehuda Sadeh <yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: [radosgw] increase avg get time after sharding
-Date: Tue, 26 Nov 2013 13:50:35 -0800
-Message-ID: <CABBk=J-XB_QG2v5974bUABjyow26HKjj0JpfFe91ivv+cUt70A@mail.gmail.com>
-References: <CAMNMNTz8g3huG53E8pEzB5oEDqMFmRkypegZmjJ4jCzUH=5E6A@mail.gmail.com>
+From: Ali Maredia <ali@linuxbox.com>
+Subject: Building Ceph using CMake
+Date: Tue, 26 Nov 2013 17:06:51 -0500 (EST)
+Message-ID: <1553187460.169.1385503611236.JavaMail.root@thunderbeast.private.linuxbox.com>
+References: <824799450.167.1385503496759.JavaMail.root@thunderbeast.private.linuxbox.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAMNMNTz8g3huG53E8pEzB5oEDqMFmRkypegZmjJ4jCzUH=5E6A-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Dominik Mostowiec <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from aa.linuxbox.com ([69.128.83.226]:3928 "EHLO aa.linuxbox.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754402Ab3KZWGx (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 26 Nov 2013 17:06:53 -0500
+Received: from thunderbeast.private.linuxbox.com (thunderbeast.private.linuxbox.com [10.1.1.55])
+	by aa.linuxbox.com (8.13.1/8.13.1/SuSE Linux 0.7) with ESMTP id rAQM6qqF032431
+	for <ceph-devel@vger.kernel.org>; Tue, 26 Nov 2013 17:06:52 -0500
+Received: from localhost (localhost.localdomain [127.0.0.1])
+	by thunderbeast.private.linuxbox.com (Postfix) with ESMTP id B773F3FC8497
+	for <ceph-devel@vger.kernel.org>; Tue, 26 Nov 2013 17:06:52 -0500 (EST)
+Received: from thunderbeast.private.linuxbox.com ([127.0.0.1])
+	by localhost (thunderbeast.private.linuxbox.com [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id hVUz7TmyeLv2 for <ceph-devel@vger.kernel.org>;
+	Tue, 26 Nov 2013 17:06:51 -0500 (EST)
+Received: from thunderbeast.private.linuxbox.com (thunderbeast.private.linuxbox.com [10.1.1.55])
+	by thunderbeast.private.linuxbox.com (Postfix) with ESMTP id 70BDD3FC848B
+	for <ceph-devel@vger.kernel.org>; Tue, 26 Nov 2013 17:06:51 -0500 (EST)
+In-Reply-To: <824799450.167.1385503496759.JavaMail.root@thunderbeast.private.linuxbox.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Tue, Nov 26, 2013 at 1:27 PM, Dominik Mostowiec
-<dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> Hi,
-> We have 2 clusters with copy of objects.
-> On one of them we splited all large buckets (largest 17mln objects) to
-> 256 buckets each (shards) and we have added 3 extra servers (6->9).
-> Old bucket was created in ceph argonaut.
-> Now we have dumpling.
-> After this operation get avg time increased almost twice:
-> https://www.dropbox.com/s/lbrpk6ias6r4459/avg_get_time.PNG
-> I found that also increased 'get_initial_lat'
-> Sum of this parametr on all servers in cluster:
-> https://www.dropbox.com/s/l90a43vf9ivw639/get_initial_lat_sum.png
->
-> Do you have an idea what is the reason?
-> Where can I start to search?
->
+Hi all,
 
-Are you running latest dumpling? There was some performance related
-issue that was fixed fairly recently.
-I'd start with trying to identify whether the issue is in the osd or
-in the gateway itself. Try turning on some logging (e.g., debug ms =
-1, debug rgw = 20), and try to see where most of the request
-processing time is spent (within the gateway, or is it just waiting
-for the osd?).
+I'm a student working on a project to make ceph build faster and to help with efforts to port ceph to other platforms using cmake. 
 
-Yehuda
+Using the cmake build, I have been able to build core ceph components in a little under 20 minutes. For in depth information on the work done so far there is a README.cmake file in the top-level ceph directory. Please try it out and I would love to get feedback on future editions and problems.
+
+You can find a branch cmake in the below repo.
+
+https://github.com/linuxbox2/linuxbox-ceph.git
+
+
+Best,
+
+Ali
