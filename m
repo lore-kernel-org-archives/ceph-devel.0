@@ -1,26 +1,23 @@
 From: Patrick McGarry <patrick@inktank.com>
-Subject: CDS Day 2.2
-Date: Tue, 26 Nov 2013 12:13:26 -0500
-Message-ID: <CAP8Oy=KBawRCpOfVYnAxSA0_7KNUyXQMhoxTMu5mHHsdc930SQ@mail.gmail.com>
+Subject: Final CDS Sessions Starting Soon
+Date: Tue, 26 Nov 2013 14:49:09 -0500
+Message-ID: <CAP8Oy=KZruSbbFWnRph77dUb_k+cZdAkOuzdBP5KH0zDXWb2hA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f47.google.com ([209.85.160.47]:53777 "EHLO
-	mail-pb0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932323Ab3KZRN1 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Nov 2013 12:13:27 -0500
-Received: by mail-pb0-f47.google.com with SMTP id um1so8377907pbc.6
-        for <ceph-devel@vger.kernel.org>; Tue, 26 Nov 2013 09:13:26 -0800 (PST)
+Received: from mail-pd0-f170.google.com ([209.85.192.170]:39651 "EHLO
+	mail-pd0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753088Ab3KZTtK (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Nov 2013 14:49:10 -0500
+Received: by mail-pd0-f170.google.com with SMTP id g10so8371449pdj.15
+        for <ceph-devel@vger.kernel.org>; Tue, 26 Nov 2013 11:49:09 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>
 
-The second (of three) sessions for CDS day 2 is about to start.
+YouTube: http://youtu.be/Rvli9pFLnMk
 
-YouTube: http://youtu.be/7SRHYyHNBCc
-
-IRC: #ceph-summit
-
+IRC: #ceph-summit (oftc)
 
 
 Best Regards,
