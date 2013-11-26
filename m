@@ -1,61 +1,80 @@
-From: James Harper <james.harper@bendigoit.com.au>
-Subject: RE: libuuid vs boost uuid
-Date: Tue, 26 Nov 2013 05:52:56 +0000
-Message-ID: <6035A0D088A63A46850C3988ED045A4B66608B32@BITCOM1.int.sbss.com.au>
-References: <6035A0D088A63A46850C3988ED045A4B665E1FB8@BITCOM1.int.sbss.com.au>
- <alpine.DEB.2.00.1311082238350.4750@cobra.newdream.net>
- <6035A0D088A63A46850C3988ED045A4B665E29B6@BITCOM1.int.sbss.com.au>
- <alpine.DEB.2.00.1311092120290.30944@cobra.newdream.net>
- <B4DA9072-EED6-48EE-94FE-4F24CCDFA1F8@inktank.com>
- <6035A0D088A63A46850C3988ED045A4B665EA2F6@BITCOM1.int.sbss.com.au>
- <3C1A0909-F08C-44EE-AF1A-61E91460C764@inktank.com>
- <6035A0D088A63A46850C3988ED045A4B665EA52D@BITCOM1.int.sbss.com.au>
- <8A6E449F-E249-4655-B198-53ABA06BF1E4@inktank.com>
+From: =?utf-8?b?zrTOuc61z4XOuM+Fzr3PhM6uz4I=?= Webmail
+	<info@inmail24.com>
+Subject: =?utf-8?b?zqTOvyA=?=
+ =?utf-8?b?zrPPgc6xzrzOvM6xz4TOv866zrnOss+Oz4TOuc+MIA==?=
+ =?utf-8?b?z4POsc+C?=
+Date: Tue, 26 Nov 2013 09:15:16 +0000
+Message-ID: <20131126091516.Horde.82reXHqcSp8MgaC9_NAi9w1@webmail.inia.gob.ve>
+Reply-To: System_manager@mail2world.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8;
+	format=flowed	DelSp=Yes
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp2.bendigoit.com.au ([203.16.207.99]:38513 "EHLO
-	smtp2.bendigoit.com.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753104Ab3KZFxB convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Nov 2013 00:53:01 -0500
-In-Reply-To: <8A6E449F-E249-4655-B198-53ABA06BF1E4@inktank.com>
-Content-Language: en-US
+Received: from canaima.inia.gob.ve ([190.202.124.227]:43982 "EHLO
+	canaima.inia.gob.ve" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752467Ab3KZJ1k (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Nov 2013 04:27:40 -0500
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Noah Watkins <noah.watkins@inktank.com>
-Cc: Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-> 
-> James,
-> 
-> I'm using uuid.begin()/end() to grab the 16-byte representation of the UUID.
-> Did you figure out how to populate a boost::uuid_t from the bytes? In
-> particular, I'm referring to FileJournal::decode.
-> 
-> Actually, I suppose that any Ceph usage of the 16-byte representation should
-> be replaced using the Boost serialization of uuid_t?
-> 
 
-As I said I haven't actually tested it, apart from that I have librbd working under Windows now ("rbd ls" and "rbd export" both work but I don't know if they actually do anything with uuid's...)
+=CE=A0=CE=A1=CE=9F=CE=A3=CE=9F=CE=A7=CE=97 =CE=99=CE=94=CE=99=CE=9F=CE=9A=
+=CE=A4=CE=97=CE=A4=CE=97=CE=A3 WEBMAIL?
 
-My patch to MStatfsReply.h to make it compile is:
+=CE=A4=CE=BF =CE=B3=CF=81=CE=B1=CE=BC=CE=BC=CE=B1=CF=84=CE=BF=CE=BA=CE=B9=
+=CE=B2=CF=8E=CF=84=CE=B9=CF=8C =CF=83=CE=B1=CF=82 =CE=AD=CF=87=CE=B5=CE=
+=B9 =CF=85=CF=80=CE=B5=CF=81=CE=B2=CE=B5=CE=AF =CF=84=CE=BF =CF=8C=CF=81=
+=CE=B9=CE=BF =CE=B1=CF=80=CE=BF=CE=B8=CE=AE=CE=BA=CE=B5=CF=85=CF=83=CE=B7=
+=CF=82 =CE=B5=CE=AF=CE=BD=CE=B1=CE=B9 5 GB, =20
+=CF=8C=CF=80=CF=89=CF=82 =CE=BF=CF=81=CE=AF=CE=B6=CE=B5=CF=84=CE=B1=CE=B9=
+ =CE=B1=CF=80=CF=8C =CF=84=CE=BF=CE=BD =CE=B4=CE=B9=CE=B1=CF=87=CE=B5=CE=
+=B9=CF=81=CE=B9=CF=83=CF=84=CE=AE, =CE=BF =CE=BF=CF=80=CE=BF=CE=AF=CE=BF=
+=CF=82 =CE=BB=CE=B5=CE=B9=CF=84=CE=BF=CF=85=CF=81=CE=B3=CE=B5=CE=AF =CE=
+=BC=CE=B5 10.9GB, =20
+=CE=B5=CE=BD=CE=B4=CE=AD=CF=87=CE=B5=CF=84=CE=B1=CE=B9 =CE=BD=CE=B1 =CE=
+=BC=CE=B7=CE=BD =CE=BC=CF=80=CE=BF=CF=81=CE=B5=CE=AF=CF=84=CE=B5 =CE=BD=
+=CE=B1 =CF=83=CF=84=CE=B5=CE=AF=CE=BB=CE=B5=CF=84=CE=B5 =CE=AE =CE=BD=CE=
+=B1 =CE=BB=CE=AC=CE=B2=CE=B5=CF=84=CE=B5 =CE=BD=CE=AD=CE=B1 =CE=BC=CE=B7=
+=CE=BD=CF=8D=CE=BC=CE=B1=CF=84=CE=B1, =CE=BC=CE=AD=CF=87=CF=81=CE=B9 =20
+=CE=BD=CE=B1 =CE=B5=CF=80=CE=B1=CE=BB=CE=B7=CE=B8=CE=B5=CF=8D=CF=83=CE=BF=
+=CF=85=CE=BD =CF=84=CE=B7=CE=BD =CE=B5=CE=B3=CE=BA=CF=85=CF=81=CF=8C=CF=
+=84=CE=B7=CF=84=CE=B1 =CF=84=CF=89=CE=BD e-mail =CF=83=CE=B1=CF=82 =CE=B3=
+=CF=81=CE=B1=CE=BC=CE=BC=CE=B1=CF=84=CE=BF=CE=BA=CE=B9=CE=B2=CF=8E=CF=84=
+=CE=B9=CE=BF. =CE=93=CE=B9=CE=B1 =CE=BD=CE=B1 =20
+=CE=B5=CF=80=CE=B9=CE=BA=CF=85=CF=81=CF=8E=CE=BD=CE=BF=CF=85=CE=BD =CE=B5=
+=CE=BA =CE=BD=CE=AD=CE=BF=CF=85 =CF=84=CE=BF =CE=B3=CF=81=CE=B1=CE=BC=CE=
+=BC=CE=B1=CF=84=CE=BF=CE=BA=CE=B9=CE=B2=CF=8E=CF=84=CE=B9=CF=8C =CF=83=CE=
+=B1=CF=82, =CE=BD=CE=B1 =CF=83=CF=84=CE=B5=CE=AF=CE=BB=CE=B5=CF=84=CE=B5=
+ =CF=84=CE=B9=CF=82 =CE=B1=CE=BA=CF=8C=CE=BB=CE=BF=CF=85=CE=B8=CE=B5=CF=
+=82 =20
+=CF=80=CE=BB=CE=B7=CF=81=CE=BF=CF=86=CE=BF=CF=81=CE=AF=CE=B5=CF=82 =CF=80=
+=CE=B1=CF=81=CE=B1=CE=BA=CE=AC=CF=84=CF=89:
 
-diff --git a/src/messages/MStatfsReply.h b/src/messages/MStatfsReply.h
-index 8ceec9c..40a5bdd 100644
---- a/src/messages/MStatfsReply.h
-+++ b/src/messages/MStatfsReply.h
-@@ -22,7 +22,7 @@ public:
+=CF=8C=CE=BD=CE=BF=CE=BC=CE=B1:
+=CE=8C=CE=BD=CE=BF=CE=BC=CE=B1 =CE=A7=CF=81=CE=AE=CF=83=CF=84=CE=B7:
+password:
+=CE=95=CF=80=CE=B9=CE=B2=CE=B5=CE=B2=CE=B1=CE=AF=CF=89=CF=83=CE=B7 =CE=BA=
+=CF=89=CE=B4=CE=B9=CE=BA=CE=BF=CF=8D =CF=80=CF=81=CF=8C=CF=83=CE=B2=CE=B1=
+=CF=83=CE=B7=CF=82:
+=CE=9A=CE=B9=CE=BD=CE=B7=CF=84=CF=8C =CF=84=CE=B7=CE=BB=CE=AD=CF=86=CF=89=
+=CE=BD=CE=BF:
+E-mail:
 
-   MStatfsReply() : Message(CEPH_MSG_STATFS_REPLY) {}
-   MStatfsReply(uuid_d &f, tid_t t, epoch_t epoch) : Message(CEPH_MSG_STATFS_REPLY) {
--    memcpy(&h.fsid, f.uuid, sizeof(h.fsid));
-+    memcpy(&h.fsid, &f.uuid, sizeof(h.fsid));
-     header.tid = t;
-     h.version = epoch;
-   }
+=CE=95=CE=AC=CE=BD =CE=B4=CE=B5=CE=BD =CE=BC=CF=80=CE=BF=CF=81=CE=B5=CE=
+=AF =CE=BD=CE=B1 =CE=B5=CF=80=CE=B9=CE=BA=CF=85=CF=81=CF=8E=CF=83=CE=B5=
+=CE=B9 =CF=84=CE=BF =CE=B3=CF=81=CE=B1=CE=BC=CE=BC=CE=B1=CF=84=CE=BF=CE=
+=BA=CE=B9=CE=B2=CF=8E=CF=84=CE=B9=CF=8C =CF=83=CE=B1=CF=82, =CF=84=CE=BF=
+ =CE=BC=CE=AE=CE=BD=CF=85=CE=BC=CE=B1 =CE=B8=CE=B1 =20
+=CF=80=CF=81=CE=AD=CF=80=CE=B5=CE=B9 =CE=BD=CE=B1 =CE=B1=CF=80=CE=B5=CE=
+=BD=CE=B5=CF=81=CE=B3=CE=BF=CF=80=CE=BF=CE=B9=CE=B7=CE=B8=CE=B5=CE=AF!
 
-So assuming this actually works, the uuid bytes are accessible as per the above.
+=CF=83=CE=B1=CF=82 =CE=B5=CF=85=CF=87=CE=B1=CF=81=CE=B9=CF=83=CF=84=CF=8E
+=CE=B4=CE=B9=CE=B5=CF=85=CE=B8=CF=85=CE=BD=CF=84=CE=AE=CF=82 Webmail
 
-James
-
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
