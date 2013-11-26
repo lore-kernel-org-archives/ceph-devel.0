@@ -1,38 +1,35 @@
-From: Alfredo Deza <alfredo.deza@inktank.com>
-Subject: [ANN] ceph-deploy 1.3.3 released!
-Date: Tue, 26 Nov 2013 14:50:51 -0600
-Message-ID: <CANtztVznWS7oZ6g+3iZKcbfzVhZOm_C2cb42PyP9Lnt3AjVXKA@mail.gmail.com>
+From: Dominik Mostowiec <dominikmostowiec@gmail.com>
+Subject: [radosgw] increase avg get time after sharding
+Date: Tue, 26 Nov 2013 22:27:13 +0100
+Message-ID: <CAMNMNTz8g3huG53E8pEzB5oEDqMFmRkypegZmjJ4jCzUH=5E6A@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oa0-f50.google.com ([209.85.219.50]:43793 "EHLO
-	mail-oa0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752492Ab3KZUuw (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Nov 2013 15:50:52 -0500
-Received: by mail-oa0-f50.google.com with SMTP id n16so6729598oag.9
-        for <ceph-devel@vger.kernel.org>; Tue, 26 Nov 2013 12:50:51 -0800 (PST)
+Received: from mail-oa0-f53.google.com ([209.85.219.53]:63027 "EHLO
+	mail-oa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751900Ab3KZV1N (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Nov 2013 16:27:13 -0500
+Received: by mail-oa0-f53.google.com with SMTP id m1so6585944oag.26
+        for <ceph-devel@vger.kernel.org>; Tue, 26 Nov 2013 13:27:13 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
+To: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi All,
+Hi,
+We have 2 clusters with copy of objects.
+On one of them we splited all large buckets (largest 17mln objects) to
+256 buckets each (shards) and we have added 3 extra servers (6->9).
+Old bucket was created in ceph argonaut.
+Now we have dumpling.
+After this operation get avg time increased almost twice:
+https://www.dropbox.com/s/lbrpk6ias6r4459/avg_get_time.PNG
+I found that also increased 'get_initial_lat'
+Sum of this parametr on all servers in cluster:
+https://www.dropbox.com/s/l90a43vf9ivw639/get_initial_lat_sum.png
 
-There is a new release of ceph-deploy, the easy deployment tool for Ceph.
+Do you have an idea what is the reason?
+Where can I start to search?
 
-The most important (non-bug) change for this release is the ability to
-specify repository mirrors when installing ceph. This can be done with
-environment variables or flags in the `install` subcommand.
-
-Full documentation on that feature can be found in the new location for docs:
-
-http://ceph.com/ceph-deploy/docs/install.html#behind-firewall
-
-The complete changelog can be found here:
-http://ceph.com/ceph-deploy/docs/changelog.html#id1
-
-Make sure you update!
-
-Thanks,
-
-
-Alfredo
+-- 
+Regards
+Dominik
