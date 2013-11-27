@@ -1,157 +1,34 @@
-From: Kent Overstreet <kmo@daterainc.com>
-Subject: [PATCH 14/25] ceph: Convert to immutable biovecs
-Date: Tue, 26 Nov 2013 16:45:17 -0800
-Message-ID: <1385513128-5035-14-git-send-email-kmo@daterainc.com>
-References: <20131127004422.GB21305@kmo>
- <1385513128-5035-1-git-send-email-kmo@daterainc.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1385513128-5035-1-git-send-email-kmo@daterainc.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, linux-fsdevel@vger.kernel.org, hch@infradead.org
-Cc: Kent Overstreet <kmo@daterainc.com>, Jens Axboe <axboe@kernel.dk>, Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+From: Christoph Hellwig <hch@infradead.org>
+Subject: Re: os recommendations
+Date: Wed, 27 Nov 2013 00:14:26 -0800
+Message-ID: <20131127081426.GA12165@infradead.org>
+References: <CAMNMNTz+whZWk55qCxx_8JCRWAruoHYz+stHYS93gBiU3qz3SQ@mail.gmail.com>
+ <20131126142243.GA7360@infradead.org>
+ <alpine.DEB.2.00.1311260647310.24677@cobra.newdream.net>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from bombadil.infradead.org ([198.137.202.9]:43118 "EHLO
+	bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753290Ab3K0IOb (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Nov 2013 03:14:31 -0500
+Content-Disposition: inline
+In-Reply-To: <alpine.DEB.2.00.1311260647310.24677@cobra.newdream.net>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: Christoph Hellwig <hch@infradead.org>, Dominik Mostowiec <dominikmostowiec@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
 
-Now that we've got a mechanism for immutable biovecs -
-bi_iter.bi_bvec_done - we need to convert drivers to use primitives that
-respect it instead of using the bvec array directly.
+On Tue, Nov 26, 2013 at 06:50:33AM -0800, Sage Weil wrote:
+> If syncfs(2) is not present, we have to use sync(2).  That means you have 
+> N daemons calling sync(2) to force a commit on a single fs, but all other 
+> mounted fs's are also synced... which means N times the sync(2) calls.
+> 
+> Fortunately syncfs(2) has been around for a while now, so this only 
+> affects really old distros.  And even when glibc does not have a syscall 
+> wrapper for it, we try to call the syscall directly.
 
-Signed-off-by: Kent Overstreet <kmo@daterainc.com>
-Cc: Jens Axboe <axboe@kernel.dk>
-Cc: Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org
----
- include/linux/ceph/messenger.h |  4 ++--
- net/ceph/messenger.c           | 43 +++++++++++++++++-------------------------
- 2 files changed, 19 insertions(+), 28 deletions(-)
+And for btrfs you were/are using magic ioctls, right.
 
-diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
-index 7c1420b..091fdb6 100644
---- a/include/linux/ceph/messenger.h
-+++ b/include/linux/ceph/messenger.h
-@@ -1,6 +1,7 @@
- #ifndef __FS_CEPH_MESSENGER_H
- #define __FS_CEPH_MESSENGER_H
- 
-+#include <linux/blk_types.h>
- #include <linux/kref.h>
- #include <linux/mutex.h>
- #include <linux/net.h>
-@@ -119,8 +120,7 @@ struct ceph_msg_data_cursor {
- #ifdef CONFIG_BLOCK
- 		struct {				/* bio */
- 			struct bio	*bio;		/* bio from list */
--			unsigned int	vector_index;	/* vector from bio */
--			unsigned int	vector_offset;	/* bytes from vector */
-+			struct bvec_iter bvec_iter;
- 		};
- #endif /* CONFIG_BLOCK */
- 		struct {				/* pages */
-diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index 4a5df7b..18c039b 100644
---- a/net/ceph/messenger.c
-+++ b/net/ceph/messenger.c
-@@ -777,13 +777,12 @@ static void ceph_msg_data_bio_cursor_init(struct ceph_msg_data_cursor *cursor,
- 
- 	bio = data->bio;
- 	BUG_ON(!bio);
--	BUG_ON(!bio->bi_vcnt);
- 
- 	cursor->resid = min(length, data->bio_length);
- 	cursor->bio = bio;
--	cursor->vector_index = 0;
--	cursor->vector_offset = 0;
--	cursor->last_piece = length <= bio->bi_io_vec[0].bv_len;
-+	cursor->bvec_iter = bio->bi_iter;
-+	cursor->last_piece =
-+		cursor->resid <= bio_iter_len(bio, cursor->bvec_iter);
- }
- 
- static struct page *ceph_msg_data_bio_next(struct ceph_msg_data_cursor *cursor,
-@@ -792,71 +791,63 @@ static struct page *ceph_msg_data_bio_next(struct ceph_msg_data_cursor *cursor,
- {
- 	struct ceph_msg_data *data = cursor->data;
- 	struct bio *bio;
--	struct bio_vec *bio_vec;
--	unsigned int index;
-+	struct bio_vec bio_vec;
- 
- 	BUG_ON(data->type != CEPH_MSG_DATA_BIO);
- 
- 	bio = cursor->bio;
- 	BUG_ON(!bio);
- 
--	index = cursor->vector_index;
--	BUG_ON(index >= (unsigned int) bio->bi_vcnt);
-+	bio_vec = bio_iter_iovec(bio, cursor->bvec_iter);
- 
--	bio_vec = &bio->bi_io_vec[index];
--	BUG_ON(cursor->vector_offset >= bio_vec->bv_len);
--	*page_offset = (size_t) (bio_vec->bv_offset + cursor->vector_offset);
-+	*page_offset = (size_t) bio_vec.bv_offset;
- 	BUG_ON(*page_offset >= PAGE_SIZE);
- 	if (cursor->last_piece) /* pagelist offset is always 0 */
- 		*length = cursor->resid;
- 	else
--		*length = (size_t) (bio_vec->bv_len - cursor->vector_offset);
-+		*length = (size_t) bio_vec.bv_len;
- 	BUG_ON(*length > cursor->resid);
- 	BUG_ON(*page_offset + *length > PAGE_SIZE);
- 
--	return bio_vec->bv_page;
-+	return bio_vec.bv_page;
- }
- 
- static bool ceph_msg_data_bio_advance(struct ceph_msg_data_cursor *cursor,
- 					size_t bytes)
- {
- 	struct bio *bio;
--	struct bio_vec *bio_vec;
--	unsigned int index;
-+	struct bio_vec bio_vec;
- 
- 	BUG_ON(cursor->data->type != CEPH_MSG_DATA_BIO);
- 
- 	bio = cursor->bio;
- 	BUG_ON(!bio);
- 
--	index = cursor->vector_index;
--	BUG_ON(index >= (unsigned int) bio->bi_vcnt);
--	bio_vec = &bio->bi_io_vec[index];
-+	bio_vec = bio_iter_iovec(bio, cursor->bvec_iter);
- 
- 	/* Advance the cursor offset */
- 
- 	BUG_ON(cursor->resid < bytes);
- 	cursor->resid -= bytes;
--	cursor->vector_offset += bytes;
--	if (cursor->vector_offset < bio_vec->bv_len)
-+
-+	bio_advance_iter(bio, &cursor->bvec_iter, bytes);
-+
-+	if (bytes < bio_vec.bv_len)
- 		return false;	/* more bytes to process in this segment */
--	BUG_ON(cursor->vector_offset != bio_vec->bv_len);
- 
- 	/* Move on to the next segment, and possibly the next bio */
- 
--	if (++index == (unsigned int) bio->bi_vcnt) {
-+	if (!cursor->bvec_iter.bi_size) {
- 		bio = bio->bi_next;
--		index = 0;
-+		cursor->bvec_iter = bio->bi_iter;
- 	}
- 	cursor->bio = bio;
--	cursor->vector_index = index;
--	cursor->vector_offset = 0;
- 
- 	if (!cursor->last_piece) {
- 		BUG_ON(!cursor->resid);
- 		BUG_ON(!bio);
- 		/* A short read is OK, so use <= rather than == */
--		if (cursor->resid <= bio->bi_io_vec[index].bv_len)
-+		if (cursor->resid <= bio_iter_len(bio, cursor->bvec_iter))
- 			cursor->last_piece = true;
- 	}
- 
--- 
-1.8.4.4
+Looks like the page reference in the last post has already been updated,
+thanks!
