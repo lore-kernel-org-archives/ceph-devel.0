@@ -1,13 +1,13 @@
 From: Li Wang <liwang@ubuntukylin.com>
-Subject: [PATCH 08/18] mds: Push inline data to client in cap message
-Date: Wed, 27 Nov 2013 21:40:47 +0800
-Message-ID: <e752c3950aba1024fe96a6ee43d25a2601ed44d3.1385558324.git.liwang@ubuntukylin.com>
+Subject: [PATCH 01/18] ceph: Add inline data feature
+Date: Wed, 27 Nov 2013 21:40:40 +0800
+Message-ID: <b777abbe69564d3a711964ba25493111175bd5fd.1385558324.git.liwang@ubuntukylin.com>
 References: <cover.1385558324.git.liwang@ubuntukylin.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from m59-178.qiye.163.com ([123.58.178.59]:48456 "EHLO
+Received: from m59-178.qiye.163.com ([123.58.178.59]:48400 "EHLO
 	m59-178.qiye.163.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752645Ab3K0NlW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Nov 2013 08:41:22 -0500
+	with ESMTP id S1752654Ab3K0NlV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Nov 2013 08:41:21 -0500
 In-Reply-To: <cover.1385558324.git.liwang@ubuntukylin.com>
 In-Reply-To: <cover.1385558324.git.liwang@ubuntukylin.com>
 References: <cover.1385558324.git.liwang@ubuntukylin.com>
@@ -19,27 +19,42 @@ Cc: Sage Weil <sage@inktank.com>, Li Wang <liwang@ubuntukylin.com>, Yunchuan Wen
 Signed-off-by: Yunchuan Wen <yunchuanwen@ubuntukylin.com>
 Signed-off-by: Li Wang <liwang@ubuntukylin.com>
 ---
- src/mds/CInode.cc |    7 +++++++
- 1 file changed, 7 insertions(+)
+ src/ceph_mds.cc             |    1 +
+ src/include/ceph_features.h |    2 ++
+ 2 files changed, 3 insertions(+)
 
-diff --git a/src/mds/CInode.cc b/src/mds/CInode.cc
-index c8b00ef..4756865 100644
---- a/src/mds/CInode.cc
-+++ b/src/mds/CInode.cc
-@@ -2989,6 +2989,13 @@ void CInode::encode_cap_message(MClientCaps *m, Capability *cap)
-   i->atime.encode_timeval(&m->head.atime);
-   m->head.time_warp_seq = i->time_warp_seq;
+diff --git a/src/ceph_mds.cc b/src/ceph_mds.cc
+index 88b807b..dac676f 100644
+--- a/src/ceph_mds.cc
++++ b/src/ceph_mds.cc
+@@ -243,6 +243,7 @@ int main(int argc, const char **argv)
+     CEPH_FEATURE_UID |
+     CEPH_FEATURE_NOSRCADDR |
+     CEPH_FEATURE_DIRLAYOUTHASH |
++    CEPH_FEATURE_MDS_INLINE_DATA |
+     CEPH_FEATURE_PGID64 |
+     CEPH_FEATURE_MSG_AUTH;
+   uint64_t required =
+diff --git a/src/include/ceph_features.h b/src/include/ceph_features.h
+index c0f01cc..70ee921 100644
+--- a/src/include/ceph_features.h
++++ b/src/include/ceph_features.h
+@@ -40,6 +40,7 @@
+ #define CEPH_FEATURE_MON_SCRUB      (1ULL<<33)
+ #define CEPH_FEATURE_OSD_PACKED_RECOVERY (1ULL<<34)
+ #define CEPH_FEATURE_OSD_CACHEPOOL (1ULL<<35)
++#define CEPH_FEATURE_MDS_INLINE_DATA     (1ULL<<36)
  
-+  if (cap->client_inline_version < i->inline_version) {
-+    m->inline_version = cap->client_inline_version = i->inline_version;
-+    m->inline_data = i->inline_data;
-+  } else {
-+    m->inline_version = 0;
-+  }
-+
-   // max_size is min of projected, actual.
-   uint64_t oldms = oi->client_ranges.count(client) ? oi->client_ranges[client].range.last : 0;
-   uint64_t newms = pi->client_ranges.count(client) ? pi->client_ranges[client].range.last : 0;
+ /*
+  * The introduction of CEPH_FEATURE_OSD_SNAPMAPPER caused the feature
+@@ -103,6 +104,7 @@ static inline unsigned long long ceph_sanitize_features(unsigned long long f) {
+ 	 CEPH_FEATURE_MON_SCRUB	|	    \
+ 	 CEPH_FEATURE_OSD_PACKED_RECOVERY | \
+ 	 CEPH_FEATURE_OSD_CACHEPOOL | \
++	 CEPH_FEATURE_MDS_INLINE_DATA | \
+ 	 0ULL)
+ 
+ #define CEPH_FEATURES_SUPPORTED_DEFAULT  CEPH_FEATURES_ALL
 -- 
 1.7.9.5
 
