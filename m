@@ -1,12 +1,12 @@
 From: Li Wang <liwang@ubuntukylin.com>
-Subject: [PATCH 11/18] mds: Receive updated inline data from client
-Date: Wed, 27 Nov 2013 21:40:50 +0800
-Message-ID: <ae958eb56f5b87cc9a242c8c2f9b1f273d385820.1385558324.git.liwang@ubuntukylin.com>
+Subject: [PATCH 14/18] client: Push inline data to mds by send cap
+Date: Wed, 27 Nov 2013 21:40:53 +0800
+Message-ID: <88f90b03dd634d91d2a8e5c7bba9cd25956d8f85.1385558324.git.liwang@ubuntukylin.com>
 References: <cover.1385558324.git.liwang@ubuntukylin.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from m59-178.qiye.163.com ([123.58.178.59]:48482 "EHLO
+Received: from m59-178.qiye.163.com ([123.58.178.59]:48497 "EHLO
 	m59-178.qiye.163.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752751Ab3K0NlY (ORCPT
+	with ESMTP id S1752779Ab3K0NlY (ORCPT
 	<rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Nov 2013 08:41:24 -0500
 In-Reply-To: <cover.1385558324.git.liwang@ubuntukylin.com>
 In-Reply-To: <cover.1385558324.git.liwang@ubuntukylin.com>
@@ -19,34 +19,25 @@ Cc: Sage Weil <sage@inktank.com>, Li Wang <liwang@ubuntukylin.com>, Yunchuan Wen
 Signed-off-by: Yunchuan Wen <yunchuanwen@ubuntukylin.com>
 Signed-off-by: Li Wang <liwang@ubuntukylin.com>
 ---
- src/mds/Locker.cc |    7 +++++++
- 1 file changed, 7 insertions(+)
+ src/client/Client.cc |    5 +++++
+ 1 file changed, 5 insertions(+)
 
-diff --git a/src/mds/Locker.cc b/src/mds/Locker.cc
-index 63e0e08..4b02a56 100644
---- a/src/mds/Locker.cc
-+++ b/src/mds/Locker.cc
-@@ -2691,6 +2691,7 @@ void Locker::_update_cap_fields(CInode *in, int dirty, MClientCaps *m, inode_t *
-     utime_t mtime = m->get_mtime();
-     utime_t ctime = m->get_ctime();
-     uint64_t size = m->get_size();
-+    uint64_t inline_version = m->inline_version;
+diff --git a/src/client/Client.cc b/src/client/Client.cc
+index 19d31e0..3beab8f 100644
+--- a/src/client/Client.cc
++++ b/src/client/Client.cc
+@@ -2399,6 +2399,11 @@ void Client::send_cap(Inode *in, MetaSession *session, Cap *cap,
+   in->ctime.encode_timeval(&m->head.ctime);
+   m->head.time_warp_seq = in->time_warp_seq;
      
-     if (((dirty & CEPH_CAP_FILE_WR) && mtime > pi->mtime) ||
- 	((dirty & CEPH_CAP_FILE_EXCL) && mtime != pi->mtime)) {
-@@ -2710,6 +2711,12 @@ void Locker::_update_cap_fields(CInode *in, int dirty, MClientCaps *m, inode_t *
-       pi->size = size;
-       pi->rstat.rbytes = size;
-     }
-+    if (in->inode.is_file() &&
-+        (dirty & CEPH_CAP_FILE_WR) &&
-+        inline_version > pi->inline_version) {
-+      pi->inline_version = inline_version;
-+      pi->inline_data = m->inline_data;
-+    }
-     if ((dirty & CEPH_CAP_FILE_EXCL) && atime != pi->atime) {
-       dout(7) << "  atime " << pi->atime << " -> " << atime
- 	      << " for " << *in << dendl;
++  if (flush & CEPH_CAP_FILE_WR) {
++    m->inline_version = in->inline_version;
++    m->inline_data = in->inline_data;
++  }
++
+   in->reported_size = in->size;
+   m->set_snap_follows(follows);
+   cap->wanted = want;
 -- 
 1.7.9.5
 
