@@ -1,57 +1,41 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Re: [ceph-users] rocksdb Seen today - replacement for leveldb?
-Date: Wed, 27 Nov 2013 19:52:06 +0800
-Message-ID: <CACJqLybC1n9ywRdrzG5cd2aWunJb5S2x9sLF_eEREJgu-hpOTg@mail.gmail.com>
-References: <5295CF96.6040708@profihost.ag>
-	<5295CFE2.8070603@profihost.ag>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Li Wang <liwang@ubuntukylin.com>
+Subject: [PATCH 02/18] ceph: Add inline state definition
+Date: Wed, 27 Nov 2013 21:40:41 +0800
+Message-ID: <f102b223595153764aa0a44d84f2a19e6ef41d68.1385558324.git.liwang@ubuntukylin.com>
+References: <cover.1385558324.git.liwang@ubuntukylin.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f41.google.com ([209.85.160.41]:34594 "EHLO
-	mail-pb0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754379Ab3K0LwG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Nov 2013 06:52:06 -0500
-Received: by mail-pb0-f41.google.com with SMTP id jt11so10260449pbb.14
-        for <ceph-devel@vger.kernel.org>; Wed, 27 Nov 2013 03:52:06 -0800 (PST)
-In-Reply-To: <5295CFE2.8070603@profihost.ag>
+Received: from m59-178.qiye.163.com ([123.58.178.59]:48401 "EHLO
+	m59-178.qiye.163.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752645Ab3K0NlU (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Nov 2013 08:41:20 -0500
+In-Reply-To: <cover.1385558324.git.liwang@ubuntukylin.com>
+In-Reply-To: <cover.1385558324.git.liwang@ubuntukylin.com>
+References: <cover.1385558324.git.liwang@ubuntukylin.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: Sage Weil <sage@inktank.com>, Li Wang <liwang@ubuntukylin.com>, Yunchuan Wen <yunchuanwen@ubuntukylin.com>
 
-Yes, we have related bp for rocksdb backend.
-wiki.ceph.com/index.php?title=01Planning/02Blueprints/Firefly/osd:_new_key%2F%2Fvalue_backend
+Signed-off-by: Yunchuan Wen <yunchuanwen@ubuntukylin.com>
+Signed-off-by: Li Wang <liwang@ubuntukylin.com>
+---
+ src/include/ceph_fs.h |    3 +++
+ 1 file changed, 3 insertions(+)
 
-On Wed, Nov 27, 2013 at 6:56 PM, Stefan Priebe - Profihost AG
-<s.priebe@profihost.ag> wrote:
-> the performance comparisions are very impressive:
->
-> https://github.com/facebook/rocksdb/wiki/Performance-Benchmarks
->
-> Stefan
->
-> Am 27.11.2013 11:55, schrieb Stefan Priebe - Profihost AG:
->> Hi,
->>
->> while googles leveldb was too slow for facebook they created rocksdb
->> (http://rocksdb.org/) may be interesting for Ceph? It's already
->> production quality.
->>
->> Greets,
->> Stefan
->> _______________________________________________
->> ceph-users mailing list
->> ceph-users@lists.ceph.com
->> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
-
+diff --git a/src/include/ceph_fs.h b/src/include/ceph_fs.h
+index 47ec1f1..07a78b8 100644
+--- a/src/include/ceph_fs.h
++++ b/src/include/ceph_fs.h
+@@ -526,6 +526,9 @@ struct ceph_filelock {
+ 
+ int ceph_flags_to_mode(int flags);
+ 
++/* inline data state */
++#define CEPH_INLINE_NONE	((__u64)-1)
++#define CEPH_INLINE_SIZE	(1 << 12)
+ 
+ /* capability bits */
+ #define CEPH_CAP_PIN         1  /* no specific capabilities beyond the pin */
 -- 
-Best Regards,
+1.7.9.5
 
-Wheat
