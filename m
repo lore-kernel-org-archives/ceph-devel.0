@@ -1,12 +1,12 @@
 From: Li Wang <liwang@ubuntukylin.com>
-Subject: [PATCH 07/18] mds: Add inline fields to Capability
-Date: Wed, 27 Nov 2013 21:40:46 +0800
-Message-ID: <9bdf9fbd2e51a5ceed328ba975dfea1e3de0887e.1385558324.git.liwang@ubuntukylin.com>
+Subject: [PATCH 09/18] ceph: Add inline fields to InodeStat
+Date: Wed, 27 Nov 2013 21:40:48 +0800
+Message-ID: <f4ac331ac81f52b6dba807263f265af990d34ed8.1385558324.git.liwang@ubuntukylin.com>
 References: <cover.1385558324.git.liwang@ubuntukylin.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from m59-178.qiye.163.com ([123.58.178.59]:48455 "EHLO
+Received: from m59-178.qiye.163.com ([123.58.178.59]:48461 "EHLO
 	m59-178.qiye.163.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752668Ab3K0NlW (ORCPT
+	with ESMTP id S1752692Ab3K0NlW (ORCPT
 	<rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Nov 2013 08:41:22 -0500
 In-Reply-To: <cover.1385558324.git.liwang@ubuntukylin.com>
 In-Reply-To: <cover.1385558324.git.liwang@ubuntukylin.com>
@@ -19,29 +19,22 @@ Cc: Sage Weil <sage@inktank.com>, Li Wang <liwang@ubuntukylin.com>, Yunchuan Wen
 Signed-off-by: Yunchuan Wen <yunchuanwen@ubuntukylin.com>
 Signed-off-by: Li Wang <liwang@ubuntukylin.com>
 ---
- src/mds/Capability.h |    2 ++
+ src/messages/MClientReply.h |    2 ++
  1 file changed, 2 insertions(+)
 
-diff --git a/src/mds/Capability.h b/src/mds/Capability.h
-index fb6b3dc..995ea3a 100644
---- a/src/mds/Capability.h
-+++ b/src/mds/Capability.h
-@@ -209,6 +209,7 @@ private:
- public:
-   snapid_t client_follows;
-   version_t client_xattr_version;
-+  uint64_t client_inline_version;
-   
-   xlist<Capability*>::item item_session_caps;
-   xlist<Capability*>::item item_snaprealm_caps;
-@@ -223,6 +224,7 @@ public:
-     mseq(0),
-     suppress(0), stale(false),
-     client_follows(0), client_xattr_version(0),
-+    client_inline_version(0),
-     item_session_caps(this), item_snaprealm_caps(this) {
-     g_num_cap++;
-     g_num_capa++;
+diff --git a/src/messages/MClientReply.h b/src/messages/MClientReply.h
+index 896245f..47908e9 100644
+--- a/src/messages/MClientReply.h
++++ b/src/messages/MClientReply.h
+@@ -108,6 +108,8 @@ struct InodeStat {
+   uint64_t truncate_size;
+   utime_t ctime, mtime, atime;
+   version_t time_warp_seq;
++  bufferlist inline_data;
++  uint64_t inline_version;
+ 
+   frag_info_t dirstat;
+   nest_info_t rstat;
 -- 
 1.7.9.5
 
