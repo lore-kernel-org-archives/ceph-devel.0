@@ -1,40 +1,52 @@
-From: Sylvain Munaut <s.munaut@whatever-company.com>
-Subject: Re: [Xen-devel] Xen blktap driver for Ceph RBD : Anybody wants to
- test ? :p
-Date: Fri, 29 Nov 2013 16:11:18 +0100
-Message-ID: <CAF6-1L7jtotzSPexz28_vKeNEGhWNzL3eGVu_Uibpkq6V+FaAA@mail.gmail.com>
-References: <CAF6-1L714v7xtXe_Bg396jm+7Fi5ivUoxX79dpZ4dmT8MFj-aA@mail.gmail.com>
-	<20130419064524.GQ11427@reaktio.net>
-	<CAF6-1L7UXXNRsyarZw+EcRjdPtnXAuULSZDGtDDB3Oy3O79KMQ@mail.gmail.com>
-	<6035A0D088A63A46850C3988ED045A4B66BB564A@BITCOM1.int.sbss.com.au>
+From: Noah Watkins <noah.watkins@inktank.com>
+Subject: Re: [May be a bug?]Cannot umount cephfs after all mons is stopped
+Date: Fri, 29 Nov 2013 07:58:59 -0800
+Message-ID: <CA+Hcz58a4fMg89608Wh6EOoLsDkpaJRXBd80WLvjhrXUWzNokQ@mail.gmail.com>
+References: <CAM9_UU9HeugRieJTbLQguCofhzVXNPvsys4nUbTqC79coG4BRA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f49.google.com ([209.85.160.49]:47181 "EHLO
-	mail-pb0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753069Ab3K2PLT (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 29 Nov 2013 10:11:19 -0500
-Received: by mail-pb0-f49.google.com with SMTP id jt11so14635458pbb.22
-        for <ceph-devel@vger.kernel.org>; Fri, 29 Nov 2013 07:11:18 -0800 (PST)
-In-Reply-To: <6035A0D088A63A46850C3988ED045A4B66BB564A@BITCOM1.int.sbss.com.au>
+Received: from mail-qe0-f46.google.com ([209.85.128.46]:37701 "EHLO
+	mail-qe0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754218Ab3K2P7A (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 29 Nov 2013 10:59:00 -0500
+Received: by mail-qe0-f46.google.com with SMTP id a11so10387889qen.19
+        for <ceph-devel@vger.kernel.org>; Fri, 29 Nov 2013 07:59:00 -0800 (PST)
+In-Reply-To: <CAM9_UU9HeugRieJTbLQguCofhzVXNPvsys4nUbTqC79coG4BRA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: James Harper <james.harper@bendigoit.com.au>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Ketor D <d.ketor@gmail.com>
+Cc: Sage Weil <sage@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi James,
+Did you try `umount -f`? I wouldn't say that is 'clean', but might
+avoid a reboot. It would seem there isn't much else that can be done
+if there is dirty data and no cluster to flush it to.
 
-> Are you still working on this in any way?
+This also looks relevant:
 
-Well I'm using it, but I haven't worked on it. I never was able to
-reproduce any issue with it locally ...
-In prod, I do run it with cache disabled though since I never took the
-time to check using the cache was safe in the various failure modes.
+   http://tracker.ceph.com/issues/206
 
-Is 300 MB normal ? Well, that probably depends on your settings (cache
-enabled / size / ...). But in anycase I'd guess the memory comes from
-a librbd itself. It's not like I do much allocation myself :p
-
-Cheers,
-
-   Sylvain
+On Thu, Nov 28, 2013 at 9:51 PM, Ketor D <d.ketor@gmail.com> wrote:
+> Hi Sage:
+>        We are testing cephfs mouting by kernel 3.12. And we meet a
+> situation that we cannot umount cephfs and also cannot reboot the
+> client machine. Only hard reset can restart the client machine.
+>         Here is the flow:
+>         1) Create a ceph cluster with 3 mons, 2 mds (active-standby), 2 osds.
+>         2) Mount the cephfs with linux kernel 3.12.
+>         3) Using service ceph stop mon.x to stop all mons.
+>         4) Then we cannot umount the cephfs. The command lsof and
+> fuser cannot return,and even if we use "umount -l [mount_point]",  we
+> only see the mount_point disappeared from /etc/mtab, but we still
+> cannot soft reboot the client machine.
+>
+>         If we get in this situation, we can only hard reset the client
+> machine to avoid this.
+>         So the problem is if there is some method can gracefully
+> umount the cephfs and dont make the client machine cant rebooted?
+>
+>          Regards!
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
