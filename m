@@ -1,52 +1,49 @@
-From: Noah Watkins <noah.watkins@inktank.com>
-Subject: Re: [May be a bug?]Cannot umount cephfs after all mons is stopped
-Date: Fri, 29 Nov 2013 07:58:59 -0800
-Message-ID: <CA+Hcz58a4fMg89608Wh6EOoLsDkpaJRXBd80WLvjhrXUWzNokQ@mail.gmail.com>
-References: <CAM9_UU9HeugRieJTbLQguCofhzVXNPvsys4nUbTqC79coG4BRA@mail.gmail.com>
+From: "Matt W. Benjamin" <matt@linuxbox.com>
+Subject: Re: [PATCH 17/18] client: Write inline data path
+Date: Fri, 29 Nov 2013 12:01:09 -0500 (EST)
+Message-ID: <938803040.82.1385744469623.JavaMail.root@thunderbeast.private.linuxbox.com>
+References: <CAAM7YAnwL4xdY0wysN46yVgb2=MciNA5DGV4Ac=nYgQi4vcfPw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qe0-f46.google.com ([209.85.128.46]:37701 "EHLO
-	mail-qe0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754218Ab3K2P7A (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 29 Nov 2013 10:59:00 -0500
-Received: by mail-qe0-f46.google.com with SMTP id a11so10387889qen.19
-        for <ceph-devel@vger.kernel.org>; Fri, 29 Nov 2013 07:59:00 -0800 (PST)
-In-Reply-To: <CAM9_UU9HeugRieJTbLQguCofhzVXNPvsys4nUbTqC79coG4BRA@mail.gmail.com>
+Received: from aa.linuxbox.com ([69.128.83.226]:2913 "EHLO aa.linuxbox.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755740Ab3K2RBW (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 29 Nov 2013 12:01:22 -0500
+In-Reply-To: <CAAM7YAnwL4xdY0wysN46yVgb2=MciNA5DGV4Ac=nYgQi4vcfPw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ketor D <d.ketor@gmail.com>
-Cc: Sage Weil <sage@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Zheng Yan <ukernel@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>, Yunchuan Wen <yunchuanwen@ubuntukylin.com>, Li Wang <liwang@ubuntukylin.com>
 
-Did you try `umount -f`? I wouldn't say that is 'clean', but might
-avoid a reboot. It would seem there isn't much else that can be done
-if there is dirty data and no cluster to flush it to.
+Hi,
 
-This also looks relevant:
+I wondered about this.  Were you able to measure an effect?
 
-   http://tracker.ceph.com/issues/206
+Thanks,
 
-On Thu, Nov 28, 2013 at 9:51 PM, Ketor D <d.ketor@gmail.com> wrote:
-> Hi Sage:
->        We are testing cephfs mouting by kernel 3.12. And we meet a
-> situation that we cannot umount cephfs and also cannot reboot the
-> client machine. Only hard reset can restart the client machine.
->         Here is the flow:
->         1) Create a ceph cluster with 3 mons, 2 mds (active-standby), 2 osds.
->         2) Mount the cephfs with linux kernel 3.12.
->         3) Using service ceph stop mon.x to stop all mons.
->         4) Then we cannot umount the cephfs. The command lsof and
-> fuser cannot return,and even if we use "umount -l [mount_point]",  we
-> only see the mount_point disappeared from /etc/mtab, but we still
-> cannot soft reboot the client machine.
->
->         If we get in this situation, we can only hard reset the client
-> machine to avoid this.
->         So the problem is if there is some method can gracefully
-> umount the cephfs and dont make the client machine cant rebooted?
->
->          Regards!
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Matt
+
+----- "Zheng Yan" <ukernel@gmail.com> wrote:
+
+> 
+> Besides, this feature should be disabled by default because it's not
+> compatible with old clients and it imposes overhead on the mds. we
+> need to use a config option or directory attribute to enable it.
+> 
+> Regards
+> Yan, Zheng
+> 
+
+-- 
+Matt Benjamin
+The Linux Box
+206 South Fifth Ave. Suite 150
+Ann Arbor, MI  48104
+
+http://linuxbox.com
+
+tel.  734-761-4689 
+fax.  734-769-8938 
+cel.  734-216-5309 
