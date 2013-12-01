@@ -1,50 +1,45 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Teuthology install
-Date: Fri, 29 Nov 2013 21:26:26 +0100
-Message-ID: <5298F872.2020805@dachary.org>
+From: James Harper <james.harper@bendigoit.com.au>
+Subject: RE: [Xen-devel] Xen blktap driver for Ceph RBD : Anybody wants to
+ test ? :p
+Date: Sun, 1 Dec 2013 04:08:45 +0000
+Message-ID: <6035A0D088A63A46850C3988ED045A4B66BD65DF@BITCOM1.int.sbss.com.au>
+References: <CAF6-1L714v7xtXe_Bg396jm+7Fi5ivUoxX79dpZ4dmT8MFj-aA@mail.gmail.com>
+	<20130419064524.GQ11427@reaktio.net>
+	<CAF6-1L7UXXNRsyarZw+EcRjdPtnXAuULSZDGtDDB3Oy3O79KMQ@mail.gmail.com>
+	<6035A0D088A63A46850C3988ED045A4B66BB564A@BITCOM1.int.sbss.com.au>
+ <CAF6-1L7jtotzSPexz28_vKeNEGhWNzL3eGVu_Uibpkq6V+FaAA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="sttrUwnCAmd0dwUGWa1xJpwbVncxi4Ef3"
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:54070 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754616Ab3K2U02 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 29 Nov 2013 15:26:28 -0500
+Received: from smtp2.bendigoit.com.au ([203.16.207.99]:42764 "EHLO
+	smtp2.bendigoit.com.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751578Ab3LAEIz convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 30 Nov 2013 23:08:55 -0500
+In-Reply-To: <CAF6-1L7jtotzSPexz28_vKeNEGhWNzL3eGVu_Uibpkq6V+FaAA@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Christophe Courtaut <christophe.courtaut@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Sylvain Munaut <s.munaut@whatever-company.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---sttrUwnCAmd0dwUGWa1xJpwbVncxi4Ef3
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+> 
+> Hi James,
+> 
+> > Are you still working on this in any way?
+> 
+> Well I'm using it, but I haven't worked on it. I never was able to
+> reproduce any issue with it locally ...
+> In prod, I do run it with cache disabled though since I never took the
+> time to check using the cache was safe in the various failure modes.
+> 
+> Is 300 MB normal ? Well, that probably depends on your settings (cache
+> enabled / size / ...). But in anycase I'd guess the memory comes from
+> a librbd itself. It's not like I do much allocation myself :p
+> 
 
-Hi Christophe,
+What sort of memory are your instances using? I haven't turned on any caching so I assume it's disabled.
 
-I was really happy to hear that you've successfully installed teuthology =
-on our new OpenStack infrastructure :-) You said you're facing an issue w=
-ith apt-key hanging. Could you tell more about it ?=20
+I increased the stack size to 8M to work around the crash I was having, but lowering that to 2MB doesn't have any significant impact on memory usage.
 
-Cheers
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-
-
---sttrUwnCAmd0dwUGWa1xJpwbVncxi4Ef3
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.20 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlKY+HIACgkQ8dLMyEl6F21SpgCdHva4pvTMTG97eZxN66YsN8KB
-a3wAoKTrjXggjjbVBkfL65s5TaPcOUfZ
-=5k/g
------END PGP SIGNATURE-----
-
---sttrUwnCAmd0dwUGWa1xJpwbVncxi4Ef3--
+James
