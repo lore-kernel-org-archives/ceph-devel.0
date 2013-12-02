@@ -1,45 +1,76 @@
-From: James Harper <james.harper@bendigoit.com.au>
-Subject: RE: [Xen-devel] Xen blktap driver for Ceph RBD : Anybody wants to
- test ? :p
-Date: Sun, 1 Dec 2013 04:08:45 +0000
-Message-ID: <6035A0D088A63A46850C3988ED045A4B66BD65DF@BITCOM1.int.sbss.com.au>
-References: <CAF6-1L714v7xtXe_Bg396jm+7Fi5ivUoxX79dpZ4dmT8MFj-aA@mail.gmail.com>
-	<20130419064524.GQ11427@reaktio.net>
-	<CAF6-1L7UXXNRsyarZw+EcRjdPtnXAuULSZDGtDDB3Oy3O79KMQ@mail.gmail.com>
-	<6035A0D088A63A46850C3988ED045A4B66BB564A@BITCOM1.int.sbss.com.au>
- <CAF6-1L7jtotzSPexz28_vKeNEGhWNzL3eGVu_Uibpkq6V+FaAA@mail.gmail.com>
+From: charles L <charlesboy009@hotmail.com>
+Subject: /usr/bin/ld: cannot find -lboost_program_options
+Date: Mon, 2 Dec 2013 02:57:34 +0100
+Message-ID: <DUB116-W1392EBBBE3792703D625FEFE0EA0@phx.gbl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp2.bendigoit.com.au ([203.16.207.99]:42764 "EHLO
-	smtp2.bendigoit.com.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751578Ab3LAEIz convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 30 Nov 2013 23:08:55 -0500
-In-Reply-To: <CAF6-1L7jtotzSPexz28_vKeNEGhWNzL3eGVu_Uibpkq6V+FaAA@mail.gmail.com>
-Content-Language: en-US
+Received: from dub0-omc4-s24.dub0.hotmail.com ([157.55.2.99]:31927 "EHLO
+	dub0-omc4-s24.dub0.hotmail.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752508Ab3LBB5f convert rfc822-to-8bit
+	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 1 Dec 2013 20:57:35 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sylvain Munaut <s.munaut@whatever-company.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-> 
-> Hi James,
-> 
-> > Are you still working on this in any way?
-> 
-> Well I'm using it, but I haven't worked on it. I never was able to
-> reproduce any issue with it locally ...
-> In prod, I do run it with cache disabled though since I never took the
-> time to check using the cache was safe in the various failure modes.
-> 
-> Is 300 MB normal ? Well, that probably depends on your settings (cache
-> enabled / size / ...). But in anycase I'd guess the memory comes from
-> a librbd itself. It's not like I do much allocation myself :p
-> 
+Pls can some1 help? Im compiling ceph...i did the make -j2 command and =
+got this "cannot find -lboost_program_options" many times ..so i tried =
+to run make in verbose mode...and =A0got this...
 
-What sort of memory are your instances using? I haven't turned on any caching so I assume it's disabled.
-
-I increased the stack size to 8M to work around the crash I was having, but lowering that to 2MB doesn't have any significant impact on memory usage.
-
-James
+root@ubuntuserver:/home/ceph# V=3D1 make
+Making all in .
+make[1]: Entering directory `/home/ceph'
+make[1]: Nothing to be done for `all-am'.
+make[1]: Leaving directory `/home/ceph'
+Making all in src
+make[1]: Entering directory `/home/ceph/src'
+make =A0all-recursive
+make[2]: Entering directory `/home/ceph/src'
+Making all in ocf
+make[3]: Entering directory `/home/ceph/src/ocf'
+make[3]: Nothing to be done for `all'.
+make[3]: Leaving directory `/home/ceph/src/ocf'
+Making all in java
+make[3]: Entering directory `/home/ceph/src/java'
+make =A0all-am
+make[4]: Entering directory `/home/ceph/src/java'
+make[4]: Nothing to be done for `all-am'.
+make[4]: Leaving directory `/home/ceph/src/java'
+make[3]: Leaving directory `/home/ceph/src/java'
+make[3]: Entering directory `/home/ceph/src'
+=2E/check_version ./.git_version
+=2E/.git_version is up to date.
+/bin/bash ../libtool =A0--tag=3DCXX =A0 --mode=3Dlink g++ -Wall -Wtype-=
+limits -Wignored-qualifiers -Winit-self -Wpointer-arith -Werror=3Dforma=
+t-security -fno-strict-aliasing -fsigned-char -rdynamic -Wnon-virtual-d=
+tor -Wno-invalid-offsetof =A0 -fno-builtin-malloc -fno-builtin-calloc -=
+fno-builtin-realloc -fno-builtin-free -Wstrict-null-sentinel -g -Wl,--a=
+s-needed -latomic_ops =A0-o ceph_filestore_tool tools/ceph-filestore-to=
+ol.o libosd.la libosdc.la libos.la -laio =A0-lleveldb -lsnappy libperfg=
+lue.la -ltcmalloc libos.la -laio =A0-lleveldb -lsnappy libglobal.la -lp=
+thread -lm -lcrypto++ =A0 -luuid -lm -lkeyutils =A0-lrt =A0 -lboost_pro=
+gram_options -ldl -lboost_thread -lboost_system -lleveldb -lsnappy
+libtool: link: g++ -Wall -Wtype-limits -Wignored-qualifiers -Winit-self=
+ -Wpointer-arith -Werror=3Dformat-security -fno-strict-aliasing -fsigne=
+d-char -rdynamic -Wnon-virtual-dtor -Wno-invalid-offsetof -fno-builtin-=
+malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free -Wstr=
+ict-null-sentinel -g -Wl,--as-needed -o ceph_filestore_tool tools/ceph-=
+filestore-tool.o =A0/usr/lib/libatomic_ops.a ./.libs/libosd.a ./.libs/l=
+ibosdc.a ./.libs/libperfglue.a -ltcmalloc ./.libs/libos.a -laio ./.libs=
+/libglobal.a -lpthread -lcrypto++ -luuid -lm -lkeyutils -lrt -lboost_pr=
+ogram_options -ldl -lboost_thread -lboost_system -lleveldb -lsnappy
+/usr/bin/ld: cannot find -lboost_program_options
+collect2: error: ld returned 1 exit status
+make[3]: *** [ceph_filestore_tool] Error 1
+make[3]: Leaving directory `/home/ceph/src'
+make[2]: *** [all-recursive] Error 1
+make[2]: Leaving directory `/home/ceph/src'
+make[1]: *** [all] Error 2
+make[1]: Leaving directory `/home/ceph/src'
+make: *** [all-recursive] Error 1 		 	   		  --
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
