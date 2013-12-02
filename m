@@ -1,111 +1,78 @@
-From: Dominik Mostowiec <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: radosgw Segmentation fault on obj copy
-Date: Mon, 2 Dec 2013 13:53:27 +0100
-Message-ID: <CAMNMNTzx_CHmYRXXE-KhbEwNZqLAAcTBp-5SZks7UiQ+OS1XqA@mail.gmail.com>
-References: <CAMNMNTzEVkom0cBe_jepaE95hzVGys+8y+-PA+2dSsTqNwg=tA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAMNMNTzEVkom0cBe_jepaE95hzVGys+8y+-PA+2dSsTqNwg=tA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+From: Li Wang <liwang@ubuntukylin.com>
+Subject: [PATCH v4] ceph: Inline data support
+Date: Mon,  2 Dec 2013 22:36:04 +0800
+Message-ID: <cover.1385993877.git.liwang@ubuntukylin.com>
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from m199-177.yeah.net ([123.58.177.199]:34615 "EHLO
+	m199-177.yeah.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751748Ab3LBOg1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Dec 2013 09:36:27 -0500
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: Sage Weil <sage@inktank.com>, Li Wang <liwang@ubuntukylin.com>, Yunchuan Wen <yunchuanwen@ubuntukylin.com>
 
-Hi,
-I found that issue is related with "ETag: ....-0" (ends -0)
-This is known bug ?
+This patch implements inline data support for Ceph.
+Review at:
+https://github.com/ceph/ceph/pull/884
+Pull at:
+https://github.com/kylinstorage/ceph.git inline
 
---
-Regards
-Dominik
+Signed-off-by: Yunchuan Wen <yunchuanwen@ubuntukylin.com>
+Signed-off-by: Li Wang <liwang@ubuntukylin.com>
+---
+Against v3:
+Add the inline switch and make inline size tunable
+Improve the back compatibility of mds from (9, 9) to (9, 6), provided the inlinefeature is disabled until all mds upgraded to support inline 
 
-2013/12/2 Dominik Mostowiec <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>:
-> Hi,
-> I have strange problem.
-> Obj copy (0 size) killing radosgw.
->
-> Head for this file:
-> Content-Type: application/octet-stream
-> Server: Apache/2.2.22 (Ubuntu)
-> ETag: "d41d8cd98f00b204e9800998ecf8427e-0"
-> Last-Modified: 2013-12-01T10:37:15Z
->
-> rgw log.
-> 2013-12-02 08:18:59.196651 7f5308ff1700  1 ====== starting new request
-> req=0x2be6fa0 =====
-> 2013-12-02 08:18:59.196709 7f5308ff1700  2 req 237:0.000058::::initializing
-> 2013-12-02 08:18:59.196752 7f5308ff1700 10 meta>> HTTP_X_AMZ_ACL=public-read
-> 2013-12-02 08:18:59.196760 7f5308ff1700 10 meta>>
-> HTTP_X_AMZ_COPY_SOURCE=/testbucket/testfile.xml
-> 2013-12-02 08:18:59.196766 7f5308ff1700 10 meta>>
-> HTTP_X_AMZ_METADATA_DIRECTIVE=COPY
-> 2013-12-02 08:18:59.196771 7f5308ff1700 10 x>> x-amz-acl:public-read
-> 2013-12-02 08:18:59.196772 7f5308ff1700 10 x>>
-> x-amz-copy-source:/testbucket/testfile.xml
-> 2013-12-02 08:18:59.196773 7f5308ff1700 10 x>> x-amz-metadata-directive:COPY
-> 2013-12-02 08:18:59.196786 7f5308ff1700 10
-> s->object=/testbucket/new_testfile.ini s->bucket=testbucket
-> 2013-12-02 08:18:59.196792 7f5308ff1700  2 req 237:0.000141:s3:PUT
-> /testbucket/new_testfile.ini::getting op
-> 2013-12-02 08:18:59.196797 7f5308ff1700  2 req 237:0.000146:s3:PUT
-> /testbucket/new_testfile.ini:copy_obj:authorizing
-> 2013-12-02 08:18:59.200648 7f5308ff1700 10 get_canon_resource():
-> dest=/testbucket/new_testfile.ini
-> 2013-12-02 08:18:59.200661 7f5308ff1700 10 auth_hdr:
-> PUT
-> 1B2M2Y8AsgTpgAmY7PhCfg==
-> application/octet-stream
-> Mon, 02 Dec 2013 07:18:55 GMT
-> x-amz-acl:public-read
-> x-amz-copy-source:/testbucket/testfile.xml
-> x-amz-metadata-directive:COPY
-> /testbucket/new_testfile.ini
-> 2013-12-02 08:18:59.200717 7f5308ff1700  2 req 237:0.004066:s3:PUT
-> /testbucket/new_testfile.ini:copy_obj:reading permissions
-> 2013-12-02 08:18:59.203330 7f5308ff1700  2 req 237:0.006679:s3:PUT
-> /testbucket/new_testfile.ini:copy_obj:verifying op permissions
-> 2013-12-02 08:18:59.207627 7f5308ff1700 10 manifest: total_size = 0
-> 2013-12-02 08:18:59.207649 7f5308ff1700  5 Searching permissions for
-> uid=0 mask=1
-> 2013-12-02 08:18:59.207652 7f5308ff1700  5 Found permission: 15
-> 2013-12-02 08:18:59.207654 7f5308ff1700 10  uid=0 requested perm
-> (type)=1, policy perm=1, user_perm_mask=15, acl perm=1
-> 2013-12-02 08:18:59.207669 7f5308ff1700  5 Searching permissions for
-> uid=0 mask=2
-> 2013-12-02 08:18:59.207670 7f5308ff1700  5 Found permission: 15
-> 2013-12-02 08:18:59.207671 7f5308ff1700 10  uid=0 requested perm
-> (type)=2, policy perm=2, user_perm_mask=15, acl perm=2
-> 2013-12-02 08:18:59.207681 7f5308ff1700  2 req 237:0.011030:s3:PUT
-> /testbucket/new_testfile.ini:copy_obj:verifying op params
-> 2013-12-02 08:18:59.207686 7f5308ff1700  2 req 237:0.011035:s3:PUT
-> /testbucket/new_testfile.ini:copy_obj:executing
-> 2013-12-02 08:18:59.207699 7f5308ff1700 10 x>> x-amz-acl:public-read
-> 2013-12-02 08:18:59.207704 7f5308ff1700 10 x>>
-> x-amz-copy-source:/testbucket/testfile.xml
-> 2013-12-02 08:18:59.207709 7f5308ff1700 10 x>> x-amz-metadata-directive:COPY
-> 2013-12-02 08:18:59.207759 7f5308ff1700  5 Copy object
-> testbucket(@.rgw.buckets[406250.1]):testfile.ini =>
-> testbucket(@.rgw.buckets[406250.1]):new_testfile.ini
-> 2013-12-02 08:18:59.208903 7f5308ff1700 -1 *** Caught signal
-> (Segmentation fault) **
->  in thread 7f5308ff1700
->
->
-> --
-> Regards
-> Dominik
+Against v2:
+Streamline the inline data migration with the subsequent read/write
 
+Against v1:
+With simplified process under multiple-writer case,
+referred to
+http://pad.ceph.com/p/mds-inline-data,
+http://www.spinics.net/lists/ceph-devel/msg16018.html
 
+Li Wang (19):
+  ceph: Add inline data feature
+  ceph: Add inline state definition
+  mds: Add inline fields to inode_t
+  mds: Add inline encode/decode to inode_t
+  ceph: Add inline fields to MClientCaps
+  osdc: Add write method with truncate parameters
+  mds: Add inline fields to Capability
+  mds: Push inline data to client in cap message
+  ceph: Add inline fields to InodeStat
+  mds: Push inline data to client in inodestat
+  mds: Receive updated inline data from client
+  client: Add inline fields to Inode
+  client: Receive inline data pushed from mds
+  client: Push inline data to mds by send cap
+  client: Add inline data migration helper
+  client: Read inline data path
+  client: Write inline data path
+  client: Fallocate inline data path
+  ceph: Add inline switch and make inline size tunable
+
+ src/ceph_mds.cc             |    1 +
+ src/client/Client.cc        |  277 +++++++++++++++++++++++++++++++++++++++----
+ src/client/Client.h         |    4 +
+ src/client/Inode.h          |    5 +
+ src/common/config_opts.h    |    2 +
+ src/include/ceph_features.h |    2 +
+ src/include/ceph_fs.h       |    3 +
+ src/mds/CInode.cc           |   22 ++++
+ src/mds/Capability.h        |    2 +
+ src/mds/Locker.cc           |    7 ++
+ src/mds/Server.cc           |    3 +
+ src/mds/mdstypes.cc         |   12 +-
+ src/mds/mdstypes.h          |    3 +
+ src/messages/MClientCaps.h  |   19 ++-
+ src/messages/MClientReply.h |    9 ++
+ src/osdc/Objecter.h         |   10 +-
+ 16 files changed, 351 insertions(+), 30 deletions(-)
 
 -- 
-Pozdrawiam
-Dominik
+1.7.9.5
+
