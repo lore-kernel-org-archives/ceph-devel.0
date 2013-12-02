@@ -1,71 +1,143 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: question about the data structure of crush_map
-Date: Sun, 1 Dec 2013 20:55:00 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1312012054060.20405@cobra.newdream.net>
-References: <CAJqA8gvBkq7F=nJBvSaVjwXJQYguHQjp4zQOPSgpvYbwOza=kA@mail.gmail.com> <CAMm-wcKBvJ4F5hBo_+4FyXEuumePHwz8EtOsPo=aYUBXwB+NiA@mail.gmail.com> <CAJqA8gvo7AndWL6RacmTVs+Q+jAsS8H=uOWnnCc=LSbx6RwFNg@mail.gmail.com>
+From: Li Wang <liwang@ubuntukylin.com>
+Subject: Re: [PATCH 17/18] client: Write inline data path
+Date: Mon, 02 Dec 2013 16:03:58 +0800
+Message-ID: <529C3EEE.3080604@ubuntukylin.com>
+References: <cover.1385558324.git.liwang@ubuntukylin.com> <8bc8c758bb5058a10965d422fb99d5bc29f85a71.1385558324.git.liwang@ubuntukylin.com> <CAAM7YAnwL4xdY0wysN46yVgb2=MciNA5DGV4Ac=nYgQi4vcfPw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:48235 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751817Ab3LBEzB (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 1 Dec 2013 23:55:01 -0500
-In-Reply-To: <CAJqA8gvo7AndWL6RacmTVs+Q+jAsS8H=uOWnnCc=LSbx6RwFNg@mail.gmail.com>
+Received: from m53-178.qiye.163.com ([123.58.178.53]:52547 "EHLO
+	m53-178.qiye.163.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752600Ab3LBIEG (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Dec 2013 03:04:06 -0500
+In-Reply-To: <CAAM7YAnwL4xdY0wysN46yVgb2=MciNA5DGV4Ac=nYgQi4vcfPw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Lipeng Wan <lipengwan86@gmail.com>
-Cc: Dong Yuan <yuandong1222@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: "Yan, Zheng" <ukernel@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>, Yunchuan Wen <yunchuanwen@ubuntukylin.com>
 
-On Sun, 1 Dec 2013, Lipeng Wan wrote:
-> Hi Dong,
-> 
-> Thanks for your reply. Then is it valid to access the memory space
-> specified by that negative id?
+Hi Zheng,
+   Thanks for your comments.
+   Regarding the configuration option, it is in our original plan, and 
+we will make it appear soon in the incoming next version :)
+   For the write optimization, it does remind us to do an optimization, 
+that is, if the inline data length is zero, we won't bother to do the 
+migration. This will capture the situation that application has a write 
+buffer larger than the inline threshold, the sequential write will not 
+incur migration. And another situation that client performs some inline 
+read/write, then truncate it to zero, then start write after the inline 
+threshold.
 
-You'll notice that every time we index the bucket array, the index is 
-something like
+Cheers,
+Li Wang
 
-	-1 - id
-
-so that -1 maps to the first item, -2 to the second, etc.  This is safe 
-because it's always preceded by some check that id is < 0 (i.e., a bucket 
-id).
-
-sage
-
-> 
-> L Wan
-> 
-> On Sun, Dec 1, 2013 at 10:31 PM, Dong Yuan <yuandong1222@gmail.com> wrote:
-> > If my memory serves me well, negative id means buckets (root, room,
-> > rack, cabinet, etc.), well positive means osds.
-> >
-> > On 2 December 2013 11:20, Lipeng Wan <lipengwan86@gmail.com> wrote:
-> >> Hi guys,
-> >>
-> >> I am reading the source code of ceph and trying to understand the data
-> >> structure of crush_map. Now I am confused by the use of "struct
-> >> crush_bucket **buckets" in function "int crush_do_rule(...)" in
-> >> src/crush/mapper.c. It seems that the index of array "map->buckets[]"
-> >> could be negative (see line 551, src/crush/mapper.c). I was wondering
-> >> if anyone could explain why the index of this array can be negative
-> >> and how those buckets were added into this array. Thanks.
-> >>
-> >> Best,
-> >> L. Wan
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >> the body of a message to majordomo@vger.kernel.org
-> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >
-> >
-> >
-> > --
-> > Dong Yuan
-> > Email:yuandong1222@gmail.com
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+On 11/28/2013 11:02 AM, Yan, Zheng wrote:
+> On Wed, Nov 27, 2013 at 9:40 PM, Li Wang <liwang@ubuntukylin.com> wrote:
+>> Signed-off-by: Yunchuan Wen <yunchuanwen@ubuntukylin.com>
+>> Signed-off-by: Li Wang <liwang@ubuntukylin.com>
+>> ---
+>>   src/client/Client.cc |   55 +++++++++++++++++++++++++++++++++++++++++++++++++-
+>>   1 file changed, 54 insertions(+), 1 deletion(-)
+>>
+>> diff --git a/src/client/Client.cc b/src/client/Client.cc
+>> index 6b08155..c913e35 100644
+>> --- a/src/client/Client.cc
+>> +++ b/src/client/Client.cc
+>> @@ -6215,6 +6215,41 @@ int Client::_write(Fh *f, int64_t offset, uint64_t size, const char *buf)
+>>
+>>     ldout(cct, 10) << " snaprealm " << *in->snaprealm << dendl;
+>>
+>> +  Mutex uninline_flock("Clinet::_write_uninline_data flock");
+>> +  Cond uninline_cond;
+>> +  bool uninline_done = false;
+>> +  int uninline_ret = 0;
+>> +  Context *onuninline = NULL;
+>> +
+>> +  if (in->inline_version < CEPH_INLINE_NONE) {
+>> +    if (endoff > CEPH_INLINE_SIZE || !(have & CEPH_CAP_FILE_BUFFER)) {
+>> +      onuninline = new C_SafeCond(&uninline_flock,
+>> +                                  &uninline_cond,
+>> +                                  &uninline_done,
+>> +                                  &uninline_ret);
+>> +      uninline_data(in, onuninline);
+>
+> If client does 4k sequence write, the second write always trigger the
+> "uninline" procedure, this is suboptimal. It's better to just copy the
+> inline data to the object cacher.
+>
+> Besides, this feature should be disabled by default because it's not
+> compatible with old clients and it imposes overhead on the mds. we
+> need to use a config option or directory attribute to enable it.
+>
+> Regards
+> Yan, Zheng
+>
+>
+>> +    } else {
+>> +      get_cap_ref(in, CEPH_CAP_FILE_BUFFER);
+>> +
+>> +      uint32_t len = in->inline_data.length();
+>> +
+>> +      if (endoff < len)
+>> +        in->inline_data.copy(endoff, len - endoff, bl);
+>> +
+>> +      if (offset < len)
+>> +        in->inline_data.splice(offset, len - offset);
+>> +      else if (offset > len)
+>> +        in->inline_data.append_zero(offset - len);
+>> +
+>> +      in->inline_data.append(bl);
+>> +      in->inline_version++;
+>> +
+>> +      put_cap_ref(in, CEPH_CAP_FILE_BUFFER);
+>> +
+>> +      goto success;
+>> +    }
+>> +  }
+>> +
+>>     if (cct->_conf->client_oc && (have & CEPH_CAP_FILE_BUFFER)) {
+>>       // do buffered write
+>>       if (!in->oset.dirty_or_tx)
+>> @@ -6265,7 +6300,7 @@ int Client::_write(Fh *f, int64_t offset, uint64_t size, const char *buf)
+>>     }
+>>
+>>     // if we get here, write was successful, update client metadata
+>> -
+>> +success:
+>>     // time
+>>     lat = ceph_clock_now(cct);
+>>     lat -= start;
+>> @@ -6293,6 +6328,24 @@ int Client::_write(Fh *f, int64_t offset, uint64_t size, const char *buf)
+>>     mark_caps_dirty(in, CEPH_CAP_FILE_WR);
+>>
+>>   done:
+>> +
+>> +  if (onuninline) {
+>> +    client_lock.Unlock();
+>> +    uninline_flock.Lock();
+>> +    while (!uninline_done)
+>> +      uninline_cond.Wait(uninline_flock);
+>> +    uninline_flock.Unlock();
+>> +    client_lock.Lock();
+>> +
+>> +    if (uninline_ret >= 0 || uninline_ret == -ECANCELED) {
+>> +      in->inline_data.clear();
+>> +      in->inline_version = CEPH_INLINE_NONE;
+>> +      mark_caps_dirty(in, CEPH_CAP_FILE_WR);
+>> +      check_caps(in, false);
+>> +    } else
+>> +      r = uninline_ret;
+>> +  }
+>> +
+>>     put_cap_ref(in, CEPH_CAP_FILE_WR);
+>>     return r;
+>>   }
+>> --
+>> 1.7.9.5
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
