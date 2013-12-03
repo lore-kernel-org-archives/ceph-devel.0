@@ -1,309 +1,59 @@
-From: Yehuda Sadeh <yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: radosgw Segmentation fault on obj copy
-Date: Mon, 2 Dec 2013 18:46:04 -0800
-Message-ID: <CABBk=J9MQESKAySjaObEK21zxJadLgUWi-AnrVh=XQdN8eLC1w@mail.gmail.com>
-References: <CAMNMNTzEVkom0cBe_jepaE95hzVGys+8y+-PA+2dSsTqNwg=tA@mail.gmail.com>
-	<CAMNMNTzx_CHmYRXXE-KhbEwNZqLAAcTBp-5SZks7UiQ+OS1XqA@mail.gmail.com>
-	<CABBk=J-HAPxi4eg0AW_vD0T+QoqRzBMchpovM9s+EhzzC2ZZmg@mail.gmail.com>
-	<CAMNMNTzMvb-udVW5LrOhJLCSWWP5KVMHHyLrHwsY=bv3ckXyGA@mail.gmail.com>
-	<CABBk=J-xw8G5Uuj1HGonP-B_Xzqn=A0myE-C28sWMMpnH9tbmA@mail.gmail.com>
-	<CAMNMNTxYE=nqg04X7Wa0U2g3iW-HfkDBCEY_fv75D+nE7=xz4w@mail.gmail.com>
-	<CABBk=J8emXQJQvoUhKQVEWUqs3=z_sP-4ADgo7aAaVNORrYh_g@mail.gmail.com>
-	<CAMNMNTy8VqNQRtbW-dvGd0A2vmWtP+ty0d9ezB4ed+fj-3Qf_A@mail.gmail.com>
-	<CABBk=J8GeCckYaxFu+_8jwagKtt2vOkmMsQ=1vii+MR7-erYjQ@mail.gmail.com>
-	<CABBk=J9a3M6yAZj40+XZKLfmoHj7xsYj3GTfs34Be8twSb19UQ@mail.gmail.com>
-	<CAMNMNTwk=q0aStrqJACqnB64AhGSH13LwNGzb3hC1DQMeZtwOg@mail.gmail.com>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: Osd magic detection failure in master
+Date: Mon, 02 Dec 2013 18:47:23 -0800
+Message-ID: <529D463B.4040601@inktank.com>
+References: <529D4528.3050901@catalyst.net.nz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-2"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAMNMNTwk=q0aStrqJACqnB64AhGSH13LwNGzb3hC1DQMeZtwOg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Dominik Mostowiec <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-yh0-f51.google.com ([209.85.213.51]:43334 "EHLO
+	mail-yh0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753805Ab3LCCrf (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Dec 2013 21:47:35 -0500
+Received: by mail-yh0-f51.google.com with SMTP id c41so8142983yho.38
+        for <ceph-devel@vger.kernel.org>; Mon, 02 Dec 2013 18:47:34 -0800 (PST)
+In-Reply-To: <529D4528.3050901@catalyst.net.nz>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-I see. Do you have backtrace for the crash?
+On 12/02/2013 06:42 PM, Mark Kirkwood wrote:
+> I just updated master (a5eda4fcc34461dbc0fcc47448f8456097de15eb), and am
+> seeing OSDs failing to start:
+>
+> 2013-12-03 15:37:01.291200 7f488e1157c0 -1 OSD magic  != my ceph osd
+> volume v026
+> failed: 'ulimit -n 32768;  /usr/bin/ceph-osd -i 0 --pid-file
+> /var/run/ceph/osd.0.pid -c /etc/ceph/ceph.conf '
+>
+> Now it appears that the magic is not being read. It is however there and
+> seemingly ok:
+>
+> $ cat /var/lib/ceph/osd/ceph-0/magic
+> ceph osd volume v026
+>
+> Looking at src/osd/OSD.cc I wonder if something like this is needed (as
+> it seems that magic is being assigned to an empty val otherwise):
 
-On Mon, Dec 2, 2013 at 6:19 PM, Dominik Mostowiec
-<dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> 0.56.7
+Exactly, I merged the same fix independently a little while ago.
+
+> --- a/src/osd/OSD.cc
+> +++ b/src/osd/OSD.cc
+> @@ -731,7 +731,7 @@ int OSD::peek_meta(ObjectStore *store, std::string&
+> magic,
+>   {
+>     string val;
 >
-> W dniu poniedzia=B3ek, 2 grudnia 2013 u=BFytkownik Yehuda Sadeh napisa=B3:
->
->> I'm having trouble reproducing the issue. What version are you using?
->>
->> Thanks,
->> Yehuda
->>
->> On Mon, Dec 2, 2013 at 2:16 PM, Yehuda Sadeh <yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org> wrote:
->> > Actually, I read that differently. It only says that if there's more
->> > than 1 part, all parts except for the last one need to be > 5M. Which
->> > means that for uploads that are smaller than 5M there should be zero
->> > or one parts.
->> >
->> > On Mon, Dec 2, 2013 at 12:54 PM, Dominik Mostowiec
->> > <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
->> >> You're right.
->> >>
->> >> S3 api doc:
->> >> http://docs.aws.amazon.com/AmazonS3/latest/API/mpUploadComplete.html
->> >> "Err:EntityTooSmall
->> >> Your proposed upload is smaller than the minimum allowed object size.
->> >> Each part must be at least 5 MB in size, except the last part."
->> >>
->> >> Thanks.
->> >>
->> >> This error should be triggered from radosgw also.
->> >>
->> >> --
->> >> Regards
->> >> Dominik
->> >>
->> >> 2013/12/2 Yehuda Sadeh <yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>:
->> >>> Looks like it. There should be a guard against it (mulitpart upload
->> >>> minimum is 5M).
->> >>>
->> >>> On Mon, Dec 2, 2013 at 12:32 PM, Dominik Mostowiec
->> >>> <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
->> >>>> Yes, this is probably upload empty file.
->> >>>> This is the problem?
->> >>>>
->> >>>> --
->> >>>> Regards
->> >>>> Dominik
->> >>>>
->> >>>>
->> >>>> 2013/12/2 Yehuda Sadeh <yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>:
->> >>>>> By any chance are you uploading empty objects through the multipart
->> >>>>> upload api?
->> >>>>>
->> >>>>> On Mon, Dec 2, 2013 at 12:08 PM, Dominik Mostowiec
->> >>>>> <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
->> >>>>>> Hi,
->> >>>>>> Another file with the same problems:
->> >>>>>>
->> >>>>>> 2013-12-01 11:37:15.556687 7f7891fd3700  1 =3D=3D=3D=3D=3D=3D sta=
-rting new
->> >>>>>> request
->> >>>>>> req=3D0x25406d0 =3D=3D=3D=3D=3D
->> >>>>>> 2013-12-01 11:37:15.556739 7f7891fd3700  2 req
->> >>>>>> 1314:0.000052::::initializing
->> >>>>>> 2013-12-01 11:37:15.556789 7f7891fd3700 10 s->object=3Dfiles/192.=
-txt
->> >>>>>> s->bucket=3Dtestbucket
->> >>>>>> 2013-12-01 11:37:15.556799 7f7891fd3700  2 req
->> >>>>>> 1314:0.000112:s3:POST
->> >>>>>> /testbucket/files/192.txt::getting op
->> >>>>>> 2013-12-01 11:37:15.556804 7f7891fd3700  2 req
->> >>>>>> 1314:0.000118:s3:POST
->> >>>>>> /testbucket/files/192.txt:complete_multipart:authorizing
->> >>>>>> 2013-12-01 11:37:15.560013 7f7891fd3700 10 get_canon_resource():
->> >>>>>>
->> >>>>>> dest=3D/testbucket/files/192.txt?uploadId=3Di92xi2olzDtFAeLXlfU2P=
-FP9CDU87BC
->> >>>>>> 2013-12-01 11:37:15.560027 7f7891fd3700 10 auth_hdr:
->> >>>>>> POST
->> >>>>>>
->> >>>>>> application/xml
->> >>>>>> Sun, 01 Dec 2013 10:37:10 GMT
->> >>>>>> /testbucket/files/192.txt?uploadId=3Di92xi2olzDtFAeLXlfU2PFP9CDU8=
-7BC
->> >>>>>> 2013-12-01 11:37:15.560085 7f7891fd3700  2 req
->> >>>>>> 1314:0.003399:s3:POST
->> >>>>>> /testbucket/files/192.txt:complete_multipart:reading permissions
->> >>>>>> 2013-12-01 11:37:15.562356 7f7891fd3700  2 req
->> >>>>>> 1314:0.005670:s3:POST
->> >>>>>> /testbucket/files/192.txt:complete_multipart:verifying op
->> >>>>>> permissions
->> >>>>>> 2013-12-01 11:37:15.562373 7f7891fd3700  5 Searching permissions
->> >>>>>> for
->> >>>>>> uid=3D0 mask=3D2
->> >>>>>> 2013-12-01 11:37:15.562377 7f7891fd3700  5 Found permission: 15
->> >>>>>> 2013-12-01 11:37:15.562378 7f7891fd3700 10  uid=3D0 requested perm
->> >>>>>> (type)=3D2, policy perm=3D2, user_perm_mask=3D2, acl perm=3D2
->> >>>>>> 2013-12-01 11:37:15.562381 7f7891fd3700  2 req
->> >>>>>> 1314:0.005695:s3:POST
->> >>>>>> /testbucket/files/192.txt:complete_multipart:verifying op params
->> >>>>>> 2013-12-01 11:37:15.562384 7f7891fd3700  2 req
->> >>>>>> 1314:0.005698:s3:POST
->> >>>>>> /testbucket/files/192.txt:complete_multipart:executing
->> >>>>>> 2013-12-01 11:37:15.565461 7f7891fd3700 10 calculated etag:
->> >>>>>> d41d8cd98f00b204e9800998ecf8427e-0
->> >>>>>> 2013-12-01 11:37:15.566718 7f7891fd3700 10 can't clone object
->> >>>>>> testbucket:files/192.txt to shadow object, tag/shadow_obj haven't
->> >>>>>> been
->> >>>>>> set
->> >>>>>> 2013-12-01 11:37:15.566777 7f7891fd3700  0 setting object
->> >>>>>> tag=3D_leyAzxCw7YxpKv8P3v3QGwcsw__9VmP
->> >>>>>> 2013-12-01 11:37:15.678973 7f7891fd3700  2 req
->> >>>>>> 1314:0.122286:s3:POST
->> >>>>>> /testbucket/files/192.txt:complete_multipart:http status=3D200
->> >>>>>> 2013-12-01 11:37:15.679192 7f7891fd3700  1 =3D=3D=3D=3D=3D=3D req=
- done
->> >>>>>> req=3D0x25406d0 http_status=3D200 =3D=3D=3D=3D=3D=3D
->> >>>>>>
->> >>>>>> Yes, I can read oryginal object.
->> >>>>>>
->> >>>>>> --
->> >>>>>> Regards
->> >>>>>> Dominik
->> >>>>>>
->> >>>>>> 2013/12/2 Yehuda Sadeh <yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>:
->> >>>>>>> That's unknown bug. I have a guess as to how the original object
->> >>>>>>> was
->> >>>>>>> created. Can you read the original object, but only copy fails?
->> >>>>>>>
->> >>>>>>> On Dec 2, 2013 4:53 AM, "Dominik Mostowiec"
->> >>>>>>> <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
->> >>>>>>> wrote:
->> >>>>>>>>
->> >>>>>>>> Hi,
->> >>>>>>>> I found that issue is related with "ETag: ....-0" (ends -0)
->> >>>>>>>> This is known bug ?
->> >>>>>>>>
->> >>>>>>>> --
->> >>>>>>>> Regards
->> >>>>>>>> Dominik
->> >>>>>>>>
->> >>>>>>>> 2013/12/2 Dominik Mostowiec <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>:
->> >>>>>>>> > Hi,
->> >>>>>>>> > I have strange problem.
->> >>>>>>>> > Obj copy (0 size) killing radosgw.
->> >>>>>>>> >
->> >>>>>>>> > Head for this file:
->> >>>>>>>> > Content-Type: application/octet-stream
->> >>>>>>>> > Server: Apache/2.2.22 (Ubuntu)
->> >>>>>>>> > ETag: "d41d8cd98f00b204e9800998ecf8427e-0"
->> >>>>>>>> > Last-Modified: 2013-12-01T10:37:15Z
->> >>>>>>>> >
->> >>>>>>>> > rgw log.
->> >>>>>>>> > 2013-12-02 08:18:59.196651 7f5308ff1700  1 =3D=3D=3D=3D=3D=3D=
- starting new
->> >>>>>>>> > request
->> >>>>>>>> > req=3D0x2be6fa0 =3D=3D=3D=3D=3D
->> >>>>>>>> > 2013-12-02 08:18:59.196709 7f5308ff1700  2 req
->> >>>>>>>> > 237:0.000058::::initializing
->> >>>>>>>> > 2013-12-02 08:18:59.196752 7f5308ff1700 10 meta>>
->> >>>>>>>> > HTTP_X_AMZ_ACL=3Dpublic-read
->> >>>>>>>> > 2013-12-02 08:18:59.196760 7f5308ff1700 10 meta>>
->> >>>>>>>> > HTTP_X_AMZ_COPY_SOURCE=3D/testbucket/testfile.xml
->> >>>>>>>> > 2013-12-02 08:18:59.196766 7f5308ff1700 10 meta>>
->> >>>>>>>> > HTTP_X_AMZ_METADATA_DIRECTIVE=3DCOPY
->> >>>>>>>> > 2013-12-02 08:18:59.196771 7f5308ff1700 10 x>>
->> >>>>>>>> > x-amz-acl:public-read
->> >>>>>>>> > 2013-12-02 08:18:59.196772 7f5308ff1700 10 x>>
->> >>>>>>>> > x-amz-copy-source:/testbucket/testfile.xml
->> >>>>>>>> > 2013-12-02 08:18:59.196773 7f5308ff1700 10 x>>
->> >>>>>>>> > x-amz-metadata-directive:COPY
->> >>>>>>>> > 2013-12-02 08:18:59.196786 7f5308ff1700 10
->> >>>>>>>> > s->object=3D/testbucket/new_testfile.ini s->bucket=3Dtestbuck=
-et
->> >>>>>>>> > 2013-12-02 08:18:59.196792 7f5308ff1700  2 req
->> >>>>>>>> > 237:0.000141:s3:PUT
->> >>>>>>>> > /testbucket/new_testfile.ini::getting op
->> >>>>>>>> > 2013-12-02 08:18:59.196797 7f5308ff1700  2 req
->> >>>>>>>> > 237:0.000146:s3:PUT
->> >>>>>>>> > /testbucket/new_testfile.ini:copy_obj:authorizing
->> >>>>>>>> > 2013-12-02 08:18:59.200648 7f5308ff1700 10
->> >>>>>>>> > get_canon_resource():
->> >>>>>>>> > dest=3D/testbucket/new_testfile.ini
->> >>>>>>>> > 2013-12-02 08:18:59.200661 7f5308ff1700 10 auth_hdr:
->> >>>>>>>> > PUT
->> >>>>>>>> > 1B2M2Y8AsgTpgAmY7PhCfg=3D=3D
->> >>>>>>>> > application/octet-stream
->> >>>>>>>> > Mon, 02 Dec 2013 07:18:55 GMT
->> >>>>>>>> > x-amz-acl:public-read
->> >>>>>>>> > x-amz-copy-source:/testbucket/testfile.xml
->> >>>>>>>> > x-amz-metadata-directive:COPY
->> >>>>>>>> > /testbucket/new_testfile.ini
->> >>>>>>>> > 2013-12-02 08:18:59.200717 7f5308ff1700  2 req
->> >>>>>>>> > 237:0.004066:s3:PUT
->> >>>>>>>> > /testbucket/new_testfile.ini:copy_obj:reading permissions
->> >>>>>>>> > 2013-12-02 08:18:59.203330 7f5308ff1700  2 req
->> >>>>>>>> > 237:0.006679:s3:PUT
->> >>>>>>>> > /testbucket/new_testfile.ini:copy_obj:verifying op permissions
->> >>>>>>>> > 2013-12-02 08:18:59.207627 7f5308ff1700 10 manifest: total_si=
-ze
->> >>>>>>>> > =3D 0
->> >>>>>>>> > 2013-12-02 08:18:59.207649 7f5308ff1700  5 Searching
->> >>>>>>>> > permissions for
->> >>>>>>>> > uid=3D0 mask=3D1
->> >>>>>>>> > 2013-12-02 08:18:59.207652 7f5308ff1700  5 Found permission: =
-15
->> >>>>>>>> > 2013-12-02 08:18:59.207654 7f5308ff1700 10  uid=3D0 requested
->> >>>>>>>> > perm
->> >>>>>>>> > (type)=3D1, policy perm=3D1, user_perm_mask=3D15, acl perm=3D1
->> >>>>>>>> > 2013-12-02 08:18:59.207669 7f5308ff1700  5 Searching
->> >>>>>>>> > permissions for
->> >>>>>>>> > uid=3D0 mask=3D2
->> >>>>>>>> > 2013-12-02 08:18:59.207670 7f5308ff1700  5 Found permission: =
-15
->> >>>>>>>> > 2013-12-02 08:18:59.207671 7f5308ff1700 10  uid=3D0 requested
->> >>>>>>>> > perm
->> >>>>>>>> > (type)=3D2, policy perm=3D2, user_perm_mask=3D15, acl perm=3D2
->> >>>>>>>> > 2013-12-02 08:18:59.207681 7f5308ff1700  2 req
->> >>>>>>>> > 237:0.011030:s3:PUT
->> >>>>>>>> > /testbucket/new_testfile.ini:copy_obj:verifying op params
->> >>>>>>>> > 2013-12-02 08:18:59.207686 7f5308ff1700  2 req
->> >>>>>>>> > 237:0.011035:s3:PUT
->> >>>>>>>> > /testbucket/new_testfile.ini:copy_obj:executing
->> >>>>>>>> > 2013-12-02 08:18:59.207699 7f5308ff1700 10 x>>
->> >>>>>>>> > x-amz-acl:public-read
->> >>>>>>>> > 2013-12-02 08:18:59.207704 7f5308ff1700 10 x>>
->> >>>>>>>> > x-amz-copy-source:/testbucket/testfile.xml
->> >>>>>>>> > 2013-12-02 08:18:59.207709 7f5308ff1700 10 x>>
->> >>>>>>>> > x-amz-metadata-directive:COPY
->> >>>>>>>> > 2013-12-02 08:18:59.207759 7f5308ff1700  5 Copy object
->> >>>>>>>> > testbucket(@.rgw.buckets[406250.1]):testfile.ini =3D>
->> >>>>>>>> > testbucket(@.rgw.buckets[406250.1]):new_testfile.ini
->> >>>>>>>> > 2013-12-02 08:18:59.208903 7f5308ff1700 -1 *** Caught signal
->> >>>>>>>> > (Segmentation fault) **
->> >>>>>>>> >  in thread 7f5308ff1700
->> >>>>>>>> >
->> >>>>>>>> >
->> >>>>>>>> > --
->> >>>>>>>> > Regards
->> >>>>>>>> > Dominik
->> >>>>>>>>
->> >>>>>>>>
->> >>>>>>>>
->> >>>>>>>> --
->> >>>>>>>> Pozdrawiam
->> >>>>>>>> Dominik
->> >>>>>>>> _______________________________________________
->> >>>>>>>> ceph-users mailing list
->> >>>>>>>> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
->> >>>>>>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->> >>>>>>
->> >>>>>>
->> >>>>>>
->> >>>>>> --
->> >>>>>> Pozdrawiam
->> >>>>>> Dominik
->> >>>>
->> >>>>
->> >>>>
->> >>>> --
->> >>>> Pozdrawiam
->> >>>> Dominik
->> >>
->> >>
->> >>
->> >> --
->> >> Pozdrawiam
->> >> Dominik
+> -  int r = store->read_meta("magic", &magic);
+> +  int r = store->read_meta("magic", &val);
+>     if (r < 0)
+>       return r;
+>     magic = val;
 >
 >
->
-> --
-> Pozdrawiam
-> Dominik
+> This makes the osd's start ok, but the mon does not detect  them
+> (possibly another issue or my patch is wrong). I'll keep looking :-)
+
+Not sure what's going on here yet, as the boot message is sent and
+received.
