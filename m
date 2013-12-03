@@ -1,251 +1,80 @@
-From: Yehuda Sadeh <yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: radosgw Segmentation fault on obj copy
-Date: Mon, 2 Dec 2013 14:30:07 -0800
-Message-ID: <CABBk=J9a3M6yAZj40+XZKLfmoHj7xsYj3GTfs34Be8twSb19UQ@mail.gmail.com>
-References: <CAMNMNTzEVkom0cBe_jepaE95hzVGys+8y+-PA+2dSsTqNwg=tA@mail.gmail.com>
-	<CAMNMNTzx_CHmYRXXE-KhbEwNZqLAAcTBp-5SZks7UiQ+OS1XqA@mail.gmail.com>
-	<CABBk=J-HAPxi4eg0AW_vD0T+QoqRzBMchpovM9s+EhzzC2ZZmg@mail.gmail.com>
-	<CAMNMNTzMvb-udVW5LrOhJLCSWWP5KVMHHyLrHwsY=bv3ckXyGA@mail.gmail.com>
-	<CABBk=J-xw8G5Uuj1HGonP-B_Xzqn=A0myE-C28sWMMpnH9tbmA@mail.gmail.com>
-	<CAMNMNTxYE=nqg04X7Wa0U2g3iW-HfkDBCEY_fv75D+nE7=xz4w@mail.gmail.com>
-	<CABBk=J8emXQJQvoUhKQVEWUqs3=z_sP-4ADgo7aAaVNORrYh_g@mail.gmail.com>
-	<CAMNMNTy8VqNQRtbW-dvGd0A2vmWtP+ty0d9ezB4ed+fj-3Qf_A@mail.gmail.com>
-	<CABBk=J8GeCckYaxFu+_8jwagKtt2vOkmMsQ=1vii+MR7-erYjQ@mail.gmail.com>
+From: "Luo Shaobo (DSI)" <luosb@dsi.a-star.edu.sg>
+Subject: MDS can't join in
+Date: Tue, 3 Dec 2013 01:31:29 +0000
+Message-ID: <7061367AB47B6A4EAE551551A9A197330100F96F@S3-EXCHMB04.shared-svc.local>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CABBk=J8GeCckYaxFu+_8jwagKtt2vOkmMsQ=1vii+MR7-erYjQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Dominik Mostowiec <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Transfer-Encoding: 8BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from gw2.scei.a-star.edu.sg ([192.122.140.11]:46528 "EHLO
+	gw2.scei.a-star.edu.sg" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752335Ab3LCBee convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Dec 2013 20:34:34 -0500
+Received: from pps.filterd (gw2.scei.a-star.edu.sg [127.0.0.1])
+	by gw2.scei.a-star.edu.sg (8.14.5/8.14.5) with SMTP id rB31YVj9001615
+	for <ceph-devel@vger.kernel.org>; Tue, 3 Dec 2013 09:34:31 +0800
+Received: from s3-cas04.shared-svc.local ([10.217.253.200])
+	by gw2.scei.a-star.edu.sg with ESMTP id 1gdr7qxapb-1
+	for <ceph-devel@vger.kernel.org>; Tue, 03 Dec 2013 09:34:31 +0800
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-I'm having trouble reproducing the issue. What version are you using?
+Dear All,
 
-Thanks,
-Yehuda
+I have updated a new version of Ceph, but I meet some strange things. It seems that MDS does not join the cluster.
 
-On Mon, Dec 2, 2013 at 2:16 PM, Yehuda Sadeh <yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org> wrote:
-> Actually, I read that differently. It only says that if there's more
-> than 1 part, all parts except for the last one need to be > 5M. Which
-> means that for uploads that are smaller than 5M there should be zero
-> or one parts.
->
-> On Mon, Dec 2, 2013 at 12:54 PM, Dominik Mostowiec
-> <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
->> You're right.
->>
->> S3 api doc: http://docs.aws.amazon.com/AmazonS3/latest/API/mpUploadComplete.html
->> "Err:EntityTooSmall
->> Your proposed upload is smaller than the minimum allowed object size.
->> Each part must be at least 5 MB in size, except the last part."
->>
->> Thanks.
->>
->> This error should be triggered from radosgw also.
->>
->> --
->> Regards
->> Dominik
->>
->> 2013/12/2 Yehuda Sadeh <yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>:
->>> Looks like it. There should be a guard against it (mulitpart upload
->>> minimum is 5M).
->>>
->>> On Mon, Dec 2, 2013 at 12:32 PM, Dominik Mostowiec
->>> <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
->>>> Yes, this is probably upload empty file.
->>>> This is the problem?
->>>>
->>>> --
->>>> Regards
->>>> Dominik
->>>>
->>>>
->>>> 2013/12/2 Yehuda Sadeh <yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>:
->>>>> By any chance are you uploading empty objects through the multipart upload api?
->>>>>
->>>>> On Mon, Dec 2, 2013 at 12:08 PM, Dominik Mostowiec
->>>>> <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
->>>>>> Hi,
->>>>>> Another file with the same problems:
->>>>>>
->>>>>> 2013-12-01 11:37:15.556687 7f7891fd3700  1 ====== starting new request
->>>>>> req=0x25406d0 =====
->>>>>> 2013-12-01 11:37:15.556739 7f7891fd3700  2 req 1314:0.000052::::initializing
->>>>>> 2013-12-01 11:37:15.556789 7f7891fd3700 10 s->object=files/192.txt
->>>>>> s->bucket=testbucket
->>>>>> 2013-12-01 11:37:15.556799 7f7891fd3700  2 req 1314:0.000112:s3:POST
->>>>>> /testbucket/files/192.txt::getting op
->>>>>> 2013-12-01 11:37:15.556804 7f7891fd3700  2 req 1314:0.000118:s3:POST
->>>>>> /testbucket/files/192.txt:complete_multipart:authorizing
->>>>>> 2013-12-01 11:37:15.560013 7f7891fd3700 10 get_canon_resource():
->>>>>> dest=/testbucket/files/192.txt?uploadId=i92xi2olzDtFAeLXlfU2PFP9CDU87BC
->>>>>> 2013-12-01 11:37:15.560027 7f7891fd3700 10 auth_hdr:
->>>>>> POST
->>>>>>
->>>>>> application/xml
->>>>>> Sun, 01 Dec 2013 10:37:10 GMT
->>>>>> /testbucket/files/192.txt?uploadId=i92xi2olzDtFAeLXlfU2PFP9CDU87BC
->>>>>> 2013-12-01 11:37:15.560085 7f7891fd3700  2 req 1314:0.003399:s3:POST
->>>>>> /testbucket/files/192.txt:complete_multipart:reading permissions
->>>>>> 2013-12-01 11:37:15.562356 7f7891fd3700  2 req 1314:0.005670:s3:POST
->>>>>> /testbucket/files/192.txt:complete_multipart:verifying op permissions
->>>>>> 2013-12-01 11:37:15.562373 7f7891fd3700  5 Searching permissions for
->>>>>> uid=0 mask=2
->>>>>> 2013-12-01 11:37:15.562377 7f7891fd3700  5 Found permission: 15
->>>>>> 2013-12-01 11:37:15.562378 7f7891fd3700 10  uid=0 requested perm
->>>>>> (type)=2, policy perm=2, user_perm_mask=2, acl perm=2
->>>>>> 2013-12-01 11:37:15.562381 7f7891fd3700  2 req 1314:0.005695:s3:POST
->>>>>> /testbucket/files/192.txt:complete_multipart:verifying op params
->>>>>> 2013-12-01 11:37:15.562384 7f7891fd3700  2 req 1314:0.005698:s3:POST
->>>>>> /testbucket/files/192.txt:complete_multipart:executing
->>>>>> 2013-12-01 11:37:15.565461 7f7891fd3700 10 calculated etag:
->>>>>> d41d8cd98f00b204e9800998ecf8427e-0
->>>>>> 2013-12-01 11:37:15.566718 7f7891fd3700 10 can't clone object
->>>>>> testbucket:files/192.txt to shadow object, tag/shadow_obj haven't been
->>>>>> set
->>>>>> 2013-12-01 11:37:15.566777 7f7891fd3700  0 setting object
->>>>>> tag=_leyAzxCw7YxpKv8P3v3QGwcsw__9VmP
->>>>>> 2013-12-01 11:37:15.678973 7f7891fd3700  2 req 1314:0.122286:s3:POST
->>>>>> /testbucket/files/192.txt:complete_multipart:http status=200
->>>>>> 2013-12-01 11:37:15.679192 7f7891fd3700  1 ====== req done
->>>>>> req=0x25406d0 http_status=200 ======
->>>>>>
->>>>>> Yes, I can read oryginal object.
->>>>>>
->>>>>> --
->>>>>> Regards
->>>>>> Dominik
->>>>>>
->>>>>> 2013/12/2 Yehuda Sadeh <yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>:
->>>>>>> That's unknown bug. I have a guess as to how the original object was
->>>>>>> created. Can you read the original object, but only copy fails?
->>>>>>>
->>>>>>> On Dec 2, 2013 4:53 AM, "Dominik Mostowiec" <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
->>>>>>> wrote:
->>>>>>>>
->>>>>>>> Hi,
->>>>>>>> I found that issue is related with "ETag: ....-0" (ends -0)
->>>>>>>> This is known bug ?
->>>>>>>>
->>>>>>>> --
->>>>>>>> Regards
->>>>>>>> Dominik
->>>>>>>>
->>>>>>>> 2013/12/2 Dominik Mostowiec <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>:
->>>>>>>> > Hi,
->>>>>>>> > I have strange problem.
->>>>>>>> > Obj copy (0 size) killing radosgw.
->>>>>>>> >
->>>>>>>> > Head for this file:
->>>>>>>> > Content-Type: application/octet-stream
->>>>>>>> > Server: Apache/2.2.22 (Ubuntu)
->>>>>>>> > ETag: "d41d8cd98f00b204e9800998ecf8427e-0"
->>>>>>>> > Last-Modified: 2013-12-01T10:37:15Z
->>>>>>>> >
->>>>>>>> > rgw log.
->>>>>>>> > 2013-12-02 08:18:59.196651 7f5308ff1700  1 ====== starting new request
->>>>>>>> > req=0x2be6fa0 =====
->>>>>>>> > 2013-12-02 08:18:59.196709 7f5308ff1700  2 req
->>>>>>>> > 237:0.000058::::initializing
->>>>>>>> > 2013-12-02 08:18:59.196752 7f5308ff1700 10 meta>>
->>>>>>>> > HTTP_X_AMZ_ACL=public-read
->>>>>>>> > 2013-12-02 08:18:59.196760 7f5308ff1700 10 meta>>
->>>>>>>> > HTTP_X_AMZ_COPY_SOURCE=/testbucket/testfile.xml
->>>>>>>> > 2013-12-02 08:18:59.196766 7f5308ff1700 10 meta>>
->>>>>>>> > HTTP_X_AMZ_METADATA_DIRECTIVE=COPY
->>>>>>>> > 2013-12-02 08:18:59.196771 7f5308ff1700 10 x>> x-amz-acl:public-read
->>>>>>>> > 2013-12-02 08:18:59.196772 7f5308ff1700 10 x>>
->>>>>>>> > x-amz-copy-source:/testbucket/testfile.xml
->>>>>>>> > 2013-12-02 08:18:59.196773 7f5308ff1700 10 x>>
->>>>>>>> > x-amz-metadata-directive:COPY
->>>>>>>> > 2013-12-02 08:18:59.196786 7f5308ff1700 10
->>>>>>>> > s->object=/testbucket/new_testfile.ini s->bucket=testbucket
->>>>>>>> > 2013-12-02 08:18:59.196792 7f5308ff1700  2 req 237:0.000141:s3:PUT
->>>>>>>> > /testbucket/new_testfile.ini::getting op
->>>>>>>> > 2013-12-02 08:18:59.196797 7f5308ff1700  2 req 237:0.000146:s3:PUT
->>>>>>>> > /testbucket/new_testfile.ini:copy_obj:authorizing
->>>>>>>> > 2013-12-02 08:18:59.200648 7f5308ff1700 10 get_canon_resource():
->>>>>>>> > dest=/testbucket/new_testfile.ini
->>>>>>>> > 2013-12-02 08:18:59.200661 7f5308ff1700 10 auth_hdr:
->>>>>>>> > PUT
->>>>>>>> > 1B2M2Y8AsgTpgAmY7PhCfg==
->>>>>>>> > application/octet-stream
->>>>>>>> > Mon, 02 Dec 2013 07:18:55 GMT
->>>>>>>> > x-amz-acl:public-read
->>>>>>>> > x-amz-copy-source:/testbucket/testfile.xml
->>>>>>>> > x-amz-metadata-directive:COPY
->>>>>>>> > /testbucket/new_testfile.ini
->>>>>>>> > 2013-12-02 08:18:59.200717 7f5308ff1700  2 req 237:0.004066:s3:PUT
->>>>>>>> > /testbucket/new_testfile.ini:copy_obj:reading permissions
->>>>>>>> > 2013-12-02 08:18:59.203330 7f5308ff1700  2 req 237:0.006679:s3:PUT
->>>>>>>> > /testbucket/new_testfile.ini:copy_obj:verifying op permissions
->>>>>>>> > 2013-12-02 08:18:59.207627 7f5308ff1700 10 manifest: total_size = 0
->>>>>>>> > 2013-12-02 08:18:59.207649 7f5308ff1700  5 Searching permissions for
->>>>>>>> > uid=0 mask=1
->>>>>>>> > 2013-12-02 08:18:59.207652 7f5308ff1700  5 Found permission: 15
->>>>>>>> > 2013-12-02 08:18:59.207654 7f5308ff1700 10  uid=0 requested perm
->>>>>>>> > (type)=1, policy perm=1, user_perm_mask=15, acl perm=1
->>>>>>>> > 2013-12-02 08:18:59.207669 7f5308ff1700  5 Searching permissions for
->>>>>>>> > uid=0 mask=2
->>>>>>>> > 2013-12-02 08:18:59.207670 7f5308ff1700  5 Found permission: 15
->>>>>>>> > 2013-12-02 08:18:59.207671 7f5308ff1700 10  uid=0 requested perm
->>>>>>>> > (type)=2, policy perm=2, user_perm_mask=15, acl perm=2
->>>>>>>> > 2013-12-02 08:18:59.207681 7f5308ff1700  2 req 237:0.011030:s3:PUT
->>>>>>>> > /testbucket/new_testfile.ini:copy_obj:verifying op params
->>>>>>>> > 2013-12-02 08:18:59.207686 7f5308ff1700  2 req 237:0.011035:s3:PUT
->>>>>>>> > /testbucket/new_testfile.ini:copy_obj:executing
->>>>>>>> > 2013-12-02 08:18:59.207699 7f5308ff1700 10 x>> x-amz-acl:public-read
->>>>>>>> > 2013-12-02 08:18:59.207704 7f5308ff1700 10 x>>
->>>>>>>> > x-amz-copy-source:/testbucket/testfile.xml
->>>>>>>> > 2013-12-02 08:18:59.207709 7f5308ff1700 10 x>>
->>>>>>>> > x-amz-metadata-directive:COPY
->>>>>>>> > 2013-12-02 08:18:59.207759 7f5308ff1700  5 Copy object
->>>>>>>> > testbucket(@.rgw.buckets[406250.1]):testfile.ini =>
->>>>>>>> > testbucket(@.rgw.buckets[406250.1]):new_testfile.ini
->>>>>>>> > 2013-12-02 08:18:59.208903 7f5308ff1700 -1 *** Caught signal
->>>>>>>> > (Segmentation fault) **
->>>>>>>> >  in thread 7f5308ff1700
->>>>>>>> >
->>>>>>>> >
->>>>>>>> > --
->>>>>>>> > Regards
->>>>>>>> > Dominik
->>>>>>>>
->>>>>>>>
->>>>>>>>
->>>>>>>> --
->>>>>>>> Pozdrawiam
->>>>>>>> Dominik
->>>>>>>> _______________________________________________
->>>>>>>> ceph-users mailing list
->>>>>>>> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
->>>>>>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->>>>>>
->>>>>>
->>>>>>
->>>>>> --
->>>>>> Pozdrawiam
->>>>>> Dominik
->>>>
->>>>
->>>>
->>>> --
->>>> Pozdrawiam
->>>> Dominik
->>
->>
->>
->> --
->> Pozdrawiam
->> Dominik
+In the manager node, there no MDS in. and the log of ceph_mds  shows error during decoding block for decryption. But all the configuration on all the node are same.
+
+1.  sudo cat /etc/ceph/ceph.client.admin.keyring
+[client.admin]
+        key = AQADa5xSCNRIIRAA/wPhnf+opgCFfwVFQTI0sg==
+
+2. sudo cat /etc/ceph/ceph.conf
+[global]
+fsid = fc446df6-cc65-4ae8-8508-9eb8db6ad922
+mon_initial_members = ubuntu217
+mon_host = 192.168.36.217
+auth_supported = cephx
+osd_journal_size = 1024
+filestore_xattr_use_omap = true
+
+3. ceph mds dump.
+dumped mdsmap epoch 32
+epoch   32
+flags   0
+created 2013-12-02 19:12:02.932374
+modified        2013-12-03 18:13:03.363896
+tableserver     0
+root    0
+session_timeout 60
+session_autoclose       300
+last_failure    0
+last_failure_osd_epoch  19
+compat  compat={},rocompat={},incompat={1=base v0.20,2=client writeable ranges,3=default file layouts on dirs,4=dir inode in separate object,5=mds uses versioned encoding}
+max_mds 1
+in      0
+up      {0=4322}
+failed
+stopped
+data_pools      0
+metadata_pool   1
+4322:   192.168.36.217:6800/2507 'ubuntu217' mds.0.6 up:replay seq 1 laggy since 2013-12-03 18:09:18.277255
+
+4. ceph-mds process log.
+
+ceph@ubuntu217:~$ sudo /usr/bin/ceph-mds --cluster=ceph -i ubuntu217 -d
+2013-12-03 18:08:55.210327 7f30827a5780  0 starting mds.ubuntu217 at :/ceph version 0.72.1 (4d923861868f6a15dcb33fef7f50f674997322de), process ceph-mds, pid 2507
+0
+2013-12-03 18:08:55.235122 7f307d838700  1 mds.0.6 handle_mds_map i am now mds.0.6
+2013-12-03 18:08:55.235125 7f307d838700  1 mds.0.6 handle_mds_map state change up:boot --> up:replay
+2013-12-03 18:08:55.235135 7f307d838700  1 mds.0.6 replay_start
+2013-12-03 18:08:55.235139 7f307d838700  1 mds.0.6  recovery set is
+2013-12-03 18:08:55.235141 7f307d838700  1 mds.0.6  need osdmap epoch 19, have 19
+2013-12-03 18:08:55.237000 7f307a630700  0 cephx: verify_reply couldn't decrypt with error: error decoding block for decryption
+2013-12-03 18:08:55.237028 7f307a630700  0 -- 192.168.36.217:6800/2507 >> 192.168.35.82:6800/7500 pipe(0x298b500 sd=16 :48150 s=1 pgs=0 cs=0 l=1 c=0x2958840).failed verifying authorize reply
+2013-12-03 18:08:55.237083 7f307a630700  0 -- 192.168.36.217:6800/2507 >> 192.168.35.82:6800/7500 pipe(0x298b500 sd=16 :48150 s=1 pgs=0 cs=0 l=1 c=0x2958840).fault
+
+________________________________
+This email and any attachments are confidential and may be privileged. If you are not the intended recipient, please delete it and notify us immediately. Please do not copy or use it for any purpose, or disclose its contents to any other person. This email does not constitute a contract offer, a contract amendment, or an acceptance of a contract offer. Thank you.
