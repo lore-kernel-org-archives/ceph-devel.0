@@ -1,7 +1,7 @@
 From: Dominik Mostowiec <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Subject: Re: radosgw Segmentation fault on obj copy
-Date: Tue, 3 Dec 2013 03:13:33 +0100
-Message-ID: <CAMNMNTyL450z=uTHMs9Uo=Gf8EOLikcyn0i7_jMRX63KwHZfEA@mail.gmail.com>
+Date: Tue, 3 Dec 2013 03:19:13 +0100
+Message-ID: <CAMNMNTwk=q0aStrqJACqnB64AhGSH13LwNGzb3hC1DQMeZtwOg@mail.gmail.com>
 References: <CAMNMNTzEVkom0cBe_jepaE95hzVGys+8y+-PA+2dSsTqNwg=tA@mail.gmail.com>
 	<CAMNMNTzx_CHmYRXXE-KhbEwNZqLAAcTBp-5SZks7UiQ+OS1XqA@mail.gmail.com>
 	<CABBk=J-HAPxi4eg0AW_vD0T+QoqRzBMchpovM9s+EhzzC2ZZmg@mail.gmail.com>
@@ -13,7 +13,7 @@ References: <CAMNMNTzEVkom0cBe_jepaE95hzVGys+8y+-PA+2dSsTqNwg=tA@mail.gmail.com>
 	<CABBk=J8GeCckYaxFu+_8jwagKtt2vOkmMsQ=1vii+MR7-erYjQ@mail.gmail.com>
 	<CABBk=J9a3M6yAZj40+XZKLfmoHj7xsYj3GTfs34Be8twSb19UQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============1713191317=="
+Content-Type: multipart/mixed; boundary="===============0448875733=="
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 In-Reply-To: <CABBk=J9a3M6yAZj40+XZKLfmoHj7xsYj3GTfs34Be8twSb19UQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
@@ -26,31 +26,35 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 To: Yehuda Sadeh <yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
---===============1713191317==
-Content-Type: multipart/alternative; boundary=089e01175e4dedd57a04ec97d7c1
+--===============0448875733==
+Content-Type: multipart/alternative; boundary=089e0149c50628decf04ec97ec71
 
---089e01175e4dedd57a04ec97d7c1
-Content-Type: text/plain; charset=ISO-8859-1
+--089e0149c50628decf04ec97ec71
+Content-Type: text/plain; charset=ISO-8859-2
+Content-Transfer-Encoding: quoted-printable
 
 0.56.7
-On Dec 2, 2013 11:30 PM, "Yehuda Sadeh" <yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org> wrote:
+
+W dniu poniedzia=B3ek, 2 grudnia 2013 u=BFytkownik Yehuda Sadeh napisa=B3:
 
 > I'm having trouble reproducing the issue. What version are you using?
 >
 > Thanks,
 > Yehuda
 >
-> On Mon, Dec 2, 2013 at 2:16 PM, Yehuda Sadeh <yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org> wrote:
+> On Mon, Dec 2, 2013 at 2:16 PM, Yehuda Sadeh <yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org<javascri=
+pt:;>>
+> wrote:
 > > Actually, I read that differently. It only says that if there's more
 > > than 1 part, all parts except for the last one need to be > 5M. Which
 > > means that for uploads that are smaller than 5M there should be zero
 > > or one parts.
 > >
 > > On Mon, Dec 2, 2013 at 12:54 PM, Dominik Mostowiec
-> > <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+> > <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org <javascript:;>> wrote:
 > >> You're right.
 > >>
 > >> S3 api doc:
@@ -67,12 +71,12 @@ On Dec 2, 2013 11:30 PM, "Yehuda Sadeh" <yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gm
 > >> Regards
 > >> Dominik
 > >>
-> >> 2013/12/2 Yehuda Sadeh <yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>:
+> >> 2013/12/2 Yehuda Sadeh <yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org <javascript:;>>:
 > >>> Looks like it. There should be a guard against it (mulitpart upload
 > >>> minimum is 5M).
 > >>>
 > >>> On Mon, Dec 2, 2013 at 12:32 PM, Dominik Mostowiec
-> >>> <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+> >>> <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org <javascript:;>> wrote:
 > >>>> Yes, this is probably upload empty file.
 > >>>> This is the problem?
 > >>>>
@@ -81,48 +85,59 @@ On Dec 2, 2013 11:30 PM, "Yehuda Sadeh" <yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gm
 > >>>> Dominik
 > >>>>
 > >>>>
-> >>>> 2013/12/2 Yehuda Sadeh <yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>:
+> >>>> 2013/12/2 Yehuda Sadeh <yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org <javascript:;>>:
 > >>>>> By any chance are you uploading empty objects through the multipart
 > upload api?
 > >>>>>
 > >>>>> On Mon, Dec 2, 2013 at 12:08 PM, Dominik Mostowiec
-> >>>>> <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+> >>>>> <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org <javascript:;>> wrote:
 > >>>>>> Hi,
 > >>>>>> Another file with the same problems:
 > >>>>>>
-> >>>>>> 2013-12-01 11:37:15.556687 7f7891fd3700  1 ====== starting new
+> >>>>>> 2013-12-01 11:37:15.556687 7f7891fd3700  1 =3D=3D=3D=3D=3D=3D star=
+ting new
 > request
-> >>>>>> req=0x25406d0 =====
+> >>>>>> req=3D0x25406d0 =3D=3D=3D=3D=3D
 > >>>>>> 2013-12-01 11:37:15.556739 7f7891fd3700  2 req
 > 1314:0.000052::::initializing
-> >>>>>> 2013-12-01 11:37:15.556789 7f7891fd3700 10 s->object=files/192.txt
-> >>>>>> s->bucket=testbucket
-> >>>>>> 2013-12-01 11:37:15.556799 7f7891fd3700  2 req 1314:0.000112:s3:POST
+> >>>>>> 2013-12-01 11:37:15.556789 7f7891fd3700 10 s->object=3Dfiles/192.t=
+xt
+> >>>>>> s->bucket=3Dtestbucket
+> >>>>>> 2013-12-01 11:37:15.556799 7f7891fd3700  2 req 1314:0.000112:s3:PO=
+ST
 > >>>>>> /testbucket/files/192.txt::getting op
-> >>>>>> 2013-12-01 11:37:15.556804 7f7891fd3700  2 req 1314:0.000118:s3:POST
+> >>>>>> 2013-12-01 11:37:15.556804 7f7891fd3700  2 req 1314:0.000118:s3:PO=
+ST
 > >>>>>> /testbucket/files/192.txt:complete_multipart:authorizing
 > >>>>>> 2013-12-01 11:37:15.560013 7f7891fd3700 10 get_canon_resource():
 > >>>>>>
-> dest=/testbucket/files/192.txt?uploadId=i92xi2olzDtFAeLXlfU2PFP9CDU87BC
+> dest=3D/testbucket/files/192.txt?uploadId=3Di92xi2olzDtFAeLXlfU2PFP9CDU87=
+BC
 > >>>>>> 2013-12-01 11:37:15.560027 7f7891fd3700 10 auth_hdr:
 > >>>>>> POST
 > >>>>>>
 > >>>>>> application/xml
 > >>>>>> Sun, 01 Dec 2013 10:37:10 GMT
-> >>>>>> /testbucket/files/192.txt?uploadId=i92xi2olzDtFAeLXlfU2PFP9CDU87BC
-> >>>>>> 2013-12-01 11:37:15.560085 7f7891fd3700  2 req 1314:0.003399:s3:POST
+> >>>>>> /testbucket/files/192.txt?uploadId=3Di92xi2olzDtFAeLXlfU2PFP9CDU87=
+BC
+> >>>>>> 2013-12-01 11:37:15.560085 7f7891fd3700  2 req 1314:0.003399:s3:PO=
+ST
 > >>>>>> /testbucket/files/192.txt:complete_multipart:reading permissions
-> >>>>>> 2013-12-01 11:37:15.562356 7f7891fd3700  2 req 1314:0.005670:s3:POST
+> >>>>>> 2013-12-01 11:37:15.562356 7f7891fd3700  2 req 1314:0.005670:s3:PO=
+ST
 > >>>>>> /testbucket/files/192.txt:complete_multipart:verifying op
 > permissions
-> >>>>>> 2013-12-01 11:37:15.562373 7f7891fd3700  5 Searching permissions for
-> >>>>>> uid=0 mask=2
+> >>>>>> 2013-12-01 11:37:15.562373 7f7891fd3700  5 Searching permissions f=
+or
+> >>>>>> uid=3D0 mask=3D2
 > >>>>>> 2013-12-01 11:37:15.562377 7f7891fd3700  5 Found permission: 15
-> >>>>>> 2013-12-01 11:37:15.562378 7f7891fd3700 10  uid=0 requested perm
-> >>>>>> (type)=2, policy perm=2, user_perm_mask=2, acl perm=2
-> >>>>>> 2013-12-01 11:37:15.562381 7f7891fd3700  2 req 1314:0.005695:s3:POST
+> >>>>>> 2013-12-01 11:37:15.562378 7f7891fd3700 10  uid=3D0 requested perm
+> >>>>>> (type)=3D2, policy perm=3D2, user_perm_mask=3D2, acl perm=3D2
+> >>>>>> 2013-12-01 11:37:15.562381 7f7891fd3700  2 req 1314:0.005695:s3:PO=
+ST
 > >>>>>> /testbucket/files/192.txt:complete_multipart:verifying op params
-> >>>>>> 2013-12-01 11:37:15.562384 7f7891fd3700  2 req 1314:0.005698:s3:POST
+> >>>>>> 2013-12-01 11:37:15.562384 7f7891fd3700  2 req 1314:0.005698:s3:PO=
+ST
 > >>>>>> /testbucket/files/192.txt:complete_multipart:executing
 > >>>>>> 2013-12-01 11:37:15.565461 7f7891fd3700 10 calculated etag:
 > >>>>>> d41d8cd98f00b204e9800998ecf8427e-0
@@ -131,11 +146,13 @@ On Dec 2, 2013 11:30 PM, "Yehuda Sadeh" <yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gm
 > been
 > >>>>>> set
 > >>>>>> 2013-12-01 11:37:15.566777 7f7891fd3700  0 setting object
-> >>>>>> tag=_leyAzxCw7YxpKv8P3v3QGwcsw__9VmP
-> >>>>>> 2013-12-01 11:37:15.678973 7f7891fd3700  2 req 1314:0.122286:s3:POST
-> >>>>>> /testbucket/files/192.txt:complete_multipart:http status=200
-> >>>>>> 2013-12-01 11:37:15.679192 7f7891fd3700  1 ====== req done
-> >>>>>> req=0x25406d0 http_status=200 ======
+> >>>>>> tag=3D_leyAzxCw7YxpKv8P3v3QGwcsw__9VmP
+> >>>>>> 2013-12-01 11:37:15.678973 7f7891fd3700  2 req 1314:0.122286:s3:PO=
+ST
+> >>>>>> /testbucket/files/192.txt:complete_multipart:http status=3D200
+> >>>>>> 2013-12-01 11:37:15.679192 7f7891fd3700  1 =3D=3D=3D=3D=3D=3D req =
+done
+> >>>>>> req=3D0x25406d0 http_status=3D200 =3D=3D=3D=3D=3D=3D
 > >>>>>>
 > >>>>>> Yes, I can read oryginal object.
 > >>>>>>
@@ -143,13 +160,13 @@ On Dec 2, 2013 11:30 PM, "Yehuda Sadeh" <yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gm
 > >>>>>> Regards
 > >>>>>> Dominik
 > >>>>>>
-> >>>>>> 2013/12/2 Yehuda Sadeh <yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>:
+> >>>>>> 2013/12/2 Yehuda Sadeh <yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org <javascript:;>>:
 > >>>>>>> That's unknown bug. I have a guess as to how the original object
 > was
 > >>>>>>> created. Can you read the original object, but only copy fails?
 > >>>>>>>
 > >>>>>>> On Dec 2, 2013 4:53 AM, "Dominik Mostowiec" <
-> dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+> dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org <javascript:;>>
 > >>>>>>> wrote:
 > >>>>>>>>
 > >>>>>>>> Hi,
@@ -160,7 +177,9 @@ On Dec 2, 2013 11:30 PM, "Yehuda Sadeh" <yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gm
 > >>>>>>>> Regards
 > >>>>>>>> Dominik
 > >>>>>>>>
-> >>>>>>>> 2013/12/2 Dominik Mostowiec <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>:
+> >>>>>>>> 2013/12/2 Dominik Mostowiec <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org<javascri=
+pt:;>
+> >:
 > >>>>>>>> > Hi,
 > >>>>>>>> > I have strange problem.
 > >>>>>>>> > Obj copy (0 size) killing radosgw.
@@ -172,17 +191,18 @@ On Dec 2, 2013 11:30 PM, "Yehuda Sadeh" <yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gm
 > >>>>>>>> > Last-Modified: 2013-12-01T10:37:15Z
 > >>>>>>>> >
 > >>>>>>>> > rgw log.
-> >>>>>>>> > 2013-12-02 08:18:59.196651 7f5308ff1700  1 ====== starting new
+> >>>>>>>> > 2013-12-02 08:18:59.196651 7f5308ff1700  1 =3D=3D=3D=3D=3D=3D =
+starting new
 > request
-> >>>>>>>> > req=0x2be6fa0 =====
+> >>>>>>>> > req=3D0x2be6fa0 =3D=3D=3D=3D=3D
 > >>>>>>>> > 2013-12-02 08:18:59.196709 7f5308ff1700  2 req
 > >>>>>>>> > 237:0.000058::::initializing
 > >>>>>>>> > 2013-12-02 08:18:59.196752 7f5308ff1700 10 meta>>
-> >>>>>>>> > HTTP_X_AMZ_ACL=public-read
+> >>>>>>>> > HTTP_X_AMZ_ACL=3Dpublic-read
 > >>>>>>>> > 2013-12-02 08:18:59.196760 7f5308ff1700 10 meta>>
-> >>>>>>>> > HTTP_X_AMZ_COPY_SOURCE=/testbucket/testfile.xml
+> >>>>>>>> > HTTP_X_AMZ_COPY_SOURCE=3D/testbucket/testfile.xml
 > >>>>>>>> > 2013-12-02 08:18:59.196766 7f5308ff1700 10 meta>>
-> >>>>>>>> > HTTP_X_AMZ_METADATA_DIRECTIVE=COPY
+> >>>>>>>> > HTTP_X_AMZ_METADATA_DIRECTIVE=3DCOPY
 > >>>>>>>> > 2013-12-02 08:18:59.196771 7f5308ff1700 10 x>>
 > x-amz-acl:public-read
 > >>>>>>>> > 2013-12-02 08:18:59.196772 7f5308ff1700 10 x>>
@@ -190,18 +210,20 @@ On Dec 2, 2013 11:30 PM, "Yehuda Sadeh" <yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gm
 > >>>>>>>> > 2013-12-02 08:18:59.196773 7f5308ff1700 10 x>>
 > >>>>>>>> > x-amz-metadata-directive:COPY
 > >>>>>>>> > 2013-12-02 08:18:59.196786 7f5308ff1700 10
-> >>>>>>>> > s->object=/testbucket/new_testfile.ini s->bucket=testbucket
+> >>>>>>>> > s->object=3D/testbucket/new_testfile.ini s->bucket=3Dtestbucke=
+t
 > >>>>>>>> > 2013-12-02 08:18:59.196792 7f5308ff1700  2 req
 > 237:0.000141:s3:PUT
 > >>>>>>>> > /testbucket/new_testfile.ini::getting op
 > >>>>>>>> > 2013-12-02 08:18:59.196797 7f5308ff1700  2 req
 > 237:0.000146:s3:PUT
 > >>>>>>>> > /testbucket/new_testfile.ini:copy_obj:authorizing
-> >>>>>>>> > 2013-12-02 08:18:59.200648 7f5308ff1700 10 get_canon_resource():
-> >>>>>>>> > dest=/testbucket/new_testfile.ini
+> >>>>>>>> > 2013-12-02 08:18:59.200648 7f5308ff1700 10 get_canon_resource(=
+):
+> >>>>>>>> > dest=3D/testbucket/new_testfile.ini
 > >>>>>>>> > 2013-12-02 08:18:59.200661 7f5308ff1700 10 auth_hdr:
 > >>>>>>>> > PUT
-> >>>>>>>> > 1B2M2Y8AsgTpgAmY7PhCfg==
+> >>>>>>>> > 1B2M2Y8AsgTpgAmY7PhCfg=3D=3D
 > >>>>>>>> > application/octet-stream
 > >>>>>>>> > Mon, 02 Dec 2013 07:18:55 GMT
 > >>>>>>>> > x-amz-acl:public-read
@@ -214,20 +236,25 @@ On Dec 2, 2013 11:30 PM, "Yehuda Sadeh" <yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gm
 > >>>>>>>> > 2013-12-02 08:18:59.203330 7f5308ff1700  2 req
 > 237:0.006679:s3:PUT
 > >>>>>>>> > /testbucket/new_testfile.ini:copy_obj:verifying op permissions
-> >>>>>>>> > 2013-12-02 08:18:59.207627 7f5308ff1700 10 manifest: total_size
-> = 0
+> >>>>>>>> > 2013-12-02 08:18:59.207627 7f5308ff1700 10 manifest: total_siz=
+e
+> =3D 0
 > >>>>>>>> > 2013-12-02 08:18:59.207649 7f5308ff1700  5 Searching
 > permissions for
-> >>>>>>>> > uid=0 mask=1
-> >>>>>>>> > 2013-12-02 08:18:59.207652 7f5308ff1700  5 Found permission: 15
-> >>>>>>>> > 2013-12-02 08:18:59.207654 7f5308ff1700 10  uid=0 requested perm
-> >>>>>>>> > (type)=1, policy perm=1, user_perm_mask=15, acl perm=1
+> >>>>>>>> > uid=3D0 mask=3D1
+> >>>>>>>> > 2013-12-02 08:18:59.207652 7f5308ff1700  5 Found permission: 1=
+5
+> >>>>>>>> > 2013-12-02 08:18:59.207654 7f5308ff1700 10  uid=3D0 requested =
+perm
+> >>>>>>>> > (type)=3D1, policy perm=3D1, user_perm_mask=3D15, acl perm=3D1
 > >>>>>>>> > 2013-12-02 08:18:59.207669 7f5308ff1700  5 Searching
 > permissions for
-> >>>>>>>> > uid=0 mask=2
-> >>>>>>>> > 2013-12-02 08:18:59.207670 7f5308ff1700  5 Found permission: 15
-> >>>>>>>> > 2013-12-02 08:18:59.207671 7f5308ff1700 10  uid=0 requested perm
-> >>>>>>>> > (type)=2, policy perm=2, user_perm_mask=15, acl perm=2
+> >>>>>>>> > uid=3D0 mask=3D2
+> >>>>>>>> > 2013-12-02 08:18:59.207670 7f5308ff1700  5 Found permission: 1=
+5
+> >>>>>>>> > 2013-12-02 08:18:59.207671 7f5308ff1700 10  uid=3D0 requested =
+perm
+> >>>>>>>> > (type)=3D2, policy perm=3D2, user_perm_mask=3D15, acl perm=3D2
 > >>>>>>>> > 2013-12-02 08:18:59.207681 7f5308ff1700  2 req
 > 237:0.011030:s3:PUT
 > >>>>>>>> > /testbucket/new_testfile.ini:copy_obj:verifying op params
@@ -241,7 +268,7 @@ On Dec 2, 2013 11:30 PM, "Yehuda Sadeh" <yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gm
 > >>>>>>>> > 2013-12-02 08:18:59.207709 7f5308ff1700 10 x>>
 > >>>>>>>> > x-amz-metadata-directive:COPY
 > >>>>>>>> > 2013-12-02 08:18:59.207759 7f5308ff1700  5 Copy object
-> >>>>>>>> > testbucket(@.rgw.buckets[406250.1]):testfile.ini =>
+> >>>>>>>> > testbucket(@.rgw.buckets[406250.1]):testfile.ini =3D>
 > >>>>>>>> > testbucket(@.rgw.buckets[406250.1]):new_testfile.ini
 > >>>>>>>> > 2013-12-02 08:18:59.208903 7f5308ff1700 -1 *** Caught signal
 > >>>>>>>> > (Segmentation fault) **
@@ -259,7 +286,7 @@ On Dec 2, 2013 11:30 PM, "Yehuda Sadeh" <yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gm
 > >>>>>>>> Dominik
 > >>>>>>>> _______________________________________________
 > >>>>>>>> ceph-users mailing list
-> >>>>>>>> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> >>>>>>>> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org <javascript:;>
 > >>>>>>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 > >>>>>>
 > >>>>>>
@@ -281,23 +308,27 @@ On Dec 2, 2013 11:30 PM, "Yehuda Sadeh" <yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gm
 > >> Dominik
 >
 
---089e01175e4dedd57a04ec97d7c1
-Content-Type: text/html; charset=ISO-8859-1
+
+--=20
+Pozdrawiam
+Dominik
+
+--089e0149c50628decf04ec97ec71
+Content-Type: text/html; charset=ISO-8859-2
 Content-Transfer-Encoding: quoted-printable
 
-<p dir=3D"ltr">0.56.7</p>
-<div class=3D"gmail_quote">On Dec 2, 2013 11:30 PM, &quot;Yehuda Sadeh&quot=
-; &lt;<a href=3D"mailto:yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org">yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org</a>&gt; wrot=
-e:<br type=3D"attribution"><blockquote class=3D"gmail_quote" style=3D"margi=
-n:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">
-I&#39;m having trouble reproducing the issue. What version are you using?<b=
-r>
+0.56.7<br><br>W dniu poniedzia=B3ek, 2 grudnia 2013 u=BFytkownik Yehuda Sad=
+eh  napisa=B3:<br><blockquote class=3D"gmail_quote" style=3D"margin:0 0 0 .=
+8ex;border-left:1px #ccc solid;padding-left:1ex">I&#39;m having trouble rep=
+roducing the issue. What version are you using?<br>
+
 <br>
 Thanks,<br>
 Yehuda<br>
 <br>
-On Mon, Dec 2, 2013 at 2:16 PM, Yehuda Sadeh &lt;<a href=3D"mailto:yehuda@i=
-nktank.com">yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org</a>&gt; wrote:<br>
+On Mon, Dec 2, 2013 at 2:16 PM, Yehuda Sadeh &lt;<a href=3D"javascript:;" o=
+nclick=3D"_e(event, &#39;cvml&#39;, &#39;yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org&#39;)">yehuda@i=
+nktank.com</a>&gt; wrote:<br>
 &gt; Actually, I read that differently. It only says that if there&#39;s mo=
 re<br>
 &gt; than 1 part, all parts except for the last one need to be &gt; 5M. Whi=
@@ -307,8 +338,9 @@ r>
 &gt; or one parts.<br>
 &gt;<br>
 &gt; On Mon, Dec 2, 2013 at 12:54 PM, Dominik Mostowiec<br>
-&gt; &lt;<a href=3D"mailto:dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org">dominikmostowiec@gma=
-il.com</a>&gt; wrote:<br>
+&gt; &lt;<a href=3D"javascript:;" onclick=3D"_e(event, &#39;cvml&#39;, &#39=
+;dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org&#39;)">dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org</a>&gt; wrote=
+:<br>
 &gt;&gt; You&#39;re right.<br>
 &gt;&gt;<br>
 &gt;&gt; S3 api doc: <a href=3D"http://docs.aws.amazon.com/AmazonS3/latest/=
@@ -328,15 +360,17 @@ t;<br>
 &gt;&gt; Regards<br>
 &gt;&gt; Dominik<br>
 &gt;&gt;<br>
-&gt;&gt; 2013/12/2 Yehuda Sadeh &lt;<a href=3D"mailto:yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org">y=
-ehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org</a>&gt;:<br>
+&gt;&gt; 2013/12/2 Yehuda Sadeh &lt;<a href=3D"javascript:;" onclick=3D"_e(=
+event, &#39;cvml&#39;, &#39;yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org&#39;)">yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org</a=
+>&gt;:<br>
 &gt;&gt;&gt; Looks like it. There should be a guard against it (mulitpart u=
 pload<br>
 &gt;&gt;&gt; minimum is 5M).<br>
 &gt;&gt;&gt;<br>
 &gt;&gt;&gt; On Mon, Dec 2, 2013 at 12:32 PM, Dominik Mostowiec<br>
-&gt;&gt;&gt; &lt;<a href=3D"mailto:dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org">dominikmosto=
-wiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org</a>&gt; wrote:<br>
+&gt;&gt;&gt; &lt;<a href=3D"javascript:;" onclick=3D"_e(event, &#39;cvml&#3=
+9;, &#39;dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org&#39;)">dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org</a>&g=
+t; wrote:<br>
 &gt;&gt;&gt;&gt; Yes, this is probably upload empty file.<br>
 &gt;&gt;&gt;&gt; This is the problem?<br>
 &gt;&gt;&gt;&gt;<br>
@@ -345,14 +379,16 @@ wiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org</a>&gt; wrote:<br>
 &gt;&gt;&gt;&gt; Dominik<br>
 &gt;&gt;&gt;&gt;<br>
 &gt;&gt;&gt;&gt;<br>
-&gt;&gt;&gt;&gt; 2013/12/2 Yehuda Sadeh &lt;<a href=3D"mailto:yehuda@inktan=
-k.com">yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org</a>&gt;:<br>
+&gt;&gt;&gt;&gt; 2013/12/2 Yehuda Sadeh &lt;<a href=3D"javascript:;" onclic=
+k=3D"_e(event, &#39;cvml&#39;, &#39;yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org&#39;)">yehuda@inktan=
+k.com</a>&gt;:<br>
 &gt;&gt;&gt;&gt;&gt; By any chance are you uploading empty objects through =
 the multipart upload api?<br>
 &gt;&gt;&gt;&gt;&gt;<br>
 &gt;&gt;&gt;&gt;&gt; On Mon, Dec 2, 2013 at 12:08 PM, Dominik Mostowiec<br>
-&gt;&gt;&gt;&gt;&gt; &lt;<a href=3D"mailto:dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org">domi=
-nikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org</a>&gt; wrote:<br>
+&gt;&gt;&gt;&gt;&gt; &lt;<a href=3D"javascript:;" onclick=3D"_e(event, &#39=
+;cvml&#39;, &#39;dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org&#39;)">dominikmostowiec@gmail.c=
+om</a>&gt; wrote:<br>
 &gt;&gt;&gt;&gt;&gt;&gt; Hi,<br>
 &gt;&gt;&gt;&gt;&gt;&gt; Another file with the same problems:<br>
 &gt;&gt;&gt;&gt;&gt;&gt;<br>
@@ -434,16 +470,19 @@ status=3D200<br>
 &gt;&gt;&gt;&gt;&gt;&gt; Regards<br>
 &gt;&gt;&gt;&gt;&gt;&gt; Dominik<br>
 &gt;&gt;&gt;&gt;&gt;&gt;<br>
-&gt;&gt;&gt;&gt;&gt;&gt; 2013/12/2 Yehuda Sadeh &lt;<a href=3D"mailto:yehud=
-a@inktank.com">yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org</a>&gt;:<br>
+&gt;&gt;&gt;&gt;&gt;&gt; 2013/12/2 Yehuda Sadeh &lt;<a href=3D"javascript:;=
+" onclick=3D"_e(event, &#39;cvml&#39;, &#39;yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org&#39;)">yehud=
+a@inktank.com</a>&gt;:<br>
 &gt;&gt;&gt;&gt;&gt;&gt;&gt; That&#39;s unknown bug. I have a guess as to h=
 ow the original object was<br>
 &gt;&gt;&gt;&gt;&gt;&gt;&gt; created. Can you read the original object, but=
  only copy fails?<br>
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;<br>
 &gt;&gt;&gt;&gt;&gt;&gt;&gt; On Dec 2, 2013 4:53 AM, &quot;Dominik Mostowie=
-c&quot; &lt;<a href=3D"mailto:dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org">dominikmostowiec@=
-gmail.com</a>&gt;<br>
+c&quot; &lt;<a href=3D"javascript:;" onclick=3D"_e(event, &#39;cvml&#39;, &=
+#39;dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org&#39;)">dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org</a>&gt;<br=
+>
+
 &gt;&gt;&gt;&gt;&gt;&gt;&gt; wrote:<br>
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;<br>
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; Hi,<br>
@@ -456,7 +495,8 @@ Tag: ....-0&quot; (ends -0)<br>
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; Dominik<br>
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;<br>
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; 2013/12/2 Dominik Mostowiec &lt;<a href=3D=
-"mailto:dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org">dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org</a>&gt;:<br>
+"javascript:;" onclick=3D"_e(event, &#39;cvml&#39;, &#39;dominikmostowiec@g=
+mail.com&#39;)">dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org</a>&gt;:<br>
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; &gt; Hi,<br>
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; &gt; I have strange problem.<br>
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; &gt; Obj copy (0 size) killing radosgw.<br=
@@ -594,8 +634,9 @@ ew_testfile.ini<br>
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; __________________________________________=
 _____<br>
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; ceph-users mailing list<br>
-&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; <a href=3D"mailto:ceph-users-idqoXFIVOFLNfb0M+mGrxg@public.gmane.org=
-m">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a><br>
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; <a href=3D"javascript:;" onclick=3D"_e(eve=
+nt, &#39;cvml&#39;, &#39;ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org&#39;)">ceph-users@lists.=
+ceph.com</a><br>
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; <a href=3D"http://lists.ceph.com/listinfo.=
 cgi/ceph-users-ceph.com" target=3D"_blank">http://lists.ceph.com/listinfo.c=
 gi/ceph-users-ceph.com</a><br>
@@ -617,11 +658,11 @@ gi/ceph-users-ceph.com</a><br>
 &gt;&gt; --<br>
 &gt;&gt; Pozdrawiam<br>
 &gt;&gt; Dominik<br>
-</blockquote></div>
+</blockquote><br><br>-- <br>Pozdrawiam<br>Dominik<br>
 
---089e01175e4dedd57a04ec97d7c1--
+--089e0149c50628decf04ec97ec71--
 
---===============1713191317==
+--===============0448875733==
 Content-Type: text/plain; charset="us-ascii"
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7bit
@@ -632,4 +673,4 @@ ceph-users mailing list
 ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 
---===============1713191317==--
+--===============0448875733==--
