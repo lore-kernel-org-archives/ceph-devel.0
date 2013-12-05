@@ -1,71 +1,44 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: core standup
-Date: Thu, 5 Dec 2013 09:53:31 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1312050952460.21812@cobra.newdream.net>
-References: <alpine.DEB.2.00.1312050919450.32370@cobra.newdream.net> <CAPYLRzhdBLg8ggq=55UYnxe7pA+B4JeSyO06SO1RMXS=psp2OQ@mail.gmail.com>
+From: Patrick McGarry <patrick-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Subject: Ceph User Committee List
+Date: Thu, 5 Dec 2013 15:12:59 -0500
+Message-ID: <CAP8Oy=K3YvDKQ0LUHQ=hMukAbssYFc_KpU+6cE_=fOokK9WTnw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-682111527-1386266011=:21812"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:49867 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757812Ab3LERxb (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Dec 2013 12:53:31 -0500
-In-Reply-To: <CAPYLRzhdBLg8ggq=55UYnxe7pA+B4JeSyO06SO1RMXS=psp2OQ@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Hey all,
 
---557981400-682111527-1386266011=:21812
-Content-Type: TEXT/PLAIN; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+For those who have been following, or are interested in, the Ceph User
+Committee [0] discussed at CDS [1] there is now a mailing list to
+discuss all things User Committee.  This could include:
 
-On Thu, 5 Dec 2013, Gregory Farnum wrote:
-> On Thursday, December 5, 2013, Sage Weil wrote:
->       Missing core standup today (all day meeting).
->=20
->       Y:
->       - more wip-tier work
->       - almost done with memstore (a simple in-memory ObjectStore
->       backend to
->       =A0 serve as a reference implementation and possibly as a
->       benchmarking tool)
->       - more review of Zheng's mds branch
->=20
->       T:
->       - meeting
->       - finish memstore
->       - more wip-tier wrangling (verify the trimming is working
->       properly; add a
->       test for it)
->=20
->       B:
->       - wip-crush-tunables needs review
->       - wip-crush needs review
->       - wip-pool-set-* needs some consensus on approach. =A0the kludgey
->       fix is in
->       the pull requests; an alternative general approach is described
->       by
->       =A0 =A0 =A0 =A0
->       https://github.com/ceph/ceph/pull/895#issuecomment-29846799
->=20
->=20
-> Since we need this for the tiering,=A0I'm going to tackle=A0an alternat=
-ive
-> today=A0that Sam and Joao and I have discussed previously, where the mo=
-nitors
-> in a quorum=A0share their accepted APIs with each other=A0and advertise=
- the
-> maximum subset to clients. I'll need to become more familiar with the
-> API=A0internals but I don't think it should be too difficult.
+* Proposed changes to Ceph.com
+* Event participation and coverage
+* Community development logistics
+* Mailing List & IRC moderation
 
-Cool.  Is this just a current_version and compat_version defined in=20
-MonCommands?  And if incompat with the leader, boot the client?
+[0] http://wiki.ceph.com/01Planning/02Blueprints/Firefly/Ceph_User_Committee
 
-s
+[1] http://pad.ceph.com/p/user-committee-announce
+
+If you have any questions please let me know. Thanks.
 
 
---557981400-682111527-1386266011=:21812--
+Best Regards,
+
+Patrick McGarry
+Director, Community || Inktank
+http://ceph.com  ||  http://inktank.com
+@scuttlemonkey || @ceph || @inktank
