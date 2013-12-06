@@ -1,251 +1,95 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: Fwd: [PATCH] ceph: initialize inode before instantiating
- dentry
-Date: Fri, 6 Dec 2013 09:25:53 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1312060925360.10914@cobra.newdream.net>
-References: <1386222336-32559-1-git-send-email-zheng.z.yan@intel.com> <52A02C72.5070205@intel.com>
+From: Yehuda Sadeh <yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: recreate bucket error
+Date: Fri, 6 Dec 2013 10:19:39 -0800
+Message-ID: <CABBk=J95C7OrwTAPN_EJ8dHmTOiSFExhrAv2n5FJ6RyACuMETA@mail.gmail.com>
+References: <CAMNMNTzt_yPoqOhgKpi9vioAXygzD_oKzhHxsh-WA6NCB7mOcg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:35884 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753168Ab3LFRZy (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Dec 2013 12:25:54 -0500
-In-Reply-To: <52A02C72.5070205@intel.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zheng.z.yan@intel.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAMNMNTzt_yPoqOhgKpi9vioAXygzD_oKzhHxsh-WA6NCB7mOcg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: Dominik Mostowiec <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Thanks!  Added this to the testing branch.
+I'm having trouble reproducing this one. Are you running on latest
+dumpling? Does it happen with any newly created bucket, or just with
+buckets that existed before?
 
-sage
+Yehuda
 
-On Thu, 5 Dec 2013, Yan, Zheng wrote:
-
-> 
-> 
-> 
-> -------- Original Message --------
-> Subject: [PATCH] ceph: initialize inode before instantiating dentry
-> Date: Thu, 5 Dec 2013 13:45:36 +0800
-> From: Yan, Zheng <zheng.z.yan@intel.com>
-> To: <linux-kernel@vger.kernel.org>
-> CC: <sage@inktank.com>, <dave@bob-the-boat.me.uk>, <malcolm@sgi.com>, "Yan, Zheng" <zheng.z.yan@intel.com>
-> 
-> From: "Yan, Zheng" <zheng.z.yan@intel.com>
-> 
-> commit b18825a7c8 (Put a small type field into struct dentry::d_flags)
-> put a type field into struct dentry::d_flags. __d_instantiate() set the
-> field by checking inode->i_mode. So we should initialize inode before
-> instantiating dentry when handling mds reply.
-> 
-> Fixes: #6930
-> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
-> ---
->  fs/ceph/inode.c | 114 +++++++++++++++++++++-----------------------------------
->  1 file changed, 43 insertions(+), 71 deletions(-)
-> 
-> diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-> index 9a8e396..c1a9367 100644
-> --- a/fs/ceph/inode.c
-> +++ b/fs/ceph/inode.c
-> @@ -978,7 +978,6 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req,
->  	struct ceph_mds_reply_inode *ininfo;
->  	struct ceph_vino vino;
->  	struct ceph_fs_client *fsc = ceph_sb_to_client(sb);
-> -	int i = 0;
->  	int err = 0;
->  
->  	dout("fill_trace %p is_dentry %d is_target %d\n", req,
-> @@ -1039,6 +1038,29 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req,
->  		}
->  	}
->  
-> +	if (rinfo->head->is_target) {
-> +		vino.ino = le64_to_cpu(rinfo->targeti.in->ino);
-> +		vino.snap = le64_to_cpu(rinfo->targeti.in->snapid);
-> +
-> +		in = ceph_get_inode(sb, vino);
-> +		if (IS_ERR(in)) {
-> +			err = PTR_ERR(in);
-> +			goto done;
-> +		}
-> +		req->r_target_inode = in;
-> +
-> +		err = fill_inode(in, &rinfo->targeti, NULL,
-> +				session, req->r_request_started,
-> +				(le32_to_cpu(rinfo->head->result) == 0) ?
-> +				req->r_fmode : -1,
-> +				&req->r_caps_reservation);
-> +		if (err < 0) {
-> +			pr_err("fill_inode badness %p %llx.%llx\n",
-> +				in, ceph_vinop(in));
-> +			goto done;
-> +		}
-> +	}
-> +
->  	/*
->  	 * ignore null lease/binding on snapdir ENOENT, or else we
->  	 * will have trouble splicing in the virtual snapdir later
-> @@ -1108,7 +1130,6 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req,
->  			     ceph_dentry(req->r_old_dentry)->offset);
->  
->  			dn = req->r_old_dentry;  /* use old_dentry */
-> -			in = dn->d_inode;
->  		}
->  
->  		/* null dentry? */
-> @@ -1130,44 +1151,28 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req,
->  		}
->  
->  		/* attach proper inode */
-> -		ininfo = rinfo->targeti.in;
-> -		vino.ino = le64_to_cpu(ininfo->ino);
-> -		vino.snap = le64_to_cpu(ininfo->snapid);
-> -		in = dn->d_inode;
-> -		if (!in) {
-> -			in = ceph_get_inode(sb, vino);
-> -			if (IS_ERR(in)) {
-> -				pr_err("fill_trace bad get_inode "
-> -				       "%llx.%llx\n", vino.ino, vino.snap);
-> -				err = PTR_ERR(in);
-> -				d_drop(dn);
-> -				goto done;
-> -			}
-> +		if (!dn->d_inode) {
-> +			ihold(in);
->  			dn = splice_dentry(dn, in, &have_lease, true);
->  			if (IS_ERR(dn)) {
->  				err = PTR_ERR(dn);
->  				goto done;
->  			}
->  			req->r_dentry = dn;  /* may have spliced */
-> -			ihold(in);
-> -		} else if (ceph_ino(in) == vino.ino &&
-> -			   ceph_snap(in) == vino.snap) {
-> -			ihold(in);
-> -		} else {
-> +		} else if (dn->d_inode && dn->d_inode != in) {
->  			dout(" %p links to %p %llx.%llx, not %llx.%llx\n",
-> -			     dn, in, ceph_ino(in), ceph_snap(in),
-> -			     vino.ino, vino.snap);
-> +			     dn, dn->d_inode, ceph_vinop(dn->d_inode),
-> +			     ceph_vinop(in));
->  			have_lease = false;
-> -			in = NULL;
->  		}
->  
->  		if (have_lease)
->  			update_dentry_lease(dn, rinfo->dlease, session,
->  					    req->r_request_started);
->  		dout(" final dn %p\n", dn);
-> -		i++;
-> -	} else if ((req->r_op == CEPH_MDS_OP_LOOKUPSNAP ||
-> -		   req->r_op == CEPH_MDS_OP_MKSNAP) && !req->r_aborted) {
-> +	} else if (!req->r_aborted &&
-> +		   (req->r_op == CEPH_MDS_OP_LOOKUPSNAP ||
-> +		    req->r_op == CEPH_MDS_OP_MKSNAP)) {
->  		struct dentry *dn = req->r_dentry;
->  
->  		/* fill out a snapdir LOOKUPSNAP dentry */
-> @@ -1177,52 +1182,15 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req,
->  		ininfo = rinfo->targeti.in;
->  		vino.ino = le64_to_cpu(ininfo->ino);
->  		vino.snap = le64_to_cpu(ininfo->snapid);
-> -		in = ceph_get_inode(sb, vino);
-> -		if (IS_ERR(in)) {
-> -			pr_err("fill_inode get_inode badness %llx.%llx\n",
-> -			       vino.ino, vino.snap);
-> -			err = PTR_ERR(in);
-> -			d_delete(dn);
-> -			goto done;
-> -		}
->  		dout(" linking snapped dir %p to dn %p\n", in, dn);
-> +		ihold(in);
->  		dn = splice_dentry(dn, in, NULL, true);
->  		if (IS_ERR(dn)) {
->  			err = PTR_ERR(dn);
->  			goto done;
->  		}
->  		req->r_dentry = dn;  /* may have spliced */
-> -		ihold(in);
-> -		rinfo->head->is_dentry = 1;  /* fool notrace handlers */
->  	}
-> -
-> -	if (rinfo->head->is_target) {
-> -		vino.ino = le64_to_cpu(rinfo->targeti.in->ino);
-> -		vino.snap = le64_to_cpu(rinfo->targeti.in->snapid);
-> -
-> -		if (in == NULL || ceph_ino(in) != vino.ino ||
-> -		    ceph_snap(in) != vino.snap) {
-> -			in = ceph_get_inode(sb, vino);
-> -			if (IS_ERR(in)) {
-> -				err = PTR_ERR(in);
-> -				goto done;
-> -			}
-> -		}
-> -		req->r_target_inode = in;
-> -
-> -		err = fill_inode(in,
-> -				 &rinfo->targeti, NULL,
-> -				 session, req->r_request_started,
-> -				 (le32_to_cpu(rinfo->head->result) == 0) ?
-> -				 req->r_fmode : -1,
-> -				 &req->r_caps_reservation);
-> -		if (err < 0) {
-> -			pr_err("fill_inode badness %p %llx.%llx\n",
-> -			       in, ceph_vinop(in));
-> -			goto done;
-> -		}
-> -	}
-> -
->  done:
->  	dout("fill_trace done err=%d\n", err);
->  	return err;
-> @@ -1360,23 +1328,27 @@ retry_lookup:
->  		} else {
->  			in = ceph_get_inode(parent->d_sb, vino);
->  			if (IS_ERR(in)) {
-> -				dout("new_inode badness\n");
-> -				d_drop(dn);
-> -				dput(dn);
->  				err = PTR_ERR(in);
-> -				goto out;
-> +				d_drop(dn);
-> +				goto next_item;
->  			}
-> -			dn = splice_dentry(dn, in, NULL, false);
-> -			if (IS_ERR(dn))
-> -				dn = NULL;
->  		}
->  
->  		if (fill_inode(in, &rinfo->dir_in[i], NULL, session,
->  			       req->r_request_started, -1,
->  			       &req->r_caps_reservation) < 0) {
->  			pr_err("fill_inode badness on %p\n", in);
-> +			if (!dn->d_inode)
-> +				iput(in);
-> +			d_drop(dn);
->  			goto next_item;
->  		}
-> +
-> +		if (!dn->d_inode) {
-> +			dn = splice_dentry(dn, in, NULL, false);
-> +			if (IS_ERR(dn))
-> +				dn = NULL;
-> +		}
->  		if (dn)
->  			update_dentry_lease(dn, rinfo->dir_dlease[i],
->  					    req->r_session,
-> -- 
-> 1.8.1.4
-> 
-> 
-> 
+On Fri, Dec 6, 2013 at 5:07 AM, Dominik Mostowiec
+<dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+> Hi,
+> In version dumpling upgraded from bobtail working create the same bucket.
+>
+> root@vm-1:/etc/apache2/sites-enabled# s3 -u create testcreate
+> Bucket successfully created.
+> root@vm-1:/etc/apache2/sites-enabled# s3 -u create testcreate
+> Bucket successfully created.
+>
+> I installed new dumpling cluster and:
+> root@s1:/var/log/radosgw# s3 -u create test1
+> Bucket successfully created.
+> root@s1:/var/log/radosgw# s3 -u create test1
+>
+> ERROR: ErrorUnknown
+>
+> In radosgw logs:
+>
+> 2013-12-06 13:59:56.083109 7f162d7c2700  1 ====== starting new request
+> req=0xb7d480 =====
+> 2013-12-06 13:59:56.083227 7f162d7c2700  2 req 5:0.000119::PUT
+> /test1/::initializing
+> 2013-12-06 13:59:56.083261 7f162d7c2700 10 meta>> HTTP_X_AMZ_DATE
+> 2013-12-06 13:59:56.083274 7f162d7c2700 10 x>> x-amz-date:Fri, 06 Dec
+> 2013 12:59:56 GMT
+> 2013-12-06 13:59:56.083298 7f162d7c2700 10 s->object=<NULL> s->bucket=test1
+> 2013-12-06 13:59:56.083307 7f162d7c2700  2 req 5:0.000199:s3:PUT
+> /test1/::getting op
+> 2013-12-06 13:59:56.083315 7f162d7c2700  2 req 5:0.000207:s3:PUT
+> /test1/:create_bucket:authorizing
+> 2013-12-06 13:59:56.091724 7f162d7c2700 10 get_canon_resource(): dest=
+> 2013-12-06 13:59:56.091742 7f162d7c2700 10 auth_hdr:
+> PUT
+>
+>
+>
+> x-amz-date:Fri, 06 Dec 2013 12:59:56 GMT
+> /test1/
+> 2013-12-06 13:59:56.091836 7f162d7c2700  2 req 5:0.008728:s3:PUT
+> /test1/:create_bucket:reading permissions
+> 2013-12-06 13:59:56.091848 7f162d7c2700  2 req 5:0.008740:s3:PUT
+> /test1/:create_bucket:verifying op mask
+> 2013-12-06 13:59:56.091852 7f162d7c2700  2 req 5:0.008744:s3:PUT
+> /test1/:create_bucket:verifying op permissions
+> 2013-12-06 13:59:56.093858 7f162d7c2700  2 req 5:0.010750:s3:PUT
+> /test1/:create_bucket:verifying op params
+> 2013-12-06 13:59:56.093882 7f162d7c2700  2 req 5:0.010773:s3:PUT
+> /test1/:create_bucket:executing
+> 2013-12-06 13:59:56.104819 7f162d7c2700  0 WARNING: couldn't find acl
+> header for object, generating default
+> 2013-12-06 13:59:56.132625 7f162d7c2700  0 get_bucket_info returned -125
+> 2013-12-06 13:59:56.132656 7f162d7c2700  0 WARNING: set_req_state_err
+> err_no=125 resorting to 500
+> 2013-12-06 13:59:56.132693 7f162d7c2700  2 req 5:0.049584:s3:PUT
+> /test1/:create_bucket:http status=500
+> 2013-12-06 13:59:56.132890 7f162d7c2700  1 ====== req done
+> req=0xb7d480 http_status=500 ======
+>
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+> Regards
+> Dominik
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
