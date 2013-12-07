@@ -1,95 +1,67 @@
-From: Yehuda Sadeh <yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: recreate bucket error
-Date: Fri, 6 Dec 2013 10:19:39 -0800
-Message-ID: <CABBk=J95C7OrwTAPN_EJ8dHmTOiSFExhrAv2n5FJ6RyACuMETA@mail.gmail.com>
-References: <CAMNMNTzt_yPoqOhgKpi9vioAXygzD_oKzhHxsh-WA6NCB7mOcg@mail.gmail.com>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: [PATCH 0/3] block I/O when cluster is full
+Date: Fri, 06 Dec 2013 18:16:24 -0800
+Message-ID: <52A284F8.7020602@inktank.com>
+References: <1386112373-25610-1-git-send-email-josh.durgin@inktank.com>	<52A12CA9.3020008@inktank.com> <CAPYLRzj+NE-g=NAt9P-x1dtvLFFFBHZmrwJSU4hxBuXiJaQbfA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAMNMNTzt_yPoqOhgKpi9vioAXygzD_oKzhHxsh-WA6NCB7mOcg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Dominik Mostowiec <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=windows-1252;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-yh0-f46.google.com ([209.85.213.46]:36556 "EHLO
+	mail-yh0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753530Ab3LGCQm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Dec 2013 21:16:42 -0500
+Received: by mail-yh0-f46.google.com with SMTP id l109so1117266yhq.33
+        for <ceph-devel@vger.kernel.org>; Fri, 06 Dec 2013 18:16:42 -0800 (PST)
+In-Reply-To: <CAPYLRzj+NE-g=NAt9P-x1dtvLFFFBHZmrwJSU4hxBuXiJaQbfA@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Gregory Farnum <greg@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-I'm having trouble reproducing this one. Are you running on latest
-dumpling? Does it happen with any newly created bucket, or just with
-buckets that existed before?
+On 12/05/2013 08:58 PM, Gregory Farnum wrote:
+> On Thu, Dec 5, 2013 at 5:47 PM, Josh Durgin <josh.durgin@inktank.com>=
+ wrote:
+>> On 12/03/2013 03:12 PM, Josh Durgin wrote:
+>>>
+>>> These patches allow rbd to block writes instead of returning errors
+>>> when OSDs are full enough that the FULL flag is set in the osd map.
+>>> This avoids filesystems on top of rbd getting confused by transient
+>>> EIOs if the cluster oscillates between full and non-full.
+>>>
+>>> These are also available in the wip-full branch of ceph-client.git.
+>>>
+>>> Josh Durgin (3):
+>>>     libceph: block I/O when PAUSE or FULL osd map flags are set
+>>>     libceph: add an option to configure client behavior when osds a=
+re
+>>>       full
+>>>     rbd: document rbd-specific options
+>>
+>>
+>> Due to a race condition between clients and osds in handling maps
+>> marked FULL, it's not feasible to offer the 'error' option, so patch=
+es
+>> 2 and 3 can be ignored.
+>>
+>> http://tracker.ceph.com/issues/6938
+>
+> It's not clear to me =97 are you going to assume all ENOSPC means the
+> map is marked as full and intercept it, or that you can't reliably
+> block IO so don't bother trying?
 
-Yehuda
+Don't bother trying to stop ENOSPC on the client side, since it'd need=20
+some restructuring in the kernel side and would be prone to screwing up
+write ordering.
 
-On Fri, Dec 6, 2013 at 5:07 AM, Dominik Mostowiec
-<dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> Hi,
-> In version dumpling upgraded from bobtail working create the same bucket.
->
-> root@vm-1:/etc/apache2/sites-enabled# s3 -u create testcreate
-> Bucket successfully created.
-> root@vm-1:/etc/apache2/sites-enabled# s3 -u create testcreate
-> Bucket successfully created.
->
-> I installed new dumpling cluster and:
-> root@s1:/var/log/radosgw# s3 -u create test1
-> Bucket successfully created.
-> root@s1:/var/log/radosgw# s3 -u create test1
->
-> ERROR: ErrorUnknown
->
-> In radosgw logs:
->
-> 2013-12-06 13:59:56.083109 7f162d7c2700  1 ====== starting new request
-> req=0xb7d480 =====
-> 2013-12-06 13:59:56.083227 7f162d7c2700  2 req 5:0.000119::PUT
-> /test1/::initializing
-> 2013-12-06 13:59:56.083261 7f162d7c2700 10 meta>> HTTP_X_AMZ_DATE
-> 2013-12-06 13:59:56.083274 7f162d7c2700 10 x>> x-amz-date:Fri, 06 Dec
-> 2013 12:59:56 GMT
-> 2013-12-06 13:59:56.083298 7f162d7c2700 10 s->object=<NULL> s->bucket=test1
-> 2013-12-06 13:59:56.083307 7f162d7c2700  2 req 5:0.000199:s3:PUT
-> /test1/::getting op
-> 2013-12-06 13:59:56.083315 7f162d7c2700  2 req 5:0.000207:s3:PUT
-> /test1/:create_bucket:authorizing
-> 2013-12-06 13:59:56.091724 7f162d7c2700 10 get_canon_resource(): dest=
-> 2013-12-06 13:59:56.091742 7f162d7c2700 10 auth_hdr:
-> PUT
->
->
->
-> x-amz-date:Fri, 06 Dec 2013 12:59:56 GMT
-> /test1/
-> 2013-12-06 13:59:56.091836 7f162d7c2700  2 req 5:0.008728:s3:PUT
-> /test1/:create_bucket:reading permissions
-> 2013-12-06 13:59:56.091848 7f162d7c2700  2 req 5:0.008740:s3:PUT
-> /test1/:create_bucket:verifying op mask
-> 2013-12-06 13:59:56.091852 7f162d7c2700  2 req 5:0.008744:s3:PUT
-> /test1/:create_bucket:verifying op permissions
-> 2013-12-06 13:59:56.093858 7f162d7c2700  2 req 5:0.010750:s3:PUT
-> /test1/:create_bucket:verifying op params
-> 2013-12-06 13:59:56.093882 7f162d7c2700  2 req 5:0.010773:s3:PUT
-> /test1/:create_bucket:executing
-> 2013-12-06 13:59:56.104819 7f162d7c2700  0 WARNING: couldn't find acl
-> header for object, generating default
-> 2013-12-06 13:59:56.132625 7f162d7c2700  0 get_bucket_info returned -125
-> 2013-12-06 13:59:56.132656 7f162d7c2700  0 WARNING: set_req_state_err
-> err_no=125 resorting to 500
-> 2013-12-06 13:59:56.132693 7f162d7c2700  2 req 5:0.049584:s3:PUT
-> /test1/:create_bucket:http status=500
-> 2013-12-06 13:59:56.132890 7f162d7c2700  1 ====== req done
-> req=0xb7d480 http_status=500 ======
->
-> --
-> Regards
-> Dominik
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+Instead drop writes on the osd side when they have a map marked full,
+and have clients resend all writes when a map goes transitions from
+full -> nonfull. The userspace side is https://github.com/ceph/ceph/pul=
+l/914
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
