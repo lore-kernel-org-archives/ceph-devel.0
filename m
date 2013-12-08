@@ -1,511 +1,787 @@
-From: Dominik Mostowiec <dominikmostowiec@gmail.com>
-Subject: Re: [ceph-users] recreate bucket error
-Date: Sat, 7 Dec 2013 18:59:02 +0100
-Message-ID: <CAMNMNTz9o2PPKSMh3HjZ5MqNbo7mHR+R0HasgMcoOck6ZGH+uQ@mail.gmail.com>
-References: <CAMNMNTzt_yPoqOhgKpi9vioAXygzD_oKzhHxsh-WA6NCB7mOcg@mail.gmail.com>
-	<CABBk=J95C7OrwTAPN_EJ8dHmTOiSFExhrAv2n5FJ6RyACuMETA@mail.gmail.com>
-	<CAMNMNTzd7LEht6y-5vT6sEvJeG3yErQGNGbmGM3x+hYOuTQs0g@mail.gmail.com>
-	<CAC-hyiG9hznbysGs84_etew3BTbZwj3QoHVP66QCbCK9asoPgw@mail.gmail.com>
-	<CAMNMNTz4pANPK67m0mLhYS=-GQpvRQ7DWCsQMjORvoM+7NPXrw@mail.gmail.com>
-	<CABBk=J8b_UU7YhJUMwWhc8wjkv0a+dD3GAWySajJF1MwzJp_Sw@mail.gmail.com>
-	<CAMNMNTxqyutv2r5d_AXgMiNRr15qCipsirajqB8xLf=MuDY2Rg@mail.gmail.com>
-	<CAMNMNTwvZbbpX1H0UZiRvFb4YY0h9VXvuJryPBE9tqE6O1rbvQ@mail.gmail.com>
-	<CABBk=J-RAb5dXZLU2F4heFu1VyoSnn9hxJ40_6UY8wXOOMBAdA@mail.gmail.com>
+From: Guangliang Zhao <lucienchao@gmail.com>
+Subject: Re: [PATCH v5] ceph: add acl for cephfs
+Date: Sun, 8 Dec 2013 11:36:22 +0800
+Message-ID: <20131208033622.GA3942@x230>
+References: <1384154283-22078-1-git-send-email-lucienchao@gmail.com>
+ <52822245.8040809@ubuntukylin.com>
+ <20131112152339.GA3878@x230>
+ <alpine.DEB.2.00.1312051741520.9468@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f169.google.com ([209.85.214.169]:59520 "EHLO
-	mail-ob0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755666Ab3LGR7D (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 7 Dec 2013 12:59:03 -0500
-Received: by mail-ob0-f169.google.com with SMTP id wm4so2160123obc.28
-        for <ceph-devel@vger.kernel.org>; Sat, 07 Dec 2013 09:59:02 -0800 (PST)
-In-Reply-To: <CABBk=J-RAb5dXZLU2F4heFu1VyoSnn9hxJ40_6UY8wXOOMBAdA@mail.gmail.com>
+Received: from mail-pd0-f170.google.com ([209.85.192.170]:53830 "EHLO
+	mail-pd0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752693Ab3LHDg2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 7 Dec 2013 22:36:28 -0500
+Received: by mail-pd0-f170.google.com with SMTP id g10so3201867pdj.29
+        for <ceph-devel@vger.kernel.org>; Sat, 07 Dec 2013 19:36:27 -0800 (PST)
+Content-Disposition: inline
+In-Reply-To: <alpine.DEB.2.00.1312051741520.9468@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh <yehuda@inktank.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
+To: Sage Weil <sage@inktank.com>
+Cc: Li Wang <liwang@ubuntukylin.com>, ceph-devel@vger.kernel.org, zheng.z.yan@intel.com
 
-Thanks for Your help !!
+On Thu, Dec 05, 2013 at 05:43:46PM -0800, Sage Weil wrote:
+> Hi!
 
----
-Regards
-Dominik
+Thanks.
 
-On Dec 7, 2013 6:34 PM, "Yehuda Sadeh" <yehuda@inktank.com> wrote:
->
-> Sounds like disabling the cache triggers some bug. I'll open a relevant ticket.
->
-> Thanks,
-> Yehuda
->
-> On Sat, Dec 7, 2013 at 9:29 AM, Dominik Mostowiec
-> <dominikmostowiec@gmail.com> wrote:
-> > ok, enabling cache helps :-)
-> > What was wrong ?
-> >
+> 
+> Sorry for the slow follow-up here--I was out on vacation and then buried 
+> in email when I got back.
+> 
+> This looks pretty good!  I think Li's suggestions are good; it would be
+> nice to see those as follow-on patches.
+> 
+> Also, I notice that the construction of the ACL is using __ceph_getxattr 
+> twice.  Is there a common upper bound on these?  It might be worth 
+> optimistically allocating a 4k page (or whatever) and avoiding making two 
+> calls in the general case.  (It would also be nice to avoid copying the 
+> xattr content into a temporary buffer, but I don't think it is worth the 
+> complexity at this point.)
+> 
+> But this is all nit-picking; I'll pull this into the testing branch.  Of 
+> the suggestions, I think a mount-time option would be the nicest as it 
+> would let us make this default to Y.
+> 
+> Thanks!  (And thanks to Zheng and Li for reviewing!)
+> sage
+> 
+> 
+> On Tue, 12 Nov 2013, Guangliang Zhao wrote:
+> 
+> > On Tue, Nov 12, 2013 at 08:42:45PM +0800, Li Wang wrote:
+> > > Hi Guangliang,
+> > >   Thanks for fixing.
+> > >   Some minor suggestions,
+> > > 1 You may wish to put ceph_forget_all_cached_acls() in a header file
+> > > and make it static inline for better performance.
+> > > 2 Currently the acl is implemented only as compile-time option, that
+> > > is less flexible, most file systems implement acl also as mount-time
+> > > option. Maybe you could take it into consideration.
+> > 
+> > All good advices, I would leave them in next patches.
+> > 
+> > Thanks,
+> > Guangliang
+> > 
+> > > 
+> > > Cheers,
+> > > Li Wang
+> > > 
+> > > On 11/11/2013 03:18 PM, Guangliang Zhao wrote:
+> > > >v5: handle the roll back in ceph_set_acl(), correct
+> > > >ceph_get/set_cached_acl()
+> > > >
+> > > >v4: check the validity before set/get_cached_acl()
+> > > >
+> > > >v3: handle the attr change in ceph_set_acl()
+> > > >
+> > > >v2: remove some redundant code in ceph_setattr()
+> > > >
+> > > >Signed-off-by: Guangliang Zhao <lucienchao@gmail.com>
+> > > >---
+> > > >  fs/ceph/Kconfig  |   13 +++
+> > > >  fs/ceph/Makefile |    1 +
+> > > >  fs/ceph/acl.c    |  332 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+> > > >  fs/ceph/caps.c   |    1 +
+> > > >  fs/ceph/dir.c    |    5 +
+> > > >  fs/ceph/inode.c  |   11 ++
+> > > >  fs/ceph/super.c  |    4 +
+> > > >  fs/ceph/super.h  |   37 +++++-
+> > > >  fs/ceph/xattr.c  |   60 ++++++++--
+> > > >  9 files changed, 451 insertions(+), 13 deletions(-)
+> > > >  create mode 100644 fs/ceph/acl.c
+> > > >
+> > > >diff --git a/fs/ceph/Kconfig b/fs/ceph/Kconfig
+> > > >index ac9a2ef..264e9bf 100644
+> > > >--- a/fs/ceph/Kconfig
+> > > >+++ b/fs/ceph/Kconfig
+> > > >@@ -25,3 +25,16 @@ config CEPH_FSCACHE
+> > > >  	  caching support for Ceph clients using FS-Cache
+> > > >
+> > > >  endif
+> > > >+
+> > > >+config CEPH_FS_POSIX_ACL
+> > > >+	bool "Ceph POSIX Access Control Lists"
+> > > >+	depends on CEPH_FS
+> > > >+	select FS_POSIX_ACL
+> > > >+	help
+> > > >+	  POSIX Access Control Lists (ACLs) support permissions for users and
+> > > >+	  groups beyond the owner/group/world scheme.
+> > > >+
+> > > >+	  To learn more about Access Control Lists, visit the POSIX ACLs for
+> > > >+	  Linux website <http://acl.bestbits.at/>.
+> > > >+
+> > > >+	  If you don't know what Access Control Lists are, say N
+> > > >diff --git a/fs/ceph/Makefile b/fs/ceph/Makefile
+> > > >index 32e3010..85a4230 100644
+> > > >--- a/fs/ceph/Makefile
+> > > >+++ b/fs/ceph/Makefile
+> > > >@@ -10,3 +10,4 @@ ceph-y := super.o inode.o dir.o file.o locks.o addr.o ioctl.o \
+> > > >  	debugfs.o
+> > > >
+> > > >  ceph-$(CONFIG_CEPH_FSCACHE) += cache.o
+> > > >+ceph-$(CONFIG_CEPH_FS_POSIX_ACL) += acl.o
+> > > >diff --git a/fs/ceph/acl.c b/fs/ceph/acl.c
+> > > >new file mode 100644
+> > > >index 0000000..64fddbc
+> > > >--- /dev/null
+> > > >+++ b/fs/ceph/acl.c
+> > > >@@ -0,0 +1,332 @@
+> > > >+/*
+> > > >+ * linux/fs/ceph/acl.c
+> > > >+ *
+> > > >+ * Copyright (C) 2013 Guangliang Zhao, <lucienchao@gmail.com>
+> > > >+ *
+> > > >+ * This program is free software; you can redistribute it and/or
+> > > >+ * modify it under the terms of the GNU General Public
+> > > >+ * License v2 as published by the Free Software Foundation.
+> > > >+ *
+> > > >+ * This program is distributed in the hope that it will be useful,
+> > > >+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+> > > >+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+> > > >+ * General Public License for more details.
+> > > >+ *
+> > > >+ * You should have received a copy of the GNU General Public
+> > > >+ * License along with this program; if not, write to the
+> > > >+ * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+> > > >+ * Boston, MA 021110-1307, USA.
+> > > >+ */
+> > > >+
+> > > >+#include <linux/ceph/ceph_debug.h>
+> > > >+#include <linux/fs.h>
+> > > >+#include <linux/string.h>
+> > > >+#include <linux/xattr.h>
+> > > >+#include <linux/posix_acl_xattr.h>
+> > > >+#include <linux/posix_acl.h>
+> > > >+#include <linux/sched.h>
+> > > >+#include <linux/slab.h>
+> > > >+
+> > > >+#include "super.h"
+> > > >+
+> > > >+static inline void ceph_set_cached_acl(struct inode *inode,
+> > > >+					int type, struct posix_acl *acl)
+> > > >+{
+> > > >+	struct ceph_inode_info *ci = ceph_inode(inode);
+> > > >+
+> > > >+	spin_lock(&ci->i_ceph_lock);
+> > > >+	if (__ceph_caps_issued_mask(ci, CEPH_CAP_XATTR_SHARED, 0))
+> > > >+		set_cached_acl(inode, type, acl);
+> > > >+	spin_unlock(&ci->i_ceph_lock);
+> > > >+}
+> > > >+
+> > > >+static inline struct posix_acl *ceph_get_cached_acl(struct inode *inode,
+> > > >+							int type)
+> > > >+{
+> > > >+	struct ceph_inode_info *ci = ceph_inode(inode);
+> > > >+	struct posix_acl *acl = ACL_NOT_CACHED;
+> > > >+
+> > > >+	spin_lock(&ci->i_ceph_lock);
+> > > >+	if (__ceph_caps_issued_mask(ci, CEPH_CAP_XATTR_SHARED, 0))
+> > > >+		acl = get_cached_acl(inode, type);
+> > > >+	spin_unlock(&ci->i_ceph_lock);
+> > > >+
+> > > >+	return acl;
+> > > >+}
+> > > >+
+> > > >+void ceph_forget_all_cached_acls(struct inode *inode)
+> > > >+{
+> > > >+	forget_all_cached_acls(inode);
+> > > >+}
+> > > >+
+> > > >+struct posix_acl *ceph_get_acl(struct inode *inode, int type)
+> > > >+{
+> > > >+	int size;
+> > > >+	const char *name;
+> > > >+	char *value = NULL;
+> > > >+	struct posix_acl *acl;
+> > > >+
+> > > >+	if (!IS_POSIXACL(inode))
+> > > >+		return NULL;
+> > > >+
+> > > >+	acl = ceph_get_cached_acl(inode, type);
+> > > >+	if (acl != ACL_NOT_CACHED)
+> > > >+		return acl;
+> > > >+
+> > > >+	switch (type) {
+> > > >+	case ACL_TYPE_ACCESS:
+> > > >+		name = POSIX_ACL_XATTR_ACCESS;
+> > > >+		break;
+> > > >+	case ACL_TYPE_DEFAULT:
+> > > >+		name = POSIX_ACL_XATTR_DEFAULT;
+> > > >+		break;
+> > > >+	default:
+> > > >+		BUG();
+> > > >+	}
+> > > >+
+> > > >+	size = __ceph_getxattr(inode, name, "", 0);
+> > > >+	if (size > 0) {
+> > > >+		value = kzalloc(size, GFP_NOFS);
+> > > >+		if (!value)
+> > > >+			return ERR_PTR(-ENOMEM);
+> > > >+		size = __ceph_getxattr(inode, name, value, size);
+> > > >+	}
+> > > >+
+> > > >+	if (size > 0)
+> > > >+		acl = posix_acl_from_xattr(&init_user_ns, value, size);
+> > > >+	else if (size == -ERANGE || size == -ENODATA || size == 0)
+> > > >+		acl = NULL;
+> > > >+	else
+> > > >+		acl = ERR_PTR(-EIO);
+> > > >+
+> > > >+	kfree(value);
+> > > >+
+> > > >+	if (!IS_ERR(acl))
+> > > >+		ceph_set_cached_acl(inode, type, acl);
+> > > >+
+> > > >+	return acl;
+> > > >+}
+> > > >+
+> > > >+static int ceph_set_acl(struct dentry *dentry, struct inode *inode,
+> > > >+				struct posix_acl *acl, int type)
+> > > >+{
+> > > >+	int ret = 0, size = 0;
+> > > >+	const char *name = NULL;
+> > > >+	char *value = NULL;
+> > > >+	struct iattr newattrs;
+> > > >+	umode_t new_mode = inode->i_mode, old_mode = inode->i_mode;
+> > > >+
+> > > >+	if (acl) {
+> > > >+		ret = posix_acl_valid(acl);
+> > > >+		if (ret < 0)
+> > > >+			goto out;
+> > > >+	}
+> > > >+
+> > > >+	switch (type) {
+> > > >+	case ACL_TYPE_ACCESS:
+> > > >+		name = POSIX_ACL_XATTR_ACCESS;
+> > > >+		if (acl) {
+> > > >+			ret = posix_acl_equiv_mode(acl, &new_mode);
+> > > >+			if (ret < 0)
+> > > >+				goto out;
+> > > >+			if (ret == 0)
+> > > >+				acl = NULL;
+> > > >+		}
+> > > >+		break;
+> > > >+	case ACL_TYPE_DEFAULT:
+> > > >+		if (!S_ISDIR(inode->i_mode)) {
+> > > >+			ret = acl ? -EINVAL : 0;
+> > > >+			goto out;
+> > > >+		}
+> > > >+		name = POSIX_ACL_XATTR_DEFAULT;
+> > > >+		break;
+> > > >+	default:
+> > > >+		ret = -EINVAL;
+> > > >+		goto out;
+> > > >+	}
+> > > >+
+> > > >+	if (acl) {
+> > > >+		size = posix_acl_xattr_size(acl->a_count);
+> > > >+		value = kmalloc(size, GFP_NOFS);
+> > > >+		if (!value) {
+> > > >+			ret = -ENOMEM;
+> > > >+			goto out;
+> > > >+		}
+> > > >+
+> > > >+		ret = posix_acl_to_xattr(&init_user_ns, acl, value, size);
+> > > >+		if (ret < 0)
+> > > >+			goto out_free;
+> > > >+	}
+> > > >+
+> > > >+	if (new_mode != old_mode) {
+> > > >+		newattrs.ia_mode = new_mode;
+> > > >+		newattrs.ia_valid = ATTR_MODE;
+> > > >+		ret = ceph_setattr(dentry, &newattrs);
+> > > >+		if (ret)
+> > > >+			goto out_free;
+> > > >+	}
+> > > >+
+> > > >+	if (value)
+> > > >+		ret = __ceph_setxattr(dentry, name, value, size, 0);
+> > > >+	else
+> > > >+		ret = __ceph_removexattr(dentry, name);
+> > > >+
+> > > >+	if (ret) {
+> > > >+		if (new_mode != old_mode) {
+> > > >+			newattrs.ia_mode = old_mode;
+> > > >+			newattrs.ia_valid = ATTR_MODE;
+> > > >+			ceph_setattr(dentry, &newattrs);
+> > > >+		}
+> > > >+		goto out_free;
+> > > >+	}
+> > > >+
+> > > >+	ceph_set_cached_acl(inode, type, acl);
+> > > >+
+> > > >+out_free:
+> > > >+	kfree(value);
+> > > >+out:
+> > > >+	return ret;
+> > > >+}
+> > > >+
+> > > >+int ceph_init_acl(struct dentry *dentry, struct inode *inode, struct inode *dir)
+> > > >+{
+> > > >+	struct posix_acl *acl = NULL;
+> > > >+	int ret = 0;
+> > > >+
+> > > >+	if (!S_ISLNK(inode->i_mode)) {
+> > > >+		if (IS_POSIXACL(dir)) {
+> > > >+			acl = ceph_get_acl(dir, ACL_TYPE_DEFAULT);
+> > > >+			if (IS_ERR(acl)) {
+> > > >+				ret = PTR_ERR(acl);
+> > > >+				goto out;
+> > > >+			}
+> > > >+		}
+> > > >+
+> > > >+		if (!acl)
+> > > >+			inode->i_mode &= ~current_umask();
+> > > >+	}
+> > > >+
+> > > >+	if (IS_POSIXACL(dir) && acl) {
+> > > >+		if (S_ISDIR(inode->i_mode)) {
+> > > >+			ret = ceph_set_acl(dentry, inode, acl,
+> > > >+						ACL_TYPE_DEFAULT);
+> > > >+			if (ret)
+> > > >+				goto out_release;
+> > > >+		}
+> > > >+		ret = posix_acl_create(&acl, GFP_NOFS, &inode->i_mode);
+> > > >+		if (ret < 0)
+> > > >+			goto out;
+> > > >+		else if (ret > 0)
+> > > >+			ret = ceph_set_acl(dentry, inode, acl, ACL_TYPE_ACCESS);
+> > > >+		else
+> > > >+			cache_no_acl(inode);
+> > > >+	} else {
+> > > >+		cache_no_acl(inode);
+> > > >+	}
+> > > >+
+> > > >+out_release:
+> > > >+	posix_acl_release(acl);
+> > > >+out:
+> > > >+	return ret;
+> > > >+}
+> > > >+
+> > > >+int ceph_acl_chmod(struct dentry *dentry, struct inode *inode)
+> > > >+{
+> > > >+	struct posix_acl *acl;
+> > > >+	int ret = 0;
+> > > >+
+> > > >+	if (S_ISLNK(inode->i_mode)) {
+> > > >+		ret = -EOPNOTSUPP;
+> > > >+		goto out;
+> > > >+	}
+> > > >+
+> > > >+	if (!IS_POSIXACL(inode))
+> > > >+		goto out;
+> > > >+
+> > > >+	acl = ceph_get_acl(inode, ACL_TYPE_ACCESS);
+> > > >+	if (IS_ERR_OR_NULL(acl)) {
+> > > >+		ret = PTR_ERR(acl);
+> > > >+		goto out;
+> > > >+	}
+> > > >+
+> > > >+	ret = posix_acl_chmod(&acl, GFP_KERNEL, inode->i_mode);
+> > > >+	if (ret)
+> > > >+		goto out;
+> > > >+	ret = ceph_set_acl(dentry, inode, acl, ACL_TYPE_ACCESS);
+> > > >+	posix_acl_release(acl);
+> > > >+out:
+> > > >+	return ret;
+> > > >+}
+> > > >+
+> > > >+static int ceph_xattr_acl_get(struct dentry *dentry, const char *name,
+> > > >+				void *value, size_t size, int type)
+> > > >+{
+> > > >+	struct posix_acl *acl;
+> > > >+	int ret = 0;
+> > > >+
+> > > >+	if (!IS_POSIXACL(dentry->d_inode))
+> > > >+		return -EOPNOTSUPP;
+> > > >+
+> > > >+	acl = ceph_get_acl(dentry->d_inode, type);
+> > > >+	if (IS_ERR(acl))
+> > > >+		return PTR_ERR(acl);
+> > > >+	if (acl == NULL)
+> > > >+		return -ENODATA;
+> > > >+
+> > > >+	ret = posix_acl_to_xattr(&init_user_ns, acl, value, size);
+> > > >+	posix_acl_release(acl);
+> > > >+
+> > > >+	return ret;
+> > > >+}
+> > > >+
+> > > >+static int ceph_xattr_acl_set(struct dentry *dentry, const char *name,
+> > > >+			const void *value, size_t size, int flags, int type)
+> > > >+{
+> > > >+	int ret = 0;
+> > > >+	struct posix_acl *acl = NULL;
+> > > >+
+> > > >+	if (!inode_owner_or_capable(dentry->d_inode)) {
+> > > >+		ret = -EPERM;
+> > > >+		goto out;
+> > > >+	}
+> > > >+
+> > > >+	if (!IS_POSIXACL(dentry->d_inode)) {
+> > > >+		ret = -EOPNOTSUPP;
+> > > >+		goto out;
+> > > >+	}
+> > > >+
+> > > >+	if (value) {
+> > > >+		acl = posix_acl_from_xattr(&init_user_ns, value, size);
+> > > >+		if (IS_ERR(acl)) {
+> > > >+			ret = PTR_ERR(acl);
+> > > >+			goto out;
+> > > >+		}
+> > > >+
+> > > >+		if (acl) {
+> > > >+			ret = posix_acl_valid(acl);
+> > > >+			if (ret)
+> > > >+				goto out_release;
+> > > >+		}
+> > > >+	}
+> > > >+
+> > > >+	ret = ceph_set_acl(dentry, dentry->d_inode, acl, type);
+> > > >+
+> > > >+out_release:
+> > > >+	posix_acl_release(acl);
+> > > >+out:
+> > > >+	return ret;
+> > > >+}
+> > > >+
+> > > >+const struct xattr_handler ceph_xattr_acl_default_handler = {
+> > > >+	.prefix = POSIX_ACL_XATTR_DEFAULT,
+> > > >+	.flags  = ACL_TYPE_DEFAULT,
+> > > >+	.get    = ceph_xattr_acl_get,
+> > > >+	.set    = ceph_xattr_acl_set,
+> > > >+};
+> > > >+
+> > > >+const struct xattr_handler ceph_xattr_acl_access_handler = {
+> > > >+	.prefix = POSIX_ACL_XATTR_ACCESS,
+> > > >+	.flags  = ACL_TYPE_ACCESS,
+> > > >+	.get    = ceph_xattr_acl_get,
+> > > >+	.set    = ceph_xattr_acl_set,
+> > > >+};
+> > > >diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+> > > >index 3c0a4bd..9289c6b2 100644
+> > > >--- a/fs/ceph/caps.c
+> > > >+++ b/fs/ceph/caps.c
+> > > >@@ -2464,6 +2464,7 @@ static void handle_cap_grant(struct inode *inode, struct ceph_mds_caps *grant,
+> > > >  				ceph_buffer_put(ci->i_xattrs.blob);
+> > > >  			ci->i_xattrs.blob = ceph_buffer_get(xattr_buf);
+> > > >  			ci->i_xattrs.version = version;
+> > > >+			ceph_forget_all_cached_acls(inode);
+> > > >  		}
+> > > >  	}
+> > > >
+> > > >diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+> > > >index 2a0bcae..b629e9d 100644
+> > > >--- a/fs/ceph/dir.c
+> > > >+++ b/fs/ceph/dir.c
+> > > >@@ -693,6 +693,10 @@ static int ceph_mknod(struct inode *dir, struct dentry *dentry,
+> > > >  	if (!err && !req->r_reply_info.head->is_dentry)
+> > > >  		err = ceph_handle_notrace_create(dir, dentry);
+> > > >  	ceph_mdsc_put_request(req);
+> > > >+
+> > > >+	if (!err)
+> > > >+		err = ceph_init_acl(dentry, dentry->d_inode, dir);
+> > > >+
+> > > >  	if (err)
+> > > >  		d_drop(dentry);
+> > > >  	return err;
+> > > >@@ -1293,6 +1297,7 @@ const struct inode_operations ceph_dir_iops = {
+> > > >  	.getxattr = ceph_getxattr,
+> > > >  	.listxattr = ceph_listxattr,
+> > > >  	.removexattr = ceph_removexattr,
+> > > >+	.get_acl = ceph_get_acl,
+> > > >  	.mknod = ceph_mknod,
+> > > >  	.symlink = ceph_symlink,
+> > > >  	.mkdir = ceph_mkdir,
+> > > >diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+> > > >index 2ae1381..6bda97b 100644
+> > > >--- a/fs/ceph/inode.c
+> > > >+++ b/fs/ceph/inode.c
+> > > >@@ -95,6 +95,7 @@ const struct inode_operations ceph_file_iops = {
+> > > >  	.getxattr = ceph_getxattr,
+> > > >  	.listxattr = ceph_listxattr,
+> > > >  	.removexattr = ceph_removexattr,
+> > > >+	.get_acl = ceph_get_acl,
+> > > >  };
+> > > >
+> > > >
+> > > >@@ -680,6 +681,7 @@ static int fill_inode(struct inode *inode,
+> > > >  			memcpy(ci->i_xattrs.blob->vec.iov_base,
+> > > >  			       iinfo->xattr_data, iinfo->xattr_len);
+> > > >  		ci->i_xattrs.version = le64_to_cpu(info->xattr_version);
+> > > >+		ceph_forget_all_cached_acls(inode);
+> > > >  		xattr_blob = NULL;
+> > > >  	}
+> > > >
+> > > >@@ -1632,6 +1634,7 @@ static const struct inode_operations ceph_symlink_iops = {
+> > > >  	.getxattr = ceph_getxattr,
+> > > >  	.listxattr = ceph_listxattr,
+> > > >  	.removexattr = ceph_removexattr,
+> > > >+	.get_acl = ceph_get_acl,
+> > > >  };
+> > > >
+> > > >  /*
+> > > >@@ -1705,6 +1708,7 @@ int ceph_setattr(struct dentry *dentry, struct iattr *attr)
+> > > >  			dirtied |= CEPH_CAP_AUTH_EXCL;
+> > > >  		} else if ((issued & CEPH_CAP_AUTH_SHARED) == 0 ||
+> > > >  			   attr->ia_mode != inode->i_mode) {
+> > > >+			inode->i_mode = attr->ia_mode;
+> > > >  			req->r_args.setattr.mode = cpu_to_le32(attr->ia_mode);
+> > > >  			mask |= CEPH_SETATTR_MODE;
+> > > >  			release |= CEPH_CAP_AUTH_SHARED;
+> > > >@@ -1820,6 +1824,12 @@ int ceph_setattr(struct dentry *dentry, struct iattr *attr)
+> > > >  	if (inode_dirty_flags)
+> > > >  		__mark_inode_dirty(inode, inode_dirty_flags);
+> > > >
+> > > >+	if (ia_valid & ATTR_MODE) {
+> > > >+		err = ceph_acl_chmod(dentry, inode);
+> > > >+		if (err)
+> > > >+			goto out_put;
+> > > >+	}
+> > > >+
+> > > >  	if (mask) {
+> > > >  		req->r_inode = inode;
+> > > >  		ihold(inode);
+> > > >@@ -1839,6 +1849,7 @@ int ceph_setattr(struct dentry *dentry, struct iattr *attr)
+> > > >  	return err;
+> > > >  out:
+> > > >  	spin_unlock(&ci->i_ceph_lock);
+> > > >+out_put:
+> > > >  	ceph_mdsc_put_request(req);
+> > > >  	return err;
+> > > >  }
+> > > >diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+> > > >index e58bd4a..c6740e4 100644
+> > > >--- a/fs/ceph/super.c
+> > > >+++ b/fs/ceph/super.c
+> > > >@@ -819,7 +819,11 @@ static int ceph_set_super(struct super_block *s, void *data)
+> > > >
+> > > >  	s->s_flags = fsc->mount_options->sb_flags;
+> > > >  	s->s_maxbytes = 1ULL << 40;  /* temp value until we get mdsmap */
+> > > >+#ifdef CONFIG_CEPH_FS_POSIX_ACL
+> > > >+	s->s_flags |= MS_POSIXACL;
+> > > >+#endif
+> > > >
+> > > >+	s->s_xattr = ceph_xattr_handlers;
+> > > >  	s->s_fs_info = fsc;
+> > > >  	fsc->sb = s;
+> > > >
+> > > >diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+> > > >index 8de94b5..7fa78a7 100644
+> > > >--- a/fs/ceph/super.h
+> > > >+++ b/fs/ceph/super.h
+> > > >@@ -335,7 +335,6 @@ struct ceph_inode_info {
+> > > >  	u32 i_fscache_gen; /* sequence, for delayed fscache validate */
+> > > >  	struct work_struct i_revalidate_work;
+> > > >  #endif
+> > > >-
+> > > >  	struct inode vfs_inode; /* at end */
+> > > >  };
+> > > >
+> > > >@@ -725,6 +724,9 @@ extern int ceph_getattr(struct vfsmount *mnt, struct dentry *dentry,
+> > > >  /* xattr.c */
+> > > >  extern int ceph_setxattr(struct dentry *, const char *, const void *,
+> > > >  			 size_t, int);
+> > > >+int __ceph_setxattr(struct dentry *, const char *, const void *, size_t, int);
+> > > >+ssize_t __ceph_getxattr(struct inode *, const char *, void *, size_t);
+> > > >+int __ceph_removexattr(struct dentry *, const char *);
+> > > >  extern ssize_t ceph_getxattr(struct dentry *, const char *, void *, size_t);
+> > > >  extern ssize_t ceph_listxattr(struct dentry *, char *, size_t);
+> > > >  extern int ceph_removexattr(struct dentry *, const char *);
+> > > >@@ -733,6 +735,39 @@ extern void __ceph_destroy_xattrs(struct ceph_inode_info *ci);
+> > > >  extern void __init ceph_xattr_init(void);
+> > > >  extern void ceph_xattr_exit(void);
+> > > >
+> > > >+/* acl.c */
+> > > >+extern const struct xattr_handler ceph_xattr_acl_access_handler;
+> > > >+extern const struct xattr_handler ceph_xattr_acl_default_handler;
+> > > >+extern const struct xattr_handler *ceph_xattr_handlers[];
+> > > >+
+> > > >+#ifdef CONFIG_CEPH_FS_POSIX_ACL
+> > > >+
+> > > >+struct posix_acl *ceph_get_acl(struct inode *, int);
+> > > >+int ceph_init_acl(struct dentry *, struct inode *, struct inode *);
+> > > >+int ceph_acl_chmod(struct dentry *, struct inode *);
+> > > >+void ceph_forget_all_cached_acls(struct inode *inode);
+> > > >+
+> > > >+#else
+> > > >+
+> > > >+#define ceph_get_acl NULL
+> > > >+
+> > > >+static inline int ceph_init_acl(struct dentry *dentry, struct inode *inode,
+> > > >+				struct inode *dir)
+> > > >+{
+> > > >+	return 0;
+> > > >+}
+> > > >+
+> > > >+static inline int ceph_acl_chmod(struct dentry *dentry, struct inode *inode)
+> > > >+{
+> > > >+	return 0;
+> > > >+}
+> > > >+
+> > > >+static inline void ceph_forget_all_cached_acls(struct inode *inode)
+> > > >+{
+> > > >+}
+> > > >+
+> > > >+#endif
+> > > >+
+> > > >  /* caps.c */
+> > > >  extern const char *ceph_cap_string(int c);
+> > > >  extern void ceph_handle_caps(struct ceph_mds_session *session,
+> > > >diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
+> > > >index be661d8..c7581f3 100644
+> > > >--- a/fs/ceph/xattr.c
+> > > >+++ b/fs/ceph/xattr.c
+> > > >@@ -11,11 +11,24 @@
+> > > >  #define XATTR_CEPH_PREFIX "ceph."
+> > > >  #define XATTR_CEPH_PREFIX_LEN (sizeof (XATTR_CEPH_PREFIX) - 1)
+> > > >
+> > > >+/*
+> > > >+ * List of handlers for synthetic system.* attributes. Other
+> > > >+ * attributes are handled directly.
+> > > >+ */
+> > > >+const struct xattr_handler *ceph_xattr_handlers[] = {
+> > > >+#ifdef CONFIG_CEPH_FS_POSIX_ACL
+> > > >+	&ceph_xattr_acl_access_handler,
+> > > >+	&ceph_xattr_acl_default_handler,
+> > > >+#endif
+> > > >+	NULL,
+> > > >+};
+> > > >+
+> > > >  static bool ceph_is_valid_xattr(const char *name)
+> > > >  {
+> > > >  	return !strncmp(name, XATTR_CEPH_PREFIX, XATTR_CEPH_PREFIX_LEN) ||
+> > > >  	       !strncmp(name, XATTR_SECURITY_PREFIX,
+> > > >  			XATTR_SECURITY_PREFIX_LEN) ||
+> > > >+	       !strncmp(name, XATTR_SYSTEM_PREFIX, XATTR_SYSTEM_PREFIX_LEN) ||
+> > > >  	       !strncmp(name, XATTR_TRUSTED_PREFIX, XATTR_TRUSTED_PREFIX_LEN) ||
+> > > >  	       !strncmp(name, XATTR_USER_PREFIX, XATTR_USER_PREFIX_LEN);
+> > > >  }
+> > > >@@ -663,10 +676,9 @@ void __ceph_build_xattrs_blob(struct ceph_inode_info *ci)
+> > > >  	}
+> > > >  }
+> > > >
+> > > >-ssize_t ceph_getxattr(struct dentry *dentry, const char *name, void *value,
+> > > >+ssize_t __ceph_getxattr(struct inode *inode, const char *name, void *value,
+> > > >  		      size_t size)
+> > > >  {
+> > > >-	struct inode *inode = dentry->d_inode;
+> > > >  	struct ceph_inode_info *ci = ceph_inode(inode);
+> > > >  	int err;
+> > > >  	struct ceph_inode_xattr *xattr;
+> > > >@@ -675,7 +687,6 @@ ssize_t ceph_getxattr(struct dentry *dentry, const char *name, void *value,
+> > > >  	if (!ceph_is_valid_xattr(name))
+> > > >  		return -ENODATA;
+> > > >
+> > > >-
+> > > >  	/* let's see if a virtual xattr was requested */
+> > > >  	vxattr = ceph_match_vxattr(inode, name);
+> > > >  	if (vxattr && !(vxattr->exists_cb && !vxattr->exists_cb(ci))) {
+> > > >@@ -725,6 +736,15 @@ out:
+> > > >  	return err;
+> > > >  }
+> > > >
+> > > >+ssize_t ceph_getxattr(struct dentry *dentry, const char *name, void *value,
+> > > >+		      size_t size)
+> > > >+{
+> > > >+	if (!strncmp(name, XATTR_SYSTEM_PREFIX, XATTR_SYSTEM_PREFIX_LEN))
+> > > >+		return generic_getxattr(dentry, name, value, size);
+> > > >+
+> > > >+	return __ceph_getxattr(dentry->d_inode, name, value, size);
+> > > >+}
+> > > >+
+> > > >  ssize_t ceph_listxattr(struct dentry *dentry, char *names, size_t size)
+> > > >  {
+> > > >  	struct inode *inode = dentry->d_inode;
+> > > >@@ -863,8 +883,8 @@ out:
+> > > >  	return err;
+> > > >  }
+> > > >
+> > > >-int ceph_setxattr(struct dentry *dentry, const char *name,
+> > > >-		  const void *value, size_t size, int flags)
+> > > >+int __ceph_setxattr(struct dentry *dentry, const char *name,
+> > > >+			const void *value, size_t size, int flags)
+> > > >  {
+> > > >  	struct inode *inode = dentry->d_inode;
+> > > >  	struct ceph_vxattr *vxattr;
+> > > >@@ -879,9 +899,6 @@ int ceph_setxattr(struct dentry *dentry, const char *name,
+> > > >  	struct ceph_inode_xattr *xattr = NULL;
+> > > >  	int required_blob_size;
+> > > >
+> > > >-	if (ceph_snap(inode) != CEPH_NOSNAP)
+> > > >-		return -EROFS;
+> > > >-
+> > > >  	if (!ceph_is_valid_xattr(name))
+> > > >  		return -EOPNOTSUPP;
+> > > >
+> > > >@@ -958,6 +975,18 @@ out:
+> > > >  	return err;
+> > > >  }
+> > > >
+> > > >+int ceph_setxattr(struct dentry *dentry, const char *name,
+> > > >+		  const void *value, size_t size, int flags)
+> > > >+{
+> > > >+	if (ceph_snap(dentry->d_inode) != CEPH_NOSNAP)
+> > > >+		return -EROFS;
+> > > >+
+> > > >+	if (!strncmp(name, XATTR_SYSTEM_PREFIX, XATTR_SYSTEM_PREFIX_LEN))
+> > > >+		return generic_setxattr(dentry, name, value, size, flags);
+> > > >+
+> > > >+	return __ceph_setxattr(dentry, name, value, size, flags);
+> > > >+}
+> > > >+
+> > > >  static int ceph_send_removexattr(struct dentry *dentry, const char *name)
+> > > >  {
+> > > >  	struct ceph_fs_client *fsc = ceph_sb_to_client(dentry->d_sb);
+> > > >@@ -984,7 +1013,7 @@ static int ceph_send_removexattr(struct dentry *dentry, const char *name)
+> > > >  	return err;
+> > > >  }
+> > > >
+> > > >-int ceph_removexattr(struct dentry *dentry, const char *name)
+> > > >+int __ceph_removexattr(struct dentry *dentry, const char *name)
+> > > >  {
+> > > >  	struct inode *inode = dentry->d_inode;
+> > > >  	struct ceph_vxattr *vxattr;
+> > > >@@ -994,9 +1023,6 @@ int ceph_removexattr(struct dentry *dentry, const char *name)
+> > > >  	int required_blob_size;
+> > > >  	int dirty;
+> > > >
+> > > >-	if (ceph_snap(inode) != CEPH_NOSNAP)
+> > > >-		return -EROFS;
+> > > >-
+> > > >  	if (!ceph_is_valid_xattr(name))
+> > > >  		return -EOPNOTSUPP;
+> > > >
+> > > >@@ -1053,3 +1079,13 @@ out:
+> > > >  	return err;
+> > > >  }
+> > > >
+> > > >+int ceph_removexattr(struct dentry *dentry, const char *name)
+> > > >+{
+> > > >+	if (ceph_snap(dentry->d_inode) != CEPH_NOSNAP)
+> > > >+		return -EROFS;
+> > > >+
+> > > >+	if (!strncmp(name, XATTR_SYSTEM_PREFIX, XATTR_SYSTEM_PREFIX_LEN))
+> > > >+		return generic_removexattr(dentry, name);
+> > > >+
+> > > >+	return __ceph_removexattr(dentry, name);
+> > > >+}
+> > > >
+> > 
+> > -- 
+> > Best regards,
+> > Guangliang
 > > --
-> > Dominik
-> >
-> > 2013/12/7 Dominik Mostowiec <dominikmostowiec@gmail.com>:
-> >> Yes, it is disabled
-> >> grep 'cache' /etc/ceph/ceph.conf  | grep rgw
-> >>         rgw_cache_enabled = false ;rgw cache enabled
-> >>         rgw_cache_lru_size = 10000 ;num of entries in rgw cache
-> >>
-> >> --
-> >> Regards
-> >> Dominik
-> >>
-> >> 2013/12/7 Yehuda Sadeh <yehuda@inktank.com>:
-> >>> Did you disable the cache by any chance (e.g., 'rgw cache enabled = false')?
-> >>>
-> >>>
-> >>>
-> >>> On Sat, Dec 7, 2013 at 8:34 AM, Dominik Mostowiec
-> >>> <dominikmostowiec@gmail.com> wrote:
-> >>>> Hi,
-> >>>> Log:
-> >>>> -------------------------
-> >>>> 2013-12-07 17:32:42.736396 7ffbe36d3780 10 allocated request req=0xe66f40
-> >>>> 2013-12-07 17:32:42.736438 7ff79b1c6700  1 ====== starting new request
-> >>>> req=0xe60860 =====
-> >>>> 2013-12-07 17:32:42.736590 7ff79b1c6700  2 req 1:0.000153::PUT
-> >>>> /test1/::initializing
-> >>>> 2013-12-07 17:32:42.736659 7ff79b1c6700 10 meta>> HTTP_X_AMZ_DATE
-> >>>> 2013-12-07 17:32:42.736686 7ff79b1c6700 10 x>> x-amz-date:Sat, 07 Dec
-> >>>> 2013 16:32:42 GMT
-> >>>> 2013-12-07 17:32:42.736758 7ff79b1c6700 10 s->object=<NULL> s->bucket=test1
-> >>>> 2013-12-07 17:32:42.736788 7ff79b1c6700  2 req 1:0.000351:s3:PUT
-> >>>> /test1/::getting op
-> >>>> 2013-12-07 17:32:42.736800 7ff79b1c6700  2 req 1:0.000364:s3:PUT
-> >>>> /test1/:create_bucket:authorizing
-> >>>> 2013-12-07 17:32:42.736907 7ff79b1c6700  1 -- 10.174.33.11:0/1270294
-> >>>> --> 10.174.33.11:6804/161220 -- osd_op(client.95391.0:107
-> >>>> F7P3E755K6BN5LR3N85U [getxattrs,stat] 7.62531457 e192) v4 -- ?+0 0x7ff
-> >>>> 794005a90 con 0xd908d0
-> >>>> 2013-12-07 17:32:42.738159 7ffbd96ec700  1 -- 10.174.33.11:0/1270294
-> >>>> <== osd.1 10.174.33.11:6804/161220 23 ==== osd_op_reply(107
-> >>>> F7P3E755K6BN5LR3N85U [getxattrs,stat] ondisk = 0) v4 ==== 161+0+20 (
-> >>>> 1539386342 0 1044315090) 0x7ffba40019c0 con 0xd908d0
-> >>>> 2013-12-07 17:32:42.738341 7ff79b1c6700  1 -- 10.174.33.11:0/1270294
-> >>>> --> 10.174.33.11:6804/161220 -- osd_op(client.95391.0:108
-> >>>> F7P3E755K6BN5LR3N85U [getxattrs,stat] 7.62531457 e192) v4 -- ?+0 0x7ff
-> >>>> 794005c20 con 0xd908d0
-> >>>> 2013-12-07 17:32:42.739230 7ffbd96ec700  1 -- 10.174.33.11:0/1270294
-> >>>> <== osd.1 10.174.33.11:6804/161220 24 ==== osd_op_reply(108
-> >>>> F7P3E755K6BN5LR3N85U [getxattrs,stat] ondisk = 0) v4 ==== 161+0+20 (
-> >>>> 1539386342 0 1044315090) 0x7ffba40019c0 con 0xd908d0
-> >>>> 2013-12-07 17:32:42.739349 7ff79b1c6700  1 -- 10.174.33.11:0/1270294
-> >>>> --> 10.174.33.11:6804/161220 -- osd_op(client.95391.0:109
-> >>>> F7P3E755K6BN5LR3N85U [read 0~524288] 7.62531457 e192) v4 -- ?+0 0x7ff7
-> >>>> 94005a90 con 0xd908d0
-> >>>> 2013-12-07 17:32:42.740172 7ffbd96ec700  1 -- 10.174.33.11:0/1270294
-> >>>> <== osd.1 10.174.33.11:6804/161220 25 ==== osd_op_reply(109
-> >>>> F7P3E755K6BN5LR3N85U [read 0~5] ondisk = 0) v4 ==== 119+0+5 (9359852
-> >>>> 51 0 150087197) 0x7ffba40019c0 con 0xd908d0
-> >>>> 2013-12-07 17:32:42.740310 7ff79b1c6700  1 -- 10.174.33.11:0/1270294
-> >>>> --> 10.174.33.11:6802/225929 -- osd_op(client.95391.0:110 0
-> >>>> [getxattrs,stat] 6.f18a3536 e192) v4 -- ?+0 0x7ff794006570 con 0xd8b
-> >>>> 210
-> >>>> 2013-12-07 17:32:42.741208 7ffbd96ec700  1 -- 10.174.33.11:0/1270294
-> >>>> <== osd.0 10.174.33.11:6802/225929 49 ==== osd_op_reply(110 0
-> >>>> [getxattrs,stat] ondisk = 0) v4 ==== 142+0+91 (2507304458 0 349659
-> >>>> 2801) 0x7ffbb4000a60 con 0xd8b210
-> >>>> 2013-12-07 17:32:42.741326 7ff79b1c6700  1 -- 10.174.33.11:0/1270294
-> >>>> --> 10.174.33.11:6802/225929 -- osd_op(client.95391.0:111 0
-> >>>> [getxattrs,stat] 6.f18a3536 e192) v4 -- ?+0 0x7ff7940063a0 con 0xd8b
-> >>>> 210
-> >>>> 2013-12-07 17:32:42.742153 7ffbd96ec700  1 -- 10.174.33.11:0/1270294
-> >>>> <== osd.0 10.174.33.11:6802/225929 50 ==== osd_op_reply(111 0
-> >>>> [getxattrs,stat] ondisk = 0) v4 ==== 142+0+91 (2507304458 0 349659
-> >>>> 2801) 0x7ffbb4000a60 con 0xd8b210
-> >>>> 2013-12-07 17:32:42.742268 7ff79b1c6700  1 -- 10.174.33.11:0/1270294
-> >>>> --> 10.174.33.11:6802/225929 -- osd_op(client.95391.0:112 0 [read
-> >>>> 0~524288] 6.f18a3536 e192) v4 -- ?+0 0x7ff7940063a0 con 0xd8b2
-> >>>> 10
-> >>>> 2013-12-07 17:32:42.743159 7ffbd96ec700  1 -- 10.174.33.11:0/1270294
-> >>>> <== osd.0 10.174.33.11:6802/225929 51 ==== osd_op_reply(112 0 [read
-> >>>> 0~254] ondisk = 0) v4 ==== 100+0+254 (3890176355 0 345783013
-> >>>> 2) 0x7ffbb4000a60 con 0xd8b210
-> >>>> 2013-12-07 17:32:42.743315 7ff79b1c6700 10 get_canon_resource(): dest=
-> >>>> 2013-12-07 17:32:42.743326 7ff79b1c6700 10 auth_hdr:
-> >>>> PUT
-> >>>>
-> >>>>
-> >>>>
-> >>>> x-amz-date:Sat, 07 Dec 2013 16:32:42 GMT
-> >>>> /test1/
-> >>>> 2013-12-07 17:32:42.743459 7ff79b1c6700  2 req 1:0.007023:s3:PUT
-> >>>> /test1/:create_bucket:reading permissions
-> >>>> 2013-12-07 17:32:42.743475 7ff79b1c6700  2 req 1:0.007038:s3:PUT
-> >>>> /test1/:create_bucket:verifying op mask
-> >>>> 2013-12-07 17:32:42.743479 7ff79b1c6700  2 req 1:0.007043:s3:PUT
-> >>>> /test1/:create_bucket:verifying op permissions
-> >>>> 2013-12-07 17:32:42.743542 7ff79b1c6700  1 -- 10.174.33.11:0/1270294
-> >>>> --> 10.174.33.11:6802/225929 -- osd_op(client.95391.0:113 0.buckets
-> >>>> [omap-get-vals 0~16] 6.f01626b7 e192) v4 -- ?+0 0x7ff7940066
-> >>>> 00 con 0xd8b210
-> >>>> 2013-12-07 17:32:42.744679 7ffbd96ec700  1 -- 10.174.33.11:0/1270294
-> >>>> <== osd.0 10.174.33.11:6802/225929 52 ==== osd_op_reply(113 0.buckets
-> >>>> [omap-get-vals 0~16] ondisk = 0) v4 ==== 108+0+288 (360462
-> >>>> 5994 0 2810901914) 0x7ffbb4000a60 con 0xd8b210
-> >>>> 2013-12-07 17:32:42.744782 7ff79b1c6700  2 req 1:0.008346:s3:PUT
-> >>>> /test1/:create_bucket:verifying op params
-> >>>> 2013-12-07 17:32:42.744791 7ff79b1c6700  2 req 1:0.008355:s3:PUT
-> >>>> /test1/:create_bucket:executing
-> >>>> 2013-12-07 17:32:42.744895 7ff79b1c6700  1 -- 10.174.33.11:0/1270294
-> >>>> --> 10.174.33.11:6802/225929 -- osd_op(client.95391.0:114 test1 [call
-> >>>> version.read,getxattrs,stat] 4.bddbf0b9 e192) v4 -- ?+0 0x
-> >>>> 7ff7940083a0 con 0xd8b210
-> >>>> 2013-12-07 17:32:42.745873 7ffbd96ec700  1 -- 10.174.33.11:0/1270294
-> >>>> <== osd.0 10.174.33.11:6802/225929 53 ==== osd_op_reply(114 test1
-> >>>> [call,getxattrs,stat] ondisk = 0) v4 ==== 188+0+139 (2921607002 0
-> >>>> 1685432528) 0x7ffbb4000a60 con 0xd8b210
-> >>>> 2013-12-07 17:32:42.746052 7ff79b1c6700  1 -- 10.174.33.11:0/1270294
-> >>>> --> 10.174.33.11:6802/225929 -- osd_op(client.95391.0:115 test1 [call
-> >>>> version.check_conds,call version.read,read 0~524288] 4.bddbf0b9 e192)
-> >>>> v4 -- ?+0 0x7ff794008d80 con 0xd8b210
-> >>>> 2013-12-07 17:32:42.746920 7ffbd96ec700  1 -- 10.174.33.11:0/1270294
-> >>>> <== osd.0 10.174.33.11:6802/225929 54 ==== osd_op_reply(115 test1
-> >>>> [call,call,read 0~111] ondisk = 0) v4 ==== 188+0+159 (3524501340 0
-> >>>> 3138215039) 0x7ffbb4000a60 con 0xd8b210
-> >>>> 2013-12-07 17:32:42.747053 7ff79b1c6700  1 -- 10.174.33.11:0/1270294
-> >>>> --> 10.174.33.13:6800/296091 -- osd_op(client.95391.0:116
-> >>>> .bucket.meta.test1:default.78189.1 [call version.read,getxattrs,stat]
-> >>>> 4.50558ec5 e192) v4 -- ?+0 0x7ff794007390 con 0xd8f710
-> >>>> 2013-12-07 17:32:42.748661 7ffbd96ec700  1 -- 10.174.33.11:0/1270294
-> >>>> <== osd.24 10.174.33.13:6800/296091 19 ==== osd_op_reply(116
-> >>>> .bucket.meta.test1:default.78189.1 [call,getxattrs,stat] ondisk = 0)
-> >>>> v4 ==== 217+0+268 (1054813027 0 2886434386) 0x7ffbac0057b0 con
-> >>>> 0xd8f710
-> >>>> 2013-12-07 17:32:42.748815 7ff79b1c6700  1 -- 10.174.33.11:0/1270294
-> >>>> --> 10.174.33.13:6800/296091 -- osd_op(client.95391.0:117
-> >>>> .bucket.meta.test1:default.78189.1 [call version.check_conds,call
-> >>>> version.read,read 0~524288] 4.50558ec5 e192) v4 -- ?+0 0x7ff79400c050
-> >>>> con 0xd8f710
-> >>>> 2013-12-07 17:32:42.750149 7ffbd96ec700  1 -- 10.174.33.11:0/1270294
-> >>>> <== osd.24 10.174.33.13:6800/296091 20 ==== osd_op_reply(117
-> >>>> .bucket.meta.test1:default.78189.1 [call,call,read 0~147] ondisk = 0)
-> >>>> v4 ==== 217+0+195 (284787856 0 526624477) 0x7ffbac001f80 con 0xd8f710
-> >>>> 2013-12-07 17:32:42.750245 7ff79b1c6700  0 WARNING: couldn't find acl
-> >>>> header for object, generating default
-> >>>> 2013-12-07 17:32:42.750288 7ff79b1c6700  1 -- 10.174.33.11:0/1270294
-> >>>> --> 10.174.33.11:6802/225929 -- osd_op(client.95391.0:118 0
-> >>>> [getxattrs,stat] 6.f18a3536 e192) v4 -- ?+0 0x7ff794007670 con
-> >>>> 0xd8b210
-> >>>> 2013-12-07 17:32:42.751004 7ffbd96ec700  1 -- 10.174.33.11:0/1270294
-> >>>> <== osd.0 10.174.33.11:6802/225929 55 ==== osd_op_reply(118 0
-> >>>> [getxattrs,stat] ondisk = 0) v4 ==== 142+0+91 (2507304458 0
-> >>>> 3496592801) 0x7ffbb4000a60 con 0xd8b210
-> >>>> 2013-12-07 17:32:42.751107 7ff79b1c6700  1 -- 10.174.33.11:0/1270294
-> >>>> --> 10.174.33.11:6802/225929 -- osd_op(client.95391.0:119 0
-> >>>> [getxattrs,stat] 6.f18a3536 e192) v4 -- ?+0 0x7ff794007650 con
-> >>>> 0xd8b210
-> >>>> 2013-12-07 17:32:42.751786 7ffbd96ec700  1 -- 10.174.33.11:0/1270294
-> >>>> <== osd.0 10.174.33.11:6802/225929 56 ==== osd_op_reply(119 0
-> >>>> [getxattrs,stat] ondisk = 0) v4 ==== 142+0+91 (2507304458 0
-> >>>> 3496592801) 0x7ffbb4000a60 con 0xd8b210
-> >>>> 2013-12-07 17:32:42.751881 7ff79b1c6700  1 -- 10.174.33.11:0/1270294
-> >>>> --> 10.174.33.11:6802/225929 -- osd_op(client.95391.0:120 0 [read
-> >>>> 0~524288] 6.f18a3536 e192) v4 -- ?+0 0x7ff794007000 con 0xd8b210
-> >>>> 2013-12-07 17:32:42.752528 7ffbd96ec700  1 -- 10.174.33.11:0/1270294
-> >>>> <== osd.0 10.174.33.11:6802/225929 57 ==== osd_op_reply(120 0 [read
-> >>>> 0~254] ondisk = 0) v4 ==== 100+0+254 (3890176355 0 3457830132)
-> >>>> 0x7ffbb4000a60 con 0xd8b210
-> >>>> 2013-12-07 17:32:42.752684 7ff79b1c6700  1 -- 10.174.33.11:0/1270294
-> >>>> --> 10.174.33.11:6804/161220 -- osd_op(client.95391.0:121
-> >>>> .dir.default.95391.1 [create 0~0,call rgw.bucket_init_index]
-> >>>> 8.5a45c1c6 e192) v4 -- ?+0 0x7ff794007540 con 0xd908d0
-> >>>> 2013-12-07 17:32:42.756042 7ffbd96ec700  1 -- 10.174.33.11:0/1270294
-> >>>> <== osd.1 10.174.33.11:6804/161220 26 ==== osd_op_reply(121
-> >>>> .dir.default.95391.1 [create 0~0,call] ack = 0) v4 ==== 161+0+0
-> >>>> (905452886 0 0) 0x7ffba40019c0 con 0xd908d0
-> >>>> 2013-12-07 17:32:42.756314 7ff79b1c6700  1 -- 10.174.33.11:0/1270294
-> >>>> --> 10.174.33.11:6802/225929 -- osd_op(client.95391.0:122
-> >>>> .bucket.meta.test1:default.95391.1 [create 0~0,call
-> >>>> version.set,writefull 0~147,setxattr user.rgw.acl (109)] 4.e2d85709
-> >>>> e192) v4 -- ?+0 0x7ff794007540 con 0xd8b210
-> >>>> 2013-12-07 17:32:42.758993 7ffbd96ec700  1 -- 10.174.33.11:0/1270294
-> >>>> <== osd.0 10.174.33.11:6802/225929 58 ==== osd_op_reply(122
-> >>>> .bucket.meta.test1:default.95391.1 [create 0~0,call,writefull
-> >>>> 0~147,setxattr (109)] ack = 0) v4 ==== 259+0+0 (1466420163 0 0)
-> >>>> 0x7ffbb4000a60 con 0xd8b210
-> >>>> 2013-12-07 17:32:42.759256 7ff79b1c6700  1 -- 10.174.33.11:0/1270294
-> >>>> --> 10.174.33.11:6802/225929 -- osd_op(client.95391.0:123 test1
-> >>>> [create 0~0,call version.set,writefull 0~111] 4.bddbf0b9 e192) v4 --
-> >>>> ?+0 0x7ff794008960 con 0xd8b210
-> >>>> 2013-12-07 17:32:42.760000 7ffbd96ec700  1 -- 10.174.33.11:0/1270294
-> >>>> <== osd.0 10.174.33.11:6802/225929 59 ==== osd_op_reply(123 test1
-> >>>> [create 0~0,call,writefull 0~111] ondisk = -17 (File exists)) v4 ====
-> >>>> 188+0+0 (208006733 0 0) 0x7ffbb4000a30 con 0xd8b210
-> >>>> 2013-12-07 17:32:42.760144 7ff79b1c6700  1 -- 10.174.33.11:0/1270294
-> >>>> --> 10.174.33.11:6802/225929 -- osd_op(client.95391.0:124 test1 [call
-> >>>> version.read,getxattrs,stat] 4.bddbf0b9 e192) v4 -- ?+0 0x7ff794008490
-> >>>> con 0xd8b210
-> >>>> 2013-12-07 17:32:42.760924 7ffbd96ec700  1 -- 10.174.33.11:0/1270294
-> >>>> <== osd.0 10.174.33.11:6802/225929 60 ==== osd_op_reply(124 test1
-> >>>> [call,getxattrs,stat] ondisk = 0) v4 ==== 188+0+139 (2921607002 0
-> >>>> 1685432528) 0x7ffbb4000a30 con 0xd8b210
-> >>>> 2013-12-07 17:32:42.761044 7ff79b1c6700  1 -- 10.174.33.11:0/1270294
-> >>>> --> 10.174.33.11:6802/225929 -- osd_op(client.95391.0:125 test1
-> >>>> [getxattrs,stat] 4.bddbf0b9 e192) v4 -- ?+0 0x7ff794008100 con
-> >>>> 0xd8b210
-> >>>> 2013-12-07 17:32:42.761759 7ffbd96ec700  1 -- 10.174.33.11:0/1270294
-> >>>> <== osd.0 10.174.33.11:6802/225929 61 ==== osd_op_reply(125 test1
-> >>>> [getxattrs,stat] ondisk = 0) v4 ==== 146+0+91 (167695905 0 2385301879)
-> >>>> 0x7ffbb4000a30 con 0xd8b210
-> >>>> 2013-12-07 17:32:42.761908 7ff79b1c6700  1 -- 10.174.33.11:0/1270294
-> >>>> --> 10.174.33.11:6802/225929 -- osd_op(client.95391.0:126 test1 [call
-> >>>> version.check_conds,call version.read,read 0~524288] 4.bddbf0b9 e192)
-> >>>> v4 -- ?+0 0x7ff79400c6e0 con 0xd8b210
-> >>>> 2013-12-07 17:32:42.762712 7ffbd96ec700  1 -- 10.174.33.11:0/1270294
-> >>>> <== osd.0 10.174.33.11:6802/225929 62 ==== osd_op_reply(126 test1
-> >>>> [call,call,read 0~111] ondisk = 0) v4 ==== 188+0+159 (3524501340 0
-> >>>> 3138215039) 0x7ffbb4000a30 con 0xd8b210
-> >>>> 2013-12-07 17:32:42.762848 7ff79b1c6700  1 -- 10.174.33.11:0/1270294
-> >>>> --> 10.174.33.13:6800/296091 -- osd_op(client.95391.0:127
-> >>>> .bucket.meta.test1:default.78189.1 [call version.check_conds,call
-> >>>> version.read,getxattrs,stat] 4.50558ec5 e192) v4 -- ?+0 0x7ff79400c6e0
-> >>>> con 0xd8f710
-> >>>> 2013-12-07 17:32:42.764173 7ffbd96ec700  1 -- 10.174.33.11:0/1270294
-> >>>> <== osd.24 10.174.33.13:6800/296091 21 ==== osd_op_reply(127
-> >>>> .bucket.meta.test1:default.78189.1 [call,call,getxattrs,stat] ondisk =
-> >>>> -125 (Operation canceled)) v4 ==== 259+0+0 (3728706219 0 0)
-> >>>> 0x7ffbac002090 con 0xd8f710
-> >>>> 2013-12-07 17:32:42.764338 7ff79b1c6700  0 get_bucket_info returned -125
-> >>>> 2013-12-07 17:32:42.764368 7ff79b1c6700  0 WARNING: set_req_state_err
-> >>>> err_no=125 resorting to 500
-> >>>> 2013-12-07 17:32:42.764431 7ff79b1c6700  2 req 1:0.027995:s3:PUT
-> >>>> /test1/:create_bucket:http status=500
-> >>>> 2013-12-07 17:32:42.764561 7ff79b1c6700  1 ====== req done
-> >>>> req=0xe60860 http_status=500 ======
-> >>>> 2013-12-07 17:32:42.794156 7ffbd1ffb700  2
-> >>>> RGWDataChangesLog::ChangesRenewThread: start
-> >>>>
-> >>>> -------------------
-> >>>>
-> >>>>
-> >>>> --
-> >>>> Regards
-> >>>> Dominik
-> >>>>
-> >>>> 2013/12/7 Yehuda Sadeh <yehuda@inktank.com>:
-> >>>>> Not sure what could be the reason. Can you turn set 'debug ms = 1',
-> >>>>> and 'debug rgw = 20'?
-> >>>>>
-> >>>>> Thanks,
-> >>>>> Yehuda
-> >>>>>
-> >>>>> On Sat, Dec 7, 2013 at 4:33 AM, Dominik Mostowiec
-> >>>>> <dominikmostowiec@gmail.com> wrote:
-> >>>>>>> Are you running on latest dumpling
-> >>>>>> Yes. It was installed, not upgraded from prev version.
-> >>>>>> This is new crated bucket.
-> >>>>>> I rebuilded cluster from scratch.
-> >>>>>>
-> >>>>>> User add command "radosgw-admin user create ..." shows:
-> >>>>>> WARNING: cannot read region map
-> >>>>>>
-> >>>>>> Create first time bucket 'test1' via 's3 -u craete test1' got error.
-> >>>>>> But in radosgw logs it seems ok:
-> >>>>>> -------
-> >>>>>> 2013-12-07 10:40:04.328277 7f7746ff5700  1 ====== starting new request
-> >>>>>> req=0x1f5c7b0 =====
-> >>>>>> 2013-12-07 10:40:04.328339 7f7746ff5700  2 req 2:0.000063::PUT
-> >>>>>> /test1/::initializing
-> >>>>>> 2013-12-07 10:40:04.328361 7f7746ff5700 10 meta>> HTTP_X_AMZ_DATE
-> >>>>>> 2013-12-07 10:40:04.328368 7f7746ff5700 10 x>> x-amz-date:Sat, 07 Dec
-> >>>>>> 2013 09:40:04 GMT
-> >>>>>> 2013-12-07 10:40:04.328383 7f7746ff5700 10 s->object=<NULL> s->bucket=test1
-> >>>>>> 2013-12-07 10:40:04.328390 7f7746ff5700  2 req 2:0.000114:s3:PUT
-> >>>>>> /test1/::getting op
-> >>>>>> 2013-12-07 10:40:04.328394 7f7746ff5700  2 req 2:0.000118:s3:PUT
-> >>>>>> /test1/:create_bucket:authorizing
-> >>>>>> 2013-12-07 10:40:04.334424 7f7746ff5700 10 get_canon_resource(): dest=
-> >>>>>> 2013-12-07 10:40:04.334433 7f7746ff5700 10 auth_hdr:
-> >>>>>> PUT
-> >>>>>>
-> >>>>>>
-> >>>>>>
-> >>>>>> x-amz-date:Sat, 07 Dec 2013 09:40:04 GMT
-> >>>>>> /test1/
-> >>>>>> 2013-12-07 10:40:04.334476 7f7746ff5700  2 req 2:0.006200:s3:PUT
-> >>>>>> /test1/:create_bucket:reading permissions
-> >>>>>> 2013-12-07 10:40:04.334481 7f7746ff5700  2 req 2:0.006205:s3:PUT
-> >>>>>> /test1/:create_bucket:verifying op mask
-> >>>>>> 2013-12-07 10:40:04.334483 7f7746ff5700  2 req 2:0.006207:s3:PUT
-> >>>>>> /test1/:create_bucket:verifying op permissions
-> >>>>>> 2013-12-07 10:40:04.335391 7f7746ff5700  2 req 2:0.007115:s3:PUT
-> >>>>>> /test1/:create_bucket:verifying op params
-> >>>>>> 2013-12-07 10:40:04.335402 7f7746ff5700  2 req 2:0.007126:s3:PUT
-> >>>>>> /test1/:create_bucket:executing
-> >>>>>> 2013-12-07 10:40:05.420459 7f7746ff5700  2 req 2:1.092182:s3:PUT
-> >>>>>> /test1/:create_bucket:http status=200
-> >>>>>> 2013-12-07 10:40:05.420621 7f7746ff5700  1 ====== req done
-> >>>>>> req=0x1f5c7b0 http_status=200 ======
-> >>>>>> -------
-> >>>>>>
-> >>>>>>
-> >>>>>> Second try:
-> >>>>>> -------
-> >>>>>> 2013-12-07 10:40:06.421876 7f778d95d780 10 allocated request req=0x1f5c710
-> >>>>>> 2013-12-07 10:40:06.421936 7f77317ca700  1 ====== starting new request
-> >>>>>> req=0x1f5bc10 =====
-> >>>>>> 2013-12-07 10:40:06.422038 7f77317ca700  2 req 3:0.000104::PUT
-> >>>>>> /test1/::initializing
-> >>>>>> 2013-12-07 10:40:06.422069 7f77317ca700 10 meta>> HTTP_X_AMZ_DATE
-> >>>>>> 2013-12-07 10:40:06.422080 7f77317ca700 10 x>> x-amz-date:Sat, 07 Dec
-> >>>>>> 2013 09:40:06 GMT
-> >>>>>> 2013-12-07 10:40:06.422101 7f77317ca700 10 s->object=<NULL> s->bucket=test1
-> >>>>>> 2013-12-07 10:40:06.422110 7f77317ca700  2 req 3:0.000176:s3:PUT
-> >>>>>> /test1/::getting op
-> >>>>>> 2013-12-07 10:40:06.422117 7f77317ca700  2 req 3:0.000183:s3:PUT
-> >>>>>> /test1/:create_bucket:authorizing
-> >>>>>> 2013-12-07 10:40:06.429576 7f77317ca700 10 get_canon_resource(): dest=
-> >>>>>> 2013-12-07 10:40:06.429592 7f77317ca700 10 auth_hdr:
-> >>>>>> PUT
-> >>>>>>
-> >>>>>>
-> >>>>>>
-> >>>>>> x-amz-date:Sat, 07 Dec 2013 09:40:06 GMT
-> >>>>>> /test1/
-> >>>>>> 2013-12-07 10:40:06.429679 7f77317ca700  2 req 3:0.007745:s3:PUT
-> >>>>>> /test1/:create_bucket:reading permissions
-> >>>>>> 2013-12-07 10:40:06.429690 7f77317ca700  2 req 3:0.007756:s3:PUT
-> >>>>>> /test1/:create_bucket:verifying op mask
-> >>>>>> 2013-12-07 10:40:06.429693 7f77317ca700  2 req 3:0.007759:s3:PUT
-> >>>>>> /test1/:create_bucket:verifying op permissions
-> >>>>>> 2013-12-07 10:40:06.430945 7f77317ca700  2 req 3:0.009010:s3:PUT
-> >>>>>> /test1/:create_bucket:verifying op params
-> >>>>>> 2013-12-07 10:40:06.430964 7f77317ca700  2 req 3:0.009030:s3:PUT
-> >>>>>> /test1/:create_bucket:executing
-> >>>>>> 2013-12-07 10:40:06.436301 7f77317ca700  0 WARNING: couldn't find acl
-> >>>>>> header for object, generating default
-> >>>>>> 2013-12-07 10:40:06.451160 7f77317ca700  0 get_bucket_info returned -125
-> >>>>>> 2013-12-07 10:40:06.451188 7f77317ca700  0 WARNING: set_req_state_err
-> >>>>>> err_no=125 resorting to 500
-> >>>>>> 2013-12-07 10:40:06.451223 7f77317ca700  2 req 3:0.029289:s3:PUT
-> >>>>>> /test1/:create_bucket:http status=500
-> >>>>>> 2013-12-07 10:40:06.451335 7f77317ca700  1 ====== req done
-> >>>>>> req=0x1f5bc10 http_status=500 ======
-> >>>>>> -------
-> >>>>>>
-> >>>>>> ceph -s
-> >>>>>>   cluster 92833861-954f-4c66-a72b-5a83090a2b3f
-> >>>>>>    health HEALTH_OK
-> >>>>>>
-> >>>>>> ceph -v
-> >>>>>> ceph version 0.67.4 (ad85b8bfafea6232d64cb7ba76a8b6e8252fa0c7)
-> >>>>>>
-> >>>>>> I have strange behavior after cluster create.
-> >>>>>> All PGs were on osd.0 and marked as stale degraded.
-> >>>>>> After add more osd's it didn't ifxed.
-> >>>>>> "ceph pg force_create_pg" helps.
-> >>>>>>
-> >>>>>> After setup cluster I changed crushmap.
-> >>>>>> Removed osd.0 and added it again to cluster.
-> >>>>>>
-> >>>>>> It can be a reason?
-> >>>>>>
-> >>>>>> ----
-> >>>>>> Regards
-> >>>>>> Dominik
-> >>>>>>
-> >>>>>> 2013/12/6 Yehuda Sadeh <yehuda@inktank.com>:
-> >>>>>>> I'm having trouble reproducing this one. Are you running on latest
-> >>>>>>> dumpling? Does it happen with any newly created bucket, or just with
-> >>>>>>> buckets that existed before?
-> >>>>>>>
-> >>>>>>> Yehuda
-> >>>>>>>
-> >>>>>>> On Fri, Dec 6, 2013 at 5:07 AM, Dominik Mostowiec
-> >>>>>>> <dominikmostowiec@gmail.com> wrote:
-> >>>>>>>> Hi,
-> >>>>>>>> In version dumpling upgraded from bobtail working create the same bucket.
-> >>>>>>>>
-> >>>>>>>> root@vm-1:/etc/apache2/sites-enabled# s3 -u create testcreate
-> >>>>>>>> Bucket successfully created.
-> >>>>>>>> root@vm-1:/etc/apache2/sites-enabled# s3 -u create testcreate
-> >>>>>>>> Bucket successfully created.
-> >>>>>>>>
-> >>>>>>>> I installed new dumpling cluster and:
-> >>>>>>>> root@s1:/var/log/radosgw# s3 -u create test1
-> >>>>>>>> Bucket successfully created.
-> >>>>>>>> root@s1:/var/log/radosgw# s3 -u create test1
-> >>>>>>>>
-> >>>>>>>> ERROR: ErrorUnknown
-> >>>>>>>>
-> >>>>>>>> In radosgw logs:
-> >>>>>>>>
-> >>>>>>>> 2013-12-06 13:59:56.083109 7f162d7c2700  1 ====== starting new request
-> >>>>>>>> req=0xb7d480 =====
-> >>>>>>>> 2013-12-06 13:59:56.083227 7f162d7c2700  2 req 5:0.000119::PUT
-> >>>>>>>> /test1/::initializing
-> >>>>>>>> 2013-12-06 13:59:56.083261 7f162d7c2700 10 meta>> HTTP_X_AMZ_DATE
-> >>>>>>>> 2013-12-06 13:59:56.083274 7f162d7c2700 10 x>> x-amz-date:Fri, 06 Dec
-> >>>>>>>> 2013 12:59:56 GMT
-> >>>>>>>> 2013-12-06 13:59:56.083298 7f162d7c2700 10 s->object=<NULL> s->bucket=test1
-> >>>>>>>> 2013-12-06 13:59:56.083307 7f162d7c2700  2 req 5:0.000199:s3:PUT
-> >>>>>>>> /test1/::getting op
-> >>>>>>>> 2013-12-06 13:59:56.083315 7f162d7c2700  2 req 5:0.000207:s3:PUT
-> >>>>>>>> /test1/:create_bucket:authorizing
-> >>>>>>>> 2013-12-06 13:59:56.091724 7f162d7c2700 10 get_canon_resource(): dest=
-> >>>>>>>> 2013-12-06 13:59:56.091742 7f162d7c2700 10 auth_hdr:
-> >>>>>>>> PUT
-> >>>>>>>>
-> >>>>>>>>
-> >>>>>>>>
-> >>>>>>>> x-amz-date:Fri, 06 Dec 2013 12:59:56 GMT
-> >>>>>>>> /test1/
-> >>>>>>>> 2013-12-06 13:59:56.091836 7f162d7c2700  2 req 5:0.008728:s3:PUT
-> >>>>>>>> /test1/:create_bucket:reading permissions
-> >>>>>>>> 2013-12-06 13:59:56.091848 7f162d7c2700  2 req 5:0.008740:s3:PUT
-> >>>>>>>> /test1/:create_bucket:verifying op mask
-> >>>>>>>> 2013-12-06 13:59:56.091852 7f162d7c2700  2 req 5:0.008744:s3:PUT
-> >>>>>>>> /test1/:create_bucket:verifying op permissions
-> >>>>>>>> 2013-12-06 13:59:56.093858 7f162d7c2700  2 req 5:0.010750:s3:PUT
-> >>>>>>>> /test1/:create_bucket:verifying op params
-> >>>>>>>> 2013-12-06 13:59:56.093882 7f162d7c2700  2 req 5:0.010773:s3:PUT
-> >>>>>>>> /test1/:create_bucket:executing
-> >>>>>>>> 2013-12-06 13:59:56.104819 7f162d7c2700  0 WARNING: couldn't find acl
-> >>>>>>>> header for object, generating default
-> >>>>>>>> 2013-12-06 13:59:56.132625 7f162d7c2700  0 get_bucket_info returned -125
-> >>>>>>>> 2013-12-06 13:59:56.132656 7f162d7c2700  0 WARNING: set_req_state_err
-> >>>>>>>> err_no=125 resorting to 500
-> >>>>>>>> 2013-12-06 13:59:56.132693 7f162d7c2700  2 req 5:0.049584:s3:PUT
-> >>>>>>>> /test1/:create_bucket:http status=500
-> >>>>>>>> 2013-12-06 13:59:56.132890 7f162d7c2700  1 ====== req done
-> >>>>>>>> req=0xb7d480 http_status=500 ======
-> >>>>>>>>
-> >>>>>>>> --
-> >>>>>>>> Regards
-> >>>>>>>> Dominik
-> >>>>>>>> _______________________________________________
-> >>>>>>>> ceph-users mailing list
-> >>>>>>>> ceph-users@lists.ceph.com
-> >>>>>>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-> >>>>>>
-> >>>>>>
-> >>>>>>
-> >>>>>> --
-> >>>>>> Pozdrawiam
-> >>>>>> Dominik
-> >>>>
-> >>>>
-> >>>>
-> >>>> --
-> >>>> Pozdrawiam
-> >>>> Dominik
-> >>
-> >>
-> >>
-> >> --
-> >> Pozdrawiam
-> >> Dominik
-> >
-> >
-> >
-> > --
-> > Pozdrawiam
-> > Dominik
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > 
+> > 
+
+-- 
+Best regards,
+Guangliang
