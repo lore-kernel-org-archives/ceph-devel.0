@@ -1,112 +1,280 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Forced push to master
-Date: Mon, 09 Dec 2013 00:53:45 +0100
-Message-ID: <52A50689.4070904@dachary.org>
-References: <52A4F9F7.8010007@dachary.org> <52A4FCC2.20902@dachary.org>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="NOrr3HMbwoelEn2wTHTnrtDNVBrg1mb35"
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: [PATCH V2] ceph: initialize inode before instantiating dentry
+Date: Mon,  9 Dec 2013 11:21:12 +0800
+Message-ID: <1386559272-9441-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:34279 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755642Ab3LHXxr (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 8 Dec 2013 18:53:47 -0500
-Received: from [10.9.0.6] (openvpn.novalocal [10.145.3.13])
-	by smtp.dmail.dachary.org (Postfix) with ESMTPS id BE69F26394
-	for <ceph-devel@vger.kernel.org>; Mon,  9 Dec 2013 00:53:45 +0100 (CET)
-In-Reply-To: <52A4FCC2.20902@dachary.org>
+Received: from mga01.intel.com ([192.55.52.88]:1671 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932105Ab3LIDVR (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 8 Dec 2013 22:21:17 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: sage@inktank.com, dave@bob-the-boat.me.uk, malcolm@sgi.com, "Yan, Zheng" <zheng.z.yan@intel.com>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---NOrr3HMbwoelEn2wTHTnrtDNVBrg1mb35
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
 
+commit b18825a7c8 (Put a small type field into struct dentry::d_flags)
+put a type field into struct dentry::d_flags. __d_instantiate() set the
+field by checking inode->i_mode. So we should initialize inode before
+instantiating dentry when handling mds reply.
 
+Fixes: #6930
+Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+---
+Changes since v1:
+ - set dentry offset after calling splice_dentry(). because the dentry
+   may be spliced.
 
-On 09/12/2013 00:12, Loic Dachary wrote:
->=20
->=20
-> On 09/12/2013 00:00, Loic Dachary wrote:
->> Hi,
->>
->> I accidentally forced push to ceph master at 11pm CEST 8 december 2013=
- the following:
->>
->> https://github.com/ceph/ceph/commit/17e0a7b2942899e3f4307bf3e9c41bcb43=
-04619d
->> https://github.com/ceph/ceph/commit/d5e44cf8b233e517d8f7f26cd556ad0ac1=
-5714c1
->> https://github.com/ceph/ceph/commit/71f820503a96cafa9e99cca047c3183c37=
-5408a8
->> https://github.com/ceph/ceph/commit/eefeb0e0ad54fe0179cbf71335a45ea17c=
-0fa23b
->> https://github.com/ceph/ceph/commit/8253ff1e0b3b3a1680293c75f015a5cf5f=
-5e34c6
->>
->> and may have discarded commits done after:
->>
->> https://github.com/ceph/ceph/commit/94da2153d1e131205c0e5e32601d0b6a9f=
-6a3cfd
->>
->> which is a merge dated
->>
->> Date:   Sat Dec 7 20:59:22 2013 -0800
->>
->> I apologize for the inconvenience and trying to figure out more.
->=20
-> http://gitbuilder.sepia.ceph.com/gitbuilder-quantal-amd64/#origin/maste=
-r
->=20
-> shows:
->=20
-> BUILDING 	17e0a7b 	loic 	build log osd/OSDMap: add feature bit for TUNA=
-BLES3 (=3D=3D CRUSH_V2)
-> 	(Pending) 	d5e44cf 	loic 	mon/OSDMonitor: allow setting 'firefly' tuna=
-bles
-> 	...3... 	=09
-> Warn 	94da215 	sage 	Warnings(1) Merge pull request #869 from ceph/wip-=
-crush=20
->=20
-> since gitbuilder reacts to every commit to master and that it did not p=
-ick anything between 94da215 and the forced push, it is somewhat reassuri=
-ng that no commit were lost. But I'm trying to find a way to be sure.
->=20
+---
+ fs/ceph/inode.c | 136 ++++++++++++++++++++++++--------------------------------
+ 1 file changed, 58 insertions(+), 78 deletions(-)
 
-https://github.com/ceph/ceph/pulls?direction=3Ddesc&page=3D1&sort=3Dupdat=
-ed&state=3Dclosed
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index 9a8e396..b11c360 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -978,7 +978,6 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req,
+ 	struct ceph_mds_reply_inode *ininfo;
+ 	struct ceph_vino vino;
+ 	struct ceph_fs_client *fsc = ceph_sb_to_client(sb);
+-	int i = 0;
+ 	int err = 0;
+ 
+ 	dout("fill_trace %p is_dentry %d is_target %d\n", req,
+@@ -1039,6 +1038,29 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req,
+ 		}
+ 	}
+ 
++	if (rinfo->head->is_target) {
++		vino.ino = le64_to_cpu(rinfo->targeti.in->ino);
++		vino.snap = le64_to_cpu(rinfo->targeti.in->snapid);
++
++		in = ceph_get_inode(sb, vino);
++		if (IS_ERR(in)) {
++			err = PTR_ERR(in);
++			goto done;
++		}
++		req->r_target_inode = in;
++
++		err = fill_inode(in, &rinfo->targeti, NULL,
++				session, req->r_request_started,
++				(le32_to_cpu(rinfo->head->result) == 0) ?
++				req->r_fmode : -1,
++				&req->r_caps_reservation);
++		if (err < 0) {
++			pr_err("fill_inode badness %p %llx.%llx\n",
++				in, ceph_vinop(in));
++			goto done;
++		}
++	}
++
+ 	/*
+ 	 * ignore null lease/binding on snapdir ENOENT, or else we
+ 	 * will have trouble splicing in the virtual snapdir later
+@@ -1108,7 +1130,6 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req,
+ 			     ceph_dentry(req->r_old_dentry)->offset);
+ 
+ 			dn = req->r_old_dentry;  /* use old_dentry */
+-			in = dn->d_inode;
+ 		}
+ 
+ 		/* null dentry? */
+@@ -1130,44 +1151,28 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req,
+ 		}
+ 
+ 		/* attach proper inode */
+-		ininfo = rinfo->targeti.in;
+-		vino.ino = le64_to_cpu(ininfo->ino);
+-		vino.snap = le64_to_cpu(ininfo->snapid);
+-		in = dn->d_inode;
+-		if (!in) {
+-			in = ceph_get_inode(sb, vino);
+-			if (IS_ERR(in)) {
+-				pr_err("fill_trace bad get_inode "
+-				       "%llx.%llx\n", vino.ino, vino.snap);
+-				err = PTR_ERR(in);
+-				d_drop(dn);
+-				goto done;
+-			}
++		if (!dn->d_inode) {
++			ihold(in);
+ 			dn = splice_dentry(dn, in, &have_lease, true);
+ 			if (IS_ERR(dn)) {
+ 				err = PTR_ERR(dn);
+ 				goto done;
+ 			}
+ 			req->r_dentry = dn;  /* may have spliced */
+-			ihold(in);
+-		} else if (ceph_ino(in) == vino.ino &&
+-			   ceph_snap(in) == vino.snap) {
+-			ihold(in);
+-		} else {
++		} else if (dn->d_inode && dn->d_inode != in) {
+ 			dout(" %p links to %p %llx.%llx, not %llx.%llx\n",
+-			     dn, in, ceph_ino(in), ceph_snap(in),
+-			     vino.ino, vino.snap);
++			     dn, dn->d_inode, ceph_vinop(dn->d_inode),
++			     ceph_vinop(in));
+ 			have_lease = false;
+-			in = NULL;
+ 		}
+ 
+ 		if (have_lease)
+ 			update_dentry_lease(dn, rinfo->dlease, session,
+ 					    req->r_request_started);
+ 		dout(" final dn %p\n", dn);
+-		i++;
+-	} else if ((req->r_op == CEPH_MDS_OP_LOOKUPSNAP ||
+-		   req->r_op == CEPH_MDS_OP_MKSNAP) && !req->r_aborted) {
++	} else if (!req->r_aborted &&
++		   (req->r_op == CEPH_MDS_OP_LOOKUPSNAP ||
++		    req->r_op == CEPH_MDS_OP_MKSNAP)) {
+ 		struct dentry *dn = req->r_dentry;
+ 
+ 		/* fill out a snapdir LOOKUPSNAP dentry */
+@@ -1177,52 +1182,15 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req,
+ 		ininfo = rinfo->targeti.in;
+ 		vino.ino = le64_to_cpu(ininfo->ino);
+ 		vino.snap = le64_to_cpu(ininfo->snapid);
+-		in = ceph_get_inode(sb, vino);
+-		if (IS_ERR(in)) {
+-			pr_err("fill_inode get_inode badness %llx.%llx\n",
+-			       vino.ino, vino.snap);
+-			err = PTR_ERR(in);
+-			d_delete(dn);
+-			goto done;
+-		}
+ 		dout(" linking snapped dir %p to dn %p\n", in, dn);
++		ihold(in);
+ 		dn = splice_dentry(dn, in, NULL, true);
+ 		if (IS_ERR(dn)) {
+ 			err = PTR_ERR(dn);
+ 			goto done;
+ 		}
+ 		req->r_dentry = dn;  /* may have spliced */
+-		ihold(in);
+-		rinfo->head->is_dentry = 1;  /* fool notrace handlers */
+-	}
+-
+-	if (rinfo->head->is_target) {
+-		vino.ino = le64_to_cpu(rinfo->targeti.in->ino);
+-		vino.snap = le64_to_cpu(rinfo->targeti.in->snapid);
+-
+-		if (in == NULL || ceph_ino(in) != vino.ino ||
+-		    ceph_snap(in) != vino.snap) {
+-			in = ceph_get_inode(sb, vino);
+-			if (IS_ERR(in)) {
+-				err = PTR_ERR(in);
+-				goto done;
+-			}
+-		}
+-		req->r_target_inode = in;
+-
+-		err = fill_inode(in,
+-				 &rinfo->targeti, NULL,
+-				 session, req->r_request_started,
+-				 (le32_to_cpu(rinfo->head->result) == 0) ?
+-				 req->r_fmode : -1,
+-				 &req->r_caps_reservation);
+-		if (err < 0) {
+-			pr_err("fill_inode badness %p %llx.%llx\n",
+-			       in, ceph_vinop(in));
+-			goto done;
+-		}
+ 	}
+-
+ done:
+ 	dout("fill_trace done err=%d\n", err);
+ 	return err;
+@@ -1272,7 +1240,7 @@ int ceph_readdir_prepopulate(struct ceph_mds_request *req,
+ 	struct qstr dname;
+ 	struct dentry *dn;
+ 	struct inode *in;
+-	int err = 0, i;
++	int err = 0, ret, i;
+ 	struct inode *snapdir = NULL;
+ 	struct ceph_mds_request_head *rhead = req->r_request->front.iov_base;
+ 	struct ceph_dentry_info *di;
+@@ -1305,6 +1273,7 @@ int ceph_readdir_prepopulate(struct ceph_mds_request *req,
+ 			ceph_fill_dirfrag(parent->d_inode, rinfo->dir_dir);
+ 	}
+ 
++	/* FIXME: release caps/leases if error occurs */
+ 	for (i = 0; i < rinfo->dir_nr; i++) {
+ 		struct ceph_vino vino;
+ 
+@@ -1329,9 +1298,10 @@ retry_lookup:
+ 				err = -ENOMEM;
+ 				goto out;
+ 			}
+-			err = ceph_init_dentry(dn);
+-			if (err < 0) {
++			ret = ceph_init_dentry(dn);
++			if (ret < 0) {
+ 				dput(dn);
++				err = ret;
+ 				goto out;
+ 			}
+ 		} else if (dn->d_inode &&
+@@ -1351,9 +1321,6 @@ retry_lookup:
+ 			spin_unlock(&parent->d_lock);
+ 		}
+ 
+-		di = dn->d_fsdata;
+-		di->offset = ceph_make_fpos(frag, i + r_readdir_offset);
+-
+ 		/* inode */
+ 		if (dn->d_inode) {
+ 			in = dn->d_inode;
+@@ -1366,26 +1333,39 @@ retry_lookup:
+ 				err = PTR_ERR(in);
+ 				goto out;
+ 			}
+-			dn = splice_dentry(dn, in, NULL, false);
+-			if (IS_ERR(dn))
+-				dn = NULL;
+ 		}
+ 
+ 		if (fill_inode(in, &rinfo->dir_in[i], NULL, session,
+ 			       req->r_request_started, -1,
+ 			       &req->r_caps_reservation) < 0) {
+ 			pr_err("fill_inode badness on %p\n", in);
++			if (!dn->d_inode)
++				iput(in);
++			d_drop(dn);
+ 			goto next_item;
+ 		}
+-		if (dn)
+-			update_dentry_lease(dn, rinfo->dir_dlease[i],
+-					    req->r_session,
+-					    req->r_request_started);
++
++		if (!dn->d_inode) {
++			dn = splice_dentry(dn, in, NULL, false);
++			if (IS_ERR(dn)) {
++				err = PTR_ERR(dn);
++				dn = NULL;
++				goto next_item;
++			}
++		}
++
++		di = dn->d_fsdata;
++		di->offset = ceph_make_fpos(frag, i + r_readdir_offset);
++
++		update_dentry_lease(dn, rinfo->dir_dlease[i],
++				    req->r_session,
++				    req->r_request_started);
+ next_item:
+ 		if (dn)
+ 			dput(dn);
+ 	}
+-	req->r_did_prepopulate = true;
++	if (err == 0)
++		req->r_did_prepopulate = true;
+ 
+ out:
+ 	if (snapdir) {
+-- 
+1.8.1.4
 
-shows the latest merges to master, most recent first. The most recent is =
-again
-
-https://github.com/ceph/ceph/pull/869 i.e. 94da215
-
-If a commit was lost it was not done via the github interface.
-
->>
->> Cheers
->>
->=20
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-
-
---NOrr3HMbwoelEn2wTHTnrtDNVBrg1mb35
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.20 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlKlBokACgkQ8dLMyEl6F21IDACeK6G+s9SDl4gWYhwEKhEeI6Bz
-x3kAmQF28G1pZuH9XhbfkZV7JFFMgCgi
-=sQfW
------END PGP SIGNATURE-----
-
---NOrr3HMbwoelEn2wTHTnrtDNVBrg1mb35--
