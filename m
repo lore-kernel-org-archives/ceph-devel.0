@@ -1,280 +1,134 @@
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: [PATCH V2] ceph: initialize inode before instantiating dentry
-Date: Mon,  9 Dec 2013 11:21:12 +0800
-Message-ID: <1386559272-9441-1-git-send-email-zheng.z.yan@intel.com>
+From: Dzianis Huznou <dzianis_huznou@epam.com>
+Subject: Re: [PATCH 1/2] No MDS mount error fix
+Date: Mon, 9 Dec 2013 15:02:29 +0300
+Message-ID: <1386590549.2091.1.camel@epbyminw3646.minsk.epam.com>
+References: <1b8c4b9c49deb956e9d065b0677bfeaf17c968d2.1386442053.git.plageat90@gmail.com>
+	 <CAAM7YAnZUWmRdB8+SV11688M+vR-oWxW5xYCUg1Cg1DmELZmqw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:1671 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932105Ab3LIDVR (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 8 Dec 2013 22:21:17 -0500
+Received: from owamsq.epam.com ([217.21.63.37]:34550 "EHLO
+	EVBYMINSA0102.epam.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932532Ab3LIMSv (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Dec 2013 07:18:51 -0500
+In-Reply-To: <CAAM7YAnZUWmRdB8+SV11688M+vR-oWxW5xYCUg1Cg1DmELZmqw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: sage@inktank.com, dave@bob-the-boat.me.uk, malcolm@sgi.com, "Yan, Zheng" <zheng.z.yan@intel.com>
+To: "Yan, Zheng" <ukernel@gmail.com>
+Cc: Mikhail Campos Guadamuz <plageat90@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
+On Sat, 2013-12-07 at 21:59 +0800, Yan, Zheng wrote:
+> On Sun, Dec 8, 2013 at 2:59 AM, Mikhail Campos Guadamuz
+> <plageat90@gmail.com> wrote:
+> > For http://tracker.ceph.com/issues/4386
+> >
+> > It determines situation, when a user is trying to mount CephFS
+> > with no MDS present. Return ECOMM from
+> > open_root_dentry which can be analyzed then by ceph.mount
+> >
+> > Signed-off-by: Mikhail Campos Guadamuz <plageat90@gmail.com>
+> > ---
+> >  fs/ceph/mdsmap.c            | 19 ++++++++++++++++---
+> >  fs/ceph/super.c             | 10 +++++++++-
+> >  include/linux/ceph/mdsmap.h |  1 +
+> >  3 files changed, 26 insertions(+), 4 deletions(-)
+> >
+> > diff --git a/fs/ceph/mdsmap.c b/fs/ceph/mdsmap.c
+> > index 132b64e..3a6ba8a 100644
+> > --- a/fs/ceph/mdsmap.c
+> > +++ b/fs/ceph/mdsmap.c
+> > @@ -12,6 +12,20 @@
+> >
+> >  #include "super.h"
+> >
+> > +/*
+> > + * count active mds's
+> > + */
+> > +int ceph_mdsmap_active_mds_count(struct ceph_mdsmap *m)
+> > +{
+> > +    int n = 0;
+> > +    int i;
+> > +
+> > +    for(i = 0; i < m->m_max_mds; ++i)
+> > +       if(m->m_info[i].state > 0)
+> > +           ++n;
+> > +
+> > +    return  n;
+> > +}
+> >
+> >  /*
+> >   * choose a random mds that is "up" (i.e. has a state > 0), or -1.
+> > @@ -26,9 +40,8 @@ int ceph_mdsmap_get_random_mds(struct ceph_mdsmap *m)
+> >                 return 0;
+> >
+> >         /* count */
+> > -       for (i = 0; i < m->m_max_mds; i++)
+> > -               if (m->m_info[i].state > 0)
+> > -                       n++;
+> > +       n = ceph_mdsmap_active_mds_count(m);
+> > +
+> >         if (n == 0)
+> >                 return -1;
+> >
+> > diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+> > index 6627b26..4d33d68 100644
+> > --- a/fs/ceph/super.c
+> > +++ b/fs/ceph/super.c
+> > @@ -674,7 +674,15 @@ static struct dentry *open_root_dentry(struct ceph_fs_client *fsc,
+> >         struct ceph_mds_request *req = NULL;
+> >         int err;
+> >         struct dentry *root;
+> > -
+> > +
+> > +       /* check for mds*/
+> > +       if( 0 == ceph_mdsmap_active_mds_count(mdsc->mdsmap) )
+> > +       {
+> > +           pr_info("active mds not found, possible not exist\n");
+> > +           root = ERR_PTR( -ECOMM );
+> > +           return root;
+> > +       }
+> 
+> I think we should return error immediately only if there is no mds
+> (mdsmap->m_max_mds == 0).  If there is inactive mds, we should stick
+> to current behavior (wait until timeout). Furthermore please don't use
+> uncommon error code ECOMM, use common error code such as EINVAL.
+> 
+> Regards
+> Yan, Zheng
+> 
+> 
+> > +
+> >         /* open dir */
+> >         dout("open_root_inode opening '%s'\n", path);
+> >         req = ceph_mdsc_create_request(mdsc, CEPH_MDS_OP_GETATTR, USE_ANY_MDS);
+> > diff --git a/include/linux/ceph/mdsmap.h b/include/linux/ceph/mdsmap.h
+> > index 87ed09f..4d7d502 100644
+> > --- a/include/linux/ceph/mdsmap.h
+> > +++ b/include/linux/ceph/mdsmap.h
+> > @@ -56,6 +56,7 @@ static inline bool ceph_mdsmap_is_laggy(struct ceph_mdsmap *m, int w)
+> >         return false;
+> >  }
+> >
+> > +extern int ceph_mdsmap_active_mds_count(struct ceph_mdsmap *m);
+> >  extern int ceph_mdsmap_get_random_mds(struct ceph_mdsmap *m);
+> >  extern struct ceph_mdsmap *ceph_mdsmap_decode(void **p, void *end);
+> >  extern void ceph_mdsmap_destroy(struct ceph_mdsmap *m);
+> > --
+> > 1.8.3.1
+> >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-commit b18825a7c8 (Put a small type field into struct dentry::d_flags)
-put a type field into struct dentry::d_flags. __d_instantiate() set the
-field by checking inode->i_mode. So we should initialize inode before
-instantiating dentry when handling mds reply.
+I think we can't check mds presence by (mdsmap->m_max_mds == 0)
+statement, because max_mds value does not strictly represent the number
+of mds. For example, we have max_mds = 1 (by default) no matter have we
+one mds or haven't. Is this a expected behavior?
 
-Fixes: #6930
-Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
----
-Changes since v1:
- - set dentry offset after calling splice_dentry(). because the dentry
-   may be spliced.
-
----
- fs/ceph/inode.c | 136 ++++++++++++++++++++++++--------------------------------
- 1 file changed, 58 insertions(+), 78 deletions(-)
-
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index 9a8e396..b11c360 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -978,7 +978,6 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req,
- 	struct ceph_mds_reply_inode *ininfo;
- 	struct ceph_vino vino;
- 	struct ceph_fs_client *fsc = ceph_sb_to_client(sb);
--	int i = 0;
- 	int err = 0;
- 
- 	dout("fill_trace %p is_dentry %d is_target %d\n", req,
-@@ -1039,6 +1038,29 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req,
- 		}
- 	}
- 
-+	if (rinfo->head->is_target) {
-+		vino.ino = le64_to_cpu(rinfo->targeti.in->ino);
-+		vino.snap = le64_to_cpu(rinfo->targeti.in->snapid);
-+
-+		in = ceph_get_inode(sb, vino);
-+		if (IS_ERR(in)) {
-+			err = PTR_ERR(in);
-+			goto done;
-+		}
-+		req->r_target_inode = in;
-+
-+		err = fill_inode(in, &rinfo->targeti, NULL,
-+				session, req->r_request_started,
-+				(le32_to_cpu(rinfo->head->result) == 0) ?
-+				req->r_fmode : -1,
-+				&req->r_caps_reservation);
-+		if (err < 0) {
-+			pr_err("fill_inode badness %p %llx.%llx\n",
-+				in, ceph_vinop(in));
-+			goto done;
-+		}
-+	}
-+
- 	/*
- 	 * ignore null lease/binding on snapdir ENOENT, or else we
- 	 * will have trouble splicing in the virtual snapdir later
-@@ -1108,7 +1130,6 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req,
- 			     ceph_dentry(req->r_old_dentry)->offset);
- 
- 			dn = req->r_old_dentry;  /* use old_dentry */
--			in = dn->d_inode;
- 		}
- 
- 		/* null dentry? */
-@@ -1130,44 +1151,28 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req,
- 		}
- 
- 		/* attach proper inode */
--		ininfo = rinfo->targeti.in;
--		vino.ino = le64_to_cpu(ininfo->ino);
--		vino.snap = le64_to_cpu(ininfo->snapid);
--		in = dn->d_inode;
--		if (!in) {
--			in = ceph_get_inode(sb, vino);
--			if (IS_ERR(in)) {
--				pr_err("fill_trace bad get_inode "
--				       "%llx.%llx\n", vino.ino, vino.snap);
--				err = PTR_ERR(in);
--				d_drop(dn);
--				goto done;
--			}
-+		if (!dn->d_inode) {
-+			ihold(in);
- 			dn = splice_dentry(dn, in, &have_lease, true);
- 			if (IS_ERR(dn)) {
- 				err = PTR_ERR(dn);
- 				goto done;
- 			}
- 			req->r_dentry = dn;  /* may have spliced */
--			ihold(in);
--		} else if (ceph_ino(in) == vino.ino &&
--			   ceph_snap(in) == vino.snap) {
--			ihold(in);
--		} else {
-+		} else if (dn->d_inode && dn->d_inode != in) {
- 			dout(" %p links to %p %llx.%llx, not %llx.%llx\n",
--			     dn, in, ceph_ino(in), ceph_snap(in),
--			     vino.ino, vino.snap);
-+			     dn, dn->d_inode, ceph_vinop(dn->d_inode),
-+			     ceph_vinop(in));
- 			have_lease = false;
--			in = NULL;
- 		}
- 
- 		if (have_lease)
- 			update_dentry_lease(dn, rinfo->dlease, session,
- 					    req->r_request_started);
- 		dout(" final dn %p\n", dn);
--		i++;
--	} else if ((req->r_op == CEPH_MDS_OP_LOOKUPSNAP ||
--		   req->r_op == CEPH_MDS_OP_MKSNAP) && !req->r_aborted) {
-+	} else if (!req->r_aborted &&
-+		   (req->r_op == CEPH_MDS_OP_LOOKUPSNAP ||
-+		    req->r_op == CEPH_MDS_OP_MKSNAP)) {
- 		struct dentry *dn = req->r_dentry;
- 
- 		/* fill out a snapdir LOOKUPSNAP dentry */
-@@ -1177,52 +1182,15 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req,
- 		ininfo = rinfo->targeti.in;
- 		vino.ino = le64_to_cpu(ininfo->ino);
- 		vino.snap = le64_to_cpu(ininfo->snapid);
--		in = ceph_get_inode(sb, vino);
--		if (IS_ERR(in)) {
--			pr_err("fill_inode get_inode badness %llx.%llx\n",
--			       vino.ino, vino.snap);
--			err = PTR_ERR(in);
--			d_delete(dn);
--			goto done;
--		}
- 		dout(" linking snapped dir %p to dn %p\n", in, dn);
-+		ihold(in);
- 		dn = splice_dentry(dn, in, NULL, true);
- 		if (IS_ERR(dn)) {
- 			err = PTR_ERR(dn);
- 			goto done;
- 		}
- 		req->r_dentry = dn;  /* may have spliced */
--		ihold(in);
--		rinfo->head->is_dentry = 1;  /* fool notrace handlers */
--	}
--
--	if (rinfo->head->is_target) {
--		vino.ino = le64_to_cpu(rinfo->targeti.in->ino);
--		vino.snap = le64_to_cpu(rinfo->targeti.in->snapid);
--
--		if (in == NULL || ceph_ino(in) != vino.ino ||
--		    ceph_snap(in) != vino.snap) {
--			in = ceph_get_inode(sb, vino);
--			if (IS_ERR(in)) {
--				err = PTR_ERR(in);
--				goto done;
--			}
--		}
--		req->r_target_inode = in;
--
--		err = fill_inode(in,
--				 &rinfo->targeti, NULL,
--				 session, req->r_request_started,
--				 (le32_to_cpu(rinfo->head->result) == 0) ?
--				 req->r_fmode : -1,
--				 &req->r_caps_reservation);
--		if (err < 0) {
--			pr_err("fill_inode badness %p %llx.%llx\n",
--			       in, ceph_vinop(in));
--			goto done;
--		}
- 	}
--
- done:
- 	dout("fill_trace done err=%d\n", err);
- 	return err;
-@@ -1272,7 +1240,7 @@ int ceph_readdir_prepopulate(struct ceph_mds_request *req,
- 	struct qstr dname;
- 	struct dentry *dn;
- 	struct inode *in;
--	int err = 0, i;
-+	int err = 0, ret, i;
- 	struct inode *snapdir = NULL;
- 	struct ceph_mds_request_head *rhead = req->r_request->front.iov_base;
- 	struct ceph_dentry_info *di;
-@@ -1305,6 +1273,7 @@ int ceph_readdir_prepopulate(struct ceph_mds_request *req,
- 			ceph_fill_dirfrag(parent->d_inode, rinfo->dir_dir);
- 	}
- 
-+	/* FIXME: release caps/leases if error occurs */
- 	for (i = 0; i < rinfo->dir_nr; i++) {
- 		struct ceph_vino vino;
- 
-@@ -1329,9 +1298,10 @@ retry_lookup:
- 				err = -ENOMEM;
- 				goto out;
- 			}
--			err = ceph_init_dentry(dn);
--			if (err < 0) {
-+			ret = ceph_init_dentry(dn);
-+			if (ret < 0) {
- 				dput(dn);
-+				err = ret;
- 				goto out;
- 			}
- 		} else if (dn->d_inode &&
-@@ -1351,9 +1321,6 @@ retry_lookup:
- 			spin_unlock(&parent->d_lock);
- 		}
- 
--		di = dn->d_fsdata;
--		di->offset = ceph_make_fpos(frag, i + r_readdir_offset);
--
- 		/* inode */
- 		if (dn->d_inode) {
- 			in = dn->d_inode;
-@@ -1366,26 +1333,39 @@ retry_lookup:
- 				err = PTR_ERR(in);
- 				goto out;
- 			}
--			dn = splice_dentry(dn, in, NULL, false);
--			if (IS_ERR(dn))
--				dn = NULL;
- 		}
- 
- 		if (fill_inode(in, &rinfo->dir_in[i], NULL, session,
- 			       req->r_request_started, -1,
- 			       &req->r_caps_reservation) < 0) {
- 			pr_err("fill_inode badness on %p\n", in);
-+			if (!dn->d_inode)
-+				iput(in);
-+			d_drop(dn);
- 			goto next_item;
- 		}
--		if (dn)
--			update_dentry_lease(dn, rinfo->dir_dlease[i],
--					    req->r_session,
--					    req->r_request_started);
-+
-+		if (!dn->d_inode) {
-+			dn = splice_dentry(dn, in, NULL, false);
-+			if (IS_ERR(dn)) {
-+				err = PTR_ERR(dn);
-+				dn = NULL;
-+				goto next_item;
-+			}
-+		}
-+
-+		di = dn->d_fsdata;
-+		di->offset = ceph_make_fpos(frag, i + r_readdir_offset);
-+
-+		update_dentry_lease(dn, rinfo->dir_dlease[i],
-+				    req->r_session,
-+				    req->r_request_started);
- next_item:
- 		if (dn)
- 			dput(dn);
- 	}
--	req->r_did_prepopulate = true;
-+	if (err == 0)
-+		req->r_did_prepopulate = true;
- 
- out:
- 	if (snapdir) {
--- 
-1.8.1.4
 
