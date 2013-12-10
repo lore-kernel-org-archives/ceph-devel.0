@@ -1,28 +1,40 @@
-From: "Don Talton (dotalton)" <dotalton@cisco.com>
-Subject: calamari roadmap?
-Date: Tue, 10 Dec 2013 19:34:16 +0000
-Message-ID: <57ED724085B72141BB091CF1314E471F01818E59@xmb-rcd-x15.cisco.com>
+From: Mrs.Saramcmillan@yahoo.com
+Subject: Re: Mrs Sara McMillan
+Date: Tue, 10 Dec 2013 16:11:33 -0300
+Message-ID: <20131210161133.126631vniz85gs4l@mail.utfsm.cl>
+Reply-To: mrssaramcmillan11@outlook.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1;
+	DelSp=Yes	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from alln-iport-8.cisco.com ([173.37.142.95]:46775 "EHLO
-	alln-iport-8.cisco.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750836Ab3LJTeS convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Dec 2013 14:34:18 -0500
-Received: from xhc-aln-x13.cisco.com (xhc-aln-x13.cisco.com [173.36.12.87])
-	by rcdn-core2-3.cisco.com (8.14.5/8.14.5) with ESMTP id rBAJYHJc029462
-	(version=TLSv1/SSLv3 cipher=AES128-SHA bits=128 verify=FAIL)
-	for <ceph-devel@vger.kernel.org>; Tue, 10 Dec 2013 19:34:17 GMT
-Content-Language: en-US
+Received: from mail.utfsm.cl ([200.1.30.21]:46767 "EHLO mail.utfsm.cl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751170Ab3LJUgK convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Dec 2013 15:36:10 -0500
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Ceph Development (ceph-devel@vger.kernel.org)" <ceph-devel@vger.kernel.org>
-
-Is there a roadmap for feature integration into Calamari?
-
-Donald Talton
-Systems Development Unit
-dotalton@cisco.com
 
 
+
+
+Although you might be nervous about my e-mail as we have not met =20
+before. My name is Sara McMillan,I work with Lloyds TSB Bank UK; there =
+=20
+is the sum of GBP =A315,200,000.00 business proposal I want to share =20
+with you. It is absolutely risk free; if you are interested send me a =20
+reply to my private e-mail below :
+
+Best Regards,
+Mrs Sara McMillan
+Email: mrssaramcmillan11@outlook.com
+London, United Kingdom
+
+----------------------------------------------------------------
+This message was sent using IMP, the Internet Messaging Program.
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
