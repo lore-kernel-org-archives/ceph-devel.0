@@ -1,109 +1,71 @@
-From: "Don Talton (dotalton)" <dotalton@cisco.com>
-Subject: RE: are there plans to move to a newer google perftools?
-Date: Tue, 10 Dec 2013 01:52:47 +0000
-Message-ID: <57ED724085B72141BB091CF1314E471F01817C86@xmb-rcd-x15.cisco.com>
-References: <57ED724085B72141BB091CF1314E471F01817C1A@xmb-rcd-x15.cisco.com>
- <alpine.DEB.2.00.1312091706520.13726@cobra.newdream.net>
- <57ED724085B72141BB091CF1314E471F01817C6A@xmb-rcd-x15.cisco.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Buffer alignment
+Date: Tue, 10 Dec 2013 09:32:52 +0100
+Message-ID: <52A6D1B4.1010503@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="bfWadtMQdfbLPwBBEnXUr3hLmv7ncI3nH"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from rcdn-iport-7.cisco.com ([173.37.86.78]:1509 "EHLO
-	rcdn-iport-7.cisco.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751048Ab3LJCCP convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Dec 2013 21:02:15 -0500
-In-Reply-To: <57ED724085B72141BB091CF1314E471F01817C6A@xmb-rcd-x15.cisco.com>
-Content-Language: en-US
+Received: from smtp.dmail.dachary.org ([91.121.254.229]:35720 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755522Ab3LJIcy (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Dec 2013 03:32:54 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: "Ceph Development (ceph-devel@vger.kernel.org)" <ceph-devel@vger.kernel.org>
+To: Andreas-Joachim Peters <andreas.joachim.peters@cern.ch>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-I should add, I am using ceph deploy. Here is the output:
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--bfWadtMQdfbLPwBBEnXUr3hLmv7ncI3nH
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
+
+Hi Andreas,
+
+In Ceph, buffers can be aligned if required using buffer::create_page_ali=
+gned
+
+https://github.com/ceph/ceph/blob/master/src/common/buffer.cc#L519
+https://github.com/ceph/ceph/blob/master/src/common/buffer.cc#L230
+
+and although the Jerasure plugin has alignment requirements
+
+https://github.com/ceph/ceph/blob/master/src/osd/ErasureCodePluginJerasur=
+e/ErasureCodeJerasure.cc#L79
+
+it did not occur to me that aligning the buffers used to stored the encod=
+ed=20
+
+https://github.com/ceph/ceph/blob/master/src/osd/ErasureCodePluginJerasur=
+e/ErasureCodeJerasure.cc#L87
+
+result would be needed. For decoding the caller is responsible for alloca=
+ting the buffers. For encoding it also is, except for the padding.=20
+
+Do you think the API should recommend something regarding alignment ?=20
+
+https://github.com/ceph/ceph/blob/master/src/osd/ErasureCodeInterface.h#L=
+20
+
+Cheers
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
 
 
-2013-12-09 18:42:58,340 [ceph][DEBUG ] The following packages have unmet dependencies:
-2013-12-09 18:42:58,340 [ceph][DEBUG ]  ceph : Depends: libgoogle-perftools0 but it is not going to be installed
-2013-12-09 18:42:58,340 [ceph][DEBUG ]  ceph-mds : Depends: libgoogle-perftools0 but it is not going to be installed
-2013-12-09 18:42:58,341 [ceph][ERROR ] RuntimeError: command returned non-zero exit status: 100
-2013-12-09 18:42:58,341 [ceph_deploy][ERROR ] RuntimeError: Failed to execute command: env DEBIAN_FRONTEND=noninteractive DEBIAN_PRIORITY=critical apt-get -q -o Dpkg::Options::=--force-confnew --no-install-recommends --assume-yes install -- ceph ceph-mds ceph-common ceph-fs-common gdisk
+--bfWadtMQdfbLPwBBEnXUr3hLmv7ncI3nH
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.20 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
 
+iEYEARECAAYFAlKm0bQACgkQ8dLMyEl6F214hQCfU1XBRjviUpiivGHkBHv76q2h
+8TgAn1zugn81QCjF0Fob4kKXG0pXSq/C
+=yby6
+-----END PGP SIGNATURE-----
 
-
-
-
-
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
-> owner@vger.kernel.org] On Behalf Of Don Talton (dotalton)
-> Sent: Monday, December 09, 2013 6:47 PM
-> To: Sage Weil
-> Cc: Ceph Development (ceph-devel@vger.kernel.org)
-> Subject: RE: are there plans to move to a newer google perftools?
-> 
-> Hi Sage,
-> 
-> It's Ubuntu 12.04 LTS
-> 
-> Mongo wants to install libgoogle-perftools4, whereas ceph wants to install
-> libgoogle-perftools0.
-> 
-> This is leaving libgoogle-perftools0 in a broken state and, I'm assuming this is
-> the cause, making ceph fault. Ceph works great before the installation of
-> libgoogle-perftools4.
-> 
-> This is with using mongo v2.4.6 and seemingly any version of ceph. I've tried
-> bobtail, dumpling, and cuttlefish.
-> 
-> Dpkg status:
-> rc  libgoogle-perftools0
-> ii  libgoogle-perftools4
-> 
-> dpkg -p ceph:
-> Depends: binutils, ceph-common, cryptsetup-bin | cryptsetup, gdisk, parted,
-> python, python-argparse, sdparm | hdparm, uuid-runtime, xfsprogs, libaio1
-> (>= 0.3.93), libboost-thread1.46.1 (>= 1.46.1-1), libc6 (>= 2.14), libgcc1 (>=
-> 1:4.1.1), libgoogle-perftools0, libnspr4 (>= 1.8.0.10), libnss3 (>= 3.12.0~1.9b1),
-> libsnappy1, libstdc++6 (>= 4.6), libuuid1 (>= 2.16)
-> 
-> It makes sense that ceph would use the latest, but it's exploding for me :)
-> 
-> 
-> > -----Original Message-----
-> > From: Sage Weil [mailto:sage@inktank.com]
-> > Sent: Monday, December 09, 2013 6:07 PM
-> > To: Don Talton (dotalton)
-> > Cc: Ceph Development (ceph-devel@vger.kernel.org)
-> > Subject: Re: are there plans to move to a newer google perftools?
-> >
-> > Hi Donald,
-> >
-> > What exactly is the conflict?  And what distro?  I believe we should
-> > be using whatever version of the library is installed.
-> >
-> > sage
-> >
-> > On Tue, 10 Dec 2013, Don Talton (dotalton) wrote:
-> >
-> > > I'm trying to package/install mongodb and ceph on the same server
-> > > and
-> > there are conflict due to the version differences.
-> > >
-> > > Donald Talton
-> > > Systems Development Unit
-> > > dotalton@cisco.com
-> > >
-> > >
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
-> > > in the body of a message to majordomo@vger.kernel.org More
-> > majordomo
-> > > info at  http://vger.kernel.org/majordomo-info.html
-> > >
-> > >
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the
-> body of a message to majordomo@vger.kernel.org More majordomo info at
-> http://vger.kernel.org/majordomo-info.html
+--bfWadtMQdfbLPwBBEnXUr3hLmv7ncI3nH--
