@@ -1,82 +1,77 @@
 From: Loic Dachary <loic@dachary.org>
-Subject: Re: Buffer alignment
-Date: Wed, 11 Dec 2013 13:25:23 +0100
-Message-ID: <52A859B3.10502@dachary.org>
-References: <52A6D1B4.1010503@dachary.org> <3472A07E6605974CBC9BC573F1BC02E4AE6A9C35@PLOXCHG03.cern.ch>
+Subject: Re: CEPH Erasure Encoding + OSD Scalability
+Date: Wed, 11 Dec 2013 13:28:28 +0100
+Message-ID: <52A85A6C.9050709@dachary.org>
+References: <-7369304096744919226@unknownmsgid> <3472A07E6605974CBC9BC573F1BC02E4A527147E@PLOXCHG03.cern.ch> <523C40B7.5060902@dachary.org> <alpine.DEB.2.00.1309200835110.25752@cobra.newdream.net> <523C7CAF.1020101@dachary.org>,<523DB725.2070104@dachary.org>,<3472A07E6605974CBC9BC573F1BC02E4A52727FF@PLOXCHG03.cern.ch> <3472A07E6605974CBC9BC573F1BC02E4AE69CCB4@PLOXCHG03.cern.ch> <52826E2D.2040503@dachary.org> <52A5F3A1.503@dachary.org>,<52A6D41A.3060205@dachary.org> <3472A07E6605974CBC9BC573F1BC02E4AE6A9C22@PLOXCHG03.cern.ch>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="rQGomJSannjsAvKAN1uJjSbsCqOsPBg9T"
+ boundary="EwQHlGUJqE7e0G76T1jITHDqh4bbNLXBj"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:37062 "EHLO
+Received: from smtp.dmail.dachary.org ([91.121.254.229]:37072 "EHLO
 	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751030Ab3LKMZZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Dec 2013 07:25:25 -0500
-In-Reply-To: <3472A07E6605974CBC9BC573F1BC02E4AE6A9C35@PLOXCHG03.cern.ch>
+	with ESMTP id S1751215Ab3LKM23 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Dec 2013 07:28:29 -0500
+In-Reply-To: <3472A07E6605974CBC9BC573F1BC02E4AE6A9C22@PLOXCHG03.cern.ch>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
 This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---rQGomJSannjsAvKAN1uJjSbsCqOsPBg9T
+--EwQHlGUJqE7e0G76T1jITHDqh4bbNLXBj
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: quoted-printable
 
 
 
-On 11/12/2013 10:50, Andreas Joachim Peters wrote:
-> Hi Loic,=20
-> if you pull the BPC extension this requires 128-bit aligned memory adre=
-sses, maybe to prepare for future extensions they should be even 512-bit =
-aligned. I can add an assertion if I see unaligned addresses.
+On 11/12/2013 10:49, Andreas Joachim Peters wrote:> Hi Loic,=20
+> I am a little bit confused which kind of tool you actually want. You wa=
+nt a simple benchmark to check for degradation or you want a full profile=
+r tool?
 >=20
 
-Could you please remind me which branch of your repository I should look =
-at ?
+I was not sure, hence the confusion.
+
+> Most of the external tools have the problem that you measure the whole =
+thing including buffer allocation and initialization. We probably don't w=
+ant to measure how long it takes to allocate memory and write random numb=
+ers into it.=20
+>=20
+> I would just o:
+>=20
+> < prepare memory>
+> <take CPU/realtime>
+> < run algorithm >
+> <take CPU/realtime>
+> < print result>
+>=20
+
+Ok, I'll do that.=20
+
+I'm glad I learnt about the other tools in the process, even if only to c=
+onclude that they are not needed.=20
 
 Cheers
 
+> Now one can also add to run the perf-stat tool after <prepare memory> a=
+nd start it from within the test program pointing to the PID running <run=
+ alogorithm>, so the benchmark would be:
+>=20
+> < prepare memory>
+> < take CPU/realtime>
+> < fork=3D>"perf stat -p <mypid>";
+> < run algorithm n times>
+> < take CPU/realtime>
+> < SIGINT to fork>
+> < print results>
+>=20
+> As an extension one could also add to have <run algorithm> with <n> thr=
+eads in a thread pool.
+>=20
 > Cheers Andreas.
 >=20
-> ________________________________________
-> From: Loic Dachary [loic@dachary.org]
-> Sent: 10 December 2013 09:32
-> To: Andreas Joachim Peters
-> Cc: Ceph Development
-> Subject: Buffer alignment
 >=20
-> Hi Andreas,
->=20
-> In Ceph, buffers can be aligned if required using buffer::create_page_a=
-ligned
->=20
-> https://github.com/ceph/ceph/blob/master/src/common/buffer.cc#L519
-> https://github.com/ceph/ceph/blob/master/src/common/buffer.cc#L230
->=20
-> and although the Jerasure plugin has alignment requirements
->=20
-> https://github.com/ceph/ceph/blob/master/src/osd/ErasureCodePluginJeras=
-ure/ErasureCodeJerasure.cc#L79
->=20
-> it did not occur to me that aligning the buffers used to stored the enc=
-oded
->=20
-> https://github.com/ceph/ceph/blob/master/src/osd/ErasureCodePluginJeras=
-ure/ErasureCodeJerasure.cc#L87
->=20
-> result would be needed. For decoding the caller is responsible for allo=
-cating the buffers. For encoding it also is, except for the padding.
->=20
-> Do you think the API should recommend something regarding alignment ?
->=20
-> https://github.com/ceph/ceph/blob/master/src/osd/ErasureCodeInterface.h=
-#L20
->=20
-> Cheers
->=20
-> --
-> Lo=EFc Dachary, Artisan Logiciel Libre
 >=20
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
@@ -89,7 +84,7 @@ n
 Lo=EFc Dachary, Artisan Logiciel Libre
 
 
---rQGomJSannjsAvKAN1uJjSbsCqOsPBg9T
+--EwQHlGUJqE7e0G76T1jITHDqh4bbNLXBj
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -98,9 +93,9 @@ Content-Disposition: attachment; filename="signature.asc"
 Version: GnuPG v2.0.20 (GNU/Linux)
 Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
 
-iEYEARECAAYFAlKoWbMACgkQ8dLMyEl6F2354gCgtJdQ7wEYS5KKuBBlSCfTCUGp
-KKsAn1XOLGhVQ+TkDqbRRHyiP9JosUO7
-=ZTe+
+iEYEARECAAYFAlKoWmwACgkQ8dLMyEl6F22zvACggZnjm9bjwCpRbioo2w2IAsAx
+184An1Cobn1eRgyiFXuP8Y7qADUBjeTz
+=l3dW
 -----END PGP SIGNATURE-----
 
---rQGomJSannjsAvKAN1uJjSbsCqOsPBg9T--
+--EwQHlGUJqE7e0G76T1jITHDqh4bbNLXBj--
