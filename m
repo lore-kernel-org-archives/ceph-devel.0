@@ -1,190 +1,114 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: question on BG# and its performance impact
-Date: Wed, 11 Dec 2013 08:37:56 -0600
-Message-ID: <52A878C4.8040501@inktank.com>
-References: <A9F57F2ABA6BB2469F01E127557C6C9B10E7BF1D@SHSMSX104.ccr.corp.intel.com> <52A7E371.7050008@inktank.com> <51FC7A40FB29414D88A121A7FFEF9A4710D43F45@SHSMSX104.ccr.corp.intel.com> <alpine.DEB.2.00.1312102134130.18451@cobra.newdream.net> <51FC7A40FB29414D88A121A7FFEF9A4710D43FFC@SHSMSX104.ccr.corp.intel.com> <alpine.DEB.2.00.1312102209570.19333@cobra.newdream.net> <A9F57F2ABA6BB2469F01E127557C6C9B10E7C12B@SHSMSX104.ccr.corp.intel.com> <52A8759C.90803@inktank.com>
+From: "Matt W. Benjamin" <matt@cohortfs.com>
+Subject: Ceph Messaging on Accelio (libxio) RDMA
+Date: Wed, 11 Dec 2013 17:32:28 -0500 (EST)
+Message-ID: <893765832.216.1386801148967.JavaMail.root@thunderbeast.private.linuxbox.com>
+Reply-To: "Matt W. Benjamin" <matt@cohortfs.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f174.google.com ([209.85.213.174]:38377 "EHLO
-	mail-ig0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751808Ab3LKOht (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Dec 2013 09:37:49 -0500
-Received: by mail-ig0-f174.google.com with SMTP id hk11so3707401igb.1
-        for <ceph-devel@vger.kernel.org>; Wed, 11 Dec 2013 06:37:48 -0800 (PST)
-In-Reply-To: <52A8759C.90803@inktank.com>
+Received: from aa.linuxbox.com ([69.128.83.226]:1178 "EHLO aa.linuxbox.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751084Ab3LKWck (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 11 Dec 2013 17:32:40 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Duan, Jiangang" <jiangang.duan@intel.com>
-Cc: Sage Weil <sage@inktank.com>, "Zhang, Jian" <jian.zhang@intel.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "He, Yujie" <yujie.he@intel.com>
+To: ceph-devel <ceph-devel@vger.kernel.org>
+Cc: Sage Weil <sage@inktank.com>, Yaron Haviv <yaronh@mellanox.com>, Eyal Salomon <esalomon@mellanox.com>
 
-On 12/11/2013 08:24 AM, Mark Nelson wrote:
-> Hi Jiangang,
->
-> To answer your earlier question about Uniformity:
->
-> What I saw in my testing was that the PG count increases, things did
-> tend to get more uniform, ie the standard deviation of the percentages
-> distributed over the set of OSDs slowly decreased with more PGs.
-> Primarily what I am interested in though is whether or not any specific
-> OSD has more PGs than the rest as that's all it will take to screw up
-> performance.  As far as performance goes though, in my testing it didn't
-> necessarily seem to be strongly correlated with the PG distribution,
-> except for very small numbers of PGs.  Much more rigorous testing is
-> probably needed to draw much of a conclusion.
->
-> Sage and I had a conversation a while ago about how to deal with
-> situations where you have uneven distributions (either through not
-> having enough PGs to ensure even distribution, or simply bad luck at
-> psuedo-random roulette).  I proposed that we might iterate through
-> multiple possible pool distributions using different seed values until
-> we found one we liked with good psudorandom distribution.  Perhaps you
-> could get even fancier by looking at what happens when you lose and OSD
-> or two.  As this is all during pool creation, a little extra time
-> finding a nice initial distribution doesn't really hurt.
->
-> Sage mentioned though that it may be better to simple take whatever
-> distribution is generated and simply re-weight it to deal with
-> uniformity imperfections.  I can't see any reason why this wouldn't also
-> work and has the benefit that it works no matter how the distribution
-> changes.  Arguably this technique could go beyond just looking at PG
-> distributions and look at actual data distribution too if the user wants
-> extremely even data uniformity at the expense of a re-weighting tweak.
->
-> In any event, with very large clusters with lots of pools, I think we
-> will likely need to at some point adopt some kind of scheme that lets us
-> get away with fewer PGs per pool than our current recommendations.
+Hi Ceph devs,
 
-Ha, replying to my own reply!  Thinking about this a little more, these 
-two techniques may in fact still be complementary.  For very large 
-clusters where the PG counts per OSD may be low, I suspect we will want 
-to at least make sure the initial map guarantees that every OSD has at 
-least 1 PG so we can do proper re-weighting down the road.  In fact the 
-better the initial distribution is, the less crazy we'll have to get 
-with re-weighting, so it may not be a bad idea to use both techniques.
+For the last several weeks, we've been working with engineers at
+Mellanox on a prototype Ceph messaging implementation that runs on
+the Accelio RDMA messaging service (libxio).
 
->
-> Mark
->
->
-> On 12/11/2013 12:22 AM, Duan, Jiangang wrote:
->> Cc the mail list as Sage suggested.
->>
->> -----Original Message-----
->> From: Sage Weil [mailto:sage@inktank.com]
->> Sent: Wednesday, December 11, 2013 2:10 PM
->> To: Zhang, Jian
->> Cc: Mark Nelson; Duan, Jiangang
->> Subject: RE: question on BG# and its performance impact
->>
->> On Wed, 11 Dec 2013, Zhang, Jian wrote:
->>> Thanks for the suggestions, I will take a look on the ls output.
->>> No, we didn't use the optimal crush tunables.
->>
->> Hopefully that is part of it... try repeating the test with the
->> optimal tunables (now the default in master)!
->>
->> s
->>
->>
->>>
->>> Jian
->>>
->>> -----Original Message-----
->>> From: Sage Weil [mailto:sage@inktank.com]
->>> Sent: Wednesday, December 11, 2013 1:36 PM
->>> To: Zhang, Jian
->>> Cc: Mark Nelson; Duan, Jiangang
->>> Subject: RE: question on BG# and its performance impact
->>>
->>> I might be worthwhile here to get teh actual list of objects (rados
->>> -p $pool ls list.txt) and calculate the pg and osd mappings for each
->>> of them to verify things are uniform.
->>>
->>> One thing: are you using the 'optimal' crush tunables (ceph osd crush
->>> tunables optimal)?
->>>
->>> Also, can we cc ceph-devel?
->>>
->>> sage
->>>
->>>
->>> On Wed, 11 Dec 2013, Zhang, Jian wrote:
->>>
->>>> Mark,
->>>> Thanks for the help.
->>>> For the performance dip, I think it should casued by the directory
->>>> splitting, just check several OSD, it does has many sub directories.
->>>> For the pg # and distribution, see if I understand you correctly:
->>>> When you said "a slow trend toward uniformity" do you mean the pg #
->>>> for each pool is unforim? But from sheet2, the pg # on OSD10 is 103,
->>>> while the pg # on OSD8 is 72, there is still a 30% gap. And I think
->>>> that's the reason we saw performance drop of 10M read with 1280 pgs
->>>> - pg # on the OSD is not balance.
->>>>
->>>> Thanks
->>>> Jian
->>>>
->>>> -----Original Message-----
->>>> From: Mark Nelson [mailto:mark.nelson@inktank.com]
->>>> Sent: Wednesday, December 11, 2013 12:01 PM
->>>> To: Duan, Jiangang
->>>> Cc: Sage Weil (sage@inktank.com); Zhang, Jian
->>>> Subject: Re: question on BG# and its performance impact
->>>>
->>>> Hi Jiangang,
->>>>
->>>> My results are rather old at this point, but I did similar testing
->>>> last spring to look at PG distribution and performance (with larger
->>>> writes) with varying numbers of PGs.  I saw what looked like a slow
->>>> trend toward uniformity.  Performance however was quite variable.
->>>>
->>>> The performance dip you saw after many hours may have been due to
->>>> directory splitting on the underlying OSDs.  When this happens
->>>> depends on the number of objects that are written out and the number
->>>> of PGs in the pool.  Eventually, when enough objects are written,
->>>> the filestore will create a deeper nested directory structure to
->>>> store objects to keep the maximum number of objects per directory
->>>> below a certain maximum.
->>>> This is governed by two settings:
->>>>
->>>> filestore merge threshold = 10
->>>>
->>>> filestore split multiple = 2
->>>>
->>>> The total number of objects per directory is by default 10 * 2 * 16
->>>> = 320.  With small PG counts this can cause quite a bit of directory
->>>> splitting if there are many objects.
->>>>
->>>> I believe that it is likely these defaults are lower than necessary
->>>> and we could allow more objects per directory, potentially reducing
->>>> the number of seeks for dentry lookups (though theoretically this
->>>> should be cached).  We definitely have seen this have a large
->>>> performance impact with RGW though on clusters with small numbers of
->>>> PGs.  With more PGs, and more relaxed thresholds, directory
->>>> splitting doesn't happen until many many millions of objects are
->>>> written out, and performance degradation as the disk fills up
->>>> appears to be less severe.
->>>>
->>>> Mark
->>>>
->>>> On 12/10/2013 09:05 PM, Duan, Jiangang wrote:
->>>>> Sage/mark,
->>>>>
->>>>> We find object# unbalance condition in our Ceph setup for both RBD
->>>>> and object. Refer to the attached pdf.
->>>>>
->>>>> Increase the PG# does increase performance however result in
->>>>> unstable issues ?
->>>>>
->>>>> Is this a known issue and do you have any BKM to fix this?
->>>>>
->>>>> -jiangang
->>>>>
->>>>
->>>>
->>>
->>>
->
+Accelio is a rather new effort to build a high-performance, high-throughput
+message passing framework atop openfabrics ibverbs and rdmacm primitives.
 
+It's early days, but the implementation has started to take shape, and
+gives a feel for what the Accelio architecture looks like when using the
+request-response model, as well as for our prototype mapping of the
+xio framework concepts to the Ceph ones.
+
+The current classes and responsibility breakdown somewhat as follows.
+The key classes in the TCP messaging implementation are:
+
+Messenger (abstract, represents a set of bidirectional communication endpoints)
+SimpleMessenger (concrete TCP messenger)
+
+Message (abstract, models a message between endpoints, all Ceph protocol messages
+derive from Message, obviously)
+
+Connection (concrete, though it -feels- abstract;  Connection models a communication
+endpoint identifiable by address, but has -some- coupling with the internals of
+SimpleMessenger, in particular, with its Pipe, below).
+
+Pipe (concrete, an active (threaded) object that encapsulates various operations on
+one side (send or recv) of a TCP connection.  The Pipe is really where a -lot- of
+the heavy lifting of SimpleMessenger is localized, and not just in the obvious
+ways--eg, Pipe drives the dispatch queue in SimpleMessenger, so a lot of it's
+visible semantics are built in cooperation with Pipe).
+
+Dispatcher (abstract, models the application processing messages and sending replies--ie, the upper edge of Messenger).
+
+The approach I took in incorporating Accelio was to build on the key abstractions
+of Messenger, Connection, and Dispatcher, and Message, and build a corresponding
+family of concrete classes:
+
+XioMessenger (concrete, implements Messenger, encapsulates xio endpoints, aggregates
+dispatchers as normal).
+
+XioConnection (concrete, implements Connection)
+
+XioPortal (concrete, a new class that represents worker thread contexts for all XioConnections in a given XioMessenger)
+
+XioMsg (concrete, a "transfer" class linking a sequence of low-level Accelio datagrams with a Message being sent)
+
+XioReplyHook (concrete, derived from Ceph::Context [indirectly via Message::ReplyHook], links a sequence of low-level Accelio datagrams for a Message that has been received-- that is, part of a new "reply" abstraction exposed to Message and Messenger).
+
+As noted above, there is some leakage of SimpleMessenger primitives into classes that are intended to be abstract, and some refactoring was needed to fit XioMessenger into the framework.  The main changes I prototyped are as follows:
+
+All traces of Pipe are removed from Connection, which is made abstract.  A new
+PipeConnection is introduced, that knows about Pipes.  SimpleMessenger now uses
+instances of PipeConnection as its concrete connection type.
+
+The most interesting changes I introduced are driven by the need to support
+Accelio's request/response model, which exists mainly to support RDMA memory
+registration primitives, and needs a concrete realization in the Messenger
+framework.
+
+To accomodate it, I've introduced two concepts.  First, callers replying to a Message use a new Messenger::send_reply(Message *msg, Message *reply) method.  In SimpleMessenger, this just maps to a call to send_message(Message *, Connection*), but in XioMessenger, the reply is delivered through a new Message::reply_hook completion functor that XioConnection sets when a message is being dispatched.  This is a general mechanism, new Messenger implementations can derive from Message::ReplyHook to define their own reply behavior, as needed.
+
+A lot of low level details of the mapping from Message to Accelio messaging are
+currently in flux, but the basic idea is to re-use the current encode/decode primitives as far as possible, while eliding the acks, sequence # and tids, and timestamp behaviors of Pipe, or rather, replacing them with mappings to Accelio primitives.  I have some wrapper classes that help with this.  For the moment, the existing Ceph message headers and footers are still there, but are now encoded/decoded, rather than hand-marshalled.  This means that checksumming 
+is probably mostly intact.  Message signatures are not implemented.
+
+What works.  The current prototype isn't integrated with the main server daemons
+(e.g., OSD) but experimental work on that is in progress.  I've created a pair of
+simple standalone client/server applications simple_server/simple_client and
+a matching xio_server/xio_client, that provide a minimal message dispatch loop with
+a new SimpleDispatcher class and some other helpers, as a way to work with both
+messengers side-by-side.  These are currently very primitive, but will probably
+do more things soon.  The current prototype sends messages over Accelio, but has some issue
+with replies, that should be fixed shortly.  It leaks lots of memory, etc.
+
+We've pushed a work-in-progress branch "xio-messenger" to our external github
+repository, for community review.  Find it here:
+
+https://github.com/linuxbox2/linuxbox-ceph
+
+Thanks!
+
+Matt
+
+-- 
+Matt Benjamin
+CohortFS, LLC.
+206 South Fifth Ave. Suite 150
+Ann Arbor, MI  48104
+
+http://cohortfs.com
+
+tel.  734-761-4689 
+fax.  734-769-8938 
+cel.  734-216-5309 
