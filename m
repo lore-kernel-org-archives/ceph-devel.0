@@ -1,56 +1,71 @@
 From: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>
-Subject: RE: CEPH Erasure Encoding + OSD Scalability
-Date: Wed, 11 Dec 2013 09:49:05 +0000
-Message-ID: <3472A07E6605974CBC9BC573F1BC02E4AE6A9C22@PLOXCHG03.cern.ch>
-References: <-7369304096744919226@unknownmsgid>
- <3472A07E6605974CBC9BC573F1BC02E4A527147E@PLOXCHG03.cern.ch>
- <523C40B7.5060902@dachary.org>
- <alpine.DEB.2.00.1309200835110.25752@cobra.newdream.net>
- <523C7CAF.1020101@dachary.org>,<523DB725.2070104@dachary.org>,<3472A07E6605974CBC9BC573F1BC02E4A52727FF@PLOXCHG03.cern.ch>
- <3472A07E6605974CBC9BC573F1BC02E4AE69CCB4@PLOXCHG03.cern.ch>
- <52826E2D.2040503@dachary.org>
- <52A5F3A1.503@dachary.org>,<52A6D41A.3060205@dachary.org>
+Subject: RE: Buffer alignment
+Date: Wed, 11 Dec 2013 09:50:18 +0000
+Message-ID: <3472A07E6605974CBC9BC573F1BC02E4AE6A9C35@PLOXCHG03.cern.ch>
+References: <52A6D1B4.1010503@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cernmx11.cern.ch ([188.184.36.50]:30417 "EHLO CERNMX11.cern.ch"
+Received: from cernmx13.cern.ch ([188.184.36.46]:39205 "EHLO CERNMX13.cern.ch"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751048Ab3LKJtL convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Dec 2013 04:49:11 -0500
-In-Reply-To: <52A6D41A.3060205@dachary.org>
+	id S1750829Ab3LKJuU convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Dec 2013 04:50:20 -0500
+In-Reply-To: <52A6D1B4.1010503@dachary.org>
 Content-Language: en-GB
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Loic Dachary <loic@dachary.org>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Loic, 
-I am a little bit confused which kind of tool you actually want. You want a simple benchmark to check for degradation or you want a full profiler tool?
-
-Most of the external tools have the problem that you measure the whole thing including buffer allocation and initialization. We probably don't want to measure how long it takes to allocate memory and write random numbers into it. 
-
-I would just do:
-
-< prepare memory>
-<take CPU/realtime>
-< run algorithm >
-<take CPU/realtime>
-< print result>
-
-Now one can also add to run the perf-stat tool after <prepare memory> and start it from within the test program pointing to the PID running <run alogorithm>, so the benchmark would be:
-
-< prepare memory>
-< take CPU/realtime>
-< fork=>"perf stat -p <mypid>";
-< run algorithm n times>
-< take CPU/realtime>
-< SIGINT to fork>
-< print results>
-
-As an extension one could also add to have <run algorithm> with <n> threads in a thread pool.
+Hi Loic,=20
+if you pull the BPC extension this requires 128-bit aligned memory adre=
+sses, maybe to prepare for future extensions they should be even 512-bi=
+t aligned. I can add an assertion if I see unaligned addresses.
 
 Cheers Andreas.
 
+________________________________________
+=46rom: Loic Dachary [loic@dachary.org]
+Sent: 10 December 2013 09:32
+To: Andreas Joachim Peters
+Cc: Ceph Development
+Subject: Buffer alignment
 
+Hi Andreas,
 
+In Ceph, buffers can be aligned if required using buffer::create_page_a=
+ligned
+
+https://github.com/ceph/ceph/blob/master/src/common/buffer.cc#L519
+https://github.com/ceph/ceph/blob/master/src/common/buffer.cc#L230
+
+and although the Jerasure plugin has alignment requirements
+
+https://github.com/ceph/ceph/blob/master/src/osd/ErasureCodePluginJeras=
+ure/ErasureCodeJerasure.cc#L79
+
+it did not occur to me that aligning the buffers used to stored the enc=
+oded
+
+https://github.com/ceph/ceph/blob/master/src/osd/ErasureCodePluginJeras=
+ure/ErasureCodeJerasure.cc#L87
+
+result would be needed. For decoding the caller is responsible for allo=
+cating the buffers. For encoding it also is, except for the padding.
+
+Do you think the API should recommend something regarding alignment ?
+
+https://github.com/ceph/ceph/blob/master/src/osd/ErasureCodeInterface.h=
+#L20
+
+Cheers
+
+--
+Lo=EFc Dachary, Artisan Logiciel Libre
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
