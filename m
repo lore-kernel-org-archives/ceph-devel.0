@@ -1,129 +1,98 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: question for the new ceph-osd key/value backend
-Date: Tue, 10 Dec 2013 22:09:25 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1312102155520.19333@cobra.newdream.net>
+From: "Duan, Jiangang" <jiangang.duan@intel.com>
+Subject: RE: question for the new ceph-osd key/value backend
+Date: Wed, 11 Dec 2013 06:59:48 +0000
+Message-ID: <A9F57F2ABA6BB2469F01E127557C6C9B10E7C197@SHSMSX104.ccr.corp.intel.com>
 References: <A9F57F2ABA6BB2469F01E127557C6C9B10E7BEDD@SHSMSX104.ccr.corp.intel.com>
+ <alpine.DEB.2.00.1312102155520.19333@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-412503121-1386742165=:19333"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:32905 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750719Ab3LKGJ0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Dec 2013 01:09:26 -0500
-In-Reply-To: <A9F57F2ABA6BB2469F01E127557C6C9B10E7BEDD@SHSMSX104.ccr.corp.intel.com>
+Received: from mga02.intel.com ([134.134.136.20]:53557 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750791Ab3LKG7w (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 11 Dec 2013 01:59:52 -0500
+In-Reply-To: <alpine.DEB.2.00.1312102155520.19333@cobra.newdream.net>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Duan, Jiangang" <jiangang.duan@intel.com>
+To: Sage Weil <sage@inktank.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
-
---557981400-412503121-1386742165=:19333
-Content-Type: TEXT/PLAIN; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-
-Hi Jiangang,
-
-On Wed, 11 Dec 2013, Duan, Jiangang wrote:
-> Sage,
->=20
-> I have some questions regarding to the key/value backend work.
->=20
-> What is the motivation to work on this? (or what is the problem we want=
- to solve?)
-> 1) to use the new interface thus we can bypass all the OS layer thus ge=
-t a short latency?
-
-That is one part.  The current strategy of layering on top of a file=20
-system and using a write-ahead journal makes sense given the existing=20
-linux fs building blocks, but is far from an optimal solution for many=20
-workloads.  A k/v interface based on something leveldb probably performs=20
-much better for many small-object use-cases.  Also, a k/v backend can tak=
-e=20
-advatange of emerging non-block storage interfaces like NVMKV, Kinetic,=20
-new libraries like rocksdb, etc.
-
-> 2) or to leverage some new primitive e.g. the atomic write thus to simp=
-lify the code writing?
-
-That too.  Basically, we are currently doing a lot of work to get what we=
-=20
-need out of posix, and are paying the price.
-
-> There are several different possibilities to use future NVM technology =
--=20
-> NVM.FILE, NVM.BLOCK, PM.XXX=20
-> http://snia.org/sites/default/files/NVMProgrammingModel_v1r10DRAFT.pdf=20
-> Even for openNVM thing - there are other usage model than k/v.
->=20
-> Do you have any typical usage model for this?=20
-
-I wasn't familiar with these; thanks for the reference!  Of these,=20
-NVM.FILE seems the most interesting (it maps most closely to an object). =
-=20
-I am predisposed to skepticism when it comes to these sorts of=20
-standards/API docs that precede an actual implementation, but it is=20
-encourgaging to see some effort here towards a common interface.
-
-In the end, we want to support generic Ceph workloads.  These range from=20
-rbd block and file type workloads (objects are stripes of files, with=20
-random bytes rewritten) to omap type workloads (like rgw bucket indices=20
-that are purely key/value).
-
-I think the first wins would be:
-
-1- a backend that more efficiently handles rgw bucket index workloads
-2- a backend that is more efficient for rgw in general (i.e., immutable=20
-objects)
-3- a backend that can handle more general purpose workloads (like rbd and=
-=20
-cephfs)
-
-and separately,
-
-4- a backend that lets you plug in a next-gen backend beneath it, like=20
-NVMKV and speedy flash.
-
-sage
-
-
-
->=20
-> -jiangang
->=20
-> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
->=20
-> From: Sage Weil <sage <at> inktank.com>
-> Subject:=C2=A0new ceph-osd key/value backend
-> Newsgroups:=C2=A0gmane.comp.file-systems.ceph.devel
-> Date: 2013-11-09 10:09:52 GMT (4 weeks, 3 days, 16 hours and 39 minutes=
- ago)
-> I've written up a blueprint with a rough sketch of how to take advantag=
-e=20
-> of alternative storage interfaces.  I am very happy to see that several=
- f=20
-> them have emerged over the past year or two:
->=20
->  - fusionio's KVMKV is a key/value interface for their flash products
->  - seagate's kinetic is a key/value interface for their new ethernet-ba=
-sed=20
-> drive
->=20
-> Also, leveldb is pretty great for many workloads when run on a=20
-> tranditional disk/fs.
->=20
-> The good news is a lot of the existing work that went into support omap=
-=20
-> looks to be reusable here.  Some new functionality and refactoring is=20
-> needed, though, particularly when it comes to storing object data (the=20
-> file-like bag of bytes portion) as key/value pairs.
->=20
-> The blueprint is here:
->=20
->   http://wiki.ceph.com/01Planning/02Blueprints/Firefly/osd%3A_new_key%2=
-F%2Fvalue_backend
->=20
-> N?????r??y??????X???v???)?{.n?????z?]z????ay?=1D????j=07??f???h?????=1E=
-?w???=0C???j:+v???w????????=07????zZ+???????j"????i
---557981400-412503121-1386742165=:19333--
+VGhhbmtzLiBJIGluIGdlbmVyYWwgdGhpbmsgdG8gZmluZCBvbmUgaW1wbGVtZW50YXRpb24gc3Vp
+dGFibGUgZm9yIGFsbCB1c2FnZSBtb2RlbHMgKHNtYWxsIHZzLiBiaWcsIGNvbGQgdnMuIGhvdCkg
+aXMgdmVyeSBkaWZmaWN1bHQuIFNvIEkgbGlrZSB0aGUgaWRlYSBvZiAiYSBiYWNrZW5kIHRoYXQg
+bGV0cyB5b3UgcGx1ZyBpbiBhIG5leHQtZ2VuIGJhY2tlbmQgYmVuZWF0aCBpdCAtICIgLSANCksv
+ViBtYXkgYmUgYSBnb29kIHdheSB0byBoYW5kbGUgbWFueSBzbWFsbCBvYmplY3RzIHRoYW4gWEZT
+IC0gaG93ZXZlciBJIGFtIG5vdCBzdXJlIGlmIGxldmVsREIgaXMgdGhlIHJpZ2h0IGNob2ljZSAo
+Y29uc2lkZXIgaXQgaXMgZ29vZCBmb3Igd3JpdGUgdGhhbiByZWFkKSBhbmQgYWxzbyBub3Qgc3Vy
+ZSBLL1YgdGhpcyB3aWxsIGJlbmVmaXQgUkJEIHdvcmtsb2FkIG9yIG5vdCAoY29uc2lkZXIgYWxs
+IDRNQiBvYmplY3Qgc2l6ZSkuDQpXaWxsIHRoaW5rIG1vcmUgYWJvdXQgdGhpcyBhbmQgdGFsayB3
+aXRoIHlvdSBhZ2Fpbi4gDQoNCi1qaWFuZ2FuZw0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0t
+LQ0KRnJvbTogU2FnZSBXZWlsIFttYWlsdG86c2FnZUBpbmt0YW5rLmNvbV0gDQpTZW50OiBXZWRu
+ZXNkYXksIERlY2VtYmVyIDExLCAyMDEzIDI6MDkgUE0NClRvOiBEdWFuLCBKaWFuZ2FuZw0KQ2M6
+IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQpTdWJqZWN0OiBSZTogcXVlc3Rpb24gZm9yIHRo
+ZSBuZXcgY2VwaC1vc2Qga2V5L3ZhbHVlIGJhY2tlbmQNCg0KSGkgSmlhbmdhbmcsDQoNCk9uIFdl
+ZCwgMTEgRGVjIDIwMTMsIER1YW4sIEppYW5nYW5nIHdyb3RlOg0KPiBTYWdlLA0KPiANCj4gSSBo
+YXZlIHNvbWUgcXVlc3Rpb25zIHJlZ2FyZGluZyB0byB0aGUga2V5L3ZhbHVlIGJhY2tlbmQgd29y
+ay4NCj4gDQo+IFdoYXQgaXMgdGhlIG1vdGl2YXRpb24gdG8gd29yayBvbiB0aGlzPyAob3Igd2hh
+dCBpcyB0aGUgcHJvYmxlbSB3ZSANCj4gd2FudCB0byBzb2x2ZT8pDQo+IDEpIHRvIHVzZSB0aGUg
+bmV3IGludGVyZmFjZSB0aHVzIHdlIGNhbiBieXBhc3MgYWxsIHRoZSBPUyBsYXllciB0aHVzIGdl
+dCBhIHNob3J0IGxhdGVuY3k/DQoNClRoYXQgaXMgb25lIHBhcnQuICBUaGUgY3VycmVudCBzdHJh
+dGVneSBvZiBsYXllcmluZyBvbiB0b3Agb2YgYSBmaWxlIHN5c3RlbSBhbmQgdXNpbmcgYSB3cml0
+ZS1haGVhZCBqb3VybmFsIG1ha2VzIHNlbnNlIGdpdmVuIHRoZSBleGlzdGluZyBsaW51eCBmcyBi
+dWlsZGluZyBibG9ja3MsIGJ1dCBpcyBmYXIgZnJvbSBhbiBvcHRpbWFsIHNvbHV0aW9uIGZvciBt
+YW55IHdvcmtsb2Fkcy4gIEEgay92IGludGVyZmFjZSBiYXNlZCBvbiBzb21ldGhpbmcgbGV2ZWxk
+YiBwcm9iYWJseSBwZXJmb3JtcyBtdWNoIGJldHRlciBmb3IgbWFueSBzbWFsbC1vYmplY3QgdXNl
+LWNhc2VzLiAgQWxzbywgYSBrL3YgYmFja2VuZCBjYW4gdGFrZSBhZHZhdGFuZ2Ugb2YgZW1lcmdp
+bmcgbm9uLWJsb2NrIHN0b3JhZ2UgaW50ZXJmYWNlcyBsaWtlIE5WTUtWLCBLaW5ldGljLCBuZXcg
+bGlicmFyaWVzIGxpa2Ugcm9ja3NkYiwgZXRjLg0KDQo+IDIpIG9yIHRvIGxldmVyYWdlIHNvbWUg
+bmV3IHByaW1pdGl2ZSBlLmcuIHRoZSBhdG9taWMgd3JpdGUgdGh1cyB0byBzaW1wbGlmeSB0aGUg
+Y29kZSB3cml0aW5nPw0KDQpUaGF0IHRvby4gIEJhc2ljYWxseSwgd2UgYXJlIGN1cnJlbnRseSBk
+b2luZyBhIGxvdCBvZiB3b3JrIHRvIGdldCB3aGF0IHdlIG5lZWQgb3V0IG9mIHBvc2l4LCBhbmQg
+YXJlIHBheWluZyB0aGUgcHJpY2UuDQoNCj4gVGhlcmUgYXJlIHNldmVyYWwgZGlmZmVyZW50IHBv
+c3NpYmlsaXRpZXMgdG8gdXNlIGZ1dHVyZSBOVk0gdGVjaG5vbG9neSANCj4gLSBOVk0uRklMRSwg
+TlZNLkJMT0NLLCBQTS5YWFggDQo+IGh0dHA6Ly9zbmlhLm9yZy9zaXRlcy9kZWZhdWx0L2ZpbGVz
+L05WTVByb2dyYW1taW5nTW9kZWxfdjFyMTBEUkFGVC5wZGYNCj4gRXZlbiBmb3Igb3Blbk5WTSB0
+aGluZyAtIHRoZXJlIGFyZSBvdGhlciB1c2FnZSBtb2RlbCB0aGFuIGsvdi4NCj4gDQo+IERvIHlv
+dSBoYXZlIGFueSB0eXBpY2FsIHVzYWdlIG1vZGVsIGZvciB0aGlzPyANCg0KSSB3YXNuJ3QgZmFt
+aWxpYXIgd2l0aCB0aGVzZTsgdGhhbmtzIGZvciB0aGUgcmVmZXJlbmNlISAgT2YgdGhlc2UsIE5W
+TS5GSUxFIHNlZW1zIHRoZSBtb3N0IGludGVyZXN0aW5nIChpdCBtYXBzIG1vc3QgY2xvc2VseSB0
+byBhbiBvYmplY3QpLiAgDQpJIGFtIHByZWRpc3Bvc2VkIHRvIHNrZXB0aWNpc20gd2hlbiBpdCBj
+b21lcyB0byB0aGVzZSBzb3J0cyBvZiBzdGFuZGFyZHMvQVBJIGRvY3MgdGhhdCBwcmVjZWRlIGFu
+IGFjdHVhbCBpbXBsZW1lbnRhdGlvbiwgYnV0IGl0IGlzIGVuY291cmdhZ2luZyB0byBzZWUgc29t
+ZSBlZmZvcnQgaGVyZSB0b3dhcmRzIGEgY29tbW9uIGludGVyZmFjZS4NCg0KSW4gdGhlIGVuZCwg
+d2Ugd2FudCB0byBzdXBwb3J0IGdlbmVyaWMgQ2VwaCB3b3JrbG9hZHMuICBUaGVzZSByYW5nZSBm
+cm9tIHJiZCBibG9jayBhbmQgZmlsZSB0eXBlIHdvcmtsb2FkcyAob2JqZWN0cyBhcmUgc3RyaXBl
+cyBvZiBmaWxlcywgd2l0aCByYW5kb20gYnl0ZXMgcmV3cml0dGVuKSB0byBvbWFwIHR5cGUgd29y
+a2xvYWRzIChsaWtlIHJndyBidWNrZXQgaW5kaWNlcyB0aGF0IGFyZSBwdXJlbHkga2V5L3ZhbHVl
+KS4NCg0KSSB0aGluayB0aGUgZmlyc3Qgd2lucyB3b3VsZCBiZToNCg0KMS0gYSBiYWNrZW5kIHRo
+YXQgbW9yZSBlZmZpY2llbnRseSBoYW5kbGVzIHJndyBidWNrZXQgaW5kZXggd29ya2xvYWRzDQoy
+LSBhIGJhY2tlbmQgdGhhdCBpcyBtb3JlIGVmZmljaWVudCBmb3Igcmd3IGluIGdlbmVyYWwgKGku
+ZS4sIGltbXV0YWJsZQ0Kb2JqZWN0cykNCjMtIGEgYmFja2VuZCB0aGF0IGNhbiBoYW5kbGUgbW9y
+ZSBnZW5lcmFsIHB1cnBvc2Ugd29ya2xvYWRzIChsaWtlIHJiZCBhbmQNCmNlcGhmcykNCg0KYW5k
+IHNlcGFyYXRlbHksDQoNCjQtIGEgYmFja2VuZCB0aGF0IGxldHMgeW91IHBsdWcgaW4gYSBuZXh0
+LWdlbiBiYWNrZW5kIGJlbmVhdGggaXQsIGxpa2UgTlZNS1YgYW5kIHNwZWVkeSBmbGFzaC4NCg0K
+c2FnZQ0KDQoNCg0KPiANCj4gLWppYW5nYW5nDQo+IA0KPiA9PT09PT09PT09PT09PT09PT09DQo+
+IA0KPiBGcm9tOiBTYWdlIFdlaWwgPHNhZ2UgPGF0PiBpbmt0YW5rLmNvbT4NCj4gU3ViamVjdDrC
+oG5ldyBjZXBoLW9zZCBrZXkvdmFsdWUgYmFja2VuZA0KPiBOZXdzZ3JvdXBzOsKgZ21hbmUuY29t
+cC5maWxlLXN5c3RlbXMuY2VwaC5kZXZlbA0KPiBEYXRlOiAyMDEzLTExLTA5IDEwOjA5OjUyIEdN
+VCAoNCB3ZWVrcywgMyBkYXlzLCAxNiBob3VycyBhbmQgMzkgDQo+IG1pbnV0ZXMgYWdvKSBJJ3Zl
+IHdyaXR0ZW4gdXAgYSBibHVlcHJpbnQgd2l0aCBhIHJvdWdoIHNrZXRjaCBvZiBob3cgdG8gDQo+
+IHRha2UgYWR2YW50YWdlIG9mIGFsdGVybmF0aXZlIHN0b3JhZ2UgaW50ZXJmYWNlcy4gIEkgYW0g
+dmVyeSBoYXBweSB0byANCj4gc2VlIHRoYXQgc2V2ZXJhbCBmIHRoZW0gaGF2ZSBlbWVyZ2VkIG92
+ZXIgdGhlIHBhc3QgeWVhciBvciB0d286DQo+IA0KPiAgLSBmdXNpb25pbydzIEtWTUtWIGlzIGEg
+a2V5L3ZhbHVlIGludGVyZmFjZSBmb3IgdGhlaXIgZmxhc2ggcHJvZHVjdHMNCj4gIC0gc2VhZ2F0
+ZSdzIGtpbmV0aWMgaXMgYSBrZXkvdmFsdWUgaW50ZXJmYWNlIGZvciB0aGVpciBuZXcgDQo+IGV0
+aGVybmV0LWJhc2VkIGRyaXZlDQo+IA0KPiBBbHNvLCBsZXZlbGRiIGlzIHByZXR0eSBncmVhdCBm
+b3IgbWFueSB3b3JrbG9hZHMgd2hlbiBydW4gb24gYSANCj4gdHJhbmRpdGlvbmFsIGRpc2svZnMu
+DQo+IA0KPiBUaGUgZ29vZCBuZXdzIGlzIGEgbG90IG9mIHRoZSBleGlzdGluZyB3b3JrIHRoYXQg
+d2VudCBpbnRvIHN1cHBvcnQgDQo+IG9tYXAgbG9va3MgdG8gYmUgcmV1c2FibGUgaGVyZS4gIFNv
+bWUgbmV3IGZ1bmN0aW9uYWxpdHkgYW5kIA0KPiByZWZhY3RvcmluZyBpcyBuZWVkZWQsIHRob3Vn
+aCwgcGFydGljdWxhcmx5IHdoZW4gaXQgY29tZXMgdG8gc3RvcmluZyANCj4gb2JqZWN0IGRhdGEg
+KHRoZSBmaWxlLWxpa2UgYmFnIG9mIGJ5dGVzIHBvcnRpb24pIGFzIGtleS92YWx1ZSBwYWlycy4N
+Cj4gDQo+IFRoZSBibHVlcHJpbnQgaXMgaGVyZToNCj4gDQo+ICAgDQo+IGh0dHA6Ly93aWtpLmNl
+cGguY29tLzAxUGxhbm5pbmcvMDJCbHVlcHJpbnRzL0ZpcmVmbHkvb3NkJTNBX25ld19rZXklMkYN
+Cj4gJTJGdmFsdWVfYmFja2VuZA0KPiANCj4gTj8/Pz8/cj8/eT8/Pz8/P1g/Pz92Pz8/KT97Lm4/
+Pz8/P3o/XXo/Pz8/YXk/HT8/Pz9qID8/Zj8/P2g/Pz8/Px4/dz8/Pw0KPz8/ajordj8/P3c/Pz8/
+Pz8/PyA/Pz8/elorPz8/Pz8/P2oiPz8/P2kNCg==
