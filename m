@@ -1,40 +1,49 @@
-From: Mrs.Saramcmillan@yahoo.com
-Subject: Re: Mrs Sara McMillan
-Date: Tue, 10 Dec 2013 16:11:33 -0300
-Message-ID: <20131210161133.126631vniz85gs4l@mail.utfsm.cl>
-Reply-To: mrssaramcmillan11@outlook.com
+From: "Duan, Jiangang" <jiangang.duan@intel.com>
+Subject: question for the new ceph-osd key/value backend
+Date: Wed, 11 Dec 2013 02:57:40 +0000
+Message-ID: <A9F57F2ABA6BB2469F01E127557C6C9B10E7BEDD@SHSMSX104.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1;
-	DelSp=Yes	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.utfsm.cl ([200.1.30.21]:46767 "EHLO mail.utfsm.cl"
+Received: from mga11.intel.com ([192.55.52.93]:51995 "EHLO mga11.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751170Ab3LJUgK convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Dec 2013 15:36:10 -0500
-Content-Disposition: inline
+	id S1751173Ab3LKC5p (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 10 Dec 2013 21:57:45 -0500
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>
+Cc: "Duan, Jiangang" <jiangang.duan@intel.com>
 
-
-
-
-Although you might be nervous about my e-mail as we have not met =20
-before. My name is Sara McMillan,I work with Lloyds TSB Bank UK; there =
-=20
-is the sum of GBP =A315,200,000.00 business proposal I want to share =20
-with you. It is absolutely risk free; if you are interested send me a =20
-reply to my private e-mail below :
-
-Best Regards,
-Mrs Sara McMillan
-Email: mrssaramcmillan11@outlook.com
-London, United Kingdom
-
-----------------------------------------------------------------
-This message was sent using IMP, the Internet Messaging Program.
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+U2FnZSwNCg0KSSBoYXZlIHNvbWUgcXVlc3Rpb25zIHJlZ2FyZGluZyB0byB0aGUga2V5L3ZhbHVl
+IGJhY2tlbmQgd29yay4NCg0KV2hhdCBpcyB0aGUgbW90aXZhdGlvbiB0byB3b3JrIG9uIHRoaXM/
+IChvciB3aGF0IGlzIHRoZSBwcm9ibGVtIHdlIHdhbnQgdG8gc29sdmU/KQ0KMSkgdG8gdXNlIHRo
+ZSBuZXcgaW50ZXJmYWNlIHRodXMgd2UgY2FuIGJ5cGFzcyBhbGwgdGhlIE9TIGxheWVyIHRodXMg
+Z2V0IGEgc2hvcnQgbGF0ZW5jeT8NCjIpIG9yIHRvIGxldmVyYWdlIHNvbWUgbmV3IHByaW1pdGl2
+ZSBlLmcuIHRoZSBhdG9taWMgd3JpdGUgdGh1cyB0byBzaW1wbGlmeSB0aGUgY29kZSB3cml0aW5n
+Pw0KDQpUaGVyZSBhcmUgc2V2ZXJhbCBkaWZmZXJlbnQgcG9zc2liaWxpdGllcyB0byB1c2UgZnV0
+dXJlIE5WTSB0ZWNobm9sb2d5IC0gTlZNLkZJTEUsIE5WTS5CTE9DSywgUE0uWFhYIGh0dHA6Ly9z
+bmlhLm9yZy9zaXRlcy9kZWZhdWx0L2ZpbGVzL05WTVByb2dyYW1taW5nTW9kZWxfdjFyMTBEUkFG
+VC5wZGYNCkV2ZW4gZm9yIG9wZW5OVk0gdGhpbmcgLSB0aGVyZSBhcmUgb3RoZXIgdXNhZ2UgbW9k
+ZWwgdGhhbiBrL3YuDQoNCkRvIHlvdSBoYXZlIGFueSB0eXBpY2FsIHVzYWdlIG1vZGVsIGZvciB0
+aGlzPyANCg0KLWppYW5nYW5nDQoNCj09PT09PT09PT09PT09PT09PT0NCg0KRnJvbTogU2FnZSBX
+ZWlsIDxzYWdlIDxhdD4gaW5rdGFuay5jb20+DQpTdWJqZWN0OsKgbmV3IGNlcGgtb3NkIGtleS92
+YWx1ZSBiYWNrZW5kDQpOZXdzZ3JvdXBzOsKgZ21hbmUuY29tcC5maWxlLXN5c3RlbXMuY2VwaC5k
+ZXZlbA0KRGF0ZTogMjAxMy0xMS0wOSAxMDowOTo1MiBHTVQgKDQgd2Vla3MsIDMgZGF5cywgMTYg
+aG91cnMgYW5kIDM5IG1pbnV0ZXMgYWdvKQ0KSSd2ZSB3cml0dGVuIHVwIGEgYmx1ZXByaW50IHdp
+dGggYSByb3VnaCBza2V0Y2ggb2YgaG93IHRvIHRha2UgYWR2YW50YWdlIA0Kb2YgYWx0ZXJuYXRp
+dmUgc3RvcmFnZSBpbnRlcmZhY2VzLiAgSSBhbSB2ZXJ5IGhhcHB5IHRvIHNlZSB0aGF0IHNldmVy
+YWwgZiANCnRoZW0gaGF2ZSBlbWVyZ2VkIG92ZXIgdGhlIHBhc3QgeWVhciBvciB0d286DQoNCiAt
+IGZ1c2lvbmlvJ3MgS1ZNS1YgaXMgYSBrZXkvdmFsdWUgaW50ZXJmYWNlIGZvciB0aGVpciBmbGFz
+aCBwcm9kdWN0cw0KIC0gc2VhZ2F0ZSdzIGtpbmV0aWMgaXMgYSBrZXkvdmFsdWUgaW50ZXJmYWNl
+IGZvciB0aGVpciBuZXcgZXRoZXJuZXQtYmFzZWQgDQpkcml2ZQ0KDQpBbHNvLCBsZXZlbGRiIGlz
+IHByZXR0eSBncmVhdCBmb3IgbWFueSB3b3JrbG9hZHMgd2hlbiBydW4gb24gYSANCnRyYW5kaXRp
+b25hbCBkaXNrL2ZzLg0KDQpUaGUgZ29vZCBuZXdzIGlzIGEgbG90IG9mIHRoZSBleGlzdGluZyB3
+b3JrIHRoYXQgd2VudCBpbnRvIHN1cHBvcnQgb21hcCANCmxvb2tzIHRvIGJlIHJldXNhYmxlIGhl
+cmUuICBTb21lIG5ldyBmdW5jdGlvbmFsaXR5IGFuZCByZWZhY3RvcmluZyBpcyANCm5lZWRlZCwg
+dGhvdWdoLCBwYXJ0aWN1bGFybHkgd2hlbiBpdCBjb21lcyB0byBzdG9yaW5nIG9iamVjdCBkYXRh
+ICh0aGUgDQpmaWxlLWxpa2UgYmFnIG9mIGJ5dGVzIHBvcnRpb24pIGFzIGtleS92YWx1ZSBwYWly
+cy4NCg0KVGhlIGJsdWVwcmludCBpcyBoZXJlOg0KDQogIGh0dHA6Ly93aWtpLmNlcGguY29tLzAx
+UGxhbm5pbmcvMDJCbHVlcHJpbnRzL0ZpcmVmbHkvb3NkJTNBX25ld19rZXklMkYlMkZ2YWx1ZV9i
+YWNrZW5kDQoNCg==
