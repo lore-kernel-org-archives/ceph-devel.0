@@ -1,190 +1,190 @@
-From: Mikhail_Campos-Guadamuz <Mikhail_Campos-Guadamuz@epam.com>
-Subject: Re: [PATCH 1/2] No MDS mount error fix
-Date: Wed, 11 Dec 2013 17:23:23 +0300
-Message-ID: <52A8755B.2070605@epam.com>
-References: <1b8c4b9c49deb956e9d065b0677bfeaf17c968d2.1386442053.git.plageat90@gmail.com>	<52A5D324.7010604@ubuntukylin.com> <CAN6N2SYZXgAKhu2mdBBr0=j2Dyry4Apr2EK0iMuCJiaK9_FczA@mail.gmail.com> <52A66D82.3070001@ubuntukylin.com>
+From: Mark Nelson <mark.nelson@inktank.com>
+Subject: Re: question on BG# and its performance impact
+Date: Wed, 11 Dec 2013 08:37:56 -0600
+Message-ID: <52A878C4.8040501@inktank.com>
+References: <A9F57F2ABA6BB2469F01E127557C6C9B10E7BF1D@SHSMSX104.ccr.corp.intel.com> <52A7E371.7050008@inktank.com> <51FC7A40FB29414D88A121A7FFEF9A4710D43F45@SHSMSX104.ccr.corp.intel.com> <alpine.DEB.2.00.1312102134130.18451@cobra.newdream.net> <51FC7A40FB29414D88A121A7FFEF9A4710D43FFC@SHSMSX104.ccr.corp.intel.com> <alpine.DEB.2.00.1312102209570.19333@cobra.newdream.net> <A9F57F2ABA6BB2469F01E127557C6C9B10E7C12B@SHSMSX104.ccr.corp.intel.com> <52A8759C.90803@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from owamsq.epam.com ([217.21.63.36]:24977 "EHLO
-	EVBYMINSA0101.epam.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751051Ab3LKOeX (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Dec 2013 09:34:23 -0500
-In-Reply-To: <52A66D82.3070001@ubuntukylin.com>
+Received: from mail-ig0-f174.google.com ([209.85.213.174]:38377 "EHLO
+	mail-ig0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751808Ab3LKOht (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Dec 2013 09:37:49 -0500
+Received: by mail-ig0-f174.google.com with SMTP id hk11so3707401igb.1
+        for <ceph-devel@vger.kernel.org>; Wed, 11 Dec 2013 06:37:48 -0800 (PST)
+In-Reply-To: <52A8759C.90803@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-Cc: Li Wang <liwang@ubuntukylin.com>
+To: "Duan, Jiangang" <jiangang.duan@intel.com>
+Cc: Sage Weil <sage@inktank.com>, "Zhang, Jian" <jian.zhang@intel.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "He, Yujie" <yujie.he@intel.com>
 
-On 12/10/2013 04:25 AM, Li Wang wrote:
-> Then we have to make a choice between immediately returning with erro=
-r=20
-> and patiently waiting for mds joining. My suggestion is
-> (1) Leave an error message from the kernel using 'printk(KERN_WARN"no=
-=20
-> active mds")' something in __choose_mds()
-> (2) Add a return value 'E_WAITING_FOR_MAP' to __choose_mds(), and=20
-> capture it in ceph_mdsc_do_request(), if the user feel boring to=20
-> CRTL+C to kill the mount process (user should at least know how to=20
-> interrupt the mount :) ), then ceph_mdsc_do_request() know that it is=
-=20
-> interrupted while waiting for new map, then return good error message=
-=20
-> to user.
+On 12/11/2013 08:24 AM, Mark Nelson wrote:
+> Hi Jiangang,
 >
-> On 2013/12/9 22:50, =D0=9C=D0=B8=D1=85=D0=B0=D1=81=D1=8C =D0=9A=D0=B0=
-=D0=BC=D0=BF=D0=BE=D1=81 wrote:
->> I agree with some points. But this patches originally created to fix
->> "confusing for new users for hard-understandable return messages" (b=
-ased
->> on http://tracker.ceph.com/issues/4386). The idea was to return a
->> different error code, which can be than handled by ceph.mount client=
- for
->> printing simple message about "what's going on".
->>
->>
->> 2013/12/9 Li Wang <liwang@ubuntukylin.com=20
->> <mailto:liwang@ubuntukylin.com>>
->>
->>     Personally, I don't think there is issue for current implementat=
-ion,
->>     either. If no ACTIVE mds, the mount process put to wait, until
->>     updated MDS map received and with active mds present indicated i=
-n
->>     the map, it will be waked up and go on the mount process, otherw=
-ise,
->>     EIO returned if timeout. If it is boring to hang for a long time=
-,
->>     you can specify a shorter mount timeout.
->>
->>
->>     On 2013/12/8 2:59, Mikhail Campos Guadamuz wrote:
->>
->>         For http://tracker.ceph.com/__issues/4386
->>         <http://tracker.ceph.com/issues/4386>
->>
->>         It determines situation, when a user is trying to mount Ceph=
-=46S
->>         with no MDS present. Return ECOMM from
->>         open_root_dentry which can be analyzed then by ceph.mount
->>
->>         Signed-off-by: Mikhail Campos Guadamuz <plageat90@gmail.com
->>         <mailto:plageat90@gmail.com>>
->>         ---
->>            fs/ceph/mdsmap.c            | 19 ++++++++++++++++---
->>            fs/ceph/super.c             | 10 +++++++++-
->>            include/linux/ceph/mdsmap.h |  1 +
->>            3 files changed, 26 insertions(+), 4 deletions(-)
->>
->>         diff --git a/fs/ceph/mdsmap.c b/fs/ceph/mdsmap.c
->>         index 132b64e..3a6ba8a 100644
->>         --- a/fs/ceph/mdsmap.c
->>         +++ b/fs/ceph/mdsmap.c
->>         @@ -12,6 +12,20 @@
->>
->>            #include "super.h"
->>
->>         +/*
->>         + * count active mds's
->>         + */
->>         +int ceph_mdsmap_active_mds_count(__struct ceph_mdsmap *m)
->>         +{
->>         +    int n =3D 0;
->>         +    int i;
->>         +
->>         +    for(i =3D 0; i < m->m_max_mds; ++i)
->>         +       if(m->m_info[i].state > 0)
->>         +           ++n;
->>         +
->>         +    return  n;
->>         +}
->>
->>            /*
->>             * choose a random mds that is "up" (i.e. has a state > 0=
-),
->>         or -1.
->>         @@ -26,9 +40,8 @@ int ceph_mdsmap_get_random_mds(__struct
->>         ceph_mdsmap *m)
->>                          return 0;
->>
->>                  /* count */
->>         -       for (i =3D 0; i < m->m_max_mds; i++)
->>         -               if (m->m_info[i].state > 0)
->>         -                       n++;
->>         +       n =3D ceph_mdsmap_active_mds_count(__m);
->>         +
->>                  if (n =3D=3D 0)
->>                          return -1;
->>
->>         diff --git a/fs/ceph/super.c b/fs/ceph/super.c
->>         index 6627b26..4d33d68 100644
->>         --- a/fs/ceph/super.c
->>         +++ b/fs/ceph/super.c
->>         @@ -674,7 +674,15 @@ static struct dentry
->>         *open_root_dentry(struct ceph_fs_client *fsc,
->>                  struct ceph_mds_request *req =3D NULL;
->>                  int err;
->>                  struct dentry *root;
->>         -
->>         +
->>         +       /* check for mds*/
->>         +       if( 0 =3D=3D ceph_mdsmap_active_mds_count(__mdsc->md=
-smap) )
->>         +       {
->>         +           pr_info("active mds not found, possible not=20
->> exist\n");
->>         +           root =3D ERR_PTR( -ECOMM );
->>         +           return root;
->>         +       }
->>         +
->>                  /* open dir */
->>                  dout("open_root_inode opening '%s'\n", path);
->>                  req =3D ceph_mdsc_create_request(mdsc,
->>         CEPH_MDS_OP_GETATTR, USE_ANY_MDS);
->>         diff --git a/include/linux/ceph/mdsmap.h
->>         b/include/linux/ceph/mdsmap.h
->>         index 87ed09f..4d7d502 100644
->>         --- a/include/linux/ceph/mdsmap.h
->>         +++ b/include/linux/ceph/mdsmap.h
->>         @@ -56,6 +56,7 @@ static inline bool ceph_mdsmap_is_laggy(st=
-ruct
->>         ceph_mdsmap *m, int w)
->>                  return false;
->>            }
->>
->>         +extern int ceph_mdsmap_active_mds_count(__struct ceph_mdsma=
-p=20
->> *m);
->>            extern int ceph_mdsmap_get_random_mds(__struct ceph_mdsma=
-p=20
->> *m);
->>            extern struct ceph_mdsmap *ceph_mdsmap_decode(void **p, v=
-oid
->>         *end);
->>            extern void ceph_mdsmap_destroy(struct ceph_mdsmap *m);
->>
->>
-> --=20
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> To answer your earlier question about Uniformity:
+>
+> What I saw in my testing was that the PG count increases, things did
+> tend to get more uniform, ie the standard deviation of the percentages
+> distributed over the set of OSDs slowly decreased with more PGs.
+> Primarily what I am interested in though is whether or not any specific
+> OSD has more PGs than the rest as that's all it will take to screw up
+> performance.  As far as performance goes though, in my testing it didn't
+> necessarily seem to be strongly correlated with the PG distribution,
+> except for very small numbers of PGs.  Much more rigorous testing is
+> probably needed to draw much of a conclusion.
+>
+> Sage and I had a conversation a while ago about how to deal with
+> situations where you have uneven distributions (either through not
+> having enough PGs to ensure even distribution, or simply bad luck at
+> psuedo-random roulette).  I proposed that we might iterate through
+> multiple possible pool distributions using different seed values until
+> we found one we liked with good psudorandom distribution.  Perhaps you
+> could get even fancier by looking at what happens when you lose and OSD
+> or two.  As this is all during pool creation, a little extra time
+> finding a nice initial distribution doesn't really hurt.
+>
+> Sage mentioned though that it may be better to simple take whatever
+> distribution is generated and simply re-weight it to deal with
+> uniformity imperfections.  I can't see any reason why this wouldn't also
+> work and has the benefit that it works no matter how the distribution
+> changes.  Arguably this technique could go beyond just looking at PG
+> distributions and look at actual data distribution too if the user wants
+> extremely even data uniformity at the expense of a re-weighting tweak.
+>
+> In any event, with very large clusters with lots of pools, I think we
+> will likely need to at some point adopt some kind of scheme that lets us
+> get away with fewer PGs per pool than our current recommendations.
 
-Thanks for suggestion. But I cannot understand one thing. We need to=20
-print message to console about no active mds. Since we can not print=20
-messages to console from kernel client, we need to return unique=20
-external error from kernel mount, which can be handled then by=20
-ceph.mount (and printed to console). All suitable errors are already in=
-=20
-use (EIO, EINVAL etc.) for other error notification. Can you explain,=20
-which suitable "common errors" can we use for this purpose? Is there=20
-another solution for printing error to console?
+Ha, replying to my own reply!  Thinking about this a little more, these 
+two techniques may in fact still be complementary.  For very large 
+clusters where the PG counts per OSD may be low, I suspect we will want 
+to at least make sure the initial map guarantees that every OSD has at 
+least 1 PG so we can do proper re-weighting down the road.  In fact the 
+better the initial distribution is, the less crazy we'll have to get 
+with re-weighting, so it may not be a bad idea to use both techniques.
 
+>
+> Mark
+>
+>
+> On 12/11/2013 12:22 AM, Duan, Jiangang wrote:
+>> Cc the mail list as Sage suggested.
+>>
+>> -----Original Message-----
+>> From: Sage Weil [mailto:sage@inktank.com]
+>> Sent: Wednesday, December 11, 2013 2:10 PM
+>> To: Zhang, Jian
+>> Cc: Mark Nelson; Duan, Jiangang
+>> Subject: RE: question on BG# and its performance impact
+>>
+>> On Wed, 11 Dec 2013, Zhang, Jian wrote:
+>>> Thanks for the suggestions, I will take a look on the ls output.
+>>> No, we didn't use the optimal crush tunables.
+>>
+>> Hopefully that is part of it... try repeating the test with the
+>> optimal tunables (now the default in master)!
+>>
+>> s
+>>
+>>
+>>>
+>>> Jian
+>>>
+>>> -----Original Message-----
+>>> From: Sage Weil [mailto:sage@inktank.com]
+>>> Sent: Wednesday, December 11, 2013 1:36 PM
+>>> To: Zhang, Jian
+>>> Cc: Mark Nelson; Duan, Jiangang
+>>> Subject: RE: question on BG# and its performance impact
+>>>
+>>> I might be worthwhile here to get teh actual list of objects (rados
+>>> -p $pool ls list.txt) and calculate the pg and osd mappings for each
+>>> of them to verify things are uniform.
+>>>
+>>> One thing: are you using the 'optimal' crush tunables (ceph osd crush
+>>> tunables optimal)?
+>>>
+>>> Also, can we cc ceph-devel?
+>>>
+>>> sage
+>>>
+>>>
+>>> On Wed, 11 Dec 2013, Zhang, Jian wrote:
+>>>
+>>>> Mark,
+>>>> Thanks for the help.
+>>>> For the performance dip, I think it should casued by the directory
+>>>> splitting, just check several OSD, it does has many sub directories.
+>>>> For the pg # and distribution, see if I understand you correctly:
+>>>> When you said "a slow trend toward uniformity" do you mean the pg #
+>>>> for each pool is unforim? But from sheet2, the pg # on OSD10 is 103,
+>>>> while the pg # on OSD8 is 72, there is still a 30% gap. And I think
+>>>> that's the reason we saw performance drop of 10M read with 1280 pgs
+>>>> - pg # on the OSD is not balance.
+>>>>
+>>>> Thanks
+>>>> Jian
+>>>>
+>>>> -----Original Message-----
+>>>> From: Mark Nelson [mailto:mark.nelson@inktank.com]
+>>>> Sent: Wednesday, December 11, 2013 12:01 PM
+>>>> To: Duan, Jiangang
+>>>> Cc: Sage Weil (sage@inktank.com); Zhang, Jian
+>>>> Subject: Re: question on BG# and its performance impact
+>>>>
+>>>> Hi Jiangang,
+>>>>
+>>>> My results are rather old at this point, but I did similar testing
+>>>> last spring to look at PG distribution and performance (with larger
+>>>> writes) with varying numbers of PGs.  I saw what looked like a slow
+>>>> trend toward uniformity.  Performance however was quite variable.
+>>>>
+>>>> The performance dip you saw after many hours may have been due to
+>>>> directory splitting on the underlying OSDs.  When this happens
+>>>> depends on the number of objects that are written out and the number
+>>>> of PGs in the pool.  Eventually, when enough objects are written,
+>>>> the filestore will create a deeper nested directory structure to
+>>>> store objects to keep the maximum number of objects per directory
+>>>> below a certain maximum.
+>>>> This is governed by two settings:
+>>>>
+>>>> filestore merge threshold = 10
+>>>>
+>>>> filestore split multiple = 2
+>>>>
+>>>> The total number of objects per directory is by default 10 * 2 * 16
+>>>> = 320.  With small PG counts this can cause quite a bit of directory
+>>>> splitting if there are many objects.
+>>>>
+>>>> I believe that it is likely these defaults are lower than necessary
+>>>> and we could allow more objects per directory, potentially reducing
+>>>> the number of seeks for dentry lookups (though theoretically this
+>>>> should be cached).  We definitely have seen this have a large
+>>>> performance impact with RGW though on clusters with small numbers of
+>>>> PGs.  With more PGs, and more relaxed thresholds, directory
+>>>> splitting doesn't happen until many many millions of objects are
+>>>> written out, and performance degradation as the disk fills up
+>>>> appears to be less severe.
+>>>>
+>>>> Mark
+>>>>
+>>>> On 12/10/2013 09:05 PM, Duan, Jiangang wrote:
+>>>>> Sage/mark,
+>>>>>
+>>>>> We find object# unbalance condition in our Ceph setup for both RBD
+>>>>> and object. Refer to the attached pdf.
+>>>>>
+>>>>> Increase the PG# does increase performance however result in
+>>>>> unstable issues ?
+>>>>>
+>>>>> Is this a known issue and do you have any BKM to fix this?
+>>>>>
+>>>>> -jiangang
+>>>>>
+>>>>
+>>>>
+>>>
+>>>
+>
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
