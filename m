@@ -1,36 +1,31 @@
-From: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>
-Subject: Re: question for the new ceph-osd key/value backend
-Date: Wed, 11 Dec 2013 20:12:47 +1300
-Message-ID: <52A8106F.30407@catalyst.net.nz>
-References: <A9F57F2ABA6BB2469F01E127557C6C9B10E7BEDD@SHSMSX104.ccr.corp.intel.com> <alpine.DEB.2.00.1312102155520.19333@cobra.newdream.net>
+From: Andrey Korolyov <andrey@xdel.ru>
+Subject: XFS preallocation with lot of small objects
+Date: Wed, 11 Dec 2013 11:24:23 +0400
+Message-ID: <52A81327.1000402@xdel.ru>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from bertrand.catalyst.net.nz ([202.78.240.40]:57939 "EHLO
-	mail.catalyst.net.nz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751349Ab3LKHMs (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Dec 2013 02:12:48 -0500
-In-Reply-To: <alpine.DEB.2.00.1312102155520.19333@cobra.newdream.net>
+Received: from mail-bk0-f43.google.com ([209.85.214.43]:45932 "EHLO
+	mail-bk0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750759Ab3LKHZj (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Dec 2013 02:25:39 -0500
+Received: by mail-bk0-f43.google.com with SMTP id mz12so148222bkb.16
+        for <ceph-devel@vger.kernel.org>; Tue, 10 Dec 2013 23:25:38 -0800 (PST)
+Received: from [192.168.1.34] (95-31-29-125.broadband.corbina.ru. [95.31.29.125])
+        by mx.google.com with ESMTPSA id no2sm13779559bkb.15.2013.12.10.23.25.36
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
+        Tue, 10 Dec 2013 23:25:37 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>, "Duan, Jiangang" <jiangang.duan@intel.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On 11/12/13 19:09, Sage Weil wrote:
+Hello,
 
-> That is one part.  The current strategy of layering on top of a file
-> system and using a write-ahead journal makes sense given the existing
-> linux fs building blocks, but is far from an optimal solution for many
-> workloads.  A k/v interface based on something leveldb probably performs
-> much better for many small-object use-cases.  Also, a k/v backend can take
-> advatange of emerging non-block storage interfaces like NVMKV, Kinetic,
-> new libraries like rocksdb, etc.
->
-
-Yeah, the pluggable backend approach seems like a really good plan.
-
-Regards
-
-Mark
-
+Due to lot of reports of ENOSPC for xfs-based stores may be it worth to
+introduce an option to, say, ceph-deploy which will pass allocsize=
+param to the mount effectively disabling Dynamic Preallocation? Of
+course not every case really worth it because of related performance
+impact. If there is any method to calculate 'real' allocation on such
+volumes, it can be put to the docs as a measurement suggestion too.
