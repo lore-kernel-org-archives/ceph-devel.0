@@ -1,179 +1,151 @@
 From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: question for the new ceph-osd key/value backend
-Date: Wed, 11 Dec 2013 07:52:40 -0600
-Message-ID: <52A86E28.8070006@inktank.com>
-References: <A9F57F2ABA6BB2469F01E127557C6C9B10E7BEDD@SHSMSX104.ccr.corp.intel.com> <alpine.DEB.2.00.1312102155520.19333@cobra.newdream.net> <A9F57F2ABA6BB2469F01E127557C6C9B10E7C197@SHSMSX104.ccr.corp.intel.com>
+Subject: Re: question on BG# and its performance impact
+Date: Wed, 11 Dec 2013 08:24:28 -0600
+Message-ID: <52A8759C.90803@inktank.com>
+References: <A9F57F2ABA6BB2469F01E127557C6C9B10E7BF1D@SHSMSX104.ccr.corp.intel.com> <52A7E371.7050008@inktank.com> <51FC7A40FB29414D88A121A7FFEF9A4710D43F45@SHSMSX104.ccr.corp.intel.com> <alpine.DEB.2.00.1312102134130.18451@cobra.newdream.net> <51FC7A40FB29414D88A121A7FFEF9A4710D43FFC@SHSMSX104.ccr.corp.intel.com> <alpine.DEB.2.00.1312102209570.19333@cobra.newdream.net> <A9F57F2ABA6BB2469F01E127557C6C9B10E7C12B@SHSMSX104.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f170.google.com ([209.85.223.170]:52123 "EHLO
-	mail-ie0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751407Ab3LKNwd (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Dec 2013 08:52:33 -0500
-Received: by mail-ie0-f170.google.com with SMTP id qd12so11002586ieb.15
-        for <ceph-devel@vger.kernel.org>; Wed, 11 Dec 2013 05:52:33 -0800 (PST)
-In-Reply-To: <A9F57F2ABA6BB2469F01E127557C6C9B10E7C197@SHSMSX104.ccr.corp.intel.com>
+Received: from mail-ie0-f178.google.com ([209.85.223.178]:50580 "EHLO
+	mail-ie0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751051Ab3LKOYV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Dec 2013 09:24:21 -0500
+Received: by mail-ie0-f178.google.com with SMTP id lx4so10634023iec.23
+        for <ceph-devel@vger.kernel.org>; Wed, 11 Dec 2013 06:24:21 -0800 (PST)
+In-Reply-To: <A9F57F2ABA6BB2469F01E127557C6C9B10E7C12B@SHSMSX104.ccr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "Duan, Jiangang" <jiangang.duan@intel.com>
-Cc: Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: Sage Weil <sage@inktank.com>, "Zhang, Jian" <jian.zhang@intel.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "He, Yujie" <yujie.he@intel.com>
 
-On 12/11/2013 12:59 AM, Duan, Jiangang wrote:
-> Thanks. I in general think to find one implementation suitable for al=
-l usage models (small vs. big, cold vs. hot) is very difficult. So I li=
-ke the idea of "a backend that lets you plug in a next-gen backend bene=
-ath it - " -
-> K/V may be a good way to handle many small objects than XFS - however=
- I am not sure if levelDB is the right choice (consider it is good for =
-write than read) and also not sure K/V this will benefit RBD workload o=
-r not (consider all 4MB object size).
-> Will think more about this and talk with you again.
+Hi Jiangang,
 
-I have been very interested in this topic recently and have been doing=20
-some benchmarking with basho's leveldb, hyperdex, and stock leveldb=20
-implementations.  Each has certain advantages (usually related to=20
-whatever they advertise, ie crc32 for basho, etc), but all seem to have=
-=20
-poor sync read/write performance, both sequential and random.  I want t=
-o=20
-take a look at rocksdb to see how it compares as well.
+To answer your earlier question about Uniformity:
 
-This whole area is very interesting as there are obvious tradeoffs=20
-regarding how we do things now vs what we potentially could do down the=
-=20
-road.  Being able to eliminate POSIX entirely behind the scenes would=20
-obviously be nice for a lot of reasons.
+What I saw in my testing was that the PG count increases, things did 
+tend to get more uniform, ie the standard deviation of the percentages 
+distributed over the set of OSDs slowly decreased with more PGs. 
+Primarily what I am interested in though is whether or not any specific 
+OSD has more PGs than the rest as that's all it will take to screw up 
+performance.  As far as performance goes though, in my testing it didn't 
+necessarily seem to be strongly correlated with the PG distribution, 
+except for very small numbers of PGs.  Much more rigorous testing is 
+probably needed to draw much of a conclusion.
+
+Sage and I had a conversation a while ago about how to deal with 
+situations where you have uneven distributions (either through not 
+having enough PGs to ensure even distribution, or simply bad luck at 
+psuedo-random roulette).  I proposed that we might iterate through 
+multiple possible pool distributions using different seed values until 
+we found one we liked with good psudorandom distribution.  Perhaps you 
+could get even fancier by looking at what happens when you lose and OSD 
+or two.  As this is all during pool creation, a little extra time 
+finding a nice initial distribution doesn't really hurt.
+
+Sage mentioned though that it may be better to simple take whatever 
+distribution is generated and simply re-weight it to deal with 
+uniformity imperfections.  I can't see any reason why this wouldn't also 
+work and has the benefit that it works no matter how the distribution 
+changes.  Arguably this technique could go beyond just looking at PG 
+distributions and look at actual data distribution too if the user wants 
+extremely even data uniformity at the expense of a re-weighting tweak.
+
+In any event, with very large clusters with lots of pools, I think we 
+will likely need to at some point adopt some kind of scheme that lets us 
+get away with fewer PGs per pool than our current recommendations.
 
 Mark
 
->
-> -jiangang
+
+On 12/11/2013 12:22 AM, Duan, Jiangang wrote:
+> Cc the mail list as Sage suggested.
 >
 > -----Original Message-----
 > From: Sage Weil [mailto:sage@inktank.com]
-> Sent: Wednesday, December 11, 2013 2:09 PM
-> To: Duan, Jiangang
-> Cc: ceph-devel@vger.kernel.org
-> Subject: Re: question for the new ceph-osd key/value backend
+> Sent: Wednesday, December 11, 2013 2:10 PM
+> To: Zhang, Jian
+> Cc: Mark Nelson; Duan, Jiangang
+> Subject: RE: question on BG# and its performance impact
 >
-> Hi Jiangang,
+> On Wed, 11 Dec 2013, Zhang, Jian wrote:
+>> Thanks for the suggestions, I will take a look on the ls output.
+>> No, we didn't use the optimal crush tunables.
 >
-> On Wed, 11 Dec 2013, Duan, Jiangang wrote:
->> Sage,
->>
->> I have some questions regarding to the key/value backend work.
->>
->> What is the motivation to work on this? (or what is the problem we
->> want to solve?)
->> 1) to use the new interface thus we can bypass all the OS layer thus=
- get a short latency?
+> Hopefully that is part of it... try repeating the test with the optimal tunables (now the default in master)!
 >
-> That is one part.  The current strategy of layering on top of a file =
-system and using a write-ahead journal makes sense given the existing l=
-inux fs building blocks, but is far from an optimal solution for many w=
-orkloads.  A k/v interface based on something leveldb probably performs=
- much better for many small-object use-cases.  Also, a k/v backend can =
-take advatange of emerging non-block storage interfaces like NVMKV, Kin=
-etic, new libraries like rocksdb, etc.
->
->> 2) or to leverage some new primitive e.g. the atomic write thus to s=
-implify the code writing?
->
-> That too.  Basically, we are currently doing a lot of work to get wha=
-t we need out of posix, and are paying the price.
->
->> There are several different possibilities to use future NVM technolo=
-gy
->> - NVM.FILE, NVM.BLOCK, PM.XXX
->> http://snia.org/sites/default/files/NVMProgrammingModel_v1r10DRAFT.p=
-df
->> Even for openNVM thing - there are other usage model than k/v.
->>
->> Do you have any typical usage model for this?
->
-> I wasn't familiar with these; thanks for the reference!  Of these, NV=
-M.FILE seems the most interesting (it maps most closely to an object).
-> I am predisposed to skepticism when it comes to these sorts of standa=
-rds/API docs that precede an actual implementation, but it is encourgag=
-ing to see some effort here towards a common interface.
->
-> In the end, we want to support generic Ceph workloads.  These range f=
-rom rbd block and file type workloads (objects are stripes of files, wi=
-th random bytes rewritten) to omap type workloads (like rgw bucket indi=
-ces that are purely key/value).
->
-> I think the first wins would be:
->
-> 1- a backend that more efficiently handles rgw bucket index workloads
-> 2- a backend that is more efficient for rgw in general (i.e., immutab=
-le
-> objects)
-> 3- a backend that can handle more general purpose workloads (like rbd=
- and
-> cephfs)
->
-> and separately,
->
-> 4- a backend that lets you plug in a next-gen backend beneath it, lik=
-e NVMKV and speedy flash.
->
-> sage
->
+> s
 >
 >
 >>
->> -jiangang
+>> Jian
 >>
->> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+>> -----Original Message-----
+>> From: Sage Weil [mailto:sage@inktank.com]
+>> Sent: Wednesday, December 11, 2013 1:36 PM
+>> To: Zhang, Jian
+>> Cc: Mark Nelson; Duan, Jiangang
+>> Subject: RE: question on BG# and its performance impact
 >>
->> From: Sage Weil <sage <at> inktank.com>
->> Subject: new ceph-osd key/value backend
->> Newsgroups: gmane.comp.file-systems.ceph.devel
->> Date: 2013-11-09 10:09:52 GMT (4 weeks, 3 days, 16 hours and 39
->> minutes ago) I've written up a blueprint with a rough sketch of how =
-to
->> take advantage of alternative storage interfaces.  I am very happy t=
-o
->> see that several f them have emerged over the past year or two:
+>> I might be worthwhile here to get teh actual list of objects (rados -p $pool ls list.txt) and calculate the pg and osd mappings for each of them to verify things are uniform.
 >>
->>   - fusionio's KVMKV is a key/value interface for their flash produc=
-ts
->>   - seagate's kinetic is a key/value interface for their new
->> ethernet-based drive
+>> One thing: are you using the 'optimal' crush tunables (ceph osd crush tunables optimal)?
 >>
->> Also, leveldb is pretty great for many workloads when run on a
->> tranditional disk/fs.
+>> Also, can we cc ceph-devel?
 >>
->> The good news is a lot of the existing work that went into support
->> omap looks to be reusable here.  Some new functionality and
->> refactoring is needed, though, particularly when it comes to storing
->> object data (the file-like bag of bytes portion) as key/value pairs.
->>
->> The blueprint is here:
+>> sage
 >>
 >>
->> http://wiki.ceph.com/01Planning/02Blueprints/Firefly/osd%3A_new_key%=
-2F
->> %2Fvalue_backend
+>> On Wed, 11 Dec 2013, Zhang, Jian wrote:
 >>
->> N?????r??y??????X???v???)?{.n?????z?]z????ay?=1D????j ??f???h?????=1E=
-?w???
-> ???j:+v???w???????? ????zZ+???????j"????i
-> N=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDr=EF=BF=BD=EF=BF=BDy=EF=
-=BF=BD=EF=BF=BD=EF=BF=BDb=EF=BF=BDX=EF=BF=BD=EF=BF=BD=C7=A7v=EF=BF=BD^=EF=
-=BF=BD)=DE=BA{.n=EF=BF=BD+=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD]z=EF=BF=
-=BD{ay=EF=BF=BD=1D=CA=87=DA=99=EF=BF=BD,j=07=EF=BF=BD=EF=BF=BDf=EF=BF=BD=
-=EF=BF=BD=EF=BF=BDh=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD=1E=EF=BF=BDw=EF=
-=BF=BD=EF=BF=BD=EF=BF=BD=0C=EF=BF=BD=EF=BF=BD=EF=BF=BDj:+v=EF=BF=BD=EF=BF=
-=BD=EF=BF=BDw=EF=BF=BDj=EF=BF=BDm=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=07=
-=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDzZ+=EF=BF=BD=EF=BF=BD=DD=A2j"=EF=BF=
-=BD=EF=BF=BD!tml=3D
->
+>>> Mark,
+>>> Thanks for the help.
+>>> For the performance dip, I think it should casued by the directory splitting, just check several OSD, it does has many sub directories.
+>>> For the pg # and distribution, see if I understand you correctly:
+>>> When you said "a slow trend toward uniformity" do you mean the pg # for each pool is unforim? But from sheet2, the pg # on OSD10 is 103, while the pg # on OSD8 is 72, there is still a 30% gap. And I think that's the reason we saw performance drop of 10M read with 1280 pgs - pg # on the OSD is not balance.
+>>>
+>>> Thanks
+>>> Jian
+>>>
+>>> -----Original Message-----
+>>> From: Mark Nelson [mailto:mark.nelson@inktank.com]
+>>> Sent: Wednesday, December 11, 2013 12:01 PM
+>>> To: Duan, Jiangang
+>>> Cc: Sage Weil (sage@inktank.com); Zhang, Jian
+>>> Subject: Re: question on BG# and its performance impact
+>>>
+>>> Hi Jiangang,
+>>>
+>>> My results are rather old at this point, but I did similar testing last spring to look at PG distribution and performance (with larger writes) with varying numbers of PGs.  I saw what looked like a slow trend toward uniformity.  Performance however was quite variable.
+>>>
+>>> The performance dip you saw after many hours may have been due to directory splitting on the underlying OSDs.  When this happens depends on the number of objects that are written out and the number of PGs in the pool.  Eventually, when enough objects are written, the filestore will create a deeper nested directory structure to store objects to keep the maximum number of objects per directory below a certain maximum.
+>>> This is governed by two settings:
+>>>
+>>> filestore merge threshold = 10
+>>>
+>>> filestore split multiple = 2
+>>>
+>>> The total number of objects per directory is by default 10 * 2 * 16 = 320.  With small PG counts this can cause quite a bit of directory splitting if there are many objects.
+>>>
+>>> I believe that it is likely these defaults are lower than necessary and we could allow more objects per directory, potentially reducing the number of seeks for dentry lookups (though theoretically this should be cached).  We definitely have seen this have a large performance impact with RGW though on clusters with small numbers of PGs.  With more PGs, and more relaxed thresholds, directory splitting doesn't happen until many many millions of objects are written out, and performance degradation as the disk fills up appears to be less severe.
+>>>
+>>> Mark
+>>>
+>>> On 12/10/2013 09:05 PM, Duan, Jiangang wrote:
+>>>> Sage/mark,
+>>>>
+>>>> We find object# unbalance condition in our Ceph setup for both RBD
+>>>> and object. Refer to the attached pdf.
+>>>>
+>>>> Increase the PG# does increase performance however result in
+>>>> unstable issues ?
+>>>>
+>>>> Is this a known issue and do you have any BKM to fix this?
+>>>>
+>>>> -jiangang
+>>>>
+>>>
+>>>
+>>
+>>
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
