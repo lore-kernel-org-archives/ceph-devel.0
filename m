@@ -1,172 +1,200 @@
-From: Sage Weil <sage@inktank.com>
+From: "Matt W. Benjamin" <matt@cohortfs.com>
 Subject: Re: Ceph Messaging on Accelio (libxio) RDMA
-Date: Wed, 11 Dec 2013 16:59:48 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1312111640550.28299@cobra.newdream.net>
-References: <893765832.216.1386801148967.JavaMail.root@thunderbeast.private.linuxbox.com>
+Date: Wed, 11 Dec 2013 20:13:58 -0500 (EST)
+Message-ID: <184417606.236.1386810838124.JavaMail.root@thunderbeast.private.linuxbox.com>
+References: <CAPYLRzisuLNgx9hU5FPMLDCg+L5vC9m=XVMREs6Ss4aNNViD5Q@mail.gmail.com>
+Reply-To: "Matt W. Benjamin" <matt@cohortfs.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:42947 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751076Ab3LLA7s (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Dec 2013 19:59:48 -0500
-In-Reply-To: <893765832.216.1386801148967.JavaMail.root@thunderbeast.private.linuxbox.com>
+Received: from aa.linuxbox.com ([69.128.83.226]:4071 "EHLO aa.linuxbox.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751438Ab3LLBOH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 11 Dec 2013 20:14:07 -0500
+In-Reply-To: <CAPYLRzisuLNgx9hU5FPMLDCg+L5vC9m=XVMREs6Ss4aNNViD5Q@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Matt W. Benjamin" <matt@cohortfs.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Yaron Haviv <yaronh@mellanox.com>, Eyal Salomon <esalomon@mellanox.com>
+To: Gregory Farnum <greg@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>, Yaron Haviv <yaronh@mellanox.com>, Eyal Salomon <esalomon@mellanox.com>
 
-Hi Matt,
+Hi Greg,
 
-Thanks for posting this!  Some comments and questions below.
+I haven't fixed the decision to reify replies in the Messenger at this
+point, but it is what the current prototype code tries to do.
 
-On Wed, 11 Dec 2013, Matt W. Benjamin wrote:
-> Hi Ceph devs,
-> 
-> For the last several weeks, we've been working with engineers at
-> Mellanox on a prototype Ceph messaging implementation that runs on
-> the Accelio RDMA messaging service (libxio).
-> 
-> Accelio is a rather new effort to build a high-performance, high-throughput
-> message passing framework atop openfabrics ibverbs and rdmacm primitives.
+The request/response model is more general than my language implied, and
+also is not the only one available.  However, it is the richest model in
+Accelio, and I'm currently exploring how best to exploit it.
 
-I was originally thinking that xio was going to be more mellanox-specific, 
-but it looks like it runs over multiple transports (even tcp!).  (I'm sure 
-I've been told this before but it apparently didn't sink in.)  Is there 
-also a mellanox-specific backend (that is not ibverbs) that takes any 
-special advantage of mellanox hw capabilities?
+The most general model available sends one-way messages in both directions,
+and obviously looks the most like current Messenger model.  Under the covers,
+both Accelio models are built on the same primitives.  The one-way model
+is not incompatible with zero-copy RDMA operations, though I believe it's
+at least trivially true that the one-way model uses only send/recv and
+read operations.  Behind the scenes, the underlying Accelio framework
+requires a more or less exchange of state between the endpoints to maintain
+a balance of RDMA resources in each direction, and to complete RDMA read
+and write transactions (which use registered memory at the sender/receiver,
+respectively).  This isn't of course something the Messenger consumer needs
+to be aware of, except precisely so as to permit the framework to know when
+the upper layer operations on registered memory have completed.
 
-Similarly, are there other projects or vendors that are looking at xio at 
-this point?  I've seen similar attempts to create this sort of library 
-(CCI comes to mind: https://github.com/CCI/cci).  Have these previous 
-attempts influenced the design of xio at all?
+As for the higher level semantics, the first thing to note is that all the
+Accelio primitives provide for delivery receipts, and one of my goals is to
+unify Message acks completely with recepts.  A second key point is that the
+primary property of the current reply hook is not it's ability to reply, but
+it's completion semantics, and these can be articulated on any of the Accelio
+models.  It's possible that's all that's desired.
 
-> It's early days, but the implementation has started to take shape, and
-> gives a feel for what the Accelio architecture looks like when using the
-> request-response model, as well as for our prototype mapping of the
-> xio framework concepts to the Ceph ones.
-> 
-> The current classes and responsibility breakdown somewhat as follows.
-> The key classes in the TCP messaging implementation are:
-> 
-> Messenger (abstract, represents a set of bidirectional communication endpoints)
-> SimpleMessenger (concrete TCP messenger)
-> 
-> Message (abstract, models a message between endpoints, all Ceph protocol messages
-> derive from Message, obviously)
-> 
-> Connection (concrete, though it -feels- abstract;  Connection models a communication
-> endpoint identifiable by address, but has -some- coupling with the internals of
-> SimpleMessenger, in particular, with its Pipe, below).
-> 
-> Pipe (concrete, an active (threaded) object that encapsulates various operations on
-> one side (send or recv) of a TCP connection.  The Pipe is really where a -lot- of
-> the heavy lifting of SimpleMessenger is localized, and not just in the obvious
-> ways--eg, Pipe drives the dispatch queue in SimpleMessenger, so a lot of it's
-> visible semantics are built in cooperation with Pipe).
-> 
-> Dispatcher (abstract, models the application processing messages and sending replies--ie, the upper edge of Messenger).
-> 
-> The approach I took in incorporating Accelio was to build on the key abstractions
-> of Messenger, Connection, and Dispatcher, and Message, and build a corresponding
-> family of concrete classes:
+I'm still exploring is whether the request/response model provides additional
+value to the caller that one-way would not.  The third available model would
+would use xio response messages to deliver any message available at sthe
+responder, so perhaps permitting greater application utilization of the
+underlying resources in some circumstances.  I think a lot of this will be
+clearer as I connect the XioMessenger to Ceph callers.  As we've worked on the
+prototype we've found a number of places where we could tweak the Accelio APIs
+to good effect, and I think we'll find more places as continue work.
 
-This sounds like the right approach.  And we definitely want to clean up 
-the separation of the abstract interfaces (Message, Connection, Messenger) 
-from the implementations.  I'm happy to pull that stuff into the tree 
-quickly once the interfaces appear stable (although it looks like your 
-branch is based off lots of other linuxbox bits, so it probably isn't 
-important until this gets closer to ready).
+Matt
 
-Also, it would be great to build out the simple_* test endpoints as this 
-effort progresses; hopefully that can eventually form the basis of a test 
-suite for the messenger and can be expanded to include various stress 
-tests that don't require a full running cluster.
+----- "Gregory Farnum" <greg@inktank.com> wrote:
 
-> XioMessenger (concrete, implements Messenger, encapsulates xio endpoints, aggregates
-> dispatchers as normal).
+> On Wed, Dec 11, 2013 at 2:32 PM, Matt W. Benjamin <matt@cohortfs.com>
+> wrote:
+> > Hi Ceph devs,
+> >
+> > For the last several weeks, we've been working with engineers at
+> > Mellanox on a prototype Ceph messaging implementation that runs on
+> > the Accelio RDMA messaging service (libxio).
 > 
-> XioConnection (concrete, implements Connection)
+> Very cool! An RDMA Messenger has been a cool-sounding project for
+> which we haven't been able to get time for several years; I'm glad
+> somebody is getting the chance to explore it seriously.
 > 
-> XioPortal (concrete, a new class that represents worker thread contexts for all XioConnections in a given XioMessenger)
+> > Accelio is a rather new effort to build a high-performance,
+> high-throughput
+> > message passing framework atop openfabrics ibverbs and rdmacm
+> primitives.
+> >
+> > It's early days, but the implementation has started to take shape,
+> and
+> > gives a feel for what the Accelio architecture looks like when using
+> the
+> > request-response model, as well as for our prototype mapping of the
+> > xio framework concepts to the Ceph ones.
+> >
+> > The current classes and responsibility breakdown somewhat as
+> follows.
+> > The key classes in the TCP messaging implementation are:
+> >
+> > Messenger (abstract, represents a set of bidirectional communication
+> endpoints)
+> > SimpleMessenger (concrete TCP messenger)
+> >
+> > Message (abstract, models a message between endpoints, all Ceph
+> protocol messages
+> > derive from Message, obviously)
+> >
+> > Connection (concrete, though it -feels- abstract;  Connection models
+> a communication
+> > endpoint identifiable by address, but has -some- coupling with the
+> internals of
+> > SimpleMessenger, in particular, with its Pipe, below).
+> >
+> > Pipe (concrete, an active (threaded) object that encapsulates
+> various operations on
+> > one side (send or recv) of a TCP connection.  The Pipe is really
+> where a -lot- of
+> > the heavy lifting of SimpleMessenger is localized, and not just in
+> the obvious
+> > ways--eg, Pipe drives the dispatch queue in SimpleMessenger, so a
+> lot of it's
+> > visible semantics are built in cooperation with Pipe).
+> >
+> > Dispatcher (abstract, models the application processing messages and
+> sending replies--ie, the upper edge of Messenger).
 > 
-> XioMsg (concrete, a "transfer" class linking a sequence of low-level Accelio datagrams with a Message being sent)
+> Good summary. You've left me feeling a little embarrassed about the
+> Connection class with that description. ;)
 > 
-> XioReplyHook (concrete, derived from Ceph::Context [indirectly via Message::ReplyHook], links a sequence of low-level Accelio datagrams for a Message that has been received-- that is, part of a new "reply" abstraction exposed to Message and Messenger).
+> > The approach I took in incorporating Accelio was to build on the key
+> abstractions
+> > of Messenger, Connection, and Dispatcher, and Message, and build a
+> corresponding
+> > family of concrete classes:
+> >
+> > XioMessenger (concrete, implements Messenger, encapsulates xio
+> endpoints, aggregates
+> > dispatchers as normal).
+> >
+> > XioConnection (concrete, implements Connection)
+> >
+> > XioPortal (concrete, a new class that represents worker thread
+> contexts for all XioConnections in a given XioMessenger)
+> >
+> > XioMsg (concrete, a "transfer" class linking a sequence of low-level
+> Accelio datagrams with a Message being sent)
+> >
+> > XioReplyHook (concrete, derived from Ceph::Context [indirectly via
+> Message::ReplyHook], links a sequence of low-level Accelio datagrams
+> for a Message that has been received-- that is, part of a new "reply"
+> abstraction exposed to Message and Messenger).
+> >
+> > As noted above, there is some leakage of SimpleMessenger primitives
+> into classes that are intended to be abstract, and some refactoring
+> was needed to fit XioMessenger into the framework.  The main changes I
+> prototyped are as follows:
+> >
+> > All traces of Pipe are removed from Connection, which is made
+> abstract.  A new
+> > PipeConnection is introduced, that knows about Pipes. 
+> SimpleMessenger now uses
+> > instances of PipeConnection as its concrete connection type.
 > 
-> As noted above, there is some leakage of SimpleMessenger primitives into classes that are intended to be abstract, and some refactoring was needed to fit XioMessenger into the framework.  The main changes I prototyped are as follows:
+> This all makes sense.
 > 
-> All traces of Pipe are removed from Connection, which is made abstract.  A new
-> PipeConnection is introduced, that knows about Pipes.  SimpleMessenger now uses
-> instances of PipeConnection as its concrete connection type.
+> > The most interesting changes I introduced are driven by the need to
+> support
+> > Accelio's request/response model, which exists mainly to support
+> RDMA memory
+> > registration primitives, and needs a concrete realization in the
+> Messenger
+> > framework.
+> >
+> > To accomodate it, I've introduced two concepts.  First, callers
+> replying to a Message use a new Messenger::send_reply(Message *msg,
+> Message *reply) method.  In SimpleMessenger, this just maps to a call
+> to send_message(Message *, Connection*), but in XioMessenger, the
+> reply is delivered through a new Message::reply_hook completion
+> functor that XioConnection sets when a message is being dispatched. 
+> This is a general mechanism, new Messenger implementations can derive
+> from Message::ReplyHook to define their own reply behavior, as
+> needed.
 > 
-> The most interesting changes I introduced are driven by the need to support
-> Accelio's request/response model, which exists mainly to support RDMA memory
-> registration primitives, and needs a concrete realization in the Messenger
-> framework.
-> 
-> To accomodate it, I've introduced two concepts.  First, callers replying 
-> to a Message use a new Messenger::send_reply(Message *msg, Message 
-> *reply) method.  In SimpleMessenger, this just maps to a call to 
-> send_message(Message *, Connection*), but in XioMessenger, the reply is 
-> delivered through a new Message::reply_hook completion functor that 
-> XioConnection sets when a message is being dispatched.  This is a 
-> general mechanism, new Messenger implementations can derive from 
-> Message::ReplyHook to define their own reply behavior, as needed.
+> Can you talk more about the request/response model in the
+> communication layer and why you're explicitly specifying what
+> messages
+> are replies to others? I'm not sure what makes that useful, or how a
+> model where it is deals with stuff like
+> 1) the two "ack/commit" responses to write requests, or
+> 2) some of the requests in which there is not an explicit response
+> message (especially OSD->monitor stuff like failure reports), or
+> 3) where a request does not get a direct response message, but
+> triggers a special indirect response of some kind (like the monitor
+> not acking a change request explicitly, but making sure to send new
+> maps to the person who requested the map change).
+> -Greg
+> Software Engineer #42 @ http://inktank.com | http://ceph.com
 
-This worries me a bit; see Greg's questions.  There are several 
-request/reply patterns, but many (most?) of the message exchanges are 
-asymmetrical.  I wonder if the low-level request/reply model really maps 
-more closely the 'ack' stuff in SimpleMessenger (as it's about 
-deallocating the sender's memory and cleaning up rdma state).
+-- 
+Matt Benjamin
+CohortFS, LLC.
+206 South Fifth Ave. Suite 150
+Ann Arbor, MI  48104
 
-> A lot of low level details of the mapping from Message to Accelio 
-> messaging are currently in flux, but the basic idea is to re-use the 
-> current encode/decode primitives as far as possible, while eliding the 
-> acks, sequence # and tids, and timestamp behaviors of Pipe, or rather, 
-> replacing them with mappings to Accelio primitives.  I have some wrapper 
-> classes that help with this.  For the moment, the existing Ceph message 
-> headers and footers are still there, but are now encoded/decoded, rather 
-> than hand-marshalled.  This means that checksumming is probably mostly 
-> intact.  Message signatures are not implemented.
-> 
-> What works.  The current prototype isn't integrated with the main server daemons
-> (e.g., OSD) but experimental work on that is in progress.  I've created a pair of
-> simple standalone client/server applications simple_server/simple_client and
-> a matching xio_server/xio_client, that provide a minimal message dispatch loop with
-> a new SimpleDispatcher class and some other helpers, as a way to work with both
-> messengers side-by-side.  These are currently very primitive, but will probably
-> do more things soon.  The current prototype sends messages over Accelio, but has some issue
-> with replies, that should be fixed shortly.  It leaks lots of memory, etc.
-> 
-> We've pushed a work-in-progress branch "xio-messenger" to our external github
-> repository, for community review.  Find it here:
-> 
-> https://github.com/linuxbox2/linuxbox-ceph
+http://cohortfs.com
 
-Looking through this, it occurs to me that there are some other 
-foundational pieces that we'll need to get in place soon:
-
- - The XioMessenger is a completely different wire protocol that needs to 
-be distinct from the legacy protocol.  Probably we can use the 
-entity_addr_t::type field for this.
- - We'll want the various *Map structures to allow multiple 
-entity_addr_t's per entity.  We already could use this to support both 
-IPv4 and IPv6.  In the future, though, we'll probably want clusters that 
-can speak both the legacy TCP protocol (via SimpleMessenger or some 
-improved implementation) and the xio one (and whatever else we dream up in 
-the future).
-
-Also, as has been mentioned previously,
-
- - We need to continue to migrate stuff over to the Connection-based 
-Messenger interface and off the original methods that take entity_inst_t.  
-The sticky bit here is the peer-to-peer mode that is used inside the OSD 
-and MDS clusters: those need to handle racing connection attempts, which 
-either requires the internal entity name -> connection map to resolve 
-races (as we have now) or a new approach that pushes the race-resolution 
-up into the calling code (meh).  No need to address it now, but eventually 
-we'll need to tackle it before this can be used on the osd back-side 
-network.
-
-sage
+tel.  734-761-4689 
+fax.  734-769-8938 
+cel.  734-216-5309 
