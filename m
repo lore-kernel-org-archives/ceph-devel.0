@@ -1,175 +1,175 @@
 From: Yaron Haviv <yaronh@mellanox.com>
 Subject: RE: Ceph Messaging on Accelio (libxio) RDMA
-Date: Thu, 12 Dec 2013 10:43:42 +0000
-Message-ID: <DD06A08C9A04024C8B0D8A63110C7E14A283C4C1@MTRDAG01.mtl.com>
-References: <893765832.216.1386801148967.JavaMail.root@thunderbeast.private.linuxbox.com>
- <20131212101907.GA9216@oder.mch.fsc.net>
+Date: Thu, 12 Dec 2013 11:32:16 +0000
+Message-ID: <DD06A08C9A04024C8B0D8A63110C7E14A283C7FF@MTRDAG01.mtl.com>
+References: <alpine.DEB.2.00.1312111640550.28299@cobra.newdream.net>
+ <1902512897.238.1386812020862.JavaMail.root@thunderbeast.private.linuxbox.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from eu1sys200aog105.obsmtp.com ([207.126.144.119]:36599 "EHLO
-	eu1sys200aog105.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751415Ab3LLKsR convert rfc822-to-8bit
-	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 12 Dec 2013 05:48:17 -0500
-In-Reply-To: <20131212101907.GA9216@oder.mch.fsc.net>
+Received: from eu1sys200aog104.obsmtp.com ([207.126.144.117]:42031 "EHLO
+	eu1sys200aog104.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751445Ab3LLLiZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 12 Dec 2013 06:38:25 -0500
+In-Reply-To: <1902512897.238.1386812020862.JavaMail.root@thunderbeast.private.linuxbox.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Kasper Dieter <dieter.kasper@ts.fujitsu.com>, "Matt W. Benjamin" <matt@cohortfs.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>, Eyal Salomon <esalomon@mellanox.com>
+To: "Matt W. Benjamin" <matt@cohortfs.com>, Sage Weil <sage@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Eyal Salomon <esalomon@mellanox.com>
 
-> -----Original Message-----
-> From: Kasper Dieter [mailto:dieter.kasper@ts.fujitsu.com]
-> Sent: Thursday, December 12, 2013 12:19 PM
-> To: Matt W. Benjamin
-> Cc: ceph-devel; Sage Weil; Yaron Haviv; Eyal Salomon
-> Subject: Re: Ceph Messaging on Accelio (libxio) RDMA
-> 
-> Hi Matt,
-> 
-> how will you solve the support of the kernel clients through libceph.ko with
-> Accelio/libxio ?
-[YH> ] 
-Dieter, hi, there is also early  kAccelio version 
-and we plan to address kernel Ceph client later on
-
-note that there is a growing momentum for using Accelio in different projects e.g. there is early HDFS version over JXIO (Accelio Java bindings), several leading storage and database vendors adopt it as their clustering middleware, we plan to add a TCP and Shared-Mem transport next year so user can enjoy the same architectural benefits (high-speed, lock free async message/RPC API, zero-copy, Multi-path, ..)  over variety of transports, this can also be leveraged by Ceph so we won't need transport switch in the upper layers     
-
-Yaron
-
-> 
-> Best Regards,
-> -Dieter
-> 
-> On Wed, Dec 11, 2013 at 11:32:28PM +0100, Matt W. Benjamin wrote:
-> > Hi Ceph devs,
-> >
-> > For the last several weeks, we've been working with engineers at
-> > Mellanox on a prototype Ceph messaging implementation that runs on the
-> > Accelio RDMA messaging service (libxio).
-> >
-> > Accelio is a rather new effort to build a high-performance,
-> > high-throughput message passing framework atop openfabrics ibverbs and
-> rdmacm primitives.
-> >
-> > It's early days, but the implementation has started to take shape, and
-> > gives a feel for what the Accelio architecture looks like when using
-> > the request-response model, as well as for our prototype mapping of
-> > the xio framework concepts to the Ceph ones.
-> >
-> > The current classes and responsibility breakdown somewhat as follows.
-> > The key classes in the TCP messaging implementation are:
-> >
-> > Messenger (abstract, represents a set of bidirectional communication
-> > endpoints) SimpleMessenger (concrete TCP messenger)
-> >
-> > Message (abstract, models a message between endpoints, all Ceph
-> > protocol messages derive from Message, obviously)
-> >
-> > Connection (concrete, though it -feels- abstract;  Connection models a
-> > communication endpoint identifiable by address, but has -some-
-> > coupling with the internals of SimpleMessenger, in particular, with its Pipe,
-> below).
-> >
-> > Pipe (concrete, an active (threaded) object that encapsulates various
-> > operations on one side (send or recv) of a TCP connection.  The Pipe
-> > is really where a -lot- of the heavy lifting of SimpleMessenger is
-> > localized, and not just in the obvious ways--eg, Pipe drives the
-> > dispatch queue in SimpleMessenger, so a lot of it's visible semantics are
-> built in cooperation with Pipe).
-> >
-> > Dispatcher (abstract, models the application processing messages and
-> sending replies--ie, the upper edge of Messenger).
-> >
-> > The approach I took in incorporating Accelio was to build on the key
-> > abstractions of Messenger, Connection, and Dispatcher, and Message,
-> > and build a corresponding family of concrete classes:
-> >
-> > XioMessenger (concrete, implements Messenger, encapsulates xio
-> > endpoints, aggregates dispatchers as normal).
-> >
-> > XioConnection (concrete, implements Connection)
-> >
-> > XioPortal (concrete, a new class that represents worker thread
-> > contexts for all XioConnections in a given XioMessenger)
-> >
-> > XioMsg (concrete, a "transfer" class linking a sequence of low-level
-> > Accelio datagrams with a Message being sent)
-> >
-> > XioReplyHook (concrete, derived from Ceph::Context [indirectly via
-> Message::ReplyHook], links a sequence of low-level Accelio datagrams for a
-> Message that has been received-- that is, part of a new "reply" abstraction
-> exposed to Message and Messenger).
-> >
-> > As noted above, there is some leakage of SimpleMessenger primitives into
-> classes that are intended to be abstract, and some refactoring was needed to
-> fit XioMessenger into the framework.  The main changes I prototyped are as
-> follows:
-> >
-> > All traces of Pipe are removed from Connection, which is made
-> > abstract.  A new PipeConnection is introduced, that knows about Pipes.
-> > SimpleMessenger now uses instances of PipeConnection as its concrete
-> connection type.
-> >
-> > The most interesting changes I introduced are driven by the need to
-> > support Accelio's request/response model, which exists mainly to
-> > support RDMA memory registration primitives, and needs a concrete
-> > realization in the Messenger framework.
-> >
-> > To accomodate it, I've introduced two concepts.  First, callers replying to a
-> Message use a new Messenger::send_reply(Message *msg, Message
-> *reply) method.  In SimpleMessenger, this just maps to a call to
-> send_message(Message *, Connection*), but in XioMessenger, the reply is
-> delivered through a new Message::reply_hook completion functor that
-> XioConnection sets when a message is being dispatched.  This is a general
-> mechanism, new Messenger implementations can derive from
-> Message::ReplyHook to define their own reply behavior, as needed.
-> >
-> > A lot of low level details of the mapping from Message to Accelio
-> > messaging are currently in flux, but the basic idea is to re-use the
-> > current encode/decode primitives as far as possible, while eliding the acks,
-> sequence # and tids, and timestamp behaviors of Pipe, or rather, replacing
-> them with mappings to Accelio primitives.  I have some wrapper classes that
-> help with this.  For the moment, the existing Ceph message headers and
-> footers are still there, but are now encoded/decoded, rather than hand-
-> marshalled.  This means that checksumming is probably mostly intact.
-> Message signatures are not implemented.
-> >
-> > What works.  The current prototype isn't integrated with the main
-> > server daemons (e.g., OSD) but experimental work on that is in
-> > progress.  I've created a pair of simple standalone client/server
-> > applications simple_server/simple_client and a matching
-> > xio_server/xio_client, that provide a minimal message dispatch loop
-> > with a new SimpleDispatcher class and some other helpers, as a way to
-> > work with both messengers side-by-side.  These are currently very
-> > primitive, but will probably do more things soon.  The current prototype
-> sends messages over Accelio, but has some issue with replies, that should be
-> fixed shortly.  It leaks lots of memory, etc.
-> >
-> > We've pushed a work-in-progress branch "xio-messenger" to our external
-> > github repository, for community review.  Find it here:
-> >
-> > https://github.com/linuxbox2/linuxbox-ceph
-> >
-> > Thanks!
-> >
-> > Matt
-> >
-> > --
-> > Matt Benjamin
-> > CohortFS, LLC.
-> > 206 South Fifth Ave. Suite 150
-> > Ann Arbor, MI  48104
-> >
-> > http://cohortfs.com
-> >
-> > tel.  734-761-4689
-> > fax.  734-769-8938
-> > cel.  734-216-5309
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
-> > in the body of a message to majordomo@vger.kernel.org More
-> majordomo
-> > info at  http://vger.kernel.org/majordomo-info.html
+dG8gc2hlZCBtb3JlIGxpZ2h0IGFib3V0IEFjY2VsaW8gc2VlIHNvbWUgbm90ZXMgYmVsb3cgDQoN
+Cllhcm9uDQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogTWF0dCBXLiBC
+ZW5qYW1pbiBbbWFpbHRvOm1hdHRAY29ob3J0ZnMuY29tXQ0KPiBTZW50OiBUaHVyc2RheSwgRGVj
+ZW1iZXIgMTIsIDIwMTMgMzozNCBBTQ0KPiBUbzogU2FnZSBXZWlsDQo+IENjOiBjZXBoLWRldmVs
+OyBZYXJvbiBIYXZpdjsgRXlhbCBTYWxvbW9uDQo+IFN1YmplY3Q6IFJlOiBDZXBoIE1lc3NhZ2lu
+ZyBvbiBBY2NlbGlvIChsaWJ4aW8pIFJETUENCj4gDQo+IEhJIFNhZ2UsDQo+IA0KPiBpbmxpbmUN
+Cj4gDQo+IC0tLS0tICJTYWdlIFdlaWwiIDxzYWdlQGlua3RhbmsuY29tPiB3cm90ZToNCj4gDQo+
+ID4gSGkgTWF0dCwNCj4gPg0KPiA+IFRoYW5rcyBmb3IgcG9zdGluZyB0aGlzISAgU29tZSBjb21t
+ZW50cyBhbmQgcXVlc3Rpb25zIGJlbG93Lg0KPiA+DQo+ID4NCj4gPiBJIHdhcyBvcmlnaW5hbGx5
+IHRoaW5raW5nIHRoYXQgeGlvIHdhcyBnb2luZyB0byBiZSBtb3JlDQo+ID4gbWVsbGFub3gtc3Bl
+Y2lmaWMsIGJ1dCBpdCBsb29rcyBsaWtlIGl0IHJ1bnMgb3ZlciBtdWx0aXBsZSB0cmFuc3BvcnRz
+DQo+ID4gKGV2ZW4gdGNwISkuICAoSSdtIHN1cmUgSSd2ZSBiZWVuIHRvbGQgdGhpcyBiZWZvcmUg
+YnV0IGl0IGFwcGFyZW50bHkNCj4gPiBkaWRuJ3Qgc2luayBpbi4pICBJcyB0aGVyZSBhbHNvIGEg
+bWVsbGFub3gtc3BlY2lmaWMgYmFja2VuZCAodGhhdCBpcw0KPiA+IG5vdCBpYnZlcmJzKSB0aGF0
+IHRha2VzIGFueQ0KPiA+DQo+ID4gc3BlY2lhbCBhZHZhbnRhZ2Ugb2YgbWVsbGFub3ggaHcgY2Fw
+YWJpbGl0aWVzPw0KPiANCltZSD4gXSANCg0Kbm90ZSB0aGF0IEFjY2VsaW8gaXMgaGFyZHdhcmUg
+aW5kZXBlbmRlbnQsIHdvcmtzIG92ZXIgZGlmZmVyZW50IFJETUEgdHJhbnNwb3J0cyAoSUIsIFJv
+Q0UsIGlXYXJwLCAuLikgYW5kIHdpbGwgYWRkIG5vbiBSRE1BIHRyYW5zcG9ydHMgDQppdCBpcyBl
+bnRpcmVseSBvcGVuIHNvdXJjZSBhbmQgY29udGFpbnMgY29udHJpYnV0aW9ucyBmcm9tIG11bHRp
+cGxlIHZlbmRvcnMsIHNlZTogIGh0dHBzOi8vZ2l0aHViLmNvbS9hY2NlbGlvL2FjY2VsaW8NCnZh
+cmlldHkgb2YgY29kZSBleGFtcGxlcyBpbjogaHR0cHM6Ly9naXRodWIuY29tL2FjY2VsaW8vYWNj
+ZWxpby90cmVlL21hc3Rlci9leGFtcGxlcy91c3INCg0KdGhlcmUgYXJlIG1hbnkgY29vbCB0cmFu
+c3BvcnQgb3B0aW1pemF0aW9ucyBhbmQgYWR2YW5jZWQgZnVuY3Rpb25hbGl0eSBidWlsdCBpbnRv
+IGl0LCBidXQgYXJlIGFic3RyYWN0ZWQgZnJvbSB0aGUgZW5kIHVzZXIgYWxsb3dpbmcgYmVzdCBw
+ZXJmb3JtYW5jZSB3aXRoIHJhcGlkIGRldmVsb3BtZW50LCBzZWUgbW9yZSBkZXRhaWxzIGluIDog
+aHR0cDovL3d3dy5hY2NlbGlvLm9yZy93cC1jb250ZW50L3RoZW1lcy9weXJhbWlkX2NoaWxkL3Bk
+Zi9XUF9BY2NlbGlvX09wZW5Tb3VyY2VfSU9fTWVzc2FnZV9hbmRfUlBDX0FjY2VsZXJhdGlvbl9M
+aWJyYXJ5LnBkZg0KDQoNCj4gVGhlIGFjdHVhbCBzaXR1YXRpb24gaXMgdGhhdCB4aW8gaXMgY3Vy
+cmVudGx5IGlidmVyYnMgc3BlY2lmaWMsIHRob3VnaCB0aGVyZSBpcw0KPiBpbnRlcmVzdCB3aXRo
+IE1lbGxhbm94IGFuZCBzb21lIHBhcnRuZXJzIGluIGJ1aWxkaW5nIGEgVENQIHRyYW5zcG9ydCBm
+b3IgaXQuDQo+IA0KW1lIPiBdIA0KDQpUQ1Agd2lsbCBiZSBhZGRlZCBlYXJseSBuZXh0IHllYXIs
+IHRoZSB0cmFuc3BvcnQgYWJzdHJhY3Rpb24vcGx1Zy1pbiBtZWNoYW5pc20gaXMgYWxyZWFkeSBp
+bXBsZW1lbnRlZCANCmlmIHNvbWVvbmUgd2FudCB0byBoZWxwIGluIHRoYXQsIHdlIGFyZSBvcGVu
+IHRvIGl0IDopIA0KDQo+IFdoYXQgaXMgdHJ1ZSBpcyB0aGF0IHhpbyBtYWtlcyB2ZXJ5IGFkdmFu
+Y2VkIHVzZSBvZiBpYnZlcmJzIGludGVyZmFjZXMsIGxvY2sNCj4gZnJlZS93YWl0LWZyZWUgYWxs
+b2NhdG9ycywgcmR0c2MsIGJ1dCBoaWRlcyBhIGxvdCBvZiBkZXRhaWxzIGZyb20gdXBwZXIgbGF5
+ZXJzLg0KPiBUaGUgeGlvIGRlc2lnbmVycyBrbmV3IGhvdyB0byBnZXQgdGhlIG1vc3QgZnJvbSBp
+bmZpbmliYW5kLyBSRE1BLCBhbmQgaXQNCj4gc2hvd3MuDQo+IA0KW1lIPiBdIA0KDQpub3RlIHRo
+YXQgQWNjZWxpbyBpcyBmYXN0ZXIgdGhhbiB1c2luZyBpYnZlcmJzIGRpcmVjdGx5LCBzaW5jZSBp
+dCBkb2VzIG1hbnkgb3B0aW1pemF0aW9ucyBvbiB0aGUgd2F5IGl0IHVzZSB0aGUgQVBJLCBlLmcu
+IGFtb3J0aXplIEhXIGNhbGxzLCBhdm9pZCBsb2NrcywgYXZvaWQgbWVtb3J5IGNvaGVyZW5jeSBh
+bmQgbG9jYWxpdHkgaXNzdWVzIC4uICwgd2UgY2FuIGdldCB0b2RheSB+MS41TSBUUC9zIChSZXEr
+UmVwKSAgcGVyIHRocmVhZCBhbmQgbWFueSBtaWxsaW9uIFRQL3Mgd2l0aCBtdWx0aXBsZSB0aHJl
+YWRzIA0KDQo+IEFsc28sIGlidmVyYnMgaXMgYSBmaXJzdC1jbGFzcyBpbnRlcmZhY2UgdG8gaVdB
+UlAgYW5kIGVzcC4NCj4gUk9DRSBoYXJkd2FyZSwgYXMgd2VsbCBhcyBpYi4gIEkndmUgYmVlbiBk
+b2luZyBtb3N0IG9mIG15IGRldmVsb3BtZW50IG9uIGENCj4gdHdlYWtlZCB2ZXJzaW9uIG9mIHRo
+ZSBzb2Z0aXdhcnAgaWIgcHJvdmlkZXIsIHdoaWNoIGFtb3VudHMgdG8gYSBmdWxsIFJETUENCj4g
+c2ltdWxhdG9yIHRoYXQgcnVucyBvbiBhbnl0aGluZy4gIChBcHBhcmVudGx5IGl0IGNhbiBydW4g
+b3ZlciBUQ1AsIGJ1dCBJIGp1c3QNCj4gdXNlIGl0IG9uIG9uZSB2bSBob3N0LikNCj4gDQo+IEkg
+aGF2ZW4ndCB3b3JrZWQgd2l0aCBjY2ksIGJ1dCBqdXN0IGdsYW5jaW5nIGF0IGl0LCBJJ2Qgc2F5
+IHhpbyBzdGFja3MgdXAgdmVyeSB3ZWxsDQo+IG9uIGlidmVyYnMsIGJ1dCB3b24ndCBzb2x2ZSB0
+aGUgVENQIHRyYW5zcG9ydCBwcm9ibGVtIGltbWVkaWF0ZWx5Lg0KPiANCj4gPg0KPiA+IFNpbWls
+YXJseSwgYXJlIHRoZXJlIG90aGVyIHByb2plY3RzIG9yIHZlbmRvcnMgdGhhdCBhcmUgbG9va2lu
+ZyBhdCB4aW8NCj4gPiBhdCB0aGlzIHBvaW50Pw0KPiANCj4gTWVsbGFub3ggcGFydG5lcnMgYXJl
+IHdvcmtpbmcgd2l0aCBpdCBtYWlubHksIEkgYmVsaWV2ZS4NCj4gDQpbWUg+IF0gDQpzZXZlcmFs
+IG9wZW4gc291cmNlIHByb2plY3RzIHdpbGwgaW5jb3Jwb3JhdGUgQWNjZWxpbyBhcyBtaWRkbGV3
+YXJlIChlLmcuIEhERlMpLCBhbmQgbWFueSBzdG9yYWdlL2RhdGFiYXNlIHZlbmRvcnMgYXJlIGFk
+b3B0aW5nIGl0LCBhbmQgdmFyaWV0eSBvZiBlbmQtdXNlcnMgcGxhbiB0byB1c2UgdGhlIEMgb3Ig
+SmF2YSBBUElzICAoIEphdmEgQWNjZWxpbyBwZXJmb3JtcyBsaWtlIHRoZSBDIGNvZGUgd2l0aCAx
+LjVNIFRQL3MgcGVyIHRocmVhZCwgc2luY2UgYWxsIHRoZSB0cmFuc3BvcnQgaXMgaW4gaGFyZHdh
+cmUgYW5kIGl0IGRvZXNu4oCZdCBjb250YWluIGNvbnRleHQgc3dpdGNoZXMgb3IgbG9ja3MpICAN
+Cg0KPiA+ICBJJ3ZlIHNlZW4gc2ltaWxhciBhdHRlbXB0cyB0byBjcmVhdGUgdGhpcyBzb3J0IG9m
+IGxpYnJhcnkNCj4gPg0KPiA+IChDQ0kgY29tZXMgdG8gbWluZDogaHR0cHM6Ly9naXRodWIuY29t
+L0NDSS9jY2kpLiAgSGF2ZSB0aGVzZSBwcmV2aW91cw0KPiA+DQo+ID4gYXR0ZW1wdHMgaW5mbHVl
+bmNlZCB0aGUgZGVzaWduIG9mIHhpbyBhdCBhbGw/DQo+IA0KPiA+ID4NCj4gPiA+IFRoZSBhcHBy
+b2FjaCBJIHRvb2sgaW4gaW5jb3Jwb3JhdGluZyBBY2NlbGlvIHdhcyB0byBidWlsZCBvbiB0aGUg
+a2V5DQo+ID4gYWJzdHJhY3Rpb25zDQo+ID4gPiBvZiBNZXNzZW5nZXIsIENvbm5lY3Rpb24sIGFu
+ZCBEaXNwYXRjaGVyLCBhbmQgTWVzc2FnZSwgYW5kIGJ1aWxkIGENCj4gPiBjb3JyZXNwb25kaW5n
+DQo+ID4gPiBmYW1pbHkgb2YgY29uY3JldGUgY2xhc3NlczoNCj4gPg0KPiA+IFRoaXMgc291bmRz
+IGxpa2UgdGhlIHJpZ2h0IGFwcHJvYWNoLiAgQW5kIHdlIGRlZmluaXRlbHkgd2FudCB0byBjbGVh
+bg0KPiA+IHVwIHRoZSBzZXBhcmF0aW9uIG9mIHRoZSBhYnN0cmFjdCBpbnRlcmZhY2VzIChNZXNz
+YWdlLCBDb25uZWN0aW9uLA0KPiA+IE1lc3NlbmdlcikNCj4gPiBmcm9tIHRoZSBpbXBsZW1lbnRh
+dGlvbnMuICBJJ20gaGFwcHkgdG8gcHVsbCB0aGF0IHN0dWZmIGludG8gdGhlIHRyZWUNCj4gPg0K
+PiA+IHF1aWNrbHkgb25jZSB0aGUgaW50ZXJmYWNlcyBhcHBlYXIgc3RhYmxlIChhbHRob3VnaCBp
+dCBsb29rcyBsaWtlIHlvdXINCj4gPg0KPiA+IGJyYW5jaCBpcyBiYXNlZCBvZmYgbG90cyBvZiBv
+dGhlciBsaW51eGJveCBiaXRzLCBzbyBpdCBwcm9iYWJseSBpc24ndA0KPiA+DQo+ID4gaW1wb3J0
+YW50IHVudGlsIHRoaXMgZ2V0cyBjbG9zZXIgdG8gcmVhZHkpLg0KPiANCj4gT2ssIGNvb2wuDQo+
+IA0KPiA+DQo+ID4gQWxzbywgaXQgd291bGQgYmUgZ3JlYXQgdG8gYnVpbGQgb3V0IHRoZSBzaW1w
+bGVfKiB0ZXN0IGVuZHBvaW50cyBhcw0KPiA+IHRoaXMgZWZmb3J0IHByb2dyZXNzZXM7IGhvcGVm
+dWxseSB0aGF0IGNhbiBldmVudHVhbGx5IGZvcm0gdGhlIGJhc2lzDQo+ID4gb2YgYSB0ZXN0IHN1
+aXRlIGZvciB0aGUgbWVzc2VuZ2VyIGFuZCBjYW4gYmUgZXhwYW5kZWQgdG8gaW5jbHVkZQ0KPiA+
+IHZhcmlvdXMgc3RyZXNzDQo+ID4NCj4gPiB0ZXN0cyB0aGF0IGRvbid0IHJlcXVpcmUgYSBmdWxs
+IHJ1bm5pbmcgY2x1c3Rlci4NCj4gDQo+IEkgYWdyZWUuICBJIGludGVuZCB0byBoYXZlIGl0IGF0
+IGxlYXN0IHJ1bm5pbmcgbW9yZSBNZXNzYWdlIHR5cGVzIFJTTi4NCj4gDQo+ID4NCj4gPiA+IFhp
+b01lc3NlbmdlciAoY29uY3JldGUsIGltcGxlbWVudHMgTWVzc2VuZ2VyLCBlbmNhcHN1bGF0ZXMg
+eGlvDQo+ID4gZW5kcG9pbnRzLCBhZ2dyZWdhdGVzDQo+IA0KPiBBZ3JlZWQsIEkgcmVzcG9uZCB0
+byB0aGlzIHBvaW50IGluIG1vcmUgZGV0YWlsIGluIG15IHJlcGx5IHRvIEdyZWcncyBtZXNzYWdl
+Lg0KPiANCj4gPg0KPiA+IFRoaXMgd29ycmllcyBtZSBhIGJpdDsgc2VlIEdyZWcncyBxdWVzdGlv
+bnMuICBUaGVyZSBhcmUgc2V2ZXJhbA0KPiA+IHJlcXVlc3QvcmVwbHkgcGF0dGVybnMsIGJ1dCBt
+YW55IChtb3N0Pykgb2YgdGhlIG1lc3NhZ2UgZXhjaGFuZ2VzIGFyZQ0KPiA+DQo+ID4gYXN5bW1l
+dHJpY2FsLiAgSSB3b25kZXIgaWYgdGhlIGxvdy1sZXZlbCByZXF1ZXN0L3JlcGx5IG1vZGVsIHJl
+YWxseQ0KPiA+IG1hcHMgbW9yZSBjbG9zZWx5IHRoZSAnYWNrJyBzdHVmZiBpbiBTaW1wbGVNZXNz
+ZW5nZXIgKGFzIGl0J3MgYWJvdXQNCj4gPiBkZWFsbG9jYXRpbmcgdGhlIHNlbmRlcidzIG1lbW9y
+eSBhbmQgY2xlYW5pbmcgdXAgcmRtYSBzdGF0ZSkuDQo+ID4NCj4gPiA+IEEgbG90IG9mIGxvdyBs
+ZXZlbCBkZXRhaWxzIG9mIHRoZSBtYXBwaW5nIGZyb20gTWVzc2FnZSB0byBBY2NlbGlvDQo+ID4g
+PiBtZXNzYWdpbmcgYXJlIGN1cnJlbnRseSBpbiBmbHV4LCBidXQgdGhlIGJhc2ljIGlkZWEgaXMg
+dG8gcmUtdXNlIHRoZQ0KPiA+DQo+ID4gPiBjdXJyZW50IGVuY29kZS9kZWNvZGUgcHJpbWl0aXZl
+cyBhcyBmYXIgYXMgcG9zc2libGUsIHdoaWxlIGVsaWRpbmcNCj4gPiB0aGUNCj4gPiA+IGFja3Ms
+IHNlcXVlbmNlICMgYW5kIHRpZHMsIGFuZCB0aW1lc3RhbXAgYmVoYXZpb3JzIG9mIFBpcGUsIG9y
+DQo+ID4gcmF0aGVyLA0KPiA+ID4gcmVwbGFjaW5nIHRoZW0gd2l0aCBtYXBwaW5ncyB0byBBY2Nl
+bGlvIHByaW1pdGl2ZXMuICBJIGhhdmUgc29tZQ0KPiA+IHdyYXBwZXINCj4gPiA+IGNsYXNzZXMg
+dGhhdCBoZWxwIHdpdGggdGhpcy4gIEZvciB0aGUgbW9tZW50LCB0aGUgZXhpc3RpbmcgQ2VwaA0K
+PiA+IG1lc3NhZ2UNCj4gPiA+IGhlYWRlcnMgYW5kIGZvb3RlcnMgYXJlIHN0aWxsIHRoZXJlLCBi
+dXQgYXJlIG5vdyBlbmNvZGVkL2RlY29kZWQsDQo+ID4gcmF0aGVyDQo+ID4gPiB0aGFuIGhhbmQt
+bWFyc2hhbGxlZC4gIFRoaXMgbWVhbnMgdGhhdCBjaGVja3N1bW1pbmcgaXMgcHJvYmFibHkNCj4g
+PiBtb3N0bHkNCj4gPiA+IGludGFjdC4gIE1lc3NhZ2Ugc2lnbmF0dXJlcyBhcmUgbm90IGltcGxl
+bWVudGVkLg0KPiA+ID4NCj4gPiA+IFdoYXQgd29ya3MuICBUaGUgY3VycmVudCBwcm90b3R5cGUg
+aXNuJ3QgaW50ZWdyYXRlZCB3aXRoIHRoZSBtYWluDQo+ID4gc2VydmVyIGRhZW1vbnMNCj4gPiA+
+IChlLmcuLCBPU0QpIGJ1dCBleHBlcmltZW50YWwgd29yayBvbiB0aGF0IGlzIGluIHByb2dyZXNz
+LiAgSSd2ZQ0KPiA+IGNyZWF0ZWQgYSBwYWlyIG9mDQo+ID4gPiBzaW1wbGUgc3RhbmRhbG9uZSBj
+bGllbnQvc2VydmVyIGFwcGxpY2F0aW9ucw0KPiA+IHNpbXBsZV9zZXJ2ZXIvc2ltcGxlX2NsaWVu
+dCBhbmQNCj4gPiA+IGEgbWF0Y2hpbmcgeGlvX3NlcnZlci94aW9fY2xpZW50LCB0aGF0IHByb3Zp
+ZGUgYSBtaW5pbWFsIG1lc3NhZ2UNCj4gPiBkaXNwYXRjaCBsb29wIHdpdGgNCj4gPiA+IGEgbmV3
+IFNpbXBsZURpc3BhdGNoZXIgY2xhc3MgYW5kIHNvbWUgb3RoZXIgaGVscGVycywgYXMgYSB3YXkg
+dG8NCj4gPiB3b3JrIHdpdGggYm90aA0KPiA+ID4gbWVzc2VuZ2VycyBzaWRlLWJ5LXNpZGUuICBU
+aGVzZSBhcmUgY3VycmVudGx5IHZlcnkgcHJpbWl0aXZlLCBidXQNCj4gPiB3aWxsIHByb2JhYmx5
+DQo+ID4gPiBkbyBtb3JlIHRoaW5ncyBzb29uLiAgVGhlIGN1cnJlbnQgcHJvdG90eXBlIHNlbmRz
+IG1lc3NhZ2VzIG92ZXINCj4gPiBBY2NlbGlvLCBidXQgaGFzIHNvbWUgaXNzdWUNCj4gPiA+IHdp
+dGggcmVwbGllcywgdGhhdCBzaG91bGQgYmUgZml4ZWQgc2hvcnRseS4gIEl0IGxlYWtzIGxvdHMg
+b2YNCj4gPiBtZW1vcnksIGV0Yy4NCj4gPiA+DQo+ID4gPiBXZSd2ZSBwdXNoZWQgYSB3b3JrLWlu
+LXByb2dyZXNzIGJyYW5jaCAieGlvLW1lc3NlbmdlciIgdG8gb3VyDQo+ID4gZXh0ZXJuYWwgZ2l0
+aHViDQo+ID4gPiByZXBvc2l0b3J5LCBmb3IgY29tbXVuaXR5IHJldmlldy4gIEZpbmQgaXQgaGVy
+ZToNCj4gPiA+DQo+ID4gPiBodHRwczovL2dpdGh1Yi5jb20vbGludXhib3gyL2xpbnV4Ym94LWNl
+cGgNCj4gPg0KPiA+IExvb2tpbmcgdGhyb3VnaCB0aGlzLCBpdCBvY2N1cnMgdG8gbWUgdGhhdCB0
+aGVyZSBhcmUgc29tZSBvdGhlcg0KPiA+IGZvdW5kYXRpb25hbCBwaWVjZXMgdGhhdCB3ZSdsbCBu
+ZWVkIHRvIGdldCBpbiBwbGFjZSBzb29uOg0KPiA+DQo+ID4gIC0gVGhlIFhpb01lc3NlbmdlciBp
+cyBhIGNvbXBsZXRlbHkgZGlmZmVyZW50IHdpcmUgcHJvdG9jb2wgdGhhdCBuZWVkcw0KPiA+IHRv
+IGJlIGRpc3RpbmN0IGZyb20gdGhlIGxlZ2FjeSBwcm90b2NvbC4gIFByb2JhYmx5IHdlIGNhbiB1
+c2UgdGhlDQo+ID4gZW50aXR5X2FkZHJfdDo6dHlwZSBmaWVsZCBmb3IgdGhpcy4NCj4gPiAgLSBX
+ZSdsbCB3YW50IHRoZSB2YXJpb3VzICpNYXAgc3RydWN0dXJlcyB0byBhbGxvdyBtdWx0aXBsZQ0K
+PiA+IGVudGl0eV9hZGRyX3QncyBwZXIgZW50aXR5LiAgV2UgYWxyZWFkeSBjb3VsZCB1c2UgdGhp
+cyB0byBzdXBwb3J0IGJvdGgNCj4gPg0KPiA+IElQdjQgYW5kIElQdjYuICBJbiB0aGUgZnV0dXJl
+LCB0aG91Z2gsIHdlJ2xsIHByb2JhYmx5IHdhbnQgY2x1c3RlcnMNCj4gPiB0aGF0IGNhbiBzcGVh
+ayBib3RoIHRoZSBsZWdhY3kgVENQIHByb3RvY29sICh2aWEgU2ltcGxlTWVzc2VuZ2VyIG9yDQo+
+ID4gc29tZSBpbXByb3ZlZCBpbXBsZW1lbnRhdGlvbikgYW5kIHRoZSB4aW8gb25lIChhbmQgd2hh
+dGV2ZXIgZWxzZSB3ZQ0KPiA+IGRyZWFtIHVwIGluIHRoZSBmdXR1cmUpLg0KPiANCj4gQWNrLg0K
+PiANCj4gPg0KPiA+IEFsc28sIGFzIGhhcyBiZWVuIG1lbnRpb25lZCBwcmV2aW91c2x5LA0KPiA+
+DQo+ID4gIC0gV2UgbmVlZCB0byBjb250aW51ZSB0byBtaWdyYXRlIHN0dWZmIG92ZXIgdG8gdGhl
+IENvbm5lY3Rpb24tYmFzZWQNCj4gPiBNZXNzZW5nZXIgaW50ZXJmYWNlIGFuZCBvZmYgdGhlIG9y
+aWdpbmFsIG1ldGhvZHMgdGhhdCB0YWtlDQo+ID4gZW50aXR5X2luc3RfdC4NCj4gPiBUaGUgc3Rp
+Y2t5IGJpdCBoZXJlIGlzIHRoZSBwZWVyLXRvLXBlZXIgbW9kZSB0aGF0IGlzIHVzZWQgaW5zaWRl
+IHRoZQ0KPiA+IE9TRCBhbmQgTURTIGNsdXN0ZXJzOiB0aG9zZSBuZWVkIHRvIGhhbmRsZSByYWNp
+bmcgY29ubmVjdGlvbiBhdHRlbXB0cywNCj4gPiB3aGljaCBlaXRoZXIgcmVxdWlyZXMgdGhlIGlu
+dGVybmFsIGVudGl0eSBuYW1lIC0+IGNvbm5lY3Rpb24gbWFwIHRvDQo+ID4gcmVzb2x2ZQ0KPiA+
+DQo+ID4gcmFjZXMgKGFzIHdlIGhhdmUgbm93KSBvciBhIG5ldyBhcHByb2FjaCB0aGF0IHB1c2hl
+cyB0aGUNCj4gPiByYWNlLXJlc29sdXRpb24gdXAgaW50byB0aGUgY2FsbGluZyBjb2RlIChtZWgp
+LiAgTm8gbmVlZCB0byBhZGRyZXNzIGl0DQo+ID4gbm93LCBidXQgZXZlbnR1YWxseSB3ZSdsbCBu
+ZWVkIHRvIHRhY2tsZSBpdCBiZWZvcmUgdGhpcyBjYW4gYmUgdXNlZCBvbg0KPiA+IHRoZSBvc2Qg
+YmFjay1zaWRlIG5ldHdvcmsuDQo+ID4NCj4gPiBzYWdlDQo+IA0KPiAtLQ0KPiBNYXR0IEJlbmph
+bWluDQo+IENvaG9ydEZTLCBMTEMuDQo+IDIwNiBTb3V0aCBGaWZ0aCBBdmUuIFN1aXRlIDE1MA0K
+PiBBbm4gQXJib3IsIE1JICA0ODEwNA0KPiANCj4gaHR0cDovL2NvaG9ydGZzLmNvbQ0KPiANCj4g
+dGVsLiAgNzM0LTc2MS00Njg5DQo+IGZheC4gIDczNC03NjktODkzOA0KPiBjZWwuICA3MzQtMjE2
+LTUzMDkNCg==
