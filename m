@@ -1,161 +1,150 @@
-From: "Duan, Jiangang" <jiangang.duan@intel.com>
-Subject: RE: question on BG# and its performance impact
-Date: Thu, 12 Dec 2013 05:10:39 +0000
-Message-ID: <A9F57F2ABA6BB2469F01E127557C6C9B10E7CD2C@SHSMSX104.ccr.corp.intel.com>
-References: <A9F57F2ABA6BB2469F01E127557C6C9B10E7BF1D@SHSMSX104.ccr.corp.intel.com>
- <52A7E371.7050008@inktank.com>
- <51FC7A40FB29414D88A121A7FFEF9A4710D43F45@SHSMSX104.ccr.corp.intel.com>
- <alpine.DEB.2.00.1312102134130.18451@cobra.newdream.net>
- <51FC7A40FB29414D88A121A7FFEF9A4710D43FFC@SHSMSX104.ccr.corp.intel.com>
- <alpine.DEB.2.00.1312102209570.19333@cobra.newdream.net>
- <A9F57F2ABA6BB2469F01E127557C6C9B10E7C12B@SHSMSX104.ccr.corp.intel.com>
- <52A8759C.90803@inktank.com> <52A878C4.8040501@inktank.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH v2 1/2] libceph: block I/O when PAUSE or FULL osd map
+ flags are set
+Date: Wed, 11 Dec 2013 21:38:45 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1312112136380.4714@cobra.newdream.net>
+References: <1386802966-15531-1-git-send-email-josh.durgin@inktank.com> <1386802966-15531-2-git-send-email-josh.durgin@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:9471 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750755Ab3LLFKp (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 12 Dec 2013 00:10:45 -0500
-In-Reply-To: <52A878C4.8040501@inktank.com>
-Content-Language: en-US
+Received: from cobra.newdream.net ([66.33.216.30]:44667 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750755Ab3LLFiq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 12 Dec 2013 00:38:46 -0500
+In-Reply-To: <1386802966-15531-2-git-send-email-josh.durgin@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mark.nelson@inktank.com>
-Cc: Sage Weil <sage@inktank.com>, "Zhang, Jian" <jian.zhang@intel.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "He, Yujie" <yujie.he@intel.com>
+To: Josh Durgin <josh.durgin@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-TWFyaywNCg0KVGhhbmtzIGZvciB0aGUgY29tbWVudHMuDQpPbmUgbW9yZSBxdWVzdGlvbjogaXMg
-dGhlcmUgYmFkIGltcGFjdCBpZiB3ZSB1c2UgYSBoaWdoZXIgUEcjIHBlciBPU0Q/IEUuZy4gMjAw
-eCAoSSB0aGluayBhIGxvdCBvZiBwZW9wbGUgdXNlIHRoaXM/KSBvciA0MDB4Pw0KRS5nLiBtb3Jl
-IG1lbW9yeSBjb25zdW1wdGlvbiBvciBsb2NrIGNvbnRlbnRpb24/DQoNCi1qaWFuZ2FuZw0KDQot
-LS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogTWFyayBOZWxzb24gW21haWx0bzptYXJr
-Lm5lbHNvbkBpbmt0YW5rLmNvbV0gDQpTZW50OiBXZWRuZXNkYXksIERlY2VtYmVyIDExLCAyMDEz
-IDEwOjM4IFBNDQpUbzogRHVhbiwgSmlhbmdhbmcNCkNjOiBTYWdlIFdlaWw7IFpoYW5nLCBKaWFu
-OyBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZzsgSGUsIFl1amllDQpTdWJqZWN0OiBSZTogcXVl
-c3Rpb24gb24gQkcjIGFuZCBpdHMgcGVyZm9ybWFuY2UgaW1wYWN0DQoNCk9uIDEyLzExLzIwMTMg
-MDg6MjQgQU0sIE1hcmsgTmVsc29uIHdyb3RlOg0KPiBIaSBKaWFuZ2FuZywNCj4NCj4gVG8gYW5z
-d2VyIHlvdXIgZWFybGllciBxdWVzdGlvbiBhYm91dCBVbmlmb3JtaXR5Og0KPg0KPiBXaGF0IEkg
-c2F3IGluIG15IHRlc3Rpbmcgd2FzIHRoYXQgdGhlIFBHIGNvdW50IGluY3JlYXNlcywgdGhpbmdz
-IGRpZCANCj4gdGVuZCB0byBnZXQgbW9yZSB1bmlmb3JtLCBpZSB0aGUgc3RhbmRhcmQgZGV2aWF0
-aW9uIG9mIHRoZSBwZXJjZW50YWdlcyANCj4gZGlzdHJpYnV0ZWQgb3ZlciB0aGUgc2V0IG9mIE9T
-RHMgc2xvd2x5IGRlY3JlYXNlZCB3aXRoIG1vcmUgUEdzLg0KPiBQcmltYXJpbHkgd2hhdCBJIGFt
-IGludGVyZXN0ZWQgaW4gdGhvdWdoIGlzIHdoZXRoZXIgb3Igbm90IGFueSANCj4gc3BlY2lmaWMg
-T1NEIGhhcyBtb3JlIFBHcyB0aGFuIHRoZSByZXN0IGFzIHRoYXQncyBhbGwgaXQgd2lsbCB0YWtl
-IHRvIA0KPiBzY3JldyB1cCBwZXJmb3JtYW5jZS4gIEFzIGZhciBhcyBwZXJmb3JtYW5jZSBnb2Vz
-IHRob3VnaCwgaW4gbXkgDQo+IHRlc3RpbmcgaXQgZGlkbid0IG5lY2Vzc2FyaWx5IHNlZW0gdG8g
-YmUgc3Ryb25nbHkgY29ycmVsYXRlZCB3aXRoIHRoZSANCj4gUEcgZGlzdHJpYnV0aW9uLCBleGNl
-cHQgZm9yIHZlcnkgc21hbGwgbnVtYmVycyBvZiBQR3MuICBNdWNoIG1vcmUgDQo+IHJpZ29yb3Vz
-IHRlc3RpbmcgaXMgcHJvYmFibHkgbmVlZGVkIHRvIGRyYXcgbXVjaCBvZiBhIGNvbmNsdXNpb24u
-DQo+DQo+IFNhZ2UgYW5kIEkgaGFkIGEgY29udmVyc2F0aW9uIGEgd2hpbGUgYWdvIGFib3V0IGhv
-dyB0byBkZWFsIHdpdGggDQo+IHNpdHVhdGlvbnMgd2hlcmUgeW91IGhhdmUgdW5ldmVuIGRpc3Ry
-aWJ1dGlvbnMgKGVpdGhlciB0aHJvdWdoIG5vdCANCj4gaGF2aW5nIGVub3VnaCBQR3MgdG8gZW5z
-dXJlIGV2ZW4gZGlzdHJpYnV0aW9uLCBvciBzaW1wbHkgYmFkIGx1Y2sgYXQgDQo+IHBzdWVkby1y
-YW5kb20gcm91bGV0dGUpLiAgSSBwcm9wb3NlZCB0aGF0IHdlIG1pZ2h0IGl0ZXJhdGUgdGhyb3Vn
-aCANCj4gbXVsdGlwbGUgcG9zc2libGUgcG9vbCBkaXN0cmlidXRpb25zIHVzaW5nIGRpZmZlcmVu
-dCBzZWVkIHZhbHVlcyB1bnRpbCANCj4gd2UgZm91bmQgb25lIHdlIGxpa2VkIHdpdGggZ29vZCBw
-c3Vkb3JhbmRvbSBkaXN0cmlidXRpb24uICBQZXJoYXBzIHlvdSANCj4gY291bGQgZ2V0IGV2ZW4g
-ZmFuY2llciBieSBsb29raW5nIGF0IHdoYXQgaGFwcGVucyB3aGVuIHlvdSBsb3NlIGFuZCANCj4g
-T1NEIG9yIHR3by4gIEFzIHRoaXMgaXMgYWxsIGR1cmluZyBwb29sIGNyZWF0aW9uLCBhIGxpdHRs
-ZSBleHRyYSB0aW1lIA0KPiBmaW5kaW5nIGEgbmljZSBpbml0aWFsIGRpc3RyaWJ1dGlvbiBkb2Vz
-bid0IHJlYWxseSBodXJ0Lg0KPg0KPiBTYWdlIG1lbnRpb25lZCB0aG91Z2ggdGhhdCBpdCBtYXkg
-YmUgYmV0dGVyIHRvIHNpbXBsZSB0YWtlIHdoYXRldmVyIA0KPiBkaXN0cmlidXRpb24gaXMgZ2Vu
-ZXJhdGVkIGFuZCBzaW1wbHkgcmUtd2VpZ2h0IGl0IHRvIGRlYWwgd2l0aCANCj4gdW5pZm9ybWl0
-eSBpbXBlcmZlY3Rpb25zLiAgSSBjYW4ndCBzZWUgYW55IHJlYXNvbiB3aHkgdGhpcyB3b3VsZG4n
-dCANCj4gYWxzbyB3b3JrIGFuZCBoYXMgdGhlIGJlbmVmaXQgdGhhdCBpdCB3b3JrcyBubyBtYXR0
-ZXIgaG93IHRoZSANCj4gZGlzdHJpYnV0aW9uIGNoYW5nZXMuICBBcmd1YWJseSB0aGlzIHRlY2hu
-aXF1ZSBjb3VsZCBnbyBiZXlvbmQganVzdCANCj4gbG9va2luZyBhdCBQRyBkaXN0cmlidXRpb25z
-IGFuZCBsb29rIGF0IGFjdHVhbCBkYXRhIGRpc3RyaWJ1dGlvbiB0b28gDQo+IGlmIHRoZSB1c2Vy
-IHdhbnRzIGV4dHJlbWVseSBldmVuIGRhdGEgdW5pZm9ybWl0eSBhdCB0aGUgZXhwZW5zZSBvZiBh
-IHJlLXdlaWdodGluZyB0d2Vhay4NCj4NCj4gSW4gYW55IGV2ZW50LCB3aXRoIHZlcnkgbGFyZ2Ug
-Y2x1c3RlcnMgd2l0aCBsb3RzIG9mIHBvb2xzLCBJIHRoaW5rIHdlIA0KPiB3aWxsIGxpa2VseSBu
-ZWVkIHRvIGF0IHNvbWUgcG9pbnQgYWRvcHQgc29tZSBraW5kIG9mIHNjaGVtZSB0aGF0IGxldHMg
-DQo+IHVzIGdldCBhd2F5IHdpdGggZmV3ZXIgUEdzIHBlciBwb29sIHRoYW4gb3VyIGN1cnJlbnQg
-cmVjb21tZW5kYXRpb25zLg0KDQpIYSwgcmVwbHlpbmcgdG8gbXkgb3duIHJlcGx5ISAgVGhpbmtp
-bmcgYWJvdXQgdGhpcyBhIGxpdHRsZSBtb3JlLCB0aGVzZSB0d28gdGVjaG5pcXVlcyBtYXkgaW4g
-ZmFjdCBzdGlsbCBiZSBjb21wbGVtZW50YXJ5LiAgRm9yIHZlcnkgbGFyZ2UgY2x1c3RlcnMgd2hl
-cmUgdGhlIFBHIGNvdW50cyBwZXIgT1NEIG1heSBiZSBsb3csIEkgc3VzcGVjdCB3ZSB3aWxsIHdh
-bnQgdG8gYXQgbGVhc3QgbWFrZSBzdXJlIHRoZSBpbml0aWFsIG1hcCBndWFyYW50ZWVzIHRoYXQg
-ZXZlcnkgT1NEIGhhcyBhdCBsZWFzdCAxIFBHIHNvIHdlIGNhbiBkbyBwcm9wZXIgcmUtd2VpZ2h0
-aW5nIGRvd24gdGhlIHJvYWQuICBJbiBmYWN0IHRoZSBiZXR0ZXIgdGhlIGluaXRpYWwgZGlzdHJp
-YnV0aW9uIGlzLCB0aGUgbGVzcyBjcmF6eSB3ZSdsbCBoYXZlIHRvIGdldCB3aXRoIHJlLXdlaWdo
-dGluZywgc28gaXQgbWF5IG5vdCBiZSBhIGJhZCBpZGVhIHRvIHVzZSBib3RoIHRlY2huaXF1ZXMu
-DQoNCj4NCj4gTWFyaw0KPg0KPg0KPiBPbiAxMi8xMS8yMDEzIDEyOjIyIEFNLCBEdWFuLCBKaWFu
-Z2FuZyB3cm90ZToNCj4+IENjIHRoZSBtYWlsIGxpc3QgYXMgU2FnZSBzdWdnZXN0ZWQuDQo+Pg0K
-Pj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4+IEZyb206IFNhZ2UgV2VpbCBbbWFpbHRv
-OnNhZ2VAaW5rdGFuay5jb21dDQo+PiBTZW50OiBXZWRuZXNkYXksIERlY2VtYmVyIDExLCAyMDEz
-IDI6MTAgUE0NCj4+IFRvOiBaaGFuZywgSmlhbg0KPj4gQ2M6IE1hcmsgTmVsc29uOyBEdWFuLCBK
-aWFuZ2FuZw0KPj4gU3ViamVjdDogUkU6IHF1ZXN0aW9uIG9uIEJHIyBhbmQgaXRzIHBlcmZvcm1h
-bmNlIGltcGFjdA0KPj4NCj4+IE9uIFdlZCwgMTEgRGVjIDIwMTMsIFpoYW5nLCBKaWFuIHdyb3Rl
-Og0KPj4+IFRoYW5rcyBmb3IgdGhlIHN1Z2dlc3Rpb25zLCBJIHdpbGwgdGFrZSBhIGxvb2sgb24g
-dGhlIGxzIG91dHB1dC4NCj4+PiBObywgd2UgZGlkbid0IHVzZSB0aGUgb3B0aW1hbCBjcnVzaCB0
-dW5hYmxlcy4NCj4+DQo+PiBIb3BlZnVsbHkgdGhhdCBpcyBwYXJ0IG9mIGl0Li4uIHRyeSByZXBl
-YXRpbmcgdGhlIHRlc3Qgd2l0aCB0aGUgDQo+PiBvcHRpbWFsIHR1bmFibGVzIChub3cgdGhlIGRl
-ZmF1bHQgaW4gbWFzdGVyKSENCj4+DQo+PiBzDQo+Pg0KPj4NCj4+Pg0KPj4+IEppYW4NCj4+Pg0K
-Pj4+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+Pj4gRnJvbTogU2FnZSBXZWlsIFttYWls
-dG86c2FnZUBpbmt0YW5rLmNvbV0NCj4+PiBTZW50OiBXZWRuZXNkYXksIERlY2VtYmVyIDExLCAy
-MDEzIDE6MzYgUE0NCj4+PiBUbzogWmhhbmcsIEppYW4NCj4+PiBDYzogTWFyayBOZWxzb247IER1
-YW4sIEppYW5nYW5nDQo+Pj4gU3ViamVjdDogUkU6IHF1ZXN0aW9uIG9uIEJHIyBhbmQgaXRzIHBl
-cmZvcm1hbmNlIGltcGFjdA0KPj4+DQo+Pj4gSSBtaWdodCBiZSB3b3J0aHdoaWxlIGhlcmUgdG8g
-Z2V0IHRlaCBhY3R1YWwgbGlzdCBvZiBvYmplY3RzIChyYWRvcyANCj4+PiAtcCAkcG9vbCBscyBs
-aXN0LnR4dCkgYW5kIGNhbGN1bGF0ZSB0aGUgcGcgYW5kIG9zZCBtYXBwaW5ncyBmb3IgZWFjaCAN
-Cj4+PiBvZiB0aGVtIHRvIHZlcmlmeSB0aGluZ3MgYXJlIHVuaWZvcm0uDQo+Pj4NCj4+PiBPbmUg
-dGhpbmc6IGFyZSB5b3UgdXNpbmcgdGhlICdvcHRpbWFsJyBjcnVzaCB0dW5hYmxlcyAoY2VwaCBv
-c2QgDQo+Pj4gY3J1c2ggdHVuYWJsZXMgb3B0aW1hbCk/DQo+Pj4NCj4+PiBBbHNvLCBjYW4gd2Ug
-Y2MgY2VwaC1kZXZlbD8NCj4+Pg0KPj4+IHNhZ2UNCj4+Pg0KPj4+DQo+Pj4gT24gV2VkLCAxMSBE
-ZWMgMjAxMywgWmhhbmcsIEppYW4gd3JvdGU6DQo+Pj4NCj4+Pj4gTWFyaywNCj4+Pj4gVGhhbmtz
-IGZvciB0aGUgaGVscC4NCj4+Pj4gRm9yIHRoZSBwZXJmb3JtYW5jZSBkaXAsIEkgdGhpbmsgaXQg
-c2hvdWxkIGNhc3VlZCBieSB0aGUgZGlyZWN0b3J5IA0KPj4+PiBzcGxpdHRpbmcsIGp1c3QgY2hl
-Y2sgc2V2ZXJhbCBPU0QsIGl0IGRvZXMgaGFzIG1hbnkgc3ViIGRpcmVjdG9yaWVzLg0KPj4+PiBG
-b3IgdGhlIHBnICMgYW5kIGRpc3RyaWJ1dGlvbiwgc2VlIGlmIEkgdW5kZXJzdGFuZCB5b3UgY29y
-cmVjdGx5Og0KPj4+PiBXaGVuIHlvdSBzYWlkICJhIHNsb3cgdHJlbmQgdG93YXJkIHVuaWZvcm1p
-dHkiIGRvIHlvdSBtZWFuIHRoZSBwZyAjIA0KPj4+PiBmb3IgZWFjaCBwb29sIGlzIHVuZm9yaW0/
-IEJ1dCBmcm9tIHNoZWV0MiwgdGhlIHBnICMgb24gT1NEMTAgaXMgDQo+Pj4+IDEwMywgd2hpbGUg
-dGhlIHBnICMgb24gT1NEOCBpcyA3MiwgdGhlcmUgaXMgc3RpbGwgYSAzMCUgZ2FwLiBBbmQgSSAN
-Cj4+Pj4gdGhpbmsgdGhhdCdzIHRoZSByZWFzb24gd2Ugc2F3IHBlcmZvcm1hbmNlIGRyb3Agb2Yg
-MTBNIHJlYWQgd2l0aCANCj4+Pj4gMTI4MCBwZ3MNCj4+Pj4gLSBwZyAjIG9uIHRoZSBPU0QgaXMg
-bm90IGJhbGFuY2UuDQo+Pj4+DQo+Pj4+IFRoYW5rcw0KPj4+PiBKaWFuDQo+Pj4+DQo+Pj4+IC0t
-LS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+Pj4+IEZyb206IE1hcmsgTmVsc29uIFttYWlsdG86
-bWFyay5uZWxzb25AaW5rdGFuay5jb21dDQo+Pj4+IFNlbnQ6IFdlZG5lc2RheSwgRGVjZW1iZXIg
-MTEsIDIwMTMgMTI6MDEgUE0NCj4+Pj4gVG86IER1YW4sIEppYW5nYW5nDQo+Pj4+IENjOiBTYWdl
-IFdlaWwgKHNhZ2VAaW5rdGFuay5jb20pOyBaaGFuZywgSmlhbg0KPj4+PiBTdWJqZWN0OiBSZTog
-cXVlc3Rpb24gb24gQkcjIGFuZCBpdHMgcGVyZm9ybWFuY2UgaW1wYWN0DQo+Pj4+DQo+Pj4+IEhp
-IEppYW5nYW5nLA0KPj4+Pg0KPj4+PiBNeSByZXN1bHRzIGFyZSByYXRoZXIgb2xkIGF0IHRoaXMg
-cG9pbnQsIGJ1dCBJIGRpZCBzaW1pbGFyIHRlc3RpbmcgDQo+Pj4+IGxhc3Qgc3ByaW5nIHRvIGxv
-b2sgYXQgUEcgZGlzdHJpYnV0aW9uIGFuZCBwZXJmb3JtYW5jZSAod2l0aCBsYXJnZXINCj4+Pj4g
-d3JpdGVzKSB3aXRoIHZhcnlpbmcgbnVtYmVycyBvZiBQR3MuICBJIHNhdyB3aGF0IGxvb2tlZCBs
-aWtlIGEgc2xvdyANCj4+Pj4gdHJlbmQgdG93YXJkIHVuaWZvcm1pdHkuICBQZXJmb3JtYW5jZSBo
-b3dldmVyIHdhcyBxdWl0ZSB2YXJpYWJsZS4NCj4+Pj4NCj4+Pj4gVGhlIHBlcmZvcm1hbmNlIGRp
-cCB5b3Ugc2F3IGFmdGVyIG1hbnkgaG91cnMgbWF5IGhhdmUgYmVlbiBkdWUgdG8gDQo+Pj4+IGRp
-cmVjdG9yeSBzcGxpdHRpbmcgb24gdGhlIHVuZGVybHlpbmcgT1NEcy4gIFdoZW4gdGhpcyBoYXBw
-ZW5zIA0KPj4+PiBkZXBlbmRzIG9uIHRoZSBudW1iZXIgb2Ygb2JqZWN0cyB0aGF0IGFyZSB3cml0
-dGVuIG91dCBhbmQgdGhlIA0KPj4+PiBudW1iZXIgb2YgUEdzIGluIHRoZSBwb29sLiAgRXZlbnR1
-YWxseSwgd2hlbiBlbm91Z2ggb2JqZWN0cyBhcmUgDQo+Pj4+IHdyaXR0ZW4sIHRoZSBmaWxlc3Rv
-cmUgd2lsbCBjcmVhdGUgYSBkZWVwZXIgbmVzdGVkIGRpcmVjdG9yeSANCj4+Pj4gc3RydWN0dXJl
-IHRvIHN0b3JlIG9iamVjdHMgdG8ga2VlcCB0aGUgbWF4aW11bSBudW1iZXIgb2Ygb2JqZWN0cyAN
-Cj4+Pj4gcGVyIGRpcmVjdG9yeSBiZWxvdyBhIGNlcnRhaW4gbWF4aW11bS4NCj4+Pj4gVGhpcyBp
-cyBnb3Zlcm5lZCBieSB0d28gc2V0dGluZ3M6DQo+Pj4+DQo+Pj4+IGZpbGVzdG9yZSBtZXJnZSB0
-aHJlc2hvbGQgPSAxMA0KPj4+Pg0KPj4+PiBmaWxlc3RvcmUgc3BsaXQgbXVsdGlwbGUgPSAyDQo+
-Pj4+DQo+Pj4+IFRoZSB0b3RhbCBudW1iZXIgb2Ygb2JqZWN0cyBwZXIgZGlyZWN0b3J5IGlzIGJ5
-IGRlZmF1bHQgMTAgKiAyICogMTYgDQo+Pj4+ID0gMzIwLiAgV2l0aCBzbWFsbCBQRyBjb3VudHMg
-dGhpcyBjYW4gY2F1c2UgcXVpdGUgYSBiaXQgb2YgDQo+Pj4+IGRpcmVjdG9yeSBzcGxpdHRpbmcg
-aWYgdGhlcmUgYXJlIG1hbnkgb2JqZWN0cy4NCj4+Pj4NCj4+Pj4gSSBiZWxpZXZlIHRoYXQgaXQg
-aXMgbGlrZWx5IHRoZXNlIGRlZmF1bHRzIGFyZSBsb3dlciB0aGFuIG5lY2Vzc2FyeSANCj4+Pj4g
-YW5kIHdlIGNvdWxkIGFsbG93IG1vcmUgb2JqZWN0cyBwZXIgZGlyZWN0b3J5LCBwb3RlbnRpYWxs
-eSByZWR1Y2luZyANCj4+Pj4gdGhlIG51bWJlciBvZiBzZWVrcyBmb3IgZGVudHJ5IGxvb2t1cHMg
-KHRob3VnaCB0aGVvcmV0aWNhbGx5IHRoaXMgDQo+Pj4+IHNob3VsZCBiZSBjYWNoZWQpLiAgV2Ug
-ZGVmaW5pdGVseSBoYXZlIHNlZW4gdGhpcyBoYXZlIGEgbGFyZ2UgDQo+Pj4+IHBlcmZvcm1hbmNl
-IGltcGFjdCB3aXRoIFJHVyB0aG91Z2ggb24gY2x1c3RlcnMgd2l0aCBzbWFsbCBudW1iZXJzIA0K
-Pj4+PiBvZiBQR3MuICBXaXRoIG1vcmUgUEdzLCBhbmQgbW9yZSByZWxheGVkIHRocmVzaG9sZHMs
-IGRpcmVjdG9yeSANCj4+Pj4gc3BsaXR0aW5nIGRvZXNuJ3QgaGFwcGVuIHVudGlsIG1hbnkgbWFu
-eSBtaWxsaW9ucyBvZiBvYmplY3RzIGFyZSANCj4+Pj4gd3JpdHRlbiBvdXQsIGFuZCBwZXJmb3Jt
-YW5jZSBkZWdyYWRhdGlvbiBhcyB0aGUgZGlzayBmaWxscyB1cCANCj4+Pj4gYXBwZWFycyB0byBi
-ZSBsZXNzIHNldmVyZS4NCj4+Pj4NCj4+Pj4gTWFyaw0KPj4+Pg0KPj4+PiBPbiAxMi8xMC8yMDEz
-IDA5OjA1IFBNLCBEdWFuLCBKaWFuZ2FuZyB3cm90ZToNCj4+Pj4+IFNhZ2UvbWFyaywNCj4+Pj4+
-DQo+Pj4+PiBXZSBmaW5kIG9iamVjdCMgdW5iYWxhbmNlIGNvbmRpdGlvbiBpbiBvdXIgQ2VwaCBz
-ZXR1cCBmb3IgYm90aCBSQkQgDQo+Pj4+PiBhbmQgb2JqZWN0LiBSZWZlciB0byB0aGUgYXR0YWNo
-ZWQgcGRmLg0KPj4+Pj4NCj4+Pj4+IEluY3JlYXNlIHRoZSBQRyMgZG9lcyBpbmNyZWFzZSBwZXJm
-b3JtYW5jZSBob3dldmVyIHJlc3VsdCBpbiANCj4+Pj4+IHVuc3RhYmxlIGlzc3VlcyA/DQo+Pj4+
-Pg0KPj4+Pj4gSXMgdGhpcyBhIGtub3duIGlzc3VlIGFuZCBkbyB5b3UgaGF2ZSBhbnkgQktNIHRv
-IGZpeCB0aGlzPw0KPj4+Pj4NCj4+Pj4+IC1qaWFuZ2FuZw0KPj4+Pj4NCj4+Pj4NCj4+Pj4NCj4+
-Pg0KPj4+DQo+DQoNCg==
+On Wed, 11 Dec 2013, Josh Durgin wrote:
+> The PAUSEWR and PAUSERD flags are meant to stop the cluster from
+> processing writes and reads, respectively. The FULL flag is set when
+> the cluster determines that it is out of space, and will no longer
+> process writes.  PAUSEWR and PAUSERD are purely client-side settings
+> already implemented in userspace clients. The osd does nothing special
+> with these flags.
+> 
+> When the FULL flag is set, however, the osd responds to all writes
+> with -ENOSPC. For cephfs, this makes sense, but for rbd the block
+> layer translates this into EIO.  If a cluster goes from full to
+> non-full quickly, a filesystem on top of rbd will not behave well,
+> since some writes succeed while others get EIO.
+> 
+> Fix this by blocking any writes when the FULL flag is set in the osd
+> client. This is the same strategy used by userspace, so apply it by
+> default.  A follow-on patch makes this configurable.
+> 
+> __map_request() is called to re-target osd requests in case the
+> available osds changed.  Add a paused field to a ceph_osd_request, and
+> set it whenever an appropriate osd map flag is set.  Avoid queueing
+> paused requests in __map_request(), but force them to be resent if
+> they become unpaused.
+> 
+> Also subscribe to the next osd map from the monitor if any of these
+> flags are set, so paused requests can be unblocked as soon as
+> possible.
+> 
+> Fixes: http://tracker.ceph.com/issues/6079
+> 
+> Signed-off-by: Josh Durgin <josh.durgin@inktank.com>
+> ---
+>  include/linux/ceph/osd_client.h |    1 +
+>  net/ceph/osd_client.c           |   29 +++++++++++++++++++++++++++--
+>  2 files changed, 28 insertions(+), 2 deletions(-)
+> 
+> diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
+> index 8f47625..4fb6a89 100644
+> --- a/include/linux/ceph/osd_client.h
+> +++ b/include/linux/ceph/osd_client.h
+> @@ -138,6 +138,7 @@ struct ceph_osd_request {
+>  	__le64           *r_request_pool;
+>  	void             *r_request_pgid;
+>  	__le32           *r_request_attempts;
+> +	bool              r_paused;
+>  	struct ceph_eversion *r_request_reassert_version;
+>  
+>  	int               r_result;
+> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+> index a17eaae..1ad9866 100644
+> --- a/net/ceph/osd_client.c
+> +++ b/net/ceph/osd_client.c
+> @@ -1232,6 +1232,22 @@ void ceph_osdc_set_request_linger(struct ceph_osd_client *osdc,
+>  EXPORT_SYMBOL(ceph_osdc_set_request_linger);
+>  
+>  /*
+> + * Returns whether a request should be blocked from being sent
+> + * based on the current osdmap and osd_client settings.
+> + *
+> + * Caller should hold map_sem for read.
+> + */
+> +static bool __req_should_be_paused(struct ceph_osd_client *osdc,
+> +				   struct ceph_osd_request *req)
+> +{
+> +	bool pauserd = ceph_osdmap_flag(osdc->osdmap, CEPH_OSDMAP_PAUSERD);
+> +	bool pausewr = ceph_osdmap_flag(osdc->osdmap, CEPH_OSDMAP_PAUSEWR) ||
+> +		ceph_osdmap_flag(osdc->osdmap, CEPH_OSDMAP_FULL);
+> +	return (req->r_flags & CEPH_OSD_FLAG_READ && pauserd) ||
+> +		(req->r_flags & CEPH_OSD_FLAG_WRITE && pausewr);
+> +}
+> +
+> +/*
+>   * Pick an osd (the first 'up' osd in the pg), allocate the osd struct
+>   * (as needed), and set the request r_osd appropriately.  If there is
+>   * no up osd, set r_osd to NULL.  Move the request to the appropriate list
+> @@ -1248,6 +1264,7 @@ static int __map_request(struct ceph_osd_client *osdc,
+>  	int acting[CEPH_PG_MAX_SIZE];
+>  	int o = -1, num = 0;
+>  	int err;
+> +	bool was_paused;
+>  
+>  	dout("map_request %p tid %lld\n", req, req->r_tid);
+>  	err = ceph_calc_ceph_pg(&pgid, req->r_oid, osdc->osdmap,
+> @@ -1264,12 +1281,18 @@ static int __map_request(struct ceph_osd_client *osdc,
+>  		num = err;
+>  	}
+>  
+> +	was_paused = req->r_paused;
+> +	req->r_paused = __req_should_be_paused(osdc, req);
+> +	if (was_paused && !req->r_paused)
+> +		force_resend = 1;
+> +
+>  	if ((!force_resend &&
+>  	     req->r_osd && req->r_osd->o_osd == o &&
+>  	     req->r_sent >= req->r_osd->o_incarnation &&
+>  	     req->r_num_pg_osds == num &&
+>  	     memcmp(req->r_pg_osds, acting, sizeof(acting[0])*num) == 0) ||
+> -	    (req->r_osd == NULL && o == -1))
+> +	    (req->r_osd == NULL && o == -1) ||
+> +	    req->r_paused)
+
+It seems like we could be a bit more aggressive (and more closely aligned 
+with what the other causes of changed mappings do) and cancel the request 
+if it is newly paused.  Otherwise, we leave req->r_osd set to the last 
+person we sent the request to, which means we might get a reply.
+
+I guess that is what we want, actually...
+
+>  		return 0;  /* no change */
+>  
+>  	dout("map_request tid %llu pgid %lld.%x osd%d (was osd%d)\n",
+> @@ -1811,7 +1834,9 @@ done:
+>  	 * we find out when we are no longer full and stop returning
+>  	 * ENOSPC.
+>  	 */
+> -	if (ceph_osdmap_flag(osdc->osdmap, CEPH_OSDMAP_FULL))
+> +	if (ceph_osdmap_flag(osdc->osdmap, CEPH_OSDMAP_FULL) ||
+> +		ceph_osdmap_flag(osdc->osdmap, CEPH_OSDMAP_PAUSERD) ||
+> +		ceph_osdmap_flag(osdc->osdmap, CEPH_OSDMAP_PAUSEWR))
+>  		ceph_monc_request_next_osdmap(&osdc->client->monc);
+>  
+>  	mutex_lock(&osdc->request_mutex);
+> -- 
+> 1.7.10.4
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
