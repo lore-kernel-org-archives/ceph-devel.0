@@ -1,122 +1,213 @@
-From: "Duan, Jiangang" <jiangang.duan@intel.com>
-Subject: RE: question for the new ceph-osd key/value backend
-Date: Thu, 12 Dec 2013 01:17:09 +0000
-Message-ID: <A9F57F2ABA6BB2469F01E127557C6C9B10E7CB60@SHSMSX104.ccr.corp.intel.com>
-References: <A9F57F2ABA6BB2469F01E127557C6C9B10E7BEDD@SHSMSX104.ccr.corp.intel.com>
- <alpine.DEB.2.00.1312102155520.19333@cobra.newdream.net>
- <A9F57F2ABA6BB2469F01E127557C6C9B10E7C197@SHSMSX104.ccr.corp.intel.com>
- <52A86E28.8070006@inktank.com>
+From: "Matt W. Benjamin" <matt@cohortfs.com>
+Subject: Re: Ceph Messaging on Accelio (libxio) RDMA
+Date: Wed, 11 Dec 2013 20:33:40 -0500 (EST)
+Message-ID: <1902512897.238.1386812020862.JavaMail.root@thunderbeast.private.linuxbox.com>
+References: <alpine.DEB.2.00.1312111640550.28299@cobra.newdream.net>
+Reply-To: "Matt W. Benjamin" <matt@cohortfs.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:14336 "EHLO mga01.intel.com"
+Received: from aa.linuxbox.com ([69.128.83.226]:4938 "EHLO aa.linuxbox.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751013Ab3LLBR0 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 11 Dec 2013 20:17:26 -0500
-In-Reply-To: <52A86E28.8070006@inktank.com>
-Content-Language: en-US
+	id S1750894Ab3LLBds (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 11 Dec 2013 20:33:48 -0500
+In-Reply-To: <alpine.DEB.2.00.1312111640550.28299@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mark.nelson@inktank.com>
-Cc: Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Yaron Haviv <yaronh@mellanox.com>, Eyal Salomon <esalomon@mellanox.com>
 
-TWFyaywgd2FudCB0byBzaGFyZSB1cyB5b3VyIGVhcmx5IHJlc3VsdD8gOikgLWppYW5nYW5nDQoN
-Ci0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBNYXJrIE5lbHNvbiBbbWFpbHRvOm1h
-cmsubmVsc29uQGlua3RhbmsuY29tXSANClNlbnQ6IFdlZG5lc2RheSwgRGVjZW1iZXIgMTEsIDIw
-MTMgOTo1MyBQTQ0KVG86IER1YW4sIEppYW5nYW5nDQpDYzogU2FnZSBXZWlsOyBjZXBoLWRldmVs
-QHZnZXIua2VybmVsLm9yZw0KU3ViamVjdDogUmU6IHF1ZXN0aW9uIGZvciB0aGUgbmV3IGNlcGgt
-b3NkIGtleS92YWx1ZSBiYWNrZW5kDQoNCk9uIDEyLzExLzIwMTMgMTI6NTkgQU0sIER1YW4sIEpp
-YW5nYW5nIHdyb3RlOg0KPiBUaGFua3MuIEkgaW4gZ2VuZXJhbCB0aGluayB0byBmaW5kIG9uZSBp
-bXBsZW1lbnRhdGlvbiBzdWl0YWJsZSBmb3IgYWxsIA0KPiB1c2FnZSBtb2RlbHMgKHNtYWxsIHZz
-LiBiaWcsIGNvbGQgdnMuIGhvdCkgaXMgdmVyeSBkaWZmaWN1bHQuIFNvIEkgbGlrZSB0aGUgaWRl
-YSBvZiAiYSBiYWNrZW5kIHRoYXQgbGV0cyB5b3UgcGx1ZyBpbiBhIG5leHQtZ2VuIGJhY2tlbmQg
-YmVuZWF0aCBpdCAtICIgLSBLL1YgbWF5IGJlIGEgZ29vZCB3YXkgdG8gaGFuZGxlIG1hbnkgc21h
-bGwgb2JqZWN0cyB0aGFuIFhGUyAtIGhvd2V2ZXIgSSBhbSBub3Qgc3VyZSBpZiBsZXZlbERCIGlz
-IHRoZSByaWdodCBjaG9pY2UgKGNvbnNpZGVyIGl0IGlzIGdvb2QgZm9yIHdyaXRlIHRoYW4gcmVh
-ZCkgYW5kIGFsc28gbm90IHN1cmUgSy9WIHRoaXMgd2lsbCBiZW5lZml0IFJCRCB3b3JrbG9hZCBv
-ciBub3QgKGNvbnNpZGVyIGFsbCA0TUIgb2JqZWN0IHNpemUpLg0KPiBXaWxsIHRoaW5rIG1vcmUg
-YWJvdXQgdGhpcyBhbmQgdGFsayB3aXRoIHlvdSBhZ2Fpbi4NCg0KSSBoYXZlIGJlZW4gdmVyeSBp
-bnRlcmVzdGVkIGluIHRoaXMgdG9waWMgcmVjZW50bHkgYW5kIGhhdmUgYmVlbiBkb2luZyBzb21l
-IGJlbmNobWFya2luZyB3aXRoIGJhc2hvJ3MgbGV2ZWxkYiwgaHlwZXJkZXgsIGFuZCBzdG9jayBs
-ZXZlbGRiIGltcGxlbWVudGF0aW9ucy4gIEVhY2ggaGFzIGNlcnRhaW4gYWR2YW50YWdlcyAodXN1
-YWxseSByZWxhdGVkIHRvIHdoYXRldmVyIHRoZXkgYWR2ZXJ0aXNlLCBpZSBjcmMzMiBmb3IgYmFz
-aG8sIGV0YyksIGJ1dCBhbGwgc2VlbSB0byBoYXZlIHBvb3Igc3luYyByZWFkL3dyaXRlIHBlcmZv
-cm1hbmNlLCBib3RoIHNlcXVlbnRpYWwgYW5kIHJhbmRvbS4gIEkgd2FudCB0byB0YWtlIGEgbG9v
-ayBhdCByb2Nrc2RiIHRvIHNlZSBob3cgaXQgY29tcGFyZXMgYXMgd2VsbC4NCg0KVGhpcyB3aG9s
-ZSBhcmVhIGlzIHZlcnkgaW50ZXJlc3RpbmcgYXMgdGhlcmUgYXJlIG9idmlvdXMgdHJhZGVvZmZz
-IHJlZ2FyZGluZyBob3cgd2UgZG8gdGhpbmdzIG5vdyB2cyB3aGF0IHdlIHBvdGVudGlhbGx5IGNv
-dWxkIGRvIGRvd24gdGhlIHJvYWQuICBCZWluZyBhYmxlIHRvIGVsaW1pbmF0ZSBQT1NJWCBlbnRp
-cmVseSBiZWhpbmQgdGhlIHNjZW5lcyB3b3VsZCBvYnZpb3VzbHkgYmUgbmljZSBmb3IgYSBsb3Qg
-b2YgcmVhc29ucy4NCg0KTWFyaw0KDQo+DQo+IC1qaWFuZ2FuZw0KPg0KPiAtLS0tLU9yaWdpbmFs
-IE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBTYWdlIFdlaWwgW21haWx0bzpzYWdlQGlua3RhbmsuY29t
-XQ0KPiBTZW50OiBXZWRuZXNkYXksIERlY2VtYmVyIDExLCAyMDEzIDI6MDkgUE0NCj4gVG86IER1
-YW4sIEppYW5nYW5nDQo+IENjOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KPiBTdWJqZWN0
-OiBSZTogcXVlc3Rpb24gZm9yIHRoZSBuZXcgY2VwaC1vc2Qga2V5L3ZhbHVlIGJhY2tlbmQNCj4N
-Cj4gSGkgSmlhbmdhbmcsDQo+DQo+IE9uIFdlZCwgMTEgRGVjIDIwMTMsIER1YW4sIEppYW5nYW5n
-IHdyb3RlOg0KPj4gU2FnZSwNCj4+DQo+PiBJIGhhdmUgc29tZSBxdWVzdGlvbnMgcmVnYXJkaW5n
-IHRvIHRoZSBrZXkvdmFsdWUgYmFja2VuZCB3b3JrLg0KPj4NCj4+IFdoYXQgaXMgdGhlIG1vdGl2
-YXRpb24gdG8gd29yayBvbiB0aGlzPyAob3Igd2hhdCBpcyB0aGUgcHJvYmxlbSB3ZSANCj4+IHdh
-bnQgdG8gc29sdmU/KQ0KPj4gMSkgdG8gdXNlIHRoZSBuZXcgaW50ZXJmYWNlIHRodXMgd2UgY2Fu
-IGJ5cGFzcyBhbGwgdGhlIE9TIGxheWVyIHRodXMgZ2V0IGEgc2hvcnQgbGF0ZW5jeT8NCj4NCj4g
-VGhhdCBpcyBvbmUgcGFydC4gIFRoZSBjdXJyZW50IHN0cmF0ZWd5IG9mIGxheWVyaW5nIG9uIHRv
-cCBvZiBhIGZpbGUgc3lzdGVtIGFuZCB1c2luZyBhIHdyaXRlLWFoZWFkIGpvdXJuYWwgbWFrZXMg
-c2Vuc2UgZ2l2ZW4gdGhlIGV4aXN0aW5nIGxpbnV4IGZzIGJ1aWxkaW5nIGJsb2NrcywgYnV0IGlz
-IGZhciBmcm9tIGFuIG9wdGltYWwgc29sdXRpb24gZm9yIG1hbnkgd29ya2xvYWRzLiAgQSBrL3Yg
-aW50ZXJmYWNlIGJhc2VkIG9uIHNvbWV0aGluZyBsZXZlbGRiIHByb2JhYmx5IHBlcmZvcm1zIG11
-Y2ggYmV0dGVyIGZvciBtYW55IHNtYWxsLW9iamVjdCB1c2UtY2FzZXMuICBBbHNvLCBhIGsvdiBi
-YWNrZW5kIGNhbiB0YWtlIGFkdmF0YW5nZSBvZiBlbWVyZ2luZyBub24tYmxvY2sgc3RvcmFnZSBp
-bnRlcmZhY2VzIGxpa2UgTlZNS1YsIEtpbmV0aWMsIG5ldyBsaWJyYXJpZXMgbGlrZSByb2Nrc2Ri
-LCBldGMuDQo+DQo+PiAyKSBvciB0byBsZXZlcmFnZSBzb21lIG5ldyBwcmltaXRpdmUgZS5nLiB0
-aGUgYXRvbWljIHdyaXRlIHRodXMgdG8gc2ltcGxpZnkgdGhlIGNvZGUgd3JpdGluZz8NCj4NCj4g
-VGhhdCB0b28uICBCYXNpY2FsbHksIHdlIGFyZSBjdXJyZW50bHkgZG9pbmcgYSBsb3Qgb2Ygd29y
-ayB0byBnZXQgd2hhdCB3ZSBuZWVkIG91dCBvZiBwb3NpeCwgYW5kIGFyZSBwYXlpbmcgdGhlIHBy
-aWNlLg0KPg0KPj4gVGhlcmUgYXJlIHNldmVyYWwgZGlmZmVyZW50IHBvc3NpYmlsaXRpZXMgdG8g
-dXNlIGZ1dHVyZSBOVk0gDQo+PiB0ZWNobm9sb2d5DQo+PiAtIE5WTS5GSUxFLCBOVk0uQkxPQ0ss
-IFBNLlhYWA0KPj4gaHR0cDovL3NuaWEub3JnL3NpdGVzL2RlZmF1bHQvZmlsZXMvTlZNUHJvZ3Jh
-bW1pbmdNb2RlbF92MXIxMERSQUZULnBkDQo+PiBmIEV2ZW4gZm9yIG9wZW5OVk0gdGhpbmcgLSB0
-aGVyZSBhcmUgb3RoZXIgdXNhZ2UgbW9kZWwgdGhhbiBrL3YuDQo+Pg0KPj4gRG8geW91IGhhdmUg
-YW55IHR5cGljYWwgdXNhZ2UgbW9kZWwgZm9yIHRoaXM/DQo+DQo+IEkgd2Fzbid0IGZhbWlsaWFy
-IHdpdGggdGhlc2U7IHRoYW5rcyBmb3IgdGhlIHJlZmVyZW5jZSEgIE9mIHRoZXNlLCBOVk0uRklM
-RSBzZWVtcyB0aGUgbW9zdCBpbnRlcmVzdGluZyAoaXQgbWFwcyBtb3N0IGNsb3NlbHkgdG8gYW4g
-b2JqZWN0KS4NCj4gSSBhbSBwcmVkaXNwb3NlZCB0byBza2VwdGljaXNtIHdoZW4gaXQgY29tZXMg
-dG8gdGhlc2Ugc29ydHMgb2Ygc3RhbmRhcmRzL0FQSSBkb2NzIHRoYXQgcHJlY2VkZSBhbiBhY3R1
-YWwgaW1wbGVtZW50YXRpb24sIGJ1dCBpdCBpcyBlbmNvdXJnYWdpbmcgdG8gc2VlIHNvbWUgZWZm
-b3J0IGhlcmUgdG93YXJkcyBhIGNvbW1vbiBpbnRlcmZhY2UuDQo+DQo+IEluIHRoZSBlbmQsIHdl
-IHdhbnQgdG8gc3VwcG9ydCBnZW5lcmljIENlcGggd29ya2xvYWRzLiAgVGhlc2UgcmFuZ2UgZnJv
-bSByYmQgYmxvY2sgYW5kIGZpbGUgdHlwZSB3b3JrbG9hZHMgKG9iamVjdHMgYXJlIHN0cmlwZXMg
-b2YgZmlsZXMsIHdpdGggcmFuZG9tIGJ5dGVzIHJld3JpdHRlbikgdG8gb21hcCB0eXBlIHdvcmts
-b2FkcyAobGlrZSByZ3cgYnVja2V0IGluZGljZXMgdGhhdCBhcmUgcHVyZWx5IGtleS92YWx1ZSku
-DQo+DQo+IEkgdGhpbmsgdGhlIGZpcnN0IHdpbnMgd291bGQgYmU6DQo+DQo+IDEtIGEgYmFja2Vu
-ZCB0aGF0IG1vcmUgZWZmaWNpZW50bHkgaGFuZGxlcyByZ3cgYnVja2V0IGluZGV4IHdvcmtsb2Fk
-cw0KPiAyLSBhIGJhY2tlbmQgdGhhdCBpcyBtb3JlIGVmZmljaWVudCBmb3Igcmd3IGluIGdlbmVy
-YWwgKGkuZS4sIA0KPiBpbW11dGFibGUNCj4gb2JqZWN0cykNCj4gMy0gYSBiYWNrZW5kIHRoYXQg
-Y2FuIGhhbmRsZSBtb3JlIGdlbmVyYWwgcHVycG9zZSB3b3JrbG9hZHMgKGxpa2UgcmJkIA0KPiBh
-bmQNCj4gY2VwaGZzKQ0KPg0KPiBhbmQgc2VwYXJhdGVseSwNCj4NCj4gNC0gYSBiYWNrZW5kIHRo
-YXQgbGV0cyB5b3UgcGx1ZyBpbiBhIG5leHQtZ2VuIGJhY2tlbmQgYmVuZWF0aCBpdCwgbGlrZSBO
-Vk1LViBhbmQgc3BlZWR5IGZsYXNoLg0KPg0KPiBzYWdlDQo+DQo+DQo+DQo+Pg0KPj4gLWppYW5n
-YW5nDQo+Pg0KPj4gPT09PT09PT09PT09PT09PT09PQ0KPj4NCj4+IEZyb206IFNhZ2UgV2VpbCA8
-c2FnZSA8YXQ+IGlua3RhbmsuY29tPg0KPj4gU3ViamVjdDogbmV3IGNlcGgtb3NkIGtleS92YWx1
-ZSBiYWNrZW5kDQo+PiBOZXdzZ3JvdXBzOiBnbWFuZS5jb21wLmZpbGUtc3lzdGVtcy5jZXBoLmRl
-dmVsDQo+PiBEYXRlOiAyMDEzLTExLTA5IDEwOjA5OjUyIEdNVCAoNCB3ZWVrcywgMyBkYXlzLCAx
-NiBob3VycyBhbmQgMzkgDQo+PiBtaW51dGVzIGFnbykgSSd2ZSB3cml0dGVuIHVwIGEgYmx1ZXBy
-aW50IHdpdGggYSByb3VnaCBza2V0Y2ggb2YgaG93IA0KPj4gdG8gdGFrZSBhZHZhbnRhZ2Ugb2Yg
-YWx0ZXJuYXRpdmUgc3RvcmFnZSBpbnRlcmZhY2VzLiAgSSBhbSB2ZXJ5IGhhcHB5IA0KPj4gdG8g
-c2VlIHRoYXQgc2V2ZXJhbCBmIHRoZW0gaGF2ZSBlbWVyZ2VkIG92ZXIgdGhlIHBhc3QgeWVhciBv
-ciB0d286DQo+Pg0KPj4gICAtIGZ1c2lvbmlvJ3MgS1ZNS1YgaXMgYSBrZXkvdmFsdWUgaW50ZXJm
-YWNlIGZvciB0aGVpciBmbGFzaCBwcm9kdWN0cw0KPj4gICAtIHNlYWdhdGUncyBraW5ldGljIGlz
-IGEga2V5L3ZhbHVlIGludGVyZmFjZSBmb3IgdGhlaXIgbmV3IA0KPj4gZXRoZXJuZXQtYmFzZWQg
-ZHJpdmUNCj4+DQo+PiBBbHNvLCBsZXZlbGRiIGlzIHByZXR0eSBncmVhdCBmb3IgbWFueSB3b3Jr
-bG9hZHMgd2hlbiBydW4gb24gYSANCj4+IHRyYW5kaXRpb25hbCBkaXNrL2ZzLg0KPj4NCj4+IFRo
-ZSBnb29kIG5ld3MgaXMgYSBsb3Qgb2YgdGhlIGV4aXN0aW5nIHdvcmsgdGhhdCB3ZW50IGludG8g
-c3VwcG9ydCANCj4+IG9tYXAgbG9va3MgdG8gYmUgcmV1c2FibGUgaGVyZS4gIFNvbWUgbmV3IGZ1
-bmN0aW9uYWxpdHkgYW5kIA0KPj4gcmVmYWN0b3JpbmcgaXMgbmVlZGVkLCB0aG91Z2gsIHBhcnRp
-Y3VsYXJseSB3aGVuIGl0IGNvbWVzIHRvIHN0b3JpbmcgDQo+PiBvYmplY3QgZGF0YSAodGhlIGZp
-bGUtbGlrZSBiYWcgb2YgYnl0ZXMgcG9ydGlvbikgYXMga2V5L3ZhbHVlIHBhaXJzLg0KPj4NCj4+
-IFRoZSBibHVlcHJpbnQgaXMgaGVyZToNCj4+DQo+Pg0KPj4gaHR0cDovL3dpa2kuY2VwaC5jb20v
-MDFQbGFubmluZy8wMkJsdWVwcmludHMvRmlyZWZseS9vc2QlM0FfbmV3X2tleSUyDQo+PiBGDQo+
-PiAlMkZ2YWx1ZV9iYWNrZW5kDQo+Pg0KPj4gTj8/Pz8/cj8/eT8/Pz8/P1g/Pz92Pz8/KT97Lm4/
-Pz8/P3o/XXo/Pz8/YXk/HT8/Pz9qID8/Zj8/P2g/Pz8/Px4/dz8/Pw0KPiA/Pz9qOit2Pz8/dz8/
-Pz8/Pz8/ID8/Pz96Wis/Pz8/Pz8/aiI/Pz8/aSANCj4gTiAgICAgciAgeSAgIGIgWCAgx6d2IF4g
-Kd66ey5uICsgICB6IF16IHtheSAdyofamSAsaiAgIGYgICBoICAgeiAeIHcgICANCiAgIGo6K3Yg
-ICB3IGogbSAgICAgICAgIHpaKyAg3aJqIiAgIXRtbD0NCj4NCg0K
+HI Sage,
+
+inline
+
+----- "Sage Weil" <sage@inktank.com> wrote:
+
+> Hi Matt,
+> 
+> Thanks for posting this!  Some comments and questions below.
+> 
+> 
+> I was originally thinking that xio was going to be more
+> mellanox-specific, 
+> but it looks like it runs over multiple transports (even tcp!).  (I'm
+> sure 
+> I've been told this before but it apparently didn't sink in.)  Is
+> there 
+> also a mellanox-specific backend (that is not ibverbs) that takes any
+>  
+> special advantage of mellanox hw capabilities?
+
+The actual situation is that xio is currently ibverbs specific, though
+there is interest with Mellanox and some partners in building a TCP
+transport for it.
+
+What is true is that xio makes very advanced use of ibverbs interfaces,
+lock free/wait-free allocators, rdtsc, but hides a lot of details from
+upper layers.  The xio designers knew how to get the most from infiniband/
+RDMA, and it shows.
+
+Also, ibverbs is a first-class interface to iWARP and esp.
+ROCE hardware, as well as ib.  I've been doing most of my development on
+a tweaked version of the softiwarp ib provider, which amounts to a full
+RDMA simulator that runs on anything.  (Apparently it can run over TCP,
+but I just use it on one vm host.)
+
+I haven't worked with cci, but just glancing at it, I'd say xio stacks
+up very well on ibverbs, but won't solve the TCP transport problem
+immediately.
+
+> 
+> Similarly, are there other projects or vendors that are looking at xio
+> at 
+> this point?
+
+Mellanox partners are working with it mainly, I believe.
+
+>  I've seen similar attempts to create this sort of library
+> 
+> (CCI comes to mind: https://github.com/CCI/cci).  Have these previous
+> 
+> attempts influenced the design of xio at all?
+
+> > 
+> > The approach I took in incorporating Accelio was to build on the key
+> abstractions
+> > of Messenger, Connection, and Dispatcher, and Message, and build a
+> corresponding
+> > family of concrete classes:
+> 
+> This sounds like the right approach.  And we definitely want to clean
+> up 
+> the separation of the abstract interfaces (Message, Connection,
+> Messenger) 
+> from the implementations.  I'm happy to pull that stuff into the tree
+> 
+> quickly once the interfaces appear stable (although it looks like your
+> 
+> branch is based off lots of other linuxbox bits, so it probably isn't
+> 
+> important until this gets closer to ready).
+
+Ok, cool.
+
+> 
+> Also, it would be great to build out the simple_* test endpoints as
+> this 
+> effort progresses; hopefully that can eventually form the basis of a
+> test 
+> suite for the messenger and can be expanded to include various stress
+> 
+> tests that don't require a full running cluster.
+
+I agree.  I intend to have it at least running more Message types
+RSN.
+
+> 
+> > XioMessenger (concrete, implements Messenger, encapsulates xio
+> endpoints, aggregates
+
+Agreed, I respond to this point in more detail in my reply to Greg's
+message.
+
+> 
+> This worries me a bit; see Greg's questions.  There are several 
+> request/reply patterns, but many (most?) of the message exchanges are
+> 
+> asymmetrical.  I wonder if the low-level request/reply model really
+> maps 
+> more closely the 'ack' stuff in SimpleMessenger (as it's about 
+> deallocating the sender's memory and cleaning up rdma state).
+> 
+> > A lot of low level details of the mapping from Message to Accelio 
+> > messaging are currently in flux, but the basic idea is to re-use the
+> 
+> > current encode/decode primitives as far as possible, while eliding
+> the 
+> > acks, sequence # and tids, and timestamp behaviors of Pipe, or
+> rather, 
+> > replacing them with mappings to Accelio primitives.  I have some
+> wrapper 
+> > classes that help with this.  For the moment, the existing Ceph
+> message 
+> > headers and footers are still there, but are now encoded/decoded,
+> rather 
+> > than hand-marshalled.  This means that checksumming is probably
+> mostly 
+> > intact.  Message signatures are not implemented.
+> > 
+> > What works.  The current prototype isn't integrated with the main
+> server daemons
+> > (e.g., OSD) but experimental work on that is in progress.  I've
+> created a pair of
+> > simple standalone client/server applications
+> simple_server/simple_client and
+> > a matching xio_server/xio_client, that provide a minimal message
+> dispatch loop with
+> > a new SimpleDispatcher class and some other helpers, as a way to
+> work with both
+> > messengers side-by-side.  These are currently very primitive, but
+> will probably
+> > do more things soon.  The current prototype sends messages over
+> Accelio, but has some issue
+> > with replies, that should be fixed shortly.  It leaks lots of
+> memory, etc.
+> > 
+> > We've pushed a work-in-progress branch "xio-messenger" to our
+> external github
+> > repository, for community review.  Find it here:
+> > 
+> > https://github.com/linuxbox2/linuxbox-ceph
+> 
+> Looking through this, it occurs to me that there are some other 
+> foundational pieces that we'll need to get in place soon:
+> 
+>  - The XioMessenger is a completely different wire protocol that needs
+> to 
+> be distinct from the legacy protocol.  Probably we can use the 
+> entity_addr_t::type field for this.
+>  - We'll want the various *Map structures to allow multiple 
+> entity_addr_t's per entity.  We already could use this to support both
+> 
+> IPv4 and IPv6.  In the future, though, we'll probably want clusters
+> that 
+> can speak both the legacy TCP protocol (via SimpleMessenger or some 
+> improved implementation) and the xio one (and whatever else we dream
+> up in 
+> the future).
+
+Ack.
+
+> 
+> Also, as has been mentioned previously,
+> 
+>  - We need to continue to migrate stuff over to the Connection-based 
+> Messenger interface and off the original methods that take
+> entity_inst_t.  
+> The sticky bit here is the peer-to-peer mode that is used inside the
+> OSD 
+> and MDS clusters: those need to handle racing connection attempts,
+> which 
+> either requires the internal entity name -> connection map to resolve
+> 
+> races (as we have now) or a new approach that pushes the
+> race-resolution 
+> up into the calling code (meh).  No need to address it now, but
+> eventually 
+> we'll need to tackle it before this can be used on the osd back-side 
+> network.
+> 
+> sage
+
+-- 
+Matt Benjamin
+CohortFS, LLC.
+206 South Fifth Ave. Suite 150
+Ann Arbor, MI  48104
+
+http://cohortfs.com
+
+tel.  734-761-4689 
+fax.  734-769-8938 
+cel.  734-216-5309 
