@@ -1,175 +1,211 @@
-From: Yaron Haviv <yaronh@mellanox.com>
-Subject: RE: Ceph Messaging on Accelio (libxio) RDMA
-Date: Thu, 12 Dec 2013 11:32:16 +0000
-Message-ID: <DD06A08C9A04024C8B0D8A63110C7E14A283C7FF@MTRDAG01.mtl.com>
-References: <alpine.DEB.2.00.1312111640550.28299@cobra.newdream.net>
- <1902512897.238.1386812020862.JavaMail.root@thunderbeast.private.linuxbox.com>
+From: Mark Nelson <mark.nelson@inktank.com>
+Subject: Re: question on BG# and its performance impact
+Date: Thu, 12 Dec 2013 07:44:20 -0600
+Message-ID: <52A9BDB4.1080800@inktank.com>
+References: <A9F57F2ABA6BB2469F01E127557C6C9B10E7BF1D@SHSMSX104.ccr.corp.intel.com> <52A7E371.7050008@inktank.com> <51FC7A40FB29414D88A121A7FFEF9A4710D43F45@SHSMSX104.ccr.corp.intel.com> <alpine.DEB.2.00.1312102134130.18451@cobra.newdream.net> <51FC7A40FB29414D88A121A7FFEF9A4710D43FFC@SHSMSX104.ccr.corp.intel.com> <alpine.DEB.2.00.1312102209570.19333@cobra.newdream.net> <A9F57F2ABA6BB2469F01E127557C6C9B10E7C12B@SHSMSX104.ccr.corp.intel.com> <52A8759C.90803@inktank.com> <52A878C4.8040501@inktank.com> <A9F57F2ABA6BB2469F01E127557C6C9B10E7CD2C@SHSMSX104.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from eu1sys200aog104.obsmtp.com ([207.126.144.117]:42031 "EHLO
-	eu1sys200aog104.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751445Ab3LLLiZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 12 Dec 2013 06:38:25 -0500
-In-Reply-To: <1902512897.238.1386812020862.JavaMail.root@thunderbeast.private.linuxbox.com>
-Content-Language: en-US
+Received: from mail-ig0-f172.google.com ([209.85.213.172]:59541 "EHLO
+	mail-ig0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751461Ab3LLNoN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 12 Dec 2013 08:44:13 -0500
+Received: by mail-ig0-f172.google.com with SMTP id hl1so5194052igb.5
+        for <ceph-devel@vger.kernel.org>; Thu, 12 Dec 2013 05:44:13 -0800 (PST)
+In-Reply-To: <A9F57F2ABA6BB2469F01E127557C6C9B10E7CD2C@SHSMSX104.ccr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Matt W. Benjamin" <matt@cohortfs.com>, Sage Weil <sage@inktank.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Eyal Salomon <esalomon@mellanox.com>
+To: "Duan, Jiangang" <jiangang.duan@intel.com>
+Cc: Sage Weil <sage@inktank.com>, "Zhang, Jian" <jian.zhang@intel.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "He, Yujie" <yujie.he@intel.com>
 
-dG8gc2hlZCBtb3JlIGxpZ2h0IGFib3V0IEFjY2VsaW8gc2VlIHNvbWUgbm90ZXMgYmVsb3cgDQoN
-Cllhcm9uDQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogTWF0dCBXLiBC
-ZW5qYW1pbiBbbWFpbHRvOm1hdHRAY29ob3J0ZnMuY29tXQ0KPiBTZW50OiBUaHVyc2RheSwgRGVj
-ZW1iZXIgMTIsIDIwMTMgMzozNCBBTQ0KPiBUbzogU2FnZSBXZWlsDQo+IENjOiBjZXBoLWRldmVs
-OyBZYXJvbiBIYXZpdjsgRXlhbCBTYWxvbW9uDQo+IFN1YmplY3Q6IFJlOiBDZXBoIE1lc3NhZ2lu
-ZyBvbiBBY2NlbGlvIChsaWJ4aW8pIFJETUENCj4gDQo+IEhJIFNhZ2UsDQo+IA0KPiBpbmxpbmUN
-Cj4gDQo+IC0tLS0tICJTYWdlIFdlaWwiIDxzYWdlQGlua3RhbmsuY29tPiB3cm90ZToNCj4gDQo+
-ID4gSGkgTWF0dCwNCj4gPg0KPiA+IFRoYW5rcyBmb3IgcG9zdGluZyB0aGlzISAgU29tZSBjb21t
-ZW50cyBhbmQgcXVlc3Rpb25zIGJlbG93Lg0KPiA+DQo+ID4NCj4gPiBJIHdhcyBvcmlnaW5hbGx5
-IHRoaW5raW5nIHRoYXQgeGlvIHdhcyBnb2luZyB0byBiZSBtb3JlDQo+ID4gbWVsbGFub3gtc3Bl
-Y2lmaWMsIGJ1dCBpdCBsb29rcyBsaWtlIGl0IHJ1bnMgb3ZlciBtdWx0aXBsZSB0cmFuc3BvcnRz
-DQo+ID4gKGV2ZW4gdGNwISkuICAoSSdtIHN1cmUgSSd2ZSBiZWVuIHRvbGQgdGhpcyBiZWZvcmUg
-YnV0IGl0IGFwcGFyZW50bHkNCj4gPiBkaWRuJ3Qgc2luayBpbi4pICBJcyB0aGVyZSBhbHNvIGEg
-bWVsbGFub3gtc3BlY2lmaWMgYmFja2VuZCAodGhhdCBpcw0KPiA+IG5vdCBpYnZlcmJzKSB0aGF0
-IHRha2VzIGFueQ0KPiA+DQo+ID4gc3BlY2lhbCBhZHZhbnRhZ2Ugb2YgbWVsbGFub3ggaHcgY2Fw
-YWJpbGl0aWVzPw0KPiANCltZSD4gXSANCg0Kbm90ZSB0aGF0IEFjY2VsaW8gaXMgaGFyZHdhcmUg
-aW5kZXBlbmRlbnQsIHdvcmtzIG92ZXIgZGlmZmVyZW50IFJETUEgdHJhbnNwb3J0cyAoSUIsIFJv
-Q0UsIGlXYXJwLCAuLikgYW5kIHdpbGwgYWRkIG5vbiBSRE1BIHRyYW5zcG9ydHMgDQppdCBpcyBl
-bnRpcmVseSBvcGVuIHNvdXJjZSBhbmQgY29udGFpbnMgY29udHJpYnV0aW9ucyBmcm9tIG11bHRp
-cGxlIHZlbmRvcnMsIHNlZTogIGh0dHBzOi8vZ2l0aHViLmNvbS9hY2NlbGlvL2FjY2VsaW8NCnZh
-cmlldHkgb2YgY29kZSBleGFtcGxlcyBpbjogaHR0cHM6Ly9naXRodWIuY29tL2FjY2VsaW8vYWNj
-ZWxpby90cmVlL21hc3Rlci9leGFtcGxlcy91c3INCg0KdGhlcmUgYXJlIG1hbnkgY29vbCB0cmFu
-c3BvcnQgb3B0aW1pemF0aW9ucyBhbmQgYWR2YW5jZWQgZnVuY3Rpb25hbGl0eSBidWlsdCBpbnRv
-IGl0LCBidXQgYXJlIGFic3RyYWN0ZWQgZnJvbSB0aGUgZW5kIHVzZXIgYWxsb3dpbmcgYmVzdCBw
-ZXJmb3JtYW5jZSB3aXRoIHJhcGlkIGRldmVsb3BtZW50LCBzZWUgbW9yZSBkZXRhaWxzIGluIDog
-aHR0cDovL3d3dy5hY2NlbGlvLm9yZy93cC1jb250ZW50L3RoZW1lcy9weXJhbWlkX2NoaWxkL3Bk
-Zi9XUF9BY2NlbGlvX09wZW5Tb3VyY2VfSU9fTWVzc2FnZV9hbmRfUlBDX0FjY2VsZXJhdGlvbl9M
-aWJyYXJ5LnBkZg0KDQoNCj4gVGhlIGFjdHVhbCBzaXR1YXRpb24gaXMgdGhhdCB4aW8gaXMgY3Vy
-cmVudGx5IGlidmVyYnMgc3BlY2lmaWMsIHRob3VnaCB0aGVyZSBpcw0KPiBpbnRlcmVzdCB3aXRo
-IE1lbGxhbm94IGFuZCBzb21lIHBhcnRuZXJzIGluIGJ1aWxkaW5nIGEgVENQIHRyYW5zcG9ydCBm
-b3IgaXQuDQo+IA0KW1lIPiBdIA0KDQpUQ1Agd2lsbCBiZSBhZGRlZCBlYXJseSBuZXh0IHllYXIs
-IHRoZSB0cmFuc3BvcnQgYWJzdHJhY3Rpb24vcGx1Zy1pbiBtZWNoYW5pc20gaXMgYWxyZWFkeSBp
-bXBsZW1lbnRlZCANCmlmIHNvbWVvbmUgd2FudCB0byBoZWxwIGluIHRoYXQsIHdlIGFyZSBvcGVu
-IHRvIGl0IDopIA0KDQo+IFdoYXQgaXMgdHJ1ZSBpcyB0aGF0IHhpbyBtYWtlcyB2ZXJ5IGFkdmFu
-Y2VkIHVzZSBvZiBpYnZlcmJzIGludGVyZmFjZXMsIGxvY2sNCj4gZnJlZS93YWl0LWZyZWUgYWxs
-b2NhdG9ycywgcmR0c2MsIGJ1dCBoaWRlcyBhIGxvdCBvZiBkZXRhaWxzIGZyb20gdXBwZXIgbGF5
-ZXJzLg0KPiBUaGUgeGlvIGRlc2lnbmVycyBrbmV3IGhvdyB0byBnZXQgdGhlIG1vc3QgZnJvbSBp
-bmZpbmliYW5kLyBSRE1BLCBhbmQgaXQNCj4gc2hvd3MuDQo+IA0KW1lIPiBdIA0KDQpub3RlIHRo
-YXQgQWNjZWxpbyBpcyBmYXN0ZXIgdGhhbiB1c2luZyBpYnZlcmJzIGRpcmVjdGx5LCBzaW5jZSBp
-dCBkb2VzIG1hbnkgb3B0aW1pemF0aW9ucyBvbiB0aGUgd2F5IGl0IHVzZSB0aGUgQVBJLCBlLmcu
-IGFtb3J0aXplIEhXIGNhbGxzLCBhdm9pZCBsb2NrcywgYXZvaWQgbWVtb3J5IGNvaGVyZW5jeSBh
-bmQgbG9jYWxpdHkgaXNzdWVzIC4uICwgd2UgY2FuIGdldCB0b2RheSB+MS41TSBUUC9zIChSZXEr
-UmVwKSAgcGVyIHRocmVhZCBhbmQgbWFueSBtaWxsaW9uIFRQL3Mgd2l0aCBtdWx0aXBsZSB0aHJl
-YWRzIA0KDQo+IEFsc28sIGlidmVyYnMgaXMgYSBmaXJzdC1jbGFzcyBpbnRlcmZhY2UgdG8gaVdB
-UlAgYW5kIGVzcC4NCj4gUk9DRSBoYXJkd2FyZSwgYXMgd2VsbCBhcyBpYi4gIEkndmUgYmVlbiBk
-b2luZyBtb3N0IG9mIG15IGRldmVsb3BtZW50IG9uIGENCj4gdHdlYWtlZCB2ZXJzaW9uIG9mIHRo
-ZSBzb2Z0aXdhcnAgaWIgcHJvdmlkZXIsIHdoaWNoIGFtb3VudHMgdG8gYSBmdWxsIFJETUENCj4g
-c2ltdWxhdG9yIHRoYXQgcnVucyBvbiBhbnl0aGluZy4gIChBcHBhcmVudGx5IGl0IGNhbiBydW4g
-b3ZlciBUQ1AsIGJ1dCBJIGp1c3QNCj4gdXNlIGl0IG9uIG9uZSB2bSBob3N0LikNCj4gDQo+IEkg
-aGF2ZW4ndCB3b3JrZWQgd2l0aCBjY2ksIGJ1dCBqdXN0IGdsYW5jaW5nIGF0IGl0LCBJJ2Qgc2F5
-IHhpbyBzdGFja3MgdXAgdmVyeSB3ZWxsDQo+IG9uIGlidmVyYnMsIGJ1dCB3b24ndCBzb2x2ZSB0
-aGUgVENQIHRyYW5zcG9ydCBwcm9ibGVtIGltbWVkaWF0ZWx5Lg0KPiANCj4gPg0KPiA+IFNpbWls
-YXJseSwgYXJlIHRoZXJlIG90aGVyIHByb2plY3RzIG9yIHZlbmRvcnMgdGhhdCBhcmUgbG9va2lu
-ZyBhdCB4aW8NCj4gPiBhdCB0aGlzIHBvaW50Pw0KPiANCj4gTWVsbGFub3ggcGFydG5lcnMgYXJl
-IHdvcmtpbmcgd2l0aCBpdCBtYWlubHksIEkgYmVsaWV2ZS4NCj4gDQpbWUg+IF0gDQpzZXZlcmFs
-IG9wZW4gc291cmNlIHByb2plY3RzIHdpbGwgaW5jb3Jwb3JhdGUgQWNjZWxpbyBhcyBtaWRkbGV3
-YXJlIChlLmcuIEhERlMpLCBhbmQgbWFueSBzdG9yYWdlL2RhdGFiYXNlIHZlbmRvcnMgYXJlIGFk
-b3B0aW5nIGl0LCBhbmQgdmFyaWV0eSBvZiBlbmQtdXNlcnMgcGxhbiB0byB1c2UgdGhlIEMgb3Ig
-SmF2YSBBUElzICAoIEphdmEgQWNjZWxpbyBwZXJmb3JtcyBsaWtlIHRoZSBDIGNvZGUgd2l0aCAx
-LjVNIFRQL3MgcGVyIHRocmVhZCwgc2luY2UgYWxsIHRoZSB0cmFuc3BvcnQgaXMgaW4gaGFyZHdh
-cmUgYW5kIGl0IGRvZXNu4oCZdCBjb250YWluIGNvbnRleHQgc3dpdGNoZXMgb3IgbG9ja3MpICAN
-Cg0KPiA+ICBJJ3ZlIHNlZW4gc2ltaWxhciBhdHRlbXB0cyB0byBjcmVhdGUgdGhpcyBzb3J0IG9m
-IGxpYnJhcnkNCj4gPg0KPiA+IChDQ0kgY29tZXMgdG8gbWluZDogaHR0cHM6Ly9naXRodWIuY29t
-L0NDSS9jY2kpLiAgSGF2ZSB0aGVzZSBwcmV2aW91cw0KPiA+DQo+ID4gYXR0ZW1wdHMgaW5mbHVl
-bmNlZCB0aGUgZGVzaWduIG9mIHhpbyBhdCBhbGw/DQo+IA0KPiA+ID4NCj4gPiA+IFRoZSBhcHBy
-b2FjaCBJIHRvb2sgaW4gaW5jb3Jwb3JhdGluZyBBY2NlbGlvIHdhcyB0byBidWlsZCBvbiB0aGUg
-a2V5DQo+ID4gYWJzdHJhY3Rpb25zDQo+ID4gPiBvZiBNZXNzZW5nZXIsIENvbm5lY3Rpb24sIGFu
-ZCBEaXNwYXRjaGVyLCBhbmQgTWVzc2FnZSwgYW5kIGJ1aWxkIGENCj4gPiBjb3JyZXNwb25kaW5n
-DQo+ID4gPiBmYW1pbHkgb2YgY29uY3JldGUgY2xhc3NlczoNCj4gPg0KPiA+IFRoaXMgc291bmRz
-IGxpa2UgdGhlIHJpZ2h0IGFwcHJvYWNoLiAgQW5kIHdlIGRlZmluaXRlbHkgd2FudCB0byBjbGVh
-bg0KPiA+IHVwIHRoZSBzZXBhcmF0aW9uIG9mIHRoZSBhYnN0cmFjdCBpbnRlcmZhY2VzIChNZXNz
-YWdlLCBDb25uZWN0aW9uLA0KPiA+IE1lc3NlbmdlcikNCj4gPiBmcm9tIHRoZSBpbXBsZW1lbnRh
-dGlvbnMuICBJJ20gaGFwcHkgdG8gcHVsbCB0aGF0IHN0dWZmIGludG8gdGhlIHRyZWUNCj4gPg0K
-PiA+IHF1aWNrbHkgb25jZSB0aGUgaW50ZXJmYWNlcyBhcHBlYXIgc3RhYmxlIChhbHRob3VnaCBp
-dCBsb29rcyBsaWtlIHlvdXINCj4gPg0KPiA+IGJyYW5jaCBpcyBiYXNlZCBvZmYgbG90cyBvZiBv
-dGhlciBsaW51eGJveCBiaXRzLCBzbyBpdCBwcm9iYWJseSBpc24ndA0KPiA+DQo+ID4gaW1wb3J0
-YW50IHVudGlsIHRoaXMgZ2V0cyBjbG9zZXIgdG8gcmVhZHkpLg0KPiANCj4gT2ssIGNvb2wuDQo+
-IA0KPiA+DQo+ID4gQWxzbywgaXQgd291bGQgYmUgZ3JlYXQgdG8gYnVpbGQgb3V0IHRoZSBzaW1w
-bGVfKiB0ZXN0IGVuZHBvaW50cyBhcw0KPiA+IHRoaXMgZWZmb3J0IHByb2dyZXNzZXM7IGhvcGVm
-dWxseSB0aGF0IGNhbiBldmVudHVhbGx5IGZvcm0gdGhlIGJhc2lzDQo+ID4gb2YgYSB0ZXN0IHN1
-aXRlIGZvciB0aGUgbWVzc2VuZ2VyIGFuZCBjYW4gYmUgZXhwYW5kZWQgdG8gaW5jbHVkZQ0KPiA+
-IHZhcmlvdXMgc3RyZXNzDQo+ID4NCj4gPiB0ZXN0cyB0aGF0IGRvbid0IHJlcXVpcmUgYSBmdWxs
-IHJ1bm5pbmcgY2x1c3Rlci4NCj4gDQo+IEkgYWdyZWUuICBJIGludGVuZCB0byBoYXZlIGl0IGF0
-IGxlYXN0IHJ1bm5pbmcgbW9yZSBNZXNzYWdlIHR5cGVzIFJTTi4NCj4gDQo+ID4NCj4gPiA+IFhp
-b01lc3NlbmdlciAoY29uY3JldGUsIGltcGxlbWVudHMgTWVzc2VuZ2VyLCBlbmNhcHN1bGF0ZXMg
-eGlvDQo+ID4gZW5kcG9pbnRzLCBhZ2dyZWdhdGVzDQo+IA0KPiBBZ3JlZWQsIEkgcmVzcG9uZCB0
-byB0aGlzIHBvaW50IGluIG1vcmUgZGV0YWlsIGluIG15IHJlcGx5IHRvIEdyZWcncyBtZXNzYWdl
-Lg0KPiANCj4gPg0KPiA+IFRoaXMgd29ycmllcyBtZSBhIGJpdDsgc2VlIEdyZWcncyBxdWVzdGlv
-bnMuICBUaGVyZSBhcmUgc2V2ZXJhbA0KPiA+IHJlcXVlc3QvcmVwbHkgcGF0dGVybnMsIGJ1dCBt
-YW55IChtb3N0Pykgb2YgdGhlIG1lc3NhZ2UgZXhjaGFuZ2VzIGFyZQ0KPiA+DQo+ID4gYXN5bW1l
-dHJpY2FsLiAgSSB3b25kZXIgaWYgdGhlIGxvdy1sZXZlbCByZXF1ZXN0L3JlcGx5IG1vZGVsIHJl
-YWxseQ0KPiA+IG1hcHMgbW9yZSBjbG9zZWx5IHRoZSAnYWNrJyBzdHVmZiBpbiBTaW1wbGVNZXNz
-ZW5nZXIgKGFzIGl0J3MgYWJvdXQNCj4gPiBkZWFsbG9jYXRpbmcgdGhlIHNlbmRlcidzIG1lbW9y
-eSBhbmQgY2xlYW5pbmcgdXAgcmRtYSBzdGF0ZSkuDQo+ID4NCj4gPiA+IEEgbG90IG9mIGxvdyBs
-ZXZlbCBkZXRhaWxzIG9mIHRoZSBtYXBwaW5nIGZyb20gTWVzc2FnZSB0byBBY2NlbGlvDQo+ID4g
-PiBtZXNzYWdpbmcgYXJlIGN1cnJlbnRseSBpbiBmbHV4LCBidXQgdGhlIGJhc2ljIGlkZWEgaXMg
-dG8gcmUtdXNlIHRoZQ0KPiA+DQo+ID4gPiBjdXJyZW50IGVuY29kZS9kZWNvZGUgcHJpbWl0aXZl
-cyBhcyBmYXIgYXMgcG9zc2libGUsIHdoaWxlIGVsaWRpbmcNCj4gPiB0aGUNCj4gPiA+IGFja3Ms
-IHNlcXVlbmNlICMgYW5kIHRpZHMsIGFuZCB0aW1lc3RhbXAgYmVoYXZpb3JzIG9mIFBpcGUsIG9y
-DQo+ID4gcmF0aGVyLA0KPiA+ID4gcmVwbGFjaW5nIHRoZW0gd2l0aCBtYXBwaW5ncyB0byBBY2Nl
-bGlvIHByaW1pdGl2ZXMuICBJIGhhdmUgc29tZQ0KPiA+IHdyYXBwZXINCj4gPiA+IGNsYXNzZXMg
-dGhhdCBoZWxwIHdpdGggdGhpcy4gIEZvciB0aGUgbW9tZW50LCB0aGUgZXhpc3RpbmcgQ2VwaA0K
-PiA+IG1lc3NhZ2UNCj4gPiA+IGhlYWRlcnMgYW5kIGZvb3RlcnMgYXJlIHN0aWxsIHRoZXJlLCBi
-dXQgYXJlIG5vdyBlbmNvZGVkL2RlY29kZWQsDQo+ID4gcmF0aGVyDQo+ID4gPiB0aGFuIGhhbmQt
-bWFyc2hhbGxlZC4gIFRoaXMgbWVhbnMgdGhhdCBjaGVja3N1bW1pbmcgaXMgcHJvYmFibHkNCj4g
-PiBtb3N0bHkNCj4gPiA+IGludGFjdC4gIE1lc3NhZ2Ugc2lnbmF0dXJlcyBhcmUgbm90IGltcGxl
-bWVudGVkLg0KPiA+ID4NCj4gPiA+IFdoYXQgd29ya3MuICBUaGUgY3VycmVudCBwcm90b3R5cGUg
-aXNuJ3QgaW50ZWdyYXRlZCB3aXRoIHRoZSBtYWluDQo+ID4gc2VydmVyIGRhZW1vbnMNCj4gPiA+
-IChlLmcuLCBPU0QpIGJ1dCBleHBlcmltZW50YWwgd29yayBvbiB0aGF0IGlzIGluIHByb2dyZXNz
-LiAgSSd2ZQ0KPiA+IGNyZWF0ZWQgYSBwYWlyIG9mDQo+ID4gPiBzaW1wbGUgc3RhbmRhbG9uZSBj
-bGllbnQvc2VydmVyIGFwcGxpY2F0aW9ucw0KPiA+IHNpbXBsZV9zZXJ2ZXIvc2ltcGxlX2NsaWVu
-dCBhbmQNCj4gPiA+IGEgbWF0Y2hpbmcgeGlvX3NlcnZlci94aW9fY2xpZW50LCB0aGF0IHByb3Zp
-ZGUgYSBtaW5pbWFsIG1lc3NhZ2UNCj4gPiBkaXNwYXRjaCBsb29wIHdpdGgNCj4gPiA+IGEgbmV3
-IFNpbXBsZURpc3BhdGNoZXIgY2xhc3MgYW5kIHNvbWUgb3RoZXIgaGVscGVycywgYXMgYSB3YXkg
-dG8NCj4gPiB3b3JrIHdpdGggYm90aA0KPiA+ID4gbWVzc2VuZ2VycyBzaWRlLWJ5LXNpZGUuICBU
-aGVzZSBhcmUgY3VycmVudGx5IHZlcnkgcHJpbWl0aXZlLCBidXQNCj4gPiB3aWxsIHByb2JhYmx5
-DQo+ID4gPiBkbyBtb3JlIHRoaW5ncyBzb29uLiAgVGhlIGN1cnJlbnQgcHJvdG90eXBlIHNlbmRz
-IG1lc3NhZ2VzIG92ZXINCj4gPiBBY2NlbGlvLCBidXQgaGFzIHNvbWUgaXNzdWUNCj4gPiA+IHdp
-dGggcmVwbGllcywgdGhhdCBzaG91bGQgYmUgZml4ZWQgc2hvcnRseS4gIEl0IGxlYWtzIGxvdHMg
-b2YNCj4gPiBtZW1vcnksIGV0Yy4NCj4gPiA+DQo+ID4gPiBXZSd2ZSBwdXNoZWQgYSB3b3JrLWlu
-LXByb2dyZXNzIGJyYW5jaCAieGlvLW1lc3NlbmdlciIgdG8gb3VyDQo+ID4gZXh0ZXJuYWwgZ2l0
-aHViDQo+ID4gPiByZXBvc2l0b3J5LCBmb3IgY29tbXVuaXR5IHJldmlldy4gIEZpbmQgaXQgaGVy
-ZToNCj4gPiA+DQo+ID4gPiBodHRwczovL2dpdGh1Yi5jb20vbGludXhib3gyL2xpbnV4Ym94LWNl
-cGgNCj4gPg0KPiA+IExvb2tpbmcgdGhyb3VnaCB0aGlzLCBpdCBvY2N1cnMgdG8gbWUgdGhhdCB0
-aGVyZSBhcmUgc29tZSBvdGhlcg0KPiA+IGZvdW5kYXRpb25hbCBwaWVjZXMgdGhhdCB3ZSdsbCBu
-ZWVkIHRvIGdldCBpbiBwbGFjZSBzb29uOg0KPiA+DQo+ID4gIC0gVGhlIFhpb01lc3NlbmdlciBp
-cyBhIGNvbXBsZXRlbHkgZGlmZmVyZW50IHdpcmUgcHJvdG9jb2wgdGhhdCBuZWVkcw0KPiA+IHRv
-IGJlIGRpc3RpbmN0IGZyb20gdGhlIGxlZ2FjeSBwcm90b2NvbC4gIFByb2JhYmx5IHdlIGNhbiB1
-c2UgdGhlDQo+ID4gZW50aXR5X2FkZHJfdDo6dHlwZSBmaWVsZCBmb3IgdGhpcy4NCj4gPiAgLSBX
-ZSdsbCB3YW50IHRoZSB2YXJpb3VzICpNYXAgc3RydWN0dXJlcyB0byBhbGxvdyBtdWx0aXBsZQ0K
-PiA+IGVudGl0eV9hZGRyX3QncyBwZXIgZW50aXR5LiAgV2UgYWxyZWFkeSBjb3VsZCB1c2UgdGhp
-cyB0byBzdXBwb3J0IGJvdGgNCj4gPg0KPiA+IElQdjQgYW5kIElQdjYuICBJbiB0aGUgZnV0dXJl
-LCB0aG91Z2gsIHdlJ2xsIHByb2JhYmx5IHdhbnQgY2x1c3RlcnMNCj4gPiB0aGF0IGNhbiBzcGVh
-ayBib3RoIHRoZSBsZWdhY3kgVENQIHByb3RvY29sICh2aWEgU2ltcGxlTWVzc2VuZ2VyIG9yDQo+
-ID4gc29tZSBpbXByb3ZlZCBpbXBsZW1lbnRhdGlvbikgYW5kIHRoZSB4aW8gb25lIChhbmQgd2hh
-dGV2ZXIgZWxzZSB3ZQ0KPiA+IGRyZWFtIHVwIGluIHRoZSBmdXR1cmUpLg0KPiANCj4gQWNrLg0K
-PiANCj4gPg0KPiA+IEFsc28sIGFzIGhhcyBiZWVuIG1lbnRpb25lZCBwcmV2aW91c2x5LA0KPiA+
-DQo+ID4gIC0gV2UgbmVlZCB0byBjb250aW51ZSB0byBtaWdyYXRlIHN0dWZmIG92ZXIgdG8gdGhl
-IENvbm5lY3Rpb24tYmFzZWQNCj4gPiBNZXNzZW5nZXIgaW50ZXJmYWNlIGFuZCBvZmYgdGhlIG9y
-aWdpbmFsIG1ldGhvZHMgdGhhdCB0YWtlDQo+ID4gZW50aXR5X2luc3RfdC4NCj4gPiBUaGUgc3Rp
-Y2t5IGJpdCBoZXJlIGlzIHRoZSBwZWVyLXRvLXBlZXIgbW9kZSB0aGF0IGlzIHVzZWQgaW5zaWRl
-IHRoZQ0KPiA+IE9TRCBhbmQgTURTIGNsdXN0ZXJzOiB0aG9zZSBuZWVkIHRvIGhhbmRsZSByYWNp
-bmcgY29ubmVjdGlvbiBhdHRlbXB0cywNCj4gPiB3aGljaCBlaXRoZXIgcmVxdWlyZXMgdGhlIGlu
-dGVybmFsIGVudGl0eSBuYW1lIC0+IGNvbm5lY3Rpb24gbWFwIHRvDQo+ID4gcmVzb2x2ZQ0KPiA+
-DQo+ID4gcmFjZXMgKGFzIHdlIGhhdmUgbm93KSBvciBhIG5ldyBhcHByb2FjaCB0aGF0IHB1c2hl
-cyB0aGUNCj4gPiByYWNlLXJlc29sdXRpb24gdXAgaW50byB0aGUgY2FsbGluZyBjb2RlIChtZWgp
-LiAgTm8gbmVlZCB0byBhZGRyZXNzIGl0DQo+ID4gbm93LCBidXQgZXZlbnR1YWxseSB3ZSdsbCBu
-ZWVkIHRvIHRhY2tsZSBpdCBiZWZvcmUgdGhpcyBjYW4gYmUgdXNlZCBvbg0KPiA+IHRoZSBvc2Qg
-YmFjay1zaWRlIG5ldHdvcmsuDQo+ID4NCj4gPiBzYWdlDQo+IA0KPiAtLQ0KPiBNYXR0IEJlbmph
-bWluDQo+IENvaG9ydEZTLCBMTEMuDQo+IDIwNiBTb3V0aCBGaWZ0aCBBdmUuIFN1aXRlIDE1MA0K
-PiBBbm4gQXJib3IsIE1JICA0ODEwNA0KPiANCj4gaHR0cDovL2NvaG9ydGZzLmNvbQ0KPiANCj4g
-dGVsLiAgNzM0LTc2MS00Njg5DQo+IGZheC4gIDczNC03NjktODkzOA0KPiBjZWwuICA3MzQtMjE2
-LTUzMDkNCg==
+On 12/11/2013 11:10 PM, Duan, Jiangang wrote:
+> Mark,
+>
+> Thanks for the comments.
+> One more question: is there bad impact if we use a higher PG# per OSD? E.g. 200x (I think a lot of people use this?) or 400x?
+> E.g. more memory consumption or lock contention?
+
+I have not seen performance issues directly related to the number of PGs 
+per OSD, but rather based on the total number of PGs in the cluster.  At 
+one point this was somewhere around 100K PGs with the hardware I was 
+testing, but some of the work we did last summer may have improved this.
+
+The symptoms were mons not responding quickly to requests and generally 
+strange behaviour.
+
+>
+> -jiangang
+>
+> -----Original Message-----
+> From: Mark Nelson [mailto:mark.nelson@inktank.com]
+> Sent: Wednesday, December 11, 2013 10:38 PM
+> To: Duan, Jiangang
+> Cc: Sage Weil; Zhang, Jian; ceph-devel@vger.kernel.org; He, Yujie
+> Subject: Re: question on BG# and its performance impact
+>
+> On 12/11/2013 08:24 AM, Mark Nelson wrote:
+>> Hi Jiangang,
+>>
+>> To answer your earlier question about Uniformity:
+>>
+>> What I saw in my testing was that the PG count increases, things did
+>> tend to get more uniform, ie the standard deviation of the percentages
+>> distributed over the set of OSDs slowly decreased with more PGs.
+>> Primarily what I am interested in though is whether or not any
+>> specific OSD has more PGs than the rest as that's all it will take to
+>> screw up performance.  As far as performance goes though, in my
+>> testing it didn't necessarily seem to be strongly correlated with the
+>> PG distribution, except for very small numbers of PGs.  Much more
+>> rigorous testing is probably needed to draw much of a conclusion.
+>>
+>> Sage and I had a conversation a while ago about how to deal with
+>> situations where you have uneven distributions (either through not
+>> having enough PGs to ensure even distribution, or simply bad luck at
+>> psuedo-random roulette).  I proposed that we might iterate through
+>> multiple possible pool distributions using different seed values until
+>> we found one we liked with good psudorandom distribution.  Perhaps you
+>> could get even fancier by looking at what happens when you lose and
+>> OSD or two.  As this is all during pool creation, a little extra time
+>> finding a nice initial distribution doesn't really hurt.
+>>
+>> Sage mentioned though that it may be better to simple take whatever
+>> distribution is generated and simply re-weight it to deal with
+>> uniformity imperfections.  I can't see any reason why this wouldn't
+>> also work and has the benefit that it works no matter how the
+>> distribution changes.  Arguably this technique could go beyond just
+>> looking at PG distributions and look at actual data distribution too
+>> if the user wants extremely even data uniformity at the expense of a re-weighting tweak.
+>>
+>> In any event, with very large clusters with lots of pools, I think we
+>> will likely need to at some point adopt some kind of scheme that lets
+>> us get away with fewer PGs per pool than our current recommendations.
+>
+> Ha, replying to my own reply!  Thinking about this a little more, these two techniques may in fact still be complementary.  For very large clusters where the PG counts per OSD may be low, I suspect we will want to at least make sure the initial map guarantees that every OSD has at least 1 PG so we can do proper re-weighting down the road.  In fact the better the initial distribution is, the less crazy we'll have to get with re-weighting, so it may not be a bad idea to use both techniques.
+>
+>>
+>> Mark
+>>
+>>
+>> On 12/11/2013 12:22 AM, Duan, Jiangang wrote:
+>>> Cc the mail list as Sage suggested.
+>>>
+>>> -----Original Message-----
+>>> From: Sage Weil [mailto:sage@inktank.com]
+>>> Sent: Wednesday, December 11, 2013 2:10 PM
+>>> To: Zhang, Jian
+>>> Cc: Mark Nelson; Duan, Jiangang
+>>> Subject: RE: question on BG# and its performance impact
+>>>
+>>> On Wed, 11 Dec 2013, Zhang, Jian wrote:
+>>>> Thanks for the suggestions, I will take a look on the ls output.
+>>>> No, we didn't use the optimal crush tunables.
+>>>
+>>> Hopefully that is part of it... try repeating the test with the
+>>> optimal tunables (now the default in master)!
+>>>
+>>> s
+>>>
+>>>
+>>>>
+>>>> Jian
+>>>>
+>>>> -----Original Message-----
+>>>> From: Sage Weil [mailto:sage@inktank.com]
+>>>> Sent: Wednesday, December 11, 2013 1:36 PM
+>>>> To: Zhang, Jian
+>>>> Cc: Mark Nelson; Duan, Jiangang
+>>>> Subject: RE: question on BG# and its performance impact
+>>>>
+>>>> I might be worthwhile here to get teh actual list of objects (rados
+>>>> -p $pool ls list.txt) and calculate the pg and osd mappings for each
+>>>> of them to verify things are uniform.
+>>>>
+>>>> One thing: are you using the 'optimal' crush tunables (ceph osd
+>>>> crush tunables optimal)?
+>>>>
+>>>> Also, can we cc ceph-devel?
+>>>>
+>>>> sage
+>>>>
+>>>>
+>>>> On Wed, 11 Dec 2013, Zhang, Jian wrote:
+>>>>
+>>>>> Mark,
+>>>>> Thanks for the help.
+>>>>> For the performance dip, I think it should casued by the directory
+>>>>> splitting, just check several OSD, it does has many sub directories.
+>>>>> For the pg # and distribution, see if I understand you correctly:
+>>>>> When you said "a slow trend toward uniformity" do you mean the pg #
+>>>>> for each pool is unforim? But from sheet2, the pg # on OSD10 is
+>>>>> 103, while the pg # on OSD8 is 72, there is still a 30% gap. And I
+>>>>> think that's the reason we saw performance drop of 10M read with
+>>>>> 1280 pgs
+>>>>> - pg # on the OSD is not balance.
+>>>>>
+>>>>> Thanks
+>>>>> Jian
+>>>>>
+>>>>> -----Original Message-----
+>>>>> From: Mark Nelson [mailto:mark.nelson@inktank.com]
+>>>>> Sent: Wednesday, December 11, 2013 12:01 PM
+>>>>> To: Duan, Jiangang
+>>>>> Cc: Sage Weil (sage@inktank.com); Zhang, Jian
+>>>>> Subject: Re: question on BG# and its performance impact
+>>>>>
+>>>>> Hi Jiangang,
+>>>>>
+>>>>> My results are rather old at this point, but I did similar testing
+>>>>> last spring to look at PG distribution and performance (with larger
+>>>>> writes) with varying numbers of PGs.  I saw what looked like a slow
+>>>>> trend toward uniformity.  Performance however was quite variable.
+>>>>>
+>>>>> The performance dip you saw after many hours may have been due to
+>>>>> directory splitting on the underlying OSDs.  When this happens
+>>>>> depends on the number of objects that are written out and the
+>>>>> number of PGs in the pool.  Eventually, when enough objects are
+>>>>> written, the filestore will create a deeper nested directory
+>>>>> structure to store objects to keep the maximum number of objects
+>>>>> per directory below a certain maximum.
+>>>>> This is governed by two settings:
+>>>>>
+>>>>> filestore merge threshold = 10
+>>>>>
+>>>>> filestore split multiple = 2
+>>>>>
+>>>>> The total number of objects per directory is by default 10 * 2 * 16
+>>>>> = 320.  With small PG counts this can cause quite a bit of
+>>>>> directory splitting if there are many objects.
+>>>>>
+>>>>> I believe that it is likely these defaults are lower than necessary
+>>>>> and we could allow more objects per directory, potentially reducing
+>>>>> the number of seeks for dentry lookups (though theoretically this
+>>>>> should be cached).  We definitely have seen this have a large
+>>>>> performance impact with RGW though on clusters with small numbers
+>>>>> of PGs.  With more PGs, and more relaxed thresholds, directory
+>>>>> splitting doesn't happen until many many millions of objects are
+>>>>> written out, and performance degradation as the disk fills up
+>>>>> appears to be less severe.
+>>>>>
+>>>>> Mark
+>>>>>
+>>>>> On 12/10/2013 09:05 PM, Duan, Jiangang wrote:
+>>>>>> Sage/mark,
+>>>>>>
+>>>>>> We find object# unbalance condition in our Ceph setup for both RBD
+>>>>>> and object. Refer to the attached pdf.
+>>>>>>
+>>>>>> Increase the PG# does increase performance however result in
+>>>>>> unstable issues ?
+>>>>>>
+>>>>>> Is this a known issue and do you have any BKM to fix this?
+>>>>>>
+>>>>>> -jiangang
+>>>>>>
+>>>>>
+>>>>>
+>>>>
+>>>>
+>>
+>
+
