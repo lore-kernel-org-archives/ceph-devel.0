@@ -1,60 +1,55 @@
-From: "Robin H. Johnson" <robbat2@gentoo.org>
-Subject: BUG v0.73: radosgw-admin key create ignores specified access-key
-Date: Fri, 13 Dec 2013 20:44:42 +0000
-Message-ID: <robbat2-20131213T203815-267676123Z@orbis-terrarum.net>
+From: Loic Dachary <loic@dachary.org>
+Subject: creation of the puppet-ceph repository
+Date: Sat, 14 Dec 2013 18:39:46 +0100
+Message-ID: <52AC97E2.8080907@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="13FgpwgjBNvkD1lUnEoLWJWBvfRrtIUD0"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.gentoo.org ([140.211.166.183]:40769 "EHLO smtp.gentoo.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753238Ab3LMUon (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 13 Dec 2013 15:44:43 -0500
-Received: from grubbs.orbis-terrarum.net (localhost [127.0.0.1])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-SHA (256/256 bits))
-	(No client certificate requested)
-	by smtp.gentoo.org (Postfix) with ESMTPS id CD55E33F4A9
-	for <ceph-devel@vger.kernel.org>; Fri, 13 Dec 2013 20:44:42 +0000 (UTC)
-Content-Disposition: inline
+Received: from smtp.dmail.dachary.org ([91.121.254.229]:40281 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753480Ab3LNRjt (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 14 Dec 2013 12:39:49 -0500
+Received: from [10.9.0.6] (openvpn.novalocal [10.145.3.13])
+	by smtp.dmail.dachary.org (Postfix) with ESMTPS id DBA1926394
+	for <ceph-devel@vger.kernel.org>; Sat, 14 Dec 2013 18:39:46 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-If I try to create a key with explicitly specifying the access-key and
-secret-key, radosgw-admin ignores the access-key entirely.
-In my case, I'm trying to copy some keys exactly from an older Ceph cluster.
-(I've slightly scrambled some details below for security)
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--13FgpwgjBNvkD1lUnEoLWJWBvfRrtIUD0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-ceph version 0.73 (d8ad51ee8ab508bc523a0398f54d8d9c5785b8d8)
-(Running the raring packages).
+Hi,
 
-# radosgw-admin key create --uid example --subuser=example:foo --access-key=exampleaccess --secret examplesecret
-{ "user_id": "example",
-  "display_name": "...",
-  "email": "..."
-  "suspended": 0,
-  "max_buckets": 1000,
-  "auid": 0,
-  "subusers": [
-        { "id": "example:foo",
-          "permissions": "read-write"}],
-  "keys": [
-        { "user": "example",
-          "access_key": "HGDRHZG1K030VGYU5AUX",
-          "secret_key": "xDCaefCz1v9jrY6yi3L\/BBd7OZznokiJNJced5\/3"},
-        { "user": "example:foo",
-          "access_key": "O8E3B2HUJMXR5L5N5UL6",
-          "secret_key": "examplesecret"}],
-  "swift_keys": [],
-  "caps": [],
-  "op_mask": "read, write, delete",
-  "default_placement": "",
-  "placement_tags": [],
-  "bucket_quota": { "enabled": false,
-      "max_size_kb": -1,
-      "max_objects": -1}}
+Could someone with sufficient permission please create the puppet-ceph re=
+pository (empty, no README or .gitignore) at http://github.com/ceph/ ?
 
--- 
-Robin Hugh Johnson
-Gentoo Linux: Developer, Infrastructure Lead
-E-Mail     : robbat2@gentoo.org
-GnuPG FP   : 11ACBA4F 4778E3F6 E4EDF38E B27B944E 34884E85
+A few weeks ago it was decided to host the development of the module on s=
+tackforge ( https://github.com/stackforge/puppet-ceph ) and also to estab=
+lish a mirror under the ceph github namespace.=20
+
+Cheers
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+
+
+--13FgpwgjBNvkD1lUnEoLWJWBvfRrtIUD0
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.20 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlKsl+IACgkQ8dLMyEl6F22VGgCfQokMIErc5k+T+bsktV36A+Jx
+6oQAoIWa1ZrUAGOBcSC8C5yBocSDSJ8X
+=furb
+-----END PGP SIGNATURE-----
+
+--13FgpwgjBNvkD1lUnEoLWJWBvfRrtIUD0--
