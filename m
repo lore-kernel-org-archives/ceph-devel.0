@@ -1,55 +1,41 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: creation of the puppet-ceph repository
-Date: Sat, 14 Dec 2013 18:39:46 +0100
-Message-ID: <52AC97E2.8080907@dachary.org>
+From: "Robin H. Johnson" <robbat2@gentoo.org>
+Subject: RGW CORS fixes for Access-Control-Request-Headers
+Date: Sun, 15 Dec 2013 21:16:21 +0000
+Message-ID: <robbat2-20131215T205912-773698930Z@orbis-terrarum.net>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="13FgpwgjBNvkD1lUnEoLWJWBvfRrtIUD0"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:40281 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753480Ab3LNRjt (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 14 Dec 2013 12:39:49 -0500
-Received: from [10.9.0.6] (openvpn.novalocal [10.145.3.13])
-	by smtp.dmail.dachary.org (Postfix) with ESMTPS id DBA1926394
-	for <ceph-devel@vger.kernel.org>; Sat, 14 Dec 2013 18:39:46 +0100 (CET)
+Received: from smtp.gentoo.org ([140.211.166.183]:34568 "EHLO smtp.gentoo.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751912Ab3LOVQX (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 15 Dec 2013 16:16:23 -0500
+Received: from grubbs.orbis-terrarum.net (localhost [127.0.0.1])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-SHA (256/256 bits))
+	(No client certificate requested)
+	by smtp.gentoo.org (Postfix) with ESMTPS id D840A33F36C
+	for <ceph-devel@vger.kernel.org>; Sun, 15 Dec 2013 21:16:22 +0000 (UTC)
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
-
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---13FgpwgjBNvkD1lUnEoLWJWBvfRrtIUD0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+To: ceph-devel@vger.kernel.org
 
 Hi,
 
-Could someone with sufficient permission please create the puppet-ceph re=
-pository (empty, no README or .gitignore) at http://github.com/ceph/ ?
+I was trying to use the RGW CORS support, and found that it flubbed
+handling of the Access-Control-Request-Headers header badly.
 
-A few weeks ago it was decided to host the development of the module on s=
-tackforge ( https://github.com/stackforge/puppet-ceph ) and also to estab=
-lish a mirror under the ceph github namespace.=20
+It was expecting Access-Control-Allow-Headers in the request where it
+should have taken the Access-Control-Request-Headers, and it was also
+validating the content in a case-sensitive manner, when the CORS
+standard (6.2.6) requires that headers are validated case-insensitive.
 
-Cheers
+I have submitted a pull request with the fixes:
+https://github.com/ceph/ceph/pull/949
 
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
+I think they should be backported to emperor as well.
 
-
---13FgpwgjBNvkD1lUnEoLWJWBvfRrtIUD0
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.20 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlKsl+IACgkQ8dLMyEl6F22VGgCfQokMIErc5k+T+bsktV36A+Jx
-6oQAoIWa1ZrUAGOBcSC8C5yBocSDSJ8X
-=furb
------END PGP SIGNATURE-----
-
---13FgpwgjBNvkD1lUnEoLWJWBvfRrtIUD0--
+-- 
+Robin Hugh Johnson
+Gentoo Linux: Developer, Infrastructure Lead
+E-Mail     : robbat2@gentoo.org
+GnuPG FP   : 11ACBA4F 4778E3F6 E4EDF38E B27B944E 34884E85
