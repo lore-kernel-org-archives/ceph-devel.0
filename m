@@ -1,45 +1,71 @@
 From: Loic Dachary <loic@dachary.org>
-Subject: Intel Erasure Code library
-Date: Mon, 16 Dec 2013 10:56:50 +0100
-Message-ID: <52AECE62.9030102@dachary.org>
+Subject: Re: creation of the puppet-ceph repository
+Date: Mon, 16 Dec 2013 12:43:00 +0100
+Message-ID: <52AEE744.5030104@dachary.org>
+References: <52AC97E2.8080907@dachary.org> <CED3B77C.1F7CF%ian.colle@inktank.com>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="qIJJmr9M3odqPWqBJ1DBcjnddxPAp7FQ4"
+ boundary="Fqd826n5iol74QWqd4XJerWbl3pW728gn"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:41373 "EHLO
+Received: from smtp.dmail.dachary.org ([91.121.254.229]:41520 "EHLO
 	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750769Ab3LPJ4w (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Dec 2013 04:56:52 -0500
-Received: from [10.9.0.6] (openvpn.novalocal [10.145.3.13])
-	by smtp.dmail.dachary.org (Postfix) with ESMTPS id E5F6026394
-	for <ceph-devel@vger.kernel.org>; Mon, 16 Dec 2013 10:56:50 +0100 (CET)
+	with ESMTP id S1752723Ab3LPLnD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Dec 2013 06:43:03 -0500
+In-Reply-To: <CED3B77C.1F7CF%ian.colle@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Ian Colle <ian.colle@inktank.com>, ceph-devel@vger.kernel.org
 
 This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---qIJJmr9M3odqPWqBJ1DBcjnddxPAp7FQ4
+--Fqd826n5iol74QWqd4XJerWbl3pW728gn
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: quoted-printable
 
-Hi,
+Thanks !
 
-A new Erasure Code library has been released as Free Software
+On 16/12/2013 04:46, Ian Colle wrote:
+>=20
+>=20
+> On 12/14/13, 9:39 AM, "Loic Dachary" <loic@dachary.org> wrote:
+>=20
+>> Hi,
+>>
+>> Could someone with sufficient permission please create the puppet-ceph=
 
-https://01.org/storage-acceleration-library/downloads/2013/isa-l-open-sou=
-rce-release
-
-It is quite tempting to write a Ceph erasure code plugin for it and see h=
-ow it performs :-)
-
-Cheers
+>> repository (empty, no README or .gitignore) at http://github.com/ceph/=
+ ?
+>=20
+> Done.
+>=20
+> https://github.com/ceph/puppet-ceph
+>=20
+>=20
+>>
+>> A few weeks ago it was decided to host the development of the module o=
+n
+>> stackforge ( https://github.com/stackforge/puppet-ceph ) and also to
+>> establish a mirror under the ceph github namespace.
+>>
+>> Cheers
+>>
+>> --=20
+>> Lo=EFc Dachary, Artisan Logiciel Libre
+>>
+>=20
+>=20
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
 
 --=20
 Lo=EFc Dachary, Artisan Logiciel Libre
 
 
---qIJJmr9M3odqPWqBJ1DBcjnddxPAp7FQ4
+--Fqd826n5iol74QWqd4XJerWbl3pW728gn
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -48,9 +74,9 @@ Content-Disposition: attachment; filename="signature.asc"
 Version: GnuPG v2.0.20 (GNU/Linux)
 Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
 
-iEYEARECAAYFAlKuzmIACgkQ8dLMyEl6F20yXgCgmKAB1lajkuZgBN2k7XIVICFm
-SHkAn3DFytkVO+Y5trXeDbCkQZOS7CeI
-=KorZ
+iEUEARECAAYFAlKu50QACgkQ8dLMyEl6F21pJQCfelcvoWwQXQPwDkFezGQHrYMF
+2WUAmPm/aAE6IexridhbL/Xvf1UIC0E=
+=zlNY
 -----END PGP SIGNATURE-----
 
---qIJJmr9M3odqPWqBJ1DBcjnddxPAp7FQ4--
+--Fqd826n5iol74QWqd4XJerWbl3pW728gn--
