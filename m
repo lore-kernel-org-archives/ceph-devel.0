@@ -1,107 +1,110 @@
 From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: [PATCH 5/7] rbd: add 'minor' sysfs rbd device attribute
-Date: Mon, 16 Dec 2013 19:16:31 +0200
-Message-ID: <1387214193-18489-6-git-send-email-ilya.dryomov@inktank.com>
-References: <1387214193-18489-1-git-send-email-ilya.dryomov@inktank.com>
+Subject: [PATCH] rbd: enable extended devt in single-major mode
+Date: Mon, 16 Dec 2013 19:33:47 +0200
+Message-ID: <1387215227-19332-1-git-send-email-ilya.dryomov@inktank.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ea0-f174.google.com ([209.85.215.174]:39104 "EHLO
-	mail-ea0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755007Ab3LPRR3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Dec 2013 12:17:29 -0500
-Received: by mail-ea0-f174.google.com with SMTP id b10so2380732eae.19
-        for <ceph-devel@vger.kernel.org>; Mon, 16 Dec 2013 09:17:28 -0800 (PST)
-In-Reply-To: <1387214193-18489-1-git-send-email-ilya.dryomov@inktank.com>
+Received: from mail-ee0-f54.google.com ([74.125.83.54]:39391 "EHLO
+	mail-ee0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754550Ab3LPRef (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Dec 2013 12:34:35 -0500
+Received: by mail-ee0-f54.google.com with SMTP id e51so2028380eek.13
+        for <ceph-devel@vger.kernel.org>; Mon, 16 Dec 2013 09:34:34 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: ilya.dryomov@inktank.com
 
-Introduce /sys/bus/rbd/devices/<id>/minor sysfs attribute for exporting
-rbd whole disk minor numbers.  This is a step towards single-major
-device number allocation scheme, but also a good thing on its own.
+If single-major device number allocation scheme is turned on, instead
+of reserving 256 minors per device, which imposes a limit of 4096
+images mapped at once, reserve 16 minors per device and enable extended
+devt feature.  This results in a theoretical limit of 65536 images
+mapped at once, and still allows to have more than 15 partititions:
+partitions starting with 16th are mapped under major 259 (Block
+Extended Major):
+
+$ rbd showmapped
+id pool image snap device
+0  rbd  b5    -    /dev/rbd0    # no partitions
+1  rbd  b2    -    /dev/rbd1    # 40 partitions
+2  rbd  b3    -    /dev/rbd2    #  2 partitions
+
+$ cat /proc/partitions
+ 251        0       1024 rbd0
+ 251       16       1024 rbd1
+ 251       17          0 rbd1p1
+ 251       18          0 rbd1p2
+ ...
+ 251       30          0 rbd1p14
+ 251       31          0 rbd1p15
+ 259        0          0 rbd1p16
+ 259        1          0 rbd1p17
+ ...
+ 259       23          0 rbd1p39
+ 259       24          0 rbd1p40
+ 251       32       1024 rbd2
+ 251       33          0 rbd2p1
+ 251       34          0 rbd2p2
+
+(major 251 was assigned dynamically at module load time)
 
 Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
-Reviewed-by: Alex Elder <elder@linaro.org>
 Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 ---
- Documentation/ABI/testing/sysfs-bus-rbd |    4 ++++
- drivers/block/rbd.c                     |   13 ++++++++++++-
- 2 files changed, 16 insertions(+), 1 deletion(-)
+[ Josh has already reviewed this and it is ready to be merged into
+testing branch of ceph-client.git, but it wasn't posted on any mailing
+list.  Correcting this oversight now. ]
 
-diff --git a/Documentation/ABI/testing/sysfs-bus-rbd b/Documentation/ABI/testing/sysfs-bus-rbd
-index 0a306476424e..17b119c692da 100644
---- a/Documentation/ABI/testing/sysfs-bus-rbd
-+++ b/Documentation/ABI/testing/sysfs-bus-rbd
-@@ -33,6 +33,10 @@ major
- 
- 	The block device major number.
- 
-+minor
-+
-+	The block device minor number.  (December 2013, since 3.14.)
-+
- name
- 
- 	The name of the rbd image.
+ drivers/block/rbd.c |   13 +++++++++----
+ 1 file changed, 9 insertions(+), 4 deletions(-)
+
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index d250549d27a4..01ed7672a076 100644
+index e5ddcb58e9a2..11ae4c1238a6 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -323,6 +323,7 @@ struct rbd_device {
- 	int			dev_id;		/* blkdev unique id */
+@@ -91,7 +91,8 @@ static int atomic_dec_return_safe(atomic_t *v)
  
- 	int			major;		/* blkdev assigned major */
-+	int			minor;
- 	struct gendisk		*disk;		/* blkdev's gendisk and rq */
+ #define RBD_DRV_NAME "rbd"
  
- 	u32			image_format;	/* Either 1 or 2 */
-@@ -3397,7 +3398,7 @@ static int rbd_init_disk(struct rbd_device *rbd_dev)
- 	snprintf(disk->disk_name, sizeof(disk->disk_name), RBD_DRV_NAME "%d",
- 		 rbd_dev->dev_id);
- 	disk->major = rbd_dev->major;
--	disk->first_minor = 0;
-+	disk->first_minor = rbd_dev->minor;
- 	disk->fops = &rbd_bd_ops;
- 	disk->private_data = rbd_dev;
+-#define RBD_PART_SHIFT	8
++#define RBD_MINORS_PER_MAJOR		256
++#define RBD_SINGLE_MAJOR_PART_SHIFT	4
  
-@@ -3469,7 +3470,14 @@ static ssize_t rbd_major_show(struct device *dev,
- 		return sprintf(buf, "%d\n", rbd_dev->major);
+ #define RBD_SNAP_DEV_NAME_PREFIX	"snap_"
+ #define RBD_MAX_SNAP_NAME_LEN	\
+@@ -415,12 +416,12 @@ static void rbd_spec_put(struct rbd_spec *spec);
  
- 	return sprintf(buf, "(none)\n");
-+}
-+
-+static ssize_t rbd_minor_show(struct device *dev,
-+			      struct device_attribute *attr, char *buf)
-+{
-+	struct rbd_device *rbd_dev = dev_to_rbd_dev(dev);
- 
-+	return sprintf(buf, "%d\n", rbd_dev->minor);
+ static int rbd_dev_id_to_minor(int dev_id)
+ {
+-	return dev_id << RBD_PART_SHIFT;
++	return dev_id << RBD_SINGLE_MAJOR_PART_SHIFT;
  }
  
- static ssize_t rbd_client_id_show(struct device *dev,
-@@ -3591,6 +3599,7 @@ static ssize_t rbd_image_refresh(struct device *dev,
- static DEVICE_ATTR(size, S_IRUGO, rbd_size_show, NULL);
- static DEVICE_ATTR(features, S_IRUGO, rbd_features_show, NULL);
- static DEVICE_ATTR(major, S_IRUGO, rbd_major_show, NULL);
-+static DEVICE_ATTR(minor, S_IRUGO, rbd_minor_show, NULL);
- static DEVICE_ATTR(client_id, S_IRUGO, rbd_client_id_show, NULL);
- static DEVICE_ATTR(pool, S_IRUGO, rbd_pool_show, NULL);
- static DEVICE_ATTR(pool_id, S_IRUGO, rbd_pool_id_show, NULL);
-@@ -3604,6 +3613,7 @@ static struct attribute *rbd_attrs[] = {
- 	&dev_attr_size.attr,
- 	&dev_attr_features.attr,
- 	&dev_attr_major.attr,
-+	&dev_attr_minor.attr,
- 	&dev_attr_client_id.attr,
- 	&dev_attr_pool.attr,
- 	&dev_attr_pool_id.attr,
-@@ -4848,6 +4858,7 @@ static int rbd_dev_device_setup(struct rbd_device *rbd_dev)
- 	if (ret < 0)
- 		goto err_out_id;
- 	rbd_dev->major = ret;
-+	rbd_dev->minor = 0;
+ static int minor_to_rbd_dev_id(int minor)
+ {
+-	return minor >> RBD_PART_SHIFT;
++	return minor >> RBD_SINGLE_MAJOR_PART_SHIFT;
+ }
  
- 	/* Set up the blkdev mapping. */
+ static BUS_ATTR(add, S_IWUSR, NULL, rbd_add);
+@@ -3434,7 +3435,9 @@ static int rbd_init_disk(struct rbd_device *rbd_dev)
+ 	u64 segment_size;
+ 
+ 	/* create gendisk info */
+-	disk = alloc_disk(1 << RBD_PART_SHIFT);
++	disk = alloc_disk(single_major ?
++			  (1 << RBD_SINGLE_MAJOR_PART_SHIFT) :
++			  RBD_MINORS_PER_MAJOR);
+ 	if (!disk)
+ 		return -ENOMEM;
+ 
+@@ -3442,6 +3445,8 @@ static int rbd_init_disk(struct rbd_device *rbd_dev)
+ 		 rbd_dev->dev_id);
+ 	disk->major = rbd_dev->major;
+ 	disk->first_minor = rbd_dev->minor;
++	if (single_major)
++		disk->flags |= GENHD_FL_EXT_DEVT;
+ 	disk->fops = &rbd_bd_ops;
+ 	disk->private_data = rbd_dev;
  
 -- 
 1.7.10.4
