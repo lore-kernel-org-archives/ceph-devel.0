@@ -1,61 +1,159 @@
 From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: [PATCH 3/7] rbd: refactor rbd_init() a bit
-Date: Mon, 16 Dec 2013 19:16:29 +0200
-Message-ID: <1387214193-18489-4-git-send-email-ilya.dryomov@inktank.com>
+Subject: [PATCH 4/7] rbd: switch to ida for rbd id assignments
+Date: Mon, 16 Dec 2013 19:16:30 +0200
+Message-ID: <1387214193-18489-5-git-send-email-ilya.dryomov@inktank.com>
 References: <1387214193-18489-1-git-send-email-ilya.dryomov@inktank.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ee0-f50.google.com ([74.125.83.50]:39139 "EHLO
-	mail-ee0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754583Ab3LPRR0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Dec 2013 12:17:26 -0500
-Received: by mail-ee0-f50.google.com with SMTP id c41so2356223eek.23
-        for <ceph-devel@vger.kernel.org>; Mon, 16 Dec 2013 09:17:25 -0800 (PST)
+Received: from mail-ee0-f53.google.com ([74.125.83.53]:47085 "EHLO
+	mail-ee0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754583Ab3LPRR2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Dec 2013 12:17:28 -0500
+Received: by mail-ee0-f53.google.com with SMTP id b57so2342292eek.26
+        for <ceph-devel@vger.kernel.org>; Mon, 16 Dec 2013 09:17:27 -0800 (PST)
 In-Reply-To: <1387214193-18489-1-git-send-email-ilya.dryomov@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: ilya.dryomov@inktank.com
 
-Refactor rbd_init() a bit to make it more clear what's going on.
+Currently rbd ids are allocated using an atomic variable that keeps
+track of the highest id currently in use and each new id is simply one
+more than the value of that variable.  That's nice and cheap, but it
+does mean that rbd ids are allowed to grow boundlessly, and, more
+importantly, it's completely unpredictable.  So, in preparation for
+single-major device number allocation scheme, which is going to
+establish and rely on a constant mapping between rbd ids and device
+numbers, switch to ida for rbd id assignments.
 
 Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
 Reviewed-by: Alex Elder <elder@linaro.org>
 Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 ---
- drivers/block/rbd.c |   12 ++++++++----
- 1 file changed, 8 insertions(+), 4 deletions(-)
+ drivers/block/rbd.c |   69 +++++++++++++++++----------------------------------
+ 1 file changed, 23 insertions(+), 46 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index d743900ca780..8b78a08483a6 100644
+index 8b78a08483a6..d250549d27a4 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -5292,18 +5292,22 @@ static int __init rbd_init(void)
+@@ -41,6 +41,7 @@
+ #include <linux/fs.h>
+ #include <linux/blkdev.h>
+ #include <linux/slab.h>
++#include <linux/idr.h>
  
- 	if (!libceph_compatible(NULL)) {
- 		rbd_warn(NULL, "libceph incompatibility (quitting)");
--
- 		return -EINVAL;
- 	}
-+
- 	rc = rbd_slab_init();
- 	if (rc)
- 		return rc;
-+
- 	rc = rbd_sysfs_init();
- 	if (rc)
--		rbd_slab_exit();
--	else
--		pr_info("loaded\n");
-+		goto err_out_slab;
+ #include "rbd_types.h"
  
-+	pr_info("loaded\n");
-+	return 0;
+@@ -385,6 +386,8 @@ static struct kmem_cache	*rbd_img_request_cache;
+ static struct kmem_cache	*rbd_obj_request_cache;
+ static struct kmem_cache	*rbd_segment_name_cache;
+ 
++static DEFINE_IDA(rbd_dev_id_ida);
 +
-+err_out_slab:
-+	rbd_slab_exit();
- 	return rc;
+ static int rbd_img_request_submit(struct rbd_img_request *img_request);
+ 
+ static void rbd_dev_device_release(struct device *dev);
+@@ -4371,20 +4374,27 @@ static void rbd_bus_del_dev(struct rbd_device *rbd_dev)
+ 	device_unregister(&rbd_dev->dev);
  }
  
+-static atomic64_t rbd_dev_id_max = ATOMIC64_INIT(0);
+-
+ /*
+  * Get a unique rbd identifier for the given new rbd_dev, and add
+- * the rbd_dev to the global list.  The minimum rbd id is 1.
++ * the rbd_dev to the global list.
+  */
+-static void rbd_dev_id_get(struct rbd_device *rbd_dev)
++static int rbd_dev_id_get(struct rbd_device *rbd_dev)
+ {
+-	rbd_dev->dev_id = atomic64_inc_return(&rbd_dev_id_max);
++	int new_dev_id;
++
++	new_dev_id = ida_simple_get(&rbd_dev_id_ida, 0, 0, GFP_KERNEL);
++	if (new_dev_id < 0)
++		return new_dev_id;
++
++	rbd_dev->dev_id = new_dev_id;
+ 
+ 	spin_lock(&rbd_dev_list_lock);
+ 	list_add_tail(&rbd_dev->node, &rbd_dev_list);
+ 	spin_unlock(&rbd_dev_list_lock);
++
+ 	dout("rbd_dev %p given dev id %d\n", rbd_dev, rbd_dev->dev_id);
++
++	return 0;
+ }
+ 
+ /*
+@@ -4393,48 +4403,13 @@ static void rbd_dev_id_get(struct rbd_device *rbd_dev)
+  */
+ static void rbd_dev_id_put(struct rbd_device *rbd_dev)
+ {
+-	struct list_head *tmp;
+-	int rbd_id = rbd_dev->dev_id;
+-	int max_id;
+-
+-	rbd_assert(rbd_id > 0);
+-
+-	dout("rbd_dev %p released dev id %d\n", rbd_dev, rbd_dev->dev_id);
+ 	spin_lock(&rbd_dev_list_lock);
+ 	list_del_init(&rbd_dev->node);
+-
+-	/*
+-	 * If the id being "put" is not the current maximum, there
+-	 * is nothing special we need to do.
+-	 */
+-	if (rbd_id != atomic64_read(&rbd_dev_id_max)) {
+-		spin_unlock(&rbd_dev_list_lock);
+-		return;
+-	}
+-
+-	/*
+-	 * We need to update the current maximum id.  Search the
+-	 * list to find out what it is.  We're more likely to find
+-	 * the maximum at the end, so search the list backward.
+-	 */
+-	max_id = 0;
+-	list_for_each_prev(tmp, &rbd_dev_list) {
+-		struct rbd_device *rbd_dev;
+-
+-		rbd_dev = list_entry(tmp, struct rbd_device, node);
+-		if (rbd_dev->dev_id > max_id)
+-			max_id = rbd_dev->dev_id;
+-	}
+ 	spin_unlock(&rbd_dev_list_lock);
+ 
+-	/*
+-	 * The max id could have been updated by rbd_dev_id_get(), in
+-	 * which case it now accurately reflects the new maximum.
+-	 * Be careful not to overwrite the maximum value in that
+-	 * case.
+-	 */
+-	atomic64_cmpxchg(&rbd_dev_id_max, rbd_id, max_id);
+-	dout("  max dev id has been reset\n");
++	ida_simple_remove(&rbd_dev_id_ida, rbd_dev->dev_id);
++
++	dout("rbd_dev %p released dev id %d\n", rbd_dev, rbd_dev->dev_id);
+ }
+ 
+ /*
+@@ -4857,10 +4832,12 @@ static int rbd_dev_device_setup(struct rbd_device *rbd_dev)
+ {
+ 	int ret;
+ 
+-	/* generate unique id: find highest unique id, add one */
+-	rbd_dev_id_get(rbd_dev);
++	/* Get an id and fill in device name. */
++
++	ret = rbd_dev_id_get(rbd_dev);
++	if (ret)
++		return ret;
+ 
+-	/* Fill in the device name, now that we have its id. */
+ 	BUILD_BUG_ON(DEV_NAME_LEN
+ 			< sizeof (RBD_DRV_NAME) + MAX_INT_FORMAT_WIDTH);
+ 	sprintf(rbd_dev->name, "%s%d", RBD_DRV_NAME, rbd_dev->dev_id);
 -- 
 1.7.10.4
 
