@@ -1,111 +1,97 @@
-From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: [PATCH] rbd: enable extended devt in single-major mode
-Date: Mon, 16 Dec 2013 19:33:47 +0200
-Message-ID: <1387215227-19332-1-git-send-email-ilya.dryomov@inktank.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: creation of the puppet-ceph repository
+Date: Mon, 16 Dec 2013 20:39:05 +0100
+Message-ID: <52AF56D9.9040005@dachary.org>
+References: <52AC97E2.8080907@dachary.org> <CED3B77C.1F7CF%ian.colle@inktank.com>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="NEJPPXNHT1He3fI46hfMpWNH5gq866M3J"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ee0-f54.google.com ([74.125.83.54]:39391 "EHLO
-	mail-ee0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754550Ab3LPRef (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Dec 2013 12:34:35 -0500
-Received: by mail-ee0-f54.google.com with SMTP id e51so2028380eek.13
-        for <ceph-devel@vger.kernel.org>; Mon, 16 Dec 2013 09:34:34 -0800 (PST)
+Received: from smtp.dmail.dachary.org ([91.121.254.229]:41968 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755405Ab3LPTkB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Dec 2013 14:40:01 -0500
+In-Reply-To: <CED3B77C.1F7CF%ian.colle@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: ilya.dryomov@inktank.com
+To: Ian Colle <ian.colle@inktank.com>, ceph-devel@vger.kernel.org
 
-If single-major device number allocation scheme is turned on, instead
-of reserving 256 minors per device, which imposes a limit of 4096
-images mapped at once, reserve 16 minors per device and enable extended
-devt feature.  This results in a theoretical limit of 65536 images
-mapped at once, and still allows to have more than 15 partititions:
-partitions starting with 16th are mapped under major 259 (Block
-Extended Major):
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--NEJPPXNHT1He3fI46hfMpWNH5gq866M3J
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-$ rbd showmapped
-id pool image snap device
-0  rbd  b5    -    /dev/rbd0    # no partitions
-1  rbd  b2    -    /dev/rbd1    # 40 partitions
-2  rbd  b3    -    /dev/rbd2    #  2 partitions
+Hi Ian,
 
-$ cat /proc/partitions
- 251        0       1024 rbd0
- 251       16       1024 rbd1
- 251       17          0 rbd1p1
- 251       18          0 rbd1p2
- ...
- 251       30          0 rbd1p14
- 251       31          0 rbd1p15
- 259        0          0 rbd1p16
- 259        1          0 rbd1p17
- ...
- 259       23          0 rbd1p39
- 259       24          0 rbd1p40
- 251       32       1024 rbd2
- 251       33          0 rbd2p1
- 251       34          0 rbd2p2
+It looks like nothing at all was created after all, not even the reposito=
+ry. Or maybe I don't understand how github works.
 
-(major 251 was assigned dynamically at module load time)
+$ git push puppet-ceph master
+ERROR: Permission to ceph/puppet-ceph.git denied to dachary.
+fatal: Could not read from remote repository.
 
-Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
-Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
----
-[ Josh has already reviewed this and it is ready to be merged into
-testing branch of ceph-client.git, but it wasn't posted on any mailing
-list.  Correcting this oversight now. ]
+Please make sure you have the correct access rights
+and the repository exists.
 
- drivers/block/rbd.c |   13 +++++++++----
- 1 file changed, 9 insertions(+), 4 deletions(-)
+Could you please re-create it and add a README ? I should be able to get =
+rid of it afterwards.
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index e5ddcb58e9a2..11ae4c1238a6 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -91,7 +91,8 @@ static int atomic_dec_return_safe(atomic_t *v)
- 
- #define RBD_DRV_NAME "rbd"
- 
--#define RBD_PART_SHIFT	8
-+#define RBD_MINORS_PER_MAJOR		256
-+#define RBD_SINGLE_MAJOR_PART_SHIFT	4
- 
- #define RBD_SNAP_DEV_NAME_PREFIX	"snap_"
- #define RBD_MAX_SNAP_NAME_LEN	\
-@@ -415,12 +416,12 @@ static void rbd_spec_put(struct rbd_spec *spec);
- 
- static int rbd_dev_id_to_minor(int dev_id)
- {
--	return dev_id << RBD_PART_SHIFT;
-+	return dev_id << RBD_SINGLE_MAJOR_PART_SHIFT;
- }
- 
- static int minor_to_rbd_dev_id(int minor)
- {
--	return minor >> RBD_PART_SHIFT;
-+	return minor >> RBD_SINGLE_MAJOR_PART_SHIFT;
- }
- 
- static BUS_ATTR(add, S_IWUSR, NULL, rbd_add);
-@@ -3434,7 +3435,9 @@ static int rbd_init_disk(struct rbd_device *rbd_dev)
- 	u64 segment_size;
- 
- 	/* create gendisk info */
--	disk = alloc_disk(1 << RBD_PART_SHIFT);
-+	disk = alloc_disk(single_major ?
-+			  (1 << RBD_SINGLE_MAJOR_PART_SHIFT) :
-+			  RBD_MINORS_PER_MAJOR);
- 	if (!disk)
- 		return -ENOMEM;
- 
-@@ -3442,6 +3445,8 @@ static int rbd_init_disk(struct rbd_device *rbd_dev)
- 		 rbd_dev->dev_id);
- 	disk->major = rbd_dev->major;
- 	disk->first_minor = rbd_dev->minor;
-+	if (single_major)
-+		disk->flags |= GENHD_FL_EXT_DEVT;
- 	disk->fops = &rbd_bd_ops;
- 	disk->private_data = rbd_dev;
- 
--- 
-1.7.10.4
+Thank you for your patience
 
+On 16/12/2013 04:46, Ian Colle wrote:
+>=20
+>=20
+> On 12/14/13, 9:39 AM, "Loic Dachary" <loic@dachary.org> wrote:
+>=20
+>> Hi,
+>>
+>> Could someone with sufficient permission please create the puppet-ceph=
+
+>> repository (empty, no README or .gitignore) at http://github.com/ceph/=
+ ?
+>=20
+> Done.
+>=20
+> https://github.com/ceph/puppet-ceph
+>=20
+>=20
+>>
+>> A few weeks ago it was decided to host the development of the module o=
+n
+>> stackforge ( https://github.com/stackforge/puppet-ceph ) and also to
+>> establish a mirror under the ceph github namespace.
+>>
+>> Cheers
+>>
+>> --=20
+>> Lo=EFc Dachary, Artisan Logiciel Libre
+>>
+>=20
+>=20
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+
+
+--NEJPPXNHT1He3fI46hfMpWNH5gq866M3J
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.20 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlKvVtkACgkQ8dLMyEl6F22lTQCfRBGTS7CrZu+UcI4eNqBE2UXf
+BjEAnilBFttqC3ZhcwtrGYDGcBhlvGjL
+=bme/
+-----END PGP SIGNATURE-----
+
+--NEJPPXNHT1He3fI46hfMpWNH5gq866M3J--
