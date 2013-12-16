@@ -1,58 +1,35 @@
-From: Ian Colle <ian.colle@inktank.com>
-Subject: Re: creation of the puppet-ceph repository
-Date: Sun, 15 Dec 2013 19:46:45 -0800
-Message-ID: <CED3B77C.1F7CF%ian.colle@inktank.com>
-References: <52AC97E2.8080907@dachary.org>
+From: Sage Weil <sage@inktank.com>
+Subject: [GIT PULL] Ceph fixes for 3.13-rc5
+Date: Sun, 15 Dec 2013 21:31:05 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1312130916510.14857@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f43.google.com ([209.85.220.43]:56132 "EHLO
-	mail-pa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752338Ab3LPDq4 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 15 Dec 2013 22:46:56 -0500
-Received: by mail-pa0-f43.google.com with SMTP id bj1so2376371pad.30
-        for <ceph-devel@vger.kernel.org>; Sun, 15 Dec 2013 19:46:55 -0800 (PST)
-Received: from [10.0.1.9] (c-67-172-132-222.hsd1.co.comcast.net. [67.172.132.222])
-        by mx.google.com with ESMTPSA id pa1sm31069347pac.17.2013.12.15.19.46.49
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1 cipher=RC4-SHA bits=128/128);
-        Sun, 15 Dec 2013 19:46:53 -0800 (PST)
-In-Reply-To: <52AC97E2.8080907@dachary.org>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: torvalds@linux-foundation.org
+Cc: ceph-devel@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
+Hi Linus,
 
+Please pull the following pair of Ceph fixes from
 
-On 12/14/13, 9:39 AM, "Loic Dachary" <loic@dachary.org> wrote:
+  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
 
->Hi,
->
->Could someone with sufficient permission please create the puppet-ceph
->repository (empty, no README or .gitignore) at http://github.com/ceph/=
- ?
+One of these is fixing a regression from the d_flags file type patch that 
+went into -rc1 that broke instantiation of inodes and dentries (we were 
+doing dentries first).  The other is just an off-by-one corner case.
 
-Done.
+Thanks!
+sage
 
-https://github.com/ceph/puppet-ceph
+----------------------------------------------------------------
+Li Wang (1):
+      ceph: Avoid data inconsistency due to d-cache aliasing in readpage()
 
+Yan, Zheng (1):
+      ceph: initialize inode before instantiating dentry
 
->
->A few weeks ago it was decided to host the development of the module o=
-n
->stackforge ( https://github.com/stackforge/puppet-ceph ) and also to
->establish a mirror under the ceph github namespace.
->
->Cheers
->
->--=20
->Lo=EFc Dachary, Artisan Logiciel Libre
->
-
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+ fs/ceph/addr.c  |   8 +++-
+ fs/ceph/inode.c | 136 ++++++++++++++++++++++++--------------------------------
+ 2 files changed, 64 insertions(+), 80 deletions(-)
