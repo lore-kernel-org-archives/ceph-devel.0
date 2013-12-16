@@ -1,40 +1,45 @@
 From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: [PATCH 0/2] rbd: tear down watch request if rbd_dev_device_setup() fails
-Date: Mon, 16 Dec 2013 22:05:33 +0200
-Message-ID: <1387224335-902-1-git-send-email-ilya.dryomov@inktank.com>
+Subject: [PATCH 2/2] rbd: tear down watch request if rbd_dev_device_setup() fails
+Date: Mon, 16 Dec 2013 22:05:35 +0200
+Message-ID: <1387224335-902-3-git-send-email-ilya.dryomov@inktank.com>
+References: <1387224335-902-1-git-send-email-ilya.dryomov@inktank.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ea0-f180.google.com ([209.85.215.180]:36952 "EHLO
-	mail-ea0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751037Ab3LPUGX (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Dec 2013 15:06:23 -0500
-Received: by mail-ea0-f180.google.com with SMTP id f15so2475506eak.11
-        for <ceph-devel@vger.kernel.org>; Mon, 16 Dec 2013 12:06:22 -0800 (PST)
+Received: from mail-ee0-f54.google.com ([74.125.83.54]:45613 "EHLO
+	mail-ee0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751037Ab3LPUG1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Dec 2013 15:06:27 -0500
+Received: by mail-ee0-f54.google.com with SMTP id e51so2093597eek.27
+        for <ceph-devel@vger.kernel.org>; Mon, 16 Dec 2013 12:06:26 -0800 (PST)
+In-Reply-To: <1387224335-902-1-git-send-email-ilya.dryomov@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: ilya.dryomov@inktank.com
 
-Hello,
+Tear down watch request if rbd_dev_device_setup() fails.
 
-Currently, if rbd_dev_device_setup() fails, we don't tear down our
-watch request.  Looks like this bug was introduced by 1f3ef78861ac,
-which moved a tear down call while fixing something else.  Fix it.
+Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
+---
+ drivers/block/rbd.c |    6 ++++++
+ 1 file changed, 6 insertions(+)
 
-These patches can be pulled from wip-rbd-unwatch branch of
-ceph-client.git.
-
-Thanks,
-
-                Ilya
-
-
-Ilya Dryomov (2):
-  rbd: introduce rbd_dev_header_unwatch_sync() and switch to it
-  rbd: tear down watch request if rbd_dev_device_setup() fails
-
- drivers/block/rbd.c |   41 ++++++++++++++++++++++++++++-------------
- 1 file changed, 28 insertions(+), 13 deletions(-)
-
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index c91108b760cf..e709f4ae117f 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -5101,6 +5101,12 @@ static ssize_t rbd_add(struct bus_type *bus,
+ 
+ 	rc = rbd_dev_device_setup(rbd_dev);
+ 	if (rc) {
++		/*
++		 * rbd_dev_header_unwatch_sync() can't be moved into
++		 * rbd_dev_image_release() without refactoring, see
++		 * commit 1f3ef78861ac.
++		 */
++		rbd_dev_header_unwatch_sync(rbd_dev);
+ 		rbd_dev_image_release(rbd_dev);
+ 		goto err_out_module;
+ 	}
 -- 
 1.7.10.4
 
