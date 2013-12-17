@@ -1,81 +1,154 @@
-From: Alexandre Oliva <oliva@gnu.org>
-Subject: Re: [PATCH] reinstate ceph cluster_snap support
-Date: Tue, 17 Dec 2013 12:22:55 -0200
-Message-ID: <orsitr8slc.fsf@livre.home>
-References: <orob8qt7kf.fsf@livre.home>
-	<alpine.DEB.2.00.1308231715500.28981@cobra.newdream.net>
-	<ortxifi1cs.fsf@livre.home>
-	<alpine.DEB.2.00.1308271515500.24783@cobra.newdream.net>
-	<or7gb3ad3w.fsf@livre.home> <orwqj38u3w.fsf@livre.home>
+From: Oliver Francke <Oliver.Francke@filoo.de>
+Subject: qemu-1.7.0 and internal snapshot, Was: qemu-1.5.0 savevm error -95
+ while writing vm with ceph-rbd as storage-backend
+Date: Tue, 17 Dec 2013 17:07:46 +0100
+Message-ID: <52B076D2.5090303@filoo.de>
+References: <59e8e229-4b48-4272-993a-3040c5d5c76b@mailpro> <38D2560F-4164-47DE-973F-2C1BD97EAD3A@filoo.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from linux-libre.fsfla.org ([208.118.235.54]:47553 "EHLO
-	linux-libre.fsfla.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751274Ab3LQOXy (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Dec 2013 09:23:54 -0500
-In-Reply-To: <orwqj38u3w.fsf@livre.home> (Alexandre Oliva's message of "Tue,
-	17 Dec 2013 11:50:11 -0200")
+Received: from mail-2.de-punkt.de ([93.190.64.238]:40233 "EHLO
+	mail-2.de-punkt.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752452Ab3LQQHs (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Dec 2013 11:07:48 -0500
+In-Reply-To: <38D2560F-4164-47DE-973F-2C1BD97EAD3A@filoo.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: sam.just@inktank.com, ceph-devel@vger.kernel.org
+To: Alexandre DERUMIER <aderumier@odiso.com>
+Cc: Wido den Hollander <wido@42on.com>, ceph-devel@vger.kernel.org
 
-On Dec 17, 2013, Alexandre Oliva <oliva@gnu.org> wrote:
+Hi Alexandre and Wido ;)
 
-> On Dec 17, 2013, Alexandre Oliva <oliva@gnu.org> wrote:
->>> Finally, eventually we should make this do a checkpoint on the mons too.  
->>> We can add the osd snapping back in first, but before this can/should 
->>> really be used the mons need to be snapshotted as well.  Probably that's 
->>> just adding in a snapshot() method to MonitorStore.h and doing either a 
->>> leveldb snap or making a full copy of store.db... I forget what leveldb is 
->>> capable of here.
+well, I know this is a pretty old question... but saw some comments fro=
+m=20
+you Wido as well as a most current patch for qemu-1.7.0 in the=20
+git.proxmox ( internal snapshot async port to qemu 1.7 v5)
+What I currently did is: apply modify-query-machines.patch and=20
+internal-snapshot-async.patch to qemu-1.7.0 sources, all hunks succeed.
 
->> I haven't looked into this yet.
+Now after talking to the QMP with:
 
-> None of these are particularly appealing; (1) wastes disk space and cpu
-> cycles; (2) relies on leveldb internal implementation details such as
-> the fact that files are never modified after they're first closed, and
-> (3) requires a btrfs subvol for the store.db.  My favorite choice would
-> be 3, but can we just fail mon snaps when this requirement is not met?
+     { "execute" : "savevm-start", "arguments": { "statefile":=20
+"rbd:123/905.save1" }}
 
-Another aspect that needs to be considered is whether to take a snapshot
-of the leader only, or of all monitors in the quorum.  The fact that the
-snapshot operation may take a while to complete (particularly (1)), and
-monitors may not make progress while taking the snapshot (which might
-cause the client and other monitors to assume other monitors have
-failed), make the whole thing quite more complex than what I'd have
-hoped for.
+or a local file, it spits out:
 
-Another point that may affect the decision is the amount of information
-in store.db that may have to be retained.  E.g., if it's just a small
-amount of information, creating a separate database makes far more sense
-than taking a complete copy of the entire database, and it might even
-make sense for the leader to include the full snapshot data in the
-snapshot-taking message shared with other monitors, so that they all
-take exactly the same snapshot, even if they're not in the quorum and
-receive the update at a later time.  Of course this wouldn't work if the
-amount of snapshotted monitor data was more than reasonable for a
-monitor message.
+     qemu-system-x86_64: block.c:4430: bdrv_set_in_use: Assertion=20
+`bs->in_use !=3D in_use' failed
 
-Anyway, this is probably more than what I'd be able to undertake myself,
-at least in part because, although I can see one place to add the
-snapshot-taking code to the leader (assuming it's ok to take the
-snapshot just before or right after all monitors agree on it), I have no
-idea of where to plug the snapshot-taking behavior into peon and
-recovering monitors.  Absent a two-phase protocol, it seems to me that
-all monitors ought to take snapshots tentatively when they issue or
-acknowledge the snapshot-taking proposal, so as to make sure that if it
-succeeds we'll have a quorum of snapshots, but if the proposal doesn't
-succeed at first, I don't know how to deal with retries (overwrite
-existing snapshots?  discard the snapshot when its proposal fails?) or
-cancellation (say, the client doesn't get confirmation from the leader,
-the leader changes, it retries that some times, and eventually it gives
-up, but some monitors have already tentatively taken the snapshot in the
-mean time).
+*sigh*
 
--- 
-Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
-You must be the change you wish to see in the world. -- Gandhi
-Be Free! -- http://FSFLA.org/   FSF Latin America board member
-Free Software Evangelist      Red Hat Brazil Compiler Engineer
+qemu is started with "some" parameters... and finally drive-specific on=
+es:
+
+-device virtio-blk-pci,drive=3Dvirtio0 -drive=20
+format=3Draw,file=3Drbd:123/vm-905-disk-.rbd:rbd_cache=3Dtrue:rbd_cache=
+_size=3D33554432:rbd_cache_max_dirty=3D16777216:rbd_cache_target_dirty=3D=
+8388608,cache=3Dwriteback,if=3Dnone,id=3Dvirtio0,media=3Ddisk,index=3D0
+
+Did I miss a relevant point?
+What would be the correct strategy?
+
+Thnx in advance and kind regards,
+
+Oliver.
+
+P.S.: I don't use libvirt nor proxmox as a complete system.
+
+On 05/24/2013 10:57 PM, Oliver Francke wrote:
+> Hi Alexandre,
+>
+> Am 24.05.2013 um 17:37 schrieb Alexandre DERUMIER <aderumier@odiso.co=
+m>:
+>
+>> Hi,
+>>
+>> For Proxmox, we have made some patchs to split the savevm process,
+>>
+>> to be able to save the memory to an external volume. (and not the cu=
+rrent volume).
+>>
+>> For rbd, we create a new rbd volume to store the memory.
+>>
+>> qemu patch is here :
+>> https://git.proxmox.com/?p=3Dpve-qemu-kvm.git;a=3Dblob;f=3Ddebian/pa=
+tches/internal-snapshot-async.patch;h=3Dc67a97ea497fe31ff449acb79e04dc1=
+c53b25578;hb=3DHEAD
+>>
+>> ----- Mail original -----
+>>
+> wow, sounds very interesting, being on the road for the next 3 days I=
+ will have a closer look next week.
+>
+> Thnx n regards,
+>
+> Oliver.
+>
+>> De: "Wido den Hollander" <wido@42on.com>
+>> =C0: "Oliver Francke" <Oliver.Francke@filoo.de>
+>> Cc: ceph-devel@vger.kernel.org
+>> Envoy=E9: Vendredi 24 Mai 2013 17:08:35
+>> Objet: Re: qemu-1.5.0 savevm error -95 while writing vm with ceph-rb=
+d as storage-backend
+>>
+>> On 05/24/2013 09:46 AM, Oliver Francke wrote:
+>>> Hi,
+>>>
+>>> with a running VM I encounter this strange behaviour, former
+>>> qemu-versions don't show up such an error.
+>>> Perhaps this comes from the rbd-backend in qemu-1.5.0 in combinatio=
+n
+>>> with ceph-0.56.6? Therefore my
+>>> crosspost.
+>>>
+>>> Even if I have no real live-snapshot avail - they know of this
+>>> restriction -, it's more work for the customers
+>>> to perform a shutdown before the wonna do some changes to their VM =
+;)
+>>>
+>> Doesn't Qemu try to save the memory state to RBD here as well? That
+>> doesn't work and fails.
+>>
+>>> Any hints welcome,
+>>>
+>>> Oliver.
+>>>
+>>
+>> --
+>> Wido den Hollander
+>> 42on B.V.
+>>
+>> Phone: +31 (0)20 700 9902
+>> Skype: contact42on
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+--=20
+
+Oliver Francke
+
+filoo GmbH
+Moltkestra=DFe 25a
+33330 G=FCtersloh
+HRB4355 AG G=FCtersloh
+
+Gesch=E4ftsf=FChrer: J.Rehp=F6hler | C.Kunz
+
+=46olgen Sie uns auf Twitter: http://twitter.com/filoogmbh
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
