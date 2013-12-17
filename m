@@ -1,62 +1,87 @@
-From: "Robin H. Johnson" <robbat2@gentoo.org>
-Subject: Re: RGW CORS fixes for Access-Control-Request-Headers
-Date: Tue, 17 Dec 2013 19:00:33 +0000
-Message-ID: <20131217190033.GI19109@orbis-terrarum.net>
-References: <robbat2-20131215T205912-773698930Z@orbis-terrarum.net>
- <CABBk=J_1yAsmHvnPfZSd_dm1wo+QcAv0SBjZcvajPcfzM9fiwA@mail.gmail.com>
+From: Ali Maredia <ali@linuxbox.com>
+Subject: Re: Building Ceph using CMake
+Date: Tue, 17 Dec 2013 15:09:03 -0500 (EST)
+Message-ID: <1045611233.81.1387310943871.JavaMail.root@thunderbeast.private.linuxbox.com>
+References: <1417102805.191.1385512980002.JavaMail.root@thunderbeast.private.linuxbox.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.gentoo.org ([140.211.166.183]:50368 "EHLO smtp.gentoo.org"
+Received: from aa.linuxbox.com ([69.128.83.226]:3441 "EHLO aa.linuxbox.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751052Ab3LQTAe (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 17 Dec 2013 14:00:34 -0500
-Received: from grubbs.orbis-terrarum.net (localhost [127.0.0.1])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-SHA (256/256 bits))
-	(No client certificate requested)
-	by smtp.gentoo.org (Postfix) with ESMTPS id 35CD233F565
-	for <ceph-devel@vger.kernel.org>; Tue, 17 Dec 2013 19:00:34 +0000 (UTC)
-Content-Disposition: inline
-In-Reply-To: <CABBk=J_1yAsmHvnPfZSd_dm1wo+QcAv0SBjZcvajPcfzM9fiwA@mail.gmail.com>
+	id S1752758Ab3LQUJI (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 17 Dec 2013 15:09:08 -0500
+In-Reply-To: <1417102805.191.1385512980002.JavaMail.root@thunderbeast.private.linuxbox.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh <yehuda@inktank.com>
-Cc: ceph-devel@vger.kernel.org, robbat2@gentoo.org
+To: "Matt W. Benjamin" <matt@linuxbox.com>
+Cc: Ceph Devel <ceph-devel@vger.kernel.org>, Noah Watkins <noah.watkins@inktank.com>
 
-On Tue, Dec 17, 2013 at 12:17:23AM -0800, Yehuda Sadeh wrote:
-> On Sun, Dec 15, 2013 at 1:16 PM, Robin H. Johnson <robbat2@gentoo.org> wrote:
-> > Hi,
-> >
-> > I was trying to use the RGW CORS support, and found that it flubbed
-> > handling of the Access-Control-Request-Headers header badly.
-> >
-> > It was expecting Access-Control-Allow-Headers in the request where it
-> > should have taken the Access-Control-Request-Headers, and it was also
-> > validating the content in a case-sensitive manner, when the CORS
-> > standard (6.2.6) requires that headers are validated case-insensitive.
-> >
-> > I have submitted a pull request with the fixes:
-> > https://github.com/ceph/ceph/pull/949
-> >
-> > I think they should be backported to emperor as well.
-> >
+All,
+
+To illustrate the benefit of using CMake to build ceph I timed builds of the ceph base (a list of targets is below) on my local machine with an Intel Core 2 Duo processor that have two 2.2 GHz cores.
+
+Here are the results I got. The following are the real times building the same exact targets.
+
+      Build/Command   |   Make base   | Make base -j2 |
+=======================================================
+ Autotools trial run 1| 58mins 31secs | 39mins 31secs |
+=======================================================
+ Autotools trial run 2| 58mins 28secs |       -       |
+=======================================================
+ CMake trial run 1    | 18mins 55secs | 10mins 31secs |
+=======================================================
+ CMake trial run 2    | 18mins 35secs | 11mins 43secs |
+=======================================================
+
+Most of the speedup can be attributed to the fact that libtool is compiling both PIC and non-PIC versions of every source file. CMake just builds everything with -fPIC. We don't have an opinion on the matter, but you may want to consider doing the same with the autotools build.
+
+Many source files are compiled into several targets causing them to be built multiple time. With the CMake build I was able to pull them into static libraries and link them into the targets that needed them.
+
+In conclusion I don't have a precise apples-to-apples comparison of cmake vs. automake, but I hope my switch over to CMake has highlighted some ways to improve upon the build system and increase developer productivity and would love to hear thoughts and comments on the matter.
+
+-Ali
+
+----- Original Message -----
+From: "Matt W. Benjamin" <matt@linuxbox.com>
+To: "Noah Watkins" <noah.watkins@inktank.com>
+Cc: "Ceph Devel" <ceph-devel@vger.kernel.org>, "Ali Maredia" <ali@linuxbox.com>
+Sent: Tuesday, November 26, 2013 7:43:00 PM
+Subject: Re: Building Ceph using CMake
+
+We are finding the cmake build system to be a big help, the compile-link-run
+cylces seem much shorter.
+
+Matt
+
+----- "Noah Watkins" <noah.watkins@inktank.com> wrote:
+
+> On Nov 26, 2013, at 2:06 PM, Ali Maredia <ali@linuxbox.com> wrote:
 > 
-> Overall it looks ok, I still want to run the test suite against it.
-Nothing in your existing tests [1] covers the CORS at all.
-
-[1] I checked s3-tests, teuthology, ceph-qa-suite
-
-> Can you open corresponding issues in the ceph tracker?
-> (tracker.ceph.com).
-Your tracker seems to be broken, I put in my OpenID URL, and hit login,
-and it just cycles me back to the login page.
-
-Also, could you please document requiring tracker issues if that's
-required to get fixes in Ceph? It's not mentioned in your
-SubmittingPatches at all.
+> > Hi all,
+> > 
+> > I'm a student working on a project to make ceph build faster and to
+> help with efforts to port ceph to other platforms using cmake. 
+> 
+> CMake is awesome. Also, you might be interested in checking out the
+> portability work going on at github.com/ceph/ceph wip-port.
+> 
+> -Noah
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+> in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
 -- 
-Robin Hugh Johnson
-Gentoo Linux: Developer, Infrastructure Lead
-E-Mail     : robbat2@gentoo.org
-GnuPG FP   : 11ACBA4F 4778E3F6 E4EDF38E B27B944E 34884E85
+Matt Benjamin
+The Linux Box
+206 South Fifth Ave. Suite 150
+Ann Arbor, MI  48104
+
+http://linuxbox.com
+
+tel.  734-761-4689 
+fax.  734-769-8938 
+cel.  734-216-5309 
