@@ -1,68 +1,68 @@
-From: Oliver Francke <Oliver.Francke@filoo.de>
-Subject: RBD/qemu-1.7.0 memory leak with drive_mirror/live-migration
-Date: Tue, 17 Dec 2013 13:45:22 +0100
-Message-ID: <52B04762.50306@filoo.de>
+From: Alexandre Oliva <oliva@gnu.org>
+Subject: Re: [PATCH] reinstate ceph cluster_snap support
+Date: Tue, 17 Dec 2013 11:50:11 -0200
+Message-ID: <orwqj38u3w.fsf@livre.home>
+References: <orob8qt7kf.fsf@livre.home>
+	<alpine.DEB.2.00.1308231715500.28981@cobra.newdream.net>
+	<ortxifi1cs.fsf@livre.home>
+	<alpine.DEB.2.00.1308271515500.24783@cobra.newdream.net>
+	<or7gb3ad3w.fsf@livre.home>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-2.de-punkt.de ([93.190.64.238]:59466 "EHLO
-	mail-2.de-punkt.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753476Ab3LQMvA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Dec 2013 07:51:00 -0500
-Received: from localhost (localhost [127.0.0.1])
-	by mail-2.de-punkt.de (Postfix) with ESMTP id 505883A310
-	for <ceph-devel@vger.kernel.org>; Tue, 17 Dec 2013 13:45:23 +0100 (CET)
-Received: from mail-2.de-punkt.de ([127.0.0.1])
-	by localhost (mail-2.de-punkt.de [127.0.0.1]) (amavisd-new, port 10024)
-	with ESMTP id QP8qoV0L-9iY for <ceph-devel@vger.kernel.org>;
-	Tue, 17 Dec 2013 13:45:23 +0100 (CET)
-Received: from [192.168.1.152] (p4FECECDE.dip0.t-ipconnect.de [79.236.236.222])
-	(Authenticated sender: oliver.francke@filoo.de)
-	by mail-2.de-punkt.de (Postfix) with ESMTPSA id 102F33A35D
-	for <ceph-devel@vger.kernel.org>; Tue, 17 Dec 2013 13:45:23 +0100 (CET)
+Received: from linux-libre.fsfla.org ([208.118.235.54]:47486 "EHLO
+	linux-libre.fsfla.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753006Ab3LQNuk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Dec 2013 08:50:40 -0500
+In-Reply-To: <or7gb3ad3w.fsf@livre.home> (Alexandre Oliva's message of "Tue,
+	17 Dec 2013 10:14:27 -0200")
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: sam.just@inktank.com, ceph-devel@vger.kernel.org
 
-Hi *,
+On Dec 17, 2013, Alexandre Oliva <oliva@gnu.org> wrote:
 
-I just tried a feature for live-migration via:
+>> Finally, eventually we should make this do a checkpoint on the mons too.  
+>> We can add the osd snapping back in first, but before this can/should 
+>> really be used the mons need to be snapshotted as well.  Probably that's 
+>> just adding in a snapshot() method to MonitorStore.h and doing either a 
+>> leveldb snap or making a full copy of store.db... I forget what leveldb is 
+>> capable of here.
 
-drive_mirror -f virtio0 rbd:123123/virtio0 rbd
+> I haven't looked into this yet.
 
-in a qemu-monitoring-session.
-One immediately can see some memory consumption... never getting=20
-released again. Additionally the block-job never ends, even after X/X=20
-bytes completed.
-You can cancel the job, memory still occupied, after another try more=20
-RSS-memory gets filled.
+I looked a bit at the leveldb interface.  It offers a facility to create
+Snapshots, but they only last for the duration of one session of the
+database.  It can be used to create multiple iterators at once state of
+the db, or to read multiple values from the same state of the db, but
+not to roll back to a state you had at an earlier session, e.g., after a
+monitor restart.  So they won't help us.
 
-Same procedure with qcow2 does not need any more memory, and the job=20
-gets cleared after completion.
+I thus see a few possibilities (all of them to be done between taking
+note of the request for the new snapshot and returning a response to the
+requestor that the request was satisfied):
 
-Possibly @Josh: any idea? Logfiles with debug_what=3D? needed? ;)
+1. take a snapshot, create an iterator out of the snapshot, create a new
+database named after the cluster_snap key, and go over all key/value
+pairs tha the iterator can see, adding each one to this new database.
 
-Thnx in @vance,
+2. close the database, create a dir named after the cluster_snap key,
+create hardlinks to all files in the database tree in the cluster_snap
+dir, and then reopen the database
 
-Oliver.
+3. flush the leveldb (how?  will a write with sync=true do?  must we
+close it?) and take a btrfs snapshot of the store.db tree, named after
+the cluster_snap key, and then reopen the database
 
---=20
+None of these are particularly appealing; (1) wastes disk space and cpu
+cycles; (2) relies on leveldb internal implementation details such as
+the fact that files are never modified after they're first closed, and
+(3) requires a btrfs subvol for the store.db.  My favorite choice would
+be 3, but can we just fail mon snaps when this requirement is not met?
 
-Oliver Francke
-
-filoo GmbH
-Moltkestra=DFe 25a
-33330 G=FCtersloh
-HRB4355 AG G=FCtersloh
-
-Gesch=E4ftsf=FChrer: J.Rehp=F6hler | C.Kunz
-
-=46olgen Sie uns auf Twitter: http://twitter.com/filoogmbh
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-- 
+Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
+You must be the change you wish to see in the world. -- Gandhi
+Be Free! -- http://FSFLA.org/   FSF Latin America board member
+Free Software Evangelist      Red Hat Brazil Compiler Engineer
