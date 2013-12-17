@@ -1,118 +1,134 @@
-From: Alexandre Oliva <oliva@gnu.org>
-Subject: [PATCH] mds: handle setxattr ceph.parent
-Date: Tue, 17 Dec 2013 09:25:39 -0200
-Message-ID: <oriounafd8.fsf@livre.home>
+From: Dzianis Huznou <dzianis_huznou@epam.com>
+Subject: Re: [PATCH 1/2] No MDS mount error fix
+Date: Tue, 17 Dec 2013 14:28:09 +0300
+Message-ID: <1387279689.19674.2.camel@epbyminw3646.minsk.epam.com>
+References: <1b8c4b9c49deb956e9d065b0677bfeaf17c968d2.1386442053.git.plageat90@gmail.com>
+	 <CAAM7YAnZUWmRdB8+SV11688M+vR-oWxW5xYCUg1Cg1DmELZmqw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="=-=-="
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from linux-libre.fsfla.org ([208.118.235.54]:47242 "EHLO
-	linux-libre.fsfla.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751537Ab3LQL0V (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Dec 2013 06:26:21 -0500
+Received: from evbyminsa0101.epam.com ([217.21.63.36]:40896 "EHLO
+	EVBYMINSA0101.epam.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750839Ab3LQL2k (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Dec 2013 06:28:40 -0500
+In-Reply-To: <CAAM7YAnZUWmRdB8+SV11688M+vR-oWxW5xYCUg1Cg1DmELZmqw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Zheng Yan <zheng.z.yan@intel.com>
+To: "Yan, Zheng" <ukernel@gmail.com>
+Cc: Mikhail Campos Guadamuz <plageat90@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
---=-=-=
+Just a one question. If you are saying about "common error", what
+exactly do you mean? Do you mean some error number range that we can
+only use? Which unique(!) error can we return from ceph kernel client if
+no mds found?
 
-This is a (probably half-baked) solution for the problem of cephfs
-clusters encountering recovery problems when clients are accessing files
-that don't have a parent attribute.  It enables clients to request the
-parent attribute to be updated right away, by a simple setxattr call:
+On Sat, 2013-12-07 at 21:59 +0800, Yan, Zheng wrote:
+> On Sun, Dec 8, 2013 at 2:59 AM, Mikhail Campos Guadamuz
+> <plageat90@gmail.com> wrote:
+> > For http://tracker.ceph.com/issues/4386
+> >
+> > It determines situation, when a user is trying to mount CephFS
+> > with no MDS present. Return ECOMM from
+> > open_root_dentry which can be analyzed then by ceph.mount
+> >
+> > Signed-off-by: Mikhail Campos Guadamuz <plageat90@gmail.com>
+> > ---
+> >  fs/ceph/mdsmap.c            | 19 ++++++++++++++++---
+> >  fs/ceph/super.c             | 10 +++++++++-
+> >  include/linux/ceph/mdsmap.h |  1 +
+> >  3 files changed, 26 insertions(+), 4 deletions(-)
+> >
+> > diff --git a/fs/ceph/mdsmap.c b/fs/ceph/mdsmap.c
+> > index 132b64e..3a6ba8a 100644
+> > --- a/fs/ceph/mdsmap.c
+> > +++ b/fs/ceph/mdsmap.c
+> > @@ -12,6 +12,20 @@
+> >
+> >  #include "super.h"
+> >
+> > +/*
+> > + * count active mds's
+> > + */
+> > +int ceph_mdsmap_active_mds_count(struct ceph_mdsmap *m)
+> > +{
+> > +    int n = 0;
+> > +    int i;
+> > +
+> > +    for(i = 0; i < m->m_max_mds; ++i)
+> > +       if(m->m_info[i].state > 0)
+> > +           ++n;
+> > +
+> > +    return  n;
+> > +}
+> >
+> >  /*
+> >   * choose a random mds that is "up" (i.e. has a state > 0), or -1.
+> > @@ -26,9 +40,8 @@ int ceph_mdsmap_get_random_mds(struct ceph_mdsmap *m)
+> >                 return 0;
+> >
+> >         /* count */
+> > -       for (i = 0; i < m->m_max_mds; i++)
+> > -               if (m->m_info[i].state > 0)
+> > -                       n++;
+> > +       n = ceph_mdsmap_active_mds_count(m);
+> > +
+> >         if (n == 0)
+> >                 return -1;
+> >
+> > diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+> > index 6627b26..4d33d68 100644
+> > --- a/fs/ceph/super.c
+> > +++ b/fs/ceph/super.c
+> > @@ -674,7 +674,15 @@ static struct dentry *open_root_dentry(struct ceph_fs_client *fsc,
+> >         struct ceph_mds_request *req = NULL;
+> >         int err;
+> >         struct dentry *root;
+> > -
+> > +
+> > +       /* check for mds*/
+> > +       if( 0 == ceph_mdsmap_active_mds_count(mdsc->mdsmap) )
+> > +       {
+> > +           pr_info("active mds not found, possible not exist\n");
+> > +           root = ERR_PTR( -ECOMM );
+> > +           return root;
+> > +       }
+> 
+> I think we should return error immediately only if there is no mds
+> (mdsmap->m_max_mds == 0).  If there is inactive mds, we should stick
+> to current behavior (wait until timeout). Furthermore please don't use
+> uncommon error code ECOMM, use common error code such as EINVAL.
+> 
+> Regards
+> Yan, Zheng
+> 
+> 
+> > +
+> >         /* open dir */
+> >         dout("open_root_inode opening '%s'\n", path);
+> >         req = ceph_mdsc_create_request(mdsc, CEPH_MDS_OP_GETATTR, USE_ANY_MDS);
+> > diff --git a/include/linux/ceph/mdsmap.h b/include/linux/ceph/mdsmap.h
+> > index 87ed09f..4d7d502 100644
+> > --- a/include/linux/ceph/mdsmap.h
+> > +++ b/include/linux/ceph/mdsmap.h
+> > @@ -56,6 +56,7 @@ static inline bool ceph_mdsmap_is_laggy(struct ceph_mdsmap *m, int w)
+> >         return false;
+> >  }
+> >
+> > +extern int ceph_mdsmap_active_mds_count(struct ceph_mdsmap *m);
+> >  extern int ceph_mdsmap_get_random_mds(struct ceph_mdsmap *m);
+> >  extern struct ceph_mdsmap *ceph_mdsmap_decode(void **p, void *end);
+> >  extern void ceph_mdsmap_destroy(struct ceph_mdsmap *m);
+> > --
+> > 1.8.3.1
+> >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-# setfattr -n ceph.parent /cephfs/mount/path/name
 
-I had to relax the assert because there's no reason I can think of to
-force the object and its parent dirty just to set this internal
-bookkeeping xattr.  The operation is not journaled, as it takes effect
-immediately.  Although there's no assurance that the operation is
-completed before success is returned, my tests indicate that running
-rados getxattr right after setfattr already gets an attribute, for
-objects that had been created before the introduction of the parent
-attribute.
-
-I realize Zheng Yan posted a patch that would mark for update missing or
-too-old parent attributes on the fly, when inodes were brought into the
-cache, so that the parent attribute would be updated when the inodes
-were to be expired from the MDS log.  I had mds running with that patch
-for a while, and I even explicitly touched and linked files and dirs
-that were missing the parent attribute; many, but not all of the files
-and dirs got the attribute, and I'm having some difficulties getting it
-to work on the remaining ones, in part because it takes so long to take
-effect (as in, perform an operation, then wait for several hours until
-the then-current MDS log segment gets expired, then check whether the
-attribute was set).  This patch causes the parent attribute to be set
-right away.
-
-I'm not sure this immediate behavior would be appropriate for use in
-production (as in, I'm not sure creating an inode and trying to set the
-parent attribute might cause a failure because the inode object isn't
-there yet by the time we try to set an attribute on it), but it should
-be ok for retrofitting ancient inode objects so that they don't cause
-recovery problems due to the lack of the parent xattr.
-
-BTW, Zheng Yan, thanks for the patch that fixed mds readdir with dirs
-ending in remote (hard) links; this one had annoyed me for a long time,
-and I was just about to start actually digging into it when I saw the
-0.73 announcement that mentioned what appeared to be a fix for the
-problem I was running into, and indeed, it was.  I merged it into my
-0.72.1 build and it's been working great!
-
-
---=-=-=
-Content-Type: text/x-diff
-Content-Disposition: inline; filename=mds-ceph-parent-setxattr.patch
-
-mds: handle setxattr ceph.parent
-
-From: Alexandre Oliva <oliva@gnu.org>
-
-Enable clients to setxattr ceph.parent to update the parent xattr.
-
-Signed-off-by: Alexandre Oliva <oliva@gnu.org>
----
- src/mds/CInode.cc |    2 +-
- src/mds/Server.cc |    5 +++++
- 2 files changed, 6 insertions(+), 1 deletion(-)
-
-diff --git a/src/mds/CInode.cc b/src/mds/CInode.cc
-index 1fc57fe..7c692d4 100644
---- a/src/mds/CInode.cc
-+++ b/src/mds/CInode.cc
-@@ -1009,7 +1009,7 @@ struct C_Inode_StoredBacktrace : public Context {
- void CInode::store_backtrace(Context *fin)
- {
-   dout(10) << "store_backtrace on " << *this << dendl;
--  assert(is_dirty_parent());
-+  assert(!fin || is_dirty_parent());
- 
-   auth_pin(this);
- 
-diff --git a/src/mds/Server.cc b/src/mds/Server.cc
-index 6bb3aef..2afb6d7 100644
---- a/src/mds/Server.cc
-+++ b/src/mds/Server.cc
-@@ -3615,6 +3615,11 @@ void Server::handle_set_vxattr(MDRequest *mdr, CInode *cur,
-     journal_and_reply(mdr, cur, 0, le, new C_MDS_inode_update_finish(mds, mdr, cur));
-     return;
-   }
-+  else if (name == "ceph.parent" && value == "") {
-+    cur->store_backtrace(NULL);
-+    reply_request(mdr, 0);
-+    return;
-+  }
- 
-   dout(10) << " unknown vxattr " << name << dendl;
-   reply_request(mdr, -EINVAL);
-
---=-=-=
-
-
--- 
-Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
-You must be the change you wish to see in the world. -- Gandhi
-Be Free! -- http://FSFLA.org/   FSF Latin America board member
-Free Software Evangelist      Red Hat Brazil Compiler Engineer
-
---=-=-=--
