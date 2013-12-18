@@ -1,68 +1,83 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: tcmalloc
-Date: Tue, 17 Dec 2013 16:59:01 -0800
-Message-ID: <CAPYLRzhqLnb6xx2QYnzN8EtMb56Ex3nMpJo50g=PHxrs+w7Hag@mail.gmail.com>
-References: <CANP1eJHzHfB+S2enWm80MkLAHvv53A4Pm36X7rU1ro=Wd2QQ7A@mail.gmail.com>
+From: "Yan, Zheng" <ukernel@gmail.com>
+Subject: Re: [PATCH] mds: handle setxattr ceph.parent
+Date: Wed, 18 Dec 2013 10:47:04 +0800
+Message-ID: <CAAM7YAnb494gQAqa=by3vTc0Oe2Oxr15QAckiHsopMjVDpvMfg@mail.gmail.com>
+References: <oriounafd8.fsf@livre.home>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f182.google.com ([209.85.216.182]:36698 "EHLO
-	mail-qc0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751200Ab3LRA7C convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Dec 2013 19:59:02 -0500
-Received: by mail-qc0-f182.google.com with SMTP id e16so5608422qcx.13
-        for <ceph-devel@vger.kernel.org>; Tue, 17 Dec 2013 16:59:01 -0800 (PST)
-In-Reply-To: <CANP1eJHzHfB+S2enWm80MkLAHvv53A4Pm36X7rU1ro=Wd2QQ7A@mail.gmail.com>
+Received: from mail-la0-f52.google.com ([209.85.215.52]:56480 "EHLO
+	mail-la0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751963Ab3LRCrH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Dec 2013 21:47:07 -0500
+Received: by mail-la0-f52.google.com with SMTP id y1so3491156lam.25
+        for <ceph-devel@vger.kernel.org>; Tue, 17 Dec 2013 18:47:04 -0800 (PST)
+In-Reply-To: <oriounafd8.fsf@livre.home>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Milosz Tanski <milosz@adfin.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Alexandre Oliva <oliva@gnu.org>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Zheng Yan <zheng.z.yan@intel.com>
 
-On Tue, Dec 17, 2013 at 4:15 PM, Milosz Tanski <milosz@adfin.com> wrote=
-:
-> I wanted to bring up an issue with Ceph's use of tcmalloc. I know tha=
-t
-> in Ubuntu (12.04) Ceph uses the distro version of tcmalloc which
-> older.
+On Tue, Dec 17, 2013 at 7:25 PM, Alexandre Oliva <oliva@gnu.org> wrote:
+> This is a (probably half-baked) solution for the problem of cephfs
+> clusters encountering recovery problems when clients are accessing files
+> that don't have a parent attribute.  It enables clients to request the
+> parent attribute to be updated right away, by a simple setxattr call:
 >
-> I've personally ran into issues with tcmalloc for our application
-> where the amount of private space for our application (analytics
-> database) is listed in 10s of gigs but the heap profiler only reports
-> a couple hundreds megs of use.
+> # setfattr -n ceph.parent /cephfs/mount/path/name
 >
-> It seams like tcmalloc while fast does a poor job with fragmentation.
-> In most cases I rather leave more memory to the OS to cache disk data
-> leave it in case the app needs to use it. I've observed issues with
-> the MDS when it's grown to a few gigs and it doesn't grow down even
-> after I've removed a 2/3 of the tree.
+> I had to relax the assert because there's no reason I can think of to
+> force the object and its parent dirty just to set this internal
+> bookkeeping xattr.  The operation is not journaled, as it takes effect
+> immediately.  Although there's no assurance that the operation is
+> completed before success is returned, my tests indicate that running
+> rados getxattr right after setfattr already gets an attribute, for
+> objects that had been created before the introduction of the parent
+> attribute.
 >
-> It's possible that this is fixed in newer versions of tcmalloc
-> (https://code.google.com/p/gperftools/issues/detail?id=3D368). I was
-> curious if anyone else audited this / ran into similar issues and
-> bring it up. For us, we moved to jemalloc which does a fine job
-> returning the memory back to the OS.
+> I realize Zheng Yan posted a patch that would mark for update missing or
+> too-old parent attributes on the fly, when inodes were brought into the
+> cache, so that the parent attribute would be updated when the inodes
+> were to be expired from the MDS log.  I had mds running with that patch
+> for a while, and I even explicitly touched and linked files and dirs
+> that were missing the parent attribute; many, but not all of the files
+> and dirs got the attribute, and I'm having some difficulties getting it
+> to work on the remaining ones, in part because it takes so long to take
+> effect (as in, perform an operation, then wait for several hours until
+> the then-current MDS log segment gets expired, then check whether the
+> attribute was set).  This patch causes the parent attribute to be set
+> right away.
+>
+> I'm not sure this immediate behavior would be appropriate for use in
+> production (as in, I'm not sure creating an inode and trying to set the
+> parent attribute might cause a failure because the inode object isn't
+> there yet by the time we try to set an attribute on it), but it should
+> be ok for retrofitting ancient inode objects so that they don't cause
+> recovery problems due to the lack of the parent xattr.
+>
 
-We've seen scattered instances of this happening on systems run by
-external users (generally on Gentoo or maybe a Fedora build), but have
-never experienced it anywhere that we could reproduce. Helpfully, when
-that's the case it's always been easy to resolve by running the "heap
-release" command (or whatever it actually is; search the docs) to make
-tcmalloc give up its free RAM.
-I haven't evaluated jemalloc, but in all the systems we've run it on
-tcmalloc behaves perfectly under our workloads and provides some
-helpful features (heap analysis, etc); the default system malloc on
-the other hand actually did grow without bound.
+Hi,
 
-I'm not sure your MDS memory use test is actually valid =97 removing
-inodes from the tree leaves them in cache until they've been cleaned
-up out of RADOS, and we have in the past had bugs related to things
-not being trimmed. You'd really want to look at the tcmalloc stats on
-the MDS to see if tcmalloc is misbehaving or not.
--Greg
-Software Engineer #42 @ http://inktank.com | http://ceph.com
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+This seems like a good solution for fixing cephfs that was created
+before dumpling. But I'm not sure whether we should merge this patch
+(how many cephfs that was created before dumpling still exist)
+
+Regards
+Yan, Zheng
+
+
+> BTW, Zheng Yan, thanks for the patch that fixed mds readdir with dirs
+> ending in remote (hard) links; this one had annoyed me for a long time,
+> and I was just about to start actually digging into it when I saw the
+> 0.73 announcement that mentioned what appeared to be a fix for the
+> problem I was running into, and indeed, it was.  I merged it into my
+> 0.72.1 build and it's been working great!
+>
+>
+>
+> --
+> Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
+> You must be the change you wish to see in the world. -- Gandhi
+> Be Free! -- http://FSFLA.org/   FSF Latin America board member
+> Free Software Evangelist      Red Hat Brazil Compiler Engineer
+>
