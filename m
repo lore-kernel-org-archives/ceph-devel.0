@@ -1,7 +1,7 @@
 From: Li Wang <liwang@ubuntukylin.com>
-Subject: [PATCH 2/2] ceph fscache: Uncaching no data page from fscache in readpage()
-Date: Thu, 19 Dec 2013 06:03:49 -0800
-Message-ID: <fe9e6fbe07dfdd26c16aa577758a9f4f799c5dfe.1387461299.git.liwang@ubuntukylin.com>
+Subject: [PATCH 1/2] ceph fscache: Introduce a routine for uncaching single no data page from fscache
+Date: Thu, 19 Dec 2013 06:03:48 -0800
+Message-ID: <65d023ce80c02fd37fcd2e88dc9c01f4959c574c.1387461299.git.liwang@ubuntukylin.com>
 References: <cover.1387461299.git.liwang@ubuntukylin.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <cover.1387461299.git.liwang@ubuntukylin.com>
@@ -12,26 +12,42 @@ To: ceph-devel@vger.kernel.org
 Cc: Sage Weil <sage@inktank.com>, Milosz Tanski <milosz@adfin.com>, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, Li Wang <liwang@ubuntukylin.com>
 List-Id: ceph-devel.vger.kernel.org
 
-Currently, if one new page allocated into fscache in readpage(), however, 
-with no data read into due to error encountered during reading from OSDs, 
-the slot in fscache is not uncached. This patch fixes this.
 
 Signed-off-by: Li Wang <liwang@ubuntukylin.com>
 ---
- fs/ceph/addr.c |    1 +
- 1 file changed, 1 insertion(+)
+ fs/ceph/cache.h |   13 +++++++++++++
+ 1 file changed, 13 insertions(+)
 
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index ec3ba43..0cc9749 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -209,6 +209,7 @@ static int readpage_nounlock(struct file *filp, struct page *page)
- 		err = 0;
- 	if (err < 0) {
- 		SetPageError(page);
-+		ceph_fscache_readpage_cancel(inode, page);
- 		goto out;
- 	} else {
- 		if (err < PAGE_CACHE_SIZE) {
+diff --git a/fs/ceph/cache.h b/fs/ceph/cache.h
+index ba94940..da95f61 100644
+--- a/fs/ceph/cache.h
++++ b/fs/ceph/cache.h
+@@ -67,6 +67,14 @@ static inline int ceph_release_fscache_page(struct page *page, gfp_t gfp)
+ 	return fscache_maybe_release_page(ci->fscache, page, gfp);
+ }
+ 
++static inline void ceph_fscache_readpage_cancel(struct inode *inode,
++						struct page *page)
++{
++	struct ceph_inode_info *ci = ceph_inode(inode);
++	if (fscache_cookie_valid(ci->fscache) && PageFsCache(page))
++		__fscache_uncache_page(ci->fscache, page);
++}
++
+ static inline void ceph_fscache_readpages_cancel(struct inode *inode,
+ 						 struct list_head *pages)
+ {
+@@ -145,6 +153,11 @@ static inline int ceph_release_fscache_page(struct page *page, gfp_t gfp)
+ 	return 1;
+ }
+ 
++static inline void ceph_fscache_readpage_cancel(struct inode *inode,
++						struct page *page)
++{
++}
++
+ static inline void ceph_fscache_readpages_cancel(struct inode *inode,
+ 						 struct list_head *pages)
+ {
 -- 
 1.7.9.5
