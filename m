@@ -1,32 +1,54 @@
-From: Noah Watkins <noah.watkins@inktank.com>
-Subject: Re: Building Ceph using CMake
-Date: Fri, 20 Dec 2013 08:58:56 -0600
-Message-ID: <CA+Hcz58WWEqkWjO-rX230JvQLRL=6LepLdE0WLBCCfqA1RoszQ@mail.gmail.com>
-References: <1417102805.191.1385512980002.JavaMail.root@thunderbeast.private.linuxbox.com>
-	<1045611233.81.1387310943871.JavaMail.root@thunderbeast.private.linuxbox.com>
+From: Milosz Tanski <milosz@adfin.com>
+Subject: Re: [PATCH 0/2] ceph fscache: uncaching single no data page when error
+Date: Fri, 20 Dec 2013 11:03:19 -0500
+Message-ID: <CANP1eJFyxBMg3x7Vbrdf2=CA2Oau6gLjpTduZgSadtMCje48iw@mail.gmail.com>
+References: <cover.1387461299.git.liwang@ubuntukylin.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f179.google.com ([209.85.216.179]:50007 "EHLO
-	mail-qc0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753476Ab3LTO65 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 20 Dec 2013 09:58:57 -0500
-Received: by mail-qc0-f179.google.com with SMTP id i8so2254833qcq.24
-        for <ceph-devel@vger.kernel.org>; Fri, 20 Dec 2013 06:58:56 -0800 (PST)
-In-Reply-To: <1045611233.81.1387310943871.JavaMail.root@thunderbeast.private.linuxbox.com>
+Received: from mail-wi0-f182.google.com ([209.85.212.182]:34386 "EHLO
+	mail-wi0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753099Ab3LTQDU (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 20 Dec 2013 11:03:20 -0500
+Received: by mail-wi0-f182.google.com with SMTP id en1so3878629wid.3
+        for <ceph-devel@vger.kernel.org>; Fri, 20 Dec 2013 08:03:19 -0800 (PST)
+In-Reply-To: <cover.1387461299.git.liwang@ubuntukylin.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ali Maredia <ali@linuxbox.com>
-Cc: "Matt W. Benjamin" <matt@linuxbox.com>, Ceph Devel <ceph-devel@vger.kernel.org>
+To: Li Wang <liwang@ubuntukylin.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, linux-kernel@vger.kernel.org
 
-On Tue, Dec 17, 2013 at 2:09 PM, Ali Maredia <ali@linuxbox.com> wrote:
->
-> Most of the speedup can be attributed to the fact that libtool is compiling both PIC and non-PIC versions of every source file. CMake just builds everything with -fPIC. We don't have an opinion on the matter, but you may want to consider doing the same with the autotools build.
->
-> Many source files are compiled into several targets causing them to be built multiple time. With the CMake build I was able to pull them into static libraries and link them into the targets that needed them.
+This looks legit to me.
 
-In the latest round of automake clean-ups I know some of the
-compilation redundancy was removed, but I dont' recall if it was all
-taken care of. If you happen to know have a list of the redundant
-stuff you found that would be helpful for improving automake.
+- M
+
+P.S: Sorry for the first HTML email, I blame gmail.
+
+On Thu, Dec 19, 2013 at 9:03 AM, Li Wang <liwang@ubuntukylin.com> wrote:
+> Currently, if one new page allocated into fscache in readpage(), however,
+> with no data read into due to error encountered during reading from OSDs,
+> the slot in fscache is not uncached. This patch fixes this.
+>
+> Li Wang (2):
+>   ceph: Introduce a routine for uncaching single no data page from
+>     fscache
+>   ceph: Uncaching no data page from fscache in readpage()
+>
+>  fs/ceph/addr.c  |    1 +
+>  fs/ceph/cache.h |   13 +++++++++++++
+>  2 files changed, 14 insertions(+)
+>
+> --
+> 1.7.9.5
+>
+
+
+
+-- 
+Milosz Tanski
+CTO
+10 East 53rd Street, 37th floor
+New York, NY 10022
+
+p: 646-253-9055
+e: milosz@adfin.com
