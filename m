@@ -1,39 +1,63 @@
 From: Alexandre Oliva <oliva@gnu.org>
-Subject: Re: [PATCH] mds: handle setxattr ceph.parent
-Date: Fri, 20 Dec 2013 01:35:34 -0200
-Message-ID: <orbo0c5h4p.fsf@livre.home>
-References: <oriounafd8.fsf@livre.home>
-	<CAAM7YAnb494gQAqa=by3vTc0Oe2Oxr15QAckiHsopMjVDpvMfg@mail.gmail.com>
-	<or38lq86ig.fsf@livre.home>
-	<alpine.DEB.2.00.1312180908270.27634@cobra.newdream.net>
-	<CAPYLRzgf=H1dMc+AdsJYJpkbjaU6bEJ1VYVAcXgB6PZX70yxVg@mail.gmail.com>
-	<or4n656zij.fsf@livre.home> <52B2F44A.1050109@intel.com>
+Subject: Re: enable old OSD snapshot to re-join a cluster
+Date: Fri, 20 Dec 2013 03:45:49 -0200
+Message-ID: <orvbyk3wj6.fsf@livre.home>
+References: <orr4kbgbn3.fsf@livre.home>
+	<CAPYLRzjG3ws-TJt+XOv0vp-oRuOZti+b1yjBZw_shhmdQE9F4g@mail.gmail.com>
+	<orbo0faevz.fsf@livre.home>
+	<CAPYLRzg6XCBu4B7P0o25q6oULVUQBzF8Jp4u2ONHtFeeAmqYjA@mail.gmail.com>
+	<or8uvh70t6.fsf@livre.home>
+	<CAPYLRzhjDMGxince9-s7fQ210eLvz57zQo+jY6yTgvrARcK51g@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from linux-libre.fsfla.org ([208.118.235.54]:54003 "EHLO
+Received: from linux-libre.fsfla.org ([208.118.235.54]:54107 "EHLO
 	linux-libre.fsfla.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752088Ab3LTDgD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Dec 2013 22:36:03 -0500
-In-Reply-To: <52B2F44A.1050109@intel.com> (Zheng Yan's message of "Thu, 19 Dec
-	2013 21:27:38 +0800")
+	with ESMTP id S1752668Ab3LTFqK (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 20 Dec 2013 00:46:10 -0500
+In-Reply-To: <CAPYLRzhjDMGxince9-s7fQ210eLvz57zQo+jY6yTgvrARcK51g@mail.gmail.com>
+	(Gregory Farnum's message of "Thu, 19 Dec 2013 11:28:54 -0800")
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zheng.z.yan@intel.com>
-Cc: Gregory Farnum <greg@inktank.com>, Sage Weil <sage@inktank.com>, "Yan, Zheng" <ukernel@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <greg@inktank.com>
+Cc: Samuel Just <sam.just@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Dec 19, 2013, "Yan, Zheng" <zheng.z.yan@intel.com> wrote:
+On Dec 19, 2013, Gregory Farnum <greg@inktank.com> wrote:
 
-> next time you encountered log corruption, please open "new issues" at http://tracker.ceph.com/
+> On Wed, Dec 18, 2013 at 11:32 PM, Alexandre Oliva <oliva@gnu.org> wrote:
+>> On Dec 18, 2013, Gregory Farnum <greg@inktank.com> wrote:
+>> 
+>>> On Tue, Dec 17, 2013 at 3:36 AM, Alexandre Oliva <oliva@gnu.org> wrote:
+>>>> Here's an updated version of the patch, that makes it much faster than
+>>>> the earlier version, particularly when the gap between the latest osdmap
+>>>> known by the osd and the earliest osdmap known by the cluster is large.
+>> 
+>>> Is this actually still necessary in the latest dumpling and emperor
+>>> branches?
+>> 
+>> I can't tell for sure, I don't recall when I last rolled back to an old
+>> snapshot without this kind of patch.
+>> 
+>>> I thought sufficiently-old OSDs would go through backfill with the new
+>>> PG members in order to get up-to-date without copying all the data.
+>> 
+>> That much is true, for sure.  The problem was getting to that point.
+>> 
+>> If the latest osdmap known by the osd snapshot turns out to be older
+>> than the earliest map known by the monitors, the osd would give up
+>> because it couldn't make the ends meet: no incremental osdmaps were
+>> available in the cluster, and the osd refused to jump over gaps in the
+>> osdmap sequence.
 
-I have saved the dumped journal, but it contains too much information
-I'm not supposed to or willing to share, especially with a US-based
-company in the post-Snowden era :-(  (something like btrfs-image -s
-might be good to have)
+>> I can give a try without the patch if you tell me there's any chance the
+>> osd might now be able to jump over gaps in the osdmap sequence.
 
-I'd be glad to try to dig info that might be useful out of it, if told
-how to do so, but uploading the journal as taken from the cluster is not
-an option.
+> I don't remember exactly when it got changed, but I think so.
+
+Excellent, I've just confirmed that recovery from an old snapshot works,
+even without the proposed patch.  Yay!
+
+Thanks!
 
 -- 
 Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
