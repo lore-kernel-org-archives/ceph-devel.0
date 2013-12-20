@@ -1,66 +1,164 @@
-From: Alexandre Oliva <oliva@gnu.org>
-Subject: Re: enable old OSD snapshot to re-join a cluster
-Date: Fri, 20 Dec 2013 03:45:49 -0200
-Message-ID: <orvbyk3wj6.fsf@livre.home>
-References: <orr4kbgbn3.fsf@livre.home>
-	<CAPYLRzjG3ws-TJt+XOv0vp-oRuOZti+b1yjBZw_shhmdQE9F4g@mail.gmail.com>
-	<orbo0faevz.fsf@livre.home>
-	<CAPYLRzg6XCBu4B7P0o25q6oULVUQBzF8Jp4u2ONHtFeeAmqYjA@mail.gmail.com>
-	<or8uvh70t6.fsf@livre.home>
-	<CAPYLRzhjDMGxince9-s7fQ210eLvz57zQo+jY6yTgvrARcK51g@mail.gmail.com>
+From: Wido den Hollander <wido@42on.com>
+Subject: Re: qemu-1.7.0 and internal snapshot, Was: qemu-1.5.0 savevm error
+ -95 while writing vm with ceph-rbd as storage-backend
+Date: Fri, 20 Dec 2013 08:06:27 +0100
+Message-ID: <52B3EC73.90306@42on.com>
+References: <59e8e229-4b48-4272-993a-3040c5d5c76b@mailpro> <38D2560F-4164-47DE-973F-2C1BD97EAD3A@filoo.de> <52B076D2.5090303@filoo.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from linux-libre.fsfla.org ([208.118.235.54]:54107 "EHLO
-	linux-libre.fsfla.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752668Ab3LTFqK (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 20 Dec 2013 00:46:10 -0500
-In-Reply-To: <CAPYLRzhjDMGxince9-s7fQ210eLvz57zQo+jY6yTgvrARcK51g@mail.gmail.com>
-	(Gregory Farnum's message of "Thu, 19 Dec 2013 11:28:54 -0800")
+Received: from websrv.42on.com ([31.25.102.167]:44205 "EHLO websrv.42on.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753874Ab3LTHGb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 20 Dec 2013 02:06:31 -0500
+In-Reply-To: <52B076D2.5090303@filoo.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: Samuel Just <sam.just@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Oliver Francke <Oliver.Francke@filoo.de>, Alexandre DERUMIER <aderumier@odiso.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Dec 19, 2013, Gregory Farnum <greg@inktank.com> wrote:
+On 12/17/2013 05:07 PM, Oliver Francke wrote:
+> Hi Alexandre and Wido ;)
+>
+> well, I know this is a pretty old question... but saw some comments f=
+rom
+> you Wido as well as a most current patch for qemu-1.7.0 in the
+> git.proxmox ( internal snapshot async port to qemu 1.7 v5)
+> What I currently did is: apply modify-query-machines.patch and
+> internal-snapshot-async.patch to qemu-1.7.0 sources, all hunks succee=
+d.
+>
+> Now after talking to the QMP with:
+>
+>      { "execute" : "savevm-start", "arguments": { "statefile":
+> "rbd:123/905.save1" }}
+>
+> or a local file, it spits out:
+>
+>      qemu-system-x86_64: block.c:4430: bdrv_set_in_use: Assertion
+> `bs->in_use !=3D in_use' failed
+>
+> *sigh*
+>
+> qemu is started with "some" parameters... and finally drive-specific =
+ones:
+>
+> -device virtio-blk-pci,drive=3Dvirtio0 -drive
+> format=3Draw,file=3Drbd:123/vm-905-disk-.rbd:rbd_cache=3Dtrue:rbd_cac=
+he_size=3D33554432:rbd_cache_max_dirty=3D16777216:rbd_cache_target_dirt=
+y=3D8388608,cache=3Dwriteback,if=3Dnone,id=3Dvirtio0,media=3Ddisk,index=
+=3D0
+>
+>
+> Did I miss a relevant point?
+> What would be the correct strategy?
+>
 
-> On Wed, Dec 18, 2013 at 11:32 PM, Alexandre Oliva <oliva@gnu.org> wrote:
->> On Dec 18, 2013, Gregory Farnum <greg@inktank.com> wrote:
->> 
->>> On Tue, Dec 17, 2013 at 3:36 AM, Alexandre Oliva <oliva@gnu.org> wrote:
->>>> Here's an updated version of the patch, that makes it much faster than
->>>> the earlier version, particularly when the gap between the latest osdmap
->>>> known by the osd and the earliest osdmap known by the cluster is large.
->> 
->>> Is this actually still necessary in the latest dumpling and emperor
->>> branches?
->> 
->> I can't tell for sure, I don't recall when I last rolled back to an old
->> snapshot without this kind of patch.
->> 
->>> I thought sufficiently-old OSDs would go through backfill with the new
->>> PG members in order to get up-to-date without copying all the data.
->> 
->> That much is true, for sure.  The problem was getting to that point.
->> 
->> If the latest osdmap known by the osd snapshot turns out to be older
->> than the earliest map known by the monitors, the osd would give up
->> because it couldn't make the ends meet: no incremental osdmaps were
->> available in the cluster, and the osd refused to jump over gaps in the
->> osdmap sequence.
+I haven't tested this recently, so I'm not sure if this should already =
+work.
 
->> I can give a try without the patch if you tell me there's any chance the
->> osd might now be able to jump over gaps in the osdmap sequence.
+It would be great if this worked, but I'm not aware of it.
 
-> I don't remember exactly when it got changed, but I think so.
+Wido
 
-Excellent, I've just confirmed that recovery from an old snapshot works,
-even without the proposed patch.  Yay!
+> Thnx in advance and kind regards,
+>
+> Oliver.
+>
+> P.S.: I don't use libvirt nor proxmox as a complete system.
+>
+> On 05/24/2013 10:57 PM, Oliver Francke wrote:
+>> Hi Alexandre,
+>>
+>> Am 24.05.2013 um 17:37 schrieb Alexandre DERUMIER <aderumier@odiso.c=
+om>:
+>>
+>>> Hi,
+>>>
+>>> For Proxmox, we have made some patchs to split the savevm process,
+>>>
+>>> to be able to save the memory to an external volume. (and not the
+>>> current volume).
+>>>
+>>> For rbd, we create a new rbd volume to store the memory.
+>>>
+>>> qemu patch is here :
+>>> https://git.proxmox.com/?p=3Dpve-qemu-kvm.git;a=3Dblob;f=3Ddebian/p=
+atches/internal-snapshot-async.patch;h=3Dc67a97ea497fe31ff449acb79e04dc=
+1c53b25578;hb=3DHEAD
+>>>
+>>>
+>>> ----- Mail original -----
+>>>
+>> wow, sounds very interesting, being on the road for the next 3 days =
+I
+>> will have a closer look next week.
+>>
+>> Thnx n regards,
+>>
+>> Oliver.
+>>
+>>> De: "Wido den Hollander" <wido@42on.com>
+>>> =C0: "Oliver Francke" <Oliver.Francke@filoo.de>
+>>> Cc: ceph-devel@vger.kernel.org
+>>> Envoy=E9: Vendredi 24 Mai 2013 17:08:35
+>>> Objet: Re: qemu-1.5.0 savevm error -95 while writing vm with ceph-r=
+bd
+>>> as storage-backend
+>>>
+>>> On 05/24/2013 09:46 AM, Oliver Francke wrote:
+>>>> Hi,
+>>>>
+>>>> with a running VM I encounter this strange behaviour, former
+>>>> qemu-versions don't show up such an error.
+>>>> Perhaps this comes from the rbd-backend in qemu-1.5.0 in combinati=
+on
+>>>> with ceph-0.56.6? Therefore my
+>>>> crosspost.
+>>>>
+>>>> Even if I have no real live-snapshot avail - they know of this
+>>>> restriction -, it's more work for the customers
+>>>> to perform a shutdown before the wonna do some changes to their VM=
+ ;)
+>>>>
+>>> Doesn't Qemu try to save the memory state to RBD here as well? That
+>>> doesn't work and fails.
+>>>
+>>>> Any hints welcome,
+>>>>
+>>>> Oliver.
+>>>>
+>>>
+>>> --
+>>> Wido den Hollander
+>>> 42on B.V.
+>>>
+>>> Phone: +31 (0)20 700 9902
+>>> Skype: contact42on
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
+l" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at http://vger.kernel.org/majordomo-info.html
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
 
-Thanks!
 
--- 
-Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
-You must be the change you wish to see in the world. -- Gandhi
-Be Free! -- http://FSFLA.org/   FSF Latin America board member
-Free Software Evangelist      Red Hat Brazil Compiler Engineer
+--=20
+Wido den Hollander
+42on B.V.
+
+Phone: +31 (0)20 700 9902
+Skype: contact42on
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
