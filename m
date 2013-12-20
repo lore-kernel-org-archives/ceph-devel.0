@@ -1,57 +1,42 @@
-From: "Robin H. Johnson" <robbat2@gentoo.org>
-Subject: Re: RGW CORS fixes for Access-Control-Request-Headers
-Date: Fri, 20 Dec 2013 00:06:36 +0000
-Message-ID: <robbat2-20131220T000518-388520092Z@orbis-terrarum.net>
-References: <robbat2-20131215T205912-773698930Z@orbis-terrarum.net>
- <CABBk=J_1yAsmHvnPfZSd_dm1wo+QcAv0SBjZcvajPcfzM9fiwA@mail.gmail.com>
+From: Alexandre Oliva <oliva@gnu.org>
+Subject: Re: [PATCH] mds: handle setxattr ceph.parent
+Date: Fri, 20 Dec 2013 01:35:34 -0200
+Message-ID: <orbo0c5h4p.fsf@livre.home>
+References: <oriounafd8.fsf@livre.home>
+	<CAAM7YAnb494gQAqa=by3vTc0Oe2Oxr15QAckiHsopMjVDpvMfg@mail.gmail.com>
+	<or38lq86ig.fsf@livre.home>
+	<alpine.DEB.2.00.1312180908270.27634@cobra.newdream.net>
+	<CAPYLRzgf=H1dMc+AdsJYJpkbjaU6bEJ1VYVAcXgB6PZX70yxVg@mail.gmail.com>
+	<or4n656zij.fsf@livre.home> <52B2F44A.1050109@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.gentoo.org ([140.211.166.183]:53637 "EHLO smtp.gentoo.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755201Ab3LTAGi (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 19 Dec 2013 19:06:38 -0500
-Received: from grubbs.orbis-terrarum.net (localhost [127.0.0.1])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-SHA (256/256 bits))
-	(No client certificate requested)
-	by smtp.gentoo.org (Postfix) with ESMTPS id DC6DC33F642
-	for <ceph-devel@vger.kernel.org>; Fri, 20 Dec 2013 00:06:37 +0000 (UTC)
-Content-Disposition: inline
-In-Reply-To: <CABBk=J_1yAsmHvnPfZSd_dm1wo+QcAv0SBjZcvajPcfzM9fiwA@mail.gmail.com>
+Received: from linux-libre.fsfla.org ([208.118.235.54]:54003 "EHLO
+	linux-libre.fsfla.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752088Ab3LTDgD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Dec 2013 22:36:03 -0500
+In-Reply-To: <52B2F44A.1050109@intel.com> (Zheng Yan's message of "Thu, 19 Dec
+	2013 21:27:38 +0800")
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh <yehuda@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
-Cc: "	Robin H. Johnson" <robbat2@gentoo.org>
+To: "Yan, Zheng" <zheng.z.yan@intel.com>
+Cc: Gregory Farnum <greg@inktank.com>, Sage Weil <sage@inktank.com>, "Yan, Zheng" <ukernel@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tue, Dec 17, 2013 at 12:17:23AM -0800,  Yehuda Sadeh wrote:
-> On Sun, Dec 15, 2013 at 1:16 PM, Robin H. Johnson <robbat2@gentoo.org> wrote:
-> > Hi,
-> >
-> > I was trying to use the RGW CORS support, and found that it flubbed
-> > handling of the Access-Control-Request-Headers header badly.
-> >
-> > It was expecting Access-Control-Allow-Headers in the request where it
-> > should have taken the Access-Control-Request-Headers, and it was also
-> > validating the content in a case-sensitive manner, when the CORS
-> > standard (6.2.6) requires that headers are validated case-insensitive.
-> >
-> > I have submitted a pull request with the fixes:
-> > https://github.com/ceph/ceph/pull/949
-> >
-> > I think they should be backported to emperor as well.
-> Overall it looks ok, I still want to run the test suite against it.
-> Can you open corresponding issues in the ceph tracker?
-> (tracker.ceph.com).
-http://tracker.ceph.com/issues/7043
+On Dec 19, 2013, "Yan, Zheng" <zheng.z.yan@intel.com> wrote:
 
-Pull request recreated because I relocated the repo (for work reasons):
-https://github.com/ceph/ceph/pull/975
+> next time you encountered log corruption, please open "new issues" at http://tracker.ceph.com/
 
-I've also got an unrelated fix I'm working on in the S3 POST code, I
-think the signature validation is wrong.
+I have saved the dumped journal, but it contains too much information
+I'm not supposed to or willing to share, especially with a US-based
+company in the post-Snowden era :-(  (something like btrfs-image -s
+might be good to have)
+
+I'd be glad to try to dig info that might be useful out of it, if told
+how to do so, but uploading the journal as taken from the cluster is not
+an option.
 
 -- 
-Robin Hugh Johnson
-Gentoo Linux: Developer, Infrastructure Lead
-E-Mail     : robbat2@gentoo.org
-GnuPG FP   : 11ACBA4F 4778E3F6 E4EDF38E B27B944E 34884E85
+Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
+You must be the change you wish to see in the world. -- Gandhi
+Be Free! -- http://FSFLA.org/   FSF Latin America board member
+Free Software Evangelist      Red Hat Brazil Compiler Engineer
