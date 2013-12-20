@@ -1,38 +1,30 @@
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: Re: [PATCH] mds: handle setxattr ceph.parent
-Date: Fri, 20 Dec 2013 16:03:42 +0800
-Message-ID: <52B3F9DE.60301@intel.com>
-References: <oriounafd8.fsf@livre.home>	<CAAM7YAnb494gQAqa=by3vTc0Oe2Oxr15QAckiHsopMjVDpvMfg@mail.gmail.com>	<or38lq86ig.fsf@livre.home>	<alpine.DEB.2.00.1312180908270.27634@cobra.newdream.net>	<CAPYLRzgf=H1dMc+AdsJYJpkbjaU6bEJ1VYVAcXgB6PZX70yxVg@mail.gmail.com>	<or4n656zij.fsf@livre.home> <52B2F44A.1050109@intel.com> <orbo0c5h4p.fsf@livre.home>
+From: James Harper <james.harper@bendigoit.com.au>
+Subject: link errors
+Date: Fri, 20 Dec 2013 09:38:53 +0000
+Message-ID: <6035A0D088A63A46850C3988ED045A4B66CD8CBA@BITCOM1.int.sbss.com.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:42551 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752777Ab3LTID7 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 20 Dec 2013 03:03:59 -0500
-In-Reply-To: <orbo0c5h4p.fsf@livre.home>
+Received: from smtp1.bendigoit.com.au ([203.16.224.4]:53190 "EHLO
+	smtp1.bendigoit.com.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754952Ab3LTJi6 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 20 Dec 2013 04:38:58 -0500
+Received: from smtp2.bendigoit.com.au ([203.16.207.99] helo=BITCOM1.int.sbss.com.au)
+	by smtp1.bendigoit.com.au with esmtp (Exim 4.80)
+	(envelope-from <james.harper@bendigoit.com.au>)
+	id 1VtwYR-0000OD-8t
+	for ceph-devel@vger.kernel.org; Fri, 20 Dec 2013 20:39:35 +1100
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre Oliva <oliva@gnu.org>
-Cc: Gregory Farnum <greg@inktank.com>, Sage Weil <sage@inktank.com>, "Yan, Zheng" <ukernel@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 12/20/2013 11:35 AM, Alexandre Oliva wrote:
-> On Dec 19, 2013, "Yan, Zheng" <zheng.z.yan@intel.com> wrote:
-> 
->> next time you encountered log corruption, please open "new issues" at http://tracker.ceph.com/
-> 
-> I have saved the dumped journal, but it contains too much information
-> I'm not supposed to or willing to share, especially with a US-based
-> company in the post-Snowden era :-(  (something like btrfs-image -s
-> might be good to have)
-> 
-> I'd be glad to try to dig info that might be useful out of it, if told
-> how to do so, but uploading the journal as taken from the cluster is not
-> an option.
-> 
+I'm trying to compile qemu with rbd support, but it throws up a heap of errors like '/usr/local/src/ceph-0.67.4/src/./osd/osd_types.h:2442: undefined reference to `__cxa_throw'' when it tries to test for rbd support.
 
-can you send out the mds log (the latest few hundreds of lines) when the mds crashed.
+It's breaking when doing static link of a dummy file in configure. Is this supposed to work?
 
-Regards
-Yan, Zheng
+Thanks
+
+James
+
