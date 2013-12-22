@@ -1,30 +1,27 @@
-From: HK China <info@customercare.com>
-Subject: I have a better plans
-Date: Sun, 22 Dec 2013 18:32:54 +0200
-Message-ID: <20131222183254.13155247rsf6hx6e@webmail.mailkurdu.net>
-Reply-To: 2721745483@qq.com
+From: Sage Weil <sage@inktank.com>
+Subject: Re: v0.72.2 Emperor released
+Date: Sun, 22 Dec 2013 11:40:28 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1312221140150.2168@cobra.newdream.net>
+References: <alpine.DEB.2.00.1312212130350.2669@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=ISO-8859-1;
- DelSp="Yes";
- format="flowed"
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from static-130-137-92-77.internetsahibi.net ([77.92.137.130]:46918
-	"EHLO burclinux.ints.net.tr" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1754136Ab3LVQg7 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 22 Dec 2013 11:36:59 -0500
-Content-Disposition: inline
+Received: from cobra.newdream.net ([66.33.216.30]:45381 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754569Ab3LVTk2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 22 Dec 2013 14:40:28 -0500
+In-Reply-To: <alpine.DEB.2.00.1312212130350.2669@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org, ceph-users@ceph.com
 
+On Sat, 21 Dec 2013, Sage Weil wrote:
+> For more detailed information, see the complete changelog:
+> 
+>  * http://ceph.com/docs/master/changelog/v0.72.2.txt
 
-I have a better plans for us reply me ASAP.   2721745483@qq.com
+Actually,
 
-Thanks.
+ * http://ceph.com/docs/master/_downloads/v0.72.2.txt
 
-
-
-
-
+sage
