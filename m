@@ -1,45 +1,85 @@
-From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: [PATCH 19/19] crush: fix crush_choose_firstn comment
-Date: Mon, 23 Dec 2013 19:09:50 +0200
-Message-ID: <1387818590-30483-20-git-send-email-ilya.dryomov@inktank.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH 00/19] crush kernel update
+Date: Mon, 23 Dec 2013 09:33:16 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1312230932230.4949@cobra.newdream.net>
 References: <1387818590-30483-1-git-send-email-ilya.dryomov@inktank.com>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ee0-f53.google.com ([74.125.83.53]:33870 "EHLO
-	mail-ee0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757723Ab3LWRLQ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Dec 2013 12:11:16 -0500
-Received: by mail-ee0-f53.google.com with SMTP id b57so2481878eek.12
-        for <ceph-devel@vger.kernel.org>; Mon, 23 Dec 2013 09:11:15 -0800 (PST)
+Received: from cobra.newdream.net ([66.33.216.30]:53512 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757737Ab3LWRdQ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Dec 2013 12:33:16 -0500
 In-Reply-To: <1387818590-30483-1-git-send-email-ilya.dryomov@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Sage Weil <sage@inktank.com>, ilya.dryomov@inktank.com
+To: Ilya Dryomov <ilya.dryomov@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-Reflects ceph.git commit 8b38f10bc2ee3643a33ea5f9545ad5c00e4ac5b4.
+This looks good!
 
-Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
----
- net/ceph/crush/mapper.c |    6 +++++-
- 1 file changed, 5 insertions(+), 1 deletion(-)
+One last patch that we need is to add the CRUSH_V2 feature bit to 
+ceph_features.h so that we advertise our new capabilities.
 
-diff --git a/net/ceph/crush/mapper.c b/net/ceph/crush/mapper.c
-index 71ce4f12a7c9..b703790b4e44 100644
---- a/net/ceph/crush/mapper.c
-+++ b/net/ceph/crush/mapper.c
-@@ -290,7 +290,11 @@ static int is_out(const struct crush_map *map,
-  * @type: the type of item to choose
-  * @out: pointer to output vector
-  * @outpos: our position in that vector
-- * @recurse_to_leaf: true if we want one device under each item of given type
-+ * @tries: number of attempts to make
-+ * @recurse_tries: number of attempts to have recursive chooseleaf make
-+ * @local_tries: localized retries
-+ * @local_fallback_tries: localized fallback retries
-+ * @recurse_to_leaf: true if we want one device under each item of given type (chooseleaf instead of choose)
-  * @out2: second output vector for leaf items (if @recurse_to_leaf)
-  */
- static int crush_choose_firstn(const struct crush_map *map,
--- 
-1.7.10.4
+And then let's stick this in the testing branch in ceph-client.git!
 
+sage
+
+
+On Mon, 23 Dec 2013, Ilya Dryomov wrote:
+
+> Hello,
+> 
+> This series brings the kernel implementation of crush up to date with
+> recent changes in ceph.git.  Highlights:
+> 
+> - 01/19 pass osdmap->max_osd for weight_max param of crush_do_rule()
+> - 05/19 add crush_do_rule_ary() helper
+> - 10/19 fix build breakage introduced by "clarify numrep vs endpos"
+>         ceph.git commit
+> - 11/19 same as 10/19
+> - 12/19, 17/19 unsigned -> unsigned int, to comply with net/ rules
+> - 17/19 squash "crush: add set_choose_local_[fallback_]tries steps" and
+>         "crush/mapper: finish adding choose_local_[fallback_]tries"
+>         ceph.git commits into one, fix build breakage introduced by
+>         "crush/mapper: finish adding choose_local_[fallback_]tries"
+> 
+> Available from wip-crush-2 branch of ceph-client.git.
+> 
+> Thanks,
+> 
+>                 Ilya
+> 
+> 
+> Ilya Dryomov (19):
+>   crush: pass weight vector size to map function
+>   crush: factor out (trivial) crush_destroy_rule()
+>   crush: reduce scope of some local variables
+>   crush: fix some comments
+>   crush: eliminate CRUSH_MAX_SET result size limitation
+>   crush: return CRUSH_ITEM_UNDEF for failed placements with indep
+>   crush: use breadth-first search for indep mode
+>   crush: add note about r in recursive choose
+>   crush: strip firstn conditionals out of crush_choose, rename
+>   crush: clarify numrep vs endpos
+>   crush: pass parent r value for indep call
+>   crush: new SET_CHOOSE_LEAF_TRIES command
+>   crush: apply chooseleaf_tries to firstn mode too
+>   crush: add SET_CHOOSE_TRIES rule step
+>   crush: CHOOSE_LEAF -> CHOOSELEAF throughout
+>   crush: generalize descend_once
+>   crush: add set_choose_local_[fallback_]tries steps
+>   crush: attempts -> tries
+>   crush: fix crush_choose_firstn comment
+> 
+>  include/linux/crush/crush.h  |   20 ++-
+>  include/linux/crush/mapper.h |    3 +-
+>  net/ceph/crush/crush.c       |    7 +-
+>  net/ceph/crush/mapper.c      |  336 +++++++++++++++++++++++++++++++++---------
+>  net/ceph/osdmap.c            |   16 +-
+>  5 files changed, 304 insertions(+), 78 deletions(-)
+> 
+> -- 
+> 1.7.10.4
+> 
+> 
