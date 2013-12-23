@@ -1,105 +1,128 @@
 From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: [PATCH 10/19] crush: clarify numrep vs endpos
-Date: Mon, 23 Dec 2013 19:09:41 +0200
-Message-ID: <1387818590-30483-11-git-send-email-ilya.dryomov@inktank.com>
+Subject: [PATCH 12/19] crush: new SET_CHOOSE_LEAF_TRIES command
+Date: Mon, 23 Dec 2013 19:09:43 +0200
+Message-ID: <1387818590-30483-13-git-send-email-ilya.dryomov@inktank.com>
 References: <1387818590-30483-1-git-send-email-ilya.dryomov@inktank.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ea0-f173.google.com ([209.85.215.173]:64391 "EHLO
-	mail-ea0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757640Ab3LWRK7 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Dec 2013 12:10:59 -0500
-Received: by mail-ea0-f173.google.com with SMTP id o10so2472094eaj.4
-        for <ceph-devel@vger.kernel.org>; Mon, 23 Dec 2013 09:10:58 -0800 (PST)
+Received: from mail-ea0-f177.google.com ([209.85.215.177]:46220 "EHLO
+	mail-ea0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757649Ab3LWRLD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Dec 2013 12:11:03 -0500
+Received: by mail-ea0-f177.google.com with SMTP id n15so2462548ead.8
+        for <ceph-devel@vger.kernel.org>; Mon, 23 Dec 2013 09:11:02 -0800 (PST)
 In-Reply-To: <1387818590-30483-1-git-send-email-ilya.dryomov@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: Sage Weil <sage@inktank.com>, ilya.dryomov@inktank.com
 
-Pass numrep (the width of the result) separately from the number of results
-we want *this* iteration.  This makes things less awkward when we do a
-recursive call (for chooseleaf) and want only one item.
+Explicitly control the number of sample attempts, and allow the number of
+tries in the recursive call to be explicitly controlled via the rule. This
+is important because the amount of time we want to spend looking for a
+solution may be rule dependent (e.g., higher for the wide indep pool than
+the rep pools).
 
-Reflects ceph.git commit 1b567ee08972f268c11b43fc881e57b5984dd08b.
+(We should do the same for the other tunables, by the way!)
+
+Reflects ceph.git commit c43c893be872f709c787bc57f46c0e97876ff681.
 
 Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
 ---
- net/ceph/crush/mapper.c |   16 ++++++++--------
- 1 file changed, 8 insertions(+), 8 deletions(-)
+ include/linux/crush/crush.h |    2 ++
+ net/ceph/crush/mapper.c     |   31 +++++++++++++++++++++----------
+ 2 files changed, 23 insertions(+), 10 deletions(-)
 
+diff --git a/include/linux/crush/crush.h b/include/linux/crush/crush.h
+index 4023b1b52296..2e50bab91655 100644
+--- a/include/linux/crush/crush.h
++++ b/include/linux/crush/crush.h
+@@ -46,6 +46,8 @@ enum {
+ 	CRUSH_RULE_EMIT = 4,          /* no args */
+ 	CRUSH_RULE_CHOOSE_LEAF_FIRSTN = 6,
+ 	CRUSH_RULE_CHOOSE_LEAF_INDEP = 7,
++
++	CRUSH_RULE_SET_CHOOSE_LEAF_TRIES = 9,
+ };
+ 
+ /*
 diff --git a/net/ceph/crush/mapper.c b/net/ceph/crush/mapper.c
-index a71f8c4c78ec..125dbd04f2b6 100644
+index c727836b5860..e3ade074541c 100644
 --- a/net/ceph/crush/mapper.c
 +++ b/net/ceph/crush/mapper.c
-@@ -457,13 +457,13 @@ reject:
+@@ -455,11 +455,13 @@ reject:
+  *
+  */
  static void crush_choose_indep(const struct crush_map *map,
- 			      struct crush_bucket *bucket,
- 			      const __u32 *weight, int weight_max,
--			      int x, int numrep, int type,
-+			       int x, int left, int numrep, int type,
- 			      int *out, int outpos,
- 			      int recurse_to_leaf,
- 			      int *out2)
+-			      struct crush_bucket *bucket,
+-			      const __u32 *weight, int weight_max,
++			       struct crush_bucket *bucket,
++			       const __u32 *weight, int weight_max,
+ 			       int x, int left, int numrep, int type,
+-			      int *out, int outpos,
+-			      int recurse_to_leaf,
++			       int *out, int outpos,
++			       unsigned int attempts,
++			       unsigned int recurse_attempts,
++			       int recurse_to_leaf,
+ 			       int *out2,
+ 			       int parent_r)
  {
- 	struct crush_bucket *in = bucket;
--	int left = numrep - outpos;
-+	int endpos = outpos + left;
- 	int rep;
- 	unsigned int ftotal;
- 	int r;
-@@ -476,14 +476,14 @@ static void crush_choose_indep(const struct crush_map *map,
- 		bucket->id, x, outpos, numrep);
- 
- 	/* initially my result is undefined */
--	for (rep = outpos; rep < numrep; rep++) {
-+	for (rep = outpos; rep < endpos; rep++) {
- 		out[rep] = CRUSH_ITEM_UNDEF;
- 		if (out2)
+@@ -483,7 +485,7 @@ static void crush_choose_indep(const struct crush_map *map,
  			out2[rep] = CRUSH_ITEM_UNDEF;
  	}
  
- 	for (ftotal = 0; left > 0 && ftotal < map->choose_total_tries; ftotal++) {
--		for (rep = outpos; rep < numrep; rep++) {
-+		for (rep = outpos; rep < endpos; rep++) {
+-	for (ftotal = 0; left > 0 && ftotal < map->choose_total_tries; ftotal++) {
++	for (ftotal = 0; left > 0 && ftotal < attempts; ftotal++) {
+ 		for (rep = outpos; rep < endpos; rep++) {
  			if (out[rep] != CRUSH_ITEM_UNDEF)
  				continue;
- 
-@@ -551,7 +551,7 @@ static void crush_choose_indep(const struct crush_map *map,
- 
- 				/* collision? */
- 				collide = 0;
--				for (i = outpos; i < numrep; i++) {
-+				for (i = outpos; i < endpos; i++) {
- 					if (out[i] == item) {
- 						collide = 1;
- 						break;
-@@ -565,7 +565,7 @@ static void crush_choose_indep(const struct crush_map *map,
+@@ -564,11 +566,12 @@ static void crush_choose_indep(const struct crush_map *map,
+ 				if (recurse_to_leaf) {
+ 					if (item < 0) {
  						crush_choose_indep(map,
- 								   map->buckets[-1-item],
- 								   weight, weight_max,
--								   x, rep+1, 0,
-+								   x, 1, numrep, 0,
- 								   out2, rep,
- 								   0, NULL);
+-								   map->buckets[-1-item],
+-								   weight, weight_max,
+-								   x, 1, numrep, 0,
+-								   out2, rep,
+-								   0, NULL, r);
++						   map->buckets[-1-item],
++						   weight, weight_max,
++						   x, 1, numrep, 0,
++						   out2, rep,
++						   recurse_attempts, 0,
++						   0, NULL, r);
  						if (out2[rep] == CRUSH_ITEM_NONE) {
-@@ -590,7 +590,7 @@ static void crush_choose_indep(const struct crush_map *map,
- 			}
- 		}
- 	}
--	for (rep = outpos; rep < numrep; rep++) {
-+	for (rep = outpos; rep < endpos; rep++) {
- 		if (out[rep] == CRUSH_ITEM_UNDEF) {
- 			out[rep] = CRUSH_ITEM_NONE;
- 		}
-@@ -698,7 +698,7 @@ int crush_do_rule(const struct crush_map *map,
- 						map,
- 						map->buckets[-1-w[i]],
- 						weight, weight_max,
--						x, numrep,
-+						x, numrep, numrep,
+ 							/* placed nothing; no leaf */
+ 							break;
+@@ -631,6 +634,7 @@ int crush_do_rule(const struct crush_map *map,
+ 	__u32 step;
+ 	int i, j;
+ 	int numrep;
++	int choose_leaf_tries = 1;
+ 	const int descend_once = 0;
+ 
+ 	if ((__u32)ruleno >= map->max_rules) {
+@@ -653,6 +657,11 @@ int crush_do_rule(const struct crush_map *map,
+ 			wsize = 1;
+ 			break;
+ 
++		case CRUSH_RULE_SET_CHOOSE_LEAF_TRIES:
++			if (curstep->arg1 > 0)
++				choose_leaf_tries = curstep->arg1;
++			break;
++
+ 		case CRUSH_RULE_CHOOSE_LEAF_FIRSTN:
+ 		case CRUSH_RULE_CHOOSE_FIRSTN:
+ 			firstn = 1;
+@@ -702,6 +711,8 @@ int crush_do_rule(const struct crush_map *map,
+ 						x, numrep, numrep,
  						curstep->arg2,
  						o+osize, j,
++						map->choose_total_tries,
++						choose_leaf_tries,
  						recurse_to_leaf,
+ 						c+osize,
+ 						0);
 -- 
 1.7.10.4
 
