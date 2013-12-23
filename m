@@ -1,233 +1,47 @@
 From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: [PATCH 07/19] crush: use breadth-first search for indep mode
-Date: Mon, 23 Dec 2013 19:09:38 +0200
-Message-ID: <1387818590-30483-8-git-send-email-ilya.dryomov@inktank.com>
+Subject: [PATCH 08/19] crush: add note about r in recursive choose
+Date: Mon, 23 Dec 2013 19:09:39 +0200
+Message-ID: <1387818590-30483-9-git-send-email-ilya.dryomov@inktank.com>
 References: <1387818590-30483-1-git-send-email-ilya.dryomov@inktank.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ea0-f180.google.com ([209.85.215.180]:39397 "EHLO
-	mail-ea0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752635Ab3LWRKy (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Dec 2013 12:10:54 -0500
-Received: by mail-ea0-f180.google.com with SMTP id f15so2475232eak.11
-        for <ceph-devel@vger.kernel.org>; Mon, 23 Dec 2013 09:10:53 -0800 (PST)
+Received: from mail-ea0-f171.google.com ([209.85.215.171]:40323 "EHLO
+	mail-ea0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752635Ab3LWRK4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Dec 2013 12:10:56 -0500
+Received: by mail-ea0-f171.google.com with SMTP id h10so2493119eak.30
+        for <ceph-devel@vger.kernel.org>; Mon, 23 Dec 2013 09:10:55 -0800 (PST)
 In-Reply-To: <1387818590-30483-1-git-send-email-ilya.dryomov@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: Sage Weil <sage@inktank.com>, ilya.dryomov@inktank.com
 
-Reflects ceph.git commit 86e978036a4ecbac4c875e7c00f6c5bbe37282d3.
+Reflects ceph.git commit 4551fee9ad89d0427ed865d766d0d44004d3e3e1.
 
 Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
 ---
- include/linux/crush/crush.h |    3 +-
- net/ceph/crush/mapper.c     |  172 ++++++++++++++++++++++++++++++++++++++++---
- 2 files changed, 165 insertions(+), 10 deletions(-)
+ net/ceph/crush/mapper.c |    8 ++++++++
+ 1 file changed, 8 insertions(+)
 
-diff --git a/include/linux/crush/crush.h b/include/linux/crush/crush.h
-index 3d6a12928560..4023b1b52296 100644
---- a/include/linux/crush/crush.h
-+++ b/include/linux/crush/crush.h
-@@ -22,7 +22,8 @@
- #define CRUSH_MAX_DEPTH 10  /* max crush hierarchy depth */
- 
- 
--#define CRUSH_ITEM_UNDEF  0x7fffffff  /* undefined result */
-+#define CRUSH_ITEM_UNDEF  0x7ffffffe  /* undefined result (internal use only) */
-+#define CRUSH_ITEM_NONE   0x7fffffff  /* no result */
- 
- /*
-  * CRUSH uses user-defined "rules" to describe how inputs should be
 diff --git a/net/ceph/crush/mapper.c b/net/ceph/crush/mapper.c
-index a8605245d190..caeb1066bea3 100644
+index caeb1066bea3..77b7a73e65cf 100644
 --- a/net/ceph/crush/mapper.c
 +++ b/net/ceph/crush/mapper.c
-@@ -474,6 +474,148 @@ reject:
+@@ -514,6 +514,14 @@ static void crush_choose_indep(const struct crush_map *map,
  
+ 			/* choose through intervening buckets */
+ 			for (;;) {
++				/* note: we base the choice on the position
++				 * even in the nested call.  that means that
++				 * if the first layer chooses the same bucket
++				 * in a different position, we will tend to
++				 * choose a different item in that bucket.
++				 * this will involve more devices in data
++				 * movement and tend to distribute the load.
++				 */
+ 				r = rep;
  
- /**
-+ * choose indep: alternative breadth-first positionally stable mapping
-+ *
-+ */
-+static void crush_choose_indep(const struct crush_map *map,
-+			      struct crush_bucket *bucket,
-+			      const __u32 *weight, int weight_max,
-+			      int x, int numrep, int type,
-+			      int *out, int outpos,
-+			      int recurse_to_leaf,
-+			      int *out2)
-+{
-+	struct crush_bucket *in = bucket;
-+	int left = numrep - outpos;
-+	int rep;
-+	unsigned int ftotal;
-+	int r;
-+	int i;
-+	int item = 0;
-+	int itemtype;
-+	int collide;
-+
-+	dprintk("CHOOSE%s INDEP bucket %d x %d outpos %d numrep %d\n", recurse_to_leaf ? "_LEAF" : "",
-+		bucket->id, x, outpos, numrep);
-+
-+	/* initially my result is undefined */
-+	for (rep = outpos; rep < numrep; rep++) {
-+		out[rep] = CRUSH_ITEM_UNDEF;
-+		if (out2)
-+			out2[rep] = CRUSH_ITEM_UNDEF;
-+	}
-+
-+	for (ftotal = 0; left > 0 && ftotal < map->choose_total_tries; ftotal++) {
-+		for (rep = outpos; rep < numrep; rep++) {
-+			if (out[rep] != CRUSH_ITEM_UNDEF)
-+				continue;
-+
-+			in = bucket;  /* initial bucket */
-+
-+			/* choose through intervening buckets */
-+			for (;;) {
-+				r = rep;
-+
-+				/* be careful */
-+				if (in->alg == CRUSH_BUCKET_UNIFORM &&
-+				    in->size % numrep == 0)
-+					/* r'=r+(n+1)*f_total */
-+					r += (numrep+1) * ftotal;
-+				else
-+					/* r' = r + n*f_total */
-+					r += numrep * ftotal;
-+
-+				/* bucket choose */
-+				if (in->size == 0) {
-+					dprintk("   empty bucket\n");
-+					break;
-+				}
-+
-+				item = crush_bucket_choose(in, x, r);
-+				if (item >= map->max_devices) {
-+					dprintk("   bad item %d\n", item);
-+					out[rep] = CRUSH_ITEM_NONE;
-+					if (out2)
-+						out2[rep] = CRUSH_ITEM_NONE;
-+					left--;
-+					break;
-+				}
-+
-+				/* desired type? */
-+				if (item < 0)
-+					itemtype = map->buckets[-1-item]->type;
-+				else
-+					itemtype = 0;
-+				dprintk("  item %d type %d\n", item, itemtype);
-+
-+				/* keep going? */
-+				if (itemtype != type) {
-+					if (item >= 0 ||
-+					    (-1-item) >= map->max_buckets) {
-+						dprintk("   bad item type %d\n", type);
-+						out[rep] = CRUSH_ITEM_NONE;
-+						if (out2)
-+							out2[rep] =
-+								CRUSH_ITEM_NONE;
-+						left--;
-+						break;
-+					}
-+					in = map->buckets[-1-item];
-+					continue;
-+				}
-+
-+				/* collision? */
-+				collide = 0;
-+				for (i = outpos; i < numrep; i++) {
-+					if (out[i] == item) {
-+						collide = 1;
-+						break;
-+					}
-+				}
-+				if (collide)
-+					break;
-+
-+				if (recurse_to_leaf) {
-+					if (item < 0) {
-+						crush_choose_indep(map,
-+								   map->buckets[-1-item],
-+								   weight, weight_max,
-+								   x, rep+1, 0,
-+								   out2, rep,
-+								   0, NULL);
-+						if (out2[rep] == CRUSH_ITEM_NONE) {
-+							/* placed nothing; no leaf */
-+							break;
-+						}
-+					} else {
-+						/* we already have a leaf! */
-+						out2[rep] = item;
-+					}
-+				}
-+
-+				/* out? */
-+				if (itemtype == 0 &&
-+				    is_out(map, weight, weight_max, item, x))
-+					break;
-+
-+				/* yay! */
-+				out[rep] = item;
-+				left--;
-+				break;
-+			}
-+		}
-+	}
-+	for (rep = outpos; rep < numrep; rep++) {
-+		if (out[rep] == CRUSH_ITEM_UNDEF) {
-+			out[rep] = CRUSH_ITEM_NONE;
-+		}
-+		if (out2 && out2[rep] == CRUSH_ITEM_UNDEF) {
-+			out2[rep] = CRUSH_ITEM_NONE;
-+		}
-+	}
-+}
-+
-+/**
-  * crush_do_rule - calculate a mapping with the given input and rule
-  * @map: the crush_map
-  * @ruleno: the rule id
-@@ -556,15 +698,27 @@ int crush_do_rule(const struct crush_map *map,
- 						continue;
- 				}
- 				j = 0;
--				osize += crush_choose(map,
--						      map->buckets[-1-w[i]],
--						      weight, weight_max,
--						      x, numrep,
--						      curstep->arg2,
--						      o+osize, j,
--						      firstn,
--						      recurse_to_leaf,
--						      descend_once, c+osize);
-+				if (firstn) {
-+					osize += crush_choose(map,
-+							      map->buckets[-1-w[i]],
-+							      weight, weight_max,
-+							      x, numrep,
-+							      curstep->arg2,
-+							      o+osize, j,
-+							      firstn,
-+							      recurse_to_leaf,
-+							      descend_once, c+osize);
-+				} else {
-+					crush_choose_indep(map,
-+							   map->buckets[-1-w[i]],
-+							   weight, weight_max,
-+							   x, numrep,
-+							   curstep->arg2,
-+							   o+osize, j,
-+							   recurse_to_leaf,
-+							   c+osize);
-+					osize += numrep;
-+				}
- 			}
- 
- 			if (recurse_to_leaf)
+ 				/* be careful */
 -- 
 1.7.10.4
 
