@@ -1,120 +1,233 @@
 From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: [PATCH 05/19] crush: eliminate CRUSH_MAX_SET result size limitation
-Date: Mon, 23 Dec 2013 19:09:36 +0200
-Message-ID: <1387818590-30483-6-git-send-email-ilya.dryomov@inktank.com>
+Subject: [PATCH 07/19] crush: use breadth-first search for indep mode
+Date: Mon, 23 Dec 2013 19:09:38 +0200
+Message-ID: <1387818590-30483-8-git-send-email-ilya.dryomov@inktank.com>
 References: <1387818590-30483-1-git-send-email-ilya.dryomov@inktank.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ea0-f177.google.com ([209.85.215.177]:56370 "EHLO
-	mail-ea0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752635Ab3LWRKu (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Dec 2013 12:10:50 -0500
-Received: by mail-ea0-f177.google.com with SMTP id n15so2478995ead.36
-        for <ceph-devel@vger.kernel.org>; Mon, 23 Dec 2013 09:10:49 -0800 (PST)
+Received: from mail-ea0-f180.google.com ([209.85.215.180]:39397 "EHLO
+	mail-ea0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752635Ab3LWRKy (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Dec 2013 12:10:54 -0500
+Received: by mail-ea0-f180.google.com with SMTP id f15so2475232eak.11
+        for <ceph-devel@vger.kernel.org>; Mon, 23 Dec 2013 09:10:53 -0800 (PST)
 In-Reply-To: <1387818590-30483-1-git-send-email-ilya.dryomov@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: Sage Weil <sage@inktank.com>, ilya.dryomov@inktank.com
 
-This is only present to size the temporary scratch arrays that we put on
-the stack.  Let the caller allocate them as they wish and remove the
-limitation.
-
-Reflects ceph.git commit 1cfe140bf2dab99517589a82a916f4c75b9492d1.
+Reflects ceph.git commit 86e978036a4ecbac4c875e7c00f6c5bbe37282d3.
 
 Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
 ---
- include/linux/crush/crush.h  |    1 -
- include/linux/crush/mapper.h |    3 ++-
- net/ceph/crush/mapper.c      |   10 ++++++----
- net/ceph/osdmap.c            |   16 +++++++++++++---
- 4 files changed, 21 insertions(+), 9 deletions(-)
+ include/linux/crush/crush.h |    3 +-
+ net/ceph/crush/mapper.c     |  172 ++++++++++++++++++++++++++++++++++++++++---
+ 2 files changed, 165 insertions(+), 10 deletions(-)
 
 diff --git a/include/linux/crush/crush.h b/include/linux/crush/crush.h
-index 09561a04c127..83543c504b5a 100644
+index 3d6a12928560..4023b1b52296 100644
 --- a/include/linux/crush/crush.h
 +++ b/include/linux/crush/crush.h
-@@ -21,7 +21,6 @@
- 
- 
+@@ -22,7 +22,8 @@
  #define CRUSH_MAX_DEPTH 10  /* max crush hierarchy depth */
--#define CRUSH_MAX_SET   10  /* max size of a mapping result */
  
+ 
+-#define CRUSH_ITEM_UNDEF  0x7fffffff  /* undefined result */
++#define CRUSH_ITEM_UNDEF  0x7ffffffe  /* undefined result (internal use only) */
++#define CRUSH_ITEM_NONE   0x7fffffff  /* no result */
  
  /*
-diff --git a/include/linux/crush/mapper.h b/include/linux/crush/mapper.h
-index 69310b031875..eab367446eea 100644
---- a/include/linux/crush/mapper.h
-+++ b/include/linux/crush/mapper.h
-@@ -14,6 +14,7 @@ extern int crush_find_rule(const struct crush_map *map, int ruleset, int type, i
- extern int crush_do_rule(const struct crush_map *map,
- 			 int ruleno,
- 			 int x, int *result, int result_max,
--			 const __u32 *weights, int weight_max);
-+			 const __u32 *weights, int weight_max,
-+			 int *scratch);
- 
- #endif
+  * CRUSH uses user-defined "rules" to describe how inputs should be
 diff --git a/net/ceph/crush/mapper.c b/net/ceph/crush/mapper.c
-index 82cab7d3e89d..dcf48bc504ea 100644
+index a8605245d190..caeb1066bea3 100644
 --- a/net/ceph/crush/mapper.c
 +++ b/net/ceph/crush/mapper.c
-@@ -478,15 +478,17 @@ reject:
-  * @result_max: maximum result size
-  * @weight: weight vector (for map leaves)
-  * @weight_max: size of weight vector
-+ * @scratch: scratch vector for private use; must be >= 3 * result_max
-  */
- int crush_do_rule(const struct crush_map *map,
- 		  int ruleno, int x, int *result, int result_max,
--		  const __u32 *weight, int weight_max)
-+		  const __u32 *weight, int weight_max,
-+		  int *scratch)
- {
- 	int result_len;
--	int a[CRUSH_MAX_SET];
--	int b[CRUSH_MAX_SET];
--	int c[CRUSH_MAX_SET];
-+	int *a = scratch;
-+	int *b = scratch + result_max;
-+	int *c = scratch + result_max*2;
- 	int recurse_to_leaf;
- 	int *w;
- 	int wsize = 0;
-diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
-index 6477a68ddecb..8b1a6b48bb5d 100644
---- a/net/ceph/osdmap.c
-+++ b/net/ceph/osdmap.c
-@@ -1110,6 +1110,16 @@ int ceph_calc_ceph_pg(struct ceph_pg *pg, const char *oid,
- }
- EXPORT_SYMBOL(ceph_calc_ceph_pg);
+@@ -474,6 +474,148 @@ reject:
  
-+static int crush_do_rule_ary(const struct crush_map *map, int ruleno, int x,
-+			     int *result, int result_max,
-+			     const __u32 *weight, int weight_max)
+ 
+ /**
++ * choose indep: alternative breadth-first positionally stable mapping
++ *
++ */
++static void crush_choose_indep(const struct crush_map *map,
++			      struct crush_bucket *bucket,
++			      const __u32 *weight, int weight_max,
++			      int x, int numrep, int type,
++			      int *out, int outpos,
++			      int recurse_to_leaf,
++			      int *out2)
 +{
-+	int scratch[result_max * 3];
++	struct crush_bucket *in = bucket;
++	int left = numrep - outpos;
++	int rep;
++	unsigned int ftotal;
++	int r;
++	int i;
++	int item = 0;
++	int itemtype;
++	int collide;
 +
-+	return crush_do_rule(map, ruleno, x, result, result_max,
-+			     weight, weight_max, scratch);
++	dprintk("CHOOSE%s INDEP bucket %d x %d outpos %d numrep %d\n", recurse_to_leaf ? "_LEAF" : "",
++		bucket->id, x, outpos, numrep);
++
++	/* initially my result is undefined */
++	for (rep = outpos; rep < numrep; rep++) {
++		out[rep] = CRUSH_ITEM_UNDEF;
++		if (out2)
++			out2[rep] = CRUSH_ITEM_UNDEF;
++	}
++
++	for (ftotal = 0; left > 0 && ftotal < map->choose_total_tries; ftotal++) {
++		for (rep = outpos; rep < numrep; rep++) {
++			if (out[rep] != CRUSH_ITEM_UNDEF)
++				continue;
++
++			in = bucket;  /* initial bucket */
++
++			/* choose through intervening buckets */
++			for (;;) {
++				r = rep;
++
++				/* be careful */
++				if (in->alg == CRUSH_BUCKET_UNIFORM &&
++				    in->size % numrep == 0)
++					/* r'=r+(n+1)*f_total */
++					r += (numrep+1) * ftotal;
++				else
++					/* r' = r + n*f_total */
++					r += numrep * ftotal;
++
++				/* bucket choose */
++				if (in->size == 0) {
++					dprintk("   empty bucket\n");
++					break;
++				}
++
++				item = crush_bucket_choose(in, x, r);
++				if (item >= map->max_devices) {
++					dprintk("   bad item %d\n", item);
++					out[rep] = CRUSH_ITEM_NONE;
++					if (out2)
++						out2[rep] = CRUSH_ITEM_NONE;
++					left--;
++					break;
++				}
++
++				/* desired type? */
++				if (item < 0)
++					itemtype = map->buckets[-1-item]->type;
++				else
++					itemtype = 0;
++				dprintk("  item %d type %d\n", item, itemtype);
++
++				/* keep going? */
++				if (itemtype != type) {
++					if (item >= 0 ||
++					    (-1-item) >= map->max_buckets) {
++						dprintk("   bad item type %d\n", type);
++						out[rep] = CRUSH_ITEM_NONE;
++						if (out2)
++							out2[rep] =
++								CRUSH_ITEM_NONE;
++						left--;
++						break;
++					}
++					in = map->buckets[-1-item];
++					continue;
++				}
++
++				/* collision? */
++				collide = 0;
++				for (i = outpos; i < numrep; i++) {
++					if (out[i] == item) {
++						collide = 1;
++						break;
++					}
++				}
++				if (collide)
++					break;
++
++				if (recurse_to_leaf) {
++					if (item < 0) {
++						crush_choose_indep(map,
++								   map->buckets[-1-item],
++								   weight, weight_max,
++								   x, rep+1, 0,
++								   out2, rep,
++								   0, NULL);
++						if (out2[rep] == CRUSH_ITEM_NONE) {
++							/* placed nothing; no leaf */
++							break;
++						}
++					} else {
++						/* we already have a leaf! */
++						out2[rep] = item;
++					}
++				}
++
++				/* out? */
++				if (itemtype == 0 &&
++				    is_out(map, weight, weight_max, item, x))
++					break;
++
++				/* yay! */
++				out[rep] = item;
++				left--;
++				break;
++			}
++		}
++	}
++	for (rep = outpos; rep < numrep; rep++) {
++		if (out[rep] == CRUSH_ITEM_UNDEF) {
++			out[rep] = CRUSH_ITEM_NONE;
++		}
++		if (out2 && out2[rep] == CRUSH_ITEM_UNDEF) {
++			out2[rep] = CRUSH_ITEM_NONE;
++		}
++	}
 +}
 +
- /*
-  * Calculate raw osd vector for the given pgid.  Return pointer to osd
-  * array, or NULL on failure.
-@@ -1163,9 +1173,9 @@ static int *calc_pg_raw(struct ceph_osdmap *osdmap, struct ceph_pg pgid,
- 				      pool->pgp_num_mask) +
- 			(unsigned)pgid.pool;
- 	}
--	r = crush_do_rule(osdmap->crush, ruleno, pps, osds,
--			  min_t(int, pool->size, *num),
--			  osdmap->osd_weight, osdmap->max_osd);
-+	r = crush_do_rule_ary(osdmap->crush, ruleno, pps,
-+			      osds, min_t(int, pool->size, *num),
-+			      osdmap->osd_weight, osdmap->max_osd);
- 	if (r < 0) {
- 		pr_err("error %d from crush rule: pool %lld ruleset %d type %d"
- 		       " size %d\n", r, pgid.pool, pool->crush_ruleset,
++/**
+  * crush_do_rule - calculate a mapping with the given input and rule
+  * @map: the crush_map
+  * @ruleno: the rule id
+@@ -556,15 +698,27 @@ int crush_do_rule(const struct crush_map *map,
+ 						continue;
+ 				}
+ 				j = 0;
+-				osize += crush_choose(map,
+-						      map->buckets[-1-w[i]],
+-						      weight, weight_max,
+-						      x, numrep,
+-						      curstep->arg2,
+-						      o+osize, j,
+-						      firstn,
+-						      recurse_to_leaf,
+-						      descend_once, c+osize);
++				if (firstn) {
++					osize += crush_choose(map,
++							      map->buckets[-1-w[i]],
++							      weight, weight_max,
++							      x, numrep,
++							      curstep->arg2,
++							      o+osize, j,
++							      firstn,
++							      recurse_to_leaf,
++							      descend_once, c+osize);
++				} else {
++					crush_choose_indep(map,
++							   map->buckets[-1-w[i]],
++							   weight, weight_max,
++							   x, numrep,
++							   curstep->arg2,
++							   o+osize, j,
++							   recurse_to_leaf,
++							   c+osize);
++					osize += numrep;
++				}
+ 			}
+ 
+ 			if (recurse_to_leaf)
 -- 
 1.7.10.4
 
