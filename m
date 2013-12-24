@@ -1,210 +1,171 @@
 From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: [PATCH 1/2] libceph: all features fields must be u64
-Date: Tue, 24 Dec 2013 21:41:51 +0200
-Message-ID: <1387914112-17809-2-git-send-email-ilya.dryomov@inktank.com>
+Subject: [PATCH 2/2] libceph: update ceph_features.h
+Date: Tue, 24 Dec 2013 21:41:52 +0200
+Message-ID: <1387914112-17809-3-git-send-email-ilya.dryomov@inktank.com>
 References: <1387914112-17809-1-git-send-email-ilya.dryomov@inktank.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ea0-f169.google.com ([209.85.215.169]:58814 "EHLO
-	mail-ea0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752492Ab3LXTmo (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 24 Dec 2013 14:42:44 -0500
-Received: by mail-ea0-f169.google.com with SMTP id l9so2603014eaj.14
-        for <ceph-devel@vger.kernel.org>; Tue, 24 Dec 2013 11:42:43 -0800 (PST)
+Received: from mail-ee0-f51.google.com ([74.125.83.51]:50873 "EHLO
+	mail-ee0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752410Ab3LXTmq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 24 Dec 2013 14:42:46 -0500
+Received: by mail-ee0-f51.google.com with SMTP id b15so3038810eek.38
+        for <ceph-devel@vger.kernel.org>; Tue, 24 Dec 2013 11:42:44 -0800 (PST)
 In-Reply-To: <1387914112-17809-1-git-send-email-ilya.dryomov@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: Sage Weil <sage@inktank.com>, ilya.dryomov@inktank.com
 
-In preparation for ceph_features.h update, change all features fields
-from unsigned int/u32 to u64.  (ceph.git has ~40 feature bits at this
-point.)
+This updates ceph_features.h so that it has all feature bits defined in
+ceph.git.  In the interim since the last update, ceph.git crossed the
+"32 feature bits" point, and, the addition of the 33rd bit wasn't
+handled correctly.  The work-around is squashed into this commit and
+reflects ceph.git commit 053659d05e0349053ef703b414f44965f368b9f0.
 
 Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
 ---
- fs/ceph/mds_client.c           |   14 +++++++-------
- fs/ceph/super.c                |    4 ++--
- include/linux/ceph/libceph.h   |    8 ++++----
- include/linux/ceph/messenger.h |   10 +++++-----
- net/ceph/ceph_common.c         |    4 ++--
- net/ceph/messenger.c           |    4 ++--
- 6 files changed, 22 insertions(+), 22 deletions(-)
+ include/linux/ceph/ceph_features.h |   96 ++++++++++++++++++++++++------------
+ net/ceph/messenger.c               |    4 +-
+ 2 files changed, 67 insertions(+), 33 deletions(-)
 
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index d90861f45210..4a13f6e72069 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -63,7 +63,7 @@ static const struct ceph_connection_operations mds_con_ops;
+diff --git a/include/linux/ceph/ceph_features.h b/include/linux/ceph/ceph_features.h
+index 4c42080347af..003ea719be65 100644
+--- a/include/linux/ceph/ceph_features.h
++++ b/include/linux/ceph/ceph_features.h
+@@ -4,42 +4,73 @@
+ /*
+  * feature bits
   */
- static int parse_reply_info_in(void **p, void *end,
- 			       struct ceph_mds_reply_info_in *info,
--			       int features)
-+			       u64 features)
- {
- 	int err = -EIO;
+-#define CEPH_FEATURE_UID            (1<<0)
+-#define CEPH_FEATURE_NOSRCADDR      (1<<1)
+-#define CEPH_FEATURE_MONCLOCKCHECK  (1<<2)
+-#define CEPH_FEATURE_FLOCK          (1<<3)
+-#define CEPH_FEATURE_SUBSCRIBE2     (1<<4)
+-#define CEPH_FEATURE_MONNAMES       (1<<5)
+-#define CEPH_FEATURE_RECONNECT_SEQ  (1<<6)
+-#define CEPH_FEATURE_DIRLAYOUTHASH  (1<<7)
+-#define CEPH_FEATURE_OBJECTLOCATOR  (1<<8)
+-#define CEPH_FEATURE_PGID64         (1<<9)
+-#define CEPH_FEATURE_INCSUBOSDMAP   (1<<10)
+-#define CEPH_FEATURE_PGPOOL3        (1<<11)
+-#define CEPH_FEATURE_OSDREPLYMUX    (1<<12)
+-#define CEPH_FEATURE_OSDENC         (1<<13)
+-#define CEPH_FEATURE_OMAP           (1<<14)
+-#define CEPH_FEATURE_MONENC         (1<<15)
+-#define CEPH_FEATURE_QUERY_T        (1<<16)
+-#define CEPH_FEATURE_INDEP_PG_MAP   (1<<17)
+-#define CEPH_FEATURE_CRUSH_TUNABLES (1<<18)
+-#define CEPH_FEATURE_CHUNKY_SCRUB   (1<<19)
+-#define CEPH_FEATURE_MON_NULLROUTE  (1<<20)
+-#define CEPH_FEATURE_MON_GV         (1<<21)
+-#define CEPH_FEATURE_BACKFILL_RESERVATION (1<<22)
+-#define CEPH_FEATURE_MSG_AUTH	    (1<<23)
+-#define CEPH_FEATURE_RECOVERY_RESERVATION (1<<24)
+-#define CEPH_FEATURE_CRUSH_TUNABLES2 (1<<25)
+-#define CEPH_FEATURE_CREATEPOOLID   (1<<26)
+-#define CEPH_FEATURE_REPLY_CREATE_INODE   (1<<27)
+-#define CEPH_FEATURE_OSD_HBMSGS     (1<<28)
+-#define CEPH_FEATURE_MDSENC         (1<<29)
+-#define CEPH_FEATURE_OSDHASHPSPOOL  (1<<30)
++#define CEPH_FEATURE_UID            (1ULL<<0)
++#define CEPH_FEATURE_NOSRCADDR      (1ULL<<1)
++#define CEPH_FEATURE_MONCLOCKCHECK  (1ULL<<2)
++#define CEPH_FEATURE_FLOCK          (1ULL<<3)
++#define CEPH_FEATURE_SUBSCRIBE2     (1ULL<<4)
++#define CEPH_FEATURE_MONNAMES       (1ULL<<5)
++#define CEPH_FEATURE_RECONNECT_SEQ  (1ULL<<6)
++#define CEPH_FEATURE_DIRLAYOUTHASH  (1ULL<<7)
++#define CEPH_FEATURE_OBJECTLOCATOR  (1ULL<<8)
++#define CEPH_FEATURE_PGID64         (1ULL<<9)
++#define CEPH_FEATURE_INCSUBOSDMAP   (1ULL<<10)
++#define CEPH_FEATURE_PGPOOL3        (1ULL<<11)
++#define CEPH_FEATURE_OSDREPLYMUX    (1ULL<<12)
++#define CEPH_FEATURE_OSDENC         (1ULL<<13)
++#define CEPH_FEATURE_OMAP           (1ULL<<14)
++#define CEPH_FEATURE_MONENC         (1ULL<<15)
++#define CEPH_FEATURE_QUERY_T        (1ULL<<16)
++#define CEPH_FEATURE_INDEP_PG_MAP   (1ULL<<17)
++#define CEPH_FEATURE_CRUSH_TUNABLES (1ULL<<18)
++#define CEPH_FEATURE_CHUNKY_SCRUB   (1ULL<<19)
++#define CEPH_FEATURE_MON_NULLROUTE  (1ULL<<20)
++#define CEPH_FEATURE_MON_GV         (1ULL<<21)
++#define CEPH_FEATURE_BACKFILL_RESERVATION (1ULL<<22)
++#define CEPH_FEATURE_MSG_AUTH	    (1ULL<<23)
++#define CEPH_FEATURE_RECOVERY_RESERVATION (1ULL<<24)
++#define CEPH_FEATURE_CRUSH_TUNABLES2 (1ULL<<25)
++#define CEPH_FEATURE_CREATEPOOLID   (1ULL<<26)
++#define CEPH_FEATURE_REPLY_CREATE_INODE   (1ULL<<27)
++#define CEPH_FEATURE_OSD_HBMSGS     (1ULL<<28)
++#define CEPH_FEATURE_MDSENC         (1ULL<<29)
++#define CEPH_FEATURE_OSDHASHPSPOOL  (1ULL<<30)
++#define CEPH_FEATURE_MON_SINGLE_PAXOS (1ULL<<31)
++#define CEPH_FEATURE_OSD_SNAPMAPPER (1ULL<<32)
++#define CEPH_FEATURE_MON_SCRUB      (1ULL<<33)
++#define CEPH_FEATURE_OSD_PACKED_RECOVERY (1ULL<<34)
++#define CEPH_FEATURE_OSD_CACHEPOOL (1ULL<<35)
++#define CEPH_FEATURE_CRUSH_V2      (1ULL<<36)  /* new indep; SET_* steps */
++#define CEPH_FEATURE_EXPORT_PEER   (1ULL<<37)
++#define CEPH_FEATURE_OSD_ERASURE_CODES (1ULL<<38)
++
++/*
++ * The introduction of CEPH_FEATURE_OSD_SNAPMAPPER caused the feature
++ * vector to evaluate to 64 bit ~0.  To cope, we designate 1ULL << 63
++ * to mean 33 bit ~0, and introduce a helper below to do the
++ * translation.
++ *
++ * This was introduced by ceph.git commit
++ *   9ea02b84104045c2ffd7e7f4e7af512953855ecd v0.58-657-g9ea02b8
++ * and fixed by ceph.git commit
++ *   4255b5c2fb54ae40c53284b3ab700fdfc7e61748 v0.65-263-g4255b5c
++ */
++#define CEPH_FEATURE_RESERVED (1ULL<<63)
++
++static inline u64 ceph_sanitize_features(u64 features)
++{
++	if (features & CEPH_FEATURE_RESERVED) {
++		/* everything through OSD_SNAPMAPPER */
++		return 0x1ffffffffull;
++	} else {
++		return features;
++	}
++}
  
-@@ -98,7 +98,7 @@ bad:
+ /*
+  * Features supported.
   */
- static int parse_reply_info_trace(void **p, void *end,
- 				  struct ceph_mds_reply_info_parsed *info,
--				  int features)
-+				  u64 features)
- {
- 	int err;
- 
-@@ -145,7 +145,7 @@ out_bad:
-  */
- static int parse_reply_info_dir(void **p, void *end,
- 				struct ceph_mds_reply_info_parsed *info,
--				int features)
-+				u64 features)
- {
- 	u32 num, i = 0;
- 	int err;
-@@ -217,7 +217,7 @@ out_bad:
-  */
- static int parse_reply_info_filelock(void **p, void *end,
- 				     struct ceph_mds_reply_info_parsed *info,
--				     int features)
-+				     u64 features)
- {
- 	if (*p + sizeof(*info->filelock_reply) > end)
- 		goto bad;
-@@ -238,7 +238,7 @@ bad:
-  */
- static int parse_reply_info_create(void **p, void *end,
- 				  struct ceph_mds_reply_info_parsed *info,
--				  int features)
-+				  u64 features)
- {
- 	if (features & CEPH_FEATURE_REPLY_CREATE_INODE) {
- 		if (*p == end) {
-@@ -262,7 +262,7 @@ bad:
-  */
- static int parse_reply_info_extra(void **p, void *end,
- 				  struct ceph_mds_reply_info_parsed *info,
--				  int features)
-+				  u64 features)
- {
- 	if (info->head->op == CEPH_MDS_OP_GETFILELOCK)
- 		return parse_reply_info_filelock(p, end, info, features);
-@@ -280,7 +280,7 @@ static int parse_reply_info_extra(void **p, void *end,
-  */
- static int parse_reply_info(struct ceph_msg *msg,
- 			    struct ceph_mds_reply_info_parsed *info,
--			    int features)
-+			    u64 features)
- {
- 	void *p, *end;
- 	u32 len;
-diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-index c6740e43a351..2df963f1cf5a 100644
---- a/fs/ceph/super.c
-+++ b/fs/ceph/super.c
-@@ -490,10 +490,10 @@ static struct ceph_fs_client *create_fs_client(struct ceph_mount_options *fsopt,
- 					struct ceph_options *opt)
- {
- 	struct ceph_fs_client *fsc;
--	const unsigned supported_features =
-+	const u64 supported_features =
- 		CEPH_FEATURE_FLOCK |
- 		CEPH_FEATURE_DIRLAYOUTHASH;
--	const unsigned required_features = 0;
-+	const u64 required_features = 0;
- 	int page_count;
- 	size_t size;
- 	int err = -ENOMEM;
-diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
-index 2e3024881a5e..7d704db60cbb 100644
---- a/include/linux/ceph/libceph.h
-+++ b/include/linux/ceph/libceph.h
-@@ -122,8 +122,8 @@ struct ceph_client {
- 
- 	int (*extra_mon_dispatch)(struct ceph_client *, struct ceph_msg *);
- 
--	u32 supported_features;
--	u32 required_features;
-+	u64 supported_features;
-+	u64 required_features;
- 
- 	struct ceph_messenger msgr;   /* messenger instance */
- 	struct ceph_mon_client monc;
-@@ -192,8 +192,8 @@ extern int ceph_compare_options(struct ceph_options *new_opt,
- 				struct ceph_client *client);
- extern struct ceph_client *ceph_create_client(struct ceph_options *opt,
- 					      void *private,
--					      unsigned supported_features,
--					      unsigned required_features);
-+					      u64 supported_features,
-+					      u64 required_features);
- extern u64 ceph_client_id(struct ceph_client *client);
- extern void ceph_destroy_client(struct ceph_client *client);
- extern int __ceph_open_session(struct ceph_client *client,
-diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
-index 7c1420bb1dce..c1d3f5a65273 100644
---- a/include/linux/ceph/messenger.h
-+++ b/include/linux/ceph/messenger.h
-@@ -60,8 +60,8 @@ struct ceph_messenger {
- 	u32 global_seq;
- 	spinlock_t global_seq_lock;
- 
--	u32 supported_features;
--	u32 required_features;
-+	u64 supported_features;
-+	u64 required_features;
- };
- 
- enum ceph_msg_data_type {
-@@ -192,7 +192,7 @@ struct ceph_connection {
- 
- 	struct ceph_entity_name peer_name; /* peer name */
- 
--	unsigned peer_features;
-+	u64 peer_features;
- 	u32 connect_seq;      /* identify the most recent connection
- 				 attempt for this connection, client */
- 	u32 peer_global_seq;  /* peer's global seq for this connection */
-@@ -256,8 +256,8 @@ extern void ceph_msgr_flush(void);
- 
- extern void ceph_messenger_init(struct ceph_messenger *msgr,
- 			struct ceph_entity_addr *myaddr,
--			u32 supported_features,
--			u32 required_features,
-+			u64 supported_features,
-+			u64 required_features,
- 			bool nocrc);
- 
- extern void ceph_con_init(struct ceph_connection *con, void *private,
-diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
-index 34b11ee8124e..43d8177a52e1 100644
---- a/net/ceph/ceph_common.c
-+++ b/net/ceph/ceph_common.c
-@@ -461,8 +461,8 @@ EXPORT_SYMBOL(ceph_client_id);
-  * create a fresh client instance
-  */
- struct ceph_client *ceph_create_client(struct ceph_options *opt, void *private,
--				       unsigned int supported_features,
--				       unsigned int required_features)
-+				       u64 supported_features,
-+				       u64 required_features)
- {
- 	struct ceph_client *client;
- 	struct ceph_entity_addr *myaddr = NULL;
+-#define CEPH_FEATURES_SUPPORTED_DEFAULT  \
++#define CEPH_FEATURES_SUPPORTED_DEFAULT		\
+ 	(CEPH_FEATURE_NOSRCADDR |		\
+ 	 CEPH_FEATURE_RECONNECT_SEQ |		\
+ 	 CEPH_FEATURE_PGID64 |			\
+@@ -56,4 +87,5 @@
+ 	 CEPH_FEATURE_PGID64 |		 \
+ 	 CEPH_FEATURE_PGPOOL3 |		 \
+ 	 CEPH_FEATURE_OSDENC)
++
+ #endif
 diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index 4a5df7b1cc9f..260670558746 100644
+index 260670558746..bd172e1ee0ae 100644
 --- a/net/ceph/messenger.c
 +++ b/net/ceph/messenger.c
-@@ -2853,8 +2853,8 @@ static void con_fault(struct ceph_connection *con)
-  */
- void ceph_messenger_init(struct ceph_messenger *msgr,
- 			struct ceph_entity_addr *myaddr,
--			u32 supported_features,
--			u32 required_features,
-+			u64 supported_features,
-+			u64 required_features,
- 			bool nocrc)
+@@ -15,6 +15,7 @@
+ #include <linux/dns_resolver.h>
+ #include <net/tcp.h>
+ 
++#include <linux/ceph/ceph_features.h>
+ #include <linux/ceph/libceph.h>
+ #include <linux/ceph/messenger.h>
+ #include <linux/ceph/decode.h>
+@@ -1945,7 +1946,8 @@ static int process_connect(struct ceph_connection *con)
  {
- 	msgr->supported_features = supported_features;
+ 	u64 sup_feat = con->msgr->supported_features;
+ 	u64 req_feat = con->msgr->required_features;
+-	u64 server_feat = le64_to_cpu(con->in_reply.features);
++	u64 server_feat = ceph_sanitize_features(
++				le64_to_cpu(con->in_reply.features));
+ 	int ret;
+ 
+ 	dout("process_connect on %p tag %d\n", con, (int)con->in_tag);
 -- 
 1.7.10.4
 
