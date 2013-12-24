@@ -1,171 +1,43 @@
 From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: [PATCH 2/2] libceph: update ceph_features.h
-Date: Tue, 24 Dec 2013 21:41:52 +0200
-Message-ID: <1387914112-17809-3-git-send-email-ilya.dryomov@inktank.com>
-References: <1387914112-17809-1-git-send-email-ilya.dryomov@inktank.com>
+Subject: [PATCH] crush: support new indep mode and SET_* steps (crush v2) by default
+Date: Tue, 24 Dec 2013 22:10:43 +0200
+Message-ID: <1387915843-18878-1-git-send-email-ilya.dryomov@inktank.com>
+References: <alpine.DEB.2.00.1312230932230.4949@cobra.newdream.net>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ee0-f51.google.com ([74.125.83.51]:50873 "EHLO
-	mail-ee0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752410Ab3LXTmq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 24 Dec 2013 14:42:46 -0500
-Received: by mail-ee0-f51.google.com with SMTP id b15so3038810eek.38
-        for <ceph-devel@vger.kernel.org>; Tue, 24 Dec 2013 11:42:44 -0800 (PST)
-In-Reply-To: <1387914112-17809-1-git-send-email-ilya.dryomov@inktank.com>
+Received: from mail-ee0-f50.google.com ([74.125.83.50]:64330 "EHLO
+	mail-ee0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750828Ab3LXULf (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 24 Dec 2013 15:11:35 -0500
+Received: by mail-ee0-f50.google.com with SMTP id c41so2994560eek.23
+        for <ceph-devel@vger.kernel.org>; Tue, 24 Dec 2013 12:11:34 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.00.1312230932230.4949@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: Sage Weil <sage@inktank.com>, ilya.dryomov@inktank.com
 
-This updates ceph_features.h so that it has all feature bits defined in
-ceph.git.  In the interim since the last update, ceph.git crossed the
-"32 feature bits" point, and, the addition of the 33rd bit wasn't
-handled correctly.  The work-around is squashed into this commit and
-reflects ceph.git commit 053659d05e0349053ef703b414f44965f368b9f0.
+Add CRUSH_V2 feature (new indep mode and SET_* steps) to a set of
+features supported by default.
 
 Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
 ---
- include/linux/ceph/ceph_features.h |   96 ++++++++++++++++++++++++------------
- net/ceph/messenger.c               |    4 +-
- 2 files changed, 67 insertions(+), 33 deletions(-)
+ include/linux/ceph/ceph_features.h |    3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/include/linux/ceph/ceph_features.h b/include/linux/ceph/ceph_features.h
-index 4c42080347af..003ea719be65 100644
+index 003ea719be65..5f42e4412909 100644
 --- a/include/linux/ceph/ceph_features.h
 +++ b/include/linux/ceph/ceph_features.h
-@@ -4,42 +4,73 @@
- /*
-  * feature bits
-  */
--#define CEPH_FEATURE_UID            (1<<0)
--#define CEPH_FEATURE_NOSRCADDR      (1<<1)
--#define CEPH_FEATURE_MONCLOCKCHECK  (1<<2)
--#define CEPH_FEATURE_FLOCK          (1<<3)
--#define CEPH_FEATURE_SUBSCRIBE2     (1<<4)
--#define CEPH_FEATURE_MONNAMES       (1<<5)
--#define CEPH_FEATURE_RECONNECT_SEQ  (1<<6)
--#define CEPH_FEATURE_DIRLAYOUTHASH  (1<<7)
--#define CEPH_FEATURE_OBJECTLOCATOR  (1<<8)
--#define CEPH_FEATURE_PGID64         (1<<9)
--#define CEPH_FEATURE_INCSUBOSDMAP   (1<<10)
--#define CEPH_FEATURE_PGPOOL3        (1<<11)
--#define CEPH_FEATURE_OSDREPLYMUX    (1<<12)
--#define CEPH_FEATURE_OSDENC         (1<<13)
--#define CEPH_FEATURE_OMAP           (1<<14)
--#define CEPH_FEATURE_MONENC         (1<<15)
--#define CEPH_FEATURE_QUERY_T        (1<<16)
--#define CEPH_FEATURE_INDEP_PG_MAP   (1<<17)
--#define CEPH_FEATURE_CRUSH_TUNABLES (1<<18)
--#define CEPH_FEATURE_CHUNKY_SCRUB   (1<<19)
--#define CEPH_FEATURE_MON_NULLROUTE  (1<<20)
--#define CEPH_FEATURE_MON_GV         (1<<21)
--#define CEPH_FEATURE_BACKFILL_RESERVATION (1<<22)
--#define CEPH_FEATURE_MSG_AUTH	    (1<<23)
--#define CEPH_FEATURE_RECOVERY_RESERVATION (1<<24)
--#define CEPH_FEATURE_CRUSH_TUNABLES2 (1<<25)
--#define CEPH_FEATURE_CREATEPOOLID   (1<<26)
--#define CEPH_FEATURE_REPLY_CREATE_INODE   (1<<27)
--#define CEPH_FEATURE_OSD_HBMSGS     (1<<28)
--#define CEPH_FEATURE_MDSENC         (1<<29)
--#define CEPH_FEATURE_OSDHASHPSPOOL  (1<<30)
-+#define CEPH_FEATURE_UID            (1ULL<<0)
-+#define CEPH_FEATURE_NOSRCADDR      (1ULL<<1)
-+#define CEPH_FEATURE_MONCLOCKCHECK  (1ULL<<2)
-+#define CEPH_FEATURE_FLOCK          (1ULL<<3)
-+#define CEPH_FEATURE_SUBSCRIBE2     (1ULL<<4)
-+#define CEPH_FEATURE_MONNAMES       (1ULL<<5)
-+#define CEPH_FEATURE_RECONNECT_SEQ  (1ULL<<6)
-+#define CEPH_FEATURE_DIRLAYOUTHASH  (1ULL<<7)
-+#define CEPH_FEATURE_OBJECTLOCATOR  (1ULL<<8)
-+#define CEPH_FEATURE_PGID64         (1ULL<<9)
-+#define CEPH_FEATURE_INCSUBOSDMAP   (1ULL<<10)
-+#define CEPH_FEATURE_PGPOOL3        (1ULL<<11)
-+#define CEPH_FEATURE_OSDREPLYMUX    (1ULL<<12)
-+#define CEPH_FEATURE_OSDENC         (1ULL<<13)
-+#define CEPH_FEATURE_OMAP           (1ULL<<14)
-+#define CEPH_FEATURE_MONENC         (1ULL<<15)
-+#define CEPH_FEATURE_QUERY_T        (1ULL<<16)
-+#define CEPH_FEATURE_INDEP_PG_MAP   (1ULL<<17)
-+#define CEPH_FEATURE_CRUSH_TUNABLES (1ULL<<18)
-+#define CEPH_FEATURE_CHUNKY_SCRUB   (1ULL<<19)
-+#define CEPH_FEATURE_MON_NULLROUTE  (1ULL<<20)
-+#define CEPH_FEATURE_MON_GV         (1ULL<<21)
-+#define CEPH_FEATURE_BACKFILL_RESERVATION (1ULL<<22)
-+#define CEPH_FEATURE_MSG_AUTH	    (1ULL<<23)
-+#define CEPH_FEATURE_RECOVERY_RESERVATION (1ULL<<24)
-+#define CEPH_FEATURE_CRUSH_TUNABLES2 (1ULL<<25)
-+#define CEPH_FEATURE_CREATEPOOLID   (1ULL<<26)
-+#define CEPH_FEATURE_REPLY_CREATE_INODE   (1ULL<<27)
-+#define CEPH_FEATURE_OSD_HBMSGS     (1ULL<<28)
-+#define CEPH_FEATURE_MDSENC         (1ULL<<29)
-+#define CEPH_FEATURE_OSDHASHPSPOOL  (1ULL<<30)
-+#define CEPH_FEATURE_MON_SINGLE_PAXOS (1ULL<<31)
-+#define CEPH_FEATURE_OSD_SNAPMAPPER (1ULL<<32)
-+#define CEPH_FEATURE_MON_SCRUB      (1ULL<<33)
-+#define CEPH_FEATURE_OSD_PACKED_RECOVERY (1ULL<<34)
-+#define CEPH_FEATURE_OSD_CACHEPOOL (1ULL<<35)
-+#define CEPH_FEATURE_CRUSH_V2      (1ULL<<36)  /* new indep; SET_* steps */
-+#define CEPH_FEATURE_EXPORT_PEER   (1ULL<<37)
-+#define CEPH_FEATURE_OSD_ERASURE_CODES (1ULL<<38)
-+
-+/*
-+ * The introduction of CEPH_FEATURE_OSD_SNAPMAPPER caused the feature
-+ * vector to evaluate to 64 bit ~0.  To cope, we designate 1ULL << 63
-+ * to mean 33 bit ~0, and introduce a helper below to do the
-+ * translation.
-+ *
-+ * This was introduced by ceph.git commit
-+ *   9ea02b84104045c2ffd7e7f4e7af512953855ecd v0.58-657-g9ea02b8
-+ * and fixed by ceph.git commit
-+ *   4255b5c2fb54ae40c53284b3ab700fdfc7e61748 v0.65-263-g4255b5c
-+ */
-+#define CEPH_FEATURE_RESERVED (1ULL<<63)
-+
-+static inline u64 ceph_sanitize_features(u64 features)
-+{
-+	if (features & CEPH_FEATURE_RESERVED) {
-+		/* everything through OSD_SNAPMAPPER */
-+		return 0x1ffffffffull;
-+	} else {
-+		return features;
-+	}
-+}
+@@ -79,7 +79,8 @@ static inline u64 ceph_sanitize_features(u64 features)
+ 	 CEPH_FEATURE_CRUSH_TUNABLES |		\
+ 	 CEPH_FEATURE_CRUSH_TUNABLES2 |		\
+ 	 CEPH_FEATURE_REPLY_CREATE_INODE |	\
+-	 CEPH_FEATURE_OSDHASHPSPOOL)
++	 CEPH_FEATURE_OSDHASHPSPOOL |		\
++	 CEPH_FEATURE_CRUSH_V2)
  
- /*
-  * Features supported.
-  */
--#define CEPH_FEATURES_SUPPORTED_DEFAULT  \
-+#define CEPH_FEATURES_SUPPORTED_DEFAULT		\
- 	(CEPH_FEATURE_NOSRCADDR |		\
- 	 CEPH_FEATURE_RECONNECT_SEQ |		\
- 	 CEPH_FEATURE_PGID64 |			\
-@@ -56,4 +87,5 @@
- 	 CEPH_FEATURE_PGID64 |		 \
- 	 CEPH_FEATURE_PGPOOL3 |		 \
- 	 CEPH_FEATURE_OSDENC)
-+
- #endif
-diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index 260670558746..bd172e1ee0ae 100644
---- a/net/ceph/messenger.c
-+++ b/net/ceph/messenger.c
-@@ -15,6 +15,7 @@
- #include <linux/dns_resolver.h>
- #include <net/tcp.h>
- 
-+#include <linux/ceph/ceph_features.h>
- #include <linux/ceph/libceph.h>
- #include <linux/ceph/messenger.h>
- #include <linux/ceph/decode.h>
-@@ -1945,7 +1946,8 @@ static int process_connect(struct ceph_connection *con)
- {
- 	u64 sup_feat = con->msgr->supported_features;
- 	u64 req_feat = con->msgr->required_features;
--	u64 server_feat = le64_to_cpu(con->in_reply.features);
-+	u64 server_feat = ceph_sanitize_features(
-+				le64_to_cpu(con->in_reply.features));
- 	int ret;
- 
- 	dout("process_connect on %p tag %d\n", con, (int)con->in_tag);
+ #define CEPH_FEATURES_REQUIRED_DEFAULT   \
+ 	(CEPH_FEATURE_NOSRCADDR |	 \
 -- 
 1.7.10.4
 
