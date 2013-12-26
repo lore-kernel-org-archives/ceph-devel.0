@@ -1,53 +1,46 @@
-From: Li Wang <liwang@ubuntukylin.com>
-Subject: [PATCH 2/3] Ceph fscache: Update object store limit after file writing
-Date: Thu, 26 Dec 2013 06:29:27 -0800
-Message-ID: <60624625dc3bf53737dabf368a23ca7151c9a616.1388066937.git.liwang@ubuntukylin.com>
-References: <cover.1388066937.git.liwang@ubuntukylin.com>
+From: Alex Elder <alex.elder@linaro.org>
+Subject: [PATCH] MAINTAINERS: update an e-mail address
+Date: Thu, 26 Dec 2013 08:37:43 -0600
+Message-ID: <52BC3F37.6050103@linaro.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from m199-177.yeah.net ([123.58.177.199]:56476 "EHLO
-	m199-177.yeah.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753137Ab3LZOav (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Dec 2013 09:30:51 -0500
-In-Reply-To: <cover.1388066937.git.liwang@ubuntukylin.com>
-In-Reply-To: <cover.1388066937.git.liwang@ubuntukylin.com>
-References: <cover.1388066937.git.liwang@ubuntukylin.com>
+Received: from mail-ie0-f176.google.com ([209.85.223.176]:39825 "EHLO
+	mail-ie0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753145Ab3LZOho (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Dec 2013 09:37:44 -0500
+Received: by mail-ie0-f176.google.com with SMTP id at1so8423855iec.7
+        for <ceph-devel@vger.kernel.org>; Thu, 26 Dec 2013 06:37:44 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Sage Weil <sage@inktank.com>, Milosz Tanski <milosz@adfin.com>, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, Yunchuan Wen <yunchuanwen@ubuntukylin.com>, Min Chen <minchen@ubuntukylin.com>, Li Wang <liwang@ubuntukylin.com>
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>
 
-From: Yunchuan Wen <yunchuanwen@ubuntukylin.com>
+[Sage, perhaps you could sign off on or ack this, and take it in
+through your tree.  Thanks.  -Alex]
 
-Synchronize object->store_limit[_l] with new inode->i_size after file writing.
+I no longer have direct access to my Inktank e-mail.  I still pay
+attention to rbd, so update its entry in MAINTAINERS accordingly.
 
-Signed-off-by: Yunchuan Wen <yunchuanwen@ubuntukylin.com>
-Signed-off-by: Min Chen <minchen@ubuntukylin.com>
-Signed-off-by: Li Wang <liwang@ubuntukylin.com>
+Signed-off-by: Alex Elder <elder@linaro.org>
 ---
- fs/ceph/file.c |    3 +++
- 1 file changed, 3 insertions(+)
+ MAINTAINERS |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index 3de8982..b6df7ab 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -786,6 +786,7 @@ retry_snap:
- 			goto retry_snap;
- 		}
- 	} else {
-+		loff_t old_size = inode->i_size;
- 		/*
- 		 * No need to acquire the i_truncate_mutex. Because
- 		 * the MDS revokes Fwb caps before sending truncate
-@@ -796,6 +797,8 @@ retry_snap:
- 		written = generic_file_buffered_write(iocb, iov, nr_segs,
- 						      pos, &iocb->ki_pos,
- 						      count, 0);
-+		if (inode->i_size > old_size)
-+			ceph_fscache_update_objectsize(inode);
- 		mutex_unlock(&inode->i_mutex);
- 	}
- 
+diff --git a/MAINTAINERS b/MAINTAINERS
+index d5e4ff3..d42633c 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -7016,7 +7016,7 @@ F:	drivers/media/parport/*-qcam*
+ RADOS BLOCK DEVICE (RBD)
+ M:	Yehuda Sadeh <yehuda@inktank.com>
+ M:	Sage Weil <sage@inktank.com>
+-M:	Alex Elder <elder@inktank.com>
++M:	Alex Elder <elder@kernel.org>
+ M:	ceph-devel@vger.kernel.org
+ W:	http://ceph.com/
+ T:	git git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git
 -- 
 1.7.9.5
 
