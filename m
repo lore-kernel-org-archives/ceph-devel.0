@@ -1,47 +1,67 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 0/2] rbd: tear down watch request if rbd_dev_device_setup()
- fails
-Date: Thu, 26 Dec 2013 12:34:36 -0800
-Message-ID: <52BC92DC.6010807@inktank.com>
-References: <1387224335-902-1-git-send-email-ilya.dryomov@inktank.com>
+From: Milosz Tanski <milosz@adfin.com>
+Subject: Re: [PATCH 0/3] Ceph fscache: Fix kernel panic due to a race
+Date: Thu, 26 Dec 2013 17:51:44 -0500
+Message-ID: <CANP1eJFMZrT+GbHhg3gWqsy=whSozEiWmZj-L08EyhD8LcqzeQ@mail.gmail.com>
+References: <cover.1388066937.git.liwang@ubuntukylin.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yh0-f52.google.com ([209.85.213.52]:50664 "EHLO
-	mail-yh0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753237Ab3LZUfX (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Dec 2013 15:35:23 -0500
-Received: by mail-yh0-f52.google.com with SMTP id i7so1837721yha.11
-        for <ceph-devel@vger.kernel.org>; Thu, 26 Dec 2013 12:35:20 -0800 (PST)
-In-Reply-To: <1387224335-902-1-git-send-email-ilya.dryomov@inktank.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <ilya.dryomov@inktank.com>, ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <cover.1388066937.git.liwang@ubuntukylin.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Li Wang <liwang@ubuntukylin.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, linux-kernel@vger.kernel.org, Yunchuan Wen <yunchuanwen@ubuntukylin.com>
+List-Id: ceph-devel.vger.kernel.org
 
-On 12/16/2013 12:05 PM, Ilya Dryomov wrote:
-> Hello,
+Li,
+
+I looked at the patchset am I correct that this only happens when we
+enable caching in the write path?
+
+- Milosz
+
+On Thu, Dec 26, 2013 at 9:29 AM, Li Wang <liwang@ubuntukylin.com> wrote:
+> From: Yunchuan Wen <yunchuanwen@ubuntukylin.com>
 >
-> Currently, if rbd_dev_device_setup() fails, we don't tear down our
-> watch request.  Looks like this bug was introduced by 1f3ef78861ac,
-> which moved a tear down call while fixing something else.  Fix it.
+> The following scripts could easily panic the kernel,
 >
-> These patches can be pulled from wip-rbd-unwatch branch of
-> ceph-client.git.
+> #!/bin/bash
+> mount -t ceph -o fsc MONADDR:/ cephfs
+> rm -rf cephfs/foo
+> dd if=/dev/zero of=cephfs/foo bs=8 count=512
+> echo 3 > /proc/sys/vm/drop_caches
+> dd if=cephfs/foo of=/dev/null bs=8 count=1024
 >
-> Thanks,
+> This is due to when writing a page into fscache, the code will
+> assert that the write position does not exceed the
+> object->store_limit_l, which is supposed to be equal to inode->i_size.
+> However, for current implementation, after file writing, the
+> object->store_limit_l is not synchronized with new
+> inode->i_size immediately, which introduces a race that if writing
+> a new page into fscache, will reach the ASSERT that write position
+> has exceeded the object->store_limit_l, and cause kernel panic.
+> This patch fixes it.
 >
->                  Ilya
+> Yunchuan Wen (3):
+>   Ceph fscache: Add an interface to synchronize object store limit
+>   Ceph fscache: Update object store limit after writing
+>   Ceph fscache: Wait for completion of object initialization
 >
+>  fs/ceph/cache.c |    1 +
+>  fs/ceph/cache.h |   10 ++++++++++
+>  fs/ceph/file.c  |    3 +++
+>  3 files changed, 14 insertions(+)
 >
-> Ilya Dryomov (2):
->    rbd: introduce rbd_dev_header_unwatch_sync() and switch to it
->    rbd: tear down watch request if rbd_dev_device_setup() fails
->
->   drivers/block/rbd.c |   41 ++++++++++++++++++++++++++++-------------
->   1 file changed, 28 insertions(+), 13 deletions(-)
+> --
+> 1.7.9.5
 >
 
-These look good to me.
 
-Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
+
+-- 
+Milosz Tanski
+CTO
+10 East 53rd Street, 37th floor
+New York, NY 10022
+
+p: 646-253-9055
+e: milosz@adfin.com
