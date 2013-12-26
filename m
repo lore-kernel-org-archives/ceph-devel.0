@@ -1,46 +1,39 @@
 From: Alex Elder <alex.elder@linaro.org>
-Subject: [PATCH] MAINTAINERS: update an e-mail address
-Date: Thu, 26 Dec 2013 08:37:43 -0600
-Message-ID: <52BC3F37.6050103@linaro.org>
+Subject: [PATCH 0/3] kernel.h: centrally define U32_MAX, etc.
+Date: Thu, 26 Dec 2013 09:11:28 -0600
+Message-ID: <52BC4720.1070904@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f176.google.com ([209.85.223.176]:39825 "EHLO
-	mail-ie0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753145Ab3LZOho (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Dec 2013 09:37:44 -0500
-Received: by mail-ie0-f176.google.com with SMTP id at1so8423855iec.7
-        for <ceph-devel@vger.kernel.org>; Thu, 26 Dec 2013 06:37:44 -0800 (PST)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>
+Return-path: <netdev-owner@vger.kernel.org>
+Sender: netdev-owner@vger.kernel.org
+To: Sage Weil <sage@inktank.com>, David Miller <davem@davemloft.net>, kuznet@ms2.inr.ac.ru, jmorris@namei.org, yoshfuji@linux-ipv6.org, kaber@trash.net, Al Viro <viro@ZenIV.linux.org.uk>, jeffm@suse.com, Steven Rostedt <rostedt@goodmis.org>, Andrew Morton <akpm@linux-foundation.org>, mst@redhat.com, Ingo Molnar <mingo@kernel.org>
+Cc: reiserfs-devel@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, ceph-devel <ceph-devel@vger.kernel.org>, netdev@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-[Sage, perhaps you could sign off on or ack this, and take it in
-through your tree.  Thanks.  -Alex]
+Although types u32, s32, u16, s16 and so on are fundamental kernel
+types, there is no central symbolic definition of their maximum and
+minimum values.  In the past I've added and used such definitions
+where I've needed them but they really belong in "kernel.h".
 
-I no longer have direct access to my Inktank e-mail.  I still pay
-attention to rbd, so update its entry in MAINTAINERS accordingly.
+This series does this, in three steps.  The first makes existing
+definitions be done conditionally; the second defines them in
+"kernel.h"; and the third gets rid of the conditional definitions.
 
-Signed-off-by: Alex Elder <elder@linaro.org>
----
- MAINTAINERS |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+(These three can obviously be squashed into a single commit.)
 
-diff --git a/MAINTAINERS b/MAINTAINERS
-index d5e4ff3..d42633c 100644
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -7016,7 +7016,7 @@ F:	drivers/media/parport/*-qcam*
- RADOS BLOCK DEVICE (RBD)
- M:	Yehuda Sadeh <yehuda@inktank.com>
- M:	Sage Weil <sage@inktank.com>
--M:	Alex Elder <elder@inktank.com>
-+M:	Alex Elder <elder@kernel.org>
- M:	ceph-devel@vger.kernel.org
- W:	http://ceph.com/
- T:	git git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git
+    					-Alex
+
+Alex Elder (3):
+  conditionally define U32_MAX
+  kernel.h: define u8, s8, u32, etc. limits
+  remove extra definitions of U32_MAX
+
+ fs/reiserfs/reiserfs.h      |    2 --
+ include/linux/ceph/decode.h |   17 -----------------
+ include/linux/kernel.h      |   13 +++++++++++++
+ net/ipv4/tcp_illinois.c     |    1 -
+ 4 files changed, 13 insertions(+), 20 deletions(-)
+
 -- 
 1.7.9.5
-
