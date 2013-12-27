@@ -1,67 +1,31 @@
-From: Milosz Tanski <milosz@adfin.com>
-Subject: Re: [PATCH 0/3] Ceph fscache: Fix kernel panic due to a race
-Date: Thu, 26 Dec 2013 17:51:44 -0500
-Message-ID: <CANP1eJFMZrT+GbHhg3gWqsy=whSozEiWmZj-L08EyhD8LcqzeQ@mail.gmail.com>
-References: <cover.1388066937.git.liwang@ubuntukylin.com>
+From: James Harper <james.harper@bendigoit.com.au>
+Subject: SMART monitoring
+Date: Fri, 27 Dec 2013 00:26:19 +0000
+Message-ID: <6035A0D088A63A46850C3988ED045A4B68565E03@BITCOM1.int.sbss.com.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <cover.1388066937.git.liwang@ubuntukylin.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Li Wang <liwang@ubuntukylin.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, linux-kernel@vger.kernel.org, Yunchuan Wen <yunchuanwen@ubuntukylin.com>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from smtp2.bendigoit.com.au ([203.16.207.99]:57564 "EHLO
+	smtp2.bendigoit.com.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753965Ab3L0A03 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Dec 2013 19:26:29 -0500
+Received: from bitcom1.int.sbss.com.au ([2002:cb10:e0fe:201:a5ca:4fd3:14f:ad5d])
+	by smtp2.bendigoit.com.au with esmtp (Exim 4.80)
+	(envelope-from <james.harper@bendigoit.com.au>)
+	id 1VwLFy-0001hK-Do
+	for ceph-devel@vger.kernel.org; Fri, 27 Dec 2013 11:26:26 +1100
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Li,
+What would be the best approach to integrate SMART with ceph, for the predictive failure case?
 
-I looked at the patchset am I correct that this only happens when we
-enable caching in the write path?
+Assuming you agree with SMART diagnosis of an impending failure, would it be better to automatically start migrating data off the OSD (reduce the weight to 0?), or to just prompt the user to replace the disk (which requires no monitoring on ceph's part)? The former would ensure that redundancy is maintained at all times without any user interaction.
 
-- Milosz
+And what about the bad sector case? Assuming you are using something like btrfs with redundant copies of metadata, and assuming that is enough to keep the metadata consistent, what should be done in the case of a small number of fs errors? Can ceph handle getting an i/o error on one of its files inside the osd and just read from the replica, or should the entire osd just be failed and let ceph rebalance the data itself?
 
-On Thu, Dec 26, 2013 at 9:29 AM, Li Wang <liwang@ubuntukylin.com> wrote:
-> From: Yunchuan Wen <yunchuanwen@ubuntukylin.com>
->
-> The following scripts could easily panic the kernel,
->
-> #!/bin/bash
-> mount -t ceph -o fsc MONADDR:/ cephfs
-> rm -rf cephfs/foo
-> dd if=/dev/zero of=cephfs/foo bs=8 count=512
-> echo 3 > /proc/sys/vm/drop_caches
-> dd if=cephfs/foo of=/dev/null bs=8 count=1024
->
-> This is due to when writing a page into fscache, the code will
-> assert that the write position does not exceed the
-> object->store_limit_l, which is supposed to be equal to inode->i_size.
-> However, for current implementation, after file writing, the
-> object->store_limit_l is not synchronized with new
-> inode->i_size immediately, which introduces a race that if writing
-> a new page into fscache, will reach the ASSERT that write position
-> has exceeded the object->store_limit_l, and cause kernel panic.
-> This patch fixes it.
->
-> Yunchuan Wen (3):
->   Ceph fscache: Add an interface to synchronize object store limit
->   Ceph fscache: Update object store limit after writing
->   Ceph fscache: Wait for completion of object initialization
->
->  fs/ceph/cache.c |    1 +
->  fs/ceph/cache.h |   10 ++++++++++
->  fs/ceph/file.c  |    3 +++
->  3 files changed, 14 insertions(+)
->
-> --
-> 1.7.9.5
->
+Thanks
 
-
-
--- 
-Milosz Tanski
-CTO
-10 East 53rd Street, 37th floor
-New York, NY 10022
-
-p: 646-253-9055
-e: milosz@adfin.com
+James
