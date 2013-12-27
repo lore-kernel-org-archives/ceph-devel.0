@@ -1,86 +1,67 @@
-From: Yunchuan Wen <yunchuanwen@ubuntukylin.com>
-Subject: Re: [PATCH 0/3] Ceph fscache: Fix kernel panic due to a race
-Date: Fri, 27 Dec 2013 09:41:39 +0800
-Message-ID: <CAAb4LOxn29vH4j5g1cgxgoXc8rHOp9zjMo+O3JJ1jzuhnJU5yw@mail.gmail.com>
-References: <cover.1388066937.git.liwang@ubuntukylin.com>
-	<CANP1eJFMZrT+GbHhg3gWqsy=whSozEiWmZj-L08EyhD8LcqzeQ@mail.gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: SMART monitoring
+Date: Thu, 26 Dec 2013 18:17:03 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1312261807240.2168@cobra.newdream.net>
+References: <6035A0D088A63A46850C3988ED045A4B68565E03@BITCOM1.int.sbss.com.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from m59-178.qiye.163.com ([123.58.178.59]:40416 "EHLO
-	m59-178.qiye.163.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754011Ab3L0Blp (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Dec 2013 20:41:45 -0500
-In-Reply-To: <CANP1eJFMZrT+GbHhg3gWqsy=whSozEiWmZj-L08EyhD8LcqzeQ@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:55186 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754011Ab3L0CRF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Dec 2013 21:17:05 -0500
+In-Reply-To: <6035A0D088A63A46850C3988ED045A4B68565E03@BITCOM1.int.sbss.com.au>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Milosz Tanski <milosz@adfin.com>
-Cc: Li Wang <liwang@ubuntukylin.com>, ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, linux-kernel@vger.kernel.org
+To: James Harper <james.harper@bendigoit.com.au>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi, Milosz
-I am not very sure about how to enable caching in write path.
+Hi James,
 
-I just compile the latest kernel with "Enable Ceph client caching
-support", start cachefilesd, and mount cephfs with -o fsc.
-Then, the kernel will panic easily when the script runs to "dd
-if=cephfs/foo of=/dev/null bs=8 count=1024"
+On Fri, 27 Dec 2013, James Harper wrote:
+> What would be the best approach to integrate SMART with ceph, for the 
+> predictive failure case?
 
+Currently (as you know) we don't do anything with SMART.  It is obviously 
+important for the entire system, but I'm unsure whether it should be 
+something that ceph-osd is doing as part of the cluster, or whether it is 
+better handled by another generic agent that is monitoring the hosts in 
+your cluster.  
 
-2013/12/27 Milosz Tanski <milosz@adfin.com>:
-> Li,
->
-> I looked at the patchset am I correct that this only happens when we
-> enable caching in the write path?
->
-> - Milosz
->
-> On Thu, Dec 26, 2013 at 9:29 AM, Li Wang <liwang@ubuntukylin.com> wrote:
->> From: Yunchuan Wen <yunchuanwen@ubuntukylin.com>
->>
->> The following scripts could easily panic the kernel,
->>
->> #!/bin/bash
->> mount -t ceph -o fsc MONADDR:/ cephfs
->> rm -rf cephfs/foo
->> dd if=/dev/zero of=cephfs/foo bs=8 count=512
->> echo 3 > /proc/sys/vm/drop_caches
->> dd if=cephfs/foo of=/dev/null bs=8 count=1024
->>
->> This is due to when writing a page into fscache, the code will
->> assert that the write position does not exceed the
->> object->store_limit_l, which is supposed to be equal to inode->i_size.
->> However, for current implementation, after file writing, the
->> object->store_limit_l is not synchronized with new
->> inode->i_size immediately, which introduces a race that if writing
->> a new page into fscache, will reach the ASSERT that write position
->> has exceeded the object->store_limit_l, and cause kernel panic.
->> This patch fixes it.
->>
->> Yunchuan Wen (3):
->>   Ceph fscache: Add an interface to synchronize object store limit
->>   Ceph fscache: Update object store limit after writing
->>   Ceph fscache: Wait for completion of object initialization
->>
->>  fs/ceph/cache.c |    1 +
->>  fs/ceph/cache.h |   10 ++++++++++
->>  fs/ceph/file.c  |    3 +++
->>  3 files changed, 14 insertions(+)
->>
->> --
->> 1.7.9.5
->>
->
->
->
-> --
-> Milosz Tanski
-> CTO
-> 10 East 53rd Street, 37th floor
-> New York, NY 10022
->
-> p: 646-253-9055
-> e: milosz@adfin.com
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I think the question comes down to whether Ceph should take some internal 
+action based on the information, or whether that is better handled by some 
+external monitoring agent.  For example, an external agent might collect 
+SMART info into graphite, and every so often do some predictive analysis 
+and mark out disks that are expected to fail soon.
+
+I'd love to see some consensus form around what this should look like...
+
+> Assuming you agree with SMART diagnosis of an impending failure, would 
+> it be better to automatically start migrating data off the OSD (reduce 
+> the weight to 0?), or to just prompt the user to replace the disk (which 
+> requires no monitoring on ceph's part)? The former would ensure that 
+> redundancy is maintained at all times without any user interaction.
+
+We definitely want to mark the disk 'out' or reweight it to zero so that 
+redudancy is never unnecessarily reduced.
+
+> And what about the bad sector case? Assuming you are using something 
+> like btrfs with redundant copies of metadata, and assuming that is 
+> enough to keep the metadata consistent, what should be done in the case 
+> of a small number of fs errors? Can ceph handle getting an i/o error on 
+> one of its files inside the osd and just read from the replica, or 
+> should the entire osd just be failed and let ceph rebalance the data 
+> itself?
+
+If the failure is masked by the fs, Ceph doesn't care.  Currently, if Ceph 
+sees any error on write, we 'fail' the entire ceph-osd process.  On read, 
+this is configurable (filestore fail eio), but also defaults to true.  
+This may seem like overkill, but if we are getting read failures, this is 
+a not-completely-horrible signal that the drive may fail more 
+spectacularly later, and it avoids having to cope with the complexity of a 
+partial failure.  Also note that since we are doing a deep-scrub with some 
+regularity (which reads every byte stored and compares across replicas), 
+the cluster will automatically fail drives that start issuing latent read 
+errors.
+
+sage
