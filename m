@@ -1,60 +1,33 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH 0/2] ceph_features.h kernel update
-Date: Fri, 27 Dec 2013 09:51:21 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1312270951140.670@cobra.newdream.net>
-References: <1387914112-17809-1-git-send-email-ilya.dryomov@inktank.com>
+From: Noah Watkins <noah.watkins@inktank.com>
+Subject: Re: feedback on supporting libc++
+Date: Fri, 27 Dec 2013 17:34:44 -0600
+Message-ID: <CA+Hcz5_pOdrHyYq9xbn=09S6jFh9enRWq1uKxHSQKS3u2qiXQw@mail.gmail.com>
+References: <CA+Hcz5-8k3rnCaJJj3htb0F63V+fitoBtofCkGzJZ4a_j29K8Q@mail.gmail.com>
+	<527157C0.40802@inktank.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:33255 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754047Ab3L0RvW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 27 Dec 2013 12:51:22 -0500
-In-Reply-To: <1387914112-17809-1-git-send-email-ilya.dryomov@inktank.com>
+Received: from mail-qa0-f48.google.com ([209.85.216.48]:49471 "EHLO
+	mail-qa0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754920Ab3L0Xep (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 27 Dec 2013 18:34:45 -0500
+Received: by mail-qa0-f48.google.com with SMTP id w5so9096831qac.0
+        for <ceph-devel@vger.kernel.org>; Fri, 27 Dec 2013 15:34:44 -0800 (PST)
+In-Reply-To: <527157C0.40802@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <ilya.dryomov@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Josh Durgin <josh.durgin@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Gregory Farnum <greg@inktank.com>, Gregory Farnum <gregory.farnum@inktank.com>
 
-both look good!
+On Wed, Oct 30, 2013 at 2:02 PM, Josh Durgin <josh.durgin@inktank.com> wrote:
+> On 10/29/2013 03:51 PM, Noah Watkins wrote:
+>
+> unsafe to me. Could you check whether you can run 'rados ls' compiled
+> against an old librados, but dynamically loading librados from this
+> branch compiled in c++98 mode?
 
-Reviewed-by: Sage Weil <sage@inktank.com>
-
-
-On Tue, 24 Dec 2013, Ilya Dryomov wrote:
-
-> Hello,
-> 
-> This is needed for the kernel to be able to advertise our new CRUSH_V2
-> features correctly.  wip-crush-2 depends and was rebased on top of
-> this.  Please make sure I got the 33rd bit work-around right.
-> 
-> Available from wip-ceph-features branch of ceph-client.git.
-> 
-> Thanks,
-> 
->                 Ilya
-> 
-> 
-> Ilya Dryomov (2):
->   libceph: all features fields must be u64
->   libceph: update ceph_features.h
-> 
->  fs/ceph/mds_client.c               |   14 +++---
->  fs/ceph/super.c                    |    4 +-
->  include/linux/ceph/ceph_features.h |   96 ++++++++++++++++++++++++------------
->  include/linux/ceph/libceph.h       |    8 +--
->  include/linux/ceph/messenger.h     |   10 ++--
->  net/ceph/ceph_common.c             |    4 +-
->  net/ceph/messenger.c               |    8 +--
->  7 files changed, 89 insertions(+), 55 deletions(-)
-> 
-> -- 
-> 1.7.10.4
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+I'm still working on this, but my understanding so far from libc++
+documentation is that libc++ and libstdc++ are API but not ABI
+compatible, so there shouldn't be an expectation that librados binary
+library built against libstc++ will work if dynamically linked against
+libc++.
