@@ -1,92 +1,48 @@
-From: Li Wang <liwang@ubuntukylin.com>
-Subject: Re: [PATCH 0/3] Ceph fscache: Fix kernel panic due to a race
-Date: Sat, 28 Dec 2013 11:51:13 +0800
-Message-ID: <52BE4AB1.6090901@ubuntukylin.com>
-References: <cover.1388066937.git.liwang@ubuntukylin.com> <CANP1eJFMZrT+GbHhg3gWqsy=whSozEiWmZj-L08EyhD8LcqzeQ@mail.gmail.com>
+From: =?ISO-8859-1?Q?Bj=F8rnar_Ness?= <bjornar.ness@gmail.com>
+Subject: Patch for rados tool to allow listomapvals to list all k/v pairs
+Date: Sat, 28 Dec 2013 14:59:32 +0100
+Message-ID: <CAJO99Tmj3itMZWpjoO6tmjk7Tz9WJSjDtKwwF-BE9W1iWODkdg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/mixed; boundary=001a11c34aeac101fc04ee989e2c
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from m199-177.yeah.net ([123.58.177.199]:42728 "EHLO
-	m199-177.yeah.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755037Ab3L1Dv2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 27 Dec 2013 22:51:28 -0500
-In-Reply-To: <CANP1eJFMZrT+GbHhg3gWqsy=whSozEiWmZj-L08EyhD8LcqzeQ@mail.gmail.com>
+Received: from mail-wg0-f43.google.com ([74.125.82.43]:35095 "EHLO
+	mail-wg0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755369Ab3L1N7e (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 28 Dec 2013 08:59:34 -0500
+Received: by mail-wg0-f43.google.com with SMTP id k14so8988446wgh.22
+        for <ceph-devel@vger.kernel.org>; Sat, 28 Dec 2013 05:59:32 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Milosz Tanski <milosz@adfin.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, linux-kernel@vger.kernel.org, Yunchuan Wen <yunchuanwen@ubuntukylin.com>
+To: ceph-devel@vger.kernel.org
 
-Hi Milosz,
-   As far as I know, logically, currently fscache does not play
-as write cache for Ceph, except that there is a
-call to ceph_readpage_to_fscache() in ceph_writepage(), but that
-is nothing related to our test case. According to our observation,
-our test case never goes through ceph_writepage(), instead, it goes
-through ceph_writepages(). So in other words, I donot think this
-is related to caching in write path.
-   May I try to explain the panic in more detail,
+--001a11c34aeac101fc04ee989e2c
+Content-Type: text/plain; charset=ISO-8859-1
 
-(1) dd if=/dev/zero of=cephfs/foo bs=8 count=512
-(2) echo 3 > /proc/sys/vm/drop_caches
-(3) dd if=cephfs/foo of=/dev/null bs=8 count=1024
+Current code only lists first 512 k/v pairs, attached patch.
 
-For statement (1), it is frequently appending a file, so
-ceph_aio_write() frequently updates the inode->i_size,
-however, these updates did not immediately reflected to
-object->store_limit_l. For statement (3), when we
-start reading the second page at [4096, 8192), ceph find that the page
-does not be cached in fscache, then it decides to write this page into
-fscache, during this process in cachefiles_write_page(), it found that 
-object->store_limit_l < 4096 (page->index << 12), it causes panic. Does
-it make sense?
+-- 
+Bj(/)rnar
 
-Cheers,
-Li Wang
+--001a11c34aeac101fc04ee989e2c
+Content-Type: text/x-diff; charset=US-ASCII; name="rados_listomapvals_everything.patch"
+Content-Disposition: attachment;
+	filename="rados_listomapvals_everything.patch"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_hpqxr7rd0
 
-On 2013/12/27 6:51, Milosz Tanski wrote:
-> Li,
->
-> I looked at the patchset am I correct that this only happens when we
-> enable caching in the write path?
->
-> - Milosz
->
-> On Thu, Dec 26, 2013 at 9:29 AM, Li Wang <liwang@ubuntukylin.com> wrote:
->> From: Yunchuan Wen <yunchuanwen@ubuntukylin.com>
->>
->> The following scripts could easily panic the kernel,
->>
->> #!/bin/bash
->> mount -t ceph -o fsc MONADDR:/ cephfs
->> rm -rf cephfs/foo
->> dd if=/dev/zero of=cephfs/foo bs=8 count=512
->> echo 3 > /proc/sys/vm/drop_caches
->> dd if=cephfs/foo of=/dev/null bs=8 count=1024
->>
->> This is due to when writing a page into fscache, the code will
->> assert that the write position does not exceed the
->> object->store_limit_l, which is supposed to be equal to inode->i_size.
->> However, for current implementation, after file writing, the
->> object->store_limit_l is not synchronized with new
->> inode->i_size immediately, which introduces a race that if writing
->> a new page into fscache, will reach the ASSERT that write position
->> has exceeded the object->store_limit_l, and cause kernel panic.
->> This patch fixes it.
->>
->> Yunchuan Wen (3):
->>    Ceph fscache: Add an interface to synchronize object store limit
->>    Ceph fscache: Update object store limit after writing
->>    Ceph fscache: Wait for completion of object initialization
->>
->>   fs/ceph/cache.c |    1 +
->>   fs/ceph/cache.h |   10 ++++++++++
->>   fs/ceph/file.c  |    3 +++
->>   3 files changed, 14 insertions(+)
->>
->> --
->> 1.7.9.5
->>
->
->
->
+ZGlmZiAtLWdpdCBhL3NyYy90b29scy9yYWRvcy9yYWRvcy5jYyBiL3NyYy90b29scy9yYWRvcy9y
+YWRvcy5jYwppbmRleCBhNWE5MjFjLi5iYmQ3YmEyIDEwMDY0NAotLS0gYS9zcmMvdG9vbHMvcmFk
+b3MvcmFkb3MuY2MKKysrIGIvc3JjL3Rvb2xzL3JhZG9zL3JhZG9zLmNjCkBAIC0xNzYwLDYgKzE3
+NjAsNyBAQCBzdGF0aWMgaW50IHJhZG9zX3Rvb2xfY29tbW9uKGNvbnN0IHN0ZDo6bWFwIDwgc3Rk
+OjpzdHJpbmcsIHN0ZAogICAgICAgICAgICAgPDwgY3BwX3N0cmVycm9yKHJldCkgPDwgc3RkOjpl
+bmRsOwogICAgICAgIHJldHVybiAxOwogICAgICAgfQorICAgICAgcmV0ID0gdmFsdWVzLnNpemUo
+KTsKICAgICAgIGZvciAobWFwPHN0cmluZywgYnVmZmVybGlzdD46OmNvbnN0X2l0ZXJhdG9yIGl0
+ID0gdmFsdWVzLmJlZ2luKCk7CiAgICAgICAgICAgaXQgIT0gdmFsdWVzLmVuZCgpOyArK2l0KSB7
+CiAgICAgICAgLy8gZHVtcCBrZXkgaW4gaGV4IGlmIGl0IGNvbnRhaW5zIG5vbnByaW50YWJsZSBj
+aGFyYWN0ZXJzCkBAIC0xNzcxLDYgKzE3NzIsNyBAQCBzdGF0aWMgaW50IHJhZG9zX3Rvb2xfY29t
+bW9uKGNvbnN0IHN0ZDo6bWFwIDwgc3RkOjpzdHJpbmcsIHN0ZAogICAgICAgICAga2V5YmwuaGV4
+ZHVtcChjb3V0KTsKICAgICAgICB9IGVsc2UgewogICAgICAgICAgY291dCA8PCBpdC0+Zmlyc3Q7
+CisgICAgICBsYXN0X3JlYWQgPSBpdC0+Zmlyc3Q7CiAgICAgICAgfQogICAgICAgIGNvdXQgPDwg
+c3RkOjplbmRsOwogICAgICAgIGNvdXQgPDwgInZhbHVlOiAoIiA8PCBpdC0+c2Vjb25kLmxlbmd0
+aCgpIDw8ICIgYnl0ZXMpIDpcbiI7Cg==
+--001a11c34aeac101fc04ee989e2c--
