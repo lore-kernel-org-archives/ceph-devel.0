@@ -1,46 +1,24 @@
-From: Sage Weil <sage@inktank.com>
-Subject: [PATCH 4/4] ceph: allocate non-zero page to fscache in readpage()
-Date: Mon, 30 Dec 2013 16:13:51 -0800
-Message-ID: <1388448831-10324-5-git-send-email-sage@inktank.com>
-References: <1388448831-10324-1-git-send-email-sage@inktank.com>
+From: nkoffi396@gmail.com
+Subject: Advise to invest in your Country
+Date: Mon, 30 Dec 2013 10:06:12 -0800
+Message-ID: <EMAILYNGnK8mZrwldiv00017dd6@email.bec.local>
+Reply-To: norkoffi@aim.com
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:34246 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932405Ab3LaAOA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Dec 2013 19:14:00 -0500
-In-Reply-To: <1388448831-10324-1-git-send-email-sage@inktank.com>
+Received: from email.bec.com.ve ([200.44.146.30]:35461 "EHLO email.bec.local"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S932403Ab3LaAPG convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Dec 2013 19:15:06 -0500
+Content-Description: Mail message body
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: stable@vger.kernel.org
-Cc: ceph-devel@vger.kernel.org, Li Wang <liwang@ubuntukylin.com>
+To: ceph-devel@vger.kernel.org
 
-From: Li Wang <liwang@ubuntukylin.com>
+Dear Friend,
 
-ceph_osdc_readpages() returns number of bytes read, currently,
-the code only allocate full-zero page into fscache, this patch
-fixes this.
+I need someone in your Country I want to invest 30MillionEuros. For more info send me your telephone number for conversation to enable us have a concrete discussion and meeting.
 
-Signed-off-by: Li Wang <liwang@ubuntukylin.com>
-Reviewed-by: Milosz Tanski <milosz@adfin.com>
-Reviewed-by: Sage Weil <sage@inktank.com>
-(cherry picked from commit ff638b7df5a9264024a6448bdfde2b2bf5d1994a)
----
- fs/ceph/addr.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index 6df8bd4..1e561c0 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -216,7 +216,7 @@ static int readpage_nounlock(struct file *filp, struct page *page)
- 	}
- 	SetPageUptodate(page);
- 
--	if (err == 0)
-+	if (err >= 0)
- 		ceph_readpage_to_fscache(inode, page);
- 
- out:
--- 
-1.8.5.1
-
+Best Regards
+Mr.Norbert Koffi 
