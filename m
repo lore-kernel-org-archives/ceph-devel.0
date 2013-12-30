@@ -1,40 +1,47 @@
-From: Justin Erenkrantz <justin@erenkrantz.com>
-Subject: Apache httpd directives for rgw
-Date: Mon, 30 Dec 2013 15:19:10 -0500
-Message-ID: <CAOGLoJPPiaRRYvJ8ZaDr5LevBBtOZyz=6CFiinx8bG2hEX9Hzg@mail.gmail.com>
+From: Patrick McGarry <patrick@inktank.com>
+Subject: Ceph Wiki Relaunch
+Date: Mon, 30 Dec 2013 16:02:31 -0500
+Message-ID: <CAP8Oy=J-80BZmwyQcfD+yTvYo1zPoUazq3gRugD5yYkOJ9a+JQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ee0-f41.google.com ([74.125.83.41]:53943 "EHLO
-	mail-ee0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932117Ab3L3UTM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Dec 2013 15:19:12 -0500
-Received: by mail-ee0-f41.google.com with SMTP id t10so5273458eei.14
-        for <ceph-devel@vger.kernel.org>; Mon, 30 Dec 2013 12:19:11 -0800 (PST)
+Received: from mail-pa0-f50.google.com ([209.85.220.50]:64141 "EHLO
+	mail-pa0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932117Ab3L3VCb (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Dec 2013 16:02:31 -0500
+Received: by mail-pa0-f50.google.com with SMTP id kp14so10189379pab.9
+        for <ceph-devel@vger.kernel.org>; Mon, 30 Dec 2013 13:02:31 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Ceph-User <ceph-users@ceph.com>, Ceph Devel <ceph-devel@vger.kernel.org>
 
-Hi ceph-devel@,
+Hey Cephers,
 
-As a note, I've upstreamed functionality similar to the ones in the
-ceph/apache2 repository.  In particular, you'd use:
+Just wanted to drop a quick note to let you all know that the Ceph
+wiki is back in action!
 
-HttpContentLengthHeadZero on
-HttpExpectStrict off
+http://wiki.ceph.com
 
-For the upstream commit:
-http://svn.apache.org/viewvc?view=revision&revision=1554303
+There are a few subtle differences from the MindTouch Core site we
+were running before, but overall we think you'll like the new tool.
+For more info you can check out the blog post I wrote about the
+launch:
 
-And, for those that only like GitHub URLs:
-https://github.com/apache/httpd/commit/1a950459084dbbceeff441f7fff1d03bdadddd03
+http://ceph.com/community/new-ceph-wiki-is-live/
 
-On dev@httpd, we're still discussing whether the default
-HttpContentLengthHeadZero functionality should be on or off.  I think
-it should be "on"...
+If you have questions feel free to direct them my way.  Fair warning
+though, if the question is "why not media wiki" the explanation is a
+bit more involved and I'll want to get my hands on you directly in
+IRC. :)
 
-After that conversation dies down, I'll probably propose it for
-backport to 2.4...but, it changes the MMN (in theory), so it may not
-be able to be properly released until 2.6.  We'll see.
+Comments and feedback are always welcome though, so give it a whirl
+and let us know what you think.  Thanks!
 
-Cheers.  -- justin
+
+
+Best Regards,
+
+Patrick McGarry
+Director, Community || Inktank
+http://ceph.com  ||  http://inktank.com
+@scuttlemonkey || @ceph || @inktank
