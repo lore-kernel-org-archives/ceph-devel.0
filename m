@@ -1,50 +1,46 @@
 From: Sage Weil <sage@inktank.com>
-Subject: [PATCH 2/4] ceph: cleanup aborted requests when re-sending requests.
-Date: Mon, 30 Dec 2013 16:13:49 -0800
-Message-ID: <1388448831-10324-3-git-send-email-sage@inktank.com>
+Subject: [PATCH 4/4] ceph: allocate non-zero page to fscache in readpage()
+Date: Mon, 30 Dec 2013 16:13:51 -0800
+Message-ID: <1388448831-10324-5-git-send-email-sage@inktank.com>
 References: <1388448831-10324-1-git-send-email-sage@inktank.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:34240 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:34246 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932403Ab3LaAOA (ORCPT
+	with ESMTP id S932405Ab3LaAOA (ORCPT
 	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Dec 2013 19:14:00 -0500
 In-Reply-To: <1388448831-10324-1-git-send-email-sage@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: stable@vger.kernel.org
-Cc: ceph-devel@vger.kernel.org, "Yan, Zheng" <zheng.z.yan@intel.com>, Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org, Li Wang <liwang@ubuntukylin.com>
 
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
+From: Li Wang <liwang@ubuntukylin.com>
 
-Aborted requests usually get cleared when the reply is received.
-If MDS crashes, no reply will be received. So we need to cleanup
-aborted requests when re-sending requests.
+ceph_osdc_readpages() returns number of bytes read, currently,
+the code only allocate full-zero page into fscache, this patch
+fixes this.
 
-Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
-Reviewed-by: Greg Farnum <greg@inktank.com>
-Signed-off-by: Sage Weil <sage@inktank.com>
-(cherry picked from commit eb1b8af33c2e42a9a57fc0a7588f4a7b255d2e79)
+Signed-off-by: Li Wang <liwang@ubuntukylin.com>
+Reviewed-by: Milosz Tanski <milosz@adfin.com>
+Reviewed-by: Sage Weil <sage@inktank.com>
+(cherry picked from commit ff638b7df5a9264024a6448bdfde2b2bf5d1994a)
 ---
- fs/ceph/mds_client.c | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+ fs/ceph/addr.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index b7bda5d..91214b2 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -1875,8 +1875,11 @@ static int __do_request(struct ceph_mds_client *mdsc,
- 	int mds = -1;
- 	int err = -EAGAIN;
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index 6df8bd4..1e561c0 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -216,7 +216,7 @@ static int readpage_nounlock(struct file *filp, struct page *page)
+ 	}
+ 	SetPageUptodate(page);
  
--	if (req->r_err || req->r_got_result)
-+	if (req->r_err || req->r_got_result) {
-+		if (req->r_aborted)
-+			__unregister_request(mdsc, req);
- 		goto out;
-+	}
+-	if (err == 0)
++	if (err >= 0)
+ 		ceph_readpage_to_fscache(inode, page);
  
- 	if (req->r_timeout &&
- 	    time_after_eq(jiffies, req->r_started + req->r_timeout)) {
+ out:
 -- 
 1.8.5.1
 
