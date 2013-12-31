@@ -1,44 +1,35 @@
 From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: feedback on supporting libc++
-Date: Mon, 30 Dec 2013 17:19:20 -0800
-Message-ID: <52C21B98.40109@inktank.com>
-References: <CA+Hcz5-8k3rnCaJJj3htb0F63V+fitoBtofCkGzJZ4a_j29K8Q@mail.gmail.com>	<527157C0.40802@inktank.com> <CA+Hcz5_pOdrHyYq9xbn=09S6jFh9enRWq1uKxHSQKS3u2qiXQw@mail.gmail.com>
+Subject: Re: Patch for rados tool to allow listomapvals to list all k/v pairs
+Date: Mon, 30 Dec 2013 17:25:31 -0800
+Message-ID: <52C21D0B.3080209@inktank.com>
+References: <CAJO99Tmj3itMZWpjoO6tmjk7Tz9WJSjDtKwwF-BE9W1iWODkdg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gg0-f179.google.com ([209.85.161.179]:40846 "EHLO
-	mail-gg0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932365Ab3LaBUK (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Dec 2013 20:20:10 -0500
-Received: by mail-gg0-f179.google.com with SMTP id l4so2434886ggi.10
-        for <ceph-devel@vger.kernel.org>; Mon, 30 Dec 2013 17:20:09 -0800 (PST)
-In-Reply-To: <CA+Hcz5_pOdrHyYq9xbn=09S6jFh9enRWq1uKxHSQKS3u2qiXQw@mail.gmail.com>
+Received: from mail-yh0-f54.google.com ([209.85.213.54]:35009 "EHLO
+	mail-yh0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932365Ab3LaB0U (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Dec 2013 20:26:20 -0500
+Received: by mail-yh0-f54.google.com with SMTP id z12so2508181yhz.13
+        for <ceph-devel@vger.kernel.org>; Mon, 30 Dec 2013 17:26:19 -0800 (PST)
+In-Reply-To: <CAJO99Tmj3itMZWpjoO6tmjk7Tz9WJSjDtKwwF-BE9W1iWODkdg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Noah Watkins <noah.watkins@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Gregory Farnum <greg@inktank.com>, Gregory Farnum <gregory.farnum@inktank.com>
+To: =?ISO-8859-1?Q?Bj=F8rnar_Ness?= <bjornar.ness@gmail.com>, ceph-devel@vger.kernel.org
 
-On 12/27/2013 03:34 PM, Noah Watkins wrote:
-> On Wed, Oct 30, 2013 at 2:02 PM, Josh Durgin <josh.durgin@inktank.com> wrote:
->> On 10/29/2013 03:51 PM, Noah Watkins wrote:
->>
->> unsafe to me. Could you check whether you can run 'rados ls' compiled
->> against an old librados, but dynamically loading librados from this
->> branch compiled in c++98 mode?
->
-> I'm still working on this, but my understanding so far from libc++
-> documentation is that libc++ and libstdc++ are API but not ABI
-> compatible, so there shouldn't be an expectation that librados binary
-> library built against libstc++ will work if dynamically linked against
-> libc++.
+On 12/28/2013 05:59 AM, Bj=F8rnar Ness wrote:
+> Current code only lists first 512 k/v pairs, attached patch.
 
-I meant if it was compiled against libstdc++ both times, I was curious
-whether changing std::tr1::shared_ptr to ceph::shared_ptr would result
-in any incompatibility.
+Thanks for looking into this!
+I moved the last_read assignment out of the conditional so it applies
+to nonprintable values too, and added a simple test case:
 
-I just tried this, and it worked fine (I think because it does not
-actually create a new c++ type, but acts like a typedef and just
-creates an alias), so I've got no issues with this approach.
+https://github.com/ceph/ceph/pull/1022
 
-Josh
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
