@@ -1,47 +1,50 @@
 From: Sage Weil <sage@inktank.com>
-Subject: [PATCH 3/4] ceph: wake up 'safe' waiters when unregistering request
-Date: Mon, 30 Dec 2013 16:13:50 -0800
-Message-ID: <1388448831-10324-4-git-send-email-sage@inktank.com>
+Subject: [PATCH 2/4] ceph: cleanup aborted requests when re-sending requests.
+Date: Mon, 30 Dec 2013 16:13:49 -0800
+Message-ID: <1388448831-10324-3-git-send-email-sage@inktank.com>
 References: <1388448831-10324-1-git-send-email-sage@inktank.com>
-Return-path: <stable-owner@vger.kernel.org>
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:34240 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932403Ab3LaAOA (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Dec 2013 19:14:00 -0500
 In-Reply-To: <1388448831-10324-1-git-send-email-sage@inktank.com>
-Sender: stable-owner@vger.kernel.org
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
 To: stable@vger.kernel.org
 Cc: ceph-devel@vger.kernel.org, "Yan, Zheng" <zheng.z.yan@intel.com>, Sage Weil <sage@inktank.com>
-List-Id: ceph-devel.vger.kernel.org
 
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-We also need to wake up 'safe' waiters if error occurs or request
-aborted. Otherwise sync(2)/fsync(2) may hang forever.
+Aborted requests usually get cleared when the reply is received.
+If MDS crashes, no reply will be received. So we need to cleanup
+aborted requests when re-sending requests.
 
 Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+Reviewed-by: Greg Farnum <greg@inktank.com>
 Signed-off-by: Sage Weil <sage@inktank.com>
-(cherry picked from commit fc55d2c9448b34218ca58733a6f51fbede09575b)
+(cherry picked from commit eb1b8af33c2e42a9a57fc0a7588f4a7b255d2e79)
 ---
- fs/ceph/mds_client.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+ fs/ceph/mds_client.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
 
 diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 91214b2..7889015 100644
+index b7bda5d..91214b2 100644
 --- a/fs/ceph/mds_client.c
 +++ b/fs/ceph/mds_client.c
-@@ -642,6 +642,8 @@ static void __unregister_request(struct ceph_mds_client *mdsc,
- 		req->r_unsafe_dir = NULL;
- 	}
+@@ -1875,8 +1875,11 @@ static int __do_request(struct ceph_mds_client *mdsc,
+ 	int mds = -1;
+ 	int err = -EAGAIN;
  
-+	complete_all(&req->r_safe_completion);
-+
- 	ceph_mdsc_put_request(req);
- }
+-	if (req->r_err || req->r_got_result)
++	if (req->r_err || req->r_got_result) {
++		if (req->r_aborted)
++			__unregister_request(mdsc, req);
+ 		goto out;
++	}
  
-@@ -2189,7 +2191,6 @@ static void handle_reply(struct ceph_mds_session *session, struct ceph_msg *msg)
- 	if (head->safe) {
- 		req->r_got_safe = true;
- 		__unregister_request(mdsc, req);
--		complete_all(&req->r_safe_completion);
- 
- 		if (req->r_got_unsafe) {
- 			/*
+ 	if (req->r_timeout &&
+ 	    time_after_eq(jiffies, req->r_started + req->r_timeout)) {
 -- 
 1.8.5.1
+
