@@ -1,35 +1,43 @@
-From: Greg KH <gregkh@linuxfoundation.org>
-Subject: Re: [PATCH 0/4] Ceph fixes for 3.12.y
-Date: Mon, 30 Dec 2013 21:15:51 -0800
-Message-ID: <20131231051551.GA29973@kroah.com>
-References: <1388448831-10324-1-git-send-email-sage@inktank.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Ilya Dryomov <ilya.dryomov@inktank.com>
+Subject: [PATCH] libceph: use CEPH_MON_PORT when the specified port is 0
+Date: Tue, 31 Dec 2013 12:54:44 +0200
+Message-ID: <1388487284-4774-1-git-send-email-ilya.dryomov@inktank.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.linuxfoundation.org ([140.211.169.12]:50947 "EHLO
-	mail.linuxfoundation.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750767Ab3LaFPC (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 31 Dec 2013 00:15:02 -0500
-Content-Disposition: inline
-In-Reply-To: <1388448831-10324-1-git-send-email-sage@inktank.com>
+Received: from mail-ea0-f171.google.com ([209.85.215.171]:42432 "EHLO
+	mail-ea0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752254Ab3LaKzg (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 31 Dec 2013 05:55:36 -0500
+Received: by mail-ea0-f171.google.com with SMTP id h10so5440143eak.16
+        for <ceph-devel@vger.kernel.org>; Tue, 31 Dec 2013 02:55:34 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: stable@vger.kernel.org, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+Cc: ilya.dryomov@inktank.com
 
-On Mon, Dec 30, 2013 at 04:13:47PM -0800, Sage Weil wrote:
-> Hi,
-> 
-> These patches are for 3.12.y stable.  All have been retested and
-> reference the original commit.  They can also be pulled from
-> 
->   git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-stable-3.12.5
-> 
-> if that is preferred.
+Similar to userspace, don't bail with "parse_ips bad ip ..." if the
+specified port is port 0, instead use port CEPH_MON_PORT (6789, the
+default monitor port).
 
-Now applied, and I also added patches 2 and 3 to the 3.10 and 3.4-stable
-trees as well.  If that was incorrect, please let me know.
+Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
+---
+ net/ceph/messenger.c |    4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
-thanks,
+diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+index bd172e1ee0ae..d2cadb5b2b63 100644
+--- a/net/ceph/messenger.c
++++ b/net/ceph/messenger.c
+@@ -1866,7 +1866,9 @@ int ceph_parse_ips(const char *c, const char *end,
+ 				port = (port * 10) + (*p - '0');
+ 				p++;
+ 			}
+-			if (port > 65535 || port == 0)
++			if (port == 0)
++				port = CEPH_MON_PORT;
++			else if (port > 65535)
+ 				goto bad;
+ 		} else {
+ 			port = CEPH_MON_PORT;
+-- 
+1.7.10.4
 
-greg k-h
