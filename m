@@ -1,54 +1,43 @@
 From: Sage Weil <sage@inktank.com>
-Subject: daily stand-ups / weekly meetings
-Date: Thu, 2 Jan 2014 12:46:29 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1401021230460.14184@cobra.newdream.net>
+Subject: CephFS standup
+Date: Thu, 2 Jan 2014 12:51:58 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1401021238320.12141@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:60958 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:32776 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751398AbaABUq3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Jan 2014 15:46:29 -0500
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 352D980049
-	for <ceph-devel@vger.kernel.org>; Thu,  2 Jan 2014 12:46:29 -0800 (PST)
-Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 0C79D80049
-	for <ceph-devel@vger.kernel.org>; Thu,  2 Jan 2014 12:46:29 -0800 (PST)
+	with ESMTP id S1750740AbaABUv7 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Jan 2014 15:51:59 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: zheng.z.yan@intel.com, liwang@ubuntukylin.com, greg@inktank.com, john.spray@inktank.com
+Cc: ceph-devel@vger.kernel.org
 
-Hi all,
+2014 will be the Year of the Linux Desktop^W^W^WCephFS!  To that end, we 
+should schedule a daily standup to coordinate development activities.
 
-We've been doing daily stand-ups for various ceph components for a while 
-now.  These have been historically attended by Inktank engineers, but for 
-a while now we've been looping in other developers.  To make this all more 
-transparent, the kraken IRC bot in #ceph-devel (irc.oftc.net) is now 
-announcing the standups when they start.  If you are interested in 
-joining, you can ping the participants on IRC to get the Google hangout 
-URL.
+The regular participants are probably:
 
-The current standups are:
+ Zheng Yan (Shanghai, China)
+ Li Wang (Changsha, China) 
+ Sage Weil (California)    
+ Greg Farnum (California)  
+ John Spray (Edinburgh, Scotland)
 
- 17:45 UTC /  9:45 PST: RGW and RBD
- 18:00 UTC / 10:00 PST: teuthology and build
- 18:15 UTC / 10:15 PST: rados/core
+...and of course anybody else who is interested in joining!
 
-We need to schedule a CephFS standup as well; I'll send a separate email 
-about that.
+I think these are all (conveniently) 8 hours apart.  Our options are 
+probably something like:
+   
+   3pm CA / 11pm Edinburgh / 7am Shanghai 
+  11pm CA /  7am Edinburgh / 3pm Shanghai 
+   7am CA /  3pm Edinburgh / 11pm Shanghai
 
-If there are any other subjects that deserve a daily or weekly online 
-meeting (like the teuthology weeklies that have been happening) we may as 
-well schedule those with kraken as well so that they are announced in the 
-channel.  For example, we may want a daily or weekly meeting about 
-Chef/Puppet/* orchestration activities, cloud stack integrations, or 
-whatever else.  Suggestions welcome!
-
-You can get the current schedule from kraken by saying
-
- kraken reminders list
-
-in #ceph-devel.
+Ian tells me the Lustre team (which was similarly distributed) used to 
+rotate every few months to spread the early morning/late night pain.  For 
+my part, I'm happy with any of these slots (although shifting a few 
+minutes earlier to 6:45am would be marginally better w/ my kids).  Does 
+anybody else have any preferences?
 
 sage
