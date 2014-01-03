@@ -1,42 +1,110 @@
-From: Alfredo Deza <alfredo.deza@inktank.com>
-Subject: [ANN] ceph-deploy 1.3.4 released!
-Date: Fri, 3 Jan 2014 09:26:17 -0500
-Message-ID: <CANtztVzbo5H3AMyFCEwLbPLhsGccq4DgzpLoSo9uF=8WnCDJ1A@mail.gmail.com>
+From: Milosz Tanski <milosz@adfin.com>
+Subject: Re: [PATCH 0/3] Ceph fscache: Fix kernel panic due to a race
+Date: Fri, 3 Jan 2014 09:43:21 -0500
+Message-ID: <CANP1eJG237CRrXjfiAPJsL5NK6E9e6OuwiaTWSydiXJ=QFa0uw@mail.gmail.com>
+References: <cover.1388066937.git.liwang@ubuntukylin.com>
+	<CANP1eJFMZrT+GbHhg3gWqsy=whSozEiWmZj-L08EyhD8LcqzeQ@mail.gmail.com>
+	<52BE4AB1.6090901@ubuntukylin.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oa0-f52.google.com ([209.85.219.52]:38028 "EHLO
-	mail-oa0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751698AbaACO0U (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Jan 2014 09:26:20 -0500
-Received: by mail-oa0-f52.google.com with SMTP id h16so16066783oag.39
-        for <ceph-devel@vger.kernel.org>; Fri, 03 Jan 2014 06:26:17 -0800 (PST)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <52BE4AB1.6090901@ubuntukylin.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Li Wang <liwang@ubuntukylin.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, linux-kernel@vger.kernel.org, Yunchuan Wen <yunchuanwen@ubuntukylin.com>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi All,
+I'm going to look the patches and the issue in full detail. In the
+meantime do you guys have the oops back trace. I have some other
+fscache patches that haven't made it upstream yet that might have been
+masking this issue for me.
 
-There is a new release of ceph-deploy, the easy deployment tool for Ceph.
+On Fri, Dec 27, 2013 at 10:51 PM, Li Wang <liwang@ubuntukylin.com> wrote:
+> Hi Milosz,
+>   As far as I know, logically, currently fscache does not play
+> as write cache for Ceph, except that there is a
+> call to ceph_readpage_to_fscache() in ceph_writepage(), but that
+> is nothing related to our test case. According to our observation,
+> our test case never goes through ceph_writepage(), instead, it goes
+> through ceph_writepages(). So in other words, I donot think this
+> is related to caching in write path.
+>   May I try to explain the panic in more detail,
+>
+> (1) dd if=/dev/zero of=cephfs/foo bs=8 count=512
+> (2) echo 3 > /proc/sys/vm/drop_caches
+> (3) dd if=cephfs/foo of=/dev/null bs=8 count=1024
+>
+> For statement (1), it is frequently appending a file, so
+> ceph_aio_write() frequently updates the inode->i_size,
+> however, these updates did not immediately reflected to
+> object->store_limit_l. For statement (3), when we
+> start reading the second page at [4096, 8192), ceph find that the page
+> does not be cached in fscache, then it decides to write this page into
+> fscache, during this process in cachefiles_write_page(), it found that
+> object->store_limit_l < 4096 (page->index << 12), it causes panic. Does
+> it make sense?
+>
+> Cheers,
+> Li Wang
+>
+>
+> On 2013/12/27 6:51, Milosz Tanski wrote:
+>>
+>> Li,
+>>
+>> I looked at the patchset am I correct that this only happens when we
+>> enable caching in the write path?
+>>
+>> - Milosz
+>>
+>> On Thu, Dec 26, 2013 at 9:29 AM, Li Wang <liwang@ubuntukylin.com> wrote:
+>>>
+>>> From: Yunchuan Wen <yunchuanwen@ubuntukylin.com>
+>>>
+>>> The following scripts could easily panic the kernel,
+>>>
+>>> #!/bin/bash
+>>> mount -t ceph -o fsc MONADDR:/ cephfs
+>>> rm -rf cephfs/foo
+>>> dd if=/dev/zero of=cephfs/foo bs=8 count=512
+>>> echo 3 > /proc/sys/vm/drop_caches
+>>> dd if=cephfs/foo of=/dev/null bs=8 count=1024
+>>>
+>>> This is due to when writing a page into fscache, the code will
+>>> assert that the write position does not exceed the
+>>> object->store_limit_l, which is supposed to be equal to inode->i_size.
+>>> However, for current implementation, after file writing, the
+>>> object->store_limit_l is not synchronized with new
+>>> inode->i_size immediately, which introduces a race that if writing
+>>> a new page into fscache, will reach the ASSERT that write position
+>>> has exceeded the object->store_limit_l, and cause kernel panic.
+>>> This patch fixes it.
+>>>
+>>> Yunchuan Wen (3):
+>>>    Ceph fscache: Add an interface to synchronize object store limit
+>>>    Ceph fscache: Update object store limit after writing
+>>>    Ceph fscache: Wait for completion of object initialization
+>>>
+>>>   fs/ceph/cache.c |    1 +
+>>>   fs/ceph/cache.h |   10 ++++++++++
+>>>   fs/ceph/file.c  |    3 +++
+>>>   3 files changed, 14 insertions(+)
+>>>
+>>> --
+>>> 1.7.9.5
+>>>
+>>
+>>
+>>
+>
 
-This is mostly a bug-fix release, although one minor feature was
-added: the ability to
-install/remove packages from remote hosts with a new sub-command: `pkg`
-
-As we continue to add features (or improve old ones) we are also
-making sure proper
-documentation goes hand in hand with those changes too. For `pkg` this
-is now documented
-in the ceph-deploy docs page: http://ceph.com/ceph-deploy/docs/pkg.html
-
-The complete changelog, including 1.3.4 changes can be found here:
-http://ceph.com/ceph-deploy/docs/changelog.html#id1
 
 
-Make sure you update!
+-- 
+Milosz Tanski
+CTO
+10 East 53rd Street, 37th floor
+New York, NY 10022
 
-
-Thanks,
-
-
-Alfredo
+p: 646-253-9055
+e: milosz@adfin.com
