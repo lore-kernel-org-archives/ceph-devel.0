@@ -1,110 +1,42 @@
-From: Milosz Tanski <milosz@adfin.com>
-Subject: Re: [PATCH 0/3] Ceph fscache: Fix kernel panic due to a race
-Date: Fri, 3 Jan 2014 09:43:21 -0500
-Message-ID: <CANP1eJG237CRrXjfiAPJsL5NK6E9e6OuwiaTWSydiXJ=QFa0uw@mail.gmail.com>
-References: <cover.1388066937.git.liwang@ubuntukylin.com>
-	<CANP1eJFMZrT+GbHhg3gWqsy=whSozEiWmZj-L08EyhD8LcqzeQ@mail.gmail.com>
-	<52BE4AB1.6090901@ubuntukylin.com>
+From: Noah Watkins <noah.watkins-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: how to use the function ceph_open_layout
+Date: Fri, 3 Jan 2014 08:07:56 -0800
+Message-ID: <CA+Hcz58PYDCDp5JwhDTx9xayRq6tQBJJpnBJtUHEQrQN1qiCMA@mail.gmail.com>
+References: <28fa4e4e.af9f.14356a4e251.Coremail.wkp4666@126.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <52BE4AB1.6090901@ubuntukylin.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Li Wang <liwang@ubuntukylin.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, linux-kernel@vger.kernel.org, Yunchuan Wen <yunchuanwen@ubuntukylin.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <28fa4e4e.af9f.14356a4e251.Coremail.wkp4666-KN7UnAbNpbg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: =?UTF-8?B?6bmP?= <wkp4666-KN7UnAbNpbg@public.gmane.org>
+Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-I'm going to look the patches and the issue in full detail. In the
-meantime do you guys have the oops back trace. I have some other
-fscache patches that haven't made it upstream yet that might have been
-masking this issue for me.
-
-On Fri, Dec 27, 2013 at 10:51 PM, Li Wang <liwang@ubuntukylin.com> wrote:
-> Hi Milosz,
->   As far as I know, logically, currently fscache does not play
-> as write cache for Ceph, except that there is a
-> call to ceph_readpage_to_fscache() in ceph_writepage(), but that
-> is nothing related to our test case. According to our observation,
-> our test case never goes through ceph_writepage(), instead, it goes
-> through ceph_writepages(). So in other words, I donot think this
-> is related to caching in write path.
->   May I try to explain the panic in more detail,
->
-> (1) dd if=/dev/zero of=cephfs/foo bs=8 count=512
-> (2) echo 3 > /proc/sys/vm/drop_caches
-> (3) dd if=cephfs/foo of=/dev/null bs=8 count=1024
->
-> For statement (1), it is frequently appending a file, so
-> ceph_aio_write() frequently updates the inode->i_size,
-> however, these updates did not immediately reflected to
-> object->store_limit_l. For statement (3), when we
-> start reading the second page at [4096, 8192), ceph find that the page
-> does not be cached in fscache, then it decides to write this page into
-> fscache, during this process in cachefiles_write_page(), it found that
-> object->store_limit_l < 4096 (page->index << 12), it causes panic. Does
-> it make sense?
->
-> Cheers,
-> Li Wang
->
->
-> On 2013/12/27 6:51, Milosz Tanski wrote:
->>
->> Li,
->>
->> I looked at the patchset am I correct that this only happens when we
->> enable caching in the write path?
->>
->> - Milosz
->>
->> On Thu, Dec 26, 2013 at 9:29 AM, Li Wang <liwang@ubuntukylin.com> wrote:
->>>
->>> From: Yunchuan Wen <yunchuanwen@ubuntukylin.com>
->>>
->>> The following scripts could easily panic the kernel,
->>>
->>> #!/bin/bash
->>> mount -t ceph -o fsc MONADDR:/ cephfs
->>> rm -rf cephfs/foo
->>> dd if=/dev/zero of=cephfs/foo bs=8 count=512
->>> echo 3 > /proc/sys/vm/drop_caches
->>> dd if=cephfs/foo of=/dev/null bs=8 count=1024
->>>
->>> This is due to when writing a page into fscache, the code will
->>> assert that the write position does not exceed the
->>> object->store_limit_l, which is supposed to be equal to inode->i_size.
->>> However, for current implementation, after file writing, the
->>> object->store_limit_l is not synchronized with new
->>> inode->i_size immediately, which introduces a race that if writing
->>> a new page into fscache, will reach the ASSERT that write position
->>> has exceeded the object->store_limit_l, and cause kernel panic.
->>> This patch fixes it.
->>>
->>> Yunchuan Wen (3):
->>>    Ceph fscache: Add an interface to synchronize object store limit
->>>    Ceph fscache: Update object store limit after writing
->>>    Ceph fscache: Wait for completion of object initialization
->>>
->>>   fs/ceph/cache.c |    1 +
->>>   fs/ceph/cache.h |   10 ++++++++++
->>>   fs/ceph/file.c  |    3 +++
->>>   3 files changed, 14 insertions(+)
->>>
->>> --
->>> 1.7.9.5
->>>
->>
->>
->>
->
-
-
-
--- 
-Milosz Tanski
-CTO
-10 East 53rd Street, 37th floor
-New York, NY 10022
-
-p: 646-253-9055
-e: milosz@adfin.com
+WW91J2xsIG5lZWQgdG8gcmVnaXN0ZXIgdGhlIG5ldyBwb29sIHdpdGggdGhlIE1EUzoKCiAgICBj
+ZXBoIG1kcyBhZGRfZGF0YV9wb29sIDxwb29sIGlkPgoKT24gVGh1LCBKYW4gMiwgMjAxNCBhdCA5
+OjQ4IFBNLCDpuY8gPHdrcDQ2NjZAMTI2LmNvbT4gd3JvdGU6Cj4gIEhpIGFsbDsKPiB0b2RheSwg
+IEkgd2FudCB0byB1c2UgdGhlIGZ1Y3Rpb24gb2YgY2VwaF9vcGVuX2xheW91dCgpIGluIGxpYmNl
+cGhGcy5oCj4KPiBJIGNyZWF0IGEgbmV3IHBvb2wgIHN1Y2Nlc3MsCj4gIyByYWRvcyBta3Bvb2wg
+ZGF0YTEKPiBhbmQgdGhlbiBJICBlZGl0IHRoZSBjb2RlIGxpa2UgdGhpczoKPgo+IGludCBmZCA9
+IGNlcGhfb3Blbl9sYXlvdXQoIGNtb3VudCwgY19wYXRoLCBPX1JET05MWXxPX0NSRUFULCAwNjY2
+LiAoMTw8MjIpLAo+IDEsICgxPDwyMikgLCAiZGF0YTEiKQo+Cj4gYW5kIHRoZW4gdGhlIGZkIGlz
+IC0yMiEhISEhISEhIQo+Cj4gd2hlbiBJIHVzZSB0aGUgZGF0YSBwb29sICwgaXQgY2FuIHN1Y2Nl
+c3MKPiBpbnQgZmQgPSBjZXBoX29wZW5fbGF5b3V0KCBjbW91bnQsIGNfcGF0aCwgT19SRE9OTFl8
+T19DUkVBVCwgMDY2Ni4gKDE8PDIyKSwKPiAxLCAoMTw8MjIpICwgImRhdGEiKQo+Cj4gdGhlIGNl
+cGhfb3Blbl9sYXlvdXQgc3VwcG9ydCByZWFkL3dyaXRlIHRvIGEgbmV3IHBvb2w/Pz8KPgo+ICAg
+ICAgICAgICAgICB0aGlua3MgeW91IGZvciB0aGUgaGVscCEKPiB5b3VzICEKPgo+Cj4KPgo+Cj4K
+Pgo+Cj4KPiBfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwo+
+IGNlcGgtdXNlcnMgbWFpbGluZyBsaXN0Cj4gY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQo+IGh0
+dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo+Cl9f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmNlcGgtdXNlcnMg
+bWFpbGluZyBsaXN0CmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KaHR0cDovL2xpc3RzLmNlcGgu
+Y29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCg==
