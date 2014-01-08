@@ -1,37 +1,104 @@
-From: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>
-Subject: Client Incarnation & librados documentation
-Date: Wed, 8 Jan 2014 11:13:21 +0000
-Message-ID: <3472A07E6605974CBC9BC573F1BC02E4AE6AF398@PLOXCHG03.cern.ch>
+From: Luis Henriques <luis.henriques@canonical.com>
+Subject: Re: Ceph fixes for 3.10.y
+Date: Wed, 8 Jan 2014 11:13:37 +0000
+Message-ID: <20140108111337.GA5179@hercules>
+References: <alpine.DEB.2.00.1312310819370.19234@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cernmx11.cern.ch ([188.184.36.50]:4207 "EHLO CERNMX11.cern.ch"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755170AbaAHLN1 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Jan 2014 06:13:27 -0500
-Content-Language: en-GB
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <stable-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <alpine.DEB.2.00.1312310819370.19234@cobra.newdream.net>
+Sender: stable-owner@vger.kernel.org
+To: Sage Weil <sage@inktank.com>
+Cc: stable@vger.kernel.org, ceph-devel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-Hi, 
-I have a question concerning the variable used by "objecter->set_client_incarnation().."
+Hi Sage,
 
-What I have seen is that currently it is always set to 0.
+On Tue, Dec 31, 2013 at 08:21:19AM -0800, Sage Weil wrote:
+> Hi Greg,
+> 
+> This is a somewhat long overdue set of fixes for 3.10.y.  Since there 
+> are a lot of patches, they can be pulled from
+> 
+>   git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-stable-3.10.24
+> 
+> If you prefer, I can send them as separate emails instead.  Note that this 
+> branch includes the 2 patches from the 3.12.y series you already picked 
+> up.
+> 
+> They are all reviewed, retested, and reference the original upstream 
+> commit (via git cherry-pick -x).
+> 
+> Thanks!
+> sage
 
-Would it be possible to add this as a variable to an IoCtx and do "objecter->set_client_incarnation()" according to the context before each objecter->XXX call. I have seen that every call to the objecter is already locked with the client mutex, so that should be safe ?!?!?
+I am also queuing those that were missing in the 3.11 kernel.  Thanks!
 
-What was the original purpose of this variable?
+Cheers,
+--
+Luis
 
-I want to use it to identify more fine grained clients using a shared librados instance and use it to authorize on server side object operations using an OSD plugin ... 
-
-Is there any better (larger than int32)  existing available 'blob' to move something with each message from librados to an OSD plugin?
-
-One small point concerning the librados documention ... we noticed when one uses seteuid(uid) together with librados all OSD connections get recreated after each seteuid call and one accumulates TIME_WAIT sockets ... maybe you can document this 'feature' ...
-
-Thanks, Andreas.
-
-
-
-
+> 
+> 
+> ----------------------------------------------------------------
+> Alex Elder (4):
+>       libceph: add lingering request reference when registered
+>       rbd: flush dcache after zeroing page data
+>       rbd: set removing flag while holding list lock
+>       rbd: protect against concurrent unmaps
+> 
+> Dan Carpenter (4):
+>       ceph: cleanup types in striped_read()
+>       libceph: fix error handling in handle_reply()
+>       libceph: potential NULL dereference in ceph_osdc_handle_map()
+>       libceph: create_singlethread_workqueue() doesn't return ERR_PTRs
+> 
+> Emil Goode (1):
+>       ceph: improve error handling in ceph_mdsmap_decode
+> 
+> Josh Durgin (8):
+>       rbd: fix buffer size for writes to images with snapshots
+>       rbd: fix null dereference in dout
+>       libceph: add function to ensure notifies are complete
+>       rbd: complete notifies before cleaning up osd_client and rbd_dev
+>       rbd: make rbd_obj_notify_ack() synchronous
+>       rbd: fix use-after free of rbd_dev->disk
+>       rbd: ignore unmapped snapshots that no longer exist
+>       rbd: fix error handling from rbd_snap_name()
+> 
+> Nathaniel Yazdani (1):
+>       ceph: fix null pointer dereference
+> 
+> Sage Weil (1):
+>       rbd: fix a couple warnings
+> 
+> Sasha Levin (1):
+>       ceph: avoid accessing invalid memory
+> 
+> Yan, Zheng (5):
+>       libceph: fix safe completion
+>       libceph: fix truncate size calculation
+>       libceph: call r_unsafe_callback when unsafe reply is received
+>       ceph: cleanup aborted requests when re-sending requests.
+>       ceph: wake up 'safe' waiters when unregistering request
+> 
+> majianpeng (4):
+>       ceph: Free mdsc if alloc mdsc->mdsmap failed.
+>       ceph: Add check returned value on func ceph_calc_ceph_pg.
+>       ceph: fix bugs about handling short-read for sync read mode.
+>       ceph: allow sync_read/write return partial successed size of read/write.
+> 
+>  drivers/block/rbd.c             | 158 +++++++++++++++++++++++++---------------
+>  fs/ceph/file.c                  |  47 ++++++------
+>  fs/ceph/ioctl.c                 |   8 +-
+>  fs/ceph/mds_client.c            |  15 +++-
+>  fs/ceph/mdsmap.c                |   4 +-
+>  fs/ceph/super.c                 |   2 +-
+>  include/linux/ceph/osd_client.h |   3 +-
+>  net/ceph/osd_client.c           |  82 ++++++++++++---------
+>  8 files changed, 189 insertions(+), 130 deletions(-)
+> --
+> To unsubscribe from this list: send the line "unsubscribe stable" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
