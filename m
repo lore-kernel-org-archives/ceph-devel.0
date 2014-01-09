@@ -1,51 +1,45 @@
-From: "Dr. Musa Hamed" <drmusahamed94@gmail.com>
-Subject: I have a very lucrative Business
-Date: Wed, 8 Jan 2014 21:04:10 +0100
-Message-ID: <CAMd3YP01iZrL3JYQ1Tijd-s531E0VhqESVA1cwFSkfjNkhTdcQ__16388.6156552055$1389213270$gmane$org@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: Proposal for adding disable FileJournal option
+Date: Thu, 9 Jan 2014 16:13:24 +0800
+Message-ID: <08E73B64-A538-4A34-B0F6-1D7A2A00A8AF@gmail.com>
+Mime-Version: 1.0 (Mac OS X Mail 7.1 \(1827\))
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f194.google.com ([209.85.216.194]:54989 "EHLO
-	mail-qc0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751273AbaAHUeW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Jan 2014 15:34:22 -0500
-Received: by mail-qc0-f194.google.com with SMTP id i8so538446qcq.9
-        for <ceph-devel@vger.kernel.org>; Wed, 08 Jan 2014 12:34:22 -0800 (PST)
+Received: from mail-pa0-f52.google.com ([209.85.220.52]:65319 "EHLO
+	mail-pa0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751201AbaAIIOG convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Jan 2014 03:14:06 -0500
+Received: by mail-pa0-f52.google.com with SMTP id ld10so2990844pab.25
+        for <ceph-devel@vger.kernel.org>; Thu, 09 Jan 2014 00:14:05 -0800 (PST)
+Received: from [10.0.0.3] (li653-121.members.linode.com. [106.186.118.121])
+        by mx.google.com with ESMTPSA id sg1sm7871931pbb.16.2014.01.09.00.14.01
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
+        Thu, 09 Jan 2014 00:14:05 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-ATTN: Dear,
+Hi all,
 
-I am Dr. Musa Hamed Executive Director of the Bank of Africa
-Plc B.O.A,Cotonou Benin Rep. I have a very lucrative Business proposal
-worth of 21,500,000.00 USD.
+We know FileJournal plays a important role in FileStore backend, it can
+hugely reduce write latency and improve small write operations.
 
-An Iraqi named Hamadi Hashem a business man made a fixed deposit of
-21,500,000.00 USD . Upon maturity several notices was sent to him,
-even during the war,eleven years ago (2003) up till this date. Again
-after the war another notification was sent and still no response came
-from him. it has been found out that Hamadi Hashem and his family had
-been killed during the war in bomb blast that hit their home at
-Mukaradeeb where his personal oil well was. I am prepared to split the
-funds with you 50%:50%.By placing you as the NEXT OF KIN to his
-deposit.
+But in practice, there exists exceptions such as we already use FlashCache or cachepool(although it's not ready).
 
-Should you be interested in doing this deal with me, please send me
-the following information:
+If cachepool enabled, we may use use journal in cache_pool but may
+not like to use journal in base_pool. The main reason why drop journal
+in base_pool is that journal take over a single physical device and waste
+too much in base_pool.
 
-(1) Your Name
-(2) Resident Address
-(3) Your Occupation
-(4) Your Phone Number
-(5) Date of Birth
-(6) Resident Country
+Like above, if I enable FlashCache or other cache, I'd not like to enable
+journal in OSD layer.
 
-And I will prefer you to reach me privately and securely on my personal
-email address: dr.musahamed30@yahoo.fr
-Tel: +229-988-400-97
+So is it necessary to disable journal in special(not really special) case?
 
-I will provide you with further information as soon as I hear
-positively from you.
+Best regards,
+Wheats
 
-Regards,
-Dr. Musa Hamed
+
+
