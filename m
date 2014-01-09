@@ -1,84 +1,63 @@
-From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Subject: Re: Proposal for adding disable FileJournal option
-Date: Thu, 9 Jan 2014 19:16:07 +0100
-Message-ID: <B25C7326-5CC9-4CCB-817D-A6CDBCAA4A9C@profihost.ag>
-References: <08E73B64-A538-4A34-B0F6-1D7A2A00A8AF@gmail.com> <CAPYLRzgb1dEi=prb32mfVZ+=jDS72376GPU-pz7n3SPs7T-t1Q@mail.gmail.com>
-Mime-Version: 1.0 (1.0)
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Noah Watkins <noah.watkins@inktank.com>
+Subject: Re: feedback on supporting libc++
+Date: Thu, 9 Jan 2014 12:54:58 -0700
+Message-ID: <CA+Hcz585SaEdQmy9Eoc_2OS48yqVD6j8u2toLeAp3peCLi5-jA@mail.gmail.com>
+References: <CA+Hcz5-8k3rnCaJJj3htb0F63V+fitoBtofCkGzJZ4a_j29K8Q@mail.gmail.com>
+	<527157C0.40802@inktank.com>
+	<CA+Hcz5_pOdrHyYq9xbn=09S6jFh9enRWq1uKxHSQKS3u2qiXQw@mail.gmail.com>
+	<52C21B98.40109@inktank.com>
+	<CA+Hcz5-Gs03049M-o1uEgd1SoTnrkMZfrAVYhLJHD8g+AcRu5Q@mail.gmail.com>
+	<52C31423.20007@inktank.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ph.de-nserver.de ([85.158.179.214]:52202 "EHLO
-	mail-ph.de-nserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751142AbaAISWy convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Jan 2014 13:22:54 -0500
-In-Reply-To: <CAPYLRzgb1dEi=prb32mfVZ+=jDS72376GPU-pz7n3SPs7T-t1Q@mail.gmail.com>
+Received: from mail-qa0-f45.google.com ([209.85.216.45]:34002 "EHLO
+	mail-qa0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752543AbaAITy7 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Jan 2014 14:54:59 -0500
+Received: by mail-qa0-f45.google.com with SMTP id j5so3082918qaq.4
+        for <ceph-devel@vger.kernel.org>; Thu, 09 Jan 2014 11:54:58 -0800 (PST)
+In-Reply-To: <52C31423.20007@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: Haomai Wang <haomaiwang@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Josh Durgin <josh.durgin@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Gregory Farnum <greg@inktank.com>, Gregory Farnum <gregory.farnum@inktank.com>
 
-I had the samt question in the past but there seems no way to change it=
- for the ceph team
+I've send up a pull request with an initial run at this patch set:
 
-Stefan
+   https://github.com/ceph/ceph/pull/1064
 
-This mail was sent with my iPhone.
+The only thing that we haven't mentioned as possible solutions is to
+only use boost variants, rather than switching between the ones in
+std:: (in c++11) and std::tr1::.
 
-> Am 09.01.2014 um 18:28 schrieb Gregory Farnum <greg@inktank.com>:
->=20
-> The FileJournal is also for data safety whenever we're using write
-> ahead. To disable it we need a backing store that we know can provide
-> us consistent checkpoints (i.e., we can use parallel journaling mode =
-=E2=80=94
-> so for the FileJournal, we're using btrfs, or maybe zfs someday). But
-> for those systems you can already configure the system not to use a
-> journal.
-> -Greg
-> Software Engineer #42 @ http://inktank.com | http://ceph.com
->=20
->=20
->> On Thu, Jan 9, 2014 at 12:13 AM, Haomai Wang <haomaiwang@gmail.com> =
-wrote:
->> Hi all,
->>=20
->> We know FileJournal plays a important role in FileStore backend, it =
-can
->> hugely reduce write latency and improve small write operations.
->>=20
->> But in practice, there exists exceptions such as we already use Flas=
-hCache or cachepool(although it's not ready).
->>=20
->> If cachepool enabled, we may use use journal in cache_pool but may
->> not like to use journal in base_pool. The main reason why drop journ=
-al
->> in base_pool is that journal take over a single physical device and =
-waste
->> too much in base_pool.
->>=20
->> Like above, if I enable FlashCache or other cache, I'd not like to e=
-nable
->> journal in OSD layer.
->>=20
->> So is it necessary to disable journal in special(not really special)=
- case?
->>=20
->> Best regards,
->> Wheats
->>=20
->>=20
->>=20
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On Tue, Dec 31, 2013 at 11:59 AM, Josh Durgin <josh.durgin@inktank.com> wrote:
+> On 12/31/2013 08:59 AM, Noah Watkins wrote:
+>>
+>> Thanks for testing that Josh. Before cleaning up this patch set, I
+>> have a few questions.
+>>
+>> I'm still not clear on how to handle the "std::tr1::shared_ptr <
+>> ObjListCtx > ctx;" in librados.hpp. If we change this to
+>> ceph::shared_ptr, then we'll also need to some how ship with the
+>> translations here:
+>>
+>>    https://github.com/ceph/ceph/blob/port/libc%2B%2B/src/include/memory.h
+>
+>
+> I'd suggest treating it like we did buffer.h and associated headers -
+> make a symlink to it from include/rados/memory.h, and install a copy of
+> it with the librados headers.
+>
+>
+>> It's also not clear that ceph::shared_ptr should be exposed publically
+>> if there is a thought we might start switching out implementations of
+>> ceph::shared_ptr via memory.h (e.g. by using boost implementation).
+>
+>
+> We can't change the actual type used by librados, since AIUI that's
+> part of the ABI, so if we want to use another type internally we can
+> make include/rados/memory.h a copy of the original instead of a symlink,
+> and then change the internal include/memory.h however we like.
+>
+> Josh
