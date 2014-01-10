@@ -1,186 +1,61 @@
-From: Jean-Charles LOPEZ <jc.lopez@inktank.com>
-Subject: Re: After creating more than one filesystem, how do i mount the filesystem i want?
-Date: Thu, 9 Jan 2014 20:32:12 -0800
-Message-ID: <D0567273-263A-40D4-BC93-17EE7E8C5B2F@inktank.com>
-References: <93F21572-A7E9-45FB-9766-6D663D6C6173@inktank.com> <5119B354.708@inktank.com> <1389316219.96751.YahooMailNeo@web122901.mail.ne1.yahoo.com>
-Mime-Version: 1.0 (Mac OS X Mail 7.1 \(1827\))
-Content-Type: text/plain; charset=windows-1252
+From: franklinbuthelezi1@yahoo.com
+Subject: =?UTF-8?Q?DiePresse.com_Mein_Freund,_der_Fahrradh=C3=A4ndler?=
+Date: Fri, 10 Jan 2014 13:33:52 +0100 (CET)
+Message-ID: <1979872310.1389357232551.JavaMail.root@dpoportal4.diepresse.apa.net>
+Reply-To: franklinbuthelezi1@yahoo.com
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f50.google.com ([209.85.160.50]:40431 "EHLO
-	mail-pb0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750702AbaAJEc1 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Jan 2014 23:32:27 -0500
-Received: by mail-pb0-f50.google.com with SMTP id rr13so3927547pbb.23
-        for <ceph-devel@vger.kernel.org>; Thu, 09 Jan 2014 20:32:26 -0800 (PST)
-In-Reply-To: <1389316219.96751.YahooMailNeo@web122901.mail.ne1.yahoo.com>
+Received: from dpocron.diepresse.apa.net ([194.232.102.6]:42136 "EHLO
+	dpocron.diepresse.apa.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751841AbaAJMok convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Jan 2014 07:44:40 -0500
+Received: from dpoportal4.diepresse.apa.net (dpoportal4.diepresse.local [192.168.0.20])
+	by dpocron.diepresse.apa.net (Postfix) with ESMTP id 8982E446F0
+	for <ceph-devel@vger.kernel.org>; Fri, 10 Jan 2014 13:33:52 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Isaac Otsiabah <zmoo76b@yahoo.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hi Isaac,
+=46olgender Artikel auf http://diepresse.com wird Ihnen von Franklin Bu=
+thelezi empfohlen:
 
-there can only be a single MDS map at a given time. So only one File Sy=
-stem will be exposed by the Ceph Cluster.
+Mein Freund, der Fahrradh=C3=A4ndler
+Manche Dinge ver=C3=A4ndern sich =C3=BCber die langen Wintermonate hinw=
+eg.=20
 
-Everytime you will run the "ceph mds newfs" command, you will just over=
-write the current config. If you happen to do so, make sure you stop th=
-e MDS to cleanly generate a new MDS map with the new pools.
+http://diepresse.com/home/leben/mode/kolumnezumtag/548717/index.do
 
-You need to create subdirectories on this file system and perform an in=
--depth mount using different sub-direcrtories if you want to split the =
-data across the File System but always on the pools you chose when you =
-issued the "ceph mds newfs" command
-
-e.g.
-	=95 MDS FS is the root /
-	=95 Create /Dir1
-	=95 Create /Dir2
-
-Use an admin client to:
-	=95 mount -t ceph host:6789:/ /mnt/ceph
-	=95 mkdir /mnt/ceph/Dir1 then make necessary chown or chgrp for specif=
-ic access through client1
-	=95 mkdir /mnt/ceph/Dir2 then make necessary chown or chgrp for specif=
-ic access through client2
-To perform the in-depth mount
-	=95 On client1 mount -t ceph host:6789:/Dir1 /mnt/ceph
-	=95 On client2 mount -t ceph host:6789:/Dir2 /mnt/ceph
-
-But all data will live on the same data pool and all the metadata will =
-live in the same metadata pool.
-
-You can of course tune each sub-directory permissions to accommodate th=
-e level of separation you need between your clients.
-
-Rgds
-JC
-
-On 9 Jan 2014, at 17:10, Isaac Otsiabah <zmoo76b@yahoo.com> wrote:
-
->=20
->=20
-> Josh, i created a new Ceph Filesystem with the following commands:
->=20
-> [root@host1]# ceph osd pool create data02 256
-> [root@host1]# ceph osd pool create metadata02 256
->=20
-> [root@host1]# ceph osd dump 2>&1 |egrep '^pool'
-> pool 0 'data' rep size 2 min_size 1 crush_ruleset 0 object_hash rjenk=
-ins=20
-> pg_num 704 pgp_num 704 last_change 1 owner 0 crash_replay_interval 45
-> pool 1 'metadata' rep size 2 min_size 1 crush_ruleset 1 object_hash r=
-jenkins pg_num 704 pgp_num 704 last_change 1 owner 0
-> pool 2 'rbd' rep size 2 min_size 1 crush_ruleset 2 object_hash rjenki=
-ns pg_num 704 pgp_num 704 last_change 1 owner 0
-> pool 3 'data02' rep size 2 min_size 1 crush_ruleset 0 object_hash rje=
-nkins pg_num 256 pgp_num 256 last_change 15 owner 0
-> pool 4 'metadata02' rep size 2 min_size 1 crush_ruleset 0 object_hash=
- rjenkins pg_num 256 pgp_num 256 last_change 17 owner 0
->=20
->=20
-> [root@host1]# ceph mds newfs 4 3 --yes-i-really-mean-it
-> [root@host1]# mount -t ceph 10.10.0.190:6789:/  /mnt/ceph
->=20
->=20
-> After i mounted as shown above and copied files to the mount point, t=
-he data=20
-> went to the new  "data02" pool of the new filesystem rather than the =
-old default "data" pool. My question is, if i have more than one=20
-> filesystem, how do i mount  the  filesystem i want to be able to read=
+Notiz:
+Dear friend,
 =20
-> from and write to the correct pool?
-> Isaac =20
->=20
->=20
->=20
->=20
-> ________________________________
-> From: Josh Durgin <josh.durgin@inktank.com>
-> To: David Zafman <david.zafman@inktank.com>=20
-> Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>=20
-> Sent: Monday, February 11, 2013 7:13 PM
-> Subject: Re: .gitignore issues
->=20
->=20
-> On 02/11/2013 06:28 PM, David Zafman wrote:
->>=20
->> After updating to latest master I have the following files listed by=
- git status:
->=20
-> These are mostly renamed binaries. If you run 'make clean' on the=20
-> version before the name changes=20
-> (133295ed001a950e3296f4e88a916ab2405be0cc) they'll be removed.
-> If you're sure you have nothing you want to save that's not
-> in a commit, you can always 'git clean -fdx'.
->=20
-> src/ceph.conf and src/keyring are generated by vstart.sh, and
-> I forgot to add them to .gitignore again earlier. There was
-> also a typo in ceph-filestore-dump - it was not renamed.
-> These are fixed now.
->=20
-> Josh
->=20
->> $ git status
->> # On branch master
->> # Untracked files:
->> #   (use "git add <file>..." to include in what will be committed)
->> #
->> #       src/bench_log
->> #       src/ceph-filestore-dump
->> #       src/ceph.conf
->> #       src/dupstore
->> #       src/keyring
->> #       src/kvstorebench
->> #       src/multi_stress_watch
->> #       src/omapbench
->> #       src/psim
->> #       src/radosacl
->> #       src/scratchtool
->> #       src/scratchtoolpp
->> #       src/smalliobench
->> #       src/smalliobenchdumb
->> #       src/smalliobenchfs
->> #       src/smalliobenchrbd
->> #       src/streamtest
->> #       src/testcrypto
->> #       src/testkeys
->> #       src/testrados
->> #       src/testrados_delete_pools_parallel
->> #       src/testrados_list_parallel
->> #       src/testrados_open_pools_parallel
->> #       src/testrados_watch_notify
->> #       src/testsignal_handlers
->> #       src/testtimers
->> #       src/tpbench
->> #       src/xattr_bench
->> nothing added to commit but untracked files present (use "git add" t=
-o track)
->>=20
->> David Zafman
->> Senior Developer
->> david.zafman@inktank.com
->>=20
->>=20
->>=20
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I am the international operations manager of ABSA bank South Africa. My=
+ name is Franklin Buthelezi. I have a sensitive and private offer from =
+the top executive to seek your partnership in re-profiling some offshor=
+e investment funds worth 11.5M U.S.D (Eleven Million five hundred thous=
+and United States Dollars) I am constrained however to withhold most of=
+ the details for now. This is a legitimate transaction.=20
+=20
+If we agree on the terms you will be given 15% of the total funds, if y=
+ou are interested please write back via email providing me your persona=
+l details and phone number for further directives.
+=20
+If you are interested and willing to render your assistance please resp=
+ond via my private email address stated below.
+=20
+I look forward to your response.
+=20
+Best regards
+=46ranklin Buthelezi
+Email: franklinbuthelezi1@yahoo.com
 
-JC
-jc.lopez@inktank.com
 
-Cell : +1-(408)-680-6959
+------------------------------------
+DiePresse.com =C3=BCbernimmt keine Haftung f=C3=BCr den Inhalt der pers=
+=C3=B6nlichen Nachricht.
 
+=C2=A9 DiePresse.com - http://diepresse.com
 
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
