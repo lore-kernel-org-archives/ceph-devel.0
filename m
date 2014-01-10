@@ -1,126 +1,187 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: Proposal for adding disable FileJournal option
-Date: Thu, 9 Jan 2014 19:13:55 -0800
-Message-ID: <CAPYLRzhVbBJRhTsuO00vTWasaxjE1Sqrj+8S_HtSdB++kJ82ZQ@mail.gmail.com>
-References: <08E73B64-A538-4A34-B0F6-1D7A2A00A8AF@gmail.com>
-	<CAPYLRzgb1dEi=prb32mfVZ+=jDS72376GPU-pz7n3SPs7T-t1Q@mail.gmail.com>
-	<CACJqLyY6L+f2DBq-dcJVphSRKegReHm0XoVhC-H_3Jg6shRmfQ@mail.gmail.com>
-	<CAMm-wcJ9_gbr6UJJhACpV3hA77Lw9Qega=AtnfU5j2w_OViJ-w@mail.gmail.com>
-Mime-Version: 1.0
+From: Jean-Charles LOPEZ <jc.lopez@inktank.com>
+Subject: Re: After creating more than one filesystem, how do i mount the filesystem i want?
+Date: Thu, 9 Jan 2014 20:32:12 -0800
+Message-ID: <D0567273-263A-40D4-BC93-17EE7E8C5B2F@inktank.com>
+References: <93F21572-A7E9-45FB-9766-6D663D6C6173@inktank.com> <5119B354.708@inktank.com> <1389316219.96751.YahooMailNeo@web122901.mail.ne1.yahoo.com>
+Mime-Version: 1.0 (Mac OS X Mail 7.1 \(1827\))
 Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qe0-f44.google.com ([209.85.128.44]:51376 "EHLO
-	mail-qe0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751027AbaAJDN4 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Jan 2014 22:13:56 -0500
-Received: by mail-qe0-f44.google.com with SMTP id nd7so4024014qeb.17
-        for <ceph-devel@vger.kernel.org>; Thu, 09 Jan 2014 19:13:55 -0800 (PST)
-In-Reply-To: <CAMm-wcJ9_gbr6UJJhACpV3hA77Lw9Qega=AtnfU5j2w_OViJ-w@mail.gmail.com>
+Received: from mail-pb0-f50.google.com ([209.85.160.50]:40431 "EHLO
+	mail-pb0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750702AbaAJEc1 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Jan 2014 23:32:27 -0500
+Received: by mail-pb0-f50.google.com with SMTP id rr13so3927547pbb.23
+        for <ceph-devel@vger.kernel.org>; Thu, 09 Jan 2014 20:32:26 -0800 (PST)
+In-Reply-To: <1389316219.96751.YahooMailNeo@web122901.mail.ne1.yahoo.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dong Yuan <yuandong1222@gmail.com>
-Cc: Haomai Wang <haomaiwang@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Isaac Otsiabah <zmoo76b@yahoo.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Exactly. We can't do a safe update without a journal =97 what if power
-goes out while the write is happening? When we boot back up, we don't
-know what version the object is actually at. So if you're using btrfs,
-you can run without a journal already (and depend on snapshots for
-recovering after failures); if you are using xfs or ext4 a journal is
-required for any safety at all, even when it's fronted by a cache
-pool.
+Hi Isaac,
 
-On Thu, Jan 9, 2014 at 7:08 PM, Dong Yuan <yuandong1222@gmail.com> wrot=
-e:
-> The Journal is the part of implementation of ObjectStore Transaction
-> Interface, while transaction is used by PG to write pglog with object
-> data in one transaction.
-> So I think if the FileJournal could be disabled, there must be
-> something else to implement the Transaction Interface. But it seems
-> hard while no local file-system provide such function in my opinion.
->
->
-> On 10 January 2014 10:04, Haomai Wang <haomaiwang@gmail.com> wrote:
->> On Fri, Jan 10, 2014 at 1:28 AM, Gregory Farnum <greg@inktank.com> w=
-rote:
->>>
->>> The FileJournal is also for data safety whenever we're using write
->>> ahead. To disable it we need a backing store that we know can provi=
-de
->>> us consistent checkpoints (i.e., we can use parallel journaling mod=
-e =97
->>> so for the FileJournal, we're using btrfs, or maybe zfs someday). B=
-ut
->>> for those systems you can already configure the system not to use a
->>> journal.
->>
->> Yes, it depends on backend. For example, FileStore can write a objec=
-t with sync
->> to sure consistent. If adding a disable FileJournal option, we need
->> some works on
->> FileStore to implement it.
->>
->>> -Greg
->>> Software Engineer #42 @ http://inktank.com | http://ceph.com
->>>
->>>
->>> On Thu, Jan 9, 2014 at 12:13 AM, Haomai Wang <haomaiwang@gmail.com>=
- wrote:
->>> > Hi all,
->>> >
->>> > We know FileJournal plays a important role in FileStore backend, =
-it can
->>> > hugely reduce write latency and improve small write operations.
->>> >
->>> > But in practice, there exists exceptions such as we already use F=
-lashCache or cachepool(although it's not ready).
->>> >
->>> > If cachepool enabled, we may use use journal in cache_pool but ma=
-y
->>> > not like to use journal in base_pool. The main reason why drop jo=
-urnal
->>> > in base_pool is that journal take over a single physical device a=
-nd waste
->>> > too much in base_pool.
->>> >
->>> > Like above, if I enable FlashCache or other cache, I'd not like t=
-o enable
->>> > journal in OSD layer.
->>> >
->>> > So is it necessary to disable journal in special(not really speci=
-al) case?
->>> >
->>> > Best regards,
->>> > Wheats
->>> >
->>> >
->>> >
->>> > --
->>> > To unsubscribe from this list: send the line "unsubscribe ceph-de=
-vel" in
->>> > the body of a message to majordomo@vger.kernel.org
->>> > More majordomo info at  http://vger.kernel.org/majordomo-info.htm=
-l
->>
->>
->>
->>
->> --
->>
->> Best Regards,
->>
->> Wheat
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
->
+there can only be a single MDS map at a given time. So only one File Sy=
+stem will be exposed by the Ceph Cluster.
+
+Everytime you will run the "ceph mds newfs" command, you will just over=
+write the current config. If you happen to do so, make sure you stop th=
+e MDS to cleanly generate a new MDS map with the new pools.
+
+You need to create subdirectories on this file system and perform an in=
+-depth mount using different sub-direcrtories if you want to split the =
+data across the File System but always on the pools you chose when you =
+issued the "ceph mds newfs" command
+
+e.g.
+	=95 MDS FS is the root /
+	=95 Create /Dir1
+	=95 Create /Dir2
+
+Use an admin client to:
+	=95 mount -t ceph host:6789:/ /mnt/ceph
+	=95 mkdir /mnt/ceph/Dir1 then make necessary chown or chgrp for specif=
+ic access through client1
+	=95 mkdir /mnt/ceph/Dir2 then make necessary chown or chgrp for specif=
+ic access through client2
+To perform the in-depth mount
+	=95 On client1 mount -t ceph host:6789:/Dir1 /mnt/ceph
+	=95 On client2 mount -t ceph host:6789:/Dir2 /mnt/ceph
+
+But all data will live on the same data pool and all the metadata will =
+live in the same metadata pool.
+
+You can of course tune each sub-directory permissions to accommodate th=
+e level of separation you need between your clients.
+
+Rgds
+JC
+
+On 9 Jan 2014, at 17:10, Isaac Otsiabah <zmoo76b@yahoo.com> wrote:
+
+>=20
+>=20
+> Josh, i created a new Ceph Filesystem with the following commands:
+>=20
+> [root@host1]# ceph osd pool create data02 256
+> [root@host1]# ceph osd pool create metadata02 256
+>=20
+> [root@host1]# ceph osd dump 2>&1 |egrep '^pool'
+> pool 0 'data' rep size 2 min_size 1 crush_ruleset 0 object_hash rjenk=
+ins=20
+> pg_num 704 pgp_num 704 last_change 1 owner 0 crash_replay_interval 45
+> pool 1 'metadata' rep size 2 min_size 1 crush_ruleset 1 object_hash r=
+jenkins pg_num 704 pgp_num 704 last_change 1 owner 0
+> pool 2 'rbd' rep size 2 min_size 1 crush_ruleset 2 object_hash rjenki=
+ns pg_num 704 pgp_num 704 last_change 1 owner 0
+> pool 3 'data02' rep size 2 min_size 1 crush_ruleset 0 object_hash rje=
+nkins pg_num 256 pgp_num 256 last_change 15 owner 0
+> pool 4 'metadata02' rep size 2 min_size 1 crush_ruleset 0 object_hash=
+ rjenkins pg_num 256 pgp_num 256 last_change 17 owner 0
+>=20
+>=20
+> [root@host1]# ceph mds newfs 4 3 --yes-i-really-mean-it
+> [root@host1]# mount -t ceph 10.10.0.190:6789:/  /mnt/ceph
+>=20
+>=20
+> After i mounted as shown above and copied files to the mount point, t=
+he data=20
+> went to the new  "data02" pool of the new filesystem rather than the =
+old default "data" pool. My question is, if i have more than one=20
+> filesystem, how do i mount  the  filesystem i want to be able to read=
+=20
+> from and write to the correct pool?
+> Isaac =20
+>=20
+>=20
+>=20
+>=20
+> ________________________________
+> From: Josh Durgin <josh.durgin@inktank.com>
+> To: David Zafman <david.zafman@inktank.com>=20
+> Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>=20
+> Sent: Monday, February 11, 2013 7:13 PM
+> Subject: Re: .gitignore issues
+>=20
+>=20
+> On 02/11/2013 06:28 PM, David Zafman wrote:
+>>=20
+>> After updating to latest master I have the following files listed by=
+ git status:
+>=20
+> These are mostly renamed binaries. If you run 'make clean' on the=20
+> version before the name changes=20
+> (133295ed001a950e3296f4e88a916ab2405be0cc) they'll be removed.
+> If you're sure you have nothing you want to save that's not
+> in a commit, you can always 'git clean -fdx'.
+>=20
+> src/ceph.conf and src/keyring are generated by vstart.sh, and
+> I forgot to add them to .gitignore again earlier. There was
+> also a typo in ceph-filestore-dump - it was not renamed.
+> These are fixed now.
+>=20
+> Josh
+>=20
+>> $ git status
+>> # On branch master
+>> # Untracked files:
+>> #   (use "git add <file>..." to include in what will be committed)
+>> #
+>> #       src/bench_log
+>> #       src/ceph-filestore-dump
+>> #       src/ceph.conf
+>> #       src/dupstore
+>> #       src/keyring
+>> #       src/kvstorebench
+>> #       src/multi_stress_watch
+>> #       src/omapbench
+>> #       src/psim
+>> #       src/radosacl
+>> #       src/scratchtool
+>> #       src/scratchtoolpp
+>> #       src/smalliobench
+>> #       src/smalliobenchdumb
+>> #       src/smalliobenchfs
+>> #       src/smalliobenchrbd
+>> #       src/streamtest
+>> #       src/testcrypto
+>> #       src/testkeys
+>> #       src/testrados
+>> #       src/testrados_delete_pools_parallel
+>> #       src/testrados_list_parallel
+>> #       src/testrados_open_pools_parallel
+>> #       src/testrados_watch_notify
+>> #       src/testsignal_handlers
+>> #       src/testtimers
+>> #       src/tpbench
+>> #       src/xattr_bench
+>> nothing added to commit but untracked files present (use "git add" t=
+o track)
+>>=20
+>> David Zafman
+>> Senior Developer
+>> david.zafman@inktank.com
+>>=20
+>>=20
+>>=20
+>=20
 > --
-> Dong Yuan
-> Email:yuandong1222@gmail.com
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+JC
+jc.lopez@inktank.com
+
+Cell : +1-(408)-680-6959
+
+
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
