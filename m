@@ -1,63 +1,138 @@
-From: Noah Watkins <noah.watkins@inktank.com>
-Subject: Re: feedback on supporting libc++
-Date: Thu, 9 Jan 2014 12:54:58 -0700
-Message-ID: <CA+Hcz585SaEdQmy9Eoc_2OS48yqVD6j8u2toLeAp3peCLi5-jA@mail.gmail.com>
-References: <CA+Hcz5-8k3rnCaJJj3htb0F63V+fitoBtofCkGzJZ4a_j29K8Q@mail.gmail.com>
-	<527157C0.40802@inktank.com>
-	<CA+Hcz5_pOdrHyYq9xbn=09S6jFh9enRWq1uKxHSQKS3u2qiXQw@mail.gmail.com>
-	<52C21B98.40109@inktank.com>
-	<CA+Hcz5-Gs03049M-o1uEgd1SoTnrkMZfrAVYhLJHD8g+AcRu5Q@mail.gmail.com>
-	<52C31423.20007@inktank.com>
+From: Isaac Otsiabah <zmoo76b@yahoo.com>
+Subject: After creating more than one filesystem, how do i mount the filesystem i want?
+Date: Thu, 9 Jan 2014 17:10:19 -0800 (PST)
+Message-ID: <1389316219.96751.YahooMailNeo@web122901.mail.ne1.yahoo.com>
+References: <93F21572-A7E9-45FB-9766-6D663D6C6173@inktank.com> <5119B354.708@inktank.com>
+Reply-To: Isaac Otsiabah <zmoo76b@yahoo.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f45.google.com ([209.85.216.45]:34002 "EHLO
-	mail-qa0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752543AbaAITy7 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Jan 2014 14:54:59 -0500
-Received: by mail-qa0-f45.google.com with SMTP id j5so3082918qaq.4
-        for <ceph-devel@vger.kernel.org>; Thu, 09 Jan 2014 11:54:58 -0800 (PST)
-In-Reply-To: <52C31423.20007@inktank.com>
+Received: from nm27-vm2.bullet.mail.ne1.yahoo.com ([98.138.91.215]:22328 "EHLO
+	nm27-vm2.bullet.mail.ne1.yahoo.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755940AbaAJBRH convert rfc822-to-8bit
+	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 9 Jan 2014 20:17:07 -0500
+In-Reply-To: <5119B354.708@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Gregory Farnum <greg@inktank.com>, Gregory Farnum <gregory.farnum@inktank.com>
+To: Josh Durgin <josh.durgin@inktank.com>, David Zafman <david.zafman@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-I've send up a pull request with an initial run at this patch set:
 
-   https://github.com/ceph/ceph/pull/1064
 
-The only thing that we haven't mentioned as possible solutions is to
-only use boost variants, rather than switching between the ones in
-std:: (in c++11) and std::tr1::.
+Josh, i created a new Ceph Filesystem with the following commands:
 
-On Tue, Dec 31, 2013 at 11:59 AM, Josh Durgin <josh.durgin@inktank.com> wrote:
-> On 12/31/2013 08:59 AM, Noah Watkins wrote:
->>
->> Thanks for testing that Josh. Before cleaning up this patch set, I
->> have a few questions.
->>
->> I'm still not clear on how to handle the "std::tr1::shared_ptr <
->> ObjListCtx > ctx;" in librados.hpp. If we change this to
->> ceph::shared_ptr, then we'll also need to some how ship with the
->> translations here:
->>
->>    https://github.com/ceph/ceph/blob/port/libc%2B%2B/src/include/memory.h
+[root@host1]# ceph osd pool create data02 256
+[root@host1]# ceph osd pool create metadata02 256
+
+[root@host1]# ceph osd dump 2>&1 |egrep '^pool'
+pool 0 'data' rep size 2 min_size 1 crush_ruleset 0 object_hash rjenkin=
+s=20
+pg_num 704 pgp_num 704 last_change 1 owner 0 crash_replay_interval 45
+pool 1 'metadata' rep size 2 min_size 1 crush_ruleset 1 object_hash rje=
+nkins pg_num 704 pgp_num 704 last_change 1 owner 0
+pool 2 'rbd' rep size 2 min_size 1 crush_ruleset 2 object_hash rjenkins=
+ pg_num 704 pgp_num 704 last_change 1 owner 0
+pool 3 'data02' rep size 2 min_size 1 crush_ruleset 0 object_hash rjenk=
+ins pg_num 256 pgp_num 256 last_change 15 owner 0
+pool 4 'metadata02' rep size 2 min_size 1 crush_ruleset 0 object_hash r=
+jenkins pg_num 256 pgp_num 256 last_change 17 owner 0
+
+
+[root@host1]# ceph mds newfs 4 3 --yes-i-really-mean-it
+[root@host1]# mount -t ceph 10.10.0.190:6789:/=A0 /mnt/ceph
+
+
+After i mounted as shown above and copied files to the mount point, the=
+ data=20
+went to the new=A0 "data02" pool of the new filesystem rather than the =
+old default "data" pool. My question is, if i have more than one=20
+filesystem, how do i mount=A0 the=A0 filesystem i want to be able to re=
+ad=20
+from and write to the correct pool?
+Isaac=A0=20
+
+
+
+
+________________________________
+=46rom: Josh Durgin <josh.durgin@inktank.com>
+To: David Zafman <david.zafman@inktank.com>=20
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>=20
+Sent: Monday, February 11, 2013 7:13 PM
+Subject: Re: .gitignore issues
+
+
+On 02/11/2013 06:28 PM, David Zafman wrote:
+>
+> After updating to latest master I have the following files listed by =
+git status:
+
+These are mostly renamed binaries. If you run 'make clean' on the=20
+version before the name changes=20
+(133295ed001a950e3296f4e88a916ab2405be0cc) they'll be removed.
+If you're sure you have nothing you want to save that's not
+in a commit, you can always 'git clean -fdx'.
+
+src/ceph.conf and src/keyring are generated by vstart.sh, and
+I forgot to add them to .gitignore again earlier. There was
+also a typo in ceph-filestore-dump - it was not renamed.
+These are fixed now.
+
+Josh
+
+> $ git status
+> # On branch master
+> # Untracked files:
+> #=A0=A0=A0(use "git add <file>..." to include in what will be committ=
+ed)
+> #
+> #=A0 =A0 =A0=A0=A0src/bench_log
+> #=A0 =A0 =A0=A0=A0src/ceph-filestore-dump
+> #=A0 =A0 =A0=A0=A0src/ceph.conf
+> #=A0 =A0 =A0=A0=A0src/dupstore
+> #=A0 =A0 =A0=A0=A0src/keyring
+> #=A0 =A0 =A0=A0=A0src/kvstorebench
+> #=A0 =A0 =A0=A0=A0src/multi_stress_watch
+> #=A0 =A0 =A0=A0=A0src/omapbench
+> #=A0 =A0 =A0=A0=A0src/psim
+> #=A0 =A0 =A0=A0=A0src/radosacl
+> #=A0 =A0 =A0=A0=A0src/scratchtool
+> #=A0 =A0 =A0=A0=A0src/scratchtoolpp
+> #=A0 =A0 =A0=A0=A0src/smalliobench
+> #=A0 =A0 =A0=A0=A0src/smalliobenchdumb
+> #=A0 =A0 =A0=A0=A0src/smalliobenchfs
+> #=A0 =A0 =A0=A0=A0src/smalliobenchrbd
+> #=A0 =A0 =A0=A0=A0src/streamtest
+> #=A0 =A0 =A0=A0=A0src/testcrypto
+> #=A0 =A0 =A0=A0=A0src/testkeys
+> #=A0 =A0 =A0=A0=A0src/testrados
+> #=A0 =A0 =A0=A0=A0src/testrados_delete_pools_parallel
+> #=A0 =A0 =A0=A0=A0src/testrados_list_parallel
+> #=A0 =A0 =A0=A0=A0src/testrados_open_pools_parallel
+> #=A0 =A0 =A0=A0=A0src/testrados_watch_notify
+> #=A0 =A0 =A0=A0=A0src/testsignal_handlers
+> #=A0 =A0 =A0=A0=A0src/testtimers
+> #=A0 =A0 =A0=A0=A0src/tpbench
+> #=A0 =A0 =A0=A0=A0src/xattr_bench
+> nothing added to commit but untracked files present (use "git add" to=
+ track)
+>
+> David Zafman
+> Senior Developer
+> david.zafman@inktank.com
 >
 >
-> I'd suggest treating it like we did buffer.h and associated headers -
-> make a symlink to it from include/rados/memory.h, and install a copy of
-> it with the librados headers.
 >
->
->> It's also not clear that ceph::shared_ptr should be exposed publically
->> if there is a thought we might start switching out implementations of
->> ceph::shared_ptr via memory.h (e.g. by using boost implementation).
->
->
-> We can't change the actual type used by librados, since AIUI that's
-> part of the ABI, so if we want to use another type internally we can
-> make include/rados/memory.h a copy of the original instead of a symlink,
-> and then change the internal include/memory.h however we like.
->
-> Josh
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at=A0 http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
