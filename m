@@ -1,64 +1,29 @@
-From: franklinbuthelezi1@yahoo.com
-Subject: =?UTF-8?Q?DiePresse.com_Mein_Freund,_der_Fahrradh=C3=A4ndler?=
-Date: Fri, 10 Jan 2014 13:33:52 +0100 (CET)
-Message-ID: <1979872310.1389357232551.JavaMail.root@dpoportal4.diepresse.apa.net>
-Reply-To: franklinbuthelezi1@yahoo.com
+From: Lipeng Wan <lipengwan86@gmail.com>
+Subject: Question about the test() function in CrushTester class
+Date: Fri, 10 Jan 2014 15:37:18 -0500
+Message-ID: <CAJqA8gvhmsrC5kOw3L+sG5zLUDZcW9ym3C=vvnhKNRLaNbjz1A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from dpocron.diepresse.apa.net ([194.232.102.6]:42136 "EHLO
-	dpocron.diepresse.apa.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751841AbaAJMok convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Jan 2014 07:44:40 -0500
-Received: from dpoportal4.diepresse.apa.net (dpoportal4.diepresse.local [192.168.0.20])
-	by dpocron.diepresse.apa.net (Postfix) with ESMTP id 8982E446F0
-	for <ceph-devel@vger.kernel.org>; Fri, 10 Jan 2014 13:33:52 +0100 (CET)
+Received: from mail-wg0-f54.google.com ([74.125.82.54]:43138 "EHLO
+	mail-wg0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751209AbaAJUhT (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Jan 2014 15:37:19 -0500
+Received: by mail-wg0-f54.google.com with SMTP id x13so1604961wgg.33
+        for <ceph-devel@vger.kernel.org>; Fri, 10 Jan 2014 12:37:18 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-=46olgender Artikel auf http://diepresse.com wird Ihnen von Franklin Bu=
-thelezi empfohlen:
+Hi guys,
 
-Mein Freund, der Fahrradh=C3=A4ndler
-Manche Dinge ver=C3=A4ndern sich =C3=BCber die langen Wintermonate hinw=
-eg.=20
+I am now trying to use crushtool.cc to test crush algorithm. First, I
+build a new crush map using crushtool.cc and all the devices have the
+maximum weight (0x10000). Then I assign different weights to devices
+using the "--weight" option and run the test() function. It seems that
+during the execution of test() function, the crush map was not
+modified based on the new device weights I gave, which means the
+bucket selection was still based on the initial device weight rather
+than the weights I gave. Dose this make sense?
 
-http://diepresse.com/home/leben/mode/kolumnezumtag/548717/index.do
-
-Notiz:
-Dear friend,
-=20
-I am the international operations manager of ABSA bank South Africa. My=
- name is Franklin Buthelezi. I have a sensitive and private offer from =
-the top executive to seek your partnership in re-profiling some offshor=
-e investment funds worth 11.5M U.S.D (Eleven Million five hundred thous=
-and United States Dollars) I am constrained however to withhold most of=
- the details for now. This is a legitimate transaction.=20
-=20
-If we agree on the terms you will be given 15% of the total funds, if y=
-ou are interested please write back via email providing me your persona=
-l details and phone number for further directives.
-=20
-If you are interested and willing to render your assistance please resp=
-ond via my private email address stated below.
-=20
-I look forward to your response.
-=20
-Best regards
-=46ranklin Buthelezi
-Email: franklinbuthelezi1@yahoo.com
-
-
-------------------------------------
-DiePresse.com =C3=BCbernimmt keine Haftung f=C3=BCr den Inhalt der pers=
-=C3=B6nlichen Nachricht.
-
-=C2=A9 DiePresse.com - http://diepresse.com
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+L. Wan
