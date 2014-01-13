@@ -1,50 +1,46 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Reliability models
-Date: Mon, 13 Jan 2014 09:48:30 +0100
-Message-ID: <52D3A85E.4050301@dachary.org>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="ghbcMCPCLxhsb7fr6fLKG1mo0lIEfrOiW"
+From: Ilya Dryomov <ilya.dryomov@inktank.com>
+Subject: [PATCH 0/3] libceph: #5425 fix
+Date: Mon, 13 Jan 2014 12:58:38 +0200
+Message-ID: <1389610721-5280-1-git-send-email-ilya.dryomov@inktank.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:41852 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751328AbaAMIsd (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Jan 2014 03:48:33 -0500
+Received: from mail-ee0-f45.google.com ([74.125.83.45]:64501 "EHLO
+	mail-ee0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750928AbaAMK7i (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Jan 2014 05:59:38 -0500
+Received: by mail-ee0-f45.google.com with SMTP id d49so3014260eek.18
+        for <ceph-devel@vger.kernel.org>; Mon, 13 Jan 2014 02:59:36 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Kyle Bader <kyle@inktank.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: ilya.dryomov@inktank.com
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---ghbcMCPCLxhsb7fr6fLKG1mo0lIEfrOiW
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Hello,
 
-Hi Kyle,
+This series fixes a bug that was part of the reason we were hitting
+#5425.  In a nutshell, a broken check (fixed in 3/3) was forcing us
+into a broken code path (not yet fixed).  1/2 and 2/2 are trivial
+renames that however make things much more obvious.
 
-IIRC you figured out how to use https://github.com/ceph/ceph-tools/tree/m=
-aster/models . Do you happen to have some kind of HOWTO or even the list =
-of commands you've used to get me started ?=20
+The fix has survived ~60 hours of xfstests in a configuration that
+previously took ~5 hours to make it pop up and should probably be
+committed w/o waiting for part 2.
 
-Cheers
+Thanks,
 
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
+                Ilya
 
 
---ghbcMCPCLxhsb7fr6fLKG1mo0lIEfrOiW
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+Ilya Dryomov (3):
+  libceph: rename ceph_msg::front_max to front_alloc_len
+  libceph: rename front to front_len in get_reply()
+  libceph: fix preallocation check in get_reply()
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.20 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+ include/linux/ceph/messenger.h |    2 +-
+ net/ceph/messenger.c           |    7 +++----
+ net/ceph/mon_client.c          |    8 ++++----
+ net/ceph/osd_client.c          |    9 +++++----
+ 4 files changed, 13 insertions(+), 13 deletions(-)
 
-iEYEARECAAYFAlLTqF4ACgkQ8dLMyEl6F21xCgCeLPxHFVCJQUpaINljqImQi1yG
-jKgAoLiPxhgsG3XqSYUOmYrRC3c2Q2gJ
-=ENvW
------END PGP SIGNATURE-----
+-- 
+1.7.10.4
 
---ghbcMCPCLxhsb7fr6fLKG1mo0lIEfrOiW--
