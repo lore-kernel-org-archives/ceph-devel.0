@@ -1,116 +1,169 @@
-From: Guang <yguang11-1ViLX0X+lBJBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: Ceph cluster is unreachable because of
-	authentication failure
-Date: Wed, 15 Jan 2014 05:54:31 +0800
-Message-ID: <BLU0-SMTP102FD05B2E9B9AE3A13557EDFBF0@phx.gbl>
-References: <BLU0-SMTP1356EEDE6A8ACF94947F22ADFBF0@phx.gbl>
-	<alpine.DEB.2.00.1401140654500.10628@cobra.newdream.net>
-Mime-Version: 1.0 (Mac OS X Mail 6.6 \(1510\))
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.00.1401140654500.10628-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: EC API to expose locality
+Date: Wed, 15 Jan 2014 00:02:24 +0100
+Message-ID: <52D5C200.8040604@dachary.org>
+References: <3472A07E6605974CBC9BC573F1BC02E4AE6B0BE8@PLOXCHG03.cern.ch> <alpine.DEB.2.00.1401140658120.10628@cobra.newdream.net>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="0Kna0hlUm9LoUb1m3CImQCih2vIIfE1bL"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from smtp.dmail.dachary.org ([91.121.254.229]:43517 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751499AbaANXCb (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Jan 2014 18:02:31 -0500
+In-Reply-To: <alpine.DEB.2.00.1401140658120.10628@cobra.newdream.net>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@inktank.com>, Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Thanks Sage.
-
--bash-4.1$ sudo ceph --admin-daemon /var/run/ceph/ceph-mon.osd151.asok mon_status
-{ "name": "osd151",
-  "rank": 2,
-  "state": "electing",
-  "election_epoch": 85469,
-  "quorum": [],
-  "outside_quorum": [],
-  "extra_probe_peers": [],
-  "sync_provider": [],
-  "monmap": { "epoch": 1,
-      "fsid": "b9cb3ea9-e1de-48b4-9e86-6921e2c537d2",
-      "modified": "0.000000",
-      "created": "0.000000",
-      "mons": [
-            { "rank": 0,
-              "name": "osd152",
-              "addr": "10.193.207.130:6789\/0"},
-            { "rank": 1,
-              "name": "osd153",
-              "addr": "10.193.207.131:6789\/0"},
-            { "rank": 2,
-              "name": "osd151",
-              "addr": "10.194.0.68:6789\/0"}]}}
-
-And:
-
--bash-4.1$ sudo ceph --admin-daemon /var/run/ceph/ceph-mon.osd151.asok quorum_status
-{ "election_epoch": 85480,
-  "quorum": [
-        0,
-        1,
-        2],
-  "quorum_names": [
-        "osd151",
-        "osd152",
-        "osd153"],
-  "quorum_leader_name": "osd152",
-  "monmap": { "epoch": 1,
-      "fsid": "b9cb3ea9-e1de-48b4-9e86-6921e2c537d2",
-      "modified": "0.000000",
-      "created": "0.000000",
-      "mons": [
-            { "rank": 0,
-              "name": "osd152",
-              "addr": "10.193.207.130:6789\/0"},
-            { "rank": 1,
-              "name": "osd153",
-              "addr": "10.193.207.131:6789\/0"},
-            { "rank": 2,
-              "name": "osd151",
-              "addr": "10.194.0.68:6789\/0"}]}}
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--0Kna0hlUm9LoUb1m3CImQCih2vIIfE1bL
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
 
-The election has been finished with leader selected from the above status.
 
-Thanks,
-Guang
+On 14/01/2014 16:39, Sage Weil wrote:
+> Hi Andreas,
+>=20
+> On Tue, 14 Jan 2014, Andreas Joachim Peters wrote:
+>> After some exchange with Loic and the recent list discussion,=20
+>> the API of the EC plugin might need some clarification/extension in th=
+e ::encode method:
+>>
+>> Currently ::encode returns a map of bufferlists where the key is the i=
+ndex of [ 0 .. (m+k) ]=20
+>> and the value is the encoded buffer belonging to that stripe index:
+>>
+>> map<int, bufferlist> *encoded
+>>
+>> If a pyramid code is used the index would be [ 0 .. (m+k+(l*l_k)) ] wh=
+ere l is the number of local=20
+>> parity subgroups and l_k are the number of parity stripes per subgroup=
+=2E The pyramid code would just
+>> chunk the input into the requested number of subgroups and compute loc=
+al parity for them according=20
+>> to the configuration.
+>>
+>> With this API the caller has actually no clue how to group stripes tog=
+ether for intelligent
+>> placement allowing to keep subgroups with local parities together to m=
+inimize traffic=20
+>> during remapping and reconstruction.
+>=20
+> This is a bit awkward, it's true.  I'm not sure there is a 'magic' way =
+to=20
+> accomplish this.  In the end, the CRUSH rule needs to have the required=
+=20
+> width *and* should group nodes accordingly, but this mapping happens at=
+ a=20
+> very different layer in Ceph than the low-level plugin, so even if call=
+ers=20
+> had this information they wouldn't be able to do anything about it.
+>=20
+> Currently, what we need to do is make sure the EC plugin maps onto a=20
+> linear array of devices the same way that CRUSH does.  For a pyramid co=
+de,=20
+> the CRUSH rule will be something like=20
+>=20
+>  step take root
+>  step choose 3 rack
+>  step choose 5 osd
+>  emit
+>=20
+> to get 3 groups of 5 devices as an array of size 15.  That means the EC=
 
-On Jan 14, 2014, at 10:55 PM, Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org> wrote:
+> plugin needs to map onto ranks that go something like
+>=20
+>  0-3 data
+>  4 local parity
+>  5-8 data
+>  9 local parity
+>  10-11 data
+>  12-13 global parity
+>  14 local parity
+>=20
+> (or whatever).
+>=20
+> Getting this to line up is a bit fragile, unfortunately.  We could make=
 
-> On Tue, 14 Jan 2014, GuangYang wrote:
->> Hi ceph-users and ceph-devel,
->> I came across an issue after restarting monitors of the cluster, that authentication fails which prevents running any ceph command.
->> 
->> After we did some maintenance work, I restart OSD, however, I found that the OSD would not join the cluster automatically after being restarted, though TCP dump showed it had already sent messenger to monitor telling add me into the cluster.
->> 
->> So that I suspected there might be some issues of monitor and I restarted monitor one by one (3 in total), however, after restarting monitors, all ceph command would fail saying authentication timeout?
->> 
->> 2014-01-14 12:00:30.499397 7fc7f195e700  0 monclient(hunting): authenticate timed out after 300
->> 2014-01-14 12:00:30.499440 7fc7f195e700  0 librados: client.admin authentication error (110) Connection timed out
->> Error connecting to cluster: Error
->> 
->> Any idea why such error happened (restarting OSD would result in the same error)?
->> 
->> I am thinking the authentication information is persisted in mon local disk and is there a chance those data got corrupted?
-> 
-> That sounds unlikely, but you're right that the core problem is with the 
-> mons.  What does 
-> 
-> ceph daemon mon.`hostname` mon_status
-> 
-> say?  Perhaps they are not forming a quorum and that is what is preventing 
-> authentication.
-> 
+> a plugin method that describes the subgrouping, but even then I'm not
+> sure how easy it is to programmatically validate that an arbitrary CRUS=
+H
+> rule will behave well.  Maybe it is enough to
+>=20
+> - have some way to query the layout of the EC plugin (e.g, 3 groups of =
+5).
+> - add a new 'osd crush rule create-pyramid ...' command to supplement=20
+>   'create-simple'.
+>=20
+> and document it well...=20
+>=20
 > sage
+
+I created http://tracker.ceph.com/issues/7146 to keep track of this featu=
+re.
+
+Cheers
+>=20
+>>
+>> Either there is an additional function returning the location sub-grou=
+p [ 0 .. l ] for each created=20
+>> chunk or the ::encode function returns the chunks already grouped like=
+:
+>>
+>> vector<int, map<int, bufferlist> *encoded
+>>
+>> Probably it would be good to have both.
+>>
+>> However it is not clear, if you can actually remap/recover an OSD with=
+out destroying the locality=20
+>> of pyramid encoding and if you can at all define CRUSH rules honoring =
+the idea of chunk locality where
+>> shrinking/extension of pools keeps the locality.
+>>
+>> Last question is, if a remapping/recovery action is only possible with=
+ the traffic going through the primary OSD.
+>>
+>> If locality cannot be supported sufficiently now or in the future, sho=
+uld the API stay as it is?
+>>
+>> The ::decode function is fine, since the plugin knows about the locali=
+ty of the available chunks and will
+>> select the cheapest decoding possible.
+>>
+>> Cheers Andreas.--
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" =
+in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+> the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+
+
+--0Kna0hlUm9LoUb1m3CImQCih2vIIfE1bL
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.20 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlLVwgAACgkQ8dLMyEl6F23U4wCeNRPUDGDxwbh4nNGoqF4uUJSe
+rPkAn3OCfwlrO7m0zzpSUkUhvUsqWk1Y
+=aeFp
+-----END PGP SIGNATURE-----
+
+--0Kna0hlUm9LoUb1m3CImQCih2vIIfE1bL--
