@@ -1,105 +1,212 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: EC API to expose locality
-Date: Tue, 14 Jan 2014 07:39:45 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1401140658120.10628@cobra.newdream.net>
-References: <3472A07E6605974CBC9BC573F1BC02E4AE6B0BE8@PLOXCHG03.cern.ch>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+From: Ilya Dryomov <ilya.dryomov@inktank.com>
+Subject: [PATCH] libceph: add ceph_kv{malloc,free}() and switch to them
+Date: Tue, 14 Jan 2014 19:44:32 +0200
+Message-ID: <1389721472-7739-1-git-send-email-ilya.dryomov@inktank.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:38099 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751342AbaANPjq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Jan 2014 10:39:46 -0500
-In-Reply-To: <3472A07E6605974CBC9BC573F1BC02E4AE6B0BE8@PLOXCHG03.cern.ch>
+Received: from mail-ee0-f52.google.com ([74.125.83.52]:62342 "EHLO
+	mail-ee0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751458AbaANRp1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Jan 2014 12:45:27 -0500
+Received: by mail-ee0-f52.google.com with SMTP id e53so376263eek.25
+        for <ceph-devel@vger.kernel.org>; Tue, 14 Jan 2014 09:45:26 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: ilya.dryomov@inktank.com
 
-Hi Andreas,
+Encapsulate kmalloc vs vmalloc memory allocation and freeing logic into
+two helpers, ceph_kvmalloc() and ceph_kvfree(), and switch to them.
 
-On Tue, 14 Jan 2014, Andreas Joachim Peters wrote:
-> After some exchange with Loic and the recent list discussion, 
-> the API of the EC plugin might need some clarification/extension in the ::encode method:
-> 
-> Currently ::encode returns a map of bufferlists where the key is the index of [ 0 .. (m+k) ] 
-> and the value is the encoded buffer belonging to that stripe index:
-> 
-> map<int, bufferlist> *encoded
-> 
-> If a pyramid code is used the index would be [ 0 .. (m+k+(l*l_k)) ] where l is the number of local 
-> parity subgroups and l_k are the number of parity stripes per subgroup. The pyramid code would just
-> chunk the input into the requested number of subgroups and compute local parity for them according 
-> to the configuration.
-> 
-> With this API the caller has actually no clue how to group stripes together for intelligent
-> placement allowing to keep subgroups with local parities together to minimize traffic 
-> during remapping and reconstruction.
+ceph_kvmalloc() kmalloc()'s a maximum of 8 pages, anything bigger is
+vmalloc()'ed with __GFP_HIGHMEM set.  This changes the existing
+behaviour:
 
-This is a bit awkward, it's true.  I'm not sure there is a 'magic' way to 
-accomplish this.  In the end, the CRUSH rule needs to have the required 
-width *and* should group nodes accordingly, but this mapping happens at a 
-very different layer in Ceph than the low-level plugin, so even if callers 
-had this information they wouldn't be able to do anything about it.
+- for buffers (ceph_buffer_new()), from trying to kmalloc() everything
+  and using vmalloc() just as a fallback
 
-Currently, what we need to do is make sure the EC plugin maps onto a 
-linear array of devices the same way that CRUSH does.  For a pyramid code, 
-the CRUSH rule will be something like 
+- for messages (ceph_msg_new()), from going to vmalloc() for anything
+  bigger than a page
 
- step take root
- step choose 3 rack
- step choose 5 osd
- emit
+- for messages (ceph_msg_new()), from disallowing vmalloc() to use high
+  memory
 
-to get 3 groups of 5 devices as an array of size 15.  That means the EC
-plugin needs to map onto ranks that go something like
+Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
+---
+ include/linux/ceph/buffer.h    |    1 -
+ include/linux/ceph/libceph.h   |   11 +++++++----
+ include/linux/ceph/messenger.h |    1 -
+ net/ceph/buffer.c              |   22 ++++++----------------
+ net/ceph/ceph_common.c         |   20 ++++++++++++++++++++
+ net/ceph/messenger.c           |   13 ++-----------
+ 6 files changed, 35 insertions(+), 33 deletions(-)
 
- 0-3 data
- 4 local parity
- 5-8 data
- 9 local parity
- 10-11 data
- 12-13 global parity
- 14 local parity
+diff --git a/include/linux/ceph/buffer.h b/include/linux/ceph/buffer.h
+index 58d19014068f..07ad423cc37f 100644
+--- a/include/linux/ceph/buffer.h
++++ b/include/linux/ceph/buffer.h
+@@ -17,7 +17,6 @@ struct ceph_buffer {
+ 	struct kref kref;
+ 	struct kvec vec;
+ 	size_t alloc_len;
+-	bool is_vmalloc;
+ };
+ 
+ extern struct ceph_buffer *ceph_buffer_new(size_t len, gfp_t gfp);
+diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
+index 7d704db60cbb..2f49aa4c4f7f 100644
+--- a/include/linux/ceph/libceph.h
++++ b/include/linux/ceph/libceph.h
+@@ -173,15 +173,18 @@ static inline int calc_pages_for(u64 off, u64 len)
+ 		(off >> PAGE_CACHE_SHIFT);
+ }
+ 
++extern struct kmem_cache *ceph_inode_cachep;
++extern struct kmem_cache *ceph_cap_cachep;
++extern struct kmem_cache *ceph_dentry_cachep;
++extern struct kmem_cache *ceph_file_cachep;
++
+ /* ceph_common.c */
+ extern bool libceph_compatible(void *data);
+ 
+ extern const char *ceph_msg_type_name(int type);
+ extern int ceph_check_fsid(struct ceph_client *client, struct ceph_fsid *fsid);
+-extern struct kmem_cache *ceph_inode_cachep;
+-extern struct kmem_cache *ceph_cap_cachep;
+-extern struct kmem_cache *ceph_dentry_cachep;
+-extern struct kmem_cache *ceph_file_cachep;
++extern void *ceph_kvmalloc(size_t size, gfp_t flags);
++extern void ceph_kvfree(const void *ptr);
+ 
+ extern struct ceph_options *ceph_parse_options(char *options,
+ 			      const char *dev_name, const char *dev_name_end,
+diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
+index 861138f7c161..20ee8b63a968 100644
+--- a/include/linux/ceph/messenger.h
++++ b/include/linux/ceph/messenger.h
+@@ -154,7 +154,6 @@ struct ceph_msg {
+ 	struct list_head list_head;	/* links for connection lists */
+ 
+ 	struct kref kref;
+-	bool front_is_vmalloc;
+ 	bool more_to_follow;
+ 	bool needs_out_seq;
+ 	int front_alloc_len;
+diff --git a/net/ceph/buffer.c b/net/ceph/buffer.c
+index bf3e6a13c215..621b5f65407f 100644
+--- a/net/ceph/buffer.c
++++ b/net/ceph/buffer.c
+@@ -6,6 +6,7 @@
+ 
+ #include <linux/ceph/buffer.h>
+ #include <linux/ceph/decode.h>
++#include <linux/ceph/libceph.h> /* for ceph_kv{malloc,free} */
+ 
+ struct ceph_buffer *ceph_buffer_new(size_t len, gfp_t gfp)
+ {
+@@ -15,16 +16,10 @@ struct ceph_buffer *ceph_buffer_new(size_t len, gfp_t gfp)
+ 	if (!b)
+ 		return NULL;
+ 
+-	b->vec.iov_base = kmalloc(len, gfp | __GFP_NOWARN);
+-	if (b->vec.iov_base) {
+-		b->is_vmalloc = false;
+-	} else {
+-		b->vec.iov_base = __vmalloc(len, gfp | __GFP_HIGHMEM, PAGE_KERNEL);
+-		if (!b->vec.iov_base) {
+-			kfree(b);
+-			return NULL;
+-		}
+-		b->is_vmalloc = true;
++	b->vec.iov_base = ceph_kvmalloc(len, gfp);
++	if (!b->vec.iov_base) {
++		kfree(b);
++		return NULL;
+ 	}
+ 
+ 	kref_init(&b->kref);
+@@ -40,12 +35,7 @@ void ceph_buffer_release(struct kref *kref)
+ 	struct ceph_buffer *b = container_of(kref, struct ceph_buffer, kref);
+ 
+ 	dout("buffer_release %p\n", b);
+-	if (b->vec.iov_base) {
+-		if (b->is_vmalloc)
+-			vfree(b->vec.iov_base);
+-		else
+-			kfree(b->vec.iov_base);
+-	}
++	ceph_kvfree(b->vec.iov_base);
+ 	kfree(b);
+ }
+ EXPORT_SYMBOL(ceph_buffer_release);
+diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
+index 43d8177a52e1..67d7721d237e 100644
+--- a/net/ceph/ceph_common.c
++++ b/net/ceph/ceph_common.c
+@@ -15,6 +15,7 @@
+ #include <linux/slab.h>
+ #include <linux/statfs.h>
+ #include <linux/string.h>
++#include <linux/vmalloc.h>
+ #include <linux/nsproxy.h>
+ #include <net/net_namespace.h>
+ 
+@@ -170,6 +171,25 @@ int ceph_compare_options(struct ceph_options *new_opt,
+ }
+ EXPORT_SYMBOL(ceph_compare_options);
+ 
++void *ceph_kvmalloc(size_t size, gfp_t flags)
++{
++	if (size <= (PAGE_SIZE << PAGE_ALLOC_COSTLY_ORDER)) {
++		void *ptr = kmalloc(size, flags | __GFP_NOWARN);
++		if (ptr)
++			return ptr;
++	}
++
++	return __vmalloc(size, flags | __GFP_HIGHMEM, PAGE_KERNEL);
++}
++
++void ceph_kvfree(const void *ptr)
++{
++	if (is_vmalloc_addr(ptr))
++		vfree(ptr);
++	else
++		kfree(ptr);
++}
++
+ 
+ static int parse_fsid(const char *str, struct ceph_fsid *fsid)
+ {
+diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+index 252ad4e01cf8..2ed1304d22a7 100644
+--- a/net/ceph/messenger.c
++++ b/net/ceph/messenger.c
+@@ -3131,13 +3131,7 @@ struct ceph_msg *ceph_msg_new(int type, int front_len, gfp_t flags,
+ 
+ 	/* front */
+ 	if (front_len) {
+-		if (front_len > PAGE_CACHE_SIZE) {
+-			m->front.iov_base = __vmalloc(front_len, flags,
+-						      PAGE_KERNEL);
+-			m->front_is_vmalloc = true;
+-		} else {
+-			m->front.iov_base = kmalloc(front_len, flags);
+-		}
++		m->front.iov_base = ceph_kvmalloc(front_len, flags);
+ 		if (m->front.iov_base == NULL) {
+ 			dout("ceph_msg_new can't allocate %d bytes\n",
+ 			     front_len);
+@@ -3259,10 +3253,7 @@ static int ceph_con_in_msg_alloc(struct ceph_connection *con, int *skip)
+ void ceph_msg_kfree(struct ceph_msg *m)
+ {
+ 	dout("msg_kfree %p\n", m);
+-	if (m->front_is_vmalloc)
+-		vfree(m->front.iov_base);
+-	else
+-		kfree(m->front.iov_base);
++	ceph_kvfree(m->front.iov_base);
+ 	kmem_cache_free(ceph_msg_cache, m);
+ }
+ 
+-- 
+1.7.10.4
 
-(or whatever).
-
-Getting this to line up is a bit fragile, unfortunately.  We could make
-a plugin method that describes the subgrouping, but even then I'm not
-sure how easy it is to programmatically validate that an arbitrary CRUSH
-rule will behave well.  Maybe it is enough to
-
-- have some way to query the layout of the EC plugin (e.g, 3 groups of 5).
-- add a new 'osd crush rule create-pyramid ...' command to supplement 
-  'create-simple'.
-
-and document it well... 
-
-sage
-
-
-> 
-> Either there is an additional function returning the location sub-group [ 0 .. l ] for each created 
-> chunk or the ::encode function returns the chunks already grouped like:
-> 
-> vector<int, map<int, bufferlist> *encoded
-> 
-> Probably it would be good to have both.
-> 
-> However it is not clear, if you can actually remap/recover an OSD without destroying the locality 
-> of pyramid encoding and if you can at all define CRUSH rules honoring the idea of chunk locality where
-> shrinking/extension of pools keeps the locality.
-> 
-> Last question is, if a remapping/recovery action is only possible with the traffic going through the primary OSD.
-> 
-> If locality cannot be supported sufficiently now or in the future, should the API stay as it is?
-> 
-> The ::decode function is fine, since the plugin knows about the locality of the available chunks and will
-> select the cheapest decoding possible.
-> 
-> Cheers Andreas.--
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
