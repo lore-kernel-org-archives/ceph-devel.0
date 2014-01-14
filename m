@@ -1,212 +1,116 @@
-From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: [PATCH] libceph: add ceph_kv{malloc,free}() and switch to them
-Date: Tue, 14 Jan 2014 19:44:32 +0200
-Message-ID: <1389721472-7739-1-git-send-email-ilya.dryomov@inktank.com>
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ee0-f52.google.com ([74.125.83.52]:62342 "EHLO
-	mail-ee0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751458AbaANRp1 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Jan 2014 12:45:27 -0500
-Received: by mail-ee0-f52.google.com with SMTP id e53so376263eek.25
-        for <ceph-devel@vger.kernel.org>; Tue, 14 Jan 2014 09:45:26 -0800 (PST)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: ilya.dryomov@inktank.com
+From: Guang <yguang11-1ViLX0X+lBJBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: Ceph cluster is unreachable because of
+	authentication failure
+Date: Wed, 15 Jan 2014 05:54:31 +0800
+Message-ID: <BLU0-SMTP102FD05B2E9B9AE3A13557EDFBF0@phx.gbl>
+References: <BLU0-SMTP1356EEDE6A8ACF94947F22ADFBF0@phx.gbl>
+	<alpine.DEB.2.00.1401140654500.10628@cobra.newdream.net>
+Mime-Version: 1.0 (Mac OS X Mail 6.6 \(1510\))
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.00.1401140654500.10628-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Encapsulate kmalloc vs vmalloc memory allocation and freeing logic into
-two helpers, ceph_kvmalloc() and ceph_kvfree(), and switch to them.
+Thanks Sage.
 
-ceph_kvmalloc() kmalloc()'s a maximum of 8 pages, anything bigger is
-vmalloc()'ed with __GFP_HIGHMEM set.  This changes the existing
-behaviour:
+-bash-4.1$ sudo ceph --admin-daemon /var/run/ceph/ceph-mon.osd151.asok mon_status
+{ "name": "osd151",
+  "rank": 2,
+  "state": "electing",
+  "election_epoch": 85469,
+  "quorum": [],
+  "outside_quorum": [],
+  "extra_probe_peers": [],
+  "sync_provider": [],
+  "monmap": { "epoch": 1,
+      "fsid": "b9cb3ea9-e1de-48b4-9e86-6921e2c537d2",
+      "modified": "0.000000",
+      "created": "0.000000",
+      "mons": [
+            { "rank": 0,
+              "name": "osd152",
+              "addr": "10.193.207.130:6789\/0"},
+            { "rank": 1,
+              "name": "osd153",
+              "addr": "10.193.207.131:6789\/0"},
+            { "rank": 2,
+              "name": "osd151",
+              "addr": "10.194.0.68:6789\/0"}]}}
 
-- for buffers (ceph_buffer_new()), from trying to kmalloc() everything
-  and using vmalloc() just as a fallback
+And:
 
-- for messages (ceph_msg_new()), from going to vmalloc() for anything
-  bigger than a page
+-bash-4.1$ sudo ceph --admin-daemon /var/run/ceph/ceph-mon.osd151.asok quorum_status
+{ "election_epoch": 85480,
+  "quorum": [
+        0,
+        1,
+        2],
+  "quorum_names": [
+        "osd151",
+        "osd152",
+        "osd153"],
+  "quorum_leader_name": "osd152",
+  "monmap": { "epoch": 1,
+      "fsid": "b9cb3ea9-e1de-48b4-9e86-6921e2c537d2",
+      "modified": "0.000000",
+      "created": "0.000000",
+      "mons": [
+            { "rank": 0,
+              "name": "osd152",
+              "addr": "10.193.207.130:6789\/0"},
+            { "rank": 1,
+              "name": "osd153",
+              "addr": "10.193.207.131:6789\/0"},
+            { "rank": 2,
+              "name": "osd151",
+              "addr": "10.194.0.68:6789\/0"}]}}
 
-- for messages (ceph_msg_new()), from disallowing vmalloc() to use high
-  memory
 
-Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
----
- include/linux/ceph/buffer.h    |    1 -
- include/linux/ceph/libceph.h   |   11 +++++++----
- include/linux/ceph/messenger.h |    1 -
- net/ceph/buffer.c              |   22 ++++++----------------
- net/ceph/ceph_common.c         |   20 ++++++++++++++++++++
- net/ceph/messenger.c           |   13 ++-----------
- 6 files changed, 35 insertions(+), 33 deletions(-)
+The election has been finished with leader selected from the above status.
 
-diff --git a/include/linux/ceph/buffer.h b/include/linux/ceph/buffer.h
-index 58d19014068f..07ad423cc37f 100644
---- a/include/linux/ceph/buffer.h
-+++ b/include/linux/ceph/buffer.h
-@@ -17,7 +17,6 @@ struct ceph_buffer {
- 	struct kref kref;
- 	struct kvec vec;
- 	size_t alloc_len;
--	bool is_vmalloc;
- };
- 
- extern struct ceph_buffer *ceph_buffer_new(size_t len, gfp_t gfp);
-diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
-index 7d704db60cbb..2f49aa4c4f7f 100644
---- a/include/linux/ceph/libceph.h
-+++ b/include/linux/ceph/libceph.h
-@@ -173,15 +173,18 @@ static inline int calc_pages_for(u64 off, u64 len)
- 		(off >> PAGE_CACHE_SHIFT);
- }
- 
-+extern struct kmem_cache *ceph_inode_cachep;
-+extern struct kmem_cache *ceph_cap_cachep;
-+extern struct kmem_cache *ceph_dentry_cachep;
-+extern struct kmem_cache *ceph_file_cachep;
-+
- /* ceph_common.c */
- extern bool libceph_compatible(void *data);
- 
- extern const char *ceph_msg_type_name(int type);
- extern int ceph_check_fsid(struct ceph_client *client, struct ceph_fsid *fsid);
--extern struct kmem_cache *ceph_inode_cachep;
--extern struct kmem_cache *ceph_cap_cachep;
--extern struct kmem_cache *ceph_dentry_cachep;
--extern struct kmem_cache *ceph_file_cachep;
-+extern void *ceph_kvmalloc(size_t size, gfp_t flags);
-+extern void ceph_kvfree(const void *ptr);
- 
- extern struct ceph_options *ceph_parse_options(char *options,
- 			      const char *dev_name, const char *dev_name_end,
-diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
-index 861138f7c161..20ee8b63a968 100644
---- a/include/linux/ceph/messenger.h
-+++ b/include/linux/ceph/messenger.h
-@@ -154,7 +154,6 @@ struct ceph_msg {
- 	struct list_head list_head;	/* links for connection lists */
- 
- 	struct kref kref;
--	bool front_is_vmalloc;
- 	bool more_to_follow;
- 	bool needs_out_seq;
- 	int front_alloc_len;
-diff --git a/net/ceph/buffer.c b/net/ceph/buffer.c
-index bf3e6a13c215..621b5f65407f 100644
---- a/net/ceph/buffer.c
-+++ b/net/ceph/buffer.c
-@@ -6,6 +6,7 @@
- 
- #include <linux/ceph/buffer.h>
- #include <linux/ceph/decode.h>
-+#include <linux/ceph/libceph.h> /* for ceph_kv{malloc,free} */
- 
- struct ceph_buffer *ceph_buffer_new(size_t len, gfp_t gfp)
- {
-@@ -15,16 +16,10 @@ struct ceph_buffer *ceph_buffer_new(size_t len, gfp_t gfp)
- 	if (!b)
- 		return NULL;
- 
--	b->vec.iov_base = kmalloc(len, gfp | __GFP_NOWARN);
--	if (b->vec.iov_base) {
--		b->is_vmalloc = false;
--	} else {
--		b->vec.iov_base = __vmalloc(len, gfp | __GFP_HIGHMEM, PAGE_KERNEL);
--		if (!b->vec.iov_base) {
--			kfree(b);
--			return NULL;
--		}
--		b->is_vmalloc = true;
-+	b->vec.iov_base = ceph_kvmalloc(len, gfp);
-+	if (!b->vec.iov_base) {
-+		kfree(b);
-+		return NULL;
- 	}
- 
- 	kref_init(&b->kref);
-@@ -40,12 +35,7 @@ void ceph_buffer_release(struct kref *kref)
- 	struct ceph_buffer *b = container_of(kref, struct ceph_buffer, kref);
- 
- 	dout("buffer_release %p\n", b);
--	if (b->vec.iov_base) {
--		if (b->is_vmalloc)
--			vfree(b->vec.iov_base);
--		else
--			kfree(b->vec.iov_base);
--	}
-+	ceph_kvfree(b->vec.iov_base);
- 	kfree(b);
- }
- EXPORT_SYMBOL(ceph_buffer_release);
-diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
-index 43d8177a52e1..67d7721d237e 100644
---- a/net/ceph/ceph_common.c
-+++ b/net/ceph/ceph_common.c
-@@ -15,6 +15,7 @@
- #include <linux/slab.h>
- #include <linux/statfs.h>
- #include <linux/string.h>
-+#include <linux/vmalloc.h>
- #include <linux/nsproxy.h>
- #include <net/net_namespace.h>
- 
-@@ -170,6 +171,25 @@ int ceph_compare_options(struct ceph_options *new_opt,
- }
- EXPORT_SYMBOL(ceph_compare_options);
- 
-+void *ceph_kvmalloc(size_t size, gfp_t flags)
-+{
-+	if (size <= (PAGE_SIZE << PAGE_ALLOC_COSTLY_ORDER)) {
-+		void *ptr = kmalloc(size, flags | __GFP_NOWARN);
-+		if (ptr)
-+			return ptr;
-+	}
-+
-+	return __vmalloc(size, flags | __GFP_HIGHMEM, PAGE_KERNEL);
-+}
-+
-+void ceph_kvfree(const void *ptr)
-+{
-+	if (is_vmalloc_addr(ptr))
-+		vfree(ptr);
-+	else
-+		kfree(ptr);
-+}
-+
- 
- static int parse_fsid(const char *str, struct ceph_fsid *fsid)
- {
-diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index 252ad4e01cf8..2ed1304d22a7 100644
---- a/net/ceph/messenger.c
-+++ b/net/ceph/messenger.c
-@@ -3131,13 +3131,7 @@ struct ceph_msg *ceph_msg_new(int type, int front_len, gfp_t flags,
- 
- 	/* front */
- 	if (front_len) {
--		if (front_len > PAGE_CACHE_SIZE) {
--			m->front.iov_base = __vmalloc(front_len, flags,
--						      PAGE_KERNEL);
--			m->front_is_vmalloc = true;
--		} else {
--			m->front.iov_base = kmalloc(front_len, flags);
--		}
-+		m->front.iov_base = ceph_kvmalloc(front_len, flags);
- 		if (m->front.iov_base == NULL) {
- 			dout("ceph_msg_new can't allocate %d bytes\n",
- 			     front_len);
-@@ -3259,10 +3253,7 @@ static int ceph_con_in_msg_alloc(struct ceph_connection *con, int *skip)
- void ceph_msg_kfree(struct ceph_msg *m)
- {
- 	dout("msg_kfree %p\n", m);
--	if (m->front_is_vmalloc)
--		vfree(m->front.iov_base);
--	else
--		kfree(m->front.iov_base);
-+	ceph_kvfree(m->front.iov_base);
- 	kmem_cache_free(ceph_msg_cache, m);
- }
- 
--- 
-1.7.10.4
+Thanks,
+Guang
 
+On Jan 14, 2014, at 10:55 PM, Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org> wrote:
+
+> On Tue, 14 Jan 2014, GuangYang wrote:
+>> Hi ceph-users and ceph-devel,
+>> I came across an issue after restarting monitors of the cluster, that authentication fails which prevents running any ceph command.
+>> 
+>> After we did some maintenance work, I restart OSD, however, I found that the OSD would not join the cluster automatically after being restarted, though TCP dump showed it had already sent messenger to monitor telling add me into the cluster.
+>> 
+>> So that I suspected there might be some issues of monitor and I restarted monitor one by one (3 in total), however, after restarting monitors, all ceph command would fail saying authentication timeout?
+>> 
+>> 2014-01-14 12:00:30.499397 7fc7f195e700  0 monclient(hunting): authenticate timed out after 300
+>> 2014-01-14 12:00:30.499440 7fc7f195e700  0 librados: client.admin authentication error (110) Connection timed out
+>> Error connecting to cluster: Error
+>> 
+>> Any idea why such error happened (restarting OSD would result in the same error)?
+>> 
+>> I am thinking the authentication information is persisted in mon local disk and is there a chance those data got corrupted?
+> 
+> That sounds unlikely, but you're right that the core problem is with the 
+> mons.  What does 
+> 
+> ceph daemon mon.`hostname` mon_status
+> 
+> say?  Perhaps they are not forming a quorum and that is what is preventing 
+> authentication.
+> 
+> sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
