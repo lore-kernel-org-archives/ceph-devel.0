@@ -1,49 +1,53 @@
-From: GuangYang <yguang11@outlook.com>
-Subject: Ceph cluster is unreachable because of authentication failure
-Date: Tue, 14 Jan 2014 20:04:14 +0800
-Message-ID: <BLU0-SMTP1356EEDE6A8ACF94947F22ADFBF0@phx.gbl>
-Mime-Version: 1.0 (Mac OS X Mail 6.6 \(1510\))
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>
+Subject: EC API to expose locality
+Date: Tue, 14 Jan 2014 13:43:02 +0000
+Message-ID: <3472A07E6605974CBC9BC573F1BC02E4AE6B0BE8@PLOXCHG03.cern.ch>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from blu0-omc4-s36.blu0.hotmail.com ([65.55.111.175]:29784 "EHLO
-	blu0-omc4-s36.blu0.hotmail.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751375AbaANMJZ convert rfc822-to-8bit
-	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 14 Jan 2014 07:09:25 -0500
+Received: from cernmx11.cern.ch ([188.184.36.50]:45244 "EHLO CERNMX11.cern.ch"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751413AbaANNnF convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Jan 2014 08:43:05 -0500
+Content-Language: en-GB
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi ceph-users and ceph-devel,
-I came across an issue after restarting monitors of the cluster, that a=
-uthentication fails which prevents running any ceph command.
+After some exchange with Loic and the recent list discussion, 
+the API of the EC plugin might need some clarification/extension in the ::encode method:
 
-After we did some maintenance work, I restart OSD, however, I found tha=
-t the OSD would not join the cluster automatically after being restarte=
-d, though TCP dump showed it had already sent messenger to monitor tell=
-ing add me into the cluster.
+Currently ::encode returns a map of bufferlists where the key is the index of [ 0 .. (m+k) ] 
+and the value is the encoded buffer belonging to that stripe index:
 
-So that I suspected there might be some issues of monitor and I restart=
-ed monitor one by one (3 in total), however, after restarting monitors,=
- all ceph command would fail saying authentication timeout=85
+map<int, bufferlist> *encoded
 
-2014-01-14 12:00:30.499397 7fc7f195e700  0 monclient(hunting): authenti=
-cate timed out after 300
-2014-01-14 12:00:30.499440 7fc7f195e700  0 librados: client.admin authe=
-ntication error (110) Connection timed out
-Error connecting to cluster: Error
+If a pyramid code is used the index would be [ 0 .. (m+k+(l*l_k)) ] where l is the number of local 
+parity subgroups and l_k are the number of parity stripes per subgroup. The pyramid code would just
+chunk the input into the requested number of subgroups and compute local parity for them according 
+to the configuration.
 
-Any idea why such error happened (restarting OSD would result in the sa=
-me error)?
+With this API the caller has actually no clue how to group stripes together for intelligent
+placement allowing to keep subgroups with local parities together to minimize traffic 
+during remapping and reconstruction.
 
-I am thinking the authentication information is persisted in mon local =
-disk and is there a chance those data got corrupted?
+Either there is an additional function returning the location sub-group [ 0 .. l ] for each created 
+chunk or the ::encode function returns the chunks already grouped like:
 
-Thanks,
-Guang--
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+vector<int, map<int, bufferlist> *encoded
+
+Probably it would be good to have both.
+
+However it is not clear, if you can actually remap/recover an OSD without destroying the locality 
+of pyramid encoding and if you can at all define CRUSH rules honoring the idea of chunk locality where
+shrinking/extension of pools keeps the locality.
+
+Last question is, if a remapping/recovery action is only possible with the traffic going through the primary OSD.
+
+If locality cannot be supported sufficiently now or in the future, should the API stay as it is?
+
+The ::decode function is fine, since the plugin knows about the locality of the available chunks and will
+select the cheapest decoding possible.
+
+Cheers Andreas.
