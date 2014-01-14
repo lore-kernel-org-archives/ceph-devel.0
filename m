@@ -1,98 +1,139 @@
-From: Li Wang <liwang@ubuntukylin.com>
-Subject: [PATCH v6] ceph: Inline data support
-Date: Tue, 14 Jan 2014 16:14:03 +0800
-Message-ID: <cover.1389686940.git.liwang@ubuntukylin.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: [ceph-users] crush choose firstn vs. indep
+Date: Tue, 14 Jan 2014 09:33:50 +0100
+Message-ID: <52D4F66E.3060301@dachary.org>
+References: <24E144B8C0207547AD09C467A8259F75592E55C0@lisa.maurer-it.com> <52D32729.40400@dachary.org> <CADTt812pZoObC+LWRGPSDFudpFSW4KR9B+z5=cMFsJLQoXCGWw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="KtPFDHiDsPOAJqwh0VSAwmXTqn1WLdNOf"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from m199-177.yeah.net ([123.58.177.199]:42687 "EHLO
-	m199-177.yeah.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750918AbaANIOY (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Jan 2014 03:14:24 -0500
+Received: from smtp.dmail.dachary.org ([91.121.254.229]:42796 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750777AbaANIdy (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Jan 2014 03:33:54 -0500
+In-Reply-To: <CADTt812pZoObC+LWRGPSDFudpFSW4KR9B+z5=cMFsJLQoXCGWw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Sage Weil <sage@inktank.com>, Li Wang <liwang@ubuntukylin.com>, Yunchuan Wen <yunchuanwen@ubuntukylin.com>
+To: ZHOU Yuan <dunk007@gmail.com>
+Cc: Dietmar Maurer <dietmar@proxmox.com>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, ceph-devel@vger.kernel.org
 
-This patch implements inline data support for Ceph.
-Review at:
-https://github.com/ceph/ceph/pull/1081
-Pull at:
-https://github.com/kylinstorage/ceph.git wip-inline
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--KtPFDHiDsPOAJqwh0VSAwmXTqn1WLdNOf
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: quoted-printable
 
-Li Wang (23):
-  ceph: Add inline data feature
-  ceph: Add inline state definition
 
-Signed-off-by: Yunchuan Wen <yunchuanwen@ubuntukylin.com>
-Signed-off-by: Li Wang <liwang@ubuntukylin.com>
----
-Against v5:
-Remove two unnecessary lines of codes according to Zheng's comments
 
-Against v4:
-Forbid old mds without inline support to join inline ever enabled mds cluster
-Kick out old mds without inline support when inline enabled
-Return EPERM to old client without inline support when it is trying to open inlined file
+On 14/01/2014 07:49, ZHOU Yuan wrote:> Hi Loic, thanks for the education!=
 
-Use version_t instead of __u64 for inline version
+>=20
+> I=92m also trying to understand the new =91indep=92 mode. Is this new m=
+ode designed for Ceph-EC only? It seems that all of the data in 3-copy sy=
+stem are equivalent and this new algorithm should also work?
+>=20
 
-Against v3:
-Add the inline switch and make inline size tunable
-Improve the back compatibility of mds from (9, 9) to (9, 6), provided the inlinefeature is disabled until all mds upgraded to support inline
+In the best case scenario, using indep instead of firstn on replicated po=
+ols won't make a difference. However, if the crush mapper does not find t=
+he required amount of items, firstn will give ( for instance ) [1,2,4] in=
+stead of [1,2,3,4] and the replicated pool code will gracefully handle th=
+is. If using indep the result will be [1,2,CRUSH_ITEM_NONE,4] and will pr=
+obably assert somewhere.
 
-Against v2:
-Streamline the inline data migration with the subsequent read/write
+Here is an example from the test suite run when you make check :
+https://github.com/ceph/ceph/blob/master/src/test/cli/crushtool/bad-mappi=
+ngs.t
+where 2147483647 =3D=3D CRUSH_ITEM_NONE
 
-Against v1:
-With simplified process under multiple-writer case,
-referred to
-http://pad.ceph.com/p/mds-inline-data,
-http://www.spinics.net/lists/ceph-devel/msg16018.html
-  mds: Add inline fields to inode_t
-  mds: Add inline encode/decode to inode_t
-  ceph: Add inline fields to MClientCaps
-  osdc: Add write method with truncate parameters
-  mds: Add inline fields to Capability
-  mds: Push inline data to client in cap message
-  ceph: Add inline fields to InodeStat
-  mds: Push inline data to client in inodestat
-  mds: Receive updated inline data from client
-  client: Add inline fields to Inode
-  client: Receive inline data pushed from mds
-  client: Push inline data to mds by send cap
-  client: Add inline data migration helper
-  client: Read inline data path
-  client: Write inline data path
-  client: Fallocate inline data path
-  client: Make inline size tunable
-  mds: Add inline switch
-  mds: Shutdown old mds when inline enable
-  mds: Handle client compatibility
-  client: Avoid uninline empty inline data
+I don't know of an other reason preventing the use of indep for replicate=
+d pools.
 
- src/ceph_mds.cc             |    1 +
- src/client/Client.cc        |  284 +++++++++++++++++++++++++++++++++++++++----
- src/client/Client.h         |    4 +
- src/client/Inode.h          |    5 +
- src/common/config_opts.h    |    1 +
- src/include/ceph_features.h |    2 +
- src/include/ceph_fs.h       |    3 +
- src/mds/CInode.cc           |   25 ++++
- src/mds/Capability.h        |    2 +
- src/mds/Locker.cc           |   11 ++
- src/mds/MDS.cc              |    5 +-
- src/mds/MDS.h               |    3 +
- src/mds/MDSMap.cc           |   25 +++-
- src/mds/MDSMap.h            |   12 +-
- src/mds/Server.cc           |   11 ++
- src/mds/mdstypes.cc         |   12 +-
- src/mds/mdstypes.h          |    3 +
- src/messages/MClientCaps.h  |   19 ++-
- src/messages/MClientReply.h |    9 ++
- src/mon/MDSMonitor.cc       |    9 +-
- src/mon/MonCommands.h       |    6 +
- src/osdc/Objecter.h         |   10 +-
- 22 files changed, 424 insertions(+), 38 deletions(-)
+Cheers
 
--- 
-1.7.9.5
+>=20
+> Sincerely, Yuan
+>=20
+>=20
+> On Mon, Jan 13, 2014 at 7:37 AM, Loic Dachary <loic@dachary.org <mailto=
+:loic@dachary.org>> wrote:
+>=20
+>=20
+>=20
+>     On 12/01/2014 15:55, Dietmar Maurer wrote:
+>     > From the docs:
+>     >
+>     >
+>     >
+>     > step [choose|chooseleaf] [firstn|indep] <N> <bucket-type>
+>     >
+>     >
+>     >
+>     > What exactly is the difference between =91firstn=92 and =91indep=92=
+?
+>     >
+>     Hi,
+>=20
+>     For Ceph releases up to Emperor[1], firstn is used and I'm not awar=
+e of a use case requiring indep. As part of the effort to implement erasu=
+re coded pools, firstn[2] and indep[3] were separated in two functions. T=
+he firstn method is best suited for replicated pools. The indep method tr=
+ies to minimize the position changes in case an OSD becomes unavailable. =
+For instance, if indep finds
+>=20
+>       [1,2,3,4]
+>=20
+>     and after a while 3 become unavailable, it is very likely to replac=
+e it with
+>=20
+>       [1,2,5,4]
+>=20
+>     It matters to erasure coded pools because
+>=20
+>       [4,5,2,1]
+>=20
+>     (i.e. the same OSDs but in different positions), implies more I/O. =
+Another difference is that in the case of a mapping failure (i.e. unable =
+to find the required number of OSDs), firstn will return a short list ( f=
+or instance [1,2,3] when 4 are required ) and indep will return a list wi=
+th a placeholder at the missing position ( for instance [1,2,CRUSH_ITEM_N=
+ONE,4] ).
+>=20
+>     Cheers
+>=20
+>     [1] implementation in releases up to Emperor https://github.com/cep=
+h/ceph/blob/v0.72/src/crush/mapper.c#L295
+>     [2] firstn https://github.com/ceph/ceph/blob/v0.74/src/crush/mapper=
+=2Ec#L295
+>     [3] indep https://github.com/ceph/ceph/blob/v0.74/src/crush/mapper.=
+c#L459
+>=20
+>     --
+>     Lo=EFc Dachary, Artisan Logiciel Libre
+>=20
+>=20
+>     _______________________________________________
+>     ceph-users mailing list
+>     ceph-users@lists.ceph.com <mailto:ceph-users@lists.ceph.com>
+>     http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>=20
+>=20
 
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+
+
+--KtPFDHiDsPOAJqwh0VSAwmXTqn1WLdNOf
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.20 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlLU9m8ACgkQ8dLMyEl6F23sBQCgqQkR2o2GLYMnM8iJaAoEL6gW
+L+8An063qytip4LPBlbFIZB/bltvnM6/
+=hTC0
+-----END PGP SIGNATURE-----
+
+--KtPFDHiDsPOAJqwh0VSAwmXTqn1WLdNOf--
