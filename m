@@ -1,42 +1,53 @@
-From: Dietmar Maurer <dietmar@proxmox.com>
-Subject: ceph cli delay when one mon is down
-Date: Wed, 15 Jan 2014 07:10:10 +0000
-Message-ID: <24E144B8C0207547AD09C467A8259F75592E9F78@lisa.maurer-it.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: ceph cli delay when one mon is down
+Date: Tue, 14 Jan 2014 23:25:35 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1401142323550.11815@cobra.newdream.net>
+References: <24E144B8C0207547AD09C467A8259F75592E9F78@lisa.maurer-it.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.maurer-it.com ([94.136.31.133]:51533 "EHLO
-	proxmox.maurer-it.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750703AbaAOHKO convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 15 Jan 2014 02:10:14 -0500
-Received: from proxmox.maurer-it.com (localhost.localdomain [127.0.0.1])
-	by proxmox.maurer-it.com (Proxmox) with ESMTP id 14C4429C023A
-	for <ceph-devel@vger.kernel.org>; Wed, 15 Jan 2014 08:10:11 +0100 (CET)
-Content-Language: en-US
+Received: from cobra.newdream.net ([66.33.216.30]:46277 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750724AbaAOHZf (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 15 Jan 2014 02:25:35 -0500
+In-Reply-To: <24E144B8C0207547AD09C467A8259F75592E9F78@lisa.maurer-it.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Dietmar Maurer <dietmar@proxmox.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi all,
+On Wed, 15 Jan 2014, Dietmar Maurer wrote:
+> Hi all,
+> 
+> I use a few helper scripts to automate things, and those scripts call 'ceph' command
+> multiple times, like
+> 
+> ------------
+> #/bin/sh
+> 
+> ceph do something
+> ...
+> ceph do something else
+> ...
+> ---------------
+> 
+> I get a delay when one monitor is down, until a working mon is found.
+> That is OK so far.
+> 
+> But I get that delay each times when I run a 'ceph' command. It would
+> be great if ceph remembers the last successful mon connection, so that such 
+> delays are avoided. 
 
-I use a few helper scripts to automate things, and those scripts call 'ceph' command
-multiple times, like
+You can avoid this, and speed things up in general, by using the 
+interactive mode:
 
-------------
-#/bin/sh
+#!/bin/sh
+ceph <<EOM
+do something
+do something else
+EOM
 
-ceph do something
-...
-ceph do something else
-...
----------------
+Caching the last successfully connected mon isn't a bad idea either... 
+care to open a feature ticket?
 
-I get a delay when one monitor is down, until a working mon is found.
-That is OK so far.
-
-But I get that delay each times when I run a 'ceph' command. It would
-be great if ceph remembers the last successful mon connection, so that such 
-delays are avoided. 
-
-
+sage
