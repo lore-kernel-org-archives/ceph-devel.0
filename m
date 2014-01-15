@@ -1,22 +1,100 @@
-From: Osbornes Solicitors LLP <dnanderson@crimson.ua.edu>
-Subject: PRIVATE MESSAGE
-Date: Wed, 15 Jan 2014 01:33:28 +0100
-Message-ID: <CAFt35pTi+3dq_i8BOWx9JDU9Bu54CJE4BpQF9YbFkg7CYKwDsQ@mail.gmail.com>
-Reply-To: Osbornlawfirm@mail2judge.com
+From: Sage Weil <sage@inktank.com>
+Subject: v0.75 released
+Date: Tue, 14 Jan 2014 19:42:31 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1401141941070.8325@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f67.google.com ([209.85.220.67]:51093 "EHLO
-	mail-pa0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750928AbaAOAd3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Jan 2014 19:33:29 -0500
-Received: by mail-pa0-f67.google.com with SMTP id rd3so242529pab.2
-        for <ceph-devel@vger.kernel.org>; Tue, 14 Jan 2014 16:33:29 -0800 (PST)
+Received: from cobra.newdream.net ([66.33.216.30]:44774 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750777AbaAODmc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Jan 2014 22:42:32 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org, ceph-users@ceph.com
 
-My late client made his last will and testament in your favour, i sent
-letters to you but got no response, i advise you contact me
-immediately.
+This is a big release, with lots of infrastructure going in for
+firefly.  The big items include a prototype standalone frontend for
+radosgw (which does not require apache or fastcgi), tracking for read
+activity on the osds (to inform tiering decisions), preliminary cache
+pool support (no snapshots yet), and lots of bug fixes and other work
+across the tree to get ready for the next batch of erasure coding
+patches.
 
-Barr Mark Freedman
+For comparison, here are the diff stats for the last few versions::
+
+ v0.75 291 files changed, 82713 insertions(+), 33495 deletions(-)
+ v0.74 192 files changed, 17980 insertions(+), 1062 deletions(-)
+ v0.73 148 files changed, 4464 insertions(+), 2129 deletions(-)
+
+Upgrading
+~~~~~~~~~
+
+* The 'osd pool create ...' syntax has changed for erasure pools.
+
+* The default CRUSH rules and layouts are now using the latest and
+  greatest tunables and defaults.  Clusters using the old values will
+  now present with a health WARN state.  This can be disabled by
+  adding 'mon warn on legacy crush tunables = false' to ceph.conf.
+
+
+Notable Changes
+~~~~~~~~~~~~~~~
+
+* common: bloom filter improvements (Sage Weil)
+* common: fix config variable substitution (Loic Dachary)
+* crush, osd: s/rep/replicated/ for less confusion (Loic Dachary)
+* crush: refactor descend_once behavior; support set_choose*_tries for 
+  replicated rules (Sage Weil)
+* librados: fix throttle leak (and eventual deadlock) (Josh Durgin)
+* librados: read directly into user buffer (Rutger ter Borg)
+* librbd: fix use-after-free aio completion bug #5426 (Josh Durgin)
+* librbd: localize/distribute parent reads (Sage Weil)
+* mds: fix Resetter locking (Alexandre Oliva)
+* mds: fix cap migration behavior (Yan, Zheng)
+* mds: fix client session flushing (Yan, Zheng)
+* mds: fix many many multi-mds bugs (Yan, Zheng)
+* misc portability work (Noah Watkins)
+* mon, osd: create erasure style crush rules (Loic Dachary, Sage Weil)
+* mon: 'osd crush show-tunables' (Sage Weil)
+* mon: clean up initial crush rule creation (Loic Dachary)
+* mon: improve (replicate or erasure) pool creation UX (Loic Dachary)
+* mon: infrastructure to handle mixed-version mon cluster and cli/rest API 
+  (Greg Farnum)
+* mon: mkfs now idempotent (Loic Dachary)
+* mon: only seed new osdmaps to current OSDs (Sage Weil)
+* mon: track osd features in OSDMap (Joao Luis, David Zafman)
+* mon: warn if crush has non-optimal tunables (Sage Weil)
+* mount.ceph: add -n for autofs support (Steve Stock)
+* msgr: fix messenger restart race (Xihui He)
+* osd, librados: fix full cluster handling (Josh Durgin)
+* osd: add HitSet tracking for read ops (Sage Weil, Greg Farnum)
+* osd: backfill to osds not in acting set (David Zafman)
+* osd: enable new hashpspool layout by default (Sage Weil)
+* osd: erasure plugin benchmarking tool (Loic Dachary)
+* osd: fix XFS detection (Greg Farnum, Sushma Gurram)
+* osd: fix copy-get omap bug (Sage Weil)
+* osd: fix linux kernel version detection (Ilya Dryomov)
+* osd: fix memstore segv (Haomai Wang)
+* osd: fix several bugs with tier infrastructure
+* osd: fix throttle thread (Haomai Wang)
+* osd: preliminary cache pool support (no snaps) (Greg Farnum, Sage Weil)
+* rados tool: fix listomapvals (Josh Durgin)
+* rados: add 'crush location', smart replica selection/balancing (Sage 
+  Weil)
+* rados: some performance optimizations (Yehuda Sadeh)
+* rbd: add rbdmap support for upstart (Laurent Barbe)
+* rbd: expose kernel rbd client options via 'rbd map' (Ilya Dryomov)
+* rbd: fix bench-write command (Hoamai Wang)
+* rbd: support for 4096 mapped devices, up from ~250 (Ilya Dryomov)
+* rgw: allow multiple frontends (Yehuda Sadeh)
+* rgw: convert bucket info to new format on demand (Yehuda Sadeh)
+* rgw: fix misc CORS bugs (Robin H. Johnson)
+* rgw: prototype mongoose frontend (Yehuda Sadeh)
+
+You can get v0.75 from the usual locations:
+
+* Git at git://github.com/ceph/ceph.git
+* Tarball at http://ceph.com/download/ceph-0.75.tar.gz
+* For packages, see http://ceph.com/docs/master/install/get-packages
+* For ceph-deploy, see http://ceph.com/docs/master/install/install-ceph-deploy
