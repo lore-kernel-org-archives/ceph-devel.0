@@ -1,34 +1,47 @@
-From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: Re: v0.75 released
-Date: Thu, 16 Jan 2014 15:51:17 +0200
-Message-ID: <CALFYKtAz5G4y1RUoqJmyr5psuh1NvD=E_7qSPm7WL+8Ra_bJ5A@mail.gmail.com>
-References: <alpine.DEB.2.00.1401141941070.8325@cobra.newdream.net>
+From: Patrick McGarry <patrick@inktank.com>
+Subject: Come Talk at Ceph Day Frankfurt!
+Date: Thu, 16 Jan 2014 12:30:03 -0500
+Message-ID: <CAP8Oy=+q1TD87xsY6q2JaGOfjoEpX8H9nzqif=-08aRmnB64_A@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f180.google.com ([209.85.212.180]:51876 "EHLO
-	mail-wi0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751768AbaAPNvS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Jan 2014 08:51:18 -0500
-Received: by mail-wi0-f180.google.com with SMTP id d13so3685064wiw.13
-        for <ceph-devel@vger.kernel.org>; Thu, 16 Jan 2014 05:51:17 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1401141941070.8325@cobra.newdream.net>
+Received: from mail-pb0-f47.google.com ([209.85.160.47]:43479 "EHLO
+	mail-pb0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750750AbaAPRaE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Jan 2014 12:30:04 -0500
+Received: by mail-pb0-f47.google.com with SMTP id um1so2931373pbc.34
+        for <ceph-devel@vger.kernel.org>; Thu, 16 Jan 2014 09:30:03 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, ceph-users@ceph.com
+To: Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>, Ceph User Committee <ceph-community@lists.ceph.com>
 
-On Wed, Jan 15, 2014 at 5:42 AM, Sage Weil <sage@inktank.com> wrote:
->
-> [...]
->
-> * rbd: support for 4096 mapped devices, up from ~250 (Ilya Dryomov)
+Greetings denizens of the Ceph universe!
 
-Just a note, v0.75 simply adds some of the infrastructure, the actual
-support for this will arrive with kernel 3.14.  The theoretical limit
-is 65536 mapped devices, although I admit I haven't tried mapping more
-than ~4000 at once.
+As you may have noticed, Inktank has announced the next "Ceph Day"
+which will be held in Frankfurt, Germany on February 27th [0].  While
+Inktank may be the one putting on these events, our hope is that the
+real stars will be from the community.  We already have two confirmed
+community talks and we'd love to get a few more.
 
-Thanks,
+If you are interested in sharing your Ceph experiences with a Ceph Day
+audience please let me know!  If you are looking for inspiration, we
+currently have a few proposed talks that may make the schedule:
 
-                Ilya
+ * Ceph + Openstack (always a favorite)
+ * Ceph Performance and Optimization
+ * Ceph Integration into Pacemaker Cluster Systems
+
+We also love to hear about specific user experiences.  So if you would
+just like to share the details of how you are integrating Ceph into
+your system that would also make an acceptable talk.  Shoot me your
+ideas and we'll get you on the docket! Thanks.
+
+[0] http://www.eventbrite.com/e/ceph-day-frankfurt-tickets-10173269523
+
+
+Best Regards,
+
+Patrick McGarry
+Director, Community || Inktank
+http://ceph.com  ||  http://inktank.com
+@scuttlemonkey || @ceph || @inktank
