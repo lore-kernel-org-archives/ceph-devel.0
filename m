@@ -1,47 +1,190 @@
-From: Patrick McGarry <patrick@inktank.com>
-Subject: Come Talk at Ceph Day Frankfurt!
-Date: Thu, 16 Jan 2014 12:30:03 -0500
-Message-ID: <CAP8Oy=+q1TD87xsY6q2JaGOfjoEpX8H9nzqif=-08aRmnB64_A@mail.gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: Ceph cluster is unreachable because of authentication failure
+Date: Thu, 16 Jan 2014 09:35:51 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1401160908170.3044@cobra.newdream.net>
+References: <BLU0-SMTP1356EEDE6A8ACF94947F22ADFBF0@phx.gbl> <alpine.DEB.2.00.1401140654500.10628@cobra.newdream.net> <016D7F31-523E-4EC1-8222-7D4084BA400F@outlook.com> <BLU0-SMTP14487458FBE42B33537BD4EDFB90@phx.gbl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f47.google.com ([209.85.160.47]:43479 "EHLO
-	mail-pb0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750750AbaAPRaE (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Jan 2014 12:30:04 -0500
-Received: by mail-pb0-f47.google.com with SMTP id um1so2931373pbc.34
-        for <ceph-devel@vger.kernel.org>; Thu, 16 Jan 2014 09:30:03 -0800 (PST)
+Received: from cobra.newdream.net ([66.33.216.30]:37663 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751004AbaAPRfw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Jan 2014 12:35:52 -0500
+In-Reply-To: <BLU0-SMTP14487458FBE42B33537BD4EDFB90@phx.gbl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>, Ceph User Committee <ceph-community@lists.ceph.com>
+To: Guang <yguang11@outlook.com>
+Cc: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Greetings denizens of the Ceph universe!
+Hi Guang,
 
-As you may have noticed, Inktank has announced the next "Ceph Day"
-which will be held in Frankfurt, Germany on February 27th [0].  While
-Inktank may be the one putting on these events, our hope is that the
-real stars will be from the community.  We already have two confirmed
-community talks and we'd love to get a few more.
+On Thu, 16 Jan 2014, Guang wrote:
+> I still have bad the luck to figure out what is the problem making authentication failure, so in order to get the cluster back, I tried:
+>   1. stop all daemons (mon & osd)
+>   2. change the configuration to disable cephx
+>   3. start mon daemons (3 in total)
+>   4. start osd daemon one by one
+>
+> After finishing step 3, the cluster can be reachable ('ceph -s' give results):
+> -bash-4.1$ sudo ceph -s
+>   cluster b9cb3ea9-e1de-48b4-9e86-6921e2c537d2
+>    health HEALTH_WARN 2797 pgs degraded; 107 pgs down; 7503 pgs peering; 917 pgs recovering; 6079 pgs recovery_wait; 2957 pgs stale; 7771 pgs stuck inactive; 2957 pgs stuck stale; 16567 pgs stuck unclean; recovery 54346804/779462977 degraded (6.972%); 9/259724199 unfound (0.000%); 2 near full osd(s); 57/751 in osds are down; noout,nobackfill,norecover,noscrub,nodeep-scrub flag(s) set
+>    monmap e1: 3 mons at {osd151=10.194.0.68:6789/0,osd152=10.193.207.130:6789/0,osd153=10.193.207.131:6789/0}, election epoch 106022, quorum 0,1,2 osd151,osd152,osd153
+>    osdmap e134893: 781 osds: 694 up, 751 in
+>     pgmap v2388518: 22203 pgs: 26 inactive, 14 active, 79 stale+active+recovering, 5020 active+clean, 242 stale, 4352 active+recovery_wait, 616 stale+active+clean, 177 active+recovering+degraded, 6714 peering, 925 stale+active+recovery_wait, 86 down+peering, 1547 active+degraded, 32 stale+active+recovering+degraded, 648 stale+peering, 21 stale+down+peering, 239 stale+active+degraded, 651 active+recovery_wait+degraded, 30 remapped+peering, 151 stale+active+recovery_wait+degraded, 4 stale+remapped+peering, 629 active+recovering; 79656 GB data, 363 TB used, 697 TB / 1061 TB avail; 54346804/779462977 degraded (6.972%); 9/259724199 unfound (0.000%)
+>    mdsmap e1: 0/0/1 up
+> (at this point, all OSDs should be down).
+> 
+> When I tried to start OSD daemon, the starting script got hang, and the process hang is:
+> root      80497  80496  0 08:18 pts/0    00:00:00 python /usr/bin/ceph --name=osd.22 --keyring=/var/lib/ceph/osd/ceph-22/keyring osd crush create-or-move -- 22 0.40 root=default host=osd173
+> 
+> When I strace the starting script, I got the following traces (process 75873 is the above process), it failed with futex and then do a infinite loop:
+>    select(0, NULL, NULL, NULL, {0, 16000}) = 0 (Timeout)
+> Any idea what might trigger this?
 
-If you are interested in sharing your Ceph experiences with a Ceph Day
-audience please let me know!  If you are looking for inspiration, we
-currently have a few proposed talks that may make the schedule:
+It is hard to tell from the strace what is going on from this.  Do you see 
+that the OSDs are booting in ceph.log (or ceph -w output)?  If not, I 
+would look at the osd daemon log for clues.  You may need to turn up 
+debugging to see (ceph daemon osd.NNN config set debug_osd 20 to adjust 
+the level on the running daemon).
 
- * Ceph + Openstack (always a favorite)
- * Ceph Performance and Optimization
- * Ceph Integration into Pacemaker Cluster Systems
+If they are booting, it is mostly a matter of letting it recover and come 
+up.  We have seen patterns where configuration or network issues have let 
+the system bury itself under a series of osdmap updates.  If you see that 
+in the log when you turn up debugging, or see the osds going up and down 
+when you try to bring the cluster up, that could be what is going on.  A 
+strategy that has worked there is to let all the osds catch up on their 
+maps before trying to peer and join the cluster.  To do that, 'ceph osd 
+set noup' (which prevents the osds from joining), wait for the ceph-osd 
+processes to stop chewing on maps (watch the cpu utilization in top), and 
+once they are all ready 'ceph osd unset noup' and let them join and peer 
+all at once.
 
-We also love to hear about specific user experiences.  So if you would
-just like to share the details of how you are integrating Ceph into
-your system that would also make an acceptable talk.  Shoot me your
-ideas and we'll get you on the docket! Thanks.
+sage
 
-[0] http://www.eventbrite.com/e/ceph-day-frankfurt-tickets-10173269523
-
-
-Best Regards,
-
-Patrick McGarry
-Director, Community || Inktank
-http://ceph.com  ||  http://inktank.com
-@scuttlemonkey || @ceph || @inktank
+> 
+> ======= STRACE (PARTIAL) ========== 
+> [pid 75873] futex(0xf707a0, FUTEX_WAIT_PRIVATE, 0, NULL <unfinished ...>
+> [pid 75878] mmap(NULL, 134217728, PROT_NONE, MAP_PRIVATE|MAP_ANONYMOUS|MAP_NORESERVE, -1, 0) = 0x7f5da6529000
+> [pid 75878] munmap(0x7f5da6529000, 28143616) = 0
+> [pid 75878] munmap(0x7f5dac000000, 38965248) = 0
+> [pid 75878] mprotect(0x7f5da8000000, 135168, PROT_READ|PROT_WRITE) = 0
+> [pid 75878] futex(0xf707a0, FUTEX_WAKE_PRIVATE, 1) = 1
+> [pid 75873] <... futex resumed> )       = 0
+> [pid 75873] futex(0xdd3cb0, FUTEX_WAIT_PRIVATE, 0, NULL <unfinished ...>
+> [pid 75878] futex(0xdd3cb0, FUTEX_WAKE_PRIVATE, 1 <unfinished ...>
+> [pid 75873] <... futex resumed> )       = -1 EAGAIN (Resource temporarily unavailable)
+> [pid 75878] <... futex resumed> )       = 0
+> [pid 75873] select(0, NULL, NULL, NULL, {0, 1000} <unfinished ...>
+> [pid 75878] rt_sigprocmask(SIG_BLOCK, ~[RTMIN RT_1], [], 8) = 0
+> [pid 75878] mmap(NULL, 10489856, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS|MAP_STACK, -1, 0) = 0x7f5dadb28000
+> [pid 75878] mprotect(0x7f5dadb28000, 4096, PROT_NONE) = 0
+> [ omit some entries?]
+> [pid 75873] select(0, NULL, NULL, NULL, {0, 16000}) = 0 (Timeout)
+> [pid 75873] select(0, NULL, NULL, NULL, {0, 32000}) = 0 (Timeout)
+> [pid 75873] select(0, NULL, NULL, NULL, {0, 50000}) = 0 (Timeout)
+> [pid 75873] select(0, NULL, NULL, NULL, {0, 50000}) = 0 (Timeout)
+> [pid 75873] select(0, NULL, NULL, NULL, {0, 50000}) = 0 (Timeout)
+> [pid 75873] select(0, NULL, NULL, NULL, {0, 50000}) = 0 (Timeout)
+> [pid 75873] select(0, NULL, NULL, NULL, {0, 50000}) = 0 (Timeout)
+> 
+> 
+> Thanks,
+> Guang
+> 
+> On Jan 15, 2014, at 5:54 AM, Guang <yguang11@outlook.com> wrote:
+> 
+> > Thanks Sage.
+> > 
+> > -bash-4.1$ sudo ceph --admin-daemon /var/run/ceph/ceph-mon.osd151.asok mon_status
+> > { "name": "osd151",
+> >  "rank": 2,
+> >  "state": "electing",
+> >  "election_epoch": 85469,
+> >  "quorum": [],
+> >  "outside_quorum": [],
+> >  "extra_probe_peers": [],
+> >  "sync_provider": [],
+> >  "monmap": { "epoch": 1,
+> >      "fsid": "b9cb3ea9-e1de-48b4-9e86-6921e2c537d2",
+> >      "modified": "0.000000",
+> >      "created": "0.000000",
+> >      "mons": [
+> >            { "rank": 0,
+> >              "name": "osd152",
+> >              "addr": "10.193.207.130:6789\/0"},
+> >            { "rank": 1,
+> >              "name": "osd153",
+> >              "addr": "10.193.207.131:6789\/0"},
+> >            { "rank": 2,
+> >              "name": "osd151",
+> >              "addr": "10.194.0.68:6789\/0"}]}}
+> > 
+> > And:
+> > 
+> > -bash-4.1$ sudo ceph --admin-daemon /var/run/ceph/ceph-mon.osd151.asok quorum_status
+> > { "election_epoch": 85480,
+> >  "quorum": [
+> >        0,
+> >        1,
+> >        2],
+> >  "quorum_names": [
+> >        "osd151",
+> >        "osd152",
+> >        "osd153"],
+> >  "quorum_leader_name": "osd152",
+> >  "monmap": { "epoch": 1,
+> >      "fsid": "b9cb3ea9-e1de-48b4-9e86-6921e2c537d2",
+> >      "modified": "0.000000",
+> >      "created": "0.000000",
+> >      "mons": [
+> >            { "rank": 0,
+> >              "name": "osd152",
+> >              "addr": "10.193.207.130:6789\/0"},
+> >            { "rank": 1,
+> >              "name": "osd153",
+> >              "addr": "10.193.207.131:6789\/0"},
+> >            { "rank": 2,
+> >              "name": "osd151",
+> >              "addr": "10.194.0.68:6789\/0"}]}}
+> > 
+> > 
+> > The election has been finished with leader selected from the above status.
+> > 
+> > Thanks,
+> > Guang
+> > 
+> > On Jan 14, 2014, at 10:55 PM, Sage Weil <sage@inktank.com> wrote:
+> > 
+> >> On Tue, 14 Jan 2014, GuangYang wrote:
+> >>> Hi ceph-users and ceph-devel,
+> >>> I came across an issue after restarting monitors of the cluster, that authentication fails which prevents running any ceph command.
+> >>> 
+> >>> After we did some maintenance work, I restart OSD, however, I found that the OSD would not join the cluster automatically after being restarted, though TCP dump showed it had already sent messenger to monitor telling add me into the cluster.
+> >>> 
+> >>> So that I suspected there might be some issues of monitor and I restarted monitor one by one (3 in total), however, after restarting monitors, all ceph command would fail saying authentication timeout?
+> >>> 
+> >>> 2014-01-14 12:00:30.499397 7fc7f195e700  0 monclient(hunting): authenticate timed out after 300
+> >>> 2014-01-14 12:00:30.499440 7fc7f195e700  0 librados: client.admin authentication error (110) Connection timed out
+> >>> Error connecting to cluster: Error
+> >>> 
+> >>> Any idea why such error happened (restarting OSD would result in the same error)?
+> >>> 
+> >>> I am thinking the authentication information is persisted in mon local disk and is there a chance those data got corrupted?
+> >> 
+> >> That sounds unlikely, but you're right that the core problem is with the 
+> >> mons.  What does 
+> >> 
+> >> ceph daemon mon.`hostname` mon_status
+> >> 
+> >> say?  Perhaps they are not forming a quorum and that is what is preventing 
+> >> authentication.
+> >> 
+> >> sage
+> >> --
+> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> >> the body of a message to majordomo@vger.kernel.org
+> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > 
+> 
+> 
