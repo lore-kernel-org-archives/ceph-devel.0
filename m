@@ -1,62 +1,93 @@
-From: James Page <james.page@ubuntu.com>
+From: Sebastien Han <sebastien.han@enovance.com>
 Subject: Re: Libvirt patch for Ubuntu 14.04 to create image format 2 by default
-Date: Fri, 17 Jan 2014 17:07:56 +0000
-Message-ID: <52D9636C.1010805@ubuntu.com>
+Date: Fri, 17 Jan 2014 17:58:34 +0100
+Message-ID: <C27879F3-1F98-4ACF-957D-FD09E554E349@enovance.com>
 References: <52D932A6.90808@42on.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Mime-Version: 1.0 (Mac OS X Mail 7.0 \(1822\))
+Content-Type: multipart/signed; boundary="Apple-Mail=_961F5245-AAF6-4A51-8D9B-D333D35D5ADB"; protocol="application/pgp-signature"; micalg=pgp-sha512
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from youngberry.canonical.com ([91.189.89.112]:53131 "EHLO
-	youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752066AbaAQRH7 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 17 Jan 2014 12:07:59 -0500
+Received: from mxi1.enovance.com ([94.143.114.217]:56650 "EHLO
+	mxi1.enovance.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751951AbaAQR0l (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 17 Jan 2014 12:26:41 -0500
 In-Reply-To: <52D932A6.90808@42on.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@42on.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Wido den Hollander <wido@42on.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, James Page <james.page@ubuntu.com>
 
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA256
 
-Hi Wido
+--Apple-Mail=_961F5245-AAF6-4A51-8D9B-D333D35D5ADB
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain;
+	charset=windows-1252
 
-On 17/01/14 13:39, Wido den Hollander wrote:
-> If the patch makes it into Libvirt in let's say 6 weeks it will
-> probably not make it into 14.04 since that has been feature
-> frozen.
-> 
-> Is there a way we can get this patch into Libvirt for Ubuntu 14.04?
-> I'm confident it will make it into Libvirt upstream, I just need
-> somebody to look at it.
+FYI OpenStack already uses format 2 images, we don=92t have this =
+problem.
 
-Chuck's happy to hold the patch in the Ubuntu packages; it will go
-into trusty with the next upload.
+=96=96=96=96=20
+S=E9bastien Han=20
+Cloud Engineer=20
 
-Cheers
+"Always give 100%. Unless you're giving blood.=94=20
 
-James
+Phone: +33 (0)1 49 70 99 72=20
+Mail: sebastien.han@enovance.com=20
+Address : 10, rue de la Victoire - 75009 Paris=20
+Web : www.enovance.com - Twitter : @enovance=20
 
-- -- 
-James Page
-Ubuntu and Debian Developer
-james.page@ubuntu.com
-jamespage@debian.org
+On 17 Jan 2014, at 14:39, Wido den Hollander <wido@42on.com> wrote:
+
+> Hi James (CC to devel),
+>=20
+> I've been trying to get a patch [0] into libvirt for the last couple =
+of months to have libvirt create RBD images format 2 by default.
+>=20
+> The response from the RedHat people has been zero until thus far. =
+Since this would be great for both OpenStack and CloudStack I'm thinking =
+about Ubuntu 14.04.
+>=20
+> If the patch makes it into Libvirt in let's say 6 weeks it will =
+probably not make it into 14.04 since that has been feature frozen.
+>=20
+> Is there a way we can get this patch into Libvirt for Ubuntu 14.04? =
+I'm confident it will make it into Libvirt upstream, I just need =
+somebody to look at it.
+>=20
+> [0]: =
+https://www.redhat.com/archives/libvir-list/2013-December/msg00645.html
+>=20
+> --=20
+> Wido den Hollander
+> 42on B.V.
+>=20
+> Phone: +31 (0)20 700 9902
+> Skype: contact42on
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" =
+in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+--Apple-Mail=_961F5245-AAF6-4A51-8D9B-D333D35D5ADB
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment;
+	filename=signature.asc
+Content-Type: application/pgp-signature;
+	name=signature.asc
+Content-Description: Message signed with OpenPGP using GPGMail
+
 -----BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.15 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+Comment: GPGTools - https://gpgtools.org
 
-iQIcBAEBCAAGBQJS2WNsAAoJEL/srsug59jDx8cQANP9xRd3u+aoWKN40AKSKGEB
-NHWOTqT5EHd9Cd6wrjyFCSEkFw3HYdsmOtoB/i7rP/KEmyE7U0sV7gkknqNpCrs3
-RHDusN9fu7whAJouNnZJUHOaVsX3cckEbA7TQni8uKNQ3iM8zgzQMOq0qgnVug5d
-1kbt0l3aGBg69PlE6THoecZNpgT2AD7hXrRDulcMyX4X+QzOV6FJID+hlPi1Qa4X
-obNRSQQViy4s2zaRZYFdgZtPtJi9ppLIcQddhtlFm1r0hwrwPI7NUnDj06pbzwhm
-RORFTDAe6tIv6z87CuDUg+grbX4xdjlmlRXQkeQZJ+EEHunJFs4ZQHZvmOvQegbd
-lw0q7zlEddKwekEU26kV2OVjdHxsbnrAxp4FhfggcTJKkuOErFN8LOtsvohF9HZa
-SP8VCZRq1+KYi55FtWzEGgjIzPSRrLI+04gwLs34f39BTo/+fjYAr0GBYZI9JxCB
-YIPi7jjc5EtNX6STe36CspUdhVj8cJcFi/MO/QnKaYvoOiCvXSeFzreiePhWtiI3
-0O9v8ukdnNo80P0NdbGHz52MuY0dbueMFnfj9kumbvnC5QdFFeMo+Lns9m+OO+eZ
-bOwsVwvhshJRnHvkKkowRDPIBXmzNh9KBozWmsHrKmyDiU3C0eqOogZPIKr+x1no
-bG93bY+lja3kpf8WdVif
-=2RKO
+iQEcBAEBCgAGBQJS2WE6AAoJECPrkYfpbtGT1hAIALFBOM2zxnSL+dCFWbFTr0Fa
+2HA0zsMx6XAkna0Ag3RQ/0drmmLxWsVMjiykha+gvwM8yqA0RQQrV+DxbKssxn7m
+HbUUwGNV+hw6N0hhL5mu87MQSZCdlMODGgZXfhiZT4JkKO1onWEUpDzbT3QYjREV
+3jtQU234Mi4zEfaYhqJA/qnC3A1MHVFs/UWWP3vY+u0VdLRu1r/ehOp4K8OyF4MA
++QDIdxobkjl8rru4HRYwX7ZC86OZanjRtYJpw2HSkAWbW2L/GyQeWJEugatuXJD+
+uKPRVyGEI5mVAtfUbzd3y3YEKTwnmfN+Co8seopSmEQ7nFIJHwfJ9JEcUqBmQgQ=
+=RGle
 -----END PGP SIGNATURE-----
+
+--Apple-Mail=_961F5245-AAF6-4A51-8D9B-D333D35D5ADB--
