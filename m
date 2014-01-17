@@ -1,49 +1,52 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [PATCH 04/25] block: Abstract out bvec iterator
-Date: Fri, 17 Jan 2014 09:00:13 +0100
-Message-ID: <CAMuHMdUmTqZSAiwYc0Uc=u1YrCZUJeFAuR7PeZqBvWqnqUwmLQ@mail.gmail.com>
-References: <20131127004422.GB21305@kmo>
-	<1385513128-5035-1-git-send-email-kmo@daterainc.com>
-	<1385513128-5035-4-git-send-email-kmo@daterainc.com>
-Reply-To: device-mapper development <dm-devel@redhat.com>
+From: Ilya Dryomov <ilya.dryomov-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: v0.75 released
+Date: Fri, 17 Jan 2014 11:20:07 +0200
+Message-ID: <CALFYKtBizOcjv9i5EkW7HLBdsNUzBCZ1oO1ZTaDWh8cwgK-tww@mail.gmail.com>
+References: <alpine.DEB.2.00.1401141941070.8325@cobra.newdream.net>
+	<CALFYKtAz5G4y1RUoqJmyr5psuh1NvD=E_7qSPm7WL+8Ra_bJ5A@mail.gmail.com>
+	<20140117090518.3f988b32@batzmaru.gol.ad.jp>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <dm-devel-bounces@redhat.com>
-In-Reply-To: <1385513128-5035-4-git-send-email-kmo@daterainc.com>
-List-Unsubscribe: <https://www.redhat.com/mailman/options/dm-devel>,
-	<mailto:dm-devel-request@redhat.com?subject=unsubscribe>
-List-Archive: <https://www.redhat.com/archives/dm-devel>
-List-Post: <mailto:dm-devel@redhat.com>
-List-Help: <mailto:dm-devel-request@redhat.com?subject=help>
-List-Subscribe: <https://www.redhat.com/mailman/listinfo/dm-devel>,
-	<mailto:dm-devel-request@redhat.com?subject=subscribe>
-Sender: dm-devel-bounces@redhat.com
-Errors-To: dm-devel-bounces@redhat.com
-To: Kent Overstreet <kmo@daterainc.com>
-Cc: Dave Kleikamp <shaggy@kernel.org>, Jeremy Fitzhardinge <jeremy@goop.org>, Herton Ronaldo Krzesinski <herton.krzesinski@canonical.com>, Jan Beulich <jbeulich@suse.com>, "Ed L. Cashin" <ecashin@coraid.com>, "Michael S. Tsirkin" <mst@redhat.com>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Selvan Mani <smani@micron.com>, Namjae Jeon <namjae.jeon@samsung.com>, Heiko Carstens <heiko.carstens@de.ibm.com>, Chris Mason <chris.mason@fusionio.com>, dm-devel@redhat.com, Paul Mackerras <paulus@samba.org>, Pavel Machek <pavel@ucw.cz>, KONISHI Ryusuke <konishi.ryusuke@lab.ntt.co.jp>, Ian Campbell <Ian.Campbell@citrix.com>, Joshua Morris <josh.h.morris@us.ibm.com>, Alasdair Kergon <agk@redhat.com>, Sage Weil <sage@inktank.com>, =?UTF-8?Q?Roger_Pau_Monn=C3=A9?= <roger.pau@citrix.com>
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <20140117090518.3f988b32-9yhXNL7Kh0lSCLKNlHTxZM8NsWr+9BEh@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: Christian Balzer <chibi-FW+hd8ioUD0@public.gmane.org>
+Cc: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users-Qp0mS5GaXlQ@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-On Wed, Nov 27, 2013 at 1:45 AM, Kent Overstreet <kmo@daterainc.com> wrote:
-> Immutable biovecs are going to require an explicit iterator. To
-> implement immutable bvecs, a later patch is going to add a bi_bvec_done
-> member to this struct; for now, this patch effectively just renames
-> things.
+On Fri, Jan 17, 2014 at 2:05 AM, Christian Balzer <chibi-FW+hd8ioUD0@public.gmane.org> wrote:
+> On Thu, 16 Jan 2014 15:51:17 +0200 Ilya Dryomov wrote:
+>
+>> On Wed, Jan 15, 2014 at 5:42 AM, Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org> wrote:
+>> >
+>> > [...]
+>> >
+>> > * rbd: support for 4096 mapped devices, up from ~250 (Ilya Dryomov)
+>>
+>> Just a note, v0.75 simply adds some of the infrastructure, the actual
+>> support for this will arrive with kernel 3.14.  The theoretical limit
+>> is 65536 mapped devices, although I admit I haven't tried mapping more
+>> than ~4000 at once.
+>>
+> Just for clarification, this is for the client side when using the kernel
+> module, right?
+>
+> Not looking at more than about 150 devices per compute node now, but that
+> might change and there is also the case of failovers...
 
-You missed xtensa simdisk:
+Yes, this is how many 'rbd map ...'s a single rbd kernel module (and
+therefore a single compute node) can handle.  Kernels 3.13 and below
+can handle ~130-150, depending on the machine.
 
-arch/xtensa/platforms/iss/simdisk.c:108:23: error: 'struct bio' has no
-member named 'bi_sector'
+Thanks,
 
-http://kisskb.ellerman.id.au/kisskb/buildresult/10477507/
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+                Ilya
