@@ -1,70 +1,49 @@
-From: "J. Bruce Fields" <bfields@fieldses.org>
-Subject: Re: [PATCH] ceph: trivial comment fix
-Date: Thu, 16 Jan 2014 21:01:19 -0500
-Message-ID: <20140117020119.GC20521@fieldses.org>
-References: <20140116224253.GB20521@fieldses.org>
- <alpine.DEB.2.00.1401161603250.16743@cobra.newdream.net>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: Re: [PATCH 04/25] block: Abstract out bvec iterator
+Date: Fri, 17 Jan 2014 09:00:13 +0100
+Message-ID: <CAMuHMdUmTqZSAiwYc0Uc=u1YrCZUJeFAuR7PeZqBvWqnqUwmLQ@mail.gmail.com>
+References: <20131127004422.GB21305@kmo>
+	<1385513128-5035-1-git-send-email-kmo@daterainc.com>
+	<1385513128-5035-4-git-send-email-kmo@daterainc.com>
+Reply-To: device-mapper development <dm-devel@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from fieldses.org ([174.143.236.118]:47476 "EHLO fieldses.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751811AbaAQCBU (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 16 Jan 2014 21:01:20 -0500
-Content-Disposition: inline
-In-Reply-To: <alpine.DEB.2.00.1401161603250.16743@cobra.newdream.net>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <dm-devel-bounces@redhat.com>
+In-Reply-To: <1385513128-5035-4-git-send-email-kmo@daterainc.com>
+List-Unsubscribe: <https://www.redhat.com/mailman/options/dm-devel>,
+	<mailto:dm-devel-request@redhat.com?subject=unsubscribe>
+List-Archive: <https://www.redhat.com/archives/dm-devel>
+List-Post: <mailto:dm-devel@redhat.com>
+List-Help: <mailto:dm-devel-request@redhat.com?subject=help>
+List-Subscribe: <https://www.redhat.com/mailman/listinfo/dm-devel>,
+	<mailto:dm-devel-request@redhat.com?subject=subscribe>
+Sender: dm-devel-bounces@redhat.com
+Errors-To: dm-devel-bounces@redhat.com
+To: Kent Overstreet <kmo@daterainc.com>
+Cc: Dave Kleikamp <shaggy@kernel.org>, Jeremy Fitzhardinge <jeremy@goop.org>, Herton Ronaldo Krzesinski <herton.krzesinski@canonical.com>, Jan Beulich <jbeulich@suse.com>, "Ed L. Cashin" <ecashin@coraid.com>, "Michael S. Tsirkin" <mst@redhat.com>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Selvan Mani <smani@micron.com>, Namjae Jeon <namjae.jeon@samsung.com>, Heiko Carstens <heiko.carstens@de.ibm.com>, Chris Mason <chris.mason@fusionio.com>, dm-devel@redhat.com, Paul Mackerras <paulus@samba.org>, Pavel Machek <pavel@ucw.cz>, KONISHI Ryusuke <konishi.ryusuke@lab.ntt.co.jp>, Ian Campbell <Ian.Campbell@citrix.com>, Joshua Morris <josh.h.morris@us.ibm.com>, Alasdair Kergon <agk@redhat.com>, Sage Weil <sage@inktank.com>, =?UTF-8?Q?Roger_Pau_Monn=C3=A9?= <roger.pau@citrix.com>
+List-Id: ceph-devel.vger.kernel.org
 
-On Thu, Jan 16, 2014 at 04:03:38PM -0800, Sage Weil wrote:
-> On Thu, 16 Jan 2014, J. Bruce Fields wrote:
-> > From: "J. Bruce Fields" <bfields@redhat.com>
-> > 
-> > "disconnected" is too easily confused with "DCACHE_DISCONNECTED".  I
-> > think "unhashed" is the more precise term here.
-> 
-> Good point.  Applied, thanks!
+On Wed, Nov 27, 2013 at 1:45 AM, Kent Overstreet <kmo@daterainc.com> wrote:
+> Immutable biovecs are going to require an explicit iterator. To
+> implement immutable bvecs, a later patch is going to add a bi_bvec_done
+> member to this struct; for now, this patch effectively just renames
+> things.
 
-Thanks!  While I'm looking, there's another d_find_alias() caller in
-build_inode_path.  What's that?  (Do the mds protocol messages actually
-use full paths?)  And will this break if you get a DCACHE_DISCONNECTED
-or an unhashed alias?
+You missed xtensa simdisk:
 
---b.
+arch/xtensa/platforms/iss/simdisk.c:108:23: error: 'struct bio' has no
+member named 'bi_sector'
 
-> sage
-> 
-> 
-> > 
-> > Signed-off-by: J. Bruce Fields <bfields@redhat.com>
-> > ---
-> >  fs/ceph/caps.c |    6 +++---
-> >  1 file changed, 3 insertions(+), 3 deletions(-)
-> > 
-> > Just ran across this while wondering what d_find_alias callers do....
-> > 
-> > diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-> > index 3c0a4bd..697f9d7 100644
-> > --- a/fs/ceph/caps.c
-> > +++ b/fs/ceph/caps.c
-> > @@ -2350,11 +2350,11 @@ static void invalidate_aliases(struct inode *inode)
-> >  	d_prune_aliases(inode);
-> >  	/*
-> >  	 * For non-directory inode, d_find_alias() only returns
-> > -	 * connected dentry. After calling d_invalidate(), the
-> > -	 * dentry become disconnected.
-> > +	 * hashed dentry. After calling d_invalidate(), the
-> > +	 * dentry becomes unhashed.
-> >  	 *
-> >  	 * For directory inode, d_find_alias() can return
-> > -	 * disconnected dentry. But directory inode should have
-> > +	 * unhashed dentry. But directory inode should have
-> >  	 * one alias at most.
-> >  	 */
-> >  	while ((dn = d_find_alias(inode))) {
-> > -- 
-> > 1.7.9.5
-> > 
-> > 
+http://kisskb.ellerman.id.au/kisskb/buildresult/10477507/
+
+Gr{oetje,eeting}s,
+
+                        Geert
+
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
