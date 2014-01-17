@@ -1,93 +1,76 @@
-From: Dietmar Maurer <dietmar@proxmox.com>
-Subject: API json format question
-Date: Fri, 17 Jan 2014 17:39:25 +0000
-Message-ID: <24E144B8C0207547AD09C467A8259F7559300288@lisa.maurer-it.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: bettie30617@googlemail.com
+Subject: RE: LOCAL MAP OPTIMIZATION FOR : mail-archive.com (Less Than
+ $99/Month)
+Date: Fri, 17 Jan 2014 23:56:34 +0530
+Message-ID: <52d975d4.23c8440a.411f.5f92@mx.google.com>
+Reply-To: JUDY18088@gmail.com
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.maurer-it.com ([94.136.31.133]:34563 "EHLO
-	proxmox.maurer-it.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752194AbaAQRja convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 17 Jan 2014 12:39:30 -0500
-Received: from proxmox.maurer-it.com (localhost.localdomain [127.0.0.1])
-	by proxmox.maurer-it.com (Proxmox) with ESMTP id 59B7329C0248
-	for <ceph-devel@vger.kernel.org>; Fri, 17 Jan 2014 18:39:27 +0100 (CET)
-Content-Language: en-US
+Received: from mail-pb0-f67.google.com ([209.85.160.67]:46355 "EHLO
+	mail-pb0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752255AbaAQS0c (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 17 Jan 2014 13:26:32 -0500
+Received: by mail-pb0-f67.google.com with SMTP id jt11so1679798pbb.6
+        for <ceph-devel@vger.kernel.org>; Fri, 17 Jan 2014 10:26:31 -0800 (PST)
+Received: from localhost.localdomain ([124.253.47.249])
+        by mx.google.com with ESMTPSA id jp3sm24526228pbc.36.2014.01.17.10.26.26
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1 cipher=RC4-SHA bits=128/128);
+        Fri, 17 Jan 2014 10:26:28 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-The command signature for "osd pool create" is:=A0=20
+Good Morning Sir / Mam
 
-=A0=A0=A0=A0=A0=A0 'cmd119' =3D> {
-=A0=A0=A0=A0 =A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0'=
-sig' =3D> [
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 'osd',
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 'pool',
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 'create',
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 {
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 'name' =3D> 'pool',
-=A0=A0=A0 =A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0'type' =3D> 'CephPoolname'
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 },
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 {
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 'range' =3D> '0',
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 'name' =3D> 'pg_num',
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 =A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0'type' =3D> 'CephInt'
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 },
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 {
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 'req' =3D> 'false',
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 'range' =3D> '0',
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
-=A0=A0=A0=A0 =A0=A0=A0=A0=A0=A0=A0=A0'name' =3D> 'pgp_num',
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 'type' =3D> 'CephInt'
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 },
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 {
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 'n' =3D> 'N',
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 'req' =3D> 'false',
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 'goodchars' =3D> '[A-Za-z0-9-_.=3D=
-]',
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 'name' =3D> 'properties',
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 'type' =3D> 'CephString'
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 }
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
-=A0=A0=A0=A0=A0=A0=A0=A0 ],
-=A0=20
-But it seems that 'properties' are ignored. I tried:
+Is your business ranking in local maps shown on PAGE 1 of google ? With new
+google policies they have specifically asked local business owners to
+optimize their website for local maps rather than JUST organics. Do you know
+the reason why you are not ranked well on google MAPs or why there is drop
+in your website rankings? Prime reason for bad rankings for a busniess is
+lack of local presence and local citations ie getting your business listed
+on directories like YELP, MANTA & Many more. These websites not just give
+your business a push but also help you Maintain a good Online Reputation.
 
-2014-01-17 09:39:13.010675 2b3a6975e700=A0 0 mon.0@0(leader) e1 handle_=
-command mon_command({"format":"json","pg_num":32,"pool":"test3","proper=
-ties":["size=3D3","min_size=3D2","crush_ruleset=3D1"],"prefix":"osd poo=
-l create"} v 0) v1
+Why you need to optimize your website for local MAP Listings ?
 
-Is something wrong with the format? (I do not get any error message).
+- MAP listings get 10 times more clicks than organic listings
+- Increased conversions because of real reviews posted on your Google Plus
+Page
+- Every year there is 30% increase in searches for local keywords
+- Increases legitimacy of a Business
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+We will help you get your website ranked well on google for the related
+keywords in your niche. We specialize in LOCAL SEARCH ENGINE OPTIMIZATION
+increasing visibility for small businesses by ranking them for
+geographically-related keywords. Say for eg-: you want to search a plumber
+in your city, You will be typing in keywords like Plumbers + City Or
+Plumbers + IN + City. We make sure your website comes in google MAP listings
+shown on page 1 for each such keyword.
+
+Now Google believes in - BE ORIGINAL, HAVE ORIGINAL AND GIVE ORIGINAL which
+means that google wants to end up that frustrating experience of users who
+are searching for Service Or Product and seeing the results that are not
+even close to what they are looking for. Google only wants to give their
+user original and relevant results. This makes it even more important that
+we showcase our business in the best possible way and make sure our website
+in valued high by google.
+
+We at TheLOCALIST will make google feel the importance of your business by
+following their guidelines thus ranking your website higher in serach
+results. We are presently offering LOCAL OPTIMIZATION to more than 400
+websites and they all rank page 1 for all possible keywords !!! Each month
+your website is submitted to more than 50 citations and social presence is
+controlled by posting videos and blogs all over the web.
+
+Email us back with your website & phone number so we can discuss this
+further with you. Our Packages start from as low as 99$/month.
+
+
+Thanks For Taking Time To Read Our Email
+
+Polly Martin
+Local SEO Manager ( THE Localist )
+Address : 24 ST Suite 32 Downtown Provo Utah
+
+-------------------
+NOT INTERESTED ? REPLY WITH NOT INTERESTED IN THE SUBJECT LINE 
