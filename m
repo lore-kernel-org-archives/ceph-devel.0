@@ -1,204 +1,225 @@
-From: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>
-Subject: RE: Pyramid Erasure Code plugin (draft)
-Date: Fri, 17 Jan 2014 14:46:07 +0000
-Message-ID: <3472A07E6605974CBC9BC573F1BC02E4AE6B25A2@PLOXCHG03.cern.ch>
-References: <52D8FC5A.5090905@dachary.org>
- <CAGhffvwLtm1rJ68ORiASxDzfsOuo0y2YQvU3uLMUvxQOAA_d7g@mail.gmail.com>,<52D90D50.8080501@dachary.org>
- <3472A07E6605974CBC9BC573F1BC02E4AE6B2508@PLOXCHG03.cern.ch>,<52D93689.7010705@dachary.org>
- <3472A07E6605974CBC9BC573F1BC02E4AE6B2587@PLOXCHG03.cern.ch>,<52D93C05.5010905@dachary.org>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: Ceph cluster is unreachable because of authentication failure
+Date: Fri, 17 Jan 2014 08:05:45 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1401170804180.304@cobra.newdream.net>
+References: <BLU0-SMTP1356EEDE6A8ACF94947F22ADFBF0@phx.gbl> <alpine.DEB.2.00.1401140654500.10628@cobra.newdream.net> <016D7F31-523E-4EC1-8222-7D4084BA400F@outlook.com> <BLU0-SMTP14487458FBE42B33537BD4EDFB90@phx.gbl> <alpine.DEB.2.00.1401160908170.3044@cobra.newdream.net>
+ <BLU0-SMTP169D80D759610D226681DD3DFB80@phx.gbl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cernmx13.cern.ch ([188.184.36.46]:9108 "EHLO CERNMX13.cern.ch"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751094AbaAQOqL convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 17 Jan 2014 09:46:11 -0500
-In-Reply-To: <52D93C05.5010905@dachary.org>
-Content-Language: en-GB
+Received: from cobra.newdream.net ([66.33.216.30]:49378 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751679AbaAQQFq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 17 Jan 2014 11:05:46 -0500
+In-Reply-To: <BLU0-SMTP169D80D759610D226681DD3DFB80@phx.gbl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Guang <yguang11@outlook.com>
+Cc: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Great,=20
-I think this is now very flexible!
+On Fri, 17 Jan 2014, Guang wrote:
+> Thanks Sage.
+> 
+> I further narrow down the problem to #any command using paxos service would hang#, following are details:
+> 
+> 1. I am able to run ceph status / osd dump, etc., however, the result are out of date (though I stopped all OSDs, it does not reflect in ceph status report).
+> 
+> -bash-4.1$ sudo ceph -s
+>   cluster b9cb3ea9-e1de-48b4-9e86-6921e2c537d2
+>    health HEALTH_WARN 2797 pgs degraded; 107 pgs down; 7503 pgs peering; 917 pgs recovering; 6079 pgs recovery_wait; 2957 pgs stale; 7771 pgs stuck inactive; 2957 pgs stuck stale; 16567 pgs stuck unclean; recovery 54346804/779462977 degraded (6.972%); 9/259724199 unfound (0.000%); 2 near full osd(s); 57/751 in osds are down; noout,nobackfill,norecover,noscrub,nodeep-scrub flag(s) set
+>    monmap e1: 3 mons at {osd151=10.194.0.68:6789/0,osd152=10.193.207.130:6789/0,osd153=10.193.207.131:6789/0}, election epoch 123278, quorum 0,1,2 osd151,osd152,osd153
+>    osdmap e134893: 781 osds: 694 up, 751 in
+>     pgmap v2388518: 22203 pgs: 26 inactive, 14 active, 79 stale+active+recovering, 5020 active+clean, 242 stale, 4352 active+recovery_wait, 616 stale+active+clean, 177 active+recovering+degraded, 6714 peering, 925 stale+active+recovery_wait, 86 down+peering, 1547 active+degraded, 32 stale+active+recovering+degraded, 648 stale+peering, 21 stale+down+peering, 239 stale+active+degraded, 651 active+recovery_wait+degraded, 30 remapped+peering, 151 stale+active+recovery_wait+degraded, 4 stale+remapped+peering, 629 active+recovering; 79656 GB data, 363 TB used, 697 TB / 1061 TB avail; 54346804/779462977 degraded (6.972%); 9/259724199 unfound (0.000%)
+>    mdsmap e1: 0/0/1 up
+> 
+> 2. If I run a command which uses paxos, the command will hang forever, this includes, ceph osd set noup (and also including those commands osd send to monitor when being started (create-or-add)).
+> 
+> I attached the corresponding monitor log (it is like a bug).
 
-Cheers Andreas.
+I see the osd set command coming through, but it arrives while paxos is 
+converging and the log seems to end before the mon would normally process 
+te delayed messages.  Is there a reason why the log fragment you attached 
+ends there, or did the process hang or something?
 
+Thanks-
+sage
 
-________________________________________
-=46rom: ceph-devel-owner@vger.kernel.org [ceph-devel-owner@vger.kernel.=
-org] on behalf of Loic Dachary [loic@dachary.org]
-Sent: 17 January 2014 15:19
-To: Andreas Joachim Peters
-Cc: Ceph Development
-Subject: Re: Pyramid Erasure Code plugin (draft)
-
-http://tracker.ceph.com/issues/7146#note-2 is updated to include the gl=
-obal parity chunks into the computation of the local parity chunks.
-
-On 17/01/2014 15:10, Andreas Joachim Peters wrote:> Hi Loic,
-> this is what I mentioned in the other thread ....
-> depending on the global parameters, it is more efficient to include t=
-he global stripes into the local parity computation because also a disk=
- with global parity breaks with the same probability like the disk with=
- data stripes and you can repair them with the local parity if you incl=
-ude them in the computation.
-
-Understood.
-
-> If I understand your scheme in the given example K:4 means, that loca=
-l parity is computed over d4 ata stripes only while K:6 means, it is co=
-mputed over 4 data + 2 global parity stripes, so this should work ?!?!?
-
-Now the local parity is computed on 6 data chunks instead of 4 data chu=
-nks.
-
-How does that look ?
-
->
-> Cheers Andreas.
->
->
-> ________________________________________
-> From: Loic Dachary [loic@dachary.org]
-> Sent: 17 January 2014 14:56
-> To: Andreas Joachim Peters
-> Cc: Ceph Development
-> Subject: Re: Pyramid Erasure Code plugin (draft)
->
-> On 17/01/2014 12:18, Andreas Joachim Peters wrote:
->> Is k:4 not wrong? I want to build the local parity using 4 data + 2 =
-RS stripes ?!?!?
->>
->
-> I misunderstood and did not consider the case where you would want to=
- do this. I'm glad you raise this now :-) Reading http://home.ie.cuhk.e=
-du.hk/~mhchen/papers/pyramid.ToS.13.pdf my understanding is that local =
-parity is not calculated for chunks created by the lower level. Am I re=
-ading it incorrectly ?
->
-> In the context of Ceph I think you're right anyway : local parity nee=
-ds to apply to chunks generated at the global level.
->
->>
->> { "plugin": "xor",
->>       "k": 4,
->>       "m": 1,
->>       "item": "datacenter",
->>       "mapping": "0000--^1111--^2222--^",
->>     },
->>
->> ________________________________________
->> From: Loic Dachary [loic@dachary.org]
->> Sent: 17 January 2014 12:00
->> To: Andreas Joachim Peters
->> Cc: Ceph Development
->> Subject: Re: Pyramid Erasure Code plugin (draft)
->>
->> On 17/01/2014 11:34, Andreas-Joachim Peters wrote:
->>> Hi Loic,
->>>
->>> i think I don't understand if this works really for all cases and p=
-robably sysadmins will be lost without ready to use templates.
->>
->> I agree, providing a sensible default is important. I'll draft somet=
-hing.
->>
->>> Can you write down with this syntax a rule like this:
->>>
->>> =3D> build 12 data chunks (d1...d12)
->>> =3D> build 6 RS chunks, distribute  (p1..p6)
->>> =3D> arrange them as : lp1=3D(d1,d2,d3,d4,p1,p2) lp2=3D(d5,d6,d7,d8=
-,p3,p4) lp3=3D(d9,d10,d11,d12,p5,p6)
->>> =3D> map 21 stripes to 3 data center as: D1=3D(d1,d2,d3,d4,p1,p2,lp=
-1) D2=3D(d5,d6,d7,d8,p3,p4,lp2) D3=3D(d9,d10,d11,d12,p5,p6,lp3)
->>> e.g. chunk(0...21) =3D (d1,d2,d3...lp1,d5,d6,d7...lp2,d9,d10,d11...=
-lp3)
->>
->> Here is how it translates : http://tracker.ceph.com/issues/7146#note=
--2 ( replacing | with - ... maybe more readable ).
->>
->> Does that make sense ?
->>>
->>> Thanks, Andreas.
->>>
->>>
->>>
->>>
->>>
->>>
->>>
->>>
->>> On Fri, Jan 17, 2014 at 10:48 AM, Loic Dachary <loic@dachary.org <m=
-ailto:loic@dachary.org>> wrote:
->>>
->>>     Hi Andreas,
->>>
->>>     I spent some time this week trying to figure out something that=
- would be reasonably generic, readable from the sysadmin point of view =
-and simple to implement. The input of the plugin is here:
->>>
->>>     http://tracker.ceph.com/issues/7146#note-1
->>>
->>>     The json structure describes the pyramid and associates an eras=
-ure code method with each layer, including parameters. The mapping desc=
-ribes how chunks relate to the list of OSDs obtained from crush. For in=
-stance in |^000111^| the | are ignored ( whitespace is confusing becaus=
-e it's not easy to figure out visually how many of them there are ), ^ =
-marks a coding chunk, any other character is a data chunk. The pyramid =
-encoding function reads this and encode the first three data chunks wit=
-h one coding chunk. The re-ordering of the chunks is done by the pyrami=
-d code and the underlying erasure code method does not need to know any=
-thing about it. There is no copy involved, it re-orders pointers ( buff=
-erptr ).
->>>
->>>     Here is a draft (not compiling not working but the logic looks =
-right to me) implementation:
->>>
->>>     encode :
->>>     https://github.com/dachary/ceph/blob/wip-pyramid/src/osd/Erasur=
-eCodePluginPyramid/ErasureCodePyramid.cc#L250
->>>
->>>     decode :
->>>     https://github.com/dachary/ceph/blob/wip-pyramid/src/osd/Erasur=
-eCodePluginPyramid/ErasureCodePyramid.cc#L367
->>>
->>>     The plugins for each layer would be loaded at init time :
->>>
->>>     https://github.com/dachary/ceph/blob/wip-pyramid/src/osd/Erasur=
-eCodePluginPyramid/ErasureCodePyramid.cc#L83
->>>
->>>     with as much consistency checks as possible, for instance:
->>>
->>>     https://github.com/dachary/ceph/blob/wip-pyramid/src/osd/Erasur=
-eCodePluginPyramid/ErasureCodePyramid.cc#L102
->>>
->>>     so that runtime can assume constraints are enforced. Please let=
- me know if you see something that does not look right, this is a draft=
-, it can be reworked 100% ;-)
->>>
->>>     Cheers
->>>
->>>     --
->>>     Lo=EFc Dachary, Artisan Logiciel Libre
->>>
->>>
->>
->> --
->> Lo=EFc Dachary, Artisan Logiciel Libre
->>
->
-> --
-> Lo=EFc Dachary, Artisan Logiciel Libre
->
-
---
-Lo=EFc Dachary, Artisan Logiciel Libre
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> I 
+> 
+> On Jan 17, 2014, at 1:35 AM, Sage Weil <sage@inktank.com> wrote:
+> 
+> > Hi Guang,
+> > 
+> > On Thu, 16 Jan 2014, Guang wrote:
+> >> I still have bad the luck to figure out what is the problem making authentication failure, so in order to get the cluster back, I tried:
+> >>  1. stop all daemons (mon & osd)
+> >>  2. change the configuration to disable cephx
+> >>  3. start mon daemons (3 in total)
+> >>  4. start osd daemon one by one
+> >> 
+> >> After finishing step 3, the cluster can be reachable ('ceph -s' give results):
+> >> -bash-4.1$ sudo ceph -s
+> >>  cluster b9cb3ea9-e1de-48b4-9e86-6921e2c537d2
+> >>   health HEALTH_WARN 2797 pgs degraded; 107 pgs down; 7503 pgs peering; 917 pgs recovering; 6079 pgs recovery_wait; 2957 pgs stale; 7771 pgs stuck inactive; 2957 pgs stuck stale; 16567 pgs stuck unclean; recovery 54346804/779462977 degraded (6.972%); 9/259724199 unfound (0.000%); 2 near full osd(s); 57/751 in osds are down; noout,nobackfill,norecover,noscrub,nodeep-scrub flag(s) set
+> >>   monmap e1: 3 mons at {osd151=10.194.0.68:6789/0,osd152=10.193.207.130:6789/0,osd153=10.193.207.131:6789/0}, election epoch 106022, quorum 0,1,2 osd151,osd152,osd153
+> >>   osdmap e134893: 781 osds: 694 up, 751 in
+> >>    pgmap v2388518: 22203 pgs: 26 inactive, 14 active, 79 stale+active+recovering, 5020 active+clean, 242 stale, 4352 active+recovery_wait, 616 stale+active+clean, 177 active+recovering+degraded, 6714 peering, 925 stale+active+recovery_wait, 86 down+peering, 1547 active+degraded, 32 stale+active+recovering+degraded, 648 stale+peering, 21 stale+down+peering, 239 stale+active+degraded, 651 active+recovery_wait+degraded, 30 remapped+peering, 151 stale+active+recovery_wait+degraded, 4 stale+remapped+peering, 629 active+recovering; 79656 GB data, 363 TB used, 697 TB / 1061 TB avail; 54346804/779462977 degraded (6.972%); 9/259724199 unfound (0.000%)
+> >>   mdsmap e1: 0/0/1 up
+> >> (at this point, all OSDs should be down).
+> >> 
+> >> When I tried to start OSD daemon, the starting script got hang, and the process hang is:
+> >> root      80497  80496  0 08:18 pts/0    00:00:00 python /usr/bin/ceph --name=osd.22 --keyring=/var/lib/ceph/osd/ceph-22/keyring osd crush create-or-move -- 22 0.40 root=default host=osd173
+> >> 
+> >> When I strace the starting script, I got the following traces (process 75873 is the above process), it failed with futex and then do a infinite loop:
+> >>   select(0, NULL, NULL, NULL, {0, 16000}) = 0 (Timeout)
+> >> Any idea what might trigger this?
+> > 
+> > It is hard to tell from the strace what is going on from this.  Do you see 
+> > that the OSDs are booting in ceph.log (or ceph -w output)?  If not, I 
+> > would look at the osd daemon log for clues.  You may need to turn up 
+> > debugging to see (ceph daemon osd.NNN config set debug_osd 20 to adjust 
+> > the level on the running daemon).
+> > 
+> > If they are booting, it is mostly a matter of letting it recover and come 
+> > up.  We have seen patterns where configuration or network issues have let 
+> > the system bury itself under a series of osdmap updates.  If you see that 
+> > in the log when you turn up debugging, or see the osds going up and down 
+> > when you try to bring the cluster up, that could be what is going on.  A 
+> > strategy that has worked there is to let all the osds catch up on their 
+> > maps before trying to peer and join the cluster.  To do that, 'ceph osd 
+> > set noup' (which prevents the osds from joining), wait for the ceph-osd 
+> > processes to stop chewing on maps (watch the cpu utilization in top), and 
+> > once they are all ready 'ceph osd unset noup' and let them join and peer 
+> > all at once.
+> > 
+> > sage
+> > 
+> >> 
+> >> ======= STRACE (PARTIAL) ========== 
+> >> [pid 75873] futex(0xf707a0, FUTEX_WAIT_PRIVATE, 0, NULL <unfinished ...>
+> >> [pid 75878] mmap(NULL, 134217728, PROT_NONE, MAP_PRIVATE|MAP_ANONYMOUS|MAP_NORESERVE, -1, 0) = 0x7f5da6529000
+> >> [pid 75878] munmap(0x7f5da6529000, 28143616) = 0
+> >> [pid 75878] munmap(0x7f5dac000000, 38965248) = 0
+> >> [pid 75878] mprotect(0x7f5da8000000, 135168, PROT_READ|PROT_WRITE) = 0
+> >> [pid 75878] futex(0xf707a0, FUTEX_WAKE_PRIVATE, 1) = 1
+> >> [pid 75873] <... futex resumed> )       = 0
+> >> [pid 75873] futex(0xdd3cb0, FUTEX_WAIT_PRIVATE, 0, NULL <unfinished ...>
+> >> [pid 75878] futex(0xdd3cb0, FUTEX_WAKE_PRIVATE, 1 <unfinished ...>
+> >> [pid 75873] <... futex resumed> )       = -1 EAGAIN (Resource temporarily unavailable)
+> >> [pid 75878] <... futex resumed> )       = 0
+> >> [pid 75873] select(0, NULL, NULL, NULL, {0, 1000} <unfinished ...>
+> >> [pid 75878] rt_sigprocmask(SIG_BLOCK, ~[RTMIN RT_1], [], 8) = 0
+> >> [pid 75878] mmap(NULL, 10489856, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS|MAP_STACK, -1, 0) = 0x7f5dadb28000
+> >> [pid 75878] mprotect(0x7f5dadb28000, 4096, PROT_NONE) = 0
+> >> [ omit some entries?]
+> >> [pid 75873] select(0, NULL, NULL, NULL, {0, 16000}) = 0 (Timeout)
+> >> [pid 75873] select(0, NULL, NULL, NULL, {0, 32000}) = 0 (Timeout)
+> >> [pid 75873] select(0, NULL, NULL, NULL, {0, 50000}) = 0 (Timeout)
+> >> [pid 75873] select(0, NULL, NULL, NULL, {0, 50000}) = 0 (Timeout)
+> >> [pid 75873] select(0, NULL, NULL, NULL, {0, 50000}) = 0 (Timeout)
+> >> [pid 75873] select(0, NULL, NULL, NULL, {0, 50000}) = 0 (Timeout)
+> >> [pid 75873] select(0, NULL, NULL, NULL, {0, 50000}) = 0 (Timeout)
+> >> 
+> >> 
+> >> Thanks,
+> >> Guang
+> >> 
+> >> On Jan 15, 2014, at 5:54 AM, Guang <yguang11@outlook.com> wrote:
+> >> 
+> >>> Thanks Sage.
+> >>> 
+> >>> -bash-4.1$ sudo ceph --admin-daemon /var/run/ceph/ceph-mon.osd151.asok mon_status
+> >>> { "name": "osd151",
+> >>> "rank": 2,
+> >>> "state": "electing",
+> >>> "election_epoch": 85469,
+> >>> "quorum": [],
+> >>> "outside_quorum": [],
+> >>> "extra_probe_peers": [],
+> >>> "sync_provider": [],
+> >>> "monmap": { "epoch": 1,
+> >>>     "fsid": "b9cb3ea9-e1de-48b4-9e86-6921e2c537d2",
+> >>>     "modified": "0.000000",
+> >>>     "created": "0.000000",
+> >>>     "mons": [
+> >>>           { "rank": 0,
+> >>>             "name": "osd152",
+> >>>             "addr": "10.193.207.130:6789\/0"},
+> >>>           { "rank": 1,
+> >>>             "name": "osd153",
+> >>>             "addr": "10.193.207.131:6789\/0"},
+> >>>           { "rank": 2,
+> >>>             "name": "osd151",
+> >>>             "addr": "10.194.0.68:6789\/0"}]}}
+> >>> 
+> >>> And:
+> >>> 
+> >>> -bash-4.1$ sudo ceph --admin-daemon /var/run/ceph/ceph-mon.osd151.asok quorum_status
+> >>> { "election_epoch": 85480,
+> >>> "quorum": [
+> >>>       0,
+> >>>       1,
+> >>>       2],
+> >>> "quorum_names": [
+> >>>       "osd151",
+> >>>       "osd152",
+> >>>       "osd153"],
+> >>> "quorum_leader_name": "osd152",
+> >>> "monmap": { "epoch": 1,
+> >>>     "fsid": "b9cb3ea9-e1de-48b4-9e86-6921e2c537d2",
+> >>>     "modified": "0.000000",
+> >>>     "created": "0.000000",
+> >>>     "mons": [
+> >>>           { "rank": 0,
+> >>>             "name": "osd152",
+> >>>             "addr": "10.193.207.130:6789\/0"},
+> >>>           { "rank": 1,
+> >>>             "name": "osd153",
+> >>>             "addr": "10.193.207.131:6789\/0"},
+> >>>           { "rank": 2,
+> >>>             "name": "osd151",
+> >>>             "addr": "10.194.0.68:6789\/0"}]}}
+> >>> 
+> >>> 
+> >>> The election has been finished with leader selected from the above status.
+> >>> 
+> >>> Thanks,
+> >>> Guang
+> >>> 
+> >>> On Jan 14, 2014, at 10:55 PM, Sage Weil <sage@inktank.com> wrote:
+> >>> 
+> >>>> On Tue, 14 Jan 2014, GuangYang wrote:
+> >>>>> Hi ceph-users and ceph-devel,
+> >>>>> I came across an issue after restarting monitors of the cluster, that authentication fails which prevents running any ceph command.
+> >>>>> 
+> >>>>> After we did some maintenance work, I restart OSD, however, I found that the OSD would not join the cluster automatically after being restarted, though TCP dump showed it had already sent messenger to monitor telling add me into the cluster.
+> >>>>> 
+> >>>>> So that I suspected there might be some issues of monitor and I restarted monitor one by one (3 in total), however, after restarting monitors, all ceph command would fail saying authentication timeout?
+> >>>>> 
+> >>>>> 2014-01-14 12:00:30.499397 7fc7f195e700  0 monclient(hunting): authenticate timed out after 300
+> >>>>> 2014-01-14 12:00:30.499440 7fc7f195e700  0 librados: client.admin authentication error (110) Connection timed out
+> >>>>> Error connecting to cluster: Error
+> >>>>> 
+> >>>>> Any idea why such error happened (restarting OSD would result in the same error)?
+> >>>>> 
+> >>>>> I am thinking the authentication information is persisted in mon local disk and is there a chance those data got corrupted?
+> >>>> 
+> >>>> That sounds unlikely, but you're right that the core problem is with the 
+> >>>> mons.  What does 
+> >>>> 
+> >>>> ceph daemon mon.`hostname` mon_status
+> >>>> 
+> >>>> say?  Perhaps they are not forming a quorum and that is what is preventing 
+> >>>> authentication.
+> >>>> 
+> >>>> sage
+> >>>> --
+> >>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> >>>> the body of a message to majordomo@vger.kernel.org
+> >>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >>> 
+> >> 
+> >> 
+> > 
+> 
+> 
