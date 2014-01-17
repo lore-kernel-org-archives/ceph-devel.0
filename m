@@ -1,49 +1,70 @@
-From: Christian Balzer <chibi-FW+hd8ioUD0@public.gmane.org>
-Subject: Re: v0.75 released
-Date: Fri, 17 Jan 2014 09:05:18 +0900
-Message-ID: <20140117090518.3f988b32@batzmaru.gol.ad.jp>
-References: <alpine.DEB.2.00.1401141941070.8325@cobra.newdream.net>
-	<CALFYKtAz5G4y1RUoqJmyr5psuh1NvD=E_7qSPm7WL+8Ra_bJ5A@mail.gmail.com>
+From: "J. Bruce Fields" <bfields@fieldses.org>
+Subject: Re: [PATCH] ceph: trivial comment fix
+Date: Thu, 16 Jan 2014 21:01:19 -0500
+Message-ID: <20140117020119.GC20521@fieldses.org>
+References: <20140116224253.GB20521@fieldses.org>
+ <alpine.DEB.2.00.1401161603250.16743@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CALFYKtAz5G4y1RUoqJmyr5psuh1NvD=E_7qSPm7WL+8Ra_bJ5A-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from fieldses.org ([174.143.236.118]:47476 "EHLO fieldses.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751811AbaAQCBU (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 16 Jan 2014 21:01:20 -0500
+Content-Disposition: inline
+In-Reply-To: <alpine.DEB.2.00.1401161603250.16743@cobra.newdream.net>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Thu, 16 Jan 2014 15:51:17 +0200 Ilya Dryomov wrote:
-
-> On Wed, Jan 15, 2014 at 5:42 AM, Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org> wrote:
-> >
-> > [...]
-> >
-> > * rbd: support for 4096 mapped devices, up from ~250 (Ilya Dryomov)
+On Thu, Jan 16, 2014 at 04:03:38PM -0800, Sage Weil wrote:
+> On Thu, 16 Jan 2014, J. Bruce Fields wrote:
+> > From: "J. Bruce Fields" <bfields@redhat.com>
+> > 
+> > "disconnected" is too easily confused with "DCACHE_DISCONNECTED".  I
+> > think "unhashed" is the more precise term here.
 > 
-> Just a note, v0.75 simply adds some of the infrastructure, the actual
-> support for this will arrive with kernel 3.14.  The theoretical limit
-> is 65536 mapped devices, although I admit I haven't tried mapping more
-> than ~4000 at once.
+> Good point.  Applied, thanks!
+
+Thanks!  While I'm looking, there's another d_find_alias() caller in
+build_inode_path.  What's that?  (Do the mds protocol messages actually
+use full paths?)  And will this break if you get a DCACHE_DISCONNECTED
+or an unhashed alias?
+
+--b.
+
+> sage
 > 
-Just for clarification, this is for the client side when using the kernel
-module, right?
-
-Not looking at more than about 150 devices per compute node now, but that
-might change and there is also the case of failovers...
-
-Regards,
-
-Christian
--- 
-Christian Balzer        Network/Systems Engineer                
-chibi-FW+hd8ioUD0@public.gmane.org   	Global OnLine Japan/Fusion Communications
-http://www.gol.com/
+> 
+> > 
+> > Signed-off-by: J. Bruce Fields <bfields@redhat.com>
+> > ---
+> >  fs/ceph/caps.c |    6 +++---
+> >  1 file changed, 3 insertions(+), 3 deletions(-)
+> > 
+> > Just ran across this while wondering what d_find_alias callers do....
+> > 
+> > diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+> > index 3c0a4bd..697f9d7 100644
+> > --- a/fs/ceph/caps.c
+> > +++ b/fs/ceph/caps.c
+> > @@ -2350,11 +2350,11 @@ static void invalidate_aliases(struct inode *inode)
+> >  	d_prune_aliases(inode);
+> >  	/*
+> >  	 * For non-directory inode, d_find_alias() only returns
+> > -	 * connected dentry. After calling d_invalidate(), the
+> > -	 * dentry become disconnected.
+> > +	 * hashed dentry. After calling d_invalidate(), the
+> > +	 * dentry becomes unhashed.
+> >  	 *
+> >  	 * For directory inode, d_find_alias() can return
+> > -	 * disconnected dentry. But directory inode should have
+> > +	 * unhashed dentry. But directory inode should have
+> >  	 * one alias at most.
+> >  	 */
+> >  	while ((dn = d_find_alias(inode))) {
+> > -- 
+> > 1.7.9.5
+> > 
+> > 
