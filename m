@@ -1,74 +1,53 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Re: rados io hints
-Date: Sat, 18 Jan 2014 13:52:13 +0800
-Message-ID: <CACJqLyYEatEF04w17+qYUVVw3bOySt0AmXrU_cjxHAbX=eHSDQ@mail.gmail.com>
-References: <alpine.DEB.2.00.1401171022030.6273@cobra.newdream.net>
-	<alpine.DEB.2.00.1401171115060.6273@cobra.newdream.net>
+From: Alexandre Oliva <oliva-mXXj517/zsQ@public.gmane.org>
+Subject: Re: v0.75 released
+Date: Sat, 18 Jan 2014 04:50:57 -0200
+Message-ID: <ord2jpvl4e.fsf@livre.home>
+References: <alpine.DEB.2.00.1401141941070.8325@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f176.google.com ([209.85.192.176]:35372 "EHLO
-	mail-pd0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751602AbaARFwO (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 18 Jan 2014 00:52:14 -0500
-Received: by mail-pd0-f176.google.com with SMTP id r10so4832308pdi.7
-        for <ceph-devel@vger.kernel.org>; Fri, 17 Jan 2014 21:52:14 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1401171115060.6273@cobra.newdream.net>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.00.1401141941070.8325-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org> (Sage
+	Weil's message of "Tue, 14 Jan 2014 19:42:31 -0800 (PST)")
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-It's great to performance, more advice from client is welcomed for ObjectStore
-implementation.
+On Jan 15, 2014, Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org> wrote:
 
-Maybe the new operation can be just like fadvise, accept flags as argument and
-ObjectStore will try to do it but not certainly.
+>  v0.75 291 files changed, 82713 insertions(+), 33495 deletions(-)
 
-KeyValueStore will also enjoy it and get much benefit from it.
+> Upgrading
+> ~~~~~~~~~
 
+I suggest adding:
 
-On Sat, Jan 18, 2014 at 3:16 AM, Sage Weil <sage@inktank.com> wrote:
-> On Fri, 17 Jan 2014, Sage Weil wrote:
->> I think we need to add rados operations that provide hints to rados about
->> what the expected object sizes, alignment, and cacheability is.  In
->> particularly, I see two main wins:
->>
->>  - knowing that rbd images have a 4m size, librbd can pass a hint that
->> will let the osd do the xfs allocation size ioctl on new files so that
->> they are allocated in 1m or 4m chunks.  We've seen cases where users with
->> rbd workloads have very high levels of fragmentation in xfs and this would
->> mitigate that and probably have a pretty nice performance benefit.
->>
->>  - If the rbd (or other client) cache is enabled, we can pass a hint that
->> indicates that the OSD shouldn't keep the object pages around in cache.
->> This would just translate into an fadvise DONTNEED or similar.
->>
->> I think the challenge is to keep this as generic as possible from the
->> client's perspetive, but make sure that there is enough information to
->> translate it into a good set of low-level hints to the underlying backend
->> (like alignment size and fadvise).  For example, intuitively the 1m
->> allocation unit sounds about right to me, but rbd would probably
->> communicate to rados that the objects are expected to be 4m each (or
->> whatever the striping strategy is).  I'm thinking the "we shouldn't do an
->> allocation unit more than 1m" logic should live in the FileStore, tunable
->> via a config option?
->
-> BTW, my initial thought is this should just be new rados operations, and
-> the client should set the FAILOK flag so that older osds will ignore the
-> fact that they don't understand the op.
->
-> s
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+  * All (replicated?) pools will likely fail scrubbing because the
+    per-pool dirty object counts, introduced in 0.75, won't match.  This
+    inconsistency is cleared by a pg repair; unfortunately this is about
+    as expensive as a a deep-scrub, and it's not automatically scheduled
+    or retried, like scrubs and deep-scrubs.
 
+I suppose after the dirty counts are brought to sync, the next scrub
+won't find inconsistent counts again, but I haven't got to that point
+yet.
 
+What surprised me was the huge number of objects marked as dirty!  It
+was at least 14k out of 70k objects in each data pool, and even more in
+metadata pools, but it's not like I have messed with this many objects
+recently.  Could something be amiss there?
 
 -- 
-Best Regards,
-
-Wheat
+Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
+You must be the change you wish to see in the world. -- Gandhi
+Be Free! -- http://FSFLA.org/   FSF Latin America board member
+Free Software Evangelist     Red Hat Brazil Toolchain Engineer
