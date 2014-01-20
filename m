@@ -1,304 +1,245 @@
-From: ceph branch robot <nobody@ceph.com>
-Subject: ceph branch status
-Date: Mon, 20 Jan 2014 08:00:27 -0800 (PST)
-Message-ID: <20140120160027.BE9F028153C@teuthology.front.sepia.ceph.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: Ceph cluster is unreachable because of authentication failure
+Date: Mon, 20 Jan 2014 08:35:21 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1401200835050.2149@cobra.newdream.net>
+References: <BLU0-SMTP1356EEDE6A8ACF94947F22ADFBF0@phx.gbl> <alpine.DEB.2.00.1401140654500.10628@cobra.newdream.net> <016D7F31-523E-4EC1-8222-7D4084BA400F@outlook.com> <BLU0-SMTP14487458FBE42B33537BD4EDFB90@phx.gbl> <alpine.DEB.2.00.1401160908170.3044@cobra.newdream.net>
+ <BLU0-SMTP169D80D759610D226681DD3DFB80@phx.gbl> <alpine.DEB.2.00.1401170804180.304@cobra.newdream.net> <BLU0-SMTP65962E190D657BC79CFBB2DFBA0@phx.gbl>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from gw.sepia.ceph.com ([64.90.32.34]:26495 "EHLO
-	teuthology.front.sepia.ceph.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1751947AbaATQA2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 20 Jan 2014 11:00:28 -0500
+Received: from cobra.newdream.net ([66.33.216.30]:59680 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751868AbaATQfW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 20 Jan 2014 11:35:22 -0500
+In-Reply-To: <BLU0-SMTP65962E190D657BC79CFBB2DFBA0@phx.gbl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Guang <yguang11@outlook.com>
+Cc: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
--- All Branches --
+On Sun, 19 Jan 2014, Guang wrote:
+> Thanks Sage.
+> 
+> I just captured part of the log (it was fast growing), the process did 
+> not hang but I saw the same pattern repeatedly. Should I increase the 
+> log level and send over email (it constantly reproduced)?
 
-Alfredo Deza <alfredo@deza.pe>
-	2013-09-27 10:33:52 -0400   wip-5900
-	2014-01-02 10:30:44 -0500   wip-6465
+Sure!  A representative fragment of the repeating fragment shoudl be 
+enough.
 
-Dan Mick <dan.mick@inktank.com>
-	2013-07-16 23:00:06 -0700   wip-5634
-
-David Zafman <david.zafman@inktank.com>
-	2013-01-28 20:26:34 -0800   wip-wireshark-zafman
-	2013-03-22 18:14:10 -0700   wip-snap-test-fix
-	2014-01-14 18:12:32 -0800   wip-7116
-
-Gary Lowell <gary.lowell@inktank.com>
-	2013-07-23 17:00:07 -0700   wip-build-test
-	2013-09-27 11:46:26 -0700   wip-6020
-	2013-10-10 12:54:51 -0700   wip-5900-gl
-	2013-10-11 11:59:12 -0700   wip-lazy-cuttlefish-gl
-
-Gary Lowell <glowell@inktank.com>
-	2013-02-05 19:29:11 -0800   wip.cppchecker
-	2013-02-10 22:21:52 -0800   wip-3955
-	2013-02-26 19:28:48 -0800   wip-system-leveldb
-	2013-03-01 18:55:35 -0800   wip-da-spec-1
-	2013-03-19 11:28:15 -0700   wip-3921
-	2013-04-11 23:00:05 -0700   wip-init-radosgw
-	2013-04-17 23:30:11 -0700   wip-4725
-	2013-04-21 22:06:37 -0700   wip-4752
-	2013-04-22 14:11:37 -0700   wip-4632
-	2013-05-31 11:20:40 -0700   wip-doc-prereq
-	2013-06-06 22:31:54 -0700   wip-build-doc
-
-Greg Farnum <greg@inktank.com>
-	2013-02-13 14:46:38 -0800   wip-mds-snap-fix
-	2013-02-22 19:57:53 -0800   wip-4248-snapid-journaling
-	2013-09-19 18:15:00 -0700   wip-4354
-	2013-10-09 13:31:38 -0700   cuttlefish-4832
-	2013-11-15 14:41:51 -0800   wip-librados-command2
-	2013-12-09 16:21:41 -0800   wip-hitset-snapshots
-
-James Page <james.page@ubuntu.com>
-	2013-02-27 22:50:38 +0000   wip-debhelper-8
-
-Joao Eduardo Luis <jecluis@gmail.com>
-	2013-08-12 11:21:29 -0700   wip-store-tool.cuttlefish
-	2013-12-09 16:39:19 +0000   wip-mon-mdsmap-trim.dumpling
-
-Joao Eduardo Luis <joao.luis@inktank.com>
-	2013-04-18 00:01:24 +0100   wip-4521-tool
-	2013-04-22 15:14:28 +0100   wip-4748
-	2013-04-24 16:42:11 +0100   wip-4521
-	2013-04-30 18:45:22 +0100   wip-mon-compact-dbg
-	2013-05-21 01:46:13 +0100   wip-monstoretool-foo
-	2013-05-31 16:26:02 +0100   wip-mon-cache-first-last-committed
-	2013-05-31 21:00:28 +0100   wip-mon-trim-b
-	2013-07-20 04:30:59 +0100   wip-mon-caps-test
-	2013-07-23 16:21:46 +0100   wip-5704-cuttlefish
-	2013-07-23 17:35:59 +0100   wip-5704
-	2013-08-02 22:54:42 +0100   wip-5648
-	2013-09-25 22:08:24 +0100   wip-6378
-	2013-10-10 14:06:59 +0100   wip-mon-set-pspool
-	2013-11-22 21:08:31 +0000   wip-6796-b
-	2013-12-18 22:17:09 +0000   wip-monstoretool-genmdsmaps
-	2014-01-17 17:11:59 -0800   wip-fix-pipe-comment-for-fhaas
-
-Joe Buck <jbbuck@gmail.com>
-	2013-05-02 16:32:33 -0700   wip-buck-add-terasort
-	2013-09-16 22:08:41 -0700   wip-buck-centos-misc
-
-John Wilkins <john.wilkins@inktank.com>
-	2013-07-31 18:00:50 -0700   wip-doc-rados-python-api
-	2014-01-13 12:40:47 -0800   wip-doc-librados-intro
-
-Josh Durgin <josh.durgin@inktank.com>
-	2013-03-01 14:45:23 -0800   wip-rbd-workunit-debug
-	2013-07-25 18:44:10 -0700   wip-5488-2
-	2013-08-14 15:51:04 -0700   wip-5970
-	2013-08-27 12:03:08 -0700   wip-krbd-workunits
-	2013-11-22 15:17:08 -0800   wip-zero-copy-bufferlist
-	2013-11-25 13:59:29 -0800   wip-init-highlander
-	2013-12-17 08:16:59 -0800   wip-rbd-deadlock-lockdep
-	2013-12-18 12:28:39 -0800   wip-rbd-deadlock-lockdep-dumpling
-	2013-12-26 18:06:39 -0800   emperor-5426
-	2013-12-26 18:07:13 -0800   dumpling-5426
-	2014-01-16 21:19:47 -0800   wip-objectcacher-flusher-dumpling
-
-Ken Dreyer <ken.dreyer@inktank.com>
-	2014-01-13 21:07:01 +0000   last
-
-Loic Dachary <loic@dachary.org>
-	2013-12-23 07:06:18 -0800   cuttlefish
-
-Matt Benjamin <matt@linuxbox.com>
-	2013-10-08 16:49:23 -0400   wip-libcephfs-emp-rb
-
-Noah Watkins <noahwatkins@gmail.com>
-	2013-01-05 11:58:38 -0800   wip-localized-read-tests
-	2013-10-18 15:42:50 -0700   cls-lua
-	2013-11-05 07:30:19 -0800   wip-port
-	2013-11-06 08:39:57 -0800   wip-6636
-	2013-11-26 08:26:24 -0800   wip-boost-uuid
-	2013-12-30 09:47:40 -0800   port/visibility
-	2014-01-13 12:16:22 -0800   fix-sbin-install
-	2014-01-18 14:03:58 -0800   port/libc++
-
-Roald van Loon <roaldvanloon@gmail.com>
-	2012-12-24 22:26:56 +0000   wip-dout
-
-Sage Weil <sage@inktank.com>
-	2012-11-30 13:47:27 -0800   wip-osd-readhole
-	2012-12-07 14:38:46 -0800   wip-osd-alloc
-	2013-01-29 13:46:02 -0800   wip-readdir
-	2013-02-11 07:05:15 -0800   wip-sim-journal-clone
-	2013-04-18 13:51:36 -0700   argonaut
-	2013-06-02 21:21:09 -0700   wip-fuse-bobtail
-	2013-06-04 22:43:04 -0700   wip-osd-push
-	2013-06-18 17:00:00 -0700   wip-mon-refs
-	2013-06-21 17:59:58 -0700   wip-rgw-vstart
-	2013-06-28 12:54:08 -0700   wip-mds-snap
-	2013-07-01 17:48:09 -0700   wip-5021
-	2013-07-06 09:22:29 -0700   wip-mds-lazyio-cuttlefish
-	2013-07-06 13:00:51 -0700   wip-mds-lazyio-cuttlefish-minimal
-	2013-07-08 14:52:10 -0700   wip-lazy-cuttlefish
-	2013-07-18 16:59:03 -0700   wip-refs
-	2013-07-19 21:13:09 -0700   wip-5692
-	2013-07-20 09:02:40 -0700   wip-5695
-	2013-07-21 17:16:10 -0700   wip-5672
-	2013-07-21 19:58:12 -0700   wip-before
-	2013-07-21 22:03:19 -0700   wip-cuttlefish-osdmap
-	2013-07-22 22:31:46 -0700   wip-5039
-	2013-07-23 09:46:55 -0700   wip-5488
-	2013-07-27 08:20:41 -0700   wip-5754
-	2013-08-02 15:47:32 -0700   wip-5648-b
-	2013-08-04 09:38:49 -0700   wip-mon-skip-auth-cuttlefish
-	2013-08-04 22:25:03 -0700   wip-5869
-	2013-08-05 14:10:27 -0700   wip-mon-global-id
-	2013-08-14 22:16:46 -0700   wip-5973
-	2013-08-28 18:11:09 -0700   wip-libs3
-	2013-09-04 17:55:02 -0700   wip-libcephfs
-	2013-09-17 06:27:35 -0700   wip-inline
-	2013-09-19 12:08:45 -0700   wip-neon-crc32c
-	2013-09-27 13:17:11 -0700   wip-test-falloc
-	2013-10-05 21:09:29 -0700   wip-osd-bloom
-	2013-10-15 15:07:22 -0700   bobtail
-	2013-11-01 23:58:57 -0700   wip-6707
-	2013-11-05 06:53:10 -0800   wip-crush-rule
-	2013-12-02 10:01:21 -0800   wip-osdmon-warnings
-	2013-12-02 21:57:18 -0800   wip-pool-stats-dumpling2
-	2013-12-07 16:04:15 -0800   wip-journaler-kludge
-	2013-12-17 18:21:43 -0800   wip-rgw-err
-	2014-01-06 22:13:09 -0800   wip-librados
-	2014-01-09 05:44:55 -0800   wip-fuse-flock
-	2014-01-10 10:08:53 -0800   dumpling
-	2014-01-10 11:33:42 -0800   emperor
-	2014-01-13 16:55:36 -0800   wip-tier-bits
-	2014-01-13 17:52:22 -0800   wip-agent
-	2014-01-14 06:40:33 -0800   wip-dio
-	2014-01-17 23:08:38 -0800   wip-primary-affinity
-	2014-01-18 21:19:58 -0800   wip-7184
-
-Samuel Just <sam.just@inktank.com>
-	2013-06-06 11:51:04 -0700   wip_bench_num
-	2013-06-06 13:08:51 -0700   wip_5238_cuttlefish
-	2013-06-19 14:54:13 -0700   wip_cuttlefish_compact_on_startup
-	2013-06-19 19:46:06 -0700   wip_observer
-	2013-07-23 14:04:29 -0700   wip-cuttlefish-next
-	2013-08-15 15:35:26 -0700   wip-5985
-	2013-08-19 00:04:13 -0700   wip-dumpling-pglog-undirty
-	2013-08-26 23:19:47 -0700   wip-dumpling-log-assert
-	2013-08-27 15:40:28 -0700   wip-dumpling-perf2
-	2013-09-01 10:57:33 -0700   wip-5869-DNM
-	2013-09-19 12:52:53 -0700   wip-5992
-	2013-10-30 16:56:18 -0700   wip-6633
-	2013-11-04 11:25:32 -0800   wip-enotempty
-	2013-11-05 17:47:48 -0800   wip-6722
-	2013-11-09 17:00:31 -0800   wip-perf2
-	2013-11-12 14:56:00 -0800   wip-queueing
-	2013-11-13 15:50:01 -0800   wip-6761
-	2013-11-15 13:54:12 -0800   wip-queueing2
-	2013-11-18 11:22:17 -0800   wip-6786
-	2013-11-18 13:14:20 -0800   wip-6756
-	2013-12-04 19:10:50 -0800   wip-testrados-ec
-	2013-12-10 16:01:03 -0800   wip-ecbackend
-	2013-12-13 13:19:25 -0800   wip-client-io-rebased
-	2014-01-13 15:15:40 -0800   wip-client-io-rebased-2
-	2014-01-19 01:41:07 -0800   wip-client-io-rebased-3
-
-Wido den Hollander <wido@42on.com>
-	2014-01-20 11:06:37 +0100   wip-rgw-powerdns
-
-Yan, Zheng <zheng.z.yan@intel.com>
-	2013-12-27 11:55:45 +0800   wip-no-anchor
-	2014-01-20 20:31:00 +0800   wip-dirfrags
-
-Yehuda Sadeh <yehuda@inktank.com>
-	2012-11-16 11:09:34 -0800   wip-mongoose
-	2012-12-13 18:09:37 -0800   wip-2169
-	2013-02-12 09:40:12 -0800   wip-json-decode
-	2013-02-22 15:04:37 -0800   wip-4247
-	2013-02-22 16:19:37 -0800   wip-rgw-zone
-	2013-02-26 18:01:46 -0800   wip-cls-version
-	2013-02-28 09:56:43 -0800   wip-librados-exec
-	2013-03-07 09:46:49 -0800   wip-4363
-	2013-03-07 09:47:56 -0800   wip-4363-next
-	2013-03-07 11:38:06 -0800   wip-4247-bobtail
-	2013-03-12 12:56:01 -0700   wip-4425
-	2013-03-13 10:13:29 -0700   wip-4425-next
-	2013-03-22 11:01:02 -0700   wip-rgw-zone-2
-	2013-03-22 11:29:49 -0700   wip-rgw-zone-3
-	2013-04-15 12:32:48 -0700   wip-rgw-bucketlog
-	2013-04-22 13:01:20 -0700   wip-4776-bobtail
-	2013-04-23 09:26:33 -0700   wip-4755
-	2013-04-26 09:41:39 -0700   wip-4760
-	2013-05-02 22:08:37 -0700   wip-4716
-	2013-05-06 14:41:10 -0700   wip-rgw-bucketlog-2
-	2013-05-07 14:03:04 -0700   wip-4600-bobtail
-	2013-05-07 14:03:37 -0700   wip-4600-argonaut
-	2013-05-16 09:08:46 -0700   wip-5073-2
-	2013-05-22 21:34:52 -0700   wip-5152
-	2013-05-30 09:34:21 -0700   wip-5204
-	2013-05-30 13:04:27 -0700   wip-5209
-	2013-06-14 14:53:54 -0700   wip-5362
-	2013-06-26 11:36:59 -0700   wip-5455
-	2013-06-29 00:25:32 -0700   wip-rgw-geo-2-replicalog2
-	2013-06-29 21:04:39 -0700   wip-rgw-geo-3
-	2013-07-08 18:55:19 -0700   rgw-next-libcurl
-	2013-07-22 14:46:30 -0700   wip-5664
-	2013-07-29 10:52:22 -0700   wip-5789
-	2013-07-29 10:54:02 -0700   wip-5793
-	2013-07-29 10:58:30 -0700   wip-5770
-	2013-07-30 13:53:53 -0700   wip-5808
-	2013-07-31 10:48:15 -0700   wip-rgw-next
-	2013-08-01 13:20:19 -0700   wip-5831
-	2013-08-01 18:23:49 -0700   wip-5810
-	2013-08-05 11:38:27 -0700   wip-5875
-	2013-08-15 11:00:05 -0700   wip-5978
-	2013-08-16 18:19:02 -0700   wip-rgw-papercuts
-	2013-08-19 16:56:27 -0700   wip-6056
-	2013-08-25 17:57:23 -0700   wip-5374
-	2013-09-04 16:03:22 -0700   wip-6078-dumpling
-	2013-09-10 12:18:55 -0700   wip-6268-bobtail
-	2013-09-10 14:18:46 -0700   wip-6268
-	2013-09-11 13:46:31 -0700   wip-6175
-	2013-09-11 22:30:12 -0700   wip-6286
-	2013-09-12 10:22:08 -0700   wip-6286-dumpling
-	2013-09-12 14:32:17 -0700   wip-6294
-	2013-09-13 14:43:54 -0700   wip-6302
-	2013-09-16 16:05:55 -0700   wip-6176
-	2013-09-18 10:37:21 -0700   wip-6340
-	2013-09-20 14:04:47 -0700   wip-6360
-	2013-10-03 11:49:33 -0700   wip-6444
-	2013-10-04 13:00:26 -0700   wip-6462
-	2013-10-07 09:45:20 -0700   wip-rgw-write
-	2013-10-17 21:29:34 -0700   wip-apache-mod
-	2013-10-18 10:36:01 -0700   wip-3896
-	2013-10-25 17:16:34 -0700   wip-mongoose-test
-	2013-10-30 10:31:11 -0700   wip-rgw-nxweb
-	2013-10-31 14:40:23 -0700   wip-bobtail-admin
-	2013-10-31 14:45:45 -0700   wip-5170
-	2013-11-04 19:02:35 -0800   wip-rgw-standalone
-	2013-11-05 18:37:43 -0800   wip-6677
-	2013-11-07 09:14:27 -0800   wip-6678
-	2013-11-08 16:26:23 -0800   wip-6744
-	2013-11-22 16:00:04 -0800   wip-5170-dumpling
-	2013-12-02 21:37:13 -0800   wip-6919
-	2013-12-07 21:13:19 -0800   wip-objecter-lock
-	2013-12-10 11:33:29 -0800   wip-mongoose-2
-	2013-12-12 23:13:41 -0800   wip-messenger-prefetch
-	2013-12-17 23:24:27 -0800   wip-rgw-getobj-cb
-	2013-12-18 10:34:12 -0800   wip-7030
-	2013-12-18 12:57:40 -0800   wip-queueing3
-	2013-12-18 13:02:52 -0800   wip-queueing3-rgw
-	2014-01-06 18:32:42 -0800   wip-7110-dumpling
-	2014-01-09 18:22:46 -0800   wip-queuing3-loadgen
-	2014-01-15 13:06:31 -0800   wip-rgw-civetweb
-	2014-01-15 14:35:57 -0800   wip-user-quota
-	2014-01-15 15:28:10 -0800   wip-rgw-civetweb-2
-	2014-01-16 14:30:53 -0800   wip-7168
-	2014-01-17 17:05:10 -0800   wip-7169
-
-markhpc <mark.a.nelson@gmail.com>
-	2013-11-06 09:23:22 -0600   wip-v0.70-mark
-
-scuttlemonkey <pmcgarry@gmail.com>
-	2013-12-13 13:37:30 -0800   wip-doc-quick-start
-
-
-
-Grouped by committer, ordered by commit time stamp.
+s
+> 
+> Thanks,
+> Guang
+> 
+> On Jan 18, 2014, at 12:05 AM, Sage Weil <sage@inktank.com> wrote:
+> 
+> > On Fri, 17 Jan 2014, Guang wrote:
+> >> Thanks Sage.
+> >> 
+> >> I further narrow down the problem to #any command using paxos service would hang#, following are details:
+> >> 
+> >> 1. I am able to run ceph status / osd dump, etc., however, the result are out of date (though I stopped all OSDs, it does not reflect in ceph status report).
+> >> 
+> >> -bash-4.1$ sudo ceph -s
+> >>  cluster b9cb3ea9-e1de-48b4-9e86-6921e2c537d2
+> >>   health HEALTH_WARN 2797 pgs degraded; 107 pgs down; 7503 pgs peering; 917 pgs recovering; 6079 pgs recovery_wait; 2957 pgs stale; 7771 pgs stuck inactive; 2957 pgs stuck stale; 16567 pgs stuck unclean; recovery 54346804/779462977 degraded (6.972%); 9/259724199 unfound (0.000%); 2 near full osd(s); 57/751 in osds are down; noout,nobackfill,norecover,noscrub,nodeep-scrub flag(s) set
+> >>   monmap e1: 3 mons at {osd151=10.194.0.68:6789/0,osd152=10.193.207.130:6789/0,osd153=10.193.207.131:6789/0}, election epoch 123278, quorum 0,1,2 osd151,osd152,osd153
+> >>   osdmap e134893: 781 osds: 694 up, 751 in
+> >>    pgmap v2388518: 22203 pgs: 26 inactive, 14 active, 79 stale+active+recovering, 5020 active+clean, 242 stale, 4352 active+recovery_wait, 616 stale+active+clean, 177 active+recovering+degraded, 6714 peering, 925 stale+active+recovery_wait, 86 down+peering, 1547 active+degraded, 32 stale+active+recovering+degraded, 648 stale+peering, 21 stale+down+peering, 239 stale+active+degraded, 651 active+recovery_wait+degraded, 30 remapped+peering, 151 stale+active+recovery_wait+degraded, 4 stale+remapped+peering, 629 active+recovering; 79656 GB data, 363 TB used, 697 TB / 1061 TB avail; 54346804/779462977 degraded (6.972%); 9/259724199 unfound (0.000%)
+> >>   mdsmap e1: 0/0/1 up
+> >> 
+> >> 2. If I run a command which uses paxos, the command will hang forever, this includes, ceph osd set noup (and also including those commands osd send to monitor when being started (create-or-add)).
+> >> 
+> >> I attached the corresponding monitor log (it is like a bug).
+> > 
+> > I see the osd set command coming through, but it arrives while paxos is 
+> > converging and the log seems to end before the mon would normally process 
+> > te delayed messages.  Is there a reason why the log fragment you attached 
+> > ends there, or did the process hang or something?
+> > 
+> > Thanks-
+> > sage
+> > 
+> >> I 
+> >> 
+> >> On Jan 17, 2014, at 1:35 AM, Sage Weil <sage@inktank.com> wrote:
+> >> 
+> >>> Hi Guang,
+> >>> 
+> >>> On Thu, 16 Jan 2014, Guang wrote:
+> >>>> I still have bad the luck to figure out what is the problem making authentication failure, so in order to get the cluster back, I tried:
+> >>>> 1. stop all daemons (mon & osd)
+> >>>> 2. change the configuration to disable cephx
+> >>>> 3. start mon daemons (3 in total)
+> >>>> 4. start osd daemon one by one
+> >>>> 
+> >>>> After finishing step 3, the cluster can be reachable ('ceph -s' give results):
+> >>>> -bash-4.1$ sudo ceph -s
+> >>>> cluster b9cb3ea9-e1de-48b4-9e86-6921e2c537d2
+> >>>>  health HEALTH_WARN 2797 pgs degraded; 107 pgs down; 7503 pgs peering; 917 pgs recovering; 6079 pgs recovery_wait; 2957 pgs stale; 7771 pgs stuck inactive; 2957 pgs stuck stale; 16567 pgs stuck unclean; recovery 54346804/779462977 degraded (6.972%); 9/259724199 unfound (0.000%); 2 near full osd(s); 57/751 in osds are down; noout,nobackfill,norecover,noscrub,nodeep-scrub flag(s) set
+> >>>>  monmap e1: 3 mons at {osd151=10.194.0.68:6789/0,osd152=10.193.207.130:6789/0,osd153=10.193.207.131:6789/0}, election epoch 106022, quorum 0,1,2 osd151,osd152,osd153
+> >>>>  osdmap e134893: 781 osds: 694 up, 751 in
+> >>>>   pgmap v2388518: 22203 pgs: 26 inactive, 14 active, 79 stale+active+recovering, 5020 active+clean, 242 stale, 4352 active+recovery_wait, 616 stale+active+clean, 177 active+recovering+degraded, 6714 peering, 925 stale+active+recovery_wait, 86 down+peering, 1547 active+degraded, 32 stale+active+recovering+degraded, 648 stale+peering, 21 stale+down+peering, 239 stale+active+degraded, 651 active+recovery_wait+degraded, 30 remapped+peering, 151 stale+active+recovery_wait+degraded, 4 stale+remapped+peering, 629 active+recovering; 79656 GB data, 363 TB used, 697 TB / 1061 TB avail; 54346804/779462977 degraded (6.972%); 9/259724199 unfound (0.000%)
+> >>>>  mdsmap e1: 0/0/1 up
+> >>>> (at this point, all OSDs should be down).
+> >>>> 
+> >>>> When I tried to start OSD daemon, the starting script got hang, and the process hang is:
+> >>>> root      80497  80496  0 08:18 pts/0    00:00:00 python /usr/bin/ceph --name=osd.22 --keyring=/var/lib/ceph/osd/ceph-22/keyring osd crush create-or-move -- 22 0.40 root=default host=osd173
+> >>>> 
+> >>>> When I strace the starting script, I got the following traces (process 75873 is the above process), it failed with futex and then do a infinite loop:
+> >>>>  select(0, NULL, NULL, NULL, {0, 16000}) = 0 (Timeout)
+> >>>> Any idea what might trigger this?
+> >>> 
+> >>> It is hard to tell from the strace what is going on from this.  Do you see 
+> >>> that the OSDs are booting in ceph.log (or ceph -w output)?  If not, I 
+> >>> would look at the osd daemon log for clues.  You may need to turn up 
+> >>> debugging to see (ceph daemon osd.NNN config set debug_osd 20 to adjust 
+> >>> the level on the running daemon).
+> >>> 
+> >>> If they are booting, it is mostly a matter of letting it recover and come 
+> >>> up.  We have seen patterns where configuration or network issues have let 
+> >>> the system bury itself under a series of osdmap updates.  If you see that 
+> >>> in the log when you turn up debugging, or see the osds going up and down 
+> >>> when you try to bring the cluster up, that could be what is going on.  A 
+> >>> strategy that has worked there is to let all the osds catch up on their 
+> >>> maps before trying to peer and join the cluster.  To do that, 'ceph osd 
+> >>> set noup' (which prevents the osds from joining), wait for the ceph-osd 
+> >>> processes to stop chewing on maps (watch the cpu utilization in top), and 
+> >>> once they are all ready 'ceph osd unset noup' and let them join and peer 
+> >>> all at once.
+> >>> 
+> >>> sage
+> >>> 
+> >>>> 
+> >>>> ======= STRACE (PARTIAL) ========== 
+> >>>> [pid 75873] futex(0xf707a0, FUTEX_WAIT_PRIVATE, 0, NULL <unfinished ...>
+> >>>> [pid 75878] mmap(NULL, 134217728, PROT_NONE, MAP_PRIVATE|MAP_ANONYMOUS|MAP_NORESERVE, -1, 0) = 0x7f5da6529000
+> >>>> [pid 75878] munmap(0x7f5da6529000, 28143616) = 0
+> >>>> [pid 75878] munmap(0x7f5dac000000, 38965248) = 0
+> >>>> [pid 75878] mprotect(0x7f5da8000000, 135168, PROT_READ|PROT_WRITE) = 0
+> >>>> [pid 75878] futex(0xf707a0, FUTEX_WAKE_PRIVATE, 1) = 1
+> >>>> [pid 75873] <... futex resumed> )       = 0
+> >>>> [pid 75873] futex(0xdd3cb0, FUTEX_WAIT_PRIVATE, 0, NULL <unfinished ...>
+> >>>> [pid 75878] futex(0xdd3cb0, FUTEX_WAKE_PRIVATE, 1 <unfinished ...>
+> >>>> [pid 75873] <... futex resumed> )       = -1 EAGAIN (Resource temporarily unavailable)
+> >>>> [pid 75878] <... futex resumed> )       = 0
+> >>>> [pid 75873] select(0, NULL, NULL, NULL, {0, 1000} <unfinished ...>
+> >>>> [pid 75878] rt_sigprocmask(SIG_BLOCK, ~[RTMIN RT_1], [], 8) = 0
+> >>>> [pid 75878] mmap(NULL, 10489856, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS|MAP_STACK, -1, 0) = 0x7f5dadb28000
+> >>>> [pid 75878] mprotect(0x7f5dadb28000, 4096, PROT_NONE) = 0
+> >>>> [ omit some entries?]
+> >>>> [pid 75873] select(0, NULL, NULL, NULL, {0, 16000}) = 0 (Timeout)
+> >>>> [pid 75873] select(0, NULL, NULL, NULL, {0, 32000}) = 0 (Timeout)
+> >>>> [pid 75873] select(0, NULL, NULL, NULL, {0, 50000}) = 0 (Timeout)
+> >>>> [pid 75873] select(0, NULL, NULL, NULL, {0, 50000}) = 0 (Timeout)
+> >>>> [pid 75873] select(0, NULL, NULL, NULL, {0, 50000}) = 0 (Timeout)
+> >>>> [pid 75873] select(0, NULL, NULL, NULL, {0, 50000}) = 0 (Timeout)
+> >>>> [pid 75873] select(0, NULL, NULL, NULL, {0, 50000}) = 0 (Timeout)
+> >>>> 
+> >>>> 
+> >>>> Thanks,
+> >>>> Guang
+> >>>> 
+> >>>> On Jan 15, 2014, at 5:54 AM, Guang <yguang11@outlook.com> wrote:
+> >>>> 
+> >>>>> Thanks Sage.
+> >>>>> 
+> >>>>> -bash-4.1$ sudo ceph --admin-daemon /var/run/ceph/ceph-mon.osd151.asok mon_status
+> >>>>> { "name": "osd151",
+> >>>>> "rank": 2,
+> >>>>> "state": "electing",
+> >>>>> "election_epoch": 85469,
+> >>>>> "quorum": [],
+> >>>>> "outside_quorum": [],
+> >>>>> "extra_probe_peers": [],
+> >>>>> "sync_provider": [],
+> >>>>> "monmap": { "epoch": 1,
+> >>>>>    "fsid": "b9cb3ea9-e1de-48b4-9e86-6921e2c537d2",
+> >>>>>    "modified": "0.000000",
+> >>>>>    "created": "0.000000",
+> >>>>>    "mons": [
+> >>>>>          { "rank": 0,
+> >>>>>            "name": "osd152",
+> >>>>>            "addr": "10.193.207.130:6789\/0"},
+> >>>>>          { "rank": 1,
+> >>>>>            "name": "osd153",
+> >>>>>            "addr": "10.193.207.131:6789\/0"},
+> >>>>>          { "rank": 2,
+> >>>>>            "name": "osd151",
+> >>>>>            "addr": "10.194.0.68:6789\/0"}]}}
+> >>>>> 
+> >>>>> And:
+> >>>>> 
+> >>>>> -bash-4.1$ sudo ceph --admin-daemon /var/run/ceph/ceph-mon.osd151.asok quorum_status
+> >>>>> { "election_epoch": 85480,
+> >>>>> "quorum": [
+> >>>>>      0,
+> >>>>>      1,
+> >>>>>      2],
+> >>>>> "quorum_names": [
+> >>>>>      "osd151",
+> >>>>>      "osd152",
+> >>>>>      "osd153"],
+> >>>>> "quorum_leader_name": "osd152",
+> >>>>> "monmap": { "epoch": 1,
+> >>>>>    "fsid": "b9cb3ea9-e1de-48b4-9e86-6921e2c537d2",
+> >>>>>    "modified": "0.000000",
+> >>>>>    "created": "0.000000",
+> >>>>>    "mons": [
+> >>>>>          { "rank": 0,
+> >>>>>            "name": "osd152",
+> >>>>>            "addr": "10.193.207.130:6789\/0"},
+> >>>>>          { "rank": 1,
+> >>>>>            "name": "osd153",
+> >>>>>            "addr": "10.193.207.131:6789\/0"},
+> >>>>>          { "rank": 2,
+> >>>>>            "name": "osd151",
+> >>>>>            "addr": "10.194.0.68:6789\/0"}]}}
+> >>>>> 
+> >>>>> 
+> >>>>> The election has been finished with leader selected from the above status.
+> >>>>> 
+> >>>>> Thanks,
+> >>>>> Guang
+> >>>>> 
+> >>>>> On Jan 14, 2014, at 10:55 PM, Sage Weil <sage@inktank.com> wrote:
+> >>>>> 
+> >>>>>> On Tue, 14 Jan 2014, GuangYang wrote:
+> >>>>>>> Hi ceph-users and ceph-devel,
+> >>>>>>> I came across an issue after restarting monitors of the cluster, that authentication fails which prevents running any ceph command.
+> >>>>>>> 
+> >>>>>>> After we did some maintenance work, I restart OSD, however, I found that the OSD would not join the cluster automatically after being restarted, though TCP dump showed it had already sent messenger to monitor telling add me into the cluster.
+> >>>>>>> 
+> >>>>>>> So that I suspected there might be some issues of monitor and I restarted monitor one by one (3 in total), however, after restarting monitors, all ceph command would fail saying authentication timeout?
+> >>>>>>> 
+> >>>>>>> 2014-01-14 12:00:30.499397 7fc7f195e700  0 monclient(hunting): authenticate timed out after 300
+> >>>>>>> 2014-01-14 12:00:30.499440 7fc7f195e700  0 librados: client.admin authentication error (110) Connection timed out
+> >>>>>>> Error connecting to cluster: Error
+> >>>>>>> 
+> >>>>>>> Any idea why such error happened (restarting OSD would result in the same error)?
+> >>>>>>> 
+> >>>>>>> I am thinking the authentication information is persisted in mon local disk and is there a chance those data got corrupted?
+> >>>>>> 
+> >>>>>> That sounds unlikely, but you're right that the core problem is with the 
+> >>>>>> mons.  What does 
+> >>>>>> 
+> >>>>>> ceph daemon mon.`hostname` mon_status
+> >>>>>> 
+> >>>>>> say?  Perhaps they are not forming a quorum and that is what is preventing 
+> >>>>>> authentication.
+> >>>>>> 
+> >>>>>> sage
+> >>>>>> --
+> >>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> >>>>>> the body of a message to majordomo@vger.kernel.org
+> >>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >>>>> 
+> >>>> 
+> >>>> 
+> >>> 
+> >> 
+> >> 
+> > 
+> 
+> 
