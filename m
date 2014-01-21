@@ -1,58 +1,187 @@
 From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: [PATCH v2 2/3] libceph: introduce con_fault_raise() and switch to it
-Date: Tue, 21 Jan 2014 13:11:06 +0200
-Message-ID: <1390302667-8729-3-git-send-email-ilya.dryomov@inktank.com>
+Subject: [PATCH v2 3/3] libceph: handle dead tcp connections during connection negotiation
+Date: Tue, 21 Jan 2014 13:11:07 +0200
+Message-ID: <1390302667-8729-4-git-send-email-ilya.dryomov@inktank.com>
 References: <1390302667-8729-1-git-send-email-ilya.dryomov@inktank.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ee0-f51.google.com ([74.125.83.51]:46307 "EHLO
-	mail-ee0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754360AbaAULMK (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 21 Jan 2014 06:12:10 -0500
-Received: by mail-ee0-f51.google.com with SMTP id b57so4000062eek.24
-        for <ceph-devel@vger.kernel.org>; Tue, 21 Jan 2014 03:12:09 -0800 (PST)
+Received: from mail-ea0-f172.google.com ([209.85.215.172]:56791 "EHLO
+	mail-ea0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754366AbaAULMM (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 21 Jan 2014 06:12:12 -0500
+Received: by mail-ea0-f172.google.com with SMTP id g15so3075495eak.31
+        for <ceph-devel@vger.kernel.org>; Tue, 21 Jan 2014 03:12:11 -0800 (PST)
 In-Reply-To: <1390302667-8729-1-git-send-email-ilya.dryomov@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: ilya.dryomov@inktank.com
 
-In preparation for connect timeout abstract ceph_connection
-fault-initiating logic into a separate function and start using it.
+Keepalive mechanism that we are currently using doesn't handle dead
+(e.g. half-open in RFC 793 sense) TCP connections: a) it's based on
+pending ceph_osd_requests which are not necessarily present, and b)
+keepalive byte is only sent if connection is in CON_STATE_OPEN state
+because of protocol restrictions.  This does not cover connection
+handshake and negotiation stages and can lead to kernel client hanging
+forever.  Fix it by forcibly resetting the connection if after two
+mount_timeouts we still haven't transitioned to CON_STATE_OPEN.
+
+Fixes: http://tracker.ceph.com/issues/7139
 
 Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
 ---
- net/ceph/messenger.c |   11 +++++++++--
- 1 file changed, 9 insertions(+), 2 deletions(-)
+ include/linux/ceph/messenger.h |    5 +++++
+ net/ceph/ceph_common.c         |    1 +
+ net/ceph/messenger.c           |   42 ++++++++++++++++++++++++++++++++++++++--
+ 3 files changed, 46 insertions(+), 2 deletions(-)
 
+diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
+index 20ee8b63a968..25d3ec8bcdde 100644
+--- a/include/linux/ceph/messenger.h
++++ b/include/linux/ceph/messenger.h
+@@ -62,6 +62,8 @@ struct ceph_messenger {
+ 
+ 	u64 supported_features;
+ 	u64 required_features;
++
++	unsigned long connect_timeout;	/* jiffies */
+ };
+ 
+ enum ceph_msg_data_type {
+@@ -240,6 +242,8 @@ struct ceph_connection {
+ 
+ 	struct delayed_work work;	    /* send|recv work */
+ 	unsigned long       delay;          /* current delay interval */
++
++	struct delayed_work connect_timeout_work;
+ };
+ 
+ 
+@@ -257,6 +261,7 @@ extern void ceph_messenger_init(struct ceph_messenger *msgr,
+ 			struct ceph_entity_addr *myaddr,
+ 			u64 supported_features,
+ 			u64 required_features,
++			unsigned long connect_timeout,
+ 			bool nocrc);
+ 
+ extern void ceph_con_init(struct ceph_connection *con, void *private,
+diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
+index 67d7721d237e..bc41e5a392a4 100644
+--- a/net/ceph/ceph_common.c
++++ b/net/ceph/ceph_common.c
+@@ -511,6 +511,7 @@ struct ceph_client *ceph_create_client(struct ceph_options *opt, void *private,
+ 	ceph_messenger_init(&client->msgr, myaddr,
+ 		client->supported_features,
+ 		client->required_features,
++		2 * client->options->mount_timeout * HZ,
+ 		ceph_test_opt(client, NOCRC));
+ 
+ 	/* subsystems */
 diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index 2ed1304d22a7..c7e0143d24f1 100644
+index c7e0143d24f1..65dea6c8c6f8 100644
 --- a/net/ceph/messenger.c
 +++ b/net/ceph/messenger.c
-@@ -378,6 +378,14 @@ static void con_sock_state_closed(struct ceph_connection *con)
- 	     CON_SOCK_STATE_CLOSED);
+@@ -385,6 +385,16 @@ static void con_fault_raise(struct ceph_connection *con)
+ 	queue_con(con);
  }
  
-+
-+static void con_fault_raise(struct ceph_connection *con)
++static void handle_connect_timeout(struct work_struct *work)
 +{
-+	con_flag_set(con, CON_FLAG_SOCK_CLOSED);
-+	queue_con(con);
++	struct ceph_connection *con = container_of(work,
++						   struct ceph_connection,
++						   connect_timeout_work.work);
++
++	dout("%s connect timeout\n", __func__);
++	con_fault_raise(con);
 +}
 +
-+
+ 
  /*
   * socket callback functions
-  */
-@@ -434,8 +442,7 @@ static void ceph_sock_state_change(struct sock *sk)
- 	case TCP_CLOSE_WAIT:
- 		dout("%s TCP_CLOSE_WAIT\n", __func__);
- 		con_sock_state_closing(con);
--		con_flag_set(con, CON_FLAG_SOCK_CLOSED);
--		queue_con(con);
-+		con_fault_raise(con);
- 		break;
+@@ -447,6 +457,18 @@ static void ceph_sock_state_change(struct sock *sk)
  	case TCP_ESTABLISHED:
  		dout("%s TCP_ESTABLISHED\n", __func__);
+ 		con_sock_state_connected(con);
++		/*
++		 * If not told otherwise, arm connect_timeout hammer to
++		 * be able to deal with half-open (in RFC 793 sense)
++		 * sockets in the interim before we transition to
++		 * CON_STATE_OPEN and regular request keepalive
++		 * mechanism (ceph_con_keepalive()) kicks in.
++		 */
++		if (con->msgr->connect_timeout) {
++			dout("arming connect_timeout hammer\n");
++			schedule_delayed_work(&con->connect_timeout_work,
++					      con->msgr->connect_timeout);
++		}
+ 		queue_con(con);
+ 		break;
+ 	default:	/* Everything else is uninteresting */
+@@ -586,6 +608,13 @@ static int con_close_socket(struct ceph_connection *con)
+ 	int rc = 0;
+ 
+ 	dout("con_close_socket on %p sock %p\n", con, con->sock);
++
++	/*
++	 * Sync with con_fault_raise() in handle_connect_timeout() to
++	 * make sure that SOCK_CLOSED is going to be cleared for good.
++	 */
++	cancel_delayed_work_sync(&con->connect_timeout_work);
++
+ 	if (con->sock) {
+ 		rc = con->sock->ops->shutdown(con->sock, SHUT_RDWR);
+ 		sock_release(con->sock);
+@@ -595,8 +624,8 @@ static int con_close_socket(struct ceph_connection *con)
+ 	/*
+ 	 * Forcibly clear the SOCK_CLOSED flag.  It gets set
+ 	 * independent of the connection mutex, and we could have
+-	 * received a socket close event before we had the chance to
+-	 * shut the socket down.
++	 * received a socket close and/or connect_timeout event
++	 * before we had the chance to shut the socket down.
+ 	 */
+ 	con_flag_clear(con, CON_FLAG_SOCK_CLOSED);
+ 
+@@ -725,6 +754,7 @@ void ceph_con_init(struct ceph_connection *con, void *private,
+ 	INIT_LIST_HEAD(&con->out_queue);
+ 	INIT_LIST_HEAD(&con->out_sent);
+ 	INIT_DELAYED_WORK(&con->work, con_work);
++	INIT_DELAYED_WORK(&con->connect_timeout_work, handle_connect_timeout);
+ 
+ 	con->state = CON_STATE_CLOSED;
+ }
+@@ -2076,6 +2106,7 @@ static int process_connect(struct ceph_connection *con)
+ 
+ 		WARN_ON(con->state != CON_STATE_NEGOTIATING);
+ 		con->state = CON_STATE_OPEN;
++
+ 		con->auth_retry = 0;    /* we authenticated; clear flag */
+ 		con->peer_global_seq = le32_to_cpu(con->in_reply.global_seq);
+ 		con->connect_seq++;
+@@ -2092,6 +2123,11 @@ static int process_connect(struct ceph_connection *con)
+ 
+ 		con->delay = 0;      /* reset backoff memory */
+ 
++		if (con->msgr->connect_timeout) {
++			dout("disarming connect_timeout hammer\n");
++			cancel_delayed_work(&con->connect_timeout_work);
++		}
++
+ 		if (con->in_reply.tag == CEPH_MSGR_TAG_SEQ) {
+ 			prepare_write_seq(con);
+ 			prepare_read_seq(con);
+@@ -2866,10 +2902,12 @@ void ceph_messenger_init(struct ceph_messenger *msgr,
+ 			struct ceph_entity_addr *myaddr,
+ 			u64 supported_features,
+ 			u64 required_features,
++			unsigned long connect_timeout,
+ 			bool nocrc)
+ {
+ 	msgr->supported_features = supported_features;
+ 	msgr->required_features = required_features;
++	msgr->connect_timeout = connect_timeout;
+ 
+ 	spin_lock_init(&msgr->global_seq_lock);
+ 
 -- 
 1.7.10.4
 
