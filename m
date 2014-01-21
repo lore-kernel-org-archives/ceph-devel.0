@@ -1,13 +1,13 @@
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: [PATCH 09/11] ceph: add open export target session helper
-Date: Tue, 21 Jan 2014 12:15:43 +0800
-Message-ID: <1390277745-20142-9-git-send-email-zheng.z.yan@intel.com>
+Subject: [PATCH 11/11] libceph: support CEPH_FEATURE_EXPORT_PEER
+Date: Tue, 21 Jan 2014 12:15:45 +0800
+Message-ID: <1390277745-20142-11-git-send-email-zheng.z.yan@intel.com>
 References: <1390277745-20142-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:65215 "EHLO mga09.intel.com"
+Received: from mga09.intel.com ([134.134.136.24]:35339 "EHLO mga09.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752916AbaAUEP6 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 20 Jan 2014 23:15:58 -0500
+	id S1753464AbaAUEQC (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 20 Jan 2014 23:16:02 -0500
 In-Reply-To: <1390277745-20142-1-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -16,99 +16,23 @@ Cc: sage@inktank.com, "Yan, Zheng" <zheng.z.yan@intel.com>
 
 Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
 ---
- fs/ceph/mds_client.c | 51 ++++++++++++++++++++++++++++++++++++---------------
- fs/ceph/mds_client.h |  2 ++
- 2 files changed, 38 insertions(+), 15 deletions(-)
+ include/linux/ceph/ceph_features.h | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 7c00dd5..f4f050a 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -847,35 +847,56 @@ static int __open_session(struct ceph_mds_client *mdsc,
-  *
-  * called under mdsc->mutex
-  */
-+static struct ceph_mds_session *
-+__open_export_target_session(struct ceph_mds_client *mdsc, int target)
-+{
-+	struct ceph_mds_session *session;
-+
-+	session = __ceph_lookup_mds_session(mdsc, target);
-+	if (!session) {
-+		session = register_session(mdsc, target);
-+		if (IS_ERR(session))
-+			return session;
-+	}
-+	if (session->s_state == CEPH_MDS_SESSION_NEW ||
-+	    session->s_state == CEPH_MDS_SESSION_CLOSING)
-+		__open_session(mdsc, session);
-+
-+	return session;
-+}
-+
-+struct ceph_mds_session *
-+ceph_mdsc_open_export_target_session(struct ceph_mds_client *mdsc, int target)
-+{
-+	struct ceph_mds_session *session;
-+
-+	dout("open_export_target_session to mds%d\n", target);
-+
-+	mutex_lock(&mdsc->mutex);
-+	session = __open_export_target_session(mdsc, target);
-+	mutex_unlock(&mdsc->mutex);
-+
-+	return session;
-+}
-+
- static void __open_export_target_sessions(struct ceph_mds_client *mdsc,
- 					  struct ceph_mds_session *session)
- {
- 	struct ceph_mds_info *mi;
- 	struct ceph_mds_session *ts;
- 	int i, mds = session->s_mds;
--	int target;
+diff --git a/include/linux/ceph/ceph_features.h b/include/linux/ceph/ceph_features.h
+index 5f42e44..d21b34d 100644
+--- a/include/linux/ceph/ceph_features.h
++++ b/include/linux/ceph/ceph_features.h
+@@ -80,7 +80,8 @@ static inline u64 ceph_sanitize_features(u64 features)
+ 	 CEPH_FEATURE_CRUSH_TUNABLES2 |		\
+ 	 CEPH_FEATURE_REPLY_CREATE_INODE |	\
+ 	 CEPH_FEATURE_OSDHASHPSPOOL |		\
+-	 CEPH_FEATURE_CRUSH_V2)
++	 CEPH_FEATURE_CRUSH_V2 |		\
++	 CEPH_FEATURE_EXPORT_PEER)
  
- 	if (mds >= mdsc->mdsmap->m_max_mds)
- 		return;
-+
- 	mi = &mdsc->mdsmap->m_info[mds];
- 	dout("open_export_target_sessions for mds%d (%d targets)\n",
- 	     session->s_mds, mi->num_export_targets);
- 
- 	for (i = 0; i < mi->num_export_targets; i++) {
--		target = mi->export_targets[i];
--		ts = __ceph_lookup_mds_session(mdsc, target);
--		if (!ts) {
--			ts = register_session(mdsc, target);
--			if (IS_ERR(ts))
--				return;
--		}
--		if (session->s_state == CEPH_MDS_SESSION_NEW ||
--		    session->s_state == CEPH_MDS_SESSION_CLOSING)
--			__open_session(mdsc, session);
--		else
--			dout(" mds%d target mds%d %p is %s\n", session->s_mds,
--			     i, ts, session_state_name(ts->s_state));
--		ceph_put_mds_session(ts);
-+		ts = __open_export_target_session(mdsc, mi->export_targets[i]);
-+		if (!IS_ERR(ts))
-+			ceph_put_mds_session(ts);
- 	}
- }
- 
-diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-index 4c053d0..6828891 100644
---- a/fs/ceph/mds_client.h
-+++ b/fs/ceph/mds_client.h
-@@ -383,6 +383,8 @@ extern void ceph_mdsc_lease_send_msg(struct ceph_mds_session *session,
- extern void ceph_mdsc_handle_map(struct ceph_mds_client *mdsc,
- 				 struct ceph_msg *msg);
- 
-+extern struct ceph_mds_session *
-+ceph_mdsc_open_export_target_session(struct ceph_mds_client *mdsc, int target);
- extern void ceph_mdsc_open_export_target_sessions(struct ceph_mds_client *mdsc,
- 					  struct ceph_mds_session *session);
- 
+ #define CEPH_FEATURES_REQUIRED_DEFAULT   \
+ 	(CEPH_FEATURE_NOSRCADDR |	 \
 -- 
 1.8.4.2
 
