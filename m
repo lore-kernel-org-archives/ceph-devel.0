@@ -1,61 +1,37 @@
-From: Tim Zhang <cofol1986-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: how does ceph handle object writes?
-Date: Tue, 21 Jan 2014 11:13:02 +0800
-Message-ID: <CAGo8jt=-QaRtdHBCGvVtqSCSj4jFJtPjKoaY5g1UZ+bcg2Fm2w@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0968787050=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: [PATCH 02/11] mds: use ceph_seq_cmp() to compare migrate_seq
+Date: Tue, 21 Jan 2014 12:15:36 +0800
+Message-ID: <1390277745-20142-2-git-send-email-zheng.z.yan@intel.com>
+References: <1390277745-20142-1-git-send-email-zheng.z.yan@intel.com>
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mga09.intel.com ([134.134.136.24]:65179 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752789AbaAUEPw (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 20 Jan 2014 23:15:52 -0500
+In-Reply-To: <1390277745-20142-1-git-send-email-zheng.z.yan@intel.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: sage@inktank.com, "Yan, Zheng" <zheng.z.yan@intel.com>
 
---===============0968787050==
-Content-Type: multipart/alternative; boundary=001a11c13c5edf70e004f07262ce
+Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+---
+ fs/ceph/caps.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
---001a11c13c5edf70e004f07262ce
-Content-Type: text/plain; charset=ISO-8859-1
+diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+index 1012099..2c39d9f 100644
+--- a/fs/ceph/caps.c
++++ b/fs/ceph/caps.c
+@@ -628,7 +628,7 @@ retry:
+ 	cap->cap_id = cap_id;
+ 	cap->issued = issued;
+ 	cap->implemented |= issued;
+-	if (mseq > cap->mseq)
++	if (ceph_seq_cmp(mseq, cap->mseq) > 0)
+ 		cap->mds_wanted = wanted;
+ 	else
+ 		cap->mds_wanted |= wanted;
+-- 
+1.8.4.2
 
-Hi guys,
-I wonder how does store objects. Consider the writing obj process,  IMO,
-osd first get obj data from client, then the primary osd get the data,
-store the data in journal(with sync) , after that the primary osd spray the
-obj to other replica osd simultaneously, and each replica osd will write
-the journal with sync and then reply to the primary osd. After recieving
-all the replies from replica osd,  primary osd will report the write op is
-finished. Is there anything wrong?
-
---001a11c13c5edf70e004f07262ce
-Content-Type: text/html; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"ltr">Hi guys,<div>I wonder how does store objects. Consider the=
- writing obj process, =A0IMO, osd first get obj data from client, then the =
-primary osd get the data, store the data in journal(with sync)=A0, after th=
-at the primary osd spray the obj to other replica osd simultaneously, and e=
-ach replica osd will write the journal with sync and then reply to the prim=
-ary osd. After recieving all the replies from replica osd, =A0primary osd w=
-ill report the write op is finished. Is there anything wrong?</div>
-<div><br></div></div>
-
---001a11c13c5edf70e004f07262ce--
-
---===============0968787050==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============0968787050==--
