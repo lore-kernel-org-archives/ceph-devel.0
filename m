@@ -1,45 +1,52 @@
 From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: [PATCH v2 0/3] libceph: #7139 fix
-Date: Tue, 21 Jan 2014 13:11:04 +0200
-Message-ID: <1390302667-8729-1-git-send-email-ilya.dryomov@inktank.com>
+Subject: [PATCH v2 1/3] libceph: add function names to timeout dout()s
+Date: Tue, 21 Jan 2014 13:11:05 +0200
+Message-ID: <1390302667-8729-2-git-send-email-ilya.dryomov@inktank.com>
+References: <1390302667-8729-1-git-send-email-ilya.dryomov@inktank.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ee0-f48.google.com ([74.125.83.48]:53731 "EHLO
-	mail-ee0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754093AbaAULMH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 21 Jan 2014 06:12:07 -0500
-Received: by mail-ee0-f48.google.com with SMTP id t10so3947440eei.35
-        for <ceph-devel@vger.kernel.org>; Tue, 21 Jan 2014 03:12:05 -0800 (PST)
+Received: from mail-ea0-f178.google.com ([209.85.215.178]:36970 "EHLO
+	mail-ea0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754093AbaAULMJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 21 Jan 2014 06:12:09 -0500
+Received: by mail-ea0-f178.google.com with SMTP id a15so2513685eae.23
+        for <ceph-devel@vger.kernel.org>; Tue, 21 Jan 2014 03:12:07 -0800 (PST)
+In-Reply-To: <1390302667-8729-1-git-send-email-ilya.dryomov@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: ilya.dryomov@inktank.com
 
-Hello,
+Add function names to timeout-related dout()s in handle_timeout() and
+handle_osds_timeout().
 
-This series fixes #7139 (Linux kernel client, "dead tcp connections
-during connection negotiation may lead to hangs").  1/3 and 2/3 are
-preparatory patches, 3/3 is the actual fix.
+Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
+---
+ net/ceph/osd_client.c |    5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
 
-v2:
-- don't set sock_state to CLOSING in connect_timeout handler (2/3)
-- disarm connect_timeout timer in con_close_socket() (3/3)
-
-Thanks,
-
-                Ilya
-
-
-Ilya Dryomov (3):
-  libceph: add function names to timeout dout()s
-  libceph: introduce con_fault_raise() and switch to it
-  libceph: handle dead tcp connections during connection negotiation
-
- include/linux/ceph/messenger.h |    5 ++++
- net/ceph/ceph_common.c         |    1 +
- net/ceph/messenger.c           |   53 +++++++++++++++++++++++++++++++++++++---
- net/ceph/osd_client.c          |    5 ++--
- 4 files changed, 58 insertions(+), 6 deletions(-)
-
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index 959d332ed534..548e63b5bcfa 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -1402,7 +1402,8 @@ static void handle_timeout(struct work_struct *work)
+ 	unsigned long keepalive =
+ 		osdc->client->options->osd_keepalive_timeout * HZ;
+ 	struct list_head slow_osds;
+-	dout("timeout\n");
++
++	dout("%s timeout\n", __func__);
+ 	down_read(&osdc->map_sem);
+ 
+ 	ceph_monc_request_next_osdmap(&osdc->client->monc);
+@@ -1446,7 +1447,7 @@ static void handle_osds_timeout(struct work_struct *work)
+ 	unsigned long delay =
+ 		osdc->client->options->osd_idle_ttl * HZ >> 2;
+ 
+-	dout("osds timeout\n");
++	dout("%s osds timeout\n", __func__);
+ 	down_read(&osdc->map_sem);
+ 	remove_old_osds(osdc);
+ 	up_read(&osdc->map_sem);
 -- 
 1.7.10.4
 
