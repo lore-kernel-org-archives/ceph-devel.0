@@ -1,66 +1,86 @@
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: [PATCH 04/11] ceph: fix trim caps
-Date: Tue, 21 Jan 2014 12:15:38 +0800
-Message-ID: <1390277745-20142-4-git-send-email-zheng.z.yan@intel.com>
+Subject: [PATCH 05/11] ceph: handle -ESTALE reply
+Date: Tue, 21 Jan 2014 12:15:39 +0800
+Message-ID: <1390277745-20142-5-git-send-email-zheng.z.yan@intel.com>
 References: <1390277745-20142-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
 Received: from mga09.intel.com ([134.134.136.24]:62235 "EHLO mga09.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752916AbaAUEPx (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 20 Jan 2014 23:15:53 -0500
+	id S1753002AbaAUEPy (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 20 Jan 2014 23:15:54 -0500
 In-Reply-To: <1390277745-20142-1-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: sage@inktank.com, "Yan, Zheng" <zheng.z.yan@intel.com>
 
-- don't trim auth cap if there are flusing caps
-- don't trim auth cap if any 'write' cap is wanted
-- allow trimming non-auth cap even if the inode is dirty
+Send requests that operate on path to directory's auth MDS if
+mode == USE_AUTH_MDS. Always retry using the auth MDS if got
+-ESTALE reply from non-auth MDS. Also clean up the code that
+handles auth MDS change.
 
 Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
 ---
- fs/ceph/mds_client.c | 17 +++++++++++------
- 1 file changed, 11 insertions(+), 6 deletions(-)
+ fs/ceph/mds_client.c | 31 +++++++++++--------------------
+ 1 file changed, 11 insertions(+), 20 deletions(-)
 
 diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 4a13f6e..73c7943 100644
+index 73c7943..1fd655a 100644
 --- a/fs/ceph/mds_client.c
 +++ b/fs/ceph/mds_client.c
-@@ -1214,7 +1214,7 @@ static int trim_caps_cb(struct inode *inode, struct ceph_cap *cap, void *arg)
- {
- 	struct ceph_mds_session *session = arg;
- 	struct ceph_inode_info *ci = ceph_inode(inode);
--	int used, oissued, mine;
-+	int used, wanted, oissued, mine;
+@@ -713,14 +713,15 @@ static int __choose_mds(struct ceph_mds_client *mdsc,
+ 			struct dentry *dn = get_nonsnap_parent(parent);
+ 			inode = dn->d_inode;
+ 			dout("__choose_mds using nonsnap parent %p\n", inode);
+-		} else if (req->r_dentry->d_inode) {
++		} else {
+ 			/* dentry target */
+ 			inode = req->r_dentry->d_inode;
+-		} else {
+-			/* dir + name */
+-			inode = dir;
+-			hash = ceph_dentry_hash(dir, req->r_dentry);
+-			is_hash = true;
++			if (!inode || mode == USE_AUTH_MDS) {
++				/* dir + name */
++				inode = dir;
++				hash = ceph_dentry_hash(dir, req->r_dentry);
++				is_hash = true;
++			}
+ 		}
+ 	}
  
- 	if (session->s_trim_caps <= 0)
- 		return -1;
-@@ -1222,14 +1222,19 @@ static int trim_caps_cb(struct inode *inode, struct ceph_cap *cap, void *arg)
- 	spin_lock(&ci->i_ceph_lock);
- 	mine = cap->issued | cap->implemented;
- 	used = __ceph_caps_used(ci);
-+	wanted = __ceph_caps_file_wanted(ci);
- 	oissued = __ceph_caps_issued_other(ci, cap);
- 
--	dout("trim_caps_cb %p cap %p mine %s oissued %s used %s\n",
-+	dout("trim_caps_cb %p cap %p mine %s oissued %s used %s wanted %s\n",
- 	     inode, cap, ceph_cap_string(mine), ceph_cap_string(oissued),
--	     ceph_cap_string(used));
--	if (ci->i_dirty_caps)
--		goto out;   /* dirty caps */
--	if ((used & ~oissued) & mine)
-+	     ceph_cap_string(used), ceph_cap_string(wanted));
-+	if (cap == ci->i_auth_cap) {
-+		if (ci->i_dirty_caps | ci->i_flushing_caps)
-+			goto out;
-+		if ((used | wanted) & CEPH_CAP_ANY_WR)
-+			goto out;
-+	}
-+	if ((used | wanted) & ~oissued & mine)
- 		goto out;   /* we need these caps */
- 
- 	session->s_trim_caps--;
+@@ -2161,26 +2162,16 @@ static void handle_reply(struct ceph_mds_session *session, struct ceph_msg *msg)
+ 	 */
+ 	if (result == -ESTALE) {
+ 		dout("got ESTALE on request %llu", req->r_tid);
+-		if (!req->r_inode) {
+-			/* do nothing; not an authority problem */
+-		} else if (req->r_direct_mode != USE_AUTH_MDS) {
++		if (req->r_direct_mode != USE_AUTH_MDS) {
+ 			dout("not using auth, setting for that now");
+ 			req->r_direct_mode = USE_AUTH_MDS;
+ 			__do_request(mdsc, req);
+ 			mutex_unlock(&mdsc->mutex);
+ 			goto out;
+ 		} else  {
+-			struct ceph_inode_info *ci = ceph_inode(req->r_inode);
+-			struct ceph_cap *cap = NULL;
+-
+-			if (req->r_session)
+-				cap = ceph_get_cap_for_mds(ci,
+-						   req->r_session->s_mds);
+-
+-			dout("already using auth");
+-			if ((!cap || cap != ci->i_auth_cap) ||
+-			    (cap->mseq != req->r_sent_on_mseq)) {
+-				dout("but cap changed, so resending");
++			int mds = __choose_mds(mdsc, req);
++			if (mds >= 0 && mds != req->r_session->s_mds) {
++				dout("but auth changed, so resending");
+ 				__do_request(mdsc, req);
+ 				mutex_unlock(&mdsc->mutex);
+ 				goto out;
 -- 
 1.8.4.2
 
