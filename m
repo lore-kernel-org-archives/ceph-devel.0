@@ -1,49 +1,102 @@
-From: Yehuda Sadeh <yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: recreate bucket error
-Date: Wed, 22 Jan 2014 08:25:23 -0800
-Message-ID: <CABBk=J_x-vO+EJcne-fZyvp5W=6V8zh2deJZAVx_FK4Nd4xgfQ@mail.gmail.com>
-References: <CAMNMNTzt_yPoqOhgKpi9vioAXygzD_oKzhHxsh-WA6NCB7mOcg@mail.gmail.com>
-	<CABBk=J95C7OrwTAPN_EJ8dHmTOiSFExhrAv2n5FJ6RyACuMETA@mail.gmail.com>
-	<CAMNMNTzd7LEht6y-5vT6sEvJeG3yErQGNGbmGM3x+hYOuTQs0g@mail.gmail.com>
-	<CAC-hyiG9hznbysGs84_etew3BTbZwj3QoHVP66QCbCK9asoPgw@mail.gmail.com>
-	<CAMNMNTz4pANPK67m0mLhYS=-GQpvRQ7DWCsQMjORvoM+7NPXrw@mail.gmail.com>
-	<CABBk=J8b_UU7YhJUMwWhc8wjkv0a+dD3GAWySajJF1MwzJp_Sw@mail.gmail.com>
-	<CAMNMNTxqyutv2r5d_AXgMiNRr15qCipsirajqB8xLf=MuDY2Rg@mail.gmail.com>
-	<CAMNMNTwvZbbpX1H0UZiRvFb4YY0h9VXvuJryPBE9tqE6O1rbvQ@mail.gmail.com>
-	<CABBk=J-RAb5dXZLU2F4heFu1VyoSnn9hxJ40_6UY8wXOOMBAdA@mail.gmail.com>
-	<CAF6-1L71rADd59Pw4TRWNPJHCdwUyOTD2aN1k7+ax1RYy0g=+Q@mail.gmail.com>
+From: "J. Bruce Fields" <bfields@fieldses.org>
+Subject: Re: [PATCH] ceph: trivial comment fix
+Date: Wed, 22 Jan 2014 13:23:39 -0500
+Message-ID: <20140122182339.GD13704@fieldses.org>
+References: <20140116224253.GB20521@fieldses.org>
+ <alpine.DEB.2.00.1401161603250.16743@cobra.newdream.net>
+ <20140117020119.GC20521@fieldses.org>
+ <alpine.DEB.2.00.1401172026020.19111@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAF6-1L71rADd59Pw4TRWNPJHCdwUyOTD2aN1k7+ax1RYy0g=+Q@mail.gmail.com>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Sylvain Munaut <s.munaut-IEbV4ISQ1OTUSxYbhEqsfVaTQe2KTcn/@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from fieldses.org ([174.143.236.118]:38274 "EHLO fieldses.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752311AbaAVSXq (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 22 Jan 2014 13:23:46 -0500
+Content-Disposition: inline
+In-Reply-To: <alpine.DEB.2.00.1401172026020.19111@cobra.newdream.net>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Wed, Jan 22, 2014 at 2:33 AM, Sylvain Munaut
-<s.munaut-IEbV4ISQ1OTUSxYbhEqsfVaTQe2KTcn/@public.gmane.org> wrote:
-> Hi,
->
-> On Sat, Dec 7, 2013 at 6:34 PM, Yehuda Sadeh <yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org> wrote:
->> Sounds like disabling the cache triggers some bug. I'll open a relevant ticket.
->
-> Any news on this ?
->
-> I have the same issue, but the cache only masks the problem. If you
-> restart radosgw, you'll get it again (once for each bucket).
->
+On Fri, Jan 17, 2014 at 08:33:48PM -0800, Sage Weil wrote:
+> On Thu, 16 Jan 2014, J. Bruce Fields wrote:
+> > On Thu, Jan 16, 2014 at 04:03:38PM -0800, Sage Weil wrote:
+> > > On Thu, 16 Jan 2014, J. Bruce Fields wrote:
+> > > > From: "J. Bruce Fields" <bfields@redhat.com>
+> > > > 
+> > > > "disconnected" is too easily confused with "DCACHE_DISCONNECTED".  I
+> > > > think "unhashed" is the more precise term here.
+> > > 
+> > > Good point.  Applied, thanks!
+> > 
+> > Thanks!  While I'm looking, there's another d_find_alias() caller in
+> > build_inode_path.  What's that?  (Do the mds protocol messages actually
+> > use full paths?)  And will this break if you get a DCACHE_DISCONNECTED
+> > or an unhashed alias?
+> 
+> They build a path relative to the first non-snapped parent, which in most 
+> cases is either no path at all (just an ino) or a single path segment.  
+> The exception is if you are inside a snapshotted directory (e.g. 
+> a/b/.snap/mysnap/c/d), in which case it can be deeper.  In any case, I 
+> think the only problem is if you have a disconnected dentry from an old 
+> nfs filename for an inode within a snapshot.
 
-There's a related issue in the ceph tracker (#6951), and it's still up
-on my list.
+Right, so I guess there may be a problem you get a disconnected dentry
+that's not yet connected all the way back up to the main dcache, in
+which case the !IS_ROOT tests in the loops in ceph_mdsc_build_path() may
+fail too soon.
 
-Yehuda
+--b.
+
+> There may be some issues 
+> there (nfs reexport + snaps isn't currently part of the test suite), but 
+> in general I don't think there is any issue with disconnected dentries.
+> 
+> sage
+> 
+> 
+> > 
+> > --b.
+> > 
+> > > sage
+> > > 
+> > > 
+> > > > 
+> > > > Signed-off-by: J. Bruce Fields <bfields@redhat.com>
+> > > > ---
+> > > >  fs/ceph/caps.c |    6 +++---
+> > > >  1 file changed, 3 insertions(+), 3 deletions(-)
+> > > > 
+> > > > Just ran across this while wondering what d_find_alias callers do....
+> > > > 
+> > > > diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+> > > > index 3c0a4bd..697f9d7 100644
+> > > > --- a/fs/ceph/caps.c
+> > > > +++ b/fs/ceph/caps.c
+> > > > @@ -2350,11 +2350,11 @@ static void invalidate_aliases(struct inode *inode)
+> > > >  	d_prune_aliases(inode);
+> > > >  	/*
+> > > >  	 * For non-directory inode, d_find_alias() only returns
+> > > > -	 * connected dentry. After calling d_invalidate(), the
+> > > > -	 * dentry become disconnected.
+> > > > +	 * hashed dentry. After calling d_invalidate(), the
+> > > > +	 * dentry becomes unhashed.
+> > > >  	 *
+> > > >  	 * For directory inode, d_find_alias() can return
+> > > > -	 * disconnected dentry. But directory inode should have
+> > > > +	 * unhashed dentry. But directory inode should have
+> > > >  	 * one alias at most.
+> > > >  	 */
+> > > >  	while ((dn = d_find_alias(inode))) {
+> > > > -- 
+> > > > 1.7.9.5
+> > > > 
+> > > > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > 
+> > 
