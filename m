@@ -1,51 +1,44 @@
-From: Haomai Wang <haomai@unitedstack.com>
-Subject: [RFC]About GenericObjectMap in KeyValueStore
-Date: Wed, 22 Jan 2014 10:39:53 +0800
-Message-ID: <DBFF7C56-99B9-4648-BE3C-09EE7D7A1FDC@unitedstack.com>
-Mime-Version: 1.0 (Mac OS X Mail 7.1 \(1827\))
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f44.google.com ([209.85.160.44]:61126 "EHLO
-	mail-pb0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754619AbaAVCkk convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 21 Jan 2014 21:40:40 -0500
-Received: by mail-pb0-f44.google.com with SMTP id rq2so9194831pbb.17
-        for <ceph-devel@vger.kernel.org>; Tue, 21 Jan 2014 18:40:39 -0800 (PST)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+From: Sylvain Munaut <s.munaut-IEbV4ISQ1OTUSxYbhEqsfVaTQe2KTcn/@public.gmane.org>
+Subject: Re: recreate bucket error
+Date: Wed, 22 Jan 2014 11:33:32 +0100
+Message-ID: <CAF6-1L71rADd59Pw4TRWNPJHCdwUyOTD2aN1k7+ax1RYy0g=+Q@mail.gmail.com>
+References: <CAMNMNTzt_yPoqOhgKpi9vioAXygzD_oKzhHxsh-WA6NCB7mOcg@mail.gmail.com>
+	<CABBk=J95C7OrwTAPN_EJ8dHmTOiSFExhrAv2n5FJ6RyACuMETA@mail.gmail.com>
+	<CAMNMNTzd7LEht6y-5vT6sEvJeG3yErQGNGbmGM3x+hYOuTQs0g@mail.gmail.com>
+	<CAC-hyiG9hznbysGs84_etew3BTbZwj3QoHVP66QCbCK9asoPgw@mail.gmail.com>
+	<CAMNMNTz4pANPK67m0mLhYS=-GQpvRQ7DWCsQMjORvoM+7NPXrw@mail.gmail.com>
+	<CABBk=J8b_UU7YhJUMwWhc8wjkv0a+dD3GAWySajJF1MwzJp_Sw@mail.gmail.com>
+	<CAMNMNTxqyutv2r5d_AXgMiNRr15qCipsirajqB8xLf=MuDY2Rg@mail.gmail.com>
+	<CAMNMNTwvZbbpX1H0UZiRvFb4YY0h9VXvuJryPBE9tqE6O1rbvQ@mail.gmail.com>
+	<CABBk=J-RAb5dXZLU2F4heFu1VyoSnn9hxJ40_6UY8wXOOMBAdA@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CABBk=J-RAb5dXZLU2F4heFu1VyoSnn9hxJ40_6UY8wXOOMBAdA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: Yehuda Sadeh <yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
 Hi,
 
-KeyValueStore is a implementation of ObjectStore which use KeyValueDB as main
-data access interface. It discard FileJournal and reply to the backend of
-KeyValueDB to get the atomic of transaction.
+On Sat, Dec 7, 2013 at 6:34 PM, Yehuda Sadeh <yehuda-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org> wrote:
+> Sounds like disabling the cache triggers some bug. I'll open a relevant ticket.
 
-KeyValueStore make a object composed of multi key/value pair in the side of
-KeyValueDB. Much like DBObjectMap, each object has a header to manage the
-metadata such as size, bitmap.
+Any news on this ?
 
-As I mentioned in previous mail, DBObjectMap has some defect in KeyValueStore.
-GenericObjectMap is aimed to provide more generic KeyValueDB wrapper. The main
-differences between GenericObjectMap and DBObjectMap contains:
-1. add "coll_t" field to the key of header
-2. expose Header to successor and all write operations are accessed via header
-3. expose key prefix to caller
+I have the same issue, but the cache only masks the problem. If you
+restart radosgw, you'll get it again (once for each bucket).
 
-I think point 2 is the primary change may confuse. KeyValueStore use
-GenericObjectMap to implement ObjectStore interfaces. it will combine all
-operations in the same transaction and apply in to the time. Like
-OSDMap::Incremental, here we need to make the former operation visible to the
-following operations in the same transaction. The header and data
-created/modified should be know by the following operations. So
-GenericObjectMap will expose "header" to caller among write operations.
+Cheers,
 
-StripObjectMap is the successor of GenericObjectMap and used by KeyValueStore
-directly. It encapsulate the interface of GenericObjectMap and make more
-suitable for KeyValueStore.
-
-Best regards,
-Haomai Wang, UnitedStack Inc.
-
+    Sylvain
