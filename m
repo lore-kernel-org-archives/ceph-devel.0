@@ -1,102 +1,97 @@
-From: "J. Bruce Fields" <bfields@fieldses.org>
-Subject: Re: [PATCH] ceph: trivial comment fix
-Date: Wed, 22 Jan 2014 13:23:39 -0500
-Message-ID: <20140122182339.GD13704@fieldses.org>
-References: <20140116224253.GB20521@fieldses.org>
- <alpine.DEB.2.00.1401161603250.16743@cobra.newdream.net>
- <20140117020119.GC20521@fieldses.org>
- <alpine.DEB.2.00.1401172026020.19111@cobra.newdream.net>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: rados io hints
+Date: Wed, 22 Jan 2014 11:11:30 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1401221058450.18304@cobra.newdream.net>
+References: <alpine.DEB.2.00.1401171022030.6273@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from fieldses.org ([174.143.236.118]:38274 "EHLO fieldses.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752311AbaAVSXq (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 22 Jan 2014 13:23:46 -0500
-Content-Disposition: inline
-In-Reply-To: <alpine.DEB.2.00.1401172026020.19111@cobra.newdream.net>
+Received: from cobra.newdream.net ([66.33.216.30]:32807 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752720AbaAVTLa (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 22 Jan 2014 14:11:30 -0500
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 5BDFC81336
+	for <ceph-devel@vger.kernel.org>; Wed, 22 Jan 2014 11:11:30 -0800 (PST)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 30F9481336
+	for <ceph-devel@vger.kernel.org>; Wed, 22 Jan 2014 11:11:30 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.00.1401171022030.6273@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Fri, Jan 17, 2014 at 08:33:48PM -0800, Sage Weil wrote:
-> On Thu, 16 Jan 2014, J. Bruce Fields wrote:
-> > On Thu, Jan 16, 2014 at 04:03:38PM -0800, Sage Weil wrote:
-> > > On Thu, 16 Jan 2014, J. Bruce Fields wrote:
-> > > > From: "J. Bruce Fields" <bfields@redhat.com>
-> > > > 
-> > > > "disconnected" is too easily confused with "DCACHE_DISCONNECTED".  I
-> > > > think "unhashed" is the more precise term here.
-> > > 
-> > > Good point.  Applied, thanks!
-> > 
-> > Thanks!  While I'm looking, there's another d_find_alias() caller in
-> > build_inode_path.  What's that?  (Do the mds protocol messages actually
-> > use full paths?)  And will this break if you get a DCACHE_DISCONNECTED
-> > or an unhashed alias?
+On Fri, 17 Jan 2014, Sage Weil wrote:
+> I think we need to add rados operations that provide hints to rados about 
+> what the expected object sizes, alignment, and cacheability is.  In 
+> particularly, I see two main wins:
 > 
-> They build a path relative to the first non-snapped parent, which in most 
-> cases is either no path at all (just an ino) or a single path segment.  
-> The exception is if you are inside a snapshotted directory (e.g. 
-> a/b/.snap/mysnap/c/d), in which case it can be deeper.  In any case, I 
-> think the only problem is if you have a disconnected dentry from an old 
-> nfs filename for an inode within a snapshot.
+>  - knowing that rbd images have a 4m size, librbd can pass a hint that 
+> will let the osd do the xfs allocation size ioctl on new files so that 
+> they are allocated in 1m or 4m chunks.  We've seen cases where users with 
+> rbd workloads have very high levels of fragmentation in xfs and this would 
+> mitigate that and probably have a pretty nice performance benefit.
+> 
+>  - If the rbd (or other client) cache is enabled, we can pass a hint that 
+> indicates that the OSD shouldn't keep the object pages around in cache.  
+> This would just translate into an fadvise DONTNEED or similar.
+> 
+> I think the challenge is to keep this as generic as possible from the 
+> client's perspetive, but make sure that there is enough information to 
+> translate it into a good set of low-level hints to the underlying backend 
+> (like alignment size and fadvise).  For example, intuitively the 1m 
+> allocation unit sounds about right to me, but rbd would probably 
+> communicate to rados that the objects are expected to be 4m each (or 
+> whatever the striping strategy is).  I'm thinking the "we shouldn't do an 
+> allocation unit more than 1m" logic should live in the FileStore, tunable 
+> via a config option?
 
-Right, so I guess there may be a problem you get a disconnected dentry
-that's not yet connected all the way back up to the main dcache, in
-which case the !IS_ROOT tests in the loops in ceph_mdsc_build_path() may
-fail too soon.
+Offline feedback is, "yes we should do this," so let me propose some 
+specifics.
 
---b.
+* For cache hints, let's just mirror what fadvise is doing.  That makes it 
+easy to just translate it down to the lower layers as is without being 
+clever.  Also, I think it's a reasonable complete set of hints.  We can 
+add a bitfield indicating whether it applies to data or omap or both, and 
+we can make the default both.  (Not sure we can plumb it into leveldb, but 
+maybe in the future or with another backend.)
 
-> There may be some issues 
-> there (nfs reexport + snaps isn't currently part of the test suite), but 
-> in general I don't think there is any issue with disconnected dentries.
-> 
-> sage
-> 
-> 
-> > 
-> > --b.
-> > 
-> > > sage
-> > > 
-> > > 
-> > > > 
-> > > > Signed-off-by: J. Bruce Fields <bfields@redhat.com>
-> > > > ---
-> > > >  fs/ceph/caps.c |    6 +++---
-> > > >  1 file changed, 3 insertions(+), 3 deletions(-)
-> > > > 
-> > > > Just ran across this while wondering what d_find_alias callers do....
-> > > > 
-> > > > diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-> > > > index 3c0a4bd..697f9d7 100644
-> > > > --- a/fs/ceph/caps.c
-> > > > +++ b/fs/ceph/caps.c
-> > > > @@ -2350,11 +2350,11 @@ static void invalidate_aliases(struct inode *inode)
-> > > >  	d_prune_aliases(inode);
-> > > >  	/*
-> > > >  	 * For non-directory inode, d_find_alias() only returns
-> > > > -	 * connected dentry. After calling d_invalidate(), the
-> > > > -	 * dentry become disconnected.
-> > > > +	 * hashed dentry. After calling d_invalidate(), the
-> > > > +	 * dentry becomes unhashed.
-> > > >  	 *
-> > > >  	 * For directory inode, d_find_alias() can return
-> > > > -	 * disconnected dentry. But directory inode should have
-> > > > +	 * unhashed dentry. But directory inode should have
-> > > >  	 * one alias at most.
-> > > >  	 */
-> > > >  	while ((dn = d_find_alias(inode))) {
-> > > > -- 
-> > > > 1.7.9.5
-> > > > 
-> > > > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > 
-> > 
+CEPH_OSD_OP_FADVISE
+ flags
+  normal
+  sequential
+  random
+  noreuse
+  willneed
+  dontneed
+ what
+  data
+  k/v
+
+* The flash people tell us that it would be very useful to know what the 
+expected temperature or lifetime of a block/key/object/whatever will be.  
+Maybe a 'shortlived' and 'longlived' flag added to the above?
+
+* Allocation hint: I think the biggest immediate win we can get is poking 
+XFS's allocation unit to ~1M or similar for rbd images to avoid excessive 
+fragmentation.  How about:
+
+CEPH_OSD_OP_ALLOCHINT
+ expected_size         -- expected size of the object
+ expected_write_size   -- what kinds of writes we expect to see from the client
+
+This is harder because these don't translate directly into what we want 
+(XFS to alloc in larger units), but I don't think it's a good idea to 
+expose that level of detail to, say, librbd.  Instead, librbd should say 
+"the objects will max out at 4MB" and "my writes are usually this big".  
+Maybe we could add in an "expected sparseness", or 
+"expected_size_probability" so that we can indicate whether we expect 
+things to be less than 4MB or not?  Then for cephfs, for example, we would 
+say the object will be 4MB but we *wouldn't* assume that they are all 
+going to be that big (because there are many small files).
+
+Thoughts?
+
+sage
+
+
