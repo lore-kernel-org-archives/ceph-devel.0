@@ -1,91 +1,40 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: Flapping osd / continuously reported as failed
-Date: Fri, 24 Jan 2014 07:36:02 -0600
-Message-ID: <52E26C42.6090806@inktank.com>
-References: <0D057B737C42FC4AB3F22773A5C9425F259DBDEDD0@MXMBON06.grupa.onet> <CAPYLRzjGDep1ny6K-Ctz_7VG4THV6nAx9odOdjr=WNNesV4cVA@mail.gmail.com> <0D057B737C42FC4AB3F22773A5C9425F259DBDEDD1@MXMBON06.grupa.onet> <CAPYLRzhVtMCY+-d-y5F5M5hMVDwRh343+bB7An4Xcw4DT3n82w@mail.gmail.com> <0D057B737C42FC4AB3F22773A5C9425F259DBDF026@MXMBON06.grupa.onet> <ADBDB4FFB0814748AF32D0A1EE6E10AF228296D145@MXMBON06.grupa.onet> <CAPYLRzghUwEvu_f0aV2Q37JqnyCJ=46cTWiteTwN4=Tmqxd3HA@mail.gmail.com> <ADBDB4FFB0814748AF32D0A1EE6E10AF228322C755@MXMBON06.grupa.onet> <CAPYLRzi8YLvg=sRq06QS3ju1gLxvCONucsOufhFjcbBPU2Av4A@mail.gmail.com> <ADBDB4FFB0814748AF32D0A1EE6E10AF228322C9F0@MXMBON06.grupa.onet> <CAPYLRzjTmLG_DY4EbmDwndSg5x6ZBznbavxOoU_+Wxh1q8OcYg@mail.gmail.com> <loom.20140124T132806-603@post.gmane.org>
+From: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
+Subject: Re: creation of the puppet-ceph repository
+Date: Fri, 24 Jan 2014 14:57:36 +0100
+Message-ID: <CAJH6TXjCRiomcpt=QoSrdCsn8KSKUwW4hf9MHQtfk5yv7n_CUw@mail.gmail.com>
+References: <52AC97E2.8080907@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f171.google.com ([209.85.223.171]:63744 "EHLO
-	mail-ie0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752209AbaAXNgD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 24 Jan 2014 08:36:03 -0500
-Received: by mail-ie0-f171.google.com with SMTP id as1so2797876iec.30
-        for <ceph-devel@vger.kernel.org>; Fri, 24 Jan 2014 05:36:02 -0800 (PST)
-In-Reply-To: <loom.20140124T132806-603@post.gmane.org>
+Received: from mail-we0-f169.google.com ([74.125.82.169]:49103 "EHLO
+	mail-we0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752359AbaAXN5i (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 24 Jan 2014 08:57:38 -0500
+Received: by mail-we0-f169.google.com with SMTP id u57so2725238wes.0
+        for <ceph-devel@vger.kernel.org>; Fri, 24 Jan 2014 05:57:37 -0800 (PST)
+In-Reply-To: <52AC97E2.8080907@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Maciej Bonin <maciej.bonin@m247.com>
-Cc: ceph-devel@vger.kernel.org
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On 01/24/2014 06:29 AM, Maciej Bonin wrote:
-> Gregory Farnum <greg@...> writes:
+2013/12/14 Loic Dachary <loic@dachary.org>:
+> Hi,
 >
->>
->> On Mon, Aug 19, 2013 at 3:09 PM, Mostowiec Dominik
->> <Dominik.Mostowiec@...> wrote:
->>> Hi,
->>>> Yes, it definitely can as scrubbing takes locks on the PG, which will
-> prevent reads or writes while the
->> message is being processed (which will involve the rgw index being
-> scanned).
->>> It is possible to tune scrubbing config for eliminate slow requests and
-> marking osd down when large rgw
->> bucket index is scrubbing?
->>
->> Unfortunately not, or we would have mentioned it before. :/ There are
->> some proposals for sharding bucket indexes that would ameliorate this
->> problem, and on Cuttlefish or Dumpling the OSD won't get marked down,
->> but it will still block incoming requests on that object (ie, requests
->> to access the bucket) while the scrubbing is in place.
->> That said, that improvement might be sufficient since you haven't
->> actually shown us how long the object scrub takes.
->> -Greg
->> Software Engineer #42  <at>  http://inktank.com | http://ceph.com
->>
+> Could someone with sufficient permission please create the puppet-ceph repository (empty, no README or .gitignore) at http://github.com/ceph/ ?
 >
->
-> Hello Guys,
->
-> I just wanted to share that we've had a similar problem and we had solved it
-> by borrowing sensible kernel option defaults from a radosgw patch iirc.
-> net.ipv4.ip_local_port_range = 1024 65535
-> net.core.netdev_max_backlog = 30000
-> net.core.somaxconn = 4096
-> net.ipv4.tcp_max_syn_backlog = 252144
-> net.ipv4.tcp_max_tw_buckets = 360000
-> net.ipv4.tcp_fin_timeout = 3
-> net.ipv4.tcp_max_orphans = 262144
-> net.ipv4.tcp_synack_retries = 2
-> net.ipv4.tcp_syn_retries = 2
+> A few weeks ago it was decided to host the development of the module on stackforge ( https://github.com/stackforge/puppet-ceph ) and also to establish a mirror under the ceph github namespace.
 
-FWIW, these may not strictly help with the situation you described, but 
-at least on our test cluster helped improve RGW performance in general 
-on 10GbE+:
+Any usage guide for these puppet recipes?
+I would like to follow this:
+https://github.com/ceph/puppet-ceph/blob/master/USECASES.md
+"I want to operate a production cluster"
 
-echo 33554432 | sudo tee /proc/sys/net/core/rmem_default
-echo 33554432 | sudo tee /proc/sys/net/core/wmem_default
-echo 33554432 | sudo tee /proc/sys/net/core/rmem_max
-echo 33554432 | sudo tee /proc/sys/net/core/wmem_max
-echo "10240 87380 33554432" | sudo tee /proc/sys/net/ipv4/tcp_rmem
-echo "10240 87380 33554432" | sudo tee /proc/sys/net/ipv4/tcp_wmem
-echo 250000 | sudo tee /proc/sys/net/core/netdev_max_backlog
-echo 524288 | sudo tee /proc/sys/net/nf_conntrack_max
-echo 1 | sudo tee /proc/sys/net/ipv4/tcp_tw_recycle
-echo 1 | sudo tee /proc/sys/net/ipv4/tcp_tw_reuse
+But it's not clear how to add OSD nodes and how to specify journal
+disks and size.
+For example, in my environment I have 12 spinning disks to be used
+(with discovery, if possible) as OSD storage, 1 SSD to be used as
+operating system (that obviously must not be formatted) and 2 OSD to
+be used as journal with 1 partitions (15GB each) for each OSD.
 
->
->
-> Regards,
-> Maciej Bonin
-> Systems Engineer
-> m247.com
-> ISO 27001 Data Protection Classification: A - Public
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-
+Should I configure somethinghin the recipe ?
