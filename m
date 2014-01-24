@@ -1,53 +1,51 @@
-From: Peter Luk <clzu@org954.onmicrosoft.com>
-Subject: New Contact.
-Date: Thu, 23 Jan 2014 16:25:07 +0000
-Message-ID: <82257f40-0e8a-41da-8dd5-c7a5578e12e8@AM3PR06MB388.eurprd06.prod.outlook.com>
-Reply-To: <petluk@qq.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Proxmox and ceph integration
+Date: Fri, 24 Jan 2014 09:33:00 +0100
+Message-ID: <52E2253C.1060604@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="wOQEHvQcTakKTtAD1PV1dMNgdIKvcMV0L"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from emea01-db3-ndr.ptr.protection.outlook.com ([157.56.120.105]:62910
-	"EHLO emea01-db3-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1750778AbaAWPZc convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Jan 2014 10:25:32 -0500
-Content-Description: Mail message body
+Received: from smtp.dmail.dachary.org ([91.121.254.229]:51750 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750803AbaAXIdC (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 24 Jan 2014 03:33:02 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Recipients <clzu@org954.onmicrosoft.com>
+To: Dietmar Maurer <dietmar@proxmox.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Dear friend,
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--wOQEHvQcTakKTtAD1PV1dMNgdIKvcMV0L
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-It is understandable that you might be a little bit apprehensive becaus=
-e you do not know me but I have a lucrative business proposal of mutual=
- interest to share with you. I got your reference in my search for some=
-one who suits my proposed business relationship.
+Hi,
 
-I am the foreign operations director of the Bank of Korea. My name is P=
-eter Luk. I have an obscured business suggestion for you. I will need y=
-ou to assist me in executing a business project from Korea to your coun=
-try. It involves the transfer of large sums of money worth 11.5M U.S.D =
-(Eleven Million five hundred thousand United States Dollars). Everythin=
-g concerning this transaction shall be legally done without hitch. Plea=
-se endeavour to observe utmost discretion in all matters concerning thi=
-s issue.
+I'm told today that the Ceph proxmox integration has recently been improv=
+ed. I'm curious to take a look, would you be so kind as to point me to th=
+e URL where I could read about it ?
 
-Once the funds have been successfully transferred into your account, we=
- shall share in the ratio to be agreed by both of us.
+Cheers
 
-I will prefer you reach me on my private email address:( peterluk1@w.cn=
- ) and finally after that I shall furnish you with more information=E2=80=
-=99s about this operation.
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
 
-Please if you are not interested delete this email and do not hunt me b=
-ecause I am putting my career and the life of my family at stake with t=
-his venture.
 
-Kind Regards,
-Mr. Peter Luk
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+--wOQEHvQcTakKTtAD1PV1dMNgdIKvcMV0L
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.20 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlLiJTwACgkQ8dLMyEl6F207egCgpgDmzeMp+wRlYf/3Ck1TXoa7
+P8AAnRTk5fpz1dGa6sl+1Fluj2uKzFtm
+=0L7i
+-----END PGP SIGNATURE-----
+
+--wOQEHvQcTakKTtAD1PV1dMNgdIKvcMV0L--
