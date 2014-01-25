@@ -1,226 +1,67 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH] libceph: add ceph_kv{malloc,free}() and switch to them
-Date: Fri, 24 Jan 2014 15:09:03 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1401241508330.2149@cobra.newdream.net>
-References: <1389721472-7739-1-git-send-email-ilya.dryomov@inktank.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: creation of the puppet-ceph repository
+Date: Sat, 25 Jan 2014 17:45:20 +0100
+Message-ID: <52E3EA20.4010403@dachary.org>
+References: <52AC97E2.8080907@dachary.org>	<CAJH6TXjCRiomcpt=QoSrdCsn8KSKUwW4hf9MHQtfk5yv7n_CUw@mail.gmail.com>	<52E29EC0.4030405@dachary.org> <CAJH6TXiHaqn7M7UF2EV_Py+D_pbQrOQQ78KrSLENGWuev6jx2Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="Ub0bs7871ctBJ5eaoHUtvhhcAfcpluibE"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:33127 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751281AbaAXXJD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 24 Jan 2014 18:09:03 -0500
-In-Reply-To: <1389721472-7739-1-git-send-email-ilya.dryomov@inktank.com>
+Received: from smtp.dmail.dachary.org ([91.121.254.229]:52765 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751914AbaAYQpW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 25 Jan 2014 11:45:22 -0500
+In-Reply-To: <CAJH6TXiHaqn7M7UF2EV_Py+D_pbQrOQQ78KrSLENGWuev6jx2Q@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <ilya.dryomov@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Nice cleanup (I didn't know about is_vmalloc_addr())!
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--Ub0bs7871ctBJ5eaoHUtvhhcAfcpluibE
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-Reviewed-by: Sage Weil <sage@inktank.com>
+Hi,
 
-On Tue, 14 Jan 2014, Ilya Dryomov wrote:
+At the moment I would recommend using ceph-deploy instead of puppet. Alth=
+ough there are puppet modules that could be used, they require significan=
+tly more work than using ceph-deploy, even for someone who already has a =
+running puppet master. The new puppet ceph module is expected to be simpl=
+er to use than ceph-deploy and address more use cases, but it is not read=
+y yet.
 
-> Encapsulate kmalloc vs vmalloc memory allocation and freeing logic into
-> two helpers, ceph_kvmalloc() and ceph_kvfree(), and switch to them.
-> 
-> ceph_kvmalloc() kmalloc()'s a maximum of 8 pages, anything bigger is
-> vmalloc()'ed with __GFP_HIGHMEM set.  This changes the existing
-> behaviour:
-> 
-> - for buffers (ceph_buffer_new()), from trying to kmalloc() everything
->   and using vmalloc() just as a fallback
-> 
-> - for messages (ceph_msg_new()), from going to vmalloc() for anything
->   bigger than a page
-> 
-> - for messages (ceph_msg_new()), from disallowing vmalloc() to use high
->   memory
-> 
-> Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
-> ---
->  include/linux/ceph/buffer.h    |    1 -
->  include/linux/ceph/libceph.h   |   11 +++++++----
->  include/linux/ceph/messenger.h |    1 -
->  net/ceph/buffer.c              |   22 ++++++----------------
->  net/ceph/ceph_common.c         |   20 ++++++++++++++++++++
->  net/ceph/messenger.c           |   13 ++-----------
->  6 files changed, 35 insertions(+), 33 deletions(-)
-> 
-> diff --git a/include/linux/ceph/buffer.h b/include/linux/ceph/buffer.h
-> index 58d19014068f..07ad423cc37f 100644
-> --- a/include/linux/ceph/buffer.h
-> +++ b/include/linux/ceph/buffer.h
-> @@ -17,7 +17,6 @@ struct ceph_buffer {
->  	struct kref kref;
->  	struct kvec vec;
->  	size_t alloc_len;
-> -	bool is_vmalloc;
->  };
->  
->  extern struct ceph_buffer *ceph_buffer_new(size_t len, gfp_t gfp);
-> diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
-> index 7d704db60cbb..2f49aa4c4f7f 100644
-> --- a/include/linux/ceph/libceph.h
-> +++ b/include/linux/ceph/libceph.h
-> @@ -173,15 +173,18 @@ static inline int calc_pages_for(u64 off, u64 len)
->  		(off >> PAGE_CACHE_SHIFT);
->  }
->  
-> +extern struct kmem_cache *ceph_inode_cachep;
-> +extern struct kmem_cache *ceph_cap_cachep;
-> +extern struct kmem_cache *ceph_dentry_cachep;
-> +extern struct kmem_cache *ceph_file_cachep;
-> +
->  /* ceph_common.c */
->  extern bool libceph_compatible(void *data);
->  
->  extern const char *ceph_msg_type_name(int type);
->  extern int ceph_check_fsid(struct ceph_client *client, struct ceph_fsid *fsid);
-> -extern struct kmem_cache *ceph_inode_cachep;
-> -extern struct kmem_cache *ceph_cap_cachep;
-> -extern struct kmem_cache *ceph_dentry_cachep;
-> -extern struct kmem_cache *ceph_file_cachep;
-> +extern void *ceph_kvmalloc(size_t size, gfp_t flags);
-> +extern void ceph_kvfree(const void *ptr);
->  
->  extern struct ceph_options *ceph_parse_options(char *options,
->  			      const char *dev_name, const char *dev_name_end,
-> diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
-> index 861138f7c161..20ee8b63a968 100644
-> --- a/include/linux/ceph/messenger.h
-> +++ b/include/linux/ceph/messenger.h
-> @@ -154,7 +154,6 @@ struct ceph_msg {
->  	struct list_head list_head;	/* links for connection lists */
->  
->  	struct kref kref;
-> -	bool front_is_vmalloc;
->  	bool more_to_follow;
->  	bool needs_out_seq;
->  	int front_alloc_len;
-> diff --git a/net/ceph/buffer.c b/net/ceph/buffer.c
-> index bf3e6a13c215..621b5f65407f 100644
-> --- a/net/ceph/buffer.c
-> +++ b/net/ceph/buffer.c
-> @@ -6,6 +6,7 @@
->  
->  #include <linux/ceph/buffer.h>
->  #include <linux/ceph/decode.h>
-> +#include <linux/ceph/libceph.h> /* for ceph_kv{malloc,free} */
->  
->  struct ceph_buffer *ceph_buffer_new(size_t len, gfp_t gfp)
->  {
-> @@ -15,16 +16,10 @@ struct ceph_buffer *ceph_buffer_new(size_t len, gfp_t gfp)
->  	if (!b)
->  		return NULL;
->  
-> -	b->vec.iov_base = kmalloc(len, gfp | __GFP_NOWARN);
-> -	if (b->vec.iov_base) {
-> -		b->is_vmalloc = false;
-> -	} else {
-> -		b->vec.iov_base = __vmalloc(len, gfp | __GFP_HIGHMEM, PAGE_KERNEL);
-> -		if (!b->vec.iov_base) {
-> -			kfree(b);
-> -			return NULL;
-> -		}
-> -		b->is_vmalloc = true;
-> +	b->vec.iov_base = ceph_kvmalloc(len, gfp);
-> +	if (!b->vec.iov_base) {
-> +		kfree(b);
-> +		return NULL;
->  	}
->  
->  	kref_init(&b->kref);
-> @@ -40,12 +35,7 @@ void ceph_buffer_release(struct kref *kref)
->  	struct ceph_buffer *b = container_of(kref, struct ceph_buffer, kref);
->  
->  	dout("buffer_release %p\n", b);
-> -	if (b->vec.iov_base) {
-> -		if (b->is_vmalloc)
-> -			vfree(b->vec.iov_base);
-> -		else
-> -			kfree(b->vec.iov_base);
-> -	}
-> +	ceph_kvfree(b->vec.iov_base);
->  	kfree(b);
->  }
->  EXPORT_SYMBOL(ceph_buffer_release);
-> diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
-> index 43d8177a52e1..67d7721d237e 100644
-> --- a/net/ceph/ceph_common.c
-> +++ b/net/ceph/ceph_common.c
-> @@ -15,6 +15,7 @@
->  #include <linux/slab.h>
->  #include <linux/statfs.h>
->  #include <linux/string.h>
-> +#include <linux/vmalloc.h>
->  #include <linux/nsproxy.h>
->  #include <net/net_namespace.h>
->  
-> @@ -170,6 +171,25 @@ int ceph_compare_options(struct ceph_options *new_opt,
->  }
->  EXPORT_SYMBOL(ceph_compare_options);
->  
-> +void *ceph_kvmalloc(size_t size, gfp_t flags)
-> +{
-> +	if (size <= (PAGE_SIZE << PAGE_ALLOC_COSTLY_ORDER)) {
-> +		void *ptr = kmalloc(size, flags | __GFP_NOWARN);
-> +		if (ptr)
-> +			return ptr;
-> +	}
-> +
-> +	return __vmalloc(size, flags | __GFP_HIGHMEM, PAGE_KERNEL);
-> +}
-> +
-> +void ceph_kvfree(const void *ptr)
-> +{
-> +	if (is_vmalloc_addr(ptr))
-> +		vfree(ptr);
-> +	else
-> +		kfree(ptr);
-> +}
-> +
->  
->  static int parse_fsid(const char *str, struct ceph_fsid *fsid)
->  {
-> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-> index 252ad4e01cf8..2ed1304d22a7 100644
-> --- a/net/ceph/messenger.c
-> +++ b/net/ceph/messenger.c
-> @@ -3131,13 +3131,7 @@ struct ceph_msg *ceph_msg_new(int type, int front_len, gfp_t flags,
->  
->  	/* front */
->  	if (front_len) {
-> -		if (front_len > PAGE_CACHE_SIZE) {
-> -			m->front.iov_base = __vmalloc(front_len, flags,
-> -						      PAGE_KERNEL);
-> -			m->front_is_vmalloc = true;
-> -		} else {
-> -			m->front.iov_base = kmalloc(front_len, flags);
-> -		}
-> +		m->front.iov_base = ceph_kvmalloc(front_len, flags);
->  		if (m->front.iov_base == NULL) {
->  			dout("ceph_msg_new can't allocate %d bytes\n",
->  			     front_len);
-> @@ -3259,10 +3253,7 @@ static int ceph_con_in_msg_alloc(struct ceph_connection *con, int *skip)
->  void ceph_msg_kfree(struct ceph_msg *m)
->  {
->  	dout("msg_kfree %p\n", m);
-> -	if (m->front_is_vmalloc)
-> -		vfree(m->front.iov_base);
-> -	else
-> -		kfree(m->front.iov_base);
-> +	ceph_kvfree(m->front.iov_base);
->  	kmem_cache_free(ceph_msg_cache, m);
->  }
->  
-> -- 
-> 1.7.10.4
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+Cheers
+
+On 24/01/2014 18:38, Gandalf Corvotempesta wrote:
+> 2014/1/24 Loic Dachary <loic@dachary.org>:
+>> Hi,
+>>
+>> At the moment the module can only be used to deploy mons. It's making =
+slow progress but a number of patches went in Ceph and should significant=
+ly simplify writing the puppet module, starting in Firefly.
+>=20
+>=20
+> Based on docs, OSD seems to be deployable from puppet.
+>=20
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+
+
+--Ub0bs7871ctBJ5eaoHUtvhhcAfcpluibE
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.20 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlLj6iAACgkQ8dLMyEl6F22sbgCgsxZ7ml7o5sMcxTFFzXKB5U4g
+6ogAn29crHgl2N0tlu7zjvX5ry/UAE5Q
+=rE99
+-----END PGP SIGNATURE-----
+
+--Ub0bs7871ctBJ5eaoHUtvhhcAfcpluibE--
