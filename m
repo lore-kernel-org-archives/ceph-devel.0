@@ -1,17 +1,17 @@
 From: Abdul Nasser <abdulnas500@justin.ddo.jp>
 Subject: Kind Regards
-Date: Sun, 26 Jan 2014 21:52:12 +0000
-Message-ID: <SECEXCHANGEAyxJMXeh00003ff7@mail.standardelectronics.com>
+Date: Sun, 26 Jan 2014 22:31:06 +0000
+Message-ID: <SECEXCHANGEMZZhKo790000627f@mail.standardelectronics.com>
 Reply-To: s.abdulnasser@yahoo.com.hk
 Mime-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.standardelectronics.com ([74.92.67.124]:55052 "EHLO
+Received: from mail.standardelectronics.com ([74.92.67.124]:55453 "EHLO
 	mail.standardelectronics.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753515AbaAZXjL convert rfc822-to-8bit
+	by vger.kernel.org with ESMTP id S1753366AbaAZXi5 convert rfc822-to-8bit
 	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 26 Jan 2014 18:39:11 -0500
+	Sun, 26 Jan 2014 18:38:57 -0500
 Content-Description: Mail message body
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
