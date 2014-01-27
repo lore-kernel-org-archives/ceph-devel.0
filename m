@@ -1,298 +1,161 @@
-From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: Re: [PATCH 10/11] libceph: follow redirect replies from osds
-Date: Mon, 27 Jan 2014 23:42:51 +0200
-Message-ID: <CALFYKtC+uDpz1_wnq26rmak7-5Vj+62K_bw1kLJj3VSxPnkatw@mail.gmail.com>
-References: <1390838333-32266-1-git-send-email-ilya.dryomov@inktank.com>
-	<1390838333-32266-11-git-send-email-ilya.dryomov@inktank.com>
-	<alpine.DEB.2.00.1401271008350.2149@cobra.newdream.net>
+From: Sage Weil <sage@inktank.com>
+Subject: patch queue for linus
+Date: Mon, 27 Jan 2014 15:15:25 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1401271512450.1084@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f52.google.com ([74.125.82.52]:36607 "EHLO
-	mail-wg0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751121AbaA0Vmx (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Jan 2014 16:42:53 -0500
-Received: by mail-wg0-f52.google.com with SMTP id b13so6370716wgh.7
-        for <ceph-devel@vger.kernel.org>; Mon, 27 Jan 2014 13:42:52 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1401271008350.2149@cobra.newdream.net>
+Received: from cobra.newdream.net ([66.33.216.30]:36826 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754553AbaA0XPZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Jan 2014 18:15:25 -0500
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 36AD88002D
+	for <ceph-devel@vger.kernel.org>; Mon, 27 Jan 2014 15:15:25 -0800 (PST)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 127198002D
+	for <ceph-devel@vger.kernel.org>; Mon, 27 Jan 2014 15:15:25 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Josh Durgin <josh.durgin@inktank.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Mon, Jan 27, 2014 at 8:32 PM, Sage Weil <sage@inktank.com> wrote:
-> On Mon, 27 Jan 2014, Ilya Dryomov wrote:
->> Follow redirect replies from osds, for details see ceph.git commit
->> fbbe3ad1220799b7bb00ea30fce581c5eadaf034.
->>
->> v1 (current) version of redirect reply consists of oloc and oid, which
->> expands to pool, key, nspace, hash and oid.  However, server-side code
->> that would populate anything other than pool doesn't exist yet, and
->> hence this commit adds support for pool redirects only.  To make sure
->> that future server-side updates don't break us, we decode all fields
->> and, if any of key, nspace, hash or oid have a non-default value, error
->> out with "corrupt osd_op_reply ..." message.
->>
->> Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
->> ---
->>  include/linux/ceph/osd_client.h |    6 ++
->>  net/ceph/osd_client.c           |  167 ++++++++++++++++++++++++++++++++++++---
->>  2 files changed, 164 insertions(+), 9 deletions(-)
->>
->> diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
->> index 3170ca6d98b2..fd47e872ebcc 100644
->> --- a/include/linux/ceph/osd_client.h
->> +++ b/include/linux/ceph/osd_client.h
->> @@ -155,6 +155,8 @@ struct ceph_osd_request {
->>
->>       struct ceph_object_locator r_base_oloc;
->>       struct ceph_object_id r_base_oid;
->> +     struct ceph_object_locator r_target_oloc;
->> +     struct ceph_object_id r_target_oid;
->>
->>       u64               r_snapid;
->>       unsigned long     r_stamp;            /* send OR check time */
->> @@ -162,6 +164,10 @@ struct ceph_osd_request {
->>       struct ceph_snap_context *r_snapc;    /* snap context for writes */
->>  };
->>
->> +struct ceph_request_redirect {
->> +     struct ceph_object_locator oloc;
->> +};
->> +
->>  struct ceph_osd_event {
->>       u64 cookie;
->>       int one_shot;
->> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
->> index 3997a87c4f51..010ff3bd58ad 100644
->> --- a/net/ceph/osd_client.c
->> +++ b/net/ceph/osd_client.c
->> @@ -369,6 +369,7 @@ struct ceph_osd_request *ceph_osdc_alloc_request(struct ceph_osd_client *osdc,
->>       INIT_LIST_HEAD(&req->r_osd_item);
->>
->>       req->r_base_oloc.pool = -1;
->> +     req->r_target_oloc.pool = -1;
->>
->>       /* create reply message */
->>       if (use_mempool)
->> @@ -1256,23 +1257,36 @@ static int __calc_request_pg(struct ceph_osdmap *osdmap,
->>                            struct ceph_osd_request *req,
->>                            struct ceph_pg *pg_out)
->>  {
->> -     if ((req->r_flags & CEPH_OSD_FLAG_IGNORE_OVERLAY) == 0) {
->> +     bool need_check_tiering;
->> +
->> +     need_check_tiering = false;
->> +     if (req->r_target_oloc.pool == -1) {
->> +             req->r_target_oloc = req->r_base_oloc; /* struct */
->> +             need_check_tiering = true;
->> +     }
->> +     if (req->r_target_oid.name_len == 0) {
->> +             ceph_oid_copy(&req->r_target_oid, &req->r_base_oid);
->> +             need_check_tiering = true;
->> +     }
->> +
->> +     if (need_check_tiering &&
->> +         (req->r_flags & CEPH_OSD_FLAG_IGNORE_OVERLAY) == 0) {
->>               struct ceph_pg_pool_info *pi;
->>
->> -             pi = ceph_pg_pool_by_id(osdmap, req->r_base_oloc.pool);
->> +             pi = ceph_pg_pool_by_id(osdmap, req->r_target_oloc.pool);
->>               if (pi) {
->>                       if ((req->r_flags & CEPH_OSD_FLAG_READ) &&
->>                           pi->read_tier >= 0)
->> -                             req->r_base_oloc.pool = pi->read_tier;
->> +                             req->r_target_oloc.pool = pi->read_tier;
->>                       if ((req->r_flags & CEPH_OSD_FLAG_WRITE) &&
->>                           pi->write_tier >= 0)
->> -                             req->r_base_oloc.pool = pi->write_tier;
->> +                             req->r_target_oloc.pool = pi->write_tier;
->>               }
->>               /* !pi is caught in ceph_oloc_oid_to_pg() */
->>       }
->>
->> -     return ceph_oloc_oid_to_pg(osdmap, &req->r_base_oloc,
->> -                                &req->r_base_oid, pg_out);
->> +     return ceph_oloc_oid_to_pg(osdmap, &req->r_target_oloc,
->> +                                &req->r_target_oid, pg_out);
->>  }
->>
->>  /*
->> @@ -1382,7 +1396,7 @@ static void __send_request(struct ceph_osd_client *osdc,
->>       /* fill in message content that changes each time we send it */
->>       put_unaligned_le32(osdc->osdmap->epoch, req->r_request_osdmap_epoch);
->>       put_unaligned_le32(req->r_flags, req->r_request_flags);
->> -     put_unaligned_le64(req->r_base_oloc.pool, req->r_request_pool);
->> +     put_unaligned_le64(req->r_target_oloc.pool, req->r_request_pool);
->>       p = req->r_request_pgid;
->>       ceph_encode_64(&p, req->r_pgid.pool);
->>       ceph_encode_32(&p, req->r_pgid.seed);
->> @@ -1483,6 +1497,109 @@ static void handle_osds_timeout(struct work_struct *work)
->>                             round_jiffies_relative(delay));
->>  }
->>
->> +static int ceph_oloc_decode(void **p, void *end,
->> +                         struct ceph_object_locator *oloc)
->> +{
->> +     u8 struct_v, struct_cv;
->> +     u32 len;
->> +     void *struct_end;
->> +     int ret = 0;
->> +
->> +     ceph_decode_need(p, end, 1 + 1 + 4, e_inval);
->> +     struct_v = ceph_decode_8(p);
->> +     struct_cv = ceph_decode_8(p);
->> +     if (struct_v < 3) {
->> +             pr_warn("got v %d < 3 cv %d of ceph_object_locator\n",
->> +                     struct_v, struct_cv);
->> +             goto e_inval;
->> +     }
->> +     if (struct_cv > 6) {
->> +             pr_warn("got v %d cv %d > 6 of ceph_object_locator\n",
->> +                     struct_v, struct_cv);
->> +             goto e_inval;
->> +     }
->> +     len = ceph_decode_32(p);
->> +     ceph_decode_need(p, end, len, e_inval);
->> +     struct_end = *p + len;
->> +
->> +     oloc->pool = ceph_decode_64(p);
->> +     *p += 4; /* skip preferred */
->> +
->> +     len = ceph_decode_32(p);
->> +     if (len > 0) {
->> +             pr_warn("ceph_object_locator::key is set\n");
->> +             goto e_inval;
->> +     }
->> +
->> +     if (struct_v >= 5) {
->> +             len = ceph_decode_32(p);
->> +             if (len > 0) {
->> +                     pr_warn("ceph_object_locator::nspace is set\n");
->> +                     goto e_inval;
->> +             }
->> +     }
->> +
->> +     if (struct_v >= 6) {
->> +             s64 hash = ceph_decode_64(p);
->> +             if (hash != -1) {
->> +                     pr_warn("ceph_object_locator::hash is set\n");
->> +                     goto e_inval;
->> +             }
->> +     }
->> +
->> +     /* skip the rest */
->> +     *p = struct_end;
->> +out:
->> +     return ret;
->> +
->> +e_inval:
->> +     ret = -EINVAL;
->> +     goto out;
->> +}
->> +
->> +static int ceph_redirect_decode(void **p, void *end,
->> +                             struct ceph_request_redirect *redir)
->> +{
->> +     u8 struct_v, struct_cv;
->> +     u32 len;
->> +     void *struct_end;
->> +     int ret;
->> +
->> +     ceph_decode_need(p, end, 1 + 1 + 4, e_inval);
->> +     struct_v = ceph_decode_8(p);
->> +     struct_cv = ceph_decode_8(p);
->> +     if (struct_cv > 1) {
->> +             pr_warn("got v %d cv %d > 1 of ceph_request_redirect\n",
->> +                     struct_v, struct_cv);
->> +             goto e_inval;
->> +     }
->> +     len = ceph_decode_32(p);
->> +     ceph_decode_need(p, end, len, e_inval);
->> +     struct_end = *p + len;
->> +
->> +     ret = ceph_oloc_decode(p, end, &redir->oloc);
->> +     if (ret)
->> +             goto out;
->> +
->> +     len = ceph_decode_32(p);
->> +     if (len > 0) {
->> +             pr_warn("ceph_request_redirect::object_name is set\n");
->> +             goto e_inval;
->> +     }
->> +
->> +     len = ceph_decode_32(p);
->> +     *p += len; /* skip osd_instructions */
->> +
->> +     /* skip the rest */
->> +     *p = struct_end;
->> +out:
->> +     return ret;
->> +
->> +e_inval:
->> +     ret = -EINVAL;
->> +     goto out;
->> +}
->> +
->>  static void complete_request(struct ceph_osd_request *req)
->>  {
->>       complete_all(&req->r_safe_completion);  /* fsync waiter */
->> @@ -1497,6 +1614,7 @@ static void handle_reply(struct ceph_osd_client *osdc, struct ceph_msg *msg,
->>  {
->>       void *p, *end;
->>       struct ceph_osd_request *req;
->> +     struct ceph_request_redirect redir;
->>       u64 tid;
->>       int object_len;
->>       unsigned int numops;
->> @@ -1576,10 +1694,41 @@ static void handle_reply(struct ceph_osd_client *osdc, struct ceph_msg *msg,
->>       for (i = 0; i < numops; i++)
->>               req->r_reply_op_result[i] = ceph_decode_32(&p);
->>
->> -     already_completed = req->r_got_reply;
->> +     if (le16_to_cpu(msg->hdr.version) >= 6) {
->> +             p += 8 + 4; /* skip replay_version */
->> +             p += 8; /* skip user_version */
->>
->> -     if (!req->r_got_reply) {
->> +             err = ceph_redirect_decode(&p, end, &redir);
->> +             if (err)
->> +                     goto bad_put;
->> +     } else {
->> +             redir.oloc.pool = -1;
->> +     }
->>
->> +     if (redir.oloc.pool != -1) {
->> +             dout("redirect pool %lld\n", redir.oloc.pool);
->> +
->> +             __unregister_request(osdc, req);
->
-> I'm a little worried here about dropping request_mutex here... we could
-> conceivably have a racing reply from a previous send attempt that does
-> something else with this request.  IIRC Josh had a patch that made
-> get_reply more aggressively ignore those replies unless it was the most
-> recent send attempt... we might want to make sure that gets in here too?
+Here is what I am planning on sending to Linus for 3.14, probably 
+tomorrow.  This includes Ilya's latest series (which isn't in testing 
+just yet).  Please let me know if anything seems to be missing.
 
-Yes, I asked Josh about those patches (wip-con-race IIRC) and he said
-that he wanted to get at least one of them in, but it was never sent to
-the mailing list.
+Thanks!
+sage
 
-Dropping request_mutex here is necessary to satisfy lock ordering (map
-semaphore - request mutex) and can probably be avoided by taking map
-semaphore unconditionally at the beginning of handle_reply.  I chose to
-drop request_mutex because I haven't fully investigated the trade offs
-involved.
+----------------------------------------------------------------
+Alex Elder (1):
+      MAINTAINERS: update an e-mail address
 
->
-> Otherwise, this all looks good!
->
-> Reviewed-by:
->
-> sage
+Guangliang Zhao (1):
+      ceph: add acl for cephfs
 
-Great, I'll add this to the testing branch.  If we decide to do
-something about map_sem/request_mutex we get that into rc2.
+Ilya Dryomov (49):
+      rbd: rbd_device::dev_id is an int, format it as such
+      rbd: tweak "loaded" message and module description
+      rbd: refactor rbd_init() a bit
+      rbd: switch to ida for rbd id assignments
+      rbd: add 'minor' sysfs rbd device attribute
+      rbd: wire up is_visible() sysfs callback for rbd bus
+      rbd: add support for single-major device number allocation scheme
+      rbd: enable extended devt in single-major mode
+      rbd: introduce rbd_dev_header_unwatch_sync() and switch to it
+      rbd: tear down watch request if rbd_dev_device_setup() fails
+      libceph: all features fields must be u64
+      libceph: update ceph_features.h
+      crush: pass weight vector size to map function
+      crush: factor out (trivial) crush_destroy_rule()
+      crush: reduce scope of some local variables
+      crush: fix some comments
+      crush: eliminate CRUSH_MAX_SET result size limitation
+      crush: return CRUSH_ITEM_UNDEF for failed placements with indep
+      crush: use breadth-first search for indep mode
+      crush: add note about r in recursive choose
+      crush: strip firstn conditionals out of crush_choose, rename
+      crush: clarify numrep vs endpos
+      crush: pass parent r value for indep call
+      crush: new SET_CHOOSE_LEAF_TRIES command
+      crush: apply chooseleaf_tries to firstn mode too
+      crush: add SET_CHOOSE_TRIES rule step
+      crush: CHOOSE_LEAF -> CHOOSELEAF throughout
+      crush: generalize descend_once
+      crush: add set_choose_local_[fallback_]tries steps
+      crush: attempts -> tries
+      crush: fix crush_choose_firstn comment
+      crush: support new indep mode and SET_* steps (crush v2) by default
+      libceph: use CEPH_MON_PORT when the specified port is 0
+      libceph: rename ceph_msg::front_max to front_alloc_len
+      libceph: rename front to front_len in get_reply()
+      libceph: fix preallocation check in get_reply()
+      libceph: add ceph_kv{malloc,free}() and switch to them
+      libceph: dout() is missing a newline
+      libceph: start using oloc abstraction
+      libceph: move ceph_file_layout helpers to ceph_fs.h
+      libceph: rename MAX_OBJ_NAME_SIZE to CEPH_MAX_OID_NAME_LEN
+      libceph: introduce and start using oid abstraction
+      libceph: replace ceph_calc_ceph_pg() with ceph_oloc_oid_to_pg()
+      libceph: CEPH_OSD_FLAG_* enum update
+      libceph: add ceph_pg_pool_by_id()
+      libceph: follow {read,write}_tier fields on osd request submission
+      libceph: rename ceph_osd_request::r_{oloc,oid} to r_base_{oloc,oid}
+      libceph: follow redirect replies from osds
+      libceph: support CEPH_FEATURE_OSD_CACHEPOOL feature
 
-Thanks,
+J. Bruce Fields (1):
+      ceph: trivial comment fix
 
-                Ilya
+Josh Durgin (2):
+      libceph: block I/O when PAUSE or FULL osd map flags are set
+      libceph: resend all writes after the osdmap loses the full flag
+
+Li Wang (4):
+      ceph: Clean up if error occurred in finish_read()
+      ceph: Add necessary clean up if invalid reply received in handle_reply()
+      ceph fscache: Introduce a routine for uncaching single no data page from fscache
+      ceph fscache: Uncaching no data page from fscache in readpage()
+
+Libo Chen (1):
+      fs: ceph: new helper: file_inode(file)
+
+Yan, Zheng (13):
+      ceph: drop unconnected inodes
+      ceph: check caps in filemap_fault and page_mkwrite
+      ceph: handle cap export race in try_flush_caps()
+      ceph: use ceph_seq_cmp() to compare migrate_seq
+      ceph: fix cache revoke race
+      ceph: fix trim caps
+      ceph: handle -ESTALE reply
+      ceph: check inode caps in ceph_d_revalidate
+      ceph: handle session flush message
+      ceph: remove exported caps when handling cap import message
+      ceph: add open export target session helper
+      ceph: add imported caps when handling cap export message
+      libceph: support CEPH_FEATURE_EXPORT_PEER
+
+majianpeng (2):
+      ceph: Implement writev/pwritev for sync operation.
+      ceph: implement readv/preadv for sync operation
+
+ Documentation/ABI/testing/sysfs-bus-rbd |  26 ++
+ MAINTAINERS                             |   2 +-
+ drivers/block/rbd.c                     | 303 ++++++++++++++--------
+ fs/ceph/Kconfig                         |  13 +
+ fs/ceph/Makefile                        |   1 +
+ fs/ceph/acl.c                           | 332 ++++++++++++++++++++++++
+ fs/ceph/addr.c                          |  93 ++++++-
+ fs/ceph/cache.h                         |  13 +
+ fs/ceph/caps.c                          | 338 +++++++++++++++---------
+ fs/ceph/dir.c                           |  16 +-
+ fs/ceph/file.c                          | 437 ++++++++++++++++++++++----------
+ fs/ceph/inode.c                         |  33 ++-
+ fs/ceph/ioctl.c                         |   8 +-
+ fs/ceph/mds_client.c                    | 132 ++++++----
+ fs/ceph/mds_client.h                    |   2 +
+ fs/ceph/strings.c                       |   2 +
+ fs/ceph/super.c                         |   9 +-
+ fs/ceph/super.h                         |  45 +++-
+ fs/ceph/xattr.c                         |  60 ++++-
+ include/linux/ceph/buffer.h             |   1 -
+ include/linux/ceph/ceph_features.h      | 101 +++++---
+ include/linux/ceph/ceph_fs.h            |  36 ++-
+ include/linux/ceph/libceph.h            |  19 +-
+ include/linux/ceph/messenger.h          |  13 +-
+ include/linux/ceph/osd_client.h         |  19 +-
+ include/linux/ceph/osdmap.h             |  66 +++--
+ include/linux/ceph/rados.h              |   4 +
+ include/linux/crush/crush.h             |  20 +-
+ include/linux/crush/mapper.h            |   3 +-
+ net/ceph/buffer.c                       |  22 +-
+ net/ceph/ceph_common.c                  |  24 +-
+ net/ceph/crush/crush.c                  |   7 +-
+ net/ceph/crush/mapper.c                 | 336 +++++++++++++++++++-----
+ net/ceph/debugfs.c                      |   3 +-
+ net/ceph/messenger.c                    |  32 +--
+ net/ceph/mon_client.c                   |   8 +-
+ net/ceph/osd_client.c                   | 283 +++++++++++++++++++--
+ net/ceph/osdmap.c                       |  78 ++++--
+ 38 files changed, 2261 insertions(+), 679 deletions(-)
+ create mode 100644 fs/ceph/acl.c
