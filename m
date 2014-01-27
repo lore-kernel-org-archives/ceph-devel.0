@@ -1,288 +1,312 @@
-From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: [PATCH 10/11] libceph: follow redirect replies from osds
-Date: Mon, 27 Jan 2014 17:58:52 +0200
-Message-ID: <1390838333-32266-11-git-send-email-ilya.dryomov@inktank.com>
-References: <1390838333-32266-1-git-send-email-ilya.dryomov@inktank.com>
+From: ceph branch robot <nobody@ceph.com>
+Subject: ceph branch status
+Date: Mon, 27 Jan 2014 08:00:26 -0800 (PST)
+Message-ID: <20140127160026.99806281521@teuthology.front.sepia.ceph.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f171.google.com ([209.85.217.171]:61820 "EHLO
-	mail-lb0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753838AbaA0QAN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Jan 2014 11:00:13 -0500
-Received: by mail-lb0-f171.google.com with SMTP id c11so4603169lbj.16
-        for <ceph-devel@vger.kernel.org>; Mon, 27 Jan 2014 08:00:12 -0800 (PST)
-In-Reply-To: <1390838333-32266-1-git-send-email-ilya.dryomov@inktank.com>
+Received: from gw.sepia.ceph.com ([64.90.32.34]:26495 "EHLO
+	teuthology.front.sepia.ceph.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1753845AbaA0QA1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 27 Jan 2014 11:00:27 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
-Cc: ilya.dryomov@inktank.com
 
-Follow redirect replies from osds, for details see ceph.git commit
-fbbe3ad1220799b7bb00ea30fce581c5eadaf034.
+-- All Branches --
 
-v1 (current) version of redirect reply consists of oloc and oid, which
-expands to pool, key, nspace, hash and oid.  However, server-side code
-that would populate anything other than pool doesn't exist yet, and
-hence this commit adds support for pool redirects only.  To make sure
-that future server-side updates don't break us, we decode all fields
-and, if any of key, nspace, hash or oid have a non-default value, error
-out with "corrupt osd_op_reply ..." message.
+Alfredo Deza <alfredo@deza.pe>
+	2013-09-27 10:33:52 -0400   wip-5900
+	2014-01-21 16:29:22 -0500   wip-6465
 
-Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
----
- include/linux/ceph/osd_client.h |    6 ++
- net/ceph/osd_client.c           |  167 ++++++++++++++++++++++++++++++++++++---
- 2 files changed, 164 insertions(+), 9 deletions(-)
+Dan Mick <dan.mick@inktank.com>
+	2013-07-16 23:00:06 -0700   wip-5634
 
-diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
-index 3170ca6d98b2..fd47e872ebcc 100644
---- a/include/linux/ceph/osd_client.h
-+++ b/include/linux/ceph/osd_client.h
-@@ -155,6 +155,8 @@ struct ceph_osd_request {
- 
- 	struct ceph_object_locator r_base_oloc;
- 	struct ceph_object_id r_base_oid;
-+	struct ceph_object_locator r_target_oloc;
-+	struct ceph_object_id r_target_oid;
- 
- 	u64               r_snapid;
- 	unsigned long     r_stamp;            /* send OR check time */
-@@ -162,6 +164,10 @@ struct ceph_osd_request {
- 	struct ceph_snap_context *r_snapc;    /* snap context for writes */
- };
- 
-+struct ceph_request_redirect {
-+	struct ceph_object_locator oloc;
-+};
-+
- struct ceph_osd_event {
- 	u64 cookie;
- 	int one_shot;
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index 3997a87c4f51..010ff3bd58ad 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -369,6 +369,7 @@ struct ceph_osd_request *ceph_osdc_alloc_request(struct ceph_osd_client *osdc,
- 	INIT_LIST_HEAD(&req->r_osd_item);
- 
- 	req->r_base_oloc.pool = -1;
-+	req->r_target_oloc.pool = -1;
- 
- 	/* create reply message */
- 	if (use_mempool)
-@@ -1256,23 +1257,36 @@ static int __calc_request_pg(struct ceph_osdmap *osdmap,
- 			     struct ceph_osd_request *req,
- 			     struct ceph_pg *pg_out)
- {
--	if ((req->r_flags & CEPH_OSD_FLAG_IGNORE_OVERLAY) == 0) {
-+	bool need_check_tiering;
-+
-+	need_check_tiering = false;
-+	if (req->r_target_oloc.pool == -1) {
-+		req->r_target_oloc = req->r_base_oloc; /* struct */
-+		need_check_tiering = true;
-+	}
-+	if (req->r_target_oid.name_len == 0) {
-+		ceph_oid_copy(&req->r_target_oid, &req->r_base_oid);
-+		need_check_tiering = true;
-+	}
-+
-+	if (need_check_tiering &&
-+	    (req->r_flags & CEPH_OSD_FLAG_IGNORE_OVERLAY) == 0) {
- 		struct ceph_pg_pool_info *pi;
- 
--		pi = ceph_pg_pool_by_id(osdmap, req->r_base_oloc.pool);
-+		pi = ceph_pg_pool_by_id(osdmap, req->r_target_oloc.pool);
- 		if (pi) {
- 			if ((req->r_flags & CEPH_OSD_FLAG_READ) &&
- 			    pi->read_tier >= 0)
--				req->r_base_oloc.pool = pi->read_tier;
-+				req->r_target_oloc.pool = pi->read_tier;
- 			if ((req->r_flags & CEPH_OSD_FLAG_WRITE) &&
- 			    pi->write_tier >= 0)
--				req->r_base_oloc.pool = pi->write_tier;
-+				req->r_target_oloc.pool = pi->write_tier;
- 		}
- 		/* !pi is caught in ceph_oloc_oid_to_pg() */
- 	}
- 
--	return ceph_oloc_oid_to_pg(osdmap, &req->r_base_oloc,
--				   &req->r_base_oid, pg_out);
-+	return ceph_oloc_oid_to_pg(osdmap, &req->r_target_oloc,
-+				   &req->r_target_oid, pg_out);
- }
- 
- /*
-@@ -1382,7 +1396,7 @@ static void __send_request(struct ceph_osd_client *osdc,
- 	/* fill in message content that changes each time we send it */
- 	put_unaligned_le32(osdc->osdmap->epoch, req->r_request_osdmap_epoch);
- 	put_unaligned_le32(req->r_flags, req->r_request_flags);
--	put_unaligned_le64(req->r_base_oloc.pool, req->r_request_pool);
-+	put_unaligned_le64(req->r_target_oloc.pool, req->r_request_pool);
- 	p = req->r_request_pgid;
- 	ceph_encode_64(&p, req->r_pgid.pool);
- 	ceph_encode_32(&p, req->r_pgid.seed);
-@@ -1483,6 +1497,109 @@ static void handle_osds_timeout(struct work_struct *work)
- 			      round_jiffies_relative(delay));
- }
- 
-+static int ceph_oloc_decode(void **p, void *end,
-+			    struct ceph_object_locator *oloc)
-+{
-+	u8 struct_v, struct_cv;
-+	u32 len;
-+	void *struct_end;
-+	int ret = 0;
-+
-+	ceph_decode_need(p, end, 1 + 1 + 4, e_inval);
-+	struct_v = ceph_decode_8(p);
-+	struct_cv = ceph_decode_8(p);
-+	if (struct_v < 3) {
-+		pr_warn("got v %d < 3 cv %d of ceph_object_locator\n",
-+			struct_v, struct_cv);
-+		goto e_inval;
-+	}
-+	if (struct_cv > 6) {
-+		pr_warn("got v %d cv %d > 6 of ceph_object_locator\n",
-+			struct_v, struct_cv);
-+		goto e_inval;
-+	}
-+	len = ceph_decode_32(p);
-+	ceph_decode_need(p, end, len, e_inval);
-+	struct_end = *p + len;
-+
-+	oloc->pool = ceph_decode_64(p);
-+	*p += 4; /* skip preferred */
-+
-+	len = ceph_decode_32(p);
-+	if (len > 0) {
-+		pr_warn("ceph_object_locator::key is set\n");
-+		goto e_inval;
-+	}
-+
-+	if (struct_v >= 5) {
-+		len = ceph_decode_32(p);
-+		if (len > 0) {
-+			pr_warn("ceph_object_locator::nspace is set\n");
-+			goto e_inval;
-+		}
-+	}
-+
-+	if (struct_v >= 6) {
-+		s64 hash = ceph_decode_64(p);
-+		if (hash != -1) {
-+			pr_warn("ceph_object_locator::hash is set\n");
-+			goto e_inval;
-+		}
-+	}
-+
-+	/* skip the rest */
-+	*p = struct_end;
-+out:
-+	return ret;
-+
-+e_inval:
-+	ret = -EINVAL;
-+	goto out;
-+}
-+
-+static int ceph_redirect_decode(void **p, void *end,
-+				struct ceph_request_redirect *redir)
-+{
-+	u8 struct_v, struct_cv;
-+	u32 len;
-+	void *struct_end;
-+	int ret;
-+
-+	ceph_decode_need(p, end, 1 + 1 + 4, e_inval);
-+	struct_v = ceph_decode_8(p);
-+	struct_cv = ceph_decode_8(p);
-+	if (struct_cv > 1) {
-+		pr_warn("got v %d cv %d > 1 of ceph_request_redirect\n",
-+			struct_v, struct_cv);
-+		goto e_inval;
-+	}
-+	len = ceph_decode_32(p);
-+	ceph_decode_need(p, end, len, e_inval);
-+	struct_end = *p + len;
-+
-+	ret = ceph_oloc_decode(p, end, &redir->oloc);
-+	if (ret)
-+		goto out;
-+
-+	len = ceph_decode_32(p);
-+	if (len > 0) {
-+		pr_warn("ceph_request_redirect::object_name is set\n");
-+		goto e_inval;
-+	}
-+
-+	len = ceph_decode_32(p);
-+	*p += len; /* skip osd_instructions */
-+
-+	/* skip the rest */
-+	*p = struct_end;
-+out:
-+	return ret;
-+
-+e_inval:
-+	ret = -EINVAL;
-+	goto out;
-+}
-+
- static void complete_request(struct ceph_osd_request *req)
- {
- 	complete_all(&req->r_safe_completion);  /* fsync waiter */
-@@ -1497,6 +1614,7 @@ static void handle_reply(struct ceph_osd_client *osdc, struct ceph_msg *msg,
- {
- 	void *p, *end;
- 	struct ceph_osd_request *req;
-+	struct ceph_request_redirect redir;
- 	u64 tid;
- 	int object_len;
- 	unsigned int numops;
-@@ -1576,10 +1694,41 @@ static void handle_reply(struct ceph_osd_client *osdc, struct ceph_msg *msg,
- 	for (i = 0; i < numops; i++)
- 		req->r_reply_op_result[i] = ceph_decode_32(&p);
- 
--	already_completed = req->r_got_reply;
-+	if (le16_to_cpu(msg->hdr.version) >= 6) {
-+		p += 8 + 4; /* skip replay_version */
-+		p += 8; /* skip user_version */
- 
--	if (!req->r_got_reply) {
-+		err = ceph_redirect_decode(&p, end, &redir);
-+		if (err)
-+			goto bad_put;
-+	} else {
-+		redir.oloc.pool = -1;
-+	}
- 
-+	if (redir.oloc.pool != -1) {
-+		dout("redirect pool %lld\n", redir.oloc.pool);
-+
-+		__unregister_request(osdc, req);
-+		mutex_unlock(&osdc->request_mutex);
-+
-+		req->r_target_oloc = redir.oloc; /* struct */
-+
-+		/*
-+		 * Start redirect requests with nofail=true.  If
-+		 * mapping fails, request will end up on the notarget
-+		 * list, waiting for the new osdmap (which can take
-+		 * a while), even though the original request mapped
-+		 * successfully.  In the future we might want to follow
-+		 * original request's nofail setting here.
-+		 */
-+		err = ceph_osdc_start_request(osdc, req, true);
-+		BUG_ON(err);
-+
-+		goto done;
-+	}
-+
-+	already_completed = req->r_got_reply;
-+	if (!req->r_got_reply) {
- 		req->r_result = result;
- 		dout("handle_reply result %d bytes %d\n", req->r_result,
- 		     bytes);
--- 
-1.7.10.4
+David Zafman <david.zafman@inktank.com>
+	2013-01-28 20:26:34 -0800   wip-wireshark-zafman
+	2013-03-22 18:14:10 -0700   wip-snap-test-fix
+	2014-01-14 18:12:32 -0800   wip-7116
 
+Gary Lowell <gary.lowell@inktank.com>
+	2013-07-23 17:00:07 -0700   wip-build-test
+	2013-09-27 11:46:26 -0700   wip-6020
+	2013-10-10 12:54:51 -0700   wip-5900-gl
+	2013-10-11 11:59:12 -0700   wip-lazy-cuttlefish-gl
+
+Gary Lowell <glowell@inktank.com>
+	2013-02-05 19:29:11 -0800   wip.cppchecker
+	2013-02-10 22:21:52 -0800   wip-3955
+	2013-02-26 19:28:48 -0800   wip-system-leveldb
+	2013-03-01 18:55:35 -0800   wip-da-spec-1
+	2013-03-19 11:28:15 -0700   wip-3921
+	2013-04-11 23:00:05 -0700   wip-init-radosgw
+	2013-04-17 23:30:11 -0700   wip-4725
+	2013-04-21 22:06:37 -0700   wip-4752
+	2013-04-22 14:11:37 -0700   wip-4632
+	2013-05-31 11:20:40 -0700   wip-doc-prereq
+	2013-06-06 22:31:54 -0700   wip-build-doc
+
+Greg Farnum <greg@inktank.com>
+	2013-02-13 14:46:38 -0800   wip-mds-snap-fix
+	2013-02-22 19:57:53 -0800   wip-4248-snapid-journaling
+	2013-09-19 18:15:00 -0700   wip-4354
+	2013-10-09 13:31:38 -0700   cuttlefish-4832
+	2013-11-15 14:41:51 -0800   wip-librados-command2
+	2013-12-09 16:21:41 -0800   wip-hitset-snapshots
+	2014-01-24 12:33:56 -0800   wip-7215-quorum-features
+
+James Page <james.page@ubuntu.com>
+	2013-02-27 22:50:38 +0000   wip-debhelper-8
+
+Joao Eduardo Luis <jecluis@gmail.com>
+	2013-08-12 11:21:29 -0700   wip-store-tool.cuttlefish
+	2013-12-09 16:39:19 +0000   wip-mon-mdsmap-trim.dumpling
+
+Joao Eduardo Luis <joao.luis@inktank.com>
+	2013-04-18 00:01:24 +0100   wip-4521-tool
+	2013-04-22 15:14:28 +0100   wip-4748
+	2013-04-24 16:42:11 +0100   wip-4521
+	2013-04-30 18:45:22 +0100   wip-mon-compact-dbg
+	2013-05-21 01:46:13 +0100   wip-monstoretool-foo
+	2013-05-31 16:26:02 +0100   wip-mon-cache-first-last-committed
+	2013-05-31 21:00:28 +0100   wip-mon-trim-b
+	2013-07-20 04:30:59 +0100   wip-mon-caps-test
+	2013-07-23 16:21:46 +0100   wip-5704-cuttlefish
+	2013-07-23 17:35:59 +0100   wip-5704
+	2013-08-02 22:54:42 +0100   wip-5648
+	2013-09-25 22:08:24 +0100   wip-6378
+	2013-10-10 14:06:59 +0100   wip-mon-set-pspool
+	2013-11-22 21:08:31 +0000   wip-6796-b
+	2013-12-18 22:17:09 +0000   wip-monstoretool-genmdsmaps
+	2014-01-17 17:11:59 -0800   wip-fix-pipe-comment-for-fhaas
+	2014-01-22 12:26:51 +0000   wip-mon-docs
+
+Joe Buck <jbbuck@gmail.com>
+	2013-05-02 16:32:33 -0700   wip-buck-add-terasort
+	2013-09-16 22:08:41 -0700   wip-buck-centos-misc
+
+John Wilkins <john.wilkins@inktank.com>
+	2013-07-31 18:00:50 -0700   wip-doc-rados-python-api
+	2014-01-13 12:40:47 -0800   wip-doc-librados-intro
+	2014-01-23 14:27:33 -0800   wip-doc-documenting-ceph
+
+Josh Durgin <josh.durgin@inktank.com>
+	2013-03-01 14:45:23 -0800   wip-rbd-workunit-debug
+	2013-07-25 18:44:10 -0700   wip-5488-2
+	2013-08-14 15:51:04 -0700   wip-5970
+	2013-08-27 12:03:08 -0700   wip-krbd-workunits
+	2013-11-22 15:17:08 -0800   wip-zero-copy-bufferlist
+	2013-11-25 13:59:29 -0800   wip-init-highlander
+	2013-12-17 08:16:59 -0800   wip-rbd-deadlock-lockdep
+	2013-12-18 12:28:39 -0800   wip-rbd-deadlock-lockdep-dumpling
+	2013-12-26 18:06:39 -0800   emperor-5426
+	2013-12-26 18:07:13 -0800   dumpling-5426
+	2014-01-16 21:19:47 -0800   wip-objectcacher-flusher-dumpling
+
+Ken Dreyer <ken.dreyer@inktank.com>
+	2014-01-13 21:07:01 +0000   last
+
+Matt Benjamin <matt@linuxbox.com>
+	2013-10-08 16:49:23 -0400   wip-libcephfs-emp-rb
+
+Noah Watkins <noahwatkins@gmail.com>
+	2013-01-05 11:58:38 -0800   wip-localized-read-tests
+	2013-10-18 15:42:50 -0700   cls-lua
+	2013-11-05 07:30:19 -0800   port/old
+	2013-11-06 08:39:57 -0800   wip-6636
+	2013-11-26 08:26:24 -0800   wip-boost-uuid
+	2013-12-30 09:47:40 -0800   port/visibility
+	2014-01-13 12:16:22 -0800   fix-sbin-install
+	2014-01-24 06:53:04 -0800   port/main
+
+Roald van Loon <roaldvanloon@gmail.com>
+	2012-12-24 22:26:56 +0000   wip-dout
+
+Sage Weil <sage@inktank.com>
+	2012-11-30 13:47:27 -0800   wip-osd-readhole
+	2012-12-07 14:38:46 -0800   wip-osd-alloc
+	2013-01-29 13:46:02 -0800   wip-readdir
+	2013-02-11 07:05:15 -0800   wip-sim-journal-clone
+	2013-04-18 13:51:36 -0700   argonaut
+	2013-06-02 21:21:09 -0700   wip-fuse-bobtail
+	2013-06-04 22:43:04 -0700   wip-osd-push
+	2013-06-18 17:00:00 -0700   wip-mon-refs
+	2013-06-21 17:59:58 -0700   wip-rgw-vstart
+	2013-06-28 12:54:08 -0700   wip-mds-snap
+	2013-07-01 17:48:09 -0700   wip-5021
+	2013-07-06 09:22:29 -0700   wip-mds-lazyio-cuttlefish
+	2013-07-06 13:00:51 -0700   wip-mds-lazyio-cuttlefish-minimal
+	2013-07-08 14:52:10 -0700   wip-lazy-cuttlefish
+	2013-07-18 16:59:03 -0700   wip-refs
+	2013-07-19 21:13:09 -0700   wip-5692
+	2013-07-20 09:02:40 -0700   wip-5695
+	2013-07-21 17:16:10 -0700   wip-5672
+	2013-07-21 19:58:12 -0700   wip-before
+	2013-07-21 22:03:19 -0700   wip-cuttlefish-osdmap
+	2013-07-22 22:31:46 -0700   wip-5039
+	2013-07-23 09:46:55 -0700   wip-5488
+	2013-07-27 08:20:41 -0700   wip-5754
+	2013-08-02 15:47:32 -0700   wip-5648-b
+	2013-08-04 09:38:49 -0700   wip-mon-skip-auth-cuttlefish
+	2013-08-04 22:25:03 -0700   wip-5869
+	2013-08-05 14:10:27 -0700   wip-mon-global-id
+	2013-08-14 22:16:46 -0700   wip-5973
+	2013-08-28 18:11:09 -0700   wip-libs3
+	2013-09-04 17:55:02 -0700   wip-libcephfs
+	2013-09-19 12:08:45 -0700   wip-neon-crc32c
+	2013-09-27 13:17:11 -0700   wip-test-falloc
+	2013-10-05 21:09:29 -0700   wip-osd-bloom
+	2013-11-01 23:58:57 -0700   wip-6707
+	2013-12-02 10:01:21 -0800   wip-osdmon-warnings
+	2013-12-02 21:57:18 -0800   wip-pool-stats-dumpling2
+	2013-12-07 16:04:15 -0800   wip-journaler-kludge
+	2013-12-17 18:21:43 -0800   wip-rgw-err
+	2014-01-06 22:13:09 -0800   wip-librados
+	2014-01-09 05:44:55 -0800   wip-fuse-flock
+	2014-01-13 16:33:42 -0800   wip-mon-big
+	2014-01-14 06:40:33 -0800   wip-dio
+	2014-01-17 23:08:38 -0800   wip-primary-affinity
+	2014-01-20 14:32:33 -0800   wip-initial-agent
+	2014-01-21 12:12:23 -0800   bobtail
+	2014-01-21 12:16:39 -0800   emperor
+	2014-01-21 21:08:51 -0800   wip-inline
+	2014-01-22 14:42:52 -0800   wip-formatter
+	2014-01-23 07:12:37 -0800   dumpling
+	2014-01-23 07:12:50 -0800   cuttlefish
+	2014-01-23 09:16:54 -0800   wip-erasure-rule
+	2014-01-24 16:42:24 -0800   wip-agent
+	2014-01-24 16:52:14 -0800   wip-7060
+	2014-01-24 17:10:56 -0800   wip-7060-emperor
+	2014-01-24 17:13:02 -0800   wip-7060-dumpling
+
+Samuel Just <sam.just@inktank.com>
+	2013-06-06 11:51:04 -0700   wip_bench_num
+	2013-06-06 13:08:51 -0700   wip_5238_cuttlefish
+	2013-06-19 14:54:13 -0700   wip_cuttlefish_compact_on_startup
+	2013-06-19 19:46:06 -0700   wip_observer
+	2013-07-23 14:04:29 -0700   wip-cuttlefish-next
+	2013-08-15 15:35:26 -0700   wip-5985
+	2013-08-19 00:04:13 -0700   wip-dumpling-pglog-undirty
+	2013-08-26 23:19:47 -0700   wip-dumpling-log-assert
+	2013-08-27 15:40:28 -0700   wip-dumpling-perf2
+	2013-09-01 10:57:33 -0700   wip-5869-DNM
+	2013-09-19 12:52:53 -0700   wip-5992
+	2013-10-30 16:56:18 -0700   wip-6633
+	2013-11-04 11:25:32 -0800   wip-enotempty
+	2013-11-05 17:47:48 -0800   wip-6722
+	2013-11-09 17:00:31 -0800   wip-perf2
+	2013-11-12 14:56:00 -0800   wip-queueing
+	2013-11-13 15:50:01 -0800   wip-6761
+	2013-11-15 13:54:12 -0800   wip-queueing2
+	2013-11-18 11:22:17 -0800   wip-6786
+	2013-11-18 13:14:20 -0800   wip-6756
+	2013-12-04 19:10:50 -0800   wip-testrados-ec
+	2013-12-10 16:01:03 -0800   wip-ecbackend
+	2013-12-13 13:19:25 -0800   wip-client-io-rebased
+	2014-01-13 15:15:40 -0800   wip-client-io-rebased-2
+	2014-01-22 11:55:16 -0800   wip-client-io-rebased-3
+	2014-01-22 12:24:11 -0800   wip-client-io-final
+	2014-01-26 19:12:31 -0800   wip-spgt
+
+Wido den Hollander <wido@42on.com>
+	2014-01-20 11:06:37 +0100   wip-rgw-powerdns
+
+Yan, Zheng <zheng.z.yan@intel.com>
+	2014-01-23 12:58:51 +0800   wip-dirfrags
+	2014-01-23 15:04:14 +0800   wip-no-anchor
+
+Yehuda Sadeh <yehuda@inktank.com>
+	2012-11-16 11:09:34 -0800   wip-mongoose
+	2012-12-13 18:09:37 -0800   wip-2169
+	2013-02-12 09:40:12 -0800   wip-json-decode
+	2013-02-22 15:04:37 -0800   wip-4247
+	2013-02-22 16:19:37 -0800   wip-rgw-zone
+	2013-02-26 18:01:46 -0800   wip-cls-version
+	2013-02-28 09:56:43 -0800   wip-librados-exec
+	2013-03-07 09:46:49 -0800   wip-4363
+	2013-03-07 09:47:56 -0800   wip-4363-next
+	2013-03-07 11:38:06 -0800   wip-4247-bobtail
+	2013-03-12 12:56:01 -0700   wip-4425
+	2013-03-13 10:13:29 -0700   wip-4425-next
+	2013-03-22 11:01:02 -0700   wip-rgw-zone-2
+	2013-03-22 11:29:49 -0700   wip-rgw-zone-3
+	2013-04-15 12:32:48 -0700   wip-rgw-bucketlog
+	2013-04-22 13:01:20 -0700   wip-4776-bobtail
+	2013-04-23 09:26:33 -0700   wip-4755
+	2013-04-26 09:41:39 -0700   wip-4760
+	2013-05-02 22:08:37 -0700   wip-4716
+	2013-05-06 14:41:10 -0700   wip-rgw-bucketlog-2
+	2013-05-07 14:03:04 -0700   wip-4600-bobtail
+	2013-05-07 14:03:37 -0700   wip-4600-argonaut
+	2013-05-16 09:08:46 -0700   wip-5073-2
+	2013-05-22 21:34:52 -0700   wip-5152
+	2013-05-30 09:34:21 -0700   wip-5204
+	2013-05-30 13:04:27 -0700   wip-5209
+	2013-06-14 14:53:54 -0700   wip-5362
+	2013-06-26 11:36:59 -0700   wip-5455
+	2013-06-29 00:25:32 -0700   wip-rgw-geo-2-replicalog2
+	2013-06-29 21:04:39 -0700   wip-rgw-geo-3
+	2013-07-08 18:55:19 -0700   rgw-next-libcurl
+	2013-07-22 14:46:30 -0700   wip-5664
+	2013-07-29 10:52:22 -0700   wip-5789
+	2013-07-29 10:54:02 -0700   wip-5793
+	2013-07-29 10:58:30 -0700   wip-5770
+	2013-07-30 13:53:53 -0700   wip-5808
+	2013-07-31 10:48:15 -0700   wip-rgw-next
+	2013-08-01 13:20:19 -0700   wip-5831
+	2013-08-01 18:23:49 -0700   wip-5810
+	2013-08-05 11:38:27 -0700   wip-5875
+	2013-08-15 11:00:05 -0700   wip-5978
+	2013-08-16 18:19:02 -0700   wip-rgw-papercuts
+	2013-08-19 16:56:27 -0700   wip-6056
+	2013-08-25 17:57:23 -0700   wip-5374
+	2013-09-04 16:03:22 -0700   wip-6078-dumpling
+	2013-09-10 12:18:55 -0700   wip-6268-bobtail
+	2013-09-10 14:18:46 -0700   wip-6268
+	2013-09-11 13:46:31 -0700   wip-6175
+	2013-09-11 22:30:12 -0700   wip-6286
+	2013-09-12 10:22:08 -0700   wip-6286-dumpling
+	2013-09-12 14:32:17 -0700   wip-6294
+	2013-09-13 14:43:54 -0700   wip-6302
+	2013-09-16 16:05:55 -0700   wip-6176
+	2013-09-18 10:37:21 -0700   wip-6340
+	2013-09-20 14:04:47 -0700   wip-6360
+	2013-10-03 11:49:33 -0700   wip-6444
+	2013-10-04 13:00:26 -0700   wip-6462
+	2013-10-07 09:45:20 -0700   wip-rgw-write
+	2013-10-17 21:29:34 -0700   wip-apache-mod
+	2013-10-18 10:36:01 -0700   wip-3896
+	2013-10-25 17:16:34 -0700   wip-mongoose-test
+	2013-10-30 10:31:11 -0700   wip-rgw-nxweb
+	2013-10-31 14:40:23 -0700   wip-bobtail-admin
+	2013-10-31 14:45:45 -0700   wip-5170
+	2013-11-04 19:02:35 -0800   wip-rgw-standalone
+	2013-11-05 18:37:43 -0800   wip-6677
+	2013-11-07 09:14:27 -0800   wip-6678
+	2013-11-08 16:26:23 -0800   wip-6744
+	2013-11-22 16:00:04 -0800   wip-5170-dumpling
+	2013-12-02 21:37:13 -0800   wip-6919
+	2013-12-07 21:13:19 -0800   wip-objecter-lock
+	2013-12-10 11:33:29 -0800   wip-mongoose-2
+	2013-12-12 23:13:41 -0800   wip-messenger-prefetch
+	2013-12-17 23:24:27 -0800   wip-rgw-getobj-cb
+	2013-12-18 10:34:12 -0800   wip-7030
+	2013-12-18 12:57:40 -0800   wip-queueing3
+	2013-12-18 13:02:52 -0800   wip-queueing3-rgw
+	2014-01-06 18:32:42 -0800   wip-7110-dumpling
+	2014-01-09 18:22:46 -0800   wip-queuing3-loadgen
+	2014-01-15 13:06:31 -0800   wip-rgw-civetweb
+	2014-01-15 14:35:57 -0800   wip-user-quota
+	2014-01-16 14:30:53 -0800   wip-7168
+	2014-01-22 17:10:32 -0800   wip-7169
+	2014-01-23 13:48:28 -0800   wip-7169-dumpling
+	2014-01-24 15:33:57 -0800   wip-user-quota-2
+
+markhpc <mark.a.nelson@gmail.com>
+	2013-11-06 09:23:22 -0600   wip-v0.70-mark
+
+scuttlemonkey <pmcgarry@gmail.com>
+	2013-12-13 13:37:30 -0800   wip-doc-quick-start
+
+
+
+Grouped by committer, ordered by commit time stamp.
