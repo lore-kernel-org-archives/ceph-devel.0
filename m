@@ -1,41 +1,168 @@
 From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: [PATCH 11/11] libceph: support CEPH_FEATURE_OSD_CACHEPOOL feature
-Date: Mon, 27 Jan 2014 17:58:53 +0200
-Message-ID: <1390838333-32266-12-git-send-email-ilya.dryomov@inktank.com>
+Subject: [PATCH 09/11] libceph: rename ceph_osd_request::r_{oloc,oid} to r_base_{oloc,oid}
+Date: Mon, 27 Jan 2014 17:58:51 +0200
+Message-ID: <1390838333-32266-10-git-send-email-ilya.dryomov@inktank.com>
 References: <1390838333-32266-1-git-send-email-ilya.dryomov@inktank.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f169.google.com ([209.85.217.169]:51937 "EHLO
-	mail-lb0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753828AbaA0QAP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Jan 2014 11:00:15 -0500
-Received: by mail-lb0-f169.google.com with SMTP id q8so4614342lbi.14
-        for <ceph-devel@vger.kernel.org>; Mon, 27 Jan 2014 08:00:13 -0800 (PST)
+Received: from mail-la0-f50.google.com ([209.85.215.50]:42261 "EHLO
+	mail-la0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753828AbaA0QAL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Jan 2014 11:00:11 -0500
+Received: by mail-la0-f50.google.com with SMTP id ec20so4707314lab.9
+        for <ceph-devel@vger.kernel.org>; Mon, 27 Jan 2014 08:00:10 -0800 (PST)
 In-Reply-To: <1390838333-32266-1-git-send-email-ilya.dryomov@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: ilya.dryomov@inktank.com
 
-Announce our (limited, see previous commit) support for CACHEPOOL
-feature.
+Rename ceph_osd_request::r_{oloc,oid} to r_base_{oloc,oid} before
+introducing r_target_{oloc,oid} needed for redirects.
 
 Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
 ---
- include/linux/ceph/ceph_features.h |    1 +
- 1 file changed, 1 insertion(+)
+ drivers/block/rbd.c             |    8 ++++----
+ include/linux/ceph/osd_client.h |    4 ++--
+ net/ceph/debugfs.c              |    4 ++--
+ net/ceph/osd_client.c           |   30 +++++++++++++++---------------
+ 4 files changed, 23 insertions(+), 23 deletions(-)
 
-diff --git a/include/linux/ceph/ceph_features.h b/include/linux/ceph/ceph_features.h
-index d21b34d94436..138448f766b4 100644
---- a/include/linux/ceph/ceph_features.h
-+++ b/include/linux/ceph/ceph_features.h
-@@ -80,6 +80,7 @@ static inline u64 ceph_sanitize_features(u64 features)
- 	 CEPH_FEATURE_CRUSH_TUNABLES2 |		\
- 	 CEPH_FEATURE_REPLY_CREATE_INODE |	\
- 	 CEPH_FEATURE_OSDHASHPSPOOL |		\
-+	 CEPH_FEATURE_OSD_CACHEPOOL |		\
- 	 CEPH_FEATURE_CRUSH_V2 |		\
- 	 CEPH_FEATURE_EXPORT_PEER)
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 6fdc5fc00447..16cab6635163 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -1808,8 +1808,8 @@ static struct ceph_osd_request *rbd_osd_req_create(
+ 	osd_req->r_callback = rbd_osd_req_callback;
+ 	osd_req->r_priv = obj_request;
  
+-	osd_req->r_oloc.pool = ceph_file_layout_pg_pool(rbd_dev->layout);
+-	ceph_oid_set_name(&osd_req->r_oid, obj_request->object_name);
++	osd_req->r_base_oloc.pool = ceph_file_layout_pg_pool(rbd_dev->layout);
++	ceph_oid_set_name(&osd_req->r_base_oid, obj_request->object_name);
+ 
+ 	return osd_req;
+ }
+@@ -1846,8 +1846,8 @@ rbd_osd_req_create_copyup(struct rbd_obj_request *obj_request)
+ 	osd_req->r_callback = rbd_osd_req_callback;
+ 	osd_req->r_priv = obj_request;
+ 
+-	osd_req->r_oloc.pool = ceph_file_layout_pg_pool(rbd_dev->layout);
+-	ceph_oid_set_name(&osd_req->r_oid, obj_request->object_name);
++	osd_req->r_base_oloc.pool = ceph_file_layout_pg_pool(rbd_dev->layout);
++	ceph_oid_set_name(&osd_req->r_base_oid, obj_request->object_name);
+ 
+ 	return osd_req;
+ }
+diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
+index 8d8bb53994b1..3170ca6d98b2 100644
+--- a/include/linux/ceph/osd_client.h
++++ b/include/linux/ceph/osd_client.h
+@@ -153,8 +153,8 @@ struct ceph_osd_request {
+ 	struct inode *r_inode;         	      /* for use by callbacks */
+ 	void *r_priv;			      /* ditto */
+ 
+-	struct ceph_object_locator r_oloc;
+-	struct ceph_object_id r_oid;
++	struct ceph_object_locator r_base_oloc;
++	struct ceph_object_id r_base_oid;
+ 
+ 	u64               r_snapid;
+ 	unsigned long     r_stamp;            /* send OR check time */
+diff --git a/net/ceph/debugfs.c b/net/ceph/debugfs.c
+index 1f8562706393..258a382e75ed 100644
+--- a/net/ceph/debugfs.c
++++ b/net/ceph/debugfs.c
+@@ -132,8 +132,8 @@ static int osdc_show(struct seq_file *s, void *pp)
+ 			   req->r_osd ? req->r_osd->o_osd : -1,
+ 			   req->r_pgid.pool, req->r_pgid.seed);
+ 
+-		seq_printf(s, "%.*s", req->r_oid.name_len,
+-			   req->r_oid.name);
++		seq_printf(s, "%.*s", req->r_base_oid.name_len,
++			   req->r_base_oid.name);
+ 
+ 		if (req->r_reassert_version.epoch)
+ 			seq_printf(s, "\t%u'%llu",
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index 0eb009eaf4ff..3997a87c4f51 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -368,7 +368,7 @@ struct ceph_osd_request *ceph_osdc_alloc_request(struct ceph_osd_client *osdc,
+ 	INIT_LIST_HEAD(&req->r_req_lru_item);
+ 	INIT_LIST_HEAD(&req->r_osd_item);
+ 
+-	req->r_oloc.pool = -1;
++	req->r_base_oloc.pool = -1;
+ 
+ 	/* create reply message */
+ 	if (use_mempool)
+@@ -763,11 +763,11 @@ struct ceph_osd_request *ceph_osdc_new_request(struct ceph_osd_client *osdc,
+ 	if (num_ops > 1)
+ 		osd_req_op_init(req, 1, CEPH_OSD_OP_STARTSYNC);
+ 
+-	req->r_oloc.pool = ceph_file_layout_pg_pool(*layout);
++	req->r_base_oloc.pool = ceph_file_layout_pg_pool(*layout);
+ 
+-	snprintf(req->r_oid.name, sizeof(req->r_oid.name),
++	snprintf(req->r_base_oid.name, sizeof(req->r_base_oid.name),
+ 		 "%llx.%08llx", vino.ino, objnum);
+-	req->r_oid.name_len = strlen(req->r_oid.name);
++	req->r_base_oid.name_len = strlen(req->r_base_oid.name);
+ 
+ 	return req;
+ }
+@@ -1259,20 +1259,20 @@ static int __calc_request_pg(struct ceph_osdmap *osdmap,
+ 	if ((req->r_flags & CEPH_OSD_FLAG_IGNORE_OVERLAY) == 0) {
+ 		struct ceph_pg_pool_info *pi;
+ 
+-		pi = ceph_pg_pool_by_id(osdmap, req->r_oloc.pool);
++		pi = ceph_pg_pool_by_id(osdmap, req->r_base_oloc.pool);
+ 		if (pi) {
+ 			if ((req->r_flags & CEPH_OSD_FLAG_READ) &&
+ 			    pi->read_tier >= 0)
+-				req->r_oloc.pool = pi->read_tier;
++				req->r_base_oloc.pool = pi->read_tier;
+ 			if ((req->r_flags & CEPH_OSD_FLAG_WRITE) &&
+ 			    pi->write_tier >= 0)
+-				req->r_oloc.pool = pi->write_tier;
++				req->r_base_oloc.pool = pi->write_tier;
+ 		}
+ 		/* !pi is caught in ceph_oloc_oid_to_pg() */
+ 	}
+ 
+-	return ceph_oloc_oid_to_pg(osdmap, &req->r_oloc,
+-				   &req->r_oid, pg_out);
++	return ceph_oloc_oid_to_pg(osdmap, &req->r_base_oloc,
++				   &req->r_base_oid, pg_out);
+ }
+ 
+ /*
+@@ -1382,7 +1382,7 @@ static void __send_request(struct ceph_osd_client *osdc,
+ 	/* fill in message content that changes each time we send it */
+ 	put_unaligned_le32(osdc->osdmap->epoch, req->r_request_osdmap_epoch);
+ 	put_unaligned_le32(req->r_flags, req->r_request_flags);
+-	put_unaligned_le64(req->r_oloc.pool, req->r_request_pool);
++	put_unaligned_le64(req->r_base_oloc.pool, req->r_request_pool);
+ 	p = req->r_request_pgid;
+ 	ceph_encode_64(&p, req->r_pgid.pool);
+ 	ceph_encode_32(&p, req->r_pgid.seed);
+@@ -2144,11 +2144,11 @@ void ceph_osdc_build_request(struct ceph_osd_request *req, u64 off,
+ 	ceph_encode_32(&p, -1);  /* preferred */
+ 
+ 	/* oid */
+-	ceph_encode_32(&p, req->r_oid.name_len);
+-	memcpy(p, req->r_oid.name, req->r_oid.name_len);
+-	dout("oid '%.*s' len %d\n", req->r_oid.name_len,
+-	     req->r_oid.name, req->r_oid.name_len);
+-	p += req->r_oid.name_len;
++	ceph_encode_32(&p, req->r_base_oid.name_len);
++	memcpy(p, req->r_base_oid.name, req->r_base_oid.name_len);
++	dout("oid '%.*s' len %d\n", req->r_base_oid.name_len,
++	     req->r_base_oid.name, req->r_base_oid.name_len);
++	p += req->r_base_oid.name_len;
+ 
+ 	/* ops--can imply data */
+ 	ceph_encode_16(&p, (u16)req->r_num_ops);
 -- 
 1.7.10.4
 
