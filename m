@@ -1,104 +1,131 @@
-From: Mike Dawson <mike.dawson@cloudapt.com>
-Subject: Re: RADOS + deep scrubbing performance issues in production environment
-Date: Tue, 28 Jan 2014 01:30:46 -0500
-Message-ID: <52E74E96.8070202@cloudapt.com>
-References: <20140127151321.GD26390@philipgian-mac> <CAFMfnwp4u-O8m3gZko35y5t3r05kAgt9zUWOew_pmHSJjmLPmA@mail.gmail.com> <alpine.DEB.2.00.1401271045160.2149@cobra.newdream.net>
+From: Dominik Mostowiec <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: many meta files in osd
+Date: Tue, 28 Jan 2014 10:26:45 +0100
+Message-ID: <CAMNMNTx-v2tWZMjgxKM2eRK6m5GqhyMqpGXBcR5ww3n5mX7pCg@mail.gmail.com>
+References: <CAMNMNTw3OM-aoUAOAEJcN5BqsrL+4S79Ha20=xt5wE_56Jd5_w@mail.gmail.com>
+	<CAMNMNTzUA-xbGrQnw_aq2XtUhpQcvo4qf1YBJrqk=sP1zKzMDw@mail.gmail.com>
+	<CAMNMNTzXETisGUHmEGd5z9NCjU-k_fmFU7Dctgn32b33vHbTyQ@mail.gmail.com>
+	<CAPYLRzhsLVRRBzSmYS25iDC50RRsBtHUmYmHWkwPNwtY-ASM5w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f182.google.com ([209.85.213.182]:36974 "EHLO
-	mail-ig0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752568AbaA1Gas (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Jan 2014 01:30:48 -0500
-Received: by mail-ig0-f182.google.com with SMTP id uy17so805904igb.3
-        for <ceph-devel@vger.kernel.org>; Mon, 27 Jan 2014 22:30:48 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1401271045160.2149@cobra.newdream.net>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>, Kyle Bader <kyle.bader@gmail.com>
-Cc: Filippos Giannakos <philipgian@grnet.gr>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, synnefo-devel@googlegroups.com
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAPYLRzhsLVRRBzSmYS25iDC50RRsBtHUmYmHWkwPNwtY-ASM5w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: Gregory Farnum <greg-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
+
+Hi,
+Thanks for Your response.
+ceph -v
+ceph version 0.67.5 (a60ac9194718083a4b6a225fc17cad6096c69bd1)
+
+grep -i rgw /etc/ceph/ceph.conf  | grep -v socket
+        rgw_cache_enabled = true
+        rgw_cache_lru_size = 10000
+        rgw_thread_pool_size = 2048
+        rgw op thread timeout = 6000
+        rgw print continue = false
+        rgw_enable_ops_log = false
+        debug rgw = 10
+        rgw dns name = ocdn.eu
 
 
-On 1/27/2014 1:45 PM, Sage Weil wrote:
-> There is also
+On my test cluster (the same version, and symulation of this case)
+command "radosgw-admin gc process" didn't help :-(
+
+--
+Regards
+Dominik
+
+
+2014-01-27 Gregory Farnum <greg-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>:
+> Looks like you got lost over the Christmas holidays; sorry!
+> I'm not an expert on running rgw but it sounds like garbage collection
+> isn't running or something. What version are you on, and have you done
+> anything to set it up?
+> -Greg
+> Software Engineer #42 @ http://inktank.com | http://ceph.com
 >
->   ceph osd set noscrub
 >
-> and then later
->
->   ceph osd unset noscrub
->
-In my experience scrub isn't nearly as much of a problem as deep-scrub. 
-On a IOPS constrained cluster with writes approaching the available 
-aggregate spindle performance minus replication penalty and possibly 
-co-located osd journal penalty, scrub may run without any disruption. 
-But deep-scrub tends to make iowait on the spindles get ugly.
-
-To disable/enable deep-scrub use:
-
-ceph osd set nodeep-scrub
-ceph osd unset nodeep-scrub
-
-
-> I forget whether this pauses an in-progress PG scrub or just makes it stop
-> when it gets to the next PG boundary.
->
-> sage
->
-> On Mon, 27 Jan 2014, Kyle Bader wrote:
->
->>> Are there any tools we are not aware of for controlling, possibly pausing,
->>> deep-scrub and/or getting some progress about the procedure ?
->>> Also since I believe it would be a bad practice to disable deep-scrubbing do you
->>> have any recommendations of how to work around (or even solve) this issue ?
+> On Sun, Jan 26, 2014 at 12:59 PM, Dominik Mostowiec
+> <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+>> Hi,
+>> It is safe to remove this files
+>>> rados -p .rgw ls | grep '.bucket.meta.my_deleted_bucket:'
+>> for deleted bucket via
+>> rados -p .rgw rm .bucket.meta.my_deleted_bucket:default.4576.1
 >>
->> The periodicity of scrubs is controllable with these tunables:
->>
->> osd scrub max interval
->> osd deep scrub interval
->>
->> You may also be interested in adjusting:
->>
->> osd scrub load threshold
->>
->> More information on the docs page:
->>
->> http://ceph.com/docs/master/rados/configuration/osd-config-ref/#scrubbing
-
-I rarely run into a situation where 1m average of load is <0.5 on a 
-multi-core server running osds, so deep scrub for me is always triggered 
-by the 'osd scrub max interval'. I've had a bug out there to take core 
-count into consideration:
-
-http://tracker.ceph.com/issues/6296
-
-The documentation used to say the "Default is 50%" implying that this 
-feature should allow scrub to start with a much higher load than 0.5 
-will allow on multi-core systems. The documentation has changed, but the 
-default of 0.5 is still artificially suppressing deep-scrub from 
-opportunistically starting on relatively idle multi-core systems.
-
-That being said, deep-scrub may be better served with an 
-osd_scrub_iops_threshold mechanism instead of (or in addition to) the 
-osd_scrub_load_threshold.
-
-- Mike
-
->>
->> Hope that helps some!
+>> I have a problem with eaten inodes on disks where is many of such files.
 >>
 >> --
+>> Regards
+>> Dominik
 >>
->> Kyle
+>> 2013-12-10 Dominik Mostowiec <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>:
+>>> Is there any posibility to remove this meta files? (whithout recreate cluster)
+>>> Files names:
+>>> {path}.bucket.meta.test1:default.4110.{sequence number}__head_...
+>>>
+>>> --
+>>> Regards
+>>> Dominik
+>>>
+>>> 2013/12/8 Dominik Mostowiec <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>:
+>>>> Hi,
+>>>> My api app to put files to s3/ceph checks if bucket exists by create
+>>>> this bucket.
+>>>> Each bucket create command adds 2 meta files.
+>>>>
+>>>> -----
+>>>> root@vm-1:/vol0/ceph/osd# find | grep meta | grep test1 | wc -l
+>>>> 44
+>>>> root@vm-1:/vol0/ceph/osd# s3 -u create test1
+>>>> Bucket successfully created.
+>>>> root@vm-1:/vol0/ceph/osd# find | grep meta | grep test1 | wc -l
+>>>> 46
+>>>> -----
+>>>>
+>>>> Unfortunately:
+>>>> -----
+>>>> root@vm-1:/vol0/ceph/osd# s3 -u delete test1
+>>>> root@vm-1:/vol0/ceph/osd# find | grep meta | grep test1 | wc -l
+>>>> 46
+>>>> -----
+>>>>
+>>>> Is there some way to remove this meta files from ceph?
+>>>>
+>>>> --
+>>>> Regards
+>>>> Dominik
+>>>
+>>>
+>>>
+>>> --
+>>> Pozdrawiam
+>>> Dominik
+>>
+>>
+>>
 >> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+>> Pozdrawiam
+>> Dominik
+>> _______________________________________________
+>> ceph-users mailing list
+>> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+
+
+-- 
+Pozdrawiam
+Dominik
