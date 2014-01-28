@@ -1,41 +1,51 @@
-From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: [PATCH] ceph: cast PAGE_SIZE to size_t in ceph_sync_write()
-Date: Tue, 28 Jan 2014 19:28:40 +0200
-Message-ID: <1390930120-9863-1-git-send-email-ilya.dryomov@inktank.com>
+From: Filippos Giannakos <philipgian@grnet.gr>
+Subject: Re: RADOS + deep scrubbing performance issues in production
+ environment
+Date: Tue, 28 Jan 2014 20:12:46 +0200
+Message-ID: <20140128181246.GB11532@philipgian-mac>
+References: <20140127151321.GD26390@philipgian-mac>
+ <CAFMfnwp4u-O8m3gZko35y5t3r05kAgt9zUWOew_pmHSJjmLPmA@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f170.google.com ([209.85.217.170]:37538 "EHLO
-	mail-lb0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754685AbaA1R3l (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Jan 2014 12:29:41 -0500
-Received: by mail-lb0-f170.google.com with SMTP id u14so631822lbd.1
-        for <ceph-devel@vger.kernel.org>; Tue, 28 Jan 2014 09:29:40 -0800 (PST)
+Received: from averel.grnet-hq.admin.grnet.gr ([195.251.29.3]:29355 "EHLO
+	averel.grnet-hq.admin.grnet.gr" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755205AbaA1SMv (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 28 Jan 2014 13:12:51 -0500
+Content-Disposition: inline
+In-Reply-To: <CAFMfnwp4u-O8m3gZko35y5t3r05kAgt9zUWOew_pmHSJjmLPmA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: ilya.dryomov@inktank.com, Jianpeng Ma <majianpeng@gmail.com>
+To: Kyle Bader <kyle.bader@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, synnefo-devel@googlegroups.com
 
-Use min_t(size_t, ...) instead of plain min(), which does strict type
-checking, to avoid compile warning on i386.
+On Mon, Jan 27, 2014 at 01:10:23PM -0500, Kyle Bader wrote:
+> > Are there any tools we are not aware of for controlling, possibly pausing,
+> > deep-scrub and/or getting some progress about the procedure ?
+> > Also since I believe it would be a bad practice to disable deep-scrubbing do you
+> > have any recommendations of how to work around (or even solve) this issue ?
+> 
+> The periodicity of scrubs is controllable with these tunables:
+> 
+> osd scrub max interval
+> osd deep scrub interval
+> 
+> You may also be interested in adjusting:
+> 
+> osd scrub load threshold
+> 
+> More information on the docs page:
+> 
+> http://ceph.com/docs/master/rados/configuration/osd-config-ref/#scrubbing
+> 
+> Hope that helps some!
+> 
 
-Cc: Jianpeng Ma <majianpeng@gmail.com>
-Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
----
- fs/ceph/file.c |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Thanks Kyle but this does not solve the performance degradation when the deep
+scrubbing is actually running. Plus, it can take several days to complete.
 
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index d10510a4733d..dfd2ce3419f8 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -734,7 +734,7 @@ static ssize_t ceph_sync_write(struct kiocb *iocb, const struct iovec *iov,
- 
- 		left = len;
- 		for (n = 0; n < num_pages; n++) {
--			size_t plen = min(left, PAGE_SIZE);
-+			size_t plen = min_t(size_t, left, PAGE_SIZE);
- 			ret = iov_iter_copy_from_user(pages[n], &i, 0, plen);
- 			if (ret != plen) {
- 				ret = -EFAULT;
+Kind Regards,
 -- 
-1.7.10.4
-
+Filippos
+<philipgian@grnet.gr>
