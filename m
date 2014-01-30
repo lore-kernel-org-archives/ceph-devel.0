@@ -1,28 +1,69 @@
-From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [PATCH v2] ceph: fix posix ACL hooks
-Date: Wed, 29 Jan 2014 23:54:21 -0800
-Message-ID: <20140130075421.GA10050@infradead.org>
-References: <CALFYKtDCNWK+9m5m3P01dcxOOV7iHFeNaOH=Q=6Pffuo8gmrMQ@mail.gmail.com>
- <1391013467-7598-1-git-send-email-ilya.dryomov@inktank.com>
- <CA+55aFwTuBDHgQoTymr8OtE-+k=+pX0T_eb+fff0K+Pa3C-g-Q@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: State of the erasure code pyramid plugin
+Date: Thu, 30 Jan 2014 09:04:15 +0100
+Message-ID: <52EA077F.4070402@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CA+55aFwTuBDHgQoTymr8OtE-+k=+pX0T_eb+fff0K+Pa3C-g-Q@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Ilya Dryomov <ilya.dryomov@inktank.com>, Sage Weil <sage@inktank.com>, Dave Jones <davej@redhat.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, ceph-devel@vger.kernel.org, linux-fsdevel <linux-fsdevel@vger.kernel.org>, Christoph Hellwig <hch@infradead.org>, Al Viro <viro@zeniv.linux.org.uk>, Guangliang Zhao <lucienchao@gmail.com>, Li Wang <li.wang@ubuntykylin.com>, zheng.z.yan@intel.com
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="2N2cteqWXw1KioHMKov3sx3epgotVU78X"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from smtp.dmail.dachary.org ([91.121.254.229]:56695 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751000AbaA3IEQ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Jan 2014 03:04:16 -0500
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Andreas-Joachim Peters <andreas.joachim.peters@cern.ch>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Wed, Jan 29, 2014 at 11:09:18AM -0800, Linus Torvalds wrote:
-> So attached is the incremental diff of the patch by Sage and Ilya, and
-> I'll apply it (delayed a bit to see if I can get the sign-off from
-> Ilya), but I also think we should fix the (non-cached) ACL functions
-> that call down to the filesystem layer to also get the dentry.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--2N2cteqWXw1KioHMKov3sx3epgotVU78X
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-For ->set_acl that's fairly easily doable and I actually had a version
-doing that to be able to convert 9p.  But for ->get_acl the path walking
-caller didn't seem easily feasible.  ->get_acl actually is an invention
-of yours, so if you got a good idea to get the dentry to it I'd love
-to be able to pass it.
+Hi,
+
+Your last comment made me realize I took an approach that is more complex=
+ than needed (the decode_chunks / encode_chunks methods are not necessary=
+), which results in something that is also sub-optimal (it decodes too mu=
+ch and has no way to limit decoding to what is strictly necessary althoug=
+h this is precisely the point of the pyramid plugin). I see how to resolv=
+e it (rewrite recursion in terms of the encode()/decode() API instead of =
+the encode_chunks()/decode_chunks() API and I'm half way thru). But since=
+ the feature freeze is Friday and given than it's not the only topic I ca=
+re about, it is probably better to postpone.=20
+
+I'm quite happy that we now have a sound implementation plan. Even more t=
+hat the current API is good enough. What remains to be done is:
+
+* Rewrite of https://github.com/ceph/ceph/pull/1142 with encode()/decode(=
+)
+* Complete the XOR plugin https://github.com/apeters1971/ceph/tree/wip-xo=
+r
+* Implement a way ( moving the primary in the same datacenter as a failin=
+g OSD ? ) for pools to take advantage of the provided locality
+
+I reorganized the tasks under http://tracker.ceph.com/issues/7266 to keep=
+ track of this.=20
+
+Cheers
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+
+
+--2N2cteqWXw1KioHMKov3sx3epgotVU78X
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.20 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlLqB38ACgkQ8dLMyEl6F20OnwCcCESDZuerEriSroRJNvdaRW5x
+ZawAnRbH4Es5KLXdb2W5/qlG9Qm8Unue
+=XznP
+-----END PGP SIGNATURE-----
+
+--2N2cteqWXw1KioHMKov3sx3epgotVU78X--
