@@ -1,114 +1,52 @@
-From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [GIT PULL] Ceph updates for -rc1
-Date: Thu, 30 Jan 2014 02:46:19 -0800
-Message-ID: <20140130104619.GA13139@infradead.org>
-References: <alpine.DEB.2.00.1401281032560.16427@cobra.newdream.net>
- <20140128211021.GB1377@redhat.com>
- <CA+55aFxmQZ+sAC+_a=QXUSVQ1e=cSVkeZVL4d8kawFp9N5eS-w@mail.gmail.com>
- <alpine.DEB.2.00.1401282145410.17720@cobra.newdream.net>
- <alpine.DEB.2.00.1401290623040.27886@cobra.newdream.net>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: DISCARD support in kernel driver
+Date: Thu, 30 Jan 2014 07:24:45 -0800
+Message-ID: <CAPYLRzi5gx-zSnvnAaywNaHq6SNevLL-815P7F_D3zCadVchFg@mail.gmail.com>
+References: <52EA1BE7.5030504@ovh.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from bombadil.infradead.org ([198.137.202.9]:51217 "EHLO
-	bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751445AbaA3KqY (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Jan 2014 05:46:24 -0500
-Content-Disposition: inline
-In-Reply-To: <alpine.DEB.2.00.1401290623040.27886@cobra.newdream.net>
+Received: from mail-qc0-f170.google.com ([209.85.216.170]:36985 "EHLO
+	mail-qc0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753042AbaA3PYq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Jan 2014 10:24:46 -0500
+Received: by mail-qc0-f170.google.com with SMTP id e9so5229627qcy.29
+        for <ceph-devel@vger.kernel.org>; Thu, 30 Jan 2014 07:24:45 -0800 (PST)
+In-Reply-To: <52EA1BE7.5030504@ovh.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, Dave Jones <davej@redhat.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, ceph-devel@vger.kernel.org, linux-fsdevel <linux-fsdevel@vger.kernel.org>, Christoph Hellwig <hch@infradead.org>, Al Viro <viro@zeniv.linux.org.uk>, Guangliang Zhao <lucienchao@gmail.com>, Li Wang <li.wang@ubuntykylin.com>, zheng.z.yan@intel.com
+To: Jean-Tiare LE BIGOT <jean-tiare.le-bigot@ovh.net>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Wed, Jan 29, 2014 at 06:30:00AM -0800, Sage Weil wrote:
-> The set_acl inode_operation wasn't getting set, and the prototype needed 
-> to be adjusted a bit (it doesn't take a dentry anymore).  All seems to be 
-> well with the below patch.
+On Thu, Jan 30, 2014 at 1:31 AM, Jean-Tiare LE BIGOT
+<jean-tiare.le-bigot@ovh.net> wrote:
+> Hi,
+>
+> I started to implement 'DISCARD' support in RBD kernel driver as described
+> on http://tracker.ceph.com/issues/190
+>
+> This first (easy) step was to add at the end of
+> drivers/block/rbd.c:rbd_init_disk
+>
+>     /* Advertise discard support for aligned blocks */
+>     queue_flag_set_unlocked(QUEUE_FLAG_DISCARD, q);
+>     disk->queue->limits.discard_granularity = segment_size;
+>     disk->queue->limits.discard_alignment = segment_size;
+>
+> With this both 'mount -o discard' and 'fstrim' stopped to complain about
+> missing 'DISCARD' support. Good !
+>
+> Next step was to add support on `rbd_request_fn` which I did (sort of). But
+> here I'm stuck. If I understood well FS drivers uses `REQ_DISCARD` flag of
+> `rq->cmd_flags` to notify the driver of the discard operation. But the
+> problem is that (rq->cmd_flags & REQ_DISCARD) never appears to be set.
+>
+> I tried copying then removing large files, lots of small files, forcing
+> fstrim. But I never got it. I must be missing something obvious but I can't
+> manage to find what ? Do you have any clue what could be wrong ?
 
-Btw, there's a few minor bits that should go on top of yours:
-
- - ->get_acl only gets called after we checked for a cached ACL, so no
-   need to call get_cached_acl again.
- - no need to check IS_POSIXACL in ->get_acl, without that it should
-   never get set as all the callers that set it already have the check.
- - you should be able to use the full posix_acl_create in CEPH
-
-Untested patch below:
-
-diff --git a/fs/ceph/acl.c b/fs/ceph/acl.c
-index 66d377a..9ab312e 100644
---- a/fs/ceph/acl.c
-+++ b/fs/ceph/acl.c
-@@ -66,13 +66,6 @@ struct posix_acl *ceph_get_acl(struct inode *inode, int type)
- 	char *value = NULL;
- 	struct posix_acl *acl;
- 
--	if (!IS_POSIXACL(inode))
--		return NULL;
--
--	acl = ceph_get_cached_acl(inode, type);
--	if (acl != ACL_NOT_CACHED)
--		return acl;
--
- 	switch (type) {
- 	case ACL_TYPE_ACCESS:
- 		name = POSIX_ACL_XATTR_ACCESS;
-@@ -190,41 +183,24 @@ out:
- 
- int ceph_init_acl(struct dentry *dentry, struct inode *inode, struct inode *dir)
- {
--	struct posix_acl *acl = NULL;
--	int ret = 0;
--
--	if (!S_ISLNK(inode->i_mode)) {
--		if (IS_POSIXACL(dir)) {
--			acl = ceph_get_acl(dir, ACL_TYPE_DEFAULT);
--			if (IS_ERR(acl)) {
--				ret = PTR_ERR(acl);
--				goto out;
--			}
--		}
-+	struct posix_acl *default_acl, *acl;
-+	int error;
- 
--		if (!acl)
--			inode->i_mode &= ~current_umask();
--	}
-+	error = posix_acl_create(dir, &inode->i_mode, &default_acl, &acl);
-+	if (error)
-+		return error;
- 
--	if (IS_POSIXACL(dir) && acl) {
--		if (S_ISDIR(inode->i_mode)) {
--			ret = ceph_set_acl(inode, acl, ACL_TYPE_DEFAULT);
--			if (ret)
--				goto out_release;
--		}
--		ret = __posix_acl_create(&acl, GFP_NOFS, &inode->i_mode);
--		if (ret < 0)
--			goto out;
--		else if (ret > 0)
--			ret = ceph_set_acl(inode, acl, ACL_TYPE_ACCESS);
--		else
--			cache_no_acl(inode);
--	} else {
-+	if (!default_acl && !acl)
- 		cache_no_acl(inode);
--	}
- 
--out_release:
--	posix_acl_release(acl);
--out:
--	return ret;
-+	if (default_acl) {
-+		error = ceph_set_acl(inode, default_acl, ACL_TYPE_DEFAULT);
-+		posix_acl_release(default_acl);
-+	}
-+	if (acl) {
-+		if (!error)
-+			error = ceph_set_acl(inode, acl, ACL_TYPE_ACCESS);
-+		posix_acl_release(acl);
-+	}
-+	return error;
- }
+I don't know anything about the relevant kernel internal interfaces
+here, but don't most FSes need to be told explicitly to do trimming?
+Did you do that?
+-Greg
+Software Engineer #42 @ http://inktank.com | http://ceph.com
