@@ -1,97 +1,51 @@
-From: Michael Sevilla <mikesevilla3@gmail.com>
-Subject: Re: CephFS standup
-Date: Thu, 30 Jan 2014 13:50:23 -0800
-Message-ID: <CAD=PzHKEWdFh9AD2COvbh6mQTe0x_CpXR7yJKA0VM093=9yJ_g@mail.gmail.com>
-References: <alpine.DEB.2.00.1401021238320.12141@cobra.newdream.net>
-	<CAPYLRzihBnyZn20w6zYKXEamM0vqvd0N5aaOeAjL1nREozdVmw@mail.gmail.com>
-	<alpine.DEB.2.00.1401301051040.24840@cobra.newdream.net>
+From: Linus Torvalds <torvalds@linux-foundation.org>
+Subject: Re: [PATCH v2] ceph: fix posix ACL hooks
+Date: Thu, 30 Jan 2014 14:01:38 -0800
+Message-ID: <CA+55aFxbVFpy8Y8P5fMCmmTSGbFxU9dTbOj9uTH+fKWGUzwgNg@mail.gmail.com>
+References: <CALFYKtDCNWK+9m5m3P01dcxOOV7iHFeNaOH=Q=6Pffuo8gmrMQ@mail.gmail.com>
+	<1391013467-7598-1-git-send-email-ilya.dryomov@inktank.com>
+	<CA+55aFwTuBDHgQoTymr8OtE-+k=+pX0T_eb+fff0K+Pa3C-g-Q@mail.gmail.com>
+	<20140130075421.GA10050@infradead.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f180.google.com ([209.85.192.180]:43645 "EHLO
-	mail-pd0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932111AbaA3VuX (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Jan 2014 16:50:23 -0500
-Received: by mail-pd0-f180.google.com with SMTP id x10so3524457pdj.39
-        for <ceph-devel@vger.kernel.org>; Thu, 30 Jan 2014 13:50:23 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1401301051040.24840@cobra.newdream.net>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Gregory Farnum <greg@inktank.com>, "Yan, Zheng" <zheng.z.yan@intel.com>, Li Wang <liwang@ubuntukylin.com>, John Spray <john.spray@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20140130075421.GA10050@infradead.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Christoph Hellwig <hch@infradead.org>
+Cc: Ilya Dryomov <ilya.dryomov@inktank.com>, Sage Weil <sage@inktank.com>, Dave Jones <davej@redhat.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, ceph-devel@vger.kernel.org, linux-fsdevel <linux-fsdevel@vger.kernel.org>, Al Viro <viro@zeniv.linux.org.uk>, Guangliang Zhao <lucienchao@gmail.com>, Li Wang <li.wang@ubuntykylin.com>, zheng.z.yan@intel.com
+List-Id: ceph-devel.vger.kernel.org
 
-I'm thinking of using the metadata cluster for a school project. I
-just got a poster + work-in-progress report relating to CephFS
-accepted at FAST'14.
+On Wed, Jan 29, 2014 at 11:54 PM, Christoph Hellwig <hch@infradead.org> wrote:
+>
+> For ->set_acl that's fairly easily doable and I actually had a version
+> doing that to be able to convert 9p.  But for ->get_acl the path walking
+> caller didn't seem easily feasible.  ->get_acl actually is an invention
+> of yours, so if you got a good idea to get the dentry to it I'd love
+> to be able to pass it.
 
-Is there room in this meeting for me to sit in? I don't want to plug
-up a space if seating is limited.
+Yeah, that's pretty annoying, largely because that path is also
+RCU-walk aware, which does *not* need this all (because it will never
+call down into the filesystem - if the acl isn't found in the cached
+acl's, we just abort).
 
-Thanks,
+And we're going through that very common "generic_permission()" thing
+that in turn is also often called from the low-level filesystens, and
+it's all fairly tightly integrated with __inode_permission() etc.
 
-Michael
+In the end, all the original call-sites should have a dentry, and none
+of this is "fundamental". But you're right, it looks like an absolute
+nightmare to add the dentry pointer through the whole chain. Damn.
 
-On Thu, Jan 30, 2014 at 11:03 AM, Sage Weil <sage@inktank.com> wrote:
-> Let's go with
->
->    6:45am CA
->    2:45pm Edinburgh / GMT
->    10:45pm Shanghai
->
-> Starting next week?
->
-> I think the initial task is to do a big of backlog scrubbing and set
-> priorities.  I shared a google doc with a 2 min braindump of where the
-> initial focus should be.  Please edit/expand the list and then we can
-> prioritize...
->
-> sage
->
->
->
-> On Mon, 6 Jan 2014, Gregory Farnum wrote:
->
->> A little late on this (I was on vacation and my phone doesn't do
->> plain-text email!), but I prefer the morning slot to the later ones.
->> :)
->> -Greg
->>
->>
->> On Thu, Jan 2, 2014 at 12:51 PM, Sage Weil <sage@inktank.com> wrote:
->> > 2014 will be the Year of the Linux Desktop^W^W^WCephFS!  To that end, we
->> > should schedule a daily standup to coordinate development activities.
->> >
->> > The regular participants are probably:
->> >
->> >  Zheng Yan (Shanghai, China)
->> >  Li Wang (Changsha, China)
->> >  Sage Weil (California)
->> >  Greg Farnum (California)
->> >  John Spray (Edinburgh, Scotland)
->> >
->> > ...and of course anybody else who is interested in joining!
->> >
->> > I think these are all (conveniently) 8 hours apart.  Our options are
->> > probably something like:
->> >
->> >    3pm CA / 11pm Edinburgh / 7am Shanghai
->> >   11pm CA /  7am Edinburgh / 3pm Shanghai
->> >    7am CA /  3pm Edinburgh / 11pm Shanghai
->> >
->> > Ian tells me the Lustre team (which was similarly distributed) used to
->> > rotate every few months to spread the early morning/late night pain.  For
->> > my part, I'm happy with any of these slots (although shifting a few
->> > minutes earlier to 6:45am would be marginally better w/ my kids).  Does
->> > anybody else have any preferences?
->> >
->> > sage
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+So I'm not thrilled about it, but maybe that "d_find_alias(inode)" to
+find the dentry is good enough in practice. It feels very much
+incorrect (it could find a dentry with a path that you cannot actually
+access on the server, and result in user-visible errors), but I
+definitely see your argument. It may just not be worth the pain for
+this odd ceph case.
+
+That said, if the ceph people decide to try to bite the bullet and do
+the required conversions to pass the dentry to the permissions
+functions, I think I'd take it unless it ends up being *too* horribly
+messy.
+
+               Linus
