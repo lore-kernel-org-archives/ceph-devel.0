@@ -1,73 +1,43 @@
-From: Sage Weil <sage@inktank.com>
-Subject: [PATCH] ceph: fix missing dput in ceph_set_acl
-Date: Fri, 31 Jan 2014 07:25:25 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1401310623140.11178@cobra.newdream.net>
+From: Patrick McGarry <patrick@inktank.com>
+Subject: Ceph Day Kuala Lumpur [Call for Speakers]
+Date: Fri, 31 Jan 2014 12:21:03 -0500
+Message-ID: <CAP8Oy=+pr+YHJYK5xZMk7ZdqatEaUagLRyH2YukBgJ0k24vLyg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:54322 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932412AbaAaPZ0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 31 Jan 2014 10:25:26 -0500
+Received: from mail-pa0-f49.google.com ([209.85.220.49]:54563 "EHLO
+	mail-pa0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932236AbaAaRVE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 31 Jan 2014 12:21:04 -0500
+Received: by mail-pa0-f49.google.com with SMTP id hz1so4649522pad.22
+        for <ceph-devel@vger.kernel.org>; Fri, 31 Jan 2014 09:21:04 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: torvalds@linux-foundation.org
-Cc: ceph-devel@vger.kernel.org, julia.lawall@lip6.fr, fengguang.wu@intel.com
+To: Ceph-User <ceph-users@ceph.com>, Ceph Devel <ceph-devel@vger.kernel.org>
 
-Add matching dput() for d_find_alias().  Move d_find_alias() down a bit
-at Julia's suggestion.
+Greetings cephalopods!
 
-Reported-by: Fengguang Wu <fengguang.wu@intel.com>
-Reported-by: Julia Lawall <julia.lawall@lip6.fr>
-Signed-off-by: Sage Weil <sage@inktank.com>
-Reviewed-by: Ilya Dryomov <ilya.dryomov@inktank.com>
----
- fs/ceph/acl.c | 9 ++++++---
- 1 file changed, 6 insertions(+), 3 deletions(-)
+This year's Ceph Day program is really starting to take shape.  While
+we already have Ceph Day Frankfurt at the end of Feb and events in
+March and April starting to take shape in the US, we now have an event
+that is starting to solidify for our APAC friends as well.
 
-diff --git a/fs/ceph/acl.c b/fs/ceph/acl.c
-index 9ab312e..4c2d452 100644
---- a/fs/ceph/acl.c
-+++ b/fs/ceph/acl.c
-@@ -107,7 +107,7 @@ int ceph_set_acl(struct inode *inode, struct posix_acl *acl, int type)
- 	char *value = NULL;
- 	struct iattr newattrs;
- 	umode_t new_mode = inode->i_mode, old_mode = inode->i_mode;
--	struct dentry *dentry = d_find_alias(inode);
-+	struct dentry *dentry;
- 
- 	if (acl) {
- 		ret = posix_acl_valid(acl);
-@@ -151,12 +151,13 @@ int ceph_set_acl(struct inode *inode, struct posix_acl *acl, int type)
- 			goto out_free;
- 	}
- 
-+	dentry = d_find_alias(inode);
- 	if (new_mode != old_mode) {
- 		newattrs.ia_mode = new_mode;
- 		newattrs.ia_valid = ATTR_MODE;
- 		ret = ceph_setattr(dentry, &newattrs);
- 		if (ret)
--			goto out_free;
-+			goto out_dput;
- 	}
- 
- 	if (value)
-@@ -170,11 +171,13 @@ int ceph_set_acl(struct inode *inode, struct posix_acl *acl, int type)
- 			newattrs.ia_valid = ATTR_MODE;
- 			ceph_setattr(dentry, &newattrs);
- 		}
--		goto out_free;
-+		goto out_dput;
- 	}
- 
- 	ceph_set_cached_acl(inode, type, acl);
- 
-+out_dput:
-+	dput(dentry);
- out_free:
- 	kfree(value);
- out:
--- 
-1.8.5.1
+Ceph Day Kuala Lumpur is tentatively scheduled for the first full week
+in May (details to follow as they solidify) and we'd like to find
+people in that region to be speakers.  There are a few people we will
+be reaching out to individually, but anyone that has a good Ceph story
+to tell is welcome to make a presentation.
 
+Presentations should be 45 minutes in length and have good technical
+depth and breadth while still appealing to a general audience.  If you
+are interested feel free to reply to me here with a descriptive title
+and a few sentences explaining what the talk will focus on.  Thanks!
+
+
+
+Best Regards,
+
+Patrick McGarry
+Director, Community || Inktank
+http://ceph.com  ||  http://inktank.com
+@scuttlemonkey || @ceph || @inktank
