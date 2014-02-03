@@ -1,61 +1,59 @@
-From: Al Viro <viro@ZenIV.linux.org.uk>
+From: Linus Torvalds <torvalds@linux-foundation.org>
 Subject: Re: [PATCH v2] ceph: fix posix ACL hooks
-Date: Mon, 3 Feb 2014 22:40:35 +0000
-Message-ID: <20140203224034.GF10323@ZenIV.linux.org.uk>
+Date: Mon, 3 Feb 2014 14:55:27 -0800
+Message-ID: <CA+55aFzQJ6ZWQAov_e_o+gKg4OBPmSba+xSrSMifSq_Yu8OLEg@mail.gmail.com>
 References: <CALFYKtDCNWK+9m5m3P01dcxOOV7iHFeNaOH=Q=6Pffuo8gmrMQ@mail.gmail.com>
- <1391013467-7598-1-git-send-email-ilya.dryomov@inktank.com>
- <CA+55aFwTuBDHgQoTymr8OtE-+k=+pX0T_eb+fff0K+Pa3C-g-Q@mail.gmail.com>
- <20140130075421.GA10050@infradead.org>
- <CA+55aFxbVFpy8Y8P5fMCmmTSGbFxU9dTbOj9uTH+fKWGUzwgNg@mail.gmail.com>
- <20140203102943.GF11829@infradead.org>
- <CA+55aFytvTPdBsv6BwSomUGWXZ_tKP=BxaeJ7FXBft0JNnjBCQ@mail.gmail.com>
- <20140203215908.GD10323@ZenIV.linux.org.uk>
- <CA+55aFz3PyyCqOLs_SBRS3cbGxWd5ez4Svz2+xK+4KtCez8iGw@mail.gmail.com>
+	<1391013467-7598-1-git-send-email-ilya.dryomov@inktank.com>
+	<CA+55aFwTuBDHgQoTymr8OtE-+k=+pX0T_eb+fff0K+Pa3C-g-Q@mail.gmail.com>
+	<20140130075421.GA10050@infradead.org>
+	<CA+55aFxbVFpy8Y8P5fMCmmTSGbFxU9dTbOj9uTH+fKWGUzwgNg@mail.gmail.com>
+	<20140203102943.GF11829@infradead.org>
+	<CA+55aFytvTPdBsv6BwSomUGWXZ_tKP=BxaeJ7FXBft0JNnjBCQ@mail.gmail.com>
+	<20140203215908.GD10323@ZenIV.linux.org.uk>
+	<CA+55aFz3PyyCqOLs_SBRS3cbGxWd5ez4Svz2+xK+4KtCez8iGw@mail.gmail.com>
+	<20140203224034.GF10323@ZenIV.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CA+55aFz3PyyCqOLs_SBRS3cbGxWd5ez4Svz2+xK+4KtCez8iGw@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-vb0-f54.google.com ([209.85.212.54]:63350 "EHLO
+	mail-vb0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752715AbaBCWz2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Feb 2014 17:55:28 -0500
+In-Reply-To: <20140203224034.GF10323@ZenIV.linux.org.uk>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Al Viro <viro@zeniv.linux.org.uk>
 Cc: Christoph Hellwig <hch@infradead.org>, Ilya Dryomov <ilya.dryomov@inktank.com>, Sage Weil <sage@inktank.com>, Dave Jones <davej@redhat.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, ceph-devel@vger.kernel.org, linux-fsdevel <linux-fsdevel@vger.kernel.org>, Guangliang Zhao <lucienchao@gmail.com>, Li Wang <li.wang@ubuntykylin.com>, zheng.z.yan@intel.com
-List-Id: ceph-devel.vger.kernel.org
 
-On Mon, Feb 03, 2014 at 02:12:00PM -0800, Linus Torvalds wrote:
+On Mon, Feb 3, 2014 at 2:40 PM, Al Viro <viro@zeniv.linux.org.uk> wrote:
+>
+> Umm...  Point, but that actually means that we get an extra pitfall for
+> filesystem writers here.  foo_permission() passes dentry (now that it
+> has one) to foo_wank_a_lot(), with the latter using dentry->d_inode at
+> some point...
 
-> >> -int afs_permission(struct inode *inode, int mask)
-> >> +int afs_permission(struct dentry *dentry, struct inode *inode, int mask)
-> >
-> > Oh, _lovely_.  So not only do we pass dentry, the arguments are redundant
-> > as well.
-> 
-> Note that *not* passing in inode would make the patch much bigger,
-> because now every filesystem would have to add the
-> 
->        struct inode *inode = dentry->d_inode;
-> 
-> at the top.
-> 
-> Also, I'm not actually convinced it is redundant at all. Remember the
-> RCU lookup case? dentry->d_inode is not safe.
+I agree.
 
-Umm...  Point, but that actually means that we get an extra pitfall for
-filesystem writers here.  foo_permission() passes dentry (now that it
-has one) to foo_wank_a_lot(), with the latter using dentry->d_inode at
-some point...
+The good news, though, is that in the RCU lookup case, we have that
+MAY_NOT_BLOCK thing, and most filesystems will have errored out for
+any complex operations.
 
-> >> +static int gfs2_vfs_permission(struct dentry *dentry, struct inode *inode, int mask)
-> >> +{
-> >> +     return gfs2_permission(inode, mask);
-> >> +}
-> >
-> > Er...  You do realize that callers of gfs2_permission() tend to have
-> > the dentry in question, either directly or as ->d_parent of something
-> > they have?
-> 
-> Not true. Look closer.
-> 
-> Look at gfs2_lookupi() in particular, and check how it is called.
+RCU lookup is special, and complicated, and sadly, the permissions
+checking is very much part of that. But for the really complex cases,
+at least we can punt.
 
-Yeowch...  gfs2_ok_to_move() is particulary nasty...  WTF do we need
-it for and why is it not racy as hell?
+>> Look at gfs2_lookupi() in particular, and check how it is called.
+>
+> Yeowch...  gfs2_ok_to_move() is particulary nasty...  WTF do we need
+> it for and why is it not racy as hell?
+
+I don't know. And I suspect that for things like the journal index
+file lookup (which is actually worse - see gfs2_jindex_hold()) we
+don't really about the permissions, since this is just done at
+init_journal() time.
+
+So I think all of this is quite solvable for gfs2, it just wasn't the
+obvious kind of "we already have the dentry" case that every single
+other case I looked at was.
+
+                     Linus
