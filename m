@@ -1,153 +1,200 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: controlling erasure code chunk size
-Date: Mon, 03 Feb 2014 12:35:48 +0100
-Message-ID: <52EF7F14.5020108@dachary.org>
-References: <52EE6128.209@dachary.org>	<3472A07E6605974CBC9BC573F1BC02E4AE6C0277@CERNXCHG41.cern.ch> <CA+4uBUbZYrp7BV8nK37Rx4BgpiN6kXg4_K74_8ja_sLL_FvN5w@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="VjIum0BXaF56cr7nIseMnlSh6aHXuCq1W"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:59609 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751908AbaBCLf4 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Feb 2014 06:35:56 -0500
-In-Reply-To: <CA+4uBUbZYrp7BV8nK37Rx4BgpiN6kXg4_K74_8ja_sLL_FvN5w@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sam.just@inktank.com>, Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+From: Guang <guangyy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: RADOS + deep scrubbing performance issues in
+	production environment
+Date: Mon, 3 Feb 2014 21:40:07 +0800
+Message-ID: <ECAD21C4-A342-48ED-BE40-9562B8CCDA08@yahoo.com>
+References: <20140127151321.GD26390@philipgian-mac>
+	<CAFMfnwp4u-O8m3gZko35y5t3r05kAgt9zUWOew_pmHSJjmLPmA@mail.gmail.com>
+	<alpine.DEB.2.00.1401271045160.2149@cobra.newdream.net>
+	<20140128181306.GC11532@philipgian-mac>
+	<066498EC-D137-472A-85DB-93751E85C753@yahoo.com>
+Mime-Version: 1.0 (Mac OS X Mail 6.6 \(1510\))
+Content-Type: multipart/mixed; boundary="===============0303378362=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <066498EC-D137-472A-85DB-93751E85C753-/E1597aS9LQAvxtiuMwx3w@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: Filippos Giannakos <philipgian-Sqt7GMbKoOQ@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org Development" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+Cc: synnefo-devel-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---VjIum0BXaF56cr7nIseMnlSh6aHXuCq1W
-Content-Type: text/plain; charset=ISO-8859-1
+
+--===============0303378362==
+Content-Type: multipart/alternative; boundary="Apple-Mail=_B23FDCA9-018B-412A-A12B-63E9E9FBCDF8"
+
+
+--Apple-Mail=_B23FDCA9-018B-412A-A12B-63E9E9FBCDF8
 Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain;
+	charset=us-ascii
 
-Hi Sam,
++ceph-users.
 
-The argument to get_chunk_size is the stripe width, named object_size bec=
-ause the API knows nothing about stripes, it is a concept for the caller =
-to implement. Say you have a desired chunk size in mind, you would:
+Does anybody have the similar experience of scrubbing / deep-scrubbing?
 
-   object_size =3D desired_chunk_size * get_data_chunk_count()
-   actual_chunk_size =3D get_chunk_size(object_size)
+Thanks,
+Guang
 
-If you have a desired stripe width / object size in mind you would:
+On Jan 29, 2014, at 10:35 AM, Guang <yguang11-/E1597aS9LQAvxtiuMwx3w@public.gmane.org> wrote:
 
-   object_size =3D desired_stripe_width
-   chunk_size =3D get_chunk_size(object_size)
-
-Following Andreas suggestions, controlling the size of the actual chunk i=
-s a matter of tweaking the alignment constraints via the erasure code plu=
-gin parameters.=20
-
-Cheers
-
-On 02/02/2014 23:45, Samuel Just wrote:
-> I assume we will use get_chunksize(desired_chunksize) *
-> get_data_chunk_count() on the mon to define the stripe width (the size
-> of the buffer which will be presented to the plugin for encoding) for
-> the pool.  At the moment, get_chunksize(4*(2<<10)) *
-> get_data_chunk_count() =3D 393216 using the jerasure plugin where
-> get_data_chunk_count() =3D 4.  This seems a bit big?
-> -Sam
+> Glad to see there are some discussion around scrubbing / =
+deep-scrubbing.
 >=20
-> On Sun, Feb 2, 2014 at 8:18 AM, Andreas Joachim Peters
-> <Andreas.Joachim.Peters@cern.ch> wrote:
->> Hi Loic et.al.
->>
->> I think there is now some confusion about chunk_size, alignment, packe=
-tsize and the stripe_size to be used upstream.
->>
->> Algorithms with a bit-matrix require that the size per device is a mul=
-tiple of (packetsize*w). Moreover the size per device and packetsize itse=
-lf must be a multiple of sizeof(long/int). For other algorithms  you can =
-assume the same with packetsize=3D1.
->>
->> packetsize and w influence  the performance and too small stripe_size =
-on top will have negative performance effects due to the preparation of b=
-ufferlist, internal buffer checks and more loops to execute for the same =
-amount of data. We can also do some measurement for this but the current =
-benchmark would probably not reflect this, since it measures the algorith=
-mic part not the bufferlist preparation part.
->>
->> If you want to define a stripe_size it has to be a multiple of the val=
-ue returned by get_chunksize  and possibly it is a large multiple but in =
-total not larger than processor caches. The plugin can not define the str=
-ipe_size, it defines only the alignment to be used for stripe_size and st=
-ripe_size is defined outside the plugin which maybe complicates the under=
-standing. We should carefully check once more the Jerasure alignment requ=
-irements and our current implementation.
->>
->> To get rid of the platform dependency we could put a generic alignment=
- requirement that chunksize has to be also 64-byte aligned.
->>
->> Cheers Andreas.
->>
->>
->>
->>
->> ________________________________________
->> From: Loic Dachary [loic@dachary.org]
->> Sent: 02 February 2014 16:15
->> To: Samuel Just
->> Cc: Ceph Development; Andreas Joachim Peters
->> Subject: controlling erasure code chunk size
->>
->> [cc' ceph-devel]
->>
->> Hi Sam,
->>
->> Here is how chunks are expected to be aligned:
->>
->> https://github.com/ceph/ceph/blob/4c4e1d0d470beba7690d1c0e39bfd1146a25=
-f465/src/osd/ErasureCodePluginJerasure/ErasureCodeJerasure.cc#L365
->>
->>  unsigned alignment =3D k*w*packetsize*sizeof(int);
->>   if ( ((w*packetsize*sizeof(int))%LARGEST_VECTOR_WORDSIZE) )
->>     alignment =3D k*w*packetsize*LARGEST_VECTOR_WORDSIZE;
->>   return alignment;
->>
->> If you are going to encode small objects, it may very well lead to ove=
-rsized chunks if packetsize is large. At the moment the default is 3072
->>
->> https://github.com/ceph/ceph/blob/4c4e1d0d470beba7690d1c0e39bfd1146a25=
-f465/src/common/config_opts.h#L406
->>
->> A value I picked when experimenting with 1MB objects encoding ( http:/=
-/dachary.org/?p=3D2594 ).
->>
->> I'm not entirely sure why the alignment is calculated the way it is. A=
-ndreas certainly has a better understanding on this topic.
->>
->> Cheers
->>
+> We are experiencing the same that scrubbing could affect latency quite =
+a bit and so far I found two slow patterns (dump_historic_ops): 1) =
+waiting from being dispatched 2) waiting in the op working queue to be =
+fetched by an available op thread. For the first slow pattern, it looks =
+like there is lock (as dispatcher stop working for 2 seconds and then =
+resume, same for scrubber thread), that needs further investigation. For =
+the second slow pattern, as scrubbing brings more ops (for scrubbing =
+check), that make the op thread's work load increase (client op has a =
+lower priority), I think that could be improved by increasing the op =
+thread number, I will confirm this analysis by adding more op threads =
+and turn on scrubbing on OSD basis.
+>=20
+> Does the above observation and analysis make sense?
+>=20
+> Thanks,
+> Guang
+>=20
+> On Jan 29, 2014, at 2:13 AM, Filippos Giannakos <philipgian-Sqt7GMbKoOQ@public.gmane.org> =
+wrote:
+>=20
+>> On Mon, Jan 27, 2014 at 10:45:48AM -0800, Sage Weil wrote:
+>>> There is also=20
+>>>=20
+>>> ceph osd set noscrub
+>>>=20
+>>> and then later
+>>>=20
+>>> ceph osd unset noscrub
+>>>=20
+>>> I forget whether this pauses an in-progress PG scrub or just makes =
+it stop=20
+>>> when it gets to the next PG boundary.
+>>>=20
+>>> sage
+>>=20
+>> I bumped into those settings but I couldn't find any documentation =
+about them.
+>> When I first tried them, they didn't do anything immediately, so I =
+thought they
+>> weren't the answer. After your mention, I tried them again, and after =
+a while
+>> the deep-scrubbing stopped. So I'm guessing they stop scrubbing on =
+the next PG
+>> boundary.
+>>=20
+>> I see from this thread and others before, that some people think it =
+is a spindle
+>> issue. I'm not sure that it is just that. Replicating it to an idle =
+cluster that
+>> can do more than 250MiB/seconds and pausing for 4-5 seconds on a =
+single request,
+>> sounds like an issue by itself. Maybe there is too much locking or =
+not enough
+>> priority to the actual I/O ? Plus, that idea of throttling deep =
+scrubbing based
+>> on the iops sounds appealing.
+>>=20
+>> Kind Regards,
+>> --=20
+>> Filippos
+>> <philipgian-Sqt7GMbKoOQ@public.gmane.org>
 >> --
->> Lo=EFc Dachary, Artisan Logiciel Libre
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" =
+in
+>> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >=20
 
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
 
+--Apple-Mail=_B23FDCA9-018B-412A-A12B-63E9E9FBCDF8
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/html;
+	charset=us-ascii
 
---VjIum0BXaF56cr7nIseMnlSh6aHXuCq1W
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+<html><head><meta http-equiv=3D"Content-Type" content=3D"text/html =
+charset=3Dus-ascii"></head><body style=3D"word-wrap: break-word; =
+-webkit-nbsp-mode: space; -webkit-line-break: after-white-space; =
+"><div>+ceph-users.</div><div><br></div><div>Does anybody have the =
+similar experience of scrubbing / =
+deep-scrubbing?</div><div><br></div><div>Thanks,</div><div>Guang</div><br>=
+<div><div>On Jan 29, 2014, at 10:35 AM, Guang &lt;<a =
+href=3D"mailto:yguang11-/E1597aS9LQAvxtiuMwx3w@public.gmane.org">yguang11-/E1597aS9LQAvxtiuMwx3w@public.gmane.org</a>&gt; =
+wrote:</div><br class=3D"Apple-interchange-newline"><blockquote =
+type=3D"cite"><meta http-equiv=3D"Content-Type" content=3D"text/html =
+charset=3Dus-ascii"><div style=3D"word-wrap: break-word; =
+-webkit-nbsp-mode: space; -webkit-line-break: after-white-space; =
+"><div><span style=3D"font-size: 16px;">Glad to see there are some =
+discussion around scrubbing / deep-scrubbing.</span></div><div><span =
+style=3D"font-size: 16px;"><br></span></div><div><span style=3D"font-size:=
+ 16px;">We are experiencing the same that scrubbing could affect latency =
+quite a bit and so far I found two slow patterns =
+(dump_historic_ops)</span><span style=3D"font-size: 16px; =
+">:&nbsp;</span><span style=3D"font-size: 16px;">1) waiting from being =
+dispatched 2) waiting in the op working queue to be fetched by an =
+available op thread. For the first slow pattern, it looks like there is =
+lock (as dispatcher stop working for 2 seconds and then resume, same for =
+scrubber thread), that needs further investigation. For the second slow =
+pattern, as scrubbing brings more ops (for scrubbing check), that make =
+the op thread's work load increase (client op has a lower priority), I =
+think that&nbsp;could&nbsp;be improved by increasing the op thread =
+number, I will confirm this analysis by adding more op threads and turn =
+on scrubbing on OSD basis.</span></div><div><span style=3D"font-size: =
+16px;"><br></span></div><div><span style=3D"font-size: 16px;">Does the =
+above observation and analysis make =
+sense?</span></div><div><br></div><div><span style=3D"font-size: =
+16px;">Thanks,</span></div><div><span style=3D"font-size: =
+16px;">Guang</span></div><br><div><div>On Jan 29, 2014, at 2:13 AM, =
+Filippos Giannakos &lt;<a =
+href=3D"mailto:philipgian-Sqt7GMbKoOQ@public.gmane.org">philipgian-Sqt7GMbKoOQ@public.gmane.org</a>&gt; =
+wrote:</div><br class=3D"Apple-interchange-newline"><blockquote =
+type=3D"cite">On Mon, Jan 27, 2014 at 10:45:48AM -0800, Sage Weil =
+wrote:<br><blockquote type=3D"cite">There is also <br><br> ceph osd set =
+noscrub<br><br>and then later<br><br> ceph osd unset noscrub<br><br>I =
+forget whether this pauses an in-progress PG scrub or just makes it stop =
+<br>when it gets to the next PG =
+boundary.<br><br>sage<br></blockquote><br>I bumped into those settings =
+but I couldn't find any documentation about them.<br>When I first tried =
+them, they didn't do anything immediately, so I thought they<br>weren't =
+the answer. After your mention, I tried them again, and after a =
+while<br>the deep-scrubbing stopped. So I'm guessing they stop scrubbing =
+on the next PG<br>boundary.<br><br>I see from this thread and others =
+before, that some people think it is a spindle<br>issue. I'm not sure =
+that it is just that. Replicating it to an idle cluster that<br>can do =
+more than 250MiB/seconds and pausing for 4-5 seconds on a single =
+request,<br>sounds like an issue by itself. Maybe there is too much =
+locking or not enough<br>priority to the actual I/O ? Plus, that idea of =
+throttling deep scrubbing based<br>on the iops sounds =
+appealing.<br><br>Kind Regards,<br>-- <br>Filippos<br>&lt;<a =
+href=3D"mailto:philipgian-Sqt7GMbKoOQ@public.gmane.org">philipgian-Sqt7GMbKoOQ@public.gmane.org</a>&gt;<br>--<br>T=
+o unsubscribe from this list: send the line "unsubscribe ceph-devel" =
+in<br>the body of a message to <a =
+href=3D"mailto:majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org">majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org</a><br=
+>More majordomo info at &nbsp;<a =
+href=3D"http://vger.kernel.org/majordomo-info.html">http://vger.kernel.org=
+/majordomo-info.html</a><br></blockquote></div><br></div></blockquote></di=
+v><br></body></html>=
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.20 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+--Apple-Mail=_B23FDCA9-018B-412A-A12B-63E9E9FBCDF8--
 
-iEYEARECAAYFAlLvfxUACgkQ8dLMyEl6F20UwwCgvxpbkmbQWIccXyp3tuHTe4wk
-MdIAn3lY8tO6SiYJ5EVnFSwrq7JB6yWS
-=8bfw
------END PGP SIGNATURE-----
+--===============0303378362==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
 
---VjIum0BXaF56cr7nIseMnlSh6aHXuCq1W--
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============0303378362==--
