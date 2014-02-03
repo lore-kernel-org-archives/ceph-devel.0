@@ -1,101 +1,150 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: firefly timing
-Date: Mon, 03 Feb 2014 18:29:20 +0100
-Message-ID: <52EFD1F0.1050808@dachary.org>
-References: <alpine.DEB.2.00.1402030819030.6345@cobra.newdream.net>
+From: Samuel Just <sam.just@inktank.com>
+Subject: Re: controlling erasure code chunk size
+Date: Mon, 3 Feb 2014 10:15:52 -0800
+Message-ID: <CA+4uBUaRXM8J2kotvMQcTdVxEYf0o0y6MJ7S=UjbwizjFcjKSg@mail.gmail.com>
+References: <52EE6128.209@dachary.org>
+	<3472A07E6605974CBC9BC573F1BC02E4AE6C0277@CERNXCHG41.cern.ch>
+	<CA+4uBUbZYrp7BV8nK37Rx4BgpiN6kXg4_K74_8ja_sLL_FvN5w@mail.gmail.com>
+	<52EF7F14.5020108@dachary.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="1cC6LqqsM7Pc8p5g9vcCUj3vmIKNRe9Q9"
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:60159 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751886AbaBCR3W (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Feb 2014 12:29:22 -0500
-In-Reply-To: <alpine.DEB.2.00.1402030819030.6345@cobra.newdream.net>
+Received: from mail-qc0-f172.google.com ([209.85.216.172]:40539 "EHLO
+	mail-qc0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751912AbaBCSPx convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Feb 2014 13:15:53 -0500
+Received: by mail-qc0-f172.google.com with SMTP id c9so11649189qcz.17
+        for <ceph-devel@vger.kernel.org>; Mon, 03 Feb 2014 10:15:52 -0800 (PST)
+In-Reply-To: <52EF7F14.5020108@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
+To: Loic Dachary <loic@dachary.org>
+Cc: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>, Ceph Development <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---1cC6LqqsM7Pc8p5g9vcCUj3vmIKNRe9Q9
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Yes, I figured we might as well match stripe_width to chunk_size *
+get_data_chunk_count().
+-Sam
 
-Hi Sage,
-
-I'm both happy and stressed out to have more time to work on erasure code=
- :-) If I'm not mistaken, the Firefly freeze is now set to Friday 14th, 2=
-014. During this time I plan to focus on implementing whatever is require=
-d for Erasure Code to work with the default jerasure plugin ( I'm thinkin=
-g https://github.com/ceph/ceph/pull/1144 , https://github.com/ceph/ceph/p=
-ull/1177 etc. ). If there is enough time, it would also be nice to have t=
-he pyramid plugin https://github.com/ceph/ceph/pull/1142 merged in, but t=
-his is not mandatory.
-
-Is there a better use of my time during this sprint ?
-
-Cheers
-
-On 03/02/2014 17:21, Sage Weil wrote:
-> The original firefly freeze date was Jan 17, but I added another sprint=
-=20
-> because there were several things that weren't quite ready yet (the cac=
-he=20
-> tier code and erasure coding).  Two weeks later we are much closer, but=
-=20
-> the EC functionality still needs a bit more time.  I would like to push=
-=20
-> out the freeze by one more sprint so that all of the code can land.  In=
-=20
-> particular, I would rather use the next sprint to get EC ready and shif=
-t=20
-> other development focus to stability early, instead of pulling last-min=
-ute=20
-> stuff in after the freeze date.
->=20
-> This bends/breaks the 'train model' schedule we are aiming for, but my =
-
-> assumption is that people are more interested in seeing the new=20
-> functionality in place than in the exact timing.
->=20
-> The only time dependency that I am aware of is the looming 14.04 freeze=
-=20
-> date.  I'm hoping that we can (worst case) put an -rc release in place =
-and=20
-> update as the code stabilizes over the next several weeks.  James, will=
-=20
-> this be problematic?
->=20
-> Does anybody else have questions or concerns about adding in another=20
-> sprint before we freeze for firefly?
->=20
-> Thanks-=20
-> sage
->=20
+On Mon, Feb 3, 2014 at 3:35 AM, Loic Dachary <loic@dachary.org> wrote:
+> Hi Sam,
+>
+> The argument to get_chunk_size is the stripe width, named object_size=
+ because the API knows nothing about stripes, it is a concept for the c=
+aller to implement. Say you have a desired chunk size in mind, you woul=
+d:
+>
+>    object_size =3D desired_chunk_size * get_data_chunk_count()
+>    actual_chunk_size =3D get_chunk_size(object_size)
+>
+> If you have a desired stripe width / object size in mind you would:
+>
+>    object_size =3D desired_stripe_width
+>    chunk_size =3D get_chunk_size(object_size)
+>
+> Following Andreas suggestions, controlling the size of the actual chu=
+nk is a matter of tweaking the alignment constraints via the erasure co=
+de plugin parameters.
+>
+> Cheers
+>
+> On 02/02/2014 23:45, Samuel Just wrote:
+>> I assume we will use get_chunksize(desired_chunksize) *
+>> get_data_chunk_count() on the mon to define the stripe width (the si=
+ze
+>> of the buffer which will be presented to the plugin for encoding) fo=
+r
+>> the pool.  At the moment, get_chunksize(4*(2<<10)) *
+>> get_data_chunk_count() =3D 393216 using the jerasure plugin where
+>> get_data_chunk_count() =3D 4.  This seems a bit big?
+>> -Sam
+>>
+>> On Sun, Feb 2, 2014 at 8:18 AM, Andreas Joachim Peters
+>> <Andreas.Joachim.Peters@cern.ch> wrote:
+>>> Hi Loic et.al.
+>>>
+>>> I think there is now some confusion about chunk_size, alignment, pa=
+cketsize and the stripe_size to be used upstream.
+>>>
+>>> Algorithms with a bit-matrix require that the size per device is a =
+multiple of (packetsize*w). Moreover the size per device and packetsize=
+ itself must be a multiple of sizeof(long/int). For other algorithms  y=
+ou can assume the same with packetsize=3D1.
+>>>
+>>> packetsize and w influence  the performance and too small stripe_si=
+ze on top will have negative performance effects due to the preparation=
+ of bufferlist, internal buffer checks and more loops to execute for th=
+e same amount of data. We can also do some measurement for this but the=
+ current benchmark would probably not reflect this, since it measures t=
+he algorithmic part not the bufferlist preparation part.
+>>>
+>>> If you want to define a stripe_size it has to be a multiple of the =
+value returned by get_chunksize  and possibly it is a large multiple bu=
+t in total not larger than processor caches. The plugin can not define =
+the stripe_size, it defines only the alignment to be used for stripe_si=
+ze and stripe_size is defined outside the plugin which maybe complicate=
+s the understanding. We should carefully check once more the Jerasure a=
+lignment requirements and our current implementation.
+>>>
+>>> To get rid of the platform dependency we could put a generic alignm=
+ent requirement that chunksize has to be also 64-byte aligned.
+>>>
+>>> Cheers Andreas.
+>>>
+>>>
+>>>
+>>>
+>>> ________________________________________
+>>> From: Loic Dachary [loic@dachary.org]
+>>> Sent: 02 February 2014 16:15
+>>> To: Samuel Just
+>>> Cc: Ceph Development; Andreas Joachim Peters
+>>> Subject: controlling erasure code chunk size
+>>>
+>>> [cc' ceph-devel]
+>>>
+>>> Hi Sam,
+>>>
+>>> Here is how chunks are expected to be aligned:
+>>>
+>>> https://github.com/ceph/ceph/blob/4c4e1d0d470beba7690d1c0e39bfd1146=
+a25f465/src/osd/ErasureCodePluginJerasure/ErasureCodeJerasure.cc#L365
+>>>
+>>>  unsigned alignment =3D k*w*packetsize*sizeof(int);
+>>>   if ( ((w*packetsize*sizeof(int))%LARGEST_VECTOR_WORDSIZE) )
+>>>     alignment =3D k*w*packetsize*LARGEST_VECTOR_WORDSIZE;
+>>>   return alignment;
+>>>
+>>> If you are going to encode small objects, it may very well lead to =
+oversized chunks if packetsize is large. At the moment the default is 3=
+072
+>>>
+>>> https://github.com/ceph/ceph/blob/4c4e1d0d470beba7690d1c0e39bfd1146=
+a25f465/src/common/config_opts.h#L406
+>>>
+>>> A value I picked when experimenting with 1MB objects encoding ( htt=
+p://dachary.org/?p=3D2594 ).
+>>>
+>>> I'm not entirely sure why the alignment is calculated the way it is=
+=2E Andreas certainly has a better understanding on this topic.
+>>>
+>>> Cheers
+>>>
+>>> --
+>>> Lo=EFc Dachary, Artisan Logiciel Libre
+>>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+> Lo=EFc Dachary, Artisan Logiciel Libre
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-
-
---1cC6LqqsM7Pc8p5g9vcCUj3vmIKNRe9Q9
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.20 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlLv0fAACgkQ8dLMyEl6F22mYQCgxiypWLNFhjVJSrTBAN+Ssnuz
-SP8Amwd2j2H9JXExgmSPlSa6CeCdRQNX
-=tE61
------END PGP SIGNATURE-----
-
---1cC6LqqsM7Pc8p5g9vcCUj3vmIKNRe9Q9--
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
