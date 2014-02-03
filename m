@@ -1,49 +1,53 @@
-From: Al Viro <viro@ZenIV.linux.org.uk>
-Subject: Re: [PATCH v2] ceph: fix posix ACL hooks
-Date: Mon, 3 Feb 2014 21:39:26 +0000
-Message-ID: <20140203213926.GA10323@ZenIV.linux.org.uk>
-References: <CALFYKtDCNWK+9m5m3P01dcxOOV7iHFeNaOH=Q=6Pffuo8gmrMQ@mail.gmail.com>
- <1391013467-7598-1-git-send-email-ilya.dryomov@inktank.com>
- <CA+55aFwTuBDHgQoTymr8OtE-+k=+pX0T_eb+fff0K+Pa3C-g-Q@mail.gmail.com>
- <20140130075421.GA10050@infradead.org>
- <CA+55aFxbVFpy8Y8P5fMCmmTSGbFxU9dTbOj9uTH+fKWGUzwgNg@mail.gmail.com>
- <20140203102943.GF11829@infradead.org>
- <CA+55aFytvTPdBsv6BwSomUGWXZ_tKP=BxaeJ7FXBft0JNnjBCQ@mail.gmail.com>
- <20140203211955.GY10323@ZenIV.linux.org.uk>
- <CA+55aFyfPVgGXn_hSBnnVyzWn4AbZQ40MPk_AoKB_6uC6LJqPg@mail.gmail.com>
+From: Patrick McGarry <patrick@inktank.com>
+Subject: CDS and GSoC
+Date: Mon, 3 Feb 2014 16:39:49 -0500
+Message-ID: <CAP8Oy=KppHkZUYutRA1fd9s9tnGifz93=qR9n4-M6pv-j0wDTg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CA+55aFyfPVgGXn_hSBnnVyzWn4AbZQ40MPk_AoKB_6uC6LJqPg@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Christoph Hellwig <hch@infradead.org>, Ilya Dryomov <ilya.dryomov@inktank.com>, Sage Weil <sage@inktank.com>, Dave Jones <davej@redhat.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, ceph-devel@vger.kernel.org, linux-fsdevel <linux-fsdevel@vger.kernel.org>, Guangliang Zhao <lucienchao@gmail.com>, Li Wang <li.wang@ubuntykylin.com>, zheng.z.yan@intel.com
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-pd0-f173.google.com ([209.85.192.173]:62196 "EHLO
+	mail-pd0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753402AbaBCVju (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Feb 2014 16:39:50 -0500
+Received: by mail-pd0-f173.google.com with SMTP id y10so7329394pdj.18
+        for <ceph-devel@vger.kernel.org>; Mon, 03 Feb 2014 13:39:49 -0800 (PST)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>
 
-On Mon, Feb 03, 2014 at 01:31:19PM -0800, Linus Torvalds wrote:
+Hey folks,
 
-> If the protocol is path-based (and it happens, and it's actually the
-> *correct* thing to do for a network filesystem, rather than the
-> idiotic "file handle" crap that tries to emulate the unix inode
-> semantics in the protocol), then the inode is simply not sufficient.
-> 
-> And no, d_find_alias() is not correct or sufficient either. It can
-> work in practice (and probably does perfectly fine 99.9% of the time),
-> but it can equally well give the *wrong* dentry: yes, the dentry it
-> returns would have been a valid dentry for somebody at some time, but
-> it might be a stale dentry *now*, and it might be the wrong dentry for
-> the current user (because the current user may not have permissions to
-> that particular path, even if the user has permissions through his
-> *own* path).
-> 
-> So I really think you're *fundamentally* incorrect when you say
-> "result *is* a function of inode alone".
+It's time for our favorite gameshow again, the Ceph Developer
+Summit...where everyone is a winner! This quarter the grand prize is a
+google hangout date with Sage and the gang to talk about Giant.
+Hooray!
 
-Which fs are you talking about?  For 9P it *is* a function of inode alone.
-For CIFS there's no wrong dentry to pick - it doesn't have links to start
-with.
+http://ceph.com/community/ceph-developer-summit-giant/
 
-If we really have hardlinks, the result of permission check would better
-be a function of inode itself - as in, "if it gives different results
-for two pathnames reachable for the same user, we have a bug".
+As you can see from the first paragraph we're working through some
+account creation issues with our auth plugin.  So, if you have issue
+creating an account on the wiki please let me know and I can make sure
+you get your blueprint posted ok. (but everyone already has wiki
+accounts, right? right? for the copious amount of doc you've been
+doing? I thoughts so! :)
+
+----
+
+We're also putting Ceph in as a Google summer of code project, so if
+anyone from the community would like to step forward as a mentor on a
+project you have in mind for Ceph development please let me know as
+soon as possible.  If you would like to see an example of what we
+submitted before it's still available:
+
+http://ceph.com/gsoc2013/
+
+The deadline to tell me about your project idea is Feb 12th.  Thanks,
+and see you at CDS!
+
+
+Best Regards,
+
+Patrick McGarry
+Director, Community || Inktank
+http://ceph.com  ||  http://inktank.com
+@scuttlemonkey || @ceph || @inktank
