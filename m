@@ -1,64 +1,40 @@
-From: Linus Torvalds <torvalds@linux-foundation.org>
+From: Al Viro <viro@ZenIV.linux.org.uk>
 Subject: Re: [PATCH v2] ceph: fix posix ACL hooks
-Date: Mon, 3 Feb 2014 13:31:19 -0800
-Message-ID: <CA+55aFyfPVgGXn_hSBnnVyzWn4AbZQ40MPk_AoKB_6uC6LJqPg@mail.gmail.com>
+Date: Mon, 3 Feb 2014 21:31:53 +0000
+Message-ID: <20140203213153.GZ10323@ZenIV.linux.org.uk>
 References: <CALFYKtDCNWK+9m5m3P01dcxOOV7iHFeNaOH=Q=6Pffuo8gmrMQ@mail.gmail.com>
-	<1391013467-7598-1-git-send-email-ilya.dryomov@inktank.com>
-	<CA+55aFwTuBDHgQoTymr8OtE-+k=+pX0T_eb+fff0K+Pa3C-g-Q@mail.gmail.com>
-	<20140130075421.GA10050@infradead.org>
-	<CA+55aFxbVFpy8Y8P5fMCmmTSGbFxU9dTbOj9uTH+fKWGUzwgNg@mail.gmail.com>
-	<20140203102943.GF11829@infradead.org>
-	<CA+55aFytvTPdBsv6BwSomUGWXZ_tKP=BxaeJ7FXBft0JNnjBCQ@mail.gmail.com>
-	<20140203211955.GY10323@ZenIV.linux.org.uk>
+ <1391013467-7598-1-git-send-email-ilya.dryomov@inktank.com>
+ <CA+55aFwTuBDHgQoTymr8OtE-+k=+pX0T_eb+fff0K+Pa3C-g-Q@mail.gmail.com>
+ <20140130075421.GA10050@infradead.org>
+ <CA+55aFxbVFpy8Y8P5fMCmmTSGbFxU9dTbOj9uTH+fKWGUzwgNg@mail.gmail.com>
+ <20140203102943.GF11829@infradead.org>
+ <CA+55aFytvTPdBsv6BwSomUGWXZ_tKP=BxaeJ7FXBft0JNnjBCQ@mail.gmail.com>
+ <20140203211955.GY10323@ZenIV.linux.org.uk>
+ <20140203212447.GA4843@infradead.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20140203211955.GY10323@ZenIV.linux.org.uk>
+Content-Disposition: inline
+In-Reply-To: <20140203212447.GA4843@infradead.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Al Viro <viro@zeniv.linux.org.uk>
-Cc: Christoph Hellwig <hch@infradead.org>, Ilya Dryomov <ilya.dryomov@inktank.com>, Sage Weil <sage@inktank.com>, Dave Jones <davej@redhat.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, ceph-devel@vger.kernel.org, linux-fsdevel <linux-fsdevel@vger.kernel.org>, Guangliang Zhao <lucienchao@gmail.com>, Li Wang <li.wang@ubuntykylin.com>, zheng.z.yan@intel.com
+To: Christoph Hellwig <hch@infradead.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, Ilya Dryomov <ilya.dryomov@inktank.com>, Sage Weil <sage@inktank.com>, Dave Jones <davej@redhat.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, ceph-devel@vger.kernel.org, linux-fsdevel <linux-fsdevel@vger.kernel.org>, Guangliang Zhao <lucienchao@gmail.com>, Li Wang <li.wang@ubuntykylin.com>, zheng.z.yan@intel.com
 List-Id: ceph-devel.vger.kernel.org
 
-On Mon, Feb 3, 2014 at 1:19 PM, Al Viro <viro@zeniv.linux.org.uk> wrote:
->
-> Please, don't do that.  Half of that is pointless (e.g. what you are
-> doing with vfs_rmdir() - if anything, we could get rid of the first
-> argument completely, it's always victim->d_parent->d_inode and we are
-> holding enough locks for that to be stable) and ->permission() is
-> just plain wrong.
->
-> Result *is* a function of inode alone; the problem with 9P is that we
-> are caching FIDs in the wrong place.
+On Mon, Feb 03, 2014 at 01:24:47PM -0800, Christoph Hellwig wrote:
+> On Mon, Feb 03, 2014 at 09:19:55PM +0000, Al Viro wrote:
+> > Result *is* a function of inode alone; the problem with 9P is that we
+> > are caching FIDs in the wrong place.
+> 
+> I don't think that's true for CIFS unfortunately, which is path based.
 
-No, Al. It's *not* just a function of the inode alone. That's the point.
+Yes, and...?  CIFS also doesn't have hardlinks, so _there_ d_find_alias()
+is just fine.
 
-Some network filesystems pass the *path* to the server. Any operation
-that needs to check something on the server needs the *dentry*, not
-the inode.
+9P is actually trickier; there we need some massage, but for CIFS it's
+literally a matter of one function call.
 
-This whole "the inode describes the file" mentality comes from old
-broken UNIX semantics. It's fundamentally true for local Unix
-filesystems, but that's it. It's not true in general.
-
-Sure, many network filesystems then emulate the local Unix filesystem
-behavior, so in practice, you get the unix semantics quite often. But
-it really is wrong.
-
-If the protocol is path-based (and it happens, and it's actually the
-*correct* thing to do for a network filesystem, rather than the
-idiotic "file handle" crap that tries to emulate the unix inode
-semantics in the protocol), then the inode is simply not sufficient.
-
-And no, d_find_alias() is not correct or sufficient either. It can
-work in practice (and probably does perfectly fine 99.9% of the time),
-but it can equally well give the *wrong* dentry: yes, the dentry it
-returns would have been a valid dentry for somebody at some time, but
-it might be a stale dentry *now*, and it might be the wrong dentry for
-the current user (because the current user may not have permissions to
-that particular path, even if the user has permissions through his
-*own* path).
-
-So I really think you're *fundamentally* incorrect when you say
-"result *is* a function of inode alone".
-
-                  Linus
+The problem with 9P is that the way we do it right now, you might pick
+the wrong dentry.  _Some_ alias already bears the FID you are after,
+but if you end up picking the one that doesn't, you might very well
+end up being unable to obtain one either.
