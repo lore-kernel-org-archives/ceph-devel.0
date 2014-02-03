@@ -1,46 +1,43 @@
-From: Charles Francis Feeney <info@office3555.onmicrosoft.com>
-Subject: DONATION FOR YOU.
-Date: Tue, 4 Feb 2014 02:53:04 +0530
-Message-ID: <f971de07-a1ba-492c-9bd1-b1fb08823308@HKNPR04MB210.apcprd04.prod.outlook.com>
-Reply-To: <charlesfrancis1103@gmail.com>
+From: Christoph Hellwig <hch@infradead.org>
+Subject: Re: [PATCH v2] ceph: fix posix ACL hooks
+Date: Mon, 3 Feb 2014 13:23:36 -0800
+Message-ID: <20140203212336.GA31966@infradead.org>
+References: <CALFYKtDCNWK+9m5m3P01dcxOOV7iHFeNaOH=Q=6Pffuo8gmrMQ@mail.gmail.com>
+ <1391013467-7598-1-git-send-email-ilya.dryomov@inktank.com>
+ <CA+55aFwTuBDHgQoTymr8OtE-+k=+pX0T_eb+fff0K+Pa3C-g-Q@mail.gmail.com>
+ <20140130075421.GA10050@infradead.org>
+ <CA+55aFxbVFpy8Y8P5fMCmmTSGbFxU9dTbOj9uTH+fKWGUzwgNg@mail.gmail.com>
+ <20140203102943.GF11829@infradead.org>
+ <CA+55aFytvTPdBsv6BwSomUGWXZ_tKP=BxaeJ7FXBft0JNnjBCQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from emea01-am1-ndr.ptr.protection.outlook.com ([157.56.116.104]:25722
-	"EHLO emea01-am1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1750789AbaBCVXb convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Feb 2014 16:23:31 -0500
-Content-Description: Mail message body
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Recipients <info@office3555.onmicrosoft.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CA+55aFytvTPdBsv6BwSomUGWXZ_tKP=BxaeJ7FXBft0JNnjBCQ@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Christoph Hellwig <hch@infradead.org>, Ilya Dryomov <ilya.dryomov@inktank.com>, Sage Weil <sage@inktank.com>, Dave Jones <davej@redhat.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, ceph-devel@vger.kernel.org, linux-fsdevel <linux-fsdevel@vger.kernel.org>, Al Viro <viro@zeniv.linux.org.uk>, Guangliang Zhao <lucienchao@gmail.com>, Li Wang <li.wang@ubuntykylin.com>, zheng.z.yan@intel.com, Steven Whitehouse <swhiteho@redhat.com>, cluster-devel@redhat.com
+List-Id: ceph-devel.vger.kernel.org
 
-Hi,
+On Mon, Feb 03, 2014 at 01:03:32PM -0800, Linus Torvalds wrote:
+> Now, to be honest, pushing it down one more level (to
+> generic_permission()) will actually start causing some trouble. In
+> particular, gfs2_permission() fundamentally does not have a dentry for
+> several of the callers.
 
-My name is Charles Francis Feeney, a philanthropist and the founder of =
-The Atlantic Philanthropies, one of the largest private foundations in =
-the world. I believe strongly in =E2=80=98giving while living.=E2=80=99=
- I had one idea that never changed in my mind =E2=80=94 that you should=
- use your wealth to help people and I have decided to secretly give USD=
- 1.9Million to randomly selected individuals worldwide. On receipt of t=
-his email, you should count yourself as the lucky individual. Your emai=
-l address was chosen online while searching at random. Kindly get back =
-to me at your earliest convenience, so I know your email address is val=
-id.
+Looking over the gfs2 code the problem seems to be that it duplicates
+permissions checks from the may_{lookup,create,linkat,delete}, most
+likely because it needs cluster locking in place for them.  The right
+fix seems to be to optionally call the filesystem from those.  That
+being said I wonder how ocfs2 or network filesystems get away without
+that.
 
-(charlesfrancis1103@gmail.com) Email me.
+> What do you think? I guess this patch could be split up into two: one
+> that does the "vfs_xyz()" helper functions, and another that does the
+> inode_permission() change. I tied them together mainly because I
+> started with the inode_permission() change, and that required the
+> vfs_xyz() change.
 
-Visit the web page to know more about me: http://en.wikipedia.org/wiki/=
-Chuck_Feeney=20
-
-Regards,
-
-Charles F. Feeney
-charlesfrancis1103@gmail.com
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+The changes look good to me, and yes I think they should be split.
+I'll see if I can take this further, but doing something non-hacky
+in GFS2 would be the first step here.
