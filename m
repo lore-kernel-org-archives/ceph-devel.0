@@ -1,31 +1,49 @@
-From: Linus Torvalds <torvalds@linux-foundation.org>
+From: Al Viro <viro@ZenIV.linux.org.uk>
 Subject: Re: [PATCH v2] ceph: fix posix ACL hooks
-Date: Mon, 3 Feb 2014 13:37:03 -0800
-Message-ID: <CA+55aFwsZtgsgirO0LJu4D1ZqQkgLBZcMk_w_7BTHeysz==gEw@mail.gmail.com>
+Date: Mon, 3 Feb 2014 21:39:26 +0000
+Message-ID: <20140203213926.GA10323@ZenIV.linux.org.uk>
 References: <CALFYKtDCNWK+9m5m3P01dcxOOV7iHFeNaOH=Q=6Pffuo8gmrMQ@mail.gmail.com>
-	<1391013467-7598-1-git-send-email-ilya.dryomov@inktank.com>
-	<CA+55aFwTuBDHgQoTymr8OtE-+k=+pX0T_eb+fff0K+Pa3C-g-Q@mail.gmail.com>
-	<20140130075421.GA10050@infradead.org>
-	<CA+55aFxbVFpy8Y8P5fMCmmTSGbFxU9dTbOj9uTH+fKWGUzwgNg@mail.gmail.com>
-	<20140203102943.GF11829@infradead.org>
-	<CA+55aFytvTPdBsv6BwSomUGWXZ_tKP=BxaeJ7FXBft0JNnjBCQ@mail.gmail.com>
-	<20140203211955.GY10323@ZenIV.linux.org.uk>
-	<20140203212447.GA4843@infradead.org>
-	<20140203213153.GZ10323@ZenIV.linux.org.uk>
+ <1391013467-7598-1-git-send-email-ilya.dryomov@inktank.com>
+ <CA+55aFwTuBDHgQoTymr8OtE-+k=+pX0T_eb+fff0K+Pa3C-g-Q@mail.gmail.com>
+ <20140130075421.GA10050@infradead.org>
+ <CA+55aFxbVFpy8Y8P5fMCmmTSGbFxU9dTbOj9uTH+fKWGUzwgNg@mail.gmail.com>
+ <20140203102943.GF11829@infradead.org>
+ <CA+55aFytvTPdBsv6BwSomUGWXZ_tKP=BxaeJ7FXBft0JNnjBCQ@mail.gmail.com>
+ <20140203211955.GY10323@ZenIV.linux.org.uk>
+ <CA+55aFyfPVgGXn_hSBnnVyzWn4AbZQ40MPk_AoKB_6uC6LJqPg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20140203213153.GZ10323@ZenIV.linux.org.uk>
+Content-Disposition: inline
+In-Reply-To: <CA+55aFyfPVgGXn_hSBnnVyzWn4AbZQ40MPk_AoKB_6uC6LJqPg@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Al Viro <viro@zeniv.linux.org.uk>
-Cc: Christoph Hellwig <hch@infradead.org>, Ilya Dryomov <ilya.dryomov@inktank.com>, Sage Weil <sage@inktank.com>, Dave Jones <davej@redhat.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, ceph-devel@vger.kernel.org, linux-fsdevel <linux-fsdevel@vger.kernel.org>, Guangliang Zhao <lucienchao@gmail.com>, zheng.z.yan@intel.com
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Christoph Hellwig <hch@infradead.org>, Ilya Dryomov <ilya.dryomov@inktank.com>, Sage Weil <sage@inktank.com>, Dave Jones <davej@redhat.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, ceph-devel@vger.kernel.org, linux-fsdevel <linux-fsdevel@vger.kernel.org>, Guangliang Zhao <lucienchao@gmail.com>, Li Wang <li.wang@ubuntykylin.com>, zheng.z.yan@intel.com
 List-Id: ceph-devel.vger.kernel.org
 
-On Mon, Feb 3, 2014 at 1:31 PM, Al Viro <viro@zeniv.linux.org.uk> wrote:
->
-> Yes, and...?  CIFS also doesn't have hardlinks, so _there_ d_find_alias()
-> is just fine.
+On Mon, Feb 03, 2014 at 01:31:19PM -0800, Linus Torvalds wrote:
 
-Hmm? I'm pretty sure cifs can actually have hardlinks.
+> If the protocol is path-based (and it happens, and it's actually the
+> *correct* thing to do for a network filesystem, rather than the
+> idiotic "file handle" crap that tries to emulate the unix inode
+> semantics in the protocol), then the inode is simply not sufficient.
+> 
+> And no, d_find_alias() is not correct or sufficient either. It can
+> work in practice (and probably does perfectly fine 99.9% of the time),
+> but it can equally well give the *wrong* dentry: yes, the dentry it
+> returns would have been a valid dentry for somebody at some time, but
+> it might be a stale dentry *now*, and it might be the wrong dentry for
+> the current user (because the current user may not have permissions to
+> that particular path, even if the user has permissions through his
+> *own* path).
+> 
+> So I really think you're *fundamentally* incorrect when you say
+> "result *is* a function of inode alone".
 
-             Linus
+Which fs are you talking about?  For 9P it *is* a function of inode alone.
+For CIFS there's no wrong dentry to pick - it doesn't have links to start
+with.
+
+If we really have hardlinks, the result of permission check would better
+be a function of inode itself - as in, "if it gives different results
+for two pathnames reachable for the same user, we have a bug".
