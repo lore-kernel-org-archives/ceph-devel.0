@@ -1,82 +1,32 @@
-From: Steven Whitehouse <swhiteho@redhat.com>
-Subject: Re: [PATCH v2] ceph: fix posix ACL hooks
-Date: Tue, 04 Feb 2014 11:33:35 +0000
-Message-ID: <1391513615.2766.18.camel@menhir>
-References: <CALFYKtDCNWK+9m5m3P01dcxOOV7iHFeNaOH=Q=6Pffuo8gmrMQ@mail.gmail.com>
-	 <1391013467-7598-1-git-send-email-ilya.dryomov@inktank.com>
-	 <CA+55aFwTuBDHgQoTymr8OtE-+k=+pX0T_eb+fff0K+Pa3C-g-Q@mail.gmail.com>
-	 <20140130075421.GA10050@infradead.org>
-	 <CA+55aFxbVFpy8Y8P5fMCmmTSGbFxU9dTbOj9uTH+fKWGUzwgNg@mail.gmail.com>
-	 <20140203102943.GF11829@infradead.org>
-	 <CA+55aFytvTPdBsv6BwSomUGWXZ_tKP=BxaeJ7FXBft0JNnjBCQ@mail.gmail.com>
-	 <20140203215908.GD10323@ZenIV.linux.org.uk>
-	 <CA+55aFz3PyyCqOLs_SBRS3cbGxWd5ez4Svz2+xK+4KtCez8iGw@mail.gmail.com>
-	 <20140203224034.GF10323@ZenIV.linux.org.uk>
+From: Justin Erenkrantz <justin@erenkrantz.com>
+Subject: Re: chef cookbooks
+Date: Tue, 4 Feb 2014 06:54:59 -0500
+Message-ID: <CAOGLoJONVQ2gOPYUyvg4_ZpbrwA3je4EiuXsbiYffsLHxXmBvQ@mail.gmail.com>
+References: <alpine.DEB.2.00.1402031135180.10986@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-In-Reply-To: <20140203224034.GF10323@ZenIV.linux.org.uk>
-Sender: linux-fsdevel-owner@vger.kernel.org
-To: Al Viro <viro@ZenIV.linux.org.uk>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, Christoph Hellwig <hch@infradead.org>, Ilya Dryomov <ilya.dryomov@inktank.com>, Sage Weil <sage@inktank.com>, Dave Jones <davej@redhat.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, ceph-devel@vger.kernel.org, linux-fsdevel <linux-fsdevel@vger.kernel.org>, Guangliang Zhao <lucienchao@gmail.com>, Li Wang <li.wang@ubuntykylin.com>, zheng.z.yan@intel.com
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ee0-f50.google.com ([74.125.83.50]:56684 "EHLO
+	mail-ee0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750937AbaBDLzB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Feb 2014 06:55:01 -0500
+Received: by mail-ee0-f50.google.com with SMTP id d17so4306531eek.9
+        for <ceph-devel@vger.kernel.org>; Tue, 04 Feb 2014 03:54:59 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.00.1402031135180.10986@cobra.newdream.net>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Mon, 2014-02-03 at 22:40 +0000, Al Viro wrote:
-> > >> +static int gfs2_vfs_permission(struct dentry *dentry, struct inode *inode, int mask)
-> > >> +{
-> > >> +     return gfs2_permission(inode, mask);
-> > >> +}
-> > >
-> > > Er...  You do realize that callers of gfs2_permission() tend to have
-> > > the dentry in question, either directly or as ->d_parent of something
-> > > they have?
-> > 
-> > Not true. Look closer.
-> > 
-> > Look at gfs2_lookupi() in particular, and check how it is called.
-> 
-> Yeowch...  gfs2_ok_to_move() is particulary nasty...  WTF do we need
-> it for and why is it not racy as hell?
+On Mon, Feb 3, 2014 at 2:36 PM, Sage Weil <sage@inktank.com> wrote:
+> Hi everyone,
+>
+> We have a huge backlog of pull requests on ceph-cookbooks.git on github.
+> At the moment Inktank doesn't have a lot of spare cycles to review and
+> test these changes.  Are there any chef+ceph users that are interested in
+> helping maintain these cookbooks?
 
-Well, the original intent was to prevent us from moving a directory into
-one of its subdirectories, and thus creating a loop. It is only called
-when the rename is moving a directory, and when the parent directories
-(source and destination) are different.
+I'll aim to review the outstanding PRs and comment on them on GitHub
+if I think that they should be merged.
 
-I know there is a problem there, recently reported by Bruce Fields which
-he came across when looking at the d_splice_alias issue. The bug that
-Bruce found only shows up in the clustered case, and not in the single
-node case though.
-
-Which particular race are you worried about? This check is covered by
-the rename glock, which is basically a cluster wide version of the vfs
-level ->s_vfs_rename_mutex.
-
-To diverge from that topic for a moment, this thread has also brought
-together some discussion on another issue which I've been pondering
-recently.... that of whether the inode operations for get/set_xattr
-should take a dentry or not. I had thought that we'd come to the
-conclusion that 9p made it impossible to swap the current dentry
-argument for an inode, and I was about to send a patch for selinux
-support on clustered fs on that basis. However the discussion in this
-thread has made me wonder whether that really is the case or not.... Al,
-can you confirm whether your xattr-experimental patches are still under
-active consideration?
-
-The other question that I have relating to that side of things, is why
-security_inode_permission() is called from __inode_permission() rather
-than from generic_permission() ? Maybe there is a good reason, but I
-can't immediately see what it is at the moment.
-
-In response to the question elsewhere about GFS2 calling
-gfs2_permission() after the vfs has already done its checks, that is
-indeed down to needing to ensure that we have the cluster locks when
-this check is called. More importantly to know that things haven't
-changed since the VFS called the same function in case we've raced with
-another node changing the permissions, for example. There are a number
-of cases where we redo vfs level checks for this reason,
-
-Steve.
-
-
+Cheers.  -- justin
