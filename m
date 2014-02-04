@@ -1,32 +1,33 @@
-From: Justin Erenkrantz <justin@erenkrantz.com>
-Subject: Re: chef cookbooks
-Date: Tue, 4 Feb 2014 06:54:59 -0500
-Message-ID: <CAOGLoJONVQ2gOPYUyvg4_ZpbrwA3je4EiuXsbiYffsLHxXmBvQ@mail.gmail.com>
-References: <alpine.DEB.2.00.1402031135180.10986@cobra.newdream.net>
+From: Joel Cooklin <joel.cooklin@gmail.com>
+Subject: Testing 3rd party integration with ceph object storag
+Date: Tue, 4 Feb 2014 07:32:29 -0700
+Message-ID: <CA+k2-NmsGVaSBjerdPUNy-GnFX7Jf-C4=B1526URwQw_AQTmzQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ee0-f50.google.com ([74.125.83.50]:56684 "EHLO
-	mail-ee0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750937AbaBDLzB (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Feb 2014 06:55:01 -0500
-Received: by mail-ee0-f50.google.com with SMTP id d17so4306531eek.9
-        for <ceph-devel@vger.kernel.org>; Tue, 04 Feb 2014 03:54:59 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1402031135180.10986@cobra.newdream.net>
+Received: from mail-we0-f176.google.com ([74.125.82.176]:36980 "EHLO
+	mail-we0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751214AbaBDOcb (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Feb 2014 09:32:31 -0500
+Received: by mail-we0-f176.google.com with SMTP id q58so4233359wes.35
+        for <ceph-devel@vger.kernel.org>; Tue, 04 Feb 2014 06:32:30 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Mon, Feb 3, 2014 at 2:36 PM, Sage Weil <sage@inktank.com> wrote:
-> Hi everyone,
->
-> We have a huge backlog of pull requests on ceph-cookbooks.git on github.
-> At the moment Inktank doesn't have a lot of spare cycles to review and
-> test these changes.  Are there any chef+ceph users that are interested in
-> helping maintain these cookbooks?
+Hi Folks,
 
-I'll aim to review the outstanding PRs and comment on them on GitHub
-if I think that they should be merged.
+I hope this is the right forum.  I am evaluating S3QL
+(http://www.rath.org/s3ql-docs/about.html) and have run into issues
+with it when attempting to connect to our Ceph based object storage.
+The issue described here
+(https://bitbucket.org/nikratio/s3ql/issue/26/doesnt-work-with-cephs-swift-impl)
+has been reported to the developer but at this point he needs the
+service exposed so that he can investigate further and unfortunately I
+cannot expose our instance to him.  Is there a solution that someone
+on this list can suggest or provide?  Is there an integration
+environment for 3rd parties that want to integrate with Ceph that he
+could get access to?
 
-Cheers.  -- justin
+Thanks,
+Joel
