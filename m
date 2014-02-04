@@ -1,89 +1,60 @@
-From: Sage Weil <sage@inktank.com>
-Subject: v0.76 released
-Date: Mon, 3 Feb 2014 22:05:53 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1402032203160.20429@cobra.newdream.net>
+From: James Page <james.page@ubuntu.com>
+Subject: Re: firefly timing
+Date: Tue, 04 Feb 2014 08:14:13 +0200
+Message-ID: <52F08535.50100@ubuntu.com>
+References: <alpine.DEB.2.00.1402030819030.6345@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:35023 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750754AbaBDGFy (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Feb 2014 01:05:54 -0500
+Received: from youngberry.canonical.com ([91.189.89.112]:47142 "EHLO
+	youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750780AbaBDGOR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Feb 2014 01:14:17 -0500
+In-Reply-To: <alpine.DEB.2.00.1402030819030.6345@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org, ceph-users@ceph.com
+To: Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
 
-This release includes another batch of updates for firefly
-functionality.  Most notably, the cache pool infrastructure now
-support snapshots, the OSD backfill functionality has been generalized
-to include multiple targets (necessary for the coming erasure pools),
-and there were performance improvements to the erasure code plugin on
-capable processors.  The MDS now properly utilizes (and seamlessly
-migrates to) the OSD key/value interface (aka omap) for storing directory
-objects.  There continue to be many other fixes and improvements for
-usability and code portability across the tree.
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
 
-Upgrading
-~~~~~~~~~
+On 03/02/14 18:21, Sage Weil wrote:
+> The only time dependency that I am aware of is the looming 14.04
+> freeze date.  I'm hoping that we can (worst case) put an -rc
+> release in place and update as the code stabilizes over the next
+> several weeks.  James, will this be problematic?
 
-* 'rbd ls' on a pool which never held rbd images now exits with code
-  0. It outputs nothing in plain format, or an empty list in
-  non-plain format. This is consistent with the behavior for a pool
-  which used to hold images, but contains none. Scripts relying on
-  this behavior should be updated.
+Pushing in an RC is a good approach; what's the likely date for the
+firefly release?  I can raise the Freeze Exception now which gives our
+release team *lots* of notice :-)  FWIW I don't think this will be a
+problem - we have a good track record with ceph in Ubuntu now.
 
-* The MDS requires a new OSD operation TMAP2OMAP, added in this release.  When
-  upgrading, be sure to upgrade and restart the ceph-osd daemons before the
-  ceph-mds daemon.  The MDS will refuse to start if any up OSDs do not support
-  the new feature.
+Cheers
 
-* The 'ceph mds set_max_mds N' command is now deprecated in favor of
-  'ceph mds set max_mds N'.
+James
 
-Notable Changes
-~~~~~~~~~~~~~~~
 
-* build: misc improvements (Ken Dreyer)
-* ceph-disk: generalize path names, add tests (Loic Dachary)
-* ceph-disk: misc improvements for puppet (Loic Dachary)
-* ceph-disk: several bug fixes (Loic Dachary)
-* ceph-fuse: fix race for sync reads (Sage Weil)
-* config: recursive metavariable expansion (Loic Dachary)
-* crush: usability and test improvements (Loic Dachary)
-* doc: misc fixes (David Moreau Simard, Kun Huang)
-* erasure-code: improve buffer alignment (Loic Dachary)
-* erasure-code: rewrite region-xor using vector operations (Andreas 
-  Peters)
-* librados, osd: new TMAP2OMAP operation (Yan, Zheng)
-* mailmap updates (Loic Dachary)
-* many portability improvements (Noah Watkins)
-* many unit test improvements (Loic Dachary)
-* mds: always store backtrace in default pool (Yan, Zheng)
-* mds: store directories in omap instead of tmap (Yan, Zheng)
-* mon: allow adjustment of cephfs max file size via 'ceph mds set 
-  max_file_size' (Sage Weil)
-* mon: do not create erasure rules by default (Sage Weil)
-* mon: do not generate spurious MDSMaps in certain cases (Sage Weil)
-* mon: do not use keyring if auth = none (Loic Dachary)
-* mon: fix pg_temp leaks (Joao Eduardo Luis)
-* osd: backfill to multiple targets (David Zafman)
-* osd: cache pool support for snapshots (Sage Weil)
-* osd: fix and cleanup misc backfill issues (David Zafman)
-* osd: fix omap_clear operation to not zap xattrs (Sam Just, Yan, Zheng)
-* osd: ignore num_objects_dirty on scrub for old pools (Sage Weil)
-* osd: include more info in pg query result (Sage Weil)
-* osd: track erasure compatibility (David Zafman)
-* rbd: make 'rbd list' return empty list and success on empty pool (Josh 
-  Durgin)
-* rgw: fix object placement read op (Yehuda Sadeh)
-* rgw: fix several CORS bugs (Robin H. Johnson)
-* specfile: fix RPM build on RHEL6 (Ken Dreyer, Derek Yarnell)
-* specfile: ship libdir/ceph (Key Dreyer)
+- -- 
+James Page
+Ubuntu and Debian Developer
+james.page@ubuntu.com
+jamespage@debian.org
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
 
-You can get v0.75 from the usual locations:
-
-* Git at git://github.com/ceph/ceph.git
-* Tarball at http://ceph.com/download/ceph-0.76.tar.gz
-* For packages, see http://ceph.com/docs/master/install/get-packages
-* For ceph-deploy, see http://ceph.com/docs/master/install/install-ceph-deploy
-
+iQIcBAEBCAAGBQJS8IU1AAoJEL/srsug59jDEQkP/Ak1DvMqDsLwtdWNJCZ6Y4qM
+/+GhBuJHCEDhx7+2mM4l9kiFdEVRNY4uarRIaCNYtgMhKWZ0c1MzFD4nVicqmg85
+72gfdc97opDU3Mus3GXk6TI51jex6YBaRR4kUDWcT5l2N39yPN9iaxiSftfYnI4C
+3sK5W2GdLCaYjWsjgdOum0UDyN9ZSZmK1qBfMHmZZ74OsMPmGK+D9hiTKnH5sEF8
+57Nmoa4G4wfmBUf/vxkKnmI51hQrXnp0zqeI5i+xDvDGelNUDtofrcxQrp0yfnff
+FAf50KvYeniyjvtgqQMvu9vrb4gvN0lTFUZygLXICq5mX45JitGjQ0NS7T4pVhbE
+fdW+2BN4I91CkIVY/qPTRqWv/RIZJM4dj/2w3DBMhoMnIl1laFd+uMd5b2mxrWD9
+RHXOOXgE9fq0gBuB5N2w8Q50Bm4+gDqxM7mfQi8lvSjXyUVPdvdnIuYd/L5beIGX
+9EbYLLoaXRHIN84DQwHY/6Ni57rPGcG0VNjOBcgNXr/8DXJi4b8ztxIpCT7rhpG0
+UeCVEuRsrM5wggvQFODaxQ1BzNvuQbUryj+FK2fsGfwnHESp1J5arKbRJUUHCkT7
+tzhHlqx9jWDp6sMyc6jMVotSOgQv/AGq+kt/gBLEz6ymLB4MsZkQQRpMXXID+RkH
+tmFj4DUwOn7LRSS1/Ag8
+=kovj
+-----END PGP SIGNATURE-----
