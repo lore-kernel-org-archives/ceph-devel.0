@@ -1,148 +1,62 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: v0.76 contributors credits (beta)
-Date: Tue, 04 Feb 2014 15:51:09 +0100
-Message-ID: <52F0FE5D.1030201@dachary.org>
+From: Christoph Hellwig <hch@infradead.org>
+Subject: Re: [PATCH v2] ceph: fix posix ACL hooks
+Date: Tue, 4 Feb 2014 07:57:44 -0800
+Message-ID: <20140204155744.GA3974@infradead.org>
+References: <1391013467-7598-1-git-send-email-ilya.dryomov@inktank.com>
+ <CA+55aFwTuBDHgQoTymr8OtE-+k=+pX0T_eb+fff0K+Pa3C-g-Q@mail.gmail.com>
+ <20140130075421.GA10050@infradead.org>
+ <CA+55aFxbVFpy8Y8P5fMCmmTSGbFxU9dTbOj9uTH+fKWGUzwgNg@mail.gmail.com>
+ <20140203102943.GF11829@infradead.org>
+ <CA+55aFytvTPdBsv6BwSomUGWXZ_tKP=BxaeJ7FXBft0JNnjBCQ@mail.gmail.com>
+ <20140203215908.GD10323@ZenIV.linux.org.uk>
+ <CA+55aFz3PyyCqOLs_SBRS3cbGxWd5ez4Svz2+xK+4KtCez8iGw@mail.gmail.com>
+ <20140203224034.GF10323@ZenIV.linux.org.uk>
+ <1391513615.2766.18.camel@menhir>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="c01gJ73JT56EpdsR6nuDc1wsAJUQpSuGb"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:32814 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753832AbaBDOvM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Feb 2014 09:51:12 -0500
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>, Ceph Community <ceph-community@lists.ceph.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1391513615.2766.18.camel@menhir>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Steven Whitehouse <swhiteho@redhat.com>
+Cc: Al Viro <viro@ZenIV.linux.org.uk>, Linus Torvalds <torvalds@linux-foundation.org>, Christoph Hellwig <hch@infradead.org>, Ilya Dryomov <ilya.dryomov@inktank.com>, Sage Weil <sage@inktank.com>, Dave Jones <davej@redhat.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, ceph-devel@vger.kernel.org, linux-fsdevel <linux-fsdevel@vger.kernel.org>, Guangliang Zhao <lucienchao@gmail.com>, Li Wang <li.wang@ubuntykylin.com>, zheng.z.yan@intel.com
+List-Id: ceph-devel.vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---c01gJ73JT56EpdsR6nuDc1wsAJUQpSuGb
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+On Tue, Feb 04, 2014 at 11:33:35AM +0000, Steven Whitehouse wrote:
+> To diverge from that topic for a moment, this thread has also brought
+> together some discussion on another issue which I've been pondering
+> recently.... that of whether the inode operations for get/set_xattr
+> should take a dentry or not. I had thought that we'd come to the
+> conclusion that 9p made it impossible to swap the current dentry
+> argument for an inode, and I was about to send a patch for selinux
+> support on clustered fs on that basis. However the discussion in this
+> thread has made me wonder whether that really is the case or not.... Al,
+> can you confirm whether your xattr-experimental patches are still under
+> active consideration?
 
-Hi Ceph,
+My plan was to work on the 9p and cifs conversions using the
+d_find_alias hack we have in ceph right now.  That means the base work
+could switch to passed in dentries or in case of 9p the per-inode fids
+easily.
 
-Here is a sorted list of authors and organizations who contributed to v0.=
-76, by number of commits or reviews back to v0.75. The affiliation of aut=
-hors to organizations can be updated by submitting a patch to https://git=
-hub.com/ceph/ceph/blob/master/.organizationmap
+> The other question that I have relating to that side of things, is why
+> security_inode_permission() is called from __inode_permission() rather
+> than from generic_permission() ? Maybe there is a good reason, but I
+> can't immediately see what it is at the moment.
 
-All commits are reviewed but the number of reviews is a fraction of the n=
-umber of commits. More often than not, the reviewer(s) is only mentioned =
-in the message of the merge although it means that all associated commits=
- have been reviewed.=20
+Seems like almost everything of the security_* family is called from the
+VFS instead of the filesystem.  There's also some very odd other
+behaviour in there, e.g. for the xattrs sets are handed to the
+filesystem first, and then the xattr layer calls into the security
+layer, which for reads the filesystems is never reached at all.
 
-If you are curious about how it is done, the details are at the end of th=
-is mail.=20
+> In response to the question elsewhere about GFS2 calling
+> gfs2_permission() after the vfs has already done its checks, that is
+> indeed down to needing to ensure that we have the cluster locks when
+> this check is called. More importantly to know that things haven't
+> changed since the VFS called the same function in case we've raced with
+> another node changing the permissions, for example. There are a number
+> of cases where we redo vfs level checks for this reason,
 
-Commits by authors
-     1	     99 Sage Weil <sage@inktank.com>
-     2	     82 Loic Dachary <loic@dachary.org>
-     3	     12 David Zafman <david.zafman@inktank.com>
-     4	     10 Noah Watkins <noah.watkins@inktank.com>
-     5	      7 Josh Durgin <josh.durgin@inktank.com>
-     6	      7 John Wilkins <john.wilkins@inktank.com>
-     7	      6 Samuel Just <sam.just@inktank.com>
-     8	      5 Ken Dreyer <ken.dreyer@inktank.com>
-     9	      4 Yan, Zheng <zheng.z.yan@intel.com>
-    10	      3 Yehuda Sadeh <yehuda@inktank.com>
-    11	      3 Robin H. Johnson <robbat2@gentoo.org>
-    12	      2 Tamil Muthamizhan <tamil.muthamizhan@inktank.com>
-    13	      2 David Moreau Simard <dmsimard@iweb.com>
-    14	      2 Dan Mick <dan.mick@inktank.com>
-    15	      2 Christophe Courtaut <christophe.courtaut@gmail.com>
-    16	      1 Yan, Zheng <ukernel@gmail.com>
-    17	      1 Kun Huang <academicgareth@gmail.com>
-    18	      1 Jonathan Dieter <jdieter@lesbg.com>
-    19	      1 Jo=E3o Eduardo Lu=EDs <joao.luis@inktank.com>
-    20	      1 Greg Farnum <greg@inktank.com>
-    21	      1 Derek Yarnell <derek@umiacs.umd.edu>
-    22	      1 Andreas Peters <andreas.joachim.peters@cern.ch>
-    23	      1 Alfredo Deza <alfredo.deza@inktank.com>
-Commits by organizations
-     1	    156 Inktank <contact@inktank.com>
-     2	     84 Cloudwatt <libre.licensing@cloudwatt.com>
-     3	      4 Intel <contact@intel.com>
-     4	      3 Gentoo <contact@gentoo.org>
-     5	      2 IWeb <contact@iweb.com>
-     6	      1 Yan, Zheng <ukernel@gmail.com>
-     7	      1 UnitedStack <contact@unitedstack.com>
-     8	      1 Lebanon Evangelical School <contact@lesbg.com>
-     9	      1 Derek Yarnell <derek@umiacs.umd.edu>
-    10	      1 CERN <contact@cern.ch>
-Reviews by authors (one review spans multiple commits)
-     1	     21 Sage Weil <sage@inktank.com>
-     2	      7 Loic Dachary <loic@dachary.org>
-     3	      5 Greg Farnum <greg@inktank.com>
-     4	      4 Josh Durgin <josh.durgin@inktank.com>
-     5	      3 Dan Mick <dan.mick@inktank.com>
-     6	      2 Yehuda Sadeh <yehuda@inktank.com>
-     7	      2 Yan, Zheng <zheng.z.yan@intel.com>
-     8	      2 Samuel Just <sam.just@inktank.com>
-     9	      2 Andreas Peters <andreas.joachim.peters@cern.ch>
-    10	      1 Roald J. van Loon <roald@roaldvanloon.nl>
-    11	      1 Noah Watkins <noah.watkins@inktank.com>
-    12	      1 John Spray <john.spray@inktank.com>
-    13	      1 Jo=E3o Eduardo Lu=EDs <joao.luis@inktank.com>
-    14	      1 David Moreau Simard <dmsimard@iweb.com>
-Reviews by organizations (one review spans multiple commits)
-     1	     40 Inktank <contact@inktank.com>
-     2	      7 Cloudwatt <libre.licensing@cloudwatt.com>
-     3	      2 Intel <contact@intel.com>
-     4	      2 CERN <contact@cern.ch>
-     5	      1 Roald van Loon Consultancy <roald@roaldvanloon.nl>
-     6	      1 IWeb <contact@iweb.com>
-
-The script used to generate this output is (copy paste at the root of a g=
-it clone https://github.com/ceph/ceph.git):
-
-cat > credits.sh <<'EOF'
-range=3D$1
-echo "Commits by authors"
-git log --pretty=3D'%aN <%aE>' $range | sort | uniq -c | sort -rn | nl
-echo "Commits by organizations"
-git log --pretty=3D'%aN <%aE>' $range | git -c mailmap.file=3D.organizati=
-onmap check-mailmap --stdin | sort | uniq -c | sort -rn | nl
-echo "Reviews by authors (one review spans multiple commits)"
-git log --pretty=3D%b $range | perl -n -e 'print "$_\n" if(s/^\s*Reviewed=
--by:\s*(.*<.*>)\s*$/\1/)' | git check-mailmap --stdin | sort | uniq -c | =
-sort -rn | nl
-echo "Reviews by organizations (one review spans multiple commits)"
-git log --pretty=3D%b $range | perl -n -e 'print "$_\n" if(s/^\s*Reviewed=
--by:\s*(.*<.*>)\s*$/\1/)' | git check-mailmap --stdin | git -c mailmap.fi=
-le=3D.organizationmap check-mailmap --stdin | sort | uniq -c | sort -rn |=
- nl
-EOF
-bash credits.sh tags/v0.75...tags/v0.76
-
-Authors names are normalized with .mailmap and authors affiliations to a =
-given organization comes from .organizationmap, both of which can be foun=
-d and patched at the root of the ceph source tree.
-
-More sophisticated reports can be generated and visualized by tools such =
-as http://bitergia.com/ or http://stackalytics.com/.=20
-Cheers
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-
-
-
-
-
-
---c01gJ73JT56EpdsR6nuDc1wsAJUQpSuGb
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.20 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlLw/l4ACgkQ8dLMyEl6F22DYQCggx5r1HeP9vIcv6jipdEoDwFd
-WR0AnjBPx9kiluhAfSya4bPVN3E9QA6E
-=Zt7g
------END PGP SIGNATURE-----
-
---c01gJ73JT56EpdsR6nuDc1wsAJUQpSuGb--
+Seems like we should be able to grab a cluster lock where we grab
+i_mutex in the namespace code to avoid having to redo all these checks.
