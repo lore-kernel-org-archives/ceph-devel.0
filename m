@@ -1,62 +1,42 @@
-From: Christoph Hellwig <hch@infradead.org>
+From: Linus Torvalds <torvalds@linux-foundation.org>
 Subject: Re: [PATCH v2] ceph: fix posix ACL hooks
-Date: Tue, 4 Feb 2014 07:57:44 -0800
-Message-ID: <20140204155744.GA3974@infradead.org>
-References: <1391013467-7598-1-git-send-email-ilya.dryomov@inktank.com>
- <CA+55aFwTuBDHgQoTymr8OtE-+k=+pX0T_eb+fff0K+Pa3C-g-Q@mail.gmail.com>
- <20140130075421.GA10050@infradead.org>
- <CA+55aFxbVFpy8Y8P5fMCmmTSGbFxU9dTbOj9uTH+fKWGUzwgNg@mail.gmail.com>
- <20140203102943.GF11829@infradead.org>
- <CA+55aFytvTPdBsv6BwSomUGWXZ_tKP=BxaeJ7FXBft0JNnjBCQ@mail.gmail.com>
- <20140203215908.GD10323@ZenIV.linux.org.uk>
- <CA+55aFz3PyyCqOLs_SBRS3cbGxWd5ez4Svz2+xK+4KtCez8iGw@mail.gmail.com>
- <20140203224034.GF10323@ZenIV.linux.org.uk>
- <1391513615.2766.18.camel@menhir>
+Date: Tue, 4 Feb 2014 08:17:26 -0800
+Message-ID: <CA+55aFz2FLCcNpLz_ey4YaKsLov+Mpjdt4onXVmw5n3z7o_TRg@mail.gmail.com>
+References: <CALFYKtDCNWK+9m5m3P01dcxOOV7iHFeNaOH=Q=6Pffuo8gmrMQ@mail.gmail.com>
+	<1391013467-7598-1-git-send-email-ilya.dryomov@inktank.com>
+	<CA+55aFwTuBDHgQoTymr8OtE-+k=+pX0T_eb+fff0K+Pa3C-g-Q@mail.gmail.com>
+	<20140130075421.GA10050@infradead.org>
+	<CA+55aFxbVFpy8Y8P5fMCmmTSGbFxU9dTbOj9uTH+fKWGUzwgNg@mail.gmail.com>
+	<20140203102943.GF11829@infradead.org>
+	<CA+55aFytvTPdBsv6BwSomUGWXZ_tKP=BxaeJ7FXBft0JNnjBCQ@mail.gmail.com>
+	<20140203215908.GD10323@ZenIV.linux.org.uk>
+	<CA+55aFz3PyyCqOLs_SBRS3cbGxWd5ez4Svz2+xK+4KtCez8iGw@mail.gmail.com>
+	<20140203224034.GF10323@ZenIV.linux.org.uk>
+	<1391513615.2766.18.camel@menhir>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
 In-Reply-To: <1391513615.2766.18.camel@menhir>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Steven Whitehouse <swhiteho@redhat.com>
-Cc: Al Viro <viro@ZenIV.linux.org.uk>, Linus Torvalds <torvalds@linux-foundation.org>, Christoph Hellwig <hch@infradead.org>, Ilya Dryomov <ilya.dryomov@inktank.com>, Sage Weil <sage@inktank.com>, Dave Jones <davej@redhat.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, ceph-devel@vger.kernel.org, linux-fsdevel <linux-fsdevel@vger.kernel.org>, Guangliang Zhao <lucienchao@gmail.com>, Li Wang <li.wang@ubuntykylin.com>, zheng.z.yan@intel.com
+Cc: Al Viro <viro@zeniv.linux.org.uk>, Christoph Hellwig <hch@infradead.org>, Ilya Dryomov <ilya.dryomov@inktank.com>, Sage Weil <sage@inktank.com>, Dave Jones <davej@redhat.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, ceph-devel@vger.kernel.org, linux-fsdevel <linux-fsdevel@vger.kernel.org>, Guangliang Zhao <lucienchao@gmail.com>, Li Wang <li.wang@ubuntykylin.com>, zheng.z.yan@intel.com
 List-Id: ceph-devel.vger.kernel.org
 
-On Tue, Feb 04, 2014 at 11:33:35AM +0000, Steven Whitehouse wrote:
-> To diverge from that topic for a moment, this thread has also brought
-> together some discussion on another issue which I've been pondering
-> recently.... that of whether the inode operations for get/set_xattr
-> should take a dentry or not. I had thought that we'd come to the
-> conclusion that 9p made it impossible to swap the current dentry
-> argument for an inode, and I was about to send a patch for selinux
-> support on clustered fs on that basis. However the discussion in this
-> thread has made me wonder whether that really is the case or not.... Al,
-> can you confirm whether your xattr-experimental patches are still under
-> active consideration?
-
-My plan was to work on the 9p and cifs conversions using the
-d_find_alias hack we have in ceph right now.  That means the base work
-could switch to passed in dentries or in case of 9p the per-inode fids
-easily.
-
+On Tue, Feb 4, 2014 at 3:33 AM, Steven Whitehouse <swhiteho@redhat.com> wrote:
+>
 > The other question that I have relating to that side of things, is why
 > security_inode_permission() is called from __inode_permission() rather
 > than from generic_permission() ? Maybe there is a good reason, but I
 > can't immediately see what it is at the moment.
 
-Seems like almost everything of the security_* family is called from the
-VFS instead of the filesystem.  There's also some very odd other
-behaviour in there, e.g. for the xattrs sets are handed to the
-filesystem first, and then the xattr layer calls into the security
-layer, which for reads the filesystems is never reached at all.
+"generic_permission()" is just a helper that implements the default
+UNIX permissions, and won't necessarily even be called. A filesystem
+could decide not to call it at all, and in fact there are cases that
+don't (eg coda or the bad_inode case).
 
-> In response to the question elsewhere about GFS2 calling
-> gfs2_permission() after the vfs has already done its checks, that is
-> indeed down to needing to ensure that we have the cluster locks when
-> this check is called. More importantly to know that things haven't
-> changed since the VFS called the same function in case we've raced with
-> another node changing the permissions, for example. There are a number
-> of cases where we redo vfs level checks for this reason,
+The inode_permission() class of helpers, in contrast, is what gets
+called by the VFS layer itself. So if you want to catch all permission
+checks (and that would be security_inode_permission()) then you need
+to catch it there.
 
-Seems like we should be able to grab a cluster lock where we grab
-i_mutex in the namespace code to avoid having to redo all these checks.
+                     Linus
