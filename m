@@ -1,254 +1,89 @@
-From: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: poor data distribution
-Date: Mon, 3 Feb 2014 16:33:10 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1402031619540.10983@cobra.newdream.net>
-References: <CAMNMNTw2u9r-Uab7+Fa1y0Wem53f9hvx77yxjTwB+tgTfnPF2A@mail.gmail.com>
-	<CAMNMNTxfw=T+-D-=qXeO65hQzuAsuVhJU1fuLGFECDcCow0isg@mail.gmail.com>
-	<alpine.DEB.2.00.1401300842550.22642@cobra.newdream.net>
-	<CAMNMNTyh6RN4xRg-tAZzu19EDaEPbau+b-Q+XxGWZq8nN1B9vQ@mail.gmail.com>
-	<alpine.DEB.2.00.1401300908040.24840@cobra.newdream.net>
-	<CAMNMNTwCRydaWffc6q5n+ruvKu_xYP_FFh+SBR96VXzRUun2fw@mail.gmail.com>
-	<CAFMfnwoB5+x7RqwoKmz8Pc9PWxnsiiTUtPCa7wp2sSQtefxT-g@mail.gmail.com>
-	<CAMNMNTz4XiwF0H_SfhBiTswj4GNFnrRFX0fdQhCcdArg0Pd0=w@mail.gmail.com>
-	<CAMNMNTwQ9uPXfFkpo3VFkiVjzxgY6-Sgq9+mK=dY3X63rsV_YA@mail.gmail.com>
-	<alpine.DEB.2.00.1402012219070.17892@cobra.newdream.net>
-	<CAMNMNTxMS-dErrtHzrd0hch1wjHKfc7USJJ5hFueac7+f6_tLQ@mail.gmail.com>
-	<CAMNMNTzjn=AzbLr-ZRVKMSFYMC_ibyGjSHcuwpB-C4WBWDN16w@mail.gmail.com>
-	<CAMNMNTx7k1J4a7oCNMXq0b1Pp1RAS_xCco9Mw4tAZj9k0PS1gA@mail.gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: v0.76 released
+Date: Mon, 3 Feb 2014 22:05:53 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1402032203160.20429@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAMNMNTx7k1J4a7oCNMXq0b1Pp1RAS_xCco9Mw4tAZj9k0PS1gA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Dominik Mostowiec <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:35023 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750754AbaBDGFy (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Feb 2014 01:05:54 -0500
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org, ceph-users@ceph.com
 
-Hi,
+This release includes another batch of updates for firefly
+functionality.  Most notably, the cache pool infrastructure now
+support snapshots, the OSD backfill functionality has been generalized
+to include multiple targets (necessary for the coming erasure pools),
+and there were performance improvements to the erasure code plugin on
+capable processors.  The MDS now properly utilizes (and seamlessly
+migrates to) the OSD key/value interface (aka omap) for storing directory
+objects.  There continue to be many other fixes and improvements for
+usability and code portability across the tree.
 
-I spent a couple hours looking at your map because it did look like there 
-was something wrong.  After some experimentation and adding a bucnh of 
-improvements to osdmaptool to test the distribution, though, I think 
-everything is working as expected.  For pool 3, your map has a standard 
-deviation in utilizations of ~8%, and we should expect ~9% for this number 
-of PGs.  For all pools, it is slightly higher (~9% vs expected ~8%).  
-This is either just in the noise, or slightly confounded by the lack of 
-the hashpspool flag on the pools (which slightly amplifies placement 
-nonuniformity with multiple pools... not enough that it is worth changing 
-anything though).
+Upgrading
+~~~~~~~~~
 
-The bad news is that that order of standard deviation results in pretty 
-wide min/max range of 118 to 202 pgs.  That seems a *bit* higher than we a 
-perfectly random placement generates (I'm seeing a spread in that is 
-usually 50-70 pgs), but I think *that* is where the pool overlap (no 
-hashpspool) is rearing its head; for just pool three the spread of 50 is 
-about what is expected.
+* 'rbd ls' on a pool which never held rbd images now exits with code
+  0. It outputs nothing in plain format, or an empty list in
+  non-plain format. This is consistent with the behavior for a pool
+  which used to hold images, but contains none. Scripts relying on
+  this behavior should be updated.
 
-Long story short: you have two options.  One is increasing the number of 
-PGs.  Note that this helps but has diminishing returns (doubling PGs 
-only takes you from ~8% to ~6% standard deviation, quadrupling to ~4%).
+* The MDS requires a new OSD operation TMAP2OMAP, added in this release.  When
+  upgrading, be sure to upgrade and restart the ceph-osd daemons before the
+  ceph-mds daemon.  The MDS will refuse to start if any up OSDs do not support
+  the new feature.
 
-The other is to use reweight-by-utilization.  That is the best approach, 
-IMO.  I'm not sure why you were seeing PGs stuck in the remapped state 
-after you did that, though, but I'm happy to dig into that too.
+* The 'ceph mds set_max_mds N' command is now deprecated in favor of
+  'ceph mds set max_mds N'.
 
-BTW, the osdmaptool addition I was using to play with is here:
-	https://github.com/ceph/ceph/pull/1178
+Notable Changes
+~~~~~~~~~~~~~~~
 
-sage
+* build: misc improvements (Ken Dreyer)
+* ceph-disk: generalize path names, add tests (Loic Dachary)
+* ceph-disk: misc improvements for puppet (Loic Dachary)
+* ceph-disk: several bug fixes (Loic Dachary)
+* ceph-fuse: fix race for sync reads (Sage Weil)
+* config: recursive metavariable expansion (Loic Dachary)
+* crush: usability and test improvements (Loic Dachary)
+* doc: misc fixes (David Moreau Simard, Kun Huang)
+* erasure-code: improve buffer alignment (Loic Dachary)
+* erasure-code: rewrite region-xor using vector operations (Andreas 
+  Peters)
+* librados, osd: new TMAP2OMAP operation (Yan, Zheng)
+* mailmap updates (Loic Dachary)
+* many portability improvements (Noah Watkins)
+* many unit test improvements (Loic Dachary)
+* mds: always store backtrace in default pool (Yan, Zheng)
+* mds: store directories in omap instead of tmap (Yan, Zheng)
+* mon: allow adjustment of cephfs max file size via 'ceph mds set 
+  max_file_size' (Sage Weil)
+* mon: do not create erasure rules by default (Sage Weil)
+* mon: do not generate spurious MDSMaps in certain cases (Sage Weil)
+* mon: do not use keyring if auth = none (Loic Dachary)
+* mon: fix pg_temp leaks (Joao Eduardo Luis)
+* osd: backfill to multiple targets (David Zafman)
+* osd: cache pool support for snapshots (Sage Weil)
+* osd: fix and cleanup misc backfill issues (David Zafman)
+* osd: fix omap_clear operation to not zap xattrs (Sam Just, Yan, Zheng)
+* osd: ignore num_objects_dirty on scrub for old pools (Sage Weil)
+* osd: include more info in pg query result (Sage Weil)
+* osd: track erasure compatibility (David Zafman)
+* rbd: make 'rbd list' return empty list and success on empty pool (Josh 
+  Durgin)
+* rgw: fix object placement read op (Yehuda Sadeh)
+* rgw: fix several CORS bugs (Robin H. Johnson)
+* specfile: fix RPM build on RHEL6 (Ken Dreyer, Derek Yarnell)
+* specfile: ship libdir/ceph (Key Dreyer)
 
+You can get v0.75 from the usual locations:
 
-On Mon, 3 Feb 2014, Dominik Mostowiec wrote:
+* Git at git://github.com/ceph/ceph.git
+* Tarball at http://ceph.com/download/ceph-0.76.tar.gz
+* For packages, see http://ceph.com/docs/master/install/get-packages
+* For ceph-deploy, see http://ceph.com/docs/master/install/install-ceph-deploy
 
-> In other words,
-> 1. we've got 3 racks ( 1 replica per rack )
-> 2. in every rack we have 3 hosts
-> 3. every host has 22 OSD's
-> 4. all pg_num's are 2^n for every pool
-> 5. we enabled "crush tunables optimal".
-> 6. on every machine we disabled 4 unused disk's (osd out, osd reweight
-> 0 and osd rm)
-> 
-> Pool ".rgw.buckets": one osd has 105 PGs and other one (on the same
-> machine) has 144 PGs (37% more!).
-> Other pools also have got this problem. It's not efficient placement.
-> 
-> --
-> Regards
-> Dominik
-> 
-> 
-> 2014-02-02 Dominik Mostowiec <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>:
-> > Hi,
-> > For more info:
-> >   crush: http://dysk.onet.pl/link/r4wGK
-> >   osd_dump: http://dysk.onet.pl/link/I3YMZ
-> >   pg_dump: http://dysk.onet.pl/link/4jkqM
-> >
-> > --
-> > Regards
-> > Dominik
-> >
-> > 2014-02-02 Dominik Mostowiec <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>:
-> >> Hi,
-> >> Hmm,
-> >> You think about sumarize PGs from different pools on one OSD's i think.
-> >> But for one pool (.rgw.buckets) where i have almost of all my data, PG
-> >> count on OSDs is aslo different.
-> >> For example 105 vs 144 PGs from pool .rgw.buckets. In first case it is
-> >> 52% disk usage, second 74%.
-> >>
-> >> --
-> >> Regards
-> >> Dominik
-> >>
-> >>
-> >> 2014-02-02 Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>:
-> >>> It occurs to me that this (and other unexplain variance reports) could
-> >>> easily be the 'hashpspool' flag not being set.  The old behavior had the
-> >>> misfeature where consecutive pool's pg's would 'line up' on the same osds,
-> >>> so that 1.7 == 2.6 == 3.5 == 4.4 etc would map to the same nodes.  This
-> >>> tends to 'amplify' any variance in the placement.  The default is still to
-> >>> use the old behavior for compatibility (this will finally change in
-> >>> firefly).
-> >>>
-> >>> You can do
-> >>>
-> >>>  ceph osd pool set <poolname> hashpspool true
-> >>>
-> >>> to enable the new placement logic on an existing pool, but be warned that
-> >>> this will rebalance *all* of the data in the pool, which can be a very
-> >>> heavyweight operation...
-> >>>
-> >>> sage
-> >>>
-> >>>
-> >>> On Sun, 2 Feb 2014, Dominik Mostowiec wrote:
-> >>>
-> >>>> Hi,
-> >>>> After scrubbing almost all PGs has equal(~) num of objects.
-> >>>> I found something else.
-> >>>> On one host PG coun on OSDs:
-> >>>> OSD with small(52%) disk usage:
-> >>>> count, pool
-> >>>>     105 3
-> >>>>      18 4
-> >>>>       3 5
-> >>>>
-> >>>> Osd with larger(74%) disk usage:
-> >>>>     144 3
-> >>>>      31 4
-> >>>>       2 5
-> >>>>
-> >>>> Pool 3 is .rgw.buckets (where is almost of all data).
-> >>>> Pool 4 is .log, where is no data.
-> >>>>
-> >>>> Count of PGs shouldn't be the same per OSD ?
-> >>>> Or maybe PG hash algorithm is disrupted by wrong count of PG for pool
-> >>>> '4'. There is 1440 PGs ( this is not power of 2 ).
-> >>>>
-> >>>> ceph osd dump:
-> >>>> pool 0 'data' rep size 3 min_size 1 crush_ruleset 0 object_hash
-> >>>> rjenkins pg_num 64 pgp_num 64 last_change 28459 owner 0
-> >>>> crash_replay_interval 45
-> >>>> pool 1 'metadata' rep size 3 min_size 1 crush_ruleset 1 object_hash
-> >>>> rjenkins pg_num 64 pgp_num 64 last_change 28460 owner 0
-> >>>> pool 2 'rbd' rep size 3 min_size 1 crush_ruleset 2 object_hash
-> >>>> rjenkins pg_num 64 pgp_num 64 last_change 28461 owner 0
-> >>>> pool 3 '.rgw.buckets' rep size 3 min_size 1 crush_ruleset 0
-> >>>> object_hash rjenkins pg_num 8192 pgp_num 8192 last_change 73711 owner
-> >>>> 0
-> >>>> pool 4 '.log' rep size 3 min_size 1 crush_ruleset 0 object_hash
-> >>>> rjenkins pg_num 1440 pgp_num 1440 last_change 28463 owner 0
-> >>>> pool 5 '.rgw' rep size 3 min_size 1 crush_ruleset 0 object_hash
-> >>>> rjenkins pg_num 128 pgp_num 128 last_change 72467 owner 0
-> >>>> pool 6 '.users.uid' rep size 3 min_size 1 crush_ruleset 0 object_hash
-> >>>> rjenkins pg_num 8 pgp_num 8 last_change 28465 owner 0
-> >>>> pool 7 '.users' rep size 3 min_size 1 crush_ruleset 0 object_hash
-> >>>> rjenkins pg_num 8 pgp_num 8 last_change 28466 owner 0
-> >>>> pool 8 '.usage' rep size 2 min_size 1 crush_ruleset 0 object_hash
-> >>>> rjenkins pg_num 8 pgp_num 8 last_change 28467 owner
-> >>>> 18446744073709551615
-> >>>> pool 9 '.intent-log' rep size 3 min_size 1 crush_ruleset 0 object_hash
-> >>>> rjenkins pg_num 8 pgp_num 8 last_change 28468 owner
-> >>>> 18446744073709551615
-> >>>> pool 10 '.rgw.control' rep size 3 min_size 1 crush_ruleset 0
-> >>>> object_hash rjenkins pg_num 8 pgp_num 8 last_change 33485 owner
-> >>>> 18446744073709551615
-> >>>> pool 11 '.rgw.gc' rep size 3 min_size 1 crush_ruleset 0 object_hash
-> >>>> rjenkins pg_num 8 pgp_num 8 last_change 33487 owner
-> >>>> 18446744073709551615
-> >>>> pool 12 '.rgw.root' rep size 2 min_size 1 crush_ruleset 0 object_hash
-> >>>> rjenkins pg_num 8 pgp_num 8 last_change 44540 owner 0
-> >>>> pool 13 '' rep size 2 min_size 1 crush_ruleset 0 object_hash rjenkins
-> >>>> pg_num 8 pgp_num 8 last_change 46912 owner 0
-> >>>>
-> >>>> --
-> >>>> Regards
-> >>>> Dominik
-> >>>>
-> >>>> 2014-02-01 Dominik Mostowiec <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>:
-> >>>> > Hi,
-> >>>> >> Did you bump pgp_num as well?
-> >>>> > Yes.
-> >>>> >
-> >>>> > See: http://dysk.onet.pl/link/BZ968
-> >>>> >
-> >>>> >> 25% pools is two times smaller from other.
-> >>>> > This is changing after scrubbing.
-> >>>> >
-> >>>> > --
-> >>>> > Regards
-> >>>> > Dominik
-> >>>> >
-> >>>> > 2014-02-01 Kyle Bader <kyle.bader-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>:
-> >>>> >>
-> >>>> >>> Change pg_num for .rgw.buckets to power of 2, an 'crush tunables
-> >>>> >>> optimal' didn't help :(
-> >>>> >>
-> >>>> >> Did you bump pgp_num as well? The split pgs will stay in place until pgp_num
-> >>>> >> is bumped as well, if you do this be prepared for (potentially lots) of data
-> >>>> >> movement.
-> >>>> >
-> >>>> >
-> >>>> >
-> >>>> > --
-> >>>> > Pozdrawiam
-> >>>> > Dominik
-> >>>>
-> >>>>
-> >>>>
-> >>>> --
-> >>>> Pozdrawiam
-> >>>> Dominik
-> >>>>
-> >>>>
-> >>
-> >>
-> >>
-> >> --
-> >> Pozdrawiam
-> >> Dominik
-> >
-> >
-> >
-> > --
-> > Pozdrawiam
-> > Dominik
-> 
-> 
-> 
-> -- 
-> Pozdrawiam
-> Dominik
-> 
-> 
