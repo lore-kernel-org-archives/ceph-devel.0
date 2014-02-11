@@ -1,154 +1,108 @@
-From: "Matt W. Benjamin" <matt@linuxbox.com>
-Subject: Re: wip-libcephfs-firefly-rb
-Date: Tue, 11 Feb 2014 10:12:41 -0500 (EST)
-Message-ID: <184140628.24.1392131561296.JavaMail.root@thunderbeast.private.linuxbox.com>
-References: <alpine.DEB.2.00.1402110656530.17892@cobra.newdream.net>
+From: Alex Elder <elder@ieee.org>
+Subject: Re: [PATCH 2/5] ceph: remove zero-size xattr
+Date: Tue, 11 Feb 2014 11:25:28 -0600
+Message-ID: <52FA5D08.6060108@ieee.org>
+References: <1392096612-11481-1-git-send-email-zheng.z.yan@intel.com>	<1392096612-11481-2-git-send-email-zheng.z.yan@intel.com>	<52FA37F1.2050903@ieee.org> <CAAM7YAkrZ=r5qYHw8iwUHALa49DvjwABPwBd--izMv-CvH2OVQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from aa.linuxbox.com ([69.128.83.226]:1601 "EHLO aa.linuxbox.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751288AbaBKPMr (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 11 Feb 2014 10:12:47 -0500
-In-Reply-To: <alpine.DEB.2.00.1402110656530.17892@cobra.newdream.net>
+Received: from mail-ie0-f180.google.com ([209.85.223.180]:60634 "EHLO
+	mail-ie0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750934AbaBKRZa (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Feb 2014 12:25:30 -0500
+Received: by mail-ie0-f180.google.com with SMTP id at1so4530619iec.25
+        for <ceph-devel@vger.kernel.org>; Tue, 11 Feb 2014 09:25:29 -0800 (PST)
+In-Reply-To: <CAAM7YAkrZ=r5qYHw8iwUHALa49DvjwABPwBd--izMv-CvH2OVQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: "Yan, Zheng" <ukernel@gmail.com>
+Cc: "Yan, Zheng" <zheng.z.yan@intel.com>, ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>
 
-This should be it:
-
-    https://github.com/linuxbox2/linuxbox-ceph/tree/wip-libcephfs-firefly-rb
-
-Matt
-
------ "Sage Weil" <sage@inktank.com> wrote:
-
-> On Sat, 8 Feb 2014, Matt W. Benjamin wrote:
-> > Hi,
-> > 
-> > It looks to me like the rebase was already done--I thought Casey
-> needed me to finish that up,
-> > but everything just built for me.
+On 02/11/2014 09:10 AM, Yan, Zheng wrote:
+> On Tue, Feb 11, 2014 at 10:47 PM, Alex Elder <elder@ieee.org> wrote:
+>> On 02/10/2014 11:30 PM, Yan, Zheng wrote:
+>>> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+>>
+>> You really need to explain better under what circumstances
+>> a zero-size xattr is getting removed.
+>>
+>> But apparently it's only when you're updating an xattr
+>> (not building it up from a blob from storage).
+>>
+>> Why are you doing this?  Why can't an xattr exist with
+>> an empty value?
 > 
-> What is the URL for the posted branch?  
-> 
-> Thanks!
-> sage
-> 
-> > 
-> > Matt
-> > 
-> > ----- "Sage Weil" <sage@inktank.com> wrote:
-> > 
-> > > Hey Matt, Casey,
-> > > 
-> > > This is great news!  Please let me know as soon as the rebase is
-> ready
-> > > and 
-> > > there is a pull-request so I get this run through the test suite.
-> 
-> > > This is 
-> > > the last week before the firefly freeze and it would be great to
-> get
-> > > this 
-> > > libcephfs API update into that release.
-> > > 
-> > > sage
-> > > 
-> > > On Fri, 7 Feb 2014, Matt W. Benjamin wrote:
-> > > 
-> > > > Hi Sage and Ceph devs,
-> > > > 
-> > > > Casey over here root-caused and we believe fixed the
-> refcounting
-> > > problem on our wip-libcephfs branch, and
-> > > > a rebase to firefly is in progress.
-> > > > 
-> > > > The fix is on wip-libcephfs-firefly-rb :
-> > > > 
-> > > > """
-> > > > fuse: fix for missing ll_ref on create
-> > > > when the 'Inode **outp' argument was added to ll_create(), it
-> was
-> > > > changed to only take the ll_ref if outp was not NULL.
-> > > fuse_ll_create()
-> > > > was calling ll_create() with outp=NULL, and subsequently
-> calling
-> > > > fuse_reply_create() (which causes fuse to increment the lookup
-> > > count)
-> > > > without registering the initial ll_ref
-> > > > 
-> > > > this patch adds a dummy inode pointer i2 to the ll_create() call
-> to
-> > > > claim our initial reference
-> > > > 
-> > > > Signed-off-by: Casey Bodley <casey@linuxbox.com>
-> > > > """
-> > > > 
-> > > > We're still finishing up the rebase, but I expect to have one
-> tested
-> > > by some time tomorrow am.
-> > > > 
-> > > > Thanks,
-> > > > 
-> > > > Matt
-> > > > 
-> > > > -- 
-> > > > Matt Benjamin
-> > > > The Linux Box
-> > > > 206 South Fifth Ave. Suite 150
-> > > > Ann Arbor, MI  48104
-> > > > 
-> > > > http://linuxbox.com
-> > > > 
-> > > > tel.  734-761-4689 
-> > > > fax.  734-769-8938 
-> > > > cel.  734-216-5309 
-> > > > --
-> > > > To unsubscribe from this list: send the line "unsubscribe
-> > > ceph-devel" in
-> > > > the body of a message to majordomo@vger.kernel.org
-> > > > More majordomo info at 
-> http://vger.kernel.org/majordomo-info.html
-> > > > 
-> > > > 
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe
-> ceph-devel"
-> > > in
-> > > the body of a message to majordomo@vger.kernel.org
-> > > More majordomo info at 
-> http://vger.kernel.org/majordomo-info.html
-> > 
-> > -- 
-> > Matt Benjamin
-> > The Linux Box
-> > 206 South Fifth Ave. Suite 150
-> > Ann Arbor, MI  48104
-> > 
-> > http://linuxbox.com
-> > 
-> > tel.  734-761-4689 
-> > fax.  734-769-8938 
-> > cel.  734-216-5309 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe
-> ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > 
-> >
+> That is how other FS behave, at least for ext* and btrfs.
 
--- 
-Matt Benjamin
-The Linux Box
-206 South Fifth Ave. Suite 150
-Ann Arbor, MI  48104
+I haven't tested this, I'm just glancing through code.
+But it looks to me like a zero-length value is OK, but
+a null value pointer means it should be deleted.  Note
+in btrfs_setxattr(), for example, the same bit of code
+I referenced before:
 
-http://linuxbox.com
+        if (size == 0)
+                value = "";  /* empty EA, do not remove */
 
-tel.  734-761-4689 
-fax.  734-769-8938 
-cel.  734-216-5309 
+And ext4 seems to delete for a null value, but handle
+an xattr whose value *length* is zero.  Same with XFS.
+
+So again, I haven't verified through testing, but my
+reading of the code (though rusty) still seems to show
+that an attribute can have an empty (zero-size) value.
+
+					-Alex
+
+> Regards
+> Yan, Zheng
+> 
+>>
+>> Looking at generic_setxattr() in "fs/xattr.c" we see:
+>>         if (size == 0)
+>>                 value = "";  /* empty EA, do not remove */
+>>
+>> The code you have below looks OK, but it seems that you
+>> shouldn't be doing this.
+>>
+>> Am I missing something?
+>>
+>>                                         -Alex
+>>
+>>> ---
+>>>  fs/ceph/xattr.c | 9 +++++++++
+>>>  1 file changed, 9 insertions(+)
+>>>
+>>> diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
+>>> index 28f9793..6ed0e5a 100644
+>>> --- a/fs/ceph/xattr.c
+>>> +++ b/fs/ceph/xattr.c
+>>> @@ -12,6 +12,9 @@
+>>>  #define XATTR_CEPH_PREFIX "ceph."
+>>>  #define XATTR_CEPH_PREFIX_LEN (sizeof (XATTR_CEPH_PREFIX) - 1)
+>>>
+>>> +static int __remove_xattr(struct ceph_inode_info *ci,
+>>> +                       struct ceph_inode_xattr *xattr);
+>>> +
+>>>  /*
+>>>   * List of handlers for synthetic system.* attributes. Other
+>>>   * attributes are handled directly.
+>>> @@ -359,6 +362,12 @@ static int __set_xattr(struct ceph_inode_info *ci,
+>>>                       kfree(val);
+>>>                       return err;
+>>>               }
+>>> +             if (!val_len) {
+>>> +                     if (xattr)
+>>> +                             __remove_xattr(ci, xattr);
+>>> +                     kfree(name);
+>>> +                     return 0;
+>>> +             }
+>>>       }
+>>>
+>>>       if (!xattr) {
+>>>
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
