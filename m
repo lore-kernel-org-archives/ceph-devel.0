@@ -1,70 +1,62 @@
-From: Daniel Poelzleithner <poelzleithner@b1-systems.de>
-Subject: [PATCH] Fix for corrupted ceph cluster
-Date: Tue, 11 Feb 2014 07:48:01 +0100
-Message-ID: <52F9C7A1.3060705@b1-systems.de>
+From: Wido den Hollander <wido@42on.com>
+Subject: Re: Libvirt patch for Ubuntu 14.04 to create image format 2 by default
+Date: Tue, 11 Feb 2014 10:43:34 +0100
+Message-ID: <52F9F0C6.9010201@42on.com>
+References: <52D932A6.90808@42on.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.b1-systems.de ([84.200.69.220]:45922 "EHLO
-	mx1.b1-systems.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750984AbaBKGsH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Feb 2014 01:48:07 -0500
-Received: from [172.22.99.170] (anon-32-58.vpn.ipredator.se [46.246.32.58])
-	by mx1.b1-systems.de (Postfix) with ESMTPSA id C75994092
-	for <ceph-devel@vger.kernel.org>; Tue, 11 Feb 2014 07:33:15 +0100 (CET)
+Received: from websrv.42on.com ([31.25.102.167]:48955 "EHLO websrv.42on.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751139AbaBKJng (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 11 Feb 2014 04:43:36 -0500
+In-Reply-To: <52D932A6.90808@42on.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>, James Page <james.page@ubuntu.com>
 
-Hi,
+On 01/17/2014 02:39 PM, Wido den Hollander wrote:
+> Hi James (CC to devel),
+>
+> I've been trying to get a patch [0] into libvirt for the last couple of
+> months to have libvirt create RBD images format 2 by default.
+>
+> The response from the RedHat people has been zero until thus far. Since
+> this would be great for both OpenStack and CloudStack I'm thinking about
+> Ubuntu 14.04.
+>
 
-I wrote a small patch that ignores object_trim requests when he does not
-find the context of this request.
-We have a node that fails to start permanently and there is no way to
-get all nodes back up.
+So, I've been trying to poke people at RedHat over and over for the last 
+couple of weeks, but no results so far...
 
-As far as I understood, deleting something that does not exist should
-not cause an assert. It is wired, but should not cause abort.
+I got a response that the patch didn't apply to master anymore, so I 
+came up with a new version [0] of the patch, but afterwards there has 
+been radio silence again.
 
-This is regarding bug http://tracker.ceph.com/issues/6101
+I'm working on a couple of extra patches for libvirt, but I want the 
+first patch in their asap since that's the most important one.
 
-Any help is highly appreciated.
+If there is somebody with contacts inside RedHat who could help, please 
+point them to that patch. I would very much appreciate that!
 
-kind regards
- Daniel
+[0]: https://www.redhat.com/archives/libvir-list/2014-January/msg01522.html
+
+> If the patch makes it into Libvirt in let's say 6 weeks it will probably
+> not make it into 14.04 since that has been feature frozen.
+>
+> Is there a way we can get this patch into Libvirt for Ubuntu 14.04? I'm
+> confident it will make it into Libvirt upstream, I just need somebody to
+> look at it.
+>
+> [0]:
+> https://www.redhat.com/archives/libvir-list/2013-December/msg00645.html
+>
 
 
----
- src/osd/ReplicatedPG.cc | 7 +++++--
- 1 file changed, 5 insertions(+), 2 deletions(-)
-
-diff --git a/src/osd/ReplicatedPG.cc b/src/osd/ReplicatedPG.cc
-index 90d3e1d..d7e0b62 100644
---- a/src/osd/ReplicatedPG.cc
-+++ b/src/osd/ReplicatedPG.cc
-@@ -1491,7 +1491,7 @@ ReplicatedPG::RepGather
-*ReplicatedPG::trim_object(const hobject_t &coid)
-   int r = find_object_context(coid, &obc, false, NULL);
-   if (r == -ENOENT || coid.snap != obc->obs.oi.soid.snap) {
-     derr << __func__ << "could not find coid " << coid << dendl;
--    assert(0);
-+    return NULL;
-   }
-   assert(r == 0);
-   assert(obc->registered);
-@@ -7866,7 +7866,10 @@ boost::statechart::result
-ReplicatedPG::TrimmingObjects::react(const SnapTrim&)
-
-   dout(10) << "TrimmingObjects react trimming " << pos << dendl;
-   RepGather *repop = pg->trim_object(pos);
--  assert(repop);
-+  if (!repop) {
-+      derr << "TrimmingObjects failed " << pos << dendl;
-+      return discard_event();
-+  }
-
-   repop->queue_snap_trimmer = true;
-   eversion_t old_last_update = pg->pg_log.get_head();
 -- 
-1.8.5.3
+Wido den Hollander
+42on B.V.
+
+Phone: +31 (0)20 700 9902
+Skype: contact42on
