@@ -1,108 +1,85 @@
 From: Alex Elder <elder@ieee.org>
-Subject: Re: [PATCH 2/5] ceph: remove zero-size xattr
-Date: Tue, 11 Feb 2014 11:25:28 -0600
-Message-ID: <52FA5D08.6060108@ieee.org>
-References: <1392096612-11481-1-git-send-email-zheng.z.yan@intel.com>	<1392096612-11481-2-git-send-email-zheng.z.yan@intel.com>	<52FA37F1.2050903@ieee.org> <CAAM7YAkrZ=r5qYHw8iwUHALa49DvjwABPwBd--izMv-CvH2OVQ@mail.gmail.com>
+Subject: Re: [PATCH 4/5] ceph: add missing init_acl() for mkdir() and atomic_open()
+Date: Tue, 11 Feb 2014 11:45:29 -0600
+Message-ID: <52FA61B9.8070705@ieee.org>
+References: <1392096612-11481-1-git-send-email-zheng.z.yan@intel.com> <1392096612-11481-4-git-send-email-zheng.z.yan@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f180.google.com ([209.85.223.180]:60634 "EHLO
-	mail-ie0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750934AbaBKRZa (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Feb 2014 12:25:30 -0500
-Received: by mail-ie0-f180.google.com with SMTP id at1so4530619iec.25
-        for <ceph-devel@vger.kernel.org>; Tue, 11 Feb 2014 09:25:29 -0800 (PST)
-In-Reply-To: <CAAM7YAkrZ=r5qYHw8iwUHALa49DvjwABPwBd--izMv-CvH2OVQ@mail.gmail.com>
+Received: from mail-ig0-f182.google.com ([209.85.213.182]:46532 "EHLO
+	mail-ig0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751313AbaBKRp2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Feb 2014 12:45:28 -0500
+Received: by mail-ig0-f182.google.com with SMTP id uy17so9232777igb.3
+        for <ceph-devel@vger.kernel.org>; Tue, 11 Feb 2014 09:45:28 -0800 (PST)
+In-Reply-To: <1392096612-11481-4-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <ukernel@gmail.com>
-Cc: "Yan, Zheng" <zheng.z.yan@intel.com>, ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>
+To: "Yan, Zheng" <zheng.z.yan@intel.com>, ceph-devel@vger.kernel.org
+Cc: sage@inktank.com
 
-On 02/11/2014 09:10 AM, Yan, Zheng wrote:
-> On Tue, Feb 11, 2014 at 10:47 PM, Alex Elder <elder@ieee.org> wrote:
->> On 02/10/2014 11:30 PM, Yan, Zheng wrote:
->>> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
->>
->> You really need to explain better under what circumstances
->> a zero-size xattr is getting removed.
->>
->> But apparently it's only when you're updating an xattr
->> (not building it up from a blob from storage).
->>
->> Why are you doing this?  Why can't an xattr exist with
->> an empty value?
+On 02/10/2014 11:30 PM, Yan, Zheng wrote:
+
+This looks OK to me but you should get another
+opinion, I haven't really given it as thorough a
+review as I normally do.
+
+Reviewed-by: Alex Elder <elder@linaro.org>
+
+> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+> ---
+>  fs/ceph/dir.c  | 9 +++++----
+>  fs/ceph/file.c | 1 +
+>  2 files changed, 6 insertions(+), 4 deletions(-)
 > 
-> That is how other FS behave, at least for ext* and btrfs.
+> diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+> index 6da4df8..3bbd0eb 100644
+> --- a/fs/ceph/dir.c
+> +++ b/fs/ceph/dir.c
+> @@ -695,9 +695,8 @@ static int ceph_mknod(struct inode *dir, struct dentry *dentry,
+>  	ceph_mdsc_put_request(req);
+>  
+>  	if (!err)
+> -		err = ceph_init_acl(dentry, dentry->d_inode, dir);
+> -
+> -	if (err)
+> +		ceph_init_acl(dentry, dentry->d_inode, dir);
+> +	else
+>  		d_drop(dentry);
+>  	return err;
+>  }
+> @@ -776,7 +775,9 @@ static int ceph_mkdir(struct inode *dir, struct dentry *dentry, umode_t mode)
+>  		err = ceph_handle_notrace_create(dir, dentry);
+>  	ceph_mdsc_put_request(req);
+>  out:
+> -	if (err < 0)
+> +	if (!err)
+> +		ceph_init_acl(dentry, dentry->d_inode, dir);
+> +	else
 
-I haven't tested this, I'm just glancing through code.
-But it looks to me like a zero-length value is OK, but
-a null value pointer means it should be deleted.  Note
-in btrfs_setxattr(), for example, the same bit of code
-I referenced before:
+Do symlinks have ACLs?  (I don't know, I just notice that
+ceph_symlink() doesn't call ceph_init_acl() on the symlink.)
 
-        if (size == 0)
-                value = "";  /* empty EA, do not remove */
+>  		d_drop(dentry);
+>  	return err;
+>  }
+> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+> index dfd2ce3..09c7afe 100644
+> --- a/fs/ceph/file.c
+> +++ b/fs/ceph/file.c
+> @@ -286,6 +286,7 @@ int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
+>  	} else {
+>  		dout("atomic_open finish_open on dn %p\n", dn);
+>  		if (req->r_op == CEPH_MDS_OP_CREATE && req->r_reply_info.has_create_ino) {
+> +			ceph_init_acl(dentry, dentry->d_inode, dir);
+>  			*opened |= FILE_CREATED;
 
-And ext4 seems to delete for a null value, but handle
-an xattr whose value *length* is zero.  Same with XFS.
+This seems OK but I have to admit I don't know this path
+through the code and I don't have time to really dig into
+it right now.
 
-So again, I haven't verified through testing, but my
-reading of the code (though rusty) still seems to show
-that an attribute can have an empty (zero-size) value.
-
-					-Alex
-
-> Regards
-> Yan, Zheng
+>  		}
+>  		err = finish_open(file, dentry, ceph_open, opened);
 > 
->>
->> Looking at generic_setxattr() in "fs/xattr.c" we see:
->>         if (size == 0)
->>                 value = "";  /* empty EA, do not remove */
->>
->> The code you have below looks OK, but it seems that you
->> shouldn't be doing this.
->>
->> Am I missing something?
->>
->>                                         -Alex
->>
->>> ---
->>>  fs/ceph/xattr.c | 9 +++++++++
->>>  1 file changed, 9 insertions(+)
->>>
->>> diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
->>> index 28f9793..6ed0e5a 100644
->>> --- a/fs/ceph/xattr.c
->>> +++ b/fs/ceph/xattr.c
->>> @@ -12,6 +12,9 @@
->>>  #define XATTR_CEPH_PREFIX "ceph."
->>>  #define XATTR_CEPH_PREFIX_LEN (sizeof (XATTR_CEPH_PREFIX) - 1)
->>>
->>> +static int __remove_xattr(struct ceph_inode_info *ci,
->>> +                       struct ceph_inode_xattr *xattr);
->>> +
->>>  /*
->>>   * List of handlers for synthetic system.* attributes. Other
->>>   * attributes are handled directly.
->>> @@ -359,6 +362,12 @@ static int __set_xattr(struct ceph_inode_info *ci,
->>>                       kfree(val);
->>>                       return err;
->>>               }
->>> +             if (!val_len) {
->>> +                     if (xattr)
->>> +                             __remove_xattr(ci, xattr);
->>> +                     kfree(name);
->>> +                     return 0;
->>> +             }
->>>       }
->>>
->>>       if (!xattr) {
->>>
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
