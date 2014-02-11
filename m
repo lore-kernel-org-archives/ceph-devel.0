@@ -1,57 +1,120 @@
-From: Alex Elder <elder@ieee.org>
-Subject: Re: [PATCH 3/5] ceph: fix ceph_removexattr()
-Date: Tue, 11 Feb 2014 08:50:46 -0600
-Message-ID: <52FA38C6.6060203@ieee.org>
-References: <1392096612-11481-1-git-send-email-zheng.z.yan@intel.com> <1392096612-11481-3-git-send-email-zheng.z.yan@intel.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: wip-libcephfs-firefly-rb
+Date: Tue, 11 Feb 2014 06:57:04 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1402110656530.17892@cobra.newdream.net>
+References: <344869287.15.1391905648502.JavaMail.root@thunderbeast.private.linuxbox.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f176.google.com ([209.85.223.176]:53527 "EHLO
-	mail-ie0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750972AbaBKOup (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Feb 2014 09:50:45 -0500
-Received: by mail-ie0-f176.google.com with SMTP id tp5so4407948ieb.7
-        for <ceph-devel@vger.kernel.org>; Tue, 11 Feb 2014 06:50:45 -0800 (PST)
-In-Reply-To: <1392096612-11481-3-git-send-email-zheng.z.yan@intel.com>
+Received: from cobra.newdream.net ([66.33.216.30]:60740 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751291AbaBKO5G (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Feb 2014 09:57:06 -0500
+In-Reply-To: <344869287.15.1391905648502.JavaMail.root@thunderbeast.private.linuxbox.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zheng.z.yan@intel.com>, ceph-devel@vger.kernel.org
-Cc: sage@inktank.com
+To: "Matt W. Benjamin" <matt@linuxbox.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 02/10/2014 11:30 PM, Yan, Zheng wrote:
-> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
-
-You need a better explanation than "fix."
-
-We have the ENODATA thing (versus ENOATTR), but again
-what you have is fine.
-
-> ---
->  fs/ceph/xattr.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+On Sat, 8 Feb 2014, Matt W. Benjamin wrote:
+> Hi,
 > 
-> diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
-> index 6ed0e5a..79f9c12 100644
-> --- a/fs/ceph/xattr.c
-> +++ b/fs/ceph/xattr.c
-> @@ -463,7 +463,7 @@ static int __remove_xattr(struct ceph_inode_info *ci,
->  			  struct ceph_inode_xattr *xattr)
->  {
->  	if (!xattr)
-> -		return -EOPNOTSUPP;
-> +		return -ENODATA;
+> It looks to me like the rebase was already done--I thought Casey needed me to finish that up,
+> but everything just built for me.
 
-It seems like this could be a void function, and the (one) caller
-could check for null before making the call.
+What is the URL for the posted branch?  
 
-Either way though, this looks good.
+Thanks!
+sage
 
-Reviewed-by: Alex Elder <elder@linaro.org>
-
-
->  
->  	rb_erase(&xattr->node, &ci->i_xattrs.index);
->  
 > 
-
+> Matt
+> 
+> ----- "Sage Weil" <sage@inktank.com> wrote:
+> 
+> > Hey Matt, Casey,
+> > 
+> > This is great news!  Please let me know as soon as the rebase is ready
+> > and 
+> > there is a pull-request so I get this run through the test suite. 
+> > This is 
+> > the last week before the firefly freeze and it would be great to get
+> > this 
+> > libcephfs API update into that release.
+> > 
+> > sage
+> > 
+> > On Fri, 7 Feb 2014, Matt W. Benjamin wrote:
+> > 
+> > > Hi Sage and Ceph devs,
+> > > 
+> > > Casey over here root-caused and we believe fixed the refcounting
+> > problem on our wip-libcephfs branch, and
+> > > a rebase to firefly is in progress.
+> > > 
+> > > The fix is on wip-libcephfs-firefly-rb :
+> > > 
+> > > """
+> > > fuse: fix for missing ll_ref on create
+> > > when the 'Inode **outp' argument was added to ll_create(), it was
+> > > changed to only take the ll_ref if outp was not NULL.
+> > fuse_ll_create()
+> > > was calling ll_create() with outp=NULL, and subsequently calling
+> > > fuse_reply_create() (which causes fuse to increment the lookup
+> > count)
+> > > without registering the initial ll_ref
+> > > 
+> > > this patch adds a dummy inode pointer i2 to the ll_create() call to
+> > > claim our initial reference
+> > > 
+> > > Signed-off-by: Casey Bodley <casey@linuxbox.com>
+> > > """
+> > > 
+> > > We're still finishing up the rebase, but I expect to have one tested
+> > by some time tomorrow am.
+> > > 
+> > > Thanks,
+> > > 
+> > > Matt
+> > > 
+> > > -- 
+> > > Matt Benjamin
+> > > The Linux Box
+> > > 206 South Fifth Ave. Suite 150
+> > > Ann Arbor, MI  48104
+> > > 
+> > > http://linuxbox.com
+> > > 
+> > > tel.  734-761-4689 
+> > > fax.  734-769-8938 
+> > > cel.  734-216-5309 
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe
+> > ceph-devel" in
+> > > the body of a message to majordomo@vger.kernel.org
+> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > > 
+> > > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+> > in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> -- 
+> Matt Benjamin
+> The Linux Box
+> 206 South Fifth Ave. Suite 150
+> Ann Arbor, MI  48104
+> 
+> http://linuxbox.com
+> 
+> tel.  734-761-4689 
+> fax.  734-769-8938 
+> cel.  734-216-5309 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
