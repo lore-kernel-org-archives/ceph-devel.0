@@ -1,90 +1,70 @@
-From: Ashish Chandra <mail.ashishchandra-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: Is it possible to have One Ceph-OSD-Daemon
- managing more than one OSD
-Date: Wed, 12 Feb 2014 17:55:17 +0530
-Message-ID: <CAP+3n31q75FmH6jBukTYzgS7ck2DN48rX6oo9HnpHz053XdYDg@mail.gmail.com>
-References: <CAEvFgitj2DoJ=D-zCZghoRf2o910K1RokOOb=08TNyZ5ZUFvSg@mail.gmail.com>
+From: Alexandre Oliva <oliva@gnu.org>
+Subject: Fixes for missing and doubly-packaged files in ceph.spec
+Date: Wed, 12 Feb 2014 10:47:51 -0200
+Message-ID: <ord2is1oqw.fsf@livre.home>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0787506147=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAEvFgitj2DoJ=D-zCZghoRf2o910K1RokOOb=08TNyZ5ZUFvSg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Vikrant Verma <vikrantverma99-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from linux-libre.fsfla.org ([208.118.235.54]:48139 "EHLO
+	linux-libre.fsfla.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751557AbaBLMsL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Feb 2014 07:48:11 -0500
+Received: from freie (home.lxoliva.fsfla.org [172.31.160.22])
+	by linux-libre.fsfla.org (8.14.4/8.14.4/Debian-2ubuntu2) with ESMTP id s1CCm62d010316
+	for <ceph-devel@vger.kernel.org>; Wed, 12 Feb 2014 12:48:07 GMT
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
---===============0787506147==
-Content-Type: multipart/alternative; boundary=001a11c1f54069907404f234aae4
+In order to upgrade my servers to the Fedora-based Hatrack 20, I had to
+roll out my own rpms, because there aren't Fedora 20 builds at ceph.com.
+This revealed some errors in the ceph spec file, that caused errors
+because some ceph_test files were not packaged at all, and warnings
+because some fileswithin libdir/ceph were packaged twice.  I added the
+ceph_test binaries and avoided the double packaging of
+libdir/ceph/erasure stuff by marking libdir/ceph with %dir.  This in
+turn left ceph_common.sh out, because it had only been covered by the
+recursive packaging of libdir/ceph, so I put it in explicitly.
 
---001a11c1f54069907404f234aae4
-Content-Type: text/plain; charset=ISO-8859-1
+Signed-off-by: Alexandre Oliva <oliva@gnu.org>
 
-AFAIK, one ceph-osd daemon is tied to single OSD, identified by osd-num and
-data path.
+---
+ ceph.spec.in |    5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
 
+diff --git a/ceph.spec.in b/ceph.spec.in
+index fb599fa..82eb102 100644
+--- a/ceph.spec.in
++++ b/ceph.spec.in
+@@ -416,7 +416,8 @@ fi
+ %{_sbindir}/rcceph
+ /sbin/mkcephfs
+ /sbin/mount.ceph
+-%{_libdir}/ceph
++%dir %{_libdir}/ceph
++%{_libdir}/ceph/ceph_common.sh
+ %dir %{_libdir}/rados-classes
+ %{_libdir}/rados-classes/libcls_rbd.so*
+ %{_libdir}/rados-classes/libcls_hello.so*
+@@ -630,6 +631,7 @@ fi
+ %{_bindir}/ceph_filestore_dump
+ %{_bindir}/ceph_filestore_tool
+ %{_bindir}/ceph_streamtest
++%{_bindir}/ceph_test_c_headers
+ %{_bindir}/ceph_test_cfuse_cache_invalidate
+ %{_bindir}/ceph_test_cls_hello
+ %{_bindir}/ceph_test_cls_lock
+@@ -649,6 +651,7 @@ fi
+ %{_bindir}/ceph_test_filestore_idempotent
+ %{_bindir}/ceph_test_filestore_idempotent_sequence
+ %{_bindir}/ceph_test_filestore_workloadgen
++%{_bindir}/ceph_test_get_blkdev_size
+ %{_bindir}/ceph_test_ioctls
+ %{_bindir}/ceph_test_keyvaluedb_atomicity
+ %{_bindir}/ceph_test_keyvaluedb_iterators
 
-On Wed, Feb 12, 2014 at 4:58 PM, Vikrant Verma <vikrantverma99-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>wrote:
-
-> Hi All,
->
-> I have one quick question -
->
-> Is it possible to have One Ceph-OSD-Daemon managing more than one Object
-> Storage Device in a Ceph  Cluster?
->
-> Regards,
-> Vikrant
->
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->
->
-
---001a11c1f54069907404f234aae4
-Content-Type: text/html; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"ltr">AFAIK, one ceph-osd daemon is tied to single OSD, identifi=
-ed by osd-num and data path.<br></div><div class=3D"gmail_extra"><br><br><d=
-iv class=3D"gmail_quote">On Wed, Feb 12, 2014 at 4:58 PM, Vikrant Verma <sp=
-an dir=3D"ltr">&lt;<a href=3D"mailto:vikrantverma99-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org" target=3D"_b=
-lank">vikrantverma99-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org</a>&gt;</span> wrote:<br>
-<blockquote class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:1p=
-x #ccc solid;padding-left:1ex"><div dir=3D"ltr">Hi All,<div><br></div><div>=
-I have one quick question -=A0</div><div><br></div><div>Is it possible to h=
-ave One Ceph-OSD-Daemon managing more than one Object Storage Device in a C=
-eph =A0Cluster?<br>
-</div><div><br>
-</div><div>Regards,</div><div>Vikrant</div></div>
-<br>_______________________________________________<br>
-ceph-users mailing list<br>
-<a href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a><=
-br>
-<a href=3D"http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com" target=
-=3D"_blank">http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com</a><br>
-<br></blockquote></div><br></div>
-
---001a11c1f54069907404f234aae4--
-
---===============0787506147==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============0787506147==--
+-- 
+Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
+You must be the change you wish to see in the world. -- Gandhi
+Be Free! -- http://FSFLA.org/   FSF Latin America board member
+Free Software Evangelist     Red Hat Brazil Toolchain Engineer
