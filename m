@@ -1,72 +1,56 @@
-From: Loic Dachary <loic@dachary.org>
+From: Mark Nelson <mark.nelson@inktank.com>
 Subject: Re: ceph-brag ready
-Date: Thu, 13 Feb 2014 01:22:42 +0100
-Message-ID: <52FC1052.3060708@dachary.org>
+Date: Wed, 12 Feb 2014 18:24:57 -0600
+Message-ID: <52FC10D9.6050100@inktank.com>
 References: <78E29451-D203-4B1A-B825-E86894D940FB@enovance.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="bQP191X2ixs0wbTlPUV9GQJ6w8xmnHFOP"
+Content-Type: text/plain; charset=windows-1252;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:41126 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751795AbaBMAWp (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Feb 2014 19:22:45 -0500
+Received: from mail-ie0-f170.google.com ([209.85.223.170]:51698 "EHLO
+	mail-ie0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752564AbaBMAYr (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Feb 2014 19:24:47 -0500
+Received: by mail-ie0-f170.google.com with SMTP id lx4so2076902iec.29
+        for <ceph-devel@vger.kernel.org>; Wed, 12 Feb 2014 16:24:47 -0800 (PST)
 In-Reply-To: <78E29451-D203-4B1A-B825-E86894D940FB@enovance.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sebastien Han <sebastien.han@enovance.com>, ceph-devel@vger.kernel.org
+To: Sebastien Han <sebastien.han@enovance.com>
+Cc: ceph-devel@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---bQP191X2ixs0wbTlPUV9GQJ6w8xmnHFOP
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: quoted-printable
-
-Cool :-) brag.ceph.com stands ready to host the server part. Could you se=
-nd me your ssh public key to be granted access ?
-
-On 12/02/2014 21:58, Sebastien Han wrote:
+On 02/12/2014 02:58 PM, Sebastien Han wrote:
 > Hi guys,
->=20
+>
 > First implementation of the ceph-brag is ready.
 > We have a public repo available here, so can try it out.
->=20
+>
 > https://github.com/enovance/ceph-brag
->=20
-> However I don=92t have any idea on how to submit this to github.com/cep=
-h.
+>
+> However I don=92t have any idea on how to submit this to github.com/c=
+eph.
 > Can someone help me on that?
->=20
+
+Just wanted to chime in and say neat. :)
+
+>
 > Cheers.
->=20
-> =96=96=96=96=20
-> S=E9bastien Han=20
-> Cloud Engineer=20
->=20
-> "Always give 100%. Unless you're giving blood.=94=20
->=20
-> Phone: +33 (0)1 49 70 99 72=20
-> Mail: sebastien.han@enovance.com=20
-> Address : 10, rue de la Victoire - 75009 Paris=20
-> Web : www.enovance.com - Twitter : @enovance=20
->=20
+>
+> =96=96=96=96
+> S=E9bastien Han
+> Cloud Engineer
+>
+> "Always give 100%. Unless you're giving blood.=94
+>
+> Phone: +33 (0)1 49 70 99 72
+> Mail: sebastien.han@enovance.com
+> Address : 10, rue de la Victoire - 75009 Paris
+> Web : www.enovance.com - Twitter : @enovance
+>
 
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-
-
---bQP191X2ixs0wbTlPUV9GQJ6w8xmnHFOP
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.20 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlL8EFIACgkQ8dLMyEl6F23bvACghQ4yfC1CSp02NL2+7sAag9du
-y4QAn3SobzeWs7FHF7QG/4hZhTGE4J6d
-=OuN6
------END PGP SIGNATURE-----
-
---bQP191X2ixs0wbTlPUV9GQJ6w8xmnHFOP--
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
