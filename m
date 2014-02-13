@@ -1,87 +1,61 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Google Summer of Code 2014
-Date: Thu, 13 Feb 2014 07:54:50 +0100
-Message-ID: <52FC6C3A.4050903@dachary.org>
-References: <CAP8Oy=LD2_2h-kQjOwkY0+_v=ZUrwGQ6rNo3Dxtxy-q5pNwbTA@mail.gmail.com>
+From: Dan Carpenter <dan.carpenter@oracle.com>
+Subject: re: rbd: use watch/notify for changes in rbd header
+Date: Thu, 13 Feb 2014 12:50:06 +0300
+Message-ID: <20140213095005.GA27350@elgon.mountain>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="xNGacji0qUwh06K1nqEM9MurprCVB6eK2"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:41319 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751385AbaBMGyx (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 13 Feb 2014 01:54:53 -0500
-In-Reply-To: <CAP8Oy=LD2_2h-kQjOwkY0+_v=ZUrwGQ6rNo3Dxtxy-q5pNwbTA@mail.gmail.com>
+Received: from aserp1040.oracle.com ([141.146.126.69]:34872 "EHLO
+	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751880AbaBMJuB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 13 Feb 2014 04:50:01 -0500
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Patrick McGarry <patrick@inktank.com>, Ceph Devel <ceph-devel@vger.kernel.org>
+To: yehuda@hq.newdream.net
+Cc: ceph-devel@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---xNGacji0qUwh06K1nqEM9MurprCVB6eK2
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: quoted-printable
+Hello Yehuda Sadeh,
 
-Hi,
+The patch 59c2be1e4d42: "rbd: use watch/notify for changes in rbd
+header" from Mar 21, 2011, leads to the following static checker
+warning:
 
-I've added the "INCREASE CODE COVERAGE" project description and volunteer=
- to be a mentor.
+	drivers/block/rbd.c:687 parse_rbd_opts_token()
+	warn: we tested 'token < 0' before and it was 'false'
 
-"ALLOW A TUNABLE =93PRIMARY AFFINITY=94 IN THE OSDMAP" is already impleme=
-nted but not merged yet at https://github.com/ceph/ceph/pull/1176
+drivers/block/rbd.c
+   677  static int parse_rbd_opts_token(char *c, void *private)
+   678  {
+   679          struct rbd_options *rbd_opts = private;
+   680          substring_t argstr[MAX_OPT_ARGS];
+   681          int token, intval, ret;
+   682  
+   683          token = match_token(c, rbd_opts_tokens, argstr);
+   684          if (token < 0)
+                    ^^^^^^^^^
+   685                  return -EINVAL;
+   686  
+   687          if (token < Opt_last_int) {
+                    ^^^^^^^^^^^^^^^^^^^^
+Opt_last_int is zero so this is never true.  Should the < be == or
+something?
 
-I volunteer to be a co-mentor for "ADD ERASURE CODING TO THE DURABILITY M=
-ODELING" and "BUILD SDK FOR OBJECT CLASSES"
+   688                  ret = match_int(&argstr[0], &intval);
+   689                  if (ret < 0) {
+   690                          pr_err("bad mount option arg (not int) "
+   691                                 "at '%s'\n", c);
+   692                          return ret;
+   693                  }
+   694                  dout("got int token %d val %d\n", token, intval);
+   695          } else if (token > Opt_last_int && token < Opt_last_string) {
+   696                  dout("got string token %d val %s\n", token,
+   697                       argstr[0].from);
+   698          } else if (token > Opt_last_string && token < Opt_last_bool) {
+   699                  dout("got Boolean token %d\n", token);
+   700          } else {
+   701                  dout("got token %d\n", token);
+   702          }
 
-Cheers
-
-On 12/02/2014 22:17, Patrick McGarry wrote:
-> Hey Ceph developers,
->=20
-> We are getting ready to submit our project list to be a mentoring
-> organization for GSoC 2014 and Sage suggested that perhaps there might
-> be a few more mentors/projects out there.  At the very least perhaps
-> some of you could help with polishing the (very rough) project
-> descriptions.
->=20
-> https://docs.google.com/document/d/1TG7Ki6gmQ5SvN0rFbEecaq8u1JUMybqZoVk=
-GZA2KcsQ/edit?usp=3Dsharing
->=20
-> Take a look and let me know if you would like to be a mentor or if you
-> have any project ideas (especially those that don't require C/C++).
-> Unfortunately the deadline on this is <48 hours away, so we'll need to
-> act quickly.  Thanks.
->=20
->=20
-> Best Regards,
->=20
-> Patrick McGarry
-> Director, Community || Inktank
-> http://ceph.com  ||  http://inktank.com
-> @scuttlemonkey || @ceph || @inktank
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-
-
---xNGacji0qUwh06K1nqEM9MurprCVB6eK2
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.20 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlL8bDoACgkQ8dLMyEl6F23DDQCfRQxg78bAGNDPLQlGjB0Thpw8
-YgoAnRueehCOA9/KUqPzD4ixacWxCy4n
-=capQ
------END PGP SIGNATURE-----
-
---xNGacji0qUwh06K1nqEM9MurprCVB6eK2--
+regards,
+dan carpenter
