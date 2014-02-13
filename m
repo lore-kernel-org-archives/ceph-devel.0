@@ -1,69 +1,58 @@
-From: Dan Carpenter <dan.carpenter@oracle.com>
-Subject: Re: rbd: use watch/notify for changes in rbd header
-Date: Thu, 13 Feb 2014 15:31:22 +0300
-Message-ID: <20140213123122.GU26776@mwanda>
-References: <20140213095005.GA27350@elgon.mountain>
- <CALFYKtABsA6TazxRZUFH35ynQqhbm2TP97npLtuqy1Wt_eQAvg@mail.gmail.com>
- <52FCBA3D.6020804@ieee.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: [PATCH] ceph: fix __dcache_readdir()
+Date: Thu, 13 Feb 2014 21:04:23 +0800
+Message-ID: <1392296663-5654-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from userp1040.oracle.com ([156.151.31.81]:30687 "EHLO
-	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753257AbaBMMbH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 13 Feb 2014 07:31:07 -0500
-Content-Disposition: inline
-In-Reply-To: <52FCBA3D.6020804@ieee.org>
+Received: from mga02.intel.com ([134.134.136.20]:19057 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753910AbaBMNE3 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 13 Feb 2014 08:04:29 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@ieee.org>
-Cc: Ilya Dryomov <ilya.dryomov@inktank.com>, yehuda@hq.newdream.net, Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: sage@inktank.com, "Yan, Zheng" <zheng.z.yan@intel.com>
 
-On Thu, Feb 13, 2014 at 06:27:41AM -0600, Alex Elder wrote:
-> On 02/13/2014 06:04 AM, Ilya Dryomov wrote:
-> > On Thu, Feb 13, 2014 at 11:50 AM, Dan Carpenter
-> > <dan.carpenter@oracle.com> wrote:
-> >> Hello Yehuda Sadeh,
-> >>
-> >> The patch 59c2be1e4d42: "rbd: use watch/notify for changes in rbd
-> >> header" from Mar 21, 2011, leads to the following static checker
-> >> warning:
-> >>
-> >>         drivers/block/rbd.c:687 parse_rbd_opts_token()
-> >>         warn: we tested 'token < 0' before and it was 'false'
-> >>
-> >> drivers/block/rbd.c
-> >>    677  static int parse_rbd_opts_token(char *c, void *private)
-> >>    678  {
-> >>    679          struct rbd_options *rbd_opts = private;
-> >>    680          substring_t argstr[MAX_OPT_ARGS];
-> >>    681          int token, intval, ret;
-> >>    682
-> >>    683          token = match_token(c, rbd_opts_tokens, argstr);
-> >>    684          if (token < 0)
-> >>                     ^^^^^^^^^
-> >>    685                  return -EINVAL;
-> >>    686
-> >>    687          if (token < Opt_last_int) {
-> >>                     ^^^^^^^^^^^^^^^^^^^^
-> >> Opt_last_int is zero so this is never true.  Should the < be == or
-> >> something?
-> > 
-> > Probably not.  It's there in case an integer option gets added to rbd
-> > in the future.  See parse_fsopt_token() and the enums above it in
-> > fs/ceph/super.c.
-> 
-> Yes, that's correct.  There were once integer options and this
-> code is a holdover from that time.
-> 
-> I think it should remain in case it's needed, but it could be
-> #ifdef'd or something.  (Or we could do some magic to get the
-> warning to go away.)
-> 
-> 					-Alex
+If directory is fragmented, readdir() read its dirfrags one by one.
+After reading all dirfrags, the corresponding dentries are sorted in
+(frag_t, off) order in the dcache. If dentries of a directory are all
+cached, __dcache_readdir() can use the cached dentries to satisfy
+readdir syscall. But when checking if a given dentry is after the
+the position of readdir, __dcache_readdir() compares numerical value
+of frag_t directly. This is wrong, it should use ceph_frag_compare().
 
-These warnings are a one time thing.  No need for ifdefs.
+Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+---
+ fs/ceph/dir.c | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
 
-regards,
-dan carpenter
+diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+index 3bbd0eb..42edab9 100644
+--- a/fs/ceph/dir.c
++++ b/fs/ceph/dir.c
+@@ -100,6 +100,14 @@ static unsigned fpos_off(loff_t p)
+ 	return p & 0xffffffff;
+ }
+ 
++static int fpos_cmp(loff_t l, loff_t r)
++{
++	int v = ceph_frag_compare(fpos_frag(l), fpos_frag(r));
++	if (v)
++		return v;
++	return fpos_off(l) > fpos_off(r);
++}
++
+ /*
+  * When possible, we try to satisfy a readdir by peeking at the
+  * dcache.  We make this work by carefully ordering dentries on
+@@ -156,7 +164,7 @@ more:
+ 		if (!d_unhashed(dentry) && dentry->d_inode &&
+ 		    ceph_snap(dentry->d_inode) != CEPH_SNAPDIR &&
+ 		    ceph_ino(dentry->d_inode) != CEPH_INO_CEPH &&
+-		    ctx->pos <= di->offset)
++		    fpos_cmp(ctx->pos, di->offset) <= 0)
+ 			break;
+ 		dout(" skipping %p %.*s at %llu (%llu)%s%s\n", dentry,
+ 		     dentry->d_name.len, dentry->d_name.name, di->offset,
+-- 
+1.8.5.3
 
