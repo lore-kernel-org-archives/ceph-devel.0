@@ -1,94 +1,52 @@
-From: Alex Elder <elder@ieee.org>
-Subject: Re: [PATCH 4/5] ceph: add missing init_acl() for mkdir() and atomic_open()
-Date: Fri, 14 Feb 2014 07:08:27 -0600
-Message-ID: <52FE154B.3050009@ieee.org>
-References: <1392096612-11481-1-git-send-email-zheng.z.yan@intel.com> <1392096612-11481-4-git-send-email-zheng.z.yan@intel.com> <20140214054649.GA3488@x230> <52FDB3D1.200@intel.com>
+From: "Dr.William Davies" <purchase@veltechuniv.edu.in>
+Subject: Re: Instructions to release your payment.
+Date: Fri, 14 Feb 2014 18:00:31 +0530
+Message-ID: <4def3476ba0d1d6a58e949f2ea8c32f2@127.0.0.1>
+Reply-To: williamdavies54@yahoo.co.uk
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f181.google.com ([209.85.223.181]:50515 "EHLO
-	mail-ie0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752291AbaBNNI1 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 14 Feb 2014 08:08:27 -0500
-Received: by mail-ie0-f181.google.com with SMTP id to1so6846429ieb.26
-        for <ceph-devel@vger.kernel.org>; Fri, 14 Feb 2014 05:08:27 -0800 (PST)
-In-Reply-To: <52FDB3D1.200@intel.com>
+Received: from webmail.veltechuniv.edu.in ([202.71.145.3]:54810 "EHLO
+	server.veltechuniv.edu.in" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1751948AbaBNNa2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 14 Feb 2014 08:30:28 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zheng.z.yan@intel.com>, ceph-devel@vger.kernel.org, sage@inktank.com
 
-On 02/14/2014 12:12 AM, Yan, Zheng wrote:
-> updated patch
+Attention
 
-This looks OK, but I just finished reviewing a separate patch that
-seems to do this...  One or the other.  Provided you resolve that:
+Sir,
 
-Reviewed-by: Alex Elder <elder@linaro.org>
+Following an application brought, seeking the release of your due payment
+through British bank, I am directed to inform you that the application has
+been approved and Natwest bank of London has been mandated to make transfer
+of your payment to the bank account you will nominate. Please kindly reply
+for immediate release of your US$6.2 Million to you nominates account.
 
+Sir, for the avoidance of doubts, reconfirm the following information to
+me to enable us forward same to Natwest bank to contact you for your
+payment.
 
-> ---
-> From 9c517a5af5af472a0bee9c900b7df400b10f3098 Mon Sep 17 00:00:00 2001
-> From: "Yan, Zheng" <zheng.z.yan@intel.com>
-> Date: Tue, 11 Feb 2014 12:55:05 +0800
-> Subject: [PATCH 4/5] ceph: add missing init_acl() for mkdir() and
->  atomic_open()
-> 
-> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
-> ---
->  fs/ceph/dir.c  | 13 ++++++++-----
->  fs/ceph/file.c |  1 +
->  2 files changed, 9 insertions(+), 5 deletions(-)
-> 
-> diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-> index 6da4df8..2e3b30d 100644
-> --- a/fs/ceph/dir.c
-> +++ b/fs/ceph/dir.c
-> @@ -695,9 +695,8 @@ static int ceph_mknod(struct inode *dir, struct dentry *dentry,
->  	ceph_mdsc_put_request(req);
->  
->  	if (!err)
-> -		err = ceph_init_acl(dentry, dentry->d_inode, dir);
-> -
-> -	if (err)
-> +		ceph_init_acl(dentry, dentry->d_inode, dir);
-> +	else
->  		d_drop(dentry);
->  	return err;
->  }
-> @@ -735,7 +734,9 @@ static int ceph_symlink(struct inode *dir, struct dentry *dentry,
->  	if (!err && !req->r_reply_info.head->is_dentry)
->  		err = ceph_handle_notrace_create(dir, dentry);
->  	ceph_mdsc_put_request(req);
-> -	if (err)
-> +	if (!err)
-> +		ceph_init_acl(dentry, dentry->d_inode, dir);
-> +	else
->  		d_drop(dentry);
->  	return err;
->  }
-> @@ -776,7 +777,9 @@ static int ceph_mkdir(struct inode *dir, struct dentry *dentry, umode_t mode)
->  		err = ceph_handle_notrace_create(dir, dentry);
->  	ceph_mdsc_put_request(req);
->  out:
-> -	if (err < 0)
-> +	if (!err)
-> +		ceph_init_acl(dentry, dentry->d_inode, dir);
-> +	else
->  		d_drop(dentry);
->  	return err;
->  }
-> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-> index dfd2ce3..09c7afe 100644
-> --- a/fs/ceph/file.c
-> +++ b/fs/ceph/file.c
-> @@ -286,6 +286,7 @@ int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
->  	} else {
->  		dout("atomic_open finish_open on dn %p\n", dn);
->  		if (req->r_op == CEPH_MDS_OP_CREATE && req->r_reply_info.has_create_ino) {
-> +			ceph_init_acl(dentry, dentry->d_inode, dir);
->  			*opened |= FILE_CREATED;
->  		}
->  		err = finish_open(file, dentry, ceph_open, opened);
-> 
+Name:
 
+Address:
+
+Tel/Fax No.:
+
+Nationality:
+
+Occupation:
+
+Date of birth: 
+
+As soon as I received the above information, I will forward them to
+Natwest bank to contact you for your approved payment. Please see in the
+attachment, letter I wrote to Natwest bank informing them of the
+transaction
+
+Yours faithfully
+
+Dr.William Davies
+Chairman,British Banking Regulatory Board.
