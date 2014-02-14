@@ -1,140 +1,94 @@
 From: Alex Elder <elder@ieee.org>
-Subject: Re: [PATCH 2/3] ceph: add acl, noacl options for cephfs mount
-Date: Fri, 14 Feb 2014 07:00:14 -0600
-Message-ID: <52FE135E.2070704@ieee.org>
-References: <1392355784-10422-1-git-send-email-lucienchao@gmail.com> <1392355784-10422-3-git-send-email-lucienchao@gmail.com>
+Subject: Re: [PATCH 4/5] ceph: add missing init_acl() for mkdir() and atomic_open()
+Date: Fri, 14 Feb 2014 07:08:27 -0600
+Message-ID: <52FE154B.3050009@ieee.org>
+References: <1392096612-11481-1-git-send-email-zheng.z.yan@intel.com> <1392096612-11481-4-git-send-email-zheng.z.yan@intel.com> <20140214054649.GA3488@x230> <52FDB3D1.200@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f176.google.com ([209.85.213.176]:57556 "EHLO
-	mail-ig0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751288AbaBNNGm (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 14 Feb 2014 08:06:42 -0500
-Received: by mail-ig0-f176.google.com with SMTP id j1so768910iga.3
-        for <ceph-devel@vger.kernel.org>; Fri, 14 Feb 2014 05:06:42 -0800 (PST)
-In-Reply-To: <1392355784-10422-3-git-send-email-lucienchao@gmail.com>
+Received: from mail-ie0-f181.google.com ([209.85.223.181]:50515 "EHLO
+	mail-ie0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752291AbaBNNI1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 14 Feb 2014 08:08:27 -0500
+Received: by mail-ie0-f181.google.com with SMTP id to1so6846429ieb.26
+        for <ceph-devel@vger.kernel.org>; Fri, 14 Feb 2014 05:08:27 -0800 (PST)
+In-Reply-To: <52FDB3D1.200@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Guangliang Zhao <lucienchao@gmail.com>, ceph-devel@vger.kernel.org
-Cc: sage@inktank.com
+To: "Yan, Zheng" <zheng.z.yan@intel.com>, ceph-devel@vger.kernel.org, sage@inktank.com
 
-On 02/13/2014 11:29 PM, Guangliang Zhao wrote:
-> Signed-off-by: Guangliang Zhao <lucienchao@gmail.com>
+On 02/14/2014 12:12 AM, Yan, Zheng wrote:
+> updated patch
 
-If CONFIG_CEPH_FS_POSIX_ACL is defined, the default is to
-have them enabled; if it is not, the default is to have it
-disabled.  But now, whether enabled or not is possible to
-enable/disable them using a mount option.
+This looks OK, but I just finished reviewing a separate patch that
+seems to do this...  One or the other.  Provided you resolve that:
 
-Well, it appears that way.  However fs/ceph/acl.o is not
-built unless CONFIG_CEP_FS_POSIX_ACL is enabled.  So the
-mount options will appear to be supported but will be
-silently ignored.
+Reviewed-by: Alex Elder <elder@linaro.org>
 
-I don't think you want to require CEPH_FS_POSIX_ACL,
-because that requires the inclusion of FS_POSIX_ACL
-which may not be desired.
-
-So you should probably make all the code related to
-the the acl options (or at least the acl enabled option)
-be conditional on CEPH_FS_POSIX_ACL, even though I think
-that won't look all that nice.
-
-I have another question/suggestion for you to consider,
-below, which is sort of separate from this particular
-change.
 
 > ---
->  fs/ceph/super.c |   24 ++++++++++++++++++++----
->  1 file changed, 20 insertions(+), 4 deletions(-)
+> From 9c517a5af5af472a0bee9c900b7df400b10f3098 Mon Sep 17 00:00:00 2001
+> From: "Yan, Zheng" <zheng.z.yan@intel.com>
+> Date: Tue, 11 Feb 2014 12:55:05 +0800
+> Subject: [PATCH 4/5] ceph: add missing init_acl() for mkdir() and
+>  atomic_open()
 > 
-> diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-> index 2df963f..9d65c08 100644
-> --- a/fs/ceph/super.c
-> +++ b/fs/ceph/super.c
-> @@ -144,7 +144,9 @@ enum {
->  	Opt_ino32,
->  	Opt_noino32,
->  	Opt_fscache,
-> -	Opt_nofscache
-> +	Opt_nofscache,
-> +	Opt_acl,
-> +	Opt_noacl
->  };
+> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+> ---
+>  fs/ceph/dir.c  | 13 ++++++++-----
+>  fs/ceph/file.c |  1 +
+>  2 files changed, 9 insertions(+), 5 deletions(-)
+> 
+> diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+> index 6da4df8..2e3b30d 100644
+> --- a/fs/ceph/dir.c
+> +++ b/fs/ceph/dir.c
+> @@ -695,9 +695,8 @@ static int ceph_mknod(struct inode *dir, struct dentry *dentry,
+>  	ceph_mdsc_put_request(req);
 >  
->  static match_table_t fsopt_tokens = {
-> @@ -172,6 +174,8 @@ static match_table_t fsopt_tokens = {
->  	{Opt_noino32, "noino32"},
->  	{Opt_fscache, "fsc"},
->  	{Opt_nofscache, "nofsc"},
-> +	{Opt_acl, "acl"},
-> +	{Opt_noacl, "noacl"},
->  	{-1, NULL}
->  };
->  
-> @@ -271,6 +275,12 @@ static int parse_fsopt_token(char *c, void *private)
->  	case Opt_nofscache:
->  		fsopt->flags &= ~CEPH_MOUNT_OPT_FSCACHE;
->  		break;
-> +	case Opt_acl:
-> +		fsopt->sb_flags |= MS_POSIXACL;
-> +		break;
-> +	case Opt_noacl:
-> +		fsopt->sb_flags &= ~MS_POSIXACL;
-
-This hunk would be affected by my suggestion, below.
-
-> +		break;
->  	default:
->  		BUG_ON(token);
->  	}
-> @@ -438,6 +448,11 @@ static int ceph_show_options(struct seq_file *m, struct dentry *root)
->  	else
->  		seq_puts(m, ",nofsc");
->  
-> +	if (fsopt->sb_flags & MS_POSIXACL)
-> +		seq_puts(m, ",acl");
+>  	if (!err)
+> -		err = ceph_init_acl(dentry, dentry->d_inode, dir);
+> -
+> -	if (err)
+> +		ceph_init_acl(dentry, dentry->d_inode, dir);
 > +	else
-> +		seq_puts(m, ",noacl");
-> +
->  	if (fsopt->wsize)
->  		seq_printf(m, ",wsize=%d", fsopt->wsize);
->  	if (fsopt->rsize != CEPH_RSIZE_DEFAULT)
-> @@ -819,9 +834,6 @@ static int ceph_set_super(struct super_block *s, void *data)
->  
->  	s->s_flags = fsc->mount_options->sb_flags;
->  	s->s_maxbytes = 1ULL << 40;  /* temp value until we get mdsmap */
-> -#ifdef CONFIG_CEPH_FS_POSIX_ACL
-> -	s->s_flags |= MS_POSIXACL;
-> -#endif
->  
->  	s->s_xattr = ceph_xattr_handlers;
->  	s->s_fs_info = fsc;
-> @@ -911,6 +923,10 @@ static struct dentry *ceph_mount(struct file_system_type *fs_type,
->  	struct ceph_options *opt = NULL;
->  
->  	dout("ceph_mount\n");
-> +
-> +#ifdef CONFIG_CEPH_FS_POSIX_ACL
-> +       flags |= MS_POSIXACL;
-
-(You appear to have spaces here instead of a tab.)
-
-> +#endif
->  	err = parse_mount_options(&fsopt, &opt, flags, data, dev_name, &path);
->  	if (err < 0) {
->  		res = ERR_PTR(err);
+>  		d_drop(dentry);
+>  	return err;
+>  }
+> @@ -735,7 +734,9 @@ static int ceph_symlink(struct inode *dir, struct dentry *dentry,
+>  	if (!err && !req->r_reply_info.head->is_dentry)
+>  		err = ceph_handle_notrace_create(dir, dentry);
+>  	ceph_mdsc_put_request(req);
+> -	if (err)
+> +	if (!err)
+> +		ceph_init_acl(dentry, dentry->d_inode, dir);
+> +	else
+>  		d_drop(dentry);
+>  	return err;
+>  }
+> @@ -776,7 +777,9 @@ static int ceph_mkdir(struct inode *dir, struct dentry *dentry, umode_t mode)
+>  		err = ceph_handle_notrace_create(dir, dentry);
+>  	ceph_mdsc_put_request(req);
+>  out:
+> -	if (err < 0)
+> +	if (!err)
+> +		ceph_init_acl(dentry, dentry->d_inode, dir);
+> +	else
+>  		d_drop(dentry);
+>  	return err;
+>  }
+> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+> index dfd2ce3..09c7afe 100644
+> --- a/fs/ceph/file.c
+> +++ b/fs/ceph/file.c
+> @@ -286,6 +286,7 @@ int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
+>  	} else {
+>  		dout("atomic_open finish_open on dn %p\n", dn);
+>  		if (req->r_op == CEPH_MDS_OP_CREATE && req->r_reply_info.has_create_ino) {
+> +			ceph_init_acl(dentry, dentry->d_inode, dir);
+>  			*opened |= FILE_CREATED;
+>  		}
+>  		err = finish_open(file, dentry, ceph_open, opened);
 > 
-
-OK, here's my question/suggestion.  Why are superblock/mount options
-not treated the same way as the rest?  I think there should be a
-CEPH_MOUNT_OPT_FS_ACL flag added to the set available for
-ceph_mount_options->flags, and just get rid of the fs_flags field
-in that structure.  Then a new function like ceph_set_super_flags()
-could be called from ceph_set_super() which would pick out superblock
-related flags from the ceph_mount_option->flags field and set the
-appropriate bits in super_block->flags.
-
-					-Alex
 
