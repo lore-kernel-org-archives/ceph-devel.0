@@ -1,67 +1,36 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH] ceph: fix __dcache_readdir()
-Date: Thu, 13 Feb 2014 05:18:21 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1402130517480.20749@cobra.newdream.net>
-References: <1392296663-5654-1-git-send-email-zheng.z.yan@intel.com>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+From: Guangliang Zhao <lucienchao@gmail.com>
+Subject: [PATCH 0/3] several misc patches
+Date: Fri, 14 Feb 2014 13:29:41 +0800
+Message-ID: <1392355784-10422-1-git-send-email-lucienchao@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:58932 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752098AbaBMNSV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 13 Feb 2014 08:18:21 -0500
-In-Reply-To: <1392296663-5654-1-git-send-email-zheng.z.yan@intel.com>
+Received: from mail-pb0-f50.google.com ([209.85.160.50]:50796 "EHLO
+	mail-pb0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751098AbaBNF3u (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 14 Feb 2014 00:29:50 -0500
+Received: by mail-pb0-f50.google.com with SMTP id rq2so11827340pbb.23
+        for <ceph-devel@vger.kernel.org>; Thu, 13 Feb 2014 21:29:50 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zheng.z.yan@intel.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+Cc: sage@inktank.com
 
-Reviewed-by: Sage Weil <sage@inktank.com>
+Hi,
 
-On Thu, 13 Feb 2014, Yan, Zheng wrote:
+These are several misc changes: acl option for ceph mount,
+ACL inheritable related bug fix, some have in Zheng's patches, 
+so this only include symlink's.
 
-> If directory is fragmented, readdir() read its dirfrags one by one.
-> After reading all dirfrags, the corresponding dentries are sorted in
-> (frag_t, off) order in the dcache. If dentries of a directory are all
-> cached, __dcache_readdir() can use the cached dentries to satisfy
-> readdir syscall. But when checking if a given dentry is after the
-> the position of readdir, __dcache_readdir() compares numerical value
-> of frag_t directly. This is wrong, it should use ceph_frag_compare().
-> 
-> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
-> ---
->  fs/ceph/dir.c | 10 +++++++++-
->  1 file changed, 9 insertions(+), 1 deletion(-)
-> 
-> diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-> index 3bbd0eb..42edab9 100644
-> --- a/fs/ceph/dir.c
-> +++ b/fs/ceph/dir.c
-> @@ -100,6 +100,14 @@ static unsigned fpos_off(loff_t p)
->  	return p & 0xffffffff;
->  }
->  
-> +static int fpos_cmp(loff_t l, loff_t r)
-> +{
-> +	int v = ceph_frag_compare(fpos_frag(l), fpos_frag(r));
-> +	if (v)
-> +		return v;
-> +	return fpos_off(l) > fpos_off(r);
-> +}
-> +
->  /*
->   * When possible, we try to satisfy a readdir by peeking at the
->   * dcache.  We make this work by carefully ordering dentries on
-> @@ -156,7 +164,7 @@ more:
->  		if (!d_unhashed(dentry) && dentry->d_inode &&
->  		    ceph_snap(dentry->d_inode) != CEPH_SNAPDIR &&
->  		    ceph_ino(dentry->d_inode) != CEPH_INO_CEPH &&
-> -		    ctx->pos <= di->offset)
-> +		    fpos_cmp(ctx->pos, di->offset) <= 0)
->  			break;
->  		dout(" skipping %p %.*s at %llu (%llu)%s%s\n", dentry,
->  		     dentry->d_name.len, dentry->d_name.name, di->offset,
-> -- 
-> 1.8.5.3
-> 
-> 
+Guangliang Zhao (3):
+  ceph: make ceph_forget_all_cached_acls() static inline
+  ceph: add acl, noacl options for cephfs mount
+  ceph: make ceph ACL for symlink inheritable
+
+ fs/ceph/acl.c   |    5 -----
+ fs/ceph/dir.c   |    4 ++++
+ fs/ceph/super.c |   24 ++++++++++++++++++++----
+ fs/ceph/super.h |    6 +++++-
+ 4 files changed, 29 insertions(+), 10 deletions(-)
+
+-- 
+1.7.9.5
+
