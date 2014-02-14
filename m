@@ -1,52 +1,40 @@
-From: "Dr.William Davies" <purchase@veltechuniv.edu.in>
-Subject: Re: Instructions to release your payment.
-Date: Fri, 14 Feb 2014 18:00:31 +0530
-Message-ID: <4def3476ba0d1d6a58e949f2ea8c32f2@127.0.0.1>
-Reply-To: williamdavies54@yahoo.co.uk
+From: Sandon Van Ness <sandon@inktank.com>
+Subject: Master needs newer version of boost on centos?
+Date: Fri, 14 Feb 2014 15:39:53 -0800
+Message-ID: <52FEA949.4090801@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from webmail.veltechuniv.edu.in ([202.71.145.3]:54810 "EHLO
-	server.veltechuniv.edu.in" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1751948AbaBNNa2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 14 Feb 2014 08:30:28 -0500
+Received: from mail-pd0-f174.google.com ([209.85.192.174]:43704 "EHLO
+	mail-pd0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752054AbaBNXjf (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 14 Feb 2014 18:39:35 -0500
+Received: by mail-pd0-f174.google.com with SMTP id z10so12435744pdj.5
+        for <ceph-devel@vger.kernel.org>; Fri, 14 Feb 2014 15:39:34 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: ben@inktank.com
 
-Attention
 
-Sir,
+The last couple builds of master have been failing on the centos 
+gitbuilder. here is the build log:
 
-Following an application brought, seeking the release of your due payment
-through British bank, I am directed to inform you that the application has
-been approved and Natwest bank of London has been mandated to make transfer
-of your payment to the bank account you will nominate. Please kindly reply
-for immediate release of your US$6.2 Million to you nominates account.
+http://gitbuilder.sepia.ceph.com/gitbuilder-centos6-amd64/log.cgi?log=f47062d8a66b94743888aaea13e0766579379395
 
-Sir, for the avoidance of doubts, reconfirm the following information to
-me to enable us forward same to Natwest bank to contact you for your
-payment.
+Its running into:
 
-Name:
+CXX mds/Capability.lo
+CXX mds/Dumper.lo
+In file included from client/Client.h:38,
+from libcephfs.cc:21:
 
-Address:
+      error: client/barrier.h:25:38: boost/icl/interval_set.hpp: No such
+      file or directory 
 
-Tel/Fax No.:
 
-Nationality:
-
-Occupation:
-
-Date of birth: 
-
-As soon as I received the above information, I will forward them to
-Natwest bank to contact you for your approved payment. Please see in the
-attachment, letter I wrote to Natwest bank informing them of the
-transaction
-
-Yours faithfully
-
-Dr.William Davies
-Chairman,British Banking Regulatory Board.
+It looks like its not effecting fedora gitbuilders that have a newer 
+version of boost but on centos/rhel the version is only 1.41.0-18. Is 
+there something we can do to get around this without back-porting or 
+will backporting a newer boost for rhel/centos be necessary?
