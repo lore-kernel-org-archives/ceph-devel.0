@@ -1,15 +1,15 @@
 From: Guangliang Zhao <lucienchao@gmail.com>
-Subject: [PATCH 1/3] ceph: make ceph_forget_all_cached_acls() static inline
-Date: Fri, 14 Feb 2014 13:29:42 +0800
-Message-ID: <1392355784-10422-2-git-send-email-lucienchao@gmail.com>
+Subject: [PATCH 2/3] ceph: add acl, noacl options for cephfs mount
+Date: Fri, 14 Feb 2014 13:29:43 +0800
+Message-ID: <1392355784-10422-3-git-send-email-lucienchao@gmail.com>
 References: <1392355784-10422-1-git-send-email-lucienchao@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f52.google.com ([209.85.160.52]:34878 "EHLO
-	mail-pb0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751740AbaBNF34 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 14 Feb 2014 00:29:56 -0500
-Received: by mail-pb0-f52.google.com with SMTP id jt11so11822814pbb.25
-        for <ceph-devel@vger.kernel.org>; Thu, 13 Feb 2014 21:29:55 -0800 (PST)
+Received: from mail-pb0-f47.google.com ([209.85.160.47]:43392 "EHLO
+	mail-pb0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751740AbaBNFaB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 14 Feb 2014 00:30:01 -0500
+Received: by mail-pb0-f47.google.com with SMTP id rp16so11881628pbb.20
+        for <ceph-devel@vger.kernel.org>; Thu, 13 Feb 2014 21:30:00 -0800 (PST)
 In-Reply-To: <1392355784-10422-1-git-send-email-lucienchao@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -18,50 +18,79 @@ Cc: sage@inktank.com
 
 Signed-off-by: Guangliang Zhao <lucienchao@gmail.com>
 ---
- fs/ceph/acl.c   |    5 -----
- fs/ceph/super.h |    6 +++++-
- 2 files changed, 5 insertions(+), 6 deletions(-)
+ fs/ceph/super.c |   24 ++++++++++++++++++++----
+ 1 file changed, 20 insertions(+), 4 deletions(-)
 
-diff --git a/fs/ceph/acl.c b/fs/ceph/acl.c
-index 64fddbc..48af0b3 100644
---- a/fs/ceph/acl.c
-+++ b/fs/ceph/acl.c
-@@ -54,11 +54,6 @@ static inline struct posix_acl *ceph_get_cached_acl(struct inode *inode,
- 	return acl;
- }
+diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+index 2df963f..9d65c08 100644
+--- a/fs/ceph/super.c
++++ b/fs/ceph/super.c
+@@ -144,7 +144,9 @@ enum {
+ 	Opt_ino32,
+ 	Opt_noino32,
+ 	Opt_fscache,
+-	Opt_nofscache
++	Opt_nofscache,
++	Opt_acl,
++	Opt_noacl
+ };
  
--void ceph_forget_all_cached_acls(struct inode *inode)
--{
--	forget_all_cached_acls(inode);
--}
--
- struct posix_acl *ceph_get_acl(struct inode *inode, int type)
- {
- 	int size;
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index c299f7d..8851dc2 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -13,6 +13,7 @@
- #include <linux/wait.h>
- #include <linux/writeback.h>
- #include <linux/slab.h>
-+#include <linux/posix_acl.h>
+ static match_table_t fsopt_tokens = {
+@@ -172,6 +174,8 @@ static match_table_t fsopt_tokens = {
+ 	{Opt_noino32, "noino32"},
+ 	{Opt_fscache, "fsc"},
+ 	{Opt_nofscache, "nofsc"},
++	{Opt_acl, "acl"},
++	{Opt_noacl, "noacl"},
+ 	{-1, NULL}
+ };
  
- #include <linux/ceph/libceph.h>
+@@ -271,6 +275,12 @@ static int parse_fsopt_token(char *c, void *private)
+ 	case Opt_nofscache:
+ 		fsopt->flags &= ~CEPH_MOUNT_OPT_FSCACHE;
+ 		break;
++	case Opt_acl:
++		fsopt->sb_flags |= MS_POSIXACL;
++		break;
++	case Opt_noacl:
++		fsopt->sb_flags &= ~MS_POSIXACL;
++		break;
+ 	default:
+ 		BUG_ON(token);
+ 	}
+@@ -438,6 +448,11 @@ static int ceph_show_options(struct seq_file *m, struct dentry *root)
+ 	else
+ 		seq_puts(m, ",nofsc");
  
-@@ -745,7 +746,10 @@ extern const struct xattr_handler *ceph_xattr_handlers[];
- struct posix_acl *ceph_get_acl(struct inode *, int);
- int ceph_init_acl(struct dentry *, struct inode *, struct inode *);
- int ceph_acl_chmod(struct dentry *, struct inode *);
--void ceph_forget_all_cached_acls(struct inode *inode);
-+static inline void ceph_forget_all_cached_acls(struct inode *inode)
-+{
-+	forget_all_cached_acls(inode);
-+}
++	if (fsopt->sb_flags & MS_POSIXACL)
++		seq_puts(m, ",acl");
++	else
++		seq_puts(m, ",noacl");
++
+ 	if (fsopt->wsize)
+ 		seq_printf(m, ",wsize=%d", fsopt->wsize);
+ 	if (fsopt->rsize != CEPH_RSIZE_DEFAULT)
+@@ -819,9 +834,6 @@ static int ceph_set_super(struct super_block *s, void *data)
  
- #else
+ 	s->s_flags = fsc->mount_options->sb_flags;
+ 	s->s_maxbytes = 1ULL << 40;  /* temp value until we get mdsmap */
+-#ifdef CONFIG_CEPH_FS_POSIX_ACL
+-	s->s_flags |= MS_POSIXACL;
+-#endif
  
+ 	s->s_xattr = ceph_xattr_handlers;
+ 	s->s_fs_info = fsc;
+@@ -911,6 +923,10 @@ static struct dentry *ceph_mount(struct file_system_type *fs_type,
+ 	struct ceph_options *opt = NULL;
+ 
+ 	dout("ceph_mount\n");
++
++#ifdef CONFIG_CEPH_FS_POSIX_ACL
++       flags |= MS_POSIXACL;
++#endif
+ 	err = parse_mount_options(&fsopt, &opt, flags, data, dev_name, &path);
+ 	if (err < 0) {
+ 		res = ERR_PTR(err);
 -- 
 1.7.9.5
 
