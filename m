@@ -1,86 +1,78 @@
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: Re: [PATCH 4/5] ceph: add missing init_acl() for mkdir() and atomic_open()
-Date: Fri, 14 Feb 2014 14:12:33 +0800
-Message-ID: <52FDB3D1.200@intel.com>
-References: <1392096612-11481-1-git-send-email-zheng.z.yan@intel.com> <1392096612-11481-4-git-send-email-zheng.z.yan@intel.com> <20140214054649.GA3488@x230>
+From: Alex Elder <elder@ieee.org>
+Subject: Re: [PATCH 1/3] ceph: make ceph_forget_all_cached_acls() static inline
+Date: Fri, 14 Feb 2014 06:29:57 -0600
+Message-ID: <52FE0C45.4070708@ieee.org>
+References: <1392355784-10422-1-git-send-email-lucienchao@gmail.com> <1392355784-10422-2-git-send-email-lucienchao@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:58113 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751242AbaBNGMf (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 14 Feb 2014 01:12:35 -0500
-In-Reply-To: <20140214054649.GA3488@x230>
+Received: from mail-ig0-f177.google.com ([209.85.213.177]:52768 "EHLO
+	mail-ig0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751312AbaBNM36 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 14 Feb 2014 07:29:58 -0500
+Received: by mail-ig0-f177.google.com with SMTP id k19so738414igc.4
+        for <ceph-devel@vger.kernel.org>; Fri, 14 Feb 2014 04:29:58 -0800 (PST)
+In-Reply-To: <1392355784-10422-2-git-send-email-lucienchao@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org, sage@inktank.com
+To: Guangliang Zhao <lucienchao@gmail.com>, ceph-devel@vger.kernel.org
+Cc: sage@inktank.com
 
-updated patch
+On 02/13/2014 11:29 PM, Guangliang Zhao wrote:
+> Signed-off-by: Guangliang Zhao <lucienchao@gmail.com>
 
----
-From 9c517a5af5af472a0bee9c900b7df400b10f3098 Mon Sep 17 00:00:00 2001
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Date: Tue, 11 Feb 2014 12:55:05 +0800
-Subject: [PATCH 4/5] ceph: add missing init_acl() for mkdir() and
- atomic_open()
+Looks good.  Is there a reason we can't just call
+forget_all_cached_acls(inode) directly?  Or is it
+just so that we have our own complete private ACL
+interface?  (I have no problem with it, just asking.)
 
-Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
----
- fs/ceph/dir.c  | 13 ++++++++-----
- fs/ceph/file.c |  1 +
- 2 files changed, 9 insertions(+), 5 deletions(-)
+Reviewed-by: Alex Elder <elder@linaro.org>
 
-diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-index 6da4df8..2e3b30d 100644
---- a/fs/ceph/dir.c
-+++ b/fs/ceph/dir.c
-@@ -695,9 +695,8 @@ static int ceph_mknod(struct inode *dir, struct dentry *dentry,
- 	ceph_mdsc_put_request(req);
- 
- 	if (!err)
--		err = ceph_init_acl(dentry, dentry->d_inode, dir);
--
--	if (err)
-+		ceph_init_acl(dentry, dentry->d_inode, dir);
-+	else
- 		d_drop(dentry);
- 	return err;
- }
-@@ -735,7 +734,9 @@ static int ceph_symlink(struct inode *dir, struct dentry *dentry,
- 	if (!err && !req->r_reply_info.head->is_dentry)
- 		err = ceph_handle_notrace_create(dir, dentry);
- 	ceph_mdsc_put_request(req);
--	if (err)
-+	if (!err)
-+		ceph_init_acl(dentry, dentry->d_inode, dir);
-+	else
- 		d_drop(dentry);
- 	return err;
- }
-@@ -776,7 +777,9 @@ static int ceph_mkdir(struct inode *dir, struct dentry *dentry, umode_t mode)
- 		err = ceph_handle_notrace_create(dir, dentry);
- 	ceph_mdsc_put_request(req);
- out:
--	if (err < 0)
-+	if (!err)
-+		ceph_init_acl(dentry, dentry->d_inode, dir);
-+	else
- 		d_drop(dentry);
- 	return err;
- }
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index dfd2ce3..09c7afe 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -286,6 +286,7 @@ int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
- 	} else {
- 		dout("atomic_open finish_open on dn %p\n", dn);
- 		if (req->r_op == CEPH_MDS_OP_CREATE && req->r_reply_info.has_create_ino) {
-+			ceph_init_acl(dentry, dentry->d_inode, dir);
- 			*opened |= FILE_CREATED;
- 		}
- 		err = finish_open(file, dentry, ceph_open, opened);
--- 
-1.8.5.3
+> ---
+>  fs/ceph/acl.c   |    5 -----
+>  fs/ceph/super.h |    6 +++++-
+>  2 files changed, 5 insertions(+), 6 deletions(-)
+> 
+> diff --git a/fs/ceph/acl.c b/fs/ceph/acl.c
+> index 64fddbc..48af0b3 100644
+> --- a/fs/ceph/acl.c
+> +++ b/fs/ceph/acl.c
+> @@ -54,11 +54,6 @@ static inline struct posix_acl *ceph_get_cached_acl(struct inode *inode,
+>  	return acl;
+>  }
+>  
+> -void ceph_forget_all_cached_acls(struct inode *inode)
+> -{
+> -	forget_all_cached_acls(inode);
+> -}
+> -
+>  struct posix_acl *ceph_get_acl(struct inode *inode, int type)
+>  {
+>  	int size;
+> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+> index c299f7d..8851dc2 100644
+> --- a/fs/ceph/super.h
+> +++ b/fs/ceph/super.h
+> @@ -13,6 +13,7 @@
+>  #include <linux/wait.h>
+>  #include <linux/writeback.h>
+>  #include <linux/slab.h>
+> +#include <linux/posix_acl.h>
+>  
+>  #include <linux/ceph/libceph.h>
+>  
+> @@ -745,7 +746,10 @@ extern const struct xattr_handler *ceph_xattr_handlers[];
+>  struct posix_acl *ceph_get_acl(struct inode *, int);
+>  int ceph_init_acl(struct dentry *, struct inode *, struct inode *);
+>  int ceph_acl_chmod(struct dentry *, struct inode *);
+> -void ceph_forget_all_cached_acls(struct inode *inode);
+> +static inline void ceph_forget_all_cached_acls(struct inode *inode)
+> +{
+> +	forget_all_cached_acls(inode);
+> +}
+>  
+>  #else
+>  
+> 
 
