@@ -1,49 +1,45 @@
-From: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Subject: v0.67.6 non-release
-Date: Fri, 14 Feb 2014 18:29:03 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1402141810381.20749@cobra.newdream.net>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: ceph-brag ready
+Date: Sat, 15 Feb 2014 09:43:50 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1402150942070.17892@cobra.newdream.net>
+References: <78E29451-D203-4B1A-B825-E86894D940FB@enovance.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1293863827-1392486230=:17892"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:59824 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753497AbaBORnu (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 15 Feb 2014 12:43:50 -0500
+In-Reply-To: <78E29451-D203-4B1A-B825-E86894D940FB@enovance.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sebastien Han <sebastien.han@enovance.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hi all,
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-We built a v0.67.6 but discovered two problems shortly after it was pushed 
-out to the public repository.  We've pulled the packages from the 
-repositories (you'll now find 0.67.5 there).  
+--557981400-1293863827-1392486230=:17892
+Content-Type: TEXT/PLAIN; charset=windows-1252
+Content-Transfer-Encoding: quoted-printable
 
-We will have a v0.67.7 shortly that addresses the problem but not until we 
-run it through its paces and verify the upgrade will be safe.
+On Wed, 12 Feb 2014, Sebastien Han wrote:
+> Hi guys,
+>=20
+> First implementation of the ceph-brag is ready.
+> We have a public repo available here, so can try it out.
+>=20
+> https://github.com/enovance/ceph-brag
+>=20
+> However I don=92t have any idea on how to submit this to github.com/cep=
+h.
+> Can someone help me on that?
 
-If you installed the v0.67.6 release in the last 24 hours, and it is a 
-branc new deployment, we recommend you reinstall.
-
-If it was a live cluster that got upgraded, let us know, as you may want 
-to move to a test build instead of waiting for v0.67.7.  Downgrading a 
-production cluster from v0.67.6 to v0.67.5 is not recommended.
-
-Specifically, there were two issues with the v0.67.6 build:
-
- 1- A recently backported librbd cache behavior change leaks memory.  
-    This is now reverted for v0.67.7.
- 2- A backported fix for xattr behavior did not include a follow-on fix, 
-    which can cause an incorrect ENOENT reply from the cluster.  The 
-    follow-on fix is now in the dumpling branch.
-
-Fixes for both issues are queued up, but as I said we want to make sure it 
-goes through its paces in QA before building a follow-on v0.67.7 release.
+I'm merging this into ceph.git now (src/brag/{client, server}).  I don't=20
+see Signed-off-by lines on the commits, though, or an indication of what=20
+the license is.  Can you confirm whether this should be LGPL or MIT or=20
+whatever?
 
 Thanks!
 sage
+--557981400-1293863827-1392486230=:17892--
