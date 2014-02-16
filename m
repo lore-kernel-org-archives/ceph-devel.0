@@ -1,143 +1,86 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH 2/3] ceph: add acl, noacl options for cephfs mount
-Date: Sun, 16 Feb 2014 10:26:54 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1402161001310.17892@cobra.newdream.net>
-References: <1392355784-10422-1-git-send-email-lucienchao@gmail.com> <1392355784-10422-3-git-send-email-lucienchao@gmail.com> <52FE135E.2070704@ieee.org>
+Subject: Re: [PATCH 1/3] ceph: make ceph_forget_all_cached_acls() static
+ inline
+Date: Sun, 16 Feb 2014 10:27:16 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1402161027130.17892@cobra.newdream.net>
+References: <1392355784-10422-1-git-send-email-lucienchao@gmail.com> <1392355784-10422-2-git-send-email-lucienchao@gmail.com> <52FE0C45.4070708@ieee.org>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:41538 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:41541 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752796AbaBPS0y (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 16 Feb 2014 13:26:54 -0500
-In-Reply-To: <52FE135E.2070704@ieee.org>
+	with ESMTP id S1752885AbaBPS1Q (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 16 Feb 2014 13:27:16 -0500
+In-Reply-To: <52FE0C45.4070708@ieee.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@ieee.org>
 Cc: Guangliang Zhao <lucienchao@gmail.com>, ceph-devel@vger.kernel.org
 
-Hi Alex, Guangliang,
+Applied.
 
 On Fri, 14 Feb 2014, Alex Elder wrote:
+
 > On 02/13/2014 11:29 PM, Guangliang Zhao wrote:
 > > Signed-off-by: Guangliang Zhao <lucienchao@gmail.com>
 > 
-> If CONFIG_CEPH_FS_POSIX_ACL is defined, the default is to
-> have them enabled; if it is not, the default is to have it
-> disabled.  But now, whether enabled or not is possible to
-> enable/disable them using a mount option.
+> Looks good.  Is there a reason we can't just call
+> forget_all_cached_acls(inode) directly?  Or is it
+> just so that we have our own complete private ACL
+> interface?  (I have no problem with it, just asking.)
 > 
-> Well, it appears that way.  However fs/ceph/acl.o is not
-> built unless CONFIG_CEP_FS_POSIX_ACL is enabled.  So the
-> mount options will appear to be supported but will be
-> silently ignored.
+> Reviewed-by: Alex Elder <elder@linaro.org>
 > 
-> I don't think you want to require CEPH_FS_POSIX_ACL,
-> because that requires the inclusion of FS_POSIX_ACL
-> which may not be desired.
+> > ---
+> >  fs/ceph/acl.c   |    5 -----
+> >  fs/ceph/super.h |    6 +++++-
+> >  2 files changed, 5 insertions(+), 6 deletions(-)
+> > 
+> > diff --git a/fs/ceph/acl.c b/fs/ceph/acl.c
+> > index 64fddbc..48af0b3 100644
+> > --- a/fs/ceph/acl.c
+> > +++ b/fs/ceph/acl.c
+> > @@ -54,11 +54,6 @@ static inline struct posix_acl *ceph_get_cached_acl(struct inode *inode,
+> >  	return acl;
+> >  }
+> >  
+> > -void ceph_forget_all_cached_acls(struct inode *inode)
+> > -{
+> > -	forget_all_cached_acls(inode);
+> > -}
+> > -
+> >  struct posix_acl *ceph_get_acl(struct inode *inode, int type)
+> >  {
+> >  	int size;
+> > diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+> > index c299f7d..8851dc2 100644
+> > --- a/fs/ceph/super.h
+> > +++ b/fs/ceph/super.h
+> > @@ -13,6 +13,7 @@
+> >  #include <linux/wait.h>
+> >  #include <linux/writeback.h>
+> >  #include <linux/slab.h>
+> > +#include <linux/posix_acl.h>
+> >  
+> >  #include <linux/ceph/libceph.h>
+> >  
+> > @@ -745,7 +746,10 @@ extern const struct xattr_handler *ceph_xattr_handlers[];
+> >  struct posix_acl *ceph_get_acl(struct inode *, int);
+> >  int ceph_init_acl(struct dentry *, struct inode *, struct inode *);
+> >  int ceph_acl_chmod(struct dentry *, struct inode *);
+> > -void ceph_forget_all_cached_acls(struct inode *inode);
+> > +static inline void ceph_forget_all_cached_acls(struct inode *inode)
+> > +{
+> > +	forget_all_cached_acls(inode);
+> > +}
+> >  
+> >  #else
+> >  
+> > 
 > 
-> So you should probably make all the code related to
-> the the acl options (or at least the acl enabled option)
-> be conditional on CEPH_FS_POSIX_ACL, even though I think
-> that won't look all that nice.
-
-I've gone ahead and done this.  Please see the patch below...
-
-sage
-
-From bc199dc7a5e891fe7d95bf9cd583a9e222a8e1fd Mon Sep 17 00:00:00 2001
-From: Sage Weil <sage@inktank.com>
-Date: Sun, 16 Feb 2014 10:05:29 -0800
-Subject: [PATCH] ceph: add acl, noacl options for cephfs mount
-
-Make the 'acl' option dependent on having ACL support compiled in.  Make
-the 'noacl' option work even without it so that one can always ask it to
-be off and not error out on mount when it is not supported.
-
-Signed-off-by: Guangliang Zhao <lucienchao@gmail.com>
-Signed-off-by: Sage Weil <sage@inktank.com>
----
- fs/ceph/super.c | 32 ++++++++++++++++++++++++++++----
- 1 file changed, 28 insertions(+), 4 deletions(-)
-
-diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-index 2df963f..10a4ccb 100644
---- a/fs/ceph/super.c
-+++ b/fs/ceph/super.c
-@@ -144,7 +144,11 @@ enum {
- 	Opt_ino32,
- 	Opt_noino32,
- 	Opt_fscache,
--	Opt_nofscache
-+	Opt_nofscache,
-+#ifdef CONFIG_CEPH_FS_POSIX_ACL
-+	Opt_acl,
-+#endif
-+	Opt_noacl
- };
- 
- static match_table_t fsopt_tokens = {
-@@ -172,6 +176,10 @@ static match_table_t fsopt_tokens = {
- 	{Opt_noino32, "noino32"},
- 	{Opt_fscache, "fsc"},
- 	{Opt_nofscache, "nofsc"},
-+#ifdef CONFIG_CEPH_FS_POSIX_ACL
-+	{Opt_acl, "acl"},
-+#endif
-+	{Opt_noacl, "noacl"},
- 	{-1, NULL}
- };
- 
-@@ -271,6 +279,14 @@ static int parse_fsopt_token(char *c, void *private)
- 	case Opt_nofscache:
- 		fsopt->flags &= ~CEPH_MOUNT_OPT_FSCACHE;
- 		break;
-+#ifdef CONFIG_CEPH_FS_POSIX_ACL
-+	case Opt_acl:
-+		fsopt->sb_flags |= MS_POSIXACL;
-+		break;
-+#endif
-+	case Opt_noacl:
-+		fsopt->sb_flags &= ~MS_POSIXACL;
-+		break;
- 	default:
- 		BUG_ON(token);
- 	}
-@@ -438,6 +454,13 @@ static int ceph_show_options(struct seq_file *m, struct dentry *root)
- 	else
- 		seq_puts(m, ",nofsc");
- 
-+#ifdef CONFIG_CEPH_FS_POSIX_ACL
-+	if (fsopt->sb_flags & MS_POSIXACL)
-+		seq_puts(m, ",acl");
-+	else
-+		seq_puts(m, ",noacl");
-+#endif
-+
- 	if (fsopt->wsize)
- 		seq_printf(m, ",wsize=%d", fsopt->wsize);
- 	if (fsopt->rsize != CEPH_RSIZE_DEFAULT)
-@@ -819,9 +842,6 @@ static int ceph_set_super(struct super_block *s, void *data)
- 
- 	s->s_flags = fsc->mount_options->sb_flags;
- 	s->s_maxbytes = 1ULL << 40;  /* temp value until we get mdsmap */
--#ifdef CONFIG_CEPH_FS_POSIX_ACL
--	s->s_flags |= MS_POSIXACL;
--#endif
- 
- 	s->s_xattr = ceph_xattr_handlers;
- 	s->s_fs_info = fsc;
-@@ -911,6 +931,10 @@ static struct dentry *ceph_mount(struct file_system_type *fs_type,
- 	struct ceph_options *opt = NULL;
- 
- 	dout("ceph_mount\n");
-+
-+#ifdef CONFIG_CEPH_FS_POSIX_ACL
-+	flags |= MS_POSIXACL;
-+#endif
- 	err = parse_mount_options(&fsopt, &opt, flags, data, dev_name, &path);
- 	if (err < 0) {
- 		res = ERR_PTR(err);
--- 
-1.8.5.1
-
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
