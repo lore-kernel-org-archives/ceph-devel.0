@@ -1,60 +1,50 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH 3/3] ceph: make ceph ACL for symlink inheritable
-Date: Sun, 16 Feb 2014 10:27:50 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1402161027190.17892@cobra.newdream.net>
-References: <1392355784-10422-1-git-send-email-lucienchao@gmail.com> <1392355784-10422-4-git-send-email-lucienchao@gmail.com> <52FE14C2.7030805@ieee.org>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+From: "Dennis Lan (dlan)" <dennis.yxun@gmail.com>
+Subject: [PATCH] crc32: mark gnu stack non-executable
+Date: Mon, 17 Feb 2014 10:40:13 +0800
+Message-ID: <1392604813-12670-1-git-send-email-dennis.yxun@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:41558 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752892AbaBPS1u (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 16 Feb 2014 13:27:50 -0500
-In-Reply-To: <52FE14C2.7030805@ieee.org>
+Received: from mail-pd0-f174.google.com ([209.85.192.174]:50490 "EHLO
+	mail-pd0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751764AbaBQCkj (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 16 Feb 2014 21:40:39 -0500
+Received: by mail-pd0-f174.google.com with SMTP id z10so14345771pdj.33
+        for <ceph-devel@vger.kernel.org>; Sun, 16 Feb 2014 18:40:39 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@ieee.org>
-Cc: Guangliang Zhao <lucienchao@gmail.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+Cc: "Dennis Lan (dlan)" <dennis.yxun@gmail.com>
 
-This one is subsumed by Zheng's updated patch.
+https://wiki.gentoo.org/wiki/Project:Hardened/GNU_stack_quickstart
+https://bugs.gentoo.org/show_bug.cgi?id=500514
 
-All of this is now in the testing branch.  Assuming all goes well I'll 
-send it to Linus in the next day or two.
+Signed-off-by: Dennis Lan (dlan) <dennis.yxun@gmail.com>
+---
+ src/common/crc32c_intel_fast_asm.S      | 3 +++
+ src/common/crc32c_intel_fast_zero_asm.S | 3 +++
+ 2 files changed, 6 insertions(+)
 
-Thanks!
-sage
+diff --git a/src/common/crc32c_intel_fast_asm.S b/src/common/crc32c_intel_fast_asm.S
+index 4ca5d65..68d3426 100644
+--- a/src/common/crc32c_intel_fast_asm.S
++++ b/src/common/crc32c_intel_fast_asm.S
+@@ -662,3 +662,6 @@ global %1_slver
+ %endmacro
+ ;;;       func            core, ver, snum
+ slversion crc32_iscsi_00, 00,   02,  0014
++#if defined(__linux__) && defined(__ELF__)
++.section .note.GNU-stack,"",%progbits
++#endiF
+diff --git a/src/common/crc32c_intel_fast_zero_asm.S b/src/common/crc32c_intel_fast_zero_asm.S
+index b7246f2..9728be9 100644
+--- a/src/common/crc32c_intel_fast_zero_asm.S
++++ b/src/common/crc32c_intel_fast_zero_asm.S
+@@ -644,3 +644,6 @@ global %1_slver
+ %endmacro
+ ;;;       func            core, ver, snum
+ slversion crc32_iscsi_zero_00, 00,   02,  0014
++#if defined(__linux__) && defined(__ELF__)
++.section .note.GNU-stack,"",%progbits
++#endiF
+-- 
+1.8.5.3
 
-On Fri, 14 Feb 2014, Alex Elder wrote:
-
-> On 02/13/2014 11:29 PM, Guangliang Zhao wrote:
-> > Default ACL couldn't be inherited by the symlink in the
-> > parent directory. This resolve it.
-> 
-> This looks good to me, and it seems to be consistent
-> with what other file systems do.
-> 
-> Reviewed-by: Alex Elder <elder@linaro.org>
-> 
-> > Signed-off-by: Guangliang Zhao <lucienchao@gmail.com>
-> > ---
-> >  fs/ceph/dir.c |    4 ++++
-> >  1 file changed, 4 insertions(+)
-> > 
-> > diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-> > index 619616d..2650570 100644
-> > --- a/fs/ceph/dir.c
-> > +++ b/fs/ceph/dir.c
-> > @@ -735,6 +735,10 @@ static int ceph_symlink(struct inode *dir, struct dentry *dentry,
-> >  	if (!err && !req->r_reply_info.head->is_dentry)
-> >  		err = ceph_handle_notrace_create(dir, dentry);
-> >  	ceph_mdsc_put_request(req);
-> > +
-> > +	if (!err)
-> > +		err = ceph_init_acl(dentry, dentry->d_inode, dir);
-> > +
-> >  	if (err)
-> >  		d_drop(dentry);
-> >  	return err;
-> > 
-> 
-> 
