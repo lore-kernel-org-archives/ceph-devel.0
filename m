@@ -1,60 +1,68 @@
-From: Ian Colle <ian.colle@inktank.com>
-Subject: Re: Ceph RPM Packages for Fedora 20
-Date: Tue, 18 Feb 2014 10:56:33 -0700
-Message-ID: <CF28EB72.256B7%ian.colle@inktank.com>
-References: <CANT588tPHU-As_V2_8N=yOaSigvW9DsQAdvGRJ3i81zRfLEmCw@mail.gmail.com>
- <B6413C97-7FF1-4E56-A6A2-F3BE09C9A34B@inktank.com>
- <20140218170115.GA2919@oder>
+From: Gaudenz Steinlin <gaudenz@debian.org>
+Subject: Re: [Ceph-maintainers] disabling updatedb
+Date: Tue, 18 Feb 2014 18:52:13 +0100
+Message-ID: <8738jg2trm.fsf@meteor.durcheinandertal.bofh>
+References: <alpine.DEB.2.00.1402180845440.15052@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f181.google.com ([209.85.213.181]:51281 "EHLO
-	mail-ig0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754072AbaBRR4k convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Feb 2014 12:56:40 -0500
-Received: by mail-ig0-f181.google.com with SMTP id hl1so6330557igb.2
-        for <ceph-devel@vger.kernel.org>; Tue, 18 Feb 2014 09:56:39 -0800 (PST)
-In-Reply-To: <20140218170115.GA2919@oder>
+Received: from vechigen.cirrax.com ([217.197.128.12]:60590 "EHLO
+	mail.cirrax.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754282AbaBRSCB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Feb 2014 13:02:01 -0500
+In-Reply-To: <alpine.DEB.2.00.1402180845440.15052@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Kasper Dieter <dieter.kasper@ts.fujitsu.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-
-We haven=B9t pushed them to http://www.ceph.com/rpm yet, in the interim=
- you
-can try http://gitbuilder.ceph.com/ceph-rpm-fedora20-x86_64-basic/
-
-Ian R. Colle
-Director of Engineering
-Inktank
-Delivering the Future of Storage
-http://www.linkedin.com/in/ircolle
-http://www.twitter.com/ircolle
-Email: ian@inktank.com
+To: Sage Weil <sage@inktank.com>, ceph-maintainers@ceph.com, ceph-devel@vger.kernel.org
 
 
+Hi
 
-On 2/18/14, 10:01 AM, "Kasper Dieter" <dieter.kasper@ts.fujitsu.com> wr=
-ote:
+Sage Weil <sage@inktank.com> writes:
 
->Hello,
+> Dan at CERN noticed that his performance was tanking because updatedb was 
+> running against /var/lib/ceph.  updatedb has a PRUNE line in 
+> /etc/updatedb.conf that we should presumably be adding ourselves to.  One 
+> user pointed out a package that uses sed to rewrite this line in the init 
+> script on start.
 >
->Ceph RPM Packages are available for Fedora 18/19.
+> I have two questions:
 >
->When will Fedora 20 RPMs be available ?
+> - is there no better way than sed to add ourselves to this list?
+> - should we do it in the init script, or postinst, or both?
 >
->
->Thanks,
->-Dieter
->--
->To unsubscribe from this list: send the line "unsubscribe ceph-devel" =
-in
->the body of a message to majordomo@vger.kernel.org
->More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Presumably this is a problem others have solved with other packages.
 
+At least for Debian neither solution is appropriate. Changing other
+packages conffiles in postinst scripts is forbidden by policy. There is
+also no way to preserve this reliably over upgrades without user
+interaction. I'm not sure if there is an explicit policy for init
+scripts, but this seems equally wrong. Also it's unclear how one would
+handle the case were an administrator does NOT want to exclude this
+directory.
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+The only solution I see if you really want to completely exclude the
+directory is to convince the mlocate maintainers to either add the
+directory to the default configuration or to add something like an
+/etc/updatedb.d directory where packages can drop configuration file
+snippets. But the latter seems like overkill to me.
+
+The real question to me is why an updatedb run can drastically impact
+ceph performance. At least in Debian updatedb is run with ionice
+-c3 in the "Idle" scheduling class. According to the man page this
+means: "A program running with idle I/O priority will only get disk time
+when no other program has asked for disk I/O for a defined grace period.
+The impact of an idle I/O process on normal system activity should be
+zero. This scheduling class does not take a priority argument.
+Presently, this scheduling class is permitted for an ordinary user
+(since kernel 2.6.25)." So it should not have any negative effect.
+
+Maybe CERN (or the distribution they use) should also run updatedb under
+ionice.
+
+Gaudenz
+
+-- 
+Ever tried. Ever failed. No matter.
+Try again. Fail again. Fail better.
+~ Samuel Beckett ~
