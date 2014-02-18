@@ -1,49 +1,151 @@
-From: Sage Weil <sage@inktank.com>
-Subject: [GIT PULL] Ceph fixes for -rc4
-Date: Mon, 17 Feb 2014 12:50:01 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1402171239030.20760@cobra.newdream.net>
+From: Alex Elder <elder@ieee.org>
+Subject: Re: [PATCH 2/3] ceph: add acl, noacl options for cephfs mount
+Date: Mon, 17 Feb 2014 18:08:21 -0600
+Message-ID: <5302A475.9070707@ieee.org>
+References: <1392355784-10422-1-git-send-email-lucienchao@gmail.com> <1392355784-10422-3-git-send-email-lucienchao@gmail.com> <52FE135E.2070704@ieee.org> <alpine.DEB.2.00.1402161001310.17892@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: torvalds@linux-foundation.org
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ig0-f175.google.com ([209.85.213.175]:62069 "EHLO
+	mail-ig0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751005AbaBRAIR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 17 Feb 2014 19:08:17 -0500
+Received: by mail-ig0-f175.google.com with SMTP id uq10so6132129igb.2
+        for <ceph-devel@vger.kernel.org>; Mon, 17 Feb 2014 16:08:15 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.00.1402161001310.17892@cobra.newdream.net>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: Guangliang Zhao <lucienchao@gmail.com>, ceph-devel@vger.kernel.org
 
-Hi Linus,
+On 02/16/2014 12:26 PM, Sage Weil wrote:
+> Hi Alex, Guangliang,
 
-Please pull the following Ceph fixes from
+Looks good to me.
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
+Reviewed-by: Alex Elder <elder@linaro.org>
 
-We have some patches fixing up ACL support issues from Zheng and 
-Guangliang and a mount option to enable/disable this support.  (These 
-fixes were somewhat delayed by the Chinese holiday.)  There is also a 
-small fix for cached readdir handling when directories are fragmented.
 
-Thanks!
-sage
+> On Fri, 14 Feb 2014, Alex Elder wrote:
+>> On 02/13/2014 11:29 PM, Guangliang Zhao wrote:
+>>> Signed-off-by: Guangliang Zhao <lucienchao@gmail.com>
+>>
+>> If CONFIG_CEPH_FS_POSIX_ACL is defined, the default is to
+>> have them enabled; if it is not, the default is to have it
+>> disabled.  But now, whether enabled or not is possible to
+>> enable/disable them using a mount option.
+>>
+>> Well, it appears that way.  However fs/ceph/acl.o is not
+>> built unless CONFIG_CEP_FS_POSIX_ACL is enabled.  So the
+>> mount options will appear to be supported but will be
+>> silently ignored.
+>>
+>> I don't think you want to require CEPH_FS_POSIX_ACL,
+>> because that requires the inclusion of FS_POSIX_ACL
+>> which may not be desired.
+>>
+>> So you should probably make all the code related to
+>> the the acl options (or at least the acl enabled option)
+>> be conditional on CEPH_FS_POSIX_ACL, even though I think
+>> that won't look all that nice.
+> 
+> I've gone ahead and done this.  Please see the patch below...
+> 
+> sage
+> 
+> From bc199dc7a5e891fe7d95bf9cd583a9e222a8e1fd Mon Sep 17 00:00:00 2001
+> From: Sage Weil <sage@inktank.com>
+> Date: Sun, 16 Feb 2014 10:05:29 -0800
+> Subject: [PATCH] ceph: add acl, noacl options for cephfs mount
+> 
+> Make the 'acl' option dependent on having ACL support compiled in.  Make
+> the 'noacl' option work even without it so that one can always ask it to
+> be off and not error out on mount when it is not supported.
+> 
+> Signed-off-by: Guangliang Zhao <lucienchao@gmail.com>
+> Signed-off-by: Sage Weil <sage@inktank.com>
+> ---
+>  fs/ceph/super.c | 32 ++++++++++++++++++++++++++++----
+>  1 file changed, 28 insertions(+), 4 deletions(-)
+> 
+> diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+> index 2df963f..10a4ccb 100644
+> --- a/fs/ceph/super.c
+> +++ b/fs/ceph/super.c
+> @@ -144,7 +144,11 @@ enum {
+>  	Opt_ino32,
+>  	Opt_noino32,
+>  	Opt_fscache,
+> -	Opt_nofscache
+> +	Opt_nofscache,
+> +#ifdef CONFIG_CEPH_FS_POSIX_ACL
+> +	Opt_acl,
+> +#endif
+> +	Opt_noacl
+>  };
+>  
+>  static match_table_t fsopt_tokens = {
+> @@ -172,6 +176,10 @@ static match_table_t fsopt_tokens = {
+>  	{Opt_noino32, "noino32"},
+>  	{Opt_fscache, "fsc"},
+>  	{Opt_nofscache, "nofsc"},
+> +#ifdef CONFIG_CEPH_FS_POSIX_ACL
+> +	{Opt_acl, "acl"},
+> +#endif
+> +	{Opt_noacl, "noacl"},
+>  	{-1, NULL}
+>  };
+>  
+> @@ -271,6 +279,14 @@ static int parse_fsopt_token(char *c, void *private)
+>  	case Opt_nofscache:
+>  		fsopt->flags &= ~CEPH_MOUNT_OPT_FSCACHE;
+>  		break;
+> +#ifdef CONFIG_CEPH_FS_POSIX_ACL
+> +	case Opt_acl:
+> +		fsopt->sb_flags |= MS_POSIXACL;
+> +		break;
+> +#endif
+> +	case Opt_noacl:
+> +		fsopt->sb_flags &= ~MS_POSIXACL;
+> +		break;
+>  	default:
+>  		BUG_ON(token);
+>  	}
+> @@ -438,6 +454,13 @@ static int ceph_show_options(struct seq_file *m, struct dentry *root)
+>  	else
+>  		seq_puts(m, ",nofsc");
+>  
+> +#ifdef CONFIG_CEPH_FS_POSIX_ACL
+> +	if (fsopt->sb_flags & MS_POSIXACL)
+> +		seq_puts(m, ",acl");
+> +	else
+> +		seq_puts(m, ",noacl");
+> +#endif
+> +
+>  	if (fsopt->wsize)
+>  		seq_printf(m, ",wsize=%d", fsopt->wsize);
+>  	if (fsopt->rsize != CEPH_RSIZE_DEFAULT)
+> @@ -819,9 +842,6 @@ static int ceph_set_super(struct super_block *s, void *data)
+>  
+>  	s->s_flags = fsc->mount_options->sb_flags;
+>  	s->s_maxbytes = 1ULL << 40;  /* temp value until we get mdsmap */
+> -#ifdef CONFIG_CEPH_FS_POSIX_ACL
+> -	s->s_flags |= MS_POSIXACL;
+> -#endif
+>  
+>  	s->s_xattr = ceph_xattr_handlers;
+>  	s->s_fs_info = fsc;
+> @@ -911,6 +931,10 @@ static struct dentry *ceph_mount(struct file_system_type *fs_type,
+>  	struct ceph_options *opt = NULL;
+>  
+>  	dout("ceph_mount\n");
+> +
+> +#ifdef CONFIG_CEPH_FS_POSIX_ACL
+> +	flags |= MS_POSIXACL;
+> +#endif
+>  	err = parse_mount_options(&fsopt, &opt, flags, data, dev_name, &path);
+>  	if (err < 0) {
+>  		res = ERR_PTR(err);
+> 
 
-----------------------------------------------------------------
-Guangliang Zhao (1):
-      ceph: make ceph_forget_all_cached_acls() static inline
-
-Sage Weil (1):
-      ceph: add acl, noacl options for cephfs mount
-
-Yan, Zheng (6):
-      ceph: properly handle XATTR_CREATE and XATTR_REPLACE
-      ceph: remove xattr when null value is given to setxattr()
-      ceph: fix ceph_removexattr()
-      ceph: fix ceph_set_acl()
-      ceph: add missing init_acl() for mkdir() and atomic_open()
-      ceph: fix __dcache_readdir()
-
- fs/ceph/acl.c                | 11 +--------
- fs/ceph/dir.c                | 23 ++++++++++++++-----
- fs/ceph/file.c               |  1 +
- fs/ceph/super.c              | 32 ++++++++++++++++++++++----
- fs/ceph/super.h              |  7 +++++-
- fs/ceph/xattr.c              | 54 ++++++++++++++++++++++++++++++++------------
- include/linux/ceph/ceph_fs.h |  5 ++--
- 7 files changed, 96 insertions(+), 37 deletions(-)
