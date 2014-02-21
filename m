@@ -1,47 +1,57 @@
-From: Sage Weil <sage@inktank.com>
-Subject: firefly branches
-Date: Fri, 21 Feb 2014 11:46:15 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1402211141100.17322@cobra.newdream.net>
+From: Ken Dreyer <ken.dreyer@inktank.com>
+Subject: Re: Fixes for missing and replicated files in ceph.spec.in
+Date: Fri, 21 Feb 2014 13:28:21 -0700
+Message-ID: <CAOpHjdDFygeaDfzOrB5HDOLc1tp-yvmBsnuvhYKKCDYcSWU0ww@mail.gmail.com>
+References: <CABAwU-ZCSVbkLUOvZBd8=+uHD1L6tVS5iAkpDNUS0_myP5Xndw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:57395 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753713AbaBUTqP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 21 Feb 2014 14:46:15 -0500
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 8FFF38044E
-	for <ceph-devel@vger.kernel.org>; Fri, 21 Feb 2014 11:46:15 -0800 (PST)
-Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 737F98044E
-	for <ceph-devel@vger.kernel.org>; Fri, 21 Feb 2014 11:46:15 -0800 (PST)
+Received: from mail-ve0-f176.google.com ([209.85.128.176]:44355 "EHLO
+	mail-ve0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750887AbaBUU2m (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 21 Feb 2014 15:28:42 -0500
+Received: by mail-ve0-f176.google.com with SMTP id jx11so3726104veb.35
+        for <ceph-devel@vger.kernel.org>; Fri, 21 Feb 2014 12:28:42 -0800 (PST)
+In-Reply-To: <CABAwU-ZCSVbkLUOvZBd8=+uHD1L6tVS5iAkpDNUS0_myP5Xndw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: huang jun <hjwsm1989@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Now that firefly is frozen, we're going to keep things interesting and 
-do things slight different that we did for emperor.  It's closer to what 
-we normally do, though, so hopefully this will be simpler.
+On Fri, Feb 21, 2014 at 4:27 AM, huang jun <hjwsm1989@gmail.com> wrote:
+> Signed-off-by: hjwsm1989<hjwsm1989@gmail.com>
+>
+> --
+> diff --git a/ceph.spec.in b/ceph.spec.in
+> index 3caa849..facba6c 100644
+> --- a/ceph.spec.in
+> +++ b/ceph.spec.in
+> @@ -429,6 +429,7 @@ fi
+> @@ -429,6 +429,7 @@ fi
+>  %{_libdir}/rados-classes/libcls_log.so*
+> diff --git a/ceph.spec.in b/ceph.spec.in
+> index 3caa849..facba6c 100644
+> --- a/ceph.spec.in
+> +++ b/ceph.spec.in
+> @@ -429,6 +429,7 @@ fi
+>  %{_libdir}/rados-classes/libcls_replica_log.so*
+>  %{_libdir}/rados-classes/libcls_statelog.so*
+> +%{_libdir}/rados-classes/libcls_user.so*
 
- master == new stuff for post-firefly v0.79.  this shouldn't see much new 
-   code since we're focusing on stabilization right now.
+Thanks for catching this.
 
- next == <deleted>.  use firefly instead.
 
- firefly == what will become firefly 0.78.  this is the branch the nightly 
-   qa is focusing on.
+> @@ -690,6 +689,7 @@ fi
+>  %{_bindir}/ceph_test_rados_list_parallel
+>  %{_bindir}/ceph_test_rados_open_pools_parallel
+>  %{_bindir}/ceph_test_rados_watch_notify
+> +%{_bindir}/ceph_test_rgw_manifest
+>  %{_bindir}/ceph_test_signal_handlers
+>  %{_bindir}/ceph_test_snap_mapper
 
-Periodically we can merge firefly back into master (as we normally do with 
-next), but this isn't particularly important since the all QA is running 
-against firefly.
 
-There are now firefly branches in teuthology.git and ceph-qa-suites.git to 
-match.
+It seems like we have to deal with this sort of thing over and over.
+Anyone have objections to simply using a wildcard to capture all the
+test files? Something like %{_bindir}/ceph_test_* ?
 
-In the past we had both next and the stable-release-to-be branch but it 
-was awkward to keep them in sync.  This avoid that ambiguity by just 
-having one branch and calling it firefly to make it crystal clear to 
-everyone what is what.
-
-That's all!
-sage
+- Ken
