@@ -1,49 +1,47 @@
-From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: [PATCH 0/6] libceph: CEPH_OSD_OP_SETALLOCHINT osd op
-Date: Fri, 21 Feb 2014 20:55:40 +0200
-Message-ID: <1393008946-7931-1-git-send-email-ilya.dryomov@inktank.com>
+From: Sage Weil <sage@inktank.com>
+Subject: firefly branches
+Date: Fri, 21 Feb 2014 11:46:15 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1402211141100.17322@cobra.newdream.net>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ee0-f51.google.com ([74.125.83.51]:45886 "EHLO
-	mail-ee0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755548AbaBUSzv (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 21 Feb 2014 13:55:51 -0500
-Received: by mail-ee0-f51.google.com with SMTP id b57so1810515eek.24
-        for <ceph-devel@vger.kernel.org>; Fri, 21 Feb 2014 10:55:50 -0800 (PST)
-Received: from localhost ([109.110.66.27])
-        by mx.google.com with ESMTPSA id o43sm29556970eef.12.2014.02.21.10.55.48
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=RC4-SHA bits=128/128);
-        Fri, 21 Feb 2014 10:55:48 -0800 (PST)
+Received: from cobra.newdream.net ([66.33.216.30]:57395 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753713AbaBUTqP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 21 Feb 2014 14:46:15 -0500
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 8FFF38044E
+	for <ceph-devel@vger.kernel.org>; Fri, 21 Feb 2014 11:46:15 -0800 (PST)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 737F98044E
+	for <ceph-devel@vger.kernel.org>; Fri, 21 Feb 2014 11:46:15 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Hello,
+Now that firefly is frozen, we're going to keep things interesting and 
+do things slight different that we did for emperor.  It's closer to what 
+we normally do, though, so hopefully this will be simpler.
 
-This series adds support for CEPH_OSD_OP_SETALLOCHINT osd op to libceph
-along with adjusting rbd to make use of it.  The rationale and the
-basic desing was outlined in the "rados io hints" thread on ceph-devel
-about a month ago.
+ master == new stuff for post-firefly v0.79.  this shouldn't see much new 
+   code since we're focusing on stabilization right now.
 
-Thanks,
+ next == <deleted>.  use firefly instead.
 
-                Ilya
+ firefly == what will become firefly 0.78.  this is the branch the nightly 
+   qa is focusing on.
 
+Periodically we can merge firefly back into master (as we normally do with 
+next), but this isn't particularly important since the all QA is running 
+against firefly.
 
-Ilya Dryomov (6):
-  libceph: encode CEPH_OSD_OP_FLAG_* op flags
-  libceph: add support for CEPH_OSD_OP_SETALLOCHINT osd op
-  libceph: bump CEPH_OSD_MAX_OP to 3
-  rbd: do not hard-code CEPH_OSD_MAX_OP in rbd_osd_req_callback()
-  rbd: num_ops parameter for rbd_osd_req_create()
-  rbd: prefix rbd writes with CEPH_OSD_OP_SETALLOCHINT osd op
+There are now firefly branches in teuthology.git and ceph-qa-suites.git to 
+match.
 
- drivers/block/rbd.c             |   90 ++++++++++++++++++++++++++++-----------
- include/linux/ceph/osd_client.h |   12 +++++-
- include/linux/ceph/rados.h      |   10 ++++-
- net/ceph/osd_client.c           |   32 ++++++++++++++
- 4 files changed, 117 insertions(+), 27 deletions(-)
+In the past we had both next and the stable-release-to-be branch but it 
+was awkward to keep them in sync.  This avoid that ambiguity by just 
+having one branch and calling it firefly to make it crystal clear to 
+everyone what is what.
 
--- 
-1.7.10.4
-
+That's all!
+sage
