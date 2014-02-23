@@ -1,80 +1,59 @@
-From: Alex Elder <elder@ieee.org>
-Subject: Re: [PATCH 0/6] libceph: CEPH_OSD_OP_SETALLOCHINT osd op
-Date: Sun, 23 Feb 2014 10:15:41 -0600
-Message-ID: <530A1EAD.6020908@ieee.org>
-References: <1393008946-7931-1-git-send-email-ilya.dryomov@inktank.com> <alpine.DEB.2.00.1402230807110.17508@cobra.newdream.net>
+From: Yehuda Sadeh <yehuda@inktank.com>
+Subject: Fwd: wip-hint
+Date: Sun, 23 Feb 2014 11:10:11 -0800
+Message-ID: <CABBk=J8o5kpOHu4mVPizf4ACSZMu7XOMTu_OtL5sSpeVjmXHJQ@mail.gmail.com>
+References: <alpine.DEB.2.00.1402230742470.17508@cobra.newdream.net>
+	<CABBk=J-o-hcyUZzoDDvCV=+YJyUunKmDobDUtSAnsWnEMxYp_A@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:49215 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751158AbaBWQPk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 23 Feb 2014 11:15:40 -0500
-Received: by mail-ie0-f174.google.com with SMTP id as1so2640328iec.5
-        for <ceph-devel@vger.kernel.org>; Sun, 23 Feb 2014 08:15:40 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1402230807110.17508@cobra.newdream.net>
+Received: from mail-vc0-f179.google.com ([209.85.220.179]:34000 "EHLO
+	mail-vc0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751326AbaBWTKL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 23 Feb 2014 14:10:11 -0500
+Received: by mail-vc0-f179.google.com with SMTP id lh14so4938097vcb.24
+        for <ceph-devel@vger.kernel.org>; Sun, 23 Feb 2014 11:10:11 -0800 (PST)
+In-Reply-To: <CABBk=J-o-hcyUZzoDDvCV=+YJyUunKmDobDUtSAnsWnEMxYp_A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>, Ilya Dryomov <ilya.dryomov@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@inktank.com>, Samuel Just <sam.just@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On 02/23/2014 10:14 AM, Sage Weil wrote:
-> Reviewed-by: Sage Weil <sage@inktank.com>
-> 
-> It would be great if Josh or Alex could also look (at 6 especially) as 
-> they are more familiar with the RBD code than I am, but I think it's safe 
-> to put this in testing for now.
+(resending to get through the list) My main concern is that the whole
+notion of hint needs to be abstracted. Instead of having a specific op
+for allocation hints we should have a generic hint operation that
+would contain a hint type in it. That hint will then be parsed within
+the various osd components, and will be used if identified and if
+needed. Then you'd be able to add various hints without needing to
+change the  protocol itself. Not sure if the operation itself needs to
+have a "write" flag set on it, as hints may apply to read operations
+too (e.g., a hint to prefetch data read). We may want to create two
+different ops, one for read and one for write.
+I think that a first step would be to modify the current op and add a
+"hint type" string at the data portion, and an optional bufferlist for
+data. The size params need to be generic and not specific (param1,
+param2, ...).
 
-I will.  I have been planning on it but I didn't have time
-on Friday.  I think I'll be able to today though.
+The reasoning behind that is that at one point we may have different
+backbends plugging into the osd externally. Providing a proper osd
+backbend sdk might be another step. So we'd want this to be as
+abstract as possible. These hints could be sent blindly without the
+osd needing to understand their meaning, leaving it to the backbend to
+interpret.
 
-					-Alex
+Yehuda
 
+On Sunday, February 23, 2014, Sage Weil <sage@inktank.com> wrote:
+>
+> Hey Sam, Yehuda,
+>
+> Can you take a final look at https://github.com/ceph/ceph/pull/1284?
+>
+> Yehuda, you mentioned wanting to make the hint op as general as possible.
+> This bit is only addressing the allocation piece, and there is room in the
+> args struct to add additional fields (so far 0 means 'not
+> specified/undefined'), but I'm not sure if that captures your concerns.
+>
 > Thanks!
 > sage
-> 
-> 
-> On Fri, 21 Feb 2014, Ilya Dryomov wrote:
-> 
->> Hello,
->>
->> This series adds support for CEPH_OSD_OP_SETALLOCHINT osd op to libceph
->> along with adjusting rbd to make use of it.  The rationale and the
->> basic desing was outlined in the "rados io hints" thread on ceph-devel
->> about a month ago.
->>
->> Thanks,
->>
->>                 Ilya
->>
->>
->> Ilya Dryomov (6):
->>   libceph: encode CEPH_OSD_OP_FLAG_* op flags
->>   libceph: add support for CEPH_OSD_OP_SETALLOCHINT osd op
->>   libceph: bump CEPH_OSD_MAX_OP to 3
->>   rbd: do not hard-code CEPH_OSD_MAX_OP in rbd_osd_req_callback()
->>   rbd: num_ops parameter for rbd_osd_req_create()
->>   rbd: prefix rbd writes with CEPH_OSD_OP_SETALLOCHINT osd op
->>
->>  drivers/block/rbd.c             |   90 ++++++++++++++++++++++++++++-----------
->>  include/linux/ceph/osd_client.h |   12 +++++-
->>  include/linux/ceph/rados.h      |   10 ++++-
->>  net/ceph/osd_client.c           |   32 ++++++++++++++
->>  4 files changed, 117 insertions(+), 27 deletions(-)
->>
->> -- 
->> 1.7.10.4
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-
+>
+>
