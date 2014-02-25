@@ -1,57 +1,52 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH 2/6] libceph: add support for CEPH_OSD_OP_SETALLOCHINT
- osd op
-Date: Tue, 25 Feb 2014 09:12:48 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1402250912360.5145@cobra.newdream.net>
-References: <1393008946-7931-1-git-send-email-ilya.dryomov@inktank.com> <1393008946-7931-3-git-send-email-ilya.dryomov@inktank.com> <530B5E36.4030200@ieee.org> <CALFYKtBkQWkiHnA28xOs-NjBH-5F9ohZ8mR-C+kOkAc=SrA7uA@mail.gmail.com> <530C9524.6070201@ieee.org>
- <CALFYKtAo9KXtnHBQcFqb0yPj3k-r7Eb5cHxhfKSEindQ=_rk+Q@mail.gmail.com>
+From: Noah Watkins <noah.watkins@inktank.com>
+Subject: Re: Assertion error in librados
+Date: Tue, 25 Feb 2014 09:33:48 -0800
+Message-ID: <CA+Hcz59dVj1CPiV6Xzo8_Z4WzhehNRiHyef_DE+MPBT19FHd4Q@mail.gmail.com>
+References: <20140225144900.GA30739@philipgian-mac>
+	<CAPYLRzhnPTEgycnmZ0HXeEW=ADe01QKS8nUmL8451rYYtoMvgw@mail.gmail.com>
+	<20140225155838.GB30739@philipgian-mac>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:35866 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752653AbaBYRMs (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Feb 2014 12:12:48 -0500
-In-Reply-To: <CALFYKtAo9KXtnHBQcFqb0yPj3k-r7Eb5cHxhfKSEindQ=_rk+Q@mail.gmail.com>
+Received: from mail-qc0-f176.google.com ([209.85.216.176]:63542 "EHLO
+	mail-qc0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752653AbaBYRdt (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Feb 2014 12:33:49 -0500
+Received: by mail-qc0-f176.google.com with SMTP id r5so6349757qcx.7
+        for <ceph-devel@vger.kernel.org>; Tue, 25 Feb 2014 09:33:48 -0800 (PST)
+In-Reply-To: <20140225155838.GB30739@philipgian-mac>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <ilya.dryomov@inktank.com>
-Cc: Alex Elder <elder@ieee.org>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Filippos Giannakos <philipgian@grnet.gr>
+Cc: Gregory Farnum <greg@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, synnefo-devel@googlegroups.com
 
-On Tue, 25 Feb 2014, Ilya Dryomov wrote:
-> On Tue, Feb 25, 2014 at 3:05 PM, Alex Elder <elder@ieee.org> wrote:
-> >>> The other thing is that the expected size is limited by
-> >>> rbd_image_header->obj_order, which is a single byte.  I
-> >>> think you should encode this the same way.  Even if the
-> >>> hint were for more than RBD, this level of granularity
-> >>> may be sufficient.
-> >>>
-> >>>> +                     u64 expected_write_size;
-> >>>
-> >>> Probably the same thing here, a byte might be enough
-> >>> to encode this by using log2(expected_write_size).
-> >>>
-> >>>> +                     __u8 expected_size_probability;
-> >>
-> >> I think in the interest of genericity expected_object_size should be an
-> >> arbitrary, not limited to a power-of-2 value.  Now, given the current
-> >> 90M object size limit 64 bits might seem a lot, but extent offset and
-> >> length are 64 bit values and to be future-proof I followed that here.
-> >
-> > I have no objection to the 64-bit size but I still think
-> > a byte representing log2(size) is sufficient.  Power-of-2
-> > granularity is most likely fine (and might even be what
-> > such a hint gets converted to anyway) for file systems
-> > or other backing store.  But again, you can do that with
-> > a 64 bit value as well.
-> 
-> Filesystems of course round it, but probably not to a power-of-2.
-> I guess it's adjusted to a multiple of block size and then capped with
-> some value that the allocator can cope with.  xfs for example would
-> happily take on say 5M.  power-of-2 is sufficient for rbd, but
-> _probably_ not in general.
+Perhaps using gtest-style asserts (ASSERT_EQ(r, 0)) in Ceph would be
+useful so we can see parameter values to the assertion in the log. In
+this case, the return value from pthread_mutex_lock is almost
+certainly EINVAL, but it'd be informative to know for sure.
 
-I agree; let's stick with u64 here.
-
-Thanks!
-sage
+On Tue, Feb 25, 2014 at 7:58 AM, Filippos Giannakos <philipgian@grnet.gr> wrote:
+> Hi Greg,
+>
+> Unfortunately we don't keep any Ceph related logs on the client side. On the
+> server side, we kept the default log settings to avoid overlogging.
+> Do you think that there might be something usefull on the OSD side ?
+>
+> On Tue, Feb 25, 2014 at 07:28:30AM -0800, Gregory Farnum wrote:
+>> Do you have logs? The assert indicates that the messenger got back
+>> something other than "okay" when trying to grab a local Mutex, which
+>> shouldn't be able to happen. It may be that some error-handling path
+>> didn't drop it (within the same thread that later tried to grab it
+>> again), but we'll need more details to track it down.
+>> -Greg
+>> Software Engineer #42 @ http://inktank.com | http://ceph.com
+>>
+>
+> Kind Regards,
+> --
+> Filippos
+> <philipgian@grnet.gr>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
