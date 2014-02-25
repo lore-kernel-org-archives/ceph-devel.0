@@ -1,67 +1,51 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: Assertion error in librados
-Date: Tue, 25 Feb 2014 07:28:30 -0800
-Message-ID: <CAPYLRzhnPTEgycnmZ0HXeEW=ADe01QKS8nUmL8451rYYtoMvgw@mail.gmail.com>
-References: <20140225144900.GA30739@philipgian-mac>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+From: Ilya Dryomov <ilya.dryomov@inktank.com>
+Subject: [PATCH v2 0/5] libceph: CEPH_OSD_OP_SETALLOCHINT osd op
+Date: Tue, 25 Feb 2014 17:36:42 +0200
+Message-ID: <1393342607-23653-1-git-send-email-ilya.dryomov@inktank.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f52.google.com ([209.85.216.52]:62756 "EHLO
-	mail-qa0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752617AbaBYPgn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Feb 2014 10:36:43 -0500
-Received: by mail-qa0-f52.google.com with SMTP id j15so555484qaq.11
-        for <ceph-devel@vger.kernel.org>; Tue, 25 Feb 2014 07:36:42 -0800 (PST)
-In-Reply-To: <20140225144900.GA30739@philipgian-mac>
+Received: from mail-la0-f41.google.com ([209.85.215.41]:53958 "EHLO
+	mail-la0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752653AbaBYPgv (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Feb 2014 10:36:51 -0500
+Received: by mail-la0-f41.google.com with SMTP id gl10so4317808lab.0
+        for <ceph-devel@vger.kernel.org>; Tue, 25 Feb 2014 07:36:50 -0800 (PST)
+Received: from localhost ([109.110.66.27])
+        by mx.google.com with ESMTPSA id gi5sm22686572lbc.4.2014.02.25.07.36.48
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=RC4-SHA bits=128/128);
+        Tue, 25 Feb 2014 07:36:49 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Filippos Giannakos <philipgian@grnet.gr>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, synnefo-devel@googlegroups.com
+To: ceph-devel@vger.kernel.org
 
-Do you have logs? The assert indicates that the messenger got back
-something other than "okay" when trying to grab a local Mutex, which
-shouldn't be able to happen. It may be that some error-handling path
-didn't drop it (within the same thread that later tried to grab it
-again), but we'll need more details to track it down.
--Greg
-Software Engineer #42 @ http://inktank.com | http://ceph.com
+Hello,
+
+This is a v2 of the CEPH_OSD_OP_SETALLOCHINT osd op series.
+Incorporated are Sage's and Alex's comments.  The rationale and the
+basic design is outlined in the "rados io hints" thread on ceph-devel.
+
+Discussion in the wip-hint thread is still on-going, but where it's
+headed is unclear.  This posting is simply to reflect the state of the
+series after a thorough review by Alex.
+
+Thanks,
+
+                Ilya
 
 
-On Tue, Feb 25, 2014 at 6:49 AM, Filippos Giannakos <philipgian@grnet.gr> wrote:
-> Hello all,
->
-> We recently bumped into the following assertion error in librados on our
-> production service:
->
->
-> common/Mutex.cc: In function 'void Mutex::Lock(bool)' thread 7fa2c2ccf700 time 2014-02-21 07:23:26.340791
-> common/Mutex.cc: 93: FAILED assert(r == 0)
->  ceph version 0.72.2 (a913ded2ff138aefb8cb84d347d72164099cfd60)
->  1: (Mutex::Lock(bool)+0x131) [0x7fa2c7707431]
->  2: (SimpleMessenger::submit_message(Message*, Connection*, entity_addr_t const&, int, bool)+0x52) [0x7fa2c7863172]
->  3: (SimpleMessenger::_send_message(Message*, Connection*, bool)+0x23e) [0x7fa2c7863bfe]
->  4: (Objecter::send_op(Objecter::Op*)+0x32c) [0x7fa2c76b317c]
->  5: (Objecter::handle_osd_map(MOSDMap*)+0x365) [0x7fa2c76b7805]
->  6: (librados::RadosClient::_dispatch(Message*)+0x7c) [0x7fa2c768c70c]
->  7: (librados::RadosClient::ms_dispatch(Message*)+0x9b) [0x7fa2c768c82b]
->  8: (DispatchQueue::entry()+0x4eb) [0x7fa2c7800d2b]
->  9: (DispatchQueue::DispatchThread::entry()+0xd) [0x7fa2c78666ad]
->  10: (()+0x6b50) [0x7fa2c7203b50]
->  11: (clone()+0x6d) [0x7fa2c6b570ed]
->  NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
-> terminate called after throwing an instance of 'ceph::FailedAssertion'
->
->
-> From what I can tell, there were some network problems on our RADOS cluster,
-> after which many of our librados clients failed with the above assertion error.
->
-> Do you have any ideas of what might went wrong ?
->
-> Kind Regards,
-> --
-> Filippos
-> <philipgian@grnet.gr>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Ilya Dryomov (5):
+  libceph: encode CEPH_OSD_OP_FLAG_* op flags
+  libceph: add support for CEPH_OSD_OP_SETALLOCHINT osd op
+  libceph: bump CEPH_OSD_MAX_OP to 3
+  rbd: num_ops parameter for rbd_osd_req_create()
+  rbd: prefix rbd writes with CEPH_OSD_OP_SETALLOCHINT osd op
+
+ drivers/block/rbd.c             |   79 +++++++++++++++++++++++++++------------
+ include/linux/ceph/osd_client.h |   13 ++++++-
+ include/linux/ceph/rados.h      |   10 ++++-
+ net/ceph/osd_client.c           |   33 ++++++++++++++++
+ 4 files changed, 110 insertions(+), 25 deletions(-)
+
+-- 
+1.7.10.4
+
