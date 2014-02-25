@@ -1,52 +1,107 @@
-From: Noah Watkins <noah.watkins@inktank.com>
-Subject: Re: Assertion error in librados
-Date: Tue, 25 Feb 2014 09:33:48 -0800
-Message-ID: <CA+Hcz59dVj1CPiV6Xzo8_Z4WzhehNRiHyef_DE+MPBT19FHd4Q@mail.gmail.com>
-References: <20140225144900.GA30739@philipgian-mac>
-	<CAPYLRzhnPTEgycnmZ0HXeEW=ADe01QKS8nUmL8451rYYtoMvgw@mail.gmail.com>
-	<20140225155838.GB30739@philipgian-mac>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: Fwd: wip-hint
+Date: Tue, 25 Feb 2014 09:38:46 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1402240521510.17508@cobra.newdream.net>
+References: <alpine.DEB.2.00.1402230742470.17508@cobra.newdream.net> <CABBk=J-o-hcyUZzoDDvCV=+YJyUunKmDobDUtSAnsWnEMxYp_A@mail.gmail.com> <CABBk=J8o5kpOHu4mVPizf4ACSZMu7XOMTu_OtL5sSpeVjmXHJQ@mail.gmail.com> <alpine.DEB.2.00.1402231113430.17508@cobra.newdream.net>
+ <CABBk=J_=V+sDg_Z8aiTxHA3Rv7ygt=ePipG_YoHTSzYUG8Y2wQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f176.google.com ([209.85.216.176]:63542 "EHLO
-	mail-qc0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752653AbaBYRdt (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Feb 2014 12:33:49 -0500
-Received: by mail-qc0-f176.google.com with SMTP id r5so6349757qcx.7
-        for <ceph-devel@vger.kernel.org>; Tue, 25 Feb 2014 09:33:48 -0800 (PST)
-In-Reply-To: <20140225155838.GB30739@philipgian-mac>
+Received: from cobra.newdream.net ([66.33.216.30]:36186 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752653AbaBYRir (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Feb 2014 12:38:47 -0500
+In-Reply-To: <CABBk=J_=V+sDg_Z8aiTxHA3Rv7ygt=ePipG_YoHTSzYUG8Y2wQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Filippos Giannakos <philipgian@grnet.gr>
-Cc: Gregory Farnum <greg@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, synnefo-devel@googlegroups.com
+To: Yehuda Sadeh <yehuda@inktank.com>
+Cc: Samuel Just <sam.just@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Perhaps using gtest-style asserts (ASSERT_EQ(r, 0)) in Ceph would be
-useful so we can see parameter values to the assertion in the log. In
-this case, the return value from pthread_mutex_lock is almost
-certainly EINVAL, but it'd be informative to know for sure.
+On Sun, 23 Feb 2014, Yehuda Sadeh wrote:
+> On Sun, Feb 23, 2014 at 11:25 AM, Sage Weil <sage@inktank.com> wrote:
+> > On Sun, 23 Feb 2014, Yehuda Sadeh wrote:
+> >> (resending to get through the list) My main concern is that the whole
+> >> notion of hint needs to be abstracted. Instead of having a specific op
+> >> for allocation hints we should have a generic hint operation that
+> >> would contain a hint type in it. That hint will then be parsed within
+> >> the various osd components, and will be used if identified and if
+> >> needed. Then you'd be able to add various hints without needing to
+> >> change the  protocol itself.
+> >> Not sure if the operation itself needs to have a "write" flag set on it,
+> >> as hints may apply to read operations too (e.g., a hint to prefetch data
+> >> read). We may want to create two different ops, one for read and one for
+> >> write. I think that a first step would be to modify the current op and
+> >> add a "hint type" string at the data portion, and an optional bufferlist
+> >> for data. The size params need to be generic and not specific (param1,
+> >> param2, ...).
+> >
+> > The nice thing about adding a new rados op is that there isn't any
+> > disruptive protocol change.  Practically speaking, there isn't a big
+> > difference between adding one new hint op that is extensible and utilizing
+> > the (already extensible) rados op infrastructure.  Mostly it just means
+> > that the allocation hint is nicely named and parameterized for this
+> > particular purpose without precluding the ability to add other ops later.
+> > In the read-side hint case I think we should be particularly careful about
+> > using things like flags to make it trivial to add new behaviors, but I
+> > don't see a benefit to smoshing those sorts of hints together with
+> > allocation hints when the alloc stuff is clearly different.
+> >
+> > That said, I think it *is* important whether we are nice and general
+> > about alloc hints in this op.  We can add new fields to the args union as
+> > needed (up to a point), and can always add an setallochint2 op, but if
+> > there is something obvious missing..
+> >
+> 
+> The current op is very specialized and I'm having trouble to see how
+> it could later be extended. Basically it just passes the following:
 
-On Tue, Feb 25, 2014 at 7:58 AM, Filippos Giannakos <philipgian@grnet.gr> wrote:
-> Hi Greg,
->
-> Unfortunately we don't keep any Ceph related logs on the client side. On the
-> server side, we kept the default log settings to avoid overlogging.
-> Do you think that there might be something usefull on the OSD side ?
->
-> On Tue, Feb 25, 2014 at 07:28:30AM -0800, Gregory Farnum wrote:
->> Do you have logs? The assert indicates that the messenger got back
->> something other than "okay" when trying to grab a local Mutex, which
->> shouldn't be able to happen. It may be that some error-handling path
->> didn't drop it (within the same thread that later tried to grab it
->> again), but we'll need more details to track it down.
->> -Greg
->> Software Engineer #42 @ http://inktank.com | http://ceph.com
->>
->
-> Kind Regards,
-> --
-> Filippos
-> <philipgian@grnet.gr>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+This is really:
+
+opcode/type = ALLOC_HINT
+> __le64 expected_size;
+> __le64 expected_write_size;
+> __u8 expected_size_probability;
+ 
+> Thinking about future librados application developers that will also
+> need to tie the osd into some specialized backend with its own quirks.
+> For example., an allocation hint might need to specify that writes
+> need to be interleaved by sectors, with some special ordering, or that
+> writes will be done directly on the block storage with some specific
+> alignment.
+
+We can add fields to this, for example by adding
+
+	__le32 alignment;
+
+to the args for this particular opcode.
+
+> Now, I don't think it would be possible for these users to add new rados 
+> ops, and otoh, the current info that this specific operation is 
+> insufficient. So at the minimum we're missing a 'hint type' info here.
+
+That's the rados opcode.  And we can add rados opcodes whenever we want, 
+specifically when we add support on the backend.  Any ops marked with 
+FAILOK will be ignored if they are not understood.
+
+Basically, at *some* level, we need to have a switch where there is a 
+'type' and we define the various parameters for that particular type of 
+hint.  We can either
+
+1- define a catch-all 'hint' op at the rados level, and then start 
+defining specific types and their params, starting with something for 
+allocation hints.
+
+2- use the existing framework for rados ops and use that as the 'type'.
+
+This patch takes option 2 because all the generic work is already done at 
+the rados level and we can easily add new ops and ignore ones that we 
+don't understand at the server side.
+
+I agree that having a full pass-through would also be useful, and we can 
+add that later (probably around the time when we have pluggable backends 
+that might understand it).  I'm not sure what we would gain from doing the 
+switch on hint type underneath a catch-all rados op.  If nothing else, we 
+already would have to have 2 since some hints are 'write' hints and need 
+to be treated a bit differently by the OSD.
+
+sage
