@@ -1,49 +1,33 @@
-From: Patrick McGarry <patrick@inktank.com>
-Subject: CDS Giant Schedule
-Date: Tue, 25 Feb 2014 14:25:05 -0500
-Message-ID: <CAP8Oy=+20xTe0zc_zKGH1y-FahaCD7WgQVNhbHGj5yxcpcKURg@mail.gmail.com>
+From: Noah Watkins <noah.watkins@inktank.com>
+Subject: Re: Assertion error in librados
+Date: Tue, 25 Feb 2014 11:26:15 -0800
+Message-ID: <CA+Hcz59FC07EfPgPSo2TT6=oUQjEMmfDYLROB1p2QG7CxRLLWQ@mail.gmail.com>
+References: <20140225144900.GA30739@philipgian-mac>
+	<CAPYLRzhnPTEgycnmZ0HXeEW=ADe01QKS8nUmL8451rYYtoMvgw@mail.gmail.com>
+	<20140225155838.GB30739@philipgian-mac>
+	<CA+Hcz59dVj1CPiV6Xzo8_Z4WzhehNRiHyef_DE+MPBT19FHd4Q@mail.gmail.com>
+	<530CD824.2000107@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f180.google.com ([209.85.192.180]:47783 "EHLO
-	mail-pd0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753178AbaBYTZF (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Feb 2014 14:25:05 -0500
-Received: by mail-pd0-f180.google.com with SMTP id y10so2571563pdj.25
-        for <ceph-devel@vger.kernel.org>; Tue, 25 Feb 2014 11:25:05 -0800 (PST)
+Received: from mail-qc0-f172.google.com ([209.85.216.172]:35189 "EHLO
+	mail-qc0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753132AbaBYT0Q (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Feb 2014 14:26:16 -0500
+Received: by mail-qc0-f172.google.com with SMTP id w7so9336726qcr.31
+        for <ceph-devel@vger.kernel.org>; Tue, 25 Feb 2014 11:26:15 -0800 (PST)
+In-Reply-To: <530CD824.2000107@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>
+To: Josh Durgin <josh.durgin@inktank.com>
+Cc: Filippos Giannakos <philipgian@grnet.gr>, Gregory Farnum <greg@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, synnefo-devel@googlegroups.com
 
-Greetings!
+On Tue, Feb 25, 2014 at 9:51 AM, Josh Durgin <josh.durgin@inktank.com> wrote:
+> That's a good idea. This particular assert in a Mutex is almost always
+> a use-after-free of the Mutex or structure containing it though.
 
-Just wanted to let people know that the schedule has been published
-for the next Ceph Developer Summit (March 04-05, 2014):
-
-https://wiki.ceph.com/Planning/CDS/CDS_Giant_(Mar_2014)
-
-There may still be a few last minute tweaks, but for the most part
-that should be what we're working with next week.  I wanted to get it
-out in plenty of time so that people can make arrangements and/or plan
-their sessions a bit.
-
-Let me apologize to anyone who is going to experience a bit of sleep
-deprivation.  There were a ton of great submissions and we are still
-experimenting with finding a "sweet spot" as far as times.  I think
-east coasters on the APAC-friendly day got the worst of it at just
-after 1am.
-
-In any case, schedule is up and linked to blueprints and pads.
-Session owners if you could toss a rough outline of what you would
-like to discuss into the pad I think that would help ensure that each
-session is smooth and productive.
-
-If anyone has questions or concerns feel free to send them my way.  Thanks!
-
-
-Best Regards,
-
-Patrick McGarry
-Director, Community || Inktank
-http://ceph.com  ||  http://inktank.com
-@scuttlemonkey || @ceph || @inktank
+I think that a use-after-free will also throw an EINVAL (assuming it
+isn't a pathalogical case) as pthread_mutex_lock checks an
+initialization magic variable. I think that particular mutex isn't
+initialized with flags that would cause any of the other possible
+return values.
