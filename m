@@ -1,59 +1,51 @@
-From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: Re: [PATCH 2/6] libceph: add support for CEPH_OSD_OP_SETALLOCHINT osd op
-Date: Tue, 25 Feb 2014 15:38:26 +0200
-Message-ID: <CALFYKtAo9KXtnHBQcFqb0yPj3k-r7Eb5cHxhfKSEindQ=_rk+Q@mail.gmail.com>
-References: <1393008946-7931-1-git-send-email-ilya.dryomov@inktank.com>
-	<1393008946-7931-3-git-send-email-ilya.dryomov@inktank.com>
-	<530B5E36.4030200@ieee.org>
-	<CALFYKtBkQWkiHnA28xOs-NjBH-5F9ohZ8mR-C+kOkAc=SrA7uA@mail.gmail.com>
-	<530C9524.6070201@ieee.org>
+From: Filippos Giannakos <philipgian@grnet.gr>
+Subject: Assertion error in librados
+Date: Tue, 25 Feb 2014 16:49:40 +0200
+Message-ID: <20140225144900.GA30739@philipgian-mac>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qg0-f48.google.com ([209.85.192.48]:35171 "EHLO
-	mail-qg0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752314AbaBYNi1 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Feb 2014 08:38:27 -0500
-Received: by mail-qg0-f48.google.com with SMTP id a108so1059015qge.7
-        for <ceph-devel@vger.kernel.org>; Tue, 25 Feb 2014 05:38:27 -0800 (PST)
-In-Reply-To: <530C9524.6070201@ieee.org>
+Received: from averel.grnet-hq.admin.grnet.gr ([195.251.29.3]:48431 "EHLO
+	averel.grnet-hq.admin.grnet.gr" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752598AbaBYOts (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 25 Feb 2014 09:49:48 -0500
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@ieee.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: synnefo-devel@googlegroups.com
 
-On Tue, Feb 25, 2014 at 3:05 PM, Alex Elder <elder@ieee.org> wrote:
->>> The other thing is that the expected size is limited by
->>> rbd_image_header->obj_order, which is a single byte.  I
->>> think you should encode this the same way.  Even if the
->>> hint were for more than RBD, this level of granularity
->>> may be sufficient.
->>>
->>>> +                     u64 expected_write_size;
->>>
->>> Probably the same thing here, a byte might be enough
->>> to encode this by using log2(expected_write_size).
->>>
->>>> +                     __u8 expected_size_probability;
->>
->> I think in the interest of genericity expected_object_size should be an
->> arbitrary, not limited to a power-of-2 value.  Now, given the current
->> 90M object size limit 64 bits might seem a lot, but extent offset and
->> length are 64 bit values and to be future-proof I followed that here.
->
-> I have no objection to the 64-bit size but I still think
-> a byte representing log2(size) is sufficient.  Power-of-2
-> granularity is most likely fine (and might even be what
-> such a hint gets converted to anyway) for file systems
-> or other backing store.  But again, you can do that with
-> a 64 bit value as well.
+Hello all,
 
-Filesystems of course round it, but probably not to a power-of-2.
-I guess it's adjusted to a multiple of block size and then capped with
-some value that the allocator can cope with.  xfs for example would
-happily take on say 5M.  power-of-2 is sufficient for rbd, but
-_probably_ not in general.
+We recently bumped into the following assertion error in librados on our
+production service:
 
-Thanks,
 
-                Ilya
+common/Mutex.cc: In function 'void Mutex::Lock(bool)' thread 7fa2c2ccf700 time 2014-02-21 07:23:26.340791
+common/Mutex.cc: 93: FAILED assert(r == 0)
+ ceph version 0.72.2 (a913ded2ff138aefb8cb84d347d72164099cfd60)
+ 1: (Mutex::Lock(bool)+0x131) [0x7fa2c7707431]
+ 2: (SimpleMessenger::submit_message(Message*, Connection*, entity_addr_t const&, int, bool)+0x52) [0x7fa2c7863172]
+ 3: (SimpleMessenger::_send_message(Message*, Connection*, bool)+0x23e) [0x7fa2c7863bfe]
+ 4: (Objecter::send_op(Objecter::Op*)+0x32c) [0x7fa2c76b317c]
+ 5: (Objecter::handle_osd_map(MOSDMap*)+0x365) [0x7fa2c76b7805]
+ 6: (librados::RadosClient::_dispatch(Message*)+0x7c) [0x7fa2c768c70c]
+ 7: (librados::RadosClient::ms_dispatch(Message*)+0x9b) [0x7fa2c768c82b]
+ 8: (DispatchQueue::entry()+0x4eb) [0x7fa2c7800d2b]
+ 9: (DispatchQueue::DispatchThread::entry()+0xd) [0x7fa2c78666ad]
+ 10: (()+0x6b50) [0x7fa2c7203b50]
+ 11: (clone()+0x6d) [0x7fa2c6b570ed]
+ NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
+terminate called after throwing an instance of 'ceph::FailedAssertion'
+
+
+From what I can tell, there were some network problems on our RADOS cluster,
+after which many of our librados clients failed with the above assertion error.
+
+Do you have any ideas of what might went wrong ?
+
+Kind Regards,
+-- 
+Filippos
+<philipgian@grnet.gr>
