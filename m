@@ -1,159 +1,206 @@
-From: Sage Weil <sage@inktank.com>
-Subject: New upstream of libedit + UTF8 (fwd)
-Date: Wed, 26 Feb 2014 14:24:18 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1402261422570.17508@cobra.newdream.net>
-Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-2085306938-1393453449=:17508"
+From: Kent Overstreet <kmo@daterainc.com>
+Subject: [PATCH 9/9] iov_iter: Kill written arg to iov_iter_init()
+Date: Wed, 26 Feb 2014 15:39:57 -0800
+Message-ID: <1393457997-17618-10-git-send-email-kmo@daterainc.com>
+References: <1393457997-17618-1-git-send-email-kmo@daterainc.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:55007 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752697AbaBZWYT (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 26 Feb 2014 17:24:19 -0500
-Content-ID: <alpine.DEB.2.00.1402261424160.17508@cobra.newdream.net>
+Received: from mail-pd0-f171.google.com ([209.85.192.171]:60699 "EHLO
+	mail-pd0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754240AbaBZXk1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 26 Feb 2014 18:40:27 -0500
+Received: by mail-pd0-f171.google.com with SMTP id r10so1607356pdi.16
+        for <ceph-devel@vger.kernel.org>; Wed, 26 Feb 2014 15:40:27 -0800 (PST)
+In-Reply-To: <1393457997-17618-1-git-send-email-kmo@daterainc.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ken.dreyer@inktank.com, dan.mick@inktank.com
+To: axboe@kernel.dk
+Cc: linux-kernel@vger.kernel.org, linux-fsdevel@vger.kernel.org, Kent Overstreet <kmo@daterainc.com>, Alexander Viro <viro@zeniv.linux.org.uk>, Chris Mason <clm@fb.com>, linux-btrfs@vger.kernel.org, Steve French <sfrench@samba.org>, linux-cifs@vger.kernel.org, Miklos Szeredi <miklos@szeredi.hu>, fuse-devel@lists.sourceforge.net, Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
+
+This gets rid of a usually needless call to iov_iter_advance().
+
+Signed-off-by: Kent Overstreet <kmo@daterainc.com>
+Cc: Alexander Viro <viro@zeniv.linux.org.uk>
+Cc: Jens Axboe <axboe@kernel.dk>
+Cc: Chris Mason <clm@fb.com>
+Cc: linux-btrfs@vger.kernel.org
+Cc: Steve French <sfrench@samba.org>
+Cc: linux-cifs@vger.kernel.org
+Cc: Miklos Szeredi <miklos@szeredi.hu>
+Cc: fuse-devel@lists.sourceforge.net
+Cc: Sage Weil <sage@inktank.com>
 Cc: ceph-devel@vger.kernel.org
+---
+ fs/btrfs/file.c     |  8 +++++---
+ fs/ceph/file.c      |  7 ++++---
+ fs/cifs/file.c      |  4 ++--
+ fs/fuse/file.c      | 11 ++++++-----
+ include/linux/uio.h |  9 +++------
+ mm/filemap.c        |  4 +++-
+ 6 files changed, 23 insertions(+), 20 deletions(-)
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+diff --git a/fs/btrfs/file.c b/fs/btrfs/file.c
+index 0165b8672f..18b2e127e8 100644
+--- a/fs/btrfs/file.c
++++ b/fs/btrfs/file.c
+@@ -1652,8 +1652,9 @@ static ssize_t __btrfs_direct_write(struct kiocb *iocb,
+ 		return written;
+ 
+ 	pos += written;
+-	count -= written;
+-	iov_iter_init(&i, iov, nr_segs, count, written);
++	iov_iter_init(&i, iov, nr_segs, count);
++	iov_iter_advance(&i, written);
++
+ 	written_buffered = __btrfs_buffered_write(file, &i, pos);
+ 	if (written_buffered < 0) {
+ 		err = written_buffered;
+@@ -1768,7 +1769,8 @@ static ssize_t btrfs_file_aio_write(struct kiocb *iocb,
+ 	} else {
+ 		struct iov_iter i;
+ 
+-		iov_iter_init(&i, iov, nr_segs, count, num_written);
++		iov_iter_init(&i, iov, nr_segs, count + num_written);
++		iov_iter_advance(&i, num_written);
+ 
+ 		num_written = __btrfs_buffered_write(file, &i, pos);
+ 		if (num_written > 0)
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index dfd2ce3419..163ae0fe20 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -580,7 +580,7 @@ ceph_sync_direct_write(struct kiocb *iocb, const struct iovec *iov,
+ 		CEPH_OSD_FLAG_ONDISK |
+ 		CEPH_OSD_FLAG_WRITE;
+ 
+-	iov_iter_init(&i, iov, nr_segs, count, 0);
++	iov_iter_init(&i, iov, nr_segs, count);
+ 
+ 	while (iov_iter_count(&i) > 0) {
+ 		void __user *data = i.iov->iov_base + i.iov_offset;
+@@ -701,7 +701,7 @@ static ssize_t ceph_sync_write(struct kiocb *iocb, const struct iovec *iov,
+ 		CEPH_OSD_FLAG_WRITE |
+ 		CEPH_OSD_FLAG_ACK;
+ 
+-	iov_iter_init(&i, iov, nr_segs, count, 0);
++	iov_iter_init(&i, iov, nr_segs, count);
+ 
+ 	while ((len = iov_iter_count(&i)) > 0) {
+ 		size_t left;
+@@ -834,7 +834,8 @@ again:
+ 				goto out;
+ 		}
+ 
+-		iov_iter_init(&i, iov, nr_segs, len, read);
++		iov_iter_init(&i, iov, nr_segs, len);
++		iov_iter_advance(&i, read);
+ 
+ 		/* hmm, this isn't really async... */
+ 		ret = ceph_sync_read(iocb, &i, &checkeof);
+diff --git a/fs/cifs/file.c b/fs/cifs/file.c
+index 755584684f..8a03eeb95e 100644
+--- a/fs/cifs/file.c
++++ b/fs/cifs/file.c
+@@ -2424,7 +2424,7 @@ cifs_iovec_write(struct file *file, const struct iovec *iov,
+ 	else
+ 		pid = current->tgid;
+ 
+-	iov_iter_init(&it, iov, nr_segs, len, 0);
++	iov_iter_init(&it, iov, nr_segs, len);
+ 	do {
+ 		size_t save_len;
+ 
+@@ -2729,7 +2729,7 @@ cifs_readdata_to_iov(struct cifs_readdata *rdata, const struct iovec *iov,
+ 	unsigned int i;
+ 
+ 	/* set up iov_iter and advance to the correct offset */
+-	iov_iter_init(&ii, iov, nr_segs, iov_length(iov, nr_segs), 0);
++	iov_iter_init(&ii, iov, nr_segs, iov_length(iov, nr_segs));
+ 	iov_iter_advance(&ii, pos);
+ 
+ 	*copied = 0;
+diff --git a/fs/fuse/file.c b/fs/fuse/file.c
+index b4c9a14e70..67542da685 100644
+--- a/fs/fuse/file.c
++++ b/fs/fuse/file.c
+@@ -1152,9 +1152,10 @@ static ssize_t fuse_file_aio_write(struct kiocb *iocb, const struct iovec *iov,
+ 			goto out;
+ 
+ 		pos += written;
+-		count -= written;
+ 
+-		iov_iter_init(&i, iov, nr_segs, count, written);
++		iov_iter_init(&i, iov, nr_segs, count);
++		iov_iter_advance(&i, written);
++
+ 		written_buffered = fuse_perform_write(file, mapping, &i, pos);
+ 		if (written_buffered < 0) {
+ 			err = written_buffered;
+@@ -1174,7 +1175,7 @@ static ssize_t fuse_file_aio_write(struct kiocb *iocb, const struct iovec *iov,
+ 		written += written_buffered;
+ 		iocb->ki_pos = pos + written_buffered;
+ 	} else {
+-		iov_iter_init(&i, iov, nr_segs, count, 0);
++		iov_iter_init(&i, iov, nr_segs, count);
+ 		written = fuse_perform_write(file, mapping, &i, pos);
+ 		if (written >= 0)
+ 			iocb->ki_pos = pos + written;
+@@ -1300,7 +1301,7 @@ ssize_t fuse_direct_io(struct fuse_io_priv *io, const struct iovec *iov,
+ 	struct fuse_req *req;
+ 	struct iov_iter ii;
+ 
+-	iov_iter_init(&ii, iov, nr_segs, count, 0);
++	iov_iter_init(&ii, iov, nr_segs, count);
+ 
+ 	if (io->async)
+ 		req = fuse_get_req_for_background(fc, fuse_iter_npages(&ii));
+@@ -2188,7 +2189,7 @@ static int fuse_ioctl_copy_user(struct page **pages, struct iovec *iov,
+ 	if (!bytes)
+ 		return 0;
+ 
+-	iov_iter_init(&ii, iov, nr_segs, bytes, 0);
++	iov_iter_init(&ii, iov, nr_segs, bytes);
+ 
+ 	while (iov_iter_count(&ii)) {
+ 		struct page *page = pages[page_idx++];
+diff --git a/include/linux/uio.h b/include/linux/uio.h
+index 2b99e0d2a1..d653feeeb1 100644
+--- a/include/linux/uio.h
++++ b/include/linux/uio.h
+@@ -67,16 +67,13 @@ size_t iov_iter_copy_from_user(struct page *page,
+ void iov_iter_advance(struct iov_iter *i, size_t bytes);
+ int iov_iter_fault_in_readable(struct iov_iter *i, size_t bytes);
+ 
+-static inline void iov_iter_init(struct iov_iter *i,
+-			const struct iovec *iov, unsigned long nr_segs,
+-			size_t count, size_t written)
++static inline void iov_iter_init(struct iov_iter *i, const struct iovec *iov,
++				 unsigned long nr_segs, size_t count)
+ {
+ 	i->iov = iov;
+ 	i->nr_segs = nr_segs;
+ 	i->iov_offset = 0;
+-	i->count = count + written;
+-
+-	iov_iter_advance(i, written);
++	i->count = count;
+ }
+ 
+ static inline size_t iov_iter_count(struct iov_iter *i)
+diff --git a/mm/filemap.c b/mm/filemap.c
+index 8e509b3225..e756a0cf21 100644
+--- a/mm/filemap.c
++++ b/mm/filemap.c
+@@ -2385,7 +2385,9 @@ generic_file_buffered_write(struct kiocb *iocb, const struct iovec *iov,
+ 	ssize_t status;
+ 	struct iov_iter i;
+ 
+-	iov_iter_init(&i, iov, nr_segs, count, written);
++	iov_iter_init(&i, iov, nr_segs, count + written);
++	iov_iter_advance(&i, written);
++
+ 	status = generic_perform_write(file, &i, pos);
+ 
+ 	if (likely(status >= 0)) {
+-- 
+1.9.0
 
---557981400-2085306938-1393453449=:17508
-Content-Type: TEXT/PLAIN; CHARSET=US-ASCII
-Content-ID: <alpine.DEB.2.00.1402261424161.17508@cobra.newdream.net>
-
-There is a libedit update coming.  IIRC, this was a dependency for the old 
-version of the ceph CLI but the new python implementation should not need 
-it.  Probably this just needs to be removed from configure.ac and the 
-package dependencies?
---557981400-2085306938-1393453449=:17508
-Content-Type: MESSAGE/RFC822; CHARSET=US-ASCII
-Content-ID: <alpine.DEB.2.00.1402261422571.17508@cobra.newdream.net>
-Content-Description: Forwarded Message
-Content-Disposition: INLINE
-
-Return-Path: <sylvestre@debian.org>
-X-Original-To: sage@cobra.newdream.net
-Delivered-To: sage@cobra.newdream.net
-Received: from destro.newdream.net (destro.newdream.net [66.33.216.68])
-	by cobra.newdream.net (Postfix) with ESMTP id 3769B80466
-	for <sage@cobra.newdream.net>; Wed, 26 Feb 2014 10:22:02 -0800 (PST)
-Received: by destro.newdream.net (Postfix)
-	id 347A512095A; Wed, 26 Feb 2014 10:22:02 -0800 (PST)
-Delivered-To: sage@destro.newdream.net
-Received: from madmax.dreamhost.com (caiajhbdcahe.dreamhost.com
-	[208.97.132.74])
-	by destro.newdream.net (Postfix) with ESMTP id 0CF491208C2
-	for <sage@newdream.net>; Wed, 26 Feb 2014 10:22:02 -0800 (PST)
-Received: from localhost (localhost [127.0.0.1])
-	by madmax.dreamhost.com (Postfix) with ESMTP id CDCB5FD666C
-	for <sage@newdream.net>; Wed, 26 Feb 2014 10:22:01 -0800 (PST)
-X-DH-Virus-Scanned: Debian amavisd-new at madmax.dreamhost.com
-X-Spam-Flag: NO
-X-Spam-Score: 3.4
-X-Spam-Level: ***
-X-Spam-Status: No, score=3.4 tagged_above=-999 required=999
-	tests=[KHOP_BIG_TO_CC=3.4] autolearn=disabled
-Received: from terminator.dreamhost.com ([208.97.132.138])
-	by localhost (madmax.dreamhost.com [208.97.132.139]) (amavisd-new,
-	port 10024) with ESMTP id Iaq6SBPEQ7NC for <sage@newdream.net>;
-	Wed, 26 Feb 2014 10:22:00 -0800 (PST)
-Received: from batou.ecranbleu.org (batou.ecranbleu.org [88.190.32.89])
-	by terminator.dreamhost.com (Postfix) with ESMTP id 5595728853A7
-	for <sage@newdream.net>; Wed, 26 Feb 2014 10:16:41 -0800 (PST)
-Received: by batou.ecranbleu.org (Postfix, from userid 999)
-	id 82A0B12BFE4; Wed, 26 Feb 2014 19:16:34 +0100 (CET)
-Received: from [192.168.12.6] (unknown [192.168.12.6])
-	(Authenticated sender: sylvestredeb@ledru.info)
-	by batou.ecranbleu.org (Postfix) with ESMTPSA id 26DEF12BE49;
-	Wed, 26 Feb 2014 19:16:30 +0100 (CET)
-Message-ID: <530E2F82.3040300@debian.org>
-Date: Wed, 26 Feb 2014 19:16:34 +0100
-From: Sylvestre Ledru <sylvestre@debian.org>
-User-Agent: Mozilla/5.0 (X11; Linux x86_64;
-	rv:24.0) Gecko/20100101 Icedove/24.3.0
-MIME-Version: 1.0
-To: Andreas Tille <tille@debian.org>, Anton Gladky <gladk@debian.org>,
-	Aurelien Jarno <aurel32@debian.org>,
-	Bdale Garbee <bdale@gag.com>, Brian May <bam@debian.org>,
-	Ceph Maintainers <ceph-maintainers@lists.ceph.com>,
-	Chris Lamb <lamby@debian.org>, Christian Hofstaedtler <zeha@debian.org>,
-	Christoph Berg <myon@debian.org>, Christoph Egger <christoph@debian.org>,
-	Colin Watson <cjwatson@debian.org>, Damyan Ivanov <dmn@debian.org>,
-	Debian Firebird Group <pkg-firebird-general@lists.alioth.debian.org>,
-	Debian Haskell Group <pkg-haskell-maintainers@lists.alioth.debian.org>,
-	Debian Java Maintainers <pkg-java-maintainers@lists.alioth.debian.org>,
-	Debian NTP Team <pkg-ntp-maintainers@lists.alioth.debian.org>,
-	Debian OpenSSH Maintainers <debian-ssh@lists.debian.org>,
-	Debian PHP Maintainers <pkg-php-maint@lists.alioth.debian.org>,
-	Debian PostgreSQL Maintainers
-	<pkg-postgresql-public@lists.alioth.debian.org>, Debian Science Team
-	<debian-science-maintainers@lists.alioth.debian.org>,
-	Debian VoIP Team <pkg-voip-maintainers@lists.alioth.debian.org>,
-	GNU/kFreeBSD Maintainers <debian-bsd@lists.debian.org>,
-	"Gudjon I. Gudjonsson" <gudjon@gudjon.org>,
-	Guillem Jover <guillem@debian.org>,
-	"HIGUCHI Daisuke (VDR dai)" <dai@debian.org>,
-	Jakub Wilk <jwilk@debian.org>, James Page <jamespage@debian.org>,
-	Jan Wagner <waja@cyconet.org>,
-	Jeffrey Ratcliffe <jeffrey.ratcliffe@gmail.com>,
-	Jelmer Vernooij <jelmer@debian.org>,
-	=?UTF-8?B?SmVyZW15IExhaW7DqQ==?= <jeremy.laine@m4x.org>,
-	Joachim Wiedorn <ad_debian@joonet.de>,
-	Kiwamu Okabe <kiwamu@debian.or.jp>, Kurt Roeckx <kurt@roeckx.be>,
-	Lars Bahner <bahner@debian.org>,
-	"Laszlo Boszormenyi (GCS)" <gcs@debian.org>,
-	Lior Kaplan <kaplan@debian.org>,
-	LLVM Packaging Team <pkg-llvm-team@lists.alioth.debian.org>,
-	Marco Nenciarini <mnencia@debian.org>,
-	Mark Purcell <msp@debian.org>, Martin Pitt <mpitt@debian.org>,
-	Matthew Vernon <matthew@debian.org>,
-	Michael Meskes <meskes@debian.org>, Niels Thykier <niels@thykier.net>,
-	Nobuhiro Iwamatsu <iwamatsu@debian.org>,
-	=?UTF-8?B?T25kxZllaiBTdXLDvQ==?= <ondrej@debian.org>,
-	Peter Eisentraut <petere@debian.org>,
-	Reinhard Tartler <siretart@tauware.de>, Robert Millan <rmh@debian.org>,
-	Ryan Kavanagh <rak@debian.org>,
-	Sage Weil <sage@newdream.net>, Sean Finney <seanius@debian.org>,
-	Sebastian Ramacher <sramacher@debian.org>,
-	Stig Sandbeck Mathisen <ssm@debian.org>,
-	Sylvestre Ledru <sylvestre@debian.org>,
-	Thijs Kinkhorst <thijs@debian.org>, Tollef Fog Heen <tfheen@debian.org>,
-	Tzafrir Cohen <tzafrir@debian.org>,
-	Varnish Package Maintainers <pkg-varnish-devel@lists.alioth.debian.org>
-Subject: New upstream of libedit + UTF8
-X-Enigmail-Version: 1.6
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-X-Spambayes-Classification: ham; 0.00
-
-
-Hello,
-
-You receive this email because of your package has libedit as build-dep
-[1] (and because libedit has
-a crazy popcon and I don't want to break all packages).
-
-A few days ago, I uploaded a new upstream version of libedit
-(3.1-20140213-1~exp1).
-
-I also turned on the utf-8 support (for more information,
-http://bugs.debian.org/737786
-https://bugs.launchpad.net/ubuntu/+source/libedit/+bug/816758
-https://bugs.launchpad.net/ubuntu/+source/libedit/+bug/1276836 )
-
-Both changes are available in experimental
-
-I would appreciate if you could test if these changes haven't break your
-packages.
-
-I am planning to upload March 7th (Friday).
-
-Thanks,
-Sylvestre
-
-[1] grep-dctrl -F Build-Depends "libedit-dev" -s Maintainer -s Uploaders
-/var/lib/apt/lists/*unstable*_Sources
-
-
---557981400-2085306938-1393453449=:17508--
