@@ -1,206 +1,103 @@
-From: Kent Overstreet <kmo@daterainc.com>
-Subject: [PATCH 9/9] iov_iter: Kill written arg to iov_iter_init()
-Date: Wed, 26 Feb 2014 15:39:57 -0800
-Message-ID: <1393457997-17618-10-git-send-email-kmo@daterainc.com>
-References: <1393457997-17618-1-git-send-email-kmo@daterainc.com>
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: [PATCH] ceph: fix ceph_dir_llseek()
+Date: Thu, 27 Feb 2014 17:07:27 +0800
+Message-ID: <1393492047-18261-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f171.google.com ([209.85.192.171]:60699 "EHLO
-	mail-pd0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754240AbaBZXk1 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 26 Feb 2014 18:40:27 -0500
-Received: by mail-pd0-f171.google.com with SMTP id r10so1607356pdi.16
-        for <ceph-devel@vger.kernel.org>; Wed, 26 Feb 2014 15:40:27 -0800 (PST)
-In-Reply-To: <1393457997-17618-1-git-send-email-kmo@daterainc.com>
+Received: from mga02.intel.com ([134.134.136.20]:5255 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750742AbaB0JHz (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 27 Feb 2014 04:07:55 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: axboe@kernel.dk
-Cc: linux-kernel@vger.kernel.org, linux-fsdevel@vger.kernel.org, Kent Overstreet <kmo@daterainc.com>, Alexander Viro <viro@zeniv.linux.org.uk>, Chris Mason <clm@fb.com>, linux-btrfs@vger.kernel.org, Steve French <sfrench@samba.org>, linux-cifs@vger.kernel.org, Miklos Szeredi <miklos@szeredi.hu>, fuse-devel@lists.sourceforge.net, Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+Cc: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-This gets rid of a usually needless call to iov_iter_advance().
+Comparing offset with inode->i_sb->s_maxbytes doesn't make sense for
+directory. For a fragmented directory, offset (frag_t, off) can be
+larger than inode->i_sb->s_maxbytes.
 
-Signed-off-by: Kent Overstreet <kmo@daterainc.com>
-Cc: Alexander Viro <viro@zeniv.linux.org.uk>
-Cc: Jens Axboe <axboe@kernel.dk>
-Cc: Chris Mason <clm@fb.com>
-Cc: linux-btrfs@vger.kernel.org
-Cc: Steve French <sfrench@samba.org>
-Cc: linux-cifs@vger.kernel.org
-Cc: Miklos Szeredi <miklos@szeredi.hu>
-Cc: fuse-devel@lists.sourceforge.net
-Cc: Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+At the very beginning of ceph_dir_llseek(), local variable old_offset
+is initialized to parameter offset. This doesn't make sense neither.
+Old_offset should be ceph_make_fpos(fi->frag, fi->next_offset).
+
+Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
 ---
- fs/btrfs/file.c     |  8 +++++---
- fs/ceph/file.c      |  7 ++++---
- fs/cifs/file.c      |  4 ++--
- fs/fuse/file.c      | 11 ++++++-----
- include/linux/uio.h |  9 +++------
- mm/filemap.c        |  4 +++-
- 6 files changed, 23 insertions(+), 20 deletions(-)
+ fs/ceph/dir.c   | 12 ++++++------
+ fs/ceph/super.h |  2 +-
+ 2 files changed, 7 insertions(+), 7 deletions(-)
 
-diff --git a/fs/btrfs/file.c b/fs/btrfs/file.c
-index 0165b8672f..18b2e127e8 100644
---- a/fs/btrfs/file.c
-+++ b/fs/btrfs/file.c
-@@ -1652,8 +1652,9 @@ static ssize_t __btrfs_direct_write(struct kiocb *iocb,
- 		return written;
+diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+index 45eda6d..a7eaf96 100644
+--- a/fs/ceph/dir.c
++++ b/fs/ceph/dir.c
+@@ -190,7 +190,7 @@ more:
+ 		if (last) {
+ 			/* remember our position */
+ 			fi->dentry = last;
+-			fi->next_offset = di->offset;
++			fi->next_offset = fpos_off(di->offset);
+ 		}
+ 		dput(dentry);
+ 		return 0;
+@@ -369,9 +369,9 @@ more:
+ 				fi->next_offset = 0;
+ 			off = fi->next_offset;
+ 		}
++		fi->frag = frag;
+ 		fi->offset = fi->next_offset;
+ 		fi->last_readdir = req;
+-		fi->frag = frag;
  
- 	pos += written;
--	count -= written;
--	iov_iter_init(&i, iov, nr_segs, count, written);
-+	iov_iter_init(&i, iov, nr_segs, count);
-+	iov_iter_advance(&i, written);
-+
- 	written_buffered = __btrfs_buffered_write(file, &i, pos);
- 	if (written_buffered < 0) {
- 		err = written_buffered;
-@@ -1768,7 +1769,8 @@ static ssize_t btrfs_file_aio_write(struct kiocb *iocb,
- 	} else {
- 		struct iov_iter i;
+ 		if (req->r_reply_info.dir_end) {
+ 			kfree(fi->last_name);
+@@ -474,7 +474,7 @@ static loff_t ceph_dir_llseek(struct file *file, loff_t offset, int whence)
+ {
+ 	struct ceph_file_info *fi = file->private_data;
+ 	struct inode *inode = file->f_mapping->host;
+-	loff_t old_offset = offset;
++	loff_t old_offset = ceph_make_fpos(fi->frag, fi->next_offset);
+ 	loff_t retval;
  
--		iov_iter_init(&i, iov, nr_segs, count, num_written);
-+		iov_iter_init(&i, iov, nr_segs, count + num_written);
-+		iov_iter_advance(&i, num_written);
+ 	mutex_lock(&inode->i_mutex);
+@@ -491,7 +491,7 @@ static loff_t ceph_dir_llseek(struct file *file, loff_t offset, int whence)
+ 		goto out;
+ 	}
  
- 		num_written = __btrfs_buffered_write(file, &i, pos);
- 		if (num_written > 0)
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index dfd2ce3419..163ae0fe20 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -580,7 +580,7 @@ ceph_sync_direct_write(struct kiocb *iocb, const struct iovec *iov,
- 		CEPH_OSD_FLAG_ONDISK |
- 		CEPH_OSD_FLAG_WRITE;
- 
--	iov_iter_init(&i, iov, nr_segs, count, 0);
-+	iov_iter_init(&i, iov, nr_segs, count);
- 
- 	while (iov_iter_count(&i) > 0) {
- 		void __user *data = i.iov->iov_base + i.iov_offset;
-@@ -701,7 +701,7 @@ static ssize_t ceph_sync_write(struct kiocb *iocb, const struct iovec *iov,
- 		CEPH_OSD_FLAG_WRITE |
- 		CEPH_OSD_FLAG_ACK;
- 
--	iov_iter_init(&i, iov, nr_segs, count, 0);
-+	iov_iter_init(&i, iov, nr_segs, count);
- 
- 	while ((len = iov_iter_count(&i)) > 0) {
- 		size_t left;
-@@ -834,7 +834,8 @@ again:
- 				goto out;
+-	if (offset >= 0 && offset <= inode->i_sb->s_maxbytes) {
++	if (offset >= 0) {
+ 		if (offset != file->f_pos) {
+ 			file->f_pos = offset;
+ 			file->f_version = 0;
+@@ -504,14 +504,14 @@ static loff_t ceph_dir_llseek(struct file *file, loff_t offset, int whence)
+ 		 * seek to new frag, or seek prior to current chunk.
+ 		 */
+ 		if (offset == 0 ||
+-		    fpos_frag(offset) != fpos_frag(old_offset) ||
++		    fpos_frag(offset) != fi->frag ||
+ 		    fpos_off(offset) < fi->offset) {
+ 			dout("dir_llseek dropping %p content\n", file);
+ 			reset_readdir(fi);
  		}
  
--		iov_iter_init(&i, iov, nr_segs, len, read);
-+		iov_iter_init(&i, iov, nr_segs, len);
-+		iov_iter_advance(&i, read);
+ 		/* bump dir_release_count if we did a forward seek */
+-		if (offset > old_offset)
++		if (fpos_cmp(offset, old_offset) > 0)
+ 			fi->dir_release_count--;
+ 	}
+ out:
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index d8801a9..70bb183 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -577,7 +577,7 @@ struct ceph_file_info {
  
- 		/* hmm, this isn't really async... */
- 		ret = ceph_sync_read(iocb, &i, &checkeof);
-diff --git a/fs/cifs/file.c b/fs/cifs/file.c
-index 755584684f..8a03eeb95e 100644
---- a/fs/cifs/file.c
-+++ b/fs/cifs/file.c
-@@ -2424,7 +2424,7 @@ cifs_iovec_write(struct file *file, const struct iovec *iov,
- 	else
- 		pid = current->tgid;
- 
--	iov_iter_init(&it, iov, nr_segs, len, 0);
-+	iov_iter_init(&it, iov, nr_segs, len);
- 	do {
- 		size_t save_len;
- 
-@@ -2729,7 +2729,7 @@ cifs_readdata_to_iov(struct cifs_readdata *rdata, const struct iovec *iov,
- 	unsigned int i;
- 
- 	/* set up iov_iter and advance to the correct offset */
--	iov_iter_init(&ii, iov, nr_segs, iov_length(iov, nr_segs), 0);
-+	iov_iter_init(&ii, iov, nr_segs, iov_length(iov, nr_segs));
- 	iov_iter_advance(&ii, pos);
- 
- 	*copied = 0;
-diff --git a/fs/fuse/file.c b/fs/fuse/file.c
-index b4c9a14e70..67542da685 100644
---- a/fs/fuse/file.c
-+++ b/fs/fuse/file.c
-@@ -1152,9 +1152,10 @@ static ssize_t fuse_file_aio_write(struct kiocb *iocb, const struct iovec *iov,
- 			goto out;
- 
- 		pos += written;
--		count -= written;
- 
--		iov_iter_init(&i, iov, nr_segs, count, written);
-+		iov_iter_init(&i, iov, nr_segs, count);
-+		iov_iter_advance(&i, written);
-+
- 		written_buffered = fuse_perform_write(file, mapping, &i, pos);
- 		if (written_buffered < 0) {
- 			err = written_buffered;
-@@ -1174,7 +1175,7 @@ static ssize_t fuse_file_aio_write(struct kiocb *iocb, const struct iovec *iov,
- 		written += written_buffered;
- 		iocb->ki_pos = pos + written_buffered;
- 	} else {
--		iov_iter_init(&i, iov, nr_segs, count, 0);
-+		iov_iter_init(&i, iov, nr_segs, count);
- 		written = fuse_perform_write(file, mapping, &i, pos);
- 		if (written >= 0)
- 			iocb->ki_pos = pos + written;
-@@ -1300,7 +1301,7 @@ ssize_t fuse_direct_io(struct fuse_io_priv *io, const struct iovec *iov,
- 	struct fuse_req *req;
- 	struct iov_iter ii;
- 
--	iov_iter_init(&ii, iov, nr_segs, count, 0);
-+	iov_iter_init(&ii, iov, nr_segs, count);
- 
- 	if (io->async)
- 		req = fuse_get_req_for_background(fc, fuse_iter_npages(&ii));
-@@ -2188,7 +2189,7 @@ static int fuse_ioctl_copy_user(struct page **pages, struct iovec *iov,
- 	if (!bytes)
- 		return 0;
- 
--	iov_iter_init(&ii, iov, nr_segs, bytes, 0);
-+	iov_iter_init(&ii, iov, nr_segs, bytes);
- 
- 	while (iov_iter_count(&ii)) {
- 		struct page *page = pages[page_idx++];
-diff --git a/include/linux/uio.h b/include/linux/uio.h
-index 2b99e0d2a1..d653feeeb1 100644
---- a/include/linux/uio.h
-+++ b/include/linux/uio.h
-@@ -67,16 +67,13 @@ size_t iov_iter_copy_from_user(struct page *page,
- void iov_iter_advance(struct iov_iter *i, size_t bytes);
- int iov_iter_fault_in_readable(struct iov_iter *i, size_t bytes);
- 
--static inline void iov_iter_init(struct iov_iter *i,
--			const struct iovec *iov, unsigned long nr_segs,
--			size_t count, size_t written)
-+static inline void iov_iter_init(struct iov_iter *i, const struct iovec *iov,
-+				 unsigned long nr_segs, size_t count)
- {
- 	i->iov = iov;
- 	i->nr_segs = nr_segs;
- 	i->iov_offset = 0;
--	i->count = count + written;
--
--	iov_iter_advance(i, written);
-+	i->count = count;
- }
- 
- static inline size_t iov_iter_count(struct iov_iter *i)
-diff --git a/mm/filemap.c b/mm/filemap.c
-index 8e509b3225..e756a0cf21 100644
---- a/mm/filemap.c
-+++ b/mm/filemap.c
-@@ -2385,7 +2385,9 @@ generic_file_buffered_write(struct kiocb *iocb, const struct iovec *iov,
- 	ssize_t status;
- 	struct iov_iter i;
- 
--	iov_iter_init(&i, iov, nr_segs, count, written);
-+	iov_iter_init(&i, iov, nr_segs, count + written);
-+	iov_iter_advance(&i, written);
-+
- 	status = generic_perform_write(file, &i, pos);
- 
- 	if (likely(status >= 0)) {
+ 	/* readdir: position within a frag */
+ 	unsigned offset;       /* offset of last chunk, adjusted for . and .. */
+-	u64 next_offset;       /* offset of next chunk (last_name's + 1) */
++	unsigned next_offset;  /* offset of next chunk (last_name's + 1) */
+ 	char *last_name;       /* last entry in previous chunk */
+ 	struct dentry *dentry; /* next dentry (for dcache readdir) */
+ 	int dir_release_count;
 -- 
-1.9.0
+1.8.5.3
 
