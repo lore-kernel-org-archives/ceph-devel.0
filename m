@@ -1,49 +1,65 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: location-aware file placement in Ceph
-Date: Thu, 27 Feb 2014 10:29:58 -0800
-Message-ID: <CAPYLRzjxhFkETj7ijQXHSjyKBP9LXcuxSqJdSA98KFBrYVVAUQ@mail.gmail.com>
-References: <530F3CAC.2040504@gmail.com>
+From: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
+Subject: Re: firefly branches
+Date: Thu, 27 Feb 2014 20:26:23 +0100
+Message-ID: <530F915F.2010608@bisect.de>
+References: <alpine.DEB.2.00.1402211141100.17322@cobra.newdream.net>
+Reply-To: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f171.google.com ([209.85.216.171]:50745 "EHLO
-	mail-qc0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753375AbaB0S37 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Feb 2014 13:29:59 -0500
-Received: by mail-qc0-f171.google.com with SMTP id x3so3822622qcv.30
-        for <ceph-devel@vger.kernel.org>; Thu, 27 Feb 2014 10:29:58 -0800 (PST)
-In-Reply-To: <530F3CAC.2040504@gmail.com>
+Received: from wp188.webpack.hosteurope.de ([80.237.132.195]:50413 "EHLO
+	wp188.webpack.hosteurope.de" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751384AbaB0TpH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 27 Feb 2014 14:45:07 -0500
+In-Reply-To: <alpine.DEB.2.00.1402211141100.17322@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Zhongliang Zhao <zhaozhongliang@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-There are some options within CRUSH to let you decide where you want
-to place particular classes of data, but it's not really available on
-a per-object or per-file basis. You should look through the CRUSH
-stuff at ceph.com/docs to get an idea of what's possible.
--Greg
-Software Engineer #42 @ http://inktank.com | http://ceph.com
+Hi Sage,
 
+since firefly is frozen and the task is now to focus on stabilization:
+how do you plan to handle it on the coverity side?
 
-On Thu, Feb 27, 2014 at 5:25 AM, Zhongliang Zhao
-<zhaozhongliang@gmail.com> wrote:
-> Dear all,
->
-> As new to ceph, may I ask in the crush algorithm, is there a way to
-> configure where the file to be stored, not randomly.
-> My requirement is to place the files that within the same location(within a
-> geographic area), into the same OSD, instead of randomly placing them
-> seperately.
->
-> I guess crush may support this. But to do this, I just have to configure
-> some parameters in some ceph commands? or I have to modify the ceph crush
-> algorithm and re-compile ceph?
->
-> Many thanks for any helpful pointers.
->
-> Cheers, Giovanni
+Is Coverity able use the firefly branch instead of master to get
+everything checked on regular bases for the next stable release?
+
+The last Coverity check was Jan 22, 2014
+
+Danny
+
+Am 21.02.2014 20:46, schrieb Sage Weil:
+> Now that firefly is frozen, we're going to keep things interesting and 
+> do things slight different that we did for emperor.  It's closer to what 
+> we normally do, though, so hopefully this will be simpler.
+> 
+>  master == new stuff for post-firefly v0.79.  this shouldn't see much new 
+>    code since we're focusing on stabilization right now.
+> 
+>  next == <deleted>.  use firefly instead.
+> 
+>  firefly == what will become firefly 0.78.  this is the branch the nightly 
+>    qa is focusing on.
+> 
+> Periodically we can merge firefly back into master (as we normally do with 
+> next), but this isn't particularly important since the all QA is running 
+> against firefly.
+> 
+> There are now firefly branches in teuthology.git and ceph-qa-suites.git to 
+> match.
+> 
+> In the past we had both next and the stable-release-to-be branch but it 
+> was awkward to keep them in sync.  This avoid that ambiguity by just 
+> having one branch and calling it firefly to make it crystal clear to 
+> everyone what is what.
+> 
+> That's all!
+> sage
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+
