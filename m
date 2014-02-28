@@ -1,11 +1,13 @@
-From: Haomai Wang <haomaiwang-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: [Annonce]The progress of KeyValueStore in Firely
-Date: Fri, 28 Feb 2014 10:45:01 +0800
-Message-ID: <CACJqLybuA48Jnz6Qwc7cs2kHJO30C4GwazXi8yGp8ZhvfFc2ZQ@mail.gmail.com>
+From: Alexandre DERUMIER <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
+Subject: Re: [Annonce]The progress of KeyValueStore in Firely
+Date: Fri, 28 Feb 2014 07:59:13 +0100 (CET)
+Message-ID: <ea31197c-1748-4b4a-ae7f-285151fb2771@mailpro>
+References: <CACJqLybuA48Jnz6Qwc7cs2kHJO30C4GwazXi8yGp8ZhvfFc2ZQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CACJqLybuA48Jnz6Qwc7cs2kHJO30C4GwazXi8yGp8ZhvfFc2ZQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
@@ -15,126 +17,109 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Haomai Wang <haomaiwang-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-Hi all,
-
-last release I propose a KeyValueStore prototype(get info from
-http://sebastien-han.fr/blog/2013/12/02/ceph-performance-interesting-things-going-on).
-It contains some performance results and problems. Now I'd like to
-refresh our thoughts on KeyValueStore.
-
-KeyValueStore is pursuing FileStore's performance during this release.
-Now things go farther, KeyValueStore did better in rbd
-situation(partial write) .
-
-I test KeyValueStore compared to FileStore in a single OSD on Samsung
-SSD 840. The config can be viewed
-here(http://pad.ceph.com/p/KeyValueStore.conf). The same config file
-is applied to both FileStore and KeyValueStore except "osd
-objectstore" option.
-
-I use fio which rbd supported from
-TelekomCloud(https://github.com/TelekomCloud/fio/commits/rbd-engine)
-to test rbd.
-
-The fio command: fio -direct=1 -iodepth=64 -thread -rw=randwrite
--ioengine=rbd -bs=4k -size=19G -numjobs=1 -runtime=100
--group_reporting -name=ebs_test -pool=openstack -rbdname=image
--clientname=fio -invalidate=0
-
-============================================
-
-FileStore result:
-ebs_test: (g=0): rw=randwrite, bs=4K-4K/4K-4K/4K-4K, ioengine=rbd, iodepth=64
-fio-2.1.4
-Starting 1 thread
-rbd engine: RBD version: 0.1.8
-
-ebs_test: (groupid=0, jobs=1): err= 0: pid=30886: Thu Feb 27 08:09:18 2014
-  write: io=283040KB, bw=6403.4KB/s, iops=1600, runt= 44202msec
-    slat (usec): min=116, max=2817, avg=195.78, stdev=56.45
-    clat (msec): min=8, max=661, avg=39.57, stdev=29.26
-     lat (msec): min=9, max=661, avg=39.77, stdev=29.25
-    clat percentiles (msec):
-     |  1.00th=[   15],  5.00th=[   20], 10.00th=[   23], 20.00th=[   28],
-     | 30.00th=[   31], 40.00th=[   35], 50.00th=[   37], 60.00th=[   40],
-     | 70.00th=[   43], 80.00th=[   46], 90.00th=[   51], 95.00th=[   58],
-     | 99.00th=[  128], 99.50th=[  210], 99.90th=[  457], 99.95th=[  494],
-     | 99.99th=[  545]
-    bw (KB  /s): min= 2120, max=12656, per=100.00%, avg=6464.27, stdev=1726.55
-    lat (msec) : 10=0.01%, 20=5.91%, 50=83.35%, 100=8.88%, 250=1.47%
-    lat (msec) : 500=0.34%, 750=0.05%
-  cpu          : usr=29.83%, sys=1.36%, ctx=84002, majf=0, minf=216
-  IO depths    : 1=0.1%, 2=0.1%, 4=0.1%, 8=0.1%, 16=0.1%, 32=17.4%, >=64=82.6%
-     submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
-     complete  : 0=0.0%, 4=99.1%, 8=0.5%, 16=0.3%, 32=0.1%, 64=0.1%, >=64=0.0%
-     issued    : total=r=0/w=70760/d=0, short=r=0/w=0/d=0
-     latency   : target=0, window=0, percentile=100.00%, depth=64
-
-Run status group 0 (all jobs):
-  WRITE: io=283040KB, aggrb=6403KB/s, minb=6403KB/s, maxb=6403KB/s,
-mint=44202msec, maxt=44202msec
-
-Disk stats (read/write):
-  sdb: ios=5/9512, merge=0/69, ticks=4/10649, in_queue=10645, util=0.92%
-
-===============================================
-
-KeyValueStore:
-ebs_test: (g=0): rw=randwrite, bs=4K-4K/4K-4K/4K-4K, ioengine=rbd, iodepth=64
-fio-2.1.4
-Starting 1 thread
-rbd engine: RBD version: 0.1.8
-
-ebs_test: (groupid=0, jobs=1): err= 0: pid=29137: Thu Feb 27 08:06:30 2014
-  write: io=444376KB, bw=6280.2KB/s, iops=1570, runt= 70759msec
-    slat (usec): min=122, max=3237, avg=184.51, stdev=37.76
-    clat (msec): min=10, max=168, avg=40.57, stdev= 5.70
-     lat (msec): min=11, max=168, avg=40.75, stdev= 5.71
-    clat percentiles (msec):
-     |  1.00th=[   34],  5.00th=[   37], 10.00th=[   39], 20.00th=[   39],
-     | 30.00th=[   40], 40.00th=[   40], 50.00th=[   41], 60.00th=[   41],
-     | 70.00th=[   42], 80.00th=[   42], 90.00th=[   44], 95.00th=[   45],
-     | 99.00th=[   48], 99.50th=[   50], 99.90th=[  163], 99.95th=[  167],
-     | 99.99th=[  167]
-    bw (KB  /s): min= 4590, max= 7480, per=100.00%, avg=6285.69, stdev=374.22
-    lat (msec) : 20=0.02%, 50=99.58%, 100=0.23%, 250=0.17%
-  cpu          : usr=29.11%, sys=1.10%, ctx=118564, majf=0, minf=194
-  IO depths    : 1=0.1%, 2=0.1%, 4=0.1%, 8=0.1%, 16=0.1%, 32=0.7%, >=64=99.3%
-     submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
-     complete  : 0=0.0%, 4=100.0%, 8=0.1%, 16=0.1%, 32=0.0%, 64=0.1%, >=64=0.0%
-     issued    : total=r=0/w=111094/d=0, short=r=0/w=0/d=0
-     latency   : target=0, window=0, percentile=100.00%, depth=64
-
-Run status group 0 (all jobs):
-  WRITE: io=444376KB, aggrb=6280KB/s, minb=6280KB/s, maxb=6280KB/s,
-mint=70759msec, maxt=70759msec
-
-Disk stats (read/write):
-  sdb: ios=0/15936, merge=0/272, ticks=0/17157, in_queue=17146, util=0.94%
-
-
-It's just a simple test, maybe exist some misleadings on the config or
-results. But
-we can obviously see the conspicuous improvement for KeyValueStore.
-
-In the near future, performance still will be the first thing to
-improve especially at write operation(The goal of KeyValueStore is
-provided with powerful write performance compared to FileStore), such
-as
-1. Fine-grained lock in object-level to improve the degree of
-parallelism, because KeyValueStore doesn't have Journal to quick the
-latency of write transaction, we need to avoid block as far as
-possible.
-2. Header cache(like inode in filesystem) to quick read.
-3. more tests
-
-Then new backend will be added like rocksdb or others. I'd like to see
-performance improvements from other backend.
-
--- 
-Best Regards,
-
-Wheat
+VGhhbmtzIGZvciB0aGUgcmVwb3J0ICEKClJlc3VsdHMgc2VlbSB0byBiZSBlbmNvdXJhZ2luZyAu
+IChJcyBpcyBsZXZlbGRiIGtleXN0b3JlID8pCgpUaGFua3MgdG8gZmlvLXJiZCwgaXQnbGwgYmUg
+ZWFzaWVyIHRvIGRvIHJhbmRvbSBpbyBiZW5jaG1hcmsgbm93ICEKCihJJ20gd2FpdGluZyB0byBz
+ZWUgaWYgcm9ja3NkYiB3aWxsIGltcHJvdmUgdGhpbmdzIGluIHRoZSBmdXR1cmUpCgpSZWdhcmRz
+LAoKQWxleGFuZHJlCi0tLS0tIE1haWwgb3JpZ2luYWwgLS0tLS0gCgpEZTogIkhhb21haSBXYW5n
+IiA8aGFvbWFpd2FuZ0BnbWFpbC5jb20+IArDgDogY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbSwg
+Y2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcgCkVudm95w6k6IFZlbmRyZWRpIDI4IEbDqXZyaWVy
+IDIwMTQgMDM6NDU6MDEgCk9iamV0OiBbY2VwaC11c2Vyc10gW0Fubm9uY2VdVGhlIHByb2dyZXNz
+IG9mIEtleVZhbHVlU3RvcmUgaW4gRmlyZWx5IAoKSGkgYWxsLCAKCmxhc3QgcmVsZWFzZSBJIHBy
+b3Bvc2UgYSBLZXlWYWx1ZVN0b3JlIHByb3RvdHlwZShnZXQgaW5mbyBmcm9tIApodHRwOi8vc2Vi
+YXN0aWVuLWhhbi5mci9ibG9nLzIwMTMvMTIvMDIvY2VwaC1wZXJmb3JtYW5jZS1pbnRlcmVzdGlu
+Zy10aGluZ3MtZ29pbmctb24pLiAKSXQgY29udGFpbnMgc29tZSBwZXJmb3JtYW5jZSByZXN1bHRz
+IGFuZCBwcm9ibGVtcy4gTm93IEknZCBsaWtlIHRvIApyZWZyZXNoIG91ciB0aG91Z2h0cyBvbiBL
+ZXlWYWx1ZVN0b3JlLiAKCktleVZhbHVlU3RvcmUgaXMgcHVyc3VpbmcgRmlsZVN0b3JlJ3MgcGVy
+Zm9ybWFuY2UgZHVyaW5nIHRoaXMgcmVsZWFzZS4gCk5vdyB0aGluZ3MgZ28gZmFydGhlciwgS2V5
+VmFsdWVTdG9yZSBkaWQgYmV0dGVyIGluIHJiZCAKc2l0dWF0aW9uKHBhcnRpYWwgd3JpdGUpIC4g
+CgpJIHRlc3QgS2V5VmFsdWVTdG9yZSBjb21wYXJlZCB0byBGaWxlU3RvcmUgaW4gYSBzaW5nbGUg
+T1NEIG9uIFNhbXN1bmcgClNTRCA4NDAuIFRoZSBjb25maWcgY2FuIGJlIHZpZXdlZCAKaGVyZSho
+dHRwOi8vcGFkLmNlcGguY29tL3AvS2V5VmFsdWVTdG9yZS5jb25mKS4gVGhlIHNhbWUgY29uZmln
+IGZpbGUgCmlzIGFwcGxpZWQgdG8gYm90aCBGaWxlU3RvcmUgYW5kIEtleVZhbHVlU3RvcmUgZXhj
+ZXB0ICJvc2QgCm9iamVjdHN0b3JlIiBvcHRpb24uIAoKSSB1c2UgZmlvIHdoaWNoIHJiZCBzdXBw
+b3J0ZWQgZnJvbSAKVGVsZWtvbUNsb3VkKGh0dHBzOi8vZ2l0aHViLmNvbS9UZWxla29tQ2xvdWQv
+ZmlvL2NvbW1pdHMvcmJkLWVuZ2luZSkgCnRvIHRlc3QgcmJkLiAKClRoZSBmaW8gY29tbWFuZDog
+ZmlvIC1kaXJlY3Q9MSAtaW9kZXB0aD02NCAtdGhyZWFkIC1ydz1yYW5kd3JpdGUgCi1pb2VuZ2lu
+ZT1yYmQgLWJzPTRrIC1zaXplPTE5RyAtbnVtam9icz0xIC1ydW50aW1lPTEwMCAKLWdyb3VwX3Jl
+cG9ydGluZyAtbmFtZT1lYnNfdGVzdCAtcG9vbD1vcGVuc3RhY2sgLXJiZG5hbWU9aW1hZ2UgCi1j
+bGllbnRuYW1lPWZpbyAtaW52YWxpZGF0ZT0wIAoKPT09PT09PT09PT09PT09PT09PT09PT09PT09
+PT09PT09PT09PT09PT09PT0gCgpGaWxlU3RvcmUgcmVzdWx0OiAKZWJzX3Rlc3Q6IChnPTApOiBy
+dz1yYW5kd3JpdGUsIGJzPTRLLTRLLzRLLTRLLzRLLTRLLCBpb2VuZ2luZT1yYmQsIGlvZGVwdGg9
+NjQgCmZpby0yLjEuNCAKU3RhcnRpbmcgMSB0aHJlYWQgCnJiZCBlbmdpbmU6IFJCRCB2ZXJzaW9u
+OiAwLjEuOCAKCmVic190ZXN0OiAoZ3JvdXBpZD0wLCBqb2JzPTEpOiBlcnI9IDA6IHBpZD0zMDg4
+NjogVGh1IEZlYiAyNyAwODowOToxOCAyMDE0IAp3cml0ZTogaW89MjgzMDQwS0IsIGJ3PTY0MDMu
+NEtCL3MsIGlvcHM9MTYwMCwgcnVudD0gNDQyMDJtc2VjIApzbGF0ICh1c2VjKTogbWluPTExNiwg
+bWF4PTI4MTcsIGF2Zz0xOTUuNzgsIHN0ZGV2PTU2LjQ1IApjbGF0IChtc2VjKTogbWluPTgsIG1h
+eD02NjEsIGF2Zz0zOS41Nywgc3RkZXY9MjkuMjYgCmxhdCAobXNlYyk6IG1pbj05LCBtYXg9NjYx
+LCBhdmc9MzkuNzcsIHN0ZGV2PTI5LjI1IApjbGF0IHBlcmNlbnRpbGVzIChtc2VjKTogCnwgMS4w
+MHRoPVsgMTVdLCA1LjAwdGg9WyAyMF0sIDEwLjAwdGg9WyAyM10sIDIwLjAwdGg9WyAyOF0sIAp8
+IDMwLjAwdGg9WyAzMV0sIDQwLjAwdGg9WyAzNV0sIDUwLjAwdGg9WyAzN10sIDYwLjAwdGg9WyA0
+MF0sIAp8IDcwLjAwdGg9WyA0M10sIDgwLjAwdGg9WyA0Nl0sIDkwLjAwdGg9WyA1MV0sIDk1LjAw
+dGg9WyA1OF0sIAp8IDk5LjAwdGg9WyAxMjhdLCA5OS41MHRoPVsgMjEwXSwgOTkuOTB0aD1bIDQ1
+N10sIDk5Ljk1dGg9WyA0OTRdLCAKfCA5OS45OXRoPVsgNTQ1XSAKYncgKEtCIC9zKTogbWluPSAy
+MTIwLCBtYXg9MTI2NTYsIHBlcj0xMDAuMDAlLCBhdmc9NjQ2NC4yNywgc3RkZXY9MTcyNi41NSAK
+bGF0IChtc2VjKSA6IDEwPTAuMDElLCAyMD01LjkxJSwgNTA9ODMuMzUlLCAxMDA9OC44OCUsIDI1
+MD0xLjQ3JSAKbGF0IChtc2VjKSA6IDUwMD0wLjM0JSwgNzUwPTAuMDUlIApjcHUgOiB1c3I9Mjku
+ODMlLCBzeXM9MS4zNiUsIGN0eD04NDAwMiwgbWFqZj0wLCBtaW5mPTIxNiAKSU8gZGVwdGhzIDog
+MT0wLjElLCAyPTAuMSUsIDQ9MC4xJSwgOD0wLjElLCAxNj0wLjElLCAzMj0xNy40JSwgPj02ND04
+Mi42JSAKc3VibWl0IDogMD0wLjAlLCA0PTEwMC4wJSwgOD0wLjAlLCAxNj0wLjAlLCAzMj0wLjAl
+LCA2ND0wLjAlLCA+PTY0PTAuMCUgCmNvbXBsZXRlIDogMD0wLjAlLCA0PTk5LjElLCA4PTAuNSUs
+IDE2PTAuMyUsIDMyPTAuMSUsIDY0PTAuMSUsID49NjQ9MC4wJSAKaXNzdWVkIDogdG90YWw9cj0w
+L3c9NzA3NjAvZD0wLCBzaG9ydD1yPTAvdz0wL2Q9MCAKbGF0ZW5jeSA6IHRhcmdldD0wLCB3aW5k
+b3c9MCwgcGVyY2VudGlsZT0xMDAuMDAlLCBkZXB0aD02NCAKClJ1biBzdGF0dXMgZ3JvdXAgMCAo
+YWxsIGpvYnMpOiAKV1JJVEU6IGlvPTI4MzA0MEtCLCBhZ2dyYj02NDAzS0IvcywgbWluYj02NDAz
+S0IvcywgbWF4Yj02NDAzS0IvcywgCm1pbnQ9NDQyMDJtc2VjLCBtYXh0PTQ0MjAybXNlYyAKCkRp
+c2sgc3RhdHMgKHJlYWQvd3JpdGUpOiAKc2RiOiBpb3M9NS85NTEyLCBtZXJnZT0wLzY5LCB0aWNr
+cz00LzEwNjQ5LCBpbl9xdWV1ZT0xMDY0NSwgdXRpbD0wLjkyJSAKCj09PT09PT09PT09PT09PT09
+PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09IAoKS2V5VmFsdWVTdG9yZTogCmVic190ZXN0
+OiAoZz0wKTogcnc9cmFuZHdyaXRlLCBicz00Sy00Sy80Sy00Sy80Sy00SywgaW9lbmdpbmU9cmJk
+LCBpb2RlcHRoPTY0IApmaW8tMi4xLjQgClN0YXJ0aW5nIDEgdGhyZWFkIApyYmQgZW5naW5lOiBS
+QkQgdmVyc2lvbjogMC4xLjggCgplYnNfdGVzdDogKGdyb3VwaWQ9MCwgam9icz0xKTogZXJyPSAw
+OiBwaWQ9MjkxMzc6IFRodSBGZWIgMjcgMDg6MDY6MzAgMjAxNCAKd3JpdGU6IGlvPTQ0NDM3NktC
+LCBidz02MjgwLjJLQi9zLCBpb3BzPTE1NzAsIHJ1bnQ9IDcwNzU5bXNlYyAKc2xhdCAodXNlYyk6
+IG1pbj0xMjIsIG1heD0zMjM3LCBhdmc9MTg0LjUxLCBzdGRldj0zNy43NiAKY2xhdCAobXNlYyk6
+IG1pbj0xMCwgbWF4PTE2OCwgYXZnPTQwLjU3LCBzdGRldj0gNS43MCAKbGF0IChtc2VjKTogbWlu
+PTExLCBtYXg9MTY4LCBhdmc9NDAuNzUsIHN0ZGV2PSA1LjcxIApjbGF0IHBlcmNlbnRpbGVzICht
+c2VjKTogCnwgMS4wMHRoPVsgMzRdLCA1LjAwdGg9WyAzN10sIDEwLjAwdGg9WyAzOV0sIDIwLjAw
+dGg9WyAzOV0sIAp8IDMwLjAwdGg9WyA0MF0sIDQwLjAwdGg9WyA0MF0sIDUwLjAwdGg9WyA0MV0s
+IDYwLjAwdGg9WyA0MV0sIAp8IDcwLjAwdGg9WyA0Ml0sIDgwLjAwdGg9WyA0Ml0sIDkwLjAwdGg9
+WyA0NF0sIDk1LjAwdGg9WyA0NV0sIAp8IDk5LjAwdGg9WyA0OF0sIDk5LjUwdGg9WyA1MF0sIDk5
+LjkwdGg9WyAxNjNdLCA5OS45NXRoPVsgMTY3XSwgCnwgOTkuOTl0aD1bIDE2N10gCmJ3IChLQiAv
+cyk6IG1pbj0gNDU5MCwgbWF4PSA3NDgwLCBwZXI9MTAwLjAwJSwgYXZnPTYyODUuNjksIHN0ZGV2
+PTM3NC4yMiAKbGF0IChtc2VjKSA6IDIwPTAuMDIlLCA1MD05OS41OCUsIDEwMD0wLjIzJSwgMjUw
+PTAuMTclIApjcHUgOiB1c3I9MjkuMTElLCBzeXM9MS4xMCUsIGN0eD0xMTg1NjQsIG1hamY9MCwg
+bWluZj0xOTQgCklPIGRlcHRocyA6IDE9MC4xJSwgMj0wLjElLCA0PTAuMSUsIDg9MC4xJSwgMTY9
+MC4xJSwgMzI9MC43JSwgPj02ND05OS4zJSAKc3VibWl0IDogMD0wLjAlLCA0PTEwMC4wJSwgOD0w
+LjAlLCAxNj0wLjAlLCAzMj0wLjAlLCA2ND0wLjAlLCA+PTY0PTAuMCUgCmNvbXBsZXRlIDogMD0w
+LjAlLCA0PTEwMC4wJSwgOD0wLjElLCAxNj0wLjElLCAzMj0wLjAlLCA2ND0wLjElLCA+PTY0PTAu
+MCUgCmlzc3VlZCA6IHRvdGFsPXI9MC93PTExMTA5NC9kPTAsIHNob3J0PXI9MC93PTAvZD0wIAps
+YXRlbmN5IDogdGFyZ2V0PTAsIHdpbmRvdz0wLCBwZXJjZW50aWxlPTEwMC4wMCUsIGRlcHRoPTY0
+IAoKUnVuIHN0YXR1cyBncm91cCAwIChhbGwgam9icyk6IApXUklURTogaW89NDQ0Mzc2S0IsIGFn
+Z3JiPTYyODBLQi9zLCBtaW5iPTYyODBLQi9zLCBtYXhiPTYyODBLQi9zLCAKbWludD03MDc1OW1z
+ZWMsIG1heHQ9NzA3NTltc2VjIAoKRGlzayBzdGF0cyAocmVhZC93cml0ZSk6IApzZGI6IGlvcz0w
+LzE1OTM2LCBtZXJnZT0wLzI3MiwgdGlja3M9MC8xNzE1NywgaW5fcXVldWU9MTcxNDYsIHV0aWw9
+MC45NCUgCgoKSXQncyBqdXN0IGEgc2ltcGxlIHRlc3QsIG1heWJlIGV4aXN0IHNvbWUgbWlzbGVh
+ZGluZ3Mgb24gdGhlIGNvbmZpZyBvciAKcmVzdWx0cy4gQnV0IAp3ZSBjYW4gb2J2aW91c2x5IHNl
+ZSB0aGUgY29uc3BpY3VvdXMgaW1wcm92ZW1lbnQgZm9yIEtleVZhbHVlU3RvcmUuIAoKSW4gdGhl
+IG5lYXIgZnV0dXJlLCBwZXJmb3JtYW5jZSBzdGlsbCB3aWxsIGJlIHRoZSBmaXJzdCB0aGluZyB0
+byAKaW1wcm92ZSBlc3BlY2lhbGx5IGF0IHdyaXRlIG9wZXJhdGlvbihUaGUgZ29hbCBvZiBLZXlW
+YWx1ZVN0b3JlIGlzIApwcm92aWRlZCB3aXRoIHBvd2VyZnVsIHdyaXRlIHBlcmZvcm1hbmNlIGNv
+bXBhcmVkIHRvIEZpbGVTdG9yZSksIHN1Y2ggCmFzIAoxLiBGaW5lLWdyYWluZWQgbG9jayBpbiBv
+YmplY3QtbGV2ZWwgdG8gaW1wcm92ZSB0aGUgZGVncmVlIG9mIApwYXJhbGxlbGlzbSwgYmVjYXVz
+ZSBLZXlWYWx1ZVN0b3JlIGRvZXNuJ3QgaGF2ZSBKb3VybmFsIHRvIHF1aWNrIHRoZSAKbGF0ZW5j
+eSBvZiB3cml0ZSB0cmFuc2FjdGlvbiwgd2UgbmVlZCB0byBhdm9pZCBibG9jayBhcyBmYXIgYXMg
+CnBvc3NpYmxlLiAKMi4gSGVhZGVyIGNhY2hlKGxpa2UgaW5vZGUgaW4gZmlsZXN5c3RlbSkgdG8g
+cXVpY2sgcmVhZC4gCjMuIG1vcmUgdGVzdHMgCgpUaGVuIG5ldyBiYWNrZW5kIHdpbGwgYmUgYWRk
+ZWQgbGlrZSByb2Nrc2RiIG9yIG90aGVycy4gSSdkIGxpa2UgdG8gc2VlIApwZXJmb3JtYW5jZSBp
+bXByb3ZlbWVudHMgZnJvbSBvdGhlciBiYWNrZW5kLiAKCi0tIApCZXN0IFJlZ2FyZHMsIAoKV2hl
+YXQgCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fIApjZXBo
+LXVzZXJzIG1haWxpbmcgbGlzdCAKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbSAKaHR0cDovL2xp
+c3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tIApfX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcg
+bGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0
+aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
