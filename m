@@ -1,78 +1,140 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: firefly branches
-Date: Thu, 27 Feb 2014 13:51:20 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1402271350570.17508@cobra.newdream.net>
-References: <alpine.DEB.2.00.1402211141100.17322@cobra.newdream.net> <530F915F.2010608@bisect.de>
+From: Haomai Wang <haomaiwang-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: [Annonce]The progress of KeyValueStore in Firely
+Date: Fri, 28 Feb 2014 10:45:01 +0800
+Message-ID: <CACJqLybuA48Jnz6Qwc7cs2kHJO30C4GwazXi8yGp8ZhvfFc2ZQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:40920 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751596AbaB0VvV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Feb 2014 16:51:21 -0500
-In-Reply-To: <530F915F.2010608@bisect.de>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Thu, 27 Feb 2014, Danny Al-Gaaf wrote:
-> Hi Sage,
-> 
-> since firefly is frozen and the task is now to focus on stabilization:
-> how do you plan to handle it on the coverity side?
-> 
-> Is Coverity able use the firefly branch instead of master to get
-> everything checked on regular bases for the next stable release?
-> 
-> The last Coverity check was Jan 22, 2014
+Hi all,
 
-I'll run it on firefly right now.  I'm not sure why my cron hasn't been 
-working; will poke that too.
+last release I propose a KeyValueStore prototype(get info from
+http://sebastien-han.fr/blog/2013/12/02/ceph-performance-interesting-things-going-on).
+It contains some performance results and problems. Now I'd like to
+refresh our thoughts on KeyValueStore.
 
-Thanks!
-sage
+KeyValueStore is pursuing FileStore's performance during this release.
+Now things go farther, KeyValueStore did better in rbd
+situation(partial write) .
+
+I test KeyValueStore compared to FileStore in a single OSD on Samsung
+SSD 840. The config can be viewed
+here(http://pad.ceph.com/p/KeyValueStore.conf). The same config file
+is applied to both FileStore and KeyValueStore except "osd
+objectstore" option.
+
+I use fio which rbd supported from
+TelekomCloud(https://github.com/TelekomCloud/fio/commits/rbd-engine)
+to test rbd.
+
+The fio command: fio -direct=1 -iodepth=64 -thread -rw=randwrite
+-ioengine=rbd -bs=4k -size=19G -numjobs=1 -runtime=100
+-group_reporting -name=ebs_test -pool=openstack -rbdname=image
+-clientname=fio -invalidate=0
+
+============================================
+
+FileStore result:
+ebs_test: (g=0): rw=randwrite, bs=4K-4K/4K-4K/4K-4K, ioengine=rbd, iodepth=64
+fio-2.1.4
+Starting 1 thread
+rbd engine: RBD version: 0.1.8
+
+ebs_test: (groupid=0, jobs=1): err= 0: pid=30886: Thu Feb 27 08:09:18 2014
+  write: io=283040KB, bw=6403.4KB/s, iops=1600, runt= 44202msec
+    slat (usec): min=116, max=2817, avg=195.78, stdev=56.45
+    clat (msec): min=8, max=661, avg=39.57, stdev=29.26
+     lat (msec): min=9, max=661, avg=39.77, stdev=29.25
+    clat percentiles (msec):
+     |  1.00th=[   15],  5.00th=[   20], 10.00th=[   23], 20.00th=[   28],
+     | 30.00th=[   31], 40.00th=[   35], 50.00th=[   37], 60.00th=[   40],
+     | 70.00th=[   43], 80.00th=[   46], 90.00th=[   51], 95.00th=[   58],
+     | 99.00th=[  128], 99.50th=[  210], 99.90th=[  457], 99.95th=[  494],
+     | 99.99th=[  545]
+    bw (KB  /s): min= 2120, max=12656, per=100.00%, avg=6464.27, stdev=1726.55
+    lat (msec) : 10=0.01%, 20=5.91%, 50=83.35%, 100=8.88%, 250=1.47%
+    lat (msec) : 500=0.34%, 750=0.05%
+  cpu          : usr=29.83%, sys=1.36%, ctx=84002, majf=0, minf=216
+  IO depths    : 1=0.1%, 2=0.1%, 4=0.1%, 8=0.1%, 16=0.1%, 32=17.4%, >=64=82.6%
+     submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+     complete  : 0=0.0%, 4=99.1%, 8=0.5%, 16=0.3%, 32=0.1%, 64=0.1%, >=64=0.0%
+     issued    : total=r=0/w=70760/d=0, short=r=0/w=0/d=0
+     latency   : target=0, window=0, percentile=100.00%, depth=64
+
+Run status group 0 (all jobs):
+  WRITE: io=283040KB, aggrb=6403KB/s, minb=6403KB/s, maxb=6403KB/s,
+mint=44202msec, maxt=44202msec
+
+Disk stats (read/write):
+  sdb: ios=5/9512, merge=0/69, ticks=4/10649, in_queue=10645, util=0.92%
+
+===============================================
+
+KeyValueStore:
+ebs_test: (g=0): rw=randwrite, bs=4K-4K/4K-4K/4K-4K, ioengine=rbd, iodepth=64
+fio-2.1.4
+Starting 1 thread
+rbd engine: RBD version: 0.1.8
+
+ebs_test: (groupid=0, jobs=1): err= 0: pid=29137: Thu Feb 27 08:06:30 2014
+  write: io=444376KB, bw=6280.2KB/s, iops=1570, runt= 70759msec
+    slat (usec): min=122, max=3237, avg=184.51, stdev=37.76
+    clat (msec): min=10, max=168, avg=40.57, stdev= 5.70
+     lat (msec): min=11, max=168, avg=40.75, stdev= 5.71
+    clat percentiles (msec):
+     |  1.00th=[   34],  5.00th=[   37], 10.00th=[   39], 20.00th=[   39],
+     | 30.00th=[   40], 40.00th=[   40], 50.00th=[   41], 60.00th=[   41],
+     | 70.00th=[   42], 80.00th=[   42], 90.00th=[   44], 95.00th=[   45],
+     | 99.00th=[   48], 99.50th=[   50], 99.90th=[  163], 99.95th=[  167],
+     | 99.99th=[  167]
+    bw (KB  /s): min= 4590, max= 7480, per=100.00%, avg=6285.69, stdev=374.22
+    lat (msec) : 20=0.02%, 50=99.58%, 100=0.23%, 250=0.17%
+  cpu          : usr=29.11%, sys=1.10%, ctx=118564, majf=0, minf=194
+  IO depths    : 1=0.1%, 2=0.1%, 4=0.1%, 8=0.1%, 16=0.1%, 32=0.7%, >=64=99.3%
+     submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+     complete  : 0=0.0%, 4=100.0%, 8=0.1%, 16=0.1%, 32=0.0%, 64=0.1%, >=64=0.0%
+     issued    : total=r=0/w=111094/d=0, short=r=0/w=0/d=0
+     latency   : target=0, window=0, percentile=100.00%, depth=64
+
+Run status group 0 (all jobs):
+  WRITE: io=444376KB, aggrb=6280KB/s, minb=6280KB/s, maxb=6280KB/s,
+mint=70759msec, maxt=70759msec
+
+Disk stats (read/write):
+  sdb: ios=0/15936, merge=0/272, ticks=0/17157, in_queue=17146, util=0.94%
 
 
-> 
-> Danny
-> 
-> Am 21.02.2014 20:46, schrieb Sage Weil:
-> > Now that firefly is frozen, we're going to keep things interesting and 
-> > do things slight different that we did for emperor.  It's closer to what 
-> > we normally do, though, so hopefully this will be simpler.
-> > 
-> >  master == new stuff for post-firefly v0.79.  this shouldn't see much new 
-> >    code since we're focusing on stabilization right now.
-> > 
-> >  next == <deleted>.  use firefly instead.
-> > 
-> >  firefly == what will become firefly 0.78.  this is the branch the nightly 
-> >    qa is focusing on.
-> > 
-> > Periodically we can merge firefly back into master (as we normally do with 
-> > next), but this isn't particularly important since the all QA is running 
-> > against firefly.
-> > 
-> > There are now firefly branches in teuthology.git and ceph-qa-suites.git to 
-> > match.
-> > 
-> > In the past we had both next and the stable-release-to-be branch but it 
-> > was awkward to keep them in sync.  This avoid that ambiguity by just 
-> > having one branch and calling it firefly to make it crystal clear to 
-> > everyone what is what.
-> > 
-> > That's all!
-> > sage
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+It's just a simple test, maybe exist some misleadings on the config or
+results. But
+we can obviously see the conspicuous improvement for KeyValueStore.
+
+In the near future, performance still will be the first thing to
+improve especially at write operation(The goal of KeyValueStore is
+provided with powerful write performance compared to FileStore), such
+as
+1. Fine-grained lock in object-level to improve the degree of
+parallelism, because KeyValueStore doesn't have Journal to quick the
+latency of write transaction, we need to avoid block as far as
+possible.
+2. Header cache(like inode in filesystem) to quick read.
+3. more tests
+
+Then new backend will be added like rocksdb or others. I'd like to see
+performance improvements from other backend.
+
+-- 
+Best Regards,
+
+Wheat
