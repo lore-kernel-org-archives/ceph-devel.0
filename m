@@ -1,72 +1,81 @@
-From: Alex Elder <elder@ieee.org>
-Subject: Re: [PATCH] ceph: fix reset_readdir()
-Date: Fri, 28 Feb 2014 08:07:29 -0600
-Message-ID: <53109821.50501@ieee.org>
-References: <1393578791-19917-1-git-send-email-zheng.z.yan@intel.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: cache pool user interfaces
+Date: Fri, 28 Feb 2014 07:21:25 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1402280711240.17508@cobra.newdream.net>
+References: <CAPYLRziGSJAjf3CvvOAy8euAr-0vCzM3GX8K6D_z214w-Nu4aw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f177.google.com ([209.85.223.177]:60724 "EHLO
-	mail-ie0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751723AbaB1OHW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 28 Feb 2014 09:07:22 -0500
-Received: by mail-ie0-f177.google.com with SMTP id rl12so3385371iec.22
-        for <ceph-devel@vger.kernel.org>; Fri, 28 Feb 2014 06:07:22 -0800 (PST)
-In-Reply-To: <1393578791-19917-1-git-send-email-zheng.z.yan@intel.com>
+Received: from cobra.newdream.net ([66.33.216.30]:50825 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751956AbaB1PV0 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 28 Feb 2014 10:21:26 -0500
+In-Reply-To: <CAPYLRziGSJAjf3CvvOAy8euAr-0vCzM3GX8K6D_z214w-Nu4aw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zheng.z.yan@intel.com>, ceph-devel@vger.kernel.org
+To: Gregory Farnum <greg@inktank.com>
+Cc: Neil Levine <neil.levine@inktank.com>, ceph-devel@vger.kernel.org
 
-On 02/28/2014 03:13 AM, Yan, Zheng wrote:
-> When changing readdir postion, fi->next_offset should be set to 0
-> if the new postion is not in the first dirfrag.
+On Wed, 26 Feb 2014, Gregory Farnum wrote:
+> We/you/somebody need(s) to sit down and decide on what kind of
+> interface we want to actually expose to users for working with caching
+> pools. What we have right now is very flexible, but it's hard to test
+> all the combinations and it's easy for users to get themselves into
+> trouble.
+> I know we've in the past discussed making all the configuration
+> options into a single "create cache pool" command that accepts
+> whatever we're interested in, and I think that's the model we want to
+> go towards right now. But we're running out of time to make that
+> change given the release deadline and the documentation that needs to
+> be generated (eg http://tracker.ceph.com/issues/7547).
 
-Again, looks like this would have been a problem if any
-fragment other than the first was being seeked to.
+Right now the sequence is:
 
-Looks good to me.
+       ceph osd pool create cache $num_pgs
+       ceph osd tier add base cache
+       ceph osd tier cache-mode cache writeback
+       ceph osd tier set-overlay base cache
+       ceph osd pool set cache hit_set_type bloom
+       ceph osd pool set cache hit_set_count 8
+       ceph osd pool set cache hit_set_period 60
+       ceph osd pool set cache target_max_objects 5000
 
-Reviewed-by: Alex Elder <elder@linaro.org>
+(modulo some sane defaults, and the target size)
 
-> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
-> ---
->  fs/ceph/dir.c | 9 ++++++---
->  1 file changed, 6 insertions(+), 3 deletions(-)
-> 
-> diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-> index a7eaf96..8ce8833 100644
-> --- a/fs/ceph/dir.c
-> +++ b/fs/ceph/dir.c
-> @@ -454,7 +454,7 @@ more:
->  	return 0;
->  }
->  
-> -static void reset_readdir(struct ceph_file_info *fi)
-> +static void reset_readdir(struct ceph_file_info *fi, unsigned frag)
->  {
->  	if (fi->last_readdir) {
->  		ceph_mdsc_put_request(fi->last_readdir);
-> @@ -462,7 +462,10 @@ static void reset_readdir(struct ceph_file_info *fi)
->  	}
->  	kfree(fi->last_name);
->  	fi->last_name = NULL;
-> -	fi->next_offset = 2;  /* compensate for . and .. */
-> +	if (ceph_frag_is_leftmost(frag))
-> +		fi->next_offset = 2;  /* compensate for . and .. */
-> +	else
-> +		fi->next_offset = 0;
->  	if (fi->dentry) {
->  		dput(fi->dentry);
->  		fi->dentry = NULL;
-> @@ -507,7 +510,7 @@ static loff_t ceph_dir_llseek(struct file *file, loff_t offset, int whence)
->  		    fpos_frag(offset) != fi->frag ||
->  		    fpos_off(offset) < fi->offset) {
->  			dout("dir_llseek dropping %p content\n", file);
-> -			reset_readdir(fi);
-> +			reset_readdir(fi, fpos_frag(offset));
->  		}
->  
->  		/* bump dir_release_count if we did a forward seek */
-> 
+I mostly like the flexibility this presents and don't forsee any major 
+problems, but nevertheless I agree that a friendly interface is safer to 
+advertise and, well, friendlier.  How about:
+
+       ceph osd pool create cache $num_pgs
+
+(I think think this should be a separate step since users will want/need 
+to adjust the crush rule and so forth to put this on the right devices 
+*before* it gets set as an overlay and gets hammered by the existing 
+pool's workload.)  Then
+
+       ceph osd tier add-cache base cache
+
+which would do the other 3 tier steps and set some sane hit_set defaults.
+What do you think?
+
+Separately:
+
+1- I'm not sure what the default target size should be set to; maybe a 
+default of 10000 objects or something?  I think it should be *something*.
+
+2- I think we need to bite the bullet and make a 'ceph df' function that 
+figures out how much space is available on a per-pool basis.  It would:
+ - figure out which osds are toched by the rules for each pool, and
+ - sum up only those osds' usages
+ - divide by the replication factor or EC storage overhead
+If there target_max_* values aren't set for the pool, this could be used 
+instead, by periodically filling in a pg_pool_t approximate_capacity type 
+field.  Of course, for multiple pools this is double counting free space, 
+but for the purposes of the cache agent it is still perfectly usable as a 
+target for controlling when the agent kicks into gear.  It would also be 
+very nice for users.  (Hmm, perhaps I should write this up in a 
+blueprint!)
+
+sage
+
 
