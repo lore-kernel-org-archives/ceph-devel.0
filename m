@@ -1,104 +1,270 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Erasure Code Alpha Testing
-Date: Sat, 01 Mar 2014 14:01:05 +0100
-Message-ID: <5311DA11.7020900@dachary.org>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="1scpgx8lTvEpPTGNt14FhWrRX6fLgi46M"
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: [PATCH 1/4] ceph: simply ceph_fh_to_dentry()
+Date: Sat,  1 Mar 2014 23:23:28 +0800
+Message-ID: <1393687411-2457-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:57617 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752401AbaCANBJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 1 Mar 2014 08:01:09 -0500
-Received: from [10.9.0.6] (openvpn.novalocal [10.145.3.13])
-	by smtp.dmail.dachary.org (Postfix) with ESMTPS id 6473C26394
-	for <ceph-devel@vger.kernel.org>; Sat,  1 Mar 2014 14:01:07 +0100 (CET)
+Received: from mga03.intel.com ([143.182.124.21]:8582 "EHLO mga03.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752871AbaCAPYE (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sat, 1 Mar 2014 10:24:04 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---1scpgx8lTvEpPTGNt14FhWrRX6fLgi46M
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+MDS handles LOOKUPHASH and LOOKUPINO MDS requests in the same way.
+So __cfh_to_dentry() is redundant.
 
-Hi Ceph,
+Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+---
+ fs/ceph/export.c | 167 +++++++++++--------------------------------------------
+ 1 file changed, 32 insertions(+), 135 deletions(-)
 
-The code implementing Erasure Code in Ceph has been merged in Firefly[1] =
-and is being tested. The unit tests are run at compile time with make che=
-ck. The integration tests are run by teuthology [2], the Q&A tool dedicat=
-ed to Ceph. A few workloads have been added for erasure code [3] and thei=
-r success/failure can be observed daily from the pulpito [4] dashboard [5=
-].=20
+diff --git a/fs/ceph/export.c b/fs/ceph/export.c
+index 16796be..905d7f2 100644
+--- a/fs/ceph/export.c
++++ b/fs/ceph/export.c
+@@ -8,23 +8,6 @@
+ #include "mds_client.h"
+ 
+ /*
+- * NFS export support
+- *
+- * NFS re-export of a ceph mount is, at present, only semireliable.
+- * The basic issue is that the Ceph architectures doesn't lend itself
+- * well to generating filehandles that will remain valid forever.
+- *
+- * So, we do our best.  If you're lucky, your inode will be in the
+- * client's cache.  If it's not, and you have a connectable fh, then
+- * the MDS server may be able to find it for you.  Otherwise, you get
+- * ESTALE.
+- *
+- * There are ways to this more reliable, but in the non-connectable fh
+- * case, we won't every work perfectly, and in the connectable case,
+- * some changes are needed on the MDS side to work better.
+- */
+-
+-/*
+  * Basic fh
+  */
+ struct ceph_nfs_fh {
+@@ -32,22 +15,12 @@ struct ceph_nfs_fh {
+ } __attribute__ ((packed));
+ 
+ /*
+- * Larger 'connectable' fh that includes parent ino and name hash.
+- * Use this whenever possible, as it works more reliably.
++ * Larger fh that includes parent ino.
+  */
+ struct ceph_nfs_confh {
+ 	u64 ino, parent_ino;
+-	u32 parent_name_hash;
+ } __attribute__ ((packed));
+ 
+-/*
+- * The presence of @parent_inode here tells us whether NFS wants a
+- * connectable file handle.  However, we want to make a connectionable
+- * file handle unconditionally so that the MDS gets as much of a hint
+- * as possible.  That means we only use @parent_dentry to indicate
+- * whether nfsd wants a connectable fh, and whether we should indicate
+- * failure from a too-small @max_len.
+- */
+ static int ceph_encode_fh(struct inode *inode, u32 *rawfh, int *max_len,
+ 			  struct inode *parent_inode)
+ {
+@@ -56,54 +29,36 @@ static int ceph_encode_fh(struct inode *inode, u32 *rawfh, int *max_len,
+ 	struct ceph_nfs_confh *cfh = (void *)rawfh;
+ 	int connected_handle_length = sizeof(*cfh)/4;
+ 	int handle_length = sizeof(*fh)/4;
+-	struct dentry *dentry;
+-	struct dentry *parent;
+ 
+ 	/* don't re-export snaps */
+ 	if (ceph_snap(inode) != CEPH_NOSNAP)
+ 		return -EINVAL;
+ 
+-	dentry = d_find_alias(inode);
++	if (parent_inode && (*max_len < connected_handle_length)) {
++		*max_len = connected_handle_length;
++		return FILEID_INVALID;
++	} else if (*max_len < handle_length) {
++		*max_len = handle_length;
++		return FILEID_INVALID;
++	}
+ 
+-	/* if we found an alias, generate a connectable fh */
+-	if (*max_len >= connected_handle_length && dentry) {
+-		dout("encode_fh %p connectable\n", dentry);
+-		spin_lock(&dentry->d_lock);
+-		parent = dentry->d_parent;
++	if (parent_inode) {
++		dout("encode_fh %llx with parent %llx\n",
++		     ceph_ino(inode), ceph_ino(parent_inode));
+ 		cfh->ino = ceph_ino(inode);
+-		cfh->parent_ino = ceph_ino(parent->d_inode);
+-		cfh->parent_name_hash = ceph_dentry_hash(parent->d_inode,
+-							 dentry);
++		cfh->parent_ino = ceph_ino(parent_inode);
+ 		*max_len = connected_handle_length;
+-		type = 2;
+-		spin_unlock(&dentry->d_lock);
+-	} else if (*max_len >= handle_length) {
+-		if (parent_inode) {
+-			/* nfsd wants connectable */
+-			*max_len = connected_handle_length;
+-			type = FILEID_INVALID;
+-		} else {
+-			dout("encode_fh %p\n", dentry);
+-			fh->ino = ceph_ino(inode);
+-			*max_len = handle_length;
+-			type = 1;
+-		}
++		type = FILEID_INO32_GEN_PARENT;
+ 	} else {
++		dout("encode_fh %llx\n", ceph_ino(inode));
++		fh->ino = ceph_ino(inode);
+ 		*max_len = handle_length;
+-		type = FILEID_INVALID;
++		type = FILEID_INO32_GEN;
+ 	}
+-	if (dentry)
+-		dput(dentry);
+ 	return type;
+ }
+ 
+-/*
+- * convert regular fh to dentry
+- *
+- * FIXME: we should try harder by querying the mds for the ino.
+- */
+-static struct dentry *__fh_to_dentry(struct super_block *sb,
+-				     struct ceph_nfs_fh *fh, int fh_len)
++static struct dentry *__fh_to_dentry(struct super_block *sb, u64 ino)
+ {
+ 	struct ceph_mds_client *mdsc = ceph_sb_to_client(sb)->mdsc;
+ 	struct inode *inode;
+@@ -111,16 +66,12 @@ static struct dentry *__fh_to_dentry(struct super_block *sb,
+ 	struct ceph_vino vino;
+ 	int err;
+ 
+-	if (fh_len < sizeof(*fh) / 4)
+-		return ERR_PTR(-ESTALE);
+-
+-	dout("__fh_to_dentry %llx\n", fh->ino);
+-	vino.ino = fh->ino;
++	dout("__fh_to_dentry %llx\n", ino);
++	vino.ino = ino;
+ 	vino.snap = CEPH_NOSNAP;
+ 	inode = ceph_find_inode(sb, vino);
+ 	if (!inode) {
+ 		struct ceph_mds_request *req;
+-
+ 		req = ceph_mdsc_create_request(mdsc, CEPH_MDS_OP_LOOKUPINO,
+ 					       USE_ANY_MDS);
+ 		if (IS_ERR(req))
+@@ -139,89 +90,35 @@ static struct dentry *__fh_to_dentry(struct super_block *sb,
+ 
+ 	dentry = d_obtain_alias(inode);
+ 	if (IS_ERR(dentry)) {
+-		pr_err("fh_to_dentry %llx -- inode %p but ENOMEM\n",
+-		       fh->ino, inode);
+ 		iput(inode);
+ 		return dentry;
+ 	}
+ 	err = ceph_init_dentry(dentry);
+ 	if (err < 0) {
+-		iput(inode);
++		dput(dentry);
+ 		return ERR_PTR(err);
+ 	}
+-	dout("__fh_to_dentry %llx %p dentry %p\n", fh->ino, inode, dentry);
++	dout("__fh_to_dentry %llx %p dentry %p\n", ino, inode, dentry);
+ 	return dentry;
+ }
+ 
+ /*
+- * convert connectable fh to dentry
++ * convert regular fh to dentry
+  */
+-static struct dentry *__cfh_to_dentry(struct super_block *sb,
+-				      struct ceph_nfs_confh *cfh, int fh_len)
++static struct dentry *ceph_fh_to_dentry(struct super_block *sb,
++					struct fid *fid,
++					int fh_len, int fh_type)
+ {
+-	struct ceph_mds_client *mdsc = ceph_sb_to_client(sb)->mdsc;
+-	struct inode *inode;
+-	struct dentry *dentry;
+-	struct ceph_vino vino;
+-	int err;
++	struct ceph_nfs_fh *fh = (void *)fid->raw;
+ 
+-	if (fh_len < sizeof(*cfh) / 4)
++	if (fh_type != FILEID_INO32_GEN  &&
++	    fh_type != FILEID_INO32_GEN_PARENT)
++		return ERR_PTR(-ESTALE);
++	if (fh_len < sizeof(*fh) / 4)
+ 		return ERR_PTR(-ESTALE);
+ 
+-	dout("__cfh_to_dentry %llx (%llx/%x)\n",
+-	     cfh->ino, cfh->parent_ino, cfh->parent_name_hash);
+-
+-	vino.ino = cfh->ino;
+-	vino.snap = CEPH_NOSNAP;
+-	inode = ceph_find_inode(sb, vino);
+-	if (!inode) {
+-		struct ceph_mds_request *req;
+-
+-		req = ceph_mdsc_create_request(mdsc, CEPH_MDS_OP_LOOKUPHASH,
+-					       USE_ANY_MDS);
+-		if (IS_ERR(req))
+-			return ERR_CAST(req);
+-
+-		req->r_ino1 = vino;
+-		req->r_ino2.ino = cfh->parent_ino;
+-		req->r_ino2.snap = CEPH_NOSNAP;
+-		req->r_path2 = kmalloc(16, GFP_NOFS);
+-		snprintf(req->r_path2, 16, "%d", cfh->parent_name_hash);
+-		req->r_num_caps = 1;
+-		err = ceph_mdsc_do_request(mdsc, NULL, req);
+-		inode = req->r_target_inode;
+-		if (inode)
+-			ihold(inode);
+-		ceph_mdsc_put_request(req);
+-		if (!inode)
+-			return ERR_PTR(err ? err : -ESTALE);
+-	}
+-
+-	dentry = d_obtain_alias(inode);
+-	if (IS_ERR(dentry)) {
+-		pr_err("cfh_to_dentry %llx -- inode %p but ENOMEM\n",
+-		       cfh->ino, inode);
+-		iput(inode);
+-		return dentry;
+-	}
+-	err = ceph_init_dentry(dentry);
+-	if (err < 0) {
+-		iput(inode);
+-		return ERR_PTR(err);
+-	}
+-	dout("__cfh_to_dentry %llx %p dentry %p\n", cfh->ino, inode, dentry);
+-	return dentry;
+-}
+-
+-static struct dentry *ceph_fh_to_dentry(struct super_block *sb, struct fid *fid,
+-					int fh_len, int fh_type)
+-{
+-	if (fh_type == 1)
+-		return __fh_to_dentry(sb, (struct ceph_nfs_fh *)fid->raw,
+-								fh_len);
+-	else
+-		return __cfh_to_dentry(sb, (struct ceph_nfs_confh *)fid->raw,
+-								fh_len);
++	pr_debug("fh_to_dentry %llx\n", fh->ino);
++	return __fh_to_dentry(sb, fh->ino);
+ }
+ 
+ /*
+-- 
+1.8.5.3
 
-Seven organizations volunteered to alpha test erasure code a few months a=
-go and were encouraged to run teuthology locally. Combined with manual te=
-sting, teuthology is a convenient way to encode a use case and explain th=
-e steps to reproduce a problem. I will make myself available to help inst=
-all teuthlology. If you want to participate, feel free to send me an emai=
-l or ping me on irc.oftc.net#ceph-devel nick loicd
-
-There are many ways to contribute to stabilize erasure code before Firefl=
-y is released:
-
-* Run the rados [6] teuthlogy [2] Q&A suite [7] locally=20
-
-* Try manually after compiling Firefly [1] from sources [8]
-
-  rm -fr dev out ;  mkdir -p dev ; LC_ALL=3DC MON=3D1 OSD=3D10 bash -x ./=
-vstart.sh -d -n -X -l mon osd
-  ./ceph osd crush rule create-erasure ecruleset erasure-code-k=3D2 erasu=
-re-code-m=3D1 erasure-code-ruleset-failure-domain=3Dosd
-  ./ceph osd pool create ecpool 12 12 erasure crush_ruleset=3Decruleset e=
-rasure-code-k=3D2 erasure-code-m=3D1
-
-  the pool ecpool is erasure coded and ready to be used manually.
-
-* Diagnose problems found by the daily teuthology runs from Intank [2]
-
-* Proofread the Firefly code [1]
-
-* Report bugs [9]
-
-* Fix unassigned erasure code bugs from the queue [10] and send a pull re=
-quest [11]
-
-Cheers
-
-[1] Firefly branch https://github.com/ceph/ceph/tree/firefly
-[2] Teuthology Q&A tool https://github.com/ceph/teuthology/
-[3] ec-* workloads https://github.com/ceph/ceph-qa-suite/tree/master/suit=
-es/rados/thrash/workloads
-[4] Pulpito, the Teuthology dashboard https://github.com/ceph/pulpito
-[5] Firefly rados suite results http://pulpito.ceph.com/?branch=3Dfirefly=
-&suite=3Drados
-[6] Rados suite https://github.com/ceph/ceph-qa-suite/tree/master/suites/=
-rados
-[7] Teuthology Q&A suite https://github.com/ceph/ceph-qa-suite/
-[8] Building from sources http://ceph.com/docs/master/install/build-ceph/=
-
-[9] Bug tracker http://tracker.ceph.com/projects/ceph/issues/new
-[10] "erasure code" or "ec" in the subject http://tracker.ceph.com/projec=
-ts/ceph/issues?query_id=3D47
-[11] Ceph pull requests https://github.com/ceph/ceph/pulls
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-
-
---1scpgx8lTvEpPTGNt14FhWrRX6fLgi46M
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.20 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlMR2hEACgkQ8dLMyEl6F22ShgCgtEQ9PRmnBJURSNYf8G5e26o3
-P5QAnj1W0OuOEHDYpzEYskQIEGwqApdB
-=63Im
------END PGP SIGNATURE-----
-
---1scpgx8lTvEpPTGNt14FhWrRX6fLgi46M--
