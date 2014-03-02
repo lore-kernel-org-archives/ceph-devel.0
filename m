@@ -1,68 +1,42 @@
-From: xiao xiaoxia <xianxiaxiao@ubuntukylin.com>
-Subject: Re: location-aware file placement in Ceph
-Date: Sun, 02 Mar 2014 14:00:48 +0800
-Message-ID: <5312C910.60709@ubuntukylin.com>
-References: <530F3CAC.2040504@gmail.com>
+From: Noah Watkins <noah.watkins@inktank.com>
+Subject: librados::ObjectIterator segfault
+Date: Sun, 2 Mar 2014 10:38:25 -0800
+Message-ID: <CA+Hcz58=sbXMpKAGZGvkmZXGFBFbP1FyST2UJ4RM9yex1bM-3Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from m59-178.qiye.163.com ([123.58.178.59]:60956 "EHLO
-	m59-178.qiye.163.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750711AbaCBGAx (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 2 Mar 2014 01:00:53 -0500
-In-Reply-To: <530F3CAC.2040504@gmail.com>
+Received: from mail-qc0-f181.google.com ([209.85.216.181]:65097 "EHLO
+	mail-qc0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750878AbaCBSi0 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 2 Mar 2014 13:38:26 -0500
+Received: by mail-qc0-f181.google.com with SMTP id c9so2929838qcz.12
+        for <ceph-devel@vger.kernel.org>; Sun, 02 Mar 2014 10:38:25 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Zhongliang Zhao <zhaozhongliang@gmail.com>
-Cc: ceph-devel@vger.kernel.org, liwang@ubuntukylin.com
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
+This is a segfault occuring in the latest master listing objects with
+`rados -p data ls`
 
-May be able to meet your needs through rbd.
+Full trace: http://pastebin.com/3JG9cX0Z
 
-You can create multiple rules,and then specify a different pool to use =
-a=20
-different ruleset.
-Then create multiple block images, and Specify image to different pools=
-=2E
-create file system on the block device and mount file system on=20
-different positions,so that the different location of the file can use=20
-different ruleset
-
-Cheers, xianxia xiao
-
--------
-ubuntukylin
-
-
-
-
-=E4=BA=8E 2014/2/27 21:25, Zhongliang Zhao =E5=86=99=E9=81=93:
-> Dear all,
->
-> As new to ceph, may I ask in the crush algorithm, is there a way to=20
-> configure where the file to be stored, not randomly.
-> My requirement is to place the files that within the same=20
-> location(within a geographic area), into the same OSD, instead of=20
-> randomly placing them seperately.
->
-> I guess crush may support this. But to do this, I just have to=20
-> configure some parameters in some ceph commands? or I have to modify=20
-> the ceph crush algorithm and re-compile ceph?
->
-> Many thanks for any helpful pointers.
->
-> Cheers, Giovanni
-> --=20
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at http://vger.kernel.org/majordomo-info.html
->
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+nwatkins@kyoto:~/ceph2/src$ CEPH_CONF=ceph.conf ./rados lspools
+data
+metadata
+rbd
+nwatkins@kyoto:~/ceph2/src$ CEPH_CONF=ceph.conf ./rados -p data ls
+*** Caught signal (Segmentation fault) **
+ in thread 7f84f02ce7c0
+ ceph version 0.77-620-gf3976c1 (f3976c16531096b9979842fc4445d40d6e889932)
+ 1: /home/nwatkins/ceph2/src/.libs/lt-rados() [0x43e2df]
+ 2: (()+0xfbb0) [0x7f84eef6bbb0]
+ 3: (librados::ObjectIterator::operator=(librados::ObjectIterator
+const&)+0x27) [0x7f84ef31f807]
+ 4: (librados::ObjectIterator::ObjectIterator(librados::ObjectIterator
+const&)+0x30) [0x7f84ef31fb10]
+ 5: (main()+0x1bff) [0x41274f]
+ 6: (__libc_start_main()+0xf5) [0x7f84ee193de5]
+ 7: /home/nwatkins/ceph2/src/.libs/lt-rados() [0x41b967]
+2014-03-02 10:35:57.471206 7f84f02ce7c0 -1 *** Caught signal
+(Segmentation fault) **
+ in thread 7f84f02ce7c0
