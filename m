@@ -1,40 +1,67 @@
-From: "Shu, Xinxin" <xinxin.shu@intel.com>
-Subject: [RFC] add rocksdb support
-Date: Mon, 3 Mar 2014 02:07:18 +0000
-Message-ID: <75674D092A819E4189E91166C74CB90D0131CB27@SHSMSX104.ccr.corp.intel.com>
+From: Ian Colle <ian.colle@inktank.com>
+Subject: Re: Ceph Ansible Repo
+Date: Sun, 02 Mar 2014 19:59:47 -0700
+Message-ID: <CF393D9A.26D01%ian.colle@inktank.com>
+References: <FA727FEF-D416-4D0E-810F-72C72E184DC1@enovance.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:10276 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752263AbaCCCJ3 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 2 Mar 2014 21:09:29 -0500
-Content-Language: en-US
+Received: from mail-ig0-f176.google.com ([209.85.213.176]:40418 "EHLO
+	mail-ig0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751883AbaCCC7s convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 2 Mar 2014 21:59:48 -0500
+Received: by mail-ig0-f176.google.com with SMTP id uy17so6618689igb.3
+        for <ceph-devel@vger.kernel.org>; Sun, 02 Mar 2014 18:59:48 -0800 (PST)
+In-Reply-To: <FA727FEF-D416-4D0E-810F-72C72E184DC1@enovance.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sebastien Han <sebastien.han@enovance.com>, ceph-devel@vger.kernel.org
+Cc: Weil Sage <sage@inktank.com>, Patrick McGarry <patrick@inktank.com>
 
-Hi all, 
-  
-This patch added rocksdb support for ceph, enabled rocksdb for omap directory.   Rocksdb source code can be get from link. To use use rocksdb, C++11 standard should be enabled, gcc version >= 4.7 is required to get C++11 support. Rocksdb can be installed with instructions described in the INSTALL.md file,  and  rocksdb header files (include/rocksdb/*) and library (librocksdb.so*) need to be copied to corresponding directories.
-To enable rocksdb, add "--with-librocksdb" option to configure. The rocksdb branch is here(https://github.com/xinxinsh/ceph/tree/rocksdb).
+Sebastien,
+
+Have you seen https://github.com/alfredodeza/ceph-ansible ?
+
+Ian R. Colle
+Director of Engineering
+Inktank
+Delivering the Future of Storage
+http://www.linkedin.com/in/ircolle
+http://www.twitter.com/ircolle
+Cell: +1.303.601.7713
+Email: ian@inktank.com
 
 
-Performance Test
-Attached file is the performance comparison of rocksdb and leveldb on four nodes with 40 osds,  using 'rados bench' as the test tool. The performance results is quite promising.
+On 3/2/14, 4:26 PM, "Sebastien Han" <sebastien.han@enovance.com> wrote:
 
-Any comments or suggestions are greatly appreciated.
+>Hi,
+>
+>As discussed during the Ceph day, I achieved the Ansible playbook for
+>Ceph.
+>It currently lives on my github, but I=B9d like to see it on
+>github.com/ceph.
+>
+>Does anyone can create the corresponding repo so I can send a pull
+>request?
+>
+>Thanks!
+>
+>=AD=AD=AD=AD=20
+>S=E9bastien Han=20
+>Cloud Engineer=20
+>
+>"Always give 100%. Unless you're giving blood.=B2
+>
+>Phone: +33 (0)1 49 70 99 72
+>Mail: sebastien.han@enovance.com
+>Address : 11 bis, rue Roqu=E9pine - 75008 Paris
+>Web : www.enovance.com - Twitter : @enovance
+>
 
-Rados bench	                       BandWidth(MB/s)	                     Average latency
-	                                 Leveldb	rocksdb	Leveldb	rocksdb
-write 4 threads	                 263.762	272.549	                    0.061	                 0.059
-write 8 threads	                 449.834	457.811                    0.071	                 0.070
-write 16 threads	 642.100	638.972	                   0.100	                 0.100
-write 32 threads	705.897 	717.598                    0.181	                 0.178
-write 64 threads	705.011 	717.204	                   0.370	                 0.362
-read 4 threads	                873.588	                841.704                    0.073	                 0.076
-read 8 threads	                816.699	                818.451	                   0.078	                 0.078
-read 16 threads	808.810                	798.053	                   0.079	                 0.080
-read 32 threads	798.394 	802.796	                   0.080	                 0.080
-read 64 threads	792.848	                790.593	                   0.081	                 0.081
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
