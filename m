@@ -1,100 +1,50 @@
-From: Alex Elder <elder@ieee.org>
-Subject: Re: [PATCH] rbd: fix error paths in rbd_img_request_fill()
-Date: Mon, 03 Mar 2014 15:59:52 -0600
-Message-ID: <5314FB58.7030604@ieee.org>
-References: <1393861102-5123-1-git-send-email-ilya.dryomov@inktank.com>
+From: Noah Watkins <noah.watkins@inktank.com>
+Subject: ceph-osd seg-fault with small writes
+Date: Mon, 3 Mar 2014 14:02:16 -0800
+Message-ID: <CA+Hcz58AJCccK_gSrt9dtBVRopyP7LHS2piUCcqXemHei=ek+Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f172.google.com ([209.85.192.172]:54372 "EHLO
-	mail-pd0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754764AbaCCWAX (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Mar 2014 17:00:23 -0500
-Received: by mail-pd0-f172.google.com with SMTP id p10so4230278pdj.17
-        for <ceph-devel@vger.kernel.org>; Mon, 03 Mar 2014 14:00:22 -0800 (PST)
-In-Reply-To: <1393861102-5123-1-git-send-email-ilya.dryomov@inktank.com>
+Received: from mail-qc0-f177.google.com ([209.85.216.177]:39900 "EHLO
+	mail-qc0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755033AbaCCWCR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Mar 2014 17:02:17 -0500
+Received: by mail-qc0-f177.google.com with SMTP id w7so4396845qcr.8
+        for <ceph-devel@vger.kernel.org>; Mon, 03 Mar 2014 14:02:17 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <ilya.dryomov@inktank.com>, ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 03/03/2014 09:38 AM, Ilya Dryomov wrote:
-> Doing rbd_obj_request_put() in rbd_img_request_fill() error paths is
-> not only insufficient, but also triggers an rbd_assert() in
-> rbd_obj_request_destroy():
->
-> Assertion failure in rbd_obj_request_destroy() at line 1867:
-> rbd_assert(obj_request->img_request == NULL);
+Running rados bench with the default 4MB object size works fine, but
+when I shrink the write size to 4K (i.e. running `rados -p data -b
+4096 bench 30 write`), ceph-osd will segfault almost immediately.
 
-Does this have a tracker entry separate from 7327?  (I
-didn't look, just curious.)
+Here is the segfault, and a link to the full debug uploaded using
+ceph-post-file.
 
-> rbd_img_obj_request_add() adds obj_requests to the img_request, the
-> opposite is rbd_img_obj_request_del().  Use it.h
+ceph-post-file id: f9c8a1f8-969f-46c2-9cef-41b4683fdc76
 
-This is the main bug here, and this is the right fix.
-
-> While at it, commit 03507db631c94 ("rbd: fix buffer size for writes to
-> images with snapshots") moved the call to rbd_img_obj_request_add() up,
-> making the out_partial label bogus.  Remove it.
-
-Yes, this is also correct, and is a bug fix.  Since it's a distinct
-bug *maybe* you could commit it separately, but I don't really think
-it's that important.
-
-Very nice.
-
-Reviewed-by: Alex Elder <elder@linaro.org>
-
-> Fixes: http://tracker.ceph.com/issues/7327
->
-> Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
-> ---
->   drivers/block/rbd.c |    9 ++++-----
->   1 file changed, 4 insertions(+), 5 deletions(-)
->
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index b365e0dfccb6..53d492e83586 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -2191,6 +2191,7 @@ static int rbd_img_request_fill(struct rbd_img_request *img_request,
->   		rbd_segment_name_free(object_name);
->   		if (!obj_request)
->   			goto out_unwind;
-> +
->   		/*
->   		 * set obj_request->img_request before creating the
->   		 * osd_request so that it gets the right snapc
-> @@ -2208,7 +2209,7 @@ static int rbd_img_request_fill(struct rbd_img_request *img_request,
->   								clone_size,
->   								GFP_ATOMIC);
->   			if (!obj_request->bio_list)
-> -				goto out_partial;
-> +				goto out_unwind;
->   		} else {
->   			unsigned int page_count;
->
-> @@ -2223,7 +2224,7 @@ static int rbd_img_request_fill(struct rbd_img_request *img_request,
->   		osd_req = rbd_osd_req_create(rbd_dev, write_request,
->   						obj_request);
->   		if (!osd_req)
-> -			goto out_partial;
-> +			goto out_unwind;
->   		obj_request->osd_req = osd_req;
->   		obj_request->callback = rbd_img_obj_callback;
->
-> @@ -2250,11 +2251,9 @@ static int rbd_img_request_fill(struct rbd_img_request *img_request,
->
->   	return 0;
->
-> -out_partial:
-> -	rbd_obj_request_put(obj_request);
->   out_unwind:
->   	for_each_obj_request_safe(img_request, obj_request, next_obj_request)
-> -		rbd_obj_request_put(obj_request);
-> +		rbd_img_obj_request_del(img_request, obj_request);
->
->   	return -ENOMEM;
->   }
->
-
+ ceph version 0.77-624-g82f62b1 (82f62b1ea82f6d92f7a5ed0bcbacd608770a15e3)
+ 1: ./ceph-osd() [0x95dbaf]
+ 2: (()+0xfbb0) [0x7f3f1f2f4bb0]
+ 3: (gsignal()+0x37) [0x7f3f1d7cdf77]
+ 4: (abort()+0x148) [0x7f3f1d7d15e8]
+ 5: (__gnu_cxx::__verbose_terminate_handler()+0x155) [0x7f3f1e0d96e5]
+ 6: (()+0x5e856) [0x7f3f1e0d7856]
+ 7: (()+0x5e883) [0x7f3f1e0d7883]
+ 8: (()+0x5eaae) [0x7f3f1e0d7aae]
+ 9: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+const*)+0x1f2) [0xa3d1b2]
+ 10: (FileStore::_do_transaction(ObjectStore::Transaction&, unsigned
+long, int, ThreadPool::TPHandle*)+0x8e9) [0x749c59]
+ 11: (FileStore::_do_transactions(std::list<ObjectStore::Transaction*,
+std::allocator<ObjectStore::Transaction*> >&, unsigned long,
+ThreadPool::TPHandle*)+0x6c) [0x74d88c]
+ 12: (FileStore::_do_op(FileStore::OpSequencer*,
+ThreadPool::TPHandle&)+0x167) [0x74da17]
+ 13: (ThreadPool::worker(ThreadPool::WorkThread*)+0xaef) [0xa2dfdf]
+ 14: (ThreadPool::WorkThread::entry()+0x10) [0xa2eed0]
+ 15: (()+0x7f6e) [0x7f3f1f2ecf6e]
+ 16: (clone()+0x6d) [0x7f3f1d8919cd]
+ NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+needed to interpret this.
