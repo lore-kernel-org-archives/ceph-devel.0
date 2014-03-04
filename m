@@ -1,77 +1,64 @@
-From: Loic Dachary <loic@dachary.org>
+From: Patrick McGarry <patrick@inktank.com>
 Subject: Re: CDS this afternoon (GMT+1)
-Date: Tue, 04 Mar 2014 14:26:35 +0100
-Message-ID: <5315D48B.4030400@dachary.org>
-References: <5315968F.5060407@ovh.net> <5315D10E.3000404@dachary.org>
+Date: Tue, 4 Mar 2014 22:58:03 +0100
+Message-ID: <CAP8Oy=+Js53HRbYvXoYpsf+qyygCp8Co4vZBS44mswM7VPXbgA@mail.gmail.com>
+References: <5315968F.5060407@ovh.net>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="lRAdTJUdRIBxfi7rd3gpVHIFiU3NPrku8"
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:60296 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757048AbaCDN0i (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Mar 2014 08:26:38 -0500
-In-Reply-To: <5315D10E.3000404@dachary.org>
+Received: from mail-pd0-f170.google.com ([209.85.192.170]:51770 "EHLO
+	mail-pd0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756853AbaCDV6E (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Mar 2014 16:58:04 -0500
+Received: by mail-pd0-f170.google.com with SMTP id v10so126158pde.29
+        for <ceph-devel@vger.kernel.org>; Tue, 04 Mar 2014 13:58:04 -0800 (PST)
+In-Reply-To: <5315968F.5060407@ovh.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jean-Tiare LE BIGOT <jean-tiare.le-bigot@ovh.net>, Ceph Development <ceph-devel@vger.kernel.org>, Guilhem Lettron <guilhem@lettron.fr>, Patrick McGarry <patrick@inktank.com>
+To: Jean-Tiare LE BIGOT <jean-tiare.le-bigot@ovh.net>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---lRAdTJUdRIBxfi7rd3gpVHIFiU3NPrku8
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Jean-Tiare,
 
-Prepared the blueprint and the pad (just in case ;-)
+For what it's worth, we went ahead and still had the discussions about
+these features.  So that should give you a good head start on the
+discussions.  The video time codes for the sessions have been added to
+the wiki:
 
-https://wiki.ceph.com/Planning/Blueprints/Giant/Ceph_deployment_%3A_ceph-=
-deploy%2C_puppet%2C_chef%2C_salt%2C_ansible...
-http://pad.ceph.com/p/cdsgiant-ceph-orchestration-and-deployment
+RBD: import/export diff, integrity local import:
+http://www.youtube.com/watch?v=XRlPV1IRFfc&feature=share&t=2h17m24s
 
-Sebastien is willing to speak about Ansible
+Reference counter for protected snapshots:
+http://www.youtube.com/watch?v=XRlPV1IRFfc&feature=share&t=2h31m30s
 
-On 04/03/2014 14:11, Loic Dachary wrote:
-> You'll be missed :-)
->=20
-> Patrick, if that's ok with you, we (Guilhem and myself) would like to d=
-iscuss what is needed from Ceph from the point of view of configuration m=
-anagement tools, primarily Chef and Puppet.
->=20
-> Title : "Configuration management and Ceph ( Chef, Puppet, ... )
->=20
-> Cheers
->=20
-> On 04/03/2014 10:02, Jean-Tiare LE BIGOT wrote:
->> Sorry for the last minute change, I was suppose to talk about [local i=
-mport] and [snap ref count] from 18:00 to 19:00 GMT+1. Unfortunately, I'm=
- afraid I won't be able to attend :(
->>
->> If you have any question about these blueprints, I'd be happy to do an=
-swer directly on this mailing list.
->>
->> [local import] https://wiki.ceph.com/Planning/Blueprints/Giant/Diff%3A=
-_integrity___local_import
->> [snap ref count] https://wiki.ceph.com/Planning/Blueprints/Giant/Refer=
-ence_counter_for_protected_snapshots
->>
->=20
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
+Hope that helps!  Thanks.
 
 
---lRAdTJUdRIBxfi7rd3gpVHIFiU3NPrku8
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+Best Regards,
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.20 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+Patrick McGarry
+Director, Community || Inktank
+http://ceph.com  ||  http://inktank.com
+@scuttlemonkey || @ceph || @inktank
 
-iEYEARECAAYFAlMV1IsACgkQ8dLMyEl6F22FxACghFyZcdcRwKh2DTHdS1FI9uaK
-+AsAoMABZ5/PlTKYfXlQBeFhPf/Z7JKg
-=7zEW
------END PGP SIGNATURE-----
 
---lRAdTJUdRIBxfi7rd3gpVHIFiU3NPrku8--
+On Tue, Mar 4, 2014 at 10:02 AM, Jean-Tiare LE BIGOT
+<jean-tiare.le-bigot@ovh.net> wrote:
+> Sorry for the last minute change, I was suppose to talk about [local import]
+> and [snap ref count] from 18:00 to 19:00 GMT+1. Unfortunately, I'm afraid I
+> won't be able to attend :(
+>
+> If you have any question about these blueprints, I'd be happy to do answer
+> directly on this mailing list.
+>
+> [local import]
+> https://wiki.ceph.com/Planning/Blueprints/Giant/Diff%3A_integrity___local_import
+> [snap ref count]
+> https://wiki.ceph.com/Planning/Blueprints/Giant/Reference_counter_for_protected_snapshots
+>
+> --
+> Jean-Tiare
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
