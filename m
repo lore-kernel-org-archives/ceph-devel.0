@@ -1,24 +1,41 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Re: [RFC] add rocksdb support
-Date: Wed, 5 Mar 2014 16:31:32 +0800
-Message-ID: <CACJqLybjX16fzRA+uGq0kh0euQqXd7X5sg404KpLnfNu5m5e7Q@mail.gmail.com>
+From: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>
+Subject: RE: [RFC] add rocksdb support
+Date: Wed, 5 Mar 2014 09:19:20 +0000
+Message-ID: <3472A07E6605974CBC9BC573F1BC02E4AE6E5996@CERNXCHG41.cern.ch>
 References: <75674D092A819E4189E91166C74CB90D01320A1F@SHSMSX104.ccr.corp.intel.com>
-	<56c52f05-53b9-438f-b027-a7838238b50f@mailpro>
+	<56c52f05-53b9-438f-b027-a7838238b50f@mailpro>,<CACJqLybjX16fzRA+uGq0kh0euQqXd7X5sg404KpLnfNu5m5e7Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=iso-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f49.google.com ([209.85.220.49]:64062 "EHLO
-	mail-pa0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753356AbaCEIbd convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Mar 2014 03:31:33 -0500
-Received: by mail-pa0-f49.google.com with SMTP id lj1so788032pab.36
-        for <ceph-devel@vger.kernel.org>; Wed, 05 Mar 2014 00:31:32 -0800 (PST)
-In-Reply-To: <56c52f05-53b9-438f-b027-a7838238b50f@mailpro>
+Received: from cernmx11.cern.ch ([188.184.36.50]:45435 "EHLO CERNMX11.cern.ch"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751780AbaCEJTZ convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Mar 2014 04:19:25 -0500
+In-Reply-To: <CACJqLybjX16fzRA+uGq0kh0euQqXd7X5sg404KpLnfNu5m5e7Q@mail.gmail.com>
+Content-Language: en-GB
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre DERUMIER <aderumier@odiso.com>
+To: Haomai Wang <haomaiwang@gmail.com>, Alexandre DERUMIER <aderumier@odiso.com>
 Cc: Xinxin Shu <xinxin.shu@intel.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+
+To me this numbers look within error bars identical and isn't that expe=
+cted?
+
+The main benefit of Rocksdb vs. Leveldb you can see when you create lar=
+ge tables going to 1 billion entries.
+
+How many keys did you create per OSD in your Rados benchmarks?
+
+Cheers Andreas.
+
+________________________________________
+=46rom: ceph-devel-owner@vger.kernel.org [ceph-devel-owner@vger.kernel.=
+org] on behalf of Haomai Wang [haomaiwang@gmail.com]
+Sent: 05 March 2014 09:31
+To: Alexandre DERUMIER
+Cc: Xinxin Shu; ceph-devel@vger.kernel.org
+Subject: Re: [RFC] add rocksdb support
 
 I think the reason why the little difference between leveldb and
 rocksdb in FileStore is that the main latency cause isn't KeyValueDB
@@ -41,9 +58,9 @@ ittle lower than leveldb
 > ----- Mail original -----
 >
 > De: "Xinxin Shu" <xinxin.shu@intel.com>
-> =C3=80: "Alexandre DERUMIER" <aderumier@odiso.com>
+> =C0: "Alexandre DERUMIER" <aderumier@odiso.com>
 > Cc: ceph-devel@vger.kernel.org
-> Envoy=C3=A9: Mardi 4 Mars 2014 09:41:05
+> Envoy=E9: Mardi 4 Mars 2014 09:41:05
 > Objet: RE: [RFC] add rocksdb support
 >
 > Hi Alexandre, below is random io test results, almost the same iops.
@@ -183,8 +200,8 @@ e
 > ----- Mail original -----
 >
 > De: "Xinxin Shu" <xinxin.shu@intel.com>
-> =C3=80: ceph-devel@vger.kernel.org
-> Envoy=C3=A9: Lundi 3 Mars 2014 03:07:18
+> =C0: ceph-devel@vger.kernel.org
+> Envoy=E9: Lundi 3 Mars 2014 03:07:18
 > Objet: [RFC] add rocksdb support
 >
 > Hi all,
@@ -227,10 +244,15 @@ nfo at http://vger.kernel.org/majordomo-info.html
 
 
 
---=20
+--
 Best Regards,
 
 Wheat
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
