@@ -1,32 +1,110 @@
-From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: Re: CMake blueprint
-Date: Wed, 5 Mar 2014 18:22:31 +0200
-Message-ID: <CALFYKtAgPBaaai598Xw0Fk_Uay2V=ZV+AhtY7J2aNS=ykS9vhA@mail.gmail.com>
-References: <613349283.59.1394035202107.JavaMail.root@thunderbeast.private.linuxbox.com>
-	<1772818692.61.1394035499924.JavaMail.root@thunderbeast.private.linuxbox.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH 2/4] ceph: fix ceph_fh_to_parent()
+Date: Wed, 5 Mar 2014 09:17:01 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1403050914430.17314@cobra.newdream.net>
+References: <1393687411-2457-1-git-send-email-zheng.z.yan@intel.com> <1393687411-2457-2-git-send-email-zheng.z.yan@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qg0-f47.google.com ([209.85.192.47]:46072 "EHLO
-	mail-qg0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753224AbaCEQWd convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Mar 2014 11:22:33 -0500
-Received: by mail-qg0-f47.google.com with SMTP id 63so3501608qgz.6
-        for <ceph-devel@vger.kernel.org>; Wed, 05 Mar 2014 08:22:31 -0800 (PST)
-In-Reply-To: <1772818692.61.1394035499924.JavaMail.root@thunderbeast.private.linuxbox.com>
+Received: from cobra.newdream.net ([66.33.216.30]:59560 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752815AbaCERRC (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Mar 2014 12:17:02 -0500
+In-Reply-To: <1393687411-2457-2-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Casey Bodley <casey@linuxbox.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Ali Maredia <ali@linuxbox.com>
+To: "Yan, Zheng" <zheng.z.yan@intel.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Wed, Mar 5, 2014 at 6:04 PM, Casey Bodley <casey@linuxbox.com> wrote:
-> Hi Ilya,
->
-> Regarding the CMake blueprint at http://wiki.ceph.com/Planning/Blueprints/Giant/CMake, we at The Linux Box are excited to see more interest!  I know that we've made several improvements to the CMakeLists on our local branches that haven't made it to our github repository.  We'll get everything consolidated, and should have another push ready sometime next week.
+On Sat, 1 Mar 2014, Yan, Zheng wrote:
+> ceph_fh_to_parent() finds the inode that corresponds to the 'ino' field
+> of struct ceph_nfs_confh. This is wrong, it should find the inode that
+> corresponds to the 'parent_ino' field.
+> 
+> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
 
-That's great to hear!  Looking forward to it.
+It's been a while since I've looked at this, but I'm a bit confused.
 
-Thanks,
+If we have a get_parent() operation that will reliably get the parent 
+directory for an inode, why do we want/need the ceph_nfs_confh?  If we 
+*do* have that struct and look up the parent_ino, we have no guarantee 
+that it is still the parent if there has been an intervening rename.  
+Would it be better to always use ceph_nfs_fh, and rely on LOOKUPPARENT 
+instead?
 
-                Ilya
+Thanks-
+sage
+
+
+> ---
+>  fs/ceph/export.c | 38 +++++---------------------------------
+>  1 file changed, 5 insertions(+), 33 deletions(-)
+> 
+> diff --git a/fs/ceph/export.c b/fs/ceph/export.c
+> index 905d7f2..017af26 100644
+> --- a/fs/ceph/export.c
+> +++ b/fs/ceph/export.c
+> @@ -122,49 +122,21 @@ static struct dentry *ceph_fh_to_dentry(struct super_block *sb,
+>  }
+>  
+>  /*
+> - * get parent, if possible.
+> - *
+> - * FIXME: we could do better by querying the mds to discover the
+> - * parent.
+> + * convert regular fh to parent
+>   */
+>  static struct dentry *ceph_fh_to_parent(struct super_block *sb,
+> -					 struct fid *fid,
+> +					struct fid *fid,
+>  					int fh_len, int fh_type)
+>  {
+>  	struct ceph_nfs_confh *cfh = (void *)fid->raw;
+> -	struct ceph_vino vino;
+> -	struct inode *inode;
+> -	struct dentry *dentry;
+> -	int err;
+>  
+> -	if (fh_type == 1)
+> +	if (fh_type != FILEID_INO32_GEN_PARENT)
+>  		return ERR_PTR(-ESTALE);
+>  	if (fh_len < sizeof(*cfh) / 4)
+>  		return ERR_PTR(-ESTALE);
+>  
+> -	pr_debug("fh_to_parent %llx/%d\n", cfh->parent_ino,
+> -		 cfh->parent_name_hash);
+> -
+> -	vino.ino = cfh->ino;
+> -	vino.snap = CEPH_NOSNAP;
+> -	inode = ceph_find_inode(sb, vino);
+> -	if (!inode)
+> -		return ERR_PTR(-ESTALE);
+> -
+> -	dentry = d_obtain_alias(inode);
+> -	if (IS_ERR(dentry)) {
+> -		pr_err("fh_to_parent %llx -- inode %p but ENOMEM\n",
+> -		       cfh->ino, inode);
+> -		iput(inode);
+> -		return dentry;
+> -	}
+> -	err = ceph_init_dentry(dentry);
+> -	if (err < 0) {
+> -		iput(inode);
+> -		return ERR_PTR(err);
+> -	}
+> -	dout("fh_to_parent %llx %p dentry %p\n", cfh->ino, inode, dentry);
+> -	return dentry;
+> +	pr_debug("fh_to_parent %llx\n", cfh->parent_ino);
+> +	return __fh_to_dentry(sb, cfh->parent_ino);
+>  }
+>  
+>  const struct export_operations ceph_export_ops = {
+> -- 
+> 1.8.5.3
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
