@@ -1,213 +1,144 @@
-From: Alexandre DERUMIER <aderumier@odiso.com>
-Subject: Re: [RFC] add rocksdb support
-Date: Wed, 05 Mar 2014 09:23:12 +0100 (CET)
-Message-ID: <56c52f05-53b9-438f-b027-a7838238b50f@mailpro>
+From: "Shu, Xinxin" <xinxin.shu@intel.com>
+Subject: RE: [RFC] add rocksdb support
+Date: Wed, 5 Mar 2014 08:30:33 +0000
+Message-ID: <75674D092A819E4189E91166C74CB90D01321052@SHSMSX104.ccr.corp.intel.com>
 References: <75674D092A819E4189E91166C74CB90D01320A1F@SHSMSX104.ccr.corp.intel.com>
+ <56c52f05-53b9-438f-b027-a7838238b50f@mailpro>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.209.98]:60380 "EHLO
-	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751544AbaCEIXW convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Mar 2014 03:23:22 -0500
-In-Reply-To: <75674D092A819E4189E91166C74CB90D01320A1F@SHSMSX104.ccr.corp.intel.com>
+Received: from mga01.intel.com ([192.55.52.88]:42196 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753356AbaCEIbR (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 5 Mar 2014 03:31:17 -0500
+In-Reply-To: <56c52f05-53b9-438f-b027-a7838238b50f@mailpro>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Xinxin Shu <xinxin.shu@intel.com>
-Cc: ceph-devel@vger.kernel.org
+To: Alexandre DERUMIER <aderumier@odiso.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
->>Hi Alexandre, below is random io test results, almost the same iops.=20
-
-Thanks Xinxin, seem not too bad indeed.  and latencies seem to be a lit=
-tle lower than leveldb
-
-(this was with 7,2k disks ? replication 2x or 3x ?)
-
-
-
------ Mail original -----=20
-
-De: "Xinxin Shu" <xinxin.shu@intel.com>=20
-=C3=80: "Alexandre DERUMIER" <aderumier@odiso.com>=20
-Cc: ceph-devel@vger.kernel.org=20
-Envoy=C3=A9: Mardi 4 Mars 2014 09:41:05=20
-Objet: RE: [RFC] add rocksdb support=20
-
-Hi Alexandre, below is random io test results, almost the same iops.=20
-
-Rocksdb results=20
-
-ebs_test: (g=3D0): rw=3Drandwrite, bs=3D4K-4K/4K-4K/4K-4K, ioengine=3Dr=
-bd, iodepth=3D64=20
-fio-2.1.4=20
-Starting 1 thread=20
-rbd engine: RBD version: 0.1.8=20
-Jobs: 1 (f=3D1): [w] [100.0% done] [0KB/23094KB/0KB /s] [0/5773/0 iops]=
- [eta 00m:00s]=20
-ebs_test: (groupid=3D0, jobs=3D1): err=3D 0: pid=3D47154: Tue Mar 4 13:=
-48:22 2014=20
-write: io=3D3356.2MB, bw=3D17183KB/s, iops=3D4295, runt=3D200004msec=20
-slat (usec): min=3D19, max=3D8855, avg=3D134.33, stdev=3D259.00=20
-clat (usec): min=3D73, max=3D4397.6K, avg=3D12756.12, stdev=3D79341.35=20
-lat (msec): min=3D1, max=3D4397, avg=3D12.89, stdev=3D79.34=20
-clat percentiles (usec):=20
-| 1.00th=3D[ 1432], 5.00th=3D[ 1752], 10.00th=3D[ 2128], 20.00th=3D[ 34=
-08],=20
-| 30.00th=3D[ 4768], 40.00th=3D[ 5856], 50.00th=3D[ 6880], 60.00th=3D[ =
-7904],=20
-| 70.00th=3D[ 8896], 80.00th=3D[10048], 90.00th=3D[11968], 95.00th=3D[1=
-4016],=20
-| 99.00th=3D[27520], 99.50th=3D[505856], 99.90th=3D[1204224], 99.95th=3D=
-[1433600],=20
-| 99.99th=3D[2834432]=20
-bw (KB /s): min=3D 403, max=3D24392, per=3D100.00%, avg=3D17358.47, std=
-ev=3D7446.69=20
-lat (usec) : 100=3D0.01%, 250=3D0.01%, 500=3D0.01%, 750=3D0.01%, 1000=3D=
-0.01%=20
-lat (msec) : 2=3D8.36%, 4=3D15.77%, 10=3D55.27%, 20=3D19.17%, 50=3D0.51=
-%=20
-lat (msec) : 100=3D0.09%, 250=3D0.16%, 500=3D0.14%, 750=3D0.19%, 1000=3D=
-0.15%=20
-lat (msec) : 2000=3D0.16%, >=3D2000=3D0.01%=20
-cpu : usr=3D18.04%, sys=3D4.15%, ctx=3D1875119, majf=3D0, minf=3D838=20
-IO depths : 1=3D0.1%, 2=3D0.1%, 4=3D0.1%, 8=3D1.1%, 16=3D10.9%, 32=3D65=
-=2E9%, >=3D64=3D22.1%=20
-submit : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.0%, 64=3D0.0=
-%, >=3D64=3D0.0%=20
-complete : 0=3D0.0%, 4=3D97.6%, 8=3D0.4%, 16=3D0.4%, 32=3D0.6%, 64=3D0.=
-9%, >=3D64=3D0.0%=20
-issued : total=3Dr=3D0/w=3D859165/d=3D0, short=3Dr=3D0/w=3D0/d=3D0=20
-
-Run status group 0 (all jobs):=20
-WRITE: io=3D3356.2MB, aggrb=3D17182KB/s, minb=3D17182KB/s, maxb=3D17182=
-KB/s, mint=3D200004msec, maxt=3D200004msec=20
-
-Disk stats (read/write):=20
-sda: ios=3D0/2191, merge=3D0/2904, ticks=3D0/936, in_queue=3D936, util=3D=
-0.29%=20
-
-leveldb results:=20
-
-ebs_test: (g=3D0): rw=3Drandwrite, bs=3D4K-4K/4K-4K/4K-4K, ioengine=3Dr=
-bd, iodepth=3D64=20
-fio-2.1.4=20
-Starting 1 thread=20
-rbd engine: RBD version: 0.1.8=20
-Jobs: 1 (f=3D1): [w] [100.0% done] [0KB/9428KB/0KB /s] [0/2357/0 iops] =
-[eta 00m:00s]=20
-ebs_test: (groupid=3D0, jobs=3D1): err=3D 0: pid=3D112425: Tue Mar 4 14=
-:54:00 2014=20
-write: io=3D3404.9MB, bw=3D17431KB/s, iops=3D4357, runt=3D200016msec=20
-slat (usec): min=3D20, max=3D7698, avg=3D114.01, stdev=3D201.06=20
-clat (usec): min=3D220, max=3D3278.3K, avg=3D13340.59, stdev=3D76874.35=
-=20
-lat (msec): min=3D1, max=3D3278, avg=3D13.45, stdev=3D76.87=20
-clat percentiles (usec):=20
-| 1.00th=3D[ 1400], 5.00th=3D[ 1608], 10.00th=3D[ 1784], 20.00th=3D[ 21=
-92],=20
-| 30.00th=3D[ 2832], 40.00th=3D[ 3824], 50.00th=3D[ 5024], 60.00th=3D[ =
-6240],=20
-| 70.00th=3D[ 7456], 80.00th=3D[ 8768], 90.00th=3D[10816], 95.00th=3D[1=
-3120],=20
-| 99.00th=3D[284672], 99.50th=3D[610304], 99.90th=3D[1089536], 99.95th=3D=
-[1286144],=20
-| 99.99th=3D[1630208]=20
-bw (KB /s): min=3D 24, max=3D25548, per=3D100.00%, avg=3D17606.69, stde=
-v=3D6779.23=20
-lat (usec) : 250=3D0.01%, 500=3D0.01%, 750=3D0.01%, 1000=3D0.01%=20
-lat (msec) : 2=3D15.63%, 4=3D25.94%, 10=3D45.35%, 20=3D10.98%, 50=3D0.4=
-4%=20
-lat (msec) : 100=3D0.17%, 250=3D0.40%, 500=3D0.42%, 750=3D0.34%, 1000=3D=
-0.19%=20
-lat (msec) : 2000=3D0.12%, >=3D2000=3D0.01%=20
-cpu : usr=3D18.25%, sys=3D4.14%, ctx=3D1887389, majf=3D0, minf=3D742=20
-IO depths : 1=3D0.1%, 2=3D0.1%, 4=3D0.1%, 8=3D0.5%, 16=3D6.0%, 32=3D55.=
-9%, >=3D64=3D37.5%=20
-submit : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.0%, 64=3D0.0=
-%, >=3D64=3D0.0%=20
-complete : 0=3D0.0%, 4=3D97.8%, 8=3D0.7%, 16=3D0.5%, 32=3D0.5%, 64=3D0.=
-5%, >=3D64=3D0.0%=20
-issued : total=3Dr=3D0/w=3D871635/d=3D0, short=3Dr=3D0/w=3D0/d=3D0=20
-
-Run status group 0 (all jobs):=20
-WRITE: io=3D3404.9MB, aggrb=3D17431KB/s, minb=3D17431KB/s, maxb=3D17431=
-KB/s, mint=3D200016msec, maxt=3D200016msec=20
-
-Disk stats (read/write):=20
-sda: ios=3D0/2125, merge=3D0/2796, ticks=3D0/708, in_queue=3D708, util=3D=
-0.23%=20
-
------Original Message-----=20
-=46rom: Alexandre DERUMIER [mailto:aderumier@odiso.com]=20
-Sent: Tuesday, March 04, 2014 12:49 PM=20
-To: Shu, Xinxin=20
-Cc: ceph-devel@vger.kernel.org=20
-Subject: Re: [RFC] add rocksdb support=20
-
->>Performance Test=20
->>Attached file is the performance comparison of rocksdb and leveldb on=
- four nodes with 40 osds, using 'rados bench' as the test tool. The per=
-formance results is quite promising.=20
-
-Thanks for your work, indeed performance seem to be promising !=20
-
->>Any comments or suggestions are greatly appreciated.=20
-
-Could you do test with random io write with last fio (with rbd support)=
- ?=20
-
-http://lists.ceph.com/pipermail/ceph-users-ceph.com/2014-February/00818=
-2.html=20
-> The fio command: fio -direct=3D1 -iodepth=3D64 -thread -rw=3Drandwrit=
-e=20
->> -ioengine=3Drbd -bs=3D4k -size=3D19G -numjobs=3D1 -runtime=3D100=20
->> -group_reporting -name=3Debs_test -pool=3Dopenstack -rbdname=3Dimage=
-=20
->> -clientname=3Dfio -invalidate=3D0=20
-
-
------ Mail original -----=20
-
-De: "Xinxin Shu" <xinxin.shu@intel.com>=20
-=C3=80: ceph-devel@vger.kernel.org=20
-Envoy=C3=A9: Lundi 3 Mars 2014 03:07:18=20
-Objet: [RFC] add rocksdb support=20
-
-Hi all,=20
-
-This patch added rocksdb support for ceph, enabled rocksdb for omap dir=
-ectory. Rocksdb source code can be get from link. To use use rocksdb, C=
-++11 standard should be enabled, gcc version >=3D 4.7 is required to ge=
-t C++11 support. Rocksdb can be installed with instructions described i=
-n the INSTALL.md file, and rocksdb header files (include/rocksdb/*) and=
- library (librocksdb.so*) need to be copied to corresponding directorie=
-s.=20
-To enable rocksdb, add "--with-librocksdb" option to configure. The roc=
-ksdb branch is here(https://github.com/xinxinsh/ceph/tree/rocksdb).=20
-
-
-Performance Test=20
-Attached file is the performance comparison of rocksdb and leveldb on f=
-our nodes with 40 osds, using 'rados bench' as the test tool. The perfo=
-rmance results is quite promising.=20
-
-Any comments or suggestions are greatly appreciated.=20
-
-Rados bench BandWidth(MB/s) Average latency Leveldb rocksdb Leveldb roc=
-ksdb write 4 threads 263.762 272.549 0.061 0.059 write 8 threads 449.83=
-4 457.811 0.071 0.070 write 16 threads 642.100 638.972 0.100 0.100 writ=
-e 32 threads 705.897 717.598 0.181 0.178 write 64 threads 705.011 717.2=
-04 0.370 0.362 read 4 threads 873.588 841.704 0.073 0.076 read 8 thread=
-s 816.699 818.451 0.078 0.078 read 16 threads 808.810 798.053 0.079 0.0=
-80 read 32 threads 798.394 802.796 0.080 0.080 read 64 threads 792.848 =
-790.593 0.081 0.081=20
---=20
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n the body of a message to majordomo@vger.kernel.org More majordomo inf=
-o at http://vger.kernel.org/majordomo-info.html=20
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+d2l0aCA3LjJrIGRpc2tzLCByZXBsaWNhdGlvbnMgMnguDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2Fn
+ZS0tLS0tDQpGcm9tOiBBbGV4YW5kcmUgREVSVU1JRVIgW21haWx0bzphZGVydW1pZXJAb2Rpc28u
+Y29tXSANClNlbnQ6IFdlZG5lc2RheSwgTWFyY2ggMDUsIDIwMTQgNDoyMyBQTQ0KVG86IFNodSwg
+WGlueGluDQpDYzogY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNClN1YmplY3Q6IFJlOiBbUkZD
+XSBhZGQgcm9ja3NkYiBzdXBwb3J0DQoNCj4+SGkgQWxleGFuZHJlLCBiZWxvdyBpcyByYW5kb20g
+aW8gdGVzdCByZXN1bHRzLCBhbG1vc3QgdGhlIHNhbWUgaW9wcy4gDQoNClRoYW5rcyBYaW54aW4s
+IHNlZW0gbm90IHRvbyBiYWQgaW5kZWVkLiAgYW5kIGxhdGVuY2llcyBzZWVtIHRvIGJlIGEgbGl0
+dGxlIGxvd2VyIHRoYW4gbGV2ZWxkYg0KDQoodGhpcyB3YXMgd2l0aCA3LDJrIGRpc2tzID8gcmVw
+bGljYXRpb24gMnggb3IgM3ggPykNCg0KDQoNCi0tLS0tIE1haWwgb3JpZ2luYWwgLS0tLS0gDQoN
+CkRlOiAiWGlueGluIFNodSIgPHhpbnhpbi5zaHVAaW50ZWwuY29tPg0Kw4A6ICJBbGV4YW5kcmUg
+REVSVU1JRVIiIDxhZGVydW1pZXJAb2Rpc28uY29tPg0KQ2M6IGNlcGgtZGV2ZWxAdmdlci5rZXJu
+ZWwub3JnDQpFbnZvecOpOiBNYXJkaSA0IE1hcnMgMjAxNCAwOTo0MTowNQ0KT2JqZXQ6IFJFOiBb
+UkZDXSBhZGQgcm9ja3NkYiBzdXBwb3J0IA0KDQpIaSBBbGV4YW5kcmUsIGJlbG93IGlzIHJhbmRv
+bSBpbyB0ZXN0IHJlc3VsdHMsIGFsbW9zdCB0aGUgc2FtZSBpb3BzLiANCg0KUm9ja3NkYiByZXN1
+bHRzIA0KDQplYnNfdGVzdDogKGc9MCk6IHJ3PXJhbmR3cml0ZSwgYnM9NEstNEsvNEstNEsvNEst
+NEssIGlvZW5naW5lPXJiZCwgaW9kZXB0aD02NA0KZmlvLTIuMS40DQpTdGFydGluZyAxIHRocmVh
+ZA0KcmJkIGVuZ2luZTogUkJEIHZlcnNpb246IDAuMS44DQpKb2JzOiAxIChmPTEpOiBbd10gWzEw
+MC4wJSBkb25lXSBbMEtCLzIzMDk0S0IvMEtCIC9zXSBbMC81NzczLzAgaW9wc10gW2V0YSAwMG06
+MDBzXQ0KZWJzX3Rlc3Q6IChncm91cGlkPTAsIGpvYnM9MSk6IGVycj0gMDogcGlkPTQ3MTU0OiBU
+dWUgTWFyIDQgMTM6NDg6MjIgMjAxNA0Kd3JpdGU6IGlvPTMzNTYuMk1CLCBidz0xNzE4M0tCL3Ms
+IGlvcHM9NDI5NSwgcnVudD0yMDAwMDRtc2VjIHNsYXQgKHVzZWMpOiBtaW49MTksIG1heD04ODU1
+LCBhdmc9MTM0LjMzLCBzdGRldj0yNTkuMDAgY2xhdCAodXNlYyk6IG1pbj03MywgbWF4PTQzOTcu
+NkssIGF2Zz0xMjc1Ni4xMiwgc3RkZXY9NzkzNDEuMzUgbGF0IChtc2VjKTogbWluPTEsIG1heD00
+Mzk3LCBhdmc9MTIuODksIHN0ZGV2PTc5LjM0IGNsYXQgcGVyY2VudGlsZXMgKHVzZWMpOiANCnwg
+MS4wMHRoPVsgMTQzMl0sIDUuMDB0aD1bIDE3NTJdLCAxMC4wMHRoPVsgMjEyOF0sIDIwLjAwdGg9
+WyAzNDA4XSwgDQp8IDMwLjAwdGg9WyA0NzY4XSwgNDAuMDB0aD1bIDU4NTZdLCA1MC4wMHRoPVsg
+Njg4MF0sIDYwLjAwdGg9WyA3OTA0XSwgDQp8IDcwLjAwdGg9WyA4ODk2XSwgODAuMDB0aD1bMTAw
+NDhdLCA5MC4wMHRoPVsxMTk2OF0sIDk1LjAwdGg9WzE0MDE2XSwgDQp8IDk5LjAwdGg9WzI3NTIw
+XSwgOTkuNTB0aD1bNTA1ODU2XSwgOTkuOTB0aD1bMTIwNDIyNF0sIA0KfCA5OS45NXRoPVsxNDMz
+NjAwXSwgOTkuOTl0aD1bMjgzNDQzMl0NCmJ3IChLQiAvcyk6IG1pbj0gNDAzLCBtYXg9MjQzOTIs
+IHBlcj0xMDAuMDAlLCBhdmc9MTczNTguNDcsIHN0ZGV2PTc0NDYuNjkgbGF0ICh1c2VjKSA6IDEw
+MD0wLjAxJSwgMjUwPTAuMDElLCA1MDA9MC4wMSUsIDc1MD0wLjAxJSwgMTAwMD0wLjAxJSBsYXQg
+KG1zZWMpIDogMj04LjM2JSwgND0xNS43NyUsIDEwPTU1LjI3JSwgMjA9MTkuMTclLCA1MD0wLjUx
+JSBsYXQgKG1zZWMpIDogMTAwPTAuMDklLCAyNTA9MC4xNiUsIDUwMD0wLjE0JSwgNzUwPTAuMTkl
+LCAxMDAwPTAuMTUlIGxhdCAobXNlYykgOiAyMDAwPTAuMTYlLCA+PTIwMDA9MC4wMSUgY3B1IDog
+dXNyPTE4LjA0JSwgc3lzPTQuMTUlLCBjdHg9MTg3NTExOSwgbWFqZj0wLCBtaW5mPTgzOCBJTyBk
+ZXB0aHMgOiAxPTAuMSUsIDI9MC4xJSwgND0wLjElLCA4PTEuMSUsIDE2PTEwLjklLCAzMj02NS45
+JSwgPj02ND0yMi4xJSBzdWJtaXQgOiAwPTAuMCUsIDQ9MTAwLjAlLCA4PTAuMCUsIDE2PTAuMCUs
+IDMyPTAuMCUsIDY0PTAuMCUsID49NjQ9MC4wJSBjb21wbGV0ZSA6IDA9MC4wJSwgND05Ny42JSwg
+OD0wLjQlLCAxNj0wLjQlLCAzMj0wLjYlLCA2ND0wLjklLCA+PTY0PTAuMCUgaXNzdWVkIDogdG90
+YWw9cj0wL3c9ODU5MTY1L2Q9MCwgc2hvcnQ9cj0wL3c9MC9kPTAgDQoNClJ1biBzdGF0dXMgZ3Jv
+dXAgMCAoYWxsIGpvYnMpOiANCldSSVRFOiBpbz0zMzU2LjJNQiwgYWdncmI9MTcxODJLQi9zLCBt
+aW5iPTE3MTgyS0IvcywgbWF4Yj0xNzE4MktCL3MsIG1pbnQ9MjAwMDA0bXNlYywgbWF4dD0yMDAw
+MDRtc2VjIA0KDQpEaXNrIHN0YXRzIChyZWFkL3dyaXRlKTogDQpzZGE6IGlvcz0wLzIxOTEsIG1l
+cmdlPTAvMjkwNCwgdGlja3M9MC85MzYsIGluX3F1ZXVlPTkzNiwgdXRpbD0wLjI5JSANCg0KbGV2
+ZWxkYiByZXN1bHRzOiANCg0KZWJzX3Rlc3Q6IChnPTApOiBydz1yYW5kd3JpdGUsIGJzPTRLLTRL
+LzRLLTRLLzRLLTRLLCBpb2VuZ2luZT1yYmQsIGlvZGVwdGg9NjQNCmZpby0yLjEuNA0KU3RhcnRp
+bmcgMSB0aHJlYWQNCnJiZCBlbmdpbmU6IFJCRCB2ZXJzaW9uOiAwLjEuOA0KSm9iczogMSAoZj0x
+KTogW3ddIFsxMDAuMCUgZG9uZV0gWzBLQi85NDI4S0IvMEtCIC9zXSBbMC8yMzU3LzAgaW9wc10g
+W2V0YSAwMG06MDBzXQ0KZWJzX3Rlc3Q6IChncm91cGlkPTAsIGpvYnM9MSk6IGVycj0gMDogcGlk
+PTExMjQyNTogVHVlIE1hciA0IDE0OjU0OjAwIDIwMTQNCndyaXRlOiBpbz0zNDA0LjlNQiwgYnc9
+MTc0MzFLQi9zLCBpb3BzPTQzNTcsIHJ1bnQ9MjAwMDE2bXNlYyBzbGF0ICh1c2VjKTogbWluPTIw
+LCBtYXg9NzY5OCwgYXZnPTExNC4wMSwgc3RkZXY9MjAxLjA2IGNsYXQgKHVzZWMpOiBtaW49MjIw
+LCBtYXg9MzI3OC4zSywgYXZnPTEzMzQwLjU5LCBzdGRldj03Njg3NC4zNSBsYXQgKG1zZWMpOiBt
+aW49MSwgbWF4PTMyNzgsIGF2Zz0xMy40NSwgc3RkZXY9NzYuODcgY2xhdCBwZXJjZW50aWxlcyAo
+dXNlYyk6IA0KfCAxLjAwdGg9WyAxNDAwXSwgNS4wMHRoPVsgMTYwOF0sIDEwLjAwdGg9WyAxNzg0
+XSwgMjAuMDB0aD1bIDIxOTJdLCANCnwgMzAuMDB0aD1bIDI4MzJdLCA0MC4wMHRoPVsgMzgyNF0s
+IDUwLjAwdGg9WyA1MDI0XSwgNjAuMDB0aD1bIDYyNDBdLCANCnwgNzAuMDB0aD1bIDc0NTZdLCA4
+MC4wMHRoPVsgODc2OF0sIDkwLjAwdGg9WzEwODE2XSwgOTUuMDB0aD1bMTMxMjBdLCANCnwgOTku
+MDB0aD1bMjg0NjcyXSwgOTkuNTB0aD1bNjEwMzA0XSwgOTkuOTB0aD1bMTA4OTUzNl0sIA0KfCA5
+OS45NXRoPVsxMjg2MTQ0XSwgOTkuOTl0aD1bMTYzMDIwOF0NCmJ3IChLQiAvcyk6IG1pbj0gMjQs
+IG1heD0yNTU0OCwgcGVyPTEwMC4wMCUsIGF2Zz0xNzYwNi42OSwgc3RkZXY9Njc3OS4yMyBsYXQg
+KHVzZWMpIDogMjUwPTAuMDElLCA1MDA9MC4wMSUsIDc1MD0wLjAxJSwgMTAwMD0wLjAxJSBsYXQg
+KG1zZWMpIDogMj0xNS42MyUsIDQ9MjUuOTQlLCAxMD00NS4zNSUsIDIwPTEwLjk4JSwgNTA9MC40
+NCUgbGF0IChtc2VjKSA6IDEwMD0wLjE3JSwgMjUwPTAuNDAlLCA1MDA9MC40MiUsIDc1MD0wLjM0
+JSwgMTAwMD0wLjE5JSBsYXQgKG1zZWMpIDogMjAwMD0wLjEyJSwgPj0yMDAwPTAuMDElIGNwdSA6
+IHVzcj0xOC4yNSUsIHN5cz00LjE0JSwgY3R4PTE4ODczODksIG1hamY9MCwgbWluZj03NDIgSU8g
+ZGVwdGhzIDogMT0wLjElLCAyPTAuMSUsIDQ9MC4xJSwgOD0wLjUlLCAxNj02LjAlLCAzMj01NS45
+JSwgPj02ND0zNy41JSBzdWJtaXQgOiAwPTAuMCUsIDQ9MTAwLjAlLCA4PTAuMCUsIDE2PTAuMCUs
+IDMyPTAuMCUsIDY0PTAuMCUsID49NjQ9MC4wJSBjb21wbGV0ZSA6IDA9MC4wJSwgND05Ny44JSwg
+OD0wLjclLCAxNj0wLjUlLCAzMj0wLjUlLCA2ND0wLjUlLCA+PTY0PTAuMCUgaXNzdWVkIDogdG90
+YWw9cj0wL3c9ODcxNjM1L2Q9MCwgc2hvcnQ9cj0wL3c9MC9kPTAgDQoNClJ1biBzdGF0dXMgZ3Jv
+dXAgMCAoYWxsIGpvYnMpOiANCldSSVRFOiBpbz0zNDA0LjlNQiwgYWdncmI9MTc0MzFLQi9zLCBt
+aW5iPTE3NDMxS0IvcywgbWF4Yj0xNzQzMUtCL3MsIG1pbnQ9MjAwMDE2bXNlYywgbWF4dD0yMDAw
+MTZtc2VjIA0KDQpEaXNrIHN0YXRzIChyZWFkL3dyaXRlKTogDQpzZGE6IGlvcz0wLzIxMjUsIG1l
+cmdlPTAvMjc5NiwgdGlja3M9MC83MDgsIGluX3F1ZXVlPTcwOCwgdXRpbD0wLjIzJSANCg0KLS0t
+LS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IEFsZXhhbmRyZSBERVJVTUlFUiBbbWFpbHRv
+OmFkZXJ1bWllckBvZGlzby5jb21dDQpTZW50OiBUdWVzZGF5LCBNYXJjaCAwNCwgMjAxNCAxMjo0
+OSBQTQ0KVG86IFNodSwgWGlueGluDQpDYzogY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNClN1
+YmplY3Q6IFJlOiBbUkZDXSBhZGQgcm9ja3NkYiBzdXBwb3J0IA0KDQo+PlBlcmZvcm1hbmNlIFRl
+c3QNCj4+QXR0YWNoZWQgZmlsZSBpcyB0aGUgcGVyZm9ybWFuY2UgY29tcGFyaXNvbiBvZiByb2Nr
+c2RiIGFuZCBsZXZlbGRiIG9uIGZvdXIgbm9kZXMgd2l0aCA0MCBvc2RzLCB1c2luZyAncmFkb3Mg
+YmVuY2gnIGFzIHRoZSB0ZXN0IHRvb2wuIFRoZSBwZXJmb3JtYW5jZSByZXN1bHRzIGlzIHF1aXRl
+IHByb21pc2luZy4gDQoNClRoYW5rcyBmb3IgeW91ciB3b3JrLCBpbmRlZWQgcGVyZm9ybWFuY2Ug
+c2VlbSB0byBiZSBwcm9taXNpbmcgISANCg0KPj5BbnkgY29tbWVudHMgb3Igc3VnZ2VzdGlvbnMg
+YXJlIGdyZWF0bHkgYXBwcmVjaWF0ZWQuIA0KDQpDb3VsZCB5b3UgZG8gdGVzdCB3aXRoIHJhbmRv
+bSBpbyB3cml0ZSB3aXRoIGxhc3QgZmlvICh3aXRoIHJiZCBzdXBwb3J0KSA/IA0KDQpodHRwOi8v
+bGlzdHMuY2VwaC5jb20vcGlwZXJtYWlsL2NlcGgtdXNlcnMtY2VwaC5jb20vMjAxNC1GZWJydWFy
+eS8wMDgxODIuaHRtbCANCj4gVGhlIGZpbyBjb21tYW5kOiBmaW8gLWRpcmVjdD0xIC1pb2RlcHRo
+PTY0IC10aHJlYWQgLXJ3PXJhbmR3cml0ZQ0KPj4gLWlvZW5naW5lPXJiZCAtYnM9NGsgLXNpemU9
+MTlHIC1udW1qb2JzPTEgLXJ1bnRpbWU9MTAwIA0KPj4gLWdyb3VwX3JlcG9ydGluZyAtbmFtZT1l
+YnNfdGVzdCAtcG9vbD1vcGVuc3RhY2sgLXJiZG5hbWU9aW1hZ2UgDQo+PiAtY2xpZW50bmFtZT1m
+aW8gLWludmFsaWRhdGU9MA0KDQoNCi0tLS0tIE1haWwgb3JpZ2luYWwgLS0tLS0gDQoNCkRlOiAi
+WGlueGluIFNodSIgPHhpbnhpbi5zaHVAaW50ZWwuY29tPiANCsOAOiBjZXBoLWRldmVsQHZnZXIu
+a2VybmVsLm9yZyANCkVudm95w6k6IEx1bmRpIDMgTWFycyAyMDE0IDAzOjA3OjE4IA0KT2JqZXQ6
+IFtSRkNdIGFkZCByb2Nrc2RiIHN1cHBvcnQgDQoNCkhpIGFsbCwgDQoNClRoaXMgcGF0Y2ggYWRk
+ZWQgcm9ja3NkYiBzdXBwb3J0IGZvciBjZXBoLCBlbmFibGVkIHJvY2tzZGIgZm9yIG9tYXAgZGly
+ZWN0b3J5LiBSb2Nrc2RiIHNvdXJjZSBjb2RlIGNhbiBiZSBnZXQgZnJvbSBsaW5rLiBUbyB1c2Ug
+dXNlIHJvY2tzZGIsIEMrKzExIHN0YW5kYXJkIHNob3VsZCBiZSBlbmFibGVkLCBnY2MgdmVyc2lv
+biA+PSA0LjcgaXMgcmVxdWlyZWQgdG8gZ2V0IEMrKzExIHN1cHBvcnQuIFJvY2tzZGIgY2FuIGJl
+IGluc3RhbGxlZCB3aXRoIGluc3RydWN0aW9ucyBkZXNjcmliZWQgaW4gdGhlIElOU1RBTEwubWQg
+ZmlsZSwgYW5kIHJvY2tzZGIgaGVhZGVyIGZpbGVzIChpbmNsdWRlL3JvY2tzZGIvKikgYW5kIGxp
+YnJhcnkgKGxpYnJvY2tzZGIuc28qKSBuZWVkIHRvIGJlIGNvcGllZCB0byBjb3JyZXNwb25kaW5n
+IGRpcmVjdG9yaWVzLiANClRvIGVuYWJsZSByb2Nrc2RiLCBhZGQgIi0td2l0aC1saWJyb2Nrc2Ri
+IiBvcHRpb24gdG8gY29uZmlndXJlLiBUaGUgcm9ja3NkYiBicmFuY2ggaXMgaGVyZShodHRwczov
+L2dpdGh1Yi5jb20veGlueGluc2gvY2VwaC90cmVlL3JvY2tzZGIpLiANCg0KDQpQZXJmb3JtYW5j
+ZSBUZXN0IA0KQXR0YWNoZWQgZmlsZSBpcyB0aGUgcGVyZm9ybWFuY2UgY29tcGFyaXNvbiBvZiBy
+b2Nrc2RiIGFuZCBsZXZlbGRiIG9uIGZvdXIgbm9kZXMgd2l0aCA0MCBvc2RzLCB1c2luZyAncmFk
+b3MgYmVuY2gnIGFzIHRoZSB0ZXN0IHRvb2wuIFRoZSBwZXJmb3JtYW5jZSByZXN1bHRzIGlzIHF1
+aXRlIHByb21pc2luZy4gDQoNCkFueSBjb21tZW50cyBvciBzdWdnZXN0aW9ucyBhcmUgZ3JlYXRs
+eSBhcHByZWNpYXRlZC4gDQoNClJhZG9zIGJlbmNoIEJhbmRXaWR0aChNQi9zKSBBdmVyYWdlIGxh
+dGVuY3kgTGV2ZWxkYiByb2Nrc2RiIExldmVsZGIgcm9ja3NkYiB3cml0ZSA0IHRocmVhZHMgMjYz
+Ljc2MiAyNzIuNTQ5IDAuMDYxIDAuMDU5IHdyaXRlIDggdGhyZWFkcyA0NDkuODM0IDQ1Ny44MTEg
+MC4wNzEgMC4wNzAgd3JpdGUgMTYgdGhyZWFkcyA2NDIuMTAwIDYzOC45NzIgMC4xMDAgMC4xMDAg
+d3JpdGUgMzIgdGhyZWFkcyA3MDUuODk3IDcxNy41OTggMC4xODEgMC4xNzggd3JpdGUgNjQgdGhy
+ZWFkcyA3MDUuMDExIDcxNy4yMDQgMC4zNzAgMC4zNjIgcmVhZCA0IHRocmVhZHMgODczLjU4OCA4
+NDEuNzA0IDAuMDczIDAuMDc2IHJlYWQgOCB0aHJlYWRzIDgxNi42OTkgODE4LjQ1MSAwLjA3OCAw
+LjA3OCByZWFkIDE2IHRocmVhZHMgODA4LjgxMCA3OTguMDUzIDAuMDc5IDAuMDgwIHJlYWQgMzIg
+dGhyZWFkcyA3OTguMzk0IDgwMi43OTYgMC4wODAgMC4wODAgcmVhZCA2NCB0aHJlYWRzIDc5Mi44
+NDggNzkwLjU5MyAwLjA4MSAwLjA4MSANCi0tIA0KVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxp
+c3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluIHRoZSBib2R5IG9m
+IGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIGlu
+Zm8gYXQgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sIA0K
