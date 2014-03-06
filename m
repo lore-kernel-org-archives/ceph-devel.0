@@ -1,32 +1,65 @@
-From: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
+From: David McBride <dwm37@cam.ac.uk>
 Subject: Re: Ceph Ansible Repo
-Date: Thu, 6 Mar 2014 11:43:54 +0100
-Message-ID: <CAJH6TXhGkK6fHyai_DMcyeYMsY3Uf4uqXyKoJwYz=_XmMpL9zw@mail.gmail.com>
-References: <FA727FEF-D416-4D0E-810F-72C72E184DC1@enovance.com>
-	<CAJH6TXiWC0yRWSgU8B0=-mNDXc0tdQ62O3=K2t+Dq5T3emSCOg@mail.gmail.com>
-	<90E136A4-51C0-4991-BC23-4ECF078D6B52@enovance.com>
-	<CAJH6TXjvu4A_1pZKfOr22M00kCx+k08uEN8JFaYrTwXRmXQjjA@mail.gmail.com>
-	<B43365B2-B0C1-4117-867B-3D7E772D30AA@enovance.com>
+Date: Thu, 06 Mar 2014 12:07:46 +0000
+Message-ID: <53186512.6080405@cam.ac.uk>
+References: <FA727FEF-D416-4D0E-810F-72C72E184DC1@enovance.com> <CAJH6TXiWC0yRWSgU8B0=-mNDXc0tdQ62O3=K2t+Dq5T3emSCOg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f175.google.com ([209.85.216.175]:46382 "EHLO
-	mail-qc0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751095AbaCFKnz (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Mar 2014 05:43:55 -0500
-Received: by mail-qc0-f175.google.com with SMTP id e16so2577798qcx.20
-        for <ceph-devel@vger.kernel.org>; Thu, 06 Mar 2014 02:43:54 -0800 (PST)
-In-Reply-To: <B43365B2-B0C1-4117-867B-3D7E772D30AA@enovance.com>
+Received: from ppsw-40.csi.cam.ac.uk ([131.111.8.140]:40393 "EHLO
+	ppsw-40.csi.cam.ac.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750714AbaCFMY1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Mar 2014 07:24:27 -0500
+In-Reply-To: <CAJH6TXiWC0yRWSgU8B0=-mNDXc0tdQ62O3=K2t+Dq5T3emSCOg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sebastien Han <sebastien.han@enovance.com>
+To: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>, Sebastien Han <sebastien.han@enovance.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Weil Sage <sage@inktank.com>, Patrick McGarry <patrick@inktank.com>
 
-2014-03-06 11:42 GMT+01:00 Sebastien Han <sebastien.han@enovance.com>:
-> Cool :)
->
-> Yes you will be able to pre-provision all the disks.
-> During the next run it will retry all the disks, some will be installed some will not therefore it will configure them :).
+On 06/03/14 09:36, Gandalf Corvotempesta wrote:
+> Hi to all.
+> Some question about ansible repo.
+>=20
+> 1. is possible to specify multiple journal devices for each OSD node?
+> We have OSD with 12 spinning disks and 2 SSD as journal. We would lik=
+e
+> to use SSD1 for OSD1 to 6 and SSD2 for OSD 7 to 12. Is this possible =
+?
 
-Perfect.
-Now the only missing thing is https://github.com/ceph/ceph-ansible/issues/5
+One option I'm currently testing is whereby the two SSDs in a node are
+stitched together into a Linux software-RAID striped array, and then
+allocate the journal partitions on the resulting /dev/md device.
+
+This is currently working well, save that the default udev rules for
+mapping OSDs explicitly skip over md journal devices; removing the
+"|md*" term in the relevant ruleset resolves this problem.  (This is in
+my workqueue to report as a bug.)
+
+This causes the IO load to be nicely balanced across the two SSDs,
+removing any hot spots, at the cost of enlarging the failure domain of
+the loss of an SSD from half a node to a full node.
+
+One potential optimization which I haven't yet investigated is to see
+whether moving the XFS filesystem journal, in addition to the OSd
+journal, might result in an improvement in performance =E2=80=94 in par=
+ticular
+on nodes which are equipped with slower 'green' drives.
+
+This is not something that ceph-deploy currently makes easy; if, as I
+expect, I find myself re-implementing the ceph-deploy functions in term=
+s
+of Ansible rules =E2=80=94 perhaps using LVM rather than GPT partitions=
+? =E2=80=94 I may
+then be able to try some experiments.
+
+Kind regards,
+David
+--=20
+David McBride <dwm37@cam.ac.uk>
+Unix Specialist, University Computing Service
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
