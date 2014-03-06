@@ -1,45 +1,33 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH] Fix for corrupted ceph cluster
-Date: Wed, 5 Mar 2014 15:12:45 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1403051512030.3593@cobra.newdream.net>
-References: <52F9C7A1.3060705@b1-systems.de> <5317AD58.1060705@b1-systems.de>
+From: Patrick McGarry <patrick@inktank.com>
+Subject: CDS Day 2 Begins!
+Date: Thu, 6 Mar 2014 01:00:33 +0100
+Message-ID: <CAP8Oy=+F2dNEn99YbYX=UadFgDP6whX_czFuEyofQLkdMvdd1A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:40275 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756732AbaCEXMq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Mar 2014 18:12:46 -0500
-In-Reply-To: <5317AD58.1060705@b1-systems.de>
+Received: from mail-pd0-f181.google.com ([209.85.192.181]:38786 "EHLO
+	mail-pd0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756211AbaCFAAd (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Mar 2014 19:00:33 -0500
+Received: by mail-pd0-f181.google.com with SMTP id p10so1710788pdj.26
+        for <ceph-devel@vger.kernel.org>; Wed, 05 Mar 2014 16:00:33 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Daniel Poelzleithner <poelzleithner@b1-systems.de>
-Cc: ceph-devel@vger.kernel.org
+To: Ceph User Committee <ceph-community@lists.ceph.com>, Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>
 
-On Thu, 6 Mar 2014, Daniel Poelzleithner wrote:
-> On 02/11/2014 07:48 AM, Daniel Poelzleithner wrote:
-> 
-> > I wrote a small patch that ignores object_trim requests when he does not
-> > find the context of this request.
-> > We have a node that fails to start permanently and there is no way to
-> > get all nodes back up.
-> [...]
-> > This is regarding bug http://tracker.ceph.com/issues/6101
-> 
-> The patch now ran for 2 weeks and the 4th node is working again.
-> I think this patch is safe to apply, but not fixing the underlying problem.
-> Some state in ceph causes the delete event to be triggered every some
-> seconds and causes a log entry to be generated.
-> 
-> Do you need more informations to find the cause ? This definitely is
-> some wired internal state and is no race condition.
+We're going to get started on Ceph Developer Day 2, which is our
+APAC-friendly day, here in a couple minutes.  If you aren't already
+tuned in, make sure you click on the appropriate session link:
 
-Can you try, instead of the discard_event, to do
+https://wiki.ceph.com/Planning/CDS/CDS_Giant_(Mar_2014)
 
-    post_event(SnapTrim());
-    return transit< WaitingOnReplicas >();
+For those who aren't able to make it, all videos should be available
+shortly after the conclusion of the sessions.  Thanks!
 
-and see if that lets it move past the bad entry?
 
-Thanks-
-sage
+Best Regards,
+
+Patrick McGarry
+Director, Community || Inktank
+http://ceph.com  ||  http://inktank.com
+@scuttlemonkey || @ceph || @inktank
