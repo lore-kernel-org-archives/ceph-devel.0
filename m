@@ -1,109 +1,133 @@
-From: Sebastien Han <sebastien.han@enovance.com>
-Subject: Re: Ceph Ansible Repo
-Date: Thu, 6 Mar 2014 17:31:14 +0100
-Message-ID: <2107CBEA-0AFA-4498-B4CB-2F904B8CE0BA@enovance.com>
-References: <FA727FEF-D416-4D0E-810F-72C72E184DC1@enovance.com>	<CAJH6TXiWC0yRWSgU8B0=-mNDXc0tdQ62O3=K2t+Dq5T3emSCOg@mail.gmail.com>	<53186512.6080405@cam.ac.uk> <CAJH6TXhSTRvn3NRqh=WXY5VdPhbW+HxPZAbUGCEqtX6rB6YFWg@mail.gmail.com> <531877FE.6040106@cam.ac.uk>
-Mime-Version: 1.0 (Mac OS X Mail 7.1 \(1827\))
-Content-Type: multipart/signed; boundary="Apple-Mail=_4E2B3378-1D95-46A1-AA19-A81877DFEF58"; protocol="application/pgp-signature"; micalg=pgp-sha512
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH 2/4] ceph: fix ceph_fh_to_parent()
+Date: Thu, 6 Mar 2014 08:32:06 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1403060830310.316@cobra.newdream.net>
+References: <1393687411-2457-1-git-send-email-zheng.z.yan@intel.com> <1393687411-2457-2-git-send-email-zheng.z.yan@intel.com> <alpine.DEB.2.00.1403050914430.17314@cobra.newdream.net> <53180472.5010201@intel.com>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mxi1.enovance.com ([94.143.114.217]:27994 "EHLO
-	mxi1.enovance.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751530AbaCFQbU (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Mar 2014 11:31:20 -0500
-In-Reply-To: <531877FE.6040106@cam.ac.uk>
+Received: from cobra.newdream.net ([66.33.216.30]:56015 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752179AbaCFQcH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Mar 2014 11:32:07 -0500
+In-Reply-To: <53180472.5010201@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: David McBride <dwm37@cam.ac.uk>
-Cc: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Weil Sage <sage@inktank.com>, Patrick McGarry <patrick@inktank.com>
+To: "Yan, Zheng" <zheng.z.yan@intel.com>
+Cc: ceph-devel@vger.kernel.org
 
+On Thu, 6 Mar 2014, Yan, Zheng wrote:
+> On 03/06/2014 01:17 AM, Sage Weil wrote:
+> > On Sat, 1 Mar 2014, Yan, Zheng wrote:
+> >> ceph_fh_to_parent() finds the inode that corresponds to the 'ino' field
+> >> of struct ceph_nfs_confh. This is wrong, it should find the inode that
+> >> corresponds to the 'parent_ino' field.
+> >>
+> >> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+> > 
+> > It's been a while since I've looked at this, but I'm a bit confused.
+> > 
+> > If we have a get_parent() operation that will reliably get the parent 
+> > directory for an inode, why do we want/need the ceph_nfs_confh?  If we 
+> > *do* have that struct and look up the parent_ino, we have no guarantee 
+> > that it is still the parent if there has been an intervening rename.  
+> > Would it be better to always use ceph_nfs_fh, and rely on LOOKUPPARENT 
+> > instead?
+> > 
+> 
+> fh_to_parent() is used when reconnecting non-directory inode. (get_parent()
+> is used when reconnecting directory inode). The problem of using LOOKUPPARENT
+> is that the inode may have multiple links. if the primary link of the inode is
+> in stray directory, LOOKUPPARENT return -ESTALE. 
 
---Apple-Mail=_4E2B3378-1D95-46A1-AA19-A81877DFEF58
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/plain;
-	charset=windows-1252
+Ah, that's true. On the other hand, though, if the file has been renamed 
+then we will return the wrong parent.  Is the idea that that is okay?  
+I suppose nfsd will repeat the lookup at some point if it needs to 
+revalidate that dentry?
 
-I believe there is a use case behind the lvm journals.
-For instance you can do:
+sage
 
-2 SSDs:
-
-* tiny mdadm raid 1 setup for the system; let=92s say /dev/sda1 and =
-/dev/sdb1
-* then you still have:
-	* /dev/sda2
-	* /dev/sdb2
-
-They can both host journals, and you usually want to manage them with =
-lvm, this is easier than managing partition.
-I just open an issue as a feature/enhancement request.
-
-https://github.com/ceph/ceph-ansible/issues/9
-
-This shouldn=92t be that difficult to implement.
-
-=96=96=96=96=20
-S=E9bastien Han=20
-Cloud Engineer=20
-
-"Always give 100%. Unless you're giving blood.=94=20
-
-Phone: +33 (0)1 49 70 99 72=20
-Mail: sebastien.han@enovance.com=20
-Address : 11 bis, rue Roqu=E9pine - 75008 Paris
-Web : www.enovance.com - Twitter : @enovance=20
-
-On 06 Mar 2014, at 14:28, David McBride <dwm37@cam.ac.uk> wrote:
-
-> On 06/03/14 13:19, Gandalf Corvotempesta wrote:
->> 2014-03-06 13:07 GMT+01:00 David McBride <dwm37@cam.ac.uk>:
->>> This causes the IO load to be nicely balanced across the two SSDs,
->>> removing any hot spots, at the cost of enlarging the failure domain =
-of
->>> the loss of an SSD from half a node to a full node.
->>=20
->> This is not a solution for me.
->> Why not using LVM with a VG striped across both SSD ?
->> I've never used LVM without raid, what happens in case of failure
->> of a phisical disks?  The whole VG is lost ?
->=20
-> Yes.  A stripe-set depends on all of the members of an array, whether
-> managed through MD or LVM.
->=20
-> Thus, in a machine with two SSDs, which are striped together, the loss
-> of *either* SSD will cause all of the OSDs hosted by that machine to =
-be
-> lost.
->=20
-> (Note: if you want to use LVM rather than GPTs on MD, you will =
-probably
-> need to remove the '|dm-*' clause from the Ceph udev rules that govern
-> OSD assembly before they will work as expected.)
->=20
-> Kind regards,
-> David
-> --=20
-> David McBride <dwm37@cam.ac.uk>
-> Unix Specialist, University Computing Service
-
-
---Apple-Mail=_4E2B3378-1D95-46A1-AA19-A81877DFEF58
-Content-Transfer-Encoding: 7bit
-Content-Disposition: attachment;
-	filename=signature.asc
-Content-Type: application/pgp-signature;
-	name=signature.asc
-Content-Description: Message signed with OpenPGP using GPGMail
-
------BEGIN PGP SIGNATURE-----
-Comment: GPGTools - https://gpgtools.org
-
-iQEcBAEBCgAGBQJTGKLTAAoJECPrkYfpbtGTE2cH/0fa3XdshVOMSvhgntIcSIZb
-f9SMgiwSmnK/myy0gNuCe0h2FQ3S7+damGvD6+yG8ku8JB7UlJiwrRaOEcUjhSkp
-ZmxVLTslAXPonm93X5JrtbE7f8DUsYfuOgiqacdNCPH2MLkcyonnARhqf1KvIaRd
-1jLtN2+incOYFMK73g3LukeqtTrh/mEB2+zal9Qd7nyci/V9Bh1wk5GDLqUJU6lu
-mn2qOqxxxpudwnrX6MKZBDAjQq2lNX9xNiyn6l1sF+gSVaeM4c41Ke4jY6Pl3/0u
-ixB2I4aNkJ53V2Q0VFv8Xu6vL1pE+fq/kWDj5kIQPBPgdz3R0Ek0HnkYly6hppg=
-=oTEX
------END PGP SIGNATURE-----
-
---Apple-Mail=_4E2B3378-1D95-46A1-AA19-A81877DFEF58--
+> 
+> > Thanks-
+> > sage
+> > 
+> > 
+> >> ---
+> >>  fs/ceph/export.c | 38 +++++---------------------------------
+> >>  1 file changed, 5 insertions(+), 33 deletions(-)
+> >>
+> >> diff --git a/fs/ceph/export.c b/fs/ceph/export.c
+> >> index 905d7f2..017af26 100644
+> >> --- a/fs/ceph/export.c
+> >> +++ b/fs/ceph/export.c
+> >> @@ -122,49 +122,21 @@ static struct dentry *ceph_fh_to_dentry(struct super_block *sb,
+> >>  }
+> >>  
+> >>  /*
+> >> - * get parent, if possible.
+> >> - *
+> >> - * FIXME: we could do better by querying the mds to discover the
+> >> - * parent.
+> >> + * convert regular fh to parent
+> >>   */
+> >>  static struct dentry *ceph_fh_to_parent(struct super_block *sb,
+> >> -					 struct fid *fid,
+> >> +					struct fid *fid,
+> >>  					int fh_len, int fh_type)
+> >>  {
+> >>  	struct ceph_nfs_confh *cfh = (void *)fid->raw;
+> >> -	struct ceph_vino vino;
+> >> -	struct inode *inode;
+> >> -	struct dentry *dentry;
+> >> -	int err;
+> >>  
+> >> -	if (fh_type == 1)
+> >> +	if (fh_type != FILEID_INO32_GEN_PARENT)
+> >>  		return ERR_PTR(-ESTALE);
+> >>  	if (fh_len < sizeof(*cfh) / 4)
+> >>  		return ERR_PTR(-ESTALE);
+> >>  
+> >> -	pr_debug("fh_to_parent %llx/%d\n", cfh->parent_ino,
+> >> -		 cfh->parent_name_hash);
+> >> -
+> >> -	vino.ino = cfh->ino;
+> >> -	vino.snap = CEPH_NOSNAP;
+> >> -	inode = ceph_find_inode(sb, vino);
+> >> -	if (!inode)
+> >> -		return ERR_PTR(-ESTALE);
+> >> -
+> >> -	dentry = d_obtain_alias(inode);
+> >> -	if (IS_ERR(dentry)) {
+> >> -		pr_err("fh_to_parent %llx -- inode %p but ENOMEM\n",
+> >> -		       cfh->ino, inode);
+> >> -		iput(inode);
+> >> -		return dentry;
+> >> -	}
+> >> -	err = ceph_init_dentry(dentry);
+> >> -	if (err < 0) {
+> >> -		iput(inode);
+> >> -		return ERR_PTR(err);
+> >> -	}
+> >> -	dout("fh_to_parent %llx %p dentry %p\n", cfh->ino, inode, dentry);
+> >> -	return dentry;
+> >> +	pr_debug("fh_to_parent %llx\n", cfh->parent_ino);
+> >> +	return __fh_to_dentry(sb, cfh->parent_ino);
+> >>  }
+> >>  
+> >>  const struct export_operations ceph_export_ops = {
+> >> -- 
+> >> 1.8.5.3
+> >>
+> >> --
+> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> >> the body of a message to majordomo@vger.kernel.org
+> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >>
+> >>
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
