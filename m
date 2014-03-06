@@ -1,133 +1,32 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH 2/4] ceph: fix ceph_fh_to_parent()
-Date: Thu, 6 Mar 2014 08:32:06 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1403060830310.316@cobra.newdream.net>
-References: <1393687411-2457-1-git-send-email-zheng.z.yan@intel.com> <1393687411-2457-2-git-send-email-zheng.z.yan@intel.com> <alpine.DEB.2.00.1403050914430.17314@cobra.newdream.net> <53180472.5010201@intel.com>
+From: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
+Subject: Re: Ceph Ansible Repo
+Date: Thu, 6 Mar 2014 17:45:23 +0100
+Message-ID: <CAJH6TXiubgAsqAgWwNVk+im4j0QFy1EGkK3OKRUC81Hw2u=qAg@mail.gmail.com>
+References: <FA727FEF-D416-4D0E-810F-72C72E184DC1@enovance.com>
+	<CAJH6TXiWC0yRWSgU8B0=-mNDXc0tdQ62O3=K2t+Dq5T3emSCOg@mail.gmail.com>
+	<53186512.6080405@cam.ac.uk>
+	<CAJH6TXhSTRvn3NRqh=WXY5VdPhbW+HxPZAbUGCEqtX6rB6YFWg@mail.gmail.com>
+	<531877FE.6040106@cam.ac.uk>
+	<2107CBEA-0AFA-4498-B4CB-2F904B8CE0BA@enovance.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:56015 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752179AbaCFQcH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Mar 2014 11:32:07 -0500
-In-Reply-To: <53180472.5010201@intel.com>
+Received: from mail-qc0-f175.google.com ([209.85.216.175]:54977 "EHLO
+	mail-qc0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750839AbaCFQpY (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Mar 2014 11:45:24 -0500
+Received: by mail-qc0-f175.google.com with SMTP id e16so3205478qcx.34
+        for <ceph-devel@vger.kernel.org>; Thu, 06 Mar 2014 08:45:23 -0800 (PST)
+In-Reply-To: <2107CBEA-0AFA-4498-B4CB-2F904B8CE0BA@enovance.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zheng.z.yan@intel.com>
-Cc: ceph-devel@vger.kernel.org
+To: Sebastien Han <sebastien.han@enovance.com>
+Cc: David McBride <dwm37@cam.ac.uk>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Weil Sage <sage@inktank.com>, Patrick McGarry <patrick@inktank.com>
 
-On Thu, 6 Mar 2014, Yan, Zheng wrote:
-> On 03/06/2014 01:17 AM, Sage Weil wrote:
-> > On Sat, 1 Mar 2014, Yan, Zheng wrote:
-> >> ceph_fh_to_parent() finds the inode that corresponds to the 'ino' field
-> >> of struct ceph_nfs_confh. This is wrong, it should find the inode that
-> >> corresponds to the 'parent_ino' field.
-> >>
-> >> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
-> > 
-> > It's been a while since I've looked at this, but I'm a bit confused.
-> > 
-> > If we have a get_parent() operation that will reliably get the parent 
-> > directory for an inode, why do we want/need the ceph_nfs_confh?  If we 
-> > *do* have that struct and look up the parent_ino, we have no guarantee 
-> > that it is still the parent if there has been an intervening rename.  
-> > Would it be better to always use ceph_nfs_fh, and rely on LOOKUPPARENT 
-> > instead?
-> > 
-> 
-> fh_to_parent() is used when reconnecting non-directory inode. (get_parent()
-> is used when reconnecting directory inode). The problem of using LOOKUPPARENT
-> is that the inode may have multiple links. if the primary link of the inode is
-> in stray directory, LOOKUPPARENT return -ESTALE. 
+2014-03-06 17:31 GMT+01:00 Sebastien Han <sebastien.han@enovance.com>:
+> They can both host journals, and you usually want to manage them with lvm, this is easier than managing partition.
+> I just open an issue as a feature/enhancement request.
 
-Ah, that's true. On the other hand, though, if the file has been renamed 
-then we will return the wrong parent.  Is the idea that that is okay?  
-I suppose nfsd will repeat the lookup at some point if it needs to 
-revalidate that dentry?
-
-sage
-
-> 
-> > Thanks-
-> > sage
-> > 
-> > 
-> >> ---
-> >>  fs/ceph/export.c | 38 +++++---------------------------------
-> >>  1 file changed, 5 insertions(+), 33 deletions(-)
-> >>
-> >> diff --git a/fs/ceph/export.c b/fs/ceph/export.c
-> >> index 905d7f2..017af26 100644
-> >> --- a/fs/ceph/export.c
-> >> +++ b/fs/ceph/export.c
-> >> @@ -122,49 +122,21 @@ static struct dentry *ceph_fh_to_dentry(struct super_block *sb,
-> >>  }
-> >>  
-> >>  /*
-> >> - * get parent, if possible.
-> >> - *
-> >> - * FIXME: we could do better by querying the mds to discover the
-> >> - * parent.
-> >> + * convert regular fh to parent
-> >>   */
-> >>  static struct dentry *ceph_fh_to_parent(struct super_block *sb,
-> >> -					 struct fid *fid,
-> >> +					struct fid *fid,
-> >>  					int fh_len, int fh_type)
-> >>  {
-> >>  	struct ceph_nfs_confh *cfh = (void *)fid->raw;
-> >> -	struct ceph_vino vino;
-> >> -	struct inode *inode;
-> >> -	struct dentry *dentry;
-> >> -	int err;
-> >>  
-> >> -	if (fh_type == 1)
-> >> +	if (fh_type != FILEID_INO32_GEN_PARENT)
-> >>  		return ERR_PTR(-ESTALE);
-> >>  	if (fh_len < sizeof(*cfh) / 4)
-> >>  		return ERR_PTR(-ESTALE);
-> >>  
-> >> -	pr_debug("fh_to_parent %llx/%d\n", cfh->parent_ino,
-> >> -		 cfh->parent_name_hash);
-> >> -
-> >> -	vino.ino = cfh->ino;
-> >> -	vino.snap = CEPH_NOSNAP;
-> >> -	inode = ceph_find_inode(sb, vino);
-> >> -	if (!inode)
-> >> -		return ERR_PTR(-ESTALE);
-> >> -
-> >> -	dentry = d_obtain_alias(inode);
-> >> -	if (IS_ERR(dentry)) {
-> >> -		pr_err("fh_to_parent %llx -- inode %p but ENOMEM\n",
-> >> -		       cfh->ino, inode);
-> >> -		iput(inode);
-> >> -		return dentry;
-> >> -	}
-> >> -	err = ceph_init_dentry(dentry);
-> >> -	if (err < 0) {
-> >> -		iput(inode);
-> >> -		return ERR_PTR(err);
-> >> -	}
-> >> -	dout("fh_to_parent %llx %p dentry %p\n", cfh->ino, inode, dentry);
-> >> -	return dentry;
-> >> +	pr_debug("fh_to_parent %llx\n", cfh->parent_ino);
-> >> +	return __fh_to_dentry(sb, cfh->parent_ino);
-> >>  }
-> >>  
-> >>  const struct export_operations ceph_export_ops = {
-> >> -- 
-> >> 1.8.5.3
-> >>
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >> the body of a message to majordomo@vger.kernel.org
-> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >>
-> >>
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+Good idea!
+But first, check my request :-D when implemented I'll try the ansible
+recipe on my cluster
