@@ -1,66 +1,44 @@
-From: Li Wang <liwang@ubuntukylin.com>
+From: Sage Weil <sage@inktank.com>
 Subject: Re: contraining crush placement possibilities
-Date: Fri, 07 Mar 2014 12:35:05 +0800
-Message-ID: <53194C79.20304@ubuntukylin.com>
-References: <alpine.DEB.2.00.1403061227080.17325@cobra.newdream.net> <5319423B.7030402@ubuntukylin.com> <531942CF.2010202@ubuntukylin.com>
+Date: Thu, 6 Mar 2014 21:03:05 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1403062055200.24219@cobra.newdream.net>
+References: <alpine.DEB.2.00.1403061227080.17325@cobra.newdream.net> <5319423B.7030402@ubuntukylin.com> <531942CF.2010202@ubuntukylin.com> <53194C79.20304@ubuntukylin.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from m199-177.yeah.net ([123.58.177.199]:44109 "EHLO
-	m199-177.yeah.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751003AbaCGEfO (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Mar 2014 23:35:14 -0500
-In-Reply-To: <531942CF.2010202@ubuntukylin.com>
+Received: from cobra.newdream.net ([66.33.216.30]:36868 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751013AbaCGFDH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Mar 2014 00:03:07 -0500
+In-Reply-To: <53194C79.20304@ubuntukylin.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
+To: Li Wang <liwang@ubuntukylin.com>
+Cc: ceph-devel@vger.kernel.org
 
-Sorry, it is (n/3)*(n/3)*(n/3)/Cn3 = n^3/(27*Cn3)
+On Fri, 7 Mar 2014, Li Wang wrote:
+> Sorry, it is (n/3)*(n/3)*(n/3)/Cn3 = n^3/(27*Cn3)
 
-On 2014/3/7 11:53, Li Wang wrote:
-> Provided 3 osds are down simultaneously
->
-> On 2014/3/7 11:51, Li Wang wrote:
->> Just had a quick look. It seems crush could meet the demand,
->> say, if we have 100 osds, replica_num is 3, then we partition the
->> 100 osds into 3 trees, 'take' iterates on the 3 trees, for each tree,
->> select 1 osd. Then the probability of losing data is at most n*n*n/Cn3,
->> can we make it better?
->>
->>
->> On 2014/3/7 4:30, Sage Weil wrote:
->>> During the CRUSH CDS session yesterday I talked a bit about the
->>> desire to
->>> constrain the number of possible disk combinations so that we reduce the
->>> probability of a concurrent failure from causing data loss.  Sheldon
->>> just
->>> pointed out a talk from ATC that discusses the basic problem:
->>>
->>>
->>> https://www.usenix.org/conference/atc13/technical-sessions/presentation/cidon
->>>
->>>
->>>
->>> The situation with CRUSH is slightly better, I think, because the number
->>> of peers for a given OSD in a large cluster is bounded (pg_num /
->>> num_osds), but I think we may still be able improve things.
->>>
->>> Last night it occurred to me that this is almost just having pgp_num <
->>> pg_num, but I think that's not quite right either.
->>>
->>> If anyone has some clear intuition here, would love to hear it.  If
->>> there
->>> is anything we can do to improve things we definitely want to do it!
->>>
->>> sage
->>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Cn3 is "n choose 3"?
+
+> > > > Last night it occurred to me that this is almost just having 
+> > > > pgp_num < pg_num, but I think that's not quite right either.
+
+Actually, maybe it is.  Basically, say there are X combinations of 3 disks 
+= n choose 3.  Some fraction of these, say Y, are actually used by CRUSH.  
+If we are to reduce that number, that implies that there are some PGs that 
+are overlapping on the same set of disks.  Which more or less reduces to 
+the case where pgp_num < pg_num, or the hashpspool flag isn't set, or any 
+other behavior that makes more than one PG line up on the same disk.  
+Just using fewer PGs in the system, in fact, would help here.  The main 
+problem is that doing this tends to make the distribution less uniform, so 
+there is a tradeoff.
+
+There is a reliability model in ceph-tools.git at
+
+	https://github.com/ceph/ceph-tools/tree/master/models/reliability
+
+that Mark Kampe built last year.  Sadly I haven't looked at it closely so 
+I'm not sure if it captures this.
+
+sage
