@@ -1,79 +1,54 @@
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: Re: LOOKUPPARENT
-Date: Fri, 07 Mar 2014 08:15:44 +0800
-Message-ID: <53190FB0.2060902@intel.com>
-References: <alpine.DEB.2.00.1403061441340.3593@cobra.newdream.net>
+From: Li Wang <liwang@ubuntukylin.com>
+Subject: Re: contraining crush placement possibilities
+Date: Fri, 07 Mar 2014 11:53:51 +0800
+Message-ID: <531942CF.2010202@ubuntukylin.com>
+References: <alpine.DEB.2.00.1403061227080.17325@cobra.newdream.net> <5319423B.7030402@ubuntukylin.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:20573 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751359AbaCGARe (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 6 Mar 2014 19:17:34 -0500
-In-Reply-To: <alpine.DEB.2.00.1403061441340.3593@cobra.newdream.net>
+Received: from m199-177.yeah.net ([123.58.177.199]:59610 "EHLO
+	m199-177.yeah.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752186AbaCGD7v (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Mar 2014 22:59:51 -0500
+In-Reply-To: <5319423B.7030402@ubuntukylin.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
 
-On 03/07/2014 06:44 AM, Sage Weil wrote:
-> Hey Zheng,
-> 
-> The recent patch that changed LOOKUPPARENT probably broke getcwd() in 
-> Client.cc:
-> 
-> void Client::getcwd(string& dir)
-> {
->   filepath path;
->   ldout(cct, 10) << "getcwd " << *cwd << dendl;
-> 
->   Inode *in = cwd;
->   while (in != root) {
->     assert(in->dn_set.size() < 2); // dirs can't be hard-linked
->     Dentry *dn = in->get_first_parent();
->     if (!dn) {
->       // look it up
->       ldout(cct, 10) << "getcwd looking up parent for " << *in << dendl;
->       MetaRequest *req = new MetaRequest(CEPH_MDS_OP_LOOKUPPARENT);
->       filepath path(in->ino);
->       req->set_filepath(path);
->       req->set_inode(in);
->       int res = make_request(req, -1, -1);
->       if (res < 0)
-> 	break;
-> 
->       // start over
->       path = filepath();
->       in = cwd;
->       continue;
->     }
->     path.push_front_dentry(dn->name);
->     in = dn->dir->parent_inode;
->   }
->   dir = "/";
->   dir += path.get_path();
-> }
-> 
-> The old version would return the diri + dentry + in, the new version just 
-> returns dir.   I don't see an old user in the kernel code, but I wonder if 
-> we should 
-> 
-> - keep the old semantics (diri + dentry + in) and make the kernel 
-> essentially ignore this information, or
-> 
-> - change getcwd to use LOOKUPINO + WANT_DENTRY to make it work.
+Provided 3 osds are down simultaneously
 
-I prefer to change getcwd. The problem of old LOOKUPPARENT semantic is that
-client can't lock the parent inode in advance, This breaks VFS locking rules
-for lookup.
-
-I added the getcwd fix to https://github.com/ceph/ceph/pull/1385
-
-Regards
-Yan, Zheng
-
-> 
-> ?
-> sage
-> 
-
+On 2014/3/7 11:51, Li Wang wrote:
+> Just had a quick look. It seems crush could meet the demand,
+> say, if we have 100 osds, replica_num is 3, then we partition the
+> 100 osds into 3 trees, 'take' iterates on the 3 trees, for each tree,
+> select 1 osd. Then the probability of losing data is at most n*n*n/Cn3,
+> can we make it better?
+>
+>
+> On 2014/3/7 4:30, Sage Weil wrote:
+>> During the CRUSH CDS session yesterday I talked a bit about the desire to
+>> constrain the number of possible disk combinations so that we reduce the
+>> probability of a concurrent failure from causing data loss.  Sheldon just
+>> pointed out a talk from ATC that discusses the basic problem:
+>>
+>>     https://www.usenix.org/conference/atc13/technical-sessions/presentation/cidon
+>>
+>>
+>> The situation with CRUSH is slightly better, I think, because the number
+>> of peers for a given OSD in a large cluster is bounded (pg_num /
+>> num_osds), but I think we may still be able improve things.
+>>
+>> Last night it occurred to me that this is almost just having pgp_num <
+>> pg_num, but I think that's not quite right either.
+>>
+>> If anyone has some clear intuition here, would love to hear it.  If there
+>> is anything we can do to improve things we definitely want to do it!
+>>
+>> sage
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
