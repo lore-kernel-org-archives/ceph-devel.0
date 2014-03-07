@@ -1,16 +1,16 @@
 From: lianghaoshen <lianghaoshen@ubuntukylin.com>
 Subject: Re: contraining crush placement possibilities
-Date: Fri, 07 Mar 2014 16:32:48 +0800
-Message-ID: <53198430.9030409@ubuntukylin.com>
+Date: Fri, 07 Mar 2014 16:37:05 +0800
+Message-ID: <53198531.1030106@ubuntukylin.com>
 References: <alpine.DEB.2.00.1403061227080.17325@cobra.newdream.net> <5319423B.7030402@ubuntukylin.com> <531942CF.2010202@ubuntukylin.com> <53194C79.20304@ubuntukylin.com> <alpine.DEB.2.00.1403062055200.24219@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from m53-178.qiye.163.com ([123.58.178.53]:33629 "EHLO
+Received: from m53-178.qiye.163.com ([123.58.178.53]:36356 "EHLO
 	m53-178.qiye.163.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750926AbaCGIj1 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Mar 2014 03:39:27 -0500
+	with ESMTP id S1751763AbaCGIod (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Mar 2014 03:44:33 -0500
 In-Reply-To: <alpine.DEB.2.00.1403062055200.24219@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
