@@ -1,95 +1,188 @@
-From: "J. Bruce Fields" <bfields-uC3wQj2KruNg9hUCZPvPmw@public.gmane.org>
-Subject: Re: [PATCH][RESEND] vfs: Make __d_materialise_dentry() set the
- materialised dentry name correctly
-Date: Fri, 7 Mar 2014 14:01:36 -0500
-Message-ID: <20140307190136.GB30256@fieldses.org>
-References: <1394115376-17109-1-git-send-email-zheng.z.yan@intel.com>
- <6487FCC2-FB5C-4A32-94EF-5D3352A39781@primarydata.com>
- <20140307185552.GA30256@fieldses.org>
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: Re: [PATCH v2 0/5] ceph: fixes for nfs export
+Date: Sat, 08 Mar 2014 08:01:01 +0800
+Message-ID: <531A5DBD.3040007@intel.com>
+References: <1394183077-399-1-git-send-email-zheng.z.yan@intel.com> <alpine.DEB.2.00.1403070657430.24219@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20140307185552.GA30256-uC3wQj2KruNg9hUCZPvPmw@public.gmane.org>
-Sender: linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Trond Myklebust <trond.myklebust-7I+n7zu2hftEKMMhf/gKZA@public.gmane.org>
-Cc: "Yan, Zheng" <zheng.z.yan-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Viro Alexander <viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org>, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mga01.intel.com ([192.55.52.88]:9557 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751581AbaCHABH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 7 Mar 2014 19:01:07 -0500
+In-Reply-To: <alpine.DEB.2.00.1403070657430.24219@cobra.newdream.net>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Fri, Mar 07, 2014 at 01:55:52PM -0500, J. Bruce Fields wrote:
-> On Thu, Mar 06, 2014 at 09:35:01AM -0500, Trond Myklebust wrote:
-> >=20
-> > On Mar 6, 2014, at 9:16, Yan, Zheng <zheng.z.yan-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
-> >=20
-> > > From: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> > >=20
-> > > Make __d_materialise_dentry() set the materialised dentry name co=
-rrectly by
-> > > flipping the arguments to switch_names().
-> > >=20
-> > > switch_names() is lazy: if both names are internal to their dentr=
-ies, it'll
-> > > overwrite that of the first dentry with that of the second, and w=
-on't update
-> > > that of the second.
-> > >=20
-> > > In the case of __d_materialise_dentry(), the second is an already=
- extant
-> > > anonymous dentry that we want to insert into the tree in place of=
- the dentry we
-> > > just looked up[*].  However, the dentry we just looked up carries=
- the name we
-> > > actually want to use.
-> > >=20
-> > > [*] This is used by NFS to join a mount of a subtree into a mount=
- of a tree
-> > > nearer the root when the two meet, where both mounts share a supe=
-rblock and
-> > > thus a set of dentries.
-> > >=20
-> > > Signed-off-by: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> > > ---
-> > > fs/dcache.c | 2 +-
-> > > 1 file changed, 1 insertion(+), 1 deletion(-)
-> > >=20
-> > > diff --git a/fs/dcache.c b/fs/dcache.c
-> > > index 265e0ce..ff779d4 100644
-> > > --- a/fs/dcache.c
-> > > +++ b/fs/dcache.c
-> > > @@ -2698,7 +2698,7 @@ static void __d_materialise_dentry(struct d=
-entry *dentry, struct dentry *anon)
-> > >=20
-> > > 	dparent =3D dentry->d_parent;
-> > >=20
-> > > -	switch_names(dentry, anon);
-> > > +	switch_names(anon, dentry);
-> > > 	swap(dentry->d_name.hash, anon->d_name.hash);
-> > >=20
-> > > 	dentry->d_parent =3D dentry;
-> >=20
-> > Well spotted...
-> >=20
-> > We ought to better document the fact that =E2=80=99switch_names=E2=80=
-=99 is asymmetrical. Perhaps change it to =E2=80=98update_target_name=E2=
-=80=99, and then switch the argument names so that the =E2=80=99target=E2=
-=80=99 really is the thing that gets updated?
->=20
-> Probably not worth it if Miklos's RENAME_EXCHANGE operation is making=
- it
-> symmetrical soon anyway?:
->=20
-> 	http://mid.gmane.org/<1380643239-16060-4-git-send-email-miklos@szere=
-di.hu>
+how about the below patch and corresponding mds change in
+https://github.com/ceph/ceph/commit/617ce6761edd7264893f3638c33fd229c71751a0
 
-To clarify: I mean, the suggested cleanup may not be worth it.  The
-__d_materialise_dentry bugfix of course is.
+Regards
+Yan, Zheng
 
-(What I wonder about is the duplication between this and __d_move.  Is
-there any way to make d_materialise_unique a special case of d_move?)
+---
+From 0fa1971741b1d3c236ee6fa3a7feb5a74fbd7f2f Mon Sep 17 00:00:00 2001
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Date: Thu, 6 Mar 2014 16:40:32 +0800
+Subject: [PATCH 1/3] ceph: add get_name() NFS export callback
 
---b.
---
-To unsubscribe from this list: send the line "unsubscribe linux-nfs" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Use the newly introduced LOOKUPNAME MDS request to connect child
+inode to its parent directory.
+
+Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+---
+ fs/ceph/export.c             | 40 ++++++++++++++++++++++++++++++++++
+ fs/ceph/inode.c              | 51 +++++++++++++++++++++++++++++++++++++++++++-
+ fs/ceph/strings.c            |  1 +
+ include/linux/ceph/ceph_fs.h |  1 +
+ 4 files changed, 92 insertions(+), 1 deletion(-)
+
+diff --git a/fs/ceph/export.c b/fs/ceph/export.c
+index 6e611e7..bf36e7f 100644
+--- a/fs/ceph/export.c
++++ b/fs/ceph/export.c
+@@ -195,9 +195,49 @@ static struct dentry *ceph_fh_to_parent(struct super_block *sb,
+ 	return dentry;
+ }
+ 
++static int ceph_get_name(struct dentry *parent, char *name,
++			 struct dentry *child)
++{
++	struct ceph_mds_client *mdsc;
++	struct ceph_mds_request *req;
++	int err;
++
++	mdsc = ceph_inode_to_client(child->d_inode)->mdsc;
++	req = ceph_mdsc_create_request(mdsc, CEPH_MDS_OP_LOOKUPNAME,
++				       USE_ANY_MDS);
++	if (IS_ERR(req))
++		return PTR_ERR(req);
++
++	mutex_lock(&parent->d_inode->i_mutex);
++
++	req->r_inode = child->d_inode;
++	ihold(child->d_inode);
++	req->r_ino2 = ceph_vino(parent->d_inode);
++	req->r_locked_dir = parent->d_inode;
++	req->r_num_caps = 1;
++	err = ceph_mdsc_do_request(mdsc, NULL, req);
++
++	mutex_unlock(&parent->d_inode->i_mutex);
++
++	if (!err) {
++		struct ceph_mds_reply_info_parsed *rinfo = &req->r_reply_info;
++		memcpy(name, rinfo->dname, rinfo->dname_len);
++		name[rinfo->dname_len] = 0;
++		dout("get_name %p ino %llx.%llx name %s\n",
++		     child, ceph_vinop(child->d_inode), name);
++	} else {
++		dout("get_name %p ino %llx.%llx err %d\n",
++		     child, ceph_vinop(child->d_inode), err);
++	}
++
++	ceph_mdsc_put_request(req);
++	return err;
++}
++
+ const struct export_operations ceph_export_ops = {
+ 	.encode_fh = ceph_encode_fh,
+ 	.fh_to_dentry = ceph_fh_to_dentry,
+ 	.fh_to_parent = ceph_fh_to_parent,
+ 	.get_parent = ceph_get_parent,
++	.get_name = ceph_get_name,
+ };
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index 8bf2384..91d6c9d 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -1044,10 +1044,59 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req,
+ 					 session, req->r_request_started, -1,
+ 					 &req->r_caps_reservation);
+ 			if (err < 0)
+-				return err;
++				goto done;
+ 		} else {
+ 			WARN_ON_ONCE(1);
+ 		}
++
++		if (dir && req->r_op == CEPH_MDS_OP_LOOKUPNAME) {
++			struct qstr dname;
++			struct dentry *dn, *parent;
++
++			BUG_ON(!rinfo->head->is_target);
++			BUG_ON(req->r_dentry);
++
++			parent = d_find_any_alias(dir);
++			BUG_ON(!parent);
++
++			dname.name = rinfo->dname;
++			dname.len = rinfo->dname_len;
++			dname.hash = full_name_hash(dname.name, dname.len);
++			vino.ino = le64_to_cpu(rinfo->targeti.in->ino);
++			vino.snap = le64_to_cpu(rinfo->targeti.in->snapid);
++retry_lookup:
++			dn = d_lookup(parent, &dname);
++			dout("d_lookup on parent=%p name=%.*s got %p\n",
++			     parent, dname.len, dname.name, dn);
++
++			if (!dn) {
++				dn = d_alloc(parent, &dname);
++				dout("d_alloc %p '%.*s' = %p\n", parent,
++				     dname.len, dname.name, dn);
++				if (dn == NULL) {
++					dput(parent);
++					err = -ENOMEM;
++					goto done;
++				}
++				err = ceph_init_dentry(dn);
++				if (err < 0) {
++					dput(dn);
++					dput(parent);
++					goto done;
++				}
++			} else if (dn->d_inode &&
++				   (ceph_ino(dn->d_inode) != vino.ino ||
++				    ceph_snap(dn->d_inode) != vino.snap)) {
++				dout(" dn %p points to wrong inode %p\n",
++				     dn, dn->d_inode);
++				d_delete(dn);
++				dput(dn);
++				goto retry_lookup;
++			}
++
++			req->r_dentry = dn;
++			dput(parent);
++		}
+ 	}
+ 
+ 	if (rinfo->head->is_target) {
+diff --git a/fs/ceph/strings.c b/fs/ceph/strings.c
+index 4440f447..51cc23e 100644
+--- a/fs/ceph/strings.c
++++ b/fs/ceph/strings.c
+@@ -54,6 +54,7 @@ const char *ceph_mds_op_name(int op)
+ 	case CEPH_MDS_OP_LOOKUPHASH:  return "lookuphash";
+ 	case CEPH_MDS_OP_LOOKUPPARENT:  return "lookupparent";
+ 	case CEPH_MDS_OP_LOOKUPINO:  return "lookupino";
++	case CEPH_MDS_OP_LOOKUPNAME:  return "lookupname";
+ 	case CEPH_MDS_OP_GETATTR:  return "getattr";
+ 	case CEPH_MDS_OP_SETXATTR: return "setxattr";
+ 	case CEPH_MDS_OP_SETATTR: return "setattr";
+diff --git a/include/linux/ceph/ceph_fs.h b/include/linux/ceph/ceph_fs.h
+index 25bfb0e..35f345f 100644
+--- a/include/linux/ceph/ceph_fs.h
++++ b/include/linux/ceph/ceph_fs.h
+@@ -332,6 +332,7 @@ enum {
+ 	CEPH_MDS_OP_LOOKUPHASH = 0x00102,
+ 	CEPH_MDS_OP_LOOKUPPARENT = 0x00103,
+ 	CEPH_MDS_OP_LOOKUPINO  = 0x00104,
++	CEPH_MDS_OP_LOOKUPNAME = 0x00105,
+ 
+ 	CEPH_MDS_OP_SETXATTR   = 0x01105,
+ 	CEPH_MDS_OP_RMXATTR    = 0x01106,
+-- 
+1.8.5.3
+
