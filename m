@@ -1,48 +1,26 @@
 From: "Yan, Zheng" <zheng.z.yan@intel.com>
 Subject: Re: [PATCH v2 0/5] ceph: fixes for nfs export
-Date: Mon, 10 Mar 2014 11:18:17 +0800
-Message-ID: <531D2EF9.5040300@intel.com>
-References: <1394183077-399-1-git-send-email-zheng.z.yan@intel.com> <alpine.DEB.2.00.1403070657430.24219@cobra.newdream.net> <531A5DBD.3040007@intel.com> <alpine.DEB.2.00.1403091841040.24219@cobra.newdream.net>
+Date: Mon, 10 Mar 2014 11:23:08 +0800
+Message-ID: <531D301C.9020301@intel.com>
+References: <1394183077-399-1-git-send-email-zheng.z.yan@intel.com> <alpine.DEB.2.00.1403070657430.24219@cobra.newdream.net> <531A5DBD.3040007@intel.com> <alpine.DEB.2.00.1403091845570.24219@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:38514 "EHLO mga09.intel.com"
+Received: from mga09.intel.com ([134.134.136.24]:25615 "EHLO mga09.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752403AbaCJDST (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 9 Mar 2014 23:18:19 -0400
-In-Reply-To: <alpine.DEB.2.00.1403091841040.24219@cobra.newdream.net>
+	id S1752721AbaCJDXK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 9 Mar 2014 23:23:10 -0400
+In-Reply-To: <alpine.DEB.2.00.1403091845570.24219@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-On 03/10/2014 09:43 AM, Sage Weil wrote:
+On 03/10/2014 09:49 AM, Sage Weil wrote:
 > On Sat, 8 Mar 2014, Yan, Zheng wrote:
 >> how about the below patch and corresponding mds change in
 >> https://github.com/ceph/ceph/commit/617ce6761edd7264893f3638c33fd229c71751a0
-> 
-> I like this better, thanks!
-> 
-> One question, though: in the LOOKUPNAME case, the client will already have 
-> a cap on both the parent and child inode, right?  (IIUC, it will have done 
-> a LOOKUPINO on the fh/child, then LOOKUPPARENT to get a cap for the 
-> parent inode, and then a LOOKUPNAME to validate the name.
-> 
-> Is the reason you still do MDCache::open_ino() because we can't assume 
-> that the parent and child are on the same MDS?
-
-For the LOOKUPNAME case, MDCache::open_ino() is not needed. I'm lazy to write
-separate function for LOOKUPNAME.
-
-Regards
-Yan, Zheng
-
-> 
-> Thanks!
-> sage
-> 
-> 
 >>
 >> Regards
 >> Yan, Zheng
@@ -102,6 +80,31 @@ Yan, Zheng
 >> +		name[rinfo->dname_len] = 0;
 >> +		dout("get_name %p ino %llx.%llx name %s\n",
 >> +		     child, ceph_vinop(child->d_inode), name);
+> 
+> One other oddity here: the MDS is returning a bunch of metadata about the 
+> dentry, including (in most cases) a lease.  The client is ignoring all of 
+> that and only needs the name itself to feed back into exportfs.  I believe 
+> at this point that is fine: the client can forget leases at any time and 
+> will respond to MDS revocations accordingly.
+> 
+> It would probably require a bit of a kludge on the MDS side to make the 
+> reply_request() respond with the dentry name but prevent a lease from 
+> being issued.  Might be worth it though?  Maybe a generic "no lease" flag 
+> that even regular LOOKUP could use (if for some reason the client didn't 
+> want a lease)?
+> 
+> This needn't hold up the other patches, but I'm curious what you think 
+> about it.
+> 
+
+the nfsd does a dentry lookup after it has got the name. the lease can avoid
+sending another 'lookup' request to the MDS.
+
+Regards
+Yan, Zheng
+
+> 
+> 
 >> +	} else {
 >> +		dout("get_name %p ino %llx.%llx err %d\n",
 >> +		     child, ceph_vinop(child->d_inode), err);
@@ -209,6 +212,11 @@ Yan, Zheng
 >>  	CEPH_MDS_OP_RMXATTR    = 0x01106,
 >> -- 
 >> 1.8.5.3
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >>
 >>
 
