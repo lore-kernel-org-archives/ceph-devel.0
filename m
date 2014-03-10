@@ -1,246 +1,108 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: [PATCH v2] ceph: use fl->fl_file as owner identifier of flock and
- posix lock
-Date: Mon, 10 Mar 2014 10:44:26 -0700
-Message-ID: <CAPYLRzjv36PwZHS7n9_PVsr-u-gJNHdxymxYDe2TLA1gEgG_gQ@mail.gmail.com>
-References: <1394467858-20373-1-git-send-email-zheng.z.yan@intel.com>
+From: David Moreau Simard <dmsimard@iweb.com>
+Subject: Re: Ceph Puppet modules (again)
+Date: Mon, 10 Mar 2014 18:27:05 +0000
+Message-ID: <8DCDD03F-3796-4D2D-813D-A4338C921C68@iweb.com>
+References: <CAPUexz9vuQ7Z91i8wwR1d9heuvkmTp9=q4GSRkNZaMV2M4Tz1Q@mail.gmail.com>
+ <62443690-E16C-4322-A5D7-6C91C84CED6C@iweb.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=Windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f178.google.com ([209.85.216.178]:35413 "EHLO
-	mail-qc0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754481AbaCJRo1 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Mar 2014 13:44:27 -0400
-Received: by mail-qc0-f178.google.com with SMTP id i8so8241425qcq.9
-        for <ceph-devel@vger.kernel.org>; Mon, 10 Mar 2014 10:44:26 -0700 (PDT)
-In-Reply-To: <1394467858-20373-1-git-send-email-zheng.z.yan@intel.com>
+Received: from bmx1.iweb.com ([70.38.127.135]:36871 "EHLO bmx1.iweb.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752663AbaCJS1H convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Mar 2014 14:27:07 -0400
+In-Reply-To: <62443690-E16C-4322-A5D7-6C91C84CED6C@iweb.com>
+Content-Language: en-US
+Content-ID: <FB6B42B43843A847BD6D09D6517DF252@corp.iweb.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zheng.z.yan@intel.com>
+To: Florian Haas <florian@hastexo.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Okay, this problem makes sense to me and I think your basic approach
-is good. I've got no problem with it after all. :)
+The initial plan was to stop the fragmentation and centralize efforts i=
+n the stackforge module. I think we were all able to agree on that.
+We=92ve had rather long discussions on the mailing list (https://groups=
+=2Egoogle.com/a/puppetlabs.com/forum/#!topic/puppet-openstack/ibnrmXBAx=
+Vg) and eventually drafted a blueprint:https://wiki.openstack.org/wiki/=
+Puppet-openstack/ceph-blueprint
 
-Just throwing this out there, if we're worried about exposing kernel
-addresses to external processes, and don't want them to collide,
-should we just keep a mapping of owner->fl_file?
--Greg
-Software Engineer #42 @ http://inktank.com | http://ceph.com
+As far as licensing goes, Enovance=92s puppet-ceph was told to become A=
+pache2 to make it easier to pull code from their version of puppet-ceph=
+ and it=92s many forks and branches (including DTAG=92s).
+As far as I can remember, Sebastien Han told me they had agreed with th=
+eir contributors to change the license to Apache2 but I have not seen t=
+hat happening.
 
+I for one welcomed the stackforge initiative but have had limited resou=
+rces to actually contribute new code only recently.
+I provide insight and reviews currently.
 
-On Mon, Mar 10, 2014 at 9:10 AM, Yan, Zheng <zheng.z.yan@intel.com> wrote:
-> flock and posix lock should use fl->fl_file instead of process ID
-> as owner identifier. (posix lock uses fl->fl_owner. fl->fl_owner
-> is usually equal to fl->fl_file, but it also can be a customized
-> value). The process ID of who holds the lock is just for F_GETLK
-> fcntl(2).
->
-> The fix is rename the 'pid' fields of struct ceph_mds_request_args
-> and struct ceph_filelock to 'owner', rename 'pid_namespace' fields
-> to 'pid'. Assign MD5 hashed fl->fl_file to the 'owner' field of
-> lock messages.
->
-> The MDS counterpart of this patch modifies the flock code to not
-> take the 'pid_namespace' into consideration when checking conflict
-> locks.
->
-> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
-> ---
->  fs/ceph/locks.c              | 62 ++++++++++++++++++++++++++++++--------------
->  fs/ceph/super.c              |  1 +
->  fs/ceph/super.h              |  1 +
->  include/linux/ceph/ceph_fs.h |  4 +--
->  4 files changed, 46 insertions(+), 22 deletions(-)
->
-> diff --git a/fs/ceph/locks.c b/fs/ceph/locks.c
-> index f91a569a..d04b322 100644
-> --- a/fs/ceph/locks.c
-> +++ b/fs/ceph/locks.c
-> @@ -2,11 +2,32 @@
->
->  #include <linux/file.h>
->  #include <linux/namei.h>
-> +#include <linux/cryptohash.h>
->
->  #include "super.h"
->  #include "mds_client.h"
->  #include <linux/ceph/pagelist.h>
->
-> +static u32 lock_secret[MD5_MESSAGE_BYTES / 4] ____cacheline_aligned;
-> +
-> +void __init ceph_flock_init(void)
-> +{
-> +       get_random_bytes(lock_secret, sizeof(lock_secret));
-> +}
-> +
-> +static u64 ceph_secure_addr(void *addr)
-> +{
-> +       u32 hash[MD5_DIGEST_WORDS];
-> +       u64 *ptr = (u64*)hash;
-> +
-> +       *ptr = (unsigned long)addr;
-> +       hash[2] = lock_secret[14];
-> +       hash[3] = lock_secret[15];
-> +       md5_transform(hash, lock_secret);
-> +
-> +       return *ptr;
-> +}
-> +
->  /**
->   * Implement fcntl and flock locking functions.
->   */
-> @@ -14,11 +35,11 @@ static int ceph_lock_message(u8 lock_type, u16 operation, struct file *file,
->                              int cmd, u8 wait, struct file_lock *fl)
->  {
->         struct inode *inode = file_inode(file);
-> -       struct ceph_mds_client *mdsc =
-> -               ceph_sb_to_client(inode->i_sb)->mdsc;
-> +       struct ceph_mds_client *mdsc = ceph_sb_to_client(inode->i_sb)->mdsc;
->         struct ceph_mds_request *req;
->         int err;
->         u64 length = 0;
-> +       u64 owner;
->
->         req = ceph_mdsc_create_request(mdsc, operation, USE_AUTH_MDS);
->         if (IS_ERR(req))
-> @@ -32,25 +53,27 @@ static int ceph_lock_message(u8 lock_type, u16 operation, struct file *file,
->         else
->                 length = fl->fl_end - fl->fl_start + 1;
->
-> -       dout("ceph_lock_message: rule: %d, op: %d, pid: %llu, start: %llu, "
-> -            "length: %llu, wait: %d, type: %d", (int)lock_type,
-> -            (int)operation, (u64)fl->fl_pid, fl->fl_start,
-> -            length, wait, fl->fl_type);
-> +       if (lock_type == CEPH_LOCK_FCNTL)
-> +               owner = ceph_secure_addr(fl->fl_owner);
-> +       else
-> +               owner = ceph_secure_addr(fl->fl_file);
-> +
-> +       dout("ceph_lock_message: rule: %d, op: %d, owner: %llu, pid: %llu, "
-> +            "start: %llu, length: %llu, wait: %d, type: %d", (int)lock_type,
-> +            (int)operation, owner, (u64)fl->fl_pid, fl->fl_start, length,
-> +            wait, fl->fl_type);
->
->         req->r_args.filelock_change.rule = lock_type;
->         req->r_args.filelock_change.type = cmd;
-> +       req->r_args.filelock_change.owner = cpu_to_le64(owner);
->         req->r_args.filelock_change.pid = cpu_to_le64((u64)fl->fl_pid);
-> -       /* This should be adjusted, but I'm not sure if
-> -          namespaces actually get id numbers*/
-> -       req->r_args.filelock_change.pid_namespace =
-> -               cpu_to_le64((u64)(unsigned long)fl->fl_nspid);
->         req->r_args.filelock_change.start = cpu_to_le64(fl->fl_start);
->         req->r_args.filelock_change.length = cpu_to_le64(length);
->         req->r_args.filelock_change.wait = wait;
->
->         err = ceph_mdsc_do_request(mdsc, inode, req);
->
-> -       if ( operation == CEPH_MDS_OP_GETFILELOCK){
-> +       if (operation == CEPH_MDS_OP_GETFILELOCK) {
->                 fl->fl_pid = le64_to_cpu(req->r_reply_info.filelock_reply->pid);
->                 if (CEPH_LOCK_SHARED == req->r_reply_info.filelock_reply->type)
->                         fl->fl_type = F_RDLCK;
-> @@ -93,8 +116,7 @@ int ceph_lock(struct file *file, int cmd, struct file_lock *fl)
->         if (__mandatory_lock(file->f_mapping->host) && fl->fl_type != F_UNLCK)
->                 return -ENOLCK;
->
-> -       fl->fl_nspid = get_pid(task_tgid(current));
-> -       dout("ceph_lock, fl_pid:%d", fl->fl_pid);
-> +       dout("ceph_lock, fl_owner: %p", fl->fl_owner);
->
->         /* set wait bit as appropriate, then make command as Ceph expects it*/
->         if (IS_GETLK(cmd))
-> @@ -111,7 +133,7 @@ int ceph_lock(struct file *file, int cmd, struct file_lock *fl)
->
->         err = ceph_lock_message(CEPH_LOCK_FCNTL, op, file, lock_cmd, wait, fl);
->         if (!err) {
-> -               if ( op != CEPH_MDS_OP_GETFILELOCK ){
-> +               if (op != CEPH_MDS_OP_GETFILELOCK) {
->                         dout("mds locked, locking locally");
->                         err = posix_lock_file(file, fl, NULL);
->                         if (err && (CEPH_MDS_OP_SETFILELOCK == op)) {
-> @@ -145,8 +167,7 @@ int ceph_flock(struct file *file, int cmd, struct file_lock *fl)
->         if (__mandatory_lock(file->f_mapping->host) && fl->fl_type != F_UNLCK)
->                 return -ENOLCK;
->
-> -       fl->fl_nspid = get_pid(task_tgid(current));
-> -       dout("ceph_flock, fl_pid:%d", fl->fl_pid);
-> +       dout("ceph_flock, fl_file: %p", fl->fl_file);
->
->         if (IS_SETLKW(cmd))
->                 wait = 1;
-> @@ -289,13 +310,14 @@ int lock_to_ceph_filelock(struct file_lock *lock,
->                           struct ceph_filelock *cephlock)
->  {
->         int err = 0;
-> -
->         cephlock->start = cpu_to_le64(lock->fl_start);
->         cephlock->length = cpu_to_le64(lock->fl_end - lock->fl_start + 1);
->         cephlock->client = cpu_to_le64(0);
-> -       cephlock->pid = cpu_to_le64(lock->fl_pid);
-> -       cephlock->pid_namespace =
-> -               cpu_to_le64((u64)(unsigned long)lock->fl_nspid);
-> +       cephlock->pid = cpu_to_le64((u64)lock->fl_pid);
-> +       if (lock->fl_flags & FL_POSIX)
-> +               cephlock->owner = cpu_to_le64(ceph_secure_addr(lock->fl_owner));
-> +       else
-> +               cephlock->owner = cpu_to_le64(ceph_secure_addr(lock->fl_file));
->
->         switch (lock->fl_type) {
->         case F_RDLCK:
-> diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-> index 10a4ccb..06150fd 100644
-> --- a/fs/ceph/super.c
-> +++ b/fs/ceph/super.c
-> @@ -1026,6 +1026,7 @@ static int __init init_ceph(void)
->         if (ret)
->                 goto out;
->
-> +       ceph_flock_init();
->         ceph_xattr_init();
->         ret = register_filesystem(&ceph_fs_type);
->         if (ret)
-> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-> index 70bb183..7866cd0 100644
-> --- a/fs/ceph/super.h
-> +++ b/fs/ceph/super.h
-> @@ -871,6 +871,7 @@ extern long ceph_ioctl(struct file *file, unsigned int cmd, unsigned long arg);
->  extern const struct export_operations ceph_export_ops;
->
->  /* locks.c */
-> +extern __init void ceph_flock_init(void);
->  extern int ceph_lock(struct file *file, int cmd, struct file_lock *fl);
->  extern int ceph_flock(struct file *file, int cmd, struct file_lock *fl);
->  extern void ceph_count_locks(struct inode *inode, int *p_num, int *f_num);
-> diff --git a/include/linux/ceph/ceph_fs.h b/include/linux/ceph/ceph_fs.h
-> index 35f345f..5f6db18 100644
-> --- a/include/linux/ceph/ceph_fs.h
-> +++ b/include/linux/ceph/ceph_fs.h
-> @@ -421,8 +421,8 @@ union ceph_mds_request_args {
->         struct {
->                 __u8 rule; /* currently fcntl or flock */
->                 __u8 type; /* shared, exclusive, remove*/
-> +               __le64 owner; /* owner of the lock */
->                 __le64 pid; /* process id requesting the lock */
-> -               __le64 pid_namespace;
->                 __le64 start; /* initial location to lock */
->                 __le64 length; /* num bytes to lock from start */
->                 __u8 wait; /* will caller wait for lock to become available? */
-> @@ -533,8 +533,8 @@ struct ceph_filelock {
->         __le64 start;/* file offset to start lock at */
->         __le64 length; /* num bytes to lock; 0 for all following start */
->         __le64 client; /* which client holds the lock */
-> +       __le64 owner; /* owner the lock */
->         __le64 pid; /* process id holding the lock on the client */
-> -       __le64 pid_namespace;
->         __u8 type; /* shared lock, exclusive lock, or unlock */
->  } __attribute__ ((packed));
->
-> --
-> 1.8.5.3
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+David Moreau Simard
+
+> On Mar 10, 2014, at 12:21 PM, Florian Haas <florian@hastexo.com> wrot=
+e:
+>=20
+>> Hi,
+>>=20
+>> Somehow I'm thinking I'm opening a can of worms, but here it goes
+>> anyway. I saw some discussion about this here on this list last
+>> (Northern Hemisphere) autumn, but not much since.
+>>=20
+>> I'd like to ask for some clarification on the current state of the
+>> Ceph Puppet modules. Currently there are several: one on StackForge
+>> (http://git.openstack.org/cgit/stackforge/puppet-ceph/), primarily
+>> written by Lo=EFc Dachary, and one on the eNovance GitHub repo
+>> (https://github.com/enovance/puppet-ceph), written by S=E9bastien Ha=
+n
+>> and Fran=E7ois Charlier. The eNovance repo is AGPL licensed, which I
+>> find rather incomprehensible =97 the only thing this would make sens=
+e
+>> for would be to force providers of *public* Puppet hosts to contribu=
+te
+>> back upstream, but that's a really far fetched use case. The
+>> StackForge repo is ASL licensed, which looks a bit saner.
+>>=20
+>> Then there is a TelekomCloud fork of the eNovance repo at
+>> https://github.com/TelekomCloud/puppet-ceph/tree/rc/eisbrecher, with
+>> 55 unmerged patches. Also AGPL, as far as I can tell.
+>>=20
+>> And finally there's puppet-cephdeploy
+>> (https://github.com/dontalton/puppet-cephdeploy) where I like that i=
+t
+>> builds upon ceph-deploy, but rather dislike that it's rather closely
+>> interwoven with OpenStack. ASL.
+>>=20
+>> Finally, after the discussion that Lo=EFc kicked off in
+>> https://www.mail-archive.com/ceph-devel@vger.kernel.org/msg16673.htm=
+l,
+>> there's https://github.com/ceph/puppet-ceph which hasn't seen any
+>> updates in 2 months. This is a mirror of the StackForge module, as f=
+ar
+>> as I can tell, is ASL licensed and has seen neither the eNovance wor=
+k
+>> nor the TelekomCloud updates, presumably on account of the license
+>> issue.
+>>=20
+>> Neither repo seems to be universally accepted and fully complete
+>> (StackForge only supports mon deployment; eNovance doesn't do radosg=
+w,
+>> for example), so I'm trying to understand where people should best
+>> direct their efforts to get things to a working state.
+>>=20
+>> All thoughts and comments appreciated. Thanks!
+>>=20
+>> Cheers,
+>> Florian
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
