@@ -1,125 +1,244 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: contraining crush placement possibilities
-Date: Mon, 10 Mar 2014 09:25:08 -0700
-Message-ID: <CAPYLRzhqn6Sv7MSULuxZ=P3qnVpJOEEP_U2pN29mxPxjC33GZA@mail.gmail.com>
-References: <alpine.DEB.2.00.1403061227080.17325@cobra.newdream.net>
-	<CABZ+qqkYw2CznTS5ters9LMaX7zPMQ8LxvB8e0rfGuz_3BYXZA@mail.gmail.com>
-	<alpine.DEB.2.00.1403070705440.24219@cobra.newdream.net>
-	<CAPYLRziGh52rUq1yk5U74D55zs+C=Sda9Dm_UbR9M7F5sECSdA@mail.gmail.com>
-	<alpine.DEB.2.00.1403070934450.3593@cobra.newdream.net>
-	<531D87C0.2050304@ubuntukylin.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH v2] ceph: use fl->fl_file as owner identifier of flock
+ and posix lock
+Date: Mon, 10 Mar 2014 10:02:16 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1403100959590.3593@cobra.newdream.net>
+References: <1394467858-20373-1-git-send-email-zheng.z.yan@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f177.google.com ([209.85.216.177]:61253 "EHLO
-	mail-qc0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751744AbaCJQZI (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Mar 2014 12:25:08 -0400
-Received: by mail-qc0-f177.google.com with SMTP id w7so7822728qcr.8
-        for <ceph-devel@vger.kernel.org>; Mon, 10 Mar 2014 09:25:08 -0700 (PDT)
-In-Reply-To: <531D87C0.2050304@ubuntukylin.com>
+Received: from cobra.newdream.net ([66.33.216.30]:54956 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753714AbaCJRCR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Mar 2014 13:02:17 -0400
+In-Reply-To: <1394467858-20373-1-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Li Wang <liwang@ubuntukylin.com>
-Cc: Sage Weil <sage@inktank.com>, Dan van der Ster <daniel.vanderster@cern.ch>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Yan, Zheng" <zheng.z.yan@intel.com>
+Cc: ceph-devel@vger.kernel.org
 
-Since pgp_num is constraining the placement, making the pg_num larger
-isn't going to improve the balance.
-Mapping directly from objects to OSDs would require a much higher
-metadata overhead, which is part of the reason we have PGs.
--Greg
-Software Engineer #42 @ http://inktank.com | http://ceph.com
+On Tue, 11 Mar 2014, Yan, Zheng wrote:
+> flock and posix lock should use fl->fl_file instead of process ID
+> as owner identifier. (posix lock uses fl->fl_owner. fl->fl_owner
+> is usually equal to fl->fl_file, but it also can be a customized
+> value). The process ID of who holds the lock is just for F_GETLK
+> fcntl(2).
+> 
+> The fix is rename the 'pid' fields of struct ceph_mds_request_args
+> and struct ceph_filelock to 'owner', rename 'pid_namespace' fields
+> to 'pid'. Assign MD5 hashed fl->fl_file to the 'owner' field of
+> lock messages.
+
+The MD5 outputs could conceivably collide.  It seems like just XOR against 
+the random bits should be sufficient?  I'm not the security expert, 
+though...
+
+sage
 
 
-On Mon, Mar 10, 2014 at 2:37 AM, Li Wang <liwang@ubuntukylin.com> wrote:
-> pgp_num is the upper bound of number of OSD combinations, right?
-> so we can reduce pgp_num to constrain the possible combinations,
-> and the data loss probability is only dependent on pgp_num,
-> say, pgp_num/Pn(replica_num) (Since (a, b) and (b, a) are different pgs, so
-> it is permutation rather than combination). But we can still
-> maintain a big pg_num, will it make the object distribution more
-> uniform? Currently object_id is mapped to pg_id, then pg_id mapped to
-> OSD combinations, why does it need two levels of mapping, why not map
-> object_id to OSD combinations directly, will it achieve a more uniform
-> distribution?
->
->
-> On 2014/3/8 1:43, Sage Weil wrote:
->>
->> On Fri, 7 Mar 2014, Gregory Farnum wrote:
->>>
->>> On Fri, Mar 7, 2014 at 7:10 AM, Sage Weil <sage@inktank.com> wrote:
->>>>
->>>> On Fri, 7 Mar 2014, Dan van der Ster wrote:
->>>>>
->>>>> On Thu, Mar 6, 2014 at 9:30 PM, Sage Weil <sage@inktank.com> wrote:
->>>>>>
->>>>>> Sheldon just
->>>>>> pointed out a talk from ATC that discusses the basic problem:
->>>>>>
->>>>>>
->>>>>> https://www.usenix.org/conference/atc13/technical-sessions/presentation/cidon
->>>>>>
->>>>>> The situation with CRUSH is slightly better, I think, because the
->>>>>> number
->>>>>> of peers for a given OSD in a large cluster is bounded (pg_num /
->>>>>> num_osds), but I think we may still be able improve things.
->>>>>
->>>>>
->>>>> I'm surprised they didn't cite Ceph -- aren't copysets ~= placement
->>>>> groups?
->>>>
->>>>
->>>> I think so (I didn't listen to the whole talk :).  My ears did perk up
->>>> when Carlos (who was part of the original team at UCSC) asked the
->>>> question
->>>> about the CRUSH paper at the end, though. :)
->>>>
->>>> Anyway, now I'm thinking that this *is* really just all about tuning
->>>> pg_num/pgp_num.  And of course managing failure domains in the CRUSH map
->>>> as best we can to align placement with expected sources of correlated
->>>> failure.  But again, I would appreciate any confirmation from others'
->>>> intuitions or (better yet) a proper mathematical model.  This bit of my
->>>> brain is full of cobwebs, and wasn't particularly strong here to begin
->>>> with.
->>>
->>>
->>> Well, yes and no. They're constraining data sharing in order to reduce
->>> the probability of any given data loss event, and we can reduce data
->>> sharing by reducing the pgp_num. But the example you cited was "place
->>> all copies in the top third of the selected racks", and that's a
->>> little different because it means they can independently scale the
->>> data sharing *within* that grouping to maintain a good data balance,
->>> which CRUSH would have trouble with.
->>> Unfortunately my intuition around probability and stats isn't much
->>> good, so that's about as far as I can take this effectively. ;)
->>
->>
->> Yeah I'm struggling with this too, but I *think* the top/middle/bottom
->> rack analogy is just an easy way to think about constraining the placement
->> options, which we're doing anyway with the placement group count--just in
->> a way that looks random but is still sampling a small portion of the
->> possible combinations.  In the end, whether you eliminate 8/9 of the
->> options of the rack layers and *then* scale pg_num, or just scale pg_num,
->> I think it still boils down to the number of distinct 3-disk sets out of
->> the total possible 3-disk sets.
->>
->> Also, FWIW, the rack thing is equivalent to making 3 parallel trees so
->> that the crush hierarchy goes like:
->>
->>   root
->>   layer of rack (top/middle/bottom)
->>   rack
->>   host
->>   osd
->>
->> and make the crush rule first pick 1 layer before doing the chooseleaf
->> over racks.
->>
->> sage
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->
+> 
+> The MDS counterpart of this patch modifies the flock code to not
+> take the 'pid_namespace' into consideration when checking conflict
+> locks.
+> 
+> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+> ---
+>  fs/ceph/locks.c              | 62 ++++++++++++++++++++++++++++++--------------
+>  fs/ceph/super.c              |  1 +
+>  fs/ceph/super.h              |  1 +
+>  include/linux/ceph/ceph_fs.h |  4 +--
+>  4 files changed, 46 insertions(+), 22 deletions(-)
+> 
+> diff --git a/fs/ceph/locks.c b/fs/ceph/locks.c
+> index f91a569a..d04b322 100644
+> --- a/fs/ceph/locks.c
+> +++ b/fs/ceph/locks.c
+> @@ -2,11 +2,32 @@
+>  
+>  #include <linux/file.h>
+>  #include <linux/namei.h>
+> +#include <linux/cryptohash.h>
+>  
+>  #include "super.h"
+>  #include "mds_client.h"
+>  #include <linux/ceph/pagelist.h>
+>  
+> +static u32 lock_secret[MD5_MESSAGE_BYTES / 4] ____cacheline_aligned;
+> +
+> +void __init ceph_flock_init(void)
+> +{
+> +	get_random_bytes(lock_secret, sizeof(lock_secret));
+> +}
+> +
+> +static u64 ceph_secure_addr(void *addr)
+> +{
+> +	u32 hash[MD5_DIGEST_WORDS];
+> +	u64 *ptr = (u64*)hash;
+> +
+> +	*ptr = (unsigned long)addr;
+> +	hash[2] = lock_secret[14];
+> +	hash[3] = lock_secret[15];
+> +	md5_transform(hash, lock_secret);
+> +
+> +	return *ptr;
+> +}
+> +
+>  /**
+>   * Implement fcntl and flock locking functions.
+>   */
+> @@ -14,11 +35,11 @@ static int ceph_lock_message(u8 lock_type, u16 operation, struct file *file,
+>  			     int cmd, u8 wait, struct file_lock *fl)
+>  {
+>  	struct inode *inode = file_inode(file);
+> -	struct ceph_mds_client *mdsc =
+> -		ceph_sb_to_client(inode->i_sb)->mdsc;
+> +	struct ceph_mds_client *mdsc = ceph_sb_to_client(inode->i_sb)->mdsc;
+>  	struct ceph_mds_request *req;
+>  	int err;
+>  	u64 length = 0;
+> +	u64 owner;
+>  
+>  	req = ceph_mdsc_create_request(mdsc, operation, USE_AUTH_MDS);
+>  	if (IS_ERR(req))
+> @@ -32,25 +53,27 @@ static int ceph_lock_message(u8 lock_type, u16 operation, struct file *file,
+>  	else
+>  		length = fl->fl_end - fl->fl_start + 1;
+>  
+> -	dout("ceph_lock_message: rule: %d, op: %d, pid: %llu, start: %llu, "
+> -	     "length: %llu, wait: %d, type: %d", (int)lock_type,
+> -	     (int)operation, (u64)fl->fl_pid, fl->fl_start,
+> -	     length, wait, fl->fl_type);
+> +	if (lock_type == CEPH_LOCK_FCNTL)
+> +		owner = ceph_secure_addr(fl->fl_owner);
+> +	else
+> +		owner = ceph_secure_addr(fl->fl_file);
+> +
+> +	dout("ceph_lock_message: rule: %d, op: %d, owner: %llu, pid: %llu, "
+> +	     "start: %llu, length: %llu, wait: %d, type: %d", (int)lock_type,
+> +	     (int)operation, owner, (u64)fl->fl_pid, fl->fl_start, length,
+> +	     wait, fl->fl_type);
+>  
+>  	req->r_args.filelock_change.rule = lock_type;
+>  	req->r_args.filelock_change.type = cmd;
+> +	req->r_args.filelock_change.owner = cpu_to_le64(owner);
+>  	req->r_args.filelock_change.pid = cpu_to_le64((u64)fl->fl_pid);
+> -	/* This should be adjusted, but I'm not sure if
+> -	   namespaces actually get id numbers*/
+> -	req->r_args.filelock_change.pid_namespace =
+> -		cpu_to_le64((u64)(unsigned long)fl->fl_nspid);
+>  	req->r_args.filelock_change.start = cpu_to_le64(fl->fl_start);
+>  	req->r_args.filelock_change.length = cpu_to_le64(length);
+>  	req->r_args.filelock_change.wait = wait;
+>  
+>  	err = ceph_mdsc_do_request(mdsc, inode, req);
+>  
+> -	if ( operation == CEPH_MDS_OP_GETFILELOCK){
+> +	if (operation == CEPH_MDS_OP_GETFILELOCK) {
+>  		fl->fl_pid = le64_to_cpu(req->r_reply_info.filelock_reply->pid);
+>  		if (CEPH_LOCK_SHARED == req->r_reply_info.filelock_reply->type)
+>  			fl->fl_type = F_RDLCK;
+> @@ -93,8 +116,7 @@ int ceph_lock(struct file *file, int cmd, struct file_lock *fl)
+>  	if (__mandatory_lock(file->f_mapping->host) && fl->fl_type != F_UNLCK)
+>  		return -ENOLCK;
+>  
+> -	fl->fl_nspid = get_pid(task_tgid(current));
+> -	dout("ceph_lock, fl_pid:%d", fl->fl_pid);
+> +	dout("ceph_lock, fl_owner: %p", fl->fl_owner);
+>  
+>  	/* set wait bit as appropriate, then make command as Ceph expects it*/
+>  	if (IS_GETLK(cmd))
+> @@ -111,7 +133,7 @@ int ceph_lock(struct file *file, int cmd, struct file_lock *fl)
+>  
+>  	err = ceph_lock_message(CEPH_LOCK_FCNTL, op, file, lock_cmd, wait, fl);
+>  	if (!err) {
+> -		if ( op != CEPH_MDS_OP_GETFILELOCK ){
+> +		if (op != CEPH_MDS_OP_GETFILELOCK) {
+>  			dout("mds locked, locking locally");
+>  			err = posix_lock_file(file, fl, NULL);
+>  			if (err && (CEPH_MDS_OP_SETFILELOCK == op)) {
+> @@ -145,8 +167,7 @@ int ceph_flock(struct file *file, int cmd, struct file_lock *fl)
+>  	if (__mandatory_lock(file->f_mapping->host) && fl->fl_type != F_UNLCK)
+>  		return -ENOLCK;
+>  
+> -	fl->fl_nspid = get_pid(task_tgid(current));
+> -	dout("ceph_flock, fl_pid:%d", fl->fl_pid);
+> +	dout("ceph_flock, fl_file: %p", fl->fl_file);
+>  
+>  	if (IS_SETLKW(cmd))
+>  		wait = 1;
+> @@ -289,13 +310,14 @@ int lock_to_ceph_filelock(struct file_lock *lock,
+>  			  struct ceph_filelock *cephlock)
+>  {
+>  	int err = 0;
+> -
+>  	cephlock->start = cpu_to_le64(lock->fl_start);
+>  	cephlock->length = cpu_to_le64(lock->fl_end - lock->fl_start + 1);
+>  	cephlock->client = cpu_to_le64(0);
+> -	cephlock->pid = cpu_to_le64(lock->fl_pid);
+> -	cephlock->pid_namespace =
+> -	        cpu_to_le64((u64)(unsigned long)lock->fl_nspid);
+> +	cephlock->pid = cpu_to_le64((u64)lock->fl_pid);
+> +	if (lock->fl_flags & FL_POSIX)
+> +		cephlock->owner = cpu_to_le64(ceph_secure_addr(lock->fl_owner));
+> +	else
+> +		cephlock->owner = cpu_to_le64(ceph_secure_addr(lock->fl_file));
+>  
+>  	switch (lock->fl_type) {
+>  	case F_RDLCK:
+> diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+> index 10a4ccb..06150fd 100644
+> --- a/fs/ceph/super.c
+> +++ b/fs/ceph/super.c
+> @@ -1026,6 +1026,7 @@ static int __init init_ceph(void)
+>  	if (ret)
+>  		goto out;
+>  
+> +	ceph_flock_init();
+>  	ceph_xattr_init();
+>  	ret = register_filesystem(&ceph_fs_type);
+>  	if (ret)
+> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+> index 70bb183..7866cd0 100644
+> --- a/fs/ceph/super.h
+> +++ b/fs/ceph/super.h
+> @@ -871,6 +871,7 @@ extern long ceph_ioctl(struct file *file, unsigned int cmd, unsigned long arg);
+>  extern const struct export_operations ceph_export_ops;
+>  
+>  /* locks.c */
+> +extern __init void ceph_flock_init(void);
+>  extern int ceph_lock(struct file *file, int cmd, struct file_lock *fl);
+>  extern int ceph_flock(struct file *file, int cmd, struct file_lock *fl);
+>  extern void ceph_count_locks(struct inode *inode, int *p_num, int *f_num);
+> diff --git a/include/linux/ceph/ceph_fs.h b/include/linux/ceph/ceph_fs.h
+> index 35f345f..5f6db18 100644
+> --- a/include/linux/ceph/ceph_fs.h
+> +++ b/include/linux/ceph/ceph_fs.h
+> @@ -421,8 +421,8 @@ union ceph_mds_request_args {
+>  	struct {
+>  		__u8 rule; /* currently fcntl or flock */
+>  		__u8 type; /* shared, exclusive, remove*/
+> +		__le64 owner; /* owner of the lock */
+>  		__le64 pid; /* process id requesting the lock */
+> -		__le64 pid_namespace;
+>  		__le64 start; /* initial location to lock */
+>  		__le64 length; /* num bytes to lock from start */
+>  		__u8 wait; /* will caller wait for lock to become available? */
+> @@ -533,8 +533,8 @@ struct ceph_filelock {
+>  	__le64 start;/* file offset to start lock at */
+>  	__le64 length; /* num bytes to lock; 0 for all following start */
+>  	__le64 client; /* which client holds the lock */
+> +	__le64 owner; /* owner the lock */
+>  	__le64 pid; /* process id holding the lock on the client */
+> -	__le64 pid_namespace;
+>  	__u8 type; /* shared lock, exclusive lock, or unlock */
+>  } __attribute__ ((packed));
+>  
+> -- 
+> 1.8.5.3
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
