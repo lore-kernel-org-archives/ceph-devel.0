@@ -1,44 +1,224 @@
-From: Florian Haas <florian@hastexo.com>
-Subject: Re: Ceph Puppet modules (again)
-Date: Mon, 10 Mar 2014 19:43:42 +0100
-Message-ID: <CAPUexz-rw5poO5ad==6haruAnBaHORhBxwumNfeARccVy4qsWg@mail.gmail.com>
-References: <CAPUexz9vuQ7Z91i8wwR1d9heuvkmTp9=q4GSRkNZaMV2M4Tz1Q@mail.gmail.com>
- <531E0411.9080002@dachary.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: [PATCH v3] ceph: use fl->fl_file as owner identifier of flock and posix lock
+Date: Tue, 11 Mar 2014 09:47:01 +0800
+Message-ID: <1394502421-9707-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f176.google.com ([209.85.216.176]:48611 "EHLO
-	mail-qc0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752099AbaCJSvt convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Mar 2014 14:51:49 -0400
-Received: by mail-qc0-f176.google.com with SMTP id m20so8100675qcx.21
-        for <ceph-devel@vger.kernel.org>; Mon, 10 Mar 2014 11:51:48 -0700 (PDT)
-In-Reply-To: <531E0411.9080002@dachary.org>
+Received: from mga01.intel.com ([192.55.52.88]:45917 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752864AbaCKBrD (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 10 Mar 2014 21:47:03 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-On Mon, Mar 10, 2014 at 7:27 PM, Loic Dachary <loic@dachary.org> wrote:
-> Hi Florian,
->
-> New efforts should be directed to
->
-> https://github.com/stackforge/puppet-ceph (mirrored at https://github.com/ceph/puppet-ceph) and evolving at https://review.openstack.org/#/q/status:open+project:stackforge/puppet-ceph,n,z
->
-> I'm happily developing it with Andrew Woodward and David Simard and quite happy about how its future looks like. It will eventually unite all other modules and benefit from a proper integration test environment. I've been distressed far too often by the lack of integration tests when writing puppet modules. It makes all the difference in the world to me, although it's not currently popular among puppet module developers, to the point that the official tool (beaker) can't allocate a disk when creating an instance (!). I wrote a tiny tool https://pypi.python.org/pypi/gerritexec to listen to gerrit events, a simple one liner that actually runs the puppet modules for osd/mon on cuttlefish/dumpling/emperor in various situations.
->
-> When working on puppet-ceph, my efforts are often directed to patching Ceph itself to make it more amicable to configuration management systems. "ceph-disk: prepare should be idempotent" is one example at http://tracker.ceph.com/issues/7475. But you will find a number of patches in Firefly oriented toward this goal. I believe this will also help reduce the complexity of the Chef, Ansible, Salt, ... playcookbooks (;-), in the same way hiding osd ids from them resolved a number of unnecessary problems for all of them (although some of them did not evolve to take advantage of it and are still overcomplex).
->
-> From the point of view of someone in a hurry and no time to develop, what I'm doing it not useable at the moment. I'm under no pressure to rush anything and won't commit to any deadline ;-) However, if a developer is willing to help out, I'd be happy to spare the time to get her/him on board and speed up the process.
+flock and posix lock should use fl->fl_file instead of process ID
+as owner identifier. (posix lock uses fl->fl_owner. fl->fl_owner
+is usually equal to fl->fl_file, but it also can be a customized
+value). The process ID of who holds the lock is just for F_GETLK
+fcntl(2).
 
-I'm not sure if I'm getting this correctly, but it sounds a bit like
-"please send patches my way, but don't expect to get anything useable
-anytime soon". That doesn't seem like a very powerful argument for
-contribution, I'm sad to say.
+The fix is rename the 'pid' fields of struct ceph_mds_request_args
+and struct ceph_filelock to 'owner', rename 'pid_namespace' fields
+to 'pid'. Assign fl->fl_file to the 'owner' field of lock messages.
+We also set the most significant bit of the 'owner' field. MDS can
+use that bit to distinguish between old and new clients.
 
-But maybe I'm getting something wrong?
+The MDS counterpart of this patch modifies the flock code to not
+take the 'pid_namespace' into consideration when checking conflict
+locks.
 
-Cheers,
-Florian
+Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+---
+ fs/ceph/locks.c              | 61 +++++++++++++++++++++++++++++---------------
+ fs/ceph/super.c              |  1 +
+ fs/ceph/super.h              |  1 +
+ include/linux/ceph/ceph_fs.h |  4 +--
+ 4 files changed, 45 insertions(+), 22 deletions(-)
+
+diff --git a/fs/ceph/locks.c b/fs/ceph/locks.c
+index f91a569a..8dbae5d 100644
+--- a/fs/ceph/locks.c
++++ b/fs/ceph/locks.c
+@@ -2,11 +2,31 @@
+ 
+ #include <linux/file.h>
+ #include <linux/namei.h>
++#include <linux/random.h>
+ 
+ #include "super.h"
+ #include "mds_client.h"
+ #include <linux/ceph/pagelist.h>
+ 
++static u64 lock_secret;
++
++static inline u64 secure_addr(void *addr)
++{
++	u64 v = (lock_secret ^ (u64)(unsigned long)addr);
++	/*
++	 * Set the most significant bit, so that MDS knows the 'owner'
++	 * is sufficient to identify the owner of lock. (old code uses
++	 * both 'owner' and 'pid')
++	 */
++	v |= (1ULL << 63);
++	return v;
++}
++
++void __init ceph_flock_init(void)
++{
++	get_random_bytes(&lock_secret, sizeof(lock_secret));
++}
++
+ /**
+  * Implement fcntl and flock locking functions.
+  */
+@@ -14,11 +34,11 @@ static int ceph_lock_message(u8 lock_type, u16 operation, struct file *file,
+ 			     int cmd, u8 wait, struct file_lock *fl)
+ {
+ 	struct inode *inode = file_inode(file);
+-	struct ceph_mds_client *mdsc =
+-		ceph_sb_to_client(inode->i_sb)->mdsc;
++	struct ceph_mds_client *mdsc = ceph_sb_to_client(inode->i_sb)->mdsc;
+ 	struct ceph_mds_request *req;
+ 	int err;
+ 	u64 length = 0;
++	u64 owner;
+ 
+ 	req = ceph_mdsc_create_request(mdsc, operation, USE_AUTH_MDS);
+ 	if (IS_ERR(req))
+@@ -32,25 +52,27 @@ static int ceph_lock_message(u8 lock_type, u16 operation, struct file *file,
+ 	else
+ 		length = fl->fl_end - fl->fl_start + 1;
+ 
+-	dout("ceph_lock_message: rule: %d, op: %d, pid: %llu, start: %llu, "
+-	     "length: %llu, wait: %d, type: %d", (int)lock_type,
+-	     (int)operation, (u64)fl->fl_pid, fl->fl_start,
+-	     length, wait, fl->fl_type);
++	if (lock_type == CEPH_LOCK_FCNTL)
++		owner = secure_addr(fl->fl_owner);
++	else
++		owner = secure_addr(fl->fl_file);
++
++	dout("ceph_lock_message: rule: %d, op: %d, owner: %llx, pid: %llu, "
++	     "start: %llu, length: %llu, wait: %d, type: %d", (int)lock_type,
++	     (int)operation, owner, (u64)fl->fl_pid, fl->fl_start, length,
++	     wait, fl->fl_type);
+ 
+ 	req->r_args.filelock_change.rule = lock_type;
+ 	req->r_args.filelock_change.type = cmd;
++	req->r_args.filelock_change.owner = cpu_to_le64(owner);
+ 	req->r_args.filelock_change.pid = cpu_to_le64((u64)fl->fl_pid);
+-	/* This should be adjusted, but I'm not sure if
+-	   namespaces actually get id numbers*/
+-	req->r_args.filelock_change.pid_namespace =
+-		cpu_to_le64((u64)(unsigned long)fl->fl_nspid);
+ 	req->r_args.filelock_change.start = cpu_to_le64(fl->fl_start);
+ 	req->r_args.filelock_change.length = cpu_to_le64(length);
+ 	req->r_args.filelock_change.wait = wait;
+ 
+ 	err = ceph_mdsc_do_request(mdsc, inode, req);
+ 
+-	if ( operation == CEPH_MDS_OP_GETFILELOCK){
++	if (operation == CEPH_MDS_OP_GETFILELOCK) {
+ 		fl->fl_pid = le64_to_cpu(req->r_reply_info.filelock_reply->pid);
+ 		if (CEPH_LOCK_SHARED == req->r_reply_info.filelock_reply->type)
+ 			fl->fl_type = F_RDLCK;
+@@ -93,8 +115,7 @@ int ceph_lock(struct file *file, int cmd, struct file_lock *fl)
+ 	if (__mandatory_lock(file->f_mapping->host) && fl->fl_type != F_UNLCK)
+ 		return -ENOLCK;
+ 
+-	fl->fl_nspid = get_pid(task_tgid(current));
+-	dout("ceph_lock, fl_pid:%d", fl->fl_pid);
++	dout("ceph_lock, fl_owner: %p", fl->fl_owner);
+ 
+ 	/* set wait bit as appropriate, then make command as Ceph expects it*/
+ 	if (IS_GETLK(cmd))
+@@ -111,7 +132,7 @@ int ceph_lock(struct file *file, int cmd, struct file_lock *fl)
+ 
+ 	err = ceph_lock_message(CEPH_LOCK_FCNTL, op, file, lock_cmd, wait, fl);
+ 	if (!err) {
+-		if ( op != CEPH_MDS_OP_GETFILELOCK ){
++		if (op != CEPH_MDS_OP_GETFILELOCK) {
+ 			dout("mds locked, locking locally");
+ 			err = posix_lock_file(file, fl, NULL);
+ 			if (err && (CEPH_MDS_OP_SETFILELOCK == op)) {
+@@ -145,8 +166,7 @@ int ceph_flock(struct file *file, int cmd, struct file_lock *fl)
+ 	if (__mandatory_lock(file->f_mapping->host) && fl->fl_type != F_UNLCK)
+ 		return -ENOLCK;
+ 
+-	fl->fl_nspid = get_pid(task_tgid(current));
+-	dout("ceph_flock, fl_pid:%d", fl->fl_pid);
++	dout("ceph_flock, fl_file: %p", fl->fl_file);
+ 
+ 	if (IS_SETLKW(cmd))
+ 		wait = 1;
+@@ -289,13 +309,14 @@ int lock_to_ceph_filelock(struct file_lock *lock,
+ 			  struct ceph_filelock *cephlock)
+ {
+ 	int err = 0;
+-
+ 	cephlock->start = cpu_to_le64(lock->fl_start);
+ 	cephlock->length = cpu_to_le64(lock->fl_end - lock->fl_start + 1);
+ 	cephlock->client = cpu_to_le64(0);
+-	cephlock->pid = cpu_to_le64(lock->fl_pid);
+-	cephlock->pid_namespace =
+-	        cpu_to_le64((u64)(unsigned long)lock->fl_nspid);
++	cephlock->pid = cpu_to_le64((u64)lock->fl_pid);
++	if (lock->fl_flags & FL_POSIX)
++		cephlock->owner = cpu_to_le64(secure_addr(lock->fl_owner));
++	else
++		cephlock->owner = cpu_to_le64(secure_addr(lock->fl_file));
+ 
+ 	switch (lock->fl_type) {
+ 	case F_RDLCK:
+diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+index 10a4ccb..06150fd 100644
+--- a/fs/ceph/super.c
++++ b/fs/ceph/super.c
+@@ -1026,6 +1026,7 @@ static int __init init_ceph(void)
+ 	if (ret)
+ 		goto out;
+ 
++	ceph_flock_init();
+ 	ceph_xattr_init();
+ 	ret = register_filesystem(&ceph_fs_type);
+ 	if (ret)
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index 70bb183..7866cd0 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -871,6 +871,7 @@ extern long ceph_ioctl(struct file *file, unsigned int cmd, unsigned long arg);
+ extern const struct export_operations ceph_export_ops;
+ 
+ /* locks.c */
++extern __init void ceph_flock_init(void);
+ extern int ceph_lock(struct file *file, int cmd, struct file_lock *fl);
+ extern int ceph_flock(struct file *file, int cmd, struct file_lock *fl);
+ extern void ceph_count_locks(struct inode *inode, int *p_num, int *f_num);
+diff --git a/include/linux/ceph/ceph_fs.h b/include/linux/ceph/ceph_fs.h
+index 35f345f..5f6db18 100644
+--- a/include/linux/ceph/ceph_fs.h
++++ b/include/linux/ceph/ceph_fs.h
+@@ -421,8 +421,8 @@ union ceph_mds_request_args {
+ 	struct {
+ 		__u8 rule; /* currently fcntl or flock */
+ 		__u8 type; /* shared, exclusive, remove*/
++		__le64 owner; /* owner of the lock */
+ 		__le64 pid; /* process id requesting the lock */
+-		__le64 pid_namespace;
+ 		__le64 start; /* initial location to lock */
+ 		__le64 length; /* num bytes to lock from start */
+ 		__u8 wait; /* will caller wait for lock to become available? */
+@@ -533,8 +533,8 @@ struct ceph_filelock {
+ 	__le64 start;/* file offset to start lock at */
+ 	__le64 length; /* num bytes to lock; 0 for all following start */
+ 	__le64 client; /* which client holds the lock */
++	__le64 owner; /* owner the lock */
+ 	__le64 pid; /* process id holding the lock on the client */
+-	__le64 pid_namespace;
+ 	__u8 type; /* shared lock, exclusive lock, or unlock */
+ } __attribute__ ((packed));
+ 
+-- 
+1.8.5.3
+
