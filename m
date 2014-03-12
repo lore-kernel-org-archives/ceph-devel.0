@@ -1,33 +1,175 @@
-From: Jean-Tiare LE BIGOT <jean-tiare.le-bigot@ovh.net>
-Subject: Re: [PATCH 0/3] patches for rbd
-Date: Wed, 12 Mar 2014 10:34:37 +0100
-Message-ID: <53202A2D.9060404@ovh.net>
-References: <1394598285-17225-1-git-send-email-lucienchao@gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Erasure code properties in OSDMap
+Date: Wed, 12 Mar 2014 14:10:25 +0100
+Message-ID: <53205CC1.20401@dachary.org>
+References: <531C5AD5.9060109@cloudwatt.com>	<CAGd4Wr0_Bre-VXckOjkomoeyG8kCx9V_Q6CqSgYWDVhTAn2-sg@mail.gmail.com>	<531F17B0.4080506@cloudwatt.com> <CAGd4Wr1-effipjF4zCvT15YtC-XMpNvepeA+2L2EYPL5nBn=Wg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="1QUmVI9GKjobdHknOp75XhCRFPRMWf5Vb"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mo1.mail-out.ovh.net ([178.32.228.1]:60713 "EHLO
-	mo1.mail-out.ovh.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752472AbaCLNKW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Mar 2014 09:10:22 -0400
-Received: from mail612.ha.ovh.net (b6.ovh.net [213.186.33.56])
-	by mo1.mail-out.ovh.net (Postfix) with SMTP id 0427B10188DD
-	for <ceph-devel@vger.kernel.org>; Wed, 12 Mar 2014 10:35:52 +0100 (CET)
-In-Reply-To: <1394598285-17225-1-git-send-email-lucienchao@gmail.com>
+Received: from smtp.dmail.dachary.org ([91.121.254.229]:40875 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752983AbaCLNK3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Mar 2014 09:10:29 -0400
+In-Reply-To: <CAGd4Wr1-effipjF4zCvT15YtC-XMpNvepeA+2L2EYPL5nBn=Wg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Guangliang Zhao <lucienchao@gmail.com>
-Cc: ceph-devel@vger.kernel.org, sage@inktank.com
+To: John Spray <john.spray@inktank.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi,
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--1QUmVI9GKjobdHknOp75XhCRFPRMWf5Vb
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 
-I must admit I've put it aside for the moment. So, I really don't mind, 
-on the contrary, if you implement the DISCARD op.
+On 12/03/2014 13:39, John Spray wrote:
+> I am sure all of that will work, but it doesn't explain why these
+> properties must be stored and named separately to crush rulesets.  To
+> flesh this out one also needs "get" and "list" operations for the sets
+> of properties, which feels like overkill if there is an existing place
+> we could be storing these things.  The reason I'm taking such an
+> interest in what may seem something minor is that once this has been
+> added, we will be stuck with it for some time once external tools
+> start depending on the interface.
+>
+> The ruleset-based approach doesn't have to be more complicated for CLI
+> users, we would essentially replace any "myproperties" above with a
+> ruleset name instead.
+>
+> osd pool create mypool <pgnum> <pgpnum> <ruleset>
+> osd set ruleset-properties <ruleset> <key>=3D<val> [<key>=3D<val>...]
+>
+> The simple default cases of "pool create mypool <pgnum> <pgpnum>
+> erasure" could be handled by making sure there exist default rulesets
+> called "erasure" and "replicated" rather than having these be magic
+> words to the commands that cause ruleset creation.  Rulesets currently
+> just have numbers instead of names, but it would be simpler to add
+> names to rulesets than to introduce a whole new type of object to the
+> interface.
+Here are the default parameters
 
-On 03/12/2014 05:24 AM, Guangliang Zhao wrote:
-> I am sorry that didn't notice Jean-Tiare's mail at all, just sage's
-> reminds me.
+OPTION(osd_pool_default_erasure_code_properties,
+       OPT_STR,
+       "erasure-code-plugin=3Djerasure "
+       "erasure-code-technique=3Dreed_sol_van "
+       "erasure-code-k=3D4 "
+       "erasure-code-m=3D2 "
+       ) // default properties of osd pool create
 
--- 
-Jean-Tiare, shared-hosting team
+The k and m parameters have a clear relationship with the pool size. And =
+they also define the minimum number of items the crush ruleset must be ab=
+le to provide. The other parameters relate to the code/decode functions a=
+nd are better understood in the context of the OSD than crush. This is th=
+e reason why I don't see these properties as being exclusively linked to =
+the crush ruleset or the OSD. By introducing a new set of properties asso=
+ciated to the erasure code feature there is no need to chose.
+
+Does that make sense ?
+>
+> John
+>
+> On Tue, Mar 11, 2014 at 2:03 PM, Loic Dachary
+> <loic.dachary@cloudwatt.com> wrote:
+>> On 11/03/2014 13:21, John Spray wrote:
+>>> From a high level view, what is the logical difference between the
+>>> crush ruleset and the properties object?  I'm thinking about how this=
+
+>>> is exposed to users and tools, and it seems like both would be define=
+d
+>>> as "the settings about data placement and encoding".  I certainly
+>>> understand the separation internally, I am just concerned about makin=
+g
+>>> the interface we expose upwards more complicated by adding a new type=
+
+>>> of object.
+>>>
+>>> Is there really a need for a new type of properties object, instead o=
+f
+>>> storing these properties under the existing ruleset ID?
+>> These properties are used to configure the new feature that was introd=
+uced in Firefly : erasure coded pools. From a user point of view the simp=
+lest would be to
+>>
+>> ceph osd pool create mypool erasure
+>>
+>> and rely on the fact that a default ruleset will be created using the =
+default erasure code plugin with the default parameters.
+>>
+>> If the sysadmin wants to tweak the K+M factors (s)he could:
+>>
+>> ceph osd set properties myproperties k=3D10 m=3D4
+>>
+>> and then
+>>
+>> ceph osd pool create mypool erasure myproperties
+>>
+>> which would implicitly ask the default erasure code plugin to create a=
+ ruleset named "mypool-ruleset" after configuring it with myproperties.
+>>
+>> If the sysadmin wants to share rulesets between pools instead of relyi=
+ng on their implicit creation, (s)he could
+>>
+>> ceph osd create-serasure myruleset myproperties
+>>
+>> and then ceph osd set crush_ruleset as per usual. And if (s)he really =
+wants fine tuning, manually adding the ruleset is also possible.
+>>
+>> I feel confortable explaining this but I'm probably much too familiar =
+with the subject to be a good judge of what makes sense to someone new or=
+ not ;-)
+>>
+>> Cheers
+>>
+>>> John
+>>>
+>>>
+>>> On Sun, Mar 9, 2014 at 12:13 PM, Loic Dachary
+>>> <loic.dachary@cloudwatt.com> wrote:
+>>>> Hi Sage & Sam,
+>>>>
+>>>> I quickly sketched the replacement of the pg_pool_t::properties map =
+with a OSDMap::properties list of maps at https://github.com/dachary/ceph=
+/commit/fe3819a62eb139fc3f0fa4282b4d22aecd8cd398 and explained how I see =
+it at http://tracker.ceph.com/issues/7662#note-2
+>>>>
+>>>> It indeed makes things simpler, more consistent and easier to explai=
+n. I can provide an implementation this week if this seems reasonable to =
+you.
+>>>>
+>>>> Cheers
+>>>>
+>>>> --
+>>>> Lo=C4=8Fc Dachary, Senior Developer
+>>>>
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>> --
+>> Lo=C3=AFc Dachary, Senior Developer
+>>
+
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+
+--1QUmVI9GKjobdHknOp75XhCRFPRMWf5Vb
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.20 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlMgXMEACgkQ8dLMyEl6F21kTQCdG7LMJ6vfnLpqOkFm6sbnFr5P
+qwwAn1j6s25PFHGiekx/HF04i0hwPedX
+=U98q
+-----END PGP SIGNATURE-----
+
+--1QUmVI9GKjobdHknOp75XhCRFPRMWf5Vb--
