@@ -1,62 +1,36 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: DISCARD support in kernel driver
-Date: Tue, 11 Mar 2014 09:50:26 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1403110950150.24219@cobra.newdream.net>
-References: <52EA1BE7.5030504@ovh.net>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+From: Guangliang Zhao <lucienchao@gmail.com>
+Subject: [PATCH 0/3] patches for rbd
+Date: Wed, 12 Mar 2014 12:24:42 +0800
+Message-ID: <1394598285-17225-1-git-send-email-lucienchao@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:40940 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751162AbaCKQu1 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Mar 2014 12:50:27 -0400
-In-Reply-To: <52EA1BE7.5030504@ovh.net>
+Received: from mail-pa0-f46.google.com ([209.85.220.46]:33626 "EHLO
+	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750843AbaCLEYz (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Mar 2014 00:24:55 -0400
+Received: by mail-pa0-f46.google.com with SMTP id kp14so526868pab.33
+        for <ceph-devel@vger.kernel.org>; Tue, 11 Mar 2014 21:24:54 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jean-Tiare LE BIGOT <jean-tiare.le-bigot@ovh.net>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: sage@inktank.com
 
-Hi Jean-Tiare,
+Hi,
 
-How is this going?
+I am sorry that didn't notice Jean-Tiare's mail at all, just sage's
+reminds me. 
 
-sage
+There are 3 patches, the first is optimization for rbd writing, the
+remaining two are support for rbd discard. If you have completed the 
+discard things, just ignore them.
 
+Guangliang Zhao (3):
+  rbd: skip the copyup when an entire object writing
+  rbd: extend the operation type
+  rbd: add discard support for rbd
 
-On Thu, 30 Jan 2014, Jean-Tiare LE BIGOT wrote:
-> Hi,
-> 
-> I started to implement 'DISCARD' support in RBD kernel driver as described on
-> http://tracker.ceph.com/issues/190
-> 
-> This first (easy) step was to add at the end of
-> drivers/block/rbd.c:rbd_init_disk
-> 
->     /* Advertise discard support for aligned blocks */
->     queue_flag_set_unlocked(QUEUE_FLAG_DISCARD, q);
->     disk->queue->limits.discard_granularity = segment_size;
->     disk->queue->limits.discard_alignment = segment_size;
-> 
-> With this both 'mount -o discard' and 'fstrim' stopped to complain about
-> missing 'DISCARD' support. Good !
-> 
-> Next step was to add support on `rbd_request_fn` which I did (sort of). But
-> here I'm stuck. If I understood well FS drivers uses `REQ_DISCARD` flag of
-> `rq->cmd_flags` to notify the driver of the discard operation. But the problem
-> is that (rq->cmd_flags & REQ_DISCARD) never appears to be set.
-> 
-> I tried copying then removing large files, lots of small files, forcing
-> fstrim. But I never got it. I must be missing something obvious but I can't
-> manage to find what ? Do you have any clue what could be wrong ?
-> 
-> Thanks,
-> 
-> -- 
-> Jean-Tiare, shared-hosting team
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+ drivers/block/rbd.c |  190 +++++++++++++++++++++++++++++++++++++++++----------
+ 1 file changed, 154 insertions(+), 36 deletions(-)
+
+-- 
+1.7.9.5
+
