@@ -1,78 +1,55 @@
-From: "=?UTF-8?B?TGx1w61zIFDDoG1pZXMgaSBKdcOhcmV6?=" <llpamies@pamies.cat>
-Subject: erasured PG always "peering"
-Date: Wed, 12 Mar 2014 10:40:40 -0700
-Message-ID: <CAKD2hyHsCTTLWtTR8O6GYMgk=qRw38r_JGz=vAY+yA1DonqYyQ@mail.gmail.com>
+From: sellers <cgseller@gmail.com>
+Subject: Re: How to build ceph upon zfs filesystem.
+Date: Wed, 12 Mar 2014 18:48:24 +0000 (UTC)
+Message-ID: <loom.20140312T194731-555@post.gmane.org>
+References: <loom.20120826T033818-148@post.gmane.org> <503A2142.2000505@inktank.com> <loom.20120827T063044-980@post.gmane.org> <loom.20120829T153702-223@post.gmane.org> <503E1E25.6060704@smart-weblications.de> <loom.20120830T055024-954@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yh0-f47.google.com ([209.85.213.47]:42153 "EHLO
-	mail-yh0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751923AbaCLRkl convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Mar 2014 13:40:41 -0400
-Received: by mail-yh0-f47.google.com with SMTP id 29so4858302yhl.20
-        for <ceph-devel@vger.kernel.org>; Wed, 12 Mar 2014 10:40:41 -0700 (PDT)
-Received: from mail-yk0-x22b.google.com (mail-yk0-x22b.google.com [2607:f8b0:4002:c07::22b])
-        by mx.google.com with ESMTPSA id t58sm76121851yho.20.2014.03.12.10.40.40
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
-        Wed, 12 Mar 2014 10:40:40 -0700 (PDT)
-Received: by mail-yk0-f171.google.com with SMTP id q9so27907889ykb.2
-        for <ceph-devel@vger.kernel.org>; Wed, 12 Mar 2014 10:40:40 -0700 (PDT)
+Received: from plane.gmane.org ([80.91.229.3]:47279 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750939AbaCLTAG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 12 Mar 2014 15:00:06 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1WNoNn-0006VM-MC
+	for ceph-devel@vger.kernel.org; Wed, 12 Mar 2014 20:00:04 +0100
+Received: from arbor.net ([50.16.207.192])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Wed, 12 Mar 2014 20:00:03 +0100
+Received: from cgseller by arbor.net with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Wed, 12 Mar 2014 20:00:03 +0100
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hi ceph-devel,
+ramu eppa <ramu.freesystems <at> gmail.com> writes:
 
-I have been playing with the new erasure code functionality and I have
-noticed that the erasure coded PG remains in "peering" state forever. I=
-s
-that normal?
+> 
+> Hi Wiessner,
+> 
+>    Actually I created zpool and this is mounted to /dev/sdb and then set a 
+> mountpint to osd.The space showing is 144GB.But the osd's are going down
+after 
+> rbd image is while running.
+> 
+> Thanks,
+> Ramu.
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo <at> vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
 
-I have a scenario with four servers each with two OSDs (total of eight
-OSDs). Then I define the extra crush rule to get four different OSDs ac=
-ross
-hosts:
 
-rule reedsol_ruleset {
-    ruleset 1
-    type erasure
-    min_size 4
-    max_size 4
-    step take default
-    step chooseleaf firstn 0 type host
-    step emit
-}
+I found I get a similar message if I have allocated an iscsi target device
+pre-partitioned with a primary partition using the entire device.   If I
+left some space and created an extended partition, it worked fine.  
 
-And create a simple pool by:
-sudo ceph osd pool create cauchy 1 1 erasure erasure-code-plugin=3Djera=
-sure
-erasure-code-k=3D2 erasure-code-m=3D2 erasure-code-technique=3Dcauchy_g=
-ood
-crush_ruleset=3Dreedsol_ruleset
+YMMV
 
-After that, the PG status jumps from "creating" to "peering" and stays
-there forever. With "sudo ceph pg dump_stuck" I can see:
-
-pg_stat objects mip degr unf bytes log disklog state state_stamp v repo=
-rted
-up up_primary acting acting_primary last_scrub scrub_stamp last_deep_sc=
-rub
-deep_scrub_stamp
-5.0 0 0 0 0 0 0 0 peering 2014-03-12 10:30:36.717544 0'0 58:3 [0,6,2,5]=
- 0
-[0,6,2,5] 0 0'0 2014-03-12 10:30:36.715589 0'0 2014-03-12 10:30:36.7155=
-89
-
-I guess that this is not normal and I'm probably doing something wrong.=
- Any
-ideas?
-
-Thanks,
-Llu=C3=ADs
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
