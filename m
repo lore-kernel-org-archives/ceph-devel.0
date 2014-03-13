@@ -1,97 +1,147 @@
-From: <ghislain.chevalier@orange.com>
-Subject: Issue with radosgw in Ubuntu 13.10/emperor/fcgid
-Date: Thu, 13 Mar 2014 10:58:03 +0000
-Message-ID: <29593_1394708284_53218F3C_29593_6617_1_B9C8EFBF13B1354DB5FA000660D66DD00C0D51E5@PEXCVZYM14.corporate.adroot.infra.ftgroup>
+From: Yehuda Sadeh <yehuda@inktank.com>
+Subject: Re: Issue with radosgw in Ubuntu 13.10/emperor/fcgid
+Date: Thu, 13 Mar 2014 08:19:04 -0700
+Message-ID: <CABBk=J8BEfo0JomU1Km00_nz+T6JtXSj3DaM+t4FYj7O5BG89g@mail.gmail.com>
+References: <29593_1394708284_53218F3C_29593_6617_1_B9C8EFBF13B1354DB5FA000660D66DD00C0D51E5@PEXCVZYM14.corporate.adroot.infra.ftgroup>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relais-ias244.francetelecom.com ([80.12.204.244]:29565 "EHLO
-	relais-inet.francetelecom.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753973AbaCMK6H (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 13 Mar 2014 06:58:07 -0400
-Received: from omfeda06.si.francetelecom.fr (unknown [xx.xx.xx.199])
-	by omfeda10.si.francetelecom.fr (ESMTP service) with ESMTP id 8E5113747E2
-	for <ceph-devel@vger.kernel.org>; Thu, 13 Mar 2014 11:58:04 +0100 (CET)
-Received: from Exchangemail-eme1.itn.ftgroup (unknown [10.114.1.183])
-	by omfeda06.si.francetelecom.fr (ESMTP service) with ESMTP id 6D1D8C8068
-	for <ceph-devel@vger.kernel.org>; Thu, 13 Mar 2014 11:58:04 +0100 (CET)
-Content-Language: fr-FR
+Received: from mail-vc0-f169.google.com ([209.85.220.169]:52995 "EHLO
+	mail-vc0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754407AbaCMPTF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 13 Mar 2014 11:19:05 -0400
+Received: by mail-vc0-f169.google.com with SMTP id ik5so1291409vcb.28
+        for <ceph-devel@vger.kernel.org>; Thu, 13 Mar 2014 08:19:04 -0700 (PDT)
+In-Reply-To: <29593_1394708284_53218F3C_29593_6617_1_B9C8EFBF13B1354DB5FA000660D66DD00C0D51E5@PEXCVZYM14.corporate.adroot.infra.ftgroup>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ghislain.chevalier@orange.com
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-DQpIaSBBbGwsDQoNCkkgY3VycmVudGx5IHRyeSB0byBpbnN0YWxsIGEgcmFkb3Nndy9lbXBlcm9y
-IG9uIGEgZGVkaWNhdGVkIHNlcnZlciB1bmRlciBVYnVudHUgMTMuMTAgDQpUaGlzIHNlcnZlciBp
-cyBhbiBleGNlcHRpb24gaW4gdGhlIGNsdXN0ZXIgd2hpY2ggaXMgaW4gRW1wZXJvciB1bmRlciBV
-YnVudHUgMTIuMDQgTFRTIA0KDQpUaGUgYXBhY2hlMiBhbmQgcmFkb3NndyBpbnN0YWxsYXRpb24g
-c2VlbSB0byBiZSBjb3JyZWN0OyBJIGNyZWF0ZWQgYSBTMyB1c2VyIHdpdGggYSBzd2lmdCBzdWJ1
-c2VyIGJ1dCBJIGdldCBhbiBlcnJvciA1MDAgdHJ5aW5nIHRvIHVzZSBpdC4NCkkgdXNlIGZjZ2lk
-IG1vZHVsZSBpbnN0ZWFkIG9mIGZhc3RjZ2kgYW5kIHNvIHRoZSBjb25maWd1cmF0aW9uIGlzIHF1
-aXRlIGRpZmZlcmVudC4NCkZZSSA6IEkgaW5zdGFsbGVkIGEgcmFkb3Nndy9kdW1wbGluZy9mYXN0
-Y2dpIG9uIGFub3RoZXIgcGxhdGZvcm0gYW5kIGl0IHdvcmtzIHdlbGwgISENCg0KSW4gcmFkb3Nn
-dyBsb2csIEkgZ290IG5vIGVycm9ycy4gDQpJbiBhcGFjaGUyIGVycm9yIGxvZywgSSBnb3QgDQpb
-VGh1IE1hciAxMyAxMTozODoxNS41ODQ4NTkgMjAxNF0gW2ZjZ2lkOndhcm5dIFtwaWQgMTUyNzk6
-dGlkIDE0MDAxNjAxNzY3NjAzMl0gKDEwNClDb25uZWN0aW9uIHJlc2V0IGJ5IHBlZXI6IFtjbGll
-bnQgMTAuMTk0LjE4Mi42MDo0Mzg3MV0gbW9kX2ZjZ2lkOiBlcnJvciByZWFkaW5nIGRhdGEgZnJv
-bSBGYXN0Q0dJIHNlcnZlcg0KW1RodSBNYXIgMTMgMTE6Mzg6MTUuNTg0OTUzIDIwMTRdIFtjb3Jl
-OmVycm9yXSBbcGlkIDE1Mjc5OnRpZCAxNDAwMTYwMTc2NzYwMzJdIFtjbGllbnQgMTAuMTk0LjE4
-Mi42MDo0Mzg3MV0gRW5kIG9mIHNjcmlwdCBvdXRwdXQgYmVmb3JlIGhlYWRlcnM6IHJhZG9zZ3cu
-ZmNnaQ0KDQpJIG5vdGljZWQgdGhhdCBhIHJhZG9zZ3cgc2NyaXB0IGlzIGxhdW5jaGVkIGF0IGV2
-ZXJ5IGh0dHAgcmVxdWVzdOKApg0KSSBob3BlIHNvbWVvbmUgd2lsbCBmaW5kIHdoYXQgaXMgd3Jv
-bmcgaW4gbXkgY29uZmlndXJhdGlvbiEhIQ0KDQpIZXJlIGFyZSBteSBjb25maWd1cmF0aW9uIGZp
-bGVzLg0KDQpyZ3cuY29uZjoNCjxWaXJ0dWFsSG9zdCAqOjg4Pg0KU2VydmVyTmFtZSAgci1jZXBo
-cmd3MDENCkRvY3VtZW50Um9vdCAvdmFyL3d3dw0KPElmTW9kdWxlIG1vZF9yZXdyaXRlLmM+DQpS
-ZXdyaXRlRW5naW5lIE9uDQpSZXdyaXRlUnVsZSBeLyhbYS16QS1aMC05LV8uXSopKFsvXT8uKikg
-L3JhZG9zZ3cuZmNnaT9wYWdlPSQxJnBhcmFtcz0kMiYle1FVRVJZX1NUUklOR30gW0U9SFRUUF9B
-VVRIT1JJWkFUSU9OOiV7SFRUUDpBdXRob3JpemF0aW9ufSxMXQ0KPC9JZk1vZHVsZT4NCjxJZk1v
-ZHVsZSBtb2RfZmNnaWQuYz4NCjxEaXJlY3RvcnkgL3Zhci93d3c+DQpPcHRpb25zICtFeGVjQ0dJ
-DQpBbGxvd092ZXJyaWRlIEFsbA0KU2V0SGFuZGxlciBmY2dpZC1zY3JpcHQNCkZjZ2lkV3JhcHBl
-ciAiL3Vzci9sb2NhbC9iaW4vcmFkb3NndyAtbiBjbGllbnQucmFkb3Nndy5yLWNlcGhyZ3cwMSIg
-LmZjZ2kgdmlydHVhbA0KT3JkZXIgYWxsb3csZGVueQ0KQWxsb3cgZnJvbSBhbGwNCkF1dGhCYXNp
-Y0F1dGhvcml0YXRpdmUgT2ZmDQo8L0RpcmVjdG9yeT4NCjwvSWZNb2R1bGU+DQpBbGxvd0VuY29k
-ZWRTbGFzaGVzIE9uDQpTZXJ2ZXJTaWduYXR1cmUgT2ZmDQo8L1ZpcnR1YWxIb3N0Pg0KDQoNCmNl
-cGguY29uZjoNCltjbGllbnQucmFkb3Nndy5yLWNlcGhyZ3cwMV0NCmhvc3QgPSByLWNlcGhyZ3cw
-MQ0Kcmd3X3NvY2tldF9wYXRoID0gL3Zhci9ydW4vY2VwaC9yYWRvc2d3LnNvY2sNCmtleXJpbmcg
-PSAvZXRjL2NlcGgva2V5cmluZy5yYWRvc2d3LnItY2VwaHJndzAxDQpyZ3dfZG5zX25hbWUgPSBy
-LWNlcGhyZ3cwMQ0KbG9nX2ZpbGUgPSAvdmFyL2xvZy9jZXBoL3JhZG9zZ3cubG9nDQpyZ3dfcG9y
-dCA9IDg4DQpyZ3dfcHJpbnRfY29udGludWUgPSBmYWxzZQ0KdXNlciA9IHd3dy1kYXRhDQoNCnJh
-ZG9zZ3cuZmNnaToNCiMhL2Jpbi9zaA0KZXhlYyAvdXNyL2xvY2FsL2Jpbi9yYWRvc2d3IC1jIC9l
-dGMvY2VwaC9jZXBoLmNvbmYgLW4gY2xpZW50LnJhZG9zZ3cuci1jZXBocmd3MDENCg0KDQpVc2Vy
-IGpvaG5kb2UgaW4gcmFkb3NndzoNCnJhZG9zZ3ctYWRtaW4gdXNlciBpbmZvIC0tdWlkPWpvaG5k
-b2UNCnsgInVzZXJfaWQiOiAiam9obmRvZSIsDQogICJkaXNwbGF5X25hbWUiOiAiSm9obiBEb2Ui
-LA0KICAiZW1haWwiOiAiam9obkBleGFtcGxlLmNvbSIsDQogICJzdXNwZW5kZWQiOiAwLA0KICAi
-bWF4X2J1Y2tldHMiOiAxMDAwLA0KICAiYXVpZCI6IDAsDQogICJzdWJ1c2VycyI6IFsNCiAgICAg
-ICAgeyAiaWQiOiAiam9obmRvZTpzd2lmdCIsDQogICAgICAgICAgInBlcm1pc3Npb25zIjogImZ1
-bGwtY29udHJvbCJ9XSwNCiAgImtleXMiOiBbDQogICAgICAgIHsgInVzZXIiOiAiam9obmRvZSIs
-DQogICAgICAgICAgImFjY2Vzc19rZXkiOiAiczNqb2huZG9lIiwNCiAgICAgICAgICAic2VjcmV0
-X2tleSI6ICJzM3NlY3JldCJ9XSwNCiAgInN3aWZ0X2tleXMiOiBbDQogICAgICAgIHsgInVzZXIi
-OiAiam9obmRvZTpzd2lmdCIsDQogICAgICAgICAgInNlY3JldF9rZXkiOiAic3dzZWNyZXQifV0s
-DQogICJjYXBzIjogW10sDQogICJvcF9tYXNrIjogInJlYWQsIHdyaXRlLCBkZWxldGUiLA0KICAi
-ZGVmYXVsdF9wbGFjZW1lbnQiOiAiIiwNCiAgInBsYWNlbWVudF90YWdzIjogW10sDQogICJidWNr
-ZXRfcXVvdGEiOiB7ICJlbmFibGVkIjogZmFsc2UsDQogICAgICAibWF4X3NpemVfa2IiOiAtMSwN
-CiAgICAgICJtYXhfb2JqZWN0cyI6IC0xfX0NCg0KDQpjZXBoIGF1dGggbGlzdCBmb3IgcmFkb3Nn
-dyBjbGllbnQNCmNsaWVudC5yYWRvc2d3LnItY2VwaHJndzAxDQogICAgICAgIGtleTogQVFBdmR3
-ZFR3TVN2R3hBQXNjdGV6VHhBUktWVnE5c1dzVW1BUGc9PQ0KICAgICAgICBjYXBzOiBbbW9uXSBh
-bGxvdyBydw0KICAgICAgICBjYXBzOiBbb3NkXSBhbGxvdyByd3gNCg0KLSAtIC0gLSAtIC0gLSAt
-IC0gLSAtIC0gLSAtIC0gLSAtIA0KR2hpc2xhaW4gQ2hldmFsaWVyDQpPUkFOR0UvT0xOQy9PTFBT
-L0FTRS9EQVBJL0NTRQ0KU3RvcmFnZSBTZXJ2aWNlIEFyY2hpdGVjdA0KICszMzI5OTEyNDQzMg0K
-Z2hpc2xhaW4uY2hldmFsaWVyQG9yYW5nZS5jb20gDQoKX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwoKQ2UgbWVzc2FnZSBldCBz
-ZXMgcGllY2VzIGpvaW50ZXMgcGV1dmVudCBjb250ZW5pciBkZXMgaW5mb3JtYXRpb25zIGNvbmZp
-ZGVudGllbGxlcyBvdSBwcml2aWxlZ2llZXMgZXQgbmUgZG9pdmVudCBkb25jCnBhcyBldHJlIGRp
-ZmZ1c2VzLCBleHBsb2l0ZXMgb3UgY29waWVzIHNhbnMgYXV0b3Jpc2F0aW9uLiBTaSB2b3VzIGF2
-ZXogcmVjdSBjZSBtZXNzYWdlIHBhciBlcnJldXIsIHZldWlsbGV6IGxlIHNpZ25hbGVyCmEgbCdl
-eHBlZGl0ZXVyIGV0IGxlIGRldHJ1aXJlIGFpbnNpIHF1ZSBsZXMgcGllY2VzIGpvaW50ZXMuIExl
-cyBtZXNzYWdlcyBlbGVjdHJvbmlxdWVzIGV0YW50IHN1c2NlcHRpYmxlcyBkJ2FsdGVyYXRpb24s
-Ck9yYW5nZSBkZWNsaW5lIHRvdXRlIHJlc3BvbnNhYmlsaXRlIHNpIGNlIG1lc3NhZ2UgYSBldGUg
-YWx0ZXJlLCBkZWZvcm1lIG91IGZhbHNpZmllLiBNZXJjaS4KClRoaXMgbWVzc2FnZSBhbmQgaXRz
-IGF0dGFjaG1lbnRzIG1heSBjb250YWluIGNvbmZpZGVudGlhbCBvciBwcml2aWxlZ2VkIGluZm9y
-bWF0aW9uIHRoYXQgbWF5IGJlIHByb3RlY3RlZCBieSBsYXc7CnRoZXkgc2hvdWxkIG5vdCBiZSBk
-aXN0cmlidXRlZCwgdXNlZCBvciBjb3BpZWQgd2l0aG91dCBhdXRob3Jpc2F0aW9uLgpJZiB5b3Ug
-aGF2ZSByZWNlaXZlZCB0aGlzIGVtYWlsIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5k
-ZXIgYW5kIGRlbGV0ZSB0aGlzIG1lc3NhZ2UgYW5kIGl0cyBhdHRhY2htZW50cy4KQXMgZW1haWxz
-IG1heSBiZSBhbHRlcmVkLCBPcmFuZ2UgaXMgbm90IGxpYWJsZSBmb3IgbWVzc2FnZXMgdGhhdCBo
-YXZlIGJlZW4gbW9kaWZpZWQsIGNoYW5nZWQgb3IgZmFsc2lmaWVkLgpUaGFuayB5b3UuCgo=
+On Thu, Mar 13, 2014 at 3:58 AM,  <ghislain.chevalier@orange.com> wrote:
+>
+> Hi All,
+>
+> I currently try to install a radosgw/emperor on a dedicated server under Ubuntu 13.10
+> This server is an exception in the cluster which is in Emperor under Ubuntu 12.04 LTS
+>
+> The apache2 and radosgw installation seem to be correct; I created a S3 user with a swift subuser but I get an error 500 trying to use it.
+> I use fcgid module instead of fastcgi and so the configuration is quite different.
+> FYI : I installed a radosgw/dumpling/fastcgi on another platform and it works well !!
+>
+> In radosgw log, I got no errors.
+> In apache2 error log, I got
+> [Thu Mar 13 11:38:15.584859 2014] [fcgid:warn] [pid 15279:tid 140016017676032] (104)Connection reset by peer: [client 10.194.182.60:43871] mod_fcgid: error reading data from FastCGI server
+> [Thu Mar 13 11:38:15.584953 2014] [core:error] [pid 15279:tid 140016017676032] [client 10.194.182.60:43871] End of script output before headers: radosgw.fcgi
+>
+> I noticed that a radosgw script is launched at every http request...
+
+Yeah, that  could be one of the issues with fcgid, not sure if there's
+a way to tell it to just be static (as we do with mod_fastcgi), any
+reason why you're using fcgid?
+
+A 500 response usually means that apache was not able to communicate
+with the radosgw backend. Not sure what the issue with your config, it
+has been a while since I configured fcgid. Try bumping up the radosgw
+logs (debug rgw = 20) to see if the requests do get there or not.
+
+
+Yehuda
+
+> I hope someone will find what is wrong in my configuration!!!
+>
+> Here are my configuration files.
+>
+> rgw.conf:
+> <VirtualHost *:88>
+> ServerName  r-cephrgw01
+> DocumentRoot /var/www
+> <IfModule mod_rewrite.c>
+> RewriteEngine On
+> RewriteRule ^/([a-zA-Z0-9-_.]*)([/]?.*) /radosgw.fcgi?page=$1&params=$2&%{QUERY_STRING} [E=HTTP_AUTHORIZATION:%{HTTP:Authorization},L]
+> </IfModule>
+> <IfModule mod_fcgid.c>
+> <Directory /var/www>
+> Options +ExecCGI
+> AllowOverride All
+> SetHandler fcgid-script
+> FcgidWrapper "/usr/local/bin/radosgw -n client.radosgw.r-cephrgw01" .fcgi virtual
+> Order allow,deny
+> Allow from all
+> AuthBasicAuthoritative Off
+> </Directory>
+> </IfModule>
+> AllowEncodedSlashes On
+> ServerSignature Off
+> </VirtualHost>
+>
+>
+> ceph.conf:
+> [client.radosgw.r-cephrgw01]
+> host = r-cephrgw01
+> rgw_socket_path = /var/run/ceph/radosgw.sock
+> keyring = /etc/ceph/keyring.radosgw.r-cephrgw01
+> rgw_dns_name = r-cephrgw01
+> log_file = /var/log/ceph/radosgw.log
+> rgw_port = 88
+> rgw_print_continue = false
+> user = www-data
+>
+> radosgw.fcgi:
+> #!/bin/sh
+> exec /usr/local/bin/radosgw -c /etc/ceph/ceph.conf -n client.radosgw.r-cephrgw01
+>
+>
+> User johndoe in radosgw:
+> radosgw-admin user info --uid=johndoe
+> { "user_id": "johndoe",
+>   "display_name": "John Doe",
+>   "email": "john@example.com",
+>   "suspended": 0,
+>   "max_buckets": 1000,
+>   "auid": 0,
+>   "subusers": [
+>         { "id": "johndoe:swift",
+>           "permissions": "full-control"}],
+>   "keys": [
+>         { "user": "johndoe",
+>           "access_key": "s3johndoe",
+>           "secret_key": "s3secret"}],
+>   "swift_keys": [
+>         { "user": "johndoe:swift",
+>           "secret_key": "swsecret"}],
+>   "caps": [],
+>   "op_mask": "read, write, delete",
+>   "default_placement": "",
+>   "placement_tags": [],
+>   "bucket_quota": { "enabled": false,
+>       "max_size_kb": -1,
+>       "max_objects": -1}}
+>
+>
+> ceph auth list for radosgw client
+> client.radosgw.r-cephrgw01
+>         key: AQAvdwdTwMSvGxAAsctezTxARKVVq9sWsUmAPg==
+>         caps: [mon] allow rw
+>         caps: [osd] allow rwx
+>
+> - - - - - - - - - - - - - - - - -
+> Ghislain Chevalier
+> ORANGE/OLNC/OLPS/ASE/DAPI/CSE
+> Storage Service Architect
+>  +33299124432
+> ghislain.chevalier@orange.com
+>
+> _________________________________________________________________________________________________________________________
+>
+> Ce message et ses pieces jointes peuvent contenir des informations confidentielles ou privilegiees et ne doivent donc
+> pas etre diffuses, exploites ou copies sans autorisation. Si vous avez recu ce message par erreur, veuillez le signaler
+> a l'expediteur et le detruire ainsi que les pieces jointes. Les messages electroniques etant susceptibles d'alteration,
+> Orange decline toute responsabilite si ce message a ete altere, deforme ou falsifie. Merci.
+>
+> This message and its attachments may contain confidential or privileged information that may be protected by law;
+> they should not be distributed, used or copied without authorisation.
+> If you have received this email in error, please notify the sender and delete this message and its attachments.
+> As emails may be altered, Orange is not liable for messages that have been modified, changed or falsified.
+> Thank you.
+>
