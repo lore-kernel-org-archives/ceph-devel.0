@@ -1,149 +1,141 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: erasured PG always "peering"
-Date: Thu, 13 Mar 2014 00:03:55 +0100
-Message-ID: <5320E7DB.7070103@dachary.org>
-References: <CAKD2hyHsCTTLWtTR8O6GYMgk=qRw38r_JGz=vAY+yA1DonqYyQ@mail.gmail.com>	<5320BE0B.4090507@dachary.org> <CAKD2hyGc0QtKBj6EVGF7EmDYjfDUoLmAYZdbyYmNJX0TDcGtgg@mail.gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: O_DIRECT logic in CephFS, ceph-fuse / Performance
+Date: Wed, 12 Mar 2014 17:08:07 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1403121704110.3593@cobra.newdream.net>
+References: <20140312202711.GA21325@oder.mch.fsc.net> <CANP1eJFHp8UHndE80_OLjXgjeJSxQSCFBdx48G2LUjk-JO_VOw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="O2MNiMdv5xfEWa4wh6S9qqglPnN888qdG"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:41557 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751101AbaCLXD5 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Mar 2014 19:03:57 -0400
-In-Reply-To: <CAKD2hyGc0QtKBj6EVGF7EmDYjfDUoLmAYZdbyYmNJX0TDcGtgg@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:60028 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752133AbaCMAII (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Mar 2014 20:08:08 -0400
+In-Reply-To: <CANP1eJFHp8UHndE80_OLjXgjeJSxQSCFBdx48G2LUjk-JO_VOw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?B?TGx1w61zIFDDoG1pZXMgaSBKdcOhcmV6?= <llpamies@pamies.cat>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Milosz Tanski <milosz@adfin.com>
+Cc: Kasper Dieter <dieter.kasper@ts.fujitsu.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, mark.nelson@inktank.com
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---O2MNiMdv5xfEWa4wh6S9qqglPnN888qdG
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Hi Kasper,
 
-Glad to hear it's working for you now ;-)
+In order to do what you want here, we need to make O_DIRECT-initiated 
+requests on the client get a flag that tells the OSD to also bypass its 
+cache.  That doesn't happen right now.
 
-There are important bug fixes daily: it is worth getting the latest Firef=
-ly from https://github.com/ceph/ceph/tree/firefly
+Assuming we do add that flag, we can either make the IO actually do 
+O_DIRECT, or we can make it do some fadvise after the call, or any manner 
+of things depending on what makes the most sense for that particular 
+backend implementation.  For FileStore, it seems pretty likely that 
+O_DIRECT is the right thing.  It is somewhat complicated by the presence 
+of the FDCache which avoids opening a new file descriptor for each IO, so 
+it is non-trivial, but doable.
 
-If you run into a problem again, it would be great if you could preserve =
-the environment in which it happens and post a bug report (even a terse o=
-ne) at http://tracker.ceph.com/projects/ceph/issues/new
+There's nothing preventing us from identifying what these hints on writes 
+might be now.  Other possibilities that have come up:
 
-Cheers
+- the following write should be done O_DIRECT.  or perhaps more precisely, 
+  the write should not be cached (e.g., because the client is caching it, 
+  or doesn't expect to ever read it)
+- the following write is on data that is expected to be immutable
+- the following write is on data that is expected to have a short/long 
+  lifetime.
 
-On 12/03/2014 21:41, Llu=C3=ADs P=C3=A0mies i Ju=C3=A1rez wrote:
-> Thanks Loic,
->=20
-> Noted the indep change.
->=20
-> The thing is that I deleted the pool and created it again and now it
-> works well (both for indep and firstn...). The cluster hasn't change
-> since I had the problem before nor have I restarted any of the
-> daemons. I wander if maybe the OSDs needed a "few hours" for
-> peering...
->=20
-> I'm using a version I cloned from github a few days ago:
-> ceph version 0.77-623-gd67a9ad (d67a9adae31da3d07a697b73878c368d2127f1d=
-a)
->=20
-> Best,
-> Lluis
->=20
->=20
-> On Wed, Mar 12, 2014 at 1:05 PM, Loic Dachary <loic@dachary.org> wrote:=
+etc.
 
->> Hi
->>
->> On 12/03/2014 18:40, Llu=C3=ADs P=C3=A0mies i Ju=C3=A1rez wrote:
->>> Hi ceph-devel,
->>>
->>> I have been playing with the new erasure code functionality and I hav=
-e
->>> noticed that the erasure coded PG remains in "peering" state forever.=
- Is
->>> that normal?
->>>
->>> I have a scenario with four servers each with two OSDs (total of eigh=
-t
->>> OSDs). Then I define the extra crush rule to get four different OSDs =
-across
->>> hosts:
->>>
->>> rule reedsol_ruleset {
->>>     ruleset 1
->>>     type erasure
->>>     min_size 4
->>>     max_size 4
->>>     step take default
->>>     step chooseleaf firstn 0 type host
->>
->> You want to s/firstn/indep/ here. But I don't think it's the source of=
- your problem.
->>
->> From what version are you running (hash of the last commit) ?
->>
->> Cheers
->>
->>>     step emit
->>> }
->>>
->>> And create a simple pool by:
->>> sudo ceph osd pool create cauchy 1 1 erasure erasure-code-plugin=3Dje=
-rasure
->>> erasure-code-k=3D2 erasure-code-m=3D2 erasure-code-technique=3Dcauchy=
-_good
->>> crush_ruleset=3Dreedsol_ruleset
->>>
->>> After that, the PG status jumps from "creating" to "peering" and stay=
-s
->>> there forever. With "sudo ceph pg dump_stuck" I can see:
->>>
->>> pg_stat objects mip degr unf bytes log disklog state state_stamp v re=
-ported
->>> up up_primary acting acting_primary last_scrub scrub_stamp last_deep_=
-scrub
->>> deep_scrub_stamp
->>> 5.0 0 0 0 0 0 0 0 peering 2014-03-12 10:30:36.717544 0'0 58:3 [0,6,2,=
-5] 0
->>> [0,6,2,5] 0 0'0 2014-03-12 10:30:36.715589 0'0 2014-03-12 10:30:36.71=
-5589
->>>
->>> I guess that this is not normal and I'm probably doing something wron=
-g. Any
->>> ideas?
->>>
->>> Thanks,
->>> Llu=C3=ADs
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>
->> --
->> Lo=C3=AFc Dachary, Artisan Logiciel Libre
->>
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
+sage
 
 
---O2MNiMdv5xfEWa4wh6S9qqglPnN888qdG
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.20 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+On Wed, 12 Mar 2014, Milosz Tanski wrote:
 
-iEYEARECAAYFAlMg59sACgkQ8dLMyEl6F23AgACdF9zhMuLENIgsQs3rjeHVH9p2
-B9wAn1hKEIE/m4egTt61DYISbN/SkJyF
-=TZ7H
------END PGP SIGNATURE-----
-
---O2MNiMdv5xfEWa4wh6S9qqglPnN888qdG--
+> Kasper,
+> 
+> I only know about the kernel cephfs... but there are special code
+> paths for O_DIRECT read/writes. Both read and write bypass the page
+> cache and send commands directly to OSDs for the objects, on the write
+> case the object has a write lock with MDS. So unlike NFS this seams
+> like it does the right thing.
+> 
+> I'm guessing when you say XFS on rbd with O_DIRECT you mean the files
+> are opened O_DIRECT on the filesystem. That doesn't take into account
+> readahead that the kernel does in the block device layer which is
+> independent of file read-ahead and (it's at much lower layer). You can
+> find out what that is set to using the "blockdev --getra /dev/XXX"
+> command.
+> 
+> Cheers,
+> - Milosz
+> 
+> On Wed, Mar 12, 2014 at 4:27 PM, Kasper Dieter
+> <dieter.kasper@ts.fujitsu.com> wrote:
+> > The 'man 2 open' states
+> > ---snip---
+> > The behaviour of O_DIRECT with NFS will differ from local file systems.  (...)
+> > The  NFS  protocol does not support passing the flag to the server,
+> > so O_DIRECT I/O will bypass the page cache only on the client;
+> > the server may still cache the I/O.
+> > ---snip---
+> >
+> > Q1: How does CephFS and ceph-fuse handle the O_DIRECT flag ?
+> >         (similar to NFS Ceph is Network FS, too and has client/server)
+> >
+> >
+> > Some Test cases with O_DIRECT & io_submit() on 4K (65536, 262144, 1048576, 4194304 is the different obj_size):
+> >
+> > out.rand.fuse.ssd2-r2-1-1-1048576:  Max. throughput read         : 7.22768MB/s
+> > out.rand.fuse.ssd2-r2-1-1-262144:  Max. throughput read         : 7.18318MB/s
+> > out.rand.fuse.ssd2-r2-1-1-65536:  Max. throughput read         : 7.25543MB/s
+> > out.sequ.fuse.ssd2-r2-1-1-1048576:  Max. throughput read         : 118.092MB/s
+> > out.sequ.fuse.ssd2-r2-1-1-262144:  Max. throughput read         : 111.073MB/s
+> > out.sequ.fuse.ssd2-r2-1-1-65536:  Max. throughput read         : 95.4332MB/s
+> >
+> > out.rand.cephfs.ssd2-r2-1-1-1048576:  Max. throughput read         : 11.2144MB/s
+> > out.rand.cephfs.ssd2-r2-1-1-262144:  Max. throughput read         : 11.0371MB/s
+> > out.rand.cephfs.ssd2-r2-1-1-65536:  Max. throughput read         : 11.017MB/s
+> > out.sequ.cephfs.ssd2-r2-1-1-1048576:  Max. throughput read         : 11.2299MB/s
+> > out.sequ.cephfs.ssd2-r2-1-1-262144:  Max. throughput read         : 10.9488MB/s
+> > out.sequ.cephfs.ssd2-r2-1-1-65536:  Max. throughput read         : 10.5669MB/s
+> >
+> > out.rand.t3-ssd2-v2-1-1048576-20:  Max. throughput read         : 81.9598MB/s
+> > out.rand.t3-ssd2-v2-1-262144-18:  Max. throughput read         : 140.45MB/s
+> > out.rand.t3-ssd2-v2-1-4194304-22:  Max. throughput read         : 55.8478MB/s
+> > out.rand.t3-ssd2-v2-1-65536-16:  Max. throughput read         : 158.441MB/s
+> > out.sequ.t3-ssd2-v2-1-1048576-20:  Max. throughput read         : 74.3693MB/s
+> > out.sequ.t3-ssd2-v2-1-262144-18:  Max. throughput read         : 140.444MB/s
+> > out.sequ.t3-ssd2-v2-1-4194304-22:  Max. throughput read         : 42.7327MB/s
+> > out.sequ.t3-ssd2-v2-1-65536-16:  Max. throughput read         : 165.434MB/s
+> >
+> > t3 = XFS on rbd.ko
+> >
+> > CephFS and ceph-fuse    seems to use no caching at all on random-reads.
+> > Ceph-fuse               seems to use some caching on sequential-reads.
+> > rbd.ko                  seems to use caching on all reads (because only XFS knows about O_DIRECT ;-))
+> >
+> >
+> > Q2: How can the read-caching logic be enabled for ceph-fuse / CephFS ?
+> >
+> > BTW I'm aware of the "O_DIRECT (...) designed  by  a  deranged monkey" text in the open-2-manpage ;-)
+> >
+> >
+> > -Dieter
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+> 
+> -- 
+> Milosz Tanski
+> CTO
+> 10 East 53rd Street, 37th floor
+> New York, NY 10022
+> 
+> p: 646-253-9055
+> e: milosz@adfin.com
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
