@@ -1,141 +1,108 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: O_DIRECT logic in CephFS, ceph-fuse / Performance
-Date: Wed, 12 Mar 2014 17:08:07 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1403121704110.3593@cobra.newdream.net>
-References: <20140312202711.GA21325@oder.mch.fsc.net> <CANP1eJFHp8UHndE80_OLjXgjeJSxQSCFBdx48G2LUjk-JO_VOw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+From: Guangliang Zhao <lucienchao@gmail.com>
+Subject: [PATCH 1/3 v2] rbd: skip the copyup when an entire object writing
+Date: Thu, 13 Mar 2014 11:21:34 +0800
+Message-ID: <1394680896-8554-1-git-send-email-lucienchao@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:60028 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752133AbaCMAII (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Mar 2014 20:08:08 -0400
-In-Reply-To: <CANP1eJFHp8UHndE80_OLjXgjeJSxQSCFBdx48G2LUjk-JO_VOw@mail.gmail.com>
+Received: from mail-pb0-f49.google.com ([209.85.160.49]:51543 "EHLO
+	mail-pb0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752937AbaCMDVr (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Mar 2014 23:21:47 -0400
+Received: by mail-pb0-f49.google.com with SMTP id jt11so452282pbb.8
+        for <ceph-devel@vger.kernel.org>; Wed, 12 Mar 2014 20:21:46 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Milosz Tanski <milosz@adfin.com>
-Cc: Kasper Dieter <dieter.kasper@ts.fujitsu.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, mark.nelson@inktank.com
+To: ceph-devel@vger.kernel.org
+Cc: elder@ieee.org
 
-Hi Kasper,
+It need to copyup the parent's content when layered writing,
+but an entire object write would overwrite it, so skip it.
 
-In order to do what you want here, we need to make O_DIRECT-initiated 
-requests on the client get a flag that tells the OSD to also bypass its 
-cache.  That doesn't happen right now.
+Signed-off-by: Guangliang Zhao <lucienchao@gmail.com>
+---
+ drivers/block/rbd.c |   49 ++++++++++++++++++++++++++++++++++---------------
+ 1 file changed, 34 insertions(+), 15 deletions(-)
 
-Assuming we do add that flag, we can either make the IO actually do 
-O_DIRECT, or we can make it do some fadvise after the call, or any manner 
-of things depending on what makes the most sense for that particular 
-backend implementation.  For FileStore, it seems pretty likely that 
-O_DIRECT is the right thing.  It is somewhat complicated by the presence 
-of the FDCache which avoids opening a new file descriptor for each IO, so 
-it is non-trivial, but doable.
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index b365e0d..2d48858 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -2624,34 +2624,53 @@ out:
+ 	return ret;
+ }
+ 
+-static int rbd_img_obj_request_submit(struct rbd_obj_request *obj_request)
++static bool rbd_obj_request_simple(struct rbd_obj_request *obj_request)
+ {
+ 	struct rbd_img_request *img_request;
+ 	struct rbd_device *rbd_dev;
+-	bool known;
++	u64 obj_size;
+ 
+ 	rbd_assert(obj_request_img_data_test(obj_request));
+ 
+ 	img_request = obj_request->img_request;
+ 	rbd_assert(img_request);
+ 	rbd_dev = img_request->rbd_dev;
++	obj_size = (u64) 1 << rbd_dev->header.obj_order;
+ 
++	/* Read requests didn't need special handling */
++	if (!img_request_write_test(img_request))
++		return true;
++	/* No-layered writes are simple requests*/
++	if (!img_request_layered_test(img_request))
++		return true;
+ 	/*
+-	 * Only writes to layered images need special handling.
+-	 * Reads and non-layered writes are simple object requests.
+ 	 * Layered writes that start beyond the end of the overlap
+-	 * with the parent have no parent data, so they too are
+-	 * simple object requests.  Finally, if the target object is
+-	 * known to already exist, its parent data has already been
+-	 * copied, so a write to the object can also be handled as a
+-	 * simple object request.
++	 * with the parent have no parent data, so they are simple
++	 * object requests.
+ 	 */
+-	if (!img_request_write_test(img_request) ||
+-		!img_request_layered_test(img_request) ||
+-		rbd_dev->parent_overlap <= obj_request->img_offset ||
+-		((known = obj_request_known_test(obj_request)) &&
+-			obj_request_exists_test(obj_request))) {
++	if (rbd_dev->parent_overlap <= obj_request->img_offset)
++		return true;
++	/*
++	 * If the obj_request aligns with the boundary and equals
++	 * to the size of an object, it doesn't need copyup, because
++	 * the obj_request will overwrite it finally.
++	 */
++	if ((!obj_request->offset) && (obj_request->length == obj_size))
++		return true;
++	/*
++	 * If the target object is known to already exist, its parent
++	 * data has already been copied, so a write to the object can
++	 * also be handled as a simple object request
++	 */
++	if (obj_request_known_test(obj_request) &&
++			obj_request_exists_test(obj_request))
++		return true;
++	return false;
++}
+ 
++static int rbd_img_obj_request_submit(struct rbd_obj_request *obj_request)
++{
++	if (rbd_obj_request_simple(obj_request)) {
+ 		struct rbd_device *rbd_dev;
+ 		struct ceph_osd_client *osdc;
+ 
+@@ -2667,7 +2686,7 @@ static int rbd_img_obj_request_submit(struct rbd_obj_request *obj_request)
+ 	 * start by reading the data for the full target object from
+ 	 * the parent so we can use it for a copyup to the target.
+ 	 */
+-	if (known)
++	if (obj_request_known_test(obj_request))
+ 		return rbd_img_obj_parent_read_full(obj_request);
+ 
+ 	/* We don't know whether the target exists.  Go find out. */
+-- 
+1.7.9.5
 
-There's nothing preventing us from identifying what these hints on writes 
-might be now.  Other possibilities that have come up:
-
-- the following write should be done O_DIRECT.  or perhaps more precisely, 
-  the write should not be cached (e.g., because the client is caching it, 
-  or doesn't expect to ever read it)
-- the following write is on data that is expected to be immutable
-- the following write is on data that is expected to have a short/long 
-  lifetime.
-
-etc.
-
-sage
-
-
-
-On Wed, 12 Mar 2014, Milosz Tanski wrote:
-
-> Kasper,
-> 
-> I only know about the kernel cephfs... but there are special code
-> paths for O_DIRECT read/writes. Both read and write bypass the page
-> cache and send commands directly to OSDs for the objects, on the write
-> case the object has a write lock with MDS. So unlike NFS this seams
-> like it does the right thing.
-> 
-> I'm guessing when you say XFS on rbd with O_DIRECT you mean the files
-> are opened O_DIRECT on the filesystem. That doesn't take into account
-> readahead that the kernel does in the block device layer which is
-> independent of file read-ahead and (it's at much lower layer). You can
-> find out what that is set to using the "blockdev --getra /dev/XXX"
-> command.
-> 
-> Cheers,
-> - Milosz
-> 
-> On Wed, Mar 12, 2014 at 4:27 PM, Kasper Dieter
-> <dieter.kasper@ts.fujitsu.com> wrote:
-> > The 'man 2 open' states
-> > ---snip---
-> > The behaviour of O_DIRECT with NFS will differ from local file systems.  (...)
-> > The  NFS  protocol does not support passing the flag to the server,
-> > so O_DIRECT I/O will bypass the page cache only on the client;
-> > the server may still cache the I/O.
-> > ---snip---
-> >
-> > Q1: How does CephFS and ceph-fuse handle the O_DIRECT flag ?
-> >         (similar to NFS Ceph is Network FS, too and has client/server)
-> >
-> >
-> > Some Test cases with O_DIRECT & io_submit() on 4K (65536, 262144, 1048576, 4194304 is the different obj_size):
-> >
-> > out.rand.fuse.ssd2-r2-1-1-1048576:  Max. throughput read         : 7.22768MB/s
-> > out.rand.fuse.ssd2-r2-1-1-262144:  Max. throughput read         : 7.18318MB/s
-> > out.rand.fuse.ssd2-r2-1-1-65536:  Max. throughput read         : 7.25543MB/s
-> > out.sequ.fuse.ssd2-r2-1-1-1048576:  Max. throughput read         : 118.092MB/s
-> > out.sequ.fuse.ssd2-r2-1-1-262144:  Max. throughput read         : 111.073MB/s
-> > out.sequ.fuse.ssd2-r2-1-1-65536:  Max. throughput read         : 95.4332MB/s
-> >
-> > out.rand.cephfs.ssd2-r2-1-1-1048576:  Max. throughput read         : 11.2144MB/s
-> > out.rand.cephfs.ssd2-r2-1-1-262144:  Max. throughput read         : 11.0371MB/s
-> > out.rand.cephfs.ssd2-r2-1-1-65536:  Max. throughput read         : 11.017MB/s
-> > out.sequ.cephfs.ssd2-r2-1-1-1048576:  Max. throughput read         : 11.2299MB/s
-> > out.sequ.cephfs.ssd2-r2-1-1-262144:  Max. throughput read         : 10.9488MB/s
-> > out.sequ.cephfs.ssd2-r2-1-1-65536:  Max. throughput read         : 10.5669MB/s
-> >
-> > out.rand.t3-ssd2-v2-1-1048576-20:  Max. throughput read         : 81.9598MB/s
-> > out.rand.t3-ssd2-v2-1-262144-18:  Max. throughput read         : 140.45MB/s
-> > out.rand.t3-ssd2-v2-1-4194304-22:  Max. throughput read         : 55.8478MB/s
-> > out.rand.t3-ssd2-v2-1-65536-16:  Max. throughput read         : 158.441MB/s
-> > out.sequ.t3-ssd2-v2-1-1048576-20:  Max. throughput read         : 74.3693MB/s
-> > out.sequ.t3-ssd2-v2-1-262144-18:  Max. throughput read         : 140.444MB/s
-> > out.sequ.t3-ssd2-v2-1-4194304-22:  Max. throughput read         : 42.7327MB/s
-> > out.sequ.t3-ssd2-v2-1-65536-16:  Max. throughput read         : 165.434MB/s
-> >
-> > t3 = XFS on rbd.ko
-> >
-> > CephFS and ceph-fuse    seems to use no caching at all on random-reads.
-> > Ceph-fuse               seems to use some caching on sequential-reads.
-> > rbd.ko                  seems to use caching on all reads (because only XFS knows about O_DIRECT ;-))
-> >
-> >
-> > Q2: How can the read-caching logic be enabled for ceph-fuse / CephFS ?
-> >
-> > BTW I'm aware of the "O_DIRECT (...) designed  by  a  deranged monkey" text in the open-2-manpage ;-)
-> >
-> >
-> > -Dieter
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
-> 
-> -- 
-> Milosz Tanski
-> CTO
-> 10 East 53rd Street, 37th floor
-> New York, NY 10022
-> 
-> p: 646-253-9055
-> e: milosz@adfin.com
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
