@@ -1,25 +1,35 @@
-From: Sage Weil <sage@inktank.com>
-Subject: nfs tests
-Date: Thu, 13 Mar 2014 17:44:25 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1403131743040.316@cobra.newdream.net>
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: Re: nfs tests
+Date: Fri, 14 Mar 2014 10:54:37 +0800
+Message-ID: <53226F6D.4000503@intel.com>
+References: <alpine.DEB.2.00.1403131743040.316@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:46415 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753692AbaCNAo0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 13 Mar 2014 20:44:26 -0400
+Received: from mga09.intel.com ([134.134.136.24]:16037 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753563AbaCNCyj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 13 Mar 2014 22:54:39 -0400
+In-Reply-To: <alpine.DEB.2.00.1403131743040.316@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: zheng.z.yan@intel.com
+To: Sage Weil <sage@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-Hey Zheng,
+On 03/14/2014 08:44 AM, Sage Weil wrote:
+> Hey Zheng,
+> 
+> What workloads have you been testing against NFS?
+kernel build, fsstress, dbench, blogbench.
 
-What workloads have you been testing against NFS?  Do you mind adding them 
-to the knfs tests in ceph-qa-suite?  I suggest we add anything that you 
-consider stable.
-
-Thanks!
-sage
+Regards
+Yan, Zheng
+Do you mind adding them 
+> to the knfs tests in ceph-qa-suite?  I suggest we add anything that you 
+> consider stable.
+>
+> Thanks!
+> sage
+> 
 
