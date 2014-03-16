@@ -1,74 +1,140 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: help - i/o error when mounting with cephfs
-Date: Fri, 14 Mar 2014 18:10:14 -0700
-Message-ID: <CAPYLRzixtzb-k7koUm3i4vzFRf1zwnVg-HiC6oWuMx8Hxi0S5A@mail.gmail.com>
-References: <CAAtBRA1j842+x+LhMHfJm68V0dvihad=uJotxOb7xY3ktSr9qA@mail.gmail.com>
+From: Kevinsky Dy <kevinsky@acale.ph>
+Subject: OSD's failing to start due to failed ASSERT
+Date: Sun, 16 Mar 2014 15:03:01 +0800
+Message-ID: <CAH3XFThHs8qqiHUwnrz3EaFtQ9K1L2wtjP3uksQgFKBS3BXYWg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f50.google.com ([209.85.216.50]:48714 "EHLO
-	mail-qa0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753732AbaCOBKP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 14 Mar 2014 21:10:15 -0400
-Received: by mail-qa0-f50.google.com with SMTP id o15so3250699qap.37
-        for <ceph-devel@vger.kernel.org>; Fri, 14 Mar 2014 18:10:14 -0700 (PDT)
-In-Reply-To: <CAAtBRA1j842+x+LhMHfJm68V0dvihad=uJotxOb7xY3ktSr9qA@mail.gmail.com>
+Received: from mail-we0-f169.google.com ([74.125.82.169]:36504 "EHLO
+	mail-we0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750849AbaCPHDE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 16 Mar 2014 03:03:04 -0400
+Received: by mail-we0-f169.google.com with SMTP id w62so3541744wes.14
+        for <ceph-devel@vger.kernel.org>; Sun, 16 Mar 2014 00:03:02 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Shaun Keenan <skeenan@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: michael@newdream.net, Winston Damarillo <winston@acale.ph>, "Infra @ Acaleph" <infra@acale.ph>
 
-On Fri, Mar 14, 2014 at 6:06 PM, Shaun Keenan <skeenan@gmail.com> wrote:
-> When trying to mount off my ceph cluster I get this:
-> mount error 5 = Input/output error
->
-> cluster looks healthy:
->
-> [root@ceph-mds2 ~]# ceph -s
->   cluster 61b6dda1-5412-41f7-9769-3ae7e47241b7
->    health HEALTH_OK
->    monmap e1: 1 mons at {ceph-mds1=10.9.53.53:6789/0}, election epoch
-> 1, quorum 0 ceph-mds1
->    osdmap e14: 2 osds: 2 up, 2 in
->     pgmap v94: 192 pgs: 192 active+clean; 14540 bytes data, 26388 MB
-> used, 50148 MB / 80631 MB avail
->    mdsmap e7: 0/0/1 up
+Hi,
 
-The MDS isn't running, and doesn't look to have actually been started.
--Greg
-Software Engineer #42 @ http://inktank.com | http://ceph.com
+I currently have 2 OSDs that won't start and it's preventing my
+cluster from running my VMs.
+My cluster is running on:
+# ceph -v
+ceph version 0.67.7 (d7ab4244396b57aac8b7e80812115bbd079e6b73)
 
->
-> mds dump seems fine:
->
-> [root@ceph-mds2 ~]# ceph mds dump
-> dumped mdsmap epoch 7
-> epoch   7
-> flags   0
-> created 2014-03-14 20:22:04.096926
-> modified        2014-03-14 20:22:04.097018
-> tableserver     0
-> root    0
-> session_timeout 60
-> session_autoclose       300
-> last_failure    0
-> last_failure_osd_epoch  0
-> compat  compat={},rocompat={},incompat={1=base v0.20,2=client
-> writeable ranges,3=default file layouts on dirs,4=dir inode in
-> separate object,5=mds uses versioned encoding}
-> max_mds 1
-> in
-> up      {}
-> failed
-> stopped
-> data_pools      1
-> metadata_pool   0
->
-> any help?  this has me completely stumped...
-> fuse hangs too, btw.
-> Thanks,
-> Shaun
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+My OSD's are found on different hosts as per the default CRUSH Map
+rules and I got the logs from the problem OSDs as follows
+
+osd.1:
+    -10> 2014-03-16 11:51:25.183093 7f50923e4780 20 read_log
+12794'1377363 (12794'1377357) modify
+5ee8f77d/rb.0.1f7b.238e1f29.0000000118fb/head//2 by
+client.1077470.0:376704 2014-03-15 12:37:43.175319
+    -9> 2014-03-16 11:51:25.183122 7f50923e4780 20 read_log
+12794'1377364 (12794'1377362) modify
+af8f477d/rb.0.24f4.238e1f29.00000000e378/head//2 by
+client.1074837.0:1295631 2014-03-15 12:38:03.613604
+    -8> 2014-03-16 11:51:25.183146 7f50923e4780 20 read_log
+12794'1377365 (12794'1377348) modify
+cbb2fb7d/rb.0.2355.2ae8944a.00000000849e/head//2 by
+client.1077379.0:1396709 2014-03-15 12:38:33.720354
+    -7> 2014-03-16 11:51:25.183179 7f50923e4780 20 read_log
+12794'1377366 (12794'1377365) modify
+cbb2fb7d/rb.0.2355.2ae8944a.00000000849e/head//2 by
+client.1077379.0:1396712 2014-03-15 12:38:33.726419
+    -6> 2014-03-16 11:51:25.183207 7f50923e4780 20 read_log
+12794'1377367 (12794'1377366) modify
+cbb2fb7d/rb.0.2355.2ae8944a.00000000849e/head//2 by
+client.1077379.0:1397305 2014-03-15 12:39:09.863260
+    -5> 2014-03-16 11:51:25.183231 7f50923e4780 20 read_log
+12794'1377368 (12794'1377367) modify
+cbb2fb7d/rb.0.2355.2ae8944a.00000000849e/head//2 by
+client.1077379.0:1398903 2014-03-15 12:40:13.096258
+    -4> 2014-03-16 11:51:25.183258 7f50923e4780 20 read_log
+12794'1377369 (12794'1377363) modify
+5ee8f77d/rb.0.1f7b.238e1f29.0000000118fb/head//2 by
+client.1077470.0:377159 2014-03-15 12:40:13.105469
+    -3> 2014-03-16 11:51:25.183282 7f50923e4780 20 read_log
+12794'1377370 (12794'1377360) modify
+19463f7d/rb.0.ecb29.238e1f29.000000000101/head//2 by
+client.1058212.1:358750 2014-03-15 12:40:24.998076
+    -2> 2014-03-16 11:51:25.183309 7f50923e4780 20 read_log
+12794'1377371 (12794'1377368) modify
+cbb2fb7d/rb.0.2355.2ae8944a.00000000849e/head//2 by
+client.1077379.0:1399253 2014-03-15 12:40:28.134624
+    -1> 2014-03-16 11:51:25.183333 7f50923e4780 20 read_log
+13740'1377371 (12605'1364064) modify
+94c6137d/rb.0.d07d.2ae8944a.000000002524/head//2 by
+client.1088028.0:10498 2014-03-16 00:06:12.643968
+     0> 2014-03-16 11:51:25.185685 7f50923e4780 -1 osd/PGLog.cc: In
+function 'static bool PGLog::read_log(ObjectStore*, coll_t, hobject_t,
+const pg_info_t&, std::map<eversion_t, hobject_t>&,
+PGLog::IndexedLog&, pg_missing_t&, std::ostringstream&,
+std::set<std::basic_string<char> >*)' thread 7f50923e4780 time
+2014-03-16 11:51:25.183350
+osd/PGLog.cc: 677: FAILED assert(last_e.version.version < e.version.version)
+
+osd.2:
+-10> 2014-03-16 11:28:45.015366 7fe5a7539780 20 read_log 12794'1377363
+(12794'1377357) modify
+5ee8f77d/rb.0.1f7b.238e1f29.0000000118fb/head//2 by
+client.1077470.0:376704 2014-03-15 12:37:43.175319
+    -9> 2014-03-16 11:28:45.015381 7fe5a7539780 20 read_log
+12794'1377364 (12794'1377362) modify
+af8f477d/rb.0.24f4.238e1f29.00000000e378/head//2 by
+client.1074837.0:1295631 2014-03-15 12:38:03.613604
+    -8> 2014-03-16 11:28:45.015394 7fe5a7539780 20 read_log
+12794'1377365 (12794'1377348) modify
+cbb2fb7d/rb.0.2355.2ae8944a.00000000849e/head//2 by
+client.1077379.0:1396709 2014-03-15 12:38:33.720354
+    -7> 2014-03-16 11:28:45.015405 7fe5a7539780 20 read_log
+12794'1377366 (12794'1377365) modify
+cbb2fb7d/rb.0.2355.2ae8944a.00000000849e/head//2 by
+client.1077379.0:1396712 2014-03-15 12:38:33.726419
+    -6> 2014-03-16 11:28:45.015418 7fe5a7539780 20 read_log
+12794'1377367 (12794'1377366) modify
+cbb2fb7d/rb.0.2355.2ae8944a.00000000849e/head//2 by
+client.1077379.0:1397305 2014-03-15 12:39:09.863260
+    -5> 2014-03-16 11:28:45.015428 7fe5a7539780 20 read_log
+12794'1377368 (12794'1377367) modify
+cbb2fb7d/rb.0.2355.2ae8944a.00000000849e/head//2 by
+client.1077379.0:1398903 2014-03-15 12:40:13.096258
+    -4> 2014-03-16 11:28:45.015441 7fe5a7539780 20 read_log
+12794'1377369 (12794'1377363) modify
+5ee8f77d/rb.0.1f7b.238e1f29.0000000118fb/head//2 by
+client.1077470.0:377159 2014-03-15 12:40:13.105469
+    -3> 2014-03-16 11:28:45.015452 7fe5a7539780 20 read_log
+12794'1377370 (12794'1377360) modify
+19463f7d/rb.0.ecb29.238e1f29.000000000101/head//2 by
+client.1058212.1:358750 2014-03-15 12:40:24.998076
+    -2> 2014-03-16 11:28:45.015464 7fe5a7539780 20 read_log
+12794'1377371 (12794'1377368) modify
+cbb2fb7d/rb.0.2355.2ae8944a.00000000849e/head//2 by
+client.1077379.0:1399253 2014-03-15 12:40:28.134624
+    -1> 2014-03-16 11:28:45.015475 7fe5a7539780 20 read_log
+13740'1377371 (12605'1364064) modify
+94c6137d/rb.0.d07d.2ae8944a.000000002524/head//2 by
+client.1088028.0:10498 2014-03-16 00:06:12.643968
+     0> 2014-03-16 11:28:45.016656 7fe5a7539780 -1 osd/PGLog.cc: In
+function 'static bool PGLog::read_log(ObjectStore*, coll_t, hobject_t,
+const pg_info_t&, std::map<eversion_t, hobject_t>&,
+PGLog::IndexedLog&, pg_missing_t&, std::ostringstream&,
+std::set<std::basic_string<char> >*)' thread 7fe5a7539780 time
+2014-03-16 11:28:45.015497
+osd/PGLog.cc: 677: FAILED assert(last_e.version.version < e.version.version)
+
+It seems that the latest version of the object taken from omap is not
+newer than the ones represented in the logs and this failed assert is
+preventing those 2 OSDs to start.
+
+Here's a link to the code.
+https://github.com/ceph/ceph/blob/dumpling/src/osd/PGLog.cc#L667
+
+Any thoughts on how to recover from this?
+
+Thanks,
+Skye Dy
+
+P.S. I apologize to those who will receive this multiple times.
