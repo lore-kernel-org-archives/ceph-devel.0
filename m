@@ -1,58 +1,64 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: gf-complete contributions
-Date: Tue, 18 Mar 2014 09:04:26 +0100
-Message-ID: <5327FE0A.9050305@dachary.org>
+From: Alexandre DERUMIER <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
+Subject: Re: firefly timing
+Date: Tue, 18 Mar 2014 11:00:44 +0100 (CET)
+Message-ID: <06006bb4-7582-46aa-85d3-f901cdcb8c7b@mailpro>
+References: <5327F0A7.8010105@profihost.ag>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="OI2NLmSm2jp8TFfeukEeaum2tl1fmcrGP"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:46522 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752001AbaCRIEc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Mar 2014 04:04:32 -0400
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "James S. Plank" <plank@cs.utk.edu>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <5327F0A7.8010105-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: Stefan Priebe - Profihost AG <s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org>
+Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---OI2NLmSm2jp8TFfeukEeaum2tl1fmcrGP
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
-
-Hi Jim,
-
-As of today jerasure 2 and gf-complete are used in the development versio=
-n of ceph :-)
-
-    https://github.com/ceph/ceph/pull/1384
-
-There are a few pull requests to gf-complete here:
-
-    https://bitbucket.org/jimplank/gf-complete/pull-requests
-
-Should they be changed so they can be merged ?
-
-Cheers
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-
-
-
---OI2NLmSm2jp8TFfeukEeaum2tl1fmcrGP
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.20 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlMn/goACgkQ8dLMyEl6F22PIACglLRXi1HHYNktgEwj+58VOP0x
-6W4AoKM3tEhpqBSO1thaTCEGyE47ORdT
-=qfkO
------END PGP SIGNATURE-----
-
---OI2NLmSm2jp8TFfeukEeaum2tl1fmcrGP--
+CkhpIFN0ZWZhbiwgCgpodHRwOi8vY2VwaC5jb20vZG9jcy9tYXN0ZXIvZGV2L2NhY2hlLXBvb2wv
+IAoKCgoKLS0tLS0gTWFpbCBvcmlnaW5hbCAtLS0tLQoKRGU6ICJTdGVmYW4gUHJpZWJlIC0gUHJv
+Zmlob3N0IEFHIiA8cy5wcmllYmVAcHJvZmlob3N0LmFnPiAKw4A6ICJTYWdlIFdlaWwiIDxzYWdl
+QGlua3RhbmsuY29tPiwgY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcgCkNjOiBjZXBoLXVzZXJz
+QGNlcGguY29tIApFbnZvecOpOiBNYXJkaSAxOCBNYXJzIDIwMTQgMDg6MDc6MTkgCk9iamV0OiBS
+ZTogW2NlcGgtdXNlcnNdIGZpcmVmbHkgdGltaW5nIAoKSGkgU2FnZSwgCgppIHJlYWxseSB3b3Vs
+ZCBsaWtlIHRvIHRlc3QgdGhlIHRpZXJpbmcuIElzIHRoZXJlIGFueSBkZXRhaWxlZCAKZG9jdW1l
+bnRhdGlvbiBhYm91dCBpdCBhbmQgaG93IGl0IHdvcmtzPyAKCkdyZWV0cywgClN0ZWZhbiAKCkFt
+IDE4LjAzLjIwMTQgMDU6NDUsIHNjaHJpZWIgU2FnZSBXZWlsOiAKPiBIaSBldmVyeW9uZSwgCj4g
+Cj4gSXQncyB0YWtlbiBsb25nZXIgdGhhbiBleHBlY3RlZCwgYnV0IHRoZSB0ZXN0cyBmb3IgdjAu
+NzggYXJlIGNhbG1pbmcgZG93biAKPiBhbmQgaXQgbG9va3MgbGlrZSB3ZSdsbCBiZSBhYmxlIHRv
+IGdldCB0aGUgcmVsZWFzZSBvdXQgdGhpcyB3ZWVrLiAKPiAKPiBIb3dldmVyLCB3ZSd2ZSBkZWNp
+ZGVkIE5PVCB0byBtYWtlIHRoaXMgcmVsZWFzZSBmaXJlZmx5LiBJdCB3aWxsIGJlIGEgCj4gbm9y
+bWFsIGRldmVsb3BtZW50IHJlbGVhc2UuIFRoaXMgd2lsbCBiZSB0aGUgZmlyc3QgcmVsZWFzZSB0
+aGF0IGluY2x1ZGVzIAo+IHNvbWUga2V5IG5ldyBmdW5jdGlvbmFsaXR5IChlcmFzdXJlIGNvZGlu
+ZyBhbmQgY2FjaGUgdGllcmluZykgYW5kIGFsdGhvdWdoIAo+IGl0IGlzIHBhc3Npbmcgb3VyIHRl
+c3RzIHdlJ2QgbGlrZSB0byBoYXZlIHNvbWUgb3BlcmF0aW9uYWwgZXhwZXJpZW5jZSB3aXRoIAo+
+IGl0IGluIG1vcmUgdXNlcnMnIGhhbmRzIGJlZm9yZSB3ZSBjb21taXQgdG8gc3VwcG9ydGluZyBp
+dCBsb25nIHRlcm0uIAo+IAo+IFRoZSB0ZW50YXRpdmUgcGxhbiBpcyB0byBmcmVlemUgYW5kIHRo
+ZW4gcmVsZWFzZSB2MC43OSBhZnRlciBhIG5vcm1hbCB0d28gCj4gd2VlayBjeWNsZS4gVGhpcyB3
+aWxsIHNlcnZlIGFzIGEgJ3JlbGVhc2UgY2FuZGlkYXRlJyB0aGF0IHNoYXZlcyBvZmYgYSAKPiBm
+ZXcgcm91Z2ggZWRnZXMgZnJvbSB0aGUgcGVuZGluZyByZWxlYXNlIChpbmNsdWRpbmcgc29tZSBp
+bXByb3ZlbWVudHMgd2l0aCAKPiB0aGUgQVBJIGZvciBzZXR0aW5nIHVwIGVyYXN1cmUgY29kZWQg
+cG9vbHMpLiBJdCBpcyBwb3NzaWJsZSB0aGF0IDAuNzkgCj4gd2lsbCB0dXJuIGludG8gZmlyZWZs
+eSwgYnV0IG1vcmUgbGlrZWx5IHRoYXQgd2Ugd2lsbCBvcHQgZm9yIGFub3RoZXIgdHdvIAo+IHdl
+ZWtzIG9mIGhhcmRlbmluZyBhbmQgbWFrZSAwLjgwIHRoZSByZWxlYXNlIHdlIG5hbWUgZmlyZWZs
+eSBhbmQgbWFpbnRhaW4gCj4gZm9yIHRoZSBsb25nIHRlcm0uIAo+IAo+IExvbmcgc3Rvcnkgc2hv
+cnQ6IDAuNzggd2lsbCBiZSBvdXQgc29vbiwgYW5kIHlvdSBzaG91bGQgdGVzdCBpdCEgSXQgaXMg
+Cj4gd2lsbCB2YXJ5IGZyb20gdGhlIGZpbmFsIGZpcmVmbHkgaW4gYSBmZXcgc3VidGxlIHdheXMs
+IGJ1dCBhbnkgZmVlZGJhY2sgb3IgCj4gdXNhYmlsaXR5IGFuZCBidWcgcmVwb3J0cyBhdCB0aGlz
+IHBvaW50IHdpbGwgYmUgdmVyeSBoZWxwZnVsIGluIHNoYXBpbmcgCj4gdGhpbmdzLiAKPiAKPiBU
+aGFua3MhIAo+IHNhZ2UgCj4gLS0gCj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNl
+bmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluIAo+IHRoZSBib2R5IG9mIGEg
+bWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIAo+IE1vcmUgbWFqb3Jkb21vIGlu
+Zm8gYXQgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sIAo+IApfX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXyAKY2VwaC11c2VycyBt
+YWlsaW5nIGxpc3QgCmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20gCmh0dHA6Ly9saXN0cy5jZXBo
+LmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbSAKX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2Vw
+aC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dp
+L2NlcGgtdXNlcnMtY2VwaC5jb20K
