@@ -1,114 +1,63 @@
-From: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: firefly timing
-Date: Tue, 18 Mar 2014 10:17:16 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1403181014410.5823@cobra.newdream.net>
-References: <alpine.DEB.2.00.1403172115140.24236@cobra.newdream.net>
-	<5327F0A7.8010105@profihost.ag>
-	<alpine.DEB.2.00.1403180905500.316@cobra.newdream.net>
-	<CANP1eJEDccw7doegUSoNKceQUgoNOfpHW1_y1Oz1fk54WDdb4w@mail.gmail.com>
+From: Vipul Nayyar <nayyar_vipul@yahoo.com>
+Subject: Re: [GSOC] Google Storage API Project
+Date: Wed, 19 Mar 2014 03:43:30 +0800 (SGT)
+Message-ID: <1395171810.80796.YahooMailNeo@web194904.mail.sg3.yahoo.com>
+References: <1393874910.26569.YahooMailNeo@web194906.mail.sg3.yahoo.com> <1393875396.14447.YahooMailNeo@web194906.mail.sg3.yahoo.com> <CF3A2C17.2701A%ian.colle@inktank.com>
+Reply-To: Vipul Nayyar <nayyar_vipul@yahoo.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CANP1eJEDccw7doegUSoNKceQUgoNOfpHW1_y1Oz1fk54WDdb4w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Milosz Tanski <milosz-B5zB6C1i6pkAvxtiuMwx3w@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from nm24-vm3.bullet.mail.sg3.yahoo.com ([106.10.151.82]:22189 "EHLO
+	nm24-vm3.bullet.mail.sg3.yahoo.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752497AbaCRTnc convert rfc822-to-8bit
+	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 18 Mar 2014 15:43:32 -0400
+In-Reply-To: <CF3A2C17.2701A%ian.colle@inktank.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Ian Colle <ian.colle@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "yehuda@inktank.com" <yehuda@inktank.com>
+Cc: "patrick@inktank.com" <patrick@inktank.com>
 
-On Tue, 18 Mar 2014, Milosz Tanski wrote:
-> Is this statement in the documentation still valid: "Stale data is
-> expired from the cache pools based on some as-yet undetermined
-> policy." As that sounds a bit scary.
+Hi Ian,
 
-I'll update the docs :).  The policy is pretty simply but not described 
-anywhere yet.
+Sorry for the late reply. Thanks for the links that you gave. I've gone=
+ through them and I'm currently studying the Google Storage API in orde=
+r to figure out it's implementation. I've also gone through the source =
+code of libs3 in the ceph repo. Due to the excellent clarity of the cod=
+e, I was able to easily understand the basic flow of how things are wor=
+king with respect to the S3. Following are the methods that will be imp=
+lemented under the Google API.
+=A0
+GET Service :=A0Lists all of the buckets in a specified project.
+DELETE Bucket
+GET Bucket
+HEAD Bucket
+PUT Bucket
+DELETE Object
+GET Object
+HEAD Object
+POST Object
+PUT Object=A0=A0
 
-sage
+The format of the HTTP headers that need to be sent regarding each meth=
+od have been clearly given in the Google documentation which is quite s=
+imilar to the S3 API. Regarding the Authorization part, every request t=
+hat needs to be authorized must have a=A0request header that contains a=
+n authentication string. This authentication string can be extracted wi=
+th the help of Oauth. As written in the project description, that authe=
+ntication will take up the majority of the project's time, hence I'd li=
+ke to know the challenges regarding this beforehand since the Google do=
+cs focus more on the Oauth authentication from the user's perspective.
 
+=46Inally, since only a few days are left for proposal submission deadl=
+ine, so I'll fast track my proposal preparation based on your feedback =
+and guidance.
 
-> 
-> - Milosz
-> 
-> On Tue, Mar 18, 2014 at 12:06 PM, Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org> wrote:
-> > On Tue, 18 Mar 2014, Stefan Priebe - Profihost AG wrote:
-> >> Hi Sage,
-> >>
-> >> i really would like to test the tiering. Is there any detailed
-> >> documentation about it and how it works?
-> >
-> > Great!  Here is a quick synopiss on how to set it up:
-> >
-> >         http://ceph.com/docs/master/dev/cache-pool/
-> >
-> > sage
-> >
-> >
-> >
-> >>
-> >> Greets,
-> >> Stefan
-> >>
-> >> Am 18.03.2014 05:45, schrieb Sage Weil:
-> >> > Hi everyone,
-> >> >
-> >> > It's taken longer than expected, but the tests for v0.78 are calming down
-> >> > and it looks like we'll be able to get the release out this week.
-> >> >
-> >> > However, we've decided NOT to make this release firefly.  It will be a
-> >> > normal development release.  This will be the first release that includes
-> >> > some key new functionality (erasure coding and cache tiering) and although
-> >> > it is passing our tests we'd like to have some operational experience with
-> >> > it in more users' hands before we commit to supporting it long term.
-> >> >
-> >> > The tentative plan is to freeze and then release v0.79 after a normal two
-> >> > week cycle.  This will serve as a 'release candidate' that shaves off a
-> >> > few rough edges from the pending release (including some improvements with
-> >> > the API for setting up erasure coded pools).  It is possible that 0.79
-> >> > will turn into firefly, but more likely that we will opt for another two
-> >> > weeks of hardening and make 0.80 the release we name firefly and maintain
-> >> > for the long term.
-> >> >
-> >> > Long story short: 0.78 will be out soon, and you should test it!  It is
-> >> > will vary from the final firefly in a few subtle ways, but any feedback or
-> >> > usability and bug reports at this point will be very helpful in shaping
-> >> > things.
-> >> >
-> >> > Thanks!
-> >> > sage
-> >> > --
-> >> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >> > the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> >> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >> >
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >>
-> >>
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
-> 
-> -- 
-> Milosz Tanski
-> CTO
-> 10 East 53rd Street, 37th floor
-> New York, NY 10022
-> 
-> p: 646-253-9055
-> e: milosz-B5zB6C1i6pkAvxtiuMwx3w@public.gmane.org
-> 
-> 
+Regards
+Vipul Nayyar=A0
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
