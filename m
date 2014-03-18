@@ -1,63 +1,48 @@
-From: Vipul Nayyar <nayyar_vipul@yahoo.com>
-Subject: Re: [GSOC] Google Storage API Project
-Date: Wed, 19 Mar 2014 03:43:30 +0800 (SGT)
-Message-ID: <1395171810.80796.YahooMailNeo@web194904.mail.sg3.yahoo.com>
-References: <1393874910.26569.YahooMailNeo@web194906.mail.sg3.yahoo.com> <1393875396.14447.YahooMailNeo@web194906.mail.sg3.yahoo.com> <CF3A2C17.2701A%ian.colle@inktank.com>
-Reply-To: Vipul Nayyar <nayyar_vipul@yahoo.com>
+From: Yaron Haviv <yaronh@mellanox.com>
+Subject: XioMessenger (RDMA) Performance results
+Date: Tue, 18 Mar 2014 20:05:25 +0000
+Message-ID: <DD06A08C9A04024C8B0D8A63110C7E14B0573CA6@MTLDAG01.mtl.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from nm24-vm3.bullet.mail.sg3.yahoo.com ([106.10.151.82]:22189 "EHLO
-	nm24-vm3.bullet.mail.sg3.yahoo.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752497AbaCRTnc convert rfc822-to-8bit
+Received: from eu1sys200aog119.obsmtp.com ([207.126.144.147]:52731 "EHLO
+	eu1sys200aog119.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754338AbaCRUFc convert rfc822-to-8bit
 	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 18 Mar 2014 15:43:32 -0400
-In-Reply-To: <CF3A2C17.2701A%ian.colle@inktank.com>
+	Tue, 18 Mar 2014 16:05:32 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ian Colle <ian.colle@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "yehuda@inktank.com" <yehuda@inktank.com>
-Cc: "patrick@inktank.com" <patrick@inktank.com>
+To: "ceph-devel (ceph-devel@vger.kernel.org)" <ceph-devel@vger.kernel.org>, "Matt W. Benjamin (matt@cohortfs.com)" <matt@cohortfs.com>, Eyal Salomon <esalomon@mellanox.com>
 
-Hi Ian,
+Im happy to share test results we run in the lab with Matt's latest XioMessenger code which implements Ceph messaging over Accelio RDMA library 
+Results look pretty encouraging, demonstrating a * 20x * performance boost
 
-Sorry for the late reply. Thanks for the links that you gave. I've gone=
- through them and I'm currently studying the Google Storage API in orde=
-r to figure out it's implementation. I've also gone through the source =
-code of libs3 in the ceph repo. Due to the excellent clarity of the cod=
-e, I was able to easily understand the basic flow of how things are wor=
-king with respect to the S3. Following are the methods that will be imp=
-lemented under the Google API.
-=A0
-GET Service :=A0Lists all of the buckets in a specified project.
-DELETE Bucket
-GET Bucket
-HEAD Bucket
-PUT Bucket
-DELETE Object
-GET Object
-HEAD Object
-POST Object
-PUT Object=A0=A0
+Below is a table comparing XioMessenger (RDMA) with SimpleMessanger (TCP) and various interconnects (56G InfiniBand and 40GbE/RoCE)
+Note that we tested with CRC on/off, in RDMA there is no need for software CRC, its done by the hardware  
+Tests below use a single communication thread, using more threads would produce higher performance (on 64KB IO the Link/PCIe is saturated with RDMA using a single thread)   
 
-The format of the HTTP headers that need to be sent regarding each meth=
-od have been clearly given in the Google documentation which is quite s=
-imilar to the S3 API. Regarding the Authorization part, every request t=
-hat needs to be authorized must have a=A0request header that contains a=
-n authentication string. This authentication string can be extracted wi=
-th the help of Oauth. As written in the project description, that authe=
-ntication will take up the majority of the project's time, hence I'd li=
-ke to know the challenges regarding this beforehand since the Google do=
-cs focus more on the Oauth authentication from the user's perspective.
+Matt has some more small IO optimizations in the pipe, and we hope to share perf results using librados soon, I assume they will be disk bound 
 
-=46Inally, since only a few days are left for proposal submission deadl=
-ine, so I'll fast track my proposal preparation based on your feedback =
-and guidance.
+protocol	CRC	msg depth	IO size	Msg/sec	bandwidth (MB/s)	CPU % server	CPU% client
+eth	crc	50	4K	          16,262 	64	100%	100%
+eth	no_crc	50	4K	          15,637 	61	100%	100%
+eth	crc	50	64K	            5,960 	373	93%	100%
+eth	no_crc	50	64K	            7,678 	480	93%	100%
+ipoib	no_crc	50	4K	          16,003 	63	100%	100%
+ipoib	no_crc	50	64K	            7,375 	461	93%	100%
+							
+IB	no_crc	50	4K	        334,088 	1305	98%	98%
+IB	no_crc	50	64K	          95,078 	5942	98%	98%
+							
+roce	no_crc	50	4K	        332,388 	1298	95%	100%
+roce	no_crc	50	64K	          69,445 	4340	91%	87%
+							
+roce	crc	50	4K	        172,756 	675	97%	100%
+roce	crc	50	64K	          19,657 	1229	100%	48%
 
-Regards
-Vipul Nayyar=A0
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Regards, Yaron
+
+
+
