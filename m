@@ -1,133 +1,63 @@
-From: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: firefly timing
-Date: Tue, 18 Mar 2014 13:12:41 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1403181311330.5823@cobra.newdream.net>
-References: <alpine.DEB.2.00.1403172115140.24236@cobra.newdream.net>
-	<5327F0A7.8010105@profihost.ag>
-	<alpine.DEB.2.00.1403180905500.316@cobra.newdream.net>
-	<CANP1eJEDccw7doegUSoNKceQUgoNOfpHW1_y1Oz1fk54WDdb4w@mail.gmail.com>
-	<alpine.DEB.2.00.1403181014410.5823@cobra.newdream.net>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: XioMessenger (RDMA) Performance results
+Date: Tue, 18 Mar 2014 13:17:51 -0700
+Message-ID: <CAPYLRzjR6hfDCa1-5=SZi2J0Rh52u0=BKr2Q45PoYraPYQVC5A@mail.gmail.com>
+References: <DD06A08C9A04024C8B0D8A63110C7E14B0573CA6@MTLDAG01.mtl.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.00.1403181014410.5823-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: john.wilkins-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org, Milosz Tanski <milosz-B5zB6C1i6pkAvxtiuMwx3w@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-qc0-f171.google.com ([209.85.216.171]:62819 "EHLO
+	mail-qc0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757695AbaCRURw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Mar 2014 16:17:52 -0400
+Received: by mail-qc0-f171.google.com with SMTP id c9so2681283qcz.2
+        for <ceph-devel@vger.kernel.org>; Tue, 18 Mar 2014 13:17:51 -0700 (PDT)
+In-Reply-To: <DD06A08C9A04024C8B0D8A63110C7E14B0573CA6@MTLDAG01.mtl.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Yaron Haviv <yaronh@mellanox.com>
+Cc: "ceph-devel (ceph-devel@vger.kernel.org)" <ceph-devel@vger.kernel.org>, "Matt W. Benjamin (matt@cohortfs.com)" <matt@cohortfs.com>, Eyal Salomon <esalomon@mellanox.com>
 
-On Tue, 18 Mar 2014, Sage Weil wrote:
-> On Tue, 18 Mar 2014, Milosz Tanski wrote:
-> > Is this statement in the documentation still valid: "Stale data is
-> > expired from the cache pools based on some as-yet undetermined
-> > policy." As that sounds a bit scary.
-> 
-> I'll update the docs :).  The policy is pretty simply but not described 
-> anywhere yet.
+On Tue, Mar 18, 2014 at 1:05 PM, Yaron Haviv <yaronh@mellanox.com> wrote:
+> Im happy to share test results we run in the lab with Matt's latest XioMessenger code which implements Ceph messaging over Accelio RDMA library
+> Results look pretty encouraging, demonstrating a * 20x * performance boost
 
-I've updated the doc; please let me know what is/isn't clear so we can 
-make sure the final doc is useful.
+Very nice! I'm excited. :)
+What did you use to generate these numbers?
 
-John, we need to figure out where this is going to fit in the overall 
-IA...
+> Below is a table comparing XioMessenger (RDMA) with SimpleMessanger (TCP) and various interconnects (56G InfiniBand and 40GbE/RoCE)
+> Note that we tested with CRC on/off, in RDMA there is no need for software CRC, its done by the hardware
+> Tests below use a single communication thread, using more threads would produce higher performance (on 64KB IO the Link/PCIe is saturated with RDMA using a single thread)
+>
+> Matt has some more small IO optimizations in the pipe, and we hope to share perf results using librados soon, I assume they will be disk bound
+>
+> protocol        CRC     msg depth       IO size Msg/sec bandwidth (MB/s)        CPU % server    CPU% client
+> eth     crc     50      4K                16,262        64      100%    100%
+> eth     no_crc  50      4K                15,637        61      100%    100%
 
-sage
+Are these numbers correct? no_crc is slower?
+-Greg
+Software Engineer #42 @ http://inktank.com | http://ceph.com
 
-
-
-> 
-> sage
-> 
-> 
-> > 
-> > - Milosz
-> > 
-> > On Tue, Mar 18, 2014 at 12:06 PM, Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org> wrote:
-> > > On Tue, 18 Mar 2014, Stefan Priebe - Profihost AG wrote:
-> > >> Hi Sage,
-> > >>
-> > >> i really would like to test the tiering. Is there any detailed
-> > >> documentation about it and how it works?
-> > >
-> > > Great!  Here is a quick synopiss on how to set it up:
-> > >
-> > >         http://ceph.com/docs/master/dev/cache-pool/
-> > >
-> > > sage
-> > >
-> > >
-> > >
-> > >>
-> > >> Greets,
-> > >> Stefan
-> > >>
-> > >> Am 18.03.2014 05:45, schrieb Sage Weil:
-> > >> > Hi everyone,
-> > >> >
-> > >> > It's taken longer than expected, but the tests for v0.78 are calming down
-> > >> > and it looks like we'll be able to get the release out this week.
-> > >> >
-> > >> > However, we've decided NOT to make this release firefly.  It will be a
-> > >> > normal development release.  This will be the first release that includes
-> > >> > some key new functionality (erasure coding and cache tiering) and although
-> > >> > it is passing our tests we'd like to have some operational experience with
-> > >> > it in more users' hands before we commit to supporting it long term.
-> > >> >
-> > >> > The tentative plan is to freeze and then release v0.79 after a normal two
-> > >> > week cycle.  This will serve as a 'release candidate' that shaves off a
-> > >> > few rough edges from the pending release (including some improvements with
-> > >> > the API for setting up erasure coded pools).  It is possible that 0.79
-> > >> > will turn into firefly, but more likely that we will opt for another two
-> > >> > weeks of hardening and make 0.80 the release we name firefly and maintain
-> > >> > for the long term.
-> > >> >
-> > >> > Long story short: 0.78 will be out soon, and you should test it!  It is
-> > >> > will vary from the final firefly in a few subtle ways, but any feedback or
-> > >> > usability and bug reports at this point will be very helpful in shaping
-> > >> > things.
-> > >> >
-> > >> > Thanks!
-> > >> > sage
-> > >> > --
-> > >> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > >> > the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> > >> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > >> >
-> > >> --
-> > >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > >> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> > >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > >>
-> > >>
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > > the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > 
-> > 
-> > 
-> > -- 
-> > Milosz Tanski
-> > CTO
-> > 10 East 53rd Street, 37th floor
-> > New York, NY 10022
-> > 
-> > p: 646-253-9055
-> > e: milosz-B5zB6C1i6pkAvxtiuMwx3w@public.gmane.org
-> > 
-> > 
+> eth     crc     50      64K                 5,960       373     93%     100%
+> eth     no_crc  50      64K                 7,678       480     93%     100%
+> ipoib   no_crc  50      4K                16,003        63      100%    100%
+> ipoib   no_crc  50      64K                 7,375       461     93%     100%
+>
+> IB      no_crc  50      4K              334,088         1305    98%     98%
+> IB      no_crc  50      64K               95,078        5942    98%     98%
+>
+> roce    no_crc  50      4K              332,388         1298    95%     100%
+> roce    no_crc  50      64K               69,445        4340    91%     87%
+>
+> roce    crc     50      4K              172,756         675     97%     100%
+> roce    crc     50      64K               19,657        1229    100%    48%
+>
+> Regards, Yaron
+>
+>
+>
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
