@@ -1,258 +1,63 @@
-From: Karan Singh <karan.singh-Gn+qtVAUx6s@public.gmane.org>
-Subject: Re: firefly timing
-Date: Tue, 18 Mar 2014 09:54:52 +0200
-Message-ID: <5166D2E8-F73F-4F2C-8530-6666071908AD@csc.fi>
-References: <alpine.DEB.2.00.1403172115140.24236@cobra.newdream.net>
-	<5327F0A7.8010105@profihost.ag>
-	<CAF-rypyVjvuddtaj=cW_yJowzGzCq0m7LgW6S=2zK1aAvsfrTA@mail.gmail.com>
-Mime-Version: 1.0 (Mac OS X Mail 7.2 \(1874\))
-Content-Type: multipart/mixed; boundary="===============1406949297=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAF-rypyVjvuddtaj=cW_yJowzGzCq0m7LgW6S=2zK1aAvsfrTA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
-
-
---===============1406949297==
-Content-Type: multipart/alternative; boundary="Apple-Mail=_CDD7CF69-663E-4BFB-8CBE-02EB01929904"
-
-
---Apple-Mail=_CDD7CF69-663E-4BFB-8CBE-02EB01929904
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/plain;
-	charset=utf-8
-
-Hello Everyone
-
-I am looking forward to test new features of 0.78 , it would be nice if =
-erasure coding and tiering implementation notes available in ceph =
-documentation.
-
-Ceph documentation is in a good shape and its always nice to follow.
-
-A humble request to add erasure coding and tiering in documentation if =
-its not already in your pipeline.=20
-
-
-Karan Singh
-CSC - IT Center for Science Ltd.
-P.O. Box 405, FI-02101 Espoo, FINLAND
-http://www.csc.fi/ | +358 (0) 503 812758
-
-On 18 Mar 2014, at 09:13, =D0=98=D1=80=D0=B5=D0=BA =D0=A4=D0=B0=D1=81=D0=B8=
-=D1=85=D0=BE=D0=B2 <malmyzh-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-
-> I'm ready to test the tiering.
->=20
->=20
-> 2014-03-18 11:07 GMT+04:00 Stefan Priebe - Profihost AG =
-<s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org>:
-> Hi Sage,
->=20
-> i really would like to test the tiering. Is there any detailed
-> documentation about it and how it works?
->=20
-> Greets,
-> Stefan
->=20
-> Am 18.03.2014 05:45, schrieb Sage Weil:
-> > Hi everyone,
-> >
-> > It's taken longer than expected, but the tests for v0.78 are calming =
-down
-> > and it looks like we'll be able to get the release out this week.
-> >
-> > However, we've decided NOT to make this release firefly.  It will be =
-a
-> > normal development release.  This will be the first release that =
-includes
-> > some key new functionality (erasure coding and cache tiering) and =
-although
-> > it is passing our tests we'd like to have some operational =
-experience with
-> > it in more users' hands before we commit to supporting it long term.
-> >
-> > The tentative plan is to freeze and then release v0.79 after a =
-normal two
-> > week cycle.  This will serve as a 'release candidate' that shaves =
-off a
-> > few rough edges from the pending release (including some =
-improvements with
-> > the API for setting up erasure coded pools).  It is possible that =
-0.79
-> > will turn into firefly, but more likely that we will opt for another =
-two
-> > weeks of hardening and make 0.80 the release we name firefly and =
-maintain
-> > for the long term.
-> >
-> > Long story short: 0.78 will be out soon, and you should test it!  It =
-is
-> > will vary from the final firefly in a few subtle ways, but any =
-feedback or
-> > usability and bug reports at this point will be very helpful in =
-shaping
-> > things.
-> >
-> > Thanks!
-> > sage
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe =
-ceph-devel" in
-> > the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->=20
->=20
->=20
-> --=20
-> =D0=A1 =D1=83=D0=B2=D0=B0=D0=B6=D0=B5=D0=BD=D0=B8=D0=B5=D0=BC, =
-=D0=A4=D0=B0=D1=81=D0=B8=D1=85=D0=BE=D0=B2 =D0=98=D1=80=D0=B5=D0=BA =
-=D0=9D=D1=83=D1=80=D0=B3=D0=B0=D1=8F=D0=B7=D0=BE=D0=B2=D0=B8=D1=87
-> =D0=9C=D0=BE=D0=B1.: +79229045757
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
-
---Apple-Mail=_CDD7CF69-663E-4BFB-8CBE-02EB01929904
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/html;
-	charset=utf-8
-
-<html><head><meta http-equiv=3D"Content-Type" content=3D"text/html =
-charset=3Dutf-8"></head><body style=3D"word-wrap: break-word; =
--webkit-nbsp-mode: space; -webkit-line-break: =
-after-white-space;"><div>Hello Everyone</div><div><br></div><div>I am =
-looking forward to test new features of 0.78 , it would be nice if =
-erasure coding and tiering implementation notes available in ceph =
-documentation.</div><div><br></div><div>Ceph documentation is in a good =
-shape and its always nice to follow.</div><div><br></div><div>A humble =
-request to add erasure coding and tiering in documentation if its not =
-already in your pipeline.&nbsp;</div><div><br></div><div><div =
-style=3D"font-family: 'times new roman', 'new york', times, serif; =
-font-size: 13.63636302947998px;"><br></div><div =
-id=3D"61cfb6a1-7aa9-4052-88b7-ba99a4d8d2ed" style=3D"font-family: 'times =
-new roman', 'new york', times, serif; font-size: =
-13.63636302947998px;"><span name=3D"x"></span>Karan Singh<br>CSC - IT =
-Center for Science Ltd.<br>P.O. Box 405, FI-02101 Espoo, FINLAND<br><a =
-href=3D"http://www.csc.fi/">http://www.csc.fi/</a> | +358 (0) 503 =
-812758</div></div><br><div><div>On 18 Mar 2014, at 09:13, =D0=98=D1=80=D0=B5=
-=D0=BA =D0=A4=D0=B0=D1=81=D0=B8=D1=85=D0=BE=D0=B2 &lt;<a =
-href=3D"mailto:malmyzh-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org">malmyzh-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org</a>&gt; =
-wrote:</div><br class=3D"Apple-interchange-newline"><blockquote =
-type=3D"cite"><div dir=3D"ltr">I'm ready to test the tiering.</div><div =
-class=3D"gmail_extra"><br><br><div class=3D"gmail_quote">2014-03-18 =
-11:07 GMT+04:00 Stefan Priebe - Profihost AG <span dir=3D"ltr">&lt;<a =
-href=3D"mailto:s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org" =
-target=3D"_blank">s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org</a>&gt;</span>:<br>
-<blockquote class=3D"gmail_quote" style=3D"margin:0 0 0 =
-.8ex;border-left:1px #ccc solid;padding-left:1ex">Hi Sage,<br>
-<br>
-i really would like to test the tiering. Is there any detailed<br>
-documentation about it and how it works?<br>
-<br>
-Greets,<br>
-Stefan<br>
-<br>
-Am 18.03.2014 05:45, schrieb Sage Weil:<br>
-<div class=3D"im HOEnZb">&gt; Hi everyone,<br>
-&gt;<br>
-&gt; It's taken longer than expected, but the tests for v0.78 are =
-calming down<br>
-&gt; and it looks like we'll be able to get the release out this =
-week.<br>
-&gt;<br>
-&gt; However, we've decided NOT to make this release firefly. &nbsp;It =
-will be a<br>
-&gt; normal development release. &nbsp;This will be the first release =
-that includes<br>
-&gt; some key new functionality (erasure coding and cache tiering) and =
-although<br>
-&gt; it is passing our tests we'd like to have some operational =
-experience with<br>
-&gt; it in more users' hands before we commit to supporting it long =
-term.<br>
-&gt;<br>
-&gt; The tentative plan is to freeze and then release v0.79 after a =
-normal two<br>
-&gt; week cycle. &nbsp;This will serve as a 'release candidate' that =
-shaves off a<br>
-&gt; few rough edges from the pending release (including some =
-improvements with<br>
-&gt; the API for setting up erasure coded pools). &nbsp;It is possible =
-that 0.79<br>
-&gt; will turn into firefly, but more likely that we will opt for =
-another two<br>
-&gt; weeks of hardening and make 0.80 the release we name firefly and =
-maintain<br>
-&gt; for the long term.<br>
-&gt;<br>
-&gt; Long story short: 0.78 will be out soon, and you should test it! =
-&nbsp;It is<br>
-&gt; will vary from the final firefly in a few subtle ways, but any =
-feedback or<br>
-&gt; usability and bug reports at this point will be very helpful in =
-shaping<br>
-&gt; things.<br>
-&gt;<br>
-&gt; Thanks!<br>
-&gt; sage<br>
-</div><span class=3D"HOEnZb"><font color=3D"#888888">&gt; --<br>
-&gt; To unsubscribe from this list: send the line "unsubscribe =
-ceph-devel" in<br>
-&gt; the body of a message to <a =
-href=3D"mailto:majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org">majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org</a><br=
->
-&gt; More majordomo info at &nbsp;<a =
-href=3D"http://vger.kernel.org/majordomo-info.html" =
-target=3D"_blank">http://vger.kernel.org/majordomo-info.html</a><br>
-</font></span><div class=3D"HOEnZb"><div class=3D"h5">&gt;<br>
-_______________________________________________<br>
-ceph-users mailing list<br>
-<a =
-href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a><br=
->
-<a href=3D"http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com" =
-target=3D"_blank">http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com</=
-a><br>
-</div></div></blockquote></div><br><br clear=3D"all"><div><br></div>-- =
-<br><div dir=3D"ltr">=D0=A1 =D1=83=D0=B2=D0=B0=D0=B6=D0=B5=D0=BD=D0=B8=D0=B5=
-=D0=BC, =D0=A4=D0=B0=D1=81=D0=B8=D1=85=D0=BE=D0=B2 =D0=98=D1=80=D0=B5=D0=BA=
- =D0=9D=D1=83=D1=80=D0=B3=D0=B0=D1=8F=D0=B7=D0=BE=D0=B2=D0=B8=D1=87<div>=D0=
-=9C=D0=BE=D0=B1.: +79229045757</div></div>
-</div>
-_______________________________________________<br>ceph-users mailing =
-list<br><a =
-href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a><br=
->http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com<br></blockquote></=
-div><br></body></html>=
-
---Apple-Mail=_CDD7CF69-663E-4BFB-8CBE-02EB01929904--
-
---===============1406949297==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
+From: Mark Nelson <mark.nelson@inktank.com>
+Subject: Re: XioMessenger (RDMA) Performance results
+Date: Tue, 18 Mar 2014 15:32:07 -0500
+Message-ID: <5328AD47.1090707@inktank.com>
+References: <DD06A08C9A04024C8B0D8A63110C7E14B0573CA6@MTLDAG01.mtl.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ie0-f170.google.com ([209.85.223.170]:37724 "EHLO
+	mail-ie0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757473AbaCRUcD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Mar 2014 16:32:03 -0400
+Received: by mail-ie0-f170.google.com with SMTP id rd18so7858875iec.15
+        for <ceph-devel@vger.kernel.org>; Tue, 18 Mar 2014 13:32:02 -0700 (PDT)
+In-Reply-To: <DD06A08C9A04024C8B0D8A63110C7E14B0573CA6@MTLDAG01.mtl.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Yaron Haviv <yaronh@mellanox.com>
+Cc: "ceph-devel (ceph-devel@vger.kernel.org)" <ceph-devel@vger.kernel.org>, "Matt W. Benjamin (matt@cohortfs.com)" <matt@cohortfs.com>, Eyal Salomon <esalomon@mellanox.com>
 
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+On 03/18/2014 03:05 PM, Yaron Haviv wrote:
+> Im happy to share test results we run in the lab with Matt's latest XioMessenger code which implements Ceph messaging over Accelio RDMA library
+> Results look pretty encouraging, demonstrating a * 20x * performance boost
+>
+> Below is a table comparing XioMessenger (RDMA) with SimpleMessanger (TCP) and various interconnects (56G InfiniBand and 40GbE/RoCE)
+> Note that we tested with CRC on/off, in RDMA there is no need for software CRC, its done by the hardware
+> Tests below use a single communication thread, using more threads would produce higher performance (on 64KB IO the Link/PCIe is saturated with RDMA using a single thread)
+>
+> Matt has some more small IO optimizations in the pipe, and we hope to share perf results using librados soon, I assume they will be disk bound
+>
+> protocol	CRC	msg depth	IO size	Msg/sec	bandwidth (MB/s)	CPU % server	CPU% client
+> eth	crc	50	4K	          16,262 	64	100%	100%
+> eth	no_crc	50	4K	          15,637 	61	100%	100%
+> eth	crc	50	64K	            5,960 	373	93%	100%
+> eth	no_crc	50	64K	            7,678 	480	93%	100%
+> ipoib	no_crc	50	4K	          16,003 	63	100%	100%
+> ipoib	no_crc	50	64K	            7,375 	461	93%	100%
+> 							
+> IB	no_crc	50	4K	        334,088 	1305	98%	98%
+> IB	no_crc	50	64K	          95,078 	5942	98%	98%
+> 							
+> roce	no_crc	50	4K	        332,388 	1298	95%	100%
+> roce	no_crc	50	64K	          69,445 	4340	91%	87%
+> 							
+> roce	crc	50	4K	        172,756 	675	97%	100%
+> roce	crc	50	64K	          19,657 	1229	100%	48%
 
---===============1406949297==--
+Very nice!  were you just writing to memory on the backend?
+
+Mark
+
+>
+> Regards, Yaron
+>
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+
