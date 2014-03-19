@@ -1,68 +1,112 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: Wireshark Dissector
-Date: Tue, 18 Mar 2014 17:04:43 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1403181659470.5823@cobra.newdream.net>
-References: <5328DDAB.3050606@kevincox.ca>
+From: "Matt W. Benjamin" <matt@cohortfs.com>
+Subject: Re: XioMessenger (RDMA) Performance results
+Date: Tue, 18 Mar 2014 20:30:26 -0400 (EDT)
+Message-ID: <74022714.160.1395189026235.JavaMail.root@thunderbeast.private.linuxbox.com>
+References: <CAPYLRzjR6hfDCa1-5=SZi2J0Rh52u0=BKr2Q45PoYraPYQVC5A@mail.gmail.com>
+Reply-To: "Matt W. Benjamin" <matt@cohortfs.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:60080 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751593AbaCSAEo (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Mar 2014 20:04:44 -0400
-In-Reply-To: <5328DDAB.3050606@kevincox.ca>
+Received: from aa.linuxbox.com ([69.128.83.226]:3426 "EHLO aa.linuxbox.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756119AbaCSAaf (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 18 Mar 2014 20:30:35 -0400
+In-Reply-To: <CAPYLRzjR6hfDCa1-5=SZi2J0Rh52u0=BKr2Q45PoYraPYQVC5A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Kevin Cox <kevincox@kevincox.ca>
-Cc: yehuda@inktank.com, ceph-devel@vger.kernel.org
+To: Gregory Farnum <greg@inktank.com>
+Cc: "ceph-devel (ceph-devel@vger.kernel.org)" <ceph-devel@vger.kernel.org>, Eyal Salomon <esalomon@mellanox.com>, Yaron Haviv <yaronh@mellanox.com>
 
-Hi Kevin,
+Hi Greg,
 
-On Tue, 18 Mar 2014, Kevin Cox wrote:
-> Hello Sage,
+----- "Gregory Farnum" <greg@inktank.com> wrote:
+
+> On Tue, Mar 18, 2014 at 1:05 PM, Yaron Haviv <yaronh@mellanox.com>
+> wrote:
+> > Im happy to share test results we run in the lab with Matt's latest
+> XioMessenger code which implements Ceph messaging over Accelio RDMA
+> library
+> > Results look pretty encouraging, demonstrating a * 20x * performance
+> boost
 > 
-> I was finishing up my proposal to write the wireshark dissector and was
-> wondering how I should segment my work.  In order to ensure I stay on
-> track I will set goals for every couple of weeks but am unsure of how to
-> slice the work up.
+> Very nice! I'm excited. :)
+> What did you use to generate these numbers?
+
+The two workload sets are created using the simple_client/simple_server vs
+xio_client/xio_server client/server pairs, on...one of the latest XioMessenger
+branches.  Eyal, was it xio-rados-exp or xio-rados-exp-noreg?
+
+I -think- it would be xio-rados-exp.  The new stuff from us (including a couple
+of librados fixups by Marcus and myself) is on xio-rados-exp-noreg.
+
 > 
-> I have looked that the files suggested by Patrick and some of the
-> implementation behind them but I haven't got a solid grasp of the full
-> protocol.  From what I can see there appears to be a "core" protocol
-> which is used by all node types then there are separate client, mon,
-> osd, and mds messages.  After dissecting the basic message format do you
-> recommend proceeding by message "area" or is there another order which
-> you would take?  Also relatively how much time do you expect each "area"
-> to take, from what I have seen they are roughly the same size but I'm
-> sure you have a better guess.
+> > Below is a table comparing XioMessenger (RDMA) with SimpleMessanger
+> (TCP) and various interconnects (56G InfiniBand and 40GbE/RoCE)
+> > Note that we tested with CRC on/off, in RDMA there is no need for
+> software CRC, its done by the hardware
+> > Tests below use a single communication thread, using more threads
+> would produce higher performance (on 64KB IO the Link/PCIe is
+> saturated with RDMA using a single thread)
+> >
+> > Matt has some more small IO optimizations in the pipe, and we hope
+> to share perf results using librados soon, I assume they will be disk
+> bound
+> >
+> > protocol        CRC     msg depth       IO size Msg/sec bandwidth
+> (MB/s)        CPU % server    CPU% client
+> > eth     crc     50      4K                16,262        64      100%
+>    100%
+> > eth     no_crc  50      4K                15,637        61      100%
+>    100%
+> 
+> Are these numbers correct? no_crc is slower?
+> -Greg
+> Software Engineer #42 @ http://inktank.com | http://ceph.com
 
-I think you're on the right track.  I suspect it would go something like:
+These numbers were from Mellanox, so I defer to Eyal.  I have seen
+some inconsistency with crc vs no_crc in informal runs, myself.
 
- - get environment, infrastructure up and running
- - parse basic message exhcange, but not messages
- - add support for individual message types by subsystem
-   - mon<->client (including authentication and such)   (small)
-   - osd<->client    (small)
-   - osd<->osd       (big)
-   - mon<->mon       (medium)
-   - client<->mds    (medium)
-   - mds<->mds       (big)
+> 
+> > eth     crc     50      64K                 5,960       373     93% 
+>    100%
+> > eth     no_crc  50      64K                 7,678       480     93% 
+>    100%
+> > ipoib   no_crc  50      4K                16,003        63      100%
+>    100%
+> > ipoib   no_crc  50      64K                 7,375       461     93% 
+>    100%
+> >
+> > IB      no_crc  50      4K              334,088         1305    98% 
+>    98%
+> > IB      no_crc  50      64K               95,078        5942    98% 
+>    98%
+> >
+> > roce    no_crc  50      4K              332,388         1298    95% 
+>    100%
+> > roce    no_crc  50      64K               69,445        4340    91% 
+>    87%
+> >
+> > roce    crc     50      4K              172,756         675     97% 
+>    100%
+> > roce    crc     50      64K               19,657        1229    100%
+>    48%
+> >
+> > Regards, Yaron
+> >
 
-The nice thing here is that the stop point is moveable.  Getting the 
-basics in place will make it easy for others to add or update additional 
-message decodings later, and with just the few most common messages the 
-tool is immediately useful.
+Regards,
 
-At some point early I would engage with the Wireshark folks too to make 
-sure things are appropriate for upstreaming.  Getting the initial support 
-in early and following up with support for additional message types later 
-might be a good strategy as well.
+Matt
 
-> PS: Is it better to talk privately or to send these messages to the
-> list?  If you think that they can be useful to others feel free to copy
-> the list on your reply.
+-- 
+Matt Benjamin
+CohortFS, LLC.
+206 South Fifth Ave. Suite 150
+Ann Arbor, MI  48104
 
-Copying the list is great as long as you're comfortable with it. :)
+http://cohortfs.com
 
-Thanks!
-sage
+tel.  734-761-4689 
+fax.  734-769-8938 
+cel.  734-216-5309 
