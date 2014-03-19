@@ -1,57 +1,74 @@
-From: John Spray <john.spray@inktank.com>
-Subject: Full OSD handling (CephFS and in general)
-Date: Wed, 19 Mar 2014 14:14:54 +0000
-Message-ID: <CAGd4Wr17Feoq6hbj0doyMi2hQ-3i1urGabN1k_qThfNgB9hpBw@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Ceph developer jobs
+Date: Wed, 19 Mar 2014 17:03:31 +0100
+Message-ID: <5329BFD3.20600@dachary.org>
+References: <52EFCC65.10709@dachary.org> <20140319135900.GU27838@thinkpad.thebehrens.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="t52E0DSmOLBEfQ88GvxeW9bkevNmIC5Cj"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f43.google.com ([209.85.220.43]:64364 "EHLO
-	mail-pa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S965206AbaCSOOz (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Mar 2014 10:14:55 -0400
-Received: by mail-pa0-f43.google.com with SMTP id bj1so9018906pad.2
-        for <ceph-devel@vger.kernel.org>; Wed, 19 Mar 2014 07:14:55 -0700 (PDT)
+Received: from smtp.dmail.dachary.org ([91.121.254.229]:48364 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933926AbaCSQDd (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Mar 2014 12:03:33 -0400
+In-Reply-To: <20140319135900.GU27838@thinkpad.thebehrens.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Thorsten Behrens <tbehrens@suse.com>
+Cc: Ceph Community <ceph-community@lists.ceph.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Having found that our full space handling in CephFS wasn't working
-right now[1], there was some discussion on the CephFS standup about
-how to improve the free space handling in a more general way.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--t52E0DSmOLBEfQ88GvxeW9bkevNmIC5Cj
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-Currently (once #7780 is fixed), we just give the MDS a pass on all
-the fullness checks, so that it can journal file deletions to free up
-space.  This is a halfway solution because there are still ways for
-the MDS to fill up the remaining space with operations other than
-deletions, especially with the advent of inlining for small files.
-It's also hacky, because there is code inside the OSD that special
-cases writes from the MDS.
+Hi Thorsten,
 
-Changes discussed
-===============
+Thanks for the update. And congratulations to the lucky developers who ge=
+t to work on Ceph full time at Suse ! The positions have been removed fro=
+m http://ceph.com/community/careers/
 
-In the CephFS layer:
- * we probably need to do some work to blacklist client requests other
-than housekeeping and deletions, when we are in a low-space situation.
+Cheers
 
-In the RADOS layer:
- * Per-pool full flag: For situations where metadata+data pools are on
-separate OSDs, a per-pool full flag (instead of the current global
-one), so that we can distinguish between situations where we need to
-be conservative with metadata operations (low space on metadata pool)
-vs situations where only client data IO is blocked (low space on data
-pool).  This seems fairly uncontroversial, as the current global full
-flag doesn't reflect that different pools can be on entirely separate
-storage.
- * Per-pool full ratio: For situations where metadata+data pools are
-on the same OSDs, separate full ratios per pool, so that once the data
-pool's threshold is reached, the remaining reserved space is given
-over to the metadata pool (assuming metadata pool has a higher full
-ratio, possibly just set to 100%).
+On 19/03/2014 14:59, Thorsten Behrens wrote:
+> Loic Dachary wrote:
+>> While at FOSDEM I met with Thorsten who mentioned two job openings
+>> dedicated to Ceph at Suse.
+>>
+>> https://attachmatehr.silkroad.com/epostings/index.cfm?fuseaction=3Dapp=
+=2Ejobinfo&jobid=3D306062&company_id=3D15495&version=3D6&source=3DONLINE&=
+jobOwner=3D1013810&aid=3D1
+>> https://attachmatehr.silkroad.com/epostings/index.cfm?fuseaction=3Dapp=
+=2Ejobinfo&jobid=3D306060&company_id=3D15495&version=3D6&source=3DONLINE&=
+jobOwner=3D1013810&aid=3D1
+>>
+> Hi Loic,
+>=20
+> thanks a lot for spreading the word! We seem to have filled the roles
+> now. :)
+>=20
+> Best,
+>=20
+> -- Thorsten
+>=20
 
-Throwing it out to the list for thoughts.
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
 
-Cheers,
-John
 
-1. http://tracker.ceph.com/issues/7780
+--t52E0DSmOLBEfQ88GvxeW9bkevNmIC5Cj
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.20 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlMpv9MACgkQ8dLMyEl6F225nQCdFwyjVAIbM6T2bSnPmFm0cIYG
+2BsAnA9j/9JE+YAYOHCOPdnaUj3ZYJMP
+=DJWO
+-----END PGP SIGNATURE-----
+
+--t52E0DSmOLBEfQ88GvxeW9bkevNmIC5Cj--
