@@ -1,72 +1,57 @@
-From: Thorsten Behrens <tbehrens@suse.com>
-Subject: Re: Ceph developer jobs
-Date: Wed, 19 Mar 2014 14:59:00 +0100
-Message-ID: <20140319135900.GU27838@thinkpad.thebehrens.net>
-References: <52EFCC65.10709@dachary.org>
+From: John Spray <john.spray@inktank.com>
+Subject: Full OSD handling (CephFS and in general)
+Date: Wed, 19 Mar 2014 14:14:54 +0000
+Message-ID: <CAGd4Wr17Feoq6hbj0doyMi2hQ-3i1urGabN1k_qThfNgB9hpBw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="9teSV9pdwBI9hpI9"
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from nat28.tlf.novell.com ([130.57.49.28]:39658 "EHLO
-	nat28.tlf.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933380AbaCSN7z (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-	Wed, 19 Mar 2014 09:59:55 -0400
-Content-Disposition: inline
-In-Reply-To: <52EFCC65.10709@dachary.org>
+Received: from mail-pa0-f43.google.com ([209.85.220.43]:64364 "EHLO
+	mail-pa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S965206AbaCSOOz (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Mar 2014 10:14:55 -0400
+Received: by mail-pa0-f43.google.com with SMTP id bj1so9018906pad.2
+        for <ceph-devel@vger.kernel.org>; Wed, 19 Mar 2014 07:14:55 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Community <ceph-community@lists.ceph.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
+Having found that our full space handling in CephFS wasn't working
+right now[1], there was some discussion on the CephFS standup about
+how to improve the free space handling in a more general way.
 
---9teSV9pdwBI9hpI9
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Currently (once #7780 is fixed), we just give the MDS a pass on all
+the fullness checks, so that it can journal file deletions to free up
+space.  This is a halfway solution because there are still ways for
+the MDS to fill up the remaining space with operations other than
+deletions, especially with the advent of inlining for small files.
+It's also hacky, because there is code inside the OSD that special
+cases writes from the MDS.
 
-Loic Dachary wrote:
-> While at FOSDEM I met with Thorsten who mentioned two job openings
-> dedicated to Ceph at Suse.
->=20
-> https://attachmatehr.silkroad.com/epostings/index.cfm?fuseaction=3Dapp.jo=
-binfo&jobid=3D306062&company_id=3D15495&version=3D6&source=3DONLINE&jobOwne=
-r=3D1013810&aid=3D1
-> https://attachmatehr.silkroad.com/epostings/index.cfm?fuseaction=3Dapp.jo=
-binfo&jobid=3D306060&company_id=3D15495&version=3D6&source=3DONLINE&jobOwne=
-r=3D1013810&aid=3D1
->=20
-Hi Loic,
+Changes discussed
+===============
 
-thanks a lot for spreading the word! We seem to have filled the roles
-now. :)
+In the CephFS layer:
+ * we probably need to do some work to blacklist client requests other
+than housekeeping and deletions, when we are in a low-space situation.
 
-Best,
+In the RADOS layer:
+ * Per-pool full flag: For situations where metadata+data pools are on
+separate OSDs, a per-pool full flag (instead of the current global
+one), so that we can distinguish between situations where we need to
+be conservative with metadata operations (low space on metadata pool)
+vs situations where only client data IO is blocked (low space on data
+pool).  This seems fairly uncontroversial, as the current global full
+flag doesn't reflect that different pools can be on entirely separate
+storage.
+ * Per-pool full ratio: For situations where metadata+data pools are
+on the same OSDs, separate full ratios per pool, so that once the data
+pool's threshold is reached, the remaining reserved space is given
+over to the metadata pool (assuming metadata pool has a higher full
+ratio, possibly just set to 100%).
 
--- Thorsten
+Throwing it out to the list for thoughts.
 
---9teSV9pdwBI9hpI9
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
+Cheers,
+John
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iQJ8BAEBCgBmBQJTKaKkXxSAAAAAAC4AKGlzc3Vlci1mcHJAbm90YXRpb25zLm9w
-ZW5wZ3AuZmlmdGhob3JzZW1hbi5uZXRDREI0NTE4NDRDMTFEMjY1NDlFM0FCNzgx
-QzE2REZEQjMwRjRGNERGAAoJEBwW39sw9PTfO2sQANZPRoTB2bBV7fuBZJzndATM
-MKq7z04XUZSOtk0mGFNu3dLo3TZCBz0A+1cqDFPoO97baU9JZ1ekEh5sjUzGHoev
-1yeLXMCN22X3XBwRgEFMZEWV3jNjJxsOqSbAra67OOUhdRfFc8eRQ+43jHdiNzjt
-L67OBnTAoTUfJ5qKfnjuS4pshA2SWRDdfU2ivS86+IF61vYVF0kjAU9X5enBE/32
-agwp2SvoSaHRIyKyzWxwDxXo2kBWefLK4TnqSsj5RfBA6ZABX68JNPRGsSWtNwu8
-P/n6Imr6EvubEt0Sj7nULDNxkIaZ3PX6+Onks7+7loT8A8f57iaBDhe8jC4vlg3R
-F8+HcH+okbGDzWa9xuQFnxQPbPtBBnmt48F84QyMMFIEqKxg5rgeUTtQx1Fpc+oU
-N90Uqdr/iHfIhFhX08BZBnl/Y/X5Blvub4nHuEIcocAs3YZVfHdNTb1rIYZbyY01
-+T5BoUmadDLuOLEu5SpOBsiU1Nx3VmA6oR5oJM5pJvOzT2UC6vkG+qtjOf3maUSS
-IcALfCREvRmOizyG3BwS+SVALl5Vn3nmZqw6EhUgA0qcRYPn0rxiQ8Zvqz7nthSc
-vKHd+lhq3wlz2Vybe5WTIhDPXfBVTXEJK4aqH34bP9+SvnfHFs1LmSa6/AQL7XWz
-SxdBZI/flOkZSDrJhHC5
-=+0nS
------END PGP SIGNATURE-----
-
---9teSV9pdwBI9hpI9--
+1. http://tracker.ceph.com/issues/7780
