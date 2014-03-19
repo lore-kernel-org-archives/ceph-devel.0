@@ -1,53 +1,45 @@
-From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: [PATCH 2/5] crush: allow crush rules to set (re)tries counts to 0
-Date: Wed, 19 Mar 2014 18:09:06 +0200
-Message-ID: <1395245349-4513-3-git-send-email-ilya.dryomov@inktank.com>
-References: <1395245349-4513-1-git-send-email-ilya.dryomov@inktank.com>
+From: Patrick McGarry <patrick@inktank.com>
+Subject: GSoC Deadline Approaching
+Date: Wed, 19 Mar 2014 13:29:15 -0400
+Message-ID: <CAP8Oy=Jf+pDMbd=k_6Lae1PEUFMgOhbmAqMLQrM3nPs8ZQwLYA@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ee0-f46.google.com ([74.125.83.46]:39570 "EHLO
-	mail-ee0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S965667AbaCSQJR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Mar 2014 12:09:17 -0400
-Received: by mail-ee0-f46.google.com with SMTP id t10so6678442eei.5
-        for <ceph-devel@vger.kernel.org>; Wed, 19 Mar 2014 09:09:16 -0700 (PDT)
-Received: from localhost ([109.110.66.126])
-        by mx.google.com with ESMTPSA id w6sm55563017eex.9.2014.03.19.09.09.15
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=RC4-SHA bits=128/128);
-        Wed, 19 Mar 2014 09:09:16 -0700 (PDT)
-In-Reply-To: <1395245349-4513-1-git-send-email-ilya.dryomov@inktank.com>
+Received: from mail-pd0-f177.google.com ([209.85.192.177]:60333 "EHLO
+	mail-pd0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756137AbaCSR3P (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Mar 2014 13:29:15 -0400
+Received: by mail-pd0-f177.google.com with SMTP id y10so8864394pdj.8
+        for <ceph-devel@vger.kernel.org>; Wed, 19 Mar 2014 10:29:15 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Patrick McGarry <patrick@inktank.com>
+Cc: Ceph-User <ceph-users@ceph.com>, Ceph Devel <ceph-devel@vger.kernel.org>
 
-These two fields are misnomers; they are *retry* counts.
+Calling all potential Google Summer of Code participants!
 
-Reflects ceph.git commit f17caba8ae0cad7b6f8f35e53e5f73b444696835.
+This is just a friendly reminder that there are only two days
+remaining in the submission window to be considered for this year's
+summer of code.  If you, or someone you know, is still planning on
+submitting a proposal to work on the Ceph project, make sure you do so
+by 19:00 UTC on 21 March.
 
-Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
----
- net/ceph/crush/mapper.c |    4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+If you have questions or need help putting the finishing touches on
+your proposal I would be happy to help.  Keep in mind that proposals
+are living documents and can be edited after the submission deadline.
+However, Google is very strict about the submission deadline, and no
+proposals will be accepted after it closes.
 
-diff --git a/net/ceph/crush/mapper.c b/net/ceph/crush/mapper.c
-index 074bb2a5e675..b3fb84903b30 100644
---- a/net/ceph/crush/mapper.c
-+++ b/net/ceph/crush/mapper.c
-@@ -684,12 +684,12 @@ int crush_do_rule(const struct crush_map *map,
- 			break;
- 
- 		case CRUSH_RULE_SET_CHOOSE_LOCAL_TRIES:
--			if (curstep->arg1 > 0)
-+			if (curstep->arg1 >= 0)
- 				choose_local_retries = curstep->arg1;
- 			break;
- 
- 		case CRUSH_RULE_SET_CHOOSE_LOCAL_FALLBACK_TRIES:
--			if (curstep->arg1 > 0)
-+			if (curstep->arg1 >= 0)
- 				choose_local_fallback_retries = curstep->arg1;
- 			break;
- 
--- 
-1.7.10.4
+Feel free to contact me via email (patrick@inktank.com), irc
+(scuttlemonkey on freenode/oftc), or twitter (@scuttlemonkey) if you
+have questions.  If I can't answer your question, I'll be sure to get
+the mentor to help give you the best possible chance at having your
+proposal accepted.  Thanks, and good luck!
 
+
+Best Regards,
+
+Patrick McGarry
+Director, Community || Inktank
+http://ceph.com  ||  http://inktank.com
+@scuttlemonkey || @ceph || @inktank
