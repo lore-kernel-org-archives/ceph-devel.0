@@ -1,56 +1,43 @@
-From: "Matt W. Benjamin" <matt@cohortfs.com>
-Subject: Re: XioMessenger (RDMA) Performance results
-Date: Tue, 18 Mar 2014 20:31:54 -0400 (EDT)
-Message-ID: <833318366.162.1395189114645.JavaMail.root@thunderbeast.private.linuxbox.com>
-References: <5328AD47.1090707@inktank.com>
-Reply-To: "Matt W. Benjamin" <matt@cohortfs.com>
+From: Sage Weil <sage@inktank.com>
+Subject: some pending pull requests
+Date: Tue, 18 Mar 2014 17:42:14 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1403181738170.5823@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from aa.linuxbox.com ([69.128.83.226]:3795 "EHLO aa.linuxbox.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757904AbaCSAcF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 18 Mar 2014 20:32:05 -0400
-In-Reply-To: <5328AD47.1090707@inktank.com>
+Received: from cobra.newdream.net ([66.33.216.30]:60232 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932539AbaCSAmP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Mar 2014 20:42:15 -0400
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id E29108013B
+	for <ceph-devel@vger.kernel.org>; Tue, 18 Mar 2014 17:42:14 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id A0DAC8013B
+	for <ceph-devel@vger.kernel.org>; Tue, 18 Mar 2014 17:42:14 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mark.nelson@inktank.com>
-Cc: "ceph-devel (ceph-devel@vger.kernel.org)" <ceph-devel@vger.kernel.org>, Eyal Salomon <esalomon@mellanox.com>, Yaron Haviv <yaronh@mellanox.com>
+To: ceph-devel@vger.kernel.org
 
-Hi Mark,
+In case you guys haven't seen these:
 
------ "Mark Nelson" <mark.nelson@inktank.com> wrote:
+sam:
+	https://github.com/ceph/ceph/pull/1444
+	https://github.com/ceph/ceph/pull/1476
 
-> 
-> Very nice!  were you just writing to memory on the backend?
+greg:
+	https://github.com/ceph/ceph/pull/1457
+	https://github.com/ceph/ceph/pull/1363
 
-These are just passing 64K message payloads across the sender/receiver,
-it's a message-passing workload comparison only.
+josh:
+	https://github.com/ceph/ceph/pull/1312
 
-> 
-> Mark
-> 
-> >
-> > Regards, Yaron
-> >
-> >
-> >
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe
-> ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >
+dan:
+	https://github.com/ceph/ceph/pull/1229
 
--- 
-Matt Benjamin
-CohortFS, LLC.
-206 South Fifth Ave. Suite 150
-Ann Arbor, MI  48104
+Also, Greg, on https://github.com/ceph/ceph/pull/1313, I think we're okay 
+to backport now.
 
-http://cohortfs.com
+Thanks!
+sage
 
-tel.  734-761-4689 
-fax.  734-769-8938 
-cel.  734-216-5309 
