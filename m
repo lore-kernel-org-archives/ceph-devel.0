@@ -1,121 +1,117 @@
-From: Sebastien Han <sebastien.han@enovance.com>
+From: Blair Bethwaite <blair.bethwaite@gmail.com>
 Subject: Re: [ceph-users] qemu non-shared storage migration of nova instances?
-Date: Wed, 19 Mar 2014 14:05:13 +0100
-Message-ID: <F7E20A5E-9D85-4E59-9F58-7CB2F42E2119@enovance.com>
-References: <CA+z5Dsx0SFjcKfXqoV_a7_EbpW3a-B7N=fZFG61OayueuPOGbw@mail.gmail.com> <CA+z5DszqaLuE+bwPvRMFQZQEUQaQYPvxrD+ap=1ehR7voK7_qA@mail.gmail.com>
-Mime-Version: 1.0 (Mac OS X Mail 7.1 \(1827\))
-Content-Type: multipart/signed; boundary="Apple-Mail=_4F58D376-AFC1-4CB3-9C74-D8F180295EB9"; protocol="application/pgp-signature"; micalg=pgp-sha512
+Date: Thu, 20 Mar 2014 00:19:25 +1100
+Message-ID: <CA+z5DswQosv1W+AVDfEwD6zm2Q6BOH204X6_Gj20k-sDMCAxng@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mxi1.enovance.com ([94.143.114.217]:21480 "EHLO
-	mxi1.enovance.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S964900AbaCSNFR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Mar 2014 09:05:17 -0400
-In-Reply-To: <CA+z5DszqaLuE+bwPvRMFQZQEUQaQYPvxrD+ap=1ehR7voK7_qA@mail.gmail.com>
+Received: from mail-la0-f46.google.com ([209.85.215.46]:61337 "EHLO
+	mail-la0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933877AbaCSNTr convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Mar 2014 09:19:47 -0400
+Received: by mail-la0-f46.google.com with SMTP id hr17so5873092lab.19
+        for <ceph-devel@vger.kernel.org>; Wed, 19 Mar 2014 06:19:45 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Blair Bethwaite <blair.bethwaite@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
+Hi Sebastian,
 
---Apple-Mail=_4F58D376-AFC1-4CB3-9C74-D8F180295EB9
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/plain;
-	charset=windows-1252
+That's the case, at least with Libvirt 1.1.1 and Qemu 1.0 & 1.5 and
+live block-migration, yes. I know the storage migration code has moved
+a lot in Qemu, but I'm not sure if this basic issue has been addressed
+or if we simply need to somehow tell Qemu to use a different
+(de-coupled) storage and VM migration method.
 
-Hi Blair,
+Appreciate any insights on this!
 
-Hum so the problem is:
+Cheers,
 
-While block-migrating a VM with local ephemeral storage (VM disk is a =
-file under /var/lib/nova/instances/) the RBD volume attached to the =
-instance gets copied also?
-
-Am I correct?
-
-=96=96=96=96=20
-S=E9bastien Han=20
-Cloud Engineer=20
-
-"Always give 100%. Unless you're giving blood.=94=20
-
-Phone: +33 (0)1 49 70 99 72=20
-Mail: sebastien.han@enovance.com=20
-Address : 11 bis, rue Roqu=E9pine - 75008 Paris
-Web : www.enovance.com - Twitter : @enovance=20
-
-On 19 Mar 2014, at 13:57, Blair Bethwaite <blair.bethwaite@gmail.com> =
+On 20 March 2014 00:05, Sebastien Han <sebastien.han@enovance.com> wrot=
+e:
+> Hi Blair,
+>
+> Hum so the problem is:
+>
+> While block-migrating a VM with local ephemeral storage (VM disk is a=
+ file under /var/lib/nova/instances/) the RBD volume attached to the in=
+stance gets copied also?
+>
+> Am I correct?
+>
+> =E2=80=93=E2=80=93=E2=80=93=E2=80=93
+> S=C3=A9bastien Han
+> Cloud Engineer
+>
+> "Always give 100%. Unless you're giving blood.=E2=80=9D
+>
+> Phone: +33 (0)1 49 70 99 72
+> Mail: sebastien.han@enovance.com
+> Address : 11 bis, rue Roqu=C3=A9pine - 75008 Paris
+> Web : www.enovance.com - Twitter : @enovance
+>
+> On 19 Mar 2014, at 13:57, Blair Bethwaite <blair.bethwaite@gmail.com>=
+ wrote:
+>
+>> Hi Sebastian,
+>>
+>> As you seem to favor this configuration too, and are very knowledgea=
+ble in these areas, I wonder if you have found an answer to my question=
+ about block-migration with attached volumes?
+>>
+>> Best regards,
+>> ~Blair
+>>
+>>
+>> On 18 March 2014 09:08, Blair Bethwaite <blair.bethwaite@gmail.com> =
 wrote:
-
-> Hi Sebastian,
->=20
-> As you seem to favor this configuration too, and are very =
-knowledgeable in these areas, I wonder if you have found an answer to my =
-question about block-migration with attached volumes?
->=20
-> Best regards,
-> ~Blair
->=20
->=20
-> On 18 March 2014 09:08, Blair Bethwaite <blair.bethwaite@gmail.com> =
-wrote:
-> Message: 20
-> Date: Mon, 17 Mar 2014 16:05:17 +0100
-> From: Sebastien Han <sebastien.han@enovance.com>
-> To: "Don Talton (dotalton)" <dotalton@cisco.com>
-> Cc: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
-> Subject: Re: [ceph-users] qemu non-shared storage migration of nova
->         instances?
-> Message-ID: <86ED699A-DE8B-4864-860F-E324A6F11CC5@enovance.com>
-> Content-Type: text/plain; charset=3D"windows-1252"
->=20
-> Hi,
->=20
-> I use the following live migration flags: =
-VIR_MIGRATE_UNDEFINE_SOURCE,VIR_MIGRATE_PEER2PEER,VIR_MIGRATE_LIVE,VIR_MIG=
-RATE_PERSIST_DEST
-> It deletes the libvirt.xml and re-creates it on the other side.
->=20
-> We use this setup (local direct-attached ephemeral storage and Ceph =
-for persistent volumes) in a production OpenStack cloud. The biggest =
-problem (which I think is still present with newer Qemu&Libvirt, though =
-we are on 1.0 and 1.1.1 respectively at the moment) with this is that =
-live-block-migrations copy all block device contents from source to =
-destination... i.e., even volumes get transferred in a ridiculous =
-sequence of "source hypervisor reads blocks from storage cluster -> =
-source hypervisor streams blocks to destination hypervisor -> =
-destination hypervisor writes blocks back to the storage cluster".
->=20
-> Is that something others have run into and found workarounds for?
->=20
-> --=20
-> Cheers,
-> ~Blairo
->=20
->=20
->=20
-> --=20
-> Cheers,
-> ~Blairo
+>> Message: 20
+>> Date: Mon, 17 Mar 2014 16:05:17 +0100
+>> From: Sebastien Han <sebastien.han@enovance.com>
+>> To: "Don Talton (dotalton)" <dotalton@cisco.com>
+>> Cc: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
+>> Subject: Re: [ceph-users] qemu non-shared storage migration of nova
+>>         instances?
+>> Message-ID: <86ED699A-DE8B-4864-860F-E324A6F11CC5@enovance.com>
+>> Content-Type: text/plain; charset=3D"windows-1252"
+>>
+>> Hi,
+>>
+>> I use the following live migration flags: VIR_MIGRATE_UNDEFINE_SOURC=
+E,VIR_MIGRATE_PEER2PEER,VIR_MIGRATE_LIVE,VIR_MIGRATE_PERSIST_DEST
+>> It deletes the libvirt.xml and re-creates it on the other side.
+>>
+>> We use this setup (local direct-attached ephemeral storage and Ceph =
+for persistent volumes) in a production OpenStack cloud. The biggest pr=
+oblem (which I think is still present with newer Qemu&Libvirt, though w=
+e are on 1.0 and 1.1.1 respectively at the moment) with this is that li=
+ve-block-migrations copy all block device contents from source to desti=
+nation... i.e., even volumes get transferred in a ridiculous sequence o=
+f "source hypervisor reads blocks from storage cluster -> source hyperv=
+isor streams blocks to destination hypervisor -> destination hypervisor=
+ writes blocks back to the storage cluster".
+>>
+>> Is that something others have run into and found workarounds for?
+>>
+>> --
+>> Cheers,
+>> ~Blairo
+>>
+>>
+>>
+>> --
+>> Cheers,
+>> ~Blairo
+>
 
 
---Apple-Mail=_4F58D376-AFC1-4CB3-9C74-D8F180295EB9
-Content-Transfer-Encoding: 7bit
-Content-Disposition: attachment;
-	filename=signature.asc
-Content-Type: application/pgp-signature;
-	name=signature.asc
-Content-Description: Message signed with OpenPGP using GPGMail
 
------BEGIN PGP SIGNATURE-----
-Comment: GPGTools - https://gpgtools.org
-
-iQEcBAEBCgAGBQJTKZYJAAoJECPrkYfpbtGTrPIH/2w1wzDTji0rno38OMEjA25o
-V/SBhzsnzUBbo1L4B7ksZmadR35EWiBWh5d3GjUksywU/chprZyBQgMhqGczrnos
-dN38t4B0y0bZbEUuTtVzP8y7sjVmkw1QXaiONzSPZEfHSaeRU3QvdbwPWQeDSIAt
-ScIfk1kisvVlHPLcYV+5PB2p5TMlCw6I4i5fRzvT6vzOL0AKW1r42ExvbZSXBPrl
-ZFvj19Ro5U/FaT5TgTZv56wdIBN9iXvF8zygj26P6HqkbpVTIalJmE5dy98XfvnF
-YifcRY5frkUNkMNkh5skDgy6y0b6SRie4NdyjWda14/6JXkNkirdSx0aREPzIX8=
-=/u8q
------END PGP SIGNATURE-----
-
---Apple-Mail=_4F58D376-AFC1-4CB3-9C74-D8F180295EB9--
+--=20
+Cheers,
+~Blairo
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
