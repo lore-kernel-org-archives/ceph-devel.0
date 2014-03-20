@@ -1,23 +1,39 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: ceph-0.77-900.gce9bfb8 Testing Rados EC/Tiering & CephFS ...
-Date: Thu, 20 Mar 2014 08:09:23 -0500
-Message-ID: <532AE883.1050106@inktank.com>
-References: <3472A07E6605974CBC9BC573F1BC02E4AE6EBB91@CERNXCHG41.cern.ch>
+From: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>
+Subject: RE: ceph-0.77-900.gce9bfb8 Testing Rados EC/Tiering & CephFS ...
+Date: Thu, 20 Mar 2014 13:43:29 +0000
+Message-ID: <3472A07E6605974CBC9BC573F1BC02E4AE6EBC08@CERNXCHG41.cern.ch>
+References: <3472A07E6605974CBC9BC573F1BC02E4AE6EBB91@CERNXCHG41.cern.ch>,<532AE883.1050106@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f180.google.com ([209.85.223.180]:58218 "EHLO
-	mail-ie0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751883AbaCTNJM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 20 Mar 2014 09:09:12 -0400
-Received: by mail-ie0-f180.google.com with SMTP id as1so760114iec.25
-        for <ceph-devel@vger.kernel.org>; Thu, 20 Mar 2014 06:09:11 -0700 (PDT)
-In-Reply-To: <3472A07E6605974CBC9BC573F1BC02E4AE6EBB91@CERNXCHG41.cern.ch>
+Received: from cernmx13.cern.ch ([188.184.36.46]:4140 "EHLO CERNMX13.cern.ch"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1758029AbaCTNnb convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 20 Mar 2014 09:43:31 -0400
+In-Reply-To: <532AE883.1050106@inktank.com>
+Content-Language: en-GB
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>
+To: Mark Nelson <mark.nelson@inktank.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+
+Hi Mark, 
+
+I tested write performance with a single rados bench (32 threads), everything on localhost, there is minimal latency on networking and IO in this setup. The test is running CPU bound with 32 paralell io's.  I used 4MB blocks, using bigger or smaller block IO volume goes down. I don't need several instances of rados bench to saturate the host. I reach already with 16 IOs comparable speed. So, that is anyway not a realistic scenario but a good baseline measurement and concurrency test.
+
+Your write results look very compatible to mine. Since I run client and server together and all in-memory all this tests are probably limited by the memory bandwidth and the CPU speed. The machine is a 2x6 core 2GHz Xeon with 1.3GHz ECC RAM.
+
+I will test with single replica front- and back-end case and post the result. I was more surprised by the IOPS I can reach in this setup. Not more then ~2.5k IOPS when writing even for tiny blocks. On your setup you seem not to get much more in the 4M case.
+
+Cheers Andreas.
+
+________________________________________
+From: Mark Nelson [mark.nelson@inktank.com]
+Sent: 20 March 2014 14:09
+To: Andreas Joachim Peters
+Cc: ceph-devel@vger.kernel.org
+Subject: Re: ceph-0.77-900.gce9bfb8 Testing Rados EC/Tiering & CephFS ...
 
 On 03/20/2014 05:49 AM, Andreas Joachim Peters wrote:
 > Hi,
@@ -37,30 +53,32 @@ On 03/20/2014 05:49 AM, Andreas Joachim Peters wrote:
 > cauchy 16+8: 520 MB/s
 > cauchy 24+8: 450 MB/s
 
-How many copies of rados bench are you using and how much concurrency? 
+How many copies of rados bench are you using and how much concurrency?
 Also, were the rados bench processes on an external host?
 
-Here's what I'm seeing internally for 4MB writes on a box with 30 
-spinning disks, 6 Intel 520 SSDs for journals, and bonded 10GbE.  This 
-was using 4 copies of rados bench and 32 concurrent IOs per process. 
-Note that 4MB writes is probably the best case scenario for EC compared 
+Here's what I'm seeing internally for 4MB writes on a box with 30
+spinning disks, 6 Intel 520 SSDs for journals, and bonded 10GbE.  This
+was using 4 copies of rados bench and 32 concurrent IOs per process.
+Note that 4MB writes is probably the best case scenario for EC compared
 to replication as far as performance goes right now.
 
 4MB READ
 
-ec-4k1m:	1546.21 MB/s
-ec-6k2m:	1308.52 MB/s
-ec-10k3m:	1060.73 MB/s
-2X rep:		2110.92 MB/s
-3X rep:		2131.03 MB/s
+ec-4k1m:        1546.21 MB/s
+ec-6k2m:        1308.52 MB/s
+ec-10k3m:       1060.73 MB/s
+2X rep:         2110.92 MB/s
+3X rep:         2131.03 MB/s
 
 4MB WRITE
 
-ec-4k1m:	1063.72 MB/s
-ec-6k2m:	750.381 MB/s
-ec-10k3m:	493.615 MB/s
-2X rep:		1171.35 MB/s
-3X rep:		755.148 MB/s
+ec-4k1m:        1063.72 MB/s
+ec-6k2m:        750.381 MB/s
+ec-10k3m:       493.615 MB/s
+2X rep:         1171.35 MB/s
+3X rep:         755.148 MB/s
+
+
 
 
 >
@@ -68,7 +86,7 @@ ec-10k3m:	493.615 MB/s
 >
 > The write performance is now 1.1 GB/s as expected when the cache is not full. If I shrink the cache pool in front forcing continuous eviction during the benchmark it degrades to stable 140 MB/s.
 
-Mind trying that same test with just a simple 1x rep pool to another 1x 
+Mind trying that same test with just a simple 1x rep pool to another 1x
 rep pool and see what happens?
 
 >
@@ -104,8 +122,8 @@ rep pool and see what happens?
 >   8: (clone()+0x6d) [0x33866e8b6d]
 >   NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
 
-Haven't seen that one yet!  Can you create an urgent bug with the full 
-stack trace and the pool settings both for the cache and the tier pool? 
+Haven't seen that one yet!  Can you create an urgent bug with the full
+stack trace and the pool settings both for the cache and the tier pool?
   Thanks!
 
 >
