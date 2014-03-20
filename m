@@ -1,33 +1,62 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: ceph-0.77-900.gce9bfb8 Testing Rados EC/Tiering & CephFS ...
-Date: Thu, 20 Mar 2014 08:55:59 -0500
-Message-ID: <532AF36F.3060804@inktank.com>
-References: <3472A07E6605974CBC9BC573F1BC02E4AE6EBB91@CERNXCHG41.cern.ch>,<532AE883.1050106@inktank.com> <3472A07E6605974CBC9BC573F1BC02E4AE6EBC08@CERNXCHG41.cern.ch>
+From: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>
+Subject: RE: ceph-0.77-900.gce9bfb8 Testing Rados EC/Tiering & CephFS ...
+Date: Thu, 20 Mar 2014 16:42:35 +0000
+Message-ID: <3472A07E6605974CBC9BC573F1BC02E4AE6EBCDD@CERNXCHG41.cern.ch>
+References: <3472A07E6605974CBC9BC573F1BC02E4AE6EBB91@CERNXCHG41.cern.ch>,<532AE883.1050106@inktank.com>
+ <3472A07E6605974CBC9BC573F1BC02E4AE6EBC08@CERNXCHG41.cern.ch>,<532AF36F.3060804@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f170.google.com ([209.85.213.170]:53878 "EHLO
-	mail-ig0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756902AbaCTNzp (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 20 Mar 2014 09:55:45 -0400
-Received: by mail-ig0-f170.google.com with SMTP id uq10so17203276igb.1
-        for <ceph-devel@vger.kernel.org>; Thu, 20 Mar 2014 06:55:44 -0700 (PDT)
-In-Reply-To: <3472A07E6605974CBC9BC573F1BC02E4AE6EBC08@CERNXCHG41.cern.ch>
+Received: from cernmx11.cern.ch ([188.184.36.50]:3567 "EHLO CERNMX11.cern.ch"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1757263AbaCTQmj convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 20 Mar 2014 12:42:39 -0400
+In-Reply-To: <532AF36F.3060804@inktank.com>
+Content-Language: en-GB
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>
+To: Mark Nelson <mark.nelson@inktank.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+
+Yes, 
+I checked CPU usage  ... the machine burns 70-100% during writing. (4+2) is faster than  3 replica probably because there is only half the bandwidth to fan out behind the primary replica although more computation is involved.
+
+Several instances of rados bench give the same sum of bandwidth or IOPS like a single instance.
+
+The 2.2k IOPS I get with a single replica and 4k blocks and this uses 70% CPU mainly used by the ceph-osd processes ... rados bench uses only 2% of all CPU. With Cauchy (4,2) I get 700 IOPS for the 4k blocks.
+
+Just for fun I also looked at the read now:
+
+Reading cached single 4k replica blocks with 16 parallel IOs I get 12k IOPS. 
+
+If I evict the blocks beforehand I get 900 IOPS reading via the tiering setup.
+
+I tried as you said with 1 replica in cache and 1 in backend and I get very mixed results. When the cache is already full then the first seconds it runs well, then it stalls for few seconds, then continues ... 
+
+For read it matters to have several rados bench running ... I can push it to 16k IOPS to read cached 4k blocks.
+
+Cheers Andreas.
+
+
+
+
+________________________________________
+From: Mark Nelson [mark.nelson@inktank.com]
+Sent: 20 March 2014 14:55
+To: Andreas Joachim Peters
+Cc: ceph-devel@vger.kernel.org
+Subject: Re: ceph-0.77-900.gce9bfb8 Testing Rados EC/Tiering & CephFS ...
 
 On 03/20/2014 08:43 AM, Andreas Joachim Peters wrote:
 > Hi Mark,
 >
 > I tested write performance with a single rados bench (32 threads), everything on localhost, there is minimal latency on networking and IO in this setup. The test is running CPU bound with 32 paralell io's.  I used 4MB blocks, using bigger or smaller block IO volume goes down. I don't need several instances of rados bench to saturate the host. I reach already with 16 IOs comparable speed. So, that is anyway not a realistic scenario but a good baseline measurement and concurrency test.
 
-Have you checked CPU usage during these tests?  EC is pretty intense, 
-and running rados bench on the same host doesn't help.  Having multiple 
-copies of rados bench going potentially may help for a couple of 
-reasons, but moving it off to a separate host may be important too 
+Have you checked CPU usage during these tests?  EC is pretty intense,
+and running rados bench on the same host doesn't help.  Having multiple
+copies of rados bench going potentially may help for a couple of
+reasons, but moving it off to a separate host may be important too
 (assuming you've got the network throughput to make it work).
 
 >
@@ -38,9 +67,9 @@ The machine in my test has 2x E5-2630L CPUs (6 core at 2GHz each).
 >
 > I will test with single replica front- and back-end case and post the result. I was more surprised by the IOPS I can reach in this setup. Not more then ~2.5k IOPS when writing even for tiny blocks. On your setup you seem not to get much more in the 4M case.
 
-As time goes on we'll be able to optimize small IO performance with EC, 
-but there's a lot more processing involved so I suspect it's always 
-going to be slower (especially for reads!) than simple replication when 
+As time goes on we'll be able to optimize small IO performance with EC,
+but there's a lot more processing involved so I suspect it's always
+going to be slower (especially for reads!) than simple replication when
 latency is critical.
 
 >
