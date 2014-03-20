@@ -1,127 +1,82 @@
-From: "Zhang, Jian" <jian.zhang@intel.com>
-Subject: FW: CURSH optimization for unbalanced pg distribution
-Date: Thu, 20 Mar 2014 03:54:01 +0000
-Message-ID: <51FC7A40FB29414D88A121A7FFEF9A4710DC3018@SHSMSX104.ccr.corp.intel.com>
-References: <51FC7A40FB29414D88A121A7FFEF9A4710DC2188@SHSMSX104.ccr.corp.intel.com>
- <53299E33.5060809@inktank.com>
- <alpine.DEB.2.00.1403190814520.316@cobra.newdream.net>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: mon_command
+Date: Thu, 20 Mar 2014 08:08:29 +0100
+Message-ID: <532A93ED.2010305@dachary.org>
+References: <39217F03-EC3A-4542-B00B-F62251B8CC98@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="VkerT9VskJPPpnGpkQ2ppISAPOdGfRDTo"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:17526 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750740AbaCTDyG convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Mar 2014 23:54:06 -0400
-In-Reply-To: <alpine.DEB.2.00.1403190814520.316@cobra.newdream.net>
-Content-Language: en-US
+Received: from smtp.dmail.dachary.org ([91.121.254.229]:49040 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750916AbaCTHIb (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 20 Mar 2014 03:08:31 -0400
+In-Reply-To: <39217F03-EC3A-4542-B00B-F62251B8CC98@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-Cc: "Sage Weil (sage@inktank.com)" <sage@inktank.com>, "Mark Nelson (mark.nelson@inktank.com) (mark.nelson@inktank.com)" <mark.nelson@inktank.com>, "Duan, Jiangang" <jiangang.duan@intel.com>, "Zhang, Jian" <jian.zhang@intel.com>
+To: David Zafman <david.zafman@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-Forwarding per Sage's suggestion. 
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--VkerT9VskJPPpnGpkQ2ppISAPOdGfRDTo
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: quoted-printable
+
+Hi David,
 
 
------Original Message-----
-From: Sage Weil [mailto:sage@inktank.com] 
-Sent: Wednesday, March 19, 2014 11:29 PM
-To: Mark Nelson
-Cc: Zhang, Jian; Duan, Jiangang; He, Yujie
-Subject: Re: CURSH optimization for unbalanced pg distribution
+On 20/03/2014 03:40, David Zafman wrote:>=20
+> My understanding is that are going to be using rados_mon_command() to c=
+reate pools according to Tracker #7586: deprecate rados_pool_create.  Wha=
+t I found when building a test case for EC is that after using the mon_co=
+mmand to create the pool I need to use wait_for_latest_osdmap() in order =
+to wait for the change to propagate.  The replicated pool test case using=
+ pool_create() doesn=92t need to wait_for_latest_osdmap().
+>=20
+> Should we be deprecating librados calls in favor of the very generic mo=
+n_command() interface? =20
 
-On Wed, 19 Mar 2014, Mark Nelson wrote:
-> On 03/19/2014 03:24 AM, Zhang, Jian wrote:
-> > For more detail data, please refer to the *Testing results* part.
-> > 
-> > *Optimization proposals: *
-> > 
-> > After we dived into the source code of CRUSH and related papers, we 
-> > proposed two possible optimizations:
-> > 
-> > 1.Add different hash algorithms, as an alternative for the Jenkin's 
-> > hash, e.g. algorithm that will produce even values when range of 
-> > input value (pg#) is relatively small. Or add new bucket type at the 
-> > same time if necessary.
+> I would suggest that we add the appropriate librados features to manipu=
+late erasure coded pools.
 
-This *might* work, but I don't have a strong intuition about it.  The modeling we've done now has essentially assumed a statistically uniform distribution, which has some inherent inbalance for low values of n (num pgs in our case).  I have generally assumed we can't do better than "random", and still have the other properties we want (independent, deterministic placement), but it may be possible.
+What do you have in mind ? There are osd erasure-code-profile, osd crush =
+rule create-erasure and the additional arguments to osd pool create can b=
+e used with rados_mon_command (or mon_command with the suggested implicit=
+ wait_for_latest_osdmap ). Anything else ?
 
-> > 
-> > 2.Find a better replica placement strategy instead of current retry
-> > logic of crush_choose_firstn, which may cause CRUSH to behave badly.
-> > 
-> > We find there are several threshold of retry times by referring to code,
-> > choose_total_tries, choose_local_tries and choose_local_fallback_tries.
-> > They are used to decide whether to do a retry_bucket, retry_descent or
-> > use permutation to do an exhaustive bucket search. We are wondering if
-> > there is another retry strategy:
-> > 
-> > a)Backtracking retry. Now the logic of crush_choose_firstn can only
-> > issue an retry either from the initial bucket(retry_descent) or from the
-> > current bucket (retry_bucket), how about retrying the intervening buckets?
-> > 
-> > b)Adjust threshold of retry times by other values. We do noticed that
-> > the 'optimal' crush tunable could be used to make it, but we still
-> > encounter unbalanced [g distribution by using the optimal strategy.
-> > Please refer to 4 of the Testing results part.
-> > 
-> > c)Add an mechanism that can adjust above mentioned thresholds
-> > adaptively. Maybe we can record the retry times of the previous call for
-> > CRUSH, and adjust retry thresholds automatically according to the record.
+https://github.com/ceph/ceph/blob/master/doc/dev/erasure-coded-pool.rst
 
-I suggest ignoring all of this retry logic.  The original version of CRUSH 
-has the local retries to try to make data move "less far", but when we 
-went back a year ago and did a statistical analysis of the distribution we 
-found that *all* of these hacks degraded the quality of the placement,a nd 
-by turning them all off (setting the 'optimal' values which zeroes them 
-all out excent for total_retries) we got something that was 
-indistinguishable from a uniform distribution.
+Cheers
 
-> > 3.Add soft link for pg directories. During pg creation, we can create
-> > soft links for the pgs if pg# on the selected osd is more than some
-> > threshold, say 10% more than desired average number, to move objects
-> > that will be stored in this pg to another osd. Balanced disk utilization
-> > may be gained in this way.
+>=20
+> David Zafman
+> Senior Developer
+> http://www.inktank.com
+>=20
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
 
-I think you need to be careful, but yes, this is an option.  There is a 
-similar exception mechanism in place that is used for other purposes and 
-something similar could be done here.  The main challenge will be in 
-ensuring that the soft links/exceptions follow the same overall policy 
-that CRUSH does after the raw mapping is performed.  This is an option, 
-but I would put it toward the bottom of the list...
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
 
-> > 4.Change placement strategy only for step of selecting devices from
-> > hosts. We found in our testing results that pg distribution was balanced
-> > among hosts, which is reasonable since pg# of each host is above 1K
-> > (according to the current BKM that pg# per osd should be about 100). So
-> > how about we apply CRUSH only on the interval buckets and find another
-> > simple but more balanced method to choose osd from host?
 
-This idea has a lot of potential.  For example:
+--VkerT9VskJPPpnGpkQ2ppISAPOdGfRDTo
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
-If you know the chassis can hold 12 disks, you can force the bucket size 
-to twelve and somehow prevent users from adjusting the structure of the 
-tree.  Then you can use a simple mapping that is truly flat (like a linear 
-mapping, disk = x % num_disks) for that bucket/subtree.  The downside of 
-course is that if you remove a disk *everything* reshuffles, hence some 
-sort of guardrails to prevent a user from inadvertantly doing that.  If a 
-disk *does* fail, you just need to make sure the disk is marked "out" but 
-not removed from the CRUSH hierarchy and the normal retry will kick in.
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.20 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
 
-Note that all this is reall doing is increasing the size of the "buckets" 
-that we are (pseudo)randomly distribution over.  It is still a 
-random/uniform distribution, but the N value is 12 times bigger (for a 12 
-disk chassis) and as a result the variance is substantially lower.
+iEYEARECAAYFAlMqk+0ACgkQ8dLMyEl6F20zuwCgl1RydqqRESXUrOctOcGygDRT
+dpAAnR52qv+QpNb0sziFH1z/1hrM5vIQ
+=qW+n
+-----END PGP SIGNATURE-----
 
-I would suggest making a new bucket type that is called 'linear' and does 
-a simple modulo and trying this out.  We will need a bunch of additional 
-safety checks to help users avoid doing silly things (like adjusting the 
-number of items in the linear buckets, which reshuffle everything) but 
-that wouldn't be needed for an initial analysis of the performance impact.
-
-Do you mind if we shift this thread over to ceph-devel?  I think there are 
-lots of people who would be interested in this discussion.  We can of 
-course leave off your attachment if you prefer.
-
-Thanks!
-sage
+--VkerT9VskJPPpnGpkQ2ppISAPOdGfRDTo--
