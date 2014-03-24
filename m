@@ -1,70 +1,57 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: GCC -msse2 portability question
-Date: Sun, 23 Mar 2014 18:40:40 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1403231840070.26602@cobra.newdream.net>
-References: <532F3B0E.2050204@dachary.org>
-Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1566250523-1395625240=:26602"
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: [PATCH] ceph: fix null pointer dereference in discard_cap_releases()
+Date: Mon, 24 Mar 2014 10:18:32 +0800
+Message-ID: <1395627512-7067-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:41063 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750999AbaCXBkl (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 23 Mar 2014 21:40:41 -0400
-In-Reply-To: <532F3B0E.2050204@dachary.org>
+Received: from mga09.intel.com ([134.134.136.24]:20781 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750878AbaCXCSr (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 23 Mar 2014 22:18:47 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Laurent Guerby <laurent@guerby.net>, Kevin Greenan <kmgreen2@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+send_mds_reconnect() may call discard_cap_releases() after all
+release messages have been dropped by cleanup_cap_releases()
 
---557981400-1566250523-1395625240=:26602
-Content-Type: TEXT/PLAIN; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+---
+ fs/ceph/mds_client.c | 21 ++++++++++++---------
+ 1 file changed, 12 insertions(+), 9 deletions(-)
 
-Hi Loic,
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index f260bd8..77640ada4 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -1462,15 +1462,18 @@ static void discard_cap_releases(struct ceph_mds_client *mdsc,
+ 
+ 	dout("discard_cap_releases mds%d\n", session->s_mds);
+ 
+-	/* zero out the in-progress message */
+-	msg = list_first_entry(&session->s_cap_releases,
+-			       struct ceph_msg, list_head);
+-	head = msg->front.iov_base;
+-	num = le32_to_cpu(head->num);
+-	dout("discard_cap_releases mds%d %p %u\n", session->s_mds, msg, num);
+-	head->num = cpu_to_le32(0);
+-	msg->front.iov_len = sizeof(*head);
+-	session->s_num_cap_releases += num;
++	if (!list_empty(&session->s_cap_releases)) {
++		/* zero out the in-progress message */
++		msg = list_first_entry(&session->s_cap_releases,
++					struct ceph_msg, list_head);
++		head = msg->front.iov_base;
++		num = le32_to_cpu(head->num);
++		dout("discard_cap_releases mds%d %p %u\n",
++		     session->s_mds, msg, num);
++		head->num = cpu_to_le32(0);
++		msg->front.iov_len = sizeof(*head);
++		session->s_num_cap_releases += num;
++	}
+ 
+ 	/* requeue completed messages */
+ 	while (!list_empty(&session->s_cap_releases_done)) {
+-- 
+1.8.5.3
 
-FWIW something with the build or feature detection seems to be off, as I=20
-just got an Illegal Instruction signal on the current master:
-
-	http://tracker.ceph.com/issues/7826
-
-sage
-
-
-
-On Sun, 23 Mar 2014, Loic Dachary wrote:
-
-> Hi Laurent,
->=20
-> In the context of optimizing erasure code functions implemented by Kevi=
-n Greenan (cc'ed) and James Plank at https://bitbucket.org/jimplank/gf-co=
-mplete/ we ran accross a question you may have the answer to: can gcc -ms=
-se2 (or -msse* for that matter ) have a negative impact on the portabilit=
-y of the compiled binary code ?=20
->=20
-> In other words, if a code is compiled without -msse* and runs fine on a=
-ll intel processors it targets, could it be that adding -msse* to the com=
-pilation of the same source code generate a binary that would fail on som=
-e processors ? This is assuming no sse specific functions were used in th=
-e source code.
->=20
-> In gf-complete, all sse specific instructions are carefully protected t=
-o not be run on a CPU that does not support them. The runtime detection i=
-s done by checking CPU id bits ( see https://bitbucket.org/jimplank/gf-co=
-mplete/pull-request/7/probe-intel-sse-features-at-runtime/diff#Lsrc/gf_in=
-tel.cT28 )
->=20
-> The corresponding thread is at:
->=20
-> https://bitbucket.org/jimplank/gf-complete/pull-request/4/defer-the-dec=
-ision-to-use-a-given-sse/diff#comment-1479296
->=20
-> Cheers
->=20
-> --=20
-> Lo=EFc Dachary, Artisan Logiciel Libre
->=20
->=20
---557981400-1566250523-1395625240=:26602--
