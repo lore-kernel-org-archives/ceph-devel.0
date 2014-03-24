@@ -1,33 +1,46 @@
-From: Szymon Szypulski <szymon.szypulski@ragnarson.com>
-Subject: Limiting specific to specific directory, client separation
-Date: Mon, 24 Mar 2014 11:37:10 +0100
-Message-ID: <CA+5bbP9-NGQ2sAsSwrauhKpsvqxjRjcxf4MRRNNL4gqxDO2k+Q@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: [PATCH] ceph: don't include ceph.{file,dir}.layout vxattr in listxattr()
+Date: Mon, 24 Mar 2014 19:28:57 +0800
+Message-ID: <1395660537-4972-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f182.google.com ([209.85.214.182]:48835 "EHLO
-	mail-ob0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750998AbaCXKhL (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 24 Mar 2014 06:37:11 -0400
-Received: by mail-ob0-f182.google.com with SMTP id uz6so5560296obc.27
-        for <ceph-devel@vger.kernel.org>; Mon, 24 Mar 2014 03:37:10 -0700 (PDT)
+Received: from mga09.intel.com ([134.134.136.24]:5166 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752663AbaCXL3C (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 24 Mar 2014 07:29:02 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
+Cc: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-Hi,
+This avoids 'cp -a' modifying layout of new files/directories.
 
-We would liked to migrate from gluster to ceph in environment where
-multiple servers can access one directory, where some should be
-unavailable. Basically we need per directory access list for multiple
-users.
-
-I've found some overdue tickets on tracker
-http://tracker.ceph.com/issues/1401 and
-http://tracker.ceph.com/issues/1237. Is there any chance it will be
-included into road map soon? If not, is there anything we can do to
-speed it up? Hire C/C++ dev internally and delegate it to ceph
-development? Maybe something else?
-
+Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
 ---
-Szymon Szypulski
+ fs/ceph/xattr.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
+index 28549d5..c9c2b88 100644
+--- a/fs/ceph/xattr.c
++++ b/fs/ceph/xattr.c
+@@ -231,7 +231,7 @@ static struct ceph_vxattr ceph_dir_vxattrs[] = {
+ 		.name_size = sizeof("ceph.dir.layout"),
+ 		.getxattr_cb = ceph_vxattrcb_layout,
+ 		.readonly = false,
+-		.hidden = false,
++		.hidden = true,
+ 		.exists_cb = ceph_vxattrcb_layout_exists,
+ 	},
+ 	XATTR_LAYOUT_FIELD(dir, layout, stripe_unit),
+@@ -258,7 +258,7 @@ static struct ceph_vxattr ceph_file_vxattrs[] = {
+ 		.name_size = sizeof("ceph.file.layout"),
+ 		.getxattr_cb = ceph_vxattrcb_layout,
+ 		.readonly = false,
+-		.hidden = false,
++		.hidden = true,
+ 		.exists_cb = ceph_vxattrcb_layout_exists,
+ 	},
+ 	XATTR_LAYOUT_FIELD(file, layout, stripe_unit),
+-- 
+1.8.5.3
+
