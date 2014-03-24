@@ -1,46 +1,38 @@
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: [PATCH] ceph: don't include ceph.{file,dir}.layout vxattr in listxattr()
-Date: Mon, 24 Mar 2014 19:28:57 +0800
-Message-ID: <1395660537-4972-1-git-send-email-zheng.z.yan@intel.com>
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: [librbd] Add interface of get the snapshot size?
+Date: Mon, 24 Mar 2014 21:30:44 +0800
+Message-ID: <CACJqLybccTqhcumeP33LTY8_s7zxjyuodU-bdKFL9a1cM28dVg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:5166 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752663AbaCXL3C (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 24 Mar 2014 07:29:02 -0400
+Received: from mail-pd0-f174.google.com ([209.85.192.174]:41116 "EHLO
+	mail-pd0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753169AbaCXNao (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 24 Mar 2014 09:30:44 -0400
+Received: by mail-pd0-f174.google.com with SMTP id y13so5289077pdi.5
+        for <ceph-devel@vger.kernel.org>; Mon, 24 Mar 2014 06:30:44 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: "Yan, Zheng" <zheng.z.yan@intel.com>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This avoids 'cp -a' modifying layout of new files/directories.
+Hi all,
 
-Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
----
- fs/ceph/xattr.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+As we know, snapshot is a lightweight resource in librbd and we
+doesn't have any statistic informations about it. But it causes some
+problems to the cloud management.
 
-diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
-index 28549d5..c9c2b88 100644
---- a/fs/ceph/xattr.c
-+++ b/fs/ceph/xattr.c
-@@ -231,7 +231,7 @@ static struct ceph_vxattr ceph_dir_vxattrs[] = {
- 		.name_size = sizeof("ceph.dir.layout"),
- 		.getxattr_cb = ceph_vxattrcb_layout,
- 		.readonly = false,
--		.hidden = false,
-+		.hidden = true,
- 		.exists_cb = ceph_vxattrcb_layout_exists,
- 	},
- 	XATTR_LAYOUT_FIELD(dir, layout, stripe_unit),
-@@ -258,7 +258,7 @@ static struct ceph_vxattr ceph_file_vxattrs[] = {
- 		.name_size = sizeof("ceph.file.layout"),
- 		.getxattr_cb = ceph_vxattrcb_layout,
- 		.readonly = false,
--		.hidden = false,
-+		.hidden = true,
- 		.exists_cb = ceph_vxattrcb_layout_exists,
- 	},
- 	XATTR_LAYOUT_FIELD(file, layout, stripe_unit),
+We can't measure the size of snapshot, different snapshot will occur
+different space. So we don't have way to estimate the resource usage
+of user.
+
+Maybe we can have a counter to record space usage when volumn created.
+When creating snapshot, the counter is freeze and store as the size of
+snapshot. New counter will assign to zero for the volume.
+
+Any feedback is appreciate!
+
 -- 
-1.8.5.3
 
+Best Regards,
+
+Wheat
