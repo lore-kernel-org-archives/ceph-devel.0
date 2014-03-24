@@ -1,84 +1,33 @@
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: [PATCH] ceph: check buffer size in ceph_vxattrcb_layout()
-Date: Mon, 24 Mar 2014 13:32:15 +0800
-Message-ID: <1395639135-12840-1-git-send-email-zheng.z.yan@intel.com>
+From: Szymon Szypulski <szymon.szypulski@ragnarson.com>
+Subject: Limiting specific to specific directory, client separation
+Date: Mon, 24 Mar 2014 11:37:10 +0100
+Message-ID: <CA+5bbP9-NGQ2sAsSwrauhKpsvqxjRjcxf4MRRNNL4gqxDO2k+Q@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:59471 "EHLO mga11.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750790AbaCXFc3 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 24 Mar 2014 01:32:29 -0400
+Received: from mail-ob0-f182.google.com ([209.85.214.182]:48835 "EHLO
+	mail-ob0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750998AbaCXKhL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 24 Mar 2014 06:37:11 -0400
+Received: by mail-ob0-f182.google.com with SMTP id uz6so5560296obc.27
+        for <ceph-devel@vger.kernel.org>; Mon, 24 Mar 2014 03:37:10 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
-Cc: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+Hi,
+
+We would liked to migrate from gluster to ceph in environment where
+multiple servers can access one directory, where some should be
+unavailable. Basically we need per directory access list for multiple
+users.
+
+I've found some overdue tickets on tracker
+http://tracker.ceph.com/issues/1401 and
+http://tracker.ceph.com/issues/1237. Is there any chance it will be
+included into road map soon? If not, is there anything we can do to
+speed it up? Hire C/C++ dev internally and delegate it to ceph
+development? Maybe something else?
+
 ---
- fs/ceph/xattr.c | 34 +++++++++++++++++++++++++---------
- 1 file changed, 25 insertions(+), 9 deletions(-)
-
-diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
-index 2dbd668..28549d5 100644
---- a/fs/ceph/xattr.c
-+++ b/fs/ceph/xattr.c
-@@ -64,32 +64,48 @@ static bool ceph_vxattrcb_layout_exists(struct ceph_inode_info *ci)
- }
- 
- static size_t ceph_vxattrcb_layout(struct ceph_inode_info *ci, char *val,
--					size_t size)
-+				   size_t size)
- {
- 	int ret;
- 	struct ceph_fs_client *fsc = ceph_sb_to_client(ci->vfs_inode.i_sb);
- 	struct ceph_osd_client *osdc = &fsc->client->osdc;
- 	s64 pool = ceph_file_layout_pg_pool(ci->i_layout);
- 	const char *pool_name;
-+	char buf[128];
- 
- 	dout("ceph_vxattrcb_layout %p\n", &ci->vfs_inode);
- 	down_read(&osdc->map_sem);
- 	pool_name = ceph_pg_pool_name_by_id(osdc->osdmap, pool);
--	if (pool_name)
--		ret = snprintf(val, size,
--		"stripe_unit=%lld stripe_count=%lld object_size=%lld pool=%s",
-+	if (pool_name) {
-+		size_t len = strlen(pool_name);
-+		ret = snprintf(buf, sizeof(buf),
-+		"stripe_unit=%lld stripe_count=%lld object_size=%lld pool=",
- 		(unsigned long long)ceph_file_layout_su(ci->i_layout),
- 		(unsigned long long)ceph_file_layout_stripe_count(ci->i_layout),
--	        (unsigned long long)ceph_file_layout_object_size(ci->i_layout),
--		pool_name);
--	else
--		ret = snprintf(val, size,
-+	        (unsigned long long)ceph_file_layout_object_size(ci->i_layout));
-+		if (!size) {
-+			ret += len;
-+		} else if (ret + len > size) {
-+			ret = -ERANGE;
-+		} else {
-+			memcpy(val, buf, ret);
-+			memcpy(val + ret, pool_name, len);
-+			ret += len;
-+		}
-+	} else {
-+		ret = snprintf(buf, sizeof(buf),
- 		"stripe_unit=%lld stripe_count=%lld object_size=%lld pool=%lld",
- 		(unsigned long long)ceph_file_layout_su(ci->i_layout),
- 		(unsigned long long)ceph_file_layout_stripe_count(ci->i_layout),
- 	        (unsigned long long)ceph_file_layout_object_size(ci->i_layout),
- 		(unsigned long long)pool);
--
-+		if (size) {
-+			if (ret <= size)
-+				memcpy(val, buf, ret);
-+			else
-+				ret = -ERANGE;
-+		}
-+	}
- 	up_read(&osdc->map_sem);
- 	return ret;
- }
--- 
-1.8.5.3
-
+Szymon Szypulski
