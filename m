@@ -1,103 +1,72 @@
-From: Laurent GUERBY <laurent@guerby.net>
-Subject: Re: GCC -msse2 portability question
-Date: Tue, 25 Mar 2014 12:22:52 +0100
-Message-ID: <1395746572.15058.219.camel@pc2>
-References: <532F3B0E.2050204@dachary.org> <1395614070.15058.140.camel@pc2>
-	 <5330A328.9060203@dachary.org> <1395740605.15058.205.camel@pc2>
-	 <533152E9.50709@dachary.org>
+From: Alex Elder <elder@ieee.org>
+Subject: Re: Issue #5876 : assertion failure in rbd_img_obj_callback()
+Date: Tue, 25 Mar 2014 06:48:40 -0500
+Message-ID: <53316D18.7040103@ieee.org>
+References: <1395736765.2823.29.camel@localhost> <CALFYKtCUR6Swm5yxBP_7y42QVjj=v+XCtag7FmJ61AvoFjUmRA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lists.tetaneutral.net ([91.224.149.207]:48740 "EHLO
-	lists.tetaneutral.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751194AbaCYLXE (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Mar 2014 07:23:04 -0400
-In-Reply-To: <533152E9.50709@dachary.org>
+Received: from mail-oa0-f51.google.com ([209.85.219.51]:38387 "EHLO
+	mail-oa0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752588AbaCYLsV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Mar 2014 07:48:21 -0400
+Received: by mail-oa0-f51.google.com with SMTP id i4so391683oah.10
+        for <ceph-devel@vger.kernel.org>; Tue, 25 Mar 2014 04:48:21 -0700 (PDT)
+In-Reply-To: <CALFYKtCUR6Swm5yxBP_7y42QVjj=v+XCtag7FmJ61AvoFjUmRA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Kevin Greenan <kmgreen2@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Ilya Dryomov <ilya.dryomov@inktank.com>, Olivier Bonvalet <ceph.list@daevel.fr>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Tue, 2014-03-25 at 10:56 +0100, Loic Dachary wrote:
-> Hi Laurent,
+On 03/25/2014 04:04 AM, Ilya Dryomov wrote:
+> On Tue, Mar 25, 2014 at 10:39 AM, Olivier Bonvalet <ceph.list@daevel.fr> wrote:
+>> Hi,
+>>
+>> what can/should I do to help fix that problem ?
+>>
+>> for now, RBD kernel client hang on :
+>>         Assertion failure in rbd_img_obj_callback() at line 2131:
+>>            rbd_assert(which >= img_request->next_completion);
 
-Hi Loic,
+If you can build your own kernel as Ilya says I'd like to
+see the values of which and img_request->next_completion
+here.
 
-> It occurs to me that all we're after is to enable SSE functions such as _mm_set_epi32. We're not trying to have the binary optimized in any implicit way, it is all explicit. The problem seems to be that -msse4.2 will do both 
+If you can't, is there anything interesting about your
+workload that might help reproduce the problem?
+
+Thanks.
+
+					-Alex
+
+>>
+>> or on :
+>>         Assertion failure in rbd_img_obj_callback() at line 2127:
+>>             rbd_assert(img_request != NULL);
+>>
+>>
+>> I have both case at least once per week, on latest 3.13.5 kernels.
+>>
+>> It seems that the problem occurs only on more loaded servers (I have 4
+>> near same servers, and crash occurs on two of them. If I move the VM,
+>> crash follows...).
 > 
-> * activate _mm_set_epi32 etc functions
-> * optimize the binary to use sse4.2 instructions
+> Hi,
 > 
-> Do you know of a compiler flag that would only 
+> I'm looking into this, but it doesn't reproduce on my boxes.  This must
+> be some sort of race and the fact that there is nothing else in the
+> dmesg right before the splats doesn't help.
 > 
-> * activate _mm_set_epi32 etc functions 
-
-This is a function part of an Intel defined standard to access processor
-feature, this standard will have one or more implementation depending on
-your compiler/libc/OS. IIRC these functions are closely aligned with
-specific processor feature, if the feature isn't there in general it
-makes no sense to use them.
-
-In the particular case of  _mm_set_epi32 it seems
-to be a data formating inline function:
-
-/usr/lib/gcc/x86_64-linux-gnu/4.7.2/include/emmintrin.h
-...
-typedef long long __m128i __attribute__ ((__vector_size__ (16),
-__may_alias__));
-...
-extern __inline __m128i __attribute__((__gnu_inline__,
-__always_inline__, __artificial__))
-_mm_set_epi32 (int __q3, int __q2, int __q1, int __q0)
-{
-  return __extension__ (__m128i)(__v4si){ __q0, __q1, __q2, __q3 };
-}
-
-Functions in this include files are using GCC builtins:
-
-http://gcc.gnu.org/onlinedocs/gcc-4.8.2/gcc/X86-Built-in-Functions.html#X86-Built-in-Functions
-
-To avoid any issue I wouldn't use these functions at all
-on a non SSE machine.
-
-Sincerely,
-
-Laurent
-
-> and not
+> Can you send me your 3.13.5 rbd.ko and libceph.ko?  Also, just so
+> I know, can you build your own kernel?
 > 
-> * optimize the binary to use sse4.2 instructions
+> Thanks,
 > 
-> ? It may be a RTFM question and I apologize for that. Reading http://gcc.gnu.org/onlinedocs/gcc-4.8.2/gcc/i386-and-x86-64-Options.html#i386-and-x86-64-Options it looks like this is more or less what --mtune=corei7-avx would do (because gf-complete uses PCLMUL when available). But it feels weird to specify a specific processor model where what we need is a set of features. 
+>                 Ilya
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > 
-> Thanks for your help :-)
-> 
-> On 25/03/2014 10:43, Laurent GUERBY wrote:
-> > On Mon, 2014-03-24 at 22:27 +0100, Loic Dachary wrote:
-> >>
-> >> On 23/03/2014 23:34, Laurent GUERBY wrote:
-> >>> http://gcc.gnu.org/onlinedocs/gcc-4.8.2/gcc/i386-and-x86-64-Options.html#i386-and-x86-64-Options
-> >>>
-> >>> So unless you want to run your code a very very old x86 32 bit processor
-> >>> "-msse" shouldn't be an issue. "-msse2" is similar.
-> >>
-> >> This is good to know :) Should I be worried about unintended side effects of -msse4.2 -mssse3 -msse4.1 or -mpclmul ? These are the flags that gf-complete are using, specifically.
-> > 
-> > Hi,
-> > 
-> > SSE4.2 will be available only in more recent
-> > processors as documented on the page above.
-> > 
-> > If your library already is dynamically checking for processor
-> > feature I would advise to be conservative in your
-> > -m flags, ie using what debian would use for maximum
-> > x86 portability.
-> > 
-> > Sincerely,
-> > 
-> > Laurent
-> > 
-> 
-
 
