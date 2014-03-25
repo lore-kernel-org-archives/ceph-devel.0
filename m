@@ -1,119 +1,58 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: GCC -msse2 portability question
-Date: Mon, 24 Mar 2014 22:27:04 +0100
-Message-ID: <5330A328.9060203@dachary.org>
-References: <532F3B0E.2050204@dachary.org> <1395614070.15058.140.camel@pc2>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: [librbd] Add interface of get the snapshot size?
+Date: Mon, 24 Mar 2014 20:22:23 -0700
+Message-ID: <5330F66F.30008@inktank.com>
+References: <CACJqLybccTqhcumeP33LTY8_s7zxjyuodU-bdKFL9a1cM28dVg@mail.gmail.com> <53303822.20800@xdel.ru>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="8ClIcGH1dUC1scf1hCkqdctisE1Tt4bkk"
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:53139 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750921AbaCXV1K (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 24 Mar 2014 17:27:10 -0400
-In-Reply-To: <1395614070.15058.140.camel@pc2>
+Received: from mail-yk0-f170.google.com ([209.85.160.170]:33753 "EHLO
+	mail-yk0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751076AbaCYDW0 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 24 Mar 2014 23:22:26 -0400
+Received: by mail-yk0-f170.google.com with SMTP id 9so17196198ykp.1
+        for <ceph-devel@vger.kernel.org>; Mon, 24 Mar 2014 20:22:26 -0700 (PDT)
+In-Reply-To: <53303822.20800@xdel.ru>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Laurent GUERBY <laurent@guerby.net>
-Cc: Kevin Greenan <kmgreen2@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Andrey Korolyov <andrey@xdel.ru>, Haomai Wang <haomaiwang@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---8ClIcGH1dUC1scf1hCkqdctisE1Tt4bkk
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-
-
-
-On 23/03/2014 23:34, Laurent GUERBY wrote:
-> On Sun, 2014-03-23 at 20:50 +0100, Loic Dachary wrote:
->> Hi Laurent,
+On 03/24/2014 06:50 AM, Andrey Korolyov wrote:
+> On 03/24/2014 05:30 PM, Haomai Wang wrote:
+>> Hi all,
 >>
->> In the context of optimizing erasure code functions implemented by
->> Kevin Greenan (cc'ed) and James Plank at
->> https://bitbucket.org/jimplank/gf-complete/ we ran accross a question
->> you may have the answer to: can gcc -msse2 (or -msse* for that matter
->> ) have a negative impact on the portability of the compiled binary
->> code ?=20
+>> As we know, snapshot is a lightweight resource in librbd and we
+>> doesn't have any statistic informations about it. But it causes some
+>> problems to the cloud management.
 >>
->> In other words, if a code is compiled without -msse* and runs fine on
->> all intel processors it targets, could it be that adding -msse* to the=
-
->> compilation of the same source code generate a binary that would fail
->> on some processors ? This is assuming no sse specific functions were
->> used in the source code.
+>> We can't measure the size of snapshot, different snapshot will occur
+>> different space. So we don't have way to estimate the resource usage
+>> of user.
 >>
->> In gf-complete, all sse specific instructions are carefully protected
->> to not be run on a CPU that does not support them. The runtime
->> detection is done by checking CPU id bits ( see
->> https://bitbucket.org/jimplank/gf-complete/pull-request/7/probe-intel-=
-sse-features-at-runtime/diff#Lsrc/gf_intel.cT28 )
+>> Maybe we can have a counter to record space usage when volumn created.
+>> When creating snapshot, the counter is freeze and store as the size of
+>> snapshot. New counter will assign to zero for the volume.
 >>
->> The corresponding thread is at:
+>> Any feedback is appreciate!
 >>
->> https://bitbucket.org/jimplank/gf-complete/pull-request/4/defer-the-de=
-cision-to-use-a-given-sse/diff#comment-1479296
->>
->> Cheers
->>
->=20
-> Hi Loic,
->=20
-> The GCC documentation is here with lists of architecture supporting
-> sse/sse2:
->=20
-> http://gcc.gnu.org/onlinedocs/gcc-4.8.2/gcc/i386-and-x86-64-Options.htm=
-l#i386-and-x86-64-Options
->=20
-> So unless you want to run your code a very very old x86 32 bit processo=
-r
-> "-msse" shouldn't be an issue. "-msse2" is similar.
+>
+> I believe that there is a rough estimation over 'rados df'. Per-image
+> statistics would be awesome, though precise stats will be neither rough
+> too(# of rbd object clones per volume) or introduce new counter
+> mechanism. Dealing with discard for the filestore, it looks even more
+> difficult to calculate right estimation, as with XFS preallocation feature.
 
-This is good to know :) Should I be worried about unintended side effects=
- of -msse4.2 -mssse3 -msse4.1 or -mpclmul ? These are the flags that gf-c=
-omplete are using, specifically.
+diff_iterate() will let you see what extents exist in the image at a
+given snapshot or between snapshots. It's not perfect, but it'll be more
+accurate than other methods.
 
-Cheers
+A better long term solution might be to leverage something like a
+bitmap of object existence. This could be marked dirty (i.e.
+unreliable) when opening an image, maintained in memory, and saved with
+a snapshot and when closing an image as clean.
 
->=20
-> -mtune=3Dxxx with xxx being a recent arch could be interesting for you
-> because it keeps compatibility with the generic arch while tuning
-> resulting code on the specific arch (for example the current fashionabl=
-e
-> arch like corei7).
->=20
-> For alibrary you can choose the code you execute a load/run time
-> for a specific function by using the STT_GNU_IFUNC feature :
->=20
-> http://vger.kernel.org/~davem/cgi-bin/blog.cgi/2010/02/07
-> http://gcc.gnu.org/onlinedocs/gcc-4.7.2/gcc/Function-Attributes.html#in=
-dex-g_t_0040code_007bifunc_007d-attribute-2529
->=20
-> I believe recent GLIBC use this feature to tune
-> some performance/arch sensitive functions.
->=20
-> Sincerely,
->=20
-> Laurent
->=20
->=20
+With xfs preallocation hints, the usage will be pretty close to object
+size * num objects.
 
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---8ClIcGH1dUC1scf1hCkqdctisE1Tt4bkk
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.20 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlMwoysACgkQ8dLMyEl6F233kwCdF7yGUYeP+5k4wj1/iV2M1b/l
-rSoAn0hJtqhCIuqB82Khkgac5TsXbZqq
-=eXtR
------END PGP SIGNATURE-----
-
---8ClIcGH1dUC1scf1hCkqdctisE1Tt4bkk--
+Josh
