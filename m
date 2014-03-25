@@ -1,88 +1,61 @@
-From: Benedikt Fraunhofer <fraunhofer@traced.net>
-Subject: rgw/civetweb.cc fixes, possibly superflous warning
-Date: Tue, 25 Mar 2014 16:42:39 +0100
-Message-ID: <CAD_6HTHptgRYruuKC3zxaDoBzCMES2xo_MBGdC333P0y0e9RNA@mail.gmail.com>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: Question about librados notification
+Date: Tue, 25 Mar 2014 08:56:03 -0700
+Message-ID: <CAPYLRzi-tiJ_9D7KiGSb8uP-6EquSUXuA3LRNUJ+frDTXv1T2A@mail.gmail.com>
+References: <CAJ58763WbS3dhnu572w7pwSVY2iywXmVwstu_bpRY=cR5K-+iQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f176.google.com ([209.85.216.176]:32808 "EHLO
-	mail-qc0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753340AbaCYPnJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Mar 2014 11:43:09 -0400
-Received: by mail-qc0-f176.google.com with SMTP id m20so792374qcx.7
-        for <ceph-devel@vger.kernel.org>; Tue, 25 Mar 2014 08:43:09 -0700 (PDT)
+Received: from mail-qg0-f47.google.com ([209.85.192.47]:63959 "EHLO
+	mail-qg0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752714AbaCYP4E (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Mar 2014 11:56:04 -0400
+Received: by mail-qg0-f47.google.com with SMTP id 63so1938523qgz.6
+        for <ceph-devel@vger.kernel.org>; Tue, 25 Mar 2014 08:56:03 -0700 (PDT)
+In-Reply-To: <CAJ58763WbS3dhnu572w7pwSVY2iywXmVwstu_bpRY=cR5K-+iQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Shinji Matsumoto <shinji.matsumoto@us.sios.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hello *,
+On Tue, Mar 25, 2014 at 5:50 AM, Shinji Matsumoto
+<shinji.matsumoto@us.sios.com> wrote:
+> Hello all,
+>
+> I have a question about Ceph notification mechanism.
+> http://ceph.com/docs/master/architecture/#object-watch-notify
+>
+> Scenario:
+>
+> (1) 3 clients (client1, client2, client3) have interests on a Ceph
+> object (object A). Each client calls rados_watch() to register
+> notification callback on the object..
+>
+> (2) Client1 calls rados_notify()  on object A. On client1 and client2,
+> the notification is delivered and processed successfully within a
+> timeout period.
+>
+> (3) However on client3, the notification is delivered, but it doesn't
+> complete within a timeout period for a temporary reason, such as
+> temporarily busy process for instance.
+>
+> (4) On client1, rados_notify() returns a status of timeout.
+>
+> (5) On client3, the temporary reason goes away and the notification is
+> processed.
+>
+> (6) Then, client3 attempts to read from object A by a call to rados_read().
+>
+> Question:
+>
+> Will the call to rados_read() attempted at step (6) always succeed,
+> always fail or is the behavior unpredictable, which is, it's affected
+> by the factors that are not defined in this scenario?
 
-i had a hard time trying to get the civetweb part of radosgw running.
-Symptoms are:
-curl/wget/s3cmd work fine, all windows clients (CloudBerry and
-S3-Browser) refuse to work.
-They work fine with the apache<>fastcgi<>radosgw chain.
-
-Looks like they wait for the "\r" in "\r\n" in the response line which
-is missing for civetweb:
-
-------------------------
-diff --git a/src/rgw/rgw_civetweb.cc b/src/rgw/rgw_civetweb.cc
-index a31177f..3396eac 100644
---- a/src/rgw/rgw_civetweb.cc
-+++ b/src/rgw/rgw_civetweb.cc
-@@ -128,7 +128,7 @@ int RGWMongoose::send_status(const char *status,
-const char *status_name)
-   if (!status_name)
-     status_name = "";
-
--  snprintf(buf, sizeof(buf), "HTTP/1.1 %s %s\n", status, status_name);
-+  snprintf(buf, sizeof(buf), "HTTP/1.1 %s %s\r\n", status, status_name);
-
-   bufferlist bl;
-   bl.append(buf);
-@@ -168,5 +168,5 @@ int RGWMongoose::send_content_length(uint64_t len)
-   has_content_length = true;
-   char buf[21];
-   snprintf(buf, sizeof(buf), "%"PRIu64, len);
--  return print("Content-Length: %s\n", buf);
-+  return print("Content-Length: %s\r\n", buf);
- }
-
-------------------------
-
-I couldn't test the patch but let instead haproxy insert the missing
-\r and now it
-works for those windows clients.
-
-Another thing i noticed is that there's this line:
-----------------------------
-rgw_main.cc
-index 9614b07..115697c 100644
-@@ -1124,7 +1124,7 @@ int main(int argc, const char **argv)
-       string err;
-
-       int port;
-      config->get_val("port", 80, &port);
-
-------------------------
-
-here it warns about my config because "port" is a string. Later, this
-is again fetched
-from the config but this time as a string and fed to
-
-------------------------------------
-class RGWMongooseFrontend : public RGWFrontend {
-[...]
-    conf->get_val("port", "80", &port_str);
-    const char *options[] = {"listening_ports", port_str.c_str(),
-"enable_keep_alive", "yes", "num_threads", thread_pool_buf, NULL};
-------------------------------------
-I (we?) want this to be a string to be able to bind it to specific ips?
-(i.e. "rgw frontends = civetweb port=127.0.0.1:2081")
-
-I dunno if you need the port as an integer in the env object.
-
-Thx & Cheers
-
- Benedikt
+The success of the read is not impacted by the notify timeout -- you
+can order reads using watch-notify, but issues in the watch-notify
+framework won't impact reads. Watch-notify is a voluntary thing. IIRC
+the OSD involved might kill client3's connection, but it'll just
+establish a new one transparently.
+-Greg
+Software Engineer #42 @ http://inktank.com | http://ceph.com
