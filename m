@@ -1,53 +1,65 @@
-From: Shinji Matsumoto <shinji.matsumoto@us.sios.com>
-Subject: Question about librados notification
-Date: Tue, 25 Mar 2014 21:50:57 +0900
-Message-ID: <CAJ58763WbS3dhnu572w7pwSVY2iywXmVwstu_bpRY=cR5K-+iQ@mail.gmail.com>
+From: Ilya Dryomov <ilya.dryomov@inktank.com>
+Subject: Re: Issue #5876 : assertion failure in rbd_img_obj_callback()
+Date: Tue, 25 Mar 2014 14:57:57 +0200
+Message-ID: <CALFYKtDKDVRke9PvF3zX1ujHJ+5gTO+yJRrQLj0saZu+Ca8k-w@mail.gmail.com>
+References: <1395736765.2823.29.camel@localhost>
+	<CALFYKtCUR6Swm5yxBP_7y42QVjj=v+XCtag7FmJ61AvoFjUmRA@mail.gmail.com>
+	<53316D18.7040103@ieee.org>
+	<CALFYKtCU4G7pebWV=icEdvL3Lf0aoUWbtxOYk7S2rV5G_UeynA@mail.gmail.com>
+	<53317BC2.9010700@ieee.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f170.google.com ([209.85.223.170]:44979 "EHLO
-	mail-ie0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751475AbaCYMu6 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Mar 2014 08:50:58 -0400
-Received: by mail-ie0-f170.google.com with SMTP id rd18so337268iec.1
-        for <ceph-devel@vger.kernel.org>; Tue, 25 Mar 2014 05:50:57 -0700 (PDT)
+Received: from mail-qa0-f54.google.com ([209.85.216.54]:64314 "EHLO
+	mail-qa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751624AbaCYM56 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Mar 2014 08:57:58 -0400
+Received: by mail-qa0-f54.google.com with SMTP id w8so380913qac.41
+        for <ceph-devel@vger.kernel.org>; Tue, 25 Mar 2014 05:57:57 -0700 (PDT)
+In-Reply-To: <53317BC2.9010700@ieee.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Alex Elder <elder@ieee.org>
+Cc: Olivier Bonvalet <ceph.list@daevel.fr>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Hello all,
+On Tue, Mar 25, 2014 at 2:51 PM, Alex Elder <elder@ieee.org> wrote:
+> On 03/25/2014 07:34 AM, Ilya Dryomov wrote:
+>>> On 03/25/2014 04:04 AM, Ilya Dryomov wrote:
+>>>> On Tue, Mar 25, 2014 at 10:39 AM, Olivier Bonvalet <ceph.list@daevel.fr> wrote:
+>>>>> Hi,
+>>>>>
+>>>>> what can/should I do to help fix that problem ?
+>>>>>
+>>>>> for now, RBD kernel client hang on :
+>>>>>         Assertion failure in rbd_img_obj_callback() at line 2131:
+>>>>>            rbd_assert(which >= img_request->next_completion);
+>>>
+>>> If you can build your own kernel as Ilya says I'd like to
+>>> see the values of which and img_request->next_completion
+>>> here.
+>>
+>> Looks like which was 1, which means that next_completion had to be 2 or
+>> greater.  I miss solaris crash dumps ...
+>>
+>> On a different note, why are we asserting next_completion outside of
+>> a spinlock which is supposed to protect next_completion?
+>
+> That's a very good point (which could be easily remedied by moving
+> the assertion down a couple lines).  The image object request (#1)
+> in this case will have been marked done at this point; it's possible
+> that request #2 (or later) was concurrently getting handled by the
+> for_each_obj_request_from() loop below in that same function, but
+> may not have updated next_completion yet.
+>
+> So that *could* explain the tripped assertion.  The assertion
+> should be moved in any case, it's a bug.
+>
+> That being said, it doesn't explain the other assertion:
+>         rbd_assert(img_request != NULL);
+> So there's at least one other thing going on.
 
-I have a question about Ceph notification mechanism.
-http://ceph.com/docs/master/architecture/#object-watch-notify
+Yeah, exactly my thoughts.
 
-Scenario:
+Thanks,
 
-(1) 3 clients (client1, client2, client3) have interests on a Ceph
-object (object A). Each client calls rados_watch() to register
-notification callback on the object..
-
-(2) Client1 calls rados_notify()  on object A. On client1 and client2,
-the notification is delivered and processed successfully within a
-timeout period.
-
-(3) However on client3, the notification is delivered, but it doesn't
-complete within a timeout period for a temporary reason, such as
-temporarily busy process for instance.
-
-(4) On client1, rados_notify() returns a status of timeout.
-
-(5) On client3, the temporary reason goes away and the notification is
-processed.
-
-(6) Then, client3 attempts to read from object A by a call to rados_read().
-
-Question:
-
-Will the call to rados_read() attempted at step (6) always succeed,
-always fail or is the behavior unpredictable, which is, it's affected
-by the factors that are not defined in this scenario?
-
-Thank you.
-
-Shinji Matsumoto
-SIOS technology, Inc.
+                Ilya
