@@ -1,104 +1,178 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: ceph-0.77-900.gce9bfb8 Testing Rados EC/Tiering & CephFS ...
-Date: Tue, 25 Mar 2014 11:04:26 -0700
-Message-ID: <CAPYLRzjQkjj0EbcM8-kVTtynW6SqPmOc5epzFc7RHQNqN+OGoQ@mail.gmail.com>
-References: <3472A07E6605974CBC9BC573F1BC02E4AE6EBB91@CERNXCHG41.cern.ch>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: GCC -msse2 portability question
+Date: Tue, 25 Mar 2014 19:45:36 +0100
+Message-ID: <5331CED0.8010103@dachary.org>
+References: <532F3B0E.2050204@dachary.org>	<1395614070.15058.140.camel@pc2>	<5330A328.9060203@dachary.org>	<1395740605.15058.205.camel@pc2>	<533152E9.50709@dachary.org>	<1395746572.15058.219.camel@pc2> <CANP1eJEYea5=tdxPVAe7G8aY30HZGb-MqdHAhCaoigtYEX3s-w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="grW4HodBVooccIuAVNbgfHAgE6QAr0dsd"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f52.google.com ([209.85.216.52]:46924 "EHLO
-	mail-qa0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753434AbaCYSE1 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Mar 2014 14:04:27 -0400
-Received: by mail-qa0-f52.google.com with SMTP id m5so955830qaj.39
-        for <ceph-devel@vger.kernel.org>; Tue, 25 Mar 2014 11:04:26 -0700 (PDT)
-In-Reply-To: <3472A07E6605974CBC9BC573F1BC02E4AE6EBB91@CERNXCHG41.cern.ch>
+Received: from smtp.dmail.dachary.org ([91.121.254.229]:54098 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754037AbaCYSpm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Mar 2014 14:45:42 -0400
+In-Reply-To: <CANP1eJEYea5=tdxPVAe7G8aY30HZGb-MqdHAhCaoigtYEX3s-w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Milosz Tanski <milosz@adfin.com>
+Cc: Kevin Greenan <kmgreen2@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Thu, Mar 20, 2014 at 3:49 AM, Andreas Joachim Peters
-<Andreas.Joachim.Peters@cern.ch> wrote:
-> Hi,
->
-> I did some Firefly ceph-0.77-900.gce9bfb8 testing of EC/Tiering deploying 64 OSD with in-memory filesystems (RapidDisk with ext4) on a single 256 GB box. The raw write performance of this box is ~3 GB/s for all and ~450 MB/s per OSD. It provides 250k IOPS per OSD.
->
-> I compared several algorithms and configurations ...
->
-> Here are the results (there is no significant difference between 64 or 10 OSDS for the performance, tried both but not for 24+8 !) with 4M objects, 32 client threads ....
->
-> 1 rep: 1.1 GB/s
-> 2 rep: 886 MB/s
-> 3 rep: 750 MB/s
-> cauchy 4+2: 880 MB/s
-> liber8tion: 4+2: 875 MB/s
-> cauchy 6+3: 780 MB/s
-> cauchy 16+8: 520 MB/s
-> cauchy 24+8: 450 MB/s
->
-> Then I added a single replica cache pool in front of cauchy 4+2.
->
-> The write performance is now 1.1 GB/s as expected when the cache is not full. If I shrink the cache pool in front forcing continuous eviction during the benchmark it degrades to stable 140 MB/s.
->
-> The single threaded client reduces from 260 MB/s to 165 MB/s.
->
-> What is strange to me is that after a "rados bench" there are objects left in the cache and the back-end tier. They only disappear if I set the "forward" and force the eviction. Is that by design the desired behaviour to not apply the deletion?
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--grW4HodBVooccIuAVNbgfHAgE6QAr0dsd
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-That's not too surprising -- you probably put enough data into the
-cluster that some of the bench objects got evicted into the cold
-storage pool, and then they were deleted by rados bench. The cache
-pool needs to keep the object around with a "deleted" and "dirty" flag
-to make sure it eventually gets cleaned up from the backing cold pool
--- as happened when you set to forward and forced an eviction.
+Thanks, I did not know about this attribute :-)
 
->
-> Some observations:
-> - I think it is important to document the alignment requirements for appends (e.g. if you do rados put it needs aligned appends and the 4M blocks are not aligned for every combination of (k,m) ).
->
-> - another observation is that seems difficult to run 64 OSDs on a box. I have no obvious memory limitation but it requires ~30k threads and it was difficult to create several pools with many PGs without having OSDs core dumping because resources are not available.
->
-> - when OSD get 100% full they core dump most of the time. In my case all OSDs become full at the same time and when this happended there is no way to get the cluster up again without manually deleting objects in the OSD directories and make some space.
->
-> - I get a syntax error in the CEPH CENTOS(RHEL6) startup script:
->
-> awk: { d=$2/1073741824 ; r = sprintf(\"%.2f\", d); print r }
-> awk:                                 ^ backslash not last character on line
->
-> - I have run several times into a situation where the only way out was to delete the whole cluster and set it up from scratch
->
-> - I got this reproducable stack trace with a EC pool and a front end tier:
-> osd/ReplicatedPG.cc: 5554: FAILED assert(cop->data.length() + cop->temp_cursor.data_offset == cop->cursor.data_offset)
->
->  ceph version 0.77-900-gce9bfb8 (ce9bfb879c32690d030db6b2a349b7b6f6e6a468)
->  1: (ReplicatedPG::_write_copy_chunk(boost::shared_ptr<ReplicatedPG::CopyOp>, PGBackend::PGTransaction*)+0x7dd) [0x8a376d]
->  2: (ReplicatedPG::_build_finish_copy_transaction(boost::shared_ptr<ReplicatedPG::CopyOp>, PGBackend::PGTransaction*)+0x114) [0x8a3954]
->  3: (ReplicatedPG::process_copy_chunk(hobject_t, unsigned long, int)+0x507) [0x8f1097]
->  4: (C_Copyfrom::finish(int)+0xb7) [0x93fa67]
->  5: (Context::complete(int)+0x9) [0x65d4b9]
->  6: (Finisher::finisher_thread_entry()+0x1d8) [0xa9a528]
->  7: /lib64/libpthread.so.0() [0x3386a079d1]
->  8: (clone()+0x6d) [0x33866e8b6d]
->  NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
+On 25/03/2014 15:44, Milosz Tanski wrote:
+> Loic,
+>=20
+> If you're already doing a runtime checking of these bits before
+> calling the functions you want to optimize then you can use the gcc
+> Function Specific Opt feature of GCC.
+> http://gcc.gnu.org/onlinedocs/gcc-4.4.0/gcc/Function-Attributes.html#in=
+dex-g_t_0040code_007btarget_007d-function-attribute-2259
+>=20
+> Basically you add a target attribute to a function (specifying use SSE =
+version).
+>=20
+> void my_optimized_function(void* sse_vec, size_t n)
+>     __attribute__ ((__target__ ("sse4.2")));
+>=20
+> It's available from GCC 4.4 and on. That happens to be the GCC version
+> on RHEL6, Debian Squeeze, Ubuntu 10.04 LTS. Hopefully that's good
+> enough and you can omit the optimization on people on platforms older
+> than that.
+>=20
+> Best,
+> - Milosz
+>=20
+>=20
+> On Tue, Mar 25, 2014 at 7:22 AM, Laurent GUERBY <laurent@guerby.net> wr=
+ote:
+>> On Tue, 2014-03-25 at 10:56 +0100, Loic Dachary wrote:
+>>> Hi Laurent,
+>>
+>> Hi Loic,
+>>
+>>> It occurs to me that all we're after is to enable SSE functions such =
+as _mm_set_epi32. We're not trying to have the binary optimized in any im=
+plicit way, it is all explicit. The problem seems to be that -msse4.2 wil=
+l do both
+>>>
+>>> * activate _mm_set_epi32 etc functions
+>>> * optimize the binary to use sse4.2 instructions
+>>>
+>>> Do you know of a compiler flag that would only
+>>>
+>>> * activate _mm_set_epi32 etc functions
+>>
+>> This is a function part of an Intel defined standard to access process=
+or
+>> feature, this standard will have one or more implementation depending =
+on
+>> your compiler/libc/OS. IIRC these functions are closely aligned with
+>> specific processor feature, if the feature isn't there in general it
+>> makes no sense to use them.
+>>
+>> In the particular case of  _mm_set_epi32 it seems
+>> to be a data formating inline function:
+>>
+>> /usr/lib/gcc/x86_64-linux-gnu/4.7.2/include/emmintrin.h
+>> ...
+>> typedef long long __m128i __attribute__ ((__vector_size__ (16),
+>> __may_alias__));
+>> ...
+>> extern __inline __m128i __attribute__((__gnu_inline__,
+>> __always_inline__, __artificial__))
+>> _mm_set_epi32 (int __q3, int __q2, int __q1, int __q0)
+>> {
+>>   return __extension__ (__m128i)(__v4si){ __q0, __q1, __q2, __q3 };
+>> }
+>>
+>> Functions in this include files are using GCC builtins:
+>>
+>> http://gcc.gnu.org/onlinedocs/gcc-4.8.2/gcc/X86-Built-in-Functions.htm=
+l#X86-Built-in-Functions
+>>
+>> To avoid any issue I wouldn't use these functions at all
+>> on a non SSE machine.
+>>
+>> Sincerely,
+>>
+>> Laurent
+>>
+>>> and not
+>>>
+>>> * optimize the binary to use sse4.2 instructions
+>>>
+>>> ? It may be a RTFM question and I apologize for that. Reading http://=
+gcc.gnu.org/onlinedocs/gcc-4.8.2/gcc/i386-and-x86-64-Options.html#i386-an=
+d-x86-64-Options it looks like this is more or less what --mtune=3Dcorei7=
+-avx would do (because gf-complete uses PCLMUL when available). But it fe=
+els weird to specify a specific processor model where what we need is a s=
+et of features.
+>>>
+>>> Thanks for your help :-)
+>>>
+>>> On 25/03/2014 10:43, Laurent GUERBY wrote:
+>>>> On Mon, 2014-03-24 at 22:27 +0100, Loic Dachary wrote:
+>>>>>
+>>>>> On 23/03/2014 23:34, Laurent GUERBY wrote:
+>>>>>> http://gcc.gnu.org/onlinedocs/gcc-4.8.2/gcc/i386-and-x86-64-Option=
+s.html#i386-and-x86-64-Options
+>>>>>>
+>>>>>> So unless you want to run your code a very very old x86 32 bit pro=
+cessor
+>>>>>> "-msse" shouldn't be an issue. "-msse2" is similar.
+>>>>>
+>>>>> This is good to know :) Should I be worried about unintended side e=
+ffects of -msse4.2 -mssse3 -msse4.1 or -mpclmul ? These are the flags tha=
+t gf-complete are using, specifically.
+>>>>
+>>>> Hi,
+>>>>
+>>>> SSE4.2 will be available only in more recent
+>>>> processors as documented on the page above.
+>>>>
+>>>> If your library already is dynamically checking for processor
+>>>> feature I would advise to be conservative in your
+>>>> -m flags, ie using what debian would use for maximum
+>>>> x86 portability.
+>>>>
+>>>> Sincerely,
+>>>>
+>>>> Laurent
+>>>>
+>>>
+>>
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" =
+in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+>=20
+>=20
 
-Hmm, we've had a lot of bug fixes going in lately (and I know some
-were around that copy infrastructure), so I bet that's fixed now.
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
 
->
-> Moreover I did some trivial testing of the meta data part of CephFS and ceph-fuse:
->
-> - I created a directory hierarchy with like 10/1000/100 = 1 Mio directories. After creation the MDS uses 5.5 GB of memory, ceph-fuse 1.8 GB. It takes 33 minutes to do "find /ceph" on this hierarchy. If I restart the MDS and do the same it takes 18 minutes. After this operation the MDS uses ~10 GB of memory (10k per directory for one entry).
 
-Hmm. That's more than I would expect, but not impossibly so if the MDS
-was having trouble keeping the relevant directories in-memory. We have
-not done any optimization around that sort of scenario right now and
-it's a pretty hard workload for a distributed storage system. :/
+--grW4HodBVooccIuAVNbgfHAgE6QAr0dsd
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
->
-> If I do "ls -laRt /ceph" I get "no such file or directory" after some time. When this happened one can pick one of the directory and do a single "ls -la <dir>". The first time one get's again "no such file or directory", the second time it eventually works and shows the contents.
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.20 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
 
-Can you expand on that a bit? What is "after some time"?
+iEYEARECAAYFAlMxztMACgkQ8dLMyEl6F207swCeJb+K6fScdx+U9GjKtEP4/K+G
+XtAAnjsn3F/fNeGyt3vmqxsrZaWTlN11
+=gh2D
+-----END PGP SIGNATURE-----
 
--Greg
-Software Engineer #42 @ http://inktank.com | http://ceph.com
+--grW4HodBVooccIuAVNbgfHAgE6QAr0dsd--
