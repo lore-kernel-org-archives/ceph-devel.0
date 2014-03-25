@@ -1,117 +1,77 @@
-From: Milosz Tanski <milosz@adfin.com>
-Subject: Re: GCC -msse2 portability question
-Date: Tue, 25 Mar 2014 15:46:31 -0400
-Message-ID: <CANP1eJFMRN5=-N0jJm=5XgJ+veKFWBR1P=TpKncfw2_XeHGE=A@mail.gmail.com>
-References: <532F3B0E.2050204@dachary.org>
-	<5331D41B.5040001@dachary.org>
-	<CA+AFVBhpOZEPehsd4qHCBr4aRzv60ZW8LzRwKsduUrZmLV1wxQ@mail.gmail.com>
-	<5331D738.9030409@dachary.org>
+From: Ilya Dryomov <ilya.dryomov@inktank.com>
+Subject: Re: Issue #5876 : assertion failure in rbd_img_obj_callback()
+Date: Tue, 25 Mar 2014 22:18:37 +0200
+Message-ID: <CALFYKtD5e6J4dtcCa53FkxM1UjYbLf6mq+1sO3Lq0uQWoEo1mA@mail.gmail.com>
+References: <1395736765.2823.29.camel@localhost>
+	<CALFYKtCUR6Swm5yxBP_7y42QVjj=v+XCtag7FmJ61AvoFjUmRA@mail.gmail.com>
+	<53316D18.7040103@ieee.org>
+	<CALFYKtCU4G7pebWV=icEdvL3Lf0aoUWbtxOYk7S2rV5G_UeynA@mail.gmail.com>
+	<53317BC2.9010700@ieee.org>
+	<CALFYKtDKDVRke9PvF3zX1ujHJ+5gTO+yJRrQLj0saZu+Ca8k-w@mail.gmail.com>
+	<1395753516.2823.37.camel@localhost>
+	<533184AF.9050101@ieee.org>
+	<5331853D.40408@ieee.org>
+	<1395767705.9967.5.camel@localhost>
+	<5331C05D.1060008@ieee.org>
+	<1395773582.2076.10.camel@localhost>
+	<5331D2E8.6060002@ieee.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f171.google.com ([209.85.212.171]:50432 "EHLO
-	mail-wi0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751624AbaCYTqc convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Mar 2014 15:46:32 -0400
-Received: by mail-wi0-f171.google.com with SMTP id hr14so2361972wib.10
-        for <ceph-devel@vger.kernel.org>; Tue, 25 Mar 2014 12:46:31 -0700 (PDT)
-In-Reply-To: <5331D738.9030409@dachary.org>
+Received: from mail-qc0-f175.google.com ([209.85.216.175]:53449 "EHLO
+	mail-qc0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753545AbaCYUSi convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Mar 2014 16:18:38 -0400
+Received: by mail-qc0-f175.google.com with SMTP id e16so1406821qcx.34
+        for <ceph-devel@vger.kernel.org>; Tue, 25 Mar 2014 13:18:38 -0700 (PDT)
+In-Reply-To: <5331D2E8.6060002@ieee.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Kevin Greenan <kmgreen2@gmail.com>, Laurent Guerby <laurent@guerby.net>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Alex Elder <elder@ieee.org>
+Cc: Olivier Bonvalet <ceph.list@daevel.fr>, Ceph Development <ceph-devel@vger.kernel.org>
 
-It gets a bit more tricky with x86_64 since the arch dictates that the
-base line has SSE2 (but not necessarily later).
-
-I would do is both support SSE2 (maybe in core without dlopen) and
-then support all the others in a SSE4 version (including SSE4_PCMUL).
-I'm glossing over x86-32 here, but you could something similar.
-
-Best
-- Milosz
-
-On Tue, Mar 25, 2014 at 3:21 PM, Loic Dachary <loic@dachary.org> wrote:
+On Tue, Mar 25, 2014 at 9:03 PM, Alex Elder <elder@ieee.org> wrote:
+> On 03/25/2014 01:53 PM, Olivier Bonvalet wrote:
+>> Le mardi 25 mars 2014 =E0 12:43 -0500, Alex Elder a =E9crit :
+>>> Please try applying this, on top of the previous patch.
+>>> If you can then reproduce the problem we'll have a bunch
+>>> of new information about the particular request that's
+>>> leading to the failure.  That might tell us what more we
+>>> can do to find the root cause.  Thank you.
+>>>
+>>>                                      -Alex
+>>>
+>>> PS  I hope my mailer doesn't botch the long lines.  It might.
+>>>
+>>
+>> Here the execution will continue, no more kernel panic after this
+>> debugging display. Is it wanted ?
 >
 >
-> On 25/03/2014 20:13, Kevin Greenan wrote:
->> +1
->>
->> Yeah, that sounds better...  Let's keep this as simple as possible.
->
-> I'll rework the https://bitbucket.org/jimplank/gf-complete/pull-reque=
-st/4/defer-the-decision-to-use-a-given-sse accordingly.
->
-> Would it be sensible to compile with SSE optimizations only if all ar=
-e available ( SSE2, SSSE3, SSE4, SSE4_PCMUL ) and not attempt to distin=
-guish betweel SSSE3 being available but not SSE4_PCMUL etc. From what I=
- understand at this point that kind of distinction is going to be diffi=
-cult to manage anyway.
->
-> Is it too simplistic ?
->
->>
->> -kevin
->>
->>
->> On Tue, Mar 25, 2014 at 12:08 PM, Loic Dachary <loic@dachary.org <ma=
-ilto:loic@dachary.org>> wrote:
->>
->>     Andreas Peters suggested another approach, which makes sense to =
-me : have one plugin with SSE optimizations enabled, another without th=
-em and chose at runtime between the two.
->>
->>     What do you think ?
->>
->>     On 23/03/2014 20:50, Loic Dachary wrote:
->>     > Hi Laurent,
->>     >
->>     > In the context of optimizing erasure code functions implemente=
-d by Kevin Greenan (cc'ed) and James Plank at https://bitbucket.org/jim=
-plank/gf-complete/ we ran accross a question you may have the answer to=
-: can gcc -msse2 (or -msse* for that matter ) have a negative impact on=
- the portability of the compiled binary code ?
->>     >
->>     > In other words, if a code is compiled without -msse* and runs =
-fine on all intel processors it targets, could it be that adding -msse*=
- to the compilation of the same source code generate a binary that woul=
-d fail on some processors ? This is assuming no sse specific functions =
-were used in the source code.
->>     >
->>     > In gf-complete, all sse specific instructions are carefully pr=
-otected to not be run on a CPU that does not support them. The runtime =
-detection is done by checking CPU id bits ( see https://bitbucket.org/j=
-implank/gf-complete/pull-request/7/probe-intel-sse-features-at-runtime/=
-diff#Lsrc/gf_intel.cT28 )
->>     >
->>     > The corresponding thread is at:
->>     >
->>     > https://bitbucket.org/jimplank/gf-complete/pull-request/4/defe=
-r-the-decision-to-use-a-given-sse/diff#comment-1479296
->>     >
->>     > Cheers
->>     >
->>
->>     --
->>     Lo=EFc Dachary, Artisan Logiciel Libre
->>
->>
->
-> --
-> Lo=EFc Dachary, Artisan Logiciel Libre
->
+> I guess it should panic.  I'm glad you mentioned this.
 
+Just in case, if you haven't done it already: stick rbd_assert(0);
+after the last printk in that if statement, so it looks like this:
 
+if (which !=3D img_request->next_completion) {
+        printk("%s: bad image object request information:\n", __func__)=
+;
+        printk("obj_request %p\n", obj_request);
+        printk("    ->object_name <%s>\n", obj_request->object_name);
+        ...
 
---=20
-Milosz Tanski
-CTO
-10 East 53rd Street, 37th floor
-New York, NY 10022
+        printk("img_request %p\n", img_request);
+        printk("    ->snap 0x%016llx\n", img_request->snap_id);
+        ...
+        printk("    ->result %d\n", img_request->result);
 
-p: 646-253-9055
-e: milosz@adfin.com
+        rbd_assert(0);
+}
+
+Thanks,
+
+                Ilya
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
