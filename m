@@ -1,53 +1,88 @@
-From: Alex Elder <elder@ieee.org>
-Subject: Re: [PATCH] rbd: assert next_completion under completion_lock
-Date: Tue, 25 Mar 2014 10:25:12 -0500
-Message-ID: <53319FD8.9020200@ieee.org>
-References: <1395755268-11908-1-git-send-email-ilya.dryomov@inktank.com>
+From: Benedikt Fraunhofer <fraunhofer@traced.net>
+Subject: rgw/civetweb.cc fixes, possibly superflous warning
+Date: Tue, 25 Mar 2014 16:42:39 +0100
+Message-ID: <CAD_6HTHptgRYruuKC3zxaDoBzCMES2xo_MBGdC333P0y0e9RNA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f180.google.com ([209.85.220.180]:50408 "EHLO
-	mail-vc0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752878AbaCYPYy (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Mar 2014 11:24:54 -0400
-Received: by mail-vc0-f180.google.com with SMTP id lf12so730785vcb.25
-        for <ceph-devel@vger.kernel.org>; Tue, 25 Mar 2014 08:24:53 -0700 (PDT)
-In-Reply-To: <1395755268-11908-1-git-send-email-ilya.dryomov@inktank.com>
+Received: from mail-qc0-f176.google.com ([209.85.216.176]:32808 "EHLO
+	mail-qc0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753340AbaCYPnJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Mar 2014 11:43:09 -0400
+Received: by mail-qc0-f176.google.com with SMTP id m20so792374qcx.7
+        for <ceph-devel@vger.kernel.org>; Tue, 25 Mar 2014 08:43:09 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <ilya.dryomov@inktank.com>, ceph-devel@vger.kernel.org
-Cc: Olivier Bonvalet <ceph.list@daevel.fr>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 03/25/2014 08:47 AM, Ilya Dryomov wrote:
-> completion_lock is there specifically to protect next_completion.
-> 
-> Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
+Hello *,
 
-Reviewed-by: Alex Elder <elder@linaro.org>
+i had a hard time trying to get the civetweb part of radosgw running.
+Symptoms are:
+curl/wget/s3cmd work fine, all windows clients (CloudBerry and
+S3-Browser) refuse to work.
+They work fine with the apache<>fastcgi<>radosgw chain.
 
-> ---
->  drivers/block/rbd.c |    4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index fbf41e058bfd..f044fab3da99 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -2123,12 +2123,12 @@ static void rbd_img_obj_callback(struct rbd_obj_request *obj_request)
->  	rbd_assert(img_request->obj_request_count > 0);
->  	rbd_assert(which != BAD_WHICH);
->  	rbd_assert(which < img_request->obj_request_count);
-> -	rbd_assert(which >= img_request->next_completion);
->  
->  	spin_lock_irq(&img_request->completion_lock);
-> -	if (which != img_request->next_completion)
-> +	if (which > img_request->next_completion)
->  		goto out;
->  
-> +	rbd_assert(which == img_request->next_completion);
->  	for_each_obj_request_from(img_request, obj_request) {
->  		rbd_assert(more);
->  		rbd_assert(which < img_request->obj_request_count);
-> 
+Looks like they wait for the "\r" in "\r\n" in the response line which
+is missing for civetweb:
 
+------------------------
+diff --git a/src/rgw/rgw_civetweb.cc b/src/rgw/rgw_civetweb.cc
+index a31177f..3396eac 100644
+--- a/src/rgw/rgw_civetweb.cc
++++ b/src/rgw/rgw_civetweb.cc
+@@ -128,7 +128,7 @@ int RGWMongoose::send_status(const char *status,
+const char *status_name)
+   if (!status_name)
+     status_name = "";
+
+-  snprintf(buf, sizeof(buf), "HTTP/1.1 %s %s\n", status, status_name);
++  snprintf(buf, sizeof(buf), "HTTP/1.1 %s %s\r\n", status, status_name);
+
+   bufferlist bl;
+   bl.append(buf);
+@@ -168,5 +168,5 @@ int RGWMongoose::send_content_length(uint64_t len)
+   has_content_length = true;
+   char buf[21];
+   snprintf(buf, sizeof(buf), "%"PRIu64, len);
+-  return print("Content-Length: %s\n", buf);
++  return print("Content-Length: %s\r\n", buf);
+ }
+
+------------------------
+
+I couldn't test the patch but let instead haproxy insert the missing
+\r and now it
+works for those windows clients.
+
+Another thing i noticed is that there's this line:
+----------------------------
+rgw_main.cc
+index 9614b07..115697c 100644
+@@ -1124,7 +1124,7 @@ int main(int argc, const char **argv)
+       string err;
+
+       int port;
+      config->get_val("port", 80, &port);
+
+------------------------
+
+here it warns about my config because "port" is a string. Later, this
+is again fetched
+from the config but this time as a string and fed to
+
+------------------------------------
+class RGWMongooseFrontend : public RGWFrontend {
+[...]
+    conf->get_val("port", "80", &port_str);
+    const char *options[] = {"listening_ports", port_str.c_str(),
+"enable_keep_alive", "yes", "num_threads", thread_pool_buf, NULL};
+------------------------------------
+I (we?) want this to be a string to be able to bind it to specific ips?
+(i.e. "rgw frontends = civetweb port=127.0.0.1:2081")
+
+I dunno if you need the port as an integer in the env object.
+
+Thx & Cheers
+
+ Benedikt
