@@ -1,162 +1,135 @@
-From: Olivier Bonvalet <ceph.list@daevel.fr>
+From: Alex Elder <elder@ieee.org>
 Subject: Re: Issue #5876 : assertion failure in rbd_img_obj_callback()
-Date: Wed, 26 Mar 2014 05:00:47 +0100
-Message-ID: <1395806447.2076.70.camel@localhost>
-References: <1395736765.2823.29.camel@localhost>
-			 <1395773582.2076.10.camel@localhost>		 <5331D2E8.6060002@ieee.org>
-				 <CALFYKtD5e6J4dtcCa53FkxM1UjYbLf6mq+1sO3Lq0uQWoEo1mA@mail.gmail.com>
-				 <1395778894.2076.12.camel@localhost>
-	 <1395780835.2076.15.camel@localhost>
-				 <1395781847.2076.21.camel@localhost>
-				 <CALFYKtBuraQUWw7y6a=uiZDv1tgyz+sBQs7LHMR35nDAPYDSTQ@mail.gmail.com>
-				 <1395782577.2076.23.camel@localhost>
-				 <CALFYKtAhTmAJMxSNH5Zo2MVoj3wWeJxMybKUh3EMgFYuDwxZ7g@mail.gmail.com>
-				 <1395783675.2076.26.camel@localhost>
-				 <CALFYKtBFMbo91ZJngJDru8V3bNn7GXhr9_vgQAwiRk42wP1g1A@mail.gmail.com>
-				 <1395784476.2076.28.camel@localhost>
-	 <1395785839.2076.30.camel@localhost>			 <5332075F.8080105@ieee.org>
-	 <1395788695.2076.35.camel@localhost>			 <53321896.1080606@ieee.org>
-	 <1395797596.2076.43.camel@localhost>		 <1395798658.2076.45.camel@localhost>
-	 <5332339A.8030000@ieee.org>	 <1395801625.2076.52.camel@localhost>
-	 <53323EA5.6010506@ieee.org> <1395801940.2076.54.camel@localhost>
-	 <53324F79.1080108@ieee.org>
+Date: Wed, 26 Mar 2014 00:00:57 -0500
+Message-ID: <53325F09.7000306@ieee.org>
+References: <1395736765.2823.29.camel@localhost>			 <CALFYKtD5e6J4dtcCa53FkxM1UjYbLf6mq+1sO3Lq0uQWoEo1mA@mail.gmail.com>				 <1395778894.2076.12.camel@localhost>	 <1395780835.2076.15.camel@localhost>				 <1395781847.2076.21.camel@localhost>				 <CALFYKtBuraQUWw7y6a=uiZDv1tgyz+sBQs7LHMR35nDAPYDSTQ@mail.gmail.com>				 <1395782577.2076.23.camel@localhost>				 <CALFYKtAhTmAJMxSNH5Zo2MVoj3wWeJxMybKUh3EMgFYuDwxZ7g@mail.gmail.com>				 <1395783675.2076.26.camel@localhost>				 <CALFYKtBFMbo91ZJngJDru8V3bNn7GXhr9_vgQAwiRk42wP1g1A@mail.gmail.com>				 <1395784476.2076.28.camel@localhost>	 <1395785839.2076.30.camel@localhost>			 <5332075F.8080105@ieee.org>	 <1395788695.2076.35.camel@localhost>			 <53321896.1080606@ieee.org>	 <1395797596.2076.43.camel@localhost>		 <1395798658.2076.45.camel@localhost>	 <
+ 5332339A.8030000@ieee.org>	 <1395801625.2076.52.camel@localhost>	 <53323EA5.6010506@ieee.org> <1395801940.2076.54.camel@localhost>	 <53324F79.1080108@ieee.org> <1395806447.2076.70.camel@localhost>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from licorne.daevel.fr ([178.32.94.222]:48427 "EHLO
-	licorne.daevel.fr" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750792AbaCZEAt (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 26 Mar 2014 00:00:49 -0400
-In-Reply-To: <53324F79.1080108@ieee.org>
+Received: from mail-qa0-f41.google.com ([209.85.216.41]:47401 "EHLO
+	mail-qa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751013AbaCZFAi (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 26 Mar 2014 01:00:38 -0400
+Received: by mail-qa0-f41.google.com with SMTP id j5so1730765qaq.28
+        for <ceph-devel@vger.kernel.org>; Tue, 25 Mar 2014 22:00:37 -0700 (PDT)
+In-Reply-To: <1395806447.2076.70.camel@localhost>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@ieee.org>
+To: Olivier Bonvalet <ceph.list@daevel.fr>
 Cc: Ilya Dryomov <ilya.dryomov@inktank.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Le mardi 25 mars 2014 =C3=A0 22:54 -0500, Alex Elder a =C3=A9crit :
-> On 03/25/2014 09:45 PM, Olivier Bonvalet wrote:
-> > Le mardi 25 mars 2014 =C3=A0 21:42 -0500, Alex Elder a =C3=A9crit :
-> >> PS  I thought you said you were going to stop for the night!
-> >=20
-> > Yes, I would love ! But my phone doesn't stop ring about ceph crash=
- :D
-> >=20
->=20
-> OK, one more thing to try and I'm going to bed.
->=20
-> I'm hoping that an image request spanning multiple objects
-> is an unusual case, enough so that the following won't
-> overwhelm with output.  I'd avoid putting it on a production
-> system (that's the case for all this testing, really) if
-> possible.
->=20
-> Basically I'm trying to catch an image object request being
-> either submitted more than once, or completing more than
-> once.  So if an image request has more than one object
-> request I produce some informative output.
->=20
-> This patch fixes two warnings in the previous debug patch,
-> and adds to it (so use it instead of the last one).
->=20
-> If you get a chance to try this I'll want to see the output.
-> But first, I shall sleep.
->=20
-> Thank you.
->=20
-> 					-Alex
->=20
-> Index: b/drivers/block/rbd.c
-> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -1484,6 +1484,10 @@ static void rbd_img_request_complete(str
->  			xferred +=3D obj_request->xferred;
->  		img_request->xferred =3D xferred;
->  	}
-> +	if (img_request->obj_request_count > 1)
-> +		printk("%s: img_request %p count %u result %d xferred %llu\n",
-> +			__func__, img_request, img_request->obj_request_count,
-> +			img_request->result, img_request->xferred);
->=20
->  	if (img_request->callback)
->  		img_request->callback(img_request);
-> @@ -2129,9 +2133,43 @@ static void rbd_img_obj_callback(struct
->  	rbd_assert(which !=3D BAD_WHICH);
->  	rbd_assert(which < img_request->obj_request_count);
->=20
-> +	if (img_request->obj_request_count > 1)
-> +		printk("%s: obj_request %p (%llu/%llu)\n", __func__,
-> +			obj_request, obj_request->offset, obj_request->length);
->  	spin_lock_irq(&img_request->completion_lock);
->  	if (which > img_request->next_completion)
->  		goto out;
-> +	if (which !=3D img_request->next_completion) {
-> +		printk("%s: bad image object request information:\n", __func__);
-> +		printk("obj_request %p\n", obj_request);
-> +		printk("    ->object_name <%s>\n", obj_request->object_name);
-> +		printk("    ->offset %llu\n", obj_request->offset);
-> +		printk("    ->length %llu\n", obj_request->length);
-> +		printk("    ->type 0x%x\n", (u32)obj_request->type);
-> +		printk("    ->flags 0x%lx\n", obj_request->flags);
-> +		printk("    ->img_request %p\n", obj_request->img_request);
-> +		printk("    ->which %u\n", obj_request->which);
-> +		printk("    ->xferred %llu\n", obj_request->xferred);
-> +		printk("    ->result %d\n", obj_request->result);
-> +		printk("    ->kref %d\n",
-> +			atomic_read(&obj_request->kref.refcount));
-> +
-> +		printk("img_request %p\n", img_request);
-> +		printk("    ->snap 0x%016llx\n", img_request->snap_id);
-> +		printk("    ->offset %llu\n", img_request->offset);
-> +		printk("    ->length %llu\n", img_request->length);
-> +		printk("    ->flags 0x%lx\n", img_request->flags);
-> +		printk("    ->obj_request_count %u\n",
-> +			img_request->obj_request_count);
-> +		printk("    ->next_completion %u\n",
-> +			img_request->next_completion);
-> +		printk("    ->xferred %llu\n", img_request->xferred);
-> +		printk("    ->result %d\n", img_request->result);
-> +		printk("    ->obj_requests head %p\n",
-> +			img_request->obj_requests.next);
-> +		printk("    ->kref %d\n",
-> +			atomic_read(&img_request->kref.refcount));
-> +	}
->  	rbd_assert(which =3D=3D img_request->next_completion);
->=20
->  	for_each_obj_request_from(img_request, obj_request) {
-> @@ -2697,11 +2735,21 @@ static int rbd_img_request_submit(struct
->  {
->  	struct rbd_obj_request *obj_request;
->  	struct rbd_obj_request *next_obj_request;
-> +	bool verbose =3D false;
->=20
->  	dout("%s: img %p\n", __func__, img_request);
-> +	if (img_request->obj_request_count > 1) {
-> +		printk("%s: img_request %p count %u (%llu/%llu)\n", __func__,
-> +			img_request, img_request->offset, img_request->length);
-> +	    	verbose =3D true;
-> +	}
->  	for_each_obj_request_safe(img_request, obj_request, next_obj_reques=
-t) {
->  		int ret;
->=20
-> +		if (verbose)
-> +			printk("%s: obj_request %p (%llu/%llu)\n", __func__,
-> +				obj_request, obj_request->offset,
-> +				obj_request->length);
->  		ret =3D rbd_img_obj_request_submit(obj_request);
->  		if (ret)
->  			return ret;
->=20
->=20
+I think I've got it.  I'll explain, and we'll have to look at
+the explanation more closely in the morning.
 
-Thanks ! I will check that tomorrow.
+Bottom line is that I think the assertion is bogus.  Like
+the other assertion that was not done under protection of
+a lock, this one is being done in a way that's not safe.
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+First, here's a patch that I think might avoid the problem:
+
+----------------------------------
+Index: b/drivers/block/rbd.c
+===================================================================
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -2130,9 +2130,8 @@ static void rbd_img_obj_callback(struct
+ 	rbd_assert(which < img_request->obj_request_count);
+
+ 	spin_lock_irq(&img_request->completion_lock);
+-	if (which > img_request->next_completion)
++	if (which != img_request->next_completion)
+ 		goto out;
+-	rbd_assert(which == img_request->next_completion);
+
+ 	for_each_obj_request_from(img_request, obj_request) {
+ 		rbd_assert(more);
+----------------------------------
+
+
+
+
+Here's what I think is happening.  I'll annotate the function,
+below.
+
+First, we enter this function when an object request has
+been marked "done."  In the case we're looking at, we
+have an image request with two (or more) object requests.
+
+static void rbd_img_obj_callback(struct rbd_obj_request *obj_request)
+{
+	struct rbd_img_request *img_request;
+	u32 which = obj_request->which;
+	bool more = true;
+
+	rbd_assert(obj_request_img_data_test(obj_request));
+	img_request = obj_request->img_request;
+
+	dout("%s: img %p obj %p\n", __func__, img_request, obj_request);
+	rbd_assert(img_request != NULL);
+	rbd_assert(img_request->obj_request_count > 0);
+	rbd_assert(which != BAD_WHICH);
+	rbd_assert(which < img_request->obj_request_count);
+
+Up to here, all is fine.  Well, *maybe*...  Anyway, I'll
+work through that in the morning.  In any case, we are
+examining fairly static fields in the object request.
+
+	spin_lock_irq(&img_request->completion_lock);
+	if (which > img_request->next_completion)
+		goto out;
+
+At this point we decide whether the object request now
+completing is the next one.  If it's not, we're done;
+whenever an earlier request (the first one) completes
+it will ensure this one will get completed as well,
+below.
+
+But that's a problem.  In the loop below, the only condition
+we're testing in order to account the completion of the
+current *and subsequent* requests is whether each request
+is marked "done."
+
+What that means is that while the second request is waiting
+to get the spinlock, the first one might be concurrently
+going through the loop below.  It finds the second one "done"
+and records that fact.  When it finishes the loop, it
+updates the next_completion value and releases the lock.
+
+The second request then enters the protected area, and
+finds that its "which" value is *not* greater than the
+next completion value.  It's in fact *less* than the
+next_completion value, because the completion of this
+second request has already been processed.
+
+The problem got worse when we moved the spinlock (i.e.,
+added protection around checking the next_completion
+field) because now the second thread is actually waiting
+before checking, so it's pretty much guaranteed it will
+trigger the failure.
+
+OK, back to bed.
+
+					-Alex
+
+	rbd_assert(which == img_request->next_completion);
+
+	for_each_obj_request_from(img_request, obj_request) {
+		rbd_assert(more);
+		rbd_assert(which < img_request->obj_request_count);
+
+		if (!obj_request_done_test(obj_request))
+			break;
+		more = rbd_img_obj_end_request(obj_request);
+		which++;
+	}
+
+	rbd_assert(more ^ (which == img_request->obj_request_count));
+	img_request->next_completion = which;
+out:
+	spin_unlock_irq(&img_request->completion_lock);
+
+	if (!more)
+		rbd_img_request_complete(img_request);
+}
