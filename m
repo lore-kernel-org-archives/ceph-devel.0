@@ -1,73 +1,40 @@
-From: Alex Elder <elder@linaro.org>
-Subject: [PATCH] rbd: drop an unsafe assertion
-Date: Wed, 26 Mar 2014 15:52:02 -0500
-Message-ID: <1395867122-9340-1-git-send-email-elder@linaro.org>
+From: Alex Elder <elder@ieee.org>
+Subject: Re: Issue #5876 : assertion failure in rbd_img_obj_callback()
+Date: Wed, 26 Mar 2014 15:58:27 -0500
+Message-ID: <53333F73.709@ieee.org>
+References: <1395736765.2823.29.camel@localhost>	<1395780835.2076.15.camel@localhost>	<1395781847.2076.21.camel@localhost>	<CALFYKtBuraQUWw7y6a=uiZDv1tgyz+sBQs7LHMR35nDAPYDSTQ@mail.gmail.com>	<1395782577.2076.23.camel@localhost>	<CALFYKtAhTmAJMxSNH5Zo2MVoj3wWeJxMybKUh3EMgFYuDwxZ7g@mail.gmail.com>	<1395783675.2076.26.camel@localhost>	<CALFYKtBFMbo91ZJngJDru8V3bNn7GXhr9_vgQAwiRk42wP1g1A@mail.gmail.com>	<1395784476.2076.28.camel@localhost>	<1395785839.2076.30.camel@localhost>	<5332075F.8080105@ieee.org>	<1395788695.2076.35.camel@localhost>	<53321896.1080606@ieee.org>	<1395797596.2076.43.camel@localhost>	<1395798658.2076.45.camel@localhost>	<5332339A.8030000@ieee.org>	<1395801625.2076.52.camel@localhost>	<53323EA5.6010506@ieee.org>	<1395801940.2076.54.camel@localhost>	<53324F79.1080108@ieee.or
+ g>	<1395806447.2076.70.camel@localhost>	<53325F09.7000306@ieee.org>	<5332B643.5040403@ieee.org> <CALFYKtCAwE0kX5Z7z-tUp6aDGY8jF3Mj2CVW3SM5YBCB40ebLQ@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f169.google.com ([209.85.223.169]:42821 "EHLO
-	mail-ie0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755274AbaCZUvp (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 26 Mar 2014 16:51:45 -0400
-Received: by mail-ie0-f169.google.com with SMTP id to1so2309744ieb.28
-        for <ceph-devel@vger.kernel.org>; Wed, 26 Mar 2014 13:51:45 -0700 (PDT)
+Received: from mail-ie0-f180.google.com ([209.85.223.180]:55879 "EHLO
+	mail-ie0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754582AbaCZU6H (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 26 Mar 2014 16:58:07 -0400
+Received: by mail-ie0-f180.google.com with SMTP id as1so2217935iec.25
+        for <ceph-devel@vger.kernel.org>; Wed, 26 Mar 2014 13:58:06 -0700 (PDT)
+In-Reply-To: <CALFYKtCAwE0kX5Z7z-tUp6aDGY8jF3Mj2CVW3SM5YBCB40ebLQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: ilya.dryomov@inktank.com, ob@daevel.fr
+To: Ilya Dryomov <ilya.dryomov@inktank.com>
+Cc: Olivier Bonvalet <ceph.list@daevel.fr>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Olivier Bonvalet reported having repeated crashes due to a failed
-assertion he was hitting in rbd_img_obj_callback():
+Olivier reports that with the simple patch I provided
+(which changed a "<" to a "!=" and removed an assertion)
+he is running successfully.
 
-    Assertion failure in rbd_img_obj_callback() at line 2165:
-	rbd_assert(which == img_request->next_completion);
+To me this is fantastic news, and you can see I posted
+a patch with the fix.
 
-With a lot of help from Olivier with reproducing the problem
-we were able to determine the object and image requests had
-already been completed (and often freed) at the point the
-assertion failed.
+There remains a race condition though, one which I described
+in a separate message earlier today.  I don't think it will
+prove to be a problem in practice, but I agreed to work on
+a fix to ensure the race condition is eliminated.  It will
+require some work with reference counting image and object
+requests.
 
-There was a great deal of discussion on the ceph-devel mailing list
-about this.  The problem only arose when there were two (or more)
-object requests in an image request, and the problem was always
-seen when the second request was being completed.
+The fix won't be coming today.  But I aim to provide it
+in a matter of several days.
 
-The problem is due to a race in the window between setting the
-"done" flag on an object request and checking the image request's
-next completion value.  When the first object request completes, it
-checks to see if its successor request is marked "done", and if
-so, that request is also completed.  In the process, the image
-request's next_completion value is updated to reflect that both
-the first and second requests are completed.  By the time the
-second request is able to check the next_completion value, it
-has been set to a value *greater* than its own "which" value,
-which caused an assertion to fail.
-
-Fix this problem by skipping over any completion processing
-unless the completing object request is the next one expected.
-Test only for inequality (not >=), and eliminate the bad
-assertion.
-
-Tested-by: Olivier Bonvalet <ob@daevel.fr>
-Signed-off-by: Alex Elder <elder@linaro.org>
----
- drivers/block/rbd.c |    3 +--
- 1 file changed, 1 insertion(+), 2 deletions(-)
-
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index f044fab..4c95b50 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -2125,10 +2125,9 @@ static void rbd_img_obj_callback(struct rbd_obj_request *obj_request)
- 	rbd_assert(which < img_request->obj_request_count);
- 
- 	spin_lock_irq(&img_request->completion_lock);
--	if (which > img_request->next_completion)
-+	if (which != img_request->next_completion)
- 		goto out;
- 
--	rbd_assert(which == img_request->next_completion);
- 	for_each_obj_request_from(img_request, obj_request) {
- 		rbd_assert(more);
- 		rbd_assert(which < img_request->obj_request_count);
--- 
-1.7.9.5
-
+					-Alex
