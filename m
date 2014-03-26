@@ -1,115 +1,44 @@
-From: "Yan, Zheng" <ukernel@gmail.com>
-Subject: Re: ceph-0.77-900.gce9bfb8 Testing Rados EC/Tiering & CephFS ...
-Date: Wed, 26 Mar 2014 10:41:39 +0800
-Message-ID: <CAAM7YAm9sQb+pWfOLpMG_4sh_jkbi-wg-dXkLuO_=K5rd2s1Rw@mail.gmail.com>
-References: <3472A07E6605974CBC9BC573F1BC02E4AE6EBB91@CERNXCHG41.cern.ch>
-	<CAPYLRzjQkjj0EbcM8-kVTtynW6SqPmOc5epzFc7RHQNqN+OGoQ@mail.gmail.com>
+From: Alex Elder <elder@ieee.org>
+Subject: Re: Issue #5876 : assertion failure in rbd_img_obj_callback()
+Date: Tue, 25 Mar 2014 21:42:45 -0500
+Message-ID: <53323EA5.6010506@ieee.org>
+References: <1395736765.2823.29.camel@localhost>	 <1395767705.9967.5.camel@localhost>		 <5331C05D.1060008@ieee.org> <1395773582.2076.10.camel@localhost>		 <5331D2E8.6060002@ieee.org>		 <CALFYKtD5e6J4dtcCa53FkxM1UjYbLf6mq+1sO3Lq0uQWoEo1mA@mail.gmail.com>		 <1395778894.2076.12.camel@localhost> <1395780835.2076.15.camel@localhost>		 <1395781847.2076.21.camel@localhost>		 <CALFYKtBuraQUWw7y6a=uiZDv1tgyz+sBQs7LHMR35nDAPYDSTQ@mail.gmail.com>		 <1395782577.2076.23.camel@localhost>		 <CALFYKtAhTmAJMxSNH5Zo2MVoj3wWeJxMybKUh3EMgFYuDwxZ7g@mail.gmail.com>		 <1395783675.2076.26.camel@localhost>		 <CALFYKtBFMbo91ZJngJDru8V3bNn7GXhr9_vgQAwiRk42wP1g1A@mail.gmail.com>		 <1395784476.2076.28.camel@localhost> <1395785839.2076.30.camel@localhost>		 <5332075F.8080105@ieee.org> <1395788695.2076.35.camel@localhos
+ t>		 <53321896.1080606@ieee.org> <1395797596.2076.43.camel@localhost>	 <1395798658.2076.45.camel@localhost> <5332339A.8030000@ieee.org> <1395801625.2076.52.camel@localhost>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f170.google.com ([209.85.217.170]:45132 "EHLO
-	mail-lb0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755450AbaCZCll convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Mar 2014 22:41:41 -0400
-Received: by mail-lb0-f170.google.com with SMTP id s7so1041392lbd.29
-        for <ceph-devel@vger.kernel.org>; Tue, 25 Mar 2014 19:41:40 -0700 (PDT)
-In-Reply-To: <CAPYLRzjQkjj0EbcM8-kVTtynW6SqPmOc5epzFc7RHQNqN+OGoQ@mail.gmail.com>
+Received: from mail-qa0-f44.google.com ([209.85.216.44]:42677 "EHLO
+	mail-qa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755209AbaCZCm0 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Mar 2014 22:42:26 -0400
+Received: by mail-qa0-f44.google.com with SMTP id f11so1594252qae.17
+        for <ceph-devel@vger.kernel.org>; Tue, 25 Mar 2014 19:42:25 -0700 (PDT)
+In-Reply-To: <1395801625.2076.52.camel@localhost>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Olivier Bonvalet <ceph.list@daevel.fr>
+Cc: Ilya Dryomov <ilya.dryomov@inktank.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Wed, Mar 26, 2014 at 2:04 AM, Gregory Farnum <greg@inktank.com> wrote:
-> On Thu, Mar 20, 2014 at 3:49 AM, Andreas Joachim Peters
-> <Andreas.Joachim.Peters@cern.ch> wrote:
->> Hi,
->>
->> I did some Firefly ceph-0.77-900.gce9bfb8 testing of EC/Tiering deploying 64 OSD with in-memory filesystems (RapidDisk with ext4) on a single 256 GB box. The raw write performance of this box is ~3 GB/s for all and ~450 MB/s per OSD. It provides 250k IOPS per OSD.
->>
->> I compared several algorithms and configurations ...
->>
->> Here are the results (there is no significant difference between 64 or 10 OSDS for the performance, tried both but not for 24+8 !) with 4M objects, 32 client threads ....
->>
->> 1 rep: 1.1 GB/s
->> 2 rep: 886 MB/s
->> 3 rep: 750 MB/s
->> cauchy 4+2: 880 MB/s
->> liber8tion: 4+2: 875 MB/s
->> cauchy 6+3: 780 MB/s
->> cauchy 16+8: 520 MB/s
->> cauchy 24+8: 450 MB/s
->>
->> Then I added a single replica cache pool in front of cauchy 4+2.
->>
->> The write performance is now 1.1 GB/s as expected when the cache is not full. If I shrink the cache pool in front forcing continuous eviction during the benchmark it degrades to stable 140 MB/s.
->>
->> The single threaded client reduces from 260 MB/s to 165 MB/s.
->>
->> What is strange to me is that after a "rados bench" there are objects left in the cache and the back-end tier. They only disappear if I set the "forward" and force the eviction. Is that by design the desired behaviour to not apply the deletion?
->
-> That's not too surprising -- you probably put enough data into the
-> cluster that some of the bench objects got evicted into the cold
-> storage pool, and then they were deleted by rados bench. The cache
-> pool needs to keep the object around with a "deleted" and "dirty" flag
-> to make sure it eventually gets cleaned up from the backing cold pool
-> -- as happened when you set to forward and forced an eviction.
->
->>
->> Some observations:
->> - I think it is important to document the alignment requirements for appends (e.g. if you do rados put it needs aligned appends and the 4M blocks are not aligned for every combination of (k,m) ).
->>
->> - another observation is that seems difficult to run 64 OSDs on a box. I have no obvious memory limitation but it requires ~30k threads and it was difficult to create several pools with many PGs without having OSDs core dumping because resources are not available.
->>
->> - when OSD get 100% full they core dump most of the time. In my case all OSDs become full at the same time and when this happended there is no way to get the cluster up again without manually deleting objects in the OSD directories and make some space.
->>
->> - I get a syntax error in the CEPH CENTOS(RHEL6) startup script:
->>
->> awk: { d=$2/1073741824 ; r = sprintf(\"%.2f\", d); print r }
->> awk:                                 ^ backslash not last character on line
->>
->> - I have run several times into a situation where the only way out was to delete the whole cluster and set it up from scratch
->>
->> - I got this reproducable stack trace with a EC pool and a front end tier:
->> osd/ReplicatedPG.cc: 5554: FAILED assert(cop->data.length() + cop->temp_cursor.data_offset == cop->cursor.data_offset)
->>
->>  ceph version 0.77-900-gce9bfb8 (ce9bfb879c32690d030db6b2a349b7b6f6e6a468)
->>  1: (ReplicatedPG::_write_copy_chunk(boost::shared_ptr<ReplicatedPG::CopyOp>, PGBackend::PGTransaction*)+0x7dd) [0x8a376d]
->>  2: (ReplicatedPG::_build_finish_copy_transaction(boost::shared_ptr<ReplicatedPG::CopyOp>, PGBackend::PGTransaction*)+0x114) [0x8a3954]
->>  3: (ReplicatedPG::process_copy_chunk(hobject_t, unsigned long, int)+0x507) [0x8f1097]
->>  4: (C_Copyfrom::finish(int)+0xb7) [0x93fa67]
->>  5: (Context::complete(int)+0x9) [0x65d4b9]
->>  6: (Finisher::finisher_thread_entry()+0x1d8) [0xa9a528]
->>  7: /lib64/libpthread.so.0() [0x3386a079d1]
->>  8: (clone()+0x6d) [0x33866e8b6d]
->>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
->
-> Hmm, we've had a lot of bug fixes going in lately (and I know some
-> were around that copy infrastructure), so I bet that's fixed now.
->
->>
->> Moreover I did some trivial testing of the meta data part of CephFS and ceph-fuse:
->>
->> - I created a directory hierarchy with like 10/1000/100 = 1 Mio directories. After creation the MDS uses 5.5 GB of memory, ceph-fuse 1.8 GB. It takes 33 minutes to do "find /ceph" on this hierarchy. If I restart the MDS and do the same it takes 18 minutes. After this operation the MDS uses ~10 GB of memory (10k per directory for one entry).
->
-> Hmm. That's more than I would expect, but not impossibly so if the MDS
-> was having trouble keeping the relevant directories in-memory. We have
-> not done any optimization around that sort of scenario right now and
-> it's a pretty hard workload for a distributed storage system. :/
->
->>
->> If I do "ls -laRt /ceph" I get "no such file or directory" after some time. When this happened one can pick one of the directory and do a single "ls -la <dir>". The first time one get's again "no such file or directory", the second time it eventually works and shows the contents.
+On 03/25/2014 09:40 PM, Olivier Bonvalet wrote:
+> Thanks again to took time to analyze that problem.
+> 
+> All my RBD images have daily snapshots, can this bug be related to
+> snapshots ?
+> 
+> Maybe it's a stupid question, but is there a workaround that I could use
+> to reduce that problem in production, until a proper fix is found ?
 
-It's symptom of the dir complete bug (exits in kernel < 3.12)
+I don't believe this has anything to do with snapshots.
 
-Yan, Zheng
+And I wish I knew a workaround, but unfortunately I
+don't know of one.  Once I understand the problem (I'm
+getting close) I might have one, but at that point I'll
+probably have a fix.
 
->
-> Can you expand on that a bit? What is "after some time"?
->
-> -Greg
-> Software Engineer #42 @ http://inktank.com | http://ceph.com
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I'll try to find a fix as soon as I can.
+
+					-Alex
+
+PS  I thought you said you were going to stop for the night!
+
