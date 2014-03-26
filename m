@@ -1,69 +1,213 @@
-From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: Re: Issue #5876 : assertion failure in rbd_img_obj_callback()
-Date: Wed, 26 Mar 2014 14:05:39 +0200
-Message-ID: <CALFYKtARUAn0FH=0vAPP7+jig=EEScbQEEhP7+rBnsQU8X=YuQ@mail.gmail.com>
-References: <1395736765.2823.29.camel@localhost>
-	<1395780835.2076.15.camel@localhost>
-	<1395781847.2076.21.camel@localhost>
-	<CALFYKtBuraQUWw7y6a=uiZDv1tgyz+sBQs7LHMR35nDAPYDSTQ@mail.gmail.com>
-	<1395782577.2076.23.camel@localhost>
-	<CALFYKtAhTmAJMxSNH5Zo2MVoj3wWeJxMybKUh3EMgFYuDwxZ7g@mail.gmail.com>
-	<1395783675.2076.26.camel@localhost>
-	<CALFYKtBFMbo91ZJngJDru8V3bNn7GXhr9_vgQAwiRk42wP1g1A@mail.gmail.com>
-	<1395784476.2076.28.camel@localhost>
-	<1395785839.2076.30.camel@localhost>
-	<5332075F.8080105@ieee.org>
-	<1395788695.2076.35.camel@localhost>
-	<53321896.1080606@ieee.org>
-	<1395797596.2076.43.camel@localhost>
-	<1395798658.2076.45.camel@localhost>
-	<5332339A.8030000@ieee.org>
-	<1395801625.2076.52.camel@localhost>
-	<53323EA5.6010506@ieee.org>
-	<1395801940.2076.54.camel@localhost>
-	<53324F79.1080108@ieee.org>
-	<1395806447.2076.70.camel@localhost>
-	<53325F09.7000306@ieee.org>
-	<5332B643.5040403@ieee.org>
-	<CALFYKtCAwE0kX5Z7z-tUp6aDGY8jF3Mj2CVW3SM5YBCB40ebLQ@mail.gmail.com>
-	<5332BE52.6020404@ieee.org>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: GCC -msse2 portability question
+Date: Wed, 26 Mar 2014 19:24:13 +0100
+Message-ID: <53331B4D.8030901@dachary.org>
+References: <532F3B0E.2050204@dachary.org>	<5331D41B.5040001@dachary.org>	<CA+AFVBhpOZEPehsd4qHCBr4aRzv60ZW8LzRwKsduUrZmLV1wxQ@mail.gmail.com>	<5331D738.9030409@dachary.org>	<CANP1eJFMRN5=-N0jJm=5XgJ+veKFWBR1P=TpKncfw2_XeHGE=A@mail.gmail.com>	<CA+AFVBgOEz8_fv9H-8_kOuVSJNL3KQ+36b5kscfjnRMs09DZ6Q@mail.gmail.com>	<53327E59.7060408@dachary.org> <CANP1eJG9xoCPkFs19KXG1RPUqc-D3aO_0SBOM=4WWFRN2JtX=g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="cxlQOU7k20jWoU7vUSO7vnx4RpsadWVVi"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f46.google.com ([209.85.216.46]:56842 "EHLO
-	mail-qa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751951AbaCZMFk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 26 Mar 2014 08:05:40 -0400
-Received: by mail-qa0-f46.google.com with SMTP id i13so2019151qae.5
-        for <ceph-devel@vger.kernel.org>; Wed, 26 Mar 2014 05:05:39 -0700 (PDT)
-In-Reply-To: <5332BE52.6020404@ieee.org>
+Received: from smtp.dmail.dachary.org ([91.121.254.229]:55305 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755203AbaCZSYU (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 26 Mar 2014 14:24:20 -0400
+In-Reply-To: <CANP1eJG9xoCPkFs19KXG1RPUqc-D3aO_0SBOM=4WWFRN2JtX=g@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@ieee.org>
-Cc: Olivier Bonvalet <ceph.list@daevel.fr>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Milosz Tanski <milosz@adfin.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Wed, Mar 26, 2014 at 1:47 PM, Alex Elder <elder@ieee.org> wrote:
-> On 03/26/2014 06:43 AM, Ilya Dryomov wrote:
->> It looks like img_request kref currenlty exists for posterity only.
->> Unless I'm missing something, its counter is set to 1 in
->> rbd_img_request_create() and is not incremented anywhere else, which
->> means that the instant rbd_img_request_put() is called, img_request is
->> freed.  I naively assumed it was incremented and decremented in
->> rbd_img_obj_request_add() and rbd_img_obj_request_del() respectively..
->> Maybe that's something we should look at first?
->
-> I believe it was something that I never finished implementing.
->
-> So yes, the kref is there to be used, it just isn't, really.
->
-> If you want to give it a try, be my guest.  I'll review it
-> carefully.  (I can't really test my changes very well anyway.)
->
-> If you want me to do it, let me know.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--cxlQOU7k20jWoU7vUSO7vnx4RpsadWVVi
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-I think you should do it ;)  If time is not a big issue, that is.  You
-have a much more complete picture in your head.
 
-Thanks,
 
-                Ilya
+On 26/03/2014 18:40, Milosz Tanski wrote:
+> Loic,
+>=20
+> I don't mean to be redundant since I posted this comment already in
+> the github on commit comments but I'm not sure if you saw this.
+
+Thanks for posting it : your comment got lost by a rebase ( github's not =
+good at that ... ).
+
+> Instead of doing cpuid manually you can use builtins provided in gcc
+> (and in clang). There's a cpuid.h header you can include. This
+> stackoverflow answer has a good summary of it:
+> http://stackoverflow.com/questions/14266772/how-do-i-call-cpuid-in-linu=
+x?answertab=3Dvotes#tab-top
+
+It is a nice improvement to have indeed. Created http://tracker.ceph.com/=
+issues/7869
+
+Cheers
+
+> On Wed, Mar 26, 2014 at 3:14 AM, Loic Dachary <loic@dachary.org> wrote:=
+
+>> Hi Kevin & Milosz,
+>>
+>> So it would be
+>>
+>> if(sse4 & sse3) =3D> use a plugin compiled with sse + sse3 + sse4 acti=
+vated
+>> else if(sse3) =3D> use a plugin with sse2 + sse3 activated but not sse=
+4
+>> else =3D> fallback to not using sse at all
+>>
+>> like so:
+>>
+>> https://github.com/dachary/ceph/commit/b6e4307bd2ee1de6e8bbda0ced370d4=
+84d512114#diff-5249f49580782dfe95a1cbcc986ee5deR113
+>>
+>> If I understand Laurent correctly, the right approach would be to semi=
+-transparently generate and select the code path depending on the feature=
+s at runtime. But that would require more work and I created a ticket to =
+track this : http://tracker.ceph.com/issues/7865
+>>
+>> Does that sound right ?
+>>
+>> On 25/03/2014 22:31, Kevin Greenan wrote:
+>>> Hey Loic,
+>>>
+>>> I think we want something closer to what Milosz is proposing (3 cut-o=
+ffs instead of 2) .  The shuffle instruction is part of SSSE3 and is the =
+basis for the SSE split table techniques, which are super fast.  By doing=
+ all-or-nothing, it is possible many users would not be able to take adva=
+ntage of it when they are capable.
+>>>
+>>> Make sense?
+>>>
+>>> -kevin
+>>>
+>>>
+>>> On Tue, Mar 25, 2014 at 12:46 PM, Milosz Tanski <milosz@adfin.com <ma=
+ilto:milosz@adfin.com>> wrote:
+>>>
+>>>     It gets a bit more tricky with x86_64 since the arch dictates tha=
+t the
+>>>     base line has SSE2 (but not necessarily later).
+>>>
+>>>     I would do is both support SSE2 (maybe in core without dlopen) an=
+d
+>>>     then support all the others in a SSE4 version (including SSE4_PCM=
+UL).
+>>>     I'm glossing over x86-32 here, but you could something similar.
+>>>
+>>>     Best
+>>>     - Milosz
+>>>
+>>>     On Tue, Mar 25, 2014 at 3:21 PM, Loic Dachary <loic@dachary.org <=
+mailto:loic@dachary.org>> wrote:
+>>>     >
+>>>     >
+>>>     > On 25/03/2014 20:13, Kevin Greenan wrote:
+>>>     >> +1
+>>>     >>
+>>>     >> Yeah, that sounds better...  Let's keep this as simple as poss=
+ible.
+>>>     >
+>>>     > I'll rework the https://bitbucket.org/jimplank/gf-complete/pull=
+-request/4/defer-the-decision-to-use-a-given-sse accordingly.
+>>>     >
+>>>     > Would it be sensible to compile with SSE optimizations only if =
+all are available ( SSE2, SSSE3, SSE4, SSE4_PCMUL ) and not attempt to di=
+stinguish betweel SSSE3 being available but not SSE4_PCMUL etc. From what=
+ I understand at this point that kind of distinction is going to be diffi=
+cult to manage anyway.
+>>>     >
+>>>     > Is it too simplistic ?
+>>>     >
+>>>     >>
+>>>     >> -kevin
+>>>     >>
+>>>     >>
+>>>     >> On Tue, Mar 25, 2014 at 12:08 PM, Loic Dachary <loic@dachary.o=
+rg <mailto:loic@dachary.org> <mailto:loic@dachary.org <mailto:loic@dachar=
+y.org>>> wrote:
+>>>     >>
+>>>     >>     Andreas Peters suggested another approach, which makes sen=
+se to me : have one plugin with SSE optimizations enabled, another withou=
+t them and chose at runtime between the two.
+>>>     >>
+>>>     >>     What do you think ?
+>>>     >>
+>>>     >>     On 23/03/2014 20:50, Loic Dachary wrote:
+>>>     >>     > Hi Laurent,
+>>>     >>     >
+>>>     >>     > In the context of optimizing erasure code functions impl=
+emented by Kevin Greenan (cc'ed) and James Plank at https://bitbucket.org=
+/jimplank/gf-complete/ we ran accross a question you may have the answer =
+to: can gcc -msse2 (or -msse* for that matter ) have a negative impact on=
+ the portability of the compiled binary code ?
+>>>     >>     >
+>>>     >>     > In other words, if a code is compiled without -msse* and=
+ runs fine on all intel processors it targets, could it be that adding -m=
+sse* to the compilation of the same source code generate a binary that wo=
+uld fail on some processors ? This is assuming no sse specific functions =
+were used in the source code.
+>>>     >>     >
+>>>     >>     > In gf-complete, all sse specific instructions are carefu=
+lly protected to not be run on a CPU that does not support them. The runt=
+ime detection is done by checking CPU id bits ( see https://bitbucket.org=
+/jimplank/gf-complete/pull-request/7/probe-intel-sse-features-at-runtime/=
+diff#Lsrc/gf_intel.cT28 )
+>>>     >>     >
+>>>     >>     > The corresponding thread is at:
+>>>     >>     >
+>>>     >>     > https://bitbucket.org/jimplank/gf-complete/pull-request/=
+4/defer-the-decision-to-use-a-given-sse/diff#comment-1479296
+>>>     >>     >
+>>>     >>     > Cheers
+>>>     >>     >
+>>>     >>
+>>>     >>     --
+>>>     >>     Lo=EFc Dachary, Artisan Logiciel Libre
+>>>     >>
+>>>     >>
+>>>     >
+>>>     > --
+>>>     > Lo=EFc Dachary, Artisan Logiciel Libre
+>>>     >
+>>>
+>>>
+>>>
+>>>     --
+>>>     Milosz Tanski
+>>>     CTO
+>>>     10 East 53rd Street, 37th floor
+>>>     New York, NY 10022
+>>>
+>>>     p: 646-253-9055 <tel:646-253-9055>
+>>>     e: milosz@adfin.com <mailto:milosz@adfin.com>
+>>>
+>>>
+>>
+>> --
+>> Lo=EFc Dachary, Artisan Logiciel Libre
+>>
+>=20
+>=20
+>=20
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+
+
+--cxlQOU7k20jWoU7vUSO7vnx4RpsadWVVi
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.20 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlMzG1EACgkQ8dLMyEl6F23tkQCfSlxFjNBbhaKXUettPLcxJHgu
+xiAAoJt4PL3nJrznPb3uuX39d8CiMvCK
+=vXgU
+-----END PGP SIGNATURE-----
+
+--cxlQOU7k20jWoU7vUSO7vnx4RpsadWVVi--
