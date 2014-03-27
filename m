@@ -1,91 +1,118 @@
 From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: [PATCH 27/33] libceph: introduce apply_temps() helper
-Date: Thu, 27 Mar 2014 20:18:13 +0200
-Message-ID: <1395944299-21970-28-git-send-email-ilya.dryomov@inktank.com>
+Subject: [PATCH 26/33] libceph: introduce pg_to_raw_osds() and raw_to_up_osds() helpers
+Date: Thu, 27 Mar 2014 20:18:12 +0200
+Message-ID: <1395944299-21970-27-git-send-email-ilya.dryomov@inktank.com>
 References: <1395944299-21970-1-git-send-email-ilya.dryomov@inktank.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ee0-f45.google.com ([74.125.83.45]:34386 "EHLO
-	mail-ee0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757163AbaC0ST1 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Mar 2014 14:19:27 -0400
-Received: by mail-ee0-f45.google.com with SMTP id d17so3193642eek.18
-        for <ceph-devel@vger.kernel.org>; Thu, 27 Mar 2014 11:19:26 -0700 (PDT)
+Received: from mail-ee0-f42.google.com ([74.125.83.42]:53957 "EHLO
+	mail-ee0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757156AbaC0STZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Mar 2014 14:19:25 -0400
+Received: by mail-ee0-f42.google.com with SMTP id d17so3238219eek.1
+        for <ceph-devel@vger.kernel.org>; Thu, 27 Mar 2014 11:19:24 -0700 (PDT)
 Received: from localhost ([109.110.66.7])
-        by mx.google.com with ESMTPSA id l42sm5974144eew.19.2014.03.27.11.19.25
+        by mx.google.com with ESMTPSA id w12sm5942975eez.36.2014.03.27.11.19.22
         for <ceph-devel@vger.kernel.org>
         (version=TLSv1.2 cipher=RC4-SHA bits=128/128);
-        Thu, 27 Mar 2014 11:19:26 -0700 (PDT)
+        Thu, 27 Mar 2014 11:19:23 -0700 (PDT)
 In-Reply-To: <1395944299-21970-1-git-send-email-ilya.dryomov@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-apply_temp() helper for applying various temporary mappings (at this
-point only pg_temp mappings) to the up set, therefore transforming it
-into an acting set.
+pg_to_raw_osds() helper for computing a raw (crush) set, which can
+contain non-existant and down osds.
+
+raw_to_up_osds() helper for pruning non-existant and down osds from the
+raw set, therefore transforming it into an up set, and determining up
+primary.
 
 Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
 ---
- net/ceph/osdmap.c |   52 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 52 insertions(+)
+ net/ceph/osdmap.c |   76 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 76 insertions(+)
 
 diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
-index ee095e07cf98..6d418433d80d 100644
+index 3ac2098972ea..ee095e07cf98 100644
 --- a/net/ceph/osdmap.c
 +++ b/net/ceph/osdmap.c
-@@ -1590,6 +1590,58 @@ static int raw_to_up_osds(struct ceph_osdmap *osdmap,
+@@ -1514,6 +1514,82 @@ static int *calc_pg_raw(struct ceph_osdmap *osdmap, struct ceph_pg pgid,
  }
  
  /*
-+ * Given up set, apply pg_temp mapping.
++ * Calculate raw (crush) set for given pgid.
 + *
-+ * Return acting set length.  *primary is set to acting primary osd id,
-+ * or -1 if acting set is empty.
++ * Return raw set length, or error.
 + */
-+static int apply_temps(struct ceph_osdmap *osdmap,
-+		       struct ceph_pg_pool_info *pool, struct ceph_pg pgid,
-+		       int *osds, int len, int *primary)
++static int pg_to_raw_osds(struct ceph_osdmap *osdmap,
++			  struct ceph_pg_pool_info *pool,
++			  struct ceph_pg pgid, u32 pps, int *osds)
 +{
-+	struct ceph_pg_mapping *pg;
-+	int temp_len;
-+	int temp_primary;
-+	int i;
++	int ruleno;
++	int len;
 +
-+	/* raw_pg -> pg */
-+	pgid.seed = ceph_stable_mod(pgid.seed, pool->pg_num,
-+				    pool->pg_num_mask);
-+
-+	/* pg_temp? */
-+	pg = __lookup_pg_mapping(&osdmap->pg_temp, pgid);
-+	if (pg) {
-+		temp_len = 0;
-+		temp_primary = -1;
-+
-+		for (i = 0; i < pg->pg_temp.len; i++) {
-+			if (ceph_osd_is_down(osdmap, pg->pg_temp.osds[i])) {
-+				if (ceph_can_shift_osds(pool))
-+					continue;
-+				else
-+					osds[temp_len++] = CRUSH_ITEM_NONE;
-+			} else {
-+				osds[temp_len++] = pg->pg_temp.osds[i];
-+			}
-+		}
-+
-+		/* apply pg_temp's primary */
-+		for (i = 0; i < temp_len; i++) {
-+			if (osds[i] != CRUSH_ITEM_NONE) {
-+				temp_primary = osds[i];
-+				break;
-+			}
-+		}
-+	} else {
-+		temp_len = len;
-+		temp_primary = *primary;
++	/* crush */
++	ruleno = crush_find_rule(osdmap->crush, pool->crush_ruleset,
++				 pool->type, pool->size);
++	if (ruleno < 0) {
++		pr_err("no crush rule: pool %lld ruleset %d type %d size %d\n",
++		       pgid.pool, pool->crush_ruleset, pool->type,
++		       pool->size);
++		return -ENOENT;
 +	}
 +
-+	*primary = temp_primary;
-+	return temp_len;
++	len = do_crush(osdmap, ruleno, pps, osds,
++		       min_t(int, pool->size, CEPH_PG_MAX_SIZE),
++		       osdmap->osd_weight, osdmap->max_osd);
++	if (len < 0) {
++		pr_err("error %d from crush rule %d: pool %lld ruleset %d type %d size %d\n",
++		       len, ruleno, pgid.pool, pool->crush_ruleset,
++		       pool->type, pool->size);
++		return len;
++	}
++
++	return len;
++}
++
++/*
++ * Given raw set, calculate up set and up primary.
++ *
++ * Return up set length.  *primary is set to up primary osd id, or -1
++ * if up set is empty.
++ */
++static int raw_to_up_osds(struct ceph_osdmap *osdmap,
++			  struct ceph_pg_pool_info *pool,
++			  int *osds, int len, int *primary)
++{
++	int up_primary = -1;
++	int i;
++
++	if (ceph_can_shift_osds(pool)) {
++		int removed = 0;
++
++		for (i = 0; i < len; i++) {
++			if (ceph_osd_is_down(osdmap, osds[i])) {
++				removed++;
++				continue;
++			}
++			if (removed)
++				osds[i - removed] = osds[i];
++		}
++
++		len -= removed;
++		if (len > 0)
++			up_primary = osds[0];
++	} else {
++		for (i = len - 1; i >= 0; i--) {
++			if (ceph_osd_is_down(osdmap, osds[i]))
++				osds[i] = CRUSH_ITEM_NONE;
++			else
++				up_primary = osds[i];
++		}
++	}
++
++	*primary = up_primary;
++	return len;
 +}
 +
 +/*
