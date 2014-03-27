@@ -1,49 +1,121 @@
-From: Alex Elder <elder@ieee.org>
-Subject: Re: [PATCH 33/33] libceph: enable PRIMARY_AFFINITY feature bit
-Date: Thu, 27 Mar 2014 16:04:40 -0500
-Message-ID: <53349268.5050306@ieee.org>
-References: <1395944299-21970-1-git-send-email-ilya.dryomov@inktank.com> <1395944299-21970-34-git-send-email-ilya.dryomov@inktank.com>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: [PATCH 1/3 v2] rbd: skip the copyup when an entire object writing
+Date: Thu, 27 Mar 2014 14:48:26 -0700
+Message-ID: <53349CAA.3020809@inktank.com>
+References: <1394680896-8554-1-git-send-email-lucienchao@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f177.google.com ([209.85.223.177]:61587 "EHLO
-	mail-ie0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756747AbaC0VES (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Mar 2014 17:04:18 -0400
-Received: by mail-ie0-f177.google.com with SMTP id rl12so4037000iec.36
-        for <ceph-devel@vger.kernel.org>; Thu, 27 Mar 2014 14:04:18 -0700 (PDT)
-In-Reply-To: <1395944299-21970-34-git-send-email-ilya.dryomov@inktank.com>
+Received: from mail-pd0-f171.google.com ([209.85.192.171]:43092 "EHLO
+	mail-pd0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755086AbaC0VvJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Mar 2014 17:51:09 -0400
+Received: by mail-pd0-f171.google.com with SMTP id r10so3941020pdi.30
+        for <ceph-devel@vger.kernel.org>; Thu, 27 Mar 2014 14:51:08 -0700 (PDT)
+In-Reply-To: <1394680896-8554-1-git-send-email-lucienchao@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <ilya.dryomov@inktank.com>, ceph-devel@vger.kernel.org
+To: Guangliang Zhao <lucienchao@gmail.com>, ceph-devel@vger.kernel.org
+Cc: elder@ieee.org
 
-On 03/27/2014 01:18 PM, Ilya Dryomov wrote:
-> Announce our support for osdmaps with non-default primary affinity
-> values.
-
-Looks good.
-
-Reviewed-by: Alex Elder <elder@linaro.org>
-
-> Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
+On 03/12/2014 08:21 PM, Guangliang Zhao wrote:
+> It need to copyup the parent's content when layered writing,
+> but an entire object write would overwrite it, so skip it.
+>
+> Signed-off-by: Guangliang Zhao <lucienchao@gmail.com>
 > ---
->  include/linux/ceph/ceph_features.h |    3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
-> 
-> diff --git a/include/linux/ceph/ceph_features.h b/include/linux/ceph/ceph_features.h
-> index 7a4cab50b2cd..d12659ce550d 100644
-> --- a/include/linux/ceph/ceph_features.h
-> +++ b/include/linux/ceph/ceph_features.h
-> @@ -91,7 +91,8 @@ static inline u64 ceph_sanitize_features(u64 features)
->  	 CEPH_FEATURE_CRUSH_V2 |		\
->  	 CEPH_FEATURE_EXPORT_PEER |		\
->  	 CEPH_FEATURE_OSDMAP_ENC |		\
-> -	 CEPH_FEATURE_CRUSH_TUNABLES3)
-> +	 CEPH_FEATURE_CRUSH_TUNABLES3 |		\
-> +	 CEPH_FEATURE_OSD_PRIMARY_AFFINITY)
->  
->  #define CEPH_FEATURES_REQUIRED_DEFAULT   \
->  	(CEPH_FEATURE_NOSRCADDR |	 \
-> 
+
+This looks good to me. This situation is unlikely with normal I/O, but
+discards done e.g. by mkfs are more likely to benefit from this
+optimization. Nice refactoring of that conditional too (thanks for
+suggesting that Alex)!
+
+Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
+
+>   drivers/block/rbd.c |   49 ++++++++++++++++++++++++++++++++++---------------
+>   1 file changed, 34 insertions(+), 15 deletions(-)
+>
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index b365e0d..2d48858 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -2624,34 +2624,53 @@ out:
+>   	return ret;
+>   }
+>
+> -static int rbd_img_obj_request_submit(struct rbd_obj_request *obj_request)
+> +static bool rbd_obj_request_simple(struct rbd_obj_request *obj_request)
+>   {
+>   	struct rbd_img_request *img_request;
+>   	struct rbd_device *rbd_dev;
+> -	bool known;
+> +	u64 obj_size;
+>
+>   	rbd_assert(obj_request_img_data_test(obj_request));
+>
+>   	img_request = obj_request->img_request;
+>   	rbd_assert(img_request);
+>   	rbd_dev = img_request->rbd_dev;
+> +	obj_size = (u64) 1 << rbd_dev->header.obj_order;
+>
+> +	/* Read requests didn't need special handling */
+> +	if (!img_request_write_test(img_request))
+> +		return true;
+> +	/* No-layered writes are simple requests*/
+> +	if (!img_request_layered_test(img_request))
+> +		return true;
+>   	/*
+> -	 * Only writes to layered images need special handling.
+> -	 * Reads and non-layered writes are simple object requests.
+>   	 * Layered writes that start beyond the end of the overlap
+> -	 * with the parent have no parent data, so they too are
+> -	 * simple object requests.  Finally, if the target object is
+> -	 * known to already exist, its parent data has already been
+> -	 * copied, so a write to the object can also be handled as a
+> -	 * simple object request.
+> +	 * with the parent have no parent data, so they are simple
+> +	 * object requests.
+>   	 */
+> -	if (!img_request_write_test(img_request) ||
+> -		!img_request_layered_test(img_request) ||
+> -		rbd_dev->parent_overlap <= obj_request->img_offset ||
+> -		((known = obj_request_known_test(obj_request)) &&
+> -			obj_request_exists_test(obj_request))) {
+> +	if (rbd_dev->parent_overlap <= obj_request->img_offset)
+> +		return true;
+> +	/*
+> +	 * If the obj_request aligns with the boundary and equals
+> +	 * to the size of an object, it doesn't need copyup, because
+> +	 * the obj_request will overwrite it finally.
+> +	 */
+> +	if ((!obj_request->offset) && (obj_request->length == obj_size))
+> +		return true;
+> +	/*
+> +	 * If the target object is known to already exist, its parent
+> +	 * data has already been copied, so a write to the object can
+> +	 * also be handled as a simple object request
+> +	 */
+> +	if (obj_request_known_test(obj_request) &&
+> +			obj_request_exists_test(obj_request))
+> +		return true;
+> +	return false;
+> +}
+>
+> +static int rbd_img_obj_request_submit(struct rbd_obj_request *obj_request)
+> +{
+> +	if (rbd_obj_request_simple(obj_request)) {
+>   		struct rbd_device *rbd_dev;
+>   		struct ceph_osd_client *osdc;
+>
+> @@ -2667,7 +2686,7 @@ static int rbd_img_obj_request_submit(struct rbd_obj_request *obj_request)
+>   	 * start by reading the data for the full target object from
+>   	 * the parent so we can use it for a copyup to the target.
+>   	 */
+> -	if (known)
+> +	if (obj_request_known_test(obj_request))
+>   		return rbd_img_obj_parent_read_full(obj_request);
+>
+>   	/* We don't know whether the target exists.  Go find out. */
+>
 
