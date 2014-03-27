@@ -1,175 +1,136 @@
 From: Alex Elder <elder@ieee.org>
-Subject: Re: [PATCH 21/33] libceph: primary_affinity infrastructure
-Date: Thu, 27 Mar 2014 15:26:42 -0500
-Message-ID: <53348982.9010707@ieee.org>
-References: <1395944299-21970-1-git-send-email-ilya.dryomov@inktank.com> <1395944299-21970-22-git-send-email-ilya.dryomov@inktank.com>
+Subject: Re: [PATCH 22/33] libceph: primary_affinity decode bits
+Date: Thu, 27 Mar 2014 15:31:29 -0500
+Message-ID: <53348AA1.2030806@ieee.org>
+References: <1395944299-21970-1-git-send-email-ilya.dryomov@inktank.com> <1395944299-21970-23-git-send-email-ilya.dryomov@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f179.google.com ([209.85.223.179]:56091 "EHLO
-	mail-ie0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757057AbaC0U0U (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Mar 2014 16:26:20 -0400
-Received: by mail-ie0-f179.google.com with SMTP id lx4so4021136iec.38
-        for <ceph-devel@vger.kernel.org>; Thu, 27 Mar 2014 13:26:20 -0700 (PDT)
-In-Reply-To: <1395944299-21970-22-git-send-email-ilya.dryomov@inktank.com>
+Received: from mail-ie0-f171.google.com ([209.85.223.171]:44178 "EHLO
+	mail-ie0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755086AbaC0UbH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Mar 2014 16:31:07 -0400
+Received: by mail-ie0-f171.google.com with SMTP id ar20so4030088iec.30
+        for <ceph-devel@vger.kernel.org>; Thu, 27 Mar 2014 13:31:07 -0700 (PDT)
+In-Reply-To: <1395944299-21970-23-git-send-email-ilya.dryomov@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Ilya Dryomov <ilya.dryomov@inktank.com>, ceph-devel@vger.kernel.org
 
 On 03/27/2014 01:18 PM, Ilya Dryomov wrote:
-> Add primary_affinity infrastructure.  primary_affinity values are
-> stored in an max_osd-sized array, hanging off ceph_osdmap, similar to
-> a osd_weight array.
-> 
-> Introduce {get,set}_primary_affinity() helpers, primarily to return
-> CEPH_OSD_DEFAULT_PRIMARY_AFFINITY when no affinity has been set and to
-> abstract out osd_primary_affinity array allocation and initialization.
+> Add two helpers to decode primary_affinity (full map, vector<u32>) and
+> new_primary_affinity (inc map, map<u32, u32>) and switch to them.
 
-One comment about some constant definitions, but
-this looks good.
+One comment below, but otherwise looks good.
 
 Reviewed-by: Alex Elder <elder@linaro.org>
 
+> 
 > Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
 > ---
->  include/linux/ceph/osdmap.h |    3 +++
->  include/linux/ceph/rados.h  |    4 ++++
->  net/ceph/debugfs.c          |    5 +++--
->  net/ceph/osdmap.c           |   47 +++++++++++++++++++++++++++++++++++++++++++
->  4 files changed, 57 insertions(+), 2 deletions(-)
+>  net/ceph/osdmap.c |   71 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  1 file changed, 71 insertions(+)
 > 
-> diff --git a/include/linux/ceph/osdmap.h b/include/linux/ceph/osdmap.h
-> index db4fb6322aae..6e030cb3c9ca 100644
-> --- a/include/linux/ceph/osdmap.h
-> +++ b/include/linux/ceph/osdmap.h
-> @@ -88,6 +88,8 @@ struct ceph_osdmap {
->  	struct rb_root pg_temp;
->  	struct rb_root primary_temp;
->  
-> +	u32 *osd_primary_affinity;
-> +
->  	struct rb_root pg_pools;
->  	u32 pool_max;
->  
-> @@ -134,6 +136,7 @@ static inline bool ceph_osdmap_flag(struct ceph_osdmap *map, int flag)
->  }
->  
->  extern char *ceph_osdmap_state_str(char *str, int len, int state);
-> +extern u32 ceph_get_primary_affinity(struct ceph_osdmap *map, int osd);
->  
->  static inline struct ceph_entity_addr *ceph_osd_addr(struct ceph_osdmap *map,
->  						     int osd)
-> diff --git a/include/linux/ceph/rados.h b/include/linux/ceph/rados.h
-> index 2caabef8d369..bb6f40c9cb0f 100644
-> --- a/include/linux/ceph/rados.h
-> +++ b/include/linux/ceph/rados.h
-> @@ -133,6 +133,10 @@ extern const char *ceph_osd_state_name(int s);
->  #define CEPH_OSD_IN  0x10000
->  #define CEPH_OSD_OUT 0
->  
-> +/* osd primary-affinity.  fixed point value: 0x10000 == baseline */
-> +#define CEPH_OSD_MAX_PRIMARY_AFFINITY 0x10000
-> +#define CEPH_OSD_DEFAULT_PRIMARY_AFFINITY 0x10000
-> +
-
-It seems like these definitions may also belong in a
-common header file.  However I know that in some cases
-it's necessary to impose limits in the kernel where
-none is enforced in user space.
-
->  /*
->   * osd map flag bits
-> diff --git a/net/ceph/debugfs.c b/net/ceph/debugfs.c
-> index 612bf55e6a8b..34453a2b4b4d 100644
-> --- a/net/ceph/debugfs.c
-> +++ b/net/ceph/debugfs.c
-> @@ -77,10 +77,11 @@ static int osdmap_show(struct seq_file *s, void *p)
->  		int state = map->osd_state[i];
->  		char sb[64];
->  
-> -		seq_printf(s, "osd%d\t%s\t%3d%%\t(%s)\n",
-> +		seq_printf(s, "osd%d\t%s\t%3d%%\t(%s)\t%3d%%\n",
->  			   i, ceph_pr_addr(&addr->in_addr),
->  			   ((map->osd_weight[i]*100) >> 16),
-> -			   ceph_osdmap_state_str(sb, sizeof(sb), state));
-> +			   ceph_osdmap_state_str(sb, sizeof(sb), state),
-> +			   ((ceph_get_primary_affinity(map, i)*100) >> 16));
->  	}
->  	for (n = rb_first(&map->pg_temp); n; n = rb_next(n)) {
->  		struct ceph_pg_mapping *pg =
 > diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
-> index 0ca7f36e88b4..538b8dd341e8 100644
+> index 538b8dd341e8..3ac2098972ea 100644
 > --- a/net/ceph/osdmap.c
 > +++ b/net/ceph/osdmap.c
-> @@ -649,6 +649,7 @@ void ceph_osdmap_destroy(struct ceph_osdmap *map)
->  	kfree(map->osd_state);
->  	kfree(map->osd_weight);
->  	kfree(map->osd_addr);
-> +	kfree(map->osd_primary_affinity);
->  	kfree(map);
->  }
->  
-> @@ -685,6 +686,20 @@ static int osdmap_set_max_osd(struct ceph_osdmap *map, int max)
->  	map->osd_weight = weight;
->  	map->osd_addr = addr;
->  
-> +	if (map->osd_primary_affinity) {
-> +		u32 *affinity;
-> +
-> +		affinity = krealloc(map->osd_primary_affinity,
-> +				    max*sizeof(*affinity), GFP_NOFS);
-> +		if (!affinity)
-> +			return -ENOMEM;
-> +
-> +		for (i = map->max_osd; i < max; i++)
-> +			affinity[i] = CEPH_OSD_DEFAULT_PRIMARY_AFFINITY;
-> +
-> +		map->osd_primary_affinity = affinity;
-> +	}
-> +
->  	map->max_osd = max;
->  
+> @@ -959,6 +959,59 @@ static int set_primary_affinity(struct ceph_osdmap *map, int osd, u32 aff)
 >  	return 0;
-> @@ -912,6 +927,38 @@ static int decode_new_primary_temp(void **p, void *end,
->  	return __decode_primary_temp(p, end, map, true);
 >  }
 >  
-> +u32 ceph_get_primary_affinity(struct ceph_osdmap *map, int osd)
+> +static int decode_primary_affinity(void **p, void *end,
+> +				   struct ceph_osdmap *map)
 > +{
-> +	BUG_ON(osd >= map->max_osd);
+> +	u32 len, i;
 > +
-> +	if (!map->osd_primary_affinity)
-> +		return CEPH_OSD_DEFAULT_PRIMARY_AFFINITY;
-> +
-> +	return map->osd_primary_affinity[osd];
-> +}
-> +
-> +static int set_primary_affinity(struct ceph_osdmap *map, int osd, u32 aff)
-> +{
-> +	BUG_ON(osd >= map->max_osd);
-> +
-> +	if (!map->osd_primary_affinity) {
-> +		int i;
-> +
-> +		map->osd_primary_affinity = kmalloc(map->max_osd*sizeof(u32),
-> +						    GFP_NOFS);
-> +		if (!map->osd_primary_affinity)
-> +			return -ENOMEM;
-> +
-> +		for (i = 0; i < map->max_osd; i++)
-> +			map->osd_primary_affinity[i] =
-> +			    CEPH_OSD_DEFAULT_PRIMARY_AFFINITY;
+> +	ceph_decode_32_safe(p, end, len, e_inval);
+> +	if (len == 0) {
+> +		kfree(map->osd_primary_affinity);
+> +		map->osd_primary_affinity = NULL;
+> +		return 0;
 > +	}
 > +
-> +	map->osd_primary_affinity[osd] = aff;
+> +	ceph_decode_need(p, end, map->max_osd*sizeof(u32), e_inval);
+> +
+> +	BUG_ON(len != map->max_osd);
+
+BUG() here is too much; it should I think just return an error instead.
+The test could be done earlier too, prior to ceph_decode_need().
+
+> +	for (i = 0; i < map->max_osd; i++) {
+> +		int ret;
+> +
+> +		ret = set_primary_affinity(map, i, ceph_decode_32(p));
+> +		if (ret)
+> +			return ret;
+> +	}
 > +
 > +	return 0;
+> +
+> +e_inval:
+> +	return -EINVAL;
+> +}
+> +
+> +static int decode_new_primary_affinity(void **p, void *end,
+> +				       struct ceph_osdmap *map)
+> +{
+> +	u32 n;
+> +
+> +	ceph_decode_32_safe(p, end, n, e_inval);
+> +	while (n--) {
+> +		u32 osd, aff;
+> +		int ret;
+> +
+> +		ceph_decode_32_safe(p, end, osd, e_inval);
+> +		ceph_decode_32_safe(p, end, aff, e_inval);
+> +
+> +		ret = set_primary_affinity(map, osd, aff);
+> +		if (ret)
+> +			return ret;
+> +	}
+> +
+> +	return 0;
+> +
+> +e_inval:
+> +	return -EINVAL;
 > +}
 > +
 >  /*
 >   * decode a full map.
 >   */
+> @@ -1036,6 +1089,17 @@ static int osdmap_decode(void **p, void *end, struct ceph_osdmap *map)
+>  			goto bad;
+>  	}
+>  
+> +	/* primary_affinity */
+> +	if (struct_v >= 2) {
+> +		err = decode_primary_affinity(p, end, map);
+> +		if (err)
+> +			goto bad;
+> +	} else {
+> +		/* XXX can this happen? */
+> +		kfree(map->osd_primary_affinity);
+> +		map->osd_primary_affinity = NULL;
+> +	}
+> +
+>  	/* crush */
+>  	ceph_decode_32_safe(p, end, len, e_inval);
+>  	map->crush = crush_decode(*p, min(*p + len, end));
+> @@ -1243,6 +1307,13 @@ struct ceph_osdmap *osdmap_apply_incremental(void **p, void *end,
+>  			goto bad;
+>  	}
+>  
+> +	/* new_primary_affinity */
+> +	if (struct_v >= 2) {
+> +		err = decode_new_primary_affinity(p, end, map);
+> +		if (err)
+> +			goto bad;
+> +	}
+> +
+>  	/* ignore the rest */
+>  	*p = end;
+>  
 > 
 
