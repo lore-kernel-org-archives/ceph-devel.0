@@ -1,89 +1,159 @@
 From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: [PATCH 13/33] libceph: rename __decode_pool{,_names}() to decode_pool{,_names}()
-Date: Thu, 27 Mar 2014 20:17:59 +0200
-Message-ID: <1395944299-21970-14-git-send-email-ilya.dryomov@inktank.com>
+Subject: [PATCH 14/33] libceph: introduce decode{,_new}_pools() and switch to them
+Date: Thu, 27 Mar 2014 20:18:00 +0200
+Message-ID: <1395944299-21970-15-git-send-email-ilya.dryomov@inktank.com>
 References: <1395944299-21970-1-git-send-email-ilya.dryomov@inktank.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ee0-f49.google.com ([74.125.83.49]:61728 "EHLO
-	mail-ee0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757067AbaC0SSy (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Mar 2014 14:18:54 -0400
-Received: by mail-ee0-f49.google.com with SMTP id c41so3202960eek.8
-        for <ceph-devel@vger.kernel.org>; Thu, 27 Mar 2014 11:18:53 -0700 (PDT)
+Received: from mail-ee0-f44.google.com ([74.125.83.44]:42165 "EHLO
+	mail-ee0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757088AbaC0SS4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Mar 2014 14:18:56 -0400
+Received: by mail-ee0-f44.google.com with SMTP id e49so3241236eek.3
+        for <ceph-devel@vger.kernel.org>; Thu, 27 Mar 2014 11:18:55 -0700 (PDT)
 Received: from localhost ([109.110.66.7])
-        by mx.google.com with ESMTPSA id 44sm5951850eek.30.2014.03.27.11.18.52
+        by mx.google.com with ESMTPSA id q41sm5985885eez.7.2014.03.27.11.18.54
         for <ceph-devel@vger.kernel.org>
         (version=TLSv1.2 cipher=RC4-SHA bits=128/128);
-        Thu, 27 Mar 2014 11:18:52 -0700 (PDT)
+        Thu, 27 Mar 2014 11:18:55 -0700 (PDT)
 In-Reply-To: <1395944299-21970-1-git-send-email-ilya.dryomov@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-To be in line with all the other osdmap decode helpers.
+Consolidate pools (full map, map<u64, pg_pool_t>) and new_pools (inc
+map, same) decoding logic into a common helper and switch to it.
 
 Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
 ---
- net/ceph/osdmap.c |   14 ++++++++------
- 1 file changed, 8 insertions(+), 6 deletions(-)
+ net/ceph/osdmap.c |   94 ++++++++++++++++++++++++++++++++---------------------
+ 1 file changed, 57 insertions(+), 37 deletions(-)
 
 diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
-index 6dd083906a1e..cd8f34abe7b7 100644
+index cd8f34abe7b7..d6a569c5508f 100644
 --- a/net/ceph/osdmap.c
 +++ b/net/ceph/osdmap.c
-@@ -506,7 +506,7 @@ static void __remove_pg_pool(struct rb_root *root, struct ceph_pg_pool_info *pi)
- 	kfree(pi);
+@@ -681,6 +681,55 @@ static int osdmap_set_max_osd(struct ceph_osdmap *map, int max)
+ 	return 0;
  }
  
--static int __decode_pool(void **p, void *end, struct ceph_pg_pool_info *pi)
-+static int decode_pool(void **p, void *end, struct ceph_pg_pool_info *pi)
- {
- 	u8 ev, cv;
- 	unsigned len, num;
-@@ -587,7 +587,7 @@ bad:
- 	return -EINVAL;
- }
++static int __decode_pools(void **p, void *end, struct ceph_osdmap *map,
++			  bool incremental)
++{
++	u32 n;
++
++	ceph_decode_32_safe(p, end, n, e_inval);
++	while (n--) {
++		struct ceph_pg_pool_info *pi;
++		u64 pool;
++		int ret;
++
++		ceph_decode_64_safe(p, end, pool, e_inval);
++
++		pi = __lookup_pg_pool(&map->pg_pools, pool);
++		if (!incremental || !pi) {
++			pi = kzalloc(sizeof(*pi), GFP_NOFS);
++			if (!pi)
++				return -ENOMEM;
++
++			pi->id = pool;
++
++			ret = __insert_pg_pool(&map->pg_pools, pi);
++			if (ret) {
++				kfree(pi);
++				return ret;
++			}
++		}
++
++		ret = decode_pool(p, end, pi);
++		if (ret)
++			return ret;
++	}
++
++	return 0;
++
++e_inval:
++	return -EINVAL;
++}
++
++static int decode_pools(void **p, void *end, struct ceph_osdmap *map)
++{
++	return __decode_pools(p, end, map, false);
++}
++
++static int decode_new_pools(void **p, void *end, struct ceph_osdmap *map)
++{
++	return __decode_pools(p, end, map, true);
++}
++
+ /*
+  * decode a full map.
+  */
+@@ -692,7 +741,6 @@ static int osdmap_decode(void **p, void *end, struct ceph_osdmap *map)
+ 	u32 max;
+ 	u32 len, i;
+ 	int err;
+-	struct ceph_pg_pool_info *pi;
  
--static int __decode_pool_names(void **p, void *end, struct ceph_osdmap *map)
-+static int decode_pool_names(void **p, void *end, struct ceph_osdmap *map)
- {
- 	struct ceph_pg_pool_info *pi;
- 	u32 num, len;
-@@ -723,7 +723,7 @@ static int osdmap_decode(void **p, void *end, struct ceph_osdmap *map)
- 			goto bad;
- 		}
- 		pi->id = ceph_decode_64(p);
--		err = __decode_pool(p, end, pi);
-+		err = decode_pool(p, end, pi);
- 		if (err < 0) {
- 			kfree(pi);
- 			goto bad;
-@@ -731,7 +731,8 @@ static int osdmap_decode(void **p, void *end, struct ceph_osdmap *map)
- 		__insert_pg_pool(&map->pg_pools, pi);
+ 	dout("%s %p to %p len %d\n", __func__, *p, end, (int)(end - *p));
+ 
+@@ -714,22 +762,10 @@ static int osdmap_decode(void **p, void *end, struct ceph_osdmap *map)
+ 	ceph_decode_copy(p, &map->created, sizeof(map->created));
+ 	ceph_decode_copy(p, &map->modified, sizeof(map->modified));
+ 
+-	ceph_decode_32_safe(p, end, max, e_inval);
+-	while (max--) {
+-		ceph_decode_need(p, end, 8 + 2, e_inval);
+-		pi = kzalloc(sizeof(*pi), GFP_NOFS);
+-		if (!pi) {
+-			err = -ENOMEM;
+-			goto bad;
+-		}
+-		pi->id = ceph_decode_64(p);
+-		err = decode_pool(p, end, pi);
+-		if (err < 0) {
+-			kfree(pi);
+-			goto bad;
+-		}
+-		__insert_pg_pool(&map->pg_pools, pi);
+-	}
++	/* pools */
++	err = decode_pools(p, end, map);
++	if (err)
++		goto bad;
+ 
+ 	/* pool_name */
+ 	err = decode_pool_names(p, end, map);
+@@ -928,26 +964,10 @@ struct ceph_osdmap *osdmap_apply_incremental(void **p, void *end,
+ 		newcrush = NULL;
  	}
  
--	err = __decode_pool_names(p, end, map);
-+	/* pool_name */
-+	err = decode_pool_names(p, end, map);
- 	if (err)
- 		goto bad;
+-	/* new_pool */
+-	ceph_decode_32_safe(p, end, len, e_inval);
+-	while (len--) {
+-		struct ceph_pg_pool_info *pi;
+-
+-		ceph_decode_64_safe(p, end, pool, e_inval);
+-		pi = __lookup_pg_pool(&map->pg_pools, pool);
+-		if (!pi) {
+-			pi = kzalloc(sizeof(*pi), GFP_NOFS);
+-			if (!pi) {
+-				err = -ENOMEM;
+-				goto bad;
+-			}
+-			pi->id = pool;
+-			__insert_pg_pool(&map->pg_pools, pi);
+-		}
+-		err = decode_pool(p, end, pi);
+-		if (err < 0)
+-			goto bad;
+-	}
++	/* new_pools */
++	err = decode_new_pools(p, end, map);
++	if (err)
++		goto bad;
  
-@@ -943,12 +944,13 @@ struct ceph_osdmap *osdmap_apply_incremental(void **p, void *end,
- 			pi->id = pool;
- 			__insert_pg_pool(&map->pg_pools, pi);
- 		}
--		err = __decode_pool(p, end, pi);
-+		err = decode_pool(p, end, pi);
- 		if (err < 0)
- 			goto bad;
- 	}
- 
--	err = __decode_pool_names(p, end, map);
-+	/* new_pool_names */
-+	err = decode_pool_names(p, end, map);
- 	if (err)
- 		goto bad;
- 
+ 	/* new_pool_names */
+ 	err = decode_pool_names(p, end, map);
 -- 
 1.7.10.4
 
