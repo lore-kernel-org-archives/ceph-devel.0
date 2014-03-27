@@ -1,98 +1,117 @@
 From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: [PATCH 18/33] libceph: generalize ceph_pg_mapping
-Date: Thu, 27 Mar 2014 20:18:04 +0200
-Message-ID: <1395944299-21970-19-git-send-email-ilya.dryomov@inktank.com>
+Subject: [PATCH 19/33] libceph: primary_temp infrastructure
+Date: Thu, 27 Mar 2014 20:18:05 +0200
+Message-ID: <1395944299-21970-20-git-send-email-ilya.dryomov@inktank.com>
 References: <1395944299-21970-1-git-send-email-ilya.dryomov@inktank.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ee0-f51.google.com ([74.125.83.51]:57919 "EHLO
-	mail-ee0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757121AbaC0STG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Mar 2014 14:19:06 -0400
-Received: by mail-ee0-f51.google.com with SMTP id c13so3220389eek.38
-        for <ceph-devel@vger.kernel.org>; Thu, 27 Mar 2014 11:19:04 -0700 (PDT)
+Received: from mail-ee0-f42.google.com ([74.125.83.42]:36096 "EHLO
+	mail-ee0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757121AbaC0STI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Mar 2014 14:19:08 -0400
+Received: by mail-ee0-f42.google.com with SMTP id d17so3232567eek.29
+        for <ceph-devel@vger.kernel.org>; Thu, 27 Mar 2014 11:19:07 -0700 (PDT)
 Received: from localhost ([109.110.66.7])
-        by mx.google.com with ESMTPSA id a42sm5981895ees.10.2014.03.27.11.19.03
+        by mx.google.com with ESMTPSA id 48sm5965677eei.24.2014.03.27.11.19.05
         for <ceph-devel@vger.kernel.org>
         (version=TLSv1.2 cipher=RC4-SHA bits=128/128);
-        Thu, 27 Mar 2014 11:19:04 -0700 (PDT)
+        Thu, 27 Mar 2014 11:19:06 -0700 (PDT)
 In-Reply-To: <1395944299-21970-1-git-send-email-ilya.dryomov@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-In preparation for adding support for primary_temp mappings, generalize
-struct ceph_pg_mapping so it can hold mappings other than pg_temp.
+Add primary_temp mappings infrastructure.  struct ceph_pg_mapping is
+overloaded, primary_temp mappings are stored in an rb-tree, rooted at
+ceph_osdmap, in a manner similar to pg_temp mappings.
+
+Dump primary_temp mappings to /sys/kernel/debug/ceph/<client>/osdmap,
+one 'primary_temp <pgid> <osd>' per line, e.g:
+
+    primary_temp 2.6 4
 
 Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
 ---
- include/linux/ceph/osdmap.h |    9 +++++++--
- net/ceph/debugfs.c          |    4 ++--
- net/ceph/osdmap.c           |    8 ++++----
- 3 files changed, 13 insertions(+), 8 deletions(-)
+ include/linux/ceph/osdmap.h |    5 +++++
+ net/ceph/debugfs.c          |    7 +++++++
+ net/ceph/osdmap.c           |   10 +++++++++-
+ 3 files changed, 21 insertions(+), 1 deletion(-)
 
 diff --git a/include/linux/ceph/osdmap.h b/include/linux/ceph/osdmap.h
-index 46c3e304c3d8..4837e58e3203 100644
+index 4837e58e3203..db4fb6322aae 100644
 --- a/include/linux/ceph/osdmap.h
 +++ b/include/linux/ceph/osdmap.h
-@@ -60,8 +60,13 @@ struct ceph_object_id {
- struct ceph_pg_mapping {
- 	struct rb_node node;
- 	struct ceph_pg pgid;
--	int len;
--	int osds[];
-+
-+	union {
+@@ -66,6 +66,9 @@ struct ceph_pg_mapping {
+ 			int len;
+ 			int osds[];
+ 		} pg_temp;
 +		struct {
-+			int len;
-+			int osds[];
-+		} pg_temp;
-+	};
++			int osd;
++		} primary_temp;
+ 	};
  };
  
- struct ceph_osdmap {
+@@ -83,6 +86,8 @@ struct ceph_osdmap {
+ 	struct ceph_entity_addr *osd_addr;
+ 
+ 	struct rb_root pg_temp;
++	struct rb_root primary_temp;
++
+ 	struct rb_root pg_pools;
+ 	u32 pool_max;
+ 
 diff --git a/net/ceph/debugfs.c b/net/ceph/debugfs.c
-index c45d235e774e..5865f2c9580a 100644
+index 5865f2c9580a..612bf55e6a8b 100644
 --- a/net/ceph/debugfs.c
 +++ b/net/ceph/debugfs.c
-@@ -88,9 +88,9 @@ static int osdmap_show(struct seq_file *s, void *p)
- 
- 		seq_printf(s, "pg_temp %llu.%x [", pg->pgid.pool,
- 			   pg->pgid.seed);
--		for (i = 0; i < pg->len; i++)
-+		for (i = 0; i < pg->pg_temp.len; i++)
- 			seq_printf(s, "%s%d", (i == 0 ? "" : ","),
--				   pg->osds[i]);
-+				   pg->pg_temp.osds[i]);
+@@ -93,6 +93,13 @@ static int osdmap_show(struct seq_file *s, void *p)
+ 				   pg->pg_temp.osds[i]);
  		seq_printf(s, "]\n");
  	}
++	for (n = rb_first(&map->primary_temp); n; n = rb_next(n)) {
++		struct ceph_pg_mapping *pg =
++			rb_entry(n, struct ceph_pg_mapping, node);
++
++		seq_printf(s, "primary_temp %llu.%x %d\n", pg->pgid.pool,
++			   pg->pgid.seed, pg->primary_temp.osd);
++	}
  
+ 	return 0;
+ }
 diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
-index ae96c73aff71..401af78ad741 100644
+index 401af78ad741..d78c3e5d60f7 100644
 --- a/net/ceph/osdmap.c
 +++ b/net/ceph/osdmap.c
-@@ -822,9 +822,9 @@ static int __decode_pg_temp(void **p, void *end, struct ceph_osdmap *map,
- 				return -ENOMEM;
+@@ -343,7 +343,7 @@ bad:
  
- 			pg->pgid = pgid;
--			pg->len = len;
-+			pg->pg_temp.len = len;
- 			for (i = 0; i < len; i++)
--				pg->osds[i] = ceph_decode_32(p);
-+				pg->pg_temp.osds[i] = ceph_decode_32(p);
- 
- 			ret = __insert_pg_mapping(pg, &map->pg_temp);
- 			if (ret) {
-@@ -1275,8 +1275,8 @@ static int *calc_pg_raw(struct ceph_osdmap *osdmap, struct ceph_pg pgid,
- 				    pool->pg_num_mask);
- 	pg = __lookup_pg_mapping(&osdmap->pg_temp, pgid);
- 	if (pg) {
--		*num = pg->len;
--		return pg->osds;
-+		*num = pg->pg_temp.len;
-+		return pg->pg_temp.osds;
+ /*
+  * rbtree of pg_mapping for handling pg_temp (explicit mapping of pgid
+- * to a set of osds)
++ * to a set of osds) and primary_temp (explicit primary setting)
+  */
+ static int pgid_cmp(struct ceph_pg l, struct ceph_pg r)
+ {
+@@ -633,6 +633,13 @@ void ceph_osdmap_destroy(struct ceph_osdmap *map)
+ 		rb_erase(&pg->node, &map->pg_temp);
+ 		kfree(pg);
  	}
++	while (!RB_EMPTY_ROOT(&map->primary_temp)) {
++		struct ceph_pg_mapping *pg =
++			rb_entry(rb_first(&map->primary_temp),
++				 struct ceph_pg_mapping, node);
++		rb_erase(&pg->node, &map->primary_temp);
++		kfree(pg);
++	}
+ 	while (!RB_EMPTY_ROOT(&map->pg_pools)) {
+ 		struct ceph_pg_pool_info *pi =
+ 			rb_entry(rb_first(&map->pg_pools),
+@@ -960,6 +967,7 @@ struct ceph_osdmap *ceph_osdmap_decode(void **p, void *end)
+ 		return ERR_PTR(-ENOMEM);
  
- 	/* crush */
+ 	map->pg_temp = RB_ROOT;
++	map->primary_temp = RB_ROOT;
+ 	mutex_init(&map->crush_scratch_mutex);
+ 
+ 	ret = osdmap_decode(p, end, map);
 -- 
 1.7.10.4
 
