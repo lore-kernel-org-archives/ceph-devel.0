@@ -1,73 +1,87 @@
-From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: [PATCH 25/33] libceph: ceph_can_shift_osds(pool) and pool type defines
-Date: Thu, 27 Mar 2014 20:18:11 +0200
-Message-ID: <1395944299-21970-26-git-send-email-ilya.dryomov@inktank.com>
-References: <1395944299-21970-1-git-send-email-ilya.dryomov@inktank.com>
+From: Alex Elder <elder@ieee.org>
+Subject: Re: [PATCH 01/33] libceph: refer to osdmap directly in osdmap_show()
+Date: Thu, 27 Mar 2014 14:09:50 -0500
+Message-ID: <5334777E.8060805@ieee.org>
+References: <1395944299-21970-1-git-send-email-ilya.dryomov@inktank.com> <1395944299-21970-2-git-send-email-ilya.dryomov@inktank.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ee0-f48.google.com ([74.125.83.48]:40211 "EHLO
-	mail-ee0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757157AbaC0STW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Mar 2014 14:19:22 -0400
-Received: by mail-ee0-f48.google.com with SMTP id b57so3191520eek.7
-        for <ceph-devel@vger.kernel.org>; Thu, 27 Mar 2014 11:19:21 -0700 (PDT)
-Received: from localhost ([109.110.66.7])
-        by mx.google.com with ESMTPSA id o4sm5973134eef.20.2014.03.27.11.19.20
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=RC4-SHA bits=128/128);
-        Thu, 27 Mar 2014 11:19:21 -0700 (PDT)
-In-Reply-To: <1395944299-21970-1-git-send-email-ilya.dryomov@inktank.com>
+Received: from mail-ig0-f177.google.com ([209.85.213.177]:44555 "EHLO
+	mail-ig0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756045AbaC0TJ2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Mar 2014 15:09:28 -0400
+Received: by mail-ig0-f177.google.com with SMTP id ur14so1999499igb.16
+        for <ceph-devel@vger.kernel.org>; Thu, 27 Mar 2014 12:09:28 -0700 (PDT)
+In-Reply-To: <1395944299-21970-2-git-send-email-ilya.dryomov@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Ilya Dryomov <ilya.dryomov@inktank.com>, ceph-devel@vger.kernel.org
 
-Bring in pg_pool_t::can_shift_osds() counterpart along with pool type
-defines.
+On 03/27/2014 01:17 PM, Ilya Dryomov wrote:
+> To make it more readable and save screen space.
 
-Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
----
- include/linux/ceph/osdmap.h |   12 ++++++++++++
- include/linux/ceph/rados.h  |    5 +++--
- 2 files changed, 15 insertions(+), 2 deletions(-)
+Looks good.
 
-diff --git a/include/linux/ceph/osdmap.h b/include/linux/ceph/osdmap.h
-index 0895797b9e28..4e28c1e5d62f 100644
---- a/include/linux/ceph/osdmap.h
-+++ b/include/linux/ceph/osdmap.h
-@@ -41,6 +41,18 @@ struct ceph_pg_pool_info {
- 	char *name;
- };
- 
-+static inline bool ceph_can_shift_osds(struct ceph_pg_pool_info *pool)
-+{
-+	switch (pool->type) {
-+	case CEPH_POOL_TYPE_REP:
-+		return true;
-+	case CEPH_POOL_TYPE_EC:
-+		return false;
-+	default:
-+		BUG_ON(1);
-+	}
-+}
-+
- struct ceph_object_locator {
- 	s64 pool;
- };
-diff --git a/include/linux/ceph/rados.h b/include/linux/ceph/rados.h
-index bb6f40c9cb0f..f20e0d8a2155 100644
---- a/include/linux/ceph/rados.h
-+++ b/include/linux/ceph/rados.h
-@@ -81,8 +81,9 @@ struct ceph_pg_v1 {
-  */
- #define CEPH_NOPOOL  ((__u64) (-1))  /* pool id not defined */
- 
--#define CEPH_PG_TYPE_REP     1
--#define CEPH_PG_TYPE_RAID4   2
-+#define CEPH_POOL_TYPE_REP     1
-+#define CEPH_POOL_TYPE_RAID4   2 /* never implemented */
-+#define CEPH_POOL_TYPE_EC      3
- 
- /*
-  * stable_mod func is used to control number of placement groups.
--- 
-1.7.10.4
+Reviewed-by: Alex Elder <elder@linaro.org>
+
+> Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
+> ---
+>  net/ceph/debugfs.c |   26 ++++++++++++++------------
+>  1 file changed, 14 insertions(+), 12 deletions(-)
+> 
+> diff --git a/net/ceph/debugfs.c b/net/ceph/debugfs.c
+> index 258a382e75ed..d225842c7b41 100644
+> --- a/net/ceph/debugfs.c
+> +++ b/net/ceph/debugfs.c
+> @@ -53,34 +53,36 @@ static int osdmap_show(struct seq_file *s, void *p)
+>  {
+>  	int i;
+>  	struct ceph_client *client = s->private;
+> +	struct ceph_osdmap *map = client->osdc.osdmap;
+>  	struct rb_node *n;
+>  
+> -	if (client->osdc.osdmap == NULL)
+> +	if (map == NULL)
+>  		return 0;
+> -	seq_printf(s, "epoch %d\n", client->osdc.osdmap->epoch);
+> +
+> +	seq_printf(s, "epoch %d\n", map->epoch);
+>  	seq_printf(s, "flags%s%s\n",
+> -		   (client->osdc.osdmap->flags & CEPH_OSDMAP_NEARFULL) ?
+> -		   " NEARFULL" : "",
+> -		   (client->osdc.osdmap->flags & CEPH_OSDMAP_FULL) ?
+> -		   " FULL" : "");
+> -	for (n = rb_first(&client->osdc.osdmap->pg_pools); n; n = rb_next(n)) {
+> +		   (map->flags & CEPH_OSDMAP_NEARFULL) ?  " NEARFULL" : "",
+> +		   (map->flags & CEPH_OSDMAP_FULL) ?  " FULL" : "");
+> +
+> +	for (n = rb_first(&map->pg_pools); n; n = rb_next(n)) {
+>  		struct ceph_pg_pool_info *pool =
+>  			rb_entry(n, struct ceph_pg_pool_info, node);
+> +
+>  		seq_printf(s, "pg_pool %llu pg_num %d / %d\n",
+>  			   (unsigned long long)pool->id, pool->pg_num,
+>  			   pool->pg_num_mask);
+>  	}
+> -	for (i = 0; i < client->osdc.osdmap->max_osd; i++) {
+> -		struct ceph_entity_addr *addr =
+> -			&client->osdc.osdmap->osd_addr[i];
+> -		int state = client->osdc.osdmap->osd_state[i];
+> +	for (i = 0; i < map->max_osd; i++) {
+> +		struct ceph_entity_addr *addr = &map->osd_addr[i];
+> +		int state = map->osd_state[i];
+>  		char sb[64];
+>  
+>  		seq_printf(s, "\tosd%d\t%s\t%3d%%\t(%s)\n",
+>  			   i, ceph_pr_addr(&addr->in_addr),
+> -			   ((client->osdc.osdmap->osd_weight[i]*100) >> 16),
+> +			   ((map->osd_weight[i]*100) >> 16),
+>  			   ceph_osdmap_state_str(sb, sizeof(sb), state));
+>  	}
+> +
+>  	return 0;
+>  }
+>  
+> 
 
