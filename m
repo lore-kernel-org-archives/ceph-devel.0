@@ -1,59 +1,51 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: AVX optimized gf-complete
-Date: Wed, 26 Mar 2014 23:44:16 +0100
-Message-ID: <53335840.2080702@dachary.org>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="DnNSwcbl7MrwprjJcSWJdPBXTxCqS0J3M"
+From: Min Chen <minchen@ubuntukylin.com>
+Subject: [PATCH 0/2] rbd: copy-on-read for clones, add an option for copy-on-read
+Date: Thu, 27 Mar 2014 08:38:16 +0800
+Message-ID: <1395880698-20479-1-git-send-email-minchen@ubuntukylin.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:55575 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754569AbaCZWoV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 26 Mar 2014 18:44:21 -0400
+Received: from m59-178.qiye.163.com ([123.58.178.59]:55817 "EHLO
+	m59-178.qiye.163.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753291AbaC0Aoq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 26 Mar 2014 20:44:46 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Kevin Greenan <kmgreen2@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: josh.durgin@inktank.com, Yunchuan Wen <yunchuanwen@ubuntukylin.com>, Li Wang <liwang@ubuntukylin.com>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---DnNSwcbl7MrwprjJcSWJdPBXTxCqS0J3M
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Add an option rbd_clone_cor to enable copy-on-read
 
-Hi Kevin,
+Signed-off-by: Min Chen <minchen@ubuntukylin.com>
+Signed-off-by: Yunchuan Wen <yunchuanwen@ubuntukylin.com>
+Signed-off-by: Li Wang <liwang@ubuntukylin.com>
+---
+ src/common/config_opts.h |    1 +
+ src/librbd/AioRequest.cc |    1 +
+ 2 files changed, 2 insertions(+)
 
-Although https://bitbucket.org/jimplank/gf-complete does not have explici=
-t #if related to AVX http://en.wikipedia.org/wiki/Advanced_Vector_Extensi=
-ons , it is used when the compiler supports it ( https://bitbucket.org/ji=
-mplank/gf-complete/src/f8ff1e2f64fc88bf74861a0ceec44d130ff1902c/m4/ax_ext=
-=2Em4?at=3Dmaster#cl-252 ) and some AVX specific instructions are used in=
- the compiled binary.
+diff --git a/src/common/config_opts.h b/src/common/config_opts.h
+index 0d03809..99167b0 100644
+--- a/src/common/config_opts.h
++++ b/src/common/config_opts.h
+@@ -620,6 +620,7 @@ OPTION(rbd_cache_block_writes_upfront, OPT_BOOL, false) // whether to block writ
+ OPTION(rbd_concurrent_management_ops, OPT_INT, 10) // how many operations can be in flight for a management operation like deleting or resizing an image
+ OPTION(rbd_balance_snap_reads, OPT_BOOL, false)
+ OPTION(rbd_localize_snap_reads, OPT_BOOL, false)
++OPTION(rbd_clone_cor, OPT_BOOL, false)//copy-on-read option for rbd clones
+ 
+ /*
+  * The following options change the behavior for librbd's image creation methods that
+diff --git a/src/librbd/AioRequest.cc b/src/librbd/AioRequest.cc
+index 11e111f..e8fb657 100644
+--- a/src/librbd/AioRequest.cc
++++ b/src/librbd/AioRequest.cc
+@@ -59,6 +59,7 @@ namespace librbd {
+     ldout(m_ictx->cct, 20) << "should_complete " << this << " " << m_oid << " " << m_object_off << "~" << m_object_len
+ 			   << " r = " << r << dendl;
+ 
++    bool COR = m_ictx->cct->_conf->rbd_clone_cor;
+     if (!m_tried_parent && r == -ENOENT) {
+       RWLock::RLocker l(m_ictx->snap_lock);
+       RWLock::RLocker l2(m_ictx->parent_lock);
+-- 
+1.7.10.4
 
-http://gcc.gnu.org/onlinedocs/gcc-4.8.2/gcc/i386-and-x86-64-Options.html#=
-i386-and-x86-64-Options suggests that AVX is not widely spread.
-
-How important is AVX to gf-complete ? Is it nice to have but with margina=
-l benefits ? Or does it make a significant difference ?
-
-Thanks for all the help :-)
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-
-
---DnNSwcbl7MrwprjJcSWJdPBXTxCqS0J3M
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.20 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlMzWEMACgkQ8dLMyEl6F22YFQCghVIx6aVau5pwZd/tU+tWnu+v
-DkoAniL0AgBKe9G7g0CLXqq6DZNDYK5I
-=M0k3
------END PGP SIGNATURE-----
-
---DnNSwcbl7MrwprjJcSWJdPBXTxCqS0J3M--
