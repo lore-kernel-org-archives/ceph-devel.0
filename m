@@ -1,197 +1,151 @@
 From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: [PATCH 16/33] libceph: introduce decode{,_new}_pg_temp() and switch to them
-Date: Thu, 27 Mar 2014 20:18:02 +0200
-Message-ID: <1395944299-21970-17-git-send-email-ilya.dryomov@inktank.com>
+Subject: [PATCH 17/33] libceph: introduce get_osdmap_client_data_v()
+Date: Thu, 27 Mar 2014 20:18:03 +0200
+Message-ID: <1395944299-21970-18-git-send-email-ilya.dryomov@inktank.com>
 References: <1395944299-21970-1-git-send-email-ilya.dryomov@inktank.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ee0-f47.google.com ([74.125.83.47]:38469 "EHLO
-	mail-ee0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757116AbaC0STB (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Mar 2014 14:19:01 -0400
-Received: by mail-ee0-f47.google.com with SMTP id b15so3189374eek.20
-        for <ceph-devel@vger.kernel.org>; Thu, 27 Mar 2014 11:19:00 -0700 (PDT)
+Received: from mail-ee0-f53.google.com ([74.125.83.53]:45763 "EHLO
+	mail-ee0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757121AbaC0STD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Mar 2014 14:19:03 -0400
+Received: by mail-ee0-f53.google.com with SMTP id b57so3199182eek.40
+        for <ceph-devel@vger.kernel.org>; Thu, 27 Mar 2014 11:19:02 -0700 (PDT)
 Received: from localhost ([109.110.66.7])
-        by mx.google.com with ESMTPSA id 44sm5952496eek.30.2014.03.27.11.18.59
+        by mx.google.com with ESMTPSA id s46sm5991109ees.3.2014.03.27.11.19.01
         for <ceph-devel@vger.kernel.org>
         (version=TLSv1.2 cipher=RC4-SHA bits=128/128);
-        Thu, 27 Mar 2014 11:18:59 -0700 (PDT)
+        Thu, 27 Mar 2014 11:19:02 -0700 (PDT)
 In-Reply-To: <1395944299-21970-1-git-send-email-ilya.dryomov@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Consolidate pg_temp (full map, map<pg_t, vector<u32>>) and new_pg_temp
-(inc map, same) decoding logic into a common helper and switch to it.
+Full and incremental osdmaps are structured identically and have
+identical headers.  Add a helper to decode both "old" (16-bit version,
+v6) and "new" (8-bit struct_v+struct_compat+struct_len, v7) osdmap
+enconding headers and switch to it.
 
 Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
 ---
- net/ceph/osdmap.c |  139 ++++++++++++++++++++++++++---------------------------
- 1 file changed, 67 insertions(+), 72 deletions(-)
+ net/ceph/osdmap.c |   81 ++++++++++++++++++++++++++++++++++++++++++-----------
+ 1 file changed, 65 insertions(+), 16 deletions(-)
 
 diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
-index 4565c72fec5c..0134df3639d2 100644
+index 0134df3639d2..ae96c73aff71 100644
 --- a/net/ceph/osdmap.c
 +++ b/net/ceph/osdmap.c
-@@ -732,6 +732,67 @@ static int decode_new_pools(void **p, void *end, struct ceph_osdmap *map)
- 	return __decode_pools(p, end, map, true);
+@@ -683,6 +683,63 @@ static int osdmap_set_max_osd(struct ceph_osdmap *map, int max)
+ 	return 0;
  }
  
-+static int __decode_pg_temp(void **p, void *end, struct ceph_osdmap *map,
-+			    bool incremental)
++#define OSDMAP_WRAPPER_COMPAT_VER	7
++#define OSDMAP_CLIENT_DATA_COMPAT_VER	1
++
++/*
++ * Return 0 or error.  On success, *v is set to 0 for old (v6) osdmaps,
++ * to struct_v of the client_data section for new (v7 and above)
++ * osdmaps.
++ */
++static int get_osdmap_client_data_v(void **p, void *end,
++				    const char *s, u8 *v)
 +{
-+	u32 n;
++	u8 struct_v;
 +
-+	ceph_decode_32_safe(p, end, n, e_inval);
-+	while (n--) {
-+		struct ceph_pg pgid;
-+		u32 len, i;
-+		int ret;
++	ceph_decode_8_safe(p, end, struct_v, e_inval);
++	if (struct_v >= 7) {
++		u8 struct_compat;
 +
-+		ret = ceph_decode_pgid(p, end, &pgid);
-+		if (ret)
-+			return ret;
-+
-+		ceph_decode_32_safe(p, end, len, e_inval);
-+
-+		ret = __remove_pg_mapping(&map->pg_temp, pgid);
-+		BUG_ON(!incremental && ret != -ENOENT);
-+
-+		if (!incremental || len > 0) {
-+			struct ceph_pg_mapping *pg;
-+
-+			ceph_decode_need(p, end, len*sizeof(u32), e_inval);
-+
-+			if (len > (UINT_MAX - sizeof(*pg)) / sizeof(u32))
-+				return -EINVAL;
-+
-+			pg = kzalloc(sizeof(*pg) + len*sizeof(u32), GFP_NOFS);
-+			if (!pg)
-+				return -ENOMEM;
-+
-+			pg->pgid = pgid;
-+			pg->len = len;
-+			for (i = 0; i < len; i++)
-+				pg->osds[i] = ceph_decode_32(p);
-+
-+			ret = __insert_pg_mapping(pg, &map->pg_temp);
-+			if (ret) {
-+				kfree(pg);
-+				return ret;
-+			}
++		ceph_decode_8_safe(p, end, struct_compat, e_inval);
++		if (struct_compat > OSDMAP_WRAPPER_COMPAT_VER) {
++			pr_warning("got v %d cv %d > %d of %s ceph_osdmap\n",
++				   struct_v, struct_compat,
++				   OSDMAP_WRAPPER_COMPAT_VER, s);
++			return -EINVAL;
 +		}
++		*p += 4; /* ignore wrapper struct_len */
++
++		ceph_decode_8_safe(p, end, struct_v, e_inval);
++		ceph_decode_8_safe(p, end, struct_compat, e_inval);
++		if (struct_compat > OSDMAP_CLIENT_DATA_COMPAT_VER) {
++			pr_warning("got v %d cv %d > %d of %s ceph_osdmap client data\n",
++				   struct_v, struct_compat,
++				   OSDMAP_CLIENT_DATA_COMPAT_VER, s);
++			return -EINVAL;
++		}
++		*p += 4; /* ignore client data struct_len */
++	} else {
++		u16 version;
++
++		*p -= 1;
++		ceph_decode_16_safe(p, end, version, e_inval);
++		if (version < 6) {
++			pr_warning("got v %d < 6 of %s ceph_osdmap\n", version,
++				   s);
++			return -EINVAL;
++		}
++
++		/* old osdmap enconding */
++		struct_v = 0;
 +	}
 +
++	*v = struct_v;
 +	return 0;
 +
 +e_inval:
 +	return -EINVAL;
 +}
 +
-+static int decode_pg_temp(void **p, void *end, struct ceph_osdmap *map)
-+{
-+	return __decode_pg_temp(p, end, map, false);
-+}
-+
-+static int decode_new_pg_temp(void **p, void *end, struct ceph_osdmap *map)
-+{
-+	return __decode_pg_temp(p, end, map, true);
-+}
-+
- /*
-  * decode a full map.
+ static int __decode_pools(void **p, void *end, struct ceph_osdmap *map,
+ 			  bool incremental)
+ {
+@@ -798,7 +855,7 @@ static int decode_new_pg_temp(void **p, void *end, struct ceph_osdmap *map)
   */
-@@ -804,36 +865,9 @@ static int osdmap_decode(void **p, void *end, struct ceph_osdmap *map)
- 		ceph_decode_addr(&map->osd_addr[i]);
+ static int osdmap_decode(void **p, void *end, struct ceph_osdmap *map)
+ {
+-	u16 version;
++	u8 struct_v;
+ 	u32 epoch = 0;
+ 	void *start = *p;
+ 	u32 max;
+@@ -807,15 +864,9 @@ static int osdmap_decode(void **p, void *end, struct ceph_osdmap *map)
  
- 	/* pg_temp */
--	ceph_decode_32_safe(p, end, len, e_inval);
--	for (i = 0; i < len; i++) {
--		int n, j;
--		struct ceph_pg pgid;
--		struct ceph_pg_mapping *pg;
--
--		err = ceph_decode_pgid(p, end, &pgid);
--		if (err)
--			goto bad;
--		ceph_decode_need(p, end, sizeof(u32), e_inval);
--		n = ceph_decode_32(p);
--		if (n > (UINT_MAX - sizeof(*pg)) / sizeof(u32))
--			goto e_inval;
--		ceph_decode_need(p, end, n * sizeof(u32), e_inval);
--		pg = kmalloc(sizeof(*pg) + n*sizeof(u32), GFP_NOFS);
--		if (!pg) {
--			err = -ENOMEM;
--			goto bad;
--		}
--		pg->pgid = pgid;
--		pg->len = n;
--		for (j = 0; j < n; j++)
--			pg->osds[j] = ceph_decode_32(p);
--
--		err = __insert_pg_mapping(pg, &map->pg_temp);
--		if (err)
--			goto bad;
--		dout(" added pg_temp %lld.%x len %d\n", pgid.pool, pgid.seed,
--		     len);
+ 	dout("%s %p to %p len %d\n", __func__, *p, end, (int)(end - *p));
+ 
+-	ceph_decode_16_safe(p, end, version, e_inval);
+-	if (version > 6) {
+-		pr_warning("got unknown v %d > 6 of osdmap\n", version);
+-		goto e_inval;
 -	}
-+	err = decode_pg_temp(p, end, map);
+-	if (version < 6) {
+-		pr_warning("got old v %d < 6 of osdmap\n", version);
+-		goto e_inval;
+-	}
++	err = get_osdmap_client_data_v(p, end, "full", &struct_v);
 +	if (err)
 +		goto bad;
  
- 	/* crush */
- 	ceph_decode_32_safe(p, end, len, e_inval);
-@@ -1032,48 +1066,9 @@ struct ceph_osdmap *osdmap_apply_incremental(void **p, void *end,
- 	}
+ 	/* fsid, epoch, created, modified */
+ 	ceph_decode_need(p, end, sizeof(map->fsid) + sizeof(u32) +
+@@ -937,15 +988,13 @@ struct ceph_osdmap *osdmap_apply_incremental(void **p, void *end,
+ 	__s32 new_flags, max;
+ 	void *start = *p;
+ 	int err;
+-	u16 version;
++	u8 struct_v;
  
- 	/* new_pg_temp */
--	ceph_decode_32_safe(p, end, len, e_inval);
--	while (len--) {
--		struct ceph_pg_mapping *pg;
--		int j;
--		struct ceph_pg pgid;
--		u32 pglen;
--
--		err = ceph_decode_pgid(p, end, &pgid);
--		if (err)
--			goto bad;
--		ceph_decode_need(p, end, sizeof(u32), e_inval);
--		pglen = ceph_decode_32(p);
--		if (pglen) {
--			ceph_decode_need(p, end, pglen*sizeof(u32), e_inval);
--
--			/* removing existing (if any) */
--			(void) __remove_pg_mapping(&map->pg_temp, pgid);
--
--			/* insert */
--			if (pglen > (UINT_MAX - sizeof(*pg)) / sizeof(u32))
--				goto e_inval;
--			pg = kmalloc(sizeof(*pg) + sizeof(u32)*pglen, GFP_NOFS);
--			if (!pg) {
--				err = -ENOMEM;
--				goto bad;
--			}
--			pg->pgid = pgid;
--			pg->len = pglen;
--			for (j = 0; j < pglen; j++)
--				pg->osds[j] = ceph_decode_32(p);
--			err = __insert_pg_mapping(pg, &map->pg_temp);
--			if (err) {
--				kfree(pg);
--				goto bad;
--			}
--			dout(" added pg_temp %lld.%x len %d\n", pgid.pool,
--			     pgid.seed, pglen);
--		} else {
--			/* remove */
--			__remove_pg_mapping(&map->pg_temp, pgid);
--		}
+ 	dout("%s %p to %p len %d\n", __func__, *p, end, (int)(end - *p));
+ 
+-	ceph_decode_16_safe(p, end, version, e_inval);
+-	if (version != 6) {
+-		pr_warning("got unknown v %d != 6 of inc osdmap\n", version);
+-		goto e_inval;
 -	}
-+	err = decode_new_pg_temp(p, end, map);
++	err = get_osdmap_client_data_v(p, end, "inc", &struct_v);
 +	if (err)
 +		goto bad;
  
- 	/* ignore the rest */
- 	*p = end;
+ 	/* fsid, epoch, modified, new_pool_max, new_flags */
+ 	ceph_decode_need(p, end, sizeof(fsid) + sizeof(u32) + sizeof(modified) +
 -- 
 1.7.10.4
 
