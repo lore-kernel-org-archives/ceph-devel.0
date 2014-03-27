@@ -1,67 +1,75 @@
 From: Alex Elder <elder@ieee.org>
-Subject: Re: [PATCH 07/33] libceph: safely decode max_osd value in osdmap_decode()
-Date: Thu, 27 Mar 2014 14:27:39 -0500
-Message-ID: <53347BAB.9010806@ieee.org>
-References: <1395944299-21970-1-git-send-email-ilya.dryomov@inktank.com> <1395944299-21970-8-git-send-email-ilya.dryomov@inktank.com>
+Subject: Re: [PATCH 08/33] libceph: assert length of osdmap osd arrays
+Date: Thu, 27 Mar 2014 14:30:33 -0500
+Message-ID: <53347C59.9040004@ieee.org>
+References: <1395944299-21970-1-git-send-email-ilya.dryomov@inktank.com> <1395944299-21970-9-git-send-email-ilya.dryomov@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f169.google.com ([209.85.213.169]:49102 "EHLO
-	mail-ig0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754643AbaC0T1S (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Mar 2014 15:27:18 -0400
-Received: by mail-ig0-f169.google.com with SMTP id h18so1859694igc.2
-        for <ceph-devel@vger.kernel.org>; Thu, 27 Mar 2014 12:27:17 -0700 (PDT)
-In-Reply-To: <1395944299-21970-8-git-send-email-ilya.dryomov@inktank.com>
+Received: from mail-ie0-f169.google.com ([209.85.223.169]:55756 "EHLO
+	mail-ie0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757104AbaC0TaM (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Mar 2014 15:30:12 -0400
+Received: by mail-ie0-f169.google.com with SMTP id to1so3957501ieb.0
+        for <ceph-devel@vger.kernel.org>; Thu, 27 Mar 2014 12:30:11 -0700 (PDT)
+In-Reply-To: <1395944299-21970-9-git-send-email-ilya.dryomov@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Ilya Dryomov <ilya.dryomov@inktank.com>, ceph-devel@vger.kernel.org
 
 On 03/27/2014 01:17 PM, Ilya Dryomov wrote:
-> max_osd value is not covered by any ceph_decode_need().  Use a safe
-> version of ceph_decode_* macro to decode it.
+> Assert length of osd_state, osd_weight and osd_addr arrays.  They
+> should all have exactly max_osd elements after the call to
+> osdmap_set_max_osd().
 
-I know it's slightly more efficient, but I never liked those
-ceph_decode_need() statements that added together a bunch
-of things you're about to go decode...
+Since this function is allowed to fail, could these
+conditions lead to returning an error code rather than
+killing the machine?
 
-Anyway, this is the right thing to do.
+Your testing incoming data (which you can't necessarily
+trust), not a fundamental assumption of the code, so
+a BUG() seems harsh.
 
-Looks good.
+Checking is absolutely the right thing to do.
+
+Switch it to return an error if you can.  If you feel
+BUG() is right, so be it.  Either way:
 
 Reviewed-by: Alex Elder <elder@linaro.org>
 
 > Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
 > ---
->  net/ceph/osdmap.c |    6 ++++--
->  1 file changed, 4 insertions(+), 2 deletions(-)
+>  net/ceph/osdmap.c |    8 ++++----
+>  1 file changed, 4 insertions(+), 4 deletions(-)
 > 
 > diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
-> index 298d076eee89..ec06010657b3 100644
+> index ec06010657b3..19aca4d3c5dd 100644
 > --- a/net/ceph/osdmap.c
 > +++ b/net/ceph/osdmap.c
-> @@ -687,9 +687,10 @@ static int osdmap_set_max_osd(struct ceph_osdmap *map, int max)
->  static int osdmap_decode(void **p, void *end, struct ceph_osdmap *map)
->  {
->  	u16 version;
-> -	u32 len, max, i;
->  	u32 epoch = 0;
->  	void *start = *p;
-> +	u32 max;
-> +	u32 len, i;
->  	int err;
->  	struct ceph_pg_pool_info *pi;
+> @@ -745,19 +745,19 @@ static int osdmap_decode(void **p, void *end, struct ceph_osdmap *map)
+>  	if (err)
+>  		goto bad;
 >  
-> @@ -736,7 +737,8 @@ static int osdmap_decode(void **p, void *end, struct ceph_osdmap *map)
+> -	/* osds */
+> +	/* osd_state, osd_weight, osd_addrs->client_addr */
+>  	ceph_decode_need(p, end, 3*sizeof(u32) +
+>  			 map->max_osd*(1 + sizeof(*map->osd_weight) +
+>  				       sizeof(*map->osd_addr)), e_inval);
 >  
->  	ceph_decode_32_safe(p, end, map->flags, e_inval);
+> -	*p += 4; /* skip length field (should match max) */
+> +	BUG_ON(ceph_decode_32(p) != map->max_osd);
+>  	ceph_decode_copy(p, map->osd_state, map->max_osd);
 >  
-> -	max = ceph_decode_32(p);
-> +	/* max_osd */
-> +	ceph_decode_32_safe(p, end, max, e_inval);
+> -	*p += 4; /* skip length field (should match max) */
+> +	BUG_ON(ceph_decode_32(p) != map->max_osd);
+>  	for (i = 0; i < map->max_osd; i++)
+>  		map->osd_weight[i] = ceph_decode_32(p);
 >  
->  	/* (re)alloc osd arrays */
->  	err = osdmap_set_max_osd(map, max);
+> -	*p += 4; /* skip length field (should match max) */
+> +	BUG_ON(ceph_decode_32(p) != map->max_osd);
+>  	ceph_decode_copy(p, map->osd_addr, map->max_osd*sizeof(*map->osd_addr));
+>  	for (i = 0; i < map->max_osd; i++)
+>  		ceph_decode_addr(&map->osd_addr[i]);
 > 
 
