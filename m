@@ -1,103 +1,56 @@
-From: Alex Elder <elder@ieee.org>
-Subject: Re: [PATCH 06/33] libceph: fixup error handling in osdmap_decode()
-Date: Fri, 28 Mar 2014 11:22:57 -0500
-Message-ID: <5335A1E1.5020909@ieee.org>
-References: <1395944299-21970-1-git-send-email-ilya.dryomov@inktank.com>	<1395944299-21970-7-git-send-email-ilya.dryomov@inktank.com>	<53347B28.7060607@ieee.org> <CALFYKtC67d5Qj7nQJQ200SV0qZVwP5kdOa2wAA6z1hjGtZiBXg@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: jerasure / gf-complete & 32 bits
+Date: Fri, 28 Mar 2014 18:15:41 +0100
+Message-ID: <5335AE3D.1050104@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="SEsMla2aENBrswJTiL841Nexmo7mIHr8o"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f177.google.com ([209.85.213.177]:46899 "EHLO
-	mail-ig0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751373AbaC1QWh (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 28 Mar 2014 12:22:37 -0400
-Received: by mail-ig0-f177.google.com with SMTP id ur14so1050174igb.10
-        for <ceph-devel@vger.kernel.org>; Fri, 28 Mar 2014 09:22:36 -0700 (PDT)
-In-Reply-To: <CALFYKtC67d5Qj7nQJQ200SV0qZVwP5kdOa2wAA6z1hjGtZiBXg@mail.gmail.com>
+Received: from smtp.dmail.dachary.org ([91.121.254.229]:57643 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751712AbaC1RPq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 28 Mar 2014 13:15:46 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <ilya.dryomov@inktank.com>
+To: Kevin Greenan <kmgreen2@gmail.com>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On 03/28/2014 09:56 AM, Ilya Dryomov wrote:
-> On Thu, Mar 27, 2014 at 9:25 PM, Alex Elder <elder@ieee.org> wrote:
->> On 03/27/2014 01:17 PM, Ilya Dryomov wrote:
->>> The existing error handling scheme requires resetting err to -EINVAL
->>> prior to calling any ceph_decode_* macro.  This is ugly and fragile,
->>> and there already are a few places where we would return 0 on error,
->>> due to a missing reset.  Fix this by adding a special e_inval label to
->>> be used by all ceph_decode_* macros.
->>
->> I don't see where it's returning 0 on error, but I think this
->> is a good change anyway.
-> 
-> Here:
-> 
->         err = __decode_pool_names(p, end, map); <--
->         if (err < 0) {
->                 dout("fail to decode pool names");
->                 goto bad;
->         }
-> 
->         ceph_decode_32_safe(p, end, map->pool_max, bad); <--
-> 
->         ceph_decode_32_safe(p, end, map->flags, bad); <--
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--SEsMla2aENBrswJTiL841Nexmo7mIHr8o
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-Fragile indeed.
+Hi Kevin,
 
-I don't particularly like the encoding of an assumed
-label in a macro the way these *_safe() macros do either
-but they do the job and they're all over the place.
-The biggest reason is that it assumes something about
-context, but this is another one, it makes things less
-obvious.  Oh well.
+Someone mentionned a problem (no more information at the moment ;-) about=
+ running jerasure / gf-complete on a 32 bits machine. Does that ring a be=
+ll ? I'll try it out with the test method you suggested:
 
-> Or here (if at least one pg_temp mapping is present):
-> 
->                 err = __insert_pg_mapping(pg, &map->pg_temp); <--
->                 if (err)
->                         goto bad;
->                 dout(" added pg_temp %lld.%x len %d\n", pgid.pool, pgid.seed,
->                      len);
->         }
-> 
->         /* crush */
->         ceph_decode_32_safe(p, end, len, bad); <--
->         dout("osdmap_decode crush len %d from off 0x%x\n", len,
->              (int)(*p - start));
->         ceph_decode_need(p, end, len, bad); <--
-> 
-> And a lot more in osdmap_apply_incremental().  There are three ways out:
-> 
-> (1) a separate variable for helper retvals;
-> (2) resetting err to -EINVAL prior to each ceph_decode_* (if it's
->     not already -EINVAL, of course);
-> (3) a separate e_inval label.
-> 
-> (3) is the only reasonable way to do this.  (1) leads to things like
-> 
->     ret = foo_helper();
->     if (ret) {
->             err = ret;
->             ...
->     }
-> 
-> and (2) is error-prone and hardly maintainable.
+"'gf_methods <w> -A -U' to run all of the tests for w=3D[4,8,16,32,64,128=
+]. Then, I install a fresh Jerasure and run test_all_gfs.sh and time_all_=
+gfs_argv_init.sh. Finally, I install PyECLib (Python library that wraps J=
+erasure, ISA-L (soon) and has some homegrown XOR- codes) and run the scri=
+pts under tests/."
 
-I agree, (3) is the right fix.
+Cheers
 
->> I'd use "einval" or "err_inval" instead of "e_inval".  But
->> no matter.
-> 
-> We already use "e_inval" in osd_client.c (OK, that was me), so I'll
-> keep it for consistency.  I could rename them all to "Einval" to make
-> them stand out though (I see some "Efoo" labels in fs/).
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
 
-Not a big deal.  Beauty is in the eye of the beholder.
 
-					-Alex
-> Thanks,
-> 
->                 Ilya
-> 
+--SEsMla2aENBrswJTiL841Nexmo7mIHr8o
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.20 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlM1rkAACgkQ8dLMyEl6F22UUQCgqjBj7hwaUO2ak0Q3+u5FFf2E
+JfEAoJZT3s+O90zF/Th76hgI7Cf2IqS5
+=thSX
+-----END PGP SIGNATURE-----
+
+--SEsMla2aENBrswJTiL841Nexmo7mIHr8o--
