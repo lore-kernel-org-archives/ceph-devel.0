@@ -1,156 +1,103 @@
-From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: Re: [PATCH 31/33] libceph: add support for osd primary affinity
-Date: Fri, 28 Mar 2014 17:03:23 +0200
-Message-ID: <CALFYKtC9wzxCPHC--=ueoSCEnWZu1w5UjX5HKJsiM85Vp=hQYg@mail.gmail.com>
-References: <1395944299-21970-1-git-send-email-ilya.dryomov@inktank.com>
-	<1395944299-21970-32-git-send-email-ilya.dryomov@inktank.com>
-	<5334914D.5000407@ieee.org>
+From: Alex Elder <elder@ieee.org>
+Subject: Re: [PATCH 06/33] libceph: fixup error handling in osdmap_decode()
+Date: Fri, 28 Mar 2014 11:22:57 -0500
+Message-ID: <5335A1E1.5020909@ieee.org>
+References: <1395944299-21970-1-git-send-email-ilya.dryomov@inktank.com>	<1395944299-21970-7-git-send-email-ilya.dryomov@inktank.com>	<53347B28.7060607@ieee.org> <CALFYKtC67d5Qj7nQJQ200SV0qZVwP5kdOa2wAA6z1hjGtZiBXg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f47.google.com ([209.85.216.47]:44431 "EHLO
-	mail-qa0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751573AbaC1PDX (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 28 Mar 2014 11:03:23 -0400
-Received: by mail-qa0-f47.google.com with SMTP id w5so5316754qac.20
-        for <ceph-devel@vger.kernel.org>; Fri, 28 Mar 2014 08:03:23 -0700 (PDT)
-In-Reply-To: <5334914D.5000407@ieee.org>
+Received: from mail-ig0-f177.google.com ([209.85.213.177]:46899 "EHLO
+	mail-ig0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751373AbaC1QWh (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 28 Mar 2014 12:22:37 -0400
+Received: by mail-ig0-f177.google.com with SMTP id ur14so1050174igb.10
+        for <ceph-devel@vger.kernel.org>; Fri, 28 Mar 2014 09:22:36 -0700 (PDT)
+In-Reply-To: <CALFYKtC67d5Qj7nQJQ200SV0qZVwP5kdOa2wAA6z1hjGtZiBXg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@ieee.org>
+To: Ilya Dryomov <ilya.dryomov@inktank.com>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Thu, Mar 27, 2014 at 10:59 PM, Alex Elder <elder@ieee.org> wrote:
-> On 03/27/2014 01:18 PM, Ilya Dryomov wrote:
->> Respond to non-default primary_affinity values accordingly.  (Primary
->> affinity allows the admin to shift 'primary responsibility' away from
->> specific osds, effectively shifting around the read side of the
->> workload and whatever overhead is incurred by peering and writes by
->> virtue of being the primary).
->
-> The code looks good, I presume it matches the algorithm.
-> I have a few questions below but nothing serious.
->
-> Reviewed-by: Alex Elder <elder@linaro.org>
->
+On 03/28/2014 09:56 AM, Ilya Dryomov wrote:
+> On Thu, Mar 27, 2014 at 9:25 PM, Alex Elder <elder@ieee.org> wrote:
+>> On 03/27/2014 01:17 PM, Ilya Dryomov wrote:
+>>> The existing error handling scheme requires resetting err to -EINVAL
+>>> prior to calling any ceph_decode_* macro.  This is ugly and fragile,
+>>> and there already are a few places where we would return 0 on error,
+>>> due to a missing reset.  Fix this by adding a special e_inval label to
+>>> be used by all ceph_decode_* macros.
 >>
->> Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
->> ---
->>  net/ceph/osdmap.c |   68 +++++++++++++++++++++++++++++++++++++++++++++++++++++
->>  1 file changed, 68 insertions(+)
->>
->> diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
->> index ed52b47d0ddb..8c596a13c60f 100644
->> --- a/net/ceph/osdmap.c
->> +++ b/net/ceph/osdmap.c
->> @@ -1589,6 +1589,72 @@ static int raw_to_up_osds(struct ceph_osdmap *osdmap,
->>       return len;
->>  }
->>
->> +static void apply_primary_affinity(struct ceph_osdmap *osdmap, u32 pps,
->> +                                struct ceph_pg_pool_info *pool,
->> +                                int *osds, int len, int *primary)
->> +{
->> +     int i;
->> +     int pos = -1;
->> +
->> +     /*
->> +      * Do we have any non-default primary_affinity values for these
->> +      * osds?
->> +      */
->> +     if (!osdmap->osd_primary_affinity)
->> +             return;
->> +
->> +     for (i = 0; i < len; i++) {
->> +             if (osds[i] != CRUSH_ITEM_NONE &&
->> +                 osdmap->osd_primary_affinity[i] !=
->> +                                     CEPH_OSD_DEFAULT_PRIMARY_AFFINITY) {
->> +                     break;
->> +             }
->> +     }
->> +     if (i == len)
->> +             return;
->
-> So if they're all DEFAULT_AFFINITY they you don't bother.
+>> I don't see where it's returning 0 on error, but I think this
+>> is a good change anyway.
+> 
+> Here:
+> 
+>         err = __decode_pool_names(p, end, map); <--
+>         if (err < 0) {
+>                 dout("fail to decode pool names");
+>                 goto bad;
+>         }
+> 
+>         ceph_decode_32_safe(p, end, map->pool_max, bad); <--
+> 
+>         ceph_decode_32_safe(p, end, map->flags, bad); <--
 
-Exactly.
+Fragile indeed.
 
->
-> I'm trying to understand what happens if at least one is
-> DEFAULT and at least one is not DEFAULT.
->
->> +
->> +     /*
->> +      * Pick the primary.  Feed both the seed (for the pg) and the
->> +      * osd into the hash/rng so that a proportional fraction of an
->> +      * osd's pgs get rejected as primary.
->> +      */
->> +     for (i = 0; i < len; i++) {
->> +             int o;
->> +             u32 a;
->
-> Maybe "osd" and "aff" for osd number and affinity values?
+I don't particularly like the encoding of an assumed
+label in a macro the way these *_safe() macros do either
+but they do the job and they're all over the place.
+The biggest reason is that it assumes something about
+context, but this is another one, it makes things less
+obvious.  Oh well.
 
-Done.
+> Or here (if at least one pg_temp mapping is present):
+> 
+>                 err = __insert_pg_mapping(pg, &map->pg_temp); <--
+>                 if (err)
+>                         goto bad;
+>                 dout(" added pg_temp %lld.%x len %d\n", pgid.pool, pgid.seed,
+>                      len);
+>         }
+> 
+>         /* crush */
+>         ceph_decode_32_safe(p, end, len, bad); <--
+>         dout("osdmap_decode crush len %d from off 0x%x\n", len,
+>              (int)(*p - start));
+>         ceph_decode_need(p, end, len, bad); <--
+> 
+> And a lot more in osdmap_apply_incremental().  There are three ways out:
+> 
+> (1) a separate variable for helper retvals;
+> (2) resetting err to -EINVAL prior to each ceph_decode_* (if it's
+>     not already -EINVAL, of course);
+> (3) a separate e_inval label.
+> 
+> (3) is the only reasonable way to do this.  (1) leads to things like
+> 
+>     ret = foo_helper();
+>     if (ret) {
+>             err = ret;
+>             ...
+>     }
+> 
+> and (2) is error-prone and hardly maintainable.
 
->
->> +
->> +             o = osds[i];
->> +             if (o == CRUSH_ITEM_NONE)
->> +                     continue;
->> +
->> +             a = osdmap->osd_primary_affinity[o];
->> +             if (a < CEPH_OSD_MAX_PRIMARY_AFFINITY &&
->
-> So CEPH_OSD_MAX_PRIMARY_AFFINITY is actually one more than
-> the maximum allowed value, right?
+I agree, (3) is the right fix.
 
-No, like I mentioned in my reply to another patch, primary affinity is
-very similar to osd weights.  Conceptually, it's a floating point
-value, [0..1].  If it's 1 (DEFAULT, and also MAX) crush output is left
-intact and the first osd in the up set is primary.  If it's less than
-1, a different osd in the up set is "preferred" for the primary role,
-with appropriate probability.  If it's 0, that osd will never be
-primary, not for a single pg, if possible of course.
+>> I'd use "einval" or "err_inval" instead of "e_inval".  But
+>> no matter.
+> 
+> We already use "e_inval" in osd_client.c (OK, that was me), so I'll
+> keep it for consistency.  I could rename them all to "Einval" to make
+> them stand out though (I see some "Efoo" labels in fs/).
 
-And, similar to osd weights, primary affinity is serialized to a fixed
-point value, [0..0x10000].  0x10000 === 1, hence the if (a < MAX).
+Not a big deal.  Beauty is in the eye of the beholder.
 
->
->> +                 (crush_hash32_2(CRUSH_HASH_RJENKINS1,
->> +                                 pps, o) >> 16) >= a) {
->> +                     /*
->> +                      * We chose not to use this primary.  Note it
->> +                      * anyway as a fallback in case we don't pick
->> +                      * anyone else, but keep looking.
->> +                      */
->> +                     if (pos < 0)
->> +                             pos = i;
->> +             } else {
->> +                     pos = i;
->> +                     break;
->> +             }
->> +     }
->> +     if (pos < 0)
->> +             return;
->> +
->> +     *primary = osds[pos];
->> +
->> +     if (ceph_can_shift_osds(pool) && pos > 0) {
->> +             /* move the new primary to the front */
->> +             for (i = pos; i > 0; i--)
->> +                     osds[i] = osds[i - 1];
->> +             osds[0] = *primary;
->> +     }
->
-> So the first one *is* the primary, you just renumber them.
-> I see.
+					-Alex
+> Thanks,
+> 
+>                 Ilya
+> 
 
-Yeah, we still move it to the front, for replicated pgs.  However, if
-primary_temp mapping for that pg exists, the primary will be whatever
-that mapping says it is, and at that point osds won't be reshuffled no
-matter what.
-
-Thanks,
-
-                Ilya
