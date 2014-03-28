@@ -1,68 +1,107 @@
 From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: Re: [PATCH 22/33] libceph: primary_affinity decode bits
-Date: Fri, 28 Mar 2014 17:01:24 +0200
-Message-ID: <CALFYKtDn-F4bjyj-evq+MJE1mAaGAawyVmFDx6dWyEvz_oaeZA@mail.gmail.com>
+Subject: Re: [PATCH 28/33] libceph: switch ceph_calc_pg_acting() to new helpers
+Date: Fri, 28 Mar 2014 17:02:10 +0200
+Message-ID: <CALFYKtD14erng=5LLTVMwYsSgkz9G-jxqcD-SYNC9eUnSakaAQ@mail.gmail.com>
 References: <1395944299-21970-1-git-send-email-ilya.dryomov@inktank.com>
-	<1395944299-21970-23-git-send-email-ilya.dryomov@inktank.com>
-	<53348AA1.2030806@ieee.org>
+	<1395944299-21970-29-git-send-email-ilya.dryomov@inktank.com>
+	<53348EC6.1070504@ieee.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qg0-f42.google.com ([209.85.192.42]:37117 "EHLO
-	mail-qg0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751760AbaC1PBq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 28 Mar 2014 11:01:46 -0400
-Received: by mail-qg0-f42.google.com with SMTP id q107so4500354qgd.15
-        for <ceph-devel@vger.kernel.org>; Fri, 28 Mar 2014 08:01:45 -0700 (PDT)
-In-Reply-To: <53348AA1.2030806@ieee.org>
+Received: from mail-qc0-f175.google.com ([209.85.216.175]:52313 "EHLO
+	mail-qc0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751839AbaC1PCL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 28 Mar 2014 11:02:11 -0400
+Received: by mail-qc0-f175.google.com with SMTP id e16so5974257qcx.6
+        for <ceph-devel@vger.kernel.org>; Fri, 28 Mar 2014 08:02:10 -0700 (PDT)
+In-Reply-To: <53348EC6.1070504@ieee.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@ieee.org>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Thu, Mar 27, 2014 at 10:31 PM, Alex Elder <elder@ieee.org> wrote:
+On Thu, Mar 27, 2014 at 10:49 PM, Alex Elder <elder@ieee.org> wrote:
 > On 03/27/2014 01:18 PM, Ilya Dryomov wrote:
->> Add two helpers to decode primary_affinity (full map, vector<u32>) and
->> new_primary_affinity (inc map, map<u32, u32>) and switch to them.
+>> Switch ceph_calc_pg_acting() to new helpers: pg_to_raw_osds(),
+>> raw_to_up_osds() and apply_temps().
 >
-> One comment below, but otherwise looks good.
+> So that's why you have a temp map in each osdmap.
+> The result is pretty clean and you eliminate the
+> local rawosds array.
+>
+> Looks good.
 >
 > Reviewed-by: Alex Elder <elder@linaro.org>
 >
->>
 >> Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
 >> ---
->>  net/ceph/osdmap.c |   71 +++++++++++++++++++++++++++++++++++++++++++++++++++++
->>  1 file changed, 71 insertions(+)
+>>  include/linux/ceph/osdmap.h |    2 +-
+>>  net/ceph/osdmap.c           |   51 ++++++++++++++++++++++++++++++++-----------
+>>  2 files changed, 39 insertions(+), 14 deletions(-)
+>>
+>> diff --git a/include/linux/ceph/osdmap.h b/include/linux/ceph/osdmap.h
+>> index 4e28c1e5d62f..b0c8f8490663 100644
+>> --- a/include/linux/ceph/osdmap.h
+>> +++ b/include/linux/ceph/osdmap.h
+>> @@ -212,7 +212,7 @@ extern int ceph_oloc_oid_to_pg(struct ceph_osdmap *osdmap,
+>>
+>>  extern int ceph_calc_pg_acting(struct ceph_osdmap *osdmap,
+>>                              struct ceph_pg pgid,
+>> -                            int *acting);
+>> +                            int *osds);
+>>  extern int ceph_calc_pg_primary(struct ceph_osdmap *osdmap,
+>>                               struct ceph_pg pgid);
 >>
 >> diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
->> index 538b8dd341e8..3ac2098972ea 100644
+>> index 6d418433d80d..1963623bd488 100644
 >> --- a/net/ceph/osdmap.c
 >> +++ b/net/ceph/osdmap.c
->> @@ -959,6 +959,59 @@ static int set_primary_affinity(struct ceph_osdmap *map, int osd, u32 aff)
->>       return 0;
+>> @@ -1642,24 +1642,49 @@ static int apply_temps(struct ceph_osdmap *osdmap,
 >>  }
 >>
->> +static int decode_primary_affinity(void **p, void *end,
->> +                                struct ceph_osdmap *map)
->> +{
->> +     u32 len, i;
->> +
->> +     ceph_decode_32_safe(p, end, len, e_inval);
->> +     if (len == 0) {
->> +             kfree(map->osd_primary_affinity);
->> +             map->osd_primary_affinity = NULL;
+>>  /*
+>> - * Return acting set for given pgid.
+>> + * Calculate acting set for given pgid.
+>> + *
+>> + * Return acting set length, or error.
+>>   */
+>>  int ceph_calc_pg_acting(struct ceph_osdmap *osdmap, struct ceph_pg pgid,
+>> -                     int *acting)
+>> +                     int *osds)
+>>  {
+>> -     int rawosds[CEPH_PG_MAX_SIZE], *osds;
+>> -     int i, o, num = CEPH_PG_MAX_SIZE;
+>> +     struct ceph_pg_pool_info *pool;
+>> +     u32 pps;
+>> +     int len;
+>> +     int primary;
+>>
+>> -     osds = calc_pg_raw(osdmap, pgid, rawosds, &num);
+>> -     if (!osds)
+>> -             return -1;
+>> +     pool = __lookup_pg_pool(&osdmap->pg_pools, pgid.pool);
+>> +     if (!pool)
 >> +             return 0;
->> +     }
->> +
->> +     ceph_decode_need(p, end, map->max_osd*sizeof(u32), e_inval);
->> +
->> +     BUG_ON(len != map->max_osd);
+>>
+>> -     /* primary is first up osd */
+>> -     o = 0;
+>> -     for (i = 0; i < num; i++)
+>> -             if (ceph_osd_is_up(osdmap, osds[i]))
+>> -                     acting[o++] = osds[i];
+>> -     return o;
+>> +     if (pool->flags & CEPH_POOL_FLAG_HASHPSPOOL) {
+>> +             /* hash pool id and seed so that pool PGs do not overlap */
+>> +             pps = crush_hash32_2(CRUSH_HASH_RJENKINS1,
+>> +                                  ceph_stable_mod(pgid.seed, pool->pgp_num,
+>> +                                                  pool->pgp_num_mask),
+>> +                                  pgid.pool);
+>> +     } else {
+>> +             /*
+>> +              * legacy ehavior: add ps and pool together.  this is
 >
-> BUG() here is too much; it should I think just return an error instead.
-> The test could be done earlier too, prior to ceph_decode_need().
+> Typo "behavior"
 
-Moved the test, changed to returning -EINVAL.
+Fixed.
 
 Thanks,
 
