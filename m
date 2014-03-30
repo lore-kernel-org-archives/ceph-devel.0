@@ -1,94 +1,37 @@
-From: Loic Dachary <loic@dachary.org>
+From: Justin Erenkrantz <justin@erenkrantz.com>
 Subject: Re: jerasure / gf-complete & 32 bits
-Date: Sat, 29 Mar 2014 22:38:59 +0100
-Message-ID: <53373D73.9030000@dachary.org>
-References: <5335AE3D.1050104@dachary.org> <53368DA3.7080206@dachary.org> <BC86EB1E-D599-4286-A73E-29130DB0A5A2@gmail.com>
+Date: Sun, 30 Mar 2014 10:58:27 -0400
+Message-ID: <CAOGLoJOVtfFB24=DBJQ4YL-PbS-mfebKGRHypNJE9o98yvGuqw@mail.gmail.com>
+References: <5335AE3D.1050104@dachary.org>
+	<53368DA3.7080206@dachary.org>
+	<BC86EB1E-D599-4286-A73E-29130DB0A5A2@gmail.com>
+	<53373D73.9030000@dachary.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="r6gEshcQ9U3Ja8dFaAWBvjpVW5qB8lake"
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:58528 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752007AbaC2VjF (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 29 Mar 2014 17:39:05 -0400
-In-Reply-To: <BC86EB1E-D599-4286-A73E-29130DB0A5A2@gmail.com>
+Received: from mail-ee0-f53.google.com ([74.125.83.53]:50352 "EHLO
+	mail-ee0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751025AbaC3O62 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 30 Mar 2014 10:58:28 -0400
+Received: by mail-ee0-f53.google.com with SMTP id b57so5762457eek.12
+        for <ceph-devel@vger.kernel.org>; Sun, 30 Mar 2014 07:58:27 -0700 (PDT)
+In-Reply-To: <53373D73.9030000@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Kevin Greenan <kmgreen2@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Kevin Greenan <kmgreen2@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---r6gEshcQ9U3Ja8dFaAWBvjpVW5qB8lake
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+On Sat, Mar 29, 2014 at 5:38 PM, Loic Dachary <loic@dachary.org> wrote:
+> I'm not sure it's worth fixing : https://github.com/ceph/ceph/pull/1563
 
+Line 25 in https://github.com/ceph/ceph/pull/1563/files has a typo:
 
++        INTEL_SSE3_FLAGS="-mssse3 -DINTEL_SSE3"
 
-On 29/03/2014 17:16, Kevin Greenan wrote:
-> Hey Loic,
->=20
-> I'll take a look on Monday.  I'll create a VM to try and reproduce (and=
- hopefully fix) this.
+should be:
 
-I'm not sure it's worth fixing : https://github.com/ceph/ceph/pull/1563
++        INTEL_SSE3_FLAGS="-msse3 -DINTEL_SSE3"
 
->=20
-> Thanks!
-> -kevin
->=20
-> On Mar 29, 2014, at 2:08 AM, Loic Dachary wrote:
->=20
->> The gf-complete + jerasure tests run fine on Ubuntu saucy 32 bits. The=
- problem is when trying to compile on a 32 bits machine as shown here
->>
->> http://gitbuilder.sepia.ceph.com/gitbuilder-ceph-tarball-precise-i386-=
-basic/log.cgi?log=3Dcb624fc9ed1e891e51cc0d20622d43f6fcd08cd5
->>
->>
->> On 28/03/2014 18:15, Loic Dachary wrote:
->>> Hi Kevin,
->>>
->>> Someone mentionned a problem (no more information at the moment ;-) a=
-bout running jerasure / gf-complete on a 32 bits machine. Does that ring =
-a bell ? I'll try it out with the test method you suggested:
->>>
->>> "'gf_methods <w> -A -U' to run all of the tests for w=3D[4,8,16,32,64=
-,128]. Then, I install a fresh Jerasure and run test_all_gfs.sh and time_=
-all_gfs_argv_init.sh. Finally, I install PyECLib (Python library that wra=
-ps Jerasure, ISA-L (soon) and has some homegrown XOR- codes) and run the =
-scripts under tests/."
->>>
->>> Cheers
->>>
->>
->> --=20
->> Lo=EFc Dachary, Artisan Logiciel Libre
->>
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
+(The AX_CHECK_COMPILE_FLAG call is correct.)
 
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-
-
---r6gEshcQ9U3Ja8dFaAWBvjpVW5qB8lake
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.20 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlM3PXYACgkQ8dLMyEl6F230KgCgv5xOEvz1aDQWiUVxIIVhfBqe
-pnAAmwUmg5MFmEguPUFGZAlXLAbFtPbz
-=/7uv
------END PGP SIGNATURE-----
-
---r6gEshcQ9U3Ja8dFaAWBvjpVW5qB8lake--
+Cheers.  -- justin
