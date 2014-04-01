@@ -1,76 +1,41 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: jerasure crash
-Date: Tue, 01 Apr 2014 09:58:13 +0200
-Message-ID: <533A7195.20204@dachary.org>
-References: <alpine.DEB.2.00.1403311735120.22715@cobra.newdream.net>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="nAe1XWn1OHIKG6QVLbdS747mrX5XuBwbF"
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: [PATCH 1/3] ceph: drop extra open file reference in ceph_atomic_open()
+Date: Tue,  1 Apr 2014 20:43:02 +0800
+Message-ID: <1396356184-4317-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:60740 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751098AbaDAH6S (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 1 Apr 2014 03:58:18 -0400
-In-Reply-To: <alpine.DEB.2.00.1403311735120.22715@cobra.newdream.net>
+Received: from mga09.intel.com ([134.134.136.24]:19264 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751162AbaDAMnH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 1 Apr 2014 08:43:07 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+Cc: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---nAe1XWn1OHIKG6QVLbdS747mrX5XuBwbF
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+ceph_atomic_open() calls ceph_open() after receiving the MDS reply.
+ceph_open() grabs an extra open file reference. (The open request
+already holds an open file reference)
 
-Hi,
+Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+---
+ fs/ceph/file.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-I'll work on it right now.
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index 2862a75..66075a4a 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -291,8 +291,9 @@ int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
+ 		}
+ 		err = finish_open(file, dentry, ceph_open, opened);
+ 	}
+-
+ out_err:
++	if (!req->r_err && req->r_target_inode)
++		ceph_put_fmode(ceph_inode(req->r_target_inode), req->r_fmode);
+ 	ceph_mdsc_put_request(req);
+ 	dout("atomic_open result=%d\n", err);
+ 	return err;
+-- 
+1.8.5.3
 
-Cheers
-
-On 01/04/2014 02:38, Sage Weil wrote:
-> Hey Loic,
->=20
-> A new failure came up in QA over the weekend that looks like a problem =
-
-> inside jerasure:
->=20
-> 	http://tracker.ceph.com/issues/7914
->=20
-> I think this is the first time this particular failure has come up.  Sa=
-m=20
-> suggests taking a hard look at the recent jerasure/gf-complete submodul=
-e=20
-> changes.  And/or we need to run one of the failing tests in a loop to g=
-et=20
-> a sense of frequency and then bisect.  Can you spearhead this one?
->=20
-> sage
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-
-
---nAe1XWn1OHIKG6QVLbdS747mrX5XuBwbF
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.20 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlM6cZgACgkQ8dLMyEl6F20rRACgxWPOyTFDWG2aFLl4t2RID06K
-/QAAn1Nx5pJd0lxYwFuCsi8dxnfKyHaB
-=DAty
------END PGP SIGNATURE-----
-
---nAe1XWn1OHIKG6QVLbdS747mrX5XuBwbF--
