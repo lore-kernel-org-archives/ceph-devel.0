@@ -1,53 +1,30 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: Assertion error in librados
-Date: Mon, 31 Mar 2014 10:10:08 -0700
-Message-ID: <CAPYLRzg3Qfpt+QS40iREznhCHgVEv=MAWaGNHZREr65AD9SRgQ@mail.gmail.com>
-References: <20140225144900.GA30739@philipgian-mac>
-	<CAPYLRzhnPTEgycnmZ0HXeEW=ADe01QKS8nUmL8451rYYtoMvgw@mail.gmail.com>
-	<20140225155838.GB30739@philipgian-mac>
-	<CA+Hcz59dVj1CPiV6Xzo8_Z4WzhehNRiHyef_DE+MPBT19FHd4Q@mail.gmail.com>
-	<530CD824.2000107@inktank.com>
-	<CA+Hcz59FC07EfPgPSo2TT6=oUQjEMmfDYLROB1p2QG7CxRLLWQ@mail.gmail.com>
-	<20140328095443.GZ28819@philipgian-mac>
+From: Sage Weil <sage@inktank.com>
+Subject: jerasure crash
+Date: Mon, 31 Mar 2014 17:38:09 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1403311735120.22715@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qg0-f47.google.com ([209.85.192.47]:33401 "EHLO
-	mail-qg0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753041AbaCaRKJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 31 Mar 2014 13:10:09 -0400
-Received: by mail-qg0-f47.google.com with SMTP id 63so7721606qgz.34
-        for <ceph-devel@vger.kernel.org>; Mon, 31 Mar 2014 10:10:08 -0700 (PDT)
-In-Reply-To: <20140328095443.GZ28819@philipgian-mac>
+Received: from cobra.newdream.net ([66.33.216.30]:47508 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750976AbaDAAiK (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 31 Mar 2014 20:38:10 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Filippos Giannakos <philipgian@grnet.gr>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Josh Durgin <josh.durgin@inktank.com>, Noah Watkins <noah.watkins@inktank.com>, synnefo-devel@googlegroups.com
+To: loic.dachary@inktank.com
+Cc: ceph-devel@vger.kernel.org
 
-Nope, I don't think anybody's looked into it. If you have core dumps
-you could get a backtrace and the return value referenced.
--Greg
-Software Engineer #42 @ http://inktank.com | http://ceph.com
+Hey Loic,
 
+A new failure came up in QA over the weekend that looks like a problem 
+inside jerasure:
 
-On Fri, Mar 28, 2014 at 2:54 AM, Filippos Giannakos <philipgian@grnet.gr> wrote:
-> Hello,
->
-> We recently bumped again into the same assertion error.
-> Do you have any indications or update regarding the cause ?
->
-> On Tue, Feb 25, 2014 at 11:26:15AM -0800, Noah Watkins wrote:
->> On Tue, Feb 25, 2014 at 9:51 AM, Josh Durgin <josh.durgin@inktank.com> wrote:
->> > That's a good idea. This particular assert in a Mutex is almost always
->> > a use-after-free of the Mutex or structure containing it though.
->>
->> I think that a use-after-free will also throw an EINVAL (assuming it
->> isn't a pathalogical case) as pthread_mutex_lock checks an
->> initialization magic variable. I think that particular mutex isn't
->> initialized with flags that would cause any of the other possible
->> return values.
->
-> Kind regards,
-> --
-> Filippos
-> <philipgian@grnet.gr>
+	http://tracker.ceph.com/issues/7914
+
+I think this is the first time this particular failure has come up.  Sam 
+suggests taking a hard look at the recent jerasure/gf-complete submodule 
+changes.  And/or we need to run one of the failing tests in a loop to get 
+a sense of frequency and then bisect.  Can you spearhead this one?
+
+sage
+
