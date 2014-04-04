@@ -1,76 +1,160 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: assertion failure while stating an object
- (librados::IoCtx::stat)
-Date: Fri, 4 Apr 2014 11:06:48 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1404041106090.25073@cobra.newdream.net>
-References: <loom.20140404T115508-66@post.gmane.org> <alpine.DEB.2.00.1404040812400.22715@cobra.newdream.net> <loom.20140404T195141-120@post.gmane.org>
+From: Scottix <scottix-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: Ceph User Committee monthly meeting #1 : executive
+	summary
+Date: Fri, 4 Apr 2014 11:11:56 -0700
+Message-ID: <CANKFHZ8rwXQXg94eC2tw-gefcCQ0Q5f5uZd3HF+DcuRjftUVYw@mail.gmail.com>
+References: <533EDF0E.70409@dachary.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:48063 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751856AbaDDSGs (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Apr 2014 14:06:48 -0400
-In-Reply-To: <loom.20140404T195141-120@post.gmane.org>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Amit Tiwary <tiwaryamt@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+Content-Type: multipart/mixed; boundary="===============0529092663=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <533EDF0E.70409-cLsNCMjd+0JAfugRpC6u6w@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+Cc: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Fri, 4 Apr 2014, Amit Tiwary wrote:
-> Sage Weil <sage <at> inktank.com> writes:
-> > 
-> > Hi Amit,
-> > > 
-> > > common/Mutex.cc: In function 'void Mutex::Lock(bool)' thread 
-> 7f615f275700 
-> > > time 2014-04-04 09:03:22.128731
-> > > common/Mutex.cc: 93: FAILED assert(r == 0)
-> > >  ceph version 0.67.4 (ad85b8bfafea6232d64cb7ba76a8b6e8252fa0c7)
-> > >  1: (Mutex::Lock(bool)+0x1d3) [0x7f61576ac763]
-> > >  2: (librados::IoCtxImpl::operate_read(object_t const&, 
-> ObjectOperation*, 
-> > > ceph::buffer::list*)+0x17b) [0x7f615765069b]
-> > 
-> > This Mutex assertion usually triggers in use-after-free cases where the 
-> > pthread mutex id is invalid (because it has been deallocated).  My guess 
-> > is that your IoCtx has been freed, or the shutdown() method has been 
-> > called on the cluster handle... is that possible? (Obviously not with the 
-> > code fragment above, but I'm guess that isn't a straight copy+paste from 
-> > your code?)
-> > 
-> > sage
-> > 
-> Thanks Sage for your input. I would look into the code to figure out if they 
-> are any calls to IoCtx::close() or Rados::shutdown(). However, on closer 
-> inspection I find lot of pthread_create() failing (refer log below) with 
-> error 11 (EAGAIN) indicating "insufficient resources to create another 
-> thread, or a system-imposed limit on the number of threads was encountered". 
-> Could Mutex assertion failure be a side effect of this?
-> -------------------------------
-> Thread::try_create(): pthread_create failed with error 11
-> common/Thread.cc: In function 'void Thread::create(size_t)' thread 
-> 7f615f275700 time 2014-04-04 08:57:03.511877
-> common/Thread.cc: 110: FAILED assert(ret == 0)
->  ceph version 0.67.4 (ad85b8bfafea6232d64cb7ba76a8b6e8252fa0c7)
->  1: (()+0x36004f) [0x7f615783804f]
->  2: (SimpleMessenger::connect_rank(entity_addr_t const&, int, Connection*, 
-> Message*)+0x17b) [0x7f61577c9b9b]
->  3: (SimpleMessenger::get_connection(entity_inst_t const&)+0x244) 
-> [0x7f61577ce824]
->  4: (Objecter::get_session(int)+0x1d1) [0x7f615765b391]
->  5: (Objecter::recalc_op_target(Objecter::Op*)+0x336) [0x7f615765c0d6]
->  6: (Objecter::_op_submit(Objecter::Op*)+0x43) [0x7f6157665993]
->  7: (librados::IoCtxImpl::operate_read(object_t const&, ObjectOperation*, 
-> ceph::buffer::list*)+0x2dc) [0x7f61576507fc]
->  8: (librados::IoCtxImpl::stat(object_t const&, unsigned long*, 
-> long*)+0x185) [0x7f6157653b05]
->  9: (librados::IoCtx::stat(std::string const&, unsigned long*, long*)+0x58) 
-> [0x7f6157628498]
+--===============0529092663==
+Content-Type: multipart/alternative; boundary=001a1132efa261b7d904f63b76c8
 
-Hmm, perhaps it's related.  It sounds like you need to increase the ulimit 
-on number of open files (ulimit -n) as we create many threads and sockets 
-to communicate with the cluster.
+--001a1132efa261b7d904f63b76c8
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-sage
+CephFS use case
+Wanted to throw in our use case.
 
+We store massive amount of timeseries data files that we need to process as
+they come in. Right now raid is holding us over but we are hitting the
+upper limits, we would have to spend some serious amount of money to go to
+the next level, even then will start needing more throughput. That is where
+Ceph would be great, although RBD is feasible, we need it to be reliably
+expandable.
+This is where Gluster has one up on Ceph. I have put off gluster because I
+don't want to deal with split-brain scenarios, anyway we have been
+experimenting with CephFS and we believe that is the way to go but we are
+very cautious at the moment.
+
+
+
+On Fri, Apr 4, 2014 at 9:34 AM, Loic Dachary <loic-cLsNCMjd+0JAfugRpC6u6w@public.gmane.org> wrote:
+
+> Hi Ceph,
+>
+> This month Ceph User Committee meeting was about:
+>
+>     Tiering, erasure code
+>     Using http://tracker.ceph.com/
+>     CephFS
+>     Miscellaneous
+>
+> You will find an executive summary at:
+>
+>
+> https://wiki.ceph.com/Community/Meetings/Ceph_User_Committee_meeting_2014=
+-04-03
+>
+> The full log of the IRC conversation is also included to provide more
+> context when needed. Feel free to edit if you see a mistake.
+>
+> Cheers
+>
+> --
+> Lo=EFc Dachary, Artisan Logiciel Libre
+>
+>
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>
+>
+
+
+--=20
+Follow Me: @Scottix <http://www.twitter.com/scottix>
+http://about.me/scottix
+Scottix-o4GsF6Y0fuwAvxtiuMwx3w@public.gmane.org
+
+--001a1132efa261b7d904f63b76c8
+Content-Type: text/html; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr">CephFS use case<div>Wanted to throw in our use case.</div>=
+<div><br></div><div>We store massive amount of timeseries data files that w=
+e need to process as they come in. Right now raid is holding us over but we=
+ are hitting the upper limits, we would have to spend some serious amount o=
+f money to go to the next level, even then will start needing more throughp=
+ut. That is where Ceph would be great, although RBD is feasible, we need it=
+ to be reliably expandable.</div>
+
+<div>This is where Gluster has one up on Ceph. I have put off gluster becau=
+se I don&#39;t want to deal with split-brain scenarios, anyway we have been=
+ experimenting with CephFS and we believe that is the way to go but we are =
+very cautious at the moment.</div>
+
+<div><br></div></div><div class=3D"gmail_extra"><br><br><div class=3D"gmail=
+_quote">On Fri, Apr 4, 2014 at 9:34 AM, Loic Dachary <span dir=3D"ltr">&lt;=
+<a href=3D"mailto:loic-cLsNCMjd+0JAfugRpC6u6w@public.gmane.org" target=3D"_blank">loic-cLsNCMjd+0JAfugRpC6u6w@public.gmane.org</a>&=
+gt;</span> wrote:<br>
+
+<blockquote class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:1p=
+x #ccc solid;padding-left:1ex">Hi Ceph,<br>
+<br>
+This month Ceph User Committee meeting was about:<br>
+<br>
+=A0 =A0 Tiering, erasure code<br>
+=A0 =A0 Using <a href=3D"http://tracker.ceph.com/" target=3D"_blank">http:/=
+/tracker.ceph.com/</a><br>
+=A0 =A0 CephFS<br>
+=A0 =A0 Miscellaneous<br>
+<br>
+You will find an executive summary at:<br>
+<br>
+=A0 =A0<a href=3D"https://wiki.ceph.com/Community/Meetings/Ceph_User_Commit=
+tee_meeting_2014-04-03" target=3D"_blank">https://wiki.ceph.com/Community/M=
+eetings/Ceph_User_Committee_meeting_2014-04-03</a><br>
+<br>
+The full log of the IRC conversation is also included to provide more conte=
+xt when needed. Feel free to edit if you see a mistake.<br>
+<br>
+Cheers<br>
+<span class=3D"HOEnZb"><font color=3D"#888888"><br>
+--<br>
+Lo=EFc Dachary, Artisan Logiciel Libre<br>
+<br>
+</font></span><br>_______________________________________________<br>
+ceph-users mailing list<br>
+<a href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a><=
+br>
+<a href=3D"http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com" target=
+=3D"_blank">http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com</a><br>
+<br></blockquote></div><br><br clear=3D"all"><div><br></div>-- <br>Follow M=
+e: <a href=3D"http://www.twitter.com/scottix" target=3D"_blank">@Scottix</a=
+><br><a href=3D"http://about.me/scottix" target=3D"_blank">http://about.me/=
+scottix</a><br>
+
+Scottix-o4GsF6Y0fuwAvxtiuMwx3w@public.gmane.org
+</div>
+
+--001a1132efa261b7d904f63b76c8--
+
+--===============0529092663==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============0529092663==--
