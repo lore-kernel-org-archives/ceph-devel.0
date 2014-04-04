@@ -1,73 +1,69 @@
-From: Amit Tiwary <tiwaryamt@gmail.com>
-Subject: assertion failure while stating an object (librados::IoCtx::stat)
-Date: Fri, 4 Apr 2014 10:12:47 +0000 (UTC)
-Message-ID: <loom.20140404T115508-66@post.gmane.org>
+From: Ilya Dryomov <ilya.dryomov@inktank.com>
+Subject: Re: Crash in rbd, need advice
+Date: Fri, 4 Apr 2014 15:08:41 +0400
+Message-ID: <CALFYKtAGBizs8gDariQH2NJACjoRD=2-1u-zwnPfo7D5bVvy3Q@mail.gmail.com>
+References: <CABt9es_uq1ixwcyHcL8ptYi2fXQjVFHvaOp71uu2epoQk_ToPw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:52256 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752284AbaDDKNA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 4 Apr 2014 06:13:00 -0400
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1WW17K-0000Fd-1G
-	for ceph-devel@vger.kernel.org; Fri, 04 Apr 2014 12:12:58 +0200
-Received: from pool-119.82.78.rev.spectranet.in ([pool-119.82.78.rev.spectranet.in])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Fri, 04 Apr 2014 12:12:58 +0200
-Received: from tiwaryamt by pool-119.82.78.rev.spectranet.in with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Fri, 04 Apr 2014 12:12:58 +0200
+Received: from mail-qg0-f53.google.com ([209.85.192.53]:42459 "EHLO
+	mail-qg0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752492AbaDDLIm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Apr 2014 07:08:42 -0400
+Received: by mail-qg0-f53.google.com with SMTP id z60so1866444qgd.26
+        for <ceph-devel@vger.kernel.org>; Fri, 04 Apr 2014 04:08:41 -0700 (PDT)
+In-Reply-To: <CABt9es_uq1ixwcyHcL8ptYi2fXQjVFHvaOp71uu2epoQk_ToPw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Hannes Landeholm <hannes@jumpstarter.io>
+Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>, Sage Weil <sage@newdream.net>, Alex Elder <elder@inktank.com>, Yehuda Sadeh <yehuda@hq.newdream.net>, Thorwald Lundqvist <thorwald@jumpstarter.io>
 
-Hi Ceph Team, We are using ceph version 0.67.4 and are recently hitting 
-large number of assertion failures on our ceph cluster while stating an 
-object using C++ librados API (as shown below)
------
- uint64_t size;
- time_t mtime;
- std::string object_name;
- librados::IoCtx mioctx;
- ...
- do {
-   // generate object_name
- }
- while ( 0 == mioctx.stat(object_name, &size, &mtime));
------
-We did not face similar issues in past 3 months.
-Any thoughts on what can be done to straighten this up?
+On Wed, Apr 2, 2014 at 12:18 AM, Hannes Landeholm <hannes@jumpstarter.io> wrote:
+> Hello,
+>
+> We're running a couple of Arch Linux servers of version 3.13.5-1 in
+> production and suddenly one of them had a strange problem after
+> running for a few days. One process (pid 319) was running with a few
+> threads, one of those threads (pid 322) was eating 100% cpu. I assumed
+> it was stuck in an infinite loop (this was our own software so I
+> assumed we had a bug) so I sent a SIGKILL to 319 which caused all
+> other threads to exit and it turning into a zombie, but thread 322 was
+> still running. After trying to stop some other services and failing I
+> realized that sending any signals to any process now didn't work at
+> all in the system.
+>
+> This was the process stack output:
+>
+> $ cat /proc/319/stack
+> [<ffffffff810642fa>] do_exit+0x73a/0xa80
+> [<ffffffff810646bf>] do_group_exit+0x3f/0xa0
+> [<ffffffff81073295>] get_signal_to_deliver+0x295/0x5f0
+> [<ffffffff810144a8>] do_signal+0x48/0x950
+> [<ffffffff81014e18>] do_notify_resume+0x68/0xa0
+> [<ffffffff8152326a>] int_signal+0x12/0x17
+> [<ffffffffffffffff>] 0xffffffffffffffff
+> $ cat /proc/319/task/322/stack
+> [<ffffffff8151c11a>] error_exit+0x2a/0x60
+> [<ffffffffffffffff>] 0xffffffffffffffff
+>
+> We're using ceph + rbd and this happened right after doing a rbd
+> mapping (mounting it) or during the mapping itself, so we suspected
+> rbd.
+>
+> A few days later (today) we had a server crash in another server, same
+> version+distro and it had also just been running a few days as well.
+> After starting it again we found the following in the system log:
+>
+> hostname kernel: BUG: unable to handle kernel paging request at ffff87fff75ad450
+> hostname kernel: IP: [<ffffffffa018c196>] rbd_img_request_fill+0x126/0x930 [rbd]
 
-Sample log is given below:
+Can you try gdb'ing that exact rbd.ko and
 
-common/Mutex.cc: In function 'void Mutex::Lock(bool)' thread 7f615f275700 
-time 2014-04-04 09:03:22.128731
-common/Mutex.cc: 93: FAILED assert(r == 0)
- ceph version 0.67.4 (ad85b8bfafea6232d64cb7ba76a8b6e8252fa0c7)
- 1: (Mutex::Lock(bool)+0x1d3) [0x7f61576ac763]
- 2: (librados::IoCtxImpl::operate_read(object_t const&, ObjectOperation*, 
-ceph::buffer::list*)+0x17b) [0x7f615765069b]
- 3: (librados::IoCtxImpl::stat(object_t const&, unsigned long*, 
-long*)+0x185) [0x7f6157653b05]
- 4: (librados::IoCtx::stat(std::string const&, unsigned long*, long*)+0x58) 
-[0x7f6157628498]
- 5: (radosencwriter::getUniqueObjectName(unsigned int)+0x22b) 
-[0x7f6158726c6b]
- 6: (radosencwriter::write_to_rados(std::string const&, unsigned 
-long)+0x14c) [0x7f6158726f9c]
- 7: (radosencwriter::write(std::string const&, unsigned long)+0x37a) 
-[0x7f615872868a]
- 8: (()+0x36153) [0x7f6158715153]
- 9: (Perl_pp_entersub()+0x5a5) [0x7f615eda3705]
- 10: (Perl_runops_standard()+0x16) [0x7f615eda1c46]
- 11: (perl_run()+0x13c) [0x7f615ed4660c]
- 12: (main()+0x154) [0x400f24]
- 13: (__libc_start_main()+0xfd) [0x7f615e312c8d]
- 14: starman worker () [0x400d09]
- NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to 
-interpret this.
+(gdb) list *rbd_img_request_fill+0x126
 
+Also, the entire stack trace pertaining to rbd_img_request_fill would
+help.
+
+Thanks,
+
+                Ilya
