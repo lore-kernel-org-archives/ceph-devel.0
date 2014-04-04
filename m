@@ -1,165 +1,73 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: RadosGW- Admin API
-Date: Thu, 3 Apr 2014 08:55:08 -0700
-Message-ID: <CABBk=J_0zwDqMgaVaCdvboG=o+g-oqqOV196ZLxATydF-SdnWg@mail.gmail.com>
-References: <5EFBD28BA42C604BB012164C72CA56048E10EA54@SMBXKO3.cgm.ag>
+From: Amit Tiwary <tiwaryamt@gmail.com>
+Subject: assertion failure while stating an object (librados::IoCtx::stat)
+Date: Fri, 4 Apr 2014 10:12:47 +0000 (UTC)
+Message-ID: <loom.20140404T115508-66@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f173.google.com ([209.85.220.173]:38433 "EHLO
-	mail-vc0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752566AbaDCPzJ convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Apr 2014 11:55:09 -0400
-Received: by mail-vc0-f173.google.com with SMTP id il7so2095328vcb.18
-        for <ceph-devel@vger.kernel.org>; Thu, 03 Apr 2014 08:55:08 -0700 (PDT)
-In-Reply-To: <5EFBD28BA42C604BB012164C72CA56048E10EA54@SMBXKO3.cgm.ag>
+Received: from plane.gmane.org ([80.91.229.3]:52256 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752284AbaDDKNA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 4 Apr 2014 06:13:00 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1WW17K-0000Fd-1G
+	for ceph-devel@vger.kernel.org; Fri, 04 Apr 2014 12:12:58 +0200
+Received: from pool-119.82.78.rev.spectranet.in ([pool-119.82.78.rev.spectranet.in])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Fri, 04 Apr 2014 12:12:58 +0200
+Received: from tiwaryamt by pool-119.82.78.rev.spectranet.in with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Fri, 04 Apr 2014 12:12:58 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-8859-1?Q?J=E4ger=2C_Philipp?= <philipp.jaeger@cgm.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-(resending to mailing list)
+Hi Ceph Team, We are using ceph version 0.67.4 and are recently hitting 
+large number of assertion failures on our ceph cluster while stating an 
+object using C++ librados API (as shown below)
+-----
+ uint64_t size;
+ time_t mtime;
+ std::string object_name;
+ librados::IoCtx mioctx;
+ ...
+ do {
+   // generate object_name
+ }
+ while ( 0 == mioctx.stat(object_name, &size, &mtime));
+-----
+We did not face similar issues in past 3 months.
+Any thoughts on what can be done to straighten this up?
 
-Could be a more basic issue, can you turn on 'debug rgw =3D 20', and
-provide the corresponding log?
+Sample log is given below:
 
-Yehuda
+common/Mutex.cc: In function 'void Mutex::Lock(bool)' thread 7f615f275700 
+time 2014-04-04 09:03:22.128731
+common/Mutex.cc: 93: FAILED assert(r == 0)
+ ceph version 0.67.4 (ad85b8bfafea6232d64cb7ba76a8b6e8252fa0c7)
+ 1: (Mutex::Lock(bool)+0x1d3) [0x7f61576ac763]
+ 2: (librados::IoCtxImpl::operate_read(object_t const&, ObjectOperation*, 
+ceph::buffer::list*)+0x17b) [0x7f615765069b]
+ 3: (librados::IoCtxImpl::stat(object_t const&, unsigned long*, 
+long*)+0x185) [0x7f6157653b05]
+ 4: (librados::IoCtx::stat(std::string const&, unsigned long*, long*)+0x58) 
+[0x7f6157628498]
+ 5: (radosencwriter::getUniqueObjectName(unsigned int)+0x22b) 
+[0x7f6158726c6b]
+ 6: (radosencwriter::write_to_rados(std::string const&, unsigned 
+long)+0x14c) [0x7f6158726f9c]
+ 7: (radosencwriter::write(std::string const&, unsigned long)+0x37a) 
+[0x7f615872868a]
+ 8: (()+0x36153) [0x7f6158715153]
+ 9: (Perl_pp_entersub()+0x5a5) [0x7f615eda3705]
+ 10: (Perl_runops_standard()+0x16) [0x7f615eda1c46]
+ 11: (perl_run()+0x13c) [0x7f615ed4660c]
+ 12: (main()+0x154) [0x400f24]
+ 13: (__libc_start_main()+0xfd) [0x7f615e312c8d]
+ 14: starman worker () [0x400d09]
+ NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to 
+interpret this.
 
-On Thu, Apr 3, 2014 at 3:51 AM, J=E4ger, Philipp <philipp.jaeger@cgm.co=
-m> wrote:
-> Hello yehuda,
->
-> we want to administrate the rados users via the admin api.
-> http://ceph.com/docs/master/radosgw/adminops/#get-user-info
->
->
-> We got the following logs from the developer, see line " Receiving re=
-sponse: HTTP/1.1 405 Method Not Allowed":
->
-> [DEBUG] internal.S3Signer                                            =
-- Calculated string to sign:
-> "GET
->
-> application/x-www-form-urlencoded; charset=3Dutf-8
-> Mon, 31 Mar 2014 11:25:58 GMT
-> //"
-> [DEBUG] com.amazonaws.request                                        =
-- Sending Request: GET https://172.25.3.12 /admin/user?format=3Djson&ui=
-d=3Dtest Headers: (Authorization: AWS NQY41E90E38HKJXV6DFM:/v1NjvtT/khF=
-uR875Fx+rexmyuo=3D, Date: Mon, 31 Mar 2014 11:25:58 GMT, User-Agent: aw=
-s-sdk-java/1.3.27 Windows_7/6.1 Java_HotSpot(TM)_Client_VM/23.21-b01, C=
-ontent-Type: application/x-www-form-urlencoded; charset=3Dutf-8, )
-> [DEBUG] conn.BasicClientConnectionManager                            =
-- Get connection for route {s}->https://172.25.3.12
-> [DEBUG] conn.DefaultClientConnectionOperator                         =
-- Connecting to 172.25.3.12:443
-> [DEBUG] protocol.RequestAddCookies                                   =
-- CookieSpec selected: best-match
-> [DEBUG] protocol.RequestAuthCache                                    =
-- Auth cache not set in the context
-> [DEBUG] protocol.RequestProxyAuthentication                          =
-- Proxy auth state: UNCHALLENGED
-> [DEBUG] client.DefaultHttpClient                                     =
-- Attempt 1 to execute request
-> [DEBUG] conn.DefaultClientConnection                                 =
-- Sending request: GET /admin/user?format=3Djson&uid=3Dtest HTTP/1.1
-> [DEBUG] org.apache.http.wire                                         =
-- >> "GET /admin/user?format=3Djson&uid=3Dtest HTTP/1.1[\r][\n]"
-> [DEBUG] org.apache.http.wire                                         =
-- >> "Host: 172.25.3.12[\r][\n]"
-> [DEBUG] org.apache.http.wire                                         =
-- >> "Authorization: AWS NQY41E90E38HKJXV6DFM:/v1NjvtT/khFuR875Fx+rexmy=
-uo=3D[\r][\n]"
-> [DEBUG] org.apache.http.wire                                         =
-- >> "Date: Mon, 31 Mar 2014 11:25:58 GMT[\r][\n]"
-> [DEBUG] org.apache.http.wire                                         =
-- >> "User-Agent: aws-sdk-java/1.3.27 Windows_7/6.1 Java_HotSpot(TM)_Cl=
-ient_VM/23.21-b01[\r][\n]"
-> [DEBUG] org.apache.http.wire                                         =
-- >> "Content-Type: application/x-www-form-urlencoded; charset=3Dutf-8[=
-\r][\n]"
-> [DEBUG] org.apache.http.wire                                         =
-- >> "Connection: Keep-Alive[\r][\n]"
-> [DEBUG] org.apache.http.wire                                         =
-- >> "[\r][\n]"
-> [DEBUG] org.apache.http.headers                                      =
-- >> GET /admin/user?format=3Djson&uid=3Dtest HTTP/1.1
-> [DEBUG] org.apache.http.headers                                      =
-- >> Host: 172.25.3.12
-> [DEBUG] org.apache.http.headers                                      =
-- >> Authorization: AWS NQY41E90E38HKJXV6DFM:/v1NjvtT/khFuR875Fx+rexmyu=
-o=3D
-> [DEBUG] org.apache.http.headers                                      =
-- >> Date: Mon, 31 Mar 2014 11:25:58 GMT
-> [DEBUG] org.apache.http.headers                                      =
-- >> User-Agent: aws-sdk-java/1.3.27 Windows_7/6.1 Java_HotSpot(TM)_Cli=
-ent_VM/23.21-b01
-> [DEBUG] org.apache.http.headers                                      =
-- >> Content-Type: application/x-www-form-urlencoded; charset=3Dutf-8
-> [DEBUG] org.apache.http.headers                                      =
-- >> Connection: Keep-Alive
-> [DEBUG] org.apache.http.wire                                         =
-- << "HTTP/1.1 405 Method Not Allowed[\r][\n]"
-> [DEBUG] org.apache.http.wire                                         =
-- << "Date: Mon, 31 Mar 2014 11:26:20 GMT[\r][\n]"
-> [DEBUG] org.apache.http.wire                                         =
-- << "Server: Apache/2.2.22 (Ubuntu)[\r][\n]"
-> [DEBUG] org.apache.http.wire                                         =
-- << "Accept-Ranges: bytes[\r][\n]"
-> [DEBUG] org.apache.http.wire                                         =
-- << "Content-Length: 27[\r][\n]"
-> [DEBUG] org.apache.http.wire                                         =
-- << "Keep-Alive: timeout=3D5, max=3D100[\r][\n]"
-> [DEBUG] org.apache.http.wire                                         =
-- << "Connection: Keep-Alive[\r][\n]"
-> [DEBUG] org.apache.http.wire                                         =
-- << "Content-Type: application/json[\r][\n]"
-> [DEBUG] org.apache.http.wire                                         =
-- << "[\r][\n]"
-> [DEBUG] conn.DefaultClientConnection                                 =
-- Receiving response: HTTP/1.1 405 Method Not Allowed
-> [DEBUG] org.apache.http.headers                                      =
-- << HTTP/1.1 405 Method Not Allowed
-> [DEBUG] org.apache.http.headers                                      =
-- << Date: Mon, 31 Mar 2014 11:26:20 GMT
-> [DEBUG] org.apache.http.headers                                      =
-- << Server: Apache/2.2.22 (Ubuntu)
-> [DEBUG] org.apache.http.headers                                      =
-- << Accept-Ranges: bytes
-> [DEBUG] org.apache.http.headers                                      =
-- << Content-Length: 27
-> [DEBUG] org.apache.http.headers                                      =
-- << Keep-Alive: timeout=3D5, max=3D100
-> [DEBUG] org.apache.http.headers                                      =
-- << Connection: Keep-Alive
-> [DEBUG] org.apache.http.headers                                      =
-- << Content-Type: application/json
-> [DEBUG] client.DefaultHttpClient                                     =
-- Connection can be kept alive for 5000 MILLISECONDS
->
->
->
-> Do you know where the mistake is or how we can identify it?
->
-> The user has the following caps:
->   "caps": [
->         { "type": "users",
->           "perm": "*"}]}
->
-> Is there something else to configure?
->
->
-> Thank you very much.
->
-> Regards
-> Philipp
->
->
->
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
