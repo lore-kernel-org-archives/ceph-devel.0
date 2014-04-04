@@ -1,35 +1,30 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: Multiple Posix namespaces?
-Date: Fri, 4 Apr 2014 12:24:04 -0700
-Message-ID: <CAPYLRzgJpb1Sk3r5DnVhsz_U9hVkdds3RDdKTD=kEPK2RMPPuQ@mail.gmail.com>
-References: <17BE816D-D0AD-4077-9D85-B43E16F8F1A9@ornl.gov>
+From: Ali Maredia <ali@linuxbox.com>
+Subject: Ceph Build Using CMake Update
+Date: Fri, 4 Apr 2014 18:35:05 -0400 (EDT)
+Message-ID: <876358909.115.1396650905156.JavaMail.root@thunderbeast.private.linuxbox.com>
+References: <1168038206.111.1396650701045.JavaMail.root@thunderbeast.private.linuxbox.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f42.google.com ([209.85.216.42]:60129 "EHLO
-	mail-qa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753747AbaDDTYG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Apr 2014 15:24:06 -0400
-Received: by mail-qa0-f42.google.com with SMTP id k15so3610227qaq.29
-        for <ceph-devel@vger.kernel.org>; Fri, 04 Apr 2014 12:24:05 -0700 (PDT)
-In-Reply-To: <17BE816D-D0AD-4077-9D85-B43E16F8F1A9@ornl.gov>
+Received: from aa.linuxbox.com ([69.128.83.226]:1706 "EHLO aa.linuxbox.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753036AbaDDWfO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 4 Apr 2014 18:35:14 -0400
+In-Reply-To: <1168038206.111.1396650701045.JavaMail.root@thunderbeast.private.linuxbox.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Atchley, Scott" <atchleyes@ornl.gov>
-Cc: ceph-devel Development <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
+Cc: Ilya Dryomov <ilya.dryomov@inktank.com>
 
-Not yet, no. There are a couple different approaches to this that a
-third-party contributor could work on without too much difficulty (I
-*think* there's a blueprint floating around somewhere), but nobody's
-done so yet.
--Greg
-Software Engineer #42 @ http://inktank.com | http://ceph.com
+Ceph Community,
 
+Last November I presented a speed up of Ceph's build by switching from autotools to CMake. I have been able to build core ceph components and just updated my work. 
 
-On Fri, Apr 4, 2014 at 11:58 AM, Atchley, Scott <atchleyes@ornl.gov> wrote:
-> Can a single RADOS system support more than one POSIX namespace (i.e. two or more distinct POSIX namespaces sharing the same set of RADOS servers?
->
-> Scott--
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+One problem I noticed in testing is that when the fastcgi and/or curl development libraries are not present, CMake runs sucessfully but has compiled errors when building it instead of print a warning or disable the rados gateway. Before you build please make sure all necessary build pre-requitsites are met. 
+
+I would love feedback and input on future editions and problems! 
+
+https://github.com/linuxbox2/linuxbox-ceph/tree/cmake
+
+-Ali
