@@ -1,99 +1,124 @@
-From: Alex Elder <elder@ieee.org>
-Subject: Re: Issue #5876 : assertion failure in rbd_img_obj_callback()
-Date: Sat, 05 Apr 2014 08:08:45 -0500
-Message-ID: <5340005D.5080401@ieee.org>
-References: <1395736765.2823.29.camel@localhost>	 <1396660579.2130.103.camel@localhost> <533F62EE.2060701@ieee.org> <1396685353.2130.106.camel@localhost>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: crash in __jbd2_journal_file_buffer
+Date: Sat, 5 Apr 2014 12:20:06 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1404051212480.21861@cobra.newdream.net>
+References: <alpine.DEB.2.00.1307301540110.12830@cobra.newdream.net> <20130731190245.GC28018@quack.suse.cz> <alpine.DEB.2.00.1308091031450.17790@cobra.newdream.net> <20130809212425.GB1050@quack.suse.cz> <alpine.DEB.2.00.1308091504320.14125@cobra.newdream.net>
+ <20130812125256.GB4596@quack.suse.cz> <alpine.DEB.2.00.1308121106320.29150@cobra.newdream.net> <20130813103416.GA12197@quack.suse.cz> <alpine.DEB.2.00.1308221633080.475@cobra.newdream.net> <20130823204810.GB12980@quack.suse.cz>
+ <20130910221900.GA9805@quack.suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f180.google.com ([209.85.223.180]:36419 "EHLO
-	mail-ie0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752685AbaDENIN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 5 Apr 2014 09:08:13 -0400
-Received: by mail-ie0-f180.google.com with SMTP id as1so4503933iec.39
-        for <ceph-devel@vger.kernel.org>; Sat, 05 Apr 2014 06:08:13 -0700 (PDT)
-In-Reply-To: <1396685353.2130.106.camel@localhost>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Olivier Bonvalet <ceph.list@daevel.fr>
-Cc: ceph-devel@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-ext4-owner@vger.kernel.org>
+In-Reply-To: <20130910221900.GA9805@quack.suse.cz>
+Sender: linux-ext4-owner@vger.kernel.org
+To: Jan Kara <jack@suse.cz>
+Cc: linux-ext4@vger.kernel.org, ceph-devel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-On 04/05/2014 03:09 AM, Olivier Bonvalet wrote:
-> Le vendredi 04 avril 2014 =C3=A0 20:57 -0500, Alex Elder a =C3=A9crit=
- :
->> On 04/04/2014 08:16 PM, Olivier Bonvalet wrote:
->>> Le mardi 25 mars 2014 =C3=A0 09:39 +0100, Olivier Bonvalet a =C3=A9=
-crit :
->>>> Hi,
->>>>
->>>> what can/should I do to help fix that problem ?
->>>>
->>>> for now, RBD kernel client hang on :=20
->>>>         Assertion failure in rbd_img_obj_callback() at line 2131:
->>>>            rbd_assert(which >=3D img_request->next_completion);
->>>>
->>>> or on :
->>>>         Assertion failure in rbd_img_obj_callback() at line 2127:
->>>>             rbd_assert(img_request !=3D NULL);
->>>>
->>>>
->>>> I have both case at least once per week, on latest 3.13.5 kernels.
->>>>
->>>> It seems that the problem occurs only on more loaded servers (I ha=
-ve 4
->>>> near same servers, and crash occurs on two of them. If I move the =
-VM,
->>>> crash follows...).
->>>>
->>>> Olivier
->>>>
->>>> --
->>>
->>> Hi,
->>>
->>> so. After some days without any problems, RBD crashed toonight :
->>
->> Unfortunately this could be a symptom of the same sort of race.
->> When a object request is removed from its image request's list
->> the request count gets decremented.  To be honest, all of these
->> assertions in rbd_img_obj_callback() are probably unsafe, at
->> least until I get the patch that does proper reference counting
->> implemented:
->>
->>         rbd_assert(img_request !=3D NULL);
->>         rbd_assert(img_request->obj_request_count > 0);
->>         rbd_assert(which !=3D BAD_WHICH);
->>         rbd_assert(which < img_request->obj_request_count);
->>
->> Until then I think you can avoid this by commenting out those
->> assertions.  I'm afraid there will remain a (smaller) window
->> of opportunity for a problem to occur, but I believe commenting
->> those out will help for now.
->>
->> I'm very sorry you're hitting these.  I'll see if I can get
->> a comprehensive fix this weekend.
->>
->> 					-Alex
->=20
-> Thanks for your help, really.
->=20
-> By removing those asserts, can I throw any data corruption ?
+Hi Jan,
 
-Data corruption is no more likely with the asserts removed.
+Thanks for reminding me about this at LSF.  Both your debug patch and this 
+fix were dropped from our testing branch a while ago, but we just hit the 
+crash again yesterday on 3.14-rc5.  The fix was in our tree for quite some 
+time, though, and did not cause any problems; I think it got dropped when 
+we rebased for the 3.14 cycle.  I'll add it back now.
 
-They should not fail, and in general they do not, so things
-are working properly.  Because of this race condition we are
-seeing them fail, on rare occasions.  I understand why this
-is happening though, and when it does, this test should avoid
-doing any invalid processing of the request:
-        if (which !=3D img_request->next_completion)
-                goto out;
+Unfortunately this triggers pretty infrequently so I'm not sure I can give 
+a definitive "this fixes it," but it feels that way, and we haven't seen 
+any fallout as a result.
 
-					-Alex
+Let me know if there's anything else we can put into the test kernel that 
+might help out.
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Thanks!
+sage
+
+
+On Wed, 11 Sep 2013, Jan Kara wrote:
+
+> On Fri 23-08-13 22:48:10, Jan Kara wrote:
+> > On Thu 22-08-13 16:35:15, Sage Weil wrote:
+> > > On Tue, 13 Aug 2013, Jan Kara wrote:
+> > > > On Mon 12-08-13 11:13:06, Sage Weil wrote:
+> > > > > Full dmesg is attached.
+> > > >   Hum, nothing interesting in there...
+> > > > 
+> > > > > Our QA seems to hit this with some regularity.  Let me know if there's 
+> > > > > some combination of patches that would help shed more light!
+> > > >   If they can run with attached debug patch it could maybe sched some more
+> > > > light. Please send also your System.map file together with the dmesg of the
+> > > > kernel when the crash happens so that I can map addresses to function
+> > > > names... Thanks!
+> > > 
+> > > Okay, finally hit it again:
+> > > 
+> > > <6>[75193.192249] EXT4-fs (sda1): re-mounted. Opts: errors=remount-ro,user_xattr,user_xattr
+> > > <3>[77877.426658] Dirtying buffer without jh at 4302720297: state 218c029,jh added from 0xffffffff8127ab1d at 4302720297, removed from 0xffffffff8127b5b0 at 4302720296
+> > > <4>[77877.441200] ------------[ cut here ]------------
+> > > <4>[77877.445845] WARNING: CPU: 7 PID: 26045 at /srv/autobuild-ceph/gitbuilder.git/build/fs/jbd2/transaction.c:1380 jbd2_journal_dirty_metadata+0x1f1/0x2e0()
+> > > 
+> > > <4>[77877.497349] CPU: 7 PID: 26045 Comm: ceph-osd Not tainted 3.11.0-rc5-ceph-00061-g546140d #1
+> > > <4>[77877.505649] Hardware name: Dell Inc. PowerEdge R410/01V648, BIOS 1.6.3 02/07/2011
+> > > <4>[77877.513213]  0000000000000564 ffff880131ca1938 ffffffff81642d85 ffff8802272ef290
+> > > <4>[77877.520694]  0000000000000000 ffff880131ca1978 ffffffff8104985c ffff880131ca19a0
+> > > <4>[77877.528218]  ffff88020f695aa0 0000000000000000 ffff880214c48b40 ffff88020be55000
+> > > <4>[77877.535756] Call Trace:
+> > > <4>[77877.538279]  [<ffffffff81642d85>] dump_stack+0x46/0x58
+> > > <4>[77877.543439]  [<ffffffff8104985c>] warn_slowpath_common+0x8c/0xc0
+> > > <4>[77877.549548]  [<ffffffff810498aa>] warn_slowpath_null+0x1a/0x20
+> > > <4>[77877.555413]  [<ffffffff8127adb1>] jbd2_journal_dirty_metadata+0x1f1/0x2e0
+> > > <4>[77877.562288]  [<ffffffff812578c3>] __ext4_handle_dirty_metadata+0xa3/0x140
+> > > <4>[77877.569155]  [<ffffffff81268e23>] ext4_xattr_release_block+0x103/0x1f0
+> > > <4>[77877.575723]  [<ffffffff812692b0>] ext4_xattr_block_set+0x1e0/0x910
+> > > <4>[77877.581990]  [<ffffffff8126a58b>] ext4_xattr_set_handle+0x38b/0x4a0
+> > > <4>[77877.588335]  [<ffffffff810af7cd>] ? trace_hardirqs_on+0xd/0x10
+> > > <4>[77877.594188]  [<ffffffff8126a765>] ext4_xattr_set+0xc5/0x140
+> > > <4>[77877.599837]  [<ffffffff8126b177>] ext4_xattr_user_set+0x47/0x50
+> > > <4>[77877.605779]  [<ffffffff811a3fee>] generic_setxattr+0x6e/0x90
+> > > <4>[77877.611514]  [<ffffffff811a48eb>] __vfs_setxattr_noperm+0x7b/0x1c0
+> > > <4>[77877.617773]  [<ffffffff811a4af4>] vfs_setxattr+0xc4/0xd0
+> > > <4>[77877.623103]  [<ffffffff811a4c3e>] setxattr+0x13e/0x1e0
+> > > <4>[77877.628317]  [<ffffffff81181ec7>] ? __sb_start_write+0xe7/0x1b0
+> > > <4>[77877.634260]  [<ffffffff8119fb98>] ? mnt_want_write_file+0x28/0x60
+> > > <4>[77877.640428]  [<ffffffff8119cf0c>] ? fget_light+0x3c/0x130
+> > > <4>[77877.645847]  [<ffffffff8119fb98>] ? mnt_want_write_file+0x28/0x60
+> > > <4>[77877.652015]  [<ffffffff8119e902>] ? mnt_clone_write+0x12/0x30
+> > > <4>[77877.657897]  [<ffffffff811a50de>] SyS_fsetxattr+0xbe/0x100
+> > > <4>[77877.663405]  [<ffffffff81653782>] system_call_fastpath+0x16/0x1b
+> > > <4>[77877.669488] ---[ end trace bb7933908cd5a32a ]---
+> >   I was scratching my head for a while how this could happen but I think I
+> > see the race now. Think we have two inodes A and B which share the same
+> > xattr block (so &BHDR(bh)->h_refcount == 2). Now we are changing xattrs for
+> > both inodes in parallel - that can easily happen because xattr locking is
+> > generally per inode (EXT4_I(inode)->xattr_sem). The following race then
+> > happens:
+> > CPU1					CPU2
+> > ext4_xattr_release_block()		ext4_xattr_release_block()
+> > lock_buffer(bh);
+> > /* False */
+> > if (BHDR(bh)->h_refcount == cpu_to_le32(1))
+> > } else {
+> > 	le32_add_cpu(&BHDR(bh)->h_refcount, -1);
+> > 	unlock_buffer(bh);
+> > 					lock_buffer(bh);
+> > 					/* True */
+> > 					if (BHDR(bh)->h_refcount == cpu_to_le32(1))
+> > 						get_bh(bh);
+> > 						ext4_free_blocks()
+> > 							...
+> > 							jbd2_journal_forget()
+> > 								jbd2_journal_unfile_buffer()
+> > 								-> JH is gone
+> > 	error = ext4_handle_dirty_xattr_block(handle, inode, bh);
+> > 	-> triggers warning
+> > 
+> > Now easy fix would be to move ext4_handle_dirty_xattr_block() before
+> > unlock_buffer() but I don't really like that because of locking
+> > constraints. I'll think about it...
+>   So finally I've got back to this. Attached is a somewhat ugly patch that
+> should fix this issue. Can you please test it? Thanks!
+> 
+> 								Honza
+> -- 
+> Jan Kara <jack@suse.cz>
+> SUSE Labs, CR
+> 
