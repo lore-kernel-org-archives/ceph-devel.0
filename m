@@ -1,174 +1,173 @@
-From: "Yan, Zheng" <ukernel@gmail.com>
-Subject: Re: queue for linus
-Date: Sun, 6 Apr 2014 14:14:01 +0800
-Message-ID: <CAAM7YA==PU6vwuhbaNs9pQumhm3HxgN9f=KALzK_MbfKsybG3w@mail.gmail.com>
-References: <alpine.DEB.2.00.1404042111591.11404@cobra.newdream.net>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: jerasure/gf-complete segmentation violation
+Date: Sun, 06 Apr 2014 12:12:43 +0200
+Message-ID: <5341289B.4080701@dachary.org>
+References: <533C4A67.3070906@dachary.org>	<CA+AFVBg00yTzu-VGxSURDxv_UWOmZJEF+077txButeoSkoQuBg@mail.gmail.com>	<533C4F40.8020207@dachary.org>	<alpine.DEB.2.00.1404021101250.2734@cobra.newdream.net> <CA+AFVBgVXsTLJuGh-FrJMx3ee11Ztf=g+B9gnHybg9EXwunfnw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="rs2QJpCgafSGOMjd0wHRqTF0TH6wj4Qr9"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f169.google.com ([209.85.217.169]:65504 "EHLO
-	mail-lb0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751122AbaDFGOE (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 6 Apr 2014 02:14:04 -0400
-Received: by mail-lb0-f169.google.com with SMTP id q8so3705889lbi.14
-        for <ceph-devel@vger.kernel.org>; Sat, 05 Apr 2014 23:14:01 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1404042111591.11404@cobra.newdream.net>
+Received: from smtp.dmail.dachary.org ([91.121.254.229]:37545 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754270AbaDFKM5 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 6 Apr 2014 06:12:57 -0400
+In-Reply-To: <CA+AFVBgVXsTLJuGh-FrJMx3ee11Ztf=g+B9gnHybg9EXwunfnw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ilya.dryomov@inktank.com, "Yan, Zheng" <zheng.z.yan@intel.com>, josh.durgin@inktank.com, ceph-devel <ceph-devel@vger.kernel.org>
+To: Kevin Greenan <kmgreen2@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Please consider including patch "ceph: skip invalid dentry during
-dcache readdir"
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--rs2QJpCgafSGOMjd0wHRqTF0TH6wj4Qr9
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-Regards
-Yan, Zheng
+Hi,
 
-On Sat, Apr 5, 2014 at 12:17 PM, Sage Weil <sage@inktank.com> wrote:
-> Hi everyone,
->
-> This is what we have queued up for Linus for 3.15-rc1.  Is there anything
-> missing?  I pulled David Howell's patch out of for-linus (since I
-> think it should go in via Al's tree) and rebased.  Is there anything
-> missing?  Josh, do you want to put the discard patches in?
->
-> Let me know and I'll send this off in the next couple of days.
->
-> Thanks!
-> sage
->
->
-> The following changes since commit 455c6fdbd219161bd09b1165f11699d6d73de11c:
->
->   Linux 3.14 (2014-03-30 20:40:15 -0700)
->
-> are available in the git repository at:
->
->   git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
->
-> for you to fetch changes up to 8a53f23fcda355958a79774c6333a3a31c380ecf:
->
->   libceph: dump pool {read,write}_tier to debugfs (2014-04-04 21:08:29 -0700)
->
-> ----------------------------------------------------------------
-> Fabian Frederick (1):
->       ceph: Remove get/set acl on symlinks
->
-> Ilya Dryomov (48):
->       libceph: a per-osdc crush scratch buffer
->       rbd: remove out_partial label in rbd_img_request_fill()
->       rbd: fix error paths in rbd_img_request_fill()
->       libceph: encode CEPH_OSD_OP_FLAG_* op flags
->       libceph: add support for CEPH_OSD_OP_SETALLOCHINT osd op
->       libceph: bump CEPH_OSD_MAX_OP to 3
->       rbd: num_ops parameter for rbd_osd_req_create()
->       rbd: prefix rbd writes with CEPH_OSD_OP_SETALLOCHINT osd op
->       crush: fix off-by-one errors in total_tries refactor
->       crush: allow crush rules to set (re)tries counts to 0
->       crush: add chooseleaf_vary_r tunable
->       crush: add SET_CHOOSELEAF_VARY_R step
->       crush: support chooseleaf_vary_r tunable (tunables3) by default
->       libceph: refer to osdmap directly in osdmap_show()
->       libceph: do not prefix osd lines with \t in debugfs output
->       libceph: dump pg_temp mappings to debugfs
->       libceph: dump osdmap and enhance output on decode errors
->       libceph: split osdmap allocation and decode steps
->       libceph: fixup error handling in osdmap_decode()
->       libceph: safely decode max_osd value in osdmap_decode()
->       libceph: check length of osdmap osd arrays
->       libceph: fix crush_decode() call site in osdmap_decode()
->       libceph: fixup error handling in osdmap_apply_incremental()
->       libceph: nuke bogus encoding version check in osdmap_apply_incremental()
->       libceph: fix and clarify ceph_decode_need() sizes
->       libceph: rename __decode_pool{,_names}() to decode_pool{,_names}()
->       libceph: introduce decode{,_new}_pools() and switch to them
->       libceph: switch osdmap_set_max_osd() to krealloc()
->       libceph: introduce decode{,_new}_pg_temp() and switch to them
->       libceph: introduce get_osdmap_client_data_v()
->       libceph: generalize ceph_pg_mapping
->       libceph: primary_temp infrastructure
->       libceph: primary_temp decode bits
->       libceph: primary_affinity infrastructure
->       libceph: primary_affinity decode bits
->       libceph: enable OSDMAP_ENC feature bit
->       libceph: ceph_osd_{exists,is_up,is_down}(osd) definitions
->       libceph: ceph_can_shift_osds(pool) and pool type defines
->       libceph: introduce pg_to_raw_osds() and raw_to_up_osds() helpers
->       libceph: introduce apply_temps() helper
->       libceph: switch ceph_calc_pg_acting() to new helpers
->       libceph: return primary from ceph_calc_pg_acting()
->       libceph: add support for primary_temp mappings
->       libceph: add support for osd primary affinity
->       libceph: redo ceph_calc_pg_primary() in terms of ceph_calc_pg_acting()
->       libceph: enable PRIMARY_AFFINITY feature bit
->       libceph: output primary affinity values on osdmap updates
->       libceph: dump pool {read,write}_tier to debugfs
->
-> Sage Weil (4):
->       ceph: avoid useless ceph_get_dentry_parent_inode() in ceph_rename()
->       ceph: do not chain inode updates to parent fsync
->       ceph: do not assume r_old_dentry[_dir] always set together
->       ceph: do not set r_old_dentry_dir on link()
->
-> Yan, Zheng (22):
->       ceph: fix ceph_dir_llseek()
->       ceph: fix reset_readdir()
->       ceph: let MDS adjust readdir 'frag'
->       ceph: simplify ceph_fh_to_dentry()
->       ceph: add get_parent() NFS export callback
->       ceph: fix ceph_fh_to_parent()
->       ceph: add get_name() NFS export callback
->       ceph: print inode number for LOOKUPINO request
->       ceph: make sure write caps are registered with auth MDS
->       ceph: update i_max_size even if inode version does not change
->       ceph: use fl->fl_type to decide flock operation
->       ceph: forbid mandatory file lock
->       ceph: use fl->fl_file as owner identifier of flock and posix lock
->       ceph: set mds_wanted when MDS reply changes a cap to auth cap
->       libceph: fix oops in ceph_msg_data_{pages,pagelist}_advance()
->       ceph: fix null pointer dereference in discard_cap_releases()
->       ceph: check buffer size in ceph_vxattrcb_layout()
->       ceph: don't include ceph.{file,dir}.layout vxattr in listxattr()
->       ceph: preallocate buffer for readdir reply
->       ceph: drop extra open file reference in ceph_atomic_open()
->       ceph: don't grabs open file reference for aborted request
->       ceph: flush cap release queue when trimming session caps
->
-> Yunchuan Wen (3):
->       ceph: fscache: add an interface to synchronize object store limit
->       ceph: fscache: Update object store limit after file writing
->       ceph: fscache: Wait for completion of object initialization
->
->  drivers/block/rbd.c                |   87 +++-
->  fs/ceph/cache.c                    |    1 +
->  fs/ceph/cache.h                    |   10 +
->  fs/ceph/caps.c                     |    9 +-
->  fs/ceph/debugfs.c                  |    5 +-
->  fs/ceph/dir.c                      |   40 +-
->  fs/ceph/export.c                   |  267 +++++-----
->  fs/ceph/file.c                     |    8 +-
->  fs/ceph/inode.c                    |   76 ++-
->  fs/ceph/ioctl.c                    |    5 +-
->  fs/ceph/locks.c                    |   98 ++--
->  fs/ceph/mds_client.c               |   97 +++-
->  fs/ceph/mds_client.h               |    4 +-
->  fs/ceph/strings.c                  |    1 +
->  fs/ceph/super.c                    |    1 +
->  fs/ceph/super.h                    |    3 +-
->  fs/ceph/xattr.c                    |   48 +-
->  include/linux/ceph/ceph_features.h |   12 +-
->  include/linux/ceph/ceph_fs.h       |    5 +-
->  include/linux/ceph/osd_client.h    |   11 +-
->  include/linux/ceph/osdmap.h        |   50 +-
->  include/linux/ceph/rados.h         |   18 +-
->  include/linux/crush/crush.h        |    7 +
->  net/ceph/crush/mapper.c            |   85 ++-
->  net/ceph/debugfs.c                 |   55 +-
->  net/ceph/messenger.c               |    6 +
->  net/ceph/osd_client.c              |   41 +-
->  net/ceph/osdmap.c                  |  993 ++++++++++++++++++++++++++----------
->  28 files changed, 1413 insertions(+), 630 deletions(-)
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+An illegal instruction this time http://tracker.ceph.com/issues/7914#note=
+-31 . Since the workload is slightly different, I'm trying to run it 30 t=
+imes and see if that triggers the problem.=20
+
+Cheers
+
+On 02/04/2014 20:15, Kevin Greenan wrote:
+> OK, it looks like this happens when the GF backend is first initialized=
+ (unless, like Loic pointed out, something is corrupted).
+>=20
+> Is this consistently happening for carry-free multiply and w=3D32 (i.e.=
+ gf_w32_cfm_init)?
+>=20
+> Can you send me a core + binary, so I can dig in gdb?
+>=20
+> -kevin
+>=20
+>=20
+> On Wed, Apr 2, 2014 at 11:01 AM, Sage Weil <sage@inktank.com <mailto:sa=
+ge@inktank.com>> wrote:
+>=20
+>     On Wed, 2 Apr 2014, Loic Dachary wrote:
+>     >
+>     >
+>     > On 02/04/2014 19:44, Kevin Greenan wrote:
+>     > > Hey Loic,
+>     > >
+>     > > Are you ensuring that Jerasure (actually gf-complete) is gettin=
+g memory buffers aligned on 16-byte boundaries?  Without looking too deep=
+, that is the first thing I would check.
+>     > >
+>     >
+>     > Yes
+>     >
+>     > https://github.com/ceph/ceph/blob/master/src/erasure-code/jerasur=
+e/ErasureCodeJerasure.cc#L32
+>     > https://github.com/ceph/ceph/blob/master/src/erasure-code/jerasur=
+e/ErasureCodeJerasure.cc#L242
+>     > https://github.com/ceph/ceph/blob/master/src/erasure-code/jerasur=
+e/ErasureCodeJerasure.cc#L65
+>     > https://github.com/ceph/ceph/blob/master/src/erasure-code/jerasur=
+e/ErasureCodeJerasure.cc#L108
+>     >
+>=20
+>     In this case they are 2K aligned:
+>=20
+>     (gdb) p data_ptrs[0]
+>     $1 =3D 0x3e46000 "I'm the", ' ' <repeats 16 times>, "3th object!"
+>     (gdb) p data_ptrs[1]
+>     $2 =3D 0x3e46800 'z' <repeats 200 times>...
+>     (gdb) p coding_ptrs[0]
+>     $3 =3D 0x338e000 "I'm the", ' ' <repeats 16 times>, "3th object!"
+>=20
+>     sage
+>=20
+>     > I'll re-read this logic tomorrow just to be sure.
+>     >
+>     > Cheers
+>     >
+>     > > I can have a deeper look later today or tomorrow.
+>     > >
+>     > > -kevin
+>     > >
+>     > >
+>     > > On Wed, Apr 2, 2014 at 10:35 AM, Loic Dachary <loic@dachary.org=
+ <mailto:loic@dachary.org> <mailto:loic@dachary.org <mailto:loic@dachary.=
+org>>> wrote:
+>     > >
+>     > >     Hi Kevin,
+>     > >
+>     > >     In the context of http://tracker.ceph.com/issues/7914 we're=
+ trying to figure out why jerasure dumps core. We don't know how to repro=
+duce it yet (ran dozens of identical tests suites with no such crash in t=
+he past few days, which is to be expected for rare bugs because the test =
+suite introduces random errors / failures on purpose).
+>     > >
+>     > >     The full stack trace is at http://tracker.ceph.com/issues/7=
+914#note-24 but the relevant part is here:
+>     > >
+>     > >     #0  0x00007f4756779b7b in raise (sig=3D<optimized out>) at =
+=2E./nptl/sysdeps/unix/sysv/linux/pt-raise.c:42
+>     > >     #1  0x0000000000981b4e in reraise_fatal (signum=3D11) at gl=
+obal/signal_handler.cc:59
+>     > >     #2  handle_fatal_signal (signum=3D11) at global/signal_hand=
+ler.cc:105
+>     > >     #3  <signal handler called>
+>     > >     #4  0x0000000000000000 in ?? ()
+>     > >     #5  0x00007f47385ae6b1 in jerasure_matrix_dotprod (k=3D2, w=
+=3D8, matrix_row=3D0x31513a8, src_ids=3D0x0, dest_id=3D<optimized out>, d=
+ata_ptrs=3D0x7f4741ec7a00, coding_ptrs=3D0x7f4741ec7a10,
+>     > >         size=3D2048) at erasure-code/jerasure/jerasure/src/jera=
+sure.c:607
+>     > >     #6  0x00007f47385ae7d6 in jerasure_matrix_encode (k=3D2, m=3D=
+1, w=3D8, matrix=3D<optimized out>, data_ptrs=3D0x7f4741ec7a00, coding_pt=
+rs=3D0x7f4741ec7a10, size=3D2048)
+>     > >         at erasure-code/jerasure/jerasure/src/jerasure.c:310
+>     > >     ...
+>     > >
+>     > >     Note that this jerasure/gf-complete combination has been co=
+mpiled with SSE4.1, SSE4.2, PCLMUL, SSSE3, SSE3, SSE2, SSE flags activate=
+d. These are jerasure v2 and gf-complete v1, only slightly modified as fo=
+und in https://github.com/ceph/jerasure/tree/v2-ceph and https://github.c=
+om/ceph/gf-complete/tree/v1-ceph (all commits there have a pending pull r=
+equest under https://bitbucket.org/jimplank/gf-complete https://bitbucket=
+=2Eorg/jimplank/jerasure, nothing you've not seen before).
+>     > >
+>     > >     #5 is https://github.com/ceph/jerasure/blob/v2-ceph/src/jer=
+asure.c#L607
+>     > >
+>     > >     and then it dives into gf-complete and most probably destro=
+yed part of the stack when corrupting memory. I'll be chasing this tomorr=
+ow. If you have a brilliant idea on why that happens, I'll take it ;-)
+>     > >
+>     > >     Cheers
+>     > >
+>     > >     --
+>     > >     Lo=EFc Dachary, Artisan Logiciel Libre
+>     > >
+>     > >
+>     >
+>     > --
+>     > Lo=EFc Dachary, Artisan Logiciel Libre
+>     >
+>     >=20
+>=20
+>=20
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+
+
+--rs2QJpCgafSGOMjd0wHRqTF0TH6wj4Qr9
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.20 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlNBKKQACgkQ8dLMyEl6F21VrQCgq2ihVPPYlqkfxa8wEZJmqRhD
+J+0An0pF61KdAnJhNKPSKtF9mVQERu/u
+=I9X8
+-----END PGP SIGNATURE-----
+
+--rs2QJpCgafSGOMjd0wHRqTF0TH6wj4Qr9--
