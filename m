@@ -1,71 +1,174 @@
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: [PATCH] ceph: skip invalid dentry during dcache readdir
-Date: Sun,  6 Apr 2014 14:10:04 +0800
-Message-ID: <1396764604-14817-1-git-send-email-zheng.z.yan@intel.com>
+From: "Yan, Zheng" <ukernel@gmail.com>
+Subject: Re: queue for linus
+Date: Sun, 6 Apr 2014 14:14:01 +0800
+Message-ID: <CAAM7YA==PU6vwuhbaNs9pQumhm3HxgN9f=KALzK_MbfKsybG3w@mail.gmail.com>
+References: <alpine.DEB.2.00.1404042111591.11404@cobra.newdream.net>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:16138 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751122AbaDFGKY (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 6 Apr 2014 02:10:24 -0400
+Received: from mail-lb0-f169.google.com ([209.85.217.169]:65504 "EHLO
+	mail-lb0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751122AbaDFGOE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 6 Apr 2014 02:14:04 -0400
+Received: by mail-lb0-f169.google.com with SMTP id q8so3705889lbi.14
+        for <ceph-devel@vger.kernel.org>; Sat, 05 Apr 2014 23:14:01 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.00.1404042111591.11404@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: sage@inktank.com, "Yan, Zheng" <zheng.z.yan@intel.com>
+To: Sage Weil <sage@inktank.com>
+Cc: ilya.dryomov@inktank.com, "Yan, Zheng" <zheng.z.yan@intel.com>, josh.durgin@inktank.com, ceph-devel <ceph-devel@vger.kernel.org>
 
-skip dentries that were added before MDS issued FILE_SHARED to
-client.
+Please consider including patch "ceph: skip invalid dentry during
+dcache readdir"
 
-Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
----
- fs/ceph/dir.c | 13 ++++++++-----
- 1 file changed, 8 insertions(+), 5 deletions(-)
+Regards
+Yan, Zheng
 
-diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-index 46cd092..766410a 100644
---- a/fs/ceph/dir.c
-+++ b/fs/ceph/dir.c
-@@ -119,7 +119,8 @@ static int fpos_cmp(loff_t l, loff_t r)
-  * defined IFF we hold CEPH_CAP_FILE_SHARED (which will be revoked by
-  * the MDS if/when the directory is modified).
-  */
--static int __dcache_readdir(struct file *file, struct dir_context *ctx)
-+static int __dcache_readdir(struct file *file,  struct dir_context *ctx,
-+			    u32 shared_gen)
- {
- 	struct ceph_file_info *fi = file->private_data;
- 	struct dentry *parent = file->f_dentry;
-@@ -133,8 +134,8 @@ static int __dcache_readdir(struct file *file, struct dir_context *ctx)
- 	last = fi->dentry;
- 	fi->dentry = NULL;
- 
--	dout("__dcache_readdir %p at %llu (last %p)\n", dir, ctx->pos,
--	     last);
-+	dout("__dcache_readdir %p v%u at %llu (last %p)\n",
-+	     dir, shared_gen, ctx->pos, last);
- 
- 	spin_lock(&parent->d_lock);
- 
-@@ -161,7 +162,8 @@ more:
- 			goto out_unlock;
- 		}
- 		spin_lock_nested(&dentry->d_lock, DENTRY_D_LOCK_NESTED);
--		if (!d_unhashed(dentry) && dentry->d_inode &&
-+		if (di->lease_shared_gen == shared_gen &&
-+		    !d_unhashed(dentry) && dentry->d_inode &&
- 		    ceph_snap(dentry->d_inode) != CEPH_SNAPDIR &&
- 		    ceph_ino(dentry->d_inode) != CEPH_INO_CEPH &&
- 		    fpos_cmp(ctx->pos, di->offset) <= 0)
-@@ -289,8 +291,9 @@ static int ceph_readdir(struct file *file, struct dir_context *ctx)
- 	    ceph_snap(inode) != CEPH_SNAPDIR &&
- 	    __ceph_dir_is_complete(ci) &&
- 	    __ceph_caps_issued_mask(ci, CEPH_CAP_FILE_SHARED, 1)) {
-+		u32 shared_gen = ci->i_shared_gen;
- 		spin_unlock(&ci->i_ceph_lock);
--		err = __dcache_readdir(file, ctx);
-+		err = __dcache_readdir(file, ctx, shared_gen);
- 		if (err != -EAGAIN)
- 			return err;
- 	} else {
--- 
-1.8.5.3
-
+On Sat, Apr 5, 2014 at 12:17 PM, Sage Weil <sage@inktank.com> wrote:
+> Hi everyone,
+>
+> This is what we have queued up for Linus for 3.15-rc1.  Is there anything
+> missing?  I pulled David Howell's patch out of for-linus (since I
+> think it should go in via Al's tree) and rebased.  Is there anything
+> missing?  Josh, do you want to put the discard patches in?
+>
+> Let me know and I'll send this off in the next couple of days.
+>
+> Thanks!
+> sage
+>
+>
+> The following changes since commit 455c6fdbd219161bd09b1165f11699d6d73de11c:
+>
+>   Linux 3.14 (2014-03-30 20:40:15 -0700)
+>
+> are available in the git repository at:
+>
+>   git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
+>
+> for you to fetch changes up to 8a53f23fcda355958a79774c6333a3a31c380ecf:
+>
+>   libceph: dump pool {read,write}_tier to debugfs (2014-04-04 21:08:29 -0700)
+>
+> ----------------------------------------------------------------
+> Fabian Frederick (1):
+>       ceph: Remove get/set acl on symlinks
+>
+> Ilya Dryomov (48):
+>       libceph: a per-osdc crush scratch buffer
+>       rbd: remove out_partial label in rbd_img_request_fill()
+>       rbd: fix error paths in rbd_img_request_fill()
+>       libceph: encode CEPH_OSD_OP_FLAG_* op flags
+>       libceph: add support for CEPH_OSD_OP_SETALLOCHINT osd op
+>       libceph: bump CEPH_OSD_MAX_OP to 3
+>       rbd: num_ops parameter for rbd_osd_req_create()
+>       rbd: prefix rbd writes with CEPH_OSD_OP_SETALLOCHINT osd op
+>       crush: fix off-by-one errors in total_tries refactor
+>       crush: allow crush rules to set (re)tries counts to 0
+>       crush: add chooseleaf_vary_r tunable
+>       crush: add SET_CHOOSELEAF_VARY_R step
+>       crush: support chooseleaf_vary_r tunable (tunables3) by default
+>       libceph: refer to osdmap directly in osdmap_show()
+>       libceph: do not prefix osd lines with \t in debugfs output
+>       libceph: dump pg_temp mappings to debugfs
+>       libceph: dump osdmap and enhance output on decode errors
+>       libceph: split osdmap allocation and decode steps
+>       libceph: fixup error handling in osdmap_decode()
+>       libceph: safely decode max_osd value in osdmap_decode()
+>       libceph: check length of osdmap osd arrays
+>       libceph: fix crush_decode() call site in osdmap_decode()
+>       libceph: fixup error handling in osdmap_apply_incremental()
+>       libceph: nuke bogus encoding version check in osdmap_apply_incremental()
+>       libceph: fix and clarify ceph_decode_need() sizes
+>       libceph: rename __decode_pool{,_names}() to decode_pool{,_names}()
+>       libceph: introduce decode{,_new}_pools() and switch to them
+>       libceph: switch osdmap_set_max_osd() to krealloc()
+>       libceph: introduce decode{,_new}_pg_temp() and switch to them
+>       libceph: introduce get_osdmap_client_data_v()
+>       libceph: generalize ceph_pg_mapping
+>       libceph: primary_temp infrastructure
+>       libceph: primary_temp decode bits
+>       libceph: primary_affinity infrastructure
+>       libceph: primary_affinity decode bits
+>       libceph: enable OSDMAP_ENC feature bit
+>       libceph: ceph_osd_{exists,is_up,is_down}(osd) definitions
+>       libceph: ceph_can_shift_osds(pool) and pool type defines
+>       libceph: introduce pg_to_raw_osds() and raw_to_up_osds() helpers
+>       libceph: introduce apply_temps() helper
+>       libceph: switch ceph_calc_pg_acting() to new helpers
+>       libceph: return primary from ceph_calc_pg_acting()
+>       libceph: add support for primary_temp mappings
+>       libceph: add support for osd primary affinity
+>       libceph: redo ceph_calc_pg_primary() in terms of ceph_calc_pg_acting()
+>       libceph: enable PRIMARY_AFFINITY feature bit
+>       libceph: output primary affinity values on osdmap updates
+>       libceph: dump pool {read,write}_tier to debugfs
+>
+> Sage Weil (4):
+>       ceph: avoid useless ceph_get_dentry_parent_inode() in ceph_rename()
+>       ceph: do not chain inode updates to parent fsync
+>       ceph: do not assume r_old_dentry[_dir] always set together
+>       ceph: do not set r_old_dentry_dir on link()
+>
+> Yan, Zheng (22):
+>       ceph: fix ceph_dir_llseek()
+>       ceph: fix reset_readdir()
+>       ceph: let MDS adjust readdir 'frag'
+>       ceph: simplify ceph_fh_to_dentry()
+>       ceph: add get_parent() NFS export callback
+>       ceph: fix ceph_fh_to_parent()
+>       ceph: add get_name() NFS export callback
+>       ceph: print inode number for LOOKUPINO request
+>       ceph: make sure write caps are registered with auth MDS
+>       ceph: update i_max_size even if inode version does not change
+>       ceph: use fl->fl_type to decide flock operation
+>       ceph: forbid mandatory file lock
+>       ceph: use fl->fl_file as owner identifier of flock and posix lock
+>       ceph: set mds_wanted when MDS reply changes a cap to auth cap
+>       libceph: fix oops in ceph_msg_data_{pages,pagelist}_advance()
+>       ceph: fix null pointer dereference in discard_cap_releases()
+>       ceph: check buffer size in ceph_vxattrcb_layout()
+>       ceph: don't include ceph.{file,dir}.layout vxattr in listxattr()
+>       ceph: preallocate buffer for readdir reply
+>       ceph: drop extra open file reference in ceph_atomic_open()
+>       ceph: don't grabs open file reference for aborted request
+>       ceph: flush cap release queue when trimming session caps
+>
+> Yunchuan Wen (3):
+>       ceph: fscache: add an interface to synchronize object store limit
+>       ceph: fscache: Update object store limit after file writing
+>       ceph: fscache: Wait for completion of object initialization
+>
+>  drivers/block/rbd.c                |   87 +++-
+>  fs/ceph/cache.c                    |    1 +
+>  fs/ceph/cache.h                    |   10 +
+>  fs/ceph/caps.c                     |    9 +-
+>  fs/ceph/debugfs.c                  |    5 +-
+>  fs/ceph/dir.c                      |   40 +-
+>  fs/ceph/export.c                   |  267 +++++-----
+>  fs/ceph/file.c                     |    8 +-
+>  fs/ceph/inode.c                    |   76 ++-
+>  fs/ceph/ioctl.c                    |    5 +-
+>  fs/ceph/locks.c                    |   98 ++--
+>  fs/ceph/mds_client.c               |   97 +++-
+>  fs/ceph/mds_client.h               |    4 +-
+>  fs/ceph/strings.c                  |    1 +
+>  fs/ceph/super.c                    |    1 +
+>  fs/ceph/super.h                    |    3 +-
+>  fs/ceph/xattr.c                    |   48 +-
+>  include/linux/ceph/ceph_features.h |   12 +-
+>  include/linux/ceph/ceph_fs.h       |    5 +-
+>  include/linux/ceph/osd_client.h    |   11 +-
+>  include/linux/ceph/osdmap.h        |   50 +-
+>  include/linux/ceph/rados.h         |   18 +-
+>  include/linux/crush/crush.h        |    7 +
+>  net/ceph/crush/mapper.c            |   85 ++-
+>  net/ceph/debugfs.c                 |   55 +-
+>  net/ceph/messenger.c               |    6 +
+>  net/ceph/osd_client.c              |   41 +-
+>  net/ceph/osdmap.c                  |  993 ++++++++++++++++++++++++++----------
+>  28 files changed, 1413 insertions(+), 630 deletions(-)
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
