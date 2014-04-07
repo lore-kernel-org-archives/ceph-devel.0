@@ -1,111 +1,98 @@
-From: "J. Bruce Fields" <bfields@fieldses.org>
-Subject: Re: [PATCH][RESEND] vfs: Make __d_materialise_dentry() set the
- materialised dentry name correctly
-Date: Mon, 7 Apr 2014 16:51:21 -0400
-Message-ID: <20140407205121.GA4426@fieldses.org>
-References: <1394115376-17109-1-git-send-email-zheng.z.yan@intel.com>
- <6487FCC2-FB5C-4A32-94EF-5D3352A39781@primarydata.com>
- <53392EDA.7000904@intel.com>
- <alpine.DEB.2.00.1404070655530.28550@cobra.newdream.net>
+From: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Subject: v0.79 released (firefly release candicate)
+Date: Mon, 7 Apr 2014 15:53:02 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1404071546300.8390@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from fieldses.org ([174.143.236.118]:57285 "EHLO fieldses.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755187AbaDGUvc (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 7 Apr 2014 16:51:32 -0400
-Content-Disposition: inline
-In-Reply-To: <alpine.DEB.2.00.1404070655530.28550@cobra.newdream.net>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Viro Alexander <viro@zeniv.linux.org.uk>, "Yan, Zheng" <zheng.z.yan@intel.com>, Trond Myklebust <trond.myklebust@primarydata.com>, David Howells <dhowells@redhat.com>, linux-fsdevel@vger.kernel.org, linux-nfs@vger.kernel.org, ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Mon, Apr 07, 2014 at 06:56:28AM -0700, Sage Weil wrote:
-> Hi Al,
-> 
-> Can this go to Linus via your tree?
+This release is intended to serve as a release candidate for firefly, 
+which will hopefully be v0.80.  No changes are being made to the code base 
+at this point except those that fix bugs.  Please test this release if you 
+intend to make use of the new erasure-coded pools or cache tiers in 
+firefly.
 
-I believe this has been fixed by
-da1ce0670c14d8380e423a3239e562a1dc15fa9e "vfs: add cross-rename".
+This release fixes a range of bugs found in v0.78 and streamlines the
+user experience when creating erasure-coded pools.  There is also a
+raft of fixes for the MDS (multi-mds, directory fragmentation, and
+large directories).  The main notable new piece of functionality is a
+small change to allow radosgw to use an erasure-coded pool for object
+data.
 
-Though probably the patch should still go in, possibly with a changelog
-update.  We want it for stable kernels if nothing else.
 
---b.
+Upgrading
+---------
 
-> 
-> Thanks!
-> sage
-> 
-> 
-> On Mon, 31 Mar 2014, Yan, Zheng wrote:
-> 
-> > Hi Al,
-> > 
-> > Could you include this in 3.15
-> > 
-> > Regards
-> > Yan, Zheng
-> > 
-> > On 03/06/2014 10:35 PM, Trond Myklebust wrote:
-> > > 
-> > > On Mar 6, 2014, at 9:16, Yan, Zheng <zheng.z.yan@intel.com> wrote:
-> > > 
-> > >> From: David Howells <dhowells@redhat.com>
-> > >>
-> > >> Make __d_materialise_dentry() set the materialised dentry name correctly by
-> > >> flipping the arguments to switch_names().
-> > >>
-> > >> switch_names() is lazy: if both names are internal to their dentries, it'll
-> > >> overwrite that of the first dentry with that of the second, and won't update
-> > >> that of the second.
-> > >>
-> > >> In the case of __d_materialise_dentry(), the second is an already extant
-> > >> anonymous dentry that we want to insert into the tree in place of the dentry we
-> > >> just looked up[*].  However, the dentry we just looked up carries the name we
-> > >> actually want to use.
-> > >>
-> > >> [*] This is used by NFS to join a mount of a subtree into a mount of a tree
-> > >> nearer the root when the two meet, where both mounts share a superblock and
-> > >> thus a set of dentries.
-> > >>
-> > >> Signed-off-by: David Howells <dhowells@redhat.com>
-> > >> ---
-> > >> fs/dcache.c | 2 +-
-> > >> 1 file changed, 1 insertion(+), 1 deletion(-)
-> > >>
-> > >> diff --git a/fs/dcache.c b/fs/dcache.c
-> > >> index 265e0ce..ff779d4 100644
-> > >> --- a/fs/dcache.c
-> > >> +++ b/fs/dcache.c
-> > >> @@ -2698,7 +2698,7 @@ static void __d_materialise_dentry(struct dentry *dentry, struct dentry *anon)
-> > >>
-> > >> 	dparent = dentry->d_parent;
-> > >>
-> > >> -	switch_names(dentry, anon);
-> > >> +	switch_names(anon, dentry);
-> > >> 	swap(dentry->d_name.hash, anon->d_name.hash);
-> > >>
-> > >> 	dentry->d_parent = dentry;
-> > > 
-> > > Well spotted...
-> > > 
-> > > We ought to better document the fact that ?switch_names? is asymmetrical. Perhaps change it to ?update_target_name?, and then switch the argument names so that the ?target? really is the thing that gets updated?
-> > > 
-> > > _________________________________
-> > > Trond Myklebust
-> > > Linux NFS client maintainer, PrimaryData
-> > > trond.myklebust@primarydata.com
-> > > 
-> > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > 
-> > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-fsdevel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+* Erasure pools created with v0.78 will no longer function with v0.79.  You
+  will need to delete the old pool and create a new one.
+
+* A bug was fixed in the authentication handshake with big-endian
+  architectures that prevent authentication between big- and
+  little-endian machines in the same cluster.  If you have a cluster
+  that consists entirely of big-endian machines, you will need to
+  upgrade all daemons and clients and restart.
+
+* The 'ceph.file.layout' and 'ceph.dir.layout' extended attributes are
+  no longer included in the listxattr(2) results to prevent problems with
+  'cp -a' and similar tools.
+
+* Monitor 'auth' read-only commands now expect the user to have 'rx' caps.
+  This is the same behavior that was present in dumpling, but in emperor
+  and more recent development releases the 'r' cap was sufficient.  The
+  affected commands are::
+
+    ceph auth export
+    ceph auth get
+    ceph auth get-key
+    ceph auth print-key
+    ceph auth list
+
+
+Notable Changes
+---------------
+
+* ceph-conf: stop creating bogus log files (Josh Durgin, Sage Weil)
+* common: fix authentication on big-endian architectures (Dan Mick)
+* debian: change directory ownership between ceph and ceph-common (Sage Weil)
+* init: fix startup ordering/timeout problem with OSDs (Dmitry Smirnov)
+* librbd: skip zeroes/holes when copying sparse images (Josh Durgin)
+* mds: cope with MDS failure during creation (John Spray)
+* mds: fix crash from client sleep/resume (Zheng Yan)
+* mds: misc fixes for directory fragments (Zheng Yan)
+* mds: misc fixes for larger directories (Zheng Yan)
+* mds: misc fixes for multiple MDSs (Zheng Yan)
+* mds: remove .ceph directory (John Spray)
+* misc coverity fixes, cleanups (Danny Al-Gaaf)
+* mon: add erasure profiles and improve erasure pool creation (Loic Dachary)
+* mon: 'ceph osd pg-temp ...' and primary-temp commands (Ilya Dryomov)
+* mon: fix pool count in 'ceph -s' output (Sage Weil)
+* msgr: improve connection error detection between clients and monitors 
+  (Greg Farnum, Sage Weil)
+* osd: add/fix CPU feature detection for jerasure (Loic Dachary)
+* osd: improved scrub checks on clones (Sage Weil, Sam Just)
+* osd: many erasure fixes (Sam Just)
+* osd: move to jerasure2 library (Loic Dachary)
+* osd: new tests for erasure pools (David Zafman)
+* osd: reduce scrub lock contention (Guang Yang)
+* rgw: allow use of an erasure data pool (Yehuda Sadeh)
+
+
+Downloading
+-----------
+
+* Git at git://github.com/ceph/ceph.git
+* Tarball at http://ceph.com/download/ceph-0.79.tar.gz
+* For packages, see http://ceph.com/docs/master/install/get-packages
+* For ceph-deploy, see http://ceph.com/docs/master/install/install-ceph-deploy
