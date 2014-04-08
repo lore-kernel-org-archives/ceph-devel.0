@@ -1,75 +1,114 @@
 From: Josh Durgin <josh.durgin@inktank.com>
-Subject: [PATCH 05/11] rbd: read image size for discard check safely
-Date: Tue,  8 Apr 2014 13:42:49 -0700
-Message-ID: <7376321311dedcd90e7f16ab1a94cb2c4f34786f.1396987789.git.josh.durgin@inktank.com>
+Subject: [PATCH 02/11] rbd: skip the copyup when an entire object writing
+Date: Tue,  8 Apr 2014 13:42:46 -0700
+Message-ID: <e8c928e7bb03d2bb934a64a8d558319d9a76b35c.1396987789.git.josh.durgin@inktank.com>
 References: <cover.1396987789.git.josh.durgin@inktank.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:56383 "EHLO
+Received: from mail.hq.newdream.net ([66.33.206.127]:56375 "EHLO
 	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756235AbaDHWC0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Apr 2014 18:02:26 -0400
-Received: from mail.hq.newdream.net (localhost [127.0.0.1])
-	by mail.hq.newdream.net (Postfix) with ESMTP id BC899267DB
-	for <ceph-devel@vger.kernel.org>; Tue,  8 Apr 2014 14:52:31 -0700 (PDT)
-Received: from vit.ops.newdream.net (unknown [38.122.20.226])
-	by mail.hq.newdream.net (Postfix) with ESMTPSA id B4781267BC
-	for <ceph-devel@vger.kernel.org>; Tue,  8 Apr 2014 14:52:31 -0700 (PDT)
+	with ESMTP id S1757105AbaDHWCZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Apr 2014 18:02:25 -0400
 In-Reply-To: <cover.1396987789.git.josh.durgin@inktank.com>
 In-Reply-To: <cover.1396987789.git.josh.durgin@inktank.com>
 References: <cover.1396987789.git.josh.durgin@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
+Cc: Guangliang Zhao <lucienchao@gmail.com>
 
-In rbd_img_request_fill() the image size is only checked to determine
-whether we can truncate an object instead of zeroing it for discard
-requests. Take rbd_dev->header_rwsem while reading the image size, and
-move this read into the discard check, so that non-discard ops don't
-need to take the semaphore in this function.
+From: Guangliang Zhao <lucienchao@gmail.com>
 
-Signed-off-by: Josh Durgin <josh.durgin@inktank.com>
+It need to copyup the parent's content when layered writing,
+but an entire object write would overwrite it, so skip it.
+
+Signed-off-by: Guangliang Zhao <lucienchao@gmail.com>
+Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
+Reviewed-by: Alex Elder <elder@linaro.org>
 ---
- drivers/block/rbd.c |   18 ++++++++++++------
- 1 file changed, 12 insertions(+), 6 deletions(-)
+ drivers/block/rbd.c |   49 ++++++++++++++++++++++++++++++++++---------------
+ 1 file changed, 34 insertions(+), 15 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 9dc33d9..486e4b5 100644
+index b6676b6..282bfcd 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -2235,7 +2235,6 @@ static int rbd_img_request_fill(struct rbd_img_request *img_request,
- 		(int)type, data_desc);
+@@ -2645,34 +2645,53 @@ out:
+ 	return ret;
+ }
  
- 	img_offset = img_request->offset;
--	img_end = rbd_dev->header.image_size;
- 	resid = img_request->length;
- 	rbd_assert(resid > 0);
+-static int rbd_img_obj_request_submit(struct rbd_obj_request *obj_request)
++static bool rbd_img_obj_request_simple(struct rbd_obj_request *obj_request)
+ {
+ 	struct rbd_img_request *img_request;
+ 	struct rbd_device *rbd_dev;
+-	bool known;
++	u64 obj_size;
  
-@@ -2300,13 +2299,20 @@ static int rbd_img_request_fill(struct rbd_img_request *img_request,
- 			if (!offset && (length == object_size)
- 				&& (!img_request_layered_test(img_request) ||
- 					(rbd_dev->parent_overlap <=
--						obj_request->img_offset)))
-+						obj_request->img_offset))) {
- 				opcode = CEPH_OSD_OP_DELETE;
--			else if ((offset + length == object_size) ||
--				(obj_request->img_offset + length == img_end))
-+			} else if ((offset + length == object_size)) {
- 				opcode = CEPH_OSD_OP_TRUNCATE;
--			else
--				opcode = CEPH_OSD_OP_ZERO;
-+			} else {
-+				down_read(&rbd_dev->header_rwsem);
-+				img_end = rbd_dev->header.image_size;
-+				up_read(&rbd_dev->header_rwsem);
-+
-+				if (obj_request->img_offset + length == img_end)
-+					opcode = CEPH_OSD_OP_TRUNCATE;
-+				else
-+					opcode = CEPH_OSD_OP_ZERO;
-+			}
- 		} else if (img_request_write_test(img_request)) {
- 			op_type = OBJ_OP_WRITE;
- 			opcode = CEPH_OSD_OP_WRITE;
+ 	rbd_assert(obj_request_img_data_test(obj_request));
+ 
+ 	img_request = obj_request->img_request;
+ 	rbd_assert(img_request);
+ 	rbd_dev = img_request->rbd_dev;
++	obj_size = (u64) 1 << rbd_dev->header.obj_order;
+ 
++	/* Read requests didn't need special handling */
++	if (!img_request_write_test(img_request))
++		return true;
++	/* No-layered writes are simple requests*/
++	if (!img_request_layered_test(img_request))
++		return true;
+ 	/*
+-	 * Only writes to layered images need special handling.
+-	 * Reads and non-layered writes are simple object requests.
+ 	 * Layered writes that start beyond the end of the overlap
+-	 * with the parent have no parent data, so they too are
+-	 * simple object requests.  Finally, if the target object is
+-	 * known to already exist, its parent data has already been
+-	 * copied, so a write to the object can also be handled as a
+-	 * simple object request.
++	 * with the parent have no parent data, so they are simple
++	 * object requests.
+ 	 */
+-	if (!img_request_write_test(img_request) ||
+-		!img_request_layered_test(img_request) ||
+-		rbd_dev->parent_overlap <= obj_request->img_offset ||
+-		((known = obj_request_known_test(obj_request)) &&
+-			obj_request_exists_test(obj_request))) {
++	if (rbd_dev->parent_overlap <= obj_request->img_offset)
++		return true;
++	/*
++	 * If the obj_request aligns with the boundary and equals
++	 * to the size of an object, it doesn't need copyup, because
++	 * the obj_request will overwrite it finally.
++	 */
++	if ((!obj_request->offset) && (obj_request->length == obj_size))
++		return true;
++	/*
++	 * If the target object is known to already exist, its parent
++	 * data has already been copied, so a write to the object can
++	 * also be handled as a simple object request
++	 */
++	if (obj_request_known_test(obj_request) &&
++			obj_request_exists_test(obj_request))
++		return true;
++	return false;
++}
+ 
++static int rbd_img_obj_request_submit(struct rbd_obj_request *obj_request)
++{
++	if (rbd_img_obj_request_simple(obj_request)) {
+ 		struct rbd_device *rbd_dev;
+ 		struct ceph_osd_client *osdc;
+ 
+@@ -2688,7 +2707,7 @@ static int rbd_img_obj_request_submit(struct rbd_obj_request *obj_request)
+ 	 * start by reading the data for the full target object from
+ 	 * the parent so we can use it for a copyup to the target.
+ 	 */
+-	if (known)
++	if (obj_request_known_test(obj_request))
+ 		return rbd_img_obj_parent_read_full(obj_request);
+ 
+ 	/* We don't know whether the target exists.  Go find out. */
 -- 
 1.7.10.4
 
