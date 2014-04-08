@@ -1,46 +1,40 @@
-From: Mark Kirkwood <mark.kirkwood-6STWZtX7tXAqAMOr+u8IRA@public.gmane.org>
-Subject: Re: Ceph v0.79 Firefly RC :: erasure-code-profile
- command set not present
-Date: Tue, 08 Apr 2014 22:12:56 +1200
-Message-ID: <5343CBA8.1050703@catalyst.net.nz>
-References: <3423E02F-D2A2-4E7A-99BF-9B277FF3AB19@csc.fi>
-	<5343C143.70803@catalyst.net.nz>
-	<6CD10D8D-16D8-4BFE-B270-D14E11D9FCF7@csc.fi>
+From: Wido den Hollander <wido@42on.com>
+Subject: Switch to RBD format 2 by default after Firefly
+Date: Tue, 08 Apr 2014 14:47:48 +0200
+Message-ID: <5343EFF4.9010808@42on.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <6CD10D8D-16D8-4BFE-B270-D14E11D9FCF7-Gn+qtVAUx6s@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Karan Singh <karan.singh-Gn+qtVAUx6s@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from websrv.42on.com ([31.25.102.167]:56156 "EHLO websrv.42on.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756846AbaDHMr4 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 8 Apr 2014 08:47:56 -0400
+Received: from [172.9.1.90] (unknown [61.8.155.149])
+	by websrv.42on.com (Postfix) with ESMTPSA id B4DF7C05A3
+	for <ceph-devel@vger.kernel.org>; Tue,  8 Apr 2014 14:47:53 +0200 (CEST)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-I'm not sure if this is relevant, but my 0.78 (and currently building 
-0.79) are compiled from src git checkout (and packages built from the 
-same src tree using dpkg-buildpackage Debian/Ubuntu package builder).
+Hi,
 
-Having said that - the above procedure *should* produce equivalent 
-binaries to the official Debian/Ubuntu and Redhat/Centos packages 
-(unless there is a specific bug in the rpm style builds).
+With Ubuntu 14.04 now shipping with the 3.13 kernel it fully supports 
+Format 2 in both librbd and krbd.
 
-Cheers
+For RHEL 7 there will be a extra yum repo with a module which supports 
+format 2, so isn't it that that after Firefly we change 
+'rbd_default_format' to 2?
 
-Mark
+I still see a lot of images being created with format 1 and that will 
+otherwise be hunting us for a long time.
 
-On 08/04/14 21:44, Karan Singh wrote:
-> Thanks Mark for this quick checkup on Ubuntu distro. you saved my time ,
-> i was also checking the same thing.
->
-> All of my ceph components are on 0.79 , this looks to be a problem with
-> ceph binaries for RHEL.
->
-> @ Ceph Developers :  Any thought on this.
->
+I'd vote for making format 2 the default or at least patch the 'rbd' 
+tool to create format 2 images.
+
+-- 
+Wido den Hollander
+42on B.V.
+
+Phone: +31 (0)20 700 9902
+Skype: contact42on
