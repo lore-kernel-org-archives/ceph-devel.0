@@ -1,57 +1,46 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: gf-complete thread safe initialization
-Date: Tue, 08 Apr 2014 19:22:51 +0200
-Message-ID: <5344306B.8030708@dachary.org>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: [PATCH 3/3 v3] rbd: add discard support for rbd
+Date: Tue, 08 Apr 2014 14:48:51 -0700
+Message-ID: <53446EC3.8000509@inktank.com>
+References: <1396362136-8722-1-git-send-email-lucienchao@gmail.com> <1396362136-8722-2-git-send-email-lucienchao@gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="qf1LUv3oQqQKPxJkFq5ClMoVkC9DwVpOQ"
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:44211 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756079AbaDHRW5 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Apr 2014 13:22:57 -0400
+Received: from mail-pd0-f175.google.com ([209.85.192.175]:56849 "EHLO
+	mail-pd0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756235AbaDHVtA (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Apr 2014 17:49:00 -0400
+Received: by mail-pd0-f175.google.com with SMTP id x10so1553745pdj.34
+        for <ceph-devel@vger.kernel.org>; Tue, 08 Apr 2014 14:49:00 -0700 (PDT)
+In-Reply-To: <1396362136-8722-2-git-send-email-lucienchao@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Kevin Greenan <kmgreen2@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Guangliang Zhao <lucienchao@gmail.com>, ceph-devel@vger.kernel.org
+Cc: elder@ieee.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---qf1LUv3oQqQKPxJkFq5ClMoVkC9DwVpOQ
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+On 04/01/2014 07:22 AM, Guangliang Zhao wrote:
+> This patch add the discard support for rbd driver.
+>
+> There are three types operation in the driver:
+> 1. The objects would be removed if they completely contained
+>     within the discard range.
+> 2. The objects would be truncated if they partly contained within
+>     the discard range, and align with their boundary.
+> 3. Others would be zeroed.
+>
+> A discard request from blkdev_issue_discard() is defined which
+> REQ_WRITE and REQ_DISCARD both marked and no data, so we must
+> check the REQ_DISCARD first when getting the request type.
+>
+> This resolve:
+> 	http://tracker.ceph.com/issues/190
+>
+> Signed-off-by: Guangliang Zhao <lucienchao@gmail.com>
+> ---
 
-Hi Kevin,
+Thanks for fixing these up! I've added them to the wip-discard branch
+in ceph-client.git, which I'll post for review shortly.
 
-The following patch is initializing the array in a lock protected / not t=
-hread sensitive part of code.=20
+Josh
 
-https://github.com/ceph/ceph/pull/1621/files
-
-Unless I'm mistaken, it ensures that it never happens automagically. The =
-first few tests that were run indicate it's not more broken than it was b=
-efore. We'll have to wait a few days to be sure that it fixes the issue.
-
-Do you think that's a sensible way to avoid thread safety problem in the =
-context of ceph ? Or are there other issues I don't see ?=20
-
-Cheers
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-
-
---qf1LUv3oQqQKPxJkFq5ClMoVkC9DwVpOQ
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlNEMGsACgkQ8dLMyEl6F23p+QCfZauLhMxTKfN2saUSU9YozTuQ
-+ckAn1ztmyb0nVyGkEdrNFYU8I4hk51t
-=DxA4
------END PGP SIGNATURE-----
-
---qf1LUv3oQqQKPxJkFq5ClMoVkC9DwVpOQ--
