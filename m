@@ -1,59 +1,75 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: Switch to RBD format 2 by default after Firefly
-Date: Tue, 08 Apr 2014 14:57:45 +0200
-Message-ID: <5343F249.5010200@42on.com>
-References: <5343EFF4.9010808@42on.com> <CALFYKtD1U_-Ckq0VpvDJ3iaqnmBAjGS4VNmRL+SFPdF5+YdnGg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: [PATCH] ceph: check directory's completeness before emitting directory entry
+Date: Tue,  8 Apr 2014 21:50:55 +0800
+Message-ID: <1396965055-6334-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from websrv.42on.com ([31.25.102.167]:56191 "EHLO websrv.42on.com"
+Received: from mga01.intel.com ([192.55.52.88]:10059 "EHLO mga01.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756369AbaDHM5s (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 8 Apr 2014 08:57:48 -0400
-In-Reply-To: <CALFYKtD1U_-Ckq0VpvDJ3iaqnmBAjGS4VNmRL+SFPdF5+YdnGg@mail.gmail.com>
+	id S1756704AbaDHNyH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 8 Apr 2014 09:54:07 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <ilya.dryomov@inktank.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: sage@inktank.com, "Yan, Zheng" <zheng.z.yan@intel.com>
 
-On 04/08/2014 02:56 PM, Ilya Dryomov wrote:
-> On Tue, Apr 8, 2014 at 4:47 PM, Wido den Hollander <wido@42on.com> wrote:
->> Hi,
->>
->> With Ubuntu 14.04 now shipping with the 3.13 kernel it fully supports Format
->> 2 in both librbd and krbd.
->>
->> For RHEL 7 there will be a extra yum repo with a module which supports
->> format 2, so isn't it that that after Firefly we change 'rbd_default_format'
->> to 2?
->>
->> I still see a lot of images being created with format 1 and that will
->> otherwise be hunting us for a long time.
->>
->> I'd vote for making format 2 the default or at least patch the 'rbd' tool to
->> create format 2 images.
->
-> Fancy format 2 striping is not supported by krbd.  We've had a couple
-> people who confused format 2 support with the ability to set their own
-> stripe settings, so we'll need to be more vocal about it.
+Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+---
+ fs/ceph/dir.c | 22 ++++++++++++----------
+ 1 file changed, 12 insertions(+), 10 deletions(-)
 
-Ah, that's something I've missed. Never used that in combination with 
-krbd. So yes, we need to be more vocal about that.
-
-Maybe even set a warning in the 'rbd' cli tool? Or at least in the 
-help/usage.
-
->
-> Thanks,
->
->                  Ilya
->
-
-
+diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+index 766410a..8c7f90b 100644
+--- a/fs/ceph/dir.c
++++ b/fs/ceph/dir.c
+@@ -182,9 +182,16 @@ more:
+ 	spin_unlock(&dentry->d_lock);
+ 	spin_unlock(&parent->d_lock);
+ 
++	/* make sure a dentry wasn't dropped while we didn't have parent lock */
++	if (!ceph_dir_is_complete(dir)) {
++		dout(" lost dir complete on %p; falling back to mds\n", dir);
++		dput(dentry);
++		err = -EAGAIN;
++		goto out;
++	}
++
+ 	dout(" %llu (%llu) dentry %p %.*s %p\n", di->offset, ctx->pos,
+ 	     dentry, dentry->d_name.len, dentry->d_name.name, dentry->d_inode);
+-	ctx->pos = di->offset;
+ 	if (!dir_emit(ctx, dentry->d_name.name,
+ 		      dentry->d_name.len,
+ 		      ceph_translate_ino(dentry->d_sb, dentry->d_inode->i_ino),
+@@ -198,19 +205,12 @@ more:
+ 		return 0;
+ 	}
+ 
++	ctx->pos = di->offset + 1;
++
+ 	if (last)
+ 		dput(last);
+ 	last = dentry;
+ 
+-	ctx->pos++;
+-
+-	/* make sure a dentry wasn't dropped while we didn't have parent lock */
+-	if (!ceph_dir_is_complete(dir)) {
+-		dout(" lost dir complete on %p; falling back to mds\n", dir);
+-		err = -EAGAIN;
+-		goto out;
+-	}
+-
+ 	spin_lock(&parent->d_lock);
+ 	p = p->prev;	/* advance to next dentry */
+ 	goto more;
+@@ -296,6 +296,8 @@ static int ceph_readdir(struct file *file, struct dir_context *ctx)
+ 		err = __dcache_readdir(file, ctx, shared_gen);
+ 		if (err != -EAGAIN)
+ 			return err;
++		frag = fpos_frag(ctx->pos);
++		off = fpos_off(ctx->pos);
+ 	} else {
+ 		spin_unlock(&ci->i_ceph_lock);
+ 	}
 -- 
-Wido den Hollander
-42on B.V.
+1.8.5.3
 
-Phone: +31 (0)20 700 9902
-Skype: contact42on
