@@ -1,114 +1,94 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: [PATCH 02/11] rbd: skip the copyup when an entire object writing
-Date: Tue,  8 Apr 2014 13:42:46 -0700
-Message-ID: <e8c928e7bb03d2bb934a64a8d558319d9a76b35c.1396987789.git.josh.durgin@inktank.com>
-References: <cover.1396987789.git.josh.durgin@inktank.com>
+From: Dmitry Smirnov <onlyjob@debian.org>
+Subject: Re: problem with /lib/lsb/init-functions
+Date: Wed, 09 Apr 2014 10:08:29 +1000
+Message-ID: <2117804.rLAcrddlMO@debstor>
+References: <alpine.DEB.2.00.1404080936130.28550@cobra.newdream.net>
+Mime-Version: 1.0
+Content-Type: multipart/signed; boundary="nextPart2945774.TKu6H2j32X"; micalg="pgp-sha256"; protocol="application/pgp-signature"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:56375 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757105AbaDHWCZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Apr 2014 18:02:25 -0400
-In-Reply-To: <cover.1396987789.git.josh.durgin@inktank.com>
-In-Reply-To: <cover.1396987789.git.josh.durgin@inktank.com>
-References: <cover.1396987789.git.josh.durgin@inktank.com>
+Received: from mail-pb0-f50.google.com ([209.85.160.50]:38973 "EHLO
+	mail-pb0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756232AbaDIAIi (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Apr 2014 20:08:38 -0400
+Received: by mail-pb0-f50.google.com with SMTP id md12so1719788pbc.23
+        for <ceph-devel@vger.kernel.org>; Tue, 08 Apr 2014 17:08:37 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.00.1404080936130.28550@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Guangliang Zhao <lucienchao@gmail.com>
+To: Sage Weil <sage@inktank.com>
+Cc: alfredo.deza@inktank.com, ceph-devel@vger.kernel.org
 
-From: Guangliang Zhao <lucienchao@gmail.com>
 
-It need to copyup the parent's content when layered writing,
-but an entire object write would overwrite it, so skip it.
+--nextPart2945774.TKu6H2j32X
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="us-ascii"
 
-Signed-off-by: Guangliang Zhao <lucienchao@gmail.com>
-Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
-Reviewed-by: Alex Elder <elder@linaro.org>
----
- drivers/block/rbd.c |   49 ++++++++++++++++++++++++++++++++++---------------
- 1 file changed, 34 insertions(+), 15 deletions(-)
+Hi Sage,
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index b6676b6..282bfcd 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -2645,34 +2645,53 @@ out:
- 	return ret;
- }
- 
--static int rbd_img_obj_request_submit(struct rbd_obj_request *obj_request)
-+static bool rbd_img_obj_request_simple(struct rbd_obj_request *obj_request)
- {
- 	struct rbd_img_request *img_request;
- 	struct rbd_device *rbd_dev;
--	bool known;
-+	u64 obj_size;
- 
- 	rbd_assert(obj_request_img_data_test(obj_request));
- 
- 	img_request = obj_request->img_request;
- 	rbd_assert(img_request);
- 	rbd_dev = img_request->rbd_dev;
-+	obj_size = (u64) 1 << rbd_dev->header.obj_order;
- 
-+	/* Read requests didn't need special handling */
-+	if (!img_request_write_test(img_request))
-+		return true;
-+	/* No-layered writes are simple requests*/
-+	if (!img_request_layered_test(img_request))
-+		return true;
- 	/*
--	 * Only writes to layered images need special handling.
--	 * Reads and non-layered writes are simple object requests.
- 	 * Layered writes that start beyond the end of the overlap
--	 * with the parent have no parent data, so they too are
--	 * simple object requests.  Finally, if the target object is
--	 * known to already exist, its parent data has already been
--	 * copied, so a write to the object can also be handled as a
--	 * simple object request.
-+	 * with the parent have no parent data, so they are simple
-+	 * object requests.
- 	 */
--	if (!img_request_write_test(img_request) ||
--		!img_request_layered_test(img_request) ||
--		rbd_dev->parent_overlap <= obj_request->img_offset ||
--		((known = obj_request_known_test(obj_request)) &&
--			obj_request_exists_test(obj_request))) {
-+	if (rbd_dev->parent_overlap <= obj_request->img_offset)
-+		return true;
-+	/*
-+	 * If the obj_request aligns with the boundary and equals
-+	 * to the size of an object, it doesn't need copyup, because
-+	 * the obj_request will overwrite it finally.
-+	 */
-+	if ((!obj_request->offset) && (obj_request->length == obj_size))
-+		return true;
-+	/*
-+	 * If the target object is known to already exist, its parent
-+	 * data has already been copied, so a write to the object can
-+	 * also be handled as a simple object request
-+	 */
-+	if (obj_request_known_test(obj_request) &&
-+			obj_request_exists_test(obj_request))
-+		return true;
-+	return false;
-+}
- 
-+static int rbd_img_obj_request_submit(struct rbd_obj_request *obj_request)
-+{
-+	if (rbd_img_obj_request_simple(obj_request)) {
- 		struct rbd_device *rbd_dev;
- 		struct ceph_osd_client *osdc;
- 
-@@ -2688,7 +2707,7 @@ static int rbd_img_obj_request_submit(struct rbd_obj_request *obj_request)
- 	 * start by reading the data for the full target object from
- 	 * the parent so we can use it for a copyup to the target.
- 	 */
--	if (known)
-+	if (obj_request_known_test(obj_request))
- 		return rbd_img_obj_parent_read_full(obj_request);
- 
- 	/* We don't know whether the target exists.  Go find out. */
--- 
-1.7.10.4
+On Tue, 8 Apr 2014 09:38:06 Sage Weil wrote:
+> In commit 012bb5fb5bbc76e5a2c5037dc0c6558f0b1b0a45 we added a depende=
+ncy
+> on /lib/lsb/init-functions which is not present on rpm-based machines=
+.
+> This thread
+>=20
+> =09http://www.redhat.com/archives/rhl-devel-list/2007-August/msg01920=
+.html
+>=20
+> proposes a workaround but there is also some concern about this being=
+
+> slow.  Do you know what the best practice is here?  I'm not familiar =
+with
+> this area.
+
+I can't tell what is the best practice on Red Hat.
+On Debian such include is a standard practice.
+
+
+> =09http://tracker.ceph.com/issues/8028
+
+I just updated the above ticket with the following:
+
+    This is because of missing depends on "lsb-base". I reckon it (or s=
+imilar
+    package) should be available on RHEL/CentOS. Besides my commit is n=
+ot a
+    problem as other init scripts already had similar include.
+    So to me it looks like RPM packaging issue...
+
+I hope this helps...
+
+=2D-=20
+Cheers,
+ Dmitry Smirnov.
+
+=2D--
+
+Reality is that which, when you stop believing in it, doesn't go away.
+        -- Philip K. Dick
+
+--nextPart2945774.TKu6H2j32X
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: This is a digitally signed message part.
+Content-Transfer-Encoding: 7Bit
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.19 (GNU/Linux)
+
+iQIcBAABCAAGBQJTRI+AAAoJEFK2u9lTlo0bmJoP/2879X9ik+AWD7hi0aoFhA9c
+My7Q5D8VKFLPyP+Rd/3IEcnUfc6nooOVjNRs0QEtx8MiXTMKq9JqAw6GyIrffeB7
+bXzaG41e3gWd33Y6HAPw5cA3uDyTr1ZYf0u0Rg0LNbIe6176xFGoCKA59eCPpXJH
+3sUm3XJjZV6gMJ/T4NuSWsGXFpNbK6uDvpri879V5q/spMOV51EEt+dL9aZe2O8I
+E+5VcAq8i+TzysVpD7RBlTU7jhpPSn0S6WbjOB4n4cFaoetpAPXXBOuynhnlFSAn
+iH0WH9P+bc41hWvI6iC2aNQ3TNytZRh8/5b8q1FgVkm1Jrs5lpc4uSnDRkgjFTmD
+s5191STXP+VKWSZ4Mj8jCOjepwZOXmRXXML8FOMNsdvl/G0+HDX846aMYOKgW5+r
+so2Iprg1D6AhFmNW2JA9UTXwlL534zNuX5bAbaIFK0yJIAmMSkEDJP/SlireRvyL
+C6O6d3HyMI5jPSmamckxwLTmvx8vosJaIhfVczCCgWN/P/iR3//9RO/OW1XsLlh3
+tFVzt7J9SJi2nY6NEFXWynIufsqYQZ718NtysfG8dn/ZzO8+ajNC0/21I+HEVod4
+OkxNQ/6tqOBB71FIe1c9MmoL8PYIVi+8GcJt+0+1touNdRz2n4v1JwUC+UEzFABB
+1nGnCE6StxmIleVLa5OX
+=8Nmf
+-----END PGP SIGNATURE-----
+
+--nextPart2945774.TKu6H2j32X--
 
