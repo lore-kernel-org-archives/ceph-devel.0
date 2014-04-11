@@ -1,71 +1,41 @@
-From: Lukas Czerner <lczerner@redhat.com>
-Subject: [PATCH 1/4] ext4: Remove unnecessary check for APPEND and IMMUTABLE
-Date: Fri, 11 Apr 2014 20:57:42 +0200
-Message-ID: <1397242665-2183-1-git-send-email-lczerner@redhat.com>
+From: Patrick McGarry <patrick-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Subject: OpenStack Survey Deadline Looms!
+Date: Fri, 11 Apr 2014 14:57:56 -0400
+Message-ID: <CAP8Oy=J-nsZFZkCSvt3z_xXzqOQL-9Kab7WSA61CV02S2P8dRg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <xfs-bounces@oss.sgi.com>
-List-Unsubscribe: <http://oss.sgi.com/mailman/options/xfs>,
-	<mailto:xfs-request@oss.sgi.com?subject=unsubscribe>
-List-Archive: <http://oss.sgi.com/pipermail/xfs>
-List-Post: <mailto:xfs@oss.sgi.com>
-List-Help: <mailto:xfs-request@oss.sgi.com?subject=help>
-List-Subscribe: <http://oss.sgi.com/mailman/listinfo/xfs>,
-	<mailto:xfs-request@oss.sgi.com?subject=subscribe>
-Errors-To: xfs-bounces@oss.sgi.com
-Sender: xfs-bounces@oss.sgi.com
-To: linux-fsdevel@vger.kernel.org
-Cc: Lukas Czerner <lczerner@redhat.com>, ceph-devel@vger.kernel.org, linux-ext4@vger.kernel.org, xfs@oss.sgi.com
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-All the checks IS_APPEND and IS_IMMUTABLE for the fallocate operation on
-the inode are done in vfs. No need to do this again in ext4. Remove it.
+Hey all,
 
-Signed-off-by: Lukas Czerner <lczerner@redhat.com>
----
- fs/ext4/extents.c | 6 ------
- fs/ext4/inode.c   | 6 +-----
- 2 files changed, 1 insertion(+), 11 deletions(-)
+Just a quick reminder that the OpenStack User Survey
 
-diff --git a/fs/ext4/extents.c b/fs/ext4/extents.c
-index 89f2227..0177150 100644
---- a/fs/ext4/extents.c
-+++ b/fs/ext4/extents.c
-@@ -5387,12 +5387,6 @@ int ext4_collapse_range(struct inode *inode, loff_t offset, loff_t len)
- 	/* Take mutex lock */
- 	mutex_lock(&inode->i_mutex);
- 
--	/* It's not possible punch hole on append only file */
--	if (IS_APPEND(inode) || IS_IMMUTABLE(inode)) {
--		ret = -EPERM;
--		goto out_mutex;
--	}
--
- 	if (IS_SWAPFILE(inode)) {
- 		ret = -ETXTBSY;
- 		goto out_mutex;
-diff --git a/fs/ext4/inode.c b/fs/ext4/inode.c
-index 1922f48..56f1ff4 100644
---- a/fs/ext4/inode.c
-+++ b/fs/ext4/inode.c
-@@ -3528,11 +3528,7 @@ int ext4_punch_hole(struct inode *inode, loff_t offset, loff_t length)
- 	}
- 
- 	mutex_lock(&inode->i_mutex);
--	/* It's not possible punch hole on append only file */
--	if (IS_APPEND(inode) || IS_IMMUTABLE(inode)) {
--		ret = -EPERM;
--		goto out_mutex;
--	}
-+
- 	if (IS_SWAPFILE(inode)) {
- 		ret = -ETXTBSY;
- 		goto out_mutex;
--- 
-1.8.3.1
+https://www.openstack.org/user-survey
 
-_______________________________________________
-xfs mailing list
-xfs@oss.sgi.com
-http://oss.sgi.com/mailman/listinfo/xfs
+will only be open for another 4 hours or so.  If you haven't already
+provided your view of the world with OpenStack && Ceph, please do!
+
+This user survey helps to give a snapshot of what the OpenStack
+landscape looks like as well as define requirements going forward.
+We'd really appreciate everyone taking a few minutes out of your busy
+day to fill it out.  Thanks!
+
+
+Best Regards,
+
+Patrick McGarry
+Director, Community || Inktank
+http://ceph.com  ||  http://inktank.com
+@scuttlemonkey || @ceph || @inktank
