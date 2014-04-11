@@ -1,86 +1,84 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH] libceph: fix non-default values check in
- apply_primary_affinity()
-Date: Thu, 10 Apr 2014 10:11:20 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1404101011010.27526@cobra.newdream.net>
-References: <1397139185-5492-1-git-send-email-ilya.dryomov@inktank.com>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: [PATCH] ceph: queue vmtruncate if necessary when handing cap grant/revoke
+Date: Fri, 11 Apr 2014 10:45:32 +0800
+Message-ID: <1397184332-6840-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:35820 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758712AbaDJRLU (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Apr 2014 13:11:20 -0400
-In-Reply-To: <1397139185-5492-1-git-send-email-ilya.dryomov@inktank.com>
+Received: from mga02.intel.com ([134.134.136.20]:50677 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754132AbaDKCpg (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 10 Apr 2014 22:45:36 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <ilya.dryomov@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+Cc: sage@inktank.com, "Yan, Zheng" <zheng.z.yan@intel.com>
 
-Reviewed-by: Sage Weil <sage@inktank.com>
+cap grant/revoke message from non-auth MDS can update inode's size
+and truncate_seq/truncate_size. (the message arrives before auth
+MDS's cap trunc message)
 
-On Thu, 10 Apr 2014, Ilya Dryomov wrote:
+Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+---
+ fs/ceph/caps.c | 26 ++++++++++++++++----------
+ 1 file changed, 16 insertions(+), 10 deletions(-)
 
-> osd_primary_affinity array is indexed into incorrectly when checking
-> for non-default primary-affinity values.  This nullifies the impact of
-> the rest of the apply_primary_affinity() and results in misdirected
-> requests.
-> 
->                 if (osds[i] != CRUSH_ITEM_NONE &&
->                     osdmap->osd_primary_affinity[i] !=
->                                                 ^^^
->                                         CEPH_OSD_DEFAULT_PRIMARY_AFFINITY) {
-> 
-> For a pool with size 2, this always ends up checking osd0 and osd1
-> primary_affinity values, instead of the values that correspond to the
-> osds in question.  E.g., given a [2,3] up set and a [max,max,0,max]
-> primary affinity vector, requests are still sent to osd2, because both
-> osd0 and osd1 happen to have max primary_affinity values and therefore
-> we return from apply_primary_affinity() early on the premise that all
-> osds in the given set have max (default) values.  Fix it.
-> 
-> Fixes: http://tracker.ceph.com/issues/7954
-> 
-> Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
-> ---
->  net/ceph/osdmap.c |    9 +++++----
->  1 file changed, 5 insertions(+), 4 deletions(-)
-> 
-> diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
-> index e632b5a52f5b..8b8a5a24b223 100644
-> --- a/net/ceph/osdmap.c
-> +++ b/net/ceph/osdmap.c
-> @@ -1548,8 +1548,10 @@ static void apply_primary_affinity(struct ceph_osdmap *osdmap, u32 pps,
->  		return;
->  
->  	for (i = 0; i < len; i++) {
-> -		if (osds[i] != CRUSH_ITEM_NONE &&
-> -		    osdmap->osd_primary_affinity[i] !=
-> +		int osd = osds[i];
-> +
-> +		if (osd != CRUSH_ITEM_NONE &&
-> +		    osdmap->osd_primary_affinity[osd] !=
->  					CEPH_OSD_DEFAULT_PRIMARY_AFFINITY) {
->  			break;
->  		}
-> @@ -1563,10 +1565,9 @@ static void apply_primary_affinity(struct ceph_osdmap *osdmap, u32 pps,
->  	 * osd's pgs get rejected as primary.
->  	 */
->  	for (i = 0; i < len; i++) {
-> -		int osd;
-> +		int osd = osds[i];
->  		u32 aff;
->  
-> -		osd = osds[i];
->  		if (osd == CRUSH_ITEM_NONE)
->  			continue;
->  
-> -- 
-> 1.7.10.4
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+index 2e5e648..9946ce3 100644
+--- a/fs/ceph/caps.c
++++ b/fs/ceph/caps.c
+@@ -2418,11 +2418,12 @@ static void handle_cap_grant(struct inode *inode, struct ceph_mds_caps *grant,
+ 	u64 max_size = le64_to_cpu(grant->max_size);
+ 	struct timespec mtime, atime, ctime;
+ 	int check_caps = 0;
+-	int wake = 0;
+-	int writeback = 0;
+-	int queue_invalidate = 0;
+-	int deleted_inode = 0;
+-	int queue_revalidate = 0;
++	bool wake = 0;
++	bool writeback = 0;
++	bool queue_trunc = 0;
++	bool queue_invalidate = 0;
++	bool queue_revalidate = 0;
++	bool deleted_inode = 0;
+ 
+ 	dout("handle_cap_grant inode %p cap %p mds%d seq %d %s\n",
+ 	     inode, cap, mds, seq, ceph_cap_string(newcaps));
+@@ -2512,9 +2513,10 @@ static void handle_cap_grant(struct inode *inode, struct ceph_mds_caps *grant,
+ 		queue_revalidate = 1;
+ 
+ 	/* size/ctime/mtime/atime? */
+-	ceph_fill_file_size(inode, issued,
+-			    le32_to_cpu(grant->truncate_seq),
+-			    le64_to_cpu(grant->truncate_size), size);
++	queue_trunc = ceph_fill_file_size(inode, issued,
++					  le32_to_cpu(grant->truncate_seq),
++					  le64_to_cpu(grant->truncate_size),
++					  size);
+ 	ceph_decode_timespec(&mtime, &grant->mtime);
+ 	ceph_decode_timespec(&atime, &grant->atime);
+ 	ceph_decode_timespec(&ctime, &grant->ctime);
+@@ -2595,6 +2597,12 @@ static void handle_cap_grant(struct inode *inode, struct ceph_mds_caps *grant,
+ 
+ 	spin_unlock(&ci->i_ceph_lock);
+ 
++	if (queue_trunc) {
++		ceph_queue_vmtruncate(inode);
++		ceph_queue_revalidate(inode);
++	} else if (queue_revalidate)
++		ceph_queue_revalidate(inode);
++
+ 	if (writeback)
+ 		/*
+ 		 * queue inode for writeback: we can't actually call
+@@ -2606,8 +2614,6 @@ static void handle_cap_grant(struct inode *inode, struct ceph_mds_caps *grant,
+ 		ceph_queue_invalidate(inode);
+ 	if (deleted_inode)
+ 		invalidate_aliases(inode);
+-	if (queue_revalidate)
+-		ceph_queue_revalidate(inode);
+ 	if (wake)
+ 		wake_up_all(&ci->i_cap_wq);
+ 
+-- 
+1.9.0
+
