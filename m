@@ -1,50 +1,31 @@
-From: Theodore Ts'o <tytso@mit.edu>
-Subject: Re: [PATCH 4/4] fs: Disallow all fallocate operation on active
-	swapfile
-Date: Sat, 12 Apr 2014 10:06:33 -0400
-Message-ID: <20140412140633.GD13837@thunk.org>
+From: Christoph Hellwig <hch@infradead.org>
+Subject: Re: [PATCH 2/4] fs: Prevent doing FALLOC_FL_ZERO_RANGE on append
+ only file
+Date: Sat, 12 Apr 2014 08:19:35 -0700
+Message-ID: <20140412151935.GA18047@infradead.org>
 References: <1397242665-2183-1-git-send-email-lczerner@redhat.com>
-	<1397242665-2183-4-git-send-email-lczerner@redhat.com>
+ <1397242665-2183-2-git-send-email-lczerner@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <xfs-bounces@oss.sgi.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1397242665-2183-4-git-send-email-lczerner@redhat.com>
-List-Unsubscribe: <http://oss.sgi.com/mailman/options/xfs>,
-	<mailto:xfs-request@oss.sgi.com?subject=unsubscribe>
-List-Archive: <http://oss.sgi.com/pipermail/xfs>
-List-Post: <mailto:xfs@oss.sgi.com>
-List-Help: <mailto:xfs-request@oss.sgi.com?subject=help>
-List-Subscribe: <http://oss.sgi.com/mailman/listinfo/xfs>,
-	<mailto:xfs-request@oss.sgi.com?subject=subscribe>
-Errors-To: xfs-bounces@oss.sgi.com
-Sender: xfs-bounces@oss.sgi.com
+In-Reply-To: <1397242665-2183-2-git-send-email-lczerner@redhat.com>
+Sender: linux-fsdevel-owner@vger.kernel.org
 To: Lukas Czerner <lczerner@redhat.com>
 Cc: linux-fsdevel@vger.kernel.org, ceph-devel@vger.kernel.org, linux-ext4@vger.kernel.org, xfs@oss.sgi.com
 List-Id: ceph-devel.vger.kernel.org
 
-On Fri, Apr 11, 2014 at 08:57:45PM +0200, Lukas Czerner wrote:
-> Currently some file system have IS_SWAPFILE check in their fallocate
-> implementations and some does not. However we should really prevent any
-> fallocate operation on swapfile so move the check to vfs and remove the
-> redundant checks from the file systems fallocate implementations.
-> 
-> Signed-off-by: Lukas Czerner <lczerner@redhat.com>
-> ---
->  fs/ceph/file.c    | 3 ---
->  fs/ext4/extents.c | 5 -----
->  fs/ext4/inode.c   | 5 -----
->  fs/open.c         | 7 +++++++
->  4 files changed, 7 insertions(+), 13 deletions(-)
+On Fri, Apr 11, 2014 at 08:57:43PM +0200, Lukas Czerner wrote:
+>  	/*
+> -	 * It's not possible to punch hole or perform collapse range
+> -	 * on append only file
+> +	 * It's not possible to punch hole, perform collapse range
+> +	 * or zero range on append only file
+>  	 */
+> -	if (mode & (FALLOC_FL_PUNCH_HOLE | FALLOC_FL_COLLAPSE_RANGE)
+> +	if (mode & (FALLOC_FL_PUNCH_HOLE | FALLOC_FL_COLLAPSE_RANGE |
+> +		    FALLOC_FL_ZERO_RANGE)
 
-Thanks, applied.  Again, if anyone has an objections with my carrying
-these patches in the ext4 tree and pushing them to Linus shortly after
--rc1, please let me know.
+Might be better to make this a negative test fo the operation that is
+allowed on an appen only file.  That's also much better future proof.
 
-					- Ted
-
-_______________________________________________
-xfs mailing list
-xfs@oss.sgi.com
-http://oss.sgi.com/mailman/listinfo/xfs
