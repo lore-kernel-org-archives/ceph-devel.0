@@ -1,202 +1,258 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: Ceph daemon memory utilization: 'heap release' drops use by 50%
-Date: Mon, 14 Apr 2014 06:53:43 -0700
-Message-ID: <CAPYLRzhJL93sgo0QnHZHy72f77m4NwZ+nG+LkSU6RP8UEL4PSw@mail.gmail.com>
-References: <534BD487.5090507@cam.ac.uk>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH] ceph: clear directory's completeness when creating
+ file
+Date: Mon, 14 Apr 2014 06:59:21 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1404140651580.16913@cobra.newdream.net>
+References: <1397457328-18905-1-git-send-email-zheng.z.yan@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f174.google.com ([209.85.216.174]:65015 "EHLO
-	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752734AbaDNNxo convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Apr 2014 09:53:44 -0400
-Received: by mail-qc0-f174.google.com with SMTP id c9so8856229qcz.33
-        for <ceph-devel@vger.kernel.org>; Mon, 14 Apr 2014 06:53:43 -0700 (PDT)
-In-Reply-To: <534BD487.5090507@cam.ac.uk>
+Received: from cobra.newdream.net ([66.33.216.30]:39238 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754457AbaDNN7V (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Apr 2014 09:59:21 -0400
+In-Reply-To: <1397457328-18905-1-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: David McBride <dwm37@cam.ac.uk>
-Cc: Ceph-devel <ceph-devel@vger.kernel.org>
+To: "Yan, Zheng" <zheng.z.yan@intel.com>
+Cc: ceph-devel@vger.kernel.org
 
-What distro are you running on?
--Greg
-Software Engineer #42 @ http://inktank.com | http://ceph.com
+On Mon, 14 Apr 2014, Yan, Zheng wrote:
+> When creating a file, ceph_set_dentry_offset() puts the new dentry
+> at the end of directory's d_subdirs, then set the dentry's offset
+> based on directory's max offset. The offset does not reflect the
+> real postion of the dentry in directory. Later readdir reply from
+> MDS may change the dentry's position/offset. This inconsistency
+> can cause missing/duplicate entries in readdir result if readdir
+> is partly satisfied by dcache_readdir().
+> 
+> The fix is clear directory's completeness after creating/renaming
+> file. It prevents later readdir from using dcache_readdir().
+
+Two thoughts:
+
+First, we could preserve this behavior when the directory is small (e.g., 
+< 1000 entries, or whatever the readdir_max is set to) since any readdir 
+would always be satisfied in a single request and we don't need to worry 
+about the mds vs dcache_readdir() case.  I that will still capture the 
+benefit for many/most directories.  This is probably primarily a matter of 
+adding a directory size counter into the ceph_dentry_info?
+
+Second, it seems like in order to keep this behavior in the general case, 
+we would basically need to build an rbtree that mirrors in d_subdirs list 
+and sorts the same way the mds does (by <frag, name>).  Which would mean 
+resorting that list when we discover a split/merge event.  That sounds 
+like a pretty big pain to me.  And similarly, I think that the larger the 
+directory, the less important readdir usually is in the workload...
+
+sage
 
 
-On Mon, Apr 14, 2014 at 5:28 AM, David McBride <dwm37@cam.ac.uk> wrote:
-> Hello,
->
-> I'm currently experimenting with a Ceph deployment, and am noting tha=
-t
-> some of my machines are having processes killed by the OOM killer,
-> despite provisioning 32GB for a 12 OSD machine.
->
-> (This tended to correlate with reshaping the cluster, which is not
-> surprising given that OSD memory utilization is documented to spike w=
-hen
-> recovery operations are in progress.)
->
-> While the recently-added zRAM kernel facility appears to be helping
-> somewhat in stretching the available resources, I've been reviewing t=
-he
-> heap utilization statistics displayed via `ceph tell osd.$i heap stat=
-s`.
->
-> On a representative process, I see:
->
->> osd.0tcmalloc heap stats:-------------------------------------------=
------
->> MALLOC:      593850280 (  566.3 MiB) Bytes in use by application
->> MALLOC: +   1621073920 ( 1546.0 MiB) Bytes in page heap freelist
->> MALLOC: +    117159712 (  111.7 MiB) Bytes in central cache freelist
->> MALLOC: +      2987008 (    2.8 MiB) Bytes in transfer cache freelis=
-t
->> MALLOC: +     84780344 (   80.9 MiB) Bytes in thread cache freelists
->> MALLOC: +     13119640 (   12.5 MiB) Bytes in malloc metadata
->> MALLOC:   ------------
->> MALLOC: =3D   2432970904 ( 2320.3 MiB) Actual memory used (physical =
-+ swap)
->> MALLOC: +     44449792 (   42.4 MiB) Bytes released to OS (aka unmap=
-ped)
->> MALLOC:   ------------
->> MALLOC: =3D   2477420696 ( 2362.7 MiB) Virtual address space used
->> MALLOC:
->> MALLOC:          60887              Spans in use
->> MALLOC:            775              Thread heaps in use
->> MALLOC:           8192              Tcmalloc page size
->> ------------------------------------------------
->
-> I noticed there's a huge amount of memory =E2=80=94 1.5GB =E2=80=94 o=
-n the main
-> freelist.  As an experiment, I ran `ceph tell osd.$i heap release`, a=
-nd
-> the amount of memory in use dropped substantially:
->
->> osd.0tcmalloc heap stats:-------------------------------------------=
------
->> MALLOC:      581434648 (  554.5 MiB) Bytes in use by application
->> MALLOC: +     11509760 (   11.0 MiB) Bytes in page heap freelist
->> MALLOC: +    105904144 (  101.0 MiB) Bytes in central cache freelist
->> MALLOC: +      2070848 (    2.0 MiB) Bytes in transfer cache freelis=
-t
->> MALLOC: +     97882520 (   93.3 MiB) Bytes in thread cache freelists
->> MALLOC: +     13119640 (   12.5 MiB) Bytes in malloc metadata
->> MALLOC:   ------------
->> MALLOC: =3D    811921560 (  774.3 MiB) Actual memory used (physical =
-+ swap)
->> MALLOC: +   1665499136 ( 1588.3 MiB) Bytes released to OS (aka unmap=
-ped)
->> MALLOC:   ------------
->> MALLOC: =3D   2477420696 ( 2362.7 MiB) Virtual address space used
->> MALLOC:
->> MALLOC:          60733              Spans in use
->> MALLOC:            803              Thread heaps in use
->> MALLOC:           8192              Tcmalloc page size
->> ------------------------------------------------
->
-> This was consistent across all 12 OSDs; running this command on all t=
-he
-> OSDs on a machine dropped memory utilization by ~15GB, or ~50% of the
-> amount of RAM in my machine.
->
-> Is this expected behaviour?  Would it be prudent to treat this as the
-> amount of memory the Ceph OSDs genuinely requires at peak demand?
-> (If so, that indicates that I need to be looking to increase the spec=
- of
-> my storage nodes...)
->
-> I see similar results on my MON nodes.  Before a release:
->
->> mon.ceph-sm000tcmalloc heap stats:----------------------------------=
---------------
->> MALLOC:      599497240 (  571.7 MiB) Bytes in use by application
->> MALLOC: +    806297600 (  768.9 MiB) Bytes in page heap freelist
->> MALLOC: +     32448368 (   30.9 MiB) Bytes in central cache freelist
->> MALLOC: +      1684080 (    1.6 MiB) Bytes in transfer cache freelis=
-t
->> MALLOC: +     23270408 (   22.2 MiB) Bytes in thread cache freelists
->> MALLOC: +      5091480 (    4.9 MiB) Bytes in malloc metadata
->> MALLOC:   ------------
->> MALLOC: =3D   1468289176 ( 1400.3 MiB) Actual memory used (physical =
-+ swap)
->> MALLOC: +     30859264 (   29.4 MiB) Bytes released to OS (aka unmap=
-ped)
->> MALLOC:   ------------
->> MALLOC: =3D   1499148440 ( 1429.7 MiB) Virtual address space used
->> MALLOC:
->> MALLOC:          18309              Spans in use
->> MALLOC:            122              Thread heaps in use
->> MALLOC:           8192              Tcmalloc page size
->> ------------------------------------------------
->
-> After:
->
->> mon.ceph-sm000tcmalloc heap stats:----------------------------------=
---------------
->> MALLOC:      600108520 (  572.3 MiB) Bytes in use by application
->> MALLOC: +     17342464 (   16.5 MiB) Bytes in page heap freelist
->> MALLOC: +     32392208 (   30.9 MiB) Bytes in central cache freelist
->> MALLOC: +       964240 (    0.9 MiB) Bytes in transfer cache freelis=
-t
->> MALLOC: +     23402360 (   22.3 MiB) Bytes in thread cache freelists
->> MALLOC: +      5091480 (    4.9 MiB) Bytes in malloc metadata
->> MALLOC:   ------------
->> MALLOC: =3D    679301272 (  647.8 MiB) Actual memory used (physical =
-+ swap)
->> MALLOC: +    819847168 (  781.9 MiB) Bytes released to OS (aka unmap=
-ped)
->> MALLOC:   ------------
->> MALLOC: =3D   1499148440 ( 1429.7 MiB) Virtual address space used
->> MALLOC:
->> MALLOC:          16396              Spans in use
->> MALLOC:            122              Thread heaps in use
->> MALLOC:           8192              Tcmalloc page size
->> ------------------------------------------------
->
-> The tcmalloc documentation suggests that memory should be gradually
-> being returned to the operating system:
->
-> http://gperftools.googlecode.com/svn/trunk/doc/tcmalloc.html#runtime
->
-> Given these OSDs were largely idle over the weekend prior to running
-> this experiment, it seems clear that this process is not operating as
-> designed.
->
-> I've looked through the environment of my running processes and the C=
-eph
-> source, and can see no reference to TCMALLOC_RELEASE_RATE or
-> SetMemoryReleaseRate().
->
-> I'm currently running an experiment whereby I define
-> "env TCMALLOC_RELEASE_RATE=3D10" in
-> /etc/init/ceph-{osd,mon}.conf.override; I'll see if this has any impa=
-ct
-> on memory usage over time.
->
-> (I suspect that my current Ceph cluster placement-group count is
-> excessive; with 144 OSDs, I'm running with about a dozen pools, each =
-of
-> which with ~8000 PGs.  It's not clear how the guidelines for PG-sizin=
-g
-> should be adjusted for multiple-pool configurations; at some point I'=
-ll
-> see what effect wiping my cluster and using a much smaller per-pool P=
-G
-> count has.)
->
-> Cheers,
-> David
-> --
-> David McBride <dwm37@cam.ac.uk>
-> Unix Specialist, University Information Services
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> Fixes: http://tracker.ceph.com/issues/8025
+> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+> ---
+>  fs/ceph/dir.c   |  9 ++++----
+>  fs/ceph/inode.c | 71 +++++++++++++--------------------------------------------
+>  fs/ceph/super.h |  1 -
+>  3 files changed, 21 insertions(+), 60 deletions(-)
+> 
+> diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+> index fb4f7a2..c29d6ae 100644
+> --- a/fs/ceph/dir.c
+> +++ b/fs/ceph/dir.c
+> @@ -448,7 +448,6 @@ more:
+>  	if (atomic_read(&ci->i_release_count) == fi->dir_release_count) {
+>  		dout(" marking %p complete\n", inode);
+>  		__ceph_dir_set_complete(ci, fi->dir_release_count);
+> -		ci->i_max_offset = ctx->pos;
+>  	}
+>  	spin_unlock(&ci->i_ceph_lock);
+>  
+> @@ -937,14 +936,16 @@ static int ceph_rename(struct inode *old_dir, struct dentry *old_dentry,
+>  		 * to do it here.
+>  		 */
+>  
+> -		/* d_move screws up d_subdirs order */
+> -		ceph_dir_clear_complete(new_dir);
+> -
+>  		d_move(old_dentry, new_dentry);
+>  
+>  		/* ensure target dentry is invalidated, despite
+>  		   rehashing bug in vfs_rename_dir */
+>  		ceph_invalidate_dentry_lease(new_dentry);
+> +
+> +		/* d_move screws up sibling dentries' offsets */
+> +		ceph_dir_clear_complete(old_dir);
+> +		ceph_dir_clear_complete(new_dir);
+> +
+>  	}
+>  	ceph_mdsc_put_request(req);
+>  	return err;
+> diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+> index 0b0728e..233c6f9 100644
+> --- a/fs/ceph/inode.c
+> +++ b/fs/ceph/inode.c
+> @@ -744,7 +744,6 @@ static int fill_inode(struct inode *inode,
+>  	    !__ceph_dir_is_complete(ci)) {
+>  		dout(" marking %p complete (empty)\n", inode);
+>  		__ceph_dir_set_complete(ci, atomic_read(&ci->i_release_count));
+> -		ci->i_max_offset = 2;
+>  	}
+>  no_change:
+>  	/* only update max_size on auth cap */
+> @@ -890,41 +889,6 @@ out_unlock:
+>  }
+>  
+>  /*
+> - * Set dentry's directory position based on the current dir's max, and
+> - * order it in d_subdirs, so that dcache_readdir behaves.
+> - *
+> - * Always called under directory's i_mutex.
+> - */
+> -static void ceph_set_dentry_offset(struct dentry *dn)
+> -{
+> -	struct dentry *dir = dn->d_parent;
+> -	struct inode *inode = dir->d_inode;
+> -	struct ceph_inode_info *ci;
+> -	struct ceph_dentry_info *di;
+> -
+> -	BUG_ON(!inode);
+> -
+> -	ci = ceph_inode(inode);
+> -	di = ceph_dentry(dn);
+> -
+> -	spin_lock(&ci->i_ceph_lock);
+> -	if (!__ceph_dir_is_complete(ci)) {
+> -		spin_unlock(&ci->i_ceph_lock);
+> -		return;
+> -	}
+> -	di->offset = ceph_inode(inode)->i_max_offset++;
+> -	spin_unlock(&ci->i_ceph_lock);
+> -
+> -	spin_lock(&dir->d_lock);
+> -	spin_lock_nested(&dn->d_lock, DENTRY_D_LOCK_NESTED);
+> -	list_move(&dn->d_u.d_child, &dir->d_subdirs);
+> -	dout("set_dentry_offset %p %lld (%p %p)\n", dn, di->offset,
+> -	     dn->d_u.d_child.prev, dn->d_u.d_child.next);
+> -	spin_unlock(&dn->d_lock);
+> -	spin_unlock(&dir->d_lock);
+> -}
+> -
+> -/*
+>   * splice a dentry to an inode.
+>   * caller must hold directory i_mutex for this to be safe.
+>   *
+> @@ -933,7 +897,7 @@ static void ceph_set_dentry_offset(struct dentry *dn)
+>   * the caller) if we fail.
+>   */
+>  static struct dentry *splice_dentry(struct dentry *dn, struct inode *in,
+> -				    bool *prehash, bool set_offset)
+> +				    bool *prehash)
+>  {
+>  	struct dentry *realdn;
+>  
+> @@ -965,8 +929,6 @@ static struct dentry *splice_dentry(struct dentry *dn, struct inode *in,
+>  	}
+>  	if ((!prehash || *prehash) && d_unhashed(dn))
+>  		d_rehash(dn);
+> -	if (set_offset)
+> -		ceph_set_dentry_offset(dn);
+>  out:
+>  	return dn;
+>  }
+> @@ -987,7 +949,6 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req,
+>  {
+>  	struct ceph_mds_reply_info_parsed *rinfo = &req->r_reply_info;
+>  	struct inode *in = NULL;
+> -	struct ceph_mds_reply_inode *ininfo;
+>  	struct ceph_vino vino;
+>  	struct ceph_fs_client *fsc = ceph_sb_to_client(sb);
+>  	int err = 0;
+> @@ -1161,6 +1122,9 @@ retry_lookup:
+>  
+>  		/* rename? */
+>  		if (req->r_old_dentry && req->r_op == CEPH_MDS_OP_RENAME) {
+> +			struct inode *olddir = req->r_old_dentry_dir;
+> +			BUG_ON(!olddir);
+> +
+>  			dout(" src %p '%.*s' dst %p '%.*s'\n",
+>  			     req->r_old_dentry,
+>  			     req->r_old_dentry->d_name.len,
+> @@ -1180,13 +1144,10 @@ retry_lookup:
+>  			   rehashing bug in vfs_rename_dir */
+>  			ceph_invalidate_dentry_lease(dn);
+>  
+> -			/*
+> -			 * d_move() puts the renamed dentry at the end of
+> -			 * d_subdirs.  We need to assign it an appropriate
+> -			 * directory offset so we can behave when dir is
+> -			 * complete.
+> -			 */
+> -			ceph_set_dentry_offset(req->r_old_dentry);
+> +			/* d_move screws up sibling dentries' offsets */
+> +			ceph_dir_clear_complete(dir);
+> +			ceph_dir_clear_complete(olddir);
+> +
+>  			dout("dn %p gets new offset %lld\n", req->r_old_dentry,
+>  			     ceph_dentry(req->r_old_dentry)->offset);
+>  
+> @@ -1213,8 +1174,9 @@ retry_lookup:
+>  
+>  		/* attach proper inode */
+>  		if (!dn->d_inode) {
+> +			ceph_dir_clear_complete(dir);
+>  			ihold(in);
+> -			dn = splice_dentry(dn, in, &have_lease, true);
+> +			dn = splice_dentry(dn, in, &have_lease);
+>  			if (IS_ERR(dn)) {
+>  				err = PTR_ERR(dn);
+>  				goto done;
+> @@ -1235,17 +1197,16 @@ retry_lookup:
+>  		   (req->r_op == CEPH_MDS_OP_LOOKUPSNAP ||
+>  		    req->r_op == CEPH_MDS_OP_MKSNAP)) {
+>  		struct dentry *dn = req->r_dentry;
+> +		struct inode *dir = req->r_locked_dir;
+>  
+>  		/* fill out a snapdir LOOKUPSNAP dentry */
+>  		BUG_ON(!dn);
+> -		BUG_ON(!req->r_locked_dir);
+> -		BUG_ON(ceph_snap(req->r_locked_dir) != CEPH_SNAPDIR);
+> -		ininfo = rinfo->targeti.in;
+> -		vino.ino = le64_to_cpu(ininfo->ino);
+> -		vino.snap = le64_to_cpu(ininfo->snapid);
+> +		BUG_ON(!dir);
+> +		BUG_ON(ceph_snap(dir) != CEPH_SNAPDIR);
+>  		dout(" linking snapped dir %p to dn %p\n", in, dn);
+> +		ceph_dir_clear_complete(dir);
+>  		ihold(in);
+> -		dn = splice_dentry(dn, in, NULL, true);
+> +		dn = splice_dentry(dn, in, NULL);
+>  		if (IS_ERR(dn)) {
+>  			err = PTR_ERR(dn);
+>  			goto done;
+> @@ -1407,7 +1368,7 @@ retry_lookup:
+>  		}
+>  
+>  		if (!dn->d_inode) {
+> -			dn = splice_dentry(dn, in, NULL, false);
+> +			dn = splice_dentry(dn, in, NULL);
+>  			if (IS_ERR(dn)) {
+>  				err = PTR_ERR(dn);
+>  				dn = NULL;
+> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+> index 7866cd0..ead05cc 100644
+> --- a/fs/ceph/super.h
+> +++ b/fs/ceph/super.h
+> @@ -266,7 +266,6 @@ struct ceph_inode_info {
+>  	struct timespec i_rctime;
+>  	u64 i_rbytes, i_rfiles, i_rsubdirs;
+>  	u64 i_files, i_subdirs;
+> -	u64 i_max_offset;  /* largest readdir offset, set with complete dir */
+>  
+>  	struct rb_root i_fragtree;
+>  	struct mutex i_fragtree_mutex;
+> -- 
+> 1.9.0
+> 
+> 
