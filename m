@@ -1,286 +1,145 @@
-From: "Yan, Zheng" <ukernel@gmail.com>
-Subject: Re: [PATCH] ceph: clear directory's completeness when creating file
-Date: Tue, 15 Apr 2014 00:49:57 +0800
-Message-ID: <CAAM7YAm1cZvL5Oqu30MGrX9iTmgqYGVhTb2KPPrn-jQEkQNB2A@mail.gmail.com>
-References: <1397457328-18905-1-git-send-email-zheng.z.yan@intel.com>
-	<alpine.DEB.2.00.1404140651580.16913@cobra.newdream.net>
-	<CAAM7YA=9sokM5pBww=wjEmmNfktMj8NzEVwZ5e-yDf5XwNicGw@mail.gmail.com>
-	<alpine.DEB.2.00.1404140808390.16913@cobra.newdream.net>
+From: Milosz Tanski <milosz@adfin.com>
+Subject: Re: Ubuntu 12.04 MDS tcmalloc leaks
+Date: Mon, 14 Apr 2014 15:11:00 -0400
+Message-ID: <CANP1eJF+e-ro+PVTTz1dwxuNc0ZVawwM_mtPMsBajgfcm5RUyw@mail.gmail.com>
+References: <CANP1eJGaoj6SAcMMMHGZNkZOtX5gP7sGMWXXo5Bxbzhw6DKBuw@mail.gmail.com>
+	<CAPYLRzgw479qtXxuz1+==vQf9B=nqri643wh0p5WooqCVWFm6g@mail.gmail.com>
+	<CANP1eJENCjmkwM-bCube2WeLWgsg6+U56z1naP3-SH-=mowHcw@mail.gmail.com>
+	<CAPYLRzi0ZNWjofAhjofy0F6fQqmwQrn+0g2N0yMSH=WuanXAAw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f42.google.com ([209.85.215.42]:51884 "EHLO
-	mail-la0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754764AbaDNQt7 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Apr 2014 12:49:59 -0400
-Received: by mail-la0-f42.google.com with SMTP id ec20so5909354lab.15
-        for <ceph-devel@vger.kernel.org>; Mon, 14 Apr 2014 09:49:57 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1404140808390.16913@cobra.newdream.net>
+Received: from mail-we0-f179.google.com ([74.125.82.179]:57412 "EHLO
+	mail-we0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752009AbaDNTLD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Apr 2014 15:11:03 -0400
+Received: by mail-we0-f179.google.com with SMTP id x48so8456896wes.38
+        for <ceph-devel@vger.kernel.org>; Mon, 14 Apr 2014 12:11:01 -0700 (PDT)
+In-Reply-To: <CAPYLRzi0ZNWjofAhjofy0F6fQqmwQrn+0g2N0yMSH=WuanXAAw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: "Yan, Zheng" <zheng.z.yan@intel.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <greg@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Franklin Cheung <franklin.cheung@adfin.com>, Benjamin <bpflanz@adfin.com>
 
-On Mon, Apr 14, 2014 at 11:12 PM, Sage Weil <sage@inktank.com> wrote:
-> On Mon, 14 Apr 2014, Yan, Zheng wrote:
->> On Mon, Apr 14, 2014 at 9:59 PM, Sage Weil <sage@inktank.com> wrote:
->> > On Mon, 14 Apr 2014, Yan, Zheng wrote:
->> >> When creating a file, ceph_set_dentry_offset() puts the new dentry
->> >> at the end of directory's d_subdirs, then set the dentry's offset
->> >> based on directory's max offset. The offset does not reflect the
->> >> real postion of the dentry in directory. Later readdir reply from
->> >> MDS may change the dentry's position/offset. This inconsistency
->> >> can cause missing/duplicate entries in readdir result if readdir
->> >> is partly satisfied by dcache_readdir().
->> >>
->> >> The fix is clear directory's completeness after creating/renaming
->> >> file. It prevents later readdir from using dcache_readdir().
->> >
->> > Two thoughts:
->> >
->> > First, we could preserve this behavior when the directory is small (e.g.,
->> > < 1000 entries, or whatever the readdir_max is set to) since any readdir
->> > would always be satisfied in a single request and we don't need to worry
->> > about the mds vs dcache_readdir() case.  I that will still capture the
->>
->> No, we couldn't. because caller of readdir can provide small buffer
->> for readdir result.
->
-> Hmm, we could set a different flag, UNORDERED, and then on readdir clear
-> COMPLETE if UNORDERED and size >= X...
->
+Sorry for not including the last on last email. It was an accident.
 
-It is too tricky. The readdir buffer is hidden by VFS, FS driver has
-no way to check its size.
+On Fri, Apr 11, 2014 at 6:23 PM, Gregory Farnum <greg@inktank.com> wrote:
+> On Fri, Apr 11, 2014 at 11:07 AM, Milosz Tanski <milosz@adfin.com> wrote:
+>> On Fri, Apr 11, 2014 at 1:07 PM, Gregory Farnum <greg@inktank.com> wrote:
+>>> On Fri, Apr 11, 2014 at 8:59 AM, Milosz Tanski <milosz@adfin.com> wrote:
+>>>> I'd like to restart this debate about tcmalloc slow leaks in MDS. This
+>>>> time around I have some charts. Looking at OSDs and MONs, it doesn't
+>>>> seam to affect those (as much).
+>>>>
+>>>> Here's the chart: http://i.imgur.com/xMCINAD.png The first two humps
+>>>> are the latest stable MDS version with tcmalloc till MDS gets killed
+>>>> by the OOM killer. The last restart MDS build of the same git tag
+>>>> without tcmalloc linked into it.
+>>>
+>>> That's interesting, but your graph cuts off before we can really see
+>>> the long-term behavior of the no-tcmalloc case. :) What's the
+>>> longer-term pattern look like?
+>>
+>> I'm only about two weeks into running without the allocator. I'm going
+>> to continue running it and report back in two weeks and a month. Sadly
+>> it takes a long time to test / reproduce the issue.
+>
+> Hmm, that makes it sound to me like it's not a tcmalloc issue, but
+> something changing in MDS state (a new workload that loads too much
+> into memory or something).
+
+13 days into last startup so far and the needle hasn't move on memory
+usage (stable since 3 days in). Previously it took 20 days (twice in a
+row) to get to OOM. But by now it would have grown much larger. The
+workload hasn't changed.
 
 >
+>>>> I know that older tcmalloc version have leaks when allocating larger
+>>>> blocks of memory:
+>>>> https://code.google.com/p/gperftools/issues/detail?id=368 So it's
+>>>> possible that there is some kind of allocation pattern in MDS that
+>>>> causes this behavior or exposes this tcmalloc bug.
+>>>
+>>> Hrm, we do use memory pools in the MDS that the OSD and monitor do
+>>> not, so that could be influencing things.
+>>
+>> The issue I linked to is caused generally by making large allocations.
+>> It's my understanding that prior to the fix was very bad
+>> fragmenetation with large allocations.
+>>
+>>>
+>>>> Last time I bought it up there was resistance to tossing tcmalloc,
+>>>> which is fine. What I'd like to see is not linking against tcmalloc on
+>>>> systems that are know to have a buggy tcmalloc (in this case ubuntu
+>>>> 12.04, older Debian systems).
+>>>
+>>> The issue is that back when we did the investigation and testing (on
+>>> older Debian systems) that made us switch to tcmalloc:
+>>> 1) Memory growth without tcmalloc on the OSDs and monitor was so bad
+>>> as to make them essentially unusable,
+>>> 2) the MDS also behaved better with it (though I don't remember how much)
+>>> 3) tcmalloc supplies some really nice memory analysis tools that I'd
+>>> like to keep around.
+>>>
+>>> So we'd need to do something like find a different allocator that
+>>> works for all three processes, or link the OSD and monitor with it but
+>>> not the MDS *and* demonstrate that the default allocators in each of
+>>> our platforms work for the MDS without issue (or go down the rat's
+>>> nest of selecting allocator based on platform). Before we embark on
+>>> that I'd like to get more data about what's causing the memory growth.
+>>> Can you gather some heap dumps and stats? Have you tried just
+>>> instructing the MDS to release unused memory when it passes some
+>>> threshold?
+>>
+>> For another internal project we started off with tcmalloc and switched
+>> to jemalloc. We ran into the same kind of pattern with tcmalloc on
+>> ubuntu 12.04.
+>>
+>> Now in our case doing database equivalent of sorting 10s to low 100s
+>> of gigabytes in background process (maintenance jobs for compacting
+>> and dup removal) we did this in blocks of 0.25g using merge sort.
+>> After about a day of runtime (when a lot of these jobs ran) we would
+>> start running into OOM cases. I enabled the tcmalloc debugger (via
+>> flags) and it would log every 1gb allocated. Tcmalloc reported that
+>> the app was using low gigabytes of working memory during busy times
+>> and and going into the low 10s of megabytes at idle times. Yet despite
+>> those the memory consumed by the process was reaching 40 gigs.
 >
+> Did you try using the HeapRelease() command (or whatever it's called)?
+> A few users have reported that tcmalloc was broken in one way or
+> another on their platform (though usually on something like Gentoo
+> rather than Ubuntu Precise!) and that call has invariably dealt with
+> the issue. *shrug*
+
+For our use case I did end up playing with the various configuration
+knobs for TCMALLOC (via environmental variables.) None of them ended
+up helping (release rate, etc). We did not end up calling the tcmalloc
+functions directly (like HeapRelease) because we didn't want to have
+our app depend on tcmalloc. And, quite frankly I thought it was silly
+for us to jump through a lot of hoops in order to make the allocator
+not explode.
+
 >
->>
->> > benefit for many/most directories.  This is probably primarily a matter of
->> > adding a directory size counter into the ceph_dentry_info?
->> >
->> > Second, it seems like in order to keep this behavior in the general case,
->> > we would basically need to build an rbtree that mirrors in d_subdirs list
->> > and sorts the same way the mds does (by <frag, name>).  Which would mean
->> > resorting that list when we discover a split/merge event.  That sounds
->> > like a pretty big pain to me.  And similarly, I think that the larger the
->> > directory, the less important readdir usually is in the workload...
->> >
->> > sage
->> >
->> >
->> >>
->> >> Fixes: http://tracker.ceph.com/issues/8025
->> >> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
->> >> ---
->> >>  fs/ceph/dir.c   |  9 ++++----
->> >>  fs/ceph/inode.c | 71 +++++++++++++--------------------------------------------
->> >>  fs/ceph/super.h |  1 -
->> >>  3 files changed, 21 insertions(+), 60 deletions(-)
->> >>
->> >> diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
->> >> index fb4f7a2..c29d6ae 100644
->> >> --- a/fs/ceph/dir.c
->> >> +++ b/fs/ceph/dir.c
->> >> @@ -448,7 +448,6 @@ more:
->> >>       if (atomic_read(&ci->i_release_count) == fi->dir_release_count) {
->> >>               dout(" marking %p complete\n", inode);
->> >>               __ceph_dir_set_complete(ci, fi->dir_release_count);
->> >> -             ci->i_max_offset = ctx->pos;
->> >>       }
->> >>       spin_unlock(&ci->i_ceph_lock);
->> >>
->> >> @@ -937,14 +936,16 @@ static int ceph_rename(struct inode *old_dir, struct dentry *old_dentry,
->> >>                * to do it here.
->> >>                */
->> >>
->> >> -             /* d_move screws up d_subdirs order */
->> >> -             ceph_dir_clear_complete(new_dir);
->> >> -
->> >>               d_move(old_dentry, new_dentry);
->> >>
->> >>               /* ensure target dentry is invalidated, despite
->> >>                  rehashing bug in vfs_rename_dir */
->> >>               ceph_invalidate_dentry_lease(new_dentry);
->> >> +
->> >> +             /* d_move screws up sibling dentries' offsets */
->> >> +             ceph_dir_clear_complete(old_dir);
->> >> +             ceph_dir_clear_complete(new_dir);
->> >> +
->> >>       }
->> >>       ceph_mdsc_put_request(req);
->> >>       return err;
->> >> diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
->> >> index 0b0728e..233c6f9 100644
->> >> --- a/fs/ceph/inode.c
->> >> +++ b/fs/ceph/inode.c
->> >> @@ -744,7 +744,6 @@ static int fill_inode(struct inode *inode,
->> >>           !__ceph_dir_is_complete(ci)) {
->> >>               dout(" marking %p complete (empty)\n", inode);
->> >>               __ceph_dir_set_complete(ci, atomic_read(&ci->i_release_count));
->> >> -             ci->i_max_offset = 2;
->> >>       }
->> >>  no_change:
->> >>       /* only update max_size on auth cap */
->> >> @@ -890,41 +889,6 @@ out_unlock:
->> >>  }
->> >>
->> >>  /*
->> >> - * Set dentry's directory position based on the current dir's max, and
->> >> - * order it in d_subdirs, so that dcache_readdir behaves.
->> >> - *
->> >> - * Always called under directory's i_mutex.
->> >> - */
->> >> -static void ceph_set_dentry_offset(struct dentry *dn)
->> >> -{
->> >> -     struct dentry *dir = dn->d_parent;
->> >> -     struct inode *inode = dir->d_inode;
->> >> -     struct ceph_inode_info *ci;
->> >> -     struct ceph_dentry_info *di;
->> >> -
->> >> -     BUG_ON(!inode);
->> >> -
->> >> -     ci = ceph_inode(inode);
->> >> -     di = ceph_dentry(dn);
->> >> -
->> >> -     spin_lock(&ci->i_ceph_lock);
->> >> -     if (!__ceph_dir_is_complete(ci)) {
->> >> -             spin_unlock(&ci->i_ceph_lock);
->> >> -             return;
->> >> -     }
->> >> -     di->offset = ceph_inode(inode)->i_max_offset++;
->> >> -     spin_unlock(&ci->i_ceph_lock);
->> >> -
->> >> -     spin_lock(&dir->d_lock);
->> >> -     spin_lock_nested(&dn->d_lock, DENTRY_D_LOCK_NESTED);
->> >> -     list_move(&dn->d_u.d_child, &dir->d_subdirs);
->> >> -     dout("set_dentry_offset %p %lld (%p %p)\n", dn, di->offset,
->> >> -          dn->d_u.d_child.prev, dn->d_u.d_child.next);
->> >> -     spin_unlock(&dn->d_lock);
->> >> -     spin_unlock(&dir->d_lock);
->> >> -}
->> >> -
->> >> -/*
->> >>   * splice a dentry to an inode.
->> >>   * caller must hold directory i_mutex for this to be safe.
->> >>   *
->> >> @@ -933,7 +897,7 @@ static void ceph_set_dentry_offset(struct dentry *dn)
->> >>   * the caller) if we fail.
->> >>   */
->> >>  static struct dentry *splice_dentry(struct dentry *dn, struct inode *in,
->> >> -                                 bool *prehash, bool set_offset)
->> >> +                                 bool *prehash)
->> >>  {
->> >>       struct dentry *realdn;
->> >>
->> >> @@ -965,8 +929,6 @@ static struct dentry *splice_dentry(struct dentry *dn, struct inode *in,
->> >>       }
->> >>       if ((!prehash || *prehash) && d_unhashed(dn))
->> >>               d_rehash(dn);
->> >> -     if (set_offset)
->> >> -             ceph_set_dentry_offset(dn);
->> >>  out:
->> >>       return dn;
->> >>  }
->> >> @@ -987,7 +949,6 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req,
->> >>  {
->> >>       struct ceph_mds_reply_info_parsed *rinfo = &req->r_reply_info;
->> >>       struct inode *in = NULL;
->> >> -     struct ceph_mds_reply_inode *ininfo;
->> >>       struct ceph_vino vino;
->> >>       struct ceph_fs_client *fsc = ceph_sb_to_client(sb);
->> >>       int err = 0;
->> >> @@ -1161,6 +1122,9 @@ retry_lookup:
->> >>
->> >>               /* rename? */
->> >>               if (req->r_old_dentry && req->r_op == CEPH_MDS_OP_RENAME) {
->> >> +                     struct inode *olddir = req->r_old_dentry_dir;
->> >> +                     BUG_ON(!olddir);
->> >> +
->> >>                       dout(" src %p '%.*s' dst %p '%.*s'\n",
->> >>                            req->r_old_dentry,
->> >>                            req->r_old_dentry->d_name.len,
->> >> @@ -1180,13 +1144,10 @@ retry_lookup:
->> >>                          rehashing bug in vfs_rename_dir */
->> >>                       ceph_invalidate_dentry_lease(dn);
->> >>
->> >> -                     /*
->> >> -                      * d_move() puts the renamed dentry at the end of
->> >> -                      * d_subdirs.  We need to assign it an appropriate
->> >> -                      * directory offset so we can behave when dir is
->> >> -                      * complete.
->> >> -                      */
->> >> -                     ceph_set_dentry_offset(req->r_old_dentry);
->> >> +                     /* d_move screws up sibling dentries' offsets */
->> >> +                     ceph_dir_clear_complete(dir);
->> >> +                     ceph_dir_clear_complete(olddir);
->> >> +
->> >>                       dout("dn %p gets new offset %lld\n", req->r_old_dentry,
->> >>                            ceph_dentry(req->r_old_dentry)->offset);
->> >>
->> >> @@ -1213,8 +1174,9 @@ retry_lookup:
->> >>
->> >>               /* attach proper inode */
->> >>               if (!dn->d_inode) {
->> >> +                     ceph_dir_clear_complete(dir);
->> >>                       ihold(in);
->> >> -                     dn = splice_dentry(dn, in, &have_lease, true);
->> >> +                     dn = splice_dentry(dn, in, &have_lease);
->> >>                       if (IS_ERR(dn)) {
->> >>                               err = PTR_ERR(dn);
->> >>                               goto done;
->> >> @@ -1235,17 +1197,16 @@ retry_lookup:
->> >>                  (req->r_op == CEPH_MDS_OP_LOOKUPSNAP ||
->> >>                   req->r_op == CEPH_MDS_OP_MKSNAP)) {
->> >>               struct dentry *dn = req->r_dentry;
->> >> +             struct inode *dir = req->r_locked_dir;
->> >>
->> >>               /* fill out a snapdir LOOKUPSNAP dentry */
->> >>               BUG_ON(!dn);
->> >> -             BUG_ON(!req->r_locked_dir);
->> >> -             BUG_ON(ceph_snap(req->r_locked_dir) != CEPH_SNAPDIR);
->> >> -             ininfo = rinfo->targeti.in;
->> >> -             vino.ino = le64_to_cpu(ininfo->ino);
->> >> -             vino.snap = le64_to_cpu(ininfo->snapid);
->> >> +             BUG_ON(!dir);
->> >> +             BUG_ON(ceph_snap(dir) != CEPH_SNAPDIR);
->> >>               dout(" linking snapped dir %p to dn %p\n", in, dn);
->> >> +             ceph_dir_clear_complete(dir);
->> >>               ihold(in);
->> >> -             dn = splice_dentry(dn, in, NULL, true);
->> >> +             dn = splice_dentry(dn, in, NULL);
->> >>               if (IS_ERR(dn)) {
->> >>                       err = PTR_ERR(dn);
->> >>                       goto done;
->> >> @@ -1407,7 +1368,7 @@ retry_lookup:
->> >>               }
->> >>
->> >>               if (!dn->d_inode) {
->> >> -                     dn = splice_dentry(dn, in, NULL, false);
->> >> +                     dn = splice_dentry(dn, in, NULL);
->> >>                       if (IS_ERR(dn)) {
->> >>                               err = PTR_ERR(dn);
->> >>                               dn = NULL;
->> >> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
->> >> index 7866cd0..ead05cc 100644
->> >> --- a/fs/ceph/super.h
->> >> +++ b/fs/ceph/super.h
->> >> @@ -266,7 +266,6 @@ struct ceph_inode_info {
->> >>       struct timespec i_rctime;
->> >>       u64 i_rbytes, i_rfiles, i_rsubdirs;
->> >>       u64 i_files, i_subdirs;
->> >> -     u64 i_max_offset;  /* largest readdir offset, set with complete dir */
->> >>
->> >>       struct rb_root i_fragtree;
->> >>       struct mutex i_fragtree_mutex;
->> >> --
->> >> 1.9.0
->> >>
->> >>
->> > --
->> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> > the body of a message to majordomo@vger.kernel.org
->> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
+>> We considered building tcmalloc from source, but noticed that redis in
+>> ubuntu/debian jemalloc and switched to using it. In this case, yes I'm
+>> shilling for jemalloc because it solved similar issues with
+>> experienced. And after doing significant testing on performance to
+>> compare the two it was within margin of error. Recent version of
+>> jemalloc support can output heap profiling information in a format
+>> understood by pprof (the google perftools).
+>
+> Interesting. Next time we wrangle some time to look at these issues
+> I'll check jemalloc out.
+> -Greg
+> Software Engineer #42 @ http://inktank.com | http://ceph.com
+
+
+
+-- 
+Milosz Tanski
+CTO
+10 East 53rd Street, 37th floor
+New York, NY 10022
+
+p: 646-253-9055
+e: milosz@adfin.com
