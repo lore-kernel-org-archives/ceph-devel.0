@@ -1,96 +1,231 @@
-From: Guang <yguang11-/E1597aS9LQAvxtiuMwx3w@public.gmane.org>
-Subject: A simple tool to do osd crush reweigh after creating
-	pool to gain better PG distribution across OSDs
-Date: Mon, 14 Apr 2014 14:15:32 +0800
-Message-ID: <101F1E71-1022-4D2C-BAE7-C0A645D267EF@yahoo.com>
-Mime-Version: 1.0 (Mac OS X Mail 7.2 \(1874\))
-Content-Type: multipart/mixed; boundary="===============1429414340=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, Ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: [PATCH] ceph: clear directory's completeness when creating file
+Date: Mon, 14 Apr 2014 14:35:28 +0800
+Message-ID: <1397457328-18905-1-git-send-email-zheng.z.yan@intel.com>
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mga09.intel.com ([134.134.136.24]:11830 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750768AbaDNGfd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 14 Apr 2014 02:35:33 -0400
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: sage@inktank.com, "Yan, Zheng" <zheng.z.yan@intel.com>
 
+When creating a file, ceph_set_dentry_offset() puts the new dentry
+at the end of directory's d_subdirs, then set the dentry's offset
+based on directory's max offset. The offset does not reflect the
+real postion of the dentry in directory. Later readdir reply from
+MDS may change the dentry's position/offset. This inconsistency
+can cause missing/duplicate entries in readdir result if readdir
+is partly satisfied by dcache_readdir().
 
---===============1429414340==
-Content-Type: multipart/alternative; boundary="Apple-Mail=_E471B135-293D-43C6-A85E-2B4FA907D600"
+The fix is clear directory's completeness after creating/renaming
+file. It prevents later readdir from using dcache_readdir().
 
+Fixes: http://tracker.ceph.com/issues/8025
+Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+---
+ fs/ceph/dir.c   |  9 ++++----
+ fs/ceph/inode.c | 71 +++++++++++++--------------------------------------------
+ fs/ceph/super.h |  1 -
+ 3 files changed, 21 insertions(+), 60 deletions(-)
 
---Apple-Mail=_E471B135-293D-43C6-A85E-2B4FA907D600
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/plain;
-	charset=us-ascii
+diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+index fb4f7a2..c29d6ae 100644
+--- a/fs/ceph/dir.c
++++ b/fs/ceph/dir.c
+@@ -448,7 +448,6 @@ more:
+ 	if (atomic_read(&ci->i_release_count) == fi->dir_release_count) {
+ 		dout(" marking %p complete\n", inode);
+ 		__ceph_dir_set_complete(ci, fi->dir_release_count);
+-		ci->i_max_offset = ctx->pos;
+ 	}
+ 	spin_unlock(&ci->i_ceph_lock);
+ 
+@@ -937,14 +936,16 @@ static int ceph_rename(struct inode *old_dir, struct dentry *old_dentry,
+ 		 * to do it here.
+ 		 */
+ 
+-		/* d_move screws up d_subdirs order */
+-		ceph_dir_clear_complete(new_dir);
+-
+ 		d_move(old_dentry, new_dentry);
+ 
+ 		/* ensure target dentry is invalidated, despite
+ 		   rehashing bug in vfs_rename_dir */
+ 		ceph_invalidate_dentry_lease(new_dentry);
++
++		/* d_move screws up sibling dentries' offsets */
++		ceph_dir_clear_complete(old_dir);
++		ceph_dir_clear_complete(new_dir);
++
+ 	}
+ 	ceph_mdsc_put_request(req);
+ 	return err;
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index 0b0728e..233c6f9 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -744,7 +744,6 @@ static int fill_inode(struct inode *inode,
+ 	    !__ceph_dir_is_complete(ci)) {
+ 		dout(" marking %p complete (empty)\n", inode);
+ 		__ceph_dir_set_complete(ci, atomic_read(&ci->i_release_count));
+-		ci->i_max_offset = 2;
+ 	}
+ no_change:
+ 	/* only update max_size on auth cap */
+@@ -890,41 +889,6 @@ out_unlock:
+ }
+ 
+ /*
+- * Set dentry's directory position based on the current dir's max, and
+- * order it in d_subdirs, so that dcache_readdir behaves.
+- *
+- * Always called under directory's i_mutex.
+- */
+-static void ceph_set_dentry_offset(struct dentry *dn)
+-{
+-	struct dentry *dir = dn->d_parent;
+-	struct inode *inode = dir->d_inode;
+-	struct ceph_inode_info *ci;
+-	struct ceph_dentry_info *di;
+-
+-	BUG_ON(!inode);
+-
+-	ci = ceph_inode(inode);
+-	di = ceph_dentry(dn);
+-
+-	spin_lock(&ci->i_ceph_lock);
+-	if (!__ceph_dir_is_complete(ci)) {
+-		spin_unlock(&ci->i_ceph_lock);
+-		return;
+-	}
+-	di->offset = ceph_inode(inode)->i_max_offset++;
+-	spin_unlock(&ci->i_ceph_lock);
+-
+-	spin_lock(&dir->d_lock);
+-	spin_lock_nested(&dn->d_lock, DENTRY_D_LOCK_NESTED);
+-	list_move(&dn->d_u.d_child, &dir->d_subdirs);
+-	dout("set_dentry_offset %p %lld (%p %p)\n", dn, di->offset,
+-	     dn->d_u.d_child.prev, dn->d_u.d_child.next);
+-	spin_unlock(&dn->d_lock);
+-	spin_unlock(&dir->d_lock);
+-}
+-
+-/*
+  * splice a dentry to an inode.
+  * caller must hold directory i_mutex for this to be safe.
+  *
+@@ -933,7 +897,7 @@ static void ceph_set_dentry_offset(struct dentry *dn)
+  * the caller) if we fail.
+  */
+ static struct dentry *splice_dentry(struct dentry *dn, struct inode *in,
+-				    bool *prehash, bool set_offset)
++				    bool *prehash)
+ {
+ 	struct dentry *realdn;
+ 
+@@ -965,8 +929,6 @@ static struct dentry *splice_dentry(struct dentry *dn, struct inode *in,
+ 	}
+ 	if ((!prehash || *prehash) && d_unhashed(dn))
+ 		d_rehash(dn);
+-	if (set_offset)
+-		ceph_set_dentry_offset(dn);
+ out:
+ 	return dn;
+ }
+@@ -987,7 +949,6 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req,
+ {
+ 	struct ceph_mds_reply_info_parsed *rinfo = &req->r_reply_info;
+ 	struct inode *in = NULL;
+-	struct ceph_mds_reply_inode *ininfo;
+ 	struct ceph_vino vino;
+ 	struct ceph_fs_client *fsc = ceph_sb_to_client(sb);
+ 	int err = 0;
+@@ -1161,6 +1122,9 @@ retry_lookup:
+ 
+ 		/* rename? */
+ 		if (req->r_old_dentry && req->r_op == CEPH_MDS_OP_RENAME) {
++			struct inode *olddir = req->r_old_dentry_dir;
++			BUG_ON(!olddir);
++
+ 			dout(" src %p '%.*s' dst %p '%.*s'\n",
+ 			     req->r_old_dentry,
+ 			     req->r_old_dentry->d_name.len,
+@@ -1180,13 +1144,10 @@ retry_lookup:
+ 			   rehashing bug in vfs_rename_dir */
+ 			ceph_invalidate_dentry_lease(dn);
+ 
+-			/*
+-			 * d_move() puts the renamed dentry at the end of
+-			 * d_subdirs.  We need to assign it an appropriate
+-			 * directory offset so we can behave when dir is
+-			 * complete.
+-			 */
+-			ceph_set_dentry_offset(req->r_old_dentry);
++			/* d_move screws up sibling dentries' offsets */
++			ceph_dir_clear_complete(dir);
++			ceph_dir_clear_complete(olddir);
++
+ 			dout("dn %p gets new offset %lld\n", req->r_old_dentry,
+ 			     ceph_dentry(req->r_old_dentry)->offset);
+ 
+@@ -1213,8 +1174,9 @@ retry_lookup:
+ 
+ 		/* attach proper inode */
+ 		if (!dn->d_inode) {
++			ceph_dir_clear_complete(dir);
+ 			ihold(in);
+-			dn = splice_dentry(dn, in, &have_lease, true);
++			dn = splice_dentry(dn, in, &have_lease);
+ 			if (IS_ERR(dn)) {
+ 				err = PTR_ERR(dn);
+ 				goto done;
+@@ -1235,17 +1197,16 @@ retry_lookup:
+ 		   (req->r_op == CEPH_MDS_OP_LOOKUPSNAP ||
+ 		    req->r_op == CEPH_MDS_OP_MKSNAP)) {
+ 		struct dentry *dn = req->r_dentry;
++		struct inode *dir = req->r_locked_dir;
+ 
+ 		/* fill out a snapdir LOOKUPSNAP dentry */
+ 		BUG_ON(!dn);
+-		BUG_ON(!req->r_locked_dir);
+-		BUG_ON(ceph_snap(req->r_locked_dir) != CEPH_SNAPDIR);
+-		ininfo = rinfo->targeti.in;
+-		vino.ino = le64_to_cpu(ininfo->ino);
+-		vino.snap = le64_to_cpu(ininfo->snapid);
++		BUG_ON(!dir);
++		BUG_ON(ceph_snap(dir) != CEPH_SNAPDIR);
+ 		dout(" linking snapped dir %p to dn %p\n", in, dn);
++		ceph_dir_clear_complete(dir);
+ 		ihold(in);
+-		dn = splice_dentry(dn, in, NULL, true);
++		dn = splice_dentry(dn, in, NULL);
+ 		if (IS_ERR(dn)) {
+ 			err = PTR_ERR(dn);
+ 			goto done;
+@@ -1407,7 +1368,7 @@ retry_lookup:
+ 		}
+ 
+ 		if (!dn->d_inode) {
+-			dn = splice_dentry(dn, in, NULL, false);
++			dn = splice_dentry(dn, in, NULL);
+ 			if (IS_ERR(dn)) {
+ 				err = PTR_ERR(dn);
+ 				dn = NULL;
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index 7866cd0..ead05cc 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -266,7 +266,6 @@ struct ceph_inode_info {
+ 	struct timespec i_rctime;
+ 	u64 i_rbytes, i_rfiles, i_rsubdirs;
+ 	u64 i_files, i_subdirs;
+-	u64 i_max_offset;  /* largest readdir offset, set with complete dir */
+ 
+ 	struct rb_root i_fragtree;
+ 	struct mutex i_fragtree_mutex;
+-- 
+1.9.0
 
-Hi all,
-In order to deal with PG uneven problem[1, 2] which further leads to =
-uneven disk usage, I recently developed a simple script which aims to do =
-*osd crush* reweight right after creating the pool (which has the most =
-significant data, e.g. .rgw.buckets), we had good experience to tune the =
-distribution difference to less than 10% with use of this tool.
-
-Here is the tool - =
-https://github.com/guangyy/ceph_misc/blob/master/osd_crush_reweight/ceph_o=
-sd_crush_reweight.pl
-
-If you have a similar experience with relatively high PG distribution =
-across OSDs by default, you can check out the script and see if that =
-serve your purpose or not, all reviews and suggestions (especially the =
-algorithm for a even better distribution) are welcomed.
-
-
-[1] https://www.mail-archive.com/ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org/msg04216.html
-[2] http://www.spinics.net/lists/ceph-devel/msg17509.html
-
-Thanks,
-Guang=
-
---Apple-Mail=_E471B135-293D-43C6-A85E-2B4FA907D600
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/html;
-	charset=us-ascii
-
-<html><head><meta http-equiv=3D"Content-Type" content=3D"text/html =
-charset=3Dus-ascii"></head><body style=3D"word-wrap: break-word; =
--webkit-nbsp-mode: space; -webkit-line-break: after-white-space;">Hi =
-all,<div>In order to deal with PG uneven problem[1, 2] which further =
-leads to uneven disk usage, I recently developed a simple script which =
-aims to do *osd crush* reweight right after creating the pool (which has =
-the most significant data, e.g. .rgw.buckets), we had good experience to =
-tune the distribution difference to less than 10% with use of this =
-tool.</div><div><br></div><div>Here is the tool -&nbsp;<a =
-href=3D"https://github.com/guangyy/ceph_misc/blob/master/osd_crush_reweigh=
-t/ceph_osd_crush_reweight.pl">https://github.com/guangyy/ceph_misc/blob/ma=
-ster/osd_crush_reweight/ceph_osd_crush_reweight.pl</a></div><div><br></div=
-><div>If you have a similar experience with relatively high PG =
-distribution across OSDs by default, you can check out the script and =
-see if that serve your purpose or not, all reviews and suggestions =
-(especially the algorithm for a even better distribution) are =
-welcomed.</div><div><br></div><div><br></div><div>[1]&nbsp;<a =
-href=3D"https://www.mail-archive.com/ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org/msg04216.ht=
-ml">https://www.mail-archive.com/ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org/msg04216.html</=
-a></div><div>[2]&nbsp;<a =
-href=3D"http://www.spinics.net/lists/ceph-devel/msg17509.html">http://www.=
-spinics.net/lists/ceph-devel/msg17509.html</a></div><div><br></div><div>Th=
-anks,</div><div>Guang</div></body></html>=
-
---Apple-Mail=_E471B135-293D-43C6-A85E-2B4FA907D600--
-
---===============1429414340==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============1429414340==--
