@@ -1,69 +1,41 @@
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH 2/4] fs: Prevent doing FALLOC_FL_ZERO_RANGE on append
- only file
-Date: Wed, 16 Apr 2014 07:36:35 +1000
-Message-ID: <20140415213635.GM15995@dastard>
-References: <1397242665-2183-1-git-send-email-lczerner@redhat.com>
- <1397242665-2183-2-git-send-email-lczerner@redhat.com>
- <20140412151935.GA18047@infradead.org>
- <alpine.LFD.2.00.1404151457550.2146@localhost.localdomain>
+From: "Gillian and Adrain Bayford" <bayford@msn.com>
+Subject: Grant
+Date: Wed, 16 Apr 2014 06:11:10 -0600
+Message-ID: <201404161213.s3GBgBnp014261@smtpb12.isg.siue.edu>
+Reply-To: gillianandadrianb@rogers.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=iso-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <alpine.LFD.2.00.1404151457550.2146@localhost.localdomain>
-Sender: linux-fsdevel-owner@vger.kernel.org
-To: =?utf-8?B?THVrw6HFoQ==?= Czerner <lczerner@redhat.com>
-Cc: Christoph Hellwig <hch@infradead.org>, linux-fsdevel@vger.kernel.org, ceph-devel@vger.kernel.org, linux-ext4@vger.kernel.org, xfs@oss.sgi.com
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from drs1.isg.siue.edu ([146.163.5.61]:56647 "EHLO drs1.isg.siue.edu"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754343AbaDPNUM convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Apr 2014 09:20:12 -0400
+Content-Description: Mail message body
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Recipients <bayford@msn.com>
 
-On Tue, Apr 15, 2014 at 03:09:42PM +0200, Luk=C3=A1=C5=A1 Czerner wrote=
-:
-> On Sat, 12 Apr 2014, Christoph Hellwig wrote:
->=20
-> > Date: Sat, 12 Apr 2014 08:19:35 -0700
-> > From: Christoph Hellwig <hch@infradead.org>
-> > To: Lukas Czerner <lczerner@redhat.com>
-> > Cc: linux-fsdevel@vger.kernel.org, ceph-devel@vger.kernel.org,
-> >     linux-ext4@vger.kernel.org, xfs@oss.sgi.com
-> > Subject: Re: [PATCH 2/4] fs: Prevent doing FALLOC_FL_ZERO_RANGE on =
-append only
-> >      file
-> >=20
-> > On Fri, Apr 11, 2014 at 08:57:43PM +0200, Lukas Czerner wrote:
-> > >  	/*
-> > > -	 * It's not possible to punch hole or perform collapse range
-> > > -	 * on append only file
-> > > +	 * It's not possible to punch hole, perform collapse range
-> > > +	 * or zero range on append only file
-> > >  	 */
-> > > -	if (mode & (FALLOC_FL_PUNCH_HOLE | FALLOC_FL_COLLAPSE_RANGE)
-> > > +	if (mode & (FALLOC_FL_PUNCH_HOLE | FALLOC_FL_COLLAPSE_RANGE |
-> > > +		    FALLOC_FL_ZERO_RANGE)
-> >=20
-> > Might be better to make this a negative test fo the operation that =
-is
-> > allowed on an appen only file.  That's also much better future proo=
-f.
-> >=20
->=20
-> True, it might be better to do it this way:
->=20
-> if (mode & ~FALLOC_FL_KEEP_SIZE && IS_APPEND(inode))
+My wife and i won =A3148.6 Million Pounds last year, and we have done l=
+ot of=20
 
-if ((mode & ~FALLOC_FL_KEEP_SIZE) && IS_APPEND(inode))
+charity donation, so we decide to give 1.5Million Pounds each to 5 luck=
+y=20
 
-:)
+people  2014, lucky for you, your email, was given to us by google mana=
+gment=20
 
-Cheers,
+as one of our lucky receipants.=20
 
-Dave.
---=20
-Dave Chinner
-david@fromorbit.com
+=46or verification process see below
+Please read the article - http://www.bbc.co.uk/news/uk-england-19254228
+
+Send Name, Country, Age, Occupation and Phone Number for details
+
+Congratulations & Happy Celebrations in Advance,
+Gillian and Adrian Bayford
 --
-To unsubscribe from this list: send the line "unsubscribe linux-fsdevel=
-" in
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
 the body of a message to majordomo@vger.kernel.org
 More majordomo info at  http://vger.kernel.org/majordomo-info.html
