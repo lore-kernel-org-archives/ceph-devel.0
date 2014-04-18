@@ -1,65 +1,39 @@
-From: Dyweni - Ceph-Devel <YS3fpFE2ykfB@dyweni.com>
-Subject: Documentation Discrepancy - Manual Configuration
-Date: Fri, 18 Apr 2014 02:10:37 -0500
-Message-ID: <6b1a50710afdfd0b10133934be7eac38@pl1.haspere.com>
-Reply-To: YS3fpFE2ykfB@dyweni.com
+From: Alain Dechorgnat <dechorgnata@gmail.com>
+Subject: RadosGW admin API
+Date: Fri, 18 Apr 2014 11:36:56 +0200
+Message-ID: <CAK7XC_k+4epfF81F4kDmq7tS_R39-xpJi69Skw-GcBPrf24exw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
- format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from pl1.haspere.com ([209.177.156.123]:41554 "EHLO pl1.haspere.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750987AbaDRHKi (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 18 Apr 2014 03:10:38 -0400
+Received: from mail-la0-f42.google.com ([209.85.215.42]:37593 "EHLO
+	mail-la0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754387AbaDRJg6 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Apr 2014 05:36:58 -0400
+Received: by mail-la0-f42.google.com with SMTP id ec20so1220459lab.15
+        for <ceph-devel@vger.kernel.org>; Fri, 18 Apr 2014 02:36:56 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Hi,
+Hi all,
 
-Testing Ceph with 0.79.
+I'm working on an administration GUI (Inkscope).
+For this, I am using RadosGW admin API from python scripts and it's
+working rather well.
+I achieve to call getUserInfo for a user
 
-1 Monitor
-2 OSDs
+But, in Radosgw admin ops API documentation, it's said for getUserInfo:
+" If no user is specified returns the list of all users along with
+suspension information."
 
+But when I don't put the uid, I got a 403 Forbidden error.
+In the radosgw.log file, I can see that signature is OK, op_mask is OK
+but it return 403.
+This happens on a Dumpling platform and an Emperor platform.
 
-Following the instructions here 
-(http://ceph.com/docs/master/install/manual-deployment/)... I arrive at 
-this state:
+Is this a bug in the documentation or the code, or am I doing something wrong?
 
-------
-     cluster e3e1a87b-d282-41b5-b4ad-fb3f969e164f
-      health HEALTH_WARN 192 pgs degraded; 192 pgs stuck unclean
-      monmap e1: 1 mons at {a=10.208.39.100:6789/0}, election epoch 1, 
-quorum 0 a
-      osdmap e16: 2 osds: 2 up, 2 in
-       pgmap v21: 192 pgs, 3 pools, 0 bytes data, 0 objects
-             2004 MB used, 59381 MB / 65536 MB avail
-                  192 active+degraded
-------
+Best regards
 
-'ceph osd dump' shows this:
-------
-...
-pool 0 'data' replicated size 3 min_size 2 ...
-pool 1 'metadata' replicated size 3 min_size 2 ...
-pool 2 'rbd' replicated size 3 min_size 2 ...
-...
-------
-
-
-
-It's not until I add a third OSD, or reduce the size of the pools, does 
-the 192 pgs become unstuck and migrate towards active+clean.
-
-
-
-I think the documentation should indicate that three nodes are required 
-for Ceph to become optimal.
-
-
-
--- 
-Thanks,
-Dyweni
+Alain Dechorgnat
+Orange Labs
