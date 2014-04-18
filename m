@@ -1,310 +1,246 @@
-From: Milosz Tanski <milosz@adfin.com>
-Subject: Re: [PATCH] ceph: clear directory's completeness when creating file
-Date: Fri, 18 Apr 2014 10:06:38 -0400
-Message-ID: <CANP1eJHCtw9UzrQn8fh=-gp+64naXh9VwLa5WGQDGvCYUVq8qQ@mail.gmail.com>
-References: <1397457328-18905-1-git-send-email-zheng.z.yan@intel.com>
-	<alpine.DEB.2.00.1404140651580.16913@cobra.newdream.net>
-	<CAAM7YA=9sokM5pBww=wjEmmNfktMj8NzEVwZ5e-yDf5XwNicGw@mail.gmail.com>
-	<alpine.DEB.2.00.1404140808390.16913@cobra.newdream.net>
-	<CAAM7YAm1cZvL5Oqu30MGrX9iTmgqYGVhTb2KPPrn-jQEkQNB2A@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: [PATCH 2/6] ceph: update inode fields according to issued caps
+Date: Fri, 18 Apr 2014 22:48:38 +0800
+Message-ID: <1397832522-9557-2-git-send-email-zheng.z.yan@intel.com>
+References: <1397832522-9557-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f48.google.com ([74.125.82.48]:40390 "EHLO
-	mail-wg0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751143AbaDROGk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Apr 2014 10:06:40 -0400
-Received: by mail-wg0-f48.google.com with SMTP id l18so555644wgh.7
-        for <ceph-devel@vger.kernel.org>; Fri, 18 Apr 2014 07:06:39 -0700 (PDT)
-In-Reply-To: <CAAM7YAm1cZvL5Oqu30MGrX9iTmgqYGVhTb2KPPrn-jQEkQNB2A@mail.gmail.com>
+Received: from mga11.intel.com ([192.55.52.93]:42749 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753846AbaDROtN (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 18 Apr 2014 10:49:13 -0400
+In-Reply-To: <1397832522-9557-1-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <ukernel@gmail.com>
-Cc: Sage Weil <sage@inktank.com>, "Yan, Zheng" <zheng.z.yan@intel.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-Just to follow up (since I submitted the original issue). I'm
-currently testing on test cluster (client cluster), so far so good,
-but we should know after a full week of use (since it crops up at
-least once in a week).
+Cap message and request reply from non-auth MDS may carry stale
+information (corresponding locks are in LOCK states) even they
+have the newest inode version. So client should update inode fields
+according to issued caps.
 
-- M
+Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+---
+ fs/ceph/caps.c               | 58 ++++++++++++++++++++----------------
+ fs/ceph/inode.c              | 70 ++++++++++++++++++++++++--------------------
+ include/linux/ceph/ceph_fs.h |  2 ++
+ 3 files changed, 73 insertions(+), 57 deletions(-)
 
-On Mon, Apr 14, 2014 at 12:49 PM, Yan, Zheng <ukernel@gmail.com> wrote:
-> On Mon, Apr 14, 2014 at 11:12 PM, Sage Weil <sage@inktank.com> wrote:
->> On Mon, 14 Apr 2014, Yan, Zheng wrote:
->>> On Mon, Apr 14, 2014 at 9:59 PM, Sage Weil <sage@inktank.com> wrote:
->>> > On Mon, 14 Apr 2014, Yan, Zheng wrote:
->>> >> When creating a file, ceph_set_dentry_offset() puts the new dentry
->>> >> at the end of directory's d_subdirs, then set the dentry's offset
->>> >> based on directory's max offset. The offset does not reflect the
->>> >> real postion of the dentry in directory. Later readdir reply from
->>> >> MDS may change the dentry's position/offset. This inconsistency
->>> >> can cause missing/duplicate entries in readdir result if readdir
->>> >> is partly satisfied by dcache_readdir().
->>> >>
->>> >> The fix is clear directory's completeness after creating/renaming
->>> >> file. It prevents later readdir from using dcache_readdir().
->>> >
->>> > Two thoughts:
->>> >
->>> > First, we could preserve this behavior when the directory is small (e.g.,
->>> > < 1000 entries, or whatever the readdir_max is set to) since any readdir
->>> > would always be satisfied in a single request and we don't need to worry
->>> > about the mds vs dcache_readdir() case.  I that will still capture the
->>>
->>> No, we couldn't. because caller of readdir can provide small buffer
->>> for readdir result.
->>
->> Hmm, we could set a different flag, UNORDERED, and then on readdir clear
->> COMPLETE if UNORDERED and size >= X...
->>
->
-> It is too tricky. The readdir buffer is hidden by VFS, FS driver has
-> no way to check its size.
->
->>
->>
->>
->>>
->>> > benefit for many/most directories.  This is probably primarily a matter of
->>> > adding a directory size counter into the ceph_dentry_info?
->>> >
->>> > Second, it seems like in order to keep this behavior in the general case,
->>> > we would basically need to build an rbtree that mirrors in d_subdirs list
->>> > and sorts the same way the mds does (by <frag, name>).  Which would mean
->>> > resorting that list when we discover a split/merge event.  That sounds
->>> > like a pretty big pain to me.  And similarly, I think that the larger the
->>> > directory, the less important readdir usually is in the workload...
->>> >
->>> > sage
->>> >
->>> >
->>> >>
->>> >> Fixes: http://tracker.ceph.com/issues/8025
->>> >> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
->>> >> ---
->>> >>  fs/ceph/dir.c   |  9 ++++----
->>> >>  fs/ceph/inode.c | 71 +++++++++++++--------------------------------------------
->>> >>  fs/ceph/super.h |  1 -
->>> >>  3 files changed, 21 insertions(+), 60 deletions(-)
->>> >>
->>> >> diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
->>> >> index fb4f7a2..c29d6ae 100644
->>> >> --- a/fs/ceph/dir.c
->>> >> +++ b/fs/ceph/dir.c
->>> >> @@ -448,7 +448,6 @@ more:
->>> >>       if (atomic_read(&ci->i_release_count) == fi->dir_release_count) {
->>> >>               dout(" marking %p complete\n", inode);
->>> >>               __ceph_dir_set_complete(ci, fi->dir_release_count);
->>> >> -             ci->i_max_offset = ctx->pos;
->>> >>       }
->>> >>       spin_unlock(&ci->i_ceph_lock);
->>> >>
->>> >> @@ -937,14 +936,16 @@ static int ceph_rename(struct inode *old_dir, struct dentry *old_dentry,
->>> >>                * to do it here.
->>> >>                */
->>> >>
->>> >> -             /* d_move screws up d_subdirs order */
->>> >> -             ceph_dir_clear_complete(new_dir);
->>> >> -
->>> >>               d_move(old_dentry, new_dentry);
->>> >>
->>> >>               /* ensure target dentry is invalidated, despite
->>> >>                  rehashing bug in vfs_rename_dir */
->>> >>               ceph_invalidate_dentry_lease(new_dentry);
->>> >> +
->>> >> +             /* d_move screws up sibling dentries' offsets */
->>> >> +             ceph_dir_clear_complete(old_dir);
->>> >> +             ceph_dir_clear_complete(new_dir);
->>> >> +
->>> >>       }
->>> >>       ceph_mdsc_put_request(req);
->>> >>       return err;
->>> >> diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
->>> >> index 0b0728e..233c6f9 100644
->>> >> --- a/fs/ceph/inode.c
->>> >> +++ b/fs/ceph/inode.c
->>> >> @@ -744,7 +744,6 @@ static int fill_inode(struct inode *inode,
->>> >>           !__ceph_dir_is_complete(ci)) {
->>> >>               dout(" marking %p complete (empty)\n", inode);
->>> >>               __ceph_dir_set_complete(ci, atomic_read(&ci->i_release_count));
->>> >> -             ci->i_max_offset = 2;
->>> >>       }
->>> >>  no_change:
->>> >>       /* only update max_size on auth cap */
->>> >> @@ -890,41 +889,6 @@ out_unlock:
->>> >>  }
->>> >>
->>> >>  /*
->>> >> - * Set dentry's directory position based on the current dir's max, and
->>> >> - * order it in d_subdirs, so that dcache_readdir behaves.
->>> >> - *
->>> >> - * Always called under directory's i_mutex.
->>> >> - */
->>> >> -static void ceph_set_dentry_offset(struct dentry *dn)
->>> >> -{
->>> >> -     struct dentry *dir = dn->d_parent;
->>> >> -     struct inode *inode = dir->d_inode;
->>> >> -     struct ceph_inode_info *ci;
->>> >> -     struct ceph_dentry_info *di;
->>> >> -
->>> >> -     BUG_ON(!inode);
->>> >> -
->>> >> -     ci = ceph_inode(inode);
->>> >> -     di = ceph_dentry(dn);
->>> >> -
->>> >> -     spin_lock(&ci->i_ceph_lock);
->>> >> -     if (!__ceph_dir_is_complete(ci)) {
->>> >> -             spin_unlock(&ci->i_ceph_lock);
->>> >> -             return;
->>> >> -     }
->>> >> -     di->offset = ceph_inode(inode)->i_max_offset++;
->>> >> -     spin_unlock(&ci->i_ceph_lock);
->>> >> -
->>> >> -     spin_lock(&dir->d_lock);
->>> >> -     spin_lock_nested(&dn->d_lock, DENTRY_D_LOCK_NESTED);
->>> >> -     list_move(&dn->d_u.d_child, &dir->d_subdirs);
->>> >> -     dout("set_dentry_offset %p %lld (%p %p)\n", dn, di->offset,
->>> >> -          dn->d_u.d_child.prev, dn->d_u.d_child.next);
->>> >> -     spin_unlock(&dn->d_lock);
->>> >> -     spin_unlock(&dir->d_lock);
->>> >> -}
->>> >> -
->>> >> -/*
->>> >>   * splice a dentry to an inode.
->>> >>   * caller must hold directory i_mutex for this to be safe.
->>> >>   *
->>> >> @@ -933,7 +897,7 @@ static void ceph_set_dentry_offset(struct dentry *dn)
->>> >>   * the caller) if we fail.
->>> >>   */
->>> >>  static struct dentry *splice_dentry(struct dentry *dn, struct inode *in,
->>> >> -                                 bool *prehash, bool set_offset)
->>> >> +                                 bool *prehash)
->>> >>  {
->>> >>       struct dentry *realdn;
->>> >>
->>> >> @@ -965,8 +929,6 @@ static struct dentry *splice_dentry(struct dentry *dn, struct inode *in,
->>> >>       }
->>> >>       if ((!prehash || *prehash) && d_unhashed(dn))
->>> >>               d_rehash(dn);
->>> >> -     if (set_offset)
->>> >> -             ceph_set_dentry_offset(dn);
->>> >>  out:
->>> >>       return dn;
->>> >>  }
->>> >> @@ -987,7 +949,6 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req,
->>> >>  {
->>> >>       struct ceph_mds_reply_info_parsed *rinfo = &req->r_reply_info;
->>> >>       struct inode *in = NULL;
->>> >> -     struct ceph_mds_reply_inode *ininfo;
->>> >>       struct ceph_vino vino;
->>> >>       struct ceph_fs_client *fsc = ceph_sb_to_client(sb);
->>> >>       int err = 0;
->>> >> @@ -1161,6 +1122,9 @@ retry_lookup:
->>> >>
->>> >>               /* rename? */
->>> >>               if (req->r_old_dentry && req->r_op == CEPH_MDS_OP_RENAME) {
->>> >> +                     struct inode *olddir = req->r_old_dentry_dir;
->>> >> +                     BUG_ON(!olddir);
->>> >> +
->>> >>                       dout(" src %p '%.*s' dst %p '%.*s'\n",
->>> >>                            req->r_old_dentry,
->>> >>                            req->r_old_dentry->d_name.len,
->>> >> @@ -1180,13 +1144,10 @@ retry_lookup:
->>> >>                          rehashing bug in vfs_rename_dir */
->>> >>                       ceph_invalidate_dentry_lease(dn);
->>> >>
->>> >> -                     /*
->>> >> -                      * d_move() puts the renamed dentry at the end of
->>> >> -                      * d_subdirs.  We need to assign it an appropriate
->>> >> -                      * directory offset so we can behave when dir is
->>> >> -                      * complete.
->>> >> -                      */
->>> >> -                     ceph_set_dentry_offset(req->r_old_dentry);
->>> >> +                     /* d_move screws up sibling dentries' offsets */
->>> >> +                     ceph_dir_clear_complete(dir);
->>> >> +                     ceph_dir_clear_complete(olddir);
->>> >> +
->>> >>                       dout("dn %p gets new offset %lld\n", req->r_old_dentry,
->>> >>                            ceph_dentry(req->r_old_dentry)->offset);
->>> >>
->>> >> @@ -1213,8 +1174,9 @@ retry_lookup:
->>> >>
->>> >>               /* attach proper inode */
->>> >>               if (!dn->d_inode) {
->>> >> +                     ceph_dir_clear_complete(dir);
->>> >>                       ihold(in);
->>> >> -                     dn = splice_dentry(dn, in, &have_lease, true);
->>> >> +                     dn = splice_dentry(dn, in, &have_lease);
->>> >>                       if (IS_ERR(dn)) {
->>> >>                               err = PTR_ERR(dn);
->>> >>                               goto done;
->>> >> @@ -1235,17 +1197,16 @@ retry_lookup:
->>> >>                  (req->r_op == CEPH_MDS_OP_LOOKUPSNAP ||
->>> >>                   req->r_op == CEPH_MDS_OP_MKSNAP)) {
->>> >>               struct dentry *dn = req->r_dentry;
->>> >> +             struct inode *dir = req->r_locked_dir;
->>> >>
->>> >>               /* fill out a snapdir LOOKUPSNAP dentry */
->>> >>               BUG_ON(!dn);
->>> >> -             BUG_ON(!req->r_locked_dir);
->>> >> -             BUG_ON(ceph_snap(req->r_locked_dir) != CEPH_SNAPDIR);
->>> >> -             ininfo = rinfo->targeti.in;
->>> >> -             vino.ino = le64_to_cpu(ininfo->ino);
->>> >> -             vino.snap = le64_to_cpu(ininfo->snapid);
->>> >> +             BUG_ON(!dir);
->>> >> +             BUG_ON(ceph_snap(dir) != CEPH_SNAPDIR);
->>> >>               dout(" linking snapped dir %p to dn %p\n", in, dn);
->>> >> +             ceph_dir_clear_complete(dir);
->>> >>               ihold(in);
->>> >> -             dn = splice_dentry(dn, in, NULL, true);
->>> >> +             dn = splice_dentry(dn, in, NULL);
->>> >>               if (IS_ERR(dn)) {
->>> >>                       err = PTR_ERR(dn);
->>> >>                       goto done;
->>> >> @@ -1407,7 +1368,7 @@ retry_lookup:
->>> >>               }
->>> >>
->>> >>               if (!dn->d_inode) {
->>> >> -                     dn = splice_dentry(dn, in, NULL, false);
->>> >> +                     dn = splice_dentry(dn, in, NULL);
->>> >>                       if (IS_ERR(dn)) {
->>> >>                               err = PTR_ERR(dn);
->>> >>                               dn = NULL;
->>> >> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
->>> >> index 7866cd0..ead05cc 100644
->>> >> --- a/fs/ceph/super.h
->>> >> +++ b/fs/ceph/super.h
->>> >> @@ -266,7 +266,6 @@ struct ceph_inode_info {
->>> >>       struct timespec i_rctime;
->>> >>       u64 i_rbytes, i_rfiles, i_rsubdirs;
->>> >>       u64 i_files, i_subdirs;
->>> >> -     u64 i_max_offset;  /* largest readdir offset, set with complete dir */
->>> >>
->>> >>       struct rb_root i_fragtree;
->>> >>       struct mutex i_fragtree_mutex;
->>> >> --
->>> >> 1.9.0
->>> >>
->>> >>
->>> > --
->>> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> > the body of a message to majordomo@vger.kernel.org
->>> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
-
+diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+index de39a03..5f6d24e 100644
+--- a/fs/ceph/caps.c
++++ b/fs/ceph/caps.c
+@@ -2476,7 +2476,8 @@ static void handle_cap_grant(struct inode *inode, struct ceph_mds_caps *grant,
+ 
+ 	__check_cap_issue(ci, cap, newcaps);
+ 
+-	if ((issued & CEPH_CAP_AUTH_EXCL) == 0) {
++	if ((newcaps & CEPH_CAP_AUTH_SHARED) &&
++	    (issued & CEPH_CAP_AUTH_EXCL) == 0) {
+ 		inode->i_mode = le32_to_cpu(grant->mode);
+ 		inode->i_uid = make_kuid(&init_user_ns, le32_to_cpu(grant->uid));
+ 		inode->i_gid = make_kgid(&init_user_ns, le32_to_cpu(grant->gid));
+@@ -2485,7 +2486,8 @@ static void handle_cap_grant(struct inode *inode, struct ceph_mds_caps *grant,
+ 		     from_kgid(&init_user_ns, inode->i_gid));
+ 	}
+ 
+-	if ((issued & CEPH_CAP_LINK_EXCL) == 0) {
++	if ((newcaps & CEPH_CAP_AUTH_SHARED) &&
++	    (issued & CEPH_CAP_LINK_EXCL) == 0) {
+ 		set_nlink(inode, le32_to_cpu(grant->nlink));
+ 		if (inode->i_nlink == 0 &&
+ 		    (newcaps & (CEPH_CAP_LINK_SHARED | CEPH_CAP_LINK_EXCL)))
+@@ -2512,31 +2514,35 @@ static void handle_cap_grant(struct inode *inode, struct ceph_mds_caps *grant,
+ 	if ((issued & CEPH_CAP_FILE_CACHE) && ci->i_rdcache_gen > 1)
+ 		queue_revalidate = 1;
+ 
+-	/* size/ctime/mtime/atime? */
+-	queue_trunc = ceph_fill_file_size(inode, issued,
+-					  le32_to_cpu(grant->truncate_seq),
+-					  le64_to_cpu(grant->truncate_size),
+-					  size);
+-	ceph_decode_timespec(&mtime, &grant->mtime);
+-	ceph_decode_timespec(&atime, &grant->atime);
+-	ceph_decode_timespec(&ctime, &grant->ctime);
+-	ceph_fill_file_time(inode, issued,
+-			    le32_to_cpu(grant->time_warp_seq), &ctime, &mtime,
+-			    &atime);
+-
+-
+-	/* file layout may have changed */
+-	ci->i_layout = grant->layout;
+-
+-	/* max size increase? */
+-	if (ci->i_auth_cap == cap && max_size != ci->i_max_size) {
+-		dout("max_size %lld -> %llu\n", ci->i_max_size, max_size);
+-		ci->i_max_size = max_size;
+-		if (max_size >= ci->i_wanted_max_size) {
+-			ci->i_wanted_max_size = 0;  /* reset */
+-			ci->i_requested_max_size = 0;
++	if (newcaps & CEPH_CAP_ANY_RD) {
++		/* ctime/mtime/atime? */
++		ceph_decode_timespec(&mtime, &grant->mtime);
++		ceph_decode_timespec(&atime, &grant->atime);
++		ceph_decode_timespec(&ctime, &grant->ctime);
++		ceph_fill_file_time(inode, issued,
++				    le32_to_cpu(grant->time_warp_seq),
++				    &ctime, &mtime, &atime);
++	}
++
++	if (newcaps & (CEPH_CAP_ANY_FILE_RD | CEPH_CAP_ANY_FILE_WR)) {
++		/* file layout may have changed */
++		ci->i_layout = grant->layout;
++		/* size/truncate_seq? */
++		queue_trunc = ceph_fill_file_size(inode, issued,
++					le32_to_cpu(grant->truncate_seq),
++					le64_to_cpu(grant->truncate_size),
++					size);
++		/* max size increase? */
++		if (ci->i_auth_cap == cap && max_size != ci->i_max_size) {
++			dout("max_size %lld -> %llu\n",
++			     ci->i_max_size, max_size);
++			ci->i_max_size = max_size;
++			if (max_size >= ci->i_wanted_max_size) {
++				ci->i_wanted_max_size = 0;  /* reset */
++				ci->i_requested_max_size = 0;
++			}
++			wake = 1;
+ 		}
+-		wake = 1;
+ 	}
+ 
+ 	/* check cap bits */
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index 233c6f9..f9e7399 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -585,14 +585,15 @@ static int fill_inode(struct inode *inode,
+ 	struct ceph_mds_reply_inode *info = iinfo->in;
+ 	struct ceph_inode_info *ci = ceph_inode(inode);
+ 	int i;
+-	int issued = 0, implemented;
++	int issued = 0, implemented, new_issued;
+ 	struct timespec mtime, atime, ctime;
+ 	u32 nsplits;
+ 	struct ceph_inode_frag *frag;
+ 	struct rb_node *rb_node;
+ 	struct ceph_buffer *xattr_blob = NULL;
+ 	int err = 0;
+-	int queue_trunc = 0;
++	bool queue_trunc = false;
++	bool new_version = false;
+ 
+ 	dout("fill_inode %p ino %llx.%llx v %llu had %llu\n",
+ 	     inode, ceph_vinop(inode), le64_to_cpu(info->version),
+@@ -623,19 +624,23 @@ static int fill_inode(struct inode *inode,
+ 	 *   3    2     skip
+ 	 *   3    3     update
+ 	 */
+-	if (le64_to_cpu(info->version) > 0 &&
+-	    (ci->i_version & ~1) >= le64_to_cpu(info->version))
+-		goto no_change;
+-	
++	if (ci->i_version == 0 ||
++	    ((info->cap.flags & CEPH_CAP_FLAG_AUTH) &&
++	     le64_to_cpu(info->version) > (ci->i_version & ~1)))
++		new_version = true;
++
+ 	issued = __ceph_caps_issued(ci, &implemented);
+ 	issued |= implemented | __ceph_caps_dirty(ci);
++	new_issued = ~issued & le32_to_cpu(info->cap.caps);
+ 
+ 	/* update inode */
+ 	ci->i_version = le64_to_cpu(info->version);
+ 	inode->i_version++;
+ 	inode->i_rdev = le32_to_cpu(info->rdev);
++	inode->i_blkbits = fls(le32_to_cpu(info->layout.fl_stripe_unit)) - 1;
+ 
+-	if ((issued & CEPH_CAP_AUTH_EXCL) == 0) {
++	if ((new_version || (new_issued & CEPH_CAP_AUTH_SHARED)) &&
++	    (issued & CEPH_CAP_AUTH_EXCL) == 0) {
+ 		inode->i_mode = le32_to_cpu(info->mode);
+ 		inode->i_uid = make_kuid(&init_user_ns, le32_to_cpu(info->uid));
+ 		inode->i_gid = make_kgid(&init_user_ns, le32_to_cpu(info->gid));
+@@ -644,23 +649,35 @@ static int fill_inode(struct inode *inode,
+ 		     from_kgid(&init_user_ns, inode->i_gid));
+ 	}
+ 
+-	if ((issued & CEPH_CAP_LINK_EXCL) == 0)
++	if ((new_version || (new_issued & CEPH_CAP_LINK_SHARED)) &&
++	    (issued & CEPH_CAP_LINK_EXCL) == 0)
+ 		set_nlink(inode, le32_to_cpu(info->nlink));
+ 
+-	/* be careful with mtime, atime, size */
+-	ceph_decode_timespec(&atime, &info->atime);
+-	ceph_decode_timespec(&mtime, &info->mtime);
+-	ceph_decode_timespec(&ctime, &info->ctime);
+-	queue_trunc = ceph_fill_file_size(inode, issued,
+-					  le32_to_cpu(info->truncate_seq),
+-					  le64_to_cpu(info->truncate_size),
+-					  le64_to_cpu(info->size));
+-	ceph_fill_file_time(inode, issued,
+-			    le32_to_cpu(info->time_warp_seq),
+-			    &ctime, &mtime, &atime);
+-
+-	ci->i_layout = info->layout;
+-	inode->i_blkbits = fls(le32_to_cpu(info->layout.fl_stripe_unit)) - 1;
++	if (new_version || (new_issued & CEPH_CAP_ANY_RD)) {
++		/* be careful with mtime, atime, size */
++		ceph_decode_timespec(&atime, &info->atime);
++		ceph_decode_timespec(&mtime, &info->mtime);
++		ceph_decode_timespec(&ctime, &info->ctime);
++		ceph_fill_file_time(inode, issued,
++				le32_to_cpu(info->time_warp_seq),
++				&ctime, &mtime, &atime);
++	}
++
++	if (new_version ||
++	    (new_issued & (CEPH_CAP_ANY_FILE_RD | CEPH_CAP_ANY_FILE_WR))) {
++		ci->i_layout = info->layout;
++		queue_trunc = ceph_fill_file_size(inode, issued,
++					le32_to_cpu(info->truncate_seq),
++					le64_to_cpu(info->truncate_size),
++					le64_to_cpu(info->size));
++		/* only update max_size on auth cap */
++		if ((info->cap.flags & CEPH_CAP_FLAG_AUTH) &&
++		    ci->i_max_size != le64_to_cpu(info->max_size)) {
++			dout("max_size %lld -> %llu\n", ci->i_max_size,
++					le64_to_cpu(info->max_size));
++			ci->i_max_size = le64_to_cpu(info->max_size);
++		}
++	}
+ 
+ 	/* xattrs */
+ 	/* note that if i_xattrs.len <= 4, i_xattrs.data will still be NULL. */
+@@ -745,15 +762,6 @@ static int fill_inode(struct inode *inode,
+ 		dout(" marking %p complete (empty)\n", inode);
+ 		__ceph_dir_set_complete(ci, atomic_read(&ci->i_release_count));
+ 	}
+-no_change:
+-	/* only update max_size on auth cap */
+-	if ((info->cap.flags & CEPH_CAP_FLAG_AUTH) &&
+-	    ci->i_max_size != le64_to_cpu(info->max_size)) {
+-		dout("max_size %lld -> %llu\n", ci->i_max_size,
+-		     le64_to_cpu(info->max_size));
+-		ci->i_max_size = le64_to_cpu(info->max_size);
+-	}
+-
+ 	spin_unlock(&ci->i_ceph_lock);
+ 
+ 	/* queue truncate if we saw i_size decrease */
+diff --git a/include/linux/ceph/ceph_fs.h b/include/linux/ceph/ceph_fs.h
+index 5f6db18..3c97d5e 100644
+--- a/include/linux/ceph/ceph_fs.h
++++ b/include/linux/ceph/ceph_fs.h
+@@ -625,6 +625,8 @@ int ceph_flags_to_mode(int flags);
+ 			   CEPH_CAP_LINK_EXCL |		\
+ 			   CEPH_CAP_XATTR_EXCL |	\
+ 			   CEPH_CAP_FILE_EXCL)
++#define CEPH_CAP_ANY_FILE_RD (CEPH_CAP_FILE_RD | CEPH_CAP_FILE_CACHE | \
++			      CEPH_CAP_FILE_SHARED)
+ #define CEPH_CAP_ANY_FILE_WR (CEPH_CAP_FILE_WR | CEPH_CAP_FILE_BUFFER |	\
+ 			      CEPH_CAP_FILE_EXCL)
+ #define CEPH_CAP_ANY_WR   (CEPH_CAP_ANY_EXCL | CEPH_CAP_ANY_FILE_WR)
 -- 
-Milosz Tanski
-CTO
-10 East 53rd Street, 37th floor
-New York, NY 10022
+1.9.0
 
-p: 646-253-9055
-e: milosz@adfin.com
