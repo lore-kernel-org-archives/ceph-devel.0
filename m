@@ -1,105 +1,84 @@
-From: "Matt W. Benjamin" <matt@linuxbox.com>
-Subject: Re: xio-rados-firefly branch update
-Date: Tue, 22 Apr 2014 17:50:20 -0400 (EDT)
-Message-ID: <2001054477.133.1398203420696.JavaMail.root@thunderbeast.private.linuxbox.com>
-References: <226225586.131.1398202885165.JavaMail.root@thunderbeast.private.linuxbox.com>
+From: Joao Eduardo Luis <joao.luis@inktank.com>
+Subject: Re: Documentation Discrepancy - Manual Configuration
+Date: Wed, 23 Apr 2014 01:23:03 +0100
+Message-ID: <535707E7.3070603@inktank.com>
+References: <6b1a50710afdfd0b10133934be7eac38@pl1.haspere.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from aa.linuxbox.com ([69.128.83.226]:2574 "EHLO aa.linuxbox.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757583AbaDVVud (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 22 Apr 2014 17:50:33 -0400
-In-Reply-To: <226225586.131.1398202885165.JavaMail.root@thunderbeast.private.linuxbox.com>
+Received: from mail-wi0-f173.google.com ([209.85.212.173]:40676 "EHLO
+	mail-wi0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750852AbaDWAW7 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Apr 2014 20:22:59 -0400
+Received: by mail-wi0-f173.google.com with SMTP id z2so4111585wiv.12
+        for <ceph-devel@vger.kernel.org>; Tue, 22 Apr 2014 17:22:58 -0700 (PDT)
+In-Reply-To: <6b1a50710afdfd0b10133934be7eac38@pl1.haspere.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Yaron Haviv <yaronh@mellanox.com>, Eyal Salomon <esalomon@mellanox.com>
+To: YS3fpFE2ykfB@dyweni.com, ceph-devel@vger.kernel.org
 
-Hi Greg,
+On 04/18/2014 08:10 AM, Dyweni - Ceph-Devel wrote:
+> Hi,
+>
+> Testing Ceph with 0.79.
+>
+> 1 Monitor
+> 2 OSDs
+>
+>
+> Following the instructions here
+> (http://ceph.com/docs/master/install/manual-deployment/)... I arrive at
+> this state:
+>
+> ------
+>      cluster e3e1a87b-d282-41b5-b4ad-fb3f969e164f
+>       health HEALTH_WARN 192 pgs degraded; 192 pgs stuck unclean
+>       monmap e1: 1 mons at {a=10.208.39.100:6789/0}, election epoch 1,
+> quorum 0 a
+>       osdmap e16: 2 osds: 2 up, 2 in
+>        pgmap v21: 192 pgs, 3 pools, 0 bytes data, 0 objects
+>              2004 MB used, 59381 MB / 65536 MB avail
+>                   192 active+degraded
 
-Sure.  I'm interested in all feedback you come up with, but for starters,
-it would be helpful to have feedback on
+Indeed, ceph's default pool size is 3.  However, during the manual 
+deployment guide you followed, on the "Monitor Bootstrap" section, 14th 
+step, you certainly configured ceph.conf.  During this step, the guide 
+presents you with an example configuration file containing the option 
+'osd pool default size = 2', which overrides the default pool size of 3.
 
-1. the Messenger reorg in general, and perhaps specifically how to think
-about the throttle ideas that I shoved into SimplePolicyMessenger
+Furthermore, later during the 'Adding OSDs' section, this is made 
+obvious right on the first paragraph.
 
-2. about the completion mechanisms--with the addition of claim_data, this
-is provisionally complete
+Could this be made more obvious to a new-comer, probably.  But the info 
+is there :)
 
-3. about DispatchStrategy and non-prio queueing, and how the way we're doing
-things relates to your parallel work with SimpleMessenger
+   -Joao
 
-Thanks,
+>
+> 'ceph osd dump' shows this:
+> ------
+> ...
+> pool 0 'data' replicated size 3 min_size 2 ...
+> pool 1 'metadata' replicated size 3 min_size 2 ...
+> pool 2 'rbd' replicated size 3 min_size 2 ...
+> ...
+> ------
+>
+>
+>
+> It's not until I add a third OSD, or reduce the size of the pools, does
+> the 192 pgs become unstuck and migrate towards active+clean.
+>
+>
+>
+> I think the documentation should indicate that three nodes are required
+> for Ceph to become optimal.
+>
+>
+>
 
-Matt
-
------ "Gregory Farnum" <greg@inktank.com> wrote:
-
-> Awesome! I'll try and take a preliminary look at this in the next day
-> or two. What kind of feedback are you interested in right now?
-> -Greg
-> Software Engineer #42 @ http://inktank.com | http://ceph.com
-> 
-> On Tue, Apr 22, 2014 at 12:44 PM, Matt W. Benjamin <matt@linuxbox.com>
-> wrote:
-> > Hi,
-> >
-> > We've completed a trial merge of our current XioMessenger branches
-> to Ceph
-> > upstream master.  The resulting branch is on our public Ceph
-> development
-> > repo, on banch xio-rados-firefly:
-> >
-> >
-> https://github.com/linuxbox2/linuxbox-ceph/commits/xio-rados-firefly
-> >
-> > This branch isn't fully vetted.  We haven't re-run librados tests on
-> it, and
-> > there may be issues.  In addition, the core XioMessenger code on
-> this branch
-> > has at least one open bug (a race condition) that appeared after we
-> switched
-> > to Accelio one-way messages (which streamline the workflow, and are
-> faster than
-> > the original request-response code).  We'll send an update on this
-> to the
-> > list as soon as we can (later this week).
-> >
-> > There is also ongoing merge work (making XioMessenger work with the
-> rest of
-> > Ceph), and open items (e.g., XioMessenger doesn't implement CephX).
-> >
-> > What I think is good about this branch is it has all the commits
-> broken out,
-> > starting with general changes to the Messenger class family, for
-> review.
-> >
-> > Thanks and regards,
-> >
-> > Matt
-> >
-> > --
-> > Matt Benjamin
-> > The Linux Box
-> > 206 South Fifth Ave. Suite 150
-> > Ann Arbor, MI  48104
-> >
-> > http://linuxbox.com
-> >
-> > tel.  734-761-4689
-> > fax.  734-769-8938
-> > cel.  734-216-5309
 
 -- 
-Matt Benjamin
-The Linux Box
-206 South Fifth Ave. Suite 150
-Ann Arbor, MI  48104
-
-http://linuxbox.com
-
-tel.  734-761-4689 
-fax.  734-769-8938 
-cel.  734-216-5309 
+Joao Eduardo Luis
+Software Engineer | http://inktank.com | http://ceph.com
