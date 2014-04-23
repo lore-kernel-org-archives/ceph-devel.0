@@ -1,40 +1,61 @@
-From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: Re: rbd map automation woes
-Date: Wed, 23 Apr 2014 13:50:24 +0400
-Message-ID: <CALFYKtCFZsqc+b7z-YGaXLnPH=WE14hDBA48VqPgJG9jRqSBSA@mail.gmail.com>
-References: <CABt9es9b2EzSn9apkEs940GMktTyssV7BjeZUPK2GV3RW5b0BQ@mail.gmail.com>
-	<CALFYKtACugAXVP=7RAt=bxFBMWnKOAT7O9S53KttOuJnTMenyQ@mail.gmail.com>
-	<CABt9es8xehAUFNNk7GPMk5CjAeESpazEyA+j=TQgPXjEkacUXQ@mail.gmail.com>
+From: "Ahmed Ali (ahmeali)" <ahmeali@cisco.com>
+Subject: ceph-deploy install error - Unhandled exception
+Date: Wed, 23 Apr 2014 21:55:59 +0000
+Message-ID: <20742D81FF40A2468E3FF071F3F15A2632B7CEBD@xmb-rcd-x15.cisco.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qg0-f49.google.com ([209.85.192.49]:46630 "EHLO
-	mail-qg0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750993AbaDWJuZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Apr 2014 05:50:25 -0400
-Received: by mail-qg0-f49.google.com with SMTP id j5so658272qga.22
-        for <ceph-devel@vger.kernel.org>; Wed, 23 Apr 2014 02:50:24 -0700 (PDT)
-In-Reply-To: <CABt9es8xehAUFNNk7GPMk5CjAeESpazEyA+j=TQgPXjEkacUXQ@mail.gmail.com>
+Received: from rcdn-iport-8.cisco.com ([173.37.86.79]:55426 "EHLO
+	rcdn-iport-8.cisco.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751186AbaDWWFl convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Apr 2014 18:05:41 -0400
+Received: from xhc-rcd-x10.cisco.com (xhc-rcd-x10.cisco.com [173.37.183.84])
+	by rcdn-core-1.cisco.com (8.14.5/8.14.5) with ESMTP id s3NLu0kF004396
+	(version=TLSv1/SSLv3 cipher=AES128-SHA bits=128 verify=FAIL)
+	for <ceph-devel@vger.kernel.org>; Wed, 23 Apr 2014 21:56:00 GMT
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Hannes Landeholm <hannes@jumpstarter.io>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Thorwald Lundqvist <thorwald@jumpstarter.io>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, Apr 22, 2014 at 11:58 PM, Hannes Landeholm
-<hannes@jumpstarter.io> wrote:
-> Okay, it's unfortunate that it still depends on udev but we would
-> really appreciate to have those guarantees.
->
-> Does the "rbd returning the new device node" feature also depend on udev?
+Hello,
 
-Yes, in fact that's the core of it.  Those guarantees are mostly just
-a nice side effect.
+I'm installing ceph using ceph-deploy and run into this error:
 
->
-> Also, is this branch public? I'd like to have a look.
+Unhandled exception in thread started by
+sys.excepthook is missing
+lost sys.stderr
 
-Yes, https://github.com/ceph/ceph/tree/wip-libkrbd.
+Command used: ceph-deploy install cephnode01-os5 cephnode02-os5 cephnode03-os5
 
-Thanks,
+Last lines:
+....
+[cephnode03-os5][DEBUG ] Setting up ceph-fs-common (0.72.2-1precise) ...
+[cephnode03-os5][DEBUG ] Setting up ceph-mds (0.72.2-1precise) ...
+[cephnode03-os5][DEBUG ] ceph-mds-all start/running
+[cephnode03-os5][DEBUG ] Processing triggers for libc-bin ...
+[cephnode03-os5][DEBUG ] ldconfig deferred processing now taking place
+[cephnode03-os5][INFO  ] Running command: sudo ceph --version
+[cephnode03-os5][DEBUG ] ceph version 0.72.2 (a913ded2ff138aefb8cb84d347d72164099cfd60)
+Unhandled exception in thread started by
+sys.excepthook is missing
+lost sys.stderr 
 
-                Ilya
+Following the quick install @ http://ceph.com/docs/master/start/quick-ceph-deploy/, step 3
+
+Took a snapshot and continue install (assuming the error is harmless and related to python), I did run into it again when I did " ceph-deploy osd prepare ...", after all the ceph health is reporting "Health_OK".
+
+
+Is that error harmless? If yes please advise.
+
+Note: I'm Just exploring ceph for the first time
+
+Thanks in advance!
+Ahmed
+
+ 
+
+
+
+
