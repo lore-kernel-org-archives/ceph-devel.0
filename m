@@ -1,257 +1,181 @@
-From: Kurt Bauer <kurt.bauer@univie.ac.at>
-Subject: Re: OSD crashing permanently
-Date: Fri, 25 Apr 2014 10:17:34 +0200
-Message-ID: <535A1A1E.9000605@univie.ac.at>
-References: <535A0B09.5080702@univie.ac.at>
+From: Olivier Bonvalet <ceph.list@daevel.fr>
+Subject: Re: Issue #5876 : assertion failure in rbd_img_obj_callback()
+Date: Fri, 25 Apr 2014 13:37:06 +0200
+Message-ID: <1398425826.2927.21.camel@localhost>
+References: <1395736765.2823.29.camel@localhost>
+	 <1396660579.2130.103.camel@localhost> <533F62EE.2060701@ieee.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; protocol="application/x-pkcs7-signature"; micalg=sha1; boundary="------------ms020104090907010905040509"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from grace.univie.ac.at ([131.130.3.115]:52246 "EHLO
-	grace.univie.ac.at" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751286AbaDYIRc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 25 Apr 2014 04:17:32 -0400
-Received: from justin.univie.ac.at ([131.130.3.111] helo=justin.univie.ac.at)
-	by grace.univie.ac.at with esmtp (Exim 4.82)
-	(envelope-from <kurt.bauer@univie.ac.at>)
-	id 1WdbK6-0006tn-Ub
-	for ceph-devel@vger.kernel.org; Fri, 25 Apr 2014 10:17:30 +0200
-Received: from [2001:628:1:5:f11a:34b8:2634:a586] (helo=kb.aco.net)
-	by justin.univie.ac.at with esmtpsa (TLSv1:ECDHE-RSA-AES256-SHA:256)
-	(Exim 4.82)
-	(envelope-from <kurt.bauer@univie.ac.at>)
-	id 1WdbK6-0007Mi-SW
-	for ceph-devel@vger.kernel.org; Fri, 25 Apr 2014 10:17:30 +0200
-In-Reply-To: <535A0B09.5080702@univie.ac.at>
+Received: from licorne.daevel.fr ([178.32.94.222]:33691 "EHLO
+	licorne.daevel.fr" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753391AbaDYLhR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 25 Apr 2014 07:37:17 -0400
+In-Reply-To: <533F62EE.2060701@ieee.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Alex Elder <elder@ieee.org>
+Cc: ceph-devel@vger.kernel.org
 
-This is a cryptographically signed message in MIME format.
+Le vendredi 04 avril 2014 =C3=A0 20:57 -0500, Alex Elder a =C3=A9crit :
+> On 04/04/2014 08:16 PM, Olivier Bonvalet wrote:
+> > Le mardi 25 mars 2014 =C3=A0 09:39 +0100, Olivier Bonvalet a =C3=A9=
+crit :
+> >> Hi,
+> >>
+> >> what can/should I do to help fix that problem ?
+> >>
+> >> for now, RBD kernel client hang on :=20
+> >>         Assertion failure in rbd_img_obj_callback() at line 2131:
+> >>            rbd_assert(which >=3D img_request->next_completion);
+> >>
+> >> or on :
+> >>         Assertion failure in rbd_img_obj_callback() at line 2127:
+> >>             rbd_assert(img_request !=3D NULL);
+> >>
+> >>
+> >> I have both case at least once per week, on latest 3.13.5 kernels.
+> >>
+> >> It seems that the problem occurs only on more loaded servers (I ha=
+ve 4
+> >> near same servers, and crash occurs on two of them. If I move the =
+VM,
+> >> crash follows...).
+> >>
+> >> Olivier
+> >>
+> >> --
+> >=20
+> > Hi,
+> >=20
+> > so. After some days without any problems, RBD crashed toonight :
+>=20
+> Unfortunately this could be a symptom of the same sort of race.
+> When a object request is removed from its image request's list
+> the request count gets decremented.  To be honest, all of these
+> assertions in rbd_img_obj_callback() are probably unsafe, at
+> least until I get the patch that does proper reference counting
+> implemented:
+>=20
+>         rbd_assert(img_request !=3D NULL);
+>         rbd_assert(img_request->obj_request_count > 0);
+>         rbd_assert(which !=3D BAD_WHICH);
+>         rbd_assert(which < img_request->obj_request_count);
+>=20
+> Until then I think you can avoid this by commenting out those
+> assertions.  I'm afraid there will remain a (smaller) window
+> of opportunity for a problem to occur, but I believe commenting
+> those out will help for now.
+>=20
+> I'm very sorry you're hitting these.  I'll see if I can get
+> a comprehensive fix this weekend.
+>=20
+> 					-Alex
+>=20
 
---------------ms020104090907010905040509
-Content-Type: text/plain; charset=ISO-8859-15
-Content-Transfer-Encoding: 7bit
+Hi,
 
-Hi again,
+I suppose that I should add :
+    if (img_request =3D=3D NULL) goto out;
 
-it seems the reason is either a corrupted file-system or disk-error.
-Correlating with the last daemon crash we saw i/o error messages from
-the kernel for the specific disk, for whatever reason there where no
-such errors previously.
-I did an xfs_repair, which showed no errors, but at least the daemon
-didn't crash after a few minutes, like the last times. At least it seems
-to be nothing 'ceph related', but a simple disk or fs error.
+Right ?
 
-Best regards,
-Kurt
+When commenting the asserts I obtain a NULL pointer dereference :
 
-> Kurt Bauer <mailto:kurt.bauer@univie.ac.at>
-> 25. April 2014 09:13
-> Hi,
->
-> since a few days we have one OSD (osd.23) permanently crashing. It can
-> be restarted without problem but after a few minutes (one time it lived
-> for a few hours) it crashes. The logfile of the specific osd for one of
-> those crashes is attached. Other OSDs on the same host work without
-> problem.
-> I tried a xfs_check on the specific disk, which showed no errors.
->
-> Maybe you can give us a hint where the problem could be and what has to
-> be done to solve it. If any further information or logs would help, I'd
-> be happy to provide them.
->
-> Many thanks,
-> best regards,
-> Kurt
->
-> PS.: Maybe the outline of the cluster could be helpful:
-> vmstor1:~# ceph osd tree
-> # id weight type name up/down reweight
-> -1 78 root default
-> -13 52 city Vienna
-> -11 26 datacenter NIG
-> -8 26 room B1
-> -3 26 rack B2
-> -2 26 host vmstor1
-> 0 2 osd.0
-> up 1
-> 1 2 osd.1
-> up 1
-> 2 2 osd.2
-> up 1
-> 3 2 osd.3
-> up 1
-> 12 3 osd.12
-> up 1
-> 14 3 osd.14
-> up 1
-> 15 3 osd.15
-> up 1
-> 16 3 osd.16
-> up 1
-> 17 3 osd.17
-> up 1
-> 18 3 osd.18
-> up 1
-> -12 26 datacenter IXION
-> -10 26 room 3
-> -7 26 rack R0
-> -4 26 host vmstor21
-> 10 2 osd.10
-> up 1
-> 11 2 osd.11
-> up 1
-> 8 2 osd.8
-> up 1
-> 9 2 osd.9
-> up 1
-> 13 3 osd.13
-> up 1
-> 25 3 osd.25
-> up 1
-> 26 3 osd.26
-> up 1
-> 27 3 osd.27
-> up 1
-> 28 3 osd.28
-> up 1
-> 29 3 osd.29
-> up 1
-> -15 26 city Linz
-> -14 26 datacenter OOE
-> -9 26 room SYS2
-> -6 26 rack LIK1N
-> -5 26 host vmstor2
-> 4 2 osd.4
-> up 1
-> 5 2 osd.5
-> up 1
-> 6 2 osd.6
-> up 1
-> 7 2 osd.7
-> up 1
-> 19 3 osd.19
-> up 1
-> 20 3 osd.20
-> up 1
-> 21 3 osd.21
-> up 1
-> 22 3 osd.22
-> up 1
-> 23 3 osd.23
-> down 0
-> 24 3 osd.24
-> up 1
->
->
+Apr 25 13:03:15 murmillia kernel: [124049.097927] BUG: unable to handle=
+ kernel NULL pointer dereference at 000000000000003c
+Apr 25 13:03:15 murmillia kernel: [124049.098008] IP: [<ffffffff8105d92=
+2>] do_raw_spin_lock+0x5/0x22
+Apr 25 13:03:15 murmillia kernel: [124049.098056] PGD 0=20
+Apr 25 13:03:15 murmillia kernel: [124049.098091] Oops: 0002 [#1] SMP=20
+Apr 25 13:03:15 murmillia kernel: [124049.098133] Modules linked in: cb=
+c rbd libceph xen_gntdev ip6table_mangle ip6t_REJECT ip6table_filter ip=
+6_tables xt_DSCP iptable_mangle xt_LOG xt_physdev ipt_REJECT xt_tcpudp =
+iptable_filter ip_tables x_tables xfs libcrc32c bridge loop iTCO_wdt gp=
+io_ich iTCO_vendor_support serio_raw sb_edac edac_core i2c_i801 evdev l=
+pc_ich mfd_core ioatdma shpchp ipmi_si ipmi_msghandler wmi ac button dm=
+_mod hid_generic usbhid hid sg sd_mod crc_t10dif crct10dif_common megar=
+aid_sas ahci libahci isci ehci_pci ehci_hcd libsas usbcore libata igb i=
+xgbe scsi_transport_sas i2c_algo_bit i2c_core usb_common scsi_mod dca p=
+tp pps_core mdio
+Apr 25 13:03:15 murmillia kernel: [124049.098695] CPU: 0 PID: 31669 Com=
+m: kworker/0:0 Not tainted 3.13-dae-dom0 #1
+Apr 25 13:03:15 murmillia kernel: [124049.098739] Hardware name: Superm=
+icro X9DRW-7TPF+/X9DRW-7TPF+, BIOS 2.0a 03/11/2013
+Apr 25 13:03:15 murmillia kernel: [124049.098809] Workqueue: ceph-msgr =
+con_work [libceph]
+Apr 25 13:03:15 murmillia kernel: [124049.098851] task: ffff8802458b38a=
+0 ti: ffff88023cfcc000 task.ti: ffff88023cfcc000
+Apr 25 13:03:15 murmillia kernel: [124049.098916] RIP: e030:[<ffffffff8=
+105d922>]  [<ffffffff8105d922>] do_raw_spin_lock+0x5/0x22
+Apr 25 13:03:15 murmillia kernel: [124049.098987] RSP: e02b:ffff88023cf=
+cdce0  EFLAGS: 00010002
+Apr 25 13:03:15 murmillia kernel: [124049.099026] RAX: 0000000000010000=
+ RBX: ffff88025749a3c8 RCX: 0000000000002201
+Apr 25 13:03:15 murmillia kernel: [124049.099091] RDX: 000000000000003c=
+ RSI: ffff88025749a3e0 RDI: 000000000000003c
+Apr 25 13:03:15 murmillia kernel: [124049.099154] RBP: 0000000000000000=
+ R08: 0000000000000001 R09: 0000000000000001
+Apr 25 13:03:15 murmillia kernel: [124049.099218] R10: ffff88024749d07d=
+ R11: ffff8802476929f8 R12: ffff880269f6b701
+Apr 25 13:03:15 murmillia kernel: [124049.099281] R13: 00000000ffffffff=
+ R14: ffff8802476927c0 R15: 0000000000000000
+Apr 25 13:03:15 murmillia kernel: [124049.099349] FS:  00007f01384088e0=
+(0000) GS:ffff88027fc00000(0000) knlGS:0000000000000000
+Apr 25 13:03:15 murmillia kernel: [124049.099415] CS:  e033 DS: 0000 ES=
+: 0000 CR0: 0000000080050033
+Apr 25 13:03:15 murmillia kernel: [124049.099455] CR2: 000000000000003c=
+ CR3: 0000000243dec000 CR4: 0000000000042660
+Apr 25 13:03:15 murmillia kernel: [124049.099519] Stack:
+Apr 25 13:03:15 murmillia kernel: [124049.099549]  ffffffffa032caad 000=
+000000000003c ffff8802476929f8 0000000000002201
+Apr 25 13:03:15 murmillia kernel: [124049.099629]  ffff8802411ea218 fff=
+f8802476927b8 ffff880269f6b718 0000000000000000
+Apr 25 13:03:15 murmillia kernel: [124049.099708]  ffff8802476927c0 000=
+0000000000000 ffffffffa030b69b 0000000000000025
+Apr 25 13:03:15 murmillia kernel: [124049.099786] Call Trace:
+Apr 25 13:03:15 murmillia kernel: [124049.099823]  [<ffffffffa032caad>]=
+ ? rbd_img_obj_callback+0x56/0x308 [rbd]
+Apr 25 13:03:15 murmillia kernel: [124049.099871]  [<ffffffffa030b69b>]=
+ ? dispatch+0x3e4/0x55e [libceph]
+Apr 25 13:03:15 murmillia kernel: [124049.099915]  [<ffffffffa03060fc>]=
+ ? con_work+0xf6e/0x1a65 [libceph]
+Apr 25 13:03:15 murmillia kernel: [124049.099959]  [<ffffffff8100122a>]=
+ ? xen_hypercall_xen_version+0xa/0x20
+Apr 25 13:03:15 murmillia kernel: [124049.100004]  [<ffffffff81005959>]=
+ ? xen_force_evtchn_callback+0x9/0xa
+Apr 25 13:03:15 murmillia kernel: [124049.100048]  [<ffffffff810484e8>]=
+ ? process_one_work+0x15a/0x214
+Apr 25 13:03:15 murmillia kernel: [124049.100100]  [<ffffffff8104896c>]=
+ ? worker_thread+0x139/0x1de
+Apr 25 13:03:15 murmillia kernel: [124049.100141]  [<ffffffff81048833>]=
+ ? rescuer_thread+0x26e/0x26e
+Apr 25 13:03:15 murmillia kernel: [124049.100183]  [<ffffffff8104d007>]=
+ ? kthread+0x9e/0xa6
+Apr 25 13:03:15 murmillia kernel: [124049.100223]  [<ffffffff8104cf69>]=
+ ? __kthread_parkme+0x55/0x55
+Apr 25 13:03:15 murmillia kernel: [124049.100268]  [<ffffffff81372a0c>]=
+ ? ret_from_fork+0x7c/0xb0
+Apr 25 13:03:15 murmillia kernel: [124049.100309]  [<ffffffff8104cf69>]=
+ ? __kthread_parkme+0x55/0x55
+Apr 25 13:03:15 murmillia kernel: [124049.100349] Code: d0 f0 0f b1 0f =
+39 d0 0f 94 c0 0f b6 c0 c3 31 c0 48 81 ff e8 db 36 81 72 0c 31 c0 48 81=
+ ff af df 36 81 0f 92 c0 c3 b8 00 00 01 00 <f0> 0f c1 07 89 c2 c1 ea 10=
+ 66 39 c2 89 d1 74 0c 66 8b 07 66 39=20
+Apr 25 13:03:15 murmillia kernel: [124049.100727] RIP  [<ffffffff8105d9=
+22>] do_raw_spin_lock+0x5/0x22
+Apr 25 13:03:15 murmillia kernel: [124049.100773]  RSP <ffff88023cfcdce=
+0>
+Apr 25 13:03:15 murmillia kernel: [124049.100807] CR2: 000000000000003c
+Apr 25 13:03:15 murmillia kernel: [124049.101120] ---[ end trace 7f81ac=
+e5e0aed716 ]---
 
---------------ms020104090907010905040509
-Content-Type: application/x-pkcs7-signature; name="smime.p7s"
-Content-Transfer-Encoding: base64
-Content-Disposition: attachment; filename="smime.p7s"
-Content-Description: S/MIME Cryptographic Signature
 
-MIAGCSqGSIb3DQEHAqCAMIACAQExCzAJBgUrDgMCGgUAMIAGCSqGSIb3DQEHAQAAoIISXTCC
-BGYwggNOoAMCAQICEFEmCpMc4n+cw6VfeeByroIwDQYJKoZIhvcNAQEFBQAwgZMxCzAJBgNV
-BAYTAlVTMQswCQYDVQQIEwJVVDEXMBUGA1UEBxMOU2FsdCBMYWtlIENpdHkxHjAcBgNVBAoT
-FVRoZSBVU0VSVFJVU1QgTmV0d29yazEhMB8GA1UECxMYaHR0cDovL3d3dy51c2VydHJ1c3Qu
-Y29tMRswGQYDVQQDExJVVE4gLSBEQVRBQ29ycCBTR0MwHhcNMDUwNjA3MDgwOTEwWhcNMTkw
-NjI0MTkwNjMwWjBvMQswCQYDVQQGEwJTRTEUMBIGA1UEChMLQWRkVHJ1c3QgQUIxJjAkBgNV
-BAsTHUFkZFRydXN0IEV4dGVybmFsIFRUUCBOZXR3b3JrMSIwIAYDVQQDExlBZGRUcnVzdCBF
-eHRlcm5hbCBDQSBSb290MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAt/caM+by
-AAQtOeBOW+0fvGwPzbX6I7bO3psRM5ekKUx9k5+9SryT7QMa44/P5W1QWtaXKZRagLBJetsu
-lf24yr83OC0ePpFBrXBWx/BPP+gynnTKyJBU6cZfD3idmkA8Dqxhql4Uj56HoWpQ3NeaTq8F
-s6ZxlJxxs1BgCscTnTgHhgKo6ahpJhiQq0ywTyOrOk+E2N/On+Fpb7vXQtdrROTHre5tQV9y
-WnEIN7N5ZaRZoJQ39wAvDcKSctrQOHLbFKhFxF0qfbe01sTurM0TRLfJK91DACX6Yblpalgj
-EbenM49WdVn1zSnXRrcKK2W200JvFbK4e/vv6V1T1TRaJwIDAQABo4HYMIHVMB8GA1UdIwQY
-MBaAFFMy0bPPf/rg8aBdhU6S0p5FHbRPMB0GA1UdDgQWBBStvZh6NLQm9/rEJlTvA73gJMtU
-GjAOBgNVHQ8BAf8EBAMCAQYwDwYDVR0TAQH/BAUwAwEB/zARBglghkgBhvhCAQEEBAMCAQIw
-IAYDVR0lBBkwFwYKKwYBBAGCNwoDAwYJYIZIAYb4QgQBMD0GA1UdHwQ2MDQwMqAwoC6GLGh0
-dHA6Ly9jcmwudXNlcnRydXN0LmNvbS9VVE4tREFUQUNvcnBTR0MuY3JsMA0GCSqGSIb3DQEB
-BQUAA4IBAQDG7lMXaBSyUSIekFgNlP298XDlhi3DNjGPVEhG5y0IN7xsCmDhDq1RNOASk+m+
-uKu4JrTplj0oj65kB/7gAezF45HrGKDxdX7bCuafkduvrnXfI5Fo3RcAWkv/ZGxw6wEa0JDZ
-x6bWbfYT5P+1ydIeKsuxJUMmeNkwm04NHr5p79/q/i2zzPmw3bUUypHUsrWl+wEZo0d5n52M
-lYc0+B84kto2phH6a+tr6dxFeBU5BtdNQeQhyNwvh9G3v0hgdaViyyTeO2GgKSCmvsVsnMTp
-Cmki75E6+iav0VtBpzri+DgHQqvBW/jObboPBD8yNKzcBCjXcDAUJgbE5JuY1c94MIIEijCC
-A3KgAwIBAgIQJ/TqEfR6hsRunbtuqRcHBzANBgkqhkiG9w0BAQUFADBvMQswCQYDVQQGEwJT
-RTEUMBIGA1UEChMLQWRkVHJ1c3QgQUIxJjAkBgNVBAsTHUFkZFRydXN0IEV4dGVybmFsIFRU
-UCBOZXR3b3JrMSIwIAYDVQQDExlBZGRUcnVzdCBFeHRlcm5hbCBDQSBSb290MB4XDTA1MDYw
-NzA4MDkxMFoXDTIwMDUzMDEwNDgzOFowga4xCzAJBgNVBAYTAlVTMQswCQYDVQQIEwJVVDEX
-MBUGA1UEBxMOU2FsdCBMYWtlIENpdHkxHjAcBgNVBAoTFVRoZSBVU0VSVFJVU1QgTmV0d29y
-azEhMB8GA1UECxMYaHR0cDovL3d3dy51c2VydHJ1c3QuY29tMTYwNAYDVQQDEy1VVE4tVVNF
-UkZpcnN0LUNsaWVudCBBdXRoZW50aWNhdGlvbiBhbmQgRW1haWwwggEiMA0GCSqGSIb3DQEB
-AQUAA4IBDwAwggEKAoIBAQCyOYWk8n2rQTtiRjeuzcFgdbw5ZflKGkeiucxIzGqY1U01Gbmk
-QuXOSeKKLx580jEHx060g2SdLinVomTEhb2FUTV5pE5okHsceqSSqBfymBXyk8zJpDKVuwxP
-ML2YoAuL5W4bokb6eLyib6tZXqUvz8rabaov66yhs2qqty5nNYt54R5piOLmRs2gpeq+C852
-OnoOm+r82idbPXMfIuZIYcZM82mxqC4bttQxICy8goqOpA6l14lD/BZarx1x1xFZ2rqHDa/6
-8+HC8KTFZ4zW1lQ63gqkugN3s2XI/R7TdGKqGMpokx6hhX71R2XL+E1XKHTSNP8wtu72YjAU
-jCzrAgMBAAGjgeEwgd4wHwYDVR0jBBgwFoAUrb2YejS0Jvf6xCZU7wO94CTLVBowHQYDVR0O
-BBYEFImCZ33EnSZwAEu0UEh83j2uBG59MA4GA1UdDwEB/wQEAwIBBjAPBgNVHRMBAf8EBTAD
-AQH/MHsGA1UdHwR0MHIwOKA2oDSGMmh0dHA6Ly9jcmwuY29tb2RvY2EuY29tL0FkZFRydXN0
-RXh0ZXJuYWxDQVJvb3QuY3JsMDagNKAyhjBodHRwOi8vY3JsLmNvbW9kby5uZXQvQWRkVHJ1
-c3RFeHRlcm5hbENBUm9vdC5jcmwwDQYJKoZIhvcNAQEFBQADggEBABnYiRFvKKymAKLnh8Gb
-kAPbfqES/R7z4vABqZRUQmuaCcSgbdeQkgQDZnlDcfz4b6/bdkXiNxo93eRZBHisHPSDRvN6
-z1uEci3lRsG6GBEp88tJeYc8um0FnaRtaE+tchQ2qLmx/b/Pf/CkapQ1UI/PgW1Vsd1ZMErf
-baCcZB9JfO82u/TjafT4OY9arUuFOrcO7dPPDUSi+wS/5C9wjiX7WlQGs9DEvG2N+3MyLOmb
-hCQt1n+RemgCUB8OP03pzPW7Z+jcHC47/E7N/gKO46gTCqUmRGXpEPJNUqeu3D7KazJcQWz+
-9V2g6v/R+puGWG09lkfl/i6VBMIAzI6h8rswggSaMIIDgqADAgECAhEAr5ge2aKKXKWWxGma
-4v+XuDANBgkqhkiG9w0BAQUFADA7MQswCQYDVQQGEwJOTDEPMA0GA1UEChMGVEVSRU5BMRsw
-GQYDVQQDExJURVJFTkEgUGVyc29uYWwgQ0EwHhcNMTMwNjEwMDAwMDAwWhcNMTYwNjA5MjM1
-OTU5WjBeMQswCQYDVQQGEwJBVDEaMBgGA1UEChMRVW5pdmVyc2l0YWV0IFdpZW4xEzARBgNV
-BAMTCkt1cnQgQmF1ZXIxHjAcBgkqhkiG9w0BCQIWD2tiQHVuaXZpZS5hYy5hdDCCASIwDQYJ
-KoZIhvcNAQEBBQADggEPADCCAQoCggEBAKUHAwBabmLShrwgz1f8mOb6gEvLaa1XNuQtIDxs
-g8Mpra2i/B22rWdRvC6SHT3QWaHJVAOZuVbXpA8Nneio3IA56KkW/fjO7iq08szkWX8X83zF
-c4zHV38vQ7BV0WEoVLAqYuoDb/pKCk/YLTe5yFwbB8dRxbeFfAv3idG3yk6eqRDIJxGRFAXA
-fUsM6MBwv3EFODD51MTPBs2CoOTqkcgG0bOgddrqUdTjH6bgGslQcG6P4yp9y0B2CDS17e0A
-1Q4s2mpV9zqj2O3URTGBWZGOTLMs8FN03v3Y8yN/2mHZXcHSVyjcoTtSO0GHlNpGbwHjuGrT
-dyHd7gpY8z5wV8ECAwEAAaOCAXQwggFwMB8GA1UdIwQYMBaAFGNNQ1oZSD/ERsECur/uDuWC
-t2amMB0GA1UdDgQWBBRocRnmRuqrwEMtoMy08RoOODCaQjAOBgNVHQ8BAf8EBAMCBaAwDAYD
-VR0TAQH/BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDBAYIKwYBBQUHAwIwGAYDVR0gBBEwDzAN
-BgsrBgEEAbIxAQICHTA/BgNVHR8EODA2MDSgMqAwhi5odHRwOi8vY3JsLnRjcy50ZXJlbmEu
-b3JnL1RFUkVOQVBlcnNvbmFsQ0EuY3JsMHIGCCsGAQUFBwEBBGYwZDA6BggrBgEFBQcwAoYu
-aHR0cDovL2NydC50Y3MudGVyZW5hLm9yZy9URVJFTkFQZXJzb25hbENBLmNydDAmBggrBgEF
-BQcwAYYaaHR0cDovL29jc3AudGNzLnRlcmVuYS5vcmcwIgYDVR0RBBswGYEXa3VydC5iYXVl
-ckB1bml2aWUuYWMuYXQwDQYJKoZIhvcNAQEFBQADggEBABPtAX3Oj5PwJf+xHyvsFivb23m4
-xbH6fquT1vNsPaEi8vcS4wvlvBZy/XIztjNpZdEdIpa05g11EXVdGumDu7MsSvHyvYVxwXkJ
-E+DUsBlFQLAtRg3LNr4KblWOZZRVm1OUIWfNs6XbVnI3V67W3rm5FfzTBBrGl9+qxrfSVEko
-kJTcEzWOxh/Xpa85IciHkkY/oxbSges7Z3qmEAKreCXjAZckDRu+gsoeP6t8kQGck2F85Pgi
-1EETsgjSb5cxttdaoJ1/hvNUNKaPqevxr5tcU+vmyWfzSkhBHgtCNf99OIzfbwfP62PGfCpf
-VIRVxhthtMn/eoUI7rsU/5wv5F4wggTDMIIDq6ADAgECAhBz/lf637jFCIF7Zrlr8C3vMA0G
-CSqGSIb3DQEBBQUAMIGuMQswCQYDVQQGEwJVUzELMAkGA1UECBMCVVQxFzAVBgNVBAcTDlNh
-bHQgTGFrZSBDaXR5MR4wHAYDVQQKExVUaGUgVVNFUlRSVVNUIE5ldHdvcmsxITAfBgNVBAsT
-GGh0dHA6Ly93d3cudXNlcnRydXN0LmNvbTE2MDQGA1UEAxMtVVROLVVTRVJGaXJzdC1DbGll
-bnQgQXV0aGVudGljYXRpb24gYW5kIEVtYWlsMB4XDTA5MDUxODAwMDAwMFoXDTI4MTIzMTIz
-NTk1OVowOzELMAkGA1UEBhMCTkwxDzANBgNVBAoTBlRFUkVOQTEbMBkGA1UEAxMSVEVSRU5B
-IFBlcnNvbmFsIENBMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyBXZ9TNqI6GQ
-Dc+7BUTDqx9KNYUaIYWgT/jwQOJKQ5v+W7Gwv7RX3HWAQUtkGvbbT2+P0CVFNfnqy0r6+9rT
-7UWIEZQ25MyoDe/FPTftFnvjwpWeWDN/Ivv4/+zmvtuuCmUlIofab4SLRuhAhig/v1YI4krp
-g6LpIvst+rYoH5HBw3H7U8ArTqQMoW6dVe3s4SSHOgjiDRzkxE3Qyyf6hGTm0ZedViRbk7sp
-LkPiQWo94kpl/JpfWoaHvIfHeYCWmVHGkA9kkZl9EN2sLAMq4Xhk/s49TvQrUBFL0VjUmwPw
-f/U7U7BTQ/vFL8QEKRo6rNdV6dEOldE7MX94T64pLQIDAQABo4IBTTCCAUkwHwYDVR0jBBgw
-FoAUiYJnfcSdJnAAS7RQSHzePa4Ebn0wHQYDVR0OBBYEFGNNQ1oZSD/ERsECur/uDuWCt2am
-MA4GA1UdDwEB/wQEAwIBBjASBgNVHRMBAf8ECDAGAQH/AgEAMBgGA1UdIAQRMA8wDQYLKwYB
-BAGyMQECAh0wWAYDVR0fBFEwTzBNoEugSYZHaHR0cDovL2NybC51c2VydHJ1c3QuY29tL1VU
-Ti1VU0VSRmlyc3QtQ2xpZW50QXV0aGVudGljYXRpb25hbmRFbWFpbC5jcmwwbwYIKwYBBQUH
-AQEEYzBhMDgGCCsGAQUFBzAChixodHRwOi8vY3J0LnVzZXJ0cnVzdC5jb20vVVROQUFBQ2xp
-ZW50X0NBLmNydDAlBggrBgEFBQcwAYYZaHR0cDovL29jc3AudXNlcnRydXN0LmNvbTANBgkq
-hkiG9w0BAQUFAAOCAQEABiupUy8T3Fw5FsyGn15Me3L77I1Vil6aCv9TTHb0Bj1Qz1fwos+v
-mYyq/qAZdj6ZAzL6dYM4irtrmqUME7LUG3bmlC5nmFnjkWwCkJqcyGBLVavKiFqNK+VplQMH
-0dQO/CQiLlmxY6Rf7dkjcuSczjpcbB9PqQDJHf76f0Utti6E3Q8noFkYTtV2JUX0mSZ522+f
-I/dDuysPBKOBJiy3ezX5PXdfQCHmfx2lllq90MsWOmy7YYuK/QQ5RArLLOHLzi4QmBrb4JPt
-SWRkCCCft6NQ8KLdyrTGfAw9514V3CeG5Do7UloXq6kGUyudCXNkHAHD/TDShwNv5BUDejlf
-aDGCAv0wggL5AgEBMFAwOzELMAkGA1UEBhMCTkwxDzANBgNVBAoTBlRFUkVOQTEbMBkGA1UE
-AxMSVEVSRU5BIFBlcnNvbmFsIENBAhEAr5ge2aKKXKWWxGma4v+XuDAJBgUrDgMCGgUAoIIB
-gjAYBgkqhkiG9w0BCQMxCwYJKoZIhvcNAQcBMBwGCSqGSIb3DQEJBTEPFw0xNDA0MjUwODE3
-MzRaMCMGCSqGSIb3DQEJBDEWBBSiZwf2XIUx3rPb+Qp8YYerMDxzOzBfBgkqhkiG9w0BCQ8x
-UjBQMAsGCWCGSAFlAwQBAjAKBggqhkiG9w0DBzAOBggqhkiG9w0DAgICAIAwDQYIKoZIhvcN
-AwICAUAwBwYFKw4DAgcwDQYIKoZIhvcNAwICASgwXwYJKwYBBAGCNxAEMVIwUDA7MQswCQYD
-VQQGEwJOTDEPMA0GA1UEChMGVEVSRU5BMRswGQYDVQQDExJURVJFTkEgUGVyc29uYWwgQ0EC
-EQCvmB7ZoopcpZbEaZri/5e4MGEGCyqGSIb3DQEJEAILMVKgUDA7MQswCQYDVQQGEwJOTDEP
-MA0GA1UEChMGVEVSRU5BMRswGQYDVQQDExJURVJFTkEgUGVyc29uYWwgQ0ECEQCvmB7Zoopc
-pZbEaZri/5e4MA0GCSqGSIb3DQEBAQUABIIBAGWTIdJypb6W5yfB07GXreyucJFhFOdBnlyR
-d0/jM4tJH9R+ymkETcIiRA1fl2g7mG8Bmh0DIWTz1SAUaErChsi1JpNCrWsaqEzu9hiFd/n7
-6kzJRgdggttVbqFqcH3DkKB7mgaJlNfuiXeAS0Q9bjQdsttXqfHle8ACkin7qrIsZbNI78ee
-oHtBWhOt2HBvttqhNIEKbzPi8JV2ZlTG+ReaOvLDX7cvEZK0BRpczTa6RL+l/qMCnZGbAf8l
-AvvjB+EDaumHXXcrgSV0N4Ln2jMWQyHAmdQ5oJYXUgd9LCSV0hf55FYA1mfgnenS8s4UZK0Z
-T9+xi2if7dCScUKcztoAAAAAAAA=
---------------ms020104090907010905040509--
+
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
