@@ -1,104 +1,46 @@
-From: Gregory Farnum <greg-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: Ceph mds laggy and failed assert in function
-	replay mds/journal.cc
-Date: Fri, 25 Apr 2014 11:02:00 -0700
-Message-ID: <CAPYLRzj2WdT4dGzh+LJ7fNwT4kiSg3ZHoM0ZpdyWG_uat6Qz3w@mail.gmail.com>
-References: <20DBB415DF55354C8FC7AF12F4AE7700132C91@MBX02-TPM.mimos.local>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <20DBB415DF55354C8FC7AF12F4AE7700132C91-SRU80uCWNiw7svLT7d/M5I2P0GrZ+RbP@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Mohd Bazli Ab Karim <bazli.abkarim-YhiXQ1Q1pWA@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+From: Xing <xinglin@cs.utah.edu>
+Subject: bandwidth with Ceph - v0.59 (Bobtail)
+Date: Fri, 25 Apr 2014 14:38:43 -0600
+Message-ID: <2C899773-4518-4704-86B3-F27B035F7E13@cs.utah.edu>
+Mime-Version: 1.0 (Mac OS X Mail 7.2 \(1874\))
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-svr1.cs.utah.edu ([155.98.64.241]:32831 "EHLO
+	mail-svr1.cs.utah.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753730AbaDYUiq convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 25 Apr 2014 16:38:46 -0400
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org, ceph-users@ceph.com
+Cc: Xing <xinglin@cs.utah.edu>
 
-Hmm, it looks like your on-disk SessionMap is horrendously out of
-date. Did your cluster get full at some point?
+Hi,
 
-In any case, we're working on tools to repair this now but they aren't
-ready for use yet. Probably the only thing you could do is create an
-empty sessionmap with a higher version than the ones the journal
-refers to, but that might have other fallout effects...
--Greg
-Software Engineer #42 @ http://inktank.com | http://ceph.com
+I also did a few other experiments, trying to get what the maximum bandwidth we can get from each data disk. The output is not encouraging: for disks that can provide 150 MB/s block-level sequential read bandwidths, we can only get about 90MB/s from each disk. Something that is particular interesting is that the replica size also affects the bandwidth we could get from the cluster. It seems that there is no such observation/conversations in the Ceph community and I think it may be helpful to share my findings.  
+
+The experiment was run with two d820 machines in Emulab at University of Utah. One is used as the data node and the other is used as the client. They are connected by a 10 GB/s Ethernet. The data node has 7 disks, one for OS and the rest 6 for OSDs. For the rest 6 disks, we use one for journal and the other for data. Thus in total we have 3 OSDs. The network bandwidth is sufficient to support reading from 3 disks in full bandwidth. 
+
+I varied the read-ahead size for the rbd block device (exp1), osd op threads for each osd (exp2), varied the replica size (exp3), and object size (exp4). The most interesting is varying the replica size. As I varied replica size from 1, to 2 and to 3, the aggregated bandwidth dropped from 267 MB/s to 211 and 180. The reason for the drop I believe is as we increase the number of replicas, we store more data into each OSD. then when we need to read it back, we have to read from a larger range (more seeks). The fundamental problem is likely because we are doing replication synchronously, and thus layout object files in a raid 10 - near format, rather than the far format. For the difference between the near format and far format for raid 10, you could have a look at the link provided below. 
+
+http://lxr.free-electrons.com/source/Documentation/device-mapper/dm-raid.txt
+
+For results about other experiments, you could download my slides at the link provided below. 
+http://www.cs.utah.edu/~xinglin/slides/ceph-bandiwdth-exp.pptx
 
 
-On Fri, Apr 25, 2014 at 2:57 AM, Mohd Bazli Ab Karim
-<bazli.abkarim-YhiXQ1Q1pWA@public.gmane.org> wrote:
-> More logs. I ran ceph-mds  with debug-mds=20.
->
-> -2> 2014-04-25 17:47:54.839672 7f0d6f3f0700 10 mds.0.journal EMetaBlob.replay inotable tablev 4316124 <= table 4317932
-> -1> 2014-04-25 17:47:54.839674 7f0d6f3f0700 10 mds.0.journal EMetaBlob.replay sessionmap v8632368 -(1|2) == table 7239603 prealloc [1000041df86~1] used 1000041db9e
->   0> 2014-04-25 17:47:54.840733 7f0d6f3f0700 -1 mds/journal.cc: In function 'void EMetaBlob::replay(MDS*, LogSegment*, MDSlaveUpdate*)' thread 7f0d6f3f0700 time 2014-04-25 17:47:54.839688 mds/journal.cc: 1303: FAILED assert(session)
->
-> Please look at the attachment for more details.
->
-> Regards,
-> Bazli
->
-> From: Mohd Bazli Ab Karim
-> Sent: Friday, April 25, 2014 12:26 PM
-> To: 'ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org'; ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> Subject: Ceph mds laggy and failed assert in function replay mds/journal.cc
->
-> Dear Ceph-devel, ceph-users,
->
-> I am currently facing issue with my ceph mds server. Ceph-mds daemon does not want to bring up back.
-> Tried running that manually with ceph-mds -i mon01 -d but it shows that it stucks at failed assert(session) line 1303 in mds/journal.cc and aborted.
->
-> Can someone shed some light in this issue.
-> ceph version 0.72.2 (a913ded2ff138aefb8cb84d347d72164099cfd60)
->
-> Let me know if I need to send log with debug enabled.
->
-> Regards,
-> Bazli
->
-> ________________________________
-> DISCLAIMER:
->
->
-> This e-mail (including any attachments) is for the addressee(s) only and may be confidential, especially as regards personal data. If you are not the intended recipient, please note that any dealing, review, distribution, printing, copying or use of this e-mail is strictly prohibited. If you have received this email in error, please notify the sender immediately and delete the original message (including any attachments).
->
->
-> MIMOS Berhad is a research and development institution under the purview of the Malaysian Ministry of Science, Technology and Innovation. Opinions, conclusions and other information in this e-mail that do not relate to the official business of MIMOS Berhad and/or its subsidiaries shall be understood as neither given nor endorsed by MIMOS Berhad and/or its subsidiaries and neither MIMOS Berhad nor its subsidiaries accepts responsibility for the same. All liability arising from or in connection with computer viruses and/or corrupted e-mails is excluded to the fullest extent permitted by law.
->
->
-> ------------------------------------------------------------------
-> -
-> -
-> DISCLAIMER:
->
-> This e-mail (including any attachments) is for the addressee(s)
-> only and may contain confidential information. If you are not the
-> intended recipient, please note that any dealing, review,
-> distribution, printing, copying or use of this e-mail is strictly
-> prohibited. If you have received this email in error, please notify
-> the sender  immediately and delete the original message.
-> MIMOS Berhad is a research and development institution under
-> the purview of the Malaysian Ministry of Science, Technology and
-> Innovation. Opinions, conclusions and other information in this e-
-> mail that do not relate to the official business of MIMOS Berhad
-> and/or its subsidiaries shall be understood as neither given nor
-> endorsed by MIMOS Berhad and/or its subsidiaries and neither
-> MIMOS Berhad nor its subsidiaries accepts responsibility for the
-> same. All liability arising from or in connection with computer
-> viruses and/or corrupted e-mails is excluded to the fullest extent
-> permitted by law.
->
->
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->
+I do not know why Ceph only gets about 60% of the disk bandwidth. To do a comparison, I ran tar to read every rbd object files to create a tarball and see how much bandwidth I can get from this workload. Interestingly, the tar workload actually gets a higher bandwidth (80% of block level bandwidth), even though it is accessing the disk more randomly (tar reads each object file in a dir sequentially while the object files were created in a different order.). For more detail, please goto my blog to have a read. 
+http://xinglin-system.blogspot.com/2014/04/ceph-lab-note-1-disk-read-bandwidth-in.html
+
+Here are a few questions. 
+1. What are the maximum bandwidth people can get from each disk? I found Jiangang from Intel also reported 57% efficiency for disk bandwidth. He suggested one reason: interference among so many sequential read workloads. I agree but when I tried to run with one single workload, I still do not get a higher efficiency. 
+2. If the efficiency is about 60%, what are the reasons that cause this? Could it be because of the locks (futex as I mentioned in my previous email) or anything else? 
+
+Thanks very much for any feedback. 
+
+Thanks,
+Xing
+
+
+
+
