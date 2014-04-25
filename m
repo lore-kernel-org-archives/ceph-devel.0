@@ -1,108 +1,104 @@
-From: Xing <xinglin@cs.utah.edu>
-Subject: question about futex calls in OSD
-Date: Fri, 25 Apr 2014 11:40:13 -0600
-Message-ID: <05766158-8F27-4AAC-A6F2-0CBBE0430D68@cs.utah.edu>
-Mime-Version: 1.0 (Mac OS X Mail 7.2 \(1874\))
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from rio.cs.utah.edu ([155.98.64.241]:55018 "EHLO
-	mail-svr1.cs.utah.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751233AbaDYRkP convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 25 Apr 2014 13:40:15 -0400
-Received: from localhost (localhost [127.0.0.1])
-	by mail-svr1.cs.utah.edu (Postfix) with ESMTP id CF32D650189
-	for <ceph-devel@vger.kernel.org>; Fri, 25 Apr 2014 11:40:14 -0600 (MDT)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Xing <xinglin@cs.utah.edu>
+From: Gregory Farnum <greg-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: Ceph mds laggy and failed assert in function
+	replay mds/journal.cc
+Date: Fri, 25 Apr 2014 11:02:00 -0700
+Message-ID: <CAPYLRzj2WdT4dGzh+LJ7fNwT4kiSg3ZHoM0ZpdyWG_uat6Qz3w@mail.gmail.com>
+References: <20DBB415DF55354C8FC7AF12F4AE7700132C91@MBX02-TPM.mimos.local>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <20DBB415DF55354C8FC7AF12F4AE7700132C91-SRU80uCWNiw7svLT7d/M5I2P0GrZ+RbP@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: Mohd Bazli Ab Karim <bazli.abkarim-YhiXQ1Q1pWA@public.gmane.org>
+Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi,
+Hmm, it looks like your on-disk SessionMap is horrendously out of
+date. Did your cluster get full at some point?
 
-This is Xing, a graduate student at the University of Utah. I am playin=
-g with Ceph and have a few questions about futex calls in OSD process. =
-I am using Ceph-v0.79. The data node machine has 7 disks, one for OS an=
-d the other 6 disks for running 6 OSDs. I set replica size =3D 1, for a=
-ll three pools (this is to improve sequential read bandwidth. Since cep=
-h is doing replication synchronously, it layouts data in a fashion simi=
-lar as RAID 10 with the near format for replica size=3D2 with two OSDs.=
- Each OSD will store exactly the same copy of whole data while during r=
-ead back, only half blocks will be read from each OSD: it will read one=
- block, seek over the next block and then read the third block. Ideally=
-, to get full disk bandwidth, we should layout data as the far format i=
-n RAID 10. I do not know how to do that in Ceph and thus simply tried w=
-ith replicasize=3D1). I created a rbd block device, initialized with an=
- ext4 fs, stored a 10GB file into it and then read it back sequentially=
-=2E I set the read_ahead to be 128M or 1G, to get the maximum bandwidth=
- for a single rbd block device (I know this is not realistic).=20
-
-While these reads requests are being served, I used strace to capture a=
-ll system calls for an OSD thread that actually does reads. I observed =
-lots of futex system calls. By specifying -T for strace, it reports tim=
-e spent by each system call and I summed it up to come up with total ti=
-me spent for each system call. I further break down two main futex call=
-s that contributes most to its overhead.
-----------
-syscall    runtime (s)   call num  average (s)
-pread      11.1028       420       0.026435
-fgetxattr  0.178381      1680      0.000106
-futex      8.83125       5217
-total runtime: 21
-
-                           runtime (s)  call num average (s)
-futex(WAIT_PRIVATE):       4.97166      1415     0.003513
-futex(WAIT_BITSET_PRIVATE  3.79         51       0.0743
-----------
-
-The overhead of lock seems to be quite high. I image this could become =
-worse as I increase the number of workloads. I was wondering why there =
-are so many futex calls and took some time to look into it. It appears =
-to me that there are three locks used during the read path in OSD. Thes=
-e locks are Mutexes and I believe the futex calls I observed in straces=
- are results of operations on these Mutexes.=20
-
-a. snapset_contexts_lock, used in functions such as get_snapset_context=
-() and put_snapset_context()
-
-b. fdcache_lock, used in lfn_open() and such
-
-c. ondisk_read_lock, used in execute_ctx().=20
-
-The one that affects most is the snapset_contexts_lock: this lock seems=
- to be the monolithic lock for controlling access to all object files i=
-n a snapset or to all object files within the same placement group and =
-belonging to the same snapset (not sure what a =92snapset=92 means. It =
-sounds like equivalent to a =92snapshot=92.). To read a block from an o=
-bject file, OSD needs to first read two extended attributes (OI_ATTR an=
-d SS_ATTR) for that file. For each read of these attributes, it seems t=
-he snapset_contexts_lock is involved: the SS_ATTR attribute is read ins=
-ide the get_snapset_context() function; the OI_ATTR attribute is read i=
-n the function get_object_context() which could be called from the func=
-tion find_object_context(). In the find_object_context(), I can also fi=
-nd a few calls to get_snapset_context() function. To release a snapset =
-context, the snapset_contexts_lock is also involved (in the put_snapset=
-_context()).=20
-
-Here are a few questions.
-1. What is the snapset_contexts_lock used for? Is it used to control ac=
-cesses to all files in a snapset or all files in the same placement gro=
-up and belonging to the same snapset? Such a big lock design does not s=
-eem to be scale. Any comments?
-2. Has anyone noticed the overhead in locking? I tried to comment out t=
-he lock in get_snapset_context() and put_snapset_context(), by commenti=
-ng the Mutex instantiation statement but that turns the system to be no=
-t working: I could not list/mount rbd block devices.=20
-
-Thanks very much for reading this. Any comment is welcome.=20
-Thanks,
-Xing
+In any case, we're working on tools to repair this now but they aren't
+ready for use yet. Probably the only thing you could do is create an
+empty sessionmap with a higher version than the ones the journal
+refers to, but that might have other fallout effects...
+-Greg
+Software Engineer #42 @ http://inktank.com | http://ceph.com
 
 
-
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On Fri, Apr 25, 2014 at 2:57 AM, Mohd Bazli Ab Karim
+<bazli.abkarim-YhiXQ1Q1pWA@public.gmane.org> wrote:
+> More logs. I ran ceph-mds  with debug-mds=20.
+>
+> -2> 2014-04-25 17:47:54.839672 7f0d6f3f0700 10 mds.0.journal EMetaBlob.replay inotable tablev 4316124 <= table 4317932
+> -1> 2014-04-25 17:47:54.839674 7f0d6f3f0700 10 mds.0.journal EMetaBlob.replay sessionmap v8632368 -(1|2) == table 7239603 prealloc [1000041df86~1] used 1000041db9e
+>   0> 2014-04-25 17:47:54.840733 7f0d6f3f0700 -1 mds/journal.cc: In function 'void EMetaBlob::replay(MDS*, LogSegment*, MDSlaveUpdate*)' thread 7f0d6f3f0700 time 2014-04-25 17:47:54.839688 mds/journal.cc: 1303: FAILED assert(session)
+>
+> Please look at the attachment for more details.
+>
+> Regards,
+> Bazli
+>
+> From: Mohd Bazli Ab Karim
+> Sent: Friday, April 25, 2014 12:26 PM
+> To: 'ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org'; ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> Subject: Ceph mds laggy and failed assert in function replay mds/journal.cc
+>
+> Dear Ceph-devel, ceph-users,
+>
+> I am currently facing issue with my ceph mds server. Ceph-mds daemon does not want to bring up back.
+> Tried running that manually with ceph-mds -i mon01 -d but it shows that it stucks at failed assert(session) line 1303 in mds/journal.cc and aborted.
+>
+> Can someone shed some light in this issue.
+> ceph version 0.72.2 (a913ded2ff138aefb8cb84d347d72164099cfd60)
+>
+> Let me know if I need to send log with debug enabled.
+>
+> Regards,
+> Bazli
+>
+> ________________________________
+> DISCLAIMER:
+>
+>
+> This e-mail (including any attachments) is for the addressee(s) only and may be confidential, especially as regards personal data. If you are not the intended recipient, please note that any dealing, review, distribution, printing, copying or use of this e-mail is strictly prohibited. If you have received this email in error, please notify the sender immediately and delete the original message (including any attachments).
+>
+>
+> MIMOS Berhad is a research and development institution under the purview of the Malaysian Ministry of Science, Technology and Innovation. Opinions, conclusions and other information in this e-mail that do not relate to the official business of MIMOS Berhad and/or its subsidiaries shall be understood as neither given nor endorsed by MIMOS Berhad and/or its subsidiaries and neither MIMOS Berhad nor its subsidiaries accepts responsibility for the same. All liability arising from or in connection with computer viruses and/or corrupted e-mails is excluded to the fullest extent permitted by law.
+>
+>
+> ------------------------------------------------------------------
+> -
+> -
+> DISCLAIMER:
+>
+> This e-mail (including any attachments) is for the addressee(s)
+> only and may contain confidential information. If you are not the
+> intended recipient, please note that any dealing, review,
+> distribution, printing, copying or use of this e-mail is strictly
+> prohibited. If you have received this email in error, please notify
+> the sender  immediately and delete the original message.
+> MIMOS Berhad is a research and development institution under
+> the purview of the Malaysian Ministry of Science, Technology and
+> Innovation. Opinions, conclusions and other information in this e-
+> mail that do not relate to the official business of MIMOS Berhad
+> and/or its subsidiaries shall be understood as neither given nor
+> endorsed by MIMOS Berhad and/or its subsidiaries and neither
+> MIMOS Berhad nor its subsidiaries accepts responsibility for the
+> same. All liability arising from or in connection with computer
+> viruses and/or corrupted e-mails is excluded to the fullest extent
+> permitted by law.
+>
+>
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>
