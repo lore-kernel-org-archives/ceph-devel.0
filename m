@@ -1,92 +1,108 @@
-From: Luke Jing Yuan <jyluke-YhiXQ1Q1pWA@public.gmane.org>
-Subject: Re: Ceph mds laggy and failed assert in
-	function	replay mds/journal.cc
-Date: Tue, 29 Apr 2014 07:43:02 +0000
-Message-ID: <E0E280CCE0E1A44898C992A9190D929A5ABC15@MBX02-TPM.mimos.local>
-References: <20DBB415DF55354C8FC7AF12F4AE7700132C91@MBX02-TPM.mimos.local>
-	<CAPYLRzj2WdT4dGzh+LJ7fNwT4kiSg3ZHoM0ZpdyWG_uat6Qz3w@mail.gmail.com>
-	<CAEDpR-sMb4A3f60DDFewb9Bfu3XbeDP1gcSkSc6iJwCZLOUBxQ@mail.gmail.com>
-	<CAAM7YAnQBwj=KSSfATeepbWyhOMAVwfoiC2AvkCEZrdPwkY2Ug@mail.gmail.com>
-	<CAEDpR-vBVOqPYnMW=VxnAcPygJBKOvaQaWSrCw3XP9aKQi1MRA@mail.gmail.com>
-	<CAAM7YAn5G-sEMOkZY+D4mOSaXbZb6NEx4A11DbRUhdMJfmC_fQ@mail.gmail.com>
-	<CAEDpR-vPCAncZ8mDWopuhjC9PmBsxnRMVBDCXCnHEsvSUZSOuQ@mail.gmail.com>
-	<CAAM7YAn3499ok-c2=MYfvYqqwEjP3JRj8TXjsSrqnSfttAVgog@mail.gmail.com>
+From: "Matt W. Benjamin" <matt@cohortfs.com>
+Subject: Re: xio-rados-firefly branch update
+Date: Tue, 29 Apr 2014 08:00:42 -0400 (EDT)
+Message-ID: <2111717275.18.1398772842816.JavaMail.root@thunderbeast.private.linuxbox.com>
+References: <1753662147.176.1398741267939.JavaMail.root@thunderbeast.private.linuxbox.com>
+Reply-To: "Matt W. Benjamin" <matt@cohortfs.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAAM7YAn3499ok-c2=MYfvYqqwEjP3JRj8TXjsSrqnSfttAVgog-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Content-Language: en-US
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: "Yan, Zheng" <ukernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Jingyuan Luke <jyluke-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from aa.linuxbox.com ([69.128.83.226]:2664 "EHLO aa.linuxbox.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S933447AbaD2MBE convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Apr 2014 08:01:04 -0400
+In-Reply-To: <1753662147.176.1398741267939.JavaMail.root@thunderbeast.private.linuxbox.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Gregory Farnum <greg@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Yaron Haviv <yaronh@mellanox.com>, Eyal Salomon <esalomon@mellanox.com>
 
-Hi,
+Hi Greg,
 
-MDS did finish the replay and working after that but we are wondering should we leave the mds_wipe_sessions in ceph.conf or remove it.
+I forgot to finish a couple of thoughts, filling them in...
 
-Regards,
-Luke
+----- "Matt W. Benjamin" <matt@linuxbox.com> wrote:
 
------Original Message-----
-From: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org [mailto:ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org] On Behalf Of Yan, Zheng
-Sent: Tuesday, 29 April, 2014 3:36 PM
-To: Jingyuan Luke
-Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Subject: Re: [ceph-users] Ceph mds laggy and failed assert in function replay mds/journal.cc
+> > > 2. about the completion mechanisms--with the addition of
+> claim_data,
+> > this
+> > > is provisionally complete
+> >=20
+> > Can you talk about this a bit in general before I comment? I want
+> to
+> > make sure I understand what's going on here, particularly with the
+> > way
+> > you're doing memory allocation in the mempools and handling the
+> > refcounting.
 
-On Tue, Apr 29, 2014 at 3:13 PM, Jingyuan Luke <jyluke-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> Hi,
+I didn't actually talk about it :).  The mempools are used everywhere
+to avoid allocation in XioMessenger fast paths (which is most of
+them).  We arrived at a need for this via profiling and measurement,
+of course.
+
+The most complicated case is reclaiming memory for a Message and relate=
+d
+structures on the responder side.  We manage the memory together using=20
+a per-request pool, which is a member of the completion hook object.
+(The backing store is the Xio pool facility.)  The decoded Message itse=
+lf
+(assuming we successfully decode) as well as each tracking Ceph buffer
+(logic for which we re-wrote from last version, as noted earlier) holds
+a reference on the hook object.  When the last of those refs is release=
+d
+(the upper-layer code is done with Message and with any buffers which
+it claimed) a cleamup process is started on the completion hook.  This
+takes a new initial reference (yes, it's atomic) on the hook, which is
+handed off to the XioPortal thread which originally delivered it, for
+final cleanup.  That thread needs to be the one which returns xio_msg
+buffers to Accelio.  Once that is done, the portal thread returns the
+last reference to the completion hook, and it is recycled also.
+
+>=20
+> Yes, and also, we have just pushed a major update to this logic on
+> our
+> current stabilization branch
+> (xio-rados-exp-noreg-buf-qs-upstream-ow-mdw).
+> The logic in the last version was overly complex.  We streamlined
+> things,
+> and also have switched to using the Xio one-way message paradigm,
+> which
+> as you mentioned a while back, is closer to Ceph's, and also has
+> higher
+> performance.
+>=20
+> >=20
+> > Is "new (bp) xio_msg_buffer(m_hook, buf, len);=E2=80=9D some syntax=
+ I=E2=80=99m
+> > unaware of, or a merge/rebase issue? (Seriously, no idea. :)
+>=20
+> This is C++ "placement new."
+
+The placement new syntax is the way you substitute your own memory allo=
+cation
+strategy for built-in new and delete (which typically use the system
+allocator, of course).  Essentially, this step calls the desired constr=
+uctor
+on the already-allocated memory.  This comes up because we're using Acc=
+elio's
+pool allocator.
+
 >
-> Assuming we got MDS working back on track, should we still leave the
-> mds_wipe_sessions in the ceph.conf or remove it and restart MDS.
-> Thanks.
 
-No.
+--=20
+Matt Benjamin
+CohortFS, LLC.
+206 South Fifth Ave. Suite 150
+Ann Arbor, MI  48104
 
-It has been several hours. the MDS still does not finish replaying the journal?
+http://cohortfs.com
 
-Regards
-Yan, Zheng
-
-
-
-________________________________
-DISCLAIMER:
-
-
-This e-mail (including any attachments) is for the addressee(s) only and may be confidential, especially as regards personal data. If you are not the intended recipient, please note that any dealing, review, distribution, printing, copying or use of this e-mail is strictly prohibited. If you have received this email in error, please notify the sender immediately and delete the original message (including any attachments).
-
-
-MIMOS Berhad is a research and development institution under the purview of the Malaysian Ministry of Science, Technology and Innovation. Opinions, conclusions and other information in this e-mail that do not relate to the official business of MIMOS Berhad and/or its subsidiaries shall be understood as neither given nor endorsed by MIMOS Berhad and/or its subsidiaries and neither MIMOS Berhad nor its subsidiaries accepts responsibility for the same. All liability arising from or in connection with computer viruses and/or corrupted e-mails is excluded to the fullest extent permitted by law.
-
-------------------------------------------------------------------
--
--
-DISCLAIMER: 
-
-This e-mail (including any attachments) is for the addressee(s) 
-only and may contain confidential information. If you are not the 
-intended recipient, please note that any dealing, review, 
-distribution, printing, copying or use of this e-mail is strictly 
-prohibited. If you have received this email in error, please notify 
-the sender  immediately and delete the original message. 
-MIMOS Berhad is a research and development institution under 
-the purview of the Malaysian Ministry of Science, Technology and 
-Innovation. Opinions, conclusions and other information in this e-
-mail that do not relate to the official business of MIMOS Berhad 
-and/or its subsidiaries shall be understood as neither given nor 
-endorsed by MIMOS Berhad and/or its subsidiaries and neither 
-MIMOS Berhad nor its subsidiaries accepts responsibility for the 
-same. All liability arising from or in connection with computer 
-viruses and/or corrupted e-mails is excluded to the fullest extent 
-permitted by law.
+tel.  734-761-4689=20
+fax.  734-769-8938=20
+cel.  734-216-5309=20
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
