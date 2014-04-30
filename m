@@ -1,27 +1,49 @@
-From: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
+From: "Matt W. Benjamin" <matt@linuxbox.com>
 Subject: Re: [ceph-users] Red Hat to acquire Inktank
-Date: Thu, 1 May 2014 00:33:18 +0200
-Message-ID: <CAJH6TXgvJhNW=QGuJsfSMHs7DW6rex-h7EFVeN9XKgSWOC6pTw@mail.gmail.com>
-References: <CAJH6TXgrNcHBKTLBDJv5XL6fNTnptMm_ahHuRy1u3B23KvBcWw@mail.gmail.com>
-	<195926884.116.1398896430783.JavaMail.root@thunderbeast.private.linuxbox.com>
+Date: Wed, 30 Apr 2014 18:37:57 -0400 (EDT)
+Message-ID: <1602381075.122.1398897477722.JavaMail.root@thunderbeast.private.linuxbox.com>
+References: <CAJH6TXgvJhNW=QGuJsfSMHs7DW6rex-h7EFVeN9XKgSWOC6pTw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f174.google.com ([209.85.216.174]:37912 "EHLO
-	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752334AbaD3WdT (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Apr 2014 18:33:19 -0400
-Received: by mail-qc0-f174.google.com with SMTP id c9so2621057qcz.19
-        for <ceph-devel@vger.kernel.org>; Wed, 30 Apr 2014 15:33:18 -0700 (PDT)
-In-Reply-To: <195926884.116.1398896430783.JavaMail.root@thunderbeast.private.linuxbox.com>
+Received: from aa.linuxbox.com ([69.128.83.226]:4964 "EHLO aa.linuxbox.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752243AbaD3WiH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 30 Apr 2014 18:38:07 -0400
+In-Reply-To: <CAJH6TXgvJhNW=QGuJsfSMHs7DW6rex-h7EFVeN9XKgSWOC6pTw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Matt W. Benjamin" <matt@linuxbox.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@ceph.com" <ceph-users@ceph.com>, Mark Nelson <mark.nelson@inktank.com>
+To: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>
+Cc: ceph-devel@vger.kernel.org, ceph-users@ceph.com, Mark Nelson <mark.nelson@inktank.com>
 
-2014-05-01 0:20 GMT+02:00 Matt W. Benjamin <matt@linuxbox.com>:
-> Hi,
->
-> Sure, that's planned for integration in Giant (see Blueprints).
+Hi,
 
-Great. Any ETA? Firefly was planned for February :)
+I should have been careful.  Our efforts are aimed at Giant.  We're
+serious about meeting delivery targets.  There's lots of shakedown, and
+of course further integration work, still to go.
+
+Regards,
+
+Matt
+
+----- "Gandalf Corvotempesta" <gandalf.corvotempesta@gmail.com> wrote:
+
+> 2014-05-01 0:20 GMT+02:00 Matt W. Benjamin <matt@linuxbox.com>:
+> > Hi,
+> >
+> > Sure, that's planned for integration in Giant (see Blueprints).
+> 
+> Great. Any ETA? Firefly was planned for February :)
+
+-- 
+Matt Benjamin
+The Linux Box
+206 South Fifth Ave. Suite 150
+Ann Arbor, MI  48104
+
+http://linuxbox.com
+
+tel.  734-761-4689 
+fax.  734-769-8938 
+cel.  734-216-5309 
