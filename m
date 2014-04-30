@@ -1,46 +1,90 @@
-From: Ketor D <d.ketor@gmail.com>
-Subject: Re: [ceph-users] Red Hat to acquire Inktank
-Date: Thu, 1 May 2014 00:46:16 +0800
-Message-ID: <CAM9_UU-gEie01T+T1dnebcpdZcbPcBA-kOcVKw=fO9jbmynB6w@mail.gmail.com>
-References: <alpine.DEB.2.00.1404300514590.14568@cobra.newdream.net> <CAC96waFOcyVMcZ08KX69oEfqP7m3hSH0gZTF14KYmNst5qfjrw@mail.gmail.com>
+From: Mike Hanby <mhanby@uab.edu>
+Subject: Re: Red Hat to acquire Inktank
+Date: Wed, 30 Apr 2014 17:05:18 +0000
+Message-ID: <612799DD-DDD3-4380-B9D7-337E5A0422F9@uab.edu>
+References: <alpine.DEB.2.00.1404300514590.14568@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f173.google.com ([209.85.214.173]:32839 "EHLO
-	mail-ob0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933593AbaD3Qqr (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Apr 2014 12:46:47 -0400
-Received: by mail-ob0-f173.google.com with SMTP id wn1so2317664obc.32
-        for <ceph-devel@vger.kernel.org>; Wed, 30 Apr 2014 09:46:46 -0700 (PDT)
-In-Reply-To: <CAC96waFOcyVMcZ08KX69oEfqP7m3hSH0gZTF14KYmNst5qfjrw@mail.gmail.com>
+Received: from uabexch2.ad.uab.edu ([138.26.5.131]:10441 "EHLO
+	uabexch2.ad.uab.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752084AbaD3RFU convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Apr 2014 13:05:20 -0400
+In-Reply-To: <alpine.DEB.2.00.1404300514590.14568@cobra.newdream.net>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: pejotes@gmail.com
-Cc: Sage Weil <sage@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>, ceph-users@ceph.com
+To: Sage Weil <sage@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@ceph.com" <ceph-users@ceph.com>
 
-Congratulation!
+Congrats, any possible conflict with RedHat's earlier acquisition of GlusterFS?
 
-On Thu, May 1, 2014 at 12:07 AM, Pawel Stefanski <pejotes@gmail.com> wrote:
-> On Wed, Apr 30, 2014 at 2:18 PM, Sage Weil <sage@inktank.com> wrote:
->> Today we are announcing some very big news: Red Hat is acquiring Inktank.
->> We are very excited about what this means for Ceph, the community, the
->> team, our partners, and our customers. Ceph has come a long way in the ten
->> years since the first line of code has been written, particularly over the
->> last two years that Inktank has been focused on its development. The fifty
->> members of the Inktank team, our partners, and the hundreds of other
->> contributors have done amazing work in bringing us to where we are today.
->>
-> [...]
->
-> Hello!!!
->
-> Congratulations!!!! Glad to hear that RH will continue develop as a
-> OSS and even open source Calamari!
-> I also admire RH work on KVM and Linux kernel, so I'm very excited on this news!
->
-> best regards!
-> --
-> Pawel
+> On Apr 30, 2014, at 7:18, "Sage Weil" <sage@inktank.com> wrote:
+> 
+> Today we are announcing some very big news: Red Hat is acquiring Inktank. 
+> We are very excited about what this means for Ceph, the community, the 
+> team, our partners, and our customers. Ceph has come a long way in the ten 
+> years since the first line of code has been written, particularly over the 
+> last two years that Inktank has been focused on its development. The fifty 
+> members of the Inktank team, our partners, and the hundreds of other 
+> contributors have done amazing work in bringing us to where we are today.
+> 
+> We believe that, as part of Red Hat, the Inktank team will be able to 
+> build a better quality Ceph storage platform that will benefit the entire 
+> ecosystem. Red Hat brings a broad base of expertise in building and 
+> delivering hardened software stacks as well as a wealth of resources that 
+> will help Ceph become the transformative and ubiquitous storage platform 
+> that we always believed it could be.
+> 
+> For existing Inktank customers, this is going to mean turning a reliable 
+> and robust storage system into something that delivers even more value. In 
+> particular, joining forces with the Red Hat team will improve our ability 
+> to address problems at all layers of the storage stack, including in the 
+> kernel. We naturally recognize that many customers and users have built 
+> platforms based on other Linux distributions. We will continue to support 
+> these installations while we determine how to provide the best customer 
+> experience moving forward and how the next iteration of the enterprise 
+> Ceph product will be structured. In the meantime, our team remains 
+> committed to keeping Ceph an open, multiplatform project that works in any 
+> environment where it makes sense, including other Linux distributions and 
+> non-Linux operating systems.
+> 
+> Red Hat is one of only a handful of companies that I trust to steward the 
+> Ceph project. When we started Inktank two years ago, our goal was to build 
+> the business by making Ceph successful as a broad-based, collaborative 
+> open source project with a vibrant user, developer, and commercial 
+> community. Red Hat shares this vision. They are passionate about open 
+> source, and have demonstrated that they are strong and fair stewards with 
+> other critical projects (like KVM). Red Hat intends to administer the Ceph 
+> trademark in a manner that protects the ecosystem as a whole and creates a 
+> level playing field where everyone is held to the same standards of use. 
+> Similarly, policies like "upstream first" ensure that bug fixes and 
+> improvements that go into Ceph-derived products are always shared with the 
+> community to streamline development and benefit all members of the 
+> ecosystem.
+> 
+> One important change that will take place involves Inktank's product 
+> strategy, in which some add-on software we have developed is proprietary. 
+> In contrast, Red Hat favors a pure open source model. That means that 
+> Calamari, the monitoring and diagnostics tool that Inktank has developed 
+> as part of the Inktank Ceph Enterprise product, will soon be open sourced.
+> 
+> This is a big step forward for the Ceph community. Very little will change 
+> on day one as it will take some time to integrate the Inktank business and 
+> for any significant changes to happen with our engineering activities. 
+> However, we are very excited about what is coming next for Ceph and are 
+> looking forward to this new chapter.
+> 
+> I'd like to thank everyone who has helped Ceph get to where we are today: 
+> the amazing research group at UCSC where it began, DreamHost for 
+> supporting us for so many years, the incredible Inktank team, and the many 
+> contributors and users that have helped shape the system. We continue to 
+> believe that robust, scalable, and completely open storage platforms like 
+> Ceph will transform a storage industry that is still dominated by 
+> proprietary systems. Let's make it happen!
+> 
+> sage
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
