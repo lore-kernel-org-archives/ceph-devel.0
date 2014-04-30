@@ -1,103 +1,97 @@
-From: Alexandre DERUMIER <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
-Subject: Re: Red Hat to acquire Inktank
-Date: Wed, 30 Apr 2014 15:01:19 +0200 (CEST)
-Message-ID: <93bdc349-7904-4eb4-a34c-e0ca7abfbcc6@mailpro>
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: Re: [ceph-users] Red Hat to acquire Inktank
+Date: Wed, 30 Apr 2014 21:27:40 +0800
+Message-ID: <CACJqLybsq1Q3YRjGOPnqRK+RsvPQnHO8b9Ft096G_P_4Yem-Tg@mail.gmail.com>
 References: <alpine.DEB.2.00.1404300514590.14568@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.00.1404300514590.14568-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-we0-f181.google.com ([74.125.82.181]:49531 "EHLO
+	mail-we0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751602AbaD3N1l (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Apr 2014 09:27:41 -0400
+Received: by mail-we0-f181.google.com with SMTP id q58so1692320wes.12
+        for <ceph-devel@vger.kernel.org>; Wed, 30 Apr 2014 06:27:40 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.00.1404300514590.14568@cobra.newdream.net>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, ceph-users@ceph.com
 
-VGhpcyBpcyBhIHZlcnkgZ29vZCBuZXdzLCBjb25ncmF0dWxhdGlvbnMgIQoKKGRvIHlvdSBrbm93
-biBpZiBDZXBoIEVudGVycHJpc2Ugc3Vic2NyaXB0aW9uIHByaWNlIHdpbGwgcmVtYWluIHRoZSBz
-YW1lID8KIEknbSBsb29raW5nIHRvIHRha2Ugc3VwcG9ydCBuZXh0IHllYXIpCgotLS0tLSBNYWls
-IG9yaWdpbmFsIC0tLS0tIAoKRGU6ICJTYWdlIFdlaWwiIDxzYWdlQGlua3RhbmsuY29tPiAKw4A6
-IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnLCBjZXBoLXVzZXJzQGNlcGguY29tIApFbnZvecOp
-OiBNZXJjcmVkaSAzMCBBdnJpbCAyMDE0IDE0OjE4OjQ4IApPYmpldDogUmVkIEhhdCB0byBhY3F1
-aXJlIElua3RhbmsgCgpUb2RheSB3ZSBhcmUgYW5ub3VuY2luZyBzb21lIHZlcnkgYmlnIG5ld3M6
-IFJlZCBIYXQgaXMgYWNxdWlyaW5nIElua3RhbmsuIApXZSBhcmUgdmVyeSBleGNpdGVkIGFib3V0
-IHdoYXQgdGhpcyBtZWFucyBmb3IgQ2VwaCwgdGhlIGNvbW11bml0eSwgdGhlIAp0ZWFtLCBvdXIg
-cGFydG5lcnMsIGFuZCBvdXIgY3VzdG9tZXJzLiBDZXBoIGhhcyBjb21lIGEgbG9uZyB3YXkgaW4g
-dGhlIHRlbiAKeWVhcnMgc2luY2UgdGhlIGZpcnN0IGxpbmUgb2YgY29kZSBoYXMgYmVlbiB3cml0
-dGVuLCBwYXJ0aWN1bGFybHkgb3ZlciB0aGUgCmxhc3QgdHdvIHllYXJzIHRoYXQgSW5rdGFuayBo
-YXMgYmVlbiBmb2N1c2VkIG9uIGl0cyBkZXZlbG9wbWVudC4gVGhlIGZpZnR5IAptZW1iZXJzIG9m
-IHRoZSBJbmt0YW5rIHRlYW0sIG91ciBwYXJ0bmVycywgYW5kIHRoZSBodW5kcmVkcyBvZiBvdGhl
-ciAKY29udHJpYnV0b3JzIGhhdmUgZG9uZSBhbWF6aW5nIHdvcmsgaW4gYnJpbmdpbmcgdXMgdG8g
-d2hlcmUgd2UgYXJlIHRvZGF5LiAKCldlIGJlbGlldmUgdGhhdCwgYXMgcGFydCBvZiBSZWQgSGF0
-LCB0aGUgSW5rdGFuayB0ZWFtIHdpbGwgYmUgYWJsZSB0byAKYnVpbGQgYSBiZXR0ZXIgcXVhbGl0
-eSBDZXBoIHN0b3JhZ2UgcGxhdGZvcm0gdGhhdCB3aWxsIGJlbmVmaXQgdGhlIGVudGlyZSAKZWNv
-c3lzdGVtLiBSZWQgSGF0IGJyaW5ncyBhIGJyb2FkIGJhc2Ugb2YgZXhwZXJ0aXNlIGluIGJ1aWxk
-aW5nIGFuZCAKZGVsaXZlcmluZyBoYXJkZW5lZCBzb2Z0d2FyZSBzdGFja3MgYXMgd2VsbCBhcyBh
-IHdlYWx0aCBvZiByZXNvdXJjZXMgdGhhdCAKd2lsbCBoZWxwIENlcGggYmVjb21lIHRoZSB0cmFu
-c2Zvcm1hdGl2ZSBhbmQgdWJpcXVpdG91cyBzdG9yYWdlIHBsYXRmb3JtIAp0aGF0IHdlIGFsd2F5
-cyBiZWxpZXZlZCBpdCBjb3VsZCBiZS4gCgpGb3IgZXhpc3RpbmcgSW5rdGFuayBjdXN0b21lcnMs
-IHRoaXMgaXMgZ29pbmcgdG8gbWVhbiB0dXJuaW5nIGEgcmVsaWFibGUgCmFuZCByb2J1c3Qgc3Rv
-cmFnZSBzeXN0ZW0gaW50byBzb21ldGhpbmcgdGhhdCBkZWxpdmVycyBldmVuIG1vcmUgdmFsdWUu
-IEluIApwYXJ0aWN1bGFyLCBqb2luaW5nIGZvcmNlcyB3aXRoIHRoZSBSZWQgSGF0IHRlYW0gd2ls
-bCBpbXByb3ZlIG91ciBhYmlsaXR5IAp0byBhZGRyZXNzIHByb2JsZW1zIGF0IGFsbCBsYXllcnMg
-b2YgdGhlIHN0b3JhZ2Ugc3RhY2ssIGluY2x1ZGluZyBpbiB0aGUgCmtlcm5lbC4gV2UgbmF0dXJh
-bGx5IHJlY29nbml6ZSB0aGF0IG1hbnkgY3VzdG9tZXJzIGFuZCB1c2VycyBoYXZlIGJ1aWx0IApw
-bGF0Zm9ybXMgYmFzZWQgb24gb3RoZXIgTGludXggZGlzdHJpYnV0aW9ucy4gV2Ugd2lsbCBjb250
-aW51ZSB0byBzdXBwb3J0IAp0aGVzZSBpbnN0YWxsYXRpb25zIHdoaWxlIHdlIGRldGVybWluZSBo
-b3cgdG8gcHJvdmlkZSB0aGUgYmVzdCBjdXN0b21lciAKZXhwZXJpZW5jZSBtb3ZpbmcgZm9yd2Fy
-ZCBhbmQgaG93IHRoZSBuZXh0IGl0ZXJhdGlvbiBvZiB0aGUgZW50ZXJwcmlzZSAKQ2VwaCBwcm9k
-dWN0IHdpbGwgYmUgc3RydWN0dXJlZC4gSW4gdGhlIG1lYW50aW1lLCBvdXIgdGVhbSByZW1haW5z
-IApjb21taXR0ZWQgdG8ga2VlcGluZyBDZXBoIGFuIG9wZW4sIG11bHRpcGxhdGZvcm0gcHJvamVj
-dCB0aGF0IHdvcmtzIGluIGFueSAKZW52aXJvbm1lbnQgd2hlcmUgaXQgbWFrZXMgc2Vuc2UsIGlu
-Y2x1ZGluZyBvdGhlciBMaW51eCBkaXN0cmlidXRpb25zIGFuZCAKbm9uLUxpbnV4IG9wZXJhdGlu
-ZyBzeXN0ZW1zLiAKClJlZCBIYXQgaXMgb25lIG9mIG9ubHkgYSBoYW5kZnVsIG9mIGNvbXBhbmll
-cyB0aGF0IEkgdHJ1c3QgdG8gc3Rld2FyZCB0aGUgCkNlcGggcHJvamVjdC4gV2hlbiB3ZSBzdGFy
-dGVkIElua3RhbmsgdHdvIHllYXJzIGFnbywgb3VyIGdvYWwgd2FzIHRvIGJ1aWxkIAp0aGUgYnVz
-aW5lc3MgYnkgbWFraW5nIENlcGggc3VjY2Vzc2Z1bCBhcyBhIGJyb2FkLWJhc2VkLCBjb2xsYWJv
-cmF0aXZlIApvcGVuIHNvdXJjZSBwcm9qZWN0IHdpdGggYSB2aWJyYW50IHVzZXIsIGRldmVsb3Bl
-ciwgYW5kIGNvbW1lcmNpYWwgCmNvbW11bml0eS4gUmVkIEhhdCBzaGFyZXMgdGhpcyB2aXNpb24u
-IFRoZXkgYXJlIHBhc3Npb25hdGUgYWJvdXQgb3BlbiAKc291cmNlLCBhbmQgaGF2ZSBkZW1vbnN0
-cmF0ZWQgdGhhdCB0aGV5IGFyZSBzdHJvbmcgYW5kIGZhaXIgc3Rld2FyZHMgd2l0aCAKb3RoZXIg
-Y3JpdGljYWwgcHJvamVjdHMgKGxpa2UgS1ZNKS4gUmVkIEhhdCBpbnRlbmRzIHRvIGFkbWluaXN0
-ZXIgdGhlIENlcGggCnRyYWRlbWFyayBpbiBhIG1hbm5lciB0aGF0IHByb3RlY3RzIHRoZSBlY29z
-eXN0ZW0gYXMgYSB3aG9sZSBhbmQgY3JlYXRlcyBhIApsZXZlbCBwbGF5aW5nIGZpZWxkIHdoZXJl
-IGV2ZXJ5b25lIGlzIGhlbGQgdG8gdGhlIHNhbWUgc3RhbmRhcmRzIG9mIHVzZS4gClNpbWlsYXJs
-eSwgcG9saWNpZXMgbGlrZSAidXBzdHJlYW0gZmlyc3QiIGVuc3VyZSB0aGF0IGJ1ZyBmaXhlcyBh
-bmQgCmltcHJvdmVtZW50cyB0aGF0IGdvIGludG8gQ2VwaC1kZXJpdmVkIHByb2R1Y3RzIGFyZSBh
-bHdheXMgc2hhcmVkIHdpdGggdGhlIApjb21tdW5pdHkgdG8gc3RyZWFtbGluZSBkZXZlbG9wbWVu
-dCBhbmQgYmVuZWZpdCBhbGwgbWVtYmVycyBvZiB0aGUgCmVjb3N5c3RlbS4gCgpPbmUgaW1wb3J0
-YW50IGNoYW5nZSB0aGF0IHdpbGwgdGFrZSBwbGFjZSBpbnZvbHZlcyBJbmt0YW5rJ3MgcHJvZHVj
-dCAKc3RyYXRlZ3ksIGluIHdoaWNoIHNvbWUgYWRkLW9uIHNvZnR3YXJlIHdlIGhhdmUgZGV2ZWxv
-cGVkIGlzIHByb3ByaWV0YXJ5LiAKSW4gY29udHJhc3QsIFJlZCBIYXQgZmF2b3JzIGEgcHVyZSBv
-cGVuIHNvdXJjZSBtb2RlbC4gVGhhdCBtZWFucyB0aGF0IApDYWxhbWFyaSwgdGhlIG1vbml0b3Jp
-bmcgYW5kIGRpYWdub3N0aWNzIHRvb2wgdGhhdCBJbmt0YW5rIGhhcyBkZXZlbG9wZWQgCmFzIHBh
-cnQgb2YgdGhlIElua3RhbmsgQ2VwaCBFbnRlcnByaXNlIHByb2R1Y3QsIHdpbGwgc29vbiBiZSBv
-cGVuIHNvdXJjZWQuIAoKVGhpcyBpcyBhIGJpZyBzdGVwIGZvcndhcmQgZm9yIHRoZSBDZXBoIGNv
-bW11bml0eS4gVmVyeSBsaXR0bGUgd2lsbCBjaGFuZ2UgCm9uIGRheSBvbmUgYXMgaXQgd2lsbCB0
-YWtlIHNvbWUgdGltZSB0byBpbnRlZ3JhdGUgdGhlIElua3RhbmsgYnVzaW5lc3MgYW5kIApmb3Ig
-YW55IHNpZ25pZmljYW50IGNoYW5nZXMgdG8gaGFwcGVuIHdpdGggb3VyIGVuZ2luZWVyaW5nIGFj
-dGl2aXRpZXMuIApIb3dldmVyLCB3ZSBhcmUgdmVyeSBleGNpdGVkIGFib3V0IHdoYXQgaXMgY29t
-aW5nIG5leHQgZm9yIENlcGggYW5kIGFyZSAKbG9va2luZyBmb3J3YXJkIHRvIHRoaXMgbmV3IGNo
-YXB0ZXIuIAoKSSdkIGxpa2UgdG8gdGhhbmsgZXZlcnlvbmUgd2hvIGhhcyBoZWxwZWQgQ2VwaCBn
-ZXQgdG8gd2hlcmUgd2UgYXJlIHRvZGF5OiAKdGhlIGFtYXppbmcgcmVzZWFyY2ggZ3JvdXAgYXQg
-VUNTQyB3aGVyZSBpdCBiZWdhbiwgRHJlYW1Ib3N0IGZvciAKc3VwcG9ydGluZyB1cyBmb3Igc28g
-bWFueSB5ZWFycywgdGhlIGluY3JlZGlibGUgSW5rdGFuayB0ZWFtLCBhbmQgdGhlIG1hbnkgCmNv
-bnRyaWJ1dG9ycyBhbmQgdXNlcnMgdGhhdCBoYXZlIGhlbHBlZCBzaGFwZSB0aGUgc3lzdGVtLiBX
-ZSBjb250aW51ZSB0byAKYmVsaWV2ZSB0aGF0IHJvYnVzdCwgc2NhbGFibGUsIGFuZCBjb21wbGV0
-ZWx5IG9wZW4gc3RvcmFnZSBwbGF0Zm9ybXMgbGlrZSAKQ2VwaCB3aWxsIHRyYW5zZm9ybSBhIHN0
-b3JhZ2UgaW5kdXN0cnkgdGhhdCBpcyBzdGlsbCBkb21pbmF0ZWQgYnkgCnByb3ByaWV0YXJ5IHN5
-c3RlbXMuIExldCdzIG1ha2UgaXQgaGFwcGVuISAKCnNhZ2UgCi0tIApUbyB1bnN1YnNjcmliZSBm
-cm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4g
-CnRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIApNb3Jl
-IG1ham9yZG9tbyBpbmZvIGF0IGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8u
-aHRtbCAKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2Vw
-aC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlz
-dHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
+Congratulation!
+
+On Wed, Apr 30, 2014 at 8:18 PM, Sage Weil <sage@inktank.com> wrote:
+> Today we are announcing some very big news: Red Hat is acquiring Inktank.
+> We are very excited about what this means for Ceph, the community, the
+> team, our partners, and our customers. Ceph has come a long way in the ten
+> years since the first line of code has been written, particularly over the
+> last two years that Inktank has been focused on its development. The fifty
+> members of the Inktank team, our partners, and the hundreds of other
+> contributors have done amazing work in bringing us to where we are today.
+>
+> We believe that, as part of Red Hat, the Inktank team will be able to
+> build a better quality Ceph storage platform that will benefit the entire
+> ecosystem. Red Hat brings a broad base of expertise in building and
+> delivering hardened software stacks as well as a wealth of resources that
+> will help Ceph become the transformative and ubiquitous storage platform
+> that we always believed it could be.
+>
+> For existing Inktank customers, this is going to mean turning a reliable
+> and robust storage system into something that delivers even more value. In
+> particular, joining forces with the Red Hat team will improve our ability
+> to address problems at all layers of the storage stack, including in the
+> kernel. We naturally recognize that many customers and users have built
+> platforms based on other Linux distributions. We will continue to support
+> these installations while we determine how to provide the best customer
+> experience moving forward and how the next iteration of the enterprise
+> Ceph product will be structured. In the meantime, our team remains
+> committed to keeping Ceph an open, multiplatform project that works in any
+> environment where it makes sense, including other Linux distributions and
+> non-Linux operating systems.
+>
+> Red Hat is one of only a handful of companies that I trust to steward the
+> Ceph project. When we started Inktank two years ago, our goal was to build
+> the business by making Ceph successful as a broad-based, collaborative
+> open source project with a vibrant user, developer, and commercial
+> community. Red Hat shares this vision. They are passionate about open
+> source, and have demonstrated that they are strong and fair stewards with
+> other critical projects (like KVM). Red Hat intends to administer the Ceph
+> trademark in a manner that protects the ecosystem as a whole and creates a
+> level playing field where everyone is held to the same standards of use.
+> Similarly, policies like "upstream first" ensure that bug fixes and
+> improvements that go into Ceph-derived products are always shared with the
+> community to streamline development and benefit all members of the
+> ecosystem.
+>
+> One important change that will take place involves Inktank's product
+> strategy, in which some add-on software we have developed is proprietary.
+> In contrast, Red Hat favors a pure open source model. That means that
+> Calamari, the monitoring and diagnostics tool that Inktank has developed
+> as part of the Inktank Ceph Enterprise product, will soon be open sourced.
+>
+> This is a big step forward for the Ceph community. Very little will change
+> on day one as it will take some time to integrate the Inktank business and
+> for any significant changes to happen with our engineering activities.
+> However, we are very excited about what is coming next for Ceph and are
+> looking forward to this new chapter.
+>
+> I'd like to thank everyone who has helped Ceph get to where we are today:
+> the amazing research group at UCSC where it began, DreamHost for
+> supporting us for so many years, the incredible Inktank team, and the many
+> contributors and users that have helped shape the system. We continue to
+> believe that robust, scalable, and completely open storage platforms like
+> Ceph will transform a storage industry that is still dominated by
+> proprietary systems. Let's make it happen!
+>
+> sage
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+
+
+-- 
+Best Regards,
+
+Wheat
