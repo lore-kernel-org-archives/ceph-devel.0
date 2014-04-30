@@ -1,91 +1,64 @@
-From: Mike Hanby <mhanby@uab.edu>
-Subject: Re: Red Hat to acquire Inktank
-Date: Wed, 30 Apr 2014 17:05:18 +0000
-Message-ID: <612799DD-DDD3-4380-B9D7-337E5A0422F9@uab.edu>
-References: <alpine.DEB.2.00.1404300514590.14568@cobra.newdream.net>
+From: Wido den Hollander <wido@42on.com>
+Subject: Re: Fwd: Kernel-client crash when adding OSDs
+Date: Wed, 30 Apr 2014 20:10:37 +0200
+Message-ID: <53613C9D.4090604@42on.com>
+References: <CAPZO0-PHskHZD+ToWxC6tuor3wN5=-dDhdv3Q-ZfjzBx1uyGmQ@mail.gmail.com> <CAPZO0-OGSB==YAPejRPYX_PEAWTADKcrvj1j_JbLnnkSPKP8og@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from uabexch2.ad.uab.edu ([138.26.5.131]:10441 "EHLO
-	uabexch2.ad.uab.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752084AbaD3RFU convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Apr 2014 13:05:20 -0400
-In-Reply-To: <alpine.DEB.2.00.1404300514590.14568@cobra.newdream.net>
-Content-Language: en-US
+Received: from websrv.42on.com ([31.25.102.167]:59453 "EHLO websrv.42on.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752159AbaD3SKk (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 30 Apr 2014 14:10:40 -0400
+In-Reply-To: <CAPZO0-OGSB==YAPejRPYX_PEAWTADKcrvj1j_JbLnnkSPKP8og@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@ceph.com" <ceph-users@ceph.com>
+To: Thorwald Lundqvist <thorwald@jumpstarter.io>, ceph-devel@vger.kernel.org
 
-Congrats, any possible conflict with RedHat's earlier acquisition of GlusterFS?
+On 04/30/2014 04:16 PM, Thorwald Lundqvist wrote:
+> Hi!
+>
+> A few days ago I added a bunch of new OSDs to hour production servers,
+> we have 3 hosts that maps and unmaps hundreds of RBD devices every
+> day. with aprox 100 RBD devs mapped at each host at any given time.
+>
+> Adding OSDs is usually quite smooth if you do it the right way. I
+> usually follow the Manual adding/remove of osd as explained in the
+> documentation. Except when it comes to the crush add, i prefer
+> decompiling and compiling my own crush map.
+ >
+> So I preceded as usuall, prepared the OSD disks, keyring and so on,
+> and then I started up 4 new ceph-osd (osd.{9,10,11,12}) on the new OSD
+> host. BAM; a host that had a bunch of RBD devs mapped crashed and
+> rebooted with this in the log: http://pastebin.com/YKJSdWLv
+>
 
-> On Apr 30, 2014, at 7:18, "Sage Weil" <sage@inktank.com> wrote:
-> 
-> Today we are announcing some very big news: Red Hat is acquiring Inktank. 
-> We are very excited about what this means for Ceph, the community, the 
-> team, our partners, and our customers. Ceph has come a long way in the ten 
-> years since the first line of code has been written, particularly over the 
-> last two years that Inktank has been focused on its development. The fifty 
-> members of the Inktank team, our partners, and the hundreds of other 
-> contributors have done amazing work in bringing us to where we are today.
-> 
-> We believe that, as part of Red Hat, the Inktank team will be able to 
-> build a better quality Ceph storage platform that will benefit the entire 
-> ecosystem. Red Hat brings a broad base of expertise in building and 
-> delivering hardened software stacks as well as a wealth of resources that 
-> will help Ceph become the transformative and ubiquitous storage platform 
-> that we always believed it could be.
-> 
-> For existing Inktank customers, this is going to mean turning a reliable 
-> and robust storage system into something that delivers even more value. In 
-> particular, joining forces with the Red Hat team will improve our ability 
-> to address problems at all layers of the storage stack, including in the 
-> kernel. We naturally recognize that many customers and users have built 
-> platforms based on other Linux distributions. We will continue to support 
-> these installations while we determine how to provide the best customer 
-> experience moving forward and how the next iteration of the enterprise 
-> Ceph product will be structured. In the meantime, our team remains 
-> committed to keeping Ceph an open, multiplatform project that works in any 
-> environment where it makes sense, including other Linux distributions and 
-> non-Linux operating systems.
-> 
-> Red Hat is one of only a handful of companies that I trust to steward the 
-> Ceph project. When we started Inktank two years ago, our goal was to build 
-> the business by making Ceph successful as a broad-based, collaborative 
-> open source project with a vibrant user, developer, and commercial 
-> community. Red Hat shares this vision. They are passionate about open 
-> source, and have demonstrated that they are strong and fair stewards with 
-> other critical projects (like KVM). Red Hat intends to administer the Ceph 
-> trademark in a manner that protects the ecosystem as a whole and creates a 
-> level playing field where everyone is held to the same standards of use. 
-> Similarly, policies like "upstream first" ensure that bug fixes and 
-> improvements that go into Ceph-derived products are always shared with the 
-> community to streamline development and benefit all members of the 
-> ecosystem.
-> 
-> One important change that will take place involves Inktank's product 
-> strategy, in which some add-on software we have developed is proprietary. 
-> In contrast, Red Hat favors a pure open source model. That means that 
-> Calamari, the monitoring and diagnostics tool that Inktank has developed 
-> as part of the Inktank Ceph Enterprise product, will soon be open sourced.
-> 
-> This is a big step forward for the Ceph community. Very little will change 
-> on day one as it will take some time to integrate the Inktank business and 
-> for any significant changes to happen with our engineering activities. 
-> However, we are very excited about what is coming next for Ceph and are 
-> looking forward to this new chapter.
-> 
-> I'd like to thank everyone who has helped Ceph get to where we are today: 
-> the amazing research group at UCSC where it began, DreamHost for 
-> supporting us for so many years, the incredible Inktank team, and the many 
-> contributors and users that have helped shape the system. We continue to 
-> believe that robust, scalable, and completely open storage platforms like 
-> Ceph will transform a storage industry that is still dominated by 
-> proprietary systems. Let's make it happen!
-> 
-> sage
+That procedure seems right, I've done that multiple times and it all 
+worked fine. That was with librbd and RGW though, so I'm not sure if 
+this was a kernel issue.
+
+> I realise that this is not much to go on since there's no stack trace
+> or anything, but if anyone can help me reproduce this, I'd be
+> grateful. And if anyone had the same issue would really like to hear
+> from them too.
+>
+> I'm running Linux 3.14.1 and ceph 0.72.2.
+>
+> Thank you for your time,
+> Thorwald Lundqvist.
+> Jumpstarter AB
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+
+
+-- 
+Wido den Hollander
+42on B.V.
+Ceph trainer and consultant
+
+Phone: +31 (0)20 700 9902
+Skype: contact42on
