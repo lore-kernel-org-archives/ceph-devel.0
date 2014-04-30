@@ -1,27 +1,13 @@
-From: "Yan, Zheng" <ukernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: Ceph mds laggy and failed assert in function
-	replay mds/journal.cc
-Date: Wed, 30 Apr 2014 23:00:59 +0800
-Message-ID: <CAAM7YAkxMsEA=2Y5OOvqendeud5E_RWqh045Bh-MB=tiBpjUAQ@mail.gmail.com>
-References: <20DBB415DF55354C8FC7AF12F4AE7700132C91@MBX02-TPM.mimos.local>
-	<CAPYLRzj2WdT4dGzh+LJ7fNwT4kiSg3ZHoM0ZpdyWG_uat6Qz3w@mail.gmail.com>
-	<CAEDpR-sMb4A3f60DDFewb9Bfu3XbeDP1gcSkSc6iJwCZLOUBxQ@mail.gmail.com>
-	<CAAM7YAnQBwj=KSSfATeepbWyhOMAVwfoiC2AvkCEZrdPwkY2Ug@mail.gmail.com>
-	<CAEDpR-vBVOqPYnMW=VxnAcPygJBKOvaQaWSrCw3XP9aKQi1MRA@mail.gmail.com>
-	<CAAM7YAn5G-sEMOkZY+D4mOSaXbZb6NEx4A11DbRUhdMJfmC_fQ@mail.gmail.com>
-	<CAEDpR-vPCAncZ8mDWopuhjC9PmBsxnRMVBDCXCnHEsvSUZSOuQ@mail.gmail.com>
-	<CAAM7YAn3499ok-c2=MYfvYqqwEjP3JRj8TXjsSrqnSfttAVgog@mail.gmail.com>
-	<E0E280CCE0E1A44898C992A9190D929A5ABC15@MBX02-TPM.mimos.local>
-	<CAAM7YAmUpvrNP1f8zbuaexWqQK6st+yd38-JUOyuUra2ZqgzLA@mail.gmail.com>
-	<E0E280CCE0E1A44898C992A9190D929A5ABCAF@MBX02-TPM.mimos.local>
-	<20DBB415DF55354C8FC7AF12F4AE77001330FC@MBX02-TPM.mimos.local>
-	<CAAM7YAnu3heq6tSp8ceYD5Tk0X9tNpHa2-CDxO8O81uFA1yydw@mail.gmail.com>
-	<20DBB415DF55354C8FC7AF12F4AE77001332D7@MBX02-TPM.mimos.local>
+From: Pawel Stefanski <pejotes-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: Red Hat to acquire Inktank
+Date: Wed, 30 Apr 2014 18:05:54 +0200
+Message-ID: <CAC96waF4tkfgVbQbDx5GEqDraiu0aJ-ScVLycP14t=ktPt180A@mail.gmail.com>
+References: <alpine.DEB.2.00.1404300514590.14568@cobra.newdream.net>
+Reply-To: pejotes-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/mixed; boundary="===============0922459729=="
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <20DBB415DF55354C8FC7AF12F4AE77001332D7-SRU80uCWNiw7svLT7d/M5I2P0GrZ+RbP@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.00.1404300514590.14568-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
@@ -31,254 +17,228 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Mohd Bazli Ab Karim <bazli.abkarim-YhiXQ1Q1pWA@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Wong Ming Tat <mt.wong-YhiXQ1Q1pWA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-On Wed, Apr 30, 2014 at 3:07 PM, Mohd Bazli Ab Karim
-<bazli.abkarim-YhiXQ1Q1pWA@public.gmane.org> wrote:
-> Hi Zheng,
->
-> Sorry for the late reply. For sure, I will try this again after we completely verifying all content in the file system. Hopefully all will be good.
-> And, please confirm this, I will set debug_mds=10 for the ceph-mds, and do you want me to send the ceph-mon log too?
+--===============0922459729==
+Content-Type: multipart/alternative; boundary=e89a8f3ba93b29a8c204f844b96c
 
-yes please.
+--e89a8f3ba93b29a8c204f844b96c
+Content-Type: text/plain; charset=UTF-8
 
->
-> BTW, how to confirm that the mds has passed the beacon to mon or not?
->
-read monitor's log
+Hello!!!
 
-Regards
-Yan, Zheng
+Congratulations!!!! Glad to hear that RH will continue develop as a OSS and
+even open source Calamari!
+I also admire RH work on KVM and Linux kernel, so I'm very excited on this
+news!
+
+best regards!
+-- 
+pawel
 
 
-> Thank you so much Zheng!
+On Wed, Apr 30, 2014 at 2:18 PM, Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org> wrote:
+
+> Today we are announcing some very big news: Red Hat is acquiring Inktank.
+> We are very excited about what this means for Ceph, the community, the
+> team, our partners, and our customers. Ceph has come a long way in the ten
+> years since the first line of code has been written, particularly over the
+> last two years that Inktank has been focused on its development. The fifty
+> members of the Inktank team, our partners, and the hundreds of other
+> contributors have done amazing work in bringing us to where we are today.
 >
-> Bazli
+> We believe that, as part of Red Hat, the Inktank team will be able to
+> build a better quality Ceph storage platform that will benefit the entire
+> ecosystem. Red Hat brings a broad base of expertise in building and
+> delivering hardened software stacks as well as a wealth of resources that
+> will help Ceph become the transformative and ubiquitous storage platform
+> that we always believed it could be.
 >
-> -----Original Message-----
-> From: Yan, Zheng [mailto:ukernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org]
-> Sent: Tuesday, April 29, 2014 10:13 PM
-> To: Mohd Bazli Ab Karim
-> Cc: Luke Jing Yuan; Wong Ming Tat
-> Subject: Re: [ceph-users] Ceph mds laggy and failed assert in function replay mds/journal.cc
+> For existing Inktank customers, this is going to mean turning a reliable
+> and robust storage system into something that delivers even more value. In
+> particular, joining forces with the Red Hat team will improve our ability
+> to address problems at all layers of the storage stack, including in the
+> kernel. We naturally recognize that many customers and users have built
+> platforms based on other Linux distributions. We will continue to support
+> these installations while we determine how to provide the best customer
+> experience moving forward and how the next iteration of the enterprise
+> Ceph product will be structured. In the meantime, our team remains
+> committed to keeping Ceph an open, multiplatform project that works in any
+> environment where it makes sense, including other Linux distributions and
+> non-Linux operating systems.
 >
-> On Tue, Apr 29, 2014 at 5:30 PM, Mohd Bazli Ab Karim <bazli.abkarim-YhiXQ1Q1pWA@public.gmane.org> wrote:
->> Hi Zheng,
->>
->> The another issue that Luke mentioned just now was like this.
->> At first, we ran one mds (mon01) with the new compiled ceph-mds. It works fine with only one MDS running at that time. However, when we ran two more MDSes mon02 mon03 with the new compiled ceph-mds, it started acting weird.
->> Mon01 which was became active at first, will have the error and started to respawning. Once respawning happened, mon03 will take over from mon01 as master mds, and replay happened again.
->> Again, when mon03 became active, it will have the same error like below, and respawning again. So, it seems to me that replay will continue to happen from one mds to another when they got respawned.
->>
->> 2014-04-29 15:36:24.917798 7f5c36476700  1 mds.0.server
->> reconnect_clients -- 1 sessions
->> 2014-04-29 15:36:24.919620 7f5c2fb3e700  0 -- 10.4.118.23:6800/26401
->> >> 10.1.64.181:0/1558263174 pipe(0x2924f5780 sd=41 :6800 s=0 pgs=0
->> cs=0 l=0 c=0x37056e0).accept peer addr is really
->> 10.1.64.181:0/1558263174 (socket is 10.1.64.181:57649/0)
->> 2014-04-29 15:36:24.921661 7f5c36476700  0 log [DBG] : reconnect by
->> client.884169 10.1.64.181:0/1558263174 after 0.003774
->> 2014-04-29 15:36:24.921786 7f5c36476700  1 mds.0.12858 reconnect_done
->> 2014-04-29 15:36:25.109391 7f5c36476700  1 mds.0.12858 handle_mds_map
->> i am now mds.0.12858
->> 2014-04-29 15:36:25.109413 7f5c36476700  1 mds.0.12858 handle_mds_map
->> state change up:reconnect --> up:rejoin
->> 2014-04-29 15:36:25.109417 7f5c36476700  1 mds.0.12858 rejoin_start
->> 2014-04-29 15:36:26.918067 7f5c36476700  1 mds.0.12858
->> rejoin_joint_start
->> 2014-04-29 15:36:33.520985 7f5c36476700  1 mds.0.12858 rejoin_done
->> 2014-04-29 15:36:36.252925 7f5c36476700  1 mds.0.12858 handle_mds_map
->> i am now mds.0.12858
->> 2014-04-29 15:36:36.252927 7f5c36476700  1 mds.0.12858 handle_mds_map
->> state change up:rejoin --> up:active
->> 2014-04-29 15:36:36.252932 7f5c36476700  1 mds.0.12858 recovery_done -- successful recovery!
->> 2014-04-29 15:36:36.745833 7f5c36476700  1 mds.0.12858 active_start
->> 2014-04-29 15:36:36.987854 7f5c36476700  1 mds.0.12858 cluster recovered.
->> 2014-04-29 15:36:40.182604 7f5c36476700  0 mds.0.12858
->> handle_mds_beacon no longer laggy
->> 2014-04-29 15:36:57.947441 7f5c2fb3e700  0 -- 10.4.118.23:6800/26401
->> >> 10.1.64.181:0/1558263174 pipe(0x2924f5780 sd=41 :6800 s=2 pgs=156
->> cs=1 l=0 c=0x37056e0).fault with nothing to send, going to standby
->> 2014-04-29 15:37:10.534593 7f5c36476700  1 mds.-1.-1 handle_mds_map i
->> (10.4.118.23:6800/26401) dne in the mdsmap, respawning myself
->> 2014-04-29 15:37:10.534604 7f5c36476700  1 mds.-1.-1 respawn
->> 2014-04-29 15:37:10.534609 7f5c36476700  1 mds.-1.-1  e: '/usr/bin/ceph-mds'
->> 2014-04-29 15:37:10.534612 7f5c36476700  1 mds.-1.-1  0: '/usr/bin/ceph-mds'
->> 2014-04-29 15:37:10.534616 7f5c36476700  1 mds.-1.-1  1: '--cluster=ceph'
->> 2014-04-29 15:37:10.534619 7f5c36476700  1 mds.-1.-1  2: '-i'
->> 2014-04-29 15:37:10.534621 7f5c36476700  1 mds.-1.-1  3: 'mon03'
->> 2014-04-29 15:37:10.534623 7f5c36476700  1 mds.-1.-1  4: '-f'
->> 2014-04-29 15:37:10.534641 7f5c36476700  1 mds.-1.-1  cwd /
->> 2014-04-29 15:37:12.155458 7f8907c8b780  0 ceph version  (), process
->> ceph-mds, pid 26401
->> 2014-04-29 15:37:12.249780 7f8902d10700  1 mds.-1.0 handle_mds_map
->> standby
->>
->> p/s. we ran ceph-mon and ceph-mds on same servers, (mon01,mon02,mon03)
->>
->> I sent to you two log files, mon01 and mon03 where the scenario of mon03 have state->standby->replay->active->respawned. And also, mon01 which is now running as active as a single MDS at this moment.
->>
+> Red Hat is one of only a handful of companies that I trust to steward the
+> Ceph project. When we started Inktank two years ago, our goal was to build
+> the business by making Ceph successful as a broad-based, collaborative
+> open source project with a vibrant user, developer, and commercial
+> community. Red Hat shares this vision. They are passionate about open
+> source, and have demonstrated that they are strong and fair stewards with
+> other critical projects (like KVM). Red Hat intends to administer the Ceph
+> trademark in a manner that protects the ecosystem as a whole and creates a
+> level playing field where everyone is held to the same standards of use.
+> Similarly, policies like "upstream first" ensure that bug fixes and
+> improvements that go into Ceph-derived products are always shared with the
+> community to streamline development and benefit all members of the
+> ecosystem.
 >
-> After the MDS became ative, it did not send beacon to the monitor. It seems like the MDS was busy doing something else. If this issue still happen, set debug_mds=10 and send the log to me.
+> One important change that will take place involves Inktank's product
+> strategy, in which some add-on software we have developed is proprietary.
+> In contrast, Red Hat favors a pure open source model. That means that
+> Calamari, the monitoring and diagnostics tool that Inktank has developed
+> as part of the Inktank Ceph Enterprise product, will soon be open sourced.
 >
-> Regards
-> Yan, Zheng
+> This is a big step forward for the Ceph community. Very little will change
+> on day one as it will take some time to integrate the Inktank business and
+> for any significant changes to happen with our engineering activities.
+> However, we are very excited about what is coming next for Ceph and are
+> looking forward to this new chapter.
 >
->> Regards,
->> Bazli
->> -----Original Message-----
->> From: Luke Jing Yuan
->> Sent: Tuesday, April 29, 2014 4:46 PM
->> To: Yan, Zheng
->> Cc: Mohd Bazli Ab Karim; Wong Ming Tat
->> Subject: RE: [ceph-users] Ceph mds laggy and failed assert in function
->> replay mds/journal.cc
->>
->> Hi Zheng,
->>
->> Thanks for the information. Actually we encounter another issue, in our original setup, we have 3 MDS running (say mon01, mon02 and mon03), when we do the replay/recovery we did it on mon01. After we completed, we restarted the mds again on mon02 and mon03 (without the mds_wipe_sessions and using the patched binary) but there was when we noticed something else, my colleague Mr. Bazli who started the original thread probably can explain a bit more on the observations made.
->>
->> Regards,
->> Luke
->>
->> -----Original Message-----
->> From: Yan, Zheng [mailto:ukernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org]
->> Sent: Tuesday, 29 April, 2014 4:26 PM
->> To: Luke Jing Yuan
->> Subject: Re: [ceph-users] Ceph mds laggy and failed assert in function
->> replay mds/journal.cc
->>
->> On Tue, Apr 29, 2014 at 3:43 PM, Luke Jing Yuan <jyluke-YhiXQ1Q1pWA@public.gmane.org> wrote:
->>> Hi,
->>>
->>> MDS did finish the replay and working after that but we are wondering should we leave the mds_wipe_sessions in ceph.conf or remove it.
->>>
->>
->> should disable mds_wipe_sessions after mds starts working
->>
->>> Regards,
->>> Luke
->>>
->>> -----Original Message-----
->>> From: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
->>> [mailto:ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org] On Behalf Of Yan, Zheng
->>> Sent: Tuesday, 29 April, 2014 3:36 PM
->>> To: Jingyuan Luke
->>> Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
->>> Subject: Re: [ceph-users] Ceph mds laggy and failed assert in
->>> function replay mds/journal.cc
->>>
->>> On Tue, Apr 29, 2014 at 3:13 PM, Jingyuan Luke <jyluke-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
->>>> Hi,
->>>>
->>>> Assuming we got MDS working back on track, should we still leave the
->>>> mds_wipe_sessions in the ceph.conf or remove it and restart MDS.
->>>> Thanks.
->>>
->>> No.
->>>
->>> It has been several hours. the MDS still does not finish replaying the journal?
->>>
->>> Regards
->>> Yan, Zheng
->>>
->>>
->>>
->>> ________________________________
->>> DISCLAIMER:
->>>
->>>
->>> This e-mail (including any attachments) is for the addressee(s) only and may be confidential, especially as regards personal data. If you are not the intended recipient, please note that any dealing, review, distribution, printing, copying or use of this e-mail is strictly prohibited. If you have received this email in error, please notify the sender immediately and delete the original message (including any attachments).
->>>
->>>
->>> MIMOS Berhad is a research and development institution under the purview of the Malaysian Ministry of Science, Technology and Innovation. Opinions, conclusions and other information in this e-mail that do not relate to the official business of MIMOS Berhad and/or its subsidiaries shall be understood as neither given nor endorsed by MIMOS Berhad and/or its subsidiaries and neither MIMOS Berhad nor its subsidiaries accepts responsibility for the same. All liability arising from or in connection with computer viruses and/or corrupted e-mails is excluded to the fullest extent permitted by law.
->>>
->>> ------------------------------------------------------------------
->>> -
->>> -
->>> DISCLAIMER:
->>>
->>> This e-mail (including any attachments) is for the addressee(s) only
->>> and may contain confidential information. If you are not the intended
->>> recipient, please note that any dealing, review, distribution,
->>> printing, copying or use of this e-mail is strictly prohibited. If
->>> you have received this email in error, please notify the sender
->>> immediately and delete the original message.
->>> MIMOS Berhad is a research and development institution under the
->>> purview of the Malaysian Ministry of Science, Technology and
->>> Innovation. Opinions, conclusions and other information in this e-
->>> mail that do not relate to the official business of MIMOS Berhad
->>> and/or its subsidiaries shall be understood as neither given nor
->>> endorsed by MIMOS Berhad and/or its subsidiaries and neither MIMOS
->>> Berhad nor its subsidiaries accepts responsibility for the same. All
->>> liability arising from or in connection with computer viruses and/or
->>> corrupted e-mails is excluded to the fullest extent permitted by law.
->>>
->>>
->>
->> ________________________________
->> DISCLAIMER:
->>
->>
->> This e-mail (including any attachments) is for the addressee(s) only and may be confidential, especially as regards personal data. If you are not the intended recipient, please note that any dealing, review, distribution, printing, copying or use of this e-mail is strictly prohibited. If you have received this email in error, please notify the sender immediately and delete the original message (including any attachments).
->>
->>
->> MIMOS Berhad is a research and development institution under the purview of the Malaysian Ministry of Science, Technology and Innovation. Opinions, conclusions and other information in this e-mail that do not relate to the official business of MIMOS Berhad and/or its subsidiaries shall be understood as neither given nor endorsed by MIMOS Berhad and/or its subsidiaries and neither MIMOS Berhad nor its subsidiaries accepts responsibility for the same. All liability arising from or in connection with computer viruses and/or corrupted e-mails is excluded to the fullest extent permitted by law.
->>
->>
->> ------------------------------------------------------------------
->> -
->> -
->> DISCLAIMER:
->>
->> This e-mail (including any attachments) is for the addressee(s) only
->> and may contain confidential information. If you are not the intended
->> recipient, please note that any dealing, review, distribution,
->> printing, copying or use of this e-mail is strictly prohibited. If you
->> have received this email in error, please notify the sender
->> immediately and delete the original message.
->> MIMOS Berhad is a research and development institution under the
->> purview of the Malaysian Ministry of Science, Technology and
->> Innovation. Opinions, conclusions and other information in this e-
->> mail that do not relate to the official business of MIMOS Berhad
->> and/or its subsidiaries shall be understood as neither given nor
->> endorsed by MIMOS Berhad and/or its subsidiaries and neither MIMOS
->> Berhad nor its subsidiaries accepts responsibility for the same. All
->> liability arising from or in connection with computer viruses and/or
->> corrupted e-mails is excluded to the fullest extent permitted by law.
->>
+> I'd like to thank everyone who has helped Ceph get to where we are today:
+> the amazing research group at UCSC where it began, DreamHost for
+> supporting us for so many years, the incredible Inktank team, and the many
+> contributors and users that have helped shape the system. We continue to
+> believe that robust, scalable, and completely open storage platforms like
+> Ceph will transform a storage industry that is still dominated by
+> proprietary systems. Let's make it happen!
 >
-> ________________________________
-> DISCLAIMER:
+> sage
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 >
+
+--e89a8f3ba93b29a8c204f844b96c
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr">Hello!!!<div><br></div><div>Congratulations!!!! Glad to he=
+ar that RH will continue develop as a OSS and even open source Calamari!</d=
+iv><div>I also admire RH work on KVM and Linux kernel, so I&#39;m very exci=
+ted on this news!</div>
+<div><br></div><div>best regards!</div><div>--=C2=A0</div><div>pawel</div><=
+/div><div class=3D"gmail_extra"><br><br><div class=3D"gmail_quote">On Wed, =
+Apr 30, 2014 at 2:18 PM, Sage Weil <span dir=3D"ltr">&lt;<a href=3D"mailto:=
+sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org" target=3D"_blank">sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org</a>&gt;</span> wrote:<=
+br>
+<blockquote class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:1p=
+x #ccc solid;padding-left:1ex">Today we are announcing some very big news: =
+Red Hat is acquiring Inktank.<br>
+We are very excited about what this means for Ceph, the community, the<br>
+team, our partners, and our customers. Ceph has come a long way in the ten<=
+br>
+years since the first line of code has been written, particularly over the<=
+br>
+last two years that Inktank has been focused on its development. The fifty<=
+br>
+members of the Inktank team, our partners, and the hundreds of other<br>
+contributors have done amazing work in bringing us to where we are today.<b=
+r>
+<br>
+We believe that, as part of Red Hat, the Inktank team will be able to<br>
+build a better quality Ceph storage platform that will benefit the entire<b=
+r>
+ecosystem. Red Hat brings a broad base of expertise in building and<br>
+delivering hardened software stacks as well as a wealth of resources that<b=
+r>
+will help Ceph become the transformative and ubiquitous storage platform<br=
 >
-> This e-mail (including any attachments) is for the addressee(s) only and may be confidential, especially as regards personal data. If you are not the intended recipient, please note that any dealing, review, distribution, printing, copying or use of this e-mail is strictly prohibited. If you have received this email in error, please notify the sender immediately and delete the original message (including any attachments).
+that we always believed it could be.<br>
+<br>
+For existing Inktank customers, this is going to mean turning a reliable<br=
 >
+and robust storage system into something that delivers even more value. In<=
+br>
+particular, joining forces with the Red Hat team will improve our ability<b=
+r>
+to address problems at all layers of the storage stack, including in the<br=
 >
-> MIMOS Berhad is a research and development institution under the purview of the Malaysian Ministry of Science, Technology and Innovation. Opinions, conclusions and other information in this e-mail that do not relate to the official business of MIMOS Berhad and/or its subsidiaries shall be understood as neither given nor endorsed by MIMOS Berhad and/or its subsidiaries and neither MIMOS Berhad nor its subsidiaries accepts responsibility for the same. All liability arising from or in connection with computer viruses and/or corrupted e-mails is excluded to the fullest extent permitted by law.
+kernel. We naturally recognize that many customers and users have built<br>
+platforms based on other Linux distributions. We will continue to support<b=
+r>
+these installations while we determine how to provide the best customer<br>
+experience moving forward and how the next iteration of the enterprise<br>
+Ceph product will be structured. In the meantime, our team remains<br>
+committed to keeping Ceph an open, multiplatform project that works in any<=
+br>
+environment where it makes sense, including other Linux distributions and<b=
+r>
+non-Linux operating systems.<br>
+<br>
+Red Hat is one of only a handful of companies that I trust to steward the<b=
+r>
+Ceph project. When we started Inktank two years ago, our goal was to build<=
+br>
+the business by making Ceph successful as a broad-based, collaborative<br>
+open source project with a vibrant user, developer, and commercial<br>
+community. Red Hat shares this vision. They are passionate about open<br>
+source, and have demonstrated that they are strong and fair stewards with<b=
+r>
+other critical projects (like KVM). Red Hat intends to administer the Ceph<=
+br>
+trademark in a manner that protects the ecosystem as a whole and creates a<=
+br>
+level playing field where everyone is held to the same standards of use.<br=
 >
-> ------------------------------------------------------------------
-> -
-> -
-> DISCLAIMER:
+Similarly, policies like &quot;upstream first&quot; ensure that bug fixes a=
+nd<br>
+improvements that go into Ceph-derived products are always shared with the<=
+br>
+community to streamline development and benefit all members of the<br>
+ecosystem.<br>
+<br>
+One important change that will take place involves Inktank&#39;s product<br=
 >
-> This e-mail (including any attachments) is for the addressee(s)
-> only and may contain confidential information. If you are not the
-> intended recipient, please note that any dealing, review,
-> distribution, printing, copying or use of this e-mail is strictly
-> prohibited. If you have received this email in error, please notify
-> the sender  immediately and delete the original message.
-> MIMOS Berhad is a research and development institution under
-> the purview of the Malaysian Ministry of Science, Technology and
-> Innovation. Opinions, conclusions and other information in this e-
-> mail that do not relate to the official business of MIMOS Berhad
-> and/or its subsidiaries shall be understood as neither given nor
-> endorsed by MIMOS Berhad and/or its subsidiaries and neither
-> MIMOS Berhad nor its subsidiaries accepts responsibility for the
-> same. All liability arising from or in connection with computer
-> viruses and/or corrupted e-mails is excluded to the fullest extent
-> permitted by law.
+strategy, in which some add-on software we have developed is proprietary.<b=
+r>
+In contrast, Red Hat favors a pure open source model. That means that<br>
+Calamari, the monitoring and diagnostics tool that Inktank has developed<br=
 >
+as part of the Inktank Ceph Enterprise product, will soon be open sourced.<=
+br>
+<br>
+This is a big step forward for the Ceph community. Very little will change<=
+br>
+on day one as it will take some time to integrate the Inktank business and<=
+br>
+for any significant changes to happen with our engineering activities.<br>
+However, we are very excited about what is coming next for Ceph and are<br>
+looking forward to this new chapter.<br>
+<br>
+I&#39;d like to thank everyone who has helped Ceph get to where we are toda=
+y:<br>
+the amazing research group at UCSC where it began, DreamHost for<br>
+supporting us for so many years, the incredible Inktank team, and the many<=
+br>
+contributors and users that have helped shape the system. We continue to<br=
 >
+believe that robust, scalable, and completely open storage platforms like<b=
+r>
+Ceph will transform a storage industry that is still dominated by<br>
+proprietary systems. Let&#39;s make it happen!<br>
+<br>
+sage<br>
+_______________________________________________<br>
+ceph-users mailing list<br>
+<a href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a><=
+br>
+<a href=3D"http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com" target=
+=3D"_blank">http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com</a><br>
+</blockquote></div><br></div>
+
+--e89a8f3ba93b29a8c204f844b96c--
+
+--===============0922459729==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============0922459729==--
