@@ -1,34 +1,56 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: [ceph-users] Red Hat to acquire Inktank
-Date: Wed, 30 Apr 2014 17:52:52 -0500
-Message-ID: <53617EC4.6070503@inktank.com>
-References: <CAJH6TXgrNcHBKTLBDJv5XL6fNTnptMm_ahHuRy1u3B23KvBcWw@mail.gmail.com>	<195926884.116.1398896430783.JavaMail.root@thunderbeast.private.linuxbox.com> <CAJH6TXgvJhNW=QGuJsfSMHs7DW6rex-h7EFVeN9XKgSWOC6pTw@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: What should the Ceph Foundation be about ?
+Date: Thu, 01 May 2014 16:35:00 +0200
+Message-ID: <53625B94.1090309@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="AVjcP29sjApoFwKE3vouCeTwKF2blN65e"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f181.google.com ([209.85.213.181]:40269 "EHLO
-	mail-ig0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759673AbaD3Wwx (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Apr 2014 18:52:53 -0400
-Received: by mail-ig0-f181.google.com with SMTP id h18so2488953igc.2
-        for <ceph-devel@vger.kernel.org>; Wed, 30 Apr 2014 15:52:52 -0700 (PDT)
-In-Reply-To: <CAJH6TXgvJhNW=QGuJsfSMHs7DW6rex-h7EFVeN9XKgSWOC6pTw@mail.gmail.com>
+Received: from smtp.dmail.dachary.org ([91.121.254.229]:60440 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751298AbaEAOfF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 1 May 2014 10:35:05 -0400
+Received: from [10.9.0.6] (unknown [10.0.2.28])
+	by smtp.dmail.dachary.org (Postfix) with ESMTP id CA10C42B2E
+	for <ceph-devel@vger.kernel.org>; Thu,  1 May 2014 16:35:00 +0200 (CEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gandalf Corvotempesta <gandalf.corvotempesta@gmail.com>, "Matt W. Benjamin" <matt@linuxbox.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@ceph.com" <ceph-users@ceph.com>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On 04/30/2014 05:33 PM, Gandalf Corvotempesta wrote:
-> 2014-05-01 0:20 GMT+02:00 Matt W. Benjamin <matt@linuxbox.com>:
->> Hi,
->>
->> Sure, that's planned for integration in Giant (see Blueprints).
->
-> Great. Any ETA? Firefly was planned for February :)
->
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--AVjcP29sjApoFwKE3vouCeTwKF2blN65e
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-At least on the plus side you can download the code whenever you want, 
-even if we decide we want to do more testing/fixing. :D
+Hi Ceph co-developers,
 
-Mark
+I wrote down a few ideas about what I'd like the Ceph Foundation to provi=
+de, from a developer perspective :=20
+
+   https://wiki.ceph.com/Development/Foundation
+
+This is no more than a wishlist, feel free to add whatever you have in mi=
+nd ;-)
+
+Cheers
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+
+
+--AVjcP29sjApoFwKE3vouCeTwKF2blN65e
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlNiW5QACgkQ8dLMyEl6F23ZrwCcC3eM8tpC/affk9Xb1tlYybWy
+qowAn1RyNScFP/bDGc7MgIJaFTS0XfV7
+=SVZV
+-----END PGP SIGNATURE-----
+
+--AVjcP29sjApoFwKE3vouCeTwKF2blN65e--
