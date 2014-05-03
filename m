@@ -1,34 +1,87 @@
-From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: Re: rbd unmap deadlock
-Date: Fri, 2 May 2014 20:52:23 +0400
-Message-ID: <CALFYKtCPUf1gJCHife3xqqcsh4CZ2scQ+P2htDpN9VmecD38fw@mail.gmail.com>
-References: <CABt9es9QGaVKT7KNtnXhrGNSSdhn12Kgn1e2nUSuUys3A-3Ysg@mail.gmail.com>
-	<5363C338.1090506@ieee.org>
-	<CABt9es85qWwoZNwq_-=7NANV8ZejTKbA6jRfE0nxdVhbZd+GMw@mail.gmail.com>
-	<CALFYKtBwUhMv_Lw=WrP9NdhSYYTF3J2sxXGgfdjUTZ-kbJgMEw@mail.gmail.com>
-	<CABt9es8uqPXiL4+9aG_JqhHM9RfUU-jP37j1AsMVL+MLeCZ43Q@mail.gmail.com>
+From: Loic Dachary <loic-cLsNCMjd+0JAfugRpC6u6w@public.gmane.org>
+Subject: Ceph User Committee monthly meeting #2 : executive
+	summary
+Date: Sat, 03 May 2014 11:52:39 +0200
+Message-ID: <5364BC67.2090303@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f171.google.com ([209.85.216.171]:57624 "EHLO
-	mail-qc0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751811AbaEBQwX (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 2 May 2014 12:52:23 -0400
-Received: by mail-qc0-f171.google.com with SMTP id c9so5044257qcz.16
-        for <ceph-devel@vger.kernel.org>; Fri, 02 May 2014 09:52:23 -0700 (PDT)
-In-Reply-To: <CABt9es8uqPXiL4+9aG_JqhHM9RfUU-jP37j1AsMVL+MLeCZ43Q@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Hannes Landeholm <hannes@jumpstarter.io>
-Cc: Alex Elder <elder@ieee.org>, Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: multipart/mixed; boundary="===============1558259869=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Fri, May 2, 2014 at 8:40 PM, Hannes Landeholm <hannes@jumpstarter.io> wrote:
-> FYI: This machine runs both the ceph cluster and the clients.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--===============1558259869==
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="gDATxO9wBOKpClXteaDDqTsdGFO8iWi4c"
 
-I'll file a ticket.  I think I saw something similar sometime ago, at
-least the stacktrace looks familiar, and that was a dev box running
-both servers and kernel client too.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--gDATxO9wBOKpClXteaDDqTsdGFO8iWi4c
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-Thanks,
+Hi Ceph,
 
-                Ilya
+This month Ceph User Committee meeting was about:
+
+    Elections
+    RedHat and Inktank
+    CephFS
+    Meetings
+
+You will find an executive summary at:
+
+   https://wiki.ceph.com/Community/Meetings/Ceph_User_Committee_meeting_2=
+014-05-02
+
+The full log of the IRC conversation is also included to provide more con=
+text when needed. Feel free to edit if you see a mistake.
+
+The next Ceph User Committee meeting is scheduled June 6th, 2014. The det=
+ails and agenda can be found at https://wiki.ceph.com/Community/Meetings
+
+Cheers
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+
+
+
+
+--gDATxO9wBOKpClXteaDDqTsdGFO8iWi4c
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlNkvGcACgkQ8dLMyEl6F23BiQCdFZ7nJHo8CjMszcUC5zQqNHni
+emoAoKhW7q28OqcngddQZmKod2fQ7xld
+=gUyO
+-----END PGP SIGNATURE-----
+
+--gDATxO9wBOKpClXteaDDqTsdGFO8iWi4c--
+
+--===============1558259869==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============1558259869==--
