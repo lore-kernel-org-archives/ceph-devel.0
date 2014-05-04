@@ -1,87 +1,29 @@
-From: Loic Dachary <loic-cLsNCMjd+0JAfugRpC6u6w@public.gmane.org>
-Subject: Ceph User Committee monthly meeting #2 : executive
-	summary
-Date: Sat, 03 May 2014 11:52:39 +0200
-Message-ID: <5364BC67.2090303@dachary.org>
+From: Sage Weil <sage@inktank.com>
+Subject: wip-objecter
+Date: Sat, 3 May 2014 21:00:32 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1405032057260.30728@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============1558259869=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-To: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:50527 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750713AbaEDEAd (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 4 May 2014 00:00:33 -0400
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: yehuda@inktank.com
+Cc: ceph-devel@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---===============1558259869==
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="gDATxO9wBOKpClXteaDDqTsdGFO8iWi4c"
+Hey Yehuda,
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---gDATxO9wBOKpClXteaDDqTsdGFO8iWi4c
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+I merged the objecter branch into master and then reassembled the patch 
+series so that all of the support bits are separate patches and there is 
+just one commit that has all of the actual objecter changes.  See 
+wip-objecter.  Hopefully this will make it easier to work with.
 
-Hi Ceph,
+IIRC the remaining piece, besides general testing/reivew, is op 
+cancellation?  And understanding what is causing Sushma's performance 
+discrepancy...
 
-This month Ceph User Committee meeting was about:
+sage
 
-    Elections
-    RedHat and Inktank
-    CephFS
-    Meetings
-
-You will find an executive summary at:
-
-   https://wiki.ceph.com/Community/Meetings/Ceph_User_Committee_meeting_2=
-014-05-02
-
-The full log of the IRC conversation is also included to provide more con=
-text when needed. Feel free to edit if you see a mistake.
-
-The next Ceph User Committee meeting is scheduled June 6th, 2014. The det=
-ails and agenda can be found at https://wiki.ceph.com/Community/Meetings
-
-Cheers
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-
-
-
-
---gDATxO9wBOKpClXteaDDqTsdGFO8iWi4c
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlNkvGcACgkQ8dLMyEl6F23BiQCdFZ7nJHo8CjMszcUC5zQqNHni
-emoAoKhW7q28OqcngddQZmKod2fQ7xld
-=gUyO
------END PGP SIGNATURE-----
-
---gDATxO9wBOKpClXteaDDqTsdGFO8iWi4c--
-
---===============1558259869==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============1558259869==--
