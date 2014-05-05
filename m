@@ -1,86 +1,55 @@
-From: John Spray <john.spray@inktank.com>
+From: Jeff Darcy <jdarcy@redhat.com>
 Subject: Re: RADOS translator for GlusterFS
-Date: Mon, 5 May 2014 17:43:38 +0100
-Message-ID: <CAGd4Wr2ez_Sb6TCdtTzxEUx6Jrb5dfWuFEWQkmYHeWmqJVT0rg@mail.gmail.com>
-References: <980181538.654650.1399300829103.JavaMail.zimbra@redhat.com>
-	<355696287.706122.1399303290204.JavaMail.zimbra@redhat.com>
+Date: Mon, 5 May 2014 14:07:44 -0400 (EDT)
+Message-ID: <324933830.809209.1399313264579.JavaMail.zimbra@redhat.com>
+References: <980181538.654650.1399300829103.JavaMail.zimbra@redhat.com> <355696287.706122.1399303290204.JavaMail.zimbra@redhat.com> <CABBk=J8=GgAPM7qWfs9=OZt6yHVERggiugPui31w4b=GPk8Oow@mail.gmail.com> <1793642728.775752.1399309685692.JavaMail.zimbra@redhat.com> <CA+4uBUaOWEwpet3dr1mzYQtr_Xju8a3aCgFAf4BCu22WGQ+aZg@mail.gmail.com> <1666953774.790843.1399311496408.JavaMail.zimbra@redhat.com> <CA+4uBUavv2d63qn0zY=yfS7KV4c45JH6Dr0PupKa+zTOh2GC1Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f42.google.com ([209.85.220.42]:61122 "EHLO
-	mail-pa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753880AbaEEQnj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 May 2014 12:43:39 -0400
-Received: by mail-pa0-f42.google.com with SMTP id bj1so10047573pad.1
-        for <ceph-devel@vger.kernel.org>; Mon, 05 May 2014 09:43:39 -0700 (PDT)
-In-Reply-To: <355696287.706122.1399303290204.JavaMail.zimbra@redhat.com>
+Received: from mx6-phx2.redhat.com ([209.132.183.39]:60982 "EHLO
+	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751711AbaEESHr (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 May 2014 14:07:47 -0400
+In-Reply-To: <CA+4uBUavv2d63qn0zY=yfS7KV4c45JH6Dr0PupKa+zTOh2GC1Q@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Samuel Just <sam.just@inktank.com>
+Cc: Yehuda Sadeh <yehuda@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>, gluster-devel@gluster.org
 
-In terms of making something work really quickly, one approach would
-be to base off the existing POSIX translator, use a local FS backed by
-an RBD volume for the metadata, and store the file content directly
-using librados.  That would avoid the need to invent a way to map
-filesystem-style metadata to librados calls, while still getting
-reasonably efficient data operations through to rados.
+> It's very important, several kinds of blocking are done at object
+> granularity.  Off the top of my head, large objects would cause deep
+> scrub and recovery to stall requests for longer.  Elephant objects
+> would also be able to skew data distribution.
 
-I would doubt this would be very slick, but it could be a fun hack!
+There are some definite parallels here to discussions we've had in
+Gluster-land, which we might as well go through because people from
+either "parent" won't have heard the other.  The data distribution
+issue has turned out to be a practical non-issue for GlusterFS
+users.  Sure, if you have very few "elephant objects" on very few
+small-ish bricks (our equivalent of OSDs) then you can get skewed
+distribution.  On the other hand, that problem *very* quickly
+solves itself for even moderate object and brick counts, to the
+point that almost no users have found it useful to enable striping.
+Has your experience been different, or do you not know because
+striping is mandatory instead of optional?
 
-John
+The "deep scrub and recovery" point brings up a whole different
+set of memories.  We used to have a problem in GlusterFS where
+self-heal would lock an entire file while it ran, so other access
+to that file would be blocked for a long time.  This would cause
+VMs to hang, for example.  In either 3.3 or 3.4 (can't remember)
+we added "granular self-heal" which would only lock the portion
+of the file that was currently under repair, in a sort of rolling
+fashion.  From your comment, it sounds like RADOS still locks the
+entire object.  Is that correct?  If so, I posit that it's
+something we wouldn't need to solve in a prototype.  If/when that
+starts turning into something real, then we'd have two options.
+One is to do striping as you suggest, which means solving all of
+the associated coordination problems.  Another would be to do
+something like what GlusterFS did, with locking at the sub-object
+level.  That does make repair less atomic, which some would
+consider a consistency problem, but we do have some evidence that
+it's a violation users don't seem to care about.
 
 
-On Mon, May 5, 2014 at 4:21 PM, Jeff Darcy <jdarcy@redhat.com> wrote:
->
-> Now that we're all one big happy family, I've been mulling over
-> different ways that the two technology stacks could work together.  One
-> idea would be to use some of the GlusterFS upper layers for their
-> interface and integration possibilities, but then falling down to RADOS
-> instead of GlusterFS's own distribution and replication.  I must
-> emphasize that I don't necessarily think this is The Right Way for
-> anything real, but I think it's an important experiment just to see what
-> the problems are and how well it performs.  So here's what I'm thinking.
->
-> For the Ceph folks, I'll describe just a tiny bit of how GlusterFS
-> works.  The core concept in GlusterFS is a "translator" which accepts
-> file system requests and generates file system requests in exactly the
-> same form.  This allows them to be stacked in arbitrary orders, moved
-> back and forth across the server/client divide, etc.  There are several
-> broad classes of translators:
->
-> * Some, such as FUSE or GFAPI, inject new requests into the translator
->   stack.
->
-> * Some, such as "posix", satisfy requests by calling a server-local FS.
->
-> * The "client" and "server" translators together get requests from one
->   machine to another.
->
-> * Some translators *route* requests (one in to one of several out).
->
-> * Some translators *fan out* requests (one in to all of several out).
->
-> * Most are one in, one out, to add e.g. locks or caching etc.
->
-> Of particular interest here are the DHT (routing/distribution) and AFR
-> (fan-out/replication) translators, which mirror functionality in RADOS.
-> My idea is to cut out everything from these on below, in favor of a
-> translator based on librados instead.  How this works is pretty obvious
-> for file data - just read and write to RADOS objects instead of to
-> files.  It's a bit less obvious for metadata, especially directory
-> entries.  One really simple idea is to store metadata as data, in some
-> format defined by the translator itself, and have it handle the
-> read/modify/write for adding/deleting entries and such.  That would be
-> enough to get some basic performance tests done.  A slightly more
-> sophisticated idea might be to use OSD class methods to do the
-> read/modify/write, but I don't know much about that mechanism so I'm not
-> sure that's even feasible.
->
-> This is not something I'm going to be working on as part of my main job,
-> but I'd like to get the experiment started in some of my "spare" time.
-> Is there anyone else interested in collaborating, or are there any other
-> obvious ideas I'm missing?
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
