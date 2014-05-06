@@ -1,90 +1,36 @@
-From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: Re: [PATCH] ceph: fix corruption when using page_count 0 page in rbd
-Date: Tue, 6 May 2014 20:34:25 +0400
-Message-ID: <CALFYKtDEobYdZDRxoSLHK-EQWa04S+rut8wOKWvf3_jT_HWrvQ@mail.gmail.com>
-References: <1398227709-4926-1-git-send-email-tuxoko@gmail.com>
-	<CALFYKtBovU83Y5WDsYq1Kzi6=QtHPKuefxJ5Ej5bdFdVADCNzQ@mail.gmail.com>
-	<alpine.DEB.2.00.1405060930450.26929@cobra.newdream.net>
+From: Justin Erenkrantz <justin@erenkrantz.com>
+Subject: Re: What should the Ceph Foundation be about ?
+Date: Mon, 5 May 2014 23:35:31 -0400
+Message-ID: <CAOGLoJP93zSkKP2N10RuY_i4=G90ftdujPFkWj-QRztdBb14BA@mail.gmail.com>
+References: <53625B94.1090309@dachary.org>
+	<53625DBE.8090305@42on.com>
+	<CAP8Oy=+W2U=66Tcte_OGbrtHdA4AVk-D2gdKk5UocyLpQuc-zg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <alpine.DEB.2.00.1405060930450.26929@cobra.newdream.net>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Sage Weil <sage@inktank.com>
-Cc: Chunwei Chen <tuxoko@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-qg0-f44.google.com ([209.85.192.44]:61012 "EHLO
+	mail-qg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933740AbaEFDfb (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 May 2014 23:35:31 -0400
+Received: by mail-qg0-f44.google.com with SMTP id i50so7463915qgf.3
+        for <ceph-devel@vger.kernel.org>; Mon, 05 May 2014 20:35:31 -0700 (PDT)
+In-Reply-To: <CAP8Oy=+W2U=66Tcte_OGbrtHdA4AVk-D2gdKk5UocyLpQuc-zg@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Patrick McGarry <patrick@inktank.com>
+Cc: Wido den Hollander <wido@42on.com>, Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Tue, May 6, 2014 at 8:31 PM, Sage Weil <sage@inktank.com> wrote:
-> On Tue, 6 May 2014, Ilya Dryomov wrote:
->> On Wed, Apr 23, 2014 at 8:35 AM, Chunwei Chen <tuxoko@gmail.com> wrote:
->> > It has been reported that using ZFSonLinux on rbd will result in memory
->> > corruption. The bug report can be found here:
->> >
->> > https://github.com/zfsonlinux/spl/issues/241
->> > http://tracker.ceph.com/issues/7790
->> >
->> > The reason is that ZFS will send pages with page_count 0 into rbd, which in
->> > turns send them to tcp_sendpage. However, tcp_sendpage cannot deal with
->> > page_count 0, as it will do get_page and put_page, and erroneously free the
->> > page.
->> >
->> > This type of issue has been noted before, and handled in iscsi, drbd,
->> > etc. So, rbd should also handle this. This fix address this issue by fall back
->> > to slower sendmsg when page_count 0 detected.
->> >
->> > Cc: Sage Weil <sage@inktank.com>
->> > Cc: Yehuda Sadeh <yehuda@inktank.com>
->> > Cc: stable@vger.kernel.org
->> > Signed-off-by: Chunwei Chen <tuxoko@gmail.com>
->> > ---
->> >  net/ceph/messenger.c | 20 +++++++++++++++++++-
->> >  1 file changed, 19 insertions(+), 1 deletion(-)
->> >
->> > diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
->> > index 4f55f9c..9a964e7 100644
->> > --- a/net/ceph/messenger.c
->> > +++ b/net/ceph/messenger.c
->> > @@ -557,7 +557,7 @@ static int ceph_tcp_sendmsg(struct socket *sock, struct kvec *iov,
->> >         return r;
->> >  }
->> >
->> > -static int ceph_tcp_sendpage(struct socket *sock, struct page *page,
->> > +static int __ceph_tcp_sendpage(struct socket *sock, struct page *page,
->> >                      int offset, size_t size, bool more)
->> >  {
->> >         int flags = MSG_DONTWAIT | MSG_NOSIGNAL | (more ? MSG_MORE : MSG_EOR);
->> > @@ -570,6 +570,24 @@ static int ceph_tcp_sendpage(struct socket *sock, struct page *page,
->> >         return ret;
->> >  }
->> >
->> > +static int ceph_tcp_sendpage(struct socket *sock, struct page *page,
->> > +                    int offset, size_t size, bool more)
->> > +{
->> > +       int ret;
->> > +       struct kvec iov;
->> > +
->> > +       /* sendpage cannot properly handle pages with page_count == 0,
->> > +        * we need to fallback to sendmsg if that's the case */
->> > +       if (page_count(page) >= 1)
->> > +               return __ceph_tcp_sendpage(sock, page, offset, size, more);
->> > +
->> > +       iov.iov_base = kmap(page) + offset;
->> > +       iov.iov_len = size;
->> > +       ret = ceph_tcp_sendmsg(sock, &iov, 1, size, more);
->> > +       kunmap(page);
->> > +
->> > +       return ret;
->> > +}
->>
->> Looks good to me.  Have you tested it with pre "Fix crash when using
->> ZFS on Ceph rbd" ZFS?
->
-> Once this looks ready, we should perhaps stick it in for-linus so that it
-> can go into 3.15.
+On Thu, May 1, 2014 at 12:32 PM, Patrick McGarry <patrick@inktank.com> wrote:
+> People like Jim Jagielski, Brian Stevens, Michael Tiemann, and many
+> others are bound to have years of experience that can help us make the
+> best decisions for the Ceph community.  I'm really looking forward to
+> exploring this topic with them as they have been very welcoming so
+> far.
 
-That's the plan, I just wanted to confirm it's been tested, since ZFS
-folks went ahead and fixed it by using compound pages.
+Given our backgrounds, I'm sure that my advice will be similar to
+Jim's; but, I'm happy to act as a sounding board as someone who has
+been an advocate for Ceph for a while now.  =)
 
-Thanks,
-
-                Ilya
+I'll be in Atlanta next week for the OpenStack Summit - happy to
+discuss this over drinks if you or anyone else will be there!  --
+justin
