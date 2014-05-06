@@ -1,320 +1,89 @@
-From: Daniel Hofmann <daniel@trvx.org>
-Subject: A plea for more tooling usage
-Date: Tue, 6 May 2014 15:48:27 +0200
-Message-ID: <20140506134826.GA17004@trvx.org>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: What should the Ceph Foundation be about ?
+Date: Tue, 06 May 2014 09:11:04 +0200
+Message-ID: <53688B08.4000008@dachary.org>
+References: <53625B94.1090309@dachary.org> <53625DBE.8090305@42on.com> <CAP8Oy=+W2U=66Tcte_OGbrtHdA4AVk-D2gdKk5UocyLpQuc-zg@mail.gmail.com> <CAOGLoJP93zSkKP2N10RuY_i4=G90ftdujPFkWj-QRztdBb14BA@mail.gmail.com> <alpine.DEB.2.00.1405052053340.9867@cobra.newdream.net> <5368894B.80403@ubuntukylin.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="iJCKSGpCcm7T47NeCxmb3Jf5Pit9Adf5w"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from trvx.org ([46.38.250.125]:39866 "EHLO mail.trvx.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752518AbaEFN40 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 6 May 2014 09:56:26 -0400
-Received: from trvx.org (HSI-KBW-046-005-197-128.hsi8.kabel-badenwuerttemberg.de [46.5.197.128])
-	by mail.trvx.org (Postfix) with ESMTPSA id BB75D1A25108
-	for <ceph-devel@vger.kernel.org>; Tue,  6 May 2014 15:48:33 +0200 (CEST)
-Content-Disposition: inline
+Received: from smtp.dmail.dachary.org ([91.121.254.229]:55879 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934128AbaEFHLJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 6 May 2014 03:11:09 -0400
+In-Reply-To: <5368894B.80403@ubuntukylin.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-
-Preamble: you might want to read the decent formatted version of this m=
-ail at:
-> https://gist.github.com/daniel-j-h/06f16015c89bec4fbb42
-
-
-Motivation
-----------
-
-I tried to build Ceph with the Clang (3.4) compiler. The only issue
-preventing the build to finish was a "VLA of non-POD type" usage which
-I fixed here:
-
-https://github.com/ceph/ceph/pull/1768
-
-
-While the build was resuming I was wondering why no one stumpled upon t=
-his
-issue in the first place. Has nobody ever tried to compile Ceph with Cl=
-ang?
-
-So I did what I'm always doing to quick-check a project's code quality:
-I set the compiler to Clang. I set flags to -Weverything.
-
-The idea is to gradually disable warnings one by one that are not inter=
-esting.
-
-Instead of doing this by hand I used the following flags that I
-accumulated over the last weeks or month to disable a handful of not so
-important warnings:
-
-> -Weverything -Wno-padded -Wno-c++11-long-long -Wno-variadic-macros
-> -Wno-c++11-extensions -Wno-global-constructors -Wno-exit-time-destruc=
-tors
-> -Wno-sign-conversion -Wno-weak-vtables -Wno-disabled-macro-expansion
-> -Wno-c99-extensions -Wno-shadow -Wno-documentation-unknown-command -W=
-no-undef
-> -Wno-documentation -Wno-duplicate-enum -Wno-switch-enum -Wno-unused-p=
-arameter
-> -Wno-packed
-
-Let's build Ceph and have a look at what Clang's -Weverything catches:
-
-    ./autogen.sh
-    ./configure --without-libxfs
-    make -j 1 2> diagnostics.txt
-
-Many warnings are duplicates because of header includes and the like.
-Let's remove duplicates and only keep unique diagnostics:
-
-    $ egrep "\[-.*\]" diagnostics.txt | sort | uniq > uniq.txt
-    $ wc -l uniq.txt=20
-    12286 uniq.txt
-
-Wow. 12286 unique diagnostics. Interested in what showed up?
-
-
-How bad is it
--------------
-
-I ended up going through the diagnostic categories, because I had a few=
- hours
-to spare. The methodology I used was the following:
-
-Check for diagnostic categories, prioritize them, and after that remove=
- all
-the occurences in the original diagnostics file by:
-
-    $ sed -i '/Wflag/d' uniq.txt
-
-In the following I'll give you a quick summary of the most important
-diagnostics. After this there are still some diagnostics left.
-
-    $ wc -l uniq.txt=20
-    3362 uniq.txt
-
-This can be explained by diagnostics that are not important at all, suc=
-h as
-unused exception parameter in a catch clause.
-
-But there are also conversions between types that have to be studied on=
-e by
-one to check if a loss in precision or comparison of types with differe=
-nt
-signedness could lead to dangerous behavior.
-
-
-Note: Clang's diagnostics can be customized, too:
-
-http://clang.llvm.org/docs/UsersManual.html#formatting-of-diagnostics
-
-
-So let's look through the categories.
-
-
-Undefined Behavior
-------------------
-
-> warning: 'va_start' has undefined behavior with reference types [-Wva=
-rargs]
-
-    $ grep Wvarargs uniq.txt | wc -l
-    1
-
-Here's the paragraph from the C++11 Standard, 18.10 =C2=A73:
-> If the parameter parmN is declared with a function, array, or referen=
-ce type, or with a type that is not compatible with the type that resul=
-ts when passing an argument for which there is no parameter, the behavi=
-or is undefined.
-
-http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2012/n3337.pdf
-
-
-Conditional Uninitialized
--------------------------
-
-> warning: variable '%' may be uninitialized when used here [-Wconditio=
-nal-uninitialized]
-
-    $ grep Wconditional-uninitialized uniq.txt | wc -l
-    4
-
-
-Unreachable Code
-----------------
-
-> warning: will never be executed [-Wunreachable-code]
-
-    $ grep Wunreachable-code uniq.txt | wc -l
-    155
-
-
-Extensions to the C++ language
-------------------------------
-
-There's this vast amount of code that is definitely not conforming to
-standard C++. Some extensions are used, such as Variable Length Arrays =
-(VLAs,
-which were the reason for my issue in the first place), some GCC specif=
-icas.
-
-You probably have to decide if you want to go this route or if you want=
- to do
-it the portable and standard C++ way.
-
-VLAs are a good example where the standard C++ way of doing it is in no=
- way
-harder to accomplish. See the following explanation:
-
-http://clang.llvm.org/compatibility.html#vla
-
-
-> warning: anonymous types declared in an anonymous union are an extens=
-ion [-Wnested-anon-types]
-
-    $ grep Wnested-anon-types uniq.txt  | wc -l
-    28
-
-> warning: zero size arrays are an extension [-Wzero-length-array]
-
-    $ grep Wzero-length-array uniq.txt | wc -l
-    8134
-
-> warning: anonymous structs are a GNU extension [-Wgnu-anonymous-struc=
-t]
-
-    $ grep Wgnu-anonymous-struct uniq.txt  | wc -l
-    2
-
-> warning: '%' may not be nested in a struct due to flexible array memb=
-er [-Wflexible-array-extensions]
-
-    $ grep Wflexible-array-extensions uniq.txt | wc -l
-    2
-
-> warning: variable length array used [-Wvla]
-> warning: variable length arrays are a C99 feature [-Wvla-extension]
-
-    $ grep Wvla uniq.txt | wc -l
-    178
-
-> warning: cast between pointer-to-function and pointer-to-object is an=
- extension [-Wpedantic]
-> warning: use of non-standard escape character '\%' [-Wpedantic]
-
-    $ grep Wpedantic uniq.txt | wc -l
-    15
-
-> warning: use of GNU old-style field designator extension [-Wgnu-desig=
-nator]
-
-    $ grep Wgnu-designator uniq.txt | wc -l
-    43
-
-> warning: anonymous unions are a C11 extension [-Wc11-extensions]
-
-    $ grep Wc11-extensions uniq.txt | wc -l
-    3
-
-
-Miscellaneous:
---------------
-
-> warning: '%' hides overloaded virtual function [-Woverloaded-virtual]
-
-    $ grep Woverloaded-virtual uniq.txt | wc -l
-    3
-
-> warning: using namespace directive in global context in header [-Whea=
-der-hygiene]
-
-    $ grep Wheader-hygiene uniq.txt | wc -l
-    87
-
-> warning: extra ';' after member function definition [-Wextra-semi]
-
-    $ grep Wextra-semi uniq.txt | wc -l
-    135
-
-> warning: struct '%' was previously declared as a class [-Wmismatched-=
-tags]
-
-    $ grep Wmismatched-tags uniq.txt | wc -l
-    93
-
-> warning: missing field '%' initializer [-Wmissing-field-initializers]
-
-    $ grep Wmissing-field-initializer uniq.txt | wc -l
-    3
-
-> warning: private field '%' is not used [-Wunused-private-field]
-
-    $ grep Wunused-private-field uniq.txt | wc -l
-    11
-
-> warning: function '%' could be declared with attribute 'noreturn' [-W=
-missing-noreturn]
-
-    $ grep Wmissing-noreturn uniq.txt | wc -l
-    23
-
-> warning: token pasting of ',' and __VA_ARGS__ is a GNU extension [-Wg=
-nu-zero-variadic-macro-arguments]
-
-    $ grep Wgnu-zero-variadic-macro-arguments uniq.txt | wc -l
-    4
-
-
-
-Style
------
-
-While fixing my initial VLA issue I skimmed through the relevant code
-in src/rgw/rgw_main.cc.
-
-What I noticed is that already in this file there's no consistent style=
-=2E
-There's a "using namespace std;" at the top, then in the file there's a=
-n
-alternate usage between vector<string> and std::vector<std::string>.
-
-It also seems to me that the memory management is often done by hand, e=
-=2Eg.
-in line 377 "string *objs =3D new string[num_objs];" and later the "del=
-ete []"
-instead of just using a std::vector<std::string>.
-
-
-Summary
--------
-
-Using Clang-3.4's -Weverything reveals critical issues.
-
-What I hope for Ceph's general code quality is to improve by using the =
-tools
-at hand. This means especially:
-
-Do the same check with an up to date Clang (that's one of the reasons I=
-'m not
-pointing out all the issues or the concrete source code positions), loo=
-k
-through them in detail, such as conversions and left-out diagnostics, a=
-nd fix
-as many as critical issues as possible.
-
-You probably could even use Clang's -fsanitize flag to check for issues=
- at runtime.
-http://clang.llvm.org/docs/UsersManual.html#controlling-code-generation
-
-Also keep in mind that this check was only done on the userspace code i=
-n the
-ceph/ceph repository.
-
-
-Thanks,
-Daniel J. Hofmann
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+To: Li Wang <liwang@ubuntukylin.com>, Sage Weil <sage@inktank.com>, Justin Erenkrantz <justin@erenkrantz.com>
+Cc: Patrick McGarry <patrick@inktank.com>, Wido den Hollander <wido@42on.com>, Ceph Development <ceph-devel@vger.kernel.org>
+
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--iJCKSGpCcm7T47NeCxmb3Jf5Pit9Adf5w
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
+
+Hi,
+
+There are two rendez-vous points already, although not specifically for t=
+he Ceph foundation topic:
+
+Meetup sunday 11th, evening http://www.meetup.com/Ceph-in-Atlanta/events/=
+174131332/
+Ceph developers session tuesday 13th, 11:15-14:40 http://sched.co/1kczSZy=
+
+
+It would be great if we could setup a meeting during the summit to discus=
+s the Ceph foundation.
+
+Cheers
+
+On 06/05/2014 09:03, Li Wang wrote:
+>=20
+> On 2014/5/6 11:54, Sage Weil wrote:
+>> On Mon, 5 May 2014, Justin Erenkrantz wrote:
+>>> On Thu, May 1, 2014 at 12:32 PM, Patrick McGarry <patrick@inktank.com=
+> wrote:
+>>>> People like Jim Jagielski, Brian Stevens, Michael Tiemann, and many
+>>>> others are bound to have years of experience that can help us make t=
+he
+>>>> best decisions for the Ceph community.  I'm really looking forward t=
+o
+>>>> exploring this topic with them as they have been very welcoming so
+>>>> far.
+>>> Given our backgrounds, I'm sure that my advice will be similar to
+>>> Jim's; but, I'm happy to act as a sounding board as someone who has
+>>> been an advocate for Ceph for a while now.  =3D)
+>>>
+>>> I'll be in Atlanta next week for the OpenStack Summit - happy to
+>>> discuss this over drinks if you or anyone else will be there!  --
+>> Excellent-- I look forward to seeing you there!
+> I will be there as well, see you then
+>>
+>> sage
+>> --=20
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" =
+in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+
+
+--iJCKSGpCcm7T47NeCxmb3Jf5Pit9Adf5w
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlNoiwgACgkQ8dLMyEl6F22ZEwCdELhG09QxP9JH6uCGFmhlVbZK
+DSgAnix/7OupU/S6HaXPNYvIYUi41Rzp
+=xDSE
+-----END PGP SIGNATURE-----
+
+--iJCKSGpCcm7T47NeCxmb3Jf5Pit9Adf5w--
