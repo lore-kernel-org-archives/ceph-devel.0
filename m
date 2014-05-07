@@ -1,90 +1,89 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: erasure code & reliability model
-Date: Wed, 07 May 2014 19:19:20 +0200
-Message-ID: <536A6B18.2080205@dachary.org>
-References: <5369CEA8.1000209@dachary.org> <1399481022.50289.YahooMailNeo@web165001.mail.bf1.yahoo.com>
+From: Mike Dawson <mike.dawson@cloudapt.com>
+Subject: Re: [ceph-users] v0.80 Firefly released
+Date: Wed, 07 May 2014 14:18:27 -0400
+Message-ID: <536A78F3.8020607@cloudapt.com>
+References: <alpine.DEB.2.00.1405061757540.28165@cobra.newdream.net>	<536A54C6.4060202@cern.ch> <CAPYLRzhyt3i0sXOGrqZxzrH02+VOjBeMS37xk8ua2K2C2oydkw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="XDw0PBETksBa4XCiojhAjsR99pebg5L3M"
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:58010 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751711AbaEGRTW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 May 2014 13:19:22 -0400
-In-Reply-To: <1399481022.50289.YahooMailNeo@web165001.mail.bf1.yahoo.com>
+Received: from mail-ie0-f177.google.com ([209.85.223.177]:34709 "EHLO
+	mail-ie0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750911AbaEGSSb (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 May 2014 14:18:31 -0400
+Received: by mail-ie0-f177.google.com with SMTP id rp18so1414583iec.36
+        for <ceph-devel@vger.kernel.org>; Wed, 07 May 2014 11:18:30 -0700 (PDT)
+In-Reply-To: <CAPYLRzhyt3i0sXOGrqZxzrH02+VOjBeMS37xk8ua2K2C2oydkw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Koleos Fuskus <koleosfuscus@yahoo.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
-
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---XDw0PBETksBa4XCiojhAjsR99pebg5L3M
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+To: Gregory Farnum <greg@inktank.com>, Dan van der Ster <daniel.vanderster@cern.ch>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>
 
 
-Hi,
+On 5/7/2014 11:53 AM, Gregory Farnum wrote:
+> On Wed, May 7, 2014 at 8:44 AM, Dan van der Ster
+> <daniel.vanderster@cern.ch> wrote:
+>> Hi,
+>>
+>>
+>> Sage Weil wrote:
+>>
+>> * *Primary affinity*: Ceph now has the ability to skew selection of
+>>    OSDs as the "primary" copy, which allows the read workload to be
+>>    cheaply skewed away from parts of the cluster without migrating any
+>>    data.
+>>
+>>
+>> Can you please elaborate a bit on this one? I found the blueprint [1] but
+>> still don't quite understand how it works. Does this only change the crush
+>> calculation for reads? i.e writes still go to the usual primary, but reads
+>> are distributed across the replicas? If so, does this change the consistency
+>> model in any way.
+>
+> It changes the calculation of who becomes the primary, and that
+> primary serves both reads and writes. In slightly more depth:
+> Previously, the primary has always been the first OSD chosen as a
+> member of the PG.
+> For erasure coding, we added the ability to specify a primary
+> independent of the selection ordering. This was part of a broad set of
+> changes to prevent moving the EC "shards" around between different
+> members of the PG, and means that the primary might be the second OSD
+> in the PG, or the fourth.
+> Once this work existed, we realized that it might be useful in other
+> cases, because primaries get more of the work for their PG (serving
+> all reads, coordinating writes).
+> So we added the ability to specify a "primary affinity", which is like
+> the CRUSH weights but only impacts whether you become the primary. So
+> if you have 3 OSDs that each have primary affinity = 1, it will behave
+> as normal. If two have primary affinity = 0, the remaining OSD will be
+> the primary. Etc.
 
-On 07/05/2014 18:43, Koleos Fuskus wrote:> Hi Loic,
->=20
-> What do you mean by action plan? if is the schedule, it is published on=
- my proposal in melange site. Indeed, the details of my proposal are priv=
-ate, if is that what you mean, I can added on the wiki. If you want this =
-part to be public no problem.=20
+Is it possible (and/or advisable) to set primary affinity low while 
+backfilling / recovering an OSD in an effort to prevent unnecessary slow 
+reads that could be directed to less busy replicas? I suppose if the 
+cost of setting/unsetting primary affinity is low and clients are 
+starved for reads during backfill/recovery from the osd in question, it 
+could be a win.
 
-Yes, that's what I meant :-) You could collect snippets from the proposal=
- posted on melange and present them on a subpage https://wiki.ceph.com/De=
-velopment and we can use this as the "home page" of your work ?=20
+Perhaps the workflow for maintenance on osd.0 would be something like:
 
-> Actually I am using some of my free time on reading ceph documentation =
-(web and papers). Do you have any specific document to recommend me? Mayb=
-e we can discuss again about the durability model on Friday/Monday.  I ne=
-ed some more understanding about the ceph architecture.
+- Stop osd.0, do some maintenance on osd.0
+- Read primary affinity of osd.0, store it for later
+- Set primary affinity on osd.0 to 0
+- Start osd.0
+- Enjoy a better backfill/recovery experience. RBD clients happier.
+- Reset primary affinity on osd.0 to previous value
 
-I'm connected on irc.oftc.net#ceph-devel today and tomorrow if you'd like=
- to chat during this "community bonding" phase (I don't remember how goog=
-le calls this for GSoC participants ;-)
+If the cost of setting primary affinity is low enough, perhaps this 
+strategy could be automated by the ceph daemons.
 
-Cheers
+Thanks,
+Mike Dawson
 
->=20
-> Cheers,
-> Ver=F3nica
-> On Wednesday, May 7, 2014 8:12 AM, Loic Dachary <loic@dachary.org> wrot=
-e:
-> Hi Veronica,
->=20
-> I was really happy to hear you're going to work on the erasure code rel=
-iability model. Unless I'm mistaken your action plan was not published. W=
-ould you mind adding it to the wiki so I can comment on it ? Someone else=
- might be interested to contribute too. I've had a discussion yesterday a=
-bout durability models (internally) and it is not well understood. Your i=
-nsight would be precious.
->=20
-> Cheers
->=20
-> --=20
-> Lo=EFc Dachary, Artisan Logiciel Libre
->=20
->=20
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-
-
---XDw0PBETksBa4XCiojhAjsR99pebg5L3M
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlNqaxgACgkQ8dLMyEl6F23iPQCeK6suKvORjHCLyPy4L232FcB3
-5NgAnjCcksQLMqrburgCOzVXsLI+U4yl
-=pyn9
------END PGP SIGNATURE-----
-
---XDw0PBETksBa4XCiojhAjsR99pebg5L3M--
+> -Greg
+> Software Engineer #42 @ http://inktank.com | http://ceph.com
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>
