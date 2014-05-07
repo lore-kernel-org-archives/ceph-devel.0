@@ -1,45 +1,53 @@
-From: tuxoko <tuxoko@gmail.com>
-Subject: Re: [PATCH] ceph: fix corruption when using page_count 0 page in
- rbd
-Date: Wed, 07 May 2014 12:16:50 +0800
-Message-ID: <5369B3B2.3070108@gmail.com>
-References: <1398227709-4926-1-git-send-email-tuxoko@gmail.com>	<CALFYKtBovU83Y5WDsYq1Kzi6=QtHPKuefxJ5Ej5bdFdVADCNzQ@mail.gmail.com>	<alpine.DEB.2.00.1405060930450.26929@cobra.newdream.net> <CALFYKtDEobYdZDRxoSLHK-EQWa04S+rut8wOKWvf3_jT_HWrvQ@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: erasure code & reliability model
+Date: Wed, 07 May 2014 08:11:52 +0200
+Message-ID: <5369CEA8.1000209@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CALFYKtDEobYdZDRxoSLHK-EQWa04S+rut8wOKWvf3_jT_HWrvQ@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ilya Dryomov <ilya.dryomov@inktank.com>, Sage Weil <sage@inktank.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="4AxLfxlKROeWRH92FLeuXPEX2i4VLrvnn"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from smtp.dmail.dachary.org ([91.121.254.229]:57131 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750795AbaEGGMN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 May 2014 02:12:13 -0400
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Koleos Fuskus <koleosfuscus@yahoo.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
+
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--4AxLfxlKROeWRH92FLeuXPEX2i4VLrvnn
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
+
+Hi Veronica,
+
+I was really happy to hear you're going to work on the erasure code relia=
+bility model. Unless I'm mistaken your action plan was not published. Wou=
+ld you mind adding it to the wiki so I can comment on it ? Someone else m=
+ight be interested to contribute too. I've had a discussion yesterday abo=
+ut durability models (internally) and it is not well understood. Your ins=
+ight would be precious.
+
+Cheers
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
 
 
+--4AxLfxlKROeWRH92FLeuXPEX2i4VLrvnn
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
-On =E8=A5=BF=E5=85=832014=E5=B9=B405=E6=9C=8807=E6=97=A5 00:34, Ilya Dr=
-yomov wrote:
-> On Tue, May 6, 2014 at 8:31 PM, Sage Weil <sage@inktank.com> wrote:
->> On Tue, 6 May 2014, Ilya Dryomov wrote:
->>>
->>> Looks good to me.  Have you tested it with pre "Fix crash when usin=
-g
->>> ZFS on Ceph rbd" ZFS?
->>
->> Once this looks ready, we should perhaps stick it in for-linus so th=
-at it
->> can go into 3.15.
->=20
-> That's the plan, I just wanted to confirm it's been tested, since ZFS
-> folks went ahead and fixed it by using compound pages.
->=20
-> Thanks,
->=20
->                 Ilya
->=20
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
 
-Hi Ilya
+iEYEARECAAYFAlNpzqgACgkQ8dLMyEl6F23aCACeOBHvzVDgCVzIeYkJBqlqeDdA
+1TsAn044HSWxVvC09jRbStfYShYBZF19
+=GNhY
+-----END PGP SIGNATURE-----
 
-Yes, I've tested before the ZFS fix and it worked for me.
-
-Thanks,
-Chunwei Chen
+--4AxLfxlKROeWRH92FLeuXPEX2i4VLrvnn--
