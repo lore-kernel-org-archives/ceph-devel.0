@@ -1,109 +1,182 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: [ceph-users] v0.80 Firefly released
-Date: Wed, 7 May 2014 11:30:36 -0700
-Message-ID: <CAPYLRzg5GX5Um9Ooz8HkZNZh9q__cWAephaX8WsZP8merVfz1g@mail.gmail.com>
-References: <alpine.DEB.2.00.1405061757540.28165@cobra.newdream.net>
-	<536A54C6.4060202@cern.ch>
-	<CAPYLRzhyt3i0sXOGrqZxzrH02+VOjBeMS37xk8ua2K2C2oydkw@mail.gmail.com>
-	<536A78F3.8020607@cloudapt.com>
+From: Sage Weil <sage@inktank.com>
+Subject: RE: RBD thoughts
+Date: Wed, 7 May 2014 12:32:30 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1405071225290.31818@cobra.newdream.net>
+References: <7334B4281E425749B85E08CF7EC6F8531F5C93CE@SACMBXIP01.sdcorp.global.sandisk.com> <alpine.DEB.2.00.1405060837530.28165@cobra.newdream.net> <7334B4281E425749B85E08CF7EC6F8531F5CA5D5@SACMBXIP01.sdcorp.global.sandisk.com>
+ <alpine.DEB.2.00.1405061418490.28165@cobra.newdream.net> <alpine.DEB.2.00.1405070912450.31818@cobra.newdream.net> <7334B4281E425749B85E08CF7EC6F8531F5CBBB1@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f44.google.com ([209.85.216.44]:37958 "EHLO
-	mail-qa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750892AbaEGSai (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 May 2014 14:30:38 -0400
-Received: by mail-qa0-f44.google.com with SMTP id j7so1451651qaq.3
-        for <ceph-devel@vger.kernel.org>; Wed, 07 May 2014 11:30:37 -0700 (PDT)
-In-Reply-To: <536A78F3.8020607@cloudapt.com>
+Received: from cobra.newdream.net ([66.33.216.30]:52321 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750866AbaEGTcb (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 May 2014 15:32:31 -0400
+In-Reply-To: <7334B4281E425749B85E08CF7EC6F8531F5CBBB1@SACMBXIP01.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mike Dawson <mike.dawson@cloudapt.com>
-Cc: Dan van der Ster <daniel.vanderster@cern.ch>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>
+To: Allen Samuels <Allen.Samuels@sandisk.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, May 7, 2014 at 11:18 AM, Mike Dawson <mike.dawson@cloudapt.com> wrote:
->
-> On 5/7/2014 11:53 AM, Gregory Farnum wrote:
->>
->> On Wed, May 7, 2014 at 8:44 AM, Dan van der Ster
->> <daniel.vanderster@cern.ch> wrote:
->>>
->>> Hi,
->>>
->>>
->>> Sage Weil wrote:
->>>
->>> * *Primary affinity*: Ceph now has the ability to skew selection of
->>>    OSDs as the "primary" copy, which allows the read workload to be
->>>    cheaply skewed away from parts of the cluster without migrating any
->>>    data.
->>>
->>>
->>> Can you please elaborate a bit on this one? I found the blueprint [1] but
->>> still don't quite understand how it works. Does this only change the
->>> crush
->>> calculation for reads? i.e writes still go to the usual primary, but
->>> reads
->>> are distributed across the replicas? If so, does this change the
->>> consistency
->>> model in any way.
->>
->>
->> It changes the calculation of who becomes the primary, and that
->> primary serves both reads and writes. In slightly more depth:
->> Previously, the primary has always been the first OSD chosen as a
->> member of the PG.
->> For erasure coding, we added the ability to specify a primary
->> independent of the selection ordering. This was part of a broad set of
->> changes to prevent moving the EC "shards" around between different
->> members of the PG, and means that the primary might be the second OSD
->> in the PG, or the fourth.
->> Once this work existed, we realized that it might be useful in other
->> cases, because primaries get more of the work for their PG (serving
->> all reads, coordinating writes).
->> So we added the ability to specify a "primary affinity", which is like
->> the CRUSH weights but only impacts whether you become the primary. So
->> if you have 3 OSDs that each have primary affinity = 1, it will behave
->> as normal. If two have primary affinity = 0, the remaining OSD will be
->> the primary. Etc.
->
->
-> Is it possible (and/or advisable) to set primary affinity low while
-> backfilling / recovering an OSD in an effort to prevent unnecessary slow
-> reads that could be directed to less busy replicas?
+On Wed, 7 May 2014, Allen Samuels wrote:
+> Ok, now I think I understand. Essentially, you have a write-ahead log + 
+> lazy application of the log to the backend + code that correctly deals 
+> with the RAW hazard (same as Cassandra, FileStore, LevelDB, etc.). 
+> Correct?
 
-I have no experimental data and haven't thought about it in the past,
-but that sounds like it might be helpful, yeah!.
-Your clients will need to support this feature, so if you're using
-kernel clients you need a very new kernel (I don't remember exactly
-which one).
--Greg
-Software Engineer #42 @ http://inktank.com | http://ceph.com
+Right.
 
-> I suppose if the cost of
-> setting/unsetting primary affinity is low and clients are starved for reads
-> during backfill/recovery from the osd in question, it could be a win.
->
-> Perhaps the workflow for maintenance on osd.0 would be something like:
->
-> - Stop osd.0, do some maintenance on osd.0
-> - Read primary affinity of osd.0, store it for later
-> - Set primary affinity on osd.0 to 0
-> - Start osd.0
-> - Enjoy a better backfill/recovery experience. RBD clients happier.
-> - Reset primary affinity on osd.0 to previous value
->
-> If the cost of setting primary affinity is low enough, perhaps this strategy
-> could be automated by the ceph daemons.
->
-> Thanks,
-> Mike Dawson
->
->> -Greg
->> Software Engineer #42 @ http://inktank.com | http://ceph.com
->> _______________________________________________
->> ceph-users mailing list
->> ceph-users@lists.ceph.com
->> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->>
->
+> So every block write is done three times, once for the replication 
+> journal, once in the FileStore journal and once in the target file 
+> system. Correct?
+
+More than that, actually.  With the FileStore backend, every write is 
+done 2x.  The rbd journal would be on top of rados objects, so that's 2*2.  
+But that cost goes away with an improved backend that doesn't need a 
+journal (like the kv backend or f2fs).
+
+> Also, if I understand the architecture, you'll be moving the data over 
+> the network at least one more time (* # of replicas). Correct?
+
+Right; this would be mirrored in the target cluster, probably in another 
+data center.
+
+> This seems VERY expensive in system resources, though I agree it's a 
+> simpler implementation task.
+
+It's certainly not free. :) 
+
+sage
+
+
+> 
+> -----------------------------------------------------------
+> Never put off until tomorrow what you can do the day after tomorrow.
+>  Mark Twain
+> 
+> Allen Samuels
+> Chief Software Architect, Emerging Storage Solutions
+> 
+> 951 SanDisk Drive, Milpitas, CA 95035
+> T: +1 408 801 7030| M: +1 408 780 6416
+> allen.samuels@SanDisk.com
+> 
+> 
+> -----Original Message-----
+> From: Sage Weil [mailto:sage@inktank.com]
+> Sent: Wednesday, May 07, 2014 9:24 AM
+> To: Allen Samuels
+> Cc: ceph-devel@vger.kernel.org
+> Subject: RE: RBD thoughts
+> 
+> On Wed, 7 May 2014, Allen Samuels wrote:
+> > Sage wrote:
+> > > Allen wrote:
+> > > > I was looking over the CDS for Giant and was paying particular
+> > > > attention to the rbd journaling stuff. Asynchronous
+> > > > geo-replications for block devices is really a key for enterprise
+> > > > deployment and this is the foundational element of that. It?s an
+> > > > area that we are keenly interested in and would be willing to
+> > > > devote development resources toward. It wasn?t clear from the
+> > > > recording whether this was just musings or would actually be
+> > > > development for Giant, but when you get your head above water
+> > > > w.r.t. the acquisition I?d like to investigate how we (Sandisk) could help turn this into a real project. IMO, this is MUCH more important than CephFS stuff for penetrating enterprises.
+> > > >
+> > > > The blueprint suggests the creation of an additional journal for
+> > > > the block device and that this journal would track metadata
+> > > > changes and potentially record overwritten data (without the
+> > > > overwritten data you can only sync to snapshots ? which will be
+> > > > reasonable functionality for some use-cases). It seems to me that
+> > > > this probably doesn?t work too well. Wouldn?t it be the case that
+> > > > you really want to commit to the journal AND to the block device
+> > > > atomically? That?s really problematic with the current RADOS
+> > > > design as the separate journal would be in a separate PG from the
+> > > > target block and likely on a separate OSD. Now you have all sorts of cases of crashes/updates where the journal and the target block are out of sync.
+> > >
+> > > The idea is to make it a write-ahead journal, which avoids any need
+> > > for atomicity.  The writes are streamed to the journal, and applied
+> > > to the rbd image proper only after they commit there.  Since block
+> > > operations are effeictively idempotent (you can replay the journal
+> > > from any point and the end result is always the same) the recovery
+> > > case is pretty simple.
+> >
+> > Who is responsible for the block device part of the commit?. If it's
+> > the RBD code rather than the OSD, then I think there's a dangerous
+> > failure case where the journal commits and then the client crashes and
+> > the journal-based replication system ends up replicating the last
+> > (un-performed) write operation. If it's the OSDs that are responsible,
+> > then this is not an issue.
+> 
+> The idea is to use the usual set of write-ahead journaling tricks: we write first to the journal, then to the device, and lazily update a pointer indicating which journal events have been applied.  After a crash, the new client will reapply anything in the journal after that point to ensure the device is in sync.
+> 
+> While the device is in active use, we'd need to track which writes have not yet been applied to the device so we can delay a read following a recent write until it is applied.  (This should be very rare, given that the file system sitting on top of the device is generally doing all sorts of caching.)
+> 
+> This only works, of course, for use-cases where there is a single active writer for the device.  That means it's usable for local file systems like
+> ext3/4 and xfs, but not for someting like ocfs2.
+> 
+> > > Similarly, I don't think the snapshot limitation is there; you can
+> > > simply note the journal offset, then copy the image (in a racy way),
+> > > and then replay the journal from that position to capture the recent
+> > > updates.
+> >
+> > w.r.t. snapshots and non-old-data-preserving journaling mode, How will
+> > you deal with the race between reading the head of the journal and
+> > reading the data referenced by that head of the journal that could be
+> > over-written by a write operation before you can actually read it?
+> 
+> Oh, I think I'm using different terminology.  I'm assuming that the journal includes the *new* data (ala data=journal mode for ext*).  We talked a bit at CDS about an optional separate journal with overwritten data so that you could 'rewind' activity on an image, but that is probably not what you were talking about :).
+> 
+> > > > Even past the functional level issues this probably creates a
+> > > > performance hot-spot too ? also undesirable.
+> > >
+> > > For a naive journal implementation and busy block device, yes.  What
+> > > I'd like to do, though, is make a journal abstraction on top of
+> > > librados that can eventually also replace the current MDS journaler
+> > > and do things a bit more intelligently.  The main thing would be to
+> > > stripe events over a set of objects to distribute the load.  For the
+> > > MDS, there are a bunch of other minor things we want to do to
+> > > streamline the implementation and to improve the ability to inspect and repair the journal.
+> > >
+> > > Note that the 'old data' would be an optional thing that would only
+> > > be enabled if the user wanted the ability to rewind.
+> > >
+> > > > It seems to me that the extra journal isn?t necessary, i.e., that
+> > > > the current PG log already has most of the information that?s
+> > > > needed (it doesn?t have the ?old data?, but that?s easily added ?
+> > > > in fact it?s cheaper to add it in with a special transaction token
+> > > > because you don?t have to send the ?old data? over the wire twice?
+> > > > the OSD can read it locally to put into the PG log). Of course, PG
+> > > > logs aren?t synchronized across the pool but that?s easy [...]
+> > >
+> > > I don't think the pg log can be sanely repurposed for this.  It is a
+> > > metadata journal only, and needs to be in order to make peering work
+> > > effectively, whereas the rbd journal needs to be a data journal to
+> > > work well.  Also, if the updates are spread across all of the rbd
+> > > image blocks/objects, then it becomes impractical to stream them to
+> > > another cluster because you'll need to watch for those updates on
+> > > all objects (vs just the journal objects)...
+> >
+> > I don't see the difference between the pg-log "metadata" journal and
+> > the rbd journal (when running in the 'non-old-data-preserving' mode).
+> > Essentially, the pg-log allows a local replica to "catch up", how is
+> > that different then allowing a non-local rbd to "catch up"??
+> 
+> The PG log only indicates which objects were touched and which versions are (now) the latest.  When recovery happens, we go get the latest version of the object from the usual location.  If there are two updates to the same object the log tells us that happens but we don't preserved the intermediate version.  The rbd data journal, on the other hand, would preserve the full update timeline, ensuring that we have a fully-coherent view of the image at any point in the timeline.
+> 
+> --
+> 
+> In any case, this is the proposal we originally discussed at CDS.  I'm not sure if it's the best or most efficient, but I think it is relatively simple to implement and takes advantage of the existing abstractions and interfaces.  Input is definitely welcome!  I'm skeptical that the pg log will be useful in this case, but you're right that the overhead with the proposed approach is non-trivial...
+> 
+> sage
+> 
+> 
+> ________________________________
+> 
+> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
