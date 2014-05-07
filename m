@@ -1,142 +1,90 @@
-From: Sage Weil <sage@inktank.com>
-Subject: RE: RBD thoughts
-Date: Wed, 7 May 2014 09:24:21 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1405070912450.31818@cobra.newdream.net>
-References: <7334B4281E425749B85E08CF7EC6F8531F5C93CE@SACMBXIP01.sdcorp.global.sandisk.com> <alpine.DEB.2.00.1405060837530.28165@cobra.newdream.net> <7334B4281E425749B85E08CF7EC6F8531F5CA5D5@SACMBXIP01.sdcorp.global.sandisk.com>
- <alpine.DEB.2.00.1405061418490.28165@cobra.newdream.net>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: erasure code & reliability model
+Date: Wed, 07 May 2014 19:19:20 +0200
+Message-ID: <536A6B18.2080205@dachary.org>
+References: <5369CEA8.1000209@dachary.org> <1399481022.50289.YahooMailNeo@web165001.mail.bf1.yahoo.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="XDw0PBETksBa4XCiojhAjsR99pebg5L3M"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:50898 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751104AbaEGQYW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 May 2014 12:24:22 -0400
-In-Reply-To: <alpine.DEB.2.00.1405061418490.28165@cobra.newdream.net>
+Received: from smtp.dmail.dachary.org ([91.121.254.229]:58010 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751711AbaEGRTW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 May 2014 13:19:22 -0400
+In-Reply-To: <1399481022.50289.YahooMailNeo@web165001.mail.bf1.yahoo.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Allen Samuels <Allen.Samuels@sandisk.com>
-Cc: ceph-devel@vger.kernel.org
+To: Koleos Fuskus <koleosfuscus@yahoo.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Wed, 7 May 2014, Allen Samuels wrote:
-> Sage wrote:
-> > Allen wrote:
-> > > I was looking over the CDS for Giant and was paying particular
-> > > attention to the rbd journaling stuff. Asynchronous geo-replications
-> > > for block devices is really a key for enterprise deployment and this
-> > > is the foundational element of that. It?s an area that we are keenly
-> > > interested in and would be willing to devote development resources
-> > > toward. It wasn?t clear from the recording whether this was just
-> > > musings or would actually be development for Giant, but when you get
-> > > your head above water w.r.t. the acquisition I?d like to investigate
-> > > how we (Sandisk) could help turn this into a real project. IMO, this is MUCH more important than CephFS stuff for penetrating enterprises.
-> > >
-> > > The blueprint suggests the creation of an additional journal for the
-> > > block device and that this journal would track metadata changes and
-> > > potentially record overwritten data (without the overwritten data you
-> > > can only sync to snapshots ? which will be reasonable functionality
-> > > for some use-cases). It seems to me that this probably doesn?t work
-> > > too well. Wouldn?t it be the case that you really want to commit to
-> > > the journal AND to the block device atomically? That?s really
-> > > problematic with the current RADOS design as the separate journal
-> > > would be in a separate PG from the target block and likely on a
-> > > separate OSD. Now you have all sorts of cases of crashes/updates where the journal and the target block are out of sync.
-> > 
-> > The idea is to make it a write-ahead journal, which avoids any need for 
-> > atomicity.  The writes are streamed to the journal, and applied to the 
-> > rbd image proper only after they commit there.  Since block operations 
-> > are effeictively idempotent (you can replay the journal from any point 
-> > and the end result is always the same) the recovery case is pretty 
-> > simple.
-> 
-> Who is responsible for the block device part of the commit?. If it's the 
-> RBD code rather than the OSD, then I think there's a dangerous failure 
-> case where the journal commits and then the client crashes and the 
-> journal-based replication system ends up replicating the last 
-> (un-performed) write operation. If it's the OSDs that are responsible, 
-> then this is not an issue.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--XDw0PBETksBa4XCiojhAjsR99pebg5L3M
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-The idea is to use the usual set of write-ahead journaling tricks: we 
-write first to the journal, then to the device, and lazily update a 
-pointer indicating which journal events have been applied.  After a crash, 
-the new client will reapply anything in the journal after that point to 
-ensure the device is in sync.
 
-While the device is in active use, we'd need to track which writes have 
-not yet been applied to the device so we can delay a read following a 
-recent write until it is applied.  (This should be very rare, given that 
-the file system sitting on top of the device is generally doing all sorts 
-of caching.)
+Hi,
 
-This only works, of course, for use-cases where there is a single active 
-writer for the device.  That means it's usable for local file systems like 
-ext3/4 and xfs, but not for someting like ocfs2.
+On 07/05/2014 18:43, Koleos Fuskus wrote:> Hi Loic,
+>=20
+> What do you mean by action plan? if is the schedule, it is published on=
+ my proposal in melange site. Indeed, the details of my proposal are priv=
+ate, if is that what you mean, I can added on the wiki. If you want this =
+part to be public no problem.=20
 
-> > Similarly, I don't think the snapshot limitation is there; you can 
-> > simply note the journal offset, then copy the image (in a racy way), and 
-> > then replay the journal from that position to capture the recent 
-> > updates.
->  
-> w.r.t. snapshots and non-old-data-preserving journaling mode, How will you 
-> deal with the race between reading the head of the journal and reading the 
-> data referenced by that head of the journal that could be over-written by 
-> a write operation before you can actually read it?
+Yes, that's what I meant :-) You could collect snippets from the proposal=
+ posted on melange and present them on a subpage https://wiki.ceph.com/De=
+velopment and we can use this as the "home page" of your work ?=20
 
-Oh, I think I'm using different terminology.  I'm assuming that the 
-journal includes the *new* data (ala data=journal mode for ext*).  We 
-talked a bit at CDS about an optional separate journal with overwritten 
-data so that you could 'rewind' activity on an image, but that is 
-probably not what you were talking about :).
+> Actually I am using some of my free time on reading ceph documentation =
+(web and papers). Do you have any specific document to recommend me? Mayb=
+e we can discuss again about the durability model on Friday/Monday.  I ne=
+ed some more understanding about the ceph architecture.
 
-> > > Even past the functional level issues this probably creates a 
-> > > performance hot-spot too ? also undesirable.
-> > 
-> > For a naive journal implementation and busy block device, yes.  What I'd 
-> > like to do, though, is make a journal abstraction on top of librados 
-> > that can eventually also replace the current MDS journaler and do things 
-> > a bit more intelligently.  The main thing would be to stripe events over 
-> > a set of objects to distribute the load.  For the MDS, there are a bunch 
-> > of other minor things we want to do to streamline the implementation and 
-> > to improve the ability to inspect and repair the journal.
-> > 
-> > Note that the 'old data' would be an optional thing that would only be 
-> > enabled if the user wanted the ability to rewind.
-> > 
-> > > It seems to me that the extra journal isn?t necessary, i.e., that the 
-> > > current PG log already has most of the information that?s needed (it 
-> > > doesn?t have the ?old data?, but that?s easily added ? in fact it?s 
-> > > cheaper to add it in with a special transaction token because you 
-> > > don?t have to send the ?old data? over the wire twice? the OSD can 
-> > > read it locally to put into the PG log). Of course, PG logs aren?t 
-> > > synchronized across the pool but that?s easy [...]
-> > 
-> > I don't think the pg log can be sanely repurposed for this.  It is a 
-> > metadata journal only, and needs to be in order to make peering work 
-> > effectively, whereas the rbd journal needs to be a data journal to work 
-> > well.  Also, if the updates are spread across all of the rbd image 
-> > blocks/objects, then it becomes impractical to stream them to another 
-> > cluster because you'll need to watch for those updates on all objects 
-> > (vs just the journal objects)...
-> 
-> I don't see the difference between the pg-log "metadata" journal and the 
-> rbd journal (when running in the 'non-old-data-preserving' mode). 
-> Essentially, the pg-log allows a local replica to "catch up", how is that 
-> different then allowing a non-local rbd to "catch up"??
+I'm connected on irc.oftc.net#ceph-devel today and tomorrow if you'd like=
+ to chat during this "community bonding" phase (I don't remember how goog=
+le calls this for GSoC participants ;-)
 
-The PG log only indicates which objects were touched and which versions 
-are (now) the latest.  When recovery happens, we go get the latest version 
-of the object from the usual location.  If there are two updates to the 
-same object the log tells us that happens but we don't preserved the 
-intermediate version.  The rbd data journal, on the other hand, would 
-preserve the full update timeline, ensuring that we have a fully-coherent 
-view of the image at any point in the timeline.
+Cheers
 
---
+>=20
+> Cheers,
+> Ver=F3nica
+> On Wednesday, May 7, 2014 8:12 AM, Loic Dachary <loic@dachary.org> wrot=
+e:
+> Hi Veronica,
+>=20
+> I was really happy to hear you're going to work on the erasure code rel=
+iability model. Unless I'm mistaken your action plan was not published. W=
+ould you mind adding it to the wiki so I can comment on it ? Someone else=
+ might be interested to contribute too. I've had a discussion yesterday a=
+bout durability models (internally) and it is not well understood. Your i=
+nsight would be precious.
+>=20
+> Cheers
+>=20
+> --=20
+> Lo=EFc Dachary, Artisan Logiciel Libre
+>=20
+>=20
 
-In any case, this is the proposal we originally discussed at CDS.  I'm not 
-sure if it's the best or most efficient, but I think it is relatively 
-simple to implement and takes advantage of the existing abstractions and 
-interfaces.  Input is definitely welcome!  I'm skeptical that the pg log 
-will be useful in this case, but you're right that the overhead with the 
-proposed approach is non-trivial...
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
 
-sage
+
+--XDw0PBETksBa4XCiojhAjsR99pebg5L3M
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlNqaxgACgkQ8dLMyEl6F23iPQCeK6suKvORjHCLyPy4L232FcB3
+5NgAnjCcksQLMqrburgCOzVXsLI+U4yl
+=pyn9
+-----END PGP SIGNATURE-----
+
+--XDw0PBETksBa4XCiojhAjsR99pebg5L3M--
