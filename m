@@ -1,118 +1,103 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH 3/3] rbd: make sure we have latest osdmap on 'rbd map'
-Date: Wed, 7 May 2014 09:04:48 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1405070903440.31818@cobra.newdream.net>
-References: <1398356607-10666-1-git-send-email-ilya.dryomov@inktank.com> <1398356607-10666-4-git-send-email-ilya.dryomov@inktank.com> <alpine.DEB.2.00.1405070901310.31818@cobra.newdream.net>
+Subject: RE: RBD thoughts
+Date: Wed, 7 May 2014 09:12:37 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1405061418490.28165@cobra.newdream.net>
+References: <7334B4281E425749B85E08CF7EC6F8531F5C93CE@SACMBXIP01.sdcorp.global.sandisk.com> <alpine.DEB.2.00.1405060837530.28165@cobra.newdream.net> <7334B4281E425749B85E08CF7EC6F8531F5CA5D5@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:50757 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:50808 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932891AbaEGQEs (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 May 2014 12:04:48 -0400
-In-Reply-To: <alpine.DEB.2.00.1405070901310.31818@cobra.newdream.net>
+	with ESMTP id S1752665AbaEGQMh (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 May 2014 12:12:37 -0400
+In-Reply-To: <7334B4281E425749B85E08CF7EC6F8531F5CA5D5@SACMBXIP01.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <ilya.dryomov@inktank.com>
+To: Allen Samuels <Allen.Samuels@sandisk.com>
 Cc: ceph-devel@vger.kernel.org
 
-On Wed, 7 May 2014, Sage Weil wrote:
-> On Thu, 24 Apr 2014, Ilya Dryomov wrote:
-> > Given an existing idle mapping (img1), mapping an image (img2) in
-> > a newly created pool (pool2) fails:
-> > 
-> >     $ ceph osd pool create pool1 8 8
-> >     $ rbd create --size 1000 pool1/img1
-> >     $ sudo rbd map pool1/img1
-> >     $ ceph osd pool create pool2 8 8
-> >     $ rbd create --size 1000 pool2/img2
-> >     $ sudo rbd map pool2/img2
-> >     rbd: sysfs write failed
-> >     rbd: map failed: (2) No such file or directory
-> > 
-> > This is because client instances are shared by default and we don't
-> > request an osdmap update when bumping a ref on an existing client.  The
-> > fix is to use the mon_get_version request to see if the osdmap we have
-> > is the latest, and block until the requested update is received if it's
-> > not.
-> 
-> This is slightly more heavyweight than the userspace client's approach.  
-> There, we only check for a newer osdmap if we find that the pool doesn't 
-> exist.  That shouldn't be too difficult to mirror here... probably just 
-> expose a wait_for_latest_map() function, and call that + retry from the 
-> rbd map code?
+[Moving this thread to ceph-devel]
 
-(Der, and I see now that your 2/3 patch already exposes that method. :)
+-----Original Message-----
 
-sage
+Sage wrote:
+> Allen wrote:
+> > I was looking over the CDS for Giant and was paying particular
+> > attention to the rbd journaling stuff. Asynchronous geo-replications
+> > for block devices is really a key for enterprise deployment and this
+> > is the foundational element of that. It?s an area that we are keenly
+> > interested in and would be willing to devote development resources
+> > toward. It wasn?t clear from the recording whether this was just
+> > musings or would actually be development for Giant, but when you get
+> > your head above water w.r.t. the acquisition I?d like to investigate
+> > how we (Sandisk) could help turn this into a real project. IMO, this is MUCH more important than CephFS stuff for penetrating enterprises.
+> >
+> > The blueprint suggests the creation of an additional journal for the
+> > block device and that this journal would track metadata changes and
+> > potentially record overwritten data (without the overwritten data you
+> > can only sync to snapshots ? which will be reasonable functionality
+> > for some use-cases). It seems to me that this probably doesn?t work
+> > too well. Wouldn?t it be the case that you really want to commit to
+> > the journal AND to the block device atomically? That?s really
+> > problematic with the current RADOS design as the separate journal
+> > would be in a separate PG from the target block and likely on a
+> > separate OSD. Now you have all sorts of cases of crashes/updates where the journal and the target block are out of sync.
+> 
+> The idea is to make it a write-ahead journal, which avoids any need for 
+> atomicity.  The writes are streamed to the journal, and applied to the 
+> rbd image proper only after they commit there.  Since block operations 
+> are effeictively idempotent (you can replay the journal from any point 
+> and the end result is always the same) the recovery case is pretty 
+> simple.
 
+Who is responsible for the block device part of the commit?. If it's the 
+RBD code rather than the OSD, then I think there's a dangerous failure 
+case where the journal commits and then the client crashes and the 
+journal-based replication system ends up replicating the last 
+(un-performed) write operation. If it's the OSDs that are responsible, 
+then this is not an issue.
+ 
+> Similarly, I don't think the snapshot limitation is there; you can 
+> simply note the journal offset, then copy the image (in a racy way), and 
+> then replay the journal from that position to capture the recent 
+> updates.
+ 
+w.r.t. snapshots and non-old-data-preserving journaling mode, How will you 
+deal with the race between reading the head of the journal and reading the 
+data referenced by that head of the journal that could be over-written by 
+a write operation before you can actually read it?
+ 
+> > Even past the functional level issues this probably creates a 
+> > performance hot-spot too ? also undesirable.
+> 
+> For a naive journal implementation and busy block device, yes.  What I'd 
+> like to do, though, is make a journal abstraction on top of librados 
+> that can eventually also replace the current MDS journaler and do things 
+> a bit more intelligently.  The main thing would be to stripe events over 
+> a set of objects to distribute the load.  For the MDS, there are a bunch 
+> of other minor things we want to do to streamline the implementation and 
+> to improve the ability to inspect and repair the journal.
+> 
+> Note that the 'old data' would be an optional thing that would only be 
+> enabled if the user wanted the ability to rewind.
+> 
+> > It seems to me that the extra journal isn?t necessary, i.e., that the 
+> > current PG log already has most of the information that?s needed (it 
+> > doesn?t have the ?old data?, but that?s easily added ? in fact it?s 
+> > cheaper to add it in with a special transaction token because you 
+> > don?t have to send the ?old data? over the wire twice? the OSD can 
+> > read it locally to put into the PG log). Of course, PG logs aren?t 
+> > synchronized across the pool but that?s easy [...]
+> 
+> I don't think the pg log can be sanely repurposed for this.  It is a 
+> metadata journal only, and needs to be in order to make peering work 
+> effectively, whereas the rbd journal needs to be a data journal to work 
+> well.  Also, if the updates are spread across all of the rbd image 
+> blocks/objects, then it becomes impractical to stream them to another 
+> cluster because you'll need to watch for those updates on all objects 
+> (vs just the journal objects)...
 
-> 
-> sage
-> 
-> > 
-> > Fixes: http://tracker.ceph.com/issues/8184
-> > 
-> > Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
-> > ---
-> >  drivers/block/rbd.c |   27 +++++++++++++++++++++++----
-> >  1 file changed, 23 insertions(+), 4 deletions(-)
-> > 
-> > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> > index 552a2edcaa74..a3734726eef9 100644
-> > --- a/drivers/block/rbd.c
-> > +++ b/drivers/block/rbd.c
-> > @@ -723,15 +723,34 @@ static int parse_rbd_opts_token(char *c, void *private)
-> >  static struct rbd_client *rbd_get_client(struct ceph_options *ceph_opts)
-> >  {
-> >  	struct rbd_client *rbdc;
-> > +	u64 newest_epoch;
-> >  
-> >  	mutex_lock_nested(&client_mutex, SINGLE_DEPTH_NESTING);
-> >  	rbdc = rbd_client_find(ceph_opts);
-> > -	if (rbdc)	/* using an existing client */
-> > -		ceph_destroy_options(ceph_opts);
-> > -	else
-> > +	if (!rbdc) {
-> >  		rbdc = rbd_client_create(ceph_opts);
-> > -	mutex_unlock(&client_mutex);
-> > +		mutex_unlock(&client_mutex);
-> > +		return rbdc;
-> > +	}
-> > +
-> > +	/*
-> > +	 * Using an existing client, make sure we've got the latest
-> > +	 * osdmap.  Ignore the errors though, as failing to get it
-> > +	 * doesn't necessarily prevent from working.
-> > +	 */
-> > +	if (ceph_monc_do_get_version(&rbdc->client->monc, "osdmap",
-> > +				     &newest_epoch) < 0)
-> > +		goto out;
-> > +
-> > +	if (rbdc->client->osdc.osdmap->epoch < newest_epoch) {
-> > +		ceph_monc_request_next_osdmap(&rbdc->client->monc);
-> > +		(void) ceph_monc_wait_osdmap(&rbdc->client->monc, newest_epoch,
-> > +				    rbdc->client->options->mount_timeout * HZ);
-> > +	}
-> >  
-> > +out:
-> > +	mutex_unlock(&client_mutex);
-> > +	ceph_destroy_options(ceph_opts);
-> >  	return rbdc;
-> >  }
-> >  
-> > -- 
-> > 1.7.10.4
-> > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > 
-> > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+I don't see the difference between the pg-log "metadata" journal and the 
+rbd journal (when running in the 'non-old-data-preserving' mode). 
+Essentially, the pg-log allows a local replica to "catch up", how is that 
+different then allowing a non-local rbd to "catch up"??
