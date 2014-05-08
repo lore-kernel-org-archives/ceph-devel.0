@@ -1,85 +1,125 @@
-From: Sage Weil <sage@inktank.com>
-Subject: ceph and systemd
-Date: Wed, 7 May 2014 21:36:06 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1405072119170.25032@cobra.newdream.net>
+From: John Spray <john.spray@inktank.com>
+Subject: Re: A plea for more tooling usage
+Date: Thu, 8 May 2014 11:37:09 +0100
+Message-ID: <CAGd4Wr2H2EGWufxi15iAxxwS5sFBsQZJLw9dv_K7NkFjUVoH1A@mail.gmail.com>
+References: <20140506134826.GA17004@trvx.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:55126 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751103AbaEHEgH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 May 2014 00:36:07 -0400
+Received: from mail-pa0-f49.google.com ([209.85.220.49]:51344 "EHLO
+	mail-pa0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753015AbaEHKhK (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 May 2014 06:37:10 -0400
+Received: by mail-pa0-f49.google.com with SMTP id lj1so2665844pab.22
+        for <ceph-devel@vger.kernel.org>; Thu, 08 May 2014 03:37:09 -0700 (PDT)
+In-Reply-To: <20140506134826.GA17004@trvx.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: rwheeler@redhat.com
+To: Daniel Hofmann <daniel@trvx.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Now that the world seems to be converging on systemd, we need to sort out 
-a proper strategy for Ceph.  Right now we have both sysvinit (old and 
-crufty but functional) and upstart, but neither are especially nice to 
-work with.
+Couple of notes for anyone following along on ubuntu precise or
+another older system:
+ * make sure you're using clang >=3.3 to get support for suppressing
+all the warning flags in Daniel's command line.
+ * libcrypto++ 5.6.1 (the version in ubuntu) doesn't compile with
+clang, unless you hack
 
-The first order of business is to identify someone who knows (or is 
-motivated to learn) how systemd does things and who can figure out how to 
-integrate things nicely.
+I was looking through the warnings out of interest and made a couple notes.
 
-Here's a quick brain dump:
+On Tue, May 6, 2014 at 2:48 PM, Daniel Hofmann <daniel@trvx.org> wrote:
+>> warning: anonymous types declared in an anonymous union are an extension [-Wnested-anon-types]
+>
+>     $ grep Wnested-anon-types uniq.txt  | wc -l
+>     28
 
-The main challenge is that, unlike most basic services, we start lots of 
-daemons on the same host.  The "new" way we handle that is by enumerating 
-them in with directories in /var/lib/ceph.  E.g.,
+This is mostly ceph_osd_op in rados.h - code is fine but nonstandard.
+We can avoid this particular warning by explicitly typedeffing the
+struct types before using them, but would still have the warning that
+anonymous unions are themselves nonstandard.  Anonymous unions are
+nice...
 
-/var/lib/ceph
-	osd/
-		ceph-530/
-		ceph-14/
-		bigcluster-121/
-	mon/
-		ceph-foo/
-	mds/
-		bigcluster-foo/
+>
+>> warning: zero size arrays are an extension [-Wzero-length-array]
+>
+>     $ grep Wzero-length-array uniq.txt | wc -l
+>     8134
 
-That is, /var/lib/ceph/$type/$cluster-$id/, where $cluster is normally 
-'ceph' (and that is all that is supported with sysvinit at the moment).  
-The config file is then /etc/ceph/$cluster.conf, logs are 
-/var/log/ceph/$cluster-$type.log, and so on.
+This is mostly dout_impl, I think -- it is using an array whose size
+is defined as 0 or -1 conditionally, apparently in order to detect out
+of bounds severity numbers.
 
-In each daemon directory, you touch either 'sysvinit' or 'upstart' to 
-indicate which init system is responsible for stopping/starting.  Here, 
-we'd presumably add 'systemd' to indicate that the new hotness is now 
-responsible for managing the daemon.
+I wonder if there is a neater way to do this - I am not a preprocessor guru.
 
-In the upstart world, which I'm guessing is most like systemd, there are a 
-few meta-jobs for ceph-osd-all, ceph-mon-all, ceph-mds-all, and a ceph-all 
-meta-job for those, so that everything can be started/stopped together.  
-Or, you can start/stop individual daemons with something like
+>> warning: '%' may not be nested in a struct due to flexible array member [-Wflexible-array-extensions]
+>
+>     $ grep Wflexible-array-extensions uniq.txt | wc -l
+>     2
 
- sudo start ceph-osd id=123 cluster=ceph
+This is true (ceph_frag_tree in ceph_mds_reply_inode)... I don't see a
+nice way around it.  Perhaps its a useful enough language extension
+that we should continue to use it.
 
-For OSDs, things are a bit more complicated because we are wired into udev 
-to automatically mount the file systems and to make things more plug and 
-play.  The basic strategy is this:
+>> warning: cast between pointer-to-function and pointer-to-object is an extension [-Wpedantic]
+>> warning: use of non-standard escape character '\%' [-Wpedantic]
+>
+>     $ grep Wpedantic uniq.txt | wc -l
+>     15
 
- - we partition disks with GPT
- - we use fixed GPT partition types UUIDs to mark osd data volumes and osd 
-   journals.
- - udev rules trigger 'ceph-disk activate $device' for osd data or 
-   'ceph-disk activate-journal $device' for osd journals.
- - ceph-disk mounts the device at /var/lib/ceph/tmp/something, identifies 
-   what cluster and osd id it belongs to, bind-mounts that to the correct 
-   /var/lib/ceph/osd/* location, and then starts the daemon with whatever 
-   init system is indicated.  There's a bunch of other logic to make sure 
-   that journals are also mounted, or to start up dm-crypt if enabled, and 
-   so on.
+The pointer cast thing is overly pedantic in the cases we're using
+dlsym (which returns a void*), object pointer cast to fn pointer is
+illegal in the language standard but guaranteed to work in POSIX.
 
-At the end of the day, it means that there's no configuration needed in 
-fstab or ceph.conf.  You can simply plug (marked) drives into a machine 
-and they will get formatted, provisioned, and added into the cluster in 
-the correct location in the CRUSH map.  Or, you can pull a disk from one 
-box and plug it into another and it will join back into the cluster 
-(provided both the data and journal are present).
+The \% thing is easily fixed.
 
-Anyway, the first order of business is to find someone who is 
-systemd-savvy...
+>> warning: use of GNU old-style field designator extension [-Wgnu-designator]
+>
+>     $ grep Wgnu-designator uniq.txt | wc -l
+>     43
 
-sage
+fuse_ll.cc:fuse_ll_oper and config.cc:g_default_file_layout.
+
+Can easily just remove the field designators and initialize as {val1,
+val2} but that's much less readable :-/  I don't think nice struct
+initialization becomes a thing until C++11.
+
+>> warning: using namespace directive in global context in header [-Wheader-hygiene]
+>
+>     $ grep Wheader-hygiene uniq.txt | wc -l
+>     87
+
+We should be able to solve these easily with a fairly mechanical procedure:
+ * Remove the 'using's from the headers
+ * Change type references in headers to use appropriate prefix (mostly std::)
+ * Add in the 'using's to any .cc files that relied on them
+
+>> warning: struct '%' was previously declared as a class [-Wmismatched-tags]
+>
+>     $ grep Wmismatched-tags uniq.txt | wc -l
+>     93
+
+At least some of these (especially Inode in libcephfs.h) appear to
+have the intention of exposing POD classes in C-compatible headers.
+We should probably change the C++ side to also use struct for the
+things that are going to be exposed to C land.
+
+>> warning: missing field '%' initializer [-Wmissing-field-initializers]
+>
+>     $ grep Wmissing-field-initializer uniq.txt | wc -l
+>     3
+
+Hmm, I only saw one of these:
+test/osd/TestRados.cc:260:36: warning: missing field 'ec_pool_valid'
+initializer [-Wmissing-field-initializers]
+
+...but I'm on an older clang (3.3) so perhaps that explains it.
+
+>> warning: private field '%' is not used [-Wunused-private-field]
+>
+>     $ grep Wunused-private-field uniq.txt | wc -l
+>     11
+
+This is a handy warning indeed, it appears to be accurately pointing
+out unused fields.
+
+John
