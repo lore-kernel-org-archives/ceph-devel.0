@@ -1,59 +1,67 @@
-From: Milosz Tanski <milosz@adfin.com>
-Subject: Re: RBD thoughts
-Date: Wed, 7 May 2014 18:05:11 -0400
-Message-ID: <CANP1eJGei-h0OJTdP9nCnGtcvakCzJni9zD9Ht+U0ys8V-uSuQ@mail.gmail.com>
-References: <7334B4281E425749B85E08CF7EC6F8531F5C93CE@SACMBXIP01.sdcorp.global.sandisk.com>
-	<alpine.DEB.2.00.1405060837530.28165@cobra.newdream.net>
-	<7334B4281E425749B85E08CF7EC6F8531F5CA5D5@SACMBXIP01.sdcorp.global.sandisk.com>
-	<alpine.DEB.2.00.1405061418490.28165@cobra.newdream.net>
-	<alpine.DEB.2.00.1405070912450.31818@cobra.newdream.net>
-	<7334B4281E425749B85E08CF7EC6F8531F5CBBB1@SACMBXIP01.sdcorp.global.sandisk.com>
-	<alpine.DEB.2.00.1405071225290.31818@cobra.newdream.net>
-	<CANP1eJHPkxi-CvSaBWnXqXs9hRWyQ83GNqpM2CEdPuHz7UjOfQ@mail.gmail.com>
-	<536A90C1.7050701@inktank.com>
-	<CANP1eJH2QTR6LROuYZnPFsEjRX=0wpzOP-8R+YbGaBCoJARCvw@mail.gmail.com>
-	<CAPYLRzhMu+AAEpwkx1MaFXyLPnQ65RAsvspcCQpkdYMYK9j9VA@mail.gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: CEPH - messenger rebind race
+Date: Wed, 7 May 2014 17:52:28 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1405071725210.24873@cobra.newdream.net>
+References: <1399452455.72957.YahooMailNeo@web140901.mail.bf1.yahoo.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f52.google.com ([74.125.82.52]:61387 "EHLO
-	mail-wg0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751777AbaEGWFM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 May 2014 18:05:12 -0400
-Received: by mail-wg0-f52.google.com with SMTP id l18so1649045wgh.35
-        for <ceph-devel@vger.kernel.org>; Wed, 07 May 2014 15:05:11 -0700 (PDT)
-In-Reply-To: <CAPYLRzhMu+AAEpwkx1MaFXyLPnQ65RAsvspcCQpkdYMYK9j9VA@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:54222 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751584AbaEHAw2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 May 2014 20:52:28 -0400
+In-Reply-To: <1399452455.72957.YahooMailNeo@web140901.mail.bf1.yahoo.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: Mark Nelson <mark.nelson@inktank.com>, Sage Weil <sage@inktank.com>, Allen Samuels <Allen.Samuels@sandisk.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Guang Yang <yguang11@yahoo.com>
+Cc: greg@inktank.com, ceph-devel@vger.kernel.org
 
-Thanks Greg; It looks like I was conflating a couple things.
+[CCing Greg and ceph-devel]
 
-On Wed, May 7, 2014 at 4:25 PM, Gregory Farnum <greg@inktank.com> wrote:
-> On Wed, May 7, 2014 at 1:13 PM, Milosz Tanski <milosz@adfin.com> wrote:
->> I was under the assumption that this was already in there (although
->> I'm using xfs) since the documentation for file store mentions that
->> being a settings that's defaulted to true.
->> https://ceph.com/docs/master/rados/configuration/filestore-config-ref/
->> filestore btrfs clone range
->>
->> We're using XFS today, but we were thinking of using brtfs in the
->> future for this exact property. In our setup reads trump writes
->> (between one or two magnitudes) and when we write data it's in large
->> chunks.
->
-> Ah, that setting is related to using btrfs clones for RADOS clones
-> (instead of explicitly copying the changed extents as we do for xfs).
-> -Greg
+On Wed, 7 May 2014, Guang Yang wrote:
+> Hi Sage,
+> Sorry to bother you directly, I am debugging / fixing issue
+> http://tracker.ceph.com/issues/8232, during which time I studied the
+> messenger component of CEPH. With more understanding of the messenger
+> component, I started getting confused by the fix of issue 6992
+> (http://tracker.ceph.com/issues/6992) in terms of how it could help to solve
+> the problem (though I fully agree we should stop accepter first and then
+> clear all PIPEs).
+> 
+> Looking at the logs posted along with the issue 6992, the failure happened
+> at pipe::writter::connect side (it should be a brand new connect instead of
+> a re-connect as cs = 0, pgs = 0) after a rebind, and the failed one already
+> has the updated local address, it is confused to me how the connection could
+> be established? As there is connect_seq check at the remote side which is
+> likely to fail for this connection attempt (which is a positive value),
+> unless there is some race at remote side updating connet_seq and in_seq.
+> 
+> Am I missing something obviously on this?
 
+Honestly I haven't looked closely at that old log; I would focus on the 
+new log.
 
+Looking at it now (for the first time, sorry), the last line is
 
--- 
-Milosz Tanski
-CTO
-10 East 53rd Street, 37th floor
-New York, NY 10022
+    -2> 2014-05-04 06:16:07.957897 7f71063ee700  2 -- 
+10.193.207.180:6884/1037605 >> 10.193.207.183:6958/5001307 pipe(0x1cfa1400 
+sd=132 :60749 s=1 pgs=0 cs=0 l=0 c=0x12b4e160). got newly_acked_seq 10 vs 
+out_seq 0
 
-p: 646-253-9055
-e: milosz@adfin.com
+If I'm reading it right, that's an outgoing connection with the same 
+source as the mark_down_all.  If it existed before the mark_down_all, 
+something is really broken because mark_dwon_all should have set it to 
+STATE_CLOSED and the connect() function checks the state.  Which makes me 
+think that it was initiated after.
+
+My guess is that this is a race in OSD.cc.  We do the rebind() stuff, but 
+only a bit further down do consume_map() which publishes the map to the 
+OSDService with all kind of complicated handoff.  I'm forgetting right now 
+how this is supposed to work, but my guess is that this is the heart of 
+the problem: some random PG thread is trying to send to an OSD using the 
+older map and grabs the older OSDMap ref and opens the connection 
+*after* we do the rebind() and mark_down_all().
+
+Does this sound plausible?
+
+sage
