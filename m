@@ -1,17 +1,17 @@
 From: Daniel Hofmann <daniel@trvx.org>
 Subject: Re: A plea for more tooling usage
-Date: Thu, 08 May 2014 16:22:52 +0200
-Message-ID: <f06db295-6402-4d3b-bdb5-2d0b84d3f434@email.android.com>
+Date: Thu, 08 May 2014 15:19:21 +0200
+Message-ID: <ec7894d7-d938-4272-b896-150fe74c3a82@email.android.com>
 References: <20140506134826.GA17004@trvx.org> <alpine.DEB.2.00.1405060816160.28165@cobra.newdream.net> <CANP1eJHnyEP_DALV9ZVF5+h=ridz73g=Gfy1aqhhsE9aUUDyLg@mail.gmail.com> <b29f7e9d-8260-4211-986b-20ed6cc65977@email.android.com> <CANP1eJGK98r-RKrSGZtSOQ17p09=Xr-KnsaNKKywm2g1mBNCPA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain;
  charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from trvx.org ([46.38.250.125]:37702 "EHLO mail.trvx.org"
+Received: from trvx.org ([46.38.250.125]:37764 "EHLO mail.trvx.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753443AbaEHOXK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 8 May 2014 10:23:10 -0400
+	id S1751856AbaEHOXN (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 8 May 2014 10:23:13 -0400
 In-Reply-To: <CANP1eJGK98r-RKrSGZtSOQ17p09=Xr-KnsaNKKywm2g1mBNCPA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -21,7 +21,7 @@ Cc: Sage Weil <sage@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
 As I said, I only uploaded the summary.
 The reports take around 5 GB of space.
 
-Please run the analyzer yourself for the detailed individual reports.
+Please run the analyzer yourself for the individual reports.
 
 On May 8, 2014 2:55:28 PM CEST, Milosz Tanski <milosz@adfin.com> wrote:
 >Daniel,
