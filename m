@@ -1,50 +1,44 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: [PATCH 2/2] Set ms_bind_ipv6 to true when IPv6 is used
-Date: Fri,  9 May 2014 10:36:15 +0200
-Message-ID: <1399624575-4772-1-git-send-email-wido@widodh.nl>
+From: Sage Weil <sage@inktank.com>
+Subject: [PATCH] rules: add by-parttypeuuid rule for GPT labeled partitions
+Date: Fri,  9 May 2014 14:31:37 -0700
+Message-ID: <1399671097-32015-1-git-send-email-sage@inktank.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:38220 "EHLO
-	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756063AbaEIIgV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 9 May 2014 04:36:21 -0400
+Received: from cobra.newdream.net ([66.33.216.30]:40028 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757900AbaEIVbn (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 9 May 2014 17:31:43 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Wido den Hollander <wido@widodh.nl>
+To: systemd-devel@lists.freedesktop.org
+Cc: ceph-devel@vger.kernel.org, Sage Weil <sage@inktank.com>
 
+The Ceph OSD initialization relies on identifying GPT partitions by type
+in order to mount data volumes and start daemons.  Currently we ship this
+rule separately, but it is awkward to duplicate the conditional logic that
+precedes this block and it would be much simpler if it were simply included
+in the upstream rules.
 
-Signed-off-by: Wido den Hollander <wido@widodh.nl>
+Signed-off-by: Sage Weil <sage@inktank.com>
 ---
- ceph_deploy/new.py |    6 ++++++
- 1 file changed, 6 insertions(+)
+ rules/60-persistent-storage.rules |    3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-diff --git a/ceph_deploy/new.py b/ceph_deploy/new.py
-index fc4c5f4..e573128 100644
---- a/ceph_deploy/new.py
-+++ b/ceph_deploy/new.py
-@@ -91,9 +91,11 @@ def new(args):
-         ip = net.get_nonlocal_ip(host)
-         LOG.debug('Monitor %s at %s', name, ip)
-         mon_initial_members.append(name)
-+        ms_ipv6 = False
-         try:
-             socket.inet_pton(socket.AF_INET6, ip)
-             mon_host.append("[" + ip + "]")
-+            ms_ipv6 = True
-         except socket.error:
-             mon_host.append(ip)
+diff --git a/rules/60-persistent-storage.rules b/rules/60-persistent-storage.rules
+index 475b151..42f5edb 100644
+--- a/rules/60-persistent-storage.rules
++++ b/rules/60-persistent-storage.rules
+@@ -80,9 +80,10 @@ ENV{ID_FS_USAGE}=="filesystem|other", ENV{ID_FS_LABEL_ENC}=="?*", SYMLINK+="disk
+ ENV{DEVTYPE}=="disk", ENV{ID_WWN_WITH_EXTENSION}=="?*", SYMLINK+="disk/by-id/wwn-$env{ID_WWN_WITH_EXTENSION}"
+ ENV{DEVTYPE}=="partition", ENV{ID_WWN_WITH_EXTENSION}=="?*", SYMLINK+="disk/by-id/wwn-$env{ID_WWN_WITH_EXTENSION}-part%n"
  
-@@ -106,6 +108,10 @@ def new(args):
-     cfg.set('global', 'mon initial members', ', '.join(mon_initial_members))
-     # no spaces here, see http://tracker.newdream.net/issues/3145
-     cfg.set('global', 'mon host', ','.join(mon_host))
-+    
-+    if ms_ipv6 == True:
-+        LOG.debug('Monitors are IPv6, binding Messenger traffic on IPv6')
-+        cfg.set('global', 'ms bind ipv6', 'true')
+-# by-partlabel/by-partuuid links (partition metadata)
++# by-partlabel/by-partuuid/by-parttypeuuid links (partition metadata)
+ ENV{ID_PART_ENTRY_SCHEME}=="gpt", ENV{ID_PART_ENTRY_UUID}=="?*", SYMLINK+="disk/by-partuuid/$env{ID_PART_ENTRY_UUID}"
+ ENV{ID_PART_ENTRY_SCHEME}=="gpt", ENV{ID_PART_ENTRY_NAME}=="?*", SYMLINK+="disk/by-partlabel/$env{ID_PART_ENTRY_NAME}"
++ENV{ID_PART_ENTRY_SCHEME}=="gpt", ENV{ID_PART_ENTRY_TYPE}=="?*", ENV{ID_PART_ENTRY_UUID}=="?*", SYMLINK+="disk/by-parttypeuuid/$env{ID_PART_ENTRY_TYPE}.$env{ID_PART_ENTRY_UUID}"
  
-     # override undesirable defaults, needed until bobtail
- 
+ # add symlink to GPT root disk
+ ENV{ID_PART_ENTRY_SCHEME}=="gpt", ENV{ID_PART_GPT_AUTO_ROOT}=="1", SYMLINK+="gpt-auto-root"
 -- 
 1.7.9.5
 
