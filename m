@@ -1,63 +1,88 @@
-From: Amit Vijairania <amit.vijairania-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [OFF TOPIC] Deep Intellect - Inside the mind of
-	the octopus
-Date: Sun, 11 May 2014 21:57:35 -0700
-Message-ID: <CADgBPFCnRB9iOhyzDugtTX0+j7oH+ub2DsZx_RLBXDUf7E8XZA@mail.gmail.com>
-References: <CADgBPFD22+VwJrsa48qcbSDMJVSUo0vwmbiRQRkC0G78jv=wDA@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Implied parity and erasure code
+Date: Mon, 12 May 2014 07:39:55 -0400
+Message-ID: <5370B30B.4000609@dachary.org>
+References: <536CF5BA.8040300@dachary.org> <3472A07E6605974CBC9BC573F1BC02E4AE704806@CERNXCHG42.cern.ch>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============2032548405=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CADgBPFD22+VwJrsa48qcbSDMJVSUo0vwmbiRQRkC0G78jv=wDA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="H0veHWpJ848uoxJ7J34mCKGq10P72csHl"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from smtp.dmail.dachary.org ([91.121.254.229]:34061 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752579AbaELLkA (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 12 May 2014 07:40:00 -0400
+In-Reply-To: <3472A07E6605974CBC9BC573F1BC02E4AE704806@CERNXCHG42.cern.ch>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
---===============2032548405==
-Content-Type: multipart/alternative; boundary=047d7bd76b9023e1e704f92cc9a6
-
---047d7bd76b9023e1e704f92cc9a6
-Content-Type: text/plain; charset=UTF-8
-
-Everyone involved with Ceph must be curious about Cephalopods..  Very
-interesting article..
-    http://www.orionmagazine.org/index.php/articles/article/6474/
-
-Amit Vijairania
---*--
-
---047d7bd76b9023e1e704f92cc9a6
-Content-Type: text/html; charset=UTF-8
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--H0veHWpJ848uoxJ7J34mCKGq10P72csHl
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: quoted-printable
 
-<div dir=3D"ltr"><div><font face=3D"arial, helvetica, sans-serif">Everyone =
-involved with Ceph must be curious about C<span style=3D"color:rgb(51,51,51=
-);line-height:19px">ephalopods.. =C2=A0Very interesting article..</span></f=
-ont></div>
-<div class=3D"gmail_extra">=C2=A0=C2=A0=C2=A0 <a href=3D"http://www.orionma=
-gazine.org/index.php/articles/article/6474/">http://www.orionmagazine.org/i=
-ndex.php/articles/article/6474/</a><br clear=3D"all"><div><div dir=3D"ltr">=
-<br>Amit Vijairania<br>
---*--</div></div></div></div>
 
---047d7bd76b9023e1e704f92cc9a6--
 
---===============2032548405==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
+On 10/05/2014 14:40, Andreas Joachim Peters wrote:
+> Hi Loic,=20
+> I think it is good to have the flexibility to include the global parity=
+ stripes in local subgroups or as in the picture to make a subgroup out o=
+f the global parities and compute a local paritiy for them. Although with=
+ the chosen parameters these local subgroups are not symmetric (5,5 and 4=
+ chunks per group)  but e.g. for 8+4 one would have 3 symmetric local gro=
+ups as drawn and if you project is on a three data center setup you would=
+ like to have for each center a local parity.=20
+>=20
+> But wasn't this already possible with your prototype implementation?
 
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+It was possible to distribute in this way, indeed. But there is no suppor=
+t for the implied parity idea. I wonder how that would fit.
 
---===============2032548405==--
+Cheers
+
+>=20
+> Cheers Andreas.
+>=20
+>=20
+>=20
+> ________________________________________
+> From: Loic Dachary [loic@dachary.org]
+> Sent: 09 May 2014 17:35
+> To: Andreas Joachim Peters
+> Cc: Ceph Development
+> Subject: Implied parity and erasure code
+>=20
+> Hi Andreas,
+>=20
+> The "implied parity bloc" mentionned page 4 of http://anrg.usc.edu/~mah=
+eswaran/Xorbas.pdf is something we've not discussed in the context of the=
+ implementation of the pyramid erasure code plugin. I'm not sure if it wo=
+uld be useful to have. Do you have an opinion ?
+>=20
+> Cheers
+>=20
+> --
+> Lo=EFc Dachary, Artisan Logiciel Libre
+>=20
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+
+
+--H0veHWpJ848uoxJ7J34mCKGq10P72csHl
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlNwswsACgkQ8dLMyEl6F20ouACfZS5YjxQAg/RRtFHPcZHrguLj
+ZTIAn3ynpq1KFC2ROjX80hvhIg/Pq++x
+=DHBU
+-----END PGP SIGNATURE-----
+
+--H0veHWpJ848uoxJ7J34mCKGq10P72csHl--
