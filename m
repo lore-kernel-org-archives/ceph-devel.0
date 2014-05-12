@@ -1,88 +1,48 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Implied parity and erasure code
-Date: Mon, 12 May 2014 07:39:55 -0400
-Message-ID: <5370B30B.4000609@dachary.org>
-References: <536CF5BA.8040300@dachary.org> <3472A07E6605974CBC9BC573F1BC02E4AE704806@CERNXCHG42.cern.ch>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="H0veHWpJ848uoxJ7J34mCKGq10P72csHl"
+From: Ilya Dryomov <ilya.dryomov@inktank.com>
+Subject: [PATCH] crush: decode and initialize chooseleaf_vary_r
+Date: Mon, 12 May 2014 16:17:39 +0400
+Message-ID: <1399897059-4813-1-git-send-email-ilya.dryomov@inktank.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:34061 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752579AbaELLkA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 12 May 2014 07:40:00 -0400
-In-Reply-To: <3472A07E6605974CBC9BC573F1BC02E4AE704806@CERNXCHG42.cern.ch>
+Received: from mail-lb0-f181.google.com ([209.85.217.181]:46934 "EHLO
+	mail-lb0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754597AbaELMRn (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 12 May 2014 08:17:43 -0400
+Received: by mail-lb0-f181.google.com with SMTP id u14so7428656lbd.12
+        for <ceph-devel@vger.kernel.org>; Mon, 12 May 2014 05:17:42 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: Dmitry Smirnov <onlyjob@member.fsf.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---H0veHWpJ848uoxJ7J34mCKGq10P72csHl
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Commit e2b149cc4ba0 ("crush: add chooseleaf_vary_r tunable") added the
+crush_map::chooseleaf_vary_r field but missed the decode part.  This
+lead to misdirected requests caused by incorrect raw crush mapping
+sets.
 
+Fixes: http://tracker.ceph.com/issues/8226
 
+Reported-and-Tested-by: Dmitry Smirnov <onlyjob@member.fsf.org>
+Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
+---
+ net/ceph/osdmap.c |    5 +++++
+ 1 file changed, 5 insertions(+)
 
-On 10/05/2014 14:40, Andreas Joachim Peters wrote:
-> Hi Loic,=20
-> I think it is good to have the flexibility to include the global parity=
- stripes in local subgroups or as in the picture to make a subgroup out o=
-f the global parities and compute a local paritiy for them. Although with=
- the chosen parameters these local subgroups are not symmetric (5,5 and 4=
- chunks per group)  but e.g. for 8+4 one would have 3 symmetric local gro=
-ups as drawn and if you project is on a three data center setup you would=
- like to have for each center a local parity.=20
->=20
-> But wasn't this already possible with your prototype implementation?
+diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
+index 8b8a5a24b223..c547e46084d3 100644
+--- a/net/ceph/osdmap.c
++++ b/net/ceph/osdmap.c
+@@ -329,6 +329,11 @@ static struct crush_map *crush_decode(void *pbyval, void *end)
+ 	dout("crush decode tunable chooseleaf_descend_once = %d",
+ 	     c->chooseleaf_descend_once);
+ 
++	ceph_decode_need(p, end, sizeof(u8), done);
++	c->chooseleaf_vary_r = ceph_decode_8(p);
++	dout("crush decode tunable chooseleaf_vary_r = %d",
++	     c->chooseleaf_vary_r);
++
+ done:
+ 	dout("crush_decode success\n");
+ 	return c;
+-- 
+1.7.10.4
 
-It was possible to distribute in this way, indeed. But there is no suppor=
-t for the implied parity idea. I wonder how that would fit.
-
-Cheers
-
->=20
-> Cheers Andreas.
->=20
->=20
->=20
-> ________________________________________
-> From: Loic Dachary [loic@dachary.org]
-> Sent: 09 May 2014 17:35
-> To: Andreas Joachim Peters
-> Cc: Ceph Development
-> Subject: Implied parity and erasure code
->=20
-> Hi Andreas,
->=20
-> The "implied parity bloc" mentionned page 4 of http://anrg.usc.edu/~mah=
-eswaran/Xorbas.pdf is something we've not discussed in the context of the=
- implementation of the pyramid erasure code plugin. I'm not sure if it wo=
-uld be useful to have. Do you have an opinion ?
->=20
-> Cheers
->=20
-> --
-> Lo=EFc Dachary, Artisan Logiciel Libre
->=20
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-
-
---H0veHWpJ848uoxJ7J34mCKGq10P72csHl
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlNwswsACgkQ8dLMyEl6F20ouACfZS5YjxQAg/RRtFHPcZHrguLj
-ZTIAn3ynpq1KFC2ROjX80hvhIg/Pq++x
-=DHBU
------END PGP SIGNATURE-----
-
---H0veHWpJ848uoxJ7J34mCKGq10P72csHl--
