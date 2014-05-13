@@ -1,57 +1,31 @@
-From: Karel Zak <kzak@redhat.com>
-Subject: Re: [PATCH] rules: add by-parttypeuuid rule for GPT
- labeled partitions
-Date: Tue, 13 May 2014 11:53:43 +0200
-Message-ID: <20140513095343.GO8951@x2.net.home>
-References: <1399671097-32015-1-git-send-email-sage@inktank.com>
- <CAPXgP11h0C0BA0u+CfTV2LDz2T0vdRBThpxXu-0U-3RX2gnzDw@mail.gmail.com>
- <alpine.DEB.2.00.1405091454000.28481@cobra.newdream.net>
- <CAPXgP10_a1XWD-ZmPYkcctMEfP_D203QnEpS6d7R2Z+HYVS_cw@mail.gmail.com>
- <alpine.DEB.2.00.1405091527480.28481@cobra.newdream.net>
- <CAPXgP10_kwapAMsq8hgsGE3AyOuWd9uBqyb-EkP=RnNRBpeaBg@mail.gmail.com>
+From: Alex Elder <elder@ieee.org>
+Subject: Re: crash in rbd_img_request_create
+Date: Tue, 13 May 2014 07:35:57 -0500
+Message-ID: <537211AD.9070209@ieee.org>
+References: <CABt9es_QVVHR30D+VyKyn+gr=0pHahwwvZAbXAvG78ixX9t86w@mail.gmail.com>	<536EEA5C.70503@ieee.org>	<CALFYKtBXLKhm1HvwK=FGQpJdx_TMaWE_7a0s6Qo7=9vdcsjkkw@mail.gmail.com>	<53704F70.3090800@ieee.org> <CABt9es8snhMJ5jg9OkiYVmXU6iX9aj3jAG8_XL1Th_BmJpgonQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <systemd-devel-bounces@lists.freedesktop.org>
-Content-Disposition: inline
-In-Reply-To: <CAPXgP10_kwapAMsq8hgsGE3AyOuWd9uBqyb-EkP=RnNRBpeaBg@mail.gmail.com>
-List-Unsubscribe: <http://lists.freedesktop.org/mailman/options/systemd-devel>,
- <mailto:systemd-devel-request@lists.freedesktop.org?subject=unsubscribe>
-List-Archive: <http://lists.freedesktop.org/archives/systemd-devel>
-List-Post: <mailto:systemd-devel@lists.freedesktop.org>
-List-Help: <mailto:systemd-devel-request@lists.freedesktop.org?subject=help>
-List-Subscribe: <http://lists.freedesktop.org/mailman/listinfo/systemd-devel>,
- <mailto:systemd-devel-request@lists.freedesktop.org?subject=subscribe>
-Errors-To: systemd-devel-bounces@lists.freedesktop.org
-Sender: "systemd-devel" <systemd-devel-bounces@lists.freedesktop.org>
-To: Kay Sievers <kay@vrfy.org>
-Cc: ceph-devel@vger.kernel.org, systemd-devel@lists.freedesktop.org, Sage Weil <sage@inktank.com>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ig0-f170.google.com ([209.85.213.170]:40779 "EHLO
+	mail-ig0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759640AbaEMMfr (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 13 May 2014 08:35:47 -0400
+Received: by mail-ig0-f170.google.com with SMTP id r10so5834710igi.3
+        for <ceph-devel@vger.kernel.org>; Tue, 13 May 2014 05:35:47 -0700 (PDT)
+In-Reply-To: <CABt9es8snhMJ5jg9OkiYVmXU6iX9aj3jAG8_XL1Th_BmJpgonQ@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Hannes Landeholm <hannes@jumpstarter.io>, Ceph Development <ceph-devel@vger.kernel.org>, Ilya Dryomov <ilya.dryomov@inktank.com>
+Cc: Thorwald Lundqvist <thorwald@jumpstarter.io>
 
-T24gTW9uLCBNYXkgMTIsIDIwMTQgYXQgMDU6MTg6NTZQTSArMDIwMCwgS2F5IFNpZXZlcnMgd3Jv
-dGU6Cj4gPiBJIGp1c3QgbG9va2VkIHVwIGxpYnVkZXYgYW5kIGl0IGxvb2tzIGxpa2UgdGhlcmUg
-aXMgZXZlbiBhIHB5dWRldiB3cmFwcGVyLAo+ID4gc28gdGhhdCBjb3VsZCBpbmRlZWQgd29yayBi
-ZXR0ZXIuICBJIHRha2UgaXQgdGhhdCBxdWVyaWVzIHZpYQo+ID4gdWRldl9lbnVtZXJhdGUgZm9y
-IChzYXkpIElEX1BBUlRfRU5UUllfVFlQRT14IGFyZSBlZmZpY2llbnQ/Cj4gCj4gU3VyZSwgZmls
-dGVyIGZvciAiYmxvY2siIGRldmljZXMgYW5kIHRoaXMgb3Igb3RoZXIgR1BUIHByb3BlcnRpZXMu
-IFRoZQo+IGxpYnVkZXYgQVBJIHdpbGwganVzdCBmaW5kIHRoZSBkZXZpY2VzIGlzIC9zeXMgYW5k
-IHJlYWQgdGhlIGRhdGFiYXNlCj4gZmlsZXMgaW4gdG1wZnMgL3J1biBhbmQsIGl0IHdpbGwgbm90
-IHRhbGsgdG8gYW55IGRldmljZXMsIHNvIGl0IHNob3VsZAo+IHBlcmZvcm0gcHJldHR5IHdlbGwu
-CgogYW5kIG9uIGNvbW1hbmQgbGluZSBsc2Jsayg4KSByZWFkcyB0aGUgaW5mbyBmcm9tIHVkZXYg
-ZGIsIHNvIHlvdSBjYW4KIHVzZToKCiAkIGxzYmxrIC1vK1BBUlRUWVBFCiBOQU1FICAgTUFKOk1J
-TiBSTSAgIFNJWkUgUk8gVFlQRSAgTU9VTlRQT0lOVCBQQVJUVFlQRQogc2RhICAgICAgODowICAg
-IDAgMTQ5LjFHICAwIGRpc2sKIOKUnOKUgHNkYTEgICA4OjEgICAgMCAgMTAwME0gIDAgcGFydCAg
-L2Jvb3QgICAgICBjMTJhNzMyOC1mODFmLTExZDItYmE0Yi0wMGEwYzkzZWM5M2IKIOKUnOKUgHNk
-YTIgICA4OjIgICAgMCAgICAgMkcgIDAgcGFydCAgICAgICAgICAgICBlYmQwYTBhMi1iOWU1LTQ0
-MzMtODdjMC02OGI2YjcyNjk5YzcKIOKUnOKUgHNkYTMgICA4OjMgICAgMCAgIDkuN0cgIDAgcGFy
-dCAgW1NXQVBdICAgICAwNjU3ZmQ2ZC1hNGFiLTQzYzQtODRlNS0wOTMzYzg0YjRmNGYKIOKUnOKU
-gHNkYTQgICA4OjQgICAgMCAgMzQuMkcgIDAgcGFydCAgLyAgICAgICAgICBlYmQwYTBhMi1iOWU1
-LTQ0MzMtODdjMC02OGI2YjcyNjk5YzcKIOKUnOKUgHNkYTUgICA4OjUgICAgMCAgNjMuMkcgIDAg
-cGFydCAgL2hvbWUgICAgICBlYmQwYTBhMi1iOWU1LTQ0MzMtODdjMC02OGI2YjcyNjk5YzcKIOKU
-lOKUgHNkYTYgICA4OjYgICAgMCAgMzkuMUcgIDAgcGFydCAgICAgICAgICAgICBlYmQwYTBhMi1i
-OWU1LTQ0MzMtODdjMC02OGI2YjcyNjk5YzcKCgood2VsbCwgdGhpcyBpcyBmcm9tIGdpdCB0cmVl
-LCB3aWxsIGJlIGluIHYyLjI1IDotKQoKICAgIEthcmVsCgotLSAKIEthcmVsIFphayAgPGt6YWtA
-cmVkaGF0LmNvbT4KIGh0dHA6Ly9rYXJlbHphay5ibG9nc3BvdC5jb20KX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18Kc3lzdGVtZC1kZXZlbCBtYWlsaW5nIGxp
-c3QKc3lzdGVtZC1kZXZlbEBsaXN0cy5mcmVlZGVza3RvcC5vcmcKaHR0cDovL2xpc3RzLmZyZWVk
-ZXNrdG9wLm9yZy9tYWlsbWFuL2xpc3RpbmZvL3N5c3RlbWQtZGV2ZWwK
+On 05/12/2014 12:28 PM, Hannes Landeholm wrote:
+> We where experimenting to use ZFS as a backend for
+> CEPH just to see what the performance and storage saving
+> characteristics was like but we're gonna completely switch to ext4 now
+> and see if the problem goes away.
+
+This is very good to know. Please report back what you find.
+Thanks.
+
+					-Alex
