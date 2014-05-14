@@ -1,53 +1,62 @@
 From: Gregory Farnum <greg@inktank.com>
-Subject: Re: XioMessenger (RDMA) Status Update
-Date: Tue, 13 May 2014 19:55:27 -0700
-Message-ID: <CAPYLRzjFgJXWhVxXMPzPzx-fCxR9fMTrFoCJueQZssoZQGcWHw@mail.gmail.com>
-References: <774348207.178.1400024312462.JavaMail.root@thunderbeast.private.linuxbox.com>
-	<731499372.186.1400031039363.JavaMail.root@thunderbeast.private.linuxbox.com>
+Subject: Suspend and the ceph clients
+Date: Wed, 14 May 2014 15:07:44 -0700
+Message-ID: <CAPYLRzhr7XA9sBArqe=5bPaXd3XPwgVGo_QOM024-J_ovh93BA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qg0-f42.google.com ([209.85.192.42]:49559 "EHLO
-	mail-qg0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751947AbaENCz2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 13 May 2014 22:55:28 -0400
-Received: by mail-qg0-f42.google.com with SMTP id q107so1852295qgd.15
-        for <ceph-devel@vger.kernel.org>; Tue, 13 May 2014 19:55:27 -0700 (PDT)
-In-Reply-To: <731499372.186.1400031039363.JavaMail.root@thunderbeast.private.linuxbox.com>
+Received: from mail-qc0-f181.google.com ([209.85.216.181]:63261 "EHLO
+	mail-qc0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752502AbaENWHp convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 May 2014 18:07:45 -0400
+Received: by mail-qc0-f181.google.com with SMTP id m20so356767qcx.26
+        for <ceph-devel@vger.kernel.org>; Wed, 14 May 2014 15:07:44 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Matt W. Benjamin" <matt@cohortfs.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: Sage Weil <sage@inktank.com>, Zheng Yan <ukernel@gmail.com>
 
-On Tue, May 13, 2014 at 6:30 PM, Matt W. Benjamin <matt@cohortfs.com> wrote:
-> Hi Greg,
->
-> 1. there isn't support for for mark_down() yet (!), but we're working
-> on it.  I've had good discussions with the Accelio team regarding exposing
-> explicit channel and flow control interfaces, which round out that topic
-> as we were exploring it.
->
-> 2. the big changes in this push are major cleanups and bug fixes, plus
-> much wider integration with the user space code.  my #1 action item from
-> our last convo was to first extend Xio coverage everywhere, and in particular,
-> add support for intra-cluster messaging over Xio.
->
-> 2.1 on the cleanups and bugs front, starting with biggest, I finished support
-> for peer identification, using a small api change to Accelio (it's now on the
-> official Accelio for_next branch).  a Connection refcnt underrun is fixed.  then
-> I added a mechanism to bypass Accelio for intra-server messages, using a special
-> singleton connection.  I cleaned up, but didn't deepen, feature support, as a
-> temporary measure.  There's lot's of cleanup and various fixes in ceph_osd, too.
->
-> 2.2 then, I did first cut integration with the MDS, and while at it, the Client
-> module as well.  I've only started verifying, but so far it looks like the
-> intra-cluster messaging paths work, and a client workload may work--more fixes
-> likely forthcoming.
->
-> I have a plan to get at least the starter policy interfaces like mark_down and
-> mark_down_all shorty.
+There's a recent ticket discussing the behavior of ceph-fuse after the
+machine it's running on has been suspended:
+http://tracker.ceph.com/issues/8291
 
-Cool. Let me know when those features are ready for a semantics review
-or there's something else we need to talk about. :)
+In short, CephFS clients which are disconnected from the cluster for a
+sufficiently long time are generally forbidden from reconnecting =E2=80=
+=94
+after a configurable timeout, their "capabilities" on inodes and
+dentries are revoked, and other users are allowed to change them. If
+the client then comes back, it's entirely possible it has incompatible
+changes to the tree, so we don't let it reconnect in order to prevent
+that. (We could make the system smarter in some situations, if for
+instance nobody has changed the given filesystem data in the
+meanwhile, but that's hard and a problem for another day.)
+
+Apparently, ceph-fuse does exactly this, as we expect (although we
+have newly-merged features which let the admin force a reconnect). But
+the kernel client does allow a reconnect. I haven't done this myself,
+so the first question is just a fact check for Sage or Zheng:
+1) What is the kernel client doing after suspend? Does it in fact
+reconnect under situations where ceph-fuse won't, and what are they?
+
+More interestingly, while suspended systems aren't part of our normal
+target use case, they'd be nice to support well. The trivial solution
+would be to somehow flush out all dirty data on suspend, and then on
+wake or when we discover we have a reset session, we can clean out our
+cache and reconnect as a new client if we have no dirty data.
+Unfortunately, I don't know anything about Linux's suspend
+functionality or APIs, and my weak attempts at googling and grepping
+aren't turning anything up. So a question to everybody:
+
+2) What notifications does Linux send, and what filesystem mechanisms
+does it invoke, when it is suspending?
+I see that it has in the past forced a sync whenever suspending, but I
+think that's no longer required. Are there other interfaces we can
+rely on, or use heuristically?
 -Greg
 Software Engineer #42 @ http://inktank.com | http://ceph.com
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
