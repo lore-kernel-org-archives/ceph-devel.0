@@ -1,37 +1,59 @@
-From: Sage Weil <sage@inktank.com>
-Subject: [GIT PULL] Ceph fixes for -rc6
-Date: Fri, 16 May 2014 12:59:44 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1405161252410.5149@cobra.newdream.net>
+From: Loic Dachary <loic@dachary.org>
+Subject: bloom filters
+Date: Fri, 16 May 2014 22:28:10 -0400
+Message-ID: <5376C93A.1050203@dachary.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: torvalds@linux-foundation.org
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="bxkIVRqLKBh1Clc2cbxaLWCHns9bTqu30"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from smtp.dmail.dachary.org ([91.121.254.229]:39724 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754042AbaEQC2N (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 May 2014 22:28:13 -0400
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sahid Ferdjaoui <sahid.ferdjaoui@cloudwatt.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Linus,
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--bxkIVRqLKBh1Clc2cbxaLWCHns9bTqu30
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-Please pull the following Ceph fixes from
+Hi Sahid,
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
+Here are the files implementing the bloom filter we discussed tonight
 
-The first patch fixes a problem when we have a page count of 0 for 
-sendpage which is triggered by zfs.  The second fixes a bug in CRUSH that 
-was resolved in the userland code a while back but fell through the cracks 
-on the kernel side.
+  https://github.com/ceph/ceph/blob/master/src/common/bloom_filter.hpp
+  https://github.com/ceph/ceph/blob/master/src/common/bloom_filter.cc
 
-Thanks!
-sage
+and the associated unit tests
+
+  https://github.com/ceph/ceph/blob/master/src/test/common/test_bloom_fil=
+ter.cc
+
+Improving code coverage would be nice way for you to learn the code base =
+;-)
+
+Cheers
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
 
 
-----------------------------------------------------------------
-Chunwei Chen (1):
-      libceph: fix corruption when using page_count 0 page in rbd
+--bxkIVRqLKBh1Clc2cbxaLWCHns9bTqu30
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
-Ilya Dryomov (1):
-      crush: decode and initialize chooseleaf_vary_r
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
 
- net/ceph/messenger.c | 20 +++++++++++++++++++-
- net/ceph/osdmap.c    |  5 +++++
- 2 files changed, 24 insertions(+), 1 deletion(-)
+iEYEARECAAYFAlN2yToACgkQ8dLMyEl6F23vjgCbBGuaKyoGV/c89PNMLNPRXIBP
+Y6QAnjq48asK1bmxpnWOchF9zghD4GlW
+=srHz
+-----END PGP SIGNATURE-----
+
+--bxkIVRqLKBh1Clc2cbxaLWCHns9bTqu30--
