@@ -1,40 +1,35 @@
 From: Loic Dachary <loic@dachary.org>
-Subject: bloom filters
-Date: Fri, 16 May 2014 22:28:10 -0400
-Message-ID: <5376C93A.1050203@dachary.org>
+Subject: Ceph low hanging fruit
+Date: Fri, 16 May 2014 22:38:19 -0400
+Message-ID: <5376CB9B.3080903@dachary.org>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="bxkIVRqLKBh1Clc2cbxaLWCHns9bTqu30"
+ boundary="0qIM5tWfRwOTKV5FCEQ6n3We3KdRUWWn4"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:39724 "EHLO
+Received: from smtp.dmail.dachary.org ([91.121.254.229]:39732 "EHLO
 	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754042AbaEQC2N (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 May 2014 22:28:13 -0400
+	with ESMTP id S1755757AbaEQCiW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 May 2014 22:38:22 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sahid Ferdjaoui <sahid.ferdjaoui@cloudwatt.com>
+To: Florent Flament <florent.flament@cloudwatt.com>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
 This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---bxkIVRqLKBh1Clc2cbxaLWCHns9bTqu30
+--0qIM5tWfRwOTKV5FCEQ6n3We3KdRUWWn4
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: quoted-printable
 
-Hi Sahid,
+Hi Florent,
 
-Here are the files implementing the bloom filter we discussed tonight
+Here is a low hanging fruit for you to walk through the Ceph contribution=
+ process:
 
-  https://github.com/ceph/ceph/blob/master/src/common/bloom_filter.hpp
-  https://github.com/ceph/ceph/blob/master/src/common/bloom_filter.cc
+  http://tracker.ceph.com/issues/7725
 
-and the associated unit tests
-
-  https://github.com/ceph/ceph/blob/master/src/test/common/test_bloom_fil=
-ter.cc
-
-Improving code coverage would be nice way for you to learn the code base =
-;-)
+I'm announcing it on the development mailing list so that it is not taken=
+ from you ;-)
 
 Cheers
 
@@ -42,7 +37,8 @@ Cheers
 Lo=EFc Dachary, Artisan Logiciel Libre
 
 
---bxkIVRqLKBh1Clc2cbxaLWCHns9bTqu30
+
+--0qIM5tWfRwOTKV5FCEQ6n3We3KdRUWWn4
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -51,9 +47,9 @@ Content-Disposition: attachment; filename="signature.asc"
 Version: GnuPG v2.0.22 (GNU/Linux)
 Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
 
-iEYEARECAAYFAlN2yToACgkQ8dLMyEl6F23vjgCbBGuaKyoGV/c89PNMLNPRXIBP
-Y6QAnjq48asK1bmxpnWOchF9zghD4GlW
-=srHz
+iEYEARECAAYFAlN2y5sACgkQ8dLMyEl6F22oQwCgjRaiRG0/Ip4aYRo0irC6AwG8
+XO8An1J8Fi7x+zceAEn3yYEzQgwnxLqb
+=Lk1w
 -----END PGP SIGNATURE-----
 
---bxkIVRqLKBh1Clc2cbxaLWCHns9bTqu30--
+--0qIM5tWfRwOTKV5FCEQ6n3We3KdRUWWn4--
