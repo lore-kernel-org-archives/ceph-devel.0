@@ -1,108 +1,156 @@
 From: Alexandre Oliva <oliva@gnu.org>
-Subject: [PATCH] osd: avoid flushing every TEMP removal to speedup startup
-Date: Sun, 18 May 2014 09:47:59 -0300
-Message-ID: <oriop3xngg.fsf@free.home>
+Subject: [PATCH] ceph_filestore_dump: introduce --type=premove to start multiple removals
+Date: Sun, 18 May 2014 09:45:35 -0300
+Message-ID: <ormwefxnkg.fsf@free.home>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
 Received: from linux-libre.fsfla.org ([208.118.235.54]:45690 "EHLO
 	linux-libre.fsfla.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751159AbaERM7s (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 18 May 2014 08:59:48 -0400
+	with ESMTP id S1751166AbaERM7t (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 18 May 2014 08:59:49 -0400
 Received: from freie.home (home.lxoliva.fsfla.org [172.31.160.22])
-	by linux-libre.fsfla.org (8.14.4/8.14.4/Debian-2ubuntu2.1) with ESMTP id s4IConuo030195
-	for <ceph-devel@vger.kernel.org>; Sun, 18 May 2014 12:50:50 GMT
+	by linux-libre.fsfla.org (8.14.4/8.14.4/Debian-2ubuntu2.1) with ESMTP id s4ICohtl030192
+	for <ceph-devel@vger.kernel.org>; Sun, 18 May 2014 12:50:43 GMT
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-When a btrfs OSD suicides because it couldn't keep up with others
-(recovery included), it is often the case that the filesystem is in a
-state in which creating and removing snapshots takes a long time.  It
-is likely that there are going to be plenty of recovering PGs (with
-corresponding TEMP directories), and we will create and remove a btrfs
-snapshot for every such directory we remove at startup.  This is very
-wasteful: there's no reason to not pile up as many removals as
-possible before syncing and flushing the removal so as to force a
-btrfs snapshot.
+After a major crushmap reconfiguration, OSDs needed some help to speed
+up recovery, freeing up space on nearly-full OSDs earlier than the
+cluster would on its own, in some cases temporarily sacrificing some
+redundancy.
 
-This patch introduces an optional argument to the function used to
-remove PGs to control whether or not to perform the final flush.  The
-flush still happens if the call does not pass that argument, but with
-the patch, the startup removals skip the per-PG flush, and run a
-single flush at the end.
+Unfortunately, ceph_filestore_dump may take a long time to remove even
+a single PG, let alone several PGs, and the OSD had to remain down for
+the duration of the removal.
+
+Part of the solution was enabling ceph_filestore_dump to just start
+the removal of a PG, dropping the metadata and renaming the collection
+so that the OSD will pick it up and complete the removal.  This patch
+introduces --type=premove in ceph_filestore_dump to do this.
+
+Another part of the solution was avoiding the huge startup overhead of
+ceph_filestore_dump: mounting the filestore was taking longer than
+removing the files proper, and I had more than a handful of PGs to
+remove at once.  So, I arranged for premove to accept a list of PGs
+instead of a single one, also in this patch.
+
+The OSD would still clean everything up before it would join the
+cluster; this was addressed in a separate patch.
 
 Signed-off-by: Alexandre Oliva <oliva@gnu.org>
 ---
- src/osd/OSD.cc |   12 +++++++++---
- src/osd/OSD.h  |    3 ++-
- 2 files changed, 11 insertions(+), 4 deletions(-)
+ src/tools/ceph_filestore_dump.cc |   67 ++++++++++++++++++++++++++++++++++++--
+ 1 file changed, 63 insertions(+), 4 deletions(-)
 
-diff --git a/src/osd/OSD.cc b/src/osd/OSD.cc
-index 4240ba8..504cb71 100644
---- a/src/osd/OSD.cc
-+++ b/src/osd/OSD.cc
-@@ -1774,7 +1774,8 @@ int OSD::read_superblock()
- 
- 
- 
--void OSD::recursive_remove_collection(ObjectStore *store, coll_t tmp)
-+void OSD::recursive_remove_collection(ObjectStore *store, coll_t tmp,
-+				      bool flush)
- {
-   OSDriver driver(
-     store,
-@@ -1810,7 +1811,8 @@ void OSD::recursive_remove_collection(ObjectStore *store, coll_t tmp)
-   t.remove_collection(tmp);
-   int r = store->apply_transaction(t);
-   assert(r == 0);
--  store->sync_and_flush();
-+  if (flush)
-+    store->sync_and_flush();
+diff --git a/src/tools/ceph_filestore_dump.cc b/src/tools/ceph_filestore_dump.cc
+index 87a8387..1149622 100644
+--- a/src/tools/ceph_filestore_dump.cc
++++ b/src/tools/ceph_filestore_dump.cc
+@@ -482,6 +482,40 @@ int finish_remove_pgs(ObjectStore *store, uint64_t *next_removal_seq)
+   return 0;
  }
  
- 
-@@ -2046,6 +2048,7 @@ void OSD::load_pgs()
- 
-   set<spg_t> head_pgs;
-   map<spg_t, interval_set<snapid_t> > pgs;
-+  bool flush = false;
-   for (vector<coll_t>::iterator it = ls.begin();
-        it != ls.end();
-        ++it) {
-@@ -2056,7 +2059,8 @@ void OSD::load_pgs()
-     if (it->is_temp(pgid) ||
- 	it->is_removal(&seq, &pgid)) {
-       dout(10) << "load_pgs " << *it << " clearing temp" << dendl;
--      recursive_remove_collection(store, *it);
-+      recursive_remove_collection(store, *it, false);
-+      flush = true;
-       continue;
-     }
- 
-@@ -2074,6 +2078,8 @@ void OSD::load_pgs()
- 
-     dout(10) << "load_pgs ignoring unrecognized " << *it << dendl;
++//Based on part of OSD::load_pgs()
++int compute_next_removal_seq(ObjectStore *store, uint64_t *next_removal_seq)
++{
++  vector<coll_t> ls;
++  int r = store->list_collections(ls);
++  if (r < 0) {
++    cout << "finish_remove_pgs: failed to list pgs: " << cpp_strerror(-r)
++      << std::endl;
++    return r;
++  }
++
++  for (vector<coll_t>::iterator it = ls.begin();
++       it != ls.end();
++       ++it) {
++    spg_t pgid;
++    snapid_t snap;
++
++    if (it->is_temp(pgid) ||
++	it->is_pg(pgid, snap)) {
++      continue;
++    }
++
++    uint64_t seq;
++    if (it->is_removal(&seq, &pgid)) {
++      if (seq >= *next_removal_seq)
++	*next_removal_seq = seq + 1;
++      continue;
++    }
++
++    //cout << "finish_remove_pgs ignoring unrecognized " << *it << std::endl;
++  }
++  return 0;
++}
++
+ int initiate_new_remove_pg(ObjectStore *store, spg_t r_pgid,
+     uint64_t *next_removal_seq)
+ {
+@@ -1088,7 +1122,7 @@ int main(int argc, char **argv)
+     ("pgid", po::value<string>(&pgidstr),
+      "PG id, mandatory except for import")
+     ("type", po::value<string>(&type),
+-     "Arg is one of [info, log, remove, export, or import], mandatory")
++     "Arg is one of [info, log, remove, premove, export, or import], mandatory")
+     ("file", po::value<string>(&file),
+      "path of file to export or import")
+     ("debug", "Enable diagnostic output to stderr")
+@@ -1122,7 +1156,7 @@ int main(int argc, char **argv)
+     return 1;
+   } 
+   if (!vm.count("type")) {
+-    cout << "Must provide type (info, log, remove, export, import)"
++    cout << "Must provide type (info, log, remove, premove, export, import)"
+       << std::endl << desc << std::endl;
+     return 1;
+   } 
+@@ -1158,8 +1192,9 @@ int main(int argc, char **argv)
    }
-+  if (flush)
-+    store->sync_and_flush();
- 
-   bool has_upgraded = false;
-   for (map<spg_t, interval_set<snapid_t> >::iterator i = pgs.begin();
-diff --git a/src/osd/OSD.h b/src/osd/OSD.h
-index ce8b74c..f599e43 100644
---- a/src/osd/OSD.h
-+++ b/src/osd/OSD.h
-@@ -870,7 +870,8 @@ public:
-     hobject_t oid(sobject_t("infos", CEPH_NOSNAP));
-     return oid;
+   
+   if ((fspath.length() == 0 || jpath.length() == 0) ||
+-      (type != "info" && type != "log" && type != "remove" && type != "export"
+-        && type != "import") ||
++      (type != "info" && type != "log" &&
++       type != "remove" && type != "premove" &&
++       type != "export" && type != "import") ||
+       (type != "import" && pgidstr.length() == 0)) {
+     cerr << "Invalid params" << std::endl;
+     exit(1);
+@@ -1332,6 +1367,30 @@ int main(int argc, char **argv)
+     goto out;
    }
--  static void recursive_remove_collection(ObjectStore *store, coll_t tmp);
-+  static void recursive_remove_collection(ObjectStore *store, coll_t tmp,
-+					  bool flush = true);
  
-   /**
-    * get_osd_initial_compat_set()
++  if (type == "premove") {
++    uint64_t next_removal_seq = 0;	//My local seq
++    compute_next_removal_seq(fs, &next_removal_seq);
++    for (const char *next = pgidstr.c_str(); *next;) {
++      int r = initiate_new_remove_pg(fs, pgid, &next_removal_seq);
++      if (r) {
++	cout << "PG '" << pgid << "' not found" << std::endl;
++	ret = 1;
++      } else
++	cout << "Remove initiated" << std::endl;
++
++      while (*next && *next != ' ' && *next != '\n' && *next != ',')
++	next++;
++      while (*next && !(*next != ' ' && *next != '\n' && *next != ','))
++	next++;
++
++      if (*next && !pgid.parse(next))
++	break;
++      log_oid = OSD::make_pg_log_oid(pgid);
++      biginfo_oid = OSD::make_pg_biginfo_oid(pgid);
++    }
++    goto out;
++  }
++
+   r = fs->list_collections(ls);
+   if (r < 0) {
+     cout << "failed to list pgs: " << cpp_strerror(-r) << std::endl;
+
 
 -- 
 Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
