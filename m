@@ -1,126 +1,69 @@
-From: Samuel Just <sam.just@inktank.com>
-Subject: Re: [PATCH] osd: avoid flushing every TEMP removal to speedup startup
-Date: Mon, 19 May 2014 13:16:47 -0700
-Message-ID: <CA+4uBUbjTfn9-8_EzjFXv1ydrtAMPXHqRk=Kim8MC3+=4Y-Rig@mail.gmail.com>
-References: <oriop3xngg.fsf@free.home>
-	<CA+4uBUY_wfrYQByk3_f7ry9OnxSDL+w+6sRW=WesXjgpUcE0_g@mail.gmail.com>
+From: David McBride <dwm37-KWPb1pKIrIJaa/9Udqfwiw@public.gmane.org>
+Subject: Re: Ceph Plugin for Collectd
+Date: Mon, 19 May 2014 21:45:50 +0100
+Message-ID: <537A6D7E.4010400@cam.ac.uk>
+References: <53736094.4060104@1und1.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qg0-f46.google.com ([209.85.192.46]:39993 "EHLO
-	mail-qg0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753803AbaESUQs (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 19 May 2014 16:16:48 -0400
-Received: by mail-qg0-f46.google.com with SMTP id q108so9600277qgd.33
-        for <ceph-devel@vger.kernel.org>; Mon, 19 May 2014 13:16:48 -0700 (PDT)
-In-Reply-To: <CA+4uBUY_wfrYQByk3_f7ry9OnxSDL+w+6sRW=WesXjgpUcE0_g@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre Oliva <oliva@gnu.org>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <53736094.4060104-JIpuZCKxcH8@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Christian Eichelmann <christian.eichelmann-JIpuZCKxcH8@public.gmane.org>
+Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, Ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Nvm, sync_and_flush forces a sync for non-writeahead journals.
--Sam
+On 14/05/14 13:24, Christian Eichelmann wrote:
+> Hi Ceph User!
+> 
+> I had a look at the "official" collectd fork for ceph, which is quite
+> outdated and not compatible with the upstream version.
+> 
+> Since this was not an option for us, I've worte a Python Plugin for
+> Collectd, that gets all the precious informations out of the admin
+> sockets "perf dump" command. It runs on our productive cluster right now
+> and I'd like to share it with you:
+> 
+> https://github.com/Crapworks/collectd-ceph
+> 
+> Any feedback is welcome!
 
-On Mon, May 19, 2014 at 1:15 PM, Samuel Just <sam.just@inktank.com> wrote:
-> Why would the osd need to create and remove 1 btrfs snapshot per temp directory?
-> -Sam
->
-> On Sun, May 18, 2014 at 5:47 AM, Alexandre Oliva <oliva@gnu.org> wrote:
->> When a btrfs OSD suicides because it couldn't keep up with others
->> (recovery included), it is often the case that the filesystem is in a
->> state in which creating and removing snapshots takes a long time.  It
->> is likely that there are going to be plenty of recovering PGs (with
->> corresponding TEMP directories), and we will create and remove a btrfs
->> snapshot for every such directory we remove at startup.  This is very
->> wasteful: there's no reason to not pile up as many removals as
->> possible before syncing and flushing the removal so as to force a
->> btrfs snapshot.
->>
->> This patch introduces an optional argument to the function used to
->> remove PGs to control whether or not to perform the final flush.  The
->> flush still happens if the call does not pass that argument, but with
->> the patch, the startup removals skip the per-PG flush, and run a
->> single flush at the end.
->>
->> Signed-off-by: Alexandre Oliva <oliva@gnu.org>
->> ---
->>  src/osd/OSD.cc |   12 +++++++++---
->>  src/osd/OSD.h  |    3 ++-
->>  2 files changed, 11 insertions(+), 4 deletions(-)
->>
->> diff --git a/src/osd/OSD.cc b/src/osd/OSD.cc
->> index 4240ba8..504cb71 100644
->> --- a/src/osd/OSD.cc
->> +++ b/src/osd/OSD.cc
->> @@ -1774,7 +1774,8 @@ int OSD::read_superblock()
->>
->>
->>
->> -void OSD::recursive_remove_collection(ObjectStore *store, coll_t tmp)
->> +void OSD::recursive_remove_collection(ObjectStore *store, coll_t tmp,
->> +                                     bool flush)
->>  {
->>    OSDriver driver(
->>      store,
->> @@ -1810,7 +1811,8 @@ void OSD::recursive_remove_collection(ObjectStore *store, coll_t tmp)
->>    t.remove_collection(tmp);
->>    int r = store->apply_transaction(t);
->>    assert(r == 0);
->> -  store->sync_and_flush();
->> +  if (flush)
->> +    store->sync_and_flush();
->>  }
->>
->>
->> @@ -2046,6 +2048,7 @@ void OSD::load_pgs()
->>
->>    set<spg_t> head_pgs;
->>    map<spg_t, interval_set<snapid_t> > pgs;
->> +  bool flush = false;
->>    for (vector<coll_t>::iterator it = ls.begin();
->>         it != ls.end();
->>         ++it) {
->> @@ -2056,7 +2059,8 @@ void OSD::load_pgs()
->>      if (it->is_temp(pgid) ||
->>         it->is_removal(&seq, &pgid)) {
->>        dout(10) << "load_pgs " << *it << " clearing temp" << dendl;
->> -      recursive_remove_collection(store, *it);
->> +      recursive_remove_collection(store, *it, false);
->> +      flush = true;
->>        continue;
->>      }
->>
->> @@ -2074,6 +2078,8 @@ void OSD::load_pgs()
->>
->>      dout(10) << "load_pgs ignoring unrecognized " << *it << dendl;
->>    }
->> +  if (flush)
->> +    store->sync_and_flush();
->>
->>    bool has_upgraded = false;
->>    for (map<spg_t, interval_set<snapid_t> >::iterator i = pgs.begin();
->> diff --git a/src/osd/OSD.h b/src/osd/OSD.h
->> index ce8b74c..f599e43 100644
->> --- a/src/osd/OSD.h
->> +++ b/src/osd/OSD.h
->> @@ -870,7 +870,8 @@ public:
->>      hobject_t oid(sobject_t("infos", CEPH_NOSNAP));
->>      return oid;
->>    }
->> -  static void recursive_remove_collection(ObjectStore *store, coll_t tmp);
->> +  static void recursive_remove_collection(ObjectStore *store, coll_t tmp,
->> +                                         bool flush = true);
->>
->>    /**
->>     * get_osd_initial_compat_set()
->>
->> --
->> Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
->> You must be the change you wish to see in the world. -- Gandhi
->> Be Free! -- http://FSFLA.org/   FSF Latin America board member
->> Free Software Evangelist|Red Hat Brasil GNU Toolchain Engineer
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Fun, I'd just implemented something very similar!
+
+I've just pushed my version upstream to:
+
+ https://github.com/dwm/collectd-ceph
+
+There appear to be some minor differences between our designs:
+
+ * I don't require that a types DB be kept up to date and consistent;
+   rather, I've reused the generic 'counter' and 'gauge' types.
+
+ * My version includes some historical processing to allow for the
+   calculation of per-period, rather than global, average values.
+
+ * Your version is nicer in that it communicates with the admin socket
+   directly; I was lazy and simply invoked the `ceph` command-line tool
+   to do that work for me.  It's not currently a significant
+   performance hit, but should be improved.
+
+I've been feeding all of my Ceph performance counter data to a Graphite
+cluster via CollectD, using the CollectD AMQP plugin and a RabbitMQ
+cluster as an intermediary, and Grafana as a query/graphing tool.
+
+Apart from causing some stress on the disk-subsystem attempting to
+write-out all those metrics, this has been working out quite well...
+
+Cheers,
+David
+-- 
+David McBride <dwm37-KWPb1pKIrIJaa/9Udqfwiw@public.gmane.org>
+Unix Specialist, University Information Services
