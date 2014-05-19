@@ -1,208 +1,365 @@
-From: Alexandre Oliva <oliva@gnu.org>
-Subject: Re: [PATCH] osd: speedup startup by finishing pending removals in background
-Date: Mon, 19 May 2014 08:32:43 -0300
-Message-ID: <or61l2xauc.fsf@free.home>
-References: <oregzrxn56.fsf@free.home>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: ceph branch robot <nobody@ceph.com>
+Subject: ceph branch status
+Date: Mon, 19 May 2014 08:00:29 -0700 (PDT)
+Message-ID: <20140519150029.ECB33281796@teuthology.front.sepia.ceph.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from linux-libre.fsfla.org ([208.118.235.54]:48132 "EHLO
-	linux-libre.fsfla.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752269AbaESLdq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 19 May 2014 07:33:46 -0400
-Received: from freie.home (home.lxoliva.fsfla.org [172.31.160.22])
-	by linux-libre.fsfla.org (8.14.4/8.14.4/Debian-2ubuntu2.1) with ESMTP id s4JBXher009199
-	for <ceph-devel@vger.kernel.org>; Mon, 19 May 2014 11:33:44 GMT
-In-Reply-To: <oregzrxn56.fsf@free.home> (Alexandre Oliva's message of "Sun, 18
-	May 2014 09:54:45 -0300")
+Received: from gw.sepia.ceph.com ([64.90.32.62]:21863 "EHLO
+	teuthology.front.sepia.ceph.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1753122AbaESPAa (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 19 May 2014 11:00:30 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-On May 18, 2014, Alexandre Oliva <oliva@gnu.org> wrote:
+-- All Branches --
 
-> In hindsight, I suppose it might have been wiser to add a data member to
-> DeletingStateRef to hold the coll_t, instead of having to search for it
-> again, but this patch is what I tested, and it's likely good enough for
-> now.
+Alfredo Deza <alfredo.deza@inktank.com>
+	2013-09-27 10:33:52 -0400   wip-5900
 
-I've now implemented this, and verified that it works.
+Dan Mick <dan.mick@inktank.com>
+	2013-07-16 23:00:06 -0700   wip-5634
+	2014-03-24 21:06:21 -0700   wip-sockaddr
+	2014-03-28 18:45:51 -0700   wip-fix-testcrypto
 
-I've also arranged for attempts to resurrect a pending removal from an
-earlier session to be delayed rather than to cause an abort.  I haven't
-tested this scenario, though; it might be the case that the osd would
-timeout and suicide or somesuch.
+Gary Lowell <gary.lowell@inktank.com>
+	2013-09-27 11:46:26 -0700   wip-6020
 
----
+Greg Farnum <greg@inktank.com>
+	2013-02-13 14:46:38 -0800   wip-mds-snap-fix
+	2013-02-22 19:57:53 -0800   wip-4248-snapid-journaling
+	2013-10-09 13:31:38 -0700   cuttlefish-4832
+	2013-11-15 14:41:51 -0800   wip-librados-command2
+	2013-12-09 16:21:41 -0800   wip-hitset-snapshots
+	2014-01-29 08:44:01 -0800   wip-filestore-fast-lookup
+	2014-04-24 15:52:18 -0700   wip-xattr-spillout
+	2014-04-28 14:51:59 -0700   wip-messenger-locking
+	2014-05-12 17:22:12 -0700   wip-8338
+	2014-05-15 16:55:02 -0700   wip-dumpling-osdmap-sub-bug-head
+	2014-05-15 17:23:33 -0700   wip-dumpling-osdmap-sub-bug
 
-When PG removals are underway and the OSD is restarted, or when
-multiple removals are scheduled manually with ceph_filestore_dump
-premove, the OSD may take a long time to process all pending removals
-before it will join the cluster.
+James Page <james.page@ubuntu.com>
+	2013-02-27 22:50:38 +0000   wip-debhelper-8
 
-This patch introduces an option that enables the OSD to join the
-cluster first, performing the removals in background while actively
-participating in the cluster, as the OSD would if it hadn't been
-restarted.
+Jenkins <jenkins@inktank.com>
+	2014-05-12 15:12:54 +0000   firefly
+	2014-05-12 15:12:54 +0000   last
 
-Signed-off-by: Alexandre Oliva <oliva@gnu.org>
----
- src/common/config_opts.h |   10 +++++++++
- src/osd/OSD.cc           |   52 +++++++++++++++++++++++++++++++++++++++++++---
- src/osd/OSD.h            |   17 +++++++++++++--
- 3 files changed, 74 insertions(+), 5 deletions(-)
+Joao Eduardo Luis <joao.luis@inktank.com>
+	2013-04-18 00:01:24 +0100   wip-4521-tool
+	2013-04-22 15:14:28 +0100   wip-4748
+	2013-04-24 16:42:11 +0100   wip-4521
+	2013-04-30 18:45:22 +0100   wip-mon-compact-dbg
+	2013-05-21 01:46:13 +0100   wip-monstoretool-foo
+	2013-05-31 16:26:02 +0100   wip-mon-cache-first-last-committed
+	2013-05-31 21:00:28 +0100   wip-mon-trim-b
+	2013-07-20 04:30:59 +0100   wip-mon-caps-test
+	2013-07-23 16:21:46 +0100   wip-5704-cuttlefish
+	2013-07-23 17:35:59 +0100   wip-5704
+	2013-08-02 22:54:42 +0100   wip-5648
+	2013-08-12 11:21:29 -0700   wip-store-tool.cuttlefish
+	2013-09-25 22:08:24 +0100   wip-6378
+	2013-10-10 14:06:59 +0100   wip-mon-set-pspool
+	2013-12-09 16:39:19 +0000   wip-mon-mdsmap-trim.dumpling
+	2013-12-18 22:17:09 +0000   wip-monstoretool-genmdsmaps
+	2014-01-17 17:11:59 -0800   wip-fix-pipe-comment-for-fhaas
+	2014-02-02 14:10:39 +0000   wip-7277.for-loic
+	2014-04-04 22:32:41 +0100   wip-mon-fix
+	2014-04-21 15:55:28 +0100   wip-7514
+	2014-04-22 17:58:58 +0100   wip-8165-joao
 
-diff --git a/src/common/config_opts.h b/src/common/config_opts.h
-index 2c65e6c..9baa356 100644
---- a/src/common/config_opts.h
-+++ b/src/common/config_opts.h
-@@ -583,6 +583,16 @@ OPTION(osd_client_op_priority, OPT_U32, 63)
- OPTION(osd_recovery_op_priority, OPT_U32, 10)
- OPTION(osd_recovery_op_warn_multiple, OPT_U32, 16)
- 
-+// Removal of PGs is done in background, but if the osd is restarted,
-+// it will finish all pending removals before joining the cluster.
-+// This can take a while.  If this option is set to true, then pending
-+// removals will be performed in background, while the osd runs
-+// normally.  This is a bit dangerous if the OSD gets a new copy of
-+// the PG before the pending removal is completed: attributes stored
-+// in the leveldb may be lost when removal cleans up an object's
-+// attributes AFTER the new object is backfilled.
-+OPTION(osd_startup_finish_remove_in_background, OPT_BOOL, false)
-+
- // Max time to wait between notifying mon of shutdown and shutting down
- OPTION(osd_mon_shutdown_timeout, OPT_DOUBLE, 5)
- 
-diff --git a/src/osd/OSD.cc b/src/osd/OSD.cc
-index 504cb71..a1e3b6f 100644
---- a/src/osd/OSD.cc
-+++ b/src/osd/OSD.cc
-@@ -2048,6 +2048,8 @@ void OSD::load_pgs()
- 
-   set<spg_t> head_pgs;
-   map<spg_t, interval_set<snapid_t> > pgs;
-+  typedef map<uint64_t, pair<spg_t, coll_t> > bgremove_t;
-+  bgremove_t *bgremove = NULL;
-   bool flush = false;
-   for (vector<coll_t>::iterator it = ls.begin();
-        it != ls.end();
-@@ -2056,14 +2058,30 @@ void OSD::load_pgs()
-     snapid_t snap;
-     uint64_t seq;
- 
--    if (it->is_temp(pgid) ||
--	it->is_removal(&seq, &pgid)) {
--      dout(10) << "load_pgs " << *it << " clearing temp" << dendl;
-+    if (it->is_temp(pgid)) {
-+      dout(10) << "load_pgs " << *it << " clearing temp " << dendl;
-       recursive_remove_collection(store, *it, false);
-       flush = true;
-       continue;
-     }
- 
-+    if (it->is_removal(&seq, &pgid)) {
-+      if (cct->_conf->osd_startup_finish_remove_in_background) {
-+	dout(10) << "load_pgs " << *it
-+		 << " delaying pending removal" << dendl;
-+	if (seq >= next_removal_seq)
-+	  next_removal_seq = seq + 1;
-+	if (!bgremove)
-+	  bgremove = new bgremove_t();
-+	(*bgremove)[seq] = make_pair(pgid, *it);
-+      } else {
-+	dout(10) << "load_pgs " << *it << " clearing pending removal " << dendl;
-+	recursive_remove_collection(store, *it, false);
-+	flush = true;
-+      }
-+      continue;
-+    }
-+
-     if (it->is_pg(pgid, snap)) {
-       if (snap != CEPH_NOSNAP) {
- 	dout(10) << "load_pgs skipping snapped dir " << *it
-@@ -2081,6 +2099,18 @@ void OSD::load_pgs()
-   if (flush)
-     store->sync_and_flush();
- 
-+  if (bgremove) {
-+    for (bgremove_t::iterator it = bgremove->begin();
-+	 it != bgremove->end(); it++) {
-+      dout(10) << "load_pgs FORREMOVAL_" << it->first << "_" << it->second
-+	       << " scheduling background removal " << dendl;
-+      DeletingStateRef deleting = service.deleting_pgs.lookup_or_create
-+	(it->second.first, make_pair(it->second.first, it->second.second));
-+      remove_wq.queue(make_pair(PGRef(0), deleting));
-+    }
-+    delete bgremove;
-+  }
-+
-   bool has_upgraded = false;
-   for (map<spg_t, interval_set<snapid_t> >::iterator i = pgs.begin();
-        i != pgs.end();
-@@ -3519,6 +3549,22 @@ void OSD::RemoveWQ::_process(
-   pair<PGRef, DeletingStateRef> item,
-   ThreadPool::TPHandle &handle)
- {
-+  if (!item.second->resurrectable_p()) {
-+    // this is for background live removal of pending FORREMOVAL pgs,
-+    // remaining from earlier OSD sessions.  This only happens if
-+    // osd_startup_finish_remove_in_background is enabled.
-+    if (!item.second->start_clearing())
-+      return;
-+
-+    if (!item.second->start_deleting())
-+      return;
-+
-+    recursive_remove_collection(store, item.second->get_coll (), false);
-+
-+    item.second->finish_deleting();
-+    return;
-+  }
-+
-   PGRef pg(item.first);
-   SnapMapper &mapper = pg->snap_mapper;
-   OSDriver &driver = pg->osdriver;
-diff --git a/src/osd/OSD.h b/src/osd/OSD.h
-index f599e43..e81fbe2b 100644
---- a/src/osd/OSD.h
-+++ b/src/osd/OSD.h
-@@ -217,9 +217,21 @@ class DeletingState {
- public:
-   const spg_t pgid;
-   const PGRef old_pg_state;
-+  const coll_t old_coll; // iff old_pg_state is NULL
-   DeletingState(const pair<spg_t, PGRef> &in) :
-     lock("DeletingState::lock"), status(QUEUED), stop_deleting(false),
--    pgid(in.first), old_pg_state(in.second) {}
-+    pgid(in.first), old_pg_state(in.second), old_coll() {}
-+  DeletingState(const pair<spg_t, coll_t> &in) :
-+    lock("DeletingState::lock"), status(QUEUED), stop_deleting(false),
-+    pgid(in.first), old_pg_state(NULL), old_coll(in.second) {}
-+
-+  bool resurrectable_p() const {
-+    return !!old_pg_state;
-+  }
-+  coll_t get_coll() const {
-+    assert(!resurrectable_p());
-+    return old_coll;
-+  }
- 
-   /// transition status to clearing
-   bool start_clearing() {
-@@ -286,7 +298,8 @@ public:
-   /// try to halt the deletion
-   bool try_stop_deletion() {
-     Mutex::Locker l(lock);
--    stop_deleting = true;
-+    if (resurrectable_p())
-+      stop_deleting = true;
-     /**
-      * If we are in DELETING_DIR or CLEARING_DIR, there are in progress
-      * operations we have to wait for before continuing on.  States
+John Spray <jcspray@gmail.com>
+	2014-03-03 13:10:05 +0000   wip-mds-stop-rank-0
+
+John Spray <john.spray@inktank.com>
+	2014-03-06 13:01:25 +0000   wip-mds-debug
+	2014-04-01 15:06:19 +0100   wip-5382
+	2014-04-30 12:27:49 +0100   wip-nullfs
+	2014-05-19 15:50:55 +0100   wip-journal-tool
+
+John Wilkins <john.wilkins@inktank.com>
+	2013-07-31 18:00:50 -0700   wip-doc-rados-python-api
+
+Josh Durgin <josh.durgin@inktank.com>
+	2013-03-01 14:45:23 -0800   wip-rbd-workunit-debug
+	2013-07-25 18:44:10 -0700   wip-5488-2
+	2013-08-14 15:51:04 -0700   wip-5970
+	2013-08-27 12:03:08 -0700   wip-krbd-workunits
+	2013-11-22 15:17:08 -0800   wip-zero-copy-bufferlist
+	2013-11-25 13:59:29 -0800   wip-init-highlander
+	2013-12-17 08:16:59 -0800   wip-rbd-deadlock-lockdep
+	2013-12-18 12:28:39 -0800   wip-rbd-deadlock-lockdep-dumpling
+	2013-12-26 18:06:39 -0800   emperor-5426
+	2013-12-26 18:07:13 -0800   dumpling-5426
+	2014-02-06 20:31:43 -0800   wip-librados-obj-ops
+	2014-02-06 20:31:47 -0800   wip-librados-op-rvals
+	2014-03-03 14:27:39 -0800   wip-object-cacher-memory
+	2014-04-08 15:13:44 -0700   wip-6480-0.67.7
+	2014-04-27 14:13:07 -0700   wip-rbd-header-dump
+
+Matt Benjamin <matt@linuxbox.com>
+	2013-10-08 16:49:23 -0400   wip-libcephfs-emp-rb
+
+Noah Watkins <noah.watkins@inktank.com>
+	2013-01-05 11:58:38 -0800   wip-localized-read-tests
+	2013-10-18 15:42:50 -0700   cls-lua
+	2013-11-05 07:30:19 -0800   port/old
+	2013-11-06 08:39:57 -0800   wip-6636
+	2013-11-26 08:26:24 -0800   wip-boost-uuid
+	2013-12-30 09:47:40 -0800   port/visibility
+	2014-01-13 12:16:22 -0800   fix-sbin-install
+	2014-02-05 14:23:59 -0800   port/main
+
+Roald van Loon <roald@roaldvanloon.nl>
+	2012-12-24 22:26:56 +0000   wip-dout
+
+Sage Weil <sage@inktank.com>
+	2012-11-30 13:47:27 -0800   wip-osd-readhole
+	2012-12-07 14:38:46 -0800   wip-osd-alloc
+	2013-01-29 13:46:02 -0800   wip-readdir
+	2013-02-11 07:05:15 -0800   wip-sim-journal-clone
+	2013-04-18 13:51:36 -0700   argonaut
+	2013-06-02 21:21:09 -0700   wip-fuse-bobtail
+	2013-06-18 17:00:00 -0700   wip-mon-refs
+	2013-06-28 12:54:08 -0700   wip-mds-snap
+	2013-07-08 14:52:10 -0700   wip-lazy-cuttlefish
+	2013-07-18 16:59:03 -0700   wip-refs
+	2013-07-23 09:46:55 -0700   wip-5488
+	2013-07-27 08:20:41 -0700   wip-5754
+	2013-08-02 15:47:32 -0700   wip-5648-b
+	2013-08-04 09:38:49 -0700   wip-mon-skip-auth-cuttlefish
+	2013-08-04 22:25:03 -0700   wip-5869
+	2013-08-05 14:10:27 -0700   wip-mon-global-id
+	2013-08-14 22:16:46 -0700   wip-5973
+	2013-08-28 18:11:09 -0700   wip-libs3
+	2013-09-19 12:08:45 -0700   wip-neon-crc32c
+	2013-09-27 13:17:11 -0700   wip-test-falloc
+	2013-10-05 21:09:29 -0700   wip-osd-bloom
+	2013-11-01 23:58:57 -0700   wip-6707
+	2013-12-02 10:01:21 -0800   wip-osdmon-warnings
+	2013-12-02 21:57:18 -0800   wip-pool-stats-dumpling2
+	2013-12-07 16:04:15 -0800   wip-journaler-kludge
+	2014-01-06 22:13:09 -0800   wip-librados
+	2014-01-09 05:44:55 -0800   wip-fuse-flock
+	2014-01-14 06:40:33 -0800   wip-dio
+	2014-01-22 14:42:52 -0800   wip-formatter
+	2014-01-28 10:51:24 -0800   wip-striper-dumpling
+	2014-02-03 08:41:19 -0800   wip-dumpling-fuse-debug
+	2014-02-09 15:07:11 -0800   wip-primary-affinity-old1
+	2014-03-05 15:14:26 -0800   wip-6101
+	2014-03-16 09:50:31 -0700   wip-dumpling-sloppy-log
+	2014-03-23 18:59:01 -0700   wip-7826
+	2014-03-24 17:22:52 -0700   wip-7779
+	2014-03-26 17:28:15 -0700   wip-leak
+	2014-03-28 12:34:55 -0700   wip-7867-b
+	2014-03-28 16:49:59 -0700   wip-7888-dumpling
+	2014-03-31 18:15:12 -0700   7935
+	2014-04-01 13:07:57 -0700   wip-rest-api-init
+	2014-04-02 08:49:33 -0700   wip-ms-dump
+	2014-04-08 12:48:49 -0700   wip-debug-pgrefs
+	2014-04-09 16:27:02 -0700   wip-rocksdb
+	2014-04-10 07:04:17 -0700   wip-fuse-reconnect
+	2014-04-11 14:32:21 -0700   wip-osd-boot
+	2014-04-19 21:13:23 -0700   wip-f2fs
+	2014-04-25 15:49:06 -0700   wip-8193
+	2014-05-07 14:23:37 -0700   emperor
+	2014-05-09 08:41:33 -0700   wip-7891
+	2014-05-11 13:36:03 -0700   wip-smart-df
+	2014-05-11 13:46:17 -0700   wip-old-out
+	2014-05-14 08:58:07 -0700   wip-perf-atomic
+	2014-05-15 14:44:05 -0700   osd-metadata
+	2014-05-16 11:29:26 -0700   wip-xio
+	2014-05-17 18:33:36 -0700   wip-osd-refs
+
+Samuel Just <sam.just@inktank.com>
+	2013-06-06 11:51:04 -0700   wip_bench_num
+	2013-06-06 13:08:51 -0700   wip_5238_cuttlefish
+	2013-06-19 14:54:13 -0700   wip_cuttlefish_compact_on_startup
+	2013-06-19 19:46:06 -0700   wip_observer
+	2013-07-23 14:04:29 -0700   wip-cuttlefish-next
+	2013-08-15 15:35:26 -0700   wip-5985
+	2013-08-19 00:04:13 -0700   wip-dumpling-pglog-undirty
+	2013-08-26 23:19:47 -0700   wip-dumpling-log-assert
+	2013-08-27 15:40:28 -0700   wip-dumpling-perf2
+	2013-09-01 10:57:33 -0700   wip-5869-DNM
+	2013-09-19 12:52:53 -0700   wip-5992
+	2013-10-30 16:56:18 -0700   wip-6633
+	2013-11-04 11:25:32 -0800   wip-enotempty
+	2013-11-05 17:47:48 -0800   wip-6722
+	2013-11-09 17:00:31 -0800   wip-perf2
+	2013-11-12 14:56:00 -0800   wip-queueing
+	2013-11-13 15:50:01 -0800   wip-6761
+	2013-11-15 13:54:12 -0800   wip-queueing2
+	2013-11-18 11:22:17 -0800   wip-6786
+	2013-11-18 13:14:20 -0800   wip-6756
+	2013-12-04 19:10:50 -0800   wip-testrados-ec
+	2013-12-10 16:01:03 -0800   wip-ecbackend
+	2013-12-13 13:19:25 -0800   wip-client-io-rebased
+	2014-01-13 15:15:40 -0800   wip-client-io-rebased-2
+	2014-01-22 12:24:11 -0800   wip-client-io-final
+	2014-01-26 19:12:31 -0800   wip-spgt
+	2014-01-28 13:05:49 -0800   wip-7190
+	2014-01-28 20:13:50 -0800   wip-spgt2
+	2014-01-30 11:38:26 -0800   wip-spgt3
+	2014-02-03 17:23:03 -0800   wip-ecbackend-3
+	2014-02-12 21:13:11 -0800   wip-ecbackend-7
+	2014-02-15 17:45:35 -0800   wip-ecbackend-8
+	2014-02-16 15:04:18 -0800   wip-ecbackend-9
+	2014-02-16 16:25:11 -0800   wip-ecbackend-alt-checksum
+	2014-02-17 13:36:58 -0800   wip-ecbackend-11
+	2014-03-10 14:07:57 -0700   wip-sam-testing2
+	2014-03-25 15:55:12 -0700   wip-ec-copy-get
+	2014-03-26 13:29:33 -0700   wip-6910-72.2
+	2014-04-20 20:28:25 -0700   wip-sam-testing-safe
+	2014-04-27 10:53:19 -0700   wip-sam-btrfs
+	2014-05-01 12:14:49 -0700   wip-dumpling-scrub
+	2014-05-05 14:57:52 -0700   wip-messageless-tracker
+	2014-05-08 13:35:24 -0700   wip-8162-dumpling
+	2014-05-08 15:44:25 -0700   wip-8301
+	2014-05-14 13:17:12 -0700   wip-8104
+	2014-05-15 21:07:03 -0700   wip-sam-testing-dumpling
+	2014-05-16 16:56:33 -0700   wip-8334
+	2014-05-16 20:54:04 -0700   wip-8332
+	2014-05-16 20:54:22 -0700   wip-sam-testing
+
+Warren Usui <warren.usui@inktank.com>
+	2014-02-25 16:49:39 -0800   wip-7374-wusui
+	2014-02-25 16:52:28 -0800   wip-7375-wusui
+	2014-02-28 21:43:31 -0800   wip-s3radoscheck-wusui
+	2014-04-24 12:55:26 -0700   wip-uselocalgithubforqemu-wusui
+	2014-04-28 13:56:29 -0700   wip-7500-wusui
+
+Wido den Hollander <wido@42on.com>
+	2014-04-17 18:19:26 +0200   wip-rgw-powerdns
+
+Yan, Zheng <zheng.z.yan@intel.com>
+	2014-05-18 15:06:23 +0800   wip-multimds
+
+Yehuda Sadeh <yehuda@inktank.com>
+	2012-11-16 11:09:34 -0800   wip-mongoose
+	2012-12-13 18:09:37 -0800   wip-2169
+	2013-02-12 09:40:12 -0800   wip-json-decode
+	2013-02-22 15:04:37 -0800   wip-4247
+	2013-02-22 16:19:37 -0800   wip-rgw-zone
+	2013-02-26 18:01:46 -0800   wip-cls-version
+	2013-02-28 09:56:43 -0800   wip-librados-exec
+	2013-03-07 09:46:49 -0800   wip-4363
+	2013-03-07 09:47:56 -0800   wip-4363-next
+	2013-03-07 11:38:06 -0800   wip-4247-bobtail
+	2013-03-12 12:56:01 -0700   wip-4425
+	2013-03-13 10:13:29 -0700   wip-4425-next
+	2013-03-22 11:01:02 -0700   wip-rgw-zone-2
+	2013-03-22 11:29:49 -0700   wip-rgw-zone-3
+	2013-04-15 12:32:48 -0700   wip-rgw-bucketlog
+	2013-04-22 13:01:20 -0700   wip-4776-bobtail
+	2013-04-23 09:26:33 -0700   wip-4755
+	2013-04-26 09:41:39 -0700   wip-4760
+	2013-05-02 22:08:37 -0700   wip-4716
+	2013-05-06 14:41:10 -0700   wip-rgw-bucketlog-2
+	2013-05-07 14:03:04 -0700   wip-4600-bobtail
+	2013-05-07 14:03:37 -0700   wip-4600-argonaut
+	2013-05-16 09:08:46 -0700   wip-5073-2
+	2013-05-22 21:34:52 -0700   wip-5152
+	2013-05-30 09:34:21 -0700   wip-5204
+	2013-05-30 13:04:27 -0700   wip-5209
+	2013-06-14 14:53:54 -0700   wip-5362
+	2013-06-26 11:36:59 -0700   wip-5455
+	2013-06-29 00:25:32 -0700   wip-rgw-geo-2-replicalog2
+	2013-06-29 21:04:39 -0700   wip-rgw-geo-3
+	2013-07-08 18:55:19 -0700   rgw-next-libcurl
+	2013-07-22 14:46:30 -0700   wip-5664
+	2013-07-29 10:52:22 -0700   wip-5789
+	2013-07-29 10:54:02 -0700   wip-5793
+	2013-07-29 10:58:30 -0700   wip-5770
+	2013-07-30 13:53:53 -0700   wip-5808
+	2013-07-31 10:48:15 -0700   wip-rgw-next
+	2013-08-01 13:20:19 -0700   wip-5831
+	2013-08-01 18:23:49 -0700   wip-5810
+	2013-08-05 11:38:27 -0700   wip-5875
+	2013-08-15 11:00:05 -0700   wip-5978
+	2013-08-16 18:19:02 -0700   wip-rgw-papercuts
+	2013-08-19 16:56:27 -0700   wip-6056
+	2013-08-25 17:57:23 -0700   wip-5374
+	2013-09-04 16:03:22 -0700   wip-6078-dumpling
+	2013-09-10 12:18:55 -0700   wip-6268-bobtail
+	2013-09-10 14:18:46 -0700   wip-6268
+	2013-09-11 13:46:31 -0700   wip-6175
+	2013-09-11 22:30:12 -0700   wip-6286
+	2013-09-12 10:22:08 -0700   wip-6286-dumpling
+	2013-09-12 14:32:17 -0700   wip-6294
+	2013-09-13 14:43:54 -0700   wip-6302
+	2013-09-16 16:05:55 -0700   wip-6176
+	2013-09-18 10:37:21 -0700   wip-6340
+	2013-09-20 14:04:47 -0700   wip-6360
+	2013-10-03 11:49:33 -0700   wip-6444
+	2013-10-04 13:00:26 -0700   wip-6462
+	2013-10-07 09:45:20 -0700   wip-rgw-write
+	2013-10-17 21:29:34 -0700   wip-apache-mod
+	2013-10-18 10:36:01 -0700   wip-3896
+	2013-10-25 17:16:34 -0700   wip-mongoose-test
+	2013-10-30 10:31:11 -0700   wip-rgw-nxweb
+	2013-10-31 14:40:23 -0700   wip-bobtail-admin
+	2013-10-31 14:45:45 -0700   wip-5170
+	2013-11-04 19:02:35 -0800   wip-rgw-standalone
+	2013-11-07 09:14:27 -0800   wip-6678
+	2013-11-08 16:26:23 -0800   wip-6744
+	2013-12-02 21:37:13 -0800   wip-6919
+	2013-12-07 21:13:19 -0800   wip-objecter-lock
+	2013-12-10 11:33:29 -0800   wip-mongoose-2
+	2013-12-13 11:01:49 -0800   wip-messenger-prefetch
+	2013-12-17 23:24:27 -0800   wip-rgw-getobj-cb
+	2013-12-18 10:34:12 -0800   wip-7030
+	2013-12-18 12:57:40 -0800   wip-queueing3
+	2013-12-18 13:02:52 -0800   wip-queueing3-rgw
+	2014-01-06 18:32:42 -0800   wip-7110-dumpling
+	2014-01-09 18:22:46 -0800   wip-queuing3-loadgen
+	2014-01-15 13:06:31 -0800   wip-rgw-civetweb
+	2014-01-15 14:35:57 -0800   wip-user-quota
+	2014-01-22 17:10:32 -0800   wip-7169
+	2014-01-23 13:48:28 -0800   wip-7169-dumpling
+	2014-01-24 15:33:57 -0800   wip-user-quota-2
+	2014-01-28 09:38:19 -0800   bobtail
+	2014-01-28 09:40:18 -0800   cuttlefish
+	2014-01-28 13:42:37 -0800   wip-6678-dumpling
+	2014-02-05 21:51:11 -0800   wip-rgw-manifest
+	2014-02-18 13:11:35 -0800   wip-rgw-manifest-2
+	2014-02-19 18:00:10 -0800   wip-7467
+	2014-02-20 09:01:21 -0800   wip-7453
+	2014-02-20 09:25:04 -0800   multi-object-delete
+	2014-02-21 10:43:37 -0800   wip-messenger-prefetch2
+	2014-02-21 19:50:36 -0800   wip-rgw-server-changes
+	2014-02-26 14:00:01 -0800   wip-objecter-locking
+	2014-02-27 13:07:55 -0800   wip-rwmap
+	2014-03-03 17:07:03 -0800   wip-7589
+	2014-03-07 17:15:39 -0800   wip-objecter-session-ops
+	2014-03-18 12:11:47 -0700   wip-7767
+	2014-03-21 11:21:18 -0700   wip-rgw-fail
+	2014-03-21 15:09:26 -0700   wip-7774
+	2014-03-25 14:08:01 -0700   wip-rgw-less-alloc
+	2014-04-03 13:44:52 -0700   wip-7774-2
+	2014-04-03 13:46:16 -0700   wip-rgw-less-alloc-2
+	2014-04-03 13:46:45 -0700   wip-7767-2
+	2014-04-09 16:29:29 -0700   wip-objecter-session-ops-3
+	2014-04-10 11:24:34 -0700   wip-5170-dumpling
+	2014-04-10 13:10:36 -0700   wip-5170-dumpling-2
+	2014-04-17 16:38:32 -0700   wip-objecter-session-ops-4
+	2014-04-29 15:50:59 -0700   wip-objecter-session-ops-sage
+	2014-04-29 15:50:59 -0700   wip-objecter-session-ops-sage-old
+	2014-05-02 17:06:05 -0700   wip-8269-dumpling
+	2014-05-06 11:06:29 -0700   wip-8289-dumpling
+	2014-05-08 12:57:47 -0700   dumpling
+	2014-05-12 14:46:18 -0700   wip-8251
+	2014-05-12 16:58:31 -0700   wip-objecter
+	2014-05-14 13:34:16 -0700   wip-objecter-yehuda
+	2014-05-19 00:13:57 -0700   wip-8170-dumpling
+
+markhpc <mark.nelson@inktank.com>
+	2013-11-06 09:23:22 -0600   wip-v0.70-mark
+	2014-03-17 14:50:57 -0500   wip-pq-mark
+
+scuttlemonkey <patrick@inktank.com>
+	2013-12-13 13:37:30 -0800   wip-doc-quick-start
 
 
--- 
-Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
-You must be the change you wish to see in the world. -- Gandhi
-Be Free! -- http://FSFLA.org/   FSF Latin America board member
-Free Software Evangelist|Red Hat Brasil GNU Toolchain Engineer
+
+Grouped by committer, ordered by commit time stamp.
