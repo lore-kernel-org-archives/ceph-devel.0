@@ -1,69 +1,93 @@
-From: David McBride <dwm37-KWPb1pKIrIJaa/9Udqfwiw@public.gmane.org>
-Subject: Re: Ceph Plugin for Collectd
-Date: Mon, 19 May 2014 21:45:50 +0100
-Message-ID: <537A6D7E.4010400@cam.ac.uk>
-References: <53736094.4060104@1und1.de>
+From: Richard Fontana <rfontana@redhat.com>
+Subject: Re: Signed-off-by and aliases
+Date: Tue, 20 May 2014 00:19:26 -0400
+Message-ID: <20140520041926.GA7063@redhat.com>
+References: <537A1FAE.9060300@dachary.org>
+ <1400513274.44658.YahooMailNeo@web165002.mail.bf1.yahoo.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <53736094.4060104-JIpuZCKxcH8@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Christian Eichelmann <christian.eichelmann-JIpuZCKxcH8@public.gmane.org>
-Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, Ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:6972 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750699AbaETETb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 20 May 2014 00:19:31 -0400
+Content-Disposition: inline
+In-Reply-To: <1400513274.44658.YahooMailNeo@web165002.mail.bf1.yahoo.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Koleos Fuskus <koleosfuscus@yahoo.com>
+Cc: Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On 14/05/14 13:24, Christian Eichelmann wrote:
-> Hi Ceph User!
+On Mon, May 19, 2014 at 08:27:54AM -0700, Koleos Fuskus wrote:
+> Please notice that the complete alias is "koleosfuscus" with "c" and not "k"
+> and I include a space when the forms ask me for name and family name. Anyway, I
+> would like to receive advice on this topic. It may be convenient for me to do
+> contributions using my real name. I am not aware of the copyright problems that
+> I may have for using alias. 
+
+I can't provide you with advice on this, but my recommendation to the
+Ceph project maintainers is that real names be required as part of the
+Signed-off-by.
+
+Use of an alias does not affect your ability to obtain copyright. One
+concern is that if you remain entirely anonymous and it becomes
+necessary to contact you in the future for some reason relating either
+to the license you are granting or the code you are providing, it may
+become relatively difficult to do so. How much this would actually
+matter is unclear (it might depend on how substantial your
+contributions are).
+
+Another concern I have is a policy issue somewhat external to Ceph. I
+am currently attempting with some others to convince OpenStack to
+switch from a CLA to a DCO contribution system and have specifically
+pointed to Ceph as an example of a successful DCO-using project, well
+known to OpenStack participants. I am concerned about possible FUD
+from CLA advocates should it be discovered that Ceph accepts
+pseudonymic contributions under the DCO. (This even though I realize a
+CLA could itself be signed pseudonymously.)
+
+ - Richard
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 > 
-> I had a look at the "official" collectd fork for ceph, which is quite
-> outdated and not compatible with the upstream version.
+> Best,
 > 
-> Since this was not an option for us, I've worte a Python Plugin for
-> Collectd, that gets all the precious informations out of the admin
-> sockets "perf dump" command. It runs on our productive cluster right now
-> and I'd like to share it with you:
+> koleos
 > 
-> https://github.com/Crapworks/collectd-ceph
 > 
-> Any feedback is welcome!
-
-Fun, I'd just implemented something very similar!
-
-I've just pushed my version upstream to:
-
- https://github.com/dwm/collectd-ceph
-
-There appear to be some minor differences between our designs:
-
- * I don't require that a types DB be kept up to date and consistent;
-   rather, I've reused the generic 'counter' and 'gauge' types.
-
- * My version includes some historical processing to allow for the
-   calculation of per-period, rather than global, average values.
-
- * Your version is nicer in that it communicates with the admin socket
-   directly; I was lazy and simply invoked the `ceph` command-line tool
-   to do that work for me.  It's not currently a significant
-   performance hit, but should be improved.
-
-I've been feeding all of my Ceph performance counter data to a Graphite
-cluster via CollectD, using the CollectD AMQP plugin and a RabbitMQ
-cluster as an intermediary, and Grafana as a query/graphing tool.
-
-Apart from causing some stress on the disk-subsystem attempting to
-write-out all those metrics, this has been working out quite well...
-
-Cheers,
-David
--- 
-David McBride <dwm37-KWPb1pKIrIJaa/9Udqfwiw@public.gmane.org>
-Unix Specialist, University Information Services
+> On Monday, May 19, 2014 5:19 PM, Loic Dachary <loic@dachary.org> wrote:
+> 
+> 
+> Hi Richard,
+> 
+> It was nice seeing you at the OpenStack summit. Do not hesitate to redirect if
+> this question is best answered by someone else at RedHat. As most of us I'm
+> still unsure who at RedHat has time to devote to Ceph ;-)
+> 
+> Koleos Fuskus <koleosfuscus@yahoo.com> would like to contribute code under an
+> alias (this is not its real name). If I understand correctly, copyright (both
+> in software and litterary works) allows authors to use aliases. Does RedHat
+> have a position on this ?
+> 
+> Cheers
+> 
+> --
+> Lo c Dachary, Artisan Logiciel Libre
+> 
+> 
