@@ -1,46 +1,40 @@
-From: Andrey Korolyov <andrey@xdel.ru>
-Subject: Helper for state replication machine
-Date: Tue, 20 May 2014 13:45:44 +0400
-Message-ID: <537B2448.2090104@xdel.ru>
+From: Richard Fontana <rfontana@redhat.com>
+Subject: Re: Signed-off-by and aliases
+Date: Tue, 20 May 2014 09:56:45 -0400
+Message-ID: <20140520135645.GA8381@redhat.com>
+References: <537A1FAE.9060300@dachary.org>
+ <1400513274.44658.YahooMailNeo@web165002.mail.bf1.yahoo.com>
+ <20140520041926.GA7063@redhat.com>
+ <537AE8CF.7050307@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f43.google.com ([209.85.215.43]:55798 "EHLO
-	mail-la0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751008AbaETJqh (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 May 2014 05:46:37 -0400
-Received: by mail-la0-f43.google.com with SMTP id mc6so181370lab.16
-        for <ceph-devel@vger.kernel.org>; Tue, 20 May 2014 02:46:35 -0700 (PDT)
-Received: from [192.168.10.12] (h195-91-128-218.ln.rinet.ru. [195.91.128.218])
-        by mx.google.com with ESMTPSA id k9sm22388760lam.11.2014.05.20.02.46.33
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
-        Tue, 20 May 2014 02:46:33 -0700 (PDT)
+Received: from mx1.redhat.com ([209.132.183.28]:20013 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750841AbaETN4w (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 20 May 2014 09:56:52 -0400
+Content-Disposition: inline
+In-Reply-To: <537AE8CF.7050307@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Koleos Fuscus <koleosfuscus@yahoo.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Hello,
+On Tue, May 20, 2014 at 07:31:59AM +0200, Loic Dachary wrote:
 
-I do not know about how many of you aware of this work of Michael Hines
-[0], but looks like it can be extremely usable for critical applications
-using qemu and, of course, Ceph at the block level. My thought was that
-if qemu rbd driver can provide any kind of metadata interface to mark
-each atomic write, it can be easily used to check and replay machine
-states on the acceptor side independently. Since Ceph replication is
-asynchronous, there is no acceptable approach to tell when it`s time to
-replay certain memory state on acceptor side, even if we are pushing all
-writes in synchronous manner. I`d be happy to hear any suggestions on
-this, because the result probably will be widely adopted by enterprise
-users whose needs includes state replication and who are bounded to
-VMWare by now. Of course, I am assuming worst case above, when primary
-replica shifts during disaster state and there are at least two sites
-holding primary and non-primary replica sets, with 100% distinction of
-primary role (>=0.80). Of course there are a lot of points to discuss,
-like 'fallback' primary affinity and so on, but I`d like to ask first of
-possibility to implement such mechanism at a driver level.
+> However, I know of at least one other instance where finding a way
+> to handle aliases would allow contributors to participate in the
+> Ceph project. OVH is a large hosting company employing a number of
+> developers and management explicitly forbids participation in Free
+> Software projects. The primary reason being that they could be
+> contacted by companies looking for talents. If their contributions
+> were clustered under the OVH <libre@ovh.com> alias, they may have
+> permission to publish their code.
 
-Thanks!
+On the assumption that OVH is the copyright holder of all such
+contributions, and would knowingly permit employees contributing using
+this alias, this seems okay to me.
 
-0. http://wiki.qemu.org/Features/MicroCheckpointing
+- Richard
+
+
