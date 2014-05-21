@@ -1,69 +1,62 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: Feedback: default FS pools and newfs behavior
-Date: Wed, 21 May 2014 21:21:03 +0200
-Message-ID: <537CFC9F.4000009@42on.com>
-References: <CAGd4Wr21kmRhJz=uXw4EgLY_UK2NoLMj3e7qKmN3+=ukHa8FdQ@mail.gmail.com>
+From: Noah Watkins <noah.watkins@inktank.com>
+Subject: Packaging RFC for cephfs-java
+Date: Wed, 21 May 2014 12:34:17 -0700
+Message-ID: <CA+Hcz5_Fu=2e0o0oGeKpg7oAHdjtEBgq_W5z0k8uVe0L0jXJ=g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from websrv.42on.com ([31.25.102.167]:36659 "EHLO websrv.42on.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752713AbaEUTVG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 21 May 2014 15:21:06 -0400
-In-Reply-To: <CAGd4Wr21kmRhJz=uXw4EgLY_UK2NoLMj3e7qKmN3+=ukHa8FdQ@mail.gmail.com>
+Received: from mail-qc0-f169.google.com ([209.85.216.169]:35701 "EHLO
+	mail-qc0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752283AbaEUTeS (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 May 2014 15:34:18 -0400
+Received: by mail-qc0-f169.google.com with SMTP id e16so4057027qcx.28
+        for <ceph-devel@vger.kernel.org>; Wed, 21 May 2014 12:34:18 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <john.spray@inktank.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Gregory Farnum <greg@inktank.com>
 
-On 05/21/2014 05:32 PM, John Spray wrote:
-> In response to #8010[1], I'm looking at making it possible to
-> explicitly disable CephFS, so that the (often unused) filesystem pools
-> don't hang around if they're unwanted.
->
-> The administrative behavior would change such that:
->   * To enable the filesystem it is necessary to create two pools and
-> use "ceph newfs <metadata> <data>"
->   * There's a new "ceph rmfs" command to disable the filesystem and
-> allow removing its pools
->   * Initially, the filesystem is disabled and the 'data' and 'metadata'
-> pools are not created by default
->
-> There's an initial cut of this on a branch:
-> https://github.com/ceph/ceph/commits/wip-nullfs
->
-> Questions:
->   * Are there strong opinions about whether the CephFS pools should
-> exist by default?  I think it makes life simpler if they don't,
-> avoiding "what the heck is the 'data' pool?" type questions from
-> newcomers.
+Hey ceph-devel,
 
-+1
+In its current form deploying any software that depends on
+`cephfs-java` can be a real pain! Users need to make sure they have
+one of each of the following installed:
 
-We simpler the clusters are, the better imho. A lot of users don't 
-require CephFS, so don't enable what ain't used.
+* platform-indep: libcephfs.jar
+* platform-dep: libcephfs_jni.[so,dylib,...]
+    - osx/linux * x86/x86-64 * etc...
 
->   * Is it too unfriendly to require users to explicitly create pools
-> before running newfs, or do we need to auto-create pools when they run
-> newfs?  Auto-creating some pools from newfs is a bit awkward
-> internally because it requires modifying both OSD and MDS maps in one
-> command.
->
-> Cheers,
-> John
->
-> 1. http://tracker.ceph.com/issues/8010
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+We build RPM and Debian packages for both, but that doesn't solve the
+following dependency problems. First, The JVM needs to be told about
+the locations of the native library via a special "java.library.path"
+property specified when the JVM starts, and the JVM doesn't always
+look in the places that the RPM/Deb packages stick the binaries.
+Projects like Hadoop invoke the JVM deep within shell scripts, so
+getting these dependencies to resolve has been a continuous source of
+frustration for users. The second problem is that users expect easy
+dependency management using solutions like Maven Central, and so
+currently dealing with the libcephfs.jar turns into a special case in
+the deployment procedure.
 
+We solve the second problem by publishing our artifacts into Maven
+Central. That is pretty easy, but the problem of resolving the native
+library dependencies remain. There are two ways to deal with this
+challenge.
 
--- 
-Wido den Hollander
-42on B.V.
-Ceph trainer and consultant
+First, several projects (e.g. JNA and LevelDB-Java) embed everything,
+including pre-built libraries for all supported platforms into a
+single JAR file, and the native library is transparently loaded at
+run-time. I've create a POC that shows how to do this:
 
-Phone: +31 (0)20 700 9902
-Skype: contact42on
+   http://github.com/ceph/ceph wip-native-cephfs-java
+
+This approach is ideal from a users approach, but means more
+packaging/shipping complexity.
+
+The second approach would depend on the current RPM/Deb installation,
+and we could manually search for these in well-known places. This
+could work I suppose, but it still requires that extra step to
+rendezvous deps from Maven and yum/apt.
+
+Any thoughts welcome!
+
+-Noah
