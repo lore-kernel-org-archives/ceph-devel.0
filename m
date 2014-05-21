@@ -1,149 +1,70 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [Performance] Improvement on DB Performance
-Date: Wed, 21 May 2014 09:15:08 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1405210857130.16657@cobra.newdream.net>
-References: <CACJqLyY5VSQubaPvk2N3BrRx=YZ7EpiyRJZbWnNM=bQMfNA8=w@mail.gmail.com> <CACJqLyYFMAxoVUZCTvPMXFGrYEPmFqTd+pZmsL2V=V1L32CisQ@mail.gmail.com> <alpine.DEB.2.00.1405210821420.1689@cobra.newdream.net> <537CCB49.8060408@cloudapt.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Signed-off-by and aliases
+Date: Wed, 21 May 2014 19:06:04 +0200
+Message-ID: <537CDCFC.4060208@dachary.org>
+References: <537A1FAE.9060300@dachary.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="GhnOXeBKUOcx0iFjEuVnoH97pMvCHDONw"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:39694 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751023AbaEUQPJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 May 2014 12:15:09 -0400
-In-Reply-To: <537CCB49.8060408@cloudapt.com>
+Received: from smtp.dmail.dachary.org ([91.121.254.229]:44151 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751724AbaEURGj (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 May 2014 13:06:39 -0400
+In-Reply-To: <537A1FAE.9060300@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mike Dawson <mike.dawson@cloudapt.com>
-Cc: Haomai Wang <haomaiwang@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Richard Fontana <rfontana@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Benjamin Jean <mjeanb@eml.cc>
 
-On Wed, 21 May 2014, Mike Dawson wrote:
-> Haomai,
-> 
-> Thanks for finding this!
-> 
-> 
-> Sage,
-> 
-> We have a client that runs an io intensive, closed-source software package
-> that seems to issue overzealous flushes which may benefit from this patch (or
-> the other methods you mention). If you were to spin a wip build based on
-> Dumpling, I'll be a willing tester.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--GhnOXeBKUOcx0iFjEuVnoH97pMvCHDONw
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-Pushed wip-librbd-flush-dumpling, should be built shortly.
+Hi Richard,
 
-sage
+I met with Benjamin Jean and two other lawyers (their names escape me, my=
+ apologies) while at http://solutionlinux.fr/ and asked for their opinion=
+=2E They suggested that if a contributor wants to remain anonymous to the=
+ general public while being easily reachable if needed, she/he could disc=
+lose her/his identity to RedHat or any other trusted third party. Do you =
+see any reason why RedHat would object to this ?=20
 
-> 
-> Thanks,
-> Mike Dawson
-> 
-> On 5/21/2014 11:23 AM, Sage Weil wrote:
-> > On Wed, 21 May 2014, Haomai Wang wrote:
-> > > I pushed the commit to fix this
-> > > problem(https://github.com/ceph/ceph/pull/1848).
-> > > 
-> > > With test program(Each sync request is issued with ten write request),
-> > > a significant improvement is noticed.
-> > > 
-> > > aio_flush                          sum: 914750     avg: 1239   count:
-> > > 738      max: 4714   min: 1011
-> > > flush_set                          sum: 904200     avg: 1225   count:
-> > > 738      max: 4698   min: 999
-> > > flush                              sum: 641648     avg: 173    count:
-> > > 3690     max: 1340   min: 128
-> > > 
-> > > Compared to last mail, it reduce each aio_flush request to 1239 ns
-> > > instead of 24145 ns.
-> > 
-> > Good catch!  That's a great improvement.
-> > 
-> > The patch looks clearly correct.  We can probably do even better by
-> > putting the Objects on a list when they get the first dirty buffer so that
-> > we only cycle through the dirty ones.  Or, have a global list of dirty
-> > buffers (instead of dirty objects -> dirty buffers).
-> > 
-> > sage
-> > 
-> > > 
-> > > I hope it's the root cause for db on rbd performance.
-> > > 
-> > > On Wed, May 21, 2014 at 6:15 PM, Haomai Wang <haomaiwang@gmail.com> wrote:
-> > > > Hi all,
-> > > > 
-> > > > I remember there exists discuss about DB(mysql) performance on rbd.
-> > > > Recently I test mysql-bench with rbd and found awful performance. So I
-> > > > dive into it and find that main cause is "flush" request from guest.
-> > > > As we know, applications such as mysql, ceph has own journal for
-> > > > durable and journal usually send sync&direct io. If fs barrier is on,
-> > > > each sync io operation make kernel issue "sync"(barrier) request to
-> > > > block device. Here, qemu will call "rbd_aio_flush" to apply.
-> > > > 
-> > > > Via systemtap, I found a amazing thing:
-> > > > aio_flush                          sum: 4177085    avg: 24145  count:
-> > > > 173      max: 28172  min: 22747
-> > > > flush_set                          sum: 4172116    avg: 24116  count:
-> > > > 173      max: 28034  min: 22733
-> > > > flush                              sum: 3029910    avg: 4      count:
-> > > > 670477   max: 1893   min: 3
-> > > > 
-> > > > This statistic info is gathered in 5s. Most of consuming time is on
-> > > > "ObjectCacher::flush". What's more, with time increasing, the flush
-> > > > count will be increasing.
-> > > > 
-> > > > After view source, I find the root cause is "ObjectCacher::flush_set",
-> > > > it will iterator the "object_set" and look for dirty buffer. And
-> > > > "object_set"  contains all objects ever opened.  For example:
-> > > > 
-> > > > 2014-05-21 18:01:37.959013 7f785c7c6700  0 objectcacher flush_set
-> > > > total: 5919 flushed: 5
-> > > > 2014-05-21 18:01:37.999698 7f785c7c6700  0 objectcacher flush_set
-> > > > total: 5919 flushed: 5
-> > > > 2014-05-21 18:01:38.038405 7f785c7c6700  0 objectcacher flush_set
-> > > > total: 5920 flushed: 5
-> > > > 2014-05-21 18:01:38.080118 7f785c7c6700  0 objectcacher flush_set
-> > > > total: 5920 flushed: 5
-> > > > 2014-05-21 18:01:38.119792 7f785c7c6700  0 objectcacher flush_set
-> > > > total: 5921 flushed: 5
-> > > > 2014-05-21 18:01:38.162004 7f785c7c6700  0 objectcacher flush_set
-> > > > total: 5922 flushed: 5
-> > > > 2014-05-21 18:01:38.202755 7f785c7c6700  0 objectcacher flush_set
-> > > > total: 5923 flushed: 5
-> > > > 2014-05-21 18:01:38.243880 7f785c7c6700  0 objectcacher flush_set
-> > > > total: 5923 flushed: 5
-> > > > 2014-05-21 18:01:38.284399 7f785c7c6700  0 objectcacher flush_set
-> > > > total: 5923 flushed: 5
-> > > > 
-> > > > These logs record the iteration info, the loop will check 5920 objects
-> > > > but only 5 objects are dirty.
-> > > > 
-> > > > So I think the solution is make "ObjectCacher::flush_set" only
-> > > > iterator the objects which is dirty.
-> > > > 
-> > > > --
-> > > > Best Regards,
-> > > > 
-> > > > Wheat
-> > > 
-> > > 
-> > > 
-> > > --
-> > > Best Regards,
-> > > 
-> > > Wheat
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > > the body of a message to majordomo@vger.kernel.org
-> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > > 
-> > > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+Cheers
+
+On 19/05/2014 17:13, Loic Dachary wrote:
+> Hi Richard,
+>=20
+> It was nice seeing you at the OpenStack summit. Do not hesitate to redi=
+rect if this question is best answered by someone else at RedHat. As most=
+ of us I'm still unsure who at RedHat has time to devote to Ceph ;-)
+>=20
+> Koleos Fuskus <koleosfuscus@yahoo.com> would like to contribute code un=
+der an alias (this is not its real name). If I understand correctly, copy=
+right (both in software and litterary works) allows authors to use aliase=
+s. Does RedHat have a position on this ?
+>=20
+> Cheers
+>=20
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+
+
+--GhnOXeBKUOcx0iFjEuVnoH97pMvCHDONw
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlN83PwACgkQ8dLMyEl6F21pWgCcDpeqnneT3+j51syh1bW3Bp19
+NUYAoJb9MX2nrj+rECIXgASAw2tWRBQH
+=7yoo
+-----END PGP SIGNATURE-----
+
+--GhnOXeBKUOcx0iFjEuVnoH97pMvCHDONw--
