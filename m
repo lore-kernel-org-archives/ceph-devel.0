@@ -1,40 +1,34 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [RFC] add rocksdb support
-Date: Tue, 20 May 2014 18:19:02 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1405201814330.1689@cobra.newdream.net>
-References: <75674D092A819E4189E91166C74CB90D0131CB27@SHSMSX104.ccr.corp.intel.com>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+From: Guang Yang <yguang11@outlook.com>
+Subject: Changes of scrubbing?
+Date: Wed, 21 May 2014 09:44:37 +0800
+Message-ID: <BLU436-SMTP155ED6E6FBB4FD0E72FC5CDF3C0@phx.gbl>
+Mime-Version: 1.0 (Mac OS X Mail 7.3 \(1878.2\))
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:35520 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750861AbaEUBTD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 May 2014 21:19:03 -0400
-In-Reply-To: <75674D092A819E4189E91166C74CB90D0131CB27@SHSMSX104.ccr.corp.intel.com>
+Received: from blu0-omc4-s37.blu0.hotmail.com ([65.55.111.176]:8670 "EHLO
+	blu0-omc4-s37.blu0.hotmail.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750952AbaEUBoq convert rfc822-to-8bit
+	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 20 May 2014 21:44:46 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Shu, Xinxin" <xinxin.shu@intel.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Xinxin,
+Hi ceph-devel,
+Like some users of Ceph, we are using Ceph for a latency sensitive project, and scrubbing (especially deep-scrubbing) impacts the SLA in a non-trivial way, as commodity hardware could fail in one way or the other, I think it is essential to have scrubbing enabled to preserve data durability.
 
-I've pushed an updated wip-rocksdb to github/liewegas/ceph.git that 
-includes the latest set of patches with the groundwork and your rocksdb 
-patch.  There is also a commit that adds rocksdb as a git submodule.  I'm 
-thinking that, since there aren't any distro packages for rocksdb at this 
-point, this is going to be the easiest way to make this usable for people.
+Inspired by how erasure coding backend implement scrubbing[1], I am wondering if the following changes is valid to somehow reduce the performance impact from scrubbing:
+ 1. Store the CRC checksum along with each physical copy of the object on filesystem (via xattr or omap?)
+ 2. For read request, it checks the CRC locally and if it mismatch, redirect the request to a replica and mark the PG as inconsistent.
 
-If you can wire the submodule into the makefile, we can merge this in so 
-that rocksdb support is in the ceph.com packages on ceph.com.  I suspect 
-that the distros will prefer to turns this off in favor of separate shared 
-libs, but they can do this at their option if/when they include rocksdb in 
-the distro. I think the key is just to have both --with-librockdb and 
---with-librocksdb-static (or similar) options so that you can either use 
-the static or dynamically linked one.
+This is just a general idea and details (like append) will need to further discussed.
 
-Has your group done further testing with rocksdb?  Anything interesting to 
-share?
+By having such, we can schedule the scrubbing less aggresively but still preserve the durability for read.
 
-Thanks!
-sage
+Does this make some sense?
 
+[1] http://ceph.com/docs/master/dev/osd_internals/erasure_coding/pgbackend/ 
+
+Thanks,
+Guang Yang
