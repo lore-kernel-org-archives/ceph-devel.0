@@ -1,62 +1,55 @@
-From: Noah Watkins <noah.watkins@inktank.com>
-Subject: Packaging RFC for cephfs-java
-Date: Wed, 21 May 2014 12:34:17 -0700
-Message-ID: <CA+Hcz5_Fu=2e0o0oGeKpg7oAHdjtEBgq_W5z0k8uVe0L0jXJ=g@mail.gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: v0.67.9 Dumpling released
+Date: Wed, 21 May 2014 13:02:27 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1405211300500.25785@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f169.google.com ([209.85.216.169]:35701 "EHLO
-	mail-qc0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752283AbaEUTeS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 May 2014 15:34:18 -0400
-Received: by mail-qc0-f169.google.com with SMTP id e16so4057027qcx.28
-        for <ceph-devel@vger.kernel.org>; Wed, 21 May 2014 12:34:18 -0700 (PDT)
+Received: from cobra.newdream.net ([66.33.216.30]:41421 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753187AbaEUUC2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 May 2014 16:02:28 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Gregory Farnum <greg@inktank.com>
+To: ceph-devel@vger.kernel.org, ceph-users@ceph.com
 
-Hey ceph-devel,
+This Dumpling point release fixes several minor bugs. The most prevalent 
+in the field is one that occasionally prevents OSDs from starting on 
+recently created clusters.
 
-In its current form deploying any software that depends on
-`cephfs-java` can be a real pain! Users need to make sure they have
-one of each of the following installed:
+We recommand that all v0.67.x Dumpling users upgrade at their convenience.
 
-* platform-indep: libcephfs.jar
-* platform-dep: libcephfs_jni.[so,dylib,...]
-    - osx/linux * x86/x86-64 * etc...
+Notable Changes
+---------------
 
-We build RPM and Debian packages for both, but that doesn't solve the
-following dependency problems. First, The JVM needs to be told about
-the locations of the native library via a special "java.library.path"
-property specified when the JVM starts, and the JVM doesn't always
-look in the places that the RPM/Deb packages stick the binaries.
-Projects like Hadoop invoke the JVM deep within shell scripts, so
-getting these dependencies to resolve has been a continuous source of
-frustration for users. The second problem is that users expect easy
-dependency management using solutions like Maven Central, and so
-currently dealing with the libcephfs.jar turns into a special case in
-the deployment procedure.
+* ceph-fuse, libcephfs: client admin socket command to kick and inspect 
+  MDS sessions (#8021, Zheng Yan)
+* monclient: fix failure detection during mon handshake (#8278, Sage Weil)
+* mon: set tid on no-op PGStatsAck messages (#8280, Sage Weil)
+* msgr: fix a rare bug with connection negotiation between OSDs (Guang 
+  Yang)
+* osd: allow snap trim throttling with simple delay (#6278, Sage Weil)
+* osd: check for splitting when processing recover/backfill reservations 
+  (#6565, Samuel Just)
+* osd: fix backfill position tracking (#8162, Samuel Just)
+* osd: fix bug in backfill stats (Samuel Just)
+* osd: fix bug preventing OSD startup for infant clusters (#8162, Greg 
+  Farnum)
+* osd: fix rare PG resurrection race causing an incomplete PG (#7740, 
+  Samuel Just)
+* osd: only complete replicas count toward min_size (#7805, Samuel Just)
+* rgw: allow setting ACLs with empty owner (#6892, Yehuda Sadeh)
+* rgw: send user manifest header field (#8170, Yehuda Sadeh)
 
-We solve the second problem by publishing our artifacts into Maven
-Central. That is pretty easy, but the problem of resolving the native
-library dependencies remain. There are two ways to deal with this
-challenge.
+For more detailed information, see the complete changelog at
 
-First, several projects (e.g. JNA and LevelDB-Java) embed everything,
-including pre-built libraries for all supported platforms into a
-single JAR file, and the native library is transparently loaded at
-run-time. I've create a POC that shows how to do this:
+  http://ceph.com/docs/master/_downloads/v0.67.9.txt
 
-   http://github.com/ceph/ceph wip-native-cephfs-java
+Getting Ceph
+------------
 
-This approach is ideal from a users approach, but means more
-packaging/shipping complexity.
+* Git at git://github.com/ceph/ceph.git
+* Tarball at http://ceph.com/download/ceph-0.67.9.tar.gz
+* For packages, see http://ceph.com/docs/master/install/get-packages
+* For ceph-deploy, see http://ceph.com/docs/master/install/install-ceph-deploy
 
-The second approach would depend on the current RPM/Deb installation,
-and we could manually search for these in well-known places. This
-could work I suppose, but it still requires that extra step to
-rendezvous deps from Maven and yum/apt.
-
-Any thoughts welcome!
-
--Noah
