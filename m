@@ -1,34 +1,72 @@
-From: Guang Yang <yguang11@outlook.com>
-Subject: Changes of scrubbing?
-Date: Wed, 21 May 2014 09:44:37 +0800
-Message-ID: <BLU436-SMTP155ED6E6FBB4FD0E72FC5CDF3C0@phx.gbl>
-Mime-Version: 1.0 (Mac OS X Mail 7.3 \(1878.2\))
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: [Performance] Improvement on DB Performance
+Date: Wed, 21 May 2014 18:15:45 +0800
+Message-ID: <CACJqLyY5VSQubaPvk2N3BrRx=YZ7EpiyRJZbWnNM=bQMfNA8=w@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from blu0-omc4-s37.blu0.hotmail.com ([65.55.111.176]:8670 "EHLO
-	blu0-omc4-s37.blu0.hotmail.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750952AbaEUBoq convert rfc822-to-8bit
-	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 20 May 2014 21:44:46 -0400
+Received: from mail-wi0-f172.google.com ([209.85.212.172]:43382 "EHLO
+	mail-wi0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750779AbaEUKPr (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 May 2014 06:15:47 -0400
+Received: by mail-wi0-f172.google.com with SMTP id hi2so7376354wib.5
+        for <ceph-devel@vger.kernel.org>; Wed, 21 May 2014 03:15:45 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph-devel <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi ceph-devel,
-Like some users of Ceph, we are using Ceph for a latency sensitive project, and scrubbing (especially deep-scrubbing) impacts the SLA in a non-trivial way, as commodity hardware could fail in one way or the other, I think it is essential to have scrubbing enabled to preserve data durability.
+Hi all,
 
-Inspired by how erasure coding backend implement scrubbing[1], I am wondering if the following changes is valid to somehow reduce the performance impact from scrubbing:
- 1. Store the CRC checksum along with each physical copy of the object on filesystem (via xattr or omap?)
- 2. For read request, it checks the CRC locally and if it mismatch, redirect the request to a replica and mark the PG as inconsistent.
+I remember there exists discuss about DB(mysql) performance on rbd.
+Recently I test mysql-bench with rbd and found awful performance. So I
+dive into it and find that main cause is "flush" request from guest.
+As we know, applications such as mysql, ceph has own journal for
+durable and journal usually send sync&direct io. If fs barrier is on,
+each sync io operation make kernel issue "sync"(barrier) request to
+block device. Here, qemu will call "rbd_aio_flush" to apply.
 
-This is just a general idea and details (like append) will need to further discussed.
+Via systemtap, I found a amazing thing:
+aio_flush                          sum: 4177085    avg: 24145  count:
+173      max: 28172  min: 22747
+flush_set                          sum: 4172116    avg: 24116  count:
+173      max: 28034  min: 22733
+flush                              sum: 3029910    avg: 4      count:
+670477   max: 1893   min: 3
 
-By having such, we can schedule the scrubbing less aggresively but still preserve the durability for read.
+This statistic info is gathered in 5s. Most of consuming time is on
+"ObjectCacher::flush". What's more, with time increasing, the flush
+count will be increasing.
 
-Does this make some sense?
+After view source, I find the root cause is "ObjectCacher::flush_set",
+it will iterator the "object_set" and look for dirty buffer. And
+"object_set"  contains all objects ever opened.  For example:
 
-[1] http://ceph.com/docs/master/dev/osd_internals/erasure_coding/pgbackend/ 
+2014-05-21 18:01:37.959013 7f785c7c6700  0 objectcacher flush_set
+total: 5919 flushed: 5
+2014-05-21 18:01:37.999698 7f785c7c6700  0 objectcacher flush_set
+total: 5919 flushed: 5
+2014-05-21 18:01:38.038405 7f785c7c6700  0 objectcacher flush_set
+total: 5920 flushed: 5
+2014-05-21 18:01:38.080118 7f785c7c6700  0 objectcacher flush_set
+total: 5920 flushed: 5
+2014-05-21 18:01:38.119792 7f785c7c6700  0 objectcacher flush_set
+total: 5921 flushed: 5
+2014-05-21 18:01:38.162004 7f785c7c6700  0 objectcacher flush_set
+total: 5922 flushed: 5
+2014-05-21 18:01:38.202755 7f785c7c6700  0 objectcacher flush_set
+total: 5923 flushed: 5
+2014-05-21 18:01:38.243880 7f785c7c6700  0 objectcacher flush_set
+total: 5923 flushed: 5
+2014-05-21 18:01:38.284399 7f785c7c6700  0 objectcacher flush_set
+total: 5923 flushed: 5
 
-Thanks,
-Guang Yang
+These logs record the iteration info, the loop will check 5920 objects
+but only 5 objects are dirty.
+
+So I think the solution is make "ObjectCacher::flush_set" only
+iterator the objects which is dirty.
+
+-- 
+Best Regards,
+
+Wheat
