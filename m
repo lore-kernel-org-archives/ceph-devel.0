@@ -1,63 +1,99 @@
-From: Olivier Bonvalet <ceph.list-PaEMFeTk6C1QFI55V6+gNQ@public.gmane.org>
-Subject: Re: Data still in OSD directories after removing
-Date: Wed, 21 May 2014 12:17:10 +0200
-Message-ID: <1400667430.27385.4.camel@localhost>
-References: <1400578369.11397.9.camel@localhost>
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: Re: [Performance] Improvement on DB Performance
+Date: Wed, 21 May 2014 18:21:59 +0800
+Message-ID: <CACJqLyYFMAxoVUZCTvPMXFGrYEPmFqTd+pZmsL2V=V1L32CisQ@mail.gmail.com>
+References: <CACJqLyY5VSQubaPvk2N3BrRx=YZ7EpiyRJZbWnNM=bQMfNA8=w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <1400578369.11397.9.camel@localhost>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Cc: Ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-wg0-f50.google.com ([74.125.82.50]:65153 "EHLO
+	mail-wg0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751137AbaEUKWA (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 May 2014 06:22:00 -0400
+Received: by mail-wg0-f50.google.com with SMTP id x12so1770087wgg.33
+        for <ceph-devel@vger.kernel.org>; Wed, 21 May 2014 03:21:59 -0700 (PDT)
+In-Reply-To: <CACJqLyY5VSQubaPvk2N3BrRx=YZ7EpiyRJZbWnNM=bQMfNA8=w@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-SGksCgpJIGhhdmUgYSBsb3Qgb2Ygc3BhY2Ugd2FzdGVkIGJ5IHRoaXMgcHJvYmxlbSAoYWJvdXQg
-MTBHQiBwZXIgT1NELCBqdXN0CmZvciB0aGlzIFJCRCBpbWFnZSkuCklmIE9TRHMgY2FuJ3QgZGV0
-ZWN0IG9ycGhhbnMgZmlsZXMsIHNob3VsZCBJIG1hbnVhbGx5IGRldGVjdCB0aGVtLCB0aGVuCnJl
-bW92ZSB0aGVtID8KClRoaXMgY29tbWFuZCBjYW4gZG8gdGhlIGpvYiwgYXQgbGVhc3QgZm9yIHRo
-aXMgaW1hZ2UgcHJlZml4IDoKICAgIGZpbmQgL3Zhci9saWIvY2VwaC9vc2QvIC1uYW1lICdyYi4w
-LjE0YmZiNWEuMjM4ZTFmMjkuKicgLWRlbGV0ZQoKVGhhbmtzIGZvciBhbnkgYWR2aWNlLApPbGl2
-aWVyCgpQUyA6IG5vdCBzdXJlIGlmIHRoaXMga2luZCBvZiBwcm9ibGVtIGlzIGZvciB0aGUgdXNl
-ciBvciBkZXYgbWFpbGluZwpsaXN0LgoKTGUgbWFyZGkgMjAgbWFpIDIwMTQgw6AgMTE6MzIgKzAy
-MDAsIE9saXZpZXIgQm9udmFsZXQgYSDDqWNyaXQgOgo+IEhpLAo+IAo+IHNob3J0IDogSSByZW1v
-dmVkIGEgMVRCIFJCRCBpbWFnZSwgYnV0IEkgc3RpbGwgc2VlIGZpbGVzIGFib3V0IGl0IG9uCj4g
-T1NELgo+IAo+IAo+IGxvbmcgOgo+IDEpIEkgZGlkIDogInJiZCBzbmFwIHB1cmdlICRwb29sLyRp
-bWciCj4gICAgYnV0IHNpbmNlIGl0IG92ZXJsb2FkIHRoZSBjbHVzdGVyLCBJIHN0b3BwZWQgaXQg
-KENUUkwrQykKPiAyKSBsYXR0ZXIsICJyYmQgc25hcCBwdXJnZSAkcG9vbC8kaW1nIgo+IDMpIHRo
-ZW4sICJyYmQgcm0gJHBvb2wvJGltZyIKPiAKPiBub3csIG9uIHRoZSBkaXNrIEkgY2FuIGZvdW5k
-IGZpbGVzIG9mIHRoaXMgdjEgUkJEIGltYWdlIChwcmVmaXggd2FzCj4gcmIuMC4xNGJmYjVhLjIz
-OGUxZjI5KSA6Cj4gCj4gIyBmaW5kIC92YXIvbGliL2NlcGgvb3NkL2NlcGgtNjQvIC1uYW1lICdy
-Yi4wLjE0YmZiNWEuMjM4ZTFmMjkuKicKPiAvdmFyL2xpYi9jZXBoL29zZC9jZXBoLTY0L2N1cnJl
-bnQvOS41YzFfaGVhZC9ESVJfMS9ESVJfQy9ESVJfNS9ESVJfMy9yYi4wLjE0YmZiNWEuMjM4ZTFm
-MjkuMDAwMDAwMDIxNDMxX19zbmFwZGlyX0M5NjYzNUMxX185Cj4gL3Zhci9saWIvY2VwaC9vc2Qv
-Y2VwaC02NC9jdXJyZW50LzkuNWMxX2hlYWQvRElSXzEvRElSX0MvRElSXzUvRElSXzMvcmIuMC4x
-NGJmYjVhLjIzOGUxZjI5LjAwMDAwMDAwNTYyMl9fYTI1Ml8zMkY0MzVDMV9fOQo+IC92YXIvbGli
-L2NlcGgvb3NkL2NlcGgtNjQvY3VycmVudC85LjVjMV9oZWFkL0RJUl8xL0RJUl9DL0RJUl81L0RJ
-Ul8zL3JiLjAuMTRiZmI1YS4yMzhlMWYyOS4wMDAwMDAwMjE0MzFfX2EyNTJfQzk2NjM1QzFfXzkK
-PiAvdmFyL2xpYi9jZXBoL29zZC9jZXBoLTY0L2N1cnJlbnQvOS41YzFfaGVhZC9ESVJfMS9ESVJf
-Qy9ESVJfNS9ESVJfMy9yYi4wLjE0YmZiNWEuMjM4ZTFmMjkuMDAwMDAwMDA1NjIyX19zbmFwZGly
-XzMyRjQzNUMxX185Cj4gL3Zhci9saWIvY2VwaC9vc2QvY2VwaC02NC9jdXJyZW50LzkuNWMxX2hl
-YWQvRElSXzEvRElSX0MvRElSXzUvRElSXzkvcmIuMC4xNGJmYjVhLjIzOGUxZjI5LjAwMDAwMDAx
-MWUwOF9fYTE3Ml81OTQ0OTVDMV9fOQo+IC92YXIvbGliL2NlcGgvb3NkL2NlcGgtNjQvY3VycmVu
-dC85LjVjMV9oZWFkL0RJUl8xL0RJUl9DL0RJUl81L0RJUl85L3JiLjAuMTRiZmI1YS4yMzhlMWYy
-OS4wMDAwMDAwMTFlMDhfX3NuYXBkaXJfNTk0NDk1QzFfXzkKPiAvdmFyL2xpYi9jZXBoL29zZC9j
-ZXBoLTY0L2N1cnJlbnQvOS41YzFfaGVhZC9ESVJfMS9ESVJfQy9ESVJfNS9ESVJfQS9yYi4wLjE0
-YmZiNWEuMjM4ZTFmMjkuMDAwMDAwMDIxNjIwX19hMjUyXzc3OUZBNUMxX185Cj4gLi4uCj4gCj4g
-Cj4gU28sIGlzIHRoZXJlIGEgd2F5IHRvIGZvcmNlIE9TRCB0byBkZXRlY3QgaWYgZmlsZXMgYXJl
-IG9ycGhhbnMsIHRoZW4KPiByZW1vdmUgdGhlbSA/Cj4gCj4gVGhhbmtzLAo+IE9saXZpZXIKPiAK
-PiBfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwo+IGNlcGgt
-dXNlcnMgbWFpbGluZyBsaXN0Cj4gY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQo+IGh0dHA6Ly9s
-aXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo+IAoKX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWls
-aW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20v
-bGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
+I pushed the commit to fix this problem(https://github.com/ceph/ceph/pull/1848).
+
+With test program(Each sync request is issued with ten write request),
+a significant improvement is noticed.
+
+aio_flush                          sum: 914750     avg: 1239   count:
+738      max: 4714   min: 1011
+flush_set                          sum: 904200     avg: 1225   count:
+738      max: 4698   min: 999
+flush                              sum: 641648     avg: 173    count:
+3690     max: 1340   min: 128
+
+Compared to last mail, it reduce each aio_flush request to 1239 ns
+instead of 24145 ns.
+
+I hope it's the root cause for db on rbd performance.
+
+On Wed, May 21, 2014 at 6:15 PM, Haomai Wang <haomaiwang@gmail.com> wrote:
+> Hi all,
+>
+> I remember there exists discuss about DB(mysql) performance on rbd.
+> Recently I test mysql-bench with rbd and found awful performance. So I
+> dive into it and find that main cause is "flush" request from guest.
+> As we know, applications such as mysql, ceph has own journal for
+> durable and journal usually send sync&direct io. If fs barrier is on,
+> each sync io operation make kernel issue "sync"(barrier) request to
+> block device. Here, qemu will call "rbd_aio_flush" to apply.
+>
+> Via systemtap, I found a amazing thing:
+> aio_flush                          sum: 4177085    avg: 24145  count:
+> 173      max: 28172  min: 22747
+> flush_set                          sum: 4172116    avg: 24116  count:
+> 173      max: 28034  min: 22733
+> flush                              sum: 3029910    avg: 4      count:
+> 670477   max: 1893   min: 3
+>
+> This statistic info is gathered in 5s. Most of consuming time is on
+> "ObjectCacher::flush". What's more, with time increasing, the flush
+> count will be increasing.
+>
+> After view source, I find the root cause is "ObjectCacher::flush_set",
+> it will iterator the "object_set" and look for dirty buffer. And
+> "object_set"  contains all objects ever opened.  For example:
+>
+> 2014-05-21 18:01:37.959013 7f785c7c6700  0 objectcacher flush_set
+> total: 5919 flushed: 5
+> 2014-05-21 18:01:37.999698 7f785c7c6700  0 objectcacher flush_set
+> total: 5919 flushed: 5
+> 2014-05-21 18:01:38.038405 7f785c7c6700  0 objectcacher flush_set
+> total: 5920 flushed: 5
+> 2014-05-21 18:01:38.080118 7f785c7c6700  0 objectcacher flush_set
+> total: 5920 flushed: 5
+> 2014-05-21 18:01:38.119792 7f785c7c6700  0 objectcacher flush_set
+> total: 5921 flushed: 5
+> 2014-05-21 18:01:38.162004 7f785c7c6700  0 objectcacher flush_set
+> total: 5922 flushed: 5
+> 2014-05-21 18:01:38.202755 7f785c7c6700  0 objectcacher flush_set
+> total: 5923 flushed: 5
+> 2014-05-21 18:01:38.243880 7f785c7c6700  0 objectcacher flush_set
+> total: 5923 flushed: 5
+> 2014-05-21 18:01:38.284399 7f785c7c6700  0 objectcacher flush_set
+> total: 5923 flushed: 5
+>
+> These logs record the iteration info, the loop will check 5920 objects
+> but only 5 objects are dirty.
+>
+> So I think the solution is make "ObjectCacher::flush_set" only
+> iterator the objects which is dirty.
+>
+> --
+> Best Regards,
+>
+> Wheat
+
+
+
+-- 
+Best Regards,
+
+Wheat
