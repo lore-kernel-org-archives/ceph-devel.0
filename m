@@ -1,129 +1,158 @@
-From: Luke Jing Yuan <jyluke@mimos.my>
-Subject: RE: [Performance] Improvement on DB Performance
-Date: Wed, 21 May 2014 12:00:57 +0000
-Message-ID: <E0E280CCE0E1A44898C992A9190D929A5B17E4@MBX02-TPM.mimos.local>
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: Re: [Performance] Improvement on DB Performance
+Date: Wed, 21 May 2014 20:12:23 +0800
+Message-ID: <CACJqLyZJ5BzKgvttik7YZ=sjt9wMucKx97d8A6-pnumkonKvkw@mail.gmail.com>
 References: <CACJqLyY5VSQubaPvk2N3BrRx=YZ7EpiyRJZbWnNM=bQMfNA8=w@mail.gmail.com>
- <CACJqLyYFMAxoVUZCTvPMXFGrYEPmFqTd+pZmsL2V=V1L32CisQ@mail.gmail.com>
+	<CACJqLyYFMAxoVUZCTvPMXFGrYEPmFqTd+pZmsL2V=V1L32CisQ@mail.gmail.com>
+	<E0E280CCE0E1A44898C992A9190D929A5B17E4@MBX02-TPM.mimos.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from imperial.mimos.my ([192.228.137.109]:50328 "EHLO
-	IMPERIAL.MIMOS.MY" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751018AbaEUMK0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 May 2014 08:10:26 -0400
-In-Reply-To: <CACJqLyYFMAxoVUZCTvPMXFGrYEPmFqTd+pZmsL2V=V1L32CisQ@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-wg0-f52.google.com ([74.125.82.52]:60326 "EHLO
+	mail-wg0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750972AbaEUMMY convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 May 2014 08:12:24 -0400
+Received: by mail-wg0-f52.google.com with SMTP id l18so1895288wgh.23
+        for <ceph-devel@vger.kernel.org>; Wed, 21 May 2014 05:12:23 -0700 (PDT)
+In-Reply-To: <E0E280CCE0E1A44898C992A9190D929A5B17E4@MBX02-TPM.mimos.local>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomaiwang@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Luke Jing Yuan <jyluke@mimos.my>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-SGksDQoNCkkgYW0ganVzdCBjdXJpb3VzIHdvdWxkIHRoaXMgaXNzdWUgYmUgYWxzbyBhcHBsaWVk
-IHRvIG90aGVyIERCIGxpa2UgcG9zdGdyZXNxbD8gTXkgdGVhbSBpcyBjdXJyZW50bHkgbG9va2lu
-ZyBhdCB0aGlzIGJ1dCB3ZSAgYXJlIHVzaW5nIGEgVk0gYW5kIGluc3RhbGwgcG9zdGdyZXNxbCA5
-LjMgb24gYW4gYXR0YWNoZWQgZGV2aWNlIHVzaW5nIFJCRCAodmlhIGxpYnZpcnQpLiBXZSBoYWQg
-eWV0IHRvIGNvbXBsZXRlIG91ciBwbGFubmVkIHRlc3RzIGJ1dCBpbml0aWFsIG9ic2VydmF0aW9u
-cyBkaWQgaW5kaWNhdGUgcG9zc2libGUgcGVyZm9ybWFuY2UgaXNzdWVzIHRob3VnaCB3ZSBoYWQg
-eWV0IHRvIGdvIHRocm91Z2ggYWxsIHBvc3NpYmxlIG9wdGlvbnMgd2l0aGluIHBvc3RncmVzcWwu
-DQoNClJlZ2FyZHMsDQpMdWtlDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBj
-ZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJA
-dmdlci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgSGFvbWFpIFdhbmcNClNlbnQ6IFdlZG5lc2Rh
-eSwgMjEgTWF5LCAyMDE0IDY6MjIgUE0NClRvOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0K
-U3ViamVjdDogUmU6IFtQZXJmb3JtYW5jZV0gSW1wcm92ZW1lbnQgb24gREIgUGVyZm9ybWFuY2UN
-Cg0KSSBwdXNoZWQgdGhlIGNvbW1pdCB0byBmaXggdGhpcyBwcm9ibGVtKGh0dHBzOi8vZ2l0aHVi
-LmNvbS9jZXBoL2NlcGgvcHVsbC8xODQ4KS4NCg0KV2l0aCB0ZXN0IHByb2dyYW0oRWFjaCBzeW5j
-IHJlcXVlc3QgaXMgaXNzdWVkIHdpdGggdGVuIHdyaXRlIHJlcXVlc3QpLCBhIHNpZ25pZmljYW50
-IGltcHJvdmVtZW50IGlzIG5vdGljZWQuDQoNCmFpb19mbHVzaCAgICAgICAgICAgICAgICAgICAg
-ICAgICAgc3VtOiA5MTQ3NTAgICAgIGF2ZzogMTIzOSAgIGNvdW50Og0KNzM4ICAgICAgbWF4OiA0
-NzE0ICAgbWluOiAxMDExDQpmbHVzaF9zZXQgICAgICAgICAgICAgICAgICAgICAgICAgIHN1bTog
-OTA0MjAwICAgICBhdmc6IDEyMjUgICBjb3VudDoNCjczOCAgICAgIG1heDogNDY5OCAgIG1pbjog
-OTk5DQpmbHVzaCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHN1bTogNjQxNjQ4ICAgICBh
-dmc6IDE3MyAgICBjb3VudDoNCjM2OTAgICAgIG1heDogMTM0MCAgIG1pbjogMTI4DQoNCkNvbXBh
-cmVkIHRvIGxhc3QgbWFpbCwgaXQgcmVkdWNlIGVhY2ggYWlvX2ZsdXNoIHJlcXVlc3QgdG8gMTIz
-OSBucyBpbnN0ZWFkIG9mIDI0MTQ1IG5zLg0KDQpJIGhvcGUgaXQncyB0aGUgcm9vdCBjYXVzZSBm
-b3IgZGIgb24gcmJkIHBlcmZvcm1hbmNlLg0KDQpPbiBXZWQsIE1heSAyMSwgMjAxNCBhdCA2OjE1
-IFBNLCBIYW9tYWkgV2FuZyA8aGFvbWFpd2FuZ0BnbWFpbC5jb20+IHdyb3RlOg0KPiBIaSBhbGws
-DQo+DQo+IEkgcmVtZW1iZXIgdGhlcmUgZXhpc3RzIGRpc2N1c3MgYWJvdXQgREIobXlzcWwpIHBl
-cmZvcm1hbmNlIG9uIHJiZC4NCj4gUmVjZW50bHkgSSB0ZXN0IG15c3FsLWJlbmNoIHdpdGggcmJk
-IGFuZCBmb3VuZCBhd2Z1bCBwZXJmb3JtYW5jZS4gU28gSQ0KPiBkaXZlIGludG8gaXQgYW5kIGZp
-bmQgdGhhdCBtYWluIGNhdXNlIGlzICJmbHVzaCIgcmVxdWVzdCBmcm9tIGd1ZXN0Lg0KPiBBcyB3
-ZSBrbm93LCBhcHBsaWNhdGlvbnMgc3VjaCBhcyBteXNxbCwgY2VwaCBoYXMgb3duIGpvdXJuYWwg
-Zm9yDQo+IGR1cmFibGUgYW5kIGpvdXJuYWwgdXN1YWxseSBzZW5kIHN5bmMmZGlyZWN0IGlvLiBJ
-ZiBmcyBiYXJyaWVyIGlzIG9uLA0KPiBlYWNoIHN5bmMgaW8gb3BlcmF0aW9uIG1ha2Uga2VybmVs
-IGlzc3VlICJzeW5jIihiYXJyaWVyKSByZXF1ZXN0IHRvDQo+IGJsb2NrIGRldmljZS4gSGVyZSwg
-cWVtdSB3aWxsIGNhbGwgInJiZF9haW9fZmx1c2giIHRvIGFwcGx5Lg0KPg0KPiBWaWEgc3lzdGVt
-dGFwLCBJIGZvdW5kIGEgYW1hemluZyB0aGluZzoNCj4gYWlvX2ZsdXNoICAgICAgICAgICAgICAg
-ICAgICAgICAgICBzdW06IDQxNzcwODUgICAgYXZnOiAyNDE0NSAgY291bnQ6DQo+IDE3MyAgICAg
-IG1heDogMjgxNzIgIG1pbjogMjI3NDcNCj4gZmx1c2hfc2V0ICAgICAgICAgICAgICAgICAgICAg
-ICAgICBzdW06IDQxNzIxMTYgICAgYXZnOiAyNDExNiAgY291bnQ6DQo+IDE3MyAgICAgIG1heDog
-MjgwMzQgIG1pbjogMjI3MzMNCj4gZmx1c2ggICAgICAgICAgICAgICAgICAgICAgICAgICAgICBz
-dW06IDMwMjk5MTAgICAgYXZnOiA0ICAgICAgY291bnQ6DQo+IDY3MDQ3NyAgIG1heDogMTg5MyAg
-IG1pbjogMw0KPg0KPiBUaGlzIHN0YXRpc3RpYyBpbmZvIGlzIGdhdGhlcmVkIGluIDVzLiBNb3N0
-IG9mIGNvbnN1bWluZyB0aW1lIGlzIG9uDQo+ICJPYmplY3RDYWNoZXI6OmZsdXNoIi4gV2hhdCdz
-IG1vcmUsIHdpdGggdGltZSBpbmNyZWFzaW5nLCB0aGUgZmx1c2gNCj4gY291bnQgd2lsbCBiZSBp
-bmNyZWFzaW5nLg0KPg0KPiBBZnRlciB2aWV3IHNvdXJjZSwgSSBmaW5kIHRoZSByb290IGNhdXNl
-IGlzICJPYmplY3RDYWNoZXI6OmZsdXNoX3NldCIsDQo+IGl0IHdpbGwgaXRlcmF0b3IgdGhlICJv
-YmplY3Rfc2V0IiBhbmQgbG9vayBmb3IgZGlydHkgYnVmZmVyLiBBbmQNCj4gIm9iamVjdF9zZXQi
-ICBjb250YWlucyBhbGwgb2JqZWN0cyBldmVyIG9wZW5lZC4gIEZvciBleGFtcGxlOg0KPg0KPiAy
-MDE0LTA1LTIxIDE4OjAxOjM3Ljk1OTAxMyA3Zjc4NWM3YzY3MDAgIDAgb2JqZWN0Y2FjaGVyIGZs
-dXNoX3NldA0KPiB0b3RhbDogNTkxOSBmbHVzaGVkOiA1DQo+IDIwMTQtMDUtMjEgMTg6MDE6Mzcu
-OTk5Njk4IDdmNzg1YzdjNjcwMCAgMCBvYmplY3RjYWNoZXIgZmx1c2hfc2V0DQo+IHRvdGFsOiA1
-OTE5IGZsdXNoZWQ6IDUNCj4gMjAxNC0wNS0yMSAxODowMTozOC4wMzg0MDUgN2Y3ODVjN2M2NzAw
-ICAwIG9iamVjdGNhY2hlciBmbHVzaF9zZXQNCj4gdG90YWw6IDU5MjAgZmx1c2hlZDogNQ0KPiAy
-MDE0LTA1LTIxIDE4OjAxOjM4LjA4MDExOCA3Zjc4NWM3YzY3MDAgIDAgb2JqZWN0Y2FjaGVyIGZs
-dXNoX3NldA0KPiB0b3RhbDogNTkyMCBmbHVzaGVkOiA1DQo+IDIwMTQtMDUtMjEgMTg6MDE6Mzgu
-MTE5NzkyIDdmNzg1YzdjNjcwMCAgMCBvYmplY3RjYWNoZXIgZmx1c2hfc2V0DQo+IHRvdGFsOiA1
-OTIxIGZsdXNoZWQ6IDUNCj4gMjAxNC0wNS0yMSAxODowMTozOC4xNjIwMDQgN2Y3ODVjN2M2NzAw
-ICAwIG9iamVjdGNhY2hlciBmbHVzaF9zZXQNCj4gdG90YWw6IDU5MjIgZmx1c2hlZDogNQ0KPiAy
-MDE0LTA1LTIxIDE4OjAxOjM4LjIwMjc1NSA3Zjc4NWM3YzY3MDAgIDAgb2JqZWN0Y2FjaGVyIGZs
-dXNoX3NldA0KPiB0b3RhbDogNTkyMyBmbHVzaGVkOiA1DQo+IDIwMTQtMDUtMjEgMTg6MDE6Mzgu
-MjQzODgwIDdmNzg1YzdjNjcwMCAgMCBvYmplY3RjYWNoZXIgZmx1c2hfc2V0DQo+IHRvdGFsOiA1
-OTIzIGZsdXNoZWQ6IDUNCj4gMjAxNC0wNS0yMSAxODowMTozOC4yODQzOTkgN2Y3ODVjN2M2NzAw
-ICAwIG9iamVjdGNhY2hlciBmbHVzaF9zZXQNCj4gdG90YWw6IDU5MjMgZmx1c2hlZDogNQ0KPg0K
-PiBUaGVzZSBsb2dzIHJlY29yZCB0aGUgaXRlcmF0aW9uIGluZm8sIHRoZSBsb29wIHdpbGwgY2hl
-Y2sgNTkyMCBvYmplY3RzDQo+IGJ1dCBvbmx5IDUgb2JqZWN0cyBhcmUgZGlydHkuDQo+DQo+IFNv
-IEkgdGhpbmsgdGhlIHNvbHV0aW9uIGlzIG1ha2UgIk9iamVjdENhY2hlcjo6Zmx1c2hfc2V0IiBv
-bmx5DQo+IGl0ZXJhdG9yIHRoZSBvYmplY3RzIHdoaWNoIGlzIGRpcnR5Lg0KPg0KPiAtLQ0KPiBC
-ZXN0IFJlZ2FyZHMsDQo+DQo+IFdoZWF0DQoNCg0KDQotLQ0KQmVzdCBSZWdhcmRzLA0KDQpXaGVh
-dA0KLS0NClRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1
-YnNjcmliZSBjZXBoLWRldmVsIiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21v
-QHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJu
-ZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCg0KX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX18NCkRJU0NMQUlNRVI6DQoNCg0KVGhpcyBlLW1haWwgKGluY2x1ZGluZyBhbnkgYXR0YWNo
-bWVudHMpIGlzIGZvciB0aGUgYWRkcmVzc2VlKHMpIG9ubHkgYW5kIG1heSBiZSBjb25maWRlbnRp
-YWwsIGVzcGVjaWFsbHkgYXMgcmVnYXJkcyBwZXJzb25hbCBkYXRhLiBJZiB5b3UgYXJlIG5vdCB0
-aGUgaW50ZW5kZWQgcmVjaXBpZW50LCBwbGVhc2Ugbm90ZSB0aGF0IGFueSBkZWFsaW5nLCByZXZp
-ZXcsIGRpc3RyaWJ1dGlvbiwgcHJpbnRpbmcsIGNvcHlpbmcgb3IgdXNlIG9mIHRoaXMgZS1tYWls
-IGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgZW1haWwg
-aW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlciBpbW1lZGlhdGVseSBhbmQgZGVsZXRl
-IHRoZSBvcmlnaW5hbCBtZXNzYWdlIChpbmNsdWRpbmcgYW55IGF0dGFjaG1lbnRzKS4NCg0KDQpN
-SU1PUyBCZXJoYWQgaXMgYSByZXNlYXJjaCBhbmQgZGV2ZWxvcG1lbnQgaW5zdGl0dXRpb24gdW5k
-ZXIgdGhlIHB1cnZpZXcgb2YgdGhlIE1hbGF5c2lhbiBNaW5pc3RyeSBvZiBTY2llbmNlLCBUZWNo
-bm9sb2d5IGFuZCBJbm5vdmF0aW9uLiBPcGluaW9ucywgY29uY2x1c2lvbnMgYW5kIG90aGVyIGlu
-Zm9ybWF0aW9uIGluIHRoaXMgZS1tYWlsIHRoYXQgZG8gbm90IHJlbGF0ZSB0byB0aGUgb2ZmaWNp
-YWwgYnVzaW5lc3Mgb2YgTUlNT1MgQmVyaGFkIGFuZC9vciBpdHMgc3Vic2lkaWFyaWVzIHNoYWxs
-IGJlIHVuZGVyc3Rvb2QgYXMgbmVpdGhlciBnaXZlbiBub3IgZW5kb3JzZWQgYnkgTUlNT1MgQmVy
-aGFkIGFuZC9vciBpdHMgc3Vic2lkaWFyaWVzIGFuZCBuZWl0aGVyIE1JTU9TIEJlcmhhZCBub3Ig
-aXRzIHN1YnNpZGlhcmllcyBhY2NlcHRzIHJlc3BvbnNpYmlsaXR5IGZvciB0aGUgc2FtZS4gQWxs
-IGxpYWJpbGl0eSBhcmlzaW5nIGZyb20gb3IgaW4gY29ubmVjdGlvbiB3aXRoIGNvbXB1dGVyIHZp
-cnVzZXMgYW5kL29yIGNvcnJ1cHRlZCBlLW1haWxzIGlzIGV4Y2x1ZGVkIHRvIHRoZSBmdWxsZXN0
-IGV4dGVudCBwZXJtaXR0ZWQgYnkgbGF3Lg0KLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tCi0KLQpESVNDTEFJTUVSOiAKClRo
-aXMgZS1tYWlsIChpbmNsdWRpbmcgYW55IGF0dGFjaG1lbnRzKSBpcyBmb3IgdGhlIGFkZHJlc3Nl
-ZShzKSAKb25seSBhbmQgbWF5IGNvbnRhaW4gY29uZmlkZW50aWFsIGluZm9ybWF0aW9uLiBJZiB5
-b3UgYXJlIG5vdCB0aGUgCmludGVuZGVkIHJlY2lwaWVudCwgcGxlYXNlIG5vdGUgdGhhdCBhbnkg
-ZGVhbGluZywgcmV2aWV3LCAKZGlzdHJpYnV0aW9uLCBwcmludGluZywgY29weWluZyBvciB1c2Ug
-b2YgdGhpcyBlLW1haWwgaXMgc3RyaWN0bHkgCnByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2Vp
-dmVkIHRoaXMgZW1haWwgaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgCnRoZSBzZW5kZXIgIGltbWVk
-aWF0ZWx5IGFuZCBkZWxldGUgdGhlIG9yaWdpbmFsIG1lc3NhZ2UuIApNSU1PUyBCZXJoYWQgaXMg
-YSByZXNlYXJjaCBhbmQgZGV2ZWxvcG1lbnQgaW5zdGl0dXRpb24gdW5kZXIgCnRoZSBwdXJ2aWV3
-IG9mIHRoZSBNYWxheXNpYW4gTWluaXN0cnkgb2YgU2NpZW5jZSwgVGVjaG5vbG9neSBhbmQgCklu
-bm92YXRpb24uIE9waW5pb25zLCBjb25jbHVzaW9ucyBhbmQgb3RoZXIgaW5mb3JtYXRpb24gaW4g
-dGhpcyBlLQptYWlsIHRoYXQgZG8gbm90IHJlbGF0ZSB0byB0aGUgb2ZmaWNpYWwgYnVzaW5lc3Mg
-b2YgTUlNT1MgQmVyaGFkIAphbmQvb3IgaXRzIHN1YnNpZGlhcmllcyBzaGFsbCBiZSB1bmRlcnN0
-b29kIGFzIG5laXRoZXIgZ2l2ZW4gbm9yIAplbmRvcnNlZCBieSBNSU1PUyBCZXJoYWQgYW5kL29y
-IGl0cyBzdWJzaWRpYXJpZXMgYW5kIG5laXRoZXIgCk1JTU9TIEJlcmhhZCBub3IgaXRzIHN1YnNp
-ZGlhcmllcyBhY2NlcHRzIHJlc3BvbnNpYmlsaXR5IGZvciB0aGUgCnNhbWUuIEFsbCBsaWFiaWxp
-dHkgYXJpc2luZyBmcm9tIG9yIGluIGNvbm5lY3Rpb24gd2l0aCBjb21wdXRlciAKdmlydXNlcyBh
-bmQvb3IgY29ycnVwdGVkIGUtbWFpbHMgaXMgZXhjbHVkZWQgdG8gdGhlIGZ1bGxlc3QgZXh0ZW50
-IApwZXJtaXR0ZWQgYnkgbGF3LgoKCg==
+If rbd cache enabled, I think it should be affected.
+
+On Wed, May 21, 2014 at 8:00 PM, Luke Jing Yuan <jyluke@mimos.my> wrote:
+> Hi,
+>
+> I am just curious would this issue be also applied to other DB like postgresql? My team is currently looking at this but we  are using a VM and install postgresql 9.3 on an attached device using RBD (via libvirt). We had yet to complete our planned tests but initial observations did indicate possible performance issues though we had yet to go through all possible options within postgresql.
+>
+> Regards,
+> Luke
+>
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Haomai Wang
+> Sent: Wednesday, 21 May, 2014 6:22 PM
+> To: ceph-devel@vger.kernel.org
+> Subject: Re: [Performance] Improvement on DB Performance
+>
+> I pushed the commit to fix this problem(https://github.com/ceph/ceph/pull/1848).
+>
+> With test program(Each sync request is issued with ten write request), a significant improvement is noticed.
+>
+> aio_flush                          sum: 914750     avg: 1239   count:
+> 738      max: 4714   min: 1011
+> flush_set                          sum: 904200     avg: 1225   count:
+> 738      max: 4698   min: 999
+> flush                              sum: 641648     avg: 173    count:
+> 3690     max: 1340   min: 128
+>
+> Compared to last mail, it reduce each aio_flush request to 1239 ns instead of 24145 ns.
+>
+> I hope it's the root cause for db on rbd performance.
+>
+> On Wed, May 21, 2014 at 6:15 PM, Haomai Wang <haomaiwang@gmail.com> wrote:
+>> Hi all,
+>>
+>> I remember there exists discuss about DB(mysql) performance on rbd.
+>> Recently I test mysql-bench with rbd and found awful performance. So I
+>> dive into it and find that main cause is "flush" request from guest.
+>> As we know, applications such as mysql, ceph has own journal for
+>> durable and journal usually send sync&direct io. If fs barrier is on,
+>> each sync io operation make kernel issue "sync"(barrier) request to
+>> block device. Here, qemu will call "rbd_aio_flush" to apply.
+>>
+>> Via systemtap, I found a amazing thing:
+>> aio_flush                          sum: 4177085    avg: 24145  count:
+>> 173      max: 28172  min: 22747
+>> flush_set                          sum: 4172116    avg: 24116  count:
+>> 173      max: 28034  min: 22733
+>> flush                              sum: 3029910    avg: 4      count:
+>> 670477   max: 1893   min: 3
+>>
+>> This statistic info is gathered in 5s. Most of consuming time is on
+>> "ObjectCacher::flush". What's more, with time increasing, the flush
+>> count will be increasing.
+>>
+>> After view source, I find the root cause is "ObjectCacher::flush_set",
+>> it will iterator the "object_set" and look for dirty buffer. And
+>> "object_set"  contains all objects ever opened.  For example:
+>>
+>> 2014-05-21 18:01:37.959013 7f785c7c6700  0 objectcacher flush_set
+>> total: 5919 flushed: 5
+>> 2014-05-21 18:01:37.999698 7f785c7c6700  0 objectcacher flush_set
+>> total: 5919 flushed: 5
+>> 2014-05-21 18:01:38.038405 7f785c7c6700  0 objectcacher flush_set
+>> total: 5920 flushed: 5
+>> 2014-05-21 18:01:38.080118 7f785c7c6700  0 objectcacher flush_set
+>> total: 5920 flushed: 5
+>> 2014-05-21 18:01:38.119792 7f785c7c6700  0 objectcacher flush_set
+>> total: 5921 flushed: 5
+>> 2014-05-21 18:01:38.162004 7f785c7c6700  0 objectcacher flush_set
+>> total: 5922 flushed: 5
+>> 2014-05-21 18:01:38.202755 7f785c7c6700  0 objectcacher flush_set
+>> total: 5923 flushed: 5
+>> 2014-05-21 18:01:38.243880 7f785c7c6700  0 objectcacher flush_set
+>> total: 5923 flushed: 5
+>> 2014-05-21 18:01:38.284399 7f785c7c6700  0 objectcacher flush_set
+>> total: 5923 flushed: 5
+>>
+>> These logs record the iteration info, the loop will check 5920 objects
+>> but only 5 objects are dirty.
+>>
+>> So I think the solution is make "ObjectCacher::flush_set" only
+>> iterator the objects which is dirty.
+>>
+>> --
+>> Best Regards,
+>>
+>> Wheat
+>
+>
+>
+> --
+> Best Regards,
+>
+> Wheat
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+> ________________________________
+> DISCLAIMER:
+>
+>
+> This e-mail (including any attachments) is for the addressee(s) only and may be confidential, especially as regards personal data. If you are not the intended recipient, please note that any dealing, review, distribution, printing, copying or use of this e-mail is strictly prohibited. If you have received this email in error, please notify the sender immediately and delete the original message (including any attachments).
+>
+>
+> MIMOS Berhad is a research and development institution under the purview of the Malaysian Ministry of Science, Technology and Innovation. Opinions, conclusions and other information in this e-mail that do not relate to the official business of MIMOS Berhad and/or its subsidiaries shall be understood as neither given nor endorsed by MIMOS Berhad and/or its subsidiaries and neither MIMOS Berhad nor its subsidiaries accepts responsibility for the same. All liability arising from or in connection with computer viruses and/or corrupted e-mails is excluded to the fullest extent permitted by law.
+> ------------------------------------------------------------------
+> -
+> -
+> DISCLAIMER:
+>
+> This e-mail (including any attachments) is for the addressee(s)
+> only and may contain confidential information. If you are not the
+> intended recipient, please note that any dealing, review,
+> distribution, printing, copying or use of this e-mail is strictly
+> prohibited. If you have received this email in error, please notify
+> the sender  immediately and delete the original message.
+> MIMOS Berhad is a research and development institution under
+> the purview of the Malaysian Ministry of Science, Technology and
+> Innovation. Opinions, conclusions and other information in this e-
+> mail that do not relate to the official business of MIMOS Berhad
+> and/or its subsidiaries shall be understood as neither given nor
+> endorsed by MIMOS Berhad and/or its subsidiaries and neither
+> MIMOS Berhad nor its subsidiaries accepts responsibility for the
+> same. All liability arising from or in connection with computer
+> viruses and/or corrupted e-mails is excluded to the fullest extent
+> permitted by law.
+>
+>
+
+
+
+-- 
+Best Regards,
+
+Wheat
