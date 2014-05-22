@@ -1,14 +1,13 @@
-From: Josh Durgin <josh.durgin-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: Data still in OSD directories after removing
-Date: Wed, 21 May 2014 18:20:42 -0700
-Message-ID: <537D50EA.9020901@inktank.com>
-References: <1400578369.11397.9.camel@localhost>	<1400667430.27385.4.camel@localhost>	<alpine.DEB.2.00.1405210818560.1689@cobra.newdream.net>
-	<1400709806.24328.0.camel@asblu>
+From: Craig Lewis <clewis-04jk9TcbgGYP2IHM84UzcNBPR1lH4CV8@public.gmane.org>
+Subject: Re: 70+  OSD are DOWN and not coming up
+Date: Wed, 21 May 2014 18:34:21 -0700
+Message-ID: <537D541D.2010005@centraldesktop.com>
+References: <5396D45F-E87E-4F53-85D8-B4DC1F630B78@csc.fi>
+	<alpine.DEB.2.00.1405200815570.1689@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; Format="flowed"
-Content-Transfer-Encoding: base64
+Content-Type: multipart/mixed; boundary="===============1242732631=="
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <1400709806.24328.0.camel@asblu>
+In-Reply-To: <alpine.DEB.2.00.1405200815570.1689-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -18,50 +17,153 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Olivier Bonvalet <ceph.list-PaEMFeTk6C1QFI55V6+gNQ@public.gmane.org>, Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, Ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ceph Community <ceph-community-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-T24gMDUvMjEvMjAxNCAwMzowMyBQTSwgT2xpdmllciBCb252YWxldCB3cm90ZToKPiBMZSBtZXJj
-cmVkaSAyMSBtYWkgMjAxNCDDoCAwODoyMCAtMDcwMCwgU2FnZSBXZWlsIGEgw6ljcml0IDoKPj4g
-WW91J3JlIGNlcnRhaW4gdGhhdCB0aGF0IGlzIHRoZSBjb3JyZWN0IHByZWZpeCBmb3IgdGhlIHJi
-ZCBpbWFnZSB5b3UKPj4gcmVtb3ZlZD8gIERvIHlvdSBzZWUgdGhlIG9iamVjdHMgbGlzdHMgd2hl
-biB5b3UgZG8gJ3JhZG9zIC1wIHJiZCBscyAtIHwKPj4gZ3JlcCA8cHJlZml4Pic/Cj4KPiBJJ20g
-cHJldHR5IHN1cmUgeWVzIDogc2luY2UgSSBkaWRuJ3Qgc2VlIGEgbG90IG9mIHNwYWNlIGZyZWVk
-IGJ5IHRoZQo+ICJyYmQgc25hcCBwdXJnZSIgY29tbWFuZCwgSSBsb29rZWQgYXQgdGhlIFJCRCBw
-cmVmaXggYmVmb3JlIHRvIGRvIHRoZQo+ICJyYmQgcm0iIChpdCdzIG5vdCB0aGUgZmlyc3QgdGlt
-ZSBJIHNlZSB0aGF0IHByb2JsZW0sIGJ1dCBwcmV2aW91cyB0aW1lCj4gd2l0aG91dCB0aGUgUkJE
-IHByZWZpeCBJIHdhcyBub3QgYWJsZSB0byBjaGVjaykuCj4KPiBTbyA6Cj4gLSAicmFkb3MgLXAg
-c2FzM2NvcGllcyBscyAtIHwgZ3JlcCByYi4wLjE0YmZiNWEuMjM4ZTFmMjkiIHJldHVybiBub3Ro
-aW5nCj4gYXQgYWxsCj4gLSAjIHJhZG9zIHN0YXQgLXAgc2FzM2NvcGllcyByYi4wLjE0YmZiNWEu
-MjM4ZTFmMjkuMDAwMDAwMDJmMDI2Cj4gICBlcnJvciBzdGF0LWluZyBzYXMzY29waWVzL3JiLjAu
-MTRiZmI1YS4yMzhlMWYyOS4wMDAwMDAwMmYwMjY6IE5vIHN1Y2gKPiBmaWxlIG9yIGRpcmVjdG9y
-eQo+IC0gIyByYWRvcyBzdGF0IC1wIHNhczNjb3BpZXMgcmIuMC4xNGJmYjVhLjIzOGUxZjI5LjAw
-MDAwMDAwMDAwMAo+ICAgZXJyb3Igc3RhdC1pbmcgc2FzM2NvcGllcy9yYi4wLjE0YmZiNWEuMjM4
-ZTFmMjkuMDAwMDAwMDAwMDAwOiBObyBzdWNoCj4gZmlsZSBvciBkaXJlY3RvcnkKPiAtICMgbHMg
-LWFsIC92YXIvbGliL2NlcGgvb3NkL2NlcGgtNjcvY3VycmVudC85LjFmZV9oZWFkL0RJUl9FL0RJ
-Ul9GL0RJUl8xL0RJUl83L3JiLjAuMTRiZmI1YS4yMzhlMWYyOS4wMDAwMDAwMmYwMjZfX2EyNTJf
-RTY4ODcxRkVfXzkKPiAtcnctci0tci0tIDEgcm9vdCByb290IDQxOTQzMDQgb2N0LiAgIDggIDIw
-MTMgL3Zhci9saWIvY2VwaC9vc2QvY2VwaC02Ny9jdXJyZW50LzkuMWZlX2hlYWQvRElSX0UvRElS
-X0YvRElSXzEvRElSXzcvcmIuMC4xNGJmYjVhLjIzOGUxZjI5LjAwMDAwMDAyZjAyNl9fYTI1Ml9F
-Njg4NzFGRV9fOQo+Cj4KPj4gSWYgdGhlIG9iamVjdHMgcmVhbGx5IGFyZSBvcnBoYW5lZCwgdGVo
-IHdheSB0byBjbGVhbiB0aGVtIHVwIGlzIHZpYSAncmFkb3MKPj4gLXAgcmJkIHJtIDxvYmplY3Ru
-YW1lPicuICBJJ2QgbGlrZSB0byBnZXQgdG8gdGhlIGJvdHRvbSBvZiBob3cgdGhleSBlbmRlZAo+
-PiB1cCB0aGF0IHdheSBmaXJzdCwgdGhvdWdoIQo+Cj4gSSBzdXBwb3NlIHRoZSBwcm9ibGVtIGNh
-bWUgZnJvbSBtZSwgYnkgZG9pbmcgQ1RSTCtDIHdoaWxlICJyYmQgc25hcAo+IHB1cmdlICRJTUci
-Lgo+ICJyYWRvcyBybSAtcCBzYXMzY29waWVzIHJiLjAuMTRiZmI1YS4yMzhlMWYyOS4wMDAwMDAw
-MmYwMjYiIGRvbid0IHJlbW92ZQo+IHRob3NlcyBmaWxlcywgYW5kIGp1c3QgYW5zd2VyIHdpdGgg
-YSAiTm8gc3VjaCBmaWxlIG9yIGRpcmVjdG9yeSIuCgpUaG9zZSBmaWxlcyBhcmUgYWxsIGZvciBz
-bmFwc2hvdHMsIHdoaWNoIGFyZSByZW1vdmVkIGJ5IHRoZSBvc2RzCmFzeW5jaHJvbm91c2x5IGlu
-IGEgcHJvY2VzcyBjYWxsZWQgJ3NuYXAgdHJpbW1pbmcnLiBUaGVyZSdzIG5vCndheSB0byBkaXJl
-Y3RseSByZW1vdmUgdGhlbSB2aWEgcmFkb3MuCgpTaW5jZSB5b3Ugc3RvcHBlZCAncmJkIHNuYXAg
-cHVyZ2UnIHBhcnR3YXkgdGhyb3VnaCwgaXQgbWF5CmhhdmUgcmVtb3ZlZCB0aGUgcmVmZXJlbmNl
-IHRvIHRoZSBzbmFwc2hvdCBiZWZvcmUgcmVtb3ZpbmcKdGhlIHNuYXBzaG90IGl0c2VsZi4KCllv
-dSBjYW4gZ2V0IGEgbGlzdCBvZiBzbmFwc2hvdCBpZHMgZm9yIHRoZSByZW1haW5pbmcgb2JqZWN0
-cwp2aWEgdGhlICdyYWRvcyBsaXN0c25hcHMnIGNvbW1hbmQsIGFuZCB1c2UKcmFkb3NfaW9jdHhf
-c2VsZm1hbmFnZWRfc25hcF9yZW1vdmUoKSAobm8gY29udmVuaWVudCB3cmFwcGVyCnVuZm9ydHVu
-YXRlbHkpIG9uIGVhY2ggb2YgdGhvc2Ugc25hcHNob3QgaWRzIHRvIGJlIHN1cmUgdGhleSBhcmUg
-YWxsCnNjaGVkdWxlZCBmb3IgYXN5bmNocm9ub3VzIGRlbGV0aW9uLgoKSm9zaApfX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcg
-bGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0
-aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
+This is a multi-part message in MIME format.
+--===============1242732631==
+Content-Type: multipart/alternative;
+ boundary="------------040501060103040909020404"
+
+This is a multi-part message in MIME format.
+--------------040501060103040909020404
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
+
+On 5/20/14 08:18 , Sage Weil wrote:
+> On Tue, 20 May 2014, Karan Singh wrote:
+>> Hello Cephers , need your suggestion for troubleshooting.
+>>
+>> My cluster is terribly struggling , 70+ osd are down out of 165
+>>
+>> Problem ?>OSD are getting marked out of cluster and are down. The cluster is
+>> degraded. On checking logs of failed OSD we are getting wired entries that
+>> are continuously getting generated.
+>
+> Also happy to debug this interactively over IRC; that will likely be
+> faster!
+>
+> Thanks-
+> sage
+>
+>
+
+If you do this over IRC, can you please post a summary to the mailling 
+list?
+
+I believe I'm having this issue as well.
+
+
+-- 
+
+*Craig Lewis*
+Senior Systems Engineer
+Office +1.714.602.1309
+Email clewis-04jk9TcbgGYP2IHM84UzcNBPR1lH4CV8@public.gmane.org <mailto:clewis-04jk9TcbgGYP2IHM84UzcNBPR1lH4CV8@public.gmane.org>
+
+*Central Desktop. Work together in ways you never thought possible.*
+Connect with us Website <http://www.centraldesktop.com/>  | Twitter 
+<http://www.twitter.com/centraldesktop>  | Facebook 
+<http://www.facebook.com/CentralDesktop>  | LinkedIn 
+<http://www.linkedin.com/groups?gid=147417>  | Blog 
+<http://cdblog.centraldesktop.com/>
+
+
+--------------040501060103040909020404
+Content-Type: text/html; charset=windows-1252
+Content-Transfer-Encoding: quoted-printable
+
+<html>
+  <head>
+    <meta content=3D"text/html; charset=3Dwindows-1252"
+      http-equiv=3D"Content-Type">
+  </head>
+  <body bgcolor=3D"#FFFFFF" text=3D"#000000">
+    <div class=3D"moz-cite-prefix">On 5/20/14 08:18 , Sage Weil wrote:<br=
+>
+    </div>
+    <blockquote
+      cite=3D"mid:alpine.DEB.2.00.1405200815570.1689-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org"
+      type=3D"cite">
+      <pre wrap=3D"">On Tue, 20 May 2014, Karan Singh wrote:
+</pre>
+      <blockquote type=3D"cite">
+        <pre wrap=3D"">Hello Cephers , need your suggestion for troublesh=
+ooting.
+
+My cluster is terribly struggling , 70+ osd are down out of 165
+
+Problem ?&gt;OSD are getting marked out of cluster and are down. The clus=
+ter is
+degraded. On checking logs of failed OSD we are getting wired entries tha=
+t
+are continuously getting generated.
+</pre>
+      </blockquote>
+      <pre wrap=3D"">
+
+Also happy to debug this interactively over IRC; that will likely be=20
+faster!
+
+Thanks-
+sage
+
+
+</pre>
+    </blockquote>
+    <br>
+    If you do this over IRC, can you please post a summary to the
+    mailling list?=A0 <br>
+    <br>
+    I believe I'm having this issue as well.<br>
+    <br>
+    <br>
+    <div class=3D"moz-signature">-- <br>
+      <div> <span style=3D"font-size:10.0pt; font-family:Arial,
+          Helvetica, sans-serif">
+          <p> <span style=3D"color:#E35825"> <strong>Craig Lewis</strong>=
+
+            </span><br>
+            <span style=3D"color:#78797B"> Senior Systems Engineer<br>
+              Office +1.714.602.1309<br>
+              Email <a href=3D"mailto:clewis-04jk9TcbgGYP2IHM84UzcNBPR1lH4CV8@public.gmane.org"
+                style=3D"color:#78797B;text-decoration:none;">clewis@cent=
+raldesktop.com</a>
+            </span> </p>
+          <p> <span style=3D"color:#4C4D4F"> <strong>Central Desktop.
+                Work together in ways you never thought possible.</strong=
+>
+              <span> <br>
+                <span style=3D"color:#78797B"> Connect with us =A0 <a
+                    href=3D"http://www.centraldesktop.com/"
+                    style=3D"color:#78797B">Website</a> =A0|=A0 <a
+                    href=3D"http://www.twitter.com/centraldesktop"
+                    style=3D"color:#78797B">Twitter</a> =A0|=A0 <a
+                    href=3D"http://www.facebook.com/CentralDesktop"
+                    style=3D"color:#78797B">Facebook</a> =A0|=A0 <a
+                    href=3D"http://www.linkedin.com/groups?gid=3D147417"
+                    style=3D"color:#78797B">LinkedIn</a> =A0|=A0 <a
+                    href=3D"http://cdblog.centraldesktop.com/"
+                    style=3D"color:#78797B">Blog</a> </span> <br>
+              </span></span></p>
+        </span>
+      </div>
+    </div>
+  </body>
+</html>
+
+--------------040501060103040909020404--
+
+--===============1242732631==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============1242732631==--
