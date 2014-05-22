@@ -1,75 +1,218 @@
-From: Andrey Korolyov <andrey@xdel.ru>
-Subject: Re: SMART monitoring
-Date: Thu, 22 May 2014 12:59:52 +0400
-Message-ID: <CABYiri89LWX0uvyf9nmHuNRt5R-OmDTkHMT1JvZaFU4nkzyHrA@mail.gmail.com>
-References: <6035A0D088A63A46850C3988ED045A4B68565E03@BITCOM1.int.sbss.com.au>
- <alpine.DEB.2.00.1312261807240.2168@cobra.newdream.net> <CAOGLoJPoS3WUUJuyRqkiUbT+DoDCochHZ-LThC4Ro8wUCdkD0g@mail.gmail.com>
- <52BDB45A.802@xdel.ru>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Ilya Dryomov <ilya.dryomov@inktank.com>
+Subject: [PATCH] rbd: fix osd_request memory leak in __rbd_dev_header_watch_sync()
+Date: Thu, 22 May 2014 20:35:15 +0400
+Message-ID: <1400776515-6608-1-git-send-email-ilya.dryomov@inktank.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f176.google.com ([209.85.214.176]:46402 "EHLO
-	mail-ob0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752488AbaEVJAM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 May 2014 05:00:12 -0400
-Received: by mail-ob0-f176.google.com with SMTP id wo20so3458994obc.35
-        for <ceph-devel@vger.kernel.org>; Thu, 22 May 2014 02:00:12 -0700 (PDT)
-In-Reply-To: <52BDB45A.802@xdel.ru>
+Received: from mail-we0-f176.google.com ([74.125.82.176]:54573 "EHLO
+	mail-we0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750917AbaEVQfU (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 May 2014 12:35:20 -0400
+Received: by mail-we0-f176.google.com with SMTP id q59so3607598wes.21
+        for <ceph-devel@vger.kernel.org>; Thu, 22 May 2014 09:35:18 -0700 (PDT)
+Received: from localhost ([109.110.67.203])
+        by mx.google.com with ESMTPSA id lz11sm8806605wic.0.2014.05.22.09.35.17
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=RC4-SHA bits=128/128);
+        Thu, 22 May 2014 09:35:17 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Justin Erenkrantz <justin@erenkrantz.com>
-Cc: Sage Weil <sage@inktank.com>, James Harper <james.harper@bendigoit.com.au>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Fri, Dec 27, 2013 at 9:09 PM, Andrey Korolyov <andrey@xdel.ru> wrote:
-> On 12/27/2013 08:15 PM, Justin Erenkrantz wrote:
->> On Thu, Dec 26, 2013 at 9:17 PM, Sage Weil <sage@inktank.com> wrote:
->>> I think the question comes down to whether Ceph should take some internal
->>> action based on the information, or whether that is better handled by some
->>> external monitoring agent.  For example, an external agent might collect
->>> SMART info into graphite, and every so often do some predictive analysis
->>> and mark out disks that are expected to fail soon.
->>>
->>> I'd love to see some consensus form around what this should look like...
->>
->> My $.02 from the peanut gallery: at a minimum, set the HEALTH_WARN flag if
->> there is a SMART failure on a physical drive that contains an OSD.  Yes,
->> you could build the monitoring into a separate system, but I think it'd be
->> really useful to combine it into the cluster health assessment.  -- justin
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->
-> Hi,
->
-> Judging from my personal experience SMART failures can be dangerous if
-> they are not bad enough to completely tear down an OSD therefore it will
-> not flap and will not be marked as down in time, but cluster performance
-> is greatly affected in this case. I don`t think that the SMART
-> monitoring task is somehow related to Ceph because seperate monitoring
-> of predictive failure counters can do its job well and in cause of
-> sudden errors SMART query may not work at all since a lot of bus resets
-> was made by the system and disk can be inaccessible at all. So I propose
-> two set of strategies - do a regular scattered background checks and
-> monitor OSD responsiveness to word around cases with performance
-> degradation due to read/write errors.
+osd_request, along with r_request and r_reply messages attached to it
+are leaked in __rbd_dev_header_watch_sync() if the requested image
+doesn't exist.  This is because lingering requests are special and get
+an extra ref in the reply path.  Fix it by unregistering linger request
+on the error path and split __rbd_dev_header_watch_sync() into two
+functions to make it maintainable.
 
-Some necromant job for this thread..
+Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
+---
+ drivers/block/rbd.c |  123 +++++++++++++++++++++++++++++++++++----------------
+ 1 file changed, 85 insertions(+), 38 deletions(-)
 
-Considering a year-long experience with Hitachi 4T disks, there are a
-lot of failures which are cannot be handled by SMART completely -
-speed degradation and sudden disk death. Although second case rules
-out by itself by kicking out stuck OSD, it is not very easy to check
-which disks are about to die without throughout dmesg monitoring for
-bus errors and periodical speed calibration. Probably introducing such
-thing as idle-priority speed measurement for OSDs without dramatically
-increasing overall wearout may be useful enough to implement in couple
-with additional OSD perf metric, like seek_time in SMART, though SMART
-may return good value for it when performance already slowed down to
-crawl, also it`ll handle most things impacting performance which can
-be unexposable at all to the host OS - correctable bus errors and so
-on. By the way, although 1T Seagates have way higher failure rate,
-they always dying with an 'appropriate' set of attributes in SMART,
-Hitachi tends to die without warning :) Hope that it`ll be helpful for
-someone.
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 552a2edcaa74..55c34b70842a 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -2872,56 +2872,55 @@ static void rbd_watch_cb(u64 ver, u64 notify_id, u8 opcode, void *data)
+ }
+ 
+ /*
+- * Request sync osd watch/unwatch.  The value of "start" determines
+- * whether a watch request is being initiated or torn down.
++ * Initiate a watch request, synchronously.
+  */
+-static int __rbd_dev_header_watch_sync(struct rbd_device *rbd_dev, bool start)
++static int rbd_dev_header_watch_sync(struct rbd_device *rbd_dev)
+ {
+ 	struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
+ 	struct rbd_obj_request *obj_request;
+ 	int ret;
+ 
+-	rbd_assert(start ^ !!rbd_dev->watch_event);
+-	rbd_assert(start ^ !!rbd_dev->watch_request);
++	rbd_assert(!rbd_dev->watch_event);
++	rbd_assert(!rbd_dev->watch_request);
+ 
+-	if (start) {
+-		ret = ceph_osdc_create_event(osdc, rbd_watch_cb, rbd_dev,
+-						&rbd_dev->watch_event);
+-		if (ret < 0)
+-			return ret;
+-		rbd_assert(rbd_dev->watch_event != NULL);
+-	}
++	ret = ceph_osdc_create_event(osdc, rbd_watch_cb, rbd_dev,
++				     &rbd_dev->watch_event);
++	if (ret < 0)
++		return ret;
++
++	rbd_assert(rbd_dev->watch_event);
+ 
+-	ret = -ENOMEM;
+ 	obj_request = rbd_obj_request_create(rbd_dev->header_name, 0, 0,
+-							OBJ_REQUEST_NODATA);
+-	if (!obj_request)
++					     OBJ_REQUEST_NODATA);
++	if (!obj_request) {
++		ret = -ENOMEM;
+ 		goto out_cancel;
++	}
+ 
+ 	obj_request->osd_req = rbd_osd_req_create(rbd_dev, true, 1,
+ 						  obj_request);
+-	if (!obj_request->osd_req)
+-		goto out_cancel;
++	if (!obj_request->osd_req) {
++		ret = -ENOMEM;
++		goto out_put;
++	}
+ 
+-	if (start)
+-		ceph_osdc_set_request_linger(osdc, obj_request->osd_req);
+-	else
+-		ceph_osdc_unregister_linger_request(osdc,
+-					rbd_dev->watch_request->osd_req);
++	ceph_osdc_set_request_linger(osdc, obj_request->osd_req);
+ 
+ 	osd_req_op_watch_init(obj_request->osd_req, 0, CEPH_OSD_OP_WATCH,
+-				rbd_dev->watch_event->cookie, 0, start ? 1 : 0);
++			      rbd_dev->watch_event->cookie, 0, 1);
+ 	rbd_osd_req_format_write(obj_request);
+ 
+ 	ret = rbd_obj_request_submit(osdc, obj_request);
+ 	if (ret)
+-		goto out_cancel;
++		goto out_linger;
++
+ 	ret = rbd_obj_request_wait(obj_request);
+ 	if (ret)
+-		goto out_cancel;
++		goto out_linger;
++
+ 	ret = obj_request->result;
+ 	if (ret)
+-		goto out_cancel;
++		goto out_linger;
+ 
+ 	/*
+ 	 * A watch request is set to linger, so the underlying osd
+@@ -2931,36 +2930,84 @@ static int __rbd_dev_header_watch_sync(struct rbd_device *rbd_dev, bool start)
+ 	 * it.  We'll drop that reference (below) after we've
+ 	 * unregistered it.
+ 	 */
+-	if (start) {
+-		rbd_dev->watch_request = obj_request;
++	rbd_dev->watch_request = obj_request;
+ 
+-		return 0;
++	return 0;
++
++out_linger:
++	ceph_osdc_unregister_linger_request(osdc, obj_request->osd_req);
++out_put:
++	rbd_obj_request_put(obj_request);
++out_cancel:
++	ceph_osdc_cancel_event(rbd_dev->watch_event);
++	rbd_dev->watch_event = NULL;
++
++	return ret;
++}
++
++/*
++ * Tear down a watch request, synchronously.
++ */
++static int __rbd_dev_header_unwatch_sync(struct rbd_device *rbd_dev)
++{
++	struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
++	struct rbd_obj_request *obj_request;
++	int ret;
++
++	rbd_assert(rbd_dev->watch_event);
++	rbd_assert(rbd_dev->watch_request);
++
++	obj_request = rbd_obj_request_create(rbd_dev->header_name, 0, 0,
++					     OBJ_REQUEST_NODATA);
++	if (!obj_request) {
++		ret = -ENOMEM;
++		goto out_cancel;
+ 	}
+ 
++	obj_request->osd_req = rbd_osd_req_create(rbd_dev, true, 1,
++						  obj_request);
++	if (!obj_request->osd_req) {
++		ret = -ENOMEM;
++		goto out_put;
++	}
++
++	osd_req_op_watch_init(obj_request->osd_req, 0, CEPH_OSD_OP_WATCH,
++			      rbd_dev->watch_event->cookie, 0, 0);
++	rbd_osd_req_format_write(obj_request);
++
++	ret = rbd_obj_request_submit(osdc, obj_request);
++	if (ret)
++		goto out_put;
++
++	ret = rbd_obj_request_wait(obj_request);
++	if (ret)
++		goto out_put;
++
++	ret = obj_request->result;
++	if (ret)
++		goto out_put;
++
+ 	/* We have successfully torn down the watch request */
+ 
++	ceph_osdc_unregister_linger_request(osdc,
++					    rbd_dev->watch_request->osd_req);
+ 	rbd_obj_request_put(rbd_dev->watch_request);
+ 	rbd_dev->watch_request = NULL;
++
++out_put:
++	rbd_obj_request_put(obj_request);
+ out_cancel:
+-	/* Cancel the event if we're tearing down, or on error */
+ 	ceph_osdc_cancel_event(rbd_dev->watch_event);
+ 	rbd_dev->watch_event = NULL;
+-	if (obj_request)
+-		rbd_obj_request_put(obj_request);
+ 
+ 	return ret;
+ }
+ 
+-static int rbd_dev_header_watch_sync(struct rbd_device *rbd_dev)
+-{
+-	return __rbd_dev_header_watch_sync(rbd_dev, true);
+-}
+-
+ static void rbd_dev_header_unwatch_sync(struct rbd_device *rbd_dev)
+ {
+ 	int ret;
+ 
+-	ret = __rbd_dev_header_watch_sync(rbd_dev, false);
++	ret = __rbd_dev_header_unwatch_sync(rbd_dev);
+ 	if (ret) {
+ 		rbd_warn(rbd_dev, "unable to tear down watch request: %d\n",
+ 			 ret);
+-- 
+1.7.10.4
+
