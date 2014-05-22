@@ -1,80 +1,75 @@
-From: Olivier Bonvalet <ceph.list-PaEMFeTk6C1QFI55V6+gNQ@public.gmane.org>
-Subject: Re: Data still in OSD directories after removing
-Date: Thu, 22 May 2014 10:56:39 +0200
-Message-ID: <1400748999.10571.3.camel@localhost>
-References: <1400578369.11397.9.camel@localhost>
-	<1400667430.27385.4.camel@localhost>
-	<alpine.DEB.2.00.1405210818560.1689@cobra.newdream.net>
-	<1400709806.24328.0.camel@asblu> <537D50EA.9020901@inktank.com>
+From: Andrey Korolyov <andrey@xdel.ru>
+Subject: Re: SMART monitoring
+Date: Thu, 22 May 2014 12:59:52 +0400
+Message-ID: <CABYiri89LWX0uvyf9nmHuNRt5R-OmDTkHMT1JvZaFU4nkzyHrA@mail.gmail.com>
+References: <6035A0D088A63A46850C3988ED045A4B68565E03@BITCOM1.int.sbss.com.au>
+ <alpine.DEB.2.00.1312261807240.2168@cobra.newdream.net> <CAOGLoJPoS3WUUJuyRqkiUbT+DoDCochHZ-LThC4Ro8wUCdkD0g@mail.gmail.com>
+ <52BDB45A.802@xdel.ru>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <537D50EA.9020901-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Josh Durgin <josh.durgin-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, Ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ob0-f176.google.com ([209.85.214.176]:46402 "EHLO
+	mail-ob0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752488AbaEVJAM (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 May 2014 05:00:12 -0400
+Received: by mail-ob0-f176.google.com with SMTP id wo20so3458994obc.35
+        for <ceph-devel@vger.kernel.org>; Thu, 22 May 2014 02:00:12 -0700 (PDT)
+In-Reply-To: <52BDB45A.802@xdel.ru>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Justin Erenkrantz <justin@erenkrantz.com>
+Cc: Sage Weil <sage@inktank.com>, James Harper <james.harper@bendigoit.com.au>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-CkxlIG1lcmNyZWRpIDIxIG1haSAyMDE0IMOgIDE4OjIwIC0wNzAwLCBKb3NoIER1cmdpbiBhIMOp
-Y3JpdCA6Cj4gT24gMDUvMjEvMjAxNCAwMzowMyBQTSwgT2xpdmllciBCb252YWxldCB3cm90ZToK
-PiA+IExlIG1lcmNyZWRpIDIxIG1haSAyMDE0IMOgIDA4OjIwIC0wNzAwLCBTYWdlIFdlaWwgYSDD
-qWNyaXQgOgo+ID4+IFlvdSdyZSBjZXJ0YWluIHRoYXQgdGhhdCBpcyB0aGUgY29ycmVjdCBwcmVm
-aXggZm9yIHRoZSByYmQgaW1hZ2UgeW91Cj4gPj4gcmVtb3ZlZD8gIERvIHlvdSBzZWUgdGhlIG9i
-amVjdHMgbGlzdHMgd2hlbiB5b3UgZG8gJ3JhZG9zIC1wIHJiZCBscyAtIHwKPiA+PiBncmVwIDxw
-cmVmaXg+Jz8KPiA+Cj4gPiBJJ20gcHJldHR5IHN1cmUgeWVzIDogc2luY2UgSSBkaWRuJ3Qgc2Vl
-IGEgbG90IG9mIHNwYWNlIGZyZWVkIGJ5IHRoZQo+ID4gInJiZCBzbmFwIHB1cmdlIiBjb21tYW5k
-LCBJIGxvb2tlZCBhdCB0aGUgUkJEIHByZWZpeCBiZWZvcmUgdG8gZG8gdGhlCj4gPiAicmJkIHJt
-IiAoaXQncyBub3QgdGhlIGZpcnN0IHRpbWUgSSBzZWUgdGhhdCBwcm9ibGVtLCBidXQgcHJldmlv
-dXMgdGltZQo+ID4gd2l0aG91dCB0aGUgUkJEIHByZWZpeCBJIHdhcyBub3QgYWJsZSB0byBjaGVj
-aykuCj4gPgo+ID4gU28gOgo+ID4gLSAicmFkb3MgLXAgc2FzM2NvcGllcyBscyAtIHwgZ3JlcCBy
-Yi4wLjE0YmZiNWEuMjM4ZTFmMjkiIHJldHVybiBub3RoaW5nCj4gPiBhdCBhbGwKPiA+IC0gIyBy
-YWRvcyBzdGF0IC1wIHNhczNjb3BpZXMgcmIuMC4xNGJmYjVhLjIzOGUxZjI5LjAwMDAwMDAyZjAy
-Ngo+ID4gICBlcnJvciBzdGF0LWluZyBzYXMzY29waWVzL3JiLjAuMTRiZmI1YS4yMzhlMWYyOS4w
-MDAwMDAwMmYwMjY6IE5vIHN1Y2gKPiA+IGZpbGUgb3IgZGlyZWN0b3J5Cj4gPiAtICMgcmFkb3Mg
-c3RhdCAtcCBzYXMzY29waWVzIHJiLjAuMTRiZmI1YS4yMzhlMWYyOS4wMDAwMDAwMDAwMDAKPiA+
-ICAgZXJyb3Igc3RhdC1pbmcgc2FzM2NvcGllcy9yYi4wLjE0YmZiNWEuMjM4ZTFmMjkuMDAwMDAw
-MDAwMDAwOiBObyBzdWNoCj4gPiBmaWxlIG9yIGRpcmVjdG9yeQo+ID4gLSAjIGxzIC1hbCAvdmFy
-L2xpYi9jZXBoL29zZC9jZXBoLTY3L2N1cnJlbnQvOS4xZmVfaGVhZC9ESVJfRS9ESVJfRi9ESVJf
-MS9ESVJfNy9yYi4wLjE0YmZiNWEuMjM4ZTFmMjkuMDAwMDAwMDJmMDI2X19hMjUyX0U2ODg3MUZF
-X185Cj4gPiAtcnctci0tci0tIDEgcm9vdCByb290IDQxOTQzMDQgb2N0LiAgIDggIDIwMTMgL3Zh
-ci9saWIvY2VwaC9vc2QvY2VwaC02Ny9jdXJyZW50LzkuMWZlX2hlYWQvRElSX0UvRElSX0YvRElS
-XzEvRElSXzcvcmIuMC4xNGJmYjVhLjIzOGUxZjI5LjAwMDAwMDAyZjAyNl9fYTI1Ml9FNjg4NzFG
-RV9fOQo+ID4KPiA+Cj4gPj4gSWYgdGhlIG9iamVjdHMgcmVhbGx5IGFyZSBvcnBoYW5lZCwgdGVo
-IHdheSB0byBjbGVhbiB0aGVtIHVwIGlzIHZpYSAncmFkb3MKPiA+PiAtcCByYmQgcm0gPG9iamVj
-dG5hbWU+Jy4gIEknZCBsaWtlIHRvIGdldCB0byB0aGUgYm90dG9tIG9mIGhvdyB0aGV5IGVuZGVk
-Cj4gPj4gdXAgdGhhdCB3YXkgZmlyc3QsIHRob3VnaCEKPiA+Cj4gPiBJIHN1cHBvc2UgdGhlIHBy
-b2JsZW0gY2FtZSBmcm9tIG1lLCBieSBkb2luZyBDVFJMK0Mgd2hpbGUgInJiZCBzbmFwCj4gPiBw
-dXJnZSAkSU1HIi4KPiA+ICJyYWRvcyBybSAtcCBzYXMzY29waWVzIHJiLjAuMTRiZmI1YS4yMzhl
-MWYyOS4wMDAwMDAwMmYwMjYiIGRvbid0IHJlbW92ZQo+ID4gdGhvc2VzIGZpbGVzLCBhbmQganVz
-dCBhbnN3ZXIgd2l0aCBhICJObyBzdWNoIGZpbGUgb3IgZGlyZWN0b3J5Ii4KPiAKPiBUaG9zZSBm
-aWxlcyBhcmUgYWxsIGZvciBzbmFwc2hvdHMsIHdoaWNoIGFyZSByZW1vdmVkIGJ5IHRoZSBvc2Rz
-Cj4gYXN5bmNocm9ub3VzbHkgaW4gYSBwcm9jZXNzIGNhbGxlZCAnc25hcCB0cmltbWluZycuIFRo
-ZXJlJ3Mgbm8KPiB3YXkgdG8gZGlyZWN0bHkgcmVtb3ZlIHRoZW0gdmlhIHJhZG9zLgo+IAo+IFNp
-bmNlIHlvdSBzdG9wcGVkICdyYmQgc25hcCBwdXJnZScgcGFydHdheSB0aHJvdWdoLCBpdCBtYXkK
-PiBoYXZlIHJlbW92ZWQgdGhlIHJlZmVyZW5jZSB0byB0aGUgc25hcHNob3QgYmVmb3JlIHJlbW92
-aW5nCj4gdGhlIHNuYXBzaG90IGl0c2VsZi4KPiAKPiBZb3UgY2FuIGdldCBhIGxpc3Qgb2Ygc25h
-cHNob3QgaWRzIGZvciB0aGUgcmVtYWluaW5nIG9iamVjdHMKPiB2aWEgdGhlICdyYWRvcyBsaXN0
-c25hcHMnIGNvbW1hbmQsIGFuZCB1c2UKPiByYWRvc19pb2N0eF9zZWxmbWFuYWdlZF9zbmFwX3Jl
-bW92ZSgpIChubyBjb252ZW5pZW50IHdyYXBwZXIKPiB1bmZvcnR1bmF0ZWx5KSBvbiBlYWNoIG9m
-IHRob3NlIHNuYXBzaG90IGlkcyB0byBiZSBzdXJlIHRoZXkgYXJlIGFsbAo+IHNjaGVkdWxlZCBm
-b3IgYXN5bmNocm9ub3VzIGRlbGV0aW9uLgo+IAo+IEpvc2gKPiAKCkdyZWF0IDogInJhZG9zIGxp
-c3RzbmFwcyIgc2VlIGl0IDoKICAgICAgICAjIHJhZG9zIGxpc3RzbmFwcyAtcCBzYXMzY29waWVz
-IHJiLjAuMTRiZmI1YS4yMzhlMWYyOS4wMDAwMDAwMmYwMjYKICAgICAgICByYi4wLjE0YmZiNWEu
-MjM4ZTFmMjkuMDAwMDAwMDJmMDI2OgogICAgICAgIGNsb25laWQJc25hcHMJc2l6ZQlvdmVybGFw
-CiAgICAgICAgNDE1NTQJMzU3NDYJNDE5NDMwNAlbXQoKU28sIEkgaGF2ZSB0byB3cml0ZSZjb21w
-aWxlIGEgd3JhcHBlciB0bwpyYWRvc19pb2N0eF9zZWxmbWFuYWdlZF9zbmFwX3JlbW92ZSgpLCBh
-bmQgZmluZCBhIHdheSB0byBvYnRhaW4gYSBsaXN0Cm9mIGFsbCAib3JwaGFuIiBvYmplY3RzID8K
-CkkgYWxzbyB0cnkgdG8gcmVjcmVhdGUgdGhlIG9iamVjdCAocmFkb3MgcHV0KSB0aGVuIHJlbW92
-ZSBpdCAocmFkb3Mgcm0pLApidXQgc25hcHNob3RzIHN0aWxsIGhlcmUuCgpPbGl2aWVyCgpfX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1h
-aWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNv
-bS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
+On Fri, Dec 27, 2013 at 9:09 PM, Andrey Korolyov <andrey@xdel.ru> wrote:
+> On 12/27/2013 08:15 PM, Justin Erenkrantz wrote:
+>> On Thu, Dec 26, 2013 at 9:17 PM, Sage Weil <sage@inktank.com> wrote:
+>>> I think the question comes down to whether Ceph should take some internal
+>>> action based on the information, or whether that is better handled by some
+>>> external monitoring agent.  For example, an external agent might collect
+>>> SMART info into graphite, and every so often do some predictive analysis
+>>> and mark out disks that are expected to fail soon.
+>>>
+>>> I'd love to see some consensus form around what this should look like...
+>>
+>> My $.02 from the peanut gallery: at a minimum, set the HEALTH_WARN flag if
+>> there is a SMART failure on a physical drive that contains an OSD.  Yes,
+>> you could build the monitoring into a separate system, but I think it'd be
+>> really useful to combine it into the cluster health assessment.  -- justin
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>
+> Hi,
+>
+> Judging from my personal experience SMART failures can be dangerous if
+> they are not bad enough to completely tear down an OSD therefore it will
+> not flap and will not be marked as down in time, but cluster performance
+> is greatly affected in this case. I don`t think that the SMART
+> monitoring task is somehow related to Ceph because seperate monitoring
+> of predictive failure counters can do its job well and in cause of
+> sudden errors SMART query may not work at all since a lot of bus resets
+> was made by the system and disk can be inaccessible at all. So I propose
+> two set of strategies - do a regular scattered background checks and
+> monitor OSD responsiveness to word around cases with performance
+> degradation due to read/write errors.
+
+Some necromant job for this thread..
+
+Considering a year-long experience with Hitachi 4T disks, there are a
+lot of failures which are cannot be handled by SMART completely -
+speed degradation and sudden disk death. Although second case rules
+out by itself by kicking out stuck OSD, it is not very easy to check
+which disks are about to die without throughout dmesg monitoring for
+bus errors and periodical speed calibration. Probably introducing such
+thing as idle-priority speed measurement for OSDs without dramatically
+increasing overall wearout may be useful enough to implement in couple
+with additional OSD perf metric, like seek_time in SMART, though SMART
+may return good value for it when performance already slowed down to
+crawl, also it`ll handle most things impacting performance which can
+be unexposable at all to the host OS - correctable bus errors and so
+on. By the way, although 1T Seagates have way higher failure rate,
+they always dying with an 'appropriate' set of attributes in SMART,
+Hitachi tends to die without warning :) Hope that it`ll be helpful for
+someone.
