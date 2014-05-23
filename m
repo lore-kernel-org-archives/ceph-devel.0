@@ -1,77 +1,57 @@
-From: John Spray <john.spray@inktank.com>
-Subject: Re: collectd / graphite / grafana .. calamari?
-Date: Fri, 23 May 2014 11:42:55 +0100
-Message-ID: <CAGd4Wr2zag-Hjjrx+ZpfdLWtt6aKOCYiy12BTSbPC3TXbQz1kg@mail.gmail.com>
-References: <CA+xPSVCDxfPNATq2_jZPACxPrp_fB=URRQC9AZRexe5UatA5=g@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Raring upstart reload bug workaround
+Date: Fri, 23 May 2014 18:53:09 +0200
+Message-ID: <537F7CF5.9010701@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="igvcwMVB4ToDi0ajLQlRk3dDttrqrV7aT"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f52.google.com ([209.85.220.52]:34094 "EHLO
-	mail-pa0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753605AbaEWKm4 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 May 2014 06:42:56 -0400
-Received: by mail-pa0-f52.google.com with SMTP id fa1so3932578pad.25
-        for <ceph-devel@vger.kernel.org>; Fri, 23 May 2014 03:42:56 -0700 (PDT)
-In-Reply-To: <CA+xPSVCDxfPNATq2_jZPACxPrp_fB=URRQC9AZRexe5UatA5=g@mail.gmail.com>
+Received: from smtp.dmail.dachary.org ([91.121.254.229]:46896 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753107AbaEWQxN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 May 2014 12:53:13 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ricardo Rocha <rocha.porto@gmail.com>
-Cc: "'ceph-users@lists.ceph.com' (ceph-users@lists.ceph.com)" <ceph-users@lists.ceph.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: James Page <james.page@ubuntu.com>, James Hunt <james.hunt@ubuntu.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Ricardo,
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--igvcwMVB4ToDi0ajLQlRk3dDttrqrV7aT
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-Let me share a few notes on metrics in calamari:
- * We're bundling graphite, and using diamond to send home metrics.
-The diamond collector used in calamari has always been open source
-[1].
- * The Calamari UI has its own graphs page that talks directly to the
-graphite API (the calamari REST API does not duplicate any of the
-graphing interface)
- * We also bundle the default graphite dashboard, so that folks can go
-to /graphite/dashboard/ on the calamari server to plot anything custom
-they want to.
+Hi,
 
-It could be quite interesting hook in Grafana there in the same way
-that we currently hook in the default graphite dashboard, as it
-grafana definitely nicer and would give us a roadmap to influxdb (a
-project I am quite excited about).
+I'm looking for the simplest workaround for a bug in the reload implement=
+ation of upstart as shipped with Ubuntu raring. It manifests itself by lo=
+osing track of the "exec" process. If it does not ring a bell, the steps =
+to reproduce from a fresh Ubuntu raring installation are here : http://tr=
+acker.ceph.com/issues/7188 . It was fixed because it does not show on Tru=
+sty but I was not able to find a reference in https://bugs.launchpad.net/=
+upstart
 
-Cheers,
-John
+Thanks in advance for any advice you may have. And for your continuous ef=
+forts to make Ubuntu better ;-)
 
-1. https://github.com/ceph/Diamond/commits/calamari
+Cheers
 
-On Fri, May 23, 2014 at 1:58 AM, Ricardo Rocha <rocha.porto@gmail.com> wrote:
-> Hi.
->
-> I saw the thread a couple days ago on ceph-users regarding collectd...
-> and yes, i've been working on something similar for the last few days
-> :)
->
-> https://github.com/rochaporto/collectd-ceph
->
-> It has a set of collectd plugins pushing metrics which mostly map what
-> the ceph commands return. In the setup we have it pushes them to
-> graphite and the displays rely on grafana (check for a screenshot in
-> the link above).
->
-> As it relies on common building blocks, it's easily extensible and
-> we'll come up with new dashboards soon - things like plotting osd data
-> against the metrics from the collectd disk plugin, which we also
-> deploy.
->
-> This email is mostly to share the work, but also to check on Calamari?
-> I asked Patrick after the RedHat/Inktank news and have no idea what it
-> provides, but i'm sure it comes with lots of extra sauce - he
-> suggested to ask in the list.
->
-> What's the timeline to have it open sourced? It would be great to have
-> a look at it, and as there's work from different people in this area
-> maybe start working together on some fancier monitoring tools.
->
-> Regards,
->   Ricardo
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+
+
+--igvcwMVB4ToDi0ajLQlRk3dDttrqrV7aT
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlN/fPUACgkQ8dLMyEl6F22yXwCfdXfE1GBA5STh2EJaNqG5ymQH
+0bAAmQFNt08tGYcp16p6ttaDG7r9ZmCr
+=55F4
+-----END PGP SIGNATURE-----
+
+--igvcwMVB4ToDi0ajLQlRk3dDttrqrV7aT--
