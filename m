@@ -1,41 +1,45 @@
-From: Patrick McGarry <patrick@inktank.com>
-Subject: Ceph Day Boston Schedule Released
-Date: Fri, 23 May 2014 13:11:50 -0400
-Message-ID: <CAP8Oy=K67PHS6muyG+UOnPai63TJU4071n8kb_a9ugR-BApxfw@mail.gmail.com>
+From: Noah Watkins <noah.watkins@inktank.com>
+Subject: [ANN] Maven support for CephFS Java
+Date: Fri, 23 May 2014 14:42:36 -0700
+Message-ID: <CA+Hcz59B0nKBbBaF6jVLnmRXARyk88Ve_Oa_QUCcMjWBB7H5JA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ve0-f179.google.com ([209.85.128.179]:62197 "EHLO
-	mail-ve0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751524AbaEWRLv (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 May 2014 13:11:51 -0400
-Received: by mail-ve0-f179.google.com with SMTP id oy12so6653791veb.10
-        for <ceph-devel@vger.kernel.org>; Fri, 23 May 2014 10:11:51 -0700 (PDT)
+Received: from mail-qc0-f173.google.com ([209.85.216.173]:58504 "EHLO
+	mail-qc0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751010AbaEWVmh (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 May 2014 17:42:37 -0400
+Received: by mail-qc0-f173.google.com with SMTP id i8so8784211qcq.4
+        for <ceph-devel@vger.kernel.org>; Fri, 23 May 2014 14:42:36 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>, Ceph User Committee <ceph-community@lists.ceph.com>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
 
-Hey cephers,
+The `cephfs-java` package can now to retreived from the Maven repository below.
 
-Just wanted to let you know that the schedule has been posted for Ceph
-Day Boston happening on 10 June at the Sheraton Boston, MA:
+Note that this is a _very alpha_ release, but contains a whole lot of
+awesome in the form of the native JNI bits embedded in the package, so
+there should be no need to do an RPM/Deb install of these dependencies
+(e.g. libcephfs-jni) and deal with all those silly search paths.
 
-http://www.inktank.com/cephdays/boston/
+Please shoot any bug reports to the list.
 
-There are still a couple of talk title tweaks that are pending, but I
-wanted to get the info out as soon as possible.  We have some really
-solid speakers, including a couple of highly technical talks from the
-CohortFS guys and a demo of one of the hot new ethernet drives that is
-poised to take the market by storm.
+Current support is limited to Linux/x86-64, but can add other archs if
+requested. All existing cephfs-java packages are unaffected.
 
-If you haven't signed up yet, please don't wait!  We want to make sure
-we can adequately accommodate everyone that wishes to attend.  Thanks,
-and see you there!
+- Noah
 
+  <repositories>
+      <repository>
+          <id>ceph-maven</id>
+          <url>http://ceph.com/maven</url>
+      </repository>
+  </repositories>
 
-Best Regards,
-
-Patrick McGarry
-Director, Community || Inktank
-http://ceph.com  ||  http://inktank.com
-@scuttlemonkey || @ceph || @inktank
+  <dependencies>
+    <dependency>
+      <groupId>com.ceph</groupId>
+      <artifactId>cephfs</artifactId>
+      <version>0.0.1</version>
+    </dependency>
+  </dependencies>
