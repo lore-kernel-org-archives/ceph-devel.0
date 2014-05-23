@@ -1,57 +1,41 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Raring upstart reload bug workaround
-Date: Fri, 23 May 2014 18:53:09 +0200
-Message-ID: <537F7CF5.9010701@dachary.org>
+From: Patrick McGarry <patrick@inktank.com>
+Subject: Ceph Day Boston Schedule Released
+Date: Fri, 23 May 2014 13:11:50 -0400
+Message-ID: <CAP8Oy=K67PHS6muyG+UOnPai63TJU4071n8kb_a9ugR-BApxfw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="igvcwMVB4ToDi0ajLQlRk3dDttrqrV7aT"
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:46896 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753107AbaEWQxN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 May 2014 12:53:13 -0400
+Received: from mail-ve0-f179.google.com ([209.85.128.179]:62197 "EHLO
+	mail-ve0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751524AbaEWRLv (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 May 2014 13:11:51 -0400
+Received: by mail-ve0-f179.google.com with SMTP id oy12so6653791veb.10
+        for <ceph-devel@vger.kernel.org>; Fri, 23 May 2014 10:11:51 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: James Page <james.page@ubuntu.com>, James Hunt <james.hunt@ubuntu.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>, Ceph User Committee <ceph-community@lists.ceph.com>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---igvcwMVB4ToDi0ajLQlRk3dDttrqrV7aT
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Hey cephers,
 
-Hi,
+Just wanted to let you know that the schedule has been posted for Ceph
+Day Boston happening on 10 June at the Sheraton Boston, MA:
 
-I'm looking for the simplest workaround for a bug in the reload implement=
-ation of upstart as shipped with Ubuntu raring. It manifests itself by lo=
-osing track of the "exec" process. If it does not ring a bell, the steps =
-to reproduce from a fresh Ubuntu raring installation are here : http://tr=
-acker.ceph.com/issues/7188 . It was fixed because it does not show on Tru=
-sty but I was not able to find a reference in https://bugs.launchpad.net/=
-upstart
+http://www.inktank.com/cephdays/boston/
 
-Thanks in advance for any advice you may have. And for your continuous ef=
-forts to make Ubuntu better ;-)
+There are still a couple of talk title tweaks that are pending, but I
+wanted to get the info out as soon as possible.  We have some really
+solid speakers, including a couple of highly technical talks from the
+CohortFS guys and a demo of one of the hot new ethernet drives that is
+poised to take the market by storm.
 
-Cheers
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
+If you haven't signed up yet, please don't wait!  We want to make sure
+we can adequately accommodate everyone that wishes to attend.  Thanks,
+and see you there!
 
 
---igvcwMVB4ToDi0ajLQlRk3dDttrqrV7aT
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+Best Regards,
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlN/fPUACgkQ8dLMyEl6F22yXwCfdXfE1GBA5STh2EJaNqG5ymQH
-0bAAmQFNt08tGYcp16p6ttaDG7r9ZmCr
-=55F4
------END PGP SIGNATURE-----
-
---igvcwMVB4ToDi0ajLQlRk3dDttrqrV7aT--
+Patrick McGarry
+Director, Community || Inktank
+http://ceph.com  ||  http://inktank.com
+@scuttlemonkey || @ceph || @inktank
