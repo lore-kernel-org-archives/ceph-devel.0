@@ -1,95 +1,37 @@
-From: Ricardo Rocha <rocha.porto-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: collectd / graphite / grafana .. calamari?
-Date: Sat, 24 May 2014 15:46:04 +1200
-Message-ID: <CA+xPSVDkyiwCk2yGt5yoEfQKDtr+vhiL8XakubwJgRwDnPG+yw@mail.gmail.com>
-References: <CA+xPSVCDxfPNATq2_jZPACxPrp_fB=URRQC9AZRexe5UatA5=g@mail.gmail.com>
-	<CAGd4Wr2zag-Hjjrx+ZpfdLWtt6aKOCYiy12BTSbPC3TXbQz1kg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAGd4Wr2zag-Hjjrx+ZpfdLWtt6aKOCYiy12BTSbPC3TXbQz1kg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: John Spray <john.spray-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Cc: "'ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org' (ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org)" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+From: Guang Yang <yguang11@outlook.com>
+Subject: Questions of KeyValueStore (leveldb) backend
+Date: Mon, 26 May 2014 09:46:13 +0800
+Message-ID: <BLU436-SMTP4071B1A51539EAA2F9D7ECDF3B0@phx.gbl>
+Mime-Version: 1.0 (Mac OS X Mail 7.3 \(1878.2\))
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from blu004-omc4s12.hotmail.com ([65.55.111.151]:54318 "EHLO
+	BLU004-OMC4S12.hotmail.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751417AbaEZBqU convert rfc822-to-8bit
+	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 25 May 2014 21:46:20 -0400
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: haomaiwang@gmail.com
+Cc: Ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi John.
+Hello Haomai,
+We are evaluating the key-value store backend which comes along with Fi=
+refly release (thanks for implementing it in Ceph), it is very promisin=
+g for a couple of our use cases, after going through the related code c=
+hange, I have a couple of questions which needs your help:
+  1. One observation is that, for object larger than 1KB, it will be st=
+riped to multiple chunks (k-v in the leveldb table), with one strip as =
+1KB size. Is there any particular reason we choose 1KB as the strip siz=
+e (and I didn=92t find a configuration to tune this value)?
 
-Thanks for the reply, sounds very good.
+  2. This is properly a leveldb question, do we expect performance degr=
+adation as the leveldb instance keeps increasing (e.g. several TB)?
 
-The extra visualizations from kibana (grafana only seems to pack a
-small subset, but the codebase is basically the same) look cool, will
-put some more in soon - seems like they can still be useful later.
-
-Looking forward to some calamari.
-
-Cheers,
-  Ricardo
-
-On Fri, May 23, 2014 at 10:42 PM, John Spray <john.spray-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org> wrote:
-> Hi Ricardo,
->
-> Let me share a few notes on metrics in calamari:
->  * We're bundling graphite, and using diamond to send home metrics.
-> The diamond collector used in calamari has always been open source
-> [1].
->  * The Calamari UI has its own graphs page that talks directly to the
-> graphite API (the calamari REST API does not duplicate any of the
-> graphing interface)
->  * We also bundle the default graphite dashboard, so that folks can go
-> to /graphite/dashboard/ on the calamari server to plot anything custom
-> they want to.
->
-> It could be quite interesting hook in Grafana there in the same way
-> that we currently hook in the default graphite dashboard, as it
-> grafana definitely nicer and would give us a roadmap to influxdb (a
-> project I am quite excited about).
->
-> Cheers,
-> John
->
-> 1. https://github.com/ceph/Diamond/commits/calamari
->
-> On Fri, May 23, 2014 at 1:58 AM, Ricardo Rocha <rocha.porto-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
->> Hi.
->>
->> I saw the thread a couple days ago on ceph-users regarding collectd...
->> and yes, i've been working on something similar for the last few days
->> :)
->>
->> https://github.com/rochaporto/collectd-ceph
->>
->> It has a set of collectd plugins pushing metrics which mostly map what
->> the ceph commands return. In the setup we have it pushes them to
->> graphite and the displays rely on grafana (check for a screenshot in
->> the link above).
->>
->> As it relies on common building blocks, it's easily extensible and
->> we'll come up with new dashboards soon - things like plotting osd data
->> against the metrics from the collectd disk plugin, which we also
->> deploy.
->>
->> This email is mostly to share the work, but also to check on Calamari?
->> I asked Patrick after the RedHat/Inktank news and have no idea what it
->> provides, but i'm sure it comes with lots of extra sauce - he
->> suggested to ask in the list.
->>
->> What's the timeline to have it open sourced? It would be great to have
->> a look at it, and as there's work from different people in this area
->> maybe start working together on some fancier monitoring tools.
->>
->> Regards,
->>   Ricardo
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Thanks,
+Guang--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
