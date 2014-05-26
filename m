@@ -1,106 +1,93 @@
-From: Guang Yang <yguang11@outlook.com>
-Subject: Re: erasure code & reliability model
-Date: Mon, 26 May 2014 19:27:27 +0800
-Message-ID: <BLU436-SMTP255B02659339C0DBBB9B647DF3B0@phx.gbl>
-References: <5369CEA8.1000209@dachary.org> <1399481022.50289.YahooMailNeo@web165001.mail.bf1.yahoo.com> <536A6B18.2080205@dachary.org> <BLU436-SMTP859D5E316FE37AC71199C6DF3B0@phx.gbl> <1401102147.93930.YahooMailNeo@web165006.mail.bf1.yahoo.com>
-Mime-Version: 1.0 (Mac OS X Mail 7.3 \(1878.2\))
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
+Subject: Slow request on cache tiering
+Date: Mon, 26 May 2014 12:05:44 +0000
+Message-ID: <06E7D85B3BA36C4DB207FEDE871C5348851DB6@SHSMSX101.ccr.corp.intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from blu004-omc4s7.hotmail.com ([65.55.111.146]:50037 "EHLO
-	BLU004-OMC4S7.hotmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751583AbaEZL1f convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 26 May 2014 07:27:35 -0400
-In-Reply-To: <1401102147.93930.YahooMailNeo@web165006.mail.bf1.yahoo.com>
+Received: from mga03.intel.com ([143.182.124.21]:50985 "EHLO mga03.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751830AbaEZMGX convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 26 May 2014 08:06:23 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Koleos Fuskus <koleosfuscus@yahoo.com>
-Cc: Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Thanks Koleos!
+Hi all,
 
-Guang
-On May 26, 2014, at 7:02 PM, Koleos Fuskus <koleosfuscus@yahoo.com> wro=
-te:
+I'm experiencing a problem when running ceph with cache tiering. Can someone help to take a look? Any comments are appreciated, thx!
 
-> Hello Guang,
->=20
-> Here is the wiki: https://wiki.ceph.com/Development/Add_erasure_codin=
-g_to_the_durability_modeling
->=20
-> Koleos
->=20
->=20
->=20
-> On Monday, May 26, 2014 10:05 AM, Guang Yang <yguang11@outlook.com> w=
-rote:
-> Hello Loic and Koleos,
-> Do we have any wiki page documenting the progress and report of this =
-effort? We are very interested in such as well.
->=20
-> Thanks,
-> Guang
->=20
->=20
->=20
->=20
-> On May 8, 2014, at 1:19 AM, Loic Dachary <loic@dachary.org> wrote:
->=20
->>=20
->> Hi,
->>=20
->> On 07/05/2014 18:43, Koleos Fuskus wrote:> Hi Loic,
->>>=20
->>> What do you mean by action plan? if is the schedule, it is publishe=
-d on my proposal in melange site. Indeed, the details of my proposal ar=
-e private, if is that what you mean, I can added on the wiki. If you wa=
-nt this part to be public no problem.=20
->>=20
->> Yes, that's what I meant :-) You could collect snippets from the pro=
-posal posted on melange and present them on a subpage https://wiki.ceph=
-=2Ecom/Development and we can use this as the "home page" of your work =
-?=20
->>=20
->>> Actually I am using some of my free time on reading ceph documentat=
-ion (web and papers). Do you have any specific document to recommend me=
-? Maybe we can discuss again about the durability model on Friday/Monda=
-y.  I need some more understanding about the ceph architecture.
->>=20
->> I'm connected on irc.oftc.net#ceph-devel today and tomorrow if you'd=
- like to chat during this "community bonding" phase (I don't remember h=
-ow google calls this for GSoC participants ;-)
->>=20
->> Cheers
->>=20
->>>=20
->>> Cheers,
->>> Ver=F3nica
->>> On Wednesday, May 7, 2014 8:12 AM, Loic Dachary <loic@dachary.org> =
-wrote:
->>> Hi Veronica,
->>>=20
->>> I was really happy to hear you're going to work on the erasure code=
- reliability model. Unless I'm mistaken your action plan was not publis=
-hed. Would you mind adding it to the wiki so I can comment on it ? Some=
-one else might be interested to contribute too. I've had a discussion y=
-esterday about durability models (internally) and it is not well unders=
-tood. Your insight would be precious.
->>>=20
->>> Cheers
->>>=20
->>> --=20
->>> Lo=EFc Dachary, Artisan Logiciel Libre
->>>=20
->>>=20
->>=20
->> --=20
->> Lo=EFc Dachary, Artisan Logiciel Libre
->>=20
->=20
->=20
+===Configuration===
+I have 2 pools, one is 'rbd', the other is 'cache'. Pool 'cache' is the cache tier of pool 'rbd'. The 'rbd' pool has 16 HDD OSDs. And the 'cache' pool has 8 SSD OSDs.
+Here is the OSD tree:
+# id    weight  type name       up/down reweight
+-6      8       root ssd
+-4      4               host zqw-s1-ssd
+16      1                       osd.16  up      1
+17      1                       osd.17  up      1
+18      1                       osd.18  up      1
+19      1                       osd.19  up      1
+-5      4               host zqw-s2-ssd
+20      1                       osd.20  up      1
+21      1                       osd.21  up      1
+22      1                       osd.22  up      1
+23      1                       osd.23  up      1
+-1      14.56   root default
+-2      7.28            host zqw-s1
+0       0.91                    osd.0   up      1
+1       0.91                    osd.1   up      1
+2       0.91                    osd.2   up      1
+3       0.91                    osd.3   up      1
+4       0.91                    osd.4   up      1
+5       0.91                    osd.5   up      1
+6       0.91                    osd.6   up      1
+7       0.91                    osd.7   up      1
+-3      7.28            host zqw-s2
+8       0.91                    osd.8   up      1
+9       0.91                    osd.9   up      1
+10      0.91                    osd.10  up      1
+11      0.91                    osd.11  up      1
+12      0.91                    osd.12  up      1
+13      0.91                    osd.13  up      1
+14      0.91                    osd.14  up      1
+15      0.91                    osd.15  up      1
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+===Problem===
+After running IO for a while, I start to see the 'slow request' warnings in the ceph log:
+
+2014-05-26 14:53:23.606138 osd.20 10.44.44.6:6823/61598 14 : [WRN] 6 slow requests, 6 included below; oldest blocked for > 30.921077 secs
+2014-05-26 14:53:23.606149 osd.20 10.44.44.6:6823/61598 15 : [WRN] slow request 30.921077 seconds old, received at 2014-05-26 14:52:52.684957: osd_op(client.42161.0:10162 rb.0.93ff.238e1f29.00000000028f [set-alloc-hint object_size 4194304 write_size 4194304,write 0~524288] 22.7ec98e46 ack+ondisk+write e16745) v4 currently waiting for subops from 16
+...
+2014-05-26 14:53:23.483175 osd.21 10.44.44.6:6825/61597 37 : [WRN] 6 slow requests, 6 included below; oldest blocked for > 30.664500 secs
+2014-05-26 14:53:23.483189 osd.21 10.44.44.6:6825/61597 38 : [WRN] slow request 30.664500 seconds old, received at 2014-05-26 14:52:52.799480: osd_op(client.42177.0:10020 rb.0.93f2.238e1f29.000000000239 [set-alloc-hint object_size 4194304 write_size 4194304,write 0~524288] 22.a3cdd2df ack+ondisk+write e16745) v4 currently waiting for subops from 16
+...
+2014-05-26 14:53:23.483164 osd.23 10.44.44.6:6816/61595 36 : [WRN] 6 slow requests, 6 included below; oldest blocked for > 30.740852 secs
+2014-05-26 14:53:23.483178 osd.23 10.44.44.6:6816/61595 37 : [WRN] slow request 30.740852 seconds old, received at 2014-05-26 14:52:52.737293: osd_op(client.42171.0:9359 rb.0.93fd.238e1f29.00000000022b [set-alloc-hint object_size 4194304 write_size 4194304,write 0~524288] 22.5e9da689 ack+ondisk+write e16745) v4 currently waiting for subops from 16
+...
+2014-05-26 14:53:23.808628 osd.22 10.44.44.6:6813/61596 24 : [WRN] 4 slow requests, 4 included below; oldest blocked for > 30.571487 secs
+2014-05-26 14:53:23.808638 osd.22 10.44.44.6:6813/61596 25 : [WRN] slow request 30.571487 seconds old, received at 2014-05-26 14:52:53.237048: osd_op(client.42174.0:9872 rb.0.93f7.238e1f29.00000000023f [set-alloc-hint object_size 4194304 write_size 4194304,write 0~524288] 22.8d495fcc ack+ondisk+write e16745) v4 currently waiting for subops from 16
+...
+2014-05-26 14:53:23.553157 osd.16 10.44.44.5:6855/72950 62 : [WRN] 6 slow requests, 6 included below; oldest blocked for > 30.930690 secs
+2014-05-26 14:53:23.553168 osd.16 10.44.44.5:6855/72950 63 : [WRN] slow request 30.930690 seconds old, received at 2014-05-26 14:52:52.586582: osd_op(client.42175.0:9650 rb.0.93f1.2ae8944a.000000000236 [set-alloc-hint object_size 4194304 write_size 4194304,write 0~524288] 22.3dec4f3b ack+ondisk+write e16745) v4 currently waiting for subops from 20
+...
+2014-05-26 14:53:35.553099 mon.0 10.44.44.5:6789/0 1348 : [INF] osd.16 10.44.44.5:6855/72950 failed (6 reports from 4 peers after 27.877781 >= grace 26.858363)
+2014-05-26 14:53:35.871891 mon.0 10.44.44.5:6789/0 1350 : [INF] osdmap e16746: 24 osds: 23 up, 24 in
+...
+2014-05-26 14:53:38.168716 osd.16 10.44.44.5:6855/72950 152 : [WRN] map e16747 wrongly marked me down
+
+===Analysis===
+From the above log, it seems something went wrong on OSD 16. OSD 16 is on server 'zqw-s1'. The other 4 SSD OSDs (20, 21, 22, 23) on the other server 'zqw-s2' are waiting for operations on OSD 16. Finally the monitor thinks the OSD 16 failed and marked it down. However, OSD 16 didn't think so.
+
+Look at the log of OSD 20, 21, 22 and 23, around the time when the 'slow request' happened, these OSDs didn't get reply from OSD 16 during heartbeat check:
+2014-05-26 14:53:27.606927 7f163d0c8700 -1 osd.20 16745 heartbeat_check: no reply from osd.16 since back 2014-05-26 14:53:07.369988 front 2014-05-26 14:53:07.369988 (cutoff 2014-05-26 14:53:07.606925)
+
+And from the log of OSD 16, around the time of the 'slow request', there are lots of logs like this:
+2014-05-26 14:53:23.772145 7fb39e35a700  1 heartbeat_map is_healthy 'OSD::op_tp thread 0x7fb39a352700' had timed out after 15
+
+===Questions===
+1. From the simple analysis above, looks like the slow request happens when doing PG replicating. The heartbeat also fails. Is it possibly because the cluster network is too busy? I'm currently using 10Gb public network and 10Gb cluster network. If it is true, why I don't see slow request caused by other OSDs at the same time?
+2. I run into this problem quite often when running ceph with cache tiering. But I don't see this problem when running without it. Is it possible that OSD 16 stuck at some cache tiering specific code?
+3. Any other reasons may cause the 'slow request' like this?
+4. I noticed from 'iostat' that when the 'slow request' happened, the cluster halted the IO for 60s. Is this true?
