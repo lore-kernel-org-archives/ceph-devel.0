@@ -1,52 +1,76 @@
-From: HUSAM AL SAYED <Husamalsayed@asia.com>
-Subject: Your Urgent reply.
-Date: Mon, 26 May 2014 21:47:36 +0400
-Message-ID: <CAKFyHyocG2A+S3oVgf3wapryzcSTQ6Uaf+cnHedGa2Rd7z6L2Q__5592.54311160675$1401126470$gmane$org@mail.gmail.com>
-Reply-To: Husamalsayed@asia.com
+From: Stefan Priebe <s.priebe@profihost.ag>
+Subject: Re: [Share]Performance tunning on Ceph FileStore with SSD backend
+Date: Mon, 26 May 2014 22:29:04 +0200
+Message-ID: <5383A410.6010002@profihost.ag>
+References: <CACJqLyb+D5n74OyjP4sRG2=G083GQ3BzEUt4i8iAdw6nEBfRJg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f68.google.com ([74.125.82.68]:62204 "EHLO
-	mail-wg0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751796AbaEZRrh (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 26 May 2014 13:47:37 -0400
-Received: by mail-wg0-f68.google.com with SMTP id x12so2641959wgg.7
-        for <ceph-devel@vger.kernel.org>; Mon, 26 May 2014 10:47:36 -0700 (PDT)
+Received: from mail-ph.de-nserver.de ([85.158.179.214]:50900 "EHLO
+	mail-ph.de-nserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751603AbaEZU2w (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 26 May 2014 16:28:52 -0400
+In-Reply-To: <CACJqLyb+D5n74OyjP4sRG2=G083GQ3BzEUt4i8iAdw6nEBfRJg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
+To: Haomai Wang <haomaiwang@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Dear Friend,
+Hi Haomai,
 
+regarding the FDCache problems you're seeing. Isn't this branch 
+interesting for you? Have you ever tested it?
 
-Compliments of the day.This mail May be a surprise to you Because you
-did not give me the permission to do so and Neither do you know me but
-before I tell you about myself I want you to please forgive me for
-sending this mail without your permission I have been in search of
-someone with this last name so when I saw you online, I was pushed to
-contact you and see how best we can assist each other. I am Mr. Husam
-Al Sayed, a Bank Officer here in U.A.E. I believe it is the wish of
-God for me to come across you now. I am having an important business
-discussion I wish to share with you which I  believe will interest
-you, because it is in connection with your last name and you are going
-to benefit from it.
+http://lists.ceph.com/pipermail/ceph-commit-ceph.com/2014-January/007399.html
 
-One Late peter who was among the death victims in the May 27 2006
-Earthquake disaster in Java, Indonesia that killed over 5,000 people.
-He was in Indonesia on a business trip and that was how he met his
-end. My bank management is yet to know about his death, I knew about
-it because he was my friend and I am his account officer.he did not
-mention any Next of Kin/ Heir when the account was opened, and he was
-not married and no children. Last week my Bank Management requested
-that he should give instructions on what to do about his funds,I know
-this will happen and that is why I have been looking for a means to
-handle the situation,
+Greets,
+Stefan
 
-If you are interested send me your private Email Address so that i can
-send you more details of the transaction,
-Thanks for your understanding
-
-I am waiting for your reply.
-
-Best regards,
-
-Mr. Husam Al Sayed
+Am 09.04.2014 12:05, schrieb Haomai Wang:
+> Hi all,
+>
+> I would like to share some ideas about how to improve performance on
+> ceph with SSD. Not much preciseness.
+>
+> Our ssd is 500GB and each OSD own a SSD(journal is on the same SSD).
+> ceph version is 0.67.5(Dumping)
+>
+> At first, we find three bottleneck on filestore:
+> 1. fdcache_lock(changed in Firely release)
+> 2. lfn_find in omap_* methods
+> 3. DBObjectMap header
+>
+> According to my understanding and the docs in
+> ObjectStore.h(https://github.com/ceph/ceph/blob/master/src/os/ObjectStore.h),
+> I simply remove lfn_find in omap_* and fdcache_lock. I'm not fully
+> sure the correctness of this change, but it works well still now.
+>
+> DBObjectMap header patch is on the pull request queue and may be
+> merged in the next feature merge window.
+>
+> With things above done, we get much performance improvement in disk
+> util and benchmark results(3x-4x).
+>
+> Next, we find fdcache size become the main bottleneck. For example, if
+> hot data range is 100GB, we need 25000(100GB/4MB) fd to cache. If hot
+> data range is 1TB, we need 250000(1000GB/4MB) fd to cache. With
+> increase "filestore_fd_cache_size", the cost of lookup(FDCache) and
+> cache miss is expensive and can't be afford. The implementation of
+> FDCache isn't O(1). So we only can get high performance on fdcache hit
+> range(maybe 100GB with 10240 fdcache size) and more data exceed the
+> size of fdcaceh will be disaster. If you want to cache more fd(102400
+> fdcache size), the implementation of FDCache will bring on extra CPU
+> cost(can't be ignore) for each op.
+>
+> Because of the capacity of SSD(several hundreds GB), we try to
+> increase the size of rbd object(16MB) so less fd cache is needed. As
+> for FDCache implementation, we simply discard SimpleLRU but introduce
+> RandomCache. Now we can set much larger fdcache size(near cache all
+> fd) with little overload.
+>
+> With these, we achieve 3x-4x performance improvements on filestore with SSD.
+>
+> Maybe it exists something I missed or something wrong, hope can
+> correct me. I hope it can help to improve FileStore on SSD and push
+> into master branch.
+>
