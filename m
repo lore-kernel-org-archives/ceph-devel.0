@@ -1,138 +1,155 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: Slow request on cache tiering
-Date: Mon, 26 May 2014 08:18:09 -0500
-Message-ID: <53833F11.3080101@inktank.com>
-References: <06E7D85B3BA36C4DB207FEDE871C5348851DB6@SHSMSX101.ccr.corp.intel.com>
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: Re: [Performance] Improvement on DB Performance
+Date: Mon, 26 May 2014 21:57:07 +0800
+Message-ID: <CACJqLyYs144J2wrqdO+8vjk2O9Z7mu_=MW5_efbVGCCEpLU0Cw@mail.gmail.com>
+References: <CACJqLyY5VSQubaPvk2N3BrRx=YZ7EpiyRJZbWnNM=bQMfNA8=w@mail.gmail.com>
+	<CACJqLyYFMAxoVUZCTvPMXFGrYEPmFqTd+pZmsL2V=V1L32CisQ@mail.gmail.com>
+	<alpine.DEB.2.00.1405210821420.1689@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f172.google.com ([209.85.213.172]:48206 "EHLO
-	mail-ig0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751781AbaEZNSJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 26 May 2014 09:18:09 -0400
-Received: by mail-ig0-f172.google.com with SMTP id uy17so3077243igb.5
-        for <ceph-devel@vger.kernel.org>; Mon, 26 May 2014 06:18:08 -0700 (PDT)
-In-Reply-To: <06E7D85B3BA36C4DB207FEDE871C5348851DB6@SHSMSX101.ccr.corp.intel.com>
+Received: from mail-wg0-f43.google.com ([74.125.82.43]:46441 "EHLO
+	mail-wg0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751823AbaEZN5J (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 26 May 2014 09:57:09 -0400
+Received: by mail-wg0-f43.google.com with SMTP id l18so7893897wgh.2
+        for <ceph-devel@vger.kernel.org>; Mon, 26 May 2014 06:57:07 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.00.1405210821420.1689@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
+To: Sage Weil <sage@inktank.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 05/26/2014 07:05 AM, Wang, Zhiqiang wrote:
-> Hi all,
+On Wed, May 21, 2014 at 11:23 PM, Sage Weil <sage@inktank.com> wrote:
+> On Wed, 21 May 2014, Haomai Wang wrote:
+>> I pushed the commit to fix this problem(https://github.com/ceph/ceph/pull/1848).
+>>
+>> With test program(Each sync request is issued with ten write request),
+>> a significant improvement is noticed.
+>>
+>> aio_flush                          sum: 914750     avg: 1239   count:
+>> 738      max: 4714   min: 1011
+>> flush_set                          sum: 904200     avg: 1225   count:
+>> 738      max: 4698   min: 999
+>> flush                              sum: 641648     avg: 173    count:
+>> 3690     max: 1340   min: 128
+>>
+>> Compared to last mail, it reduce each aio_flush request to 1239 ns
+>> instead of 24145 ns.
+>
+> Good catch!  That's a great improvement.
+>
+> The patch looks clearly correct.  We can probably do even better by
+> putting the Objects on a list when they get the first dirty buffer so that
+> we only cycle through the dirty ones.  Or, have a global list of dirty
+> buffers (instead of dirty objects -> dirty buffers).
 
-Hi Zhigiang!
+Yes, I think the dirty objects list is worth to maintain.
 
-The problem you describe below is something we've seen internally at 
-Inktank as well.  I've got a couple of comments / suggestions.
+According to my test: create a 1TB volume and has 500GB DB data, I run
+the test program covered 100GB hot data. So in the test, we have
+nearly 3000 objects. I calculate the time flush_set consumed and
+compared it to the total time which get from "ceph perf
+dump"(aio_flush_latency). The flush_set loop usually consumes 1-4ms,
+and the total flush request consumes 3-8ms. The proportion is still
+high.
+
+Sample logs:
+2014-05-26 22:11:16.392538 7fa6c6e41700  0 objectcacher flush_set
+total: 28952 flushed: 4
+2014-05-26 22:11:16.398726 7fa6c6e41700  0 objectcacher flush_set: time 0.004436
+2014-05-26 22:11:16.398745 7fa6c6e41700  0 objectcacher flush_set
+total: 28955 flushed: 15
+2014-05-26 22:11:16.400992 7fa6c6e41700  0 objectcacher flush_set: time 0.002149
+2014-05-26 22:11:17.039226 7fa6c6e41700  0 objectcacher flush_set: time 0.001304
+2014-05-26 22:11:17.039274 7fa6c6e41700  0 objectcacher flush_set
+total: 28950 flushed: 4
+2014-05-26 22:11:17.045580 7fa6c6e41700  0 objectcacher flush_set: time 0.004523
+2014-05-26 22:11:17.045636 7fa6c6e41700  0 objectcacher flush_set
+total: 28959 flushed: 15
+
+I think a request consuming 4ms in client side is still unaffordable.
+And if I create a 2 or 3TB volume, the time will be more larger.
 
 >
-> I'm experiencing a problem when running ceph with cache tiering. Can someone help to take a look? Any comments are appreciated, thx!
+> sage
 >
-> ===Configuration===
-> I have 2 pools, one is 'rbd', the other is 'cache'. Pool 'cache' is the cache tier of pool 'rbd'. The 'rbd' pool has 16 HDD OSDs. And the 'cache' pool has 8 SSD OSDs.
-> Here is the OSD tree:
-> # id    weight  type name       up/down reweight
-> -6      8       root ssd
-> -4      4               host zqw-s1-ssd
-> 16      1                       osd.16  up      1
-> 17      1                       osd.17  up      1
-> 18      1                       osd.18  up      1
-> 19      1                       osd.19  up      1
-> -5      4               host zqw-s2-ssd
-> 20      1                       osd.20  up      1
-> 21      1                       osd.21  up      1
-> 22      1                       osd.22  up      1
-> 23      1                       osd.23  up      1
-> -1      14.56   root default
-> -2      7.28            host zqw-s1
-> 0       0.91                    osd.0   up      1
-> 1       0.91                    osd.1   up      1
-> 2       0.91                    osd.2   up      1
-> 3       0.91                    osd.3   up      1
-> 4       0.91                    osd.4   up      1
-> 5       0.91                    osd.5   up      1
-> 6       0.91                    osd.6   up      1
-> 7       0.91                    osd.7   up      1
-> -3      7.28            host zqw-s2
-> 8       0.91                    osd.8   up      1
-> 9       0.91                    osd.9   up      1
-> 10      0.91                    osd.10  up      1
-> 11      0.91                    osd.11  up      1
-> 12      0.91                    osd.12  up      1
-> 13      0.91                    osd.13  up      1
-> 14      0.91                    osd.14  up      1
-> 15      0.91                    osd.15  up      1
->
-> ===Problem===
-> After running IO for a while, I start to see the 'slow request' warnings in the ceph log:
->
-> 2014-05-26 14:53:23.606138 osd.20 10.44.44.6:6823/61598 14 : [WRN] 6 slow requests, 6 included below; oldest blocked for > 30.921077 secs
-> 2014-05-26 14:53:23.606149 osd.20 10.44.44.6:6823/61598 15 : [WRN] slow request 30.921077 seconds old, received at 2014-05-26 14:52:52.684957: osd_op(client.42161.0:10162 rb.0.93ff.238e1f29.00000000028f [set-alloc-hint object_size 4194304 write_size 4194304,write 0~524288] 22.7ec98e46 ack+ondisk+write e16745) v4 currently waiting for subops from 16
-> ...
-> 2014-05-26 14:53:23.483175 osd.21 10.44.44.6:6825/61597 37 : [WRN] 6 slow requests, 6 included below; oldest blocked for > 30.664500 secs
-> 2014-05-26 14:53:23.483189 osd.21 10.44.44.6:6825/61597 38 : [WRN] slow request 30.664500 seconds old, received at 2014-05-26 14:52:52.799480: osd_op(client.42177.0:10020 rb.0.93f2.238e1f29.000000000239 [set-alloc-hint object_size 4194304 write_size 4194304,write 0~524288] 22.a3cdd2df ack+ondisk+write e16745) v4 currently waiting for subops from 16
-> ...
-> 2014-05-26 14:53:23.483164 osd.23 10.44.44.6:6816/61595 36 : [WRN] 6 slow requests, 6 included below; oldest blocked for > 30.740852 secs
-> 2014-05-26 14:53:23.483178 osd.23 10.44.44.6:6816/61595 37 : [WRN] slow request 30.740852 seconds old, received at 2014-05-26 14:52:52.737293: osd_op(client.42171.0:9359 rb.0.93fd.238e1f29.00000000022b [set-alloc-hint object_size 4194304 write_size 4194304,write 0~524288] 22.5e9da689 ack+ondisk+write e16745) v4 currently waiting for subops from 16
-> ...
-> 2014-05-26 14:53:23.808628 osd.22 10.44.44.6:6813/61596 24 : [WRN] 4 slow requests, 4 included below; oldest blocked for > 30.571487 secs
-> 2014-05-26 14:53:23.808638 osd.22 10.44.44.6:6813/61596 25 : [WRN] slow request 30.571487 seconds old, received at 2014-05-26 14:52:53.237048: osd_op(client.42174.0:9872 rb.0.93f7.238e1f29.00000000023f [set-alloc-hint object_size 4194304 write_size 4194304,write 0~524288] 22.8d495fcc ack+ondisk+write e16745) v4 currently waiting for subops from 16
-> ...
-> 2014-05-26 14:53:23.553157 osd.16 10.44.44.5:6855/72950 62 : [WRN] 6 slow requests, 6 included below; oldest blocked for > 30.930690 secs
-> 2014-05-26 14:53:23.553168 osd.16 10.44.44.5:6855/72950 63 : [WRN] slow srequest 30.930690 seconds old, received at 2014-05-26 14:52:52.586582: osd_op(client.42175.0:9650 rb.0.93f1.2ae8944a.000000000236 [set-alloc-hint object_size 4194304 write_size 4194304,write 0~524288] 22.3dec4f3b ack+ondisk+write e16745) v4 currently waiting for subops from 20
-> ...
-> 2014-05-26 14:53:35.553099 mon.0 10.44.44.5:6789/0 1348 : [INF] osd.16 10.44.44.5:6855/72950 failed (6 reports from 4 peers after 27.877781 >= grace 26.858363)
-> 2014-05-26 14:53:35.871891 mon.0 10.44.44.5:6789/0 1350 : [INF] osdmap e16746: 24 osds: 23 up, 24 in
-> ...
-> 2014-05-26 14:53:38.168716 osd.16 10.44.44.5:6855/72950 152 : [WRN] map e16747 wrongly marked me down
+>>
+>> I hope it's the root cause for db on rbd performance.
+>>
+>> On Wed, May 21, 2014 at 6:15 PM, Haomai Wang <haomaiwang@gmail.com> wrote:
+>> > Hi all,
+>> >
+>> > I remember there exists discuss about DB(mysql) performance on rbd.
+>> > Recently I test mysql-bench with rbd and found awful performance. So I
+>> > dive into it and find that main cause is "flush" request from guest.
+>> > As we know, applications such as mysql, ceph has own journal for
+>> > durable and journal usually send sync&direct io. If fs barrier is on,
+>> > each sync io operation make kernel issue "sync"(barrier) request to
+>> > block device. Here, qemu will call "rbd_aio_flush" to apply.
+>> >
+>> > Via systemtap, I found a amazing thing:
+>> > aio_flush                          sum: 4177085    avg: 24145  count:
+>> > 173      max: 28172  min: 22747
+>> > flush_set                          sum: 4172116    avg: 24116  count:
+>> > 173      max: 28034  min: 22733
+>> > flush                              sum: 3029910    avg: 4      count:
+>> > 670477   max: 1893   min: 3
+>> >
+>> > This statistic info is gathered in 5s. Most of consuming time is on
+>> > "ObjectCacher::flush". What's more, with time increasing, the flush
+>> > count will be increasing.
+>> >
+>> > After view source, I find the root cause is "ObjectCacher::flush_set",
+>> > it will iterator the "object_set" and look for dirty buffer. And
+>> > "object_set"  contains all objects ever opened.  For example:
+>> >
+>> > 2014-05-21 18:01:37.959013 7f785c7c6700  0 objectcacher flush_set
+>> > total: 5919 flushed: 5
+>> > 2014-05-21 18:01:37.999698 7f785c7c6700  0 objectcacher flush_set
+>> > total: 5919 flushed: 5
+>> > 2014-05-21 18:01:38.038405 7f785c7c6700  0 objectcacher flush_set
+>> > total: 5920 flushed: 5
+>> > 2014-05-21 18:01:38.080118 7f785c7c6700  0 objectcacher flush_set
+>> > total: 5920 flushed: 5
+>> > 2014-05-21 18:01:38.119792 7f785c7c6700  0 objectcacher flush_set
+>> > total: 5921 flushed: 5
+>> > 2014-05-21 18:01:38.162004 7f785c7c6700  0 objectcacher flush_set
+>> > total: 5922 flushed: 5
+>> > 2014-05-21 18:01:38.202755 7f785c7c6700  0 objectcacher flush_set
+>> > total: 5923 flushed: 5
+>> > 2014-05-21 18:01:38.243880 7f785c7c6700  0 objectcacher flush_set
+>> > total: 5923 flushed: 5
+>> > 2014-05-21 18:01:38.284399 7f785c7c6700  0 objectcacher flush_set
+>> > total: 5923 flushed: 5
+>> >
+>> > These logs record the iteration info, the loop will check 5920 objects
+>> > but only 5 objects are dirty.
+>> >
+>> > So I think the solution is make "ObjectCacher::flush_set" only
+>> > iterator the objects which is dirty.
+>> >
+>> > --
+>> > Best Regards,
+>> >
+>> > Wheat
+>>
+>>
+>>
+>> --
+>> Best Regards,
+>>
+>> Wheat
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
 
 
-I suspect you are hitting this as soon as the cache is full and now have 
-to flush while doing writes.  One of the unfortunate things about the 
-cache teiring right now is that there is a lot of overhead, both because 
-you are now doing extra reads/writes to move data in and out of the 
-cache tier (likely over the network!), but also because each cache tier 
-OSD has to do it's own journalling and replication.  The effect of all 
-of this is that you really want to make sure you have a high ratio of 
-hot/cold data.  Otherwise, using the same SSDs for journal devices for 
-the OSDs will have a greater impact on performance.
 
-FWIW, I just had a number of performance tests finish using both random 
-and skewed read/write distributions in 3 scenarios: only a base pool, a 
-base pool with an SSD cache tier, and a base pool with SSD journals. 
-The SSD journal configuration did better than the cache tier, even when 
-the data distribution with skewed (zipf distribution, theta = 1.2)
+-- 
+Best Regards,
 
->
-> ===Analysis===
->  From the above log, it seems something went wrong on OSD 16. OSD 16 is on server 'zqw-s1'. The other 4 SSD OSDs (20, 21, 22, 23) on the other server 'zqw-s2' are waiting for operations on OSD 16. Finally the monitor thinks the OSD 16 failed and marked it down. However, OSD 16 didn't think so.
->
-> Look at the log of OSD 20, 21, 22 and 23, around the time when the 'slow request' happened, these OSDs didn't get reply from OSD 16 during heartbeat check:
-> 2014-05-26 14:53:27.606927 7f163d0c8700 -1 osd.20 16745 heartbeat_check: no reply from osd.16 since back 2014-05-26 14:53:07.369988 front 2014-05-26 14:53:07.369988 (cutoff 2014-05-26 14:53:07.606925)
->
-> And from the log of OSD 16, around the time of the 'slow request', there are lots of logs like this:
-> 2014-05-26 14:53:23.772145 7fb39e35a700  1 heartbeat_map is_healthy 'OSD::op_tp thread 0x7fb39a352700' had timed out after 15
-
-See http://tracker.ceph.com/issues/8301
-
-I suspect if what you are seeing is what I've seen, you are hitting 
-major page faults in the VM layer and it's slowing the op threads down 
-enough that you are seeing those messages.  You may even hit suicide 
-timeouts.  I typically see this during writes.  Try setting swappiness 
-to 10 and see if that helps.  For what it's worth, I first saw this 
-during tiering tests but was able to invoke it in normal operation as well.
-
->
-> ===Questions===
-> 1. From the simple analysis above, looks like the slow request happens when doing PG replicating. The heartbeat also fails. Is it possibly because the cluster network is too busy? I'm currently using 10Gb public network and 10Gb cluster network. If it is true, why I don't see slow request caused by other OSDs at the same time?
-> 2. I run into this problem quite often when running ceph with cache tiering. But I don't see this problem when running without it. Is it possible that OSD 16 stuck at some cache tiering specific code?
-> 3. Any other reasons may cause the 'slow request' like this?
-> 4. I noticed from 'iostat' that when the 'slow request' happened, the cluster halted the IO for 60s. Is this true?
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-
+Wheat
