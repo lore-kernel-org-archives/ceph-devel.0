@@ -1,51 +1,71 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Repair-Optimal MDS Array Codes over GF(2)
-Date: Mon, 26 May 2014 10:11:34 +0200
-Message-ID: <5382F736.5030708@dachary.org>
+From: Wido den Hollander <wido@42on.com>
+Subject: Re: Questions of KeyValueStore (leveldb) backend
+Date: Mon, 26 May 2014 11:23:00 +0200
+Message-ID: <538307F4.8090101@42on.com>
+References: <BLU436-SMTP4071B1A51539EAA2F9D7ECDF3B0@phx.gbl> <CACJqLyZYe6+CBrB49B5TnyahsT6387-bWDXCQ6JCYcJGP8iyJA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="ov5IID9OrgeWAKv9LHCXpKnbaqjbjpcA3"
+Content-Type: text/plain; charset=UTF-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:48627 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751443AbaEZIMZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 26 May 2014 04:12:25 -0400
+Received: from websrv.42on.com ([31.25.102.167]:51254 "EHLO websrv.42on.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751515AbaEZJXD (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 26 May 2014 05:23:03 -0400
+In-Reply-To: <CACJqLyZYe6+CBrB49B5TnyahsT6387-bWDXCQ6JCYcJGP8iyJA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: cyril.guyot@hgst.com
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Haomai Wang <haomaiwang@gmail.com>, Guang Yang <yguang11@outlook.com>
+Cc: Ceph-devel <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---ov5IID9OrgeWAKv9LHCXpKnbaqjbjpcA3
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+On 05/26/2014 06:55 AM, Haomai Wang wrote:
+> On Mon, May 26, 2014 at 9:46 AM, Guang Yang <yguang11@outlook.com> wr=
+ote:
+>> Hello Haomai,
+>> We are evaluating the key-value store backend which comes along with=
+ Firefly release (thanks for implementing it in Ceph), it is very promi=
+sing for a couple of our use cases, after going through the related cod=
+e change, I have a couple of questions which needs your help:
+>>    1. One observation is that, for object larger than 1KB, it will b=
+e striped to multiple chunks (k-v in the leveldb table), with one strip=
+ as 1KB size. Is there any particular reason we choose 1KB as the strip=
+ size (and I didn=E2=80=99t find a configuration to tune this value)?
+>
+> 1KB is not a serious value, this value can be configured in the near =
+future.
+>
 
-Hi Cyril,
+So that is currently hardcoded? I can't find any reference to it in=20
+config_opts.h
 
-I browsed your article on "Repair-Optimal MDS Array Codes over GF(2)" htt=
-p://arxiv.org/pdf/1302.4129.pdf and it looks like something useful in the=
- context of Ceph. Are you aware of a Free Software implementation I could=
- look at ?=20
+>>
+>>    2. This is properly a leveldb question, do we expect performance =
+degradation as the leveldb instance keeps increasing (e.g. several TB)?
+>
+> Ceph OSD is expected to own a physical disk, normally is several
+> TB(1-4TB). LevelDB can take it easy. Especially we use it to store
+> large value(compared to normal application usage).
+>
 
-Cheers
+With a large value you mean something like 4MB? The regular strip-size=20
+for RBD, CephFS and such?
+
+>>
+>> Thanks,
+>> Guang
+>
+>
+>
+
 
 --=20
-Lo=EFc Dachary, Artisan Logiciel Libre
+Wido den Hollander
+42on B.V.
 
-
---ov5IID9OrgeWAKv9LHCXpKnbaqjbjpcA3
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlOC9zYACgkQ8dLMyEl6F23WCwCgokSi+Nd3ddsL/hh9fIWgxRo/
-ptYAnj/7eAotZa3+wqxyiznBY4yK0Bqk
-=Ell6
------END PGP SIGNATURE-----
-
---ov5IID9OrgeWAKv9LHCXpKnbaqjbjpcA3--
+Phone: +31 (0)20 700 9902
+Skype: contact42on
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
