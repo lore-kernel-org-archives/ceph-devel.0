@@ -1,105 +1,104 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Re: Questions of KeyValueStore (leveldb) backend
-Date: Mon, 26 May 2014 17:29:40 +0800
-Message-ID: <CACJqLyYrnk4a74nQ+cmP5bqi2WwOMCHTR+Wrm=Qt55Ar+sdL0w@mail.gmail.com>
-References: <BLU436-SMTP4071B1A51539EAA2F9D7ECDF3B0@phx.gbl>
-	<CACJqLyZYe6+CBrB49B5TnyahsT6387-bWDXCQ6JCYcJGP8iyJA@mail.gmail.com>
-	<538307F4.8090101@42on.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Guang Yang <yguang11@outlook.com>
+Subject: Re: erasure code & reliability model
+Date: Mon, 26 May 2014 19:27:27 +0800
+Message-ID: <BLU436-SMTP255B02659339C0DBBB9B647DF3B0@phx.gbl>
+References: <5369CEA8.1000209@dachary.org> <1399481022.50289.YahooMailNeo@web165001.mail.bf1.yahoo.com> <536A6B18.2080205@dachary.org> <BLU436-SMTP859D5E316FE37AC71199C6DF3B0@phx.gbl> <1401102147.93930.YahooMailNeo@web165006.mail.bf1.yahoo.com>
+Mime-Version: 1.0 (Mac OS X Mail 7.3 \(1878.2\))
+Content-Type: text/plain; charset=iso-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f169.google.com ([209.85.212.169]:35505 "EHLO
-	mail-wi0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751706AbaEZJ3p convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 26 May 2014 05:29:45 -0400
-Received: by mail-wi0-f169.google.com with SMTP id hi2so4044870wib.4
-        for <ceph-devel@vger.kernel.org>; Mon, 26 May 2014 02:29:41 -0700 (PDT)
-In-Reply-To: <538307F4.8090101@42on.com>
+Received: from blu004-omc4s7.hotmail.com ([65.55.111.146]:50037 "EHLO
+	BLU004-OMC4S7.hotmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751583AbaEZL1f convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 26 May 2014 07:27:35 -0400
+In-Reply-To: <1401102147.93930.YahooMailNeo@web165006.mail.bf1.yahoo.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@42on.com>
-Cc: Guang Yang <yguang11@outlook.com>, Ceph-devel <ceph-devel@vger.kernel.org>
+To: Koleos Fuskus <koleosfuscus@yahoo.com>
+Cc: Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Mon, May 26, 2014 at 5:23 PM, Wido den Hollander <wido@42on.com> wro=
+Thanks Koleos!
+
+Guang
+On May 26, 2014, at 7:02 PM, Koleos Fuskus <koleosfuscus@yahoo.com> wro=
 te:
-> On 05/26/2014 06:55 AM, Haomai Wang wrote:
->>
->> On Mon, May 26, 2014 at 9:46 AM, Guang Yang <yguang11@outlook.com> w=
+
+> Hello Guang,
+>=20
+> Here is the wiki: https://wiki.ceph.com/Development/Add_erasure_codin=
+g_to_the_durability_modeling
+>=20
+> Koleos
+>=20
+>=20
+>=20
+> On Monday, May 26, 2014 10:05 AM, Guang Yang <yguang11@outlook.com> w=
 rote:
->>>
->>> Hello Haomai,
->>> We are evaluating the key-value store backend which comes along wit=
-h
->>> Firefly release (thanks for implementing it in Ceph), it is very pr=
-omising
->>> for a couple of our use cases, after going through the related code=
- change,
->>> I have a couple of questions which needs your help:
->>>    1. One observation is that, for object larger than 1KB, it will =
-be
->>> striped to multiple chunks (k-v in the leveldb table), with one str=
-ip as 1KB
->>> size. Is there any particular reason we choose 1KB as the strip siz=
-e (and I
->>> didn=E2=80=99t find a configuration to tune this value)?
->>
->>
->> 1KB is not a serious value, this value can be configured in the near
->> future.
->>
->
-> So that is currently hardcoded? I can't find any reference to it in
-> config_opts.h
+> Hello Loic and Koleos,
+> Do we have any wiki page documenting the progress and report of this =
+effort? We are very interested in such as well.
+>=20
+> Thanks,
+> Guang
+>=20
+>=20
+>=20
+>=20
+> On May 8, 2014, at 1:19 AM, Loic Dachary <loic@dachary.org> wrote:
+>=20
+>>=20
+>> Hi,
+>>=20
+>> On 07/05/2014 18:43, Koleos Fuskus wrote:> Hi Loic,
+>>>=20
+>>> What do you mean by action plan? if is the schedule, it is publishe=
+d on my proposal in melange site. Indeed, the details of my proposal ar=
+e private, if is that what you mean, I can added on the wiki. If you wa=
+nt this part to be public no problem.=20
+>>=20
+>> Yes, that's what I meant :-) You could collect snippets from the pro=
+posal posted on melange and present them on a subpage https://wiki.ceph=
+=2Ecom/Development and we can use this as the "home page" of your work =
+?=20
+>>=20
+>>> Actually I am using some of my free time on reading ceph documentat=
+ion (web and papers). Do you have any specific document to recommend me=
+? Maybe we can discuss again about the durability model on Friday/Monda=
+y.  I need some more understanding about the ceph architecture.
+>>=20
+>> I'm connected on irc.oftc.net#ceph-devel today and tomorrow if you'd=
+ like to chat during this "community bonding" phase (I don't remember h=
+ow google calls this for GSoC participants ;-)
+>>=20
+>> Cheers
+>>=20
+>>>=20
+>>> Cheers,
+>>> Ver=F3nica
+>>> On Wednesday, May 7, 2014 8:12 AM, Loic Dachary <loic@dachary.org> =
+wrote:
+>>> Hi Veronica,
+>>>=20
+>>> I was really happy to hear you're going to work on the erasure code=
+ reliability model. Unless I'm mistaken your action plan was not publis=
+hed. Would you mind adding it to the wiki so I can comment on it ? Some=
+one else might be interested to contribute too. I've had a discussion y=
+esterday about durability models (internally) and it is not well unders=
+tood. Your insight would be precious.
+>>>=20
+>>> Cheers
+>>>=20
+>>> --=20
+>>> Lo=EFc Dachary, Artisan Logiciel Libre
+>>>=20
+>>>=20
+>>=20
+>> --=20
+>> Lo=EFc Dachary, Artisan Logiciel Libre
+>>=20
+>=20
+>=20
 
-Yes
-
->
->
->>>
->>>    2. This is properly a leveldb question, do we expect performance
->>> degradation as the leveldb instance keeps increasing (e.g. several =
-TB)?
->>
->>
->> Ceph OSD is expected to own a physical disk, normally is several
->> TB(1-4TB). LevelDB can take it easy. Especially we use it to store
->> large value(compared to normal application usage).
->>
->
-> With a large value you mean something like 4MB? The regular strip-siz=
-e for
-> RBD, CephFS and such?
-
-Not 4MB, it should be 4KB matching the default page size in kernel. Or
-4MB for radosgw goal.
-I want to match the operation "set_alloc_size" and make it better for w=
-orkload.
-
-
->
->>>
->>> Thanks,
->>> Guang
->>
->>
->>
->>
->
->
-> --
-> Wido den Hollander
-> 42on B.V.
->
-> Phone: +31 (0)20 700 9902
-> Skype: contact42on
-
-
-
---=20
-Best Regards,
-
-Wheat
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
