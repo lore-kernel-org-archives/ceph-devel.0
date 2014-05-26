@@ -1,59 +1,80 @@
 From: Guang Yang <yguang11@outlook.com>
-Subject: Re: Questions of KeyValueStore (leveldb) backend
-Date: Mon, 26 May 2014 13:09:32 +0800
-Message-ID: <BLU436-SMTP759AB8A87875AE2FBBD0E8DF3B0@phx.gbl>
-References: <BLU436-SMTP4071B1A51539EAA2F9D7ECDF3B0@phx.gbl> <CACJqLyZYe6+CBrB49B5TnyahsT6387-bWDXCQ6JCYcJGP8iyJA@mail.gmail.com>
+Subject: Re: erasure code & reliability model
+Date: Mon, 26 May 2014 16:05:44 +0800
+Message-ID: <BLU436-SMTP859D5E316FE37AC71199C6DF3B0@phx.gbl>
+References: <5369CEA8.1000209@dachary.org> <1399481022.50289.YahooMailNeo@web165001.mail.bf1.yahoo.com> <536A6B18.2080205@dachary.org>
 Mime-Version: 1.0 (Mac OS X Mail 7.3 \(1878.2\))
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=iso-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from blu0-omc4-s34.blu0.hotmail.com ([65.55.111.173]:6821 "EHLO
-	blu0-omc4-s34.blu0.hotmail.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751710AbaEZFJk convert rfc822-to-8bit
+Received: from blu004-omc4s10.hotmail.com ([65.55.111.149]:57941 "EHLO
+	BLU004-OMC4S10.hotmail.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751552AbaEZIFw convert rfc822-to-8bit
 	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 26 May 2014 01:09:40 -0400
-In-Reply-To: <CACJqLyZYe6+CBrB49B5TnyahsT6387-bWDXCQ6JCYcJGP8iyJA@mail.gmail.com>
+	Mon, 26 May 2014 04:05:52 -0400
+In-Reply-To: <536A6B18.2080205@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomaiwang@gmail.com>
-Cc: Ceph-devel <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Koleos Fuskus <koleosfuscus@yahoo.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Thanks!
-On May 26, 2014, at 12:55 PM, Haomai Wang <haomaiwang@gmail.com> wrote:
+Hello Loic and Koleos,
+Do we have any wiki page documenting the progress and report of this ef=
+fort? We are very interested in such as well.
 
-> On Mon, May 26, 2014 at 9:46 AM, Guang Yang <yguang11@outlook.com> wr=
-ote:
->> Hello Haomai,
->> We are evaluating the key-value store backend which comes along with=
- Firefly release (thanks for implementing it in Ceph), it is very promi=
-sing for a couple of our use cases, after going through the related cod=
-e change, I have a couple of questions which needs your help:
->>  1. One observation is that, for object larger than 1KB, it will be =
-striped to multiple chunks (k-v in the leveldb table), with one strip a=
-s 1KB size. Is there any particular reason we choose 1KB as the strip s=
-ize (and I didn=92t find a configuration to tune this value)?
+Thanks,
+Guang
+
+On May 8, 2014, at 1:19 AM, Loic Dachary <loic@dachary.org> wrote:
+
 >=20
-> 1KB is not a serious value, this value can be configured in the near =
-future.
+> Hi,
+>=20
+> On 07/05/2014 18:43, Koleos Fuskus wrote:> Hi Loic,
+>>=20
+>> What do you mean by action plan? if is the schedule, it is published=
+ on my proposal in melange site. Indeed, the details of my proposal are=
+ private, if is that what you mean, I can added on the wiki. If you wan=
+t this part to be public no problem.=20
+>=20
+> Yes, that's what I meant :-) You could collect snippets from the prop=
+osal posted on melange and present them on a subpage https://wiki.ceph.=
+com/Development and we can use this as the "home page" of your work ?=20
+>=20
+>> Actually I am using some of my free time on reading ceph documentati=
+on (web and papers). Do you have any specific document to recommend me?=
+ Maybe we can discuss again about the durability model on Friday/Monday=
+=2E  I need some more understanding about the ceph architecture.
+>=20
+> I'm connected on irc.oftc.net#ceph-devel today and tomorrow if you'd =
+like to chat during this "community bonding" phase (I don't remember ho=
+w google calls this for GSoC participants ;-)
+>=20
+> Cheers
 >=20
 >>=20
->>  2. This is properly a leveldb question, do we expect performance de=
-gradation as the leveldb instance keeps increasing (e.g. several TB)?
->=20
-> Ceph OSD is expected to own a physical disk, normally is several
-> TB(1-4TB). LevelDB can take it easy. Especially we use it to store
-> large value(compared to normal application usage).
->=20
+>> Cheers,
+>> Ver=F3nica
+>> On Wednesday, May 7, 2014 8:12 AM, Loic Dachary <loic@dachary.org> w=
+rote:
+>> Hi Veronica,
 >>=20
->> Thanks,
->> Guang
->=20
->=20
+>> I was really happy to hear you're going to work on the erasure code =
+reliability model. Unless I'm mistaken your action plan was not publish=
+ed. Would you mind adding it to the wiki so I can comment on it ? Someo=
+ne else might be interested to contribute too. I've had a discussion ye=
+sterday about durability models (internally) and it is not well underst=
+ood. Your insight would be precious.
+>>=20
+>> Cheers
+>>=20
+>> --=20
+>> Lo=EFc Dachary, Artisan Logiciel Libre
+>>=20
+>>=20
 >=20
 > --=20
-> Best Regards,
->=20
-> Wheat
+> Lo=EFc Dachary, Artisan Logiciel Libre
 >=20
 
 --
