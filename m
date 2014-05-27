@@ -1,114 +1,163 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: durability model
-Date: Tue, 27 May 2014 16:24:16 +0200
-Message-ID: <5384A010.4080300@dachary.org>
-References: <1401131148.7008.YahooMailNeo@web165003.mail.bf1.yahoo.com> <CAHxYaFN6R3F6Tn0Vnh9N+pAXhOT8F7+gYLTzTgonn==GJUpX_w@mail.gmail.com> <1401197435.39621.YahooMailNeo@web165002.mail.bf1.yahoo.com>
+From: Milosz Tanski <milosz@adfin.com>
+Subject: Re: [Share]Performance tunning on Ceph FileStore with SSD backend
+Date: Tue, 27 May 2014 12:32:37 -0400
+Message-ID: <CANP1eJFV-4+moCm05Hf97yrA5TyDfdsrNhPP4=vH_01-AC-RdA@mail.gmail.com>
+References: <CACJqLyb+D5n74OyjP4sRG2=G083GQ3BzEUt4i8iAdw6nEBfRJg@mail.gmail.com>
+	<5383A410.6010002@profihost.ag>
+	<CACJqLyZRY_Jd+6ED91UD1ibdaekC3cCj8ddtRDVHPqw2PTBrcA@mail.gmail.com>
+	<53842B2C.10807@profihost.ag>
+	<CACJqLyZ8E5xPfb97NNEF0mkZ+Kh-saThMWawkwHJoXe+mrDYHA@mail.gmail.com>
+	<5384349A.7070608@profihost.ag>
+	<CACJqLybezUtvB-W5b5PL3ujp-5jA_9Evhbh9efmrv97g3+e04w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="snRcx02WKc7mSS1PCf940Ol6RpGuEK3AQ"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:50173 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751913AbaE0OYp (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 27 May 2014 10:24:45 -0400
-In-Reply-To: <1401197435.39621.YahooMailNeo@web165002.mail.bf1.yahoo.com>
+Received: from mail-la0-f41.google.com ([209.85.215.41]:39463 "EHLO
+	mail-la0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751916AbaE0Qcj (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 27 May 2014 12:32:39 -0400
+Received: by mail-la0-f41.google.com with SMTP id e16so6647414lan.14
+        for <ceph-devel@vger.kernel.org>; Tue, 27 May 2014 09:32:37 -0700 (PDT)
+In-Reply-To: <CACJqLybezUtvB-W5b5PL3ujp-5jA_9Evhbh9efmrv97g3+e04w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Koleos Fuskus <koleosfuscus@yahoo.com>
-Cc: Kyle Bader <kyle@inktank.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Haomai Wang <haomaiwang@gmail.com>
+Cc: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---snRcx02WKc7mSS1PCf940Ol6RpGuEK3AQ
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+If the locking on something the fdcache is scabbily bottleneck. Why
+not test using a spinlock instead of a mutex. It may (or may not) be
+an easy and cheap win esp. if the amount of work inside of the spin
+lock (operating on the map and LRU) are pretty cheap operations.
 
+Another fine option if this is a issue that comes up with multiple
+data structures in Ceph is to look into the CDS project. They provide
+a number of lock free and wait free data structures implemented in C++
+that also happen to be portable to most operating systems (with
+fallback and specials implementations for each).
 
+Obviously non trivial to replace the current data structures with
+different ones, but it's also easier then rolling your own. We've
+started using CDS recently for other projects and in a C++ code base,
+it's easier to use then liburcu and more portable (with windows
+support).
 
-On 27/05/2014 15:30, Koleos Fuskus wrote:> Hi Kyle,
-> Thanks for your answer!
-> I have other questions regarding the model. Sorry, I accumulated differ=
-ent doubts and the e-mail is a bit long.
->=20
-> 1. What will be erasure model unit? Is it a pool or a placement group? =
-I cannot see the best option here yet, probably because my inexperience w=
-ith Ceph.
+The library is located here:
+http://libcds.sourceforge.net/
 
-A pool.=20
+Best,
+- Milosz
 
-> 2. Crush_ruleset for erasured pools: Are these crush-ruleset impacting =
-on the reliability model? Should I define a default crush-ruleset?=20
-
-Unless I'm mistaken, the crush ruleset is only relevant to the durability=
- model to the extent that it defines the failure domain. If a ruleset req=
-uires that no two shards of a given placement group (i.e. no two shards o=
-f a given object since a placement group is a set of object that share th=
-e same OSD for a given shard) are on the same host, it will lead to a mod=
-el that is different from a ruleset that requires that no two shards are =
-in the same datacenter.
-
-> 3. Metadata: Jerasure creates metadata files. How are those files store=
-d in ceph (what kind of redundancy)? Should I care about them? I guess th=
-e jerasure metafiles are not important. If all objects stored in a pool s=
-hare the same erasure-code-k and erasure-code-m, then is easy to re-gener=
-ate the metadata file. However, if metadata file is lost and the pool con=
-tains erasured objects with different k and m, then repairing data will n=
-ot be possible. Should I ignore this problem? Could you confirm that each=
- pool has the same erasure parameters?
-
-Jerasure does not create a metadata file.
-
-> 4. Number of PG for an erasured-pool. The total PGs in the case of repl=
-ication is calculated with this formula: Total PGs=3D (OSDs * 100)/Replic=
-as.
+On Tue, May 27, 2014 at 6:05 AM, Haomai Wang <haomaiwang@gmail.com> wrote:
+> Still not, I will try to push to master branch
 >
-> Should I replace Replicas for the stretch factor (storage overhead) in =
-the case of erasure?
->=20
-> 5.Parameters - Default values:
-> erasure-code-k (default 4)
-> erasure-code-m (default 2)
->=20
-> OSD (default 200)
-> PG (default 100 x OSD)
-> stripes (default ????)
+> On Tue, May 27, 2014 at 2:45 PM, Stefan Priebe - Profihost AG
+> <s.priebe@profihost.ag> wrote:
+>> Am 27.05.2014 08:37, schrieb Haomai Wang:
+>>> I'm not full sure the correctness of changes although it seemed ok to
+>>> me. And I apply these changes to product env and no problems.
+>>
+>> Do you have a branch in your yuyuyu github account for this?
+>>
+>>> On Tue, May 27, 2014 at 2:05 PM, Stefan Priebe - Profihost AG
+>>> <s.priebe@profihost.ag> wrote:
+>>>> Am 27.05.2014 06:42, schrieb Haomai Wang:
+>>>>> On Tue, May 27, 2014 at 4:29 AM, Stefan Priebe <s.priebe@profihost.ag> wrote:
+>>>>>> Hi Haomai,
+>>>>>>
+>>>>>> regarding the FDCache problems you're seeing. Isn't this branch interesting
+>>>>>> for you? Have you ever tested it?
+>>>>>>
+>>>>>> http://lists.ceph.com/pipermail/ceph-commit-ceph.com/2014-January/007399.html
+>>>>>>
+>>>>>
+>>>>> Yes, I noticed it. But my main job is improving performance on 0.67.5
+>>>>> version. Before this branch, my improvement on this problem is avoid
+>>>>> lfn_find in omap* methods with FileStore
+>>>>> class.(https://www.mail-archive.com/ceph-devel@vger.kernel.org/msg18505.html)
+>>>>
+>>>> Avoids mean just remove them? Are they not needed? Do you have a branch
+>>>> for this?
+>>>>
+>>>>>> Greets,
+>>>>>> Stefan
+>>>>>>
+>>>>>> Am 09.04.2014 12:05, schrieb Haomai Wang:
+>>>>>>
+>>>>>>> Hi all,
+>>>>>>>
+>>>>>>> I would like to share some ideas about how to improve performance on
+>>>>>>> ceph with SSD. Not much preciseness.
+>>>>>>>
+>>>>>>> Our ssd is 500GB and each OSD own a SSD(journal is on the same SSD).
+>>>>>>> ceph version is 0.67.5(Dumping)
+>>>>>>>
+>>>>>>> At first, we find three bottleneck on filestore:
+>>>>>>> 1. fdcache_lock(changed in Firely release)
+>>>>>>> 2. lfn_find in omap_* methods
+>>>>>>> 3. DBObjectMap header
+>>>>>>>
+>>>>>>> According to my understanding and the docs in
+>>>>>>>
+>>>>>>> ObjectStore.h(https://github.com/ceph/ceph/blob/master/src/os/ObjectStore.h),
+>>>>>>> I simply remove lfn_find in omap_* and fdcache_lock. I'm not fully
+>>>>>>> sure the correctness of this change, but it works well still now.
+>>>>>>>
+>>>>>>> DBObjectMap header patch is on the pull request queue and may be
+>>>>>>> merged in the next feature merge window.
+>>>>>>>
+>>>>>>> With things above done, we get much performance improvement in disk
+>>>>>>> util and benchmark results(3x-4x).
+>>>>>>>
+>>>>>>> Next, we find fdcache size become the main bottleneck. For example, if
+>>>>>>> hot data range is 100GB, we need 25000(100GB/4MB) fd to cache. If hot
+>>>>>>> data range is 1TB, we need 250000(1000GB/4MB) fd to cache. With
+>>>>>>> increase "filestore_fd_cache_size", the cost of lookup(FDCache) and
+>>>>>>> cache miss is expensive and can't be afford. The implementation of
+>>>>>>> FDCache isn't O(1). So we only can get high performance on fdcache hit
+>>>>>>> range(maybe 100GB with 10240 fdcache size) and more data exceed the
+>>>>>>> size of fdcaceh will be disaster. If you want to cache more fd(102400
+>>>>>>> fdcache size), the implementation of FDCache will bring on extra CPU
+>>>>>>> cost(can't be ignore) for each op.
+>>>>>>>
+>>>>>>> Because of the capacity of SSD(several hundreds GB), we try to
+>>>>>>> increase the size of rbd object(16MB) so less fd cache is needed. As
+>>>>>>> for FDCache implementation, we simply discard SimpleLRU but introduce
+>>>>>>> RandomCache. Now we can set much larger fdcache size(near cache all
+>>>>>>> fd) with little overload.
+>>>>>>>
+>>>>>>> With these, we achieve 3x-4x performance improvements on filestore with
+>>>>>>> SSD.
+>>>>>>>
+>>>>>>> Maybe it exists something I missed or something wrong, hope can
+>>>>>>> correct me. I hope it can help to improve FileStore on SSD and push
+>>>>>>> into master branch.
+>>>>>>>
+>>>>>>
+>>>>>
+>>>>>
+>>>>>
+>>>
+>>>
+>>>
+>
+>
+>
+> --
+> Best Regards,
+>
+> Wheat
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
 
-I proposed an update to the documentation to clarify this : https://githu=
-b.com/ceph/ceph/pull/1856 . Does it look sensible to you ?
 
-Cheers
+-- 
+Milosz Tanski
+CTO
+10 East 53rd Street, 37th floor
+New York, NY 10022
 
-> 6. Units
-> It is hardcoded on the reliable tool:
-> KiB =3D 1000
-> MiB =3D KiB * 1000
-> GiB =3D MiB * 1000
-> TiB =3D GiB * 1000
-> PiB =3D TiB * 1000
->=20
-> Why KiB is 1000 when should be 1024?
-
-> Best,=20
-> Koleosfuscus
->=20
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-
-
---snRcx02WKc7mSS1PCf940Ol6RpGuEK3AQ
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlOEoBcACgkQ8dLMyEl6F22T1gCfcdsYWoMjOYb5JmYS3YMnCzom
-u58AnRwM5G5VFXJg/Kzl2E9+mocFZhOh
-=69od
------END PGP SIGNATURE-----
-
---snRcx02WKc7mSS1PCf940Ol6RpGuEK3AQ--
+p: 646-253-9055
+e: milosz@adfin.com
