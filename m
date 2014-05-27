@@ -1,18 +1,18 @@
 From: Haomai Wang <haomaiwang@gmail.com>
 Subject: Re: [Share]Performance tunning on Ceph FileStore with SSD backend
-Date: Tue, 27 May 2014 12:42:58 +0800
-Message-ID: <CACJqLyZRY_Jd+6ED91UD1ibdaekC3cCj8ddtRDVHPqw2PTBrcA@mail.gmail.com>
+Date: Tue, 27 May 2014 12:46:23 +0800
+Message-ID: <CACJqLybjJ5c2aWf3_5Wt6AhS-jrcbDDWBCDDBCrDK=GL_oEg-w@mail.gmail.com>
 References: <CACJqLyb+D5n74OyjP4sRG2=G083GQ3BzEUt4i8iAdw6nEBfRJg@mail.gmail.com>
 	<5383A410.6010002@profihost.ag>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f181.google.com ([209.85.212.181]:47919 "EHLO
-	mail-wi0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752502AbaE0EnA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 27 May 2014 00:43:00 -0400
-Received: by mail-wi0-f181.google.com with SMTP id n15so922749wiw.8
-        for <ceph-devel@vger.kernel.org>; Mon, 26 May 2014 21:42:58 -0700 (PDT)
+Received: from mail-wg0-f49.google.com ([74.125.82.49]:43325 "EHLO
+	mail-wg0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751142AbaE0EqZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 27 May 2014 00:46:25 -0400
+Received: by mail-wg0-f49.google.com with SMTP id m15so8696093wgh.8
+        for <ceph-devel@vger.kernel.org>; Mon, 26 May 2014 21:46:23 -0700 (PDT)
 In-Reply-To: <5383A410.6010002@profihost.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -28,10 +28,7 @@ On Tue, May 27, 2014 at 4:29 AM, Stefan Priebe <s.priebe@profihost.ag> wrote:
 > http://lists.ceph.com/pipermail/ceph-commit-ceph.com/2014-January/007399.html
 >
 
-Yes, I noticed it. But my main job is improving performance on 0.67.5
-version. Before this branch, my improvement on this problem is avoid
-lfn_find in omap* methods with FileStore
-class.(https://www.mail-archive.com/ceph-devel@vger.kernel.org/msg18505.html)
+I don't test performance improvements with this branch.
 
 > Greets,
 > Stefan
