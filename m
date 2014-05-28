@@ -1,87 +1,133 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: durability model
-Date: Wed, 28 May 2014 16:05:02 +0200
-Message-ID: <5385ED0E.9070204@dachary.org>
-References: <1401131148.7008.YahooMailNeo@web165003.mail.bf1.yahoo.com> <CAHxYaFN6R3F6Tn0Vnh9N+pAXhOT8F7+gYLTzTgonn==GJUpX_w@mail.gmail.com> <1401197435.39621.YahooMailNeo@web165002.mail.bf1.yahoo.com> <5384A010.4080300@dachary.org> <1401284130.75330.YahooMailNeo@web165006.mail.bf1.yahoo.com>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="EPLVnUAv08X1D4CFroosDI0sWDTaa00D9"
+From: mark.doffman@codethink.co.uk
+Subject: [PATCH v3 2/2] Documentation: Document the cephroot functionality
+Date: Wed, 28 May 2014 14:53:38 -0500
+Message-ID: <90848eb35c97154c216f9cfbdb1fcba5296dd387.1401306206.git.mark.doffman@codethink.co.uk>
+References: <cover.1401306206.git.mark.doffman@codethink.co.uk>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:51768 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751466AbaE1OFI (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 28 May 2014 10:05:08 -0400
-In-Reply-To: <1401284130.75330.YahooMailNeo@web165006.mail.bf1.yahoo.com>
+Received: from ducie-dc1.codethink.co.uk ([185.25.241.215]:33376 "EHLO
+	ducie-dc1.codethink.co.uk" rhost-flags-OK-FAIL-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1751694AbaE1Tx7 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 28 May 2014 15:53:59 -0400
+In-Reply-To: <cover.1401306206.git.mark.doffman@codethink.co.uk>
+In-Reply-To: <cover.1401306206.git.mark.doffman@codethink.co.uk>
+References: <cover.1389806186.git.mark.doffman@codethink.co.uk> <cover.1401306206.git.mark.doffman@codethink.co.uk>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Koleos Fuskus <koleosfuscus@yahoo.com>
-Cc: Kyle Bader <kyle@inktank.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org, sage@inktank.com
+Cc: Rob Taylor <rob.taylor@codethink.co.uk>, Mark Doffman <mark.doffman@codethink.co.uk>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---EPLVnUAv08X1D4CFroosDI0sWDTaa00D9
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+From: Rob Taylor <rob.taylor@codethink.co.uk>
 
+Document using the cephfs as a root device, its purpose,
+functionality and use.
 
+Signed-off-by: Mark Doffman <mark.doffman@codethink.co.uk>
+Signed-off-by: Rob Taylor <rob.taylor@codethink.co.uk>
+Reviewed-by: Ian Molton <ian.molton@codethink.co.uk>
+---
+ Documentation/filesystems/{ => ceph}/ceph.txt |  0
+ Documentation/filesystems/ceph/cephroot.txt   | 86 +++++++++++++++++++++++++++
+ 2 files changed, 86 insertions(+)
+ rename Documentation/filesystems/{ => ceph}/ceph.txt (100%)
+ create mode 100644 Documentation/filesystems/ceph/cephroot.txt
 
-On 28/05/2014 15:35, Koleos Fuskus wrote:
->=20
->=20
->> 1. What will be erasure model unit? Is it a pool or a placement group?=
- I cannot see the best option here yet, probably because my inexperience =
-with Ceph.
->=20
-> A pool.=20
-> OK. this is what I thought but some things are not clear enough. I am d=
-eploying Ceph to toying a bit more.
->=20
->=20
->> 3. Metadata: Jerasure creates metadata files. How are those files stor=
-ed in ceph (what kind of=20
-> Jerasure does not create a metadata file.
->=20
-> It does on my machine! at least with jerasure 1.2 on mac os :)
+diff --git a/Documentation/filesystems/ceph.txt b/Documentation/filesystems/ceph/ceph.txt
+similarity index 100%
+rename from Documentation/filesystems/ceph.txt
+rename to Documentation/filesystems/ceph/ceph.txt
+diff --git a/Documentation/filesystems/ceph/cephroot.txt b/Documentation/filesystems/ceph/cephroot.txt
+new file mode 100644
+index 0000000..0bcddf7
+--- /dev/null
++++ b/Documentation/filesystems/ceph/cephroot.txt
+@@ -0,0 +1,86 @@
++Mounting the root filesystem via Ceph (cephroot)
++===============================================
++
++Written 2013 by Rob Taylor <rob.taylor@codethink.co.uk>
++
++derived from nfsroot.txt:
++
++Written 1996 by Gero Kuhlmann <gero@gkminix.han.de>
++Updated 1997 by Martin Mares <mj@atrey.karlin.mff.cuni.cz>
++Updated 2006 by Nico Schottelius <nico-kernel-nfsroot@schottelius.org>
++Updated 2006 by Horms <horms@verge.net.au>
++
++
++
++In order to use a diskless system, such as an X-terminal or printer server
++for example, it is necessary for the root filesystem to be present on a
++non-disk device. This may be an initramfs (see Documentation/filesystems/
++ramfs-rootfs-initramfs.txt), a ramdisk (see Documentation/initrd.txt), a
++filesystem mounted via NFS or a filesystem mounted via Ceph. The following
++text describes on how to use Ceph for the root filesystem.
++
++For the rest of this text 'client' means the diskless system, and 'server'
++means the Ceph server.
++
++
++1.) Enabling cephroot capabilities
++    -----------------------------
++
++In order to use cephroot, CEPH_FS needs to be selected as
++built-in during configuration. Once this has been selected, the cephroot
++option will become available, which should also be selected.
++
++In the networking options, kernel level autoconfiguration can be selected,
++along with the types of autoconfiguration to support. Selecting all of
++DHCP, BOOTP and RARP is safe.
++
++
++2.) Kernel command line
++    -------------------
++
++When the kernel has been loaded by a boot loader (see below) it needs to be
++told what root fs device to use, and in the case of cephroot, where to find
++both the server and the name of the directory on the server to mount as root.
++This can be established using the following kernel command line parameters:
++
++root=/dev/ceph
++
++This is necessary to enable the pseudo-Ceph-device. Note that it's not a
++real device but just a synonym to tell the kernel to use Ceph instead of
++a real device.
++
++If cephroot is not specified, it is expected that a valid mount will be
++found via DHCP option 17, Root Path [1]
++
++cephroot=<monaddrs>:/[<subdir>],<ceph-opts>
++
++  <monaddrs>    Monitor addresses separated by commas. Each takes the form
++		host[:port]. If the port is not specified, the Ceph default
++		of 6789 is assumed.
++
++  <subdir>	A subdirectory subdir may be specified if a subset of the file
++		system is to be mounted.
++
++  <ceph-opts>	Standard Ceph options. All options are separated by commas.
++		See Documentation/filesystems/ceph/ceph.txt for options and
++		their defaults.
++
++4.) References
++    ----------
++
++[1] http://tools.ietf.org/html/rfc2132
++
++5.) Credits
++    -------
++
++  cephroot was derived from nfsroot by Rob Taylor <rob.taylor@codethink.co.uk>
++  and Mark Doffman <mark.doffman@codethink.co.uk>
++
++  The nfsroot code in the kernel and the RARP support have been written
++  by Gero Kuhlmann <gero@gkminix.han.de>.
++
++  The rest of the IP layer autoconfiguration code has been written
++  by Martin Mares <mj@atrey.karlin.mff.cuni.cz>.
++
++  In order to write the initial version of nfsroot I would like to thank
++  Jens-Uwe Mager <jum@anubis.han.de> for his help.
+-- 
+1.8.4
 
-If you mean the files that are created by the command line examples provi=
-ded with jerasure (1.2 or 2), they are not required and only meant for te=
-st purposes.
-
-Cheers
-
->=20
->=20
->=20
->=20
-> I proposed an update to the documentation to clarify this : https://git=
-hub.com/ceph/ceph/pull/1856 . Does it look sensible to you ?
->=20
->=20
->=20
-> THanks!
->=20
-> Cheers,
->=20
->=20
-> Koleosfuscus
->=20
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-
-
---EPLVnUAv08X1D4CFroosDI0sWDTaa00D9
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlOF7Q4ACgkQ8dLMyEl6F20ZtgCguJlDY6XyEbkTNmoYS3GoJuxG
-1ZQAnR/ANHd/XOk62evGyDA6B/9L4ANr
-=oVlc
------END PGP SIGNATURE-----
-
---EPLVnUAv08X1D4CFroosDI0sWDTaa00D9--
