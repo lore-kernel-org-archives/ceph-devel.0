@@ -1,51 +1,58 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: A plea for more tooling usage
-Date: Wed, 28 May 2014 14:21:49 -0700
-Message-ID: <5386536D.7020503@inktank.com>
-References: <20140506134826.GA17004@trvx.org> <alpine.DEB.2.00.1405060816160.28165@cobra.newdream.net> <20140515233431.GS13333@thinkpad.thebehrens.net> <20140527221935.GA15288@thinkpad.thebehrens.net>
+From: Alex Elsayed <eternaleye@gmail.com>
+Subject: Re: [PATCH v3 0/2] Add ceph root filesystem
+Date: Wed, 28 May 2014 16:46:09 -0700
+Message-ID: <lm5sg3$tn3$1@ger.gmane.org>
+References: <cover.1389806186.git.mark.doffman@codethink.co.uk> <cover.1401306206.git.mark.doffman@codethink.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7Bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f182.google.com ([209.85.223.182]:53489 "EHLO
-	mail-ie0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751695AbaE1VVu (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 28 May 2014 17:21:50 -0400
-Received: by mail-ie0-f182.google.com with SMTP id x19so3551235ier.41
-        for <ceph-devel@vger.kernel.org>; Wed, 28 May 2014 14:21:50 -0700 (PDT)
-In-Reply-To: <20140527221935.GA15288@thinkpad.thebehrens.net>
+Received: from plane.gmane.org ([80.91.229.3]:60559 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750932AbaE1Xqb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 28 May 2014 19:46:31 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1WpnY9-0004ma-VB
+	for ceph-devel@vger.kernel.org; Thu, 29 May 2014 01:46:25 +0200
+Received: from 50.245.141.77 ([50.245.141.77])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Thu, 29 May 2014 01:46:25 +0200
+Received: from eternaleye by 50.245.141.77 with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Thu, 29 May 2014 01:46:25 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Thorsten Behrens <tbehrens@suse.com>, Danny Al-Gaaf <danny.al-gaaf@bisect.de>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On 05/27/2014 03:19 PM, Thorsten Behrens wrote:
-> I wrote:
->> Sage Weil wrote:
->>> If anybody is interested in helping with that effort, pull requests
->>> are very welcome!  :)
->>>
-> [snip]
->
->> As hinted at in the patch, something like boost::program_options would
->> be nice, but that's a chunk of work & I'd rather hear feedback first
->> this way or the other. For the boost option, not sure if verbose error
->> reporting (the if (oss) parts) would translate over easily, I presume
->> that is deemed important?
->>
-> Hi guys,
->
-> any further opinion on that? If no one feels strongly, I think I'll
-> just go ahead & hack something up with program_options, and see if
-> that looks more pleasant. :)
+mark.doffman@codethink.co.uk wrote:
 
-It'd be interesting if you could use boost::program_options just
-for the binary-specific flags.
+> From: Mark Doffman <mark.doffman@codethink.co.uk>
+> 
+> Hi All,
+> 
+> The following is a third version of a patch series that adds the ability
+> to use a ceph distributed file system as the root device.
+<snip>
 
-Trying to use it for all options, including those from
-common/config_opts.h, is a lot more effort. There was some work towards
-that a while ago, though the branch is no longer there:
+Would you mind expanding on why you want to do this in the kernel, instead 
+of using an initramfs? For example, dracut supports the following syntax, 
+and sets it up using the same tools as mounting NFS in a running system 
+rather than the kernel's nfsroot support:
 
-http://comments.gmane.org/gmane.comp.file-systems.ceph.devel/11139
+root=nfs:[<server-ip>:]<root-dir>[:<nfs-options>]
+root=nfs4:[<server-ip>:]<root-dir>[:<nfs-options>]
+root={dhcp|dhcp6}
 
-Josh
+root=dhcp alone directs initrd to look at the DHCP root-path where NFS 
+options can be specified.
+
+It also supports CIFS, as a further illustration:
+
+root=cifs://[<username>[:<password>]@]<server-ip>:<root-dir>
+
+Extending this to Ceph seems much simpler than implementing such a thing in 
+the kernel, especially given dracut's modular nature, and it's easy enough 
+to compile an initramfs into the kernel.
+
