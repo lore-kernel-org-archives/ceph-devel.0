@@ -1,63 +1,51 @@
-From: mark.doffman@codethink.co.uk
-Subject: [PATCH v3 0/2] Add ceph root filesystem
-Date: Wed, 28 May 2014 14:53:36 -0500
-Message-ID: <cover.1401306206.git.mark.doffman@codethink.co.uk>
-References: <cover.1389806186.git.mark.doffman@codethink.co.uk>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: A plea for more tooling usage
+Date: Wed, 28 May 2014 14:21:49 -0700
+Message-ID: <5386536D.7020503@inktank.com>
+References: <20140506134826.GA17004@trvx.org> <alpine.DEB.2.00.1405060816160.28165@cobra.newdream.net> <20140515233431.GS13333@thinkpad.thebehrens.net> <20140527221935.GA15288@thinkpad.thebehrens.net>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from ducie-dc1.codethink.co.uk ([185.25.241.215]:33365 "EHLO
-	ducie-dc1.codethink.co.uk" rhost-flags-OK-FAIL-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1752789AbaE1TyA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 28 May 2014 15:54:00 -0400
-In-Reply-To: <cover.1389806186.git.mark.doffman@codethink.co.uk>
+Received: from mail-ie0-f182.google.com ([209.85.223.182]:53489 "EHLO
+	mail-ie0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751695AbaE1VVu (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 28 May 2014 17:21:50 -0400
+Received: by mail-ie0-f182.google.com with SMTP id x19so3551235ier.41
+        for <ceph-devel@vger.kernel.org>; Wed, 28 May 2014 14:21:50 -0700 (PDT)
+In-Reply-To: <20140527221935.GA15288@thinkpad.thebehrens.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org, sage@inktank.com
-Cc: Mark Doffman <mark.doffman@codethink.co.uk>
+To: Thorsten Behrens <tbehrens@suse.com>, Danny Al-Gaaf <danny.al-gaaf@bisect.de>
+Cc: ceph-devel@vger.kernel.org
 
-From: Mark Doffman <mark.doffman@codethink.co.uk>
+On 05/27/2014 03:19 PM, Thorsten Behrens wrote:
+> I wrote:
+>> Sage Weil wrote:
+>>> If anybody is interested in helping with that effort, pull requests
+>>> are very welcome!  :)
+>>>
+> [snip]
+>
+>> As hinted at in the patch, something like boost::program_options would
+>> be nice, but that's a chunk of work & I'd rather hear feedback first
+>> this way or the other. For the boost option, not sure if verbose error
+>> reporting (the if (oss) parts) would translate over easily, I presume
+>> that is deemed important?
+>>
+> Hi guys,
+>
+> any further opinion on that? If no one feels strongly, I think I'll
+> just go ahead & hack something up with program_options, and see if
+> that looks more pleasant. :)
 
-Hi All,
+It'd be interesting if you could use boost::program_options just
+for the binary-specific flags.
 
-The following is a third version of a patch series that adds the ability to use
-a ceph distributed file system as the root device.
+Trying to use it for all options, including those from
+common/config_opts.h, is a lot more effort. There was some work towards
+that a while ago, though the branch is no longer there:
 
-Changes from v2
+http://comments.gmane.org/gmane.comp.file-systems.ceph.devel/11139
 
-* Typos and punctiation errors in documentation corrected.
-
-Applies to v3.15-rc7-60-g2a0823f.
-
-As mentioned since v2 the patch now accepts on the command line ipv6 addresses
-and multiple monitor addresses.
-
-Is this something Ceph guys are interested in?
-
-Thanks
-
-Mark
-
-Mark Doffman (1):
-  init: Add a new root device option, the Ceph file system
-
-Rob Taylor (1):
-  Documentation: Document the cephroot functionality
-
- Documentation/filesystems/{ => ceph}/ceph.txt |   0
- Documentation/filesystems/ceph/cephroot.txt   |  86 +++++++++++++
- fs/ceph/Kconfig                               |  10 ++
- fs/ceph/Makefile                              |   1 +
- fs/ceph/root.c                                | 176 ++++++++++++++++++++++++++
- include/linux/ceph/ceph_root.h                |  10 ++
- include/linux/root_dev.h                      |   1 +
- init/do_mounts.c                              |  32 ++++-
- net/ipv4/ipconfig.c                           |  10 +-
- 9 files changed, 323 insertions(+), 3 deletions(-)
- rename Documentation/filesystems/{ => ceph}/ceph.txt (100%)
- create mode 100644 Documentation/filesystems/ceph/cephroot.txt
- create mode 100644 fs/ceph/root.c
- create mode 100644 include/linux/ceph/ceph_root.h
-
--- 
-1.8.4
-
+Josh
