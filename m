@@ -1,50 +1,44 @@
-From: Patrick McGarry <patrick@inktank.com>
-Subject: Ceph Wiki IA Overhaul (blueprint)
-Date: Thu, 29 May 2014 15:28:17 -0400
-Message-ID: <CAP8Oy=Ja7A7q2nWqsHmXFmZkD9aPcQ7F32hp_YzwDVskeMTJWA@mail.gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: messenger changes
+Date: Thu, 29 May 2014 13:46:31 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1405291345580.20692@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ve0-f173.google.com ([209.85.128.173]:45825 "EHLO
-	mail-ve0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753815AbaE2T2S (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 29 May 2014 15:28:18 -0400
-Received: by mail-ve0-f173.google.com with SMTP id pa12so955004veb.18
-        for <ceph-devel@vger.kernel.org>; Thu, 29 May 2014 12:28:17 -0700 (PDT)
+Received: from cobra.newdream.net ([66.33.216.30]:39732 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932795AbaE2Uqb (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 29 May 2014 16:46:31 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>, Ceph User Committee <ceph-community@lists.ceph.com>
+To: matt@linuxbox.com
+Cc: greg@inktank.com, ceph-devel@vger.kernel.org
 
-Greetings!
+Hey Matt,
 
-I know that many of you have discussed various enhancements/changes to
-the wiki with me over the past months, and "now is the time on
-sprockets when we dance!" (it's time to work on the wiki :P).  I have
-created a blueprint that encompasses many of the requirements that I
-have been collecting, but I would love feedback and any help that I
-can get:
+Can you join us for the core standup tomorrow, or shortly after, to sycn 
+up on the messenger changes needed for xio?
 
-https://wiki.ceph.com/Planning/Blueprints/Submissions/Wiki_IA_Overhaul
+I've taken most of the generic messenger refactoring and changes that I 
+see that aren't yet xio-specific and pulled them into wip-msgr:
 
-I'm open to any suggestions with respect to organization, content, or
-governance as it relates to the wiki.  Once we have a working model
-and can start populating data there will be incentives for those who
-contribute (both short term "blitz/hackathon" style and longer term
-compensation for contribution, but more on that when we get there).
+	https://github.com/ceph/ceph/pull/1883
 
-I feel that the wiki has been seriously lacking in attention and love
-simply because we didn't have the hands to dedicate to making it
-better.  However, thanks to en expanded resource pool we really want
-to make sure that our community documentation and resources continue
-to grow to suit our needs.
+The main things I see now that are blocking the rest of the xio stuff:
 
-I welcome any feedback and/or participation that you guys can give.  Thanks!
+ - xio specific code in the buffer class
 
+ - the Message completion hook and other stuff needs to be separated out 
+into a separate patch that goes ahead of the other pieces
 
+ - I don't think creating multiple Messenger instances for all of the OSD, 
+mon, etc is going to work well.  We need to figure out a generic way to 
+instantiate them without adding support that is specific to every 
+subsystem/client/daemon/whatever.  Probably this means passing an address 
+type to the Messenger::create() method, or something similar. For now, I 
+think we can focus on a single transport for each part of the system 
+(e.g., osd<->osd) and not worry about multiprotocol support.  That will 
+get us to something usable much sooner.
 
-Best Regards,
+sage
 
-Patrick McGarry
-Director, Community || Inktank
-http://ceph.com  ||  http://inktank.com
-@scuttlemonkey || @ceph || @inktank
