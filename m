@@ -1,84 +1,51 @@
-From: "Matt W. Benjamin" <matt@linuxbox.com>
-Subject: Re: messenger changes
-Date: Thu, 29 May 2014 18:04:50 -0400 (EDT)
-Message-ID: <1079621891.156.1401401090133.JavaMail.root@thunderbeast.private.linuxbox.com>
-References: <alpine.DEB.2.00.1405291345580.20692@cobra.newdream.net>
+From: Gregory Farnum <greg@inktank.com>
+Subject: xattr spillout appears broken :(
+Date: Thu, 29 May 2014 16:15:24 -0700
+Message-ID: <CAPYLRzh7bno0Ppb7hayJrc-TQM24iO-+RgtHYWZmYYVAtBYjVg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from aa.linuxbox.com ([69.128.83.226]:2512 "EHLO aa.linuxbox.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932963AbaE2WEy (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 29 May 2014 18:04:54 -0400
-In-Reply-To: <alpine.DEB.2.00.1405291345580.20692@cobra.newdream.net>
+Received: from mail-qg0-f42.google.com ([209.85.192.42]:36686 "EHLO
+	mail-qg0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751538AbaE2XPZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 29 May 2014 19:15:25 -0400
+Received: by mail-qg0-f42.google.com with SMTP id q107so3220182qgd.29
+        for <ceph-devel@vger.kernel.org>; Thu, 29 May 2014 16:15:24 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: greg@inktank.com, ceph-devel@vger.kernel.org
+To: Haomai Wang <haomaiwang@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Sage,
+I got a bug report a little while ago that we were hitting leveldb on
+every xattr lookup with Firefly, and after looking into it I indeed
+discovered that we never set the XATTR_SPILL_OUT_NAME xattr when
+creating new files.
+I pushed a branch wip-xattr-spillout containing a fix for that, plus
+some more general FileStore cleanups Sam asked for, but (much to my
+surprise) it didn't pass testing. I tried backing off and bisecting
+down to the broken commit, and although the test failures aren't
+consistent, it appears that simply setting the spillout xattr is
+enough to sporadically break tests (patch "FileStore: set
+XATTR_NO_SPILL_OUT when creating new files.").
 
-Sure, I'll join the core standup.  I think you have the right ideas, I'll give
-it some more thought as well, before tomorrow's meeting.
+I've done some code inspection to see if I can find the issue and am
+drawing a blank. It's possible my setup patch is just wrong, but I
+think the issue must be elsewhere in the code. I wonder if you could
+take a look and try to figure it out?
 
-Thanks,
+My test logs (these are against two slightly different branches; so
+check the sha1s) are:
+Test Run: gregf-2014-05-22_15:27:32-rados-wip-xattr-spillout-basic-testing-basic-plana
+=================================================================
+info:   http://pulpito.ceph.com/gregf-2014-05-22_15:27:32-rados-wip-xattr-spillout-basic-testing-basic-plana/
+logs:   http://qa-proxy.ceph.com/teuthology/gregf-2014-05-22_15:27:32-rados-wip-xattr-spillout-basic-testing-basic-plana/
 
-Matt
+Test Run: gregf-2014-05-20_15:45:53-rados-wip-xattr-spillout-testing-basic-plana
+=================================================================
+info:   http://pulpito.ceph.com/gregf-2014-05-20_15:45:53-rados-wip-xattr-spillout-testing-basic-plana/
+logs:   http://qa-proxy.ceph.com/teuthology/gregf-2014-05-20_15:45:53-rados-wip-xattr-spillout-testing-basic-plana/
 
------ "Sage Weil" <sage@inktank.com> wrote:
-
-> Hey Matt,
-> 
-> Can you join us for the core standup tomorrow, or shortly after, to
-> sycn 
-> up on the messenger changes needed for xio?
-> 
-> I've taken most of the generic messenger refactoring and changes that
-> I 
-> see that aren't yet xio-specific and pulled them into wip-msgr:
-> 
-> 	https://github.com/ceph/ceph/pull/1883
-> 
-> The main things I see now that are blocking the rest of the xio
-> stuff:
-> 
->  - xio specific code in the buffer class
-> 
->  - the Message completion hook and other stuff needs to be separated
-> out 
-> into a separate patch that goes ahead of the other pieces
-> 
->  - I don't think creating multiple Messenger instances for all of the
-> OSD, 
-> mon, etc is going to work well.  We need to figure out a generic way
-> to 
-> instantiate them without adding support that is specific to every 
-> subsystem/client/daemon/whatever.  Probably this means passing an
-> address 
-> type to the Messenger::create() method, or something similar. For now,
-> I 
-> think we can focus on a single transport for each part of the system 
-> (e.g., osd<->osd) and not worry about multiprotocol support.  That
-> will 
-> get us to something usable much sooner.
-> 
-> sage
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
-> in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
--- 
-Matt Benjamin
-The Linux Box
-206 South Fifth Ave. Suite 150
-Ann Arbor, MI  48104
-
-http://linuxbox.com
-
-tel.  734-761-4689 
-fax.  734-769-8938 
-cel.  734-216-5309 
+If you don't think you'll have a chance, let me know and I'll dig into
+it more. Thanks!
+-Greg
+Software Engineer #42 @ http://inktank.com | http://ceph.com
