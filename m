@@ -1,58 +1,55 @@
-From: Alex Elsayed <eternaleye@gmail.com>
-Subject: Re: [PATCH v3 0/2] Add ceph root filesystem
-Date: Wed, 28 May 2014 16:46:09 -0700
-Message-ID: <lm5sg3$tn3$1@ger.gmane.org>
-References: <cover.1389806186.git.mark.doffman@codethink.co.uk> <cover.1401306206.git.mark.doffman@codethink.co.uk>
+From: "Matt W. Benjamin" <matt@linuxbox.com>
+Subject: some firefly -std=c++11 changes
+Date: Thu, 29 May 2014 11:30:29 -0400 (EDT)
+Message-ID: <1529397390.44.1401377429252.JavaMail.root@thunderbeast.private.linuxbox.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:60559 "EHLO plane.gmane.org"
+Received: from aa.linuxbox.com ([69.128.83.226]:2606 "EHLO aa.linuxbox.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750932AbaE1Xqb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 28 May 2014 19:46:31 -0400
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1WpnY9-0004ma-VB
-	for ceph-devel@vger.kernel.org; Thu, 29 May 2014 01:46:25 +0200
-Received: from 50.245.141.77 ([50.245.141.77])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Thu, 29 May 2014 01:46:25 +0200
-Received: from eternaleye by 50.245.141.77 with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Thu, 29 May 2014 01:46:25 +0200
+	id S1756179AbaE2Pac (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 29 May 2014 11:30:32 -0400
+Received: from thunderbeast.private.linuxbox.com (thunderbeast.private.linuxbox.com [10.1.1.55])
+	by aa.linuxbox.com (8.13.1/8.13.1/SuSE Linux 0.7) with ESMTP id s4TFUVrB014099
+	for <ceph-devel@vger.kernel.org>; Thu, 29 May 2014 11:30:31 -0400
+Received: from localhost (localhost.localdomain [127.0.0.1])
+	by thunderbeast.private.linuxbox.com (Postfix) with ESMTP id F243F3FC8499
+	for <ceph-devel@vger.kernel.org>; Thu, 29 May 2014 11:30:30 -0400 (EDT)
+Received: from thunderbeast.private.linuxbox.com ([127.0.0.1])
+	by localhost (thunderbeast.private.linuxbox.com [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id TgA3y+veOFRE for <ceph-devel@vger.kernel.org>;
+	Thu, 29 May 2014 11:30:29 -0400 (EDT)
+Received: from thunderbeast.private.linuxbox.com (thunderbeast.private.linuxbox.com [10.1.1.55])
+	by thunderbeast.private.linuxbox.com (Postfix) with ESMTP id 6A46B3FC8498
+	for <ceph-devel@vger.kernel.org>; Thu, 29 May 2014 11:30:29 -0400 (EDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-mark.doffman@codethink.co.uk wrote:
+Hi Ceph devs,
 
-> From: Mark Doffman <mark.doffman@codethink.co.uk>
-> 
-> Hi All,
-> 
-> The following is a third version of a patch series that adds the ability
-> to use a ceph distributed file system as the root device.
-<snip>
+I pushed a small set of changes against Firefly to permit building with
+-std=std++11 (actually I'm using -std=gnu++11 atm, due to a problem in a
+fio header).
 
-Would you mind expanding on why you want to do this in the kernel, instead 
-of using an initramfs? For example, dracut supports the following syntax, 
-and sets it up using the same tools as mounting NFS in a running system 
-rather than the kernel's nfsroot support:
+If folks are interested:
 
-root=nfs:[<server-ip>:]<root-dir>[:<nfs-options>]
-root=nfs4:[<server-ip>:]<root-dir>[:<nfs-options>]
-root={dhcp|dhcp6}
+To https://github.com/linuxbox2/linuxbox-ceph.git
+ * [new branch]      firefly-std11 -> firefly-std11
 
-root=dhcp alone directs initrd to look at the DHCP root-path where NFS 
-options can be specified.
+Thanks,
 
-It also supports CIFS, as a further illustration:
+Matt
 
-root=cifs://[<username>[:<password>]@]<server-ip>:<root-dir>
+-- 
+Matt Benjamin
+The Linux Box
+206 South Fifth Ave. Suite 150
+Ann Arbor, MI  48104
 
-Extending this to Ceph seems much simpler than implementing such a thing in 
-the kernel, especially given dracut's modular nature, and it's easy enough 
-to compile an initramfs into the kernel.
+http://linuxbox.com
 
+tel.  734-761-4689 
+fax.  734-769-8938 
+cel.  734-216-5309 
