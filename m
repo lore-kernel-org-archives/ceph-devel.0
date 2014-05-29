@@ -1,55 +1,38 @@
-From: "Matt W. Benjamin" <matt@linuxbox.com>
-Subject: some firefly -std=c++11 changes
-Date: Thu, 29 May 2014 11:30:29 -0400 (EDT)
-Message-ID: <1529397390.44.1401377429252.JavaMail.root@thunderbeast.private.linuxbox.com>
+From: Patrick McGarry <patrick@inktank.com>
+Subject: Ceph Day Boston, it's not too late!
+Date: Thu, 29 May 2014 14:39:37 -0400
+Message-ID: <CAP8Oy=+CWeFmTWUPcW9NpXVw9bXp3FfoeXEfyVNbw3Gf=LOuPw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from aa.linuxbox.com ([69.128.83.226]:2606 "EHLO aa.linuxbox.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756179AbaE2Pac (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 29 May 2014 11:30:32 -0400
-Received: from thunderbeast.private.linuxbox.com (thunderbeast.private.linuxbox.com [10.1.1.55])
-	by aa.linuxbox.com (8.13.1/8.13.1/SuSE Linux 0.7) with ESMTP id s4TFUVrB014099
-	for <ceph-devel@vger.kernel.org>; Thu, 29 May 2014 11:30:31 -0400
-Received: from localhost (localhost.localdomain [127.0.0.1])
-	by thunderbeast.private.linuxbox.com (Postfix) with ESMTP id F243F3FC8499
-	for <ceph-devel@vger.kernel.org>; Thu, 29 May 2014 11:30:30 -0400 (EDT)
-Received: from thunderbeast.private.linuxbox.com ([127.0.0.1])
-	by localhost (thunderbeast.private.linuxbox.com [127.0.0.1]) (amavisd-new, port 10024)
-	with ESMTP id TgA3y+veOFRE for <ceph-devel@vger.kernel.org>;
-	Thu, 29 May 2014 11:30:29 -0400 (EDT)
-Received: from thunderbeast.private.linuxbox.com (thunderbeast.private.linuxbox.com [10.1.1.55])
-	by thunderbeast.private.linuxbox.com (Postfix) with ESMTP id 6A46B3FC8498
-	for <ceph-devel@vger.kernel.org>; Thu, 29 May 2014 11:30:29 -0400 (EDT)
+Received: from mail-vc0-f172.google.com ([209.85.220.172]:64455 "EHLO
+	mail-vc0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932159AbaE2Sji (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 29 May 2014 14:39:38 -0400
+Received: by mail-vc0-f172.google.com with SMTP id lf12so697613vcb.3
+        for <ceph-devel@vger.kernel.org>; Thu, 29 May 2014 11:39:37 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>
 
-Hi Ceph devs,
+Hey cephers,
 
-I pushed a small set of changes against Firefly to permit building with
--std=std++11 (actually I'm using -std=gnu++11 atm, due to a problem in a
-fio header).
+If you haven't already signed up for Ceph Day Boston (10 June), it's
+not too late to do so.
 
-If folks are interested:
+http://www.inktank.com/cephdays/boston/
 
-To https://github.com/linuxbox2/linuxbox-ceph.git
- * [new branch]      firefly-std11 -> firefly-std11
+We had one speaker have to pull out at the last minute, but thankfully
+Jeff Darcy was willing to come tell us about his franken-filesystem
+built on top of librados.  There are tons of great talks scheduled,
+it's definitely an event not to miss (in my not-so-humble opinion).
 
-Thanks,
+Hope to see you all there!
 
-Matt
 
--- 
-Matt Benjamin
-The Linux Box
-206 South Fifth Ave. Suite 150
-Ann Arbor, MI  48104
+Best Regards,
 
-http://linuxbox.com
-
-tel.  734-761-4689 
-fax.  734-769-8938 
-cel.  734-216-5309 
+Patrick McGarry
+Director, Community || Inktank
+http://ceph.com  ||  http://inktank.com
+@scuttlemonkey || @ceph || @inktank
