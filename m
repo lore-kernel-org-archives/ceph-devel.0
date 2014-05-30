@@ -1,311 +1,256 @@
 From: Arnd Bergmann <arnd@arndb.de>
-Subject: [RFC 08/32] fs/ceph: convert to 'struct inode_time'
-Date: Fri, 30 May 2014 22:01:32 +0200
-Message-ID: <1401480116-1973111-9-git-send-email-arnd@arndb.de>
-References: <1401480116-1973111-1-git-send-email-arnd@arndb.de>
+Subject: [RFC 00/32] making inode time stamps y2038 ready
+Date: Fri, 30 May 2014 22:01:24 +0200
+Message-ID: <1401480116-1973111-1-git-send-email-arnd@arndb.de>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1401480116-1973111-1-git-send-email-arnd@arndb.de>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org
-Cc: linux-arch@vger.kernel.org, joseph@codesourcery.com, john.stultz@linaro.org, hch@infradead.org, tglx@linutronix.de, geert@linux-m68k.org, lftan@altera.com, hpa@zytor.com, linux-fsdevel@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
+Cc: linux-arch@vger.kernel.org, joseph@codesourcery.com, john.stultz@linaro.org, hch@infradead.org, tglx@linutronix.de, geert@linux-m68k.org, lftan@altera.com, hpa@zytor.com, linux-fsdevel@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, coda@cs.cmu.edu, codalist@coda.cs.cmu.edu, fuse-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, linux-btrfs@vger.kernel.org, linux-cifs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, linux-mtd@lists.infradead.org, linux-nfs@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-scsi@vger.kernel.org, logfs@logfs.org, ocfs2-devel@oss.oracle.com, reiserfs-devel@vger.kernel.org, samba-technical@lists.samba.org, xfs@oss.sgi.com
 List-Id: ceph-devel.vger.kernel.org
 
-Ceph supports timestamps until year 2106 using u32 seconds on the
-wire, but the kernel internally limits this to a signed value
-that only works until 2038 on 32 bit CPUs.
+Based on the recent discussion about 64-bit time_t for new
+architectures, and for solving the year 2038 problem in general,
+I decided to try out what it would take to solve part of the
+kernel side of things.
 
-This changes the type used in the ceph code to struct inode_time
-to lift that limitation.
+This is a proof-of-concept work to get us to the point where
+two system calls (utimes and stat) provide a working interface
+to user space to pass 64-bit inode time stamps in and out of
+the kernel all the way to the file systems.
 
-Signed-off-by: Arnd Bergmann <arnd@arndb.de>
-Cc: Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org
----
- drivers/block/rbd.c             |  2 +-
- fs/ceph/cache.c                 |  2 +-
- fs/ceph/caps.c                  |  6 +++---
- fs/ceph/file.c                  |  4 ++--
- fs/ceph/inode.c                 | 20 ++++++++++----------
- fs/ceph/super.h                 |  8 ++++----
- include/linux/ceph/decode.h     |  8 ++++----
- include/linux/ceph/osd_client.h |  4 ++--
- net/ceph/auth_x.c               |  2 +-
- net/ceph/osd_client.c           |  4 ++--
- 10 files changed, 30 insertions(+), 30 deletions(-)
+I picked this because it is a fairly isolated problem, as the
+inode time stamps are rarely assigned to any other time values.
+As a byproduct of this work, I documented for each of the file
+systems we support how long the on-disk format can work[1].
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 4c95b50..d4a7404 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -1710,7 +1710,7 @@ static void rbd_osd_req_format_write(struct rbd_obj_request *obj_request)
- 	struct rbd_img_request *img_request = obj_request->img_request;
- 	struct ceph_osd_request *osd_req = obj_request->osd_req;
- 	struct ceph_snap_context *snapc;
--	struct timespec mtime = CURRENT_TIME;
-+	struct inode_time mtime = CURRENT_TIME;
- 
- 	rbd_assert(osd_req != NULL);
- 
-diff --git a/fs/ceph/cache.c b/fs/ceph/cache.c
-index 834f9f3..cf48f4b 100644
---- a/fs/ceph/cache.c
-+++ b/fs/ceph/cache.c
-@@ -25,7 +25,7 @@
- #include "cache.h"
- 
- struct ceph_aux_inode {
--	struct timespec	mtime;
-+	struct inode_time mtime;
- 	loff_t          size;
- };
- 
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index c561b62..263eecd 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -988,7 +988,7 @@ static int send_cap_msg(struct ceph_mds_session *session,
- 			int caps, int wanted, int dirty,
- 			u32 seq, u64 flush_tid, u32 issue_seq, u32 mseq,
- 			u64 size, u64 max_size,
--			struct timespec *mtime, struct timespec *atime,
-+			struct inode_time *mtime, struct inode_time *atime,
- 			u64 time_warp_seq,
- 			kuid_t uid, kgid_t gid, umode_t mode,
- 			u64 xattr_version,
-@@ -1132,7 +1132,7 @@ static int __send_cap(struct ceph_mds_client *mdsc, struct ceph_cap *cap,
- 	int held, revoking, dropping, keep;
- 	u64 seq, issue_seq, mseq, time_warp_seq, follows;
- 	u64 size, max_size;
--	struct timespec mtime, atime;
-+	struct inode_time mtime, atime;
- 	int wake = 0;
- 	umode_t mode;
- 	kuid_t uid;
-@@ -2416,7 +2416,7 @@ static void handle_cap_grant(struct inode *inode, struct ceph_mds_caps *grant,
- 	int issued, implemented, used, wanted, dirty;
- 	u64 size = le64_to_cpu(grant->size);
- 	u64 max_size = le64_to_cpu(grant->max_size);
--	struct timespec mtime, atime, ctime;
-+	struct inode_time mtime, atime, ctime;
- 	int check_caps = 0;
- 	int wake = 0;
- 	int writeback = 0;
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index 3020851..0ebb709 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -546,7 +546,7 @@ ceph_sync_direct_write(struct kiocb *iocb, struct iov_iter *from)
- 	int flags;
- 	int check_caps = 0;
- 	int ret;
--	struct timespec mtime = CURRENT_TIME;
-+	struct inode_time mtime = CURRENT_TIME;
- 	loff_t pos = iocb->ki_pos;
- 	size_t count = iov_iter_count(from);
- 
-@@ -662,7 +662,7 @@ static ssize_t ceph_sync_write(struct kiocb *iocb, struct iov_iter *from)
- 	int flags;
- 	int check_caps = 0;
- 	int ret;
--	struct timespec mtime = CURRENT_TIME;
-+	struct inode_time mtime = CURRENT_TIME;
- 	loff_t pos = iocb->ki_pos;
- 	size_t count = iov_iter_count(from);
- 
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index e4fff9f..ba18c9d 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -506,8 +506,8 @@ int ceph_fill_file_size(struct inode *inode, int issued,
- }
- 
- void ceph_fill_file_time(struct inode *inode, int issued,
--			 u64 time_warp_seq, struct timespec *ctime,
--			 struct timespec *mtime, struct timespec *atime)
-+			 u64 time_warp_seq, struct inode_time *ctime,
-+			 struct inode_time *mtime, struct inode_time *atime)
- {
- 	struct ceph_inode_info *ci = ceph_inode(inode);
- 	int warn = 0;
-@@ -517,7 +517,7 @@ void ceph_fill_file_time(struct inode *inode, int issued,
- 		      CEPH_CAP_FILE_BUFFER|
- 		      CEPH_CAP_AUTH_EXCL|
- 		      CEPH_CAP_XATTR_EXCL)) {
--		if (timespec_compare(ctime, &inode->i_ctime) > 0) {
-+		if (inode_time_compare(ctime, &inode->i_ctime) > 0) {
- 			dout("ctime %ld.%09ld -> %ld.%09ld inc w/ cap\n",
- 			     inode->i_ctime.tv_sec, inode->i_ctime.tv_nsec,
- 			     ctime->tv_sec, ctime->tv_nsec);
-@@ -536,14 +536,14 @@ void ceph_fill_file_time(struct inode *inode, int issued,
- 			ci->i_time_warp_seq = time_warp_seq;
- 		} else if (time_warp_seq == ci->i_time_warp_seq) {
- 			/* nobody did utimes(); take the max */
--			if (timespec_compare(mtime, &inode->i_mtime) > 0) {
-+			if (inode_time_compare(mtime, &inode->i_mtime) > 0) {
- 				dout("mtime %ld.%09ld -> %ld.%09ld inc\n",
- 				     inode->i_mtime.tv_sec,
- 				     inode->i_mtime.tv_nsec,
- 				     mtime->tv_sec, mtime->tv_nsec);
- 				inode->i_mtime = *mtime;
- 			}
--			if (timespec_compare(atime, &inode->i_atime) > 0) {
-+			if (inode_time_compare(atime, &inode->i_atime) > 0) {
- 				dout("atime %ld.%09ld -> %ld.%09ld inc\n",
- 				     inode->i_atime.tv_sec,
- 				     inode->i_atime.tv_nsec,
-@@ -586,7 +586,7 @@ static int fill_inode(struct inode *inode,
- 	struct ceph_inode_info *ci = ceph_inode(inode);
- 	int i;
- 	int issued = 0, implemented;
--	struct timespec mtime, atime, ctime;
-+	struct inode_time mtime, atime, ctime;
- 	u32 nsplits;
- 	struct ceph_inode_frag *frag;
- 	struct rb_node *rb_node;
-@@ -1714,12 +1714,12 @@ int ceph_setattr(struct dentry *dentry, struct iattr *attr)
- 			inode->i_atime = attr->ia_atime;
- 			dirtied |= CEPH_CAP_FILE_EXCL;
- 		} else if ((issued & CEPH_CAP_FILE_WR) &&
--			   timespec_compare(&inode->i_atime,
-+			   inode_time_compare(&inode->i_atime,
- 					    &attr->ia_atime) < 0) {
- 			inode->i_atime = attr->ia_atime;
- 			dirtied |= CEPH_CAP_FILE_WR;
- 		} else if ((issued & CEPH_CAP_FILE_SHARED) == 0 ||
--			   !timespec_equal(&inode->i_atime, &attr->ia_atime)) {
-+			   !inode_time_equal(&inode->i_atime, &attr->ia_atime)) {
- 			ceph_encode_timespec(&req->r_args.setattr.atime,
- 					     &attr->ia_atime);
- 			mask |= CEPH_SETATTR_ATIME;
-@@ -1736,12 +1736,12 @@ int ceph_setattr(struct dentry *dentry, struct iattr *attr)
- 			inode->i_mtime = attr->ia_mtime;
- 			dirtied |= CEPH_CAP_FILE_EXCL;
- 		} else if ((issued & CEPH_CAP_FILE_WR) &&
--			   timespec_compare(&inode->i_mtime,
-+			   inode_time_compare(&inode->i_mtime,
- 					    &attr->ia_mtime) < 0) {
- 			inode->i_mtime = attr->ia_mtime;
- 			dirtied |= CEPH_CAP_FILE_WR;
- 		} else if ((issued & CEPH_CAP_FILE_SHARED) == 0 ||
--			   !timespec_equal(&inode->i_mtime, &attr->ia_mtime)) {
-+			   !inode_time_equal(&inode->i_mtime, &attr->ia_mtime)) {
- 			ceph_encode_timespec(&req->r_args.setattr.mtime,
- 					     &attr->ia_mtime);
- 			mask |= CEPH_SETATTR_MTIME;
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index ead05cc..15dc11a 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -156,7 +156,7 @@ struct ceph_cap_snap {
- 	u64 xattr_version;
- 
- 	u64 size;
--	struct timespec mtime, atime, ctime;
-+	struct inode_time mtime, atime, ctime;
- 	u64 time_warp_seq;
- 	int writing;   /* a sync write is still in progress */
- 	int dirty_pages;     /* dirty pages awaiting writeback */
-@@ -263,7 +263,7 @@ struct ceph_inode_info {
- 	char *i_symlink;
- 
- 	/* for dirs */
--	struct timespec i_rctime;
-+	struct inode_time i_rctime;
- 	u64 i_rbytes, i_rfiles, i_rsubdirs;
- 	u64 i_files, i_subdirs;
- 
-@@ -698,8 +698,8 @@ extern struct inode *ceph_get_snapdir(struct inode *parent);
- extern int ceph_fill_file_size(struct inode *inode, int issued,
- 			       u32 truncate_seq, u64 truncate_size, u64 size);
- extern void ceph_fill_file_time(struct inode *inode, int issued,
--				u64 time_warp_seq, struct timespec *ctime,
--				struct timespec *mtime, struct timespec *atime);
-+				u64 time_warp_seq, struct inode_time *ctime,
-+				struct inode_time *mtime, struct inode_time *atime);
- extern int ceph_fill_trace(struct super_block *sb,
- 			   struct ceph_mds_request *req,
- 			   struct ceph_mds_session *session);
-diff --git a/include/linux/ceph/decode.h b/include/linux/ceph/decode.h
-index a6ef9cc..f1bb277 100644
---- a/include/linux/ceph/decode.h
-+++ b/include/linux/ceph/decode.h
-@@ -132,16 +132,16 @@ bad:
- }
- 
- /*
-- * struct ceph_timespec <-> struct timespec
-+ * struct ceph_timespec <-> struct inode_time
-  */
--static inline void ceph_decode_timespec(struct timespec *ts,
-+static inline void ceph_decode_timespec(struct inode_time *ts,
- 					const struct ceph_timespec *tv)
- {
--	ts->tv_sec = (__kernel_time_t)le32_to_cpu(tv->tv_sec);
-+	ts->tv_sec = (u64)le32_to_cpu(tv->tv_sec);
- 	ts->tv_nsec = (long)le32_to_cpu(tv->tv_nsec);
- }
- static inline void ceph_encode_timespec(struct ceph_timespec *tv,
--					const struct timespec *ts)
-+					const struct inode_time *ts)
- {
- 	tv->tv_sec = cpu_to_le32((u32)ts->tv_sec);
- 	tv->tv_nsec = cpu_to_le32((u32)ts->tv_nsec);
-diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
-index 94ec696..1617d31 100644
---- a/include/linux/ceph/osd_client.h
-+++ b/include/linux/ceph/osd_client.h
-@@ -312,7 +312,7 @@ extern struct ceph_osd_request *ceph_osdc_alloc_request(struct ceph_osd_client *
- extern void ceph_osdc_build_request(struct ceph_osd_request *req, u64 off,
- 				    struct ceph_snap_context *snapc,
- 				    u64 snap_id,
--				    struct timespec *mtime);
-+				    struct inode_time *mtime);
- 
- extern struct ceph_osd_request *ceph_osdc_new_request(struct ceph_osd_client *,
- 				      struct ceph_file_layout *layout,
-@@ -361,7 +361,7 @@ extern int ceph_osdc_writepages(struct ceph_osd_client *osdc,
- 				struct ceph_snap_context *sc,
- 				u64 off, u64 len,
- 				u32 truncate_seq, u64 truncate_size,
--				struct timespec *mtime,
-+				struct inode_time *mtime,
- 				struct page **pages, int nr_pages);
- 
- /* watch/notify events */
-diff --git a/net/ceph/auth_x.c b/net/ceph/auth_x.c
-index 96238ba..14f0e8a 100644
---- a/net/ceph/auth_x.c
-+++ b/net/ceph/auth_x.c
-@@ -163,7 +163,7 @@ static int ceph_x_proc_ticket_reply(struct ceph_auth_client *ac,
- 		void *dp, *dend;
- 		int dlen;
- 		char is_enc;
--		struct timespec validity;
-+		struct inode_time validity;
- 		struct ceph_crypto_key old_key;
- 		void *tp, *tpend;
- 		struct ceph_timespec new_validity;
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index b0dfce7..1433798 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -2315,7 +2315,7 @@ bad:
-  */
- void ceph_osdc_build_request(struct ceph_osd_request *req, u64 off,
- 				struct ceph_snap_context *snapc, u64 snap_id,
--				struct timespec *mtime)
-+				struct inode_time *mtime)
- {
- 	struct ceph_msg *msg = req->r_request;
- 	void *p;
-@@ -2630,7 +2630,7 @@ int ceph_osdc_writepages(struct ceph_osd_client *osdc, struct ceph_vino vino,
- 			 struct ceph_snap_context *snapc,
- 			 u64 off, u64 len,
- 			 u32 truncate_seq, u64 truncate_size,
--			 struct timespec *mtime,
-+			 struct inode_time *mtime,
- 			 struct page **pages, int num_pages)
- {
- 	struct ceph_osd_request *req;
+Obviously we also need to convert all the other syscalls and
+have a proper libc implementation using those for this to
+be really useful, but it's a start and it can be tested
+independently (I didn't so far, want to wait for initial
+feedback).
+
+All the interesting stuff is in the first five patches here,
+the rest is the straightforward conversion of all file systems
+that use 'timespec' values internally.
+
+There are of course a number of open questions:
+
+a) is this the right approach in general? The previous discussion
+   pointed this way, but there may be other opinions.
+b) what type should we use internally to represent inode time
+   stamps? The code contains three different versions that would
+   all work, we just have to pick a good tradeoff between
+   efficiency and the range of times we want to cover.
+c) Should we continue this way for all 32-bit platforms for
+   consistency, including future ones, or should we go to
+   different 64-bit types right away? My feeling is that the
+   second approach would complicate this work.
+
+	Arnd
+
+[1] http://kernelnewbies.org/y2038
+
+Arnd Bergmann (32):
+  fs: introduce new 'struct inode_time'
+  uapi: add struct __kernel_timespec{32,64}
+  fs: introduce sys_utimens64at
+  fs: introduce sys_newfstat64/sys_newfstatat64
+  arch: hook up new stat and utimes syscalls
+  isofs: fix timestamps beyond 2027
+  fs/nfs: convert to struct inode_time
+  fs/ceph: convert to 'struct inode_time'
+  fs/pstore: convert to struct inode_time
+  fs/coda: convert to struct inode_time
+  xfs: convert to struct inode_time
+  btrfs: convert to struct inode_time
+  ext3: convert to struct inode_time
+  ext4: convert to struct inode_time
+  cifs: convert to struct inode_time
+  ntfs: convert to struct inode_time
+  ubifs: convert to struct inode_time
+  ocfs2: convert to struct inode_time
+  fs/fat: convert to struct inode_time
+  afs: convert to struct inode_time
+  udf: convert to struct inode_time
+  fs: convert simple fs to inode_time
+  logfs: convert to struct inode_time
+  hfs, hfsplus: convert to struct inode_time
+  gfs2: convert to struct inode_time
+  reiserfs: convert to struct inode_time
+  jffs2: convert to struct inode_time
+  adfs: convert to struct inode_time
+  f2fs: convert to struct inode_time
+  fuse: convert to struct inode_time
+  scsi: fnic: use current_kernel_time() for timestamp
+  fs: use new inode_time definition unconditionally
+
+ arch/alpha/kernel/osf_sys.c        |  2 +-
+ arch/arm/include/asm/unistd.h      |  2 +-
+ arch/arm/include/uapi/asm/stat.h   | 25 +++++++++++++++++
+ arch/arm/include/uapi/asm/unistd.h |  3 +++
+ arch/arm/kernel/calls.S            |  3 +++
+ arch/arm64/include/asm/unistd32.h  |  5 +++-
+ arch/x86/include/uapi/asm/stat.h   | 28 +++++++++++++++++++
+ arch/x86/syscalls/syscall_32.tbl   |  3 +++
+ drivers/block/rbd.c                |  2 +-
+ drivers/firmware/efi/efi-pstore.c  | 28 +++++++++----------
+ drivers/scsi/fnic/fnic_trace.c     |  2 +-
+ drivers/tty/tty_io.c               |  2 +-
+ drivers/usb/gadget/f_fs.c          |  2 +-
+ fs/adfs/inode.c                    |  4 +--
+ fs/afs/afs.h                       |  6 ++---
+ fs/afs/fsclient.c                  |  2 +-
+ fs/attr.c                          |  8 +++---
+ fs/btrfs/file.c                    |  6 ++---
+ fs/btrfs/inode.c                   |  4 +--
+ fs/btrfs/ioctl.c                   |  4 +--
+ fs/btrfs/root-tree.c               |  2 +-
+ fs/btrfs/transaction.c             |  2 +-
+ fs/ceph/cache.c                    |  2 +-
+ fs/ceph/caps.c                     |  6 ++---
+ fs/ceph/file.c                     |  4 +--
+ fs/ceph/inode.c                    | 20 +++++++-------
+ fs/ceph/super.h                    |  8 +++---
+ fs/cifs/cache.c                    |  6 ++---
+ fs/cifs/cifsglob.h                 |  6 ++---
+ fs/cifs/cifsproto.h                |  6 ++---
+ fs/cifs/cifssmb.c                  |  5 ++--
+ fs/cifs/inode.c                    |  2 +-
+ fs/cifs/netmisc.c                  | 15 ++++++-----
+ fs/coda/coda_linux.c               | 18 ++++++++-----
+ fs/compat.c                        | 19 ++-----------
+ fs/configfs/inode.c                |  6 ++---
+ fs/cramfs/inode.c                  |  2 +-
+ fs/ext3/inode.c                    |  4 +--
+ fs/ext4/ext4.h                     | 10 +++----
+ fs/ext4/extents.c                  |  2 +-
+ fs/f2fs/file.c                     |  6 ++---
+ fs/fat/dir.c                       |  2 +-
+ fs/fat/fat.h                       |  6 ++---
+ fs/fat/misc.c                      |  4 +--
+ fs/fat/namei_msdos.c               |  8 +++---
+ fs/fat/namei_vfat.c                | 10 +++----
+ fs/fuse/inode.c                    |  6 ++---
+ fs/gfs2/dir.c                      |  6 ++---
+ fs/gfs2/glops.c                    |  4 +--
+ fs/hfs/hfs_fs.h                    |  2 +-
+ fs/hfsplus/hfsplus_fs.h            |  2 +-
+ fs/inode.c                         | 18 ++++++-------
+ fs/isofs/util.c                    |  2 +-
+ fs/jffs2/os-linux.h                |  2 +-
+ fs/locks.c                         |  4 +--
+ fs/logfs/readwrite.c               | 18 ++++++-------
+ fs/nfs/callback.h                  |  4 +--
+ fs/nfs/callback_xdr.c              |  6 ++---
+ fs/nfs/file.c                      |  2 +-
+ fs/nfs/fscache-index.c             |  8 +++---
+ fs/nfs/inode.c                     | 10 +++----
+ fs/nfs/internal.h                  |  4 +--
+ fs/nfs/netns.h                     |  2 +-
+ fs/nfs/nfs2xdr.c                   |  8 +++---
+ fs/nfs/nfs3xdr.c                   | 10 +++----
+ fs/nfs/nfs4xdr.c                   | 20 +++++++-------
+ fs/nfsd/nfs3xdr.c                  |  6 ++---
+ fs/nfsd/nfsfh.h                    |  4 +--
+ fs/nfsd/nfsxdr.c                   |  2 +-
+ fs/ntfs/inode.c                    | 12 ++++-----
+ fs/ntfs/time.h                     |  8 +++---
+ fs/ocfs2/dlmglue.c                 | 16 +++++------
+ fs/ocfs2/file.c                    |  6 ++---
+ fs/ocfs2/ocfs2.h                   |  2 +-
+ fs/pstore/inode.c                  |  2 +-
+ fs/pstore/internal.h               |  2 +-
+ fs/pstore/platform.c               |  2 +-
+ fs/pstore/ram.c                    | 18 +++++++------
+ fs/reiserfs/namei.c                |  2 +-
+ fs/reiserfs/xattr.c                |  4 +--
+ fs/stat.c                          | 55 ++++++++++++++++++++++++++++++++++++++
+ fs/ubifs/dir.c                     |  2 +-
+ fs/ubifs/file.c                    | 16 +++++------
+ fs/ubifs/misc.h                    |  2 +-
+ fs/udf/udf_i.h                     |  2 +-
+ fs/udf/udf_sb.h                    |  2 +-
+ fs/udf/udfdecl.h                   |  7 ++---
+ fs/udf/udftime.c                   |  7 ++---
+ fs/utimes.c                        | 47 +++++++++++++++++++++++++++-----
+ fs/xfs/time.h                      |  4 +--
+ fs/xfs/xfs_inode.c                 |  2 +-
+ fs/xfs/xfs_iops.c                  |  2 +-
+ fs/xfs/xfs_trans_inode.c           |  6 ++---
+ include/linux/ceph/decode.h        |  8 +++---
+ include/linux/ceph/osd_client.h    |  4 +--
+ include/linux/compat.h             |  2 +-
+ include/linux/fs.h                 | 32 +++++++++++-----------
+ include/linux/nfs_fs_sb.h          |  2 +-
+ include/linux/nfs_xdr.h            | 14 +++++-----
+ include/linux/pstore.h             |  4 +--
+ include/linux/stat.h               |  6 ++---
+ include/linux/syscalls.h           |  9 ++++++-
+ include/linux/time.h               | 44 +++++++++++++++++++++++++++---
+ include/uapi/asm-generic/stat.h    | 29 ++++++++++++++++++--
+ include/uapi/asm-generic/unistd.h  |  8 +++++-
+ include/uapi/linux/coda.h          |  1 +
+ include/uapi/linux/time.h          | 40 ++++++++++++++++++++++++++-
+ init/initramfs.c                   |  2 +-
+ kernel/audit.c                     |  2 +-
+ kernel/auditsc.c                   |  2 +-
+ kernel/time.c                      | 44 +++++++++++++++++++++++++-----
+ kernel/time/timekeeping.c          | 16 +++++++++++
+ net/ceph/auth_x.c                  |  2 +-
+ net/ceph/osd_client.c              |  4 +--
+ 114 files changed, 642 insertions(+), 333 deletions(-)
+
 -- 
 1.8.3.2
+
+Bcc: "J. Bruce Fields" <bfields@fieldses.org>
+Bcc: "Theodore Ts'o" <tytso@mit.edu>
+Bcc: Adrian Hunter <adrian.hunter@intel.com>
+Bcc: Andreas Dilger <adilger.kernel@dilger.ca>
+Bcc: Andrew Morton <akpm@linux-foundation.org>
+Bcc: Anton Altaparmakov <anton@tuxera.com>
+Bcc: Anton Vorontsov <anton@enomsg.org>
+Bcc: Artem Bityutskiy <dedekind1@gmail.com>
+Bcc: Brian Uchino <buchino@cisco.com>
+Bcc: Chris Mason <clm@fb.com>
+Bcc: Colin Cross <ccross@android.com>
+Bcc: Dave Chinner <david@fromorbit.com>
+Bcc: David Howells <dhowells@redhat.com>
+Bcc: David Woodhouse <dwmw2@infradead.org>
+Bcc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Bcc: Hiral Patel <hiralpat@cisco.com>
+Bcc: Jaegeuk Kim <jaegeuk.kim@samsung.com>
+Bcc: Jan Harkes <jaharkes@cs.cmu.edu>
+Bcc: Jan Kara <jack@suse.cz>
+Bcc: Joel Becker <jlbec@evilplan.org>
+Bcc: Joern Engel <joern@logfs.org>
+Bcc: Josef Bacik <jbacik@fb.com>
+Bcc: Kees Cook <keescook@chromium.org>
+Bcc: Mark Fasheh <mfasheh@suse.com>
+Bcc: Miklos Szeredi <miklos@szeredi.hu>
+Bcc: OGAWA Hirofumi <hirofumi@mail.parknet.co.jp>
+Bcc: Prasad Joshi <prasadjoshi.linux@gmail.com>
+Bcc: Sage Weil <sage@inktank.com>
+Bcc: Steve French <sfrench@samba.org>
+Bcc: Steven Whitehouse <swhiteho@redhat.com>
+Bcc: Suma Ramars <sramars@cisco.com>
+Bcc: Tony Luck <tony.luck@intel.com>
+Cc: ceph-devel@vger.kernel.org
+Cc: cluster-devel@redhat.com
+Cc: coda@cs.cmu.edu
+Cc: codalist@coda.cs.cmu.edu
+Cc: fuse-devel@lists.sourceforge.net
+Cc: linux-afs@lists.infradead.org
+Cc: linux-btrfs@vger.kernel.org
+Cc: linux-cifs@vger.kernel.org
+Cc: linux-ext4@vger.kernel.org
+Cc: linux-f2fs-devel@lists.sourceforge.net
+Cc: linux-mtd@lists.infradead.org
+Cc: linux-nfs@vger.kernel.org
+Cc: linux-ntfs-dev@lists.sourceforge.net
+Cc: linux-scsi@vger.kernel.org
+Cc: logfs@logfs.org
+Cc: ocfs2-devel@oss.oracle.com
+Cc: reiserfs-devel@vger.kernel.org
+Cc: samba-technical@lists.samba.org
+Cc: xfs@oss.sgi.com
