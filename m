@@ -1,31 +1,26 @@
-From: Mike Dawson <mike.dawson@cloudapt.com>
+From: Mark Nelson <mark.nelson@inktank.com>
 Subject: Re: Calamari Goes Open Source
-Date: Fri, 30 May 2014 18:09:35 -0400
-Message-ID: <5389019F.6040505@cloudapt.com>
+Date: Fri, 30 May 2014 17:11:24 -0500
+Message-ID: <5389020C.3030602@inktank.com>
 References: <CAP8Oy=JZm_w6uZnhfFrx-GU4du54iTg3NkA_2-k+MG9ci3rYnw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f181.google.com ([209.85.223.181]:58437 "EHLO
-	mail-ie0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932299AbaE3WJj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 30 May 2014 18:09:39 -0400
-Received: by mail-ie0-f181.google.com with SMTP id rp18so2350163iec.40
-        for <ceph-devel@vger.kernel.org>; Fri, 30 May 2014 15:09:39 -0700 (PDT)
+Received: from mail-pb0-f53.google.com ([209.85.160.53]:43867 "EHLO
+	mail-pb0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754324AbaE3WL0 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 30 May 2014 18:11:26 -0400
+Received: by mail-pb0-f53.google.com with SMTP id md12so2150198pbc.26
+        for <ceph-devel@vger.kernel.org>; Fri, 30 May 2014 15:11:26 -0700 (PDT)
 In-Reply-To: <CAP8Oy=JZm_w6uZnhfFrx-GU4du54iTg3NkA_2-k+MG9ci3rYnw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Patrick McGarry <patrick@inktank.com>, Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>
 
-Great work Inktank / Red Hat! An open source Calamari will be a great 
-benefit to the community!
+YAY!
 
-Cheers,
-Mike Dawson
-
-
-On 5/30/2014 6:04 PM, Patrick McGarry wrote:
+On 05/30/2014 05:04 PM, Patrick McGarry wrote:
 > Hey cephers,
 >
 > Sorry to push this announcement so late on a Friday but...
@@ -56,8 +51,9 @@ On 5/30/2014 6:04 PM, Patrick McGarry wrote:
 > Director, Community || Inktank
 > http://ceph.com  ||  http://inktank.com
 > @scuttlemonkey || @ceph || @inktank
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users@lists.ceph.com
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >
+
