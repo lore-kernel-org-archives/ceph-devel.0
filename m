@@ -1,58 +1,45 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: Librbd licensing
-Date: Fri, 30 May 2014 10:43:21 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1405301042200.11044@cobra.newdream.net>
-References: <loom.20140530T192820-478@post.gmane.org>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: xattr spillout appears broken :(
+Date: Fri, 30 May 2014 11:06:30 -0700
+Message-ID: <CAPYLRzi8HpyxEmJgyde9yrmpZP2t9_1odEwff_9Tck40tCiSCA@mail.gmail.com>
+References: <CAPYLRzh7bno0Ppb7hayJrc-TQM24iO-+RgtHYWZmYYVAtBYjVg@mail.gmail.com>
+	<CACJqLybuxRR1hgL+b+ijmRzySFH054ZHqOYm50PmLNf-W01JOg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:45695 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751776AbaE3RnW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 30 May 2014 13:43:22 -0400
-In-Reply-To: <loom.20140530T192820-478@post.gmane.org>
+Received: from mail-qg0-f43.google.com ([209.85.192.43]:37698 "EHLO
+	mail-qg0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932165AbaE3SGb (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 30 May 2014 14:06:31 -0400
+Received: by mail-qg0-f43.google.com with SMTP id 63so6361626qgz.2
+        for <ceph-devel@vger.kernel.org>; Fri, 30 May 2014 11:06:30 -0700 (PDT)
+In-Reply-To: <CACJqLybuxRR1hgL+b+ijmRzySFH054ZHqOYm50PmLNf-W01JOg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Steve Taylor <steveftaylor@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Haomai Wang <haomaiwang@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Steve,
+On Fri, May 30, 2014 at 2:18 AM, Haomai Wang <haomaiwang@gmail.com> wrote:
+> Hi Gregory,
+>
+> I try to reproduce the bug in my local machine but failed.
+>
+> My test cmdline:
+> ./ceph_test_rados --op read 100 --op write 100 --op delete 50
+> --max-ops 400000 --objects 1024 --max-in-flight 64 --size 4000000
+> --min-stride-size 400000 --max-stride-size 800000 --max-seconds 600
+> --op copy_from 50 --op snap_create 50 --op snap_remove 50 --op
+> rollback 50 --op setattr 25 --op rmattr 25 --pool unique_pool_0
+>
+> Is there any tip to reproduce it?
 
-On Fri, 30 May 2014, Steve Taylor wrote:
-> I am working with a company that wants to utilize librbd in a project to
-> interact with Ceph storage. For the purposes of this integration,
-> LGPL-licensed open source code is acceptable, but GPL-licensed code is not.
-> Well, at least not without other changes to the project, which can be
-> accomplished if necessary.
-> 
-> The COPYING file distributed with the Ceph source code seems to indicate
-> that librbd would fall under LGPL 2.1, but some of the source files in
-> librbd reference GPL 2.1 in their copyright headers.
-
-Which files?  If there are disparities we should correct them. To the best 
-of my knowledge everything in librbd is LGPL.
-
-Thanks!
-sage
-
-
-> 
-> >From what I have found so far, it appears to me that the sources in
-> question were probably originally LGPL, but were switched to GPL a few
-> years back to comply with FUSE licensing, which is GPL. Is my understanding
-> correct that these librbd source files are now GPL? If so and FUSE is the
-> reason behind it, is it possible to dual-license those files so they could
-> be LGPL when not used with FUSE?
-> 
-> I just want to make sure I understand the licensing properly. I apologize
-> if this has been discussed previously. I am new to the list and can't seem
-> to get the archive search feature to work.
-> 
-> Steve
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+Hmm. I've been directly running the teuthology tests that failed; that
+is the command line it's running though so I think the only difference
+would be that I've got OSD thrashing (ie, recovery) happening while
+the test is running.
+Most of the other failures were scrub turning up inconsistencies in
+the xattrs at each replica/shard of an object. I didn't see any
+obvious mechanism by which storing values in xattrs versus leveldb
+would impact these higher-level primitives, but maybe you have some
+idea?
+-Greg
