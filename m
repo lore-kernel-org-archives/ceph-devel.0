@@ -1,100 +1,42 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Pyramid erasure code description revisited
-Date: Sat, 31 May 2014 19:10:16 +0200
-Message-ID: <538A0CF8.8030501@dachary.org>
+From: Richard Cochran <richardcochran-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: [RFC 00/32] making inode time stamps y2038 ready
+Date: Sat, 31 May 2014 20:22:37 +0200
+Message-ID: <20140531182237.GA5382@localhost.localdomain>
+References: <1401480116-1973111-1-git-send-email-arnd@arndb.de>
+ <20140531145114.GA3721@localhost.localdomain>
+ <6347520.8jMPlVsFjM@wuerfel>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="L2nd5k8I8dXvaDtON9Vln0Gd9r2va6lpT"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:56201 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750940AbaEaRKS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 31 May 2014 13:10:18 -0400
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Andreas-Joachim Peters <andreas.joachim.peters@cern.ch>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-cifs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <6347520.8jMPlVsFjM@wuerfel>
+Sender: linux-cifs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, hch-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org, linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, logfs-PCqxUs/MD9bYtjvyW6yDsg@public.gmane.org, linux-afs-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, joseph-qD8j1LwMmJjtCj0u4l0SBw@public.gmane.org, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-scsi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, codalist-/uMB558Y47wP4a1z8dhFYw@public.gmane.org, cluster-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, coda-ETDLCGt7PQU3uPMLIKxrzw@public.gmane.org, geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org, linux-ext4-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, fuse-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, reiserfs-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, xfs-VZNHf3L845pBDgjK7y7TUQ@public.gmane.org, john.stultz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-ntfs-dev-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, samba-technical-w/Ol4Ecudpl8XjKLYN78aQ@public.gmane.org, linux-f2fs-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, ocfs2-devel-N0ozoZBvEnrZJqsBc5GL+g@public.gmane.org, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, lftan-EIB2kfCEclfQT0dZR+AlfA@public.gmane.org, linux-btrfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---L2nd5k8I8dXvaDtON9Vln0Gd9r2va6lpT
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+On Sat, May 31, 2014 at 05:23:02PM +0200, Arnd Bergmann wrote:
+> 
+> It's an approximation:
 
-Hi Andreas,
+(Approximately never ;)
 
-After a few weeks and a fresh eye, I revisited the way pyramid erasure co=
-de could be described by the system administrator. Here is a proposal tha=
-t is hopefully more intuitive than the one from the last CDS ( http://pad=
-=2Eceph.com/p/cdsgiant-pyramid-erasure-code ).
+> with 64-bit timestamps, you can represent close to 300 billion
+> years, which is way past the time that our planet can sustain
+> life of any form[1].
 
-These are the steps to create all coding chunks. The upper case letters a=
-re data chunks and the lower case letters are coding chunks.
+Did you mean mean 64 bits worth of seconds?
 
-"__ABC__DE_" data chunks placement
+  2^64 / (3600*24*365) = 584,942,417,355
 
-Step 1
-"__ABC__DE_"
-"_yVWX_zYZ_" K=3D5, M=3D2
-"_aABC_bDE_"
+That is more than 300 billion years, and still, it is not quite the
+same as "never".
 
-Step 2
-"_aABC_bDE_"
-"z_XYZ_____" K=3D3, M=3D1
-"caABC_bDE_"
+In any case, that term is not too helpful in the comparison table,
+IMHO. One could think that some sort of clever running count relative
+to the last mount time was implied.
 
-Step 3
-"caABC_bDE_"
-"_____zXYZ_" K=3D3, M=3D1
-"caABCdbDE_"
+Thanks,
+Richard
 
-Step 4
-"caABCdbDE_"
-"_____WXYZz" K=3D4, M=3D1
-"caABCdbDEe"
-
-The interpretation of Step 3 is as follows:
-
-Given the output of the previous step ( "caABC_bDE_" ), the bDE chunks ar=
-e considered to be data chunks at this stage and they are marked with XYZ=
-=2E A K=3D3, M=3D1 coding chunk is calculated and placed in the chunk mar=
-ked with z ( "_____zXYZ_" ). The output of this coding step is the previo=
-us step plus the coding chunk that was just calculated, named d ( "caABCd=
-bDE_" ).=20
-
-This gives the flexibility of deciding wether or not a coding chunk from =
-a previous step is used as data to compute the coding chunk of the next s=
-tep. It also allows for unbalanced steps such as step 4.
-
-For decoding, the steps are walked from the bottom up. If E is missing, i=
-t can be reconstructed from dbD.e in step 4 and the other steps are skipp=
-ed because it was the only missing chunk. If AB are missing, all steps th=
-at have not be used to encode it are ignored, up to step 2 that will fail=
- to recover them because M=3D1 and yeild to step 1 that will use a..CbDE =
-successfully because M=3D2.
-
-Giving up the recursion and favor iteration seems to simplify how it can =
-be explained. And I suspect the implementation is also simpler. What do y=
-ou think ?
-
-Cheers
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-
-
---L2nd5k8I8dXvaDtON9Vln0Gd9r2va6lpT
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlOKDPgACgkQ8dLMyEl6F20pTgCgmgo4wcl7n01u/DE3doiTnGyu
-2FoAn0YO8CsVesWTzW0WNQ1rUhPfXATJ
-=ItkQ
------END PGP SIGNATURE-----
-
---L2nd5k8I8dXvaDtON9Vln0Gd9r2va6lpT--
+[1] You are forgetting the immortal robotic overlords.
