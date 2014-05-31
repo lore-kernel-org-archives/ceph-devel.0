@@ -1,84 +1,63 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: [ceph-users] Calamari Goes Open Source
-Date: Sat, 31 May 2014 00:37:15 +0200
-Message-ID: <5389081B.8020709@dachary.org>
-References: <CAP8Oy=JZm_w6uZnhfFrx-GU4du54iTg3NkA_2-k+MG9ci3rYnw@mail.gmail.com>
+From: Vyacheslav Dubeyko <slava@dubeyko.com>
+Subject: Re: [RFC 00/32] making inode time stamps y2038 ready
+Date: Sat, 31 May 2014 18:30:49 +0400
+Message-ID: <1401546649.2413.6.camel@slavad-CELSIUS-H720>
+References: <1401480116-1973111-1-git-send-email-arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="cPP1ej0275iu1tKCkFJfHGuNa2rKliFt7"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:55423 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934615AbaE3WhS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 30 May 2014 18:37:18 -0400
-In-Reply-To: <CAP8Oy=JZm_w6uZnhfFrx-GU4du54iTg3NkA_2-k+MG9ci3rYnw@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Patrick McGarry <patrick@inktank.com>, Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-btrfs-owner@vger.kernel.org>
+In-Reply-To: <1401480116-1973111-1-git-send-email-arnd@arndb.de>
+Sender: linux-btrfs-owner@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, joseph@codesourcery.com, john.stultz@linaro.org, hch@infradead.org, tglx@linutronix.de, geert@linux-m68k.org, lftan@altera.com, hpa@zytor.com, linux-fsdevel@vger.kernel.org, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, coda@cs.cmu.edu, codalist@coda.cs.cmu.edu, fuse-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, linux-btrfs@vger.kernel.org, linux-cifs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, linux-mtd@lists.infradead.org, linux-nfs@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-scsi@vger.kernel.org, logfs@logfs.org, ocfs2-devel@oss.oracle.com, reiserfs-devel@vger.kernel.org, samba-technical@lists.samba.org, xfs@oss.sgi.com
+List-Id: ceph-devel.vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---cPP1ej0275iu1tKCkFJfHGuNa2rKliFt7
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Hi Arnd,
 
-It's great that Calamari becomes Free Software.
+On Fri, 2014-05-30 at 22:01 +0200, Arnd Bergmann wrote:
 
-Vive le logiciel libre !
+[snip]
+> 
+> Arnd Bergmann (32):
+>   fs: introduce new 'struct inode_time'
+>   uapi: add struct __kernel_timespec{32,64}
+>   fs: introduce sys_utimens64at
+>   fs: introduce sys_newfstat64/sys_newfstatat64
+>   arch: hook up new stat and utimes syscalls
+>   isofs: fix timestamps beyond 2027
+>   fs/nfs: convert to struct inode_time
+>   fs/ceph: convert to 'struct inode_time'
+>   fs/pstore: convert to struct inode_time
+>   fs/coda: convert to struct inode_time
+>   xfs: convert to struct inode_time
+>   btrfs: convert to struct inode_time
+>   ext3: convert to struct inode_time
+>   ext4: convert to struct inode_time
+>   cifs: convert to struct inode_time
+>   ntfs: convert to struct inode_time
+>   ubifs: convert to struct inode_time
+>   ocfs2: convert to struct inode_time
+>   fs/fat: convert to struct inode_time
+>   afs: convert to struct inode_time
+>   udf: convert to struct inode_time
+>   fs: convert simple fs to inode_time
+>   logfs: convert to struct inode_time
+>   hfs, hfsplus: convert to struct inode_time
+>   gfs2: convert to struct inode_time
+>   reiserfs: convert to struct inode_time
+>   jffs2: convert to struct inode_time
+>   adfs: convert to struct inode_time
+>   f2fs: convert to struct inode_time
+>   fuse: convert to struct inode_time
+>   scsi: fnic: use current_kernel_time() for timestamp
+>   fs: use new inode_time definition unconditionally
+> 
 
-On 31/05/2014 00:04, Patrick McGarry wrote:
-> Hey cephers,
->=20
-> Sorry to push this announcement so late on a Friday but...
->=20
-> Calamari has arrived!
->=20
-> The source code bits have been flipped, the ticket tracker has been
-> moved, and we have even given you a little bit of background from both
-> a technical and vision point of view:
->=20
-> Technical (ceph.com):
-> http://ceph.com/community/ceph-calamari-goes-open-source/
->=20
-> Vision (inktank.com):
-> http://www.inktank.com/software/future-of-calamari/
->=20
-> The ceph.com link should give you everything you need to know about
-> what tech comprises Calamari, where the source lives, and where the
-> discussions will take place.  If you have any questions feel free to
-> hit the new ceph-calamari list or stop by IRC and we'll get you
-> started.  Hope you all enjoy the GUI!
->=20
->=20
->=20
-> Best Regards,
->=20
-> Patrick McGarry
-> Director, Community || Inktank
-> http://ceph.com  ||  http://inktank.com
-> @scuttlemonkey || @ceph || @inktank
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users@lists.ceph.com
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->=20
+By the way, what about NILFS2? Is NILFS2 ready for suggested approach
+without any changes?
 
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
+Thanks,
+Vyacheslav Dubeyko.
 
 
---cPP1ej0275iu1tKCkFJfHGuNa2rKliFt7
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlOJCBsACgkQ8dLMyEl6F207vwCgls3mcSGAHHwH50V9bxIKR0T9
-EaMAniY7zQPfTyqgEjxBRAsAA3kbp7Bp
-=DqJI
------END PGP SIGNATURE-----
-
---cPP1ej0275iu1tKCkFJfHGuNa2rKliFt7--
