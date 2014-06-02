@@ -1,58 +1,45 @@
-From: "Joseph S. Myers" <joseph@codesourcery.com>
-Subject: Re: [RFC 00/32] making inode time stamps y2038 ready
-Date: Mon, 2 Jun 2014 21:02:15 +0000
-Message-ID: <Pine.LNX.4.64.1406022044090.27099@digraph.polyomino.org.uk>
-References: <1401480116-1973111-1-git-send-email-arnd@arndb.de>
- <Pine.LNX.4.64.1406021350030.19591@digraph.polyomino.org.uk>
- <4233989.Saca0ocOUr@wuerfel>
+From: "Robin H. Johnson" <robbat2@gentoo.org>
+Subject: Re: Experiences with Ceph at the June'14 issue of USENIX ;login:
+Date: Mon, 2 Jun 2014 21:40:40 +0000
+Message-ID: <20140602214040.GG4356@orbis-terrarum.net>
+References: <20140602183219.GD17479@philipgian-mac>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="US-ASCII"
-Return-path: <reiserfs-devel-owner@vger.kernel.org>
-In-Reply-To: <4233989.Saca0ocOUr@wuerfel>
-Sender: reiserfs-devel-owner@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, john.stultz@linaro.org, hch@infradead.org, tglx@linutronix.de, geert@linux-m68k.org, lftan@altera.com, hpa@zytor.com, linux-fsdevel@vger.kernel.org, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, coda@cs.cmu.edu, codalist@coda.cs.cmu.edu, fuse-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, linux-btrfs@vger.kernel.org, linux-cifs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, linux-mtd@lists.infradead.org, linux-nfs@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-scsi@vger.kernel.org, logfs@logfs.org, ocfs2-devel@oss.oracle.com, reiserfs-devel@vger.kernel.org, samba-technical@lists.samba.org, xfs@oss.sgi.com
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from smtp.gentoo.org ([140.211.166.183]:46182 "EHLO smtp.gentoo.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753103AbaFBVkq (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 2 Jun 2014 17:40:46 -0400
+Received: from grubbs.orbis-terrarum.net (localhost [127.0.0.1])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-SHA (256/256 bits))
+	(No client certificate requested)
+	by smtp.gentoo.org (Postfix) with ESMTPS id 8D0CC33FDF9
+	for <ceph-devel@vger.kernel.org>; Mon,  2 Jun 2014 21:40:45 +0000 (UTC)
+Content-Disposition: inline
+In-Reply-To: <20140602183219.GD17479@philipgian-mac>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Mon, 2 Jun 2014, Arnd Bergmann wrote:
+On Mon, Jun 02, 2014 at 09:32:19PM +0300,  Filippos Giannakos wrote:
+> As you may already know, we have been using Ceph for quite some time now to back
+> the ~okeanos [1] public cloud service, which is powered by Synnefo [2].
+(Background info for other readers: Synnefo is a cloud layer on top of
+Ganeti).
 
-> Ok. Sorry about missing linux-api, I confused it with linux-arch, which
-> may not be as relevant here, except for the one question whether we
-> actually want to have the new ABI on all 32-bit architectures or only
-> as an opt-in for those that expect to stay around for another 24 years.
+> In the article we describe our storage needs, how we use Ceph and how it has
+> worked so far. I hope you enjoy reading it.
+Are you just using the existing kernel RBD mapping for Ganeti running
+KVM, or did you implement the pieces for Ganeti to use the QEMU
+userspace RBD driver?
 
-For glibc I think it will make the most sense to add the support for 
-64-bit time_t across all architectures that currently have 32-bit time_t 
-(with the new interfaces having fallback support to implementation in 
-terms of the 32-bit kernel interfaces, if the 64-bit syscalls are 
-unavailable either at runtime or in the kernel headers against which glibc 
-is compiled - this fallback code will of course need to check for overflow 
-when passing a time value to the kernel, hopefully with error handling 
-consistent with whatever the kernel ends up doing when a filesystem can't 
-support a timestamp).  If some architectures don't provide the new 
-interfaces in the kernel then that will mean the fallback code in glibc 
-can't be removed until glibc support for those architectures is removed 
-(as opposed to removing it when glibc no longer supports kernels predating 
-the kernel support).
-
-> Two more questions for you:
-> 
-> - are you (and others) happy with adding this type of stat syscall
->   (fstatat64/fstat64) as opposed to the more generic xstat that has
->   been discussed in the past and that never made it through the bike-
->   shedding discussion?
-
-I am.
-
-> - once we have enough buy-in from reviewers to merge this initial
->   series, should we proceed to define rest of the syscall ABI
->   (minus driver ioctls) so glibc and kernel can do the conversion
->   on top of that, or should we better try to do things one syscall
->   family at a time and actually get the kernel to handle them
->   correctly internally?
-
-I don't have any comments on that ordering question.
+I've got both Ceph & Ganeti clusters already, but am reluctant to marry
+the two sets of functionality because the kernel RBD driver still seemed
+to perform so much worse than the Qemu userspace RBD driver, and Ganeti
+still hasn't implemented the userspace mapping pieces :-(
 
 -- 
-Joseph S. Myers
-joseph@codesourcery.com
+Robin Hugh Johnson
+Gentoo Linux: Developer, Infrastructure Lead
+E-Mail     : robbat2@gentoo.org
+GnuPG FP   : 11ACBA4F 4778E3F6 E4EDF38E B27B944E 34884E85
