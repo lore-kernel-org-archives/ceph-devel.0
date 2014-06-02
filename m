@@ -1,148 +1,124 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Pyramid erasure code description revisited
-Date: Mon, 02 Jun 2014 15:14:47 +0200
-Message-ID: <538C78C7.2090308@dachary.org>
-References: <538A0CF8.8030501@dachary.org> <3472A07E6605974CBC9BC573F1BC02E4AE72E354@CERNXCHG44.cern.ch>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="QMqfjCuFUicov2i4tPpJhWWqipr09BGwi"
+From: Guang Yang <yguang11@outlook.com>
+Subject: Re: Radosgw - bucket index
+Date: Mon, 2 Jun 2014 21:37:30 +0800
+Message-ID: <BLU436-SMTP237CB8BBFC0921406960C55DF200@phx.gbl>
+References: <alpine.DEB.2.00.1405061757540.28165@cobra.newdream.net> <BLU436-SMTP195A770E0A729DF4723DD28DF310@phx.gbl> <alpine.DEB.2.00.1405160600320.28306@cobra.newdream.net> <CABBk=J_p9dDQBhvhbXrDmUonsY_TW5ZFDWuQqw3DGukVSRJeKg@mail.gmail.com> <BLU436-SMTP15995ECEE2C5FA8E935D70EDF330@phx.gbl> <alpine.DEB.2.00.1405181601030.1689@cobra.newdream.net> <BLU436-SMTP1455EF599E16A12B539B498DF320@phx.gbl> <CABBk=J9E0rCXvAWtizqQgqizf8o247cPZrv2VE6GNwWFrNa=Tw@mail.gmail.com> <0F65B78C-DF9A-40E4-BAAF-7411443DA3B6@outlook.com>
+Mime-Version: 1.0 (Mac OS X Mail 7.3 \(1878.2\))
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:58150 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753850AbaFBNOu (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Jun 2014 09:14:50 -0400
-In-Reply-To: <3472A07E6605974CBC9BC573F1BC02E4AE72E354@CERNXCHG44.cern.ch>
+Received: from blu004-omc4s7.hotmail.com ([65.55.111.146]:55783 "EHLO
+	BLU004-OMC4S7.hotmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754459AbaFBNh7 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Jun 2014 09:37:59 -0400
+In-Reply-To: <0F65B78C-DF9A-40E4-BAAF-7411443DA3B6@outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Koleos Fuscus <koleosfuscus@yahoo.com>
+To: Yehuda Sadeh <yehuda@inktank.com>, Sage Weil <sage@inktank.com>
+Cc: Ceph-devel <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---QMqfjCuFUicov2i4tPpJhWWqipr09BGwi
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Hi Yehuda and Sage,
+Can you help to comment on the ticket, I would like to send out a pull =
+request some time this week for you to review, but before that, it woul=
+d be nice to see your comments in terms of the interface and any other =
+concerns you may have for this. Thanks.
 
-Hi Andreas,
+Thanks,
+Guang
 
-On 02/06/2014 14:20, Andreas Joachim Peters wrote:> Hi Loic,=20
->=20
-> I think this gives all the flexibility to define any possible combinati=
-on for encoding ...
->=20
-> When one constructs the steps one has just to be aware that the 'most l=
-ocal' encoding should happen in the end, right?
 
-Yes.=20
+On May 30, 2014, at 8:35 AM, Guang Yang <yguang11@outlook.com> wrote:
 
+> Hi Yehuda,
+> I opened an issue here: http://tracker.ceph.com/issues/8473, please h=
+elp to review and comment.
 >=20
-> It would be usefule to have a tool which outputs then for each data aND=
- parity chunk the achieved 'redundancy' and the overall volume and maxima=
-l reconstruction 'overhead'.
+> Thanks,
+> Guang
+>=20
+> On May 19, 2014, at 2:47 PM, Yehuda Sadeh <yehuda@inktank.com> wrote:
+>=20
+>> On Sun, May 18, 2014 at 11:18 PM, Guang Yang <yguang11@outlook.com> =
+wrote:
+>>> On May 19, 2014, at 7:05 AM, Sage Weil <sage@inktank.com> wrote:
+>>>=20
+>>>> On Sun, 18 May 2014, Guang wrote:
+>>>>>>> radosgw is using the omap key/value API for objects, which is m=
+ore or less
+>>>>>>> equivalent to what swift is doing with sqlite.  This data passe=
+s straight
+>>>>>>> into leveldb on the backend (or whatever other backend you are =
+using).
+>>>>>>> Using something like rocksdb in its place is pretty simple and =
+ther are
+>>>>>>> unmerged patches to do that; the user would just need to adjust=
+ their
+>>>>>>> crush map so that the rgw index pool is mapped to a different s=
+et of OSDs
+>>>>>>> with the better k/v backend.
+>>>>> Not sure if I miss anything, but the key difference with SWIFT?s
+>>>>> implementation is that they are using a table for bucket index an=
+d it
+>>>>> actually can be updated in parallel which makes more scalable for=
+ write,
+>>>>> though at certain point the sql table would result in performance
+>>>>> degradation as well.
+>>>>=20
+>>>> As I understand it the same limitation is present there too: the i=
+ndex is
+>>>> in a single sqlite table.
+>>>>=20
+>>>>>> My more well-formed opinion is that we need to come up with a go=
+od
+>>>>>> design. It needs to be flexible enough to be able to grow (and m=
+aybe
+>>>>>> shrink), and I assume there would be some kind of background ope=
+ration
+>>>>>> that will enable that. I also believe that making it hash based =
+is the
+>>>>>> way to go. It looks like that the more complicated issue is here=
+ is
+>>>>>> how to handle the transition in which we shard buckets.
+>>>>> Yeah I agree. I think the conflicting goals here are, we want a s=
+orted
+>>>>> list (so that it enable prefix scan for listing purpose) and we w=
+ant to
+>>>>> shard at the very beginning (the problem we are facing is paralle=
+l
+>>>>> writes updating the same bucket index object will need to be
+>>>>> serialized).
+>>>>=20
+>>>> Given how infrequent container listings are, pre-sharding containe=
+rs
+>>>> across several objects makes some sense.  Paying the cost of doing
+>>>> listings in parallel across N (where N is not too big) is not a bi=
+g price
+>>>> to pay. However, there will always need to be a way to re-shard fu=
+rther
+>>>> when containers/buckets get extremely big.  Perhaps a starting poi=
+nt would
+>>>> be support for static sharding where the number of shards is speci=
+fied at
+>>>> container/bucket creation time=85
+>>> Considering the scope of the change, I also think this is a good st=
+arting point to make the bucket index updating more scalable.
+>>> Yehuda,
+>>> How do you think?
+>>=20
+>> Sharding it will help with scaling it up to a certain point. As Sage
+>> mentioned we can start with a static setting as a first simpler
+>> approach, and move into a dynamic approach later on.
+>>=20
+>> Yehuda
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
 
-Right. I'm kind of hoping koleosfuscus (cc'ed) will be able to fit that i=
-nto the reliability model, but we've not discussed that yet. In any case =
-you are right, a small command line tool would be helpful. Something that=
- would explain: if you loose one of the chunks you need four to recover. =
-If you lose two you need all of them. That's more humanly readable and un=
-derstandable than the full description ;-)
-
-Cheers
-
->=20
-> Cheers Andreas.
->=20
-> ________________________________________
-> From: Loic Dachary [loic@dachary.org]
-> Sent: 31 May 2014 19:10
-> To: Andreas Joachim Peters
-> Cc: Ceph Development
-> Subject: Pyramid erasure code description revisited
->=20
-> Hi Andreas,
->=20
-> After a few weeks and a fresh eye, I revisited the way pyramid erasure =
-code could be described by the system administrator. Here is a proposal t=
-hat is hopefully more intuitive than the one from the last CDS ( http://p=
-ad.ceph.com/p/cdsgiant-pyramid-erasure-code ).
->=20
-> These are the steps to create all coding chunks. The upper case letters=
- are data chunks and the lower case letters are coding chunks.
->=20
-> "__ABC__DE_" data chunks placement
->=20
-> Step 1
-> "__ABC__DE_"
-> "_yVWX_zYZ_" K=3D5, M=3D2
-> "_aABC_bDE_"
->=20
-> Step 2
-> "_aABC_bDE_"
-> "z_XYZ_____" K=3D3, M=3D1
-> "caABC_bDE_"
->=20
-> Step 3
-> "caABC_bDE_"
-> "_____zXYZ_" K=3D3, M=3D1
-> "caABCdbDE_"
->=20
-> Step 4
-> "caABCdbDE_"
-> "_____WXYZz" K=3D4, M=3D1
-> "caABCdbDEe"
->=20
-> The interpretation of Step 3 is as follows:
->=20
-> Given the output of the previous step ( "caABC_bDE_" ), the bDE chunks =
-are considered to be data chunks at this stage and they are marked with X=
-YZ. A K=3D3, M=3D1 coding chunk is calculated and placed in the chunk mar=
-ked with z ( "_____zXYZ_" ). The output of this coding step is the previo=
-us step plus the coding chunk that was just calculated, named d ( "caABCd=
-bDE_" ).
->=20
-> This gives the flexibility of deciding wether or not a coding chunk fro=
-m a previous step is used as data to compute the coding chunk of the next=
- step. It also allows for unbalanced steps such as step 4.
->=20
-> For decoding, the steps are walked from the bottom up. If E is missing,=
- it can be reconstructed from dbD.e in step 4 and the other steps are ski=
-pped because it was the only missing chunk. If AB are missing, all steps =
-that have not be used to encode it are ignored, up to step 2 that will fa=
-il to recover them because M=3D1 and yeild to step 1 that will use a..CbD=
-E successfully because M=3D2.
->=20
-> Giving up the recursion and favor iteration seems to simplify how it ca=
-n be explained. And I suspect the implementation is also simpler. What do=
- you think ?
->=20
-> Cheers
->=20
-> --
-> Lo=EFc Dachary, Artisan Logiciel Libre
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-
-
---QMqfjCuFUicov2i4tPpJhWWqipr09BGwi
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlOMeMcACgkQ8dLMyEl6F21eVQCgmcUPJqHCO4l5iRbhMD9WFxeu
-bqwAoLP6EZiXiXmz3Z0SfCx+Uwypr1h5
-=AiuB
------END PGP SIGNATURE-----
-
---QMqfjCuFUicov2i4tPpJhWWqipr09BGwi--
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
