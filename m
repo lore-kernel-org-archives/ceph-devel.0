@@ -1,97 +1,105 @@
-From: Francois Deppierraz <francois@ctrlaltdel.ch>
-Subject: [radosgw-admin] modify bucker owner
-Date: Mon, 02 Jun 2014 11:07:16 +0200
-Message-ID: <538C3EC4.8000604@ctrlaltdel.ch>
+From: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>
+Subject: RE: Pyramid erasure code description revisited
+Date: Mon, 2 Jun 2014 12:20:37 +0000
+Message-ID: <3472A07E6605974CBC9BC573F1BC02E4AE72E354@CERNXCHG44.cern.ch>
+References: <538A0CF8.8030501@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=iso-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.nimag.net ([62.220.136.11]:38547 "EHLO smtp.nimag.net"
+Received: from cernmx11.cern.ch ([188.184.36.50]:26334 "EHLO CERNMX11.cern.ch"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752879AbaFBJQl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 2 Jun 2014 05:16:41 -0400
+	id S1753145AbaFBMUm convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Jun 2014 08:20:42 -0400
+In-Reply-To: <538A0CF8.8030501@dachary.org>
+Content-Language: en-GB
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi,
+Hi Loic,=20
 
-I'm trying to modify the owner of an existing bucket. The original user
-(userA) was manually created with radosgw-admin user create a few
-releases ago (dumpling I guess). The new user
-(a2176a80eeac47a58c3d773eaebf6659) is defined in the Openstack Keystone
-service.
+I think this gives all the flexibility to define any possible combinati=
+on for encoding ...
 
-# ceph -v
-ceph version 0.72.2 (a913ded2ff138aefb8cb84d347d72164099cfd60)
-# radosgw-admin bucket stats --bucket test-permissions3
-{ "bucket": "test-permissions3",
-  "pool": ".rgw.buckets",
-  "index_pool": ".rgw.buckets",
-  "id": "default.37768360.136",
-  "marker": "default.37768360.136",
-  "owner": "userA",
-  "ver": 3,
-  "master_ver": 0,
-  "mtime": 1401699197,
-  "max_marker": "",
-  "usage": { "rgw.main": { "size_kb": 1,
-          "size_kb_actual": 4,
-          "num_objects": 1}},
-  "bucket_quota": { "enabled": false,
-      "max_size_kb": -1,
-      "max_objects": -1}}
-# radosgw-admin bucket link --bucket test-permissions3 --uid
-a2176a80eeac47a58c3d773eaebf6659
-# radosgw-admin bucket stats --bucket test-permissions3
-{ "bucket": "test-permissions3",
-  "pool": ".rgw.buckets",
-  "index_pool": ".rgw.buckets",
-  "id": "default.37768360.136",
-  "marker": "default.37768360.136",
-  "owner": "a2176a80eeac47a58c3d773eaebf6659",
-  "ver": 3,
-  "master_ver": 0,
-  "mtime": 1401699387,
-  "max_marker": "",
-  "usage": { "rgw.main": { "size_kb": 1,
-          "size_kb_actual": 4,
-          "num_objects": 1}},
-  "bucket_quota": { "enabled": false,
-      "max_size_kb": -1,
-      "max_objects": -1}}
+When one constructs the steps one has just to be aware that the 'most l=
+ocal' encoding should happen in the end, right?
 
+It would be usefule to have a tool which outputs then for each data aND=
+ parity chunk the achieved 'redundancy' and the overall volume and maxi=
+mal reconstruction 'overhead'.
 
-Looks like the bucket owner was correctly changed, however access to th=
-e
-bucket through the swift API with the new user fails.
+Cheers Andreas.
 
-$ swift list
-test-permissions3
-$ swift list test-permissions3
-Container GET failed:
-https://s3.company.com/swift/v1/test-permissions3?format=3Djson 401
-Authorization Required   {"Code":"AccessDenied"}
-$
+________________________________________
+=46rom: Loic Dachary [loic@dachary.org]
+Sent: 31 May 2014 19:10
+To: Andreas Joachim Peters
+Cc: Ceph Development
+Subject: Pyramid erasure code description revisited
 
-Trying to rollback to the previous state also fails.
+Hi Andreas,
 
-# radosgw-admin bucket link --bucket test-permissions3 --uid userA
-failure: (22) Invalid argument
-2014-06-02 11:02:21.216739 7fb0b0392780  0 bucket entry point user
-mismatch, can't unlink bucket: a2176a80eeac47a58c3d773eaebf6659 !=3D us=
-erA
-#
+After a few weeks and a fresh eye, I revisited the way pyramid erasure =
+code could be described by the system administrator. Here is a proposal=
+ that is hopefully more intuitive than the one from the last CDS ( http=
+://pad.ceph.com/p/cdsgiant-pyramid-erasure-code ).
 
-=46ortunately, access to the bucket with the old user still works, even
-though it's no longer listed as owner of the bucket according to
-radosgw-admin.
+These are the steps to create all coding chunks. The upper case letters=
+ are data chunks and the lower case letters are coding chunks.
 
-Am I doing this wrong or is there a bug somewhere?
+"__ABC__DE_" data chunks placement
 
-Thanks for your help!
+Step 1
+"__ABC__DE_"
+"_yVWX_zYZ_" K=3D5, M=3D2
+"_aABC_bDE_"
 
-=46ran=E7ois
+Step 2
+"_aABC_bDE_"
+"z_XYZ_____" K=3D3, M=3D1
+"caABC_bDE_"
+
+Step 3
+"caABC_bDE_"
+"_____zXYZ_" K=3D3, M=3D1
+"caABCdbDE_"
+
+Step 4
+"caABCdbDE_"
+"_____WXYZz" K=3D4, M=3D1
+"caABCdbDEe"
+
+The interpretation of Step 3 is as follows:
+
+Given the output of the previous step ( "caABC_bDE_" ), the bDE chunks =
+are considered to be data chunks at this stage and they are marked with=
+ XYZ. A K=3D3, M=3D1 coding chunk is calculated and placed in the chunk=
+ marked with z ( "_____zXYZ_" ). The output of this coding step is the =
+previous step plus the coding chunk that was just calculated, named d (=
+ "caABCdbDE_" ).
+
+This gives the flexibility of deciding wether or not a coding chunk fro=
+m a previous step is used as data to compute the coding chunk of the ne=
+xt step. It also allows for unbalanced steps such as step 4.
+
+=46or decoding, the steps are walked from the bottom up. If E is missin=
+g, it can be reconstructed from dbD.e in step 4 and the other steps are=
+ skipped because it was the only missing chunk. If AB are missing, all =
+steps that have not be used to encode it are ignored, up to step 2 that=
+ will fail to recover them because M=3D1 and yeild to step 1 that will =
+use a..CbDE successfully because M=3D2.
+
+Giving up the recursion and favor iteration seems to simplify how it ca=
+n be explained. And I suspect the implementation is also simpler. What =
+do you think ?
+
+Cheers
+
+--
+Lo=EFc Dachary, Artisan Logiciel Libre
+
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
