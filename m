@@ -1,166 +1,166 @@
-From: Loic Dachary <loic@dachary.org>
+From: Steve Taylor <steveftaylor@gmail.com>
 Subject: Re: Librbd licensing
-Date: Mon, 02 Jun 2014 19:02:12 +0200
-Message-ID: <538CAE14.4060602@dachary.org>
-References: <loom.20140530T192820-478@post.gmane.org> <alpine.DEB.2.00.1405301042200.11044@cobra.newdream.net> <CADXiVcpM8GJcCbDkdOPWzXPoJrDdyiQn0-q4nDH6o0zpg_u8gg@mail.gmail.com>
+Date: Mon, 2 Jun 2014 11:15:09 -0600
+Message-ID: <CADXiVcrSf4WgMUJ1d6FRSFqUOEeeGVDTTw5VvY6gSdDsQObJZQ@mail.gmail.com>
+References: <loom.20140530T192820-478@post.gmane.org> <alpine.DEB.2.00.1405301042200.11044@cobra.newdream.net>
+ <CADXiVcpM8GJcCbDkdOPWzXPoJrDdyiQn0-q4nDH6o0zpg_u8gg@mail.gmail.com> <538CAE14.4060602@dachary.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="lcWLkNlT3pAIWgFvt9aEIsF0lQMlrreb1"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:58577 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751796AbaFBRCQ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Jun 2014 13:02:16 -0400
-In-Reply-To: <CADXiVcpM8GJcCbDkdOPWzXPoJrDdyiQn0-q4nDH6o0zpg_u8gg@mail.gmail.com>
+Received: from mail-we0-f175.google.com ([74.125.82.175]:41766 "EHLO
+	mail-we0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752636AbaFBRPc convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Jun 2014 13:15:32 -0400
+Received: by mail-we0-f175.google.com with SMTP id p10so5441173wes.20
+        for <ceph-devel@vger.kernel.org>; Mon, 02 Jun 2014 10:15:31 -0700 (PDT)
+In-Reply-To: <538CAE14.4060602@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Steve Taylor <steveftaylor@gmail.com>
+To: Loic Dachary <loic@dachary.org>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---lcWLkNlT3pAIWgFvt9aEIsF0lQMlrreb1
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+=46air enough. Thanks for clearing it up. Is this something anyone care=
+s
+to fix? I'm personally happy to accept it as is with this email chain
+as reference, but I will also be happy to add the "Lesser" and submit
+a pull request if you want it. I'm not big on changing other peoples'
+copyright headers unless they ask for it though. :-)
 
-Hi,
+Steve
 
-The missing "Lesser" is a nice typo :-) There has never been a GPLv2.1 ( =
-https://en.wikipedia.org/wiki/GNU_General_Public_License#Version_2 ) and =
-I guess it helps disambiguate the interpretation.
-
-Cheers
-
-On 02/06/2014 18:15, Steve Taylor wrote:
-> Sorry, my previous reply was rejected by the list because it wasn't in
-> plain text. Let's try again.
->=20
-> librbd.cc:
-> /*
->  * Ceph - scalable distributed file system
->  *
->  * Copyright (C) 2011 New Dream Network
->  *
->  * This is free software; you can redistribute it and/or
->  * modify it under the terms of the GNU General Public
->  * License version 2.1, as published by the Free Software
->  * Foundation.  See file COPYING.
->  *
->  */
->=20
-> librbd.h:
-> /*
->  * Ceph - scalable distributed file system
->  *
->  * Copyright (C) 2011 New Dream Network
->  *
->  * This is free software; you can redistribute it and/or
->  * modify it under the terms of the GNU General Public
->  * License version 2.1, as published by the Free Software
->  * Foundation.  See file COPYING.
->  *
->  */
->=20
-> librbd.hpp:
-> /*
->  * Ceph - scalable distributed file system
->  *
->  * Copyright (C) 2011 New Dream Network
->  *
->  * This is free software; you can redistribute it and/or
->  * modify it under the terms of the GNU General Public
->  * License version 2.1, as published by the Free Software
->  * Foundation.  See file COPYING.
->  *
->  */
->=20
-> These are the three that I've noticed poking around librbd so far. My
-> understanding from COPYING is that they should be LGPL, but these
-> copyright headers obviously state GPL instead. I'm just trying to
-> understand definitely which it is. :)
->=20
-> If a change is in order, of course I'll be happy to make the change
-> myself and submit a pull request if you like.
->=20
-> Steve
->=20
-> On Fri, May 30, 2014 at 11:43 AM, Sage Weil <sage@inktank.com> wrote:
->> Hi Steve,
+On Mon, Jun 2, 2014 at 11:02 AM, Loic Dachary <loic@dachary.org> wrote:
+> Hi,
+>
+> The missing "Lesser" is a nice typo :-) There has never been a GPLv2.=
+1 ( https://en.wikipedia.org/wiki/GNU_General_Public_License#Version_2 =
+) and I guess it helps disambiguate the interpretation.
+>
+> Cheers
+>
+> On 02/06/2014 18:15, Steve Taylor wrote:
+>> Sorry, my previous reply was rejected by the list because it wasn't =
+in
+>> plain text. Let's try again.
 >>
->> On Fri, 30 May 2014, Steve Taylor wrote:
->>> I am working with a company that wants to utilize librbd in a project=
- to
->>> interact with Ceph storage. For the purposes of this integration,
->>> LGPL-licensed open source code is acceptable, but GPL-licensed code i=
-s not.
->>> Well, at least not without other changes to the project, which can be=
-
->>> accomplished if necessary.
->>>
->>> The COPYING file distributed with the Ceph source code seems to indic=
-ate
->>> that librbd would fall under LGPL 2.1, but some of the source files i=
-n
->>> librbd reference GPL 2.1 in their copyright headers.
+>> librbd.cc:
+>> /*
+>>  * Ceph - scalable distributed file system
+>>  *
+>>  * Copyright (C) 2011 New Dream Network
+>>  *
+>>  * This is free software; you can redistribute it and/or
+>>  * modify it under the terms of the GNU General Public
+>>  * License version 2.1, as published by the Free Software
+>>  * Foundation.  See file COPYING.
+>>  *
+>>  */
 >>
->> Which files?  If there are disparities we should correct them. To the =
-best
->> of my knowledge everything in librbd is LGPL.
+>> librbd.h:
+>> /*
+>>  * Ceph - scalable distributed file system
+>>  *
+>>  * Copyright (C) 2011 New Dream Network
+>>  *
+>>  * This is free software; you can redistribute it and/or
+>>  * modify it under the terms of the GNU General Public
+>>  * License version 2.1, as published by the Free Software
+>>  * Foundation.  See file COPYING.
+>>  *
+>>  */
 >>
->> Thanks!
->> sage
+>> librbd.hpp:
+>> /*
+>>  * Ceph - scalable distributed file system
+>>  *
+>>  * Copyright (C) 2011 New Dream Network
+>>  *
+>>  * This is free software; you can redistribute it and/or
+>>  * modify it under the terms of the GNU General Public
+>>  * License version 2.1, as published by the Free Software
+>>  * Foundation.  See file COPYING.
+>>  *
+>>  */
 >>
+>> These are the three that I've noticed poking around librbd so far. M=
+y
+>> understanding from COPYING is that they should be LGPL, but these
+>> copyright headers obviously state GPL instead. I'm just trying to
+>> understand definitely which it is. :)
 >>
+>> If a change is in order, of course I'll be happy to make the change
+>> myself and submit a pull request if you like.
+>>
+>> Steve
+>>
+>> On Fri, May 30, 2014 at 11:43 AM, Sage Weil <sage@inktank.com> wrote=
+:
+>>> Hi Steve,
 >>>
->>> >From what I have found so far, it appears to me that the sources in
->>> question were probably originally LGPL, but were switched to GPL a fe=
-w
->>> years back to comply with FUSE licensing, which is GPL. Is my underst=
-anding
->>> correct that these librbd source files are now GPL? If so and FUSE is=
- the
->>> reason behind it, is it possible to dual-license those files so they =
-could
->>> be LGPL when not used with FUSE?
+>>> On Fri, 30 May 2014, Steve Taylor wrote:
+>>>> I am working with a company that wants to utilize librbd in a proj=
+ect to
+>>>> interact with Ceph storage. For the purposes of this integration,
+>>>> LGPL-licensed open source code is acceptable, but GPL-licensed cod=
+e is not.
+>>>> Well, at least not without other changes to the project, which can=
+ be
+>>>> accomplished if necessary.
+>>>>
+>>>> The COPYING file distributed with the Ceph source code seems to in=
+dicate
+>>>> that librbd would fall under LGPL 2.1, but some of the source file=
+s in
+>>>> librbd reference GPL 2.1 in their copyright headers.
 >>>
->>> I just want to make sure I understand the licensing properly. I apolo=
-gize
->>> if this has been discussed previously. I am new to the list and can't=
- seem
->>> to get the archive search feature to work.
+>>> Which files?  If there are disparities we should correct them. To t=
+he best
+>>> of my knowledge everything in librbd is LGPL.
 >>>
->>> Steve
->>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>> Thanks!
+>>> sage
 >>>
 >>>
+>>>>
+>>>> >From what I have found so far, it appears to me that the sources =
+in
+>>>> question were probably originally LGPL, but were switched to GPL a=
+ few
+>>>> years back to comply with FUSE licensing, which is GPL. Is my unde=
+rstanding
+>>>> correct that these librbd source files are now GPL? If so and FUSE=
+ is the
+>>>> reason behind it, is it possible to dual-license those files so th=
+ey could
+>>>> be LGPL when not used with FUSE?
+>>>>
+>>>> I just want to make sure I understand the licensing properly. I ap=
+ologize
+>>>> if this has been discussed previously. I am new to the list and ca=
+n't seem
+>>>> to get the archive search feature to work.
+>>>>
+>>>> Steve
+>>>>
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe ceph-dev=
+el" in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>
+>>>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-
-
---lcWLkNlT3pAIWgFvt9aEIsF0lQMlrreb1
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlOMrhQACgkQ8dLMyEl6F21nVQCfW3bWK/jpYZZApuMOgWg/q4pw
-lXUAn2vB9XobByXeWrvyByBXkQw9dQST
-=xao9
------END PGP SIGNATURE-----
-
---lcWLkNlT3pAIWgFvt9aEIsF0lQMlrreb1--
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
