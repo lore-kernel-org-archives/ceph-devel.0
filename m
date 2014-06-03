@@ -1,103 +1,64 @@
-From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-Subject: Re: [RFC 00/32] making inode time stamps y2038 ready
-Date: Tue, 03 Jun 2014 16:22:19 +0200
-Message-ID: <5011138.W0gbOc20Qp@wuerfel>
-References: <1401480116-1973111-1-git-send-email-arnd@arndb.de>
-	<7175692.dpgYFMbTaP@wuerfel> <538CF346.2070504@zytor.com>
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: Re: xattr spillout appears broken :(
+Date: Tue, 3 Jun 2014 22:33:08 +0800
+Message-ID: <CACJqLyYiUcveR4-CxNsjA7PZjWyc30GjriQ_XfyaB8W+eJopbg@mail.gmail.com>
+References: <CAPYLRzh7bno0Ppb7hayJrc-TQM24iO-+RgtHYWZmYYVAtBYjVg@mail.gmail.com>
+	<CACJqLybuxRR1hgL+b+ijmRzySFH054ZHqOYm50PmLNf-W01JOg@mail.gmail.com>
+	<CAPYLRzi8HpyxEmJgyde9yrmpZP2t9_1odEwff_9Tck40tCiSCA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <fuse-devel-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-In-Reply-To: <538CF346.2070504-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/fuse-devel>,
-	<mailto:fuse-devel-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=fuse-devel>
-List-Post: <mailto:fuse-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-List-Help: <mailto:fuse-devel-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/fuse-devel>,
-	<mailto:fuse-devel-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=subscribe>
-Errors-To: fuse-devel-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
-To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: hch-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org, linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, logfs-PCqxUs/MD9bYtjvyW6yDsg@public.gmane.org, linux-afs-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, "Joseph S. Myers" <joseph-qD8j1LwMmJjtCj0u4l0SBw@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-scsi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, cluster-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, coda-ETDLCGt7PQU3uPMLIKxrzw@public.gmane.org, geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org, linux-ext4-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, codalist-ySnCqBnJi5yMVn35/9/JlcWGCVk0P7UB@public.gmane.org, fuse-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, reiserfs-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, xfs-VZNHf3L845pBDgjK7y7TUQ@public.gmane.org, john.stultz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-ntfs-dev-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, samba-technical-w/Ol4Ecudpl8XjKLYN78aQ@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-f2fs-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, ocfs2-devel-N0ozoZBvEnrZJqsBc5GL+g@public.gmane.org, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, lftan-EIB2kfCEclfQT0dZR+AlfA@public.gmane.org, linux-btrfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-wi0-f169.google.com ([209.85.212.169]:35880 "EHLO
+	mail-wi0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751489AbaFCOdM (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Jun 2014 10:33:12 -0400
+Received: by mail-wi0-f169.google.com with SMTP id hi2so6150238wib.0
+        for <ceph-devel@vger.kernel.org>; Tue, 03 Jun 2014 07:33:08 -0700 (PDT)
+In-Reply-To: <CAPYLRzi8HpyxEmJgyde9yrmpZP2t9_1odEwff_9Tck40tCiSCA@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Gregory Farnum <greg@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Monday 02 June 2014 14:57:26 H. Peter Anvin wrote:
-> On 06/02/2014 12:55 PM, Arnd Bergmann wrote:
-> >>
-> >> The bit that is really going to hurt is every single ioctl that uses a
-> >> timespec.
-> >>
-> >> Honestly, though, I really don't understand the point with "struct
-> >> inode_time".  It seems like the zeroeth-order thing is to change the
-> >> kernel internal version of struct timespec to have a 64-bit time... it
-> >> isn't just about inodes.  We then should be explicit about the external
-> >> uses of time, and use accessors.
-> > 
-> > I picked these because they are fairly isolated from all other uses,
-> > in particular since inode times are the only things where we really
-> > care about times in the distant past or future (decades away as opposed
-> > to things that happened between boot and shutdown).
-> > 
-> 
-> If nothing else, I would expect to be able to set the system time to
-> weird values for testing.  So I'm not so sure I agree with that...
+Hi Gregory,
 
-I think John Stultz and Thomas Gleixner have already started looking
-at how the timekeeping code can be updated. Once that is done, we should
-be able to add a functional 64-bit gettimeofday/settimeofday syscall
-pair. While I definitely agree this is one of the most basic things to
-have, it's also not an area of the kernel that is easy to change.
+I checked again and again each line change about spill out codes,
+still failed to find anything wrong.
 
-> > For other kernel-internal uses, we may be better off migrating to
-> > a completely different representation, such as nanoseconds since
-> > boot or the architecture specific ktime_t, but this is really something
-> > to decide for each subsystem.
-> 
-> Having a bunch of different time representations in the kernel seems
-> like a real headache...
+I ran "ceph_test_rados" then activate scrub process several times
+locally, nothing unusual. I'm familiar with teuthoghy jobs, maybe we
+can find the common thing among fail jobs.
 
-We already have time_t, ktime_t, timeval, timespec, compat_timespec,
-clock_t, cputime_t, cputime64_t, tm, nanoseconds, jiffies, jiffies64,
-and lots of driver or file system specific representations. I'm all for
-removing a bunch of these from the kernel, but my feeling is that this is
-one of the cases where we first have to add new ones in order to remove
-those that are already there.
-To complicate things further, we also have various times bases
-(realtime/utc, realtime/tai, monotonic, monotonic_raw, boottime, ...),
-and at least for the timespec values we pass around, it's not always
-obvious which one is used, of if that's the right one.
 
-We probably don't want to add a lot of new representations, and it's
-possible that we can change most of the internal code we have to
-ktime_t and then convert that to whatever user space wants at the
-interfaces.
+On Sat, May 31, 2014 at 2:06 AM, Gregory Farnum <greg@inktank.com> wrote:
+> On Fri, May 30, 2014 at 2:18 AM, Haomai Wang <haomaiwang@gmail.com> wrote:
+>> Hi Gregory,
+>>
+>> I try to reproduce the bug in my local machine but failed.
+>>
+>> My test cmdline:
+>> ./ceph_test_rados --op read 100 --op write 100 --op delete 50
+>> --max-ops 400000 --objects 1024 --max-in-flight 64 --size 4000000
+>> --min-stride-size 400000 --max-stride-size 800000 --max-seconds 600
+>> --op copy_from 50 --op snap_create 50 --op snap_remove 50 --op
+>> rollback 50 --op setattr 25 --op rmattr 25 --pool unique_pool_0
+>>
+>> Is there any tip to reproduce it?
+>
+> Hmm. I've been directly running the teuthology tests that failed; that
+> is the command line it's running though so I think the only difference
+> would be that I've got OSD thrashing (ie, recovery) happening while
+> the test is running.
+> Most of the other failures were scrub turning up inconsistencies in
+> the xattrs at each replica/shard of an object. I didn't see any
+> obvious mechanism by which storing values in xattrs versus leveldb
+> would impact these higher-level primitives, but maybe you have some
+> idea?
+> -Greg
 
-The possible uses I can see for non-ktime_t types in the kernel are:
-* inodes need 96 bit timestamps to represent the full range of values
-  that can be stored in a file system, you made a convincing argument
-  for that. Almost everything else can fit into 64 bit on a 32-bit
-  kernel, in theory also on a 64-bit kernel if we want that.
-* A number of interfaces pass relative timespecs: nanosleep(), poll(),
-  select(), sigtimedwait(), alarm(), futex() and probably more. There is
-  nothing wrong with the use of timespec here, and it may be good to
-  annotate that by using a new type (e.g. struct timeout) that is defined
-  as compatible with the current timespec.
-* For new user interfaces, we need a new type such as the
-  __kernel_timespec64 I introduced, so it doesn't clash with the normal
-  user timespec that may be smaller, depending on the libc.
-* A lot of drivers will need new ioctl commands, and for drivers that
-  just need time stamps (audio, v4l, sockets, ...) it may be more
-  efficient and more correct to use a new timestamp_t (e.g. boot time
-  64-bit nanoseconds) than __kernel_timespec64, which is not normally
-  monotonic and requires a normalization step. If we end up introducing
-  such a type in the user interface, we can also start using it in the
-  kernel.
 
-	Arnd
 
-------------------------------------------------------------------------------
-Learn Graph Databases - Download FREE O'Reilly Book
-"Graph Databases" is the definitive new guide to graph databases and their 
-applications. Written by three acclaimed leaders in the field, 
-this first edition is now available. Download your free book today!
-http://p.sf.net/sfu/NeoTech
+-- 
+Best Regards,
+
+Wheat
