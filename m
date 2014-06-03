@@ -1,42 +1,24 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [RFC 00/32] making inode time stamps y2038 ready
-Date: Tue, 03 Jun 2014 16:37:46 +0200
-Message-ID: <18158267.ZX0ZMPkVDT@wuerfel>
-References: <1401480116-1973111-1-git-send-email-arnd@arndb.de>
-	<5011138.W0gbOc20Qp@wuerfel>
-	<Pine.LNX.4.64.1406031427130.12421@digraph.polyomino.org.uk>
+From: Alfredo Deza <alfredo.deza@inktank.com>
+Subject: missing 0.81 from ceph.com/downloads/
+Date: Tue, 3 Jun 2014 10:59:45 -0400
+Message-ID: <CANtztVy5zMeMDi=5mVmoofYmNF6ETwENt8xa7WvMTKn2uC67Fg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <cluster-devel-bounces@redhat.com>
-In-Reply-To: <Pine.LNX.4.64.1406031427130.12421@digraph.polyomino.org.uk>
-List-Unsubscribe: <https://www.redhat.com/mailman/options/cluster-devel>,
-	<mailto:cluster-devel-request@redhat.com?subject=unsubscribe>
-List-Archive: <https://www.redhat.com/archives/cluster-devel>
-List-Post: <mailto:cluster-devel@redhat.com>
-List-Help: <mailto:cluster-devel-request@redhat.com?subject=help>
-List-Subscribe: <https://www.redhat.com/mailman/listinfo/cluster-devel>,
-	<mailto:cluster-devel-request@redhat.com?subject=subscribe>
-Sender: cluster-devel-bounces@redhat.com
-Errors-To: cluster-devel-bounces@redhat.com
-To: "Joseph S. Myers" <joseph@codesourcery.com>
-Cc: linux-mtd@lists.infradead.org, "H. Peter Anvin" <hpa@zytor.com>, logfs@logfs.org, linux-afs@lists.infradead.org, linux-arch@vger.kernel.org, linux-cifs@vger.kernel.org, linux-scsi@vger.kernel.org, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, coda@cs.cmu.edu, geert@linux-m68k.org, linux-ext4@vger.kernel.org, codalist@telemann.coda.cs.cmu.edu, fuse-devel@lists.sourceforge.net, reiserfs-devel@vger.kernel.org, xfs@oss.sgi.com, john.stultz@linaro.org, tglx@linutronix.de, linux-nfs@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, samba-technical@lists.samba.org, linux-kernel@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, ocfs2-devel@oss.oracle.com, linux-fsdevel@vger.kernel.org, lftan@altera.com, linux-btrfs@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-yk0-f174.google.com ([209.85.160.174]:36650 "EHLO
+	mail-yk0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752096AbaFCO7p (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Jun 2014 10:59:45 -0400
+Received: by mail-yk0-f174.google.com with SMTP id 9so4950338ykp.5
+        for <ceph-devel@vger.kernel.org>; Tue, 03 Jun 2014 07:59:45 -0700 (PDT)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tuesday 03 June 2014 14:33:10 Joseph S. Myers wrote:
-> On Tue, 3 Jun 2014, Arnd Bergmann wrote:
-> 
-> > I think John Stultz and Thomas Gleixner have already started looking
-> > at how the timekeeping code can be updated. Once that is done, we should
-> > be able to add a functional 64-bit gettimeofday/settimeofday syscall
-> > pair. While I definitely agree this is one of the most basic things to
-> > have, it's also not an area of the kernel that is easy to change.
-> 
-> 64-bit clock_gettime / clock_settime instead of gettimeofday / 
-> settimeofday should avoid the need for the kernel to have a 64-bit version 
-> of struct timeval.  (Userspace 64-bit gettimeofday / settimeofday would 
-> need to use a combination of the syscalls if the tz pointer is non-NULL.)
+It looks like we missed out on a step to get the 0.81 tarballs to
+ceph.com/downloads/
 
-Yes, that's what I meant.
+It just got uploaded. Apologies if you got bit by that!
 
-	Arnd
+
+-Alfredo
