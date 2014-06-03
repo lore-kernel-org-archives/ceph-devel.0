@@ -1,75 +1,42 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Re: xattr spillout appears broken :(
-Date: Tue, 3 Jun 2014 22:33:43 +0800
-Message-ID: <CACJqLyYECXY6p92Kr5G5y3mdPjDavGjFyVq6Ry5UP8fUAgJBqA@mail.gmail.com>
-References: <CAPYLRzh7bno0Ppb7hayJrc-TQM24iO-+RgtHYWZmYYVAtBYjVg@mail.gmail.com>
-	<CACJqLybuxRR1hgL+b+ijmRzySFH054ZHqOYm50PmLNf-W01JOg@mail.gmail.com>
-	<CAPYLRzi8HpyxEmJgyde9yrmpZP2t9_1odEwff_9Tck40tCiSCA@mail.gmail.com>
-	<CACJqLyYiUcveR4-CxNsjA7PZjWyc30GjriQ_XfyaB8W+eJopbg@mail.gmail.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [RFC 00/32] making inode time stamps y2038 ready
+Date: Tue, 03 Jun 2014 16:37:46 +0200
+Message-ID: <18158267.ZX0ZMPkVDT@wuerfel>
+References: <1401480116-1973111-1-git-send-email-arnd@arndb.de>
+	<5011138.W0gbOc20Qp@wuerfel>
+	<Pine.LNX.4.64.1406031427130.12421@digraph.polyomino.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-we0-f181.google.com ([74.125.82.181]:34293 "EHLO
-	mail-we0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754689AbaFCOdo (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Jun 2014 10:33:44 -0400
-Received: by mail-we0-f181.google.com with SMTP id w61so6854373wes.40
-        for <ceph-devel@vger.kernel.org>; Tue, 03 Jun 2014 07:33:43 -0700 (PDT)
-In-Reply-To: <CACJqLyYiUcveR4-CxNsjA7PZjWyc30GjriQ_XfyaB8W+eJopbg@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <cluster-devel-bounces@redhat.com>
+In-Reply-To: <Pine.LNX.4.64.1406031427130.12421@digraph.polyomino.org.uk>
+List-Unsubscribe: <https://www.redhat.com/mailman/options/cluster-devel>,
+	<mailto:cluster-devel-request@redhat.com?subject=unsubscribe>
+List-Archive: <https://www.redhat.com/archives/cluster-devel>
+List-Post: <mailto:cluster-devel@redhat.com>
+List-Help: <mailto:cluster-devel-request@redhat.com?subject=help>
+List-Subscribe: <https://www.redhat.com/mailman/listinfo/cluster-devel>,
+	<mailto:cluster-devel-request@redhat.com?subject=subscribe>
+Sender: cluster-devel-bounces@redhat.com
+Errors-To: cluster-devel-bounces@redhat.com
+To: "Joseph S. Myers" <joseph@codesourcery.com>
+Cc: linux-mtd@lists.infradead.org, "H. Peter Anvin" <hpa@zytor.com>, logfs@logfs.org, linux-afs@lists.infradead.org, linux-arch@vger.kernel.org, linux-cifs@vger.kernel.org, linux-scsi@vger.kernel.org, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, coda@cs.cmu.edu, geert@linux-m68k.org, linux-ext4@vger.kernel.org, codalist@telemann.coda.cs.cmu.edu, fuse-devel@lists.sourceforge.net, reiserfs-devel@vger.kernel.org, xfs@oss.sgi.com, john.stultz@linaro.org, tglx@linutronix.de, linux-nfs@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, samba-technical@lists.samba.org, linux-kernel@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, ocfs2-devel@oss.oracle.com, linux-fsdevel@vger.kernel.org, lftan@altera.com, linux-btrfs@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-/familiar/not familiar/
+On Tuesday 03 June 2014 14:33:10 Joseph S. Myers wrote:
+> On Tue, 3 Jun 2014, Arnd Bergmann wrote:
+> 
+> > I think John Stultz and Thomas Gleixner have already started looking
+> > at how the timekeeping code can be updated. Once that is done, we should
+> > be able to add a functional 64-bit gettimeofday/settimeofday syscall
+> > pair. While I definitely agree this is one of the most basic things to
+> > have, it's also not an area of the kernel that is easy to change.
+> 
+> 64-bit clock_gettime / clock_settime instead of gettimeofday / 
+> settimeofday should avoid the need for the kernel to have a 64-bit version 
+> of struct timeval.  (Userspace 64-bit gettimeofday / settimeofday would 
+> need to use a combination of the syscalls if the tz pointer is non-NULL.)
 
-On Tue, Jun 3, 2014 at 10:33 PM, Haomai Wang <haomaiwang@gmail.com> wrote:
-> Hi Gregory,
->
-> I checked again and again each line change about spill out codes,
-> still failed to find anything wrong.
->
-> I ran "ceph_test_rados" then activate scrub process several times
-> locally, nothing unusual. I'm familiar with teuthoghy jobs, maybe we
-> can find the common thing among fail jobs.
->
->
-> On Sat, May 31, 2014 at 2:06 AM, Gregory Farnum <greg@inktank.com> wrote:
->> On Fri, May 30, 2014 at 2:18 AM, Haomai Wang <haomaiwang@gmail.com> wrote:
->>> Hi Gregory,
->>>
->>> I try to reproduce the bug in my local machine but failed.
->>>
->>> My test cmdline:
->>> ./ceph_test_rados --op read 100 --op write 100 --op delete 50
->>> --max-ops 400000 --objects 1024 --max-in-flight 64 --size 4000000
->>> --min-stride-size 400000 --max-stride-size 800000 --max-seconds 600
->>> --op copy_from 50 --op snap_create 50 --op snap_remove 50 --op
->>> rollback 50 --op setattr 25 --op rmattr 25 --pool unique_pool_0
->>>
->>> Is there any tip to reproduce it?
->>
->> Hmm. I've been directly running the teuthology tests that failed; that
->> is the command line it's running though so I think the only difference
->> would be that I've got OSD thrashing (ie, recovery) happening while
->> the test is running.
->> Most of the other failures were scrub turning up inconsistencies in
->> the xattrs at each replica/shard of an object. I didn't see any
->> obvious mechanism by which storing values in xattrs versus leveldb
->> would impact these higher-level primitives, but maybe you have some
->> idea?
->> -Greg
->
->
->
-> --
-> Best Regards,
->
-> Wheat
+Yes, that's what I meant.
 
-
-
--- 
-Best Regards,
-
-Wheat
+	Arnd
