@@ -1,82 +1,53 @@
 From: Sage Weil <sage@inktank.com>
-Subject: RE: [RFC] add rocksdb support
-Date: Tue, 3 Jun 2014 13:01:48 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1406031300490.26887@cobra.newdream.net>
-References: <75674D092A819E4189E91166C74CB90D0131CB27@SHSMSX104.ccr.corp.intel.com> <alpine.DEB.2.00.1405201814330.1689@cobra.newdream.net> <75674D092A819E4189E91166C74CB90D013BEDED@shsmsx102.ccr.corp.intel.com> <537CA4BA.4000900@inktank.com>
- <75674D092A819E4189E91166C74CB90D013C094D@shsmsx102.ccr.corp.intel.com>
+Subject: Re: [PATCH v3 1/4] libceph: recognize poolop requests in debugfs
+Date: Tue, 3 Jun 2014 13:51:00 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1406031350570.26887@cobra.newdream.net>
+References: <1400777408-7016-1-git-send-email-ilya.dryomov@inktank.com> <1400777408-7016-2-git-send-email-ilya.dryomov@inktank.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:49869 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:50232 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933084AbaFCUBt (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Jun 2014 16:01:49 -0400
-In-Reply-To: <75674D092A819E4189E91166C74CB90D013C094D@shsmsx102.ccr.corp.intel.com>
+	with ESMTP id S1754170AbaFCUvB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Jun 2014 16:51:01 -0400
+In-Reply-To: <1400777408-7016-2-git-send-email-ilya.dryomov@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Shu, Xinxin" <xinxin.shu@intel.com>
-Cc: Mark Nelson <mark.nelson@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "Zhang, Jian" <jian.zhang@intel.com>
+To: Ilya Dryomov <ilya.dryomov@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hi Xinxin,
+Reviewed-by:
 
-On Wed, 28 May 2014, Shu, Xinxin wrote:
-> Hi sage ,  
-> I will add two configure options to --with-librocksdb-static and 
-> --with-librocksdb , with --with-librocksdb-static option , ceph will 
-> compile the code that get from ceph repository , with --with-librocksdb 
-> option , in case of distro packages for rocksdb , ceph will not compile 
-> the rocksdb code , will use pre-installed library. is that ok for you ?
+On Thu, 22 May 2014, Ilya Dryomov wrote:
+
+> Recognize poolop requests in debugfs monc dump, fix prink format
+> specifiers - tid is unsigned.
 > 
-> since current rocksdb does not support autoconf&automake , I will add 
-> autoconf&automake support for rocksdb , but before that , i think we 
-> should fork a stable branch (maybe 3.0) for ceph .
-
-That sounds right to me.  We can update which commit we're building easily 
-later.
-
-Thanks!
-sage
-
-
+> Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
+> ---
+>  net/ceph/debugfs.c |    6 ++++--
+>  1 file changed, 4 insertions(+), 2 deletions(-)
 > 
-> -----Original Message-----
-> From: Mark Nelson [mailto:mark.nelson@inktank.com] 
-> Sent: Wednesday, May 21, 2014 9:06 PM
-> To: Shu, Xinxin; Sage Weil
-> Cc: ceph-devel@vger.kernel.org; Zhang, Jian
-> Subject: Re: [RFC] add rocksdb support
-> 
-> On 05/21/2014 07:54 AM, Shu, Xinxin wrote:
-> > Hi, sage
-> >
-> > I will add rocksdb submodule into the makefile , currently we want to have fully performance tests on key-value db backend , both leveldb and rocksdb. Then optimize on rocksdb performance.
-> 
-> I'm definitely interested in any performance tests you do here.  Last winter I started doing some fairly high level tests on raw leveldb/hyperleveldb/raikleveldb.  I'm very interested in what you see with rocksdb as a backend.
-> 
-> >
-> > -----Original Message-----
-> > From: Sage Weil [mailto:sage@inktank.com]
-> > Sent: Wednesday, May 21, 2014 9:19 AM
-> > To: Shu, Xinxin
-> > Cc: ceph-devel@vger.kernel.org
-> > Subject: Re: [RFC] add rocksdb support
-> >
-> > Hi Xinxin,
-> >
-> > I've pushed an updated wip-rocksdb to github/liewegas/ceph.git that includes the latest set of patches with the groundwork and your rocksdb patch.  There is also a commit that adds rocksdb as a git submodule.  I'm thinking that, since there aren't any distro packages for rocksdb at this point, this is going to be the easiest way to make this usable for people.
-> >
-> > If you can wire the submodule into the makefile, we can merge this in so that rocksdb support is in the ceph.com packages on ceph.com.  I suspect that the distros will prefer to turns this off in favor of separate shared libs, but they can do this at their option if/when they include rocksdb in the distro. I think the key is just to have both --with-librockdb and --with-librocksdb-static (or similar) options so that you can either use the static or dynamically linked one.
-> >
-> > Has your group done further testing with rocksdb?  Anything interesting to share?
-> >
-> > Thanks!
-> > sage
-> >
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
-> > in the body of a message to majordomo@vger.kernel.org More majordomo 
-> > info at  http://vger.kernel.org/majordomo-info.html
-> >
+> diff --git a/net/ceph/debugfs.c b/net/ceph/debugfs.c
+> index 10421a4b76f8..8903dcee8d8e 100644
+> --- a/net/ceph/debugfs.c
+> +++ b/net/ceph/debugfs.c
+> @@ -126,9 +126,11 @@ static int monc_show(struct seq_file *s, void *p)
+>  		req = rb_entry(rp, struct ceph_mon_generic_request, node);
+>  		op = le16_to_cpu(req->request->hdr.type);
+>  		if (op == CEPH_MSG_STATFS)
+> -			seq_printf(s, "%lld statfs\n", req->tid);
+> +			seq_printf(s, "%llu statfs\n", req->tid);
+> +		else if (op == CEPH_MSG_POOLOP)
+> +			seq_printf(s, "%llu poolop\n", req->tid);
+>  		else
+> -			seq_printf(s, "%lld unknown\n", req->tid);
+> +			seq_printf(s, "%llu unknown\n", req->tid);
+>  	}
+>  
+>  	mutex_unlock(&monc->mutex);
+> -- 
+> 1.7.10.4
 > 
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
