@@ -1,58 +1,42 @@
-From: Constantinos Venetsanopoulos <cven@grnet.gr>
-Subject: Re: Experiences with Ceph at the June'14 issue of USENIX ;login:
-Date: Tue, 03 Jun 2014 12:12:12 +0300
-Message-ID: <538D916C.4020801@grnet.gr>
-References: <20140602183219.GD17479@philipgian-mac> <20140602214040.GG4356@orbis-terrarum.net>
+From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+Subject: Re: [RFC 00/32] making inode time stamps y2038 ready
+Date: Tue, 03 Jun 2014 14:21:29 +0200
+Message-ID: <7080340.W1OdttOEiZ@wuerfel>
+References: <1401480116-1973111-1-git-send-email-arnd@arndb.de>
+	<1401546649.2413.6.camel@slavad-CELSIUS-H720>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from averel.grnet-hq.admin.grnet.gr ([195.251.29.3]:25327 "EHLO
-	averel.grnet-hq.admin.grnet.gr" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751000AbaFCJ01 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Jun 2014 05:26:27 -0400
-In-Reply-To: <20140602214040.GG4356@orbis-terrarum.net>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "Robin H. Johnson" <robbat2@gentoo.org>, ceph-devel@vger.kernel.org
+Return-path: <fuse-devel-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
+In-Reply-To: <1401546649.2413.6.camel@slavad-CELSIUS-H720>
+List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/fuse-devel>,
+	<mailto:fuse-devel-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=fuse-devel>
+List-Post: <mailto:fuse-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
+List-Help: <mailto:fuse-devel-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/fuse-devel>,
+	<mailto:fuse-devel-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=subscribe>
+Errors-To: fuse-devel-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
+To: Vyacheslav Dubeyko <slava-yeENwD64cLxBDgjK7y7TUQ@public.gmane.org>
+Cc: hch-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org, linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, logfs-PCqxUs/MD9bYtjvyW6yDsg@public.gmane.org, linux-afs-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, joseph-qD8j1LwMmJjtCj0u4l0SBw@public.gmane.org, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-scsi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, codalist-/uMB558Y47wP4a1z8dhFYw@public.gmane.org, cluster-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, coda-ETDLCGt7PQU3uPMLIKxrzw@public.gmane.org, geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org, linux-ext4-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, fuse-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, reiserfs-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, xfs-VZNHf3L845pBDgjK7y7TUQ@public.gmane.org, john.stultz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-ntfs-dev-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, samba-technical-w/Ol4Ecudpl8XjKLYN78aQ@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-f2fs-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, ocfs2-devel-N0ozoZBvEnrZJqsBc5GL+g@public.gmane.org, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, lftan-EIB2kfCEclfQT0dZR+AlfA@public.gmane.org, linux-btrfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-Hello Robin,
+On Saturday 31 May 2014 18:30:49 Vyacheslav Dubeyko wrote:
+> By the way, what about NILFS2? Is NILFS2 ready for suggested approach
+> without any changes?
 
-On 6/3/14, 24:40 AM, Robin H. Johnson wrote:
-> On Mon, Jun 02, 2014 at 09:32:19PM +0300,  Filippos Giannakos wrote:
->> As you may already know, we have been using Ceph for quite some time now to back
->> the ~okeanos [1] public cloud service, which is powered by Synnefo [2].
-> (Background info for other readers: Synnefo is a cloud layer on top of
-> Ganeti).
->
->> In the article we describe our storage needs, how we use Ceph and how it has
->> worked so far. I hope you enjoy reading it.
-> Are you just using the existing kernel RBD mapping for Ganeti running
-> KVM, or did you implement the pieces for Ganeti to use the QEMU
-> userspace RBD driver?
+nilfs2 and a lot of other file systems don't need any changes for
+this, because they don't assign the inode time stamp fields to
+a 'struct timespec'.
 
-Non of the above. From the Ceph project we are just using RADOS,
-which we access via an Archipelago [1] backend driver that uses
-librados from userspace.
+FWIW, nilfs2 uses a 64-bit seconds value, which is always safe and
+can represent the full range of user space timespec on all machines.
 
-We integrate Archipelago with Ganeti with the Archipelago ExtStorage
-provider.
+	Arnd
 
-> I've got both Ceph & Ganeti clusters already, but am reluctant to marry
-> the two sets of functionality because the kernel RBD driver still seemed
-> to perform so much worse than the Qemu userspace RBD driver, and Ganeti
-> still hasn't implemented the userspace mapping pieces :-(
->
-
-Ganeti supports accessing RADOS from userspace (via the qemu-rbd
-driver) since version 2.10. The current stable is 2.11. Not only that,
-but starting v2.13 (not released yet), you will be able to configure the
-access method per-disk, e.g. saying that the first disk of the instance
-will be kernel backed and the second userspace backed. So, I'd suggest
-you give it a try and see how it goes :)
-
-Thanks,
-Constantinos
-
-
-[1] https://www.synnefo.org/docs/archipelago/latest/
+------------------------------------------------------------------------------
+Learn Graph Databases - Download FREE O'Reilly Book
+"Graph Databases" is the definitive new guide to graph databases and their 
+applications. Written by three acclaimed leaders in the field, 
+this first edition is now available. Download your free book today!
+http://p.sf.net/sfu/NeoTech
