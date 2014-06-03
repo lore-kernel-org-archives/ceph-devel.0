@@ -1,127 +1,47 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH v3 4/4] rbd: make sure we have latest osdmap on 'rbd
- map'
-Date: Tue, 3 Jun 2014 14:29:47 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1406031429440.24775@cobra.newdream.net>
-References: <1400777408-7016-1-git-send-email-ilya.dryomov@inktank.com> <1400777408-7016-5-git-send-email-ilya.dryomov@inktank.com>
+From: Dave Chinner <david-FqsqvQoI3Ljby3iVrkZq2A@public.gmane.org>
+Subject: Re: [RFC 00/32] making inode time stamps y2038 ready
+Date: Wed, 4 Jun 2014 07:38:02 +1000
+Message-ID: <20140603213802.GH14410@dastard>
+References: <1401480116-1973111-1-git-send-email-arnd@arndb.de>
+ <7175692.dpgYFMbTaP@wuerfel>
+ <538CF346.2070504@zytor.com>
+ <5011138.W0gbOc20Qp@wuerfel>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:50481 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S965105AbaFCV3r (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Jun 2014 17:29:47 -0400
-In-Reply-To: <1400777408-7016-5-git-send-email-ilya.dryomov@inktank.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <ilya.dryomov@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-cifs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <5011138.W0gbOc20Qp@wuerfel>
+Sender: linux-cifs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "Joseph S. Myers" <joseph-qD8j1LwMmJjtCj0u4l0SBw@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, john.stultz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, hch-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org, lftan-EIB2kfCEclfQT0dZR+AlfA@public.gmane.org, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, cluster-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, coda-ETDLCGt7PQU3uPMLIKxrzw@public.gmane.org, codalist-ySnCqBnJi5yMVn35/9/JlcWGCVk0P7UB@public.gmane.org, fuse-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, linux-afs-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-btrfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-ext4-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-f2fs-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-ntfs-dev-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, linux-scsi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, logfs-PCqxUs/MD9bYtjvyW6yDsg@public.gmane.org, ocfs2-devel-N0ozoZBvEnrZJqsBc5GL+g@public.gmane.org, reiserfs-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, samba-technical-w/Ol4Ecudpl8XjKLYN78aQ@public.gmane.org, xfs-VZNHf3L845pBDgjK7y7TUQ@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-Reviewed-by:
+On Tue, Jun 03, 2014 at 04:22:19PM +0200, Arnd Bergmann wrote:
+> On Monday 02 June 2014 14:57:26 H. Peter Anvin wrote:
+> > On 06/02/2014 12:55 PM, Arnd Bergmann wrote:
+> The possible uses I can see for non-ktime_t types in the kernel are:
+> * inodes need 96 bit timestamps to represent the full range of values
+>   that can be stored in a file system, you made a convincing argument
+>   for that. Almost everything else can fit into 64 bit on a 32-bit
+>   kernel, in theory also on a 64-bit kernel if we want that.
 
-On Thu, 22 May 2014, Ilya Dryomov wrote:
+Just ot be pedantic, inodes don't *need* 96 bit timestamps - some
+filesystems can *support up to* 96 bit timestamps. If the kernel
+only supports 64 bit timestamps and that's all the kernel can
+represent, then the upper bits of the 96 bit on-disk inode
+timestamps simply remain zero.
 
-> Given an existing idle mapping (img1), mapping an image (img2) in
-> a newly created pool (pool2) fails:
-> 
->     $ ceph osd pool create pool1 8 8
->     $ rbd create --size 1000 pool1/img1
->     $ sudo rbd map pool1/img1
->     $ ceph osd pool create pool2 8 8
->     $ rbd create --size 1000 pool2/img2
->     $ sudo rbd map pool2/img2
->     rbd: sysfs write failed
->     rbd: map failed: (2) No such file or directory
-> 
-> This is because client instances are shared by default and we don't
-> request an osdmap update when bumping a ref on an existing client.  The
-> fix is to use the mon_get_version request to see if the osdmap we have
-> is the latest, and block until the requested update is received if it's
-> not.
-> 
-> Fixes: http://tracker.ceph.com/issues/8184
-> 
-> Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
-> ---
-> v2:
-> - send mon_get_version request and wait for a reply only if we were
->   unable to locate the pool (i.e. don't hurt the common case)
-> 
-> v3:
-> - make use of the updated MMonGetVersionReply userspace code, which
->   will now populate MMonGetVersionReply tid with the tid of the
->   original MMonGetVersion request
-> 
->  drivers/block/rbd.c |   36 +++++++++++++++++++++++++++++++++---
->  1 file changed, 33 insertions(+), 3 deletions(-)
-> 
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 552a2edcaa74..daf7b4659b4a 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -4683,6 +4683,38 @@ out_err:
->  }
->  
->  /*
-> + * Return pool id (>= 0) or a negative error code.
-> + */
-> +static int rbd_add_get_pool_id(struct rbd_client *rbdc, const char *pool_name)
-> +{
-> +	u64 newest_epoch;
-> +	unsigned long timeout = rbdc->client->options->mount_timeout * HZ;
-> +	int tries = 0;
-> +	int ret;
-> +
-> +again:
-> +	ret = ceph_pg_poolid_by_name(rbdc->client->osdc.osdmap, pool_name);
-> +	if (ret == -ENOENT && tries++ < 1) {
-> +		ret = ceph_monc_do_get_version(&rbdc->client->monc, "osdmap",
-> +					       &newest_epoch);
-> +		if (ret < 0)
-> +			return ret;
-> +
-> +		if (rbdc->client->osdc.osdmap->epoch < newest_epoch) {
-> +			ceph_monc_request_next_osdmap(&rbdc->client->monc);
-> +			(void) ceph_monc_wait_osdmap(&rbdc->client->monc,
-> +						     newest_epoch, timeout);
-> +			goto again;
-> +		} else {
-> +			/* the osdmap we have is new enough */
-> +			return -ENOENT;
-> +		}
-> +	}
-> +
-> +	return ret;
-> +}
-> +
-> +/*
->   * An rbd format 2 image has a unique identifier, distinct from the
->   * name given to it by the user.  Internally, that identifier is
->   * what's used to specify the names of objects related to the image.
-> @@ -5053,7 +5085,6 @@ static ssize_t do_rbd_add(struct bus_type *bus,
->  	struct rbd_options *rbd_opts = NULL;
->  	struct rbd_spec *spec = NULL;
->  	struct rbd_client *rbdc;
-> -	struct ceph_osd_client *osdc;
->  	bool read_only;
->  	int rc = -ENOMEM;
->  
-> @@ -5075,8 +5106,7 @@ static ssize_t do_rbd_add(struct bus_type *bus,
->  	}
->  
->  	/* pick the pool */
-> -	osdc = &rbdc->client->osdc;
-> -	rc = ceph_pg_poolid_by_name(osdc->osdmap, spec->pool_name);
-> +	rc = rbd_add_get_pool_id(rbdc, spec->pool_name);
->  	if (rc < 0)
->  		goto err_out_client;
->  	spec->pool_id = (u64)rc;
-> -- 
-> 1.7.10.4
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+If you move the filesystem between kernels with different time
+ranges, then the filesystem needs to be able to tell the kernel what
+it's supported range is.  This is where having the VFS limit the
+range of supported timestamps is important: the limit is the
+min(kernel range, filesystem range). This allows the filesystems
+to be indepenent of the kernel time representation, and the kernel
+to be independent of the physical filesystem time encoding....
+
+Cheers,
+
+Dave.
+-- 
+Dave Chinner
+david-FqsqvQoI3Ljby3iVrkZq2A@public.gmane.org
