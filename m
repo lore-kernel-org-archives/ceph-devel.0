@@ -1,273 +1,87 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH v3 2/4] libceph: mon_get_version request infrastructure
-Date: Tue, 3 Jun 2014 13:58:10 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1406031356350.26887@cobra.newdream.net>
-References: <1400777408-7016-1-git-send-email-ilya.dryomov@inktank.com> <1400777408-7016-3-git-send-email-ilya.dryomov@inktank.com>
+Subject: Re: [PATCH v3 3/4] libceph: add ceph_monc_wait_osdmap()
+Date: Tue, 3 Jun 2014 13:59:18 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1406031359130.26887@cobra.newdream.net>
+References: <1400777408-7016-1-git-send-email-ilya.dryomov@inktank.com> <1400777408-7016-4-git-send-email-ilya.dryomov@inktank.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:50291 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:50305 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754395AbaFCU6L (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Jun 2014 16:58:11 -0400
-In-Reply-To: <1400777408-7016-3-git-send-email-ilya.dryomov@inktank.com>
+	with ESMTP id S933057AbaFCU7S (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Jun 2014 16:59:18 -0400
+In-Reply-To: <1400777408-7016-4-git-send-email-ilya.dryomov@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Ilya Dryomov <ilya.dryomov@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
+Reviewed-by:
+
 On Thu, 22 May 2014, Ilya Dryomov wrote:
 
-> Add support for mon_get_version requests to libceph.  This reuses much
-> of the ceph_mon_generic_request infrastructure, with one exception.
-> Older OSDs don't set mon_get_version reply hdr->tid even if the
-> original request had a non-zero tid, which makes it impossible to
-> lookup ceph_mon_generic_request contexts by tid in get_generic_reply()
-> for such replies.  As a workaround, we allocate a reply message on the
-> reply path.  This can probably interfere with revoke, but I don't see
-> a better way.
+> Add ceph_monc_wait_osdmap(), which will block until the osdmap with the
+> specified epoch is received or timeout occurs.
+> 
+> Export both of these as they are going to be needed by rbd.
 > 
 > Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
 > ---
->  include/linux/ceph/mon_client.h |    9 ++-
->  net/ceph/ceph_common.c          |    2 +
->  net/ceph/debugfs.c              |    2 +
->  net/ceph/mon_client.c           |  123 +++++++++++++++++++++++++++++++++++++--
->  4 files changed, 128 insertions(+), 8 deletions(-)
+>  include/linux/ceph/mon_client.h |    2 ++
+>  net/ceph/mon_client.c           |   27 +++++++++++++++++++++++++++
+>  2 files changed, 29 insertions(+)
 > 
 > diff --git a/include/linux/ceph/mon_client.h b/include/linux/ceph/mon_client.h
-> index a486f390dfbe..585ef9450e9d 100644
+> index 585ef9450e9d..deb47e45ac7c 100644
 > --- a/include/linux/ceph/mon_client.h
 > +++ b/include/linux/ceph/mon_client.h
-> @@ -40,9 +40,9 @@ struct ceph_mon_request {
->  };
+> @@ -104,6 +104,8 @@ extern int ceph_monc_got_mdsmap(struct ceph_mon_client *monc, u32 have);
+>  extern int ceph_monc_got_osdmap(struct ceph_mon_client *monc, u32 have);
 >  
->  /*
-> - * ceph_mon_generic_request is being used for the statfs and poolop requests
-> - * which are bening done a bit differently because we need to get data back
-> - * to the caller
-> + * ceph_mon_generic_request is being used for the statfs, poolop and
-> + * mon_get_version requests which are being done a bit differently
-> + * because we need to get data back to the caller
->   */
->  struct ceph_mon_generic_request {
->  	struct kref kref;
-> @@ -108,6 +108,9 @@ extern void ceph_monc_request_next_osdmap(struct ceph_mon_client *monc);
+>  extern void ceph_monc_request_next_osdmap(struct ceph_mon_client *monc);
+> +extern int ceph_monc_wait_osdmap(struct ceph_mon_client *monc, u32 epoch,
+> +				 unsigned long timeout);
+>  
 >  extern int ceph_monc_do_statfs(struct ceph_mon_client *monc,
 >  			       struct ceph_statfs *buf);
->  
-> +extern int ceph_monc_do_get_version(struct ceph_mon_client *monc,
-> +				    const char *what, u64 *newest);
-> +
->  extern int ceph_monc_open_session(struct ceph_mon_client *monc);
->  
->  extern int ceph_monc_validate_auth(struct ceph_mon_client *monc);
-> diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
-> index 67d7721d237e..1675021d8c12 100644
-> --- a/net/ceph/ceph_common.c
-> +++ b/net/ceph/ceph_common.c
-> @@ -72,6 +72,8 @@ const char *ceph_msg_type_name(int type)
->  	case CEPH_MSG_MON_SUBSCRIBE_ACK: return "mon_subscribe_ack";
->  	case CEPH_MSG_STATFS: return "statfs";
->  	case CEPH_MSG_STATFS_REPLY: return "statfs_reply";
-> +	case CEPH_MSG_MON_GET_VERSION: return "mon_get_version";
-> +	case CEPH_MSG_MON_GET_VERSION_REPLY: return "mon_get_version_reply";
->  	case CEPH_MSG_MDS_MAP: return "mds_map";
->  	case CEPH_MSG_CLIENT_SESSION: return "client_session";
->  	case CEPH_MSG_CLIENT_RECONNECT: return "client_reconnect";
-> diff --git a/net/ceph/debugfs.c b/net/ceph/debugfs.c
-> index 8903dcee8d8e..d1a62c69a9f4 100644
-> --- a/net/ceph/debugfs.c
-> +++ b/net/ceph/debugfs.c
-> @@ -129,6 +129,8 @@ static int monc_show(struct seq_file *s, void *p)
->  			seq_printf(s, "%llu statfs\n", req->tid);
->  		else if (op == CEPH_MSG_POOLOP)
->  			seq_printf(s, "%llu poolop\n", req->tid);
-> +		else if (op == CEPH_MSG_MON_GET_VERSION)
-> +			seq_printf(s, "%llu mon_get_version", req->tid);
->  		else
->  			seq_printf(s, "%llu unknown\n", req->tid);
->  	}
 > diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
-> index 2ac9ef35110b..6b46f1205ceb 100644
+> index 6b46f1205ceb..ecfd65c05f49 100644
 > --- a/net/ceph/mon_client.c
 > +++ b/net/ceph/mon_client.c
-> @@ -477,14 +477,13 @@ static struct ceph_msg *get_generic_reply(struct ceph_connection *con,
->  	return m;
+> @@ -296,6 +296,33 @@ void ceph_monc_request_next_osdmap(struct ceph_mon_client *monc)
+>  		__send_subscribe(monc);
+>  	mutex_unlock(&monc->mutex);
 >  }
->  
-> -static int do_generic_request(struct ceph_mon_client *monc,
-> -			      struct ceph_mon_generic_request *req)
-> +static int __do_generic_request(struct ceph_mon_client *monc, u64 tid,
-> +				struct ceph_mon_generic_request *req)
->  {
->  	int err;
->  
->  	/* register request */
-> -	mutex_lock(&monc->mutex);
-> -	req->tid = ++monc->last_tid;
-> +	req->tid = tid != 0 ? tid : ++monc->last_tid;
->  	req->request->hdr.tid = cpu_to_le64(req->tid);
->  	__insert_generic_request(monc, req);
->  	monc->num_generic_requests++;
-> @@ -496,13 +495,24 @@ static int do_generic_request(struct ceph_mon_client *monc,
->  	mutex_lock(&monc->mutex);
->  	rb_erase(&req->node, &monc->generic_request_tree);
->  	monc->num_generic_requests--;
-> -	mutex_unlock(&monc->mutex);
->  
->  	if (!err)
->  		err = req->result;
->  	return err;
->  }
->  
-> +static int do_generic_request(struct ceph_mon_client *monc,
-> +			      struct ceph_mon_generic_request *req)
+> +EXPORT_SYMBOL(ceph_monc_request_next_osdmap);
+> +
+> +int ceph_monc_wait_osdmap(struct ceph_mon_client *monc, u32 epoch,
+> +			  unsigned long timeout)
 > +{
-> +	int err;
+> +	unsigned long started = jiffies;
+> +	int ret;
 > +
 > +	mutex_lock(&monc->mutex);
-> +	err = __do_generic_request(monc, 0, req);
+> +	while (monc->have_osdmap < epoch) {
+> +		mutex_unlock(&monc->mutex);
+> +
+> +		if (timeout != 0 && time_after_eq(jiffies, started + timeout))
+> +			return -ETIMEDOUT;
+> +
+> +		ret = wait_event_interruptible_timeout(monc->client->auth_wq,
+> +					 monc->have_osdmap >= epoch, timeout);
+> +		if (ret < 0)
+> +			return ret;
+> +
+> +		mutex_lock(&monc->mutex);
+> +	}
+> +
 > +	mutex_unlock(&monc->mutex);
-> +
-> +	return err;
+> +	return 0;
 > +}
-> +
+> +EXPORT_SYMBOL(ceph_monc_wait_osdmap);
+>  
 >  /*
->   * statfs
->   */
-> @@ -579,6 +589,96 @@ out:
->  }
->  EXPORT_SYMBOL(ceph_monc_do_statfs);
->  
-> +static void handle_get_version_reply(struct ceph_mon_client *monc,
-> +				     struct ceph_msg *msg)
-> +{
-> +	struct ceph_mon_generic_request *req;
-> +	u64 tid = le64_to_cpu(msg->hdr.tid);
-> +	void *p = msg->front.iov_base;
-> +	void *end = p + msg->front_alloc_len;
-> +	u64 handle;
-> +
-> +	dout("%s %p tid %llu\n", __func__, msg, tid);
-> +
-> +	ceph_decode_need(&p, end, 2*sizeof(u64), bad);
-> +	handle = ceph_decode_64(&p);
-> +	if (tid != 0 && tid != handle)
-> +		goto bad;
-> +
-> +	mutex_lock(&monc->mutex);
-> +	req = __lookup_generic_req(monc, handle);
-> +	if (req) {
-> +		*(u64 *)req->buf = ceph_decode_64(&p);
-> +		req->result = 0;
-> +		get_generic_request(req);
-> +	}
-> +	mutex_unlock(&monc->mutex);
-> +	if (req) {
-> +		complete_all(&req->completion);
-> +		put_generic_request(req);
-> +	}
-> +
-> +	return;
-> +bad:
-> +	pr_err("corrupt mon_get_version reply\n");
-> +	ceph_msg_dump(msg);
-> +}
-> +
-> +/*
-> + * Send MMonGetVersion and wait for the reply.
-> + *
-> + * @what: one of "mdsmap", "osdmap" or "monmap"
-> + */
-> +int ceph_monc_do_get_version(struct ceph_mon_client *monc, const char *what,
-> +			     u64 *newest)
-> +{
-> +	struct ceph_mon_generic_request *req;
-> +	void *p, *end;
-> +	u64 tid;
-> +	int err;
-> +
-> +	req = kzalloc(sizeof(*req), GFP_NOFS);
-> +	if (!req)
-> +		return -ENOMEM;
-> +
-> +	kref_init(&req->kref);
-> +	req->buf = newest;
-> +	req->buf_len = sizeof(*newest);
-> +	init_completion(&req->completion);
-> +
-> +	req->request = ceph_msg_new(CEPH_MSG_MON_GET_VERSION,
-> +				    sizeof(u64) + sizeof(u32) + strlen(what),
-> +				    GFP_NOFS, true);
-> +	if (!req->request) {
-> +		err = -ENOMEM;
-> +		goto out;
-> +	}
-> +
-> +	req->reply = ceph_msg_new(CEPH_MSG_MON_GET_VERSION_REPLY, 1024,
-> +				  GFP_NOFS, true);
-> +	if (!req->request) {
-
-req->reply
-
-With that change, Reviewed-by:
-
-sage
-
-
-> +		err = -ENOMEM;
-> +		goto out;
-> +	}
-> +
-> +	p = req->request->front.iov_base;
-> +	end = p + req->request->front_alloc_len;
-> +
-> +	/* fill out request */
-> +	mutex_lock(&monc->mutex);
-> +	tid = ++monc->last_tid;
-> +	ceph_encode_64(&p, tid); /* handle */
-> +	ceph_encode_string(&p, end, what, strlen(what));
-> +
-> +	err = __do_generic_request(monc, tid, req);
-> +
-> +	mutex_unlock(&monc->mutex);
-> +out:
-> +	kref_put(&req->kref, release_generic_request);
-> +	return err;
-> +}
-> +EXPORT_SYMBOL(ceph_monc_do_get_version);
-> +
->  /*
->   * pool ops
->   */
-> @@ -981,6 +1081,10 @@ static void dispatch(struct ceph_connection *con, struct ceph_msg *msg)
->  		handle_statfs_reply(monc, msg);
->  		break;
->  
-> +	case CEPH_MSG_MON_GET_VERSION_REPLY:
-> +		handle_get_version_reply(monc, msg);
-> +		break;
-> +
->  	case CEPH_MSG_POOLOP_REPLY:
->  		handle_poolop_reply(monc, msg);
->  		break;
-> @@ -1029,6 +1133,15 @@ static struct ceph_msg *mon_alloc_msg(struct ceph_connection *con,
->  	case CEPH_MSG_AUTH_REPLY:
->  		m = ceph_msg_get(monc->m_auth_reply);
->  		break;
-> +	case CEPH_MSG_MON_GET_VERSION_REPLY:
-> +		if (le64_to_cpu(hdr->tid) != 0)
-> +			return get_generic_reply(con, hdr, skip);
-> +
-> +		/*
-> +		 * Older OSDs don't set reply tid even if the orignal
-> +		 * request had a non-zero tid.  Workaround this weirdness
-> +		 * by falling through to the allocate case.
-> +		 */
->  	case CEPH_MSG_MON_MAP:
->  	case CEPH_MSG_MDS_MAP:
->  	case CEPH_MSG_OSD_MAP:
+>   *
 > -- 
 > 1.7.10.4
 > 
