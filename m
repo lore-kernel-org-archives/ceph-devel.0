@@ -1,69 +1,42 @@
-From: Nicolas Pitre <nicolas.pitre@linaro.org>
-Subject: Re: [RFC 00/32] making inode time stamps y2038 ready
-Date: Wed, 4 Jun 2014 13:30:32 -0400 (EDT)
-Message-ID: <alpine.LFD.2.11.1406041308300.17310@knanqh.ubzr>
-References: <1401480116-1973111-1-git-send-email-arnd@arndb.de>
- <5011138.W0gbOc20Qp@wuerfel> <20140603213802.GH14410@dastard>
- <201406041703.47592.arnd@arndb.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org>
-In-Reply-To: <201406041703.47592.arnd@arndb.de>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mtd>,
- <mailto:linux-mtd-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-mtd/>
-List-Post: <mailto:linux-mtd@lists.infradead.org>
-List-Help: <mailto:linux-mtd-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mtd>,
- <mailto:linux-mtd-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-mtd" <linux-mtd-bounces@lists.infradead.org>
-Errors-To: linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: hch@infradead.org, Dave Chinner <david@fromorbit.com>, linux-mtd@lists.infradead.org, "H. Peter Anvin" <hpa@zytor.com>, linux-f2fs-devel@lists.sourceforge.net, ceph-devel@vger.kernel.org, "Joseph S. Myers" <joseph@codesourcery.com>, linux-arch@vger.kernel.org, linux-cifs@vger.kernel.org, linux-scsi@vger.kernel.org, linux-afs@lists.infradead.org, cluster-devel@redhat.com, coda@cs.cmu.edu, geert@linux-m68k.org, linux-ext4@vger.kernel.org, codalist@telemann.coda.cs.cmu.edu, fuse-devel@lists.sourceforge.net, reiserfs-devel@vger.kernel.org, xfs@oss.sgi.com, john.stultz@linaro.org, tglx@linutronix.de, linux-nfs@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, samba-technical@lists.samba.org, linux-kernel@vger.kernel.org, logfs@logfs.org, linux-btrfs@vger.kernel.org, linux-fsdevel@vger.kernel.org, lftan@altera.com, ocfs2-devel@oss.oracle.com
-List-Id: ceph-devel.vger.kernel.org
+From: Ilya Dryomov <ilya.dryomov@inktank.com>
+Subject: [PATCH] rbd: fix ida/idr memory leak
+Date: Wed,  4 Jun 2014 20:38:37 +0400
+Message-ID: <1401899917-11254-1-git-send-email-ilya.dryomov@inktank.com>
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-la0-f47.google.com ([209.85.215.47]:35272 "EHLO
+	mail-la0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750944AbaFDQil (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Jun 2014 12:38:41 -0400
+Received: by mail-la0-f47.google.com with SMTP id pn19so4577190lab.34
+        for <ceph-devel@vger.kernel.org>; Wed, 04 Jun 2014 09:38:40 -0700 (PDT)
+Received: from localhost ([109.110.66.45])
+        by mx.google.com with ESMTPSA id vq4sm2973240lbb.14.2014.06.04.09.38.38
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=RC4-SHA bits=128/128);
+        Wed, 04 Jun 2014 09:38:39 -0700 (PDT)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Wed, 4 Jun 2014, Arnd Bergmann wrote:
+ida_destroy() needs to be called on module exit to release ida caches.
 
-> On Tuesday 03 June 2014, Dave Chinner wrote:
-> > Just ot be pedantic, inodes don't need 96 bit timestamps - some
-> > filesystems can *support up to* 96 bit timestamps. If the kernel
-> > only supports 64 bit timestamps and that's all the kernel can
-> > represent, then the upper bits of the 96 bit on-disk inode
-> > timestamps simply remain zero.
-> 
-> I meant the reverse: since we have file systems that can store
-> 96-bit timestamps when using 64-bit kernels, we need to extend
-> 32-bit kernels to have the same internal representation so we
-> can actually read those file systems correctly.
-> 
-> > If you move the filesystem between kernels with different time
-> > ranges, then the filesystem needs to be able to tell the kernel what
-> > it's supported range is.  This is where having the VFS limit the
-> > range of supported timestamps is important: the limit is the
-> > min(kernel range, filesystem range). This allows the filesystems
-> > to be indepenent of the kernel time representation, and the kernel
-> > to be independent of the physical filesystem time encoding....
-> 
-> I agree it makes sense to let the kernel know about the limits
-> of the file system it accesses, but for the reverse, we're probably
-> better off just making the kernel representation large enough (i.e.
-> 96 bits) so it can work with any known file system.
+Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
+---
+ drivers/block/rbd.c |    1 +
+ 1 file changed, 1 insertion(+)
 
-Depends...  96 bit handling may get prohibitive on 32-bit archs.
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 94747afc2e78..ecdd4aee173c 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -5464,6 +5464,7 @@ err_out_slab:
+ 
+ static void __exit rbd_exit(void)
+ {
++	ida_destroy(&rbd_dev_id_ida);
+ 	rbd_sysfs_cleanup();
+ 	if (single_major)
+ 		unregister_blkdev(rbd_major, RBD_DRV_NAME);
+-- 
+1.7.10.4
 
-The important point here is for the kernel to be able to represent the 
-time _range_ used by any known filesystem, not necessarily the time 
-_precision_.
-
-For example, a 64 bit representation can be made of 40 bits for seconds 
-spanning 34865 years, and 24 bits for fractional seconds providing 
-precision down to 60 nanosecs.  That ought to be plenty good on 32 bit 
-systems while still being cheap to handle.
-
-
-Nicolas
-
-______________________________________________________
-Linux MTD discussion mailing list
-http://lists.infradead.org/mailman/listinfo/linux-mtd/
