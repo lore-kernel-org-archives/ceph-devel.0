@@ -1,225 +1,34 @@
-From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: Re: [PATCH v3 2/4] libceph: mon_get_version request infrastructure
-Date: Wed, 4 Jun 2014 11:39:36 +0400
-Message-ID: <CALFYKtBPUy--om=H0dxehQq_14LqfYFGWdyjkZ4kEe261k1BBA@mail.gmail.com>
-References: <1400777408-7016-1-git-send-email-ilya.dryomov@inktank.com>
-	<1400777408-7016-3-git-send-email-ilya.dryomov@inktank.com>
-	<alpine.DEB.2.00.1406031356350.26887@cobra.newdream.net>
+From: Ruben Kerkhof <ruben@rubenkerkhof.com>
+Subject: Re: Official Ceph RPM build flags needed
+Date: Wed, 4 Jun 2014 09:40:17 +0200
+Message-ID: <CAPed3OFsc0GCaH22DsMAgJL5+Tnktzc+bOMxUOoxbsgfRpj8MQ@mail.gmail.com>
+References: <46cee548efee484b8edf2b24e0cc4340@EPBYMINSA0001.epam.com>
+ <CAJZMiudJFUfWncXhkVncYOhzOXzkSLCgRYLrU=vTrFwDNSZykw@mail.gmail.com> <285a083a91ed4cb6867d0a86e9bbda0b@EPBYMINSA0001.epam.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qg0-f43.google.com ([209.85.192.43]:53715 "EHLO
-	mail-qg0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755429AbaFDHjh (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Jun 2014 03:39:37 -0400
-Received: by mail-qg0-f43.google.com with SMTP id 63so14956345qgz.16
-        for <ceph-devel@vger.kernel.org>; Wed, 04 Jun 2014 00:39:36 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1406031356350.26887@cobra.newdream.net>
+Received: from mail-pb0-f45.google.com ([209.85.160.45]:52629 "EHLO
+	mail-pb0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755429AbaFDHkj (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Jun 2014 03:40:39 -0400
+Received: by mail-pb0-f45.google.com with SMTP id um1so6612185pbc.18
+        for <ceph-devel@vger.kernel.org>; Wed, 04 Jun 2014 00:40:39 -0700 (PDT)
+In-Reply-To: <285a083a91ed4cb6867d0a86e9bbda0b@EPBYMINSA0001.epam.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Ilya Storozhilov <Ilya_Storozhilov@epam.com>
+Cc: Daniel Sterling <sterling.daniel@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, Jun 4, 2014 at 12:58 AM, Sage Weil <sage@inktank.com> wrote:
-> On Thu, 22 May 2014, Ilya Dryomov wrote:
->
->> Add support for mon_get_version requests to libceph.  This reuses much
->> of the ceph_mon_generic_request infrastructure, with one exception.
->> Older OSDs don't set mon_get_version reply hdr->tid even if the
->> original request had a non-zero tid, which makes it impossible to
->> lookup ceph_mon_generic_request contexts by tid in get_generic_reply()
->> for such replies.  As a workaround, we allocate a reply message on the
->> reply path.  This can probably interfere with revoke, but I don't see
->> a better way.
->>
->> Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
->> ---
->>  include/linux/ceph/mon_client.h |    9 ++-
->>  net/ceph/ceph_common.c          |    2 +
->>  net/ceph/debugfs.c              |    2 +
->>  net/ceph/mon_client.c           |  123 +++++++++++++++++++++++++++++++++++++--
->>  4 files changed, 128 insertions(+), 8 deletions(-)
->>
->> diff --git a/include/linux/ceph/mon_client.h b/include/linux/ceph/mon_client.h
->> index a486f390dfbe..585ef9450e9d 100644
->> --- a/include/linux/ceph/mon_client.h
->> +++ b/include/linux/ceph/mon_client.h
->> @@ -40,9 +40,9 @@ struct ceph_mon_request {
->>  };
->>
->>  /*
->> - * ceph_mon_generic_request is being used for the statfs and poolop requests
->> - * which are bening done a bit differently because we need to get data back
->> - * to the caller
->> + * ceph_mon_generic_request is being used for the statfs, poolop and
->> + * mon_get_version requests which are being done a bit differently
->> + * because we need to get data back to the caller
->>   */
->>  struct ceph_mon_generic_request {
->>       struct kref kref;
->> @@ -108,6 +108,9 @@ extern void ceph_monc_request_next_osdmap(struct ceph_mon_client *monc);
->>  extern int ceph_monc_do_statfs(struct ceph_mon_client *monc,
->>                              struct ceph_statfs *buf);
->>
->> +extern int ceph_monc_do_get_version(struct ceph_mon_client *monc,
->> +                                 const char *what, u64 *newest);
->> +
->>  extern int ceph_monc_open_session(struct ceph_mon_client *monc);
->>
->>  extern int ceph_monc_validate_auth(struct ceph_mon_client *monc);
->> diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
->> index 67d7721d237e..1675021d8c12 100644
->> --- a/net/ceph/ceph_common.c
->> +++ b/net/ceph/ceph_common.c
->> @@ -72,6 +72,8 @@ const char *ceph_msg_type_name(int type)
->>       case CEPH_MSG_MON_SUBSCRIBE_ACK: return "mon_subscribe_ack";
->>       case CEPH_MSG_STATFS: return "statfs";
->>       case CEPH_MSG_STATFS_REPLY: return "statfs_reply";
->> +     case CEPH_MSG_MON_GET_VERSION: return "mon_get_version";
->> +     case CEPH_MSG_MON_GET_VERSION_REPLY: return "mon_get_version_reply";
->>       case CEPH_MSG_MDS_MAP: return "mds_map";
->>       case CEPH_MSG_CLIENT_SESSION: return "client_session";
->>       case CEPH_MSG_CLIENT_RECONNECT: return "client_reconnect";
->> diff --git a/net/ceph/debugfs.c b/net/ceph/debugfs.c
->> index 8903dcee8d8e..d1a62c69a9f4 100644
->> --- a/net/ceph/debugfs.c
->> +++ b/net/ceph/debugfs.c
->> @@ -129,6 +129,8 @@ static int monc_show(struct seq_file *s, void *p)
->>                       seq_printf(s, "%llu statfs\n", req->tid);
->>               else if (op == CEPH_MSG_POOLOP)
->>                       seq_printf(s, "%llu poolop\n", req->tid);
->> +             else if (op == CEPH_MSG_MON_GET_VERSION)
->> +                     seq_printf(s, "%llu mon_get_version", req->tid);
->>               else
->>                       seq_printf(s, "%llu unknown\n", req->tid);
->>       }
->> diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
->> index 2ac9ef35110b..6b46f1205ceb 100644
->> --- a/net/ceph/mon_client.c
->> +++ b/net/ceph/mon_client.c
->> @@ -477,14 +477,13 @@ static struct ceph_msg *get_generic_reply(struct ceph_connection *con,
->>       return m;
->>  }
->>
->> -static int do_generic_request(struct ceph_mon_client *monc,
->> -                           struct ceph_mon_generic_request *req)
->> +static int __do_generic_request(struct ceph_mon_client *monc, u64 tid,
->> +                             struct ceph_mon_generic_request *req)
->>  {
->>       int err;
->>
->>       /* register request */
->> -     mutex_lock(&monc->mutex);
->> -     req->tid = ++monc->last_tid;
->> +     req->tid = tid != 0 ? tid : ++monc->last_tid;
->>       req->request->hdr.tid = cpu_to_le64(req->tid);
->>       __insert_generic_request(monc, req);
->>       monc->num_generic_requests++;
->> @@ -496,13 +495,24 @@ static int do_generic_request(struct ceph_mon_client *monc,
->>       mutex_lock(&monc->mutex);
->>       rb_erase(&req->node, &monc->generic_request_tree);
->>       monc->num_generic_requests--;
->> -     mutex_unlock(&monc->mutex);
->>
->>       if (!err)
->>               err = req->result;
->>       return err;
->>  }
->>
->> +static int do_generic_request(struct ceph_mon_client *monc,
->> +                           struct ceph_mon_generic_request *req)
->> +{
->> +     int err;
->> +
->> +     mutex_lock(&monc->mutex);
->> +     err = __do_generic_request(monc, 0, req);
->> +     mutex_unlock(&monc->mutex);
->> +
->> +     return err;
->> +}
->> +
->>  /*
->>   * statfs
->>   */
->> @@ -579,6 +589,96 @@ out:
->>  }
->>  EXPORT_SYMBOL(ceph_monc_do_statfs);
->>
->> +static void handle_get_version_reply(struct ceph_mon_client *monc,
->> +                                  struct ceph_msg *msg)
->> +{
->> +     struct ceph_mon_generic_request *req;
->> +     u64 tid = le64_to_cpu(msg->hdr.tid);
->> +     void *p = msg->front.iov_base;
->> +     void *end = p + msg->front_alloc_len;
->> +     u64 handle;
->> +
->> +     dout("%s %p tid %llu\n", __func__, msg, tid);
->> +
->> +     ceph_decode_need(&p, end, 2*sizeof(u64), bad);
->> +     handle = ceph_decode_64(&p);
->> +     if (tid != 0 && tid != handle)
->> +             goto bad;
->> +
->> +     mutex_lock(&monc->mutex);
->> +     req = __lookup_generic_req(monc, handle);
->> +     if (req) {
->> +             *(u64 *)req->buf = ceph_decode_64(&p);
->> +             req->result = 0;
->> +             get_generic_request(req);
->> +     }
->> +     mutex_unlock(&monc->mutex);
->> +     if (req) {
->> +             complete_all(&req->completion);
->> +             put_generic_request(req);
->> +     }
->> +
->> +     return;
->> +bad:
->> +     pr_err("corrupt mon_get_version reply\n");
->> +     ceph_msg_dump(msg);
->> +}
->> +
->> +/*
->> + * Send MMonGetVersion and wait for the reply.
->> + *
->> + * @what: one of "mdsmap", "osdmap" or "monmap"
->> + */
->> +int ceph_monc_do_get_version(struct ceph_mon_client *monc, const char *what,
->> +                          u64 *newest)
->> +{
->> +     struct ceph_mon_generic_request *req;
->> +     void *p, *end;
->> +     u64 tid;
->> +     int err;
->> +
->> +     req = kzalloc(sizeof(*req), GFP_NOFS);
->> +     if (!req)
->> +             return -ENOMEM;
->> +
->> +     kref_init(&req->kref);
->> +     req->buf = newest;
->> +     req->buf_len = sizeof(*newest);
->> +     init_completion(&req->completion);
->> +
->> +     req->request = ceph_msg_new(CEPH_MSG_MON_GET_VERSION,
->> +                                 sizeof(u64) + sizeof(u32) + strlen(what),
->> +                                 GFP_NOFS, true);
->> +     if (!req->request) {
->> +             err = -ENOMEM;
->> +             goto out;
->> +     }
->> +
->> +     req->reply = ceph_msg_new(CEPH_MSG_MON_GET_VERSION_REPLY, 1024,
->> +                               GFP_NOFS, true);
->> +     if (!req->request) {
->
-> req->reply
->
-> With that change, Reviewed-by:
+On Tue, Jun 3, 2014 at 6:19 PM, Ilya Storozhilov
+<Ilya_Storozhilov@epam.com> wrote:
+> So it seems, that this is up to packager what to put to RPM_OPT_FLAGS environment variable on packaging. Maybe someone knows what particular value is used?
+> Thank you!
 
-Updated, pushed to testing.
+You can see what the actual value is by running:
+$ rpm --eval '%{optflags}'
+-O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions
+-fstack-protector --param=ssp-buffer-size=4 -m64 -mtune=generic
 
-Thanks,
+Hope it helps,
 
-                Ilya
+Ruben Kerkhof
