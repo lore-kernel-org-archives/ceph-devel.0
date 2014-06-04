@@ -1,42 +1,33 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [RFC 00/32] making inode time stamps y2038 ready
-Date: Wed, 4 Jun 2014 17:05:27 +0200
-Message-ID: <201406041705.27599.arnd@arndb.de>
-References: <1401480116-1973111-1-git-send-email-arnd@arndb.de> <4233989.Saca0ocOUr@wuerfel> <Pine.LNX.4.64.1406022044090.27099@digraph.polyomino.org.uk>
+From: Sylvain Munaut <s.munaut@whatever-company.com>
+Subject: RGW: Multi part upload - Attributes not copied from the upload object
+ to the final meta object
+Date: Wed, 4 Jun 2014 17:10:08 +0200
+Message-ID: <CAF6-1L4rcN+P21sN2-ofrXdjqsLLbT4VYEMWzuu-1-evWBs9Yw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <Pine.LNX.4.64.1406022044090.27099@digraph.polyomino.org.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Joseph S. Myers" <joseph@codesourcery.com>
-Cc: linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, john.stultz@linaro.org, hch@infradead.org, tglx@linutronix.de, geert@linux-m68k.org, lftan@altera.com, hpa@zytor.com, linux-fsdevel@vger.kernel.org, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, coda@cs.cmu.edu, codalist@coda.cs.cmu.edu, fuse-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, linux-btrfs@vger.kernel.org, linux-cifs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, linux-mtd@lists.infradead.org, linux-nfs@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-scsi@vger.kernel.org, logfs@logfs.org, ocfs2-devel@oss.oracle.com, reiserfs-devel@vger.kernel.org, samba-technical@lists.samba.org, xfs@oss.sgi.com
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-pd0-f181.google.com ([209.85.192.181]:61010 "EHLO
+	mail-pd0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751728AbaFDPKJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Jun 2014 11:10:09 -0400
+Received: by mail-pd0-f181.google.com with SMTP id z10so6126653pdj.26
+        for <ceph-devel@vger.kernel.org>; Wed, 04 Jun 2014 08:10:09 -0700 (PDT)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Monday 02 June 2014, Joseph S. Myers wrote:
-> On Mon, 2 Jun 2014, Arnd Bergmann wrote:
-> 
-> > Ok. Sorry about missing linux-api, I confused it with linux-arch, which
-> > may not be as relevant here, except for the one question whether we
-> > actually want to have the new ABI on all 32-bit architectures or only
-> > as an opt-in for those that expect to stay around for another 24 years.
-> 
-> For glibc I think it will make the most sense to add the support for 
-> 64-bit time_t across all architectures that currently have 32-bit time_t 
-> (with the new interfaces having fallback support to implementation in 
-> terms of the 32-bit kernel interfaces, if the 64-bit syscalls are 
-> unavailable either at runtime or in the kernel headers against which glibc 
-> is compiled - this fallback code will of course need to check for overflow 
-> when passing a time value to the kernel, hopefully with error handling 
-> consistent with whatever the kernel ends up doing when a filesystem can't 
-> support a timestamp).  If some architectures don't provide the new 
-> interfaces in the kernel then that will mean the fallback code in glibc 
-> can't be removed until glibc support for those architectures is removed 
-> (as opposed to removing it when glibc no longer supports kernels predating 
-> the kernel support).
+Hi,
 
-Ok, that's a good reason to just provide the new interfaces on all
-architectures right away. Thanks for the insight!
 
-	Arnd
+When playing around with firefly, I noticed that the content-type I'm
+setting when doing multi-part upload is not taken into account.
+
+And looking at the rados object, I can see the xattr present on the
+.meta file (upload obj), but when doing a complete, that object is
+removed and the attributes are not copied over to the final object
+AFAICT.
+
+
+Cheers,
+
+    Sylvain
