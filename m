@@ -1,115 +1,225 @@
-From: Haomai Wang <haomaiwang-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [Annonce]The progress of KeyValueStore in Firely
-Date: Wed, 4 Jun 2014 13:02:39 +0800
-Message-ID: <CACJqLyZk9soijDtM1QfsL76AdthvWkHWp0=1rBWBswgza4evqg@mail.gmail.com>
-References: <CACJqLybuA48Jnz6Qwc7cs2kHJO30C4GwazXi8yGp8ZhvfFc2ZQ@mail.gmail.com>
-	<531123F6.5070007@bisect.de>
-	<CACJqLybtitrDOcTcRXBZYJy552JzeYZWp_d=yWGUofxT7E46+A@mail.gmail.com>
-	<CAOj3taPYaJfdipyiqFavw1AT24ZumrCVWm4FrUnEc1Ki7cah9Q@mail.gmail.com>
-	<CACJqLyY=BBKKdwOsEoDbo8OfD+o2B2XoSEtmnQ8=nNCm4EaADQ@mail.gmail.com>
-	<CAOj3taONVV8rMAgu8Cen=eCZ2ycYjSs8u3nfKiJUptdb7ffyEA@mail.gmail.com>
-	<538E2361.2040400@bisect.de>
-	<CAOj3taNQeKyicMvmaMU-EcE_abzoZ1fSERDNqONy99jvJLCg-A@mail.gmail.com>
+From: Ilya Dryomov <ilya.dryomov@inktank.com>
+Subject: Re: [PATCH v3 2/4] libceph: mon_get_version request infrastructure
+Date: Wed, 4 Jun 2014 11:39:36 +0400
+Message-ID: <CALFYKtBPUy--om=H0dxehQq_14LqfYFGWdyjkZ4kEe261k1BBA@mail.gmail.com>
+References: <1400777408-7016-1-git-send-email-ilya.dryomov@inktank.com>
+	<1400777408-7016-3-git-send-email-ilya.dryomov@inktank.com>
+	<alpine.DEB.2.00.1406031356350.26887@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAOj3taNQeKyicMvmaMU-EcE_abzoZ1fSERDNqONy99jvJLCg-A-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sushma R <gsushma-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-qg0-f43.google.com ([209.85.192.43]:53715 "EHLO
+	mail-qg0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755429AbaFDHjh (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Jun 2014 03:39:37 -0400
+Received: by mail-qg0-f43.google.com with SMTP id 63so14956345qgz.16
+        for <ceph-devel@vger.kernel.org>; Wed, 04 Jun 2014 00:39:36 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.00.1406031356350.26887@cobra.newdream.net>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-The fix pull request is https://github.com/ceph/ceph/pull/1912/files.
-
-Someone can help to review and merge
-
-On Wed, Jun 4, 2014 at 3:38 AM, Sushma R <gsushma-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> ceph version : master (ceph version 0.80-713-g86754cc
-> (86754cc78ca570f19f5a68fb634d613f952a22eb))
-> fio version : fio-2.1.9-20-g290a
+On Wed, Jun 4, 2014 at 12:58 AM, Sage Weil <sage@inktank.com> wrote:
+> On Thu, 22 May 2014, Ilya Dryomov wrote:
 >
-> gdb backtrace
-> #0  0x00007ffff6de5249 in AO_fetch_and_add_full (incr=1, p=0x7fff00000018)
-> at /usr/include/atomic_ops/sysdeps/gcc/x86.h:68
-> #1  inc (this=0x7fff00000018) at ./include/atomic.h:98
-> #2  ceph::buffer::ptr::ptr (this=0x7fffecf74820, p=..., o=<optimized out>,
-> l=0) at common/buffer.cc:575
-> #3  0x00007ffff6de63df in ceph::buffer::list::append
-> (this=this@entry=0x7fffc80008e8, bp=..., off=<optimized out>,
-> len=len@entry=0) at common/buffer.cc:1267
-> #4  0x00007ffff6de6a44 in ceph::buffer::list::splice (this=0x7fffe4014590,
-> off=<optimized out>, len=64512, claim_by=0x7fffc80008e8) at
-> common/buffer.cc:1426
-> #5  0x00007ffff7b89d45 in
-> Striper::StripedReadResult::add_partial_sparse_result (this=0x7fffe4014278,
-> cct=0x7fffe4006f50, bl=..., bl_map=..., bl_off=3670016,
->     buffer_extents=...) at osdc/Striper.cc:291
-> #6  0x00007ffff7b180d8 in librbd::C_AioRead::finish (this=0x7fffe400d6a0,
-> r=<optimized out>) at librbd/AioCompletion.cc:94
-> #7  0x00007ffff7b182f9 in Context::complete (this=0x7fffe400d6a0,
-> r=<optimized out>) at ./include/Context.h:64
-> #8  0x00007ffff7b1840d in librbd::AioRequest::complete (this=0x7fffe4014540,
-> r=0) at ./librbd/AioRequest.h:40
-> #9  0x00007ffff6d3a538 in librados::C_AioComplete::finish
-> (this=0x7fffdc0025c0, r=<optimized out>) at
-> ./librados/AioCompletionImpl.h:178
-> #10 0x00007ffff7b182f9 in Context::complete (this=0x7fffdc0025c0,
-> r=<optimized out>) at ./include/Context.h:64
-> #11 0x00007ffff6dc85f0 in Finisher::finisher_thread_entry
-> (this=0x7fffe400c7c8) at common/Finisher.cc:56
-> #12 0x00007ffff5f49f8e in start_thread (arg=0x7fffecf75700) at
-> pthread_create.c:311
-> #13 0x00007ffff5a6fa0d in clone () at
-> ../sysdeps/unix/sysv/linux/x86_64/clone.S:113
+>> Add support for mon_get_version requests to libceph.  This reuses much
+>> of the ceph_mon_generic_request infrastructure, with one exception.
+>> Older OSDs don't set mon_get_version reply hdr->tid even if the
+>> original request had a non-zero tid, which makes it impossible to
+>> lookup ceph_mon_generic_request contexts by tid in get_generic_reply()
+>> for such replies.  As a workaround, we allocate a reply message on the
+>> reply path.  This can probably interfere with revoke, but I don't see
+>> a better way.
+>>
+>> Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
+>> ---
+>>  include/linux/ceph/mon_client.h |    9 ++-
+>>  net/ceph/ceph_common.c          |    2 +
+>>  net/ceph/debugfs.c              |    2 +
+>>  net/ceph/mon_client.c           |  123 +++++++++++++++++++++++++++++++++++++--
+>>  4 files changed, 128 insertions(+), 8 deletions(-)
+>>
+>> diff --git a/include/linux/ceph/mon_client.h b/include/linux/ceph/mon_client.h
+>> index a486f390dfbe..585ef9450e9d 100644
+>> --- a/include/linux/ceph/mon_client.h
+>> +++ b/include/linux/ceph/mon_client.h
+>> @@ -40,9 +40,9 @@ struct ceph_mon_request {
+>>  };
+>>
+>>  /*
+>> - * ceph_mon_generic_request is being used for the statfs and poolop requests
+>> - * which are bening done a bit differently because we need to get data back
+>> - * to the caller
+>> + * ceph_mon_generic_request is being used for the statfs, poolop and
+>> + * mon_get_version requests which are being done a bit differently
+>> + * because we need to get data back to the caller
+>>   */
+>>  struct ceph_mon_generic_request {
+>>       struct kref kref;
+>> @@ -108,6 +108,9 @@ extern void ceph_monc_request_next_osdmap(struct ceph_mon_client *monc);
+>>  extern int ceph_monc_do_statfs(struct ceph_mon_client *monc,
+>>                              struct ceph_statfs *buf);
+>>
+>> +extern int ceph_monc_do_get_version(struct ceph_mon_client *monc,
+>> +                                 const char *what, u64 *newest);
+>> +
+>>  extern int ceph_monc_open_session(struct ceph_mon_client *monc);
+>>
+>>  extern int ceph_monc_validate_auth(struct ceph_mon_client *monc);
+>> diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
+>> index 67d7721d237e..1675021d8c12 100644
+>> --- a/net/ceph/ceph_common.c
+>> +++ b/net/ceph/ceph_common.c
+>> @@ -72,6 +72,8 @@ const char *ceph_msg_type_name(int type)
+>>       case CEPH_MSG_MON_SUBSCRIBE_ACK: return "mon_subscribe_ack";
+>>       case CEPH_MSG_STATFS: return "statfs";
+>>       case CEPH_MSG_STATFS_REPLY: return "statfs_reply";
+>> +     case CEPH_MSG_MON_GET_VERSION: return "mon_get_version";
+>> +     case CEPH_MSG_MON_GET_VERSION_REPLY: return "mon_get_version_reply";
+>>       case CEPH_MSG_MDS_MAP: return "mds_map";
+>>       case CEPH_MSG_CLIENT_SESSION: return "client_session";
+>>       case CEPH_MSG_CLIENT_RECONNECT: return "client_reconnect";
+>> diff --git a/net/ceph/debugfs.c b/net/ceph/debugfs.c
+>> index 8903dcee8d8e..d1a62c69a9f4 100644
+>> --- a/net/ceph/debugfs.c
+>> +++ b/net/ceph/debugfs.c
+>> @@ -129,6 +129,8 @@ static int monc_show(struct seq_file *s, void *p)
+>>                       seq_printf(s, "%llu statfs\n", req->tid);
+>>               else if (op == CEPH_MSG_POOLOP)
+>>                       seq_printf(s, "%llu poolop\n", req->tid);
+>> +             else if (op == CEPH_MSG_MON_GET_VERSION)
+>> +                     seq_printf(s, "%llu mon_get_version", req->tid);
+>>               else
+>>                       seq_printf(s, "%llu unknown\n", req->tid);
+>>       }
+>> diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
+>> index 2ac9ef35110b..6b46f1205ceb 100644
+>> --- a/net/ceph/mon_client.c
+>> +++ b/net/ceph/mon_client.c
+>> @@ -477,14 +477,13 @@ static struct ceph_msg *get_generic_reply(struct ceph_connection *con,
+>>       return m;
+>>  }
+>>
+>> -static int do_generic_request(struct ceph_mon_client *monc,
+>> -                           struct ceph_mon_generic_request *req)
+>> +static int __do_generic_request(struct ceph_mon_client *monc, u64 tid,
+>> +                             struct ceph_mon_generic_request *req)
+>>  {
+>>       int err;
+>>
+>>       /* register request */
+>> -     mutex_lock(&monc->mutex);
+>> -     req->tid = ++monc->last_tid;
+>> +     req->tid = tid != 0 ? tid : ++monc->last_tid;
+>>       req->request->hdr.tid = cpu_to_le64(req->tid);
+>>       __insert_generic_request(monc, req);
+>>       monc->num_generic_requests++;
+>> @@ -496,13 +495,24 @@ static int do_generic_request(struct ceph_mon_client *monc,
+>>       mutex_lock(&monc->mutex);
+>>       rb_erase(&req->node, &monc->generic_request_tree);
+>>       monc->num_generic_requests--;
+>> -     mutex_unlock(&monc->mutex);
+>>
+>>       if (!err)
+>>               err = req->result;
+>>       return err;
+>>  }
+>>
+>> +static int do_generic_request(struct ceph_mon_client *monc,
+>> +                           struct ceph_mon_generic_request *req)
+>> +{
+>> +     int err;
+>> +
+>> +     mutex_lock(&monc->mutex);
+>> +     err = __do_generic_request(monc, 0, req);
+>> +     mutex_unlock(&monc->mutex);
+>> +
+>> +     return err;
+>> +}
+>> +
+>>  /*
+>>   * statfs
+>>   */
+>> @@ -579,6 +589,96 @@ out:
+>>  }
+>>  EXPORT_SYMBOL(ceph_monc_do_statfs);
+>>
+>> +static void handle_get_version_reply(struct ceph_mon_client *monc,
+>> +                                  struct ceph_msg *msg)
+>> +{
+>> +     struct ceph_mon_generic_request *req;
+>> +     u64 tid = le64_to_cpu(msg->hdr.tid);
+>> +     void *p = msg->front.iov_base;
+>> +     void *end = p + msg->front_alloc_len;
+>> +     u64 handle;
+>> +
+>> +     dout("%s %p tid %llu\n", __func__, msg, tid);
+>> +
+>> +     ceph_decode_need(&p, end, 2*sizeof(u64), bad);
+>> +     handle = ceph_decode_64(&p);
+>> +     if (tid != 0 && tid != handle)
+>> +             goto bad;
+>> +
+>> +     mutex_lock(&monc->mutex);
+>> +     req = __lookup_generic_req(monc, handle);
+>> +     if (req) {
+>> +             *(u64 *)req->buf = ceph_decode_64(&p);
+>> +             req->result = 0;
+>> +             get_generic_request(req);
+>> +     }
+>> +     mutex_unlock(&monc->mutex);
+>> +     if (req) {
+>> +             complete_all(&req->completion);
+>> +             put_generic_request(req);
+>> +     }
+>> +
+>> +     return;
+>> +bad:
+>> +     pr_err("corrupt mon_get_version reply\n");
+>> +     ceph_msg_dump(msg);
+>> +}
+>> +
+>> +/*
+>> + * Send MMonGetVersion and wait for the reply.
+>> + *
+>> + * @what: one of "mdsmap", "osdmap" or "monmap"
+>> + */
+>> +int ceph_monc_do_get_version(struct ceph_mon_client *monc, const char *what,
+>> +                          u64 *newest)
+>> +{
+>> +     struct ceph_mon_generic_request *req;
+>> +     void *p, *end;
+>> +     u64 tid;
+>> +     int err;
+>> +
+>> +     req = kzalloc(sizeof(*req), GFP_NOFS);
+>> +     if (!req)
+>> +             return -ENOMEM;
+>> +
+>> +     kref_init(&req->kref);
+>> +     req->buf = newest;
+>> +     req->buf_len = sizeof(*newest);
+>> +     init_completion(&req->completion);
+>> +
+>> +     req->request = ceph_msg_new(CEPH_MSG_MON_GET_VERSION,
+>> +                                 sizeof(u64) + sizeof(u32) + strlen(what),
+>> +                                 GFP_NOFS, true);
+>> +     if (!req->request) {
+>> +             err = -ENOMEM;
+>> +             goto out;
+>> +     }
+>> +
+>> +     req->reply = ceph_msg_new(CEPH_MSG_MON_GET_VERSION_REPLY, 1024,
+>> +                               GFP_NOFS, true);
+>> +     if (!req->request) {
 >
-> Thanks,
-> Sushma
+> req->reply
 >
->
-> On Tue, Jun 3, 2014 at 12:34 PM, Danny Al-Gaaf <danny.al-gaaf-2YacvwyR+KOzQB+pC5nmwQ@public.gmane.org>
-> wrote:
->>
->> Am 03.06.2014 20:55, schrieb Sushma R:
->> > Haomai,
->> >
->> > I'm using the latest ceph master branch.
->> >
->> > ceph_smalliobench is a Ceph internal benchmarking tool similar to rados
->> > bench and the performance is more or less similar to that reported by
->> > fio.
->> >
->> > I tried to use fio with rbd ioengine (
->> >
->> > http://telekomcloud.github.io/ceph/2014/02/26/ceph-performance-analysis_fio_rbd.html)
->> > and below are the numbers with different workloads on our setup.
->> > Note : fio rbd engine segfaults with randread IO pattern, only with
->> > LevelDB
->> > (no issues with FileStore). With FileStore, performance of
->> > ceph_smalliobench and fio-rbd is similar for READs, so the numbers for
->> > randread for LevelDB are with ceph_smalliobench (since fio rbd
->> > segfaults).
->>
->> Could you send me a backtrace of the segfault and some info about the
->> ceph and fio version you used so that I can take a look at it?
->>
->> Thanks,
->>
->> Danny
->>
->
+> With that change, Reviewed-by:
 
+Updated, pushed to testing.
 
+Thanks,
 
--- 
-Best Regards,
-
-Wheat
+                Ilya
