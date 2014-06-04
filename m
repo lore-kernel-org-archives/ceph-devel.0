@@ -1,40 +1,69 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: RGW: Multi part upload - Attributes not copied from the upload
- object to the final meta object
-Date: Wed, 4 Jun 2014 09:15:31 -0700
-Message-ID: <CABBk=J_ZrA6iprZEAUsAf3Nfa7UA2KFZE+XSN13wpALYZiq7KQ@mail.gmail.com>
-References: <CAF6-1L4rcN+P21sN2-ofrXdjqsLLbT4VYEMWzuu-1-evWBs9Yw@mail.gmail.com>
-	<CABBk=J9AaxABAYR9VkY1GavfzMtYop8+0xxbfXcQRdPhAoJz2w@mail.gmail.com>
-	<CAF6-1L5uvDfs_tkAVu8QB35G8eHsNQbHLQA-WUg89OY+9iG7XQ@mail.gmail.com>
+From: Nicolas Pitre <nicolas.pitre@linaro.org>
+Subject: Re: [RFC 00/32] making inode time stamps y2038 ready
+Date: Wed, 4 Jun 2014 13:30:32 -0400 (EDT)
+Message-ID: <alpine.LFD.2.11.1406041308300.17310@knanqh.ubzr>
+References: <1401480116-1973111-1-git-send-email-arnd@arndb.de>
+ <5011138.W0gbOc20Qp@wuerfel> <20140603213802.GH14410@dastard>
+ <201406041703.47592.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f180.google.com ([209.85.220.180]:55511 "EHLO
-	mail-vc0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750722AbaFDQPc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Jun 2014 12:15:32 -0400
-Received: by mail-vc0-f180.google.com with SMTP id hq11so6873210vcb.39
-        for <ceph-devel@vger.kernel.org>; Wed, 04 Jun 2014 09:15:31 -0700 (PDT)
-In-Reply-To: <CAF6-1L5uvDfs_tkAVu8QB35G8eHsNQbHLQA-WUg89OY+9iG7XQ@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sylvain Munaut <s.munaut@whatever-company.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org>
+In-Reply-To: <201406041703.47592.arnd@arndb.de>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mtd>,
+ <mailto:linux-mtd-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-mtd/>
+List-Post: <mailto:linux-mtd@lists.infradead.org>
+List-Help: <mailto:linux-mtd-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mtd>,
+ <mailto:linux-mtd-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-mtd" <linux-mtd-bounces@lists.infradead.org>
+Errors-To: linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: hch@infradead.org, Dave Chinner <david@fromorbit.com>, linux-mtd@lists.infradead.org, "H. Peter Anvin" <hpa@zytor.com>, linux-f2fs-devel@lists.sourceforge.net, ceph-devel@vger.kernel.org, "Joseph S. Myers" <joseph@codesourcery.com>, linux-arch@vger.kernel.org, linux-cifs@vger.kernel.org, linux-scsi@vger.kernel.org, linux-afs@lists.infradead.org, cluster-devel@redhat.com, coda@cs.cmu.edu, geert@linux-m68k.org, linux-ext4@vger.kernel.org, codalist@telemann.coda.cs.cmu.edu, fuse-devel@lists.sourceforge.net, reiserfs-devel@vger.kernel.org, xfs@oss.sgi.com, john.stultz@linaro.org, tglx@linutronix.de, linux-nfs@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, samba-technical@lists.samba.org, linux-kernel@vger.kernel.org, logfs@logfs.org, linux-btrfs@vger.kernel.org, linux-fsdevel@vger.kernel.org, lftan@altera.com, ocfs2-devel@oss.oracle.com
+List-Id: ceph-devel.vger.kernel.org
 
-On Wed, Jun 4, 2014 at 9:07 AM, Sylvain Munaut
-<s.munaut@whatever-company.com> wrote:
->> This is a known issue (8452). We have a fix for that and we'll get it
->> to firefly.
->
-> Ok, great. Somehow my search didn't turn that up.
->
->
-> Looking at the patch, shouldn't the
->
-> meta_obj.set_in_extra_data(true);
->
-> be moved as well ?
+On Wed, 4 Jun 2014, Arnd Bergmann wrote:
 
-Yeah, it should. Thanks!
+> On Tuesday 03 June 2014, Dave Chinner wrote:
+> > Just ot be pedantic, inodes don't need 96 bit timestamps - some
+> > filesystems can *support up to* 96 bit timestamps. If the kernel
+> > only supports 64 bit timestamps and that's all the kernel can
+> > represent, then the upper bits of the 96 bit on-disk inode
+> > timestamps simply remain zero.
+> 
+> I meant the reverse: since we have file systems that can store
+> 96-bit timestamps when using 64-bit kernels, we need to extend
+> 32-bit kernels to have the same internal representation so we
+> can actually read those file systems correctly.
+> 
+> > If you move the filesystem between kernels with different time
+> > ranges, then the filesystem needs to be able to tell the kernel what
+> > it's supported range is.  This is where having the VFS limit the
+> > range of supported timestamps is important: the limit is the
+> > min(kernel range, filesystem range). This allows the filesystems
+> > to be indepenent of the kernel time representation, and the kernel
+> > to be independent of the physical filesystem time encoding....
+> 
+> I agree it makes sense to let the kernel know about the limits
+> of the file system it accesses, but for the reverse, we're probably
+> better off just making the kernel representation large enough (i.e.
+> 96 bits) so it can work with any known file system.
 
-Yehuda
+Depends...  96 bit handling may get prohibitive on 32-bit archs.
+
+The important point here is for the kernel to be able to represent the 
+time _range_ used by any known filesystem, not necessarily the time 
+_precision_.
+
+For example, a 64 bit representation can be made of 40 bits for seconds 
+spanning 34865 years, and 24 bits for fractional seconds providing 
+precision down to 60 nanosecs.  That ought to be plenty good on 32 bit 
+systems while still being cheap to handle.
+
+
+Nicolas
+
+______________________________________________________
+Linux MTD discussion mailing list
+http://lists.infradead.org/mailman/listinfo/linux-mtd/
