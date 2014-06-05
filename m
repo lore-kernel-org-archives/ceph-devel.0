@@ -1,67 +1,49 @@
-From: Mark Doffman <mark.doffman@codethink.co.uk>
-Subject: Re: [PATCH v3 0/2] Add ceph root filesystem
-Date: Thu, 05 Jun 2014 14:13:31 -0500
-Message-ID: <5390C15B.4060407@codethink.co.uk>
-References: <cover.1389806186.git.mark.doffman@codethink.co.uk> <cover.1401306206.git.mark.doffman@codethink.co.uk> <lm5sg3$tn3$1@ger.gmane.org>
+From: Patrick McGarry <pmcgarry@gmail.com>
+Subject: Ceph Day Boston - Last Call
+Date: Thu, 5 Jun 2014 15:28:46 -0400
+Message-ID: <etPan.5390c4ee.46e87ccd.9a49@scuttleair.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from ducie-dc1.codethink.co.uk ([185.25.241.215]:37713 "EHLO
-	ducie-dc1.codethink.co.uk" rhost-flags-OK-FAIL-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1752110AbaFETNk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Jun 2014 15:13:40 -0400
-In-Reply-To: <lm5sg3$tn3$1@ger.gmane.org>
+Received: from mail-qa0-f43.google.com ([209.85.216.43]:49471 "EHLO
+	mail-qa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752670AbaFET2s convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Jun 2014 15:28:48 -0400
+Received: by mail-qa0-f43.google.com with SMTP id m5so2069389qaj.2
+        for <ceph-devel@vger.kernel.org>; Thu, 05 Jun 2014 12:28:47 -0700 (PDT)
+Received: from scuttleair.local ([72.11.211.243])
+        by mx.google.com with ESMTPSA id a9sm10852179qaa.26.2014.06.05.12.28.46
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
+        Thu, 05 Jun 2014 12:28:47 -0700 (PDT)
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elsayed <eternaleye@gmail.com>, ceph-devel@vger.kernel.org
+To: Ceph Devel <ceph-devel@vger.kernel.org>
+
+Hey Cephers,=C2=A0
+
+If you still haven't signed up for Ceph Day Boston you should stop proc=
+rastinating and proceed directly to the event page! :)=C2=A0
+
+http://www.inktank.com/cephdays/boston/=C2=A0
+
+We'd really love to have all of our closest Ceph friends join us for wh=
+at is shaping up to be another dynamite event. We have talks from sever=
+al community members and one even includes a live hardware demo (brave!=
+). If you have any questions about the venue or would like a discount c=
+ode give me a shout and I'll see what I can do to hook you up. Hope to =
+see everyone there.=C2=A0
 
 
 
-On 05/28/2014 06:46 PM, Alex Elsayed wrote:
-> mark.doffman@codethink.co.uk wrote:
->
->> From: Mark Doffman <mark.doffman@codethink.co.uk>
->>
->> Hi All,
->>
->> The following is a third version of a patch series that adds the ability
->> to use a ceph distributed file system as the root device.
-> <snip>
->
-> Would you mind expanding on why you want to do this in the kernel, instead
-> of using an initramfs? For example, dracut supports the following syntax,
-> and sets it up using the same tools as mounting NFS in a running system
-> rather than the kernel's nfsroot support:
->
-> root=nfs:[<server-ip>:]<root-dir>[:<nfs-options>]
-> root=nfs4:[<server-ip>:]<root-dir>[:<nfs-options>]
-> root={dhcp|dhcp6}
->
-> root=dhcp alone directs initrd to look at the DHCP root-path where NFS
-> options can be specified.
->
-> It also supports CIFS, as a further illustration:
->
-> root=cifs://[<username>[:<password>]@]<server-ip>:<root-dir>
->
-> Extending this to Ceph seems much simpler than implementing such a thing in
-> the kernel, especially given dracut's modular nature, and it's easy enough
-> to compile an initramfs into the kernel.
 
-An initramfs, and dracut, has been mentioned before as a possible 
-solution. The reason I would prefer this in the kernel is simplicity. 
-NFS root is in the kernel and we regularly use it without an initramfs.
+Best Regards, =20
 
-However simple dracut is still a more complex procedure, for something 
-that is very easy to do in the kernel.
-
-Using a root device also has the advantage that it might produce smaller 
-images for memory constrained devices.
-
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+Patrick
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
