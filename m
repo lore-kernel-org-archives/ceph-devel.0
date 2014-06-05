@@ -1,103 +1,67 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: Mon backing store
-Date: Thu, 5 Jun 2014 18:40:22 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F25CFE02D@SACMBXIP01.sdcorp.global.sandisk.com>
-References: <CA+4uBUZaFHhyn9Brx=dM08qFgPFQiAohufpVk+GH5zCR9Hzb0Q@mail.gmail.com>
- <5390B470.4010608@inktank.com>
- <755F6B91B3BE364F9BCA11EA3F9E0C6F25CFCFD6@SACMBXIP01.sdcorp.global.sandisk.com>
- <5390B7EB.9080402@inktank.com>
+From: Mark Doffman <mark.doffman@codethink.co.uk>
+Subject: Re: [PATCH v3 0/2] Add ceph root filesystem
+Date: Thu, 05 Jun 2014 14:13:31 -0500
+Message-ID: <5390C15B.4060407@codethink.co.uk>
+References: <cover.1389806186.git.mark.doffman@codethink.co.uk> <cover.1401306206.git.mark.doffman@codethink.co.uk> <lm5sg3$tn3$1@ger.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1lp0139.outbound.protection.outlook.com ([207.46.163.139]:6023
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751758AbaFESk3 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 5 Jun 2014 14:40:29 -0400
-In-Reply-To: <5390B7EB.9080402@inktank.com>
-Content-Language: en-US
+Received: from ducie-dc1.codethink.co.uk ([185.25.241.215]:37713 "EHLO
+	ducie-dc1.codethink.co.uk" rhost-flags-OK-FAIL-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1752110AbaFETNk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Jun 2014 15:13:40 -0400
+In-Reply-To: <lm5sg3$tn3$1@ger.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mark.nelson@inktank.com>, Samuel Just <sam.just@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Alex Elsayed <eternaleye@gmail.com>, ceph-devel@vger.kernel.org
 
-WWVhaCA6LSkuLi5XZSBhcmUgYWxzbyB3YWl0aW5nIGZvciB3aXAtcm9ja3NkYiB0byBtZXJnZSBp
-biBtYWluc3RyZWFtLg0KDQpUaGFua3MgJiBSZWdhcmRzDQpTb21uYXRoDQoNCi0tLS0tT3JpZ2lu
-YWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBNYXJrIE5lbHNvbiBbbWFpbHRvOm1hcmsubmVsc29uQGlu
-a3RhbmsuY29tXSANClNlbnQ6IFRodXJzZGF5LCBKdW5lIDA1LCAyMDE0IDExOjMzIEFNDQpUbzog
-U29tbmF0aCBSb3k7IFNhbXVlbCBKdXN0OyBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KU3Vi
-amVjdDogUmU6IE1vbiBiYWNraW5nIHN0b3JlDQoNCkhpIFNvbW5hdGgsDQoNClNvcnJ5IHRvIGdl
-dCB5b3VyIGhvcGVzIHVwLCBubyBjZXBoK3JvY2tzZGIgYmVuY2htYXJrcyAoeWV0ISkuICBJIHdh
-cyByZWZlcnJpbmcgdG8gdGhlIGJlbmNobWFya3MgdGhhdCB0aGUgcm9ja3NkYiBkZXZlbG9wZXJz
-IHB1Ymxpc2hlZCBoZXJlOg0KDQpodHRwczovL2dpdGh1Yi5jb20vZmFjZWJvb2svcm9ja3NkYi93
-aWtpL1BlcmZvcm1hbmNlLUJlbmNobWFya3MNCg0KU291bmRzIGxpa2Ugd2UgbmVlZCB0byBzdGFy
-dCBzb21lIHBlcmZvcm1hbmNlIHRlc3Rpbmcgb24gd2lwLXJvY2tzZGIgZ29pbmcgdGhvdWdoISA6
-KQ0KDQpNYXJrDQoNCk9uIDA2LzA1LzIwMTQgMDE6MjYgUE0sIFNvbW5hdGggUm95IHdyb3RlOg0K
-PiBNYXJrLA0KPiBDb3VsZCB5b3UgcGxlYXNlIHNoYXJlIHRoZSBwZXJmb3JtYW5jZSBiZW5jaG1h
-cmsgcmVzdWx0IHdpdGggUm9ja3NkYnN0b3JlICsgY2VwaCBhbmQgbGV2ZWxkYnN0b3JlK2NlcGgg
-YXMgeW91IG1lbnRpb25lZCBiZWxvdyA/DQo+IEJUVywgaGF2ZSB5b3UgbWVhc3VyZWQgdGhlIFdB
-IGluZHVjZWQgYnkgUm9ja3NkYnN0b3JlIGFuZCBsZXZlbGRic3RvcmUgaW4gdGhlIHByb2Nlc3Mg
-c2luY2UgdGhhdCBpcyBhbHNvIGEgdmVyeSBpbXBvcnRhbnQgZmFjdG9yIHdoaWxlIGJhY2tlbmQg
-aXMgZmxhc2ggPw0KPg0KPiBUaGFua3MgJiBSZWdhcmRzDQo+IFNvbW5hdGgNCj4NCj4gLS0tLS1P
-cmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5l
-bC5vcmcgDQo+IFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJl
-aGFsZiBPZiBNYXJrIE5lbHNvbg0KPiBTZW50OiBUaHVyc2RheSwgSnVuZSAwNSwgMjAxNCAxMTox
-OCBBTQ0KPiBUbzogU2FtdWVsIEp1c3Q7IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQo+IFN1
-YmplY3Q6IFJlOiBNb24gYmFja2luZyBzdG9yZQ0KPg0KPiBPbiAwNi8wNS8yMDE0IDEyOjQyIFBN
-LCBTYW11ZWwgSnVzdCB3cm90ZToNCj4+IEkgYW0gc3RhcnRpbmcgdG8gd29uZGVyIHdoZXRoZXIg
-dXNpbmcgbGV2ZWxkYiBmb3IgdGhlIG1vbiBpcyBhY3R1YWxseSANCj4+IGludHJvZHVjaW5nIGFu
-IGV4Y2Vzc2l2ZSBhbW91bnQgdW5uZWNlc3NhcnkgY29tcGxleGl0eSBhbmQgDQo+PiBub24tZGV0
-ZXJtaW5pc20uICBHaXZlbiB0aGF0IHRoZSBtb25pdG9yIHdvcmtsb2FkIGlzIHJlYWQgbW9zdGx5
-LCANCj4+IGV4Y2VwdCBmb3IgZmFpbHVyZSBjb25kaXRpb25zIHdoZW4gaXQgYmVjb21lcyB3cml0
-ZSBsYXRlbmN5IA0KPj4gc2Vuc2l0aXZlLCBtaWdodCB3ZSBkbyBiZXR0ZXIgd2l0aCBhIHN0cmlj
-dCBiLXRyZWUgc3R5bGUgYmFja2luZyBkYiANCj4+IHN1Y2ggYXMgYmVya2VseSBkYiBldmVuIGF0
-IHRoZSBjb3N0IG9mIHNvbWUgcGVyZm9ybWFuY2U/ICBJdCBzZWVtcyANCj4+IGxpa2Ugc29tZXRo
-aW5nIGxpa2UgdGhhdCBtaWdodCBwcm92aWRlIG1vcmUgcmVsaWFibGUgbGF0ZW5jeSBwcm9wZXJ0
-aWVzLg0KPg0KPiBJJ20gbm90IGFnYWluc3QgdHJ5aW5nIGl0LCBidXQgSSdtIG5vdCBjb252aW5j
-ZWQgaXQncyB0aGUgcmlnaHQgc29sdXRpb24uICBJZiB0aGUgOTl0aCBwZXJjZW50aWxlIGxhdGVu
-Y3kgaXMgc2lnbmlmaWNhbnRseSBiZXR0ZXIsIHRoYXQncyBvYnZpb3VzbHkgYSB3aW4sIGJ1dCBJ
-IHRoaW5rIHdlIGFyZSBpbmRlZWQgZ29pbmcgdG8gdGFrZSBhIGJpZyBwZXJmb3JtYW5jZSBoaXQg
-b3ZlcmFsbC4gIEknbSBtb3JlIGluIGZhdm9yIG9mIHRyeWluZyByb2Nrc2RiIGZpcnN0Lg0KPiBJ
-J20gY2VydGFpbmx5IG5vdCBhcyB3ZWxsIHZlcnNlZCBpbiB0aGUgbGV2ZWxkYiBpbnRlcmZhY2Ug
-YXMgeW91IG9yIEpvYW8gYXJlLCBidXQgaXQgYXBwZWFycyBtdWNoIG9mIG91ciBjb2RlIGluIExl
-dmVsREJTdG9yZSB3b3VsZCBiZSByZXVzYWJsZS4NCj4gICAgSSBkb24ndCBrbm93IHRoYXQgcm9j
-a3NkYiB3b24ndCBoYXZlIHRoZSBzYW1lIGlzc3VlcyB0aGF0IGxldmVsZGIgZG9lcywgYnV0IHRo
-ZSByb2Nrc2RiIGRldmVsb3BlcnMgc3BlY2lmaWNhbGx5IG1lbnRpb24gbGV2ZWxkYidzIGJhZCA5
-OXRoIHBlcmNlbnRpbGUgbGF0ZW5jaWVzIGFzIGEgZHJpdmVyIGZvciBpdCdzIGRldmVsb3BtZW50
-Og0KPg0KPiAiQnkgY29udHJhc3QsIHdl4oCZdmUgcHVibGlzaGVkIHRoZSBSb2Nrc0RCIGJlbmNo
-bWFyayByZXN1bHRzIGZvciBzZXJ2ZXIgc2lkZSB3b3JrbG9hZHMgb24gRmxhc2guIFdlIGFsc28g
-bWVhc3VyZWQgdGhlIHBlcmZvcm1hbmNlIG9mIExldmVsREIgb24gdGhlc2Ugc2VydmVyLXdvcmts
-b2FkIGJlbmNobWFya3MgYW5kIGZvdW5kIHRoYXQgUm9ja3NEQiBzb2xpZGx5IG91dHBlcmZvcm1z
-IExldmVsREIgZm9yIHRoZXNlIElPIGJvdW5kIHdvcmtsb2Fkcy4gV2UgZm91bmQgdGhhdCBMZXZl
-bERC4oCZcyBzaW5nbGUtdGhyZWFkZWQgY29tcGFjdGlvbiBwcm9jZXNzIHdhcyBpbnN1ZmZpY2ll
-bnQgdG8gZHJpdmUgc2VydmVyIHdvcmtsb2Fkcy4gV2Ugc2F3IGZyZXF1ZW50IHdyaXRlLXN0YWxs
-cyB3aXRoIExldmVsREIgdGhhdCBjYXVzZWQgOTktcGVyY2VudGlsZSBsYXRlbmN5IHRvIGJlIHRy
-ZW1lbmRvdXNseSBsYXJnZS4gV2UgZm91bmQgdGhhdCBtbWFwLWluZyBhIGZpbGUgaW50byB0aGUg
-T1MgY2FjaGUgaW50cm9kdWNlZCBwZXJmb3JtYW5jZSBib3R0bGVuZWNrcyBmb3IgcmVhZHMuIFdl
-IGNvdWxkIG5vdCBtYWtlIExldmVsREIgY29uc3VtZSBhbGwgdGhlIElPcyBvZmZlcmVkIGJ5IHRo
-ZSB1bmRlcmx5aW5nIEZsYXNoIHN0b3JhZ2UuIg0KPg0KPiBDb21wYWN0aW9uIHBlcmZvcm1hbmNl
-IGFuZCBoaWdoIG1tYXAvcGFnZSBmYXVsdC9rc3dhcGQgdXRpbGl6YXRpb24gZHVyaW5nIHJlYWRz
-IGFyZSB0d28gYmlnIGlzc3VlcyB3ZSd2ZSBoaXQgaW4gbGV2ZWxkYiwgc28gSSdtIGluY2xpbmVk
-IHRvIHRoaW5rIHRoYXQgcm9ja3NkYiBpcyBhdCBsZWFzdCB3b3J0aHkgb2Ygc29tZSBhdHRlbnRp
-b24uDQo+DQo+IEhlcmUncyB0aGUgYmVuY2htYXJrIHJlc3VsdHMgb24gdGhlaXIgd2lraToNCj4N
-Cj4gaHR0cHM6Ly9naXRodWIuY29tL2ZhY2Vib29rL3JvY2tzZGIvd2lraS9QZXJmb3JtYW5jZS1C
-ZW5jaG1hcmtzDQo+DQo+Pg0KPj4gVGhvdWdodHM/DQo+PiAtU2FtDQo+PiAtLQ0KPj4gVG8gdW5z
-dWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgt
-ZGV2ZWwiDQo+PiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2Vy
-bmVsLm9yZyBNb3JlIG1ham9yZG9tbyANCj4+IGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5v
-cmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KPj4NCj4NCj4gLS0NCj4gVG8gdW5zdWJzY3JpYmUgZnJv
-bSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIA0KPiBp
-biB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3Jl
-IG1ham9yZG9tbyANCj4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8t
-aW5mby5odG1sDQo+DQo+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fDQo+DQo+IFBM
-RUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBt
-YWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRl
-ZCByZWNpcGllbnQocykgbmFtZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNzYWdl
-IGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3RpZmllZCB0
-aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhhdCBhbnkg
-cmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2YgdGhpcyBt
-ZXNzYWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMg
-Y29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHRlbGVw
-aG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVzdHJveSBh
-bnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lvbiAod2hl
-dGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4NCj4NCg0K
+
+
+On 05/28/2014 06:46 PM, Alex Elsayed wrote:
+> mark.doffman@codethink.co.uk wrote:
+>
+>> From: Mark Doffman <mark.doffman@codethink.co.uk>
+>>
+>> Hi All,
+>>
+>> The following is a third version of a patch series that adds the ability
+>> to use a ceph distributed file system as the root device.
+> <snip>
+>
+> Would you mind expanding on why you want to do this in the kernel, instead
+> of using an initramfs? For example, dracut supports the following syntax,
+> and sets it up using the same tools as mounting NFS in a running system
+> rather than the kernel's nfsroot support:
+>
+> root=nfs:[<server-ip>:]<root-dir>[:<nfs-options>]
+> root=nfs4:[<server-ip>:]<root-dir>[:<nfs-options>]
+> root={dhcp|dhcp6}
+>
+> root=dhcp alone directs initrd to look at the DHCP root-path where NFS
+> options can be specified.
+>
+> It also supports CIFS, as a further illustration:
+>
+> root=cifs://[<username>[:<password>]@]<server-ip>:<root-dir>
+>
+> Extending this to Ceph seems much simpler than implementing such a thing in
+> the kernel, especially given dracut's modular nature, and it's easy enough
+> to compile an initramfs into the kernel.
+
+An initramfs, and dracut, has been mentioned before as a possible 
+solution. The reason I would prefer this in the kernel is simplicity. 
+NFS root is in the kernel and we regularly use it without an initramfs.
+
+However simple dracut is still a more complex procedure, for something 
+that is very easy to do in the kernel.
+
+Using a root device also has the advantage that it might produce smaller 
+images for memory constrained devices.
+
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
