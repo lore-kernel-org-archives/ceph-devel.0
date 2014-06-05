@@ -1,89 +1,72 @@
-From: Allen Samuels <Allen.Samuels@sandisk.com>
-Subject: RE: [Feature]Proposal for adding a new flag named shared to support
- performance and statistic purpose
-Date: Thu, 5 Jun 2014 13:55:07 +0000
-Message-ID: <7334B4281E425749B85E08CF7EC6F85329CBE143@SACMBXIP01.sdcorp.global.sandisk.com>
-References: <CACJqLyZoxqN69NarVLsWZan7aULwbULUAFwmGC5D_jiVTc=uqg@mail.gmail.com>
-	<53901B6D.1060707@42on.com>
- <CACJqLyb8dpoV9iRFaqg_F05cbso6AX2RYD7bLPb4Gj9z+=V1tg@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Locally Repairable Codes vs Pyramid
+Date: Thu, 05 Jun 2014 16:00:50 +0200
+Message-ID: <53907812.6030100@dachary.org>
+References: <538C9FA2.3020805@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="3gr566B5Ep0hKbeN13E6ob7GiuGjVvtxr"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from [207.46.163.187] ([207.46.163.187]:59591 "EHLO
-	na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751380AbaFENzc (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 5 Jun 2014 09:55:32 -0400
-In-Reply-To: <CACJqLyb8dpoV9iRFaqg_F05cbso6AX2RYD7bLPb4Gj9z+=V1tg@mail.gmail.com>
-Content-Language: en-US
+Received: from smtp.dmail.dachary.org ([91.121.254.229]:34797 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751664AbaFEOAx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Jun 2014 10:00:53 -0400
+Received: from [10.9.0.6] (unknown [10.0.2.28])
+	by smtp.dmail.dachary.org (Postfix) with ESMTP id D69E1428A3
+	for <ceph-devel@vger.kernel.org>; Thu,  5 Jun 2014 16:00:50 +0200 (CEST)
+In-Reply-To: <538C9FA2.3020805@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomaiwang@gmail.com>, Wido den Hollander <wido@42on.com>
-Cc: Sage Weil <sage@inktank.com>, Josh Durgin <josh.durgin@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-WW91IHRhbGsgYWJvdXQgcmVzdHRpbmcgdGhlIG9iamVjdCBtYXAgb24gYSByZXN0YXJ0IGFmdGVy
-IGEgY3Jhc2ggLS0gSSBhc3N1bWUgeW91IG1lYW4gcmVidWlsZGluZywgaG93IGxvbmcgd2lsbCB0
-aGlzIHRha2U/DQoNCg0KLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0NClRoZSB0cnVlIG15c3Rlcnkgb2YgdGhlIHdvcmxkIGlzIHRoZSB2
-aXNpYmxlLCBub3QgdGhlIGludmlzaWJsZS4NCiBPc2NhciBXaWxkZSAoMTg1NCAtIDE5MDApDQoN
-CkFsbGVuIFNhbXVlbHMNCkNoaWVmIFNvZnR3YXJlIEFyY2hpdGVjdCwgRW1lcmdpbmcgU3RvcmFn
-ZSBTb2x1dGlvbnMNCg0KOTUxIFNhbkRpc2sgRHJpdmUsIE1pbHBpdGFzLCBDQSA5NTAzNQ0KVDog
-KzEgNDA4IDgwMSA3MDMwfCBNOiArMSA0MDggNzgwIDY0MTYNCmFsbGVuLnNhbXVlbHNAU2FuRGlz
-ay5jb20NCg0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogY2VwaC1kZXZlbC1v
-d25lckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVs
-Lm9yZ10gT24gQmVoYWxmIE9mIEhhb21haSBXYW5nDQpTZW50OiBUaHVyc2RheSwgSnVuZSAwNSwg
-MjAxNCAxMjo0MyBBTQ0KVG86IFdpZG8gZGVuIEhvbGxhbmRlcg0KQ2M6IFNhZ2UgV2VpbDsgSm9z
-aCBEdXJnaW47IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQpTdWJqZWN0OiBSZTogW0ZlYXR1
-cmVdUHJvcG9zYWwgZm9yIGFkZGluZyBhIG5ldyBmbGFnIG5hbWVkIHNoYXJlZCB0byBzdXBwb3J0
-IHBlcmZvcm1hbmNlIGFuZCBzdGF0aXN0aWMgcHVycG9zZQ0KDQpPbiBUaHUsIEp1biA1LCAyMDE0
-IGF0IDM6MjUgUE0sIFdpZG8gZGVuIEhvbGxhbmRlciA8d2lkb0A0Mm9uLmNvbT4gd3JvdGU6DQo+
-IE9uIDA2LzA1LzIwMTQgMDk6MDEgQU0sIEhhb21haSBXYW5nIHdyb3RlOg0KPj4NCj4+IEhpLA0K
-Pj4gUHJldmlvdXNseSBJIHNlbnQgYSBtYWlsIGFib3V0IHRoZSBkaWZmaWN1bHQgb2YgcmJkIHNu
-YXBzaG90IHNpemUNCj4+IHN0YXRpc3RpYy4gVGhlIG1haW4gc29sdXRpb24gaXMgdXNpbmcgb2Jq
-ZWN0IG1hcCB0byBzdG9yZSB0aGUgY2hhbmdlcy4NCj4+IFRoZSBwcm9ibGVtIGlzIHdlIGNhbid0
-IGhhbmRsZSB3aXRoIG11bHRpIGNsaWVudCBjb25jdXJyZW50IG1vZGlmeS4NCj4+DQo+PiBMYWNr
-IG9mIG9iamVjdCBtYXAobGlrZSBwb2ludGVyIG1hcCBpbiBxY293MiksIGl0IGNhdXNlIG1hbnkg
-cHJvYmxlbXMNCj4+IGluIGxpYnJiZC4gU3VjaCBhcyBjbG9uZSBkZXB0aCwgdGhlIGRlZXAgY2xv
-bmUgZGVwdGggd2lsbCBjYXVzZQ0KPj4gcmVtYXJrYWJsZSBsYXRlbmN5LiBVc3VhbGx5IGVhY2gg
-Y2xvbmUgd3JhcCB3aWxsIGluY3JlYXNlIHR3byB0aW1lcw0KPj4gb2YgbGF0ZW5jeS4NCj4+DQo+
-PiBJIGNvbnNpZGVyIHRvIG1ha2UgYSB0cmFkZW9mZiBiZXR3ZWVuIG11bHRpLWNsaWVudCBzdXBw
-b3J0IGFuZA0KPj4gc2luZ2xlLWNsaWVudCBzdXBwb3J0IGZvciBsaWJyYmQuIEluIHByYWN0aWNl
-LCBtb3N0IG9mIHRoZQ0KPj4gdm9sdW1lcy9pbWFnZXMgYXJlIHVzZWQgYnkgVk0sIHRoZXJlIG9u
-bHkgZXhpc3Qgb25lIGNsaWVudCB3aWxsDQo+PiBhY2Nlc3MvbW9kaWZ5IGltYWdlLiBXZSBjYW4n
-dCBvbmx5IHdhbnQgdG8gbWFrZSBzaGFyZWQgaW1hZ2UgcG9zc2libGUNCj4+IGJ1dCBtYWtlIG1v
-c3Qgb2YgdXNlIGNhc2VzIGJhZC4gU28gd2UgY2FuIGFkZCBhIG5ldyBmbGFnIGNhbGxlZA0KPj4g
-InNoYXJlZCIgd2hlbiBjcmVhdGluZyBpbWFnZS4gSWYgInNoYXJlZCIgaXMgZmFsc2UsIGxpYnJi
-ZCB3aWxsDQo+PiBtYWludGFpbiBhIG9iamVjdCBtYXAgZm9yIGVhY2ggaW1hZ2UuIFRoZSBvYmpl
-Y3QgbWFwIGlzIGNvbnNpZGVyZWQgdG8NCj4+IGR1cmFibGUsIGVhY2ggaW1hZ2VfY2xvc2UgY2Fs
-bCB3aWxsIHN0b3JlIHRoZSBtYXAgaW50byByYWRvcy4gSWYgdGhlDQo+PiBjbGllbnQgIGlzIGNy
-YXNoZWQgYW5kIGZhaWxlZCB0byBkdW1wIHRoZSBvYmplY3QgbWFwLCB0aGUgbmV4dCBjbGllbnQN
-Cj4+IG9wZW4gdGhlIGltYWdlIHdpbGwgdGhpbmsgdGhlIG9iamVjdCBtYXAgYXMgb3V0IG9mIGRh
-dGUgYW5kIHJlc2V0IHRoZQ0KPj4gb2JqZWN0bWFwLg0KPg0KPg0KPiBXaHkgbm90IGZsdXNoIG91
-dCB0aGUgb2JqZWN0IG1hcCBldmVyeSBYIHBlcmlvZD8gQXNzdW1lIGEgY2xpZW50IHJ1bnMNCj4g
-Zm9yIHdlZWtzIG9yIG1vbnRocyBhbmQgeW91IHdvdWxkIGtlZXAgdGhhdCBtYXAgaW4gbWVtb3J5
-IGFsbCB0aGUgdGltZQ0KPiBzaW5jZSB0aGUgaW1hZ2UgaXMgbmV2ZXIgY2xvc2VkLg0KDQpZZXMs
-IGFzIGEgcGVyaW9kIGpvYiBpcyBhbHNvIGEgZ29vZCBhbHRlcg0KDQo+DQo+DQo+Pg0KPj4gV2Ug
-Y2FuIGVhc2lseSBmaW5kIHRoZSBhZHZhbnRhZ2Ugb2YgdGhpcyBmZWF0dXJlOg0KPj4gMS4gQXZv
-aWQgY2xvbmUgcGVyZm9ybWFuY2UgcHJvYmxlbQ0KPj4gMi4gTWFrZSBzbmFwc2hvdCBzdGF0aXN0
-aWMgcG9zc2libGUNCj4+IDMuIEltcHJvdmUgbGlicmJkIG9wZXJhdGlvbiBwZXJmb3JtYW5jZSBp
-bmNsdWRpbmcgcmVhZCwgY29weS1vbi13cml0ZQ0KPj4gb3BlcmF0aW9uLg0KPj4NCj4+IFdoYXQg
-ZG8geW91IHRoaW5rIGFib3ZlPyBNb3JlIGZlZWRiYWNrcyBhcmUgYXBwcmVjaWF0ZSENCj4+DQo+
-DQo+DQo+IC0tDQo+IFdpZG8gZGVuIEhvbGxhbmRlcg0KPiA0Mm9uIEIuVi4NCj4NCj4gUGhvbmU6
-ICszMSAoMCkyMCA3MDAgOTkwMg0KPiBTa3lwZTogY29udGFjdDQyb24NCg0KDQoNCi0tDQpCZXN0
-IFJlZ2FyZHMsDQoNCldoZWF0DQotLQ0KVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNl
-bmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluIHRoZSBib2R5IG9mIGEgbWVz
-c2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIGluZm8gYXQg
-IGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KDQpfX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fXw0KDQpQTEVBU0UgTk9URTogVGhlIGluZm9ybWF0aW9uIGNv
-bnRhaW5lZCBpbiB0aGlzIGVsZWN0cm9uaWMgbWFpbCBtZXNzYWdlIGlzIGludGVuZGVkIG9ubHkg
-Zm9yIHRoZSB1c2Ugb2YgdGhlIGRlc2lnbmF0ZWQgcmVjaXBpZW50KHMpIG5hbWVkIGFib3ZlLiBJ
-ZiB0aGUgcmVhZGVyIG9mIHRoaXMgbWVzc2FnZSBpcyBub3QgdGhlIGludGVuZGVkIHJlY2lwaWVu
-dCwgeW91IGFyZSBoZXJlYnkgbm90aWZpZWQgdGhhdCB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIG1l
-c3NhZ2UgaW4gZXJyb3IgYW5kIHRoYXQgYW55IHJldmlldywgZGlzc2VtaW5hdGlvbiwgZGlzdHJp
-YnV0aW9uLCBvciBjb3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBpcyBzdHJpY3RseSBwcm9oaWJpdGVk
-LiBJZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGNvbW11bmljYXRpb24gaW4gZXJyb3IsIHBsZWFz
-ZSBub3RpZnkgdGhlIHNlbmRlciBieSB0ZWxlcGhvbmUgb3IgZS1tYWlsIChhcyBzaG93biBhYm92
-ZSkgaW1tZWRpYXRlbHkgYW5kIGRlc3Ryb3kgYW55IGFuZCBhbGwgY29waWVzIG9mIHRoaXMgbWVz
-c2FnZSBpbiB5b3VyIHBvc3Nlc3Npb24gKHdoZXRoZXIgaGFyZCBjb3BpZXMgb3IgZWxlY3Ryb25p
-Y2FsbHkgc3RvcmVkIGNvcGllcykuDQoNCg==
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--3gr566B5Ep0hKbeN13E6ob7GiuGjVvtxr
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
+
+For the record and since nobody objected, I made the suggested change.
+
+On 02/06/2014 18:00, Loic Dachary wrote:
+> Hi Ceph,
+>=20
+> TL;DR: s/pyramid/LRC/ in the implementation of http://pad.ceph.com/p/cd=
+sgiant-pyramid-erasure-code for clarity
+>=20
+> Although the term "Pyramid code" has been consistently used in referenc=
+e to the technique used to reduce the network requirements when repairing=
+ from the loss of a single OSD (put simply ;-), I realized today when dis=
+cussing with Dan Lambright and Xavier Hernandez from glusterfs that I was=
+ unclear about what it really means.
+>=20
+> As far as I can tell, LRC as described in http://anrg.usc.edu/~maheswar=
+an/Xorbas.pdf suggests an implementation that is close to what has been d=
+escribed during the last CDS. In contrast the pyramid code paper http://r=
+esearch.microsoft.com/pubs/70415/tr-2007-25.pdf suggests a more sophistic=
+ated approach which I do not fully understand.=20
+>=20
+> Instead of hardcoding the word "pyramid" in the pathnames of the implem=
+entation it seems better to use "LRC" instead.
+>=20
+> Cheers
+>=20
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+
+
+--3gr566B5Ep0hKbeN13E6ob7GiuGjVvtxr
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlOQeBIACgkQ8dLMyEl6F23gAwCfWqsa2H4ZF+o6Bs/1PjYp4dcC
+L5sAnRclLl8mV5A8aO7aDqjRTWOm7a41
+=ioa0
+-----END PGP SIGNATURE-----
+
+--3gr566B5Ep0hKbeN13E6ob7GiuGjVvtxr--
