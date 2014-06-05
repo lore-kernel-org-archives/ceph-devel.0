@@ -1,47 +1,72 @@
-From: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [RFC 00/32] making inode time stamps y2038 ready
-Date: Wed, 04 Jun 2014 17:10:24 -0700
-Message-ID: <538FB570.8000502@zytor.com>
-References: <1401480116-1973111-1-git-send-email-arnd@arndb.de>
-	<201406041703.47592.arnd@arndb.de>
-	<alpine.LFD.2.11.1406041308300.17310@knanqh.ubzr>
-	<8770583.6XeZxCxOY8@wuerfel>
+From: Christian Balzer <chibi-FW+hd8ioUD0@public.gmane.org>
+Subject: Re: Experiences with Ceph at the June'14 issue of
+ USENIX ; login:
+Date: Thu, 5 Jun 2014 15:59:08 +0900
+Message-ID: <20140605155908.4dfe125a@batzmaru.gol.ad.jp>
+References: <20140602183219.GD17479@philipgian-mac>
+	<1235448490.9762058.1401748668812.JavaMail.zimbra@redhat.com>
+	<20140604142235.GI17479@philipgian-mac>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <fuse-devel-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-In-Reply-To: <8770583.6XeZxCxOY8@wuerfel>
-List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/fuse-devel>,
-	<mailto:fuse-devel-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=fuse-devel>
-List-Post: <mailto:fuse-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-List-Help: <mailto:fuse-devel-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/fuse-devel>,
-	<mailto:fuse-devel-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=subscribe>
-Errors-To: fuse-devel-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
-To: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Nicolas Pitre <nicolas.pitre-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: hch-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org, Dave Chinner <david-FqsqvQoI3Ljby3iVrkZq2A@public.gmane.org>, linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-f2fs-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Joseph S. Myers" <joseph-qD8j1LwMmJjtCj0u4l0SBw@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-scsi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-afs-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, cluster-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, coda-ETDLCGt7PQU3uPMLIKxrzw@public.gmane.org, geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org, linux-ext4-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, codalist-ySnCqBnJi5yMVn35/9/JlcWGCVk0P7UB@public.gmane.org, fuse-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, reiserfs-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, xfs-VZNHf3L845pBDgjK7y7TUQ@public.gmane.org, john.stultz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-ntfs-dev-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, samba-technical-w/Ol4Ecudpl8XjKLYN78aQ@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, logfs-PCqxUs/MD9bYtjvyW6yDsg@public.gmane.org, linux-btrfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, lftan-EIB2kfCEclfQT0dZR+AlfA@public.gmane.org, ocfs2-devel-N0ozoZBvEnrZJqsBc5GL+g@public.gmane.org
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <20140604142235.GI17479@philipgian-mac>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Filippos Giannakos <philipgian-Sqt7GMbKoOQ@public.gmane.org>
+Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-On 06/04/2014 12:24 PM, Arnd Bergmann wrote:
+
+Hello Filippos,
+
+On Wed, 4 Jun 2014 17:22:35 +0300 Filippos Giannakos wrote:
+
+> Hello Ian,
 > 
-> For other timekeeping stuff in the kernel, I agree that using some
-> 64-bit representation (nanoseconds, 32/32 unsigned seconds/nanoseconds,
-> ...) has advantages, that's exactly the point I was making earlier
-> against simply extending the internal time_t/timespec to 64-bit
-> seconds for everything.
+> Thanks for your interest.
 > 
+> On Mon, Jun 02, 2014 at 06:37:48PM -0400, Ian Colle wrote:
+> > Thanks, Filippos! Very interesting reading.
+> > 
+> > Are you comfortable enough yet to remove the RAID-1 from your
+> > architecture and get all that space back?
+> 
+> Actually, we are not ready to do that yet. There are three major things
+> to consider.
+> 
+> First, to be able to get rid of the RAID-1 setup, we need to increase the
+> replication level to at least 3x. So the space gain is not that great to
+> begin with.
+> 
+> Second, this operation can take about a month for our scale according to
+> our calculations and previous experience. During this period of
+> increased I/O we might get peaks of performance degradation. Plus, we
+> currently do not have the necessary hardware available to increase the
+> replication level before we get rid of the RAID setup.
+> 
+> Third, we have a few disk failures per month. The RAID-1 setup has
+> allowed us to seamlessly replace them without any hiccup or even a clue
+> to the end user that something went wrong. Surely we can rely on RADOS
+> to avoid any data loss, but if we currently rely on RADOS for recovery
+> there might be some (minor) performance degradation, especially for the
+> VM I/O traffic.
+> 
+That. 
+And in addition you probably never had to do all that song and dance of
+removing a failed OSD and bringing up a replacement. ^o^ 
+One of the reasons I choose RAIDs as OSDs, especially since the Ceph
+cluster in question is not local.
 
-How much of a performance issue is it to make time_t 64 bits, and for
-the bits there are, how hard are they to fix?
-
-	-hpa
-
-
-
-------------------------------------------------------------------------------
-Learn Graph Databases - Download FREE O'Reilly Book
-"Graph Databases" is the definitive new guide to graph databases and their 
-applications. Written by three acclaimed leaders in the field, 
-this first edition is now available. Download your free book today!
-http://p.sf.net/sfu/NeoTech
+Christian
+-- 
+Christian Balzer        Network/Systems Engineer                
+chibi-FW+hd8ioUD0@public.gmane.org   	Global OnLine Japan/Fusion Communications
+http://www.gol.com/
