@@ -1,36 +1,88 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: Mon backing store
-Date: Thu, 5 Jun 2014 11:26:32 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1406051126100.11281@cobra.newdream.net>
-References: <CA+4uBUZaFHhyn9Brx=dM08qFgPFQiAohufpVk+GH5zCR9Hzb0Q@mail.gmail.com> <CABBk=J9dfAXHcYPYzcu0ipAnzretOMWE3wHhtXVa1oYSzvF1zA@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Mon backing store
+Date: Thu, 5 Jun 2014 18:26:35 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F25CFCFD6@SACMBXIP01.sdcorp.global.sandisk.com>
+References: <CA+4uBUZaFHhyn9Brx=dM08qFgPFQiAohufpVk+GH5zCR9Hzb0Q@mail.gmail.com>
+ <5390B470.4010608@inktank.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:36840 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751967AbaFES0d (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Jun 2014 14:26:33 -0400
-In-Reply-To: <CABBk=J9dfAXHcYPYzcu0ipAnzretOMWE3wHhtXVa1oYSzvF1zA@mail.gmail.com>
+Received: from mail-bn1blp0190.outbound.protection.outlook.com ([207.46.163.190]:42623
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752406AbaFES0l (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 5 Jun 2014 14:26:41 -0400
+In-Reply-To: <5390B470.4010608@inktank.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh <yehuda@inktank.com>
-Cc: Samuel Just <sam.just@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Mark Nelson <mark.nelson@inktank.com>, Samuel Just <sam.just@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Thu, 5 Jun 2014, Yehuda Sadeh wrote:
-> On Thu, Jun 5, 2014 at 10:42 AM, Samuel Just <sam.just@inktank.com> wrote:
-> > I am starting to wonder whether using leveldb for the mon is actually
-> > introducing an excessive amount unnecessary complexity and
-> > non-determinism.  Given that the monitor workload is read mostly,
-> > except for failure conditions when it becomes write latency sensitive,
-> > might we do better with a strict b-tree style backing db such as
-> > berkely db even at the cost of some performance?  It seems like
-> > something like that might provide more reliable latency properties.
-> >
-> > Thoughts?
-> 
-> Whichever route we're taking it'd be nice if it would have been 
-> abstracted more cleanly, and make it pluggable.
-
-The first several patches in the wip-rocksdb branch do this.
-
-sage
+TWFyaywNCkNvdWxkIHlvdSBwbGVhc2Ugc2hhcmUgdGhlIHBlcmZvcm1hbmNlIGJlbmNobWFyayBy
+ZXN1bHQgd2l0aCBSb2Nrc2Ric3RvcmUgKyBjZXBoIGFuZCBsZXZlbGRic3RvcmUrY2VwaCBhcyB5
+b3UgbWVudGlvbmVkIGJlbG93ID8NCkJUVywgaGF2ZSB5b3UgbWVhc3VyZWQgdGhlIFdBIGluZHVj
+ZWQgYnkgUm9ja3NkYnN0b3JlIGFuZCBsZXZlbGRic3RvcmUgaW4gdGhlIHByb2Nlc3Mgc2luY2Ug
+dGhhdCBpcyBhbHNvIGEgdmVyeSBpbXBvcnRhbnQgZmFjdG9yIHdoaWxlIGJhY2tlbmQgaXMgZmxh
+c2ggPw0KDQpUaGFua3MgJiBSZWdhcmRzDQpTb21uYXRoDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2Fn
+ZS0tLS0tDQpGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmNl
+cGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgTWFyayBOZWxzb24N
+ClNlbnQ6IFRodXJzZGF5LCBKdW5lIDA1LCAyMDE0IDExOjE4IEFNDQpUbzogU2FtdWVsIEp1c3Q7
+IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQpTdWJqZWN0OiBSZTogTW9uIGJhY2tpbmcgc3Rv
+cmUNCg0KT24gMDYvMDUvMjAxNCAxMjo0MiBQTSwgU2FtdWVsIEp1c3Qgd3JvdGU6DQo+IEkgYW0g
+c3RhcnRpbmcgdG8gd29uZGVyIHdoZXRoZXIgdXNpbmcgbGV2ZWxkYiBmb3IgdGhlIG1vbiBpcyBh
+Y3R1YWxseQ0KPiBpbnRyb2R1Y2luZyBhbiBleGNlc3NpdmUgYW1vdW50IHVubmVjZXNzYXJ5IGNv
+bXBsZXhpdHkgYW5kDQo+IG5vbi1kZXRlcm1pbmlzbS4gIEdpdmVuIHRoYXQgdGhlIG1vbml0b3Ig
+d29ya2xvYWQgaXMgcmVhZCBtb3N0bHksDQo+IGV4Y2VwdCBmb3IgZmFpbHVyZSBjb25kaXRpb25z
+IHdoZW4gaXQgYmVjb21lcyB3cml0ZSBsYXRlbmN5IHNlbnNpdGl2ZSwNCj4gbWlnaHQgd2UgZG8g
+YmV0dGVyIHdpdGggYSBzdHJpY3QgYi10cmVlIHN0eWxlIGJhY2tpbmcgZGIgc3VjaCBhcw0KPiBi
+ZXJrZWx5IGRiIGV2ZW4gYXQgdGhlIGNvc3Qgb2Ygc29tZSBwZXJmb3JtYW5jZT8gIEl0IHNlZW1z
+IGxpa2UNCj4gc29tZXRoaW5nIGxpa2UgdGhhdCBtaWdodCBwcm92aWRlIG1vcmUgcmVsaWFibGUg
+bGF0ZW5jeSBwcm9wZXJ0aWVzLg0KDQpJJ20gbm90IGFnYWluc3QgdHJ5aW5nIGl0LCBidXQgSSdt
+IG5vdCBjb252aW5jZWQgaXQncyB0aGUgcmlnaHQgc29sdXRpb24uICBJZiB0aGUgOTl0aCBwZXJj
+ZW50aWxlIGxhdGVuY3kgaXMgc2lnbmlmaWNhbnRseSBiZXR0ZXIsIHRoYXQncyBvYnZpb3VzbHkg
+YSB3aW4sIGJ1dCBJIHRoaW5rIHdlIGFyZSBpbmRlZWQgZ29pbmcgdG8gdGFrZSBhIGJpZyBwZXJm
+b3JtYW5jZSBoaXQgb3ZlcmFsbC4gIEknbSBtb3JlIGluIGZhdm9yIG9mIHRyeWluZyByb2Nrc2Ri
+IGZpcnN0Lg0KSSdtIGNlcnRhaW5seSBub3QgYXMgd2VsbCB2ZXJzZWQgaW4gdGhlIGxldmVsZGIg
+aW50ZXJmYWNlIGFzIHlvdSBvciBKb2FvIGFyZSwgYnV0IGl0IGFwcGVhcnMgbXVjaCBvZiBvdXIg
+Y29kZSBpbiBMZXZlbERCU3RvcmUgd291bGQgYmUgcmV1c2FibGUuDQogIEkgZG9uJ3Qga25vdyB0
+aGF0IHJvY2tzZGIgd29uJ3QgaGF2ZSB0aGUgc2FtZSBpc3N1ZXMgdGhhdCBsZXZlbGRiIGRvZXMs
+IGJ1dCB0aGUgcm9ja3NkYiBkZXZlbG9wZXJzIHNwZWNpZmljYWxseSBtZW50aW9uIGxldmVsZGIn
+cyBiYWQgOTl0aCBwZXJjZW50aWxlIGxhdGVuY2llcyBhcyBhIGRyaXZlciBmb3IgaXQncyBkZXZl
+bG9wbWVudDoNCg0KIkJ5IGNvbnRyYXN0LCB3ZeKAmXZlIHB1Ymxpc2hlZCB0aGUgUm9ja3NEQiBi
+ZW5jaG1hcmsgcmVzdWx0cyBmb3Igc2VydmVyIHNpZGUgd29ya2xvYWRzIG9uIEZsYXNoLiBXZSBh
+bHNvIG1lYXN1cmVkIHRoZSBwZXJmb3JtYW5jZSBvZiBMZXZlbERCIG9uIHRoZXNlIHNlcnZlci13
+b3JrbG9hZCBiZW5jaG1hcmtzIGFuZCBmb3VuZCB0aGF0IFJvY2tzREIgc29saWRseSBvdXRwZXJm
+b3JtcyBMZXZlbERCIGZvciB0aGVzZSBJTyBib3VuZCB3b3JrbG9hZHMuIFdlIGZvdW5kIHRoYXQg
+TGV2ZWxEQuKAmXMgc2luZ2xlLXRocmVhZGVkIGNvbXBhY3Rpb24gcHJvY2VzcyB3YXMgaW5zdWZm
+aWNpZW50IHRvIGRyaXZlIHNlcnZlciB3b3JrbG9hZHMuIFdlIHNhdyBmcmVxdWVudCB3cml0ZS1z
+dGFsbHMgd2l0aCBMZXZlbERCIHRoYXQgY2F1c2VkIDk5LXBlcmNlbnRpbGUgbGF0ZW5jeSB0byBi
+ZSB0cmVtZW5kb3VzbHkgbGFyZ2UuIFdlIGZvdW5kIHRoYXQgbW1hcC1pbmcgYSBmaWxlIGludG8g
+dGhlIE9TIGNhY2hlIGludHJvZHVjZWQgcGVyZm9ybWFuY2UgYm90dGxlbmVja3MgZm9yIHJlYWRz
+LiBXZSBjb3VsZCBub3QgbWFrZSBMZXZlbERCIGNvbnN1bWUgYWxsIHRoZSBJT3Mgb2ZmZXJlZCBi
+eSB0aGUgdW5kZXJseWluZyBGbGFzaCBzdG9yYWdlLiINCg0KQ29tcGFjdGlvbiBwZXJmb3JtYW5j
+ZSBhbmQgaGlnaCBtbWFwL3BhZ2UgZmF1bHQva3N3YXBkIHV0aWxpemF0aW9uIGR1cmluZyByZWFk
+cyBhcmUgdHdvIGJpZyBpc3N1ZXMgd2UndmUgaGl0IGluIGxldmVsZGIsIHNvIEknbSBpbmNsaW5l
+ZCB0byB0aGluayB0aGF0IHJvY2tzZGIgaXMgYXQgbGVhc3Qgd29ydGh5IG9mIHNvbWUgYXR0ZW50
+aW9uLg0KDQpIZXJlJ3MgdGhlIGJlbmNobWFyayByZXN1bHRzIG9uIHRoZWlyIHdpa2k6DQoNCmh0
+dHBzOi8vZ2l0aHViLmNvbS9mYWNlYm9vay9yb2Nrc2RiL3dpa2kvUGVyZm9ybWFuY2UtQmVuY2ht
+YXJrcw0KDQo+DQo+IFRob3VnaHRzPw0KPiAtU2FtDQo+IC0tDQo+IFRvIHVuc3Vic2NyaWJlIGZy
+b20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIg0KPiBp
+biB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3Jl
+IG1ham9yZG9tbw0KPiBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1p
+bmZvLmh0bWwNCj4NCg0KLS0NClRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRo
+ZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2Ug
+dG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRw
+Oi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCg0KX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX18NCg0KUExFQVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWlu
+ZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0
+aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhl
+IHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlv
+dSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdl
+IGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZpZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlv
+biwgb3IgY29weWluZyBvZiB0aGlzIG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYg
+eW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90
+aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25lIG9yIGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGlt
+bWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2Ug
+aW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5
+IHN0b3JlZCBjb3BpZXMpLg0KDQo=
