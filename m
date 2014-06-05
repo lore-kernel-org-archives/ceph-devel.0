@@ -1,80 +1,89 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Re: [Feature]Proposal for adding a new flag named shared to support
+From: Allen Samuels <Allen.Samuels@sandisk.com>
+Subject: RE: [Feature]Proposal for adding a new flag named shared to support
  performance and statistic purpose
-Date: Thu, 5 Jun 2014 15:43:07 +0800
-Message-ID: <CACJqLyb8dpoV9iRFaqg_F05cbso6AX2RYD7bLPb4Gj9z+=V1tg@mail.gmail.com>
+Date: Thu, 5 Jun 2014 13:55:07 +0000
+Message-ID: <7334B4281E425749B85E08CF7EC6F85329CBE143@SACMBXIP01.sdcorp.global.sandisk.com>
 References: <CACJqLyZoxqN69NarVLsWZan7aULwbULUAFwmGC5D_jiVTc=uqg@mail.gmail.com>
 	<53901B6D.1060707@42on.com>
+ <CACJqLyb8dpoV9iRFaqg_F05cbso6AX2RYD7bLPb4Gj9z+=V1tg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f46.google.com ([74.125.82.46]:61353 "EHLO
-	mail-wg0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751135AbaFEHnI (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Jun 2014 03:43:08 -0400
-Received: by mail-wg0-f46.google.com with SMTP id b13so398736wgh.29
-        for <ceph-devel@vger.kernel.org>; Thu, 05 Jun 2014 00:43:07 -0700 (PDT)
-In-Reply-To: <53901B6D.1060707@42on.com>
+Received: from [207.46.163.187] ([207.46.163.187]:59591 "EHLO
+	na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751380AbaFENzc (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 5 Jun 2014 09:55:32 -0400
+In-Reply-To: <CACJqLyb8dpoV9iRFaqg_F05cbso6AX2RYD7bLPb4Gj9z+=V1tg@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@42on.com>
+To: Haomai Wang <haomaiwang@gmail.com>, Wido den Hollander <wido@42on.com>
 Cc: Sage Weil <sage@inktank.com>, Josh Durgin <josh.durgin@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Thu, Jun 5, 2014 at 3:25 PM, Wido den Hollander <wido@42on.com> wrote:
-> On 06/05/2014 09:01 AM, Haomai Wang wrote:
->>
->> Hi,
->> Previously I sent a mail about the difficult of rbd snapshot size
->> statistic. The main solution is using object map to store the changes.
->> The problem is we can't handle with multi client concurrent modify.
->>
->> Lack of object map(like pointer map in qcow2), it cause many problems
->> in librbd. Such as clone depth, the deep clone depth will cause
->> remarkable latency. Usually each clone wrap will increase two times of
->> latency.
->>
->> I consider to make a tradeoff between multi-client support and
->> single-client support for librbd. In practice, most of the
->> volumes/images are used by VM, there only exist one client will
->> access/modify image. We can't only want to make shared image possible
->> but make most of use cases bad. So we can add a new flag called
->> "shared" when creating image. If "shared" is false, librbd will
->> maintain a object map for each image. The object map is considered to
->> durable, each image_close call will store the map into rados. If the
->> client  is crashed and failed to dump the object map, the next client
->> open the image will think the object map as out of date and reset the
->> objectmap.
->
->
-> Why not flush out the object map every X period? Assume a client runs for
-> weeks or months and you would keep that map in memory all the time since the
-> image is never closed.
-
-Yes, as a period job is also a good alter
-
->
->
->>
->> We can easily find the advantage of this feature:
->> 1. Avoid clone performance problem
->> 2. Make snapshot statistic possible
->> 3. Improve librbd operation performance including read, copy-on-write
->> operation.
->>
->> What do you think above? More feedbacks are appreciate!
->>
->
->
-> --
-> Wido den Hollander
-> 42on B.V.
->
-> Phone: +31 (0)20 700 9902
-> Skype: contact42on
-
-
-
--- 
-Best Regards,
-
-Wheat
+WW91IHRhbGsgYWJvdXQgcmVzdHRpbmcgdGhlIG9iamVjdCBtYXAgb24gYSByZXN0YXJ0IGFmdGVy
+IGEgY3Jhc2ggLS0gSSBhc3N1bWUgeW91IG1lYW4gcmVidWlsZGluZywgaG93IGxvbmcgd2lsbCB0
+aGlzIHRha2U/DQoNCg0KLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0NClRoZSB0cnVlIG15c3Rlcnkgb2YgdGhlIHdvcmxkIGlzIHRoZSB2
+aXNpYmxlLCBub3QgdGhlIGludmlzaWJsZS4NCiBPc2NhciBXaWxkZSAoMTg1NCAtIDE5MDApDQoN
+CkFsbGVuIFNhbXVlbHMNCkNoaWVmIFNvZnR3YXJlIEFyY2hpdGVjdCwgRW1lcmdpbmcgU3RvcmFn
+ZSBTb2x1dGlvbnMNCg0KOTUxIFNhbkRpc2sgRHJpdmUsIE1pbHBpdGFzLCBDQSA5NTAzNQ0KVDog
+KzEgNDA4IDgwMSA3MDMwfCBNOiArMSA0MDggNzgwIDY0MTYNCmFsbGVuLnNhbXVlbHNAU2FuRGlz
+ay5jb20NCg0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogY2VwaC1kZXZlbC1v
+d25lckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVs
+Lm9yZ10gT24gQmVoYWxmIE9mIEhhb21haSBXYW5nDQpTZW50OiBUaHVyc2RheSwgSnVuZSAwNSwg
+MjAxNCAxMjo0MyBBTQ0KVG86IFdpZG8gZGVuIEhvbGxhbmRlcg0KQ2M6IFNhZ2UgV2VpbDsgSm9z
+aCBEdXJnaW47IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQpTdWJqZWN0OiBSZTogW0ZlYXR1
+cmVdUHJvcG9zYWwgZm9yIGFkZGluZyBhIG5ldyBmbGFnIG5hbWVkIHNoYXJlZCB0byBzdXBwb3J0
+IHBlcmZvcm1hbmNlIGFuZCBzdGF0aXN0aWMgcHVycG9zZQ0KDQpPbiBUaHUsIEp1biA1LCAyMDE0
+IGF0IDM6MjUgUE0sIFdpZG8gZGVuIEhvbGxhbmRlciA8d2lkb0A0Mm9uLmNvbT4gd3JvdGU6DQo+
+IE9uIDA2LzA1LzIwMTQgMDk6MDEgQU0sIEhhb21haSBXYW5nIHdyb3RlOg0KPj4NCj4+IEhpLA0K
+Pj4gUHJldmlvdXNseSBJIHNlbnQgYSBtYWlsIGFib3V0IHRoZSBkaWZmaWN1bHQgb2YgcmJkIHNu
+YXBzaG90IHNpemUNCj4+IHN0YXRpc3RpYy4gVGhlIG1haW4gc29sdXRpb24gaXMgdXNpbmcgb2Jq
+ZWN0IG1hcCB0byBzdG9yZSB0aGUgY2hhbmdlcy4NCj4+IFRoZSBwcm9ibGVtIGlzIHdlIGNhbid0
+IGhhbmRsZSB3aXRoIG11bHRpIGNsaWVudCBjb25jdXJyZW50IG1vZGlmeS4NCj4+DQo+PiBMYWNr
+IG9mIG9iamVjdCBtYXAobGlrZSBwb2ludGVyIG1hcCBpbiBxY293MiksIGl0IGNhdXNlIG1hbnkg
+cHJvYmxlbXMNCj4+IGluIGxpYnJiZC4gU3VjaCBhcyBjbG9uZSBkZXB0aCwgdGhlIGRlZXAgY2xv
+bmUgZGVwdGggd2lsbCBjYXVzZQ0KPj4gcmVtYXJrYWJsZSBsYXRlbmN5LiBVc3VhbGx5IGVhY2gg
+Y2xvbmUgd3JhcCB3aWxsIGluY3JlYXNlIHR3byB0aW1lcw0KPj4gb2YgbGF0ZW5jeS4NCj4+DQo+
+PiBJIGNvbnNpZGVyIHRvIG1ha2UgYSB0cmFkZW9mZiBiZXR3ZWVuIG11bHRpLWNsaWVudCBzdXBw
+b3J0IGFuZA0KPj4gc2luZ2xlLWNsaWVudCBzdXBwb3J0IGZvciBsaWJyYmQuIEluIHByYWN0aWNl
+LCBtb3N0IG9mIHRoZQ0KPj4gdm9sdW1lcy9pbWFnZXMgYXJlIHVzZWQgYnkgVk0sIHRoZXJlIG9u
+bHkgZXhpc3Qgb25lIGNsaWVudCB3aWxsDQo+PiBhY2Nlc3MvbW9kaWZ5IGltYWdlLiBXZSBjYW4n
+dCBvbmx5IHdhbnQgdG8gbWFrZSBzaGFyZWQgaW1hZ2UgcG9zc2libGUNCj4+IGJ1dCBtYWtlIG1v
+c3Qgb2YgdXNlIGNhc2VzIGJhZC4gU28gd2UgY2FuIGFkZCBhIG5ldyBmbGFnIGNhbGxlZA0KPj4g
+InNoYXJlZCIgd2hlbiBjcmVhdGluZyBpbWFnZS4gSWYgInNoYXJlZCIgaXMgZmFsc2UsIGxpYnJi
+ZCB3aWxsDQo+PiBtYWludGFpbiBhIG9iamVjdCBtYXAgZm9yIGVhY2ggaW1hZ2UuIFRoZSBvYmpl
+Y3QgbWFwIGlzIGNvbnNpZGVyZWQgdG8NCj4+IGR1cmFibGUsIGVhY2ggaW1hZ2VfY2xvc2UgY2Fs
+bCB3aWxsIHN0b3JlIHRoZSBtYXAgaW50byByYWRvcy4gSWYgdGhlDQo+PiBjbGllbnQgIGlzIGNy
+YXNoZWQgYW5kIGZhaWxlZCB0byBkdW1wIHRoZSBvYmplY3QgbWFwLCB0aGUgbmV4dCBjbGllbnQN
+Cj4+IG9wZW4gdGhlIGltYWdlIHdpbGwgdGhpbmsgdGhlIG9iamVjdCBtYXAgYXMgb3V0IG9mIGRh
+dGUgYW5kIHJlc2V0IHRoZQ0KPj4gb2JqZWN0bWFwLg0KPg0KPg0KPiBXaHkgbm90IGZsdXNoIG91
+dCB0aGUgb2JqZWN0IG1hcCBldmVyeSBYIHBlcmlvZD8gQXNzdW1lIGEgY2xpZW50IHJ1bnMNCj4g
+Zm9yIHdlZWtzIG9yIG1vbnRocyBhbmQgeW91IHdvdWxkIGtlZXAgdGhhdCBtYXAgaW4gbWVtb3J5
+IGFsbCB0aGUgdGltZQ0KPiBzaW5jZSB0aGUgaW1hZ2UgaXMgbmV2ZXIgY2xvc2VkLg0KDQpZZXMs
+IGFzIGEgcGVyaW9kIGpvYiBpcyBhbHNvIGEgZ29vZCBhbHRlcg0KDQo+DQo+DQo+Pg0KPj4gV2Ug
+Y2FuIGVhc2lseSBmaW5kIHRoZSBhZHZhbnRhZ2Ugb2YgdGhpcyBmZWF0dXJlOg0KPj4gMS4gQXZv
+aWQgY2xvbmUgcGVyZm9ybWFuY2UgcHJvYmxlbQ0KPj4gMi4gTWFrZSBzbmFwc2hvdCBzdGF0aXN0
+aWMgcG9zc2libGUNCj4+IDMuIEltcHJvdmUgbGlicmJkIG9wZXJhdGlvbiBwZXJmb3JtYW5jZSBp
+bmNsdWRpbmcgcmVhZCwgY29weS1vbi13cml0ZQ0KPj4gb3BlcmF0aW9uLg0KPj4NCj4+IFdoYXQg
+ZG8geW91IHRoaW5rIGFib3ZlPyBNb3JlIGZlZWRiYWNrcyBhcmUgYXBwcmVjaWF0ZSENCj4+DQo+
+DQo+DQo+IC0tDQo+IFdpZG8gZGVuIEhvbGxhbmRlcg0KPiA0Mm9uIEIuVi4NCj4NCj4gUGhvbmU6
+ICszMSAoMCkyMCA3MDAgOTkwMg0KPiBTa3lwZTogY29udGFjdDQyb24NCg0KDQoNCi0tDQpCZXN0
+IFJlZ2FyZHMsDQoNCldoZWF0DQotLQ0KVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNl
+bmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluIHRoZSBib2R5IG9mIGEgbWVz
+c2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIGluZm8gYXQg
+IGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KDQpfX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fXw0KDQpQTEVBU0UgTk9URTogVGhlIGluZm9ybWF0aW9uIGNv
+bnRhaW5lZCBpbiB0aGlzIGVsZWN0cm9uaWMgbWFpbCBtZXNzYWdlIGlzIGludGVuZGVkIG9ubHkg
+Zm9yIHRoZSB1c2Ugb2YgdGhlIGRlc2lnbmF0ZWQgcmVjaXBpZW50KHMpIG5hbWVkIGFib3ZlLiBJ
+ZiB0aGUgcmVhZGVyIG9mIHRoaXMgbWVzc2FnZSBpcyBub3QgdGhlIGludGVuZGVkIHJlY2lwaWVu
+dCwgeW91IGFyZSBoZXJlYnkgbm90aWZpZWQgdGhhdCB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIG1l
+c3NhZ2UgaW4gZXJyb3IgYW5kIHRoYXQgYW55IHJldmlldywgZGlzc2VtaW5hdGlvbiwgZGlzdHJp
+YnV0aW9uLCBvciBjb3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBpcyBzdHJpY3RseSBwcm9oaWJpdGVk
+LiBJZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGNvbW11bmljYXRpb24gaW4gZXJyb3IsIHBsZWFz
+ZSBub3RpZnkgdGhlIHNlbmRlciBieSB0ZWxlcGhvbmUgb3IgZS1tYWlsIChhcyBzaG93biBhYm92
+ZSkgaW1tZWRpYXRlbHkgYW5kIGRlc3Ryb3kgYW55IGFuZCBhbGwgY29waWVzIG9mIHRoaXMgbWVz
+c2FnZSBpbiB5b3VyIHBvc3Nlc3Npb24gKHdoZXRoZXIgaGFyZCBjb3BpZXMgb3IgZWxlY3Ryb25p
+Y2FsbHkgc3RvcmVkIGNvcGllcykuDQoNCg==
