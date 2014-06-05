@@ -1,88 +1,125 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: Mon backing store
-Date: Thu, 5 Jun 2014 18:26:35 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F25CFCFD6@SACMBXIP01.sdcorp.global.sandisk.com>
-References: <CA+4uBUZaFHhyn9Brx=dM08qFgPFQiAohufpVk+GH5zCR9Hzb0Q@mail.gmail.com>
- <5390B470.4010608@inktank.com>
+From: Mark Nelson <mark.nelson@inktank.com>
+Subject: Re: Mon backing store
+Date: Thu, 05 Jun 2014 13:33:15 -0500
+Message-ID: <5390B7EB.9080402@inktank.com>
+References: <CA+4uBUZaFHhyn9Brx=dM08qFgPFQiAohufpVk+GH5zCR9Hzb0Q@mail.gmail.com> <5390B470.4010608@inktank.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F25CFCFD6@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1blp0190.outbound.protection.outlook.com ([207.46.163.190]:42623
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752406AbaFES0l (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 5 Jun 2014 14:26:41 -0400
-In-Reply-To: <5390B470.4010608@inktank.com>
-Content-Language: en-US
+Received: from mail-ig0-f182.google.com ([209.85.213.182]:48235 "EHLO
+	mail-ig0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751065AbaFESdN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Jun 2014 14:33:13 -0400
+Received: by mail-ig0-f182.google.com with SMTP id a13so2644210igq.3
+        for <ceph-devel@vger.kernel.org>; Thu, 05 Jun 2014 11:33:12 -0700 (PDT)
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F25CFCFD6@SACMBXIP01.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mark.nelson@inktank.com>, Samuel Just <sam.just@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>, Samuel Just <sam.just@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-TWFyaywNCkNvdWxkIHlvdSBwbGVhc2Ugc2hhcmUgdGhlIHBlcmZvcm1hbmNlIGJlbmNobWFyayBy
-ZXN1bHQgd2l0aCBSb2Nrc2Ric3RvcmUgKyBjZXBoIGFuZCBsZXZlbGRic3RvcmUrY2VwaCBhcyB5
-b3UgbWVudGlvbmVkIGJlbG93ID8NCkJUVywgaGF2ZSB5b3UgbWVhc3VyZWQgdGhlIFdBIGluZHVj
-ZWQgYnkgUm9ja3NkYnN0b3JlIGFuZCBsZXZlbGRic3RvcmUgaW4gdGhlIHByb2Nlc3Mgc2luY2Ug
-dGhhdCBpcyBhbHNvIGEgdmVyeSBpbXBvcnRhbnQgZmFjdG9yIHdoaWxlIGJhY2tlbmQgaXMgZmxh
-c2ggPw0KDQpUaGFua3MgJiBSZWdhcmRzDQpTb21uYXRoDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2Fn
-ZS0tLS0tDQpGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmNl
-cGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgTWFyayBOZWxzb24N
-ClNlbnQ6IFRodXJzZGF5LCBKdW5lIDA1LCAyMDE0IDExOjE4IEFNDQpUbzogU2FtdWVsIEp1c3Q7
-IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQpTdWJqZWN0OiBSZTogTW9uIGJhY2tpbmcgc3Rv
-cmUNCg0KT24gMDYvMDUvMjAxNCAxMjo0MiBQTSwgU2FtdWVsIEp1c3Qgd3JvdGU6DQo+IEkgYW0g
-c3RhcnRpbmcgdG8gd29uZGVyIHdoZXRoZXIgdXNpbmcgbGV2ZWxkYiBmb3IgdGhlIG1vbiBpcyBh
-Y3R1YWxseQ0KPiBpbnRyb2R1Y2luZyBhbiBleGNlc3NpdmUgYW1vdW50IHVubmVjZXNzYXJ5IGNv
-bXBsZXhpdHkgYW5kDQo+IG5vbi1kZXRlcm1pbmlzbS4gIEdpdmVuIHRoYXQgdGhlIG1vbml0b3Ig
-d29ya2xvYWQgaXMgcmVhZCBtb3N0bHksDQo+IGV4Y2VwdCBmb3IgZmFpbHVyZSBjb25kaXRpb25z
-IHdoZW4gaXQgYmVjb21lcyB3cml0ZSBsYXRlbmN5IHNlbnNpdGl2ZSwNCj4gbWlnaHQgd2UgZG8g
-YmV0dGVyIHdpdGggYSBzdHJpY3QgYi10cmVlIHN0eWxlIGJhY2tpbmcgZGIgc3VjaCBhcw0KPiBi
-ZXJrZWx5IGRiIGV2ZW4gYXQgdGhlIGNvc3Qgb2Ygc29tZSBwZXJmb3JtYW5jZT8gIEl0IHNlZW1z
-IGxpa2UNCj4gc29tZXRoaW5nIGxpa2UgdGhhdCBtaWdodCBwcm92aWRlIG1vcmUgcmVsaWFibGUg
-bGF0ZW5jeSBwcm9wZXJ0aWVzLg0KDQpJJ20gbm90IGFnYWluc3QgdHJ5aW5nIGl0LCBidXQgSSdt
-IG5vdCBjb252aW5jZWQgaXQncyB0aGUgcmlnaHQgc29sdXRpb24uICBJZiB0aGUgOTl0aCBwZXJj
-ZW50aWxlIGxhdGVuY3kgaXMgc2lnbmlmaWNhbnRseSBiZXR0ZXIsIHRoYXQncyBvYnZpb3VzbHkg
-YSB3aW4sIGJ1dCBJIHRoaW5rIHdlIGFyZSBpbmRlZWQgZ29pbmcgdG8gdGFrZSBhIGJpZyBwZXJm
-b3JtYW5jZSBoaXQgb3ZlcmFsbC4gIEknbSBtb3JlIGluIGZhdm9yIG9mIHRyeWluZyByb2Nrc2Ri
-IGZpcnN0Lg0KSSdtIGNlcnRhaW5seSBub3QgYXMgd2VsbCB2ZXJzZWQgaW4gdGhlIGxldmVsZGIg
-aW50ZXJmYWNlIGFzIHlvdSBvciBKb2FvIGFyZSwgYnV0IGl0IGFwcGVhcnMgbXVjaCBvZiBvdXIg
-Y29kZSBpbiBMZXZlbERCU3RvcmUgd291bGQgYmUgcmV1c2FibGUuDQogIEkgZG9uJ3Qga25vdyB0
-aGF0IHJvY2tzZGIgd29uJ3QgaGF2ZSB0aGUgc2FtZSBpc3N1ZXMgdGhhdCBsZXZlbGRiIGRvZXMs
-IGJ1dCB0aGUgcm9ja3NkYiBkZXZlbG9wZXJzIHNwZWNpZmljYWxseSBtZW50aW9uIGxldmVsZGIn
-cyBiYWQgOTl0aCBwZXJjZW50aWxlIGxhdGVuY2llcyBhcyBhIGRyaXZlciBmb3IgaXQncyBkZXZl
-bG9wbWVudDoNCg0KIkJ5IGNvbnRyYXN0LCB3ZeKAmXZlIHB1Ymxpc2hlZCB0aGUgUm9ja3NEQiBi
-ZW5jaG1hcmsgcmVzdWx0cyBmb3Igc2VydmVyIHNpZGUgd29ya2xvYWRzIG9uIEZsYXNoLiBXZSBh
-bHNvIG1lYXN1cmVkIHRoZSBwZXJmb3JtYW5jZSBvZiBMZXZlbERCIG9uIHRoZXNlIHNlcnZlci13
-b3JrbG9hZCBiZW5jaG1hcmtzIGFuZCBmb3VuZCB0aGF0IFJvY2tzREIgc29saWRseSBvdXRwZXJm
-b3JtcyBMZXZlbERCIGZvciB0aGVzZSBJTyBib3VuZCB3b3JrbG9hZHMuIFdlIGZvdW5kIHRoYXQg
-TGV2ZWxEQuKAmXMgc2luZ2xlLXRocmVhZGVkIGNvbXBhY3Rpb24gcHJvY2VzcyB3YXMgaW5zdWZm
-aWNpZW50IHRvIGRyaXZlIHNlcnZlciB3b3JrbG9hZHMuIFdlIHNhdyBmcmVxdWVudCB3cml0ZS1z
-dGFsbHMgd2l0aCBMZXZlbERCIHRoYXQgY2F1c2VkIDk5LXBlcmNlbnRpbGUgbGF0ZW5jeSB0byBi
-ZSB0cmVtZW5kb3VzbHkgbGFyZ2UuIFdlIGZvdW5kIHRoYXQgbW1hcC1pbmcgYSBmaWxlIGludG8g
-dGhlIE9TIGNhY2hlIGludHJvZHVjZWQgcGVyZm9ybWFuY2UgYm90dGxlbmVja3MgZm9yIHJlYWRz
-LiBXZSBjb3VsZCBub3QgbWFrZSBMZXZlbERCIGNvbnN1bWUgYWxsIHRoZSBJT3Mgb2ZmZXJlZCBi
-eSB0aGUgdW5kZXJseWluZyBGbGFzaCBzdG9yYWdlLiINCg0KQ29tcGFjdGlvbiBwZXJmb3JtYW5j
-ZSBhbmQgaGlnaCBtbWFwL3BhZ2UgZmF1bHQva3N3YXBkIHV0aWxpemF0aW9uIGR1cmluZyByZWFk
-cyBhcmUgdHdvIGJpZyBpc3N1ZXMgd2UndmUgaGl0IGluIGxldmVsZGIsIHNvIEknbSBpbmNsaW5l
-ZCB0byB0aGluayB0aGF0IHJvY2tzZGIgaXMgYXQgbGVhc3Qgd29ydGh5IG9mIHNvbWUgYXR0ZW50
-aW9uLg0KDQpIZXJlJ3MgdGhlIGJlbmNobWFyayByZXN1bHRzIG9uIHRoZWlyIHdpa2k6DQoNCmh0
-dHBzOi8vZ2l0aHViLmNvbS9mYWNlYm9vay9yb2Nrc2RiL3dpa2kvUGVyZm9ybWFuY2UtQmVuY2ht
-YXJrcw0KDQo+DQo+IFRob3VnaHRzPw0KPiAtU2FtDQo+IC0tDQo+IFRvIHVuc3Vic2NyaWJlIGZy
-b20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIg0KPiBp
-biB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3Jl
-IG1ham9yZG9tbw0KPiBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1p
-bmZvLmh0bWwNCj4NCg0KLS0NClRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRo
-ZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2Ug
-dG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRw
-Oi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCg0KX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX18NCg0KUExFQVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWlu
-ZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0
-aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhl
-IHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlv
-dSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdl
-IGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZpZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlv
-biwgb3IgY29weWluZyBvZiB0aGlzIG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYg
-eW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90
-aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25lIG9yIGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGlt
-bWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2Ug
-aW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5
-IHN0b3JlZCBjb3BpZXMpLg0KDQo=
+Hi Somnath,
+
+Sorry to get your hopes up, no ceph+rocksdb benchmarks (yet!).  I was=20
+referring to the benchmarks that the rocksdb developers published here:
+
+https://github.com/facebook/rocksdb/wiki/Performance-Benchmarks
+
+Sounds like we need to start some performance testing on wip-rocksdb=20
+going though! :)
+
+Mark
+
+On 06/05/2014 01:26 PM, Somnath Roy wrote:
+> Mark,
+> Could you please share the performance benchmark result with Rocksdbs=
+tore + ceph and leveldbstore+ceph as you mentioned below ?
+> BTW, have you measured the WA induced by Rocksdbstore and leveldbstor=
+e in the process since that is also a very important factor while backe=
+nd is flash ?
+>
+> Thanks & Regards
+> Somnath
+>
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.=
+kernel.org] On Behalf Of Mark Nelson
+> Sent: Thursday, June 05, 2014 11:18 AM
+> To: Samuel Just; ceph-devel@vger.kernel.org
+> Subject: Re: Mon backing store
+>
+> On 06/05/2014 12:42 PM, Samuel Just wrote:
+>> I am starting to wonder whether using leveldb for the mon is actuall=
+y
+>> introducing an excessive amount unnecessary complexity and
+>> non-determinism.  Given that the monitor workload is read mostly,
+>> except for failure conditions when it becomes write latency sensitiv=
+e,
+>> might we do better with a strict b-tree style backing db such as
+>> berkely db even at the cost of some performance?  It seems like
+>> something like that might provide more reliable latency properties.
+>
+> I'm not against trying it, but I'm not convinced it's the right solut=
+ion.  If the 99th percentile latency is significantly better, that's ob=
+viously a win, but I think we are indeed going to take a big performanc=
+e hit overall.  I'm more in favor of trying rocksdb first.
+> I'm certainly not as well versed in the leveldb interface as you or J=
+oao are, but it appears much of our code in LevelDBStore would be reusa=
+ble.
+>    I don't know that rocksdb won't have the same issues that leveldb =
+does, but the rocksdb developers specifically mention leveldb's bad 99t=
+h percentile latencies as a driver for it's development:
+>
+> "By contrast, we=E2=80=99ve published the RocksDB benchmark results f=
+or server side workloads on Flash. We also measured the performance of =
+LevelDB on these server-workload benchmarks and found that RocksDB soli=
+dly outperforms LevelDB for these IO bound workloads. We found that Lev=
+elDB=E2=80=99s single-threaded compaction process was insufficient to d=
+rive server workloads. We saw frequent write-stalls with LevelDB that c=
+aused 99-percentile latency to be tremendously large. We found that mma=
+p-ing a file into the OS cache introduced performance bottlenecks for r=
+eads. We could not make LevelDB consume all the IOs offered by the unde=
+rlying Flash storage."
+>
+> Compaction performance and high mmap/page fault/kswapd utilization du=
+ring reads are two big issues we've hit in leveldb, so I'm inclined to =
+think that rocksdb is at least worthy of some attention.
+>
+> Here's the benchmark results on their wiki:
+>
+> https://github.com/facebook/rocksdb/wiki/Performance-Benchmarks
+>
+>>
+>> Thoughts?
+>> -Sam
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+"
+>> in the body of a message to majordomo@vger.kernel.org More majordomo
+>> info at  http://vger.kernel.org/majordomo-info.html
+>>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in the body of a message to majordomo@vger.kernel.org More majordomo i=
+nfo at  http://vger.kernel.org/majordomo-info.html
+>
+> ________________________________
+>
+> PLEASE NOTE: The information contained in this electronic mail messag=
+e is intended only for the use of the designated recipient(s) named abo=
+ve. If the reader of this message is not the intended recipient, you ar=
+e hereby notified that you have received this message in error and that=
+ any review, dissemination, distribution, or copying of this message is=
+ strictly prohibited. If you have received this communication in error,=
+ please notify the sender by telephone or e-mail (as shown above) immed=
+iately and destroy any and all copies of this message in your possessio=
+n (whether hard copies or electronically stored copies).
+>
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
