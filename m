@@ -1,125 +1,103 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: Mon backing store
-Date: Thu, 05 Jun 2014 13:33:15 -0500
-Message-ID: <5390B7EB.9080402@inktank.com>
-References: <CA+4uBUZaFHhyn9Brx=dM08qFgPFQiAohufpVk+GH5zCR9Hzb0Q@mail.gmail.com> <5390B470.4010608@inktank.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F25CFCFD6@SACMBXIP01.sdcorp.global.sandisk.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Mon backing store
+Date: Thu, 5 Jun 2014 18:40:22 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F25CFE02D@SACMBXIP01.sdcorp.global.sandisk.com>
+References: <CA+4uBUZaFHhyn9Brx=dM08qFgPFQiAohufpVk+GH5zCR9Hzb0Q@mail.gmail.com>
+ <5390B470.4010608@inktank.com>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F25CFCFD6@SACMBXIP01.sdcorp.global.sandisk.com>
+ <5390B7EB.9080402@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f182.google.com ([209.85.213.182]:48235 "EHLO
-	mail-ig0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751065AbaFESdN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Jun 2014 14:33:13 -0400
-Received: by mail-ig0-f182.google.com with SMTP id a13so2644210igq.3
-        for <ceph-devel@vger.kernel.org>; Thu, 05 Jun 2014 11:33:12 -0700 (PDT)
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F25CFCFD6@SACMBXIP01.sdcorp.global.sandisk.com>
+Received: from mail-bn1lp0139.outbound.protection.outlook.com ([207.46.163.139]:6023
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751758AbaFESk3 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 5 Jun 2014 14:40:29 -0400
+In-Reply-To: <5390B7EB.9080402@inktank.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>, Samuel Just <sam.just@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Mark Nelson <mark.nelson@inktank.com>, Samuel Just <sam.just@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Somnath,
-
-Sorry to get your hopes up, no ceph+rocksdb benchmarks (yet!).  I was=20
-referring to the benchmarks that the rocksdb developers published here:
-
-https://github.com/facebook/rocksdb/wiki/Performance-Benchmarks
-
-Sounds like we need to start some performance testing on wip-rocksdb=20
-going though! :)
-
-Mark
-
-On 06/05/2014 01:26 PM, Somnath Roy wrote:
-> Mark,
-> Could you please share the performance benchmark result with Rocksdbs=
-tore + ceph and leveldbstore+ceph as you mentioned below ?
-> BTW, have you measured the WA induced by Rocksdbstore and leveldbstor=
-e in the process since that is also a very important factor while backe=
-nd is flash ?
->
-> Thanks & Regards
-> Somnath
->
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.=
-kernel.org] On Behalf Of Mark Nelson
-> Sent: Thursday, June 05, 2014 11:18 AM
-> To: Samuel Just; ceph-devel@vger.kernel.org
-> Subject: Re: Mon backing store
->
-> On 06/05/2014 12:42 PM, Samuel Just wrote:
->> I am starting to wonder whether using leveldb for the mon is actuall=
-y
->> introducing an excessive amount unnecessary complexity and
->> non-determinism.  Given that the monitor workload is read mostly,
->> except for failure conditions when it becomes write latency sensitiv=
-e,
->> might we do better with a strict b-tree style backing db such as
->> berkely db even at the cost of some performance?  It seems like
->> something like that might provide more reliable latency properties.
->
-> I'm not against trying it, but I'm not convinced it's the right solut=
-ion.  If the 99th percentile latency is significantly better, that's ob=
-viously a win, but I think we are indeed going to take a big performanc=
-e hit overall.  I'm more in favor of trying rocksdb first.
-> I'm certainly not as well versed in the leveldb interface as you or J=
-oao are, but it appears much of our code in LevelDBStore would be reusa=
-ble.
->    I don't know that rocksdb won't have the same issues that leveldb =
-does, but the rocksdb developers specifically mention leveldb's bad 99t=
-h percentile latencies as a driver for it's development:
->
-> "By contrast, we=E2=80=99ve published the RocksDB benchmark results f=
-or server side workloads on Flash. We also measured the performance of =
-LevelDB on these server-workload benchmarks and found that RocksDB soli=
-dly outperforms LevelDB for these IO bound workloads. We found that Lev=
-elDB=E2=80=99s single-threaded compaction process was insufficient to d=
-rive server workloads. We saw frequent write-stalls with LevelDB that c=
-aused 99-percentile latency to be tremendously large. We found that mma=
-p-ing a file into the OS cache introduced performance bottlenecks for r=
-eads. We could not make LevelDB consume all the IOs offered by the unde=
-rlying Flash storage."
->
-> Compaction performance and high mmap/page fault/kswapd utilization du=
-ring reads are two big issues we've hit in leveldb, so I'm inclined to =
-think that rocksdb is at least worthy of some attention.
->
-> Here's the benchmark results on their wiki:
->
-> https://github.com/facebook/rocksdb/wiki/Performance-Benchmarks
->
->>
->> Thoughts?
->> -Sam
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-"
->> in the body of a message to majordomo@vger.kernel.org More majordomo
->> info at  http://vger.kernel.org/majordomo-info.html
->>
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in the body of a message to majordomo@vger.kernel.org More majordomo i=
-nfo at  http://vger.kernel.org/majordomo-info.html
->
-> ________________________________
->
-> PLEASE NOTE: The information contained in this electronic mail messag=
-e is intended only for the use of the designated recipient(s) named abo=
-ve. If the reader of this message is not the intended recipient, you ar=
-e hereby notified that you have received this message in error and that=
- any review, dissemination, distribution, or copying of this message is=
- strictly prohibited. If you have received this communication in error,=
- please notify the sender by telephone or e-mail (as shown above) immed=
-iately and destroy any and all copies of this message in your possessio=
-n (whether hard copies or electronically stored copies).
->
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+WWVhaCA6LSkuLi5XZSBhcmUgYWxzbyB3YWl0aW5nIGZvciB3aXAtcm9ja3NkYiB0byBtZXJnZSBp
+biBtYWluc3RyZWFtLg0KDQpUaGFua3MgJiBSZWdhcmRzDQpTb21uYXRoDQoNCi0tLS0tT3JpZ2lu
+YWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBNYXJrIE5lbHNvbiBbbWFpbHRvOm1hcmsubmVsc29uQGlu
+a3RhbmsuY29tXSANClNlbnQ6IFRodXJzZGF5LCBKdW5lIDA1LCAyMDE0IDExOjMzIEFNDQpUbzog
+U29tbmF0aCBSb3k7IFNhbXVlbCBKdXN0OyBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KU3Vi
+amVjdDogUmU6IE1vbiBiYWNraW5nIHN0b3JlDQoNCkhpIFNvbW5hdGgsDQoNClNvcnJ5IHRvIGdl
+dCB5b3VyIGhvcGVzIHVwLCBubyBjZXBoK3JvY2tzZGIgYmVuY2htYXJrcyAoeWV0ISkuICBJIHdh
+cyByZWZlcnJpbmcgdG8gdGhlIGJlbmNobWFya3MgdGhhdCB0aGUgcm9ja3NkYiBkZXZlbG9wZXJz
+IHB1Ymxpc2hlZCBoZXJlOg0KDQpodHRwczovL2dpdGh1Yi5jb20vZmFjZWJvb2svcm9ja3NkYi93
+aWtpL1BlcmZvcm1hbmNlLUJlbmNobWFya3MNCg0KU291bmRzIGxpa2Ugd2UgbmVlZCB0byBzdGFy
+dCBzb21lIHBlcmZvcm1hbmNlIHRlc3Rpbmcgb24gd2lwLXJvY2tzZGIgZ29pbmcgdGhvdWdoISA6
+KQ0KDQpNYXJrDQoNCk9uIDA2LzA1LzIwMTQgMDE6MjYgUE0sIFNvbW5hdGggUm95IHdyb3RlOg0K
+PiBNYXJrLA0KPiBDb3VsZCB5b3UgcGxlYXNlIHNoYXJlIHRoZSBwZXJmb3JtYW5jZSBiZW5jaG1h
+cmsgcmVzdWx0IHdpdGggUm9ja3NkYnN0b3JlICsgY2VwaCBhbmQgbGV2ZWxkYnN0b3JlK2NlcGgg
+YXMgeW91IG1lbnRpb25lZCBiZWxvdyA/DQo+IEJUVywgaGF2ZSB5b3UgbWVhc3VyZWQgdGhlIFdB
+IGluZHVjZWQgYnkgUm9ja3NkYnN0b3JlIGFuZCBsZXZlbGRic3RvcmUgaW4gdGhlIHByb2Nlc3Mg
+c2luY2UgdGhhdCBpcyBhbHNvIGEgdmVyeSBpbXBvcnRhbnQgZmFjdG9yIHdoaWxlIGJhY2tlbmQg
+aXMgZmxhc2ggPw0KPg0KPiBUaGFua3MgJiBSZWdhcmRzDQo+IFNvbW5hdGgNCj4NCj4gLS0tLS1P
+cmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5l
+bC5vcmcgDQo+IFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJl
+aGFsZiBPZiBNYXJrIE5lbHNvbg0KPiBTZW50OiBUaHVyc2RheSwgSnVuZSAwNSwgMjAxNCAxMTox
+OCBBTQ0KPiBUbzogU2FtdWVsIEp1c3Q7IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQo+IFN1
+YmplY3Q6IFJlOiBNb24gYmFja2luZyBzdG9yZQ0KPg0KPiBPbiAwNi8wNS8yMDE0IDEyOjQyIFBN
+LCBTYW11ZWwgSnVzdCB3cm90ZToNCj4+IEkgYW0gc3RhcnRpbmcgdG8gd29uZGVyIHdoZXRoZXIg
+dXNpbmcgbGV2ZWxkYiBmb3IgdGhlIG1vbiBpcyBhY3R1YWxseSANCj4+IGludHJvZHVjaW5nIGFu
+IGV4Y2Vzc2l2ZSBhbW91bnQgdW5uZWNlc3NhcnkgY29tcGxleGl0eSBhbmQgDQo+PiBub24tZGV0
+ZXJtaW5pc20uICBHaXZlbiB0aGF0IHRoZSBtb25pdG9yIHdvcmtsb2FkIGlzIHJlYWQgbW9zdGx5
+LCANCj4+IGV4Y2VwdCBmb3IgZmFpbHVyZSBjb25kaXRpb25zIHdoZW4gaXQgYmVjb21lcyB3cml0
+ZSBsYXRlbmN5IA0KPj4gc2Vuc2l0aXZlLCBtaWdodCB3ZSBkbyBiZXR0ZXIgd2l0aCBhIHN0cmlj
+dCBiLXRyZWUgc3R5bGUgYmFja2luZyBkYiANCj4+IHN1Y2ggYXMgYmVya2VseSBkYiBldmVuIGF0
+IHRoZSBjb3N0IG9mIHNvbWUgcGVyZm9ybWFuY2U/ICBJdCBzZWVtcyANCj4+IGxpa2Ugc29tZXRo
+aW5nIGxpa2UgdGhhdCBtaWdodCBwcm92aWRlIG1vcmUgcmVsaWFibGUgbGF0ZW5jeSBwcm9wZXJ0
+aWVzLg0KPg0KPiBJJ20gbm90IGFnYWluc3QgdHJ5aW5nIGl0LCBidXQgSSdtIG5vdCBjb252aW5j
+ZWQgaXQncyB0aGUgcmlnaHQgc29sdXRpb24uICBJZiB0aGUgOTl0aCBwZXJjZW50aWxlIGxhdGVu
+Y3kgaXMgc2lnbmlmaWNhbnRseSBiZXR0ZXIsIHRoYXQncyBvYnZpb3VzbHkgYSB3aW4sIGJ1dCBJ
+IHRoaW5rIHdlIGFyZSBpbmRlZWQgZ29pbmcgdG8gdGFrZSBhIGJpZyBwZXJmb3JtYW5jZSBoaXQg
+b3ZlcmFsbC4gIEknbSBtb3JlIGluIGZhdm9yIG9mIHRyeWluZyByb2Nrc2RiIGZpcnN0Lg0KPiBJ
+J20gY2VydGFpbmx5IG5vdCBhcyB3ZWxsIHZlcnNlZCBpbiB0aGUgbGV2ZWxkYiBpbnRlcmZhY2Ug
+YXMgeW91IG9yIEpvYW8gYXJlLCBidXQgaXQgYXBwZWFycyBtdWNoIG9mIG91ciBjb2RlIGluIExl
+dmVsREJTdG9yZSB3b3VsZCBiZSByZXVzYWJsZS4NCj4gICAgSSBkb24ndCBrbm93IHRoYXQgcm9j
+a3NkYiB3b24ndCBoYXZlIHRoZSBzYW1lIGlzc3VlcyB0aGF0IGxldmVsZGIgZG9lcywgYnV0IHRo
+ZSByb2Nrc2RiIGRldmVsb3BlcnMgc3BlY2lmaWNhbGx5IG1lbnRpb24gbGV2ZWxkYidzIGJhZCA5
+OXRoIHBlcmNlbnRpbGUgbGF0ZW5jaWVzIGFzIGEgZHJpdmVyIGZvciBpdCdzIGRldmVsb3BtZW50
+Og0KPg0KPiAiQnkgY29udHJhc3QsIHdl4oCZdmUgcHVibGlzaGVkIHRoZSBSb2Nrc0RCIGJlbmNo
+bWFyayByZXN1bHRzIGZvciBzZXJ2ZXIgc2lkZSB3b3JrbG9hZHMgb24gRmxhc2guIFdlIGFsc28g
+bWVhc3VyZWQgdGhlIHBlcmZvcm1hbmNlIG9mIExldmVsREIgb24gdGhlc2Ugc2VydmVyLXdvcmts
+b2FkIGJlbmNobWFya3MgYW5kIGZvdW5kIHRoYXQgUm9ja3NEQiBzb2xpZGx5IG91dHBlcmZvcm1z
+IExldmVsREIgZm9yIHRoZXNlIElPIGJvdW5kIHdvcmtsb2Fkcy4gV2UgZm91bmQgdGhhdCBMZXZl
+bERC4oCZcyBzaW5nbGUtdGhyZWFkZWQgY29tcGFjdGlvbiBwcm9jZXNzIHdhcyBpbnN1ZmZpY2ll
+bnQgdG8gZHJpdmUgc2VydmVyIHdvcmtsb2Fkcy4gV2Ugc2F3IGZyZXF1ZW50IHdyaXRlLXN0YWxs
+cyB3aXRoIExldmVsREIgdGhhdCBjYXVzZWQgOTktcGVyY2VudGlsZSBsYXRlbmN5IHRvIGJlIHRy
+ZW1lbmRvdXNseSBsYXJnZS4gV2UgZm91bmQgdGhhdCBtbWFwLWluZyBhIGZpbGUgaW50byB0aGUg
+T1MgY2FjaGUgaW50cm9kdWNlZCBwZXJmb3JtYW5jZSBib3R0bGVuZWNrcyBmb3IgcmVhZHMuIFdl
+IGNvdWxkIG5vdCBtYWtlIExldmVsREIgY29uc3VtZSBhbGwgdGhlIElPcyBvZmZlcmVkIGJ5IHRo
+ZSB1bmRlcmx5aW5nIEZsYXNoIHN0b3JhZ2UuIg0KPg0KPiBDb21wYWN0aW9uIHBlcmZvcm1hbmNl
+IGFuZCBoaWdoIG1tYXAvcGFnZSBmYXVsdC9rc3dhcGQgdXRpbGl6YXRpb24gZHVyaW5nIHJlYWRz
+IGFyZSB0d28gYmlnIGlzc3VlcyB3ZSd2ZSBoaXQgaW4gbGV2ZWxkYiwgc28gSSdtIGluY2xpbmVk
+IHRvIHRoaW5rIHRoYXQgcm9ja3NkYiBpcyBhdCBsZWFzdCB3b3J0aHkgb2Ygc29tZSBhdHRlbnRp
+b24uDQo+DQo+IEhlcmUncyB0aGUgYmVuY2htYXJrIHJlc3VsdHMgb24gdGhlaXIgd2lraToNCj4N
+Cj4gaHR0cHM6Ly9naXRodWIuY29tL2ZhY2Vib29rL3JvY2tzZGIvd2lraS9QZXJmb3JtYW5jZS1C
+ZW5jaG1hcmtzDQo+DQo+Pg0KPj4gVGhvdWdodHM/DQo+PiAtU2FtDQo+PiAtLQ0KPj4gVG8gdW5z
+dWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgt
+ZGV2ZWwiDQo+PiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2Vy
+bmVsLm9yZyBNb3JlIG1ham9yZG9tbyANCj4+IGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5v
+cmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KPj4NCj4NCj4gLS0NCj4gVG8gdW5zdWJzY3JpYmUgZnJv
+bSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIA0KPiBp
+biB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3Jl
+IG1ham9yZG9tbyANCj4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8t
+aW5mby5odG1sDQo+DQo+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fDQo+DQo+IFBM
+RUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBt
+YWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRl
+ZCByZWNpcGllbnQocykgbmFtZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNzYWdl
+IGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3RpZmllZCB0
+aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhhdCBhbnkg
+cmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2YgdGhpcyBt
+ZXNzYWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMg
+Y29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHRlbGVw
+aG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVzdHJveSBh
+bnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lvbiAod2hl
+dGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4NCj4NCg0K
