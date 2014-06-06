@@ -1,142 +1,139 @@
-From: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>
-Subject: RE: Locally repairable code description revisited (was Pyramid ...)
-Date: Fri, 6 Jun 2014 11:46:23 +0000
-Message-ID: <3472A07E6605974CBC9BC573F1BC02E4AE730544@CERNXCHG44.cern.ch>
-References: <538A0CF8.8030501@dachary.org>,<53907935.9010009@dachary.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
+From: Guang Yang <yguang11@outlook.com>
+Subject: Re: Radosgw - bucket index
+Date: Fri, 6 Jun 2014 20:50:39 +0800
+Message-ID: <BLU436-SMTP669F03B3A3A9B777101C8EDF2C0@phx.gbl>
+References: <alpine.DEB.2.00.1405061757540.28165@cobra.newdream.net> <BLU436-SMTP195A770E0A729DF4723DD28DF310@phx.gbl> <alpine.DEB.2.00.1405160600320.28306@cobra.newdream.net> <CABBk=J_p9dDQBhvhbXrDmUonsY_TW5ZFDWuQqw3DGukVSRJeKg@mail.gmail.com> <BLU436-SMTP15995ECEE2C5FA8E935D70EDF330@phx.gbl> <alpine.DEB.2.00.1405181601030.1689@cobra.newdream.net> <BLU436-SMTP1455EF599E16A12B539B498DF320@phx.gbl> <CABBk=J9E0rCXvAWtizqQgqizf8o247cPZrv2VE6GNwWFrNa=Tw@mail.gmail.com> <0F65B78C-DF9A-40E4-BAAF-7411443DA3B6@outlook.com> <959F3CD3-D69A-4B9C-818C-7C0F241E48EC@outlook.com>
+Mime-Version: 1.0 (Mac OS X Mail 7.3 \(1878.2\))
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cernmx13.cern.ch ([188.184.36.46]:19421 "EHLO CERNMX13.cern.ch"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750740AbaFFLq0 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Jun 2014 07:46:26 -0400
-In-Reply-To: <53907935.9010009@dachary.org>
-Content-Language: en-GB
+Received: from blu004-omc4s20.hotmail.com ([65.55.111.159]:58648 "EHLO
+	BLU004-OMC4S20.hotmail.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751638AbaFFMus convert rfc822-to-8bit
+	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 6 Jun 2014 08:50:48 -0400
+In-Reply-To: <959F3CD3-D69A-4B9C-818C-7C0F241E48EC@outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Yehuda Sadeh <yehuda@inktank.com>
+Cc: Ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Loic,
-the basic implementation looks very clean.
+Hi Yehuda,
+Can you take a look at a very high level of the code change, here is th=
+e pull request - https://github.com/ceph/ceph/pull/1929.
 
-I have few comments/ideas:
+If things look good to you, i will continue the effort and make it more=
+ clear/complete by end of next week.
 
-- the reconstruction strategy using the three levels is certainly effic=
-ient enough for standard cases but does not guarantee always the minimu=
-m decoding (in cases where one layer is not enough to reconstruct) sinc=
-e your third algorithm is just brute-force to reconstruct everything th=
-rough all layers until we have what we need ...
+Thanks,
+Guang
 
-- the whole LRC configuration actually does not describe the placement =
-- it still looks disconnected from the placement strategy/crush rules .=
-=2E. wouldn't it make sense to have the crush rule implicit in the desc=
-ription or a function to derive it automatically based on the LRC confi=
-guration? Maybe you have this already done in another way and I didn't =
-see it ...
+On Jun 2, 2014, at 9:37 PM, Guang Yang <yguang11@outlook.com> wrote:
 
--  should the plug-in have the ability to select reconstruction on prox=
-imity or this should be up-to the higher layer to provide chunks in a w=
-ay that reconstruction would select the 'closest' layer? The relevance =
-of the question you will understand better in the next point ....
-
-- I remember we had this 3 data centre example with (8,4) where you can=
- reconstruct every object if 2 data centres are up. Another appealing e=
-xample avoiding remote access when reading an object is that you have 2=
- data centres having a replication of e.g. (4,2) encoded objects. Can y=
-ou describe in your LRC configuration language to store the same chunk =
-twice like    __ABCCBA__ ?
-
-Cheers Andreas.
-
-
-________________________________________
-=46rom: Loic Dachary [loic@dachary.org]
-Sent: 05 June 2014 16:05
-To: Andreas Joachim Peters
-Cc: Ceph Development
-Subject: Re: Locally repairable code description revisited (was Pyramid=
- ...)
-
-Hi Andreas,
-
-Here is a preliminary implementation https://github.com/ceph/ceph/pull/=
-1921 . It does not have tests yet, nor does it run but but it compiles =
-and I think it makes sense. It is indeed simpler than the previous impl=
-ementation.
-
-It would be great if you could quickly browse
-
-   https://github.com/dachary/ceph/commit/5661c72864eca04c5dac9494a3f7e=
-7a13515fca6
-
-and let me know if you have any concerns.
-
-Cheers
-
-On 31/05/2014 19:10, Loic Dachary wrote:
-> Hi Andreas,
->
-> After a few weeks and a fresh eye, I revisited the way pyramid erasur=
-e code could be described by the system administrator. Here is a propos=
-al that is hopefully more intuitive than the one from the last CDS ( ht=
-tp://pad.ceph.com/p/cdsgiant-pyramid-erasure-code ).
->
-> These are the steps to create all coding chunks. The upper case lette=
-rs are data chunks and the lower case letters are coding chunks.
->
-> "__ABC__DE_" data chunks placement
->
-> Step 1
-> "__ABC__DE_"
-> "_yVWX_zYZ_" K=3D5, M=3D2
-> "_aABC_bDE_"
->
-> Step 2
-> "_aABC_bDE_"
-> "z_XYZ_____" K=3D3, M=3D1
-> "caABC_bDE_"
->
-> Step 3
-> "caABC_bDE_"
-> "_____zXYZ_" K=3D3, M=3D1
-> "caABCdbDE_"
->
-> Step 4
-> "caABCdbDE_"
-> "_____WXYZz" K=3D4, M=3D1
-> "caABCdbDEe"
->
-> The interpretation of Step 3 is as follows:
->
-> Given the output of the previous step ( "caABC_bDE_" ), the bDE chunk=
-s are considered to be data chunks at this stage and they are marked wi=
-th XYZ. A K=3D3, M=3D1 coding chunk is calculated and placed in the chu=
-nk marked with z ( "_____zXYZ_" ). The output of this coding step is th=
-e previous step plus the coding chunk that was just calculated, named d=
- ( "caABCdbDE_" ).
->
-> This gives the flexibility of deciding wether or not a coding chunk f=
-rom a previous step is used as data to compute the coding chunk of the =
-next step. It also allows for unbalanced steps such as step 4.
->
-> For decoding, the steps are walked from the bottom up. If E is missin=
-g, it can be reconstructed from dbD.e in step 4 and the other steps are=
- skipped because it was the only missing chunk. If AB are missing, all =
-steps that have not be used to encode it are ignored, up to step 2 that=
- will fail to recover them because M=3D1 and yeild to step 1 that will =
-use a..CbDE successfully because M=3D2.
->
-> Giving up the recursion and favor iteration seems to simplify how it =
-can be explained. And I suspect the implementation is also simpler. Wha=
-t do you think ?
->
-> Cheers
->
-
---
-Lo=EFc Dachary, Artisan Logiciel Libre
+> Hi Yehuda and Sage,
+> Can you help to comment on the ticket, I would like to send out a pul=
+l request some time this week for you to review, but before that, it wo=
+uld be nice to see your comments in terms of the interface and any othe=
+r concerns you may have for this. Thanks.
+>=20
+> Thanks,
+> Guang
+>=20
+>=20
+> On May 30, 2014, at 8:35 AM, Guang Yang <yguang11@outlook.com> wrote:
+>=20
+>> Hi Yehuda,
+>> I opened an issue here: http://tracker.ceph.com/issues/8473, please =
+help to review and comment.
+>>=20
+>> Thanks,
+>> Guang
+>>=20
+>> On May 19, 2014, at 2:47 PM, Yehuda Sadeh <yehuda@inktank.com> wrote=
+:
+>>=20
+>>> On Sun, May 18, 2014 at 11:18 PM, Guang Yang <yguang11@outlook.com>=
+ wrote:
+>>>> On May 19, 2014, at 7:05 AM, Sage Weil <sage@inktank.com> wrote:
+>>>>=20
+>>>>> On Sun, 18 May 2014, Guang wrote:
+>>>>>>>> radosgw is using the omap key/value API for objects, which is =
+more or less
+>>>>>>>> equivalent to what swift is doing with sqlite.  This data pass=
+es straight
+>>>>>>>> into leveldb on the backend (or whatever other backend you are=
+ using).
+>>>>>>>> Using something like rocksdb in its place is pretty simple and=
+ ther are
+>>>>>>>> unmerged patches to do that; the user would just need to adjus=
+t their
+>>>>>>>> crush map so that the rgw index pool is mapped to a different =
+set of OSDs
+>>>>>>>> with the better k/v backend.
+>>>>>> Not sure if I miss anything, but the key difference with SWIFT?s
+>>>>>> implementation is that they are using a table for bucket index a=
+nd it
+>>>>>> actually can be updated in parallel which makes more scalable fo=
+r write,
+>>>>>> though at certain point the sql table would result in performanc=
+e
+>>>>>> degradation as well.
+>>>>>=20
+>>>>> As I understand it the same limitation is present there too: the =
+index is
+>>>>> in a single sqlite table.
+>>>>>=20
+>>>>>>> My more well-formed opinion is that we need to come up with a g=
+ood
+>>>>>>> design. It needs to be flexible enough to be able to grow (and =
+maybe
+>>>>>>> shrink), and I assume there would be some kind of background op=
+eration
+>>>>>>> that will enable that. I also believe that making it hash based=
+ is the
+>>>>>>> way to go. It looks like that the more complicated issue is her=
+e is
+>>>>>>> how to handle the transition in which we shard buckets.
+>>>>>> Yeah I agree. I think the conflicting goals here are, we want a =
+sorted
+>>>>>> list (so that it enable prefix scan for listing purpose) and we =
+want to
+>>>>>> shard at the very beginning (the problem we are facing is parall=
+el
+>>>>>> writes updating the same bucket index object will need to be
+>>>>>> serialized).
+>>>>>=20
+>>>>> Given how infrequent container listings are, pre-sharding contain=
+ers
+>>>>> across several objects makes some sense.  Paying the cost of doin=
+g
+>>>>> listings in parallel across N (where N is not too big) is not a b=
+ig price
+>>>>> to pay. However, there will always need to be a way to re-shard f=
+urther
+>>>>> when containers/buckets get extremely big.  Perhaps a starting po=
+int would
+>>>>> be support for static sharding where the number of shards is spec=
+ified at
+>>>>> container/bucket creation time=85
+>>>> Considering the scope of the change, I also think this is a good s=
+tarting point to make the bucket index updating more scalable.
+>>>> Yehuda,
+>>>> How do you think?
+>>>=20
+>>> Sharding it will help with scaling it up to a certain point. As Sag=
+e
+>>> mentioned we can start with a static setting as a first simpler
+>>> approach, and move into a dynamic approach later on.
+>>>=20
+>>> Yehuda
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
+l" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>=20
+>=20
 
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
