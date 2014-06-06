@@ -1,57 +1,105 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Re: xattr spillout appears broken :(
-Date: Sat, 7 Jun 2014 03:00:53 +0800
-Message-ID: <CACJqLyY3GZO9-uZd2oqfQ42a7NX_tZkTH13O3HMBjuWJhQX-rA@mail.gmail.com>
-References: <CAPYLRzh7bno0Ppb7hayJrc-TQM24iO-+RgtHYWZmYYVAtBYjVg@mail.gmail.com>
-	<CACJqLybuxRR1hgL+b+ijmRzySFH054ZHqOYm50PmLNf-W01JOg@mail.gmail.com>
-	<CAPYLRzi8HpyxEmJgyde9yrmpZP2t9_1odEwff_9Tck40tCiSCA@mail.gmail.com>
-	<CACJqLyYiUcveR4-CxNsjA7PZjWyc30GjriQ_XfyaB8W+eJopbg@mail.gmail.com>
-	<CACJqLyYECXY6p92Kr5G5y3mdPjDavGjFyVq6Ry5UP8fUAgJBqA@mail.gmail.com>
-	<CACJqLyb3cNVE=w6th0C4PavGxcppYOkVs0D+XsURyKL9=U4jww@mail.gmail.com>
-	<CACJqLyZrGkHBURR-swEwO7+ZK=HpJM3cYvjNhVmMDHCoM+wtxQ@mail.gmail.com>
-	<CAPYLRzgvem=pVAXSZFm_tXZ6YJGvb7JEA4BaxfWOkbuF0VKzkQ@mail.gmail.com>
+From: Alexey Kurnosov <alexey@kurnosov.spb.ru>
+Subject: Re: incomplete PG
+Date: Fri, 6 Jun 2014 23:18:51 +0400
+Message-ID: <20140606191851.GB17468@unsen.q53.spb.ru>
+References: <20140606132000.GA17468@unsen.q53.spb.ru>
+ <alpine.DEB.2.00.1406060856330.31587@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="Fba/0zbH8Xs+Fj9o"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f46.google.com ([74.125.82.46]:42455 "EHLO
-	mail-wg0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751796AbaFFTAy (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Jun 2014 15:00:54 -0400
-Received: by mail-wg0-f46.google.com with SMTP id b13so3058050wgh.29
-        for <ceph-devel@vger.kernel.org>; Fri, 06 Jun 2014 12:00:53 -0700 (PDT)
-In-Reply-To: <CAPYLRzgvem=pVAXSZFm_tXZ6YJGvb7JEA4BaxfWOkbuF0VKzkQ@mail.gmail.com>
+Received: from 94.19.218.213.pool.sknt.ru ([94.19.218.213]:45206 "EHLO
+	q53.spb.ru" rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
+	id S1751361AbaFFTS4 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 6 Jun 2014 15:18:56 -0400
+Content-Disposition: inline
+In-Reply-To: <alpine.DEB.2.00.1406060856330.31587@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-
-Yes, maybe you can add it in your branch. Because it will happen when
-creating object and set spill out
-
-On Sat, Jun 7, 2014 at 2:59 AM, Gregory Farnum <greg@inktank.com> wrote:
-> On Fri, Jun 6, 2014 at 11:55 AM, Haomai Wang <haomaiwang@gmail.com> wrote:
->> The fix should make clone method copy "cephos" prefix xattrs
->>
->> On Sat, Jun 7, 2014 at 2:54 AM, Haomai Wang <haomaiwang@gmail.com> wrote:
->>> Hi Greg,
->>>
->>> I have found the reason. "user.cephos.spill_out" can't be apply to new
->>> object when calling clone method. So if the origin object is spill
->>> out, the new object still has no spill out marker.
->>>
->>> I pushed a commit (https://github.com/ceph/ceph/pull/1932) to help
->>> cover this situation.
->
-> Awesome, thanks!
->
-> So that commit is a test that reveals the issue, but we still need to
-> come up with a fix?
-> -Greg
-> Software Engineer #42 @ http://inktank.com | http://ceph.com
+To: Sage Weil <sage@inktank.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
 
+--Fba/0zbH8Xs+Fj9o
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
--- 
-Best Regards,
+On Fri, Jun 06, 2014 at 08:57:46AM -0700, Sage Weil wrote:
+> On Fri, 6 Jun 2014, Alexey Kurnosov wrote:
+> > Hi all.
+> >=20
+> > Sorry for a rude offtop, but looks like nobody can help me at ceph-user=
+s.
+> > Here is the link to my email:
+> > http://lists.ceph.com/pipermail/ceph-users-ceph.com/2014-June/040383.ht=
+ml
+> > Here some additional data:
+> > http://pastebin.com/Nc4y3S1U
+> >=20
+> > During read requests i can see in logs:
+> > 2014-06-06 13:28:08.586262 7f335f29f700 10 osd.7 21942 dequeue_op 0x356=
+cb40 prio 127 cost 0 latency 0.000352 osd_op(client.11324.1:436 rb.0.1465.2=
+ae8944a.000000000bb1 [read 0~131072] 4.b940a077 e21942) v4 pg pg[4.77( empt=
+y local-les=3D0 n=3D0 ec=3D144 les/c 19162/16786 21941/21941/21941) [7,2] r=
+=3D0 lpr=3D21941 pi=3D8764-21940/115 mlcod 0'0 incomplete]
+> >=20
+> >=20
+> > Any help would be appreciated.=20
+>=20
+> This looks like a hangup somewhere in teh osd/osd communication that is=
+=20
+> preventing the peering/probing from happening.  Since you're running=20
+> emperor and we stopped testing and backporting fixes there a while back=
+=20
+> I'm not sure offhand what bug fix is missing.  My suggestion is to upgrad=
+e=20
+> to 0.80.1 firefly as a first step.
+Upgrade has been performed. I do not see any changes.
 
-Wheat
+
+>=20
+> FWIW simply restartin the OSDs involved in those PGs will probably also=
+=20
+> get things rolling, but this bug will still be present.
+I restarted it many times. Looks like PG copies all are incomplete.
+
+
+>=20
+> sage
+>=20
+>=20
+>  >=20
+> >=20
+> > (Somebody hit similar issue here: http://lists.ceph.com/pipermail/ceph-=
+users-ceph.com/2014-February/007948.html)
+> >=20
+> > --
+> > Alexey Kurnosov
+> >=20
+> >=20
+> >=20
+> >=20
+> >=20
+> >=20
+
+--
+Alexey Kurnosov
+
+
+--Fba/0zbH8Xs+Fj9o
+Content-Type: application/pgp-signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
+
+iQEcBAEBAgAGBQJTkhQbAAoJEOvtiXwvSWEqWvoIALa9PArxke08KQFQlwrOhxqJ
+mdTm8yCjeWRpFlmmvePGcMDnd4nGb62+OLBi4pFq35UhZxdXWQCN/hsRqf1FlVT8
+RVgXGCCN56KckWxZCim3gGHt6Df4YYTtjx5KH6HWHFGeYETI63DTQUs21qX1cM+D
+gOb9nFI8ZDHPFRt4ITiamfoqa6Wv/LoSCURp8xhzIoCdIbm4XBoEuymwj1C8JcXB
+Y6TMC3IUbSokqS+4qHy0h+AHUy7AUCG/0WrqvsSQxRgLxw3zL0ZX1++Bm2Q14dt5
+dbsEugQ+cEJNCkKsOQNnWMpZoCFvRMN7JuwBPUId0ztRCD1fzV/4akoWPsja9gA=
+=tsJl
+-----END PGP SIGNATURE-----
+
+--Fba/0zbH8Xs+Fj9o--
