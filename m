@@ -1,49 +1,33 @@
-From: Patrick McGarry <pmcgarry@gmail.com>
-Subject: Ceph Day Boston - Last Call
-Date: Thu, 5 Jun 2014 15:28:46 -0400
-Message-ID: <etPan.5390c4ee.46e87ccd.9a49@scuttleair.local>
+From: zou wonder <wonder.zou@gmail.com>
+Subject: What the ceph do when detecting one OSD overloaded?
+Date: Fri, 6 Jun 2014 16:14:16 +0800
+Message-ID: <CAOXjUBxhgB4L7PNdAcYhbFx8LCvW8eJ7Qj1vRbYn=aCfjGroBg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f43.google.com ([209.85.216.43]:49471 "EHLO
-	mail-qa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752670AbaFET2s convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Jun 2014 15:28:48 -0400
-Received: by mail-qa0-f43.google.com with SMTP id m5so2069389qaj.2
-        for <ceph-devel@vger.kernel.org>; Thu, 05 Jun 2014 12:28:47 -0700 (PDT)
-Received: from scuttleair.local ([72.11.211.243])
-        by mx.google.com with ESMTPSA id a9sm10852179qaa.26.2014.06.05.12.28.46
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
-        Thu, 05 Jun 2014 12:28:47 -0700 (PDT)
-Content-Disposition: inline
+Received: from mail-lb0-f179.google.com ([209.85.217.179]:47094 "EHLO
+	mail-lb0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751829AbaFFIOS (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Jun 2014 04:14:18 -0400
+Received: by mail-lb0-f179.google.com with SMTP id c11so1274102lbj.38
+        for <ceph-devel@vger.kernel.org>; Fri, 06 Jun 2014 01:14:16 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hey Cephers,=C2=A0
+Hi buddies,
 
-If you still haven't signed up for Ceph Day Boston you should stop proc=
-rastinating and proceed directly to the event page! :)=C2=A0
+  I am doing investigation on Ceph and Swift,and I am newbie to Ceph.
 
-http://www.inktank.com/cephdays/boston/=C2=A0
+I am unclear to the behaviour of the Ceph when there is overload situation.
+According to the doc, when Ceph do CRUSH, if it find the OSD is overload,
+it will skip it to select the other OSD. It means if the OSD don't get
+overloaded
+the object should be put in this OSD. So how about the original on put on
+this OSD when it is not get overloaded?
+Can we read it ? When doing CRUSH , the OSD will be skip.
 
-We'd really love to have all of our closest Ceph friends join us for wh=
-at is shaping up to be another dynamite event. We have talks from sever=
-al community members and one even includes a live hardware demo (brave!=
-). If you have any questions about the venue or would like a discount c=
-ode give me a shout and I'll see what I can do to hook you up. Hope to =
-see everyone there.=C2=A0
+If my understanding is wrong, please correct me.
 
-
-
-
-Best Regards, =20
-
-Patrick
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Best Regards,
+zou
