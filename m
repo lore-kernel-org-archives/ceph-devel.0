@@ -1,142 +1,69 @@
-From: Guang Yang <yguang11@outlook.com>
-Subject: Re: Radosgw - bucket index
-Date: Fri, 6 Jun 2014 20:50:39 +0800
-Message-ID: <BLU436-SMTP669F03B3A3A9B777101C8EDF2C0@phx.gbl>
-References: <alpine.DEB.2.00.1405061757540.28165@cobra.newdream.net> <BLU436-SMTP195A770E0A729DF4723DD28DF310@phx.gbl> <alpine.DEB.2.00.1405160600320.28306@cobra.newdream.net> <CABBk=J_p9dDQBhvhbXrDmUonsY_TW5ZFDWuQqw3DGukVSRJeKg@mail.gmail.com> <BLU436-SMTP15995ECEE2C5FA8E935D70EDF330@phx.gbl> <alpine.DEB.2.00.1405181601030.1689@cobra.newdream.net> <BLU436-SMTP1455EF599E16A12B539B498DF320@phx.gbl> <CABBk=J9E0rCXvAWtizqQgqizf8o247cPZrv2VE6GNwWFrNa=Tw@mail.gmail.com> <0F65B78C-DF9A-40E4-BAAF-7411443DA3B6@outlook.com> <959F3CD3-D69A-4B9C-818C-7C0F241E48EC@outlook.com>
-Mime-Version: 1.0 (Mac OS X Mail 7.3 \(1878.2\))
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Alexey Kurnosov <alexey@kurnosov.spb.ru>
+Subject: incomplete PG
+Date: Fri, 6 Jun 2014 17:20:00 +0400
+Message-ID: <20140606132000.GA17468@unsen.q53.spb.ru>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="wac7ysb48OaltWcw"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from blu004-omc4s20.hotmail.com ([65.55.111.159]:58648 "EHLO
-	BLU004-OMC4S20.hotmail.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751638AbaFFMus convert rfc822-to-8bit
-	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 6 Jun 2014 08:50:48 -0400
-In-Reply-To: <959F3CD3-D69A-4B9C-818C-7C0F241E48EC@outlook.com>
+Received: from 94.19.218.213.pool.sknt.ru ([94.19.218.213]:44955 "EHLO
+	q53.spb.ru" rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
+	id S1751979AbaFFNZO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 6 Jun 2014 09:25:14 -0400
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh <yehuda@inktank.com>
-Cc: Ceph-devel <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Yehuda,
-Can you take a look at a very high level of the code change, here is th=
-e pull request - https://github.com/ceph/ceph/pull/1929.
 
-If things look good to you, i will continue the effort and make it more=
- clear/complete by end of next week.
+--wac7ysb48OaltWcw
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Thanks,
-Guang
+Hi all.
 
-On Jun 2, 2014, at 9:37 PM, Guang Yang <yguang11@outlook.com> wrote:
+Sorry for a rude offtop, but looks like nobody can help me at ceph-users.
+Here is the link to my email:
+http://lists.ceph.com/pipermail/ceph-users-ceph.com/2014-June/040383.html
+Here some additional data:
+http://pastebin.com/Nc4y3S1U
 
-> Hi Yehuda and Sage,
-> Can you help to comment on the ticket, I would like to send out a pul=
-l request some time this week for you to review, but before that, it wo=
-uld be nice to see your comments in terms of the interface and any othe=
-r concerns you may have for this. Thanks.
->=20
-> Thanks,
-> Guang
->=20
->=20
-> On May 30, 2014, at 8:35 AM, Guang Yang <yguang11@outlook.com> wrote:
->=20
->> Hi Yehuda,
->> I opened an issue here: http://tracker.ceph.com/issues/8473, please =
-help to review and comment.
->>=20
->> Thanks,
->> Guang
->>=20
->> On May 19, 2014, at 2:47 PM, Yehuda Sadeh <yehuda@inktank.com> wrote=
-:
->>=20
->>> On Sun, May 18, 2014 at 11:18 PM, Guang Yang <yguang11@outlook.com>=
- wrote:
->>>> On May 19, 2014, at 7:05 AM, Sage Weil <sage@inktank.com> wrote:
->>>>=20
->>>>> On Sun, 18 May 2014, Guang wrote:
->>>>>>>> radosgw is using the omap key/value API for objects, which is =
-more or less
->>>>>>>> equivalent to what swift is doing with sqlite.  This data pass=
-es straight
->>>>>>>> into leveldb on the backend (or whatever other backend you are=
- using).
->>>>>>>> Using something like rocksdb in its place is pretty simple and=
- ther are
->>>>>>>> unmerged patches to do that; the user would just need to adjus=
-t their
->>>>>>>> crush map so that the rgw index pool is mapped to a different =
-set of OSDs
->>>>>>>> with the better k/v backend.
->>>>>> Not sure if I miss anything, but the key difference with SWIFT?s
->>>>>> implementation is that they are using a table for bucket index a=
-nd it
->>>>>> actually can be updated in parallel which makes more scalable fo=
-r write,
->>>>>> though at certain point the sql table would result in performanc=
-e
->>>>>> degradation as well.
->>>>>=20
->>>>> As I understand it the same limitation is present there too: the =
-index is
->>>>> in a single sqlite table.
->>>>>=20
->>>>>>> My more well-formed opinion is that we need to come up with a g=
-ood
->>>>>>> design. It needs to be flexible enough to be able to grow (and =
-maybe
->>>>>>> shrink), and I assume there would be some kind of background op=
-eration
->>>>>>> that will enable that. I also believe that making it hash based=
- is the
->>>>>>> way to go. It looks like that the more complicated issue is her=
-e is
->>>>>>> how to handle the transition in which we shard buckets.
->>>>>> Yeah I agree. I think the conflicting goals here are, we want a =
-sorted
->>>>>> list (so that it enable prefix scan for listing purpose) and we =
-want to
->>>>>> shard at the very beginning (the problem we are facing is parall=
-el
->>>>>> writes updating the same bucket index object will need to be
->>>>>> serialized).
->>>>>=20
->>>>> Given how infrequent container listings are, pre-sharding contain=
-ers
->>>>> across several objects makes some sense.  Paying the cost of doin=
-g
->>>>> listings in parallel across N (where N is not too big) is not a b=
-ig price
->>>>> to pay. However, there will always need to be a way to re-shard f=
-urther
->>>>> when containers/buckets get extremely big.  Perhaps a starting po=
-int would
->>>>> be support for static sharding where the number of shards is spec=
-ified at
->>>>> container/bucket creation time=85
->>>> Considering the scope of the change, I also think this is a good s=
-tarting point to make the bucket index updating more scalable.
->>>> Yehuda,
->>>> How do you think?
->>>=20
->>> Sharding it will help with scaling it up to a certain point. As Sag=
-e
->>> mentioned we can start with a static setting as a first simpler
->>> approach, and move into a dynamic approach later on.
->>>=20
->>> Yehuda
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
-l" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>=20
->=20
+During read requests i can see in logs:
+2014-06-06 13:28:08.586262 7f335f29f700 10 osd.7 21942 dequeue_op 0x356cb40=
+ prio 127 cost 0 latency 0.000352 osd_op(client.11324.1:436 rb.0.1465.2ae89=
+44a.000000000bb1 [read 0~131072] 4.b940a077 e21942) v4 pg pg[4.77( empty lo=
+cal-les=3D0 n=3D0 ec=3D144 les/c 19162/16786 21941/21941/21941) [7,2] r=3D0=
+ lpr=3D21941 pi=3D8764-21940/115 mlcod 0'0 incomplete]
+
+
+Any help would be appreciated.=20
+
+
+(Somebody hit similar issue here: http://lists.ceph.com/pipermail/ceph-user=
+s-ceph.com/2014-February/007948.html)
 
 --
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Alexey Kurnosov
+
+
+
+
+
+
+--wac7ysb48OaltWcw
+Content-Type: application/pgp-signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
+
+iQEcBAEBAgAGBQJTkcAAAAoJEOvtiXwvSWEqBiAH/RRs94aBBlG2aKpZqgjfEpOT
+BW6lNfTFEPnU30u/te8ukHO0D+LebZgdv4OOFyQmanJeLplT+lMQmPlhgP+h9CGT
+GbRmiWHKvwmW0HX9DJa7siGS8FjHk50WSF+JK6JeMoC5xZDLgeoVJ0Oy+VpH+WFt
+ai5hXRMT9N5rrmplOc/Ct/ikDwj53phO9fvXqdhCoQUdKtim4CcUGY5wKnV2BOpB
+g5IP8ow6m0xH+AKGGCbJoqjTd701g2lK3JRyrig5YP7fJ5P8eL05CxDpvvcgRHzv
+KRjqdra97SDMEC15Z2aLJWZ4PX5b4NvgZXa4LocYg4cmd56dPgP4+4mf+LSfwXA=
+=ahSd
+-----END PGP SIGNATURE-----
+
+--wac7ysb48OaltWcw--
