@@ -1,57 +1,93 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: incomplete PG
-Date: Fri, 6 Jun 2014 08:57:46 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1406060856330.31587@cobra.newdream.net>
-References: <20140606132000.GA17468@unsen.q53.spb.ru>
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: Re: xattr spillout appears broken :(
+Date: Sat, 7 Jun 2014 02:54:41 +0800
+Message-ID: <CACJqLyb3cNVE=w6th0C4PavGxcppYOkVs0D+XsURyKL9=U4jww@mail.gmail.com>
+References: <CAPYLRzh7bno0Ppb7hayJrc-TQM24iO-+RgtHYWZmYYVAtBYjVg@mail.gmail.com>
+	<CACJqLybuxRR1hgL+b+ijmRzySFH054ZHqOYm50PmLNf-W01JOg@mail.gmail.com>
+	<CAPYLRzi8HpyxEmJgyde9yrmpZP2t9_1odEwff_9Tck40tCiSCA@mail.gmail.com>
+	<CACJqLyYiUcveR4-CxNsjA7PZjWyc30GjriQ_XfyaB8W+eJopbg@mail.gmail.com>
+	<CACJqLyYECXY6p92Kr5G5y3mdPjDavGjFyVq6Ry5UP8fUAgJBqA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:43851 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752055AbaFFP5q (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Jun 2014 11:57:46 -0400
-In-Reply-To: <20140606132000.GA17468@unsen.q53.spb.ru>
+Received: from mail-we0-f175.google.com ([74.125.82.175]:63261 "EHLO
+	mail-we0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752045AbaFFSym (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Jun 2014 14:54:42 -0400
+Received: by mail-we0-f175.google.com with SMTP id p10so3248896wes.20
+        for <ceph-devel@vger.kernel.org>; Fri, 06 Jun 2014 11:54:41 -0700 (PDT)
+In-Reply-To: <CACJqLyYECXY6p92Kr5G5y3mdPjDavGjFyVq6Ry5UP8fUAgJBqA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexey Kurnosov <alexey@kurnosov.spb.ru>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <greg@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Fri, 6 Jun 2014, Alexey Kurnosov wrote:
-> Hi all.
-> 
-> Sorry for a rude offtop, but looks like nobody can help me at ceph-users.
-> Here is the link to my email:
-> http://lists.ceph.com/pipermail/ceph-users-ceph.com/2014-June/040383.html
-> Here some additional data:
-> http://pastebin.com/Nc4y3S1U
-> 
-> During read requests i can see in logs:
-> 2014-06-06 13:28:08.586262 7f335f29f700 10 osd.7 21942 dequeue_op 0x356cb40 prio 127 cost 0 latency 0.000352 osd_op(client.11324.1:436 rb.0.1465.2ae8944a.000000000bb1 [read 0~131072] 4.b940a077 e21942) v4 pg pg[4.77( empty local-les=0 n=0 ec=144 les/c 19162/16786 21941/21941/21941) [7,2] r=0 lpr=21941 pi=8764-21940/115 mlcod 0'0 incomplete]
-> 
-> 
-> Any help would be appreciated. 
+Hi Greg,
 
-This looks like a hangup somewhere in teh osd/osd communication that is 
-preventing the peering/probing from happening.  Since you're running 
-emperor and we stopped testing and backporting fixes there a while back 
-I'm not sure offhand what bug fix is missing.  My suggestion is to upgrade 
-to 0.80.1 firefly as a first step.
+I have found the reason. "user.cephos.spill_out" can't be apply to new
+object when calling clone method. So if the origin object is spill
+out, the new object still has no spill out marker.
 
-FWIW simply restartin the OSDs involved in those PGs will probably also 
-get things rolling, but this bug will still be present.
-
-sage
+I pushed a commit (https://github.com/ceph/ceph/pull/1932) to help
+cover this situation.
 
 
- > 
-> 
-> (Somebody hit similar issue here: http://lists.ceph.com/pipermail/ceph-users-ceph.com/2014-February/007948.html)
-> 
+On Tue, Jun 3, 2014 at 10:33 PM, Haomai Wang <haomaiwang@gmail.com> wrote:
+> /familiar/not familiar/
+>
+> On Tue, Jun 3, 2014 at 10:33 PM, Haomai Wang <haomaiwang@gmail.com> wrote:
+>> Hi Gregory,
+>>
+>> I checked again and again each line change about spill out codes,
+>> still failed to find anything wrong.
+>>
+>> I ran "ceph_test_rados" then activate scrub process several times
+>> locally, nothing unusual. I'm familiar with teuthoghy jobs, maybe we
+>> can find the common thing among fail jobs.
+>>
+>>
+>> On Sat, May 31, 2014 at 2:06 AM, Gregory Farnum <greg@inktank.com> wrote:
+>>> On Fri, May 30, 2014 at 2:18 AM, Haomai Wang <haomaiwang@gmail.com> wrote:
+>>>> Hi Gregory,
+>>>>
+>>>> I try to reproduce the bug in my local machine but failed.
+>>>>
+>>>> My test cmdline:
+>>>> ./ceph_test_rados --op read 100 --op write 100 --op delete 50
+>>>> --max-ops 400000 --objects 1024 --max-in-flight 64 --size 4000000
+>>>> --min-stride-size 400000 --max-stride-size 800000 --max-seconds 600
+>>>> --op copy_from 50 --op snap_create 50 --op snap_remove 50 --op
+>>>> rollback 50 --op setattr 25 --op rmattr 25 --pool unique_pool_0
+>>>>
+>>>> Is there any tip to reproduce it?
+>>>
+>>> Hmm. I've been directly running the teuthology tests that failed; that
+>>> is the command line it's running though so I think the only difference
+>>> would be that I've got OSD thrashing (ie, recovery) happening while
+>>> the test is running.
+>>> Most of the other failures were scrub turning up inconsistencies in
+>>> the xattrs at each replica/shard of an object. I didn't see any
+>>> obvious mechanism by which storing values in xattrs versus leveldb
+>>> would impact these higher-level primitives, but maybe you have some
+>>> idea?
+>>> -Greg
+>>
+>>
+>>
+>> --
+>> Best Regards,
+>>
+>> Wheat
+>
+>
+>
 > --
-> Alexey Kurnosov
-> 
-> 
-> 
-> 
-> 
-> 
+> Best Regards,
+>
+> Wheat
+
+
+
+-- 
+Best Regards,
+
+Wheat
