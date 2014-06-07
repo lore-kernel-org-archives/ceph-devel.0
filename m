@@ -1,64 +1,78 @@
 From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Re: xattr spillout appears broken :(
-Date: Sat, 7 Jun 2014 14:52:30 +0800
-Message-ID: <CACJqLyZX2f0wSGoq=5sd4_MS37HW7OAYGmpzyq8REwr2H7DUtw@mail.gmail.com>
-References: <CAPYLRzh7bno0Ppb7hayJrc-TQM24iO-+RgtHYWZmYYVAtBYjVg@mail.gmail.com>
-	<CACJqLybuxRR1hgL+b+ijmRzySFH054ZHqOYm50PmLNf-W01JOg@mail.gmail.com>
-	<CAPYLRzi8HpyxEmJgyde9yrmpZP2t9_1odEwff_9Tck40tCiSCA@mail.gmail.com>
-	<CACJqLyYiUcveR4-CxNsjA7PZjWyc30GjriQ_XfyaB8W+eJopbg@mail.gmail.com>
-	<CACJqLyYECXY6p92Kr5G5y3mdPjDavGjFyVq6Ry5UP8fUAgJBqA@mail.gmail.com>
-	<CACJqLyb3cNVE=w6th0C4PavGxcppYOkVs0D+XsURyKL9=U4jww@mail.gmail.com>
-	<CACJqLyZrGkHBURR-swEwO7+ZK=HpJM3cYvjNhVmMDHCoM+wtxQ@mail.gmail.com>
-	<CAPYLRzgvem=pVAXSZFm_tXZ6YJGvb7JEA4BaxfWOkbuF0VKzkQ@mail.gmail.com>
-	<CACJqLyY3GZO9-uZd2oqfQ42a7NX_tZkTH13O3HMBjuWJhQX-rA@mail.gmail.com>
+Subject: Re: osd systemtap initial steps
+Date: Sat, 7 Jun 2014 20:15:18 +0800
+Message-ID: <CACJqLybMfGkEtTwP9Yz64992CqHFSj2TuubW1j4-_SJONvvPDQ@mail.gmail.com>
+References: <CA+4uBUbt8SikqyznV1q17UyqdAVyNM7fG7n5k5i4uSjSFuL8pg@mail.gmail.com>
+	<CACJqLybakktJy0ewWdV4TMe63_9_XuxxgfCHze2N4LDzK+q6Vg@mail.gmail.com>
+	<5360F860.20902@bisect.de>
+	<CA+4uBUYHUuRV0CtxtLmkga1fyB6StULfj19v0yhicWn3iEBZYg@mail.gmail.com>
+	<536168BF.2030207@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f182.google.com ([209.85.220.182]:57696 "EHLO
-	mail-vc0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751483AbaFGGwb (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 7 Jun 2014 02:52:31 -0400
-Received: by mail-vc0-f182.google.com with SMTP id il7so4339762vcb.27
-        for <ceph-devel@vger.kernel.org>; Fri, 06 Jun 2014 23:52:30 -0700 (PDT)
-In-Reply-To: <CACJqLyY3GZO9-uZd2oqfQ42a7NX_tZkTH13O3HMBjuWJhQX-rA@mail.gmail.com>
+Received: from mail-wg0-f52.google.com ([74.125.82.52]:49071 "EHLO
+	mail-wg0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752425AbaFGMPU (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 7 Jun 2014 08:15:20 -0400
+Received: by mail-wg0-f52.google.com with SMTP id l18so3838623wgh.11
+        for <ceph-devel@vger.kernel.org>; Sat, 07 Jun 2014 05:15:19 -0700 (PDT)
+In-Reply-To: <536168BF.2030207@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Mark Nelson <mark.nelson@inktank.com>
+Cc: Samuel Just <sam.just@inktank.com>, Danny Al-Gaaf <danny.al-gaaf@bisect.de>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Marc Koderer <marckoderer@gmail.com>
 
-Greg, I have submit a patch to fix it. https://github.com/ceph/ceph/pull/1932
+May I asked the status of this bp?
 
-On Sat, Jun 7, 2014 at 3:00 AM, Haomai Wang <haomaiwang@gmail.com> wrote:
-> Yes, maybe you can add it in your branch. Because it will happen when
-> creating object and set spill out
+Maybe we can push this further
+
+On Thu, May 1, 2014 at 5:18 AM, Mark Nelson <mark.nelson@inktank.com> wrote:
+> Have I mentioned how exciting that is?
 >
-> On Sat, Jun 7, 2014 at 2:59 AM, Gregory Farnum <greg@inktank.com> wrote:
->> On Fri, Jun 6, 2014 at 11:55 AM, Haomai Wang <haomaiwang@gmail.com> wrote:
->>> The fix should make clone method copy "cephos" prefix xattrs
+> Mark
+>
+>
+> On 04/30/2014 04:14 PM, Samuel Just wrote:
+>>
+>> Cool.  Looks like we read the same guide on the autotools bit :P.  I'm
+>> focusing on instrumenting the OSD op life cycle.
+>> -Sam
+>>
+>> On Wed, Apr 30, 2014 at 6:19 AM, Danny Al-Gaaf <danny.al-gaaf@bisect.de>
+>> wrote:
 >>>
->>> On Sat, Jun 7, 2014 at 2:54 AM, Haomai Wang <haomaiwang@gmail.com> wrote:
->>>> Hi Greg,
+>>> Am 30.04.2014 04:21, schrieb Haomai Wang:
 >>>>
->>>> I have found the reason. "user.cephos.spill_out" can't be apply to new
->>>> object when calling clone method. So if the origin object is spill
->>>> out, the new object still has no spill out marker.
+>>>> So cool!
 >>>>
->>>> I pushed a commit (https://github.com/ceph/ceph/pull/1932) to help
->>>> cover this situation.
+>>>> I remember a telekomcloud guy is also worked for it since last summit.
+>>>
+>>>
+>>> Correct ... our initial version is/was this:
+>>> https://github.com/dalgaaf/ceph/commits/wip-master-bp-systemtap
+>>>
+>>> Danny
+>>>
+>>>> On Wed, Apr 30, 2014 at 6:17 AM, Samuel Just <sam.just@inktank.com>
+>>>> wrote:
+>>>>>
+>>>>> I'm starting on adding systemtap trace points to the osd.
+>>>>>
+>>>>> https://github.com/athanatos/ceph/tree/wip-osd-stap
+>>>>>
+>>>>> has some initial build changes and a single tracepoint in
+>>>>> OSD::handle_op.
+>>>>>
+>>>>> I'll ping the list when I've got more.
+>>>>> -Sam
+>>>
+>>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >>
->> Awesome, thanks!
->>
->> So that commit is a test that reveals the issue, but we still need to
->> come up with a fix?
->> -Greg
->> Software Engineer #42 @ http://inktank.com | http://ceph.com
 >
->
->
-> --
-> Best Regards,
->
-> Wheat
 
 
 
