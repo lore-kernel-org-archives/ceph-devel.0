@@ -1,77 +1,79 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: [RFC] add rocksdb support
-Date: Mon, 09 Jun 2014 12:11:45 -0500
-Message-ID: <5395EAD1.9000501@inktank.com>
-References: <75674D092A819E4189E91166C74CB90D0131CB27@SHSMSX104.ccr.corp.intel.com> <alpine.DEB.2.00.1405201814330.1689@cobra.newdream.net> <75674D092A819E4189E91166C74CB90D013BEDED@shsmsx102.ccr.corp.intel.com> <537CA4BA.4000900@inktank.com> <75674D092A819E4189E91166C74CB90D013C094D@shsmsx102.ccr.corp.intel.com>
+From: Zack Cerza <zack.cerza@inktank.com>
+Subject: Re: teuthology and erasure code pool creation
+Date: Mon, 9 Jun 2014 12:15:00 -0500
+Message-ID: <CAMfdg1PhTWuL1LKCZuOV5GwhNMehsY1HNeBPtWkJwy01_7Q42g@mail.gmail.com>
+References: <539488A3.3070507@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f172.google.com ([209.85.213.172]:34613 "EHLO
-	mail-ig0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754000AbaFIRLi (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Jun 2014 13:11:38 -0400
-Received: by mail-ig0-f172.google.com with SMTP id l13so4076420iga.17
-        for <ceph-devel@vger.kernel.org>; Mon, 09 Jun 2014 10:11:37 -0700 (PDT)
-In-Reply-To: <75674D092A819E4189E91166C74CB90D013C094D@shsmsx102.ccr.corp.intel.com>
+Received: from mail-yk0-f178.google.com ([209.85.160.178]:41780 "EHLO
+	mail-yk0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754873AbaFIRPA convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Jun 2014 13:15:00 -0400
+Received: by mail-yk0-f178.google.com with SMTP id q9so699298ykb.37
+        for <ceph-devel@vger.kernel.org>; Mon, 09 Jun 2014 10:15:00 -0700 (PDT)
+In-Reply-To: <539488A3.3070507@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Shu, Xinxin" <xinxin.shu@intel.com>, Sage Weil <sage@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "Zhang, Jian" <jian.zhang@intel.com>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Xinxin,
+Hi Loic,
 
-On 05/28/2014 05:05 AM, Shu, Xinxin wrote:
-> Hi sage ,
-> I will add two configure options to --with-librocksdb-static and --with-librocksdb , with --with-librocksdb-static option , ceph will compile the code that get from ceph repository , with  --with-librocksdb option ,  in case of distro packages for rocksdb , ceph will not compile the rocksdb code , will use pre-installed library. is that ok for you ?
->
-> since current rocksdb does not support autoconf&automake , I will add autoconf&automake support for rocksdb , but before that , i think we should fork a stable branch (maybe 3.0) for ceph .
+Without spending too much time investigating, it seems to me it would
+be preferable to just add the missing arguments to the functions you
+pointed out. That way they could even be fully documented! ;)
 
-I'm looking at testing out the rocksdb support as well, both for the OSD 
-and for the monitor based on some issues we've been seeing lately.  Any 
-news on the 3.0 fork and autoconf/automake support in rocksdb?
+Zack
 
-Thanks,
-Mark
-
+On Sun, Jun 8, 2014 at 11:00 AM, Loic Dachary <loic@dachary.org> wrote:
+> Hi Zack,
 >
-> -----Original Message-----
-> From: Mark Nelson [mailto:mark.nelson@inktank.com]
-> Sent: Wednesday, May 21, 2014 9:06 PM
-> To: Shu, Xinxin; Sage Weil
-> Cc: ceph-devel@vger.kernel.org; Zhang, Jian
-> Subject: Re: [RFC] add rocksdb support
+> In order to test locally repairable codes ( described at https://wiki=
+=2Eceph.com/Planning/Blueprints/Giant/Pyramid_Erasure_Code and document=
+ed at https://github.com/dachary/ceph/commit/2ae645438243232392c11fd80f=
+d960f6221fd2a0#diff-5518964bc98a094a784ce2d17a5b0cc1R20 ) it would be a=
+ convenient to set the erasure code profile without modifying the teuth=
+ology code.
 >
-> On 05/21/2014 07:54 AM, Shu, Xinxin wrote:
->> Hi, sage
->>
->> I will add rocksdb submodule into the makefile , currently we want to have fully performance tests on key-value db backend , both leveldb and rocksdb. Then optimize on rocksdb performance.
+> There are not too many instances of hardcoded parameters:
 >
-> I'm definitely interested in any performance tests you do here.  Last winter I started doing some fairly high level tests on raw leveldb/hyperleveldb/raikleveldb.  I'm very interested in what you see with rocksdb as a backend.
+>   https://github.com/ceph/teuthology/blob/master/teuthology/task_util=
+/rados.py#L27
+>   https://github.com/ceph/teuthology/blob/master/teuthology/task/ceph=
+_manager.py#L732
 >
->>
->> -----Original Message-----
->> From: Sage Weil [mailto:sage@inktank.com]
->> Sent: Wednesday, May 21, 2014 9:19 AM
->> To: Shu, Xinxin
->> Cc: ceph-devel@vger.kernel.org
->> Subject: Re: [RFC] add rocksdb support
->>
->> Hi Xinxin,
->>
->> I've pushed an updated wip-rocksdb to github/liewegas/ceph.git that includes the latest set of patches with the groundwork and your rocksdb patch.  There is also a commit that adds rocksdb as a git submodule.  I'm thinking that, since there aren't any distro packages for rocksdb at this point, this is going to be the easiest way to make this usable for people.
->>
->> If you can wire the submodule into the makefile, we can merge this in so that rocksdb support is in the ceph.com packages on ceph.com.  I suspect that the distros will prefer to turns this off in favor of separate shared libs, but they can do this at their option if/when they include rocksdb in the distro. I think the key is just to have both --with-librockdb and --with-librocksdb-static (or similar) options so that you can either use the static or dynamically linked one.
->>
->> Has your group done further testing with rocksdb?  Anything interesting to share?
->>
->> Thanks!
->> sage
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->> in the body of a message to majordomo@vger.kernel.org More majordomo
->> info at  http://vger.kernel.org/majordomo-info.html
->>
+> and it could be generalized. In a nutshell, the definition of an eras=
+ure coded profile is a set of key value which should default to:
 >
-
+>   k: 2
+>   m: 1
+>   plugin: jerasure
+>   ruleset-failure-domain: osd
+>
+> and
+>
+>   self.raw_cluster_cmd('osd', 'erasure-code-profile', 'set', 'teuthol=
+ogyprofile', 'ruleset-failure-domain=3Dosd', 'm=3D'+str(ec_m), 'k=3D'+s=
+tr(ec_k))
+>
+> could be replaced with:
+>
+>    self.raw_cluster_cmd('osd', 'erasure-code-profile', 'set', 'teutho=
+logyprofile', **kwargs)
+>
+> assuming kwargs is the above map parsed from the yaml.
+>
+> Any advice you may have on the implementation would be very welcome :=
+-)
+>
+> Cheers
+> --
+> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
