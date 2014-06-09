@@ -1,101 +1,77 @@
-From: Karan Singh <karan.singh-Gn+qtVAUx6s@public.gmane.org>
-Subject: Re: ceph-deploy 1.5.4 (addressing packages coming from
-	EPEL)
-Date: Mon, 9 Jun 2014 18:01:42 +0300
-Message-ID: <B7FB349C-3BF0-4579-AE7E-A3D2D68CCE30@csc.fi>
-References: <CANtztVyYc1kobPs9wU9VpeECCOkCmCgEUoeNN52ZXE3FHuDxZg@mail.gmail.com>
-Mime-Version: 1.0 (Mac OS X Mail 7.3 \(1878.2\))
-Content-Type: multipart/mixed; boundary="===============0941471572=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CANtztVyYc1kobPs9wU9VpeECCOkCmCgEUoeNN52ZXE3FHuDxZg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Alfredo Deza <alfredo.deza-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-maintainers-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
-
-
---===============0941471572==
-Content-Type: multipart/alternative; boundary="Apple-Mail=_EF599E7A-9DBC-45E7-9339-CD889D2FF7F2"
-
-
---Apple-Mail=_EF599E7A-9DBC-45E7-9339-CD889D2FF7F2
+From: Mark Nelson <mark.nelson@inktank.com>
+Subject: Re: [RFC] add rocksdb support
+Date: Mon, 09 Jun 2014 12:11:45 -0500
+Message-ID: <5395EAD1.9000501@inktank.com>
+References: <75674D092A819E4189E91166C74CB90D0131CB27@SHSMSX104.ccr.corp.intel.com> <alpine.DEB.2.00.1405201814330.1689@cobra.newdream.net> <75674D092A819E4189E91166C74CB90D013BEDED@shsmsx102.ccr.corp.intel.com> <537CA4BA.4000900@inktank.com> <75674D092A819E4189E91166C74CB90D013C094D@shsmsx102.ccr.corp.intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
-Content-Type: text/plain;
-	charset=us-ascii
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ig0-f172.google.com ([209.85.213.172]:34613 "EHLO
+	mail-ig0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754000AbaFIRLi (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Jun 2014 13:11:38 -0400
+Received: by mail-ig0-f172.google.com with SMTP id l13so4076420iga.17
+        for <ceph-devel@vger.kernel.org>; Mon, 09 Jun 2014 10:11:37 -0700 (PDT)
+In-Reply-To: <75674D092A819E4189E91166C74CB90D013C094D@shsmsx102.ccr.corp.intel.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "Shu, Xinxin" <xinxin.shu@intel.com>, Sage Weil <sage@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "Zhang, Jian" <jian.zhang@intel.com>
 
-Thanks Alfredo , happy to see your email.
+Hi Xinxin,
 
-I was a victim of this problem , hope 1.5.4 will take away my pain :-)
+On 05/28/2014 05:05 AM, Shu, Xinxin wrote:
+> Hi sage ,
+> I will add two configure options to --with-librocksdb-static and --with-librocksdb , with --with-librocksdb-static option , ceph will compile the code that get from ceph repository , with  --with-librocksdb option ,  in case of distro packages for rocksdb , ceph will not compile the rocksdb code , will use pre-installed library. is that ok for you ?
+>
+> since current rocksdb does not support autoconf&automake , I will add autoconf&automake support for rocksdb , but before that , i think we should fork a stable branch (maybe 3.0) for ceph .
 
+I'm looking at testing out the rocksdb support as well, both for the OSD 
+and for the monitor based on some issues we've been seeing lately.  Any 
+news on the 3.0 fork and autoconf/automake support in rocksdb?
 
-- Karan Sing -
+Thanks,
+Mark
 
-On 09 Jun 2014, at 15:33, Alfredo Deza <alfredo.deza-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org> wrote:
+>
+> -----Original Message-----
+> From: Mark Nelson [mailto:mark.nelson@inktank.com]
+> Sent: Wednesday, May 21, 2014 9:06 PM
+> To: Shu, Xinxin; Sage Weil
+> Cc: ceph-devel@vger.kernel.org; Zhang, Jian
+> Subject: Re: [RFC] add rocksdb support
+>
+> On 05/21/2014 07:54 AM, Shu, Xinxin wrote:
+>> Hi, sage
+>>
+>> I will add rocksdb submodule into the makefile , currently we want to have fully performance tests on key-value db backend , both leveldb and rocksdb. Then optimize on rocksdb performance.
+>
+> I'm definitely interested in any performance tests you do here.  Last winter I started doing some fairly high level tests on raw leveldb/hyperleveldb/raikleveldb.  I'm very interested in what you see with rocksdb as a backend.
+>
+>>
+>> -----Original Message-----
+>> From: Sage Weil [mailto:sage@inktank.com]
+>> Sent: Wednesday, May 21, 2014 9:19 AM
+>> To: Shu, Xinxin
+>> Cc: ceph-devel@vger.kernel.org
+>> Subject: Re: [RFC] add rocksdb support
+>>
+>> Hi Xinxin,
+>>
+>> I've pushed an updated wip-rocksdb to github/liewegas/ceph.git that includes the latest set of patches with the groundwork and your rocksdb patch.  There is also a commit that adds rocksdb as a git submodule.  I'm thinking that, since there aren't any distro packages for rocksdb at this point, this is going to be the easiest way to make this usable for people.
+>>
+>> If you can wire the submodule into the makefile, we can merge this in so that rocksdb support is in the ceph.com packages on ceph.com.  I suspect that the distros will prefer to turns this off in favor of separate shared libs, but they can do this at their option if/when they include rocksdb in the distro. I think the key is just to have both --with-librockdb and --with-librocksdb-static (or similar) options so that you can either use the static or dynamically linked one.
+>>
+>> Has your group done further testing with rocksdb?  Anything interesting to share?
+>>
+>> Thanks!
+>> sage
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>> in the body of a message to majordomo@vger.kernel.org More majordomo
+>> info at  http://vger.kernel.org/majordomo-info.html
+>>
+>
 
-> http://ceph.com/ceph-deploy/docs/changelog.html#id1
-
-
---Apple-Mail=_EF599E7A-9DBC-45E7-9339-CD889D2FF7F2
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/html;
-	charset=us-ascii
-
-<html><head><meta http-equiv=3D"Content-Type" content=3D"text/html =
-charset=3Dus-ascii"></head><body style=3D"word-wrap: break-word; =
--webkit-nbsp-mode: space; -webkit-line-break: after-white-space;">Thanks =
-Alfredo , happy to see your email.<div><br></div><div>I was a victim of =
-this problem , hope 1.5.4 will take away my pain =
-:-)</div><div><br></div><div><br><div apple-content-edited=3D"true">
-<div style=3D"color: rgb(0, 0, 0); letter-spacing: normal; orphans: =
-auto; text-align: start; text-indent: 0px; text-transform: none; =
-white-space: normal; widows: auto; word-spacing: 0px; =
--webkit-text-stroke-width: 0px; word-wrap: break-word; =
--webkit-nbsp-mode: space; -webkit-line-break: after-white-space;"><div =
-style=3D"color: rgb(0, 0, 0); letter-spacing: normal; orphans: auto; =
-text-align: start; text-indent: 0px; text-transform: none; white-space: =
-normal; widows: auto; word-spacing: 0px; -webkit-text-stroke-width: 0px; =
-word-wrap: break-word; -webkit-nbsp-mode: space; -webkit-line-break: =
-after-white-space;"><div style=3D"color: rgb(0, 0, 0); font-family: =
-Helvetica; font-size: 12px; font-style: normal; font-variant: normal; =
-font-weight: normal; letter-spacing: normal; line-height: normal; =
-orphans: auto; text-align: start; text-indent: 0px; text-transform: =
-none; white-space: normal; widows: auto; word-spacing: 0px; =
--webkit-text-stroke-width: 0px; word-wrap: break-word; =
--webkit-nbsp-mode: space; -webkit-line-break: =
-after-white-space;"></div>- Karan Sing -</div></div>
-</div>
-<br><div><div>On 09 Jun 2014, at 15:33, Alfredo Deza &lt;<a =
-href=3D"mailto:alfredo.deza-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org">alfredo.deza-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org</a>&gt; =
-wrote:</div><br class=3D"Apple-interchange-newline"><blockquote =
-type=3D"cite"><a =
-href=3D"http://ceph.com/ceph-deploy/docs/changelog.html#id1" =
-style=3D"font-family: Helvetica; font-size: 12px; font-style: normal; =
-font-variant: normal; font-weight: normal; letter-spacing: normal; =
-line-height: normal; orphans: auto; text-align: start; text-indent: 0px; =
-text-transform: none; white-space: normal; widows: auto; word-spacing: =
-0px; -webkit-text-stroke-width: =
-0px;">http://ceph.com/ceph-deploy/docs/changelog.html#id1</a></blockquote>=
-</div><br></div></body></html>=
-
---Apple-Mail=_EF599E7A-9DBC-45E7-9339-CD889D2FF7F2--
-
---===============0941471572==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============0941471572==--
