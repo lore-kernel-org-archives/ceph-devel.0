@@ -1,81 +1,48 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: teuthology and erasure code pool creation
-Date: Sun, 08 Jun 2014 18:00:35 +0200
-Message-ID: <539488A3.3070507@dachary.org>
+From: Alfredo Deza <alfredo.deza-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Subject: ceph-deploy 1.5.4 (addressing packages coming from
+	EPEL)
+Date: Mon, 9 Jun 2014 08:33:00 -0400
+Message-ID: <CANtztVyYc1kobPs9wU9VpeECCOkCmCgEUoeNN52ZXE3FHuDxZg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="cTEOr7Ex6CwBnCL8W1pmi5mIDbPsee2HC"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:37711 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753192AbaFHQAi (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 8 Jun 2014 12:00:38 -0400
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Zack Cerza <zack.cerza@inktank.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-maintainers-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---cTEOr7Ex6CwBnCL8W1pmi5mIDbPsee2HC
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Hi All,
 
-Hi Zack,
+We've experienced a lot of issues since EPEL started packaging a
+0.80.1-2 version that YUM
+will see as higher than 0.80.1 and therefore will choose to install
+the EPEL one.
 
-In order to test locally repairable codes ( described at https://wiki.cep=
-h.com/Planning/Blueprints/Giant/Pyramid_Erasure_Code and documented at ht=
-tps://github.com/dachary/ceph/commit/2ae645438243232392c11fd80fd960f6221f=
-d2a0#diff-5518964bc98a094a784ce2d17a5b0cc1R20 ) it would be a convenient =
-to set the erasure code profile without modifying the teuthology code.=20
+That package has some issues from what we have seen and in most cases
+will break the installation
+process.
 
-There are not too many instances of hardcoded parameters:
+There is a new version of ceph-deploy (1.5.4) that addresses this
+problem by setting the priorities
+so that the ceph.repo will be considered before the EPEL one.
 
-  https://github.com/ceph/teuthology/blob/master/teuthology/task_util/rad=
-os.py#L27
-  https://github.com/ceph/teuthology/blob/master/teuthology/task/ceph_man=
-ager.py#L732
+Some improvements where done for how ceph-deploy parses
+cephdeploy.conf files so that priorities
+can be correctly set (and honored) from there as well.
 
-and it could be generalized. In a nutshell, the definition of an erasure =
-coded profile is a set of key value which should default to:
+The changelog with the details of this release can be found here:
 
-  k: 2
-  m: 1
-  plugin: jerasure
-  ruleset-failure-domain: osd
+http://ceph.com/ceph-deploy/docs/changelog.html#id1
 
-and=20
-
-  self.raw_cluster_cmd('osd', 'erasure-code-profile', 'set', 'teuthologyp=
-rofile', 'ruleset-failure-domain=3Dosd', 'm=3D'+str(ec_m), 'k=3D'+str(ec_=
-k))
-
-could be replaced with:
-  =20
-   self.raw_cluster_cmd('osd', 'erasure-code-profile', 'set', 'teuthology=
-profile', **kwargs)
-
-assuming kwargs is the above map parsed from the yaml.=20
-
-Any advice you may have on the implementation would be very welcome :-)
-
-Cheers
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
+Make sure you update!
 
 
---cTEOr7Ex6CwBnCL8W1pmi5mIDbPsee2HC
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlOUiKMACgkQ8dLMyEl6F215WwCdHYSClPEDSNtrA1j7a91mNVBI
-SNcAoIRbrcPrPzdq2l4HTSNZqyNBjO0t
-=MlZq
------END PGP SIGNATURE-----
-
---cTEOr7Ex6CwBnCL8W1pmi5mIDbPsee2HC--
+-Alfredo
