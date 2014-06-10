@@ -1,170 +1,63 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Locally repairable code description revisited (was Pyramid ...)
-Date: Mon, 09 Jun 2014 23:40:30 +0200
-Message-ID: <539629CE.8090409@dachary.org>
-References: <538A0CF8.8030501@dachary.org>	<53907935.9010009@dachary.org>	<3472A07E6605974CBC9BC573F1BC02E4AE730544@CERNXCHG44.cern.ch>	<5391D069.30701@dachary.org>	<CAPYLRzgEhTRohS9Jb9dZHnTL8_TpgDvF8sJkzn_NoY2kc4DmbA@mail.gmail.com> <CA+4uBUbc3PtmLU3GetzQCm5r=SXA8cxq=bsayZOnvLFR2Sja8A@mail.gmail.com>
+From: Alphe Salas Michels <asalas@kepler.cl>
+Subject: rbd after removal still 10 TB used.
+Date: Mon, 09 Jun 2014 20:46:34 -0400
+Message-ID: <5396556A.8010908@kepler.cl>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="uBv2Vx4dJJohJe0sNhskcuQPgV6Dd0Am3"
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:38885 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754093AbaFIVke (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Jun 2014 17:40:34 -0400
-In-Reply-To: <CA+4uBUbc3PtmLU3GetzQCm5r=SXA8cxq=bsayZOnvLFR2Sja8A@mail.gmail.com>
+Received: from mail-qa0-f49.google.com ([209.85.216.49]:51147 "EHLO
+	mail-qa0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S964851AbaFJAqi (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Jun 2014 20:46:38 -0400
+Received: by mail-qa0-f49.google.com with SMTP id w8so1597336qac.22
+        for <ceph-devel@vger.kernel.org>; Mon, 09 Jun 2014 17:46:37 -0700 (PDT)
+Received: from [192.168.0.44] ([200.111.172.141])
+        by mx.google.com with ESMTPSA id i9sm33083102qaq.14.2014.06.09.17.46.35
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
+        Mon, 09 Jun 2014 17:46:36 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sam.just@inktank.com>, Gregory Farnum <greg@inktank.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---uBv2Vx4dJJohJe0sNhskcuQPgV6Dd0Am3
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Hello,
+I have this issue to submit you.It is with ceph emperor version 0.72 i 
+don t know if in firefly it is solved. I didnt see in the changelog any 
+change to that issue.
 
-Sam, Greg,
+First of all ceph is storage ogre. Let me explain. In an global 40TB 
+disk the real data i can use is 40 TB /2 - 25% = around 15TB. But as I 
+delete data and store new data I notice the replicas are never 
+overwritten. logically a pg has its mirror and so if the pg is updated 
+then the mirrored pg corresponding is updated too. or better said if a 
+pg is overwritten with new data then its related pg mirror is 
+overwritten too with that new data. Experience in real life shown to me 
+that it is not the case. Simply pg are overwriten and a new pg mirror is 
+created to contain the new data letting the old pg mirror remain. So as 
+i delete and overwrite  data to my rbd image I notice the ever growing 
+effect that lead to a forever pgs stuck to backfill osds. So slowly ceph 
+is stopping to accept new data. More osd are in near_full ratio then 
+full ratio.
 
-A simpler proposal is documented at :
-
-    https://github.com/dachary/ceph/commit/ff11902bdc26aa35c70dd2f4d9de31=
-f4cd207519#diff-5518964bc98a094a784ce2d17a5b0cc1R1
-
-which is part of the proposed implementation for locally repairable code
-
-    https://github.com/ceph/ceph/pull/1921
-
-Hopefully it makes sense ;-)
-
-Cheers
-
-On 09/06/2014 22:38, Samuel Just wrote:
-> I'm finding that I don't really understand how the LRC specification
-> works.  Is there a doc somewhere I can read?
-> -Sam
->=20
-> On Mon, Jun 9, 2014 at 1:18 PM, Gregory Farnum <greg@inktank.com> wrote=
-:
->> On Fri, Jun 6, 2014 at 7:30 AM, Loic Dachary <loic@dachary.org> wrote:=
-
->>> Hi Andreas,
->>>
->>> On 06/06/2014 13:46, Andreas Joachim Peters wrote:> Hi Loic,
->>>> the basic implementation looks very clean.
->>>>
->>>> I have few comments/ideas:
->>>>
->>>> - the reconstruction strategy using the three levels is certainly ef=
-ficient enough for standard cases but does not guarantee always the minim=
-um decoding (in cases where one layer is not enough to reconstruct) since=
- your third algorithm is just brute-force to reconstruct everything throu=
-gh all layers until we have what we need ...
->>>
->>> The third strategy is indeed brute force. Do you think it is worth ch=
-anging to be minimal ? It would be nice to quantify the percent of cases =
-it addresses. Do you know how to do that ? It looks like a very small per=
-centage but there is no proof it is small ;-)
->>>
->>>> - the whole LRC configuration actually does not describe the placeme=
-nt - it still looks disconnected from the placement strategy/crush rules =
-=2E.. wouldn't it make sense to have the crush rule implicit in the descr=
-iption or a function to derive it automatically based on the LRC configur=
-ation? Maybe you have this already done in another way and I didn't see i=
-t ...
->>>
->>> Good catch.
->>>
->>> What about this:
->>>
->>>       "  [ \"_aAAA_aAA_\", \"set choose datacenter 2\","
->>>       "    \"_aXXX_aXX_\" ],"
->>>       "  [ \"b_BBB_____\", \"set choose host 5\","
->>>       "    \"baXXX_____\" ],"
->>>       "  [ \"_____cCCC_\", \"\","
->>>       "    \"baXXXcaXX_\" ],"
->>>       "  [ \"_____DDDDd\", \"\","
->>>       "    \"baXXXcaXXd\" ],"
->>>
->>> Which translates into
->>>
->>> take root
->>> set choose datacenter 2
->>> set choose host 5
->>>
->>> In other words, the ruleset is created by concatenating the strings f=
-rom the description, without any kind of smart computation. It is up to t=
-he person who creates the description to add the ruleset near a descripti=
-on that makes sense. There is going to be minimal checking to make sure t=
-he ruleset can actually be used to get the required number of chunks.
->>>
->>> It probably is very difficult and very confusing to automate the gene=
-ration of the ruleset. If it is implicit rather than explicit as above, t=
-he operator will have to somehow understand and learn how it is computed =
-to make sure it does what is desired. With an explicit set of crush rules=
- loosely coupled to chunk mapping, the operator can read the crush docume=
-ntation instead of guessing.
->>
->> I think I'm missing some context for this discussion (maybe I haven't
->> been reading other threads closely enough); can you discuss this in
->> more detail?
->> Matching up CRUSH rulesets and the EC plugin formulas is very
->> important and demonstrated to be difficult, but I don't really
->> understand what you're suggesting here, which makes me think it's not
->> quite the right idea. ;)
->>
->>>
->>>> -  should the plug-in have the ability to select reconstruction on p=
-roximity or this should be up-to the higher layer to provide chunks in a =
-way that reconstruction would select the 'closest' layer? The relevance o=
-f the question you will understand better in the next point ....
->>>>
->>>> - I remember we had this 3 data centre example with (8,4) where you =
-can reconstruct every object if 2 data centres are up. Another appealing =
-example avoiding remote access when reading an object is that you have 2 =
-data centres having a replication of e.g. (4,2) encoded objects. Can you =
-describe in your LRC configuration language to store the same chunk twice=
- like    __ABCCBA__ ?
->>>
->>> Unless I'm mistaken that would require the caller of the plugin to su=
-pport duplicate data chunks and provide a kind of proximity check. Since =
-this is not currently supported by the OSD logic, it is difficult to figu=
-re out how an erasure code plugin could provide support for this use case=
-=2E
->>
->> I haven't looked at the EC plugin interface at all, but I thought the
->> OSD told the plugin what chunks it could access, and the plugin tells
->> it which ones to fetch. So couldn't the plugin simply output duplicate=
-
->> chunks, and not have the OSD retrieve both of them?
->> -Greg
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" =
-in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
+Still after I do a rbd rm myimagename I notice that because some pgs 
+where stuck to backfill then i still have 10 TB locked. Only way to 
+retrieve that data is to completly clear the ceph cluster and reinstall 
+a new version. I don t think most people using ceph will affort an ever 
+growing ceph system, because yes beleive it or not new disks and new 
+nodes have a cost, and that it is not  wise to have replicas that over 
+match more than 3 times the data they backup on a replica = 2 environement.
 
 
---uBv2Vx4dJJohJe0sNhskcuQPgV6Dd0Am3
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+At the time ceph is willing to extend it seems we are all oblivious to 
+the core problems of ceph. No data triming no data replicas triming.
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+Probably triming data is ressource consuming. So we should have at least 
+a "lets plan and do a trim for that day" possibility. The other way 
+around would be to have a better replica management since that is where 
+the problem is orginated.
 
-iEYEARECAAYFAlOWKc8ACgkQ8dLMyEl6F22Q5QCgnq90dyfnngiGFqJtNNgPV4gu
-nEcAn3zKLBYwEu5GEzgc4lTOTqMWt8P8
-=IRXy
------END PGP SIGNATURE-----
+Best regards
 
---uBv2Vx4dJJohJe0sNhskcuQPgV6Dd0Am3--
+-------
+Alphe Salas
