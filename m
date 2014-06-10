@@ -1,121 +1,137 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [Feature]Proposal for adding a new flag named shared to support
- performance and statistic purpose
-Date: Tue, 10 Jun 2014 12:38:01 -0700
-Message-ID: <20140610123801.72291cf6@sietchtabr>
-References: <CACJqLyZoxqN69NarVLsWZan7aULwbULUAFwmGC5D_jiVTc=uqg@mail.gmail.com>
-	<20140609181625.401b76d5@sietchtabr>
-	<CACJqLybz-aATGRKJ0_iSqEfHzRBaSWJRO_kyB9ic-yt2SGqYUg@mail.gmail.com>
+From: Craig Lewis <clewis@centraldesktop.com>
+Subject: I have PGs that I can't deep-scrub
+Date: Tue, 10 Jun 2014 14:18:46 -0700
+Message-ID: <CADHZLBa3z-7k28iL2SArQ+KYyBF0aUZEiAbASika8OEevpLk+A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:46117 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751998AbaFJTiS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Jun 2014 15:38:18 -0400
-In-Reply-To: <CACJqLybz-aATGRKJ0_iSqEfHzRBaSWJRO_kyB9ic-yt2SGqYUg@mail.gmail.com>
+Received: from mail-wi0-f169.google.com ([209.85.212.169]:36075 "EHLO
+	mail-wi0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751758AbaFJVTI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Jun 2014 17:19:08 -0400
+Received: by mail-wi0-f169.google.com with SMTP id hi2so4408561wib.2
+        for <ceph-devel@vger.kernel.org>; Tue, 10 Jun 2014 14:19:06 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomaiwang@gmail.com>
-Cc: Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Ceph Users <ceph-users@lists.ceph.com>, Ceph Devel <ceph-devel@vger.kernel.org>
 
-On Tue, 10 Jun 2014 14:52:54 +0800
-Haomai Wang <haomaiwang@gmail.com> wrote:
+Every time I deep-scrub one PG, all of the OSDs responsible get kicked
+out of the cluster.  I've deep-scrubbed this PG 4 times now, and it
+fails the same way every time.  OSD logs are linked at the bottom.
 
-> Thanks, Josh!
-> 
-> Your points are really helpful. Maybe we can schedule this bp to the
-> near CDS? The implementation I hope can has great performance effects
-> on librbd.
+What can I do to get this deep-scrub to complete cleanly?
 
-It'd be great to discuss it more at CDS. Could you add a blueprint for
-it on the wiki:
+This is the first time I've deep-scrubbed these PGs since Sage helped
+me recover from some OSD problems
+(http://t53277.file-systems-ceph-development.file-systemstalk.info/70-osd-are-down-and-not-coming-up-t53277.html)
 
-https://wiki.ceph.com/Planning/Blueprints/Submissions 
+I can trigger the issue easily in this cluster, but have not been able
+to re-create in other clusters.
 
-Josh
 
-> On Tue, Jun 10, 2014 at 9:16 AM, Josh Durgin
-> <josh.durgin@inktank.com> wrote:
-> > On 06/05/2014 12:01 AM, Haomai Wang wrote:
-> >> Hi,
-> >> Previously I sent a mail about the difficult of rbd snapshot size
-> >> statistic. The main solution is using object map to store the
-> >> changes. The problem is we can't handle with multi client
-> >> concurrent modify.
-> >>
-> >> Lack of object map(like pointer map in qcow2), it cause many
-> >> problems in librbd. Such as clone depth, the deep clone depth will
-> >> cause remarkable latency. Usually each clone wrap will increase
-> >> two times of latency.
-> >>
-> >> I consider to make a tradeoff between multi-client support and
-> >> single-client support for librbd. In practice, most of the
-> >> volumes/images are used by VM, there only exist one client will
-> >> access/modify image. We can't only want to make shared image
-> >> possible but make most of use cases bad. So we can add a new flag
-> >> called "shared" when creating image. If "shared" is false, librbd
-> >> will maintain a object map for each image. The object map is
-> >> considered to durable, each image_close call will store the map
-> >> into rados. If the client  is crashed and failed to dump the
-> >> object map, the next client open the image will think the object
-> >> map as out of date and reset the objectmap.
-> >>
-> >> We can easily find the advantage of this feature:
-> >> 1. Avoid clone performance problem
-> >> 2. Make snapshot statistic possible
-> >> 3. Improve librbd operation performance including read,
-> >> copy-on-write operation.
-> >>
-> >> What do you think above? More feedbacks are appreciate!
-> >
-> > I think it's a great idea! We discussed this a little at the last
-> > cds [1]. I like the idea of the shared flag on an image. Since the
-> > vastly more common case is single-client, I'd go further and
-> > suggest that we treat images as if shared is false by default if
-> > the flag is not present (perhaps with a config option to change
-> > this default behavior).
-> >
-> > That way existing images can benefit from the feature without extra
-> > configuration. There can be an rbd command to toggle the shared
-> > flag as well, so users of ocfs2 or gfs2 or other
-> > multi-client-writing systems can upgrade and set shared to true
-> > before restarting their clients.
-> >
-> > Another thing to consider is the granularity of the object map. The
-> > coarse granularity of a bitmap of object existence would be
-> > simplest, and most useful for in-memory comparison for clones. For
-> > statistics it might be desirable in the future to have a
-> > finer-grained index of data existence in the image. To make that
-> > easy to handle, the on-disk format could be a list of extents (byte
-> > ranges).
-> >
-> > Another potential use case would be a mode in which the index is
-> > treated as authoritative. This could make discard very fast, for
-> > example. I'm not sure it could be done safely with only binary
-> > 'exists/does not exist' information though - a third 'unknown' state
-> > might be needed for some cases. If this kind of index is actually
-> > useful (I'm not sure there are cases where the performance penalty
-> > would be worth it), we could add a new index format if we need it.
-> >
-> > Back to the currently proposed design, to be safe with live
-> > migration we'd need to make sure the index is consistent in the
-> > destination process. Using rados_notify() after we set the clean
-> > flag on the index can make the destination vm re-read the index
-> > before any I/O happens. This might be a good time to introduce a
-> > data payload to the notify as well, so we can only re-read the
-> > index, instead of all the header metadata. Rereading the index
-> > after cache invalidation and wiring that up through qemu's
-> > bdrv_invalidate() would be even better.
-> >
-> > There's more to consider in implementing this wrt snapshots, but
-> > this email has gone on long enough.
-> >
-> > Josh
-> >
-> > [1] http://pad.ceph.com/p/cdsgiant-rbd-copy-on-read-for-clones
-> 
-> 
-> 
 
+
+
+
+The PG stats for this PG say that last_deep_scrub and deep_scrub_stamp
+are 48009'1904117 2014-05-21 07:28:01.315996 respectively.  This PG is
+owned by OSDs [11,0]
+
+This is a secondary cluster, so I stopped all external I/O on it.  I
+set nodeep-scrub, and restarted both OSDs with:
+  debug osd = 5/5
+  debug filestore = 5/5
+  debug journal = 1
+  debug monc = 20/20
+
+then I ran a deep-scrub on this PG.
+
+2014-06-10 10:47:50.881783 mon.0 [INF] pgmap v8832020: 2560 pgs: 2555
+active+clean, 5 active+clean+scrubbing; 27701 GB data, 56218 GB used,
+77870 GB / 130 TB avail
+2014-06-10 10:47:54.039829 mon.0 [INF] pgmap v8832021: 2560 pgs: 2554
+active+clean, 5 active+clean+scrubbing, 1 active+clean+scrubbing+deep;
+27701 GB data, 56218 GB used, 77870 GB / 130 TB avail
+
+
+At 10:49:09, I see ceph-osd for both 11 and 0 spike to 100% CPU
+(100.3% +/- 1.0%).  Prior to this, they were both using ~30% CPU.  It
+might've started a few seconds sooner, I'm watching top.
+
+I forgot to watch IO stat until 10:56.  At this point, both OSDs are
+reading.  iostat reports that they're both doing ~100
+transactions/sec, reading ~1 MiBps, 0 writes.
+
+
+At 11:01:26, iostat reports that both osds are no longer consuming any
+disk I/O.  They both go for > 30 seconds with 0 transactions, and 0
+kiB read/write.  There are small bumps of 2 transactions/sec for one
+second, then it's back to 0.
+
+
+At 11:02:41, the primary OSD gets kicked out by the monitors:
+2014-06-10 11:02:41.168443 mon.0 [INF] pgmap v8832125: 2560 pgs: 2555
+active+clean, 4 active+clean+scrubbing, 1 active+clean+scrubbing+deep;
+27701 GB data, 56218 GB used, 77870 GB / 130 TB avail; 1996 B/s rd, 2
+op/s
+2014-06-10 11:02:57.801047 mon.0 [INF] osd.11 marked down after no pg
+stats for 903.825187seconds
+2014-06-10 11:02:57.823115 mon.0 [INF] osdmap e58834: 36 osds: 35 up, 36 in
+
+Both ceph-osd processes (11 and 0) continue to use 100% CPU (same range).
+
+
+At ~11:10, I see that osd.11 has resumed reading from disk at the
+original levels (~100 tps, ~1MiBps read, 0 MiBps write).  Since it's
+down, but doing something, I let it run.
+
+Both the osd.11 and osd.0 repeat this pattern.  Reading for a while at
+~1 MiBps, then nothing.  The duty cycle seems about 50%, with a 20
+minute period, but I haven't timed anything.  CPU usage remains at
+100%, regardless of whether IO is happening or not.
+
+
+At 12:24:15, osd.11 rejoins the cluster:
+2014-06-10 12:24:15.294646 mon.0 [INF] osd.11 10.193.0.7:6804/7100 boot
+2014-06-10 12:24:15.294725 mon.0 [INF] osdmap e58838: 36 osds: 35 up, 36 in
+2014-06-10 12:24:15.343869 mon.0 [INF] pgmap v8832827: 2560 pgs: 1
+stale+active+clean+scrubbing+deep, 2266 active+clean, 5
+stale+active+clean, 287 active+degraded, 1 active+clean+scrubbing;
+27701 GB data, 56218 GB used, 77870 GB / 130 TB avail; 15650 B/s rd,
+18 op/s; 3617854/61758142 objects degraded (5.858%)
+
+
+osd.0's CPU usage drops back to normal when osd.11 rejoins the
+cluster.  The PG stats have not changed.   The last_deep_scrub and
+deep_scrub_stamp are still 48009'1904117 2014-05-21 07:28:01.315996
+respectively.
+
+
+This time, osd.0 did not get kicked out by the monitors.  In previous
+attempts, osd.0 was kicked out 5-10 minutes after osd.11.  When that
+happens, osd.0 rejoins the cluster after osd.11.
+
+
+I have several more PGs exhibiting the same behavior.  At least 3 that
+I know of, and many more that I haven't attempted to deep-scrub.
+
+
+
+
+
+
+ceph -v: ceph version 0.72.2 (a913ded2ff138aefb8cb84d347d72164099cfd60)
+ceph.conf: https://cd.centraldesktop.com/p/eAAAAAAADvxuAAAAAHJRUk4
+ceph-osd.11.log (5.7 MiB):
+https://cd.centraldesktop.com/p/eAAAAAAADvxyAAAAABPwaeM
+ceph-osd.0.log (6.3 MiB):
+https://cd.centraldesktop.com/p/eAAAAAAADvx0AAAAADWEGng
+ceph pg 40.11e query: https://cd.centraldesktop.com/p/eAAAAAAADvxvAAAAAAylTW0
+
+(the pg query was collected at 13:24, after the above events)
+
+
+
+
+Things that probably don't matter:
+The OSD partitions were created using ceph-disk-prepare --dmcrypt.
