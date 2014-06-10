@@ -1,62 +1,93 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [RFC 00/32] making inode time stamps y2038 ready
-Date: Tue, 10 Jun 2014 11:54:14 +0200
-Message-ID: <10173877.4plnjUiyX8@wuerfel>
-References: <1401480116-1973111-1-git-send-email-arnd@arndb.de>
-	<8770583.6XeZxCxOY8@wuerfel> <538FB570.8000502@zytor.com>
+From: Alfredo Deza <alfredo.deza@inktank.com>
+Subject: Re: [ceph-users] Problem installing ceph from package manager / ceph repositories
+Date: Tue, 10 Jun 2014 08:22:10 -0400
+Message-ID: <CANtztVwCJx_=bR-mpct0i3j=xaMxreRJw0X9PF1CE7X07o-jgA@mail.gmail.com>
+References: <4849752F-2209-4D3F-B934-C670ADBB9CDC@csc.fi>
+	<4DC842D9-8254-4519-9034-1E76F0BF3C84@csc.fi>
+	<C108D0D0-F5F3-4E73-B12E-2196C8FD652B@cern.ch>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <cluster-devel-bounces@redhat.com>
-In-Reply-To: <538FB570.8000502@zytor.com>
-List-Unsubscribe: <https://www.redhat.com/mailman/options/cluster-devel>,
-	<mailto:cluster-devel-request@redhat.com?subject=unsubscribe>
-List-Archive: <https://www.redhat.com/archives/cluster-devel>
-List-Post: <mailto:cluster-devel@redhat.com>
-List-Help: <mailto:cluster-devel-request@redhat.com?subject=help>
-List-Subscribe: <https://www.redhat.com/mailman/listinfo/cluster-devel>,
-	<mailto:cluster-devel-request@redhat.com?subject=subscribe>
-Sender: cluster-devel-bounces@redhat.com
-Errors-To: cluster-devel-bounces@redhat.com
-To: "H. Peter Anvin" <hpa@zytor.com>
-Cc: Nicolas Pitre <nicolas.pitre@linaro.org>, Dave Chinner <david@fromorbit.com>, linux-mtd@lists.infradead.org, linux-f2fs-devel@lists.sourceforge.net, ceph-devel@vger.kernel.org, "Joseph S. Myers" <joseph@codesourcery.com>, linux-arch@vger.kernel.org, linux-cifs@vger.kernel.org, linux-scsi@vger.kernel.org, linux-afs@lists.infradead.org, cluster-devel@redhat.com, coda@cs.cmu.edu, geert@linux-m68k.org, linux-ext4@vger.kernel.org, codalist@telemann.coda.cs.cmu.edu, fuse-devel@lists.sourceforge.net, reiserfs-devel@vger.kernel.org, xfs@oss.sgi.com, john.stultz@linaro.org, tglx@linutronix.de, linux-nfs@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, samba-technical@lists.samba.org, linux-kernel@vger.kernel.org, logfs@logfs.org, linux-btrfs@vger.kernel.org, linux-fsdevel@vger.kernel.
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-yk0-f182.google.com ([209.85.160.182]:39779 "EHLO
+	mail-yk0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750888AbaFJMWL convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Jun 2014 08:22:11 -0400
+Received: by mail-yk0-f182.google.com with SMTP id 19so2178340ykq.27
+        for <ceph-devel@vger.kernel.org>; Tue, 10 Jun 2014 05:22:10 -0700 (PDT)
+In-Reply-To: <C108D0D0-F5F3-4E73-B12E-2196C8FD652B@cern.ch>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Dan Van Der Ster <daniel.vanderster@cern.ch>
+Cc: Karan Singh <karan.singh@csc.fi>, "ceph-users@ceph.com" <ceph-users@ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wednesday 04 June 2014 17:10:24 H. Peter Anvin wrote:
-> On 06/04/2014 12:24 PM, Arnd Bergmann wrote:
-> > 
-> > For other timekeeping stuff in the kernel, I agree that using some
-> > 64-bit representation (nanoseconds, 32/32 unsigned seconds/nanoseconds,
-> > ...) has advantages, that's exactly the point I was making earlier
-> > against simply extending the internal time_t/timespec to 64-bit
-> > seconds for everything.
-> > 
-> 
-> How much of a performance issue is it to make time_t 64 bits, and for
-> the bits there are, how hard are they to fix?
+On Tue, Jun 10, 2014 at 4:34 AM, Dan Van Der Ster
+<daniel.vanderster@cern.ch> wrote:
+> Hi,
+>
+> On 10 Jun 2014, at 10:30, Karan Singh <karan.singh@csc.fi> wrote:
+>
+> Hello Cephers
+>
+> First of all this problem is not related to ceph-deploy , ceph-deploy=
+ 1.5.4
+> works like charm :-) , thanks for Alfredo
+>
+> Problem :
+>
+> 1. When installing Ceph using package manger ( # yum install ceph  or=
+  # yum
+> update cehp) that uses ceph repositories (cep.repo) , the package man=
+ager
+> does not respect the ceph.repo file and takes ceph package directly f=
+rom
+> EPEL . But when i disable EPEL repo and again try to install ceph , i=
+t takes
+> from ceph repo.  This is a new problem and earlier i have not faced t=
+his ,
+> though i have done several ceph cluster installation with package man=
+ager. I
+> don=E2=80=99t want EPEL version of Ceph.
+>
+>
+> You probably need to tweak the repo priorities. We use priority=3D30 =
+for
+> epel.repo, priority=3D5 for ceph.repo.
+>
 
-Probably very little overhead for most uses, it's more the regression
-potential in the less common parts of the kernel I'm worried about.
+This is exactly what ceph-deploy is now doing. It is installing the
+priorities plugin for yum
+and then setting a very low number for ceph.repo (1 I believe)
 
-There is a significant but not overwhelming number of uses of the
-main problematic types in the kernel:
+This is explained in the last release announcement for ceph-deploy and
+for more details
+you can see this ticket:  http://tracker.ceph.com/issues/8533
 
-arnd@wuerfel:~/arm-soc$ git grep -wl time_t | wc
-    188     188    5566
-arnd@wuerfel:~/arm-soc$ git grep -wl timeval | wc
-    320     320   10353
-arnd@wuerfel:~/arm-soc$ git grep -wl timespec | wc
-    406     406   10886
-
-I believe we have to audit all of them anyway if we want to change
-the kernel to less problematic types and introduce new user
-interfaces.
-
-IMHO this work is helped if we change the uses to a new type
-as we find the problems. This lets us do the work one subsystem
-at a time and avoid accidental ABI changes. I don't care much what
-type that will be, and having a 96-bit type will certainly work
-well in a lot of cases, but I don't see a strong reason to use
-that over other types, especially when they can be more efficient.
-
-	Arnd
+> Cheers, Dan
+>
+>
+> -- Dan van der Ster || Data & Storage Services || CERN IT Department =
+--
+>
+>
+> 2. When i uninstall ceph , from system its repository file i.e. ceph.=
+repo is
+> getting removed . Is this normal , i have not seen this before.
+>
+>
+> Any one else facing the same problem or have solution to this.
+>
+>
+> Regards
+> Karan Singh
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
