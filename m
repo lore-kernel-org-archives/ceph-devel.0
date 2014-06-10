@@ -1,50 +1,80 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: Changes of scrubbing?
-Date: Tue, 10 Jun 2014 15:33:58 -0700
-Message-ID: <CAPYLRziTJKy4DQTASRwDZa2P5cy9qc4Zj7VM2P2QbrntFpKudg@mail.gmail.com>
-References: <BLU436-SMTP155ED6E6FBB4FD0E72FC5CDF3C0@phx.gbl>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: [ceph-users] Fwd: CEPH Multitenancy and Data Isolation
+Date: Tue, 10 Jun 2014 16:30:39 -0700
+Message-ID: <5397951F.1000009@inktank.com>
+References: <CFBB8E65.E806%vilobhmm@yahoo-inc.com> <AE4D7541-2202-4A06-BBC6-DADEC88AE89D@yahoo-inc.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=windows-1252;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f43.google.com ([209.85.216.43]:45970 "EHLO
-	mail-qa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750888AbaFJWd7 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Jun 2014 18:33:59 -0400
-Received: by mail-qa0-f43.google.com with SMTP id k15so1279525qaq.2
-        for <ceph-devel@vger.kernel.org>; Tue, 10 Jun 2014 15:33:59 -0700 (PDT)
-In-Reply-To: <BLU436-SMTP155ED6E6FBB4FD0E72FC5CDF3C0@phx.gbl>
+Received: from mail-qc0-f179.google.com ([209.85.216.179]:52441 "EHLO
+	mail-qc0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752087AbaFJXa7 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Jun 2014 19:30:59 -0400
+Received: by mail-qc0-f179.google.com with SMTP id r5so3395031qcx.10
+        for <ceph-devel@vger.kernel.org>; Tue, 10 Jun 2014 16:30:59 -0700 (PDT)
+In-Reply-To: <AE4D7541-2202-4A06-BBC6-DADEC88AE89D@yahoo-inc.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Guang Yang <yguang11@outlook.com>
-Cc: Ceph-devel <ceph-devel@vger.kernel.org>
+To: Vilobh Meshram <vilobhmm@yahoo-inc.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: "ceph-users@ceph.com" <ceph-users@ceph.com>
 
-On Tue, May 20, 2014 at 6:44 PM, Guang Yang <yguang11@outlook.com> wrote:
-> Hi ceph-devel,
-> Like some users of Ceph, we are using Ceph for a latency sensitive project, and scrubbing (especially deep-scrubbing) impacts the SLA in a non-trivial way, as commodity hardware could fail in one way or the other, I think it is essential to have scrubbing enabled to preserve data durability.
->
-> Inspired by how erasure coding backend implement scrubbing[1], I am wondering if the following changes is valid to somehow reduce the performance impact from scrubbing:
->  1. Store the CRC checksum along with each physical copy of the object on filesystem (via xattr or omap?)
->  2. For read request, it checks the CRC locally and if it mismatch, redirect the request to a replica and mark the PG as inconsistent.
+On 06/10/2014 01:56 AM, Vilobh Meshram wrote:
+>> How does CEPH guarantee data isolation for volumes which are not mea=
+nt
+>> to be shared in a Openstack tenant?
+>>
+>> When used with OpenStack the data isolation is provided by the
+>> Openstack level so that all users who are part of same tenant will b=
+e
+>> able to access/share the volumes created by users in that tenant.
+>> Consider a case where we have one pool named =93Volumes=94 for all t=
+he
+>> tenants. All the tenants use the same keyring to access the volumes =
+in
+>> the pool.
+>>
+>>  1. How do we guarantee that one user can=92t see the contents of th=
+e
+>>     volumes created by another user; if the volume is not meant to b=
+e
+>>     shared.
 
-The problem with this is that you need to maintain the CRC across
-partial overwrites of the object. And the real cost of scrubbing isn't
-in the network traffic, it's in the disk reads, which you would have
-to do anyway with this method. :)
--Greg
-Software Engineer #42 @ http://inktank.com | http://ceph.com
+OpenStack users or tenants have no access to the keyring. Cinder tracks
+volume ownership and checks permissions when a volume is attached, and
+qemu prevents users from seeing anything outside of their vm, including=
+=20
+the keyring.
 
->
-> This is just a general idea and details (like append) will need to further discussed.
->
-> By having such, we can schedule the scrubbing less aggresively but still preserve the durability for read.
->
-> Does this make some sense?
->
-> [1] http://ceph.com/docs/master/dev/osd_internals/erasure_coding/pgbackend/
->
-> Thanks,
-> Guang Yang--
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>  2. If someone malicious user gets the access to the keyring (which =
+we
+>>     used as a authentication mechanism between the client/Openstack
+>>     and CEPH) how does CEPH guarantee that the malicious user can=92=
+t
+>>     access the volumes in that pool.
+
+The keyring gives a user access to the cluster. If someone has a valid=20
+keyring, Ceph treats them as a valid user, since there is no informatio=
+n
+to say otherwise. Ceph can't tell whether the user of a keyring is
+malicious.
+
+>>  3. Lets say our Cinder services are running on the Openstack API
+>>     node. How does the CEPH keyring information gets transferred fro=
+m
+>>     the API node to the Hypervisor node ? Does this keyring passed
+>>     through message queue? If yes can the malicious user have a look
+>>     at the message queue and grab this keyring information ? If not
+>>     then how does it reach from the API node to the Hypervisor node.
+
+The keyring is static and configured by the administrator on the nodes
+running cinder-volume and nova-compute. It's not sent over the network,
+and is not needed by nova or cinder api nodes.
+
+Josh
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
