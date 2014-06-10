@@ -1,92 +1,92 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [Feature]Proposal for adding a new flag named shared to support
- performance and statistic purpose
-Date: Mon, 9 Jun 2014 18:16:25 -0700
-Message-ID: <20140609181625.401b76d5@sietchtabr>
-References: <CACJqLyZoxqN69NarVLsWZan7aULwbULUAFwmGC5D_jiVTc=uqg@mail.gmail.com>
+From: "Shu, Xinxin" <xinxin.shu@intel.com>
+Subject: RE: [RFC] add rocksdb support
+Date: Tue, 10 Jun 2014 04:59:44 +0000
+Message-ID: <75674D092A819E4189E91166C74CB90D013C3C13@shsmsx102.ccr.corp.intel.com>
+References: <75674D092A819E4189E91166C74CB90D0131CB27@SHSMSX104.ccr.corp.intel.com>
+ <alpine.DEB.2.00.1405201814330.1689@cobra.newdream.net>
+ <75674D092A819E4189E91166C74CB90D013BEDED@shsmsx102.ccr.corp.intel.com>
+ <537CA4BA.4000900@inktank.com>
+ <75674D092A819E4189E91166C74CB90D013C094D@shsmsx102.ccr.corp.intel.com>
+ <5395EAD1.9000501@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:46316 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933400AbaFJBWF (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Jun 2014 21:22:05 -0400
-In-Reply-To: <CACJqLyZoxqN69NarVLsWZan7aULwbULUAFwmGC5D_jiVTc=uqg@mail.gmail.com>
+Received: from mga11.intel.com ([192.55.52.93]:41047 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751038AbaFJFAd convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Jun 2014 01:00:33 -0400
+In-Reply-To: <5395EAD1.9000501@inktank.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomaiwang@gmail.com>, Sage Weil <sage@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Mark Nelson <mark.nelson@inktank.com>, Sage Weil <sage@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "Zhang, Jian" <jian.zhang@intel.com>
 
-On 06/05/2014 12:01 AM, Haomai Wang wrote:
-> Hi,
-> Previously I sent a mail about the difficult of rbd snapshot size
-> statistic. The main solution is using object map to store the changes.
-> The problem is we can't handle with multi client concurrent modify.
+Hi mark 
+
+I have finished development of support of rocksdb submodule,  a pull request for support of autoconf/automake for rocksdb has been created , you can find https://github.com/ceph/rocksdb/pull/2 , if this patch is ok ,  I will create a pull request for rocksdb submodule support , currently this patch can be found https://github.com/xinxinsh/ceph/tree/wip-rocksdb .
+
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
+Sent: Tuesday, June 10, 2014 1:12 AM
+To: Shu, Xinxin; Sage Weil
+Cc: ceph-devel@vger.kernel.org; Zhang, Jian
+Subject: Re: [RFC] add rocksdb support
+
+Hi Xinxin,
+
+On 05/28/2014 05:05 AM, Shu, Xinxin wrote:
+> Hi sage ,
+> I will add two configure options to --with-librocksdb-static and --with-librocksdb , with --with-librocksdb-static option , ceph will compile the code that get from ceph repository , with  --with-librocksdb option ,  in case of distro packages for rocksdb , ceph will not compile the rocksdb code , will use pre-installed library. is that ok for you ?
 >
-> Lack of object map(like pointer map in qcow2), it cause many problems
-> in librbd. Such as clone depth, the deep clone depth will cause
-> remarkable latency. Usually each clone wrap will increase two times of
-> latency.
+> since current rocksdb does not support autoconf&automake , I will add autoconf&automake support for rocksdb , but before that , i think we should fork a stable branch (maybe 3.0) for ceph .
+
+I'm looking at testing out the rocksdb support as well, both for the OSD and for the monitor based on some issues we've been seeing lately.  Any news on the 3.0 fork and autoconf/automake support in rocksdb?
+
+Thanks,
+Mark
+
 >
-> I consider to make a tradeoff between multi-client support and
-> single-client support for librbd. In practice, most of the
-> volumes/images are used by VM, there only exist one client will
-> access/modify image. We can't only want to make shared image possible
-> but make most of use cases bad. So we can add a new flag called
-> "shared" when creating image. If "shared" is false, librbd will
-> maintain a object map for each image. The object map is considered to
-> durable, each image_close call will store the map into rados. If the
-> client  is crashed and failed to dump the object map, the next client
-> open the image will think the object map as out of date and reset the
-> objectmap.
+> -----Original Message-----
+> From: Mark Nelson [mailto:mark.nelson@inktank.com]
+> Sent: Wednesday, May 21, 2014 9:06 PM
+> To: Shu, Xinxin; Sage Weil
+> Cc: ceph-devel@vger.kernel.org; Zhang, Jian
+> Subject: Re: [RFC] add rocksdb support
 >
-> We can easily find the advantage of this feature:
-> 1. Avoid clone performance problem
-> 2. Make snapshot statistic possible
-> 3. Improve librbd operation performance including read, copy-on-write
-> operation.
+> On 05/21/2014 07:54 AM, Shu, Xinxin wrote:
+>> Hi, sage
+>>
+>> I will add rocksdb submodule into the makefile , currently we want to have fully performance tests on key-value db backend , both leveldb and rocksdb. Then optimize on rocksdb performance.
 >
-> What do you think above? More feedbacks are appreciate!
+> I'm definitely interested in any performance tests you do here.  Last winter I started doing some fairly high level tests on raw leveldb/hyperleveldb/raikleveldb.  I'm very interested in what you see with rocksdb as a backend.
+>
+>>
+>> -----Original Message-----
+>> From: Sage Weil [mailto:sage@inktank.com]
+>> Sent: Wednesday, May 21, 2014 9:19 AM
+>> To: Shu, Xinxin
+>> Cc: ceph-devel@vger.kernel.org
+>> Subject: Re: [RFC] add rocksdb support
+>>
+>> Hi Xinxin,
+>>
+>> I've pushed an updated wip-rocksdb to github/liewegas/ceph.git that includes the latest set of patches with the groundwork and your rocksdb patch.  There is also a commit that adds rocksdb as a git submodule.  I'm thinking that, since there aren't any distro packages for rocksdb at this point, this is going to be the easiest way to make this usable for people.
+>>
+>> If you can wire the submodule into the makefile, we can merge this in so that rocksdb support is in the ceph.com packages on ceph.com.  I suspect that the distros will prefer to turns this off in favor of separate shared libs, but they can do this at their option if/when they include rocksdb in the distro. I think the key is just to have both --with-librockdb and --with-librocksdb-static (or similar) options so that you can either use the static or dynamically linked one.
+>>
+>> Has your group done further testing with rocksdb?  Anything interesting to share?
+>>
+>> Thanks!
+>> sage
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>> in the body of a message to majordomo@vger.kernel.org More majordomo 
+>> info at  http://vger.kernel.org/majordomo-info.html
+>>
+>
 
-I think it's a great idea! We discussed this a little at the last cds
-[1]. I like the idea of the shared flag on an image. Since the vastly
-more common case is single-client, I'd go further and suggest that
-we treat images as if shared is false by default if the flag is not
-present (perhaps with a config option to change this default behavior).
-
-That way existing images can benefit from the feature without extra
-configuration. There can be an rbd command to toggle the shared flag as
-well, so users of ocfs2 or gfs2 or other multi-client-writing systems
-can upgrade and set shared to true before restarting their clients.
-
-Another thing to consider is the granularity of the object map. The
-coarse granularity of a bitmap of object existence would be simplest,
-and most useful for in-memory comparison for clones. For statistics
-it might be desirable in the future to have a finer-grained index of
-data existence in the image. To make that easy to handle, the on-disk
-format could be a list of extents (byte ranges).
-
-Another potential use case would be a mode in which the index is
-treated as authoritative. This could make discard very fast, for
-example. I'm not sure it could be done safely with only binary
-'exists/does not exist' information though - a third 'unknown' state
-might be needed for some cases. If this kind of index is actually useful
-(I'm not sure there are cases where the performance penalty would be
-worth it), we could add a new index format if we need it.
-
-Back to the currently proposed design, to be safe with live migration
-we'd need to make sure the index is consistent in the destination
-process. Using rados_notify() after we set the clean flag on the index
-can make the destination vm re-read the index before any I/O
-happens. This might be a good time to introduce a data payload to the
-notify as well, so we can only re-read the index, instead of all the
-header metadata. Rereading the index after cache invalidation and wiring
-that up through qemu's bdrv_invalidate() would be even better.
-
-There's more to consider in implementing this wrt snapshots, but this
-email has gone on long enough.
-
-Josh
-
-[1] http://pad.ceph.com/p/cdsgiant-rbd-copy-on-read-for-clones
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
