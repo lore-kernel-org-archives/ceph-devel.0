@@ -1,195 +1,121 @@
-From: Karan Singh <karan.singh-Gn+qtVAUx6s@public.gmane.org>
-Subject: Re: Problem installing ceph from package manager /
-	ceph repositories
-Date: Tue, 10 Jun 2014 15:40:41 +0300
-Message-ID: <39BBDA4C-5558-4E0B-A1D3-58CE722B7542@csc.fi>
-References: <4849752F-2209-4D3F-B934-C670ADBB9CDC@csc.fi>
-	<4DC842D9-8254-4519-9034-1E76F0BF3C84@csc.fi>
-	<C108D0D0-F5F3-4E73-B12E-2196C8FD652B@cern.ch>
-	<CANtztVwCJx_=bR-mpct0i3j=xaMxreRJw0X9PF1CE7X07o-jgA@mail.gmail.com>
-Mime-Version: 1.0 (Mac OS X Mail 7.3 \(1878.2\))
-Content-Type: multipart/mixed; boundary="===============1741123086=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CANtztVwCJx_=bR-mpct0i3j=xaMxreRJw0X9PF1CE7X07o-jgA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Alfredo Deza <alfredo.deza-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>, Dan Van Der Ster <daniel.vanderster-vJEk5272eHo@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
-
-
---===============1741123086==
-Content-Type: multipart/alternative; boundary="Apple-Mail=_7D252F28-7AF1-4BB9-8655-DA325CE2DAD9"
-
-
---Apple-Mail=_7D252F28-7AF1-4BB9-8655-DA325CE2DAD9
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/plain;
-	charset=windows-1252
-
-Thanks Dan / Alfredo
-
-Yep priority=3D1  helped a little bit and yum-plugin-priority fixed all.
-
-- karan -
-
-On 10 Jun 2014, at 15:22, Alfredo Deza <alfredo.deza-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org> wrote:
-
-> On Tue, Jun 10, 2014 at 4:34 AM, Dan Van Der Ster
-> <daniel.vanderster-vJEk5272eHo@public.gmane.org> wrote:
->> Hi,
->>=20
->> On 10 Jun 2014, at 10:30, Karan Singh <karan.singh-Gn+qtVAUx6s@public.gmane.org> wrote:
->>=20
->> Hello Cephers
->>=20
->> First of all this problem is not related to ceph-deploy , ceph-deploy =
-1.5.4
->> works like charm :-) , thanks for Alfredo
->>=20
->> Problem :
->>=20
->> 1. When installing Ceph using package manger ( # yum install ceph  or =
- # yum
->> update cehp) that uses ceph repositories (cep.repo) , the package =
-manager
->> does not respect the ceph.repo file and takes ceph package directly =
-from
->> EPEL . But when i disable EPEL repo and again try to install ceph , =
-it takes
->> from ceph repo.  This is a new problem and earlier i have not faced =
-this ,
->> though i have done several ceph cluster installation with package =
-manager. I
->> don=92t want EPEL version of Ceph.
->>=20
->>=20
->> You probably need to tweak the repo priorities. We use priority=3D30 =
-for
->> epel.repo, priority=3D5 for ceph.repo.
->>=20
->=20
-> This is exactly what ceph-deploy is now doing. It is installing the
-> priorities plugin for yum
-> and then setting a very low number for ceph.repo (1 I believe)
->=20
-> This is explained in the last release announcement for ceph-deploy and
-> for more details
-> you can see this ticket:  http://tracker.ceph.com/issues/8533
->=20
->> Cheers, Dan
->>=20
->>=20
->> -- Dan van der Ster || Data & Storage Services || CERN IT Department =
---
->>=20
->>=20
->> 2. When i uninstall ceph , from system its repository file i.e. =
-ceph.repo is
->> getting removed . Is this normal , i have not seen this before.
->>=20
->>=20
->> Any one else facing the same problem or have solution to this.
->>=20
->>=20
->> Regards
->> Karan Singh
->> _______________________________________________
->> ceph-users mailing list
->> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
->> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
-
---Apple-Mail=_7D252F28-7AF1-4BB9-8655-DA325CE2DAD9
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/html;
-	charset=windows-1252
-
-<html><head><meta http-equiv=3D"Content-Type" content=3D"text/html =
-charset=3Dwindows-1252"></head><body style=3D"word-wrap: break-word; =
--webkit-nbsp-mode: space; -webkit-line-break: after-white-space;">Thanks =
-Dan / Alfredo<div><br></div><div>Yep priority=3D1 &nbsp;helped a little =
-bit and yum-plugin-priority fixed all.<div =
-apple-content-edited=3D"true"><div style=3D"color: rgb(0, 0, 0); =
-letter-spacing: normal; orphans: auto; text-align: start; text-indent: =
-0px; text-transform: none; white-space: normal; widows: auto; =
-word-spacing: 0px; -webkit-text-stroke-width: 0px; word-wrap: =
-break-word; -webkit-nbsp-mode: space; -webkit-line-break: =
-after-white-space;"><div style=3D"color: rgb(0, 0, 0); letter-spacing: =
-normal; orphans: auto; text-align: start; text-indent: 0px; =
-text-transform: none; white-space: normal; widows: auto; word-spacing: =
-0px; -webkit-text-stroke-width: 0px; word-wrap: break-word; =
--webkit-nbsp-mode: space; -webkit-line-break: after-white-space;"><div =
-style=3D"color: rgb(0, 0, 0); font-family: Helvetica; font-size: 12px; =
-font-style: normal; font-variant: normal; font-weight: normal; =
-letter-spacing: normal; line-height: normal; orphans: auto; text-align: =
-start; text-indent: 0px; text-transform: none; white-space: normal; =
-widows: auto; word-spacing: 0px; -webkit-text-stroke-width: 0px; =
-word-wrap: break-word; -webkit-nbsp-mode: space; -webkit-line-break: =
-after-white-space;"><br class=3D"Apple-interchange-newline">- karan =
--</div></div></div>
-</div>
-<br><div><div>On 10 Jun 2014, at 15:22, Alfredo Deza &lt;<a =
-href=3D"mailto:alfredo.deza-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org">alfredo.deza-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org</a>&gt; =
-wrote:</div><br class=3D"Apple-interchange-newline"><blockquote =
-type=3D"cite"><div style=3D"font-size: 12px; font-style: normal; =
-font-variant: normal; font-weight: normal; letter-spacing: normal; =
-line-height: normal; orphans: auto; text-align: start; text-indent: 0px; =
-text-transform: none; white-space: normal; widows: auto; word-spacing: =
-0px; -webkit-text-stroke-width: 0px;">On Tue, Jun 10, 2014 at 4:34 AM, =
-Dan Van Der Ster<br>&lt;<a =
-href=3D"mailto:daniel.vanderster-vJEk5272eHo@public.gmane.org">daniel.vanderster-vJEk5272eHo@public.gmane.org</a>&gt=
-; wrote:<br><blockquote type=3D"cite">Hi,<br><br>On 10 Jun 2014, at =
-10:30, Karan Singh &lt;<a =
-href=3D"mailto:karan.singh-Gn+qtVAUx6s@public.gmane.org">karan.singh-Gn+qtVAUx6s@public.gmane.org</a>&gt; =
-wrote:<br><br>Hello Cephers<br><br>First of all this problem is not =
-related to ceph-deploy , ceph-deploy 1.5.4<br>works like charm :-) , =
-thanks for Alfredo<br><br>Problem :<br><br>1. When installing Ceph using =
-package manger ( # yum install ceph &nbsp;or &nbsp;# yum<br>update cehp) =
-that uses ceph repositories (cep.repo) , the package manager<br>does not =
-respect the ceph.repo file and takes ceph package directly from<br>EPEL =
-. But when i disable EPEL repo and again try to install ceph , it =
-takes<br>from ceph repo. &nbsp;This is a new problem and earlier i have =
-not faced this ,<br>though i have done several ceph cluster installation =
-with package manager. I<br>don=92t want EPEL version of =
-Ceph.<br><br><br>You probably need to tweak the repo priorities. We use =
-priority=3D30 for<br>epel.repo, priority=3D5 for =
-ceph.repo.<br><br></blockquote><br>This is exactly what ceph-deploy is =
-now doing. It is installing the<br>priorities plugin for yum<br>and then =
-setting a very low number for ceph.repo (1 I believe)<br><br>This is =
-explained in the last release announcement for ceph-deploy and<br>for =
-more details<br>you can see this ticket: &nbsp;<a =
-href=3D"http://tracker.ceph.com/issues/8533">http://tracker.ceph.com/issue=
-s/8533</a><br><br><blockquote type=3D"cite">Cheers, Dan<br><br><br>-- =
-Dan van der Ster || Data &amp; Storage Services || CERN IT Department =
---<br><br><br>2. When i uninstall ceph , from system its repository file =
-i.e. ceph.repo is<br>getting removed . Is this normal , i have not seen =
-this before.<br><br><br>Any one else facing the same problem or have =
-solution to this.<br><br><br>Regards<br>Karan =
-Singh<br>_______________________________________________<br>ceph-users =
-mailing list<br><a =
-href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a><br=
->http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com</blockquote></div>=
-</blockquote></div><br></div></body></html>=
-
---Apple-Mail=_7D252F28-7AF1-4BB9-8655-DA325CE2DAD9--
-
---===============1741123086==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: [Feature]Proposal for adding a new flag named shared to support
+ performance and statistic purpose
+Date: Tue, 10 Jun 2014 12:38:01 -0700
+Message-ID: <20140610123801.72291cf6@sietchtabr>
+References: <CACJqLyZoxqN69NarVLsWZan7aULwbULUAFwmGC5D_jiVTc=uqg@mail.gmail.com>
+	<20140609181625.401b76d5@sietchtabr>
+	<CACJqLybz-aATGRKJ0_iSqEfHzRBaSWJRO_kyB9ic-yt2SGqYUg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail.hq.newdream.net ([66.33.206.127]:46117 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751998AbaFJTiS (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Jun 2014 15:38:18 -0400
+In-Reply-To: <CACJqLybz-aATGRKJ0_iSqEfHzRBaSWJRO_kyB9ic-yt2SGqYUg@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Haomai Wang <haomaiwang@gmail.com>
+Cc: Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+On Tue, 10 Jun 2014 14:52:54 +0800
+Haomai Wang <haomaiwang@gmail.com> wrote:
 
---===============1741123086==--
+> Thanks, Josh!
+> 
+> Your points are really helpful. Maybe we can schedule this bp to the
+> near CDS? The implementation I hope can has great performance effects
+> on librbd.
+
+It'd be great to discuss it more at CDS. Could you add a blueprint for
+it on the wiki:
+
+https://wiki.ceph.com/Planning/Blueprints/Submissions 
+
+Josh
+
+> On Tue, Jun 10, 2014 at 9:16 AM, Josh Durgin
+> <josh.durgin@inktank.com> wrote:
+> > On 06/05/2014 12:01 AM, Haomai Wang wrote:
+> >> Hi,
+> >> Previously I sent a mail about the difficult of rbd snapshot size
+> >> statistic. The main solution is using object map to store the
+> >> changes. The problem is we can't handle with multi client
+> >> concurrent modify.
+> >>
+> >> Lack of object map(like pointer map in qcow2), it cause many
+> >> problems in librbd. Such as clone depth, the deep clone depth will
+> >> cause remarkable latency. Usually each clone wrap will increase
+> >> two times of latency.
+> >>
+> >> I consider to make a tradeoff between multi-client support and
+> >> single-client support for librbd. In practice, most of the
+> >> volumes/images are used by VM, there only exist one client will
+> >> access/modify image. We can't only want to make shared image
+> >> possible but make most of use cases bad. So we can add a new flag
+> >> called "shared" when creating image. If "shared" is false, librbd
+> >> will maintain a object map for each image. The object map is
+> >> considered to durable, each image_close call will store the map
+> >> into rados. If the client  is crashed and failed to dump the
+> >> object map, the next client open the image will think the object
+> >> map as out of date and reset the objectmap.
+> >>
+> >> We can easily find the advantage of this feature:
+> >> 1. Avoid clone performance problem
+> >> 2. Make snapshot statistic possible
+> >> 3. Improve librbd operation performance including read,
+> >> copy-on-write operation.
+> >>
+> >> What do you think above? More feedbacks are appreciate!
+> >
+> > I think it's a great idea! We discussed this a little at the last
+> > cds [1]. I like the idea of the shared flag on an image. Since the
+> > vastly more common case is single-client, I'd go further and
+> > suggest that we treat images as if shared is false by default if
+> > the flag is not present (perhaps with a config option to change
+> > this default behavior).
+> >
+> > That way existing images can benefit from the feature without extra
+> > configuration. There can be an rbd command to toggle the shared
+> > flag as well, so users of ocfs2 or gfs2 or other
+> > multi-client-writing systems can upgrade and set shared to true
+> > before restarting their clients.
+> >
+> > Another thing to consider is the granularity of the object map. The
+> > coarse granularity of a bitmap of object existence would be
+> > simplest, and most useful for in-memory comparison for clones. For
+> > statistics it might be desirable in the future to have a
+> > finer-grained index of data existence in the image. To make that
+> > easy to handle, the on-disk format could be a list of extents (byte
+> > ranges).
+> >
+> > Another potential use case would be a mode in which the index is
+> > treated as authoritative. This could make discard very fast, for
+> > example. I'm not sure it could be done safely with only binary
+> > 'exists/does not exist' information though - a third 'unknown' state
+> > might be needed for some cases. If this kind of index is actually
+> > useful (I'm not sure there are cases where the performance penalty
+> > would be worth it), we could add a new index format if we need it.
+> >
+> > Back to the currently proposed design, to be safe with live
+> > migration we'd need to make sure the index is consistent in the
+> > destination process. Using rados_notify() after we set the clean
+> > flag on the index can make the destination vm re-read the index
+> > before any I/O happens. This might be a good time to introduce a
+> > data payload to the notify as well, so we can only re-read the
+> > index, instead of all the header metadata. Rereading the index
+> > after cache invalidation and wiring that up through qemu's
+> > bdrv_invalidate() would be even better.
+> >
+> > There's more to consider in implementing this wrt snapshots, but
+> > this email has gone on long enough.
+> >
+> > Josh
+> >
+> > [1] http://pad.ceph.com/p/cdsgiant-rbd-copy-on-read-for-clones
+> 
+> 
+> 
+
