@@ -1,110 +1,109 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Re: [Feature]Proposal for adding a new flag named shared to support
- performance and statistic purpose
-Date: Tue, 10 Jun 2014 14:52:54 +0800
-Message-ID: <CACJqLybz-aATGRKJ0_iSqEfHzRBaSWJRO_kyB9ic-yt2SGqYUg@mail.gmail.com>
-References: <CACJqLyZoxqN69NarVLsWZan7aULwbULUAFwmGC5D_jiVTc=uqg@mail.gmail.com>
-	<20140609181625.401b76d5@sietchtabr>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f180.google.com ([209.85.212.180]:57594 "EHLO
-	mail-wi0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755030AbaFJGw4 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Jun 2014 02:52:56 -0400
-Received: by mail-wi0-f180.google.com with SMTP id hi2so3246336wib.1
-        for <ceph-devel@vger.kernel.org>; Mon, 09 Jun 2014 23:52:55 -0700 (PDT)
-In-Reply-To: <20140609181625.401b76d5@sietchtabr>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>
-Cc: Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-
-Thanks, Josh!
-
-Your points are really helpful. Maybe we can schedule this bp to the
-near CDS? The implementation I hope can has great performance effects
-on librbd.
+From: Karan Singh <karan.singh-Gn+qtVAUx6s@public.gmane.org>
+Subject: Problem installing ceph from package manager / ceph
+	repositories
+Date: Tue, 10 Jun 2014 11:30:28 +0300
+Message-ID: <4DC842D9-8254-4519-9034-1E76F0BF3C84@csc.fi>
+References: <4849752F-2209-4D3F-B934-C670ADBB9CDC@csc.fi>
+Mime-Version: 1.0 (Mac OS X Mail 7.3 \(1878.2\))
+Content-Type: multipart/mixed; boundary="===============0863960586=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Ceph Community <ceph-community-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Alfredo Deza <alfredo.deza-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
 
-
-On Tue, Jun 10, 2014 at 9:16 AM, Josh Durgin <josh.durgin@inktank.com> wrote:
-> On 06/05/2014 12:01 AM, Haomai Wang wrote:
->> Hi,
->> Previously I sent a mail about the difficult of rbd snapshot size
->> statistic. The main solution is using object map to store the changes.
->> The problem is we can't handle with multi client concurrent modify.
->>
->> Lack of object map(like pointer map in qcow2), it cause many problems
->> in librbd. Such as clone depth, the deep clone depth will cause
->> remarkable latency. Usually each clone wrap will increase two times of
->> latency.
->>
->> I consider to make a tradeoff between multi-client support and
->> single-client support for librbd. In practice, most of the
->> volumes/images are used by VM, there only exist one client will
->> access/modify image. We can't only want to make shared image possible
->> but make most of use cases bad. So we can add a new flag called
->> "shared" when creating image. If "shared" is false, librbd will
->> maintain a object map for each image. The object map is considered to
->> durable, each image_close call will store the map into rados. If the
->> client  is crashed and failed to dump the object map, the next client
->> open the image will think the object map as out of date and reset the
->> objectmap.
->>
->> We can easily find the advantage of this feature:
->> 1. Avoid clone performance problem
->> 2. Make snapshot statistic possible
->> 3. Improve librbd operation performance including read, copy-on-write
->> operation.
->>
->> What do you think above? More feedbacks are appreciate!
->
-> I think it's a great idea! We discussed this a little at the last cds
-> [1]. I like the idea of the shared flag on an image. Since the vastly
-> more common case is single-client, I'd go further and suggest that
-> we treat images as if shared is false by default if the flag is not
-> present (perhaps with a config option to change this default behavior).
->
-> That way existing images can benefit from the feature without extra
-> configuration. There can be an rbd command to toggle the shared flag as
-> well, so users of ocfs2 or gfs2 or other multi-client-writing systems
-> can upgrade and set shared to true before restarting their clients.
->
-> Another thing to consider is the granularity of the object map. The
-> coarse granularity of a bitmap of object existence would be simplest,
-> and most useful for in-memory comparison for clones. For statistics
-> it might be desirable in the future to have a finer-grained index of
-> data existence in the image. To make that easy to handle, the on-disk
-> format could be a list of extents (byte ranges).
->
-> Another potential use case would be a mode in which the index is
-> treated as authoritative. This could make discard very fast, for
-> example. I'm not sure it could be done safely with only binary
-> 'exists/does not exist' information though - a third 'unknown' state
-> might be needed for some cases. If this kind of index is actually useful
-> (I'm not sure there are cases where the performance penalty would be
-> worth it), we could add a new index format if we need it.
->
-> Back to the currently proposed design, to be safe with live migration
-> we'd need to make sure the index is consistent in the destination
-> process. Using rados_notify() after we set the clean flag on the index
-> can make the destination vm re-read the index before any I/O
-> happens. This might be a good time to introduce a data payload to the
-> notify as well, so we can only re-read the index, instead of all the
-> header metadata. Rereading the index after cache invalidation and wiring
-> that up through qemu's bdrv_invalidate() would be even better.
->
-> There's more to consider in implementing this wrt snapshots, but this
-> email has gone on long enough.
->
-> Josh
->
-> [1] http://pad.ceph.com/p/cdsgiant-rbd-copy-on-read-for-clones
+--===============0863960586==
+Content-Type: multipart/alternative; boundary="Apple-Mail=_254EA45A-8F65-402C-A183-102DC1DC98D8"
 
 
+--Apple-Mail=_254EA45A-8F65-402C-A183-102DC1DC98D8
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain;
+	charset=windows-1252
 
--- 
-Best Regards,
+Hello Cephers
 
-Wheat
+First of all this problem is not related to ceph-deploy , ceph-deploy =
+1.5.4 works like charm :-) , thanks for Alfredo=20
+
+Problem : =20
+
+1. When installing Ceph using package manger ( # yum install ceph  or  # =
+yum update cehp) that uses ceph repositories (cep.repo) , the package =
+manager does not respect the ceph.repo file and takes ceph package =
+directly from EPEL . But when i disable EPEL repo and again try to =
+install ceph , it takes from ceph repo.  This is a new problem and =
+earlier i have not faced this , though i have done several ceph cluster =
+installation with package manager. I don=92t want EPEL version of Ceph.
+
+2. When i uninstall ceph , from system its repository file i.e. =
+ceph.repo is getting removed . Is this normal , i have not seen this =
+before.
+
+
+Any one else facing the same problem or have solution to this.
+
+
+Regards
+Karan Singh=
+
+--Apple-Mail=_254EA45A-8F65-402C-A183-102DC1DC98D8
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/html;
+	charset=windows-1252
+
+<html><head><meta http-equiv=3D"Content-Type" content=3D"text/html =
+charset=3Dwindows-1252"></head><body style=3D"word-wrap: break-word; =
+-webkit-nbsp-mode: space; -webkit-line-break: =
+after-white-space;"><blockquote style=3D"margin: 0 0 0 40px; border: =
+none; padding: 0px;"></blockquote><blockquote style=3D"margin: 0 0 0 =
+40px; border: none; padding: 0px;"></blockquote><span style=3D"font-size: =
+large;">Hello Cephers</span><font size=3D"4"><br></font><font =
+size=3D"4"><br></font><span style=3D"font-size: large;">First of all =
+this problem is not related to ceph-deploy , ceph-deploy 1.5.4 works =
+like charm :-) , thanks for Alfredo&nbsp;</span><br><font =
+size=3D"4"><br></font><span style=3D"font-size: large;">Problem : =
+&nbsp;</span><br><font size=3D"4"><br>1. When installing Ceph using =
+package manger ( # yum install ceph &nbsp;or &nbsp;# yum update cehp) =
+that uses ceph&nbsp;repositories (cep.repo) , the package manager does =
+not respect the ceph.repo file and takes ceph package directly from EPEL =
+.&nbsp;But when i disable EPEL repo and again try to install ceph , it =
+takes from ceph repo. &nbsp;This is a new problem and earlier =
+i&nbsp;have not faced this , though i have done several ceph cluster =
+installation with package manager. I&nbsp;don=92t want EPEL version of =
+Ceph.<br></font><font size=3D"4"><br></font><span style=3D"font-size: =
+large;">2. When i uninstall ceph , from system its repository file i.e. =
+ceph.repo is getting removed . Is this normal , i have not seen this =
+before.</span><br><font size=3D"4"><br><br></font><span =
+style=3D"font-size: large;">Any one&nbsp;else facing the same problem or =
+have solution to this.</span><div><font size=3D"4"><br><br></font><span =
+style=3D"font-size: large;">Regards</span><br><font size=3D"4"><div><div =
+style=3D"word-wrap: break-word; -webkit-nbsp-mode: space; =
+-webkit-line-break: after-white-space;"><div><div style=3D"word-wrap: =
+break-word; -webkit-nbsp-mode: space; -webkit-line-break: =
+after-white-space;"><div apple-content-edited=3D"true"><font =
+size=3D"4">Karan =
+Singh</font></div></div></div></div></div></font></div></body></html>=
+
+--Apple-Mail=_254EA45A-8F65-402C-A183-102DC1DC98D8--
+
+--===============0863960586==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============0863960586==--
