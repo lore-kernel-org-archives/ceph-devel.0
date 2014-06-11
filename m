@@ -1,54 +1,72 @@
-From: Guang Yang <yguang11@outlook.com>
-Subject: Re: Changes of scrubbing?
-Date: Wed, 11 Jun 2014 15:54:08 +0800
-Message-ID: <BLU436-SMTP200935F4900B0A29C32286DDF2B0@phx.gbl>
-References: <BLU436-SMTP155ED6E6FBB4FD0E72FC5CDF3C0@phx.gbl> <CAPYLRziTJKy4DQTASRwDZa2P5cy9qc4Zj7VM2P2QbrntFpKudg@mail.gmail.com>
-Mime-Version: 1.0 (Mac OS X Mail 7.3 \(1878.2\))
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+From: <ghislain.chevalier@orange.com>
+Subject: [Ceph] Managing crushmap
+Date: Wed, 11 Jun 2014 09:17:20 +0000
+Message-ID: <31473_1402478241_53981EA1_31473_30_1_B9C8EFBF13B1354DB5FA000660D66DD00C122930@PEXCVZYM14.corporate.adroot.infra.ftgroup>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from blu004-omc4s3.hotmail.com ([65.55.111.142]:49521 "EHLO
-	BLU004-OMC4S3.hotmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754117AbaFKHyQ convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Jun 2014 03:54:16 -0400
-In-Reply-To: <CAPYLRziTJKy4DQTASRwDZa2P5cy9qc4Zj7VM2P2QbrntFpKudg@mail.gmail.com>
+Received: from relais-ias91.francetelecom.com ([193.251.215.91]:30168 "EHLO
+	relais-inet.francetelecom.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751208AbaFKJYV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 11 Jun 2014 05:24:21 -0400
+Received: from omfedm06.si.francetelecom.fr (unknown [xx.xx.xx.2])
+	by omfedm09.si.francetelecom.fr (ESMTP service) with ESMTP id F16542DC47E
+	for <ceph-devel@vger.kernel.org>; Wed, 11 Jun 2014 11:17:21 +0200 (CEST)
+Received: from Exchangemail-eme1.itn.ftgroup (unknown [10.114.1.183])
+	by omfedm06.si.francetelecom.fr (ESMTP service) with ESMTP id DB18D27C053
+	for <ceph-devel@vger.kernel.org>; Wed, 11 Jun 2014 11:17:21 +0200 (CEST)
+Content-Language: fr-FR
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: Ceph-devel <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Jun 11, 2014, at 6:33 AM, Gregory Farnum <greg@inktank.com> wrote:
-
-> On Tue, May 20, 2014 at 6:44 PM, Guang Yang <yguang11@outlook.com> wrote:
->> Hi ceph-devel,
->> Like some users of Ceph, we are using Ceph for a latency sensitive project, and scrubbing (especially deep-scrubbing) impacts the SLA in a non-trivial way, as commodity hardware could fail in one way or the other, I think it is essential to have scrubbing enabled to preserve data durability.
->> 
->> Inspired by how erasure coding backend implement scrubbing[1], I am wondering if the following changes is valid to somehow reduce the performance impact from scrubbing:
->> 1. Store the CRC checksum along with each physical copy of the object on filesystem (via xattr or omap?)
->> 2. For read request, it checks the CRC locally and if it mismatch, redirect the request to a replica and mark the PG as inconsistent.
-> 
-> The problem with this is that you need to maintain the CRC across
-> partial overwrites of the object. And the real cost of scrubbing isn't
-> in the network traffic, it's in the disk reads, which you would have
-> to do anyway with this method. :)
-Thanks Greg for the response!
-Partial update is the right concern if that happens frequently. However, the major benefit of this proposal is to postpone the CRC check to READ request instead of doing it from within a background job (although we may still need to do background check as deep-scrubbing, we can reduce the frequency dramatically). By checking the CRC at read time, in-consistent object are marked as inconsistent (PG) and further we can trigger a repair for the PG.
-> -Greg
-> Software Engineer #42 @ http://inktank.com | http://ceph.com
-> 
->> 
->> This is just a general idea and details (like append) will need to further discussed.
->> 
->> By having such, we can schedule the scrubbing less aggresively but still preserve the durability for read.
->> 
->> Does this make some sense?
->> 
->> [1] http://ceph.com/docs/master/dev/osd_internals/erasure_coding/pgbackend/
->> 
->> Thanks,
->> Guang Yang--
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-
+SGkgYWxsLA0KDQpDb250ZXh0IDoNCkxhYiBQbGF0Zm9ybQ0KQ2VwaCBkdW1wbGluZyBhbmQgZmly
+ZWZseSANClVidW50dSAxMi4wNCBMVFMNCg0KSSBlbmNvdW50ZXJlZCBhIHN0cmFuZ2UgYmVoYXZp
+b3IgbWFuYWdpbmcgdGhlIGNydXNobWFwIG9uIGEgZHVtcGxpbmcgYW5kIGEgZmlyZWZseSBjZXBo
+IHBsYXRmb3JtLg0KDQpJIGJ1aWx0IGEgY3J1c2htYXAsIGFkZGluZyAyIHNwZWNpZmljIHJ1bGVz
+IChmYXN0cnVsZSBhbmQgc2xvd3J1bGUpIGluIG9yZGVyIHRvIGV4cGVyaW1lbnQgdGllcmluZy4N
+CkkgdXNlZCAiY2VwaCBvc2QgZ2V0fHNldGNydXNobWFwIiBhbmQgY3J1c2h0b29sIHRvIGV4dHJh
+Y3QgYW5kIGluZ2VzdCB0aGUgdXBkYXRlZCBjcnVzaG1hcCBpbiB0aGUgc3lzdGVtLg0KSSBoYXZl
+IHRvIHByZWNpc2UgdGhhdCBJIHJlc3BlY3RpdmVseSBhc3NvY2lhdGVkIDUwIGFuZCA1MSBhcyBy
+dWxlc2V0IG51bWJlcnMgZm9yIHRoZSAyIG5ldyBydWxlcy4NClRoZSBpbmdlc3Rpb24gd2FzIGdv
+b2Q7IEkgY2hlY2tlZCBpdCBieSAiY2VwaCBvc2QgY3J1c2ggcnVsZSBkdW1wIg0KDQpJIGNyZWF0
+ZWQgMiBwb29scyAoZmFzdHBvb2wgYW5kIHNsb3dwb29sKQ0KQXMgaW5kaWNhdGVkIGluIHRoZSBk
+b2MsIEkgdHJpZWQgdG8gYXNzb2NpYXRlIGZhc3Rwb29sIHRvIHJ1bGVzZXQgNTAgYnkgImNlcGgg
+b3NkIHBvb2wgc2V0IGZhc3Rwb29sIGNydXNoX3J1bGVzZXQgNTAiDQphbiBlcnJvciBvY2N1cnJl
+ZCA6IHJ1bGUgNTAgZG9lc24ndCBleGlzdA0KQXMgdGhlIHJ1bGVfaWQgb2YgZmFzdHJ1bGUgaXMg
+NCwgSSBkaWQgImNlcGggb3NkIHBvb2wgc2V0IGZhc3Rwb29sIGNydXNoX3J1bGVzZXQgNCIgYW5k
+IGl0IHdvcmtzIGJ1dCBpdCdzIG5vdCBhIGNvcnJlY3QgYmVoYXZpb3IuDQpJZiBhIGNlcGggYWRt
+aW4gd2FudHMgdG8gbWFuYWdlIHRoZSBjcnVzaG1hcCwgaGUgZG9lc24ndCBoYXZlIHRvIGNoZWNr
+IHRoZSBydWxlX2lkICh0aGF0IGhlIGNhbm5vdCBzZXQpIGJlZm9yZSB1cGRhdGluZyB0aGUgYXR0
+cmlidXRlIGNydXNoX3J1bGVzZXQgb2YgcG9vbHMuDQpUaGUgd2F5IHRvIG1hbmFnZSB0aGUgcnVs
+ZXMgaWYgdGhlIHJ1bGVzZXQgbm90IHRoZSBydWxlX2lkLg0KDQpJIGFsc28gdGVzdGVkIHRoYXQg
+cmVpbmdlc3RpbmcgYSBjcnVzaG1hcCAoYWZ0ZXIgZm9yIGV4YW1wbGUgY2hhbmdpbmcgdGhlIHNl
+cXVlbmNlIG9mIHRoZSBydWxlcyBpbiB0aGUgZGVjb21waWxlZCBmaWxlKSBjYXVzZXMgYSBnbG9i
+YWwgdXBkYXRlIG9mIHRoZSBydWxlX2lkcy4NCkkgY2FuJ3QgaW1hZ2luZSB0aGUgaW1wYWN0cyBv
+biBhIHBsYXRmb3JtLg0KDQpEaWQgc29tZW9uZSBlbmNvdW50ZXIgdGhpcyBiZWhhdmlvcj8NCkRp
+ZCBJIG1pc3VuZGVyc3RhbmQgaG93IHRvIGNvbmZpZ3VyZSBhIGNydXNobWFwPw0KDQpCZXN0IHJl
+Z2FyZHMNCg0KDQoNCg0KDQotIC0gLSAtIC0gLSAtIC0gLSAtIC0gLSAtIC0gLSAtIC0gDQpHaGlz
+bGFpbiBDaGV2YWxpZXINCk9SQU5HRS9PTE5DL09MUFMvQVNFL0RBUEkvQ1NFDQpBcmNoaXRlY3Rl
+IGRlIHNlcnZpY2VzIGRlIHN0b2NrYWdlDQpTdG9yYWdlIFNlcnZpY2UgQXJjaGl0ZWN0DQogKzMz
+Mjk5MTI0NDMyDQpnaGlzbGFpbi5jaGV2YWxpZXJAb3JhbmdlLmNvbSANCu+BkMKgUGVuc2V6IMOg
+IGwnRW52aXJvbm5lbWVudCBhdmFudCBkJ2ltcHJpbWVyIGNlIG1lc3NhZ2UgISANCg0KCl9fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X18KCkNlIG1lc3NhZ2UgZXQgc2VzIHBpZWNlcyBqb2ludGVzIHBldXZlbnQgY29udGVuaXIgZGVz
+IGluZm9ybWF0aW9ucyBjb25maWRlbnRpZWxsZXMgb3UgcHJpdmlsZWdpZWVzIGV0IG5lIGRvaXZl
+bnQgZG9uYwpwYXMgZXRyZSBkaWZmdXNlcywgZXhwbG9pdGVzIG91IGNvcGllcyBzYW5zIGF1dG9y
+aXNhdGlvbi4gU2kgdm91cyBhdmV6IHJlY3UgY2UgbWVzc2FnZSBwYXIgZXJyZXVyLCB2ZXVpbGxl
+eiBsZSBzaWduYWxlcgphIGwnZXhwZWRpdGV1ciBldCBsZSBkZXRydWlyZSBhaW5zaSBxdWUgbGVz
+IHBpZWNlcyBqb2ludGVzLiBMZXMgbWVzc2FnZXMgZWxlY3Ryb25pcXVlcyBldGFudCBzdXNjZXB0
+aWJsZXMgZCdhbHRlcmF0aW9uLApPcmFuZ2UgZGVjbGluZSB0b3V0ZSByZXNwb25zYWJpbGl0ZSBz
+aSBjZSBtZXNzYWdlIGEgZXRlIGFsdGVyZSwgZGVmb3JtZSBvdSBmYWxzaWZpZS4gTWVyY2kuCgpU
+aGlzIG1lc3NhZ2UgYW5kIGl0cyBhdHRhY2htZW50cyBtYXkgY29udGFpbiBjb25maWRlbnRpYWwg
+b3IgcHJpdmlsZWdlZCBpbmZvcm1hdGlvbiB0aGF0IG1heSBiZSBwcm90ZWN0ZWQgYnkgbGF3Owp0
+aGV5IHNob3VsZCBub3QgYmUgZGlzdHJpYnV0ZWQsIHVzZWQgb3IgY29waWVkIHdpdGhvdXQgYXV0
+aG9yaXNhdGlvbi4KSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBlbWFpbCBpbiBlcnJvciwgcGxl
+YXNlIG5vdGlmeSB0aGUgc2VuZGVyIGFuZCBkZWxldGUgdGhpcyBtZXNzYWdlIGFuZCBpdHMgYXR0
+YWNobWVudHMuCkFzIGVtYWlscyBtYXkgYmUgYWx0ZXJlZCwgT3JhbmdlIGlzIG5vdCBsaWFibGUg
+Zm9yIG1lc3NhZ2VzIHRoYXQgaGF2ZSBiZWVuIG1vZGlmaWVkLCBjaGFuZ2VkIG9yIGZhbHNpZmll
+ZC4KVGhhbmsgeW91LgoK
