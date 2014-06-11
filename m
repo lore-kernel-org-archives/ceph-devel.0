@@ -1,80 +1,135 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [ceph-users] Fwd: CEPH Multitenancy and Data Isolation
-Date: Tue, 10 Jun 2014 16:30:39 -0700
-Message-ID: <5397951F.1000009@inktank.com>
-References: <CFBB8E65.E806%vilobhmm@yahoo-inc.com> <AE4D7541-2202-4A06-BBC6-DADEC88AE89D@yahoo-inc.com>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: [Feature]Proposal for adding a new flag named shared to support
+ performance and statistic purpose
+Date: Tue, 10 Jun 2014 21:01:31 -0700
+Message-ID: <CAPYLRzjphq14tYf5+fb7fQOaPVUNaEko4O7VNV7ryMcuLtxjew@mail.gmail.com>
+References: <CACJqLyZoxqN69NarVLsWZan7aULwbULUAFwmGC5D_jiVTc=uqg@mail.gmail.com>
+	<20140609181625.401b76d5@sietchtabr>
+	<CACJqLybz-aATGRKJ0_iSqEfHzRBaSWJRO_kyB9ic-yt2SGqYUg@mail.gmail.com>
+	<20140610123801.72291cf6@sietchtabr>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f179.google.com ([209.85.216.179]:52441 "EHLO
-	mail-qc0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752087AbaFJXa7 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Jun 2014 19:30:59 -0400
-Received: by mail-qc0-f179.google.com with SMTP id r5so3395031qcx.10
-        for <ceph-devel@vger.kernel.org>; Tue, 10 Jun 2014 16:30:59 -0700 (PDT)
-In-Reply-To: <AE4D7541-2202-4A06-BBC6-DADEC88AE89D@yahoo-inc.com>
+Received: from mail-qc0-f170.google.com ([209.85.216.170]:46402 "EHLO
+	mail-qc0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750713AbaFKEBc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Jun 2014 00:01:32 -0400
+Received: by mail-qc0-f170.google.com with SMTP id l6so3734413qcy.29
+        for <ceph-devel@vger.kernel.org>; Tue, 10 Jun 2014 21:01:31 -0700 (PDT)
+In-Reply-To: <20140610123801.72291cf6@sietchtabr>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Vilobh Meshram <vilobhmm@yahoo-inc.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-Cc: "ceph-users@ceph.com" <ceph-users@ceph.com>
+To: Josh Durgin <josh.durgin@inktank.com>, Haomai Wang <haomaiwang@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 06/10/2014 01:56 AM, Vilobh Meshram wrote:
->> How does CEPH guarantee data isolation for volumes which are not mea=
-nt
->> to be shared in a Openstack tenant?
+We discussed a great deal of this during the initial format 2 work as
+well, when we were thinking about having bitmaps of allocated space.
+(Although we also have interval sets which might be a better fit?) I
+think there was more thought behind it than is in the copy-on-read
+blueprint; do you know if we have it written down anywhere, Josh?
+-Greg
+
+On Tue, Jun 10, 2014 at 12:38 PM, Josh Durgin <josh.durgin@inktank.com> wrote:
+> On Tue, 10 Jun 2014 14:52:54 +0800
+> Haomai Wang <haomaiwang@gmail.com> wrote:
+>
+>> Thanks, Josh!
 >>
->> When used with OpenStack the data isolation is provided by the
->> Openstack level so that all users who are part of same tenant will b=
-e
->> able to access/share the volumes created by users in that tenant.
->> Consider a case where we have one pool named =93Volumes=94 for all t=
-he
->> tenants. All the tenants use the same keyring to access the volumes =
-in
->> the pool.
+>> Your points are really helpful. Maybe we can schedule this bp to the
+>> near CDS? The implementation I hope can has great performance effects
+>> on librbd.
+>
+> It'd be great to discuss it more at CDS. Could you add a blueprint for
+> it on the wiki:
+>
+> https://wiki.ceph.com/Planning/Blueprints/Submissions
+>
+> Josh
+>
+>> On Tue, Jun 10, 2014 at 9:16 AM, Josh Durgin
+>> <josh.durgin@inktank.com> wrote:
+>> > On 06/05/2014 12:01 AM, Haomai Wang wrote:
+>> >> Hi,
+>> >> Previously I sent a mail about the difficult of rbd snapshot size
+>> >> statistic. The main solution is using object map to store the
+>> >> changes. The problem is we can't handle with multi client
+>> >> concurrent modify.
+>> >>
+>> >> Lack of object map(like pointer map in qcow2), it cause many
+>> >> problems in librbd. Such as clone depth, the deep clone depth will
+>> >> cause remarkable latency. Usually each clone wrap will increase
+>> >> two times of latency.
+>> >>
+>> >> I consider to make a tradeoff between multi-client support and
+>> >> single-client support for librbd. In practice, most of the
+>> >> volumes/images are used by VM, there only exist one client will
+>> >> access/modify image. We can't only want to make shared image
+>> >> possible but make most of use cases bad. So we can add a new flag
+>> >> called "shared" when creating image. If "shared" is false, librbd
+>> >> will maintain a object map for each image. The object map is
+>> >> considered to durable, each image_close call will store the map
+>> >> into rados. If the client  is crashed and failed to dump the
+>> >> object map, the next client open the image will think the object
+>> >> map as out of date and reset the objectmap.
+>> >>
+>> >> We can easily find the advantage of this feature:
+>> >> 1. Avoid clone performance problem
+>> >> 2. Make snapshot statistic possible
+>> >> 3. Improve librbd operation performance including read,
+>> >> copy-on-write operation.
+>> >>
+>> >> What do you think above? More feedbacks are appreciate!
+>> >
+>> > I think it's a great idea! We discussed this a little at the last
+>> > cds [1]. I like the idea of the shared flag on an image. Since the
+>> > vastly more common case is single-client, I'd go further and
+>> > suggest that we treat images as if shared is false by default if
+>> > the flag is not present (perhaps with a config option to change
+>> > this default behavior).
+>> >
+>> > That way existing images can benefit from the feature without extra
+>> > configuration. There can be an rbd command to toggle the shared
+>> > flag as well, so users of ocfs2 or gfs2 or other
+>> > multi-client-writing systems can upgrade and set shared to true
+>> > before restarting their clients.
+>> >
+>> > Another thing to consider is the granularity of the object map. The
+>> > coarse granularity of a bitmap of object existence would be
+>> > simplest, and most useful for in-memory comparison for clones. For
+>> > statistics it might be desirable in the future to have a
+>> > finer-grained index of data existence in the image. To make that
+>> > easy to handle, the on-disk format could be a list of extents (byte
+>> > ranges).
+>> >
+>> > Another potential use case would be a mode in which the index is
+>> > treated as authoritative. This could make discard very fast, for
+>> > example. I'm not sure it could be done safely with only binary
+>> > 'exists/does not exist' information though - a third 'unknown' state
+>> > might be needed for some cases. If this kind of index is actually
+>> > useful (I'm not sure there are cases where the performance penalty
+>> > would be worth it), we could add a new index format if we need it.
+>> >
+>> > Back to the currently proposed design, to be safe with live
+>> > migration we'd need to make sure the index is consistent in the
+>> > destination process. Using rados_notify() after we set the clean
+>> > flag on the index can make the destination vm re-read the index
+>> > before any I/O happens. This might be a good time to introduce a
+>> > data payload to the notify as well, so we can only re-read the
+>> > index, instead of all the header metadata. Rereading the index
+>> > after cache invalidation and wiring that up through qemu's
+>> > bdrv_invalidate() would be even better.
+>> >
+>> > There's more to consider in implementing this wrt snapshots, but
+>> > this email has gone on long enough.
+>> >
+>> > Josh
+>> >
+>> > [1] http://pad.ceph.com/p/cdsgiant-rbd-copy-on-read-for-clones
 >>
->>  1. How do we guarantee that one user can=92t see the contents of th=
-e
->>     volumes created by another user; if the volume is not meant to b=
-e
->>     shared.
-
-OpenStack users or tenants have no access to the keyring. Cinder tracks
-volume ownership and checks permissions when a volume is attached, and
-qemu prevents users from seeing anything outside of their vm, including=
-=20
-the keyring.
-
->>  2. If someone malicious user gets the access to the keyring (which =
-we
->>     used as a authentication mechanism between the client/Openstack
->>     and CEPH) how does CEPH guarantee that the malicious user can=92=
-t
->>     access the volumes in that pool.
-
-The keyring gives a user access to the cluster. If someone has a valid=20
-keyring, Ceph treats them as a valid user, since there is no informatio=
-n
-to say otherwise. Ceph can't tell whether the user of a keyring is
-malicious.
-
->>  3. Lets say our Cinder services are running on the Openstack API
->>     node. How does the CEPH keyring information gets transferred fro=
-m
->>     the API node to the Hypervisor node ? Does this keyring passed
->>     through message queue? If yes can the malicious user have a look
->>     at the message queue and grab this keyring information ? If not
->>     then how does it reach from the API node to the Hypervisor node.
-
-The keyring is static and configured by the administrator on the nodes
-running cinder-volume and nova-compute. It's not sent over the network,
-and is not needed by nova or cinder api nodes.
-
-Josh
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
