@@ -1,135 +1,54 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: [Feature]Proposal for adding a new flag named shared to support
- performance and statistic purpose
-Date: Tue, 10 Jun 2014 21:01:31 -0700
-Message-ID: <CAPYLRzjphq14tYf5+fb7fQOaPVUNaEko4O7VNV7ryMcuLtxjew@mail.gmail.com>
-References: <CACJqLyZoxqN69NarVLsWZan7aULwbULUAFwmGC5D_jiVTc=uqg@mail.gmail.com>
-	<20140609181625.401b76d5@sietchtabr>
-	<CACJqLybz-aATGRKJ0_iSqEfHzRBaSWJRO_kyB9ic-yt2SGqYUg@mail.gmail.com>
-	<20140610123801.72291cf6@sietchtabr>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Guang Yang <yguang11@outlook.com>
+Subject: Re: Changes of scrubbing?
+Date: Wed, 11 Jun 2014 15:54:08 +0800
+Message-ID: <BLU436-SMTP200935F4900B0A29C32286DDF2B0@phx.gbl>
+References: <BLU436-SMTP155ED6E6FBB4FD0E72FC5CDF3C0@phx.gbl> <CAPYLRziTJKy4DQTASRwDZa2P5cy9qc4Zj7VM2P2QbrntFpKudg@mail.gmail.com>
+Mime-Version: 1.0 (Mac OS X Mail 7.3 \(1878.2\))
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f170.google.com ([209.85.216.170]:46402 "EHLO
-	mail-qc0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750713AbaFKEBc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Jun 2014 00:01:32 -0400
-Received: by mail-qc0-f170.google.com with SMTP id l6so3734413qcy.29
-        for <ceph-devel@vger.kernel.org>; Tue, 10 Jun 2014 21:01:31 -0700 (PDT)
-In-Reply-To: <20140610123801.72291cf6@sietchtabr>
+Received: from blu004-omc4s3.hotmail.com ([65.55.111.142]:49521 "EHLO
+	BLU004-OMC4S3.hotmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754117AbaFKHyQ convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Jun 2014 03:54:16 -0400
+In-Reply-To: <CAPYLRziTJKy4DQTASRwDZa2P5cy9qc4Zj7VM2P2QbrntFpKudg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>, Haomai Wang <haomaiwang@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <greg@inktank.com>
+Cc: Ceph-devel <ceph-devel@vger.kernel.org>
 
-We discussed a great deal of this during the initial format 2 work as
-well, when we were thinking about having bitmaps of allocated space.
-(Although we also have interval sets which might be a better fit?) I
-think there was more thought behind it than is in the copy-on-read
-blueprint; do you know if we have it written down anywhere, Josh?
--Greg
+On Jun 11, 2014, at 6:33 AM, Gregory Farnum <greg@inktank.com> wrote:
 
-On Tue, Jun 10, 2014 at 12:38 PM, Josh Durgin <josh.durgin@inktank.com> wrote:
-> On Tue, 10 Jun 2014 14:52:54 +0800
-> Haomai Wang <haomaiwang@gmail.com> wrote:
->
->> Thanks, Josh!
->>
->> Your points are really helpful. Maybe we can schedule this bp to the
->> near CDS? The implementation I hope can has great performance effects
->> on librbd.
->
-> It'd be great to discuss it more at CDS. Could you add a blueprint for
-> it on the wiki:
->
-> https://wiki.ceph.com/Planning/Blueprints/Submissions
->
-> Josh
->
->> On Tue, Jun 10, 2014 at 9:16 AM, Josh Durgin
->> <josh.durgin@inktank.com> wrote:
->> > On 06/05/2014 12:01 AM, Haomai Wang wrote:
->> >> Hi,
->> >> Previously I sent a mail about the difficult of rbd snapshot size
->> >> statistic. The main solution is using object map to store the
->> >> changes. The problem is we can't handle with multi client
->> >> concurrent modify.
->> >>
->> >> Lack of object map(like pointer map in qcow2), it cause many
->> >> problems in librbd. Such as clone depth, the deep clone depth will
->> >> cause remarkable latency. Usually each clone wrap will increase
->> >> two times of latency.
->> >>
->> >> I consider to make a tradeoff between multi-client support and
->> >> single-client support for librbd. In practice, most of the
->> >> volumes/images are used by VM, there only exist one client will
->> >> access/modify image. We can't only want to make shared image
->> >> possible but make most of use cases bad. So we can add a new flag
->> >> called "shared" when creating image. If "shared" is false, librbd
->> >> will maintain a object map for each image. The object map is
->> >> considered to durable, each image_close call will store the map
->> >> into rados. If the client  is crashed and failed to dump the
->> >> object map, the next client open the image will think the object
->> >> map as out of date and reset the objectmap.
->> >>
->> >> We can easily find the advantage of this feature:
->> >> 1. Avoid clone performance problem
->> >> 2. Make snapshot statistic possible
->> >> 3. Improve librbd operation performance including read,
->> >> copy-on-write operation.
->> >>
->> >> What do you think above? More feedbacks are appreciate!
->> >
->> > I think it's a great idea! We discussed this a little at the last
->> > cds [1]. I like the idea of the shared flag on an image. Since the
->> > vastly more common case is single-client, I'd go further and
->> > suggest that we treat images as if shared is false by default if
->> > the flag is not present (perhaps with a config option to change
->> > this default behavior).
->> >
->> > That way existing images can benefit from the feature without extra
->> > configuration. There can be an rbd command to toggle the shared
->> > flag as well, so users of ocfs2 or gfs2 or other
->> > multi-client-writing systems can upgrade and set shared to true
->> > before restarting their clients.
->> >
->> > Another thing to consider is the granularity of the object map. The
->> > coarse granularity of a bitmap of object existence would be
->> > simplest, and most useful for in-memory comparison for clones. For
->> > statistics it might be desirable in the future to have a
->> > finer-grained index of data existence in the image. To make that
->> > easy to handle, the on-disk format could be a list of extents (byte
->> > ranges).
->> >
->> > Another potential use case would be a mode in which the index is
->> > treated as authoritative. This could make discard very fast, for
->> > example. I'm not sure it could be done safely with only binary
->> > 'exists/does not exist' information though - a third 'unknown' state
->> > might be needed for some cases. If this kind of index is actually
->> > useful (I'm not sure there are cases where the performance penalty
->> > would be worth it), we could add a new index format if we need it.
->> >
->> > Back to the currently proposed design, to be safe with live
->> > migration we'd need to make sure the index is consistent in the
->> > destination process. Using rados_notify() after we set the clean
->> > flag on the index can make the destination vm re-read the index
->> > before any I/O happens. This might be a good time to introduce a
->> > data payload to the notify as well, so we can only re-read the
->> > index, instead of all the header metadata. Rereading the index
->> > after cache invalidation and wiring that up through qemu's
->> > bdrv_invalidate() would be even better.
->> >
->> > There's more to consider in implementing this wrt snapshots, but
->> > this email has gone on long enough.
->> >
->> > Josh
->> >
->> > [1] http://pad.ceph.com/p/cdsgiant-rbd-copy-on-read-for-clones
->>
->>
->>
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> On Tue, May 20, 2014 at 6:44 PM, Guang Yang <yguang11@outlook.com> wrote:
+>> Hi ceph-devel,
+>> Like some users of Ceph, we are using Ceph for a latency sensitive project, and scrubbing (especially deep-scrubbing) impacts the SLA in a non-trivial way, as commodity hardware could fail in one way or the other, I think it is essential to have scrubbing enabled to preserve data durability.
+>> 
+>> Inspired by how erasure coding backend implement scrubbing[1], I am wondering if the following changes is valid to somehow reduce the performance impact from scrubbing:
+>> 1. Store the CRC checksum along with each physical copy of the object on filesystem (via xattr or omap?)
+>> 2. For read request, it checks the CRC locally and if it mismatch, redirect the request to a replica and mark the PG as inconsistent.
+> 
+> The problem with this is that you need to maintain the CRC across
+> partial overwrites of the object. And the real cost of scrubbing isn't
+> in the network traffic, it's in the disk reads, which you would have
+> to do anyway with this method. :)
+Thanks Greg for the response!
+Partial update is the right concern if that happens frequently. However, the major benefit of this proposal is to postpone the CRC check to READ request instead of doing it from within a background job (although we may still need to do background check as deep-scrubbing, we can reduce the frequency dramatically). By checking the CRC at read time, in-consistent object are marked as inconsistent (PG) and further we can trigger a repair for the PG.
+> -Greg
+> Software Engineer #42 @ http://inktank.com | http://ceph.com
+> 
+>> 
+>> This is just a general idea and details (like append) will need to further discussed.
+>> 
+>> By having such, we can schedule the scrubbing less aggresively but still preserve the durability for read.
+>> 
+>> Does this make some sense?
+>> 
+>> [1] http://ceph.com/docs/master/dev/osd_internals/erasure_coding/pgbackend/
+>> 
+>> Thanks,
+>> Guang Yang--
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+
