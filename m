@@ -1,83 +1,110 @@
-From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: [PATCH] rbd: handle parent_overlap on writes correctly
-Date: Wed, 11 Jun 2014 20:40:49 +0400
-Message-ID: <1402504849-9958-1-git-send-email-ilya.dryomov@inktank.com>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: [Ceph] Managing crushmap
+Date: Wed, 11 Jun 2014 10:02:56 -0700
+Message-ID: <CAPYLRzjj7C2HhHtwFqBJ6zPUeF-pPnhVMmceZSYOgSy-cPOzwA@mail.gmail.com>
+References: <31473_1402478241_53981EA1_31473_30_1_B9C8EFBF13B1354DB5FA000660D66DD00C122930@PEXCVZYM14.corporate.adroot.infra.ftgroup>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f43.google.com ([209.85.215.43]:49388 "EHLO
-	mail-la0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755583AbaFKQky (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Jun 2014 12:40:54 -0400
-Received: by mail-la0-f43.google.com with SMTP id e16so297lan.2
-        for <ceph-devel@vger.kernel.org>; Wed, 11 Jun 2014 09:40:52 -0700 (PDT)
-Received: from localhost ([109.110.66.45])
-        by mx.google.com with ESMTPSA id x2sm21960705lae.1.2014.06.11.09.40.50
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=RC4-SHA bits=128/128);
-        Wed, 11 Jun 2014 09:40:51 -0700 (PDT)
+Received: from mail-qc0-f171.google.com ([209.85.216.171]:42531 "EHLO
+	mail-qc0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751220AbaFKRC5 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Jun 2014 13:02:57 -0400
+Received: by mail-qc0-f171.google.com with SMTP id w7so51345qcr.2
+        for <ceph-devel@vger.kernel.org>; Wed, 11 Jun 2014 10:02:56 -0700 (PDT)
+In-Reply-To: <31473_1402478241_53981EA1_31473_30_1_B9C8EFBF13B1354DB5FA000660D66DD00C122930@PEXCVZYM14.corporate.adroot.infra.ftgroup>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: ghislain.chevalier@orange.com
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-The following check in rbd_img_obj_request_submit()
+That doesn't sound right. Can you supply your decompiled CRUSH map,
+the exact commands you ran against the ceph cluster, and the exact
+version(s) you ran the test against?
+-Greg
 
-    rbd_dev->parent_overlap <= obj_request->img_offset
+Software Engineer #42 @ http://inktank.com | http://ceph.com
 
-allows the fall through to the non-layered write case even if both
-parent_overlap and obj_request->img_offset belong to the same RADOS
-object.  This leads to data corruption, because the area to the left of
-parent_overlap ends up unconditionally zero-filled instead of being
-populated with parent data.  Suppose we want to write 1M to offset 6M
-of image bar, which is a clone of foo@snap; object_size is 4M,
-parent_overlap is 5M:
 
-    rbd_data.<id>.0000000000000001
-     ---------------------|----------------------|------------
-    | should be copyup'ed | should be zeroed out | write ...
-     ---------------------|----------------------|------------
-   4M                    5M                     6M
-                    parent_overlap    obj_request->img_offset
-
-4..5M should be copyup'ed from foo, yet it is zero-filled, just like
-5..6M is.
-
-Given that the only striping mode kernel client currently supports is
-chunking (i.e. stripe_unit == object_size, stripe_count == 1), round
-parent_overlap up to the next object boundary for the purposes of the
-overlap check.
-
-Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
----
- drivers/block/rbd.c |   10 +++++++++-
- 1 file changed, 9 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 8295b3afa8e0..813e673d49df 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -1366,6 +1366,14 @@ static bool obj_request_exists_test(struct rbd_obj_request *obj_request)
- 	return test_bit(OBJ_REQ_EXISTS, &obj_request->flags) != 0;
- }
- 
-+static bool obj_request_overlaps_parent(struct rbd_obj_request *obj_request)
-+{
-+	struct rbd_device *rbd_dev = obj_request->img_request->rbd_dev;
-+
-+	return obj_request->img_offset <
-+	    round_up(rbd_dev->parent_overlap, rbd_obj_bytes(&rbd_dev->header));
-+}
-+
- static void rbd_obj_request_get(struct rbd_obj_request *obj_request)
- {
- 	dout("%s: obj %p (was %d)\n", __func__, obj_request,
-@@ -2683,7 +2691,7 @@ static int rbd_img_obj_request_submit(struct rbd_obj_request *obj_request)
- 	 */
- 	if (!img_request_write_test(img_request) ||
- 		!img_request_layered_test(img_request) ||
--		rbd_dev->parent_overlap <= obj_request->img_offset ||
-+		!obj_request_overlaps_parent(obj_request) ||
- 		((known = obj_request_known_test(obj_request)) &&
- 			obj_request_exists_test(obj_request))) {
- 
--- 
-1.7.10.4
-
+On Wed, Jun 11, 2014 at 2:17 AM,  <ghislain.chevalier@orange.com> wrote=
+:
+> Hi all,
+>
+> Context :
+> Lab Platform
+> Ceph dumpling and firefly
+> Ubuntu 12.04 LTS
+>
+> I encountered a strange behavior managing the crushmap on a dumpling =
+and a firefly ceph platform.
+>
+> I built a crushmap, adding 2 specific rules (fastrule and slowrule) i=
+n order to experiment tiering.
+> I used "ceph osd get|setcrushmap" and crushtool to extract and ingest=
+ the updated crushmap in the system.
+> I have to precise that I respectively associated 50 and 51 as ruleset=
+ numbers for the 2 new rules.
+> The ingestion was good; I checked it by "ceph osd crush rule dump"
+>
+> I created 2 pools (fastpool and slowpool)
+> As indicated in the doc, I tried to associate fastpool to ruleset 50 =
+by "ceph osd pool set fastpool crush_ruleset 50"
+> an error occurred : rule 50 doesn't exist
+> As the rule_id of fastrule is 4, I did "ceph osd pool set fastpool cr=
+ush_ruleset 4" and it works but it's not a correct behavior.
+> If a ceph admin wants to manage the crushmap, he doesn't have to chec=
+k the rule_id (that he cannot set) before updating the attribute crush_=
+ruleset of pools.
+> The way to manage the rules if the ruleset not the rule_id.
+>
+> I also tested that reingesting a crushmap (after for example changing=
+ the sequence of the rules in the decompiled file) causes a global upda=
+te of the rule_ids.
+> I can't imagine the impacts on a platform.
+>
+> Did someone encounter this behavior?
+> Did I misunderstand how to configure a crushmap?
+>
+> Best regards
+>
+>
+>
+>
+>
+> - - - - - - - - - - - - - - - - -
+> Ghislain Chevalier
+> ORANGE/OLNC/OLPS/ASE/DAPI/CSE
+> Architecte de services de stockage
+> Storage Service Architect
+>  +33299124432
+> ghislain.chevalier@orange.com
+> =EF=81=90 Pensez =C3=A0 l'Environnement avant d'imprimer ce message !
+>
+>
+> _____________________________________________________________________=
+____________________________________________________
+>
+> Ce message et ses pieces jointes peuvent contenir des informations co=
+nfidentielles ou privilegiees et ne doivent donc
+> pas etre diffuses, exploites ou copies sans autorisation. Si vous ave=
+z recu ce message par erreur, veuillez le signaler
+> a l'expediteur et le detruire ainsi que les pieces jointes. Les messa=
+ges electroniques etant susceptibles d'alteration,
+> Orange decline toute responsabilite si ce message a ete altere, defor=
+me ou falsifie. Merci.
+>
+> This message and its attachments may contain confidential or privileg=
+ed information that may be protected by law;
+> they should not be distributed, used or copied without authorisation.
+> If you have received this email in error, please notify the sender an=
+d delete this message and its attachments.
+> As emails may be altered, Orange is not liable for messages that have=
+ been modified, changed or falsified.
+> Thank you.
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
