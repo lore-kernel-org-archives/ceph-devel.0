@@ -1,87 +1,89 @@
-From: Sage Weil <sage@inktank.com>
-Subject: [GIT PULL] Ceph changes for 3.16-rc1
-Date: Thu, 12 Jun 2014 17:09:56 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1406121007100.7864@cobra.newdream.net>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: [PATCH] rbd: handle parent_overlap on writes correctly
+Date: Thu, 12 Jun 2014 18:26:40 -0700
+Message-ID: <539A5350.1070706@inktank.com>
+References: <1402504849-9958-1-git-send-email-ilya.dryomov@inktank.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: torvalds@linux-foundation.org
-Cc: linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-qa0-f46.google.com ([209.85.216.46]:45733 "EHLO
+	mail-qa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751181AbaFMB1D (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 12 Jun 2014 21:27:03 -0400
+Received: by mail-qa0-f46.google.com with SMTP id i13so2601060qae.19
+        for <ceph-devel@vger.kernel.org>; Thu, 12 Jun 2014 18:27:02 -0700 (PDT)
+In-Reply-To: <1402504849-9958-1-git-send-email-ilya.dryomov@inktank.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Ilya Dryomov <ilya.dryomov@inktank.com>, ceph-devel@vger.kernel.org
 
-Hi Linus,
+On 06/11/2014 09:40 AM, Ilya Dryomov wrote:
+> The following check in rbd_img_obj_request_submit()
+>
+>      rbd_dev->parent_overlap <= obj_request->img_offset
+>
+> allows the fall through to the non-layered write case even if both
+> parent_overlap and obj_request->img_offset belong to the same RADOS
+> object.  This leads to data corruption, because the area to the left of
+> parent_overlap ends up unconditionally zero-filled instead of being
+> populated with parent data.  Suppose we want to write 1M to offset 6M
+> of image bar, which is a clone of foo@snap; object_size is 4M,
+> parent_overlap is 5M:
+>
+>      rbd_data.<id>.0000000000000001
+>       ---------------------|----------------------|------------
+>      | should be copyup'ed | should be zeroed out | write ...
+>       ---------------------|----------------------|------------
+>     4M                    5M                     6M
+>                      parent_overlap    obj_request->img_offset
+>
+> 4..5M should be copyup'ed from foo, yet it is zero-filled, just like
+> 5..6M is.
+>
+> Given that the only striping mode kernel client currently supports is
+> chunking (i.e. stripe_unit == object_size, stripe_count == 1), round
+> parent_overlap up to the next object boundary for the purposes of the
+> overlap check.
+>
+> Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
+> ---
 
-Please pull the following Ceph updates from
+Good catch! This should be included in any stable kernels 3.10 or later
+too.
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
+Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
-This pull has a mix of bug fixes and cleanups. Alex's patch fixes a rare 
-race in RBD.  Ilya's patches fix an ENOENT check when a second rbd image 
-is mapped and a couple memory leaks.  Zheng fixes several issues with 
-fragmented directories and multiple MDSs.  Josh fixes a spin/sleep issue, 
-and Josh and Guangliang's patches fix setting and unsetting RBD images 
-read-only. Naturally there are several other cleanups mixed in for good 
-measure.
+>   drivers/block/rbd.c |   10 +++++++++-
+>   1 file changed, 9 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index 8295b3afa8e0..813e673d49df 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -1366,6 +1366,14 @@ static bool obj_request_exists_test(struct rbd_obj_request *obj_request)
+>   	return test_bit(OBJ_REQ_EXISTS, &obj_request->flags) != 0;
+>   }
+>
+> +static bool obj_request_overlaps_parent(struct rbd_obj_request *obj_request)
+> +{
+> +	struct rbd_device *rbd_dev = obj_request->img_request->rbd_dev;
+> +
+> +	return obj_request->img_offset <
+> +	    round_up(rbd_dev->parent_overlap, rbd_obj_bytes(&rbd_dev->header));
+> +}
+> +
+>   static void rbd_obj_request_get(struct rbd_obj_request *obj_request)
+>   {
+>   	dout("%s: obj %p (was %d)\n", __func__, obj_request,
+> @@ -2683,7 +2691,7 @@ static int rbd_img_obj_request_submit(struct rbd_obj_request *obj_request)
+>   	 */
+>   	if (!img_request_write_test(img_request) ||
+>   		!img_request_layered_test(img_request) ||
+> -		rbd_dev->parent_overlap <= obj_request->img_offset ||
+> +		!obj_request_overlaps_parent(obj_request) ||
+>   		((known = obj_request_known_test(obj_request)) &&
+>   			obj_request_exists_test(obj_request))) {
+>
+>
 
-Thanks!
-sage
-
-
-----------------------------------------------------------------
-Alex Elder (1):
-      rbd: use reference counts for image requests
-
-Duan Jiong (1):
-      rbd: replace IS_ERR and PTR_ERR with PTR_ERR_OR_ZERO
-
-Fengguang Wu (1):
-      ceph: ceph_get_parent() can be static
-
-Guangliang Zhao (1):
-      rbd: add ioctl for rbd
-
-Ilya Dryomov (6):
-      libceph: recognize poolop requests in debugfs
-      libceph: mon_get_version request infrastructure
-      libceph: add ceph_monc_wait_osdmap()
-      rbd: make sure we have latest osdmap on 'rbd map'
-      rbd: fix osd_request memory leak in __rbd_dev_header_watch_sync()
-      rbd: fix ida/idr memory leak
-
-Josh Durgin (2):
-      rbd: move calls that may sleep out of spin lock range
-      rbd: only set disk to read-only once
-
-Sage Weil (1):
-      ceph: include time stamp in every MDS request
-
-Yan, Zheng (8):
-      ceph: queue vmtruncate if necessary when handing cap grant/revoke
-      ceph: update inode fields according to issued caps
-      ceph: pre-allocate ceph_cap struct for ceph_add_cap()
-      ceph: handle cap import atomically
-      ceph: introduce ceph_fill_fragtree()
-      ceph: remember subtree root dirfrag's auth MDS
-      mds: check cap ID when handling cap export message
-      ceph: use truncate_pagecache() instead of truncate_inode_pages()
-
-Zhang Zhen (2):
-      ceph: remove useless ACL check
-      ceph: refactor readpage_nounlock() to make the logic clearer
-
- drivers/block/rbd.c             | 242 +++++++++++++++++++++++++++++++--------
- fs/ceph/acl.c                   |   6 -
- fs/ceph/addr.c                  |  17 ++-
- fs/ceph/caps.c                  | 246 ++++++++++++++++++++-------------------
- fs/ceph/export.c                |   2 +-
- fs/ceph/inode.c                 | 247 +++++++++++++++++++++++++---------------
- fs/ceph/mds_client.c            |   9 +-
- fs/ceph/mds_client.h            |   1 +
- fs/ceph/super.h                 |  13 ++-
- include/linux/ceph/ceph_fs.h    |   2 +
- include/linux/ceph/mon_client.h |  11 +-
- net/ceph/ceph_common.c          |   2 +
- net/ceph/debugfs.c              |   8 +-
- net/ceph/mon_client.c           | 150 +++++++++++++++++++++++-
- 14 files changed, 670 insertions(+), 286 deletions(-)
