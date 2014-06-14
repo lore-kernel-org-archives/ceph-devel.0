@@ -1,128 +1,55 @@
-From: "Shu, Xinxin" <xinxin.shu@intel.com>
-Subject: RE: [RFC] add rocksdb support
-Date: Sat, 14 Jun 2014 03:49:36 +0000
-Message-ID: <75674D092A819E4189E91166C74CB90D013D3C3F@shsmsx102.ccr.corp.intel.com>
-References: <75674D092A819E4189E91166C74CB90D0131CB27@SHSMSX104.ccr.corp.intel.com>
- <alpine.DEB.2.00.1405201814330.1689@cobra.newdream.net>
- <75674D092A819E4189E91166C74CB90D013BEDED@shsmsx102.ccr.corp.intel.com>
- <537CA4BA.4000900@inktank.com>
- <75674D092A819E4189E91166C74CB90D013C094D@shsmsx102.ccr.corp.intel.com>
- <5395EAD1.9000501@inktank.com>
- <75674D092A819E4189E91166C74CB90D013C3C13@shsmsx102.ccr.corp.intel.com>
- <B9FF37F8E2D7894A9493A5314D0816FC22609DCA@SACMBXIP01.sdcorp.global.sandisk.com>
-Mime-Version: 1.0
+From: Guang Yang <yguang11@outlook.com>
+Subject: Re: Changes of scrubbing?
+Date: Sat, 14 Jun 2014 15:41:22 +0800
+Message-ID: <BLU436-SMTP1920C7C469EDC9D656FE21DF140@phx.gbl>
+References: <BLU436-SMTP155ED6E6FBB4FD0E72FC5CDF3C0@phx.gbl> <CAPYLRziTJKy4DQTASRwDZa2P5cy9qc4Zj7VM2P2QbrntFpKudg@mail.gmail.com> <BLU436-SMTP200935F4900B0A29C32286DDF2B0@phx.gbl> <CAPYLRzjbn2qwOHmn3ENp1169283HAu3ctnbBUkOff-65B1-bMg@mail.gmail.com>
+Mime-Version: 1.0 (Mac OS X Mail 7.3 \(1878.2\))
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:16184 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754467AbaFNDtq convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Jun 2014 23:49:46 -0400
-In-Reply-To: <B9FF37F8E2D7894A9493A5314D0816FC22609DCA@SACMBXIP01.sdcorp.global.sandisk.com>
-Content-Language: en-US
+Received: from blu004-omc4s32.hotmail.com ([65.55.111.171]:56758 "EHLO
+	BLU004-OMC4S32.hotmail.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752706AbaFNHlk convert rfc822-to-8bit
+	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sat, 14 Jun 2014 03:41:40 -0400
+In-Reply-To: <CAPYLRzjbn2qwOHmn3ENp1169283HAu3ctnbBUkOff-65B1-bMg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sushma Gurram <Sushma.Gurram@sandisk.com>, Mark Nelson <mark.nelson@inktank.com>, Sage Weil <sage@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "Zhang, Jian" <jian.zhang@intel.com>
+To: Gregory Farnum <greg@inktank.com>
+Cc: Ceph-devel <ceph-devel@vger.kernel.org>
 
-Currently ceph will get stable rocksdb from branch 3.0.fb of  ceph/rocksdb  , since PR https://github.com/ceph/rocksdb/pull/2 has not been merged ,  so if you use 'git submodule update --init' to get rocksdb submodule , It did not support autoconf/automake .  
 
------Original Message-----
-From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sushma Gurram
-Sent: Saturday, June 14, 2014 2:52 AM
-To: Shu, Xinxin; Mark Nelson; Sage Weil
-Cc: ceph-devel@vger.kernel.org; Zhang, Jian
-Subject: RE: [RFC] add rocksdb support
+On Jun 11, 2014, at 10:02 PM, Gregory Farnum <greg@inktank.com> wrote:
 
-Hi Xinxin,
+> On Wed, Jun 11, 2014 at 12:54 AM, Guang Yang <yguang11@outlook.com> wrote:
+>> On Jun 11, 2014, at 6:33 AM, Gregory Farnum <greg@inktank.com> wrote:
+>> 
+>>> On Tue, May 20, 2014 at 6:44 PM, Guang Yang <yguang11@outlook.com> wrote:
+>>>> Hi ceph-devel,
+>>>> Like some users of Ceph, we are using Ceph for a latency sensitive project, and scrubbing (especially deep-scrubbing) impacts the SLA in a non-trivial way, as commodity hardware could fail in one way or the other, I think it is essential to have scrubbing enabled to preserve data durability.
+>>>> 
+>>>> Inspired by how erasure coding backend implement scrubbing[1], I am wondering if the following changes is valid to somehow reduce the performance impact from scrubbing:
+>>>> 1. Store the CRC checksum along with each physical copy of the object on filesystem (via xattr or omap?)
+>>>> 2. For read request, it checks the CRC locally and if it mismatch, redirect the request to a replica and mark the PG as inconsistent.
+>>> 
+>>> The problem with this is that you need to maintain the CRC across
+>>> partial overwrites of the object. And the real cost of scrubbing isn't
+>>> in the network traffic, it's in the disk reads, which you would have
+>>> to do anyway with this method. :)
+>> Thanks Greg for the response!
+>> Partial update is the right concern if that happens frequently. However, the major benefit of this proposal is to postpone the CRC check to READ request instead of doing it from within a background job (although we may still need to do background check as deep-scrubbing, we can reduce the frequency dramatically). By checking the CRC at read time, in-consistent object are marked as inconsistent (PG) and further we can trigger a repair for the PG.
+> 
+> Oh, I see.
+> Still, partial update is in fact the major concern. We have a debug
+> mechanism called "sloppy crc" or similar that keeps track of them for
+> full (or sufficiently large?) writes, but it's not something you can
+> use on production cluster because it turns every write into a
+> read-modify-write cycle, and that's just prohibitively expensive (in
+> addition to issues with stuff like OSD restart, I think). This sort of
+> thing would make sense for the erasure-coded pools; maybe that would
+> be a better place to start?
+Yeah, that sounds like a good starting point, let me see if I can spend some time doing a simple POC.
+Thanks Greg.
+> -Greg
+> Software Engineer #42 @ http://inktank.com | http://ceph.com
 
-I tried to compile the wip-rocksdb branch, but the src/rocksdb directory seems to be empty. Do I need toput autoconf/automake in this directory?
-It doesn't seem to have any other source files and compilation fails:
-os/RocksDBStore.cc:10:24: fatal error: rocksdb/db.h: No such file or directory compilation terminated.
-
-Thanks,
-Sushma
-
------Original Message-----
-From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Shu, Xinxin
-Sent: Monday, June 09, 2014 10:00 PM
-To: Mark Nelson; Sage Weil
-Cc: ceph-devel@vger.kernel.org; Zhang, Jian
-Subject: RE: [RFC] add rocksdb support
-
-Hi mark
-
-I have finished development of support of rocksdb submodule,  a pull request for support of autoconf/automake for rocksdb has been created , you can find https://github.com/ceph/rocksdb/pull/2 , if this patch is ok ,  I will create a pull request for rocksdb submodule support , currently this patch can be found https://github.com/xinxinsh/ceph/tree/wip-rocksdb .
-
------Original Message-----
-From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
-Sent: Tuesday, June 10, 2014 1:12 AM
-To: Shu, Xinxin; Sage Weil
-Cc: ceph-devel@vger.kernel.org; Zhang, Jian
-Subject: Re: [RFC] add rocksdb support
-
-Hi Xinxin,
-
-On 05/28/2014 05:05 AM, Shu, Xinxin wrote:
-> Hi sage ,
-> I will add two configure options to --with-librocksdb-static and --with-librocksdb , with --with-librocksdb-static option , ceph will compile the code that get from ceph repository , with  --with-librocksdb option ,  in case of distro packages for rocksdb , ceph will not compile the rocksdb code , will use pre-installed library. is that ok for you ?
->
-> since current rocksdb does not support autoconf&automake , I will add autoconf&automake support for rocksdb , but before that , i think we should fork a stable branch (maybe 3.0) for ceph .
-
-I'm looking at testing out the rocksdb support as well, both for the OSD and for the monitor based on some issues we've been seeing lately.  Any news on the 3.0 fork and autoconf/automake support in rocksdb?
-
-Thanks,
-Mark
-
->
-> -----Original Message-----
-> From: Mark Nelson [mailto:mark.nelson@inktank.com]
-> Sent: Wednesday, May 21, 2014 9:06 PM
-> To: Shu, Xinxin; Sage Weil
-> Cc: ceph-devel@vger.kernel.org; Zhang, Jian
-> Subject: Re: [RFC] add rocksdb support
->
-> On 05/21/2014 07:54 AM, Shu, Xinxin wrote:
->> Hi, sage
->>
->> I will add rocksdb submodule into the makefile , currently we want to have fully performance tests on key-value db backend , both leveldb and rocksdb. Then optimize on rocksdb performance.
->
-> I'm definitely interested in any performance tests you do here.  Last winter I started doing some fairly high level tests on raw leveldb/hyperleveldb/raikleveldb.  I'm very interested in what you see with rocksdb as a backend.
->
->>
->> -----Original Message-----
->> From: Sage Weil [mailto:sage@inktank.com]
->> Sent: Wednesday, May 21, 2014 9:19 AM
->> To: Shu, Xinxin
->> Cc: ceph-devel@vger.kernel.org
->> Subject: Re: [RFC] add rocksdb support
->>
->> Hi Xinxin,
->>
->> I've pushed an updated wip-rocksdb to github/liewegas/ceph.git that includes the latest set of patches with the groundwork and your rocksdb patch.  There is also a commit that adds rocksdb as a git submodule.  I'm thinking that, since there aren't any distro packages for rocksdb at this point, this is going to be the easiest way to make this usable for people.
->>
->> If you can wire the submodule into the makefile, we can merge this in so that rocksdb support is in the ceph.com packages on ceph.com.  I suspect that the distros will prefer to turns this off in favor of separate shared libs, but they can do this at their option if/when they include rocksdb in the distro. I think the key is just to have both --with-librockdb and --with-librocksdb-static (or similar) options so that you can either use the static or dynamically linked one.
->>
->> Has your group done further testing with rocksdb?  Anything interesting to share?
->>
->> Thanks!
->> sage
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->> in the body of a message to majordomo@vger.kernel.org More majordomo 
->> info at  http://vger.kernel.org/majordomo-info.html
->>
->
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-________________________________
-
-PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
