@@ -1,17 +1,17 @@
 From: Loic Dachary <loic@dachary.org>
 Subject: Re: [ceph-users] EC pool errors with some k/m combinations
-Date: Wed, 18 Jun 2014 17:27:32 +0200
-Message-ID: <53A1AFE4.2080708@dachary.org>
+Date: Wed, 18 Jun 2014 17:30:20 +0200
+Message-ID: <53A1B08C.10800@dachary.org>
 References: <alpine.LFD.2.03.1403292258150.8259@tnld.net>	<5337FFD7.4080102@dachary.org>	<alpine.LFD.2.03.1403310103050.11536@tnld.net>	<alpine.LFD.2.03.1404010004450.13251@tnld.net> <CAKD2hyEhMvMQDcSUmyxtBaOOREk9FS51msRwG0kLyu6PQA6RyQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="hLi4fmFwe2kFtXB290UcPhWXIfe9qL612"
+ boundary="wolHbflrcBBe06dQIefSeUAvTkGhrWcab"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.dmail.dachary.org ([91.121.254.229]:48413 "EHLO
+Received: from smtp.dmail.dachary.org ([91.121.254.229]:48420 "EHLO
 	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753316AbaFRPaV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Jun 2014 11:30:21 -0400
+	with ESMTP id S1751942AbaFRPal (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Jun 2014 11:30:41 -0400
 In-Reply-To: <CAKD2hyEhMvMQDcSUmyxtBaOOREk9FS51msRwG0kLyu6PQA6RyQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -19,7 +19,7 @@ To: =?UTF-8?B?TGx1w61zIFDDoG1pZXMgaSBKdcOhcmV6?= <llpamies@pamies.cat>, Michael 
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
 This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---hLi4fmFwe2kFtXB290UcPhWXIfe9qL612
+--wolHbflrcBBe06dQIefSeUAvTkGhrWcab
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: quoted-printable
 
@@ -173,7 +173,7 @@ sd k=3D3
 Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
 
---hLi4fmFwe2kFtXB290UcPhWXIfe9qL612
+--wolHbflrcBBe06dQIefSeUAvTkGhrWcab
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -182,9 +182,9 @@ Content-Disposition: attachment; filename="signature.asc"
 Version: GnuPG v2.0.22 (GNU/Linux)
 Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
 
-iEYEARECAAYFAlOhr+QACgkQ8dLMyEl6F22m7QCghm9YDii2j3M5bUMG4VxnzrPK
-/9wAn0pqDNVg13U4NQroHOuUV1Xuv0YW
-=UKpW
+iEYEARECAAYFAlOhsI0ACgkQ8dLMyEl6F22alQCeMg/AnSxdqFO0KrJJ0ZnOJ+np
+NIAAoIF+zxB+8IMTH+PMikoRycctY8Lw
+=Bt2z
 -----END PGP SIGNATURE-----
 
---hLi4fmFwe2kFtXB290UcPhWXIfe9qL612--
+--wolHbflrcBBe06dQIefSeUAvTkGhrWcab--
