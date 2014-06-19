@@ -1,24 +1,38 @@
 From: Benny Kopilov <bkopilov@redhat.com>
-Subject: unable to create volume with openstack rhos 5  -
+Subject: Re: unable to create volume with openstack rhos 5  -
  cinder.api.middleware.fault
-Date: Thu, 19 Jun 2014 04:06:54 -0400 (EDT)
-Message-ID: <425147976.16474794.1403165214735.JavaMail.zimbra@redhat.com>
-References: <640514811.16029637.1403095540996.JavaMail.zimbra@redhat.com>
+Date: Thu, 19 Jun 2014 04:44:37 -0400 (EDT)
+Message-ID: <1700983431.16484644.1403167477508.JavaMail.zimbra@redhat.com>
+References: <425147976.16474794.1403165214735.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx6-phx2.redhat.com ([209.132.183.39]:47270 "EHLO
-	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757336AbaFSIGz convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Jun 2014 04:06:55 -0400
+Received: from mx3-phx2.redhat.com ([209.132.183.24]:49462 "EHLO
+	mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757745AbaFSIoh convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Jun 2014 04:44:37 -0400
 Received: from zmail23.collab.prod.int.phx2.redhat.com (zmail23.collab.prod.int.phx2.redhat.com [10.5.83.28])
-	by mx6-phx2.redhat.com (8.14.4/8.14.4) with ESMTP id s5J86spN024583
-	for <ceph-devel@vger.kernel.org>; Thu, 19 Jun 2014 04:06:54 -0400
-In-Reply-To: <640514811.16029637.1403095540996.JavaMail.zimbra@redhat.com>
+	by mx3-phx2.redhat.com (8.13.8/8.13.8) with ESMTP id s5J8ibBc028192
+	for <ceph-devel@vger.kernel.org>; Thu, 19 Jun 2014 04:44:37 -0400
+In-Reply-To: <425147976.16474794.1403165214735.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
+
+
+Hi , 
+
+Looks like the issue id when glance_api is version 2  ( under cinder.conf ) 
+When change to glance_api_version 1 it works
+
+Benny
+
+----- Original Message -----
+From: "Benny Kopilov" <bkopilov@redhat.com>
+To: ceph-devel@vger.kernel.org
+Sent: Thursday, June 19, 2014 11:06:54 AM
+Subject: unable to create volume with openstack rhos 5  - cinder.api.middleware.fault
 
 
 Hi , 
