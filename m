@@ -1,235 +1,93 @@
 From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: [PATCH 4/4] rbd: add rbd_obj_watch_request_helper() helper
-Date: Fri, 20 Jun 2014 13:09:43 +0400
-Message-ID: <1403255383-5729-5-git-send-email-ilya.dryomov@inktank.com>
+Subject: [PATCH 2/4] libceph: introduce ceph_osdc_cancel_request()
+Date: Fri, 20 Jun 2014 13:09:41 +0400
+Message-ID: <1403255383-5729-3-git-send-email-ilya.dryomov@inktank.com>
 References: <1403255383-5729-1-git-send-email-ilya.dryomov@inktank.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f50.google.com ([209.85.215.50]:63842 "EHLO
+Received: from mail-la0-f50.google.com ([209.85.215.50]:61513 "EHLO
 	mail-la0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S965886AbaFTJJ6 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 20 Jun 2014 05:09:58 -0400
-Received: by mail-la0-f50.google.com with SMTP id pv20so2165615lab.23
-        for <ceph-devel@vger.kernel.org>; Fri, 20 Jun 2014 02:09:56 -0700 (PDT)
+	with ESMTP id S965376AbaFTJJx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 20 Jun 2014 05:09:53 -0400
+Received: by mail-la0-f50.google.com with SMTP id pv20so2221100lab.9
+        for <ceph-devel@vger.kernel.org>; Fri, 20 Jun 2014 02:09:51 -0700 (PDT)
 Received: from localhost ([109.110.66.173])
-        by mx.google.com with ESMTPSA id ut18sm6142214lbb.38.2014.06.20.02.09.55
+        by mx.google.com with ESMTPSA id an10sm3395090lac.4.2014.06.20.02.09.50
         for <ceph-devel@vger.kernel.org>
         (version=TLSv1.2 cipher=RC4-SHA bits=128/128);
-        Fri, 20 Jun 2014 02:09:55 -0700 (PDT)
+        Fri, 20 Jun 2014 02:09:51 -0700 (PDT)
 In-Reply-To: <1403255383-5729-1-git-send-email-ilya.dryomov@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-rbd_dev_header_watch_sync() used to handle both watch and unwatch and
-was entangled and leaky.  Commit b30a01f2a307 ("rbd: fix osd_request
-memory leak in __rbd_dev_header_watch_sync()") split it into two
-separate functions.  This commit cleanly abstracts the common bits,
-relying on the fixed rbd_obj_request_wait().
+Introduce ceph_osdc_cancel_request() intended for canceling requests
+from the higher layers (rbd and cephfs).  Because higher layers are in
+charge and are supposed to know what and when they are canceling, the
+request is not completed, only unref'ed and removed from the libceph
+data structures.
 
 Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
 ---
- drivers/block/rbd.c |  134 +++++++++++++++++++++------------------------------
- 1 file changed, 54 insertions(+), 80 deletions(-)
+ include/linux/ceph/osd_client.h |    1 +
+ net/ceph/osd_client.c           |   25 ++++++++++++++++++++-----
+ 2 files changed, 21 insertions(+), 5 deletions(-)
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 1701595648ce..deab91b2d967 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -2966,30 +2966,21 @@ static void rbd_watch_cb(u64 ver, u64 notify_id, u8 opcode, void *data)
- }
+diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
+index 94ec69672164..8ba70a213d97 100644
+--- a/include/linux/ceph/osd_client.h
++++ b/include/linux/ceph/osd_client.h
+@@ -341,6 +341,7 @@ static inline void ceph_osdc_put_request(struct ceph_osd_request *req)
+ extern int ceph_osdc_start_request(struct ceph_osd_client *osdc,
+ 				   struct ceph_osd_request *req,
+ 				   bool nofail);
++extern void ceph_osdc_cancel_request(struct ceph_osd_request *req);
+ extern int ceph_osdc_wait_request(struct ceph_osd_client *osdc,
+ 				  struct ceph_osd_request *req);
+ extern void ceph_osdc_sync(struct ceph_osd_client *osdc);
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index 6b8c5e8c49ce..318d1c55485d 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -2431,6 +2431,24 @@ int ceph_osdc_start_request(struct ceph_osd_client *osdc,
+ EXPORT_SYMBOL(ceph_osdc_start_request);
  
  /*
-- * Initiate a watch request, synchronously.
-+ * Send a (un)watch request and wait for the ack.  Return a request
-+ * with a ref held on success or error.
-  */
--static int rbd_dev_header_watch_sync(struct rbd_device *rbd_dev)
-+static struct rbd_obj_request *rbd_obj_watch_request_helper(
-+						struct rbd_device *rbd_dev,
-+						bool watch)
- {
- 	struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
- 	struct rbd_obj_request *obj_request;
- 	int ret;
- 
--	rbd_assert(!rbd_dev->watch_event);
--	rbd_assert(!rbd_dev->watch_request);
--
--	ret = ceph_osdc_create_event(osdc, rbd_watch_cb, rbd_dev,
--				     &rbd_dev->watch_event);
--	if (ret < 0)
--		return ret;
--
--	rbd_assert(rbd_dev->watch_event);
--
- 	obj_request = rbd_obj_request_create(rbd_dev->header_name, 0, 0,
- 					     OBJ_REQUEST_NODATA);
--	if (!obj_request) {
--		ret = -ENOMEM;
--		goto out_cancel;
--	}
-+	if (!obj_request)
-+		return ERR_PTR(-ENOMEM);
- 
- 	obj_request->osd_req = rbd_osd_req_create(rbd_dev, true, 1,
- 						  obj_request);
-@@ -2998,12 +2989,13 @@ static int rbd_dev_header_watch_sync(struct rbd_device *rbd_dev)
- 		goto out_put;
- 	}
- 
--	ceph_osdc_set_request_linger(osdc, obj_request->osd_req);
--
- 	osd_req_op_watch_init(obj_request->osd_req, 0, CEPH_OSD_OP_WATCH,
--			      rbd_dev->watch_event->cookie, 0, 1);
-+			      rbd_dev->watch_event->cookie, 0, watch);
- 	rbd_osd_req_format_write(obj_request);
- 
-+	if (watch)
-+		ceph_osdc_set_request_linger(osdc, obj_request->osd_req);
-+
- 	ret = rbd_obj_request_submit(osdc, obj_request);
- 	if (ret)
- 		goto out_linger;
-@@ -3016,96 +3008,78 @@ static int rbd_dev_header_watch_sync(struct rbd_device *rbd_dev)
- 	if (ret)
- 		goto out_linger;
- 
--	/*
--	 * A watch request is set to linger, so the underlying osd
--	 * request won't go away until we unregister it.  We retain
--	 * a pointer to the object request during that time (in
--	 * rbd_dev->watch_request), so we'll keep a reference to
--	 * it.  We'll drop that reference (below) after we've
--	 * unregistered it.
--	 */
--	rbd_dev->watch_request = obj_request;
--
--	return 0;
-+	return obj_request;
- 
- out_linger:
--	ceph_osdc_unregister_linger_request(osdc, obj_request->osd_req);
-+	if (watch)
-+		ceph_osdc_unregister_linger_request(osdc, obj_request->osd_req);
- out_put:
- 	rbd_obj_request_put(obj_request);
--out_cancel:
--	ceph_osdc_cancel_event(rbd_dev->watch_event);
--	rbd_dev->watch_event = NULL;
--
--	return ret;
-+	return ERR_PTR(ret);
- }
- 
- /*
-- * Tear down a watch request, synchronously.
-+ * Initiate a watch request, synchronously.
-  */
--static int __rbd_dev_header_unwatch_sync(struct rbd_device *rbd_dev)
-+static int rbd_dev_header_watch_sync(struct rbd_device *rbd_dev)
- {
- 	struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
- 	struct rbd_obj_request *obj_request;
- 	int ret;
- 
--	rbd_assert(rbd_dev->watch_event);
--	rbd_assert(rbd_dev->watch_request);
-+	rbd_assert(!rbd_dev->watch_event);
-+	rbd_assert(!rbd_dev->watch_request);
- 
--	obj_request = rbd_obj_request_create(rbd_dev->header_name, 0, 0,
--					     OBJ_REQUEST_NODATA);
--	if (!obj_request) {
--		ret = -ENOMEM;
--		goto out_cancel;
--	}
-+	ret = ceph_osdc_create_event(osdc, rbd_watch_cb, rbd_dev,
-+				     &rbd_dev->watch_event);
-+	if (ret < 0)
-+		return ret;
- 
--	obj_request->osd_req = rbd_osd_req_create(rbd_dev, true, 1,
--						  obj_request);
--	if (!obj_request->osd_req) {
--		ret = -ENOMEM;
--		goto out_put;
-+	obj_request = rbd_obj_watch_request_helper(rbd_dev, true);
-+	if (IS_ERR(obj_request)) {
-+		ceph_osdc_cancel_event(rbd_dev->watch_event);
-+		rbd_dev->watch_event = NULL;
-+		return PTR_ERR(obj_request);
- 	}
- 
--	osd_req_op_watch_init(obj_request->osd_req, 0, CEPH_OSD_OP_WATCH,
--			      rbd_dev->watch_event->cookie, 0, 0);
--	rbd_osd_req_format_write(obj_request);
-+	/*
-+	 * A watch request is set to linger, so the underlying osd
-+	 * request won't go away until we unregister it.  We retain
-+	 * a pointer to the object request during that time (in
-+	 * rbd_dev->watch_request), so we'll keep a reference to it.
-+	 * We'll drop that reference after we've unregistered it in
-+	 * rbd_dev_header_unwatch_sync().
-+	 */
-+	rbd_dev->watch_request = obj_request;
- 
--	ret = rbd_obj_request_submit(osdc, obj_request);
--	if (ret)
--		goto out_put;
-+	return 0;
-+}
- 
--	ret = rbd_obj_request_wait(obj_request);
--	if (ret)
--		goto out_put;
-+/*
-+ * Tear down a watch request, synchronously.
++ * Unregister a registered request.  The request is not completed (i.e.
++ * no callbacks or wakeups) - higher layers are supposed to know what
++ * they are canceling.
 + */
-+static void rbd_dev_header_unwatch_sync(struct rbd_device *rbd_dev)
++void ceph_osdc_cancel_request(struct ceph_osd_request *req)
 +{
-+	struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
-+	struct rbd_obj_request *obj_request;
++	struct ceph_osd_client *osdc = req->r_osdc;
++
++	mutex_lock(&osdc->request_mutex);
++	__cancel_request(req);
++	__unregister_request(osdc, req);
++	mutex_unlock(&osdc->request_mutex);
++
++	dout("%s tid %llu canceled\n", __func__, req->r_tid);
++}
++EXPORT_SYMBOL(ceph_osdc_cancel_request);
++
++/*
+  * wait for a request to complete
+  */
+ int ceph_osdc_wait_request(struct ceph_osd_client *osdc,
+@@ -2440,12 +2458,9 @@ int ceph_osdc_wait_request(struct ceph_osd_client *osdc,
  
--	ret = obj_request->result;
--	if (ret)
--		goto out_put;
-+	rbd_assert(rbd_dev->watch_event);
-+	rbd_assert(rbd_dev->watch_request);
+ 	rc = wait_for_completion_interruptible(&req->r_completion);
+ 	if (rc < 0) {
+-		mutex_lock(&osdc->request_mutex);
+-		__cancel_request(req);
+-		__unregister_request(osdc, req);
+-		mutex_unlock(&osdc->request_mutex);
++		dout("%s tid %llu interrupted\n", __func__, req->r_tid);
++		ceph_osdc_cancel_request(req);
+ 		complete_request(req);
+-		dout("wait_request tid %llu canceled/timed out\n", req->r_tid);
+ 		return rc;
+ 	}
  
--	/* We have successfully torn down the watch request */
-+	obj_request = rbd_obj_watch_request_helper(rbd_dev, false);
-+	if (!IS_ERR(obj_request))
-+		rbd_obj_request_put(obj_request);
-+	else
-+		rbd_warn(rbd_dev, "unable to tear down watch request (%ld)",
-+			 PTR_ERR(obj_request));
- 
- 	ceph_osdc_unregister_linger_request(osdc,
- 					    rbd_dev->watch_request->osd_req);
- 	rbd_obj_request_put(rbd_dev->watch_request);
- 	rbd_dev->watch_request = NULL;
- 
--out_put:
--	rbd_obj_request_put(obj_request);
--out_cancel:
- 	ceph_osdc_cancel_event(rbd_dev->watch_event);
- 	rbd_dev->watch_event = NULL;
--
--	return ret;
--}
--
--static void rbd_dev_header_unwatch_sync(struct rbd_device *rbd_dev)
--{
--	int ret;
--
--	ret = __rbd_dev_header_unwatch_sync(rbd_dev);
--	if (ret) {
--		rbd_warn(rbd_dev, "unable to tear down watch request: %d\n",
--			 ret);
--	}
- }
- 
- /*
 -- 
 1.7.10.4
 
