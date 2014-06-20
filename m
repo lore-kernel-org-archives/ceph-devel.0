@@ -1,21 +1,37 @@
 From: Alexandre DERUMIER <aderumier@odiso.com>
 Subject: Re: CEPH IOPS Baseline Measurements with MemStore
-Date: Fri, 20 Jun 2014 06:35:12 +0200 (CEST)
-Message-ID: <36031eee-ed15-448d-8f84-ae940f627dbc@mailpro>
-References: <CANP1eJFs76SAkoG99OH+hSo6dPg=02XbTRr7FBegGJ6a=fEhkA@mail.gmail.com>
+Date: Fri, 20 Jun 2014 06:41:19 +0200 (CEST)
+Message-ID: <ae132423-84b1-490c-b36e-e29ee226c8e5@mailpro>
+References: <36031eee-ed15-448d-8f84-ae940f627dbc@mailpro>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.209.98]:44524 "EHLO
+Received: from mailpro.odiso.net ([89.248.209.98]:33952 "EHLO
 	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751431AbaFTEfW convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 20 Jun 2014 00:35:22 -0400
-In-Reply-To: <CANP1eJFs76SAkoG99OH+hSo6dPg=02XbTRr7FBegGJ6a=fEhkA@mail.gmail.com>
+	with ESMTP id S1751378AbaFTEl1 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 20 Jun 2014 00:41:27 -0400
+In-Reply-To: <36031eee-ed15-448d-8f84-ae940f627dbc@mailpro>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Milosz Tanski <milosz@adfin.com>
 Cc: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>, ceph-devel <ceph-devel@vger.kernel.org>
+
+They are also a tracker here
+http://tracker.ceph.com/issues/7191
+"Replace Mutex to RWLock with fdcache_lock in FileStore"
+
+seem to be done, but I'm not sure it's already is the master branch ?
+
+
+----- Mail original -----=20
+
+De: "Alexandre DERUMIER" <aderumier@odiso.com>=20
+=C3=80: "Milosz Tanski" <milosz@adfin.com>=20
+Cc: "Andreas Joachim Peters" <Andreas.Joachim.Peters@cern.ch>, "ceph-de=
+vel" <ceph-devel@vger.kernel.org>=20
+Envoy=C3=A9: Vendredi 20 Juin 2014 06:35:12=20
+Objet: Re: CEPH IOPS Baseline Measurements with MemStore=20
 
 >>There was a gentleman on this list before who identified a few=20
 >>possible locking issues in the ceph osd deamon. Here is a thread=20
@@ -25,24 +41,25 @@ e=20
 >>performed some really back hacks (like just dropping mutexes) which=20
 >>one shouldn't do... but it turned out that he was able to get 3 to 4=20
 >>performance improvement.=20
-Yes, I remember of this post, the 4 bottleneck was:
+Yes, I remember of this post, the 4 bottleneck was:=20
 
-1. fdcache_lock
-2. lfn_find in omap_* methods
-3. DBObjectMap header
+1. fdcache_lock=20
+2. lfn_find in omap_* methods=20
+3. DBObjectMap header=20
 4. fdcache size, slow lookup=20
 
 
 
->>If you're willing to do a lock contention trace (using mutrace, or
->>something similar) I'd be really interested in the results of it. The
->>results should be especially useful if you're running it against
->>MemStore since it'll take away any thing that would prevent these
->>bottleneck from showing up (like disk access).
+>>If you're willing to do a lock contention trace (using mutrace, or=20
+>>something similar) I'd be really interested in the results of it. The=
+=20
+>>results should be especially useful if you're running it against=20
+>>MemStore since it'll take away any thing that would prevent these=20
+>>bottleneck from showing up (like disk access).=20
 
-I'll build a new ceph test storage soon, so I think I can try to help.
+I'll build a new ceph test storage soon, so I think I can try to help.=20
 
-But I'm not an expert in process tracing, so help/howto is welcome.
+But I'm not an expert in process tracing, so help/howto is welcome.=20
 
 ----- Mail original -----=20
 
@@ -334,6 +351,11 @@ New York, NY 10016=20
 
 p: 646-253-9055=20
 e: milosz@adfin.com=20
+--=20
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n=20
+the body of a message to majordomo@vger.kernel.org=20
+More majordomo info at http://vger.kernel.org/majordomo-info.html=20
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
