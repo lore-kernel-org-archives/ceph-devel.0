@@ -1,152 +1,158 @@
-From: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>
-Subject: RE: CEPH IOPS Baseline Measurements with MemStore
-Date: Fri, 20 Jun 2014 21:49:35 +0000
-Message-ID: <3472A07E6605974CBC9BC573F1BC02E4AE743A96@CERNXCHG44.cern.ch>
-References: <3472A07E6605974CBC9BC573F1BC02E4AE7433A2@CERNXCHG44.cern.ch>
+From: "Shu, Xinxin" <xinxin.shu@intel.com>
+Subject: RE: [RFC] add rocksdb support
+Date: Mon, 23 Jun 2014 01:18:24 +0000
+Message-ID: <75674D092A819E4189E91166C74CB90D013D657C@shsmsx102.ccr.corp.intel.com>
+References: <75674D092A819E4189E91166C74CB90D0131CB27@SHSMSX104.ccr.corp.intel.com>
+ <alpine.DEB.2.00.1405201814330.1689@cobra.newdream.net>
+ <75674D092A819E4189E91166C74CB90D013BEDED@shsmsx102.ccr.corp.intel.com>
+ <537CA4BA.4000900@inktank.com>
+ <75674D092A819E4189E91166C74CB90D013C094D@shsmsx102.ccr.corp.intel.com>
+ <5395EAD1.9000501@inktank.com>
+ <75674D092A819E4189E91166C74CB90D013C3C13@shsmsx102.ccr.corp.intel.com>
+ <B9FF37F8E2D7894A9493A5314D0816FC22609DCA@SACMBXIP01.sdcorp.global.sandisk.com>
+ <75674D092A819E4189E91166C74CB90D013D3C3F@shsmsx102.ccr.corp.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cernmx11.cern.ch ([188.184.36.50]:32090 "EHLO CERNMX11.cern.ch"
+Received: from mga09.intel.com ([134.134.136.24]:33693 "EHLO mga09.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754651AbaFTVtk convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 20 Jun 2014 17:49:40 -0400
-In-Reply-To: <3472A07E6605974CBC9BC573F1BC02E4AE7433A2@CERNXCHG44.cern.ch>
-Content-Language: en-GB
+	id S1750943AbaFWBS2 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 22 Jun 2014 21:18:28 -0400
+In-Reply-To: <75674D092A819E4189E91166C74CB90D013D3C3F@shsmsx102.ccr.corp.intel.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-
-FYI,
-
-I made a second measurement on a more modern/powerful machine Intel(R) Xeon(R) CPU E5-2650 v2.
-
-Ping RTT is 10 micro seconds. TCP Message roundtrip time measured is 40 micro seconds (ZMQ/XRootd).
-
-All measurements scale up roughly factor 2.
-
-The best read IOPS is now 70 kHz (4 OSD, 4x -b 1 -t 10), write IOPS is 36 kHz (4 OSD, 4x -b 1 -t 10). Lowest avg. read latency (1 reader) is 200 micro seconds.
-
-The comparison IO daemon delivers up to 750 kHz, latency 40 micro seconds.
-
-So similar picture, but improved with better hardware. I am doing some realtime/cputime profiling with google pert tools now.
-
-Cheers Andreas.
-
-__________________________
-From: Andreas Joachim Peters
-Sent: 19 June 2014 11:05
-To: ceph-devel@vger.kernel.org
-Subject: CEPH IOPS Baseline Measurements with MemStore
-
-Hi,
-
-I made some benchmarks/testing using the firefly branch and GCC 4.9. Hardware is 2 CPUs with  6-core  Intel(R) Xeon(R) CPU E5-2630L 0 @ 2.00GHz with Hyperthreading and 256 GB of memory (kernel 2.6.32-431.17.1.el6.x86_64).
-
-In my tests I run two OSD configurations on a single box:
-
-[A] 4 OSDs running with MemStore
-[B] 1 OSD running with MemStore
-
-I use a pool with 'size=1' and read and read/write 1-byte objects all via localhost.
-
-The local RTT reported by ping is 15 micro seconds, the RTT measured with ZMQ is 100 micro seconds (10 kHZ synchronous 1-byte messages).
-RTT measured with another file IO daemon (XRootD) we are using at CERN (31-byte messages) is 9.9 kHZ.
-
--------------------------------------------------------------------------------------------------------------------------
-4 OSDs
--------------------------------------------------------------------------------------------------------------------------
-
-{1} [A]
-*******
-I measure IOPS with 1 byte objects for separate write and read operations disabling logging of any subsystem:
-
-Type : IOPS[kHz] : Latency [ms] : ConcurIO [#]
-===================================
-Write : 01.7 : 0.50 : 1
-Write:  11.2 : 0.88 : 10
-Write:  11.8 : 1.69 : 10 x 2 [ 2 rados bench processes ]
-Write:  11.2 : 3.57 : 10 x 4 [ 4 rados bench processes ]
-Read : 02.6 : 0.33 : 1
-Read : 22.4 : 0.43 : 10
-Read : 40.0 : 0.97 : 20 x 2 [ 2 rados bench processes ]
-Read : 46.0 : 0.88 : 10 x 4 [ 4 rados bench processes ]
-Read : 40.0 : 1.60 : 20 x 4 [ 4 rados bench processes ]
-
-{2} [A]
-*******
-I measure IOPS with the CEPH firefly branch as is (default logging) :
-
-Type : IOPS[kHz] : Latency [ms] : ConcurIO [#]
-===================================
-Write : 01.2 : 0.78 : 1
-Write : 09.1 : 1.00 : 10
-Read : 01.8 : 0.50 : 1
-Read : 14.0 : 1.00 : 10
-Read : 18:0 : 2.00 : 20 x 2 [ 2 rados bench processes ]
-Read : 18.0 : 2.20 : 10 x 4 [ 4 rados bench processes ]
-
--------------------------------------------------------------------------------------------------------------------------
-1 OSD
--------------------------------------------------------------------------------------------------------------------------
-
-{1} [B] (subsys logging disabled, 1 OSD)
-*******
-Write : 02.0 : 0.46 : 1
-Write : 10.0 : 0.95 : 10
-Write : 11.1 : 1.74 : 20
-Write : 12.0 : 1.80 : 10 x 2 [ 2 rados bench processes ]
-Write : 10.8 : 3.60 : 10 x 4 [ 4 rados bench processes ]
-Read : 03.6 : 0.27 : 1
-Read : 16.9 : 0.50 : 10
-Read : 28.0 : 0.70 : 10 x 2 [ 2 rados bench processes ]
-Read : 29.6 : 1.37 : 20 x 2 [ 2 rados bench processes ]
-Read : 27.2 : 1.50 : 10 x 4 [ 4 rados bench processes ]
-
-{2} [B] (defaultlogging, 1 OSD)
-*******
-Write : 01.4 : 0.68 : 1
-Write : 04.0 : 2.35 : 10
-Write : 04.0 : 4.69 : 10 x 2 [ 2 rados bench processes ]
-
-I also played with OSD thread number (no change) and used an in memory filesystem + journaling (filestore backend). Here the{1} [A] result is 1.4 kHz write for 1 IOPS in flight and the peak write performance putting many IOPS in flight and several rados bench processes is 2.3 kHz!
+To: 'Sushma Gurram' <Sushma.Gurram@sandisk.com>, 'Mark Nelson' <mark.nelson@inktank.com>, 'Sage Weil' <sage@inktank.com>
+Cc: "'ceph-devel@vger.kernel.org'" <ceph-devel@vger.kernel.org>, "Zhang, Jian" <jian.zhang@intel.com>
 
 
-Some summarizing remarks:
+Hi all,
 
-1) Default Logging has an important impact on the IOPS & latency [0.1-0.2ms]
-2) OSD implementation without journaling does not scale linear with concurrent IOs - need several OSDs to scale IOPS - lock contention/threading model?
-3) a writing OSD never fills more than 4 cores
-4) a reading OSD never fills more than 5 cores
-5) running 'rados bench' on a remote machine gives similar or slghltly worse results (upto -20%)
-6) CEPH delivering 20k read IOPS uses 4 cores on server side, while identical operations with higher payload (XRootD) uses one core for 3x higher performance (60k IOPS)
-7) I can scale the other IO daemon (XRootD) to use 10 cores and to deliver 300.000 IOPS on the same box.
+ We enabled rocksdb as data store in our test setup (10 osds on two servers, each server has 5 HDDs as osd , 2 ssds as journal , Intel(R) Xeon(R) CPU E31280)  and have performance tests for xfs, leveldb and rocksdb (use rados bench as our test tool),  the following chart shows details, for write ,  with small number threads , leveldb performance is lower than the other two backends , from 16 threads point ,  rocksdb perform a little better than xfs and leveldb , leveldb and rocksdb perform much better than xfs with higher thread number.
 
-Looking forward to SSDs and volatile memory backend stores I see some improvements to be done in the OSD/communication layer.
+	                                          xfs		  leveldb		rocksdb	
+	                  throughtput	latency	    throughtput	latency	   throughtput	latency
+1 thread write	     84.029	  0.048	            52.430	   0.076	      71.920	0.056
+2 threads write	     166.417	  0.048	            97.917	   0.082	     155.148	0.052
+4 threads write	      304.099	  0.052	            156.094	    0.102	     270.461	0.059
+8 threads write	      323.047	  0.099	            221.370	    0.144	     339.455	0.094
+16 threads write     295.040	  0.216	            272.032	    0.235       348.849	0.183
+32 threads write     324.467	  0.394	            290.072	     0.441	     338.103	0.378
+64 threads write     313.713	  0.812	            293.261	     0.871     324.603	0.787
+1 thread read	      75.687	  0.053	             71.629	     0.056      72.526	0.055
+2 threads read	      182.329	  0.044	            151.683	      0.053     153.125	0.052
+4 threads read	      320.785	  0.050	            307.180	      0.052      312.016	0.051
+8 threads read	       504.880	  0.063	            512.295	      0.062      519.683	0.062
+16 threads read       477.706	  0.134	            643.385	      0.099      654.149	0.098
+32 threads read       517.670	  0.247	             666.696          0.192      678.480	0.189
+64 threads read       516.599	  0.495	             668.360	       0.383      680.673	0.376
 
-If you have some ideas for parameters to tune or see some mistakes in this measurement - let me know!
+-----Original Message-----
+From: Shu, Xinxin 
+Sent: Saturday, June 14, 2014 11:50 AM
+To: Sushma Gurram; Mark Nelson; Sage Weil
+Cc: ceph-devel@vger.kernel.org; Zhang, Jian
+Subject: RE: [RFC] add rocksdb support
 
-Cheers Andreas.
+Currently ceph will get stable rocksdb from branch 3.0.fb of  ceph/rocksdb  , since PR https://github.com/ceph/rocksdb/pull/2 has not been merged ,  so if you use 'git submodule update --init' to get rocksdb submodule , It did not support autoconf/automake .  
 
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sushma Gurram
+Sent: Saturday, June 14, 2014 2:52 AM
+To: Shu, Xinxin; Mark Nelson; Sage Weil
+Cc: ceph-devel@vger.kernel.org; Zhang, Jian
+Subject: RE: [RFC] add rocksdb support
 
+Hi Xinxin,
 
+I tried to compile the wip-rocksdb branch, but the src/rocksdb directory seems to be empty. Do I need toput autoconf/automake in this directory?
+It doesn't seem to have any other source files and compilation fails:
+os/RocksDBStore.cc:10:24: fatal error: rocksdb/db.h: No such file or directory compilation terminated.
 
+Thanks,
+Sushma
 
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Shu, Xinxin
+Sent: Monday, June 09, 2014 10:00 PM
+To: Mark Nelson; Sage Weil
+Cc: ceph-devel@vger.kernel.org; Zhang, Jian
+Subject: RE: [RFC] add rocksdb support
 
+Hi mark
 
+I have finished development of support of rocksdb submodule,  a pull request for support of autoconf/automake for rocksdb has been created , you can find https://github.com/ceph/rocksdb/pull/2 , if this patch is ok ,  I will create a pull request for rocksdb submodule support , currently this patch can be found https://github.com/xinxinsh/ceph/tree/wip-rocksdb .
 
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
+Sent: Tuesday, June 10, 2014 1:12 AM
+To: Shu, Xinxin; Sage Weil
+Cc: ceph-devel@vger.kernel.org; Zhang, Jian
+Subject: Re: [RFC] add rocksdb support
 
+Hi Xinxin,
 
+On 05/28/2014 05:05 AM, Shu, Xinxin wrote:
+> Hi sage ,
+> I will add two configure options to --with-librocksdb-static and --with-librocksdb , with --with-librocksdb-static option , ceph will compile the code that get from ceph repository , with  --with-librocksdb option ,  in case of distro packages for rocksdb , ceph will not compile the rocksdb code , will use pre-installed library. is that ok for you ?
+>
+> since current rocksdb does not support autoconf&automake , I will add autoconf&automake support for rocksdb , but before that , i think we should fork a stable branch (maybe 3.0) for ceph .
 
+I'm looking at testing out the rocksdb support as well, both for the OSD and for the monitor based on some issues we've been seeing lately.  Any news on the 3.0 fork and autoconf/automake support in rocksdb?
 
+Thanks,
+Mark
 
+>
+> -----Original Message-----
+> From: Mark Nelson [mailto:mark.nelson@inktank.com]
+> Sent: Wednesday, May 21, 2014 9:06 PM
+> To: Shu, Xinxin; Sage Weil
+> Cc: ceph-devel@vger.kernel.org; Zhang, Jian
+> Subject: Re: [RFC] add rocksdb support
+>
+> On 05/21/2014 07:54 AM, Shu, Xinxin wrote:
+>> Hi, sage
+>>
+>> I will add rocksdb submodule into the makefile , currently we want to have fully performance tests on key-value db backend , both leveldb and rocksdb. Then optimize on rocksdb performance.
+>
+> I'm definitely interested in any performance tests you do here.  Last winter I started doing some fairly high level tests on raw leveldb/hyperleveldb/raikleveldb.  I'm very interested in what you see with rocksdb as a backend.
+>
+>>
+>> -----Original Message-----
+>> From: Sage Weil [mailto:sage@inktank.com]
+>> Sent: Wednesday, May 21, 2014 9:19 AM
+>> To: Shu, Xinxin
+>> Cc: ceph-devel@vger.kernel.org
+>> Subject: Re: [RFC] add rocksdb support
+>>
+>> Hi Xinxin,
+>>
+>> I've pushed an updated wip-rocksdb to github/liewegas/ceph.git that includes the latest set of patches with the groundwork and your rocksdb patch.  There is also a commit that adds rocksdb as a git submodule.  I'm thinking that, since there aren't any distro packages for rocksdb at this point, this is going to be the easiest way to make this usable for people.
+>>
+>> If you can wire the submodule into the makefile, we can merge this in so that rocksdb support is in the ceph.com packages on ceph.com.  I suspect that the distros will prefer to turns this off in favor of separate shared libs, but they can do this at their option if/when they include rocksdb in the distro. I think the key is just to have both --with-librockdb and --with-librocksdb-static (or similar) options so that you can either use the static or dynamically linked one.
+>>
+>> Has your group done further testing with rocksdb?  Anything interesting to share?
+>>
+>> Thanks!
+>> sage
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>> in the body of a message to majordomo@vger.kernel.org More majordomo 
+>> info at  http://vger.kernel.org/majordomo-info.html
+>>
+>
 
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
+________________________________
 
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
 
-
-
-
-
-
-
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
