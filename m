@@ -1,32 +1,40 @@
-From: Patrick McGarry <patrick-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Subject: CDS is Nigh!
-Date: Tue, 24 Jun 2014 10:15:43 -0400
-Message-ID: <etPan.53a9880f.2ca88611.5fb@scuttleair.local>
+From: Shayan Saeed <shayansaeed93@gmail.com>
+Subject: Disabling CRUSH for erasure code and doing custom placement
+Date: Tue, 24 Jun 2014 11:29:50 -0400
+Message-ID: <CALUBZ__98nzUjucW9NmFKEHzPFvu0yY0X5yHEtFH7g9QkhqSAQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-Content-Disposition: inline
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "=?utf-8?Q?community=40ceph.com?=" <community-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-pb0-f45.google.com ([209.85.160.45]:37347 "EHLO
+	mail-pb0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754187AbaFXP3v (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 24 Jun 2014 11:29:51 -0400
+Received: by mail-pb0-f45.google.com with SMTP id rr13so385490pbb.18
+        for <ceph-devel@vger.kernel.org>; Tue, 24 Jun 2014 08:29:50 -0700 (PDT)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-SGV5IGNlcGhlcnMsCgpXZeKAmXJlIGFib3V0IDQ1IG1pbnV0ZXMgZnJvbSBDZXBoIERldmVsb3Bl
-ciBTdW1taXQsIERheSAxIHN0YXJ0LiDCoElmIHlvdSBoYXZlIGFueSBwcm9ibGVtcyBqb2luaW5n
-IHRoZSB2aWRlbyBjb25mZXJlbmNlIHBsZWFzZSBhc2sgc2N1dHRsZW1vbmtleSBpbiAjY2VwaC1z
-dW1taXQgb24gb2Z0YyBhbmQgd2XigJlsbCB3b3JrIG9uIGdldHRpbmcgeW91IGluLiDCoFRoYW5r
-cyEKCmh0dHBzOi8vd2lraS5jZXBoLmNvbS9QbGFubmluZy9DRFMvQ0RTX0dpYW50X2FuZF9IYW1t
-ZXJfKEp1bl8yMDE0KQoKCgpCZXN0IFJlZ2FyZHMsICAKClBhdHJpY2sgTWNHYXJyeQpEaXJlY3Rv
-ciBDZXBoIENvbW11bml0eSwgUmVkIEhhdApodHRwOi8vY2VwaC5jb20gfHwgaHR0cDovL2NvbW11
-bml0eS5yZWRoYXQuY29tCkBzY3V0dGxlbW9ua2V5IHx8IEBjZXBoCl9fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0CmNl
-cGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNn
-aS9jZXBoLXVzZXJzLWNlcGguY29tCg==
+Hi,
+
+CRUSH placement algorithm works really nice with replication. However,
+with erasure code, my cluster has some issues which require making
+changes that I cannot specify with CRUSH maps.
+Sometimes, depending on the type of data, I would like to place them
+on different OSDs but in the same pool.
+
+I realize that to disable the CRUSH placement algorithm and replacing
+it with my own custom algorithm, such as random placement algo or any
+other, I have to make changes in the source code. I want to ask if
+there is an easy way to do this without going into every code file and
+looking where the mapping from objects to PG is done and changing
+that. Is there some configuration option which disables crush and
+points to my own placement algo file for doing custom placement.
+
+Let me know about the most neat way to go about it. Appreciate any
+help I can get.
+
+Regards,
+Shayan Saeed
+Research Assistant, Systems Research Lab
+University of Illinois Urbana-Champaign
