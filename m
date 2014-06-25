@@ -1,121 +1,103 @@
 From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: [PATCH 03/14] libceph: move and add dout()s to ceph_msg_{get,put}()
-Date: Wed, 25 Jun 2014 21:16:36 +0400
-Message-ID: <1403716607-13535-4-git-send-email-ilya.dryomov@inktank.com>
+Subject: [PATCH 04/14] libceph: move and add dout()s to ceph_osdc_request_{get,put}()
+Date: Wed, 25 Jun 2014 21:16:37 +0400
+Message-ID: <1403716607-13535-5-git-send-email-ilya.dryomov@inktank.com>
 References: <1403716607-13535-1-git-send-email-ilya.dryomov@inktank.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f170.google.com ([209.85.217.170]:60099 "EHLO
-	mail-lb0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757311AbaFYRQ7 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 25 Jun 2014 13:16:59 -0400
-Received: by mail-lb0-f170.google.com with SMTP id 10so2085846lbg.1
-        for <ceph-devel@vger.kernel.org>; Wed, 25 Jun 2014 10:16:57 -0700 (PDT)
+Received: from mail-la0-f49.google.com ([209.85.215.49]:40574 "EHLO
+	mail-la0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757311AbaFYRRB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 25 Jun 2014 13:17:01 -0400
+Received: by mail-la0-f49.google.com with SMTP id gf5so1000187lab.36
+        for <ceph-devel@vger.kernel.org>; Wed, 25 Jun 2014 10:17:00 -0700 (PDT)
 Received: from localhost ([109.110.67.53])
-        by mx.google.com with ESMTPSA id i10sm1805659laa.46.2014.06.25.10.16.56
+        by mx.google.com with ESMTPSA id i10sm4222232lbc.16.2014.06.25.10.16.58
         for <ceph-devel@vger.kernel.org>
         (version=TLSv1.2 cipher=RC4-SHA bits=128/128);
-        Wed, 25 Jun 2014 10:16:57 -0700 (PDT)
+        Wed, 25 Jun 2014 10:16:59 -0700 (PDT)
 In-Reply-To: <1403716607-13535-1-git-send-email-ilya.dryomov@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Add dout()s to ceph_msg_{get,put}().  Also move them to .c and turn
-kref release callback into a static function.
+Add dout()s to ceph_osdc_request_{get,put}().  Also move them to .c and
+turn kref release callback into a static function.
 
 Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
 ---
- include/linux/ceph/messenger.h |   14 ++------------
- net/ceph/messenger.c           |   31 ++++++++++++++++++++++---------
- 2 files changed, 24 insertions(+), 21 deletions(-)
+ include/linux/ceph/osd_client.h |   11 ++---------
+ net/ceph/osd_client.c           |   26 ++++++++++++++++++++++----
+ 2 files changed, 24 insertions(+), 13 deletions(-)
 
-diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
-index d21f2dba0731..40ae58e3e9db 100644
---- a/include/linux/ceph/messenger.h
-+++ b/include/linux/ceph/messenger.h
-@@ -285,19 +285,9 @@ extern void ceph_msg_data_add_bio(struct ceph_msg *msg, struct bio *bio,
+diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
+index 7490a03ac163..a8d5652f589d 100644
+--- a/include/linux/ceph/osd_client.h
++++ b/include/linux/ceph/osd_client.h
+@@ -328,15 +328,8 @@ extern void ceph_osdc_set_request_linger(struct ceph_osd_client *osdc,
+ extern void ceph_osdc_unregister_linger_request(struct ceph_osd_client *osdc,
+ 						struct ceph_osd_request *req);
  
- extern struct ceph_msg *ceph_msg_new(int type, int front_len, gfp_t flags,
- 				     bool can_fail);
--extern void ceph_msg_kfree(struct ceph_msg *m);
- 
--
--static inline struct ceph_msg *ceph_msg_get(struct ceph_msg *msg)
+-static inline void ceph_osdc_get_request(struct ceph_osd_request *req)
 -{
--	kref_get(&msg->kref);
--	return msg;
+-	kref_get(&req->r_kref);
 -}
--extern void ceph_msg_last_put(struct kref *kref);
--static inline void ceph_msg_put(struct ceph_msg *msg)
+-extern void ceph_osdc_release_request(struct kref *kref);
+-static inline void ceph_osdc_put_request(struct ceph_osd_request *req)
 -{
--	kref_put(&msg->kref, ceph_msg_last_put);
+-	kref_put(&req->r_kref, ceph_osdc_release_request);
 -}
-+extern struct ceph_msg *ceph_msg_get(struct ceph_msg *msg);
-+extern void ceph_msg_put(struct ceph_msg *msg);
++extern void ceph_osdc_get_request(struct ceph_osd_request *req);
++extern void ceph_osdc_put_request(struct ceph_osd_request *req);
  
- extern void ceph_msg_dump(struct ceph_msg *msg);
- 
-diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index 1948d592aa54..8bffa5b90fef 100644
---- a/net/ceph/messenger.c
-+++ b/net/ceph/messenger.c
-@@ -3269,24 +3269,21 @@ static int ceph_con_in_msg_alloc(struct ceph_connection *con, int *skip)
+ extern int ceph_osdc_start_request(struct ceph_osd_client *osdc,
+ 				   struct ceph_osd_request *req,
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index 6202923b41ff..7406046212dc 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -297,12 +297,15 @@ static void osd_req_op_data_release(struct ceph_osd_request *osd_req,
  /*
-  * Free a generically kmalloc'd message.
+  * requests
   */
--void ceph_msg_kfree(struct ceph_msg *m)
-+static void ceph_msg_free(struct ceph_msg *m)
+-void ceph_osdc_release_request(struct kref *kref)
++static void ceph_osdc_release_request(struct kref *kref)
  {
--	dout("msg_kfree %p\n", m);
-+	dout("%s %p\n", __func__, m);
- 	ceph_kvfree(m->front.iov_base);
- 	kmem_cache_free(ceph_msg_cache, m);
- }
+-	struct ceph_osd_request *req;
++	struct ceph_osd_request *req = container_of(kref,
++					    struct ceph_osd_request, r_kref);
+ 	unsigned int which;
  
--/*
-- * Drop a msg ref.  Destroy as needed.
-- */
--void ceph_msg_last_put(struct kref *kref)
-+static void ceph_msg_release(struct kref *kref)
- {
- 	struct ceph_msg *m = container_of(kref, struct ceph_msg, kref);
- 	LIST_HEAD(data);
- 	struct list_head *links;
- 	struct list_head *next;
- 
--	dout("ceph_msg_put last one on %p\n", m);
-+	dout("%s %p\n", __func__, m);
- 	WARN_ON(!list_empty(&m->list_head));
- 
- 	/* drop middle, data, if any */
-@@ -3308,9 +3305,25 @@ void ceph_msg_last_put(struct kref *kref)
- 	if (m->pool)
- 		ceph_msgpool_put(m->pool, m);
- 	else
--		ceph_msg_kfree(m);
-+		ceph_msg_free(m);
-+}
+-	req = container_of(kref, struct ceph_osd_request, r_kref);
++	dout("%s %p (r_request %p r_reply %p)\n", __func__, req,
++	     req->r_request, req->r_reply);
 +
-+struct ceph_msg *ceph_msg_get(struct ceph_msg *msg)
-+{
-+	dout("%s %p (was %d)\n", __func__, msg,
-+	     atomic_read(&msg->kref.refcount));
-+	kref_get(&msg->kref);
-+	return msg;
-+}
-+EXPORT_SYMBOL(ceph_msg_get);
-+
-+void ceph_msg_put(struct ceph_msg *msg)
-+{
-+	dout("%s %p (was %d)\n", __func__, msg,
-+	     atomic_read(&msg->kref.refcount));
-+	kref_put(&msg->kref, ceph_msg_release);
- }
--EXPORT_SYMBOL(ceph_msg_last_put);
-+EXPORT_SYMBOL(ceph_msg_put);
+ 	if (req->r_request)
+ 		ceph_msg_put(req->r_request);
+ 	if (req->r_reply) {
+@@ -320,7 +323,22 @@ void ceph_osdc_release_request(struct kref *kref)
+ 		kmem_cache_free(ceph_osd_request_cache, req);
  
- void ceph_msg_dump(struct ceph_msg *msg)
- {
+ }
+-EXPORT_SYMBOL(ceph_osdc_release_request);
++
++void ceph_osdc_get_request(struct ceph_osd_request *req)
++{
++	dout("%s %p (was %d)\n", __func__, req,
++	     atomic_read(&req->r_kref.refcount));
++	kref_get(&req->r_kref);
++}
++EXPORT_SYMBOL(ceph_osdc_get_request);
++
++void ceph_osdc_put_request(struct ceph_osd_request *req)
++{
++	dout("%s %p (was %d)\n", __func__, req,
++	     atomic_read(&req->r_kref.refcount));
++	kref_put(&req->r_kref, ceph_osdc_release_request);
++}
++EXPORT_SYMBOL(ceph_osdc_put_request);
+ 
+ struct ceph_osd_request *ceph_osdc_alloc_request(struct ceph_osd_client *osdc,
+ 					       struct ceph_snap_context *snapc,
 -- 
 1.7.10.4
 
