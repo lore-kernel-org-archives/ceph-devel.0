@@ -1,68 +1,64 @@
-From: Sage Weil <sage@redhat.com>
-Subject: Re: Ceph on Fedora
-Date: Wed, 25 Jun 2014 08:52:37 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1406250847320.11402@cobra.newdream.net>
-References: <81484967.26606084.1403611408994.JavaMail.zimbra@redhat.com> <alpine.DEB.2.00.1406240658490.26155@cobra.newdream.net> <1933569313.26739343.1403619189180.JavaMail.zimbra@redhat.com> <alpine.DEB.2.00.1406241339320.29955@cobra.newdream.net>
- <2098519518.26968570.1403644538772.JavaMail.zimbra@redhat.com> <53A9EBC3.8090708@inktank.com> <196130012.26972749.1403645349752.JavaMail.zimbra@redhat.com> <1023335739.27158897.1403688592530.JavaMail.zimbra@redhat.com>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+From: Ilya Dryomov <ilya.dryomov@inktank.com>
+Subject: [PATCH 00/14] rbd: #6628 fixes (wip-remove-osd-6628)
+Date: Wed, 25 Jun 2014 21:16:33 +0400
+Message-ID: <1403716607-13535-1-git-send-email-ilya.dryomov@inktank.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:56313 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757211AbaFYPwi (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 25 Jun 2014 11:52:38 -0400
-In-Reply-To: <1023335739.27158897.1403688592530.JavaMail.zimbra@redhat.com>
+Received: from mail-lb0-f172.google.com ([209.85.217.172]:49138 "EHLO
+	mail-lb0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757311AbaFYRQv (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 25 Jun 2014 13:16:51 -0400
+Received: by mail-lb0-f172.google.com with SMTP id c11so2088770lbj.31
+        for <ceph-devel@vger.kernel.org>; Wed, 25 Jun 2014 10:16:50 -0700 (PDT)
+Received: from localhost ([109.110.67.53])
+        by mx.google.com with ESMTPSA id j13sm1807121lab.39.2014.06.25.10.16.48
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=RC4-SHA bits=128/128);
+        Wed, 25 Jun 2014 10:16:49 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Federico Simoncelli <fsimonce@redhat.com>
-Cc: Dan Mick <dan.mick@inktank.com>, Sage Weil <sweil@redhat.com>, icolle@redhat.com, Alfredo Deza <adeza@redhat.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-[adding ceph-devel]
+Hi,
 
-On Wed, 25 Jun 2014, Federico Simoncelli wrote:
-> New version of the patch:
-> 
->  http://github.com/simon3z/ceph/commit/ef42184
-> 
-> sadly not fully addressing the cluster problem (it is now configurable 
-> but it is unique). It is clear that systemd doesn't support multiple 
-> instance identifiers %i (we could have used one for the mon/osd/mds id 
-> and one for the cluster) and it doesn't support parsing the single %i 
-> (to be split in two).
+This series is the result of hunting down and fixing #6628.  The core
+patches are:
 
-That is unfortunate, but so it goes.  Any idea if this is something 
-that systemd may get later?
- 
-> Instances are not even that common in systemd, I think the way fedora would
-> integrate ceph is using the /etc/sysconfig/ceph file to configure the ids:
-> 
-> CLUSTER="ceph"
-> MON_ID="ceph-node01"
-> OSD_ID="0"
-> MDS_ID="ceph-node01"
-> 
-> and then just run:
-> 
->  # systemctl start ceph-mon ceph-osd ceph-mds
-> 
-> So I have the feeling that we're already giving an extra degree of freedom
-> by using instances to run multiple mon/osd/mds (even though I am not sure
-> how much that's useful if they have to be part of the same cluster).
-> 
-> Actually, do you feel that having multiple mon/osd/mds is useless if they
-> have to be of the same cluster? I am talking about the regular deployments,
-> not testing/developing.
+ 7/14 libceph: unregister only registered linger requests
+10/14 rbd: rbd_obj_request_wait() should cancel the request if interrupted
+12/14 rbd: use rbd_obj_watch_request_helper() helper
+14/14 libceph: drop osd ref when canceling con work
 
-Having multiple instances of daemons is definitely required.  The vast 
-majority of deployments have many OSDs per node.  It's less common for the 
-mon and mds daemons, but I think it is simplest to make them match.
+The rest are cleanups and miscellaneous fixes.  wip-remove-osd-6628 has
+been force-pushed.
 
-That being the case, I think your original suggestion of having the 
-cluster specified somewhere in /etc/ceph or /etc/sysconfig/ceph is the 
-right interim solution.
+Thanks,
 
-Is there a way to set up meta-jobs that capture all instances of each 
-daemon type, or all ceph daemons?
+                Ilya
 
-Thanks!
-sage
+
+Ilya Dryomov (14):
+  libceph: rename ceph_osd_request::r_linger_osd to r_linger_osd_item
+  libceph: add maybe_move_osd_to_lru() and switch to it
+  libceph: move and add dout()s to ceph_msg_{get,put}()
+  libceph: move and add dout()s to ceph_osdc_request_{get,put}()
+  libceph: harden ceph_osdc_request_release() a bit
+  libceph: assert both regular and lingering lists in __remove_osd()
+  libceph: unregister only registered linger requests
+  libceph: fix linger request check in __unregister_request()
+  libceph: introduce ceph_osdc_cancel_request()
+  rbd: rbd_obj_request_wait() should cancel the request if interrupted
+  rbd: add rbd_obj_watch_request_helper() helper
+  rbd: use rbd_obj_watch_request_helper() helper
+  libceph: nuke ceph_osdc_unregister_linger_request()
+  libceph: drop osd ref when canceling con work
+
+ drivers/block/rbd.c             |  191 ++++++++++++++++++---------------------
+ include/linux/ceph/messenger.h  |   14 +--
+ include/linux/ceph/osd_client.h |   18 +---
+ net/ceph/messenger.c            |   45 ++++++---
+ net/ceph/osd_client.c           |  129 +++++++++++++++++---------
+ 5 files changed, 217 insertions(+), 180 deletions(-)
+
+-- 
+1.7.10.4
+
