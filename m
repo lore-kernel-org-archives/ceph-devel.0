@@ -1,41 +1,27 @@
-From: Sage Weil <sage@redhat.com>
-Subject: Re: Speeding up ceph builds
-Date: Wed, 25 Jun 2014 10:28:19 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1406251027350.12946@cobra.newdream.net>
-References: <53AAE7A0.5060404@redhat.com>
+From: Sage Weil <sage@inktank.com>
+Subject: radosstriper build failure on i386
+Date: Wed, 25 Jun 2014 14:28:41 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1406251427470.24410@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:56925 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:58325 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757446AbaFYR2T (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 25 Jun 2014 13:28:19 -0400
-In-Reply-To: <53AAE7A0.5060404@redhat.com>
+	with ESMTP id S1753174AbaFYV2m (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 25 Jun 2014 17:28:42 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Luis Pabon <lpabon@redhat.com>
+To: sebastien.ponce@cern.ch
 Cc: ceph-devel@vger.kernel.org
 
-On Wed, 25 Jun 2014, Luis Pabon wrote:
-> Hi all,
->   I have tried disabling static builds which cut build time by half.  I have
-> built it without static builds and they work, but I wanted to see if others
-> could try it out also and determine that the software still works.  To speed
-> up the build time, you can type:
-> 
-> ./configure --disable-static
-> 
-> If no one finds any issues with this mode, we can set it up as the default in
-> configure.ac.
-> 
-> This could provide a speed up while we wait for the Cmake patch.
+Hi Sebastien,
 
-As a conservative first step, this
+There are several build errors we didn't notice before merging in 
+radosstriper:
 
-	https://github.com/ceph/ceph/pull/2025
+	http://gitbuilder.sepia.ceph.com/gitbuilder-ceph-tarball-saucy-i386-basic/log.cgi?log=31b59d6626f64d4f5f4a1960b4084eaea7ed79f0
 
-enables it for do_autogen.sh, which will make life better for 
-developers...
+Do you mind taking a look?
 
+Thanks!
 sage
-
