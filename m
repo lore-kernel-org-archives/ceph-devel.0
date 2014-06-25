@@ -1,104 +1,97 @@
 From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: [PATCH 09/14] libceph: introduce ceph_osdc_cancel_request()
-Date: Wed, 25 Jun 2014 21:16:42 +0400
-Message-ID: <1403716607-13535-10-git-send-email-ilya.dryomov@inktank.com>
+Subject: [PATCH 10/14] rbd: rbd_obj_request_wait() should cancel the request if interrupted
+Date: Wed, 25 Jun 2014 21:16:43 +0400
+Message-ID: <1403716607-13535-11-git-send-email-ilya.dryomov@inktank.com>
 References: <1403716607-13535-1-git-send-email-ilya.dryomov@inktank.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f45.google.com ([209.85.215.45]:44627 "EHLO
-	mail-la0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757661AbaFYRRO (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 25 Jun 2014 13:17:14 -0400
-Received: by mail-la0-f45.google.com with SMTP id hr17so990681lab.4
-        for <ceph-devel@vger.kernel.org>; Wed, 25 Jun 2014 10:17:13 -0700 (PDT)
+Received: from mail-la0-f41.google.com ([209.85.215.41]:52152 "EHLO
+	mail-la0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757668AbaFYRRR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 25 Jun 2014 13:17:17 -0400
+Received: by mail-la0-f41.google.com with SMTP id hz20so1007735lab.28
+        for <ceph-devel@vger.kernel.org>; Wed, 25 Jun 2014 10:17:15 -0700 (PDT)
 Received: from localhost ([109.110.67.53])
-        by mx.google.com with ESMTPSA id i10sm1805919laa.46.2014.06.25.10.17.12
+        by mx.google.com with ESMTPSA id ui5sm4216270lbb.32.2014.06.25.10.17.14
         for <ceph-devel@vger.kernel.org>
         (version=TLSv1.2 cipher=RC4-SHA bits=128/128);
-        Wed, 25 Jun 2014 10:17:12 -0700 (PDT)
+        Wed, 25 Jun 2014 10:17:14 -0700 (PDT)
 In-Reply-To: <1403716607-13535-1-git-send-email-ilya.dryomov@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Introduce ceph_osdc_cancel_request() intended for canceling requests
-from the higher layers (rbd and cephfs).  Because higher layers are in
-charge and are supposed to know what and when they are canceling, the
-request is not completed, only unref'ed and removed from the libceph
-data structures.
+rbd_obj_request_wait() should cancel the underlying OSD request if
+interrupted.  Otherwise libceph will hold onto it indefinitely, causing
+assert failures or leaking the original object request.
+
+This also adds an rbd wrapper around ceph_osdc_cancel_request() to
+match rbd_obj_request_submit() and rbd_obj_request_wait().
 
 Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
 ---
- include/linux/ceph/osd_client.h |    1 +
- net/ceph/osd_client.c           |   31 +++++++++++++++++++++++++------
- 2 files changed, 26 insertions(+), 6 deletions(-)
+ drivers/block/rbd.c |   39 ++++++++++++++++++++++++++++-----------
+ 1 file changed, 28 insertions(+), 11 deletions(-)
 
-diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
-index a8d5652f589d..de09cad7b7c7 100644
---- a/include/linux/ceph/osd_client.h
-+++ b/include/linux/ceph/osd_client.h
-@@ -334,6 +334,7 @@ extern void ceph_osdc_put_request(struct ceph_osd_request *req);
- extern int ceph_osdc_start_request(struct ceph_osd_client *osdc,
- 				   struct ceph_osd_request *req,
- 				   bool nofail);
-+extern void ceph_osdc_cancel_request(struct ceph_osd_request *req);
- extern int ceph_osdc_wait_request(struct ceph_osd_client *osdc,
- 				  struct ceph_osd_request *req);
- extern void ceph_osdc_sync(struct ceph_osd_client *osdc);
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index 8104db24bc09..ef44cc0bbc6a 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -2470,6 +2470,25 @@ int ceph_osdc_start_request(struct ceph_osd_client *osdc,
- EXPORT_SYMBOL(ceph_osdc_start_request);
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index b2c98c1bc037..20147aec86f3 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -1527,11 +1527,37 @@ static bool obj_request_type_valid(enum obj_request_type type)
+ static int rbd_obj_request_submit(struct ceph_osd_client *osdc,
+ 				struct rbd_obj_request *obj_request)
+ {
+-	dout("%s: osdc %p obj %p\n", __func__, osdc, obj_request);
+-
++	dout("%s %p\n", __func__, obj_request);
+ 	return ceph_osdc_start_request(osdc, obj_request->osd_req, false);
+ }
  
- /*
-+ * Unregister a registered request.  The request is not completed (i.e.
-+ * no callbacks or wakeups) - higher layers are supposed to know what
-+ * they are canceling.
-+ */
-+void ceph_osdc_cancel_request(struct ceph_osd_request *req)
++static void rbd_obj_request_end(struct rbd_obj_request *obj_request)
 +{
-+	struct ceph_osd_client *osdc = req->r_osdc;
-+
-+	mutex_lock(&osdc->request_mutex);
-+	if (req->r_linger)
-+		__unregister_linger_request(osdc, req);
-+	__unregister_request(osdc, req);
-+	mutex_unlock(&osdc->request_mutex);
-+
-+	dout("%s %p tid %llu canceled\n", __func__, req, req->r_tid);
++	dout("%s %p\n", __func__, obj_request);
++	ceph_osdc_cancel_request(obj_request->osd_req);
 +}
-+EXPORT_SYMBOL(ceph_osdc_cancel_request);
 +
 +/*
-  * wait for a request to complete
-  */
- int ceph_osdc_wait_request(struct ceph_osd_client *osdc,
-@@ -2477,18 +2496,18 @@ int ceph_osdc_wait_request(struct ceph_osd_client *osdc,
- {
- 	int rc;
- 
-+	dout("%s %p tid %llu\n", __func__, req, req->r_tid);
++ * Wait for an object request to complete.  If interrupted, cancel the
++ * underlying osd request.
++ */
++static int rbd_obj_request_wait(struct rbd_obj_request *obj_request)
++{
++	int ret;
 +
- 	rc = wait_for_completion_interruptible(&req->r_completion);
- 	if (rc < 0) {
--		mutex_lock(&osdc->request_mutex);
--		__cancel_request(req);
--		__unregister_request(osdc, req);
--		mutex_unlock(&osdc->request_mutex);
-+		dout("%s %p tid %llu interrupted\n", __func__, req, req->r_tid);
-+		ceph_osdc_cancel_request(req);
- 		complete_request(req);
--		dout("wait_request tid %llu canceled/timed out\n", req->r_tid);
- 		return rc;
- 	}
++	dout("%s %p\n", __func__, obj_request);
++
++	ret = wait_for_completion_interruptible(&obj_request->completion);
++	if (ret < 0) {
++		dout("%s %p interrupted\n", __func__, obj_request);
++		rbd_obj_request_end(obj_request);
++		return ret;
++	}
++
++	dout("%s %p done\n", __func__, obj_request);
++	return 0;
++}
++
+ static void rbd_img_request_complete(struct rbd_img_request *img_request)
+ {
  
--	dout("wait_request tid %llu result %d\n", req->r_tid, req->r_result);
-+	dout("%s %p tid %llu result %d\n", __func__, req, req->r_tid,
-+	     req->r_result);
- 	return req->r_result;
+@@ -1558,15 +1584,6 @@ static void rbd_img_request_complete(struct rbd_img_request *img_request)
+ 		rbd_img_request_put(img_request);
  }
- EXPORT_SYMBOL(ceph_osdc_wait_request);
+ 
+-/* Caller is responsible for rbd_obj_request_destroy(obj_request) */
+-
+-static int rbd_obj_request_wait(struct rbd_obj_request *obj_request)
+-{
+-	dout("%s: obj %p\n", __func__, obj_request);
+-
+-	return wait_for_completion_interruptible(&obj_request->completion);
+-}
+-
+ /*
+  * The default/initial value for all image request flags is 0.  Each
+  * is conditionally set to 1 at image request initialization time
 -- 
 1.7.10.4
 
