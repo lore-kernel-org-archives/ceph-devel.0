@@ -1,58 +1,71 @@
-From: huang jun <hjwsm1989@gmail.com>
-Subject: how to improve read through on sparse files (vm image file)
-Date: Fri, 27 Jun 2014 00:27:06 +0800
-Message-ID: <CABAwU-buZtx=ViUTCs4n2sgvdCLPA41VweB9waa4eHPPZE7BSg@mail.gmail.com>
+From: Luis Pabon <lpabon@redhat.com>
+Subject: master does not compile
+Date: Thu, 26 Jun 2014 13:27:49 -0400
+Message-ID: <53AC5815.3090503@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yk0-f176.google.com ([209.85.160.176]:39744 "EHLO
-	mail-yk0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751759AbaFZQ1H (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Jun 2014 12:27:07 -0400
-Received: by mail-yk0-f176.google.com with SMTP id 131so2129299ykp.7
-        for <ceph-devel@vger.kernel.org>; Thu, 26 Jun 2014 09:27:06 -0700 (PDT)
+Received: from mx1.redhat.com ([209.132.183.28]:19226 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753043AbaFZR1v (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 26 Jun 2014 13:27:51 -0400
+Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
+	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id s5QHRoCq010715
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK)
+	for <ceph-devel@vger.kernel.org>; Thu, 26 Jun 2014 13:27:51 -0400
+Received: from localhost.localdomain (vpn-59-95.rdu2.redhat.com [10.10.59.95])
+	by int-mx10.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id s5QHRorJ011296
+	for <ceph-devel@vger.kernel.org>; Thu, 26 Jun 2014 13:27:50 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-hi,all
-We migrate vmware EXSI vm from ceph cluster via NFS to local disk,the
-image file size is about 250GB. we have 8 OSDs on 2 hosts.
-But the migrate speed is pretty slow, we test it in 3 way:
-1) NFS + kclient + ceph
-during the first 5 minutes, read speed is about 40MB/s,
-but after that, down to 20MB/s, the whole migrate cost 3 hours.
-Check the osd log, we find there are many read request at 4KB size,
-and OSD return -2, which means those requests are for the hole in the
-vm image file.
-we also find that NFS send random read request to OSDs while checking
-the client log,
+I hit this issue just now (Fedora 20).  Please confirm that this happens 
+in other systems.  Travis may be able to at least help do sanity tests.
 
-2) NFS + ceph-fuse + ceph
-avg read speed is about 40MB/s, the whole migrate cost 2 hours.
-After check the osd log, the read request size is 128KB.
+- Luis
 
-2.1) set  the client readahead size like below:
-[client]
-client_readahead_min = 4194304
-client_readahead_max = 41943040
+   CXX      librados/librados_la-RadosClient.lo
+erasure-code/jerasure/ErasureCodePluginJerasure.cc: In function 'int 
+__erasure_code_init(char*)':
+erasure-code/jerasure/ErasureCodePluginJerasure.cc:78:43: error: 
+'galois_init_default_field' was not declared in this scope
+      int r = galois_init_default_field(w[i]);
+                                            ^
+erasure-code/jerasure/ErasureCodePluginJerasure.cc: In function 'int 
+__erasure_code_init(char*)':
+erasure-code/jerasure/ErasureCodePluginJerasure.cc:78:43: error: 
+'galois_init_default_field' was not declared in this scope
+      int r = galois_init_default_field(w[i]);
+                                            ^
+make[3]: *** 
+[erasure-code/jerasure/libec_jerasure_generic_la-ErasureCodePluginJerasure.lo] 
+Error 1
+make[3]: *** Waiting for unfinished jobs....
+make[3]: *** 
+[erasure-code/jerasure/libec_jerasure_sse3_la-ErasureCodePluginJerasure.lo] 
+Error 1
+erasure-code/jerasure/ErasureCodePluginJerasure.cc: In function 'int 
+__erasure_code_init(char*)':
+erasure-code/jerasure/ErasureCodePluginJerasure.cc:78:43: error: 
+'galois_init_default_field' was not declared in this scope
+      int r = galois_init_default_field(w[i]);
+                                            ^
+make[3]: *** 
+[erasure-code/jerasure/libec_jerasure_sse4_la-ErasureCodePluginJerasure.lo] 
+Error 1
+make[3]: Leaving directory `/data/lpabon/git/ceph/ceph/src'
+make[2]: *** [all-recursive] Error 1
+make[2]: Leaving directory `/data/lpabon/git/ceph/ceph/src'
+make[1]: *** [all] Error 2
+make[1]: Leaving directory `/data/lpabon/git/ceph/ceph/src'
+make: *** [all-recursive] Error 1
 
-but is doesn't make big difference, the migration cost 1 hour 58 minutes.
+$ git log --oneline -3
+959d664 Merge pull request #2032 from sponce/wip-fixstriperoni386
+a5f9a09 Fixed build on 32 bits platforms
+f5a72b7 Added a couple of ASSERTS for avoiding coverity to complain 
+about the possibility of a division by 0
 
-2.2) we change the client code to always read ahead objects when we do
-every read request.
-unfortunately, the migration time does reduce much.
 
-3) NFS + rbd + ceph
-the read speed can reach 117MB/s (reading holes in sparse file)
-and decrease to 40MB/s when reading the data parts of the vm image file.
-
-i have questions:
-1) is there any way to improve the through when reading sparse files?
-2) can i change the read size of nfs(may be asked on nfs mailing list)?
-
-3) any other params to set on ceph fuse client to improve read speed?
-
--- 
-thanks
-huangjun
