@@ -1,357 +1,123 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: FW: erasure code and coefficients
-Date: Mon, 30 Jun 2014 15:32:41 +0200
-Message-ID: <53B166F9.5050206@dachary.org>
-References: <53AFDC99.9010009@dachary.org>	<CACUN8h3rxRmBkMD7dWJgp3yiJ6Qm9TvJptGSfsUgL-bAyoQi8Q@mail.gmail.com>	<53B05E85.9020405@dachary.org>	<CACUN8h2PnC=x4_6EesCAgG5meQB=e0QMqrc6AHTNa0tJzOyaTA@mail.gmail.com>	<53B1289D.8030901@dachary.org>	<3472A07E6605974CBC9BC573F1BC02E4AE746F2A@CERNXCHG44.cern.ch>	<53B13D2A.8030901@dachary.org> <CAGhffvxTXLfziX9YLifvufYtuBnFPoooKNL5nGaHU0QyZWt6yg@mail.gmail.com>,<53B158FC.8050303@dachary.org> <3472A07E6605974CBC9BC573F1BC02E4AE746FD9@CERNXCHG44.cern.ch>
+From: Alex Elder <elder@ieee.org>
+Subject: Re: [PATCH 09/14] libceph: introduce ceph_osdc_cancel_request()
+Date: Mon, 30 Jun 2014 08:39:19 -0500
+Message-ID: <53B16887.2090309@ieee.org>
+References: <1403716607-13535-1-git-send-email-ilya.dryomov@inktank.com> <1403716607-13535-10-git-send-email-ilya.dryomov@inktank.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="JA0SRQf56LDO4rO9Pv6hfXIk0sE9tBRfF"
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:60773 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1750771AbaF3Ncs (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Jun 2014 09:32:48 -0400
-In-Reply-To: <3472A07E6605974CBC9BC573F1BC02E4AE746FD9@CERNXCHG44.cern.ch>
+Received: from mail-ig0-f179.google.com ([209.85.213.179]:50499 "EHLO
+	mail-ig0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751896AbaF3NjM (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Jun 2014 09:39:12 -0400
+Received: by mail-ig0-f179.google.com with SMTP id uq10so4276522igb.0
+        for <ceph-devel@vger.kernel.org>; Mon, 30 Jun 2014 06:39:11 -0700 (PDT)
+In-Reply-To: <1403716607-13535-10-git-send-email-ilya.dryomov@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Ilya Dryomov <ilya.dryomov@inktank.com>, ceph-devel@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---JA0SRQf56LDO4rO9Pv6hfXIk0sE9tBRfF
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+On 06/25/2014 12:16 PM, Ilya Dryomov wrote:
+> Introduce ceph_osdc_cancel_request() intended for canceling requests
+> from the higher layers (rbd and cephfs).  Because higher layers are in
+> charge and are supposed to know what and when they are canceling, the
+> request is not completed, only unref'ed and removed from the libceph
+> data structures.
 
-Hi,
+This seems reasonable.
 
-On 30/06/2014 14:59, Andreas Joachim Peters wrote:
-> Hi Loic,=20
->=20
-> I was reading through the code and I have got the impression that they =
-have formulated something simple with a lot of mathematical formulas in t=
-his paper. Indeed all ci =3D 1 ... which makes it simple ...
+But you make two changes here that I'd like to see a little
+more explanation on.  They seem significant enough to warrant
+a little more attention in the commit description.
 
-It makes things simpler to understand from my perspective, cool :-)
+- __cancel_request() is no longer called when
+  ceph_osdc_wait_request() fails due to an
+  an interrupt.  This is my main concern, and I
+  plan to work through it but I'm in a small hurry
+  right now.
+- __unregister_linger_request() is now called when
+  a request is canceled, but it wasn't before.  (Since
+  we're consistent about setting the r_linger flag
+  this should be fine, but it *is* a behavior change.)
 
-> The code seems to work  like this  e..g 10 + 2 + 4 :
->=20
-> Data =3D (1,2,3,4,5,6,7,8,9,10)
->=20
-> (RS1,RS2,RS3,RS4) =3D RS(1,2,3,4,5,5,6,7,8,9,10)
->=20
-> P1 =3D 1 ^ 2 ^ 3 ^ 4 ^ 5
-> P2 =3D 6 ^ 7 ^ 8 ^ 9 ^ 10
-> P3 =3D P1 ^ P2 =3D RS1 ^ RS2 ^ RS3 ^ RS4 ( no need to store that, since=
- we store P1 and P2)
->=20
+I'm going to keep looking at this; I have about
+20 minutes before I have to leave for a while.
 
-Using my own words, if local parity P1 and P2 is calculated using only th=
-e data chunks, it follows that P1 ^ P2 can also be used as an implied par=
-ity chunk for the RS parity chunks. But would that be true if P1 and P2 w=
-as calculated using a random subset of the data + coding chunks ? I.e if =
-P1 =3D RS1 ^ 2 ^ 3 ^ 4 ^ 5 , can P1 ^ P2 =3D P3 be used to recover any of=
- 1, RS2, RS3, RS4 ? In other words, does it make a difference that P3 is =
-an implied parity for the parity chunks or can it be an implied parity fo=
-r any data/coding chunks involved in RS ?
+					-Alex
 
-Cheers
+> Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
+> ---
+>  include/linux/ceph/osd_client.h |    1 +
+>  net/ceph/osd_client.c           |   31 +++++++++++++++++++++++++------
+>  2 files changed, 26 insertions(+), 6 deletions(-)
+> 
+> diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
+> index a8d5652f589d..de09cad7b7c7 100644
+> --- a/include/linux/ceph/osd_client.h
+> +++ b/include/linux/ceph/osd_client.h
+> @@ -334,6 +334,7 @@ extern void ceph_osdc_put_request(struct ceph_osd_request *req);
+>  extern int ceph_osdc_start_request(struct ceph_osd_client *osdc,
+>  				   struct ceph_osd_request *req,
+>  				   bool nofail);
+> +extern void ceph_osdc_cancel_request(struct ceph_osd_request *req);
+>  extern int ceph_osdc_wait_request(struct ceph_osd_client *osdc,
+>  				  struct ceph_osd_request *req);
+>  extern void ceph_osdc_sync(struct ceph_osd_client *osdc);
+> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+> index 8104db24bc09..ef44cc0bbc6a 100644
+> --- a/net/ceph/osd_client.c
+> +++ b/net/ceph/osd_client.c
+> @@ -2470,6 +2470,25 @@ int ceph_osdc_start_request(struct ceph_osd_client *osdc,
+>  EXPORT_SYMBOL(ceph_osdc_start_request);
+>  
+>  /*
+> + * Unregister a registered request.  The request is not completed (i.e.
+> + * no callbacks or wakeups) - higher layers are supposed to know what
+> + * they are canceling.
+> + */
+> +void ceph_osdc_cancel_request(struct ceph_osd_request *req)
+> +{
+> +	struct ceph_osd_client *osdc = req->r_osdc;
+> +
+> +	mutex_lock(&osdc->request_mutex);
+> +	if (req->r_linger)
+> +		__unregister_linger_request(osdc, req);
+> +	__unregister_request(osdc, req);
+> +	mutex_unlock(&osdc->request_mutex);
+> +
+> +	dout("%s %p tid %llu canceled\n", __func__, req, req->r_tid);
+> +}
+> +EXPORT_SYMBOL(ceph_osdc_cancel_request);
+> +
+> +/*
+>   * wait for a request to complete
+>   */
+>  int ceph_osdc_wait_request(struct ceph_osd_client *osdc,
+> @@ -2477,18 +2496,18 @@ int ceph_osdc_wait_request(struct ceph_osd_client *osdc,
+>  {
+>  	int rc;
+>  
+> +	dout("%s %p tid %llu\n", __func__, req, req->r_tid);
+> +
+>  	rc = wait_for_completion_interruptible(&req->r_completion);
+>  	if (rc < 0) {
+> -		mutex_lock(&osdc->request_mutex);
+> -		__cancel_request(req);
+> -		__unregister_request(osdc, req);
+> -		mutex_unlock(&osdc->request_mutex);
+> +		dout("%s %p tid %llu interrupted\n", __func__, req, req->r_tid);
+> +		ceph_osdc_cancel_request(req);
+>  		complete_request(req);
+> -		dout("wait_request tid %llu canceled/timed out\n", req->r_tid);
+>  		return rc;
+>  	}
+>  
+> -	dout("wait_request tid %llu result %d\n", req->r_tid, req->r_result);
+> +	dout("%s %p tid %llu result %d\n", __func__, req, req->r_tid,
+> +	     req->r_result);
+>  	return req->r_result;
+>  }
+>  EXPORT_SYMBOL(ceph_osdc_wait_request);
+> 
 
-> You can reconstruct a missing RS chunk with local parity like: RS1 =3D =
-P1 ^ P2 ^ RS2 ^ RS3 ^ RS4
->=20
-> At least this is what I got out of the code ...  look at getSRCGroupNei=
-ghbors
->=20
-> What I don't know is, if P1 ^ P2 ^ P3 =3D 0 work with every encoding ma=
-trix or only for that particular one used.
->=20
-> Cheers Andreas.
->=20
->=20
->=20
->>
->> On Mon, Jun 30, 2014 at 12:34 PM, Loic Dachary <loic@dachary.org <mail=
-to:loic@dachary.org>> wrote:
->>
->>     Hi Andreas,
->>
->>     TL;DR: which part of the code chooses the coefficients to maximize=
- the fault tolerance of the code as suggested in the Xorbas paper ?
->>
->>     If I understand correctly, the locality is computed (i.e. how many=
- local parity chunks are created) with:
->>
->>     https://github.com/madiator/HadoopUSC/blob/developUSC/src/contrib/=
-raid/src/java/org/apache/hadoop/raid/SimpleRegeneratingCode.java#L84
->>
->>     This is different from specifying it explicitly (https://github.co=
-m/dachary/ceph/commit/91b9cc2be5851f7668d593bb69b2f4f089ea585a#diff-55189=
-64bc98a094a784ce2d17a5b0cc1R11)
->>
->>     Then a RS encoding matrix is calculated
->>
->>     https://github.com/madiator/HadoopUSC/blob/developUSC/src/contrib/=
-raid/src/java/org/apache/hadoop/raid/SimpleRegeneratingCode.java#L100
->>
->>     and will be used when encoding an object
->>
->>     https://github.com/madiator/HadoopUSC/blob/developUSC/src/contrib/=
-raid/src/java/org/apache/hadoop/raid/SimpleRegeneratingCode.java#L143
->>
->>     then each local parity chunk is calculated using a simpler functio=
-n (XOR)
->>
->>     https://github.com/madiator/HadoopUSC/blob/developUSC/src/contrib/=
-raid/src/java/org/apache/hadoop/raid/SimpleRegeneratingCode.java#L154
->>
->>     When decoding, the equivalent of the Ceph minimum_to_decode method=
- is used to figure out which chunks are needed to recover the lost chunks=
-
->>
->>     https://github.com/madiator/HadoopUSC/blob/developUSC/src/contrib/=
-raid/src/java/org/apache/hadoop/raid/SimpleRegeneratingCode.java#L319
->>
->>     During recovery, if only one chunk is missing, it is recovered wit=
-h the simpler function (XOR)
->>
->>     https://github.com/madiator/HadoopUSC/blob/developUSC/src/contrib/=
-raid/src/java/org/apache/hadoop/raid/SimpleRegeneratingCode.java#L207
->>     https://github.com/madiator/HadoopUSC/blob/developUSC/src/contrib/=
-raid/src/java/org/apache/hadoop/raid/SimpleRegeneratingCode.java#L224
->>     (both of which are combined recursively)
->>
->>     and if there is is a "conflict" (i.e. if local parity is not enoug=
-h to recover), then the RS decoding function is used
->>
->>     https://github.com/madiator/HadoopUSC/blob/developUSC/src/contrib/=
-raid/src/java/org/apache/hadoop/raid/SimpleRegeneratingCode.java#L266
->>
->>     I don't understand at all how local parity is related to RS parity=
-, in the sense of "choosing the coefficients c(i) to maximize the fault t=
-olerance of the code" as mentioned in the Xorbas paper : I must be missin=
-g something :-) I do understand how the code works though, which is troub=
-ling. It also is reassuring because the logic is very similar to what is =
-proposed in https://github.com/ceph/ceph/pull/1921
->>
->>     Cheers
->>
->>     On 30/06/2014 11:26, Andreas Joachim Peters wrote:
->>     > Hi Loic,
->>     >
->>     > i think the best is to read along the sources. It is very readab=
-le!
->>     >
->>     > https://github.com/madiator/HadoopUSC/blob/developUSC/src/contri=
-b/raid/src/java/org/apache/hadoop/raid/SimpleRegeneratingCode.java
->>     >
->>     > If there is a high interest in this, you  could port the code fr=
-om Java to C++ and use the GF-complete or Intel GF-multiplication impleme=
-ntation for the used GF multiplications.
->>     >
->>     > Cheers Andreas.
->>     >
->>     >
->>     > ________________________________________
->>     > From: ceph-devel-owner@vger.kernel.org <mailto:ceph-devel-owner@=
-vger.kernel.org> [ceph-devel-owner@vger.kernel.org <mailto:ceph-devel-own=
-er@vger.kernel.org>] on behalf of Loic Dachary [loic@dachary.org <mailto:=
-loic@dachary.org>]
->>     > Sent: 30 June 2014 11:06
->>     > To: Koleos Fuscus
->>     > Cc: Ceph Development
->>     > Subject: Re: erasure code and coefficients
->>     >
->>     > Hi koleosfuscus,
->>     >
->>     > It clarifies it enough to raise a question : where can I read co=
-de (or an algorithm if not code) that chose the coefficients desirable to=
- implement what is suggested in the Xorbas paper ?
->>     >
->>     > Cheers
->>     >
->>     > On 30/06/2014 10:18, Koleos Fuscus wrote:
->>     >> Hi Loic,
->>     >>
->>     >> I am happy to contribute with some clarifications. In fact,
->>     >> erasure/reliability concepts are not blocking my progress with =
-the
->>     >> reliability model at ceph. It is the ceph model itself that has=
- some
->>     >> parts not clear to me, and nobody had time yet to review the st=
-ate
->>     >> model diagram that I published on the wiki. :(
->>     >>  Anyway, regarding coefficients here is a bit of background.
->>     >> Coefficients are the numbers that multiply your variables insid=
-e an
->>     >> equation. In a toy example, to solve the equation ax^2+bx+c=3D0=
- you need
->>     >> to find the coefficients a,b,c that make the equation valid.
->>     >> In the context of Reed Solomon, the definition of coefficients =
-is a
->>     >> bit more confusing. In the original design, the message x is
->>     >> interpreted as coefficients of a polynomial p. But in subsequen=
-ts
->>     >> interpretations the message x is seen as the values of the poly=
-nomial
->>     >> p evaluated at the first k points a1..ak. Such interpretation i=
-s
->>     >> apparently a bit less efficient but desirable because you can
->>     >> construct a systematic code.
->>     >> In the context of xorbas, you are constructing a code on top of=
- Reed
->>     >> Solomon. The codewords are seen as values, and the idea is to g=
-et
->>     >> coefficients c1..c10 that also satisfy s1+s2+s3=3D0 (take this =
-as a
->>     >> missing introduction to my previous message)
->>     >>
->>     >> Cheers,
->>     >>
->>     >> koleosfuscus
->>     >>
->>     >> _______________________________________________________________=
-_
->>     >> "My reply is: the software has no known bugs, therefore it has =
-not
->>     >> been updated."
->>     >> Wietse Venema
->>     >>
->>     >>
->>     >> On Sun, Jun 29, 2014 at 8:44 PM, Loic Dachary <loic@dachary.org=
- <mailto:loic@dachary.org>> wrote:
->>     >>> Hi koleofuscus,
->>     >>>
->>     >>> Thanks for the explanation : it is very conforting to know tha=
-t you understand this :-) At the risk of being thick, I must say that the=
- very notion of "coefficient" eludes me. What are they ?
->>     >>>
->>     >>> Cheers
->>     >>>
->>     >>> On 29/06/2014 20:38, Koleos Fuscus wrote:
->>     >>>> Hello Loic,
->>     >>>> Dimakis (one of the authors of xorbas) is talking about coeff=
-icients
->>     >>>> because they want to find a way to reduce the storage overhea=
-d used
->>     >>>> with LRC. In the simple case used in Fig. 2, a RS (k=3D10, m=3D=
-4) has
->>     >>>> 14/10 storage overhead but when using LRC, the overhead incre=
-ases to
->>     >>>> 17/10 because you also need to store s1, s2 and s3. Basically=
-, the
->>     >>>> idea is to find specific coefficients c1..c10 that permit to =
-obtain s3
->>     >>>> through s1 and s2. In other words, get some s1 and s2 that wh=
-en xored
->>     >>>> together give s3. If you find such coefficients, you don't ne=
-ed to
->>     >>>> store s3 and the storage overhead of LRC is 1.6x instead of 1=
-=2E7x.
->>     >>>>
->>     >>>> Dimakis said that for the Reed Solomon implementation used in=
- HDFS
->>     >>>> RAID they can simple set all coefficients with value '1' and =
-use xor.
->>     >>>>
->>     >>>> This cannot be the case of the Reed Solomon implemented by yo=
-u (I
->>     >>>> understood is the jerasure library by Plank) but that I am no=
-t sure. I
->>     >>>> guess we need the help of a mathematician or at least check a=
-nd
->>     >>>> compare both implementations.
->>     >>>>
->>     >>>> Finally, apparently for xorbas they only implemented the conf=
-iguration
->>     >>>> RS(10,4) and not other combinations. Unfortunately, the wiki =
-page of
->>     >>>> the project is empty http://wiki.apache.org/hadoop/ErasureCod=
-e and the
->>     >>>> main page says 'erasure coding under development'.
->>     >>>>
->>     >>>> I recommend you to watch the xorbas presentation video
->>     >>>> http://smahesh.com/HadoopUSC/ (a very clear explanation of xo=
-rbas) and
->>     >>>> use the Dimakis wiki page to check the large collection of pa=
-per they
->>     >>>> have: http://storagewiki.ece.utexas.edu/
->>     >>>>
->>     >>>> Best,
->>     >>>>
->>     >>>> koleosfuscus
->>     >>>>
->>     >>>> _____________________________________________________________=
-___
->>     >>>> "My reply is: the software has no known bugs, therefore it ha=
-s not
->>     >>>> been updated."
->>     >>>> Wietse Venema
->>     >>>>
->>     >>>>
->>     >>>> On Sun, Jun 29, 2014 at 11:30 AM, Loic Dachary <loic@dachary.=
-org <mailto:loic@dachary.org>> wrote:
->>     >>>>> Hi Andreas,
->>     >>>>>
->>     >>>>> In http://anrg.usc.edu/~maheswaran/Xorbas.pdf I get the idea=
- of computing local coding chunks the way it is implemented in https://gi=
-thub.com/ceph/ceph/pull/1921 (i.e. delegating encoding / decoding to othe=
-r plugins). However, there are theoretical aspects of the paper that I do=
- not understand and I'm hoping you can shed some light on it. In particul=
-ar, I don't know what "coefficients" are about. For instance in the conte=
-xt of Figure 2 caption : "The main theoretical challenge is to choose the=
- coeffi cients c(i) to maximize the fault tolerance of the code."
->>     >>>>>
->>     >>>>> Would you recommend a paper to read to better understand thi=
-s ? Also I'd like to understand what "coefficients" mean in the context o=
-f jerasure or if they do not apply.
->>     >>>>>
->>     >>>>> Thanks for you help :-)
->>     >>>>>
->>     >>>>> --
->>     >>>>> Lo=EFc Dachary, Artisan Logiciel Libre
->>     >>>>>
->>     >>>
->>     >>> --
->>     >>> Lo=EFc Dachary, Artisan Logiciel Libre
->>     >>>
->>     >
->>     > --
->>     > Lo=EFc Dachary, Artisan Logiciel Libre
->>     >
->>     > --
->>     > To unsubscribe from this list: send the line "unsubscribe ceph-d=
-evel" in
->>     > the body of a message to majordomo@vger.kernel.org <mailto:major=
-domo@vger.kernel.org>
->>     > More majordomo info at  http://vger.kernel.org/majordomo-info.ht=
-ml
->>     >
->>
->>     --
->>     Lo=EFc Dachary, Artisan Logiciel Libre
->>
->>
->=20
-> --
-> Lo=EFc Dachary, Artisan Logiciel Libre
->=20
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-
-
---JA0SRQf56LDO4rO9Pv6hfXIk0sE9tBRfF
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlOxZvkACgkQ8dLMyEl6F21/FACgvAQp0kC1seKvRPsZ1gptc0P0
-8Y4AoKRExcEikLGuoMzJszbrPP+J+7h5
-=lnGT
------END PGP SIGNATURE-----
-
---JA0SRQf56LDO4rO9Pv6hfXIk0sE9tBRfF--
