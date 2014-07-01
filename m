@@ -1,7 +1,7 @@
-From: Sushma Gurram <Sushma.Gurram@sandisk.com>
-Subject: RE: [RFC] add rocksdb support
-Date: Tue, 1 Jul 2014 00:39:59 +0000
-Message-ID: <B9FF37F8E2D7894A9493A5314D0816FC226152DE@SACMBXIP01.sdcorp.global.sandisk.com>
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: Re: [RFC] add rocksdb support
+Date: Tue, 1 Jul 2014 14:10:23 +0800
+Message-ID: <CACJqLyatf-qMdtGPEfOfC7KhgrK1uyWe14j+f8ZfZWbVtq4zeg@mail.gmail.com>
 References: <75674D092A819E4189E91166C74CB90D0131CB27@SHSMSX104.ccr.corp.intel.com>
 	<alpine.DEB.2.00.1405201814330.1689@cobra.newdream.net>
 	<75674D092A819E4189E91166C74CB90D013BEDED@shsmsx102.ccr.corp.intel.com>
@@ -13,265 +13,285 @@ References: <75674D092A819E4189E91166C74CB90D0131CB27@SHSMSX104.ccr.corp.intel.c
 	<75674D092A819E4189E91166C74CB90D013D3C3F@shsmsx102.ccr.corp.intel.com>
 	<75674D092A819E4189E91166C74CB90D013D657C@shsmsx102.ccr.corp.intel.com>
 	<B9FF37F8E2D7894A9493A5314D0816FC226141BD@SACMBXIP01.sdcorp.global.sandisk.com>
- <CACJqLybJ2Bbk1m+p-29rm7ErSVuikhx2VhumRGTF08Wp47g7fw@mail.gmail.com>
+	<CACJqLybJ2Bbk1m+p-29rm7ErSVuikhx2VhumRGTF08Wp47g7fw@mail.gmail.com>
+	<B9FF37F8E2D7894A9493A5314D0816FC226152DE@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1blp0183.outbound.protection.outlook.com ([207.46.163.183]:58935
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751246AbaGAAkH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 30 Jun 2014 20:40:07 -0400
-In-Reply-To: <CACJqLybJ2Bbk1m+p-29rm7ErSVuikhx2VhumRGTF08Wp47g7fw@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-we0-f177.google.com ([74.125.82.177]:60836 "EHLO
+	mail-we0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751848AbaGAGKZ convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 1 Jul 2014 02:10:25 -0400
+Received: by mail-we0-f177.google.com with SMTP id u56so9029238wes.36
+        for <ceph-devel@vger.kernel.org>; Mon, 30 Jun 2014 23:10:23 -0700 (PDT)
+In-Reply-To: <B9FF37F8E2D7894A9493A5314D0816FC226152DE@SACMBXIP01.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomaiwang@gmail.com>
+To: Sushma Gurram <Sushma.Gurram@sandisk.com>
 Cc: "Shu, Xinxin" <xinxin.shu@intel.com>, Mark Nelson <mark.nelson@inktank.com>, Sage Weil <sage@inktank.com>, "Zhang, Jian" <jian.zhang@intel.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-SGkgSGFvbWFpL0dyZWcsDQoNCkkgdHJpZWQgdG8gYW5hbHl6ZSB0aGlzIGEgYml0IG1vcmUgYW5k
-IGl0IGFwcGVhcnMgdGhhdCB0aGUgR2VuZXJpY09iamVjdE1hcDo6aGVhZGVyX2xvY2sgaXMgc2Vy
-aWFsaXppbmcgdGhlIFJFQUQgcmVxdWVzdHMgaW4gdGhlIGZvbGxvd2luZyBwYXRoIGFuZCBoZW5j
-ZSB0aGUgbG93IHBlcmZvcm1hbmNlIG51bWJlcnMgd2l0aCBLZXlWYWx1ZVN0b3JlLg0KUmVwbGlj
-YXRlZFBHOjpkb19vcCgpIC0+IFJlcGxpY2F0ZWRQRzo6ZmluZF9vYmplY3RfY29udGV4dCgpIC0+
-IFJlcGxpY2F0ZWRQRzo6Z2V0X29iamVjdF9jb250ZXh0KCkgLT4gUEdCYWNrZW5kOjpvYmplY3Rz
-X2dldF9hdHRyKCkgLT4gS2V5VmFsdWVTdG9yZTo6Z2V0YXR0cigpIC0+IEdlbmVyaWNPYmplY3RN
-YXA6OmdldF92YWx1ZXMoKSAtPiBHZW5lcmljT2JqZWN0TWFwOjpsb29rdXBfaGVhZGVyKCkNCg0K
-SSBmYWJyaWNhdGVkIHRoZSBjb2RlIHRvIGF2b2lkIHRoaXMgbG9jayBmb3IgYSBzcGVjaWZpYyBy
-dW4gYW5kIG5vdGljZWQgdGhhdCB0aGUgcGVyZm9ybWFuY2UgaXMgc2ltaWxhciB0byBGaWxlU3Rv
-cmUuDQoNCkluIG91ciBlYXJsaWVyIGludmVzdGlnYXRpb25zIGFsc28gd2Ugbm90aWNlZCBzaW1p
-bGFyIHNlcmlhbGl6YXRpb24gaXNzdWVzIHdpdGggREJPYmplY3RNYXA6OmhlYWRlcl9sb2NrIHdo
-ZW4gcmd3IHN0b3JlcyB4YXR0cnMgaW4gTGV2ZWxEQi4NCg0KQ2FuIHlvdSBwbGVhc2UgaGVscCB1
-bmRlcnN0YW5kIHRoZSByZWFzb24gZm9yIHRoaXMgbG9jayBhbmQgd2hldGhlciBpdCBjYW4gYmUg
-cmVwbGFjZWQgd2l0aCBhIFJXTG9jayBvciBhbnkgb3RoZXIgc3VnZ2VzdGlvbnMgdG8gYXZvaWQg
-c2VyaWFsaXphdGlvbiBkdWUgdG8gdGhpcyBsb2NrPw0KDQpUaGFua3MsDQpTdXNobWENCg0KLS0t
-LS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IEhhb21haSBXYW5nIFttYWlsdG86aGFvbWFp
-d2FuZ0BnbWFpbC5jb21dIA0KU2VudDogRnJpZGF5LCBKdW5lIDI3LCAyMDE0IDE6MDggQU0NClRv
-OiBTdXNobWEgR3VycmFtDQpDYzogU2h1LCBYaW54aW47IE1hcmsgTmVsc29uOyBTYWdlIFdlaWw7
-IFpoYW5nLCBKaWFuOyBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KU3ViamVjdDogUmU6IFtS
-RkNdIGFkZCByb2Nrc2RiIHN1cHBvcnQNCg0KQXMgSSBtZW50aW9uZWQgZGF5cyBhZ286DQoNClRo
-ZXJlIGV4aXN0cyB0d28gcG9pbnRzIHJlbGF0ZWQga3ZzdG9yZSBwZXJmOg0KMS4gVGhlIG9yZGVy
-IG9mIGltYWdlIGFuZCB0aGUgc3RyaXANCnNpemUgYXJlIGltcG9ydGFudCB0byBwZXJmb3JtYW5j
-ZS4gQmVjYXVzZSB0aGUgaGVhZGVyIGxpa2UgaW5vZGUgaW4gZnMgaXMgbXVjaCBsaWdodHdlaWdo
-dCB0aGFuIGZkLCBzbyB0aGUgb3JkZXIgb2YgaW1hZ2UgaXMgZXhwZWN0ZWQgdG8gYmUgbG93ZXIu
-IEFuZCBzdHJpcCBzaXplIGNhbiBiZSBjb25maWd1cmF0ZWQgdG8gNGtiIHRvIGltcHJvdmUgbGFy
-Z2UgaW8gcGVyZm9ybWFuY2UuDQoyLiBUaGUgaGVhZGVyIGNhY2hlKGh0dHBzOi8vZ2l0aHViLmNv
-bS9jZXBoL2NlcGgvcHVsbC8xNjQ5KSBpcyBub3QgbWVyZ2VkLCB0aGUgaGVhZGVyIGNhY2hlIGlz
-IGltcG9ydGFudCB0byBwZXJmLiBJdCdzIGp1c3QgbGlrZSBmZGNhaGNlIGluIEZpbGVTdG9yZS4N
-Cg0KQXMgZm9yIGRldGFpbCBwZXJmIG51bWJlciwgSSB0aGluayB0aGlzIHJlc3VsdCBiYXNlZCBv
-biBtYXN0ZXIgYnJhbmNoIGlzIG5lYXJseSBjb3JyZWN0LiBXaGVuIHN0cmlwLXNpemUgYW5kIGhl
-YWRlciBjYWNoZSBhcmUgcmVhZHksIEkgdGhpbmsgaXQgd2lsbCBiZSBiZXR0ZXIuDQoNCk9uIEZy
-aSwgSnVuIDI3LCAyMDE0IGF0IDg6NDQgQU0sIFN1c2htYSBHdXJyYW0gPFN1c2htYS5HdXJyYW1A
-c2FuZGlzay5jb20+IHdyb3RlOg0KPiBEZWxpdmVyeSBmYWlsdXJlIGR1ZSB0byB0YWJsZSBmb3Jt
-YXQuIFJlc2VuZGluZyBhcyBwbGFpbiB0ZXh0Lg0KPg0KPiBfX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX18NCj4gRnJvbTogU3VzaG1hIEd1cnJhbQ0KPiBTZW50OiBU
-aHVyc2RheSwgSnVuZSAyNiwgMjAxNCA1OjM1IFBNDQo+IFRvOiAnU2h1LCBYaW54aW4nOyAnTWFy
-ayBOZWxzb24nOyAnU2FnZSBXZWlsJw0KPiBDYzogJ1poYW5nLCBKaWFuJzsgY2VwaC1kZXZlbEB2
-Z2VyLmtlcm5lbC5vcmcNCj4gU3ViamVjdDogUkU6IFtSRkNdIGFkZCByb2Nrc2RiIHN1cHBvcnQN
-Cj4NCj4NCj4gSGkgWGlueGluLA0KPg0KPiBUaGFua3MgZm9yIHByb3ZpZGluZyB0aGUgcmVzdWx0
-cyBvZiB0aGUgcGVyZm9ybWFuY2UgdGVzdHMuDQo+DQo+IEkgdXNlZCBmaW8gKHdpdGggc3VwcG9y
-dCBmb3IgcmJkIGlvZW5naW5lKSB0byBjb21wYXJlIFhGUyBhbmQgUm9ja0RCIHdpdGggYSBzaW5n
-bGUgT1NELiBBbHNvIGNvbmZpcm1lZCB3aXRoIHJhZG9zIGJlbmNoIGFuZCBib3RoIG51bWJlcnMg
-c2VlbSB0byBiZSBvZiB0aGUgc2FtZSBvcmRlci4NCj4gTXkgZmluZGluZ3Mgc2hvdyB0aGF0IFhG
-UyBpcyBiZXR0ZXIgdGhhbiByb2Nrc2RiLiBDYW4geW91IHBsZWFzZSBsZXQgdXMga25vdyByb2Nr
-c2RiIGNvbmZpZ3VyYXRpb24gdGhhdCB5b3UgdXNlZCwgb2JqZWN0IHNpemUgYW5kIGR1cmF0aW9u
-IG9mIHJ1biBmb3IgcmFkb3MgYmVuY2g/DQo+IEZvciByYW5kb20gd3JpdGVzIHRlc3RzLCBJIHNl
-ZSAicm9ja3NkYjpiZzAiIHRocmVhZCBhcyB0aGUgdG9wIENQVSBjb25zdW1lciAoJUNQVSBvZiB0
-aGlzIHRocmVhZCBpcyA1MCwgd2hpbGUgdGhhdCBvZiBhbGwgb3RoZXIgdGhyZWFkcyBpbiB0aGUg
-T1NEIGlzIDwxMCUgdXRpbGl6ZWQpLg0KPiBJcyB0aGVyZSBhIGNlcGguY29uZiBjb25maWcgb3B0
-aW9uIHRvIGNvbmZpZ3VyZSB0aGUgYmFja2dyb3VuZCB0aHJlYWRzIGluIHJvY2tzZGI/DQo+DQo+
-IFdlIHJhbiBvdXIgdGVzdHMgd2l0aCBmb2xsb3dpbmcgY29uZmlndXJhdGlvbjoNCj4gU3lzdGVt
-IDogSW50ZWwoUikgWGVvbihSKSBDUFUgRTUtNDYyMCAwIEAgMi4yMEdIeiAoMTYgcGh5c2ljYWwg
-Y29yZXMpLCANCj4gSFQgZGlzYWJsZWQsIDE2IEdCIG1lbW9yeQ0KPg0KPiByb2Nrc2RiIGNvbmZp
-Z3VyYXRpb24gaGFzIGJlZW4gc2V0IHRvIHRoZSBmb2xsb3dpbmcgdmFsdWVzIGluIGNlcGguY29u
-Zi4NCj4gICAgICAgICByb2Nrc2RiX3dyaXRlX2J1ZmZlcl9zaXplID0gNDE5NDMwNA0KPiAgICAg
-ICAgIHJvY2tzZGJfY2FjaGVfc2l6ZSA9IDQxOTQzMDQNCj4gICAgICAgICByb2Nrc2RiX2Jsb29t
-X3NpemUgPSAwDQo+ICAgICAgICAgcm9ja3NkYl9tYXhfb3Blbl9maWxlcyA9IDEwMjQwDQo+ICAg
-ICAgICAgcm9ja3NkYl9jb21wcmVzc2lvbiA9IGZhbHNlDQo+ICAgICAgICAgcm9ja3NkYl9wYXJh
-bm9pZCA9IGZhbHNlDQo+ICAgICAgICAgcm9ja3NkYl9sb2cgPSAvZGV2L251bGwNCj4gICAgICAg
-ICByb2Nrc2RiX2NvbXBhY3Rfb25fbW91bnQgPSBmYWxzZQ0KPg0KPiBmaW8gcmJkIGlvZW5naW5l
-IHdpdGggbnVtam9icz0xIGZvciB3cml0ZXMgYW5kIG51bWpvYnM9MTYgZm9yIHJlYWRzLCBpb2Rl
-cHRoPTMyLiBVbmxpa2UgcmFkb3MgYmVuY2gsIGZpbyByYmQgaGVscHMgdG8gY3JlYXRlIG11bHRp
-cGxlICg9bnVtam9icykgY2xpZW50IGNvbm5lY3Rpb25zIHRvIHRoZSBPU0QsIHRodXMgc3RyZXNz
-aW5nIHRoZSBPU0QuDQo+DQo+IHJiZCBpbWFnZSBzaXplID0gMiBHQiwgcm9ja3NkYl93cml0ZV9i
-dWZmZXJfc2l6ZT00TUINCj4gLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0KPiBJTyBQYXR0ZXJuICAgICAgWEZTIChJT1Bz
-KSAgICAgIFJvY2tzZGIgKElPUHMpDQo+IDRLIHdyaXRlcyAgICAgICB+MTQ1MCAgICAgICAgICAg
-fjY3MA0KPiA0SyByZWFkcyAgICAgICAgfjY1MDAwICAgICAgICAgIH4yMDAwDQo+IDY0SyB3cml0
-ZXMgICAgICB+NDMxICAgICAgICAgICAgfjU3DQo+IDY0SyByZWFkcyAgICAgICB+MTc1MDAgICAg
-ICAgICAgfjE4MA0KPg0KPg0KPiByYmQgaW1hZ2Ugc2l6ZSA9IDIgR0IsIHJvY2tzZGJfd3JpdGVf
-YnVmZmVyX3NpemU9MUdCDQo+IC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCj4gSU8gUGF0dGVybiAgICAgIFhGUyAoSU9Q
-cykgICAgICBSb2Nrc2RiIChJT1BzKQ0KPiA0SyB3cml0ZXMgICAgICAgfjE0NTAgICAgICAgICAg
-IH45NjINCj4gNEsgcmVhZHMgICAgICAgIH42NTAwMCAgICAgICAgICB+MTY0MQ0KPiA2NEsgd3Jp
-dGVzICAgICAgfjQzMSAgICAgICAgICAgIH40MjYNCj4gNjRLIHJlYWRzICAgICAgIH4xNzUwMCAg
-ICAgICAgICB+MjA5DQo+DQo+IEkgZ3Vlc3MgdGhlb3JldGljYWxseSBsb3dlciByb2Nrc2RiIHBl
-cmZvcm1hbmNlIGNhbiBiZSBhdHRyaWJ1dGVkIHRvIGNvbXBhY3Rpb24gZHVyaW5nIHdyaXRlcyBh
-bmQgbWVyZ2luZyBkdXJpbmcgcmVhZHMsIGJ1dCBJJ20gbm90IHN1cmUgaWYgUkVBRHMgYXJlIGxv
-d2VyIGJ5IHRoaXMgbWFnbml0dWRlLg0KPiBIb3dldmVyLCB5b3VyIHJlc3VsdHMgc2VlbSB0byBz
-aG93IG90aGVyd2lzZS4gQ2FuIHlvdSBwbGVhc2UgaGVscCB1cyB3aXRoIHJvY2tkYiBjb25maWcg
-YW5kIGhvdyB0aGUgcmFkb3MgYmVuY2ggaGFzIGJlZW4gcnVuPw0KPg0KPiBUaGFua3MsDQo+IFN1
-c2htYQ0KPg0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBTaHUsIFhpbnhp
-biBbbWFpbHRvOnhpbnhpbi5zaHVAaW50ZWwuY29tXQ0KPiBTZW50OiBTdW5kYXksIEp1bmUgMjIs
-IDIwMTQgNjoxOCBQTQ0KPiBUbzogU3VzaG1hIEd1cnJhbTsgJ01hcmsgTmVsc29uJzsgJ1NhZ2Ug
-V2VpbCcNCj4gQ2M6ICdjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZyc7IFpoYW5nLCBKaWFuDQo+
-IFN1YmplY3Q6IFJFOiBbUkZDXSBhZGQgcm9ja3NkYiBzdXBwb3J0DQo+DQo+DQo+IEhpIGFsbCwN
-Cj4NCj4gIFdlIGVuYWJsZWQgcm9ja3NkYiBhcyBkYXRhIHN0b3JlIGluIG91ciB0ZXN0IHNldHVw
-ICgxMCBvc2RzIG9uIHR3byBzZXJ2ZXJzLCBlYWNoIHNlcnZlciBoYXMgNSBIRERzIGFzIG9zZCAs
-IDIgc3NkcyBhcyBqb3VybmFsICwgSW50ZWwoUikgWGVvbihSKSBDUFUgRTMxMjgwKSAgYW5kIGhh
-dmUgcGVyZm9ybWFuY2UgdGVzdHMgZm9yIHhmcywgbGV2ZWxkYiBhbmQgcm9ja3NkYiAodXNlIHJh
-ZG9zIGJlbmNoIGFzIG91ciB0ZXN0IHRvb2wpLCAgdGhlIGZvbGxvd2luZyBjaGFydCBzaG93cyBk
-ZXRhaWxzLCBmb3Igd3JpdGUgLCAgd2l0aCBzbWFsbCBudW1iZXIgdGhyZWFkcyAsIGxldmVsZGIg
-cGVyZm9ybWFuY2UgaXMgbG93ZXIgdGhhbiB0aGUgb3RoZXIgdHdvIGJhY2tlbmRzICwgZnJvbSAx
-NiB0aHJlYWRzIHBvaW50ICwgIHJvY2tzZGIgcGVyZm9ybSBhIGxpdHRsZSBiZXR0ZXIgdGhhbiB4
-ZnMgYW5kIGxldmVsZGIgLCBsZXZlbGRiIGFuZCByb2Nrc2RiIHBlcmZvcm0gbXVjaCBiZXR0ZXIg
-dGhhbiB4ZnMgd2l0aCBoaWdoZXIgdGhyZWFkIG51bWJlci4NCj4NCj4gICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB4ZnMgICAgICAgICAgICAgbGV2ZWxk
-YiAgICAgICAgICAgICAgIHJvY2tzZGINCj4gICAgICAgICAgICAgICAgICAgICAgICAgICB0aHJv
-dWdodHB1dCAgIGxhdGVuY3kgICAgIHRocm91Z2h0cHV0IGxhdGVuY3kgICAgdGhyb3VnaHRwdXQg
-IGxhdGVuY3kNCj4gMSB0aHJlYWQgd3JpdGUgICAgICAgODQuMDI5ICAgICAgIDAuMDQ4ICAgICAg
-ICAgICAgIDUyLjQzMCAgICAgICAgIDAuMDc2ICAgICAgICAgICAgICA3MS45MjAgICAgMC4wNTYN
-Cj4gMiB0aHJlYWRzIHdyaXRlICAgICAgMTY2LjQxNyAgICAgIDAuMDQ4ICAgICAgICAgICAgIDk3
-LjkxNyAgICAgICAgIDAuMDgyICAgICAgICAgICAgIDE1NS4xNDggICAgMC4wNTINCj4gNCB0aHJl
-YWRzIHdyaXRlICAgICAgIDMwNC4wOTkgICAgIDAuMDUyICAgICAgICAgICAgIDE1Ni4wOTQgICAg
-ICAgICAwLjEwMiAgICAgICAgICAgIDI3MC40NjEgICAgMC4wNTkNCj4gOCB0aHJlYWRzIHdyaXRl
-ICAgICAgIDMyMy4wNDcgICAgIDAuMDk5ICAgICAgICAgICAgIDIyMS4zNzAgICAgICAgICAwLjE0
-NCAgICAgICAgICAgIDMzOS40NTUgICAgMC4wOTQNCj4gMTYgdGhyZWFkcyB3cml0ZSAgICAgMjk1
-LjA0MCAgICAgIDAuMjE2ICAgICAgICAgICAgIDI3Mi4wMzIgICAgICAgICAwLjIzNSAgICAgICAz
-NDguODQ5IDAuMTgzDQo+IDMyIHRocmVhZHMgd3JpdGUgICAgIDMyNC40NjcgICAgICAwLjM5NCAg
-ICAgICAgICAgICAyOTAuMDcyICAgICAgICAgIDAuNDQxICAgICAgICAgICAzMzguMTAzICAgIDAu
-Mzc4DQo+IDY0IHRocmVhZHMgd3JpdGUgICAgIDMxMy43MTMgICAgICAwLjgxMiAgICAgICAgICAg
-ICAyOTMuMjYxICAgICAgICAgIDAuODcxICAgICAzMjQuNjAzICAwLjc4Nw0KPiAxIHRocmVhZCBy
-ZWFkICAgICAgICAgNzUuNjg3ICAgICAgMC4wNTMgICAgICAgICAgICAgIDcxLjYyOSAgICAgICAg
-ICAwLjA1NiAgICAgIDcyLjUyNiAgMC4wNTUNCj4gMiB0aHJlYWRzIHJlYWQgICAgICAgIDE4Mi4z
-MjkgICAgIDAuMDQ0ICAgICAgICAgICAgIDE1MS42ODMgICAgICAgICAgIDAuMDUzICAgICAxNTMu
-MTI1IDAuMDUyDQo+IDQgdGhyZWFkcyByZWFkICAgICAgICAzMjAuNzg1ICAgICAwLjA1MCAgICAg
-ICAgICAgICAzMDcuMTgwICAgICAgICAgICAwLjA1MiAgICAgIDMxMi4wMTYgICAgICAgIDAuMDUx
-DQo+IDggdGhyZWFkcyByZWFkICAgICAgICAgNTA0Ljg4MCAgICAwLjA2MyAgICAgICAgICAgICA1
-MTIuMjk1ICAgICAgICAgICAwLjA2MiAgICAgIDUxOS42ODMgICAgICAgIDAuMDYyDQo+IDE2IHRo
-cmVhZHMgcmVhZCAgICAgICA0NzcuNzA2ICAgICAwLjEzNCAgICAgICAgICAgICA2NDMuMzg1ICAg
-ICAgICAgICAwLjA5OSAgICAgIDY1NC4xNDkgICAgICAgIDAuMDk4DQo+IDMyIHRocmVhZHMgcmVh
-ZCAgICAgICA1MTcuNjcwICAgICAwLjI0NyAgICAgICAgICAgICAgNjY2LjY5NiAgICAgICAgICAw
-LjE5MiAgICAgIDY3OC40ODAgICAgICAgIDAuMTg5DQo+IDY0IHRocmVhZHMgcmVhZCAgICAgICA1
-MTYuNTk5ICAgICAwLjQ5NSAgICAgICAgICAgICAgNjY4LjM2MCAgICAgICAgICAgMC4zODMgICAg
-ICA2ODAuNjczICAgICAgIDAuMzc2DQo+DQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+
-IEZyb206IFNodSwgWGlueGluDQo+IFNlbnQ6IFNhdHVyZGF5LCBKdW5lIDE0LCAyMDE0IDExOjUw
-IEFNDQo+IFRvOiBTdXNobWEgR3VycmFtOyBNYXJrIE5lbHNvbjsgU2FnZSBXZWlsDQo+IENjOiBj
-ZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZzsgWmhhbmcsIEppYW4NCj4gU3ViamVjdDogUkU6IFtS
-RkNdIGFkZCByb2Nrc2RiIHN1cHBvcnQNCj4NCj4gQ3VycmVudGx5IGNlcGggd2lsbCBnZXQgc3Rh
-YmxlIHJvY2tzZGIgZnJvbSBicmFuY2ggMy4wLmZiIG9mICBjZXBoL3JvY2tzZGIgICwgc2luY2Ug
-UFIgaHR0cHM6Ly9naXRodWIuY29tL2NlcGgvcm9ja3NkYi9wdWxsLzIgaGFzIG5vdCBiZWVuIG1l
-cmdlZCAsICBzbyBpZiB5b3UgdXNlICdnaXQgc3VibW9kdWxlIHVwZGF0ZSAtLWluaXQnIHRvIGdl
-dCByb2Nrc2RiIHN1Ym1vZHVsZSAsIEl0IGRpZCBub3Qgc3VwcG9ydCBhdXRvY29uZi9hdXRvbWFr
-ZSAuDQo+DQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IGNlcGgtZGV2ZWwt
-b3duZXJAdmdlci5rZXJuZWwub3JnIA0KPiBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJAdmdlci5r
-ZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgU3VzaG1hIEd1cnJhbQ0KPiBTZW50OiBTYXR1cmRheSwg
-SnVuZSAxNCwgMjAxNCAyOjUyIEFNDQo+IFRvOiBTaHUsIFhpbnhpbjsgTWFyayBOZWxzb247IFNh
-Z2UgV2VpbA0KPiBDYzogY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc7IFpoYW5nLCBKaWFuDQo+
-IFN1YmplY3Q6IFJFOiBbUkZDXSBhZGQgcm9ja3NkYiBzdXBwb3J0DQo+DQo+IEhpIFhpbnhpbiwN
-Cj4NCj4gSSB0cmllZCB0byBjb21waWxlIHRoZSB3aXAtcm9ja3NkYiBicmFuY2gsIGJ1dCB0aGUg
-c3JjL3JvY2tzZGIgZGlyZWN0b3J5IHNlZW1zIHRvIGJlIGVtcHR5LiBEbyBJIG5lZWQgdG9wdXQg
-YXV0b2NvbmYvYXV0b21ha2UgaW4gdGhpcyBkaXJlY3Rvcnk/DQo+IEl0IGRvZXNuJ3Qgc2VlbSB0
-byBoYXZlIGFueSBvdGhlciBzb3VyY2UgZmlsZXMgYW5kIGNvbXBpbGF0aW9uIGZhaWxzOg0KPiBv
-cy9Sb2Nrc0RCU3RvcmUuY2M6MTA6MjQ6IGZhdGFsIGVycm9yOiByb2Nrc2RiL2RiLmg6IE5vIHN1
-Y2ggZmlsZSBvciBkaXJlY3RvcnkgY29tcGlsYXRpb24gdGVybWluYXRlZC4NCj4NCj4gVGhhbmtz
-LA0KPiBTdXNobWENCj4NCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogY2Vw
-aC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgDQo+IFttYWlsdG86Y2VwaC1kZXZlbC1vd25l
-ckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFsZiBPZiBTaHUsIFhpbnhpbg0KPiBTZW50OiBNb25k
-YXksIEp1bmUgMDksIDIwMTQgMTA6MDAgUE0NCj4gVG86IE1hcmsgTmVsc29uOyBTYWdlIFdlaWwN
-Cj4gQ2M6IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnOyBaaGFuZywgSmlhbg0KPiBTdWJqZWN0
-OiBSRTogW1JGQ10gYWRkIHJvY2tzZGIgc3VwcG9ydA0KPg0KPiBIaSBtYXJrDQo+DQo+IEkgaGF2
-ZSBmaW5pc2hlZCBkZXZlbG9wbWVudCBvZiBzdXBwb3J0IG9mIHJvY2tzZGIgc3VibW9kdWxlLCAg
-YSBwdWxsIHJlcXVlc3QgZm9yIHN1cHBvcnQgb2YgYXV0b2NvbmYvYXV0b21ha2UgZm9yIHJvY2tz
-ZGIgaGFzIGJlZW4gY3JlYXRlZCAsIHlvdSBjYW4gZmluZCBodHRwczovL2dpdGh1Yi5jb20vY2Vw
-aC9yb2Nrc2RiL3B1bGwvMiAsIGlmIHRoaXMgcGF0Y2ggaXMgb2sgLCAgSSB3aWxsIGNyZWF0ZSBh
-IHB1bGwgcmVxdWVzdCBmb3Igcm9ja3NkYiBzdWJtb2R1bGUgc3VwcG9ydCAsIGN1cnJlbnRseSB0
-aGlzIHBhdGNoIGNhbiBiZSBmb3VuZCBodHRwczovL2dpdGh1Yi5jb20veGlueGluc2gvY2VwaC90
-cmVlL3dpcC1yb2Nrc2RiIC4NCj4NCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJv
-bTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgDQo+IFttYWlsdG86Y2VwaC1kZXZl
-bC1vd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFsZiBPZiBNYXJrIE5lbHNvbg0KPiBTZW50
-OiBUdWVzZGF5LCBKdW5lIDEwLCAyMDE0IDE6MTIgQU0NCj4gVG86IFNodSwgWGlueGluOyBTYWdl
-IFdlaWwNCj4gQ2M6IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnOyBaaGFuZywgSmlhbg0KPiBT
-dWJqZWN0OiBSZTogW1JGQ10gYWRkIHJvY2tzZGIgc3VwcG9ydA0KPg0KPiBIaSBYaW54aW4sDQo+
-DQo+IE9uIDA1LzI4LzIwMTQgMDU6MDUgQU0sIFNodSwgWGlueGluIHdyb3RlOg0KPj4gSGkgc2Fn
-ZSAsDQo+PiBJIHdpbGwgYWRkIHR3byBjb25maWd1cmUgb3B0aW9ucyB0byAtLXdpdGgtbGlicm9j
-a3NkYi1zdGF0aWMgYW5kIC0td2l0aC1saWJyb2Nrc2RiICwgd2l0aCAtLXdpdGgtbGlicm9ja3Nk
-Yi1zdGF0aWMgb3B0aW9uICwgY2VwaCB3aWxsIGNvbXBpbGUgdGhlIGNvZGUgdGhhdCBnZXQgZnJv
-bSBjZXBoIHJlcG9zaXRvcnkgLCB3aXRoICAtLXdpdGgtbGlicm9ja3NkYiBvcHRpb24gLCAgaW4g
-Y2FzZSBvZiBkaXN0cm8gcGFja2FnZXMgZm9yIHJvY2tzZGIgLCBjZXBoIHdpbGwgbm90IGNvbXBp
-bGUgdGhlIHJvY2tzZGIgY29kZSAsIHdpbGwgdXNlIHByZS1pbnN0YWxsZWQgbGlicmFyeS4gaXMg
-dGhhdCBvayBmb3IgeW91ID8NCj4+DQo+PiBzaW5jZSBjdXJyZW50IHJvY2tzZGIgZG9lcyBub3Qg
-c3VwcG9ydCBhdXRvY29uZiZhdXRvbWFrZSAsIEkgd2lsbCBhZGQgYXV0b2NvbmYmYXV0b21ha2Ug
-c3VwcG9ydCBmb3Igcm9ja3NkYiAsIGJ1dCBiZWZvcmUgdGhhdCAsIGkgdGhpbmsgd2Ugc2hvdWxk
-IGZvcmsgYSBzdGFibGUgYnJhbmNoIChtYXliZSAzLjApIGZvciBjZXBoIC4NCj4NCj4gSSdtIGxv
-b2tpbmcgYXQgdGVzdGluZyBvdXQgdGhlIHJvY2tzZGIgc3VwcG9ydCBhcyB3ZWxsLCBib3RoIGZv
-ciB0aGUgT1NEIGFuZCBmb3IgdGhlIG1vbml0b3IgYmFzZWQgb24gc29tZSBpc3N1ZXMgd2UndmUg
-YmVlbiBzZWVpbmcgbGF0ZWx5LiAgQW55IG5ld3Mgb24gdGhlIDMuMCBmb3JrIGFuZCBhdXRvY29u
-Zi9hdXRvbWFrZSBzdXBwb3J0IGluIHJvY2tzZGI/DQo+DQo+IFRoYW5rcywNCj4gTWFyaw0KPg0K
-Pj4NCj4+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+PiBGcm9tOiBNYXJrIE5lbHNvbiBb
-bWFpbHRvOm1hcmsubmVsc29uQGlua3RhbmsuY29tXQ0KPj4gU2VudDogV2VkbmVzZGF5LCBNYXkg
-MjEsIDIwMTQgOTowNiBQTQ0KPj4gVG86IFNodSwgWGlueGluOyBTYWdlIFdlaWwNCj4+IENjOiBj
-ZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZzsgWmhhbmcsIEppYW4NCj4+IFN1YmplY3Q6IFJlOiBb
-UkZDXSBhZGQgcm9ja3NkYiBzdXBwb3J0DQo+Pg0KPj4gT24gMDUvMjEvMjAxNCAwNzo1NCBBTSwg
-U2h1LCBYaW54aW4gd3JvdGU6DQo+Pj4gSGksIHNhZ2UNCj4+Pg0KPj4+IEkgd2lsbCBhZGQgcm9j
-a3NkYiBzdWJtb2R1bGUgaW50byB0aGUgbWFrZWZpbGUgLCBjdXJyZW50bHkgd2Ugd2FudCB0byBo
-YXZlIGZ1bGx5IHBlcmZvcm1hbmNlIHRlc3RzIG9uIGtleS12YWx1ZSBkYiBiYWNrZW5kICwgYm90
-aCBsZXZlbGRiIGFuZCByb2Nrc2RiLiBUaGVuIG9wdGltaXplIG9uIHJvY2tzZGIgcGVyZm9ybWFu
-Y2UuDQo+Pg0KPj4gSSdtIGRlZmluaXRlbHkgaW50ZXJlc3RlZCBpbiBhbnkgcGVyZm9ybWFuY2Ug
-dGVzdHMgeW91IGRvIGhlcmUuICBMYXN0IHdpbnRlciBJIHN0YXJ0ZWQgZG9pbmcgc29tZSBmYWly
-bHkgaGlnaCBsZXZlbCB0ZXN0cyBvbiByYXcgbGV2ZWxkYi9oeXBlcmxldmVsZGIvcmFpa2xldmVs
-ZGIuICBJJ20gdmVyeSBpbnRlcmVzdGVkIGluIHdoYXQgeW91IHNlZSB3aXRoIHJvY2tzZGIgYXMg
-YSBiYWNrZW5kLg0KPj4NCj4+Pg0KPj4+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+Pj4g
-RnJvbTogU2FnZSBXZWlsIFttYWlsdG86c2FnZUBpbmt0YW5rLmNvbV0NCj4+PiBTZW50OiBXZWRu
-ZXNkYXksIE1heSAyMSwgMjAxNCA5OjE5IEFNDQo+Pj4gVG86IFNodSwgWGlueGluDQo+Pj4gQ2M6
-IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQo+Pj4gU3ViamVjdDogUmU6IFtSRkNdIGFkZCBy
-b2Nrc2RiIHN1cHBvcnQNCj4+Pg0KPj4+IEhpIFhpbnhpbiwNCj4+Pg0KPj4+IEkndmUgcHVzaGVk
-IGFuIHVwZGF0ZWQgd2lwLXJvY2tzZGIgdG8gZ2l0aHViL2xpZXdlZ2FzL2NlcGguZ2l0IHRoYXQg
-aW5jbHVkZXMgdGhlIGxhdGVzdCBzZXQgb2YgcGF0Y2hlcyB3aXRoIHRoZSBncm91bmR3b3JrIGFu
-ZCB5b3VyIHJvY2tzZGIgcGF0Y2guICBUaGVyZSBpcyBhbHNvIGEgY29tbWl0IHRoYXQgYWRkcyBy
-b2Nrc2RiIGFzIGEgZ2l0IHN1Ym1vZHVsZS4gIEknbSB0aGlua2luZyB0aGF0LCBzaW5jZSB0aGVy
-ZSBhcmVuJ3QgYW55IGRpc3RybyBwYWNrYWdlcyBmb3Igcm9ja3NkYiBhdCB0aGlzIHBvaW50LCB0
-aGlzIGlzIGdvaW5nIHRvIGJlIHRoZSBlYXNpZXN0IHdheSB0byBtYWtlIHRoaXMgdXNhYmxlIGZv
-ciBwZW9wbGUuDQo+Pj4NCj4+PiBJZiB5b3UgY2FuIHdpcmUgdGhlIHN1Ym1vZHVsZSBpbnRvIHRo
-ZSBtYWtlZmlsZSwgd2UgY2FuIG1lcmdlIHRoaXMgaW4gc28gdGhhdCByb2Nrc2RiIHN1cHBvcnQg
-aXMgaW4gdGhlIGNlcGguY29tIHBhY2thZ2VzIG9uIGNlcGguY29tLiAgSSBzdXNwZWN0IHRoYXQg
-dGhlIGRpc3Ryb3Mgd2lsbCBwcmVmZXIgdG8gdHVybnMgdGhpcyBvZmYgaW4gZmF2b3Igb2Ygc2Vw
-YXJhdGUgc2hhcmVkIGxpYnMsIGJ1dCB0aGV5IGNhbiBkbyB0aGlzIGF0IHRoZWlyIG9wdGlvbiBp
-Zi93aGVuIHRoZXkgaW5jbHVkZSByb2Nrc2RiIGluIHRoZSBkaXN0cm8uIEkgdGhpbmsgdGhlIGtl
-eSBpcyBqdXN0IHRvIGhhdmUgYm90aCAtLXdpdGgtbGlicm9ja2RiIGFuZCAtLXdpdGgtbGlicm9j
-a3NkYi1zdGF0aWMgKG9yIHNpbWlsYXIpIG9wdGlvbnMgc28gdGhhdCB5b3UgY2FuIGVpdGhlciB1
-c2UgdGhlIHN0YXRpYyBvciBkeW5hbWljYWxseSBsaW5rZWQgb25lLg0KPj4+DQo+Pj4gSGFzIHlv
-dXIgZ3JvdXAgZG9uZSBmdXJ0aGVyIHRlc3Rpbmcgd2l0aCByb2Nrc2RiPyAgQW55dGhpbmcgaW50
-ZXJlc3RpbmcgdG8gc2hhcmU/DQo+Pj4NCj4+PiBUaGFua3MhDQo+Pj4gc2FnZQ0KPj4+DQo+Pj4g
-LS0NCj4+PiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5z
-dWJzY3JpYmUgY2VwaC1kZXZlbCINCj4+PiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFq
-b3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyANCj4+PiBpbmZvIGF0ICBodHRw
-Oi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCj4+Pg0KPj4NCj4NCj4gLS0N
-Cj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2Ny
-aWJlIGNlcGgtZGV2ZWwiIA0KPiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21v
-QHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyANCj4gaW5mbyBhdCAgaHR0cDovL3ZnZXIu
-a2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+IC0tDQo+IFRvIHVuc3Vic2NyaWJlIGZy
-b20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiANCj4g
-aW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9y
-ZSBtYWpvcmRvbW8gDQo+IGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21v
-LWluZm8uaHRtbA0KPg0KPiBfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXw0KPg0KPiBQ
-TEVBU0UgTk9URTogVGhlIGluZm9ybWF0aW9uIGNvbnRhaW5lZCBpbiB0aGlzIGVsZWN0cm9uaWMg
-bWFpbCBtZXNzYWdlIGlzIGludGVuZGVkIG9ubHkgZm9yIHRoZSB1c2Ugb2YgdGhlIGRlc2lnbmF0
-ZWQgcmVjaXBpZW50KHMpIG5hbWVkIGFib3ZlLiBJZiB0aGUgcmVhZGVyIG9mIHRoaXMgbWVzc2Fn
-ZSBpcyBub3QgdGhlIGludGVuZGVkIHJlY2lwaWVudCwgeW91IGFyZSBoZXJlYnkgbm90aWZpZWQg
-dGhhdCB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIG1lc3NhZ2UgaW4gZXJyb3IgYW5kIHRoYXQgYW55
-IHJldmlldywgZGlzc2VtaW5hdGlvbiwgZGlzdHJpYnV0aW9uLCBvciBjb3B5aW5nIG9mIHRoaXMg
-bWVzc2FnZSBpcyBzdHJpY3RseSBwcm9oaWJpdGVkLiBJZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlz
-IGNvbW11bmljYXRpb24gaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlciBieSB0ZWxl
-cGhvbmUgb3IgZS1tYWlsIChhcyBzaG93biBhYm92ZSkgaW1tZWRpYXRlbHkgYW5kIGRlc3Ryb3kg
-YW55IGFuZCBhbGwgY29waWVzIG9mIHRoaXMgbWVzc2FnZSBpbiB5b3VyIHBvc3Nlc3Npb24gKHdo
-ZXRoZXIgaGFyZCBjb3BpZXMgb3IgZWxlY3Ryb25pY2FsbHkgc3RvcmVkIGNvcGllcykuDQo+DQo+
-IC0tDQo+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1
-YnNjcmliZSBjZXBoLWRldmVsIiANCj4gaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9y
-ZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gDQo+IGluZm8gYXQgIGh0dHA6Ly92
-Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KPiAtLQ0KPiBUbyB1bnN1YnNjcmli
-ZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIg
-DQo+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3Jn
-IE1vcmUgbWFqb3Jkb21vIA0KPiBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9y
-ZG9tby1pbmZvLmh0bWwNCg0KDQoNCi0tDQpCZXN0IFJlZ2FyZHMsDQoNCldoZWF0DQo=
+Hi Sushma,
+
+Thanks for your investigations! We already noticed the serializing
+risk on GenericObjectMap/DBObjectMap. In order to improve performance
+we add header cache to DBObjectMap.
+
+As for KeyValueStore, a cache branch is on the reviewing, it can
+greatly reduce lookup_header calls. Of course, replace with RWLock is
+a good suggestion, I would like to try to estimate!
+
+On Tue, Jul 1, 2014 at 8:39 AM, Sushma Gurram <Sushma.Gurram@sandisk.com> wrote:
+> Hi Haomai/Greg,
+>
+> I tried to analyze this a bit more and it appears that the GenericObjectMap::header_lock is serializing the READ requests in the following path and hence the low performance numbers with KeyValueStore.
+> ReplicatedPG::do_op() -> ReplicatedPG::find_object_context() -> ReplicatedPG::get_object_context() -> PGBackend::objects_get_attr() -> KeyValueStore::getattr() -> GenericObjectMap::get_values() -> GenericObjectMap::lookup_header()
+>
+> I fabricated the code to avoid this lock for a specific run and noticed that the performance is similar to FileStore.
+>
+> In our earlier investigations also we noticed similar serialization issues with DBObjectMap::header_lock when rgw stores xattrs in LevelDB.
+>
+> Can you please help understand the reason for this lock and whether it can be replaced with a RWLock or any other suggestions to avoid serialization due to this lock?
+>
+> Thanks,
+> Sushma
+>
+> -----Original Message-----
+> From: Haomai Wang [mailto:haomaiwang@gmail.com]
+> Sent: Friday, June 27, 2014 1:08 AM
+> To: Sushma Gurram
+> Cc: Shu, Xinxin; Mark Nelson; Sage Weil; Zhang, Jian; ceph-devel@vger.kernel.org
+> Subject: Re: [RFC] add rocksdb support
+>
+> As I mentioned days ago:
+>
+> There exists two points related kvstore perf:
+> 1. The order of image and the strip
+> size are important to performance. Because the header like inode in fs is much lightweight than fd, so the order of image is expected to be lower. And strip size can be configurated to 4kb to improve large io performance.
+> 2. The header cache(https://github.com/ceph/ceph/pull/1649) is not merged, the header cache is important to perf. It's just like fdcahce in FileStore.
+>
+> As for detail perf number, I think this result based on master branch is nearly correct. When strip-size and header cache are ready, I think it will be better.
+>
+> On Fri, Jun 27, 2014 at 8:44 AM, Sushma Gurram <Sushma.Gurram@sandisk.com> wrote:
+>> Delivery failure due to table format. Resending as plain text.
+>>
+>> _____________________________________________
+>> From: Sushma Gurram
+>> Sent: Thursday, June 26, 2014 5:35 PM
+>> To: 'Shu, Xinxin'; 'Mark Nelson'; 'Sage Weil'
+>> Cc: 'Zhang, Jian'; ceph-devel@vger.kernel.org
+>> Subject: RE: [RFC] add rocksdb support
+>>
+>>
+>> Hi Xinxin,
+>>
+>> Thanks for providing the results of the performance tests.
+>>
+>> I used fio (with support for rbd ioengine) to compare XFS and RockDB with a single OSD. Also confirmed with rados bench and both numbers seem to be of the same order.
+>> My findings show that XFS is better than rocksdb. Can you please let us know rocksdb configuration that you used, object size and duration of run for rados bench?
+>> For random writes tests, I see "rocksdb:bg0" thread as the top CPU consumer (%CPU of this thread is 50, while that of all other threads in the OSD is <10% utilized).
+>> Is there a ceph.conf config option to configure the background threads in rocksdb?
+>>
+>> We ran our tests with following configuration:
+>> System : Intel(R) Xeon(R) CPU E5-4620 0 @ 2.20GHz (16 physical cores),
+>> HT disabled, 16 GB memory
+>>
+>> rocksdb configuration has been set to the following values in ceph.conf.
+>>         rocksdb_write_buffer_size = 4194304
+>>         rocksdb_cache_size = 4194304
+>>         rocksdb_bloom_size = 0
+>>         rocksdb_max_open_files = 10240
+>>         rocksdb_compression = false
+>>         rocksdb_paranoid = false
+>>         rocksdb_log = /dev/null
+>>         rocksdb_compact_on_mount = false
+>>
+>> fio rbd ioengine with numjobs=1 for writes and numjobs=16 for reads, iodepth=32. Unlike rados bench, fio rbd helps to create multiple (=numjobs) client connections to the OSD, thus stressing the OSD.
+>>
+>> rbd image size = 2 GB, rocksdb_write_buffer_size=4MB
+>> -------------------------------------------------------------------
+>> IO Pattern      XFS (IOPs)      Rocksdb (IOPs)
+>> 4K writes       ~1450           ~670
+>> 4K reads        ~65000          ~2000
+>> 64K writes      ~431            ~57
+>> 64K reads       ~17500          ~180
+>>
+>>
+>> rbd image size = 2 GB, rocksdb_write_buffer_size=1GB
+>> -------------------------------------------------------------------
+>> IO Pattern      XFS (IOPs)      Rocksdb (IOPs)
+>> 4K writes       ~1450           ~962
+>> 4K reads        ~65000          ~1641
+>> 64K writes      ~431            ~426
+>> 64K reads       ~17500          ~209
+>>
+>> I guess theoretically lower rocksdb performance can be attributed to compaction during writes and merging during reads, but I'm not sure if READs are lower by this magnitude.
+>> However, your results seem to show otherwise. Can you please help us with rockdb config and how the rados bench has been run?
+>>
+>> Thanks,
+>> Sushma
+>>
+>> -----Original Message-----
+>> From: Shu, Xinxin [mailto:xinxin.shu@intel.com]
+>> Sent: Sunday, June 22, 2014 6:18 PM
+>> To: Sushma Gurram; 'Mark Nelson'; 'Sage Weil'
+>> Cc: 'ceph-devel@vger.kernel.org'; Zhang, Jian
+>> Subject: RE: [RFC] add rocksdb support
+>>
+>>
+>> Hi all,
+>>
+>>  We enabled rocksdb as data store in our test setup (10 osds on two servers, each server has 5 HDDs as osd , 2 ssds as journal , Intel(R) Xeon(R) CPU E31280)  and have performance tests for xfs, leveldb and rocksdb (use rados bench as our test tool),  the following chart shows details, for write ,  with small number threads , leveldb performance is lower than the other two backends , from 16 threads point ,  rocksdb perform a little better than xfs and leveldb , leveldb and rocksdb perform much better than xfs with higher thread number.
+>>
+>>                                                   xfs             leveldb               rocksdb
+>>                           throughtput   latency     throughtput latency    throughtput  latency
+>> 1 thread write       84.029       0.048             52.430         0.076              71.920    0.056
+>> 2 threads write      166.417      0.048             97.917         0.082             155.148    0.052
+>> 4 threads write       304.099     0.052             156.094         0.102            270.461    0.059
+>> 8 threads write       323.047     0.099             221.370         0.144            339.455    0.094
+>> 16 threads write     295.040      0.216             272.032         0.235       348.849 0.183
+>> 32 threads write     324.467      0.394             290.072          0.441           338.103    0.378
+>> 64 threads write     313.713      0.812             293.261          0.871     324.603  0.787
+>> 1 thread read         75.687      0.053              71.629          0.056      72.526  0.055
+>> 2 threads read        182.329     0.044             151.683           0.053     153.125 0.052
+>> 4 threads read        320.785     0.050             307.180           0.052      312.016        0.051
+>> 8 threads read         504.880    0.063             512.295           0.062      519.683        0.062
+>> 16 threads read       477.706     0.134             643.385           0.099      654.149        0.098
+>> 32 threads read       517.670     0.247              666.696          0.192      678.480        0.189
+>> 64 threads read       516.599     0.495              668.360           0.383      680.673       0.376
+>>
+>> -----Original Message-----
+>> From: Shu, Xinxin
+>> Sent: Saturday, June 14, 2014 11:50 AM
+>> To: Sushma Gurram; Mark Nelson; Sage Weil
+>> Cc: ceph-devel@vger.kernel.org; Zhang, Jian
+>> Subject: RE: [RFC] add rocksdb support
+>>
+>> Currently ceph will get stable rocksdb from branch 3.0.fb of  ceph/rocksdb  , since PR https://github.com/ceph/rocksdb/pull/2 has not been merged ,  so if you use 'git submodule update --init' to get rocksdb submodule , It did not support autoconf/automake .
+>>
+>> -----Original Message-----
+>> From: ceph-devel-owner@vger.kernel.org
+>> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sushma Gurram
+>> Sent: Saturday, June 14, 2014 2:52 AM
+>> To: Shu, Xinxin; Mark Nelson; Sage Weil
+>> Cc: ceph-devel@vger.kernel.org; Zhang, Jian
+>> Subject: RE: [RFC] add rocksdb support
+>>
+>> Hi Xinxin,
+>>
+>> I tried to compile the wip-rocksdb branch, but the src/rocksdb directory seems to be empty. Do I need toput autoconf/automake in this directory?
+>> It doesn't seem to have any other source files and compilation fails:
+>> os/RocksDBStore.cc:10:24: fatal error: rocksdb/db.h: No such file or directory compilation terminated.
+>>
+>> Thanks,
+>> Sushma
+>>
+>> -----Original Message-----
+>> From: ceph-devel-owner@vger.kernel.org
+>> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Shu, Xinxin
+>> Sent: Monday, June 09, 2014 10:00 PM
+>> To: Mark Nelson; Sage Weil
+>> Cc: ceph-devel@vger.kernel.org; Zhang, Jian
+>> Subject: RE: [RFC] add rocksdb support
+>>
+>> Hi mark
+>>
+>> I have finished development of support of rocksdb submodule,  a pull request for support of autoconf/automake for rocksdb has been created , you can find https://github.com/ceph/rocksdb/pull/2 , if this patch is ok ,  I will create a pull request for rocksdb submodule support , currently this patch can be found https://github.com/xinxinsh/ceph/tree/wip-rocksdb .
+>>
+>> -----Original Message-----
+>> From: ceph-devel-owner@vger.kernel.org
+>> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
+>> Sent: Tuesday, June 10, 2014 1:12 AM
+>> To: Shu, Xinxin; Sage Weil
+>> Cc: ceph-devel@vger.kernel.org; Zhang, Jian
+>> Subject: Re: [RFC] add rocksdb support
+>>
+>> Hi Xinxin,
+>>
+>> On 05/28/2014 05:05 AM, Shu, Xinxin wrote:
+>>> Hi sage ,
+>>> I will add two configure options to --with-librocksdb-static and --with-librocksdb , with --with-librocksdb-static option , ceph will compile the code that get from ceph repository , with  --with-librocksdb option ,  in case of distro packages for rocksdb , ceph will not compile the rocksdb code , will use pre-installed library. is that ok for you ?
+>>>
+>>> since current rocksdb does not support autoconf&automake , I will add autoconf&automake support for rocksdb , but before that , i think we should fork a stable branch (maybe 3.0) for ceph .
+>>
+>> I'm looking at testing out the rocksdb support as well, both for the OSD and for the monitor based on some issues we've been seeing lately.  Any news on the 3.0 fork and autoconf/automake support in rocksdb?
+>>
+>> Thanks,
+>> Mark
+>>
+>>>
+>>> -----Original Message-----
+>>> From: Mark Nelson [mailto:mark.nelson@inktank.com]
+>>> Sent: Wednesday, May 21, 2014 9:06 PM
+>>> To: Shu, Xinxin; Sage Weil
+>>> Cc: ceph-devel@vger.kernel.org; Zhang, Jian
+>>> Subject: Re: [RFC] add rocksdb support
+>>>
+>>> On 05/21/2014 07:54 AM, Shu, Xinxin wrote:
+>>>> Hi, sage
+>>>>
+>>>> I will add rocksdb submodule into the makefile , currently we want to have fully performance tests on key-value db backend , both leveldb and rocksdb. Then optimize on rocksdb performance.
+>>>
+>>> I'm definitely interested in any performance tests you do here.  Last winter I started doing some fairly high level tests on raw leveldb/hyperleveldb/raikleveldb.  I'm very interested in what you see with rocksdb as a backend.
+>>>
+>>>>
+>>>> -----Original Message-----
+>>>> From: Sage Weil [mailto:sage@inktank.com]
+>>>> Sent: Wednesday, May 21, 2014 9:19 AM
+>>>> To: Shu, Xinxin
+>>>> Cc: ceph-devel@vger.kernel.org
+>>>> Subject: Re: [RFC] add rocksdb support
+>>>>
+>>>> Hi Xinxin,
+>>>>
+>>>> I've pushed an updated wip-rocksdb to github/liewegas/ceph.git that includes the latest set of patches with the groundwork and your rocksdb patch.  There is also a commit that adds rocksdb as a git submodule.  I'm thinking that, since there aren't any distro packages for rocksdb at this point, this is going to be the easiest way to make this usable for people.
+>>>>
+>>>> If you can wire the submodule into the makefile, we can merge this in so that rocksdb support is in the ceph.com packages on ceph.com.  I suspect that the distros will prefer to turns this off in favor of separate shared libs, but they can do this at their option if/when they include rocksdb in the distro. I think the key is just to have both --with-librockdb and --with-librocksdb-static (or similar) options so that you can either use the static or dynamically linked one.
+>>>>
+>>>> Has your group done further testing with rocksdb?  Anything interesting to share?
+>>>>
+>>>> Thanks!
+>>>> sage
+>>>>
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>>>> in the body of a message to majordomo@vger.kernel.org More majordomo
+>>>> info at  http://vger.kernel.org/majordomo-info.html
+>>>>
+>>>
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>> in the body of a message to majordomo@vger.kernel.org More majordomo
+>> info at  http://vger.kernel.org/majordomo-info.html
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>> in the body of a message to majordomo@vger.kernel.org More majordomo
+>> info at  http://vger.kernel.org/majordomo-info.html
+>>
+>> ________________________________
+>>
+>> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>> in the body of a message to majordomo@vger.kernel.org More majordomo
+>> info at  http://vger.kernel.org/majordomo-info.html
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>> in the body of a message to majordomo@vger.kernel.org More majordomo
+>> info at  http://vger.kernel.org/majordomo-info.html
+>
+>
+>
+> --
+> Best Regards,
+>
+> Wheat
+
+
+
+-- 
+Best Regards,
+
+Wheat
