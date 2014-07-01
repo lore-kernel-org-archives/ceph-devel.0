@@ -1,80 +1,48 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: state model diagram
-Date: Tue, 01 Jul 2014 19:30:10 +0200
-Message-ID: <53B2F022.1060002@dachary.org>
-References: <CACUN8h3uudxbkxBNQYZX8_UV1WYOXfBjoivBGCZJhO4N2yZdKA@mail.gmail.com>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: [ceph-users] Why is librbd1 / librados2 from Firefly 20% slower
+ than the one from dumpling?
+Date: Tue, 1 Jul 2014 15:51:36 -0700
+Message-ID: <CAPYLRzhJ_3WkWSFUAx+w+gt5PTLD7SYmSyQ-xPRZ31ahN4a1Ag@mail.gmail.com>
+References: <539B11C4.1010400@profihost.ag>
+	<CAPYLRzjL1JrgsThUejDHQsG3qcK1ZTXgcO2mHEuoHN-FbwVwsQ@mail.gmail.com>
+	<53AD1411.101@profihost.ag>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="hEgKxurAn4Q1hUL4aQRrvjVLpHI3wI2tx"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:34140 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1755193AbaGARaQ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 1 Jul 2014 13:30:16 -0400
-In-Reply-To: <CACUN8h3uudxbkxBNQYZX8_UV1WYOXfBjoivBGCZJhO4N2yZdKA@mail.gmail.com>
+Received: from mail-qa0-f54.google.com ([209.85.216.54]:33086 "EHLO
+	mail-qa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S964965AbaGAWvh (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 1 Jul 2014 18:51:37 -0400
+Received: by mail-qa0-f54.google.com with SMTP id v10so8174749qac.41
+        for <ceph-devel@vger.kernel.org>; Tue, 01 Jul 2014 15:51:36 -0700 (PDT)
+In-Reply-To: <53AD1411.101@profihost.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Koleos Fuscus <koleosfuscus@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@lists.ceph.com>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---hEgKxurAn4Q1hUL4aQRrvjVLpHI3wI2tx
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+On Thu, Jun 26, 2014 at 11:49 PM, Stefan Priebe - Profihost AG
+<s.priebe@profihost.ag> wrote:
+> Hi Greg,
+>
+> Am 26.06.2014 02:17, schrieb Gregory Farnum:
+>> Sorry we let this drop; we've all been busy traveling and things.
+>>
+>> There have been a lot of changes to librados between Dumpling and
+>> Firefly, but we have no idea what would have made it slower. Can you
+>> provide more details about how you were running these tests?
+>
+> it's just a normal fio run:
+> fio --ioengine=rbd --bs=4k --name=foo --invalidate=0
+> --readwrite=randwrite --iodepth=32 --rbdname=fio_test2 --pool=teststor
+> --runtime=90 --numjobs=32 --direct=1 --group
+>
+> Running one time with firefly libs and one time with dumpling libs.
+> Traget is always the same pool on a firefly ceph storage.
 
-
-Hi koleofuscus,
-
-I took a look at https://wiki.ceph.com/Development/Add_erasure_coding_to_=
-the_durability_model/Technical_details_on_the_model and it makes sense to=
- me. However I wonder why you would want to go into that level of detail =
-? Could you point me where you would encode such details events in the cu=
-rrent code ?
-
-Cheers
-
-On 26/06/2014 02:29, Koleos Fuscus wrote:
-> Hi,
->=20
-> I found a state model diagram in the page that explains peering
-> (http://ceph.com/docs/firefly/dev/peering/). The image cannot be
-> visualised correctly. I build the docs and could open the image in an
-> appropriate size using graphviz but still the layout is too complex
-> and messy.
-> I decided to do my own state model to collaborate in the understanding
-> of ceph. Actually, it helps me to measure my own understanding of the
-> system. Using the diagram facilitates the decision of modeling one
-> event or skip another. You can find the diagram here:
-> https://wiki.ceph.com/Development/Add_erasure_coding_to_the_durability_=
-model/Technical_details_on_the_model
->=20
-> Please give me your comments.
->=20
-> koleosfuscus
->=20
-> ________________________________________________________________
-> "My reply is: the software has no known bugs, therefore it has not
-> been updated."
-> Wietse Venema
->=20
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---hEgKxurAn4Q1hUL4aQRrvjVLpHI3wI2tx
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlOy8CIACgkQ8dLMyEl6F21eDgCdEUTlnx9bhA5qfShczSvsKusY
-lTwAnRIVGSAlZrFO5Hn8wTuf6SJtjqP/
-=/CSd
------END PGP SIGNATURE-----
-
---hEgKxurAn4Q1hUL4aQRrvjVLpHI3wI2tx--
+What's the backing cluster you're running against? What kind of CPU
+usage do you see with both? 25k IOPS is definitely getting up there,
+but I'd like some guidance about whether we're looking for a reduction
+in parallelism, or an increase in per-op costs, or something else.
+-Greg
+Software Engineer #42 @ http://inktank.com | http://ceph.com
