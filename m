@@ -1,113 +1,30 @@
-From: Stefan Priebe <s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org>
-Subject: Re: Why is librbd1 / librados2 from Firefly 20% slower
- than the one from dumpling?
-Date: Wed, 02 Jul 2014 21:00:51 +0200
-Message-ID: <53B456E3.1060909@profihost.ag>
-References: <539B11C4.1010400@profihost.ag>	<CAPYLRzjL1JrgsThUejDHQsG3qcK1ZTXgcO2mHEuoHN-FbwVwsQ@mail.gmail.com>	<53AD1411.101@profihost.ag>	<CAPYLRzhJ_3WkWSFUAx+w+gt5PTLD7SYmSyQ-xPRZ31ahN4a1Ag@mail.gmail.com>	<53B40292.2000108@profihost.ag>	<CACJqLyZYpEJYUn5m5B4LCGGfszY_xPjui5q7HShQuotBkVDt4Q@mail.gmail.com>	<53B40526.7080907@profihost.ag>
-	<CAPYLRziFqZYFn4E22oE+-HXXcRppzwY=h2TbDuCErSixzZ=eWQ@mail.gmail.com>
+From: Luis Pabon <lpabon@redhat.com>
+Subject: Q&A Session for ReplicatedPG.cc
+Date: Wed, 02 Jul 2014 15:08:52 -0400
+Message-ID: <53B458C4.7000908@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAPYLRziFqZYFn4E22oE+-HXXcRppzwY=h2TbDuCErSixzZ=eWQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Gregory Farnum <greg-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:48733 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751809AbaGBTIy (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 2 Jul 2014 15:08:54 -0400
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>, Samuel Just <sjust@redhat.com>
+Cc: ceph-devel@vger.kernel.org
 
+Hi guys,
+     I finally have been able to allocate some time to the Read Forward 
+cache work.  I started looking and navigating the code and have a few 
+questions on the behavior and expectations of some of the functions.  I 
+have created a Gist with quetions prefixed by a ''//**''.  Do you mind 
+spending a few minutes on those questions? Or, you can also point me at 
+documentation I can read which can answer those questions.
 
-Am 02.07.2014 16:00, schrieb Gregory Farnum:
-> Yeah, it's fighting for attention with a lot of other urgent stuff. :(
->
-> Anyway, even if you can't look up any details or reproduce at this
-> time, I'm sure you know what shape the cluster was (number of OSDs,
-> running on SSDs or hard drives, etc), and that would be useful
-> guidance. :)
+Gist:  https://gist.github.com/5d037d1cd2c0e482aeb5.git
 
-Sure
+Thank you.
 
-Number of OSDs: 24
-Each OSD has an SSD capable of doing tested with fio before installing 
-ceph (70.000 iop/s 4k write, 580MB/s seq. write 1MB blocks)
-
-Single Xeon E5-1620 v2 @ 3.70GHz
-
-48GB RAM
-
-Stefan
-
-> -Greg
-> Software Engineer #42 @ http://inktank.com | http://ceph.com
->
->
-> On Wed, Jul 2, 2014 at 6:12 AM, Stefan Priebe - Profihost AG
-> <s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org> wrote:
->>
->> Am 02.07.2014 15:07, schrieb Haomai Wang:
->>> Could you give some perf counter from rbd client side? Such as op latency?
->>
->> Sorry haven't any counters. As this mail was some days unseen - i
->> thought nobody has an idea or could help.
->>
->> Stefan
->>
->>> On Wed, Jul 2, 2014 at 9:01 PM, Stefan Priebe - Profihost AG
->>> <s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org> wrote:
->>>> Am 02.07.2014 00:51, schrieb Gregory Farnum:
->>>>> On Thu, Jun 26, 2014 at 11:49 PM, Stefan Priebe - Profihost AG
->>>>> <s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org> wrote:
->>>>>> Hi Greg,
->>>>>>
->>>>>> Am 26.06.2014 02:17, schrieb Gregory Farnum:
->>>>>>> Sorry we let this drop; we've all been busy traveling and things.
->>>>>>>
->>>>>>> There have been a lot of changes to librados between Dumpling and
->>>>>>> Firefly, but we have no idea what would have made it slower. Can you
->>>>>>> provide more details about how you were running these tests?
->>>>>>
->>>>>> it's just a normal fio run:
->>>>>> fio --ioengine=rbd --bs=4k --name=foo --invalidate=0
->>>>>> --readwrite=randwrite --iodepth=32 --rbdname=fio_test2 --pool=teststor
->>>>>> --runtime=90 --numjobs=32 --direct=1 --group
->>>>>>
->>>>>> Running one time with firefly libs and one time with dumpling libs.
->>>>>> Traget is always the same pool on a firefly ceph storage.
->>>>>
->>>>> What's the backing cluster you're running against? What kind of CPU
->>>>> usage do you see with both? 25k IOPS is definitely getting up there,
->>>>> but I'd like some guidance about whether we're looking for a reduction
->>>>> in parallelism, or an increase in per-op costs, or something else.
->>>>
->>>> Hi Greg,
->>>>
->>>> i don't have that test cluster anymore. It had to go into production
->>>> with dumpling.
->>>>
->>>> So i can't tell you.
->>>>
->>>> Sorry.
->>>>
->>>> Stefan
->>>>
->>>>> -Greg
->>>>> Software Engineer #42 @ http://inktank.com | http://ceph.com
->>>>> --
->>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>>> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
->>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>>
->>>> _______________________________________________
->>>> ceph-users mailing list
->>>> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
->>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->>>
->>>
->>>
+- Luis
