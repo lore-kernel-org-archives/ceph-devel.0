@@ -1,86 +1,69 @@
-From: Gregory Farnum <greg-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: Why is librbd1 / librados2 from Firefly 20% slower
- than the one from dumpling?
-Date: Wed, 2 Jul 2014 12:46:13 -0700
-Message-ID: <CAPYLRzg7NyEch-Yz=GonBCFLsjzBpcc1T-b+n37+f3bK+EMV6A@mail.gmail.com>
-References: <539B11C4.1010400@profihost.ag>
-	<CAPYLRzjL1JrgsThUejDHQsG3qcK1ZTXgcO2mHEuoHN-FbwVwsQ@mail.gmail.com>
-	<53AD1411.101@profihost.ag>
-	<CAPYLRzhJ_3WkWSFUAx+w+gt5PTLD7SYmSyQ-xPRZ31ahN4a1Ag@mail.gmail.com>
-	<53B40292.2000108@profihost.ag>
-	<CACJqLyZYpEJYUn5m5B4LCGGfszY_xPjui5q7HShQuotBkVDt4Q@mail.gmail.com>
-	<53B40526.7080907@profihost.ag>
-	<CAPYLRziFqZYFn4E22oE+-HXXcRppzwY=h2TbDuCErSixzZ=eWQ@mail.gmail.com>
-	<53B456E3.1060909@profihost.ag>
-	<CAPYLRzgZyk_qHfuEANcbLYLHXX++Lj71t5xeTxbLf9ywy6s-ww@mail.gmail.com>
-	<53B46106.7050306@profihost.ag>
+From: Luis Pabon <lpabon@redhat.com>
+Subject: Re: Q&A Session for ReplicatedPG.cc
+Date: Wed, 02 Jul 2014 15:50:37 -0400
+Message-ID: <53B4628D.9080908@redhat.com>
+References: <53B458C4.7000908@redhat.com>	<53B4602B.9010904@redhat.com> <CAPYLRzjdXWt16GFnrJx2pPPwstUo5suOMqvZgj6djUXz=xg3_w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <53B46106.7050306-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Stefan Priebe <s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:14619 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754278AbaGBTuj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 2 Jul 2014 15:50:39 -0400
+In-Reply-To: <CAPYLRzjdXWt16GFnrJx2pPPwstUo5suOMqvZgj6djUXz=xg3_w@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Gregory Farnum <greg@inktank.com>
+Cc: Sage Weil <sweil@redhat.com>, Samuel Just <sjust@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, Jul 2, 2014 at 12:44 PM, Stefan Priebe <s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org> wrote:
-> Hi Greg,
->
-> Am 02.07.2014 21:36, schrieb Gregory Farnum:
->>
->> On Wed, Jul 2, 2014 at 12:00 PM, Stefan Priebe <s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org>
->> wrote:
->>>
->>>
->>> Am 02.07.2014 16:00, schrieb Gregory Farnum:
->>>
->>>> Yeah, it's fighting for attention with a lot of other urgent stuff. :(
->>>>
->>>> Anyway, even if you can't look up any details or reproduce at this
->>>> time, I'm sure you know what shape the cluster was (number of OSDs,
->>>> running on SSDs or hard drives, etc), and that would be useful
->>>> guidance. :)
->>>
->>>
->>>
->>> Sure
->>>
->>> Number of OSDs: 24
->>> Each OSD has an SSD capable of doing tested with fio before installing
->>> ceph
->>> (70.000 iop/s 4k write, 580MB/s seq. write 1MB blocks)
->>>
->>> Single Xeon E5-1620 v2 @ 3.70GHz
->>>
->>> 48GB RAM
->>
->>
->> Awesome, thanks.
->>
->> I went through the changelogs on the librados/, osdc/, and msg/
->> directories to see if I could find any likely change candidates
->> between Dumpling and Firefly and couldn't see any issues. :( But I
->> suspect that the sharding changes coming will more than make up the
->> difference, so you might want to plan on checking that out when it
->> arrives, even if you don't want to deploy it to production.n
->
->
-> To which changes do you refer? Will they be part or backported of/to
-> firefly?
+Yeah I wish there was a way to do it inline.
 
-Yehuda's got a pretty big patchset that is sharding up the "big
-Objecter lock" into many smaller mutexes and RWLocks that will make it
-much more parallel. He's on vacation just now but I understand it's
-almost ready to merge; I don't think it'll be suitable for backport to
-firefly, though (it's big).
--Greg
-Software Engineer #42 @ http://inktank.com | http://ceph.com
+You can add them as comments at the bottom of the Gist or as a reply to 
+this email.  Whatever is easiest.
+
+- Luis
+
+On 07/02/2014 03:44 PM, Gregory Farnum wrote:
+> I had a few minutes unexpectedly free so I was going to answer (some
+> of) these, but I can't figure out a way to answer questions inline on
+> a gist. Did you have something else in mind? :)
+> -Greg
+> Software Engineer #42 @ http://inktank.com | http://ceph.com
+>
+>
+> On Wed, Jul 2, 2014 at 12:40 PM, Luis Pabon <lpabon@redhat.com> wrote:
+>> Bad link.  Here is the Gist:
+>> https://gist.github.com/lpabon/5d037d1cd2c0e482aeb5
+>>
+>> - Luis
+>>
+>>
+>> On 07/02/2014 03:08 PM, Luis Pabon wrote:
+>>> Hi guys,
+>>>      I finally have been able to allocate some time to the Read Forward
+>>> cache work.  I started looking and navigating the code and have a few
+>>> questions on the behavior and expectations of some of the functions.  I have
+>>> created a Gist with quetions prefixed by a ''//**''.  Do you mind spending a
+>>> few minutes on those questions? Or, you can also point me at documentation I
+>>> can read which can answer those questions.
+>>>
+>>> Gist:  https://gist.github.com/5d037d1cd2c0e482aeb5.git
+>>>
+>>> Thank you.
+>>>
+>>> - Luis
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
