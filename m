@@ -1,73 +1,63 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: state model diagram
-Date: Wed, 2 Jul 2014 12:28:54 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1407021225090.24420@cobra.newdream.net>
-References: <CACUN8h3uudxbkxBNQYZX8_UV1WYOXfBjoivBGCZJhO4N2yZdKA@mail.gmail.com> <53B2F022.1060002@dachary.org>
+From: Gregory Farnum <greg-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: Why is librbd1 / librados2 from Firefly 20% slower
+ than the one from dumpling?
+Date: Wed, 2 Jul 2014 12:36:43 -0700
+Message-ID: <CAPYLRzgZyk_qHfuEANcbLYLHXX++Lj71t5xeTxbLf9ywy6s-ww@mail.gmail.com>
+References: <539B11C4.1010400@profihost.ag>
+	<CAPYLRzjL1JrgsThUejDHQsG3qcK1ZTXgcO2mHEuoHN-FbwVwsQ@mail.gmail.com>
+	<53AD1411.101@profihost.ag>
+	<CAPYLRzhJ_3WkWSFUAx+w+gt5PTLD7SYmSyQ-xPRZ31ahN4a1Ag@mail.gmail.com>
+	<53B40292.2000108@profihost.ag>
+	<CACJqLyZYpEJYUn5m5B4LCGGfszY_xPjui5q7HShQuotBkVDt4Q@mail.gmail.com>
+	<53B40526.7080907@profihost.ag>
+	<CAPYLRziFqZYFn4E22oE+-HXXcRppzwY=h2TbDuCErSixzZ=eWQ@mail.gmail.com>
+	<53B456E3.1060909@profihost.ag>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:47554 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751809AbaGBT2z (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Jul 2014 15:28:55 -0400
-In-Reply-To: <53B2F022.1060002@dachary.org>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Koleos Fuscus <koleosfuscus@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <53B456E3.1060909-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Stefan Priebe <s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org>
+Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi Koleofuscus, Loic,
+On Wed, Jul 2, 2014 at 12:00 PM, Stefan Priebe <s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org> wrote:
+>
+> Am 02.07.2014 16:00, schrieb Gregory Farnum:
+>
+>> Yeah, it's fighting for attention with a lot of other urgent stuff. :(
+>>
+>> Anyway, even if you can't look up any details or reproduce at this
+>> time, I'm sure you know what shape the cluster was (number of OSDs,
+>> running on SSDs or hard drives, etc), and that would be useful
+>> guidance. :)
+>
+>
+> Sure
+>
+> Number of OSDs: 24
+> Each OSD has an SSD capable of doing tested with fio before installing ceph
+> (70.000 iop/s 4k write, 580MB/s seq. write 1MB blocks)
+>
+> Single Xeon E5-1620 v2 @ 3.70GHz
+>
+> 48GB RAM
 
-I see several minor inaccuracies on that diagram, but my main question 
-(like Loic) is whether they are relevant for the reliability model.
+Awesome, thanks.
 
-For example, backfill and 'remap and get sync' are more or less equivalent 
-(tho backfill is missing the 'delete stray replicas' state after); it make 
-little difference from a durability perspective whether it is the primary 
-or a replica that fails unless you are watching the messages go by.  And I 
-think the exceptional cases (unfound objects) can be simplified.
-
-sage
-
-
-On Tue, 1 Jul 2014, Loic Dachary wrote:
-
-> 
-> Hi koleofuscus,
-> 
-> I took a look at 
-> https://wiki.ceph.com/Development/Add_erasure_coding_to_the_durability_model/Technical_details_on_the_model 
-> and it makes sense to me. However I wonder why you would want to go into 
-> that level of detail ? Could you point me where you would encode such 
-> details events in the current code ?
-> 
-> Cheers
-> 
-> On 26/06/2014 02:29, Koleos Fuscus wrote:
-> > Hi,
-> > 
-> > I found a state model diagram in the page that explains peering
-> > (http://ceph.com/docs/firefly/dev/peering/). The image cannot be
-> > visualised correctly. I build the docs and could open the image in an
-> > appropriate size using graphviz but still the layout is too complex
-> > and messy.
-> > I decided to do my own state model to collaborate in the understanding
-> > of ceph. Actually, it helps me to measure my own understanding of the
-> > system. Using the diagram facilitates the decision of modeling one
-> > event or skip another. You can find the diagram here:
-> > https://wiki.ceph.com/Development/Add_erasure_coding_to_the_durability_model/Technical_details_on_the_model
-> > 
-> > Please give me your comments.
-> > 
-> > koleosfuscus
-> > 
-> > ________________________________________________________________
-> > "My reply is: the software has no known bugs, therefore it has not
-> > been updated."
-> > Wietse Venema
-> > 
-> 
-> -- 
-> Lo?c Dachary, Artisan Logiciel Libre
-> 
-> 
+I went through the changelogs on the librados/, osdc/, and msg/
+directories to see if I could find any likely change candidates
+between Dumpling and Firefly and couldn't see any issues. :( But I
+suspect that the sharding changes coming will more than make up the
+difference, so you might want to plan on checking that out when it
+arrives, even if you don't want to deploy it to production.
+-Greg
