@@ -1,39 +1,27 @@
-From: =?UTF-8?B?5p2O5rKb5Lym?= <lpl6338236@gmail.com>
-Subject: A log bug in OSD.cc
-Date: Sat, 5 Jul 2014 14:41:12 +0800
-Message-ID: <CAPS90kg8BrzB_mt1AUjdTAx1nioaBkW-fe7SVVWA_Lxa_E9O6A@mail.gmail.com>
+From: "K.H" <konghui10@126.com>
+Subject: GOOD DAY,
+Date: Sat, 5 Jul 2014 08:50:13 -0000
+Message-ID: <344ae197b2f0976de0b38810c3821ddd.squirrel@192.237.168.48>
+Reply-To: konghui14@126.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f181.google.com ([209.85.223.181]:45234 "EHLO
-	mail-ie0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751856AbaGEGlN convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 5 Jul 2014 02:41:13 -0400
-Received: by mail-ie0-f181.google.com with SMTP id y20so2088460ier.40
-        for <ceph-devel@vger.kernel.org>; Fri, 04 Jul 2014 23:41:12 -0700 (PDT)
+Received: from [192.237.168.48] ([192.237.168.48]:60864 "EHLO mail.vps.com"
+	rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1754234AbaGEJAO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sat, 5 Jul 2014 05:00:14 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
 
-It seems that the 2 log sentences
-OSD.cc:1220 dout(10) << "init creating/touching snapmapper object" << d=
-endl;
-OSD.cc:1230  dout(10) << "init creating/touching infos object" << dendl=
-;
-need to be exchanged to agree with the operations following them(info
-and snapmapper ).
---=20
-Li Peilun (=E6=9D=8E=E6=B2=9B=E4=BC=A6)
-Yao Class J10
-Institute for Interdisciplinary Information Sciences
-Tsinghua University
-Beijing,100084
-P.R.China
-Tel:86-18810671857
-E-mail: lpl6338236@gmail.com
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
+
+My name is Kong Hui, I want you to be my partner in a business project. If
+Interested Contact me back via my email.
+
+Thank You.
+
+
+
