@@ -1,15 +1,15 @@
 From: Sage Weil <sweil@redhat.com>
 Subject: Re: Cache tier READ_FORWARD transition
-Date: Mon, 7 Jul 2014 12:43:20 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1407071242050.24973@cobra.newdream.net>
+Date: Mon, 7 Jul 2014 12:45:19 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1407071244370.24973@cobra.newdream.net>
 References: <53BACB03.5010603@redhat.com> <alpine.DEB.2.00.1407070934120.23451@cobra.newdream.net> <53BAF752.3080005@inktank.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:48138 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:48163 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751225AbaGGTnU (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Jul 2014 15:43:20 -0400
+	with ESMTP id S1751287AbaGGTpT (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Jul 2014 15:45:19 -0400
 In-Reply-To: <53BAF752.3080005@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -54,12 +54,8 @@ On Mon, 7 Jul 2014, Mark Nelson wrote:
 > That would make the behaviour for default RBD object sizes always 3 read, but
 > could keep big objects out of the cache tier for RGW.
 
-We don't have enough information to do that right now, since on a miss we 
-redirect the client instead of proxying them and never learn what the 
-actual object size is.
-
-If/after we start doing proxying for the reads, then lots of other stuff 
-becomes possible... but I think we'll need to be careful about choosing 
-where to add complexity.
+Hmm FWIW we in the RBD vs RGW case those are different pools so we can set 
+different policies.  I think small vs big object distinction might make 
+sense in other contexts, though!
 
 sage
