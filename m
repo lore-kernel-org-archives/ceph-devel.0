@@ -1,129 +1,98 @@
 From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: Re: [PATCH 03/14] libceph: move and add dout()s to ceph_msg_{get,put}()
-Date: Tue, 8 Jul 2014 15:12:14 +0400
-Message-ID: <CALFYKtCuMn5MfPF4aOYBbyXM1TD7sNQ5M6XJtzGmuLWQW+6Ogw@mail.gmail.com>
+Subject: Re: [PATCH 09/14] libceph: introduce ceph_osdc_cancel_request()
+Date: Tue, 8 Jul 2014 15:15:54 +0400
+Message-ID: <CALFYKtDS+H99cCs9rgBj7qmwQ5KGZv9zqPac5iBoOHexAAra8g@mail.gmail.com>
 References: <1403716607-13535-1-git-send-email-ilya.dryomov@inktank.com>
-	<1403716607-13535-4-git-send-email-ilya.dryomov@inktank.com>
-	<53B15815.7050700@ieee.org>
+	<1403716607-13535-10-git-send-email-ilya.dryomov@inktank.com>
+	<53B16887.2090309@ieee.org>
+	<CALFYKtB4oCa71L+pOO+jkROKRr-wLWCds_MY6zbk+P4b987y8A@mail.gmail.com>
+	<53BAA501.5030901@ieee.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f50.google.com ([209.85.216.50]:40094 "EHLO
-	mail-qa0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753139AbaGHLMP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Jul 2014 07:12:15 -0400
-Received: by mail-qa0-f50.google.com with SMTP id m5so4674000qaj.9
-        for <ceph-devel@vger.kernel.org>; Tue, 08 Jul 2014 04:12:14 -0700 (PDT)
-In-Reply-To: <53B15815.7050700@ieee.org>
+Received: from mail-qg0-f49.google.com ([209.85.192.49]:53509 "EHLO
+	mail-qg0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753139AbaGHLPz (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Jul 2014 07:15:55 -0400
+Received: by mail-qg0-f49.google.com with SMTP id f51so4753288qge.22
+        for <ceph-devel@vger.kernel.org>; Tue, 08 Jul 2014 04:15:54 -0700 (PDT)
+In-Reply-To: <53BAA501.5030901@ieee.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@ieee.org>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Mon, Jun 30, 2014 at 4:29 PM, Alex Elder <elder@ieee.org> wrote:
-> On 06/25/2014 12:16 PM, Ilya Dryomov wrote:
->> Add dout()s to ceph_msg_{get,put}().  Also move them to .c and turn
->> kref release callback into a static function.
+On Mon, Jul 7, 2014 at 5:47 PM, Alex Elder <elder@ieee.org> wrote:
+> On 06/30/2014 09:34 AM, Ilya Dryomov wrote:
+>> On Mon, Jun 30, 2014 at 5:39 PM, Alex Elder <elder@ieee.org> wrote:
+>>> On 06/25/2014 12:16 PM, Ilya Dryomov wrote:
+>>>> Introduce ceph_osdc_cancel_request() intended for canceling requests
+>>>> from the higher layers (rbd and cephfs).  Because higher layers are in
+>>>> charge and are supposed to know what and when they are canceling, the
+>>>> request is not completed, only unref'ed and removed from the libceph
+>>>> data structures.
+>>>
+>>> This seems reasonable.
+>>>
+>>> But you make two changes here that I'd like to see a little
+>>> more explanation on.  They seem significant enough to warrant
+>>> a little more attention in the commit description.
+>>>
+>>> - __cancel_request() is no longer called when
+>>>   ceph_osdc_wait_request() fails due to an
+>>>   an interrupt.  This is my main concern, and I
+>>>   plan to work through it but I'm in a small hurry
+>>>   right now.
 >>
->> Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
+>> Perhaps it should have been a separate commit.  __unregister_request()
+>> revokes r_request, so I opted for not trying to do it twice.  As for
 >
-> This is all very good.
->
-> I have one suggestion though, below, but regardless:
->
-> Reviewed-by: Alex Elder <elder@linaro.org>
->
->
->> ---
->>  include/linux/ceph/messenger.h |   14 ++------------
->>  net/ceph/messenger.c           |   31 ++++++++++++++++++++++---------
->>  2 files changed, 24 insertions(+), 21 deletions(-)
->>
->> diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
->> index d21f2dba0731..40ae58e3e9db 100644
->> --- a/include/linux/ceph/messenger.h
->> +++ b/include/linux/ceph/messenger.h
->> @@ -285,19 +285,9 @@ extern void ceph_msg_data_add_bio(struct ceph_msg *msg, struct bio *bio,
->>
->>  extern struct ceph_msg *ceph_msg_new(int type, int front_len, gfp_t flags,
->>                                    bool can_fail);
->> -extern void ceph_msg_kfree(struct ceph_msg *m);
->>
->> -
->> -static inline struct ceph_msg *ceph_msg_get(struct ceph_msg *msg)
->> -{
->> -     kref_get(&msg->kref);
->> -     return msg;
->> -}
->> -extern void ceph_msg_last_put(struct kref *kref);
->> -static inline void ceph_msg_put(struct ceph_msg *msg)
->> -{
->> -     kref_put(&msg->kref, ceph_msg_last_put);
->> -}
->> +extern struct ceph_msg *ceph_msg_get(struct ceph_msg *msg);
->> +extern void ceph_msg_put(struct ceph_msg *msg);
->>
->>  extern void ceph_msg_dump(struct ceph_msg *msg);
->>
->> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
->> index 1948d592aa54..8bffa5b90fef 100644
->> --- a/net/ceph/messenger.c
->> +++ b/net/ceph/messenger.c
->> @@ -3269,24 +3269,21 @@ static int ceph_con_in_msg_alloc(struct ceph_connection *con, int *skip)
->>  /*
->>   * Free a generically kmalloc'd message.
->>   */
->> -void ceph_msg_kfree(struct ceph_msg *m)
->> +static void ceph_msg_free(struct ceph_msg *m)
->>  {
->> -     dout("msg_kfree %p\n", m);
->> +     dout("%s %p\n", __func__, m);
->>       ceph_kvfree(m->front.iov_base);
->>       kmem_cache_free(ceph_msg_cache, m);
->>  }
->>
->> -/*
->> - * Drop a msg ref.  Destroy as needed.
->> - */
->> -void ceph_msg_last_put(struct kref *kref)
->> +static void ceph_msg_release(struct kref *kref)
->>  {
->>       struct ceph_msg *m = container_of(kref, struct ceph_msg, kref);
->>       LIST_HEAD(data);
->>       struct list_head *links;
->>       struct list_head *next;
->>
->> -     dout("ceph_msg_put last one on %p\n", m);
->> +     dout("%s %p\n", __func__, m);
->>       WARN_ON(!list_empty(&m->list_head));
->>
->>       /* drop middle, data, if any */
->> @@ -3308,9 +3305,25 @@ void ceph_msg_last_put(struct kref *kref)
->>       if (m->pool)
->>               ceph_msgpool_put(m->pool, m);
->>       else
->> -             ceph_msg_kfree(m);
->> +             ceph_msg_free(m);
->> +}
->> +
->> +struct ceph_msg *ceph_msg_get(struct ceph_msg *msg)
->> +{
->> +     dout("%s %p (was %d)\n", __func__, msg,
->> +          atomic_read(&msg->kref.refcount));
->> +     kref_get(&msg->kref);
->
-> I suggest you do the dout() *after* you call kref_get().
-> I'm sure it doesn't matter in practice here, but my
-> reasoning is that you get the reference immediately, and
-> you'll have the reference when reading the refcount value.
-> It also  makes the dout() calls here and in ceph_msg_put()
-> end up getting symmetrically wrapped by the get kref
-> get and put.  (You have a race reading the updated
-> refcount value either way, but it's debug code.)
+> OK, that makes sense--revoking the request is basically all
+> __cancel_request() does anyway.  You ought to have mentioned
+> that in the description anyway, even if it wasn't a separate
+> commit.
 
-My inspiration was rbd_{img,obj}_request_get().  kref_get() can't fail
-(may spit out a WARN though) and it is racey anyway, so I'll leave it as
-is for consistency.
+I have added the explanation to the commit message.
+
+>
+>> the r_sent condition and assignment, it doesn't seem to make much of
+>> a difference, given that the request is about to be unregistered
+>> anyway.
+>
+> If the request is getting canceled (from a caller outside libceph)
+> it can't take into account whether it was sent or not.  As you said,
+> it is getting revoked unconditionally by __unregister_request().
+> To be honest though, *that* revoke call should have been zeroing
+> the r_sent value also.  It apparently won't matter, but I think it's
+> wrong.  The revoke drops a reference, it doesn't necessarily free
+> the structure (though I expect it may always do so anyway).
+>
+>>> - __unregister_linger_request() is now called when
+>>>   a request is canceled, but it wasn't before.  (Since
+>>>   we're consistent about setting the r_linger flag
+>>>   this should be fine, but it *is* a behavior change.)
+>>
+>> The general goal here is to make ceph_osdc_cancel_request() cancel
+>> *any* request correctly, so if r_linger is set, which means that the
+>> request in question *could* be lingering, __unregister_linger_request()
+>> is called.
+>
+> The goal is good.  Note that __unregister_linger_request() drops
+> a reference to the request though.  There are three other callers
+> of this function.  Two of them drop a reference that had just been
+> added by a call to __register_request().  The other one is in
+> ceph_osdc_unregister_linger_request(), initiated by a higher layer.
+> In that last case, r_linger will be zeroed, so calling it again
+> should be harmless.
+
+Yeah, ceph_osdc_unregister_linger_request() is removed in favor of
+ceph_osdc_cancel_request() later in the series.  r_linger is now
+treated is a sort of immutable field - it's never zeroed after it's
+been set.  It's still safe to call __unregister_linger_request()
+at any point in time though, because unless the request is *actually*
+lingering it won't do a thing.
+
+Are you OK with your Reviewed-by for this patch?
 
 Thanks,
 
