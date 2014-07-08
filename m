@@ -1,98 +1,96 @@
 From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: Re: [PATCH 09/14] libceph: introduce ceph_osdc_cancel_request()
-Date: Tue, 8 Jul 2014 15:15:54 +0400
-Message-ID: <CALFYKtDS+H99cCs9rgBj7qmwQ5KGZv9zqPac5iBoOHexAAra8g@mail.gmail.com>
+Subject: Re: [PATCH 10/14] rbd: rbd_obj_request_wait() should cancel the
+ request if interrupted
+Date: Tue, 8 Jul 2014 15:18:02 +0400
+Message-ID: <CALFYKtDv7rnPjSVvzMJVPFQj7=p5PZHf6xEogXPGGS7HD3wnLQ@mail.gmail.com>
 References: <1403716607-13535-1-git-send-email-ilya.dryomov@inktank.com>
-	<1403716607-13535-10-git-send-email-ilya.dryomov@inktank.com>
-	<53B16887.2090309@ieee.org>
-	<CALFYKtB4oCa71L+pOO+jkROKRr-wLWCds_MY6zbk+P4b987y8A@mail.gmail.com>
-	<53BAA501.5030901@ieee.org>
+	<1403716607-13535-11-git-send-email-ilya.dryomov@inktank.com>
+	<53BAD0FC.5020007@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qg0-f49.google.com ([209.85.192.49]:53509 "EHLO
-	mail-qg0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753139AbaGHLPz (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Jul 2014 07:15:55 -0400
-Received: by mail-qg0-f49.google.com with SMTP id f51so4753288qge.22
-        for <ceph-devel@vger.kernel.org>; Tue, 08 Jul 2014 04:15:54 -0700 (PDT)
-In-Reply-To: <53BAA501.5030901@ieee.org>
+Received: from mail-qa0-f46.google.com ([209.85.216.46]:46094 "EHLO
+	mail-qa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753139AbaGHLSE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Jul 2014 07:18:04 -0400
+Received: by mail-qa0-f46.google.com with SMTP id v10so164861qac.19
+        for <ceph-devel@vger.kernel.org>; Tue, 08 Jul 2014 04:18:03 -0700 (PDT)
+In-Reply-To: <53BAD0FC.5020007@linaro.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@ieee.org>
+To: Alex Elder <elder@linaro.org>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Mon, Jul 7, 2014 at 5:47 PM, Alex Elder <elder@ieee.org> wrote:
-> On 06/30/2014 09:34 AM, Ilya Dryomov wrote:
->> On Mon, Jun 30, 2014 at 5:39 PM, Alex Elder <elder@ieee.org> wrote:
->>> On 06/25/2014 12:16 PM, Ilya Dryomov wrote:
->>>> Introduce ceph_osdc_cancel_request() intended for canceling requests
->>>> from the higher layers (rbd and cephfs).  Because higher layers are in
->>>> charge and are supposed to know what and when they are canceling, the
->>>> request is not completed, only unref'ed and removed from the libceph
->>>> data structures.
->>>
->>> This seems reasonable.
->>>
->>> But you make two changes here that I'd like to see a little
->>> more explanation on.  They seem significant enough to warrant
->>> a little more attention in the commit description.
->>>
->>> - __cancel_request() is no longer called when
->>>   ceph_osdc_wait_request() fails due to an
->>>   an interrupt.  This is my main concern, and I
->>>   plan to work through it but I'm in a small hurry
->>>   right now.
->>
->> Perhaps it should have been a separate commit.  __unregister_request()
->> revokes r_request, so I opted for not trying to do it twice.  As for
+On Mon, Jul 7, 2014 at 8:55 PM, Alex Elder <elder@linaro.org> wrote:
+> On 06/25/2014 12:16 PM, Ilya Dryomov wrote:
+>> rbd_obj_request_wait() should cancel the underlying OSD request if
+>> interrupted.  Otherwise libceph will hold onto it indefinitely, causing
+>> assert failures or leaking the original object request.
 >
-> OK, that makes sense--revoking the request is basically all
-> __cancel_request() does anyway.  You ought to have mentioned
-> that in the description anyway, even if it wasn't a separate
-> commit.
+> At first I didn't understand this.  Let me see if I've got
+> it now, though.
+>
+> Each OSD request has a completion associated with it.  An
+> OSD request is started via ceph_osdc_start_request(), which
+> registers the request and takes a reference to it.  One can
+> call ceph_osdc_wait_request() after the request has been
+> successfully started.  Whether the wait succeeds or not,
+> by the time ceph_osdc_wait_request() returns the request
+> should have been cleaned up, back to the state it was
+> in before the start_request call.  That means the request
+> needs to be unregistered and its reference dropped, etc.
+>
+> Similarly, each RBD object request has a completion associated
+> with it.  It is distinct from the OSD request associated
+> with the RBD object request because there may be more to do
+> for RBD request to complete than just complete one object
+> request.  An RBD object request is started by a call to
+> rbd_obj_request_submit(), and once that's successfully
+> returned, one can wait for it to complete using a call to
+> rbd_obj_request_wait().  And as above, that call should
+> return state to (roughly) where it was before the submit
+> call, whether the wait request succeeded or not.
+>
+> Now, RBD doesn't actually wait for its object requests
+> to complete--all its OSD requests complete asynchronously.
+> Instead, it relies on the OSD client to call the callback
+> function (always rbd_osd_req_callback()) when it has
+> completed.  That function will lead to the RBD request's
+> completion being signaled when appropriate.
+>
+> So...  What happens when an interrupt occurs after
+> rbd_obj_request_submit() has returned successfully?  That
+> function is a simple wrapper for ceph_osdc_start_request(),
+> so a successful return means the request was mapped and
+> put on a target's unsent list (or the OSD client's no
+> target list).  Nobody waits for the OSD request, so an
+> interrupt won't get the benefit of the cleanup done in
+> ceph_osdc_wait_request().  Therefore the RBD layer needs
+> to be responsible for doing that.
+>
+> In other words, when rbd_obj_request_wait() gets an
+> interrupt while waiting for the completion, it needs
+> to clean up (end) the interrupted request, and
+> rbd_obj_request_end() sounds right.  And what that
+> cleanup function should do is basically the same
+> as what ceph_osdc_wait_request() should do in that
+> situation, which is call ceph_osdc_cancel_request().
 
-I have added the explanation to the commit message.
+That's exactly right.
 
 >
->> the r_sent condition and assignment, it doesn't seem to make much of
->> a difference, given that the request is about to be unregistered
->> anyway.
->
-> If the request is getting canceled (from a caller outside libceph)
-> it can't take into account whether it was sent or not.  As you said,
-> it is getting revoked unconditionally by __unregister_request().
-> To be honest though, *that* revoke call should have been zeroing
-> the r_sent value also.  It apparently won't matter, but I think it's
-> wrong.  The revoke drops a reference, it doesn't necessarily free
-> the structure (though I expect it may always do so anyway).
->
->>> - __unregister_linger_request() is now called when
->>>   a request is canceled, but it wasn't before.  (Since
->>>   we're consistent about setting the r_linger flag
->>>   this should be fine, but it *is* a behavior change.)
->>
->> The general goal here is to make ceph_osdc_cancel_request() cancel
->> *any* request correctly, so if r_linger is set, which means that the
->> request in question *could* be lingering, __unregister_linger_request()
->> is called.
->
-> The goal is good.  Note that __unregister_linger_request() drops
-> a reference to the request though.  There are three other callers
-> of this function.  Two of them drop a reference that had just been
-> added by a call to __register_request().  The other one is in
-> ceph_osdc_unregister_linger_request(), initiated by a higher layer.
-> In that last case, r_linger will be zeroed, so calling it again
-> should be harmless.
+> The only question that leaves me with is, does
+> ceph_osdc_cancel_request() need to include the
+> call to complete_request() that's present in
+> ceph_osdc_wait_request()?
 
-Yeah, ceph_osdc_unregister_linger_request() is removed in favor of
-ceph_osdc_cancel_request() later in the series.  r_linger is now
-treated is a sort of immutable field - it's never zeroed after it's
-been set.  It's still safe to call __unregister_linger_request()
-at any point in time though, because unless the request is *actually*
-lingering it won't do a thing.
-
-Are you OK with your Reviewed-by for this patch?
+I don't think so - I mentioned it in the ceph_osdc_cancel_request()
+function comment.  ceph_osdc_cancel_request() is supposed to be used by
+higher layers - rbd, cephfs - and exactly because their completion
+logic is decoupled from libceph completions (as you have brilliantly
+explained above) it's the higher layers who should be taking care of
+it.  IOW higher layers are in charge and are supposed to know what and
+when they are cancelling.
 
 Thanks,
 
