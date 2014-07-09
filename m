@@ -1,111 +1,84 @@
-From: Luis Pabon <lpabon@redhat.com>
-Subject: Re: Cache tier READ_FORWARD transition
-Date: Wed, 09 Jul 2014 13:46:31 -0400
-Message-ID: <53BD7FF7.1090801@redhat.com>
-References: <53BACB03.5010603@redhat.com> <alpine.DEB.2.00.1407070934120.23451@cobra.newdream.net> <53BB11C7.4050802@redhat.com> <alpine.DEB.2.00.1407080856060.9196@cobra.newdream.net>
+From: Patrick McGarry <patrick@inktank.com>
+Subject: Re: [Ceph-community] The first PHP library to communicate with Ceph
+ REST API
+Date: Wed, 9 Jul 2014 14:18:50 -0400
+Message-ID: <CAP8Oy=+aRC1BqHcUqi5Dqy6KL4xSKPnFZf91jtMOWq+aNj7gFQ@mail.gmail.com>
+References: <53BD5D8D.3010503@imagin.pl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-2
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:35220 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752746AbaGIRqd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 9 Jul 2014 13:46:33 -0400
-Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id s69HkWgf003369
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK)
-	for <ceph-devel@vger.kernel.org>; Wed, 9 Jul 2014 13:46:33 -0400
-In-Reply-To: <alpine.DEB.2.00.1407080856060.9196@cobra.newdream.net>
+Received: from mail-vc0-f175.google.com ([209.85.220.175]:40390 "EHLO
+	mail-vc0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753923AbaGISSv convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Jul 2014 14:18:51 -0400
+Received: by mail-vc0-f175.google.com with SMTP id hy4so7756281vcb.6
+        for <ceph-devel@vger.kernel.org>; Wed, 09 Jul 2014 11:18:50 -0700 (PDT)
+In-Reply-To: <53BD5D8D.3010503@imagin.pl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Mark Nelson <mnelson@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Antoni Orfin <aorfin@imagin.pl>
+Cc: Ceph User Committee <ceph-community@lists.ceph.com>, Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>
 
-This is great information.
-
-Thank Sage.
-
-- Luis
+Sending this over to ceph-devel and ceph-user where this will have
+interest (ceph-community is for the user committee).  Thanks.
 
 
-On 07/08/2014 12:01 PM, Sage Weil wrote:
-> On Mon, 7 Jul 2014, Luis Pab?n wrote:
->> What about the following usecase (please forgive some of my ceph architecture
->> ignorance):
->>
->> If it was possible to setup OSD caching tier at the host (if the host had a
->> dedicated SSD for accelerating I/O), then caching pools could be created to
->> cache VM rbds, since they are inherently exclusive to a single host.  Using a
->> write through (or a readonly, depending on the workload) policy would have a
->> major increase in VM IOPs.   Using writethrough or readonly policy would also
->> ensure any writes are first written to the back end storage tier.  Enabling
->> hosts to service most of their VM I/O reads would also increases the overall
->> IOPs of the back end storage tier.
-> This could be accomplished by doing a rados pool per client host.  The
-> rados caching only works in as a writeback cache, though, not
-> write-through, so you really need to replicate it for it to be usable in
-> practice.  So although it's possible, this isn't a particularly attractive
-> approach.
+Best Regards,
+
+Patrick McGarry
+Director Ceph Community || Red Hat
+http://ceph.com  ||  http://community.redhat.com
+@scuttlemonkey || @ceph
+
+
+On Wed, Jul 9, 2014 at 11:19 AM, Antoni Orfin <aorfin@imagin.pl> wrote:
+> Hi!
 >
-> What you're describing is really a client-side write-through cache, either
-> for librbd or librados.  We've discussed this in the past (mostly in the
-> context of a shared host-wide read-only data, not as write-through), but
-> in both cases the caching would plug into the client libraries.  There are
-> some CDS notes from emperor:
+> We're happy to announce that after some days of development, we've fi=
+nally
+> releasing PHP library to communicate with CEPH API.
 >
-> 	http://wiki.ceph.com/Planning/Sideboard/rbd%3A_shared_read_cache
-> 	http://pad.ceph.com/p/rbd-shared-read-cache
-> 	http://www.youtube.com/watch?v=SVgBdUv_Lv4&t=70m11s
+> Check out release note on our blog
+> (http://labs.octivi.com/octivi-releases-the-first-php-client-for-ceph=
+/) to
+> find out more about the library.
 >
-> Note that you can also accomplish this with the kernel rbd driver by
-> layering dm-cache or bcache or something similar on top and running it in
-> write-through mode.  Most clients are (KVM+)librbd, though, so eventually
-> a userspace implementation for librbd (or maybe librados) makes sense.
+> It provides fluent Object-Oriented interface for the most of the CEPH=
+'s API
+> commands.
 >
-> sage
+> Library is available on our Github
+> (https://github.com/octivi/php-cephclient/) - you can just download t=
+he code
+> as an archive or install it via Composer.
+> We've released it under GPL v3 license so everyone is kindly welcome =
+for
+> contribution :-)
 >
+> It's production-ready - we're using it in one of our projects.
 >
->> Does this make sense?
->>
->> - Luis
->>
->> On 07/07/2014 03:29 PM, Sage Weil wrote:
->>> On Mon, 7 Jul 2014, Luis Pabon wrote:
->>>> Hi all,
->>>>       I am working on OSDMonitor.cc:5325 and wanted to confirm the
->>>> following
->>>> read_forward cache tier transition:
->>>>
->>>>       readforward -> forward || writeback || (any && num_objects_dirty ==
->>>> 0)
->>>>       forward -> writeback || readforward || (any && num_objects_dirty ==
->>>> 0)
->>>>       writeback -> readforward || forward
->>>>
->>>> Is this the correct cache tier state transition?
->>> That looks right to me.
->>>
->>> By the way, I had a thought after we spoke that we probably want something
->>> that is somewhere inbetween the current writeback behavior (promote on
->>> first read) and the read_forward behavior (never promote on read).  I
->>> suspect a good all-around policy is something like promote on second read?
->>> This should probably be rolled into the writeback mode as a tunable...
->>>
->>> sage
->>>
->>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+> Antoni Orfin
+> email: aorfin@imagin.pl
+> tel: +48 71 723 01 25
+> www: http://imagin.pl/   /  http://octivi.com
+>
+> IMAGIN Sp. z o.o., ul. Kwiska 5-7, 54-210 Wroc=B3aw NIP: 8943044386 K=
+RS:
+> 0000450950 Kapita=B3 zak=B3adowy: 50.000z=B3
+> S=B1d Rejonowy dla Wroc=B3awia-Fabrycznej we Wroc=B3awiu, VI Wydzia=B3=
+ Gospodarczy
+> Krajowego Rejestru S=B1dowego
+>
+>
+> _______________________________________________
+> Ceph-community mailing list
+> Ceph-community@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-community-ceph.com
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
