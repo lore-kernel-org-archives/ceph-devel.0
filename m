@@ -1,52 +1,59 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH] rbd.cc: Check io-size avoid floating point exception.
-Date: Thu, 10 Jul 2014 18:01:53 -0700
-Message-ID: <53BF3781.5090707@inktank.com>
-References: <6AA21C22F0A5DA478922644AD2EC308C87E2AA@SHSMSX101.ccr.corp.intel.com>
+From: Chris Dunlop <chris-s239Etu9j1dPR4JQBCEnsQ@public.gmane.org>
+Subject: Re: I have PGs that I can't deep-scrub
+Date: Fri, 11 Jul 2014 12:20:22 +1000
+Message-ID: <20140711022022.GA4156@onthe.net.au>
+References: <CADHZLBa3z-7k28iL2SArQ+KYyBF0aUZEiAbASika8OEevpLk+A@mail.gmail.com>
+	<alpine.DEB.2.00.1406110539520.2197@cobra.newdream.net>
+	<CADHZLBa-gY++kzBko9pyDJdzHvXb5A85qEH9shpknKWjTdVrLQ@mail.gmail.com>
+	<CADHZLBaZD2+6S5u2OYLAhnibSCBswY+gZdj7rAWAcmsO0_zgoA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:48965 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750927AbaGKBBl (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Jul 2014 21:01:41 -0400
-In-Reply-To: <6AA21C22F0A5DA478922644AD2EC308C87E2AA@SHSMSX101.ccr.corp.intel.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "Ma, Jianpeng" <jianpeng.ma@intel.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <CADHZLBaZD2+6S5u2OYLAhnibSCBswY+gZdj7rAWAcmsO0_zgoA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Craig Lewis <clewis-04jk9TcbgGYP2IHM84UzcNBPR1lH4CV8@public.gmane.org>
+Cc: Ceph Users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On 06/12/2014 01:15 AM, Ma, Jianpeng wrote:
-> In func do_bench_write if io_size is zero,it can cause floating point execption.
->
-> Signed-off-by: Jianpeng Ma <jianpeng.ma@intel.com>
+Hi Craig,
 
-Applied, thanks!
+On Thu, Jul 10, 2014 at 03:09:51PM -0700, Craig Lewis wrote:
+> I fixed this issue by reformatting all of the OSDs.  I changed the mkfs
+> options from
+> 
+> [osd]
+>   osd mkfs type = xfs
+>   osd mkfs options xfs = -l size=1024m -n size=64k -i size=2048 -s size=4096
+> 
+> to
+> [osd]
+>   osd mkfs type = xfs
+>   osd mkfs options xfs = -s size=4096
+> 
+> (I have a mix of 512 and 4k sector drives, and I want to treat them all
+> like 4k sector).
+> 
+> 
+> Now deep scrub runs to completion, and CPU usage of the daemon never goes
+> over 30%.  I did have to restart a few OSDs when I scrubbed known problem
+> PGs, but they scrubbed the 2nd time successfully.  The cluster is still
+> scrubbing, but it's completed half with no more issues.
 
-Josh
+I suspect it was the "-n size=64k" causing this behaviour, potentially using
+too much CPU and starving the OSD processes:
 
-> ---
->   src/rbd.cc | 8 ++++++++
->   1 file changed, 8 insertions(+)
->
-> diff --git a/src/rbd.cc b/src/rbd.cc
-> index d6658e3..c068ed6 100644
-> --- a/src/rbd.cc
-> +++ b/src/rbd.cc
-> @@ -2038,6 +2038,14 @@ int main(int argc, const char **argv)
->   	return EXIT_FAILURE;
->         }
->       } else if (ceph_argparse_withlonglong(args, i, &bench_io_size, &err, "--io-size", (char*)NULL)) {
-> +      if (!err.str().empty()) {
-> +	cerr << "rbd: " << err.str() << std::endl;
-> +	return EXIT_FAILURE;
-> +      }
-> +      if (bench_io_size == 0) {
-> +	cerr << "rbd: io-size must be > 0" << std::endl;
-> +	return EXIT_FAILURE;
-> +      }
->       } else if (ceph_argparse_withlonglong(args, i, &bench_io_threads, &err, "--io-threads", (char*)NULL)) {
->       } else if (ceph_argparse_withlonglong(args, i, &bench_bytes, &err, "--io-total", (char*)NULL)) {
->       } else if (ceph_argparse_witharg(args, i, &bench_pattern, &err, "--io-pattern", (char*)NULL)) {
->
+http://xfs.org/index.php/XFS_FAQ#Q:_Performance:_mkfs.xfs_-n_size.3D64k_option
 
+Cheers,
+
+Chris
