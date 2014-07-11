@@ -1,72 +1,48 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: coefficients
-Date: Fri, 11 Jul 2014 20:19:39 +0300
-Message-ID: <53C01CAB.5070208@dachary.org>
-References: <CACUN8h2ixhb_yDq2mY=zMW=GPUV-wDEzkGLG9LVh-d3VT-2Hxg@mail.gmail.com>
+From: Samuel Just <sam.just@inktank.com>
+Subject: Re: [PATCH] ReplicatedPG: For async-read, set the real result after
+ completing read.
+Date: Fri, 11 Jul 2014 10:21:10 -0700
+Message-ID: <CA+4uBUbYO-yrKaALNy=8Y5UJ0k2oLfWM4sT9Da3iQB2_-aP_JA@mail.gmail.com>
+References: <6AA21C22F0A5DA478922644AD2EC308C88781F@SHSMSX101.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="MSKp3dv2xDkH1uclovr1gNLdEh89R3fsd"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:42222 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751114AbaGKRTp (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Jul 2014 13:19:45 -0400
-In-Reply-To: <CACUN8h2ixhb_yDq2mY=zMW=GPUV-wDEzkGLG9LVh-d3VT-2Hxg@mail.gmail.com>
+Received: from mail-pd0-f176.google.com ([209.85.192.176]:51872 "EHLO
+	mail-pd0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751683AbaGKRVL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Jul 2014 13:21:11 -0400
+Received: by mail-pd0-f176.google.com with SMTP id ft15so1719019pdb.7
+        for <ceph-devel@vger.kernel.org>; Fri, 11 Jul 2014 10:21:11 -0700 (PDT)
+In-Reply-To: <6AA21C22F0A5DA478922644AD2EC308C88781F@SHSMSX101.ccr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Koleos Fuscus <koleosfuscus@gmail.com>
+To: "Ma, Jianpeng" <jianpeng.ma@intel.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---MSKp3dv2xDkH1uclovr1gNLdEh89R3fsd
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Looks about right, file a pull request?
+-Sam
 
-Hi koleosfuscus,
-
-Thanks for the pointer, it is very helpful. I'm inclined to keep the simp=
-ler approach for the first implementation while exploring and learning mo=
-re about the smarter / more complex approach. This may change if someone =
-willing to help comes on board in the meantime ;-)
-
-Cheers
-
-On 11/07/2014 13:48, Koleos Fuscus wrote:
-> Hi Loic,
->=20
-> If you still need to calculate more coefficients there is an
-> explanation of how to construct the coding equations in the paper
-> Erasure coding in Windows Azure Storage (unless you will keep your LRC
-> implementation simple and do only the LRC (10,6,5) ). I undertand that
-> the codes LRC in the mentioned paper are not exactly the same but at
-> least the paper explains the coefficients. I think in Azure they used
-> functional repair instead of exact repair as you wish.
->=20
-> koleosfuscus
->=20
-> ________________________________________________________________
-> "My reply is: the software has no known bugs, therefore it has not
-> been updated."
-> Wietse Venema
->=20
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---MSKp3dv2xDkH1uclovr1gNLdEh89R3fsd
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlPAHKsACgkQ8dLMyEl6F22uaQCgh8Goe28l/iTydZYXO2Btbi6m
-aT4AoMF6ZIbgSBvw0dkTNZtE7y6Wh3p/
-=FpNH
------END PGP SIGNATURE-----
-
---MSKp3dv2xDkH1uclovr1gNLdEh89R3fsd--
+On Thu, Jul 10, 2014 at 2:23 AM, Ma, Jianpeng <jianpeng.ma@intel.com> wrote:
+> When reading an object from replicated pool, ceph uses sync mode, so it can set the results in execute_ctx correctly.
+> However, For the async-read in EC Pool, current code didn't set the real results after read in complete_read_ctx.
+>
+> Signed-off-by: Ma Jianpeng <jianpeng.ma@intel.com>
+> ---
+>  src/osd/ReplicatedPG.cc | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/src/osd/ReplicatedPG.cc b/src/osd/ReplicatedPG.cc
+> index cab3fde..ac0e8ad 100644
+> --- a/src/osd/ReplicatedPG.cc
+> +++ b/src/osd/ReplicatedPG.cc
+> @@ -5318,7 +5318,7 @@ void ReplicatedPG::complete_read_ctx(int result, OpContext *ctx)
+>      // on ENOENT, set a floor for what the next user version will be.
+>      reply->set_enoent_reply_versions(info.last_update, info.last_user_version);
+>    }
+> -
+> +  reply->set_result(result);
+>    reply->add_flags(CEPH_OSD_FLAG_ACK | CEPH_OSD_FLAG_ONDISK);
+>    osd->send_message_osd_client(reply, m->get_connection());
+>    close_op_ctx(ctx, 0);
+> --
+> 1.9.1
