@@ -1,48 +1,134 @@
-From: Samuel Just <sam.just@inktank.com>
-Subject: Re: [PATCH] ReplicatedPG: For async-read, set the real result after
- completing read.
-Date: Fri, 11 Jul 2014 10:21:10 -0700
-Message-ID: <CA+4uBUbYO-yrKaALNy=8Y5UJ0k2oLfWM4sT9Da3iQB2_-aP_JA@mail.gmail.com>
-References: <6AA21C22F0A5DA478922644AD2EC308C88781F@SHSMSX101.ccr.corp.intel.com>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: [PATCH master] rbd.cc: add --force option at 'rbd import'
+Date: Fri, 11 Jul 2014 10:45:46 -0700
+Message-ID: <53C022CA.2050805@inktank.com>
+References: <1403091761-26148-1-git-send-email-bl.dimitris@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f176.google.com ([209.85.192.176]:51872 "EHLO
-	mail-pd0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751683AbaGKRVL (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Jul 2014 13:21:11 -0400
-Received: by mail-pd0-f176.google.com with SMTP id ft15so1719019pdb.7
-        for <ceph-devel@vger.kernel.org>; Fri, 11 Jul 2014 10:21:11 -0700 (PDT)
-In-Reply-To: <6AA21C22F0A5DA478922644AD2EC308C88781F@SHSMSX101.ccr.corp.intel.com>
+Received: from mail.hq.newdream.net ([66.33.206.127]:50374 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751661AbaGKRpc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Jul 2014 13:45:32 -0400
+In-Reply-To: <1403091761-26148-1-git-send-email-bl.dimitris@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Ma, Jianpeng" <jianpeng.ma@intel.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Dimitris Bliablias <bl.dimitris@gmail.com>, ceph-devel@vger.kernel.org
+Cc: synnefo-devel@googlegroups.com
 
-Looks about right, file a pull request?
--Sam
+On 06/18/2014 04:42 AM, Dimitris Bliablias wrote:
+> Extend the rbd utility with a new option named '--force'. This option
+> will be used by the 'rbd import' command to allow overwriting an
+> existing rbd image, something which is currently forbidden. If the image
+> has snapshots, the command returns an error and nothing is imported. The
+> force option will first remove the existing rbd image and then recreate
+> it before importing the new data.
 
-On Thu, Jul 10, 2014 at 2:23 AM, Ma, Jianpeng <jianpeng.ma@intel.com> wrote:
-> When reading an object from replicated pool, ceph uses sync mode, so it can set the results in execute_ctx correctly.
-> However, For the async-read in EC Pool, current code didn't set the real results after read in complete_read_ctx.
->
-> Signed-off-by: Ma Jianpeng <jianpeng.ma@intel.com>
+It makes sense to add a --force option to rbd import.
+
+> This patch also updates the tests affected by the modified functions, to
+> reflect the latest changes. In addition, updates the rbd man page
+> accordingly to record the new '--force' option.
+
+Excellent, it's great to see tests, all bindings, and the man page
+updated in the right place.
+
+> Signed-off-by: Dimitris Bliablias <bl.dimitris@gmail.com>
 > ---
->  src/osd/ReplicatedPG.cc | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+>   doc/man/8/rbd.rst                    |  12 +++-
+>   qa/workunits/rbd/import_export.sh    |   6 ++
+>   src/include/rbd/librbd.h             |   9 ++-
+>   src/include/rbd/librbd.hpp           |   7 +-
+>   src/librbd/internal.cc               |  61 +++++++++++++---
+>   src/librbd/internal.h                |   4 +-
+>   src/librbd/librbd.cc                 |  29 ++++----
+>   src/pybind/rbd.py                    |  11 +--
+>   src/rbd.cc                           |  27 +++++---
+>   src/rbd_fuse/rbd-fuse.c              |   2 +-
+>   src/test/bench/small_io_bench_rbd.cc |   2 +-
+>   src/test/cli/rbd/help.t              |   3 +-
+>   src/test/librbd/fsx.c                |   5 +-
+>   src/test/librbd/test_librbd.cc       | 131 +++++++++++++++++++++++++----------
+>   14 files changed, 227 insertions(+), 82 deletions(-)
 >
-> diff --git a/src/osd/ReplicatedPG.cc b/src/osd/ReplicatedPG.cc
-> index cab3fde..ac0e8ad 100644
-> --- a/src/osd/ReplicatedPG.cc
-> +++ b/src/osd/ReplicatedPG.cc
-> @@ -5318,7 +5318,7 @@ void ReplicatedPG::complete_read_ctx(int result, OpContext *ctx)
->      // on ENOENT, set a floor for what the next user version will be.
->      reply->set_enoent_reply_versions(info.last_update, info.last_user_version);
->    }
-> -
-> +  reply->set_result(result);
->    reply->add_flags(CEPH_OSD_FLAG_ACK | CEPH_OSD_FLAG_ONDISK);
->    osd->send_message_osd_client(reply, m->get_connection());
->    close_op_ctx(ctx, 0);
-> --
-> 1.9.1
+> diff --git a/doc/man/8/rbd.rst b/doc/man/8/rbd.rst
+> index 215aa92..95cd7d3 100644
+> --- a/doc/man/8/rbd.rst
+> +++ b/doc/man/8/rbd.rst
+> @@ -123,6 +123,11 @@ Parameters
+>
+>      Map the image read-only.  Equivalent to -o ro.
+>
+> +.. option:: --f, --force
+> +
+> +   Overwrite an existing rbd image. This option is only used by the rbd import
+> +   command. See import section (below) for more details.
+> +
+>
+>   Commands
+>   ========
+> @@ -176,11 +181,16 @@ Commands
+>   :command:`export` [*image-name*] [*dest-path*]
+>     Exports image to dest path (use - for stdout).
+>
+> -:command:`import` [*path*] [*dest-image*]
+> +:command:`import` [*path*] [*dest-image*] [--force]
+>     Creates a new image and imports its data from path (use - for
+>     stdin).  The import operation will try to create sparse rbd images
+>     if possible.  For import from stdin, the sparsification unit is
+>     the data block size of the destination image (1 << order).
+> +  Using the --force option will overwrite the destination image if it exists.
+> +  Overwriting images using a different format is not supported. If the image
+> +  has snapshots, import fails and nothing is imported. (Note: using --force
+> +  will first remove the original rbd image, and then re-create it to import
+> +  the data from path.
+>
+>   :command:`export-diff` [*image-name*] [*dest-path*] [--from-snap *snapname*]
+>     Exports an incremental diff for an image to dest path (use - for stdout).  If
+> diff --git a/qa/workunits/rbd/import_export.sh b/qa/workunits/rbd/import_export.sh
+> index 29fcb6c..1b1b291 100755
+> --- a/qa/workunits/rbd/import_export.sh
+> +++ b/qa/workunits/rbd/import_export.sh
+> @@ -54,6 +54,12 @@ rbd rm testimg
+>   cmp /tmp/img /tmp/img2
+>   cmp /tmp/img /tmp/img3
+>
+> +# import using --force option
+> +rbd create testimg $RBD_CREATE_ARGS --size 10
+> +rbd import $RBD_CREATE_ARGS /tmp/img testimg && exit 1 || true   # should fail
+> +rbd import $RBD_CREATE_ARGS /tmp/img testimg --force
+> +rbd rm testimg
+> +
+>   rm /tmp/img /tmp/img2 /tmp/img3
+>
+>
+> diff --git a/src/include/rbd/librbd.h b/src/include/rbd/librbd.h
+> index a9a3318..9da6f5d 100644
+> --- a/src/include/rbd/librbd.h
+> +++ b/src/include/rbd/librbd.h
+> @@ -25,6 +25,7 @@ extern "C" {
+>   #elif defined(__FreeBSD__)
+>   #include <sys/types.h>
+>   #endif
+> +#include <stdbool.h>
+>   #include <string.h>
+>   #include "../rados/librados.h"
+>   #include "features.h"
+> @@ -69,9 +70,10 @@ void rbd_version(int *major, int *minor, int *extra);
+>
+>   /* images */
+>   int rbd_list(rados_ioctx_t io, char *names, size_t *size);
+> -int rbd_create(rados_ioctx_t io, const char *name, uint64_t size, int *order);
+> +int rbd_create(rados_ioctx_t io, const char *name, uint64_t size, int *order,
+> +	       bool force);
+>   int rbd_create2(rados_ioctx_t io, const char *name, uint64_t size,
+> -		uint64_t features, int *order);
+> +		uint64_t features, int *order, bool force);
+
+However, this is changing the ABI, which breaks existing users.
+Why not implement this in the command line tool instead of as part of
+librbd? Trying to create(), and then removing and recreating if EEXIST
+is returned should work just as well.
+
+Josh
