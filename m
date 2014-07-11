@@ -1,54 +1,118 @@
 From: Sage Weil <sweil@redhat.com>
-Subject: Re: v0.80.2?
-Date: Fri, 11 Jul 2014 13:44:48 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1407111259580.3932@cobra.newdream.net>
-References: <alpine.DEB.2.00.1407101629490.16614@cobra.newdream.net> <CAF6-1L6bYp9EUidFnKZDwh1Qsf6wRrRpyL4gm7nP7aHS+VHEng@mail.gmail.com>
+Subject: v0.80.3 released
+Date: Fri, 11 Jul 2014 16:16:23 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1407111614260.3932@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:47085 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:47793 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753026AbaGKUos (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Jul 2014 16:44:48 -0400
-In-Reply-To: <CAF6-1L6bYp9EUidFnKZDwh1Qsf6wRrRpyL4gm7nP7aHS+VHEng@mail.gmail.com>
+	with ESMTP id S1750775AbaGKXQY (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Jul 2014 19:16:24 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sylvain Munaut <s.munaut@whatever-company.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-users@ceph.com, ceph-devel@vger.kernel.org
 
-On Fri, 11 Jul 2014, Sylvain Munaut wrote:
-> Hi,
-> 
-> > We built v0.80.2 yesterday and pushed it out to the repos, but quickly
-> > discovered a regression in radosgw that preventing reading objects written
-> > with earlier versions.  We pulled the packages, fixed the bug, and are
-> > rerunning tests to confirm the fix and ensure there aren't other
-> > upgrade-related issues.  We expect to have a v0.80.3 ready tomorrow or
-> > Monday.
-> 
-> 
-> I see that you reverted 5fd8b0d1639c67e355f0fc0d7e6d7036618d87a1. in
-> 0.80.2. But without this patch, I can't initiate multipart upload ...
-> I reported this in http://tracker.ceph.com/issues/8517  My fix was a
-> bit different but should be equivalent to the one that was merged in.
-> 
-> Who reported the issue with this patch ?
+v0.80.3 Firefly
+===============
 
-We merged two batches of firefly backports.  After the first batch, 
-s3-tests was passing cleanly.  With the second batch, which included that 
-commit, the multipart upload test broke.  I definitely want to get the fix 
-in, but we can't delay 0.80.2 any longer given the other fixes in there.
+This is the third Firefly point release.  It includes a single fix
+for a radosgw regression that was discovered in v0.80.2 right after it
+was released.
 
-Ideally the thing to do here is run s3-tests on your end and confirm that 
-the tests are failing with the patch and figure out why.  Or, if it passes 
-for you, we can figure out what is different between your environment and 
-QA.  And then, ideally, we can extend s3-tests to reproduce the failure 
-that you are seeing with the patch reverted so that we can confirm it is 
-fixed (and stays fixed).
+We recommand that all v0.80.x Firefly users upgrade.
 
-Yehuda isn't back until next week, but Josh and I are also around on IRC 
-etc to help out.
+Notable Changes
+---------------
 
-Thanks!
-sage
+* radosgw: fix regression in manifest decoding (#8804, Sage Weil)
+
+For more detailed information, see:
+
+  http://ceph.com/docs/master/_downloads/v0.80.3.txt
+
+v0.80.2 Firefly
+===============
+
+This is the second Firefly point release.  It contains a range of
+important fixes, including several bugs in the OSD cache tiering, some
+compatibility checks that affect upgrade situations, several radosgw
+bugs, and an irritating and unnecessary feature bit check that
+prevents older clients from communicating with a cluster with any
+erasure coded pools.
+
+One someone large change in this point release is that the ceph RPM
+package is separated into a ceph and ceph-common package, similar to
+Debian.  The ceph-common package contains just the client libraries
+without any of the server-side daemons.
+
+We recommend that all v0.80.x Firefly users skip this release and use
+v0.80.3.
+
+Notable Changes
+---------------
+
+* ceph-disk: better debug logging (Alfredo Deza)
+* ceph-disk: fix preparation of OSDs with dmcrypt (#6700, Stephen F 
+  Taylor)
+* ceph-disk: partprobe on prepare to fix dm-crypt (#6966, Eric Eastman)
+* do not require ERASURE_CODE feature from clients (#8556, Sage Weil)
+* libcephfs-java: build with older JNI headers (Greg Farnum)
+* libcephfs-java: fix build with gcj-jdk (Dmitry Smirnov)
+* librados: fix osd op tid for redirected ops (#7588, Samuel Just)
+* librados: fix rados_pool_list buffer bounds checks (#8447, Sage Weil)
+* librados: resend ops when pool overlay changes (#8305, Sage Weil)
+* librbd, ceph-fuse: reduce CPU overhead for clean object check in cache 
+  (Haomai Wang)
+* mon: allow deletion of cephfs pools (John Spray)
+* mon: fix default pool ruleset choice (#8373, John Spray)
+* mon: fix health summary for mon low disk warning (Sage Weil)
+* mon: fix 'osd pool set <pool> cache_target_full_ratio' (Geoffrey Hartz)
+* mon: fix quorum feature check (Greg Farnum)
+* mon: fix request forwarding in mixed firefly+dumpling clusters 9#8727, 
+  Joao Eduardo Luis)
+* mon: fix rule vs ruleset check in 'osd pool set ... crush_ruleset' 
+  command (John Spray)
+* mon: make osd 'down' count accurate (Sage Weil)
+* mon: set 'next commit' in primary-affinity reply (Ilya Dryomov)
+* mon: verify CRUSH features are supported by all mons (#8738, Greg 
+  Farnum)
+* msgr: fix sequence negotiation during connection reset (Guang Yang)
+* osd: block scrub on blocked objects (#8011, Samuel Just)
+* osd: call XFS hint ioctl less often (#8241, Ilya Dryomov)
+* osd: copy xattr spill out marker on clone (Haomai Wang)
+* osd: fix flush of snapped objects (#8334, Samuel Just)
+* osd: fix hashindex restart of merge operation (#8332, Samuel Just)
+* osd: fix osdmap subscription bug causing startup hang (Greg Farnum)
+* osd: fix potential null deref (#8328, Sage Weil)
+* osd: fix shutdown race (#8319, Sage Weil)
+* osd: handle 'none' in CRUSH results properly during peering (#8507, 
+  Samuel Just)
+* osd: set no spill out marker on new objects (Greg Farnum)
+* osd: skip op ordering debug checks on tiered pools (#8380, Sage Weil)
+* rados: enforce 'put' alignment (Lluis Pamies-Juarez)
+* rest-api: fix for 'rx' commands (Ailing Zhang)
+* rgw: calc user manifest etag and fix check (#8169, #8436, Yehuda Sadeh)
+* rgw: fetch attrs on multipart completion (#8452, Yehuda Sadeh, Sylvain 
+  Munaut)
+* rgw: fix buffer overflow for long instance ids (#8608, Yehuda Sadeh)
+* rgw: fix entity permission check on metadata put (#8428, Yehuda Sadeh)
+* rgw: fix multipart retry race (#8269, Yehuda Sadeh)
+* rpm: split ceph into ceph and ceph-common RPMs (Sandon Van Ness, Dan 
+  Mick)
+* sysvinit: continue startin daemons after failure doing mount (#8554, 
+  Sage Weil)
+
+For more detailed information, see:
+
+  http://ceph.com/docs/master/_downloads/v0.80.2.txt
+
+
+Getting Ceph
+------------
+
+* Git at git://github.com/ceph/ceph.git
+* Tarball at http://ceph.com/download/ceph-0.80.3.tar.gz
+* For packages, see http://ceph.com/docs/master/install/get-packages
+* For ceph-deploy, see http://ceph.com/docs/master/install/install-ceph-deploy
 
