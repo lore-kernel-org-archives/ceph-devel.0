@@ -1,26 +1,72 @@
-From: Guang Yang <yguang11@outlook.com>
-Subject: EC pool - empty files in OSD from radosgw
-Date: Sat, 12 Jul 2014 00:43:56 +0800
-Message-ID: <BLU436-SMTP933F4D7E759A69ACAF763ADF090@phx.gbl>
-Mime-Version: 1.0 (Mac OS X Mail 7.3 \(1878.6\))
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: coefficients
+Date: Fri, 11 Jul 2014 20:19:39 +0300
+Message-ID: <53C01CAB.5070208@dachary.org>
+References: <CACUN8h2ixhb_yDq2mY=zMW=GPUV-wDEzkGLG9LVh-d3VT-2Hxg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="MSKp3dv2xDkH1uclovr1gNLdEh89R3fsd"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from blu004-omc4s32.hotmail.com ([65.55.111.171]:58090 "EHLO
-	BLU004-OMC4S32.hotmail.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751309AbaGKQoG convert rfc822-to-8bit
-	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 11 Jul 2014 12:44:06 -0400
+Received: from mail2.dachary.org ([91.121.57.175]:42222 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751114AbaGKRTp (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Jul 2014 13:19:45 -0400
+In-Reply-To: <CACUN8h2ixhb_yDq2mY=zMW=GPUV-wDEzkGLG9LVh-d3VT-2Hxg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: loic Dachary <loic@dachary.org>, Ceph-devel <ceph-devel@vger.kernel.org>
+To: Koleos Fuscus <koleosfuscus@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Loic,
-I opened an issue in terms of a change brought along with EC pool plus radosgw (http://tracker.ceph.com/issues/8625), in our test cluster, we observed a large number of empty files in OSD and the root cause is that for head object from radosgw, there are a couple of transactions coming together, including create 0~0, setxattr, writefull, as EC bring the concept of the object generation, the create transaction will first create an object and the following write full transition will be taken as an update and rename the original empty file to a generation and create/write a new file. As a result, we observed quite some empty files.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--MSKp3dv2xDkH1uclovr1gNLdEh89R3fsd
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 
-There is an bug tracking the effort to remove those files with generation and is pending to be back port to firefly, that could definitely help our use case, however, I am also wondering if there is any room to improve for such case so that those empty files would not be generated in the first place (change might be at radosgw side).
+Hi koleosfuscus,
 
-Any suggestion is welcomed.
+Thanks for the pointer, it is very helpful. I'm inclined to keep the simp=
+ler approach for the first implementation while exploring and learning mo=
+re about the smarter / more complex approach. This may change if someone =
+willing to help comes on board in the meantime ;-)
 
-Thanks,
-Guang
+Cheers
+
+On 11/07/2014 13:48, Koleos Fuscus wrote:
+> Hi Loic,
+>=20
+> If you still need to calculate more coefficients there is an
+> explanation of how to construct the coding equations in the paper
+> Erasure coding in Windows Azure Storage (unless you will keep your LRC
+> implementation simple and do only the LRC (10,6,5) ). I undertand that
+> the codes LRC in the mentioned paper are not exactly the same but at
+> least the paper explains the coefficients. I think in Azure they used
+> functional repair instead of exact repair as you wish.
+>=20
+> koleosfuscus
+>=20
+> ________________________________________________________________
+> "My reply is: the software has no known bugs, therefore it has not
+> been updated."
+> Wietse Venema
+>=20
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--MSKp3dv2xDkH1uclovr1gNLdEh89R3fsd
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlPAHKsACgkQ8dLMyEl6F22uaQCgh8Goe28l/iTydZYXO2Btbi6m
+aT4AoMF6ZIbgSBvw0dkTNZtE7y6Wh3p/
+=FpNH
+-----END PGP SIGNATURE-----
+
+--MSKp3dv2xDkH1uclovr1gNLdEh89R3fsd--
