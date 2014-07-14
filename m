@@ -1,50 +1,79 @@
-From: "Ma, Jianpeng" <jianpeng.ma@intel.com>
-Subject: RE: [PATCH] ReplicatedPG: For async-read, set the real result after
- completing read.
-Date: Mon, 14 Jul 2014 03:22:37 +0000
-Message-ID: <6AA21C22F0A5DA478922644AD2EC308C887C7B@SHSMSX101.ccr.corp.intel.com>
-References: <6AA21C22F0A5DA478922644AD2EC308C88781F@SHSMSX101.ccr.corp.intel.com>
- <CA+4uBUbYO-yrKaALNy=8Y5UJ0k2oLfWM4sT9Da3iQB2_-aP_JA@mail.gmail.com>
+From: Ilya Dryomov <ilya.dryomov@inktank.com>
+Subject: Re: consequences of XFS_IOC_FSSETXATTR on non-empty file?
+Date: Mon, 14 Jul 2014 11:24:05 +0400
+Message-ID: <CALFYKtBVLLTjXnxS3qc7sCYbc+MfFFrGsbM1D_8jK4oiUd267w@mail.gmail.com>
+References: <CA+4uBUYg+81G2=sj3qXO4GGgA7pyjgVrGDCN+UQ32jnWgSbG5w@mail.gmail.com>
+	<20140713012624.GS4453@dastard>
+	<CA+4uBUZwuh5t28jU5jfQb3ApdUKx8t88hg6m8CXS+0ztpi6OTw@mail.gmail.com>
+	<CALFYKtC7J1ZvW40wsSWmVpNS5T3tmAOmY9CP=nsh4r=iUjeznA@mail.gmail.com>
+	<20140713225532.GD22339@dastard>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:25947 "EHLO mga02.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752751AbaGNDWk (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 13 Jul 2014 23:22:40 -0400
-In-Reply-To: <CA+4uBUbYO-yrKaALNy=8Y5UJ0k2oLfWM4sT9Da3iQB2_-aP_JA@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-qc0-f175.google.com ([209.85.216.175]:57092 "EHLO
+	mail-qc0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752202AbaGNHYG (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Jul 2014 03:24:06 -0400
+Received: by mail-qc0-f175.google.com with SMTP id i8so3128933qcq.6
+        for <ceph-devel@vger.kernel.org>; Mon, 14 Jul 2014 00:24:05 -0700 (PDT)
+In-Reply-To: <20140713225532.GD22339@dastard>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sam.just@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Dave Chinner <david@fromorbit.com>
+Cc: Samuel Just <sam.just@inktank.com>, xfs@oss.sgi.com, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>
 
-SGkgU2FtLA0KICAgSSdtIGEgbmV3YmllIGFuZCBJIGRvbuKAmXQgaGF2ZSBteSBjZXBoIHJlcG8g
-aW4gZ2l0aHViLiBTbyBJIGNhbid0IHNlbmQgYSBmdWxsIHJlcXVlc3QuDQoNCkppYW5wZW5nIE1h
-DQpUaGFua3MhDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBTYW11ZWwgSnVz
-dCBbbWFpbHRvOnNhbS5qdXN0QGlua3RhbmsuY29tXSANClNlbnQ6IFNhdHVyZGF5LCBKdWx5IDEy
-LCAyMDE0IDE6MjEgQU0NClRvOiBNYSwgSmlhbnBlbmcNCkNjOiBjZXBoLWRldmVsQHZnZXIua2Vy
-bmVsLm9yZw0KU3ViamVjdDogUmU6IFtQQVRDSF0gUmVwbGljYXRlZFBHOiBGb3IgYXN5bmMtcmVh
-ZCwgc2V0IHRoZSByZWFsIHJlc3VsdCBhZnRlciBjb21wbGV0aW5nIHJlYWQuDQoNCkxvb2tzIGFi
-b3V0IHJpZ2h0LCBmaWxlIGEgcHVsbCByZXF1ZXN0Pw0KLVNhbQ0KDQpPbiBUaHUsIEp1bCAxMCwg
-MjAxNCBhdCAyOjIzIEFNLCBNYSwgSmlhbnBlbmcgPGppYW5wZW5nLm1hQGludGVsLmNvbT4gd3Jv
-dGU6DQo+IFdoZW4gcmVhZGluZyBhbiBvYmplY3QgZnJvbSByZXBsaWNhdGVkIHBvb2wsIGNlcGgg
-dXNlcyBzeW5jIG1vZGUsIHNvIGl0IGNhbiBzZXQgdGhlIHJlc3VsdHMgaW4gZXhlY3V0ZV9jdHgg
-Y29ycmVjdGx5Lg0KPiBIb3dldmVyLCBGb3IgdGhlIGFzeW5jLXJlYWQgaW4gRUMgUG9vbCwgY3Vy
-cmVudCBjb2RlIGRpZG4ndCBzZXQgdGhlIHJlYWwgcmVzdWx0cyBhZnRlciByZWFkIGluIGNvbXBs
-ZXRlX3JlYWRfY3R4Lg0KPg0KPiBTaWduZWQtb2ZmLWJ5OiBNYSBKaWFucGVuZyA8amlhbnBlbmcu
-bWFAaW50ZWwuY29tPg0KPiAtLS0NCj4gIHNyYy9vc2QvUmVwbGljYXRlZFBHLmNjIHwgMiArLQ0K
-PiAgMSBmaWxlIGNoYW5nZWQsIDEgaW5zZXJ0aW9uKCspLCAxIGRlbGV0aW9uKC0pDQo+DQo+IGRp
-ZmYgLS1naXQgYS9zcmMvb3NkL1JlcGxpY2F0ZWRQRy5jYyBiL3NyYy9vc2QvUmVwbGljYXRlZFBH
-LmNjIGluZGV4IA0KPiBjYWIzZmRlLi5hYzBlOGFkIDEwMDY0NA0KPiAtLS0gYS9zcmMvb3NkL1Jl
-cGxpY2F0ZWRQRy5jYw0KPiArKysgYi9zcmMvb3NkL1JlcGxpY2F0ZWRQRy5jYw0KPiBAQCAtNTMx
-OCw3ICs1MzE4LDcgQEAgdm9pZCBSZXBsaWNhdGVkUEc6OmNvbXBsZXRlX3JlYWRfY3R4KGludCBy
-ZXN1bHQsIE9wQ29udGV4dCAqY3R4KQ0KPiAgICAgIC8vIG9uIEVOT0VOVCwgc2V0IGEgZmxvb3Ig
-Zm9yIHdoYXQgdGhlIG5leHQgdXNlciB2ZXJzaW9uIHdpbGwgYmUuDQo+ICAgICAgcmVwbHktPnNl
-dF9lbm9lbnRfcmVwbHlfdmVyc2lvbnMoaW5mby5sYXN0X3VwZGF0ZSwgaW5mby5sYXN0X3VzZXJf
-dmVyc2lvbik7DQo+ICAgIH0NCj4gLQ0KPiArICByZXBseS0+c2V0X3Jlc3VsdChyZXN1bHQpOw0K
-PiAgICByZXBseS0+YWRkX2ZsYWdzKENFUEhfT1NEX0ZMQUdfQUNLIHwgQ0VQSF9PU0RfRkxBR19P
-TkRJU0spOw0KPiAgICBvc2QtPnNlbmRfbWVzc2FnZV9vc2RfY2xpZW50KHJlcGx5LCBtLT5nZXRf
-Y29ubmVjdGlvbigpKTsNCj4gICAgY2xvc2Vfb3BfY3R4KGN0eCwgMCk7DQo+IC0tDQo+IDEuOS4x
-DQo=
+On Mon, Jul 14, 2014 at 2:55 AM, Dave Chinner <david@fromorbit.com> wrote:
+> On Sun, Jul 13, 2014 at 09:01:13PM +0400, Ilya Dryomov wrote:
+>> On Sun, Jul 13, 2014 at 5:48 AM, Samuel Just <sam.just@inktank.com> wrote:
+>> > Actually, on this ubuntu kernel (3.13.0-24-generic), it doesn't seem
+>> > to give an error.  I'll attach my test case for that.  We don't yet
+>> > have a way of reproducing the corruption -- the ext_size change in the
+>> > osd simply seemed like a promising lead.
+>> > -Sam
+>> >
+>> > On Sat, Jul 12, 2014 at 6:26 PM, Dave Chinner <david@fromorbit.com> wrote:
+>> >> On Sat, Jul 12, 2014 at 06:16:54PM -0700, Samuel Just wrote:
+>> >>> Hi,
+>> >>>
+>> >>> We are seeing reports of ceph-osd stores on xfs of files with some
+>> >>> garbage data (possibly misplaced from data elsewhere in the
+>> >>> filesystem).  There was a bug for a while where the ceph-osd process
+>> >>> would set a value for fsx_extsize on a non-empty (possibly sparse)
+>> >>> file using XFS_IOC_FSSETXATTR.  Could that plausibly result in a file
+>> >>> with garbage data?
+>> >>
+>> >> No, setting an extent size on a non-empty file will simply fail
+>> >> with EINVAL.
+>>
+>> AFAIR it checks whether or not any extents are actually allocated, not
+>> whether the file is empty or not.
+>
+> FWIW, that's an implementation detail, not the definition of the
+> intended behaviour of the ioctl.  Indeed, the man page says:
+>
+> "The fsx_xflags realtime file bit and the file's extent size may be
+> changed only when the file is empty, ..."
+>
+> For most people, "[non-]empty file" is much more easily understood
+> than "a file without real extents, but might have been written to
+> and so have dirty, in-memory delayed allocation data whose
+> asynchronous flushing may or may not affect the behaviour of a call
+> to XFS_IOC_FSSETXATTR".
+>
+> i.e. the intended application behaviour is that they should only be
+> able to change the extent size hint *before* any data is written to
+> the file.
+>
+>> I think if you call fsync() or even
+>> fdatasync() before close(fd), it will fail as expected.
+>
+> Only if you are trying to change the extent size immediately after
+> the first write you do to an empty file. Which is, as per the above,
+> not the recommended or intended use of the ioctl.
+
+That's understood, but that is exactly what Sam's test program happens
+to try to do, so I had to point the "file w/o real extents" thing out.
+
+Thanks,
+
+                Ilya
