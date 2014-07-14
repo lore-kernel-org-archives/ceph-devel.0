@@ -1,68 +1,160 @@
-From: Sylvain Munaut <s.munaut@whatever-company.com>
-Subject: Re: v0.80.2?
-Date: Mon, 14 Jul 2014 16:35:24 +0200
-Message-ID: <CAF6-1L6MHOUWd_yrzf8ZyxpVVNEm86AoasoV1Azv9iTWogGnwA@mail.gmail.com>
-References: <alpine.DEB.2.00.1407101629490.16614@cobra.newdream.net>
-	<CAF6-1L6bYp9EUidFnKZDwh1Qsf6wRrRpyL4gm7nP7aHS+VHEng@mail.gmail.com>
-	<alpine.DEB.2.00.1407111259580.3932@cobra.newdream.net>
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: Re: [Feature]Proposal for adding a new flag named shared to support
+ performance and statistic purpose
+Date: Mon, 14 Jul 2014 22:34:53 +0800
+Message-ID: <CACJqLybkLnSbWR6WUafw02AwV6o==oM1vM_qWi=WNCNw=20mqw@mail.gmail.com>
+References: <CACJqLyZoxqN69NarVLsWZan7aULwbULUAFwmGC5D_jiVTc=uqg@mail.gmail.com>
+	<20140609181625.401b76d5@sietchtabr>
+	<CACJqLybz-aATGRKJ0_iSqEfHzRBaSWJRO_kyB9ic-yt2SGqYUg@mail.gmail.com>
+	<20140610123801.72291cf6@sietchtabr>
+	<CAPYLRzjphq14tYf5+fb7fQOaPVUNaEko4O7VNV7ryMcuLtxjew@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f175.google.com ([209.85.192.175]:56772 "EHLO
-	mail-pd0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755831AbaGNOfY (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Jul 2014 10:35:24 -0400
-Received: by mail-pd0-f175.google.com with SMTP id v10so5314106pde.20
-        for <ceph-devel@vger.kernel.org>; Mon, 14 Jul 2014 07:35:24 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1407111259580.3932@cobra.newdream.net>
+Received: from mail-we0-f177.google.com ([74.125.82.177]:36887 "EHLO
+	mail-we0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755783AbaGNOe7 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Jul 2014 10:34:59 -0400
+Received: by mail-we0-f177.google.com with SMTP id w62so727513wes.8
+        for <ceph-devel@vger.kernel.org>; Mon, 14 Jul 2014 07:34:53 -0700 (PDT)
+In-Reply-To: <CAPYLRzjphq14tYf5+fb7fQOaPVUNaEko4O7VNV7ryMcuLtxjew@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <greg@inktank.com>
+Cc: Josh Durgin <josh.durgin@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi,
+Hi all,
 
-> Ideally the thing to do here is run s3-tests on your end and confirm that
-> the tests are failing with the patch and figure out why.  Or, if it passes
-> for you, we can figure out what is different between your environment and
-> QA.  And then, ideally, we can extend s3-tests to reproduce the failure
-> that you are seeing with the patch reverted so that we can confirm it is
-> fixed (and stays fixed).
+I have viewed the discuss video on Ceph CDS. By the way, sorry for the
+absence because of something urgent.
 
-I just tried some tests on various revisions. It's not s3-tests
-because I couldn't figure out how to just run the relevant test
-(trying to just select the multipart test yields 0 tests run ... and
-the full suite fails because I run lighttpd and some error codes are
-different, and it also takes forever)
+It seemed that we have two ways to implement it, one is lightweight
+another is complex. I like the simple one which prefer invalidating
+cache and let librbd reload/lazy load object state. And the most
+important one is implementing a performance optimized
+Index(ObjectMap).
 
-So I have my own create bucket - upload multi part - download it back
-- delete bucket  test with just boto in python.
-It's part of the test I use internally to validate S3 before deploying
-it to prod (it tests all the stuff we use including some weird stuff).
-
-I know the test fails on 0.80.1. I also knows it works fine on our own
-internal package of firefly (which are based on some intermediate
-version of firefly branch between 0.80.1 and 0.80.2 + some patches I
-backported myself).
+Is there exists progress Josh? I think we could push further based on
+discuss. Or I missed something?
 
 
-* 8589c108dd5f00471986deae72d88811ccf0627f  (which should be 0.80.3)
-   -> Fails to do the multipart upload
 
-* Re-applying b300318113b162522759d4794b1cfa3d1d9398e4 over it
-   -> Actually crashes / segfault ... so yeah, really not good.
+On Wed, Jun 11, 2014 at 12:01 PM, Gregory Farnum <greg@inktank.com> wrote:
+> We discussed a great deal of this during the initial format 2 work as
+> well, when we were thinking about having bitmaps of allocated space.
+> (Although we also have interval sets which might be a better fit?) I
+> think there was more thought behind it than is in the copy-on-read
+> blueprint; do you know if we have it written down anywhere, Josh?
+> -Greg
+>
+> On Tue, Jun 10, 2014 at 12:38 PM, Josh Durgin <josh.durgin@inktank.com> wrote:
+>> On Tue, 10 Jun 2014 14:52:54 +0800
+>> Haomai Wang <haomaiwang@gmail.com> wrote:
+>>
+>>> Thanks, Josh!
+>>>
+>>> Your points are really helpful. Maybe we can schedule this bp to the
+>>> near CDS? The implementation I hope can has great performance effects
+>>> on librbd.
+>>
+>> It'd be great to discuss it more at CDS. Could you add a blueprint for
+>> it on the wiki:
+>>
+>> https://wiki.ceph.com/Planning/Blueprints/Submissions
+>>
+>> Josh
+>>
+>>> On Tue, Jun 10, 2014 at 9:16 AM, Josh Durgin
+>>> <josh.durgin@inktank.com> wrote:
+>>> > On 06/05/2014 12:01 AM, Haomai Wang wrote:
+>>> >> Hi,
+>>> >> Previously I sent a mail about the difficult of rbd snapshot size
+>>> >> statistic. The main solution is using object map to store the
+>>> >> changes. The problem is we can't handle with multi client
+>>> >> concurrent modify.
+>>> >>
+>>> >> Lack of object map(like pointer map in qcow2), it cause many
+>>> >> problems in librbd. Such as clone depth, the deep clone depth will
+>>> >> cause remarkable latency. Usually each clone wrap will increase
+>>> >> two times of latency.
+>>> >>
+>>> >> I consider to make a tradeoff between multi-client support and
+>>> >> single-client support for librbd. In practice, most of the
+>>> >> volumes/images are used by VM, there only exist one client will
+>>> >> access/modify image. We can't only want to make shared image
+>>> >> possible but make most of use cases bad. So we can add a new flag
+>>> >> called "shared" when creating image. If "shared" is false, librbd
+>>> >> will maintain a object map for each image. The object map is
+>>> >> considered to durable, each image_close call will store the map
+>>> >> into rados. If the client  is crashed and failed to dump the
+>>> >> object map, the next client open the image will think the object
+>>> >> map as out of date and reset the objectmap.
+>>> >>
+>>> >> We can easily find the advantage of this feature:
+>>> >> 1. Avoid clone performance problem
+>>> >> 2. Make snapshot statistic possible
+>>> >> 3. Improve librbd operation performance including read,
+>>> >> copy-on-write operation.
+>>> >>
+>>> >> What do you think above? More feedbacks are appreciate!
+>>> >
+>>> > I think it's a great idea! We discussed this a little at the last
+>>> > cds [1]. I like the idea of the shared flag on an image. Since the
+>>> > vastly more common case is single-client, I'd go further and
+>>> > suggest that we treat images as if shared is false by default if
+>>> > the flag is not present (perhaps with a config option to change
+>>> > this default behavior).
+>>> >
+>>> > That way existing images can benefit from the feature without extra
+>>> > configuration. There can be an rbd command to toggle the shared
+>>> > flag as well, so users of ocfs2 or gfs2 or other
+>>> > multi-client-writing systems can upgrade and set shared to true
+>>> > before restarting their clients.
+>>> >
+>>> > Another thing to consider is the granularity of the object map. The
+>>> > coarse granularity of a bitmap of object existence would be
+>>> > simplest, and most useful for in-memory comparison for clones. For
+>>> > statistics it might be desirable in the future to have a
+>>> > finer-grained index of data existence in the image. To make that
+>>> > easy to handle, the on-disk format could be a list of extents (byte
+>>> > ranges).
+>>> >
+>>> > Another potential use case would be a mode in which the index is
+>>> > treated as authoritative. This could make discard very fast, for
+>>> > example. I'm not sure it could be done safely with only binary
+>>> > 'exists/does not exist' information though - a third 'unknown' state
+>>> > might be needed for some cases. If this kind of index is actually
+>>> > useful (I'm not sure there are cases where the performance penalty
+>>> > would be worth it), we could add a new index format if we need it.
+>>> >
+>>> > Back to the currently proposed design, to be safe with live
+>>> > migration we'd need to make sure the index is consistent in the
+>>> > destination process. Using rados_notify() after we set the clean
+>>> > flag on the index can make the destination vm re-read the index
+>>> > before any I/O happens. This might be a good time to introduce a
+>>> > data payload to the notify as well, so we can only re-read the
+>>> > index, instead of all the header metadata. Rereading the index
+>>> > after cache invalidation and wiring that up through qemu's
+>>> > bdrv_invalidate() would be even better.
+>>> >
+>>> > There's more to consider in implementing this wrt snapshots, but
+>>> > this email has gone on long enough.
+>>> >
+>>> > Josh
+>>> >
+>>> > [1] http://pad.ceph.com/p/cdsgiant-rbd-copy-on-read-for-clones
+>>>
+>>>
+>>>
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-So I tried going back to d43e7113dd501aea1db33fdae30d56e96e9c3897
-which is the revision I based my packages on. And I applied
-b300318113b162522759d4794b1cfa3d1d9398e4.
-   -> Multi part upload works and no crash !
 
 
-So something between d43e7113dd501aea1db33fdae30d56e96e9c3897 and
-8589c108dd5f00471986deae72d88811ccf0627f is causing the fix to
-misbehave ...
+-- 
+Best Regards,
 
-
-Cheers,
-
-    Sylvain
+Wheat
