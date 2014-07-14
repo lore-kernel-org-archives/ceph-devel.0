@@ -1,79 +1,38 @@
-From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: Re: consequences of XFS_IOC_FSSETXATTR on non-empty file?
-Date: Mon, 14 Jul 2014 11:24:05 +0400
-Message-ID: <CALFYKtBVLLTjXnxS3qc7sCYbc+MfFFrGsbM1D_8jK4oiUd267w@mail.gmail.com>
-References: <CA+4uBUYg+81G2=sj3qXO4GGgA7pyjgVrGDCN+UQ32jnWgSbG5w@mail.gmail.com>
-	<20140713012624.GS4453@dastard>
-	<CA+4uBUZwuh5t28jU5jfQb3ApdUKx8t88hg6m8CXS+0ztpi6OTw@mail.gmail.com>
-	<CALFYKtC7J1ZvW40wsSWmVpNS5T3tmAOmY9CP=nsh4r=iUjeznA@mail.gmail.com>
-	<20140713225532.GD22339@dastard>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Guang Yang <yguang11@outlook.com>
+Subject: Re: EC pool - empty files in OSD from radosgw
+Date: Mon, 14 Jul 2014 17:47:46 +0800
+Message-ID: <BLU436-SMTP138559DFDE12C157EC27FC7DF0A0@phx.gbl>
+References: <22D2ACCA-6772-4041-8AB4-6FB331BD2AC5@outlook.com>
+Mime-Version: 1.0 (Mac OS X Mail 7.3 \(1878.6\))
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f175.google.com ([209.85.216.175]:57092 "EHLO
-	mail-qc0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752202AbaGNHYG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Jul 2014 03:24:06 -0400
-Received: by mail-qc0-f175.google.com with SMTP id i8so3128933qcq.6
-        for <ceph-devel@vger.kernel.org>; Mon, 14 Jul 2014 00:24:05 -0700 (PDT)
-In-Reply-To: <20140713225532.GD22339@dastard>
+Received: from [65.55.111.157] ([65.55.111.157]:61186 "EHLO
+	BLU004-OMC4S18.hotmail.com" rhost-flags-FAIL-FAIL-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1753551AbaGNJsy convert rfc822-to-8bit
+	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 14 Jul 2014 05:48:54 -0400
+In-Reply-To: <22D2ACCA-6772-4041-8AB4-6FB331BD2AC5@outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dave Chinner <david@fromorbit.com>
-Cc: Samuel Just <sam.just@inktank.com>, xfs@oss.sgi.com, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>
+To: Yehuda Sadeh <yehuda@inktank.com>, sam.just@inktank.com
+Cc: Ceph-devel <ceph-devel@vger.kernel.org>
 
-On Mon, Jul 14, 2014 at 2:55 AM, Dave Chinner <david@fromorbit.com> wrote:
-> On Sun, Jul 13, 2014 at 09:01:13PM +0400, Ilya Dryomov wrote:
->> On Sun, Jul 13, 2014 at 5:48 AM, Samuel Just <sam.just@inktank.com> wrote:
->> > Actually, on this ubuntu kernel (3.13.0-24-generic), it doesn't seem
->> > to give an error.  I'll attach my test case for that.  We don't yet
->> > have a way of reproducing the corruption -- the ext_size change in the
->> > osd simply seemed like a promising lead.
->> > -Sam
->> >
->> > On Sat, Jul 12, 2014 at 6:26 PM, Dave Chinner <david@fromorbit.com> wrote:
->> >> On Sat, Jul 12, 2014 at 06:16:54PM -0700, Samuel Just wrote:
->> >>> Hi,
->> >>>
->> >>> We are seeing reports of ceph-osd stores on xfs of files with some
->> >>> garbage data (possibly misplaced from data elsewhere in the
->> >>> filesystem).  There was a bug for a while where the ceph-osd process
->> >>> would set a value for fsx_extsize on a non-empty (possibly sparse)
->> >>> file using XFS_IOC_FSSETXATTR.  Could that plausibly result in a file
->> >>> with garbage data?
->> >>
->> >> No, setting an extent size on a non-empty file will simply fail
->> >> with EINVAL.
->>
->> AFAIR it checks whether or not any extents are actually allocated, not
->> whether the file is empty or not.
->
-> FWIW, that's an implementation detail, not the definition of the
-> intended behaviour of the ioctl.  Indeed, the man page says:
->
-> "The fsx_xflags realtime file bit and the file's extent size may be
-> changed only when the file is empty, ..."
->
-> For most people, "[non-]empty file" is much more easily understood
-> than "a file without real extents, but might have been written to
-> and so have dirty, in-memory delayed allocation data whose
-> asynchronous flushing may or may not affect the behaviour of a call
-> to XFS_IOC_FSSETXATTR".
->
-> i.e. the intended application behaviour is that they should only be
-> able to change the extent size hint *before* any data is written to
-> the file.
->
->> I think if you call fsync() or even
->> fdatasync() before close(fd), it will fail as expected.
->
-> Only if you are trying to change the extent size immediately after
-> the first write you do to an empty file. Which is, as per the above,
-> not the recommended or intended use of the ioctl.
-
-That's understood, but that is exactly what Sam's test program happens
-to try to do, so I had to point the "file w/o real extents" thing out.
+Hi Yehuda and Sam,
+Any suggestion on top of the below issue?
 
 Thanks,
+Guang
 
-                Ilya
+On Jul 12, 2014, at 12:43 AM, Guang Yang <yguang11@outlook.com> wrote:
+
+> Hi Loic,
+> I opened an issue in terms of a change brought along with EC pool plus radosgw (http://tracker.ceph.com/issues/8625), in our test cluster, we observed a large number of empty files in OSD and the root cause is that for head object from radosgw, there are a couple of transactions coming together, including create 0~0, setxattr, writefull, as EC bring the concept of the object generation, the create transaction will first create an object and the following write full transition will be taken as an update and rename the original empty file to a generation and create/write a new file. As a result, we observed quite some empty files.
+> 
+> There is an bug tracking the effort to remove those files with generation and is pending to be back port to firefly, that could definitely help our use case, however, I am also wondering if there is any room to improve for such case so that those empty files would not be generated in the first place (change might be at radosgw side).
+> 
+> Any suggestion is welcomed.
+> 
+> Thanks,
+> Guang
+
