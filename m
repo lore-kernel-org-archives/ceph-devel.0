@@ -1,65 +1,97 @@
-From: =?ISO-8859-1?Q?Luis_Pab=F3n?= <lpabon@redhat.com>
-Subject: Re: rpm dependencies
-Date: Tue, 15 Jul 2014 15:02:30 -0400
-Message-ID: <53C57AC6.2030303@redhat.com>
-References: <alpine.DEB.2.00.1407142132260.21295@cobra.newdream.net>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: [PATCH] qa/workunits/erasure-code/bench.sh: Using correcting
+ parameter name when call ceph_erasure_code_benchmark.
+Date: Tue, 15 Jul 2014 23:03:23 +0300
+Message-ID: <53C5890B.3000803@dachary.org>
+References: <6AA21C22F0A5DA478922644AD2EC308C8880CC@SHSMSX101.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="ueIkE8CdENpsVr2x1aheNCF34WDbUelmB"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:55977 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932924AbaGOTCd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 15 Jul 2014 15:02:33 -0400
-Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
-	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id s6FJ2VWG004002
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK)
-	for <ceph-devel@vger.kernel.org>; Tue, 15 Jul 2014 15:02:32 -0400
-In-Reply-To: <alpine.DEB.2.00.1407142132260.21295@cobra.newdream.net>
+Received: from mail2.dachary.org ([91.121.57.175]:43737 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751945AbaGOUDb (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Jul 2014 16:03:31 -0400
+In-Reply-To: <6AA21C22F0A5DA478922644AD2EC308C8880CC@SHSMSX101.ccr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
+To: "Ma, Jianpeng" <jianpeng.ma@intel.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Sage,
-     Looks like it is configuration issue in configure.ac.  I'm fixing 
-the issue now and will be sending a patch soon.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--ueIkE8CdENpsVr2x1aheNCF34WDbUelmB
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-- Luis
+Hi,
+
+This is part of a larger pull request ( https://github.com/ceph/ceph/pull=
+/1875 ), specifically https://github.com/dachary/ceph/commit/64175d9d6e1c=
+8f6cbdc5396e85ba8c94168afba8#diff-8a5d2cfe0db7cb75615a5f6b2245148bL53 . B=
+ut it's worth applying as suggested until it gets merged, to avoid confus=
+ion.
+
+Thanks !
+
+Reviewed-by:
+
+On 15/07/2014 12:31, Ma, Jianpeng wrote:
+> In commit bcc74879a, loic modifed the parameter name. But he forgot to
+> modify the name in qa/workunits/erasure-code/bench.sh. Now modify and m=
+ake
+> bench.sh work.
+>=20
+> Signed-off-by: Ma Jianpeng <jianpeng.ma@intel.com>
+> ---
+>  qa/workunits/erasure-code/bench.sh | 6 +++---
+>  1 file changed, 3 insertions(+), 3 deletions(-)
+>=20
+> diff --git a/qa/workunits/erasure-code/bench.sh b/qa/workunits/erasure-=
+code/bench.sh
+> index db7c490..483450b 100755
+> --- a/qa/workunits/erasure-code/bench.sh
+> +++ b/qa/workunits/erasure-code/bench.sh
+> @@ -50,9 +50,9 @@ function bench() {
+>          --iterations $iterations \
+>          --size $size \
+>          --erasures $erasures \
+> -        --parameter erasure-code-k=3D$k \
+> -        --parameter erasure-code-m=3D$m \
+> -        --parameter erasure-code-directory=3D$PLUGIN_DIRECTORY)
+> +        --parameter k=3D$k \
+> +        --parameter m=3D$m \
+> +        --parameter directory=3D$PLUGIN_DIRECTORY)
+>      result=3D$($command "$@")
+>      echo -e "$result\t$plugin\t$k\t$m\t$workload\t$iterations\t$size\t=
+$erasures\t$command ""$@"
+>  }
+> --
+> 1.9.1
+>=20
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
 
 
-On 07/15/2014 12:39 AM, Sage Weil wrote:
-> Hey Luis,
->
-> I pushed wip-dencoder, which moves ceph-dencoder to ceph from ceph-common.
-> This avoids the dependency for ceph-common.
->
-> For the librados2 package, though, there is still a leveldb dependency
-> that makes no sense.  See the packages at
->
->   http://gitbuilder.ceph.com/ceph-rpm-rhel6_5-x86_64-basic/ref/wip-dencoder/x86_64/
->
->   $ wget http://gitbuilder.ceph.com/ceph-rpm-rhel6_5-x86_64-basic/ref/wip-dencoder/x86_64/librados2-0.82-595.g95f5a44.el6.x86_64.rpm
->   $ rpm -qpR librados2-0.82-595.g95f5a44.el6.x86_64.rpm | grep level
->   warning: librados2-0.82-595.g95f5a44.el6.x86_64.rpm: Header V4 DSA/SHA1 Signature, key ID 03c3951a: NOKEY
->   libleveldb.so.1()(64bit)
->   $ rpm2cpio librados2-0.82-595.g95f5a44.el6.x86_64.rpm | cpio -i --make-directories
->   ...
->   $ ldd usr/lib/librados2.so.2 | grep -c leveldb
->   1
->
-> Our Makefile.am doesn't specify that we link against leveldb for librados,
-> although strangely it is listed in the librados.la file anyway (along with
-> every other lib anything links against).  Despite this, ldd
-> .libs/librados.so on my (debian) box doesn't list it when building
-> locally.
->
-> The Makefile-env.am has --as-needed, which is supposed to make us only use
-> dependencies we actually use.
->
-> Not sure what is going on with the RPM build that is putting this
-> dependency in place...
->
-> Any idea what is going on?  :/
->
-> sage
+--ueIkE8CdENpsVr2x1aheNCF34WDbUelmB
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlPFiQsACgkQ8dLMyEl6F21pNQCgxJVuHuAHabXjUaFvRavCBpBI
+UBYAnjVdb4IpNNyKukuRR8T1ITLtCDyz
+=FbIJ
+-----END PGP SIGNATURE-----
+
+--ueIkE8CdENpsVr2x1aheNCF34WDbUelmB--
