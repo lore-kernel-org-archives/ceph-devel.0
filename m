@@ -1,60 +1,49 @@
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: consequences of XFS_IOC_FSSETXATTR on non-empty file?
-Date: Tue, 15 Jul 2014 06:23:31 +1000
-Message-ID: <20140714202330.GU4453@dastard>
-References: <CA+4uBUYg+81G2=sj3qXO4GGgA7pyjgVrGDCN+UQ32jnWgSbG5w@mail.gmail.com>
-	<20140713012624.GS4453@dastard>
-	<CA+4uBUZwuh5t28jU5jfQb3ApdUKx8t88hg6m8CXS+0ztpi6OTw@mail.gmail.com>
-	<CALFYKtC7J1ZvW40wsSWmVpNS5T3tmAOmY9CP=nsh4r=iUjeznA@mail.gmail.com>
-	<20140713225532.GD22339@dastard>
-	<CALFYKtBVLLTjXnxS3qc7sCYbc+MfFFrGsbM1D_8jK4oiUd267w@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: rpm dependencies
+Date: Mon, 14 Jul 2014 21:39:10 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1407142132260.21295@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <xfs-bounces@oss.sgi.com>
-Content-Disposition: inline
-In-Reply-To: <CALFYKtBVLLTjXnxS3qc7sCYbc+MfFFrGsbM1D_8jK4oiUd267w@mail.gmail.com>
-List-Unsubscribe: <http://oss.sgi.com/mailman/options/xfs>,
-	<mailto:xfs-request@oss.sgi.com?subject=unsubscribe>
-List-Archive: <http://oss.sgi.com/pipermail/xfs>
-List-Post: <mailto:xfs@oss.sgi.com>
-List-Help: <mailto:xfs-request@oss.sgi.com?subject=help>
-List-Subscribe: <http://oss.sgi.com/mailman/listinfo/xfs>,
-	<mailto:xfs-request@oss.sgi.com?subject=subscribe>
-Errors-To: xfs-bounces@oss.sgi.com
-Sender: xfs-bounces@oss.sgi.com
-To: Ilya Dryomov <ilya.dryomov@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>, Samuel Just <sam.just@inktank.com>, xfs@oss.sgi.com
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:36642 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751161AbaGOEjL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Jul 2014 00:39:11 -0400
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: lpabon@redhat.com, ceph-devel@vger.kernel.org
 
-On Mon, Jul 14, 2014 at 11:24:05AM +0400, Ilya Dryomov wrote:
-> On Mon, Jul 14, 2014 at 2:55 AM, Dave Chinner <david@fromorbit.com> wrote:
-> > On Sun, Jul 13, 2014 at 09:01:13PM +0400, Ilya Dryomov wrote:
-> >> On Sun, Jul 13, 2014 at 5:48 AM, Samuel Just <sam.just@inktank.com> wrote:
-> >> I think if you call fsync() or even
-> >> fdatasync() before close(fd), it will fail as expected.
-> >
-> > Only if you are trying to change the extent size immediately after
-> > the first write you do to an empty file. Which is, as per the above,
-> > not the recommended or intended use of the ioctl.
-> 
-> That's understood, but that is exactly what Sam's test program happens
-> to try to do, so I had to point the "file w/o real extents" thing out.
+Hey Luis,
 
-Oh, I missed that there was a test program attached. That's what
-happens when people top post a reply then attach text at the
-bottom....
+I pushed wip-dencoder, which moves ceph-dencoder to ceph from ceph-common.  
+This avoids the dependency for ceph-common.
 
-Moral of the story: don't top post ;)
+For the librados2 package, though, there is still a leveldb dependency 
+that makes no sense.  See the packages at
 
-Cheersm
+ http://gitbuilder.ceph.com/ceph-rpm-rhel6_5-x86_64-basic/ref/wip-dencoder/x86_64/
 
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+ $ wget http://gitbuilder.ceph.com/ceph-rpm-rhel6_5-x86_64-basic/ref/wip-dencoder/x86_64/librados2-0.82-595.g95f5a44.el6.x86_64.rpm
+ $ rpm -qpR librados2-0.82-595.g95f5a44.el6.x86_64.rpm | grep level
+ warning: librados2-0.82-595.g95f5a44.el6.x86_64.rpm: Header V4 DSA/SHA1 Signature, key ID 03c3951a: NOKEY
+ libleveldb.so.1()(64bit)
+ $ rpm2cpio librados2-0.82-595.g95f5a44.el6.x86_64.rpm | cpio -i --make-directories
+ ...
+ $ ldd usr/lib/librados2.so.2 | grep -c leveldb
+ 1
 
-_______________________________________________
-xfs mailing list
-xfs@oss.sgi.com
-http://oss.sgi.com/mailman/listinfo/xfs
+Our Makefile.am doesn't specify that we link against leveldb for librados, 
+although strangely it is listed in the librados.la file anyway (along with 
+every other lib anything links against).  Despite this, ldd 
+.libs/librados.so on my (debian) box doesn't list it when building 
+locally.
+
+The Makefile-env.am has --as-needed, which is supposed to make us only use 
+dependencies we actually use.
+
+Not sure what is going on with the RPM build that is putting this 
+dependency in place...
+
+Any idea what is going on?  :/
+
+sage
