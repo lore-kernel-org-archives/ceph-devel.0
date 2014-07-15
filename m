@@ -1,53 +1,48 @@
-From: Lakshminarayana Mavunduri <Lakshminarayana.Mavunduri@sandisk.com>
-Subject: Read from clones
-Date: Tue, 15 Jul 2014 05:44:19 +0000
-Message-ID: <3ADFB25A75C80A4BA0183C65FE86C53404934AB4@SACMBXIP02.sdcorp.global.sandisk.com>
+From: "Ma, Jianpeng" <jianpeng.ma@intel.com>
+Subject: [PATCH] qa/workunits/erasure-code/bench.sh: Using correcting
+ parameter name when call ceph_erasure_code_benchmark.
+Date: Tue, 15 Jul 2014 09:31:28 +0000
+Message-ID: <6AA21C22F0A5DA478922644AD2EC308C8880CC@SHSMSX101.ccr.corp.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2lp0241.outbound.protection.outlook.com ([207.46.163.241]:19092
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751739AbaGOFoY convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Jul 2014 01:44:24 -0400
+Received: from mga01.intel.com ([192.55.52.88]:57902 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1757530AbaGOJbn convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Jul 2014 05:31:43 -0400
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-Cc: Pavan Rallabhandi <Pavan.Rallabhandi@sandisk.com>
+To: "loic@dachary.org" <loic@dachary.org>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi,
+In commit bcc74879a, loic modifed the parameter name. But he forgot to
+modify the name in qa/workunits/erasure-code/bench.sh. Now modify and make
+bench.sh work.
 
-Following the below set of steps, we are seeing data loss while reading from clones.
+Signed-off-by: Ma Jianpeng <jianpeng.ma@intel.com>
+---
+ qa/workunits/erasure-code/bench.sh | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
-1)Create an image with image format 2 (in this case we have made the size to be 1024MB).
-        rbd create image1 --size 1024 --image-format 2
-2)Map the image and write 1024MB worth of data to it.
-3)Create a snapshot for the image created in step 1)
-        rbd snap create image1@snap1
-4)Create a clone for the snapshot created in step 3)
-        rbd clone image1@snap1 clone1
-5)Create a snapshot for the clone created in step 4)
-        rbd snap create clone1@snap2
-6)Create a clone for the snapshot created in step 5)
-        rbd clone clone1@snap2 clone2
-7)Shrink the size of the clone created in step 4) (in this case we have made it to half of its size)
-        rbd resize -s 512 --allow-shrink clone1
-8)Map the clone created in step 6) and try reading 1024MB worth of data.
-9)Our observation is that, only the first 512MB worth data is intact, the rest is not copied over. (In fact, it's only the parent overlap worth data of clone1 that is always copied over!)
-
-After the above set of steps, the parent overlap for clone2 would be 1024MB, whereas the parent overlap for clone1 would be 512MB. Our understanding is, since clone2's parent snapshot is taken before a shrink is performed on clone1, any reads worth parent overlap data on clone2 should be serviced from it's parent (at least, as long as there are no overwrites done on clone2, which is the case here), and we are not finding that to be true in this case.
-
-To augment our theory, if the parent image (a base RBD image, which is not a clone) is shrinked, any reads on the clones that are created before the shrink, are as expected to our understanding.
-
-Wanted to check if this is indeed a bug or if we are missing anything here. The tests are run across ceph version 0.80.
-
-Thanks,
-M.Laks...
-
-
-________________________________
-
-PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+diff --git a/qa/workunits/erasure-code/bench.sh b/qa/workunits/erasure-code/bench.sh
+index db7c490..483450b 100755
+--- a/qa/workunits/erasure-code/bench.sh
++++ b/qa/workunits/erasure-code/bench.sh
+@@ -50,9 +50,9 @@ function bench() {
+         --iterations $iterations \
+         --size $size \
+         --erasures $erasures \
+-        --parameter erasure-code-k=$k \
+-        --parameter erasure-code-m=$m \
+-        --parameter erasure-code-directory=$PLUGIN_DIRECTORY)
++        --parameter k=$k \
++        --parameter m=$m \
++        --parameter directory=$PLUGIN_DIRECTORY)
+     result=$($command "$@")
+     echo -e "$result\t$plugin\t$k\t$m\t$workload\t$iterations\t$size\t$erasures\t$command ""$@"
+ }
+--
+1.9.1
 
