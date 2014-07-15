@@ -1,107 +1,65 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: Disabling CRUSH for erasure code and doing custom placement
-Date: Tue, 15 Jul 2014 10:18:54 -0700
-Message-ID: <CAPYLRzhoiP7t81VG5FEgo53xP9GVMOu6e8zQdwU+HxF2gB7HRQ@mail.gmail.com>
-References: <CALUBZ__98nzUjucW9NmFKEHzPFvu0yY0X5yHEtFH7g9QkhqSAQ@mail.gmail.com>
-	<CAPYLRzgeb2DB_tJfRFvK1gk5XEYYd7mgHH5E5URqYsn_2bH4mQ@mail.gmail.com>
-	<CALUBZ_-gBR2KHMQcGe65+GDHE3xC+Fq9_J+DZLDqf+7LQHrq6g@mail.gmail.com>
+From: =?ISO-8859-1?Q?Luis_Pab=F3n?= <lpabon@redhat.com>
+Subject: Re: rpm dependencies
+Date: Tue, 15 Jul 2014 15:02:30 -0400
+Message-ID: <53C57AC6.2030303@redhat.com>
+References: <alpine.DEB.2.00.1407142132260.21295@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f176.google.com ([209.85.216.176]:58651 "EHLO
-	mail-qc0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758878AbaGORSz convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Jul 2014 13:18:55 -0400
-Received: by mail-qc0-f176.google.com with SMTP id i17so2661259qcy.21
-        for <ceph-devel@vger.kernel.org>; Tue, 15 Jul 2014 10:18:54 -0700 (PDT)
-In-Reply-To: <CALUBZ_-gBR2KHMQcGe65+GDHE3xC+Fq9_J+DZLDqf+7LQHrq6g@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:55977 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932924AbaGOTCd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 15 Jul 2014 15:02:33 -0400
+Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
+	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id s6FJ2VWG004002
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK)
+	for <ceph-devel@vger.kernel.org>; Tue, 15 Jul 2014 15:02:32 -0400
+In-Reply-To: <alpine.DEB.2.00.1407142132260.21295@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Shayan Saeed <shayansaeed93@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
 
-One of Ceph's design tentpoles is *avoiding* a central metadata lookup
-table. The Ceph MDS maintains a filesystem hierarchy but doesn't
-really handle the sort of thing you're talking about, either. If you
-want some kind of lookup, you'll need to build it yourself =E2=80=94 al=
-though
-you could make use of some RADOS features to do it, if you really
-wanted to. (For instance, depending on scale you could keep an index
-of objects in an omap somewhere.)
--Greg
-Software Engineer #42 @ http://inktank.com | http://ceph.com
+Hi Sage,
+     Looks like it is configuration issue in configure.ac.  I'm fixing 
+the issue now and will be sending a patch soon.
+
+- Luis
 
 
-On Tue, Jul 15, 2014 at 10:11 AM, Shayan Saeed <shayansaeed93@gmail.com=
-> wrote:
-> Well I did end up putting the data in different pools for custom
-> placement. However, I run into trouble during retrieval. The messy wa=
-y
-> is to query every pool to check where the data is stored. This
-> requires many round trips to machines in the far off racks. Is it
-> possible this information is contained within a centralized sort of
-> metadata server? I understand that for simple object store MDS is not
-> used but is there a way to utilize it for faster querying?
+On 07/15/2014 12:39 AM, Sage Weil wrote:
+> Hey Luis,
 >
-> Regards,
-> Shayan Saeed
+> I pushed wip-dencoder, which moves ceph-dencoder to ceph from ceph-common.
+> This avoids the dependency for ceph-common.
 >
+> For the librados2 package, though, there is still a leveldb dependency
+> that makes no sense.  See the packages at
 >
-> On Tue, Jun 24, 2014 at 11:37 AM, Gregory Farnum <greg@inktank.com> w=
-rote:
->> On Tue, Jun 24, 2014 at 8:29 AM, Shayan Saeed <shayansaeed93@gmail.c=
-om> wrote:
->>> Hi,
->>>
->>> CRUSH placement algorithm works really nice with replication. Howev=
-er,
->>> with erasure code, my cluster has some issues which require making
->>> changes that I cannot specify with CRUSH maps.
->>> Sometimes, depending on the type of data, I would like to place the=
-m
->>> on different OSDs but in the same pool.
->>
->> Why do you want to keep the data in the same pool?
->>
->>>
->>> I realize that to disable the CRUSH placement algorithm and replaci=
-ng
->>> it with my own custom algorithm, such as random placement algo or a=
-ny
->>> other, I have to make changes in the source code. I want to ask if
->>> there is an easy way to do this without going into every code file =
-and
->>> looking where the mapping from objects to PG is done and changing
->>> that. Is there some configuration option which disables crush and
->>> points to my own placement algo file for doing custom placement.
->>
->> What you're asking for really doesn't sound feasible, but the thing
->> that comes closest would probably be resurrecting the "pg preferred"
->> mechanisms in CRUSH and the Ceph codebase. You'll have to go back
->> through the git history to find it, but once upon a time we supporte=
-d
->> a mechanism that let you specify a specific OSD you wanted a
->> particular object to live on, and then it would place the remaining
->> replicas using CRUSH.
->> -Greg
->> Software Engineer #42 @ http://inktank.com | http://ceph.com
->>
->>>
->>> Let me know about the most neat way to go about it. Appreciate any
->>> help I can get.
->>>
->>> Regards,
->>> Shayan Saeed
->>> Research Assistant, Systems Research Lab
->>> University of Illinois Urbana-Champaign
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
-l" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>   http://gitbuilder.ceph.com/ceph-rpm-rhel6_5-x86_64-basic/ref/wip-dencoder/x86_64/
+>
+>   $ wget http://gitbuilder.ceph.com/ceph-rpm-rhel6_5-x86_64-basic/ref/wip-dencoder/x86_64/librados2-0.82-595.g95f5a44.el6.x86_64.rpm
+>   $ rpm -qpR librados2-0.82-595.g95f5a44.el6.x86_64.rpm | grep level
+>   warning: librados2-0.82-595.g95f5a44.el6.x86_64.rpm: Header V4 DSA/SHA1 Signature, key ID 03c3951a: NOKEY
+>   libleveldb.so.1()(64bit)
+>   $ rpm2cpio librados2-0.82-595.g95f5a44.el6.x86_64.rpm | cpio -i --make-directories
+>   ...
+>   $ ldd usr/lib/librados2.so.2 | grep -c leveldb
+>   1
+>
+> Our Makefile.am doesn't specify that we link against leveldb for librados,
+> although strangely it is listed in the librados.la file anyway (along with
+> every other lib anything links against).  Despite this, ldd
+> .libs/librados.so on my (debian) box doesn't list it when building
+> locally.
+>
+> The Makefile-env.am has --as-needed, which is supposed to make us only use
+> dependencies we actually use.
+>
+> Not sure what is going on with the RPM build that is putting this
+> dependency in place...
+>
+> Any idea what is going on?  :/
+>
+> sage
+
