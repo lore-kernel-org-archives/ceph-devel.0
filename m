@@ -1,132 +1,79 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: [ceph-users] v0.80.4 Firefly released
-Date: Wed, 16 Jul 2014 09:27:09 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1407160926550.28285@cobra.newdream.net>
-References: <alpine.DEB.2.00.1407151634250.21336@cobra.newdream.net> <CAMvtBPPr0MO5U_e=PEb6xqDUjQVhZLdh2oSD1tA0voVp_cu=Jw@mail.gmail.com> <CACkq2mrDrkp0anEE1MLxqwuw-O7aEhMrYua2_QjKrrS+Fqn5Yg@mail.gmail.com>
+From: "=?utf-8?B?eXk=?=" <yy@xspring.net>
+Subject: =?utf-8?B?c29tZSBidWdzIHdoZW4gY2x1c3RlciBuYW1lIGlz?=
+ =?utf-8?B?IG5vdCDigJhjZXBoJw==?=
+Date: Thu, 17 Jul 2014 00:37:25 +0800
+Message-ID: <tencent_2FAE500D23138B8C713B9511@qq.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1666882128-1405528029=:28285"
+Content-Type: text/plain;
+	charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:47339 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S965529AbaGPQ1K (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Jul 2014 12:27:10 -0400
-In-Reply-To: <CACkq2mrDrkp0anEE1MLxqwuw-O7aEhMrYua2_QjKrrS+Fqn5Yg@mail.gmail.com>
+Received: from SMTPBG2.QQ.COM ([183.60.61.197]:51238 "EHLO smtpbg2.qq.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932684AbaGPQh7 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 16 Jul 2014 12:37:59 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Travis Rhoden <trhoden@gmail.com>
-Cc: Andrija Panic <andrija.panic@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>
+To: =?utf-8?B?Y2VwaC1kZXZlbA==?= <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+SGksIHdlIGZvdW5kIHNvbWUgYnVncyB3aGVuIGNsdXN0ZXIgbmFtZSBpcyBub3Qg4oCYY2Vw
+aCcgaW4gdmVyc2lvbiAwLjgwLjEsDQotLS0tLQ0KZGlmZiAtLWdpdCBhL3NyYy9jZXBoLWRp
+c2sgYi9zcmMvY2VwaC1kaXNrDQppbmRleCBmNzllMzQxLi4xNTNlMzQ0IDEwMDc1NQ0KLS0t
+IGEvc3JjL2NlcGgtZGlzaw0KKysrIGIvc3JjL2NlcGgtZGlzaw0KQEAgLTE2MTEsNiArMTYx
+MSw4IEBAIGRlZiBzdGFydF9kYWVtb24oDQogICAgICAgICAgICAgICAgIFsNCiAgICAgICAg
+ICAgICAgICAgICAgIHN2YywNCiAgICAgICAgICAgICAgICAgICAgICdjZXBoJywNCisgICAg
+ICAgICAgICAgICAgICAgICctYycsDQorICAgICAgICAgICAgICAgICAgICAnL2V0Yy9jZXBo
+L3tjbHVzdGVyfS5jb25mJy5mb3JtYXQoY2x1c3Rlcj1jbHVzdGVyKSwNCiAgICAgICAgICAg
+ICAgICAgICAgICdzdGFydCcsDQogICAgICAgICAgICAgICAgICAgICAnb3NkLntvc2RfaWR9
+Jy5mb3JtYXQob3NkX2lkPW9zZF9pZCksDQogICAgICAgICAgICAgICAgICAgICBdLA0KZGlm
+ZiAtLWdpdCBhL3NyYy9jZXBoX2NvbW1vbi5zaCBiL3NyYy9jZXBoX2NvbW1vbi5zaA0KaW5k
+ZXggMDE3ODFiNy4uOGQxNGEzYyAxMDA2NDQNCi0tLSBhL3NyYy9jZXBoX2NvbW1vbi5zaA0K
+KysrIGIvc3JjL2NlcGhfY29tbW9uLnNoDQpAQCAtNDksMTMgKzQ5LDEzIEBAIGNoZWNrX2hv
+c3QoKSB7DQogICAgIGdldF9jb25mIHVzZXIgIiIgInVzZXIiDQogDQogICAgICNlY2hvIGhv
+c3QgZm9yICRuYW1lIGlzICRob3N0LCBpIGFtICRob3N0bmFtZQ0KLQ0KLSAgICBpZiBbIC1l
+ICIvdmFyL2xpYi9jZXBoLyR0eXBlL2NlcGgtJGlkL3Vwc3RhcnQiIF07IHRoZW4NCisgICAg
+Y2x1c3Rlcj0kMQ0KKyAgICBpZiBbIC1lICIvdmFyL2xpYi9jZXBoLyR0eXBlLyRjbHVzdGVy
+LSRpZC91cHN0YXJ0IiBdOyB0aGVuDQogCXJldHVybiAxDQogICAgIGZpDQogDQogICAgICMg
+c3lzdmluaXQgbWFuYWdlZCBpbnN0YW5jZSBpbiBzdGFuZGFyZCBsb2NhdGlvbj8NCi0gICAg
+aWYgWyAtZSAiL3Zhci9saWIvY2VwaC8kdHlwZS9jZXBoLSRpZC9zeXN2aW5pdCIgXTsgdGhl
+bg0KKyAgICBpZiBbIC1lICIvdmFyL2xpYi9jZXBoLyR0eXBlLyRjbHVzdGVyLSRpZC9zeXN2
+aW5pdCIgXTsgdGhlbg0KIAlob3N0PSIkaG9zdG5hbWUiDQogCWVjaG8gIj09PSAkdHlwZS4k
+aWQgPT09ICINCiAJcmV0dXJuIDANCmRpZmYgLS1naXQgYS9zcmMvaW5pdC1jZXBoLmluIGIv
+c3JjL2luaXQtY2VwaC5pbg0KaW5kZXggODQ2YmQ1Ny4uMjRjNTJkOSAxMDA2NDQNCi0tLSBh
+L3NyYy9pbml0LWNlcGguaW4NCisrKyBiL3NyYy9pbml0LWNlcGguaW4NCkBAIC0xODksNyAr
+MTg5LDcgQEAgZm9yIG5hbWUgaW4gJHdoYXQ7IGRvDQogICAgIG51bT0kaWQNCiAgICAgbmFt
+ZT0iJHR5cGUuJGlkIg0KIA0KLSAgICBjaGVja19ob3N0IHx8IGNvbnRpbnVlDQorICAgIGNo
+ZWNrX2hvc3QgJGNsdXN0ZXJ8fCBjb250aW51ZQ0KIA0KICAgICBiaW5hcnk9IiRCSU5ESVIv
+Y2VwaC0kdHlwZSINCiAgICAgY21kPSIkYmluYXJ5IC1pICRpZCINCkBAIC0yMzEsNyArMjMx
+LDcgQEAgZm9yIG5hbWUgaW4gJHdoYXQ7IGRvDQogICAgIGNtZD0iJGNtZCAtYyAkY29uZiIN
+CiANCiAgICAgaWYgZWNobyAkbmFtZSB8IGdyZXAgLXEgXm9zZDsgdGhlbg0KLQlnZXRfY29u
+ZiBvc2RfZGF0YSAiL3Zhci9saWIvY2VwaC9vc2QvY2VwaC0kaWQiICJvc2QgZGF0YSINCisJ
+Z2V0X2NvbmYgb3NkX2RhdGEgIi92YXIvbGliL2NlcGgvb3NkLyRjbHVzdGVyLSRpZCIgIm9z
+ZCBkYXRhIg0KIAlnZXRfY29uZiBmc19wYXRoICIkb3NkX2RhdGEiICJmcyBwYXRoIiAgIyBt
+b3VudCBwb2ludCBkZWZhdWx0cyBzbyBvc2QgZGF0YQ0KICAgICAgICAgZ2V0X2NvbmYgZnNf
+ZGV2cyAiIiAiZGV2cyINCiAJaWYgWyAteiAiJGZzX2RldnMiIF07IHRoZW4NCkBAIC0zMjMs
+NyArMzIzLDcgQEAgZm9yIG5hbWUgaW4gJHdoYXQ7IGRvDQogCQlpZiBbICIke3VwZGF0ZV9j
+cnVzaDotMX0iID0gIjEiIC1vICIke3VwZGF0ZV9jcnVzaDotMX0iID0gInRydWUiIF07IHRo
+ZW4NCiAJCSAgICAjIHVwZGF0ZSBsb2NhdGlvbiBpbiBjcnVzaA0KIAkJICAgIGdldF9jb25m
+IG9zZF9sb2NhdGlvbl9ob29rICIkQklORElSL2NlcGgtY3J1c2gtbG9jYXRpb24iICJvc2Qg
+Y3J1c2ggbG9jYXRpb24gaG9vayINCi0JCSAgICBvc2RfbG9jYXRpb249YCRvc2RfbG9jYXRp
+b25faG9vayAtLWNsdXN0ZXIgY2VwaCAtLWlkICRpZCAtLXR5cGUgb3NkYA0KKwkJICAgIG9z
+ZF9sb2NhdGlvbj1gJG9zZF9sb2NhdGlvbl9ob29rIC0tY2x1c3RlciAkY2x1c3RlciAtLWlk
+ICRpZCAtLXR5cGUgb3NkYA0KIAkJICAgIGdldF9jb25mIG9zZF93ZWlnaHQgIiIgIm9zZCBj
+cnVzaCBpbml0aWFsIHdlaWdodCINCiAJCSAgICBkZWZhdWx0d2VpZ2h0PSIkKGRmIC1QIC1r
+ICRvc2RfZGF0YS8uIHwgdGFpbCAtMSB8IGF3ayAneyBwcmludCBzcHJpbnRmKCIlLjJmIiwk
+Mi8xMDczNzQxODI0KSB9JykiDQogCQkgICAgZ2V0X2NvbmYgb3NkX2tleXJpbmcgIiRvc2Rf
+ZGF0YS9rZXlyaW5nIiAia2V5cmluZyINCkBAIC0zNTQsNyArMzU0LDcgQEAgZm9yIG5hbWUg
+aW4gJHdoYXQ7IGRvDQogCQlnZXRfY29uZiBtb25fZGF0YSAiL3Zhci9saWIvY2VwaC9tb24v
+Y2VwaC0kaWQiICJtb24gZGF0YSINCiAJCWlmIFsgIiRtb25fZGF0YSIgPSAiL3Zhci9saWIv
+Y2VwaC9tb24vY2VwaC0kaWQiIC1hICIkYXNvayIgPSAiL3Zhci9ydW4vY2VwaC9jZXBoLW1v
+bi4kaWQuYXNvayIgXTsgdGhlbg0KIAkJICAgIGVjaG8gU3RhcnRpbmcgY2VwaC1jcmVhdGUt
+a2V5cyBvbiAkaG9zdC4uLg0KLQkJICAgIGNtZDI9IiRTQklORElSL2NlcGgtY3JlYXRlLWtl
+eXMgLWkgJGlkIDI+IC9kZXYvbnVsbCAmIg0KKwkJICAgIGNtZDI9IiRTQklORElSL2NlcGgt
+Y3JlYXRlLWtleXMgLS1jbHVzdGVyICRjbHVzdGVyIC1pICRpZCAyPiAvZGV2L251bGwgJiIN
+CiAJCSAgICBkb19jbWQgIiRjbWQyIg0KIAkJZmkNCiAJICAgIGZpDQoNCi0tLS0tLS0tLS0t
+DQpCZXN0IHJlZ2FyZHMsDQp5eSwNCmVYdHJlbWUgU3ByaW5nIE5ldHdvcmsgVGVjaG5vbG9n
+eSBMaW1pdGVkLiBDby4=
 
---557981400-1666882128-1405528029=:28285
-Content-Type: TEXT/PLAIN; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-
-On Wed, 16 Jul 2014, Travis Rhoden wrote:
-> Hi Andrija,
->=20
-> I'm running a cluster with both CentOS and Ubuntu machines in it.=C2=A0=
- I just
-> did some upgrades to 0.80.4, and I can confirm that doing "yum update c=
-eph"
-> on the CentOS machine did result in having all OSDs on that machine
-> restarted automatically.=C2=A0 I actually did not know that would happe=
-n, as the
-> CentOS machines were new additions (first update since deploying them w=
-ith
-> 0.80.1), and I'm used the Ubuntu behavior where I can update the packag=
-e
-> first, then reboot things at will.
->=20
-> So yeah, that still happens with RPM.=C2=A0 :/
-
-We'll make sure this is fixed in 0.80.5!
-
-Thanks-
-sage
 
 
->=20
->=20
-> On Wed, Jul 16, 2014 at 3:55 AM, Andrija Panic <andrija.panic@gmail.com=
->
-> wrote:
->       Hi Sage,
-> can anyone validate, if there is still "bug" inside RPMs that does
-> automatic CEPH service restart after updating packages ?
->=20
-> We are instructed to first update/restart MONs, and after that OSD -
-> but that is impossible if we have MON+OSDs on same host...since the
-> ceph is automaticaly restarted with YUM/RPM, but NOT automaticaly
-> restarted on Ubuntu/Debian (as reported by some other list memeber...)
->=20
-> Thanks
->=20
->=20
-> On 16 July 2014 01:45, Sage Weil <sage@inktank.com> wrote:
->       This Firefly point release fixes an potential data
->       corruption problem
->       when ceph-osd daemons run on top of XFS and service
->       Firefly librbd
->       clients. =C2=A0A recently added allocation hint that RBD
->       utilizes triggers
->       an XFS bug on some kernels (Linux 3.2, and likely others)
->       that leads
->       to data corruption and deep-scrub errors (and inconsistent
->       PGs). =C2=A0This
->       release avoids the situation by disabling the allocation
->       hint until we
->       can validate which kernels are affected and/or are known
->       to be safe to
->       use the hint on.
->=20
->       We recommend that all v0.80.x Firefly users urgently
->       upgrade,
->       especially if they are using RBD.
->=20
->       Notable Changes
->       ---------------
->=20
->       * osd: disable XFS extsize hint by default (#8830, Samuel
->       Just)
->       * rgw: fix extra data pool default name (Yehuda Sadeh)
->=20
->       For more detailed information, see:
->=20
->       =C2=A0 http://ceph.com/docs/master/_downloads/v0.80.4.txt
->=20
->       Getting Ceph
->       ------------
->=20
->       * Git at git://github.com/ceph/ceph.git
->       * Tarball at http://ceph.com/download/ceph-0.80.4.tar.gz
->       * For packages, see
->       http://ceph.com/docs/master/install/get-packages
->       * For ceph-deploy, see
->       http://ceph.com/docs/master/install/install-ceph-deploy
->=20
->       _______________________________________________
->       ceph-users mailing list
->       ceph-users@lists.ceph.com
->       http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->=20
->=20
->=20
->=20
-> --
->=20
-> Andrija Pani?
-> --------------------------------------
-> =C2=A0 http://admintweets.com
-> --------------------------------------
->=20
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users@lists.ceph.com
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->=20
->=20
->=20
->=20
---557981400-1666882128-1405528029=:28285--
