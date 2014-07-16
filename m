@@ -1,79 +1,46 @@
-From: "=?utf-8?B?eXk=?=" <yy@xspring.net>
-Subject: =?utf-8?B?c29tZSBidWdzIHdoZW4gY2x1c3RlciBuYW1lIGlz?=
- =?utf-8?B?IG5vdCDigJhjZXBoJw==?=
-Date: Thu, 17 Jul 2014 00:37:25 +0800
-Message-ID: <tencent_2FAE500D23138B8C713B9511@qq.com>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: [ceph-users] v0.80.4 Firefly released
+Date: Wed, 16 Jul 2014 10:19:44 -0700
+Message-ID: <CAPYLRzgARD7K0WtB6O=pj-vbePCet2atcq447cugvdbFppZfjg@mail.gmail.com>
+References: <alpine.DEB.2.00.1407151634250.21336@cobra.newdream.net>
+	<e7039ceecb224324acb2466f87efff8b@SIXPR04MB304.apcprd04.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from SMTPBG2.QQ.COM ([183.60.61.197]:51238 "EHLO smtpbg2.qq.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932684AbaGPQh7 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 16 Jul 2014 12:37:59 -0400
+Received: from mail-qc0-f175.google.com ([209.85.216.175]:64583 "EHLO
+	mail-qc0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933237AbaGPRTp (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Jul 2014 13:19:45 -0400
+Received: by mail-qc0-f175.google.com with SMTP id w7so1049730qcr.20
+        for <ceph-devel@vger.kernel.org>; Wed, 16 Jul 2014 10:19:44 -0700 (PDT)
+In-Reply-To: <e7039ceecb224324acb2466f87efff8b@SIXPR04MB304.apcprd04.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?utf-8?B?Y2VwaC1kZXZlbA==?= <ceph-devel@vger.kernel.org>
+To: James Harper <james@ejbdigital.com.au>
+Cc: Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@ceph.com" <ceph-users@ceph.com>
 
-SGksIHdlIGZvdW5kIHNvbWUgYnVncyB3aGVuIGNsdXN0ZXIgbmFtZSBpcyBub3Qg4oCYY2Vw
-aCcgaW4gdmVyc2lvbiAwLjgwLjEsDQotLS0tLQ0KZGlmZiAtLWdpdCBhL3NyYy9jZXBoLWRp
-c2sgYi9zcmMvY2VwaC1kaXNrDQppbmRleCBmNzllMzQxLi4xNTNlMzQ0IDEwMDc1NQ0KLS0t
-IGEvc3JjL2NlcGgtZGlzaw0KKysrIGIvc3JjL2NlcGgtZGlzaw0KQEAgLTE2MTEsNiArMTYx
-MSw4IEBAIGRlZiBzdGFydF9kYWVtb24oDQogICAgICAgICAgICAgICAgIFsNCiAgICAgICAg
-ICAgICAgICAgICAgIHN2YywNCiAgICAgICAgICAgICAgICAgICAgICdjZXBoJywNCisgICAg
-ICAgICAgICAgICAgICAgICctYycsDQorICAgICAgICAgICAgICAgICAgICAnL2V0Yy9jZXBo
-L3tjbHVzdGVyfS5jb25mJy5mb3JtYXQoY2x1c3Rlcj1jbHVzdGVyKSwNCiAgICAgICAgICAg
-ICAgICAgICAgICdzdGFydCcsDQogICAgICAgICAgICAgICAgICAgICAnb3NkLntvc2RfaWR9
-Jy5mb3JtYXQob3NkX2lkPW9zZF9pZCksDQogICAgICAgICAgICAgICAgICAgICBdLA0KZGlm
-ZiAtLWdpdCBhL3NyYy9jZXBoX2NvbW1vbi5zaCBiL3NyYy9jZXBoX2NvbW1vbi5zaA0KaW5k
-ZXggMDE3ODFiNy4uOGQxNGEzYyAxMDA2NDQNCi0tLSBhL3NyYy9jZXBoX2NvbW1vbi5zaA0K
-KysrIGIvc3JjL2NlcGhfY29tbW9uLnNoDQpAQCAtNDksMTMgKzQ5LDEzIEBAIGNoZWNrX2hv
-c3QoKSB7DQogICAgIGdldF9jb25mIHVzZXIgIiIgInVzZXIiDQogDQogICAgICNlY2hvIGhv
-c3QgZm9yICRuYW1lIGlzICRob3N0LCBpIGFtICRob3N0bmFtZQ0KLQ0KLSAgICBpZiBbIC1l
-ICIvdmFyL2xpYi9jZXBoLyR0eXBlL2NlcGgtJGlkL3Vwc3RhcnQiIF07IHRoZW4NCisgICAg
-Y2x1c3Rlcj0kMQ0KKyAgICBpZiBbIC1lICIvdmFyL2xpYi9jZXBoLyR0eXBlLyRjbHVzdGVy
-LSRpZC91cHN0YXJ0IiBdOyB0aGVuDQogCXJldHVybiAxDQogICAgIGZpDQogDQogICAgICMg
-c3lzdmluaXQgbWFuYWdlZCBpbnN0YW5jZSBpbiBzdGFuZGFyZCBsb2NhdGlvbj8NCi0gICAg
-aWYgWyAtZSAiL3Zhci9saWIvY2VwaC8kdHlwZS9jZXBoLSRpZC9zeXN2aW5pdCIgXTsgdGhl
-bg0KKyAgICBpZiBbIC1lICIvdmFyL2xpYi9jZXBoLyR0eXBlLyRjbHVzdGVyLSRpZC9zeXN2
-aW5pdCIgXTsgdGhlbg0KIAlob3N0PSIkaG9zdG5hbWUiDQogCWVjaG8gIj09PSAkdHlwZS4k
-aWQgPT09ICINCiAJcmV0dXJuIDANCmRpZmYgLS1naXQgYS9zcmMvaW5pdC1jZXBoLmluIGIv
-c3JjL2luaXQtY2VwaC5pbg0KaW5kZXggODQ2YmQ1Ny4uMjRjNTJkOSAxMDA2NDQNCi0tLSBh
-L3NyYy9pbml0LWNlcGguaW4NCisrKyBiL3NyYy9pbml0LWNlcGguaW4NCkBAIC0xODksNyAr
-MTg5LDcgQEAgZm9yIG5hbWUgaW4gJHdoYXQ7IGRvDQogICAgIG51bT0kaWQNCiAgICAgbmFt
-ZT0iJHR5cGUuJGlkIg0KIA0KLSAgICBjaGVja19ob3N0IHx8IGNvbnRpbnVlDQorICAgIGNo
-ZWNrX2hvc3QgJGNsdXN0ZXJ8fCBjb250aW51ZQ0KIA0KICAgICBiaW5hcnk9IiRCSU5ESVIv
-Y2VwaC0kdHlwZSINCiAgICAgY21kPSIkYmluYXJ5IC1pICRpZCINCkBAIC0yMzEsNyArMjMx
-LDcgQEAgZm9yIG5hbWUgaW4gJHdoYXQ7IGRvDQogICAgIGNtZD0iJGNtZCAtYyAkY29uZiIN
-CiANCiAgICAgaWYgZWNobyAkbmFtZSB8IGdyZXAgLXEgXm9zZDsgdGhlbg0KLQlnZXRfY29u
-ZiBvc2RfZGF0YSAiL3Zhci9saWIvY2VwaC9vc2QvY2VwaC0kaWQiICJvc2QgZGF0YSINCisJ
-Z2V0X2NvbmYgb3NkX2RhdGEgIi92YXIvbGliL2NlcGgvb3NkLyRjbHVzdGVyLSRpZCIgIm9z
-ZCBkYXRhIg0KIAlnZXRfY29uZiBmc19wYXRoICIkb3NkX2RhdGEiICJmcyBwYXRoIiAgIyBt
-b3VudCBwb2ludCBkZWZhdWx0cyBzbyBvc2QgZGF0YQ0KICAgICAgICAgZ2V0X2NvbmYgZnNf
-ZGV2cyAiIiAiZGV2cyINCiAJaWYgWyAteiAiJGZzX2RldnMiIF07IHRoZW4NCkBAIC0zMjMs
-NyArMzIzLDcgQEAgZm9yIG5hbWUgaW4gJHdoYXQ7IGRvDQogCQlpZiBbICIke3VwZGF0ZV9j
-cnVzaDotMX0iID0gIjEiIC1vICIke3VwZGF0ZV9jcnVzaDotMX0iID0gInRydWUiIF07IHRo
-ZW4NCiAJCSAgICAjIHVwZGF0ZSBsb2NhdGlvbiBpbiBjcnVzaA0KIAkJICAgIGdldF9jb25m
-IG9zZF9sb2NhdGlvbl9ob29rICIkQklORElSL2NlcGgtY3J1c2gtbG9jYXRpb24iICJvc2Qg
-Y3J1c2ggbG9jYXRpb24gaG9vayINCi0JCSAgICBvc2RfbG9jYXRpb249YCRvc2RfbG9jYXRp
-b25faG9vayAtLWNsdXN0ZXIgY2VwaCAtLWlkICRpZCAtLXR5cGUgb3NkYA0KKwkJICAgIG9z
-ZF9sb2NhdGlvbj1gJG9zZF9sb2NhdGlvbl9ob29rIC0tY2x1c3RlciAkY2x1c3RlciAtLWlk
-ICRpZCAtLXR5cGUgb3NkYA0KIAkJICAgIGdldF9jb25mIG9zZF93ZWlnaHQgIiIgIm9zZCBj
-cnVzaCBpbml0aWFsIHdlaWdodCINCiAJCSAgICBkZWZhdWx0d2VpZ2h0PSIkKGRmIC1QIC1r
-ICRvc2RfZGF0YS8uIHwgdGFpbCAtMSB8IGF3ayAneyBwcmludCBzcHJpbnRmKCIlLjJmIiwk
-Mi8xMDczNzQxODI0KSB9JykiDQogCQkgICAgZ2V0X2NvbmYgb3NkX2tleXJpbmcgIiRvc2Rf
-ZGF0YS9rZXlyaW5nIiAia2V5cmluZyINCkBAIC0zNTQsNyArMzU0LDcgQEAgZm9yIG5hbWUg
-aW4gJHdoYXQ7IGRvDQogCQlnZXRfY29uZiBtb25fZGF0YSAiL3Zhci9saWIvY2VwaC9tb24v
-Y2VwaC0kaWQiICJtb24gZGF0YSINCiAJCWlmIFsgIiRtb25fZGF0YSIgPSAiL3Zhci9saWIv
-Y2VwaC9tb24vY2VwaC0kaWQiIC1hICIkYXNvayIgPSAiL3Zhci9ydW4vY2VwaC9jZXBoLW1v
-bi4kaWQuYXNvayIgXTsgdGhlbg0KIAkJICAgIGVjaG8gU3RhcnRpbmcgY2VwaC1jcmVhdGUt
-a2V5cyBvbiAkaG9zdC4uLg0KLQkJICAgIGNtZDI9IiRTQklORElSL2NlcGgtY3JlYXRlLWtl
-eXMgLWkgJGlkIDI+IC9kZXYvbnVsbCAmIg0KKwkJICAgIGNtZDI9IiRTQklORElSL2NlcGgt
-Y3JlYXRlLWtleXMgLS1jbHVzdGVyICRjbHVzdGVyIC1pICRpZCAyPiAvZGV2L251bGwgJiIN
-CiAJCSAgICBkb19jbWQgIiRjbWQyIg0KIAkJZmkNCiAJICAgIGZpDQoNCi0tLS0tLS0tLS0t
-DQpCZXN0IHJlZ2FyZHMsDQp5eSwNCmVYdHJlbWUgU3ByaW5nIE5ldHdvcmsgVGVjaG5vbG9n
-eSBMaW1pdGVkLiBDby4=
+On Wed, Jul 16, 2014 at 1:50 AM, James Harper <james@ejbdigital.com.au> wrote:
+> Can you offer some comments on what the impact is likely to be to the data in an affected cluster? Should all data now be treated with suspicion and restored back to before the firefly upgrade?
 
+I am under the impression that it's not actually a data corruption
+bug, so much as a "reveal garbage data in sparse files" bug. So far
+everybody who's run into this has run a repair and not seen any
+issues, at least. Backups *should* be unnecessary, but we're still
+nailing down *exactly* what the bug is, so it's possible our
+suspicions are wrong or my information is out of date.
 
+On Wed, Jul 16, 2014 at 2:49 AM, Sylvain Munaut
+<s.munaut@whatever-company.com> wrote:
+> On Wed, Jul 16, 2014 at 10:50 AM, James Harper <james@ejbdigital.com.au> wrote:
+>> Can you offer some comments on what the impact is likely to be to the data in an affected cluster? Should all data now be treated with suspicion and restored back to before the firefly upgrade?
+>
+> Yes, I'd definitely like to know that too ... I upgraded a couple
+> weeks ago to firefly and I run precise with a 3.2 kernel on XFS. I
+> didn't see any deep scrubs error however.
+>
+> Also does this affect RBD only or can also affect radosgw ?
 
+RBD-only, and if you haven't seen/don't get deep-scrub errors you
+won't have any issues.
+-Greg
+Software Engineer #42 @ http://inktank.com | http://ceph.com
