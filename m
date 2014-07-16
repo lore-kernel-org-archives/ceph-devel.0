@@ -1,67 +1,62 @@
-From: David Moreau Simard <dmsimard@iweb.com>
-Subject: Re: [ceph-users] EU mirror now supports rsync
-Date: Wed, 16 Jul 2014 19:48:03 +0000
-Message-ID: <3DEA146C-4659-4F9C-ACD2-8C536C056E3A@iweb.com>
-References: <2069129717.8.1397023489379.open-xchange@websrv.42on.com>
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: v0.80.4 Firefly released
+Date: Thu, 17 Jul 2014 08:31:50 +1000
+Message-ID: <20140716223150.GE4453@dastard>
+References: <alpine.DEB.2.00.1407151634250.21336@cobra.newdream.net>
+ <20140716092226.GA23561@infradead.org>
+ <CAPYLRziqpnjHbViaFw2MtXcYKiCDE9wz8qaqiQjAJGDoUbG7cg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from bmx1.iweb.com ([70.38.127.135]:49228 "EHLO bmx1.iweb.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750921AbaGPTsG convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Jul 2014 15:48:06 -0400
-In-Reply-To: <2069129717.8.1397023489379.open-xchange@websrv.42on.com>
-Content-Language: en-US
-Content-ID: <2EAAA25DE73AB24F9A89012C5FE797B8@corp.iweb.com>
+Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:43260 "EHLO
+	ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752634AbaGPWbx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 16 Jul 2014 18:31:53 -0400
+Content-Disposition: inline
+In-Reply-To: <CAPYLRziqpnjHbViaFw2MtXcYKiCDE9wz8qaqiQjAJGDoUbG7cg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@42on.com>
-Cc: Ceph Devel <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <gregory.farnum@dreamhost.com>
+Cc: Christoph Hellwig <hch@infradead.org>, Samuel Just <sam.just@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>, xfs@oss.sgi.com
 
-Hi,
+On Wed, Jul 16, 2014 at 10:26:23AM -0700, Gregory Farnum wrote:
+> On Wed, Jul 16, 2014 at 2:22 AM, Christoph Hellwig <hch@infradead.org> wrote:
+> > On Tue, Jul 15, 2014 at 04:45:59PM -0700, Sage Weil wrote:
+> >> This Firefly point release fixes an potential data corruption problem
+> >> when ceph-osd daemons run on top of XFS and service Firefly librbd
+> >> clients.  A recently added allocation hint that RBD utilizes triggers
+> >> an XFS bug on some kernels (Linux 3.2, and likely others) that leads
+> >> to data corruption and deep-scrub errors (and inconsistent PGs).  This
+> >> release avoids the situation by disabling the allocation hint until we
+> >> can validate which kernels are affected and/or are known to be safe to
+> >> use the hint on.
+> >
+> > I've not really seen an report for that on the XFS list, could it be
+> > that you're running into the issue fixed by
+> >
+> >  "xfs: Use preallocation for inodes with extsz hints"
+> >
+> > (commit aff3a9edb7080f69f07fe76a8bd089b3dfa4cb5d)?
+> 
+> Sam reported the issue we're seeing in "consequences of
+> XFS_IOC_FSSETXATTR on non-empty file?",
 
-Thanks for making this available.
-I am currently synchronizing off of it and will make it available on our 4 Gbps mirror on the Canadian east coast by the end of this week.
+Assuming you've created an extent size hint with a file with delayed
+allocation on it and no blocks, then that's more than likely the
+same issue. The above commit uses preallocation to allocate
+unwritten extents rather than delayed allocation for files with
+extent size hints because delayed allocation doesn't write zeros
+over ranges in the allocated extents that don't have dirty data over
+them.
 
-Are you able to share how you are synchronizing from the Ceph repositories ?
-It would probably be better for us to synchronize from the source rather than the Europe mirror.
+Moral of the story: any time you get what appears to be data
+corruption in the underlying data store, you should report it to the
+relevant filesystem list rather than try to work around it....
 
---
-David Moreau Simard
+Cheers,
 
-On Apr 9, 2014, at 2:04 AM, Wido den Hollander <wido@42on.com> wrote:
-
-> Hi,
-> 
-> I just enabled rsync on the eu.ceph.com mirror.
-> 
-> eu.ceph.com mirrors from Ceph.com every 3 hours.
-> 
-> Feel free to rsync all the contents to your local environment, might be useful
-> for some large deployments where you want to save external bandwidth by not
-> having each machine fetch the Deb/RPM packages from the internet.
-> 
-> Rsync is available over IPv4 and IPv6, simply sync with this command:
-> $ mkdir cephmirror
-> $ rsync -avr --stats --progress eu.ceph.com::ceph cephmirror
-> 
-> I ask you all to be gentle. It's a free service, so don't start hammering the
-> server by setting your Cron to sync every 5 minutes. Once every couple of hours
-> should be sufficient.
-> 
-> Also, please don't all start syncing at the first minute of the hour. When
-> setting up the Cron, select a random minute from the hour. This way the load on
-> the system can be spread out.
-> 
-> Should you have any questions or issues, let me know!
-> 
-> --
-> Wido den Hollander
-> 42on B.V.
-> Ceph trainer and consultant
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users@lists.ceph.com
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
