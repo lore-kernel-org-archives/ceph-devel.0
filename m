@@ -1,91 +1,163 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: [PATCH] mon: OSDMonitor: add "osd pool get <pool> erasure_code_profile"
- command
-Date: Wed, 16 Jul 2014 17:53:29 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1407161749220.9196@cobra.newdream.net>
-References: <6AA21C22F0A5DA478922644AD2EC308C893D76@SHSMSX101.ccr.corp.intel.com>
+From: Cheng Wei-Chung <freeze.vicente.cheng-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: v0.80.4 Firefly released
+Date: Thu, 17 Jul 2014 10:35:06 +0800
+Message-ID: <CABF_e-GQ-a0Z5UWsz6qS62bvaccYVQ500b-jDe30hU-3-K9r+A@mail.gmail.com>
+References: <alpine.DEB.2.00.1407151634250.21336@cobra.newdream.net>
+	<e7039ceecb224324acb2466f87efff8b@SIXPR04MB304.apcprd04.prod.outlook.com>
+	<CAPYLRzgARD7K0WtB6O=pj-vbePCet2atcq447cugvdbFppZfjg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:51252 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752706AbaGQAx3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Jul 2014 20:53:29 -0400
-In-Reply-To: <6AA21C22F0A5DA478922644AD2EC308C893D76@SHSMSX101.ccr.corp.intel.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "Ma, Jianpeng" <jianpeng.ma@intel.com>
-Cc: Samuel Just <sam.just@inktank.com>, "loic@dachary.org" <loic@dachary.org>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: multipart/mixed; boundary="===============1283705923=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAPYLRzgARD7K0WtB6O=pj-vbePCet2atcq447cugvdbFppZfjg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Gregory Farnum <greg-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Applied, thanks!
+--===============1283705923==
+Content-Type: multipart/alternative; boundary=047d7b414e14232b4504fe5a7d0e
 
-sage
+--047d7b414e14232b4504fe5a7d0e
+Content-Type: text/plain; charset=UTF-8
 
-On Thu, 17 Jul 2014, Ma, Jianpeng wrote:
+hi all:
 
-> Enable us to obtain the erasure-code-profile for a given erasure-pool.
-> 
-> Signed-off-by: Ma Jianpeng <jianpeng.ma@intel.com>
-> ---
->  src/mon/MonCommands.h |  2 +-
->  src/mon/OSDMonitor.cc | 11 +++++++++++
->  2 files changed, 12 insertions(+), 1 deletion(-)
-> 
-> diff --git a/src/mon/MonCommands.h b/src/mon/MonCommands.h
-> index f429e0f..627546b 100644
-> --- a/src/mon/MonCommands.h
-> +++ b/src/mon/MonCommands.h
-> @@ -571,7 +571,7 @@ COMMAND("osd pool rename " \
->         "rename <srcpool> to <destpool>", "osd", "rw", "cli,rest")
->  COMMAND("osd pool get " \
->         "name=pool,type=CephPoolname " \
-> -       "name=var,type=CephChoices,strings=size|min_size|crash_replay_interval|pg_num|pgp_num|crush_ruleset|hit_set_type|hit_set_period|hit_set_count|hit_set_fpp|auid|target_max_objects|target_max_bytes|cache_target_dirty_ratio|cache_target_full_ratio|cache_min_flush_age|cache_min_evict_age", \
-> +       "name=var,type=CephChoices,strings=size|min_size|crash_replay_interval|pg_num|pgp_num|crush_ruleset|hit_set_type|hit_set_period|hit_set_count|hit_set_fpp|auid|target_max_objects|target_max_bytes|cache_target_dirty_ratio|cache_target_full_ratio|cache_min_flush_age|cache_min_evict_age|erasure_code_profile", \
->         "get pool parameter <var>", "osd", "r", "cli,rest")
->  COMMAND("osd pool set " \
->         "name=pool,type=CephPoolname " \
-> diff --git a/src/mon/OSDMonitor.cc b/src/mon/OSDMonitor.cc
-> index c60d744..d267245 100644
-> --- a/src/mon/OSDMonitor.cc
-> +++ b/src/mon/OSDMonitor.cc
-> @@ -2483,6 +2483,13 @@ bool OSDMonitor::preprocess_command(MMonCommand *m)
->        goto reply;
->      }
-> 
-> +    if (!p->is_erasure() && var == "erasure_code_profile") {
-> +      ss << "pool '" << poolstr
-> +         << "' is not a erasure pool: variable not applicable";
-> +      r = -EACCES;
-> +      goto reply;
-> +    }
-> +
->      if (f) {
->        f->open_object_section("pool");
->        f->dump_string("pool", poolstr);
-> @@ -2536,6 +2543,8 @@ bool OSDMonitor::preprocess_command(MMonCommand *m)
->          f->dump_unsigned("cache_min_flush_age", p->cache_min_flush_age);
->        } else if (var == "cache_min_evict_age") {
->          f->dump_unsigned("cache_min_evict_age", p->cache_min_evict_age);
-> +      } else if (var == "erasure_code_profile") {
-> +       f->dump_string("erasure_code_profile", p->erasure_code_profile);
->        }
-> 
->        f->close_section();
-> @@ -2583,6 +2592,8 @@ bool OSDMonitor::preprocess_command(MMonCommand *m)
->          ss << "cache_min_flush_age: " << p->cache_min_flush_age;
->        } else if (var == "cache_min_evict_age") {
->          ss << "cache_min_evict_age: " << p->cache_min_evict_age;
-> +      } else if (var == "erasure_code_profile") {
-> +       ss << "erasure_code_profile: " << p->erasure_code_profile;
->        }
-> 
->        rdata.append(ss);
-> --
-> 1.9.1
-> 
+This issue will meet deep-scrub error 100% with RBD user?
+
+I mean it is possible just occur sometimes.
+
+I use firefly v0.80.1 with kernel 3.8.0-37 and did not see any deep-scrub
+error.
+
+Then I still need to upgrade to 0.80.4 or I didn't get this issue?
+
+Thanks!!
+
+
+2014-07-17 1:19 GMT+08:00 Gregory Farnum <greg-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>:
+
+> On Wed, Jul 16, 2014 at 1:50 AM, James Harper <james-u7/cK5yN3tp/jDykUgYHh4dd74u8MsAO@public.gmane.org>
+> wrote:
+> > Can you offer some comments on what the impact is likely to be to the
+> data in an affected cluster? Should all data now be treated with suspicion
+> and restored back to before the firefly upgrade?
+>
+> I am under the impression that it's not actually a data corruption
+> bug, so much as a "reveal garbage data in sparse files" bug. So far
+> everybody who's run into this has run a repair and not seen any
+> issues, at least. Backups *should* be unnecessary, but we're still
+> nailing down *exactly* what the bug is, so it's possible our
+> suspicions are wrong or my information is out of date.
+>
+> On Wed, Jul 16, 2014 at 2:49 AM, Sylvain Munaut
+> <s.munaut-IEbV4ISQ1OTUSxYbhEqsfVaTQe2KTcn/@public.gmane.org> wrote:
+> > On Wed, Jul 16, 2014 at 10:50 AM, James Harper <james-u7/cK5yN3tp/jDykUgYHh4dd74u8MsAO@public.gmane.org>
+> wrote:
+> >> Can you offer some comments on what the impact is likely to be to the
+> data in an affected cluster? Should all data now be treated with suspicion
+> and restored back to before the firefly upgrade?
+> >
+> > Yes, I'd definitely like to know that too ... I upgraded a couple
+> > weeks ago to firefly and I run precise with a 3.2 kernel on XFS. I
+> > didn't see any deep scrubs error however.
+> >
+> > Also does this affect RBD only or can also affect radosgw ?
+>
+> RBD-only, and if you haven't seen/don't get deep-scrub errors you
+> won't have any issues.
+> -Greg
+> Software Engineer #42 @ http://inktank.com | http://ceph.com
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+>
+
+--047d7b414e14232b4504fe5a7d0e
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr">hi all:<div><br></div><div>This issue will meet deep-scrub=
+ error 100% with RBD user?</div><div><br></div><div>I mean it is possible j=
+ust occur sometimes.</div><div><br></div><div>I use firefly v0.80.1 with ke=
+rnel 3.8.0-37 and did not see any deep-scrub error.</div>
+<div><br></div><div>Then I still need to upgrade to 0.80.4 or I didn&#39;t =
+get this issue?</div><div><br></div><div>Thanks!!</div><div><div class=3D"g=
+mail_extra"><br><br><div class=3D"gmail_quote">2014-07-17 1:19 GMT+08:00 Gr=
+egory Farnum <span dir=3D"ltr">&lt;<a href=3D"mailto:greg-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org" targ=
+et=3D"_blank">greg-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org</a>&gt;</span>:<br>
+<blockquote class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:1p=
+x #ccc solid;padding-left:1ex"><div class=3D"">On Wed, Jul 16, 2014 at 1:50=
+ AM, James Harper &lt;<a href=3D"mailto:james-u7/cK5yN3tp/jDykUgYHh4dd74u8MsAO@public.gmane.org">james@ejbd=
+igital.com.au</a>&gt; wrote:<br>
+
+&gt; Can you offer some comments on what the impact is likely to be to the =
+data in an affected cluster? Should all data now be treated with suspicion =
+and restored back to before the firefly upgrade?<br>
+<br>
+</div>I am under the impression that it&#39;s not actually a data corruptio=
+n<br>
+bug, so much as a &quot;reveal garbage data in sparse files&quot; bug. So f=
+ar<br>
+everybody who&#39;s run into this has run a repair and not seen any<br>
+issues, at least. Backups *should* be unnecessary, but we&#39;re still<br>
+nailing down *exactly* what the bug is, so it&#39;s possible our<br>
+suspicions are wrong or my information is out of date.<br>
+<div class=3D""><br>
+On Wed, Jul 16, 2014 at 2:49 AM, Sylvain Munaut<br>
+&lt;<a href=3D"mailto:s.munaut-IEbV4ISQ1OTUSxYbhEqsfVaTQe2KTcn/@public.gmane.org">s.munaut@whatever-comp=
+any.com</a>&gt; wrote:<br>
+&gt; On Wed, Jul 16, 2014 at 10:50 AM, James Harper &lt;<a href=3D"mailto:j=
+ames-u7/cK5yN3tp/jDykUgYHh4dd74u8MsAO@public.gmane.org">james-u7/cK5yN3tp/jDykUgYHh4dd74u8MsAO@public.gmane.org</a>&gt; wrote:<br>
+</div><div class=3D"">&gt;&gt; Can you offer some comments on what the impa=
+ct is likely to be to the data in an affected cluster? Should all data now =
+be treated with suspicion and restored back to before the firefly upgrade?<=
+br>
+
+&gt;<br>
+</div><div class=3D"">&gt; Yes, I&#39;d definitely like to know that too ..=
+. I upgraded a couple<br>
+&gt; weeks ago to firefly and I run precise with a 3.2 kernel on XFS. I<br>
+&gt; didn&#39;t see any deep scrubs error however.<br>
+&gt;<br>
+&gt; Also does this affect RBD only or can also affect radosgw ?<br>
+<br>
+</div>RBD-only, and if you haven&#39;t seen/don&#39;t get deep-scrub errors=
+ you<br>
+won&#39;t have any issues.<br>
+-Greg<br>
+Software Engineer #42 @ <a href=3D"http://inktank.com" target=3D"_blank">ht=
+tp://inktank.com</a> | <a href=3D"http://ceph.com" target=3D"_blank">http:/=
+/ceph.com</a><br>
+<div class=3D"HOEnZb"><div class=3D"h5">--<br>
+To unsubscribe from this list: send the line &quot;unsubscribe ceph-devel&q=
+uot; in<br>
+the body of a message to <a href=3D"mailto:majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org">major=
+domo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org</a><br>
+More majordomo info at =C2=A0<a href=3D"http://vger.kernel.org/majordomo-in=
+fo.html" target=3D"_blank">http://vger.kernel.org/majordomo-info.html</a><b=
+r>
+</div></div></blockquote></div><br></div></div></div>
+
+--047d7b414e14232b4504fe5a7d0e--
+
+--===============1283705923==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============1283705923==--
