@@ -1,50 +1,115 @@
-From: Alphe Salas <asalas@kepler.cl>
+From: Sage Weil <sweil@redhat.com>
 Subject: Re: Forever growing data in ceph using RBD image
-Date: Thu, 17 Jul 2014 14:17:50 -0400
-Message-ID: <53C8134E.8030802@kepler.cl>
-References: <53C7D97D.3010607@kepler.cl> <20140717164712.GA4690@infradead.org>
+Date: Thu, 17 Jul 2014 11:27:31 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1407171121040.3932@cobra.newdream.net>
+References: <53C7D97D.3010607@kepler.cl> <alpine.DEB.2.00.1407170931270.3932@cobra.newdream.net> <53C81266.6080306@kepler.cl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f179.google.com ([209.85.216.179]:56958 "EHLO
-	mail-qc0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751339AbaGQSRy (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Jul 2014 14:17:54 -0400
-Received: by mail-qc0-f179.google.com with SMTP id r5so2445429qcx.10
-        for <ceph-devel@vger.kernel.org>; Thu, 17 Jul 2014 11:17:53 -0700 (PDT)
-In-Reply-To: <20140717164712.GA4690@infradead.org>
+Received: from cobra.newdream.net ([66.33.216.30]:56189 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751349AbaGQS1b (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Jul 2014 14:27:31 -0400
+In-Reply-To: <53C81266.6080306@kepler.cl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Christoph Hellwig <hch@infradead.org>
+To: Alphe Salas <asalas@kepler.cl>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
+On Thu, 17 Jul 2014, Alphe Salas wrote:
+> On 07/17/2014 12:35 PM, Sage Weil wrote:
+> > On Thu, 17 Jul 2014, Alphe Salas wrote:
+> > > Hello,
+> > > I would like to know if there is something planned to correct the "forever
+> > > growing" effet when using rbd image.
+> > > My experience shows that the replicas of a rbd images are never discarded
+> > > and
+> > > never overwriten. Lets say my physical share is about 30 TB I make an
+> > > image of
+> > > 13TB (half the real space - 25% of disfunction osd support). My experience
+> > > shows that the rbd image is overwriten so if I top the 13TB once i get a
+> > > 26TB
+> > > of real space used (replicas set to 2) if I delete 8TB from those 13TB I
+> > > see
+> > > the real space used unchanged.
+> > > If I write back 4TB then ceph collapse it is nearfull and I have to go buy
+> > > another 30TB integrate it to my cluster to hold the problem. But still
+> > > soon I
+> > > have in my ceph more useless replicas of "delete" datas than usefull data
+> > > with
+> > > they replicas.
+> > > 
+> > > Usually when I talk to dev team about this problem they tell me that the
+> > > real problem is the lack of trim in XFS, but my own analysis shows that
+> > > the real problem is ceph internal way to handle data. It is ceph that
+> > > never discard any replicas and never "clean" itself to only keep records
+> > > of the data in use.
+> 
+> > 
+> > You are correct that if XFS (or whatever FS you are using) does not issue
+> > discard/trim, then deleting data inside the fs on top of RBD won't free
+> > any space.  Note that you usually have to explicitly enable this via a
+> > mount option; most (all?) kernels still leave this off by default.
+> > 
+> > Are you taking RBD snapshots?  If not, then there will never be more than
+> > the rbd image size * num_replicas space used (ignoring the few % of file
+> > system overhead for the moment).
+> > 
+> > If you are taking snapshots, then yes.. you will see more space used until
+> > the snapshot is deleted because we will keep old copies of objects around.
+> 
+> I am not using snapshot. I dont have enought space to write to the disk after
+> some round of write / delete /write / delete so I can t affort to use fancy
+> features like snapshots. I use regular image rbd type 1  not even able to be
+> snapshoot.
+> 
+> I tryed to activate XFS trim system but that shown no change at all. (discard
+> mount option just have no real effect try in ubuntu 14.04)
 
+I believe you have to have mounted with -o discard at the time the data is 
+deleted; simply enabling the option later won't help.  This is what 
+the fstrim utility is for; see
 
-Alphe Salas
-I.T ingeneer
+	http://man7.org/linux/man-pages/man8/fstrim.8.html
 
-On 07/17/2014 12:47 PM, Christoph Hellwig wrote:
-> On Thu, Jul 17, 2014 at 10:11:09AM -0400, Alphe Salas wrote:
->> Usually when I talk to dev team about this problem they tell me that the
->> real problem is the lack of trim in XFS, but my own analysis shows that the
->> real problem is ceph internal way to handle data. It is ceph that never
->> discard any replicas and never "clean" itself to only keep records of the
->> data in use.
+> Like I said what seems to grow in fact are the replica side of the data.
+> There is no overwriting of the replicas when real data are overwriten so
+> slowly I see the real disk weight of my datas in the ceph cluster grow, grow,
+> grow and never come to a stable size.
+
+This is simply not true.  RADOS object are overwritten in place.  If you 
+create a 10 TB image and write it 100x with dd, you will still only 
+consume 10 TB * num_replicas.  If you are seeing something other 
+than this, ignore everything else in this email and go figure out what 
+else is writing files to the underlying volumes.
+
+> There is the trick which layer of XFS are we talking about the layer inside
+> the rbd image ? or the one below the RBD image ?
 >
-> XFS supports TRIM just fine - with -o discard it will issue TRIMs on
-> unlink, and with fstrim you can do it explicitly.  Note that the online
-> discard might be very slow for all Linux filesystems, although I've not
-> actually tested it on top of RBD.
->
-I will test it again probably the point I missed it that you have to 
-unmount / remount the XFS RBD image in order to see the data disapear 
-from the real disk space old in ceph. I will try it today and comeback 
-with copy /paste of ceph -s etc..
+> I already see a bug ticket from 2009 in ceph bug track that state that
+> XFS trim is not taken in consideration by ceph. That ticket doesn t seem to
+> have got a solution.
+> 
+> and if I have XFS as format on the low end Ceph cluster and ext4 in the rbd
+> image how will trim works?
+
+I assume you are using kvm/qemu?  It may be that older versions aren't 
+passing through trims; Josh would know more.  Or maybe the trim sizes are 
+too small to let rados effectively deallocate entire objects.  Logs might 
+help there.
+
+But, as I said, if you see more data written than the size of your image 
+then stop worrying about trim and sort that out first...
+
+> Low level XFS (of the osd disks ) have mount options that are not managed by
+> the user it is auto process of mount when the osd is activated in that
+> consideration how do I activate the trim ? Do I have to put the hands on udev
+> level scripts ?
+
+Trim on the underlying XFS volumes isn't necessary or important.  When RBD 
+gets a discard, it will either delete, truncate, or punch holes in the 
+underlying XFS object files the image maps too.
+
+sage
 
 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
