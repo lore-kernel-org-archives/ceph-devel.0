@@ -1,82 +1,79 @@
-From: Samuel Just <sam.just@inktank.com>
-Subject: Re: v0.80.4 Firefly released
-Date: Wed, 16 Jul 2014 16:41:32 -0700
-Message-ID: <CA+4uBUYTu9LsgfuBvz7_S5QYb3ySwOdfPcvDTK-Ym6usEQ=0-g@mail.gmail.com>
-References: <alpine.DEB.2.00.1407151634250.21336@cobra.newdream.net>
-	<20140716092226.GA23561@infradead.org>
-	<CAPYLRziqpnjHbViaFw2MtXcYKiCDE9wz8qaqiQjAJGDoUbG7cg@mail.gmail.com>
-	<20140716223150.GE4453@dastard>
+From: "Ma, Jianpeng" <jianpeng.ma@intel.com>
+Subject: [PATCH] mon: OSDMonitor: add "osd pool get <pool>
+ erasure_code_profile" command
+Date: Thu, 17 Jul 2014 00:42:13 +0000
+Message-ID: <6AA21C22F0A5DA478922644AD2EC308C893D76@SHSMSX101.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qg0-f49.google.com ([209.85.192.49]:43505 "EHLO
-	mail-qg0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751409AbaGPXld (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Jul 2014 19:41:33 -0400
-Received: by mail-qg0-f49.google.com with SMTP id j107so1280370qga.8
-        for <ceph-devel@vger.kernel.org>; Wed, 16 Jul 2014 16:41:32 -0700 (PDT)
-In-Reply-To: <20140716223150.GE4453@dastard>
+Received: from mga11.intel.com ([192.55.52.93]:25323 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754796AbaGQAmX convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Jul 2014 20:42:23 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dave Chinner <david@fromorbit.com>
-Cc: Gregory Farnum <gregory.farnum@dreamhost.com>, Christoph Hellwig <hch@infradead.org>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>, xfs@oss.sgi.com
+To: Samuel Just <sam.just@inktank.com>
+Cc: "loic@dachary.org" <loic@dachary.org>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-[Apologies for the repost, attachment was too big]
+Enable us to obtain the erasure-code-profile for a given erasure-pool.
 
-Sorry for the delay.  I've been trying to put together a simpler
-reproducer since no one wants to debug a filesystem based on rbd
-symptoms :).  It doesn't appear to be related to using extsize on a
-non-empty file. The linked archive below has a reproducer
-(xfs_extsize_reproducer.cc), an input op sequence (trimmed-ops.in),
-the resulting file and what it should be (test, test.correct), and a
-summary (notes.txt).
+Signed-off-by: Ma Jianpeng <jianpeng.ma@intel.com>
+---
+ src/mon/MonCommands.h |  2 +-
+ src/mon/OSDMonitor.cc | 11 +++++++++++
+ 2 files changed, 12 insertions(+), 1 deletion(-)
 
-http://filedump.ceph.com/samuelj/reproducer.tgz
+diff --git a/src/mon/MonCommands.h b/src/mon/MonCommands.h
+index f429e0f..627546b 100644
+--- a/src/mon/MonCommands.h
++++ b/src/mon/MonCommands.h
+@@ -571,7 +571,7 @@ COMMAND("osd pool rename " \
+        "rename <srcpool> to <destpool>", "osd", "rw", "cli,rest")
+ COMMAND("osd pool get " \
+        "name=pool,type=CephPoolname " \
+-       "name=var,type=CephChoices,strings=size|min_size|crash_replay_interval|pg_num|pgp_num|crush_ruleset|hit_set_type|hit_set_period|hit_set_count|hit_set_fpp|auid|target_max_objects|target_max_bytes|cache_target_dirty_ratio|cache_target_full_ratio|cache_min_flush_age|cache_min_evict_age", \
++       "name=var,type=CephChoices,strings=size|min_size|crash_replay_interval|pg_num|pgp_num|crush_ruleset|hit_set_type|hit_set_period|hit_set_count|hit_set_fpp|auid|target_max_objects|target_max_bytes|cache_target_dirty_ratio|cache_target_full_ratio|cache_min_flush_age|cache_min_evict_age|erasure_code_profile", \
+        "get pool parameter <var>", "osd", "r", "cli,rest")
+ COMMAND("osd pool set " \
+        "name=pool,type=CephPoolname " \
+diff --git a/src/mon/OSDMonitor.cc b/src/mon/OSDMonitor.cc
+index c60d744..d267245 100644
+--- a/src/mon/OSDMonitor.cc
++++ b/src/mon/OSDMonitor.cc
+@@ -2483,6 +2483,13 @@ bool OSDMonitor::preprocess_command(MMonCommand *m)
+       goto reply;
+     }
 
-I think this probably is fixed in the commit mentioned above (xfs: Use
-preallocation for inodes with extsz hints).
++    if (!p->is_erasure() && var == "erasure_code_profile") {
++      ss << "pool '" << poolstr
++         << "' is not a erasure pool: variable not applicable";
++      r = -EACCES;
++      goto reply;
++    }
++
+     if (f) {
+       f->open_object_section("pool");
+       f->dump_string("pool", poolstr);
+@@ -2536,6 +2543,8 @@ bool OSDMonitor::preprocess_command(MMonCommand *m)
+         f->dump_unsigned("cache_min_flush_age", p->cache_min_flush_age);
+       } else if (var == "cache_min_evict_age") {
+         f->dump_unsigned("cache_min_evict_age", p->cache_min_evict_age);
++      } else if (var == "erasure_code_profile") {
++       f->dump_string("erasure_code_profile", p->erasure_code_profile);
+       }
 
-Thanks!
--Sam
+       f->close_section();
+@@ -2583,6 +2592,8 @@ bool OSDMonitor::preprocess_command(MMonCommand *m)
+         ss << "cache_min_flush_age: " << p->cache_min_flush_age;
+       } else if (var == "cache_min_evict_age") {
+         ss << "cache_min_evict_age: " << p->cache_min_evict_age;
++      } else if (var == "erasure_code_profile") {
++       ss << "erasure_code_profile: " << p->erasure_code_profile;
+       }
 
-On Wed, Jul 16, 2014 at 3:31 PM, Dave Chinner <david@fromorbit.com> wrote:
-> On Wed, Jul 16, 2014 at 10:26:23AM -0700, Gregory Farnum wrote:
->> On Wed, Jul 16, 2014 at 2:22 AM, Christoph Hellwig <hch@infradead.org> wrote:
->> > On Tue, Jul 15, 2014 at 04:45:59PM -0700, Sage Weil wrote:
->> >> This Firefly point release fixes an potential data corruption problem
->> >> when ceph-osd daemons run on top of XFS and service Firefly librbd
->> >> clients.  A recently added allocation hint that RBD utilizes triggers
->> >> an XFS bug on some kernels (Linux 3.2, and likely others) that leads
->> >> to data corruption and deep-scrub errors (and inconsistent PGs).  This
->> >> release avoids the situation by disabling the allocation hint until we
->> >> can validate which kernels are affected and/or are known to be safe to
->> >> use the hint on.
->> >
->> > I've not really seen an report for that on the XFS list, could it be
->> > that you're running into the issue fixed by
->> >
->> >  "xfs: Use preallocation for inodes with extsz hints"
->> >
->> > (commit aff3a9edb7080f69f07fe76a8bd089b3dfa4cb5d)?
->>
->> Sam reported the issue we're seeing in "consequences of
->> XFS_IOC_FSSETXATTR on non-empty file?",
->
-> Assuming you've created an extent size hint with a file with delayed
-> allocation on it and no blocks, then that's more than likely the
-> same issue. The above commit uses preallocation to allocate
-> unwritten extents rather than delayed allocation for files with
-> extent size hints because delayed allocation doesn't write zeros
-> over ranges in the allocated extents that don't have dirty data over
-> them.
->
-> Moral of the story: any time you get what appears to be data
-> corruption in the underlying data store, you should report it to the
-> relevant filesystem list rather than try to work around it....
->
-> Cheers,
->
-> Dave.
-> --
-> Dave Chinner
-> david@fromorbit.com
+       rdata.append(ss);
+--
+1.9.1
+
