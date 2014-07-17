@@ -1,88 +1,32 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: [ceph-users] EU mirror now supports rsync
-Date: Thu, 17 Jul 2014 11:21:07 +0200
-Message-ID: <53C79583.6030103@42on.com>
-References: <2069129717.8.1397023489379.open-xchange@websrv.42on.com> <3DEA146C-4659-4F9C-ACD2-8C536C056E3A@iweb.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+From: Guang Yang <yguang11-1ViLX0X+lBJBDgjK7y7TUQ@public.gmane.org>
+Subject: row geo-replication to another data store?
+Date: Thu, 17 Jul 2014 21:51:42 +0800
+Message-ID: <BLU436-SMTP1698E22620FB6AEF006A733DFF40@phx.gbl>
+Mime-Version: 1.0 (Mac OS X Mail 7.3 \(1878.6\))
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from websrv.42on.com ([31.25.102.167]:50068 "EHLO websrv.42on.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756077AbaGQJ2s (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 17 Jul 2014 05:28:48 -0400
-In-Reply-To: <3DEA146C-4659-4F9C-ACD2-8C536C056E3A@iweb.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: David Moreau Simard <dmsimard@iweb.com>
-Cc: Ceph Devel <ceph-devel@vger.kernel.org>
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On 07/16/2014 09:48 PM, David Moreau Simard wrote:
-> Hi,
->
-> Thanks for making this available.
-> I am currently synchronizing off of it and will make it available on our 4 Gbps mirror on the Canadian east coast by the end of this week.
->
+Hi cephers,
+We are investigating a backup solution for Ceph, in short, we would like a solution to backup a Ceph cluster to another data store (not Ceph cluster, assume it has SWIFT API). We would like to have both full backup and incremental backup on top of the full backup.
 
-Cool! More mirrors is always better.
+After going through the geo-replication blueprint [1], I am thinking that we can leverage the effort and instead of replicate the data into another ceph cluster, we make it replicate to another data store. At the same time, I have a couple of questions which need your help:
 
-> Are you able to share how you are synchronizing from the Ceph repositories ?
-> It would probably be better for us to synchronize from the source rather than the Europe mirror.
->
+1) How does the ragosgw-agent scale to multiple hosts? Our first investigation shows it only works on a single host but I would like to confirm.
+2) Can we configure the interval  to do incremental backup like 1 hour / 1 day / 1 month?
 
-I have a SSH account into the ceph.com server and use that to sync the 
-packages. I've set this up the the community guys Ross and Patrick, you 
-might want to ping them.
+[1] https://wiki.ceph.com/Planning/Blueprints/Dumpling/RGW_Geo-Replication_and_Disaster_Recovery
 
-There is no official distribution mechanism for this right now. I simply 
-set up a rsyncd to provide this the community.
-
-Wido
-
-> --
-> David Moreau Simard
->
-> On Apr 9, 2014, at 2:04 AM, Wido den Hollander <wido@42on.com> wrote:
->
->> Hi,
->>
->> I just enabled rsync on the eu.ceph.com mirror.
->>
->> eu.ceph.com mirrors from Ceph.com every 3 hours.
->>
->> Feel free to rsync all the contents to your local environment, might be useful
->> for some large deployments where you want to save external bandwidth by not
->> having each machine fetch the Deb/RPM packages from the internet.
->>
->> Rsync is available over IPv4 and IPv6, simply sync with this command:
->> $ mkdir cephmirror
->> $ rsync -avr --stats --progress eu.ceph.com::ceph cephmirror
->>
->> I ask you all to be gentle. It's a free service, so don't start hammering the
->> server by setting your Cron to sync every 5 minutes. Once every couple of hours
->> should be sufficient.
->>
->> Also, please don't all start syncing at the first minute of the hour. When
->> setting up the Cron, select a random minute from the hour. This way the load on
->> the system can be spread out.
->>
->> Should you have any questions or issues, let me know!
->>
->> --
->> Wido den Hollander
->> 42on B.V.
->> Ceph trainer and consultant
->> _______________________________________________
->> ceph-users mailing list
->> ceph-users@lists.ceph.com
->> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->
-
-
--- 
-Wido den Hollander
-Ceph consultant and trainer
-42on B.V.
-
-Phone: +31 (0)20 700 9902
-Skype: contact42on
+Thanks,
+Guang
