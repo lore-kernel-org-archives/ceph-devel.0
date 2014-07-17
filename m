@@ -1,65 +1,31 @@
-From: Sage Weil <sweil@redhat.com>
+From: Christoph Hellwig <hch@infradead.org>
 Subject: Re: Forever growing data in ceph using RBD image
-Date: Thu, 17 Jul 2014 09:35:05 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1407170931270.3932@cobra.newdream.net>
+Date: Thu, 17 Jul 2014 09:47:12 -0700
+Message-ID: <20140717164712.GA4690@infradead.org>
 References: <53C7D97D.3010607@kepler.cl>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:55438 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756898AbaGQQfG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Jul 2014 12:35:06 -0400
+Received: from bombadil.infradead.org ([198.137.202.9]:57916 "EHLO
+	bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932908AbaGQQrM (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Jul 2014 12:47:12 -0400
+Content-Disposition: inline
 In-Reply-To: <53C7D97D.3010607@kepler.cl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alphe Salas <asalas@kepler.cl>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, 17 Jul 2014, Alphe Salas wrote:
-> Hello,
-> I would like to know if there is something planned to correct the "forever
-> growing" effet when using rbd image.
-> My experience shows that the replicas of a rbd images are never discarded and
-> never overwriten. Lets say my physical share is about 30 TB I make an image of
-> 13TB (half the real space - 25% of disfunction osd support). My experience
-> shows that the rbd image is overwriten so if I top the 13TB once i get a 26TB
-> of real space used (replicas set to 2) if I delete 8TB from those 13TB I see
-> the real space used unchanged.
-> If I write back 4TB then ceph collapse it is nearfull and I have to go buy
-> another 30TB integrate it to my cluster to hold the problem. But still soon I
-> have in my ceph more useless replicas of "delete" datas than usefull data with
-> they replicas.
-> 
-> Usually when I talk to dev team about this problem they tell me that the 
-> real problem is the lack of trim in XFS, but my own analysis shows that 
-> the real problem is ceph internal way to handle data. It is ceph that 
-> never discard any replicas and never "clean" itself to only keep records 
-> of the data in use.
+On Thu, Jul 17, 2014 at 10:11:09AM -0400, Alphe Salas wrote:
+> Usually when I talk to dev team about this problem they tell me that the
+> real problem is the lack of trim in XFS, but my own analysis shows that the
+> real problem is ceph internal way to handle data. It is ceph that never
+> discard any replicas and never "clean" itself to only keep records of the
+> data in use.
 
-You are correct that if XFS (or whatever FS you are using) does not issue 
-discard/trim, then deleting data inside the fs on top of RBD won't free 
-any space.  Note that you usually have to explicitly enable this via a 
-mount option; most (all?) kernels still leave this off by default.
-
-Are you taking RBD snapshots?  If not, then there will never be more than 
-the rbd image size * num_replicas space used (ignoring the few % of file 
-system overhead for the moment).
-
-If you are taking snapshots, then yes.. you will see more space used until 
-the snapshot is deleted because we will keep old copies of objects around.
-
-> If ceph was behaving properly then for a replicas set to 2 I would have 
-> my rbd image of 13 TB the 13TB replicas corresponding, and a fix 26TB of 
-> overall used data. When I would "free" data in the rbd image the 
-> corresponding replicas would be considered as discarded by ceph and when 
-> the real data in the rbd image is overwriten their corresponding 
-> replicas would be overwriten too with the new data. That would show the 
-> overall data space used as fixed.
-
-Both ceph *and* the file system on top of RBD have to be "behaving 
-properly".  RBD can't free space until it is told to do so by the file 
-system, and by default, most/all do not...
-
-sage
+XFS supports TRIM just fine - with -o discard it will issue TRIMs on
+unlink, and with fstrim you can do it explicitly.  Note that the online
+discard might be very slow for all Linux filesystems, although I've not
+actually tested it on top of RBD.
 
