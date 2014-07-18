@@ -1,91 +1,178 @@
 From: Gregory Farnum <greg@inktank.com>
-Subject: Re: Disabling CRUSH for erasure code and doing custom placement
-Date: Fri, 18 Jul 2014 11:14:41 -0700
-Message-ID: <CAPYLRzi1vBwVon1Zbb08xWUuJM7R=GR=16YZOLHoHvGNxyHFcQ@mail.gmail.com>
-References: <CALUBZ__98nzUjucW9NmFKEHzPFvu0yY0X5yHEtFH7g9QkhqSAQ@mail.gmail.com>
-	<CAPYLRzgeb2DB_tJfRFvK1gk5XEYYd7mgHH5E5URqYsn_2bH4mQ@mail.gmail.com>
-	<CALUBZ_-gBR2KHMQcGe65+GDHE3xC+Fq9_J+DZLDqf+7LQHrq6g@mail.gmail.com>
-	<CAPYLRzhoiP7t81VG5FEgo53xP9GVMOu6e8zQdwU+HxF2gB7HRQ@mail.gmail.com>
-	<CFEEFD16.5F5CB%kaifeng@yahoo-inc.com>
+Subject: Re: [RFC][PATCH] osd: Add local_connection to fast_dispatch in func _send_boot.
+Date: Fri, 18 Jul 2014 13:55:20 -0700
+Message-ID: <CAPYLRzjHLntr__i46Q61iQKa3YpcjcE67hhgy+wxZpESOMRYfg@mail.gmail.com>
+References: <6AA21C22F0A5DA478922644AD2EC308C887C60@SHSMSX101.ccr.corp.intel.com>
+	<CAPYLRzhx0JUPYV8Qbv0cCUxH1Wr_1Zm7s=N3YpF-_6Qit_SWWA@mail.gmail.com>
+	<6AA21C22F0A5DA478922644AD2EC308C893D3E@SHSMSX101.ccr.corp.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f49.google.com ([74.125.82.49]:53556 "EHLO
-	mail-wg0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1030597AbaGRSOn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Jul 2014 14:14:43 -0400
-Received: by mail-wg0-f49.google.com with SMTP id k14so3927875wgh.32
-        for <ceph-devel@vger.kernel.org>; Fri, 18 Jul 2014 11:14:41 -0700 (PDT)
-In-Reply-To: <CFEEFD16.5F5CB%kaifeng@yahoo-inc.com>
+Received: from mail-wg0-f52.google.com ([74.125.82.52]:40553 "EHLO
+	mail-wg0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1762181AbaGRUzW convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Jul 2014 16:55:22 -0400
+Received: by mail-wg0-f52.google.com with SMTP id a1so3992619wgh.35
+        for <ceph-devel@vger.kernel.org>; Fri, 18 Jul 2014 13:55:21 -0700 (PDT)
+In-Reply-To: <6AA21C22F0A5DA478922644AD2EC308C893D3E@SHSMSX101.ccr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Kaifeng Yao <kaifeng@yahoo-inc.com>
-Cc: Shayan Saeed <shayansaeed93@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Ma, Jianpeng" <jianpeng.ma@intel.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Fri, Jul 18, 2014 at 2:12 AM, Kaifeng Yao <kaifeng@yahoo-inc.com> wrote:
-> I was thinking about 'PG preferred' to allow binding a PG's placement to
-> arbitrary OSDs. My angle is to make the PG more evenly distributed across
-> OSDs, thus to potentially save ~20% cost. I am searching the 'pg
-> preferred' implementation in CEPH to get more context.
+Hrm, I'd really like to see the startup sequence. I see the crash
+occurring, but I don't understand how it's happening =E2=80=94 we test =
+this
+pretty extensively so there must be something about your testing
+configuration that is different than ours. Can you provide that part
+of the log, and maybe a little more description of what you think the
+problem is?
 
-The pg preferred implementation doesn't exist any more (it was
-difficult to maintain and its primary use case didn't really benefit
-from using it anyway), and since it required remembering which objects
-were in which PGs it really only made sense for systems which already
-had a metadata overhead which could easily remember that (eg, the
-filesystem...it was really added for Hadoop).
-
-> For the PG -> OSD distribution problem, we have tried the after-fact
-> reweight-by-utilization, which results heavy data movements, and finally
-> the PG/OSD variation dropped from +- 2x% to +- 1x%. We also tried
-> pre-reweight right after the pool creation but before any data is stored.
-> Similar to reweight-by-utilization but here the weight is calculated by
-> PGs per OSD. In this way it can run several rounds of iterations
-> relatively quicker and the variation can drop to +- 10%. Neither is good
-> enough. So I wonder if we can work around CRUSH placement for this case.
->
-> Here are the scenarios I am thinking about:
-> Admin can create a pool with a given crush rule, then adjust the PG's
-> 'preferred OSD' to its one or several replicas (or EC strips). Basically
-> if OSD #n is overloaded and OSD #m is less occupied, then we enumerate the
-> PGs that have some replica on OSD #n, and move that replica to #m. This
-> process can be automated. After some iterations it should be very close to
-> uniform distribution (+- 5% variation or less?).
-
-This isn't quite how pg preferred placement worked even when we had it
-in the code base; my recollection is that it forced the *primary* for
-an OSD to be the preferred location, but then it used CRUSH for the
-others in its normal order. So unless the OSD you were trying to get
-data off of was the last one in the proper mapping, this wouldn't
-actually remove data from it.
-Also, we never tried changing the preferred_pg on existing PGs; rather
-we created special "local" PGs for each OSD. Even if it was worth
-resurrecting preferred placement for this (I'm not convinced), there
-are probably a lot of bugs and other issues to work out with flipping
-the preferred value on and off.
-
->
-> Some more stuff to consider:
-> 1) The setting takes effect only if it complies to the CRUSH rule, and the
-> OSD is in.
-> 2) For scaling out/in cases, the preferred flags have to be recalculated
-> to make the distribution even again. It is not so good as CRUSH's
-> consistent hashing. But this can be automated too.
-
-Something we've discussed (blue-skied, really) adding in the past is a
-system that takes as inputs the data weighting you *want* your OSDs to
-have, and then runs a bunch of CRUSH mapping simulations to try and
-figure out the optimal CRUSH weights to apply to actually *get* that
-distribution. Something like this obviously still relies on data being
-distributed evenly across the hash space, but with a bit of compute
-time should be able to figure out the weighting values to put in
-everywhere so that the pseudo-random calculation actually distributes
-PGs evenly (most imbalances are generally because of disparities in PG
-counts on an OSD, and the disparity in size between PGs that cover
-double hash space, not disparities in data concentration on the hash
-space).
-The downside to something like this is that the weights could change a
-fair bit when growth; nobody's modeled how that would or would not
-change.
+In particular, we *always* call init_local_connection when the
+messenger starts, so every messenger who is allowed to receive EC
+messages should have the local connection set up before they get one.
+I don't really see how supplying the local connection as a new one in
+_send_boot *should* be fixing that, and it's not the place to do so
+(although I guess it's doing *something*, I just can't figure out
+what).
 -Greg
 Software Engineer #42 @ http://inktank.com | http://ceph.com
+
+
+On Wed, Jul 16, 2014 at 5:17 PM, Ma, Jianpeng <jianpeng.ma@intel.com> w=
+rote:
+> Hi Greg,
+>    The attachment is the log.
+>
+> Thanks!
+>
+> -----Original Message-----
+> From: Gregory Farnum [mailto:greg@inktank.com]
+> Sent: Thursday, July 17, 2014 3:41 AM
+> To: Ma, Jianpeng
+> Cc: ceph-devel@vger.kernel.org
+> Subject: Re: [RFC][PATCH] osd: Add local_connection to fast_dispatch =
+in func _send_boot.
+>
+> I'm looking at this and getting a little confused. Can you provide a =
+log of the crash occurring? (preferably with debug_ms=3D20,
+> debug_osd=3D20)
+> -Greg
+> Software Engineer #42 @ http://inktank.com | http://ceph.com
+>
+>
+> On Sun, Jul 13, 2014 at 8:17 PM, Ma, Jianpeng <jianpeng.ma@intel.com>=
+ wrote:
+>> When do ec-read, i met a bug which was occured 100%. The messages ar=
+e:
+>> 2014-07-14 10:03:07.318681 7f7654f6e700 -1 osd/OSD.cc: In function
+>> 'virtual void OSD::ms_fast_dispatch(Message*)' thread 7f7654f6e700
+>> time
+>> 2014-07-14 10:03:07.316782 osd/OSD.cc: 5019: FAILED assert(session)
+>>
+>>  ceph version 0.82-585-g79f3f67
+>> (79f3f6749122ce2944baa70541949d7ca75525e6)
+>>  1: (OSD::ms_fast_dispatch(Message*)+0x286) [0x6544b6]
+>>  2: (DispatchQueue::fast_dispatch(Message*)+0x56) [0xb059d6]
+>>  3: (DispatchQueue::run_local_delivery()+0x6b) [0xb08e0b]
+>>  4: (DispatchQueue::LocalDeliveryThread::entry()+0xd) [0xa4a5fd]
+>>  5: (()+0x8182) [0x7f7665670182]
+>>  6: (clone()+0x6d) [0x7f7663a1130d]
+>>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is n=
+eeded to interpret this.
+>>
+>> In commit 69fc6b2b66, it enable fast_dispatch on local connections a=
+nd
+>> it will add local_connection to fast_dispatch in func init_local_con=
+nection.
+>> But if there is no fast-dispatch, the local connection can't add.
+>>
+>> If there is no clutser addr in ceph.conf, it will add local_connecti=
+on
+>> to fast dispatch in func _send_boot because the cluster_addr is empt=
+y.
+>> But if there is cluster addr, local_connection can't add to fast dis=
+patch.
+>>
+>> For ECSubRead, it send to itself by func send_message_osd_cluster so
+>> it will cause this bug.
+>>
+>> I don't know about hb_back/front_server_messenger. But they are in
+>> _send_boot like cluster_messenger, so i also modified those.
+>>
+>> Signed-off-by: Ma Jianpeng <jianpeng.ma@intel.com>
+>> ---
+>>  src/osd/OSD.cc | 14 +++++++++++---
+>>  1 file changed, 11 insertions(+), 3 deletions(-)
+>>
+>> diff --git a/src/osd/OSD.cc b/src/osd/OSD.cc index 52a3839..75b294b
+>> 100644
+>> --- a/src/osd/OSD.cc
+>> +++ b/src/osd/OSD.cc
+>> @@ -3852,29 +3852,37 @@ void OSD::_send_boot()  {
+>>    dout(10) << "_send_boot" << dendl;
+>>    entity_addr_t cluster_addr =3D cluster_messenger->get_myaddr();
+>> +  Connection *local_connection =3D
+>> + cluster_messenger->get_loopback_connection().get();
+>>    if (cluster_addr.is_blank_ip()) {
+>>      int port =3D cluster_addr.get_port();
+>>      cluster_addr =3D client_messenger->get_myaddr();
+>>      cluster_addr.set_port(port);
+>>      cluster_messenger->set_addr_unknowns(cluster_addr);
+>>      dout(10) << " assuming cluster_addr ip matches client_addr" <<
+>> dendl;
+>> -  }
+>> +  } else if (local_connection->get_priv() =3D=3D NULL)
+>> +
+>> + cluster_messenger->ms_deliver_handle_fast_connect(local_connection=
+);
+>> +
+>>    entity_addr_t hb_back_addr =3D
+>> hb_back_server_messenger->get_myaddr();
+>> +  local_connection =3D
+>> + hb_back_server_messenger->get_loopback_connection().get();
+>>    if (hb_back_addr.is_blank_ip()) {
+>>      int port =3D hb_back_addr.get_port();
+>>      hb_back_addr =3D cluster_addr;
+>>      hb_back_addr.set_port(port);
+>>      hb_back_server_messenger->set_addr_unknowns(hb_back_addr);
+>>      dout(10) << " assuming hb_back_addr ip matches cluster_addr" <<
+>> dendl;
+>> -  }
+>> +  } else if (local_connection->get_priv() =3D=3D NULL)
+>> +
+>> + hb_back_server_messenger->ms_deliver_handle_fast_connect(local_con=
+ne
+>> + ction);
+>> +
+>>    entity_addr_t hb_front_addr =3D
+>> hb_front_server_messenger->get_myaddr();
+>> +  local_connection =3D
+>> + hb_front_server_messenger->get_loopback_connection().get();
+>>    if (hb_front_addr.is_blank_ip()) {
+>>      int port =3D hb_front_addr.get_port();
+>>      hb_front_addr =3D client_messenger->get_myaddr();
+>>      hb_front_addr.set_port(port);
+>>      hb_front_server_messenger->set_addr_unknowns(hb_front_addr);
+>>      dout(10) << " assuming hb_front_addr ip matches client_addr" <<
+>> dendl;
+>> -  }
+>> +  } else if (local_connection->get_priv() =3D=3D NULL)
+>> +
+>> + hb_front_server_messenger->ms_deliver_handle_fast_connect(local_co=
+nn
+>> + ection);
+>>
+>>    MOSDBoot *mboot =3D new MOSDBoot(superblock, service.get_boot_epo=
+ch(),
+>>                                   hb_back_addr, hb_front_addr,
+>> cluster_addr);
+>> --
+>> 1.9.1
+>>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
