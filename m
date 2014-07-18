@@ -1,264 +1,91 @@
-From: Dimitris Bliablias <bl.dimitris@gmail.com>
-Subject: [PATCH master] rbd.cc: add --force option at 'rbd import'
-Date: Fri, 18 Jul 2014 12:45:49 +0300
-Message-ID: <1405676749-14204-1-git-send-email-bl.dimitris@gmail.com>
-References: <53C022CA.2050805@inktank.com>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: Disabling CRUSH for erasure code and doing custom placement
+Date: Fri, 18 Jul 2014 11:14:41 -0700
+Message-ID: <CAPYLRzi1vBwVon1Zbb08xWUuJM7R=GR=16YZOLHoHvGNxyHFcQ@mail.gmail.com>
+References: <CALUBZ__98nzUjucW9NmFKEHzPFvu0yY0X5yHEtFH7g9QkhqSAQ@mail.gmail.com>
+	<CAPYLRzgeb2DB_tJfRFvK1gk5XEYYd7mgHH5E5URqYsn_2bH4mQ@mail.gmail.com>
+	<CALUBZ_-gBR2KHMQcGe65+GDHE3xC+Fq9_J+DZLDqf+7LQHrq6g@mail.gmail.com>
+	<CAPYLRzhoiP7t81VG5FEgo53xP9GVMOu6e8zQdwU+HxF2gB7HRQ@mail.gmail.com>
+	<CFEEFD16.5F5CB%kaifeng@yahoo-inc.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f181.google.com ([209.85.212.181]:65128 "EHLO
-	mail-wi0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756014AbaGRJqp (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Jul 2014 05:46:45 -0400
-Received: by mail-wi0-f181.google.com with SMTP id bs8so532807wib.8
-        for <ceph-devel@vger.kernel.org>; Fri, 18 Jul 2014 02:46:44 -0700 (PDT)
-In-Reply-To: <53C022CA.2050805@inktank.com>
+Received: from mail-wg0-f49.google.com ([74.125.82.49]:53556 "EHLO
+	mail-wg0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1030597AbaGRSOn (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Jul 2014 14:14:43 -0400
+Received: by mail-wg0-f49.google.com with SMTP id k14so3927875wgh.32
+        for <ceph-devel@vger.kernel.org>; Fri, 18 Jul 2014 11:14:41 -0700 (PDT)
+In-Reply-To: <CFEEFD16.5F5CB%kaifeng@yahoo-inc.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: josh.durgin@inktank.com, ceph-devel@vger.kernel.org
-Cc: synnefo-devel@googlegroups.com
+To: Kaifeng Yao <kaifeng@yahoo-inc.com>
+Cc: Shayan Saeed <shayansaeed93@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Extend the rbd utility with a new option named '--force'. This option
-will be used by the 'rbd import' command to allow overwriting an
-existing rbd image, something which is currently forbidden. If the image
-has snapshots, the command returns an error and nothing is imported. The
-force option will first remove the existing rbd image and then recreate
-it before importing the new data.
+On Fri, Jul 18, 2014 at 2:12 AM, Kaifeng Yao <kaifeng@yahoo-inc.com> wrote:
+> I was thinking about 'PG preferred' to allow binding a PG's placement to
+> arbitrary OSDs. My angle is to make the PG more evenly distributed across
+> OSDs, thus to potentially save ~20% cost. I am searching the 'pg
+> preferred' implementation in CEPH to get more context.
 
-This patch also updates the tests affected by the modified functions, to
-reflect the latest changes. In addition, updates the rbd man page
-accordingly to record the new '--force' option.
+The pg preferred implementation doesn't exist any more (it was
+difficult to maintain and its primary use case didn't really benefit
+from using it anyway), and since it required remembering which objects
+were in which PGs it really only made sense for systems which already
+had a metadata overhead which could easily remember that (eg, the
+filesystem...it was really added for Hadoop).
 
-Signed-off-by: Dimitris Bliablias <bl.dimitris@gmail.com>
----
-Hello,
+> For the PG -> OSD distribution problem, we have tried the after-fact
+> reweight-by-utilization, which results heavy data movements, and finally
+> the PG/OSD variation dropped from +- 2x% to +- 1x%. We also tried
+> pre-reweight right after the pool creation but before any data is stored.
+> Similar to reweight-by-utilization but here the weight is calculated by
+> PGs per OSD. In this way it can run several rounds of iterations
+> relatively quicker and the variation can drop to +- 10%. Neither is good
+> enough. So I wonder if we can work around CRUSH placement for this case.
+>
+> Here are the scenarios I am thinking about:
+> Admin can create a pool with a given crush rule, then adjust the PG's
+> 'preferred OSD' to its one or several replicas (or EC strips). Basically
+> if OSD #n is overloaded and OSD #m is less occupied, then we enumerate the
+> PGs that have some replica on OSD #n, and move that replica to #m. This
+> process can be automated. After some iterations it should be very close to
+> uniform distribution (+- 5% variation or less?).
 
-I've refactored the patch as you suggested, but I had to also drop the
-'-f' option and keep only the '--force' one. This was made due to the
-fact that the '-f' option is currently used along with the
-'--foreground' option that specifies whether the Ceph daemons should run
-in the foreground or not. The 'parse_argv' function of the
-'src/common/config.h' file is called before the argument parsing of the
-rbd utility command line options and consequently it consumes the '-f'
-argument whenever it is supplied. Not sure if this is the intended 
-behavior for the '-f' option.
+This isn't quite how pg preferred placement worked even when we had it
+in the code base; my recollection is that it forced the *primary* for
+an OSD to be the preferred location, but then it used CRUSH for the
+others in its normal order. So unless the OSD you were trying to get
+data off of was the last one in the proper mapping, this wouldn't
+actually remove data from it.
+Also, we never tried changing the preferred_pg on existing PGs; rather
+we created special "local" PGs for each OSD. Even if it was worth
+resurrecting preferred placement for this (I'm not convinced), there
+are probably a lot of bugs and other issues to work out with flipping
+the preferred value on and off.
 
-Thanks,
-Dimitris
+>
+> Some more stuff to consider:
+> 1) The setting takes effect only if it complies to the CRUSH rule, and the
+> OSD is in.
+> 2) For scaling out/in cases, the preferred flags have to be recalculated
+> to make the distribution even again. It is not so good as CRUSH's
+> consistent hashing. But this can be automated too.
 
- doc/man/8/rbd.rst                 | 12 +++++++-
- qa/workunits/rbd/import_export.sh |  6 ++++
- src/rbd.cc                        | 65 +++++++++++++++++++++++++++++++++++++--
- src/test/cli/rbd/help.t           |  3 +-
- 4 files changed, 81 insertions(+), 5 deletions(-)
-
-diff --git a/doc/man/8/rbd.rst b/doc/man/8/rbd.rst
-index 5424547..46d7f21 100644
---- a/doc/man/8/rbd.rst
-+++ b/doc/man/8/rbd.rst
-@@ -123,6 +123,11 @@ Parameters
- 
-    Map the image read-only.  Equivalent to -o ro.
- 
-+.. option:: --force
-+
-+   Overwrite an existing rbd image. This option is only used by the rbd import
-+   command. See import section (below) for more details.
-+
- 
- Commands
- ========
-@@ -176,11 +181,16 @@ Commands
- :command:`export` [*image-name*] [*dest-path*]
-   Exports image to dest path (use - for stdout).
- 
--:command:`import` [*path*] [*dest-image*]
-+:command:`import` [*path*] [*dest-image*] [--force]
-   Creates a new image and imports its data from path (use - for
-   stdin).  The import operation will try to create sparse rbd images 
-   if possible.  For import from stdin, the sparsification unit is
-   the data block size of the destination image (1 << order).
-+  Using the --force option will overwrite the destination image if it exists.
-+  Overwriting images using a different format is not supported. If the image
-+  has snapshots, import fails and nothing is imported. (Note: using --force
-+  will first remove the original rbd image, and then re-create it to import
-+  the data from path).
- 
- :command:`export-diff` [*image-name*] [*dest-path*] [--from-snap *snapname*]
-   Exports an incremental diff for an image to dest path (use - for stdout).  If
-diff --git a/qa/workunits/rbd/import_export.sh b/qa/workunits/rbd/import_export.sh
-index 29fcb6c..1b1b291 100755
---- a/qa/workunits/rbd/import_export.sh
-+++ b/qa/workunits/rbd/import_export.sh
-@@ -54,6 +54,12 @@ rbd rm testimg
- cmp /tmp/img /tmp/img2
- cmp /tmp/img /tmp/img3
- 
-+# import using --force option
-+rbd create testimg $RBD_CREATE_ARGS --size 10
-+rbd import $RBD_CREATE_ARGS /tmp/img testimg && exit 1 || true   # should fail
-+rbd import $RBD_CREATE_ARGS /tmp/img testimg --force
-+rbd rm testimg
-+
- rm /tmp/img /tmp/img2 /tmp/img3
- 
- 
-diff --git a/src/rbd.cc b/src/rbd.cc
-index c068ed6..a0cf544 100644
---- a/src/rbd.cc
-+++ b/src/rbd.cc
-@@ -28,6 +28,7 @@
- 
- #include "include/compat.h"
- #include "common/blkdev.h"
-+#include "librbd/internal.h"
- 
- #include <boost/scoped_ptr.hpp>
- #include <errno.h>
-@@ -89,7 +90,7 @@ void usage()
- "  rm <image-name>                             delete an image\n"
- "  export <image-name> <path>                  export image to file\n"
- "                                              \"-\" for stdout\n"
--"  import <path> <image-name>                  import image from file\n"
-+"  import <path> <image-name> [--force]        import image from file\n"
- "                                              (dest defaults\n"
- "                                               as the filename part of file)\n"
- "                                              \"-\" for stdin\n"
-@@ -150,6 +151,7 @@ void usage()
- "  --no-progress                      do not show progress for long-running commands\n"
- "  -o, --options <map-options>        options to use when mapping an image\n"
- "  --read-only                        set device readonly when mapping image\n"
-+"  --force                            overwrite an existing image when importing\n"
- "  --allow-shrink                     allow shrinking of an image when resizing\n";
- }
- 
-@@ -1290,7 +1292,7 @@ done_img:
- 
- static int do_import(librbd::RBD &rbd, librados::IoCtx& io_ctx,
- 		     const char *imgname, int *order, const char *path,
--		     int format, uint64_t features, uint64_t size)
-+		     int format, uint64_t features, uint64_t size, bool force)
- {
-   int fd, r;
-   struct stat stat_buf;
-@@ -1310,6 +1312,7 @@ static int do_import(librbd::RBD &rbd, librados::IoCtx& io_ctx,
-   ssize_t readlen;		// amount received from one read
-   size_t blklen = 0;		// amount accumulated from reads to fill blk
-   librbd::Image image;
-+  bool old_format;
- 
-   bool from_stdin = !strcmp(path, "-");
-   if (from_stdin) {
-@@ -1346,6 +1349,53 @@ static int do_import(librbd::RBD &rbd, librados::IoCtx& io_ctx,
-       size = (uint64_t) bdev_size;
-     }
-   }
-+  // check if the rbd image already exists, in either format
-+  r = librbd::detect_format(io_ctx, imgname, &old_format, NULL);
-+  if (r != -ENOENT) {
-+    if (force) {
-+      // using the force option when importing to an rbd image is only allowed
-+      // for images of the same format
-+      bool format_match =
-+	old_format ? (format == 1) : (format == 2);
-+      if (format_match) {
-+        // force option supplied, remove the original image
-+        r = do_delete(rbd, io_ctx, imgname);
-+	if (r < 0) {
-+	  if (r == -ENOTEMPTY) {
-+	    cerr << "rbd: image has snapshots - these must be deleted"
-+		 << " with 'rbd snap purge' before the image can be removed."
-+		 << std::endl;
-+	  } else if (r == -EBUSY) {
-+	    cerr << "rbd: error: image still has watchers"
-+		 << std::endl
-+		 << "This means the image is still open or the client using "
-+		 << "it crashed. Try again after closing/unmapping it or "
-+		 << "waiting 30s for the crashed client to timeout."
-+		 << std::endl;
-+	  } else {
-+	    cerr << "rbd: error removing original image: " << cpp_strerror(-r)
-+		 << std::endl;
-+	  }
-+	goto done;
-+	}
-+      } else {
-+	cerr << "rbd: image " << imgname << " already exists in format "
-+	     << format << std::endl
-+	     << "Option '--force' is only valid for images of the same format."
-+	     << std::endl;
-+	r = -EEXIST;
-+	goto done;
-+      }
-+    } else {
-+      cerr << "rbd: image " << imgname << " already exists"
-+	   << std::endl
-+	   << "If you really know what you are doing, supply the"
-+	   << " '--force' option to overwrite this image."
-+	   << std::endl;
-+      r = -EEXIST;
-+      goto done;
-+    }
-+  }
-   r = do_create(rbd, io_ctx, imgname, size, order, format, features, 0, 0);
-   if (r < 0) {
-     cerr << "rbd: image creation failed" << std::endl;
-@@ -1972,6 +2022,7 @@ int main(int argc, const char **argv)
-   int order = 0;
-   bool format_specified = false, output_format_specified = false;
-   int format = 1;
-+  bool force = false;
-   uint64_t features = RBD_FEATURE_LAYERING;
-   const char *imgname = NULL, *snapname = NULL, *destname = NULL,
-     *dest_poolname = NULL, *dest_snapname = NULL, *path = NULL,
-@@ -1997,6 +2048,8 @@ int main(int argc, const char **argv)
-     } else if (ceph_argparse_flag(args, i, "-h", "--help", (char*)NULL)) {
-       usage();
-       return 0;
-+    } else if (ceph_argparse_flag(args, i, "--force", (char*)NULL)) {
-+      force = true;
-     } else if (ceph_argparse_flag(args, i, "--new-format", (char*)NULL)) {
-       format = 2;
-       format_specified = true;
-@@ -2190,6 +2243,12 @@ if (!set_conf_param(v, p1, p2, p3)) { \
-     }
-   }
- 
-+  if (force && opt_cmd != OPT_IMPORT) {
-+    cerr << "rbd: --force can only be used when"
-+	 << " importing an image" << std::endl;
-+    return EXIT_FAILURE;
-+  }
-+
-   if (format_specified && opt_cmd != OPT_IMPORT && opt_cmd != OPT_CREATE) {
-     cerr << "rbd: image format can only be set when "
- 	 << "creating or importing an image" << std::endl;
-@@ -2663,7 +2722,7 @@ if (!set_conf_param(v, p1, p2, p3)) { \
-       return EINVAL;
-     }
-     r = do_import(rbd, dest_io_ctx, destname, &order, path,
--		  format, features, size);
-+		  format, features, size, force);
-     if (r < 0) {
-       cerr << "rbd: import failed: " << cpp_strerror(-r) << std::endl;
-       return -r;
-diff --git a/src/test/cli/rbd/help.t b/src/test/cli/rbd/help.t
-index 3818ee3..1529efd 100644
---- a/src/test/cli/rbd/help.t
-+++ b/src/test/cli/rbd/help.t
-@@ -16,7 +16,7 @@
-     rm <image-name>                             delete an image
-     export <image-name> <path>                  export image to file
-                                                 "-" for stdout
--    import <path> <image-name>                  import image from file
-+    import <path> <image-name> [--force]        import image from file
-                                                 (dest defaults
-                                                  as the filename part of file)
-                                                 "-" for stdin
-@@ -77,4 +77,5 @@
-     --no-progress                      do not show progress for long-running commands
-     -o, --options <map-options>        options to use when mapping an image
-     --read-only                        set device readonly when mapping image
-+    --force                            overwrite an existing image when importing
-     --allow-shrink                     allow shrinking of an image when resizing
--- 
-1.9.1
-
+Something we've discussed (blue-skied, really) adding in the past is a
+system that takes as inputs the data weighting you *want* your OSDs to
+have, and then runs a bunch of CRUSH mapping simulations to try and
+figure out the optimal CRUSH weights to apply to actually *get* that
+distribution. Something like this obviously still relies on data being
+distributed evenly across the hash space, but with a bit of compute
+time should be able to figure out the weighting values to put in
+everywhere so that the pseudo-random calculation actually distributes
+PGs evenly (most imbalances are generally because of disparities in PG
+counts on an OSD, and the disparity in size between PGs that cover
+double hash space, not disparities in data concentration on the hash
+space).
+The downside to something like this is that the weights could change a
+fair bit when growth; nobody's modeled how that would or would not
+change.
+-Greg
+Software Engineer #42 @ http://inktank.com | http://ceph.com
