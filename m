@@ -1,95 +1,143 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: RE: Cache tiering read-proxy mode
-Date: Sun, 20 Jul 2014 20:55:22 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1407202051490.28285@cobra.newdream.net>
-References: <06E7D85B3BA36C4DB207FEDE871C534891BC27@SHSMSX101.ccr.corp.intel.com> <alpine.DEB.2.00.1407180707310.28285@cobra.newdream.net> <06E7D85B3BA36C4DB207FEDE871C534891CD56@SHSMSX101.ccr.corp.intel.com> <alpine.DEB.2.00.1407201831340.28285@cobra.newdream.net>
- <06E7D85B3BA36C4DB207FEDE871C534891CDD2@SHSMSX101.ccr.corp.intel.com>
+From: "Ma, Jianpeng" <jianpeng.ma@intel.com>
+Subject: RE: [RFC][PATCH] osd: Add local_connection to fast_dispatch in func
+ _send_boot.
+Date: Mon, 21 Jul 2014 06:33:38 +0000
+Message-ID: <6AA21C22F0A5DA478922644AD2EC308C895230@SHSMSX101.ccr.corp.intel.com>
+References: <6AA21C22F0A5DA478922644AD2EC308C887C60@SHSMSX101.ccr.corp.intel.com>
+	<CAPYLRzhx0JUPYV8Qbv0cCUxH1Wr_1Zm7s=N3YpF-_6Qit_SWWA@mail.gmail.com>
+	<6AA21C22F0A5DA478922644AD2EC308C893D3E@SHSMSX101.ccr.corp.intel.com>
+ <CAPYLRzjHLntr__i46Q61iQKa3YpcjcE67hhgy+wxZpESOMRYfg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:45778 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750985AbaGUDzX (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 20 Jul 2014 23:55:23 -0400
-In-Reply-To: <06E7D85B3BA36C4DB207FEDE871C534891CDD2@SHSMSX101.ccr.corp.intel.com>
+Received: from mga11.intel.com ([192.55.52.93]:64737 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753001AbaGUGeE (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 21 Jul 2014 02:34:04 -0400
+In-Reply-To: <CAPYLRzjHLntr__i46Q61iQKa3YpcjcE67hhgy+wxZpESOMRYfg@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
-Cc: "Zhang, Jian" <jian.zhang@intel.com>, "icolle@redhat.com" <icolle@redhat.com>, "sam.just@inktank.com" <sam.just@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <greg@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Mon, 21 Jul 2014, Wang, Zhiqiang wrote:
-> For the min_read_recency_for_promote option, it's easy to understand the 
-> '0' and '<= hit set interval' cases. But for the '> hit set interval' 
-> case, do you mean we always keep all the hit sets in RAM and check for 
-> the object's existence in all of them, or just load all the hit sets and 
-> check for object existence before the read? In another word, when 
-> min_read_recency_for_promote is greater than 'hit set interval', we 
-> always keep all the hit sets in RAM?
-
-I'm thinking we would keep any many HitSets as are needed to cover 
-whatever the configured interval is.  Setting the option to the same value 
-as the hitset interval (or just '1'?) would be the simplest thing, and 
-probably the default?
-
-We would need to decide what behavior we want with respect to the 
-normal HitSet rotation, though.  If they each cover, say, one hour, then 
-on average they will half of that, and sometimes almost no time at 
-all (if they just rotated).  So probably we'd want to keep the 
-next-most-recent in memory for some period?  It'll always be a bit 
-imprecise, though, but hopefully it won't really matter...
-
-sage
-
-> 
-> -----Original Message-----
-> From: Sage Weil [mailto:sweil@redhat.com] 
-> Sent: Monday, July 21, 2014 9:44 AM
-> To: Wang, Zhiqiang
-> Cc: Zhang, Jian; icolle@redhat.com; sam.just@inktank.com; ceph-devel@vger.kernel.org
-> Subject: RE: Cache tiering read-proxy mode
-> 
-> [Adding ceph-devel]
-> 
-> On Mon, 21 Jul 2014, Wang, Zhiqiang wrote:
-> > Sage,
-> > 
-> > I agree with you that promotion on the 2nd read could improve cache 
-> > tiering's performance for some kinds of workloads. The general idea 
-> > here is to implement some kinds of policies in the cache tier to 
-> > measure the warmness of the data. If the cache tier is aware of the 
-> > data warmness, it could even initiate data movement between the cache 
-> > tier and the base tier. This means data could be prefetched into the 
-> > cache tier before reading or writing. But I think this is something we 
-> > could do in the future.
-> 
-> Yeah. I suspect it will be challenging to put this sort of prefetching intelligence directly into the OSDs, though.  It could possibly be done by an external agent, maybe, or could be driven by explicit hints from clients ("I will probably access this data soon").
-> 
-> > The 'promotion on 2nd read' policy is straightforward. Sure it will 
-> > benefit some kinds of workload, but not all. If it is implemented as a 
-> > cache tier option, the user needs to decide to turn it on or not. But 
-> > I'm afraid most of the users don't have the idea of this. This 
-> > increases the difficulty of using cache tiering.
-> 
-> I suspect the 2nd read behavior will be something we'll want to do by default...  but yeah, there will be a new pool option (or options) that controls the behavior.
-> 
-> > One question for the implementation of 'promotion on 2nd read': what 
-> > do we do for the 1st read? Does the cache tier read the object from 
-> > base tier but not doing replication, or just redirecting it?
-> 
-> For the first read, we just redirect the client.  The on the second read, we call promote_object().  See maybe_handle_cache() in ReplicatedPG.cc.  
-> We can pretty easily tell the difference by checking the in-memory HitSet for a match.
-> 
-> Perhaps the option in the pool would be something like min_read_recency_for_promote?  If we measure "recency" as "(avg) seconds since last access" (loosely), 0 would mean it would promote on first read, and anything <= the HitSet interval would mean promote if the object is in the current HitSet.  > than that would mean we'd need to keep additional previous HitSets in RAM.
-> 
-> ...which leads us to a separate question of how to describe access frequency vs recency.  We keep N HitSets, each covering a time period of T seconds.  Normally we only keep the most recent HitSet in memory, unless the agent is active (flushing data).  So what I described above is checking how recently the last access was (within how many multiples of T seconds).  Additionally, though, we could describe the frequency of
-> access: was the object accesssed at least once in every N interval of T seconds?  Or some fraction of them?  That is probably best described as "temperature?"  I'm not to fond of the term "recency," tho I can't think of anything better right now.
-> 
-> Anyway, for the read promote behavior, recency is probably sufficient, but for the tiering agent flush/evict behavior temperature might be a good thing to consider...
-> 
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+PiBIcm0sIEknZCByZWFsbHkgbGlrZSB0byBzZWUgdGhlIHN0YXJ0dXAgc2VxdWVuY2UuIEkgc2Vl
+IHRoZSBjcmFzaCBvY2N1cnJpbmcsIGJ1dCBJDQo+IGRvbid0IHVuZGVyc3RhbmQgaG93IGl0J3Mg
+aGFwcGVuaW5nIOKAlCB3ZSB0ZXN0IHRoaXMgcHJldHR5IGV4dGVuc2l2ZWx5IHNvIHRoZXJlDQo+
+IG11c3QgYmUgc29tZXRoaW5nIGFib3V0IHlvdXIgdGVzdGluZyBjb25maWd1cmF0aW9uIHRoYXQg
+aXMgZGlmZmVyZW50IHRoYW4gb3Vycy4NCj4gQ2FuIHlvdSBwcm92aWRlIHRoYXQgcGFydCBvZiB0
+aGUgbG9nLCBhbmQgbWF5YmUgYSBsaXR0bGUgbW9yZSBkZXNjcmlwdGlvbiBvZg0KPiB3aGF0IHlv
+dSB0aGluayB0aGUgcHJvYmxlbSBpcz8NCg0KSWYgdGhlIGNlcGguY29uZiBjb250YWluICJjbHVz
+dGVyIGFkZHIiLCAgdGhlIGJ1ZyBtdXN0IG9jY3VyLg0KRm9yIG5vICJjbHVzdGVyIGFkZHIiIGlu
+IGNlcGguY29uZiwgdGhlIGxvY2FsLWNvbm5lY3Rpb24gYWRkIHRvIGZhc3QtZGlzcGF0Y2ggaW4g
+ZnVuYyAgX3NlbmRfYm9vdC8gY2x1c3Rlcl9tZXNzZW5nZXItPnNldF9hZGRyX3Vua25vd25zLg0K
+DQo+IA0KPiBJbiBwYXJ0aWN1bGFyLCB3ZSAqYWx3YXlzKiBjYWxsIGluaXRfbG9jYWxfY29ubmVj
+dGlvbiB3aGVuIHRoZSBtZXNzZW5nZXINCj4gc3RhcnRzLCBzbyBldmVyeSBtZXNzZW5nZXIgd2hv
+IGlzIGFsbG93ZWQgdG8gcmVjZWl2ZSBFQyBtZXNzYWdlcyBzaG91bGQgaGF2ZQ0KPiB0aGUgbG9j
+YWwgY29ubmVjdGlvbiBzZXQgdXAgYmVmb3JlIHRoZXkgZ2V0IG9uZS4NClllcyB5b3UgY2FsbCBp
+bml0X2xvY2FsX2Nvbm5lY3Rpb24uIEJ1dCBvbmx5IGFkZGluZyBvc2QgdG8gbWVzc2VuZ2VyLCB0
+aGUgbG9jYWxfY29uZW5jdGlvbiBjYW4gYWRkIHRvIGRpc3BhdGNoLg0KSW4gZnVuYyBPU0Q6Omlu
+aXQNCgk+PmNsdXN0ZXJfbWVzc2VuZ2VyLT5hZGRfZGlzcGF0Y2hlcl9oZWFkKHRoaXMpOw0KT25s
+eSBhZnRlciB0aGlzLCB0aGUgbG9jYWxfY29ubmVjdGlvbiBjYW4gYWRkIHRvIGRpc3BhdGNoLg0K
+QmVjYXVzZSBpZiBsb2NhbF9jb25uZWN0aW9uIGhhcyBjb3JyZWN0IHR5cGUsIGl0IGNhbiBhZGQg
+dG8gZGlzcGF0Y2ggYW5kIGRvbuKAmXQnIGNhcmUgdGhlIGNsdXN0ZXIgYWRkci4NCldoZW4gYWxs
+b2NhdGUgYSBNZXNzZW5nZXIsIGl0IHNldCB0aGUgdHlwZSBhbmQgb25seSBhZnRlciBhZGRfZGlz
+cGF0Y2hlcl9oZWFkL3RhaWwsIHRoZSBsb2NhbC1jb25uZWN0aW9uIGNhbiBhZGQgdG8gZGlzcGF0
+Y2guDQpNYXliZSBhZGQgbXNfZGVsaXZlcl9oYW5kbGVfZmFzdF9jb25uZWN0KGxvY2FsX2Nvbm5l
+Y3Rpb24uZ2V0KCkpICBpbiBTaW1wbGVNZXNzZW5nZXI6OnJlYWR5IGlzIGJldHRlci4NCg0KDQpK
+aWFucGVuZyBNYQ0KDQo+IEkgZG9uJ3QgcmVhbGx5IHNlZSBob3cgc3VwcGx5aW5nIHRoZSBsb2Nh
+bCBjb25uZWN0aW9uIGFzIGEgbmV3IG9uZSBpbg0KPiBfc2VuZF9ib290ICpzaG91bGQqIGJlIGZp
+eGluZyB0aGF0LCBhbmQgaXQncyBub3QgdGhlIHBsYWNlIHRvIGRvIHNvIChhbHRob3VnaCBJDQo+
+IGd1ZXNzIGl0J3MgZG9pbmcgKnNvbWV0aGluZyosIEkganVzdCBjYW4ndCBmaWd1cmUgb3V0IHdo
+YXQpLg0KDQoNCj4gLUdyZWcNCj4gU29mdHdhcmUgRW5naW5lZXIgIzQyIEAgaHR0cDovL2lua3Rh
+bmsuY29tIHwgaHR0cDovL2NlcGguY29tDQo+IA0KPiANCj4gT24gV2VkLCBKdWwgMTYsIDIwMTQg
+YXQgNToxNyBQTSwgTWEsIEppYW5wZW5nIDxqaWFucGVuZy5tYUBpbnRlbC5jb20+DQo+IHdyb3Rl
+Og0KPiA+IEhpIEdyZWcsDQo+ID4gICAgVGhlIGF0dGFjaG1lbnQgaXMgdGhlIGxvZy4NCj4gPg0K
+PiA+IFRoYW5rcyENCj4gPg0KPiA+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+ID4gRnJv
+bTogR3JlZ29yeSBGYXJudW0gW21haWx0bzpncmVnQGlua3RhbmsuY29tXQ0KPiA+IFNlbnQ6IFRo
+dXJzZGF5LCBKdWx5IDE3LCAyMDE0IDM6NDEgQU0NCj4gPiBUbzogTWEsIEppYW5wZW5nDQo+ID4g
+Q2M6IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQo+ID4gU3ViamVjdDogUmU6IFtSRkNdW1BB
+VENIXSBvc2Q6IEFkZCBsb2NhbF9jb25uZWN0aW9uIHRvIGZhc3RfZGlzcGF0Y2ggaW4gZnVuYw0K
+PiBfc2VuZF9ib290Lg0KPiA+DQo+ID4gSSdtIGxvb2tpbmcgYXQgdGhpcyBhbmQgZ2V0dGluZyBh
+IGxpdHRsZSBjb25mdXNlZC4gQ2FuIHlvdSBwcm92aWRlIGENCj4gPiBsb2cgb2YgdGhlIGNyYXNo
+IG9jY3VycmluZz8gKHByZWZlcmFibHkgd2l0aCBkZWJ1Z19tcz0yMCwNCj4gPiBkZWJ1Z19vc2Q9
+MjApDQo+ID4gLUdyZWcNCj4gPiBTb2Z0d2FyZSBFbmdpbmVlciAjNDIgQCBodHRwOi8vaW5rdGFu
+ay5jb20gfCBodHRwOi8vY2VwaC5jb20NCj4gPg0KPiA+DQo+ID4gT24gU3VuLCBKdWwgMTMsIDIw
+MTQgYXQgODoxNyBQTSwgTWEsIEppYW5wZW5nIDxqaWFucGVuZy5tYUBpbnRlbC5jb20+DQo+IHdy
+b3RlOg0KPiA+PiBXaGVuIGRvIGVjLXJlYWQsIGkgbWV0IGEgYnVnIHdoaWNoIHdhcyBvY2N1cmVk
+IDEwMCUuIFRoZSBtZXNzYWdlcyBhcmU6DQo+ID4+IDIwMTQtMDctMTQgMTA6MDM6MDcuMzE4Njgx
+IDdmNzY1NGY2ZTcwMCAtMSBvc2QvT1NELmNjOiBJbiBmdW5jdGlvbg0KPiA+PiAndmlydHVhbCB2
+b2lkIE9TRDo6bXNfZmFzdF9kaXNwYXRjaChNZXNzYWdlKiknIHRocmVhZCA3Zjc2NTRmNmU3MDAN
+Cj4gPj4gdGltZQ0KPiA+PiAyMDE0LTA3LTE0IDEwOjAzOjA3LjMxNjc4MiBvc2QvT1NELmNjOiA1
+MDE5OiBGQUlMRUQgYXNzZXJ0KHNlc3Npb24pDQo+ID4+DQo+ID4+ICBjZXBoIHZlcnNpb24gMC44
+Mi01ODUtZzc5ZjNmNjcNCj4gPj4gKDc5ZjNmNjc0OTEyMmNlMjk0NGJhYTcwNTQxOTQ5ZDdjYTc1
+NTI1ZTYpDQo+ID4+ICAxOiAoT1NEOjptc19mYXN0X2Rpc3BhdGNoKE1lc3NhZ2UqKSsweDI4Nikg
+WzB4NjU0NGI2XQ0KPiA+PiAgMjogKERpc3BhdGNoUXVldWU6OmZhc3RfZGlzcGF0Y2goTWVzc2Fn
+ZSopKzB4NTYpIFsweGIwNTlkNl0NCj4gPj4gIDM6IChEaXNwYXRjaFF1ZXVlOjpydW5fbG9jYWxf
+ZGVsaXZlcnkoKSsweDZiKSBbMHhiMDhlMGJdDQo+ID4+ICA0OiAoRGlzcGF0Y2hRdWV1ZTo6TG9j
+YWxEZWxpdmVyeVRocmVhZDo6ZW50cnkoKSsweGQpIFsweGE0YTVmZF0NCj4gPj4gIDU6ICgoKSsw
+eDgxODIpIFsweDdmNzY2NTY3MDE4Ml0NCj4gPj4gIDY6IChjbG9uZSgpKzB4NmQpIFsweDdmNzY2
+M2ExMTMwZF0NCj4gPj4gIE5PVEU6IGEgY29weSBvZiB0aGUgZXhlY3V0YWJsZSwgb3IgYG9iamR1
+bXAgLXJkUyA8ZXhlY3V0YWJsZT5gIGlzIG5lZWRlZA0KPiB0byBpbnRlcnByZXQgdGhpcy4NCj4g
+Pj4NCj4gPj4gSW4gY29tbWl0IDY5ZmM2YjJiNjYsIGl0IGVuYWJsZSBmYXN0X2Rpc3BhdGNoIG9u
+IGxvY2FsIGNvbm5lY3Rpb25zDQo+ID4+IGFuZCBpdCB3aWxsIGFkZCBsb2NhbF9jb25uZWN0aW9u
+IHRvIGZhc3RfZGlzcGF0Y2ggaW4gZnVuYw0KPiBpbml0X2xvY2FsX2Nvbm5lY3Rpb24uDQo+ID4+
+IEJ1dCBpZiB0aGVyZSBpcyBubyBmYXN0LWRpc3BhdGNoLCB0aGUgbG9jYWwgY29ubmVjdGlvbiBj
+YW4ndCBhZGQuDQo+ID4+DQo+ID4+IElmIHRoZXJlIGlzIG5vIGNsdXRzZXIgYWRkciBpbiBjZXBo
+LmNvbmYsIGl0IHdpbGwgYWRkDQo+ID4+IGxvY2FsX2Nvbm5lY3Rpb24gdG8gZmFzdCBkaXNwYXRj
+aCBpbiBmdW5jIF9zZW5kX2Jvb3QgYmVjYXVzZSB0aGUNCj4gY2x1c3Rlcl9hZGRyIGlzIGVtcHR5
+Lg0KPiA+PiBCdXQgaWYgdGhlcmUgaXMgY2x1c3RlciBhZGRyLCBsb2NhbF9jb25uZWN0aW9uIGNh
+bid0IGFkZCB0byBmYXN0IGRpc3BhdGNoLg0KPiA+Pg0KPiA+PiBGb3IgRUNTdWJSZWFkLCBpdCBz
+ZW5kIHRvIGl0c2VsZiBieSBmdW5jIHNlbmRfbWVzc2FnZV9vc2RfY2x1c3RlciBzbw0KPiA+PiBp
+dCB3aWxsIGNhdXNlIHRoaXMgYnVnLg0KPiA+Pg0KPiA+PiBJIGRvbid0IGtub3cgYWJvdXQgaGJf
+YmFjay9mcm9udF9zZXJ2ZXJfbWVzc2VuZ2VyLiBCdXQgdGhleSBhcmUgaW4NCj4gPj4gX3NlbmRf
+Ym9vdCBsaWtlIGNsdXN0ZXJfbWVzc2VuZ2VyLCBzbyBpIGFsc28gbW9kaWZpZWQgdGhvc2UuDQo+
+ID4+DQo+ID4+IFNpZ25lZC1vZmYtYnk6IE1hIEppYW5wZW5nIDxqaWFucGVuZy5tYUBpbnRlbC5j
+b20+DQo+ID4+IC0tLQ0KPiA+PiAgc3JjL29zZC9PU0QuY2MgfCAxNCArKysrKysrKysrKy0tLQ0K
+PiA+PiAgMSBmaWxlIGNoYW5nZWQsIDExIGluc2VydGlvbnMoKyksIDMgZGVsZXRpb25zKC0pDQo+
+ID4+DQo+ID4+IGRpZmYgLS1naXQgYS9zcmMvb3NkL09TRC5jYyBiL3NyYy9vc2QvT1NELmNjIGlu
+ZGV4IDUyYTM4MzkuLjc1YjI5NGINCj4gPj4gMTAwNjQ0DQo+ID4+IC0tLSBhL3NyYy9vc2QvT1NE
+LmNjDQo+ID4+ICsrKyBiL3NyYy9vc2QvT1NELmNjDQo+ID4+IEBAIC0zODUyLDI5ICszODUyLDM3
+IEBAIHZvaWQgT1NEOjpfc2VuZF9ib290KCkgIHsNCj4gPj4gICAgZG91dCgxMCkgPDwgIl9zZW5k
+X2Jvb3QiIDw8IGRlbmRsOw0KPiA+PiAgICBlbnRpdHlfYWRkcl90IGNsdXN0ZXJfYWRkciA9IGNs
+dXN0ZXJfbWVzc2VuZ2VyLT5nZXRfbXlhZGRyKCk7DQo+ID4+ICsgIENvbm5lY3Rpb24gKmxvY2Fs
+X2Nvbm5lY3Rpb24gPQ0KPiA+PiArIGNsdXN0ZXJfbWVzc2VuZ2VyLT5nZXRfbG9vcGJhY2tfY29u
+bmVjdGlvbigpLmdldCgpOw0KPiA+PiAgICBpZiAoY2x1c3Rlcl9hZGRyLmlzX2JsYW5rX2lwKCkp
+IHsNCj4gPj4gICAgICBpbnQgcG9ydCA9IGNsdXN0ZXJfYWRkci5nZXRfcG9ydCgpOw0KPiA+PiAg
+ICAgIGNsdXN0ZXJfYWRkciA9IGNsaWVudF9tZXNzZW5nZXItPmdldF9teWFkZHIoKTsNCj4gPj4g
+ICAgICBjbHVzdGVyX2FkZHIuc2V0X3BvcnQocG9ydCk7DQo+ID4+ICAgICAgY2x1c3Rlcl9tZXNz
+ZW5nZXItPnNldF9hZGRyX3Vua25vd25zKGNsdXN0ZXJfYWRkcik7DQo+ID4+ICAgICAgZG91dCgx
+MCkgPDwgIiBhc3N1bWluZyBjbHVzdGVyX2FkZHIgaXAgbWF0Y2hlcyBjbGllbnRfYWRkciIgPDwN
+Cj4gPj4gZGVuZGw7DQo+ID4+IC0gIH0NCj4gPj4gKyAgfSBlbHNlIGlmIChsb2NhbF9jb25uZWN0
+aW9uLT5nZXRfcHJpdigpID09IE5VTEwpDQo+ID4+ICsNCj4gPj4gKyBjbHVzdGVyX21lc3Nlbmdl
+ci0+bXNfZGVsaXZlcl9oYW5kbGVfZmFzdF9jb25uZWN0KGxvY2FsX2Nvbm5lY3Rpb24pDQo+ID4+
+ICsgOw0KPiA+PiArDQo+ID4+ICAgIGVudGl0eV9hZGRyX3QgaGJfYmFja19hZGRyID0NCj4gPj4g
+aGJfYmFja19zZXJ2ZXJfbWVzc2VuZ2VyLT5nZXRfbXlhZGRyKCk7DQo+ID4+ICsgIGxvY2FsX2Nv
+bm5lY3Rpb24gPQ0KPiA+PiArIGhiX2JhY2tfc2VydmVyX21lc3Nlbmdlci0+Z2V0X2xvb3BiYWNr
+X2Nvbm5lY3Rpb24oKS5nZXQoKTsNCj4gPj4gICAgaWYgKGhiX2JhY2tfYWRkci5pc19ibGFua19p
+cCgpKSB7DQo+ID4+ICAgICAgaW50IHBvcnQgPSBoYl9iYWNrX2FkZHIuZ2V0X3BvcnQoKTsNCj4g
+Pj4gICAgICBoYl9iYWNrX2FkZHIgPSBjbHVzdGVyX2FkZHI7DQo+ID4+ICAgICAgaGJfYmFja19h
+ZGRyLnNldF9wb3J0KHBvcnQpOw0KPiA+PiAgICAgIGhiX2JhY2tfc2VydmVyX21lc3Nlbmdlci0+
+c2V0X2FkZHJfdW5rbm93bnMoaGJfYmFja19hZGRyKTsNCj4gPj4gICAgICBkb3V0KDEwKSA8PCAi
+IGFzc3VtaW5nIGhiX2JhY2tfYWRkciBpcCBtYXRjaGVzIGNsdXN0ZXJfYWRkciIgPDwNCj4gPj4g
+ZGVuZGw7DQo+ID4+IC0gIH0NCj4gPj4gKyAgfSBlbHNlIGlmIChsb2NhbF9jb25uZWN0aW9uLT5n
+ZXRfcHJpdigpID09IE5VTEwpDQo+ID4+ICsNCj4gPj4gKw0KPiBoYl9iYWNrX3NlcnZlcl9tZXNz
+ZW5nZXItPm1zX2RlbGl2ZXJfaGFuZGxlX2Zhc3RfY29ubmVjdChsb2NhbF9jb25uDQo+ID4+ICsg
+ZQ0KPiA+PiArIGN0aW9uKTsNCj4gPj4gKw0KPiA+PiAgICBlbnRpdHlfYWRkcl90IGhiX2Zyb250
+X2FkZHIgPQ0KPiA+PiBoYl9mcm9udF9zZXJ2ZXJfbWVzc2VuZ2VyLT5nZXRfbXlhZGRyKCk7DQo+
+ID4+ICsgIGxvY2FsX2Nvbm5lY3Rpb24gPQ0KPiA+PiArIGhiX2Zyb250X3NlcnZlcl9tZXNzZW5n
+ZXItPmdldF9sb29wYmFja19jb25uZWN0aW9uKCkuZ2V0KCk7DQo+ID4+ICAgIGlmIChoYl9mcm9u
+dF9hZGRyLmlzX2JsYW5rX2lwKCkpIHsNCj4gPj4gICAgICBpbnQgcG9ydCA9IGhiX2Zyb250X2Fk
+ZHIuZ2V0X3BvcnQoKTsNCj4gPj4gICAgICBoYl9mcm9udF9hZGRyID0gY2xpZW50X21lc3Nlbmdl
+ci0+Z2V0X215YWRkcigpOw0KPiA+PiAgICAgIGhiX2Zyb250X2FkZHIuc2V0X3BvcnQocG9ydCk7
+DQo+ID4+ICAgICAgaGJfZnJvbnRfc2VydmVyX21lc3Nlbmdlci0+c2V0X2FkZHJfdW5rbm93bnMo
+aGJfZnJvbnRfYWRkcik7DQo+ID4+ICAgICAgZG91dCgxMCkgPDwgIiBhc3N1bWluZyBoYl9mcm9u
+dF9hZGRyIGlwIG1hdGNoZXMgY2xpZW50X2FkZHIiIDw8DQo+ID4+IGRlbmRsOw0KPiA+PiAtICB9
+DQo+ID4+ICsgIH0gZWxzZSBpZiAobG9jYWxfY29ubmVjdGlvbi0+Z2V0X3ByaXYoKSA9PSBOVUxM
+KQ0KPiA+PiArDQo+ID4+ICsgaGJfZnJvbnRfc2VydmVyX21lc3Nlbmdlci0+bXNfZGVsaXZlcl9o
+YW5kbGVfZmFzdF9jb25uZWN0KGxvY2FsX2Nvbg0KPiA+PiArIG4NCj4gPj4gKyBlY3Rpb24pOw0K
+PiA+Pg0KPiA+PiAgICBNT1NEQm9vdCAqbWJvb3QgPSBuZXcgTU9TREJvb3Qoc3VwZXJibG9jaywN
+Cj4gc2VydmljZS5nZXRfYm9vdF9lcG9jaCgpLA0KPiA+PiAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgaGJfYmFja19hZGRyLCBoYl9mcm9udF9hZGRyLA0KPiA+PiBjbHVzdGVyX2Fk
+ZHIpOw0KPiA+PiAtLQ0KPiA+PiAxLjkuMQ0KPiA+Pg0K
