@@ -1,49 +1,71 @@
-From: Patrick McGarry <patrick@inktank.com>
-Subject: Ceph Turns 10 Twitter Photo Contest
-Date: Mon, 21 Jul 2014 11:04:07 -0700
-Message-ID: <CAP8Oy=+ybdt3RLr9R6C5Mc3XHV02k1pWFLj=+QvoWF9wVsyUCw@mail.gmail.com>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: [RFC][PATCH] osd: Add local_connection to fast_dispatch in func _send_boot.
+Date: Mon, 21 Jul 2014 13:54:47 -0700
+Message-ID: <CAPYLRzjMKZ5RsaYLXGX054qq7BOmNL8rHVbKqzs+2-bZ=MajMw@mail.gmail.com>
+References: <6AA21C22F0A5DA478922644AD2EC308C887C60@SHSMSX101.ccr.corp.intel.com>
+	<CAPYLRzhx0JUPYV8Qbv0cCUxH1Wr_1Zm7s=N3YpF-_6Qit_SWWA@mail.gmail.com>
+	<6AA21C22F0A5DA478922644AD2EC308C893D3E@SHSMSX101.ccr.corp.intel.com>
+	<CAPYLRzjHLntr__i46Q61iQKa3YpcjcE67hhgy+wxZpESOMRYfg@mail.gmail.com>
+	<6AA21C22F0A5DA478922644AD2EC308C895230@SHSMSX101.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f182.google.com ([209.85.220.182]:49562 "EHLO
-	mail-vc0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932320AbaGUSEI (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Jul 2014 14:04:08 -0400
-Received: by mail-vc0-f182.google.com with SMTP id hy4so12749136vcb.41
-        for <ceph-devel@vger.kernel.org>; Mon, 21 Jul 2014 11:04:07 -0700 (PDT)
+Received: from mail-wi0-f175.google.com ([209.85.212.175]:32996 "EHLO
+	mail-wi0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754521AbaGUUys convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Jul 2014 16:54:48 -0400
+Received: by mail-wi0-f175.google.com with SMTP id ho1so4867423wib.8
+        for <ceph-devel@vger.kernel.org>; Mon, 21 Jul 2014 13:54:47 -0700 (PDT)
+In-Reply-To: <6AA21C22F0A5DA478922644AD2EC308C895230@SHSMSX101.ccr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>
+To: "Ma, Jianpeng" <jianpeng.ma@intel.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hey cephers,
+On Sun, Jul 20, 2014 at 11:33 PM, Ma, Jianpeng <jianpeng.ma@intel.com> =
+wrote:
+>> Hrm, I'd really like to see the startup sequence. I see the crash oc=
+curring, but I
+>> don't understand how it's happening =E2=80=94 we test this pretty ex=
+tensively so there
+>> must be something about your testing configuration that is different=
+ than ours.
+>> Can you provide that part of the log, and maybe a little more descri=
+ption of
+>> what you think the problem is?
+>
+> If the ceph.conf contain "cluster addr",  the bug must occur.
+> For no "cluster addr" in ceph.conf, the local-connection add to fast-=
+dispatch in func  _send_boot/ cluster_messenger->set_addr_unknowns.
+>
+>>
+>> In particular, we *always* call init_local_connection when the messe=
+nger
+>> starts, so every messenger who is allowed to receive EC messages sho=
+uld have
+>> the local connection set up before they get one.
+> Yes you call init_local_connection. But only adding osd to messenger,=
+ the local_conenction can add to dispatch.
+> In func OSD::init
+>         >>cluster_messenger->add_dispatcher_head(this);
+> Only after this, the local_connection can add to dispatch.
+> Because if local_connection has correct type, it can add to dispatch =
+and don=E2=80=99t' care the cluster addr.
+> When allocate a Messenger, it set the type and only after add_dispatc=
+her_head/tail, the local-connection can add to dispatch.
+> Maybe add ms_deliver_handle_fast_connect(local_connection.get())  in =
+SimpleMessenger::ready is better.
 
-Just wanted to let you guys know that we are launching a Twitter photo
-contest as a part of OSCON that will run through the end of the month.
-If you tweet a photo of how you are celebrating Ceph's 10th birthday
-to @ceph w/ #cephturns10, you could win a desktop Ceph cluster built
-by our very own Mark Nelson.  Check out the links below for details:
-
-Blog:
-http://ceph.com/uncategorized/ceph-turns-10-twitter-photo-contest/
-
-Contest Page:
-https://wiki.ceph.com/Community/Contests
-
-Contest Details:
-https://wiki.ceph.com/Community/Contests/Ceph_Turns_10_Twitter_Photo_Contest
-
-Official Contest Rules:
-https://wiki.ceph.com/@api/deki/files/31/Ceph10thBirthdayTwitterPhotoContest--FINAL.pdf
-
-Additionally, if you are at OSCON stop by booth P2 to say hi and enjoy
-cupcakes (Tues only) and special edition t-shirts.  Happy birthday to
-Ceph!
-
-
-
-Best Regards,
-
-Patrick McGarry
-Director Ceph Community || Red Hat
-http://ceph.com  ||  http://community.redhat.com
-@scuttlemonkey || @ceph
+Ooooookay, I see the problem now. I pulled the patch (with some
+wording changes) into master at commit
+9061988ec7eaa922e2b303d9eece86e7c8ee0fa1. I've also created a ticket
+to clean up the local dispatch Connection setup at
+http://tracker.ceph.com/issues/8892.
+Thanks!
+-Greg
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
