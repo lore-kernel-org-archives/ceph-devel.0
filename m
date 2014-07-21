@@ -1,106 +1,132 @@
-From: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
-Subject: RE: Cache tiering read-proxy mode
-Date: Mon, 21 Jul 2014 07:49:35 +0000
-Message-ID: <06E7D85B3BA36C4DB207FEDE871C534891CE44@SHSMSX101.ccr.corp.intel.com>
-References: <06E7D85B3BA36C4DB207FEDE871C534891BC27@SHSMSX101.ccr.corp.intel.com>
- <alpine.DEB.2.00.1407180707310.28285@cobra.newdream.net>
- <06E7D85B3BA36C4DB207FEDE871C534891CD56@SHSMSX101.ccr.corp.intel.com>
- <alpine.DEB.2.00.1407201831340.28285@cobra.newdream.net>
- <06E7D85B3BA36C4DB207FEDE871C534891CDD2@SHSMSX101.ccr.corp.intel.com>
- <alpine.DEB.2.00.1407202051490.28285@cobra.newdream.net>
+From: Milosz Tanski <milosz@adfin.com>
+Subject: Re: fscache recursive hang -- similar to loopback
+	NFS issues
+Date: Mon, 21 Jul 2014 07:42:38 -0400
+Message-ID: <CANP1eJEVnH2w7t6r8g1ow07UNWRA8bPduwD-FezqCBKB_J_=XQ@mail.gmail.com>
+References: <CANP1eJE7tU9touhSq+Utt=MLE4w5D_C4pT1TAFAiFNBh8ee_mA@mail.gmail.com>
+	<20140721164044.2845f3fd@notabene.brown>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga03.intel.com ([143.182.124.21]:9024 "EHLO mga03.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751799AbaGUHt6 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Jul 2014 03:49:58 -0400
-In-Reply-To: <alpine.DEB.2.00.1407202051490.28285@cobra.newdream.net>
-Content-Language: en-US
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: "Zhang, Jian" <jian.zhang@intel.com>, "icolle@redhat.com" <icolle@redhat.com>, "sam.just@inktank.com" <sam.just@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-cachefs-bounces@redhat.com>
+In-Reply-To: <20140721164044.2845f3fd@notabene.brown>
+List-Unsubscribe: <https://www.redhat.com/mailman/options/linux-cachefs>,
+	<mailto:linux-cachefs-request@redhat.com?subject=unsubscribe>
+List-Archive: <https://www.redhat.com/archives/linux-cachefs>
+List-Post: <mailto:linux-cachefs@redhat.com>
+List-Help: <mailto:linux-cachefs-request@redhat.com?subject=help>
+List-Subscribe: <https://www.redhat.com/mailman/listinfo/linux-cachefs>,
+	<mailto:linux-cachefs-request@redhat.com?subject=subscribe>
+Sender: linux-cachefs-bounces@redhat.com
+Errors-To: linux-cachefs-bounces@redhat.com
+To: NeilBrown <neilb@suse.de>
+Cc: "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, ceph-devel <ceph-devel@vger.kernel.org>, "linux-cachefs@redhat.com" <linux-cachefs@redhat.com>
+List-Id: ceph-devel.vger.kernel.org
 
-In the current code, when the evict mode is idle, we just keep the current hit set in memory. All the other hit sets (hit_set_count-1) are on disks. And when the evict mode is not idle, all the hit sets are loaded into memory. When the current hit set is full or exceeds its interval, it is persisted to disk. A new hit set is created to act as the current and the oldest is removed from disk.
+Neil,
 
-So, if we introduce the min_read_recency_for_promote option, say the user sets its value to 200, and the value of 'hit set interval' to 60, does it mean we need to always keep 200/60+1=4 latest hit sets in memory (Assuming 'hit set count' is greater than 4, number of 'hit set count' if not), even if the evict mode is idle? And when persisting the current hit set, it is still kept in memory, but the oldest in-memory hit set is removed from memory?
+That's the same thing exact fix I started testing on Saturday. I found that
+there already is a wait_event_timeout (even without your recent changes).
+The thing I'm not quite sure is what timeout it should use? A quick search
+through references on LXR shows that it's use anywhere in fs code except
+for debug cases (btrfs) and network filesystem.
 
-Btw, I don't quite get what you said on the normal hit set rotation part.
+- Milosz
 
------Original Message-----
-From: Sage Weil [mailto:sweil@redhat.com] 
-Sent: Monday, July 21, 2014 11:55 AM
-To: Wang, Zhiqiang
-Cc: Zhang, Jian; icolle@redhat.com; sam.just@inktank.com; ceph-devel@vger.kernel.org
-Subject: RE: Cache tiering read-proxy mode
 
-On Mon, 21 Jul 2014, Wang, Zhiqiang wrote:
-> For the min_read_recency_for_promote option, it's easy to understand 
-> the '0' and '<= hit set interval' cases. But for the '> hit set interval'
-> case, do you mean we always keep all the hit sets in RAM and check for 
-> the object's existence in all of them, or just load all the hit sets 
-> and check for object existence before the read? In another word, when 
-> min_read_recency_for_promote is greater than 'hit set interval', we 
-> always keep all the hit sets in RAM?
+On Mon, Jul 21, 2014 at 2:40 AM, NeilBrown <neilb@suse.de> wrote:
 
-I'm thinking we would keep any many HitSets as are needed to cover whatever the configured interval is.  Setting the option to the same value as the hitset interval (or just '1'?) would be the simplest thing, and probably the default?
+> On Sat, 19 Jul 2014 16:20:01 -0400 Milosz Tanski <milosz@adfin.com> wrote:
+>
+> > Neil,
+> >
+> > I saw your recent patcheset for improving the wait_on_bit interface
+> > (particular: SCHED: allow wait_on_bit_action functions to support a
+> > timeout.) I'm looking on some guidance on leveraging that work to
+> > solve other recursive lock hang in fscache.
+> >
+> > I've ran into similar issues you're trying to solve with loopback NFS
+> > but in the fscache code. This happens under heavy vma preasure when
+> > the kernel is aggressively trying to trim the page cache.
+> >
+> > The hang is caused by this serious of events
+> > 1. cachefiles_write_page - cachefiles (the fscache backend, sitting on
+> > ext4) tries to write page to disk
+> > 2. ext4 tries to allocate a page in writeback (without GPF_NOFS and
+> > with wait flag)
+> > 3. due to vma preasure the kernel tries to free-up pages
+> > 4. this causes release pages in ceph to be called
+> > 5. the selected page is cached page in process of write out (from step
+> #1)
+> > 6. fscache_wait_on_page_write hangs forever
+> >
+> > Is there a solution that you have to NFS as another patch that
+> > implements the timeout that I can use a template? I'm not familiar
+> > with that piece of the code base.
+>
+> It looks like the comment in  __fscache_maybe_release_page
+>
+>         /* We will wait here if we're allowed to, but that could deadlock
+> the
+>          * allocator as the work threads writing to the cache may all end
+> up
+>          * sleeping on memory allocation, so we may need to impose a
+> timeout
+>          * too. */
+>
+> is correct when it says "we may need to impose a timeout".
+> The following __fscache_wait_on_page_write() needs to timeout.
+>
+> However that doesn't use wait_on_bit(), it just has a simple wait_event.
+> So something like this should fix it (or should at least move the problem
+> along a bit).
+>
+> NeilBrown
+>
+>
+>
+> diff --git a/fs/fscache/page.c b/fs/fscache/page.c
+> index ed70714503fa..58035024c5cf 100644
+> --- a/fs/fscache/page.c
+> +++ b/fs/fscache/page.c
+> @@ -43,6 +43,13 @@ void __fscache_wait_on_page_write(struct fscache_cookie
+> *cookie, struct page *pa
+>  }
+>  EXPORT_SYMBOL(__fscache_wait_on_page_write);
+>
+> +void __fscache_wait_on_page_write_timeout(struct fscache_cookie *cookie,
+> struct page *page, unsigned long timeout)
+> +{
+> +       wait_queue_head_t *wq = bit_waitqueue(&cookie->flags, 0);
+> +
+> +       wait_event_timeout(*wq, !__fscache_check_page_write(cookie, page),
+> timeout);
+> +}
+> +
+>  /*
+>   * decide whether a page can be released, possibly by cancelling a store
+> to it
+>   * - we're allowed to sleep if __GFP_WAIT is flagged
+> @@ -115,7 +122,7 @@ page_busy:
+>         }
+>
+>         fscache_stat(&fscache_n_store_vmscan_wait);
+> -       __fscache_wait_on_page_write(cookie, page);
+> +       __fscache_wait_on_page_write_timeout(cookie, page, HZ);
+>         gfp &= ~__GFP_WAIT;
+>         goto try_again;
+>  }
+>
+>
+>
+>
 
-We would need to decide what behavior we want with respect to the normal HitSet rotation, though.  If they each cover, say, one hour, then on average they will half of that, and sometimes almost no time at all (if they just rotated).  So probably we'd want to keep the next-most-recent in memory for some period?  It'll always be a bit imprecise, though, but hopefully it won't really matter...
 
-sage
+-- 
+Milosz Tanski
+CTO
+16 East 34th Street, 15th floor
+New York, NY 10016
 
-> 
-> -----Original Message-----
-> From: Sage Weil [mailto:sweil@redhat.com] 
-> Sent: Monday, July 21, 2014 9:44 AM
-> To: Wang, Zhiqiang
-> Cc: Zhang, Jian; icolle@redhat.com; sam.just@inktank.com; ceph-devel@vger.kernel.org
-> Subject: RE: Cache tiering read-proxy mode
-> 
-> [Adding ceph-devel]
-> 
-> On Mon, 21 Jul 2014, Wang, Zhiqiang wrote:
-> > Sage,
-> > 
-> > I agree with you that promotion on the 2nd read could improve cache 
-> > tiering's performance for some kinds of workloads. The general idea 
-> > here is to implement some kinds of policies in the cache tier to 
-> > measure the warmness of the data. If the cache tier is aware of the 
-> > data warmness, it could even initiate data movement between the cache 
-> > tier and the base tier. This means data could be prefetched into the 
-> > cache tier before reading or writing. But I think this is something we 
-> > could do in the future.
-> 
-> Yeah. I suspect it will be challenging to put this sort of prefetching intelligence directly into the OSDs, though.  It could possibly be done by an external agent, maybe, or could be driven by explicit hints from clients ("I will probably access this data soon").
-> 
-> > The 'promotion on 2nd read' policy is straightforward. Sure it will 
-> > benefit some kinds of workload, but not all. If it is implemented as a 
-> > cache tier option, the user needs to decide to turn it on or not. But 
-> > I'm afraid most of the users don't have the idea of this. This 
-> > increases the difficulty of using cache tiering.
-> 
-> I suspect the 2nd read behavior will be something we'll want to do by default...  but yeah, there will be a new pool option (or options) that controls the behavior.
-> 
-> > One question for the implementation of 'promotion on 2nd read': what 
-> > do we do for the 1st read? Does the cache tier read the object from 
-> > base tier but not doing replication, or just redirecting it?
-> 
-> For the first read, we just redirect the client.  The on the second read, we call promote_object().  See maybe_handle_cache() in ReplicatedPG.cc.  
-> We can pretty easily tell the difference by checking the in-memory HitSet for a match.
-> 
-> Perhaps the option in the pool would be something like min_read_recency_for_promote?  If we measure "recency" as "(avg) seconds since last access" (loosely), 0 would mean it would promote on first read, and anything <= the HitSet interval would mean promote if the object is in the current HitSet.  > than that would mean we'd need to keep additional previous HitSets in RAM.
-> 
-> ...which leads us to a separate question of how to describe access frequency vs recency.  We keep N HitSets, each covering a time period of T seconds.  Normally we only keep the most recent HitSet in memory, unless the agent is active (flushing data).  So what I described above is checking how recently the last access was (within how many multiples of T seconds).  Additionally, though, we could describe the frequency of
-> access: was the object accesssed at least once in every N interval of T seconds?  Or some fraction of them?  That is probably best described as "temperature?"  I'm not to fond of the term "recency," tho I can't think of anything better right now.
-> 
-> Anyway, for the read promote behavior, recency is probably sufficient, but for the tiering agent flush/evict behavior temperature might be a good thing to consider...
-> 
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+p: 646-253-9055
+e: milosz@adfin.com
