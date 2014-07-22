@@ -1,97 +1,89 @@
-From: Andrey Korolyov <andrey@xdel.ru>
-Subject: Re: Adding a delay when restarting all OSDs on a host
-Date: Tue, 22 Jul 2014 18:58:33 +0400
-Message-ID: <CABYiri_YnWbC7H60WaMSWGwSTXtj4GKzVkPn36LRQv3v37zcJQ@mail.gmail.com>
-References: <53CE64D0.5050308@42on.com> <CABYiri8hsZahorNYeeFZBO-bE6u8BZULcnNfs8eBSyYOJL+9jw@mail.gmail.com>
- <53CE7503.8030901@42on.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: wip-memstore and wip-objectstore
+Date: Tue, 22 Jul 2014 08:49:32 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1407220847170.15853@cobra.newdream.net>
+References: <alpine.DEB.2.00.1407220747400.15853@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oa0-f42.google.com ([209.85.219.42]:43668 "EHLO
-	mail-oa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752381AbaGVO6x (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Jul 2014 10:58:53 -0400
-Received: by mail-oa0-f42.google.com with SMTP id n16so9948964oag.1
-        for <ceph-devel@vger.kernel.org>; Tue, 22 Jul 2014 07:58:53 -0700 (PDT)
-In-Reply-To: <53CE7503.8030901@42on.com>
+Received: from cobra.newdream.net ([66.33.216.30]:55104 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755359AbaGVPtd (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Jul 2014 11:49:33 -0400
+In-Reply-To: <alpine.DEB.2.00.1407220747400.15853@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@42on.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: haomaiwang@gmail.com
+Cc: ceph-devel@vger.kernel.org
 
-On Tue, Jul 22, 2014 at 6:28 PM, Wido den Hollander <wido@42on.com> wrote:
-> On 07/22/2014 03:48 PM, Andrey Korolyov wrote:
->>
->> On Tue, Jul 22, 2014 at 5:19 PM, Wido den Hollander <wido@42on.com> wrote:
->>>
->>> Hi,
->>>
->>> Currently on Ubuntu with Upstart when you invoke a restart like this:
->>>
->>> $ sudo restart ceph-osd-all
->>>
->>> It will restart all OSDs at once, which can increase the load on the
->>> system
->>> a quite a bit.
->>>
->>> It's better to restart all OSDs by restarting them one by one:
->>>
->>> $ sudo ceph restart ceph-osd id=X
->>>
->>> But you then have to figure out all the IDs by doing a find in
->>> /var/lib/ceph/osd and that's more manual work.
->>>
->>> I'm thinking of patching the init scripts which allows something like
->>> this:
->>>
->>> $ sudo restart ceph-osd-all delay=180
->>>
->>> It then waits 180 seconds between each OSD restart making the proces even
->>> smoother.
->>>
->>> I know there are currently sysvinit, upstart and systemd scripts, so it
->>> has
->>> to be implemented on various places, but how does the general idea sound?
->>>
->>> --
->>> Wido den Hollander
->>> Ceph consultant and trainer
->>> 42on B.V.
->>>
->>> Phone: +31 (0)20 700 9902
->>> Skype: contact42on
->>> --
->>
->>
->>
->> Hi,
->>
->> this behaviour obviously have a negative side of increased overall
->> peering time and larger integral value of out-of-SLA delays. I`d vote
->> for warming up necessary files, most likely collections, just before
->> restart. If there are no enough room to hold all of them at once, we
->> can probably combine both methods to achieve lower impact value on
->> restart, although adding a simple delay sounds much more straight than
->> putting file cache to ram.
->>
->
-> In the case I'm talking about there are 23 OSDs running on a single machine
-> and restarting all the OSDs causes a lot of peering and reading PG logs.
->
-> A warm-up mechanism might work, but that would be a lot of work.
->
-> When upgrading your cluster you simply want to do this:
->
-> $ dsh -g ceph-osd "sudo restart ceph-osd-all delay=180"
->
-> That might take hours to complete, but if it's just an upgrade that doesn't
-> matter. You want as minimal impact on service as possible.
->
+Hi Haomai,
 
-I may suggest to measure impact with vmtouch[0], it decreased OSD
-startup time greatly on mine tests, but I was stuck with same resource
-exhaustion as before after OSD marked itself up (IOPS ceiling
-primarily).
+Hmm, one other thing: I'm testing the fix in wip-8701 and it is tripping 
+over the KeyValueStore test.  This
+
+ ./ceph_test_objectstore --gtest_filter=ObjectStore/StoreTest.BigRGWObjectName/1
+
+fails with
+
+     0> 2014-07-22 08:45:25.640932 7fe617fff700 -1 *** Caught signal (Segmentation fault) **
+ in thread 7fe617fff700
+
+ ceph version 0.82-649-gc5732e4 (c5732e4aefbd80f29b766756478d79808f0245d7)
+ 1: (ceph::BackTrace::BackTrace(int)+0x2d) [0xa09a7b]
+ 2: ./ceph_test_objectstore() [0xb145b6]
+ 3: (()+0x10340) [0x7fe621313340]
+ 4: (std::pair<unsigned long const, ghobject_t>::pair(unsigned long const&, ghobject_t const&)+0x18) [0xadb710]
+ 5: (std::map<unsigned long, ghobject_t, std::less<unsigned long>, std::allocator<std::pair<unsigned long const, ghobject_t> > >::operator[](unsigned long const&)+0x109) [0xad957f]
+ 6: (RandomCache<ghobject_t, std::pair<coll_t, std::tr1::shared_ptr<StripObjectMap::StripObjectHeader> > >::trim_cache(unsigned long)+0xc2) [0xad7218]
+ 7: (RandomCache<ghobject_t, std::pair<coll_t, std::tr1::shared_ptr<StripObjectMap::StripObjectHeader> > >::add(ghobject_t, std::pair<coll_t, std::tr1::shared_ptr<StripObjectMap::StripObjectHeader> >)+0x70) [0xad53a2]
+ 8: (StripObjectMap::lookup_strip_header(coll_t const&, ghobject_t const&, std::tr1::shared_ptr<StripObjectMap::StripObjectHeader>*)+0x4d3) [0xab1fb1]
+ 9: (KeyValueStore::BufferTransaction::lookup_cached_header(coll_t const&, ghobject_t const&, std::tr1::shared_ptr<StripObjectMap::StripObjectHeader>*, bool)+0x1dc) [0xab32c0]
+ 10: (KeyValueStore::_remove(coll_t, ghobject_t const&, KeyValueStore::BufferTransaction&)+0x188) [0xac0472]
+ 11: (KeyValueStore::_do_transaction(ObjectStore::Transaction&, KeyValueStore::BufferTransaction&, ThreadPool::TPHandle*)+0x632) [0xabba0c]
+ 12: (KeyValueStore::_do_transactions(std::list<ObjectStore::Transaction*, std::allocator<ObjectStore::Transaction*> >&, unsigned long, ThreadPool::TPHandle*)+0x138) [0xabb2ee]
+ 13: (KeyValueStore::_do_op(KeyValueStore::OpSequencer*, ThreadPool::TPHandle&)+0x1f5) [0xabac11]
+ 14: (KeyValueStore::OpWQ::_process(KeyValueStore::OpSequencer*, ThreadPool::TPHandle&)+0x2f) [0xad3f23]
+ 15: (ThreadPool::WorkQueue<KeyValueStore::OpSequencer>::_void_process(void*, ThreadPool::TPHandle&)+0x33) [0xadf645]
+ 16: (ThreadPool::worker(ThreadPool::WorkThread*)+0x734) [0xb28f7c]
+ 17: (ThreadPool::WorkThread::entry()+0x23) [0xb2d031]
+ 18: (Thread::entry_wrapper()+0x79) [0xb21647]
+ 19: (Thread::_entry_func(void*)+0x18) [0xb215c4]
+ 20: (()+0x8182) [0x7fe62130b182]
+ 21: (clone()+0x6d) [0x7fe61fc8330d]
+ NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
+
+It's a new test (long file names and collection_move) that addresses an 
+issue with the FileStore, but KeyValueStore doesn't seem to like it 
+either...
+
+Thanks!
+sage
 
 
-0. http://hoytech.com/vmtouch/
+On Tue, 22 Jul 2014, Sage Weil wrote:
+
+> Hi Haomai,
+> 
+> Do you mind looking at wip-memstore at 
+> 
+> 	https://github.com/ceph/ceph/pull/2125
+> 
+> A couple minor fixes and then we can enable it in ceph_test_objectstore.
+> 
+> Also, I would love any feedback on wip-objectstore
+> 
+> 	https://github.com/ceph/ceph/pull/2124
+> 
+> That one is RFC at this point.  I'm trying to simplify the ObjectStore 
+> interface as much as possible.
+> 
+> Thanks!
+> sage
+> 
+> 	
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
