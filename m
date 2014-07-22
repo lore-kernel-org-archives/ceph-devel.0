@@ -1,131 +1,100 @@
-From: Shayan Saeed <shayansaeed93@gmail.com>
-Subject: Re: Disabling CRUSH for erasure code and doing custom placement
-Date: Tue, 22 Jul 2014 17:48:23 -0400
-Message-ID: <CALUBZ_-HxjMrni0Gtv_gs=nT1RGxTEYhZGmw1s=z5hkPT4kV3w@mail.gmail.com>
-References: <CALUBZ__98nzUjucW9NmFKEHzPFvu0yY0X5yHEtFH7g9QkhqSAQ@mail.gmail.com>
-	<CAPYLRzgeb2DB_tJfRFvK1gk5XEYYd7mgHH5E5URqYsn_2bH4mQ@mail.gmail.com>
-	<CALUBZ_-gBR2KHMQcGe65+GDHE3xC+Fq9_J+DZLDqf+7LQHrq6g@mail.gmail.com>
-	<CAPYLRzhoiP7t81VG5FEgo53xP9GVMOu6e8zQdwU+HxF2gB7HRQ@mail.gmail.com>
+From: Alex Elsayed <eternaleye@gmail.com>
+Subject: Re: Forcing Ceph into mapping all objects to a single PG
+Date: Tue, 22 Jul 2014 15:44:16 -0700
+Message-ID: <lqmpg2$chu$1@ger.gmane.org>
+References: <53CD93B4.6020500@trvx.org> <CAPYLRzj4tzBCSrGPCsaLvy1+7ac4=Um1EHDeZhLsCpuZZy7miA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7Bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f48.google.com ([209.85.220.48]:62087 "EHLO
-	mail-pa0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751272AbaGVVsY convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Jul 2014 17:48:24 -0400
-Received: by mail-pa0-f48.google.com with SMTP id et14so341391pad.21
-        for <ceph-devel@vger.kernel.org>; Tue, 22 Jul 2014 14:48:23 -0700 (PDT)
-In-Reply-To: <CAPYLRzhoiP7t81VG5FEgo53xP9GVMOu6e8zQdwU+HxF2gB7HRQ@mail.gmail.com>
+Received: from plane.gmane.org ([80.91.229.3]:56078 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932980AbaGVWoa (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 22 Jul 2014 18:44:30 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1X9inM-0003Ty-7C
+	for ceph-devel@vger.kernel.org; Wed, 23 Jul 2014 00:44:28 +0200
+Received: from 50.245.141.77 ([50.245.141.77])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Wed, 23 Jul 2014 00:44:28 +0200
+Received: from eternaleye by 50.245.141.77 with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Wed, 23 Jul 2014 00:44:28 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Another question along the same lines. For erasure code, same as
-replicated files, the request goes through the primary member. Isn't
-it possible to send the request to any of the members and get the
-file. While this might have kept things neater on the development side
-and might have made some sense for replicated system, it makes the
-availability and load balancing worse for erasure coded files. I see a
-lot of requests coming in for a specific object which makes the
-primary osd hosting it go down sometimes and then all the requests
-have to wait another osd comes up and repair is done.  For load
-balancing purposes, is there a way to make the requests go to someone
-else without hinderance and get the object without waiting for repair.
+Gregory Farnum wrote:
 
-Thanks,
-Shayan
-Regards,
-Shayan Saeed
-
-
-On Tue, Jul 15, 2014 at 1:18 PM, Gregory Farnum <greg@inktank.com> wrot=
-e:
-> One of Ceph's design tentpoles is *avoiding* a central metadata looku=
-p
-> table. The Ceph MDS maintains a filesystem hierarchy but doesn't
-> really handle the sort of thing you're talking about, either. If you
-> want some kind of lookup, you'll need to build it yourself =E2=80=94 =
-although
-> you could make use of some RADOS features to do it, if you really
-> wanted to. (For instance, depending on scale you could keep an index
-> of objects in an omap somewhere.)
-> -Greg
-> Software Engineer #42 @ http://inktank.com | http://ceph.com
->
->
-> On Tue, Jul 15, 2014 at 10:11 AM, Shayan Saeed <shayansaeed93@gmail.c=
-om> wrote:
->> Well I did end up putting the data in different pools for custom
->> placement. However, I run into trouble during retrieval. The messy w=
-ay
->> is to query every pool to check where the data is stored. This
->> requires many round trips to machines in the far off racks. Is it
->> possible this information is contained within a centralized sort of
->> metadata server? I understand that for simple object store MDS is no=
-t
->> used but is there a way to utilize it for faster querying?
+> On Mon, Jul 21, 2014 at 3:27 PM, Daniel Hofmann <daniel@trvx.org> wrote:
+>> Preamble: you might want to read the decent formatted version of this
+>> mail at:
+>>> https://gist.github.com/daniel-j-h/2daae2237bb21596c97d
+<snip aggressively>
+>> -------
 >>
->> Regards,
->> Shayan Saeed
+>> Ceph's object mapping depends on the rjenkins hash function.
+>> It's possible to force Ceph into mapping all objects to a single PG.
 >>
->>
->> On Tue, Jun 24, 2014 at 11:37 AM, Gregory Farnum <greg@inktank.com> =
-wrote:
->>> On Tue, Jun 24, 2014 at 8:29 AM, Shayan Saeed <shayansaeed93@gmail.=
-com> wrote:
->>>> Hi,
->>>>
->>>> CRUSH placement algorithm works really nice with replication. Howe=
-ver,
->>>> with erasure code, my cluster has some issues which require making
->>>> changes that I cannot specify with CRUSH maps.
->>>> Sometimes, depending on the type of data, I would like to place th=
-em
->>>> on different OSDs but in the same pool.
->>>
->>> Why do you want to keep the data in the same pool?
->>>
->>>>
->>>> I realize that to disable the CRUSH placement algorithm and replac=
-ing
->>>> it with my own custom algorithm, such as random placement algo or =
-any
->>>> other, I have to make changes in the source code. I want to ask if
->>>> there is an easy way to do this without going into every code file=
- and
->>>> looking where the mapping from objects to PG is done and changing
->>>> that. Is there some configuration option which disables crush and
->>>> points to my own placement algo file for doing custom placement.
->>>
->>> What you're asking for really doesn't sound feasible, but the thing
->>> that comes closest would probably be resurrecting the "pg preferred=
-"
->>> mechanisms in CRUSH and the Ceph codebase. You'll have to go back
->>> through the git history to find it, but once upon a time we support=
-ed
->>> a mechanism that let you specify a specific OSD you wanted a
->>> particular object to live on, and then it would place the remaining
->>> replicas using CRUSH.
->>> -Greg
->>> Software Engineer #42 @ http://inktank.com | http://ceph.com
->>>
->>>>
->>>> Let me know about the most neat way to go about it. Appreciate any
->>>> help I can get.
->>>>
->>>> Regards,
->>>> Shayan Saeed
->>>> Research Assistant, Systems Research Lab
->>>> University of Illinois Urbana-Champaign
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-dev=
-el" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> Please discuss!
+> 
+> Yes, this is an attack vector. It functions against...well, any system
+> using hash-based placement.
+
+Sort of. How well it functions is a function (heh) of how easy it is to find 
+a preimage against the hash (collision only allows a pair, you need 
+preimages to get beyond that).
+
+With fletcher4, preimages aren't particularly difficult to find. By using a 
+more robust hash[1], then preimages become more computationally expensive 
+since you need to brute-force for each value rather than taking advantage of 
+a weakness in the algorithm.
+
+This doesn't buy a huge amount since the bruteforce effort per iteration is 
+still bounded by the number of PGs, but it does help - and it means that as 
+PGs are split, resistance to the attack increases as well.
+
+> RGW mangles names on its own, although the mangling is deterministic
+> enough that an attacker could perhaps manipulate it into mangling them
+> onto the same PG. (Within the constraints, though, it'd be pretty
+> difficult.)
+> RBD names objects in a way that users can't really control, so I guess
+> it's safe, sort of? (But users of rbd will still have write permission
+> to some class of objects in which they may be able to find an attack.)
+> 
+> The real issue though, is that any user with permission to write to
+> *any* set of objects directly in the cluster will be able to exploit
+> this regardless of what barriers we erect. Deterministic placement, in
+> that anybody directly accessing the cluster can compute data
+> locations, is central to Ceph's design. We could add "salts" or
+> something to try and prevent attackers from *outside* the direct set
+> (eg, users of RGW) exploiting it directly, but anybody who can read or
+> write from the cluster would need to be able to read the salt in order
+> to compute locations themselves.
+
+Actually, doing (say) per-pool salts does help in a notable way: even 
+someone who can write to two pools can't reuse the computation of colliding 
+values across pools. It forces them to expend the work factor for each pool 
+they attack, rather than being able to amortize.
+
+> So I'm pretty sure this attack vector
+> is:
+> 1) Inherent to all hash-placement systems,
+> 2) not something we can reasonably defend against *anyway*.
+
+I'd agree that in the absolute sense it's inherent and insoluble, but that 
+doesn't imply that _mitigations_ are worthless.
+
+A more drastic option would be to look at how the sfq network scheduler 
+handles it - it hashes flows onto a fixed number of queues, and gets around 
+collisions by periodically perturbing the salt (resulting in a _stochastic_ 
+avoidance of clumping). It'd definitely require some research to find a way 
+to do this such that it doesn't cause huge data movement, but it might be 
+worth thinking about for the longer term.
+
+[1] I'm thinking along the lines of SipHash, not any heavy-weight 
+cryptographic hash; however with network latencies on the table those might 
+not be too bad regardless
+
