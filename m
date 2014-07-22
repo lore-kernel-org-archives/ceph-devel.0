@@ -1,88 +1,35 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: Adding a delay when restarting all OSDs on a host
-Date: Tue, 22 Jul 2014 16:28:19 +0200
-Message-ID: <53CE7503.8030901@42on.com>
-References: <53CE64D0.5050308@42on.com> <CABYiri8hsZahorNYeeFZBO-bE6u8BZULcnNfs8eBSyYOJL+9jw@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: wip-memstore and wip-objectstore
+Date: Tue, 22 Jul 2014 07:50:10 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1407220747400.15853@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from websrv.42on.com ([31.25.102.167]:58792 "EHLO websrv.42on.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754122AbaGVO2W (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 22 Jul 2014 10:28:22 -0400
-In-Reply-To: <CABYiri8hsZahorNYeeFZBO-bE6u8BZULcnNfs8eBSyYOJL+9jw@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:54748 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752157AbaGVOuL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Jul 2014 10:50:11 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andrey Korolyov <andrey@xdel.ru>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: haomaiwang@gmail.com
+Cc: ceph-devel@vger.kernel.org
 
-On 07/22/2014 03:48 PM, Andrey Korolyov wrote:
-> On Tue, Jul 22, 2014 at 5:19 PM, Wido den Hollander <wido@42on.com> wrote:
->> Hi,
->>
->> Currently on Ubuntu with Upstart when you invoke a restart like this:
->>
->> $ sudo restart ceph-osd-all
->>
->> It will restart all OSDs at once, which can increase the load on the system
->> a quite a bit.
->>
->> It's better to restart all OSDs by restarting them one by one:
->>
->> $ sudo ceph restart ceph-osd id=X
->>
->> But you then have to figure out all the IDs by doing a find in
->> /var/lib/ceph/osd and that's more manual work.
->>
->> I'm thinking of patching the init scripts which allows something like this:
->>
->> $ sudo restart ceph-osd-all delay=180
->>
->> It then waits 180 seconds between each OSD restart making the proces even
->> smoother.
->>
->> I know there are currently sysvinit, upstart and systemd scripts, so it has
->> to be implemented on various places, but how does the general idea sound?
->>
->> --
->> Wido den Hollander
->> Ceph consultant and trainer
->> 42on B.V.
->>
->> Phone: +31 (0)20 700 9902
->> Skype: contact42on
->> --
->
->
-> Hi,
->
-> this behaviour obviously have a negative side of increased overall
-> peering time and larger integral value of out-of-SLA delays. I`d vote
-> for warming up necessary files, most likely collections, just before
-> restart. If there are no enough room to hold all of them at once, we
-> can probably combine both methods to achieve lower impact value on
-> restart, although adding a simple delay sounds much more straight than
-> putting file cache to ram.
->
+Hi Haomai,
 
-In the case I'm talking about there are 23 OSDs running on a single 
-machine and restarting all the OSDs causes a lot of peering and reading 
-PG logs.
+Do you mind looking at wip-memstore at 
 
-A warm-up mechanism might work, but that would be a lot of work.
+	https://github.com/ceph/ceph/pull/2125
 
-When upgrading your cluster you simply want to do this:
+A couple minor fixes and then we can enable it in ceph_test_objectstore.
 
-$ dsh -g ceph-osd "sudo restart ceph-osd-all delay=180"
+Also, I would love any feedback on wip-objectstore
 
-That might take hours to complete, but if it's just an upgrade that 
-doesn't matter. You want as minimal impact on service as possible.
+	https://github.com/ceph/ceph/pull/2124
 
--- 
-Wido den Hollander
-Ceph consultant and trainer
-42on B.V.
+That one is RFC at this point.  I'm trying to simplify the ObjectStore 
+interface as much as possible.
 
-Phone: +31 (0)20 700 9902
-Skype: contact42on
+Thanks!
+sage
+
+	
