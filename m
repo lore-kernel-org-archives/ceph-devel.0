@@ -1,55 +1,44 @@
-From: Yehuda Sadeh <yehuda@redhat.com>
-Subject: Re: radosgw-admin: symbol lookup error
-Date: Mon, 21 Jul 2014 17:15:10 -0700
-Message-ID: <CABBk=J_o8=r_H0UaRSkhtZodmtmrqtFfXUtQ7HEgZOOKGPQ-Gw@mail.gmail.com>
-References: <53CD1B3A.7060008@gmail.com>
-	<53CDAA37.90209@redhat.com>
+From: "Ma, Jianpeng" <jianpeng.ma@intel.com>
+Subject: [PATCH] os/FileJournal: When dump journal, using correctly last-seq
+ avoid  misjudging joural corrupt.
+Date: Tue, 22 Jul 2014 00:29:20 +0000
+Message-ID: <6AA21C22F0A5DA478922644AD2EC308C8953EE@SHSMSX101.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f173.google.com ([209.85.220.173]:48300 "EHLO
-	mail-vc0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751501AbaGVAPL (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Jul 2014 20:15:11 -0400
-Received: by mail-vc0-f173.google.com with SMTP id hy10so13688237vcb.18
-        for <ceph-devel@vger.kernel.org>; Mon, 21 Jul 2014 17:15:10 -0700 (PDT)
-In-Reply-To: <53CDAA37.90209@redhat.com>
+Received: from mga02.intel.com ([134.134.136.20]:17703 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750831AbaGVA32 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Jul 2014 20:29:28 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: bhubbard@redhat.com, =?UTF-8?B?6LW15Lit5Lqu?= <zhaozhongliang@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: "sage@inktank.com" <sage@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Mon, Jul 21, 2014 at 5:03 PM, Brad Hubbard <bhubbard@redhat.com> wrote:
-> On 07/21/2014 11:52 PM, Zhongliang Zhao wrote:
->>
->> Dear all,
->>
->> I am trying to test the feature of geo-replication, which is suported
->> via radosgw service.
->> After following
->>
->> http://ceph.com/docs/master/radosgw/config/#adjust-path-ownership-permissions,
->>
->> $sudo /etc/init.d/radosgw start (start the gateway)
->> returns
->> $Starting client.radosgw.instance-1...
->> $/usr/bin/radosgw is running
->>
->> However, when I want to use the radosgw-admin command, it gives error
->> like:
->>
->> radosgw-admin: symbol lookup error: radosgw-admin: undefined symbol:
->> _ZTVN4ceph6crypto8HMACSHA1E
->
->
-> Looks like it is missing a definition for a crypto function.
->
-> $ c++filt  _ZTVN4ceph6crypto8HMACSHA1E
-> vtable for ceph::crypto::HMACSHA1
+In func FileJournal::dump, it always use seq=0 as last-seq and misjudge the journal corrupt.
 
+Signed-off-by: Ma Jianpeng <jianpeng.ma@intel.com>
+---
+ src/os/FileJournal.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-That would usually mean that it couldn't find librados. Try running
-'ldd radosgw-admin' to verify linkage target, and adjust
-LD_LIBRARY_PATH appropriately.
+diff --git a/src/os/FileJournal.cc b/src/os/FileJournal.cc
+index 7eb7927..3307655 100644
+--- a/src/os/FileJournal.cc
++++ b/src/os/FileJournal.cc
+@@ -564,9 +564,9 @@ int FileJournal::dump(ostream& out)
+   JSONFormatter f(true);
 
-Yehuda
+   f.open_array_section("journal");
++  uint64_t seq = 0;
+   while (1) {
+     bufferlist bl;
+-    uint64_t seq = 0;
+     uint64_t pos = read_pos;
+     if (!read_entry(bl, seq)) {
+       dout(3) << "journal_replay: end of journal, done." << dendl;
+--
+1.9.1
+
