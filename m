@@ -1,102 +1,56 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Re: wip-memstore and wip-objectstore
-Date: Wed, 23 Jul 2014 00:48:31 +0800
-Message-ID: <CACJqLybMDnmD85jgdFxiBmH3cJ5seogBiwWMzeehWezVjujyDg@mail.gmail.com>
-References: <alpine.DEB.2.00.1407220747400.15853@cobra.newdream.net>
-	<alpine.DEB.2.00.1407220847170.15853@cobra.newdream.net>
+From: Himangi Saraogi <himangi774@gmail.com>
+Subject: [PATCH] rbd: Use kmem_cache_free
+Date: Tue, 22 Jul 2014 23:41:30 +0530
+Message-ID: <20140722181130.GA3278@himangi-Dell>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f48.google.com ([74.125.82.48]:35585 "EHLO
-	mail-wg0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755990AbaGVQsc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Jul 2014 12:48:32 -0400
-Received: by mail-wg0-f48.google.com with SMTP id x13so8379451wgg.7
-        for <ceph-devel@vger.kernel.org>; Tue, 22 Jul 2014 09:48:31 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1407220847170.15853@cobra.newdream.net>
+Received: from mail-pa0-f51.google.com ([209.85.220.51]:42761 "EHLO
+	mail-pa0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750865AbaGVSLk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Jul 2014 14:11:40 -0400
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Yehuda Sadeh <yehuda@inktank.com>, Sage Weil <sage@inktank.com>, Alex Elder <elder@kernel.org>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Julia Lawall <julia.lawall@lip6.fr>
 
-Thanks, I will dive into it and fix it next.
+Free memory allocated using kmem_cache_zalloc using kmem_cache_free
+rather than kfree.
 
-On Tue, Jul 22, 2014 at 11:49 PM, Sage Weil <sweil@redhat.com> wrote:
-> Hi Haomai,
->
-> Hmm, one other thing: I'm testing the fix in wip-8701 and it is tripping
-> over the KeyValueStore test.  This
->
->  ./ceph_test_objectstore --gtest_filter=ObjectStore/StoreTest.BigRGWObjectName/1
->
-> fails with
->
->      0> 2014-07-22 08:45:25.640932 7fe617fff700 -1 *** Caught signal (Segmentation fault) **
->  in thread 7fe617fff700
->
->  ceph version 0.82-649-gc5732e4 (c5732e4aefbd80f29b766756478d79808f0245d7)
->  1: (ceph::BackTrace::BackTrace(int)+0x2d) [0xa09a7b]
->  2: ./ceph_test_objectstore() [0xb145b6]
->  3: (()+0x10340) [0x7fe621313340]
->  4: (std::pair<unsigned long const, ghobject_t>::pair(unsigned long const&, ghobject_t const&)+0x18) [0xadb710]
->  5: (std::map<unsigned long, ghobject_t, std::less<unsigned long>, std::allocator<std::pair<unsigned long const, ghobject_t> > >::operator[](unsigned long const&)+0x109) [0xad957f]
->  6: (RandomCache<ghobject_t, std::pair<coll_t, std::tr1::shared_ptr<StripObjectMap::StripObjectHeader> > >::trim_cache(unsigned long)+0xc2) [0xad7218]
->  7: (RandomCache<ghobject_t, std::pair<coll_t, std::tr1::shared_ptr<StripObjectMap::StripObjectHeader> > >::add(ghobject_t, std::pair<coll_t, std::tr1::shared_ptr<StripObjectMap::StripObjectHeader> >)+0x70) [0xad53a2]
->  8: (StripObjectMap::lookup_strip_header(coll_t const&, ghobject_t const&, std::tr1::shared_ptr<StripObjectMap::StripObjectHeader>*)+0x4d3) [0xab1fb1]
->  9: (KeyValueStore::BufferTransaction::lookup_cached_header(coll_t const&, ghobject_t const&, std::tr1::shared_ptr<StripObjectMap::StripObjectHeader>*, bool)+0x1dc) [0xab32c0]
->  10: (KeyValueStore::_remove(coll_t, ghobject_t const&, KeyValueStore::BufferTransaction&)+0x188) [0xac0472]
->  11: (KeyValueStore::_do_transaction(ObjectStore::Transaction&, KeyValueStore::BufferTransaction&, ThreadPool::TPHandle*)+0x632) [0xabba0c]
->  12: (KeyValueStore::_do_transactions(std::list<ObjectStore::Transaction*, std::allocator<ObjectStore::Transaction*> >&, unsigned long, ThreadPool::TPHandle*)+0x138) [0xabb2ee]
->  13: (KeyValueStore::_do_op(KeyValueStore::OpSequencer*, ThreadPool::TPHandle&)+0x1f5) [0xabac11]
->  14: (KeyValueStore::OpWQ::_process(KeyValueStore::OpSequencer*, ThreadPool::TPHandle&)+0x2f) [0xad3f23]
->  15: (ThreadPool::WorkQueue<KeyValueStore::OpSequencer>::_void_process(void*, ThreadPool::TPHandle&)+0x33) [0xadf645]
->  16: (ThreadPool::worker(ThreadPool::WorkThread*)+0x734) [0xb28f7c]
->  17: (ThreadPool::WorkThread::entry()+0x23) [0xb2d031]
->  18: (Thread::entry_wrapper()+0x79) [0xb21647]
->  19: (Thread::_entry_func(void*)+0x18) [0xb215c4]
->  20: (()+0x8182) [0x7fe62130b182]
->  21: (clone()+0x6d) [0x7fe61fc8330d]
->  NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
->
-> It's a new test (long file names and collection_move) that addresses an
-> issue with the FileStore, but KeyValueStore doesn't seem to like it
-> either...
->
-> Thanks!
-> sage
->
->
-> On Tue, 22 Jul 2014, Sage Weil wrote:
->
->> Hi Haomai,
->>
->> Do you mind looking at wip-memstore at
->>
->>       https://github.com/ceph/ceph/pull/2125
->>
->> A couple minor fixes and then we can enable it in ceph_test_objectstore.
->>
->> Also, I would love any feedback on wip-objectstore
->>
->>       https://github.com/ceph/ceph/pull/2124
->>
->> That one is RFC at this point.  I'm trying to simplify the ObjectStore
->> interface as much as possible.
->>
->> Thanks!
->> sage
->>
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
+The Coccinelle semantic patch that makes this change is as follows:
 
+// <smpl>
+@@
+expression x,E,c;
+@@
 
+ x = \(kmem_cache_alloc\|kmem_cache_zalloc\|kmem_cache_alloc_node\)(c,...)
+ ... when != x = E
+     when != &x
+?-kfree(x)
++kmem_cache_free(c,x)
+// </smpl>
 
+Signed-off-by: Himangi Saraogi <himangi774@gmail.com>
+Acked-by: Julia Lawall <julia.lawall@lip6.fr>
+---
+ drivers/block/rbd.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index b2c98c1..8381c54 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -1158,7 +1158,7 @@ static const char *rbd_segment_name(struct rbd_device *rbd_dev, u64 offset)
+ 	if (ret < 0 || ret > CEPH_MAX_OID_NAME_LEN) {
+ 		pr_err("error formatting segment name for #%llu (%d)\n",
+ 			segment, ret);
+-		kfree(name);
++		kmem_cache_free(rbd_segment_name_cache, name);
+ 		name = NULL;
+ 	}
+ 
 -- 
-Best Regards,
+1.9.1
 
-Wheat
