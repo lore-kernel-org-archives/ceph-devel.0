@@ -1,44 +1,65 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: Disabling CRUSH for erasure code and doing custom placement
-Date: Wed, 23 Jul 2014 15:57:51 -0700
-Message-ID: <CAPYLRzi9BWMeK51d=P3P1-Mv7FN6jE3OLNqYQsoX5C0JK=Ueug@mail.gmail.com>
-References: <CALUBZ__98nzUjucW9NmFKEHzPFvu0yY0X5yHEtFH7g9QkhqSAQ@mail.gmail.com>
-	<CAPYLRzgeb2DB_tJfRFvK1gk5XEYYd7mgHH5E5URqYsn_2bH4mQ@mail.gmail.com>
-	<CALUBZ_-gBR2KHMQcGe65+GDHE3xC+Fq9_J+DZLDqf+7LQHrq6g@mail.gmail.com>
-	<CAPYLRzhoiP7t81VG5FEgo53xP9GVMOu6e8zQdwU+HxF2gB7HRQ@mail.gmail.com>
-	<CALUBZ_-HxjMrni0Gtv_gs=nT1RGxTEYhZGmw1s=z5hkPT4kV3w@mail.gmail.com>
+From: Mark Nelson <mark.nelson@inktank.com>
+Subject: First attempt at rocksdb monitor store stress testing
+Date: Wed, 23 Jul 2014 18:14:27 -0500
+Message-ID: <53D041D3.3080203@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-we0-f180.google.com ([74.125.82.180]:52674 "EHLO
-	mail-we0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758447AbaGWW5w (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Jul 2014 18:57:52 -0400
-Received: by mail-we0-f180.google.com with SMTP id w61so1910500wes.39
-        for <ceph-devel@vger.kernel.org>; Wed, 23 Jul 2014 15:57:51 -0700 (PDT)
-In-Reply-To: <CALUBZ_-HxjMrni0Gtv_gs=nT1RGxTEYhZGmw1s=z5hkPT4kV3w@mail.gmail.com>
+Received: from mail-ig0-f182.google.com ([209.85.213.182]:36352 "EHLO
+	mail-ig0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751532AbaGWXOZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Jul 2014 19:14:25 -0400
+Received: by mail-ig0-f182.google.com with SMTP id c1so2034447igq.9
+        for <ceph-devel@vger.kernel.org>; Wed, 23 Jul 2014 16:14:25 -0700 (PDT)
+Received: from [192.168.1.3] (184-97-191-94.mpls.qwest.net. [184.97.191.94])
+        by mx.google.com with ESMTPSA id v8sm17145874igh.19.2014.07.23.16.14.23
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
+        Wed, 23 Jul 2014 16:14:24 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Shayan Saeed <shayansaeed93@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Tue, Jul 22, 2014 at 2:48 PM, Shayan Saeed <shayansaeed93@gmail.com> wrote:
-> Another question along the same lines. For erasure code, same as
-> replicated files, the request goes through the primary member. Isn't
-> it possible to send the request to any of the members and get the
-> file. While this might have kept things neater on the development side
-> and might have made some sense for replicated system, it makes the
-> availability and load balancing worse for erasure coded files. I see a
-> lot of requests coming in for a specific object which makes the
-> primary osd hosting it go down sometimes and then all the requests
-> have to wait another osd comes up and repair is done.  For load
-> balancing purposes, is there a way to make the requests go to someone
-> else without hinderance and get the object without waiting for repair.
+Hi Guys,
 
-Not really. This would have all the same consistency issues of having
-replicated objects read from multiple replicas, plus the problem of
-needing to get a consistent view across multiple machines instead of a
-single machine. If an OSD is getting overloaded by clients, that's the
-bug and it should be addressed as one.
--Greg
-Software Engineer #42 @ http://inktank.com | http://ceph.com
+So I've been interested lately in leveldb 99th percentile latency (and 
+the amount of write amplification we are seeing) with leveldb. Joao 
+mentioned he has written a tool called mon-store-stress in 
+wip-leveldb-misc to try to provide a means to roughly guess at what's 
+happening on the mons under heavy load.  I cherry-picked it over to 
+wip-rocksdb and after a couple of hacks was able to get everything built 
+and running with some basic tests.  There was little tuning done and I 
+don't know how realistic this workload is, so don't assume this means 
+anything yet, but some initial results are here:
+
+http://nhm.ceph.com/mon-store-stress/First%20Attempt.pdf
+
+Command that was used to run the tests:
+
+./ceph-test-mon-store-stress --mon-keyvaluedb <leveldb|rocksdb> 
+--write-min-size 50K --write-max-size 2M --percent-write 70 
+--percent-read 30 --keep-state --test-seed 1406137270 --stop-at 5000 foo
+
+The most interesting bit right now is that rocksdb seems to be hanging 
+in the middle of the test (left it running for several hours).  CPU 
+usage on one core was quite high during the hang.  Profiling using perf 
+with dwarf symbols I see:
+
+-  49.14%  ceph-test-mon-s  ceph-test-mon-store-stress  [.] unsigned int 
+rocksdb::crc32c::ExtendImpl<&rocksdb::crc32c::Fast_CRC32>(unsigned int, 
+char const*, unsigned long)
+    - unsigned int 
+rocksdb::crc32c::ExtendImpl<&rocksdb::crc32c::Fast_CRC32>(unsigned int, 
+char const*, unsigned long)
+         51.70% rocksdb::ReadBlockContents(rocksdb::RandomAccessFile*, 
+rocksdb::Footer const&, rocksdb::ReadOptions const&, 
+rocksdb::BlockHandle const&, rocksdb::BlockContents*, rocksdb::Env*, bool)
+         48.30% 
+rocksdb::BlockBasedTableBuilder::WriteRawBlock(rocksdb::Slice const&, 
+rocksdb::CompressionType, rocksdb::BlockHandle*)
+
+Not sure what's going on yet, may need to try to enable 
+logging/debugging in rocksdb.  Thoughts/Suggestions welcome. :)
+
+Mark
