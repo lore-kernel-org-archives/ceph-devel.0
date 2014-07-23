@@ -1,51 +1,72 @@
-From: Himangi Saraogi <himangi774@gmail.com>
-Subject: [PATCH] ceph: convert comma to semicolon
-Date: Wed, 23 Jul 2014 20:11:11 +0530
-Message-ID: <20140723144111.GA3190@himangi-Dell>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: [PATCH] os/FileJournal: Update the journal header when closing
+ journal
+Date: Wed, 23 Jul 2014 10:38:58 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1407231037360.15853@cobra.newdream.net>
+References: <6AA21C22F0A5DA478922644AD2EC308C895E17@SHSMSX101.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-Sender: linux-kernel-owner@vger.kernel.org
-To: Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: julia.lawall@lip6.fr
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:34707 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932289AbaGWRi7 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Jul 2014 13:38:59 -0400
+In-Reply-To: <6AA21C22F0A5DA478922644AD2EC308C895E17@SHSMSX101.ccr.corp.intel.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "Ma, Jianpeng" <jianpeng.ma@intel.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Replace a comma between expression statements by a semicolon. This changes
-the semantics of the code, but given the current indentation appears to be
-what is intended.
+Hi,
 
-A simplified version of the Coccinelle semantic patch that performs this
-transformation is as follows:
-// <smpl>
-@r@
-expression e1,e2;
-@@
+Pushed this to wip-journal-header, see
 
- e1
--,
-+;
- e2;
-// </smpl>
+	https://github.com/ceph/ceph/pull/2139
 
-Signed-off-by: Himangi Saraogi <himangi774@gmail.com>
-Acked-by: Julia Lawall <julia.lawall@lip6.fr>
----
- fs/ceph/caps.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+We'll run this through the regression suite before merging.
 
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index 1fde164..6d1cd45 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -3277,7 +3277,7 @@ int ceph_encode_inode_release(void **p, struct inode *inode,
- 			rel->ino = cpu_to_le64(ceph_ino(inode));
- 			rel->cap_id = cpu_to_le64(cap->cap_id);
- 			rel->seq = cpu_to_le32(cap->seq);
--			rel->issue_seq = cpu_to_le32(cap->issue_seq),
-+			rel->issue_seq = cpu_to_le32(cap->issue_seq);
- 			rel->mseq = cpu_to_le32(cap->mseq);
- 			rel->caps = cpu_to_le32(cap->implemented);
- 			rel->wanted = cpu_to_le32(cap->mds_wanted);
--- 
-1.9.1
+Thanks!
+sage
+
+
+On Wed, 23 Jul 2014, Ma, Jianpeng wrote:
+
+> When closing journal, it should check must_write_header and update
+> journal header if must_write_header alreay set.
+> It can reduce the nosense journal-replay after restarting osd.
+> 
+> Signed-off-by: Ma Jianpeng <jianpeng.ma@intel.com>
+> ---
+>  src/os/FileJournal.cc | 3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
+> 
+> diff --git a/src/os/FileJournal.cc b/src/os/FileJournal.cc
+> index 7eb7927..5649e6d 100644
+> --- a/src/os/FileJournal.cc
+> +++ b/src/os/FileJournal.cc
+> @@ -544,6 +544,7 @@ void FileJournal::close()
+> 
+>    // close
+>    assert(writeq_empty());
+> +  assert(!must_write_header);
+>    assert(fd >= 0);
+>    VOID_TEMP_FAILURE_RETRY(::close(fd));
+>    fd = -1;
+> @@ -1102,7 +1103,7 @@ void FileJournal::write_thread_entry()
+>    while (1) {
+>      {
+>        Mutex::Locker locker(writeq_lock);
+> -      if (writeq.empty()) {
+> +      if (writeq.empty() && !must_write_header) {
+>         if (write_stop)
+>           break;
+>         dout(20) << "write_thread_entry going to sleep" << dendl;
+> --
+> 1.9.1
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
