@@ -1,84 +1,44 @@
-From: Himangi Saraogi <himangi774@gmail.com>
-Subject: [PATCH] rbd: Use rbd_segment_name_free
-Date: Thu, 24 Jul 2014 03:17:07 +0530
-Message-ID: <20140723214707.GA8100@himangi-Dell>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: Disabling CRUSH for erasure code and doing custom placement
+Date: Wed, 23 Jul 2014 15:57:51 -0700
+Message-ID: <CAPYLRzi9BWMeK51d=P3P1-Mv7FN6jE3OLNqYQsoX5C0JK=Ueug@mail.gmail.com>
+References: <CALUBZ__98nzUjucW9NmFKEHzPFvu0yY0X5yHEtFH7g9QkhqSAQ@mail.gmail.com>
+	<CAPYLRzgeb2DB_tJfRFvK1gk5XEYYd7mgHH5E5URqYsn_2bH4mQ@mail.gmail.com>
+	<CALUBZ_-gBR2KHMQcGe65+GDHE3xC+Fq9_J+DZLDqf+7LQHrq6g@mail.gmail.com>
+	<CAPYLRzhoiP7t81VG5FEgo53xP9GVMOu6e8zQdwU+HxF2gB7HRQ@mail.gmail.com>
+	<CALUBZ_-HxjMrni0Gtv_gs=nT1RGxTEYhZGmw1s=z5hkPT4kV3w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f172.google.com ([209.85.192.172]:60068 "EHLO
-	mail-pd0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933568AbaGWVrP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Jul 2014 17:47:15 -0400
-Content-Disposition: inline
+Received: from mail-we0-f180.google.com ([74.125.82.180]:52674 "EHLO
+	mail-we0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758447AbaGWW5w (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Jul 2014 18:57:52 -0400
+Received: by mail-we0-f180.google.com with SMTP id w61so1910500wes.39
+        for <ceph-devel@vger.kernel.org>; Wed, 23 Jul 2014 15:57:51 -0700 (PDT)
+In-Reply-To: <CALUBZ_-HxjMrni0Gtv_gs=nT1RGxTEYhZGmw1s=z5hkPT4kV3w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh <yehuda@inktank.com>, Sage Weil <sage@inktank.com>, Alex Elder <elder@kernel.org>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Julia Lawall <julia.lawall@lip6.fr>
+To: Shayan Saeed <shayansaeed93@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Free memory allocated using kmem_cache_zalloc using kmem_cache_free
-rather than kfree. The helper rbd_segment_name_free does the job here.
-Its position is shifted above the calling function.
+On Tue, Jul 22, 2014 at 2:48 PM, Shayan Saeed <shayansaeed93@gmail.com> wrote:
+> Another question along the same lines. For erasure code, same as
+> replicated files, the request goes through the primary member. Isn't
+> it possible to send the request to any of the members and get the
+> file. While this might have kept things neater on the development side
+> and might have made some sense for replicated system, it makes the
+> availability and load balancing worse for erasure coded files. I see a
+> lot of requests coming in for a specific object which makes the
+> primary osd hosting it go down sometimes and then all the requests
+> have to wait another osd comes up and repair is done.  For load
+> balancing purposes, is there a way to make the requests go to someone
+> else without hinderance and get the object without waiting for repair.
 
-The Coccinelle semantic patch that detects this change is as follows:
-
-// <smpl>
-@@
-expression x,E,c;
-@@
-
- x = \(kmem_cache_alloc\|kmem_cache_zalloc\|kmem_cache_alloc_node\)(c,...)
- ... when != x = E
-     when != &x
-?-kfree(x)
-+kmem_cache_free(c,x)
-// </smpl>
-
-Signed-off-by: Himangi Saraogi <himangi774@gmail.com>
-Acked-by: Julia Lawall <julia.lawall@lip6.fr>
----
- drivers/block/rbd.c | 16 ++++++++--------
- 1 file changed, 8 insertions(+), 8 deletions(-)
-
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index b2c98c1..1b86b5e 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -1139,6 +1139,13 @@ static void rbd_dev_mapping_clear(struct rbd_device *rbd_dev)
- 	rbd_dev->mapping.features = 0;
- }
- 
-+static void rbd_segment_name_free(const char *name)
-+{
-+	/* The explicit cast here is needed to drop the const qualifier */
-+
-+	kmem_cache_free(rbd_segment_name_cache, (void *)name);
-+}
-+
- static const char *rbd_segment_name(struct rbd_device *rbd_dev, u64 offset)
- {
- 	char *name;
-@@ -1158,20 +1165,13 @@ static const char *rbd_segment_name(struct rbd_device *rbd_dev, u64 offset)
- 	if (ret < 0 || ret > CEPH_MAX_OID_NAME_LEN) {
- 		pr_err("error formatting segment name for #%llu (%d)\n",
- 			segment, ret);
--		kfree(name);
-+		rbd_segment_name_free(name);
- 		name = NULL;
- 	}
- 
- 	return name;
- }
- 
--static void rbd_segment_name_free(const char *name)
--{
--	/* The explicit cast here is needed to drop the const qualifier */
--
--	kmem_cache_free(rbd_segment_name_cache, (void *)name);
--}
--
- static u64 rbd_segment_offset(struct rbd_device *rbd_dev, u64 offset)
- {
- 	u64 segment_size = (u64) 1 << rbd_dev->header.obj_order;
--- 
-1.9.1
-
+Not really. This would have all the same consistency issues of having
+replicated objects read from multiple replicas, plus the problem of
+needing to get a consistent view across multiple machines instead of a
+single machine. If an OSD is getting overloaded by clients, that's the
+bug and it should be addressed as one.
+-Greg
+Software Engineer #42 @ http://inktank.com | http://ceph.com
