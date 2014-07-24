@@ -1,67 +1,91 @@
-From: =?UTF-8?B?VG9yYWxmIEbDtnJzdGVy?= <toralf.foerster@gmx.de>
-Subject: Re: sizeof (struct tYpO *) : it is just a typo or rather a bug ?
-Date: Thu, 24 Jul 2014 20:37:52 +0200
-Message-ID: <53D15280.5070407@gmx.de>
-References: <53D14E60.1010105@gmx.de> <CALFYKtAyB6xGEgJ65Ti5vPx9xf4ipX9__FZBwosBYg1y9z7cKg@mail.gmail.com>
+From: Alex Elder <elder@ieee.org>
+Subject: Re: [PATCH 8/8] rbd: take snap_id into account when reading in parent
+ info
+Date: Thu, 24 Jul 2014 13:43:35 -0500
+Message-ID: <53D153D7.7030804@ieee.org>
+References: <1406191369-6746-1-git-send-email-ilya.dryomov@inktank.com> <1406191369-6746-9-git-send-email-ilya.dryomov@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mout.gmx.net ([212.227.15.19]:51011 "EHLO mout.gmx.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757603AbaGXSh4 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 24 Jul 2014 14:37:56 -0400
-In-Reply-To: <CALFYKtAyB6xGEgJ65Ti5vPx9xf4ipX9__FZBwosBYg1y9z7cKg@mail.gmail.com>
+Received: from mail-ig0-f182.google.com ([209.85.213.182]:34329 "EHLO
+	mail-ig0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933349AbaGXSnf (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Jul 2014 14:43:35 -0400
+Received: by mail-ig0-f182.google.com with SMTP id c1so3021854igq.15
+        for <ceph-devel@vger.kernel.org>; Thu, 24 Jul 2014 11:43:34 -0700 (PDT)
+In-Reply-To: <1406191369-6746-9-git-send-email-ilya.dryomov@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <ilya.dryomov@inktank.com>
-Cc: linux-ia64@vger.kernel.org, Ceph Development <ceph-devel@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>
+To: Ilya Dryomov <ilya.dryomov@inktank.com>, ceph-devel@vger.kernel.org
 
-On 07/24/2014 08:33 PM, Ilya Dryomov wrote:
-> On Thu, Jul 24, 2014 at 10:20 PM, Toralf F=C3=B6rster <toralf.foerste=
-r@gmx.de> wrote:
->> Inspired by this "typo" fix
->> http://article.gmane.org/gmane.linux.kernel/1754640
->> I grep'ed the current git tree of linus for similar issues.
->>
->> For these 4 places I'm wondering where the appropriate struct defini=
-tion is located :
->>
->> arch/ia64/sn/kernel/io_acpi_init.c:         sizeof(struct pci_devdev=
-_info *)) {
->> tools/perf/builtin-sched.c:     sched->tasks =3D realloc(sched->task=
-s, sched->nr_tasks * sizeof(struct task_task *));
->> fs/ceph/xattr.c:                xattrs =3D kcalloc(numattr, sizeof(s=
-truct ceph_xattr *),
->> fs/ceph/xattr.c:                memset(xattrs, 0, numattr*sizeof(str=
-uct ceph_xattr *));
->=20
-> Heh, the ceph one is a five year old typo..  Looks like it should be
-> struct ceph_inode_xattr, I'll fix it up.  I'm curious though, how did
-> you grep for these?
->=20
-> Thanks,
->=20
->                 Ilya
->=20
+On 07/24/2014 03:42 AM, Ilya Dryomov wrote:
+> If we are mapping a snapshot, we must read in the parent_overlap value
+> of that snapshot instead of that of the base image.  Not doing so may
+> in particular result in us returning zeros instead of user data:
+> 
+>     # cat overlap-snap.sh
+>     #!/bin/bash
+>     rbd create --size 10 --image-format 2 foo
+>     FOO_DEV=$(rbd map foo)
+>     dd if=/dev/urandom of=/dev/rbd0 bs=1M &>/dev/null
+>     echo "Base image"
+>     dd if=$FOO_DEV bs=1 count=16 skip=$(((4 << 20) - 8)) 2>/dev/null | xxd
+>     rbd snap create foo@snap
+>     rbd snap protect foo@snap
+>     rbd clone foo@snap bar
+>     rbd snap create bar@snap
+>     BAR_DEV=$(rbd map bar@snap)
+>     echo "Snapshot"
+>     dd if=$BAR_DEV bs=1 count=16 skip=$(((4 << 20) - 8)) 2>/dev/null | xxd
+>     rbd resize --allow-shrink --size 4 bar
+>     echo "Snapshot after base image resize"
+>     dd if=$BAR_DEV bs=1 count=16 skip=$(((4 << 20) - 8)) 2>/dev/null | xxd
+> 
+>     # ./overlap-snap.sh
+>     Base image
+>     0000000: e781 e33b d34b 2225 6034 2845 a2e3 36ed  ...;.K"%`4(E..6.
+>     Snapshot
+>     0000000: e781 e33b d34b 2225 6034 2845 a2e3 36ed  ...;.K"%`4(E..6.
+>     Resizing image: 100% complete...done.
+>     Snapshot after base image resize
+>     0000000: e781 e33b d34b 2225 0000 0000 0000 0000  ...;.K"%........
+> 
+> Even though bar@snap was taken with the old bar parent_overlap (8M),
+> reads from bar@snap beyond the new bar parent_overlap (4M) return
+> zeroes.  Fix it.
+> 
+> Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
+> ---
+>  drivers/block/rbd.c |    2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index c4606987e9d1..cbc89fa9a677 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -4020,7 +4020,7 @@ static int rbd_dev_v2_parent_info(struct rbd_device *rbd_dev)
+>  		goto out_err;
+>  	}
+>  
+> -	snapid = cpu_to_le64(CEPH_NOSNAP);
+> +	snapid = cpu_to_le64(rbd_dev->spec->snap_id);
 
-1:
-	grep -Hr "sizeof[ *(]struct .* \*.)"  | cut -f2- -d':' | tee ~/tmp/out
+Well that's just an outright bug.  It's been there since the
+original commit that added parent support:
+    86b00e0 rbd: get parent spec for version 2 images
+Parent images *must* be snapshots, so this was never
+right.
 
-2:
-	cat ~/tmp/out | perl -wane 'chomp(); my ($left, $right) =3D split (/si=
-zeof\(/); print $right, "\n";' | cut -f2 -d' ' | sort -u | cut -f1 -d')=
-' | grep -v '^+' | while read i; do echo $i; git grep -q "struct $i {" =
-|| echo error; echo; done
+I bet that was hard to figure out...
 
-3:
-	ignore false positives
+Looks good.
 
---=20
-Toralf
+Reviewed-by: Alex Elder <elder@linaro.org>
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+>  	ret = rbd_obj_method_sync(rbd_dev, rbd_dev->header_name,
+>  				"rbd", "get_parent",
+>  				&snapid, sizeof (snapid),
+> 
+
