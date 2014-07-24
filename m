@@ -1,54 +1,76 @@
-From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: Re: Read from clones
-Date: Thu, 24 Jul 2014 12:56:51 +0400
-Message-ID: <CALFYKtD4B4Kpi5nPoOZ2Jc1gOnfPSUrbixDhiOCuin_eePL=kA@mail.gmail.com>
+From: Pavan Rallabhandi <Pavan.Rallabhandi@sandisk.com>
+Subject: RE: Read from clones
+Date: Thu, 24 Jul 2014 08:58:04 +0000
+Message-ID: <68A06213B74F1742A2C48216AE1BB6B803FE88C5@SACMBXIP02.sdcorp.global.sandisk.com>
 References: <3ADFB25A75C80A4BA0183C65FE86C53404934AB4@SACMBXIP02.sdcorp.global.sandisk.com>
+ <CALFYKtD4B4Kpi5nPoOZ2Jc1gOnfPSUrbixDhiOCuin_eePL=kA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qg0-f47.google.com ([209.85.192.47]:60802 "EHLO
-	mail-qg0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750797AbaGXI4w convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Jul 2014 04:56:52 -0400
-Received: by mail-qg0-f47.google.com with SMTP id i50so2871876qgf.6
-        for <ceph-devel@vger.kernel.org>; Thu, 24 Jul 2014 01:56:51 -0700 (PDT)
-In-Reply-To: <3ADFB25A75C80A4BA0183C65FE86C53404934AB4@SACMBXIP02.sdcorp.global.sandisk.com>
+Received: from mail-by2lp0238.outbound.protection.outlook.com ([207.46.163.238]:56491
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1750843AbaGXI6J (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 24 Jul 2014 04:58:09 -0400
+In-Reply-To: <CALFYKtD4B4Kpi5nPoOZ2Jc1gOnfPSUrbixDhiOCuin_eePL=kA@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Lakshminarayana Mavunduri <Lakshminarayana.Mavunduri@sandisk.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Pavan Rallabhandi <Pavan.Rallabhandi@sandisk.com>
+To: Ilya Dryomov <ilya.dryomov@inktank.com>, Lakshminarayana Mavunduri <Lakshminarayana.Mavunduri@sandisk.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, Jul 15, 2014 at 9:44 AM, Lakshminarayana Mavunduri
-<Lakshminarayana.Mavunduri@sandisk.com> wrote:
-> Hi,
->
-> Following the below set of steps, we are seeing data loss while reading from clones.
->
-> 1)Create an image with image format 2 (in this case we have made the size to be 1024MB).
->         rbd create image1 --size 1024 --image-format 2
-> 2)Map the image and write 1024MB worth of data to it.
-> 3)Create a snapshot for the image created in step 1)
->         rbd snap create image1@snap1
-> 4)Create a clone for the snapshot created in step 3)
->         rbd clone image1@snap1 clone1
-> 5)Create a snapshot for the clone created in step 4)
->         rbd snap create clone1@snap2
-> 6)Create a clone for the snapshot created in step 5)
->         rbd clone clone1@snap2 clone2
-> 7)Shrink the size of the clone created in step 4) (in this case we have made it to half of its size)
->         rbd resize -s 512 --allow-shrink clone1
-> 8)Map the clone created in step 6) and try reading 1024MB worth of data.
-> 9)Our observation is that, only the first 512MB worth data is intact, the rest is not copied over. (In fact, it's only the parent overlap worth data of clone1 that is always copied over!)
->
-> After the above set of steps, the parent overlap for clone2 would be 1024MB, whereas the parent overlap for clone1 would be 512MB. Our understanding is, since clone2's parent snapshot is taken before a shrink is performed on clone1, any reads worth parent overlap data on clone2 should be serviced from it's parent (at least, as long as there are no overwrites done on clone2, which is the case here), and we are not finding that to be true in this case.
->
-> To augment our theory, if the parent image (a base RBD image, which is not a clone) is shrinked, any reads on the clones that are created before the shrink, are as expected to our understanding.
->
-> Wanted to check if this is indeed a bug or if we are missing anything here. The tests are run across ceph version 0.80.
-
-FWIW, I just pushed a fix for this - wip-overlap in ceph-client.git.
-
-Thanks,
-
-                Ilya
+VGhhbmtzIElseWEhDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBJbHlhIERy
+eW9tb3YgW21haWx0bzppbHlhLmRyeW9tb3ZAaW5rdGFuay5jb21dDQpTZW50OiBUaHVyc2RheSwg
+SnVseSAyNCwgMjAxNCAyOjI3IFBNDQpUbzogTGFrc2htaW5hcmF5YW5hIE1hdnVuZHVyaQ0KQ2M6
+IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnOyBQYXZhbiBSYWxsYWJoYW5kaQ0KU3ViamVjdDog
+UmU6IFJlYWQgZnJvbSBjbG9uZXMNCg0KT24gVHVlLCBKdWwgMTUsIDIwMTQgYXQgOTo0NCBBTSwg
+TGFrc2htaW5hcmF5YW5hIE1hdnVuZHVyaSA8TGFrc2htaW5hcmF5YW5hLk1hdnVuZHVyaUBzYW5k
+aXNrLmNvbT4gd3JvdGU6DQo+IEhpLA0KPg0KPiBGb2xsb3dpbmcgdGhlIGJlbG93IHNldCBvZiBz
+dGVwcywgd2UgYXJlIHNlZWluZyBkYXRhIGxvc3Mgd2hpbGUgcmVhZGluZyBmcm9tIGNsb25lcy4N
+Cj4NCj4gMSlDcmVhdGUgYW4gaW1hZ2Ugd2l0aCBpbWFnZSBmb3JtYXQgMiAoaW4gdGhpcyBjYXNl
+IHdlIGhhdmUgbWFkZSB0aGUgc2l6ZSB0byBiZSAxMDI0TUIpLg0KPiAgICAgICAgIHJiZCBjcmVh
+dGUgaW1hZ2UxIC0tc2l6ZSAxMDI0IC0taW1hZ2UtZm9ybWF0IDIgMilNYXAgdGhlIGltYWdlDQo+
+IGFuZCB3cml0ZSAxMDI0TUIgd29ydGggb2YgZGF0YSB0byBpdC4NCj4gMylDcmVhdGUgYSBzbmFw
+c2hvdCBmb3IgdGhlIGltYWdlIGNyZWF0ZWQgaW4gc3RlcCAxKQ0KPiAgICAgICAgIHJiZCBzbmFw
+IGNyZWF0ZSBpbWFnZTFAc25hcDENCj4gNClDcmVhdGUgYSBjbG9uZSBmb3IgdGhlIHNuYXBzaG90
+IGNyZWF0ZWQgaW4gc3RlcCAzKQ0KPiAgICAgICAgIHJiZCBjbG9uZSBpbWFnZTFAc25hcDEgY2xv
+bmUxDQo+IDUpQ3JlYXRlIGEgc25hcHNob3QgZm9yIHRoZSBjbG9uZSBjcmVhdGVkIGluIHN0ZXAg
+NCkNCj4gICAgICAgICByYmQgc25hcCBjcmVhdGUgY2xvbmUxQHNuYXAyDQo+IDYpQ3JlYXRlIGEg
+Y2xvbmUgZm9yIHRoZSBzbmFwc2hvdCBjcmVhdGVkIGluIHN0ZXAgNSkNCj4gICAgICAgICByYmQg
+Y2xvbmUgY2xvbmUxQHNuYXAyIGNsb25lMg0KPiA3KVNocmluayB0aGUgc2l6ZSBvZiB0aGUgY2xv
+bmUgY3JlYXRlZCBpbiBzdGVwIDQpIChpbiB0aGlzIGNhc2Ugd2UgaGF2ZSBtYWRlIGl0IHRvIGhh
+bGYgb2YgaXRzIHNpemUpDQo+ICAgICAgICAgcmJkIHJlc2l6ZSAtcyA1MTIgLS1hbGxvdy1zaHJp
+bmsgY2xvbmUxIDgpTWFwIHRoZSBjbG9uZQ0KPiBjcmVhdGVkIGluIHN0ZXAgNikgYW5kIHRyeSBy
+ZWFkaW5nIDEwMjRNQiB3b3J0aCBvZiBkYXRhLg0KPiA5KU91ciBvYnNlcnZhdGlvbiBpcyB0aGF0
+LCBvbmx5IHRoZSBmaXJzdCA1MTJNQiB3b3J0aCBkYXRhIGlzIGludGFjdCwNCj4gdGhlIHJlc3Qg
+aXMgbm90IGNvcGllZCBvdmVyLiAoSW4gZmFjdCwgaXQncyBvbmx5IHRoZSBwYXJlbnQgb3Zlcmxh
+cA0KPiB3b3J0aCBkYXRhIG9mIGNsb25lMSB0aGF0IGlzIGFsd2F5cyBjb3BpZWQgb3ZlciEpDQo+
+DQo+IEFmdGVyIHRoZSBhYm92ZSBzZXQgb2Ygc3RlcHMsIHRoZSBwYXJlbnQgb3ZlcmxhcCBmb3Ig
+Y2xvbmUyIHdvdWxkIGJlIDEwMjRNQiwgd2hlcmVhcyB0aGUgcGFyZW50IG92ZXJsYXAgZm9yIGNs
+b25lMSB3b3VsZCBiZSA1MTJNQi4gT3VyIHVuZGVyc3RhbmRpbmcgaXMsIHNpbmNlIGNsb25lMidz
+IHBhcmVudCBzbmFwc2hvdCBpcyB0YWtlbiBiZWZvcmUgYSBzaHJpbmsgaXMgcGVyZm9ybWVkIG9u
+IGNsb25lMSwgYW55IHJlYWRzIHdvcnRoIHBhcmVudCBvdmVybGFwIGRhdGEgb24gY2xvbmUyIHNo
+b3VsZCBiZSBzZXJ2aWNlZCBmcm9tIGl0J3MgcGFyZW50IChhdCBsZWFzdCwgYXMgbG9uZyBhcyB0
+aGVyZSBhcmUgbm8gb3ZlcndyaXRlcyBkb25lIG9uIGNsb25lMiwgd2hpY2ggaXMgdGhlIGNhc2Ug
+aGVyZSksIGFuZCB3ZSBhcmUgbm90IGZpbmRpbmcgdGhhdCB0byBiZSB0cnVlIGluIHRoaXMgY2Fz
+ZS4NCj4NCj4gVG8gYXVnbWVudCBvdXIgdGhlb3J5LCBpZiB0aGUgcGFyZW50IGltYWdlIChhIGJh
+c2UgUkJEIGltYWdlLCB3aGljaCBpcyBub3QgYSBjbG9uZSkgaXMgc2hyaW5rZWQsIGFueSByZWFk
+cyBvbiB0aGUgY2xvbmVzIHRoYXQgYXJlIGNyZWF0ZWQgYmVmb3JlIHRoZSBzaHJpbmssIGFyZSBh
+cyBleHBlY3RlZCB0byBvdXIgdW5kZXJzdGFuZGluZy4NCj4NCj4gV2FudGVkIHRvIGNoZWNrIGlm
+IHRoaXMgaXMgaW5kZWVkIGEgYnVnIG9yIGlmIHdlIGFyZSBtaXNzaW5nIGFueXRoaW5nIGhlcmUu
+IFRoZSB0ZXN0cyBhcmUgcnVuIGFjcm9zcyBjZXBoIHZlcnNpb24gMC44MC4NCg0KRldJVywgSSBq
+dXN0IHB1c2hlZCBhIGZpeCBmb3IgdGhpcyAtIHdpcC1vdmVybGFwIGluIGNlcGgtY2xpZW50Lmdp
+dC4NCg0KVGhhbmtzLA0KDQogICAgICAgICAgICAgICAgSWx5YQ0KDQpfX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fXw0KDQpQTEVBU0UgTk9URTogVGhlIGluZm9ybWF0aW9uIGNvbnRhaW5l
+ZCBpbiB0aGlzIGVsZWN0cm9uaWMgbWFpbCBtZXNzYWdlIGlzIGludGVuZGVkIG9ubHkgZm9yIHRo
+ZSB1c2Ugb2YgdGhlIGRlc2lnbmF0ZWQgcmVjaXBpZW50KHMpIG5hbWVkIGFib3ZlLiBJZiB0aGUg
+cmVhZGVyIG9mIHRoaXMgbWVzc2FnZSBpcyBub3QgdGhlIGludGVuZGVkIHJlY2lwaWVudCwgeW91
+IGFyZSBoZXJlYnkgbm90aWZpZWQgdGhhdCB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIG1lc3NhZ2Ug
+aW4gZXJyb3IgYW5kIHRoYXQgYW55IHJldmlldywgZGlzc2VtaW5hdGlvbiwgZGlzdHJpYnV0aW9u
+LCBvciBjb3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBpcyBzdHJpY3RseSBwcm9oaWJpdGVkLiBJZiB5
+b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGNvbW11bmljYXRpb24gaW4gZXJyb3IsIHBsZWFzZSBub3Rp
+ZnkgdGhlIHNlbmRlciBieSB0ZWxlcGhvbmUgb3IgZS1tYWlsIChhcyBzaG93biBhYm92ZSkgaW1t
+ZWRpYXRlbHkgYW5kIGRlc3Ryb3kgYW55IGFuZCBhbGwgY29waWVzIG9mIHRoaXMgbWVzc2FnZSBp
+biB5b3VyIHBvc3Nlc3Npb24gKHdoZXRoZXIgaGFyZCBjb3BpZXMgb3IgZWxlY3Ryb25pY2FsbHkg
+c3RvcmVkIGNvcGllcykuDQoNCg==
