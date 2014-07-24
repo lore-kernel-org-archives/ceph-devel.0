@@ -1,52 +1,47 @@
-From: Alex Elder <elder@ieee.org>
-Subject: Re: [PATCH 3/8] rbd: remove unnecessary asserts in rbd_dev_image_probe()
-Date: Thu, 24 Jul 2014 07:40:00 -0500
-Message-ID: <53D0FEA0.9020900@ieee.org>
-References: <1406191369-6746-1-git-send-email-ilya.dryomov@inktank.com> <1406191369-6746-4-git-send-email-ilya.dryomov@inktank.com>
+From: Ilya Dryomov <ilya.dryomov@inktank.com>
+Subject: Re: [PATCH 1/8] rbd: show the entire chain of parent images
+Date: Thu, 24 Jul 2014 16:45:14 +0400
+Message-ID: <CALFYKtAYEC_KOLFG6ahER_DJq6vZ4+Ap+G8+gD+aWbt-zRW5hA@mail.gmail.com>
+References: <1406191369-6746-1-git-send-email-ilya.dryomov@inktank.com>
+	<1406191369-6746-2-git-send-email-ilya.dryomov@inktank.com>
+	<53D0FCAC.3030801@ieee.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f171.google.com ([209.85.213.171]:64160 "EHLO
-	mail-ig0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758526AbaGXMkB (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Jul 2014 08:40:01 -0400
-Received: by mail-ig0-f171.google.com with SMTP id l13so6398411iga.10
-        for <ceph-devel@vger.kernel.org>; Thu, 24 Jul 2014 05:40:00 -0700 (PDT)
-In-Reply-To: <1406191369-6746-4-git-send-email-ilya.dryomov@inktank.com>
+Received: from mail-qa0-f50.google.com ([209.85.216.50]:51914 "EHLO
+	mail-qa0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758059AbaGXMpP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Jul 2014 08:45:15 -0400
+Received: by mail-qa0-f50.google.com with SMTP id s7so2828532qap.37
+        for <ceph-devel@vger.kernel.org>; Thu, 24 Jul 2014 05:45:15 -0700 (PDT)
+In-Reply-To: <53D0FCAC.3030801@ieee.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <ilya.dryomov@inktank.com>, ceph-devel@vger.kernel.org
+To: Alex Elder <elder@ieee.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On 07/24/2014 03:42 AM, Ilya Dryomov wrote:
-> spec->image_id assert doesn't buy us much and image_format is asserted
-> in rbd_dev_header_name() and rbd_dev_header_info() anyway.
+On Thu, Jul 24, 2014 at 4:31 PM, Alex Elder <elder@ieee.org> wrote:
+> On 07/24/2014 03:42 AM, Ilya Dryomov wrote:
+>> Make /sys/bus/rbd/devices/<id>/parent show the entire chain of parent
+>> images.  While at it, kernel sprintf() doesn't return negative values,
+>> casting to unsigned long long is no longer necessary and there is no
+>> good reason to split into multiple sprintf() calls.
+>
+> I like the use of a single snprintf() call, it is much less
+> cumbersome.
+>
+> The reason I always cast u64 values to (unsigned long long)
+> in printf() calls is because on some 64-bit architectures,
+> u64 is defined as simply (unsigned long), so without the
+> cast they spit out warnings.  I hate this, but it is reality
+> (see include/asm-generic/{int-l64.h,int-ll64.h}).  You can
+> alternatively use %PRIu64 rather than %llu in your format
+> strings, but I think I hate that more.  Anyway, if you want
+> to avoid warnings on all architectures you should fix that.
 
-Looks good.  Over time I'm sure there are more assertions
-that can go away; they were most useful during rapid development
-when confidence in certain things was lower.
+IIRC all architectures nowadays use int-ll64.h.  int-l64.h is used only
+in userspace for compatibility.
 
-Reviewed-by: Alex Elder <elder@linaro.org>
+Thanks,
 
-
-> 
-> Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
-> ---
->  drivers/block/rbd.c |    2 --
->  1 file changed, 2 deletions(-)
-> 
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 0d3be608f16f..4541f6027e4a 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -5143,8 +5143,6 @@ static int rbd_dev_image_probe(struct rbd_device *rbd_dev, bool mapping)
->  	ret = rbd_dev_image_id(rbd_dev);
->  	if (ret)
->  		return ret;
-> -	rbd_assert(rbd_dev->spec->image_id);
-> -	rbd_assert(rbd_image_format_valid(rbd_dev->image_format));
->  
->  	ret = rbd_dev_header_name(rbd_dev);
->  	if (ret)
-> 
-
+                Ilya
