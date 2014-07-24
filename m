@@ -1,51 +1,112 @@
-From: Yehuda Sadeh <yehuda@redhat.com>
-Subject: Re: [PATCH 0/3] WIP-8112 radosgw usage & man update
-Date: Thu, 24 Jul 2014 13:15:24 -0700
-Message-ID: <CABBk=J8ceLh4i_DiGRS4yq1rhdNr5ssookFu8__c5ohxyTjqpg@mail.gmail.com>
-References: <1406214043-23730-1-git-send-email-abhishek.lekshmanan@gmail.com>
+From: Mark Nelson <mark.nelson@inktank.com>
+Subject: Re: First attempt at rocksdb monitor store stress testing
+Date: Thu, 24 Jul 2014 18:45:22 -0500
+Message-ID: <53D19A92.3010000@inktank.com>
+References: <53D041D3.3080203@inktank.com> <75674D092A819E4189E91166C74CB90D013F2ACA@shsmsx102.ccr.corp.intel.com> <53D0EA63.10107@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f172.google.com ([209.85.220.172]:49066 "EHLO
-	mail-vc0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934512AbaGXUP0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Jul 2014 16:15:26 -0400
-Received: by mail-vc0-f172.google.com with SMTP id im17so5732566vcb.31
-        for <ceph-devel@vger.kernel.org>; Thu, 24 Jul 2014 13:15:25 -0700 (PDT)
-In-Reply-To: <1406214043-23730-1-git-send-email-abhishek.lekshmanan@gmail.com>
+Received: from mail-ig0-f171.google.com ([209.85.213.171]:62995 "EHLO
+	mail-ig0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934746AbaGXXpU (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Jul 2014 19:45:20 -0400
+Received: by mail-ig0-f171.google.com with SMTP id l13so104830iga.10
+        for <ceph-devel@vger.kernel.org>; Thu, 24 Jul 2014 16:45:19 -0700 (PDT)
+In-Reply-To: <53D0EA63.10107@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Abhishek Lekshmanan <abhishek.lekshmanan@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: "Shu, Xinxin" <xinxin.shu@intel.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Applied (with very slight modifications).
+Earlier today I modified the rocksdb options so I could enable universal 
+compaction.  Over all performance is lower but I don't see the 
+hang/stall in the middle of the test either.  Instead the disk is 
+basically pegged with 100% writes.  I suspect average latency is higher 
+than leveldb, but the highest latency is about 5-6s while we were seeing 
+30s spikes for leveldb with levelled (heh) compaction.
 
-Thanks,
-Yehuda
+I haven't done much tuning either way yet.  It may be that if we keep 
+level 0 and level 1 roughly the same size we can reduce stalls in the 
+levelled setups.  It will also be interesting to see what happens in 
+these tests on SSDs.
 
-On Thu, Jul 24, 2014 at 8:00 AM, Abhishek Lekshmanan
-<abhishek.lekshmanan@gmail.com> wrote:
-> Hi,
+Mark
+
+On 07/24/2014 06:13 AM, Mark Nelson wrote:
+> Hi Xinxin,
 >
-> This is a series of patches to update radosgw usage and man pages with
-> all the available help options. 1/3 is a minor format fix to display
-> the options in the same line.
+> Thanks! I wonder as well if it might be interesting to expose the
+> options related to universal compaction?  It looks like rocksdb provides
+> a lot of interesting knobs you can adjust!
 >
-> Abhishek Lekshmanan (3):
->   rgw: format help options to align with the rest
->   rgw: list all available options during help()
->   doc: update radosgw man page with available opts
+> Mark
 >
->  doc/man/8/radosgw.rst | 28 ++++++++++++++++++++++++++++
->  src/rgw/rgw_main.cc   | 10 ++++++++--
->  2 files changed, 36 insertions(+), 2 deletions(-)
+> On 07/24/2014 12:08 AM, Shu, Xinxin wrote:
+>> Hi mark,
+>>
+>> I think this maybe related to 'verify_checksums' config option ,when
+>> ReadOptions is initialized, default this option is  true , all data
+>> read from underlying storage will be verified against corresponding
+>> checksums,  however,  this option cannot be configured in wip-rocksdb
+>> branch. I will modify code to make this option configurable .
+>>
+>> Cheers,
+>> xinxin
+>>
+>> -----Original Message-----
+>> From: ceph-devel-owner@vger.kernel.org
+>> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
+>> Sent: Thursday, July 24, 2014 7:14 AM
+>> To: ceph-devel@vger.kernel.org
+>> Subject: First attempt at rocksdb monitor store stress testing
+>>
+>> Hi Guys,
+>>
+>> So I've been interested lately in leveldb 99th percentile latency (and
+>> the amount of write amplification we are seeing) with leveldb. Joao
+>> mentioned he has written a tool called mon-store-stress in
+>> wip-leveldb-misc to try to provide a means to roughly guess at what's
+>> happening on the mons under heavy load.  I cherry-picked it over to
+>> wip-rocksdb and after a couple of hacks was able to get everything
+>> built and running with some basic tests.  There was little tuning done
+>> and I don't know how realistic this workload is, so don't assume this
+>> means anything yet, but some initial results are here:
+>>
+>> http://nhm.ceph.com/mon-store-stress/First%20Attempt.pdf
+>>
+>> Command that was used to run the tests:
+>>
+>> ./ceph-test-mon-store-stress --mon-keyvaluedb <leveldb|rocksdb>
+>> --write-min-size 50K --write-max-size 2M --percent-write 70
+>> --percent-read 30 --keep-state --test-seed 1406137270 --stop-at 5000 foo
+>>
+>> The most interesting bit right now is that rocksdb seems to be hanging
+>> in the middle of the test (left it running for several hours).  CPU
+>> usage on one core was quite high during the hang.  Profiling using
+>> perf with dwarf symbols I see:
+>>
+>> -  49.14%  ceph-test-mon-s  ceph-test-mon-store-stress  [.] unsigned
+>> int rocksdb::crc32c::ExtendImpl<&rocksdb::crc32c::Fast_CRC32>(unsigned
+>> int, char const*, unsigned long)
+>>      - unsigned int
+>> rocksdb::crc32c::ExtendImpl<&rocksdb::crc32c::Fast_CRC32>(unsigned
+>> int, char const*, unsigned long)
+>>           51.70% rocksdb::ReadBlockContents(rocksdb::RandomAccessFile*,
+>> rocksdb::Footer const&, rocksdb::ReadOptions const&,
+>> rocksdb::BlockHandle const&, rocksdb::BlockContents*, rocksdb::Env*,
+>> bool)
+>>           48.30%
+>> rocksdb::BlockBasedTableBuilder::WriteRawBlock(rocksdb::Slice const&,
+>> rocksdb::CompressionType, rocksdb::BlockHandle*)
+>>
+>> Not sure what's going on yet, may need to try to enable
+>> logging/debugging in rocksdb.  Thoughts/Suggestions welcome. :)
+>>
+>> Mark
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>> in the body of a message to majordomo@vger.kernel.org More majordomo
+>> info at  http://vger.kernel.org/majordomo-info.html
+>>
 >
-> --
-> 1.9.1
->
-> Thanks,
->          Abhishek
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
