@@ -1,47 +1,41 @@
-From: Abhishek Lekshmanan <abhishek.lekshmanan@gmail.com>
-Subject: [PATCH 1/3] rgw: format help options to align with the rest
-Date: Thu, 24 Jul 2014 20:30:41 +0530
-Message-ID: <1406214043-23730-2-git-send-email-abhishek.lekshmanan@gmail.com>
-References: <1406214043-23730-1-git-send-email-abhishek.lekshmanan@gmail.com>
+From: David Moreau Simard <dmsimard@iweb.com>
+Subject: Re: help: how to get ceph daemon debug info from ceph-rest-api?
+Date: Thu, 24 Jul 2014 15:01:38 +0000
+Message-ID: <AAD57C12-9BED-4A74-B4C9-351F5C65B1F2@iweb.com>
+References: <000001cfa71b$fa614cf0$ef23e6d0$@foxmail.com>
+ <CAG+vcOUvY67h-Dq+rnzzV=4Ud1qmxJsV3BiFVuWEZr0kK+w07Q@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f47.google.com ([209.85.220.47]:47716 "EHLO
-	mail-pa0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759339AbaGXPBc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Jul 2014 11:01:32 -0400
-Received: by mail-pa0-f47.google.com with SMTP id kx10so4085334pab.20
-        for <ceph-devel@vger.kernel.org>; Thu, 24 Jul 2014 08:01:31 -0700 (PDT)
-Received: from localhost.localdomain ([49.32.0.91])
-        by mx.google.com with ESMTPSA id uj2sm21604517pab.14.2014.07.24.08.01.28
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
-        Thu, 24 Jul 2014 08:01:29 -0700 (PDT)
-In-Reply-To: <1406214043-23730-1-git-send-email-abhishek.lekshmanan@gmail.com>
+Received: from bmx1.iweb.com ([70.38.127.135]:41427 "EHLO bmx1.iweb.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1759268AbaGXPBl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 24 Jul 2014 11:01:41 -0400
+In-Reply-To: <CAG+vcOUvY67h-Dq+rnzzV=4Ud1qmxJsV3BiFVuWEZr0kK+w07Q@mail.gmail.com>
+Content-Language: en-US
+Content-ID: <B6F2FD0CE05BB341B4728AC9737B6F50@corp.iweb.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: "zhu_qiang_ws@foxmail.com" <zhu_qiang_ws@foxmail.com>
+Cc: Ceph Devel <ceph-devel@vger.kernel.org>
 
-Whitespace removal to make all help options align in a similar fashion
-
-Signed-off-by: Abhishek Lekshmanan <abhishek.lekshmanan@gmail.com>
----
- src/rgw/rgw_main.cc | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
-
-diff --git a/src/rgw/rgw_main.cc b/src/rgw/rgw_main.cc
-index f6257d7..51cfebe 100644
---- a/src/rgw/rgw_main.cc
-+++ b/src/rgw/rgw_main.cc
-@@ -724,8 +724,8 @@ int usage()
- {
-   cerr << "usage: radosgw [options...]" << std::endl;
-   cerr << "options:\n";
--  cerr << "   --rgw-region=<region>     region in which radosgw runs\n";
--  cerr << "   --rgw-zone=<zone>         zone in which radosgw runs\n";
-+  cerr << "  --rgw-region=<region>     region in which radosgw runs\n";
-+  cerr << "  --rgw-zone=<zone>         zone in which radosgw runs\n";
-   generic_server_usage();
-   return 0;
- }
--- 
-1.9.1
-
+SGkgWmh1IFFpYW5nLA0KDQpVbmxlc3MgSSBhbSBtaXN0YWtlbiwgaXQgbG9va3MgbGlrZSB0aGUg
+Y29tbWFuZCDigJxkdW1wX29wc19pbl9mbGlnaHTigJ0gaXMgb25seSBhdmFpbGFibGUgYXMgYW4g
+YWRtaW4tc29ja2V0IGNvbW1hbmQ6DQpodHRwczovL2dpdGh1Yi5jb20vY2VwaC9jZXBoL2Jsb2Iv
+bWFzdGVyL3NyYy9vc2QvT1NELmNjI0wxMzcxLUwxMzczDQoNClRoZSBjb21tYW5kcyBhdmFpbGFi
+bGUgdG8gY2VwaC1yZXN0LWFwaSBhcmUsIHRvIG15IGtub3dsZWRnZSwgdXN1YWxseSBkZWNsYXJl
+ZCBsaWtlIHNvOiBodHRwczovL2dpdGh1Yi5jb20vY2VwaC9jZXBoL2Jsb2IvbWFzdGVyL3NyYy9t
+b24vTW9uQ29tbWFuZHMuaA0KDQpJIHB1dCB0aGUgY2VwaC1kZXZlbCBtYWlsaW5nIGxpc3QgaW4g
+Y29weSwgcGVyaGFwcyBzb21lb25lIGVsc2Uga25vd3MgaWYgdGhlcmUgaXMgYW5vdGhlciB3YXkg
+dG8gcmV0cmlldmUgdGhhdCBpbmZvcm1hdGlvbi4NCg0KLS0NCkRhdmlkIE1vcmVhdSBTaW1hcmQN
+Cg0KT24gSnVsIDI0LCAyMDE0LCBhdCA0OjQ4IEFNLCB6aHUgcWlhbmcgPHpodV9xaWFuZ193c0Bm
+b3htYWlsLmNvbT4gd3JvdGU6DQoNCj4gSGVsbG8gTXIuIFNpbWFyZA0KPiANCj4gDQo+IEkgd2Fu
+dCB0byB1c2UgY2VwaC1yZXN0LWFwaSB0byB2aWV3IHNvbWUgZGVidWcgZGV0YWlscyBmcm9tIGNl
+cGggZGFlbW9ucy4NCj4gT24gbGludXggc2hlbGwgSSBjYW4gZ2V0IHRoaXMgbWVzc2FnZSBmcm9t
+IGJlbG93Og0KPiAjIGNlcGggZGFlbW9uIG9zZC4wIGR1bXBfb3BzX2luX2ZsaWdodCB8IHB5dGhv
+biAtbSBqc29uLnRvb2wNCj4gICB7ICJudW1fb3BzIjogMCwNCj4gICAib3BzIjogW119DQo+IA0K
+PiBUaGlzIGlzIG15IHF1ZXN0aW9u77yaDQo+IENhbiBJIGdldCB0aGlzIG91dHB1dCBmcm9tIGNl
+cGgtcmVzdC1hcGkgPw0KPiANCj4gVW50aWwgbm93IEkgdHJpZWQgc29tZSBtZXRob2QgOiBjdXJs
+LCBweXRob24tY2VwaGNsaWVudCAsYnV0IEkgZGlkIG5vdCBnZXQgdGhlIHJpZ2h0IHJlc3BvbmUu
+DQo+IA0KPiBCZXN0IHJlZ2FyZGluZy4NCj4gDQo+IA0KPiANCg0K
