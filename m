@@ -1,41 +1,58 @@
-From: David Moreau Simard <dmsimard@iweb.com>
-Subject: Re: help: how to get ceph daemon debug info from ceph-rest-api?
-Date: Thu, 24 Jul 2014 15:01:38 +0000
-Message-ID: <AAD57C12-9BED-4A74-B4C9-351F5C65B1F2@iweb.com>
-References: <000001cfa71b$fa614cf0$ef23e6d0$@foxmail.com>
- <CAG+vcOUvY67h-Dq+rnzzV=4Ud1qmxJsV3BiFVuWEZr0kK+w07Q@mail.gmail.com>
+From: Ilya Dryomov <ilya.dryomov@inktank.com>
+Subject: Re: [PATCH 6/8] rbd: update mapping size only on refresh
+Date: Thu, 24 Jul 2014 19:10:16 +0400
+Message-ID: <CALFYKtB1HZow3SDZxryWdyAmF8Vj1WYSTf5BQB4MkaVhgxrBgg@mail.gmail.com>
+References: <1406191369-6746-1-git-send-email-ilya.dryomov@inktank.com>
+	<1406191369-6746-7-git-send-email-ilya.dryomov@inktank.com>
+	<53D10941.2050205@ieee.org>
+	<CALFYKtAGMmBvb-ujedZK_rctH5XDMGwVR262jVwbev9GQsbD8A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from bmx1.iweb.com ([70.38.127.135]:41427 "EHLO bmx1.iweb.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1759268AbaGXPBl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 24 Jul 2014 11:01:41 -0400
-In-Reply-To: <CAG+vcOUvY67h-Dq+rnzzV=4Ud1qmxJsV3BiFVuWEZr0kK+w07Q@mail.gmail.com>
-Content-Language: en-US
-Content-ID: <B6F2FD0CE05BB341B4728AC9737B6F50@corp.iweb.com>
+Received: from mail-qg0-f48.google.com ([209.85.192.48]:33067 "EHLO
+	mail-qg0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759075AbaGXPKR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Jul 2014 11:10:17 -0400
+Received: by mail-qg0-f48.google.com with SMTP id i50so3413533qgf.35
+        for <ceph-devel@vger.kernel.org>; Thu, 24 Jul 2014 08:10:16 -0700 (PDT)
+In-Reply-To: <CALFYKtAGMmBvb-ujedZK_rctH5XDMGwVR262jVwbev9GQsbD8A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "zhu_qiang_ws@foxmail.com" <zhu_qiang_ws@foxmail.com>
-Cc: Ceph Devel <ceph-devel@vger.kernel.org>
+To: Alex Elder <elder@ieee.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-SGkgWmh1IFFpYW5nLA0KDQpVbmxlc3MgSSBhbSBtaXN0YWtlbiwgaXQgbG9va3MgbGlrZSB0aGUg
-Y29tbWFuZCDigJxkdW1wX29wc19pbl9mbGlnaHTigJ0gaXMgb25seSBhdmFpbGFibGUgYXMgYW4g
-YWRtaW4tc29ja2V0IGNvbW1hbmQ6DQpodHRwczovL2dpdGh1Yi5jb20vY2VwaC9jZXBoL2Jsb2Iv
-bWFzdGVyL3NyYy9vc2QvT1NELmNjI0wxMzcxLUwxMzczDQoNClRoZSBjb21tYW5kcyBhdmFpbGFi
-bGUgdG8gY2VwaC1yZXN0LWFwaSBhcmUsIHRvIG15IGtub3dsZWRnZSwgdXN1YWxseSBkZWNsYXJl
-ZCBsaWtlIHNvOiBodHRwczovL2dpdGh1Yi5jb20vY2VwaC9jZXBoL2Jsb2IvbWFzdGVyL3NyYy9t
-b24vTW9uQ29tbWFuZHMuaA0KDQpJIHB1dCB0aGUgY2VwaC1kZXZlbCBtYWlsaW5nIGxpc3QgaW4g
-Y29weSwgcGVyaGFwcyBzb21lb25lIGVsc2Uga25vd3MgaWYgdGhlcmUgaXMgYW5vdGhlciB3YXkg
-dG8gcmV0cmlldmUgdGhhdCBpbmZvcm1hdGlvbi4NCg0KLS0NCkRhdmlkIE1vcmVhdSBTaW1hcmQN
-Cg0KT24gSnVsIDI0LCAyMDE0LCBhdCA0OjQ4IEFNLCB6aHUgcWlhbmcgPHpodV9xaWFuZ193c0Bm
-b3htYWlsLmNvbT4gd3JvdGU6DQoNCj4gSGVsbG8gTXIuIFNpbWFyZA0KPiANCj4gDQo+IEkgd2Fu
-dCB0byB1c2UgY2VwaC1yZXN0LWFwaSB0byB2aWV3IHNvbWUgZGVidWcgZGV0YWlscyBmcm9tIGNl
-cGggZGFlbW9ucy4NCj4gT24gbGludXggc2hlbGwgSSBjYW4gZ2V0IHRoaXMgbWVzc2FnZSBmcm9t
-IGJlbG93Og0KPiAjIGNlcGggZGFlbW9uIG9zZC4wIGR1bXBfb3BzX2luX2ZsaWdodCB8IHB5dGhv
-biAtbSBqc29uLnRvb2wNCj4gICB7ICJudW1fb3BzIjogMCwNCj4gICAib3BzIjogW119DQo+IA0K
-PiBUaGlzIGlzIG15IHF1ZXN0aW9u77yaDQo+IENhbiBJIGdldCB0aGlzIG91dHB1dCBmcm9tIGNl
-cGgtcmVzdC1hcGkgPw0KPiANCj4gVW50aWwgbm93IEkgdHJpZWQgc29tZSBtZXRob2QgOiBjdXJs
-LCBweXRob24tY2VwaGNsaWVudCAsYnV0IEkgZGlkIG5vdCBnZXQgdGhlIHJpZ2h0IHJlc3BvbmUu
-DQo+IA0KPiBCZXN0IHJlZ2FyZGluZy4NCj4gDQo+IA0KPiANCg0K
+On Thu, Jul 24, 2014 at 5:46 PM, Ilya Dryomov <ilya.dryomov@inktank.com> wrote:
+> On Thu, Jul 24, 2014 at 5:25 PM, Alex Elder <elder@ieee.org> wrote:
+>> On 07/24/2014 03:42 AM, Ilya Dryomov wrote:
+>>> There is no sense in trying to update the mapping size before it's even
+>>> been set.
+>>
+>> It took me a bit to follow this.  But basically there is
+>> no mapping unless it's mapped.  So previously this was
+>> updating the mapping information even for unmapped
+>> parent (or other) images.  There's no need to update
+>> the mapping size for a snapshot--it'll never change.
+>>
+>> Is that right?  If not, please advise; otherwise:
+>
+> No.  Previously it was updating the mapping size both on the inital map
+> and on refresh (of the base image).  Doing that on the inital map
+> doesn't make sense: not only struct rbd_mapping fields aren't properly
+> initialized at that point - rbd_dev_mapping_set() is called much later
+> in the map sequence, snap_id isn't initialized either (at least in the
+> format 2 case, I haven't looked too closely at the format 1 case).  And
+> just in general, trying to update something before it had a chance to
+> change is bogus..
+
+BTW, while we are on the subject of struct rbd_mapping, is there any
+particular reason to keep around both the base image values and actual
+mapping values?  I am tempted to change the mapping sequence so that 1)
+snap context is read in immediately after watch setup, before anything
+else is done, 2) supplied snap name is resolved into an id and 3) the
+actual (i.e. based on snap_id) mapping size, features, parent_overlap,
+etc are read in directly into struct rbd_image_header.  That would
+allow to rip struct rbd_mapping entirely and make the code more clear.
+
+Thanks,
+
+                Ilya
