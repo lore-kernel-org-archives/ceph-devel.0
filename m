@@ -1,56 +1,46 @@
-From: Henrique de Moraes Holschuh <hmh@hmh.eng.br>
-Subject: Re: sizeof (struct tYpO *) : it is just a typo or rather a bug ?
-Date: Fri, 25 Jul 2014 08:20:39 -0300
-Message-ID: <20140725112038.GA401@khazad-dum.debian.net>
-References: <53D14E60.1010105@gmx.de>
+From: Daniel Hofmann <daniel@trvx.org>
+Subject: Re: Forcing Ceph into mapping all objects to a single PG
+Date: Fri, 25 Jul 2014 14:26:33 +0200
+Message-ID: <53D24CF9.8080803@trvx.org>
+References: <53CD93B4.6020500@trvx.org> <CAPYLRzj4tzBCSrGPCsaLvy1+7ac4=Um1EHDeZhLsCpuZZy7miA@mail.gmail.com> <lqmpg2$chu$1@ger.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-ia64-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <53D14E60.1010105@gmx.de>
-Sender: linux-ia64-owner@vger.kernel.org
-To: Toralf =?iso-8859-1?Q?F=F6rster?= <toralf.foerster@gmx.de>
-Cc: linux-ia64@vger.kernel.org, ceph-devel@vger.kernel.org, Linux Kernel <linux-kernel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from trvx.org ([46.38.250.125]:60580 "EHLO mail.trvx.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751648AbaGYM0n (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 25 Jul 2014 08:26:43 -0400
+In-Reply-To: <lqmpg2$chu$1@ger.gmane.org>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Alex Elsayed <eternaleye@gmail.com>, ceph-devel@vger.kernel.org
 
-On Thu, 24 Jul 2014, Toralf F=F6rster wrote:
-> Inspired by this "typo" fix=20
-> http://article.gmane.org/gmane.linux.kernel/1754640
-> I grep'ed the current git tree of linus for similar issues.
+The main issue however is not the hash's strength, but the fact that
+once pre-computed, I'm able to use preimages on **every Ceph cluster out
+there**. (As the hash functions's output is a deterministic function of
+the object's name only)
 
-I wonder if we couldn't use Coccinelle to do that?  I would say it woul=
-d be
-not as cool as deep grep magick, but Coccinelle is cool by definition a=
-nd
-therefore immune from any such comparisons :-)
+I agree in that the general issue is inherent in hash-placement systems.
 
-> Nevertheless I was told, that gcc doesn't complain about such things =
-due
-> to eventually evaluating it to "sizeof(null)". I'm however curious if=
- at
-> least a warning should be emitted in such a case, or?
+But what I don't agree with is the following:
 
-Well, it cannot become a real bug because the moment the code changes t=
-o
-actually access/derreference such a typo, it will cause the compiler to
-abort with an error.  If gcc will have to waste a measurable amount of =
-time
-to issue such a warning, it is not worth it.
+Why do I have to be able to calculate my object's placement for **every
+Ceph cluster** out there?
 
-OTOH, such typos could confuse someone reading the code into thinking
-they're dealing with a different structure or something, and it _is_
-incorrect code no matter how harmless, so it makes sense to fix all suc=
-h
-typos eventually.
+Why does it not suffice for me to be able to calculate the placement
+only for the cluster I'm currently accessing?
 
---=20
-  "One disk to rule them all, One disk to find them. One disk to bring
-  them all and in the darkness grind them. In the Land of Redmond
-  where the shadows lie." -- The Silicon Valley Tarot
-  Henrique Holschuh
---
-To unsubscribe from this list: send the line "unsubscribe linux-ia64" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+From a logical standpoint it seems reasonable. Why then, are we not able
+to constrain the placement calculation in that regard?
+
+
+If the placement is bound to a specific cluster it should suffice to
+derive e.g. a key for SipHash based on cluster specifics.
+
+Is this doable from an implementation point of view?
+
+
+Note: I only did this as a proof-of-concept for the object store.
+Think about the implications, if you're able to do this e.g. for every
+RadosGW out there and servies using RadosGW.
