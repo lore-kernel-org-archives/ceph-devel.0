@@ -1,48 +1,56 @@
-From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: [PATCH] ceph: fix sizeof(struct tYpO *) typo
-Date: Fri, 25 Jul 2014 13:26:25 +0400
-Message-ID: <1406280385-30275-1-git-send-email-ilya.dryomov@inktank.com>
+From: Henrique de Moraes Holschuh <hmh@hmh.eng.br>
+Subject: Re: sizeof (struct tYpO *) : it is just a typo or rather a bug ?
+Date: Fri, 25 Jul 2014 08:20:39 -0300
+Message-ID: <20140725112038.GA401@khazad-dum.debian.net>
+References: <53D14E60.1010105@gmx.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=iso-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f45.google.com ([209.85.215.45]:63268 "EHLO
-	mail-la0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750818AbaGYJ0b (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 25 Jul 2014 05:26:31 -0400
-Received: by mail-la0-f45.google.com with SMTP id ty20so2841114lab.32
-        for <ceph-devel@vger.kernel.org>; Fri, 25 Jul 2014 02:26:28 -0700 (PDT)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Yan Zheng <zheng.z.yan@intel.com>
+Return-path: <linux-ia64-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <53D14E60.1010105@gmx.de>
+Sender: linux-ia64-owner@vger.kernel.org
+To: Toralf =?iso-8859-1?Q?F=F6rster?= <toralf.foerster@gmx.de>
+Cc: linux-ia64@vger.kernel.org, ceph-devel@vger.kernel.org, Linux Kernel <linux-kernel@vger.kernel.org>
+List-Id: ceph-devel.vger.kernel.org
 
-struct ceph_xattr -> struct ceph_inode_xattr
+On Thu, 24 Jul 2014, Toralf F=F6rster wrote:
+> Inspired by this "typo" fix=20
+> http://article.gmane.org/gmane.linux.kernel/1754640
+> I grep'ed the current git tree of linus for similar issues.
 
-Reported-by: Toralf F=C3=B6rster <toralf.foerster@gmx.de>
-Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
----
- fs/ceph/xattr.c |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+I wonder if we couldn't use Coccinelle to do that?  I would say it woul=
+d be
+not as cool as deep grep magick, but Coccinelle is cool by definition a=
+nd
+therefore immune from any such comparisons :-)
 
-diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
-index f89698cdbc41..12f58d22e017 100644
---- a/fs/ceph/xattr.c
-+++ b/fs/ceph/xattr.c
-@@ -592,7 +592,7 @@ start:
- 		xattr_version =3D ci->i_xattrs.version;
- 		spin_unlock(&ci->i_ceph_lock);
-=20
--		xattrs =3D kcalloc(numattr, sizeof(struct ceph_xattr *),
-+		xattrs =3D kcalloc(numattr, sizeof(struct ceph_inode_xattr *),
- 				 GFP_NOFS);
- 		err =3D -ENOMEM;
- 		if (!xattrs)
+> Nevertheless I was told, that gcc doesn't complain about such things =
+due
+> to eventually evaluating it to "sizeof(null)". I'm however curious if=
+ at
+> least a warning should be emitted in such a case, or?
+
+Well, it cannot become a real bug because the moment the code changes t=
+o
+actually access/derreference such a typo, it will cause the compiler to
+abort with an error.  If gcc will have to waste a measurable amount of =
+time
+to issue such a warning, it is not worth it.
+
+OTOH, such typos could confuse someone reading the code into thinking
+they're dealing with a different structure or something, and it _is_
+incorrect code no matter how harmless, so it makes sense to fix all suc=
+h
+typos eventually.
+
 --=20
-1.7.10.4
-
+  "One disk to rule them all, One disk to find them. One disk to bring
+  them all and in the darkness grind them. In the Land of Redmond
+  where the shadows lie." -- The Silicon Valley Tarot
+  Henrique Holschuh
 --
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+To unsubscribe from this list: send the line "unsubscribe linux-ia64" i=
 n
 the body of a message to majordomo@vger.kernel.org
 More majordomo info at  http://vger.kernel.org/majordomo-info.html
