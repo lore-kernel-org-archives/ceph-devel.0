@@ -1,34 +1,23 @@
-From: Yehuda Sadeh <yehuda@redhat.com>
-Subject: issue #8937
-Date: Fri, 25 Jul 2014 20:41:51 -0700
-Message-ID: <CABBk=J82jFBKESgh_sRHMxzobUnMG1rxJPLvtRpGDJrSMVZvFA@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: wip-objecter
+Date: Fri, 25 Jul 2014 22:42:51 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1407251727430.5027@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f41.google.com ([209.85.220.41]:60793 "EHLO
-	mail-pa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751621AbaGZDlw (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 25 Jul 2014 23:41:52 -0400
-Received: by mail-pa0-f41.google.com with SMTP id rd3so7131125pab.14
-        for <ceph-devel@vger.kernel.org>; Fri, 25 Jul 2014 20:41:51 -0700 (PDT)
+Received: from cobra.newdream.net ([66.33.216.30]:32847 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750717AbaGZFmv (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 26 Jul 2014 01:42:51 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: john.spray@inktank.com
+Cc: ceph-devel@vger.kernel.org
 
-I pushed a fix (which is not heavily tested) to wip-8937. The problem
-seem to have been triggered by the fix to #8928. One thing that I
-noticed was that previously max_chunk_size at that point was actually
-used as the minimum write size (how appropriate). It's used elsewhere
-as the max size for data drained off the front end.
-Basically the fix for #8928 now makes max_chunk_size to limit the
-rados writes to no more than that. Since up until now we weren't doing
-it, then I'm not too sure that this change won't have significant
-performance implications.
-The options that we have at this point is:
- - keep it as it is now, max_chunk_size limits rados writes
- - revert it to the old behavior, but add some code to handle the pool
-alignment when needed
+Hey John,
 
-In any case, I don't think this is ready to go into firefly.
+I fixed up the mds osdmap wait stuff and squashed it into wip-objecter.  
+That rebased out from underneath your branch; sorry.  Will try to look at 
+the other patches shortly!
 
-Yehuda
+sage
