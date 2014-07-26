@@ -1,109 +1,34 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: LTTng unfriendly with mixed static/dynamic linking
-Date: Fri, 25 Jul 2014 15:12:07 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1407251507160.22752@cobra.newdream.net>
-References: <CAFu9Dv37reLPuQ_9fHkgqwDWtKiwQk8FCd4MAqY6wk75ASs07w@mail.gmail.com> <CAFu9Dv3FY=RkC9cAqt8p5oB0FNHsLUnK=1Nx3eh==C8Q4-i1Ww@mail.gmail.com>
+From: Yehuda Sadeh <yehuda@redhat.com>
+Subject: issue #8937
+Date: Fri, 25 Jul 2014 20:41:51 -0700
+Message-ID: <CABBk=J82jFBKESgh_sRHMxzobUnMG1rxJPLvtRpGDJrSMVZvFA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:59521 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751506AbaGYWMH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 25 Jul 2014 18:12:07 -0400
-In-Reply-To: <CAFu9Dv3FY=RkC9cAqt8p5oB0FNHsLUnK=1Nx3eh==C8Q4-i1Ww@mail.gmail.com>
+Received: from mail-pa0-f41.google.com ([209.85.220.41]:60793 "EHLO
+	mail-pa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751621AbaGZDlw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 25 Jul 2014 23:41:52 -0400
+Received: by mail-pa0-f41.google.com with SMTP id rd3so7131125pab.14
+        for <ceph-devel@vger.kernel.org>; Fri, 25 Jul 2014 20:41:51 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Adam Crume <adamcrume@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Fri, 25 Jul 2014, Adam Crume wrote:
-> I tried all solutions, and it looks like only #1 works.  #2 gives the
-> error "/usr/bin/ld: main: hidden symbol `tracepoint_dlopen' in
-> common_tp.a(common_tp.o) is referenced by DSO" when linking.  #3 gives
-> the error "./liblibrary.so: undefined reference to
-> `tracepoint_dlopen'" when linking.  (Linking is complicated by the
-> fact that LTTng uses special symbol attributes, and tracepoint_dlopen
-> happens to be weak and hidden.) 
+I pushed a fix (which is not heavily tested) to wip-8937. The problem
+seem to have been triggered by the fix to #8928. One thing that I
+noticed was that previously max_chunk_size at that point was actually
+used as the minimum write size (how appropriate). It's used elsewhere
+as the max size for data drained off the front end.
+Basically the fix for #8928 now makes max_chunk_size to limit the
+rados writes to no more than that. Since up until now we weren't doing
+it, then I'm not too sure that this change won't have significant
+performance implications.
+The options that we have at this point is:
+ - keep it as it is now, max_chunk_size limits rados writes
+ - revert it to the old behavior, but add some code to handle the pool
+alignment when needed
 
-I think #1 is good for other reasons, too.  We already have issues (I 
-think!) with binaries that use librados and also link libcommon 
-statically.  Specifically, I think we've seen that having mismatched 
-versions of librados and the binary installed lead to confusion about the 
-contents/structure of mdconfig_t (g_conf).  This is one of the reasons 
-why the libcommon and rgw packages require an identical version of 
-librados or librbd or whatever--to avoid this inconsistency.
+In any case, I don't think this is ready to go into firefly.
 
-> Unless I'm mistaken (and I very well
-> may be), we will have to ensure that all traced code is either 1)
-> placed in a shared library and never statically linked elsewhere, or
-> 2) never linked into any shared library.
-
-That sounds doable and sane to me:
-
- - librados, librbd, libceph_common, etc. would have the tracepoints in 
-the same .so
- - ceph-osd could have its own tracepoints, as long as they are always 
-static.  (For example, libos.la, which is linked statically by ceph-mon 
-and ceph-osd but never dynamically.)
-
-One pain point in all of this, though, is that the libceph_common.so (or 
-whatever) will need to go into a separate package that is required by 
-librados.so and librbd and ceph-common and everything else.  'ceph-common' 
-is what this ought to be called, but we've coopted it to mean 'ceph 
-clients'.  I'm not sure it if it worthwhile to go through the hinjinx to 
-rename ceph-common to ceph-clients and repurpose ceph-common for this?
-
-sage
-
-
-
-> 
-> Thoughts?
-> 
-> Adam
-> 
-> On Fri, Jul 25, 2014 at 11:48 AM, Adam Crume <adamcrume@gmail.com> wrote:
-> > LTTng requires tracepoints to be linked into a program only once.  If
-> > tracepoints are linked in multiple times, the program crashes at
-> > startup with: "LTTng-UST: Error (-17) while registering tracepoint
-> > probe. Duplicate registration of tracepoint probes having the same
-> > name is not allowed."
-> >
-> > This is problematic when mixing static and dynamic linking.  If the
-> > tracepoints are in a static library, that library can end up in an
-> > executable multiple times by being linked in directly, as well as
-> > being statically linked into a dynamic library.  Even if the
-> > tracepoints are not linked directly into the executable, they can be
-> > statically linked into multiple dynamic libraries that the executable
-> > loads.
-> >
-> > For us, this problem shows up with libcommon, and could show up with
-> > others such as libosd.  (In general, I think anything added to
-> > noinst_LTLIBRARIES is static, and anything added to lib_LTLIBRARIES is
-> > dynamic.)
-> >
-> > There are a few ways of solving the issue:
-> > 1. Change every library that has tracepoints, like libcommon, from
-> > static to dynamic.  This could be a big change, as at the very least
-> > we'd have to rename the library to something like libceph_common to
-> > avoid conflicts, since now it would be an installed file.  This has
-> > the advantage of keeping code and its tracepoints in the same library.
-> > 2. Keep tracepoints in a separate static library.  For example,
-> > libcommon and libcommon_tp.  Unfortunately, every executable (but not
-> > library!) that links in libcommon (directly or indirectly) would have
-> > to manually link in libcommon_tp, and I don't think Automake could
-> > automate that.
-> > 3. Keep tracepoints in a separate dynamic library.  In this case, I
-> > think libcommon could depend on libcommon_tp, so executables would not
-> > have to manually link in libcommon_tp.  (I'm not an Automake expert,
-> > so let me know if I'm wrong on that.)  Again, libcommon_tp would be an
-> > installed file, so we'd want to rename it to something like
-> > libceph_common_tp.
-> >
-> > I attached a minimal test case of the problem.
-> >
-> > Thoughts or suggestions?
-> >
-> > Thanks,
-> > Adam Crume
-> 
+Yehuda
