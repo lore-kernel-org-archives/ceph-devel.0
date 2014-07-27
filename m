@@ -1,83 +1,41 @@
-From: M Ranga Swami Reddy <swamireddy@gmail.com>
-Subject: Re: Fwd: S3 API Compatibility support
-Date: Sun, 27 Jul 2014 13:24:30 +0530
-Message-ID: <CANA9Uk4JGm_2L_VnGsOgfpsX17=Ja4LLDaVNXzKJe-ZkY=ya9A@mail.gmail.com>
-References: <CANA9Uk55UZXtKzS=urk3Q+KY=DoWoTaCRf=rKiEtjt9y7FYw7A@mail.gmail.com>
-	<CANA9Uk6E9t30Ve3pKhZa1cW4g6N7JjzG8JgiwOoDa9TWdNEagQ@mail.gmail.com>
-	<alpine.DEB.2.00.1407250848060.22752@cobra.newdream.net>
-	<CANA9Uk468XOE1cr935HY1y+tSnu-xp6QPaj7uCpZNQbJhg-pOA@mail.gmail.com>
-	<CABBk=J8+3K28M-RNf+ULx0TnTMmGxdymJDLeFMft-EX8PhS_4A@mail.gmail.com>
+From: John Spray <john.spray@redhat.com>
+Subject: Re: wip-objecter
+Date: Sun, 27 Jul 2014 13:19:46 +0100
+Message-ID: <CAGd4Wr17ds-r8u4ZZfSwptsCV9LV43s206=c_uee5Lp4R7ex3A@mail.gmail.com>
+References: <alpine.DEB.2.00.1407251727430.5027@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f181.google.com ([209.85.217.181]:47164 "EHLO
-	mail-lb0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751032AbaG0Hyc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 27 Jul 2014 03:54:32 -0400
-Received: by mail-lb0-f181.google.com with SMTP id 10so4598602lbg.40
-        for <ceph-devel@vger.kernel.org>; Sun, 27 Jul 2014 00:54:30 -0700 (PDT)
-In-Reply-To: <CABBk=J8+3K28M-RNf+ULx0TnTMmGxdymJDLeFMft-EX8PhS_4A@mail.gmail.com>
+Received: from mail-pa0-f49.google.com ([209.85.220.49]:38583 "EHLO
+	mail-pa0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751821AbaG0MTr (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 27 Jul 2014 08:19:47 -0400
+Received: by mail-pa0-f49.google.com with SMTP id hz1so8623913pad.8
+        for <ceph-devel@vger.kernel.org>; Sun, 27 Jul 2014 05:19:46 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.00.1407251727430.5027@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh <yehuda@redhat.com>
-Cc: Sage Weil <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Good no know the details. Can you please share the issue ID for bucket
-lifecycle? My team also could start help here.
-Regarding the notification - Do we have the issue ID?
-Yes, the object versioning will be backlog one - I strongly feel we
-start working on this asap.
+I think that for the calls where we check the epoch and then
+conditionally call wait_for_map with the context, we have to change
+them to do the wait_for_map call first and check the boolean response.
+Otherwise, if the map we have is updated between the read of the epoch
+and the call to wait_for_map, it could already be ready and never call
+back our context.
 
-Thanks
-Swami
+My version is here (on top a rebase of wip-objecter to master on
+branch wip-objecter-rebase):
+https://github.com/ceph/ceph/commit/3cd82464ed6f13ec5b44da303849061648b9e3a1
 
-On Fri, Jul 25, 2014 at 11:31 PM, Yehuda Sadeh <yehuda@redhat.com> wrote:
-> On Fri, Jul 25, 2014 at 10:14 AM, M Ranga Swami Reddy
-> <swamireddy@gmail.com> wrote:
->> Thanks for quick reply.
->> Yes,  versioned object - missing in ceph ATM
->> Iam looking for: bucket lifecylce (get/put/delete), bucket location,
->> put object notification and object restore (ie versioned object) S3
->> API support.
->> Please let me now any of the above work is in progress or some one
->> planned to work on.
+John
+
+On Sat, Jul 26, 2014 at 6:42 AM, Sage Weil <sweil@redhat.com> wrote:
+> Hey John,
 >
+> I fixed up the mds osdmap wait stuff and squashed it into wip-objecter.
+> That rebased out from underneath your branch; sorry.  Will try to look at
+> the other patches shortly!
 >
-> I opened an issue for bucket lifecycle (we already had an issue open
-> for object expiration though). We do have bucket location already
-> (part of the multi-region feature). Object versioning is definitely on
-> our backlog and one that we'll hopefully implement sooner rather
-> later.
-> With regard to object notification, it'll require having a
-> notification service which is a bit out of the scope. Integrating the
-> gateway with such a service whouldn't be hard, but we'll need to have
-> that first.
->
-> Yehuda
->
->>
->> Thanks
->> Swami
->>
->>
->> On Fri, Jul 25, 2014 at 9:19 PM, Sage Weil <sweil@redhat.com> wrote:
->>> On Fri, 25 Jul 2014, M Ranga Swami Reddy wrote:
->>>> Hi Team: As per the ceph document a few S3 APIs compatibility not supported.
->>>>
->>>> Link: http://ceph.com/docs/master/radosgw/s3/
->>>>
->>>> Is there plan to support the ?n supported item in the above table?
->>>> or
->>>> Any working on this?
->>>
->>> Yes.  Unfortunately this table isn't particularly detailed or accurate or
->>> up to date.   The main gap, I think, is versioned objects.
->>>
->>> Are there specfiic parts of the S3 API that are missing that you need?
->>> That sort of info is very helpful for prioritizing effort...
->>>
->>> sage
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> sage
