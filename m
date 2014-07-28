@@ -1,105 +1,53 @@
-From: Yehuda Sadeh <yehuda@redhat.com>
-Subject: Re: Fwd: S3 API Compatibility support
-Date: Mon, 28 Jul 2014 13:07:20 -0700
-Message-ID: <CABBk=J8Sv+euyymH7Wepf_Kots_-vROB6+imT56fvSOfGfdwFw@mail.gmail.com>
-References: <CANA9Uk55UZXtKzS=urk3Q+KY=DoWoTaCRf=rKiEtjt9y7FYw7A@mail.gmail.com>
-	<CANA9Uk6E9t30Ve3pKhZa1cW4g6N7JjzG8JgiwOoDa9TWdNEagQ@mail.gmail.com>
-	<alpine.DEB.2.00.1407250848060.22752@cobra.newdream.net>
-	<CANA9Uk468XOE1cr935HY1y+tSnu-xp6QPaj7uCpZNQbJhg-pOA@mail.gmail.com>
-	<CABBk=J8+3K28M-RNf+ULx0TnTMmGxdymJDLeFMft-EX8PhS_4A@mail.gmail.com>
-	<CANA9Uk4JGm_2L_VnGsOgfpsX17=Ja4LLDaVNXzKJe-ZkY=ya9A@mail.gmail.com>
-	<CANA9Uk5OZpnZGAnqWBf-=cvTYimqLHLz=mL7L9nhzvSA8Dqx+w@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: wip-objecter
+Date: Mon, 28 Jul 2014 14:48:42 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1407281437030.4962@cobra.newdream.net>
+References: <alpine.DEB.2.00.1407251727430.5027@cobra.newdream.net> <CAGd4Wr17ds-r8u4ZZfSwptsCV9LV43s206=c_uee5Lp4R7ex3A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f177.google.com ([209.85.213.177]:43229 "EHLO
-	mail-ig0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751027AbaG1UHV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Jul 2014 16:07:21 -0400
-Received: by mail-ig0-f177.google.com with SMTP id hn18so4225692igb.10
-        for <ceph-devel@vger.kernel.org>; Mon, 28 Jul 2014 13:07:20 -0700 (PDT)
-In-Reply-To: <CANA9Uk5OZpnZGAnqWBf-=cvTYimqLHLz=mL7L9nhzvSA8Dqx+w@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:45055 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750708AbaG1Vsm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Jul 2014 17:48:42 -0400
+In-Reply-To: <CAGd4Wr17ds-r8u4ZZfSwptsCV9LV43s206=c_uee5Lp4R7ex3A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: M Ranga Swami Reddy <swamireddy@gmail.com>
-Cc: Sage Weil <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: John Spray <john.spray@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-There's no good enumeration of the actual apis and features that are
-covered by this test. It's definitely a worthy cause to pursue though,
-and one that could be done with the help of a willing community
-member. The s3 test suite can be found here:
+On Sun, 27 Jul 2014, John Spray wrote:
+> I think that for the calls where we check the epoch and then
+> conditionally call wait_for_map with the context, we have to change
+> them to do the wait_for_map call first and check the boolean response.
+> Otherwise, if the map we have is updated between the read of the epoch
+> and the call to wait_for_map, it could already be ready and never call
+> back our context.
+> 
+> My version is here (on top a rebase of wip-objecter to master on branch 
+> wip-objecter-rebase): 
+> https://github.com/ceph/ceph/commit/3cd82464ed6f13ec5b44da303849061648b9e3a1
 
-https://github.com/ceph/s3-tests
+Okay, I finally got around to looking at this again, and it looks like we 
+managed to collide on a few things.  The wip-objecter-rebase branch is 
+missing the change in my series, specifically the old commit
 
-Thanks,
-Yehuda
+ fa8d2d581b3da0fc5176a674623738cd555a3766
 
-On Mon, Jul 28, 2014 at 6:05 AM, M Ranga Swami Reddy
-<swamireddy@gmail.com> wrote:
-> Can you please share the details on coverage of  the ceph/s3-tests suite?
-> (mean how many S3 compatibility APIs tests performed with s3-tests suite)
->
-> Thanks
-> Swami
->
-> On Sun, Jul 27, 2014 at 1:24 PM, M Ranga Swami Reddy
-> <swamireddy@gmail.com> wrote:
->> Good no know the details. Can you please share the issue ID for bucket
->> lifecycle? My team also could start help here.
->> Regarding the notification - Do we have the issue ID?
->> Yes, the object versioning will be backlog one - I strongly feel we
->> start working on this asap.
->>
->> Thanks
->> Swami
->>
->> On Fri, Jul 25, 2014 at 11:31 PM, Yehuda Sadeh <yehuda@redhat.com> wrote:
->>> On Fri, Jul 25, 2014 at 10:14 AM, M Ranga Swami Reddy
->>> <swamireddy@gmail.com> wrote:
->>>> Thanks for quick reply.
->>>> Yes,  versioned object - missing in ceph ATM
->>>> Iam looking for: bucket lifecylce (get/put/delete), bucket location,
->>>> put object notification and object restore (ie versioned object) S3
->>>> API support.
->>>> Please let me now any of the above work is in progress or some one
->>>> planned to work on.
->>>
->>>
->>> I opened an issue for bucket lifecycle (we already had an issue open
->>> for object expiration though). We do have bucket location already
->>> (part of the multi-region feature). Object versioning is definitely on
->>> our backlog and one that we'll hopefully implement sooner rather
->>> later.
->>> With regard to object notification, it'll require having a
->>> notification service which is a bit out of the scope. Integrating the
->>> gateway with such a service whouldn't be hard, but we'll need to have
->>> that first.
->>>
->>> Yehuda
->>>
->>>>
->>>> Thanks
->>>> Swami
->>>>
->>>>
->>>> On Fri, Jul 25, 2014 at 9:19 PM, Sage Weil <sweil@redhat.com> wrote:
->>>>> On Fri, 25 Jul 2014, M Ranga Swami Reddy wrote:
->>>>>> Hi Team: As per the ceph document a few S3 APIs compatibility not supported.
->>>>>>
->>>>>> Link: http://ceph.com/docs/master/radosgw/s3/
->>>>>>
->>>>>> Is there plan to support the ?n supported item in the above table?
->>>>>> or
->>>>>> Any working on this?
->>>>>
->>>>> Yes.  Unfortunately this table isn't particularly detailed or accurate or
->>>>> up to date.   The main gap, I think, is versioned objects.
->>>>>
->>>>> Are there specfiic parts of the S3 API that are missing that you need?
->>>>> That sort of info is very helpful for prioritizing effort...
->>>>>
->>>>> sage
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+is replaced with
+
+ 7cb3cf98b09685ebd48451878ded3cbc212e0a12
+
+in the (rebased) wip-objecter.  Also, the missing } was squashed into
+
+ e596ad8e67719f7fb8e96b579c34a438f51c319f
+
+Anyway, I rebased and resolved conflicts and pushed a new 
+wip-objecter-rebased which looks like it has the right diff between the 
+old and new versions.
+
+Take a look?  The main change is that the set data pool virtual xattrs do 
+objecter->wait_for_latest_osdmap() and the flawed MDS::request_osdmap() 
+helper is now gone.
+
+sage
