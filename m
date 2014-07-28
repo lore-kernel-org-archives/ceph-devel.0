@@ -1,172 +1,92 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: RE: Cache tiering read-proxy mode
-Date: Mon, 28 Jul 2014 12:59:34 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1407281259020.4962@cobra.newdream.net>
-References: <06E7D85B3BA36C4DB207FEDE871C534891BC27@SHSMSX101.ccr.corp.intel.com> <alpine.DEB.2.00.1407180707310.28285@cobra.newdream.net> <06E7D85B3BA36C4DB207FEDE871C534891CD56@SHSMSX101.ccr.corp.intel.com> <alpine.DEB.2.00.1407201831340.28285@cobra.newdream.net>
- <06E7D85B3BA36C4DB207FEDE871C534891CDD2@SHSMSX101.ccr.corp.intel.com> <alpine.DEB.2.00.1407202051490.28285@cobra.newdream.net> <06E7D85B3BA36C4DB207FEDE871C534891CE44@SHSMSX101.ccr.corp.intel.com> <alpine.DEB.2.00.1407210715230.28285@cobra.newdream.net>
- <06E7D85B3BA36C4DB207FEDE871C534891D15F@SHSMSX101.ccr.corp.intel.com> <06E7D85B3BA36C4DB207FEDE871C534891D764@SHSMSX101.ccr.corp.intel.com>
+From: Yehuda Sadeh <yehuda@redhat.com>
+Subject: Re: Fwd: S3 API Compatibility support
+Date: Mon, 28 Jul 2014 13:05:35 -0700
+Message-ID: <CABBk=J-fSR8mc7LQBLcUQDPkgC8NaSfvRB-2ED71qSvQzLX8Cw@mail.gmail.com>
+References: <CANA9Uk55UZXtKzS=urk3Q+KY=DoWoTaCRf=rKiEtjt9y7FYw7A@mail.gmail.com>
+	<CANA9Uk6E9t30Ve3pKhZa1cW4g6N7JjzG8JgiwOoDa9TWdNEagQ@mail.gmail.com>
+	<alpine.DEB.2.00.1407250848060.22752@cobra.newdream.net>
+	<CANA9Uk468XOE1cr935HY1y+tSnu-xp6QPaj7uCpZNQbJhg-pOA@mail.gmail.com>
+	<CABBk=J8+3K28M-RNf+ULx0TnTMmGxdymJDLeFMft-EX8PhS_4A@mail.gmail.com>
+	<CANA9Uk4JGm_2L_VnGsOgfpsX17=Ja4LLDaVNXzKJe-ZkY=ya9A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:44460 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751381AbaG1T7f (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Jul 2014 15:59:35 -0400
-In-Reply-To: <06E7D85B3BA36C4DB207FEDE871C534891D764@SHSMSX101.ccr.corp.intel.com>
+Received: from mail-ie0-f182.google.com ([209.85.223.182]:52384 "EHLO
+	mail-ie0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751905AbaG1UFf (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Jul 2014 16:05:35 -0400
+Received: by mail-ie0-f182.google.com with SMTP id y20so7407059ier.13
+        for <ceph-devel@vger.kernel.org>; Mon, 28 Jul 2014 13:05:35 -0700 (PDT)
+In-Reply-To: <CANA9Uk4JGm_2L_VnGsOgfpsX17=Ja4LLDaVNXzKJe-ZkY=ya9A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
-Cc: "Zhang, Jian" <jian.zhang@intel.com>, "'icolle@redhat.com'" <icolle@redhat.com>, "'sam.just@inktank.com'" <sam.just@inktank.com>, "'ceph-devel@vger.kernel.org'" <ceph-devel@vger.kernel.org>
+To: M Ranga Swami Reddy <swamireddy@gmail.com>
+Cc: Sage Weil <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Mon, 28 Jul 2014, Wang, Zhiqiang wrote:
-> Hi Sage,
-> 
-> I made this change in https://github.com/wonzhq/ceph/commit/924e418abb831338e2df7f4a4ec9409b02ee5524 and unit tested it. Could you take a review and give comments? Thanks.
+Bucket lifecycle:
+http://tracker.ceph.com/issues/8929
 
-I made a few comments on the commit on github.  Overall it looks good, but 
-we should add a test to ceph_test_rados_api_tier (test/librados/tier.cc).
+Bucket notification:
+http://tracker.ceph.com/issues/8956
 
-Thanks!
-sage
-
-
-> 
-> -----Original Message-----
-> From: Wang, Zhiqiang 
-> Sent: Tuesday, July 22, 2014 9:38 AM
-> To: Sage Weil
-> Cc: Zhang, Jian; icolle@redhat.com; sam.just@inktank.com; ceph-devel@vger.kernel.org
-> Subject: RE: Cache tiering read-proxy mode
-> 
-> Since we can't be accurate at the seconds level, how about making the min_read_recency_for_promote option as the number of 'hit set intervals' instead of number of seconds? So that, when min_read_recency_for_promote is
-> 1) 0, promotion on first read
-> 2) 1, promotion on second read, checking only the current hit set
-> 3) any other number, promotion on second read, keep this number (including the current one) of hit sets in memory, checking object existence in these hit sets regardless of hit set rotation
-> 
-> -----Original Message-----
-> From: Sage Weil [mailto:sweil@redhat.com]
-> Sent: Monday, July 21, 2014 10:20 PM
-> To: Wang, Zhiqiang
-> Cc: Zhang, Jian; icolle@redhat.com; sam.just@inktank.com; ceph-devel@vger.kernel.org
-> Subject: RE: Cache tiering read-proxy mode
-> 
-> On Mon, 21 Jul 2014, Wang, Zhiqiang wrote:
-> > In the current code, when the evict mode is idle, we just keep the 
-> > current hit set in memory. All the other hit sets (hit_set_count-1) 
-> > are on disks. And when the evict mode is not idle, all the hit sets 
-> > are loaded into memory. When the current hit set is full or exceeds 
-> > its interval, it is persisted to disk. A new hit set is created to act 
-> > as the current and the oldest is removed from disk.
-> > 
-> > So, if we introduce the min_read_recency_for_promote option, say the 
-> > user sets its value to 200, and the value of 'hit set interval' to 60, 
-> > does it mean we need to always keep 200/60+1=4 latest hit sets in 
-> > memory (Assuming 'hit set count' is greater than 4, number of 'hit set count'
-> > if not), even if the evict mode is idle? And when persisting the 
-> > current hit set, it is still kept in memory, but the oldest in-memory 
-> > hit set is removed from memory?
-> 
-> Exactly.  We can probably just make helper that loads these into memory for the tiering agent sufficiently generic (if it isn't already) so that it keeps the right number of them in memory when the agent is inactive.
-> 
-> > Btw, I don't quite get what you said on the normal hit set rotation part.
-> 
-> If we set the tunable to, say, one hour, and the HitSet interval is also an hour, then does this mean we always have 2 HitSet's in RAM, so that we cover *at least* an hour while the newest is being populated?  If we decide to check the first and second HitSets, then we are actually covering up to double the configured period.
-> 
-> sage
-> 
-> 
-> > -----Original Message-----
-> > From: Sage Weil [mailto:sweil@redhat.com]
-> > Sent: Monday, July 21, 2014 11:55 AM
-> > To: Wang, Zhiqiang
-> > Cc: Zhang, Jian; icolle@redhat.com; sam.just@inktank.com; 
-> > ceph-devel@vger.kernel.org
-> > Subject: RE: Cache tiering read-proxy mode
-> > 
-> > On Mon, 21 Jul 2014, Wang, Zhiqiang wrote:
-> > > For the min_read_recency_for_promote option, it's easy to understand 
-> > > the '0' and '<= hit set interval' cases. But for the '> hit set interval'
-> > > case, do you mean we always keep all the hit sets in RAM and check 
-> > > for the object's existence in all of them, or just load all the hit 
-> > > sets and check for object existence before the read? In another 
-> > > word, when min_read_recency_for_promote is greater than 'hit set 
-> > > interval', we always keep all the hit sets in RAM?
-> > 
-> > I'm thinking we would keep any many HitSets as are needed to cover whatever the configured interval is.  Setting the option to the same value as the hitset interval (or just '1'?) would be the simplest thing, and probably the default?
-> > 
-> > We would need to decide what behavior we want with respect to the normal HitSet rotation, though.  If they each cover, say, one hour, then on average they will half of that, and sometimes almost no time at all (if they just rotated).  So probably we'd want to keep the next-most-recent in memory for some period?  It'll always be a bit imprecise, though, but hopefully it won't really matter...
-> > 
-> > sage
-> > 
-> > > 
-> > > -----Original Message-----
-> > > From: Sage Weil [mailto:sweil@redhat.com]
-> > > Sent: Monday, July 21, 2014 9:44 AM
-> > > To: Wang, Zhiqiang
-> > > Cc: Zhang, Jian; icolle@redhat.com; sam.just@inktank.com; 
-> > > ceph-devel@vger.kernel.org
-> > > Subject: RE: Cache tiering read-proxy mode
-> > > 
-> > > [Adding ceph-devel]
-> > > 
-> > > On Mon, 21 Jul 2014, Wang, Zhiqiang wrote:
-> > > > Sage,
-> > > > 
-> > > > I agree with you that promotion on the 2nd read could improve 
-> > > > cache tiering's performance for some kinds of workloads. The 
-> > > > general idea here is to implement some kinds of policies in the 
-> > > > cache tier to measure the warmness of the data. If the cache tier 
-> > > > is aware of the data warmness, it could even initiate data 
-> > > > movement between the cache tier and the base tier. This means data 
-> > > > could be prefetched into the cache tier before reading or writing.
-> > > > But I think this is something we could do in the future.
-> > > 
-> > > Yeah. I suspect it will be challenging to put this sort of prefetching intelligence directly into the OSDs, though.  It could possibly be done by an external agent, maybe, or could be driven by explicit hints from clients ("I will probably access this data soon").
-> > > 
-> > > > The 'promotion on 2nd read' policy is straightforward. Sure it 
-> > > > will benefit some kinds of workload, but not all. If it is 
-> > > > implemented as a cache tier option, the user needs to decide to 
-> > > > turn it on or not. But I'm afraid most of the users don't have the 
-> > > > idea of this. This increases the difficulty of using cache tiering.
-> > > 
-> > > I suspect the 2nd read behavior will be something we'll want to do by default...  but yeah, there will be a new pool option (or options) that controls the behavior.
-> > > 
-> > > > One question for the implementation of 'promotion on 2nd read': 
-> > > > what do we do for the 1st read? Does the cache tier read the 
-> > > > object from base tier but not doing replication, or just redirecting it?
-> > > 
-> > > For the first read, we just redirect the client.  The on the second read, we call promote_object().  See maybe_handle_cache() in ReplicatedPG.cc.  
-> > > We can pretty easily tell the difference by checking the in-memory HitSet for a match.
-> > > 
-> > > Perhaps the option in the pool would be something like min_read_recency_for_promote?  If we measure "recency" as "(avg) seconds since last access" (loosely), 0 would mean it would promote on first read, and anything <= the HitSet interval would mean promote if the object is in the current HitSet.  > than that would mean we'd need to keep additional previous HitSets in RAM.
-> > > 
-> > > ...which leads us to a separate question of how to describe access 
-> > > frequency vs recency.  We keep N HitSets, each covering a time 
-> > > period of T seconds.  Normally we only keep the most recent HitSet 
-> > > in memory, unless the agent is active (flushing data).  So what I 
-> > > described above is checking how recently the last access was (within 
-> > > how many multiples of T seconds).  Additionally, though, we could 
-> > > describe the frequency of
-> > > access: was the object accesssed at least once in every N interval of T seconds?  Or some fraction of them?  That is probably best described as "temperature?"  I'm not to fond of the term "recency," tho I can't think of anything better right now.
-> > > 
-> > > Anyway, for the read promote behavior, recency is probably sufficient, but for the tiering agent flush/evict behavior temperature might be a good thing to consider...
-> > > 
-> > > sage
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe 
-> > > ceph-devel" in the body of a message to majordomo@vger.kernel.org 
-> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > > 
-> > > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
-> > in the body of a message to majordomo@vger.kernel.org More majordomo 
-> > info at  http://vger.kernel.org/majordomo-info.html
-> > 
-> > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+On Sun, Jul 27, 2014 at 12:54 AM, M Ranga Swami Reddy
+<swamireddy@gmail.com> wrote:
+> Good no know the details. Can you please share the issue ID for bucket
+> lifecycle? My team also could start help here.
+> Regarding the notification - Do we have the issue ID?
+> Yes, the object versioning will be backlog one - I strongly feel we
+> start working on this asap.
+>
+> Thanks
+> Swami
+>
+> On Fri, Jul 25, 2014 at 11:31 PM, Yehuda Sadeh <yehuda@redhat.com> wrote:
+>> On Fri, Jul 25, 2014 at 10:14 AM, M Ranga Swami Reddy
+>> <swamireddy@gmail.com> wrote:
+>>> Thanks for quick reply.
+>>> Yes,  versioned object - missing in ceph ATM
+>>> Iam looking for: bucket lifecylce (get/put/delete), bucket location,
+>>> put object notification and object restore (ie versioned object) S3
+>>> API support.
+>>> Please let me now any of the above work is in progress or some one
+>>> planned to work on.
+>>
+>>
+>> I opened an issue for bucket lifecycle (we already had an issue open
+>> for object expiration though). We do have bucket location already
+>> (part of the multi-region feature). Object versioning is definitely on
+>> our backlog and one that we'll hopefully implement sooner rather
+>> later.
+>> With regard to object notification, it'll require having a
+>> notification service which is a bit out of the scope. Integrating the
+>> gateway with such a service whouldn't be hard, but we'll need to have
+>> that first.
+>>
+>> Yehuda
+>>
+>>>
+>>> Thanks
+>>> Swami
+>>>
+>>>
+>>> On Fri, Jul 25, 2014 at 9:19 PM, Sage Weil <sweil@redhat.com> wrote:
+>>>> On Fri, 25 Jul 2014, M Ranga Swami Reddy wrote:
+>>>>> Hi Team: As per the ceph document a few S3 APIs compatibility not supported.
+>>>>>
+>>>>> Link: http://ceph.com/docs/master/radosgw/s3/
+>>>>>
+>>>>> Is there plan to support the ?n supported item in the above table?
+>>>>> or
+>>>>> Any working on this?
+>>>>
+>>>> Yes.  Unfortunately this table isn't particularly detailed or accurate or
+>>>> up to date.   The main gap, I think, is versioned objects.
+>>>>
+>>>> Are there specfiic parts of the S3 API that are missing that you need?
+>>>> That sort of info is very helpful for prioritizing effort...
+>>>>
+>>>> sage
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
