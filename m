@@ -1,78 +1,36 @@
-From: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>
-Subject: RE: Pull Request for ISA EC plug-in
-Date: Mon, 28 Jul 2014 22:53:42 +0000
-Message-ID: <3472A07E6605974CBC9BC573F1BC02E4AE750C17@CERNXCHG44.cern.ch>
-References: <3472A07E6605974CBC9BC573F1BC02E4AE7509E3@CERNXCHG44.cern.ch>,<alpine.DEB.2.00.1407281520470.4962@cobra.newdream.net>
+From: John Spray <john.spray@redhat.com>
+Subject: Re: wip-objecter
+Date: Tue, 29 Jul 2014 00:23:59 +0100
+Message-ID: <CAGd4Wr0JvxUg37cHdvVT+qQ+bDjp2DDn36QW-nDwZ2MddeYtng@mail.gmail.com>
+References: <alpine.DEB.2.00.1407251727430.5027@cobra.newdream.net>
+	<CAGd4Wr17ds-r8u4ZZfSwptsCV9LV43s206=c_uee5Lp4R7ex3A@mail.gmail.com>
+	<alpine.DEB.2.00.1407281437030.4962@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cernmx11.cern.ch ([188.184.36.50]:7567 "EHLO CERNMX11.cern.ch"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751425AbaG1Wxr convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Jul 2014 18:53:47 -0400
-In-Reply-To: <alpine.DEB.2.00.1407281520470.4962@cobra.newdream.net>
-Content-Language: en-GB
+Received: from mail-pd0-f182.google.com ([209.85.192.182]:47199 "EHLO
+	mail-pd0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751213AbaG1XX7 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Jul 2014 19:23:59 -0400
+Received: by mail-pd0-f182.google.com with SMTP id fp1so10756815pdb.27
+        for <ceph-devel@vger.kernel.org>; Mon, 28 Jul 2014 16:23:59 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.00.1407281437030.4962@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sweil@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Sage, 
-
-I fixed that. I missed '$(srcdir)' in the assembler  and C/C++ include statements (I always compiled in src dir ..)
-
-You can retry.
-
-Thanks Andreas.
-
-________________________________________
-From: ceph-devel-owner@vger.kernel.org [ceph-devel-owner@vger.kernel.org] on behalf of Sage Weil [sweil@redhat.com]
-Sent: 29 July 2014 00:22
-To: Andreas Joachim Peters
-Cc: ceph-devel@vger.kernel.org
-Subject: Re: Pull Request for ISA EC plug-in
-
-Hi Andreas!
-
-On Mon, 28 Jul 2014, Andreas Joachim Peters wrote:
-> Hi all,
+On Mon, Jul 28, 2014 at 10:48 PM, Sage Weil <sweil@redhat.com> wrote:
+> Anyway, I rebased and resolved conflicts and pushed a new
+> wip-objecter-rebased which looks like it has the right diff between the
+> old and new versions.
 >
-> here is a PULL request for the ISA EC plugin rebased against master of
-> today for review.
->
-> https://github.com/ceph/ceph/pull/2155
->
-> I have added as discussed the exhaustive test of all possible failures
-> scenarios for both supported matrix types for a (k=12,m=4) configuration
-> to the unit tests ( which helped indeed to spot a bug in the table
-> caching )
+> Take a look?  The main change is that the set data pool virtual xattrs do
+> objecter->wait_for_latest_osdmap() and the flawed MDS::request_osdmap()
+> helper is now gone.
 
-I tried to push this through the build system and it looks like perhaps
-some files are missing from the commit?
+Yep, looks right.  I was going to do about the same squashup once
+things were passing unit tests, but I had missed the leak of the
+contexts.
 
-CC erasure-code/isa/isa-l/erasure_code/libec_isa_la-ec_highlevel_func.lo
-In file included from erasure-code/isa/isa-l/erasure_code/ec_base.c:32:0:
-erasure-code/isa/isa-l/include/erasure_code.h:52:25: fatal error: gf_vect_mul.h: No such file or directory
-compilation terminated.
-CCAS erasure-code/isa/isa-l/erasure_code/libec_isa_la-ec_multibinary.asm.lo
-CCAS erasure-code/isa/isa-l/erasure_code/libec_isa_la-gf_2vect_dot_prod_avx2.asm.lo
-In file included from erasure-code/isa/isa-l/erasure_code/ec_highlevel_func.c:30:0:
-erasure-code/isa/isa-l/include/erasure_code.h:52:25: fatal error: gf_vect_mul.h: No such file or directory
-compilation terminated.
-
-and
-
-FATAL: yasm: unable to open include file `reg_sizes.asm'
-
-See
- http://gitbuilder.sepia.ceph.com/gitbuilder-ceph-deb-wheezy-amd64-basic/log.cgi?log=60408e6c6b3b34d719943d16fcc023407e08ae01
-
-Hopefully these are just sitting in your working directory?
-
-Thanks!
-sage
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+John
