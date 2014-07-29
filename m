@@ -1,13 +1,13 @@
 From: Julia Lawall <Julia.Lawall@lip6.fr>
-Subject: [PATCH 6/9] gpiolib: devres: use correct structure type name in sizeof
-Date: Tue, 29 Jul 2014 17:16:48 +0200
-Message-ID: <1406647011-8543-7-git-send-email-Julia.Lawall@lip6.fr>
+Subject: [PATCH 7/9] scsi: use correct structure type name in sizeof
+Date: Tue, 29 Jul 2014 17:16:49 +0200
+Message-ID: <1406647011-8543-8-git-send-email-Julia.Lawall@lip6.fr>
 References: <1406647011-8543-1-git-send-email-Julia.Lawall@lip6.fr>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1406647011-8543-1-git-send-email-Julia.Lawall@lip6.fr>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: kernel-janitors@vger.kernel.org, linux-ia64@vger.kernel.org, ceph-devel@vger.kernel.org, toralf.foerster@gmx.de, hmh@hmh.eng.br, Alexandre Courbot <gnurou@gmail.com>, linux-gpio@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Dario Ballabio <ballabio_dario@emc.com>
+Cc: kernel-janitors@vger.kernel.org, linux-ia64@vger.kernel.org, ceph-devel@vger.kernel.org, toralf.foerster@gmx.de, hmh@hmh.eng.br, "James E.J. Bottomley" <JBottomley@parallels.com>, linux-scsi@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
 From: Julia Lawall <Julia.Lawall@lip6.fr>
@@ -22,19 +22,19 @@ semantic patch used can be found in message 0 of this patch series.
 Signed-off-by: Julia Lawall <Julia.Lawall@lip6.fr>
 
 ---
- drivers/gpio/devres.c |    2 +-
+ drivers/scsi/u14-34f.c |    2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/gpio/devres.c b/drivers/gpio/devres.c
-index 65978cf..4a63207 100644
---- a/drivers/gpio/devres.c
-+++ b/drivers/gpio/devres.c
-@@ -84,7 +84,7 @@ struct gpio_desc *__must_check devm_gpiod_get_index(struct device *dev,
- 	struct gpio_desc **dr;
- 	struct gpio_desc *desc;
+diff --git a/drivers/scsi/u14-34f.c b/drivers/scsi/u14-34f.c
+index 4e76fe8..617d72a 100644
+--- a/drivers/scsi/u14-34f.c
++++ b/drivers/scsi/u14-34f.c
+@@ -585,7 +585,7 @@ struct mscp {
+    struct sg_list *sglist; /* pointer to the allocated SG list */
+    };
  
--	dr = devres_alloc(devm_gpiod_release, sizeof(struct gpiod_desc *),
-+	dr = devres_alloc(devm_gpiod_release, sizeof(struct gpio_desc *),
- 			  GFP_KERNEL);
- 	if (!dr)
- 		return ERR_PTR(-ENOMEM);
+-#define CP_TAIL_SIZE (sizeof(struct sglist *) + sizeof(dma_addr_t))
++#define CP_TAIL_SIZE (sizeof(struct sg_list *) + sizeof(dma_addr_t))
+ 
+ struct hostdata {
+    struct mscp cp[MAX_MAILBOXES];       /* Mailboxes for this board */
