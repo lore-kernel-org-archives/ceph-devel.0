@@ -1,13 +1,13 @@
 From: Julia Lawall <Julia.Lawall@lip6.fr>
-Subject: [PATCH 4/9] reiserfs: use correct structure type name in sizeof
-Date: Tue, 29 Jul 2014 17:16:46 +0200
-Message-ID: <1406647011-8543-5-git-send-email-Julia.Lawall@lip6.fr>
+Subject: [PATCH 5/9] scsi: use correct structure type name in sizeof
+Date: Tue, 29 Jul 2014 17:16:47 +0200
+Message-ID: <1406647011-8543-6-git-send-email-Julia.Lawall@lip6.fr>
 References: <1406647011-8543-1-git-send-email-Julia.Lawall@lip6.fr>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1406647011-8543-1-git-send-email-Julia.Lawall@lip6.fr>
 Sender: linux-kernel-owner@vger.kernel.org
-To: reiserfs-devel@vger.kernel.org
-Cc: kernel-janitors@vger.kernel.org, linux-ia64@vger.kernel.org, ceph-devel@vger.kernel.org, toralf.foerster@gmx.de, hmh@hmh.eng.br, linux-kernel@vger.kernel.org
+To: Dario Ballabio <ballabio_dario@emc.com>
+Cc: kernel-janitors@vger.kernel.org, linux-ia64@vger.kernel.org, ceph-devel@vger.kernel.org, toralf.foerster@gmx.de, hmh@hmh.eng.br, "James E.J. Bottomley" <JBottomley@parallels.com>, linux-scsi@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
 From: Julia Lawall <Julia.Lawall@lip6.fr>
@@ -22,19 +22,19 @@ semantic patch used can be found in message 0 of this patch series.
 Signed-off-by: Julia Lawall <Julia.Lawall@lip6.fr>
 
 ---
- fs/reiserfs/resize.c |    2 +-
+ drivers/scsi/eata.c |    2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/fs/reiserfs/resize.c b/fs/reiserfs/resize.c
-index 6052d32..e69051b 100644
---- a/fs/reiserfs/resize.c
-+++ b/fs/reiserfs/resize.c
-@@ -99,7 +99,7 @@ int reiserfs_resize(struct super_block *s, unsigned long block_count_new)
- 		 */
- 		copy_size = bmap_nr_new < bmap_nr ? bmap_nr_new : bmap_nr;
- 		copy_size =
--		    copy_size * sizeof(struct reiserfs_list_bitmap_node *);
-+		    copy_size * sizeof(struct reiserfs_bitmap_node *);
- 		for (i = 0; i < JOURNAL_NUM_BITMAPS; i++) {
- 			struct reiserfs_bitmap_node **node_tmp;
- 			jb = SB_JOURNAL(s)->j_list_bitmap + i;
+diff --git a/drivers/scsi/eata.c b/drivers/scsi/eata.c
+index 813dd5c..4caf221 100644
+--- a/drivers/scsi/eata.c
++++ b/drivers/scsi/eata.c
+@@ -811,7 +811,7 @@ struct mscp {
+ 	struct sg_list *sglist;	/* pointer to the allocated SG list */
+ };
+ 
+-#define CP_TAIL_SIZE (sizeof(struct sglist *) + sizeof(dma_addr_t))
++#define CP_TAIL_SIZE (sizeof(struct sg_list *) + sizeof(dma_addr_t))
+ 
+ struct hostdata {
+ 	struct mscp cp[MAX_MAILBOXES];	/* Mailboxes for this board */
