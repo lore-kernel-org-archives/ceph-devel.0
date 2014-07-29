@@ -1,36 +1,30 @@
-From: David Howells <dhowells@redhat.com>
-Subject: Re: fscache recursive hang -- similar to loopback
-	NFS issues
-Date: Tue, 29 Jul 2014 17:12:34 +0100
-Message-ID: <29057.1406650354@warthog.procyon.org.uk>
-References: <CANP1eJEVnH2w7t6r8g1ow07UNWRA8bPduwD-FezqCBKB_J_=XQ@mail.gmail.com>
-	<CANP1eJE7tU9touhSq+Utt=MLE4w5D_C4pT1TAFAiFNBh8ee_mA@mail.gmail.com>
-	<20140721164044.2845f3fd@notabene.brown>
+From: Derek Yarnell <derek@umiacs.umd.edu>
+Subject: Admin Operations API Quota Get
+Date: Tue, 29 Jul 2014 13:32:11 -0400
+Message-ID: <53D7DA9B.2000407@umiacs.umd.edu>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-cachefs-bounces@redhat.com>
-In-Reply-To: <CANP1eJEVnH2w7t6r8g1ow07UNWRA8bPduwD-FezqCBKB_J_=XQ@mail.gmail.com>
-Content-ID: <29056.1406650354.1@warthog.procyon.org.uk>
-List-Unsubscribe: <https://www.redhat.com/mailman/options/linux-cachefs>,
-	<mailto:linux-cachefs-request@redhat.com?subject=unsubscribe>
-List-Archive: <https://www.redhat.com/archives/linux-cachefs>
-List-Post: <mailto:linux-cachefs@redhat.com>
-List-Help: <mailto:linux-cachefs-request@redhat.com?subject=help>
-List-Subscribe: <https://www.redhat.com/mailman/listinfo/linux-cachefs>,
-	<mailto:linux-cachefs-request@redhat.com?subject=subscribe>
-Sender: linux-cachefs-bounces@redhat.com
-Errors-To: linux-cachefs-bounces@redhat.com
-To: Milosz Tanski <milosz@adfin.com>
-Cc: NeilBrown <neilb@suse.de>, ceph-devel <ceph-devel@vger.kernel.org>, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, "linux-cachefs@redhat.com" <linux-cachefs@redhat.com>
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from bubs.umiacs.umd.edu ([128.8.132.55]:35261 "EHLO
+	bubs.umiacs.umd.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750929AbaG2Rmp (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Jul 2014 13:42:45 -0400
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: derek@umiacs.umd.edu
 
-Milosz Tanski <milosz@adfin.com> wrote:
+http://ceph.com/docs/master/radosgw/adminops/#get-user-quota
 
-> That's the same thing exact fix I started testing on Saturday. I found that
-> there already is a wait_event_timeout (even without your recent changes). The
-> thing I'm not quite sure is what timeout it should use?
+I had logged a bug report[1] and I just wanted to see if anyone else was
+using the admin api for radosgw to manage quotas?  We have a workaround
+wrapping the command line rgwadmin but it would be very nice to be able
+to just use the API.
 
-That's probably something to make an external tuning knob for.
+[1] - http://tracker.ceph.com/issues/8293
 
-David
+-- 
+Derek T. Yarnell
+University of Maryland
+Institute for Advanced Computer Studies
