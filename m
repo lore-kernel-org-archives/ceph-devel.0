@@ -1,13 +1,13 @@
 From: Julia Lawall <Julia.Lawall@lip6.fr>
-Subject: [PATCH 8/9] iwlegacy: use correct structure type name in sizeof
-Date: Tue, 29 Jul 2014 17:16:50 +0200
-Message-ID: <1406647011-8543-9-git-send-email-Julia.Lawall@lip6.fr>
+Subject: [PATCH 6/9] gpiolib: devres: use correct structure type name in sizeof
+Date: Tue, 29 Jul 2014 17:16:48 +0200
+Message-ID: <1406647011-8543-7-git-send-email-Julia.Lawall@lip6.fr>
 References: <1406647011-8543-1-git-send-email-Julia.Lawall@lip6.fr>
-Return-path: <kernel-janitors-owner@vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1406647011-8543-1-git-send-email-Julia.Lawall@lip6.fr>
-Sender: kernel-janitors-owner@vger.kernel.org
-To: Stanislaw Gruszka <sgruszka@redhat.com>
-Cc: kernel-janitors@vger.kernel.org, linux-ia64@vger.kernel.org, ceph-devel@vger.kernel.org, toralf.foerster@gmx.de, hmh@hmh.eng.br, "John W. Linville" <linville@tuxdriver.com>, linux-wireless@vger.kernel.org, netdev@vger.kernel.org, linux-kernel@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: kernel-janitors@vger.kernel.org, linux-ia64@vger.kernel.org, ceph-devel@vger.kernel.org, toralf.foerster@gmx.de, hmh@hmh.eng.br, Alexandre Courbot <gnurou@gmail.com>, linux-gpio@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
 From: Julia Lawall <Julia.Lawall@lip6.fr>
@@ -22,21 +22,19 @@ semantic patch used can be found in message 0 of this patch series.
 Signed-off-by: Julia Lawall <Julia.Lawall@lip6.fr>
 
 ---
- drivers/net/wireless/iwlegacy/common.c |    3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+ drivers/gpio/devres.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/net/wireless/iwlegacy/common.c b/drivers/net/wireless/iwlegacy/common.c
-index 03de746..2c4fa49 100644
---- a/drivers/net/wireless/iwlegacy/common.c
-+++ b/drivers/net/wireless/iwlegacy/common.c
-@@ -2980,7 +2980,8 @@ il_tx_queue_alloc(struct il_priv *il, struct il_tx_queue *txq, u32 id)
- 	/* Driver ilate data, only for Tx (not command) queues,
- 	 * not shared with device. */
- 	if (id != il->cmd_queue) {
--		txq->skbs = kcalloc(TFD_QUEUE_SIZE_MAX, sizeof(struct skb *),
-+		txq->skbs = kcalloc(TFD_QUEUE_SIZE_MAX,
-+				    sizeof(struct sk_buff *),
- 				    GFP_KERNEL);
- 		if (!txq->skbs) {
- 			IL_ERR("Fail to alloc skbs\n");
-
+diff --git a/drivers/gpio/devres.c b/drivers/gpio/devres.c
+index 65978cf..4a63207 100644
+--- a/drivers/gpio/devres.c
++++ b/drivers/gpio/devres.c
+@@ -84,7 +84,7 @@ struct gpio_desc *__must_check devm_gpiod_get_index(struct device *dev,
+ 	struct gpio_desc **dr;
+ 	struct gpio_desc *desc;
+ 
+-	dr = devres_alloc(devm_gpiod_release, sizeof(struct gpiod_desc *),
++	dr = devres_alloc(devm_gpiod_release, sizeof(struct gpio_desc *),
+ 			  GFP_KERNEL);
+ 	if (!dr)
+ 		return ERR_PTR(-ENOMEM);
