@@ -1,96 +1,50 @@
-From: Milosz Tanski <milosz@adfin.com>
-Subject: Re: [PATCH] ceph: use the OSD time as the object mtime instead of the
- client time
-Date: Tue, 29 Jul 2014 14:54:42 -0400
-Message-ID: <CANP1eJH8KOgJdkRaSgecr-Esjf7GjOVNM7=T1y52SFMKic5ZuA@mail.gmail.com>
-References: <06E7D85B3BA36C4DB207FEDE871C534891D8CB@SHSMSX101.ccr.corp.intel.com>
-	<alpine.DEB.2.00.1407290844430.27871@cobra.newdream.net>
-	<CAPYLRzh3EfcTeVuZB-StY2dfQ=4B9a6CspX9bXefxsQeSUm1iw@mail.gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: v0.80.5 Firefly released
+Date: Tue, 29 Jul 2014 12:34:13 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1407291232410.26502@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f169.google.com ([209.85.217.169]:38334 "EHLO
-	mail-lb0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751479AbaG2Syo convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Jul 2014 14:54:44 -0400
-Received: by mail-lb0-f169.google.com with SMTP id s7so67964lbd.28
-        for <ceph-devel@vger.kernel.org>; Tue, 29 Jul 2014 11:54:42 -0700 (PDT)
-In-Reply-To: <CAPYLRzh3EfcTeVuZB-StY2dfQ=4B9a6CspX9bXefxsQeSUm1iw@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:53496 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751397AbaG2TeO (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Jul 2014 15:34:14 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: Sage Weil <sweil@redhat.com>, "Wang, Zhiqiang" <zhiqiang.wang@intel.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org, ceph-users@ceph.com, ceph-maintainers@ceph.com
 
-Off the top of my head... the fscache code (read only) in the CephFS
-kclient uses the mtime to see if the item is valid (there was not an
-object change version counter at the time). I don't know if / how that
-would be affected of the top of my head.
+This release fixes a few important bugs in the radosgw and fixes several 
+packaging and environment issues, including OSD log rotation, systemd 
+environments, and daemon restarts on upgrade.
 
-- M
+We recommend that all v0.80.x Firefly users upgrade, particularly if they 
+are using upstart, systemd, or radosgw.
 
-On Tue, Jul 29, 2014 at 12:02 PM, Gregory Farnum <greg@inktank.com> wro=
-te:
-> On Tue, Jul 29, 2014 at 11:46 AM, Sage Weil <sweil@redhat.com> wrote:
->> On Tue, 29 Jul 2014, Wang, Zhiqiang wrote:
->>> This fixes a bug when the time of the OSDs and clients are not sync=
-hronized
->>> (especially when client is ahead of OSD), and the cache tier dirty =
-ratio
->>> reaches the threshold, the agent skips the flush work because it th=
-inks
->>> the object is too young.
->>>
->>> The skipping flush code is as following:
->>>
->>>   if (obc->obs.oi.mtime + utime_t(pool.info.cache_min_flush_age, 0)=
- > now) {
->>>     dout(20) << __func__ << " skip (too young) " << obc->obs.oi << =
-dendl;
->>>     osd->logger->inc(l_osd_agent_skip);
->>>     return false;
->>>   }
->>
->> Hmm, I think the use of the client mtime is an important property we=
- want
->> to maintain for the benefit of the rest of the system.  Two other
->> possibilities:
->
-> This was my initial thought as well =E2=80=94 but I don't think we're=
- actually
-> relying on that any more (e.g., we used to use the client times for
-> file recovery in the MDS, but the rest of CephFS is now using MDS
-> times anyway). Are there scenarios other than CephFS recovery?
->
->>
->> 1) If cache_min_flush_age is 0, skip the check, so we avoid mtimes i=
-n the
->> future in that case.
->>
->> 2) Add an additional field to object_info_t that is an mtime based o=
-n the
->> OSD's clock, and use that for these checks.
->
-> But option 2 is probably still a good idea.
-> -Greg
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Notable Changes
+---------------
 
+* ceph-dencoder: do not needlessly link to librgw, librados, etc. (Sage 
+  Weil)
+* do not needlessly link binaries to leveldb (Sage Weil)
+* mon: fix mon crash when no auth keys are present (#8851, Joao Eduardo 
+  Luis)
+* osd: fix cleanup (and avoid occasional crash) during shutdown (#7981, 
+  Sage Weil)
+* osd: fix log rotation under upstart (Sage Weil)
+* rgw: fix multipart upload when object has irregular size (#8846, Yehuda 
+  Sadeh, Sylvain Munaut)
+* rgw: improve bucket listing S3 compatibility (#8858, Yehuda Sadeh)
+* rgw: improve delimited bucket listing (Yehuda Sadeh)
+* rpm: do not restart daemons on upgrade (#8849, Alfredo Deza)
 
+For more detailed information, see the complete changelog:
 
---=20
-Milosz Tanski
-CTO
-16 East 34th Street, 15th floor
-New York, NY 10016
+  http://ceph.com/docs/master/_downloads/v0.80.5.txt
 
-p: 646-253-9055
-e: milosz@adfin.com
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Getting Ceph
+------------
+
+* Git at git://github.com/ceph/ceph.git
+* Tarball at http://ceph.com/download/ceph-0.80.5.tar.gz
+* For packages, see http://ceph.com/docs/master/install/get-packages
+* For ceph-deploy, see http://ceph.com/docs/master/install/install-ceph-deploy
