@@ -1,50 +1,29 @@
-From: Sage Weil <sage@inktank.com>
-Subject: v0.80.5 Firefly released
-Date: Tue, 29 Jul 2014 12:34:13 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1407291232410.26502@cobra.newdream.net>
+From: "Brown, Aaron F" <aaron.f.brown@intel.com>
+Subject: Re: [PATCH 3/9] i40e: use correct structure type name in sizeof
+Date: Tue, 29 Jul 2014 20:22:20 +0000
+Message-ID: <309B89C4C689E141A5FF6A0C5FB2118B73369BF3@ORSMSX104.amr.corp.intel.com>
+References: <1406647011-8543-1-git-send-email-Julia.Lawall@lip6.fr>
+ <1406647011-8543-4-git-send-email-Julia.Lawall@lip6.fr>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:53496 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751397AbaG2TeO (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Jul 2014 15:34:14 -0400
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org, ceph-users@ceph.com, ceph-maintainers@ceph.com
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-ia64-owner@vger.kernel.org>
+In-Reply-To: <1406647011-8543-4-git-send-email-Julia.Lawall@lip6.fr>
+Content-Language: en-US
+Sender: linux-ia64-owner@vger.kernel.org
+To: "Julia.Lawall@lip6.fr" <Julia.Lawall@lip6.fr>
+Cc: "Kirsher, Jeffrey T" <jeffrey.t.kirsher@intel.com>, "Brandeburg, Jesse" <jesse.brandeburg@intel.com>, "Allan, Bruce W" <bruce.w.allan@intel.com>, "Wyborny, Carolyn" <carolyn.wyborny@intel.com>, "Skidmore, Donald C" <donald.c.skidmore@intel.com>, "Rose, Gregory V" <gregory.v.rose@intel.com>, "Duyck, Alexander H" <alexander.h.duyck@intel.com>, "Ronciak, John" <john.ronciak@intel.com>, "Williams, Mitch A" <mitch.a.williams@intel.com>, "kernel-janitors@vger.kernel.org" <kernel-janitors@vger.kernel.org>, "linux-ia64@vger.kernel.org" <linux-ia64@vger.kernel.org>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "toralf.foerster@gmx.de" <toralf.foerster@gmx.de>, "hmh@hmh.eng.br" <hmh@hmh.eng.br>, Linux NICS <Linux-nics@isotope.jf.intel.com>, "e1000-devel@lists.sourceforge.net" <e1000-devel@lists.sourceforge.net>, "netdev@vger.kernel.org" <netdev@vger.kernel.org>
+List-Id: ceph-devel.vger.kernel.org
 
-This release fixes a few important bugs in the radosgw and fixes several 
-packaging and environment issues, including OSD log rotation, systemd 
-environments, and daemon restarts on upgrade.
-
-We recommend that all v0.80.x Firefly users upgrade, particularly if they 
-are using upstart, systemd, or radosgw.
-
-Notable Changes
----------------
-
-* ceph-dencoder: do not needlessly link to librgw, librados, etc. (Sage 
-  Weil)
-* do not needlessly link binaries to leveldb (Sage Weil)
-* mon: fix mon crash when no auth keys are present (#8851, Joao Eduardo 
-  Luis)
-* osd: fix cleanup (and avoid occasional crash) during shutdown (#7981, 
-  Sage Weil)
-* osd: fix log rotation under upstart (Sage Weil)
-* rgw: fix multipart upload when object has irregular size (#8846, Yehuda 
-  Sadeh, Sylvain Munaut)
-* rgw: improve bucket listing S3 compatibility (#8858, Yehuda Sadeh)
-* rgw: improve delimited bucket listing (Yehuda Sadeh)
-* rpm: do not restart daemons on upgrade (#8849, Alfredo Deza)
-
-For more detailed information, see the complete changelog:
-
-  http://ceph.com/docs/master/_downloads/v0.80.5.txt
-
-Getting Ceph
-------------
-
-* Git at git://github.com/ceph/ceph.git
-* Tarball at http://ceph.com/download/ceph-0.80.5.tar.gz
-* For packages, see http://ceph.com/docs/master/install/get-packages
-* For ceph-deploy, see http://ceph.com/docs/master/install/install-ceph-deploy
+T24gVHVlLCAyMDE0LTA3LTI5IGF0IDE3OjE2ICswMjAwLCBKdWxpYSBMYXdhbGwgd3JvdGU6Cj4g
+RnJvbTogSnVsaWEgTGF3YWxsIDxKdWxpYS5MYXdhbGxAbGlwNi5mcj4KPiAKPiBDb3JyZWN0IHR5
+cG8gaW4gdGhlIG5hbWUgb2YgdGhlIHR5cGUgZ2l2ZW4gdG8gc2l6ZW9mLiAgQmVjYXVzZSBpdCBp
+cyB0aGUKPiBzaXplIG9mIGEgcG9pbnRlciB0aGF0IGlzIHdhbnRlZCwgdGhlIHR5cG8gaGFzIG5v
+IGltcGFjdCBvbiBjb21waWxhdGlvbiBvcgo+IGV4ZWN1dGlvbi4KPiAKPiBUaGlzIHByb2JsZW0g
+d2FzIGZvdW5kIHVzaW5nIENvY2NpbmVsbGUgKGh0dHA6Ly9jb2NjaW5lbGxlLmxpcDYuZnIvKS4g
+IFRoZQo+IHNlbWFudGljIHBhdGNoIHVzZWQgY2FuIGJlIGZvdW5kIGluIG1lc3NhZ2UgMCBvZiB0
+aGlzIHBhdGNoIHNlcmllcy4KPiAKPiBTaWduZWQtb2ZmLWJ5OiBKdWxpYSBMYXdhbGwgPEp1bGlh
+Lkxhd2FsbEBsaXA2LmZyPgo+IAo+IC0tLQo+ICBkcml2ZXJzL25ldC9ldGhlcm5ldC9pbnRlbC9p
+NDBlL2k0MGVfbWFpbi5jIHwgICAgMiArLQo+ICAxIGZpbGUgY2hhbmdlZCwgMSBpbnNlcnRpb24o
+KyksIDEgZGVsZXRpb24oLSkKClRoYW5rcyBKdWxpYSwgSSBoYXZlIGFkZGVkIHlvdXIgcGF0Y2gg
+dG8gb3VyIChKZWZmJ3MpIHF1ZXVlLgo=
