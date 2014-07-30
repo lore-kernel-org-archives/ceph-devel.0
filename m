@@ -1,54 +1,74 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: giant and hammer dates
-Date: Tue, 29 Jul 2014 18:20:23 -0500
-Message-ID: <53D82C37.8020705@inktank.com>
-References: <alpine.DEB.2.00.1407291558060.26221@cobra.newdream.net>
+From: "Xue, Chendi" <chendi.xue@intel.com>
+Subject: [PATCH]init-ceph: Adding do_cmd_okfail when calling
+ ceph-crush-location
+Date: Wed, 30 Jul 2014 00:55:13 +0000
+Message-ID: <C8CF870384EBCF4CAB89D2041A5C80B301135242@SHSMSX101.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f180.google.com ([209.85.213.180]:59387 "EHLO
-	mail-ig0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751811AbaG2XUP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Jul 2014 19:20:15 -0400
-Received: by mail-ig0-f180.google.com with SMTP id l13so1863929iga.1
-        for <ceph-devel@vger.kernel.org>; Tue, 29 Jul 2014 16:20:14 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1407291558060.26221@cobra.newdream.net>
+Received: from mga09.intel.com ([134.134.136.24]:47993 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754572AbaG3Azm convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Jul 2014 20:55:42 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 07/29/2014 06:11 PM, Sage Weil wrote:
-> We've talked a bit about moving to a ~4 month (instead of 3 month)
-> cadence.  I'm still inclined in this direction because it means fewer
-> stable releases that we will be maintaining and a longer and (hopefully)
-> more productive interval to do real work in between.
->
-> The other key point is that we don't want a repeat of the firefly delay.
-> I think we should stay as close to a train model as we can.  If something
-> isn't ready by freeze, let it wait for the next cycle.  We shouldn't be
-> cramming things in at the end, especially big things.  As a general rule,
-> big things should be merged early in the cycle so that we have lots of
-> time to shake out the issues that only come out of lots of testing and
-> aren't obvious from code review.
->
-> Anyway, how about:
->
->            Freeze         Approx Release
->    Giant   Mon Sep  1     Mon Sep 29
->    Hammer  Mon Jan  4     Mon Feb  2
->
-> That gives us another month for Giant, then September to shake out
-> anything issues.  And then three full months before the Hammer freeze.
->
-> What say ye?
+=46rom 797dbf4f027200bb22ba89d2f616e254321ec023 Mon Sep 17 00:00:00 200=
+1
+=46rom: Chendi Xue <chendi.xue@intel.com>
+Date: Tue, 29 Jul 2014 16:45:45 +0800
+Subject: [PATCH 8/8] Adding do_cmd_okfail when calling ceph-crush-locat=
+ion
 
-6 months. ;)
+Original init-ceph doesn't use do_cmd_okfail when getting osd_location,=
+ which
+results in osds wrong mapping( verified by using "ceph osd tree" )
 
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+Signed-off-by: Chendi Xue <chendi.xue@intel.com>
+---
+src/init-ceph.in | 2 +-
+1 file changed, 1 insertion(+), 1 deletion(-)
 
+diff --git a/src/init-ceph.in b/src/init-ceph.in
+index 86eb87f..09c7cbc 100644
+--- a/src/init-ceph.in
++++ b/src/init-ceph.in
+@@ -327,7 +327,7 @@ for name in $what; do
+=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
+=A0=A0=A0=A0=A0=A0 if [ "${update_crush:-1}" =3D "1" -o "${update_crush=
+:-1}" =3D "true" ]; then
+=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
+=A0=A0=A0=A0=A0=A0 =A0=A0=A0=A0# update location in crush
+=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
+=A0=A0=A0=A0=A0=A0 =A0=A0=A0=A0get_conf osd_location_hook "$BINDIR/ceph=
+-crush-location" "osd crush location hook"
+-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
+=A0=A0=A0=A0=A0 =A0=A0=A0 osd_location=3D`$osd_location_hook --cluster =
+ceph --id $id --type osd`
++=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
+=A0=A0=A0=A0 =A0=A0=A0 osd_location=3D$(do_cmd_okfail "$osd_location_ho=
+ok --cluster ceph --id $id --type osd")
+=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
+=A0=A0=A0=A0=A0=A0 =A0=A0=A0=A0get_conf osd_weight "" "osd crush initia=
+l weight"
+=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
+=A0=A0=A0=A0=A0=A0 =A0=A0=A0=A0defaultweight=3D"$(df -P -k $osd_data/. =
+| tail -1 | awk '{ print sprintf("%.2f",$2/1073741824) }')"
+=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
+=A0=A0=A0=A0=A0=A0 =A0=A0=A0=A0get_conf osd_keyring "$osd_data/keyring"=
+ "keyring"
+--=20
+1.9.1
+
+
+Best Regards,
+-Chendi
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
