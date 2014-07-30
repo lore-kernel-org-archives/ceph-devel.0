@@ -1,43 +1,30 @@
-From: "Ma, Jianpeng" <jianpeng.ma@intel.com>
-Subject: [PATCH]ECBackend: Using ROUND_UP_TO to refactor
-  get_recovery_chunk_size()
-Date: Wed, 30 Jul 2014 06:12:27 +0000
-Message-ID: <6AA21C22F0A5DA478922644AD2EC308C897ED0@SHSMSX101.ccr.corp.intel.com>
+From: Alexandre Courbot <gnurou@gmail.com>
+Subject: Re: [PATCH 6/9] gpiolib: devres: use correct structure type name in sizeof
+Date: Wed, 30 Jul 2014 17:27:38 +0900
+Message-ID: <CAAVeFuLZb3CVV6B771V3-mzYdp0zsxaBfAAdikQDMBxSZTPTjA@mail.gmail.com>
+References: <1406647011-8543-1-git-send-email-Julia.Lawall@lip6.fr> <1406647011-8543-7-git-send-email-Julia.Lawall@lip6.fr>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga03.intel.com ([143.182.124.21]:57202 "EHLO mga03.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751155AbaG3GMh convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Jul 2014 02:12:37 -0400
-Content-Language: en-US
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "sage@redhat.com" <sage@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-gpio-owner@vger.kernel.org>
+In-Reply-To: <1406647011-8543-7-git-send-email-Julia.Lawall@lip6.fr>
+Sender: linux-gpio-owner@vger.kernel.org
+To: Julia Lawall <Julia.Lawall@lip6.fr>
+Cc: Linus Walleij <linus.walleij@linaro.org>, kernel-janitors@vger.kernel.org, linux-ia64@vger.kernel.org, ceph-devel@vger.kernel.org, toralf.foerster@gmx.de, hmh@hmh.eng.br, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Signed-off-by: Ma Jianpeng <jianpeng.ma@intel.com>
----
- src/osd/ECBackend.h | 6 ++----
- 1 file changed, 2 insertions(+), 4 deletions(-)
+On Wed, Jul 30, 2014 at 12:16 AM, Julia Lawall <Julia.Lawall@lip6.fr> wrote:
+> From: Julia Lawall <Julia.Lawall@lip6.fr>
+>
+> Correct typo in the name of the type given to sizeof.  Because it is the
+> size of a pointer that is wanted, the typo has no impact on compilation or
+> execution.
+>
+> This problem was found using Coccinelle (http://coccinelle.lip6.fr/).  The
+> semantic patch used can be found in message 0 of this patch series.
 
-diff --git a/src/osd/ECBackend.h b/src/osd/ECBackend.h
-index 28bcf8a..0e96407 100644
---- a/src/osd/ECBackend.h
-+++ b/src/osd/ECBackend.h
-@@ -149,10 +149,8 @@ public:
- private:
-   friend struct ECRecoveryHandle;
-   uint64_t get_recovery_chunk_size() const {
--    uint64_t max = cct->_conf->osd_recovery_max_chunk;
--    max -= max % sinfo.get_stripe_width();
--    max += sinfo.get_stripe_width();
--    return max;
-+    return ROUND_UP_TO(cct->_conf->osd_recovery_max_chunk,
-+                       sinfo.get_stripe_width());
-   }
+Acked-by: Alexandre Courbot <acourbot@nvidia.com>
 
-   /**
---
-1.9.1
+Interestingly the compiler never complains despite gpiod_desc not
+being a declared type...
+
+Thanks!
