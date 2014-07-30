@@ -1,38 +1,39 @@
-From: Julia Lawall <julia.lawall@lip6.fr>
-Subject: Re: [PATCH 6/9] gpiolib: devres: use correct structure type name in
- sizeof
-Date: Wed, 30 Jul 2014 10:48:43 +0200 (CEST)
-Message-ID: <alpine.DEB.2.10.1407301048170.2389@hadrien>
-References: <1406647011-8543-1-git-send-email-Julia.Lawall@lip6.fr> <1406647011-8543-7-git-send-email-Julia.Lawall@lip6.fr> <CAAVeFuLZb3CVV6B771V3-mzYdp0zsxaBfAAdikQDMBxSZTPTjA@mail.gmail.com>
+From: Aanchal Agrawal <Aanchal.Agrawal@sandisk.com>
+Subject: Non existing monitor
+Date: Wed, 30 Jul 2014 10:07:20 +0000
+Message-ID: <7F4FDDF05D5B3241ABA5EB82D169E31E04B2F97D@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <kernel-janitors-owner@vger.kernel.org>
-In-Reply-To: <CAAVeFuLZb3CVV6B771V3-mzYdp0zsxaBfAAdikQDMBxSZTPTjA@mail.gmail.com>
-Sender: kernel-janitors-owner@vger.kernel.org
-To: Alexandre Courbot <gnurou@gmail.com>
-Cc: Linus Walleij <linus.walleij@linaro.org>, kernel-janitors@vger.kernel.org, linux-ia64@vger.kernel.org, ceph-devel@vger.kernel.org, toralf.foerster@gmx.de, hmh@hmh.eng.br, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-bn1blp0186.outbound.protection.outlook.com ([207.46.163.186]:16889
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751887AbaG3KH0 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Jul 2014 06:07:26 -0400
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: Pavan Rallabhandi <Pavan.Rallabhandi@sandisk.com>
 
+Hi,
 
+We found a case(bug?) in ceph mon code, where in, an attempt to start a non-existing monitor is throwing up a levelDB error saying "failed to create new leveldb store", instead we thought an appropriate message say "No Monitor present with that id" would do, by checking for the monitor existence way ahead.
 
-On Wed, 30 Jul 2014, Alexandre Courbot wrote:
+It seems that 'mon_exists()' checks for the existence of the mon data directory(via 'mon_data_exists()') and also for the non-empty nature of that directory(via 'mon_data_empty()'). The fix seemed pretty simple, as to flag the appropriate message if 'mon_data_exists()' were to set 'exists' to 'false', in case mkfs is not set.
 
-> On Wed, Jul 30, 2014 at 12:16 AM, Julia Lawall <Julia.Lawall@lip6.fr> wrote:
-> > From: Julia Lawall <Julia.Lawall@lip6.fr>
-> >
-> > Correct typo in the name of the type given to sizeof.  Because it is the
-> > size of a pointer that is wanted, the typo has no impact on compilation or
-> > execution.
-> >
-> > This problem was found using Coccinelle (http://coccinelle.lip6.fr/).  The
-> > semantic patch used can be found in message 0 of this patch series.
->
-> Acked-by: Alexandre Courbot <acourbot@nvidia.com>
->
-> Interestingly the compiler never complains despite gpiod_desc not
-> being a declared type...
+The other behavior that we are seeking clarity, again in case of mkfs not being set is, if 'mon_data_exists()' sets 'exists' to 'true' and 'mon_data_empty()' sets 'exists' to 'false' (meaning the mon data directory is present, but it is empty), then the current code seems to be going ahead in an attempt to open the 'store.db', and when open fails, it tries to create a new 'store.db' (though mkfs is not set) and eventually gives up throwing "unable to read magic from mon data".
 
-The compiler doesn't care.  A pointer is a pointer, regardless of the
-type.
+The questions we had around this were:
 
-julia
+1) Though in case of mkfs not being set, what is the reason for creating a new levelDB store in case an attempt to open the 'store.db' is a failure, as levelDB anyways seem to be throwing 'magic' error going forward. Are there any use cases for this scenario?
+2) And also, is it valid to flag "No Monitor present" in case the mon data directory is existing, but with no data('store.db') in it, in case mkfs is not set?
+
+Thanks,
+Aanchal
+
+________________________________
+
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+
