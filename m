@@ -1,193 +1,163 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: bucket index sharding - IO throttle
-Date: Wed, 30 Jul 2014 10:00:18 -0700
-Message-ID: <CABBk=J9H+ncDjp6ABVmraaPOx5x5ubvfn2vb3UK6y3R=B=zLBQ@mail.gmail.com>
-References: <1963E3AE-B242-4896-904C-B0868F5AC569@outlook.com>
-	<BLU437-SMTP904C06D419679BD5A09056DFF90@phx.gbl>
+From: Mark Nelson <mark.nelson@inktank.com>
+Subject: Re: First attempt at rocksdb monitor store stress testing
+Date: Wed, 30 Jul 2014 12:34:55 -0500
+Message-ID: <53D92CBF.3010403@inktank.com>
+References: <53D041D3.3080203@inktank.com> <75674D092A819E4189E91166C74CB90D013F2ACA@shsmsx102.ccr.corp.intel.com> <53D0EA63.10107@inktank.com> <53D19A92.3010000@inktank.com> <75674D092A819E4189E91166C74CB90D013F30D4@shsmsx102.ccr.corp.intel.com> <53D28145.2020504@inktank.com> <75674D092A819E4189E91166C74CB90D013F3CD6@shsmsx102.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:43744 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755197AbaG3RAT (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Jul 2014 13:00:19 -0400
-Received: by mail-ie0-f174.google.com with SMTP id rp18so1910696iec.33
-        for <ceph-devel@vger.kernel.org>; Wed, 30 Jul 2014 10:00:19 -0700 (PDT)
-In-Reply-To: <BLU437-SMTP904C06D419679BD5A09056DFF90@phx.gbl>
+Received: from mail-ie0-f179.google.com ([209.85.223.179]:36449 "EHLO
+	mail-ie0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754662AbaG3Reu (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Jul 2014 13:34:50 -0400
+Received: by mail-ie0-f179.google.com with SMTP id rl12so1966859iec.38
+        for <ceph-devel@vger.kernel.org>; Wed, 30 Jul 2014 10:34:50 -0700 (PDT)
+In-Reply-To: <75674D092A819E4189E91166C74CB90D013F3CD6@shsmsx102.ccr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Guang Yang <yguang11@outlook.com>
-Cc: Ceph-devel <ceph-devel@vger.kernel.org>
+To: "Shu, Xinxin" <xinxin.shu@intel.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Can you send this code through a github pull request (or at least as a
-patch)? It'lll be easier to review and comment.
+Hi Xinxin,
 
-Thanks,
-Yehuda
+Yes, that did work.  I was able to observe the log and figure out the 
+stall:  Too many files open in the level0->level1 compaction thread. 
+Similar to the issue that we've seen the past with leveldb.  Setting a 
+higher ulimit fixed the problem.  With leveled compaction on spinning 
+disks I do see latency spikes but at first glance they do not appear to 
+be as bad as with leveldb.  I will now run some longer tests.
 
-On Wed, Jul 30, 2014 at 7:58 AM, Guang Yang <yguang11@outlook.com> wrote:
-> +ceph-devel.
+Mark
+
+On 07/27/2014 11:45 PM, Shu, Xinxin wrote:
+> Hi mark,
 >
-> Thanks,
-> Guang
+> I tested this option on my setup , same issue happened , I will dig into it , if you want to get info log , there is a workaround, set this option to none:
 >
-> On Jul 29, 2014, at 10:20 PM, Guang Yang <yguang11@outlook.com> wrote:
+> Rocksdb_log = ""
 >
->> Hi Yehuda,
->> Per you review comment in terms of IO throttling for bucket index operation, I prototyped the below code (details still need to polish), can you take a look if that is right way to go?
+> Cheers,
+> xinxin
+>
+> -----Original Message-----
+> From: Mark Nelson [mailto:mark.nelson@inktank.com]
+> Sent: Saturday, July 26, 2014 12:10 AM
+> To: Shu, Xinxin; ceph-devel@vger.kernel.org
+> Subject: Re: First attempt at rocksdb monitor store stress testing
+>
+> Hi Xinxin,
+>
+> I'm trying to enable the rocksdb log file as described in config_opts using:
+>
+> rocksdb_log = <path to log file>
+>
+> The file gets created but is empty.  Any ideas?
+>
+> Mark
+>
+> On 07/24/2014 08:28 PM, Shu, Xinxin wrote:
+>> Hi mark,
 >>
->> Another problem I came across is that ClsBucketIndexOpCtx::handle_compeltion was not called for the bucket index init op (below), is there anything I missed obviously here?
+>> I am looking forward to your results on SSDs .
+>> rocksdb generates a crc of data to be written , this cannot be switch off (but can be subsititued with xxhash),  there are two options , Option. verify_checksums_in_compaction and ReadOptions. verify_checksums,  If we disable these two options , i think cpu usage will goes down . If we use universal compaction , this is not friendly with read operation.
 >>
->> Thanks,
->> Guang
+>> Btw , can you list your rocksdb configuration?
 >>
+>> Cheers,
+>> xinxin
 >>
->> class ClsBucketIndexAioThrottler {
->> protected:
->>  int completed;
->>  int ret_code;
->>  IoCtx& io_ctx;
->>  Mutex lock;
->>  struct LockCond {
->>    Mutex lock;
->>    Cond cond;
->>    LockCond() : lock("LockCond"), cond() {}
->>  } lock_cond;
->> public:
->>  ClsBucketIndexAioThrottler(IoCtx& _io_ctx)
->>    : completed(0), ret_code(0), io_ctx(_io_ctx),
->>    lock("ClsBucketIndexAioThrottler"), lock_cond() {}
+>> -----Original Message-----
+>> From: Mark Nelson [mailto:mark.nelson@inktank.com]
+>> Sent: Friday, July 25, 2014 7:45 AM
+>> To: Shu, Xinxin; ceph-devel@vger.kernel.org
+>> Subject: Re: First attempt at rocksdb monitor store stress testing
 >>
->>  virtual ~ClsBucketIndexAioThrottler() {}
->>  virtual void do_next() = 0;
->>  virtual bool is_completed () = 0;
+>> Earlier today I modified the rocksdb options so I could enable universal compaction.  Over all performance is lower but I don't see the hang/stall in the middle of the test either.  Instead the disk is basically pegged with 100% writes.  I suspect average latency is higher than leveldb, but the highest latency is about 5-6s while we were seeing 30s spikes for leveldb with levelled (heh) compaction.
 >>
->>  void complete(int ret) {
->>    {
->>      Mutex::Locker l(lock);
->>      if (ret < 0)
->>        ret_code = ret;
->>      ++completed;
->>    }
+>> I haven't done much tuning either way yet.  It may be that if we keep level 0 and level 1 roughly the same size we can reduce stalls in the levelled setups.  It will also be interesting to see what happens in these tests on SSDs.
 >>
->>    lock_cond.lock.Lock();
->>    lock_cond.cond.Signal();
->>    lock_cond.lock.Unlock();
->>  }
+>> Mark
 >>
->>  int get_ret_code () {
->>    Mutex::Locker l(lock);
->>    return ret_code;
->>  }
->>
->>  virtual int wait_completion() {
->>    lock_cond.lock.Lock();
->>    while (1) {
->>      if (is_completed()) {
->>        lock_cond.lock.Unlock();
->>        return ret_code;
->>      }
->>      lock_cond.cond.Wait(lock_cond.lock);
->>      lock_cond.lock.Lock();
->>    }
->>  }
->> };
->>
->> class ClsBucketIndexListAioThrottler : public ClsBucketIndexAioThrottler {
->> protected:
->>  vector<string> bucket_objects;
->>  vector<string>::iterator iter_pos;
->> public:
->>  ClsBucketIndexListAioThrottler(IoCtx& _io_ctx, const vector<string> _bucket_objs)
->>    : ClsBucketIndexAioThrottler(_io_ctx), bucket_objects(_bucket_objs),
->>    iter_pos(bucket_objects.begin()) {}
->>
->>  virtual bool is_completed() {
->>    Mutex::Locker l(lock);
->>    int sent = 0;
->>    vector<string>::iterator iter = bucket_objects.begin();
->>    for (; iter != iter_pos; ++iter) ++sent;
->>
->>    return (sent == completed &&
->>        (iter_pos == bucket_objects.end() /*Success*/ || ret_code < 0 /*Failure*/));
->>  }
->> };
->>
->> template<typename T>
->> class ClsBucketIndexOpCtx : public ObjectOperationCompletion {
->> private:
->>  T* data;
->>  // Return code of the operation
->>  int* ret_code;
->>
->>  // The Aio completion object associated with this Op, it should
->>  // be release from within the completion handler
->>  librados::AioCompletion* completion;
->>  ClsBucketIndexAioThrottler* throttler;
->> public:
->>  ClsBucketIndexOpCtx(T* _data, int* _ret_code, librados::AioCompletion* _completion,
->>          ClsBucketIndexAioThrottler* _throttler)
->>    : data(_data), ret_code(_ret_code), completion(_completion), throttler(_throttler) {}
->>  ~ClsBucketIndexOpCtx() {}
->>
->>  // The completion callback, fill the response data
->>  void handle_completion(int r, bufferlist& outbl) {
->>    if (r >= 0) {
->>      if (data) {
->>        try {
->>          bufferlist::iterator iter = outbl.begin();
->>          ::decode((*data), iter);
->>        } catch (buffer::error& err) {
->>          r = -EIO;
->>        }
->>      }
->>      // Do the next request
->>    }
->>    throttler->do_next();
->>    throttler->complete(r);
->>    if (completion) {
->>      completion->release();
->>    }
->>  }
->> };
->>
->>
->> class ClsBucketIndexInitAioThrottler : public ClsBucketIndexListAioThrottler {
->> public:
->>  ClsBucketIndexInitAioThrottler(IoCtx& _io_ctx, const vector<string> _bucket_objs) :
->>    ClsBucketIndexListAioThrottler(_io_ctx, _bucket_objs) {}
->>
->>  virtual void do_next() {
->>    string oid;
->>    {
->>      Mutex::Locker l(lock);
->>      if (iter_pos == bucket_objects.end())
->>        return;
->>      oid = *(iter_pos++);
->>    }
->>    AioCompletion* c = librados::Rados::aio_create_completion(NULL, NULL, NULL);
->>    // Dummy
->>    bufferlist in;
->>    librados::ObjectWriteOperation op;
->>    op.create(true);
->>    op.exec("rgw", "bucket_init_index", in, new ClsBucketIndexOpCtx<int>(NULL, NULL, c, this));
->>    io_ctx.aio_operate(oid, c, &op, NULL);
->>  }
->> };
->>
->>
->> int cls_rgw_bucket_index_init_op(librados::IoCtx &io_ctx,
->>        const vector<string>& bucket_objs, uint32_t max_aio)
->> {
->>   vector<string>::const_iterator iter = bucket_objs.begin();
->>   bufferlist in;
->>   ClsBucketIndexAioThrottler* throttler = new ClsBucketIndexInitAioThrottler(io_ctx, bucket_objs);
->>   for (; iter != bucket_objs.end() && max_aio-- > 0; ++iter) {
->>       throttler->do_next();
->>   }
->>   throttler->wait_completion();
->>   return 0;
->> }
->>
+>> On 07/24/2014 06:13 AM, Mark Nelson wrote:
+>>> Hi Xinxin,
+>>>
+>>> Thanks! I wonder as well if it might be interesting to expose the
+>>> options related to universal compaction?  It looks like rocksdb
+>>> provides a lot of interesting knobs you can adjust!
+>>>
+>>> Mark
+>>>
+>>> On 07/24/2014 12:08 AM, Shu, Xinxin wrote:
+>>>> Hi mark,
+>>>>
+>>>> I think this maybe related to 'verify_checksums' config option ,when
+>>>> ReadOptions is initialized, default this option is  true , all data
+>>>> read from underlying storage will be verified against corresponding
+>>>> checksums,  however,  this option cannot be configured in
+>>>> wip-rocksdb branch. I will modify code to make this option configurable .
+>>>>
+>>>> Cheers,
+>>>> xinxin
+>>>>
+>>>> -----Original Message-----
+>>>> From: ceph-devel-owner@vger.kernel.org
+>>>> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
+>>>> Sent: Thursday, July 24, 2014 7:14 AM
+>>>> To: ceph-devel@vger.kernel.org
+>>>> Subject: First attempt at rocksdb monitor store stress testing
+>>>>
+>>>> Hi Guys,
+>>>>
+>>>> So I've been interested lately in leveldb 99th percentile latency
+>>>> (and the amount of write amplification we are seeing) with leveldb.
+>>>> Joao mentioned he has written a tool called mon-store-stress in
+>>>> wip-leveldb-misc to try to provide a means to roughly guess at
+>>>> what's happening on the mons under heavy load.  I cherry-picked it
+>>>> over to wip-rocksdb and after a couple of hacks was able to get
+>>>> everything built and running with some basic tests.  There was
+>>>> little tuning done and I don't know how realistic this workload is,
+>>>> so don't assume this means anything yet, but some initial results are here:
+>>>>
+>>>> http://nhm.ceph.com/mon-store-stress/First%20Attempt.pdf
+>>>>
+>>>> Command that was used to run the tests:
+>>>>
+>>>> ./ceph-test-mon-store-stress --mon-keyvaluedb <leveldb|rocksdb>
+>>>> --write-min-size 50K --write-max-size 2M --percent-write 70
+>>>> --percent-read 30 --keep-state --test-seed 1406137270 --stop-at 5000
+>>>> foo
+>>>>
+>>>> The most interesting bit right now is that rocksdb seems to be
+>>>> hanging in the middle of the test (left it running for several
+>>>> hours).  CPU usage on one core was quite high during the hang.
+>>>> Profiling using perf with dwarf symbols I see:
+>>>>
+>>>> -  49.14%  ceph-test-mon-s  ceph-test-mon-store-stress  [.] unsigned
+>>>> int
+>>>> rocksdb::crc32c::ExtendImpl<&rocksdb::crc32c::Fast_CRC32>(unsigned
+>>>> int, char const*, unsigned long)
+>>>>        - unsigned int
+>>>> rocksdb::crc32c::ExtendImpl<&rocksdb::crc32c::Fast_CRC32>(unsigned
+>>>> int, char const*, unsigned long)
+>>>>             51.70%
+>>>> rocksdb::ReadBlockContents(rocksdb::RandomAccessFile*,
+>>>> rocksdb::Footer const&, rocksdb::ReadOptions const&,
+>>>> rocksdb::BlockHandle const&, rocksdb::BlockContents*, rocksdb::Env*,
+>>>> bool)
+>>>>             48.30%
+>>>> rocksdb::BlockBasedTableBuilder::WriteRawBlock(rocksdb::Slice
+>>>> const&, rocksdb::CompressionType, rocksdb::BlockHandle*)
+>>>>
+>>>> Not sure what's going on yet, may need to try to enable
+>>>> logging/debugging in rocksdb.  Thoughts/Suggestions welcome. :)
+>>>>
+>>>> Mark
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>>>> in the body of a message to majordomo@vger.kernel.org More majordomo
+>>>> info at  http://vger.kernel.org/majordomo-info.html
+>>>>
+>>>
 >>
 >
+
