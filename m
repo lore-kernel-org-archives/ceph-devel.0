@@ -1,119 +1,110 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: giant and hammer dates
-Date: Wed, 30 Jul 2014 10:59:43 +0600
-Message-ID: <53D87BBF.2020408@dachary.org>
-References: <alpine.DEB.2.00.1407291558060.26221@cobra.newdream.net>
+From: "Ma, Jianpeng" <jianpeng.ma@intel.com>
+Subject: [PATCH]ECBackend: Don't directyly use get_recovery_chunk_size() in
+ RecoveryOp::WRITING state.
+Date: Wed, 30 Jul 2014 06:09:50 +0000
+Message-ID: <6AA21C22F0A5DA478922644AD2EC308C897EBF@SHSMSX101.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="HDNfA1xTApdHADtwbVMviNU6c7GOo8IlB"
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:50634 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751020AbaG3FAA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Jul 2014 01:00:00 -0400
-In-Reply-To: <alpine.DEB.2.00.1407291558060.26221@cobra.newdream.net>
+Received: from mga03.intel.com ([143.182.124.21]:17468 "EHLO mga03.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753407AbaG3GJ4 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Jul 2014 02:09:56 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
+To: "sage@redhat.com" <sage@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---HDNfA1xTApdHADtwbVMviNU6c7GOo8IlB
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+We cannot guarantee that conf->osd_recovery_max_chunk don't change when
+recoverying a erasure object.
+If change between RecoveryOp::READING and RecoveryOp::WRITING, it can cause this bug:
 
-Hi Sage,
+2014-07-30 10:12:09.599220 7f7ff26c0700 -1 osd/ECBackend.cc: In function
+'void ECBackend::continue_recovery_op(ECBackend::RecoveryOp&,
+RecoveryMessages*)' thread 7f7ff26c0700 time 2014-07-30 10:12:09.596837
+osd/ECBackend.cc: 529: FAILED assert(pop.data.length() ==
+sinfo.aligned_logical_offset_to_chunk_offset(
+after_progress.data_recovered_to -
+op.recovery_progress.data_recovered_to))
 
-=46rom my (biased) point of view, the upside is that it will give me more=
- time to complete the locally repairable code for Giant ;-). The downside=
- is that it puts a little less pressure to improve the tools and methods =
-that make a rapid release cycles possible (i.e. unit tests, bug tracking,=
- patch acceptance workflow, package building/gitbuilder, teuthology, pulp=
-ito, upgrades testing, ...). In a perfect world Ceph could sustain a thre=
-e month release cycle without inconveniencing anyone. A longer release cy=
-cle (five or six months) would encourage even more complex / bigger chang=
-es within a release cycle. It would also probably encourage Ceph develope=
-rs to forget about the release process tools during two or three months a=
-nd not improve them as they should be.
+ ceph version 0.83-383-g3cfda57
+(3cfda577b15039cb5c678b79bef3e561df826ed1)
+ 1: (ECBackend::continue_recovery_op(ECBackend::RecoveryOp&,RecoveryMessages*)+0x1a50) [0x928070]
+ 2: (ECBackend::handle_recovery_read_complete(hobject_t const&,
+boost::tuples::tuple<unsigned long, unsigned long, std::map<pg_shard_t,
+ceph::buffer::list, std::less<pg_shard_t>,
+std::allocator<std::pair<pg_shard_t const, ceph::buffer::list> > >,
+boost::tuples::null_type, boost::tuples::null_type,
+boost::tuples::null_type, boost::tuples::null_type,
+boost::tuples::null_type, boost::tuples::null_type,
+boost::tuples::null_type>&, boost::optional<std::map<std::string,
+ceph::buffer::list, std::less<std::string>,
+std::allocator<std::pair<std::string const, ceph::buffer::list> > > >,
+RecoveryMessages*)+0x90c) [0x92952c]
+ 3: (OnRecoveryReadComplete::finish(std::pair<RecoveryMessages*,
+ECBackend::read_result_t&>&)+0x121) [0x938481]
+ 4: (GenContext<std::pair<RecoveryMessages*,
+ECBackend::read_result_t&>&>::complete(std::pair<RecoveryMessages*,
+ECBackend::read_result_t&>&)+0x9) [0x929d69]
+ 5: (ECBackend::complete_read_op(ECBackend::ReadOp&,RecoveryMessages*)+0x63) [0x91c6e3]
+ 6: (ECBackend::handle_sub_read_reply(pg_shard_t, ECSubReadReply&,RecoveryMessages*)+0x96d) [0x920b4d]
+ 7: (ECBackend::handle_message(std::tr1::shared_ptr<OpRequest>)+0x17e)[0x92884e]
+ 8: (ReplicatedPG::do_request(std::tr1::shared_ptr<OpRequest>&,ThreadPool::TPHandle&)+0x23b) [0x7b34db]
+ 9: (OSD::dequeue_op(boost::intrusive_ptr<PG>,std::tr1::shared_ptr<OpRequest>, ThreadPool::TPHandle&)+0x428)
+[0x638d58]
+ 10: (OSD::ShardedOpWQ::_process(unsigned int,ceph::heartbeat_handle_d*)+0x346) [0x6392f6]
+ 11: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x8ce)[0xa5caae]
+ 12: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0xa5ed00]
+ 13: (()+0x8182) [0x7f800b5d3182]
+ 14: (clone()+0x6d) [0x7f800997430d]
+ NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+needed to interpret this.
 
-IMHO the test cycle is significantly slowing down the release process and=
- a faster, more comprehensive test cycle would help a lot.=20
+So we only get the get_recovery_chunk_size() at RecoverOp::READING and
+record it using RecoveryOp::extent_requested.
 
-Each commit should be unit / functional tested within seconds, locally (s=
-ee https://github.com/ceph/ceph/blob/master/src/test/osd/types.cc#L1295 f=
-or instance). It is usually more difficult to diagnose / fix a border cas=
-e when it is discovered during integration tests (i.e. teuthology) rather=
- than with a unit / functional test designed for it. Creating unit tests =
-is often problematic because some of the code base cannot be easily isola=
-ted. With a continuous effort to re-arrange parts of the code to be more =
-test friendly, this can eventually be resolved.
+Signed-off-by: Ma Jianpeng <jianpeng.ma@intel.com>
+---
+ src/osd/ECBackend.cc | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
 
-Every commit proposed to master should be run against the relevant teutho=
-logy suite to help the reviewer. The problem here is that it requires mor=
-e resources than what Ceph currently has. Harvesting more machines, makin=
-g it possible for people and organizations amicable to Ceph to easily don=
-ate virtual machines could probably help.
+diff --git a/src/osd/ECBackend.cc b/src/osd/ECBackend.cc
+index 2a3913a..e9402e8 100644
+--- a/src/osd/ECBackend.cc
++++ b/src/osd/ECBackend.cc
+@@ -476,6 +476,7 @@ void ECBackend::continue_recovery_op(
+       assert(!op.recovery_progress.data_complete);
+       set<int> want(op.missing_on_shards.begin(), op.missing_on_shards.end());
+       set<pg_shard_t> to_read;
++      uint64_t recovery_max_chunk = get_recovery_chunk_size();
+       int r = get_min_avail_to_read_shards(
+        op.hoid, want, true, &to_read);
+       if (r != 0) {
+@@ -492,11 +493,11 @@ void ECBackend::continue_recovery_op(
+        this,
+        op.hoid,
+        op.recovery_progress.data_recovered_to,
+-       get_recovery_chunk_size(),
++       recovery_max_chunk,
+        to_read,
+        op.recovery_progress.first);
+       op.extent_requested = make_pair(op.recovery_progress.data_recovered_to,
+-                                     get_recovery_chunk_size());
++                                     recovery_max_chunk);
+       dout(10) << __func__ << ": IDLE return " << op << dendl;
+       return;
+     }
+@@ -506,7 +507,7 @@ void ECBackend::continue_recovery_op(
+       assert(op.returned_data.size());
+       op.state = RecoveryOp::WRITING;
+       ObjectRecoveryProgress after_progress = op.recovery_progress;
+-      after_progress.data_recovered_to += get_recovery_chunk_size();
++      after_progress.data_recovered_to += op.extent_requested.second;
+       after_progress.first = false;
+       if (after_progress.data_recovered_to >= op.obc->obs.oi.size) {
+        after_progress.data_recovered_to =
+--
+1.9.1
 
-This deserves a separate discussions but I wanted to expand on what I mea=
-nt by "test cycle" and its impact on the release cycle.=20
-
-Cheers
-
-On 30/07/2014 05:11, Sage Weil wrote:
-> We've talked a bit about moving to a ~4 month (instead of 3 month)=20
-> cadence.  I'm still inclined in this direction because it means fewer=20
-> stable releases that we will be maintaining and a longer and (hopefully=
-)=20
-> more productive interval to do real work in between.
->=20
-> The other key point is that we don't want a repeat of the firefly delay=
-=2E =20
-> I think we should stay as close to a train model as we can.  If somethi=
-ng=20
-> isn't ready by freeze, let it wait for the next cycle.  We shouldn't be=
-=20
-> cramming things in at the end, especially big things.  As a general rul=
-e,=20
-> big things should be merged early in the cycle so that we have lots of =
-
-> time to shake out the issues that only come out of lots of testing and =
-
-> aren't obvious from code review.
->=20
-> Anyway, how about:
->=20
->           Freeze         Approx Release
->   Giant   Mon Sep  1     Mon Sep 29
->   Hammer  Mon Jan  4     Mon Feb  2
->=20
-> That gives us another month for Giant, then September to shake out=20
-> anything issues.  And then three full months before the Hammer freeze.
->=20
-> What say ye?
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-
-
---HDNfA1xTApdHADtwbVMviNU6c7GOo8IlB
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlPYe78ACgkQ8dLMyEl6F2111ACgha6UMxxQvzf/hg9JQ3EON+xu
-cCsAn0GtA+qTOENIBafYGGmkRYKQdzQv
-=qU2N
------END PGP SIGNATURE-----
-
---HDNfA1xTApdHADtwbVMviNU6c7GOo8IlB--
