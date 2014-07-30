@@ -1,10 +1,13 @@
-From: German Anders <ganders-LWDKa8F8PCdWk0Htik3J/w@public.gmane.org>
+From: "Dan Ryder (daryder)" <daryder-FYB4Gu1CFyUAvxtiuMwx3w@public.gmane.org>
 Subject: Re: Calamari Goes Open Source
-Date: Wed, 30 Jul 2014 10:32:38 -0400
-Message-ID: <53d90206.7092.fbb76700.1c9f0076@despegar.com>
+Date: Wed, 30 Jul 2014 14:40:57 +0000
+Message-ID: <5E9507129465C14D901E7E34D2D03B440581A0C3@xmb-aln-x12.cisco.com>
+References: <53d90206.7092.fbb76700.1c9f0076@despegar.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============1188240434=="
+Content-Type: multipart/mixed; boundary="===============1291944111=="
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <53d90206.7092.fbb76700.1c9f0076-LWDKa8F8PCdWk0Htik3J/w@public.gmane.org>
+Content-Language: en-US
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -14,190 +17,263 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Larry Liu <larryliugml-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+To: German Anders <ganders-LWDKa8F8PCdWk0Htik3J/w@public.gmane.org>, Larry Liu <larryliugml-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Cc: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, Mike Dawson <mike.dawson-ffsCFlcjuZBWk0Htik3J/w@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-This is a multi-part message in MIME format.
+--===============1291944111==
+Content-Language: en-US
+Content-Type: multipart/alternative;
+	boundary="_000_5E9507129465C14D901E7E34D2D03B440581A0C3xmbalnx12ciscoc_"
 
---===============1188240434==
-Content-Type: multipart/alternative; boundary="----=_SW_695538132_1406730758_mpa="
+--_000_5E9507129465C14D901E7E34D2D03B440581A0C3xmbalnx12ciscoc_
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 
-This is a multi-part message in MIME format.
+SSBoYWQgc2ltaWxhciBpc3N1ZXMsIEkgdHJpZWQgbWFueSBkaWZmZXJlbnQgd2F5cyB0byB1c2Ug
+dmFncmFudCBidXQgY291bGRu4oCZdCBidWlsZCBwYWNrYWdlcyBzdWNjZXNzZnVsbHkuIEnigJlt
+IG5vdCBzdXJlIGhvdyByZWxpYWJsZSB0aGlzIGlzLCBidXQgaWYgeW91IGFyZSBsb29raW5nIHRv
+IGdldCBDYWxhbWFyaSBwYWNrYWdlcyBxdWlja2x5LCB5b3UgY2FuIHNraXAgdGhlIFZhZ3JhbnQg
+aW5zdGFsbCBzdGVwcyBhbmQganVzdCB1c2UgdGhlIE1ha2VmaWxlLg0KDQpJIHVzZWQg4oCcbWFr
+ZSBkcGtn4oCdIHRvIGJ1aWxkIHRoZSBwYWNrYWdlcyBvbiBVYnVudHUgMTIuMDQg4oCTIGFsdGhv
+dWdoIEkgaGFkIHRvIGluc3RhbGwgbXVsdGlwbGUgZGVwZW5kZW5jaWVzIGJlZm9yZSBpdCB3b3Jr
+ZWQuIExldOKAmXMganVzdCBzYXkgaXQgd2FzbuKAmXQgYSBmdW4gcHJvY2Vzcy4gTmV2ZXJ0aGVs
+ZXNzIEkgaGF2ZSBDYWxhbWFyaSB1cCBhbmQgcnVubmluZyBub3cuDQoNCkRhbiBSeWRlcg0KDQpG
+cm9tOiBjZXBoLXVzZXJzIFttYWlsdG86Y2VwaC11c2Vycy1ib3VuY2VzQGxpc3RzLmNlcGguY29t
+XSBPbiBCZWhhbGYgT2YgR2VybWFuIEFuZGVycw0KU2VudDogV2VkbmVzZGF5LCBKdWx5IDMwLCAy
+MDE0IDEwOjMzIEFNDQpUbzogTGFycnkgTGl1DQpDYzogQ2VwaCBEZXZlbDsgQ2VwaC1Vc2VyOyBN
+aWtlIERhd3Nvbg0KU3ViamVjdDogUmU6IFtjZXBoLXVzZXJzXSBDYWxhbWFyaSBHb2VzIE9wZW4g
+U291cmNlDQoNCkhhdmUgdGhlIHNhbWUgaXNzdWUsIGl0IHdpbGwgYmUgcmVhbGx5IGhlbHBmdWwg
+aWYgc29tZW9uZSBoYXMgYW55IGhvbWUtbWFkZSBwcm9jZWR1cmUgb3Igc29tZSBub3Rlcy4NCg0K
+R2VybWFuIEFuZGVycw0KDQoNCg0KDQoNCg0KDQoNCg0KDQoNCg0KDQoNCi0tLSBPcmlnaW5hbCBt
+ZXNzYWdlIC0tLQ0KQXN1bnRvOiBSZTogW2NlcGgtdXNlcnNdIENhbGFtYXJpIEdvZXMgT3BlbiBT
+b3VyY2UNCkRlOiBMYXJyeSBMaXUgPGxhcnJ5bGl1Z21sQGdtYWlsLmNvbTxtYWlsdG86bGFycnls
+aXVnbWxAZ21haWwuY29tPj4NClBhcmE6IE1pa2UgRGF3c29uIDxtaWtlLmRhd3NvbkBjbG91ZGFw
+dC5jb208bWFpbHRvOm1pa2UuZGF3c29uQGNsb3VkYXB0LmNvbT4+DQpDYzogQ2VwaCBEZXZlbCA8
+Y2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc8bWFpbHRvOmNlcGgtZGV2ZWxAdmdlci5rZXJuZWwu
+b3JnPj4sIENlcGgtVXNlciA8Y2VwaC11c2Vyc0BjZXBoLmNvbTxtYWlsdG86Y2VwaC11c2Vyc0Bj
+ZXBoLmNvbT4+DQpGZWNoYTogV2VkbmVzZGF5LCAzMC8wNy8yMDE0IDExOjI0DQpIb3cgaGFzIGdv
+b2QgZG9jdW1lbnRhdGlvbiBvbiBob3cgdG8gc2V0IHVwIGNhbGFtYXJpPyBXaGF0ZXZlciBvbiBn
+aXRodWIgZG9lc24ndCByZWFsbHkgd29yay4gVmFyZ3JhbnQgY29tcGxpYW5zIHByZWNpc2U2NCBp
+cyB1bmFibGUgdG8gYmUgZm91bmQuDQoNCk9uIEZyaSwgTWF5IDMwLCAyMDE0IGF0IDM6MDkgUE0s
+IE1pa2UgRGF3c29uIDxtaWtlLmRhd3NvbkBjbG91ZGFwdC5jb208bWFpbHRvOm1pa2UuZGF3c29u
+QGNsb3VkYXB0LmNvbT4+IHdyb3RlOg0KR3JlYXQgd29yayBJbmt0YW5rIC8gUmVkIEhhdCEgQW4g
+b3BlbiBzb3VyY2UgQ2FsYW1hcmkgd2lsbCBiZSBhIGdyZWF0IGJlbmVmaXQgdG8gdGhlIGNvbW11
+bml0eSENCg0KQ2hlZXJzLA0KTWlrZSBEYXdzb24NCg0KDQpPbiA1LzMwLzIwMTQgNjowNCBQTSwg
+UGF0cmljayBNY0dhcnJ5IHdyb3RlOg0KSGV5IGNlcGhlcnMsDQoNClNvcnJ5IHRvIHB1c2ggdGhp
+cyBhbm5vdW5jZW1lbnQgc28gbGF0ZSBvbiBhIEZyaWRheSBidXQuLi4NCg0KQ2FsYW1hcmkgaGFz
+IGFycml2ZWQhDQoNClRoZSBzb3VyY2UgY29kZSBiaXRzIGhhdmUgYmVlbiBmbGlwcGVkLCB0aGUg
+dGlja2V0IHRyYWNrZXIgaGFzIGJlZW4NCm1vdmVkLCBhbmQgd2UgaGF2ZSBldmVuIGdpdmVuIHlv
+dSBhIGxpdHRsZSBiaXQgb2YgYmFja2dyb3VuZCBmcm9tIGJvdGgNCmEgdGVjaG5pY2FsIGFuZCB2
+aXNpb24gcG9pbnQgb2YgdmlldzoNCg0KVGVjaG5pY2FsIChjZXBoLmNvbTxodHRwOi8vY2VwaC5j
+b20+KToNCmh0dHA6Ly9jZXBoLmNvbS9jb21tdW5pdHkvY2VwaC1jYWxhbWFyaS1nb2VzLW9wZW4t
+c291cmNlLw0KDQpWaXNpb24gKGlua3RhbmsuY29tPGh0dHA6Ly9pbmt0YW5rLmNvbT4pOg0KaHR0
+cDovL3d3dy5pbmt0YW5rLmNvbS9zb2Z0d2FyZS9mdXR1cmUtb2YtY2FsYW1hcmkvDQoNClRoZSBj
+ZXBoLmNvbTxodHRwOi8vY2VwaC5jb20+IGxpbmsgc2hvdWxkIGdpdmUgeW91IGV2ZXJ5dGhpbmcg
+eW91IG5lZWQgdG8ga25vdyBhYm91dA0Kd2hhdCB0ZWNoIGNvbXByaXNlcyBDYWxhbWFyaSwgd2hl
+cmUgdGhlIHNvdXJjZSBsaXZlcywgYW5kIHdoZXJlIHRoZQ0KZGlzY3Vzc2lvbnMgd2lsbCB0YWtl
+IHBsYWNlLiAgSWYgeW91IGhhdmUgYW55IHF1ZXN0aW9ucyBmZWVsIGZyZWUgdG8NCmhpdCB0aGUg
+bmV3IGNlcGgtY2FsYW1hcmkgbGlzdCBvciBzdG9wIGJ5IElSQyBhbmQgd2UnbGwgZ2V0IHlvdQ0K
+c3RhcnRlZC4gIEhvcGUgeW91IGFsbCBlbmpveSB0aGUgR1VJIQ0KDQoNCg0KQmVzdCBSZWdhcmRz
+LA0KDQpQYXRyaWNrIE1jR2FycnkNCkRpcmVjdG9yLCBDb21tdW5pdHkgfHwgSW5rdGFuaw0KaHR0
+cDovL2NlcGguY29tICB8fCAgaHR0cDovL2lua3RhbmsuY29tDQpAc2N1dHRsZW1vbmtleSB8fCBA
+Y2VwaCB8fCBAaW5rdGFuaw0KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX18NCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0DQpjZXBoLXVzZXJzQGxpc3RzLmNlcGgu
+Y29tPG1haWx0bzpjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tPg0KaHR0cDovL2xpc3RzLmNlcGgu
+Y29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tDQpfX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fXw0KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QNCmNl
+cGgtdXNlcnNAbGlzdHMuY2VwaC5jb208bWFpbHRvOmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20+
+DQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20N
+Cg0KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCmNlcGgt
+dXNlcnMgbWFpbGluZyBsaXN0DQpjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tPG1haWx0bzpjZXBo
+LXVzZXJzQGxpc3RzLmNlcGguY29tPg0KaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNn
+aS9jZXBoLXVzZXJzLWNlcGguY29tDQoNCg==
 
-------=_SW_695538132_1406730758_mpa=
-Content-Type: text/plain; charset=us-ascii; format=flowed
+--_000_5E9507129465C14D901E7E34D2D03B440581A0C3xmbalnx12ciscoc_
+Content-Type: text/html; charset="utf-8"
+Content-Transfer-Encoding: base64
 
-Have the same issue, it will be really helpful if someone has any 
-home-made procedure or some notes.
+PGh0bWwgeG1sbnM6dj0idXJuOnNjaGVtYXMtbWljcm9zb2Z0LWNvbTp2bWwiIHhtbG5zOm89InVy
+bjpzY2hlbWFzLW1pY3Jvc29mdC1jb206b2ZmaWNlOm9mZmljZSIgeG1sbnM6dz0idXJuOnNjaGVt
+YXMtbWljcm9zb2Z0LWNvbTpvZmZpY2U6d29yZCIgeG1sbnM6bT0iaHR0cDovL3NjaGVtYXMubWlj
+cm9zb2Z0LmNvbS9vZmZpY2UvMjAwNC8xMi9vbW1sIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcv
+VFIvUkVDLWh0bWw0MCI+DQo8aGVhZD4NCjxtZXRhIGh0dHAtZXF1aXY9IkNvbnRlbnQtVHlwZSIg
+Y29udGVudD0idGV4dC9odG1sOyBjaGFyc2V0PXV0Zi04Ij4NCjxtZXRhIG5hbWU9IkdlbmVyYXRv
+ciIgY29udGVudD0iTWljcm9zb2Z0IFdvcmQgMTQgKGZpbHRlcmVkIG1lZGl1bSkiPg0KPHN0eWxl
+PjwhLS0NCi8qIEZvbnQgRGVmaW5pdGlvbnMgKi8NCkBmb250LWZhY2UNCgl7Zm9udC1mYW1pbHk6
+Q2FsaWJyaTsNCglwYW5vc2UtMToyIDE1IDUgMiAyIDIgNCAzIDIgNDt9DQpAZm9udC1mYWNlDQoJ
+e2ZvbnQtZmFtaWx5OlRhaG9tYTsNCglwYW5vc2UtMToyIDExIDYgNCAzIDUgNCA0IDIgNDt9DQpA
+Zm9udC1mYWNlDQoJe2ZvbnQtZmFtaWx5OiJUcmVidWNoZXQgTVMiOw0KCXBhbm9zZS0xOjIgMTEg
+NiAzIDIgMiAyIDIgMiA0O30NCi8qIFN0eWxlIERlZmluaXRpb25zICovDQpwLk1zb05vcm1hbCwg
+bGkuTXNvTm9ybWFsLCBkaXYuTXNvTm9ybWFsDQoJe21hcmdpbjowaW47DQoJbWFyZ2luLWJvdHRv
+bTouMDAwMXB0Ow0KCWZvbnQtc2l6ZToxMi4wcHQ7DQoJZm9udC1mYW1pbHk6IlRpbWVzIE5ldyBS
+b21hbiIsInNlcmlmIjt9DQphOmxpbmssIHNwYW4uTXNvSHlwZXJsaW5rDQoJe21zby1zdHlsZS1w
+cmlvcml0eTo5OTsNCgljb2xvcjpibHVlOw0KCXRleHQtZGVjb3JhdGlvbjp1bmRlcmxpbmU7fQ0K
+YTp2aXNpdGVkLCBzcGFuLk1zb0h5cGVybGlua0ZvbGxvd2VkDQoJe21zby1zdHlsZS1wcmlvcml0
+eTo5OTsNCgljb2xvcjpwdXJwbGU7DQoJdGV4dC1kZWNvcmF0aW9uOnVuZGVybGluZTt9DQpwDQoJ
+e21zby1zdHlsZS1wcmlvcml0eTo5OTsNCgltc28tbWFyZ2luLXRvcC1hbHQ6YXV0bzsNCgltYXJn
+aW4tcmlnaHQ6MGluOw0KCW1zby1tYXJnaW4tYm90dG9tLWFsdDphdXRvOw0KCW1hcmdpbi1sZWZ0
+OjBpbjsNCglmb250LXNpemU6MTIuMHB0Ow0KCWZvbnQtZmFtaWx5OiJUaW1lcyBOZXcgUm9tYW4i
+LCJzZXJpZiI7fQ0KcC5zd21lc3NhZ2UsIGxpLnN3bWVzc2FnZSwgZGl2LnN3bWVzc2FnZQ0KCXtt
+c28tc3R5bGUtbmFtZTpzd19tZXNzYWdlOw0KCW1zby1tYXJnaW4tdG9wLWFsdDphdXRvOw0KCW1h
+cmdpbi1yaWdodDowaW47DQoJbXNvLW1hcmdpbi1ib3R0b20tYWx0OmF1dG87DQoJbWFyZ2luLWxl
+ZnQ6MGluOw0KCWJhY2tncm91bmQ6d2hpdGU7DQoJZm9udC1zaXplOjEyLjBwdDsNCglmb250LWZh
+bWlseToiVGFob21hIiwic2Fucy1zZXJpZiI7fQ0Kc3Bhbi5FbWFpbFN0eWxlMTkNCgl7bXNvLXN0
+eWxlLXR5cGU6cGVyc29uYWwtcmVwbHk7DQoJZm9udC1mYW1pbHk6IkNhbGlicmkiLCJzYW5zLXNl
+cmlmIjsNCgljb2xvcjojMUY0OTdEO30NCi5Nc29DaHBEZWZhdWx0DQoJe21zby1zdHlsZS10eXBl
+OmV4cG9ydC1vbmx5Ow0KCWZvbnQtc2l6ZToxMC4wcHQ7fQ0KQHBhZ2UgV29yZFNlY3Rpb24xDQoJ
+e3NpemU6OC41aW4gMTEuMGluOw0KCW1hcmdpbjoxLjBpbiAxLjBpbiAxLjBpbiAxLjBpbjt9DQpk
+aXYuV29yZFNlY3Rpb24xDQoJe3BhZ2U6V29yZFNlY3Rpb24xO30NCi0tPjwvc3R5bGU+PCEtLVtp
+ZiBndGUgbXNvIDldPjx4bWw+DQo8bzpzaGFwZWRlZmF1bHRzIHY6ZXh0PSJlZGl0IiBzcGlkbWF4
+PSIxMDI2IiAvPg0KPC94bWw+PCFbZW5kaWZdLS0+PCEtLVtpZiBndGUgbXNvIDldPjx4bWw+DQo8
+bzpzaGFwZWxheW91dCB2OmV4dD0iZWRpdCI+DQo8bzppZG1hcCB2OmV4dD0iZWRpdCIgZGF0YT0i
+MSIgLz4NCjwvbzpzaGFwZWxheW91dD48L3htbD48IVtlbmRpZl0tLT4NCjwvaGVhZD4NCjxib2R5
+IGJnY29sb3I9IndoaXRlIiBsYW5nPSJFTi1VUyIgbGluaz0iYmx1ZSIgdmxpbms9InB1cnBsZSI+
+DQo8ZGl2IGNsYXNzPSJXb3JkU2VjdGlvbjEiPg0KPHAgY2xhc3M9Ik1zb05vcm1hbCI+PHNwYW4g
+c3R5bGU9ImZvbnQtc2l6ZToxMS4wcHQ7Zm9udC1mYW1pbHk6JnF1b3Q7Q2FsaWJyaSZxdW90Oywm
+cXVvdDtzYW5zLXNlcmlmJnF1b3Q7O2NvbG9yOiMxRjQ5N0QiPkkgaGFkIHNpbWlsYXIgaXNzdWVz
+LCBJIHRyaWVkIG1hbnkgZGlmZmVyZW50IHdheXMgdG8gdXNlIHZhZ3JhbnQgYnV0IGNvdWxkbuKA
+mXQgYnVpbGQgcGFja2FnZXMgc3VjY2Vzc2Z1bGx5LiBJ4oCZbSBub3Qgc3VyZSBob3cgcmVsaWFi
+bGUgdGhpcyBpcywgYnV0IGlmIHlvdSBhcmUNCiBsb29raW5nIHRvIGdldCBDYWxhbWFyaSBwYWNr
+YWdlcyBxdWlja2x5LCB5b3UgY2FuIHNraXAgdGhlIFZhZ3JhbnQgaW5zdGFsbCBzdGVwcyBhbmQg
+anVzdCB1c2UgdGhlIE1ha2VmaWxlLjxvOnA+PC9vOnA+PC9zcGFuPjwvcD4NCjxwIGNsYXNzPSJN
+c29Ob3JtYWwiPjxzcGFuIHN0eWxlPSJmb250LXNpemU6MTEuMHB0O2ZvbnQtZmFtaWx5OiZxdW90
+O0NhbGlicmkmcXVvdDssJnF1b3Q7c2Fucy1zZXJpZiZxdW90Oztjb2xvcjojMUY0OTdEIj48bzpw
+PiZuYnNwOzwvbzpwPjwvc3Bhbj48L3A+DQo8cCBjbGFzcz0iTXNvTm9ybWFsIj48c3BhbiBzdHls
+ZT0iZm9udC1zaXplOjExLjBwdDtmb250LWZhbWlseTomcXVvdDtDYWxpYnJpJnF1b3Q7LCZxdW90
+O3NhbnMtc2VyaWYmcXVvdDs7Y29sb3I6IzFGNDk3RCI+SSB1c2VkIOKAnG1ha2UgZHBrZ+KAnSB0
+byBidWlsZCB0aGUgcGFja2FnZXMgb24gVWJ1bnR1IDEyLjA0IOKAkyBhbHRob3VnaCBJIGhhZCB0
+byBpbnN0YWxsIG11bHRpcGxlIGRlcGVuZGVuY2llcyBiZWZvcmUgaXQgd29ya2VkLiBMZXTigJlz
+IGp1c3Qgc2F5IGl0IHdhc27igJl0IGEgZnVuDQogcHJvY2Vzcy4gTmV2ZXJ0aGVsZXNzIEkgaGF2
+ZSBDYWxhbWFyaSB1cCBhbmQgcnVubmluZyBub3cuPG86cD48L286cD48L3NwYW4+PC9wPg0KPHAg
+Y2xhc3M9Ik1zb05vcm1hbCI+PHNwYW4gc3R5bGU9ImZvbnQtc2l6ZToxMS4wcHQ7Zm9udC1mYW1p
+bHk6JnF1b3Q7Q2FsaWJyaSZxdW90OywmcXVvdDtzYW5zLXNlcmlmJnF1b3Q7O2NvbG9yOiMxRjQ5
+N0QiPjxvOnA+Jm5ic3A7PC9vOnA+PC9zcGFuPjwvcD4NCjxwIGNsYXNzPSJNc29Ob3JtYWwiPjxz
+cGFuIHN0eWxlPSJmb250LXNpemU6MTEuMHB0O2ZvbnQtZmFtaWx5OiZxdW90O0NhbGlicmkmcXVv
+dDssJnF1b3Q7c2Fucy1zZXJpZiZxdW90Oztjb2xvcjojMUY0OTdEIj5EYW4gUnlkZXI8bzpwPjwv
+bzpwPjwvc3Bhbj48L3A+DQo8cCBjbGFzcz0iTXNvTm9ybWFsIj48c3BhbiBzdHlsZT0iZm9udC1z
+aXplOjExLjBwdDtmb250LWZhbWlseTomcXVvdDtDYWxpYnJpJnF1b3Q7LCZxdW90O3NhbnMtc2Vy
+aWYmcXVvdDs7Y29sb3I6IzFGNDk3RCI+PG86cD4mbmJzcDs8L286cD48L3NwYW4+PC9wPg0KPGRp
+dj4NCjxkaXYgc3R5bGU9ImJvcmRlcjpub25lO2JvcmRlci10b3A6c29saWQgI0I1QzRERiAxLjBw
+dDtwYWRkaW5nOjMuMHB0IDBpbiAwaW4gMGluIj4NCjxwIGNsYXNzPSJNc29Ob3JtYWwiPjxiPjxz
+cGFuIHN0eWxlPSJmb250LXNpemU6MTAuMHB0O2ZvbnQtZmFtaWx5OiZxdW90O1RhaG9tYSZxdW90
+OywmcXVvdDtzYW5zLXNlcmlmJnF1b3Q7Ij5Gcm9tOjwvc3Bhbj48L2I+PHNwYW4gc3R5bGU9ImZv
+bnQtc2l6ZToxMC4wcHQ7Zm9udC1mYW1pbHk6JnF1b3Q7VGFob21hJnF1b3Q7LCZxdW90O3NhbnMt
+c2VyaWYmcXVvdDsiPiBjZXBoLXVzZXJzIFttYWlsdG86Y2VwaC11c2Vycy1ib3VuY2VzQGxpc3Rz
+LmNlcGguY29tXQ0KPGI+T24gQmVoYWxmIE9mIDwvYj5HZXJtYW4gQW5kZXJzPGJyPg0KPGI+U2Vu
+dDo8L2I+IFdlZG5lc2RheSwgSnVseSAzMCwgMjAxNCAxMDozMyBBTTxicj4NCjxiPlRvOjwvYj4g
+TGFycnkgTGl1PGJyPg0KPGI+Q2M6PC9iPiBDZXBoIERldmVsOyBDZXBoLVVzZXI7IE1pa2UgRGF3
+c29uPGJyPg0KPGI+U3ViamVjdDo8L2I+IFJlOiBbY2VwaC11c2Vyc10gQ2FsYW1hcmkgR29lcyBP
+cGVuIFNvdXJjZTxvOnA+PC9vOnA+PC9zcGFuPjwvcD4NCjwvZGl2Pg0KPC9kaXY+DQo8cCBjbGFz
+cz0iTXNvTm9ybWFsIj48bzpwPiZuYnNwOzwvbzpwPjwvcD4NCjxwIGNsYXNzPSJNc29Ob3JtYWwi
+PjxzcGFuIHN0eWxlPSJmb250LWZhbWlseTomcXVvdDtUYWhvbWEmcXVvdDssJnF1b3Q7c2Fucy1z
+ZXJpZiZxdW90OyI+SGF2ZSB0aGUgc2FtZSBpc3N1ZSwgaXQgd2lsbCBiZSByZWFsbHkgaGVscGZ1
+bCBpZiBzb21lb25lIGhhcyBhbnkgaG9tZS1tYWRlIHByb2NlZHVyZSBvciBzb21lIG5vdGVzLjxv
+OnA+PC9vOnA+PC9zcGFuPjwvcD4NCjxkaXY+DQo8cCBjbGFzcz0iTXNvTm9ybWFsIj48c3BhbiBz
+dHlsZT0iZm9udC1mYW1pbHk6JnF1b3Q7VGFob21hJnF1b3Q7LCZxdW90O3NhbnMtc2VyaWYmcXVv
+dDsiPiZuYnNwOzxvOnA+PC9vOnA+PC9zcGFuPjwvcD4NCjwvZGl2Pg0KPGRpdiBpZD0iZWRpdG9y
+X3NpZ25hdHVyZSI+DQo8cCBjbGFzcz0iTXNvTm9ybWFsIj48Yj48c3BhbiBzdHlsZT0iZm9udC1z
+aXplOjEwLjBwdDtmb250LWZhbWlseTomcXVvdDtUcmVidWNoZXQgTVMmcXVvdDssJnF1b3Q7c2Fu
+cy1zZXJpZiZxdW90Oztjb2xvcjojNDQ0NDQ0Ij5HZXJtYW4gQW5kZXJzPC9zcGFuPjwvYj48bzpw
+PjwvbzpwPjwvcD4NCjxwIGNsYXNzPSJNc29Ob3JtYWwiIHN0eWxlPSJtYXJnaW4tYm90dG9tOjEy
+LjBwdCI+PHNwYW4gc3R5bGU9ImZvbnQtZmFtaWx5OiZxdW90O1RhaG9tYSZxdW90OywmcXVvdDtz
+YW5zLXNlcmlmJnF1b3Q7Ij48YnI+DQo8YnI+DQo8YnI+DQo8YnI+DQo8YnI+DQo8YnI+DQo8YnI+
+DQo8YnI+DQo8YnI+DQo8YnI+DQo8YnI+DQo8YnI+DQo8YnI+DQo8bzpwPjwvbzpwPjwvc3Bhbj48
+L3A+DQo8L2Rpdj4NCjxkaXY+DQo8cCBjbGFzcz0iTXNvTm9ybWFsIj48c3BhbiBzdHlsZT0iZm9u
+dC1mYW1pbHk6JnF1b3Q7VGFob21hJnF1b3Q7LCZxdW90O3NhbnMtc2VyaWYmcXVvdDsiPiZuYnNw
+OzxvOnA+PC9vOnA+PC9zcGFuPjwvcD4NCjwvZGl2Pg0KPGJsb2NrcXVvdGUgc3R5bGU9ImJvcmRl
+cjpub25lO2JvcmRlci1sZWZ0OnNvbGlkICMxNDRGQUUgMS41cHQ7cGFkZGluZzowaW4gMGluIDBp
+biA0LjBwdDttYXJnaW4tbGVmdDozLjc1cHQ7bWFyZ2luLXRvcDo1LjBwdDttYXJnaW4tYm90dG9t
+OjUuMHB0Ij4NCjxwIGNsYXNzPSJNc29Ob3JtYWwiIHN0eWxlPSJtYXJnaW4tYm90dG9tOjEyLjBw
+dCI+PHNwYW4gc3R5bGU9ImZvbnQtZmFtaWx5OiZxdW90O1RhaG9tYSZxdW90OywmcXVvdDtzYW5z
+LXNlcmlmJnF1b3Q7O2NvbG9yOiMxNDRGQUUiPi0tLSBPcmlnaW5hbCBtZXNzYWdlIC0tLQ0KPGJy
+Pg0KPGI+QXN1bnRvOjwvYj4gUmU6IFtjZXBoLXVzZXJzXSBDYWxhbWFyaSBHb2VzIE9wZW4gU291
+cmNlIDxicj4NCjxiPkRlOjwvYj4gTGFycnkgTGl1ICZsdDs8YSBocmVmPSJtYWlsdG86bGFycnls
+aXVnbWxAZ21haWwuY29tIj5sYXJyeWxpdWdtbEBnbWFpbC5jb208L2E+Jmd0Ow0KPGJyPg0KPGI+
+UGFyYTo8L2I+IE1pa2UgRGF3c29uICZsdDs8YSBocmVmPSJtYWlsdG86bWlrZS5kYXdzb25AY2xv
+dWRhcHQuY29tIj5taWtlLmRhd3NvbkBjbG91ZGFwdC5jb208L2E+Jmd0Ow0KPGJyPg0KPGI+Q2M6
+PC9iPiBDZXBoIERldmVsICZsdDs8YSBocmVmPSJtYWlsdG86Y2VwaC1kZXZlbEB2Z2VyLmtlcm5l
+bC5vcmciPmNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnPC9hPiZndDssIENlcGgtVXNlciAmbHQ7
+PGEgaHJlZj0ibWFpbHRvOmNlcGgtdXNlcnNAY2VwaC5jb20iPmNlcGgtdXNlcnNAY2VwaC5jb208
+L2E+Jmd0Ow0KPGJyPg0KPGI+RmVjaGE6PC9iPiBXZWRuZXNkYXksIDMwLzA3LzIwMTQgMTE6MjQ8
+bzpwPjwvbzpwPjwvc3Bhbj48L3A+DQo8ZGl2Pg0KPHAgY2xhc3M9Ik1zb05vcm1hbCI+PHNwYW4g
+c3R5bGU9ImZvbnQtZmFtaWx5OiZxdW90O1RhaG9tYSZxdW90OywmcXVvdDtzYW5zLXNlcmlmJnF1
+b3Q7O2NvbG9yOiMxNDRGQUUiPkhvdyBoYXMgZ29vZCBkb2N1bWVudGF0aW9uIG9uIGhvdyB0byBz
+ZXQgdXAgY2FsYW1hcmk/IFdoYXRldmVyIG9uIGdpdGh1YiBkb2Vzbid0IHJlYWxseSB3b3JrLiBW
+YXJncmFudCBjb21wbGlhbnMgcHJlY2lzZTY0IGlzIHVuYWJsZSB0byBiZSBmb3VuZC48bzpwPjwv
+bzpwPjwvc3Bhbj48L3A+DQo8L2Rpdj4NCjxkaXY+DQo8cCBjbGFzcz0iTXNvTm9ybWFsIiBzdHls
+ZT0ibWFyZ2luLWJvdHRvbToxMi4wcHQiPjxzcGFuIHN0eWxlPSJmb250LWZhbWlseTomcXVvdDtU
+YWhvbWEmcXVvdDssJnF1b3Q7c2Fucy1zZXJpZiZxdW90Oztjb2xvcjojMTQ0RkFFIj48bzpwPiZu
+YnNwOzwvbzpwPjwvc3Bhbj48L3A+DQo8ZGl2Pg0KPHAgY2xhc3M9Ik1zb05vcm1hbCI+PHNwYW4g
+c3R5bGU9ImZvbnQtZmFtaWx5OiZxdW90O1RhaG9tYSZxdW90OywmcXVvdDtzYW5zLXNlcmlmJnF1
+b3Q7O2NvbG9yOiMxNDRGQUUiPk9uIEZyaSwgTWF5IDMwLCAyMDE0IGF0IDM6MDkgUE0sIE1pa2Ug
+RGF3c29uICZsdDs8YSBocmVmPSJtYWlsdG86bWlrZS5kYXdzb25AY2xvdWRhcHQuY29tIiB0YXJn
+ZXQ9Il9ibGFuayI+bWlrZS5kYXdzb25AY2xvdWRhcHQuY29tPC9hPiZndDsgd3JvdGU6PG86cD48
+L286cD48L3NwYW4+PC9wPg0KPHAgY2xhc3M9Ik1zb05vcm1hbCI+PHNwYW4gc3R5bGU9ImZvbnQt
+ZmFtaWx5OiZxdW90O1RhaG9tYSZxdW90OywmcXVvdDtzYW5zLXNlcmlmJnF1b3Q7O2NvbG9yOiMw
+MDYzMTIiPkdyZWF0IHdvcmsgSW5rdGFuayAvIFJlZCBIYXQhIEFuIG9wZW4gc291cmNlIENhbGFt
+YXJpIHdpbGwgYmUgYSBncmVhdCBiZW5lZml0IHRvIHRoZSBjb21tdW5pdHkhPGJyPg0KPGJyPg0K
+Q2hlZXJzLDxicj4NCk1pa2UgRGF3c29uPGJyPg0KPGJyPg0KPGJyPg0KT24gNS8zMC8yMDE0IDY6
+MDQgUE0sIFBhdHJpY2sgTWNHYXJyeSB3cm90ZTo8bzpwPjwvbzpwPjwvc3Bhbj48L3A+DQo8cCBj
+bGFzcz0iTXNvTm9ybWFsIiBzdHlsZT0ibWFyZ2luLWJvdHRvbToxMi4wcHQiPjxzcGFuIHN0eWxl
+PSJmb250LWZhbWlseTomcXVvdDtUYWhvbWEmcXVvdDssJnF1b3Q7c2Fucy1zZXJpZiZxdW90Oztj
+b2xvcjojOEU1NjU2Ij5IZXkgY2VwaGVycyw8YnI+DQo8YnI+DQpTb3JyeSB0byBwdXNoIHRoaXMg
+YW5ub3VuY2VtZW50IHNvIGxhdGUgb24gYSBGcmlkYXkgYnV0Li4uPGJyPg0KPGJyPg0KQ2FsYW1h
+cmkgaGFzIGFycml2ZWQhPGJyPg0KPGJyPg0KVGhlIHNvdXJjZSBjb2RlIGJpdHMgaGF2ZSBiZWVu
+IGZsaXBwZWQsIHRoZSB0aWNrZXQgdHJhY2tlciBoYXMgYmVlbjxicj4NCm1vdmVkLCBhbmQgd2Ug
+aGF2ZSBldmVuIGdpdmVuIHlvdSBhIGxpdHRsZSBiaXQgb2YgYmFja2dyb3VuZCBmcm9tIGJvdGg8
+YnI+DQphIHRlY2huaWNhbCBhbmQgdmlzaW9uIHBvaW50IG9mIHZpZXc6PGJyPg0KPGJyPg0KVGVj
+aG5pY2FsICg8YSBocmVmPSJodHRwOi8vY2VwaC5jb20iIHRhcmdldD0iX2JsYW5rIj5jZXBoLmNv
+bTwvYT4pOjxicj4NCjxhIGhyZWY9Imh0dHA6Ly9jZXBoLmNvbS9jb21tdW5pdHkvY2VwaC1jYWxh
+bWFyaS1nb2VzLW9wZW4tc291cmNlLyIgdGFyZ2V0PSJfYmxhbmsiPmh0dHA6Ly9jZXBoLmNvbS9j
+b21tdW5pdHkvY2VwaC1jYWxhbWFyaS1nb2VzLW9wZW4tc291cmNlLzwvYT48YnI+DQo8YnI+DQpW
+aXNpb24gKDxhIGhyZWY9Imh0dHA6Ly9pbmt0YW5rLmNvbSIgdGFyZ2V0PSJfYmxhbmsiPmlua3Rh
+bmsuY29tPC9hPik6PGJyPg0KPGEgaHJlZj0iaHR0cDovL3d3dy5pbmt0YW5rLmNvbS9zb2Z0d2Fy
+ZS9mdXR1cmUtb2YtY2FsYW1hcmkvIiB0YXJnZXQ9Il9ibGFuayI+aHR0cDovL3d3dy5pbmt0YW5r
+LmNvbS9zb2Z0d2FyZS9mdXR1cmUtb2YtY2FsYW1hcmkvPC9hPjxicj4NCjxicj4NClRoZSA8YSBo
+cmVmPSJodHRwOi8vY2VwaC5jb20iIHRhcmdldD0iX2JsYW5rIj5jZXBoLmNvbTwvYT4gbGluayBz
+aG91bGQgZ2l2ZSB5b3UgZXZlcnl0aGluZyB5b3UgbmVlZCB0byBrbm93IGFib3V0PGJyPg0Kd2hh
+dCB0ZWNoIGNvbXByaXNlcyBDYWxhbWFyaSwgd2hlcmUgdGhlIHNvdXJjZSBsaXZlcywgYW5kIHdo
+ZXJlIHRoZTxicj4NCmRpc2N1c3Npb25zIHdpbGwgdGFrZSBwbGFjZS4gJm5ic3A7SWYgeW91IGhh
+dmUgYW55IHF1ZXN0aW9ucyBmZWVsIGZyZWUgdG88YnI+DQpoaXQgdGhlIG5ldyBjZXBoLWNhbGFt
+YXJpIGxpc3Qgb3Igc3RvcCBieSBJUkMgYW5kIHdlJ2xsIGdldCB5b3U8YnI+DQpzdGFydGVkLiAm
+bmJzcDtIb3BlIHlvdSBhbGwgZW5qb3kgdGhlIEdVSSE8YnI+DQo8YnI+DQo8YnI+DQo8YnI+DQpC
+ZXN0IFJlZ2FyZHMsPGJyPg0KPGJyPg0KUGF0cmljayBNY0dhcnJ5PGJyPg0KRGlyZWN0b3IsIENv
+bW11bml0eSB8fCBJbmt0YW5rPGJyPg0KPGEgaHJlZj0iaHR0cDovL2NlcGguY29tIiB0YXJnZXQ9
+Il9ibGFuayI+aHR0cDovL2NlcGguY29tPC9hPiAmbmJzcDt8fCAmbmJzcDs8YSBocmVmPSJodHRw
+Oi8vaW5rdGFuay5jb20iIHRhcmdldD0iX2JsYW5rIj5odHRwOi8vaW5rdGFuay5jb208L2E+PGJy
+Pg0KQHNjdXR0bGVtb25rZXkgfHwgQGNlcGggfHwgQGlua3Rhbms8YnI+DQpfX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXzxicj4NCmNlcGgtdXNlcnMgbWFpbGlu
+ZyBsaXN0PGJyPg0KPGEgaHJlZj0ibWFpbHRvOmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20iIHRh
+cmdldD0iX2JsYW5rIj5jZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tPC9hPjxicj4NCjxhIGhyZWY9
+Imh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbSIg
+dGFyZ2V0PSJfYmxhbmsiPmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11
+c2Vycy1jZXBoLmNvbTwvYT48bzpwPjwvbzpwPjwvc3Bhbj48L3A+DQo8cCBjbGFzcz0iTXNvTm9y
+bWFsIj48c3BhbiBzdHlsZT0iZm9udC1mYW1pbHk6JnF1b3Q7VGFob21hJnF1b3Q7LCZxdW90O3Nh
+bnMtc2VyaWYmcXVvdDs7Y29sb3I6IzAwNjMxMiI+X19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX188YnI+DQpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdDxicj4NCjxh
+IGhyZWY9Im1haWx0bzpjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tIiB0YXJnZXQ9Il9ibGFuayI+
+Y2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbTwvYT48YnI+DQo8YSBocmVmPSJodHRwOi8vbGlzdHMu
+Y2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20iIHRhcmdldD0iX2JsYW5r
+Ij5odHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb208
+L2E+PG86cD48L286cD48L3NwYW4+PC9wPg0KPC9kaXY+DQo8cCBjbGFzcz0iTXNvTm9ybWFsIj48
+c3BhbiBzdHlsZT0iZm9udC1mYW1pbHk6JnF1b3Q7VGFob21hJnF1b3Q7LCZxdW90O3NhbnMtc2Vy
+aWYmcXVvdDs7Y29sb3I6IzE0NEZBRSI+PG86cD4mbmJzcDs8L286cD48L3NwYW4+PC9wPg0KPC9k
+aXY+DQo8cCBjbGFzcz0iTXNvTm9ybWFsIiBzdHlsZT0ibWFyZ2luLWJvdHRvbToxMi4wcHQiPjxz
+cGFuIHN0eWxlPSJmb250LWZhbWlseTomcXVvdDtUYWhvbWEmcXVvdDssJnF1b3Q7c2Fucy1zZXJp
+ZiZxdW90Oztjb2xvcjojMTQ0RkFFIj5fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fXzxicj4NCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0PGJyPg0KPGEgaHJlZj0i
+bWFpbHRvOmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20iPmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5j
+b208L2E+PGJyPg0KPGEgaHJlZj0iaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9j
+ZXBoLXVzZXJzLWNlcGguY29tIiB0YXJnZXQ9Il9ibGFuayI+aHR0cDovL2xpc3RzLmNlcGguY29t
+L2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tPC9hPjxvOnA+PC9vOnA+PC9zcGFuPjwv
+cD4NCjwvYmxvY2txdW90ZT4NCjxwIGNsYXNzPSJNc29Ob3JtYWwiPjxzcGFuIHN0eWxlPSJmb250
+LWZhbWlseTomcXVvdDtUYWhvbWEmcXVvdDssJnF1b3Q7c2Fucy1zZXJpZiZxdW90OyI+PG86cD4m
+bmJzcDs8L286cD48L3NwYW4+PC9wPg0KPC9kaXY+DQo8L2JvZHk+DQo8L2h0bWw+DQo=
 
+--_000_5E9507129465C14D901E7E34D2D03B440581A0C3xmbalnx12ciscoc_--
 
-German Anders
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-> --- Original message ---
-> Asunto: Re: [ceph-users] Calamari Goes Open Source
-> De: Larry Liu <larryliugml-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-> Para: Mike Dawson <mike.dawson-ffsCFlcjuZBWk0Htik3J/w@public.gmane.org>
-> Cc: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User 
-> <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-> Fecha: Wednesday, 30/07/2014 11:24
->
->
-> How has good documentation on how to set up calamari? Whatever on 
-> github doesn't really work. Vargrant complians precise64 is unable to 
-> be found.
->
->
-> On Fri, May 30, 2014 at 3:09 PM, Mike Dawson 
-> <mike.dawson-ffsCFlcjuZBWk0Htik3J/w@public.gmane.org> wrote:
->>
->> Great work Inktank / Red Hat! An open source Calamari will be a great 
->> benefit to the community!
->>
->> Cheers,
->> Mike Dawson
->>
->>
->> On 5/30/2014 6:04 PM, Patrick McGarry wrote:
->>>
->>> Hey cephers,
->>>
->>> Sorry to push this announcement so late on a Friday but...
->>>
->>> Calamari has arrived!
->>>
->>> The source code bits have been flipped, the ticket tracker has been
->>> moved, and we have even given you a little bit of background from both
->>> a technical and vision point of view:
->>>
->>> Technical (ceph.com):
->>> http://ceph.com/community/ceph-calamari-goes-open-source/
->>>
->>> Vision (inktank.com):
->>> http://www.inktank.com/software/future-of-calamari/
->>>
->>> The ceph.com link should give you everything you need to know about
->>> what tech comprises Calamari, where the source lives, and where the
->>> discussions will take place.  If you have any questions feel free to
->>> hit the new ceph-calamari list or stop by IRC and we'll get you
->>> started.  Hope you all enjoy the GUI!
->>>
->>>
->>>
->>> Best Regards,
->>>
->>> Patrick McGarry
->>> Director, Community || Inktank
->>> http://ceph.com  ||  http://inktank.com
->>> @scuttlemonkey || @ceph || @inktank
->>> _______________________________________________
->>> ceph-users mailing list
->>> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
->>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->>>
->> _______________________________________________
->> ceph-users mailing list
->> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
->> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->
-
-
-------=_SW_695538132_1406730758_mpa=
-Content-Type: text/html; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-
-<html>
-<head>
-<style>
- .sw_message P{margin:0px;padding:0px;}
- .sw_message {FONT-SIZE: 12pt;FONT-FAMILY:Tahoma,Arial,Helvetica,sans-serif;background:white;}
- .sw_message blockquote{margin-left:5px;padding-left:5px;border-left:2px solid #144fae;color: #144fae;}
- .sw_message blockquote blockquote{border-left:2px solid #006312;color: #006312;}
- .sw_message blockquote blockquote blockquote{border-left:2px solid #8e5656;color: #8e5656;}
- .sw_message blockquote blockquote blockquote blockquote{border-left:2px solid #888;color: #888;}
-</style>
-</head>
-<body class=3d"sw_message">
-Have the same issue, it will be really helpful if someone has any home-made =
-procedure or some notes.<br><div>&nbsp;</div><div id=3d"editor_signature"><p=
- class=3d"MsoNormal"><b><span style=3d"font-size:10.0pt;font-family:Trebuche=
-t MS,sans-serif;color:#444444">German Anders<br></span></b></p><br><br><br><=
-br><br><br><br><br><br><br><br><br><br><br></div><div>&nbsp;</div><blockquot=
-e type=3d"cite">--- Original message --- <br><b>Asunto:</b> Re: [ceph-users]=
- Calamari Goes Open Source <br><b>De:</b> Larry Liu &lt;larryliugml-Re5JQEeQqe8@public.gmane.org=
-m&gt; <br><b>Para:</b> Mike Dawson &lt;mike.dawson-ffsCFlcjuZBWk0Htik3J/w@public.gmane.org&gt; <br><b>C=
-c:</b> Ceph Devel &lt;ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org&gt;, Ceph-User &lt;ceph-use=
-rs-Qp0mS5GaXlQ@public.gmane.org&gt; <br><b>Fecha:</b> Wednesday, 30/07/2014 11:24<br><br><div>Ho=
-w has good documentation on how to set up calamari? Whatever on github doesn=
-'t really work. Vargrant complians precise64 is unable to be found.</div><di=
-v class=3d"gmail_extra"><br><br><div class=3d"gmail_quote">On Fri, May 30, 2=
-014 at 3:09 PM, Mike Dawson <span>&lt;<a href=3d"mailto:mike.dawson@cloudapt=
-.com" target=3d"_blank">mike.dawson-ffsCFlcjuZBWk0Htik3J/w@public.gmane.org</a>&gt;</span> wrote:<br><b=
-lockquote class=3d"gmail_quote" style=3d"margin:0 0 0 .8ex;border-left:1px #=
-ccc solid;padding-left:1ex">Great work Inktank / Red Hat! An open source Cal=
-amari will be a great benefit to the community!<br><br>Cheers,<br>Mike Dawso=
-n<br><br><br>On 5/30/2014 6:04 PM, Patrick McGarry wrote:<br><blockquote cla=
-ss=3d"gmail_quote" style=3d"margin:0 0 0 .8ex;border-left:1px #ccc solid;pad=
-ding-left:1ex">Hey cephers,<br><br>Sorry to push this announcement so late o=
-n a Friday but...<br><br>Calamari has arrived!<br><br>The source code bits h=
-ave been flipped, the ticket tracker has been<br>moved, and we have even giv=
-en you a little bit of background from both<br>a technical and vision point =
-of view:<br><br>Technical (<a href=3d"http://ceph.com" target=3d"_blank">cep=
-h.com</a>):<br><a href=3d"http://ceph.com/community/ceph-calamari-goes-open-=
-source/" target=3d"_blank">http://ceph.com/community/<u></u>ceph-calamari-go=
-<wbr>es-open-<u></u>source/</a><br><br>Vision (<a href=3d"http://inktank.com=
-" target=3d"_blank">inktank.com</a>):<br><a href=3d"http://www.inktank.com/s=
-oftware/future-of-calamari/" target=3d"_blank">http://www.inktank.com/<u></u=
->software/future-<wbr>of-calamari/</a><br><br>The <a href=3d"http://ceph.com=
-" target=3d"_blank">ceph.com</a> link should give you everything you need to=
- know about<br>what tech comprises Calamari, where the source lives, and whe=
-re the<br>discussions will take place. &nbsp;If you have any questions feel =
-free to<br>hit the new ceph-calamari list or stop by IRC and we'll get you<b=
-r>started. &nbsp;Hope you all enjoy the GUI!<br><br><br><br>Best Regards,<br=
-><br>Patrick McGarry<br>Director, Community || Inktank<br><a href=3d"http://=
-ceph.com" target=3d"_blank">http://ceph.com</a> &nbsp;|| &nbsp;<a href=3d"ht=
-tp://inktank.com" target=3d"_blank">http://inktank.com</a><br>@scuttlemonkey=
- || @ceph || @inktank<br>______________________________<u></u>______________=
-___<br>ceph-users mailing list<br><a href=3d"mailto:ceph-users-idqoXFIVOFLNfb0M+mGrxg@public.gmane.org=
-m" target=3d"_blank">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a><br><a href=3d"http://list=
-s.ceph.com/listinfo.cgi/ceph-users-ceph.com" target=3d"_blank">http://lists.=
-ceph.com/<u></u>listinfo.cgi/ceph-users-ceph.<u></u>com</a><br><br></blockqu=
-ote>______________________________<u></u>_________________<br>ceph-users mai=
-ling list<br><a href=3d"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" target=3d"_blank">=
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a><br><a href=3d"http://lists.ceph.com/listinfo.c=
-gi/ceph-users-ceph.com" target=3d"_blank">http://lists.ceph.com/<u></u>listi=
-nfo.cgi/ceph-users-ceph.<u></u>com</a><br></blockquote></div><br></div>_____=
-__________________________________________<br>ceph-users mailing list<br>cep=
-h-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org<br><a target=3d"_blank" href=3d"http://lists.ceph.com=
-/listinfo.cgi/ceph-users-ceph.com">http://lists.ceph.com/listinfo.cgi/ceph-u=
-sers-ceph.com</a><br><br></blockquote><br> 
-</body></html>
-
-------=_SW_695538132_1406730758_mpa=--
-
-
---===============1188240434==
+--===============1291944111==
 Content-Type: text/plain; charset="us-ascii"
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7bit
@@ -208,4 +284,4 @@ ceph-users mailing list
 ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 
---===============1188240434==--
+--===============1291944111==--
