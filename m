@@ -1,74 +1,110 @@
-From: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
-Subject: RE: [PATCH] ceph: use the OSD time as the object mtime instead of
- the client time
-Date: Wed, 30 Jul 2014 01:02:37 +0000
-Message-ID: <06E7D85B3BA36C4DB207FEDE871C534891DA15@SHSMSX101.ccr.corp.intel.com>
-References: <06E7D85B3BA36C4DB207FEDE871C534891D8CB@SHSMSX101.ccr.corp.intel.com>
-	<alpine.DEB.2.00.1407290844430.27871@cobra.newdream.net>
-	<CAPYLRzh3EfcTeVuZB-StY2dfQ=4B9a6CspX9bXefxsQeSUm1iw@mail.gmail.com>
- <CANP1eJH8KOgJdkRaSgecr-Esjf7GjOVNM7=T1y52SFMKic5ZuA@mail.gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: v0.83 released
+Date: Tue, 29 Jul 2014 18:21:04 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1407291820100.5744@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:49131 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750702AbaG3BDC (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 29 Jul 2014 21:03:02 -0400
-In-Reply-To: <CANP1eJH8KOgJdkRaSgecr-Esjf7GjOVNM7=T1y52SFMKic5ZuA@mail.gmail.com>
-Content-Language: en-US
+Received: from cobra.newdream.net ([66.33.216.30]:55211 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750702AbaG3BVF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Jul 2014 21:21:05 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Milosz Tanski <milosz@adfin.com>, Gregory Farnum <greg@inktank.com>
-Cc: Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org, ceph-users@ceph.com, ceph-maintainers@redhat.com
 
-TG9va3MgbGlrZSB3ZSBkbyBuZWVkIHRvIGtlZXAgdGhlIGNsaWVudCB0aW1lIGFzIHRoZSBtdGlt
-ZS4gU2luY2Ugb3B0aW9uIDEgZG9lc24ndCByZWFsbHkgZml4IHRoZSBwcm9ibGVtLCBJIHdvdWxk
-IHZvdGUgZm9yIG9wdGlvbiAyLg0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTog
-Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpjZXBoLWRldmVsLW93bmVy
-QHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIE1pbG9zeiBUYW5za2kNClNlbnQ6IFdlZG5l
-c2RheSwgSnVseSAzMCwgMjAxNCAyOjU1IEFNDQpUbzogR3JlZ29yeSBGYXJudW0NCkNjOiBTYWdl
-IFdlaWw7IFdhbmcsIFpoaXFpYW5nOyBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KU3ViamVj
-dDogUmU6IFtQQVRDSF0gY2VwaDogdXNlIHRoZSBPU0QgdGltZSBhcyB0aGUgb2JqZWN0IG10aW1l
-IGluc3RlYWQgb2YgdGhlIGNsaWVudCB0aW1lDQoNCk9mZiB0aGUgdG9wIG9mIG15IGhlYWQuLi4g
-dGhlIGZzY2FjaGUgY29kZSAocmVhZCBvbmx5KSBpbiB0aGUgQ2VwaEZTIGtjbGllbnQgdXNlcyB0
-aGUgbXRpbWUgdG8gc2VlIGlmIHRoZSBpdGVtIGlzIHZhbGlkICh0aGVyZSB3YXMgbm90IGFuIG9i
-amVjdCBjaGFuZ2UgdmVyc2lvbiBjb3VudGVyIGF0IHRoZSB0aW1lKS4gSSBkb24ndCBrbm93IGlm
-IC8gaG93IHRoYXQgd291bGQgYmUgYWZmZWN0ZWQgb2YgdGhlIHRvcCBvZiBteSBoZWFkLg0KDQot
-IE0NCg0KT24gVHVlLCBKdWwgMjksIDIwMTQgYXQgMTI6MDIgUE0sIEdyZWdvcnkgRmFybnVtIDxn
-cmVnQGlua3RhbmsuY29tPiB3cm90ZToNCj4gT24gVHVlLCBKdWwgMjksIDIwMTQgYXQgMTE6NDYg
-QU0sIFNhZ2UgV2VpbCA8c3dlaWxAcmVkaGF0LmNvbT4gd3JvdGU6DQo+PiBPbiBUdWUsIDI5IEp1
-bCAyMDE0LCBXYW5nLCBaaGlxaWFuZyB3cm90ZToNCj4+PiBUaGlzIGZpeGVzIGEgYnVnIHdoZW4g
-dGhlIHRpbWUgb2YgdGhlIE9TRHMgYW5kIGNsaWVudHMgYXJlIG5vdCANCj4+PiBzeW5jaHJvbml6
-ZWQgKGVzcGVjaWFsbHkgd2hlbiBjbGllbnQgaXMgYWhlYWQgb2YgT1NEKSwgYW5kIHRoZSBjYWNo
-ZSANCj4+PiB0aWVyIGRpcnR5IHJhdGlvIHJlYWNoZXMgdGhlIHRocmVzaG9sZCwgdGhlIGFnZW50
-IHNraXBzIHRoZSBmbHVzaCANCj4+PiB3b3JrIGJlY2F1c2UgaXQgdGhpbmtzIHRoZSBvYmplY3Qg
-aXMgdG9vIHlvdW5nLg0KPj4+DQo+Pj4gVGhlIHNraXBwaW5nIGZsdXNoIGNvZGUgaXMgYXMgZm9s
-bG93aW5nOg0KPj4+DQo+Pj4gICBpZiAob2JjLT5vYnMub2kubXRpbWUgKyB1dGltZV90KHBvb2wu
-aW5mby5jYWNoZV9taW5fZmx1c2hfYWdlLCAwKSA+IG5vdykgew0KPj4+ICAgICBkb3V0KDIwKSA8
-PCBfX2Z1bmNfXyA8PCAiIHNraXAgKHRvbyB5b3VuZykgIiA8PCBvYmMtPm9icy5vaSA8PCBkZW5k
-bDsNCj4+PiAgICAgb3NkLT5sb2dnZXItPmluYyhsX29zZF9hZ2VudF9za2lwKTsNCj4+PiAgICAg
-cmV0dXJuIGZhbHNlOw0KPj4+ICAgfQ0KPj4NCj4+IEhtbSwgSSB0aGluayB0aGUgdXNlIG9mIHRo
-ZSBjbGllbnQgbXRpbWUgaXMgYW4gaW1wb3J0YW50IHByb3BlcnR5IHdlIA0KPj4gd2FudCB0byBt
-YWludGFpbiBmb3IgdGhlIGJlbmVmaXQgb2YgdGhlIHJlc3Qgb2YgdGhlIHN5c3RlbS4gIFR3byAN
-Cj4+IG90aGVyDQo+PiBwb3NzaWJpbGl0aWVzOg0KPg0KPiBUaGlzIHdhcyBteSBpbml0aWFsIHRo
-b3VnaHQgYXMgd2VsbCDigJQgYnV0IEkgZG9uJ3QgdGhpbmsgd2UncmUgYWN0dWFsbHkgDQo+IHJl
-bHlpbmcgb24gdGhhdCBhbnkgbW9yZSAoZS5nLiwgd2UgdXNlZCB0byB1c2UgdGhlIGNsaWVudCB0
-aW1lcyBmb3IgDQo+IGZpbGUgcmVjb3ZlcnkgaW4gdGhlIE1EUywgYnV0IHRoZSByZXN0IG9mIENl
-cGhGUyBpcyBub3cgdXNpbmcgTURTIA0KPiB0aW1lcyBhbnl3YXkpLiBBcmUgdGhlcmUgc2NlbmFy
-aW9zIG90aGVyIHRoYW4gQ2VwaEZTIHJlY292ZXJ5Pw0KPg0KPj4NCj4+IDEpIElmIGNhY2hlX21p
-bl9mbHVzaF9hZ2UgaXMgMCwgc2tpcCB0aGUgY2hlY2ssIHNvIHdlIGF2b2lkIG10aW1lcyBpbiAN
-Cj4+IHRoZSBmdXR1cmUgaW4gdGhhdCBjYXNlLg0KPj4NCj4+IDIpIEFkZCBhbiBhZGRpdGlvbmFs
-IGZpZWxkIHRvIG9iamVjdF9pbmZvX3QgdGhhdCBpcyBhbiBtdGltZSBiYXNlZCBvbiANCj4+IHRo
-ZSBPU0QncyBjbG9jaywgYW5kIHVzZSB0aGF0IGZvciB0aGVzZSBjaGVja3MuDQo+DQo+IEJ1dCBv
-cHRpb24gMiBpcyBwcm9iYWJseSBzdGlsbCBhIGdvb2QgaWRlYS4NCj4gLUdyZWcNCj4gLS0NCj4g
-VG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJl
-IGNlcGgtZGV2ZWwiIA0KPiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZn
-ZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyANCj4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2Vy
-bmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQoNCg0KDQotLQ0KTWlsb3N6IFRhbnNraQ0KQ1RP
-DQoxNiBFYXN0IDM0dGggU3RyZWV0LCAxNXRoIGZsb29yDQpOZXcgWW9yaywgTlkgMTAwMTYNCg0K
-cDogNjQ2LTI1My05MDU1DQplOiBtaWxvc3pAYWRmaW4uY29tDQotLQ0KVG8gdW5zdWJzY3JpYmUg
-ZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGlu
-IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUg
-bWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8u
-aHRtbA0K
+Another Ceph development release!  This has been a longer cycle, so there 
+has been quite a bit of bug fixing and stabilization in this round.  
+There is also a bunch of packaging fixes for RPM distros (RHEL/CentOS, 
+Fedora, and SUSE) and for systemd.  We've also added a new 
+librados-striper library from Sebastien Ponce that provides a generic 
+striping API for applications to code to.
+
+Upgrading
+---------
+
+* The experimental keyvaluestore-dev OSD backend had an on-disk format
+  change that prevents existing OSD data from being upgraded.  This
+  affects developers and testers only.
+
+* mon-specific and osd-specific leveldb options have been removed.
+  From this point onward users should use 'leveldb_' generic options and add
+  the options in the appropriate sections of their configuration files.
+  Monitors will still maintain the following monitor-specific defaults:
+
+    leveldb_write_buffer_size = 32*1024*1024  = 33554432  // 32MB
+    leveldb_cache_size        = 512*1024*1204 = 536870912 // 512MB
+    leveldb_block_size        = 64*1024       = 65536     // 64KB
+    leveldb_compression       = false
+    leveldb_log               = ""
+
+  OSDs will still maintain the following osd-specific defaults:
+
+    leveldb_log               = ""
+
+Notable Changes
+---------------
+
+* ceph-disk: fix dmcrypt support (Stephen Taylor)
+* cephtool: fix help (Yilong Zhao)
+* cephtool: test cleanup (Joao Eduardo Luis)
+* doc: librados example fixes (Kevin Dalley)
+* doc: many doc updates (John Wilkins)
+* doc: update erasure docs (Loic Dachary, Venky Shankar)
+* filestore: disable use of XFS hint (buggy on old kernels) (Samuel Just)
+* filestore: fix xattr spillout (Greg Farnum, Haomai Wang)
+* keyvaluestore: header cache (Haomai Wang)
+* librados_striper: striping library for librados (Sebastien Ponce)
+* libs3: update to latest (Danny Al-Gaaf)
+* log: fix derr level (Joao Eduardo Luis)
+* logrotate: fix osd log rotation on ubuntu (Sage Weil)
+* mds: fix xattr bug triggered by ACLs (Yan, Zheng)
+* misc memory leaks, cleanups, fixes (Danny Al-Gaaf, Sahid Ferdjaoui)
+* misc suse fixes (Danny Al-Gaaf)
+* misc word size fixes (Kevin Cox)
+* mon: drop mon- and osd- specific leveldb options (Joao Eduardo Luis)
+* mon: ec pool profile fixes (Loic Dachary)
+* mon: fix health down messages (Sage Weil)
+* mon: fix quorum feature check (#8738, Greg Farnum)
+* mon: 'osd crush reweight-subtree ...' (Sage Weil)
+* mon, osd: relax client EC support requirements (Sage Weil)
+* mon: some instrumentation (Sage Weil)
+* objecter: flag operations that are redirected by caching (Sage Weil)
+* osd: clean up shard_id_t, shard_t (Loic Dachary)
+* osd: fix connection reconnect race (Greg Farnum)
+* osd: fix dumps (Joao Eduardo Luis)
+* osd: fix erasure-code lib initialization (Loic Dachary)
+* osd: fix extent normalization (Adam Crume)
+* osd: fix loopback msgr issue (Ma Jianpeng)
+* osd: fix LSB release parsing (Danny Al-Gaaf)
+* osd: improved backfill priorities (Sage Weil)
+* osd: many many core fixes (Samuel Just)
+* osd, mon: config sanity checks on start (Sage Weil, Joao Eduardo Luis)
+* osd: sharded threadpool to improve parallelism (Somnath Roy)
+* osd: simple io prioritization for scrub (Sage Weil)
+* osd: simple scrub throttling (Sage Weil)
+* osd: tests for bench command (Loic Dachary)
+* osd: use xfs hint less frequently (Ilya Dryomov)
+* pybind/rados: fix small timeouts (John Spray)
+* qa: xfstests updates (Ilya Dryomov)
+* rgw: cache bucket info (Yehuda Sadeh)
+* rgw: cache decoded user info (Yehuda Sadeh)
+* rgw: fix multipart object attr regression (#8452, Yehuda Sadeh)
+* rgw: fix radosgw-admin 'show log' command (#8553, Yehuda Sadeh)
+* rgw: fix URL decoding (#8702, Brian Rak)
+* rgw: handle empty extra pool name (Yehuda Sadeh)
+* rpm: do not restart daemons on upgrade (Alfredo Deza)
+* rpm: misc packaging fixes for rhel7 (Sandon Van Ness)
+* rpm: split ceph-common from ceph (Sandon Van Ness)
+* systemd: wrap started daemons in new systemd environment (Sage Weil, Dan 
+  Mick)
+* sysvinit: less sensitive to failures (Sage Weil)
+* upstart: increase max open files limit (Sage Weil)
+
+Getting Ceph
+------------
+
+* Git at git://github.com/ceph/ceph.git
+* Tarball at http://ceph.com/download/ceph-0.83.tar.gz
+* For packages, see http://ceph.com/docs/master/install/get-packages
+* For ceph-deploy, see http://ceph.com/docs/master/install/install-ceph-deploy
