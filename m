@@ -1,119 +1,142 @@
-From: NeilBrown <neilb@suse.de>
-Subject: Re: fscache recursive hang -- similar to loopback NFS issues
-Date: Wed, 30 Jul 2014 12:19:35 +1000
-Message-ID: <20140730121935.124bc7c9@notabene.brown>
-References: <CANP1eJEVnH2w7t6r8g1ow07UNWRA8bPduwD-FezqCBKB_J_=XQ@mail.gmail.com>
-	<CANP1eJE7tU9touhSq+Utt=MLE4w5D_C4pT1TAFAiFNBh8ee_mA@mail.gmail.com>
-	<20140721164044.2845f3fd@notabene.brown>
-	<29057.1406650354@warthog.procyon.org.uk>
-	<20140730071735.21ab7ca6@notabene.brown>
-	<CANP1eJHo7xrFoXWWgKQNrTi94vaxN9x-ViXNBE4VcXAa_jjQ3Q@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: RE: [PATCH]init-ceph: Adding do_cmd_okfail when calling
+ ceph-crush-location
+Date: Tue, 29 Jul 2014 20:44:03 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1407292042020.18917@cobra.newdream.net>
+References: <C8CF870384EBCF4CAB89D2041A5C80B301135242@SHSMSX101.ccr.corp.intel.com> <alpine.DEB.2.00.1407291801010.5022@cobra.newdream.net> <C8CF870384EBCF4CAB89D2041A5C80B301135373@SHSMSX101.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- boundary="Sig_/asB.5b=FcD4nt5q5xfqNt.0"; protocol="application/pgp-signature"
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-In-Reply-To: <CANP1eJHo7xrFoXWWgKQNrTi94vaxN9x-ViXNBE4VcXAa_jjQ3Q@mail.gmail.com>
-Sender: linux-fsdevel-owner@vger.kernel.org
-To: Milosz Tanski <milosz@adfin.com>
-Cc: David Howells <dhowells@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, "linux-cachefs@redhat.com" <linux-cachefs@redhat.com>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1112312789-1406691844=:18917"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:55710 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932083AbaG3DoF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Jul 2014 23:44:05 -0400
+In-Reply-To: <C8CF870384EBCF4CAB89D2041A5C80B301135373@SHSMSX101.ccr.corp.intel.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "Xue, Chendi" <chendi.xue@intel.com>
+Cc: ceph-devel@vger.kernel.org
 
---Sig_/asB.5b=FcD4nt5q5xfqNt.0
-Content-Type: text/plain; charset=US-ASCII
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
+
+--557981400-1112312789-1406691844=:18917
+Content-Type: TEXT/PLAIN; charset=iso-8859-1
 Content-Transfer-Encoding: quoted-printable
 
-On Tue, 29 Jul 2014 21:48:34 -0400 Milosz Tanski <milosz@adfin.com> wrote:
+On Wed, 30 Jul 2014, Xue, Chendi wrote:
+> Hi, Sage
+>=20
+> Yes, this happened when I use the -a switch.
+>=20
+> If I use do_cmd instead of do_cmd_okfail to call the location hook here=
+,=20
+> is it being more suitable?
 
-> I would vote on the lower end of the spectrum by default (closer to
-> 100ms) since I imagine anybody deploying this in production
-> environment would likely be using SSD drives for the caching. And in
-> my tests on spinning disks there was little to no benefit outside of
-> reducing network traffic.
+I think that'll work, yeah!
 
-Maybe I'm confused......
+> I think there are still a bunch of people using "/etc/init.d/ceph -a=20
+> start" to start ceph deamon, so why leave this small problem in=20
+> init-ceph when "-a" is still supported?
 
-I thought the whole point of this patch was to avoid deadlocks.
-Now you seem to be talking about a performance benefit.
-What did I miss?
+I think it's fine.  The main issue is that the -a mode only works for=20
+clusters deployed the 'old' way (not with ceph-deploy or chef or puppet).
 
-NeilBrown
+Anyway, I'll take a patch with do_cmd (provided you tested it and it work=
+s=20
+for you).  :)
+
+sage
 
 
 >=20
-> - Milosz
 >=20
-> On Tue, Jul 29, 2014 at 5:17 PM, NeilBrown <neilb@suse.de> wrote:
-> > On Tue, 29 Jul 2014 17:12:34 +0100 David Howells <dhowells@redhat.com> =
-wrote:
-> >
-> >> Milosz Tanski <milosz@adfin.com> wrote:
-> >>
-> >> > That's the same thing exact fix I started testing on Saturday. I fou=
-nd that
-> >> > there already is a wait_event_timeout (even without your recent chan=
-ges). The
-> >> > thing I'm not quite sure is what timeout it should use?
-> >>
-> >> That's probably something to make an external tuning knob for.
-> >>
-> >> David
-> >
-> > Ugg.  External tuning knobs should be avoided wherever possible, and al=
-ways
-> > come with detailed instructions on how to tune them  </rant>
-> >
-> > In this case I think it very nearly doesn't matter *at all* what value =
-is
-> > used.
-> >
-> > If you set it a bit too high, then on the very very rare occasion that =
-it
-> > would currently deadlock, you get a longer-than-necessary wait.  So jus=
-t make
-> > sure that is short enough that by the time the sysadmin notices and sta=
-rts
-> > looking for the problem, it will be gone.
-> >
-> > And if you set it a bit too low, then it will loop around to find anoth=
-er
-> > page to deal with before that one is finished being written out, and so=
- maybe
-> > do a little bit more work than is needed (though it'll be needed eventu=
-ally).
-> >
-> > So the perfect number is somewhere between the typical response time for
-> > storage, and the typical response time for the sys-admin.  Anywhere bet=
-ween
-> > 100ms and 10sec would do.  1 second is the geo-mean.
-> >
-> > (sorry I didn't reply earlier - I missed you email somehow).
-> >
-> > NeilBrown
+> Best Regards,
+> -Chendi
+>=20
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.ke=
+rnel.org] On Behalf Of Sage Weil
+> Sent: Wednesday, July 30, 2014 9:03 AM
+> To: Xue, Chendi
+> Cc: ceph-devel@vger.kernel.org
+> Subject: Re: [PATCH]init-ceph: Adding do_cmd_okfail when calling ceph-c=
+rush-location
+>=20
+> Hi,
+>=20
+> On Wed, 30 Jul 2014, Xue, Chendi wrote:
+> > >From 797dbf4f027200bb22ba89d2f616e254321ec023 Mon Sep 17 00:00:00=20
+> > >2001
+> > From: Chendi Xue <chendi.xue@intel.com>
+> > Date: Tue, 29 Jul 2014 16:45:45 +0800
+> > Subject: [PATCH 8/8] Adding do_cmd_okfail when calling=20
+> > ceph-crush-location
+> >=20
+> > Original init-ceph doesn't use do_cmd_okfail when getting=20
+> > osd_location, which results in osds wrong mapping( verified by using=20
+> > "ceph osd tree" )
+>=20
+> Is this when you are using the -a switch, or when you are starting daem=
+ons on the local host?  The -a stuff isn't well supported any more (and I=
+'ve half a mind to kill support for it entirely if the world weren't goin=
+g toward systemd anyway).
+>=20
+> Anyway, I'm worried about what the _okfail variant will change the beha=
+vior here if the location hook script exits with an error for some reason=
+...
+>=20
+> sage
 >=20
 >=20
+> >=20
+> > Signed-off-by: Chendi Xue <chendi.xue@intel.com>
+> > ---
+> > src/init-ceph.in | 2 +-
+> > 1 file changed, 1 insertion(+), 1 deletion(-)
+> >=20
+> > diff --git a/src/init-ceph.in b/src/init-ceph.in index=20
+> > 86eb87f..09c7cbc 100644
+> > --- a/src/init-ceph.in
+> > +++ b/src/init-ceph.in
+> > @@ -327,7 +327,7 @@ for name in $what; do
+> > =A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
+=A0=A0=A0=A0=A0=A0=A0 if [ "${update_crush:-1}" =3D "1" -o=20
+> > "${update_crush:-1}" =3D "true" ]; then
+> > =A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
+=A0=A0=A0=A0=A0=A0=A0 =A0=A0=A0=A0# update location in crush
+> > =A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
+=A0=A0=A0=A0=A0=A0=A0 =A0=A0=A0=A0get_conf osd_location_hook "$BINDIR/cep=
+h-crush-location" "osd crush location hook"
+> > -=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
+=A0=A0=A0=A0=A0=A0 =A0=A0=A0 osd_location=3D`$osd_location_hook=20
+> > --cluster ceph --id $id --type osd`
+> > +=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
+=A0=A0=A0=A0=A0 =A0=A0=A0 osd_location=3D$(do_cmd_okfail=20
+> > +"$osd_location_hook --cluster ceph --id $id --type osd")
+> > =A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
+=A0=A0=A0=A0=A0=A0=A0 =A0=A0=A0=A0get_conf osd_weight "" "osd crush initi=
+al weight"
+> > =A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
+=A0=A0=A0=A0=A0=A0=A0 =A0=A0=A0=A0defaultweight=3D"$(df -P -k $osd_data/.=
+ | tail -1 | awk '{ print sprintf("%.2f",$2/1073741824) }')"
+> > =A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
+=A0=A0=A0=A0=A0=A0=A0 =A0=A0=A0=A0get_conf osd_keyring "$osd_data/keyring=
+" "keyring"
+> > --
+> > 1.9.1
+> >=20
+> >=20
+> > Best Regards,
+> > -Chendi
+> >=20
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+=20
+> > in the body of a message to majordomo@vger.kernel.org More majordomo=20
+> > info at  http://vger.kernel.org/majordomo-info.html
+> >=20
+> >=20
 >=20
-
-
---Sig_/asB.5b=FcD4nt5q5xfqNt.0
-Content-Type: application/pgp-signature; name=signature.asc
-Content-Disposition: attachment; filename=signature.asc
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iQIVAwUBU9hWNznsnt1WYoG5AQLUlw//Zm+SXXyzheobKhZ7nuGNXWpo/+CmRLHz
-IUKHjFnxeptkXqOXt5uhjQhPFIFV4iOOCh1wlXp3AY5ZCUJ2NfgGLwXX6vu24uHl
-Owja0OagN3tDEgyGDzb8FDzZhfulV9Kgcet95skSGNk3apDt1y+Aak0OZYq5Q7WB
-CAA/uFjEYVXMTqIq/TqwlZtfStKuw7sOjnExWwUSzJj2WGqe5RdwGFYNrenFNdET
-D7Kz0yTF26jzT+73asgYOVjH1LWp58kxbdlNVs43nhv7p7327poE3MW/iN/2olOZ
-8reUtYXpYBPXOsvnGdiq+z5AGWc6UT3HUvhE2nhwDm6fLAwiH4jdWa5h7qteIkFU
-ZZD0Sc/z7QNXYslz5mYkoDma9qPYzuDK4UDasspyxAmbOEEf/5bA7b2++vhA9Uxl
-IzU0w6OiYmlNwksWEgfW1TAqlxwPYUprcvuftIt+d6pzyAXcRZxPcogPDn+/02V0
-S7tiPbIZNzR9Kt5uP59OSApdyzAiFGrIgEaia1sfGJd1059/XFDAg20ZUmS6l7Iv
-RxT2hm+2Ef5+S+SrlyFKSX2E7YG0TbhGH031YN3y1EhOLSejqV2O49nzt7m4gebW
-GhuvsCLBIqQXYF5SCOALzjKbNjB94lDJESLKPB7TEBERX21FAfwECKXD000W2Htl
-YJdw8N0n7T8=
-=3qjX
------END PGP SIGNATURE-----
-
---Sig_/asB.5b=FcD4nt5q5xfqNt.0--
+>=20
+--557981400-1112312789-1406691844=:18917--
