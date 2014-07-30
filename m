@@ -1,110 +1,72 @@
-From: Sage Weil <sage@inktank.com>
-Subject: v0.83 released
-Date: Tue, 29 Jul 2014 18:21:04 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1407291820100.5744@cobra.newdream.net>
+From: Milosz Tanski <milosz@adfin.com>
+Subject: Re: fscache recursive hang -- similar to loopback NFS issues
+Date: Tue, 29 Jul 2014 21:48:34 -0400
+Message-ID: <CANP1eJHo7xrFoXWWgKQNrTi94vaxN9x-ViXNBE4VcXAa_jjQ3Q@mail.gmail.com>
+References: <CANP1eJEVnH2w7t6r8g1ow07UNWRA8bPduwD-FezqCBKB_J_=XQ@mail.gmail.com>
+	<CANP1eJE7tU9touhSq+Utt=MLE4w5D_C4pT1TAFAiFNBh8ee_mA@mail.gmail.com>
+	<20140721164044.2845f3fd@notabene.brown>
+	<29057.1406650354@warthog.procyon.org.uk>
+	<20140730071735.21ab7ca6@notabene.brown>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:55211 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750702AbaG3BVF (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Jul 2014 21:21:05 -0400
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org, ceph-users@ceph.com, ceph-maintainers@redhat.com
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+In-Reply-To: <20140730071735.21ab7ca6@notabene.brown>
+Sender: linux-fsdevel-owner@vger.kernel.org
+To: NeilBrown <neilb@suse.de>
+Cc: David Howells <dhowells@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, "linux-cachefs@redhat.com" <linux-cachefs@redhat.com>
+List-Id: ceph-devel.vger.kernel.org
 
-Another Ceph development release!  This has been a longer cycle, so there 
-has been quite a bit of bug fixing and stabilization in this round.  
-There is also a bunch of packaging fixes for RPM distros (RHEL/CentOS, 
-Fedora, and SUSE) and for systemd.  We've also added a new 
-librados-striper library from Sebastien Ponce that provides a generic 
-striping API for applications to code to.
+I would vote on the lower end of the spectrum by default (closer to
+100ms) since I imagine anybody deploying this in production
+environment would likely be using SSD drives for the caching. And in
+my tests on spinning disks there was little to no benefit outside of
+reducing network traffic.
 
-Upgrading
----------
+- Milosz
 
-* The experimental keyvaluestore-dev OSD backend had an on-disk format
-  change that prevents existing OSD data from being upgraded.  This
-  affects developers and testers only.
+On Tue, Jul 29, 2014 at 5:17 PM, NeilBrown <neilb@suse.de> wrote:
+> On Tue, 29 Jul 2014 17:12:34 +0100 David Howells <dhowells@redhat.com> wrote:
+>
+>> Milosz Tanski <milosz@adfin.com> wrote:
+>>
+>> > That's the same thing exact fix I started testing on Saturday. I found that
+>> > there already is a wait_event_timeout (even without your recent changes). The
+>> > thing I'm not quite sure is what timeout it should use?
+>>
+>> That's probably something to make an external tuning knob for.
+>>
+>> David
+>
+> Ugg.  External tuning knobs should be avoided wherever possible, and always
+> come with detailed instructions on how to tune them  </rant>
+>
+> In this case I think it very nearly doesn't matter *at all* what value is
+> used.
+>
+> If you set it a bit too high, then on the very very rare occasion that it
+> would currently deadlock, you get a longer-than-necessary wait.  So just make
+> sure that is short enough that by the time the sysadmin notices and starts
+> looking for the problem, it will be gone.
+>
+> And if you set it a bit too low, then it will loop around to find another
+> page to deal with before that one is finished being written out, and so maybe
+> do a little bit more work than is needed (though it'll be needed eventually).
+>
+> So the perfect number is somewhere between the typical response time for
+> storage, and the typical response time for the sys-admin.  Anywhere between
+> 100ms and 10sec would do.  1 second is the geo-mean.
+>
+> (sorry I didn't reply earlier - I missed you email somehow).
+>
+> NeilBrown
 
-* mon-specific and osd-specific leveldb options have been removed.
-  From this point onward users should use 'leveldb_' generic options and add
-  the options in the appropriate sections of their configuration files.
-  Monitors will still maintain the following monitor-specific defaults:
 
-    leveldb_write_buffer_size = 32*1024*1024  = 33554432  // 32MB
-    leveldb_cache_size        = 512*1024*1204 = 536870912 // 512MB
-    leveldb_block_size        = 64*1024       = 65536     // 64KB
-    leveldb_compression       = false
-    leveldb_log               = ""
 
-  OSDs will still maintain the following osd-specific defaults:
+-- 
+Milosz Tanski
+CTO
+16 East 34th Street, 15th floor
+New York, NY 10016
 
-    leveldb_log               = ""
-
-Notable Changes
----------------
-
-* ceph-disk: fix dmcrypt support (Stephen Taylor)
-* cephtool: fix help (Yilong Zhao)
-* cephtool: test cleanup (Joao Eduardo Luis)
-* doc: librados example fixes (Kevin Dalley)
-* doc: many doc updates (John Wilkins)
-* doc: update erasure docs (Loic Dachary, Venky Shankar)
-* filestore: disable use of XFS hint (buggy on old kernels) (Samuel Just)
-* filestore: fix xattr spillout (Greg Farnum, Haomai Wang)
-* keyvaluestore: header cache (Haomai Wang)
-* librados_striper: striping library for librados (Sebastien Ponce)
-* libs3: update to latest (Danny Al-Gaaf)
-* log: fix derr level (Joao Eduardo Luis)
-* logrotate: fix osd log rotation on ubuntu (Sage Weil)
-* mds: fix xattr bug triggered by ACLs (Yan, Zheng)
-* misc memory leaks, cleanups, fixes (Danny Al-Gaaf, Sahid Ferdjaoui)
-* misc suse fixes (Danny Al-Gaaf)
-* misc word size fixes (Kevin Cox)
-* mon: drop mon- and osd- specific leveldb options (Joao Eduardo Luis)
-* mon: ec pool profile fixes (Loic Dachary)
-* mon: fix health down messages (Sage Weil)
-* mon: fix quorum feature check (#8738, Greg Farnum)
-* mon: 'osd crush reweight-subtree ...' (Sage Weil)
-* mon, osd: relax client EC support requirements (Sage Weil)
-* mon: some instrumentation (Sage Weil)
-* objecter: flag operations that are redirected by caching (Sage Weil)
-* osd: clean up shard_id_t, shard_t (Loic Dachary)
-* osd: fix connection reconnect race (Greg Farnum)
-* osd: fix dumps (Joao Eduardo Luis)
-* osd: fix erasure-code lib initialization (Loic Dachary)
-* osd: fix extent normalization (Adam Crume)
-* osd: fix loopback msgr issue (Ma Jianpeng)
-* osd: fix LSB release parsing (Danny Al-Gaaf)
-* osd: improved backfill priorities (Sage Weil)
-* osd: many many core fixes (Samuel Just)
-* osd, mon: config sanity checks on start (Sage Weil, Joao Eduardo Luis)
-* osd: sharded threadpool to improve parallelism (Somnath Roy)
-* osd: simple io prioritization for scrub (Sage Weil)
-* osd: simple scrub throttling (Sage Weil)
-* osd: tests for bench command (Loic Dachary)
-* osd: use xfs hint less frequently (Ilya Dryomov)
-* pybind/rados: fix small timeouts (John Spray)
-* qa: xfstests updates (Ilya Dryomov)
-* rgw: cache bucket info (Yehuda Sadeh)
-* rgw: cache decoded user info (Yehuda Sadeh)
-* rgw: fix multipart object attr regression (#8452, Yehuda Sadeh)
-* rgw: fix radosgw-admin 'show log' command (#8553, Yehuda Sadeh)
-* rgw: fix URL decoding (#8702, Brian Rak)
-* rgw: handle empty extra pool name (Yehuda Sadeh)
-* rpm: do not restart daemons on upgrade (Alfredo Deza)
-* rpm: misc packaging fixes for rhel7 (Sandon Van Ness)
-* rpm: split ceph-common from ceph (Sandon Van Ness)
-* systemd: wrap started daemons in new systemd environment (Sage Weil, Dan 
-  Mick)
-* sysvinit: less sensitive to failures (Sage Weil)
-* upstart: increase max open files limit (Sage Weil)
-
-Getting Ceph
-------------
-
-* Git at git://github.com/ceph/ceph.git
-* Tarball at http://ceph.com/download/ceph-0.83.tar.gz
-* For packages, see http://ceph.com/docs/master/install/get-packages
-* For ceph-deploy, see http://ceph.com/docs/master/install/install-ceph-deploy
+p: 646-253-9055
+e: milosz@adfin.com
