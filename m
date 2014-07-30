@@ -1,102 +1,74 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: [PATCH]init-ceph: Adding do_cmd_okfail when calling
- ceph-crush-location
-Date: Tue, 29 Jul 2014 18:02:44 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1407291801010.5022@cobra.newdream.net>
-References: <C8CF870384EBCF4CAB89D2041A5C80B301135242@SHSMSX101.ccr.corp.intel.com>
+From: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
+Subject: RE: [PATCH] ceph: use the OSD time as the object mtime instead of
+ the client time
+Date: Wed, 30 Jul 2014 01:02:37 +0000
+Message-ID: <06E7D85B3BA36C4DB207FEDE871C534891DA15@SHSMSX101.ccr.corp.intel.com>
+References: <06E7D85B3BA36C4DB207FEDE871C534891D8CB@SHSMSX101.ccr.corp.intel.com>
+	<alpine.DEB.2.00.1407290844430.27871@cobra.newdream.net>
+	<CAPYLRzh3EfcTeVuZB-StY2dfQ=4B9a6CspX9bXefxsQeSUm1iw@mail.gmail.com>
+ <CANP1eJH8KOgJdkRaSgecr-Esjf7GjOVNM7=T1y52SFMKic5ZuA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1505559202-1406682164=:5022"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:55117 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752030AbaG3BCo (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Jul 2014 21:02:44 -0400
-In-Reply-To: <C8CF870384EBCF4CAB89D2041A5C80B301135242@SHSMSX101.ccr.corp.intel.com>
+Received: from mga09.intel.com ([134.134.136.24]:49131 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750702AbaG3BDC (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 29 Jul 2014 21:03:02 -0400
+In-Reply-To: <CANP1eJH8KOgJdkRaSgecr-Esjf7GjOVNM7=T1y52SFMKic5ZuA@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Xue, Chendi" <chendi.xue@intel.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Milosz Tanski <milosz@adfin.com>, Gregory Farnum <greg@inktank.com>
+Cc: Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
-
---557981400-1505559202-1406682164=:5022
-Content-Type: TEXT/PLAIN; charset=iso-8859-1
-Content-Transfer-Encoding: quoted-printable
-
-Hi,
-
-On Wed, 30 Jul 2014, Xue, Chendi wrote:
-> >From 797dbf4f027200bb22ba89d2f616e254321ec023 Mon Sep 17 00:00:00 2001
-> From: Chendi Xue <chendi.xue@intel.com>
-> Date: Tue, 29 Jul 2014 16:45:45 +0800
-> Subject: [PATCH 8/8] Adding do_cmd_okfail when calling ceph-crush-locat=
-ion
->=20
-> Original init-ceph doesn't use do_cmd_okfail when getting osd_location,=
-=20
-> which results in osds wrong mapping( verified by using "ceph osd tree" =
-)
-
-Is this when you are using the -a switch, or when you are starting daemon=
-s=20
-on the local host?  The -a stuff isn't well supported any more (and I've=20
-half a mind to kill support for it entirely if the world weren't going=20
-toward systemd anyway).
-
-Anyway, I'm worried about what the _okfail variant will change the=20
-behavior here if the location hook script exits with an error for some=20
-reason...
-
-sage
-
-
->=20
-> Signed-off-by: Chendi Xue <chendi.xue@intel.com>
-> ---
-> src/init-ceph.in | 2 +-
-> 1 file changed, 1 insertion(+), 1 deletion(-)
->=20
-> diff --git a/src/init-ceph.in b/src/init-ceph.in
-> index 86eb87f..09c7cbc 100644
-> --- a/src/init-ceph.in
-> +++ b/src/init-ceph.in
-> @@ -327,7 +327,7 @@ for name in $what; do
-> =A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
-=A0=A0=A0=A0=A0=A0 if [ "${update_crush:-1}" =3D "1" -o "${update_crush:-=
-1}" =3D "true" ]; then
-> =A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
-=A0=A0=A0=A0=A0=A0 =A0=A0=A0=A0# update location in crush
-> =A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
-=A0=A0=A0=A0=A0=A0 =A0=A0=A0=A0get_conf osd_location_hook "$BINDIR/ceph-c=
-rush-location" "osd crush location hook"
-> -=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
-=A0=A0=A0=A0=A0 =A0=A0=A0 osd_location=3D`$osd_location_hook --cluster ce=
-ph --id $id --type osd`
-> +=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
-=A0=A0=A0=A0 =A0=A0=A0 osd_location=3D$(do_cmd_okfail "$osd_location_hook=
- --cluster ceph --id $id --type osd")
-> =A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
-=A0=A0=A0=A0=A0=A0 =A0=A0=A0=A0get_conf osd_weight "" "osd crush initial =
-weight"
-> =A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
-=A0=A0=A0=A0=A0=A0 =A0=A0=A0=A0defaultweight=3D"$(df -P -k $osd_data/. | =
-tail -1 | awk '{ print sprintf("%.2f",$2/1073741824) }')"
-> =A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
-=A0=A0=A0=A0=A0=A0 =A0=A0=A0=A0get_conf osd_keyring "$osd_data/keyring" "=
-keyring"
-> --=20
-> 1.9.1
->=20
->=20
-> Best Regards,
-> -Chendi
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
->=20
---557981400-1505559202-1406682164=:5022--
+TG9va3MgbGlrZSB3ZSBkbyBuZWVkIHRvIGtlZXAgdGhlIGNsaWVudCB0aW1lIGFzIHRoZSBtdGlt
+ZS4gU2luY2Ugb3B0aW9uIDEgZG9lc24ndCByZWFsbHkgZml4IHRoZSBwcm9ibGVtLCBJIHdvdWxk
+IHZvdGUgZm9yIG9wdGlvbiAyLg0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTog
+Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpjZXBoLWRldmVsLW93bmVy
+QHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIE1pbG9zeiBUYW5za2kNClNlbnQ6IFdlZG5l
+c2RheSwgSnVseSAzMCwgMjAxNCAyOjU1IEFNDQpUbzogR3JlZ29yeSBGYXJudW0NCkNjOiBTYWdl
+IFdlaWw7IFdhbmcsIFpoaXFpYW5nOyBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KU3ViamVj
+dDogUmU6IFtQQVRDSF0gY2VwaDogdXNlIHRoZSBPU0QgdGltZSBhcyB0aGUgb2JqZWN0IG10aW1l
+IGluc3RlYWQgb2YgdGhlIGNsaWVudCB0aW1lDQoNCk9mZiB0aGUgdG9wIG9mIG15IGhlYWQuLi4g
+dGhlIGZzY2FjaGUgY29kZSAocmVhZCBvbmx5KSBpbiB0aGUgQ2VwaEZTIGtjbGllbnQgdXNlcyB0
+aGUgbXRpbWUgdG8gc2VlIGlmIHRoZSBpdGVtIGlzIHZhbGlkICh0aGVyZSB3YXMgbm90IGFuIG9i
+amVjdCBjaGFuZ2UgdmVyc2lvbiBjb3VudGVyIGF0IHRoZSB0aW1lKS4gSSBkb24ndCBrbm93IGlm
+IC8gaG93IHRoYXQgd291bGQgYmUgYWZmZWN0ZWQgb2YgdGhlIHRvcCBvZiBteSBoZWFkLg0KDQot
+IE0NCg0KT24gVHVlLCBKdWwgMjksIDIwMTQgYXQgMTI6MDIgUE0sIEdyZWdvcnkgRmFybnVtIDxn
+cmVnQGlua3RhbmsuY29tPiB3cm90ZToNCj4gT24gVHVlLCBKdWwgMjksIDIwMTQgYXQgMTE6NDYg
+QU0sIFNhZ2UgV2VpbCA8c3dlaWxAcmVkaGF0LmNvbT4gd3JvdGU6DQo+PiBPbiBUdWUsIDI5IEp1
+bCAyMDE0LCBXYW5nLCBaaGlxaWFuZyB3cm90ZToNCj4+PiBUaGlzIGZpeGVzIGEgYnVnIHdoZW4g
+dGhlIHRpbWUgb2YgdGhlIE9TRHMgYW5kIGNsaWVudHMgYXJlIG5vdCANCj4+PiBzeW5jaHJvbml6
+ZWQgKGVzcGVjaWFsbHkgd2hlbiBjbGllbnQgaXMgYWhlYWQgb2YgT1NEKSwgYW5kIHRoZSBjYWNo
+ZSANCj4+PiB0aWVyIGRpcnR5IHJhdGlvIHJlYWNoZXMgdGhlIHRocmVzaG9sZCwgdGhlIGFnZW50
+IHNraXBzIHRoZSBmbHVzaCANCj4+PiB3b3JrIGJlY2F1c2UgaXQgdGhpbmtzIHRoZSBvYmplY3Qg
+aXMgdG9vIHlvdW5nLg0KPj4+DQo+Pj4gVGhlIHNraXBwaW5nIGZsdXNoIGNvZGUgaXMgYXMgZm9s
+bG93aW5nOg0KPj4+DQo+Pj4gICBpZiAob2JjLT5vYnMub2kubXRpbWUgKyB1dGltZV90KHBvb2wu
+aW5mby5jYWNoZV9taW5fZmx1c2hfYWdlLCAwKSA+IG5vdykgew0KPj4+ICAgICBkb3V0KDIwKSA8
+PCBfX2Z1bmNfXyA8PCAiIHNraXAgKHRvbyB5b3VuZykgIiA8PCBvYmMtPm9icy5vaSA8PCBkZW5k
+bDsNCj4+PiAgICAgb3NkLT5sb2dnZXItPmluYyhsX29zZF9hZ2VudF9za2lwKTsNCj4+PiAgICAg
+cmV0dXJuIGZhbHNlOw0KPj4+ICAgfQ0KPj4NCj4+IEhtbSwgSSB0aGluayB0aGUgdXNlIG9mIHRo
+ZSBjbGllbnQgbXRpbWUgaXMgYW4gaW1wb3J0YW50IHByb3BlcnR5IHdlIA0KPj4gd2FudCB0byBt
+YWludGFpbiBmb3IgdGhlIGJlbmVmaXQgb2YgdGhlIHJlc3Qgb2YgdGhlIHN5c3RlbS4gIFR3byAN
+Cj4+IG90aGVyDQo+PiBwb3NzaWJpbGl0aWVzOg0KPg0KPiBUaGlzIHdhcyBteSBpbml0aWFsIHRo
+b3VnaHQgYXMgd2VsbCDigJQgYnV0IEkgZG9uJ3QgdGhpbmsgd2UncmUgYWN0dWFsbHkgDQo+IHJl
+bHlpbmcgb24gdGhhdCBhbnkgbW9yZSAoZS5nLiwgd2UgdXNlZCB0byB1c2UgdGhlIGNsaWVudCB0
+aW1lcyBmb3IgDQo+IGZpbGUgcmVjb3ZlcnkgaW4gdGhlIE1EUywgYnV0IHRoZSByZXN0IG9mIENl
+cGhGUyBpcyBub3cgdXNpbmcgTURTIA0KPiB0aW1lcyBhbnl3YXkpLiBBcmUgdGhlcmUgc2NlbmFy
+aW9zIG90aGVyIHRoYW4gQ2VwaEZTIHJlY292ZXJ5Pw0KPg0KPj4NCj4+IDEpIElmIGNhY2hlX21p
+bl9mbHVzaF9hZ2UgaXMgMCwgc2tpcCB0aGUgY2hlY2ssIHNvIHdlIGF2b2lkIG10aW1lcyBpbiAN
+Cj4+IHRoZSBmdXR1cmUgaW4gdGhhdCBjYXNlLg0KPj4NCj4+IDIpIEFkZCBhbiBhZGRpdGlvbmFs
+IGZpZWxkIHRvIG9iamVjdF9pbmZvX3QgdGhhdCBpcyBhbiBtdGltZSBiYXNlZCBvbiANCj4+IHRo
+ZSBPU0QncyBjbG9jaywgYW5kIHVzZSB0aGF0IGZvciB0aGVzZSBjaGVja3MuDQo+DQo+IEJ1dCBv
+cHRpb24gMiBpcyBwcm9iYWJseSBzdGlsbCBhIGdvb2QgaWRlYS4NCj4gLUdyZWcNCj4gLS0NCj4g
+VG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJl
+IGNlcGgtZGV2ZWwiIA0KPiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZn
+ZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyANCj4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2Vy
+bmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQoNCg0KDQotLQ0KTWlsb3N6IFRhbnNraQ0KQ1RP
+DQoxNiBFYXN0IDM0dGggU3RyZWV0LCAxNXRoIGZsb29yDQpOZXcgWW9yaywgTlkgMTAwMTYNCg0K
+cDogNjQ2LTI1My05MDU1DQplOiBtaWxvc3pAYWRmaW4uY29tDQotLQ0KVG8gdW5zdWJzY3JpYmUg
+ZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGlu
+IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUg
+bWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8u
+aHRtbA0K
