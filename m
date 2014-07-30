@@ -1,77 +1,193 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: giant and hammer dates
-Date: Wed, 30 Jul 2014 11:52:56 -0500
-Message-ID: <53D922E8.3050809@inktank.com>
-References: <alpine.DEB.2.00.1407291558060.26221@cobra.newdream.net> <CAPYLRzgv8m-7LzQBgcGafwOw3SWjn_wVBh7L_+vMnwtRFUYz7g@mail.gmail.com>
+From: Yehuda Sadeh <yehuda@inktank.com>
+Subject: Re: bucket index sharding - IO throttle
+Date: Wed, 30 Jul 2014 10:00:18 -0700
+Message-ID: <CABBk=J9H+ncDjp6ABVmraaPOx5x5ubvfn2vb3UK6y3R=B=zLBQ@mail.gmail.com>
+References: <1963E3AE-B242-4896-904C-B0868F5AC569@outlook.com>
+	<BLU437-SMTP904C06D419679BD5A09056DFF90@phx.gbl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f182.google.com ([209.85.223.182]:55269 "EHLO
-	mail-ie0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754454AbaG3QxE (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Jul 2014 12:53:04 -0400
-Received: by mail-ie0-f182.google.com with SMTP id y20so1938687ier.13
-        for <ceph-devel@vger.kernel.org>; Wed, 30 Jul 2014 09:53:03 -0700 (PDT)
-In-Reply-To: <CAPYLRzgv8m-7LzQBgcGafwOw3SWjn_wVBh7L_+vMnwtRFUYz7g@mail.gmail.com>
+Received: from mail-ie0-f174.google.com ([209.85.223.174]:43744 "EHLO
+	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755197AbaG3RAT (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Jul 2014 13:00:19 -0400
+Received: by mail-ie0-f174.google.com with SMTP id rp18so1910696iec.33
+        for <ceph-devel@vger.kernel.org>; Wed, 30 Jul 2014 10:00:19 -0700 (PDT)
+In-Reply-To: <BLU437-SMTP904C06D419679BD5A09056DFF90@phx.gbl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>, Sage Weil <sweil@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Guang Yang <yguang11@outlook.com>
+Cc: Ceph-devel <ceph-devel@vger.kernel.org>
 
-On 07/30/2014 09:22 AM, Gregory Farnum wrote:
-> On Tue, Jul 29, 2014 at 7:11 PM, Sage Weil <sweil@redhat.com> wrote:
->> We've talked a bit about moving to a ~4 month (instead of 3 month)
->> cadence.  I'm still inclined in this direction because it means fewer
->> stable releases that we will be maintaining and a longer and (hopefully)
->> more productive interval to do real work in between.
+Can you send this code through a github pull request (or at least as a
+patch)? It'lll be easier to review and comment.
+
+Thanks,
+Yehuda
+
+On Wed, Jul 30, 2014 at 7:58 AM, Guang Yang <yguang11@outlook.com> wrote:
+> +ceph-devel.
+>
+> Thanks,
+> Guang
+>
+> On Jul 29, 2014, at 10:20 PM, Guang Yang <yguang11@outlook.com> wrote:
+>
+>> Hi Yehuda,
+>> Per you review comment in terms of IO throttling for bucket index operation, I prototyped the below code (details still need to polish), can you take a look if that is right way to go?
 >>
->> The other key point is that we don't want a repeat of the firefly delay.
->> I think we should stay as close to a train model as we can.  If something
->> isn't ready by freeze, let it wait for the next cycle.  We shouldn't be
->> cramming things in at the end, especially big things.  As a general rule,
->> big things should be merged early in the cycle so that we have lots of
->> time to shake out the issues that only come out of lots of testing and
->> aren't obvious from code review.
+>> Another problem I came across is that ClsBucketIndexOpCtx::handle_compeltion was not called for the bucket index init op (below), is there anything I missed obviously here?
+>>
+>> Thanks,
+>> Guang
+>>
+>>
+>> class ClsBucketIndexAioThrottler {
+>> protected:
+>>  int completed;
+>>  int ret_code;
+>>  IoCtx& io_ctx;
+>>  Mutex lock;
+>>  struct LockCond {
+>>    Mutex lock;
+>>    Cond cond;
+>>    LockCond() : lock("LockCond"), cond() {}
+>>  } lock_cond;
+>> public:
+>>  ClsBucketIndexAioThrottler(IoCtx& _io_ctx)
+>>    : completed(0), ret_code(0), io_ctx(_io_ctx),
+>>    lock("ClsBucketIndexAioThrottler"), lock_cond() {}
+>>
+>>  virtual ~ClsBucketIndexAioThrottler() {}
+>>  virtual void do_next() = 0;
+>>  virtual bool is_completed () = 0;
+>>
+>>  void complete(int ret) {
+>>    {
+>>      Mutex::Locker l(lock);
+>>      if (ret < 0)
+>>        ret_code = ret;
+>>      ++completed;
+>>    }
+>>
+>>    lock_cond.lock.Lock();
+>>    lock_cond.cond.Signal();
+>>    lock_cond.lock.Unlock();
+>>  }
+>>
+>>  int get_ret_code () {
+>>    Mutex::Locker l(lock);
+>>    return ret_code;
+>>  }
+>>
+>>  virtual int wait_completion() {
+>>    lock_cond.lock.Lock();
+>>    while (1) {
+>>      if (is_completed()) {
+>>        lock_cond.lock.Unlock();
+>>        return ret_code;
+>>      }
+>>      lock_cond.cond.Wait(lock_cond.lock);
+>>      lock_cond.lock.Lock();
+>>    }
+>>  }
+>> };
+>>
+>> class ClsBucketIndexListAioThrottler : public ClsBucketIndexAioThrottler {
+>> protected:
+>>  vector<string> bucket_objects;
+>>  vector<string>::iterator iter_pos;
+>> public:
+>>  ClsBucketIndexListAioThrottler(IoCtx& _io_ctx, const vector<string> _bucket_objs)
+>>    : ClsBucketIndexAioThrottler(_io_ctx), bucket_objects(_bucket_objs),
+>>    iter_pos(bucket_objects.begin()) {}
+>>
+>>  virtual bool is_completed() {
+>>    Mutex::Locker l(lock);
+>>    int sent = 0;
+>>    vector<string>::iterator iter = bucket_objects.begin();
+>>    for (; iter != iter_pos; ++iter) ++sent;
+>>
+>>    return (sent == completed &&
+>>        (iter_pos == bucket_objects.end() /*Success*/ || ret_code < 0 /*Failure*/));
+>>  }
+>> };
+>>
+>> template<typename T>
+>> class ClsBucketIndexOpCtx : public ObjectOperationCompletion {
+>> private:
+>>  T* data;
+>>  // Return code of the operation
+>>  int* ret_code;
+>>
+>>  // The Aio completion object associated with this Op, it should
+>>  // be release from within the completion handler
+>>  librados::AioCompletion* completion;
+>>  ClsBucketIndexAioThrottler* throttler;
+>> public:
+>>  ClsBucketIndexOpCtx(T* _data, int* _ret_code, librados::AioCompletion* _completion,
+>>          ClsBucketIndexAioThrottler* _throttler)
+>>    : data(_data), ret_code(_ret_code), completion(_completion), throttler(_throttler) {}
+>>  ~ClsBucketIndexOpCtx() {}
+>>
+>>  // The completion callback, fill the response data
+>>  void handle_completion(int r, bufferlist& outbl) {
+>>    if (r >= 0) {
+>>      if (data) {
+>>        try {
+>>          bufferlist::iterator iter = outbl.begin();
+>>          ::decode((*data), iter);
+>>        } catch (buffer::error& err) {
+>>          r = -EIO;
+>>        }
+>>      }
+>>      // Do the next request
+>>    }
+>>    throttler->do_next();
+>>    throttler->complete(r);
+>>    if (completion) {
+>>      completion->release();
+>>    }
+>>  }
+>> };
+>>
+>>
+>> class ClsBucketIndexInitAioThrottler : public ClsBucketIndexListAioThrottler {
+>> public:
+>>  ClsBucketIndexInitAioThrottler(IoCtx& _io_ctx, const vector<string> _bucket_objs) :
+>>    ClsBucketIndexListAioThrottler(_io_ctx, _bucket_objs) {}
+>>
+>>  virtual void do_next() {
+>>    string oid;
+>>    {
+>>      Mutex::Locker l(lock);
+>>      if (iter_pos == bucket_objects.end())
+>>        return;
+>>      oid = *(iter_pos++);
+>>    }
+>>    AioCompletion* c = librados::Rados::aio_create_completion(NULL, NULL, NULL);
+>>    // Dummy
+>>    bufferlist in;
+>>    librados::ObjectWriteOperation op;
+>>    op.create(true);
+>>    op.exec("rgw", "bucket_init_index", in, new ClsBucketIndexOpCtx<int>(NULL, NULL, c, this));
+>>    io_ctx.aio_operate(oid, c, &op, NULL);
+>>  }
+>> };
+>>
+>>
+>> int cls_rgw_bucket_index_init_op(librados::IoCtx &io_ctx,
+>>        const vector<string>& bucket_objs, uint32_t max_aio)
+>> {
+>>   vector<string>::const_iterator iter = bucket_objs.begin();
+>>   bufferlist in;
+>>   ClsBucketIndexAioThrottler* throttler = new ClsBucketIndexInitAioThrottler(io_ctx, bucket_objs);
+>>   for (; iter != bucket_objs.end() && max_aio-- > 0; ++iter) {
+>>       throttler->do_next();
+>>   }
+>>   throttler->wait_completion();
+>>   return 0;
+>> }
+>>
+>>
 >
-> These two points are sort of opposing. In particular, extending the
-> release cycle just makes the release seem more important, and
-> increases the pressure to merge features in one cycle instead of
-> waiting for the next one. (*Especially* if we continue to maintain
-> every other named release.)
-> I continue to prefer a 3-month cycle where we maintain enough merging
-> discipline that the follow-on one-month shakeout period is something
-> that the development team largely doesn't have to worry about, because
-> the code is already working *before* we start it and we're just
-> uncovering rare and longer-term bugs during that period.
-
-Personally I'd prefer a longer testing and bugfix period for named 
-releases.  4 months of development plus 2 months of testing. 
-Development can easily go several weeks or a month over schedule 
-(Personally I believe even good teams can't consistently stop this from 
-happening, especially with something as complicated as next generation 
-distributed storage!).  Our bugfix/test period gets too crunched as it 
-is and our initial named releases feel more like release candidates. 
-Soon after release we tend to make a bunch of point releases to fix 
-semi-major bugs.  If we are doing that anyway, I think it would be 
-better to just extend the test time and really make sure we've devoted a 
-solid chunk of time for RC or Beta releases before the named release 
-goes out.
-
-I think the short point release cycle does help mitigate the merge 
-pressure problem, but only if we are disciplined.  If the point releases 
-are getting behind, stuff has to get cut.  6 months isn't that much 
-longer to wait than 4 months, especially if people are already waiting 
-until the 2nd or 3rd point release before they deploy for production 
-(not sure if this is happening, but I suspect it is).
-
-Mark
-
-> -Greg
-> Software Engineer #42 @ http://inktank.com | http://ceph.com
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-
