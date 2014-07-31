@@ -1,250 +1,100 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: First attempt at rocksdb monitor store stress testing
-Date: Thu, 31 Jul 2014 07:47:00 -0500
-Message-ID: <53DA3AC4.10708@inktank.com>
-References: <53D041D3.3080203@inktank.com> <75674D092A819E4189E91166C74CB90D013F2ACA@shsmsx102.ccr.corp.intel.com> <53D0EA63.10107@inktank.com> <53D19A92.3010000@inktank.com> <75674D092A819E4189E91166C74CB90D013F30D4@shsmsx102.ccr.corp.intel.com> <53D28145.2020504@inktank.com> <75674D092A819E4189E91166C74CB90D013F3CD6@shsmsx102.ccr.corp.intel.com> <53D68096.1060009@inktank.com> <75674D092A819E4189E91166C74CB90D01402A44@shsmsx102.ccr.corp.intel.com> <alpine.DEB.2.00.1407301906230.18917@cobra.newdream.net> <75674D092A819E4189E91166C74CB90D01405418@shsmsx102.ccr.corp.intel.com>
+From: Peter Zijlstra <peterz@infradead.org>
+Subject: Re: [PATCH] locking/mutexes: Revert "locking/mutexes: Add extra
+ reschedule point"
+Date: Thu, 31 Jul 2014 15:13:31 +0200
+Message-ID: <20140731131331.GT19379@twins.programming.kicks-ass.net>
+References: <1406801797-20139-1-git-send-email-ilya.dryomov@inktank.com>
+ <20140731115759.GS19379@twins.programming.kicks-ass.net>
+ <CALFYKtBGQpxaZ0EFXbdvuEHeDeASeU-7XxQ_1a6ZDM=aJS651w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f171.google.com ([209.85.223.171]:57969 "EHLO
-	mail-ie0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750702AbaGaMqv (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Jul 2014 08:46:51 -0400
-Received: by mail-ie0-f171.google.com with SMTP id at1so3617144iec.2
-        for <ceph-devel@vger.kernel.org>; Thu, 31 Jul 2014 05:46:51 -0700 (PDT)
-In-Reply-To: <75674D092A819E4189E91166C74CB90D01405418@shsmsx102.ccr.corp.intel.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "Shu, Xinxin" <xinxin.shu@intel.com>, Sage Weil <sweil@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="sBjycZIcBwEtFqBK"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CALFYKtBGQpxaZ0EFXbdvuEHeDeASeU-7XxQ_1a6ZDM=aJS651w@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ilya Dryomov <ilya.dryomov@inktank.com>
+Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Ingo Molnar <mingo@kernel.org>, Ceph Development <ceph-devel@vger.kernel.org>, davidlohr@hp.com, jason.low2@hp.com
+List-Id: ceph-devel.vger.kernel.org
 
-FWIW this was the problem I ran into and mentioned in #ceph-devel the 
-other day.  The way I solved it was to add -Wno-portability to the 
-configure.ac file in the rocksdb distribution.  Perhaps this is a better 
-solution though...
 
-Mark
+--sBjycZIcBwEtFqBK
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-On 07/31/2014 03:58 AM, Shu, Xinxin wrote:
-> Hi sage ,
->
-> I create a pull request https://github.com/ceph/rocksdb/pull/3 , please help review.
->
-> Cheers,
-> xinxin
->
-> -----Original Message-----
-> From: Shu, Xinxin
-> Sent: Thursday, July 31, 2014 4:42 PM
-> To: 'Sage Weil'
-> Cc: Mark Nelson; ceph-devel@vger.kernel.org
-> Subject: RE: First attempt at rocksdb monitor store stress testing
->
-> Hi sage ,
->
-> This maybe due to  $(shell) is a feature of GNU make ,   I think there are two solutions:
-> 1)  run the script at configure time rather than at run time.
-> 2)  $(shell (./build_tools/build_detect_version)) will generated util/build_version.cc , the file only contain some version info (git version , compile time) , since we may not care about thess infos , we can remove this line from Makefile.am , generate util/build_version.cc by myself.
->
-> Cheers,
-> xinxin
->
-> -----Original Message-----
-> From: Sage Weil [mailto:sweil@redhat.com]
-> Sent: Thursday, July 31, 2014 10:08 AM
-> To: Shu, Xinxin
-> Cc: Mark Nelson; ceph-devel@vger.kernel.org
-> Subject: RE: First attempt at rocksdb monitor store stress testing
->
-> By the way, I'm getting closer to getting wip-rocksdb in a state where it can be merged, but it is failing to build due to this line:
->
-> 	$(shell (./build_tools/build_detect_version))
->
-> in Makefile.am which results in
->
-> automake: warnings are treated as errors
-> warning: Makefile.am:59: shell (./build_tools/build_detect_version:
-> non-POSIX variable name
-> Makefile.am:59: (probably a GNU make extension)
-> Makefile.am: installing './depcomp'
-> autoreconf: automake failed with exit status: 1
->
-> Any suggestions?  You can see these build results at
->
-> 	http://ceph.com/gitbuilder.cgi
-> 	http://gitbuilder.sepia.ceph.com/gitbuilder-ceph-deb-trusty-amd64-basic/log.cgi?log=92212c722100065922468e4185759be0435877ff
->
-> sage
->
->
-> On Thu, 31 Jul 2014, Shu, Xinxin wrote:
->
->> Does your report base on wip-rocksdb-mark branch?
->>
->> Cheers,
->> xinxin
->>
->> -----Original Message-----
->> From: ceph-devel-owner@vger.kernel.org
->> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
->> Sent: Tuesday, July 29, 2014 12:56 AM
->> To: Shu, Xinxin; ceph-devel@vger.kernel.org
->> Subject: Re: First attempt at rocksdb monitor store stress testing
->>
->> Hi Xinxin,
->>
->> Thanks, I'll give it a try.  I want to figure out what's going on in Rocksdb when the test stalls with leveled compaction.  In the mean time, here are the test results with spinning disks and SSDs:
->>
->> http://nhm.ceph.com/mon-store-stress/Monitor_Store_Stress_Short_Tests.
->> pdf
->>
->> Mark
->>
->> On 07/27/2014 11:45 PM, Shu, Xinxin wrote:
->>> Hi mark,
->>>
->>> I tested this option on my setup , same issue happened , I will dig into it , if you want to get info log , there is a workaround, set this option to none:
->>>
->>> Rocksdb_log = ""
->>>
->>> Cheers,
->>> xinxin
->>>
->>> -----Original Message-----
->>> From: Mark Nelson [mailto:mark.nelson@inktank.com]
->>> Sent: Saturday, July 26, 2014 12:10 AM
->>> To: Shu, Xinxin; ceph-devel@vger.kernel.org
->>> Subject: Re: First attempt at rocksdb monitor store stress testing
->>>
->>> Hi Xinxin,
->>>
->>> I'm trying to enable the rocksdb log file as described in config_opts using:
->>>
->>> rocksdb_log = <path to log file>
->>>
->>> The file gets created but is empty.  Any ideas?
->>>
->>> Mark
->>>
->>> On 07/24/2014 08:28 PM, Shu, Xinxin wrote:
->>>> Hi mark,
->>>>
->>>> I am looking forward to your results on SSDs .
->>>> rocksdb generates a crc of data to be written , this cannot be switch off (but can be subsititued with xxhash),  there are two options , Option. verify_checksums_in_compaction and ReadOptions. verify_checksums,  If we disable these two options , i think cpu usage will goes down . If we use universal compaction , this is not friendly with read operation.
->>>>
->>>> Btw , can you list your rocksdb configuration?
->>>>
->>>> Cheers,
->>>> xinxin
->>>>
->>>> -----Original Message-----
->>>> From: Mark Nelson [mailto:mark.nelson@inktank.com]
->>>> Sent: Friday, July 25, 2014 7:45 AM
->>>> To: Shu, Xinxin; ceph-devel@vger.kernel.org
->>>> Subject: Re: First attempt at rocksdb monitor store stress testing
->>>>
->>>> Earlier today I modified the rocksdb options so I could enable universal compaction.  Over all performance is lower but I don't see the hang/stall in the middle of the test either.  Instead the disk is basically pegged with 100% writes.  I suspect average latency is higher than leveldb, but the highest latency is about 5-6s while we were seeing 30s spikes for leveldb with levelled (heh) compaction.
->>>>
->>>> I haven't done much tuning either way yet.  It may be that if we keep level 0 and level 1 roughly the same size we can reduce stalls in the levelled setups.  It will also be interesting to see what happens in these tests on SSDs.
->>>>
->>>> Mark
->>>>
->>>> On 07/24/2014 06:13 AM, Mark Nelson wrote:
->>>>> Hi Xinxin,
->>>>>
->>>>> Thanks! I wonder as well if it might be interesting to expose the
->>>>> options related to universal compaction?  It looks like rocksdb
->>>>> provides a lot of interesting knobs you can adjust!
->>>>>
->>>>> Mark
->>>>>
->>>>> On 07/24/2014 12:08 AM, Shu, Xinxin wrote:
->>>>>> Hi mark,
->>>>>>
->>>>>> I think this maybe related to 'verify_checksums' config option
->>>>>> ,when ReadOptions is initialized, default this option is  true ,
->>>>>> all data read from underlying storage will be verified against
->>>>>> corresponding checksums,  however,  this option cannot be
->>>>>> configured in wip-rocksdb branch. I will modify code to make this option configurable .
->>>>>>
->>>>>> Cheers,
->>>>>> xinxin
->>>>>>
->>>>>> -----Original Message-----
->>>>>> From: ceph-devel-owner@vger.kernel.org
->>>>>> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark
->>>>>> Nelson
->>>>>> Sent: Thursday, July 24, 2014 7:14 AM
->>>>>> To: ceph-devel@vger.kernel.org
->>>>>> Subject: First attempt at rocksdb monitor store stress testing
->>>>>>
->>>>>> Hi Guys,
->>>>>>
->>>>>> So I've been interested lately in leveldb 99th percentile latency
->>>>>> (and the amount of write amplification we are seeing) with leveldb.
->>>>>> Joao mentioned he has written a tool called mon-store-stress in
->>>>>> wip-leveldb-misc to try to provide a means to roughly guess at
->>>>>> what's happening on the mons under heavy load.  I cherry-picked
->>>>>> it over to wip-rocksdb and after a couple of hacks was able to
->>>>>> get everything built and running with some basic tests.  There
->>>>>> was little tuning done and I don't know how realistic this
->>>>>> workload is, so don't assume this means anything yet, but some initial results are here:
->>>>>>
->>>>>> http://nhm.ceph.com/mon-store-stress/First%20Attempt.pdf
->>>>>>
->>>>>> Command that was used to run the tests:
->>>>>>
->>>>>> ./ceph-test-mon-store-stress --mon-keyvaluedb <leveldb|rocksdb>
->>>>>> --write-min-size 50K --write-max-size 2M --percent-write 70
->>>>>> --percent-read 30 --keep-state --test-seed 1406137270 --stop-at
->>>>>> 5000 foo
->>>>>>
->>>>>> The most interesting bit right now is that rocksdb seems to be
->>>>>> hanging in the middle of the test (left it running for several
->>>>>> hours).  CPU usage on one core was quite high during the hang.
->>>>>> Profiling using perf with dwarf symbols I see:
->>>>>>
->>>>>> -  49.14%  ceph-test-mon-s  ceph-test-mon-store-stress  [.]
->>>>>> unsigned int
->>>>>> rocksdb::crc32c::ExtendImpl<&rocksdb::crc32c::Fast_CRC32>(unsigne
->>>>>> d
->>>>>> int, char const*, unsigned long)
->>>>>>         - unsigned int
->>>>>> rocksdb::crc32c::ExtendImpl<&rocksdb::crc32c::Fast_CRC32>(unsigne
->>>>>> d
->>>>>> int, char const*, unsigned long)
->>>>>>              51.70%
->>>>>> rocksdb::ReadBlockContents(rocksdb::RandomAccessFile*,
->>>>>> rocksdb::Footer const&, rocksdb::ReadOptions const&,
->>>>>> rocksdb::BlockHandle const&, rocksdb::BlockContents*,
->>>>>> rocksdb::Env*,
->>>>>> bool)
->>>>>>              48.30%
->>>>>> rocksdb::BlockBasedTableBuilder::WriteRawBlock(rocksdb::Slice
->>>>>> const&, rocksdb::CompressionType, rocksdb::BlockHandle*)
->>>>>>
->>>>>> Not sure what's going on yet, may need to try to enable
->>>>>> logging/debugging in rocksdb.  Thoughts/Suggestions welcome. :)
->>>>>>
->>>>>> Mark
->>>>>> --
->>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->>>>>> in the body of a message to majordomo@vger.kernel.org More
->>>>>> majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>>>
->>>>>
->>>>
->>>
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->> in the body of a message to majordomo@vger.kernel.org More majordomo
->> info at  http://vger.kernel.org/majordomo-info.html
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->> in the body of a message to majordomo@vger.kernel.org More majordomo
->> info at  http://vger.kernel.org/majordomo-info.html
->>
->>
+On Thu, Jul 31, 2014 at 04:37:29PM +0400, Ilya Dryomov wrote:
 
+> This didn't make sense to me at first too, and I'll be happy to be
+> proven wrong, but we can reproduce this with rbd very reliably under
+> higher than usual load, and the revert makes it go away.  What we are
+> seeing in the rbd scenario is the following.
+
+This is drivers/block/rbd.c ? I can find but a single mutex_lock() in
+there.
+
+> Suppose foo needs mutexes A and B, bar needs mutex B.  foo acquires
+> A and then wants to acquire B, but B is held by bar.  foo spins
+> a little and ends up calling schedule_preempt_disabled() on line 484
+> above, but that call never returns, even though a hundred usecs later
+> bar releases B.  foo ends up stuck in mutex_lock() indefinitely, but
+> still holds A and everybody else who needs A gets behind A.  Given that
+> this A happens to be a central libceph mutex all rbd activity halts.
+> Deadlock may not be the best term for this, but never returning from
+> mutex_lock(&B) even though B has been unlocked is *a* problem.
+>=20
+> This obviously doesn't happen every time schedule_preempt_disabled() on
+> line 484 is called, so there must be some sort of race here.  I'll send
+> along the actual rbd stack traces shortly.
+
+Smells like maybe current->state !=3D TASK_RUNNING, does the below
+trigger?
+
+If so, you've wrecked something in whatever...
+
+---
+ kernel/locking/mutex.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/kernel/locking/mutex.c b/kernel/locking/mutex.c
+index ae712b25e492..3d726fdaa764 100644
+--- a/kernel/locking/mutex.c
++++ b/kernel/locking/mutex.c
+@@ -473,8 +473,12 @@ __mutex_lock_common(struct mutex *lock, long state, un=
+signed int subclass,
+ 	 * reschedule now, before we try-lock the mutex. This avoids getting
+ 	 * scheduled out right after we obtained the mutex.
+ 	 */
+-	if (need_resched())
++	if (need_resched()) {
++		if (WARN_ON_ONCE(current->state !=3D TASK_RUNNING))
++			__set_current_state(TASK_RUNNING);
++
+ 		schedule_preempt_disabled();
++	}
+ #endif
+ 	spin_lock_mutex(&lock->wait_lock, flags);
+=20
+
+--sBjycZIcBwEtFqBK
+Content-Type: application/pgp-signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
+
+iQIcBAEBAgAGBQJT2kD6AAoJEHZH4aRLwOS6WoEQAIdDHtilwraCEWm0I+ftpltP
+uxRXHS86sgZOzeRqtMR+ZDtqSVnjhsWTdZ/zTvBrFPq9ZANmNLa8OiuxNsiNVgyW
+Nmh8YKSi2aFW4dyXWs9GCo6U/PWA0S5+WFVaUEj7yptY3XkKMYR4qUh/RFPi07/c
+hkjsIQib0d4l9aBr1/OYsdX9s+rZnUtsfzTtnq428JmDnJ1DamxqRZINpIHE5N8l
+ejHQ2AtVgftQIheBcn3yXYyArL663JVVVlr/JmpAZAr0hbMs+VcGq5go9wUoQZM2
+Yjdyp7d/bXwlsrD9gaZW9uH0xy8raUEHoDLCxYDk46Ibh7yk1w7sK+4wsSrdcQZF
+OMC9llNJ6hWJEXE0Dn8KuAFzyJ7Z81/OMrY8x1Ee3PHLs+qo5jF/CWk4qV6roI0Y
+7HZ+k37nmBUiacJeFoWZiAcLCl09AwNk7/6NpgKSJoPdGWgSWPPwpVs3KE+y5UqP
+zlhV6OdBneFPtPRKiqG3BBXdyQ1pga58MAaIUwIMwghZUox2PkJbchCudxBapISf
+C0s8x56IqLegx+77RNyHa2Yc++tM98LXkQ1XtBAUSjgOyoR3h3QnMPAgWPhmnTCt
+vfn/2C8ZhwHsguJi8Q4TmUUOj8y0Ahlqh77BFUwyG9vAwnax0q6dKTjHRc1biTQ+
+34nQao01b5qz/HByMQCf
+=X6jY
+-----END PGP SIGNATURE-----
+
+--sBjycZIcBwEtFqBK--
