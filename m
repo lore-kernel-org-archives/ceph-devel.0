@@ -1,118 +1,250 @@
 From: Sage Weil <sweil@redhat.com>
-Subject: KeyFileStore ?
-Date: Wed, 30 Jul 2014 22:25:30 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1407302156410.18917@cobra.newdream.net>
+Subject: RE: Pull Request for ISA EC plug-in
+Date: Wed, 30 Jul 2014 22:27:09 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1407302226300.18917@cobra.newdream.net>
+References: <3472A07E6605974CBC9BC573F1BC02E4AE7509E3@CERNXCHG44.cern.ch>, <alpine.DEB.2.00.1407281520470.4962@cobra.newdream.net> <3472A07E6605974CBC9BC573F1BC02E4AE750C17@CERNXCHG44.cern.ch>, <alpine.DEB.2.00.1407301044510.4962@cobra.newdream.net>
+ <3472A07E6605974CBC9BC573F1BC02E4AE7529BD@CERNXCHG44.cern.ch> <alpine.DEB.2.00.1407301600170.4962@cobra.newdream.net> <6AA21C22F0A5DA478922644AD2EC308C8A1810@SHSMSX101.ccr.corp.intel.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:33962 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:33970 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751142AbaGaFZa (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Jul 2014 01:25:30 -0400
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 80B9B80489
-	for <ceph-devel@vger.kernel.org>; Wed, 30 Jul 2014 22:25:30 -0700 (PDT)
-Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 5CD1180489
-	for <ceph-devel@vger.kernel.org>; Wed, 30 Jul 2014 22:25:30 -0700 (PDT)
+	with ESMTP id S1751142AbaGaF1K (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Jul 2014 01:27:10 -0400
+In-Reply-To: <6AA21C22F0A5DA478922644AD2EC308C8A1810@SHSMSX101.ccr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: "Ma, Jianpeng" <jianpeng.ma@intel.com>
+Cc: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-After the latest set of bug fixes to the FileStore file naming code I am 
-newly inspired to replace it with something less complex.  Right now I'm 
-mostly thinking about HDDs, although some of this may map well onto hybrid 
-SSD/HDD as well.  It may or may not make sense for pure flash.
+On Thu, 31 Jul 2014, Ma, Jianpeng wrote:
+> Hi,
+>    At my machine, I also met this bug. But I modify this, it can work.
+> diff --git a/src/erasure-code/isa/Makefile.am b/src/erasure-code/isa/Makefile.am
+> index eebffea..dee593b 100644
+> --- a/src/erasure-code/isa/Makefile.am
+> +++ b/src/erasure-code/isa/Makefile.am
+> @@ -34,7 +34,7 @@ libec_isa_la_SOURCES = ${isa_sources}
+> 
+>  libec_isa_la_CFLAGS = ${AM_CFLAGS} -I $(srcdir)/erasure-code/isa/isa-l/include/
+>  libec_isa_la_CXXFLAGS = ${AM_CXXFLAGS} -I $(srcdir)/erasure-code/isa/isa-l/include/
+> -libec_isa_la_CCASFLAGS = ${AM_CCASFLAGS} -I $(srcdir)/erasure-code/isa/isa-l/include/
+> +libec_isa_la_CCASFLAGS = ${AM_CCASFLAGS} -i $(srcdir)/erasure-code/isa/isa-l/include
+> 
+>  libec_isa_la_LIBADD = $(LIBCRUSH) $(PTHREAD_LIBS) $(EXTRALIBS)
+>  libec_isa_la_LDFLAGS = ${AM_LDFLAGS} -version-info 2:10:0
+> 
+> 
+> As Andreas said, the different is -I and -i.
+> But how to choose? My yasm version is 1.2.0.
 
-Anyway, here are the main flaws with the overall approach that FileStore 
-uses:
-
-- It tries to maintain a direct mapping of object names to file names.  
-This is problematic because of 255 character limits, rados namespaces, pg 
-prefixes, and the pg directory hashing we do to allow efficient split, for 
-starters.  It is also problematic because we often want to do things like 
-rename but can't make it happen atomically in combination with the rest of 
-our transaction.
-
-- The PG directory hashing (that we do to allow efficient split) can have 
-a big impact on performance, particularly when injesting lots of data.  
-(And when benchmarking.)  It's also complex.
-
-- We often overwrite or replace entire objects.  These are "easy" 
-operations to do safely without doing complete data journaling, but the 
-current design is not conducive to doing anything clever (and it's complex 
-enough that I wouldn't want to add any cleverness on top).
-
-- Objects may contain only key/value data, but we still have to create an 
-inode for them and look that up first.  This only matters for some 
-workloads (rgw indexes, cephfs directory objects).
-
-Instead, I think we should try a hybrid approach that more heavily 
-leverages a key/value db in combination with the file system.  The kv db 
-might be leveldb, rocksdb, LMDB, BDB, or whatever else; for now we just 
-assume it provides transactional key/value storage and efficient range 
-operations.  Here's the basic idea:
-
-- The mapping from names to object lives in the kv db.  The object 
-metadata is in a structure we can call an "onode" to avoid confusing it 
-with the inodes in the backing file system.  The mapping is simple 
-ghobject_t -> onode map; there is no PG collection.  The PG collection 
-still exist but really only as ranges of those keys.  We will need to be 
-slightly clever with the coll_t to distinguish between "bare" PGs (that 
-live in this flat mapping) and the other collections (*_temp and 
-metadata), but that should be easy.  This makes PG splitting "free" as far 
-as the objects go.
-
-- The onodes are relatively small.  They will contain the xattrs and 
-basic metadata like object size.  They will also identify the file name of 
-the backing file in the file system (if size > 0).
-
-- The backing file can be a random, short file name.  We can just make a 
-one or two level deep set of directories, and let the directories get 
-reasonably big... whatever we decide the backing fs can handle 
-efficiently.  We can also store a file handle in the onode and use the 
-open by handle API; this should let us go directly from onode (in our kv 
-db) to the on-disk inode without looking at the directory at all, and fall 
-back to using the actual file name only if that fails for some reason 
-(say, someone mucked around with the backing files).  The backing file 
-need not have any xattrs on it at all (except perhaps some simple id to 
-verify it does it fact belong to the referring onode, just as a sanity 
-check).
-
-- The name -> onode mapping can live in a disjunct part of the kv 
-namespace so that the other kv stuff associated with the file (like omap 
-pairs or big xattrs or whatever) don't blow up those parts of the 
-db and slow down lookup.
-
-- We can keep a simple LRU of recent onodes in memory and avoid the kv 
-lookup for hot objects.
-
-- Previously complicated operations like rename are now trivial: we just 
-update the kv db with a transaction.  The backing file never gets renamed, 
-ever, and the other object omap data is keyed by a unique (onode) id, not 
-the name.
-
-Initially, for simplicity, we can start with the existing data journaling 
-behavior.  However, I think there are opportunities to improve the 
-situation there.  There is a pending wip-transactions branch in which I 
-started to rejigger the ObjectStore::Transaction interface a bit so that 
-you identify objects by handle and then operation on them.  Although it 
-doesn't change the encoding yet, once it does, we can make the 
-implementation take advantage of that, by avoid duplicate name lookups.  
-It will also let us do things like clearly identify when an object is 
-entirely new; in that case, we might forgo data journaling and instead 
-write the data to the (new) file, fsync, and then commit the journal entry 
-with the transaction that uses it.  (On remount a simple cleanup process 
-can throw out new but unreferenced backing files.)  It would also make it 
-easier to track all recently touched files and bulk fsync them instead of 
-doing a syncfs (if we decide that is faster).
-
-Anyway, at the end of the day, small writes or overwrites would still be 
-journaled, but large writes or large new objects would not, which would (I 
-think) be a pretty big improvement.  Overall, I think the design will be 
-much simpler to reason about, and there are several potential avenues to 
-be clever and make improvements.  I'm not sure we can say the same about 
-the FileStore design, which suffers from the fact that it has evolved 
-slowly over the last 9 years or so.
+Ah, my machine with 1.2 is behaving.  I think it's a combination of that, 
+and that the files are not all include in the 'make dist' tarball.
 
 sage
+
+
+
+> 
+> Thanks!
+> 
+> 
+> 
+> > -----Original Message-----
+> > From: ceph-devel-owner@vger.kernel.org
+> > [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
+> > Sent: Thursday, July 31, 2014 7:02 AM
+> > To: Andreas Joachim Peters
+> > Cc: ceph-devel@vger.kernel.org
+> > Subject: RE: Pull Request for ISA EC plug-in
+> > 
+> > On Wed, 30 Jul 2014, Andreas Joachim Peters wrote:
+> > > Hi Sage,
+> > >
+> > > my guess it comes from the yasm include option which evt. is
+> > > non-standard. Mine documents '-i' and '-I' while I found on the web
+> > > that probably only '-I' is the portable one.
+> > >
+> > > I have changed that, still I can only guess, since I cannot reproduce.
+> > 
+> > Hmm, how are you building it?  Running make on my work box (precise) also
+> > fails.  I modified yasm-wrapper slightly[1] and it's gets further, but still no
+> > dice...
+> > 
+> > Thanks!
+> > sage
+> > 
+> > 
+> > [1] https://github.com/ceph/ceph/commit/wip-ec-isa
+> > 
+> > 
+> > >
+> > > Please rerun.
+> > >
+> > > Thanks, Andreas.
+> > >
+> > > ________________________________________
+> > > From: Sage Weil [sweil@redhat.com]
+> > > Sent: 30 July 2014 19:46
+> > > To: Andreas Joachim Peters
+> > > Cc: ceph-devel@vger.kernel.org
+> > > Subject: RE: Pull Request for ISA EC plug-in
+> > >
+> > > On Mon, 28 Jul 2014, Andreas Joachim Peters wrote:
+> > > > Hi Sage,
+> > > >
+> > > > I fixed that. I missed '$(srcdir)' in the assembler  and C/C++
+> > > > include statements (I always compiled in src dir ..)
+> > > >
+> > > > You can retry.
+> > >
+> > > I think there are still a few issues:
+> > >
+> > > make[4]: ***
+> > > [erasure-code/isa/isa-l/erasure_code/libec_isa_la-ec_base.lo] Error 1
+> > > make[4]: *** Waiting for unfinished jobs....
+> > > ./yasm-wrapper: yasm -f elf64 -i ./erasure-code/isa/isa-l/include/
+> > > erasure-code/isa/isa-l/erasure_code/ec_multibinary.asm.s -o
+> > > erasure-code/isa/isa-l/erasure_code/.libs/libec_isa_la-ec_multibinary.
+> > > asm.o
+> > > FATAL: yasm: unable to open include file `reg_sizes.asm'
+> > > ./yasm-wrapper: yasm -f elf64 -i ./erasure-code/isa/isa-l/include/
+> > > erasure-code/isa/isa-l/erasure_code/gf_2vect_dot_prod_avx2.asm.s -o
+> > > erasure-code/isa/isa-l/erasure_code/.libs/libec_isa_la-gf_2vect_dot_pr
+> > > od_avx2.asm.o
+> > > error:
+> > > erasure-code/isa/isa-l/erasure_code/gf_2vect_dot_prod_avx2.asm.s:157:
+> > > undefined symbol `gf_2vect_dot_prod_avx2.return_fail' (first use)
+> > > error:
+> > > erasure-code/isa/isa-l/erasure_code/gf_2vect_dot_prod_avx2.asm.s:157:
+> > > (Each undefined symbol is reported only once.)
+> > > error:
+> > > erasure-code/isa/isa-l/erasure_code/gf_2vect_dot_prod_avx2.asm.s:161:
+> > > instruction expected after label
+> > > error:
+> > > erasure-code/isa/isa-l/erasure_code/gf_2vect_dot_prod_avx2.asm.s:178:
+> > > instruction expected after label
+> > > error:
+> > > erasure-code/isa/isa-l/erasure_code/gf_2vect_dot_prod_avx2.asm.s:179:
+> > > instruction expected after label
+> > > error:
+> > > erasure-code/isa/isa-l/erasure_code/gf_2vect_dot_prod_avx2.asm.s:183:
+> > > instruction expected after label
+> > > error:
+> > > erasure-code/isa/isa-l/erasure_code/gf_2vect_dot_prod_avx2.asm.s:184:
+> > > instruction expected after label
+> > > error:
+> > > erasure-code/isa/isa-l/erasure_code/gf_2vect_dot_prod_avx2.asm.s:206:
+> > > undefined symbol `vperm2i128.next_vect' (first use)
+> > > error:
+> > > erasure-code/isa/isa-l/erasure_code/gf_2vect_dot_prod_avx2.asm.s:213:
+> > > undefined symbol `vperm2i128.loop32' (first use)
+> > > make[4]: ***
+> > > [erasure-code/isa/isa-l/erasure_code/libec_isa_la-ec_multibinary.asm.l
+> > > o] Error 1
+> > > make[4]: ***
+> > > [erasure-code/isa/isa-l/erasure_code/libec_isa_la-gf_2vect_dot_prod_av
+> > > x2.asm.lo] Error 1
+> > > ./yasm-wrapper: yasm -f elf64 -i ./erasure-code/isa/isa-l/include/
+> > > erasure-code/isa/isa-l/erasure_code/gf_2vect_dot_prod_avx.asm.s -o
+> > > erasure-code/isa/isa-l/erasure_code/.libs/libec_isa_la-gf_2vect_dot_pr
+> > > od_avx.asm.o In file included from
+> > > erasure-code/isa/isa-l/erasure_code/ec_highlevel_func.c:30:0:
+> > > ./erasure-code/isa/isa-l/include/erasure_code.h:52:25: fatal error:
+> > > gf_vect_mul.h: No such file or directory compilation terminated.
+> > >
+> > > This is from
+> > >
+> > http://gitbuilder.sepia.ceph.com/gitbuilder-ceph-deb-precise-amd64-basic/log.
+> > cgi?log=c7e765e22427958c0d03fbfec42a29aa34895ef3.
+> > >
+> > > Thanks!
+> > > sage
+> > >
+> > >
+> > >
+> > >
+> > > >
+> > > > Thanks Andreas.
+> > > >
+> > > > ________________________________________
+> > > > From: ceph-devel-owner@vger.kernel.org
+> > > > [ceph-devel-owner@vger.kernel.org] on behalf of Sage Weil
+> > > > [sweil@redhat.com]
+> > > > Sent: 29 July 2014 00:22
+> > > > To: Andreas Joachim Peters
+> > > > Cc: ceph-devel@vger.kernel.org
+> > > > Subject: Re: Pull Request for ISA EC plug-in
+> > > >
+> > > > Hi Andreas!
+> > > >
+> > > > On Mon, 28 Jul 2014, Andreas Joachim Peters wrote:
+> > > > > Hi all,
+> > > > >
+> > > > > here is a PULL request for the ISA EC plugin rebased against
+> > > > > master of today for review.
+> > > > >
+> > > > > https://github.com/ceph/ceph/pull/2155
+> > > > >
+> > > > > I have added as discussed the exhaustive test of all possible
+> > > > > failures scenarios for both supported matrix types for a
+> > > > > (k=12,m=4) configuration to the unit tests ( which helped indeed
+> > > > > to spot a bug in the table caching )
+> > > >
+> > > > I tried to push this through the build system and it looks like
+> > > > perhaps some files are missing from the commit?
+> > > >
+> > > > CC
+> > > > erasure-code/isa/isa-l/erasure_code/libec_isa_la-ec_highlevel_func.l
+> > > > o In file included from
+> > > > erasure-code/isa/isa-l/erasure_code/ec_base.c:32:0:
+> > > > erasure-code/isa/isa-l/include/erasure_code.h:52:25: fatal error:
+> > > > gf_vect_mul.h: No such file or directory compilation terminated.
+> > > > CCAS
+> > > > erasure-code/isa/isa-l/erasure_code/libec_isa_la-ec_multibinary.asm.
+> > > > lo CCAS
+> > > > erasure-code/isa/isa-l/erasure_code/libec_isa_la-gf_2vect_dot_prod_a
+> > > > vx2.asm.lo In file included from
+> > > > erasure-code/isa/isa-l/erasure_code/ec_highlevel_func.c:30:0:
+> > > > erasure-code/isa/isa-l/include/erasure_code.h:52:25: fatal error:
+> > > > gf_vect_mul.h: No such file or directory compilation terminated.
+> > > >
+> > > > and
+> > > >
+> > > > FATAL: yasm: unable to open include file `reg_sizes.asm'
+> > > >
+> > > > See
+> > > >
+> > > > http://gitbuilder.sepia.ceph.com/gitbuilder-ceph-deb-wheezy-amd64-ba
+> > > > sic/log.cgi?log=60408e6c6b3b34d719943d16fcc023407e08ae01
+> > > >
+> > > > Hopefully these are just sitting in your working directory?
+> > > >
+> > > > Thanks!
+> > > > sage
+> > > > --
+> > > > To unsubscribe from this list: send the line "unsubscribe
+> > > > ceph-devel" in the body of a message to majordomo@vger.kernel.org
+> > > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > > > --
+> > > > To unsubscribe from this list: send the line "unsubscribe
+> > > > ceph-devel" in the body of a message to majordomo@vger.kernel.org
+> > > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > > >
+> > > >
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+> > > in the body of a message to majordomo@vger.kernel.org More majordomo
+> > > info at  http://vger.kernel.org/majordomo-info.html
+> > >
+> > >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body
+> > of a message to majordomo@vger.kernel.org More majordomo info at
+> > http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
