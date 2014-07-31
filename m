@@ -1,299 +1,73 @@
-From: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>
-Subject: RE: Pull Request for ISA EC plug-in
-Date: Thu, 31 Jul 2014 09:25:37 +0000
-Message-ID: <3472A07E6605974CBC9BC573F1BC02E4AE752D28@CERNXCHG44.cern.ch>
-References: <3472A07E6605974CBC9BC573F1BC02E4AE7509E3@CERNXCHG44.cern.ch>,
- <alpine.DEB.2.00.1407281520470.4962@cobra.newdream.net>
- <3472A07E6605974CBC9BC573F1BC02E4AE750C17@CERNXCHG44.cern.ch>,
- <alpine.DEB.2.00.1407301044510.4962@cobra.newdream.net>
- <3472A07E6605974CBC9BC573F1BC02E4AE7529BD@CERNXCHG44.cern.ch>
- <alpine.DEB.2.00.1407301600170.4962@cobra.newdream.net>
- <6AA21C22F0A5DA478922644AD2EC308C8A1810@SHSMSX101.ccr.corp.intel.com>,<alpine.DEB.2.00.1407302226300.18917@cobra.newdream.net>,<3472A07E6605974CBC9BC573F1BC02E4AE752C7A@CERNXCHG44.cern.ch>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+From: Ilya Dryomov <ilya.dryomov@inktank.com>
+Subject: [PATCH] locking/mutexes: Revert "locking/mutexes: Add extra reschedule point"
+Date: Thu, 31 Jul 2014 14:16:37 +0400
+Message-ID: <1406801797-20139-1-git-send-email-ilya.dryomov@inktank.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cernmx13.cern.ch ([188.184.36.46]:53242 "EHLO CERNMX13.cern.ch"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932305AbaGaJZk convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Jul 2014 05:25:40 -0400
-In-Reply-To: <3472A07E6605974CBC9BC573F1BC02E4AE752C7A@CERNXCHG44.cern.ch>
-Content-Language: en-GB
+Received: from mail-la0-f48.google.com ([209.85.215.48]:57950 "EHLO
+	mail-la0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756291AbaGaKQm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Jul 2014 06:16:42 -0400
+Received: by mail-la0-f48.google.com with SMTP id gl10so1841425lab.21
+        for <ceph-devel@vger.kernel.org>; Thu, 31 Jul 2014 03:16:40 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, "Ma, Jianpeng" <jianpeng.ma@intel.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: linux-kernel@vger.kernel.org
+Cc: Peter Zijlstra <peterz@infradead.org>, Ingo Molnar <mingo@kernel.org>, ceph-devel@vger.kernel.org
 
-Ok, 
+This reverts commit 34c6bc2c919a55e5ad4e698510a2f35ee13ab900.
 
-I fixed the 'make dist' problem and hopefully also the YASM include problem.
+This commit can lead to deadlocks by way of what at a high level
+appears to look like a missing wakeup on mutex_unlock() when
+CONFIG_MUTEX_SPIN_ON_OWNER is set, which is how most distributions ship
+their kernels.  In particular, it causes reproducible deadlocks in
+libceph/rbd code under higher than moderate loads with the evidence
+actually pointing to the bowels of mutex_lock().
 
-The CEPH yasm-wrapper was removing '-I' from the options passed to yasm, so '-I' didn't work without patching the wrapper itself.
+kernel/locking/mutex.c, __mutex_lock_common():
+476         osq_unlock(&lock->osq);
+477 slowpath:
+478         /*
+479          * If we fell out of the spin path because of need_resched(),
+480          * reschedule now, before we try-lock the mutex. This avoids getting
+481          * scheduled out right after we obtained the mutex.
+482          */
+483         if (need_resched())
+484                 schedule_preempt_disabled(); <-- never returns
+485 #endif
+486         spin_lock_mutex(&lock->wait_lock, flags);
 
-I looked into YASM 1.1 and I found that at a certain patch version they fixed the behaviour for relative -I paths, so I use now "-I $(abs_srcdir)" hoping that this works with both YASM versions.
+We started bumping into deadlocks in QA the day our branch has been
+rebased onto 3.15 (the release this commit went in) but then as part of
+debugging effort I enabled all locking debug options, which also
+disabled CONFIG_MUTEX_SPIN_ON_OWNER and made everything disappear,
+which is why it hasn't been looked into until now.  Revert makes the
+problem go away, confirmed by our users.
 
-Let me know, 
-thanks Andreas.
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: stable@vger.kernel.org # 3.15
+Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
+---
+ kernel/locking/mutex.c |    7 -------
+ 1 file changed, 7 deletions(-)
 
-________________________________________
-From: ceph-devel-owner@vger.kernel.org [ceph-devel-owner@vger.kernel.org] on behalf of Andreas Joachim Peters [Andreas.Joachim.Peters@cern.ch]
-Sent: 31 July 2014 09:39
-To: Sage Weil; Ma, Jianpeng
-Cc: ceph-devel@vger.kernel.org
-Subject: RE: Pull Request for ISA EC plug-in
+diff --git a/kernel/locking/mutex.c b/kernel/locking/mutex.c
+index acca2c1a3c5e..746ff280a2fc 100644
+--- a/kernel/locking/mutex.c
++++ b/kernel/locking/mutex.c
+@@ -475,13 +475,6 @@ __mutex_lock_common(struct mutex *lock, long state, unsigned int subclass,
+ 	}
+ 	osq_unlock(&lock->osq);
+ slowpath:
+-	/*
+-	 * If we fell out of the spin path because of need_resched(),
+-	 * reschedule now, before we try-lock the mutex. This avoids getting
+-	 * scheduled out right after we obtained the mutex.
+-	 */
+-	if (need_resched())
+-		schedule_preempt_disabled();
+ #endif
+ 	spin_lock_mutex(&lock->wait_lock, flags);
+ 
+-- 
+1.7.10.4
 
-Ok,
-thanks for looking into that.
-
-I am fixing the 'make dist' target and will try to make it work also with yasm 1.1 ...
-
-Will let you know when to retry ...
-
-Andreas.
-
-________________________________________
-From: ceph-devel-owner@vger.kernel.org [ceph-devel-owner@vger.kernel.org] on behalf of Sage Weil [sweil@redhat.com]
-Sent: 31 July 2014 07:27
-To: Ma, Jianpeng
-Cc: Andreas Joachim Peters; ceph-devel@vger.kernel.org
-Subject: RE: Pull Request for ISA EC plug-in
-
-On Thu, 31 Jul 2014, Ma, Jianpeng wrote:
-> Hi,
->    At my machine, I also met this bug. But I modify this, it can work.
-> diff --git a/src/erasure-code/isa/Makefile.am b/src/erasure-code/isa/Makefile.am
-> index eebffea..dee593b 100644
-> --- a/src/erasure-code/isa/Makefile.am
-> +++ b/src/erasure-code/isa/Makefile.am
-> @@ -34,7 +34,7 @@ libec_isa_la_SOURCES = ${isa_sources}
->
->  libec_isa_la_CFLAGS = ${AM_CFLAGS} -I $(srcdir)/erasure-code/isa/isa-l/include/
->  libec_isa_la_CXXFLAGS = ${AM_CXXFLAGS} -I $(srcdir)/erasure-code/isa/isa-l/include/
-> -libec_isa_la_CCASFLAGS = ${AM_CCASFLAGS} -I $(srcdir)/erasure-code/isa/isa-l/include/
-> +libec_isa_la_CCASFLAGS = ${AM_CCASFLAGS} -i $(srcdir)/erasure-code/isa/isa-l/include
->
->  libec_isa_la_LIBADD = $(LIBCRUSH) $(PTHREAD_LIBS) $(EXTRALIBS)
->  libec_isa_la_LDFLAGS = ${AM_LDFLAGS} -version-info 2:10:0
->
->
-> As Andreas said, the different is -I and -i.
-> But how to choose? My yasm version is 1.2.0.
-
-Ah, my machine with 1.2 is behaving.  I think it's a combination of that,
-and that the files are not all include in the 'make dist' tarball.
-
-sage
-
-
-
->
-> Thanks!
->
->
->
-> > -----Original Message-----
-> > From: ceph-devel-owner@vger.kernel.org
-> > [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
-> > Sent: Thursday, July 31, 2014 7:02 AM
-> > To: Andreas Joachim Peters
-> > Cc: ceph-devel@vger.kernel.org
-> > Subject: RE: Pull Request for ISA EC plug-in
-> >
-> > On Wed, 30 Jul 2014, Andreas Joachim Peters wrote:
-> > > Hi Sage,
-> > >
-> > > my guess it comes from the yasm include option which evt. is
-> > > non-standard. Mine documents '-i' and '-I' while I found on the web
-> > > that probably only '-I' is the portable one.
-> > >
-> > > I have changed that, still I can only guess, since I cannot reproduce.
-> >
-> > Hmm, how are you building it?  Running make on my work box (precise) also
-> > fails.  I modified yasm-wrapper slightly[1] and it's gets further, but still no
-> > dice...
-> >
-> > Thanks!
-> > sage
-> >
-> >
-> > [1] https://github.com/ceph/ceph/commit/wip-ec-isa
-> >
-> >
-> > >
-> > > Please rerun.
-> > >
-> > > Thanks, Andreas.
-> > >
-> > > ________________________________________
-> > > From: Sage Weil [sweil@redhat.com]
-> > > Sent: 30 July 2014 19:46
-> > > To: Andreas Joachim Peters
-> > > Cc: ceph-devel@vger.kernel.org
-> > > Subject: RE: Pull Request for ISA EC plug-in
-> > >
-> > > On Mon, 28 Jul 2014, Andreas Joachim Peters wrote:
-> > > > Hi Sage,
-> > > >
-> > > > I fixed that. I missed '$(srcdir)' in the assembler  and C/C++
-> > > > include statements (I always compiled in src dir ..)
-> > > >
-> > > > You can retry.
-> > >
-> > > I think there are still a few issues:
-> > >
-> > > make[4]: ***
-> > > [erasure-code/isa/isa-l/erasure_code/libec_isa_la-ec_base.lo] Error 1
-> > > make[4]: *** Waiting for unfinished jobs....
-> > > ./yasm-wrapper: yasm -f elf64 -i ./erasure-code/isa/isa-l/include/
-> > > erasure-code/isa/isa-l/erasure_code/ec_multibinary.asm.s -o
-> > > erasure-code/isa/isa-l/erasure_code/.libs/libec_isa_la-ec_multibinary.
-> > > asm.o
-> > > FATAL: yasm: unable to open include file `reg_sizes.asm'
-> > > ./yasm-wrapper: yasm -f elf64 -i ./erasure-code/isa/isa-l/include/
-> > > erasure-code/isa/isa-l/erasure_code/gf_2vect_dot_prod_avx2.asm.s -o
-> > > erasure-code/isa/isa-l/erasure_code/.libs/libec_isa_la-gf_2vect_dot_pr
-> > > od_avx2.asm.o
-> > > error:
-> > > erasure-code/isa/isa-l/erasure_code/gf_2vect_dot_prod_avx2.asm.s:157:
-> > > undefined symbol `gf_2vect_dot_prod_avx2.return_fail' (first use)
-> > > error:
-> > > erasure-code/isa/isa-l/erasure_code/gf_2vect_dot_prod_avx2.asm.s:157:
-> > > (Each undefined symbol is reported only once.)
-> > > error:
-> > > erasure-code/isa/isa-l/erasure_code/gf_2vect_dot_prod_avx2.asm.s:161:
-> > > instruction expected after label
-> > > error:
-> > > erasure-code/isa/isa-l/erasure_code/gf_2vect_dot_prod_avx2.asm.s:178:
-> > > instruction expected after label
-> > > error:
-> > > erasure-code/isa/isa-l/erasure_code/gf_2vect_dot_prod_avx2.asm.s:179:
-> > > instruction expected after label
-> > > error:
-> > > erasure-code/isa/isa-l/erasure_code/gf_2vect_dot_prod_avx2.asm.s:183:
-> > > instruction expected after label
-> > > error:
-> > > erasure-code/isa/isa-l/erasure_code/gf_2vect_dot_prod_avx2.asm.s:184:
-> > > instruction expected after label
-> > > error:
-> > > erasure-code/isa/isa-l/erasure_code/gf_2vect_dot_prod_avx2.asm.s:206:
-> > > undefined symbol `vperm2i128.next_vect' (first use)
-> > > error:
-> > > erasure-code/isa/isa-l/erasure_code/gf_2vect_dot_prod_avx2.asm.s:213:
-> > > undefined symbol `vperm2i128.loop32' (first use)
-> > > make[4]: ***
-> > > [erasure-code/isa/isa-l/erasure_code/libec_isa_la-ec_multibinary.asm.l
-> > > o] Error 1
-> > > make[4]: ***
-> > > [erasure-code/isa/isa-l/erasure_code/libec_isa_la-gf_2vect_dot_prod_av
-> > > x2.asm.lo] Error 1
-> > > ./yasm-wrapper: yasm -f elf64 -i ./erasure-code/isa/isa-l/include/
-> > > erasure-code/isa/isa-l/erasure_code/gf_2vect_dot_prod_avx.asm.s -o
-> > > erasure-code/isa/isa-l/erasure_code/.libs/libec_isa_la-gf_2vect_dot_pr
-> > > od_avx.asm.o In file included from
-> > > erasure-code/isa/isa-l/erasure_code/ec_highlevel_func.c:30:0:
-> > > ./erasure-code/isa/isa-l/include/erasure_code.h:52:25: fatal error:
-> > > gf_vect_mul.h: No such file or directory compilation terminated.
-> > >
-> > > This is from
-> > >
-> > http://gitbuilder.sepia.ceph.com/gitbuilder-ceph-deb-precise-amd64-basic/log.
-> > cgi?log=c7e765e22427958c0d03fbfec42a29aa34895ef3.
-> > >
-> > > Thanks!
-> > > sage
-> > >
-> > >
-> > >
-> > >
-> > > >
-> > > > Thanks Andreas.
-> > > >
-> > > > ________________________________________
-> > > > From: ceph-devel-owner@vger.kernel.org
-> > > > [ceph-devel-owner@vger.kernel.org] on behalf of Sage Weil
-> > > > [sweil@redhat.com]
-> > > > Sent: 29 July 2014 00:22
-> > > > To: Andreas Joachim Peters
-> > > > Cc: ceph-devel@vger.kernel.org
-> > > > Subject: Re: Pull Request for ISA EC plug-in
-> > > >
-> > > > Hi Andreas!
-> > > >
-> > > > On Mon, 28 Jul 2014, Andreas Joachim Peters wrote:
-> > > > > Hi all,
-> > > > >
-> > > > > here is a PULL request for the ISA EC plugin rebased against
-> > > > > master of today for review.
-> > > > >
-> > > > > https://github.com/ceph/ceph/pull/2155
-> > > > >
-> > > > > I have added as discussed the exhaustive test of all possible
-> > > > > failures scenarios for both supported matrix types for a
-> > > > > (k=12,m=4) configuration to the unit tests ( which helped indeed
-> > > > > to spot a bug in the table caching )
-> > > >
-> > > > I tried to push this through the build system and it looks like
-> > > > perhaps some files are missing from the commit?
-> > > >
-> > > > CC
-> > > > erasure-code/isa/isa-l/erasure_code/libec_isa_la-ec_highlevel_func.l
-> > > > o In file included from
-> > > > erasure-code/isa/isa-l/erasure_code/ec_base.c:32:0:
-> > > > erasure-code/isa/isa-l/include/erasure_code.h:52:25: fatal error:
-> > > > gf_vect_mul.h: No such file or directory compilation terminated.
-> > > > CCAS
-> > > > erasure-code/isa/isa-l/erasure_code/libec_isa_la-ec_multibinary.asm.
-> > > > lo CCAS
-> > > > erasure-code/isa/isa-l/erasure_code/libec_isa_la-gf_2vect_dot_prod_a
-> > > > vx2.asm.lo In file included from
-> > > > erasure-code/isa/isa-l/erasure_code/ec_highlevel_func.c:30:0:
-> > > > erasure-code/isa/isa-l/include/erasure_code.h:52:25: fatal error:
-> > > > gf_vect_mul.h: No such file or directory compilation terminated.
-> > > >
-> > > > and
-> > > >
-> > > > FATAL: yasm: unable to open include file `reg_sizes.asm'
-> > > >
-> > > > See
-> > > >
-> > > > http://gitbuilder.sepia.ceph.com/gitbuilder-ceph-deb-wheezy-amd64-ba
-> > > > sic/log.cgi?log=60408e6c6b3b34d719943d16fcc023407e08ae01
-> > > >
-> > > > Hopefully these are just sitting in your working directory?
-> > > >
-> > > > Thanks!
-> > > > sage
-> > > > --
-> > > > To unsubscribe from this list: send the line "unsubscribe
-> > > > ceph-devel" in the body of a message to majordomo@vger.kernel.org
-> > > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > > > --
-> > > > To unsubscribe from this list: send the line "unsubscribe
-> > > > ceph-devel" in the body of a message to majordomo@vger.kernel.org
-> > > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > > >
-> > > >
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
-> > > in the body of a message to majordomo@vger.kernel.org More majordomo
-> > > info at  http://vger.kernel.org/majordomo-info.html
-> > >
-> > >
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body
-> > of a message to majordomo@vger.kernel.org More majordomo info at
-> > http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
