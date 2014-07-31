@@ -1,7 +1,7 @@
 From: "Shu, Xinxin" <xinxin.shu@intel.com>
 Subject: RE: First attempt at rocksdb monitor store stress testing
-Date: Thu, 31 Jul 2014 01:59:00 +0000
-Message-ID: <75674D092A819E4189E91166C74CB90D01402A1D@shsmsx102.ccr.corp.intel.com>
+Date: Thu, 31 Jul 2014 02:00:33 +0000
+Message-ID: <75674D092A819E4189E91166C74CB90D01402A44@shsmsx102.ccr.corp.intel.com>
 References: <53D041D3.3080203@inktank.com>
  <75674D092A819E4189E91166C74CB90D013F2ACA@shsmsx102.ccr.corp.intel.com>
  <53D0EA63.10107@inktank.com> <53D19A92.3010000@inktank.com>
@@ -13,23 +13,20 @@ Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:40134 "EHLO mga02.intel.com"
+Received: from mga14.intel.com ([192.55.52.115]:32247 "EHLO mga14.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751966AbaGaB7U convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Jul 2014 21:59:20 -0400
+	id S1752176AbaGaCAl convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Jul 2014 22:00:41 -0400
 In-Reply-To: <53D68096.1060009@inktank.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Mark Nelson <mark.nelson@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi mark , 
- 
-There are four tables in your report , do you run four tests cases  or only run a single case (read/write mix) , if you run a single mix case , but latency in the fourth table is not same with other three tables .
+Does your report base on wip-rocksdb-mark branch?
 
-In leveldb and rocksdb, level0 and level1 should be same size?
-
-to my knowledge , in rocksdb , by default ,level1 size is ten times of level0 size , but the same size sstable file.
+Cheers,
+xinxin
 
 -----Original Message-----
 From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
