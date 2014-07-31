@@ -1,255 +1,122 @@
-From: Joe Young <zhouyuan@outlook.com>
-Subject: Re: Pull Request for ISA EC plug-in
-Date: Thu, 31 Jul 2014 11:19:56 +0800
-Message-ID: <BLU436-SMTP222A01E44E580353F95F34AD7E60@phx.gbl>
-References: <3472A07E6605974CBC9BC573F1BC02E4AE7509E3@CERNXCHG44.cern.ch>
- <alpine.DEB.2.00.1407281520470.4962@cobra.newdream.net> <3472A07E6605974CBC9BC573F1BC02E4AE750C17@CERNXCHG44.cern.ch>
- <alpine.DEB.2.00.1407301044510.4962@cobra.newdream.net> <3472A07E6605974CBC9BC573F1BC02E4AE7529BD@CERNXCHG44.cern.ch>
- <alpine.DEB.2.00.1407301600170.4962@cobra.newdream.net> <6AA21C22F0A5DA478922644AD2EC308C8A1810@SHSMSX101.ccr.corp.intel.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: [PATCH] daemons: write pid file even when told not to daemonize
+Date: Thu, 31 Jul 2014 10:18:01 +0600
+Message-ID: <53D9C379.9070904@dachary.org>
+References: <or4mxyuvo4.fsf@free.home>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="Kgi9bV0MU6HuGMMeJOFwhBsqjXxJTM4pB"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from blu004-omc4s16.hotmail.com ([65.55.111.155]:60220 "EHLO
-	BLU004-OMC4S16.hotmail.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755871AbaGaDZ0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 30 Jul 2014 23:25:26 -0400
-Received: by mail-vc0-f173.google.com with SMTP id hy10so3340077vcb.18
-        for <ceph-devel@vger.kernel.org>; Wed, 30 Jul 2014 20:20:16 -0700 (PDT)
-In-Reply-To: <6AA21C22F0A5DA478922644AD2EC308C8A1810@SHSMSX101.ccr.corp.intel.com>
+Received: from mail2.dachary.org ([91.121.57.175]:51358 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1750881AbaGaESO (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Jul 2014 00:18:14 -0400
+In-Reply-To: <or4mxyuvo4.fsf@free.home>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Ma, Jianpeng" <jianpeng.ma@intel.com>
-Cc: Sage Weil <sweil@redhat.com>, Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Alexandre Oliva <oliva@gnu.org>, ceph-devel@vger.kernel.org
 
-Hi,
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--Kgi9bV0MU6HuGMMeJOFwhBsqjXxJTM4pB
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-I also did a quick verify on my precise box, upgrading to yasm1.2 with
- '-i' include option can do the work, while with yasm1.1(default in
-precise) it is not able to work with '-i' or '-I' . Seems like we
-should do a check on yasm version?
+Hi Alexandre,
 
-thanks, /j
+With this patch ceph-osd -f will try to create the default pid file : thi=
+s is a non backward compatible change. Maybe there is a way for systemd t=
+o capture the pid of the process and store it instead of requiring the de=
+amon to create the pid file ?
 
-On Thu, Jul 31, 2014 at 8:43 AM, Ma, Jianpeng <jianpeng.ma@intel.com> wrote:
->
-> Hi,
->    At my machine, I also met this bug. But I modify this, it can work.
-> diff --git a/src/erasure-code/isa/Makefile.am b/src/erasure-code/isa/Makefile.am
-> index eebffea..dee593b 100644
-> --- a/src/erasure-code/isa/Makefile.am
-> +++ b/src/erasure-code/isa/Makefile.am
-> @@ -34,7 +34,7 @@ libec_isa_la_SOURCES = ${isa_sources}
->
->  libec_isa_la_CFLAGS = ${AM_CFLAGS} -I $(srcdir)/erasure-code/isa/isa-l/include/
->  libec_isa_la_CXXFLAGS = ${AM_CXXFLAGS} -I $(srcdir)/erasure-code/isa/isa-l/include/
-> -libec_isa_la_CCASFLAGS = ${AM_CCASFLAGS} -I $(srcdir)/erasure-code/isa/isa-l/include/
-> +libec_isa_la_CCASFLAGS = ${AM_CCASFLAGS} -i $(srcdir)/erasure-code/isa/isa-l/include
->
->  libec_isa_la_LIBADD = $(LIBCRUSH) $(PTHREAD_LIBS) $(EXTRALIBS)
->  libec_isa_la_LDFLAGS = ${AM_LDFLAGS} -version-info 2:10:0
->
->
-> As Andreas said, the different is -I and -i.
-> But how to choose? My yasm version is 1.2.0.
->
-> Thanks!
->
->
->
-> > -----Original Message-----
-> > From: ceph-devel-owner@vger.kernel.org
-> > [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
-> > Sent: Thursday, July 31, 2014 7:02 AM
-> > To: Andreas Joachim Peters
-> > Cc: ceph-devel@vger.kernel.org
-> > Subject: RE: Pull Request for ISA EC plug-in
-> >
-> > On Wed, 30 Jul 2014, Andreas Joachim Peters wrote:
-> > > Hi Sage,
-> > >
-> > > my guess it comes from the yasm include option which evt. is
-> > > non-standard. Mine documents '-i' and '-I' while I found on the web
-> > > that probably only '-I' is the portable one.
-> > >
-> > > I have changed that, still I can only guess, since I cannot reproduce.
-> >
-> > Hmm, how are you building it?  Running make on my work box (precise) also
-> > fails.  I modified yasm-wrapper slightly[1] and it's gets further, but still no
-> > dice...
-> >
-> > Thanks!
-> > sage
-> >
-> >
-> > [1] https://github.com/ceph/ceph/commit/wip-ec-isa
-> >
-> >
-> > >
-> > > Please rerun.
-> > >
-> > > Thanks, Andreas.
-> > >
-> > > ________________________________________
-> > > From: Sage Weil [sweil@redhat.com]
-> > > Sent: 30 July 2014 19:46
-> > > To: Andreas Joachim Peters
-> > > Cc: ceph-devel@vger.kernel.org
-> > > Subject: RE: Pull Request for ISA EC plug-in
-> > >
-> > > On Mon, 28 Jul 2014, Andreas Joachim Peters wrote:
-> > > > Hi Sage,
-> > > >
-> > > > I fixed that. I missed '$(srcdir)' in the assembler  and C/C++
-> > > > include statements (I always compiled in src dir ..)
-> > > >
-> > > > You can retry.
-> > >
-> > > I think there are still a few issues:
-> > >
-> > > make[4]: ***
-> > > [erasure-code/isa/isa-l/erasure_code/libec_isa_la-ec_base.lo] Error 1
-> > > make[4]: *** Waiting for unfinished jobs....
-> > > ./yasm-wrapper: yasm -f elf64 -i ./erasure-code/isa/isa-l/include/
-> > > erasure-code/isa/isa-l/erasure_code/ec_multibinary.asm.s -o
-> > > erasure-code/isa/isa-l/erasure_code/.libs/libec_isa_la-ec_multibinary.
-> > > asm.o
-> > > FATAL: yasm: unable to open include file `reg_sizes.asm'
-> > > ./yasm-wrapper: yasm -f elf64 -i ./erasure-code/isa/isa-l/include/
-> > > erasure-code/isa/isa-l/erasure_code/gf_2vect_dot_prod_avx2.asm.s -o
-> > > erasure-code/isa/isa-l/erasure_code/.libs/libec_isa_la-gf_2vect_dot_pr
-> > > od_avx2.asm.o
-> > > error:
-> > > erasure-code/isa/isa-l/erasure_code/gf_2vect_dot_prod_avx2.asm.s:157:
-> > > undefined symbol `gf_2vect_dot_prod_avx2.return_fail' (first use)
-> > > error:
-> > > erasure-code/isa/isa-l/erasure_code/gf_2vect_dot_prod_avx2.asm.s:157:
-> > > (Each undefined symbol is reported only once.)
-> > > error:
-> > > erasure-code/isa/isa-l/erasure_code/gf_2vect_dot_prod_avx2.asm.s:161:
-> > > instruction expected after label
-> > > error:
-> > > erasure-code/isa/isa-l/erasure_code/gf_2vect_dot_prod_avx2.asm.s:178:
-> > > instruction expected after label
-> > > error:
-> > > erasure-code/isa/isa-l/erasure_code/gf_2vect_dot_prod_avx2.asm.s:179:
-> > > instruction expected after label
-> > > error:
-> > > erasure-code/isa/isa-l/erasure_code/gf_2vect_dot_prod_avx2.asm.s:183:
-> > > instruction expected after label
-> > > error:
-> > > erasure-code/isa/isa-l/erasure_code/gf_2vect_dot_prod_avx2.asm.s:184:
-> > > instruction expected after label
-> > > error:
-> > > erasure-code/isa/isa-l/erasure_code/gf_2vect_dot_prod_avx2.asm.s:206:
-> > > undefined symbol `vperm2i128.next_vect' (first use)
-> > > error:
-> > > erasure-code/isa/isa-l/erasure_code/gf_2vect_dot_prod_avx2.asm.s:213:
-> > > undefined symbol `vperm2i128.loop32' (first use)
-> > > make[4]: ***
-> > > [erasure-code/isa/isa-l/erasure_code/libec_isa_la-ec_multibinary.asm.l
-> > > o] Error 1
-> > > make[4]: ***
-> > > [erasure-code/isa/isa-l/erasure_code/libec_isa_la-gf_2vect_dot_prod_av
-> > > x2.asm.lo] Error 1
-> > > ./yasm-wrapper: yasm -f elf64 -i ./erasure-code/isa/isa-l/include/
-> > > erasure-code/isa/isa-l/erasure_code/gf_2vect_dot_prod_avx.asm.s -o
-> > > erasure-code/isa/isa-l/erasure_code/.libs/libec_isa_la-gf_2vect_dot_pr
-> > > od_avx.asm.o In file included from
-> > > erasure-code/isa/isa-l/erasure_code/ec_highlevel_func.c:30:0:
-> > > ./erasure-code/isa/isa-l/include/erasure_code.h:52:25: fatal error:
-> > > gf_vect_mul.h: No such file or directory compilation terminated.
-> > >
-> > > This is from
-> > >
-> > http://gitbuilder.sepia.ceph.com/gitbuilder-ceph-deb-precise-amd64-basic/log.
-> > cgi?log=c7e765e22427958c0d03fbfec42a29aa34895ef3.
-> > >
-> > > Thanks!
-> > > sage
-> > >
-> > >
-> > >
-> > >
-> > > >
-> > > > Thanks Andreas.
-> > > >
-> > > > ________________________________________
-> > > > From: ceph-devel-owner@vger.kernel.org
-> > > > [ceph-devel-owner@vger.kernel.org] on behalf of Sage Weil
-> > > > [sweil@redhat.com]
-> > > > Sent: 29 July 2014 00:22
-> > > > To: Andreas Joachim Peters
-> > > > Cc: ceph-devel@vger.kernel.org
-> > > > Subject: Re: Pull Request for ISA EC plug-in
-> > > >
-> > > > Hi Andreas!
-> > > >
-> > > > On Mon, 28 Jul 2014, Andreas Joachim Peters wrote:
-> > > > > Hi all,
-> > > > >
-> > > > > here is a PULL request for the ISA EC plugin rebased against
-> > > > > master of today for review.
-> > > > >
-> > > > > https://github.com/ceph/ceph/pull/2155
-> > > > >
-> > > > > I have added as discussed the exhaustive test of all possible
-> > > > > failures scenarios for both supported matrix types for a
-> > > > > (k=12,m=4) configuration to the unit tests ( which helped indeed
-> > > > > to spot a bug in the table caching )
-> > > >
-> > > > I tried to push this through the build system and it looks like
-> > > > perhaps some files are missing from the commit?
-> > > >
-> > > > CC
-> > > > erasure-code/isa/isa-l/erasure_code/libec_isa_la-ec_highlevel_func.l
-> > > > o In file included from
-> > > > erasure-code/isa/isa-l/erasure_code/ec_base.c:32:0:
-> > > > erasure-code/isa/isa-l/include/erasure_code.h:52:25: fatal error:
-> > > > gf_vect_mul.h: No such file or directory compilation terminated.
-> > > > CCAS
-> > > > erasure-code/isa/isa-l/erasure_code/libec_isa_la-ec_multibinary.asm.
-> > > > lo CCAS
-> > > > erasure-code/isa/isa-l/erasure_code/libec_isa_la-gf_2vect_dot_prod_a
-> > > > vx2.asm.lo In file included from
-> > > > erasure-code/isa/isa-l/erasure_code/ec_highlevel_func.c:30:0:
-> > > > erasure-code/isa/isa-l/include/erasure_code.h:52:25: fatal error:
-> > > > gf_vect_mul.h: No such file or directory compilation terminated.
-> > > >
-> > > > and
-> > > >
-> > > > FATAL: yasm: unable to open include file `reg_sizes.asm'
-> > > >
-> > > > See
-> > > >
-> > > > http://gitbuilder.sepia.ceph.com/gitbuilder-ceph-deb-wheezy-amd64-ba
-> > > > sic/log.cgi?log=60408e6c6b3b34d719943d16fcc023407e08ae01
-> > > >
-> > > > Hopefully these are just sitting in your working directory?
-> > > >
-> > > > Thanks!
-> > > > sage
-> > > > --
-> > > > To unsubscribe from this list: send the line "unsubscribe
-> > > > ceph-devel" in the body of a message to majordomo@vger.kernel.org
-> > > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > > > --
-> > > > To unsubscribe from this list: send the line "unsubscribe
-> > > > ceph-devel" in the body of a message to majordomo@vger.kernel.org
-> > > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > > >
-> > > >
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
-> > > in the body of a message to majordomo@vger.kernel.org More majordomo
-> > > info at  http://vger.kernel.org/majordomo-info.html
-> > >
-> > >
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body
-> > of a message to majordomo@vger.kernel.org More majordomo info at
-> > http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Cheers
+
+On 31/07/2014 08:08, Alexandre Oliva wrote:
+> systemd wants to run daemons in foreground, but daemons wouldn't write
+> out the pid file with -f.  Fixed.
+>=20
+> Signed-off-by: Alexandre Oliva <oliva@gnu.org>
+> ---
+>  src/ceph_mon.cc           |    3 +--
+>  src/common/config.cc      |    2 --
+>  src/global/global_init.cc |   10 +++++++++-
+>  3 files changed, 10 insertions(+), 5 deletions(-)
+>=20
+> diff --git a/src/ceph_mon.cc b/src/ceph_mon.cc
+> index 4e84b4d..14dd6da 100644
+> --- a/src/ceph_mon.cc
+> +++ b/src/ceph_mon.cc
+> @@ -406,8 +406,7 @@ int main(int argc, const char **argv)
+>    // screwing us over
+>    Preforker prefork;
+>    if (!(flags & CINIT_FLAG_NO_DAEMON_ACTIONS)) {
+> -    if (g_conf->daemonize) {
+> -      global_init_prefork(g_ceph_context, 0);
+> +    if (global_init_prefork(g_ceph_context, 0) >=3D 0) {
+>        prefork.prefork();
+>        if (prefork.is_parent()) {
+>  	return prefork.parent_wait();
+> diff --git a/src/common/config.cc b/src/common/config.cc
+> index 0ee7f58..4e3b6fe 100644
+> --- a/src/common/config.cc
+> +++ b/src/common/config.cc
+> @@ -389,12 +389,10 @@ int md_config_t::parse_argv(std::vector<const cha=
+r*>& args)
+>      }
+>      else if (ceph_argparse_flag(args, i, "--foreground", "-f", (char*)=
+NULL)) {
+>        set_val_or_die("daemonize", "false");
+> -      set_val_or_die("pid_file", "");
+>      }
+>      else if (ceph_argparse_flag(args, i, "-d", (char*)NULL)) {
+>        set_val_or_die("daemonize", "false");
+>        set_val_or_die("log_file", "");
+> -      set_val_or_die("pid_file", "");
+>        set_val_or_die("log_to_stderr", "true");
+>        set_val_or_die("err_to_stderr", "true");
+>        set_val_or_die("log_to_syslog", "false");
+> diff --git a/src/global/global_init.cc b/src/global/global_init.cc
+> index 7b20343..f03677c 100644
+> --- a/src/global/global_init.cc
+> +++ b/src/global/global_init.cc
+> @@ -166,8 +166,16 @@ int global_init_prefork(CephContext *cct, int flag=
+s)
+>    if (g_code_env !=3D CODE_ENVIRONMENT_DAEMON)
+>      return -1;
+>    const md_config_t *conf =3D cct->_conf;
+> -  if (!conf->daemonize)
+> +  if (!conf->daemonize) {
+> +    if (atexit(pidfile_remove_void)) {
+> +      derr << "global_init_daemonize: failed to set pidfile_remove fun=
+ction "
+> +	   << "to run at exit." << dendl;
+> +    }
+> +
+> +    pidfile_write(g_conf);
+> +
+>      return -1;
+> +  }
+> =20
+>    // stop log thread
+>    g_ceph_context->_log->flush();
+>=20
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+
+
+--Kgi9bV0MU6HuGMMeJOFwhBsqjXxJTM4pB
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlPZw3kACgkQ8dLMyEl6F20jLQCeLo1Aq03R/4lJC+w75tVYfLbp
+hdIAn2SyugUAzdgqXwCHEcdgGkSgmRaB
+=fyWv
+-----END PGP SIGNATURE-----
+
+--Kgi9bV0MU6HuGMMeJOFwhBsqjXxJTM4pB--
