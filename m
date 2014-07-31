@@ -1,45 +1,47 @@
 From: "Shu, Xinxin" <xinxin.shu@intel.com>
 Subject: RE: First attempt at rocksdb monitor store stress testing
-Date: Thu, 31 Jul 2014 01:46:34 +0000
-Message-ID: <75674D092A819E4189E91166C74CB90D014009AD@shsmsx102.ccr.corp.intel.com>
+Date: Thu, 31 Jul 2014 01:59:00 +0000
+Message-ID: <75674D092A819E4189E91166C74CB90D01402A1D@shsmsx102.ccr.corp.intel.com>
 References: <53D041D3.3080203@inktank.com>
  <75674D092A819E4189E91166C74CB90D013F2ACA@shsmsx102.ccr.corp.intel.com>
  <53D0EA63.10107@inktank.com> <53D19A92.3010000@inktank.com>
  <75674D092A819E4189E91166C74CB90D013F30D4@shsmsx102.ccr.corp.intel.com>
  <53D28145.2020504@inktank.com>
  <75674D092A819E4189E91166C74CB90D013F3CD6@shsmsx102.ccr.corp.intel.com>
- <53D92CBF.3010403@inktank.com>
+ <53D68096.1060009@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:24501 "EHLO mga02.intel.com"
+Received: from mga02.intel.com ([134.134.136.20]:40134 "EHLO mga02.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752578AbaGaBrn convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Jul 2014 21:47:43 -0400
-In-Reply-To: <53D92CBF.3010403@inktank.com>
+	id S1751966AbaGaB7U convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Jul 2014 21:59:20 -0400
+In-Reply-To: <53D68096.1060009@inktank.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Mark Nelson <mark.nelson@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi mark, 
-Which way do you used to set a higher limitation?  use 'ulimit' command or enlarge rocksdb_max_open_files config option?
+Hi mark , 
+ 
+There are four tables in your report , do you run four tests cases  or only run a single case (read/write mix) , if you run a single mix case , but latency in the fourth table is not same with other three tables .
 
-Cheers,
-xinxin
+In leveldb and rocksdb, level0 and level1 should be same size?
+
+to my knowledge , in rocksdb , by default ,level1 size is ten times of level0 size , but the same size sstable file.
 
 -----Original Message-----
-From: Mark Nelson [mailto:mark.nelson@inktank.com] 
-Sent: Thursday, July 31, 2014 1:35 AM
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
+Sent: Tuesday, July 29, 2014 12:56 AM
 To: Shu, Xinxin; ceph-devel@vger.kernel.org
 Subject: Re: First attempt at rocksdb monitor store stress testing
 
 Hi Xinxin,
 
-Yes, that did work.  I was able to observe the log and figure out the
-stall:  Too many files open in the level0->level1 compaction thread. 
-Similar to the issue that we've seen the past with leveldb.  Setting a higher ulimit fixed the problem.  With leveled compaction on spinning disks I do see latency spikes but at first glance they do not appear to be as bad as with leveldb.  I will now run some longer tests.
+Thanks, I'll give it a try.  I want to figure out what's going on in Rocksdb when the test stalls with leveled compaction.  In the mean time, here are the test results with spinning disks and SSDs:
+
+http://nhm.ceph.com/mon-store-stress/Monitor_Store_Stress_Short_Tests.pdf
 
 Mark
 
@@ -176,3 +178,5 @@ On 07/27/2014 11:45 PM, Shu, Xinxin wrote:
 >>
 >
 
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
