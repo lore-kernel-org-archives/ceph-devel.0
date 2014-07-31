@@ -1,95 +1,31 @@
-From: Alexandre Oliva <oliva@gnu.org>
-Subject: [PATCH] osd: requeue replays we couldn't start in this tick
-Date: Wed, 30 Jul 2014 23:07:47 -0300
-Message-ID: <orbns6uvpo.fsf@free.home>
+From: David Miller <davem@davemloft.net>
+Subject: Re: [PATCH 2/9] CAPI: use correct structure type name in sizeof
+Date: Wed, 30 Jul 2014 19:14:05 -0700 (PDT)
+Message-ID: <20140730.191405.497343033042623279.davem@davemloft.net>
+References: <1406647011-8543-1-git-send-email-Julia.Lawall@lip6.fr>
+	<1406647011-8543-3-git-send-email-Julia.Lawall@lip6.fr>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from linux-libre.fsfla.org ([208.118.235.54]:58492 "EHLO
-	linux-libre.fsfla.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751028AbaGaCNW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Jul 2014 22:13:22 -0400
-Received: from freie.home (home.lxoliva.fsfla.org [172.31.160.22])
-	by linux-libre.fsfla.org (8.14.4/8.14.4/Debian-2ubuntu2.1) with ESMTP id s6V27wAn020269
-	for <ceph-devel@vger.kernel.org>; Thu, 31 Jul 2014 02:07:59 GMT
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+Content-Type: Text/Plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-ia64-owner@vger.kernel.org>
+In-Reply-To: <1406647011-8543-3-git-send-email-Julia.Lawall@lip6.fr>
+Sender: linux-ia64-owner@vger.kernel.org
+To: Julia.Lawall@lip6.fr
+Cc: isdn@linux-pingi.de, kernel-janitors@vger.kernel.org, linux-ia64@vger.kernel.org, ceph-devel@vger.kernel.org, toralf.foerster@gmx.de, hmh@hmh.eng.br, netdev@vger.kernel.org, linux-kernel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-If a PG is in replay but it's not active yet by the time the OSD tick
-gets to running the replay queue, we'll drop the PG from the replay
-queue without clearing its replay state.
+From: Julia Lawall <Julia.Lawall@lip6.fr>
+Date: Tue, 29 Jul 2014 17:16:44 +0200
 
-This patch arranges for PGs that weren't ready for replaying (or that
-weren't replayed for any other reason) to be requeued, so that they
-will be retried in the next tick.
+> From: Julia Lawall <Julia.Lawall@lip6.fr>
+> 
+> Correct typo in the name of the type given to sizeof.  Because it is the
+> size of a pointer that is wanted, the typo has no impact on compilation or
+> execution.
+> 
+> This problem was found using Coccinelle (http://coccinelle.lip6.fr/).  The
+> semantic patch used can be found in message 0 of this patch series.
+> 
+> Signed-off-by: Julia Lawall <Julia.Lawall@lip6.fr>
 
-I have confirmed, with this patch, that my memory-starved nodes would
-often trigger the new log message, indicating the PGs were not active
-yet.  I have not observed instances of non-primary or replay_until
-mismatch, and I'm not sure the latter should justify a requeue, an
-assertion failure or whatever, but simply dropping the PG on the floor
-leaving it indefinitely in replay state is not something that should
-be done, since it prevents other operations from being processed.
-
-This patch does NOT fix the other problem reported in Issue #8758,
-that restarting any of the osds holding a PG is enough to clear the
-replay state.
-
-Signed-off-by: Alexandre Oliva <oliva@gnu.org>
----
- src/osd/OSD.cc |   22 ++++++++++++++++++++++
- 1 file changed, 22 insertions(+)
-
-diff --git a/src/osd/OSD.cc b/src/osd/OSD.cc
-index 1e08c28..40d1121 100644
---- a/src/osd/OSD.cc
-+++ b/src/osd/OSD.cc
-@@ -7228,6 +7228,7 @@ void OSD::check_replay_queue()
-   }
-   replay_queue_lock.Unlock();
- 
-+  list< pair<spg_t,utime_t> > requeue;
-   for (list< pair<spg_t,utime_t> >::iterator p = pgids.begin(); p != pgids.end(); ++p) {
-     spg_t pgid = p->first;
-     if (pg_map.count(pgid)) {
-@@ -7239,12 +7240,33 @@ void OSD::check_replay_queue()
- 	  pg->replay_until == p->second) {
- 	pg->replay_queued_ops();
-       }
-+      if (pg->is_replay()) {
-+	dout(12) << "check_replay_queue requeueing " << pgid
-+		 << (pg->is_active() ? "" : ", not active")
-+		 << (pg->is_primary() ? "" : ", not primary")
-+		 << (pg->replay_until == p->second ? ""
-+		     : ", mismatched replay_until")
-+		 << ", pg->until " << pg->replay_until
-+		 << ", queued " << p->second << dendl;
-+	requeue.push_back(*p);
-+      }
-       pg->unlock();
-     } else {
-       dout(10) << "check_replay_queue pgid " << pgid << " (not found)" << dendl;
-     }
-   }
-   
-+  if (!requeue.empty()) {
-+    replay_queue_lock.Lock();
-+    // reverse order to preserve it; push to the front of the queue,
-+    // where these entries came from
-+    while (!requeue.empty()) {
-+      replay_queue.push_front(requeue.back());
-+      requeue.pop_back();
-+    }
-+    replay_queue_lock.Unlock();
-+  }
-+
-   // wake up _all_ pg waiters; raw pg -> actual pg mapping may have shifted
-   wake_all_pg_waiters();
- }
-
--- 
-Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
-You must be the change you wish to see in the world. -- Gandhi
-Be Free! -- http://FSFLA.org/   FSF Latin America board member
-Free Software Evangelist|Red Hat Brasil GNU Toolchain Engineer
+Relatively harmless, so applied to net-next, thanks.
