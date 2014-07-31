@@ -1,79 +1,181 @@
-From: Peter Zijlstra <peterz@infradead.org>
-Subject: Re: [PATCH] locking/mutexes: Revert "locking/mutexes: Add extra
- reschedule point"
-Date: Thu, 31 Jul 2014 13:57:59 +0200
-Message-ID: <20140731115759.GS19379@twins.programming.kicks-ass.net>
-References: <1406801797-20139-1-git-send-email-ilya.dryomov@inktank.com>
+From: Mark Nelson <mark.nelson@inktank.com>
+Subject: Re: First attempt at rocksdb monitor store stress testing
+Date: Thu, 31 Jul 2014 07:30:55 -0500
+Message-ID: <53DA36FF.4040803@inktank.com>
+References: <53D041D3.3080203@inktank.com> <75674D092A819E4189E91166C74CB90D013F2ACA@shsmsx102.ccr.corp.intel.com> <53D0EA63.10107@inktank.com> <53D19A92.3010000@inktank.com> <75674D092A819E4189E91166C74CB90D013F30D4@shsmsx102.ccr.corp.intel.com> <53D28145.2020504@inktank.com> <75674D092A819E4189E91166C74CB90D013F3CD6@shsmsx102.ccr.corp.intel.com> <53D92CBF.3010403@inktank.com> <75674D092A819E4189E91166C74CB90D014009AD@shsmsx102.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="yILFoTi2Ujy0ZZ8L"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1406801797-20139-1-git-send-email-ilya.dryomov@inktank.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ilya Dryomov <ilya.dryomov@inktank.com>
-Cc: linux-kernel@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, ceph-devel@vger.kernel.org, davidlohr@hp.com, jason.low2@hp.com
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ie0-f174.google.com ([209.85.223.174]:53742 "EHLO
+	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751071AbaGaMay (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Jul 2014 08:30:54 -0400
+Received: by mail-ie0-f174.google.com with SMTP id rp18so3665111iec.19
+        for <ceph-devel@vger.kernel.org>; Thu, 31 Jul 2014 05:30:53 -0700 (PDT)
+In-Reply-To: <75674D092A819E4189E91166C74CB90D014009AD@shsmsx102.ccr.corp.intel.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "Shu, Xinxin" <xinxin.shu@intel.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
+On 07/30/2014 08:46 PM, Shu, Xinxin wrote:
+> Hi mark,
+> Which way do you used to set a higher limitation?  use 'ulimit' command or enlarge rocksdb_max_open_files config option?
 
---yILFoTi2Ujy0ZZ8L
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+ulimit command, though you might be able to limit the max open files in 
+rocksdb to be smaller than the default too.  Setting a higher ulimit is 
+what we already do for ceph processes so I just mimicked our existing 
+solution.
 
-On Thu, Jul 31, 2014 at 02:16:37PM +0400, Ilya Dryomov wrote:
-> This reverts commit 34c6bc2c919a55e5ad4e698510a2f35ee13ab900.
->=20
-> This commit can lead to deadlocks by way of what at a high level
-> appears to look like a missing wakeup on mutex_unlock() when
-> CONFIG_MUTEX_SPIN_ON_OWNER is set, which is how most distributions ship
-> their kernels.  In particular, it causes reproducible deadlocks in
-> libceph/rbd code under higher than moderate loads with the evidence
-> actually pointing to the bowels of mutex_lock().
->=20
-> kernel/locking/mutex.c, __mutex_lock_common():
-> 476         osq_unlock(&lock->osq);
-> 477 slowpath:
-> 478         /*
-> 479          * If we fell out of the spin path because of need_resched(),
-> 480          * reschedule now, before we try-lock the mutex. This avoids =
-getting
-> 481          * scheduled out right after we obtained the mutex.
-> 482          */
-> 483         if (need_resched())
-> 484                 schedule_preempt_disabled(); <-- never returns
-> 485 #endif
-> 486         spin_lock_mutex(&lock->wait_lock, flags);
->=20
-> We started bumping into deadlocks in QA the day our branch has been
-> rebased onto 3.15 (the release this commit went in) but then as part of
-> debugging effort I enabled all locking debug options, which also
-> disabled CONFIG_MUTEX_SPIN_ON_OWNER and made everything disappear,
-> which is why it hasn't been looked into until now.  Revert makes the
-> problem go away, confirmed by our users.
+>
+> Cheers,
+> xinxin
+>
+> -----Original Message-----
+> From: Mark Nelson [mailto:mark.nelson@inktank.com]
+> Sent: Thursday, July 31, 2014 1:35 AM
+> To: Shu, Xinxin; ceph-devel@vger.kernel.org
+> Subject: Re: First attempt at rocksdb monitor store stress testing
+>
+> Hi Xinxin,
+>
+> Yes, that did work.  I was able to observe the log and figure out the
+> stall:  Too many files open in the level0->level1 compaction thread.
+> Similar to the issue that we've seen the past with leveldb.  Setting a higher ulimit fixed the problem.  With leveled compaction on spinning disks I do see latency spikes but at first glance they do not appear to be as bad as with leveldb.  I will now run some longer tests.
+>
+> Mark
+>
+> On 07/27/2014 11:45 PM, Shu, Xinxin wrote:
+>> Hi mark,
+>>
+>> I tested this option on my setup , same issue happened , I will dig into it , if you want to get info log , there is a workaround, set this option to none:
+>>
+>> Rocksdb_log = ""
+>>
+>> Cheers,
+>> xinxin
+>>
+>> -----Original Message-----
+>> From: Mark Nelson [mailto:mark.nelson@inktank.com]
+>> Sent: Saturday, July 26, 2014 12:10 AM
+>> To: Shu, Xinxin; ceph-devel@vger.kernel.org
+>> Subject: Re: First attempt at rocksdb monitor store stress testing
+>>
+>> Hi Xinxin,
+>>
+>> I'm trying to enable the rocksdb log file as described in config_opts using:
+>>
+>> rocksdb_log = <path to log file>
+>>
+>> The file gets created but is empty.  Any ideas?
+>>
+>> Mark
+>>
+>> On 07/24/2014 08:28 PM, Shu, Xinxin wrote:
+>>> Hi mark,
+>>>
+>>> I am looking forward to your results on SSDs .
+>>> rocksdb generates a crc of data to be written , this cannot be switch off (but can be subsititued with xxhash),  there are two options , Option. verify_checksums_in_compaction and ReadOptions. verify_checksums,  If we disable these two options , i think cpu usage will goes down . If we use universal compaction , this is not friendly with read operation.
+>>>
+>>> Btw , can you list your rocksdb configuration?
+>>>
+>>> Cheers,
+>>> xinxin
+>>>
+>>> -----Original Message-----
+>>> From: Mark Nelson [mailto:mark.nelson@inktank.com]
+>>> Sent: Friday, July 25, 2014 7:45 AM
+>>> To: Shu, Xinxin; ceph-devel@vger.kernel.org
+>>> Subject: Re: First attempt at rocksdb monitor store stress testing
+>>>
+>>> Earlier today I modified the rocksdb options so I could enable universal compaction.  Over all performance is lower but I don't see the hang/stall in the middle of the test either.  Instead the disk is basically pegged with 100% writes.  I suspect average latency is higher than leveldb, but the highest latency is about 5-6s while we were seeing 30s spikes for leveldb with levelled (heh) compaction.
+>>>
+>>> I haven't done much tuning either way yet.  It may be that if we keep level 0 and level 1 roughly the same size we can reduce stalls in the levelled setups.  It will also be interesting to see what happens in these tests on SSDs.
+>>>
+>>> Mark
+>>>
+>>> On 07/24/2014 06:13 AM, Mark Nelson wrote:
+>>>> Hi Xinxin,
+>>>>
+>>>> Thanks! I wonder as well if it might be interesting to expose the
+>>>> options related to universal compaction?  It looks like rocksdb
+>>>> provides a lot of interesting knobs you can adjust!
+>>>>
+>>>> Mark
+>>>>
+>>>> On 07/24/2014 12:08 AM, Shu, Xinxin wrote:
+>>>>> Hi mark,
+>>>>>
+>>>>> I think this maybe related to 'verify_checksums' config option
+>>>>> ,when ReadOptions is initialized, default this option is  true ,
+>>>>> all data read from underlying storage will be verified against
+>>>>> corresponding checksums,  however,  this option cannot be
+>>>>> configured in wip-rocksdb branch. I will modify code to make this option configurable .
+>>>>>
+>>>>> Cheers,
+>>>>> xinxin
+>>>>>
+>>>>> -----Original Message-----
+>>>>> From: ceph-devel-owner@vger.kernel.org
+>>>>> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
+>>>>> Sent: Thursday, July 24, 2014 7:14 AM
+>>>>> To: ceph-devel@vger.kernel.org
+>>>>> Subject: First attempt at rocksdb monitor store stress testing
+>>>>>
+>>>>> Hi Guys,
+>>>>>
+>>>>> So I've been interested lately in leveldb 99th percentile latency
+>>>>> (and the amount of write amplification we are seeing) with leveldb.
+>>>>> Joao mentioned he has written a tool called mon-store-stress in
+>>>>> wip-leveldb-misc to try to provide a means to roughly guess at
+>>>>> what's happening on the mons under heavy load.  I cherry-picked it
+>>>>> over to wip-rocksdb and after a couple of hacks was able to get
+>>>>> everything built and running with some basic tests.  There was
+>>>>> little tuning done and I don't know how realistic this workload is,
+>>>>> so don't assume this means anything yet, but some initial results are here:
+>>>>>
+>>>>> http://nhm.ceph.com/mon-store-stress/First%20Attempt.pdf
+>>>>>
+>>>>> Command that was used to run the tests:
+>>>>>
+>>>>> ./ceph-test-mon-store-stress --mon-keyvaluedb <leveldb|rocksdb>
+>>>>> --write-min-size 50K --write-max-size 2M --percent-write 70
+>>>>> --percent-read 30 --keep-state --test-seed 1406137270 --stop-at
+>>>>> 5000 foo
+>>>>>
+>>>>> The most interesting bit right now is that rocksdb seems to be
+>>>>> hanging in the middle of the test (left it running for several
+>>>>> hours).  CPU usage on one core was quite high during the hang.
+>>>>> Profiling using perf with dwarf symbols I see:
+>>>>>
+>>>>> -  49.14%  ceph-test-mon-s  ceph-test-mon-store-stress  [.]
+>>>>> unsigned int
+>>>>> rocksdb::crc32c::ExtendImpl<&rocksdb::crc32c::Fast_CRC32>(unsigned
+>>>>> int, char const*, unsigned long)
+>>>>>         - unsigned int
+>>>>> rocksdb::crc32c::ExtendImpl<&rocksdb::crc32c::Fast_CRC32>(unsigned
+>>>>> int, char const*, unsigned long)
+>>>>>              51.70%
+>>>>> rocksdb::ReadBlockContents(rocksdb::RandomAccessFile*,
+>>>>> rocksdb::Footer const&, rocksdb::ReadOptions const&,
+>>>>> rocksdb::BlockHandle const&, rocksdb::BlockContents*,
+>>>>> rocksdb::Env*,
+>>>>> bool)
+>>>>>              48.30%
+>>>>> rocksdb::BlockBasedTableBuilder::WriteRawBlock(rocksdb::Slice
+>>>>> const&, rocksdb::CompressionType, rocksdb::BlockHandle*)
+>>>>>
+>>>>> Not sure what's going on yet, may need to try to enable
+>>>>> logging/debugging in rocksdb.  Thoughts/Suggestions welcome. :)
+>>>>>
+>>>>> Mark
+>>>>> --
+>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>>>>> in the body of a message to majordomo@vger.kernel.org More
+>>>>> majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>>
+>>>>
+>>>
+>>
+>
 
-This doesn't make sense and you fail to explain how this can possibly
-deadlock.
-
---yILFoTi2Ujy0ZZ8L
-Content-Type: application/pgp-signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.12 (GNU/Linux)
-
-iQIcBAEBAgAGBQJT2i9HAAoJEHZH4aRLwOS6ORgP/3X4oTHF/0PDDxTJd45u7zXS
-CvFdbG9jv6hcE8/4eMR4vjFoQABw6rOWXeJUBLF7faoSaAVTs1rhW149rxmV4+nA
-OWMHqZXTH9A8cLeYdcfW1BQbRAeMEJPsUrvJqQmul84WkKr4YjobBC64LqKoJQ1K
-cQZTzyOeXqNM5sTRs9MqoVlGEoR7r1s/OPunEgiyq53d3oXSWpr7lDt2oIi0roJq
-YYZNONCJy4GrHz/iKcxzpwZI31EiCeH0T5uxisTz1D1AqoqJkLx+8sLqseaf8yQC
-Uf/waDxeOQYvcB7WZ+4Wrj/+is2A3ikx4BxRzt2d9QDA4DdUxIX+BH2ZJM0w9UZh
-z3uI5J2yNztEaK3RKFfmoEFjpPBv6VzkSc+SLxYKT9Ec/WwfhxuxXwHn2znsUb4D
-Dsy4E/e3T2rcaFFZWHdAcshwPYH9Bw1O8muY+g0+vYVifWQn44q6UKNi5kHgUmii
-obYHK7ID5BP7YKldLJMkkaHamte+mY1c597QuA5pWdIdatmSuOpE7jNcsimO/e8K
-WM0j/9YXfeU/QjW4rp7Toyn+ePxtsEl4q/pSD1D8psOMtoOlq9tLZ6NhDaFN52gv
-Bq2UFNDD4eYa5BCSH2uSEXRmCsxxaGv7M539qnC2G0HXl45K53jT33+KGtM7hEAs
-BhgQS7m3rZBRLosEHtpZ
-=OEt/
------END PGP SIGNATURE-----
-
---yILFoTi2Ujy0ZZ8L--
