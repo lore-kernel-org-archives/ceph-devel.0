@@ -1,72 +1,79 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: About erasure code optimizations for ARM
-Date: Thu, 31 Jul 2014 17:42:09 +0545
-Message-ID: <53DA2F15.5060605@dachary.org>
+From: Peter Zijlstra <peterz@infradead.org>
+Subject: Re: [PATCH] locking/mutexes: Revert "locking/mutexes: Add extra
+ reschedule point"
+Date: Thu, 31 Jul 2014 13:57:59 +0200
+Message-ID: <20140731115759.GS19379@twins.programming.kicks-ass.net>
+References: <1406801797-20139-1-git-send-email-ilya.dryomov@inktank.com>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="KPklwDBmbRavNbnvRFMTSllsXnSbqhcxO"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:51555 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751190AbaGaL5T (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Jul 2014 07:57:19 -0400
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Ethan Miller <elm@cs.ucsc.edu>, Kevin Greenan <kmgreen2@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+	protocol="application/pgp-signature"; boundary="yILFoTi2Ujy0ZZ8L"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1406801797-20139-1-git-send-email-ilya.dryomov@inktank.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ilya Dryomov <ilya.dryomov@inktank.com>
+Cc: linux-kernel@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, ceph-devel@vger.kernel.org, davidlohr@hp.com, jason.low2@hp.com
+List-Id: ceph-devel.vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---KPklwDBmbRavNbnvRFMTSllsXnSbqhcxO
-Content-Type: text/plain; charset=ISO-8859-1
+
+--yILFoTi2Ujy0ZZ8L
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-Hi,
+On Thu, Jul 31, 2014 at 02:16:37PM +0400, Ilya Dryomov wrote:
+> This reverts commit 34c6bc2c919a55e5ad4e698510a2f35ee13ab900.
+>=20
+> This commit can lead to deadlocks by way of what at a high level
+> appears to look like a missing wakeup on mutex_unlock() when
+> CONFIG_MUTEX_SPIN_ON_OWNER is set, which is how most distributions ship
+> their kernels.  In particular, it causes reproducible deadlocks in
+> libceph/rbd code under higher than moderate loads with the evidence
+> actually pointing to the bowels of mutex_lock().
+>=20
+> kernel/locking/mutex.c, __mutex_lock_common():
+> 476         osq_unlock(&lock->osq);
+> 477 slowpath:
+> 478         /*
+> 479          * If we fell out of the spin path because of need_resched(),
+> 480          * reschedule now, before we try-lock the mutex. This avoids =
+getting
+> 481          * scheduled out right after we obtained the mutex.
+> 482          */
+> 483         if (need_resched())
+> 484                 schedule_preempt_disabled(); <-- never returns
+> 485 #endif
+> 486         spin_lock_mutex(&lock->wait_lock, flags);
+>=20
+> We started bumping into deadlocks in QA the day our branch has been
+> rebased onto 3.15 (the release this commit went in) but then as part of
+> debugging effort I enabled all locking debug options, which also
+> disabled CONFIG_MUTEX_SPIN_ON_OWNER and made everything disappear,
+> which is why it hasn't been looked into until now.  Revert makes the
+> problem go away, confirmed by our users.
 
-When using the jerasure plugin for erasure coded placement groups, it tak=
-es advantage of http://en.wikipedia.org/wiki/SIMD when running on an Inte=
-l processor. It would be nice to also use http://en.wikipedia.org/wiki/NE=
-ON_%28instruction_set%29 when running on an ARM processor.
+This doesn't make sense and you fail to explain how this can possibly
+deadlock.
 
-The optimizations themselves are in the https://bitbucket.org/jimplank/gf=
--complete library. At compile time Ceph creates different flavors of the =
-plugin ( https://github.com/ceph/ceph/blob/firefly/src/erasure-code/jeras=
-ure/Makefile.am#L73 ) depending on the capabilities of the compiler to ge=
-nerate the appropriate instructions for SIMD. At runtime Ceph selects the=
- plugin ( https://github.com/ceph/ceph/blob/firefly/src/erasure-code/jera=
-sure/ErasureCodePluginSelectJerasure.cc#L41 ) depending on the CPU capabi=
-lities ( https://github.com/ceph/ceph/blob/firefly/src/arch/intel.c#L55 )=
-=2E=20
-
-NEON detection already exists in Ceph ( https://github.com/ceph/ceph/blob=
-/firefly/src/arch/neon.c#L41 ) and adding more would be trivial.
-
-A (very) naive approach would be to add #ifdef NEON in places such as htt=
-ps://bitbucket.org/jimplank/gf-complete/src/c25310f215bc97a37944339d331b0=
-00ba806d505/src/gf_w4.c?at=3Dmaster#cl-492 when and if a function such as=
- https://bitbucket.org/jimplank/gf-complete/src/c25310f215bc97a37944339d3=
-31b000ba806d505/src/gf_w4.c?at=3Dmaster#cl-922 can be implemented with NE=
-ON instructions instead of SIMD.
-
-Maybe it is more complex and it needs some kind of rearchitecture ?
-
-Cheers
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-
-
---KPklwDBmbRavNbnvRFMTSllsXnSbqhcxO
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+--yILFoTi2Ujy0ZZ8L
+Content-Type: application/pgp-signature
 
 -----BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+Version: GnuPG v1.4.12 (GNU/Linux)
 
-iEYEARECAAYFAlPaLxYACgkQ8dLMyEl6F2340wCcCFEWD9dZ54d2R0o8wCFOoUJC
-1a4An2iZrLuQoj9kghuMQgHwBD2uExqI
-=MCm2
+iQIcBAEBAgAGBQJT2i9HAAoJEHZH4aRLwOS6ORgP/3X4oTHF/0PDDxTJd45u7zXS
+CvFdbG9jv6hcE8/4eMR4vjFoQABw6rOWXeJUBLF7faoSaAVTs1rhW149rxmV4+nA
+OWMHqZXTH9A8cLeYdcfW1BQbRAeMEJPsUrvJqQmul84WkKr4YjobBC64LqKoJQ1K
+cQZTzyOeXqNM5sTRs9MqoVlGEoR7r1s/OPunEgiyq53d3oXSWpr7lDt2oIi0roJq
+YYZNONCJy4GrHz/iKcxzpwZI31EiCeH0T5uxisTz1D1AqoqJkLx+8sLqseaf8yQC
+Uf/waDxeOQYvcB7WZ+4Wrj/+is2A3ikx4BxRzt2d9QDA4DdUxIX+BH2ZJM0w9UZh
+z3uI5J2yNztEaK3RKFfmoEFjpPBv6VzkSc+SLxYKT9Ec/WwfhxuxXwHn2znsUb4D
+Dsy4E/e3T2rcaFFZWHdAcshwPYH9Bw1O8muY+g0+vYVifWQn44q6UKNi5kHgUmii
+obYHK7ID5BP7YKldLJMkkaHamte+mY1c597QuA5pWdIdatmSuOpE7jNcsimO/e8K
+WM0j/9YXfeU/QjW4rp7Toyn+ePxtsEl4q/pSD1D8psOMtoOlq9tLZ6NhDaFN52gv
+Bq2UFNDD4eYa5BCSH2uSEXRmCsxxaGv7M539qnC2G0HXl45K53jT33+KGtM7hEAs
+BhgQS7m3rZBRLosEHtpZ
+=OEt/
 -----END PGP SIGNATURE-----
 
---KPklwDBmbRavNbnvRFMTSllsXnSbqhcxO--
+--yILFoTi2Ujy0ZZ8L--
