@@ -1,219 +1,262 @@
-From: Samuel Just <sam.just@inktank.com>
-Subject: Re: KeyFileStore ?
-Date: Fri, 1 Aug 2014 14:34:37 -0700
-Message-ID: <CA+4uBUaCgKkS2z4C6v-Wnguuy3ynjffCqQpe3UsRTxPm02AREA@mail.gmail.com>
-References: <alpine.DEB.2.00.1407302156410.18917@cobra.newdream.net>
-	<BLU436-SMTP1627AE51BD079D97C293309DFE70@phx.gbl>
+From: Sage Weil <sweil@redhat.com>
+Subject: RE: First attempt at rocksdb monitor store stress testing
+Date: Fri, 1 Aug 2014 15:30:17 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1408011529310.19810@cobra.newdream.net>
+References: <53D041D3.3080203@inktank.com> <75674D092A819E4189E91166C74CB90D013F2ACA@shsmsx102.ccr.corp.intel.com> <53D0EA63.10107@inktank.com> <53D19A92.3010000@inktank.com> <75674D092A819E4189E91166C74CB90D013F30D4@shsmsx102.ccr.corp.intel.com>
+ <53D28145.2020504@inktank.com> <75674D092A819E4189E91166C74CB90D013F3CD6@shsmsx102.ccr.corp.intel.com> <53D68096.1060009@inktank.com> <75674D092A819E4189E91166C74CB90D01402A44@shsmsx102.ccr.corp.intel.com> <alpine.DEB.2.00.1407301906230.18917@cobra.newdream.net>
+  <75674D092A819E4189E91166C74CB90D01405418@shsmsx102.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qg0-f46.google.com ([209.85.192.46]:35044 "EHLO
-	mail-qg0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754822AbaHAVei convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Aug 2014 17:34:38 -0400
-Received: by mail-qg0-f46.google.com with SMTP id z60so6278076qgd.5
-        for <ceph-devel@vger.kernel.org>; Fri, 01 Aug 2014 14:34:37 -0700 (PDT)
-In-Reply-To: <BLU436-SMTP1627AE51BD079D97C293309DFE70@phx.gbl>
+Received: from cobra.newdream.net ([66.33.216.30]:44080 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751460AbaHAWaS (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Aug 2014 18:30:18 -0400
+In-Reply-To: <75674D092A819E4189E91166C74CB90D01405418@shsmsx102.ccr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Guang Yang <yguang11@outlook.com>
-Cc: Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Shu, Xinxin" <xinxin.shu@intel.com>
+Cc: Mark Nelson <mark.nelson@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Sage's basic approach sounds about right to me.  I'm fairly skeptical
-about the benefits of packing small objects together within larger
-files, though.  It seems like for very small objects, we would be
-better off stashing the contents opportunistically within the onode.
-=46or somewhat larger objects, it seems like the complexity of
-maintaining information about the larger pack objects would be
-equivalent to the what the filesystem would do anyway.
--Sam
+Hi xinxin,
 
-On Fri, Aug 1, 2014 at 8:08 AM, Guang Yang <yguang11@outlook.com> wrote=
-:
-> I really like the idea, one scenario keeps bothering us is that there=
- are too many small files which make the file system indexing slow (so =
-that a single read request could take more than 10 disk IOs for path lo=
-okup).
->
-> If we pursuit this proposal, is there a chance we can take one step f=
-urther, that instead of storing one physical file for each object, we c=
-an allocate a big file (tens of GB) and each object only map to a chunk=
- within that big file. So that all those big file=E2=80=99s description=
- could be cached to avoid disk I/O to open the file. At least we keep i=
-t flexible that if someone would like to implement in such way, there i=
-s a chance to leverage the existing framework.
->
-> Thanks,
-> Guang
->
-> On Jul 31, 2014, at 1:25 PM, Sage Weil <sweil@redhat.com> wrote:
->
->> After the latest set of bug fixes to the FileStore file naming code =
-I am
->> newly inspired to replace it with something less complex.  Right now=
- I'm
->> mostly thinking about HDDs, although some of this may map well onto =
-hybrid
->> SSD/HDD as well.  It may or may not make sense for pure flash.
->>
->> Anyway, here are the main flaws with the overall approach that FileS=
-tore
->> uses:
->>
->> - It tries to maintain a direct mapping of object names to file name=
-s.
->> This is problematic because of 255 character limits, rados namespace=
-s, pg
->> prefixes, and the pg directory hashing we do to allow efficient spli=
-t, for
->> starters.  It is also problematic because we often want to do things=
- like
->> rename but can't make it happen atomically in combination with the r=
-est of
->> our transaction.
->>
->> - The PG directory hashing (that we do to allow efficient split) can=
- have
->> a big impact on performance, particularly when injesting lots of dat=
-a.
->> (And when benchmarking.)  It's also complex.
->>
->> - We often overwrite or replace entire objects.  These are "easy"
->> operations to do safely without doing complete data journaling, but =
-the
->> current design is not conducive to doing anything clever (and it's c=
-omplex
->> enough that I wouldn't want to add any cleverness on top).
->>
->> - Objects may contain only key/value data, but we still have to crea=
-te an
->> inode for them and look that up first.  This only matters for some
->> workloads (rgw indexes, cephfs directory objects).
->>
->> Instead, I think we should try a hybrid approach that more heavily
->> leverages a key/value db in combination with the file system.  The k=
-v db
->> might be leveldb, rocksdb, LMDB, BDB, or whatever else; for now we j=
-ust
->> assume it provides transactional key/value storage and efficient ran=
-ge
->> operations.  Here's the basic idea:
->>
->> - The mapping from names to object lives in the kv db.  The object
->> metadata is in a structure we can call an "onode" to avoid confusing=
- it
->> with the inodes in the backing file system.  The mapping is simple
->> ghobject_t -> onode map; there is no PG collection.  The PG collecti=
-on
->> still exist but really only as ranges of those keys.  We will need t=
-o be
->> slightly clever with the coll_t to distinguish between "bare" PGs (t=
-hat
->> live in this flat mapping) and the other collections (*_temp and
->> metadata), but that should be easy.  This makes PG splitting "free" =
-as far
->> as the objects go.
->>
->> - The onodes are relatively small.  They will contain the xattrs and
->> basic metadata like object size.  They will also identify the file n=
-ame of
->> the backing file in the file system (if size > 0).
->>
->> - The backing file can be a random, short file name.  We can just ma=
-ke a
->> one or two level deep set of directories, and let the directories ge=
-t
->> reasonably big... whatever we decide the backing fs can handle
->> efficiently.  We can also store a file handle in the onode and use t=
-he
->> open by handle API; this should let us go directly from onode (in ou=
-r kv
->> db) to the on-disk inode without looking at the directory at all, an=
-d fall
->> back to using the actual file name only if that fails for some reaso=
-n
->> (say, someone mucked around with the backing files).  The backing fi=
-le
->> need not have any xattrs on it at all (except perhaps some simple id=
- to
->> verify it does it fact belong to the referring onode, just as a sani=
-ty
->> check).
->>
->> - The name -> onode mapping can live in a disjunct part of the kv
->> namespace so that the other kv stuff associated with the file (like =
-omap
->> pairs or big xattrs or whatever) don't blow up those parts of the
->> db and slow down lookup.
->>
->> - We can keep a simple LRU of recent onodes in memory and avoid the =
-kv
->> lookup for hot objects.
->>
->> - Previously complicated operations like rename are now trivial: we =
-just
->> update the kv db with a transaction.  The backing file never gets re=
-named,
->> ever, and the other object omap data is keyed by a unique (onode) id=
-, not
->> the name.
->>
->> Initially, for simplicity, we can start with the existing data journ=
-aling
->> behavior.  However, I think there are opportunities to improve the
->> situation there.  There is a pending wip-transactions branch in whic=
-h I
->> started to rejigger the ObjectStore::Transaction interface a bit so =
-that
->> you identify objects by handle and then operation on them.  Although=
- it
->> doesn't change the encoding yet, once it does, we can make the
->> implementation take advantage of that, by avoid duplicate name looku=
-ps.
->> It will also let us do things like clearly identify when an object i=
-s
->> entirely new; in that case, we might forgo data journaling and inste=
-ad
->> write the data to the (new) file, fsync, and then commit the journal=
- entry
->> with the transaction that uses it.  (On remount a simple cleanup pro=
-cess
->> can throw out new but unreferenced backing files.)  It would also ma=
-ke it
->> easier to track all recently touched files and bulk fsync them inste=
-ad of
->> doing a syncfs (if we decide that is faster).
->>
->> Anyway, at the end of the day, small writes or overwrites would stil=
-l be
->> journaled, but large writes or large new objects would not, which wo=
-uld (I
->> think) be a pretty big improvement.  Overall, I think the design wil=
-l be
->> much simpler to reason about, and there are several potential avenue=
-s to
->> be clever and make improvements.  I'm not sure we can say the same a=
-bout
->> the FileStore design, which suffers from the fact that it has evolve=
-d
->> slowly over the last 9 years or so.
->>
->> sage
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->
+It's merged!  We've hit one other snag, though.. rocksdb is failing to 
+build in i386.  See
+
+	http://gitbuilder.sepia.ceph.com/gitbuilder-ceph-deb-trusty-i386-basic/log.cgi?log=52c2182fe833e8a0206787ecd878bd010cc2e529
+
+Do you mind taking a look?  Probably the int type in the parent class 
+doesn't match.
+
+Thanks!
+sage
+
+
+On Thu, 31 Jul 2014, Shu, Xinxin wrote:
+
+> Hi sage , 
+>  
+> I create a pull request https://github.com/ceph/rocksdb/pull/3 , please help review.
+> 
+> Cheers,
+> xinxin
+> 
+> -----Original Message-----
+> From: Shu, Xinxin 
+> Sent: Thursday, July 31, 2014 4:42 PM
+> To: 'Sage Weil'
+> Cc: Mark Nelson; ceph-devel@vger.kernel.org
+> Subject: RE: First attempt at rocksdb monitor store stress testing
+> 
+> Hi sage , 
+> 
+> This maybe due to  $(shell) is a feature of GNU make ,   I think there are two solutions:
+> 1)  run the script at configure time rather than at run time.
+> 2)  $(shell (./build_tools/build_detect_version)) will generated util/build_version.cc , the file only contain some version info (git version , compile time) , since we may not care about thess infos , we can remove this line from Makefile.am , generate util/build_version.cc by myself.
+> 
+> Cheers,
+> xinxin
+> 
+> -----Original Message-----
+> From: Sage Weil [mailto:sweil@redhat.com]
+> Sent: Thursday, July 31, 2014 10:08 AM
+> To: Shu, Xinxin
+> Cc: Mark Nelson; ceph-devel@vger.kernel.org
+> Subject: RE: First attempt at rocksdb monitor store stress testing
+> 
+> By the way, I'm getting closer to getting wip-rocksdb in a state where it can be merged, but it is failing to build due to this line:
+> 
+> 	$(shell (./build_tools/build_detect_version))
+> 
+> in Makefile.am which results in
+> 
+> automake: warnings are treated as errors
+> warning: Makefile.am:59: shell (./build_tools/build_detect_version: 
+> non-POSIX variable name
+> Makefile.am:59: (probably a GNU make extension)
+> Makefile.am: installing './depcomp'
+> autoreconf: automake failed with exit status: 1
+> 
+> Any suggestions?  You can see these build results at
+> 
+> 	http://ceph.com/gitbuilder.cgi
+> 	http://gitbuilder.sepia.ceph.com/gitbuilder-ceph-deb-trusty-amd64-basic/log.cgi?log=92212c722100065922468e4185759be0435877ff
+> 
+> sage
+> 
+> 
+> On Thu, 31 Jul 2014, Shu, Xinxin wrote:
+> 
+> > Does your report base on wip-rocksdb-mark branch?
+> > 
+> > Cheers,
+> > xinxin
+> > 
+> > -----Original Message-----
+> > From: ceph-devel-owner@vger.kernel.org 
+> > [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
+> > Sent: Tuesday, July 29, 2014 12:56 AM
+> > To: Shu, Xinxin; ceph-devel@vger.kernel.org
+> > Subject: Re: First attempt at rocksdb monitor store stress testing
+> > 
+> > Hi Xinxin,
+> > 
+> > Thanks, I'll give it a try.  I want to figure out what's going on in Rocksdb when the test stalls with leveled compaction.  In the mean time, here are the test results with spinning disks and SSDs:
+> > 
+> > http://nhm.ceph.com/mon-store-stress/Monitor_Store_Stress_Short_Tests.
+> > pdf
+> > 
+> > Mark
+> > 
+> > On 07/27/2014 11:45 PM, Shu, Xinxin wrote:
+> > > Hi mark,
+> > >
+> > > I tested this option on my setup , same issue happened , I will dig into it , if you want to get info log , there is a workaround, set this option to none:
+> > >
+> > > Rocksdb_log = ""
+> > >
+> > > Cheers,
+> > > xinxin
+> > >
+> > > -----Original Message-----
+> > > From: Mark Nelson [mailto:mark.nelson@inktank.com]
+> > > Sent: Saturday, July 26, 2014 12:10 AM
+> > > To: Shu, Xinxin; ceph-devel@vger.kernel.org
+> > > Subject: Re: First attempt at rocksdb monitor store stress testing
+> > >
+> > > Hi Xinxin,
+> > >
+> > > I'm trying to enable the rocksdb log file as described in config_opts using:
+> > >
+> > > rocksdb_log = <path to log file>
+> > >
+> > > The file gets created but is empty.  Any ideas?
+> > >
+> > > Mark
+> > >
+> > > On 07/24/2014 08:28 PM, Shu, Xinxin wrote:
+> > >> Hi mark,
+> > >>
+> > >> I am looking forward to your results on SSDs .
+> > >> rocksdb generates a crc of data to be written , this cannot be switch off (but can be subsititued with xxhash),  there are two options , Option. verify_checksums_in_compaction and ReadOptions. verify_checksums,  If we disable these two options , i think cpu usage will goes down . If we use universal compaction , this is not friendly with read operation.
+> > >>
+> > >> Btw , can you list your rocksdb configuration?
+> > >>
+> > >> Cheers,
+> > >> xinxin
+> > >>
+> > >> -----Original Message-----
+> > >> From: Mark Nelson [mailto:mark.nelson@inktank.com]
+> > >> Sent: Friday, July 25, 2014 7:45 AM
+> > >> To: Shu, Xinxin; ceph-devel@vger.kernel.org
+> > >> Subject: Re: First attempt at rocksdb monitor store stress testing
+> > >>
+> > >> Earlier today I modified the rocksdb options so I could enable universal compaction.  Over all performance is lower but I don't see the hang/stall in the middle of the test either.  Instead the disk is basically pegged with 100% writes.  I suspect average latency is higher than leveldb, but the highest latency is about 5-6s while we were seeing 30s spikes for leveldb with levelled (heh) compaction.
+> > >>
+> > >> I haven't done much tuning either way yet.  It may be that if we keep level 0 and level 1 roughly the same size we can reduce stalls in the levelled setups.  It will also be interesting to see what happens in these tests on SSDs.
+> > >>
+> > >> Mark
+> > >>
+> > >> On 07/24/2014 06:13 AM, Mark Nelson wrote:
+> > >>> Hi Xinxin,
+> > >>>
+> > >>> Thanks! I wonder as well if it might be interesting to expose the 
+> > >>> options related to universal compaction?  It looks like rocksdb 
+> > >>> provides a lot of interesting knobs you can adjust!
+> > >>>
+> > >>> Mark
+> > >>>
+> > >>> On 07/24/2014 12:08 AM, Shu, Xinxin wrote:
+> > >>>> Hi mark,
+> > >>>>
+> > >>>> I think this maybe related to 'verify_checksums' config option 
+> > >>>> ,when ReadOptions is initialized, default this option is  true , 
+> > >>>> all data read from underlying storage will be verified against 
+> > >>>> corresponding checksums,  however,  this option cannot be 
+> > >>>> configured in wip-rocksdb branch. I will modify code to make this option configurable .
+> > >>>>
+> > >>>> Cheers,
+> > >>>> xinxin
+> > >>>>
+> > >>>> -----Original Message-----
+> > >>>> From: ceph-devel-owner@vger.kernel.org 
+> > >>>> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark 
+> > >>>> Nelson
+> > >>>> Sent: Thursday, July 24, 2014 7:14 AM
+> > >>>> To: ceph-devel@vger.kernel.org
+> > >>>> Subject: First attempt at rocksdb monitor store stress testing
+> > >>>>
+> > >>>> Hi Guys,
+> > >>>>
+> > >>>> So I've been interested lately in leveldb 99th percentile latency 
+> > >>>> (and the amount of write amplification we are seeing) with leveldb.
+> > >>>> Joao mentioned he has written a tool called mon-store-stress in 
+> > >>>> wip-leveldb-misc to try to provide a means to roughly guess at 
+> > >>>> what's happening on the mons under heavy load.  I cherry-picked 
+> > >>>> it over to wip-rocksdb and after a couple of hacks was able to 
+> > >>>> get everything built and running with some basic tests.  There 
+> > >>>> was little tuning done and I don't know how realistic this 
+> > >>>> workload is, so don't assume this means anything yet, but some initial results are here:
+> > >>>>
+> > >>>> http://nhm.ceph.com/mon-store-stress/First%20Attempt.pdf
+> > >>>>
+> > >>>> Command that was used to run the tests:
+> > >>>>
+> > >>>> ./ceph-test-mon-store-stress --mon-keyvaluedb <leveldb|rocksdb> 
+> > >>>> --write-min-size 50K --write-max-size 2M --percent-write 70 
+> > >>>> --percent-read 30 --keep-state --test-seed 1406137270 --stop-at
+> > >>>> 5000 foo
+> > >>>>
+> > >>>> The most interesting bit right now is that rocksdb seems to be 
+> > >>>> hanging in the middle of the test (left it running for several 
+> > >>>> hours).  CPU usage on one core was quite high during the hang.
+> > >>>> Profiling using perf with dwarf symbols I see:
+> > >>>>
+> > >>>> -  49.14%  ceph-test-mon-s  ceph-test-mon-store-stress  [.] 
+> > >>>> unsigned int 
+> > >>>> rocksdb::crc32c::ExtendImpl<&rocksdb::crc32c::Fast_CRC32>(unsigne
+> > >>>> d
+> > >>>> int, char const*, unsigned long)
+> > >>>>        - unsigned int
+> > >>>> rocksdb::crc32c::ExtendImpl<&rocksdb::crc32c::Fast_CRC32>(unsigne
+> > >>>> d
+> > >>>> int, char const*, unsigned long)
+> > >>>>             51.70%
+> > >>>> rocksdb::ReadBlockContents(rocksdb::RandomAccessFile*,
+> > >>>> rocksdb::Footer const&, rocksdb::ReadOptions const&, 
+> > >>>> rocksdb::BlockHandle const&, rocksdb::BlockContents*, 
+> > >>>> rocksdb::Env*,
+> > >>>> bool)
+> > >>>>             48.30%
+> > >>>> rocksdb::BlockBasedTableBuilder::WriteRawBlock(rocksdb::Slice
+> > >>>> const&, rocksdb::CompressionType, rocksdb::BlockHandle*)
+> > >>>>
+> > >>>> Not sure what's going on yet, may need to try to enable 
+> > >>>> logging/debugging in rocksdb.  Thoughts/Suggestions welcome. :)
+> > >>>>
+> > >>>> Mark
+> > >>>> --
+> > >>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+> > >>>> in the body of a message to majordomo@vger.kernel.org More 
+> > >>>> majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > >>>>
+> > >>>
+> > >>
+> > >
+> > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> > in the body of a message to majordomo@vger.kernel.org More majordomo 
+> > info at  http://vger.kernel.org/majordomo-info.html
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> > in the body of a message to majordomo@vger.kernel.org More majordomo 
+> > info at  http://vger.kernel.org/majordomo-info.html
+> > 
+> > 
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
