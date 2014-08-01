@@ -1,62 +1,97 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: bug of bucket instance log list?
-Date: Thu, 31 Jul 2014 20:48:21 -0700
-Message-ID: <CABBk=J8cL5Qo6cb2Z6hz3C4aHuuG3n_RzBg1kqQB+r7PBZtGQA@mail.gmail.com>
-References: <CAOdVJi25jD2Gi19+d8e56eeWPP0MpDWcBrCw747fH1ZqrYeZ=A@mail.gmail.com>
+From: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>
+Subject: Simplified LRC in CEPH
+Date: Fri, 1 Aug 2014 08:00:59 +0000
+Message-ID: <3472A07E6605974CBC9BC573F1BC02E4AE75333D@CERNXCHG44.cern.ch>
+References: <3472A07E6605974CBC9BC573F1BC02E4AE753328@CERNXCHG44.cern.ch>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f182.google.com ([209.85.223.182]:37923 "EHLO
-	mail-ie0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751847AbaHADsV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Jul 2014 23:48:21 -0400
-Received: by mail-ie0-f182.google.com with SMTP id y20so5157627ier.27
-        for <ceph-devel@vger.kernel.org>; Thu, 31 Jul 2014 20:48:21 -0700 (PDT)
-In-Reply-To: <CAOdVJi25jD2Gi19+d8e56eeWPP0MpDWcBrCw747fH1ZqrYeZ=A@mail.gmail.com>
+Received: from cernmx11.cern.ch ([188.184.36.50]:5237 "EHLO CERNMX11.cern.ch"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753864AbaHAIBB convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Aug 2014 04:01:01 -0400
+In-Reply-To: <3472A07E6605974CBC9BC573F1BC02E4AE753328@CERNXCHG44.cern.ch>
+Content-Language: en-GB
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: star fan <jfanix@gmail.com>
-Cc: Ceph-devel <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Thu, Jul 31, 2014 at 8:34 PM, star fan <jfanix@gmail.com> wrote:
-> Hi Yehuda,
->
-> I think there are logic error about max_entries
-> betweenRGWOp_BILog_List::execute() and  store->list_bi_log_entries.
->
-> Look at the codes:
-> in RGWOp_BILog_List::execute()
->   do {
->
->     list<rgw_bi_log_entry> entries;
->     int ret = store->list_bi_log_entries(bucket_info.bucket,
->                                           marker, max_entries - count,
->                                           entries, &truncated);
->     if (ret < 0) {
->       dout(5) << "ERROR: list_bi_log_entries()" << dendl;
->       return;
->     }
->
->     count += entries.size();
->
->     send_response(entries, marker);
->   } while (truncated && count < max_entries);
->
-> and RGWRados::list_bi_log_entries
-> int ret = cls_rgw_bi_log_list(index_ctx, oid, marker, max -
-> result.size(), entries, truncated);
->
-> I think there is a conflict between  "max_entries - count" and "max -
-> result.size()".   I think this bug is hard to test since I don't know
-> how the bi log creates.
->
+Hi Loic et. al.
 
-Right. Looking at the code, there are a couple of issues. First, as
-you pointed out RGWOp_BILog_List::execute() assumes that entries are
-cleared within the call to store->list_bi_log_entries(), but the
-latter assumes the opposite (that the result is appended). The second
-issue that I see is that we shouldn't call to list::size() as it's
-O(N).
+I managed to prototype (and understand) LRC encoding similiar to Xorbas in the ISA plug-in.
 
-Thanks,
-Yehuda
+As an example take a (16,4) code (which gives nice alignment for 4k blocks) :
+
+For 4 sub groups of the data chunks you build e.g. local parities LP1-LP4
+
+LP1 = 1 ^ 2 ^ 3 ^ 4
+
+LP2 = 5 ^ 6 ^ 7 ^ 8
+
+LP3 = 9 ^ 10 ^ 11 ^ 12
+
+LP4 = 13 ^ 14 ^ 15 ^ 16
+
+You do normal erasure encoding with 4 RS chunks:
+
+RS(1..16) = (R1, R2, R3, R4)
+
+You compute the local parity LP5 for the erasure chunks:
+
+LP5 = R1 ^ R2 ^ R3 ^ R4
+
+The relation which holds for Vandermonde matrices (because the first matrix row contains only 1's)
+
+LP1 ^ LP2 ^ LP3 ^ LP4 = R1
+
+So you need to store only 24 chunks (not 25):
+
+(1 .. 16) (R2,R3,R4) (LP1,LP2,LP3,LP4,LP5)
+
+Side remark: in this simplified explanation I imply R1, not LP5 as described in the Xorbas paper
+
+The degree of the code is 5 e.g. you can construct a failure with 5 losses where you loose data, while if you are 'lucky' the code can even repair up to 8 failures (one loss in each sub group + LP5,R2,R3,R4).
+
+The reconstruction traffic for single failures is:
+
+[(20 x 4) + (4 x 8)]/24 =~ 4.66 x [disk size] instead of 16 x [disk size]
+
+There are three repair scenarios:
+
+1) only single failures in any of the local groups using LRC repair (simple parities)
+2) multiple failures which can be reconstructed with RS parities without LRC repair
+3) multiple failures which can be reconstructed with RS parities after LRC repair
+
+[ 4) reconstruction impossible  ]
+
+Having your proposed LRC layer (decoding) model in mind there is a certain contradiction here because there are cases where it is not required to use LRC since you can resolve all the failures with RS alone.
+
+In the end I think, it is sufficient if we introduce a parameter l in the EC parameter list which defines the number of subgroups in the data chunks and imply to use always one local parity for all RS chunks. So you can specify an LRC easily with three simple parameters:
+
+k=16 m=4 l=4
+
+The Xorbas configuration would be written as k=10 m=4 l=2
+
+Wouldn't that be much simpler and sufficient? What do you think?
+
+Cheers Andreas.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
