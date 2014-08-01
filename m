@@ -1,198 +1,82 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: First attempt at rocksdb monitor store stress testing
-Date: Fri, 01 Aug 2014 12:41:55 -0500
-Message-ID: <53DBD163.5000004@inktank.com>
-References: <53D041D3.3080203@inktank.com> <75674D092A819E4189E91166C74CB90D013F2ACA@shsmsx102.ccr.corp.intel.com> <53D0EA63.10107@inktank.com> <53D19A92.3010000@inktank.com> <75674D092A819E4189E91166C74CB90D013F30D4@shsmsx102.ccr.corp.intel.com> <53D28145.2020504@inktank.com> <75674D092A819E4189E91166C74CB90D013F3CD6@shsmsx102.ccr.corp.intel.com> <53D68096.1060009@inktank.com> <75674D092A819E4189E91166C74CB90D01402A44@shsmsx102.ccr.corp.intel.com>
+From: Pavan Rallabhandi <Pavan.Rallabhandi@sandisk.com>
+Subject: RE: Non existing monitor
+Date: Fri, 1 Aug 2014 18:20:16 +0000
+Message-ID: <68A06213B74F1742A2C48216AE1BB6B803FEDE4F@SACMBXIP02.sdcorp.global.sandisk.com>
+References: <7F4FDDF05D5B3241ABA5EB82D169E31E04B2FE35@SACMBXIP01.sdcorp.global.sandisk.com>
+ <CAPYLRzjRw-wTcv3Q2ZAKjmXKwNsLwL6gsj5BAJfSVSNcEg3New@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f180.google.com ([209.85.223.180]:56177 "EHLO
-	mail-ie0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750774AbaHARmA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Aug 2014 13:42:00 -0400
-Received: by mail-ie0-f180.google.com with SMTP id at20so6101550iec.25
-        for <ceph-devel@vger.kernel.org>; Fri, 01 Aug 2014 10:41:59 -0700 (PDT)
-In-Reply-To: <75674D092A819E4189E91166C74CB90D01402A44@shsmsx102.ccr.corp.intel.com>
+Received: from mail-bn1lp0141.outbound.protection.outlook.com ([207.46.163.141]:22477
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1754982AbaHASUk (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 1 Aug 2014 14:20:40 -0400
+In-Reply-To: <CAPYLRzjRw-wTcv3Q2ZAKjmXKwNsLwL6gsj5BAJfSVSNcEg3New@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Shu, Xinxin" <xinxin.shu@intel.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <greg@inktank.com>, Aanchal Agrawal <Aanchal.Agrawal@sandisk.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Samuel Just <sam.just@inktank.com>, Joao Luis <joao.luis@inktank.com>
 
-On 07/30/2014 09:00 PM, Shu, Xinxin wrote:
-> Does your report base on wip-rocksdb-mark branch?
-
-Yes, though I've been tweaking Joao's test tool a bit.
-
-I ran more tests with the higher ulimit for rocksdb, and also did 10,000 
-objects instead of 5,000.  There are some interesting effects.  Leveldb 
-appears to be faster for reads, but compaction causes horrible 
-predictable stalls.  rocksdb with leveled compaction appears to reduce 
-and/or eliminate the length and duration of the compaction stalls. 
-Surprisingly the spinning disk test had no high outliers while the SSD 
-test had a few.  Universal Compaction seems to fair poorly with more 
-objects. The maximum latencies are still bound, but the averages are 
-significantly worse.
-
-http://nhm.ceph.com/mon-store-stress/Monitor_Store_Stress_Medium_Tests.pdf
-
-Next I will need to examine the test parameters and run much longer 
-tests.  Switch to GNUPlot as well.  Open office can't handle this much 
-data. :)
-
-Mark
-
->
-> Cheers,
-> xinxin
->
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
-> Sent: Tuesday, July 29, 2014 12:56 AM
-> To: Shu, Xinxin; ceph-devel@vger.kernel.org
-> Subject: Re: First attempt at rocksdb monitor store stress testing
->
-> Hi Xinxin,
->
-> Thanks, I'll give it a try.  I want to figure out what's going on in Rocksdb when the test stalls with leveled compaction.  In the mean time, here are the test results with spinning disks and SSDs:
->
-> http://nhm.ceph.com/mon-store-stress/Monitor_Store_Stress_Short_Tests.pdf
->
-> Mark
->
-> On 07/27/2014 11:45 PM, Shu, Xinxin wrote:
->> Hi mark,
->>
->> I tested this option on my setup , same issue happened , I will dig into it , if you want to get info log , there is a workaround, set this option to none:
->>
->> Rocksdb_log = ""
->>
->> Cheers,
->> xinxin
->>
->> -----Original Message-----
->> From: Mark Nelson [mailto:mark.nelson@inktank.com]
->> Sent: Saturday, July 26, 2014 12:10 AM
->> To: Shu, Xinxin; ceph-devel@vger.kernel.org
->> Subject: Re: First attempt at rocksdb monitor store stress testing
->>
->> Hi Xinxin,
->>
->> I'm trying to enable the rocksdb log file as described in config_opts using:
->>
->> rocksdb_log = <path to log file>
->>
->> The file gets created but is empty.  Any ideas?
->>
->> Mark
->>
->> On 07/24/2014 08:28 PM, Shu, Xinxin wrote:
->>> Hi mark,
->>>
->>> I am looking forward to your results on SSDs .
->>> rocksdb generates a crc of data to be written , this cannot be switch off (but can be subsititued with xxhash),  there are two options , Option. verify_checksums_in_compaction and ReadOptions. verify_checksums,  If we disable these two options , i think cpu usage will goes down . If we use universal compaction , this is not friendly with read operation.
->>>
->>> Btw , can you list your rocksdb configuration?
->>>
->>> Cheers,
->>> xinxin
->>>
->>> -----Original Message-----
->>> From: Mark Nelson [mailto:mark.nelson@inktank.com]
->>> Sent: Friday, July 25, 2014 7:45 AM
->>> To: Shu, Xinxin; ceph-devel@vger.kernel.org
->>> Subject: Re: First attempt at rocksdb monitor store stress testing
->>>
->>> Earlier today I modified the rocksdb options so I could enable universal compaction.  Over all performance is lower but I don't see the hang/stall in the middle of the test either.  Instead the disk is basically pegged with 100% writes.  I suspect average latency is higher than leveldb, but the highest latency is about 5-6s while we were seeing 30s spikes for leveldb with levelled (heh) compaction.
->>>
->>> I haven't done much tuning either way yet.  It may be that if we keep level 0 and level 1 roughly the same size we can reduce stalls in the levelled setups.  It will also be interesting to see what happens in these tests on SSDs.
->>>
->>> Mark
->>>
->>> On 07/24/2014 06:13 AM, Mark Nelson wrote:
->>>> Hi Xinxin,
->>>>
->>>> Thanks! I wonder as well if it might be interesting to expose the
->>>> options related to universal compaction?  It looks like rocksdb
->>>> provides a lot of interesting knobs you can adjust!
->>>>
->>>> Mark
->>>>
->>>> On 07/24/2014 12:08 AM, Shu, Xinxin wrote:
->>>>> Hi mark,
->>>>>
->>>>> I think this maybe related to 'verify_checksums' config option
->>>>> ,when ReadOptions is initialized, default this option is  true ,
->>>>> all data read from underlying storage will be verified against
->>>>> corresponding checksums,  however,  this option cannot be
->>>>> configured in wip-rocksdb branch. I will modify code to make this option configurable .
->>>>>
->>>>> Cheers,
->>>>> xinxin
->>>>>
->>>>> -----Original Message-----
->>>>> From: ceph-devel-owner@vger.kernel.org
->>>>> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
->>>>> Sent: Thursday, July 24, 2014 7:14 AM
->>>>> To: ceph-devel@vger.kernel.org
->>>>> Subject: First attempt at rocksdb monitor store stress testing
->>>>>
->>>>> Hi Guys,
->>>>>
->>>>> So I've been interested lately in leveldb 99th percentile latency
->>>>> (and the amount of write amplification we are seeing) with leveldb.
->>>>> Joao mentioned he has written a tool called mon-store-stress in
->>>>> wip-leveldb-misc to try to provide a means to roughly guess at
->>>>> what's happening on the mons under heavy load.  I cherry-picked it
->>>>> over to wip-rocksdb and after a couple of hacks was able to get
->>>>> everything built and running with some basic tests.  There was
->>>>> little tuning done and I don't know how realistic this workload is,
->>>>> so don't assume this means anything yet, but some initial results are here:
->>>>>
->>>>> http://nhm.ceph.com/mon-store-stress/First%20Attempt.pdf
->>>>>
->>>>> Command that was used to run the tests:
->>>>>
->>>>> ./ceph-test-mon-store-stress --mon-keyvaluedb <leveldb|rocksdb>
->>>>> --write-min-size 50K --write-max-size 2M --percent-write 70
->>>>> --percent-read 30 --keep-state --test-seed 1406137270 --stop-at
->>>>> 5000 foo
->>>>>
->>>>> The most interesting bit right now is that rocksdb seems to be
->>>>> hanging in the middle of the test (left it running for several
->>>>> hours).  CPU usage on one core was quite high during the hang.
->>>>> Profiling using perf with dwarf symbols I see:
->>>>>
->>>>> -  49.14%  ceph-test-mon-s  ceph-test-mon-store-stress  [.]
->>>>> unsigned int
->>>>> rocksdb::crc32c::ExtendImpl<&rocksdb::crc32c::Fast_CRC32>(unsigned
->>>>> int, char const*, unsigned long)
->>>>>         - unsigned int
->>>>> rocksdb::crc32c::ExtendImpl<&rocksdb::crc32c::Fast_CRC32>(unsigned
->>>>> int, char const*, unsigned long)
->>>>>              51.70%
->>>>> rocksdb::ReadBlockContents(rocksdb::RandomAccessFile*,
->>>>> rocksdb::Footer const&, rocksdb::ReadOptions const&,
->>>>> rocksdb::BlockHandle const&, rocksdb::BlockContents*,
->>>>> rocksdb::Env*,
->>>>> bool)
->>>>>              48.30%
->>>>> rocksdb::BlockBasedTableBuilder::WriteRawBlock(rocksdb::Slice
->>>>> const&, rocksdb::CompressionType, rocksdb::BlockHandle*)
->>>>>
->>>>> Not sure what's going on yet, may need to try to enable
->>>>> logging/debugging in rocksdb.  Thoughts/Suggestions welcome. :)
->>>>>
->>>>> Mark
->>>>> --
->>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->>>>> in the body of a message to majordomo@vger.kernel.org More
->>>>> majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>>
->>>>
->>>
->>
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-
+R3JlZywNCg0KVGhlIGNvbW1hbmRzIHVzZWQgd2VyZSB0byBzdGFydCBtb25pdG9yIGZvciBhbiBp
+bnN0YW5jZSBpZCB0aGF0IGlzIG5vbiBleGlzdGluZywgZm9yIHdoaWNoIGEgbGV2ZWxkYiBzdG9y
+ZSBlcnJvciBpcyB0aHJvd246DQoNCjxzbmlwPg0KDQpzcmMvY2VwaC1tb24gLWkgZm9vDQoyMDE0
+LTA4LTAxIDAyOjQ3OjA4LjIxMDIwOCA3ZjczNDFjM2M4MDAgLTEgZmFpbGVkIHRvIGNyZWF0ZSBu
+ZXcgbGV2ZWxkYiBzdG9yZQ0KDQo8XHNuaXA+DQoNClRoZSBpZGVhIGlzIHRvIGZpeCB0aGlzIGJl
+aGF2aW9yIGJ5IHRocm93aW5nIGEgcmVsZXZhbnQgZXJyb3IuDQoNClRoYW5rcywNCi1QYXZhbi4N
+Cg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IEdyZWdvcnkgRmFybnVtIFttYWls
+dG86Z3JlZ0Bpbmt0YW5rLmNvbV0NClNlbnQ6IEZyaWRheSwgQXVndXN0IDAxLCAyMDE0IDY6MTYg
+UE0NClRvOiBBYW5jaGFsIEFncmF3YWwNCkNjOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZzsg
+UGF2YW4gUmFsbGFiaGFuZGk7IFNhbXVlbCBKdXN0OyBKb2FvIEx1aXMNClN1YmplY3Q6IFJlOiBO
+b24gZXhpc3RpbmcgbW9uaXRvcg0KDQpPbiBGcmksIEF1ZyAxLCAyMDE0IGF0IDY6MDMgQU0sIEFh
+bmNoYWwgQWdyYXdhbCA8QWFuY2hhbC5BZ3Jhd2FsQHNhbmRpc2suY29tPiB3cm90ZToNCj4gQW55
+IGhlbHAgb24gdGhpcyAuLi4NCj4NCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJv
+bTogQWFuY2hhbCBBZ3Jhd2FsDQo+IFNlbnQ6IFdlZG5lc2RheSwgSnVseSAzMCwgMjAxNCAzOjM3
+IFBNDQo+IFRvOiAnY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcnDQo+IENjOiBQYXZhbiBSYWxs
+YWJoYW5kaQ0KPiBTdWJqZWN0OiBOb24gZXhpc3RpbmcgbW9uaXRvcg0KPg0KPiBIaSwNCj4NCj4g
+V2UgZm91bmQgYSBjYXNlKGJ1Zz8pIGluIGNlcGggbW9uIGNvZGUsIHdoZXJlIGluLCBhbiBhdHRl
+bXB0IHRvIHN0YXJ0IGEgbm9uLWV4aXN0aW5nIG1vbml0b3IgaXMgdGhyb3dpbmcgdXAgYSBsZXZl
+bERCIGVycm9yIHNheWluZyAiZmFpbGVkIHRvIGNyZWF0ZSBuZXcgbGV2ZWxkYiBzdG9yZSIsIGlu
+c3RlYWQgd2UgdGhvdWdodCBhbiBhcHByb3ByaWF0ZSBtZXNzYWdlIHNheSAiTm8gTW9uaXRvciBw
+cmVzZW50IHdpdGggdGhhdCBpZCIgd291bGQgZG8sIGJ5IGNoZWNraW5nIGZvciB0aGUgbW9uaXRv
+ciBleGlzdGVuY2Ugd2F5IGFoZWFkLg0KPg0KPiBJdCBzZWVtcyB0aGF0ICdtb25fZXhpc3RzKCkn
+IGNoZWNrcyBmb3IgdGhlIGV4aXN0ZW5jZSBvZiB0aGUgbW9uIGRhdGEgZGlyZWN0b3J5KHZpYSAn
+bW9uX2RhdGFfZXhpc3RzKCknKSBhbmQgYWxzbyBmb3IgdGhlIG5vbi1lbXB0eSBuYXR1cmUgb2Yg
+dGhhdCBkaXJlY3RvcnkodmlhICdtb25fZGF0YV9lbXB0eSgpJykuIFRoZSBmaXggc2VlbWVkIHBy
+ZXR0eSBzaW1wbGUsIGFzIHRvIGZsYWcgdGhlIGFwcHJvcHJpYXRlIG1lc3NhZ2UgaWYgJ21vbl9k
+YXRhX2V4aXN0cygpJyB3ZXJlIHRvIHNldCAnZXhpc3RzJyB0byAnZmFsc2UnLCBpbiBjYXNlIG1r
+ZnMgaXMgbm90IHNldC4NCj4NCj4gVGhlIG90aGVyIGJlaGF2aW9yIHRoYXQgd2UgYXJlIHNlZWtp
+bmcgY2xhcml0eSwgYWdhaW4gaW4gY2FzZSBvZiBta2ZzIG5vdCBiZWluZyBzZXQgaXMsIGlmICdt
+b25fZGF0YV9leGlzdHMoKScgc2V0cyAnZXhpc3RzJyB0byAndHJ1ZScgYW5kICdtb25fZGF0YV9l
+bXB0eSgpJyBzZXRzICdleGlzdHMnIHRvICdmYWxzZScgKG1lYW5pbmcgdGhlIG1vbiBkYXRhIGRp
+cmVjdG9yeSBpcyBwcmVzZW50LCBidXQgaXQgaXMgZW1wdHkpLCB0aGVuIHRoZSBjdXJyZW50IGNv
+ZGUgc2VlbXMgdG8gYmUgZ29pbmcgYWhlYWQgaW4gYW4gYXR0ZW1wdCB0byBvcGVuIHRoZSAnc3Rv
+cmUuZGInLCBhbmQgd2hlbiBvcGVuIGZhaWxzLCBpdCB0cmllcyB0byBjcmVhdGUgYSBuZXcgJ3N0
+b3JlLmRiJyAodGhvdWdoIG1rZnMgaXMgbm90IHNldCkgYW5kIGV2ZW50dWFsbHkgZ2l2ZXMgdXAg
+dGhyb3dpbmcgInVuYWJsZSB0byByZWFkIG1hZ2ljIGZyb20gbW9uIGRhdGEiLg0KPg0KPiBUaGUg
+cXVlc3Rpb25zIHdlIGhhZCBhcm91bmQgdGhpcyB3ZXJlOg0KPg0KPiAxKSBUaG91Z2ggaW4gY2Fz
+ZSBvZiBta2ZzIG5vdCBiZWluZyBzZXQsIHdoYXQgaXMgdGhlIHJlYXNvbiBmb3IgY3JlYXRpbmcg
+YSBuZXcgbGV2ZWxEQiBzdG9yZSBpbiBjYXNlIGFuIGF0dGVtcHQgdG8gb3BlbiB0aGUgJ3N0b3Jl
+LmRiJyBpcyBhIGZhaWx1cmUsIGFzIGxldmVsREIgYW55d2F5cyBzZWVtIHRvIGJlIHRocm93aW5n
+ICdtYWdpYycgZXJyb3IgZ29pbmcgZm9yd2FyZC4gQXJlIHRoZXJlIGFueSB1c2UgY2FzZXMgZm9y
+IHRoaXMgc2NlbmFyaW8/DQo+IDIpIEFuZCBhbHNvLCBpcyBpdCB2YWxpZCB0byBmbGFnICJObyBN
+b25pdG9yIHByZXNlbnQiIGluIGNhc2UgdGhlIG1vbiBkYXRhIGRpcmVjdG9yeSBpcyBleGlzdGlu
+ZywgYnV0IHdpdGggbm8gZGF0YSgnc3RvcmUuZGInKSBpbiBpdCwgaW4gY2FzZSBta2ZzIGlzIG5v
+dCBzZXQ/DQoNClRoaXMgaXMgYSBsaXR0bGUgdW5jbGVhciB0byBtZS4gQ2FuIHlvdSBkZXNjcmli
+ZSBleGFjdGx5IHdoYXQgY29tbWFuZHMgeW91J3JlIHJ1bm5pbmcgYW5kIHdoYXQgdGhlIHJlc3Bv
+bnNlIGZyb20gdGhlIG1vbml0b3IgaXM/DQotR3JlZw0KU29mdHdhcmUgRW5naW5lZXIgIzQyIEAg
+aHR0cDovL2lua3RhbmsuY29tIHwgaHR0cDovL2NlcGguY29tDQoNCl9fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fDQoNClBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVk
+IGluIHRoaXMgZWxlY3Ryb25pYyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhl
+IHVzZSBvZiB0aGUgZGVzaWduYXRlZCByZWNpcGllbnQocykgbmFtZWQgYWJvdmUuIElmIHRoZSBy
+ZWFkZXIgb2YgdGhpcyBtZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3Ug
+YXJlIGhlcmVieSBub3RpZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBp
+biBlcnJvciBhbmQgdGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24s
+IG9yIGNvcHlpbmcgb2YgdGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlv
+dSBoYXZlIHJlY2VpdmVkIHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlm
+eSB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1l
+ZGlhdGVseSBhbmQgZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGlu
+IHlvdXIgcG9zc2Vzc2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBz
+dG9yZWQgY29waWVzKS4NCg0K
