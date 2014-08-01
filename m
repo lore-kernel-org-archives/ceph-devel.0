@@ -1,32 +1,75 @@
-From: Alfredo Deza <alfredo.deza@inktank.com>
-Subject: [ANN] ceph-deploy 1.5.10 released
-Date: Fri, 1 Aug 2014 09:38:47 -0400
-Message-ID: <CANtztVweotFTyC1GbgPj8FK-9cQduv1h2BONPOHD1WkRiimuKQ@mail.gmail.com>
+From: Ilya Dryomov <ilya.dryomov@inktank.com>
+Subject: Re: [PATCH] locking/mutexes: Revert "locking/mutexes: Add extra
+ reschedule point"
+Date: Fri, 1 Aug 2014 17:50:05 +0400
+Message-ID: <CALFYKtDDnebBbQSXBOGwabJ5cNga8b_MFq8bREJ+Qnw2f4eYmw@mail.gmail.com>
+References: <1406801797-20139-1-git-send-email-ilya.dryomov@inktank.com>
+	<20140731115759.GS19379@twins.programming.kicks-ass.net>
+	<CALFYKtBGQpxaZ0EFXbdvuEHeDeASeU-7XxQ_1a6ZDM=aJS651w@mail.gmail.com>
+	<20140731131331.GT19379@twins.programming.kicks-ass.net>
+	<1406817052.17194.12.camel@marge.simpson.net>
+	<20140731143946.GV19379@twins.programming.kicks-ass.net>
+	<CALFYKtBnK4uaq-37O3gWVQLuQZ9Vrs8oNhdvcUWEPqgpge-pdw@mail.gmail.com>
+	<20140801132754.GI19379@twins.programming.kicks-ass.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yk0-f177.google.com ([209.85.160.177]:52122 "EHLO
-	mail-yk0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750851AbaHANir (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Aug 2014 09:38:47 -0400
-Received: by mail-yk0-f177.google.com with SMTP id 79so2410866ykr.22
-        for <ceph-devel@vger.kernel.org>; Fri, 01 Aug 2014 06:38:47 -0700 (PDT)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20140801132754.GI19379@twins.programming.kicks-ass.net>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Peter Zijlstra <peterz@infradead.org>
+Cc: Mike Galbraith <umgwanakikbuti@gmail.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Ingo Molnar <mingo@kernel.org>, Ceph Development <ceph-devel@vger.kernel.org>, davidlohr@hp.com, jason.low2@hp.com, axboe@kernel.dk, Kent Overstreet <kmo@daterainc.com>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi All,
+On Fri, Aug 1, 2014 at 5:27 PM, Peter Zijlstra <peterz@infradead.org> wrote:
+> On Fri, Aug 01, 2014 at 04:56:27PM +0400, Ilya Dryomov wrote:
+>> I'm going to fix up rbd_request_fn(), but I want to make sure
+>> I understand this in full.
+>>
+>> - Previously the danger of calling blocking primitives on the way to
+>>   schedule(), i.e. with task->state != TASK_RUNNING, was that if the
+>>   blocking primitive was indeed to block the task state would be set
+>>   back to TASK_RUNNING and the schedule() that that task was on the way
+>>   to wouldn't have any effect.  Your "Add extra reschedule point" patch
+>>   essentially made calling mutex_lock() and probably others much more
+>>   wrong that it used to be, because mutex_lock() may now reschedule
+>>   when the task is not on the mutex wait queue.
+>
+> Right and in general we cannot allow spurious wakeups (although we try
+> very hard to deal with them in generic code, which is why things more or
+> less worked).
+>
+> But if you do a patch that 'randomly' ignores ->state on schedule (I did
+> one) stuff comes apart _real_ quick.
+>
+> Therefore you should very much not destroy ->state on the way to
+> schedule.
+>
+>> - There is nothing wrong with releasing queue_lock and reenabling IRQs
+>>   in rbd_request_fn() as long as it doesn't block and I remember to
+>>   disable IRQs and take queue_lock back on return.
+>
+> Releasing queue_lock might be ok, dunno about the blk locking, however
+> reenabling IRQs it is actually wrong as per blk_flush_plug_list() since
+> that uses local_irq_save()/restore() which means it can be called from
+> contexts which cannot deal with enabling IRQs, and then your
+> ->request_fn() goes and does that.
+>
+> Now maybe blk_flush_plug_list() is overly paranoid and it could use
+> local_irq_disable()/enable() instead, I don't know. But until it does, a
+> request_fn() should never reenable IRQs.
+>
+>> I'm asking because rbd_request_fn() is probably not the only broken in
+>> this way code path.  I poked around and found read_events() in aio.c,
+>> it seems to have been written with the "danger" assumption that
+>> I outlined above and there is even a comment to it.
+>
+> I'm fairly sure there's more broken stuff, I didn't dare looking.
+>
+>> Does that above make sense or am I missing something?
+>
+> I think that's about it.
 
-There is a new release of ceph-deploy, the easy deployment tool
-for Ceph.
+Thanks for clarifying things.  CC'ing Kent to draw attention to
+read_events().
 
-This release comes with a few improvements towards better usage of ceph-disk
-on remote nodes, with more verbosity so things are a bit more clear when they
-execute.
-
-The full list of fixes for this release can be found in the changelog:
-
-http://ceph.com/ceph-deploy/docs/changelog.html#id1
-
-
-Make sure you update!
+                Ilya
