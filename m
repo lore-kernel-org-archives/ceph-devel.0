@@ -1,188 +1,158 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: RE: Simplified LRC in CEPH
-Date: Fri, 1 Aug 2014 08:29:25 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1408010827280.5022@cobra.newdream.net>
-References: <3472A07E6605974CBC9BC573F1BC02E4AE753328@CERNXCHG44.cern.ch> <3472A07E6605974CBC9BC573F1BC02E4AE75333D@CERNXCHG44.cern.ch>, <53DB88EC.4050209@dachary.org> <3472A07E6605974CBC9BC573F1BC02E4AE7534F1@CERNXCHG44.cern.ch>, <53DB92C9.5040302@dachary.org>
- <3472A07E6605974CBC9BC573F1BC02E4AE7535EB@CERNXCHG44.cern.ch>
+From: Marios-Evaggelos Kogias <marioskogias-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: =?utf-8?q?=CE=99nstrumenting_RADOS_with_Zipkin_+_LTT?=
+	=?utf-8?q?ng?=
+Date: Fri, 1 Aug 2014 19:14:16 +0300
+Message-ID: <CACDi=KokBUhxkFQqnTKdU1t8qLUXtF-wvhm5x2nMxHAR=9nEKw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:42040 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755106AbaHAP3Z (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Aug 2014 11:29:25 -0400
-In-Reply-To: <3472A07E6605974CBC9BC573F1BC02E4AE7535EB@CERNXCHG44.cern.ch>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>
-Cc: Loic Dachary <loic@dachary.org>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: multipart/mixed; boundary="===============1878368566=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
+Cc: Filippos Giannakos <philipgian-Sqt7GMbKoOQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Fri, 1 Aug 2014, Andreas Joachim Peters wrote:
-> Hi Loic, 
-> your initial scheme is more flexible. Nevertheless I think that a 
-> simplified description covers 99% of peoples use cases.
-> 
-> You can absorb the logic of implied parity into your generic LRC plug-in 
-> if you find a good way to describe something like 'compute but don't' 
-> store'. If you then offer additionally the poor man's description 
-> (k,m,l) one cover's the simple and complex use case!
+--===============1878368566==
+Content-Type: multipart/alternative; boundary=001a11c2ab4e4916e304ff93ae40
 
-Yeah.
+--001a11c2ab4e4916e304ff93ae40
+Content-Type: text/plain; charset=UTF-8
 
-I like the part of Loic's strategy where we can do a search for 
-different repair scenarios and choose the one that minimizes the cost 
-(in terms of IO or CPU or whatever).  If it can express the xorbas-style 
-code with an implied block, than I suspect we would want to do something 
-similar internally anyway.
+Hello all,
 
-In any case, being able to simply say l=... would definitely be a win.
+my name is Marios Kogias and I am a student at the National Technical
+University of Athens. As part of my diploma thesis and my participation in
+Google Summer of Code 2014 (in the LTTng organization) I am working on a
+low-overhead tracing infrastructure for distributed systems. I am also
+collaborating with the Synnefo team (https://www.synnefo.org/) and
+especially
+with Vangelis Koukis, Constantinos Venetsanopoulos and Filippos Giannakos
+(cc)
 
-sage
+Some time ago, we started experimenting with RADOS instrumentation using
+LTTng and
+we noticed that there are similar endeavours in the Ceph github repository
+[1].
 
+However, unlike your approach, we are following an annotation-based tracing
+schema, which enables us to track a specific request from the time it enters
+the system at higher levels till it is finally served by RADOS.
 
-> 
-> Cheers Andreas.
-> 
-> ________________________________________
-> From: ceph-devel-owner@vger.kernel.org [ceph-devel-owner@vger.kernel.org] on behalf of Loic Dachary [loic@dachary.org]
-> Sent: 01 August 2014 15:14
-> To: Andreas Joachim Peters; ceph-devel@vger.kernel.org
-> Subject: Re: Simplified LRC in CEPH
-> 
-> Hi Andreas,
-> 
-> It probably is just what we need. Although https://github.com/ceph/ceph/pull/1921 is more flexible in terms of chunk placement, I can't think of a use case where it would actually be useful. Maybe it's just me being back from hollidays but it smells like a solution to a non existent problem ;-) The other difference is that your proposal does not allow for nested locality. I.e. datacenter locality and rack locality within a datacenter, for instance. What do you think ?
-> 
-> Cheers
-> 
-> On 01/08/2014 18:29, Andreas Joachim Peters wrote:
-> > Hi Loic,
-> >
-> >> It would, definitely. How would you control where data / parity chunks are located ?
-> >
-> > I ordered the chunks after encoding in this way:
-> >
-> > ( 1 2 3 4 LP1 ) ( 5 6 7 8 LP2 ) ( 9 10 11 12 LP3 ) ( 13 14 15 16 LP4 ) ( R2 R3 R4 LP5 )
-> >
-> > Always (k/l)+1 consecutive chunks belong location-wise together ...  and I demand that (k/l) <= m
-> >
-> > That is probably straight forward to express in a crush rule.
-> >
-> > Cheers Andreas.
-> >
-> > PS: just one correction, I wrote 'degree' but it is called the 'distance' of the code
-> >
-> > ________________________________________
-> > From: Loic Dachary [loic@dachary.org]
-> > Sent: 01 August 2014 14:32
-> > To: Andreas Joachim Peters; ceph-devel@vger.kernel.org
-> > Subject: Re: Simplified LRC in CEPH
-> >
-> > Hi Andreas,
-> >
-> > Enlightening explanation, thank you !
-> >
-> > On 01/08/2014 13:45, Andreas Joachim Peters wrote:
-> >> Hi Loic et. al.
-> >>
-> >> I managed to prototype (and understand) LRC encoding similiar to Xorbas in the ISA plug-in.
-> >>
-> >> As an example take a (16,4) code (which gives nice alignment for 4k blocks) :
-> >>
-> >> For 4 sub groups of the data chunks you build e.g. local parities LP1-LP4
-> >>
-> >> LP1 = 1 ^ 2 ^ 3 ^ 4
-> >>
-> >> LP2 = 5 ^ 6 ^ 7 ^ 8
-> >>
-> >> LP3 = 9 ^ 10 ^ 11 ^ 12
-> >>
-> >> LP4 = 13 ^ 14 ^ 15 ^ 16
-> >>
-> >> You do normal erasure encoding with 4 RS chunks:
-> >>
-> >> RS(1..16) = (R1, R2, R3, R4)
-> >>
-> >> You compute the local parity LP5 for the erasure chunks:
-> >>
-> >> LP5 = R1 ^ R2 ^ R3 ^ R4
-> >>
-> >> The relation which holds for Vandermonde matrices (because the first matrix row contains only 1's)
-> >>
-> >> LP1 ^ LP2 ^ LP3 ^ LP4 = R1
-> >>
-> >> So you need to store only 24 chunks (not 25):
-> >>
-> >> (1 .. 16) (R2,R3,R4) (LP1,LP2,LP3,LP4,LP5)
-> >>
-> >> Side remark: in this simplified explanation I imply R1, not LP5 as described in the Xorbas paper
-> >
-> > Does it make a difference or is it equivalent ?
-> >
-> >> The degree of the code is 5 e.g. you can construct a failure with 5 losses where you loose data, while if you are 'lucky' the code can even repair up to 8 failures (one loss in each sub group + LP5,R2,R3,R4).
-> >>
-> >> The reconstruction traffic for single failures is:
-> >>
-> >> [(20 x 4) + (4 x 8)]/24 =~ 4.66 x [disk size] instead of 16 x [disk size]
-> >>
-> >> There are three repair scenarios:
-> >>
-> >> 1) only single failures in any of the local groups using LRC repair (simple parities)
-> >> 2) multiple failures which can be reconstructed with RS parities without LRC repair
-> >> 3) multiple failures which can be reconstructed with RS parities after LRC repair
-> >>
-> >> [ 4) reconstruction impossible  ]
-> >>
-> >> Having your proposed LRC layer (decoding) model in mind there is a certain contradiction here because there are cases where it is not required to use LRC since you can resolve all the failures with RS alone.
-> >>
-> >> In the end I think, it is sufficient if we introduce a parameter l in the EC parameter list which defines the number of subgroups in the data chunks and imply to use always one local parity for all RS chunks. So you can specify an LRC easily with three simple parameters:
-> >>
-> >> k=16 m=4 l=4
-> >>
-> >> The Xorbas configuration would be written as k=10 m=4 l=2
-> >>
-> >> Wouldn't that be much simpler and sufficient? What do you think?
-> >
-> > It would, definitely. How would you control where data / parity chunks are located ?
-> >
-> > Cheers
-> >>
-> >> Cheers Andreas.
-> >>
-> >>
-> >>
-> >>
-> >>
-> >>
-> >>
-> >>
-> >>
-> >>
-> >>
-> >>
-> >>
-> >>
-> >>
-> >>
-> >>
-> >>
-> >>
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >> the body of a message to majordomo@vger.kernel.org
-> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >>
-> >
-> > --
-> > Lo?c Dachary, Artisan Logiciel Libre
-> >
-> 
-> --
-> Lo?c Dachary, Artisan Logiciel Libre
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+In general, we try to implement the tracing semantics described in the
+Dapper
+paper [2] in order to trace the causal relationships between the different
+processing phases that an IO request may trigger. Our target is an
+end-to-end
+visualisation of the request's route in the system, accompanied by
+information
+concerning latencies in each processing phase. Thanks to LTTng this can
+happen
+with a minimal overhead and in realtime. In order to visualize the results
+we
+have integrated Twitter's Zipkin [3], (which is a tracing system entirely
+based on
+Dapper) with LTTng.
+
+You can find a proof of concept of what we've done so far here:
+
+http://snf-551656.vm.okeanos.grnet.gr:8080/traces/0b554b8a48cb3e84?serviceName=MOSDOp
+
+In the above link you can see the trace of a write request served by a RADOS
+pool with replication level set to 3 (two replicas).
+
+We'd love to have early feedback and comments from you guys too,
+so that we can incorporate useful recommendations. You can find all the
+relevant code
+here[5][6]. If you have any questions or you wish to experiment with the
+project please do not hesitate to contact us.
+
+Kind regards,
+Marios
+
+[1]https://github.com/ceph/ceph/tree/wip-lttng
+[2]
+http://static.googleusercontent.com/media/research.google.com/el//pubs/archive/36356.pdf
+[3]http://twitter.github.io/zipkin/
+[4] https://github.com/marioskogias/blkin
+[5] https://github.com/marioskogias/babeltrace-plugins
+
+--001a11c2ab4e4916e304ff93ae40
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div style=3D"font-family:arial,sans-serif;font-size:13px"=
+>Hello all,<br><br>my name is Marios Kogias and I am a student at the Natio=
+nal Technical<br>University of Athens. As part of my diploma thesis and my =
+participation in<br>
+Google Summer of Code 2014 (in the LTTng organization) I am working on a<br=
+>low-overhead tracing infrastructure for distributed systems. I am also<br>=
+collaborating with the Synnefo team (<a href=3D"https://www.synnefo.org/" t=
+arget=3D"_blank">https://www.synnefo.org/</a>) and especially<br>
+with Vangelis Koukis, Constantinos Venetsanopoulos and Filippos Giannakos (=
+cc)<br><br>Some time ago, we started experimenting with RADOS instrumentati=
+on using LTTng and<br>we noticed that there are similar endeavours in the C=
+eph github repository [1].<br>
+</div><br style=3D"font-family:arial,sans-serif;font-size:13px"><div style=
+=3D"font-family:arial,sans-serif;font-size:13px"><div>However, unlike your =
+approach, we are following an annotation-based tracing<br>schema, which ena=
+bles us to track a specific request from the time it enters<br>
+the system at higher levels till it is finally served by RADOS.<br><br>In g=
+eneral, we try to implement the tracing semantics described in the Dapper<b=
+r>paper [2] in order to trace the causal relationships between the differen=
+t<br>
+processing phases that an IO request may trigger. Our target is an end-to-e=
+nd<br>visualisation of the request&#39;s route in the system, accompanied b=
+y information<br>concerning latencies in each processing phase. Thanks to L=
+TTng this can happen<br>
+with a minimal overhead and in realtime. In order to visualize the results =
+we<br>have integrated Twitter&#39;s Zipkin [3], (which is a tracing system =
+entirely based on<br>Dapper) with LTTng.<br></div><br>You can find a proof =
+of concept of what we&#39;ve done so far here:</div>
+<div style=3D"font-family:arial,sans-serif;font-size:13px"><br></div><div s=
+tyle=3D"font-family:arial,sans-serif;font-size:13px"><a href=3D"http://snf-=
+551656.vm.okeanos.grnet.gr:8080/traces/0b554b8a48cb3e84?serviceName=3DMOSDO=
+p" target=3D"_blank">http://snf-551656.vm.okeanos.grnet.gr:8080/traces/0b55=
+4b8a48cb3e84?serviceName=3DMOSDOp</a><br>
+<br>In the above link you can see the trace of a write request served by a =
+RADOS<br>pool with replication level set to 3 (two replicas).<br><br>We&#39=
+;d love to have early feedback and comments from you guys too,<br>so that w=
+e can incorporate useful recommendations.=C2=A0You can find all the relevan=
+t code<br>
+here[5][6]. If you have any questions or you wish to experiment with the<br=
+>project please do not hesitate to contact us.<br><br>Kind regards,</div><d=
+iv style=3D"font-family:arial,sans-serif;font-size:13px">Marios<br><br>[1]<=
+a href=3D"https://github.com/ceph/ceph/tree/wip-lttng" target=3D"_blank">ht=
+tps://github.com/ceph/ceph/tree/wip-lttng</a><br>
+[2]<a href=3D"http://static.googleusercontent.com/media/research.google.com=
+/el//pubs/archive/36356.pdf" target=3D"_blank">http://static.googleusercont=
+ent.com/media/research.google.com/el//pubs/archive/36356.pdf</a><br>[3]<a h=
+ref=3D"http://twitter.github.io/zipkin/" target=3D"_blank">http://twitter.g=
+ithub.io/zipkin/</a><br>
+[4]=C2=A0<a href=3D"https://github.com/marioskogias/blkin" target=3D"_blank=
+">https://github.com/marioskogias/blkin</a><br>[5]=C2=A0<a href=3D"https://=
+github.com/marioskogias/babeltrace-plugins" target=3D"_blank">https://githu=
+b.com/marioskogias/babeltrace-plugins</a><br>
+<div><img src=3D"https://ssl.gstatic.com/ui/v1/icons/mail/images/cleardot.g=
+if"></div></div></div>
+
+--001a11c2ab4e4916e304ff93ae40--
+
+--===============1878368566==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============1878368566==--
