@@ -1,189 +1,198 @@
-From: Owen Synge <osynge@suse.com>
-Subject: Re: call for comments -> "ceph-disk" making OSD directories on typos
- and is inconsistent (useability).
-Date: Fri, 01 Aug 2014 19:26:43 +0200
-Message-ID: <53DBCDD3.6030608@suse.com>
-References: <53DB539C.8090306@suse.com> <alpine.DEB.2.00.1408010808020.18917@cobra.newdream.net>
+From: Mark Nelson <mark.nelson@inktank.com>
+Subject: Re: First attempt at rocksdb monitor store stress testing
+Date: Fri, 01 Aug 2014 12:41:55 -0500
+Message-ID: <53DBD163.5000004@inktank.com>
+References: <53D041D3.3080203@inktank.com> <75674D092A819E4189E91166C74CB90D013F2ACA@shsmsx102.ccr.corp.intel.com> <53D0EA63.10107@inktank.com> <53D19A92.3010000@inktank.com> <75674D092A819E4189E91166C74CB90D013F30D4@shsmsx102.ccr.corp.intel.com> <53D28145.2020504@inktank.com> <75674D092A819E4189E91166C74CB90D013F3CD6@shsmsx102.ccr.corp.intel.com> <53D68096.1060009@inktank.com> <75674D092A819E4189E91166C74CB90D01402A44@shsmsx102.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.emea.novell.com ([130.57.118.101]:54486 "EHLO
-	mail.emea.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755818AbaHAR1T (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-	Fri, 1 Aug 2014 13:27:19 -0400
-In-Reply-To: <alpine.DEB.2.00.1408010808020.18917@cobra.newdream.net>
+Received: from mail-ie0-f180.google.com ([209.85.223.180]:56177 "EHLO
+	mail-ie0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750774AbaHARmA (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Aug 2014 13:42:00 -0400
+Received: by mail-ie0-f180.google.com with SMTP id at20so6101550iec.25
+        for <ceph-devel@vger.kernel.org>; Fri, 01 Aug 2014 10:41:59 -0700 (PDT)
+In-Reply-To: <75674D092A819E4189E91166C74CB90D01402A44@shsmsx102.ccr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: ceph-devel@vger.kernel.org
+To: "Shu, Xinxin" <xinxin.shu@intel.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
+On 07/30/2014 09:00 PM, Shu, Xinxin wrote:
+> Does your report base on wip-rocksdb-mark branch?
 
+Yes, though I've been tweaking Joao's test tool a bit.
 
-On 08/01/2014 05:10 PM, Sage Weil wrote:
-> On Fri, 1 Aug 2014, Owen Synge wrote:
->> Dear all,
+I ran more tests with the higher ulimit for rocksdb, and also did 10,000 
+objects instead of 5,000.  There are some interesting effects.  Leveldb 
+appears to be faster for reads, but compaction causes horrible 
+predictable stalls.  rocksdb with leveled compaction appears to reduce 
+and/or eliminate the length and duration of the compaction stalls. 
+Surprisingly the spinning disk test had no high outliers while the SSD 
+test had a few.  Universal Compaction seems to fair poorly with more 
+objects. The maximum latencies are still bound, but the averages are 
+significantly worse.
+
+http://nhm.ceph.com/mon-store-stress/Monitor_Store_Stress_Medium_Tests.pdf
+
+Next I will need to examine the test parameters and run much longer 
+tests.  Switch to GNUPlot as well.  Open office can't handle this much 
+data. :)
+
+Mark
+
+>
+> Cheers,
+> xinxin
+>
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
+> Sent: Tuesday, July 29, 2014 12:56 AM
+> To: Shu, Xinxin; ceph-devel@vger.kernel.org
+> Subject: Re: First attempt at rocksdb monitor store stress testing
+>
+> Hi Xinxin,
+>
+> Thanks, I'll give it a try.  I want to figure out what's going on in Rocksdb when the test stalls with leveled compaction.  In the mean time, here are the test results with spinning disks and SSDs:
+>
+> http://nhm.ceph.com/mon-store-stress/Monitor_Store_Stress_Short_Tests.pdf
+>
+> Mark
+>
+> On 07/27/2014 11:45 PM, Shu, Xinxin wrote:
+>> Hi mark,
 >>
->> By default "ceph-disk" will do the following:
+>> I tested this option on my setup , same issue happened , I will dig into it , if you want to get info log , there is a workaround, set this option to none:
 >>
->> # ceph-disk -vvvv prepare  --fs-type xfs --cluster ceph -- /dev/sdk
->> DEBUG:ceph-disk:Preparing osd data dir /dev/sdk
+>> Rocksdb_log = ""
 >>
->> No block device "/dev/sdk" exists so "ceph-disk" decides a block device
->> is not wanted and makes a directory for an OSD.
+>> Cheers,
+>> xinxin
 >>
->> I think as policy "ceph-disk" should not assume by default, that a non
->> existent target is correct, make a directory for the "disk" type OSD to
->> reside in, and set it up as a "disk" type OSD.
+>> -----Original Message-----
+>> From: Mark Nelson [mailto:mark.nelson@inktank.com]
+>> Sent: Saturday, July 26, 2014 12:10 AM
+>> To: Shu, Xinxin; ceph-devel@vger.kernel.org
+>> Subject: Re: First attempt at rocksdb monitor store stress testing
 >>
->> Hence I proposed this patch:
+>> Hi Xinxin,
 >>
->> https://github.com/ceph/ceph/pull/2160
-> 
-> In a vacuum, this seems like the cleanest approach...
-
-I agree, and think for major releases going forward this should be how
-ceph-disk works.
-
-For maintenance releases for firefly and before, should we follow Loic
-Dachary's suggestion of only refusing to make a data dir if it starts
-with "/dev"?
-
-I am happy to write an additional patch to support this mode of
-operation for maintenance releases, even though I think the idea of
-making directory targets if the target does not exist is not a good idea
-even for backward compatibility.
-
->> As a second best option I would be happier with an explicit "don?t fail
->> if target is not present and just make a directory at the target". But
->> then you get on to the question of deeper directory structures being
->> handled:
+>> I'm trying to enable the rocksdb log file as described in config_opts using:
 >>
->> The current behavior with deeper directory structures is currently
->> inconsistent as this output shows:
+>> rocksdb_log = <path to log file>
 >>
->> # ceph-disk prepare --fs-type xfs --cluster ceph -- /mnt/vdu/vdu
->> Traceback (most recent call last):
->>   File "/usr/sbin/ceph-disk", line 2605, in <module>
->>     main()
->>   File "/usr/sbin/ceph-disk", line 2583, in main
->>     args.func(args)
->>   File "/usr/sbin/ceph-disk", line 1311, in main_prepare
->>     os.mkdir(args.data)
->> OSError: [Errno 2] No such file or directory: '/mnt/vdu/vdu'
+>> The file gets created but is empty.  Any ideas?
 >>
->> I think as a third best option would be to only make directories the
->> "--data-dir" parameter is used, but still suffers the deeper directory
->> structures question.
+>> Mark
 >>
->> I am still unsure if I like the idea of creating directories for deeper
->> directory structures, as again the potential for typos leading to vastly
->> different directory paths with a single misplaced character, and for
->> consistency would rather "ceph-disk" just failed if the target is not
->> available.
+>> On 07/24/2014 08:28 PM, Shu, Xinxin wrote:
+>>> Hi mark,
+>>>
+>>> I am looking forward to your results on SSDs .
+>>> rocksdb generates a crc of data to be written , this cannot be switch off (but can be subsititued with xxhash),  there are two options , Option. verify_checksums_in_compaction and ReadOptions. verify_checksums,  If we disable these two options , i think cpu usage will goes down . If we use universal compaction , this is not friendly with read operation.
+>>>
+>>> Btw , can you list your rocksdb configuration?
+>>>
+>>> Cheers,
+>>> xinxin
+>>>
+>>> -----Original Message-----
+>>> From: Mark Nelson [mailto:mark.nelson@inktank.com]
+>>> Sent: Friday, July 25, 2014 7:45 AM
+>>> To: Shu, Xinxin; ceph-devel@vger.kernel.org
+>>> Subject: Re: First attempt at rocksdb monitor store stress testing
+>>>
+>>> Earlier today I modified the rocksdb options so I could enable universal compaction.  Over all performance is lower but I don't see the hang/stall in the middle of the test either.  Instead the disk is basically pegged with 100% writes.  I suspect average latency is higher than leveldb, but the highest latency is about 5-6s while we were seeing 30s spikes for leveldb with levelled (heh) compaction.
+>>>
+>>> I haven't done much tuning either way yet.  It may be that if we keep level 0 and level 1 roughly the same size we can reduce stalls in the levelled setups.  It will also be interesting to see what happens in these tests on SSDs.
+>>>
+>>> Mark
+>>>
+>>> On 07/24/2014 06:13 AM, Mark Nelson wrote:
+>>>> Hi Xinxin,
+>>>>
+>>>> Thanks! I wonder as well if it might be interesting to expose the
+>>>> options related to universal compaction?  It looks like rocksdb
+>>>> provides a lot of interesting knobs you can adjust!
+>>>>
+>>>> Mark
+>>>>
+>>>> On 07/24/2014 12:08 AM, Shu, Xinxin wrote:
+>>>>> Hi mark,
+>>>>>
+>>>>> I think this maybe related to 'verify_checksums' config option
+>>>>> ,when ReadOptions is initialized, default this option is  true ,
+>>>>> all data read from underlying storage will be verified against
+>>>>> corresponding checksums,  however,  this option cannot be
+>>>>> configured in wip-rocksdb branch. I will modify code to make this option configurable .
+>>>>>
+>>>>> Cheers,
+>>>>> xinxin
+>>>>>
+>>>>> -----Original Message-----
+>>>>> From: ceph-devel-owner@vger.kernel.org
+>>>>> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
+>>>>> Sent: Thursday, July 24, 2014 7:14 AM
+>>>>> To: ceph-devel@vger.kernel.org
+>>>>> Subject: First attempt at rocksdb monitor store stress testing
+>>>>>
+>>>>> Hi Guys,
+>>>>>
+>>>>> So I've been interested lately in leveldb 99th percentile latency
+>>>>> (and the amount of write amplification we are seeing) with leveldb.
+>>>>> Joao mentioned he has written a tool called mon-store-stress in
+>>>>> wip-leveldb-misc to try to provide a means to roughly guess at
+>>>>> what's happening on the mons under heavy load.  I cherry-picked it
+>>>>> over to wip-rocksdb and after a couple of hacks was able to get
+>>>>> everything built and running with some basic tests.  There was
+>>>>> little tuning done and I don't know how realistic this workload is,
+>>>>> so don't assume this means anything yet, but some initial results are here:
+>>>>>
+>>>>> http://nhm.ceph.com/mon-store-stress/First%20Attempt.pdf
+>>>>>
+>>>>> Command that was used to run the tests:
+>>>>>
+>>>>> ./ceph-test-mon-store-stress --mon-keyvaluedb <leveldb|rocksdb>
+>>>>> --write-min-size 50K --write-max-size 2M --percent-write 70
+>>>>> --percent-read 30 --keep-state --test-seed 1406137270 --stop-at
+>>>>> 5000 foo
+>>>>>
+>>>>> The most interesting bit right now is that rocksdb seems to be
+>>>>> hanging in the middle of the test (left it running for several
+>>>>> hours).  CPU usage on one core was quite high during the hang.
+>>>>> Profiling using perf with dwarf symbols I see:
+>>>>>
+>>>>> -  49.14%  ceph-test-mon-s  ceph-test-mon-store-stress  [.]
+>>>>> unsigned int
+>>>>> rocksdb::crc32c::ExtendImpl<&rocksdb::crc32c::Fast_CRC32>(unsigned
+>>>>> int, char const*, unsigned long)
+>>>>>         - unsigned int
+>>>>> rocksdb::crc32c::ExtendImpl<&rocksdb::crc32c::Fast_CRC32>(unsigned
+>>>>> int, char const*, unsigned long)
+>>>>>              51.70%
+>>>>> rocksdb::ReadBlockContents(rocksdb::RandomAccessFile*,
+>>>>> rocksdb::Footer const&, rocksdb::ReadOptions const&,
+>>>>> rocksdb::BlockHandle const&, rocksdb::BlockContents*,
+>>>>> rocksdb::Env*,
+>>>>> bool)
+>>>>>              48.30%
+>>>>> rocksdb::BlockBasedTableBuilder::WriteRawBlock(rocksdb::Slice
+>>>>> const&, rocksdb::CompressionType, rocksdb::BlockHandle*)
+>>>>>
+>>>>> Not sure what's going on yet, may need to try to enable
+>>>>> logging/debugging in rocksdb.  Thoughts/Suggestions welcome. :)
+>>>>>
+>>>>> Mark
+>>>>> --
+>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>>>>> in the body of a message to majordomo@vger.kernel.org More
+>>>>> majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>>
+>>>>
+>>>
 >>
->> Although I propose failing fast and clearly with a clear error message
->> when a target does not exist, removing the assumption that all non
->> existent targets are valid and "disk" based OSD's and to try and make an
->> "appropriate" directory, I do see 2 issues with this change:
->>
->> (A) This is a change to the current default behavior so effecting
->> deployment frameworks.
->> (B) This would effect "ceph-deploy" which under some circumstances uses
->> this behavior.
->>
->> I propose the following patch to mitigate side effect (B).
->>
->> https://github.com/ceph/ceph-deploy/pull/224
-> 
-> Is the problem that ceph-deploy will let you specify a directory /foo/bar 
-
-Yes it will.
-
-> and create bar for you?
-
-No it wont, only ceph-disk does this.
-
-If ceph-disk fails when the target directory /foo/bar is missing, then
-ceph-deploy is not backwards compatible.
-
-Since this is only desirable (if it is desirable to make a target
-directory) then it is only desirable if the target is a target directory
-and not a block device.
-
-Since the original error prompting this discovery was a block device eg
-"/dev/sdk" that was thought to exist but did not, I enclosed the rather
-big assumption that ceph-deploy would assume all files under "/dev" are
-block devices.
-
-> Given that I don't think the directory use case is a common as the 
-> device one, perhaps simply requiring that that directory already exist 
-> (user can do mkdir -p $dir) will get us to the cleanest point.  I think 
-> one of the more common use cases for this is when the user has their own 
-> mount they want to set up, in which case it'll be an existing 
-> directory (mount point).
-
-I agree.
-
-> The other main use case that comes to mind is the 'quickly deploy in a 
-> bunch of dirs for testing', and in that case we can simply add mkdir to 
-> the instructions...?
-
-I agree.
-
-Based on your assumptions:
-
-https://github.com/ceph/ceph-deploy/pull/224
-
-should be refused if:
-
-https://github.com/ceph/ceph/pull/2160
-
-is accepted.
-
-Only if it is desired to keep the functionality of making directories
-for backwards compatibility would you want to keep "224".
-
-I am not in favor of making directory targets if the target does not
-exist, but if this is desired functionality, accepting "224" is better
-than the current situation for ceph-deploy users. After seeing Loic
-Dachary's suggestion of "ceph-disk" only refusing to make a data dir if
-it starts with "/dev" it seems a more universal solution than "224" but
-does continue the assumption that you want to make directory targets if
-the target does not exist.
-
-Since I am not in favor of making directory targets if the target does
-not exist, accepting "2160" and refusing "224" would be my preference
-going forward.
-
-Best regards
-
-Owen
-
-
-
-
-> 
->>
->> I see no way to resolve issue (A) in general if my proposal for change
->> is selected.
->>
->> I have discussed this issue with "alfredodeza" on IRC both privately and
->> later on the "ceph-devel" IRC channel and he is "really divided here"
->> hence we decided I would bring this up for discussion on this mailing list.
->>
->> Best regards
->>
->> Owen
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
+>
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+
