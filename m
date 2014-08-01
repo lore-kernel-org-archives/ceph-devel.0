@@ -1,61 +1,156 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: Non existing monitor
-Date: Fri, 01 Aug 2014 12:10:50 +0200
-Message-ID: <53DB67AA.9090007@42on.com>
-References: <7F4FDDF05D5B3241ABA5EB82D169E31E04B2F97D@SACMBXIP01.sdcorp.global.sandisk.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Simplified LRC in CEPH
+Date: Fri, 01 Aug 2014 18:17:44 +0545
+Message-ID: <53DB88EC.4050209@dachary.org>
+References: <3472A07E6605974CBC9BC573F1BC02E4AE753328@CERNXCHG44.cern.ch> <3472A07E6605974CBC9BC573F1BC02E4AE75333D@CERNXCHG44.cern.ch>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="HVwOK1gmNduPv7L2pbwXsB0U5tP3iSwgg"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from websrv.42on.com ([31.25.102.167]:49294 "EHLO websrv.42on.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754003AbaHAKKx (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 1 Aug 2014 06:10:53 -0400
-In-Reply-To: <7F4FDDF05D5B3241ABA5EB82D169E31E04B2F97D@SACMBXIP01.sdcorp.global.sandisk.com>
+Received: from mail2.dachary.org ([91.121.57.175]:52149 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751963AbaHAMcs (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Aug 2014 08:32:48 -0400
+In-Reply-To: <3472A07E6605974CBC9BC573F1BC02E4AE75333D@CERNXCHG44.cern.ch>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Aanchal Agrawal <Aanchal.Agrawal@sandisk.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-Cc: Pavan Rallabhandi <Pavan.Rallabhandi@sandisk.com>
+To: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 07/30/2014 12:07 PM, Aanchal Agrawal wrote:
-> Hi,
->
-> We found a case(bug?) in ceph mon code, where in, an attempt to start a non-existing monitor is throwing up a levelDB error saying "failed to create new leveldb store", instead we thought an appropriate message say "No Monitor present with that id" would do, by checking for the monitor existence way ahead.
->
-> It seems that 'mon_exists()' checks for the existence of the mon data directory(via 'mon_data_exists()') and also for the non-empty nature of that directory(via 'mon_data_empty()'). The fix seemed pretty simple, as to flag the appropriate message if 'mon_data_exists()' were to set 'exists' to 'false', in case mkfs is not set.
->
-> The other behavior that we are seeking clarity, again in case of mkfs not being set is, if 'mon_data_exists()' sets 'exists' to 'true' and 'mon_data_empty()' sets 'exists' to 'false' (meaning the mon data directory is present, but it is empty), then the current code seems to be going ahead in an attempt to open the 'store.db', and when open fails, it tries to create a new 'store.db' (though mkfs is not set) and eventually gives up throwing "unable to read magic from mon data".
->
-> The questions we had around this were:
->
-> 1) Though in case of mkfs not being set, what is the reason for creating a new levelDB store in case an attempt to open the 'store.db' is a failure, as levelDB anyways seem to be throwing 'magic' error going forward. Are there any use cases for this scenario?
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--HVwOK1gmNduPv7L2pbwXsB0U5tP3iSwgg
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-Separate from Ceph it seems like bad behavior of a daemon to start 
-creating directories when --mkfs is not supplied.
+Hi Andreas,
 
-It should spit our errors about not being able to access it's data 
-store, but not start creating them without explicitly being told to do so.
+Enlightening explanation, thank you !
 
-> 2) And also, is it valid to flag "No Monitor present" in case the mon data directory is existing, but with no data('store.db') in it, in case mkfs is not set?
->
-> Thanks,
-> Aanchal
->
-> ________________________________
->
-> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
->
+On 01/08/2014 13:45, Andreas Joachim Peters wrote:
+> Hi Loic et. al.
+>=20
+> I managed to prototype (and understand) LRC encoding similiar to Xorbas=
+ in the ISA plug-in.
+>=20
+> As an example take a (16,4) code (which gives nice alignment for 4k blo=
+cks) :
+>=20
+> For 4 sub groups of the data chunks you build e.g. local parities LP1-L=
+P4
+>=20
+> LP1 =3D 1 ^ 2 ^ 3 ^ 4
+>=20
+> LP2 =3D 5 ^ 6 ^ 7 ^ 8
+>=20
+> LP3 =3D 9 ^ 10 ^ 11 ^ 12
+>=20
+> LP4 =3D 13 ^ 14 ^ 15 ^ 16
+>=20
+> You do normal erasure encoding with 4 RS chunks:
+>=20
+> RS(1..16) =3D (R1, R2, R3, R4)
+>=20
+> You compute the local parity LP5 for the erasure chunks:
+>=20
+> LP5 =3D R1 ^ R2 ^ R3 ^ R4
+>=20
+> The relation which holds for Vandermonde matrices (because the first ma=
+trix row contains only 1's)
+>=20
+> LP1 ^ LP2 ^ LP3 ^ LP4 =3D R1
+>=20
+> So you need to store only 24 chunks (not 25):
+>=20
+> (1 .. 16) (R2,R3,R4) (LP1,LP2,LP3,LP4,LP5)
+>=20
+> Side remark: in this simplified explanation I imply R1, not LP5 as desc=
+ribed in the Xorbas paper
+
+Does it make a difference or is it equivalent ?
+
+> The degree of the code is 5 e.g. you can construct a failure with 5 los=
+ses where you loose data, while if you are 'lucky' the code can even repa=
+ir up to 8 failures (one loss in each sub group + LP5,R2,R3,R4).
+>=20
+> The reconstruction traffic for single failures is:
+>=20
+> [(20 x 4) + (4 x 8)]/24 =3D~ 4.66 x [disk size] instead of 16 x [disk s=
+ize]
+>=20
+> There are three repair scenarios:
+>=20
+> 1) only single failures in any of the local groups using LRC repair (si=
+mple parities)
+> 2) multiple failures which can be reconstructed with RS parities withou=
+t LRC repair
+> 3) multiple failures which can be reconstructed with RS parities after =
+LRC repair
+>=20
+> [ 4) reconstruction impossible  ]
+>=20
+> Having your proposed LRC layer (decoding) model in mind there is a cert=
+ain contradiction here because there are cases where it is not required t=
+o use LRC since you can resolve all the failures with RS alone.
+>=20
+> In the end I think, it is sufficient if we introduce a parameter l in t=
+he EC parameter list which defines the number of subgroups in the data ch=
+unks and imply to use always one local parity for all RS chunks. So you c=
+an specify an LRC easily with three simple parameters:
+>=20
+> k=3D16 m=3D4 l=3D4
+>=20
+> The Xorbas configuration would be written as k=3D10 m=3D4 l=3D2
+>=20
+> Wouldn't that be much simpler and sufficient? What do you think?
+
+It would, definitely. How would you control where data / parity chunks ar=
+e located ?
+
+Cheers
+>=20
+> Cheers Andreas.
+>=20
+>=20
+>=20
+>=20
+>=20
+>=20
+>=20
+>=20
+>=20
+>=20
+>=20
+>=20
+>=20
+>=20
+>=20
+>=20
+>=20
+>=20
+>=20
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+>=20
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
 
 
--- 
-Wido den Hollander
-42on B.V.
-Ceph trainer and consultant
+--HVwOK1gmNduPv7L2pbwXsB0U5tP3iSwgg
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
-Phone: +31 (0)20 700 9902
-Skype: contact42on
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlPbiOwACgkQ8dLMyEl6F21OCwCfQZK/L7Km0ixrrdmAN0zJ0T4n
+gtsAnRwrvbELN/U5N+E3LQPH1CoicVmE
+=IMPB
+-----END PGP SIGNATURE-----
+
+--HVwOK1gmNduPv7L2pbwXsB0U5tP3iSwgg--
