@@ -1,64 +1,64 @@
-From: Samuel Just <sam.just@inktank.com>
-Subject: Re: firefly backports
-Date: Sun, 3 Aug 2014 13:07:09 -0700
-Message-ID: <CA+4uBUb0+vFxFH5tUnUU_urJ==5bs4fPZB-7487SVmtw_-rnRQ@mail.gmail.com>
-References: <alpine.DEB.2.00.1408011756300.1270@cobra.newdream.net>
-	<CABBk=J-=9R3PUgZX6_5+v90+Rgx1BZih2cu0KrFqnXGJT7kmfA@mail.gmail.com>
+From: yuelongguang <fastsync-9Onoh4P/yGk@public.gmane.org>
+Subject: what is collection(COLL) and cid
+Date: Mon, 4 Aug 2014 12:04:28 +0800 (CST)
+Message-ID: <7803cb8c.b3ff.1479f3098f1.Coremail.fastsync@163.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f171.google.com ([209.85.220.171]:33226 "EHLO
-	mail-vc0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751261AbaHCUHK (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 3 Aug 2014 16:07:10 -0400
-Received: by mail-vc0-f171.google.com with SMTP id hq11so9796817vcb.30
-        for <ceph-devel@vger.kernel.org>; Sun, 03 Aug 2014 13:07:10 -0700 (PDT)
-In-Reply-To: <CABBk=J-=9R3PUgZX6_5+v90+Rgx1BZih2cu0KrFqnXGJT7kmfA@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh <yehuda@inktank.com>
-Cc: Sage Weil <sage@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: multipart/mixed; boundary="===============0585630171=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Added 8701.
--Sam
+--===============0585630171==
+Content-Type: multipart/alternative;
+	boundary="----=_Part_184321_1139688458.1407125068017"
 
-On Sat, Aug 2, 2014 at 8:44 PM, Yehuda Sadeh <yehuda@inktank.com> wrote:
-> I pushed fixes for the following:
->
->  - 8586
->  - 8702
->  - 8937
->  - 8928
->  - 8442
->  - 8972
->
-> There is follow up fix for 8937 that will need to go in, but it'll
-> need to make it to master first (there's a pull request).
->
-> Yehuda
->
-> On Fri, Aug 1, 2014 at 6:00 PM, Sage Weil <sage@inktank.com> wrote:
->> Sam, Yehuda,
->>
->> I backported a ton of pending stuff to firefly-next.  A bunch of it was
->> the cephtool tests and unwinding it from the mds cli changes.  Also did
->> ceph df writeable space (with fix).
->>
->> I didn't do some of the core OSD stuff, though, namely
->>
->>  8438 ec objeccts are not cleaned up
->>  8701 scrub found obsolete rollback object
->>  7999 pgs share info that isn't persisted
->>  8733 crash in ECBackend::handle_sub_read
->>
->> Those are the 'pending backport' bugs at least; I suspect there are other
->> OSD fixes that should be included.
->>
->> I also didn't do any of the rgw patches, or the s3-tests.
->>
->> Can you take a look at some point and put them in firefly-next?  I'd like
->> to get this point going through the firefly suite soon so that it bakes
->> there for as long as possible before the next point release.
->>
->> Thanks!
->> sage
+------=_Part_184321_1139688458.1407125068017
+Content-Type: text/plain; charset=GBK
+Content-Transfer-Encoding: base64
+
+aGksYWxsCmxvb2sgYXQgdGhlIGNvZGUuCmNhc2UgVHJhbnNhY3Rpb246Ok9QX01LQ09MTDoKICAg
+ICAgewogICAgICAgICAgICAgY29sbF90IGNpZCA9IGkuZ2V0X2NpZCgpOwogICAgICAuLi59CjEg
+Lgp3aGF0IGlzIENPTEwgYW5kIGNpZD8gIAppcyBjb2xsIGlzIGEgcGcgYW5kIGNpZCBpcyBwZ2lk
+PwogCjIuIHdoYXQgaXMgdGhlIHJlbGF0aW9uIGJldHdlZW4gY2lkIGFuZCAnY3VycmVudC9tZXRh
+Jz8gICBvciB3aGF0IGlzIGluIGN1cnJlbnQvbWV0YT8KIAogCnRoYW5rcyB2ZXJ5IG11Y2gu
+------=_Part_184321_1139688458.1407125068017
+Content-Type: text/html; charset=GBK
+Content-Transfer-Encoding: base64
+
+PGRpdiBzdHlsZT0ibGluZS1oZWlnaHQ6MS43O2NvbG9yOiMwMDAwMDA7Zm9udC1zaXplOjE0cHg7
+Zm9udC1mYW1pbHk6QXJpYWwiPjxkaXY+aGksYWxsPC9kaXY+PGRpdj5sb29rIGF0IHRoZSBjb2Rl
+LjwvZGl2PjxkaXY+Y2FzZSBUcmFuc2FjdGlvbjo6T1BfTUtDT0xMOjxicj4mbmJzcDsmbmJzcDsm
+bmJzcDsmbmJzcDsmbmJzcDsgezxicj4mbmJzcDsmbmJzcDsmbmJzcDsmbmJzcDsmbmJzcDsmbmJz
+cDsmbmJzcDsmbmJzcDsmbmJzcDsmbmJzcDsmbmJzcDsmbmJzcDsmbmJzcDtjb2xsX3QgY2lkID0g
+aS5nZXRfY2lkKCk7PC9kaXY+PGRpdj4mbmJzcDsmbmJzcDsmbmJzcDsmbmJzcDsmbmJzcDsgLi4u
+fTwvZGl2PjxkaXY+MSAuPC9kaXY+PGRpdj53aGF0IGlzIENPTEwgYW5kIGNpZD8mbmJzcDsmbmJz
+cDsgPC9kaXY+PGRpdj5pcyBjb2xsIGlzIGEgcGcgYW5kIGNpZCBpcyBwZ2lkPzwvZGl2PjxkaXY+
+Jm5ic3A7PC9kaXY+PGRpdj4yLiB3aGF0IGlzIHRoZSByZWxhdGlvbiBiZXR3ZWVuIGNpZCBhbmQg
+J2N1cnJlbnQvbWV0YSc/Jm5ic3A7Jm5ic3A7IG9yIHdoYXQgaXMgaW4gY3VycmVudC9tZXRhPzwv
+ZGl2PjxkaXY+Jm5ic3A7PC9kaXY+PGRpdj4mbmJzcDs8L2Rpdj48ZGl2PnRoYW5rcyB2ZXJ5IG11
+Y2guPC9kaXY+PC9kaXY+PGJyPjxicj48c3BhbiB0aXRsZT0ibmV0ZWFzZWZvb3RlciI+PHNwYW4g
+aWQ9Im5ldGVhc2VfbWFpbF9mb290ZXIiPjwvc3Bhbj48L3NwYW4+
+------=_Part_184321_1139688458.1407125068017--
+
+
+--===============0585630171==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============0585630171==--
