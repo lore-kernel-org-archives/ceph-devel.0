@@ -1,188 +1,415 @@
-From: Joao Eduardo Luis <joao.luis@inktank.com>
-Subject: Re: Non existing monitor
-Date: Mon, 04 Aug 2014 14:40:36 +0000
-Message-ID: <53DF9B64.7070805@inktank.com>
-References: <7F4FDDF05D5B3241ABA5EB82D169E31E04B2FE35@SACMBXIP01.sdcorp.global.sandisk.com> <CAPYLRzjRw-wTcv3Q2ZAKjmXKwNsLwL6gsj5BAJfSVSNcEg3New@mail.gmail.com> <68A06213B74F1742A2C48216AE1BB6B803FEDE4F@SACMBXIP02.sdcorp.global.sandisk.com> <53DCE506.6050106@inktank.com> <7F4FDDF05D5B3241ABA5EB82D169E31E04B301BC@SACMBXIP01.sdcorp.global.sandisk.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+From: ceph branch robot <nobody@ceph.com>
+Subject: ceph branch status
+Date: Mon,  4 Aug 2014 08:00:18 -0700 (PDT)
+Message-ID: <20140804150018.B1904281859@teuthology.front.sepia.ceph.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f46.google.com ([74.125.82.46]:46983 "EHLO
-	mail-wg0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752285AbaHDOkq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Aug 2014 10:40:46 -0400
-Received: by mail-wg0-f46.google.com with SMTP id m15so7758120wgh.29
-        for <ceph-devel@vger.kernel.org>; Mon, 04 Aug 2014 07:40:41 -0700 (PDT)
-In-Reply-To: <7F4FDDF05D5B3241ABA5EB82D169E31E04B301BC@SACMBXIP01.sdcorp.global.sandisk.com>
+Received: from gw.sepia.ceph.com ([64.90.32.62]:21863 "EHLO
+	teuthology.front.sepia.ceph.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1753074AbaHDPAT (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Aug 2014 11:00:19 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Aanchal Agrawal <Aanchal.Agrawal@sandisk.com>, Pavan Rallabhandi <Pavan.Rallabhandi@sandisk.com>, Gregory Farnum <greg@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Samuel Just <sam.just@inktank.com>
+To: ceph-devel@vger.kernel.org
 
-Hello Aanchal,
+-- All Branches --
 
-On 04/08/14 06:43, Aanchal Agrawal wrote:
-> Hi Joao,
->
-> I have already fixed this issue(let me know if the fix looks good) and was about to send the pull request with the following diff.
-> But I still had couple of unanswered questions, hence this mail chain. And they were:
+Alfredo Deza <alfredo.deza@inktank.com>
+	2013-09-27 10:33:52 -0400   wip-5900
+	2014-07-08 13:58:35 -0400   wip-8679
 
-I was in the middle of finishing a patch when I read your email. 
-Although your patch looks good as a fix for the incorrect behaviour, I 
-believe how the code itself was structured and the holes it left opened 
-was concerning, so I pushed my branch nonetheless.  You can find it in 
-ceph's github repository, branch name 'wip-mon-empty-store'.  A review 
-would be appreciated, and any concerns you may have will be welcome.
+Dan Mick <dan.mick@inktank.com>
+	2013-07-16 23:00:06 -0700   wip-5634
 
->
-> 1) Though in case of mkfs not being set, what is the reason for creating a new levelDB store in case an attempt to open the 'store.db' is a failure, as levelDB anyways seem to be throwing 'magic' error going forward. Are there any use cases for this scenario?
-> 2) And also, is it valid to flag "No Monitor present" in case the mon data directory is existing, but with no data('store.db') in it, in case mkfs is not set?
+Danny Al-Gaaf <danny.al-gaaf@bisect.de>
+	2014-07-28 20:50:24 +0200   wip-coverity-20140728
 
-With regard to 1), it is a bug.  On open we specified that leveldb 
-should not create a new database (see db->open() vs 
-db->create_and_open()).  However, leveldb will create the directory 
-structure if it is missing nonetheless, and this is what was creating 
-those issues.  The patch in the branch I mentioned above will work 
-around that by checking whether the monitor's data directory is empty 
-before opening the database -- thus, if it is indeed empty, it will not 
-call on db->open() and therefore avoid populating the directory with 
-senseless noise.
+David Zafman <david.zafman@inktank.com>
+	2014-07-31 16:58:10 -0700   wip-8231
 
-About 2), 'store.db' may not be present if we are upgrading a release 
-prior to cuttlefish, as at the time the monitor store format was 
-different.  We use the absence of 'store.db' as an indicator to check 
-for a possible need for a format upgrade (which will then be performed 
-by Monitor::StoreConverter).  However, we can use the total and complete 
-absence of files in the monitor's data directory as a definite indicator 
-that there's no monitor store at that path.
+Greg Farnum <greg@inktank.com>
+	2013-02-13 14:46:38 -0800   wip-mds-snap-fix
+	2013-02-22 19:57:53 -0800   wip-4248-snapid-journaling
+	2013-09-30 14:37:49 -0700   wip-filestore-test
+	2013-10-09 13:31:38 -0700   cuttlefish-4832
+	2013-11-15 14:41:51 -0800   wip-librados-command2
+	2013-12-09 16:21:41 -0800   wip-hitset-snapshots
+	2014-01-29 08:44:01 -0800   wip-filestore-fast-lookup
+	2014-04-28 14:51:59 -0700   wip-messenger-locking
+	2014-05-20 13:36:10 -0700   wip-xattr-spillout-basic
+	2014-05-29 14:54:29 -0700   wip-client-fast-dispatch
+	2014-06-16 14:57:41 -0700   wip-8519-osd-unblocking
+	2014-07-28 18:42:31 -0700   wip-8880
 
-Hope this sheds some light on your questions.
+Haomai Wang <haomaiwang@gmail.com>
+	2014-07-27 13:37:49 +0800   wip-flush-set
 
-   -Joao
+Ilya Dryomov <ilya.dryomov@inktank.com>
+	2014-07-28 00:53:33 +0400   wip-dis-tmp
+
+James Page <james.page@ubuntu.com>
+	2013-02-27 22:50:38 +0000   wip-debhelper-8
+
+Jenkins <jenkins@inktank.com>
+	2014-07-29 13:42:53 -0700   last
+
+Joao Eduardo Luis <joao.luis@gmail.com>
+	2014-07-22 15:41:42 +0100   wip-leveldb-misc
+	2014-07-22 15:46:29 +0100   wip-leveldb-get
+
+Joao Eduardo Luis <joao.luis@inktank.com>
+	2013-04-18 00:01:24 +0100   wip-4521-tool
+	2013-04-22 15:14:28 +0100   wip-4748
+	2013-04-24 16:42:11 +0100   wip-4521
+	2013-04-30 18:45:22 +0100   wip-mon-compact-dbg
+	2013-05-21 01:46:13 +0100   wip-monstoretool-foo
+	2013-05-31 16:26:02 +0100   wip-mon-cache-first-last-committed
+	2013-05-31 21:00:28 +0100   wip-mon-trim-b
+	2013-07-20 04:30:59 +0100   wip-mon-caps-test
+	2013-07-23 16:21:46 +0100   wip-5704-cuttlefish
+	2013-07-23 17:35:59 +0100   wip-5704
+	2013-08-02 22:54:42 +0100   wip-5648
+	2013-08-12 11:21:29 -0700   wip-store-tool.cuttlefish
+	2013-09-25 22:08:24 +0100   wip-6378
+	2013-10-10 14:06:59 +0100   wip-mon-set-pspool
+	2013-12-09 16:39:19 +0000   wip-mon-mdsmap-trim.dumpling
+	2013-12-18 22:17:09 +0000   wip-monstoretool-genmdsmaps
+	2014-01-17 17:11:59 -0800   wip-fix-pipe-comment-for-fhaas
+	2014-02-02 14:10:39 +0000   wip-7277.for-loic
+	2014-04-04 22:32:41 +0100   wip-mon-fix
+	2014-04-21 15:55:28 +0100   wip-7514
+	2014-04-22 17:58:58 +0100   wip-8165-joao
+	2014-06-24 23:16:17 +0100   wip-8624-with-amazing-foo
+	2014-07-11 16:06:02 +0100   wip-8696.with-test-mdsfixes
+	2014-07-30 00:29:59 +0100   wip-7988
+	2014-08-04 14:27:50 +0000   wip-mon-empty-store
+
+John Spray <jcspray@gmail.com>
+	2014-03-03 13:10:05 +0000   wip-mds-stop-rank-0
+
+John Spray <john.spray@inktank.com>
+	2014-04-01 15:06:19 +0100   wip-5382
+
+John Spray <john.spray@redhat.com>
+	2014-06-25 22:54:13 -0400   wip-mds-sessions
+	2014-07-22 17:39:56 +0100   wip-cephtool-test
+	2014-07-24 02:10:19 +0100   wip-objecter-jcsp
+	2014-07-29 00:15:21 +0100   wip-objecter-rebase
+	2014-08-01 01:20:25 +0100   wip-mds-contexts
+
+John Spray <jspray@redhat.com>
+	2014-07-28 14:41:18 +0100   wip-jt-smoke
+
+John Wilkins <john.wilkins@inktank.com>
+	2013-07-31 18:00:50 -0700   wip-doc-rados-python-api
+	2014-07-03 07:31:14 -0700   wip-doc-rgw-federated
+	2014-07-15 13:42:13 -0700   wip-doc-documenting-ceph
+
+Josh Durgin <josh.durgin@inktank.com>
+	2013-03-01 14:45:23 -0800   wip-rbd-workunit-debug
+	2013-07-25 18:44:10 -0700   wip-5488-2
+	2013-08-14 15:51:04 -0700   wip-5970
+	2013-08-27 12:03:08 -0700   wip-krbd-workunits
+	2013-11-22 15:17:08 -0800   wip-zero-copy-bufferlist
+	2013-11-25 13:59:29 -0800   wip-init-highlander
+	2013-12-17 08:16:59 -0800   wip-rbd-deadlock-lockdep
+	2013-12-18 12:28:39 -0800   wip-rbd-deadlock-lockdep-dumpling
+	2013-12-26 18:06:39 -0800   emperor-5426
+	2013-12-26 18:07:13 -0800   dumpling-5426
+	2014-02-06 20:31:43 -0800   wip-librados-obj-ops
+	2014-02-06 20:31:47 -0800   wip-librados-op-rvals
+	2014-03-03 14:27:39 -0800   wip-object-cacher-memory
+	2014-04-08 15:13:44 -0700   wip-6480-0.67.7
+	2014-04-27 14:13:07 -0700   wip-rbd-header-dump
+	2014-06-06 15:40:12 -0700   wip-libradosstriper
+
+Loic Dachary <loic@dachary.org>
+	2014-07-03 12:46:15 +0200   wip-7238-lrc
+	2014-07-30 23:12:20 +0600   wip-erasure-code-profile-default
+	2014-08-04 10:54:21 +0200   wip-8475
+
+Matt Benjamin <matt@linuxbox.com>
+	2013-10-08 16:49:23 -0400   wip-libcephfs-emp-rb
+
+Mohammad Salehe <salehe+dev@gmail.com>
+	2014-05-27 18:58:53 +0430   wip-pybind-fixes
+
+Noah Watkins <noah.watkins@inktank.com>
+	2013-01-05 11:58:38 -0800   wip-localized-read-tests
+	2013-10-18 15:42:50 -0700   cls-lua
+	2013-11-05 07:30:19 -0800   port/old
+	2013-11-06 08:39:57 -0800   wip-6636
+	2013-11-26 08:26:24 -0800   wip-boost-uuid
+	2013-12-30 09:47:40 -0800   port/visibility
+	2014-01-13 12:16:22 -0800   fix-sbin-install
+	2014-02-05 14:23:59 -0800   port/main
+	2014-05-23 14:25:21 -0700   wip-native-cephfs-java
+	2014-07-01 15:48:00 -0700   wip-lttng
+
+Roald van Loon <roald@roaldvanloon.nl>
+	2012-12-24 22:26:56 +0000   wip-dout
+
+Sage Weil <sage@inktank.com>
+	2012-11-30 13:47:27 -0800   wip-osd-readhole
+	2012-12-07 14:38:46 -0800   wip-osd-alloc
+	2013-01-29 13:46:02 -0800   wip-readdir
+	2013-02-11 07:05:15 -0800   wip-sim-journal-clone
+	2013-04-18 13:51:36 -0700   argonaut
+	2013-06-02 21:21:09 -0700   wip-fuse-bobtail
+	2013-06-18 17:00:00 -0700   wip-mon-refs
+	2013-06-28 12:54:08 -0700   wip-mds-snap
+	2013-07-08 14:52:10 -0700   wip-lazy-cuttlefish
+	2013-07-23 09:46:55 -0700   wip-5488
+	2013-07-27 08:20:41 -0700   wip-5754
+	2013-08-02 15:47:32 -0700   wip-5648-b
+	2013-08-04 09:38:49 -0700   wip-mon-skip-auth-cuttlefish
+	2013-08-04 22:25:03 -0700   wip-5869
+	2013-08-05 14:10:27 -0700   wip-mon-global-id
+	2013-08-14 22:16:46 -0700   wip-5973
+	2013-08-28 18:11:09 -0700   wip-libs3
+	2013-09-19 12:08:45 -0700   wip-neon-crc32c
+	2013-09-27 13:17:11 -0700   wip-test-falloc
+	2013-10-05 21:09:29 -0700   wip-osd-bloom
+	2013-11-01 23:58:57 -0700   wip-6707
+	2013-12-02 10:01:21 -0800   wip-osdmon-warnings
+	2013-12-02 21:57:18 -0800   wip-pool-stats-dumpling2
+	2013-12-07 16:04:15 -0800   wip-journaler-kludge
+	2014-01-06 22:13:09 -0800   wip-librados
+	2014-01-09 05:44:55 -0800   wip-fuse-flock
+	2014-01-14 06:40:33 -0800   wip-dio
+	2014-01-22 14:42:52 -0800   wip-formatter
+	2014-01-28 10:51:24 -0800   wip-striper-dumpling
+	2014-02-03 08:41:19 -0800   wip-dumpling-fuse-debug
+	2014-02-09 15:07:11 -0800   wip-primary-affinity-old1
+	2014-03-05 15:14:26 -0800   wip-6101
+	2014-03-16 09:50:31 -0700   wip-dumpling-sloppy-log
+	2014-03-23 18:59:01 -0700   wip-7826
+	2014-03-24 17:22:52 -0700   wip-7779
+	2014-03-28 12:34:55 -0700   wip-7867-b
+	2014-04-01 13:07:57 -0700   wip-rest-api-init
+	2014-04-02 08:49:33 -0700   wip-ms-dump
+	2014-04-08 12:48:49 -0700   wip-debug-pgrefs
+	2014-04-10 07:04:17 -0700   wip-fuse-reconnect
+	2014-04-19 21:13:23 -0700   wip-f2fs
+	2014-05-20 21:36:42 -0700   wip-xio
+	2014-05-21 08:55:54 -0700   wip-librbd-flush-dumpling
+	2014-06-12 09:39:04 -0700   wip-addr
+	2014-06-16 12:57:36 -0700   wip-ec-hitset
+	2014-06-23 09:08:05 -0700   emperor
+	2014-07-01 17:15:03 -0700   wip-7995
+	2014-07-08 12:43:00 -0700   wip-leak
+
+Sage Weil <sage@redhat.com>
+	2014-06-18 21:34:57 -0700   wip-disk-ioprio-dumpling
+	2014-06-18 21:34:57 -0700   wip-scrub-sleep-dumpling
+	2014-06-30 17:54:58 -0700   wip-osd-map-cache-size
+	2014-07-14 15:51:10 -0700   wip-misplaced
+	2014-07-15 09:36:32 -0700   wip-journal-sync
+	2014-07-16 18:04:07 -0700   wip-8632-dumpling
+	2014-07-19 15:20:05 -0700   wip-transaction
+	2014-07-22 06:07:43 -0700   wip-read-hole
+	2014-07-24 11:37:07 -0700   wip-msgr
+	2014-07-25 16:38:22 -0700   wip-objecter
+	2014-07-30 10:52:42 -0700   wip-rbd-flush
+	2014-07-30 14:10:25 -0700   wip-8595
+	2014-08-01 15:57:55 -0700   dumpling
+	2014-08-01 20:49:23 -0700   wip-libcommon
+	2014-08-03 08:40:57 -0700   firefly
+	2014-08-03 11:15:38 -0700   wip-objectstore
+	2014-08-03 18:26:34 -0700   wip-8891
+	2014-08-03 20:49:16 -0700   wip-sage-testing
+	2014-08-03 21:00:51 -0700   wip-ceph-conf
+
+Samuel Just <sam.just@inktank.com>
+	2013-06-06 11:51:04 -0700   wip_bench_num
+	2013-06-06 13:08:51 -0700   wip_5238_cuttlefish
+	2013-06-19 14:54:13 -0700   wip_cuttlefish_compact_on_startup
+	2013-06-19 19:46:06 -0700   wip_observer
+	2013-07-23 14:04:29 -0700   wip-cuttlefish-next
+	2013-08-15 15:35:26 -0700   wip-5985
+	2013-08-19 00:04:13 -0700   wip-dumpling-pglog-undirty
+	2013-08-26 23:19:47 -0700   wip-dumpling-log-assert
+	2013-08-27 15:40:28 -0700   wip-dumpling-perf2
+	2013-09-01 10:57:33 -0700   wip-5869-DNM
+	2013-09-19 12:52:53 -0700   wip-5992
+	2013-10-30 16:56:18 -0700   wip-6633
+	2013-11-04 11:25:32 -0800   wip-enotempty
+	2013-11-05 17:47:48 -0800   wip-6722
+	2013-11-09 17:00:31 -0800   wip-perf2
+	2013-11-12 14:56:00 -0800   wip-queueing
+	2013-11-13 15:50:01 -0800   wip-6761
+	2013-11-15 13:54:12 -0800   wip-queueing2
+	2013-11-18 11:22:17 -0800   wip-6786
+	2013-11-18 13:14:20 -0800   wip-6756
+	2013-12-04 19:10:50 -0800   wip-testrados-ec
+	2013-12-10 16:01:03 -0800   wip-ecbackend
+	2013-12-13 13:19:25 -0800   wip-client-io-rebased
+	2014-01-13 15:15:40 -0800   wip-client-io-rebased-2
+	2014-01-22 12:24:11 -0800   wip-client-io-final
+	2014-01-26 19:12:31 -0800   wip-spgt
+	2014-01-28 20:13:50 -0800   wip-spgt2
+	2014-01-30 11:38:26 -0800   wip-spgt3
+	2014-02-03 17:23:03 -0800   wip-ecbackend-3
+	2014-02-12 21:13:11 -0800   wip-ecbackend-7
+	2014-02-15 17:45:35 -0800   wip-ecbackend-8
+	2014-02-16 15:04:18 -0800   wip-ecbackend-9
+	2014-02-16 16:25:11 -0800   wip-ecbackend-alt-checksum
+	2014-02-17 13:36:58 -0800   wip-ecbackend-11
+	2014-03-25 15:55:12 -0700   wip-ec-copy-get
+	2014-03-26 13:29:33 -0700   wip-6910-72.2
+	2014-04-20 20:28:25 -0700   wip-sam-testing-safe
+	2014-04-27 10:53:19 -0700   wip-sam-btrfs
+	2014-05-01 12:14:49 -0700   wip-dumpling-scrub
+	2014-05-08 15:44:25 -0700   wip-8301
+	2014-05-15 14:47:16 -0700   wip-osd-stap
+	2014-05-15 21:07:03 -0700   wip-sam-testing-dumpling
+	2014-06-09 11:00:51 -0700   wip-sam-testing-2
+	2014-06-17 12:11:24 -0700   wip-8595-sam
+	2014-06-19 07:50:25 -0700   wip-dumpling-scrub-67.9
+	2014-07-09 11:50:20 -0700   wip-dumpling-scrub-snaptrimmer-67.9
+	2014-07-11 16:13:16 -0700   wip-sam-testing2
+	2014-07-14 13:31:06 -0700   wip-80.3-no-hint
+	2014-07-29 16:46:46 -0700   wip-sam-testing
+	2014-07-31 15:51:55 -0700   wip-8977
+	2014-08-01 14:06:33 -0700   wip-8625
+	2014-08-03 12:47:23 -0700   firefly-next
+
+Yehuda Sadeh <yehuda@inktank.com>
+	2012-11-16 11:09:34 -0800   wip-mongoose
+	2012-12-13 18:09:37 -0800   wip-2169
+	2013-02-12 09:40:12 -0800   wip-json-decode
+	2013-02-22 15:04:37 -0800   wip-4247
+	2013-02-22 16:19:37 -0800   wip-rgw-zone
+	2013-02-26 18:01:46 -0800   wip-cls-version
+	2013-02-28 09:56:43 -0800   wip-librados-exec
+	2013-03-07 09:46:49 -0800   wip-4363
+	2013-03-07 09:47:56 -0800   wip-4363-next
+	2013-03-07 11:38:06 -0800   wip-4247-bobtail
+	2013-03-12 12:56:01 -0700   wip-4425
+	2013-03-13 10:13:29 -0700   wip-4425-next
+	2013-03-22 11:01:02 -0700   wip-rgw-zone-2
+	2013-03-22 11:29:49 -0700   wip-rgw-zone-3
+	2013-04-15 12:32:48 -0700   wip-rgw-bucketlog
+	2013-04-22 13:01:20 -0700   wip-4776-bobtail
+	2013-04-23 09:26:33 -0700   wip-4755
+	2013-04-26 09:41:39 -0700   wip-4760
+	2013-05-02 22:08:37 -0700   wip-4716
+	2013-05-06 14:41:10 -0700   wip-rgw-bucketlog-2
+	2013-05-07 14:03:04 -0700   wip-4600-bobtail
+	2013-05-07 14:03:37 -0700   wip-4600-argonaut
+	2013-05-16 09:08:46 -0700   wip-5073-2
+	2013-05-22 21:34:52 -0700   wip-5152
+	2013-05-30 09:34:21 -0700   wip-5204
+	2013-05-30 13:04:27 -0700   wip-5209
+	2013-06-14 14:53:54 -0700   wip-5362
+	2013-06-26 11:36:59 -0700   wip-5455
+	2013-06-29 00:25:32 -0700   wip-rgw-geo-2-replicalog2
+	2013-06-29 21:04:39 -0700   wip-rgw-geo-3
+	2013-07-08 18:55:19 -0700   rgw-next-libcurl
+	2013-07-22 14:46:30 -0700   wip-5664
+	2013-07-29 10:52:22 -0700   wip-5789
+	2013-07-29 10:54:02 -0700   wip-5793
+	2013-07-29 10:58:30 -0700   wip-5770
+	2013-07-30 13:53:53 -0700   wip-5808
+	2013-07-31 10:48:15 -0700   wip-rgw-next
+	2013-08-01 13:20:19 -0700   wip-5831
+	2013-08-01 18:23:49 -0700   wip-5810
+	2013-08-05 11:38:27 -0700   wip-5875
+	2013-08-15 11:00:05 -0700   wip-5978
+	2013-08-16 18:19:02 -0700   wip-rgw-papercuts
+	2013-08-19 16:56:27 -0700   wip-6056
+	2013-08-25 17:57:23 -0700   wip-5374
+	2013-09-04 16:03:22 -0700   wip-6078-dumpling
+	2013-09-10 12:18:55 -0700   wip-6268-bobtail
+	2013-09-10 14:18:46 -0700   wip-6268
+	2013-09-11 13:46:31 -0700   wip-6175
+	2013-09-11 22:30:12 -0700   wip-6286
+	2013-09-12 10:22:08 -0700   wip-6286-dumpling
+	2013-09-12 14:32:17 -0700   wip-6294
+	2013-09-13 14:43:54 -0700   wip-6302
+	2013-09-16 16:05:55 -0700   wip-6176
+	2013-09-18 10:37:21 -0700   wip-6340
+	2013-09-20 14:04:47 -0700   wip-6360
+	2013-10-03 11:49:33 -0700   wip-6444
+	2013-10-04 13:00:26 -0700   wip-6462
+	2013-10-07 09:45:20 -0700   wip-rgw-write
+	2013-10-17 21:29:34 -0700   wip-apache-mod
+	2013-10-18 10:36:01 -0700   wip-3896
+	2013-10-25 17:16:34 -0700   wip-mongoose-test
+	2013-10-30 10:31:11 -0700   wip-rgw-nxweb
+	2013-10-31 14:40:23 -0700   wip-bobtail-admin
+	2013-10-31 14:45:45 -0700   wip-5170
+	2013-11-04 19:02:35 -0800   wip-rgw-standalone
+	2013-11-07 09:14:27 -0800   wip-6678
+	2013-11-08 16:26:23 -0800   wip-6744
+	2013-12-02 21:37:13 -0800   wip-6919
+	2013-12-07 21:13:19 -0800   wip-objecter-lock
+	2013-12-10 11:33:29 -0800   wip-mongoose-2
+	2013-12-13 11:01:49 -0800   wip-messenger-prefetch
+	2013-12-17 23:24:27 -0800   wip-rgw-getobj-cb
+	2013-12-18 10:34:12 -0800   wip-7030
+	2013-12-18 12:57:40 -0800   wip-queueing3
+	2013-12-18 13:02:52 -0800   wip-queueing3-rgw
+	2014-01-06 18:32:42 -0800   wip-7110-dumpling
+	2014-01-09 18:22:46 -0800   wip-queuing3-loadgen
+	2014-01-15 13:06:31 -0800   wip-rgw-civetweb
+	2014-01-15 14:35:57 -0800   wip-user-quota
+	2014-01-22 17:10:32 -0800   wip-7169
+	2014-01-23 13:48:28 -0800   wip-7169-dumpling
+	2014-01-28 09:38:19 -0800   bobtail
+	2014-01-28 09:40:18 -0800   cuttlefish
+	2014-01-28 13:42:37 -0800   wip-6678-dumpling
+	2014-02-05 21:51:11 -0800   wip-rgw-manifest
+	2014-02-19 18:00:10 -0800   wip-7467
+	2014-02-20 09:01:21 -0800   wip-7453
+	2014-02-20 09:25:04 -0800   multi-object-delete
+	2014-02-21 10:43:37 -0800   wip-messenger-prefetch2
+	2014-02-21 19:50:36 -0800   wip-rgw-server-changes
+	2014-02-26 14:00:01 -0800   wip-objecter-locking
+	2014-02-27 13:07:55 -0800   wip-rwmap
+	2014-03-03 17:07:03 -0800   wip-7589
+	2014-03-07 17:15:39 -0800   wip-objecter-session-ops
+	2014-03-21 11:21:18 -0700   wip-rgw-fail
+	2014-03-21 15:09:26 -0700   wip-7774
+	2014-03-25 14:08:01 -0700   wip-rgw-less-alloc
+	2014-04-03 13:44:52 -0700   wip-7774-2
+	2014-04-03 13:46:16 -0700   wip-rgw-less-alloc-2
+	2014-04-03 13:46:45 -0700   wip-7767-2
+	2014-04-09 16:29:29 -0700   wip-objecter-session-ops-3
+	2014-04-10 11:24:34 -0700   wip-5170-dumpling
+	2014-04-10 13:10:36 -0700   wip-5170-dumpling-2
+	2014-04-17 16:38:32 -0700   wip-objecter-session-ops-4
+	2014-04-29 15:50:59 -0700   wip-objecter-session-ops-sage
+	2014-04-29 15:50:59 -0700   wip-objecter-session-ops-sage-old
+	2014-05-06 11:06:29 -0700   wip-8289-dumpling
+	2014-05-12 14:46:18 -0700   wip-8251
+	2014-05-19 14:49:46 -0700   wip-rgw-keystone-expire
+	2014-05-22 18:27:58 -0700   wip-8428-firefly
+	2014-05-28 14:19:40 -0700   wip-8170-dumpling
+	2014-05-29 07:53:15 -0700   wip-8436
+	2014-06-04 13:25:23 -0700   wip-objecter-yehuda
+	2014-06-05 11:09:12 -0700   wip-7767-3
+	2014-06-05 16:33:34 -0700   wip-8539
+	2014-06-05 18:46:37 -0700   wip-7767
+	2014-06-16 13:10:54 -0700   wip-objecter-base
+	2014-07-14 10:50:48 -0700   wip-firefly-8698
+	2014-07-16 16:39:36 -0700   wip-8632
+	2014-07-18 13:31:30 -0700   wip-8702
+
+Yehuda Sadeh <yehuda@redhat.com>
+	2014-07-25 13:53:26 -0700   wip-rgw-align-firefly
+	2014-07-25 20:38:44 -0700   wip-8937
+	2014-07-28 16:16:12 -0700   wip-rgw-versioning
+	2014-08-01 16:35:01 -0700   wip-8621
+	2014-08-02 20:40:37 -0700   wip-rgw-need-to-wait
+
+markhpc <mark.nelson@inktank.com>
+	2013-11-06 09:23:22 -0600   wip-v0.70-mark
+	2014-03-17 14:50:57 -0500   wip-pq-mark
+	2014-07-29 18:53:37 -0500   wip-rocksdb-mark
+
+scuttlemonkey <patrick@inktank.com>
+	2013-12-13 13:37:30 -0800   wip-doc-quick-start
 
 
 
-
-> ========================
-> <snip>
->
-> @@ -152,11 +152,20 @@ int mon_data_empty(bool *r)
->     return code;
->   }
->
-> -int mon_exists(bool *r)
-> +int mon_exists(bool *r, bool mkfs)
->   {
->     int code = mon_data_exists(r);
-> -  if (code || *r == false)
-> +  if (code)
->       return code;
-> +  // If mon_data(directory) not present, check for mkfs
-> +  if (*r == false) {
-> +    if (!mkfs) {
-> +      cerr << "No monitor with ID " << g_conf->name.get_id() << " in cluster" << std::endl;
-> +      return 1;
-> +    }
-> +    // If mkfs is true, we want to create a new directory, hence return 0
-> +    return code;
-> +  }
->     return mon_data_empty(r);
->   }
->
-> @@ -268,7 +277,7 @@ int main(int argc, const char **argv)
->     }
->
->     bool exists;
-> -  if (mon_exists(&exists))
-> +  if (mon_exists(&exists, mkfs))
->       exit(1);
->
->     if (mkfs && exists) {
-> @@ -452,7 +461,7 @@ int main(int argc, const char **argv)
->
-> <\snip>
-> ==========================
->
-> Thanks,
-> Aanchal
->
-> -----Original Message-----
-> From: Joao Eduardo Luis [mailto:joao.luis@inktank.com]
-> Sent: Saturday, August 02, 2014 6:48 PM
-> To: Pavan Rallabhandi; Gregory Farnum; Aanchal Agrawal
-> Cc: ceph-devel@vger.kernel.org; Samuel Just
-> Subject: Re: Non existing monitor
->
-> On 01/08/14 18:20, Pavan Rallabhandi wrote:
->> Greg,
->>
->> The commands used were to start monitor for an instance id that is non existing, for which a leveldb store error is thrown:
->>
->> <snip>
->>
->> src/ceph-mon -i foo
->> 2014-08-01 02:47:08.210208 7f7341c3c800 -1 failed to create new
->> leveldb store
->>
->> <\snip>
->>
->> The idea is to fix this behavior by throwing a relevant error.
->
-> The infrastructure is there (ceph_mon.cc) but is not doing what I believe it should.  It was introduced in 1eafe8dc45419a6b7d319345cac7fbc0d684d1b1.  I'm fixing it now.
->
->     -Joao
->
->>
->> Thanks,
->> -Pavan.
->>
->> -----Original Message-----
->> From: Gregory Farnum [mailto:greg@inktank.com]
->> Sent: Friday, August 01, 2014 6:16 PM
->> To: Aanchal Agrawal
->> Cc: ceph-devel@vger.kernel.org; Pavan Rallabhandi; Samuel Just; Joao
->> Luis
->> Subject: Re: Non existing monitor
->>
->> On Fri, Aug 1, 2014 at 6:03 AM, Aanchal Agrawal <Aanchal.Agrawal@sandisk.com> wrote:
->>> Any help on this ...
->>>
->>> -----Original Message-----
->>> From: Aanchal Agrawal
->>> Sent: Wednesday, July 30, 2014 3:37 PM
->>> To: 'ceph-devel@vger.kernel.org'
->>> Cc: Pavan Rallabhandi
->>> Subject: Non existing monitor
->>>
->>> Hi,
->>>
->>> We found a case(bug?) in ceph mon code, where in, an attempt to start a non-existing monitor is throwing up a levelDB error saying "failed to create new leveldb store", instead we thought an appropriate message say "No Monitor present with that id" would do, by checking for the monitor existence way ahead.
->>>
->>> It seems that 'mon_exists()' checks for the existence of the mon data directory(via 'mon_data_exists()') and also for the non-empty nature of that directory(via 'mon_data_empty()'). The fix seemed pretty simple, as to flag the appropriate message if 'mon_data_exists()' were to set 'exists' to 'false', in case mkfs is not set.
->>>
->>> The other behavior that we are seeking clarity, again in case of mkfs not being set is, if 'mon_data_exists()' sets 'exists' to 'true' and 'mon_data_empty()' sets 'exists' to 'false' (meaning the mon data directory is present, but it is empty), then the current code seems to be going ahead in an attempt to open the 'store.db', and when open fails, it tries to create a new 'store.db' (though mkfs is not set) and eventually gives up throwing "unable to read magic from mon data".
->>>
->>> The questions we had around this were:
->>>
->>> 1) Though in case of mkfs not being set, what is the reason for creating a new levelDB store in case an attempt to open the 'store.db' is a failure, as levelDB anyways seem to be throwing 'magic' error going forward. Are there any use cases for this scenario?
->>> 2) And also, is it valid to flag "No Monitor present" in case the mon data directory is existing, but with no data('store.db') in it, in case mkfs is not set?
->>
->> This is a little unclear to me. Can you describe exactly what commands you're running and what the response from the monitor is?
->> -Greg
->> Software Engineer #42 @ http://inktank.com | http://ceph.com
->>
->> ________________________________
->>
->> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
->>
->
->
-> --
-> Joao Eduardo Luis
-> Software Engineer | http://inktank.com | http://ceph.com
->
-
-
--- 
-Joao Eduardo Luis
-Software Engineer | http://inktank.com | http://ceph.com
+Grouped by committer, ordered by commit time stamp.
