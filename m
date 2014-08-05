@@ -1,52 +1,52 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: ErasureCode base class
-Date: Tue, 05 Aug 2014 09:53:49 +0200
-Message-ID: <53E08D8D.1010303@dachary.org>
+From: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>
+Subject: RE: ErasureCode base class
+Date: Tue, 5 Aug 2014 08:30:27 +0000
+Message-ID: <3472A07E6605974CBC9BC573F1BC02E4AE7585BB@CERNXCHG43.cern.ch>
+References: <53E08D8D.1010303@dachary.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="Sf3BmFGktFoH6BU9efxrFCpogh5rQ83Ae"
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:54011 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1753743AbaHEHx4 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Aug 2014 03:53:56 -0400
+Received: from cernmx13.cern.ch ([188.184.36.46]:35053 "EHLO CERNMX13.cern.ch"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754738AbaHEIaa convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Aug 2014 04:30:30 -0400
+In-Reply-To: <53E08D8D.1010303@dachary.org>
+Content-Language: en-GB
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andreas-Joachim Peters <andreas.joachim.peters@cern.ch>
+To: Loic Dachary <loic@dachary.org>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---Sf3BmFGktFoH6BU9efxrFCpogh5rQ83Ae
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Hi Loic,=20
+looks very good and removes all the duplication!=20
+
+I will then do the cache modification against this code base including =
+this pull request.
+
+Cheers Andreas.
+________________________________________
+=46rom: Loic Dachary [loic@dachary.org]
+Sent: 05 August 2014 09:53
+To: Andreas Joachim Peters
+Cc: Ceph Development
+Subject: ErasureCode base class
 
 Hi,
 
-Would you have time to review the ErasureCode base class at https://githu=
-b.com/ceph/ceph/pull/2201 ? It factorizes code that is common to ErasureC=
-odeJerasure and ErasureCodeIsa. While doing so it really helped that you =
-wrote the ErasureCodeIsa decode functions with only minimal changes compa=
-red to those in ErasureCodeJerasure. Thanks for that :-)
+Would you have time to review the ErasureCode base class at https://git=
+hub.com/ceph/ceph/pull/2201 ? It factorizes code that is common to Eras=
+ureCodeJerasure and ErasureCodeIsa. While doing so it really helped tha=
+t you wrote the ErasureCodeIsa decode functions with only minimal chang=
+es compared to those in ErasureCodeJerasure. Thanks for that :-)
 
 Cheers
 
---=20
+--
 Lo=EFc Dachary, Artisan Logiciel Libre
 
-
---Sf3BmFGktFoH6BU9efxrFCpogh5rQ83Ae
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlPgjY0ACgkQ8dLMyEl6F23npQCfc26R5V5f824pSqW91C/qvuLf
-cE0AnRYbKvqV1MrBaMIrt+BRuvbT+izG
-=ZJ7m
------END PGP SIGNATURE-----
-
---Sf3BmFGktFoH6BU9efxrFCpogh5rQ83Ae--
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
