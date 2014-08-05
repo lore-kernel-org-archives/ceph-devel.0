@@ -1,104 +1,41 @@
-From: Marios-Evaggelos Kogias <marioskogias@gmail.com>
-Subject: =?UTF-8?Q?Re=3A_=CE=99nstrumenting_RADOS_with_Zipkin_=2B_LTTng?=
-Date: Tue, 5 Aug 2014 19:22:59 +0300
-Message-ID: <CACDi=KosXL9L9WjHPw-f-2hZ6DpWbCbX+rSLmVyg7h1jm5cRGw@mail.gmail.com>
-References: <CACDi=KpbvTNNEL-59Fej9rvShO9HOdsEPDueTD4uw9nWOYaByg@mail.gmail.com>
-	<CA+4uBUYSM3n-3DcuHuHDA-CarXp5vx0s7JmyTVSGqerpLGGe1g@mail.gmail.com>
-	<CA+4uBUaV_W0x5vV7SS0xBGnWfDRLa6OAd25NYWsEc0vOp3+c7A@mail.gmail.com>
-	<CAFu9Dv1Aqsf69=fXGZ1QjgQuvmXyaDGX0vk91MAT=6QuWznXDw@mail.gmail.com>
+From: Patrick McGarry <patrick@inktank.com>
+Subject: Vote for Ceph Talks at OpenStack Paris
+Date: Tue, 5 Aug 2014 12:30:17 -0400
+Message-ID: <CAP8Oy=Kyk3sgiCHO+NxLWGeW139igj6M9fxLdafVygD5Kdyy+w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f177.google.com ([209.85.220.177]:53669 "EHLO
-	mail-vc0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755189AbaHEQXA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Aug 2014 12:23:00 -0400
-Received: by mail-vc0-f177.google.com with SMTP id hy4so1932522vcb.36
-        for <ceph-devel@vger.kernel.org>; Tue, 05 Aug 2014 09:22:59 -0700 (PDT)
-In-Reply-To: <CAFu9Dv1Aqsf69=fXGZ1QjgQuvmXyaDGX0vk91MAT=6QuWznXDw@mail.gmail.com>
+Received: from mail-vc0-f171.google.com ([209.85.220.171]:41996 "EHLO
+	mail-vc0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755235AbaHEQaU (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Aug 2014 12:30:20 -0400
+Received: by mail-vc0-f171.google.com with SMTP id hq11so1948536vcb.30
+        for <ceph-devel@vger.kernel.org>; Tue, 05 Aug 2014 09:30:20 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Adam Crume <adamcrume@gmail.com>
-Cc: Samuel Just <sam.just@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Vangelis Koukis <vkoukis@grnet.gr>, Constantinos Venetsanopoulos <cven@grnet.gr>, Filippos Giannakos <philipgian@grnet.gr>
+To: Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>
 
-2014-08-02 0:00 GMT+03:00 Adam Crume <adamcrume@gmail.com>:
-> I've been assuming the code is at
-> https://github.com/marioskogias/ceph/tree/feature-blkin, in which case
-> the diff is attached.  I computed the diff using:
-> git diff $(git merge-base marioskogias/feature-blkin ceph/master)
-> marioskogias/feature-blkin
->
+Hey cephers,
 
-Exactly, this is the repo with the Ceph code changes.
-Indeed we updated it so as it has the latest code producing the output shown in
-the screenshot which was attached in the previous mail.
+Just wanted to let you know there are a ton of great submissions to
+the upcoming OpenStack Summit in Paris, and many of them are about
+Ceph.  To make it easy to find the good stuff I have aggregated the
+Ceph talks for easy perusal and voting.  Please head over to the
+OpenStack site and vote for your favorite Ceph (or others if you have
+time) submissions.
 
-Marios
+http://ceph.com/community/ceph-submissions-abound-openstack-paris/
 
-> On Fri, Aug 1, 2014 at 1:24 PM, Samuel Just <sam.just@inktank.com> wrote:
->> I'm probably missing something, is there supposed to be a [6] with
->> your ceph changes?
->> -Sam
->>
->> On Fri, Aug 1, 2014 at 1:17 PM, Samuel Just <sam.just@inktank.com> wrote:
->>> Reading!
->>> -Sam
->>>
->>> On Fri, Aug 1, 2014 at 9:28 AM, Marios-Evaggelos Kogias
->>> <marioskogias@gmail.com> wrote:
->>>> Hello all,
->>>>
->>>> my name is Marios Kogias and I am a student at the National Technical
->>>> University of Athens. As part of my diploma thesis and my participation in
->>>> Google Summer of Code 2014 (in the LTTng organization) I am working on a
->>>> low-overhead tracing infrastructure for distributed systems. I am also
->>>> collaborating with the Synnefo team (https://www.synnefo.org/) and especially
->>>> with Vangelis Koukis, Constantinos Venetsanopoulos and Filippos Giannakos (cc)
->>>>
->>>> Some time ago, we started experimenting with RADOS instrumentation
->>>> using LTTng and
->>>> we noticed that there are similar endeavours in the Ceph github repository [1].
->>>>
->>>> However, unlike your approach, we are following an annotation-based tracing
->>>> schema, which enables us to track a specific request from the time it enters
->>>> the system at higher levels till it is finally served by RADOS.
->>>>
->>>> In general, we try to implement the tracing semantics described in the Dapper
->>>> paper [2] in order to trace the causal relationships between the different
->>>> processing phases that an IO request may trigger. Our target is an end-to-end
->>>> visualisation of the request's route in the system, accompanied by information
->>>> concerning latencies in each processing phase. Thanks to LTTng this can happen
->>>> with a minimal overhead and in realtime. In order to visualize the results we
->>>> have integrated Twitter's Zipkin [3], (which is a tracing system
->>>> entirely based on
->>>> Dapper) with LTTng.
->>>>
->>>> You can find a proof of concept of what we've done so far here:
->>>>
->>>> http://snf-551656.vm.okeanos.grnet.gr:8080/traces/0b554b8a48cb3e84?serviceName=MOSDOp
->>>>
->>>> In the above link you can see the trace of a write request served by a RADOS
->>>> pool with replication level set to 3 (two replicas).
->>>>
->>>> We'd love to have early feedback and comments from you guys too,
->>>> so that we can incorporate useful recommendations. You can find all
->>>> the relevant code
->>>> here[5][6]. If you have any questions or you wish to experiment with the
->>>> project please do not hesitate to contact us.
->>>>
->>>> Kind regards,
->>>> Marios
->>>>
->>>> [1]https://github.com/ceph/ceph/tree/wip-lttng
->>>> [2]http://static.googleusercontent.com/media/research.google.com/el//pubs/archive/36356.pdf
->>>> [3]http://twitter.github.io/zipkin/
->>>> [4] https://github.com/marioskogias/blkin
->>>> [5] https://github.com/marioskogias/babeltrace-plugins
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I think it's great that the OpenStack process is relatively
+democratic, so we should definitely avail ourselves of the ability to
+vote.  Please let me know if you have any questions, otherwise
+hopefully we'll see you there!  Thanks.
+
+
+
+Best Regards,
+
+Patrick McGarry
+Director Ceph Community || Red Hat
+http://ceph.com  ||  http://community.redhat.com
+@scuttlemonkey || @ceph
