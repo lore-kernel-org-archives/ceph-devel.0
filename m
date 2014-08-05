@@ -1,169 +1,198 @@
-From: Pavan Rallabhandi <Pavan.Rallabhandi@sandisk.com>
-Subject: RE: Non existing monitor
-Date: Tue, 5 Aug 2014 11:01:23 +0000
-Message-ID: <68A06213B74F1742A2C48216AE1BB6B803FF4B2E@SACMBXIP02.sdcorp.global.sandisk.com>
-References: <7F4FDDF05D5B3241ABA5EB82D169E31E04B2FE35@SACMBXIP01.sdcorp.global.sandisk.com>
- <CAPYLRzjRw-wTcv3Q2ZAKjmXKwNsLwL6gsj5BAJfSVSNcEg3New@mail.gmail.com>
- <68A06213B74F1742A2C48216AE1BB6B803FEDE4F@SACMBXIP02.sdcorp.global.sandisk.com>
- <53DCE506.6050106@inktank.com>
- <7F4FDDF05D5B3241ABA5EB82D169E31E04B301BC@SACMBXIP01.sdcorp.global.sandisk.com>
- <53DF9B64.7070805@inktank.com>
+From: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: v0.83 released
+Date: Tue, 5 Aug 2014 06:55:07 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1408050653170.18917@cobra.newdream.net>
+References: <alpine.DEB.2.00.1407291820100.5744@cobra.newdream.net>
+	<CA+SSH2qOdNne-ExmOjLGnNKfZYXtO+KJ8vSQzvJj07hOK5H8qA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bl2lp0203.outbound.protection.outlook.com ([207.46.163.203]:2438
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S932281AbaHELBu (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 5 Aug 2014 07:01:50 -0400
-In-Reply-To: <53DF9B64.7070805@inktank.com>
-Content-Language: en-US
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Joao Eduardo Luis <joao.luis@inktank.com>, Aanchal Agrawal <Aanchal.Agrawal@sandisk.com>, Gregory Farnum <greg@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Samuel Just <sam.just@inktank.com>
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-787324881-1407246907=:18917"
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CA+SSH2qOdNne-ExmOjLGnNKfZYXtO+KJ8vSQzvJj07hOK5H8qA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: debian Only <onlydebian-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: ceph-maintainers-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-VGhhbmtzIEpvYW8gZm9yIHRoZSByZXNwb25zZSwgd2lsbCB0cmFjayBhZ2FpbnN0IHRoZSByZXZp
-ZXcgZm9yIGFueSBtb3JlIGNsYXJpdHkuDQoNClRoYW5rcywNCi1QYXZhbi4NCg0KLS0tLS1Pcmln
-aW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3Jn
-IFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFsZiBPZiBK
-b2FvIEVkdWFyZG8gTHVpcw0KU2VudDogTW9uZGF5LCBBdWd1c3QgMDQsIDIwMTQgODoxMSBQTQ0K
-VG86IEFhbmNoYWwgQWdyYXdhbDsgUGF2YW4gUmFsbGFiaGFuZGk7IEdyZWdvcnkgRmFybnVtDQpD
-YzogY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc7IFNhbXVlbCBKdXN0DQpTdWJqZWN0OiBSZTog
-Tm9uIGV4aXN0aW5nIG1vbml0b3INCg0KSGVsbG8gQWFuY2hhbCwNCg0KT24gMDQvMDgvMTQgMDY6
-NDMsIEFhbmNoYWwgQWdyYXdhbCB3cm90ZToNCj4gSGkgSm9hbywNCj4NCj4gSSBoYXZlIGFscmVh
-ZHkgZml4ZWQgdGhpcyBpc3N1ZShsZXQgbWUga25vdyBpZiB0aGUgZml4IGxvb2tzIGdvb2QpIGFu
-ZCB3YXMgYWJvdXQgdG8gc2VuZCB0aGUgcHVsbCByZXF1ZXN0IHdpdGggdGhlIGZvbGxvd2luZyBk
-aWZmLg0KPiBCdXQgSSBzdGlsbCBoYWQgY291cGxlIG9mIHVuYW5zd2VyZWQgcXVlc3Rpb25zLCBo
-ZW5jZSB0aGlzIG1haWwgY2hhaW4uIEFuZCB0aGV5IHdlcmU6DQoNCkkgd2FzIGluIHRoZSBtaWRk
-bGUgb2YgZmluaXNoaW5nIGEgcGF0Y2ggd2hlbiBJIHJlYWQgeW91ciBlbWFpbC4gDQpBbHRob3Vn
-aCB5b3VyIHBhdGNoIGxvb2tzIGdvb2QgYXMgYSBmaXggZm9yIHRoZSBpbmNvcnJlY3QgYmVoYXZp
-b3VyLCBJIGJlbGlldmUgaG93IHRoZSBjb2RlIGl0c2VsZiB3YXMgc3RydWN0dXJlZCBhbmQgdGhl
-IGhvbGVzIGl0IGxlZnQgb3BlbmVkIHdhcyBjb25jZXJuaW5nLCBzbyBJIHB1c2hlZCBteSBicmFu
-Y2ggbm9uZXRoZWxlc3MuICBZb3UgY2FuIGZpbmQgaXQgaW4gY2VwaCdzIGdpdGh1YiByZXBvc2l0
-b3J5LCBicmFuY2ggbmFtZSAnd2lwLW1vbi1lbXB0eS1zdG9yZScuICBBIHJldmlldyB3b3VsZCBi
-ZSBhcHByZWNpYXRlZCwgYW5kIGFueSBjb25jZXJucyB5b3UgbWF5IGhhdmUgd2lsbCBiZSB3ZWxj
-b21lLg0KDQo+DQo+IDEpIFRob3VnaCBpbiBjYXNlIG9mIG1rZnMgbm90IGJlaW5nIHNldCwgd2hh
-dCBpcyB0aGUgcmVhc29uIGZvciBjcmVhdGluZyBhIG5ldyBsZXZlbERCIHN0b3JlIGluIGNhc2Ug
-YW4gYXR0ZW1wdCB0byBvcGVuIHRoZSAnc3RvcmUuZGInIGlzIGEgZmFpbHVyZSwgYXMgbGV2ZWxE
-QiBhbnl3YXlzIHNlZW0gdG8gYmUgdGhyb3dpbmcgJ21hZ2ljJyBlcnJvciBnb2luZyBmb3J3YXJk
-LiBBcmUgdGhlcmUgYW55IHVzZSBjYXNlcyBmb3IgdGhpcyBzY2VuYXJpbz8NCj4gMikgQW5kIGFs
-c28sIGlzIGl0IHZhbGlkIHRvIGZsYWcgIk5vIE1vbml0b3IgcHJlc2VudCIgaW4gY2FzZSB0aGUg
-bW9uIGRhdGEgZGlyZWN0b3J5IGlzIGV4aXN0aW5nLCBidXQgd2l0aCBubyBkYXRhKCdzdG9yZS5k
-YicpIGluIGl0LCBpbiBjYXNlIG1rZnMgaXMgbm90IHNldD8NCg0KV2l0aCByZWdhcmQgdG8gMSks
-IGl0IGlzIGEgYnVnLiAgT24gb3BlbiB3ZSBzcGVjaWZpZWQgdGhhdCBsZXZlbGRiIHNob3VsZCBu
-b3QgY3JlYXRlIGEgbmV3IGRhdGFiYXNlIChzZWUgZGItPm9wZW4oKSB2cyANCmRiLT5jcmVhdGVf
-YW5kX29wZW4oKSkuICBIb3dldmVyLCBsZXZlbGRiIHdpbGwgY3JlYXRlIHRoZSBkaXJlY3RvcnkN
-CnN0cnVjdHVyZSBpZiBpdCBpcyBtaXNzaW5nIG5vbmV0aGVsZXNzLCBhbmQgdGhpcyBpcyB3aGF0
-IHdhcyBjcmVhdGluZyB0aG9zZSBpc3N1ZXMuICBUaGUgcGF0Y2ggaW4gdGhlIGJyYW5jaCBJIG1l
-bnRpb25lZCBhYm92ZSB3aWxsIHdvcmsgYXJvdW5kIHRoYXQgYnkgY2hlY2tpbmcgd2hldGhlciB0
-aGUgbW9uaXRvcidzIGRhdGEgZGlyZWN0b3J5IGlzIGVtcHR5IGJlZm9yZSBvcGVuaW5nIHRoZSBk
-YXRhYmFzZSAtLSB0aHVzLCBpZiBpdCBpcyBpbmRlZWQgZW1wdHksIGl0IHdpbGwgbm90IGNhbGwg
-b24gZGItPm9wZW4oKSBhbmQgdGhlcmVmb3JlIGF2b2lkIHBvcHVsYXRpbmcgdGhlIGRpcmVjdG9y
-eSB3aXRoIHNlbnNlbGVzcyBub2lzZS4NCg0KQWJvdXQgMiksICdzdG9yZS5kYicgbWF5IG5vdCBi
-ZSBwcmVzZW50IGlmIHdlIGFyZSB1cGdyYWRpbmcgYSByZWxlYXNlIHByaW9yIHRvIGN1dHRsZWZp
-c2gsIGFzIGF0IHRoZSB0aW1lIHRoZSBtb25pdG9yIHN0b3JlIGZvcm1hdCB3YXMgZGlmZmVyZW50
-LiAgV2UgdXNlIHRoZSBhYnNlbmNlIG9mICdzdG9yZS5kYicgYXMgYW4gaW5kaWNhdG9yIHRvIGNo
-ZWNrIGZvciBhIHBvc3NpYmxlIG5lZWQgZm9yIGEgZm9ybWF0IHVwZ3JhZGUgKHdoaWNoIHdpbGwg
-dGhlbiBiZSBwZXJmb3JtZWQgYnkgTW9uaXRvcjo6U3RvcmVDb252ZXJ0ZXIpLiAgSG93ZXZlciwg
-d2UgY2FuIHVzZSB0aGUgdG90YWwgYW5kIGNvbXBsZXRlIGFic2VuY2Ugb2YgZmlsZXMgaW4gdGhl
-IG1vbml0b3IncyBkYXRhIGRpcmVjdG9yeSBhcyBhIGRlZmluaXRlIGluZGljYXRvciB0aGF0IHRo
-ZXJlJ3Mgbm8gbW9uaXRvciBzdG9yZSBhdCB0aGF0IHBhdGguDQoNCkhvcGUgdGhpcyBzaGVkcyBz
-b21lIGxpZ2h0IG9uIHlvdXIgcXVlc3Rpb25zLg0KDQogICAtSm9hbw0KDQoNCg0KDQo+ID09PT09
-PT09PT09PT09PT09PT09PT09PQ0KPiA8c25pcD4NCj4NCj4gQEAgLTE1MiwxMSArMTUyLDIwIEBA
-IGludCBtb25fZGF0YV9lbXB0eShib29sICpyKQ0KPiAgICAgcmV0dXJuIGNvZGU7DQo+ICAgfQ0K
-Pg0KPiAtaW50IG1vbl9leGlzdHMoYm9vbCAqcikNCj4gK2ludCBtb25fZXhpc3RzKGJvb2wgKnIs
-IGJvb2wgbWtmcykNCj4gICB7DQo+ICAgICBpbnQgY29kZSA9IG1vbl9kYXRhX2V4aXN0cyhyKTsN
-Cj4gLSAgaWYgKGNvZGUgfHwgKnIgPT0gZmFsc2UpDQo+ICsgIGlmIChjb2RlKQ0KPiAgICAgICBy
-ZXR1cm4gY29kZTsNCj4gKyAgLy8gSWYgbW9uX2RhdGEoZGlyZWN0b3J5KSBub3QgcHJlc2VudCwg
-Y2hlY2sgZm9yIG1rZnMgIGlmICgqciA9PSANCj4gKyBmYWxzZSkgew0KPiArICAgIGlmICghbWtm
-cykgew0KPiArICAgICAgY2VyciA8PCAiTm8gbW9uaXRvciB3aXRoIElEICIgPDwgZ19jb25mLT5u
-YW1lLmdldF9pZCgpIDw8ICIgaW4gY2x1c3RlciIgPDwgc3RkOjplbmRsOw0KPiArICAgICAgcmV0
-dXJuIDE7DQo+ICsgICAgfQ0KPiArICAgIC8vIElmIG1rZnMgaXMgdHJ1ZSwgd2Ugd2FudCB0byBj
-cmVhdGUgYSBuZXcgZGlyZWN0b3J5LCBoZW5jZSByZXR1cm4gMA0KPiArICAgIHJldHVybiBjb2Rl
-Ow0KPiArICB9DQo+ICAgICByZXR1cm4gbW9uX2RhdGFfZW1wdHkocik7DQo+ICAgfQ0KPg0KPiBA
-QCAtMjY4LDcgKzI3Nyw3IEBAIGludCBtYWluKGludCBhcmdjLCBjb25zdCBjaGFyICoqYXJndikN
-Cj4gICAgIH0NCj4NCj4gICAgIGJvb2wgZXhpc3RzOw0KPiAtICBpZiAobW9uX2V4aXN0cygmZXhp
-c3RzKSkNCj4gKyAgaWYgKG1vbl9leGlzdHMoJmV4aXN0cywgbWtmcykpDQo+ICAgICAgIGV4aXQo
-MSk7DQo+DQo+ICAgICBpZiAobWtmcyAmJiBleGlzdHMpIHsNCj4gQEAgLTQ1Miw3ICs0NjEsNyBA
-QCBpbnQgbWFpbihpbnQgYXJnYywgY29uc3QgY2hhciAqKmFyZ3YpDQo+DQo+IDxcc25pcD4NCj4g
-PT09PT09PT09PT09PT09PT09PT09PT09PT0NCj4NCj4gVGhhbmtzLA0KPiBBYW5jaGFsDQo+DQo+
-IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IEpvYW8gRWR1YXJkbyBMdWlzIFtt
-YWlsdG86am9hby5sdWlzQGlua3RhbmsuY29tXQ0KPiBTZW50OiBTYXR1cmRheSwgQXVndXN0IDAy
-LCAyMDE0IDY6NDggUE0NCj4gVG86IFBhdmFuIFJhbGxhYmhhbmRpOyBHcmVnb3J5IEZhcm51bTsg
-QWFuY2hhbCBBZ3Jhd2FsDQo+IENjOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZzsgU2FtdWVs
-IEp1c3QNCj4gU3ViamVjdDogUmU6IE5vbiBleGlzdGluZyBtb25pdG9yDQo+DQo+IE9uIDAxLzA4
-LzE0IDE4OjIwLCBQYXZhbiBSYWxsYWJoYW5kaSB3cm90ZToNCj4+IEdyZWcsDQo+Pg0KPj4gVGhl
-IGNvbW1hbmRzIHVzZWQgd2VyZSB0byBzdGFydCBtb25pdG9yIGZvciBhbiBpbnN0YW5jZSBpZCB0
-aGF0IGlzIG5vbiBleGlzdGluZywgZm9yIHdoaWNoIGEgbGV2ZWxkYiBzdG9yZSBlcnJvciBpcyB0
-aHJvd246DQo+Pg0KPj4gPHNuaXA+DQo+Pg0KPj4gc3JjL2NlcGgtbW9uIC1pIGZvbw0KPj4gMjAx
-NC0wOC0wMSAwMjo0NzowOC4yMTAyMDggN2Y3MzQxYzNjODAwIC0xIGZhaWxlZCB0byBjcmVhdGUg
-bmV3IA0KPj4gbGV2ZWxkYiBzdG9yZQ0KPj4NCj4+IDxcc25pcD4NCj4+DQo+PiBUaGUgaWRlYSBp
-cyB0byBmaXggdGhpcyBiZWhhdmlvciBieSB0aHJvd2luZyBhIHJlbGV2YW50IGVycm9yLg0KPg0K
-PiBUaGUgaW5mcmFzdHJ1Y3R1cmUgaXMgdGhlcmUgKGNlcGhfbW9uLmNjKSBidXQgaXMgbm90IGRv
-aW5nIHdoYXQgSSBiZWxpZXZlIGl0IHNob3VsZC4gIEl0IHdhcyBpbnRyb2R1Y2VkIGluIDFlYWZl
-OGRjNDU0MTlhNmI3ZDMxOTM0NWNhYzdmYmMwZDY4NGQxYjEuICBJJ20gZml4aW5nIGl0IG5vdy4N
-Cj4NCj4gICAgIC1Kb2FvDQo+DQo+Pg0KPj4gVGhhbmtzLA0KPj4gLVBhdmFuLg0KPj4NCj4+IC0t
-LS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+PiBGcm9tOiBHcmVnb3J5IEZhcm51bSBbbWFpbHRv
-OmdyZWdAaW5rdGFuay5jb21dDQo+PiBTZW50OiBGcmlkYXksIEF1Z3VzdCAwMSwgMjAxNCA2OjE2
-IFBNDQo+PiBUbzogQWFuY2hhbCBBZ3Jhd2FsDQo+PiBDYzogY2VwaC1kZXZlbEB2Z2VyLmtlcm5l
-bC5vcmc7IFBhdmFuIFJhbGxhYmhhbmRpOyBTYW11ZWwgSnVzdDsgSm9hbyANCj4+IEx1aXMNCj4+
-IFN1YmplY3Q6IFJlOiBOb24gZXhpc3RpbmcgbW9uaXRvcg0KPj4NCj4+IE9uIEZyaSwgQXVnIDEs
-IDIwMTQgYXQgNjowMyBBTSwgQWFuY2hhbCBBZ3Jhd2FsIDxBYW5jaGFsLkFncmF3YWxAc2FuZGlz
-ay5jb20+IHdyb3RlOg0KPj4+IEFueSBoZWxwIG9uIHRoaXMgLi4uDQo+Pj4NCj4+PiAtLS0tLU9y
-aWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPj4+IEZyb206IEFhbmNoYWwgQWdyYXdhbA0KPj4+IFNlbnQ6
-IFdlZG5lc2RheSwgSnVseSAzMCwgMjAxNCAzOjM3IFBNDQo+Pj4gVG86ICdjZXBoLWRldmVsQHZn
-ZXIua2VybmVsLm9yZycNCj4+PiBDYzogUGF2YW4gUmFsbGFiaGFuZGkNCj4+PiBTdWJqZWN0OiBO
-b24gZXhpc3RpbmcgbW9uaXRvcg0KPj4+DQo+Pj4gSGksDQo+Pj4NCj4+PiBXZSBmb3VuZCBhIGNh
-c2UoYnVnPykgaW4gY2VwaCBtb24gY29kZSwgd2hlcmUgaW4sIGFuIGF0dGVtcHQgdG8gc3RhcnQg
-YSBub24tZXhpc3RpbmcgbW9uaXRvciBpcyB0aHJvd2luZyB1cCBhIGxldmVsREIgZXJyb3Igc2F5
-aW5nICJmYWlsZWQgdG8gY3JlYXRlIG5ldyBsZXZlbGRiIHN0b3JlIiwgaW5zdGVhZCB3ZSB0aG91
-Z2h0IGFuIGFwcHJvcHJpYXRlIG1lc3NhZ2Ugc2F5ICJObyBNb25pdG9yIHByZXNlbnQgd2l0aCB0
-aGF0IGlkIiB3b3VsZCBkbywgYnkgY2hlY2tpbmcgZm9yIHRoZSBtb25pdG9yIGV4aXN0ZW5jZSB3
-YXkgYWhlYWQuDQo+Pj4NCj4+PiBJdCBzZWVtcyB0aGF0ICdtb25fZXhpc3RzKCknIGNoZWNrcyBm
-b3IgdGhlIGV4aXN0ZW5jZSBvZiB0aGUgbW9uIGRhdGEgZGlyZWN0b3J5KHZpYSAnbW9uX2RhdGFf
-ZXhpc3RzKCknKSBhbmQgYWxzbyBmb3IgdGhlIG5vbi1lbXB0eSBuYXR1cmUgb2YgdGhhdCBkaXJl
-Y3RvcnkodmlhICdtb25fZGF0YV9lbXB0eSgpJykuIFRoZSBmaXggc2VlbWVkIHByZXR0eSBzaW1w
-bGUsIGFzIHRvIGZsYWcgdGhlIGFwcHJvcHJpYXRlIG1lc3NhZ2UgaWYgJ21vbl9kYXRhX2V4aXN0
-cygpJyB3ZXJlIHRvIHNldCAnZXhpc3RzJyB0byAnZmFsc2UnLCBpbiBjYXNlIG1rZnMgaXMgbm90
-IHNldC4NCj4+Pg0KPj4+IFRoZSBvdGhlciBiZWhhdmlvciB0aGF0IHdlIGFyZSBzZWVraW5nIGNs
-YXJpdHksIGFnYWluIGluIGNhc2Ugb2YgbWtmcyBub3QgYmVpbmcgc2V0IGlzLCBpZiAnbW9uX2Rh
-dGFfZXhpc3RzKCknIHNldHMgJ2V4aXN0cycgdG8gJ3RydWUnIGFuZCAnbW9uX2RhdGFfZW1wdHko
-KScgc2V0cyAnZXhpc3RzJyB0byAnZmFsc2UnIChtZWFuaW5nIHRoZSBtb24gZGF0YSBkaXJlY3Rv
-cnkgaXMgcHJlc2VudCwgYnV0IGl0IGlzIGVtcHR5KSwgdGhlbiB0aGUgY3VycmVudCBjb2RlIHNl
-ZW1zIHRvIGJlIGdvaW5nIGFoZWFkIGluIGFuIGF0dGVtcHQgdG8gb3BlbiB0aGUgJ3N0b3JlLmRi
-JywgYW5kIHdoZW4gb3BlbiBmYWlscywgaXQgdHJpZXMgdG8gY3JlYXRlIGEgbmV3ICdzdG9yZS5k
-YicgKHRob3VnaCBta2ZzIGlzIG5vdCBzZXQpIGFuZCBldmVudHVhbGx5IGdpdmVzIHVwIHRocm93
-aW5nICJ1bmFibGUgdG8gcmVhZCBtYWdpYyBmcm9tIG1vbiBkYXRhIi4NCj4+Pg0KPj4+IFRoZSBx
-dWVzdGlvbnMgd2UgaGFkIGFyb3VuZCB0aGlzIHdlcmU6DQo+Pj4NCj4+PiAxKSBUaG91Z2ggaW4g
-Y2FzZSBvZiBta2ZzIG5vdCBiZWluZyBzZXQsIHdoYXQgaXMgdGhlIHJlYXNvbiBmb3IgY3JlYXRp
-bmcgYSBuZXcgbGV2ZWxEQiBzdG9yZSBpbiBjYXNlIGFuIGF0dGVtcHQgdG8gb3BlbiB0aGUgJ3N0
-b3JlLmRiJyBpcyBhIGZhaWx1cmUsIGFzIGxldmVsREIgYW55d2F5cyBzZWVtIHRvIGJlIHRocm93
-aW5nICdtYWdpYycgZXJyb3IgZ29pbmcgZm9yd2FyZC4gQXJlIHRoZXJlIGFueSB1c2UgY2FzZXMg
-Zm9yIHRoaXMgc2NlbmFyaW8/DQo+Pj4gMikgQW5kIGFsc28sIGlzIGl0IHZhbGlkIHRvIGZsYWcg
-Ik5vIE1vbml0b3IgcHJlc2VudCIgaW4gY2FzZSB0aGUgbW9uIGRhdGEgZGlyZWN0b3J5IGlzIGV4
-aXN0aW5nLCBidXQgd2l0aCBubyBkYXRhKCdzdG9yZS5kYicpIGluIGl0LCBpbiBjYXNlIG1rZnMg
-aXMgbm90IHNldD8NCj4+DQo+PiBUaGlzIGlzIGEgbGl0dGxlIHVuY2xlYXIgdG8gbWUuIENhbiB5
-b3UgZGVzY3JpYmUgZXhhY3RseSB3aGF0IGNvbW1hbmRzIHlvdSdyZSBydW5uaW5nIGFuZCB3aGF0
-IHRoZSByZXNwb25zZSBmcm9tIHRoZSBtb25pdG9yIGlzPw0KPj4gLUdyZWcNCj4+IFNvZnR3YXJl
-IEVuZ2luZWVyICM0MiBAIGh0dHA6Ly9pbmt0YW5rLmNvbSB8IGh0dHA6Ly9jZXBoLmNvbQ0KPj4N
-Cj4+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fDQo+Pg0KPj4gUExFQVNFIE5PVEU6
-IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVzc2Fn
-ZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVu
-dChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRo
-ZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhh
-dmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZpZXcsIGRp
-c3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzIG1lc3NhZ2UgaXMg
-c3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0
-aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25lIG9yIGUt
-bWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxs
-IGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQg
-Y29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KPj4NCj4NCj4NCj4gLS0N
-Cj4gSm9hbyBFZHVhcmRvIEx1aXMNCj4gU29mdHdhcmUgRW5naW5lZXIgfCBodHRwOi8vaW5rdGFu
-ay5jb20gfCBodHRwOi8vY2VwaC5jb20NCj4NCg0KDQotLQ0KSm9hbyBFZHVhcmRvIEx1aXMNClNv
-ZnR3YXJlIEVuZ2luZWVyIHwgaHR0cDovL2lua3RhbmsuY29tIHwgaHR0cDovL2NlcGguY29tDQot
-LQ0KVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2Ny
-aWJlIGNlcGgtZGV2ZWwiIGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdl
-ci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5v
-cmcvbWFqb3Jkb21vLWluZm8uaHRtbA0K
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
+
+--557981400-787324881-1407246907=:18917
+Content-Type: TEXT/PLAIN; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+
+On Tue, 5 Aug 2014, debian Only wrote:
+> Good news. =C2=A0when this release will public in Debian Wheezy pkglist=
+ ?thanks
+> for ur good job
+
+I think that, in general, the strategy should be to keep the stable=20
+packages (firefly 0.80.x currently) in the stable downstream repos=20
+(wheezy).  These development releases can either be found at ceph.com, or=
+=20
+perhaps they can go into debian unstable or rawhide or similar.  I don't=20
+think it is the release that most users will want when they 'apt-get=20
+install ceph' on a generic system, though!
+
+sage
+
+
+>=20
+>=20
+> 2014-07-30 8:21 GMT+07:00 Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>:
+>       Another Ceph development release! =C2=A0This has been a longer cy=
+cle,
+>       so there
+>       has been quite a bit of bug fixing and stabilization in this
+>       round.
+>       There is also a bunch of packaging fixes for RPM distros
+>       (RHEL/CentOS,
+>       Fedora, and SUSE) and for systemd. =C2=A0We've also added a new
+>       librados-striper library from Sebastien Ponce that provides a
+>       generic
+>       striping API for applications to code to.
+>=20
+>       Upgrading
+>       ---------
+>=20
+>       * The experimental keyvaluestore-dev OSD backend had an on-disk
+>       format
+>       =C2=A0 change that prevents existing OSD data from being upgraded=
+.
+>       =C2=A0This
+>       =C2=A0 affects developers and testers only.
+>=20
+>       * mon-specific and osd-specific leveldb options have been
+>       removed.
+>       =C2=A0 From this point onward users should use 'leveldb_' generic
+>       options and add
+>       =C2=A0 the options in the appropriate sections of their configura=
+tion
+>       files.
+>       =C2=A0 Monitors will still maintain the following monitor-specifi=
+c
+>       defaults:
+>=20
+>       =C2=A0 =C2=A0 leveldb_write_buffer_size =3D 32*1024*1024 =C2=A0=3D=
+ 33554432 =C2=A0//
+>       32MB
+>       =C2=A0 =C2=A0 leveldb_cache_size =C2=A0 =C2=A0 =C2=A0 =C2=A0=3D 5=
+12*1024*1204 =3D 536870912 //
+>       512MB
+>       =C2=A0 =C2=A0 leveldb_block_size =C2=A0 =C2=A0 =C2=A0 =C2=A0=3D 6=
+4*1024 =C2=A0 =C2=A0 =C2=A0 =3D 65536 =C2=A0 =C2=A0 //
+>       64KB
+>       =C2=A0 =C2=A0 leveldb_compression =C2=A0 =C2=A0 =C2=A0 =3D false
+>       =C2=A0 =C2=A0 leveldb_log =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =3D ""
+>=20
+>       =C2=A0 OSDs will still maintain the following osd-specific defaul=
+ts:
+>=20
+>       =C2=A0 =C2=A0 leveldb_log =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =3D ""
+>=20
+>       Notable Changes
+>       ---------------
+>=20
+>       * ceph-disk: fix dmcrypt support (Stephen Taylor)
+>       * cephtool: fix help (Yilong Zhao)
+>       * cephtool: test cleanup (Joao Eduardo Luis)
+>       * doc: librados example fixes (Kevin Dalley)
+>       * doc: many doc updates (John Wilkins)
+>       * doc: update erasure docs (Loic Dachary, Venky Shankar)
+>       * filestore: disable use of XFS hint (buggy on old kernels)
+>       (Samuel Just)
+>       * filestore: fix xattr spillout (Greg Farnum, Haomai Wang)
+>       * keyvaluestore: header cache (Haomai Wang)
+>       * librados_striper: striping library for librados (Sebastien
+>       Ponce)
+>       * libs3: update to latest (Danny Al-Gaaf)
+>       * log: fix derr level (Joao Eduardo Luis)
+>       * logrotate: fix osd log rotation on ubuntu (Sage Weil)
+>       * mds: fix xattr bug triggered by ACLs (Yan, Zheng)
+>       * misc memory leaks, cleanups, fixes (Danny Al-Gaaf, Sahid
+>       Ferdjaoui)
+>       * misc suse fixes (Danny Al-Gaaf)
+>       * misc word size fixes (Kevin Cox)
+>       * mon: drop mon- and osd- specific leveldb options (Joao Eduardo
+>       Luis)
+>       * mon: ec pool profile fixes (Loic Dachary)
+>       * mon: fix health down messages (Sage Weil)
+>       * mon: fix quorum feature check (#8738, Greg Farnum)
+>       * mon: 'osd crush reweight-subtree ...' (Sage Weil)
+>       * mon, osd: relax client EC support requirements (Sage Weil)
+>       * mon: some instrumentation (Sage Weil)
+>       * objecter: flag operations that are redirected by caching (Sage
+>       Weil)
+>       * osd: clean up shard_id_t, shard_t (Loic Dachary)
+>       * osd: fix connection reconnect race (Greg Farnum)
+>       * osd: fix dumps (Joao Eduardo Luis)
+>       * osd: fix erasure-code lib initialization (Loic Dachary)
+>       * osd: fix extent normalization (Adam Crume)
+>       * osd: fix loopback msgr issue (Ma Jianpeng)
+>       * osd: fix LSB release parsing (Danny Al-Gaaf)
+>       * osd: improved backfill priorities (Sage Weil)
+>       * osd: many many core fixes (Samuel Just)
+>       * osd, mon: config sanity checks on start (Sage Weil, Joao
+>       Eduardo Luis)
+>       * osd: sharded threadpool to improve parallelism (Somnath Roy)
+>       * osd: simple io prioritization for scrub (Sage Weil)
+>       * osd: simple scrub throttling (Sage Weil)
+>       * osd: tests for bench command (Loic Dachary)
+>       * osd: use xfs hint less frequently (Ilya Dryomov)
+>       * pybind/rados: fix small timeouts (John Spray)
+>       * qa: xfstests updates (Ilya Dryomov)
+>       * rgw: cache bucket info (Yehuda Sadeh)
+>       * rgw: cache decoded user info (Yehuda Sadeh)
+>       * rgw: fix multipart object attr regression (#8452, Yehuda
+>       Sadeh)
+>       * rgw: fix radosgw-admin 'show log' command (#8553, Yehuda
+>       Sadeh)
+>       * rgw: fix URL decoding (#8702, Brian Rak)
+>       * rgw: handle empty extra pool name (Yehuda Sadeh)
+>       * rpm: do not restart daemons on upgrade (Alfredo Deza)
+>       * rpm: misc packaging fixes for rhel7 (Sandon Van Ness)
+>       * rpm: split ceph-common from ceph (Sandon Van Ness)
+>       * systemd: wrap started daemons in new systemd environment (Sage
+>       Weil, Dan
+>       =C2=A0 Mick)
+>       * sysvinit: less sensitive to failures (Sage Weil)
+>       * upstart: increase max open files limit (Sage Weil)
+>=20
+>       Getting Ceph
+>       ------------
+>=20
+>       * Git at git://github.com/ceph/ceph.git
+>       * Tarball at http://ceph.com/download/ceph-0.83.tar.gz
+>       * For packages, see
+>       http://ceph.com/docs/master/install/get-packages
+>       * For ceph-deploy, see
+>       http://ceph.com/docs/master/install/install-ceph-deploy
+>       _______________________________________________
+>       ceph-users mailing list
+>       ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+>       http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>=20
+>=20
+>=20
+>=20
+--557981400-787324881-1407246907=:18917
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--557981400-787324881-1407246907=:18917--
