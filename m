@@ -1,34 +1,52 @@
-From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [PATCH] rbd: rework rbd_request_fn()
-Date: Tue, 5 Aug 2014 00:44:50 -0700
-Message-ID: <20140805074450.GA10925@infradead.org>
-References: <1407224324-4811-1-git-send-email-ilya.dryomov@inktank.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: ErasureCode base class
+Date: Tue, 05 Aug 2014 09:53:49 +0200
+Message-ID: <53E08D8D.1010303@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="Sf3BmFGktFoH6BU9efxrFCpogh5rQ83Ae"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from bombadil.infradead.org ([198.137.202.9]:38788 "EHLO
-	bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754548AbaHEHov (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Aug 2014 03:44:51 -0400
-Content-Disposition: inline
-In-Reply-To: <1407224324-4811-1-git-send-email-ilya.dryomov@inktank.com>
+Received: from mail2.dachary.org ([91.121.57.175]:54011 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1753743AbaHEHx4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Aug 2014 03:53:56 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <ilya.dryomov@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Andreas-Joachim Peters <andreas.joachim.peters@cern.ch>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Tue, Aug 05, 2014 at 11:38:44AM +0400, Ilya Dryomov wrote:
-> While it was never a good idea to sleep in request_fn(), commit
-> 34c6bc2c919a ("locking/mutexes: Add extra reschedule point") made it
-> a *bad* idea.  mutex_lock() since 3.15 may reschedule *before* putting
-> task on the mutex wait queue, which for tasks in !TASK_RUNNING state
-> means block forever.  request_fn() may be called with !TASK_RUNNING on
-> the way to schedule() in io_schedule().
-> 
-> Offload request handling to a workqueue, one per rbd device, to avoid
-> calling blocking primitives from rbd_request_fn().
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--Sf3BmFGktFoH6BU9efxrFCpogh5rQ83Ae
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-Btw, for the future you might want to consider converting rbd to use the
-blk-mq infrastructure, which calls the I/O submission function from user
-context and will allow you to sleep.
+Hi,
 
+Would you have time to review the ErasureCode base class at https://githu=
+b.com/ceph/ceph/pull/2201 ? It factorizes code that is common to ErasureC=
+odeJerasure and ErasureCodeIsa. While doing so it really helped that you =
+wrote the ErasureCodeIsa decode functions with only minimal changes compa=
+red to those in ErasureCodeJerasure. Thanks for that :-)
+
+Cheers
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+
+
+--Sf3BmFGktFoH6BU9efxrFCpogh5rQ83Ae
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlPgjY0ACgkQ8dLMyEl6F23npQCfc26R5V5f824pSqW91C/qvuLf
+cE0AnRYbKvqV1MrBaMIrt+BRuvbT+izG
+=ZJ7m
+-----END PGP SIGNATURE-----
+
+--Sf3BmFGktFoH6BU9efxrFCpogh5rQ83Ae--
