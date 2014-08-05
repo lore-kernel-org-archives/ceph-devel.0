@@ -1,192 +1,284 @@
-From: NeilBrown <neilb@suse.de>
-Subject: Re: fscache recursive hang -- similar to loopback NFS issues
-Date: Tue, 5 Aug 2014 14:49:23 +1000
-Message-ID: <20140805144923.7b315366@notabene.brown>
-References: <CANP1eJEVnH2w7t6r8g1ow07UNWRA8bPduwD-FezqCBKB_J_=XQ@mail.gmail.com>
-	<CANP1eJE7tU9touhSq+Utt=MLE4w5D_C4pT1TAFAiFNBh8ee_mA@mail.gmail.com>
-	<20140721164044.2845f3fd@notabene.brown>
-	<29057.1406650354@warthog.procyon.org.uk>
-	<20140730071735.21ab7ca6@notabene.brown>
-	<CANP1eJHo7xrFoXWWgKQNrTi94vaxN9x-ViXNBE4VcXAa_jjQ3Q@mail.gmail.com>
-	<20140730121935.124bc7c9@notabene.brown>
-	<CANP1eJEBO0VbG2MoBzRB1h3c0QzOhAjvqUtHSX0+Y_uDT5oZug@mail.gmail.com>
-	<CANP1eJGoT2RmKB6asjbFgP=emLuxQqgqE4Xf9Gx7fYzPfS1img@mail.gmail.com>
+From: debian Only <onlydebian-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: v0.83 released
+Date: Tue, 5 Aug 2014 11:58:10 +0700
+Message-ID: <CA+SSH2qOdNne-ExmOjLGnNKfZYXtO+KJ8vSQzvJj07hOK5H8qA@mail.gmail.com>
+References: <alpine.DEB.2.00.1407291820100.5744@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- boundary="Sig_/YxZExu9z6.8n/TF.eim.IMU"; protocol="application/pgp-signature"
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-In-Reply-To: <CANP1eJGoT2RmKB6asjbFgP=emLuxQqgqE4Xf9Gx7fYzPfS1img@mail.gmail.com>
-Sender: linux-fsdevel-owner@vger.kernel.org
-To: Milosz Tanski <milosz@adfin.com>
-Cc: David Howells <dhowells@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, "linux-cachefs@redhat.com" <linux-cachefs@redhat.com>
+Content-Type: multipart/mixed; boundary="===============1952056370=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.00.1407291820100.5744-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Cc: ceph-maintainers-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
---Sig_/YxZExu9z6.8n/TF.eim.IMU
-Content-Type: text/plain; charset=US-ASCII
+--===============1952056370==
+Content-Type: multipart/alternative; boundary=f46d043c08ccc41cb004ffdab3c2
+
+--f46d043c08ccc41cb004ffdab3c2
+Content-Type: text/plain; charset=UTF-8
+
+Good news.  when this release will public in Debian Wheezy pkglist ?
+thanks for ur good job
+
+
+2014-07-30 8:21 GMT+07:00 Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>:
+
+> Another Ceph development release!  This has been a longer cycle, so there
+> has been quite a bit of bug fixing and stabilization in this round.
+> There is also a bunch of packaging fixes for RPM distros (RHEL/CentOS,
+> Fedora, and SUSE) and for systemd.  We've also added a new
+> librados-striper library from Sebastien Ponce that provides a generic
+> striping API for applications to code to.
+>
+> Upgrading
+> ---------
+>
+> * The experimental keyvaluestore-dev OSD backend had an on-disk format
+>   change that prevents existing OSD data from being upgraded.  This
+>   affects developers and testers only.
+>
+> * mon-specific and osd-specific leveldb options have been removed.
+>   From this point onward users should use 'leveldb_' generic options and
+> add
+>   the options in the appropriate sections of their configuration files.
+>   Monitors will still maintain the following monitor-specific defaults:
+>
+>     leveldb_write_buffer_size = 32*1024*1024  = 33554432  // 32MB
+>     leveldb_cache_size        = 512*1024*1204 = 536870912 // 512MB
+>     leveldb_block_size        = 64*1024       = 65536     // 64KB
+>     leveldb_compression       = false
+>     leveldb_log               = ""
+>
+>   OSDs will still maintain the following osd-specific defaults:
+>
+>     leveldb_log               = ""
+>
+> Notable Changes
+> ---------------
+>
+> * ceph-disk: fix dmcrypt support (Stephen Taylor)
+> * cephtool: fix help (Yilong Zhao)
+> * cephtool: test cleanup (Joao Eduardo Luis)
+> * doc: librados example fixes (Kevin Dalley)
+> * doc: many doc updates (John Wilkins)
+> * doc: update erasure docs (Loic Dachary, Venky Shankar)
+> * filestore: disable use of XFS hint (buggy on old kernels) (Samuel Just)
+> * filestore: fix xattr spillout (Greg Farnum, Haomai Wang)
+> * keyvaluestore: header cache (Haomai Wang)
+> * librados_striper: striping library for librados (Sebastien Ponce)
+> * libs3: update to latest (Danny Al-Gaaf)
+> * log: fix derr level (Joao Eduardo Luis)
+> * logrotate: fix osd log rotation on ubuntu (Sage Weil)
+> * mds: fix xattr bug triggered by ACLs (Yan, Zheng)
+> * misc memory leaks, cleanups, fixes (Danny Al-Gaaf, Sahid Ferdjaoui)
+> * misc suse fixes (Danny Al-Gaaf)
+> * misc word size fixes (Kevin Cox)
+> * mon: drop mon- and osd- specific leveldb options (Joao Eduardo Luis)
+> * mon: ec pool profile fixes (Loic Dachary)
+> * mon: fix health down messages (Sage Weil)
+> * mon: fix quorum feature check (#8738, Greg Farnum)
+> * mon: 'osd crush reweight-subtree ...' (Sage Weil)
+> * mon, osd: relax client EC support requirements (Sage Weil)
+> * mon: some instrumentation (Sage Weil)
+> * objecter: flag operations that are redirected by caching (Sage Weil)
+> * osd: clean up shard_id_t, shard_t (Loic Dachary)
+> * osd: fix connection reconnect race (Greg Farnum)
+> * osd: fix dumps (Joao Eduardo Luis)
+> * osd: fix erasure-code lib initialization (Loic Dachary)
+> * osd: fix extent normalization (Adam Crume)
+> * osd: fix loopback msgr issue (Ma Jianpeng)
+> * osd: fix LSB release parsing (Danny Al-Gaaf)
+> * osd: improved backfill priorities (Sage Weil)
+> * osd: many many core fixes (Samuel Just)
+> * osd, mon: config sanity checks on start (Sage Weil, Joao Eduardo Luis)
+> * osd: sharded threadpool to improve parallelism (Somnath Roy)
+> * osd: simple io prioritization for scrub (Sage Weil)
+> * osd: simple scrub throttling (Sage Weil)
+> * osd: tests for bench command (Loic Dachary)
+> * osd: use xfs hint less frequently (Ilya Dryomov)
+> * pybind/rados: fix small timeouts (John Spray)
+> * qa: xfstests updates (Ilya Dryomov)
+> * rgw: cache bucket info (Yehuda Sadeh)
+> * rgw: cache decoded user info (Yehuda Sadeh)
+> * rgw: fix multipart object attr regression (#8452, Yehuda Sadeh)
+> * rgw: fix radosgw-admin 'show log' command (#8553, Yehuda Sadeh)
+> * rgw: fix URL decoding (#8702, Brian Rak)
+> * rgw: handle empty extra pool name (Yehuda Sadeh)
+> * rpm: do not restart daemons on upgrade (Alfredo Deza)
+> * rpm: misc packaging fixes for rhel7 (Sandon Van Ness)
+> * rpm: split ceph-common from ceph (Sandon Van Ness)
+> * systemd: wrap started daemons in new systemd environment (Sage Weil, Dan
+>   Mick)
+> * sysvinit: less sensitive to failures (Sage Weil)
+> * upstart: increase max open files limit (Sage Weil)
+>
+> Getting Ceph
+> ------------
+>
+> * Git at git://github.com/ceph/ceph.git
+> * Tarball at http://ceph.com/download/ceph-0.83.tar.gz
+> * For packages, see http://ceph.com/docs/master/install/get-packages
+> * For ceph-deploy, see
+> http://ceph.com/docs/master/install/install-ceph-deploy
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>
+
+--f46d043c08ccc41cb004ffdab3c2
+Content-Type: text/html; charset=UTF-8
 Content-Transfer-Encoding: quoted-printable
 
-On Tue, 5 Aug 2014 00:12:25 -0400 Milosz Tanski <milosz@adfin.com> wrote:
+<div dir=3D"ltr">Good news. =C2=A0when this release will public in Debian W=
+heezy pkglist ?<div>thanks for ur good job</div></div><div class=3D"gmail_e=
+xtra"><br><br><div class=3D"gmail_quote">2014-07-30 8:21 GMT+07:00 Sage Wei=
+l <span dir=3D"ltr">&lt;<a href=3D"mailto:sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org" target=3D"_blan=
+k">sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org</a>&gt;</span>:<br>
+<blockquote class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:1p=
+x #ccc solid;padding-left:1ex">Another Ceph development release! =C2=A0This=
+ has been a longer cycle, so there<br>
+has been quite a bit of bug fixing and stabilization in this round.<br>
+There is also a bunch of packaging fixes for RPM distros (RHEL/CentOS,<br>
+Fedora, and SUSE) and for systemd. =C2=A0We&#39;ve also added a new<br>
+librados-striper library from Sebastien Ponce that provides a generic<br>
+striping API for applications to code to.<br>
+<br>
+Upgrading<br>
+---------<br>
+<br>
+* The experimental keyvaluestore-dev OSD backend had an on-disk format<br>
+=C2=A0 change that prevents existing OSD data from being upgraded. =C2=A0Th=
+is<br>
+=C2=A0 affects developers and testers only.<br>
+<br>
+* mon-specific and osd-specific leveldb options have been removed.<br>
+=C2=A0 From this point onward users should use &#39;leveldb_&#39; generic o=
+ptions and add<br>
+=C2=A0 the options in the appropriate sections of their configuration files=
+.<br>
+=C2=A0 Monitors will still maintain the following monitor-specific defaults=
+:<br>
+<br>
+=C2=A0 =C2=A0 leveldb_write_buffer_size =3D 32*1024*1024 =C2=A0=3D 33554432=
+ =C2=A0// 32MB<br>
+=C2=A0 =C2=A0 leveldb_cache_size =C2=A0 =C2=A0 =C2=A0 =C2=A0=3D 512*1024*12=
+04 =3D 536870912 // 512MB<br>
+=C2=A0 =C2=A0 leveldb_block_size =C2=A0 =C2=A0 =C2=A0 =C2=A0=3D 64*1024 =C2=
+=A0 =C2=A0 =C2=A0 =3D 65536 =C2=A0 =C2=A0 // 64KB<br>
+=C2=A0 =C2=A0 leveldb_compression =C2=A0 =C2=A0 =C2=A0 =3D false<br>
+=C2=A0 =C2=A0 leveldb_log =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
+=3D &quot;&quot;<br>
+<br>
+=C2=A0 OSDs will still maintain the following osd-specific defaults:<br>
+<br>
+=C2=A0 =C2=A0 leveldb_log =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
+=3D &quot;&quot;<br>
+<br>
+Notable Changes<br>
+---------------<br>
+<br>
+* ceph-disk: fix dmcrypt support (Stephen Taylor)<br>
+* cephtool: fix help (Yilong Zhao)<br>
+* cephtool: test cleanup (Joao Eduardo Luis)<br>
+* doc: librados example fixes (Kevin Dalley)<br>
+* doc: many doc updates (John Wilkins)<br>
+* doc: update erasure docs (Loic Dachary, Venky Shankar)<br>
+* filestore: disable use of XFS hint (buggy on old kernels) (Samuel Just)<b=
+r>
+* filestore: fix xattr spillout (Greg Farnum, Haomai Wang)<br>
+* keyvaluestore: header cache (Haomai Wang)<br>
+* librados_striper: striping library for librados (Sebastien Ponce)<br>
+* libs3: update to latest (Danny Al-Gaaf)<br>
+* log: fix derr level (Joao Eduardo Luis)<br>
+* logrotate: fix osd log rotation on ubuntu (Sage Weil)<br>
+* mds: fix xattr bug triggered by ACLs (Yan, Zheng)<br>
+* misc memory leaks, cleanups, fixes (Danny Al-Gaaf, Sahid Ferdjaoui)<br>
+* misc suse fixes (Danny Al-Gaaf)<br>
+* misc word size fixes (Kevin Cox)<br>
+* mon: drop mon- and osd- specific leveldb options (Joao Eduardo Luis)<br>
+* mon: ec pool profile fixes (Loic Dachary)<br>
+* mon: fix health down messages (Sage Weil)<br>
+* mon: fix quorum feature check (#8738, Greg Farnum)<br>
+* mon: &#39;osd crush reweight-subtree ...&#39; (Sage Weil)<br>
+* mon, osd: relax client EC support requirements (Sage Weil)<br>
+* mon: some instrumentation (Sage Weil)<br>
+* objecter: flag operations that are redirected by caching (Sage Weil)<br>
+* osd: clean up shard_id_t, shard_t (Loic Dachary)<br>
+* osd: fix connection reconnect race (Greg Farnum)<br>
+* osd: fix dumps (Joao Eduardo Luis)<br>
+* osd: fix erasure-code lib initialization (Loic Dachary)<br>
+* osd: fix extent normalization (Adam Crume)<br>
+* osd: fix loopback msgr issue (Ma Jianpeng)<br>
+* osd: fix LSB release parsing (Danny Al-Gaaf)<br>
+* osd: improved backfill priorities (Sage Weil)<br>
+* osd: many many core fixes (Samuel Just)<br>
+* osd, mon: config sanity checks on start (Sage Weil, Joao Eduardo Luis)<br=
+>
+* osd: sharded threadpool to improve parallelism (Somnath Roy)<br>
+* osd: simple io prioritization for scrub (Sage Weil)<br>
+* osd: simple scrub throttling (Sage Weil)<br>
+* osd: tests for bench command (Loic Dachary)<br>
+* osd: use xfs hint less frequently (Ilya Dryomov)<br>
+* pybind/rados: fix small timeouts (John Spray)<br>
+* qa: xfstests updates (Ilya Dryomov)<br>
+* rgw: cache bucket info (Yehuda Sadeh)<br>
+* rgw: cache decoded user info (Yehuda Sadeh)<br>
+* rgw: fix multipart object attr regression (#8452, Yehuda Sadeh)<br>
+* rgw: fix radosgw-admin &#39;show log&#39; command (#8553, Yehuda Sadeh)<b=
+r>
+* rgw: fix URL decoding (#8702, Brian Rak)<br>
+* rgw: handle empty extra pool name (Yehuda Sadeh)<br>
+* rpm: do not restart daemons on upgrade (Alfredo Deza)<br>
+* rpm: misc packaging fixes for rhel7 (Sandon Van Ness)<br>
+* rpm: split ceph-common from ceph (Sandon Van Ness)<br>
+* systemd: wrap started daemons in new systemd environment (Sage Weil, Dan<=
+br>
+=C2=A0 Mick)<br>
+* sysvinit: less sensitive to failures (Sage Weil)<br>
+* upstart: increase max open files limit (Sage Weil)<br>
+<br>
+Getting Ceph<br>
+------------<br>
+<br>
+* Git at git://<a href=3D"http://github.com/ceph/ceph.git" target=3D"_blank=
+">github.com/ceph/ceph.git</a><br>
+* Tarball at <a href=3D"http://ceph.com/download/ceph-0.83.tar.gz" target=
+=3D"_blank">http://ceph.com/download/ceph-0.83.tar.gz</a><br>
+* For packages, see <a href=3D"http://ceph.com/docs/master/install/get-pack=
+ages" target=3D"_blank">http://ceph.com/docs/master/install/get-packages</a=
+><br>
+* For ceph-deploy, see <a href=3D"http://ceph.com/docs/master/install/insta=
+ll-ceph-deploy" target=3D"_blank">http://ceph.com/docs/master/install/insta=
+ll-ceph-deploy</a><br>
+_______________________________________________<br>
+ceph-users mailing list<br>
+<a href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a><=
+br>
+<a href=3D"http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com" target=
+=3D"_blank">http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com</a><br>
+</blockquote></div><br></div>
 
-> I was away for a few days but I did think about this some more and how
-> to avoid a tunable and having a sensible default option.
->=20
-> FSCache already tracks statistics about how long writes and reads take
-> (at least if you enable that option). With those stats in hand we
-> should be able generate a default timeout value that works well and
-> avoid a tunable.
->=20
-> My self I thinking something like the 90th percentile time for page
-> write... whatever the value may be this should be a decent way of
-> auto-optimizing this timeout.
+--f46d043c08ccc41cb004ffdab3c2--
 
-Sounds like it could be a good approach, though if stats aren't enabled we
-need a sensible fall back.
+--===============1952056370==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
 
-What is the actual cost of having the timeout too small?  I guess it might =
-be
-unnecessary writeouts, but I haven't done any analysis.
-If the cost is expected to be quite small, a smaller timeout might be very
-appropriate.
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 
-One statistic that might be interesting is how long that wait typically tak=
-es
-at present, and how often it deadlocks.
-
-Mind you, we might be trying too hard.  Maybe just go for 100ms.
-
-When you suggested that, I wasn't really objecting to your choice of a
-number.  I was surprised because you seemed to justify it as a performance
-concern, and I didn't think deadlocks would happen often enough for that to
-be a valid concern.  When deadlock do happen, I presume the system is
-temporarily under high memory pressure so lots of things are probably going
-slowly, so a delay of a second might not be noticed.
-But there are way too many "probably"s and "might"s.  If you can present
-anything that looks like real data, it'll certainly trump all my hypotheses.
-
-Thanks,
-NeilBrown
-
->=20
-> - M
->=20
-> On Wed, Jul 30, 2014 at 12:06 PM, Milosz Tanski <milosz@adfin.com> wrote:
-> > I don't think that fixing a dead lock should impose a somewhat
-> > un-explainable high latency for the for the end user (or system
-> > admin). With old drives such latencies (second plus) were not
-> > unexpected.
-> >
-> > - Milosz
-> >
-> > On Tue, Jul 29, 2014 at 10:19 PM, NeilBrown <neilb@suse.de> wrote:
-> >> On Tue, 29 Jul 2014 21:48:34 -0400 Milosz Tanski <milosz@adfin.com> wr=
-ote:
-> >>
-> >>> I would vote on the lower end of the spectrum by default (closer to
-> >>> 100ms) since I imagine anybody deploying this in production
-> >>> environment would likely be using SSD drives for the caching. And in
-> >>> my tests on spinning disks there was little to no benefit outside of
-> >>> reducing network traffic.
-> >>
-> >> Maybe I'm confused......
-> >>
-> >> I thought the whole point of this patch was to avoid deadlocks.
-> >> Now you seem to be talking about a performance benefit.
-> >> What did I miss?
-> >>
-> >> NeilBrown
-> >>
-> >>
-> >>>
-> >>> - Milosz
-> >>>
-> >>> On Tue, Jul 29, 2014 at 5:17 PM, NeilBrown <neilb@suse.de> wrote:
-> >>> > On Tue, 29 Jul 2014 17:12:34 +0100 David Howells <dhowells@redhat.c=
-om> wrote:
-> >>> >
-> >>> >> Milosz Tanski <milosz@adfin.com> wrote:
-> >>> >>
-> >>> >> > That's the same thing exact fix I started testing on Saturday. I=
- found that
-> >>> >> > there already is a wait_event_timeout (even without your recent =
-changes). The
-> >>> >> > thing I'm not quite sure is what timeout it should use?
-> >>> >>
-> >>> >> That's probably something to make an external tuning knob for.
-> >>> >>
-> >>> >> David
-> >>> >
-> >>> > Ugg.  External tuning knobs should be avoided wherever possible, an=
-d always
-> >>> > come with detailed instructions on how to tune them  </rant>
-> >>> >
-> >>> > In this case I think it very nearly doesn't matter *at all* what va=
-lue is
-> >>> > used.
-> >>> >
-> >>> > If you set it a bit too high, then on the very very rare occasion t=
-hat it
-> >>> > would currently deadlock, you get a longer-than-necessary wait.  So=
- just make
-> >>> > sure that is short enough that by the time the sysadmin notices and=
- starts
-> >>> > looking for the problem, it will be gone.
-> >>> >
-> >>> > And if you set it a bit too low, then it will loop around to find a=
-nother
-> >>> > page to deal with before that one is finished being written out, an=
-d so maybe
-> >>> > do a little bit more work than is needed (though it'll be needed ev=
-entually).
-> >>> >
-> >>> > So the perfect number is somewhere between the typical response tim=
-e for
-> >>> > storage, and the typical response time for the sys-admin.  Anywhere=
- between
-> >>> > 100ms and 10sec would do.  1 second is the geo-mean.
-> >>> >
-> >>> > (sorry I didn't reply earlier - I missed you email somehow).
-> >>> >
-> >>> > NeilBrown
-> >>>
-> >>>
-> >>>
-> >>
-> >
-> >
-> >
-> > --
-> > Milosz Tanski
-> > CTO
-> > 16 East 34th Street, 15th floor
-> > New York, NY 10016
-> >
-> > p: 646-253-9055
-> > e: milosz@adfin.com
->=20
->=20
->=20
-
-
---Sig_/YxZExu9z6.8n/TF.eim.IMU
-Content-Type: application/pgp-signature; name=signature.asc
-Content-Disposition: attachment; filename=signature.asc
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iQIVAwUBU+BiVDnsnt1WYoG5AQJtuQ/+My1BouWeaSkgMi3aYkqej14oZF7IR4gk
-lFUELsJNSYMjGpcIF1DnHZgbNd2vOYkq4OHc0hkAIoVaOP8bccyk58/5J2a5NT40
-1WNt5tStrHUH8xxCD9L0vGjBSHT6BYhmxGXmsmyNEG0Ol3Q0sLBReO50+auDFcyr
-UcefuUgK3dpHvrX0TQPJaQrhSAjQo8BoVTMVOwy6WZ6ppXATRQmonulVmiYKYj5C
-0L6nt1INwQChPx4rPwVEm9nYbehd60DdTH9j+t5HBN9W4oVMxsMcYSDFk6DGfZF/
-uNrVBc1alLCo97hk6gSla/Awrs0/f5HPFx7ukmPu4PL5ZrE4FIAmcKVqaOej4pJJ
-YpYCO8vAyGprjJEoy9zgorrvDGbXtaujIzjEWGZvaVEdZEezBtPJ4Q0TfM8dU2so
-DbHsNTmh0myEkA7va6nxCBszPYNv4Of05LbLq02Cn8VTeIHYYRlfVfan9ENT2qDR
-LbaySbR+ocKHET3ig37cZh9Up6ao22dzlAo7fPGVlNt3we3NF8JRq5GxCR61yp+D
-ps+wpedcAbK8KKC0JRJ/zAd0q7qHB5h9aXbgVzR6IfM8qDHfNrkT+eMcW15sm6UJ
-O2Csw4Ol9w+tVAmOCOCoWf4it+rBRKzW9hb8Eu5YrqYGLYZO78/Bx5QtvAbT0fyt
-kCPQWneeRP0=
-=0UtF
------END PGP SIGNATURE-----
-
---Sig_/YxZExu9z6.8n/TF.eim.IMU--
+--===============1952056370==--
