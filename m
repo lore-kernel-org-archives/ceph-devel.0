@@ -1,224 +1,313 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: upgrade:firefly-x:stress-split related workload
-Date: Tue, 05 Aug 2014 08:27:48 +0200
-Message-ID: <53E07964.1080809@dachary.org>
-References: <53DF8672.2050109@dachary.org>	<CAJBxG-sCN2DwpqyXqjLzUCTo-DvTBNVLQWzKPipCkMkZc=NFaw@mail.gmail.com>	<53DFAFA5.8040606@dachary.org> <CAJBxG-v-4mWTtdDvWhATpLHkjgozgQiFTt4hxw_s7CjWSyB=Sg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="7FSvGNi8kvDDe0BNgdrPgCm54kwnm833m"
+From: Ilya Dryomov <ilya.dryomov@inktank.com>
+Subject: [PATCH] rbd: rework rbd_request_fn()
+Date: Tue,  5 Aug 2014 11:38:44 +0400
+Message-ID: <1407224324-4811-1-git-send-email-ilya.dryomov@inktank.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:53951 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1754760AbaHEG14 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Aug 2014 02:27:56 -0400
-In-Reply-To: <CAJBxG-v-4mWTtdDvWhATpLHkjgozgQiFTt4hxw_s7CjWSyB=Sg@mail.gmail.com>
+Received: from mail-lb0-f173.google.com ([209.85.217.173]:53322 "EHLO
+	mail-lb0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756542AbaHEHit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Aug 2014 03:38:49 -0400
+Received: by mail-lb0-f173.google.com with SMTP id p9so401632lbv.4
+        for <ceph-devel@vger.kernel.org>; Tue, 05 Aug 2014 00:38:48 -0700 (PDT)
+Received: from localhost ([109.110.66.143])
+        by mx.google.com with ESMTPSA id xl2sm1495790lbb.47.2014.08.05.00.38.46
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=RC4-SHA bits=128/128);
+        Tue, 05 Aug 2014 00:38:47 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yuri Weinstein <yuri.weinstein@inktank.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---7FSvGNi8kvDDe0BNgdrPgCm54kwnm833m
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+While it was never a good idea to sleep in request_fn(), commit
+34c6bc2c919a ("locking/mutexes: Add extra reschedule point") made it
+a *bad* idea.  mutex_lock() since 3.15 may reschedule *before* putting
+task on the mutex wait queue, which for tasks in !TASK_RUNNING state
+means block forever.  request_fn() may be called with !TASK_RUNNING on
+the way to schedule() in io_schedule().
 
-Hi,=20
+Offload request handling to a workqueue, one per rbd device, to avoid
+calling blocking primitives from rbd_request_fn().
 
-The test suite finished at produced 5 errors, 4 of them in the "SWIFT_TES=
-T_CONFIG_FILE" category
+Cc: stable@vger.kernel.org # 3.15+
+Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
+---
+ drivers/block/rbd.c |  195 +++++++++++++++++++++++++++++++--------------------
+ 1 file changed, 118 insertions(+), 77 deletions(-)
 
-http://pulpito.ceph.com/loic-2014-08-04_15:06:02-upgrade:firefly-x:stress=
--split-wip-8475-testing-basic-plana/396882/
-INFO:teuthology.orchestra.run.plana28.stderr:----------------------------=
-------------------------------------------
-2014-08-04T10:54:48.138 INFO:teuthology.orchestra.run.plana28.stderr:Trac=
-eback (most recent call last):
-2014-08-04T10:54:48.138 INFO:teuthology.orchestra.run.plana28.stderr:  Fi=
-le "/home/ubuntu/cephtest/swift/test/functional/tests.py", line 104, in s=
-etUp
-2014-08-04T10:54:48.138 INFO:teuthology.orchestra.run.plana28.stderr:    =
-cls.env.setUp()
-2014-08-04T10:54:48.139 INFO:teuthology.orchestra.run.plana28.stderr:  Fi=
-le "/home/ubuntu/cephtest/swift/test/functional/tests.py", line 140, in s=
-etUp
-2014-08-04T10:54:48.139 INFO:teuthology.orchestra.run.plana28.stderr:    =
-raise ResponseError(cls.conn.response)
-2014-08-04T10:54:48.139 INFO:teuthology.orchestra.run.plana28.stderr:Resp=
-onseError: 500: Internal Server Error
-2014-08-04T10:54:48.139 INFO:teuthology.orchestra.run.plana28.stderr:
-2014-08-04T10:54:48.139 INFO:teuthology.orchestra.run.plana28.stderr:=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-2014-08-04T10:54:48.139 INFO:teuthology.orchestra.run.plana28.stderr:FAIL=
-: testGetRequest (test.functional.tests.TestAccountNoContainers)
-2014-08-04T10:54:48.139 INFO:teuthology.orchestra.run.plana28.stderr:----=
-------------------------------------------------------------------
-2014-08-04T10:54:48.139 INFO:teuthology.orchestra.run.plana28.stderr:Trac=
-eback (most recent call last):
-2014-08-04T10:54:48.139 INFO:teuthology.orchestra.run.plana28.stderr:  Fi=
-le "/home/ubuntu/cephtest/swift/test/functional/tests.py", line 325, in t=
-estGetRequest
-2014-08-04T10:54:48.140 INFO:teuthology.orchestra.run.plana28.stderr:    =
-parms=3D{'format':format}))
-2014-08-04T10:54:48.140 INFO:teuthology.orchestra.run.plana28.stderr:Asse=
-rtionError: False is not true
-2014-08-04T10:54:48.140 INFO:teuthology.orchestra.run.plana28.stderr:
-2014-08-04T10:54:48.140
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index e3412317d3f9..e07d9d71b187 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -42,6 +42,7 @@
+ #include <linux/blkdev.h>
+ #include <linux/slab.h>
+ #include <linux/idr.h>
++#include <linux/workqueue.h>
+ 
+ #include "rbd_types.h"
+ 
+@@ -332,7 +333,10 @@ struct rbd_device {
+ 
+ 	char			name[DEV_NAME_LEN]; /* blkdev name, e.g. rbd3 */
+ 
++	struct list_head	rq_queue;	/* incoming rq queue */
+ 	spinlock_t		lock;		/* queue, flags, open_count */
++	struct workqueue_struct	*rq_wq;
++	struct work_struct	rq_work;
+ 
+ 	struct rbd_image_header	header;
+ 	unsigned long		flags;		/* possibly lock protected */
+@@ -3176,102 +3180,129 @@ out:
+ 	return ret;
+ }
+ 
+-static void rbd_request_fn(struct request_queue *q)
+-		__releases(q->queue_lock) __acquires(q->queue_lock)
++static void rbd_handle_request(struct rbd_device *rbd_dev, struct request *rq)
+ {
+-	struct rbd_device *rbd_dev = q->queuedata;
+-	struct request *rq;
++	struct rbd_img_request *img_request;
++	u64 offset = (u64)blk_rq_pos(rq) << SECTOR_SHIFT;
++	u64 length = blk_rq_bytes(rq);
++	bool wr = rq_data_dir(rq) == WRITE;
+ 	int result;
+ 
+-	while ((rq = blk_fetch_request(q))) {
+-		bool write_request = rq_data_dir(rq) == WRITE;
+-		struct rbd_img_request *img_request;
+-		u64 offset;
+-		u64 length;
++	/* Ignore/skip any zero-length requests */
+ 
+-		/* Ignore any non-FS requests that filter through. */
++	if (!length) {
++		dout("%s: zero-length request\n", __func__);
++		result = 0;
++		goto err_rq;
++	}
+ 
+-		if (rq->cmd_type != REQ_TYPE_FS) {
+-			dout("%s: non-fs request type %d\n", __func__,
+-				(int) rq->cmd_type);
+-			__blk_end_request_all(rq, 0);
+-			continue;
++	/* Disallow writes to a read-only device */
++
++	if (wr) {
++		if (rbd_dev->mapping.read_only) {
++			result = -EROFS;
++			goto err_rq;
+ 		}
++		rbd_assert(rbd_dev->spec->snap_id == CEPH_NOSNAP);
++	}
+ 
+-		/* Ignore/skip any zero-length requests */
++	/*
++	 * Quit early if the mapped snapshot no longer exists.  It's
++	 * still possible the snapshot will have disappeared by the
++	 * time our request arrives at the osd, but there's no sense in
++	 * sending it if we already know.
++	 */
++	if (!test_bit(RBD_DEV_FLAG_EXISTS, &rbd_dev->flags)) {
++		dout("request for non-existent snapshot");
++		rbd_assert(rbd_dev->spec->snap_id != CEPH_NOSNAP);
++		result = -ENXIO;
++		goto err_rq;
++	}
+ 
+-		offset = (u64) blk_rq_pos(rq) << SECTOR_SHIFT;
+-		length = (u64) blk_rq_bytes(rq);
++	if (offset && length > U64_MAX - offset + 1) {
++		rbd_warn(rbd_dev, "bad request range (%llu~%llu)", offset,
++			 length);
++		result = -EINVAL;
++		goto err_rq;	/* Shouldn't happen */
++	}
+ 
+-		if (!length) {
+-			dout("%s: zero-length request\n", __func__);
+-			__blk_end_request_all(rq, 0);
+-			continue;
+-		}
++	if (offset + length > rbd_dev->mapping.size) {
++		rbd_warn(rbd_dev, "beyond EOD (%llu~%llu > %llu)", offset,
++			 length, rbd_dev->mapping.size);
++		result = -EIO;
++		goto err_rq;
++	}
+ 
+-		spin_unlock_irq(q->queue_lock);
++	img_request = rbd_img_request_create(rbd_dev, offset, length, wr);
++	if (!img_request) {
++		result = -ENOMEM;
++		goto err_rq;
++	}
++	img_request->rq = rq;
+ 
+-		/* Disallow writes to a read-only device */
++	result = rbd_img_request_fill(img_request, OBJ_REQUEST_BIO, rq->bio);
++	if (result)
++		goto err_img_request;
+ 
+-		if (write_request) {
+-			result = -EROFS;
+-			if (rbd_dev->mapping.read_only)
+-				goto end_request;
+-			rbd_assert(rbd_dev->spec->snap_id == CEPH_NOSNAP);
+-		}
++	result = rbd_img_request_submit(img_request);
++	if (result)
++		goto err_img_request;
+ 
+-		/*
+-		 * Quit early if the mapped snapshot no longer
+-		 * exists.  It's still possible the snapshot will
+-		 * have disappeared by the time our request arrives
+-		 * at the osd, but there's no sense in sending it if
+-		 * we already know.
+-		 */
+-		if (!test_bit(RBD_DEV_FLAG_EXISTS, &rbd_dev->flags)) {
+-			dout("request for non-existent snapshot");
+-			rbd_assert(rbd_dev->spec->snap_id != CEPH_NOSNAP);
+-			result = -ENXIO;
+-			goto end_request;
+-		}
++	return;
+ 
+-		result = -EINVAL;
+-		if (offset && length > U64_MAX - offset + 1) {
+-			rbd_warn(rbd_dev, "bad request range (%llu~%llu)",
+-				offset, length);
+-			goto end_request;	/* Shouldn't happen */
+-		}
++err_img_request:
++	rbd_img_request_put(img_request);
++err_rq:
++	if (result)
++		rbd_warn(rbd_dev, "%s %llx at %llx result %d",
++			 wr ? "write" : "read", length, offset, result);
++	blk_end_request_all(rq, result);
++}
+ 
+-		result = -EIO;
+-		if (offset + length > rbd_dev->mapping.size) {
+-			rbd_warn(rbd_dev, "beyond EOD (%llu~%llu > %llu)",
+-				offset, length, rbd_dev->mapping.size);
+-			goto end_request;
+-		}
++static void rbd_request_workfn(struct work_struct *work)
++{
++	struct rbd_device *rbd_dev =
++	    container_of(work, struct rbd_device, rq_work);
++	struct request *rq, *next;
++	LIST_HEAD(requests);
+ 
+-		result = -ENOMEM;
+-		img_request = rbd_img_request_create(rbd_dev, offset, length,
+-							write_request);
+-		if (!img_request)
+-			goto end_request;
++	spin_lock_irq(&rbd_dev->lock); /* rq->q->queue_lock */
++	list_splice_init(&rbd_dev->rq_queue, &requests);
++	spin_unlock_irq(&rbd_dev->lock);
+ 
+-		img_request->rq = rq;
++	list_for_each_entry_safe(rq, next, &requests, queuelist) {
++		list_del_init(&rq->queuelist);
++		rbd_handle_request(rbd_dev, rq);
++	}
++}
+ 
+-		result = rbd_img_request_fill(img_request, OBJ_REQUEST_BIO,
+-						rq->bio);
+-		if (!result)
+-			result = rbd_img_request_submit(img_request);
+-		if (result)
+-			rbd_img_request_put(img_request);
+-end_request:
+-		spin_lock_irq(q->queue_lock);
+-		if (result < 0) {
+-			rbd_warn(rbd_dev, "%s %llx at %llx result %d",
+-				write_request ? "write" : "read",
+-				length, offset, result);
+-
+-			__blk_end_request_all(rq, result);
++/*
++ * Called with q->queue_lock held and interrupts disabled, possibly on
++ * the way to schedule().  Do not sleep here!
++ */
++static void rbd_request_fn(struct request_queue *q)
++{
++	struct rbd_device *rbd_dev = q->queuedata;
++	struct request *rq;
++	int queued = 0;
++
++	rbd_assert(rbd_dev);
++
++	while ((rq = blk_fetch_request(q))) {
++		/* Ignore any non-FS requests that filter through. */
++		if (rq->cmd_type != REQ_TYPE_FS) {
++			dout("%s: non-fs request type %d\n", __func__,
++				(int) rq->cmd_type);
++			__blk_end_request_all(rq, 0);
++			continue;
+ 		}
++
++		list_add_tail(&rq->queuelist, &rbd_dev->rq_queue);
++		queued++;
+ 	}
++
++	if (queued)
++		queue_work(rbd_dev->rq_wq, &rbd_dev->rq_work);
+ }
+ 
+ /*
+@@ -3847,6 +3878,8 @@ static struct rbd_device *rbd_dev_create(struct rbd_client *rbdc,
+ 		return NULL;
+ 
+ 	spin_lock_init(&rbd_dev->lock);
++	INIT_LIST_HEAD(&rbd_dev->rq_queue);
++	INIT_WORK(&rbd_dev->rq_work, rbd_request_workfn);
+ 	rbd_dev->flags = 0;
+ 	atomic_set(&rbd_dev->parent_ref, 0);
+ 	INIT_LIST_HEAD(&rbd_dev->node);
+@@ -5050,12 +5083,17 @@ static int rbd_dev_device_setup(struct rbd_device *rbd_dev)
+ 	ret = rbd_dev_mapping_set(rbd_dev);
+ 	if (ret)
+ 		goto err_out_disk;
++
+ 	set_capacity(rbd_dev->disk, rbd_dev->mapping.size / SECTOR_SIZE);
+ 	set_disk_ro(rbd_dev->disk, rbd_dev->mapping.read_only);
+ 
++	rbd_dev->rq_wq = alloc_workqueue(rbd_dev->disk->disk_name, 0, 0);
++	if (!rbd_dev->rq_wq)
++		goto err_out_mapping;
++
+ 	ret = rbd_bus_add_dev(rbd_dev);
+ 	if (ret)
+-		goto err_out_mapping;
++		goto err_out_workqueue;
+ 
+ 	/* Everything's ready.  Announce the disk to the world. */
+ 
+@@ -5067,6 +5105,8 @@ static int rbd_dev_device_setup(struct rbd_device *rbd_dev)
+ 
+ 	return ret;
+ 
++err_out_workqueue:
++	destroy_workqueue(rbd_dev->rq_wq);
+ err_out_mapping:
+ 	rbd_dev_mapping_clear(rbd_dev);
+ err_out_disk:
+@@ -5313,6 +5353,7 @@ static void rbd_dev_device_release(struct device *dev)
+ {
+ 	struct rbd_device *rbd_dev = dev_to_rbd_dev(dev);
+ 
++	destroy_workqueue(rbd_dev->rq_wq);
+ 	rbd_free_disk(rbd_dev);
+ 	clear_bit(RBD_DEV_FLAG_EXISTS, &rbd_dev->flags);
+ 	rbd_dev_mapping_clear(rbd_dev);
+-- 
+1.7.10.4
 
-http://pulpito.ceph.com/loic-2014-08-04_15:06:02-upgrade:firefly-x:stress=
--split-wip-8475-testing-basic-plana/396890/
-INFO:teuthology.orchestra.run.plana64.stderr:=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-2014-08-04T12:51:21.582 INFO:teuthology.orchestra.run.plana64.stderr:FAIL=
-: testUtf8Container (test.functional.tests.TestContainerUTF8)
-2014-08-04T12:51:21.582 INFO:teuthology.orchestra.run.plana64.stderr:----=
-------------------------------------------------------------------
-2014-08-04T12:51:21.582 INFO:teuthology.orchestra.run.plana64.stderr:Trac=
-eback (most recent call last):
-2014-08-04T12:51:21.583 INFO:teuthology.orchestra.run.plana64.stderr:  Fi=
-le "/home/ubuntu/cephtest/swift/test/functional/tests.py", line 462, in t=
-estUtf8Container
-2014-08-04T12:51:21.583 INFO:teuthology.orchestra.run.plana64.stderr:    =
-self.assert_(container.create(cfg=3D{'no_path_quote':True}))
-2014-08-04T12:51:21.583 INFO:teuthology.orchestra.run.plana64.stderr:Asse=
-rtionError: False is not true
-2014-08-04T12:51:21.583 INFO:teuthology.orchestra.run.plana64.stderr:
-2014-08-04T12:51:21.583
-
-http://pulpito.ceph.com/loic-2014-08-04_15:06:02-upgrade:firefly-x:stress=
--split-wip-8475-testing-basic-plana/396891/
-INFO:teuthology.orchestra.run.plana12.stderr:=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-2014-08-04T13:36:17.551 INFO:teuthology.orchestra.run.plana12.stderr:FAIL=
-: testSerialization (test.functional.tests.TestFile)
-2014-08-04T13:36:17.552 INFO:teuthology.orchestra.run.plana12.stderr:----=
-------------------------------------------------------------------
-2014-08-04T13:36:17.552 INFO:teuthology.orchestra.run.plana12.stderr:Trac=
-eback (most recent call last):
-2014-08-04T13:36:17.552 INFO:teuthology.orchestra.run.plana12.stderr:  Fi=
-le "/home/ubuntu/cephtest/swift/test/functional/tests.py", line 1315, in =
-testSerialization
-2014-08-04T13:36:17.552 INFO:teuthology.orchestra.run.plana12.stderr:    =
-self.assert_(container.create())
-2014-08-04T13:36:17.552 INFO:teuthology.orchestra.run.plana12.stderr:Asse=
-rtionError: False is not true
-2014-08-04T13:36:17.553 INFO:teuthology.orchestra.run.plana12.stderr:
-2014-08-04T13:36:17.553
-
-http://pulpito.ceph.com/loic-2014-08-04_15:06:02-upgrade:firefly-x:stress=
--split-wip-8475-testing-basic-plana/396893/
-INFO:teuthology.orchestra.run.plana34.stderr:=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-2014-08-04T12:59:44.078 INFO:teuthology.orchestra.run.plana34.stderr:FAIL=
-: testPrefixAndLimit (test.functional.tests.TestContainer)
-2014-08-04T12:59:44.078 INFO:teuthology.orchestra.run.plana34.stderr:----=
-------------------------------------------------------------------
-2014-08-04T12:59:44.078 INFO:teuthology.orchestra.run.plana34.stderr:Trac=
-eback (most recent call last):
-2014-08-04T12:59:44.078 INFO:teuthology.orchestra.run.plana34.stderr:  Fi=
-le "/home/ubuntu/cephtest/swift/test/functional/tests.py", line 415, in t=
-estPrefixAndLimit
-2014-08-04T12:59:44.079 INFO:teuthology.orchestra.run.plana34.stderr:    =
-self.assert_(cont.create())
-2014-08-04T12:59:44.079 INFO:teuthology.orchestra.run.plana34.stderr:Asse=
-rtionError: False is not true
-2014-08-04T12:59:44.079 INFO:teuthology.orchestra.run.plana34.stderr:
-2014-08-04T12:59:44.079
-
-one of them is because of a failed kill ceph-osd -f -i 5
-
-http://pulpito.ceph.com/loic-2014-08-04_15:06:02-upgrade:firefly-x:stress=
--split-wip-8475-testing-basic-plana/396887/
-
-which I suspect to be related to http://tracker.ceph.com/issues/8736
-
-It strikes me as odd that all radosgw failures are different. As if somet=
-hing was preventing, randomly, the test to complete. Maybe a combination =
-of running the test against a cluster that is stopped before the test can=
- complete ?=20
-
-Cheers
-
-On 04/08/2014 18:13, Yuri Weinstein wrote:
-> Not yet.  I was wondering if you cold take a look after your run is
-> completed (we had mane environment related and backport related
-> issues, so we need to get trustworthy runs)?
->=20
-> But I did talk to Yehuda and logged
-> http://tracker.ceph.com/issues/8988 which maybe covered a couple of
-> them.
->=20
-> Thx
-> YuriW
->=20
-> On Mon, Aug 4, 2014 at 9:07 AM, Loic Dachary <loic@dachary.org> wrote:
->>
->>
->> On 04/08/2014 16:54, Yuri Weinstein wrote:
->>> Sounds good, Loic.
->>>
->>> I ran 60 tests on vps -
->>> http://pulpito.front.sepia.ceph.com/teuthology-2014-08-03_16:05:01-up=
-grade:firefly-x:stress-split-next---basic-vps/
->>>
->>> I will need your help to see what to do about on ##
->>> http://tracker.ceph.com/issues/8736,
->>> http://tracker.ceph.com/issues/8737 and
->>> http://tracker.ceph.com/issues/8740
->>
->> Sure. Did you match them to errors from the 19 failures of http://pulp=
-ito.front.sepia.ceph.com/teuthology-2014-08-03_16:05:01-upgrade:firefly-x=
-:stress-split-next---basic-vps/ ?
->>>
->>> Thx
->>> YuriW
->>>
->>> On Mon, Aug 4, 2014 at 6:11 AM, Loic Dachary <loic@dachary.org> wrote=
-:
->>>> Hi Yuri,
->>>>
->>>> FYI I scheduled a upgrade:firefly-x:stress-split to check if http://=
-tracker.ceph.com/issues/8475#note-14 behaves as expected http://pulpito.c=
-eph.com/loic-2014-08-04_15:06:02-upgrade:firefly-x:stress-split-wip-8475-=
-testing-basic-plana/
->>>>
->>>> I'm hoping to see the same failures you have on master on next http:=
-//pulpito.ceph.com/teuthology-2014-07-30_13:09:01-upgrade:firefly-x:stres=
-s-split-next---basic-plana/
->>>>
->>>> Cheers
->>>> --
->>>> Lo=C3=AFc Dachary, Artisan Logiciel Libre
->>>>
->>
->> --
->> Lo=C3=AFc Dachary, Artisan Logiciel Libre
->>
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---7FSvGNi8kvDDe0BNgdrPgCm54kwnm833m
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlPgeWQACgkQ8dLMyEl6F2090wCglec48rZSPq1booqLOtlQhC83
-mc0AoKhW4diRP1qcAXNCLSn8t33wpGev
-=tmpK
------END PGP SIGNATURE-----
-
---7FSvGNi8kvDDe0BNgdrPgCm54kwnm833m--
