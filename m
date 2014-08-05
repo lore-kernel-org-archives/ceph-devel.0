@@ -1,45 +1,63 @@
-From: David Howells <dhowells@redhat.com>
-Subject: Re: fscache recursive hang -- similar to loopback
-	NFS issues
-Date: Tue, 05 Aug 2014 15:32:46 +0100
-Message-ID: <20765.1407249166@warthog.procyon.org.uk>
-References: <CANP1eJGoT2RmKB6asjbFgP=emLuxQqgqE4Xf9Gx7fYzPfS1img@mail.gmail.com>
-	<CANP1eJEVnH2w7t6r8g1ow07UNWRA8bPduwD-FezqCBKB_J_=XQ@mail.gmail.com>
-	<CANP1eJE7tU9touhSq+Utt=MLE4w5D_C4pT1TAFAiFNBh8ee_mA@mail.gmail.com>
-	<20140721164044.2845f3fd@notabene.brown>
-	<29057.1406650354@warthog.procyon.org.uk>
-	<20140730071735.21ab7ca6@notabene.brown>
-	<CANP1eJHo7xrFoXWWgKQNrTi94vaxN9x-ViXNBE4VcXAa_jjQ3Q@mail.gmail.com>
-	<20140730121935.124bc7c9@notabene.brown>
-	<CANP1eJEBO0VbG2MoBzRB1h3c0QzOhAjvqUtHSX0+Y_uDT5oZug@mail.gmail.com>
+From: Thorwald Lundqvist <thorwald@jumpstarter.io>
+Subject: Re: Ceph kRBD stuck after disk crash
+Date: Tue, 5 Aug 2014 16:38:01 +0200
+Message-ID: <CAPZO0-N4EFAZLr4M_xLPPjhkqao+Rd6dSm5mLNinr_V6-ALA_Q@mail.gmail.com>
+References: <CAPZO0-O2eRt1t9o_aN6vZ88gwfT2MMcvjN-Y+-BiFkXHuPo3tA@mail.gmail.com>
+	<CALFYKtD5oTTTujLU-ax6+_Yz2p5+9qgYMXepHH4rcAo38nXXiA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-cachefs-bounces@redhat.com>
-In-Reply-To: <CANP1eJGoT2RmKB6asjbFgP=emLuxQqgqE4Xf9Gx7fYzPfS1img@mail.gmail.com>
-Content-ID: <20764.1407249166.1@warthog.procyon.org.uk>
-List-Unsubscribe: <https://www.redhat.com/mailman/options/linux-cachefs>,
-	<mailto:linux-cachefs-request@redhat.com?subject=unsubscribe>
-List-Archive: <https://www.redhat.com/archives/linux-cachefs>
-List-Post: <mailto:linux-cachefs@redhat.com>
-List-Help: <mailto:linux-cachefs-request@redhat.com?subject=help>
-List-Subscribe: <https://www.redhat.com/mailman/listinfo/linux-cachefs>,
-	<mailto:linux-cachefs-request@redhat.com?subject=subscribe>
-Sender: linux-cachefs-bounces@redhat.com
-Errors-To: linux-cachefs-bounces@redhat.com
-To: Milosz Tanski <milosz@adfin.com>
-Cc: NeilBrown <neilb@suse.de>, ceph-devel <ceph-devel@vger.kernel.org>, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, "linux-cachefs@redhat.com" <linux-cachefs@redhat.com>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-la0-f45.google.com ([209.85.215.45]:49801 "EHLO
+	mail-la0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752121AbaHEOiE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Aug 2014 10:38:04 -0400
+Received: by mail-la0-f45.google.com with SMTP id ty20so804160lab.4
+        for <ceph-devel@vger.kernel.org>; Tue, 05 Aug 2014 07:38:01 -0700 (PDT)
+In-Reply-To: <CALFYKtD5oTTTujLU-ax6+_Yz2p5+9qgYMXepHH4rcAo38nXXiA@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Ilya Dryomov <ilya.dryomov@inktank.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Milosz Tanski <milosz@adfin.com> wrote:
+Thank you Eric and Ilya, The disk crash does not seems to not be
+related even though it happened almost at the same time then I guess.
 
-> FSCache already tracks statistics about how long writes and reads take
-> (at least if you enable that option). With those stats in hand we
-> should be able generate a default timeout value that works well and
-> avoid a tunable.
+No dd until 3.15.9 then. ;)
 
-If stat generation is going to be on all the time, it should probably use
-something other than atomic ops.  NFS uses a set of ints on each CPU which are
-added together when needed.
+Thank you again.
 
-David
+On Tue, Aug 5, 2014 at 4:28 PM, Ilya Dryomov <ilya.dryomov@inktank.com> wrote:
+> On Tue, Aug 5, 2014 at 5:59 PM, Thorwald Lundqvist
+> <thorwald@jumpstarter.io> wrote:
+>> Hi!
+>>
+>> I've just experienced a disk crash in my ceph cluster. This seems to
+>> have caused an error in the kernel since every I/O command sent to any
+>> mapped RBD is defered indefinitely, even an hour later, the OSD is
+>> already taken out of the cluster and ceph -s says HEALTH_OK.
+>>
+>> A kernel dump is provided at this pastebin link: http://pastebin.com/WMqmiUsM
+>>
+>> What did I do prior the crash?
+>>
+>> I mapped one clean rbd device at /dev/rbd0 and one rbd device that had
+>> a partition and ext4 filesystem at 20GB each
+>>
+>> I started to dd rbd1 to rbd0 (dd if=/dev/rbd1 of=/dev/rbd0 bs=4M) It
+>> copied a few GB, then deep-scrub started and at that moment one of the
+>> disks failed. and dd got stuck (disk defered). And it still is.
+>>
+>> I think that only a reboot of the server can fix this problem now.
+>>
+>> This is not normal behavior when a disk crashes, right?
+>
+> No, it's not ;)  Technically this is not a crash though, it's more of
+> a deadlock - one process ended up blocking forever while holding
+> a crucial lock.  See http://tracker.ceph.com/issues/8818.
+>
+> The fix is going to be in 3.17-rc1 so it should catch the last 3.15
+> stable update.
+>
+> Thanks,
+>
+>                 Ilya
