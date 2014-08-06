@@ -1,288 +1,289 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: upgrade:firefly-x:stress-split related workload
-Date: Tue, 05 Aug 2014 21:35:46 +0200
-Message-ID: <53E13212.5010601@dachary.org>
-References: <53DF8672.2050109@dachary.org>	<CAJBxG-sCN2DwpqyXqjLzUCTo-DvTBNVLQWzKPipCkMkZc=NFaw@mail.gmail.com>	<53DFAFA5.8040606@dachary.org>	<CAJBxG-v-4mWTtdDvWhATpLHkjgozgQiFTt4hxw_s7CjWSyB=Sg@mail.gmail.com>	<53E07964.1080809@dachary.org>	<CAJBxG-tLnMitountCUWZ-A7sqpv=BrMyfW64uepbDH1w+dOurw@mail.gmail.com>	<CAJBxG-u8mc-UtdzyL8Qx6w_PU7mw06sqvtN5PJaUUAPJTOHzTA@mail.gmail.com> <CAJBxG-sTXRrCM12v5y867P7GPrar_rp0ULvZMg_q-OKhCp8Ctw@mail.gmail.com> <53E13085.8060602@dachary.org>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: [PATCH master] rbd.cc: add --force option at 'rbd import'
+Date: Tue, 05 Aug 2014 18:10:07 -0700
+Message-ID: <53E1806F.8050905@inktank.com>
+References: <53C022CA.2050805@inktank.com> <1405676749-14204-1-git-send-email-bl.dimitris@gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="uRcMPwmlC1b7ud8edlfnG12Hu4tw065BK"
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:54374 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1753519AbaHETfx (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Aug 2014 15:35:53 -0400
-In-Reply-To: <53E13085.8060602@dachary.org>
+Received: from mail.hq.newdream.net ([66.33.206.127]:44077 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755132AbaHFBJr (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Aug 2014 21:09:47 -0400
+In-Reply-To: <1405676749-14204-1-git-send-email-bl.dimitris@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yuri Weinstein <yuri.weinstein@inktank.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Dimitris Bliablias <bl.dimitris@gmail.com>, ceph-devel@vger.kernel.org
+Cc: synnefo-devel@googlegroups.com
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---uRcMPwmlC1b7ud8edlfnG12Hu4tw065BK
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+On 07/18/2014 02:45 AM, Dimitris Bliablias wrote:
+> Extend the rbd utility with a new option named '--force'. This option
+> will be used by the 'rbd import' command to allow overwriting an
+> existing rbd image, something which is currently forbidden. If the image
+> has snapshots, the command returns an error and nothing is imported. The
+> force option will first remove the existing rbd image and then recreate
+> it before importing the new data.
+>
+> This patch also updates the tests affected by the modified functions, to
+> reflect the latest changes. In addition, updates the rbd man page
+> accordingly to record the new '--force' option.
+>
+> Signed-off-by: Dimitris Bliablias <bl.dimitris@gmail.com>
+> ---
+> Hello,
+>
+> I've refactored the patch as you suggested, but I had to also drop the
+> '-f' option and keep only the '--force' one. This was made due to the
+> fact that the '-f' option is currently used along with the
+> '--foreground' option that specifies whether the Ceph daemons should run
+> in the foreground or not. The 'parse_argv' function of the
+> 'src/common/config.h' file is called before the argument parsing of the
+> rbd utility command line options and consequently it consumes the '-f'
+> argument whenever it is supplied. Not sure if this is the intended
+> behavior for the '-f' option.
 
-Please ignore me : I misread the *dumpling* ;-)
+This is a side-effect of the common args parsing infrastructure shared
+by daemons (where this option makes sense) and command line tools.
+Since this is triggered by global_init() which takes a daemon/utility
+flag, it wouldn't be too hard to pass that down to the config code and
+ignore daemon-only options like this for command line tools.
 
-I guess copying the=20
+> Thanks,
+> Dimitris
+>
+>   doc/man/8/rbd.rst                 | 12 +++++++-
+>   qa/workunits/rbd/import_export.sh |  6 ++++
+>   src/rbd.cc                        | 65 +++++++++++++++++++++++++++++++++++++--
+>   src/test/cli/rbd/help.t           |  3 +-
+>   4 files changed, 81 insertions(+), 5 deletions(-)
+>
+> diff --git a/doc/man/8/rbd.rst b/doc/man/8/rbd.rst
+> index 5424547..46d7f21 100644
+> --- a/doc/man/8/rbd.rst
+> +++ b/doc/man/8/rbd.rst
+> @@ -123,6 +123,11 @@ Parameters
+>
+>      Map the image read-only.  Equivalent to -o ro.
+>
+> +.. option:: --force
+> +
+> +   Overwrite an existing rbd image. This option is only used by the rbd import
+> +   command. See import section (below) for more details.
+> +
+>
+>   Commands
+>   ========
+> @@ -176,11 +181,16 @@ Commands
+>   :command:`export` [*image-name*] [*dest-path*]
+>     Exports image to dest path (use - for stdout).
+>
+> -:command:`import` [*path*] [*dest-image*]
+> +:command:`import` [*path*] [*dest-image*] [--force]
+>     Creates a new image and imports its data from path (use - for
+>     stdin).  The import operation will try to create sparse rbd images
+>     if possible.  For import from stdin, the sparsification unit is
+>     the data block size of the destination image (1 << order).
+> +  Using the --force option will overwrite the destination image if it exists.
+> +  Overwriting images using a different format is not supported. If the image
+> +  has snapshots, import fails and nothing is imported. (Note: using --force
+> +  will first remove the original rbd image, and then re-create it to import
+> +  the data from path).
+>
+>   :command:`export-diff` [*image-name*] [*dest-path*] [--from-snap *snapname*]
+>     Exports an incremental diff for an image to dest path (use - for stdout).  If
+> diff --git a/qa/workunits/rbd/import_export.sh b/qa/workunits/rbd/import_export.sh
+> index 29fcb6c..1b1b291 100755
+> --- a/qa/workunits/rbd/import_export.sh
+> +++ b/qa/workunits/rbd/import_export.sh
+> @@ -54,6 +54,12 @@ rbd rm testimg
+>   cmp /tmp/img /tmp/img2
+>   cmp /tmp/img /tmp/img3
+>
+> +# import using --force option
+> +rbd create testimg $RBD_CREATE_ARGS --size 10
+> +rbd import $RBD_CREATE_ARGS /tmp/img testimg && exit 1 || true   # should fail
+> +rbd import $RBD_CREATE_ARGS /tmp/img testimg --force
+> +rbd rm testimg
+> +
+>   rm /tmp/img /tmp/img2 /tmp/img3
+>
+>
+> diff --git a/src/rbd.cc b/src/rbd.cc
+> index c068ed6..a0cf544 100644
+> --- a/src/rbd.cc
+> +++ b/src/rbd.cc
+> @@ -28,6 +28,7 @@
+>
+>   #include "include/compat.h"
+>   #include "common/blkdev.h"
+> +#include "librbd/internal.h"
+>
+>   #include <boost/scoped_ptr.hpp>
+>   #include <errno.h>
+> @@ -89,7 +90,7 @@ void usage()
+>   "  rm <image-name>                             delete an image\n"
+>   "  export <image-name> <path>                  export image to file\n"
+>   "                                              \"-\" for stdout\n"
+> -"  import <path> <image-name>                  import image from file\n"
+> +"  import <path> <image-name> [--force]        import image from file\n"
+>   "                                              (dest defaults\n"
+>   "                                               as the filename part of file)\n"
+>   "                                              \"-\" for stdin\n"
+> @@ -150,6 +151,7 @@ void usage()
+>   "  --no-progress                      do not show progress for long-running commands\n"
+>   "  -o, --options <map-options>        options to use when mapping an image\n"
+>   "  --read-only                        set device readonly when mapping image\n"
+> +"  --force                            overwrite an existing image when importing\n"
+>   "  --allow-shrink                     allow shrinking of an image when resizing\n";
+>   }
+>
+> @@ -1290,7 +1292,7 @@ done_img:
+>
+>   static int do_import(librbd::RBD &rbd, librados::IoCtx& io_ctx,
+>   		     const char *imgname, int *order, const char *path,
+> -		     int format, uint64_t features, uint64_t size)
+> +		     int format, uint64_t features, uint64_t size, bool force)
+>   {
+>     int fd, r;
+>     struct stat stat_buf;
+> @@ -1310,6 +1312,7 @@ static int do_import(librbd::RBD &rbd, librados::IoCtx& io_ctx,
+>     ssize_t readlen;		// amount received from one read
+>     size_t blklen = 0;		// amount accumulated from reads to fill blk
+>     librbd::Image image;
+> +  bool old_format;
+>
+>     bool from_stdin = !strcmp(path, "-");
+>     if (from_stdin) {
+> @@ -1346,6 +1349,53 @@ static int do_import(librbd::RBD &rbd, librados::IoCtx& io_ctx,
+>         size = (uint64_t) bdev_size;
+>       }
+>     }
+> +  // check if the rbd image already exists, in either format
+> +  r = librbd::detect_format(io_ctx, imgname, &old_format, NULL);
 
-   https://github.com/ceph/ceph-qa-suite/blob/master/suites/upgrade/firef=
-ly-x/stress-split/5-workload/ec-readwrite.yaml
+I'd rather avoid using librbd-internal functions (like
+detect_format()). Trying to open the image image would accomplish the
+same thing.
 
-somewhere in the dumpling-firefly-x, after the upgrade, would demonstrate=
- it is able to create and use an erasure coded pool. More importantly it =
-will also show that the bug http://tracker.ceph.com/issues/8601 actually =
-is fixed and backported.
+> +  if (r != -ENOENT) {
+> +    if (force) {
+> +      // using the force option when importing to an rbd image is only allowed
+> +      // for images of the same format
 
-Good idea !
+I'm not sure why this restriction would be useful. What's the rationale?
+To me the format is just another property of the image.
 
-On 05/08/2014 21:29, Loic Dachary wrote:
-> Hi Yuri,
->=20
-> It already has an ec_pool workload at
->=20
->    https://github.com/ceph/ceph-qa-suite/blob/master/suites/upgrade/fir=
-efly-x/stress-split/5-workload/ec-readwrite.yaml
->=20
-> Cheers
->=20
-> On 05/08/2014 19:25, Yuri Weinstein wrote:
->> BTW, I have a suite upgrade/dumpling-firefly-x, which all passed yeste=
-rday.
->>
->> How can EC be enabled for it?  Do you want to try EC on it?
->>
->> Thx
->> YuriW
->>
->> On Tue, Aug 5, 2014 at 10:05 AM, Yuri Weinstein
->> <yuri.weinstein@inktank.com> wrote:
->>> What is really disappointing when failed tests pass - 396983 passed.
->>>
->>> ???
->>>
->>> On Tue, Aug 5, 2014 at 8:26 AM, Yuri Weinstein
->>> <yuri.weinstein@inktank.com> wrote:
->>>> Yeah, that's possible.
->>>>
->>>> I am re-trying manually now 396893
->>>> (http://qa-proxy.ceph.com/teuthology/loic-2014-08-04_15:06:02-upgrad=
-e:firefly-x:stress-split-wip-8475-testing-basic-plana/396893/orig.config.=
-yaml)
->>>>
->>>> On Mon, Aug 4, 2014 at 11:27 PM, Loic Dachary <loic@dachary.org> wro=
-te:
->>>>> Hi,
->>>>>
->>>>> The test suite finished at produced 5 errors, 4 of them in the "SWI=
-FT_TEST_CONFIG_FILE" category
->>>>>
->>>>> http://pulpito.ceph.com/loic-2014-08-04_15:06:02-upgrade:firefly-x:=
-stress-split-wip-8475-testing-basic-plana/396882/
->>>>> INFO:teuthology.orchestra.run.plana28.stderr:----------------------=
-------------------------------------------------
->>>>> 2014-08-04T10:54:48.138 INFO:teuthology.orchestra.run.plana28.stder=
-r:Traceback (most recent call last):
->>>>> 2014-08-04T10:54:48.138 INFO:teuthology.orchestra.run.plana28.stder=
-r:  File "/home/ubuntu/cephtest/swift/test/functional/tests.py", line 104=
-, in setUp
->>>>> 2014-08-04T10:54:48.138 INFO:teuthology.orchestra.run.plana28.stder=
-r:    cls.env.setUp()
->>>>> 2014-08-04T10:54:48.139 INFO:teuthology.orchestra.run.plana28.stder=
-r:  File "/home/ubuntu/cephtest/swift/test/functional/tests.py", line 140=
-, in setUp
->>>>> 2014-08-04T10:54:48.139 INFO:teuthology.orchestra.run.plana28.stder=
-r:    raise ResponseError(cls.conn.response)
->>>>> 2014-08-04T10:54:48.139 INFO:teuthology.orchestra.run.plana28.stder=
-r:ResponseError: 500: Internal Server Error
->>>>> 2014-08-04T10:54:48.139 INFO:teuthology.orchestra.run.plana28.stder=
-r:
->>>>> 2014-08-04T10:54:48.139 INFO:teuthology.orchestra.run.plana28.stder=
-r:=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
->>>>> 2014-08-04T10:54:48.139 INFO:teuthology.orchestra.run.plana28.stder=
-r:FAIL: testGetRequest (test.functional.tests.TestAccountNoContainers)
->>>>> 2014-08-04T10:54:48.139 INFO:teuthology.orchestra.run.plana28.stder=
-r:----------------------------------------------------------------------
->>>>> 2014-08-04T10:54:48.139 INFO:teuthology.orchestra.run.plana28.stder=
-r:Traceback (most recent call last):
->>>>> 2014-08-04T10:54:48.139 INFO:teuthology.orchestra.run.plana28.stder=
-r:  File "/home/ubuntu/cephtest/swift/test/functional/tests.py", line 325=
-, in testGetRequest
->>>>> 2014-08-04T10:54:48.140 INFO:teuthology.orchestra.run.plana28.stder=
-r:    parms=3D{'format':format}))
->>>>> 2014-08-04T10:54:48.140 INFO:teuthology.orchestra.run.plana28.stder=
-r:AssertionError: False is not true
->>>>> 2014-08-04T10:54:48.140 INFO:teuthology.orchestra.run.plana28.stder=
-r:
->>>>> 2014-08-04T10:54:48.140
->>>>>
->>>>> http://pulpito.ceph.com/loic-2014-08-04_15:06:02-upgrade:firefly-x:=
-stress-split-wip-8475-testing-basic-plana/396890/
->>>>> INFO:teuthology.orchestra.run.plana64.stderr:=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
->>>>> 2014-08-04T12:51:21.582 INFO:teuthology.orchestra.run.plana64.stder=
-r:FAIL: testUtf8Container (test.functional.tests.TestContainerUTF8)
->>>>> 2014-08-04T12:51:21.582 INFO:teuthology.orchestra.run.plana64.stder=
-r:----------------------------------------------------------------------
->>>>> 2014-08-04T12:51:21.582 INFO:teuthology.orchestra.run.plana64.stder=
-r:Traceback (most recent call last):
->>>>> 2014-08-04T12:51:21.583 INFO:teuthology.orchestra.run.plana64.stder=
-r:  File "/home/ubuntu/cephtest/swift/test/functional/tests.py", line 462=
-, in testUtf8Container
->>>>> 2014-08-04T12:51:21.583 INFO:teuthology.orchestra.run.plana64.stder=
-r:    self.assert_(container.create(cfg=3D{'no_path_quote':True}))
->>>>> 2014-08-04T12:51:21.583 INFO:teuthology.orchestra.run.plana64.stder=
-r:AssertionError: False is not true
->>>>> 2014-08-04T12:51:21.583 INFO:teuthology.orchestra.run.plana64.stder=
-r:
->>>>> 2014-08-04T12:51:21.583
->>>>>
->>>>> http://pulpito.ceph.com/loic-2014-08-04_15:06:02-upgrade:firefly-x:=
-stress-split-wip-8475-testing-basic-plana/396891/
->>>>> INFO:teuthology.orchestra.run.plana12.stderr:=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
->>>>> 2014-08-04T13:36:17.551 INFO:teuthology.orchestra.run.plana12.stder=
-r:FAIL: testSerialization (test.functional.tests.TestFile)
->>>>> 2014-08-04T13:36:17.552 INFO:teuthology.orchestra.run.plana12.stder=
-r:----------------------------------------------------------------------
->>>>> 2014-08-04T13:36:17.552 INFO:teuthology.orchestra.run.plana12.stder=
-r:Traceback (most recent call last):
->>>>> 2014-08-04T13:36:17.552 INFO:teuthology.orchestra.run.plana12.stder=
-r:  File "/home/ubuntu/cephtest/swift/test/functional/tests.py", line 131=
-5, in testSerialization
->>>>> 2014-08-04T13:36:17.552 INFO:teuthology.orchestra.run.plana12.stder=
-r:    self.assert_(container.create())
->>>>> 2014-08-04T13:36:17.552 INFO:teuthology.orchestra.run.plana12.stder=
-r:AssertionError: False is not true
->>>>> 2014-08-04T13:36:17.553 INFO:teuthology.orchestra.run.plana12.stder=
-r:
->>>>> 2014-08-04T13:36:17.553
->>>>>
->>>>> http://pulpito.ceph.com/loic-2014-08-04_15:06:02-upgrade:firefly-x:=
-stress-split-wip-8475-testing-basic-plana/396893/
->>>>> INFO:teuthology.orchestra.run.plana34.stderr:=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
->>>>> 2014-08-04T12:59:44.078 INFO:teuthology.orchestra.run.plana34.stder=
-r:FAIL: testPrefixAndLimit (test.functional.tests.TestContainer)
->>>>> 2014-08-04T12:59:44.078 INFO:teuthology.orchestra.run.plana34.stder=
-r:----------------------------------------------------------------------
->>>>> 2014-08-04T12:59:44.078 INFO:teuthology.orchestra.run.plana34.stder=
-r:Traceback (most recent call last):
->>>>> 2014-08-04T12:59:44.078 INFO:teuthology.orchestra.run.plana34.stder=
-r:  File "/home/ubuntu/cephtest/swift/test/functional/tests.py", line 415=
-, in testPrefixAndLimit
->>>>> 2014-08-04T12:59:44.079 INFO:teuthology.orchestra.run.plana34.stder=
-r:    self.assert_(cont.create())
->>>>> 2014-08-04T12:59:44.079 INFO:teuthology.orchestra.run.plana34.stder=
-r:AssertionError: False is not true
->>>>> 2014-08-04T12:59:44.079 INFO:teuthology.orchestra.run.plana34.stder=
-r:
->>>>> 2014-08-04T12:59:44.079
->>>>>
->>>>> one of them is because of a failed kill ceph-osd -f -i 5
->>>>>
->>>>> http://pulpito.ceph.com/loic-2014-08-04_15:06:02-upgrade:firefly-x:=
-stress-split-wip-8475-testing-basic-plana/396887/
->>>>>
->>>>> which I suspect to be related to http://tracker.ceph.com/issues/873=
-6
->>>>>
->>>>> It strikes me as odd that all radosgw failures are different. As if=
- something was preventing, randomly, the test to complete. Maybe a combin=
-ation of running the test against a cluster that is stopped before the te=
-st can complete ?
->>>>>
->>>>> Cheers
->>>>>
->>>>> On 04/08/2014 18:13, Yuri Weinstein wrote:
->>>>>> Not yet.  I was wondering if you cold take a look after your run i=
-s
->>>>>> completed (we had mane environment related and backport related
->>>>>> issues, so we need to get trustworthy runs)?
->>>>>>
->>>>>> But I did talk to Yehuda and logged
->>>>>> http://tracker.ceph.com/issues/8988 which maybe covered a couple o=
-f
->>>>>> them.
->>>>>>
->>>>>> Thx
->>>>>> YuriW
->>>>>>
->>>>>> On Mon, Aug 4, 2014 at 9:07 AM, Loic Dachary <loic@dachary.org> wr=
-ote:
->>>>>>>
->>>>>>>
->>>>>>> On 04/08/2014 16:54, Yuri Weinstein wrote:
->>>>>>>> Sounds good, Loic.
->>>>>>>>
->>>>>>>> I ran 60 tests on vps -
->>>>>>>> http://pulpito.front.sepia.ceph.com/teuthology-2014-08-03_16:05:=
-01-upgrade:firefly-x:stress-split-next---basic-vps/
->>>>>>>>
->>>>>>>> I will need your help to see what to do about on ##
->>>>>>>> http://tracker.ceph.com/issues/8736,
->>>>>>>> http://tracker.ceph.com/issues/8737 and
->>>>>>>> http://tracker.ceph.com/issues/8740
->>>>>>>
->>>>>>> Sure. Did you match them to errors from the 19 failures of http:/=
-/pulpito.front.sepia.ceph.com/teuthology-2014-08-03_16:05:01-upgrade:fire=
-fly-x:stress-split-next---basic-vps/ ?
->>>>>>>>
->>>>>>>> Thx
->>>>>>>> YuriW
->>>>>>>>
->>>>>>>> On Mon, Aug 4, 2014 at 6:11 AM, Loic Dachary <loic@dachary.org> =
-wrote:
->>>>>>>>> Hi Yuri,
->>>>>>>>>
->>>>>>>>> FYI I scheduled a upgrade:firefly-x:stress-split to check if ht=
-tp://tracker.ceph.com/issues/8475#note-14 behaves as expected http://pulp=
-ito.ceph.com/loic-2014-08-04_15:06:02-upgrade:firefly-x:stress-split-wip-=
-8475-testing-basic-plana/
->>>>>>>>>
->>>>>>>>> I'm hoping to see the same failures you have on master on next =
-http://pulpito.ceph.com/teuthology-2014-07-30_13:09:01-upgrade:firefly-x:=
-stress-split-next---basic-plana/
->>>>>>>>>
->>>>>>>>> Cheers
->>>>>>>>> --
->>>>>>>>> Lo=C3=AFc Dachary, Artisan Logiciel Libre
->>>>>>>>>
->>>>>>>
->>>>>>> --
->>>>>>> Lo=C3=AFc Dachary, Artisan Logiciel Libre
->>>>>>>
->>>>>
->>>>> --
->>>>> Lo=C3=AFc Dachary, Artisan Logiciel Libre
->>>>>
->=20
+> +      bool format_match =
+> +	old_format ? (format == 1) : (format == 2);
+> +      if (format_match) {
+> +        // force option supplied, remove the original image
+> +        r = do_delete(rbd, io_ctx, imgname);
+> +	if (r < 0) {
+> +	  if (r == -ENOTEMPTY) {
+> +	    cerr << "rbd: image has snapshots - these must be deleted"
+> +		 << " with 'rbd snap purge' before the image can be removed."
+> +		 << std::endl;
+> +	  } else if (r == -EBUSY) {
+> +	    cerr << "rbd: error: image still has watchers"
+> +		 << std::endl
+> +		 << "This means the image is still open or the client using "
+> +		 << "it crashed. Try again after closing/unmapping it or "
+> +		 << "waiting 30s for the crashed client to timeout."
+> +		 << std::endl;
+> +	  } else {
+> +	    cerr << "rbd: error removing original image: " << cpp_strerror(-r)
+> +		 << std::endl;
+> +	  }
 
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
+This section of do_delete() and print various error messages can go into 
+a helper, called from here and main() for 'rbd rm'.
 
+The rest looks good.
 
---uRcMPwmlC1b7ud8edlfnG12Hu4tw065BK
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+Thanks!
+Josh
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+> +	goto done;
+> +	}
+> +      } else {
+> +	cerr << "rbd: image " << imgname << " already exists in format "
+> +	     << format << std::endl
+> +	     << "Option '--force' is only valid for images of the same format."
+> +	     << std::endl;
+> +	r = -EEXIST;
+> +	goto done;
+> +      }
+> +    } else {
+> +      cerr << "rbd: image " << imgname << " already exists"
+> +	   << std::endl
+> +	   << "If you really know what you are doing, supply the"
+> +	   << " '--force' option to overwrite this image."
+> +	   << std::endl;
+> +      r = -EEXIST;
+> +      goto done;
+> +    }
+> +  }
+>     r = do_create(rbd, io_ctx, imgname, size, order, format, features, 0, 0);
+>     if (r < 0) {
+>       cerr << "rbd: image creation failed" << std::endl;
+> @@ -1972,6 +2022,7 @@ int main(int argc, const char **argv)
+>     int order = 0;
+>     bool format_specified = false, output_format_specified = false;
+>     int format = 1;
+> +  bool force = false;
+>     uint64_t features = RBD_FEATURE_LAYERING;
+>     const char *imgname = NULL, *snapname = NULL, *destname = NULL,
+>       *dest_poolname = NULL, *dest_snapname = NULL, *path = NULL,
+> @@ -1997,6 +2048,8 @@ int main(int argc, const char **argv)
+>       } else if (ceph_argparse_flag(args, i, "-h", "--help", (char*)NULL)) {
+>         usage();
+>         return 0;
+> +    } else if (ceph_argparse_flag(args, i, "--force", (char*)NULL)) {
+> +      force = true;
+>       } else if (ceph_argparse_flag(args, i, "--new-format", (char*)NULL)) {
+>         format = 2;
+>         format_specified = true;
+> @@ -2190,6 +2243,12 @@ if (!set_conf_param(v, p1, p2, p3)) { \
+>       }
+>     }
+>
+> +  if (force && opt_cmd != OPT_IMPORT) {
+> +    cerr << "rbd: --force can only be used when"
+> +	 << " importing an image" << std::endl;
+> +    return EXIT_FAILURE;
+> +  }
+> +
+>     if (format_specified && opt_cmd != OPT_IMPORT && opt_cmd != OPT_CREATE) {
+>       cerr << "rbd: image format can only be set when "
+>   	 << "creating or importing an image" << std::endl;
+> @@ -2663,7 +2722,7 @@ if (!set_conf_param(v, p1, p2, p3)) { \
+>         return EINVAL;
+>       }
+>       r = do_import(rbd, dest_io_ctx, destname, &order, path,
+> -		  format, features, size);
+> +		  format, features, size, force);
+>       if (r < 0) {
+>         cerr << "rbd: import failed: " << cpp_strerror(-r) << std::endl;
+>         return -r;
+> diff --git a/src/test/cli/rbd/help.t b/src/test/cli/rbd/help.t
+> index 3818ee3..1529efd 100644
+> --- a/src/test/cli/rbd/help.t
+> +++ b/src/test/cli/rbd/help.t
+> @@ -16,7 +16,7 @@
+>       rm <image-name>                             delete an image
+>       export <image-name> <path>                  export image to file
+>                                                   "-" for stdout
+> -    import <path> <image-name>                  import image from file
+> +    import <path> <image-name> [--force]        import image from file
+>                                                   (dest defaults
+>                                                    as the filename part of file)
+>                                                   "-" for stdin
+> @@ -77,4 +77,5 @@
+>       --no-progress                      do not show progress for long-running commands
+>       -o, --options <map-options>        options to use when mapping an image
+>       --read-only                        set device readonly when mapping image
+> +    --force                            overwrite an existing image when importing
+>       --allow-shrink                     allow shrinking of an image when resizing
+>
 
-iEYEARECAAYFAlPhMhIACgkQ8dLMyEl6F21AdgCfdB7xZmLlL6aDmTwNZ32Q2JMd
-170AnilmEPTEavYrUwYb4vHGy1/s3usT
-=Jxxt
------END PGP SIGNATURE-----
-
---uRcMPwmlC1b7ud8edlfnG12Hu4tw065BK--
