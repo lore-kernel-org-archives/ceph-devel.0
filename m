@@ -1,101 +1,136 @@
-From: Somnath Roy <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: Regarding cache tier understanding
-Date: Thu, 7 Aug 2014 16:00:51 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F264573D0@SACMBXIP02.sdcorp.global.sandisk.com>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F264570F2@SACMBXIP02.sdcorp.global.sandisk.com>
-	<alpine.DEB.2.00.1408070706200.18917@cobra.newdream.net>
+From: Yehuda Sadeh <yehuda@redhat.com>
+Subject: Re: RadosGW storage format
+Date: Thu, 7 Aug 2014 10:20:20 -0700
+Message-ID: <CABBk=J8UUxTPgQ7uprpVMs2nQea9m78_bezNBMxqV7_ShCwu8g@mail.gmail.com>
+References: <CAF6-1L5XC+dFeOAx3bV34qL8T=cFif1xPg=o_L=NotZO4ehx+A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.00.1408070706200.18917-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
-Content-Language: en-US
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Anirban Ray <Anirban.Ray-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, Allen Samuels <Allen.Samuels-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ie0-f176.google.com ([209.85.223.176]:42914 "EHLO
+	mail-ie0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757264AbaHGRUV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Aug 2014 13:20:21 -0400
+Received: by mail-ie0-f176.google.com with SMTP id tr6so5030762ieb.21
+        for <ceph-devel@vger.kernel.org>; Thu, 07 Aug 2014 10:20:20 -0700 (PDT)
+In-Reply-To: <CAF6-1L5XC+dFeOAx3bV34qL8T=cFif1xPg=o_L=NotZO4ehx+A@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sylvain Munaut <s.munaut@whatever-company.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Thanks Sage, this helps !
+I don't think there's one document that describes everything.
+Definitely not one that is up to date. It would really be great to
+have something like that. Some of the stuff was described in messages
+to the mailing list when it was conceived, but things have since might
+have gone major revisions and changes.
+As a starting point, I can provide a few pointers.
 
-Regards
-Somnath
+ - How objects are cut:
 
------Original Message-----
-From: Sage Weil [mailto:sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org]
-Sent: Thursday, August 07, 2014 7:12 AM
-To: Somnath Roy
-Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org; Anirban Ray; Allen Samuels
-Subject: Re: Regarding cache tier understanding
+An object is split into a 'head' part and a logical 'tail' part. The
+head will never be more than a predefined chunk size (default is
+512k). Objects can either have data in the head or not, and smaller
+objects might not have tail (if they fit into the head, and the head
+is actually used to hold the data). The head is mapped to a single
+rados object. It has a deterministic name, and it is mutable. The tail
+is immutable and may map into more than a single rados object.
+The tail is made of one or more logical parts, and each part is
+striped, using a specific stripe size. Each stripe is mapped into one
+rados object.
 
-On Thu, 7 Aug 2014, Somnath Roy wrote:
-> Hi Sage,
+ - What manifest are:
+
+Manifests are object descriptors. They specify how an object is built.
+Prior to firefly, the manifest was just mapping offsets into rados
+objects ('explicit' object mapping). Currently, the manifest provides
+rules that specify how the different object parts are built and named,
+so that it scales much better than the previous method. For example,
+the following is a manifest for object 'f4' in bucket 'buck3':
+
+{ "name": "f4",
+  "size": 104857600,
+  "policy": { "acl": { "acl_user_map": [
+                { "user": "yehsad",
+                  "acl": 15}],
+          "acl_group_map": [],
+          "grant_map": [
+                { "id": "yehsad",
+                  "grant": { "type": { "type": 0},
+                      "id": "yehsad",
+                      "email": "",
+                      "permission": { "flags": 15},
+                      "name": "yehuda",
+                      "group": 0}}]},
+      "owner": { "id": "yehsad",
+          "display_name": "yehuda"}},
+  "etag": "0b224491a3c207b05a0296cb29dcbbbb-17",
+  "tag": "swab-1.4326.42",
+  "manifest": { "objs": [],
+      "obj_size": 104857600,
+      "explicit_objs": "false",
+      "head_obj": { "bucket": { "name": "buck3",
+              "pool": ".rgw.buckets",
+              "index_pool": ".rgw.buckets",
+              "marker": "swab-1.4326.2",
+              "bucket_id": "swab-1.4326.2"},
+          "key": "f4",
+          "ns": "",
+          "object": "f4"},
+      "head_size": 0,
+      "max_head_size": 0,
+      "prefix": "f4.2\/5uI2Tf5UalEXgbB150JS_YUD-BB4q_v",
+      "rules": [
+            { "key": 0,
+              "val": { "start_part_num": 1,
+                  "start_ofs": 0,
+                  "part_size": 6291456,
+                  "stripe_max_size": 4194304}},
+            { "key": 100663296,
+              "val": { "start_part_num": 17,
+                  "start_ofs": 100663296,
+                  "part_size": 4194304,
+                  "stripe_max_size": 4194304}}]},
+  "attrs": {}}
+
+ The head size for it is 0, so all its data is contained in the tail.
+It defines two rules for the different parts, the first one starts at
+offest 0 (which is part 1), and the second one starts at offset
+100663296 (at part 17). As you can see, the stripe size for both rules
+is 4M. The first 16 parts are 6M, which means that each will consist
+two rados objects, one will hold 4M and the second one will hold 2M.
+The last part holds only 4M. There is a deterministic way to name the
+tail's rados objects, using the bucket id, the object name, the
+prefix, the part number, and the stripe number within that part.
+
+
+ - what rados features are used
+
+This is a very general question and it is hard to answer. Can you be
+more specific?
+
+
+
+Yehuda
+
+On Thu, Aug 7, 2014 at 2:11 AM, Sylvain Munaut
+<s.munaut@whatever-company.com> wrote:
+> Hi,
 >
-> I went through the tiering agent code base and here is my
-> understanding on the agent behavior. Please let me know if that is correct.
+>
+> Is there a document somewhere describing the mapping from S3 to RADOS
+> ? (things like how files are cut, what manifest are, what rados
+> features are used ....)
+>
+> Reading the source code, it is not always obvious how things are
+> organized internally and you're never sure if you're understanding is
+> correct or not (which can be dangerous when you try to build stuff
+> based on that).
 >
 >
+> Cheers,
 >
-> 1.       Agent will be always in idle state if target_max_bytes or
-> target_max_objects not set on the pool irrespective of other tiering
-> params set in the pool. dirty_micro and full_micro will not be
-> calculated if those two params are zero which is by default I guess.
-
-Yeah
-
-> 2.       Now, flush will be activated if dirty_micro is >
-> flush_target. My understanding is, once it is activated it will
-> iterate through all the dirty objects and flush all the dirty objects
-> which is > cache_min_flush_age. Am I right ?
-
-Yeah
-
-> 3.       For the eviction, if full_micro > 1000000 , the mode set as
-> TierAgentState::EVICT_MODE_FULL and all the clean objects are flushed.
-
-Yeah
-
-> 4.       if (full_micro > evict_target), the mode is set as
-> TierAgentState::EVICT_MODE_SOME. In this scenario evict_effort is
-> calculated and based on hit_set and temp calculation some clean
-> objects are evicted. My question is , can we quantify this value ? For
-> ex, if the target_full_ratio = 50%, once the eviction is triggered, what %objects will be evicted ?
-
-The effort is calculated based on how far between target_full and 100% we are.  This is mapped onto the estimation of atime.  We generate a histogram of age for the objects we have examined, so after the agent has run a bit we'll have a reasonable idea how the current object's age compares to others and can decide whether this is older or newer than the others; based on that we decide what to do.
-
-> 5.       Also, why we are multiplying with 1000000 always ? Is it
-> because in the histogram it is positioned as 0..1000000 ?
-
-Yeah, and we use "micro" units throughout to avoid doing any floating point.
-
-> 6.       I saw the cache_min_evict_age is not been used anywhere, am I
-> missing anything ?
-
-It's possible.  The _min_ params are a bit dangerous because they can potentially confuse the cache agent (e.g., what if *all* objects are under the min?  How/when do we decide to ignore the min, or, how/when do we give up trying to find an older object?).
-
-> 7.       The cache_min_flush_age will only be applicable if the flush
-> is triggered after crossing the dirty_threshold, right ? If
-> dirty_threshold is not breached, the flush age param is never checked.
-
-Right.
-
-> I need to understand the behavior so that we can test the Cache
-> tiering properly.
->
-> Is there any behavior I am missing here which you want us to test out ?
-
-There is a new behavior just merged into master that controls our decision to promote data into the cache on read; see maybe_handle_cache().  That's not strictly agent behavior per se.  Also, there is now a readforward mode that doesn't promote on read ever, based on our discussion about the performance of flash on read.
-
-Hope this helps!
-sage
-
-________________________________
-
-PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+>     Sylvain
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
