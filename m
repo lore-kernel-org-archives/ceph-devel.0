@@ -1,136 +1,135 @@
-From: Yehuda Sadeh <yehuda@redhat.com>
-Subject: Re: RadosGW storage format
-Date: Thu, 7 Aug 2014 10:20:20 -0700
-Message-ID: <CABBk=J8UUxTPgQ7uprpVMs2nQea9m78_bezNBMxqV7_ShCwu8g@mail.gmail.com>
-References: <CAF6-1L5XC+dFeOAx3bV34qL8T=cFif1xPg=o_L=NotZO4ehx+A@mail.gmail.com>
+From: Kasper Dieter <dieter.kasper@ts.fujitsu.com>
+Subject: krbd kernel 3.16.0-1 with v0.83 got stuck during write
+Date: Thu, 7 Aug 2014 19:36:46 +0200
+Message-ID: <20140807173646.GA1130@oder.mch.fsc.net>
+References: <alpine.DEB.2.00.1407291820100.5744@cobra.newdream.net>
+ <CA+SSH2qOdNne-ExmOjLGnNKfZYXtO+KJ8vSQzvJj07hOK5H8qA@mail.gmail.com>
+ <alpine.DEB.2.00.1408050653170.18917@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f176.google.com ([209.85.223.176]:42914 "EHLO
-	mail-ie0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757264AbaHGRUV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Aug 2014 13:20:21 -0400
-Received: by mail-ie0-f176.google.com with SMTP id tr6so5030762ieb.21
-        for <ceph-devel@vger.kernel.org>; Thu, 07 Aug 2014 10:20:20 -0700 (PDT)
-In-Reply-To: <CAF6-1L5XC+dFeOAx3bV34qL8T=cFif1xPg=o_L=NotZO4ehx+A@mail.gmail.com>
+Received: from dgate20.ts.fujitsu.com ([80.70.172.51]:62242 "EHLO
+	dgate20.ts.fujitsu.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751346AbaHGRqc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Aug 2014 13:46:32 -0400
+Content-Disposition: inline
+In-Reply-To: <alpine.DEB.2.00.1408050653170.18917@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sylvain Munaut <s.munaut@whatever-company.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: Kasper Dieter <Dieter.Kasper@ts.fujitsu.com>
 
-I don't think there's one document that describes everything.
-Definitely not one that is up to date. It would really be great to
-have something like that. Some of the stuff was described in messages
-to the mailing list when it was conceived, but things have since might
-have gone major revisions and changes.
-As a starting point, I can provide a few pointers.
+Hi,
 
- - How objects are cut:
+I'm running a 3 node cluster with 126 OSDs in total under CentOS-6.5 wi=
+th=20
+ceph version 0.83 (78ff1f0a5dfd3c5850805b4021738564c36c92b8)
 
-An object is split into a 'head' part and a logical 'tail' part. The
-head will never be more than a predefined chunk size (default is
-512k). Objects can either have data in the head or not, and smaller
-objects might not have tail (if they fit into the head, and the head
-is actually used to hold the data). The head is mapped to a single
-rados object. It has a deterministic name, and it is mutable. The tail
-is immutable and may map into more than a single rados object.
-The tail is made of one or more logical parts, and each part is
-striped, using a specific stripe size. Each stripe is mapped into one
-rados object.
+On the client side it's 0.83, too=20
+with kernel 3.16.0-1.el6.elrepo.x86_64
 
- - What manifest are:
+rbd showmapped
+id pool   image           snap device   =20
+0  SAS-r2 sas2-r2-1T-4m.0 -    /dev/rbd0=20
+1  SAS-r2 sas2-r2-1T-4m.1 -    /dev/rbd1=20
+2  SAS-r2 sas2-r2-1T-4m.2 -    /dev/rbd2=20
 
-Manifests are object descriptors. They specify how an object is built.
-Prior to firefly, the manifest was just mapping offsets into rados
-objects ('explicit' object mapping). Currently, the manifest provides
-rules that specify how the different object parts are built and named,
-so that it scales much better than the previous method. For example,
-the following is a manifest for object 'f4' in bucket 'buck3':
+After a couple of minutes (trying to fill the 1TB volume)
+fio --filename=3D/dev/rbd0 --direct=3D1 --rw=3Dwrite --bs=3D8M --size=3D=
+8G --numjobs=3D128 --offset_increment=3D8G --runtime=3D3600 --group_rep=
+orting --name=3Dfile1
+got stuck.
 
-{ "name": "f4",
-  "size": 104857600,
-  "policy": { "acl": { "acl_user_map": [
-                { "user": "yehsad",
-                  "acl": 15}],
-          "acl_group_map": [],
-          "grant_map": [
-                { "id": "yehsad",
-                  "grant": { "type": { "type": 0},
-                      "id": "yehsad",
-                      "email": "",
-                      "permission": { "flags": 15},
-                      "name": "yehuda",
-                      "group": 0}}]},
-      "owner": { "id": "yehsad",
-          "display_name": "yehuda"}},
-  "etag": "0b224491a3c207b05a0296cb29dcbbbb-17",
-  "tag": "swab-1.4326.42",
-  "manifest": { "objs": [],
-      "obj_size": 104857600,
-      "explicit_objs": "false",
-      "head_obj": { "bucket": { "name": "buck3",
-              "pool": ".rgw.buckets",
-              "index_pool": ".rgw.buckets",
-              "marker": "swab-1.4326.2",
-              "bucket_id": "swab-1.4326.2"},
-          "key": "f4",
-          "ns": "",
-          "object": "f4"},
-      "head_size": 0,
-      "max_head_size": 0,
-      "prefix": "f4.2\/5uI2Tf5UalEXgbB150JS_YUD-BB4q_v",
-      "rules": [
-            { "key": 0,
-              "val": { "start_part_num": 1,
-                  "start_ofs": 0,
-                  "part_size": 6291456,
-                  "stripe_max_size": 4194304}},
-            { "key": 100663296,
-              "val": { "start_part_num": 17,
-                  "start_ofs": 100663296,
-                  "part_size": 4194304,
-                  "stripe_max_size": 4194304}}]},
-  "attrs": {}}
+/var/log/message:
+(...)
+Aug  7 19:22:34 rx37-0 kernel: libceph: osd118 192.168.113.54:6902 sock=
+et closed (con state OPEN)
+Aug  7 19:22:34 rx37-0 kernel: libceph: osd40 192.168.113.52:6920 socke=
+t closed (con state OPEN)
+Aug  7 19:22:34 rx37-0 kernel: libceph: osd109 192.168.113.54:6875 sock=
+et closed (con state OPEN)
+Aug  7 19:22:34 rx37-0 kernel: libceph: osd67 192.168.113.53:6875 socke=
+t closed (con state OPEN)
+Aug  7 19:22:34 rx37-0 kernel: libceph: osd37 192.168.113.52:6911 socke=
+t closed (con state OPEN)
+Aug  7 19:22:34 rx37-0 kernel: libceph: osd98 192.168.113.54:6842 socke=
+t closed (con state OPEN)
+Aug  7 19:22:34 rx37-0 kernel: libceph: osd26 192.168.113.52:6878 socke=
+t closed (con state OPEN)
+Aug  7 19:24:43 rx37-0 kernel: INFO: task kworker/2:0:19 blocked for mo=
+re than 120 seconds.
+Aug  7 19:24:43 rx37-0 kernel:      Not tainted 3.16.0-1.el6.elrepo.x86=
+_64 #1
+Aug  7 19:24:43 rx37-0 kernel: "echo 0 > /proc/sys/kernel/hung_task_tim=
+eout_secs" disables this message.
+Aug  7 19:24:43 rx37-0 kernel: kworker/2:0     D 0000000000000002     0=
+    19      2 0x00000000
+Aug  7 19:24:43 rx37-0 kernel: Workqueue: ceph-msgr con_work [libceph]
+Aug  7 19:24:43 rx37-0 kernel: ffff8810307bfb68 0000000000000046 ffff88=
+10307bfb18 ffff8810307bc010
+Aug  7 19:24:43 rx37-0 kernel: 0000000000014380 0000000000014380 ffff88=
+10307ae390 ffff880079678250
+Aug  7 19:24:43 rx37-0 kernel: 0000003500004040 ffff88102a1fd7c8 ffff88=
+102a1fd7cc ffff8810307ae390
+Aug  7 19:24:43 rx37-0 kernel: Call Trace:
+Aug  7 19:24:43 rx37-0 kernel: [<ffffffff81647629>] schedule+0x29/0x70
+Aug  7 19:24:43 rx37-0 kernel: [<ffffffff8164778e>] schedule_preempt_di=
+sabled+0xe/0x10
+Aug  7 19:24:43 rx37-0 kernel: [<ffffffff816490fb>] __mutex_lock_slowpa=
+th+0xdb/0x1d0
+Aug  7 19:24:43 rx37-0 kernel: [<ffffffff81649213>] mutex_lock+0x23/0x4=
+0
+Aug  7 19:24:43 rx37-0 kernel: [<ffffffffa0615e0f>] get_reply+0x3f/0x20=
+0 [libceph]
+Aug  7 19:24:43 rx37-0 kernel: [<ffffffffa0616058>] alloc_msg+0x88/0x90=
+ [libceph]
+Aug  7 19:24:43 rx37-0 kernel: [<ffffffffa060d8f1>] ceph_con_in_msg_all=
+oc+0x71/0x240 [libceph]
+Aug  7 19:24:43 rx37-0 kernel: [<ffffffffa060eba8>] read_partial_messag=
+e+0x1e8/0x3d0 [libceph]
+Aug  7 19:24:43 rx37-0 kernel: [<ffffffffa060d278>] ? ceph_tcp_recvmsg+=
+0x48/0x60 [libceph]
+Aug  7 19:24:43 rx37-0 kernel: [<ffffffffa06101d6>] try_read+0x2b6/0x43=
+0 [libceph]
+Aug  7 19:24:43 rx37-0 kernel: [<ffffffffa0610688>] con_work+0x78/0x220=
+ [libceph]
+Aug  7 19:24:43 rx37-0 kernel: [<ffffffff8108d60c>] process_one_work+0x=
+17c/0x420
+Aug  7 19:24:43 rx37-0 kernel: [<ffffffff8108e7d3>] worker_thread+0x123=
+/0x420
+Aug  7 19:24:43 rx37-0 kernel: [<ffffffff8108e6b0>] ? maybe_create_work=
+er+0x180/0x180
+Aug  7 19:24:43 rx37-0 kernel: [<ffffffff810943be>] kthread+0xce/0xf0
+Aug  7 19:24:43 rx37-0 kernel: [<ffffffff810942f0>] ? kthread_freezable=
+_should_stop+0x70/0x70
+Aug  7 19:24:43 rx37-0 kernel: [<ffffffff8164ae3c>] ret_from_fork+0x7c/=
+0xb0
+Aug  7 19:24:43 rx37-0 kernel: [<ffffffff810942f0>] ? kthread_freezable=
+_should_stop+0x70/0x70
+Aug  7 19:24:43 rx37-0 kernel: INFO: task kworker/3:0:24 blocked for mo=
+re than 120 seconds.
+Aug  7 19:24:43 rx37-0 kernel:      Not tainted 3.16.0-1.el6.elrepo.x86=
+_64 #1
+Aug  7 19:24:43 rx37-0 kernel: "echo 0 > /proc/sys/kernel/hung_task_tim=
+eout_secs" disables this message.
+Aug  7 19:24:43 rx37-0 kernel: kworker/3:0     D 0000000000000003     0=
+    24      2 0x00000000
+Aug  7 19:24:43 rx37-0 kernel: Workqueue: ceph-msgr con_work [libceph]
+Aug  7 19:24:43 rx37-0 kernel: ffff881030027c98 0000000000000046 ffff88=
+1019afe330 ffff881030024010
+(...)
 
- The head size for it is 0, so all its data is contained in the tail.
-It defines two rules for the different parts, the first one starts at
-offest 0 (which is part 1), and the second one starts at offset
-100663296 (at part 17). As you can see, the stripe size for both rules
-is 4M. The first 16 parts are 6M, which means that each will consist
-two rados objects, one will hold 4M and the second one will hold 2M.
-The last part holds only 4M. There is a deterministic way to name the
-tail's rados objects, using the bucket id, the object name, the
-prefix, the part number, and the stripe number within that part.
+
+Any ideas ?
+
+With Kernel 3.10.32 on the client side everythink worked fine.
 
 
- - what rados features are used
-
-This is a very general question and it is hard to answer. Can you be
-more specific?
-
-
-
-Yehuda
-
-On Thu, Aug 7, 2014 at 2:11 AM, Sylvain Munaut
-<s.munaut@whatever-company.com> wrote:
-> Hi,
->
->
-> Is there a document somewhere describing the mapping from S3 to RADOS
-> ? (things like how files are cut, what manifest are, what rados
-> features are used ....)
->
-> Reading the source code, it is not always obvious how things are
-> organized internally and you're never sure if you're understanding is
-> correct or not (which can be dangerous when you try to build stuff
-> based on that).
->
->
-> Cheers,
->
->     Sylvain
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Mit freundlichen Gr=FC=DFen / Best regards
+Dieter Kasper
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
