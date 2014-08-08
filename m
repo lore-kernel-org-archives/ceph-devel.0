@@ -1,66 +1,32 @@
-From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: [PATCH] libceph: set last_piece in ceph_msg_data_pages_cursor_init() correctly
-Date: Fri,  8 Aug 2014 15:18:27 +0400
-Message-ID: <1407496707-11641-1-git-send-email-ilya.dryomov@inktank.com>
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f45.google.com ([209.85.215.45]:63230 "EHLO
-	mail-la0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755518AbaHHLSc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Aug 2014 07:18:32 -0400
-Received: by mail-la0-f45.google.com with SMTP id ty20so4510235lab.18
-        for <ceph-devel@vger.kernel.org>; Fri, 08 Aug 2014 04:18:31 -0700 (PDT)
-Received: from localhost ([109.110.66.143])
-        by mx.google.com with ESMTPSA id q2sm1403143lah.8.2014.08.08.04.18.29
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=RC4-SHA bits=128/128);
-        Fri, 08 Aug 2014 04:18:29 -0700 (PDT)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH 6/9] gpiolib: devres: use correct structure type name in sizeof
+Date: Fri, 8 Aug 2014 15:26:59 +0200
+Message-ID: <CACRpkdZBuihe8dy3WhM9n0xqjBDV_5w+cVd6VL_xWWERuxRCrg@mail.gmail.com>
+References: <1406647011-8543-1-git-send-email-Julia.Lawall@lip6.fr>
+	<1406647011-8543-7-git-send-email-Julia.Lawall@lip6.fr>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-ia64-owner@vger.kernel.org>
+In-Reply-To: <1406647011-8543-7-git-send-email-Julia.Lawall@lip6.fr>
+Sender: linux-ia64-owner@vger.kernel.org
+To: Julia Lawall <Julia.Lawall@lip6.fr>
+Cc: kernel-janitors@vger.kernel.org, linux-ia64@vger.kernel.org, ceph-devel@vger.kernel.org, toralf.foerster@gmx.de, hmh@hmh.eng.br, Alexandre Courbot <gnurou@gmail.com>, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Determining ->last_piece based on the value of ->page_offset + length
-is incorrect because length here is the length of the entire message.
-->last_piece set to false even if page array data item length is <=
-PAGE_SIZE, which results in invalid length passed to
-ceph_tcp_{send,recv}page() and causes various asserts to fire.
+On Tue, Jul 29, 2014 at 5:16 PM, Julia Lawall <Julia.Lawall@lip6.fr> wrote:
 
-    # cat pages-cursor-init.sh
-    #!/bin/bash
-    rbd create --size 10 --image-format 2 foo
-    FOO_DEV=$(rbd map foo)
-    dd if=/dev/urandom of=$FOO_DEV bs=1M &>/dev/null
-    rbd snap create foo@snap
-    rbd snap protect foo@snap
-    rbd clone foo@snap bar
-    # rbd_resize calls librbd rbd_resize(), size is in bytes
-    ./rbd_resize bar $(((4 << 20) + 512))
-    rbd resize --size 10 bar
-    BAR_DEV=$(rbd map bar)
-    # trigger a 512-byte copyup -- 512-byte page array data item
-    dd if=/dev/urandom of=$BAR_DEV bs=1M count=1 seek=5
+> From: Julia Lawall <Julia.Lawall@lip6.fr>
+>
+> Correct typo in the name of the type given to sizeof.  Because it is the
+> size of a pointer that is wanted, the typo has no impact on compilation or
+> execution.
+>
+> This problem was found using Coccinelle (http://coccinelle.lip6.fr/).  The
+> semantic patch used can be found in message 0 of this patch series.
+>
+> Signed-off-by: Julia Lawall <Julia.Lawall@lip6.fr>
 
-The problem exists only in ceph_msg_data_pages_cursor_init(),
-ceph_msg_data_pages_advance() does the right thing.  The size_t cast is
-unnecessary.
+Patch applied with Alexandre's ACK.
 
-Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
----
- net/ceph/messenger.c |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index e51cad0db580..b2f571dd933d 100644
---- a/net/ceph/messenger.c
-+++ b/net/ceph/messenger.c
-@@ -901,7 +901,7 @@ static void ceph_msg_data_pages_cursor_init(struct ceph_msg_data_cursor *cursor,
- 	BUG_ON(page_count > (int)USHRT_MAX);
- 	cursor->page_count = (unsigned short)page_count;
- 	BUG_ON(length > SIZE_MAX - cursor->page_offset);
--	cursor->last_piece = (size_t)cursor->page_offset + length <= PAGE_SIZE;
-+	cursor->last_piece = cursor->page_offset + cursor->resid <= PAGE_SIZE;
- }
- 
- static struct page *
--- 
-1.7.10.4
-
+Yours,
+Linus Walleij
