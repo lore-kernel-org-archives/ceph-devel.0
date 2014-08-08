@@ -1,29 +1,57 @@
-From: Sage Weil <sweil@redhat.com>
+From: Alex Elder <elder@ieee.org>
 Subject: Re: [PATCH] libceph: set last_piece in ceph_msg_data_pages_cursor_init()
  correctly
-Date: Fri, 8 Aug 2014 10:46:38 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1408081046220.15376@cobra.newdream.net>
+Date: Fri, 08 Aug 2014 15:59:56 -0500
+Message-ID: <53E53A4C.9000306@ieee.org>
 References: <1407496707-11641-1-git-send-email-ilya.dryomov@inktank.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:55115 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751122AbaHHRqi (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Aug 2014 13:46:38 -0400
+Received: from mail-ie0-f172.google.com ([209.85.223.172]:61626 "EHLO
+	mail-ie0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756528AbaHHU75 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Aug 2014 16:59:57 -0400
+Received: by mail-ie0-f172.google.com with SMTP id lx4so7013205iec.31
+        for <ceph-devel@vger.kernel.org>; Fri, 08 Aug 2014 13:59:56 -0700 (PDT)
 In-Reply-To: <1407496707-11641-1-git-send-email-ilya.dryomov@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <ilya.dryomov@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Ilya Dryomov <ilya.dryomov@inktank.com>, ceph-devel@vger.kernel.org
 
-On Fri, 8 Aug 2014, Ilya Dryomov wrote:
+On 08/08/2014 06:18 AM, Ilya Dryomov wrote:
 > Determining ->last_piece based on the value of ->page_offset + length
 > is incorrect because length here is the length of the entire message.
 > ->last_piece set to false even if page array data item length is <=
 > PAGE_SIZE, which results in invalid length passed to
 > ceph_tcp_{send,recv}page() and causes various asserts to fire.
-> 
+
+I glanced at this this morning and thought it might have
+a problem.  Now that I've had the time to look at it a
+little more closely I conclude it's fine.
+
+I'm going to explain my reasoning, which just reaffirms what
+you've explained. (Doing this helps me brush up on things,
+I'm starting to get rusty...)
+
+A message has a list of data items, and a data item is
+broken into pieces, each of which (for a pages data item)
+holds data from a single page.  A cursor keeps the data item
+now being processed in cursor->data, and cursor->resid is the
+number of un-consumed bytes in the current data item.  We want
+to set cursor->last_piece when the next piece to process is
+the last in the *data item*, not the last in the *message*,
+so we need to compare against cursor->resid, not the message
+length.
+
+Before your change, any message with more than one data
+item including a page array data item that was not last
+in the list would have problems.
+
+So in summary:  Looks good.
+
+Reviewed-by: Alex Elder <elder@linaro.org>
+
 >     # cat pages-cursor-init.sh
 >     #!/bin/bash
 >     rbd create --size 10 --image-format 2 foo
@@ -44,11 +72,6 @@ On Fri, 8 Aug 2014, Ilya Dryomov wrote:
 > unnecessary.
 > 
 > Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
-
-Looks good!
-
-Reviewed-by: Sage Weil <sage@redhat.com>
-
 > ---
 >  net/ceph/messenger.c |    2 +-
 >  1 file changed, 1 insertion(+), 1 deletion(-)
@@ -66,12 +89,5 @@ Reviewed-by: Sage Weil <sage@redhat.com>
 >  }
 >  
 >  static struct page *
-> -- 
-> 1.7.10.4
 > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+
