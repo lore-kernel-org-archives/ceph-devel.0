@@ -1,162 +1,103 @@
-From: Loic Dachary <loic@dachary.org>
+From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
 Subject: Re: Resolving the ruleno / ruleset confusion
-Date: Fri, 08 Aug 2014 16:34:19 +0200
-Message-ID: <53E4DFEB.40105@dachary.org>
-References: <53E4D2C5.8050600@dachary.org> <alpine.DEB.2.00.1408080703370.18917@cobra.newdream.net>
+Date: Fri, 8 Aug 2014 14:54:39 +0000
+Message-ID: <125EBE20-6632-496D-AD2D-7E553C7E13CE@intel.com>
+References: <53E4D2C5.8050600@dachary.org>
+ <alpine.DEB.2.00.1408080703370.18917@cobra.newdream.net>,<53E4DFEB.40105@dachary.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="Vw2ofLGPHmAbohdbdabDMA9A6CMGGVbn4"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:56199 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1755485AbaHHOe0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Aug 2014 10:34:26 -0400
-In-Reply-To: <alpine.DEB.2.00.1408080703370.18917@cobra.newdream.net>
+Received: from mga14.intel.com ([192.55.52.115]:54925 "EHLO mga14.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754807AbaHHOyu (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 8 Aug 2014 10:54:50 -0400
+In-Reply-To: <53E4DFEB.40105@dachary.org>
+Content-Language: zh-CN
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Ma Jianpeng <majianpeng@gmail.com>, "Chen, Xiaoxi" <xiaoxi.chen@intel.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Sage Weil <sweil@redhat.com>, Ma Jianpeng <majianpeng@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---Vw2ofLGPHmAbohdbdabDMA9A6CMGGVbn4
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
-
-
-
-On 08/08/2014 16:12, Sage Weil wrote:
-> On Fri, 8 Aug 2014, Loic Dachary wrote:
->> Hi,
->>
->> As you noticed, there are places where ruleset and ruleno / ruleid are=
- used interchangeably although they are not. This is a source of subtle b=
-ugs that can be hard to trace. By default ruleid and ruleset are the same=
-, but dumping a crush map including
->>
->> rule data {
->>         ruleset 0
->>         type replicated
->>         min_size 1
->>         max_size 10
->>         step take default
->>         step chooseleaf firstn 0 type host
->>         step emit
->> }
->> rule metadata {
->>         ruleset 1
->>         type replicated
->>         min_size 1
->>         max_size 10
->>         step take default
->>         step chooseleaf firstn 0 type host
->>         step emit
->> }
->>
->> and swapping the rules as follows
->>
->> rule metadata {
->>         ruleset 1
->>         type replicated
->>         min_size 1
->>         max_size 10
->>         step take default
->>         step chooseleaf firstn 0 type host
->>         step emit
->> }
->>
->> rule data {
->>         ruleset 0
->>         type replicated
->>         min_size 1
->>         max_size 10
->>         step take default
->>         step chooseleaf firstn 0 type host
->>         step emit
->> }
->>
->> will have ruleset 1 with rule id 0 and ruleset 0 with rule id 1
->>
->> Since the ruleset is the only reliable number, from the user point of =
-
->> view, we could simply change CrushWrapper.h to never return the rule i=
-d=20
->> and assume only ruleset are given in argument, even where it currently=
-=20
->> claims to be a rule id.
->=20
-> I'm worried about making that sort of change in an internal interface. =
-=20
-> And, more generally, about CRUSH maps in the wild that may have odd=20
-> mappings that we don't want to break with subtle changes (even fixes). =
- :/
->=20
->> The downside is that looking up the ruleset implies iterating over all=
-=20
->> the rules, but that's probably not an issue.
->>
->> What do you think ?
->=20
-> I sat down a few months ago and tried to figure out if we could get rid=
- of=20
-> the ruleset concept entirely and simply map pools directly to rules=20
-> (which are the things the user conceptually thinks about, we name, etc.=
-). =20
-> The original motivation for a ruleset was to be able to adjust the pool=
-=20
-> replication factor and have the system adjust the placement behavior=20
-> accordingly, but in reality that is a pretty useless capability: num_re=
-p=20
-> rarely changes, and when it does you can simply adjust the placement ru=
-le=20
-> at the same time.  Unfortunately, I didn't come up with any easy and=20
-> clean way to do it and gave up.
->=20
-> I think we should try again.  Getting rid of this particular wart will =
-
-> save us a lot of confusion and complexity and improve the user/admin=20
-> experience significantly...
->=20
-> My suspicion is that we may need to have a explicit 'upgrade' validatio=
-n=20
-> step that rejiggers an existing CRUSH map to remap ruleids and rulesets=
- to=20
-> map to each other, and enforce that constraint on the cluster.  Then we=
-=20
-> could get away with renaming the field and clean up all the admin tools=
-=20
-> and such based on that constraint.  Then, in a year or two, we can chan=
-ge=20
-> the actual placement code to drop the ruleset logic.  Otherwise we'll n=
-eed=20
-> to set incompatible feature bits and force clients to update and so on,=
-=20
-> which we want to avoid...
-
-Understood. Even before going into this, it looks like we need a way to f=
-ind all bugs like http://tracker.ceph.com/issues/9044 and fix them. Readi=
-ng the code won't be enough I'm afraid. What about changing ruleno and ru=
-leset into structs so that compilation shows where they are used intercha=
-ngeably when they should not ?=20
-
-Cheers
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-
-
---Vw2ofLGPHmAbohdbdabDMA9A6CMGGVbn4
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlPk3+sACgkQ8dLMyEl6F23E+QCbBkRafJJaiYozMwrar0l6XR1P
-mjkAoIjqacDQx4mdKDAW4Rph7cnBQUoh
-=o8Uv
------END PGP SIGNATURE-----
-
---Vw2ofLGPHmAbohdbdabDMA9A6CMGGVbn4--
+SSB0aGluayBiZWZvcmUgd2Ugc3RhcnQgYnVnIGZpeCBvciB0cnkgdG8gZ2V0IHJpZCBvZiBydWxl
+c2V0IGNvbmNlcHQsIHdlIGNhbiBzdGFydCB3aXRoIGRlZmluZSBhIHJlYXNvbmFibGUgdXNlIGNh
+c2UuIEhvdyB3ZSBleHBlY3QgdXNlciB0byBwbGF5IHdpdGggcnVsZSBhbmQgcG9vbHMuICB0aGVy
+ZSBpcyBubyBDTEkgdG8gY3JlYXRlL21vZGlmeSBhIHJ1bGVzZXQsIGV2ZW4gd29yc2UgLCB5b3Ug
+YXJlIG5vdCBhYmxlIHRvIGdldCB0aGUgcnVsZXNldCBpZCB3aXRob3V0IGR1bXAgYSBydWxlLiAN
+Cg0KY3VycmVudGx5IHRoZSBsb2dpYyBvZiBjb21tYW5kIGZsb3cgaXMgcmVhbGx5IHN0cmFuZ2Us
+IHVzZXIgd3JpdGVzIGEgcnVsZSwgd2hlbiBoZSB3YW50cyB0byB1c2UgdGhlIHJ1bGUsaGUgbmVl
+ZCB0byBmaW5kIG91dCB0aGUgcnVsZXNldCB3aG8gY29udGFpbnMgdGhlIHJ1bGUsIGFuZCBzcGVj
+aWZpZWQgdGhlIHJ1bGVzZXQgdG8gYSBwb29sLiBJZiB0aGUgcnVsZXNldCBvbmx5IGNvbnRhaW5z
+IGEgcnVsZSwgdGhlIGNvbmNlcHQgb2YgcnVsZXNldCBpcyAgY29uZnVzaW5nIGFuZCB1c2VsZXNz
+LCBpZiB0aGUgcnVsZXNldCBjb250YWlucyBtb3JlIHRoYW4gb25lIHJ1bGVzLCB1c2VyIG1heSBo
+YXZlIHRoZSByaXNrIHRoYXQgY2VwaCBzZWxlY3QgYSBydWxlIGluIHRoZSBydWxlc2V0LCBidXQg
+bm90IHRoZSBvbmUgaGUgd2FudC4uLg0KDQoNCg0K5ZyoIDIwMTQtOC0477yMMjI6MzTvvIwiTG9p
+YyBEYWNoYXJ5IiA8bG9pY0BkYWNoYXJ5Lm9yZz4g5YaZ6YGT77yaDQoNCj4gDQo+IA0KPiBPbiAw
+OC8wOC8yMDE0IDE2OjEyLCBTYWdlIFdlaWwgd3JvdGU6DQo+PiBPbiBGcmksIDggQXVnIDIwMTQs
+IExvaWMgRGFjaGFyeSB3cm90ZToNCj4+PiBIaSwNCj4+PiANCj4+PiBBcyB5b3Ugbm90aWNlZCwg
+dGhlcmUgYXJlIHBsYWNlcyB3aGVyZSBydWxlc2V0IGFuZCBydWxlbm8gLyBydWxlaWQgYXJlIHVz
+ZWQgaW50ZXJjaGFuZ2VhYmx5IGFsdGhvdWdoIHRoZXkgYXJlIG5vdC4gVGhpcyBpcyBhIHNvdXJj
+ZSBvZiBzdWJ0bGUgYnVncyB0aGF0IGNhbiBiZSBoYXJkIHRvIHRyYWNlLiBCeSBkZWZhdWx0IHJ1
+bGVpZCBhbmQgcnVsZXNldCBhcmUgdGhlIHNhbWUsIGJ1dCBkdW1waW5nIGEgY3J1c2ggbWFwIGlu
+Y2x1ZGluZw0KPj4+IA0KPj4+IHJ1bGUgZGF0YSB7DQo+Pj4gICAgICAgIHJ1bGVzZXQgMA0KPj4+
+ICAgICAgICB0eXBlIHJlcGxpY2F0ZWQNCj4+PiAgICAgICAgbWluX3NpemUgMQ0KPj4+ICAgICAg
+ICBtYXhfc2l6ZSAxMA0KPj4+ICAgICAgICBzdGVwIHRha2UgZGVmYXVsdA0KPj4+ICAgICAgICBz
+dGVwIGNob29zZWxlYWYgZmlyc3RuIDAgdHlwZSBob3N0DQo+Pj4gICAgICAgIHN0ZXAgZW1pdA0K
+Pj4+IH0NCj4+PiBydWxlIG1ldGFkYXRhIHsNCj4+PiAgICAgICAgcnVsZXNldCAxDQo+Pj4gICAg
+ICAgIHR5cGUgcmVwbGljYXRlZA0KPj4+ICAgICAgICBtaW5fc2l6ZSAxDQo+Pj4gICAgICAgIG1h
+eF9zaXplIDEwDQo+Pj4gICAgICAgIHN0ZXAgdGFrZSBkZWZhdWx0DQo+Pj4gICAgICAgIHN0ZXAg
+Y2hvb3NlbGVhZiBmaXJzdG4gMCB0eXBlIGhvc3QNCj4+PiAgICAgICAgc3RlcCBlbWl0DQo+Pj4g
+fQ0KPj4+IA0KPj4+IGFuZCBzd2FwcGluZyB0aGUgcnVsZXMgYXMgZm9sbG93cw0KPj4+IA0KPj4+
+IHJ1bGUgbWV0YWRhdGEgew0KPj4+ICAgICAgICBydWxlc2V0IDENCj4+PiAgICAgICAgdHlwZSBy
+ZXBsaWNhdGVkDQo+Pj4gICAgICAgIG1pbl9zaXplIDENCj4+PiAgICAgICAgbWF4X3NpemUgMTAN
+Cj4+PiAgICAgICAgc3RlcCB0YWtlIGRlZmF1bHQNCj4+PiAgICAgICAgc3RlcCBjaG9vc2VsZWFm
+IGZpcnN0biAwIHR5cGUgaG9zdA0KPj4+ICAgICAgICBzdGVwIGVtaXQNCj4+PiB9DQo+Pj4gDQo+
+Pj4gcnVsZSBkYXRhIHsNCj4+PiAgICAgICAgcnVsZXNldCAwDQo+Pj4gICAgICAgIHR5cGUgcmVw
+bGljYXRlZA0KPj4+ICAgICAgICBtaW5fc2l6ZSAxDQo+Pj4gICAgICAgIG1heF9zaXplIDEwDQo+
+Pj4gICAgICAgIHN0ZXAgdGFrZSBkZWZhdWx0DQo+Pj4gICAgICAgIHN0ZXAgY2hvb3NlbGVhZiBm
+aXJzdG4gMCB0eXBlIGhvc3QNCj4+PiAgICAgICAgc3RlcCBlbWl0DQo+Pj4gfQ0KPj4+IA0KPj4+
+IHdpbGwgaGF2ZSBydWxlc2V0IDEgd2l0aCBydWxlIGlkIDAgYW5kIHJ1bGVzZXQgMCB3aXRoIHJ1
+bGUgaWQgMQ0KPj4+IA0KPj4+IFNpbmNlIHRoZSBydWxlc2V0IGlzIHRoZSBvbmx5IHJlbGlhYmxl
+IG51bWJlciwgZnJvbSB0aGUgdXNlciBwb2ludCBvZiANCj4+PiB2aWV3LCB3ZSBjb3VsZCBzaW1w
+bHkgY2hhbmdlIENydXNoV3JhcHBlci5oIHRvIG5ldmVyIHJldHVybiB0aGUgcnVsZSBpZCANCj4+
+PiBhbmQgYXNzdW1lIG9ubHkgcnVsZXNldCBhcmUgZ2l2ZW4gaW4gYXJndW1lbnQsIGV2ZW4gd2hl
+cmUgaXQgY3VycmVudGx5IA0KPj4+IGNsYWltcyB0byBiZSBhIHJ1bGUgaWQuDQo+PiANCj4+IEkn
+bSB3b3JyaWVkIGFib3V0IG1ha2luZyB0aGF0IHNvcnQgb2YgY2hhbmdlIGluIGFuIGludGVybmFs
+IGludGVyZmFjZS4gIA0KPj4gQW5kLCBtb3JlIGdlbmVyYWxseSwgYWJvdXQgQ1JVU0ggbWFwcyBp
+biB0aGUgd2lsZCB0aGF0IG1heSBoYXZlIG9kZCANCj4+IG1hcHBpbmdzIHRoYXQgd2UgZG9uJ3Qg
+d2FudCB0byBicmVhayB3aXRoIHN1YnRsZSBjaGFuZ2VzIChldmVuIGZpeGVzKS4gIDovDQo+PiAN
+Cj4+PiBUaGUgZG93bnNpZGUgaXMgdGhhdCBsb29raW5nIHVwIHRoZSBydWxlc2V0IGltcGxpZXMg
+aXRlcmF0aW5nIG92ZXIgYWxsIA0KPj4+IHRoZSBydWxlcywgYnV0IHRoYXQncyBwcm9iYWJseSBu
+b3QgYW4gaXNzdWUuDQo+Pj4gDQo+Pj4gV2hhdCBkbyB5b3UgdGhpbmsgPw0KPj4gDQo+PiBJIHNh
+dCBkb3duIGEgZmV3IG1vbnRocyBhZ28gYW5kIHRyaWVkIHRvIGZpZ3VyZSBvdXQgaWYgd2UgY291
+bGQgZ2V0IHJpZCBvZiANCj4+IHRoZSBydWxlc2V0IGNvbmNlcHQgZW50aXJlbHkgYW5kIHNpbXBs
+eSBtYXAgcG9vbHMgZGlyZWN0bHkgdG8gcnVsZXMgDQo+PiAod2hpY2ggYXJlIHRoZSB0aGluZ3Mg
+dGhlIHVzZXIgY29uY2VwdHVhbGx5IHRoaW5rcyBhYm91dCwgd2UgbmFtZSwgZXRjLikuICANCj4+
+IFRoZSBvcmlnaW5hbCBtb3RpdmF0aW9uIGZvciBhIHJ1bGVzZXQgd2FzIHRvIGJlIGFibGUgdG8g
+YWRqdXN0IHRoZSBwb29sIA0KPj4gcmVwbGljYXRpb24gZmFjdG9yIGFuZCBoYXZlIHRoZSBzeXN0
+ZW0gYWRqdXN0IHRoZSBwbGFjZW1lbnQgYmVoYXZpb3IgDQo+PiBhY2NvcmRpbmdseSwgYnV0IGlu
+IHJlYWxpdHkgdGhhdCBpcyBhIHByZXR0eSB1c2VsZXNzIGNhcGFiaWxpdHk6IG51bV9yZXAgDQo+
+PiByYXJlbHkgY2hhbmdlcywgYW5kIHdoZW4gaXQgZG9lcyB5b3UgY2FuIHNpbXBseSBhZGp1c3Qg
+dGhlIHBsYWNlbWVudCBydWxlIA0KPj4gYXQgdGhlIHNhbWUgdGltZS4gIFVuZm9ydHVuYXRlbHks
+IEkgZGlkbid0IGNvbWUgdXAgd2l0aCBhbnkgZWFzeSBhbmQgDQo+PiBjbGVhbiB3YXkgdG8gZG8g
+aXQgYW5kIGdhdmUgdXAuDQo+PiANCj4+IEkgdGhpbmsgd2Ugc2hvdWxkIHRyeSBhZ2Fpbi4gIEdl
+dHRpbmcgcmlkIG9mIHRoaXMgcGFydGljdWxhciB3YXJ0IHdpbGwgDQo+PiBzYXZlIHVzIGEgbG90
+IG9mIGNvbmZ1c2lvbiBhbmQgY29tcGxleGl0eSBhbmQgaW1wcm92ZSB0aGUgdXNlci9hZG1pbiAN
+Cj4+IGV4cGVyaWVuY2Ugc2lnbmlmaWNhbnRseS4uLg0KPj4gDQo+PiBNeSBzdXNwaWNpb24gaXMg
+dGhhdCB3ZSBtYXkgbmVlZCB0byBoYXZlIGEgZXhwbGljaXQgJ3VwZ3JhZGUnIHZhbGlkYXRpb24g
+DQo+PiBzdGVwIHRoYXQgcmVqaWdnZXJzIGFuIGV4aXN0aW5nIENSVVNIIG1hcCB0byByZW1hcCBy
+dWxlaWRzIGFuZCBydWxlc2V0cyB0byANCj4+IG1hcCB0byBlYWNoIG90aGVyLCBhbmQgZW5mb3Jj
+ZSB0aGF0IGNvbnN0cmFpbnQgb24gdGhlIGNsdXN0ZXIuICBUaGVuIHdlIA0KPj4gY291bGQgZ2V0
+IGF3YXkgd2l0aCByZW5hbWluZyB0aGUgZmllbGQgYW5kIGNsZWFuIHVwIGFsbCB0aGUgYWRtaW4g
+dG9vbHMgDQo+PiBhbmQgc3VjaCBiYXNlZCBvbiB0aGF0IGNvbnN0cmFpbnQuICBUaGVuLCBpbiBh
+IHllYXIgb3IgdHdvLCB3ZSBjYW4gY2hhbmdlIA0KPj4gdGhlIGFjdHVhbCBwbGFjZW1lbnQgY29k
+ZSB0byBkcm9wIHRoZSBydWxlc2V0IGxvZ2ljLiAgT3RoZXJ3aXNlIHdlJ2xsIG5lZWQgDQo+PiB0
+byBzZXQgaW5jb21wYXRpYmxlIGZlYXR1cmUgYml0cyBhbmQgZm9yY2UgY2xpZW50cyB0byB1cGRh
+dGUgYW5kIHNvIG9uLCANCj4+IHdoaWNoIHdlIHdhbnQgdG8gYXZvaWQuLi4NCj4gDQo+IFVuZGVy
+c3Rvb2QuIEV2ZW4gYmVmb3JlIGdvaW5nIGludG8gdGhpcywgaXQgbG9va3MgbGlrZSB3ZSBuZWVk
+IGEgd2F5IHRvIGZpbmQgYWxsIGJ1Z3MgbGlrZSBodHRwOi8vdHJhY2tlci5jZXBoLmNvbS9pc3N1
+ZXMvOTA0NCBhbmQgZml4IHRoZW0uIFJlYWRpbmcgdGhlIGNvZGUgd29uJ3QgYmUgZW5vdWdoIEkn
+bSBhZnJhaWQuIFdoYXQgYWJvdXQgY2hhbmdpbmcgcnVsZW5vIGFuZCBydWxlc2V0IGludG8gc3Ry
+dWN0cyBzbyB0aGF0IGNvbXBpbGF0aW9uIHNob3dzIHdoZXJlIHRoZXkgYXJlIHVzZWQgaW50ZXJj
+aGFuZ2VhYmx5IHdoZW4gdGhleSBzaG91bGQgbm90ID8gDQo+IA0KPiBDaGVlcnMNCj4gDQo+IC0t
+IA0KPiBMb8OvYyBEYWNoYXJ5LCBBcnRpc2FuIExvZ2ljaWVsIExpYnJlDQo+IA0K
