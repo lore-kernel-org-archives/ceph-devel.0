@@ -1,135 +1,65 @@
-From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
-Subject: RE: Resolving the ruleno / ruleset confusion
-Date: Fri, 8 Aug 2014 15:35:42 +0000
-Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC02085B6E@shsmsx102.ccr.corp.intel.com>
-References: <53E4D2C5.8050600@dachary.org>
- <alpine.DEB.2.00.1408080703370.18917@cobra.newdream.net>,<53E4DFEB.40105@dachary.org>
- <125EBE20-6632-496D-AD2D-7E553C7E13CE@intel.com>
- <53E4E871.6040907@dachary.org>
+From: Sylvain Munaut <s.munaut@whatever-company.com>
+Subject: Re: RadosGW storage format
+Date: Fri, 8 Aug 2014 17:57:36 +0200
+Message-ID: <CAF6-1L5_N6UyP-xa0Z4Mo2G=NdFPC-mvAO7EDp3KG1gEaLPtOg@mail.gmail.com>
+References: <CAF6-1L5XC+dFeOAx3bV34qL8T=cFif1xPg=o_L=NotZO4ehx+A@mail.gmail.com>
+	<CABBk=J8UUxTPgQ7uprpVMs2nQea9m78_bezNBMxqV7_ShCwu8g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:35919 "EHLO mga11.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752807AbaHHPfw (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 8 Aug 2014 11:35:52 -0400
-In-Reply-To: <53E4E871.6040907@dachary.org>
-Content-Language: en-US
+Received: from mail-pd0-f172.google.com ([209.85.192.172]:53261 "EHLO
+	mail-pd0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755980AbaHHP5h (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Aug 2014 11:57:37 -0400
+Received: by mail-pd0-f172.google.com with SMTP id y13so1324611pdi.31
+        for <ceph-devel@vger.kernel.org>; Fri, 08 Aug 2014 08:57:37 -0700 (PDT)
+In-Reply-To: <CABBk=J8UUxTPgQ7uprpVMs2nQea9m78_bezNBMxqV7_ShCwu8g@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Sage Weil <sweil@redhat.com>, Ma Jianpeng <majianpeng@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Yehuda Sadeh <yehuda@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Rm9yIG15IHNpZGUsIEkgaGF2ZSBzZWVuIHNvbWUgZ3V5cyhhY3R1YWxseSBtb3JlIHRoYW4gODAl
-IG9mIHRoZSB1c2VyIEkgaGF2ZSBzZWVuIGluIHVuaXZlcnNpdHkvY29tcGFueSkgICBkbyBhcyB0
-aGUgZm9sbG93aW5nIHdheToNCg0KMC5XaGF0IHRoZXkgd2FudCB0byBkbyBpcyA6IGNyZWF0ZSBh
-IHBvb2wgdGhhdCBsb2NhdGVkIGluIGEgc3BlY2lmaWVkIHJhY2suDQoNCjEuQ3JlYXRlIGEgcnVs
-ZSB3aXRoICJjZXBoIG9zZCBjcnVzaCBydWxlIGNyZWF0ZS1zaW1wbGUgbXlydWxlMSByYWNrMiBo
-b3N0IGZpcnN0bg0KMi5DcmVhdGUgYSBwb29sIG5hbWVkIG15cG9vbDENCjMuU2V0IHRoZSBydWxl
-c2V0IG9mIHRoZSBwb29sLCBidXQgdGhleSBhcmVuJ3QgdGhhdCBjbGVhciBhYm91dCB0aGUgZGlm
-ZmVyZW5jZSBpbiBjb25jZXB0cyBvZiBydWxlIGFuZCBydWxlc2V0Li4uIEhlcmUgdGhleSBqdXN0
-IG5lZWQgYW4gSUQsIHNvIHRoZXkgdXNlICJjZXBoIG9zZCBjcnVzaCBydWxlIGxzIiB0byBsaXN0
-IGFsbCB0aGUgcnVsZXModGhleSBtYXkgaW1hZ2luZyBydWxlPXJ1bGVzZXQpLCBhbmQgdGhlbiBz
-dGFydCB0byBjb3VudCwgMCwgMSwyLCAzLCBhaGEsIHRoZSBJRCBmb3IgbXlydWxlMSBpcyAzLiAg
-U28gdGhleSBzaW1wbHkgdHlwZSBpbiAiY2VwaCBvc2QgcG9vbCBzZXQgbXlwb29sMSBjcnVzaF9y
-dWxlc2V0IDMuLi4uDQoNCkluIG1vc3QgY2FzZSwgdGhpcyB3b3JrcywgYnV0IGFjdHVhbGx5IHRo
-aXMgaXMgbm90IHRoZSByaWdodCB3YXkgdG8gZG8uLi4uLg0KDQotLS0tLU9yaWdpbmFsIE1lc3Nh
-Z2UtLS0tLQ0KRnJvbTogTG9pYyBEYWNoYXJ5IFttYWlsdG86bG9pY0BkYWNoYXJ5Lm9yZ10gDQpT
-ZW50OiBGcmlkYXksIEF1Z3VzdCA4LCAyMDE0IDExOjExIFBNDQpUbzogQ2hlbiwgWGlhb3hpDQpD
-YzogU2FnZSBXZWlsOyBNYSBKaWFucGVuZzsgQ2VwaCBEZXZlbG9wbWVudA0KU3ViamVjdDogUmU6
-IFJlc29sdmluZyB0aGUgcnVsZW5vIC8gcnVsZXNldCBjb25mdXNpb24NCg0KSSBndWVzcyBtb3N0
-IHVzZXJzIGp1c3QgdGhpbmsgb2YgcnVsZXNldCBhbmQgbmV2ZXIgZmluZHMgb3V0IHRoZXJlIGFy
-ZSB0d28gZGlmZmVyZW50IG51bWJlcnMgd2l0aCBzbGlnaHRseSBkaWZmZXJlbnQgc2VtYW50aWMu
-IA0KDQpGb3IgbWUgdGhlIHVzZSBjYXNlIGlzLCAxMDAlIG9mIHRoZSB0aW1lIDogY3JlYXRpbmcg
-YSBydWxlIHZpYSB0aGUgY29tbWFuZCBsaW5lIGFuZCBnZXQgdGhlIHJ1bGVzZXQgdmlhIGR1bXAg
-T1IgY3JlYXRlIGFuZCB1cGRhdGUgYSBydWxlIHZpYSBkdW1wIC8gbG9hZCB0aGUgb3NkbWFwLCBp
-biB3aGljaCBjYXNlIEkgZGlsaWdlbnRseSAoZm9yIG5vIHJlYXNvbiwganVzdCBiZWNhdXNlIGl0
-IHNlZW1lZCByaWdodCkgaW5jcmVtZW50IHRoZSBydWxlc2V0IGFuZCBrZWVwIHRoZW0gaW4gb3Jk
-ZXIuDQoNCkkgaGF2ZSBubyB1c2Ugb2YgcnVsZSBpZHMgYW5kIG9ubHkgdXNlIHJ1bGVzZXRzLg0K
-DQpDaGVlcnMNCg0KT24gMDgvMDgvMjAxNCAxNjo1NCwgQ2hlbiwgWGlhb3hpIHdyb3RlOg0KPiBJ
-IHRoaW5rIGJlZm9yZSB3ZSBzdGFydCBidWcgZml4IG9yIHRyeSB0byBnZXQgcmlkIG9mIHJ1bGVz
-ZXQgY29uY2VwdCwgd2UgY2FuIHN0YXJ0IHdpdGggZGVmaW5lIGEgcmVhc29uYWJsZSB1c2UgY2Fz
-ZS4gSG93IHdlIGV4cGVjdCB1c2VyIHRvIHBsYXkgd2l0aCBydWxlIGFuZCBwb29scy4gIHRoZXJl
-IGlzIG5vIENMSSB0byBjcmVhdGUvbW9kaWZ5IGEgcnVsZXNldCwgZXZlbiB3b3JzZSAsIHlvdSBh
-cmUgbm90IGFibGUgdG8gZ2V0IHRoZSBydWxlc2V0IGlkIHdpdGhvdXQgZHVtcCBhIHJ1bGUuIA0K
-PiANCj4gY3VycmVudGx5IHRoZSBsb2dpYyBvZiBjb21tYW5kIGZsb3cgaXMgcmVhbGx5IHN0cmFu
-Z2UsIHVzZXIgd3JpdGVzIGEgcnVsZSwgd2hlbiBoZSB3YW50cyB0byB1c2UgdGhlIHJ1bGUsaGUg
-bmVlZCB0byBmaW5kIG91dCB0aGUgcnVsZXNldCB3aG8gY29udGFpbnMgdGhlIHJ1bGUsIGFuZCBz
-cGVjaWZpZWQgdGhlIHJ1bGVzZXQgdG8gYSBwb29sLiBJZiB0aGUgcnVsZXNldCBvbmx5IGNvbnRh
-aW5zIGEgcnVsZSwgdGhlIGNvbmNlcHQgb2YgcnVsZXNldCBpcyAgY29uZnVzaW5nIGFuZCB1c2Vs
-ZXNzLCBpZiB0aGUgcnVsZXNldCBjb250YWlucyBtb3JlIHRoYW4gb25lIHJ1bGVzLCB1c2VyIG1h
-eSBoYXZlIHRoZSByaXNrIHRoYXQgY2VwaCBzZWxlY3QgYSBydWxlIGluIHRoZSBydWxlc2V0LCBi
-dXQgbm90IHRoZSBvbmUgaGUgd2FudC4uLg0KPiANCj4gDQo+IA0KPiDlnKggMjAxNC04LTjvvIwy
-MjozNO+8jCJMb2ljIERhY2hhcnkiIDxsb2ljQGRhY2hhcnkub3JnPiDlhpnpgZPvvJoNCj4gDQo+
-Pg0KPj4NCj4+IE9uIDA4LzA4LzIwMTQgMTY6MTIsIFNhZ2UgV2VpbCB3cm90ZToNCj4+PiBPbiBG
-cmksIDggQXVnIDIwMTQsIExvaWMgRGFjaGFyeSB3cm90ZToNCj4+Pj4gSGksDQo+Pj4+DQo+Pj4+
-IEFzIHlvdSBub3RpY2VkLCB0aGVyZSBhcmUgcGxhY2VzIHdoZXJlIHJ1bGVzZXQgYW5kIHJ1bGVu
-byAvIHJ1bGVpZCANCj4+Pj4gYXJlIHVzZWQgaW50ZXJjaGFuZ2VhYmx5IGFsdGhvdWdoIHRoZXkg
-YXJlIG5vdC4gVGhpcyBpcyBhIHNvdXJjZSBvZiANCj4+Pj4gc3VidGxlIGJ1Z3MgdGhhdCBjYW4g
-YmUgaGFyZCB0byB0cmFjZS4gQnkgZGVmYXVsdCBydWxlaWQgYW5kIA0KPj4+PiBydWxlc2V0IGFy
-ZSB0aGUgc2FtZSwgYnV0IGR1bXBpbmcgYSBjcnVzaCBtYXAgaW5jbHVkaW5nDQo+Pj4+DQo+Pj4+
-IHJ1bGUgZGF0YSB7DQo+Pj4+ICAgICAgICBydWxlc2V0IDANCj4+Pj4gICAgICAgIHR5cGUgcmVw
-bGljYXRlZA0KPj4+PiAgICAgICAgbWluX3NpemUgMQ0KPj4+PiAgICAgICAgbWF4X3NpemUgMTAN
-Cj4+Pj4gICAgICAgIHN0ZXAgdGFrZSBkZWZhdWx0DQo+Pj4+ICAgICAgICBzdGVwIGNob29zZWxl
-YWYgZmlyc3RuIDAgdHlwZSBob3N0DQo+Pj4+ICAgICAgICBzdGVwIGVtaXQNCj4+Pj4gfQ0KPj4+
-PiBydWxlIG1ldGFkYXRhIHsNCj4+Pj4gICAgICAgIHJ1bGVzZXQgMQ0KPj4+PiAgICAgICAgdHlw
-ZSByZXBsaWNhdGVkDQo+Pj4+ICAgICAgICBtaW5fc2l6ZSAxDQo+Pj4+ICAgICAgICBtYXhfc2l6
-ZSAxMA0KPj4+PiAgICAgICAgc3RlcCB0YWtlIGRlZmF1bHQNCj4+Pj4gICAgICAgIHN0ZXAgY2hv
-b3NlbGVhZiBmaXJzdG4gMCB0eXBlIGhvc3QNCj4+Pj4gICAgICAgIHN0ZXAgZW1pdA0KPj4+PiB9
-DQo+Pj4+DQo+Pj4+IGFuZCBzd2FwcGluZyB0aGUgcnVsZXMgYXMgZm9sbG93cw0KPj4+Pg0KPj4+
-PiBydWxlIG1ldGFkYXRhIHsNCj4+Pj4gICAgICAgIHJ1bGVzZXQgMQ0KPj4+PiAgICAgICAgdHlw
-ZSByZXBsaWNhdGVkDQo+Pj4+ICAgICAgICBtaW5fc2l6ZSAxDQo+Pj4+ICAgICAgICBtYXhfc2l6
-ZSAxMA0KPj4+PiAgICAgICAgc3RlcCB0YWtlIGRlZmF1bHQNCj4+Pj4gICAgICAgIHN0ZXAgY2hv
-b3NlbGVhZiBmaXJzdG4gMCB0eXBlIGhvc3QNCj4+Pj4gICAgICAgIHN0ZXAgZW1pdA0KPj4+PiB9
-DQo+Pj4+DQo+Pj4+IHJ1bGUgZGF0YSB7DQo+Pj4+ICAgICAgICBydWxlc2V0IDANCj4+Pj4gICAg
-ICAgIHR5cGUgcmVwbGljYXRlZA0KPj4+PiAgICAgICAgbWluX3NpemUgMQ0KPj4+PiAgICAgICAg
-bWF4X3NpemUgMTANCj4+Pj4gICAgICAgIHN0ZXAgdGFrZSBkZWZhdWx0DQo+Pj4+ICAgICAgICBz
-dGVwIGNob29zZWxlYWYgZmlyc3RuIDAgdHlwZSBob3N0DQo+Pj4+ICAgICAgICBzdGVwIGVtaXQN
-Cj4+Pj4gfQ0KPj4+Pg0KPj4+PiB3aWxsIGhhdmUgcnVsZXNldCAxIHdpdGggcnVsZSBpZCAwIGFu
-ZCBydWxlc2V0IDAgd2l0aCBydWxlIGlkIDENCj4+Pj4NCj4+Pj4gU2luY2UgdGhlIHJ1bGVzZXQg
-aXMgdGhlIG9ubHkgcmVsaWFibGUgbnVtYmVyLCBmcm9tIHRoZSB1c2VyIHBvaW50IA0KPj4+PiBv
-ZiB2aWV3LCB3ZSBjb3VsZCBzaW1wbHkgY2hhbmdlIENydXNoV3JhcHBlci5oIHRvIG5ldmVyIHJl
-dHVybiB0aGUgDQo+Pj4+IHJ1bGUgaWQgYW5kIGFzc3VtZSBvbmx5IHJ1bGVzZXQgYXJlIGdpdmVu
-IGluIGFyZ3VtZW50LCBldmVuIHdoZXJlIA0KPj4+PiBpdCBjdXJyZW50bHkgY2xhaW1zIHRvIGJl
-IGEgcnVsZSBpZC4NCj4+Pg0KPj4+IEknbSB3b3JyaWVkIGFib3V0IG1ha2luZyB0aGF0IHNvcnQg
-b2YgY2hhbmdlIGluIGFuIGludGVybmFsIGludGVyZmFjZS4gIA0KPj4+IEFuZCwgbW9yZSBnZW5l
-cmFsbHksIGFib3V0IENSVVNIIG1hcHMgaW4gdGhlIHdpbGQgdGhhdCBtYXkgaGF2ZSBvZGQgDQo+
-Pj4gbWFwcGluZ3MgdGhhdCB3ZSBkb24ndCB3YW50IHRvIGJyZWFrIHdpdGggc3VidGxlIGNoYW5n
-ZXMgKGV2ZW4gDQo+Pj4gZml4ZXMpLiAgOi8NCj4+Pg0KPj4+PiBUaGUgZG93bnNpZGUgaXMgdGhh
-dCBsb29raW5nIHVwIHRoZSBydWxlc2V0IGltcGxpZXMgaXRlcmF0aW5nIG92ZXIgDQo+Pj4+IGFs
-bCB0aGUgcnVsZXMsIGJ1dCB0aGF0J3MgcHJvYmFibHkgbm90IGFuIGlzc3VlLg0KPj4+Pg0KPj4+
-PiBXaGF0IGRvIHlvdSB0aGluayA/DQo+Pj4NCj4+PiBJIHNhdCBkb3duIGEgZmV3IG1vbnRocyBh
-Z28gYW5kIHRyaWVkIHRvIGZpZ3VyZSBvdXQgaWYgd2UgY291bGQgZ2V0IA0KPj4+IHJpZCBvZiB0
-aGUgcnVsZXNldCBjb25jZXB0IGVudGlyZWx5IGFuZCBzaW1wbHkgbWFwIHBvb2xzIGRpcmVjdGx5
-IHRvIA0KPj4+IHJ1bGVzICh3aGljaCBhcmUgdGhlIHRoaW5ncyB0aGUgdXNlciBjb25jZXB0dWFs
-bHkgdGhpbmtzIGFib3V0LCB3ZSBuYW1lLCBldGMuKS4NCj4+PiBUaGUgb3JpZ2luYWwgbW90aXZh
-dGlvbiBmb3IgYSBydWxlc2V0IHdhcyB0byBiZSBhYmxlIHRvIGFkanVzdCB0aGUgDQo+Pj4gcG9v
-bCByZXBsaWNhdGlvbiBmYWN0b3IgYW5kIGhhdmUgdGhlIHN5c3RlbSBhZGp1c3QgdGhlIHBsYWNl
-bWVudCANCj4+PiBiZWhhdmlvciBhY2NvcmRpbmdseSwgYnV0IGluIHJlYWxpdHkgdGhhdCBpcyBh
-IHByZXR0eSB1c2VsZXNzIA0KPj4+IGNhcGFiaWxpdHk6IG51bV9yZXAgcmFyZWx5IGNoYW5nZXMs
-IGFuZCB3aGVuIGl0IGRvZXMgeW91IGNhbiBzaW1wbHkgDQo+Pj4gYWRqdXN0IHRoZSBwbGFjZW1l
-bnQgcnVsZSBhdCB0aGUgc2FtZSB0aW1lLiAgVW5mb3J0dW5hdGVseSwgSSBkaWRuJ3QgDQo+Pj4g
-Y29tZSB1cCB3aXRoIGFueSBlYXN5IGFuZCBjbGVhbiB3YXkgdG8gZG8gaXQgYW5kIGdhdmUgdXAu
-DQo+Pj4NCj4+PiBJIHRoaW5rIHdlIHNob3VsZCB0cnkgYWdhaW4uICBHZXR0aW5nIHJpZCBvZiB0
-aGlzIHBhcnRpY3VsYXIgd2FydCANCj4+PiB3aWxsIHNhdmUgdXMgYSBsb3Qgb2YgY29uZnVzaW9u
-IGFuZCBjb21wbGV4aXR5IGFuZCBpbXByb3ZlIHRoZSANCj4+PiB1c2VyL2FkbWluIGV4cGVyaWVu
-Y2Ugc2lnbmlmaWNhbnRseS4uLg0KPj4+DQo+Pj4gTXkgc3VzcGljaW9uIGlzIHRoYXQgd2UgbWF5
-IG5lZWQgdG8gaGF2ZSBhIGV4cGxpY2l0ICd1cGdyYWRlJyANCj4+PiB2YWxpZGF0aW9uIHN0ZXAg
-dGhhdCByZWppZ2dlcnMgYW4gZXhpc3RpbmcgQ1JVU0ggbWFwIHRvIHJlbWFwIA0KPj4+IHJ1bGVp
-ZHMgYW5kIHJ1bGVzZXRzIHRvIG1hcCB0byBlYWNoIG90aGVyLCBhbmQgZW5mb3JjZSB0aGF0IA0K
-Pj4+IGNvbnN0cmFpbnQgb24gdGhlIGNsdXN0ZXIuICBUaGVuIHdlIGNvdWxkIGdldCBhd2F5IHdp
-dGggcmVuYW1pbmcgdGhlIA0KPj4+IGZpZWxkIGFuZCBjbGVhbiB1cCBhbGwgdGhlIGFkbWluIHRv
-b2xzIGFuZCBzdWNoIGJhc2VkIG9uIHRoYXQgDQo+Pj4gY29uc3RyYWludC4gIFRoZW4sIGluIGEg
-eWVhciBvciB0d28sIHdlIGNhbiBjaGFuZ2UgdGhlIGFjdHVhbCANCj4+PiBwbGFjZW1lbnQgY29k
-ZSB0byBkcm9wIHRoZSBydWxlc2V0IGxvZ2ljLiAgT3RoZXJ3aXNlIHdlJ2xsIG5lZWQgdG8gDQo+
-Pj4gc2V0IGluY29tcGF0aWJsZSBmZWF0dXJlIGJpdHMgYW5kIGZvcmNlIGNsaWVudHMgdG8gdXBk
-YXRlIGFuZCBzbyBvbiwgd2hpY2ggd2Ugd2FudCB0byBhdm9pZC4uLg0KPj4NCj4+IFVuZGVyc3Rv
-b2QuIEV2ZW4gYmVmb3JlIGdvaW5nIGludG8gdGhpcywgaXQgbG9va3MgbGlrZSB3ZSBuZWVkIGEg
-d2F5IHRvIGZpbmQgYWxsIGJ1Z3MgbGlrZSBodHRwOi8vdHJhY2tlci5jZXBoLmNvbS9pc3N1ZXMv
-OTA0NCBhbmQgZml4IHRoZW0uIFJlYWRpbmcgdGhlIGNvZGUgd29uJ3QgYmUgZW5vdWdoIEknbSBh
-ZnJhaWQuIFdoYXQgYWJvdXQgY2hhbmdpbmcgcnVsZW5vIGFuZCBydWxlc2V0IGludG8gc3RydWN0
-cyBzbyB0aGF0IGNvbXBpbGF0aW9uIHNob3dzIHdoZXJlIHRoZXkgYXJlIHVzZWQgaW50ZXJjaGFu
-Z2VhYmx5IHdoZW4gdGhleSBzaG91bGQgbm90ID8gDQo+Pg0KPj4gQ2hlZXJzDQo+Pg0KPj4gLS0N
-Cj4+IExvw69jIERhY2hhcnksIEFydGlzYW4gTG9naWNpZWwgTGlicmUNCj4+DQoNCi0tIA0KTG/D
-r2MgRGFjaGFyeSwgQXJ0aXNhbiBMb2dpY2llbCBMaWJyZQ0KDQo=
+Hi,
+
+
+> I don't think there's one document that describes everything.
+> Definitely not one that is up to date. It would really be great to
+> have something like that. Some of the stuff was described in messages
+> to the mailing list when it was conceived, but things have since might
+> have gone major revisions and changes.
+> As a starting point, I can provide a few pointers.
+
+Thanks a lot for the detailed explanation !
+
+Another question though : How are object listed ? It is just the
+.dir.xxx objects that "represent" the bucket by itself ?
+
+
+
+>  - what rados features are used
+>
+> This is a very general question and it is hard to answer. Can you be
+> more specific?
+>
+
+Like: Does it only use rados object and their content, or does it also
+use the xattr on them, or what about the omap key/val ?
+
+
+I'm looking into doing a couple of maintenance tools for it like a
+fsck that checks different things, or also a tool that allows me to
+move a bucket(s) from one pool to another, or merge two pools.
+
+Due to some "bad" decisions in the beginning, we ended up with too
+many pools (and so too much PGs, causing stress on the OSD) and I'd
+like the option to merge them at some point without having to go
+through the S3 interface (it would double the network xfer required
+and also modify the mtime of all the objects which I'm hoping I can
+keep intact with direct rados ops).
+
+But to do all of this, I need to know exactly what needs copying :p
+
+
+Cheers,
+
+   Sylvain
