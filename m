@@ -1,32 +1,103 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH 6/9] gpiolib: devres: use correct structure type name in sizeof
-Date: Fri, 8 Aug 2014 15:26:59 +0200
-Message-ID: <CACRpkdZBuihe8dy3WhM9n0xqjBDV_5w+cVd6VL_xWWERuxRCrg@mail.gmail.com>
-References: <1406647011-8543-1-git-send-email-Julia.Lawall@lip6.fr>
-	<1406647011-8543-7-git-send-email-Julia.Lawall@lip6.fr>
+From: Loic Dachary <loic@dachary.org>
+Subject: Resolving the ruleno / ruleset confusion
+Date: Fri, 08 Aug 2014 15:38:13 +0200
+Message-ID: <53E4D2C5.8050600@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-ia64-owner@vger.kernel.org>
-In-Reply-To: <1406647011-8543-7-git-send-email-Julia.Lawall@lip6.fr>
-Sender: linux-ia64-owner@vger.kernel.org
-To: Julia Lawall <Julia.Lawall@lip6.fr>
-Cc: kernel-janitors@vger.kernel.org, linux-ia64@vger.kernel.org, ceph-devel@vger.kernel.org, toralf.foerster@gmx.de, hmh@hmh.eng.br, Alexandre Courbot <gnurou@gmail.com>, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="XchJ5Th2CrEFxaBC0W36Up9jBiuV9QgAc"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail2.dachary.org ([91.121.57.175]:56151 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752115AbaHHNiP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Aug 2014 09:38:15 -0400
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Ma Jianpeng <majianpeng@gmail.com>, "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Tue, Jul 29, 2014 at 5:16 PM, Julia Lawall <Julia.Lawall@lip6.fr> wrote:
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--XchJ5Th2CrEFxaBC0W36Up9jBiuV9QgAc
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-> From: Julia Lawall <Julia.Lawall@lip6.fr>
->
-> Correct typo in the name of the type given to sizeof.  Because it is the
-> size of a pointer that is wanted, the typo has no impact on compilation or
-> execution.
->
-> This problem was found using Coccinelle (http://coccinelle.lip6.fr/).  The
-> semantic patch used can be found in message 0 of this patch series.
->
-> Signed-off-by: Julia Lawall <Julia.Lawall@lip6.fr>
+Hi,
 
-Patch applied with Alexandre's ACK.
+As you noticed, there are places where ruleset and ruleno / ruleid are us=
+ed interchangeably although they are not. This is a source of subtle bugs=
+ that can be hard to trace. By default ruleid and ruleset are the same, b=
+ut dumping a crush map including
 
-Yours,
-Linus Walleij
+rule data {
+        ruleset 0
+        type replicated
+        min_size 1
+        max_size 10
+        step take default
+        step chooseleaf firstn 0 type host
+        step emit
+}
+rule metadata {
+        ruleset 1
+        type replicated
+        min_size 1
+        max_size 10
+        step take default
+        step chooseleaf firstn 0 type host
+        step emit
+}
+
+and swapping the rules as follows
+
+rule metadata {
+        ruleset 1
+        type replicated
+        min_size 1
+        max_size 10
+        step take default
+        step chooseleaf firstn 0 type host
+        step emit
+}
+
+rule data {
+        ruleset 0
+        type replicated
+        min_size 1
+        max_size 10
+        step take default
+        step chooseleaf firstn 0 type host
+        step emit
+}
+
+will have ruleset 1 with rule id 0 and ruleset 0 with rule id 1
+
+Since the ruleset is the only reliable number, from the user point of vie=
+w, we could simply change CrushWrapper.h to never return the rule id and =
+assume only ruleset are given in argument, even where it currently claims=
+ to be a rule id.
+
+The downside is that looking up the ruleset implies iterating over all th=
+e rules, but that's probably not an issue.
+
+What do you think ?
+
+Cheers
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+
+
+--XchJ5Th2CrEFxaBC0W36Up9jBiuV9QgAc
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlPk0sUACgkQ8dLMyEl6F21ChgCeMjqnf1AP2N2nQGWIXeUH8fuC
+b3IAoK9A8OB50JfF5gIoVZJa0/qMmMmo
+=B1WH
+-----END PGP SIGNATURE-----
+
+--XchJ5Th2CrEFxaBC0W36Up9jBiuV9QgAc--
