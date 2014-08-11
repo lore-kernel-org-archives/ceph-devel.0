@@ -1,127 +1,92 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: Swift tests failing randomly
-Date: Mon, 11 Aug 2014 11:55:14 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1408111154070.32572@cobra.newdream.net>
-References: <53E7316D.3090808@dachary.org> <53E8ED9C.5000601@dachary.org> <CABBk=J8by_UDKXddSDQ5HovtCtNOvhzBsGWdAiywEN1MmSS69A@mail.gmail.com> <alpine.DEB.2.00.1408111012100.32572@cobra.newdream.net> <CAJBxG-t8mWq4=1zjGf6d7O6_6NNqQs1NgZdpXuuifRPsh_nKtw@mail.gmail.com>
- <53E90FB6.8060808@dachary.org> <CAJBxG-srn4+0MuRa9EgQ4csF=jK5+m=GBKPhKUp+nnzsP==gyA@mail.gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: [GIT PULL] Ceph updates for 3.17-rc1
+Date: Mon, 11 Aug 2014 13:48:20 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1408111342470.8075@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:41629 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751203AbaHKSzP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Aug 2014 14:55:15 -0400
-In-Reply-To: <CAJBxG-srn4+0MuRa9EgQ4csF=jK5+m=GBKPhKUp+nnzsP==gyA@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Yuri Weinstein <yuri.weinstein@inktank.com>
-Cc: Loic Dachary <loic@dachary.org>, Yehuda Sadeh <yehuda@inktank.com>, Ceph Development <ceph-devel@vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: torvalds@linux-foundation.org
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Mon, 11 Aug 2014, Yuri Weinstein wrote:
-> I thought we could do the same in run-time for vps'es only.
-> 
-> Sage?
+Hi Linus,
 
-That's what I'm suggesting here.. move the change in that pull request 
-into vps.yaml, and put vps.yaml inside ceph-qa-suite.git (maybe 
-machine_types/vps.yaml?) so that it doesn't live in ~teuthworker?
+Please pull the following Ceph updates from
 
-Need to confirm that that value can be set with an overrides, though ...
+  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
 
+There is a lot of refactoring and hardening of the libceph and rbd code 
+here from Ilya that fix various smaller bugs, and a few more important 
+fixes with clone overlap.  The main fix is a critical change to the 
+request_fn handling to not sleep that was exposed by the recent mutex 
+changes (which will also go to teh 3.16 stable series).
+
+Yan Zheng has several fixes in here for CephFS fixing ACL handling, time 
+stamps, and request resends when the MDS restarts.
+
+Finally, there are a few cleanups from Himangi Saraogi based on 
+Coccinelle.
+
+Thanks!
 sage
 
-> 
-> On Mon, Aug 11, 2014 at 11:47 AM, Loic Dachary <loic@dachary.org> wrote:
-> >
-> >
-> > On 11/08/2014 19:34, Yuri Weinstein wrote:
-> >> Here is what we have in vps.yaml now:
-> >>
-> >> overrides:
-> >>   ceph:
-> >>     conf:
-> >>       global:
-> >>         osd heartbeat grace: 40
-> >>
-> >> What do we want to add?
-> >
-> > I think the idle_timeout values at
-> >
-> > https://github.com/ceph/ceph-qa-suite/pull/79/files
-> >
-> >
-> >>
-> >> ~
-> >>
-> >> On Mon, Aug 11, 2014 at 10:13 AM, Sage Weil <sweil@redhat.com> wrote:
-> >>> On Mon, 11 Aug 2014, Yehuda Sadeh wrote:
-> >>>> Yeah, looking at these logs, it really seem that it's just that things
-> >>>> are going slow on these machines and it's hitting timeouts. The fix is
-> >>>> ok with me, although I'd rather have it adjusted per machine type
-> >>>> (somehow).
-> >>>
-> >>> There is a vps.yaml that bumps up another timeout, so we could put it
-> >>> there.  Right now it lives on the teuthology machine
-> >>> (~teuthworker/vps.yaml I think?), but perhaps we should stick it in
-> >>> ceph-qa-suite.git somewhere ...
-> >>>
-> >>> sage
-> >>>
-> >>>>
-> >>>> Yehuda
-> >>>>
-> >>>> On Mon, Aug 11, 2014 at 9:21 AM, Loic Dachary <loic@dachary.org> wrote:
-> >>>>> Hi Yehuda,
-> >>>>>
-> >>>>> It looks like increasing the rgw idle timeout makes the problem go away ( https://github.com/ceph/ceph-qa-suite/pull/79 and http://tracker.ceph.com/issues/8988 ). It previously was 300 sec which looks like a large value already. Does this fix / workaround make sense to you ?
-> >>>>>
-> >>>>> Cheers
-> >>>>>
-> >>>>> On 10/08/2014 10:46, Loic Dachary wrote:
-> >>>>>> Hi Yehuda,
-> >>>>>>
-> >>>>>> In the past few months the swift tests failed randomly and I was unfortunately unable to figure out why. Here are a few examples:
-> >>>>>>
-> >>>>>>     http://pulpito.ceph.com/loic-2014-08-08_12:17:30-upgrade:firefly-x:stress-split-wip-9025-chunk-remapping-testing-basic-vps/406944
-> >>>>>>     http://pulpito.ceph.com/loic-2014-08-08_12:17:30-upgrade:firefly-x:stress-split-wip-9025-chunk-remapping-testing-basic-vps/406941
-> >>>>>>     http://pulpito.ceph.com/loic-2014-08-08_12:17:30-upgrade:firefly-x:stress-split-wip-9025-chunk-remapping-testing-basic-vps/406946
-> >>>>>>     http://pulpito.ceph.com/loic-2014-08-08_12:17:30-upgrade:firefly-x:stress-split-wip-9025-chunk-remapping-testing-basic-vps/406947
-> >>>>>>
-> >>>>>> and it has happened on every upgrade test run since I can remember. I fail to see a pattern and cannot figure out what the real problem is. It would be really great if you could take a look. Even a hunch or a tip would be greatly appreciated :-)
-> >>>>>>
-> >>>>>> You can find more context in
-> >>>>>>
-> >>>>>> http://tracker.ceph.com/issues/8988
-> >>>>>> http://tracker.ceph.com/issues/8016
-> >>>>>> http://tracker.ceph.com/issues/7799
-> >>>>>>
-> >>>>>> and discussions at
-> >>>>>>
-> >>>>>> http://www.spinics.net/lists/ceph-devel/msg19933.html
-> >>>>>>
-> >>>>>> Cheers
-> >>>>>>
-> >>>>>
-> >>>>> --
-> >>>>> Lo?c Dachary, Artisan Logiciel Libre
-> >>>>>
-> >>>> --
-> >>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >>>> the body of a message to majordomo@vger.kernel.org
-> >>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >>>>
-> >>>>
-> >>> --
-> >>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >>> the body of a message to majordomo@vger.kernel.org
-> >>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >
-> > --
-> > Lo?c Dachary, Artisan Logiciel Libre
-> >
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+
+----------------------------------------------------------------
+Himangi Saraogi (2):
+      rbd: use rbd_segment_name_free() instead of kfree()
+      ceph: replace comma with a semicolon
+
+Ilya Dryomov (29):
+      libceph: rename ceph_osd_request::r_linger_osd to r_linger_osd_item
+      libceph: add maybe_move_osd_to_lru() and switch to it
+      libceph: move and add dout()s to ceph_msg_{get,put}()
+      libceph: move and add dout()s to ceph_osdc_request_{get,put}()
+      libceph: harden ceph_osdc_request_release() a bit
+      libceph: assert both regular and lingering lists in __remove_osd()
+      libceph: unregister only registered linger requests
+      libceph: fix linger request check in __unregister_request()
+      libceph: introduce ceph_osdc_cancel_request()
+      rbd: rbd_obj_request_wait() should cancel the request if interrupted
+      rbd: add rbd_obj_watch_request_helper() helper
+      rbd: use rbd_obj_watch_request_helper() helper
+      libceph: nuke ceph_osdc_unregister_linger_request()
+      libceph: drop osd ref when canceling con work
+      rbd: do not leak image_id in rbd_dev_v2_parent_info()
+      rbd: show the entire chain of parent images
+      rbd: introduce rbd_dev_header_info()
+      rbd: remove unnecessary asserts in rbd_dev_image_probe()
+      rbd: split rbd_dev_spec_update() into two functions
+      rbd: harden rbd_dev_refresh() and callers a bit
+      rbd: update mapping size only on refresh
+      rbd: do not read in parent info before snap context
+      rbd: take snap_id into account when reading in parent info
+      ceph: remove redundant memset(0)
+      ceph: fix sizeof(struct tYpO *) typo
+      rbd: rework rbd_request_fn()
+      rbd: allocate img_request with GFP_NOIO instead GFP_ATOMIC
+      rbd: remove extra newlines from rbd_warn() messages
+      libceph: set last_piece in ceph_msg_data_pages_cursor_init() correctly
+
+Yan, Zheng (8):
+      ceph: check unsupported fallocate mode
+      ceph: include time stamp in replayed MDS requests
+      ceph: pass proper page offset to copy_page_to_iter()
+      ceph: properly apply umask when ACL is enabled
+      ceph: reset r_resend_mds after receiving -ESTALE
+      ceph: check zero length in ceph_sync_read()
+      ceph: fix append mode write
+      ceph: fix kick_requests()
+
+ Documentation/ABI/testing/sysfs-bus-rbd |    4 +-
+ drivers/block/rbd.c                     |  689 ++++++++++++++++---------------
+ fs/ceph/acl.c                           |   14 +-
+ fs/ceph/caps.c                          |    2 +-
+ fs/ceph/file.c                          |   24 +-
+ fs/ceph/mds_client.c                    |   16 +-
+ fs/ceph/xattr.c                         |    4 +-
+ include/linux/ceph/messenger.h          |   14 +-
+ include/linux/ceph/osd_client.h         |   18 +-
+ net/ceph/messenger.c                    |   47 ++-
+ net/ceph/osd_client.c                   |  129 ++++--
+ 11 files changed, 538 insertions(+), 423 deletions(-)
