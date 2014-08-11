@@ -1,82 +1,32 @@
-From: Kevin Cox <kevincox@kevincox.ca>
-Subject: Wireshark Dissector and the Future
-Date: Sun, 10 Aug 2014 08:22:32 -0400
-Message-ID: <53E76408.9050000@kevincox.ca>
+From: "Shu, Xinxin" <xinxin.shu@intel.com>
+Subject: how to enable ENCODE_DUMP debug option for message
+Date: Mon, 11 Aug 2014 00:56:27 +0000
+Message-ID: <75674D092A819E4189E91166C74CB90D0141EA52@shsmsx102.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f41.google.com ([209.85.216.41]:38246 "EHLO
-	mail-qa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751400AbaHJMWe (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 10 Aug 2014 08:22:34 -0400
-Received: by mail-qa0-f41.google.com with SMTP id j7so7185312qaq.28
-        for <ceph-devel@vger.kernel.org>; Sun, 10 Aug 2014 05:22:34 -0700 (PDT)
-Received: from [192.168.2.3] (bas1-ottawa11-1176224243.dsl.bell.ca. [70.27.193.243])
-        by mx.google.com with ESMTPSA id 103sm1589738qgh.39.2014.08.10.05.22.32
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Sun, 10 Aug 2014 05:22:33 -0700 (PDT)
+Received: from mga14.intel.com ([192.55.52.115]:24715 "EHLO mga14.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751407AbaHKA4o convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 10 Aug 2014 20:56:44 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: "Shu, Xinxin" <xinxin.shu@intel.com>
 
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA256
 
-Hello,
+Hi all , 
 
-This summer as a GSOC project I have implemented a Wireshark dissector
-for Ceph.  It has been committed to Wireshark master and will be
-available in the next release.
+I want to debug message and noticed that there is  ENCODE_DUMP debug options , I recompile ceph with the following command line :
 
-I have been talking with Sage and we have been identifying a couple of
-next steps that need to be discussed about how the dissector will be
-kept up to date and related issues.
+./do_autogen.sh -d 1 -e /var/message/ -n && make && make install
 
-Firstly there is the issue of the two existing dissectors sitting in the
-Ceph tree.  Neither compile with a modern Wireshark and the new one is
-far more complete.  The current plan is simply to delete them unless
-anyone has objections or a better idea.
+then excecuted 'rbd ls', but in the /var/message/ directory , the message file did not get created .
 
-Secondly there is the issue of keeping the dissector up to date.  The
-way it is written it should be fairly resilient to new messages and
-encodings but of course to be the most useful it would understand the
-latest version of the protocol.
-
-There is documentation coming to both the Ceph tree and the top of the
-Wireshark dissector (both mostly written but uncommitted) describing how
-to update the dissector.  However we were wondering how updating the
-dissector could become part of the regular workflow when updating Ceph.
- I have a couple of ideas myself but wanted to pitch it to the community
-to see what we could come up with in addition to my thoughts which are
-below.
-
-1. Make if part of the review process. "Hey, I noticed you updated the
-encoding of 'x' could you update the wireshark dissector as well."
-
-2. Create a "static analysis" tool to check for current encoding
-versions and warn if they are newer then what is supported by the
-dissector.
-
-3. Run the network traffic of automated tests (such as teuthology)
-through Wireshark and check the warnings/errors.
-
-I think number 3 is particularly interesting because it can catch more
-then encoding mismatches and possibly other errors in the traffic.
-However it needs much more integration and requires that the new
-encodings are properly tested (although they should be anyway).
-
-I would appreciate ideas and feedback about how this can/should be
-handled and integrated into the pipeline.
+any tip about this ? thanks in advance.
 
 Cheers,
-Kevin
+xinxin
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-
-iF4EAREIAAYFAlPnZAcACgkQwHWKOzTVLnTV/AD8D+ASjEYM4QEZY7LeP3hwFIaO
-icK8icddehuxgqYL2qcA/jyHz8gKlQXu7uvjx/qHp0Crd3i8OohTyMbD2DkVMO/c
-=Vzto
------END PGP SIGNATURE-----
