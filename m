@@ -1,82 +1,98 @@
-From: Yehuda Sadeh <yehuda@redhat.com>
-Subject: Re: RadosGW storage format
-Date: Mon, 11 Aug 2014 10:27:24 -0700
-Message-ID: <CABBk=J-bk60c4aq4ACR9bFPbSzwAVXcePG5as2V2DcH=JSdsBg@mail.gmail.com>
-References: <CAF6-1L5XC+dFeOAx3bV34qL8T=cFif1xPg=o_L=NotZO4ehx+A@mail.gmail.com>
-	<CABBk=J8UUxTPgQ7uprpVMs2nQea9m78_bezNBMxqV7_ShCwu8g@mail.gmail.com>
-	<CAF6-1L5_N6UyP-xa0Z4Mo2G=NdFPC-mvAO7EDp3KG1gEaLPtOg@mail.gmail.com>
+From: Yuri Weinstein <yuri.weinstein@inktank.com>
+Subject: Re: Swift tests failing randomly
+Date: Mon, 11 Aug 2014 10:34:13 -0700
+Message-ID: <CAJBxG-t8mWq4=1zjGf6d7O6_6NNqQs1NgZdpXuuifRPsh_nKtw@mail.gmail.com>
+References: <53E7316D.3090808@dachary.org>
+	<53E8ED9C.5000601@dachary.org>
+	<CABBk=J8by_UDKXddSDQ5HovtCtNOvhzBsGWdAiywEN1MmSS69A@mail.gmail.com>
+	<alpine.DEB.2.00.1408111012100.32572@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f169.google.com ([209.85.223.169]:62808 "EHLO
-	mail-ie0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751100AbaHKR1Z (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Aug 2014 13:27:25 -0400
-Received: by mail-ie0-f169.google.com with SMTP id rd18so10251822iec.14
-        for <ceph-devel@vger.kernel.org>; Mon, 11 Aug 2014 10:27:24 -0700 (PDT)
-In-Reply-To: <CAF6-1L5_N6UyP-xa0Z4Mo2G=NdFPC-mvAO7EDp3KG1gEaLPtOg@mail.gmail.com>
+Received: from mail-wi0-f169.google.com ([209.85.212.169]:55242 "EHLO
+	mail-wi0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753065AbaHKReP convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Aug 2014 13:34:15 -0400
+Received: by mail-wi0-f169.google.com with SMTP id n3so5885439wiv.4
+        for <ceph-devel@vger.kernel.org>; Mon, 11 Aug 2014 10:34:14 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.00.1408111012100.32572@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sylvain Munaut <s.munaut@whatever-company.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: Yehuda Sadeh <yehuda@inktank.com>, Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Fri, Aug 8, 2014 at 8:57 AM, Sylvain Munaut
-<s.munaut@whatever-company.com> wrote:
-> Hi,
->
->
->> I don't think there's one document that describes everything.
->> Definitely not one that is up to date. It would really be great to
->> have something like that. Some of the stuff was described in messages
->> to the mailing list when it was conceived, but things have since might
->> have gone major revisions and changes.
->> As a starting point, I can provide a few pointers.
->
-> Thanks a lot for the detailed explanation !
->
-> Another question though : How are object listed ? It is just the
-> .dir.xxx objects that "represent" the bucket by itself ?
->
+Here is what we have in vps.yaml now:
 
-There are a few objects that are created for every bucket, but at the
-moment the .dir.xxx object contains the list of objects.
+overrides:
+  ceph:
+    conf:
+      global:
+        osd heartbeat grace: 40
+
+What do we want to add?
+
+~
+
+On Mon, Aug 11, 2014 at 10:13 AM, Sage Weil <sweil@redhat.com> wrote:
+> On Mon, 11 Aug 2014, Yehuda Sadeh wrote:
+>> Yeah, looking at these logs, it really seem that it's just that things
+>> are going slow on these machines and it's hitting timeouts. The fix is
+>> ok with me, although I'd rather have it adjusted per machine type
+>> (somehow).
 >
+> There is a vps.yaml that bumps up another timeout, so we could put it
+> there.  Right now it lives on the teuthology machine
+> (~teuthworker/vps.yaml I think?), but perhaps we should stick it in
+> ceph-qa-suite.git somewhere ...
 >
->>  - what rados features are used
+> sage
+>
 >>
->> This is a very general question and it is hard to answer. Can you be
->> more specific?
+>> Yehuda
 >>
->
-> Like: Does it only use rados object and their content, or does it also
-> use the xattr on them, or what about the omap key/val ?
->
-rgw objects are contained in rados objects, and we use xattrs to hold
-objects metadata. The gateway does not use omap explicitly on the
-objects themselves.
-
->
-> I'm looking into doing a couple of maintenance tools for it like a
-> fsck that checks different things, or also a tool that allows me to
-> move a bucket(s) from one pool to another, or merge two pools.
-
-Bucket index pools or data pools? If it's the latter then you'll end
-up copying data anyway.
-
-
-Yehuda
-
->
-> Due to some "bad" decisions in the beginning, we ended up with too
-> many pools (and so too much PGs, causing stress on the OSD) and I'd
-> like the option to merge them at some point without having to go
-> through the S3 interface (it would double the network xfer required
-> and also modify the mtime of all the objects which I'm hoping I can
-> keep intact with direct rados ops).
->
-> But to do all of this, I need to know exactly what needs copying :p
->
->
-> Cheers,
->
->    Sylvain
+>> On Mon, Aug 11, 2014 at 9:21 AM, Loic Dachary <loic@dachary.org> wrote:
+>> > Hi Yehuda,
+>> >
+>> > It looks like increasing the rgw idle timeout makes the problem go away ( https://github.com/ceph/ceph-qa-suite/pull/79 and http://tracker.ceph.com/issues/8988 ). It previously was 300 sec which looks like a large value already. Does this fix / workaround make sense to you ?
+>> >
+>> > Cheers
+>> >
+>> > On 10/08/2014 10:46, Loic Dachary wrote:
+>> >> Hi Yehuda,
+>> >>
+>> >> In the past few months the swift tests failed randomly and I was unfortunately unable to figure out why. Here are a few examples:
+>> >>
+>> >>     http://pulpito.ceph.com/loic-2014-08-08_12:17:30-upgrade:firefly-x:stress-split-wip-9025-chunk-remapping-testing-basic-vps/406944
+>> >>     http://pulpito.ceph.com/loic-2014-08-08_12:17:30-upgrade:firefly-x:stress-split-wip-9025-chunk-remapping-testing-basic-vps/406941
+>> >>     http://pulpito.ceph.com/loic-2014-08-08_12:17:30-upgrade:firefly-x:stress-split-wip-9025-chunk-remapping-testing-basic-vps/406946
+>> >>     http://pulpito.ceph.com/loic-2014-08-08_12:17:30-upgrade:firefly-x:stress-split-wip-9025-chunk-remapping-testing-basic-vps/406947
+>> >>
+>> >> and it has happened on every upgrade test run since I can remember. I fail to see a pattern and cannot figure out what the real problem is. It would be really great if you could take a look. Even a hunch or a tip would be greatly appreciated :-)
+>> >>
+>> >> You can find more context in
+>> >>
+>> >> http://tracker.ceph.com/issues/8988
+>> >> http://tracker.ceph.com/issues/8016
+>> >> http://tracker.ceph.com/issues/7799
+>> >>
+>> >> and discussions at
+>> >>
+>> >> http://www.spinics.net/lists/ceph-devel/msg19933.html
+>> >>
+>> >> Cheers
+>> >>
+>> >
+>> > --
+>> > Lo?c Dachary, Artisan Logiciel Libre
+>> >
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
