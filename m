@@ -1,33 +1,53 @@
-From: Adam Crume <adamcrume@gmail.com>
-Subject: Re: LTTng unfriendly with mixed static/dynamic linking
-Date: Tue, 12 Aug 2014 13:30:53 -0700
-Message-ID: <CAFu9Dv0SyShvzK_Eh8ck9XNXNkz8ytAB43CCPLQ-cgEiWz8PDg@mail.gmail.com>
-References: <CAFu9Dv37reLPuQ_9fHkgqwDWtKiwQk8FCd4MAqY6wk75ASs07w@mail.gmail.com>
-	<CAFu9Dv3FY=RkC9cAqt8p5oB0FNHsLUnK=1Nx3eh==C8Q4-i1Ww@mail.gmail.com>
-	<alpine.DEB.2.00.1407251507160.22752@cobra.newdream.net>
-	<53D38300.2050009@inktank.com>
-	<CAFu9Dv1owC=qjte+bgDuq8N=7ykuyuytwEZLdNL+71-oOxc0ag@mail.gmail.com>
-	<alpine.DEB.2.00.1408121246500.32572@cobra.newdream.net>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: ceph-disk and dmcrypt
+Date: Tue, 12 Aug 2014 13:46:01 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1408121345430.32572@cobra.newdream.net>
+References: <alpine.DEB.2.00.1408120936270.13051@cobra.newdream.net> <CADXiVcrXqduZs02a2qtDa5vpk7eTUvTegPtaob+AEEqAO0O9Sw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oa0-f44.google.com ([209.85.219.44]:55250 "EHLO
-	mail-oa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754399AbaHLUax (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Aug 2014 16:30:53 -0400
-Received: by mail-oa0-f44.google.com with SMTP id eb12so7796204oac.31
-        for <ceph-devel@vger.kernel.org>; Tue, 12 Aug 2014 13:30:53 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1408121246500.32572@cobra.newdream.net>
+Received: from cobra.newdream.net ([66.33.216.30]:49851 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751523AbaHLUqC (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Aug 2014 16:46:02 -0400
+In-Reply-To: <CADXiVcrXqduZs02a2qtDa5vpk7eTUvTegPtaob+AEEqAO0O9Sw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: "Noah M. Watkins" <noahwatkins@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Steve Taylor <steveftaylor@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-With the version match requirements, I think it would work.  Will
-automake and libtool let us have a static and dynamic version of the
-same library, or would we have two similarly-named libraries?
+On Tue, 12 Aug 2014, Steve Taylor wrote:
+> Hi Sage,
+> 
+> I set up a simple virtual cluster to test this today, and it appears
+> that all is well. The issue I was attempting to fix doesn't appear to
+> be present in wip-firefly-dmcrypt's ceph-disk.
 
-Removing the tracepoints from libcommon would be an appropriate short
-term fix.  Besides just this, though, I need to finish moving the
-tracepoints in librbd, clean up the branch's history, and test the
-whole workflow again before it's ready to merge to master.
+Great.  Thanks for testing!
+
+sage
+
+
+
+> 
+> Steve
+> 
+> On Tue, Aug 12, 2014 at 10:39 AM, Sage Weil <sage@inktank.com> wrote:
+> > Hi Steve,
+> >
+> > We ran into a problem with the ceph-disk changes back in 67339470 (they
+> > were breaking dmcrypt when the journal was on a separate device).  At the
+> > same time we resolved another bug.  With your change reverted, and the new
+> > fix, and other changes to ceph-disk since then, it appears to be working
+> > fine for all of my tests.
+> >
+> > Do you mind testing the ceph-disk from wip-firefly-dmcrypt in your
+> > environment to verify that you don't see the original problem?  The
+> > explanation in your original commit sounds plausible (that the kernel
+> > wouldn't refresh the partition table if dmcrypt was consuming one of the
+> > partitions), but it just doesn't seem to be the case for me.
+> >
+> > Thanks!
+> > sage
+> 
+> 
