@@ -1,92 +1,97 @@
-From: Sage Weil <sage@inktank.com>
-Subject: [GIT PULL] Ceph updates for 3.17-rc1
-Date: Mon, 11 Aug 2014 13:48:20 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1408111342470.8075@cobra.newdream.net>
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: [RFC]About ImageIndex
+Date: Tue, 12 Aug 2014 10:50:53 +0800
+Message-ID: <CACJqLybDC95NH36mux9jQcA5abqSxa8k1eMgTXKdqDWG0yjD-Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: torvalds@linux-foundation.org
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-wg0-f45.google.com ([74.125.82.45]:59067 "EHLO
+	mail-wg0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750763AbaHLCuz convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Aug 2014 22:50:55 -0400
+Received: by mail-wg0-f45.google.com with SMTP id x12so9211093wgg.28
+        for <ceph-devel@vger.kernel.org>; Mon, 11 Aug 2014 19:50:54 -0700 (PDT)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Josh Durgin <josh.durgin@inktank.com>, Sage Weil <sweil@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Linus,
+Hi Sage, Josh:
 
-Please pull the following Ceph updates from
+ImageIndex is aimed to hold each object's location info which avoid
+extra checking for none-existing object. It's only used when image flag=
+s
+exists LIBRBD_CREATE_NONSHARED. Otherwise, ImageIndex will become gawp =
+and
+has no effect.
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
+Each object has three state:
+1. UNKNOWN: default value, it will follow origin path
+2. LOCAL: imply this object is local, don't need to lookup parent image
+3. PARENT: imply this object is in the parent image, don't need to read
+from local image
 
-There is a lot of refactoring and hardening of the libceph and rbd code 
-here from Ilya that fix various smaller bugs, and a few more important 
-fixes with clone overlap.  The main fix is a critical change to the 
-request_fn handling to not sleep that was exposed by the recent mutex 
-changes (which will also go to teh 3.16 stable series).
+Note: ImageIndex isn't full sync to real data all the time. Because the
+transformation {"unknown" -> "local", "unknown" -> "parent"} are safe.
+So We only need to handle with the exception when ImageIndex implies
+this object is "parent" but the real data is "local". There exists thre=
+e
+methods to solve it:
+1. flush `state_map` every time when "parent" -> "local" happened
+2. mark all objects from "parent" state to "unknown=E2=80=9C state when=
+ loading
+image index(not including snapshot which has frozen index).
 
-Yan Zheng has several fixes in here for CephFS fixing ACL handling, time 
-stamps, and request resends when the MDS restarts.
+Here choose to implement method 2. This method only allow 2 read ops
+in one read request at max and without overhead. Usually, librbd will
+open image for many days(months) for normal use case such as VM usage.
+So the image index will be warmed up and became smart when processing
+ops.
 
-Finally, there are a few cleanups from Himangi Saraogi based on 
-Coccinelle.
+Except image state changed problem, another concern is size. Image
+index only permit single client write, but resize/flatten/rollback ops
+are allowed to happen concurrently. For simply, now these ops don't
+change and save states into rados. Resize op will affect "size" and
+current write client will be notified.
 
-Thanks!
-sage
+Below listing object state change scenes:
+1. When clone from image, it will mark all objects as "parent"
+2. When creating snapshot, image index will be freeze and save it as th=
+e
+index of the snapshot. All "parent" state objects will be marked as
+"unknown" for safe
+3. When write(including modified op) a object, it will mark this object
+as "local"
+4. When reading object, the current image object will be always read in
+spite of the state. And the parent image's object will be checked and
+trust the state. If exists parent image but read local object
+successfully, the local object will be marked "local"
+
+The principle is that only exists one client can operate and save the
+ImageIndex changes into rados. Now the challenge is that how to decide
+who is the owner of ImageIndex. Like VM usage, qemu will open image to
+do IO ops and externally user also can do create snapshot for the
+opened image(rbd snap create ...). So it will exists two client modify
+the same image, one can be regarded as "owner client" another is
+"management client". "management client" is expected to not change the
+state of object.
+
+I only come up with a idea that user need to call "set_owner_image"
+when client want to become "owner client" and this client can operate
+ImageIndex.
+
+PR(https://github.com/ceph/ceph/pull/2212)
+I have passed test_librbd and test_librbd_fsx tests. The IO logic
+seemed worked as expected.
 
 
-----------------------------------------------------------------
-Himangi Saraogi (2):
-      rbd: use rbd_segment_name_free() instead of kfree()
-      ceph: replace comma with a semicolon
+--=20
+Best Regards,
 
-Ilya Dryomov (29):
-      libceph: rename ceph_osd_request::r_linger_osd to r_linger_osd_item
-      libceph: add maybe_move_osd_to_lru() and switch to it
-      libceph: move and add dout()s to ceph_msg_{get,put}()
-      libceph: move and add dout()s to ceph_osdc_request_{get,put}()
-      libceph: harden ceph_osdc_request_release() a bit
-      libceph: assert both regular and lingering lists in __remove_osd()
-      libceph: unregister only registered linger requests
-      libceph: fix linger request check in __unregister_request()
-      libceph: introduce ceph_osdc_cancel_request()
-      rbd: rbd_obj_request_wait() should cancel the request if interrupted
-      rbd: add rbd_obj_watch_request_helper() helper
-      rbd: use rbd_obj_watch_request_helper() helper
-      libceph: nuke ceph_osdc_unregister_linger_request()
-      libceph: drop osd ref when canceling con work
-      rbd: do not leak image_id in rbd_dev_v2_parent_info()
-      rbd: show the entire chain of parent images
-      rbd: introduce rbd_dev_header_info()
-      rbd: remove unnecessary asserts in rbd_dev_image_probe()
-      rbd: split rbd_dev_spec_update() into two functions
-      rbd: harden rbd_dev_refresh() and callers a bit
-      rbd: update mapping size only on refresh
-      rbd: do not read in parent info before snap context
-      rbd: take snap_id into account when reading in parent info
-      ceph: remove redundant memset(0)
-      ceph: fix sizeof(struct tYpO *) typo
-      rbd: rework rbd_request_fn()
-      rbd: allocate img_request with GFP_NOIO instead GFP_ATOMIC
-      rbd: remove extra newlines from rbd_warn() messages
-      libceph: set last_piece in ceph_msg_data_pages_cursor_init() correctly
-
-Yan, Zheng (8):
-      ceph: check unsupported fallocate mode
-      ceph: include time stamp in replayed MDS requests
-      ceph: pass proper page offset to copy_page_to_iter()
-      ceph: properly apply umask when ACL is enabled
-      ceph: reset r_resend_mds after receiving -ESTALE
-      ceph: check zero length in ceph_sync_read()
-      ceph: fix append mode write
-      ceph: fix kick_requests()
-
- Documentation/ABI/testing/sysfs-bus-rbd |    4 +-
- drivers/block/rbd.c                     |  689 ++++++++++++++++---------------
- fs/ceph/acl.c                           |   14 +-
- fs/ceph/caps.c                          |    2 +-
- fs/ceph/file.c                          |   24 +-
- fs/ceph/mds_client.c                    |   16 +-
- fs/ceph/xattr.c                         |    4 +-
- include/linux/ceph/messenger.h          |   14 +-
- include/linux/ceph/osd_client.h         |   18 +-
- net/ceph/messenger.c                    |   47 ++-
- net/ceph/osd_client.c                   |  129 ++++--
- 11 files changed, 538 insertions(+), 423 deletions(-)
+Wheat
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
