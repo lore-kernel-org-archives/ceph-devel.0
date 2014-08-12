@@ -1,95 +1,253 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: [RFC]About ImageIndex
-Date: Tue, 12 Aug 2014 10:50:53 +0800
-Message-ID: <CACJqLybDC95NH36mux9jQcA5abqSxa8k1eMgTXKdqDWG0yjD-Q@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Guang Yang <yguang11@outlook.com>
+Subject: Re: bucket index sharding - IO throttle
+Date: Tue, 12 Aug 2014 15:50:09 +0800
+Message-ID: <BLU436-SMTP1711702C30047479C55E88EDFEA0@phx.gbl>
+References: <1963E3AE-B242-4896-904C-B0868F5AC569@outlook.com> <BLU437-SMTP904C06D419679BD5A09056DFF90@phx.gbl> <CABBk=J9H+ncDjp6ABVmraaPOx5x5ubvfn2vb3UK6y3R=B=zLBQ@mail.gmail.com> <BLU436-SMTP258261DA4CD49AE6829E5A9DFE60@phx.gbl> <BAA0B931-AFB1-41E6-AA11-A901D4CF8A27@outlook.com>
+Mime-Version: 1.0 (Mac OS X Mail 7.3 \(1878.6\))
+Content-Type: text/plain; charset=GB2312
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f45.google.com ([74.125.82.45]:59067 "EHLO
-	mail-wg0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750763AbaHLCuz convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Aug 2014 22:50:55 -0400
-Received: by mail-wg0-f45.google.com with SMTP id x12so9211093wgg.28
-        for <ceph-devel@vger.kernel.org>; Mon, 11 Aug 2014 19:50:54 -0700 (PDT)
+Received: from blu004-omc4s27.hotmail.com ([65.55.111.166]:55665 "EHLO
+	BLU004-OMC4S27.hotmail.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753447AbaHLHuS convert rfc822-to-8bit
+	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 12 Aug 2014 03:50:18 -0400
+In-Reply-To: <BAA0B931-AFB1-41E6-AA11-A901D4CF8A27@outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>, Sage Weil <sweil@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Yehuda Sadeh <yehuda@inktank.com>
+Cc: Ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Sage, Josh:
+Hi Yehuda,
+Can you help to review the latest patch with throttle mechanism you sug=
+gested. Thanks!
 
-ImageIndex is aimed to hold each object's location info which avoid
-extra checking for none-existing object. It's only used when image flag=
-s
-exists LIBRBD_CREATE_NONSHARED. Otherwise, ImageIndex will become gawp =
-and
-has no effect.
+Thanks,
+Guang
+On Aug 4, 2014, at 3:20 PM, Guang Yang <yguang11@outlook.com> wrote:
 
-Each object has three state:
-1. UNKNOWN: default value, it will follow origin path
-2. LOCAL: imply this object is local, don't need to lookup parent image
-3. PARENT: imply this object is in the parent image, don't need to read
-from local image
+> Hi Yehuda,
+> Here is the new pull request - https://github.com/ceph/ceph/pull/2187
+>=20
+> Thanks,
+> Guang
+> On Jul 31, 2014, at 10:40 PM, Guang Yang <yguang11@outlook.com> wrote=
+:
+>=20
+>> Thanks Yehuda. I will do that (sorry I was occupied by some other st=
+uff recently but I will try my best to provide a patch as soon as possi=
+ble).
+>>=20
+>> Thanks,
+>> Guang
+>>=20
+>> =D4=DA 2014=C4=EA7=D4=C231=C8=D5=A3=AC=C9=CF=CE=E71:00=A3=ACYehuda S=
+adeh <yehuda@inktank.com> =D0=B4=B5=C0=A3=BA
+>>=20
+>>> Can you send this code through a github pull request (or at least a=
+s a
+>>> patch)? It'lll be easier to review and comment.
+>>>=20
+>>> Thanks,
+>>> Yehuda
+>>>=20
+>>> On Wed, Jul 30, 2014 at 7:58 AM, Guang Yang <yguang11@outlook.com> =
+wrote:
+>>>> +ceph-devel.
+>>>>=20
+>>>> Thanks,
+>>>> Guang
+>>>>=20
+>>>> On Jul 29, 2014, at 10:20 PM, Guang Yang <yguang11@outlook.com> wr=
+ote:
+>>>>=20
+>>>>> Hi Yehuda,
+>>>>> Per you review comment in terms of IO throttling for bucket index=
+ operation, I prototyped the below code (details still need to polish),=
+ can you take a look if that is right way to go?
+>>>>>=20
+>>>>> Another problem I came across is that ClsBucketIndexOpCtx::handle=
+_compeltion was not called for the bucket index init op (below), is the=
+re anything I missed obviously here?
+>>>>>=20
+>>>>> Thanks,
+>>>>> Guang
+>>>>>=20
+>>>>>=20
+>>>>> class ClsBucketIndexAioThrottler {
+>>>>> protected:
+>>>>> int completed;
+>>>>> int ret_code;
+>>>>> IoCtx& io_ctx;
+>>>>> Mutex lock;
+>>>>> struct LockCond {
+>>>>> Mutex lock;
+>>>>> Cond cond;
+>>>>> LockCond() : lock("LockCond"), cond() {}
+>>>>> } lock_cond;
+>>>>> public:
+>>>>> ClsBucketIndexAioThrottler(IoCtx& _io_ctx)
+>>>>> : completed(0), ret_code(0), io_ctx(_io_ctx),
+>>>>> lock("ClsBucketIndexAioThrottler"), lock_cond() {}
+>>>>>=20
+>>>>> virtual ~ClsBucketIndexAioThrottler() {}
+>>>>> virtual void do_next() =3D 0;
+>>>>> virtual bool is_completed () =3D 0;
+>>>>>=20
+>>>>> void complete(int ret) {
+>>>>> {
+>>>>>   Mutex::Locker l(lock);
+>>>>>   if (ret < 0)
+>>>>>     ret_code =3D ret;
+>>>>>   ++completed;
+>>>>> }
+>>>>>=20
+>>>>> lock_cond.lock.Lock();
+>>>>> lock_cond.cond.Signal();
+>>>>> lock_cond.lock.Unlock();
+>>>>> }
+>>>>>=20
+>>>>> int get_ret_code () {
+>>>>> Mutex::Locker l(lock);
+>>>>> return ret_code;
+>>>>> }
+>>>>>=20
+>>>>> virtual int wait_completion() {
+>>>>> lock_cond.lock.Lock();
+>>>>> while (1) {
+>>>>>   if (is_completed()) {
+>>>>>     lock_cond.lock.Unlock();
+>>>>>     return ret_code;
+>>>>>   }
+>>>>>   lock_cond.cond.Wait(lock_cond.lock);
+>>>>>   lock_cond.lock.Lock();
+>>>>> }
+>>>>> }
+>>>>> };
+>>>>>=20
+>>>>> class ClsBucketIndexListAioThrottler : public ClsBucketIndexAioTh=
+rottler {
+>>>>> protected:
+>>>>> vector<string> bucket_objects;
+>>>>> vector<string>::iterator iter_pos;
+>>>>> public:
+>>>>> ClsBucketIndexListAioThrottler(IoCtx& _io_ctx, const vector<strin=
+g> _bucket_objs)
+>>>>> : ClsBucketIndexAioThrottler(_io_ctx), bucket_objects(_bucket_obj=
+s),
+>>>>> iter_pos(bucket_objects.begin()) {}
+>>>>>=20
+>>>>> virtual bool is_completed() {
+>>>>> Mutex::Locker l(lock);
+>>>>> int sent =3D 0;
+>>>>> vector<string>::iterator iter =3D bucket_objects.begin();
+>>>>> for (; iter !=3D iter_pos; ++iter) ++sent;
+>>>>>=20
+>>>>> return (sent =3D=3D completed &&
+>>>>>     (iter_pos =3D=3D bucket_objects.end() /*Success*/ || ret_code=
+ < 0 /*Failure*/));
+>>>>> }
+>>>>> };
+>>>>>=20
+>>>>> template<typename T>
+>>>>> class ClsBucketIndexOpCtx : public ObjectOperationCompletion {
+>>>>> private:
+>>>>> T* data;
+>>>>> // Return code of the operation
+>>>>> int* ret_code;
+>>>>>=20
+>>>>> // The Aio completion object associated with this Op, it should
+>>>>> // be release from within the completion handler
+>>>>> librados::AioCompletion* completion;
+>>>>> ClsBucketIndexAioThrottler* throttler;
+>>>>> public:
+>>>>> ClsBucketIndexOpCtx(T* _data, int* _ret_code, librados::AioComple=
+tion* _completion,
+>>>>>       ClsBucketIndexAioThrottler* _throttler)
+>>>>> : data(_data), ret_code(_ret_code), completion(_completion), thro=
+ttler(_throttler) {}
+>>>>> ~ClsBucketIndexOpCtx() {}
+>>>>>=20
+>>>>> // The completion callback, fill the response data
+>>>>> void handle_completion(int r, bufferlist& outbl) {
+>>>>> if (r >=3D 0) {
+>>>>>   if (data) {
+>>>>>     try {
+>>>>>       bufferlist::iterator iter =3D outbl.begin();
+>>>>>       ::decode((*data), iter);
+>>>>>     } catch (buffer::error& err) {
+>>>>>       r =3D -EIO;
+>>>>>     }
+>>>>>   }
+>>>>>   // Do the next request
+>>>>> }
+>>>>> throttler->do_next();
+>>>>> throttler->complete(r);
+>>>>> if (completion) {
+>>>>>   completion->release();
+>>>>> }
+>>>>> }
+>>>>> };
+>>>>>=20
+>>>>>=20
+>>>>> class ClsBucketIndexInitAioThrottler : public ClsBucketIndexListA=
+ioThrottler {
+>>>>> public:
+>>>>> ClsBucketIndexInitAioThrottler(IoCtx& _io_ctx, const vector<strin=
+g> _bucket_objs) :
+>>>>> ClsBucketIndexListAioThrottler(_io_ctx, _bucket_objs) {}
+>>>>>=20
+>>>>> virtual void do_next() {
+>>>>> string oid;
+>>>>> {
+>>>>>   Mutex::Locker l(lock);
+>>>>>   if (iter_pos =3D=3D bucket_objects.end())
+>>>>>     return;
+>>>>>   oid =3D *(iter_pos++);
+>>>>> }
+>>>>> AioCompletion* c =3D librados::Rados::aio_create_completion(NULL,=
+ NULL, NULL);
+>>>>> // Dummy
+>>>>> bufferlist in;
+>>>>> librados::ObjectWriteOperation op;
+>>>>> op.create(true);
+>>>>> op.exec("rgw", "bucket_init_index", in, new ClsBucketIndexOpCtx<i=
+nt>(NULL, NULL, c, this));
+>>>>> io_ctx.aio_operate(oid, c, &op, NULL);
+>>>>> }
+>>>>> };
+>>>>>=20
+>>>>>=20
+>>>>> int cls_rgw_bucket_index_init_op(librados::IoCtx &io_ctx,
+>>>>>     const vector<string>& bucket_objs, uint32_t max_aio)
+>>>>> {
+>>>>> vector<string>::const_iterator iter =3D bucket_objs.begin();
+>>>>> bufferlist in;
+>>>>> ClsBucketIndexAioThrottler* throttler =3D new ClsBucketIndexInitA=
+ioThrottler(io_ctx, bucket_objs);
+>>>>> for (; iter !=3D bucket_objs.end() && max_aio-- > 0; ++iter) {
+>>>>>    throttler->do_next();
+>>>>> }
+>>>>> throttler->wait_completion();
+>>>>> return 0;
+>>>>> }
+>>>>>=20
+>>>>>=20
+>>>>=20
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
+l" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>=20
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>=20
+>=20
 
-Note: ImageIndex isn't full sync to real data all the time. Because the
-transformation {"unknown" -> "local", "unknown" -> "parent"} are safe.
-So We only need to handle with the exception when ImageIndex implies
-this object is "parent" but the real data is "local". There exists thre=
-e
-methods to solve it:
-1. flush `state_map` every time when "parent" -> "local" happened
-2. mark all objects from "parent" state to "unknown=E2=80=9C state when=
- loading
-image index(not including snapshot which has frozen index).
-
-Here choose to implement method 2. This method only allow 2 read ops
-in one read request at max and without overhead. Usually, librbd will
-open image for many days(months) for normal use case such as VM usage.
-So the image index will be warmed up and became smart when processing
-ops.
-
-Except image state changed problem, another concern is size. Image
-index only permit single client write, but resize/flatten/rollback ops
-are allowed to happen concurrently. For simply, now these ops don't
-change and save states into rados. Resize op will affect "size" and
-current write client will be notified.
-
-Below listing object state change scenes:
-1. When clone from image, it will mark all objects as "parent"
-2. When creating snapshot, image index will be freeze and save it as th=
-e
-index of the snapshot. All "parent" state objects will be marked as
-"unknown" for safe
-3. When write(including modified op) a object, it will mark this object
-as "local"
-4. When reading object, the current image object will be always read in
-spite of the state. And the parent image's object will be checked and
-trust the state. If exists parent image but read local object
-successfully, the local object will be marked "local"
-
-The principle is that only exists one client can operate and save the
-ImageIndex changes into rados. Now the challenge is that how to decide
-who is the owner of ImageIndex. Like VM usage, qemu will open image to
-do IO ops and externally user also can do create snapshot for the
-opened image(rbd snap create ...). So it will exists two client modify
-the same image, one can be regarded as "owner client" another is
-"management client". "management client" is expected to not change the
-state of object.
-
-I only come up with a idea that user need to call "set_owner_image"
-when client want to become "owner client" and this client can operate
-ImageIndex.
-
-PR(https://github.com/ceph/ceph/pull/2212)
-I have passed test_librbd and test_librbd_fsx tests. The IO logic
-seemed worked as expected.
-
-
---=20
-Best Regards,
-
-Wheat
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
