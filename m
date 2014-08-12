@@ -1,40 +1,74 @@
-From: M Ranga Swami Reddy <swamireddy@gmail.com>
-Subject: Re: Fwd: S3 API Compatibility support
-Date: Tue, 12 Aug 2014 22:47:00 +0530
-Message-ID: <CANA9Uk5juQrjhn--tsKRaxYDJvML_6uLCYhEhHOgrxry4yYb-A@mail.gmail.com>
-References: <CANA9Uk55UZXtKzS=urk3Q+KY=DoWoTaCRf=rKiEtjt9y7FYw7A@mail.gmail.com>
-	<CANA9Uk6E9t30Ve3pKhZa1cW4g6N7JjzG8JgiwOoDa9TWdNEagQ@mail.gmail.com>
-	<alpine.DEB.2.00.1407250848060.22752@cobra.newdream.net>
-	<CANA9Uk468XOE1cr935HY1y+tSnu-xp6QPaj7uCpZNQbJhg-pOA@mail.gmail.com>
-	<CABBk=J8+3K28M-RNf+ULx0TnTMmGxdymJDLeFMft-EX8PhS_4A@mail.gmail.com>
-	<CANA9Uk58WqPoH-mGiuNiXwfJK1YJtozxOjhgmDeKDq585xqx9w@mail.gmail.com>
-	<CANA9Uk5u5q4CGDPat+rdPVY=e-bYA6gG+aii6zMAoxUdK+CQuA@mail.gmail.com>
-	<CABBk=J9Au5aX7AKnbM5d=1HOpd2EAdcteyn=uNSZ2jn9UK9HJg@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: v0.67.10 Dumpling released
+Date: Tue, 12 Aug 2014 12:40:06 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1408121235040.32576@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f48.google.com ([209.85.215.48]:49223 "EHLO
-	mail-la0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753361AbaHLRRC (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Aug 2014 13:17:02 -0400
-Received: by mail-la0-f48.google.com with SMTP id gl10so8251312lab.35
-        for <ceph-devel@vger.kernel.org>; Tue, 12 Aug 2014 10:17:00 -0700 (PDT)
-In-Reply-To: <CABBk=J9Au5aX7AKnbM5d=1HOpd2EAdcteyn=uNSZ2jn9UK9HJg@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:49425 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755076AbaHLTkH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Aug 2014 15:40:07 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh <yehuda@redhat.com>
-Cc: Sage Weil <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org, ceph-users@ceph.com, ceph-maintainers@ceph.com
 
-Thanks Yehuda. I am testing the S3 APIs suing the openstack+ceph.
-Could able test a couple of APIs like put/get/delete bucket (using the
-boto python libraries). When I tried for get bucket location I got an
-error mentioned in my previous email.
+This stable update release for Dumpling includes primarily fixes for RGW, 
+including several issues with bucket listings and a potential data 
+corruption problem when multiple multi-part uploads race.  There is also 
+some throttling capability added in the OSD for scrub that can mitigate 
+the performance impact on production clusters.
 
-And explored the ceph source code and not able see the appropriate
-code/function for "get_bucket_location". But as per the previous email
-discuss,
-the bucket_location supported as part multi-region support.
-Let me know, if I miss something here.
+We recommend that all Dumpling users upgrade at their convenience.
 
-Thanks
-Swami
+Notable Changes
+---------------
+
+* ceph-disk: partprobe befoere settle, fixing dm-crypt (#6966, Eric 
+  Eastman)
+* librbd: add invalidate cache interface (Josh Durgin)
+* librbd: close image if remove_child fails (Ilya Dryomov)
+* librbd: fix potential null pointer dereference (Danny Al-Gaaf)
+* librbd: improve writeback checks, performance (Haomai Wang)
+* librbd: skip zeroes when copying image (#6257, Josh Durgin)
+* mon: fix rule(set) check on 'ceph pool set ... crush_ruleset ...' 
+  (#8599, John Spray)
+* mon: shut down if mon is removed from cluster (#6789, Joao Eduardo Luis)
+* osd: fix filestore perf reports to mon (Sage Weil)
+* osd: force any new or updated xattr into leveldb if E2BIG from XFS 
+  (#7779, Sage Weil)
+* osd: lock snapdir object during write to fix race with backfill (Samuel 
+  Just)
+* osd: option sleep during scrub (Sage Weil)
+* osd: set io priority on scrub and snap trim threads (Sage Weil)
+* osd: 'status' admin socket command (Sage Weil)
+* rbd: tolerate missing NULL terminator on block_name_prefix (#7577, Dan 
+  Mick)
+* rgw: calculate user manifest (#8169, Yehuda Sadeh)
+* rgw: fix abort on chunk read error, avoid using extra memory (#8289, 
+  Yehuda Sadeh)
+* rgw: fix buffer overflow on bucket instance id (#8608, Yehuda Sadeh)
+* rgw: fix crash in swift CORS preflight request (#8586, Yehuda Sadeh)
+* rgw: fix implicit removal of old objects on object creation (#8972, 
+  Patrycja Szablowska, Yehuda Sadeh)
+* rgw: fix MaxKeys in bucket listing (Yehuda Sadeh)
+* rgw: fix race with multiple updates to a single multipart object (#8269, 
+  Yehuda Sadeh)
+* rgw: improve bucket listing with delimiter (Yehuda Sadeh)
+* rgw: include NextMarker in bucket listing (#8858, Yehuda Sadeh)
+* rgw: return error early on non-existent bucket (#7064, Yehuda Sadeh)
+* rgw: set truncation flag correctly in bucket listing (Yehuda Sadeh)
+* sysvinit: continue starting daemons after pre-mount error (#8554, Sage 
+  Weil)
+
+For more detailed information, see:
+
+  http://ceph.com/docs/master/_downloads/v0.67.10.txt
+
+Getting Ceph
+------------
+
+* Git at git://github.com/ceph/ceph.git
+* Tarball at http://ceph.com/download/ceph-0.67.10.tar.gz
+* For packages, see http://ceph.com/docs/master/install/get-packages
+* For ceph-deploy, see http://ceph.com/docs/master/install/install-ceph-deploy
