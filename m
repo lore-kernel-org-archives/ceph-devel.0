@@ -1,141 +1,206 @@
-From: Dhiraj Kamble <Dhiraj.Kamble@sandisk.com>
-Subject: RE: [RFC]About ImageIndex
-Date: Wed, 13 Aug 2014 11:32:38 +0000
-Message-ID: <AE39FC098EAC574B88212DCCB67F06AF05DA16F8@SACMBXIP01.sdcorp.global.sandisk.com>
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: Re: [RFC]About ImageIndex
+Date: Wed, 13 Aug 2014 20:37:19 +0800
+Message-ID: <CACJqLyaJr_4vXrZ415W=xesZ514pP=VzjRSRb3Bv2rqH5buspw@mail.gmail.com>
 References: <CACJqLybDC95NH36mux9jQcA5abqSxa8k1eMgTXKdqDWG0yjD-Q@mail.gmail.com>
- <53EACA0E.5050506@inktank.com>
+	<53EACA0E.5050506@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bl2lp0207.outbound.protection.outlook.com ([207.46.163.207]:56442
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751965AbaHMLdA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 13 Aug 2014 07:33:00 -0400
+Received: from mail-wg0-f44.google.com ([74.125.82.44]:45050 "EHLO
+	mail-wg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750751AbaHMMhU convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Aug 2014 08:37:20 -0400
+Received: by mail-wg0-f44.google.com with SMTP id m15so11156663wgh.15
+        for <ceph-devel@vger.kernel.org>; Wed, 13 Aug 2014 05:37:19 -0700 (PDT)
 In-Reply-To: <53EACA0E.5050506@inktank.com>
-Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>, Haomai Wang <haomaiwang@gmail.com>, Sage Weil <sweil@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Josh Durgin <josh.durgin@inktank.com>
+Cc: Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-SGkgSm9zaCwgSGFvbWFpLA0KDQpJIGFtIGN1cnJlbnRseSB3b3JraW5nIG9uIGEgQ0xJIHRvIGRl
-dGVjdCBpbmNvbnNpc3RlbmNpZXMgaW4gcmJkIGFuZCBoYXZlIHNvbWUgZnVuY3Rpb25hbCBjaGVj
-a3Mgd29ya2luZy4gV2UgY2FuIGxldmVyYWdlIGl0IHRvIGRldGVjdCBpbmNvbnNpc3RlbmN5IHdp
-dGggSW1hZ2VJbmRleC9oZWFkZXIuDQpMZXQgbWUga25vdyBpZiBJIGNhbiBoZWxwIHlvdSB3aXRo
-IHRoaXMuDQoNCg0KUmVnYXJkcywNCkRoaXJhag0KDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0t
-LS0tDQpGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgt
-ZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgSm9zaCBEdXJnaW4NClNl
-bnQ6IFdlZG5lc2RheSwgQXVndXN0IDEzLCAyMDE0IDc6NDUgQU0NClRvOiBIYW9tYWkgV2FuZzsg
-U2FnZSBXZWlsDQpDYzogY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNClN1YmplY3Q6IFJlOiBb
-UkZDXUFib3V0IEltYWdlSW5kZXgNCg0KT24gMDgvMTEvMjAxNCAwNzo1MCBQTSwgSGFvbWFpIFdh
-bmcgd3JvdGU6DQo+IEhpIFNhZ2UsIEpvc2g6DQo+DQo+IEltYWdlSW5kZXggaXMgYWltZWQgdG8g
-aG9sZCBlYWNoIG9iamVjdCdzIGxvY2F0aW9uIGluZm8gd2hpY2ggYXZvaWQNCj4gZXh0cmEgY2hl
-Y2tpbmcgZm9yIG5vbmUtZXhpc3Rpbmcgb2JqZWN0LiBJdCdzIG9ubHkgdXNlZCB3aGVuIGltYWdl
-DQo+IGZsYWdzIGV4aXN0cyBMSUJSQkRfQ1JFQVRFX05PTlNIQVJFRC4gT3RoZXJ3aXNlLCBJbWFn
-ZUluZGV4IHdpbGwNCj4gYmVjb21lIGdhd3AgYW5kIGhhcyBubyBlZmZlY3QuDQoNCkkgbGlrZSB0
-aGUgZ2VuZXJhbCBzdHJ1Y3R1cmUgb2YgdGhlIGNvZGUsIGFuZCBpdCdzIGdyZWF0IHRvIGhlYXIg
-eW91J3ZlIGJlZW4gdGVzdGluZyBpdCB3aXRoIHRlc3RfbGlicmJkX2ZzeC4gU29tZSB0aG91Z2h0
-cyBvbiB0aGUgZGVzaWduOg0KDQo+IEVhY2ggb2JqZWN0IGhhcyB0aHJlZSBzdGF0ZToNCj4gMS4g
-VU5LTk9XTjogZGVmYXVsdCB2YWx1ZSwgaXQgd2lsbCBmb2xsb3cgb3JpZ2luIHBhdGggMi4gTE9D
-QUw6IGltcGx5DQo+IHRoaXMgb2JqZWN0IGlzIGxvY2FsLCBkb24ndCBuZWVkIHRvIGxvb2t1cCBw
-YXJlbnQgaW1hZ2UgMy4gUEFSRU5UOg0KPiBpbXBseSB0aGlzIG9iamVjdCBpcyBpbiB0aGUgcGFy
-ZW50IGltYWdlLCBkb24ndCBuZWVkIHRvIHJlYWQgZnJvbQ0KPiBsb2NhbCBpbWFnZQ0KDQpXaGF0
-IGFib3V0IGNhbGxpbmcgdGhlc2UgdW5rbm93biwgZXhpc3RzLCBhbmQgbm9uZXhpc3RlbnQgaW5z
-dGVhZD8NClRoaXMgaW5mb3JtYXRpb24gY2FuIGJlIHVzZWQgZm9yIG5vbi1jbG9uZSB1c2UgY2Fz
-ZXMgdG9vLiBJbnRlcm5hbGx5IHRoZXJlJ3MgYW5vdGhlciBJbWFnZUN0eCBmb3IgZWFjaCBwYXJl
-bnQsIHdoaWNoIGNhbiBoYXZlIGl0cyBvd24gaW5kZXgsIHNvIEkgZG9uJ3QgdGhpbmsgdGhlcmUn
-cyBhIG5lZWQgdG8ga2VlcCB0cmFjayBvZiBhbnkgb2JqZWN0cyBmcm9tIGRpZmZlcmVudCBpbWFn
-ZXMgaW4gb25lIEltYWdlQ3R4Lg0KDQo+IE5vdGU6IEltYWdlSW5kZXggaXNuJ3QgZnVsbCBzeW5j
-IHRvIHJlYWwgZGF0YSBhbGwgdGhlIHRpbWUuIEJlY2F1c2UNCj4gdGhlIHRyYW5zZm9ybWF0aW9u
-IHsidW5rbm93biIgLT4gImxvY2FsIiwgInVua25vd24iIC0+ICJwYXJlbnQifSBhcmUgc2FmZS4N
-Cj4gU28gV2Ugb25seSBuZWVkIHRvIGhhbmRsZSB3aXRoIHRoZSBleGNlcHRpb24gd2hlbiBJbWFn
-ZUluZGV4IGltcGxpZXMNCj4gdGhpcyBvYmplY3QgaXMgInBhcmVudCIgYnV0IHRoZSByZWFsIGRh
-dGEgaXMgImxvY2FsIi4gVGhlcmUgZXhpc3RzDQo+IHRocmVlIG1ldGhvZHMgdG8gc29sdmUgaXQ6
-DQo+IDEuIGZsdXNoIGBzdGF0ZV9tYXBgIGV2ZXJ5IHRpbWUgd2hlbiAicGFyZW50IiAtPiAibG9j
-YWwiIGhhcHBlbmVkIDIuDQo+IG1hcmsgYWxsIG9iamVjdHMgZnJvbSAicGFyZW50IiBzdGF0ZSB0
-byAidW5rbm93buKAnCBzdGF0ZSB3aGVuIGxvYWRpbmcNCj4gaW1hZ2UgaW5kZXgobm90IGluY2x1
-ZGluZyBzbmFwc2hvdCB3aGljaCBoYXMgZnJvemVuIGluZGV4KS4NCg0KQXQgdGhlIGVuZCBvZiB0
-aGUgQ0RTIHNlc3Npb24gSSB3YXMgdGhpbmtpbmcgdGhhdCBpbXBsZW1lbnRpbmcgaXQgc3RyaWN0
-bHkgd291bGQgYmUgYmV0dGVyLCBzbyB0aGF0IHlvdSBjb3VsZCBhbHdheXMgdHJ1c3QgdGhlIG9u
-LWRpc2sgY29weSBvZiB0aGUgaW5kZXguIEluIHBhcnRpY3VsYXIgd2Ugd2VyZSB3b3JyaWVkIGFi
-b3V0IHRoZSBjb21wbGV4aXR5IG9mIGhhbmRsaW5nIGEgbm9uLXN0cmljdCBpbmRleCBkdXJpbmcg
-dGhpbmdzIGxpa2UgbGl2ZSBtaWdyYXRpb24sIGFuZCBiZWluZyBhYmxlIHRvIHVzZSBpdCB0byBz
-cGVlZCB1cCBtYW5hZ2VtZW50IG9wZXJhdGlvbnMgbW9yZSByZWxpYWJseS4NCg0KU2luY2UgY3Jl
-YXRpbmcgbmV3IG9iamVjdHMgKG9yIGRpc2NhcmRpbmcgZW50aXJlIGV4aXN0aW5nIG9iamVjdHMp
-IGlzIHByZXR0eSByYXJlLCBpdCBzZWVtcyB3b3J0aCB0aGUgZXh0cmEgSS9PcyB0byB1cGRhdGUg
-dGhlIGluZGV4IHN5bmNocm9ub3VzbHkgaW4gdGhlc2UgY2FzZXMuIFRvIGJlIGZ1bGx5IHNhZmUg
-SSB0aGluayBhbnkgd3JpdGUgdG8gYSBuZXcgb2JqZWN0IG9yIGRpc2NhcmQgb2YgYSBmdWxsIG9i
-amVjdCB3b3VsZCBuZWVkIHRvIGNoYW5nZSBpbmRleCBzdGF0ZSB0byB1bmtub3duLCBkbyB0aGUg
-d3JpdGUvZGlzY2FyZCwgYW5kIGZpbmFsbHkgY2hhbmdlIHRoZSBpbmRleCBzdGF0ZSB0byBleGlz
-dHMvbm9uZXhpc3RlbnQuIFRoZXJlIG1pZ2h0IGJlIHNvbWUgd2F5cyB0byBvcHRpbWl6ZSB0aGF0
-IHRob3VnaC4NCg0KPiBIZXJlIGNob29zZSB0byBpbXBsZW1lbnQgbWV0aG9kIDIuIFRoaXMgbWV0
-aG9kIG9ubHkgYWxsb3cgMiByZWFkIG9wcw0KPiBpbiBvbmUgcmVhZCByZXF1ZXN0IGF0IG1heCBh
-bmQgd2l0aG91dCBvdmVyaGVhZC4gVXN1YWxseSwgbGlicmJkIHdpbGwNCj4gb3BlbiBpbWFnZSBm
-b3IgbWFueSBkYXlzKG1vbnRocykgZm9yIG5vcm1hbCB1c2UgY2FzZSBzdWNoIGFzIFZNIHVzYWdl
-Lg0KPiBTbyB0aGUgaW1hZ2UgaW5kZXggd2lsbCBiZSB3YXJtZWQgdXAgYW5kIGJlY2FtZSBzbWFy
-dCB3aGVuIHByb2Nlc3NpbmcNCj4gb3BzLg0KPg0KPiBFeGNlcHQgaW1hZ2Ugc3RhdGUgY2hhbmdl
-ZCBwcm9ibGVtLCBhbm90aGVyIGNvbmNlcm4gaXMgc2l6ZS4gSW1hZ2UNCj4gaW5kZXggb25seSBw
-ZXJtaXQgc2luZ2xlIGNsaWVudCB3cml0ZSwgYnV0IHJlc2l6ZS9mbGF0dGVuL3JvbGxiYWNrIG9w
-cw0KPiBhcmUgYWxsb3dlZCB0byBoYXBwZW4gY29uY3VycmVudGx5LiBGb3Igc2ltcGx5LCBub3cg
-dGhlc2Ugb3BzIGRvbid0DQo+IGNoYW5nZSBhbmQgc2F2ZSBzdGF0ZXMgaW50byByYWRvcy4gUmVz
-aXplIG9wIHdpbGwgYWZmZWN0ICJzaXplIiBhbmQNCj4gY3VycmVudCB3cml0ZSBjbGllbnQgd2ls
-bCBiZSBub3RpZmllZC4NCj4NCj4gQmVsb3cgbGlzdGluZyBvYmplY3Qgc3RhdGUgY2hhbmdlIHNj
-ZW5lczoNCj4gMS4gV2hlbiBjbG9uZSBmcm9tIGltYWdlLCBpdCB3aWxsIG1hcmsgYWxsIG9iamVj
-dHMgYXMgInBhcmVudCINCg0KV2UgY2FuIGRvIHRoaXMgZm9yIGFueSBuZXcgaW1hZ2UgKG1hcmsg
-YWxsIG9iamVjdHMgbm9uLWV4aXN0ZW50IGluaXRpYWxseSksIG5vdCBqdXN0IGNsb25lcy4NCg0K
-PiAyLiBXaGVuIGNyZWF0aW5nIHNuYXBzaG90LCBpbWFnZSBpbmRleCB3aWxsIGJlIGZyZWV6ZSBh
-bmQgc2F2ZSBpdCBhcw0KPiB0aGUgaW5kZXggb2YgdGhlIHNuYXBzaG90LiBBbGwgInBhcmVudCIg
-c3RhdGUgb2JqZWN0cyB3aWxsIGJlIG1hcmtlZA0KPiBhcyAidW5rbm93biIgZm9yIHNhZmUNCg0K
-T25lIGltcGxlbWVudGF0aW9uIGRldGFpbCBoZXJlIC0gSSB0aGluayBpdCdkIGJlIGdvb2QgdG8g
-c3RvcmUgc25hcHNob3QgaW5kZXhlcyBpbiBzZXBhcmF0ZSBvYmplY3RzIHNvIHRoYXQgaGF2aW5n
-IG1hbnkgc25hcHNob3RzIGRvZXMgbm90IGNhdXNlIHRoZSBoZWFkZXIgb2JqZWN0IHRvIGJlY29t
-ZSB0b28gbGFyZ2UuDQoNClRvIHJlY292ZXIgZnJvbSBhIHBhcnRpYWwgc25hcHNob3QsIHdoZXJl
-IHRoZSBoZWFkZXIgd2FzIHVwZGF0ZWQgYnV0IHRoZSBpbmRleCB3YXNuJ3Qgc2F2ZWQsIGl0IHdv
-dWxkIGJlIHVzZWZ1bCB0byBoYXZlIGEgcmJkIGNsaSBjb21tYW5kIHRvIHJlcGFpciAob3Igb3B0
-aW9uYWxseSBqdXN0IGNoZWNrKSB0aGUgaW5kZXggZm9yIGEgc25hcHNob3QuDQoNCj4gMy4gV2hl
-biB3cml0ZShpbmNsdWRpbmcgbW9kaWZpZWQgb3ApIGEgb2JqZWN0LCBpdCB3aWxsIG1hcmsgdGhp
-cw0KPiBvYmplY3QgYXMgImxvY2FsIg0KPiA0LiBXaGVuIHJlYWRpbmcgb2JqZWN0LCB0aGUgY3Vy
-cmVudCBpbWFnZSBvYmplY3Qgd2lsbCBiZSBhbHdheXMgcmVhZA0KPiBpbiBzcGl0ZSBvZiB0aGUg
-c3RhdGUuIEFuZCB0aGUgcGFyZW50IGltYWdlJ3Mgb2JqZWN0IHdpbGwgYmUgY2hlY2tlZA0KPiBh
-bmQgdHJ1c3QgdGhlIHN0YXRlLiBJZiBleGlzdHMgcGFyZW50IGltYWdlIGJ1dCByZWFkIGxvY2Fs
-IG9iamVjdA0KPiBzdWNjZXNzZnVsbHksIHRoZSBsb2NhbCBvYmplY3Qgd2lsbCBiZSBtYXJrZWQg
-ImxvY2FsIg0KPg0KPiBUaGUgcHJpbmNpcGxlIGlzIHRoYXQgb25seSBleGlzdHMgb25lIGNsaWVu
-dCBjYW4gb3BlcmF0ZSBhbmQgc2F2ZSB0aGUNCj4gSW1hZ2VJbmRleCBjaGFuZ2VzIGludG8gcmFk
-b3MuIE5vdyB0aGUgY2hhbGxlbmdlIGlzIHRoYXQgaG93IHRvIGRlY2lkZQ0KPiB3aG8gaXMgdGhl
-IG93bmVyIG9mIEltYWdlSW5kZXguIExpa2UgVk0gdXNhZ2UsIHFlbXUgd2lsbCBvcGVuIGltYWdl
-IHRvDQo+IGRvIElPIG9wcyBhbmQgZXh0ZXJuYWxseSB1c2VyIGFsc28gY2FuIGRvIGNyZWF0ZSBz
-bmFwc2hvdCBmb3IgdGhlDQo+IG9wZW5lZCBpbWFnZShyYmQgc25hcCBjcmVhdGUgLi4uKS4gU28g
-aXQgd2lsbCBleGlzdHMgdHdvIGNsaWVudCBtb2RpZnkNCj4gdGhlIHNhbWUgaW1hZ2UsIG9uZSBj
-YW4gYmUgcmVnYXJkZWQgYXMgIm93bmVyIGNsaWVudCIgYW5vdGhlciBpcw0KPiAibWFuYWdlbWVu
-dCBjbGllbnQiLiAibWFuYWdlbWVudCBjbGllbnQiIGlzIGV4cGVjdGVkIHRvIG5vdCBjaGFuZ2Ug
-dGhlDQo+IHN0YXRlIG9mIG9iamVjdC4NCj4NCj4gSSBvbmx5IGNvbWUgdXAgd2l0aCBhIGlkZWEg
-dGhhdCB1c2VyIG5lZWQgdG8gY2FsbCAic2V0X293bmVyX2ltYWdlIg0KPiB3aGVuIGNsaWVudCB3
-YW50IHRvIGJlY29tZSAib3duZXIgY2xpZW50IiBhbmQgdGhpcyBjbGllbnQgY2FuIG9wZXJhdGUN
-Cj4gSW1hZ2VJbmRleC4NCg0KVGhpcyBpcyBhIGdyZWF0IGlkZWEgZm9yIGFsbCBoZWFkZXIgdXBk
-YXRlcy4gSSd2ZSBiZWVuIHRoaW5raW5nIGFib3V0IHRoZSBzYW1lIHRoaW5nIGZvciByYmQgbWly
-cm9yaW5nLCBhbmQgU2FnZSBzdGFydGVkIHdvcmtpbmcgb24gc29tZSB3YXRjaC9ub3RpZnkgY2hh
-bmdlcyB0aGF0IHdpbGwgaGVscCBtYWtlIHRoaXMgcm9idXN0Og0KDQpodHRwOi8vcGFkLmNlcGgu
-Y29tL3Avd2F0Y2gtbm90aWZ5DQoNCj4gUFIoaHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2VwaC9w
-dWxsLzIyMTIpDQo+IEkgaGF2ZSBwYXNzZWQgdGVzdF9saWJyYmQgYW5kIHRlc3RfbGlicmJkX2Zz
-eCB0ZXN0cy4gVGhlIElPIGxvZ2ljDQo+IHNlZW1lZCB3b3JrZWQgYXMgZXhwZWN0ZWQuDQoNCkkg
-aGF2ZW4ndCBoYWQgdGltZSB0byBsb29rIGF0IHRoZSBjb2RlIGluIGEgbG90IG9mIGRldGFpbCB5
-ZXQsIGJ1dCBpdCdkIGJlIG5pY2UgdG8gdXNlIGp1c3QgMiBiaXRzIHBlciBvYmplY3Qgb24gZGlz
-ay4gSSdtIG9uIHZhY2F0aW9uIHRoZSBuZXh0IGNvdXBsZSB3ZWVrcywgYnV0IFNhZ2UgbWF5IGhh
-dmUgbW9yZSBmZWVkYmFjay4NCg0KSm9zaA0KLS0NClRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBs
-aXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbiB0aGUgYm9keSBv
-ZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyBp
-bmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCg0KX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCg0KUExFQVNFIE5PVEU6IFRoZSBpbmZvcm1h
-dGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVzc2FnZSBpcyBpbnRlbmRl
-ZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVudChzKSBuYW1lZCBh
-Ym92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZCBy
-ZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQg
-dGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZpZXcsIGRpc3NlbWluYXRpb24s
-IGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzIG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJv
-aGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0aW9uIGluIGVycm9y
-LCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25lIG9yIGUtbWFpbCAoYXMgc2hv
-d24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0
-aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQgY29waWVzIG9yIGVs
-ZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KDQo=
+On Wed, Aug 13, 2014 at 10:14 AM, Josh Durgin <josh.durgin@inktank.com>=
+ wrote:
+> On 08/11/2014 07:50 PM, Haomai Wang wrote:
+>>
+>> Hi Sage, Josh:
+>>
+>> ImageIndex is aimed to hold each object's location info which avoid
+>> extra checking for none-existing object. It's only used when image f=
+lags
+>> exists LIBRBD_CREATE_NONSHARED. Otherwise, ImageIndex will become ga=
+wp and
+>> has no effect.
+>
+>
+> I like the general structure of the code, and it's great to hear you'=
+ve
+> been testing it with test_librbd_fsx. Some thoughts on the design:
+>
+>
+>> Each object has three state:
+>> 1. UNKNOWN: default value, it will follow origin path
+>> 2. LOCAL: imply this object is local, don't need to lookup parent im=
+age
+>> 3. PARENT: imply this object is in the parent image, don't need to r=
+ead
+>> from local image
+>
+>
+> What about calling these unknown, exists, and nonexistent instead?
+> This information can be used for non-clone use cases too. Internally
+> there's another ImageCtx for each parent, which can have its own
+> index, so I don't think there's a need to keep track of any objects
+> from different images in one ImageCtx.
+
+The names seemed better. But what's mean of latter sentences?
+Now a image's ImageIndex only track own objects.
+
+>
+>
+>> Note: ImageIndex isn't full sync to real data all the time. Because =
+the
+>> transformation {"unknown" -> "local", "unknown" -> "parent"} are saf=
+e.
+>> So We only need to handle with the exception when ImageIndex implies
+>> this object is "parent" but the real data is "local". There exists t=
+hree
+>> methods to solve it:
+>> 1. flush `state_map` every time when "parent" -> "local" happened
+>> 2. mark all objects from "parent" state to "unknown=E2=80=9C state w=
+hen loading
+>> image index(not including snapshot which has frozen index).
+>
+>
+> At the end of the CDS session I was thinking that implementing it
+> strictly would be better, so that you could always trust the on-disk =
+copy of
+> the index. In particular we were worried about the complexity of
+> handling a non-strict index during things like live migration, and
+> being able to use it to speed up management operations more reliably.
+>
+> Since creating new objects (or discarding entire existing objects) is
+> pretty rare, it seems worth the extra I/Os to update the index
+> synchronously in these cases. To be fully safe I think any write to
+> a new object or discard of a full object would need to change index
+> state to unknown, do the write/discard, and finally change the index
+> state to exists/nonexistent. There might be some ways to optimize tha=
+t
+> though.
+
+It make sense to me.
+
+>
+>
+>> Here choose to implement method 2. This method only allow 2 read ops
+>> in one read request at max and without overhead. Usually, librbd wil=
+l
+>> open image for many days(months) for normal use case such as VM usag=
+e.
+>> So the image index will be warmed up and became smart when processin=
+g
+>> ops.
+>>
+>> Except image state changed problem, another concern is size. Image
+>> index only permit single client write, but resize/flatten/rollback o=
+ps
+>> are allowed to happen concurrently. For simply, now these ops don't
+>> change and save states into rados. Resize op will affect "size" and
+>> current write client will be notified.
+>>
+>> Below listing object state change scenes:
+>> 1. When clone from image, it will mark all objects as "parent"
+>
+>
+> We can do this for any new image (mark all objects non-existent
+> initially), not just clones.
+>
+>
+>> 2. When creating snapshot, image index will be freeze and save it as=
+ the
+>> index of the snapshot. All "parent" state objects will be marked as
+>> "unknown" for safe
+>
+>
+> One implementation detail here - I think it'd be good to store snapsh=
+ot
+> indexes in separate objects so that having many snapshots does not ca=
+use
+> the header object to become too large.
+
+Good point!
+
+>
+> To recover from a partial snapshot, where the header was updated but
+> the index wasn't saved, it would be useful to have a rbd cli command =
+to
+> repair (or optionally just check) the index for a snapshot.
+
+Yes, it's a good idea.
+
+>
+>
+>> 3. When write(including modified op) a object, it will mark this obj=
+ect
+>> as "local"
+>> 4. When reading object, the current image object will be always read=
+ in
+>> spite of the state. And the parent image's object will be checked an=
+d
+>> trust the state. If exists parent image but read local object
+>> successfully, the local object will be marked "local"
+>>
+>> The principle is that only exists one client can operate and save th=
+e
+>> ImageIndex changes into rados. Now the challenge is that how to deci=
+de
+>> who is the owner of ImageIndex. Like VM usage, qemu will open image =
+to
+>> do IO ops and externally user also can do create snapshot for the
+>> opened image(rbd snap create ...). So it will exists two client modi=
+fy
+>> the same image, one can be regarded as "owner client" another is
+>> "management client". "management client" is expected to not change t=
+he
+>> state of object.
+>>
+>> I only come up with a idea that user need to call "set_owner_image"
+>> when client want to become "owner client" and this client can operat=
+e
+>> ImageIndex.
+>
+>
+> This is a great idea for all header updates. I've been thinking about
+> the same thing for rbd mirroring, and Sage started working on some
+> watch/notify changes that will help make this robust:
+
+Hmm, I will dive into it.
+
+>
+> http://pad.ceph.com/p/watch-notify
+>
+>
+>> PR(https://github.com/ceph/ceph/pull/2212)
+>> I have passed test_librbd and test_librbd_fsx tests. The IO logic
+>> seemed worked as expected.
+>
+>
+> I haven't had time to look at the code in a lot of detail yet, but
+> it'd be nice to use just 2 bits per object on disk. I'm on vacation
+> the next couple weeks, but Sage may have more feedback.
+>
+> Josh
+
+Thanks for your reply, Josh!
+
+
+--=20
+Best Regards,
+
+Wheat
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
