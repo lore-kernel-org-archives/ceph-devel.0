@@ -1,42 +1,32 @@
-From: Viral Mehta <viral.vkm@gmail.com>
-Subject: Fwd: crush_addition_is_unsafe
-Date: Wed, 13 Aug 2014 19:08:13 +0530
-Message-ID: <CANX6DanR++1xm9_kQ3dzz7eB0SdGdhCUfrddrm3OqEzG7=a87w@mail.gmail.com>
-References: <CANX6Damfw3SQZmWhC+C0258utdJHRM2Qnx6pZXYHnGFdXtYu_A@mail.gmail.com>
+From: Huamin Chen <hchen@redhat.com>
+Subject: assert failure
+Date: Wed, 13 Aug 2014 16:29:19 -0400 (EDT)
+Message-ID: <1229494305.20638287.1407961759048.JavaMail.zimbra@redhat.com>
+References: <973721792.20638089.1407961733872.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f176.google.com ([209.85.192.176]:55265 "EHLO
-	mail-pd0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752134AbaHMNiN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Aug 2014 09:38:13 -0400
-Received: by mail-pd0-f176.google.com with SMTP id y10so14349410pdj.7
-        for <ceph-devel@vger.kernel.org>; Wed, 13 Aug 2014 06:38:13 -0700 (PDT)
-In-Reply-To: <CANX6Damfw3SQZmWhC+C0258utdJHRM2Qnx6pZXYHnGFdXtYu_A@mail.gmail.com>
+Received: from mx3-phx2.redhat.com ([209.132.183.24]:56510 "EHLO
+	mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751704AbaHMU3T (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Aug 2014 16:29:19 -0400
+Received: from zmail23.collab.prod.int.phx2.redhat.com (zmail23.collab.prod.int.phx2.redhat.com [10.5.83.28])
+	by mx3-phx2.redhat.com (8.13.8/8.13.8) with ESMTP id s7DKTJED016146
+	for <ceph-devel@vger.kernel.org>; Wed, 13 Aug 2014 16:29:19 -0400
+In-Reply-To: <973721792.20638089.1407961733872.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Does this make sense ? I can prepare a patch.
+Is the following assert failure an known issue?
 
-
-diff --git a/src/crush/builder.c b/src/crush/builder.c
-index c319620..5700a88 100644
---- a/src/crush/builder.c
-+++ b/src/crush/builder.c
-@@ -651,7 +651,7 @@ int crush_add_tree_bucket_item(struct
-crush_bucket_tree *bucket, int item, int w
-        for (j=1; j<depth; j++) {
-                node = parent(node);
-
--                if
-(!crush_addition_is_unsafe(bucket->node_weights[node], weight))
-+                if
-(crush_addition_is_unsafe(bucket->node_weights[node], weight))
-                         return -ERANGE;
-
-                bucket->node_weights[node] += weight;
-
-
--- 
-VKM
+msg/Pipe.cc: In function 'int Pipe::connect()' thread 7fed3d2dd700 time 2014-08-13 16:26:06.039799
+msg/Pipe.cc: 1070: FAILED assert(m)
+ ceph version 0.80.1 (a38fe1169b6d2ac98b427334c12d7cf81f809b74)
+ 1: (Pipe::connect()+0x390e) [0x7feee89cf99e]
+ 2: (Pipe::writer()+0x511) [0x7feee89d0fd1]
+ 3: (Pipe::Writer::entry()+0xd) [0x7feee89d5d0d]
+ 4: (()+0x7df3) [0x7fef336cadf3]
+ 5: (clone()+0x6d) [0x7fef32fe63dd]
+ NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
