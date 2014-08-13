@@ -1,30 +1,42 @@
-From: Alfredo Deza <alfredo.deza-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Subject: [ANN] ceph-deploy 1.5.11 released
-Date: Wed, 13 Aug 2014 09:24:26 -0400
-Message-ID: <CANtztVy_UbBNn0fJndpAar5uVYozFi0qvXQSeCtGSrd16Z5tvQ@mail.gmail.com>
+From: Viral Mehta <viral.vkm@gmail.com>
+Subject: Fwd: crush_addition_is_unsafe
+Date: Wed, 13 Aug 2014 19:08:13 +0530
+Message-ID: <CANX6DanR++1xm9_kQ3dzz7eB0SdGdhCUfrddrm3OqEzG7=a87w@mail.gmail.com>
+References: <CANX6Damfw3SQZmWhC+C0258utdJHRM2Qnx6pZXYHnGFdXtYu_A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-pd0-f176.google.com ([209.85.192.176]:55265 "EHLO
+	mail-pd0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752134AbaHMNiN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Aug 2014 09:38:13 -0400
+Received: by mail-pd0-f176.google.com with SMTP id y10so14349410pdj.7
+        for <ceph-devel@vger.kernel.org>; Wed, 13 Aug 2014 06:38:13 -0700 (PDT)
+In-Reply-To: <CANX6Damfw3SQZmWhC+C0258utdJHRM2Qnx6pZXYHnGFdXtYu_A@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hi All,
-
-This is a bug fix release of ceph-deploy, it primarily addresses the
-issue of failing to install
-Ceph on CentOS7 distros.
-
-Make sure you update!
+Does this make sense ? I can prepare a patch.
 
 
--Alfredo
+diff --git a/src/crush/builder.c b/src/crush/builder.c
+index c319620..5700a88 100644
+--- a/src/crush/builder.c
++++ b/src/crush/builder.c
+@@ -651,7 +651,7 @@ int crush_add_tree_bucket_item(struct
+crush_bucket_tree *bucket, int item, int w
+        for (j=1; j<depth; j++) {
+                node = parent(node);
+
+-                if
+(!crush_addition_is_unsafe(bucket->node_weights[node], weight))
++                if
+(crush_addition_is_unsafe(bucket->node_weights[node], weight))
+                         return -ERANGE;
+
+                bucket->node_weights[node] += weight;
+
+
+-- 
+VKM
