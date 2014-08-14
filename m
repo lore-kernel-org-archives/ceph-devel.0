@@ -1,74 +1,69 @@
 From: Sage Weil <sweil@redhat.com>
-Subject: RE: Is that possible to run teuthology on local test servers
-Date: Thu, 14 Aug 2014 05:59:46 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1408140558190.28244@cobra.newdream.net>
-References: <53EC2446.3020708@gmail.com> <085BC98701B92B4C86AE7696562D284D0529FBB5@SACMBXIP01.sdcorp.global.sandisk.com>
+Subject: RE: A bug in FileStore::mount and A problem about XFS
+Date: Thu, 14 Aug 2014 06:01:23 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1408140601040.28244@cobra.newdream.net>
+References: <20140814120742.86212cn7dlk8dy4g@intranet.cs.hku.hk> <6AA21C22F0A5DA478922644AD2EC308C8B7053@SHSMSX101.ccr.corp.intel.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:60474 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:60506 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754945AbaHNM7s (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Aug 2014 08:59:48 -0400
-In-Reply-To: <085BC98701B92B4C86AE7696562D284D0529FBB5@SACMBXIP01.sdcorp.global.sandisk.com>
+	with ESMTP id S1754329AbaHNNBX (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Aug 2014 09:01:23 -0400
+In-Reply-To: <6AA21C22F0A5DA478922644AD2EC308C8B7053@SHSMSX101.ccr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Vijayendra Shamanna <Vijayendra.Shamanna@sandisk.com>
-Cc: guping <magicgup@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Ma, Jianpeng" <jianpeng.ma@intel.com>
+Cc: "nyao@cs.hku.hk" <nyao@cs.hku.hk>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-You can accomplish the same thing by adding a section like
+On Thu, 14 Aug 2014, Ma, Jianpeng wrote:
+> I think you got the old code. I'm not find FX_TYPE_OTHER
 
-targets:
-  ubuntu@plana37.front.sepia.ceph.com: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDlGkqSVZEriH63rFY4R4y6jelC0RGv/A8JtkIGWqRDIjLYsXgB4GoSNsI5H0FGhR+8ZiE2kOimFvpzYXCiFEW9QNWEcdKn75ZsnUnCTJf0fhYUyyD0qaxL00003BhDyPX2pazSPvIB9w+WSATpW3XoL6uos7VIRjGn95VsHOonWjx25rupntyF9ac0VChYCFAO7WVQcxDfQ8MAW3O4YhH+uIuzv62ZahI8l+9A1rKbxcQU5aOaS+lhJArHEGxF38JXGWOmqybhe1x8wc4Fw/1g777VfwbyzG0wh2WgxkZ2R7qzKttnJ+iT8a/Un+ZLi8AnWN7KiwabRiMvc1VXO6zl
-
-to your yaml.  The key is the *public* key of the machine (what you get 
-from ssh-keyscan), to verify you are talking to the right target.  That, 
-along with the 'roles' and 'tasks' section, is put in a yaml file, and the 
-filename is passed to the 'teuthology' binary.
+It was only recently removed in master.  I suspect this bug is present in 
+firefly, though, and should still be fixed!
 
 sage
 
 
-On Thu, 14 Aug 2014, Vijayendra Shamanna wrote:
-
-> Hi,
-> 
-> I had gotten teuthology to work some time back to a reasonable extent in my local setup with a few quick ugly hacks. The main set of changes were,
-> 
-> 1. Explicitly named my test systems as "plana01" , "plana02" & "plana03". Some of the teuthology code which checks for VM instances does compare with known set/class of machine names
-> 2. In lock_machines() routine (teuthology/task/internal.py), set ctx.config['targets'] as follows:
->     mydict['myuser@plana01'] = 'ssh-rsa <my_ssh_key1>'
->     mydict['myuser@plana02'] = 'ssh-rsa <my_ssh_key2>' and so on..
->    ctx.config['targets'] = mydict
-> 3. Comment out the reporting code in teuthology/report.py
-> 
-> There were a few other minor changes like disabling teuthology branch checkout etc.
-> 
-> Thanks,
-> Viju
 > 
 > 
-> 
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of guping
-> Sent: Thursday, August 14, 2014 8:22 AM
-> To: ceph-devel@vger.kernel.org
-> Subject: Is that possible to run teuthology on local test servers
-> 
-> I read the doc on the github teuthology, but still can not figure out how to run teuthology on my local test servers.
-> Any experience? Any advice?
-> 
-> --
-> Thanks,
-> Gu Ping
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> ________________________________
-> 
-> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
-> 
+> > -----Original Message-----
+> > From: ceph-devel-owner@vger.kernel.org
+> > [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of nyao@cs.hku.hk
+> > Sent: Thursday, August 14, 2014 12:08 PM
+> > To: ceph-devel@vger.kernel.org
+> > Subject: A bug in FileStore::mount and A problem about XFS
+> > 
+> > 
+> > Dear developers,
+> > 
+> > I find a bug in FileStore::mount() function. If we use raw partitial as a Journal
+> > disk, like /dev/sda1, then it will cause a error when setting the parameters
+> > "m_filestore_max_inline_xattr_size" and "m_filestore_max_inline_xattrs".
+> > 
+> > First of all, when creating the FileStore, it calls the mount() and detect fs_type
+> > as XFS, so it will check m_filestore_replica_fadvise(true default) and set it to
+> > false. At the same time, m_fs_tpye = FS_TYPE_XFS.
+> > 
+> > However, when create JournalStore, it also enters mount() function and detect
+> > fs_type. Unfourtuanlly, this time, m_filestore_replica_fadvise = false so that it
+> > cannot update m_fs_type = FS_TYPE_XFS. Instread, it will sets to m_fs_tpye =
+> > FS_TYPE_OTHER. This bug is quite easy to repair.
+> > 
+> > 
+> > By the way, I wanna ask another question about XFS, I find that if I use ceph
+> > cluster heavily for about 2-3 hour. XFS always wakes up a kernel thread (xfsaild)
+> > to deal with its inodes reading and writing.
+> > This will impact the performance a lot and make the cluster's throughput drop
+> > heavily. So how to solve this problem and why this occurs after running a heavily
+> > read, write operation after 2-3 hour.
+> > 
+> > Best Regards,
+> > Neal Yao
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body
+> > of a message to majordomo@vger.kernel.org More majordomo info at
+> > http://vger.kernel.org/majordomo-info.html
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
