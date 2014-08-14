@@ -1,58 +1,58 @@
-From: nyao@cs.hku.hk
-Subject: A bug in FileStore::mount and A problem about XFS
-Date: Thu, 14 Aug 2014 12:07:42 +0800
-Message-ID: <20140814120742.86212cn7dlk8dy4g@intranet.cs.hku.hk>
+From: Vijayendra Shamanna <Vijayendra.Shamanna@sandisk.com>
+Subject: RE: Is that possible to run teuthology on local test servers
+Date: Thu, 14 Aug 2014 05:26:31 +0000
+Message-ID: <085BC98701B92B4C86AE7696562D284D0529FBB5@SACMBXIP01.sdcorp.global.sandisk.com>
+References: <53EC2446.3020708@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=GB2312;
- DelSp="Yes";
- format="flowed"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.cs.hku.hk ([147.8.176.10]:38752 "EHLO mail.cs.hku.hk"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750839AbaHNENM (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 14 Aug 2014 00:13:12 -0400
-Received: from intranet.cs.hku.hk (intranet.cs.hku.hk [147.8.175.19])
-	by mail.cs.hku.hk (8.13.8+Sun/8.13.8) with ESMTP id s7E47kg5022566
-	for <ceph-devel@vger.kernel.org>; Thu, 14 Aug 2014 12:07:47 +0800 (HKT)
-Received: from intranet.cs.hku.hk (localhost.cs.hku.hk [127.0.0.1])
-	by intranet.cs.hku.hk (8.13.8+Sun/8.13.7) with ESMTP id s7E47k5I007059
-	for <ceph-devel@vger.kernel.org>; Thu, 14 Aug 2014 12:07:46 +0800 (HKT)
-Received: (from daemon@localhost)
-	by intranet.cs.hku.hk (8.13.8+Sun/8.13.8/Submit) id s7E47glh007058
-	for ceph-devel@vger.kernel.org; Thu, 14 Aug 2014 12:07:42 +0800 (HKT)
-Content-Disposition: inline
+Received: from mail-bl2lp0203.outbound.protection.outlook.com ([207.46.163.203]:10513
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752506AbaHNF1D convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Aug 2014 01:27:03 -0400
+In-Reply-To: <53EC2446.3020708@gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
+To: guping <magicgup@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+
+Hi,
+
+I had gotten teuthology to work some time back to a reasonable extent in my local setup with a few quick ugly hacks. The main set of changes were,
+
+1. Explicitly named my test systems as "plana01" , "plana02" & "plana03". Some of the teuthology code which checks for VM instances does compare with known set/class of machine names
+2. In lock_machines() routine (teuthology/task/internal.py), set ctx.config['targets'] as follows:
+    mydict['myuser@plana01'] = 'ssh-rsa <my_ssh_key1>'
+    mydict['myuser@plana02'] = 'ssh-rsa <my_ssh_key2>' and so on..
+   ctx.config['targets'] = mydict
+3. Comment out the reporting code in teuthology/report.py
+
+There were a few other minor changes like disabling teuthology branch checkout etc.
+
+Thanks,
+Viju
+
+
+
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of guping
+Sent: Thursday, August 14, 2014 8:22 AM
 To: ceph-devel@vger.kernel.org
+Subject: Is that possible to run teuthology on local test servers
 
+I read the doc on the github teuthology, but still can not figure out how to run teuthology on my local test servers.
+Any experience? Any advice?
 
-Dear developers,
+--
+Thanks,
+Gu Ping
 
-I find a bug in FileStore::mount() function. If we use raw partitial  
-as a Journal disk, like /dev/sda1, then it will cause a error when  
-setting the parameters "m_filestore_max_inline_xattr_size" and  
-"m_filestore_max_inline_xattrs".
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-First of all, when creating the FileStore, it calls the mount() and  
-detect fs_type as XFS, so it will check  
-m_filestore_replica_fadvise(true default) and set it to false. At the  
-same time, m_fs_tpye = FS_TYPE_XFS.
+________________________________
 
-However, when create JournalStore, it also enters mount() function and  
-detect fs_type. Unfourtuanlly, this time, m_filestore_replica_fadvise  
-= false so that it cannot update m_fs_type = FS_TYPE_XFS. Instread, it  
-will sets to m_fs_tpye = FS_TYPE_OTHER. This bug is quite easy to  
-repair.
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
 
-
-By the way, I wanna ask another question about XFS, I find that if I  
-use ceph cluster heavily for about 2-3 hour. XFS always wakes up a  
-kernel thread (xfsaild) to deal with its inodes reading and writing.  
-This will impact the performance a lot and make the cluster's  
-throughput drop heavily. So how to solve this problem and why this  
-occurs after running a heavily read, write operation after 2-3 hour.
-
-Best Regards,
-Neal Yao
