@@ -1,123 +1,117 @@
-From: =?UTF-8?B?THVpcyBQYWLDs24=?= <lpabon@redhat.com>
-Subject: Re: RGW Swift questions
-Date: Thu, 14 Aug 2014 12:52:50 -0400
-Message-ID: <53ECE962.8090208@redhat.com>
-References: <53ECC736.2090202@redhat.com>	<CABBk=J9KxxYNeZNTpLbRRNbd0ApqdSojbh-f3R7iuuF=FvfoGQ@mail.gmail.com>	<368555473.7277905.1408032020541.JavaMail.zimbra@redhat.com> <CABBk=J94xz+0oCcnoq-EnFXNrPYCrgkv3zw2-O7Aa19+z+egMw@mail.gmail.com>
+From: "Christopher R. Hertel" <crh@redhat.com>
+Subject: Ceph authentication/authorization paradignms
+Date: Thu, 14 Aug 2014 13:10:30 -0400 (EDT)
+Message-ID: <1355490291.31383019.1408036230928.JavaMail.zimbra@redhat.com>
+References: <1642211910.31382003.1408036197918.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:60634 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753194AbaHNQww (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 14 Aug 2014 12:52:52 -0400
-Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id s7EGqpVh032675
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK)
-	for <ceph-devel@vger.kernel.org>; Thu, 14 Aug 2014 12:52:51 -0400
-In-Reply-To: <CABBk=J94xz+0oCcnoq-EnFXNrPYCrgkv3zw2-O7Aa19+z+egMw@mail.gmail.com>
+Received: from mx5-phx2.redhat.com ([209.132.183.37]:43035 "EHLO
+	mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751675AbaHNRKc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Aug 2014 13:10:32 -0400
+Received: from zmail11.collab.prod.int.phx2.redhat.com (zmail11.collab.prod.int.phx2.redhat.com [10.5.83.13])
+	by mx5-phx2.redhat.com (8.14.4/8.14.4) with ESMTP id s7EHAVFF030373
+	for <ceph-devel@vger.kernel.org>; Thu, 14 Aug 2014 13:10:31 -0400
+In-Reply-To: <1642211910.31382003.1408036197918.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh <yehuda@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Great thanks!
+Ceph Folks:
 
-- Luis
+Hi.  I am new to Ceph but I've been around in the Open Source world for a
+while, working on a variety of different projects (mostly Windows Interop
+stuff).  I was asked to take a look at the authentication mechanisms used in
+Ceph, focusing on two key areas:
 
-On 08/14/2014 12:40 PM, Yehuda Sadeh wrote:
-> On Thu, Aug 14, 2014 at 9:00 AM, Luis Pabon <lpabon@redhat.com> wrote=
-:
->> Thanks for the quick turnaround Yehuda.  I have just a few more comm=
-ents below:
->>
->> ----- Original Message -----
->> From: "Yehuda Sadeh" <yehuda@redhat.com>
->> To: "Luis Pab=C3=B3n" <lpabon@redhat.com>
->> Cc: ceph-devel@vger.kernel.org
->> Sent: Thursday, August 14, 2014 11:02:06 AM
->> Subject: Re: RGW Swift questions
->>
->> On Thu, Aug 14, 2014 at 7:27 AM, Luis Pab=C3=B3n <lpabon@redhat.com>=
- wrote:
->>> Hi Yehuda,
->>>      I am starting work on RGW and have a few questions:
->>>
->>> * Why is the command 'user create' when I am sending '--subuser'. S=
-eems
->>> confusing.  Is there a reason why we are not to use 'subuser create=
-'?
->> A subuser needs to have the containing user in order to be created.
->> The 'user create' command generates ones. The order of things would =
-be
->> to create a user, then create a subuser for that user. By specifying
->> --subuser=3D.. on the user creation it should do both.
->>
->> [LP] Great, thank you
->>
->>> * If I use "user create --subuser", the JSON returned shows the ent=
-ry for
->>> "subusers" is empty.  What is subusers for? (This is related to the=
- previous
->>> question)
->> So I assume the subuser wasn't created?
->> The rgw user model follows the S3 user model which is a bit differen=
-t
->> from the swift one. In S3 there's basically a single tenant, multipl=
-e
->> users. With swift there are multiple tenants (originally referred to
->> as 'accounts'), each have different users that share a similar view =
-of
->> the system (e.g., share list of containers, etc.). The more natural
->> (although not perfect) mapping is by having an rgw user map to a swi=
-ft
->> account. That's why we needed to add a second level of identificatio=
-n,
->> the subuser.
->>
->> [LP] I will have to check why it is empty.
->>
->>
->>> * Where do I place the OpenStack Tenant information?
->> The tenant id should be the user name.
->>
->> [LP] Cool, thanks. So if the tenant is the user name in RGW, what is=
- the Swift user
->> map to?
-> It maps into the subuser.
->
-> Yehuda
->
->>> * Is there a document which describes how to setup RGW for OpenStac=
-k Swift?
->> Not that I'm aware of. Basically rgw is set to work with both S3 and
->> Swift out of the box. Here's how to integrate with keystone:
->> http://ceph.com/docs/master/radosgw/keystone/
->>
->>> * The radosgw-admin help screen does not explain which options to u=
-se for
->>> certain commands.  Is this something that we should fix?
->> We should certainly improve documentation. This can either go into t=
-he
->> man page, or a complete rework of the usage help.
->>
->>> * On page: http://ceph.com/docs/master/radosgw/swift/auth/ , clicki=
-ng on
->>> "see radosgw-admin" does not work.
->> I opened issue #9116.
->>
->>
->> Thanks,
->> Yehuda
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+  * Calamari
+  * Ceph client authentication to the Ceph cluster.
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I am purposefully avoiding anything to do with the internal
+service-to-service authentication/authorization system (that is, Cephx) for
+two reasons.  The first is that Cephx is specifically designed for Ceph's
+many-to-many environment, and the second is that it is sufficiently isolated
+that I don't believe it needs to be modified to work with new external
+authentication mechanisms.
+
+Below is a quick overview of my thoughts on this topic.
+
+
+Ceph and Calamari Authentication Expansion
+==========================================
+
+I'll keep this quick and simple.  It's a summary of what I've learned
+and where I'm headed on this topic.
+
+Adding LDAP Authentication to Calamari
+--------------------------------------
+
+  This should be easy, as the Django modules to do this already exist.  The
+  trick will be creating accounts in Django and mapping those to existing
+  LDAP accounts.  We can't just grant access to anyone who has a valid LDAP
+  account, so access control would still be handled by Django and LDAP would
+  be limited to authentication only.
+
+  I just need to test this to see how the pieces fall together.
+
+Adding Roles to Calamari
+------------------------
+
+  There was a discussion of setting up roles for Calamari, such that
+  different roles would have different levels of control over the Ceph
+  cluster.
+
+  Django already supports the concept, in a variety of ways.  The first step
+  here is to define sensible roles that will work within Django.  I have
+  seen a couple of proposals.  The simplest one would be a ReadOnly role and
+  a FullControl role.
+
+Adding Kerberos and/or LDAP Auth for Ceph Clients
+-------------------------------------------------
+
+  I have set up a FreeIPA server so that I can have something to test
+  against.  FreeIPA provides both LDAP and Kerberos authentication.
+
+  There are different opinions regarding the priority of LDAP vs. Kerberos.
+  I'll aim to get done first what I can get done first, and work from
+  there.
+
+  Right now, I have working LDAP authentication code using the simplest form
+  of LDAP authentication.  My next step is to ensure that the authentication
+  is encrypted.
+
+  Note that the FreeIPA folks, who are keenly interested in helping us out
+  on this project, are adising against trying to get LDAP auth working and
+  recommend going directly to their tools.  I am still open to providing
+  both mechanisms, assuming that LDAP auth can be made to work securely
+  without too much end-user overhead.
+
+FreeIPA and SSSD
+----------------
+
+  FreeIPA bundles LDAP and Kerberos support, and can integrate with Active
+  Directory.  Also, the folks who work on it are friends and
+  colleagues...folks I know fairly well.  They are interested in this
+  project, and I want to better understand how integrating with FreeIPA can
+  simplify authentication setup.  One key advantage of integrating with
+  FreeIPA is that FreeIPA already handles a lot of gnasty compatibility,
+  failover, and general complexity issues that people run into when trying
+  to make use of existing authentication systems.
+
+  SSSD is the client-side piece.  It maintains credentials in a secure
+  fashion, so that users don't have to re-authenticate every time they
+  connect to a new service (that uses the same authentication service).
+  Integrating with SSSD is a longer-term goal.
+
+Active Directory
+----------------
+
+  This is basically Kerberos or LDAP authentication, with some twists.
+  Microsoft, for instance, believes in case-insensitivity.  Not so for
+  standard Kerberos.  Once we have extended authentication working, we can
+  address the specifics of AD.  Again, FreeIPA may help us solve some of
+  this.
+
+Chris -)-----
