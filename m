@@ -1,67 +1,70 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Using erasure code plugins outside of an OSD
-Date: Thu, 14 Aug 2014 19:23:26 +0200
-Message-ID: <53ECF08E.3070507@dachary.org>
+From: Craig Lewis <clewis-04jk9TcbgGYP2IHM84UzcNBPR1lH4CV8@public.gmane.org>
+Subject: Translating a RadosGW object name into a filename on
+	disk
+Date: Thu, 14 Aug 2014 11:34:53 -0700
+Message-ID: <CADHZLBa+5dx+kojiSh+T7GmM_asCwhPTriTNr3ob2SUya+KFhw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="8PPhRw31pJepRC6icM27ogQtVPW01fSRs"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:59547 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S932172AbaHNRXd (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Aug 2014 13:23:33 -0400
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: David Zafman <david.zafman@inktank.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph Users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---8PPhRw31pJepRC6icM27ogQtVPW01fSRs
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+In my effort to learn more of the details of Ceph, I'm trying to
+figure out how to get from an object name in RadosGW, through the
+layers, down to the files on disk.
 
-Hi David,
+clewis@clewis-mac ~ $ s3cmd ls s3://cpltest/
+2014-08-13 23:02        14M  28dde9db15fdcb5a342493bc81f91151
+s3://cpltest/vmware-freebsd-tools.tar.gz
 
-You presumably want to load a plugin, similar to what
+Looking at the .rgw pool's contents tells me that the cpltest bucket
+is default.73886.55:
+root@dev-ceph0:/var/lib/ceph/osd/ceph-0/current# rados -p .rgw ls | grep cpltest
+cpltest
+.bucket.meta.cpltest:default.73886.55
 
-    https://github.com/ceph/ceph/blob/firefly/src/mon/OSDMonitor.cc#L3040=
-
-
-does. To use it the high level is to be found in
-
-    https://github.com/ceph/ceph/blob/master/src/osd/ECBackend.cc#L361
-
-which relies on a thin layer of utilities
-
-    https://github.com/ceph/ceph/blob/master/src/osd/ECUtil.cc
-
-That creates convenience functions that you may or may not need. All plug=
-ins implement the API:
-
-    https://github.com/ceph/ceph/blob/master/src/erasure-code/ErasureCode=
-Interface.h
-
-and you may not need more than that.
-
-Cheers
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
+The rados objects that belong to that bucket are:
+root@dev-ceph0:~# rados -p .rgw.buckets ls | grep default.73886.55
+default.73886.55__shadow__RpwwfOt2X-mhwU65Qa1OHDi--4OMGvQ_1
+default.73886.55__shadow__RpwwfOt2X-mhwU65Qa1OHDi--4OMGvQ_3
+default.73886.55_vmware-freebsd-tools.tar.gz
+default.73886.55__shadow__RpwwfOt2X-mhwU65Qa1OHDi--4OMGvQ_2
+default.73886.55__shadow__RpwwfOt2X-mhwU65Qa1OHDi--4OMGvQ_4
 
 
---8PPhRw31pJepRC6icM27ogQtVPW01fSRs
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+I know those shadow__RpwwfOt2X-mhwU65Qa1OHDi--4OMGvQ_ files are the
+rest of vmware-freebsd-tools.tar.gz.  I can infer that because this
+bucket only has a single file (and the sum of the sizes matches).
+With many files, I can't infer the link anymore.
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+How do I look up that link?
 
-iEYEARECAAYFAlPs8I8ACgkQ8dLMyEl6F22meACbBbB0PJxBgfi26Utr9pAwQOef
-QjgAniRPAvJW3UZ7wrlMD+EluV0B2o5V
-=2X3Z
------END PGP SIGNATURE-----
+I tried reading the src/rgw/rgw_rados.cc, but I'm getting lost.
 
---8PPhRw31pJepRC6icM27ogQtVPW01fSRs--
+
+
+My real goal is the reverse.  I recently repaired an inconsistent PG.
+The primary replica had the bad data, so I want to verify that the
+repaired object is correct.  I have a database that stores the SHA256
+of every object.  If I can get from the filename on disk back to an S3
+object, I can verify the file.  If it's bad, I can restore from the
+replicated zone.
+
+
+Aside from today's task, I think it's really handy to understand these
+low level details.  I know it's been handy in the past, when I had
+disk corruption under my PostgreSQL database.  Knowing (and
+practicing) ahead of time really saved me a lot of downtime then.
+
+
+Thanks for any pointers.
