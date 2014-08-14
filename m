@@ -1,66 +1,58 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: [PATCH -next] rbd: fix error return code in
- rbd_dev_device_setup()
-Date: Wed, 13 Aug 2014 20:50:31 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1408132050280.12544@cobra.newdream.net>
-References: <1407977768-15119-1-git-send-email-weiyj_lk@163.com> <53EC2207.1070409@ieee.org>
+From: nyao@cs.hku.hk
+Subject: A bug in FileStore::mount and A problem about XFS
+Date: Thu, 14 Aug 2014 12:07:42 +0800
+Message-ID: <20140814120742.86212cn7dlk8dy4g@intranet.cs.hku.hk>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain;
+ charset=GB2312;
+ DelSp="Yes";
+ format="flowed"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:58359 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752042AbaHNDuc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Aug 2014 23:50:32 -0400
-In-Reply-To: <53EC2207.1070409@ieee.org>
+Received: from mail.cs.hku.hk ([147.8.176.10]:38752 "EHLO mail.cs.hku.hk"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750839AbaHNENM (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 14 Aug 2014 00:13:12 -0400
+Received: from intranet.cs.hku.hk (intranet.cs.hku.hk [147.8.175.19])
+	by mail.cs.hku.hk (8.13.8+Sun/8.13.8) with ESMTP id s7E47kg5022566
+	for <ceph-devel@vger.kernel.org>; Thu, 14 Aug 2014 12:07:47 +0800 (HKT)
+Received: from intranet.cs.hku.hk (localhost.cs.hku.hk [127.0.0.1])
+	by intranet.cs.hku.hk (8.13.8+Sun/8.13.7) with ESMTP id s7E47k5I007059
+	for <ceph-devel@vger.kernel.org>; Thu, 14 Aug 2014 12:07:46 +0800 (HKT)
+Received: (from daemon@localhost)
+	by intranet.cs.hku.hk (8.13.8+Sun/8.13.8/Submit) id s7E47glh007058
+	for ceph-devel@vger.kernel.org; Thu, 14 Aug 2014 12:07:42 +0800 (HKT)
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@ieee.org>
-Cc: weiyj_lk@163.com, Yehuda Sadeh <yehuda@inktank.com>, Alex Elder <elder@kernel.org>, Ilya Dryomov <ilya.dryomov@inktank.com>, Wei Yongjun <yongjun_wei@trendmicro.com.cn>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Applied.  Thanks!
 
-On Wed, 13 Aug 2014, Alex Elder wrote:
+Dear developers,
 
-> On 08/13/2014 07:56 PM, weiyj_lk@163.com wrote:
-> > From: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
-> > 
-> > Fix to return -ENOMEM from the workqueue alloc error handling
-> > case instead of 0, as done elsewhere in this function.
-> > 
-> > Signed-off-by: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
-> 
-> This looks good to me.  Sorry I missed this when I first
-> reviewed the workqueue code.
-> 
-> Reviewed-by: Alex Elder <elder@linaro.org>
-> 
-> 
-> > ---
-> >   drivers/block/rbd.c | 5 +++--
-> >   1 file changed, 3 insertions(+), 2 deletions(-)
-> > 
-> > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> > index 623c841..f3be022 100644
-> > --- a/drivers/block/rbd.c
-> > +++ b/drivers/block/rbd.c
-> > @@ -5088,8 +5087,10 @@ static int rbd_dev_device_setup(struct rbd_device
-> > *rbd_dev)
-> >   	set_disk_ro(rbd_dev->disk, rbd_dev->mapping.read_only);
-> > 
-> >   	rbd_dev->rq_wq = alloc_workqueue(rbd_dev->disk->disk_name, 0, 0);
-> > -	if (!rbd_dev->rq_wq)
-> > +	if (!rbd_dev->rq_wq) {
-> > +		ret = -ENOMEM;
-> >   		goto err_out_mapping;
-> > +	}
-> > 
-> >   	ret = rbd_bus_add_dev(rbd_dev);
-> >   	if (ret)
-> > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > 
-> 
-> 
+I find a bug in FileStore::mount() function. If we use raw partitial  
+as a Journal disk, like /dev/sda1, then it will cause a error when  
+setting the parameters "m_filestore_max_inline_xattr_size" and  
+"m_filestore_max_inline_xattrs".
+
+First of all, when creating the FileStore, it calls the mount() and  
+detect fs_type as XFS, so it will check  
+m_filestore_replica_fadvise(true default) and set it to false. At the  
+same time, m_fs_tpye = FS_TYPE_XFS.
+
+However, when create JournalStore, it also enters mount() function and  
+detect fs_type. Unfourtuanlly, this time, m_filestore_replica_fadvise  
+= false so that it cannot update m_fs_type = FS_TYPE_XFS. Instread, it  
+will sets to m_fs_tpye = FS_TYPE_OTHER. This bug is quite easy to  
+repair.
+
+
+By the way, I wanna ask another question about XFS, I find that if I  
+use ceph cluster heavily for about 2-3 hour. XFS always wakes up a  
+kernel thread (xfsaild) to deal with its inodes reading and writing.  
+This will impact the performance a lot and make the cluster's  
+throughput drop heavily. So how to solve this problem and why this  
+occurs after running a heavily read, write operation after 2-3 hour.
+
+Best Regards,
+Neal Yao
