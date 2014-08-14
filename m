@@ -1,187 +1,105 @@
 From: Luis Pabon <lpabon@redhat.com>
-Subject: Re: object versioning
-Date: Thu, 14 Aug 2014 11:51:53 -0400 (EDT)
-Message-ID: <959221070.7274453.1408031513918.JavaMail.zimbra@redhat.com>
-References: <CABBk=J9yTxfXENN8X7VUaK_cbJZ71UCBxc4pnAsMHA7-XkJriw@mail.gmail.com>
+Subject: Re: RGW Swift questions
+Date: Thu, 14 Aug 2014 12:00:20 -0400 (EDT)
+Message-ID: <368555473.7277905.1408032020541.JavaMail.zimbra@redhat.com>
+References: <53ECC736.2090202@redhat.com> <CABBk=J9KxxYNeZNTpLbRRNbd0ApqdSojbh-f3R7iuuF=FvfoGQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx4-phx2.redhat.com ([209.132.183.25]:46896 "EHLO
-	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754898AbaHNPvz (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Aug 2014 11:51:55 -0400
-In-Reply-To: <CABBk=J9yTxfXENN8X7VUaK_cbJZ71UCBxc4pnAsMHA7-XkJriw@mail.gmail.com>
+Received: from mx6-phx2.redhat.com ([209.132.183.39]:38425 "EHLO
+	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752912AbaHNQAV convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Aug 2014 12:00:21 -0400
+In-Reply-To: <CABBk=J9KxxYNeZNTpLbRRNbd0ApqdSojbh-f3R7iuuF=FvfoGQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Yehuda Sadeh <yehuda@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>, Samuel Just <sam.just@inktank.com>, Thiago da Silva <tdasilva@redhat.com>, Prashanth Pai <ppai@redhat.com>
+Cc: ceph-devel@vger.kernel.org
 
-Adding Swiftonfile developers to see if they can help.
-
-- Luis
+Thanks for the quick turnaround Yehuda.  I have just a few more comment=
+s below:
 
 ----- Original Message -----
-From: "Yehuda Sadeh" <yehuda@redhat.com>
-To: "ceph-devel" <ceph-devel@vger.kernel.org>
-Cc: "Sage Weil" <sage@redhat.com>, "Samuel Just" <sam.just@inktank.com>
-Sent: Wednesday, August 13, 2014 8:00:37 PM
-Subject: object versioning
+=46rom: "Yehuda Sadeh" <yehuda@redhat.com>
+To: "Luis Pab=C3=B3n" <lpabon@redhat.com>
+Cc: ceph-devel@vger.kernel.org
+Sent: Thursday, August 14, 2014 11:02:06 AM
+Subject: Re: RGW Swift questions
 
-One of the next features that we're working on is the long due object
-versioning. This basically allows keeping old versions of objects
-inside buckets, even if user has removed or overwritten them. Any
-object instance is immutable. and object can then be fetched by the
-version (instance) id of that object.
-When removing the object without specifying a version, a new deletion
-marker is created. It is, however, possible to remove a specific
-object version, and in this case the version is not accessible
-anymore. What complicates things is that if the current object's
-version (the one that is accessed when accessing the object without
-specifying a version) is removed, then the object will then point at
-its previous version. Permissions are set on the object version level.
+On Thu, Aug 14, 2014 at 7:27 AM, Luis Pab=C3=B3n <lpabon@redhat.com> wr=
+ote:
+>
+> Hi Yehuda,
+>     I am starting work on RGW and have a few questions:
+>
+> * Why is the command 'user create' when I am sending '--subuser'. See=
+ms
+> confusing.  Is there a reason why we are not to use 'subuser create'?
 
-Another requirement is the ability to list all objects and versions of
-the objects. This means that when listing objects we either need to
-list only the current objects, or both the current objects and their
-respective versions.
-One thing to note is that object versioning needs to be switched on
-for the bucket for the feature to be activated, and once it's switched
-on it can only be suspended. This means that newly created objects
-will not be versioned, but old versions will still be accessible.
+A subuser needs to have the containing user in order to be created.
+The 'user create' command generates ones. The order of things would be
+to create a user, then create a subuser for that user. By specifying
+--subuser=3D.. on the user creation it should do both.
 
-Let's sum up the functionality:
- - ability to list objects and versions
- - ability to read specific object version
- - ability to remove a specific object version (*)
- - object creation / overwrite creates a new object version, object
-points at new instance
- - object removal does not remove object instance, creates a deletion marker
- - (*) removal of the current object version rolls back object to
-point at previous object version
- - permissions affect the object version and can be set on the versions
+[LP] Great, thank you
 
-Now, considering this functionality, it seems that we need to deal
-with 3 different entities:
- - bucket index
- - object instances (versions)
- - object logical head (olh)
+> * If I use "user create --subuser", the JSON returned shows the entry=
+ for
+> "subusers" is empty.  What is subusers for? (This is related to the p=
+revious
+> question)
 
-The first two can be mapped nicely into the already existing
-structures. The existing bucket index will be extended to keep the
-list of versions, and our current rgw objects will be used to handle
-the object instances, as they serve the same function.
-One of the options that we can consider for the object logical head is
-also to use a regular object that will just have a copy of the
-appropriate instance manifest. It doesn't seem that this will function
-as needed, as it doesn't satisfy the last requirement (permissions are
-set at the version level). What we do need to have is some sort of a
-soft link that will be used to point at the appropriate object
-instance.
+So I assume the subuser wasn't created?
+The rgw user model follows the S3 user model which is a bit different
+from the swift one. In S3 there's basically a single tenant, multiple
+users. With swift there are multiple tenants (originally referred to
+as 'accounts'), each have different users that share a similar view of
+the system (e.g., share list of containers, etc.). The more natural
+(although not perfect) mapping is by having an rgw user map to a swift
+account. That's why we needed to add a second level of identification,
+the subuser.
 
-We had internal discussions on how to make everything work together.
-There are a few things that we need to be careful about. We need to
-make sure that the bucket index listing reflects the status of the
-actual objects. When the olh points at a specific version, we
-shouldn't show a different view when listing the objects. This gets
-even more complicated when removing an object version that requires
-olh change, as we have 3 different entities that we need to sync. Note
-that rados does not have multi-object transactions (for now), and we
-traditionally avoided locking for rgw object operations.
-
-The current scheme is that we update the bucket index using a 2 phase
-commit, and it follows up on the objects state. So when adding /
-removing an object, we first tell the bucket index to 'prepare' for
-the operation, then do the operation, and eventually we let the bucket
-index know about the completion. For ordering we rely on the pg
-versioning system that gives us insight into the timeline, so that
-when two concurrent operations happen on the same object the bucket
-index can figure out who won and who is dead.
-This system as it is doesn't really work with versioning as we have
-both the olh, and the object instances. This is one of the solutions
-that we came up with:
-
- - The bucket index will be the source of the truth
- - The bucket index will serve as an operational log for olh operations
-
-The bucket index will index every object instance in reverse order
-(from new to old). The bucket index will keep entries for deletion
-markers.
-The bucket index will also keep operations journal for olh
-modifications. Each operation in this journal will have an id that
-will be increased monotonically, and that will be tied into current
-olh version. The olh will be modified using idempotent operations that
-will be subject to having its current version smaller than the
-operation id.
-The journal will be used for keeping order, and the entries in the
-journal will serve as a blueprint that the gateways will need to
-follow when applying changes. In order to ensure that operations that
-needed to be complete were done, we'll mark the olh before going to
-the bucket index, so that if the gateway died before completing the
-operation, next time we try to access the object we'll know that we
-need to go to the bucket index and complete the operation.
-
-Things will then work like this:
-
-* object creation
-
-1. Create object instance
-2. Mark olh that it's about to be modified
-3. Update bucket index about new object instance
-4. Read bucket index object op journal
-
-Note that the journal should have at this point an entry that says
-'point olh to specific object version, subject to olh is at version
-X'.
-
-5. Apply journal ops
-6. Trim journal, unmark olh
-
-* object removal (olh)
-
-1. Mark olh that it's about to be modified
-2. Update bucket index about the new deletion marker
-3. Read bucket index object op journal
-
-The journal entry should say something like 'mark olh as removed,
-subject to olh is at version X'
-
-4. Apply ops
-5. Trim journal, unmark olh
-
-Another option is to actually remove the olh, but in this case we'll
-lose the olh versioning. We can in that case use the object
-non-existent state as a check, but that will not be enough as there
-are some corner cases where we could end up with the olh pointing at
-the wrong object.
-
-* object version removal
-
-1. Mark olh as it will potentially be modified
-2. Update bucket index about object instance removal
-3. Read bucket index op journal
-4. apply ops journal ...
-Now the journal might just say something like 'remove object
-instance', which means that the olh was pointing at a different object
-version. The more interesting case is when the olh pointing at this
-specific object version. In this case the journal will say something
-like 'first point the olh at version V2, subject to olh is at version
-X. Now, remove object instance V1'.
-
-5. Trim journal, unmark olh
+[LP] I will have to check why it is empty.
 
 
-Note about olh marking: The olh mark will create an attr on the olh
-that will have an id and a timestamp. There could be multiple marks on
-the olh, and the marks should have some expiration, so that operations
-that did not really start would be removed after a while.
+> * Where do I place the OpenStack Tenant information?
+The tenant id should be the user name.
 
+[LP] Cool, thanks. So if the tenant is the user name in RGW, what is th=
+e Swift user
+map to?
 
-Let me know if that makes sense, or if you have any questions.
+> * Is there a document which describes how to setup RGW for OpenStack =
+Swift?
+
+Not that I'm aware of. Basically rgw is set to work with both S3 and
+Swift out of the box. Here's how to integrate with keystone:
+http://ceph.com/docs/master/radosgw/keystone/
+
+> * The radosgw-admin help screen does not explain which options to use=
+ for
+> certain commands.  Is this something that we should fix?
+
+We should certainly improve documentation. This can either go into the
+man page, or a complete rework of the usage help.
+
+> * On page: http://ceph.com/docs/master/radosgw/swift/auth/ , clicking=
+ on
+> "see radosgw-admin" does not work.
+
+I opened issue #9116.
+
 
 Thanks,
 Yehuda
 --
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
 the body of a message to majordomo@vger.kernel.org
 More majordomo info at  http://vger.kernel.org/majordomo-info.html
