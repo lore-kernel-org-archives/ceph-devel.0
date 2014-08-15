@@ -1,26 +1,46 @@
-From: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>
-Subject: ISA EC Table Cache
-Date: Fri, 15 Aug 2014 09:48:03 +0000
-Message-ID: <3472A07E6605974CBC9BC573F1BC02E4AE77C2DE@CERNXCHG43.cern.ch>
+From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+Subject: Re: Add a converter in OSDMap to split the ruleset into rule
+Date: Fri, 15 Aug 2014 09:52:24 +0000
+Message-ID: <6F7727D7-3C44-4560-A102-457F30A29F10@intel.com>
+References: <53EDD0C8.5020007@dachary.org> <53EDD238.4020602@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cernmx11.cern.ch ([188.184.36.50]:48635 "EHLO CERNMX11.cern.ch"
+Received: from mga09.intel.com ([134.134.136.24]:28875 "EHLO mga09.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754230AbaHOJsG convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 15 Aug 2014 05:48:06 -0400
-Content-Language: en-GB
+	id S1752316AbaHOJwj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 15 Aug 2014 05:52:39 -0400
+In-Reply-To: <53EDD238.4020602@dachary.org>
+Content-Language: zh-CN
+Content-ID: <015E8A6CC5920D4D98242FE857A74D57@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Loic, 
-as discuess I have prepared the pull request to add the shared table cache. It is rebased today against matser.
-
-The pull request is here: https://github.com/ceph/ceph/pull/2262
-
-I am not around for 10 days, so if you see issues or want changes, you can just postpone it until I am back or do the required changes.
-
-Cheers Andreas.
-
+DQoNCg0KDQrlnKggMjAxNC04LTE177yMMTc6MjbvvIwiTG9pYyBEYWNoYXJ5IiA8bG9pY0BkYWNo
+YXJ5Lm9yZz4g5YaZ6YGT77yaDQoNCj4gDQo+IA0KPiBPbiAxNS8wOC8yMDE0IDExOjIwLCBMb2lj
+IERhY2hhcnkgd3JvdGU6DQo+PiBIaSwNCj4+IA0KPj4gSSd2ZSBhZGRlZCBhIGZldyBjb21tZW50
+cyBpbmxpbmUgYXQgaHR0cHM6Ly9naXRodWIuY29tL3hpYW94aWNoZW4vY2VwaC9jb21taXQvMzU0
+YzA5MTMxYTY0YWMxZTFhNjdjNzE3OTRkMWEzYmFiODMzNGNhOCAuIENvdWxkIHlvdSBleHBsYWlu
+IGluIHBzZXVkbyBjb2RlLCBpbiB0aGUgY29tbWl0IG1lc3NhZ2UsIHdoYXQgdXBncmFkZSBzdHJh
+dGVneSB5b3UgYXJlIHRyeWluZyB0byBpbXBsZW1lbnQgDQoNClllcywgd2lsbCBkbyBzby4NCj4+
+IA0KPj4gRm9yIHRlc3RpbmcgcHVycG9zZXMsIEkgd291bGQgY3JlYXRlIGJvcmRlciBjYXNlcyAo
+aS5lLiBoYXZpbmcgYSBydWxlIHdpdGggcnVsZWlkICE9IHJ1bGVzZXQpIGluIGEgc2NyaXB0IHNp
+bWlsYXIgdG8gDQo+PiANCj4+ICAgaHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2VwaC9ibG9iL2Zp
+cmVmbHkvc3JjL3Rlc3QvbW9uL29zZC1jcnVzaC5zaA0KPj4gDQo+PiBhbmQgdGhlbiB0cmlnZ2Vy
+IHRoZSB1cGdyYWRlIGFuZCBjaGVjayB0aGF0IGl0IGVuZm9yY2VzIHRoZSBjb25zdHJhaW50Lg0K
+PiANCj4gV2hpY2ggaXMgZXhhY3RseSB3aGF0IHlvdSBkaWQgOy0pDQo+IA0KPj4gDQo+PiBUaGVy
+ZSBpcyBhIG5lZWQgZm9yIGEgY2hhbmdlIG5lYXIgDQo+PiANCj4+ICAgaHR0cHM6Ly9naXRodWIu
+Y29tL2NlcGgvY2VwaC9ibG9iL21hc3Rlci9zcmMvY3J1c2gvQ3J1c2hXcmFwcGVyLmNjI0w3ODcN
+Cj4+IA0KPj4gc28gdGhhdCBpdCBkb2VzIG5vdCBwaWNrIGEgcnVsZXNldCBkaWZmZXJlbnQgZnJv
+bSB0aGUgcnVsZWlkLiBNYXliZSB0aGF0IGNvdWxkIGJlIGEgZmlyc3Qgc3RlcCBpbiB0aGUgcmln
+aHQgZGlyZWN0aW9uID8gSSBtZWFuLCBub3QgbW9kaWZ5aW5nIHRoZSBleGlzdGluZyBtYXBzIHll
+dCwganVzdCBlbmZvcmNpbmcgcnVsZWlkID09IHJ1bGVzZXQgYnkgY2hhbmdpbmcgdGhlIGNvZGUu
+IFNvIHRoYXQgYSBuZXcgY2x1c3RlciBkb2VzIG5vdCBzdWZmZXIgZnJvbSB0aGlzIGluY29uc2lz
+dGVuY3kuDQo+PiANCg0Kb3JpZ2luYWxseSBJIHBsYW4gdG8gZG8gdGhpcyBhZnRlciB0aGUgY29u
+dmVydGVyLCBidXQgaXQgaXMgYSBzaW1wbGUgY2hhbmdlLCB3aWxsIG1ha2UgaXQgcmlnaHQgbm93
+LiANCg0KVGhhbmtzIGEgbG90IGZvciB5b3VyIHJldmlldyBhbmQgd2lsbCBpc3N1ZSBhIHB1bGwg
+cmVxdWVzdCBhZnRlciByZWZpbmUgdGhpcyBwYXRjaA0KPj4gQ2hlZXJzDQo+IA0KPiAtLSANCj4g
+TG/Dr2MgRGFjaGFyeSwgQXJ0aXNhbiBMb2dpY2llbCBMaWJyZQ0KPiANCg==
