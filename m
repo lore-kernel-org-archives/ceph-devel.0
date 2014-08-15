@@ -1,22 +1,34 @@
-From: Guang Yang <yguang11@outlook.com>
+From: Huamin Chen <hchen@redhat.com>
 Subject: Re: assert failure
-Date: Sat, 16 Aug 2014 02:23:12 +0800
-Message-ID: <BLU436-SMTP20F2D351F8BDE3C60C9E39DFE90@phx.gbl>
-References: <1229494305.20638287.1407961759048.JavaMail.zimbra@redhat.com> <BLU437-SMTP55D87E766F90EFADF2BDA0DFE80@phx.gbl> <2101679920.20989042.1408029715043.JavaMail.zimbra@redhat.com>
-Mime-Version: 1.0 (Mac OS X Mail 7.3 \(1878.6\))
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Date: Fri, 15 Aug 2014 17:36:51 -0400 (EDT)
+Message-ID: <178229523.21856716.1408138611841.JavaMail.zimbra@redhat.com>
+References: <1229494305.20638287.1407961759048.JavaMail.zimbra@redhat.com> <BLU437-SMTP55D87E766F90EFADF2BDA0DFE80@phx.gbl> <2101679920.20989042.1408029715043.JavaMail.zimbra@redhat.com> <BLU436-SMTP20F2D351F8BDE3C60C9E39DFE90@phx.gbl>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from blu004-omc4s28.hotmail.com ([65.55.111.167]:63433 "EHLO
-	BLU004-OMC4S28.hotmail.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751176AbaHOSXT convert rfc822-to-8bit
-	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 15 Aug 2014 14:23:19 -0400
-In-Reply-To: <2101679920.20989042.1408029715043.JavaMail.zimbra@redhat.com>
+Received: from mx4-phx2.redhat.com ([209.132.183.25]:57324 "EHLO
+	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751109AbaHOVgx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 15 Aug 2014 17:36:53 -0400
+In-Reply-To: <BLU436-SMTP20F2D351F8BDE3C60C9E39DFE90@phx.gbl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Huamin Chen <hchen@redhat.com>
+To: Guang Yang <yguang11@outlook.com>
 Cc: Ceph-devel <ceph-devel@vger.kernel.org>
+
+Thanks. I was running a single node ceph fs cluster on a VM. Each time the VM is created, it downloads the latest bits and runs unit tests. There are many mount and unmount during the tests.
+This issue can be reliably reproduced in one of these tests.
+
+The test info can be found https://github.com/rootfs/tachyon/tree/wip-ceph/vagrant/ceph/README.md
+
+
+----- Original Message -----
+From: "Guang Yang" <yguang11@outlook.com>
+To: "Huamin Chen" <hchen@redhat.com>
+Cc: "Ceph-devel" <ceph-devel@vger.kernel.org>
+Sent: Friday, August 15, 2014 2:23:12 PM
+Subject: Re: assert failure
 
 + ceph-devel.
 
