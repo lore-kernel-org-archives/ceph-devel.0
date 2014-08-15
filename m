@@ -1,119 +1,80 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: Import a pg into an already down osd causes it to crash on
- startup
-Date: Fri, 15 Aug 2014 11:05:19 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1408151102290.32572@cobra.newdream.net>
-References: <CCEA212A-9E44-4D22-A764-8AD5C15E7A76@inktank.com>
-Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1292573385-1408125919=:32572"
+From: Guang Yang <yguang11@outlook.com>
+Subject: Re: assert failure
+Date: Sat, 16 Aug 2014 02:23:12 +0800
+Message-ID: <BLU436-SMTP20F2D351F8BDE3C60C9E39DFE90@phx.gbl>
+References: <1229494305.20638287.1407961759048.JavaMail.zimbra@redhat.com> <BLU437-SMTP55D87E766F90EFADF2BDA0DFE80@phx.gbl> <2101679920.20989042.1408029715043.JavaMail.zimbra@redhat.com>
+Mime-Version: 1.0 (Mac OS X Mail 7.3 \(1878.6\))
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:40686 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751673AbaHOSFU (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 15 Aug 2014 14:05:20 -0400
-In-Reply-To: <CCEA212A-9E44-4D22-A764-8AD5C15E7A76@inktank.com>
+Received: from blu004-omc4s28.hotmail.com ([65.55.111.167]:63433 "EHLO
+	BLU004-OMC4S28.hotmail.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751176AbaHOSXT convert rfc822-to-8bit
+	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 15 Aug 2014 14:23:19 -0400
+In-Reply-To: <2101679920.20989042.1408029715043.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: David Zafman <david.zafman@inktank.com>
-Cc: Samuel Just <sam.just@inktank.com>, ceph-devel@vger.kernel.org
+To: Huamin Chen <hchen@redhat.com>
+Cc: Ceph-devel <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
++ ceph-devel.
 
---557981400-1292573385-1408125919=:32572
-Content-Type: TEXT/PLAIN; charset=windows-1252
-Content-Transfer-Encoding: quoted-printable
+Hi Huamin,
+Did you upgrade the entire cluster to v0.80.5? If I remember correctly, if its peer has the old version, it could crash the new version as well.
 
-[switching to ceph-devel]
+Thanks,
+Guang
 
-On Fri, 15 Aug 2014, David Zafman wrote:
->=20
-> The way my test works, is that when an osd goes down we export a pg fro=
-m it.
-> =A0Then we look to see if other OSDs are already down to pick from. =A0=
-Since we
-> are moving a pg from an OSD that has been up longer than the destinatio=
-n
-> OSD, that one doesn?t have the maps that the newly imported pg needs.
->=20
-> In load_pgs() the get_map() called here asserts:
->=20
-> =A0 =A0 dout(10) << "pgid " << pgid << " coll " << coll_t(pgid) << dend=
-l;
-> =A0 =A0 bufferlist bl;
-> =A0 =A0 epoch_t map_epoch =3D PG::peek_map_epoch(store, coll_t(pgid),
-> service.infos_oid, &bl);
->=20
-> =A0 =A0 PG *pg =3D _open_lock_pg(map_epoch =3D=3D 0 ? osdmap :
-> service.get_map(map_epoch), pgid);
->=20
-> =A0 OSDMapRef get_map(epoch_t e) {
-> =A0 =A0 OSDMapRef ret(try_get_map(e));
-> =A0 =A0 assert(ret);
-> =A0 =A0 return ret;
-> =A0 }
->=20
-> osd-3 log
-> =A0 =A0 -8> 2014-08-15 10:40:08.516025 7ff2f931d7a0 10 osd.3 61 pgid 1.=
-10 coll
-> 1.10_head
-> =A0 =A0 -7> 2014-08-15 10:40:08.516034 7ff2f931d7a0 15
-> filestore(/var/lib/ceph/osd/ceph-3) collection_getattr
-> /var/lib/ceph/osd/ceph-3/current/1.10_head 'info'
-> =A0 =A0 -6> 2014-08-15 10:40:08.516048 7ff2f931d7a0 10
-> filestore(/var/lib/ceph/osd/ceph-3) collection_getattr
-> /var/lib/ceph/osd/ceph-3/current/1.10_head 'info' =3D 1
-> =A0 =A0 -5> 2014-08-15 10:40:08.516056 7ff2f931d7a0 15
-> filestore(/var/lib/ceph/osd/ceph-3) omap_get_values
-> meta/16ef7597/infos/head//-1
-> =A0 =A0 -4> 2014-08-15 10:40:08.516111 7ff2f931d7a0 20 osd.3 0 get_map =
-77 -
-> loading and decoding 0x3aea400
-> =A0 =A0 -3> 2014-08-15 10:40:08.516120 7ff2f931d7a0 15
-> filestore(/var/lib/ceph/osd/ceph-3) read meta/64173f2c/osdmap.77/0//-1 =
-0~0
-> =A0 =A0 -2> 2014-08-15 10:40:08.516165 7ff2f931d7a0 10
-> filestore(/var/lib/ceph/osd/ceph-3) error opening file
-> /var/lib/ceph/osd/ceph-3/current/meta/osdmap.77__0_64173F2C__none with
-> flags=3D2: (2) No such file or directory
-> =A0 =A0 -1> 2014-08-15 10:40:08.516246 7ff2f931d7a0 10
-> filestore(/var/lib/ceph/osd/ceph-3)
-> FileStore::read(meta/64173f2c/osdmap.77/0//-1) open error: (2) No such =
-file
-> or directory
-> =A0 =A0 =A00> 2014-08-15 10:40:08.517093 7ff2f931d7a0 -1 osd/OSD.h: In =
-function
-> 'OSDMapRef OSDService::get_map(epoch_t)' thread 7ff2f931d7a0 time 2014-=
-08-15
-> 10:40:08.516268
-> osd/OSD.h: 729: FAILED assert(ret)
->=20
-> =A0ceph version 0.83-731-g50e1ed0 (50e1ed04a1a48d653f11829fdf7e0f3954a2=
-4f97)
-> =A01: (OSD::load_pgs()+0x23b1) [0x660551]
-> =A02: (OSD::init()+0x19d5) [0x663145]
-> =A03: (main()+0x35ec) [0x6019fc]
-> =A04: (__libc_start_main()+0xfd) [0x379ae1ed1d]
-> =A05: ceph-osd() [0x5fe059]
-> =A0NOTE: a copy of the executable, or `objdump -rdS <executable>` is ne=
-eded to
-> interpret this.
+On Aug 14, 2014, at 11:21 PM, Huamin Chen <hchen@redhat.com> wrote:
 
-Maybe we also need a export and import maps functions.  Then there would=20
-be a check on import that the osd has at least the map that the PG needs.=
- =20
-And on OSD startup, the existing code in the OSD will (I think) get all o=
-f=20
-the PGs to consume the new maps if they are present.
+> Bad news, still there ...
+> msg/Pipe.cc: In function 'int Pipe::connect()' thread 7f30c4511700 time 2014-08-14 15:16:44.659312
+> msg/Pipe.cc: 1080: FAILED assert(m)
+> ceph version 0.80.5 (38b73c67d375a2552d8ed67843c8a65c2c0feba6)
+> 1: (Pipe::connect()+0x3d0c) [0x7f327552a2ac]
+> 2: (Pipe::writer()+0x9f3) [0x7f327552aff3]
+> 3: (Pipe::Writer::entry()+0xd) [0x7f327553748d]
+> 4: (()+0x79d1) [0x7f32953449d1]
+> 5: (clone()+0x6d) [0x7f3294c89b5d]
+> NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
+> terminate called after throwing an instance of 'ceph::FailedAssertion'
+> 
+> Attached please find all related logs
+> 
+> ----- Original Message -----
+> From: "Guang Yang" <yguang11@outlook.com>
+> To: "Huamin Chen" <hchen@redhat.com>
+> Cc: ceph-devel@vger.kernel.org
+> Sent: Wednesday, August 13, 2014 10:39:10 PM
+> Subject: Re: assert failure
+> 
+> Hi Huamin,
+> At least one known issue in 0.80.1 with the same failing pattern has been fixed in the latest 0.80.4 release of firefly. Here is the tracking ticket - http://tracker.ceph.com/issues/8232.
+> 
+> Can you compare the log snippets from within the bug and see if they are the same issue?
+> 
+> Thanks,
+> Guang
+> 
+> On Aug 14, 2014, at 4:29 AM, Huamin Chen <hchen@redhat.com> wrote:
+> 
+>> Is the following assert failure an known issue?
+>> 
+>> msg/Pipe.cc: In function 'int Pipe::connect()' thread 7fed3d2dd700 time 2014-08-13 16:26:06.039799
+>> msg/Pipe.cc: 1070: FAILED assert(m)
+>> ceph version 0.80.1 (a38fe1169b6d2ac98b427334c12d7cf81f809b74)
+>> 1: (Pipe::connect()+0x390e) [0x7feee89cf99e]
+>> 2: (Pipe::writer()+0x511) [0x7feee89d0fd1]
+>> 3: (Pipe::Writer::entry()+0xd) [0x7feee89d5d0d]
+>> 4: (()+0x7df3) [0x7fef336cadf3]
+>> 5: (clone()+0x6d) [0x7fef32fe63dd]
+>> NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> 
+> 
+> <ceph-error-log.tgz>
 
-The main challenge would then be to make sure that we export=20
-enough maps with the PG that the import will succeed (so we don't have to=
-=20
-retry or something).  Maybe the thrasher would grab the current epoch eac=
-h=20
-time it starts a new episode of thrashing and always export maps back to=20
-that point (when we were last active+clean) to ensure it's enough ...
-
-sage
-
---557981400-1292573385-1408125919=:32572--
