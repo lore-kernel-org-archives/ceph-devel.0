@@ -1,293 +1,366 @@
-From: Yehuda Sadeh <yehuda@redhat.com>
-Subject: Re: object versioning
-Date: Thu, 14 Aug 2014 13:16:48 -0700
-Message-ID: <CABBk=J-qoG6CJoQGCMmjJo0nXGCcWi8HcF4rN+S237vWzg-S5w@mail.gmail.com>
-References: <CABBk=J9yTxfXENN8X7VUaK_cbJZ71UCBxc4pnAsMHA7-XkJriw@mail.gmail.com>
-	<alpine.DEB.2.00.1408140917300.32572@cobra.newdream.net>
+From: "Shu, Xinxin" <xinxin.shu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: Re: Tracking the system calls for OSD write
+Date: Fri, 15 Aug 2014 01:27:50 +0000
+Message-ID: <75674D092A819E4189E91166C74CB90D01421D27@shsmsx102.ccr.corp.intel.com>
+References: <EEA8A9BCB323504A9C651920CAD4944B73F62946@ORSMSX102.amr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f182.google.com ([209.85.213.182]:43755 "EHLO
-	mail-ig0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754101AbaHNUQt (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Aug 2014 16:16:49 -0400
-Received: by mail-ig0-f182.google.com with SMTP id c1so3161igq.9
-        for <ceph-devel@vger.kernel.org>; Thu, 14 Aug 2014 13:16:48 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1408140917300.32572@cobra.newdream.net>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Samuel Just <sam.just@inktank.com>
+Content-Type: multipart/mixed; boundary="===============1035564675=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <EEA8A9BCB323504A9C651920CAD4944B73F62946-P5GAC/sN6hlcIJlls4ac1rfspsVTdybXVpNB7YpNyf8@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: "Sudarsan, Rajesh" <rajesh.sudarsan-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Thu, Aug 14, 2014 at 11:51 AM, Sage Weil <sweil@redhat.com> wrote:
-> On Wed, 13 Aug 2014, Yehuda Sadeh wrote:
->> One of the next features that we're working on is the long due object
->> versioning. This basically allows keeping old versions of objects
->> inside buckets, even if user has removed or overwritten them. Any
->> object instance is immutable. and object can then be fetched by the
->> version (instance) id of that object.
->> When removing the object without specifying a version, a new deletion
->> marker is created. It is, however, possible to remove a specific
->> object version, and in this case the version is not accessible
->> anymore. What complicates things is that if the current object's
->> version (the one that is accessed when accessing the object without
->> specifying a version) is removed, then the object will then point at
->> its previous version. Permissions are set on the object version level.
->>
->> Another requirement is the ability to list all objects and versions of
->> the objects. This means that when listing objects we either need to
->> list only the current objects, or both the current objects and their
->> respective versions.
->> One thing to note is that object versioning needs to be switched on
->> for the bucket for the feature to be activated, and once it's switched
->> on it can only be suspended. This means that newly created objects
->> will not be versioned, but old versions will still be accessible.
->>
->> Let's sum up the functionality:
->>  - ability to list objects and versions
->
-> Is this actually two things?
->
->  1- The regular bucket list will include all versions of all objects.
->  2- A new operation will list all version of a given object.
->
-> Or would you just specify the prefix to be the object name and do the
-> bucket list to get all versions of object foo?
+--===============1035564675==
+Content-Language: en-US
+Content-Type: multipart/alternative;
+	boundary="_000_75674D092A819E4189E91166C74CB90D01421D27shsmsx102ccrcor_"
 
-With S3 there's no request for a specific object's versions. There's a
-request that works at the bucket level, similar to regular bucket
-listing. So it's just one thing.
+--_000_75674D092A819E4189E91166C74CB90D01421D27shsmsx102ccrcor_
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 
->
->>  - ability to read specific object version
->>  - ability to remove a specific object version (*)
->>  - object creation / overwrite creates a new object version, object
->> points at new instance
->>  - object removal does not remove object instance, creates a deletion marker
->>  - (*) removal of the current object version rolls back object to
->> point at previous object version
->>  - permissions affect the object version and can be set on the versions
->
-> Throwing in a couple of goals here too:
->
->  - a GET can still be serviced by going directly to librados objects,
-> without consulting an index (and breaking read-side bucket scalability)
->  - a bucket listing is still reasonably efficient (normally performed by
-> consulting the index object only).
->
->> Now, considering this functionality, it seems that we need to deal
->> with 3 different entities:
->>  - bucket index
->>  - object instances (versions)
->>  - object logical head (olh)
->>
->> The first two can be mapped nicely into the already existing
->> structures. The existing bucket index will be extended to keep the
->> list of versions, and our current rgw objects will be used to handle
->> the object instances, as they serve the same function.
->
-> I think there is one differnce, though: before the head would be
-> addressible by the object name, whereas here it is object name +
-> tag/version... right?  So that the heads don't collide with other
-> object versions.
+The system call is invoked in FileStore::_do_transaction().
 
-This is correct. The internal object mechanics will work the same, the
-object naming scheme will be different.
+Cheers,
+xinxin
 
->
->> One of the options that we can consider for the object logical head is
->> also to use a regular object that will just have a copy of the
->> appropriate instance manifest. It doesn't seem that this will function
->> as needed, as it doesn't satisfy the last requirement (permissions are
->> set at the version level). What we do need to have is some sort of a
->> soft link that will be used to point at the appropriate object
->> instance.
->>
->> We had internal discussions on how to make everything work together.
->> There are a few things that we need to be careful about. We need to
->> make sure that the bucket index listing reflects the status of the
->> actual objects. When the olh points at a specific version, we
->> shouldn't show a different view when listing the objects. This gets
->> even more complicated when removing an object version that requires
->> olh change, as we have 3 different entities that we need to sync. Note
->> that rados does not have multi-object transactions (for now), and we
->> traditionally avoided locking for rgw object operations.
->
-> (those 3 entities being the index, the object version, and the olh
-> pointer)
->
->> The current scheme is that we update the bucket index using a 2 phase
->> commit, and it follows up on the objects state. So when adding /
->> removing an object, we first tell the bucket index to 'prepare' for
->> the operation, then do the operation, and eventually we let the bucket
->> index know about the completion. For ordering we rely on the pg
->> versioning system that gives us insight into the timeline, so that
->> when two concurrent operations happen on the same object the bucket
->> index can figure out who won and who is dead.
->> This system as it is doesn't really work with versioning as we have
->> both the olh, and the object instances. This is one of the solutions
->> that we came up with:
->>
->>  - The bucket index will be the source of the truth
->>  - The bucket index will serve as an operational log for olh operations
->>
->> The bucket index will index every object instance in reverse order
->> (from new to old). The bucket index will keep entries for deletion
->> markers.
->> The bucket index will also keep operations journal for olh
->> modifications. Each operation in this journal will have an id that
->> will be increased monotonically, and that will be tied into current
->> olh version. The olh will be modified using idempotent operations that
->> will be subject to having its current version smaller than the
->> operation id.
->> The journal will be used for keeping order, and the entries in the
->> journal will serve as a blueprint that the gateways will need to
->> follow when applying changes. In order to ensure that operations that
->> needed to be complete were done, we'll mark the olh before going to
->> the bucket index, so that if the gateway died before completing the
->> operation, next time we try to access the object we'll know that we
->> need to go to the bucket index and complete the operation.
->>
->> Things will then work like this:
->
-> I take it there is also a:
->
-> * object read
->
-> 1. look at olh
-> 2. if marked as pending-modify,
->    a. check index for current head version, and use that vaue
->    b. if pending-modify is super old and no matching index entry exists,
->       remove marker
->    b. if index entry does exist, send async op to roll-forward the olh
-> 3. read referenced object version
->
-> ...and the 'roll-forward' on the olh would be something like
->
->  cmpxattr pending-modify-$tag == 1
+From: ceph-users [mailto:ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org] On Behalf Of Su=
+darsan, Rajesh
+Sent: Thursday, August 14, 2014 3:01 PM
+To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Subject: [ceph-users] Tracking the system calls for OSD write
 
-I'm not sure we need to this comparison. What really matters is the
-actual olh version.
+Hi,
 
->  cmpxattr olh_version == previous v
+I am trying to track the actual system open and write call on a OSD when a =
+new file is created and written. So far, my tracking is as follows:
 
-Maybe it should actually be cmpxattr olh_version < new v
+Using the debug log messages, I located the first write call in do_osd_ops =
+function (case CEPH_OSD_OP_WRITE) in os/ReplicatedPG.cc (line 3727)
 
->  setxattr olh_version = new v
->  setxattr head_version = whatever
->  rmxattr pending-modify-$tag
->
-> This has the side-effect that a hot object will briefly pummel the index.
-> That is probably fine...
->
->> * object creation
->>
->> 1. Create object instance
->
->  is there a step 0 so that a failed rgw gets garbage collected?
+t->write(soid, op.extent.offset, op.extent.length, osd_op.indata);
 
-What scenario are you worried about? Incomplete operations should be
-take care of by step (5)
+where t is a transaction object.
 
->
->> 2. Mark olh that it's about to be modified
->
->  setxattr pending-modify-$tag=1
->
->> 3. Update bucket index about new object instance
->
->  omap_setkeys journal_$object_$olhversion_$tag = pending ?
+This function is defined in os/ObjectStore.h (line 652)
 
-Yeah, something along these lines.
+void write(coll_t cid, const ghobject_t& oid, uint64_t off, uint64_t len,
+               const bufferlist& data) {
+      __u32 op =3D OP_WRITE;
+      ::encode(op, tbl);
+      ::encode(cid, tbl);
+      ::encode(oid, tbl);
+      ::encode(off, tbl);
+      ::encode(len, tbl);
+      assert(len =3D=3D data.length());
+      if (data.length() > largest_data_len) {
+        largest_data_len =3D data.length();
+        largest_data_off =3D off;
+        largest_data_off_in_tbl =3D tbl.length() + sizeof(__u32);  // we ar=
+e about to
+      }
+      ::encode(data, tbl);
+      ops++;
+    }
 
->
->> 4. Read bucket index object op journal
->>
->> Note that the journal should have at this point an entry that says
->> 'point olh to specific object version, subject to olh is at version
->> X'.
->>
->> 5. Apply journal ops
->
-> same as roll-forward event above?  unmark olh in the same op:
->
->  cmpxattr pending-modify-$tag == 1
->  cmpxattr olh_version == $olh_version_old
->  setxattr olh_version = $olh_version_new
->  setxattr head_version = whatever
->  rmxattr pending-modify-$tag
->
->> 6. Trim journal, unmark olh
->
-> Just trim the journal.
->
->  call rgw.trim_journal($object, $olh_version_new)
->
-> ...which can remove all prior journal entries too, since the olh is now at
-> that version (or something higher).
->
-> Am I on the right track?
+The encode functions are defined as a template in include/encoding.h (line =
+61) which eventually calls bufferlist.append in src/common/buffers.cc (line=
+ 1272) to insert the buffers from one list to another.
 
-Yes.
+  void buffer::list::append(const list& bl)
+  {
+    _len +=3D bl._len;
+    for (std::list<ptr>::const_iterator p =3D bl._buffers.begin();
+         p !=3D bl._buffers.end();
+         ++p)
+      _buffers.push_back(*p);
+  }
 
-Yehuda
+Since the buffers are "push_back" I figured that there must be a call to po=
+p_front in ReplicatedPG.cc . But there is not pop_front associated with any=
+ write. This is where I am stuck.
 
+At this point I have two questions:
 
+1.       When does the actual file open happen?
+
+2.       Where is the system call to physically write the file to the disk?
+
+Any help is appreciated.
+
+Rajesh
+
+--_000_75674D092A819E4189E91166C74CB90D01421D27shsmsx102ccrcor_
+Content-Type: text/html; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+
+<html xmlns:v=3D"urn:schemas-microsoft-com:vml" xmlns:o=3D"urn:schemas-micr=
+osoft-com:office:office" xmlns:w=3D"urn:schemas-microsoft-com:office:word" =
+xmlns:m=3D"http://schemas.microsoft.com/office/2004/12/omml" xmlns=3D"http:=
+//www.w3.org/TR/REC-html40">
+<head>
+<meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3Dus-ascii"=
 >
-> sage
->
->
->> * object removal (olh)
->>
->> 1. Mark olh that it's about to be modified
->> 2. Update bucket index about the new deletion marker
->> 3. Read bucket index object op journal
->>
->> The journal entry should say something like 'mark olh as removed,
->> subject to olh is at version X'
->>
->> 4. Apply ops
->> 5. Trim journal, unmark olh
->>
->> Another option is to actually remove the olh, but in this case we'll
->> lose the olh versioning. We can in that case use the object
->> non-existent state as a check, but that will not be enough as there
->> are some corner cases where we could end up with the olh pointing at
->> the wrong object.
->>
->> * object version removal
->>
->> 1. Mark olh as it will potentially be modified
->> 2. Update bucket index about object instance removal
->> 3. Read bucket index op journal
->> 4. apply ops journal ...
->> Now the journal might just say something like 'remove object
->> instance', which means that the olh was pointing at a different object
->> version. The more interesting case is when the olh pointing at this
->> specific object version. In this case the journal will say something
->> like 'first point the olh at version V2, subject to olh is at version
->> X. Now, remove object instance V1'.
->>
->> 5. Trim journal, unmark olh
->>
->>
->> Note about olh marking: The olh mark will create an attr on the olh
->> that will have an id and a timestamp. There could be multiple marks on
->> the olh, and the marks should have some expiration, so that operations
->> that did not really start would be removed after a while.
->>
->>
->> Let me know if that makes sense, or if you have any questions.
->>
->> Thanks,
->> Yehuda
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+<meta name=3D"Generator" content=3D"Microsoft Word 15 (filtered medium)">
+<style><!--
+/* Font Definitions */
+@font-face
+	{font-family:SimSun;
+	panose-1:2 1 6 0 3 1 1 1 1 1;}
+@font-face
+	{font-family:"Cambria Math";
+	panose-1:2 4 5 3 5 4 6 3 2 4;}
+@font-face
+	{font-family:Calibri;
+	panose-1:2 15 5 2 2 2 4 3 2 4;}
+@font-face
+	{font-family:"\@SimSun";
+	panose-1:2 1 6 0 3 1 1 1 1 1;}
+/* Style Definitions */
+p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin:0in;
+	margin-bottom:.0001pt;
+	font-size:11.0pt;
+	font-family:"Calibri","sans-serif";}
+a:link, span.MsoHyperlink
+	{mso-style-priority:99;
+	color:#0563C1;
+	text-decoration:underline;}
+a:visited, span.MsoHyperlinkFollowed
+	{mso-style-priority:99;
+	color:#954F72;
+	text-decoration:underline;}
+p.MsoListParagraph, li.MsoListParagraph, div.MsoListParagraph
+	{mso-style-priority:34;
+	margin-top:0in;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	margin-bottom:.0001pt;
+	font-size:11.0pt;
+	font-family:"Calibri","sans-serif";}
+span.EmailStyle18
+	{mso-style-type:personal;
+	font-family:"Calibri","sans-serif";
+	color:windowtext;}
+span.EmailStyle19
+	{mso-style-type:personal-reply;
+	font-family:"Calibri","sans-serif";
+	color:#1F497D;}
+.MsoChpDefault
+	{mso-style-type:export-only;
+	font-size:10.0pt;}
+@page WordSection1
+	{size:8.5in 11.0in;
+	margin:1.0in 1.0in 1.0in 1.0in;}
+div.WordSection1
+	{page:WordSection1;}
+/* List Definitions */
+@list l0
+	{mso-list-id:583612375;
+	mso-list-type:hybrid;
+	mso-list-template-ids:970331566 67698703 67698713 67698715 67698703 676987=
+13 67698715 67698703 67698713 67698715;}
+@list l0:level1
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level2
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level3
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	text-indent:-9.0pt;}
+@list l0:level4
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level5
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level6
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	text-indent:-9.0pt;}
+@list l0:level7
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level8
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level9
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	text-indent:-9.0pt;}
+ol
+	{margin-bottom:0in;}
+ul
+	{margin-bottom:0in;}
+--></style><!--[if gte mso 9]><xml>
+<o:shapedefaults v:ext=3D"edit" spidmax=3D"1026" />
+</xml><![endif]--><!--[if gte mso 9]><xml>
+<o:shapelayout v:ext=3D"edit">
+<o:idmap v:ext=3D"edit" data=3D"1" />
+</o:shapelayout></xml><![endif]-->
+</head>
+<body lang=3D"EN-US" link=3D"#0563C1" vlink=3D"#954F72">
+<div class=3D"WordSection1">
+<p class=3D"MsoNormal"><span style=3D"color:#1F497D">The system call is inv=
+oked in FileStore::_do_transaction().<o:p></o:p></span></p>
+<p class=3D"MsoNormal"><span style=3D"color:#1F497D"><o:p>&nbsp;</o:p></spa=
+n></p>
+<div>
+<p class=3D"MsoNormal"><span style=3D"color:#1F497D">Cheers,<o:p></o:p></sp=
+an></p>
+<p class=3D"MsoNormal"><span style=3D"color:#1F497D">xinxin<o:p></o:p></spa=
+n></p>
+</div>
+<p class=3D"MsoNormal"><span style=3D"color:#1F497D"><o:p>&nbsp;</o:p></spa=
+n></p>
+<div>
+<div style=3D"border:none;border-top:solid #E1E1E1 1.0pt;padding:3.0pt 0in =
+0in 0in">
+<p class=3D"MsoNormal"><b>From:</b> ceph-users [mailto:ceph-users-bounces@l=
+ists.ceph.com]
+<b>On Behalf Of </b>Sudarsan, Rajesh<br>
+<b>Sent:</b> Thursday, August 14, 2014 3:01 PM<br>
+<b>To:</b> ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org<br>
+<b>Subject:</b> [ceph-users] Tracking the system calls for OSD write<o:p></=
+o:p></p>
+</div>
+</div>
+<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoNormal">Hi, <o:p></o:p></p>
+<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoNormal">I am trying to track the actual system open and writ=
+e call on a OSD when a new file is created and written. So far, my tracking=
+ is as follows:<o:p></o:p></p>
+<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoNormal">Using the debug log messages, I located the first wr=
+ite call in do_osd_ops function (case CEPH_OSD_OP_WRITE) in os/ReplicatedPG=
+.cc (line 3727)<o:p></o:p></p>
+<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoNormal"><span style=3D"color:#0070C0">t-&gt;write(soid, op.e=
+xtent.offset, op.extent.length, osd_op.indata);<o:p></o:p></span></p>
+<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoNormal">where t is a transaction object.<o:p></o:p></p>
+<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoNormal">This function is defined in os/ObjectStore.h (line 6=
+52)<o:p></o:p></p>
+<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoNormal">void write(coll_t cid, const ghobject_t&amp; oid, ui=
+nt64_t off, uint64_t len,<o:p></o:p></p>
+<p class=3D"MsoNormal">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbs=
+p;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; const bufferlist&amp; data) {<o:p></o:p></=
+p>
+<p class=3D"MsoNormal">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; __u32 op =3D OP_WRITE=
+;<o:p></o:p></p>
+<p class=3D"MsoNormal">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ::encode(op, tbl);<o:=
+p></o:p></p>
+<p class=3D"MsoNormal">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ::encode(cid, tbl);<o=
+:p></o:p></p>
+<p class=3D"MsoNormal">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ::encode(oid, tbl);<o=
+:p></o:p></p>
+<p class=3D"MsoNormal">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ::encode(off, tbl);<o=
+:p></o:p></p>
+<p class=3D"MsoNormal">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ::encode(len, tbl);<o=
+:p></o:p></p>
+<p class=3D"MsoNormal">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; assert(len =3D=3D dat=
+a.length());<o:p></o:p></p>
+<p class=3D"MsoNormal">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (data.length() &gt=
+; largest_data_len) {<o:p></o:p></p>
+<p class=3D"MsoNormal">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; largest_d=
+ata_len =3D data.length();<o:p></o:p></p>
+<p class=3D"MsoNormal">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; largest_d=
+ata_off =3D off;<o:p></o:p></p>
+<p class=3D"MsoNormal">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; largest_d=
+ata_off_in_tbl =3D tbl.length() &#43; sizeof(__u32);&nbsp; // we are about =
+to<o:p></o:p></p>
+<p class=3D"MsoNormal">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<o:p></o:p></p>
+<p class=3D"MsoNormal">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ::encode(data, tbl);<=
+o:p></o:p></p>
+<p class=3D"MsoNormal">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ops&#43;&#43;;<o:p></=
+o:p></p>
+<p class=3D"MsoNormal">&nbsp;&nbsp;&nbsp; }<o:p></o:p></p>
+<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoNormal">The encode functions are defined as a template in in=
+clude/encoding.h (line 61) which eventually calls bufferlist.append in src/=
+common/buffers.cc (line 1272) to insert the buffers from one list to anothe=
+r.<o:p></o:p></p>
+<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoNormal">&nbsp; void buffer::list::append(const list&amp; bl)=
+<o:p></o:p></p>
+<p class=3D"MsoNormal">&nbsp; {<o:p></o:p></p>
+<p class=3D"MsoNormal">&nbsp;&nbsp;&nbsp; _len &#43;=3D bl._len;<o:p></o:p>=
+</p>
+<p class=3D"MsoNormal">&nbsp;&nbsp;&nbsp; for (std::list&lt;ptr&gt;::const_=
+iterator p =3D bl._buffers.begin();<o:p></o:p></p>
+<p class=3D"MsoNormal">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; p !=
+=3D bl._buffers.end();<o:p></o:p></p>
+<p class=3D"MsoNormal">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#4=
+3;&#43;p)<o:p></o:p></p>
+<p class=3D"MsoNormal">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _buffers.push_back(*p=
+);<o:p></o:p></p>
+<p class=3D"MsoNormal">&nbsp; } <o:p></o:p></p>
+<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoNormal">Since the buffers are &#8220;push_back&#8221; I figu=
+red that there must be a call to pop_front in ReplicatedPG.cc . But there i=
+s not pop_front associated with any write. This is where I am stuck.
+<o:p></o:p></p>
+<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoNormal">At this point I have two questions:<o:p></o:p></p>
+<p class=3D"MsoListParagraph" style=3D"text-indent:-.25in;mso-list:l0 level=
+1 lfo2"><![if !supportLists]><span style=3D"mso-list:Ignore">1.<span style=
+=3D"font:7.0pt &quot;Times New Roman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&=
+nbsp;
+</span></span><![endif]>When does the actual file open happen?<o:p></o:p></=
+p>
+<p class=3D"MsoListParagraph" style=3D"text-indent:-.25in;mso-list:l0 level=
+1 lfo2"><![if !supportLists]><span style=3D"mso-list:Ignore">2.<span style=
+=3D"font:7.0pt &quot;Times New Roman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&=
+nbsp;
+</span></span><![endif]>Where is the system call to physically write the fi=
+le to the disk?<o:p></o:p></p>
+<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoNormal">Any help is appreciated. <o:p></o:p></p>
+<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoNormal">Rajesh &nbsp;<o:p></o:p></p>
+</div>
+</body>
+</html>
+
+--_000_75674D092A819E4189E91166C74CB90D01421D27shsmsx102ccrcor_--
+
+--===============1035564675==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============1035564675==--
