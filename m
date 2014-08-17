@@ -1,60 +1,63 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: any reason why multiple ranged-reads not currently supported
- in rados-java?
-Date: Sat, 16 Aug 2014 20:12:42 +0200
-Message-ID: <53EF9F1A.5090201@42on.com>
-References: <CAAmmvixquAW-s5td03UpnEhFDWujAWServHgehKzrYHRs+dsBg@mail.gmail.com> <alpine.DEB.2.00.1408150839460.966@cobra.newdream.net>
+From: Loic Dachary <loic@dachary.org>
+Subject: Call for help : contributor credits updates
+Date: Sun, 17 Aug 2014 13:19:44 +0200
+Message-ID: <53F08FD0.9040104@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="N7e8bHrPtvXrJorejDqBEu01mxOnaBiIp"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from websrv.42on.com ([31.25.102.167]:47625 "EHLO websrv.42on.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751536AbaHPSMp (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sat, 16 Aug 2014 14:12:45 -0400
-In-Reply-To: <alpine.DEB.2.00.1408150839460.966@cobra.newdream.net>
+Received: from mail2.dachary.org ([91.121.57.175]:60938 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751230AbaHQLTw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 17 Aug 2014 07:19:52 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, Daniel Hsueh <dchsueh@alumni.uwaterloo.ca>
-Cc: ceph-devel@vger.kernel.org, wido@widodh.nl
+To: Ceph Development <ceph-devel@vger.kernel.org>
+Cc: Ceph Community <ceph-community@lists.ceph.com>
 
-On 08/15/2014 05:40 PM, Sage Weil wrote:
-> On Fri, 15 Aug 2014, Daniel Hsueh wrote:
->> Hello,
->>
->> I'm looking at the Java librados JNA-based API, and note that ranged
->> reads (rados_create_read_op, rados_release_read_op,
->> rados_read_op_read, rados_read_op_operate) are not currently
->> accessible to a Java program.
->>
->> Are there any difficulties in implementing access to these calls?  If
->> it is straightforward, I'll implement them myself and contribute back
->> to the github repository.
->
-> My guess is this was just an oversight.  A patch / pull request wiring
-> this up would be awesome.
->
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--N7e8bHrPtvXrJorejDqBEu01mxOnaBiIp
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-Indeed. I was a bit lazy and implemented what I needed at the time of 
-writing rados-java.
+Hi Ceph,
 
-A pull request is welcome, or just create a issue in the tracker on 
-http://tracker.ceph.com/
+TL;DR: looking for a co-maintainer for https://github.com/ceph/ceph/blob/=
+master/.mailmap
 
-Thanks!
+Would someone be willing to share the workload of maintaining the https:/=
+/github.com/ceph/ceph/blob/master/.mailmap and https://github.com/ceph/ce=
+ph/blob/master/.organizationmap files with me ? The idea would be that we=
+ take turns to send the mail summarizing the contributor credits ( see ht=
+tp://www.spinics.net/lists/ceph-devel/msg18941.html for instance ). I'm h=
+appy to do it because it gives me a chance to get in touch with new Ceph =
+developers and discover new organizations contributing to Ceph. But it wo=
+uld be better if I'm not the only one doing it. It requires no more than =
+two hours for a given release, all included.
 
-> Thanks!
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+If you're interested, you can read about the workflow and technical detai=
+ls in https://wiki.ceph.com/Community/Ceph_contributors_list_maintenance_=
+guide=20
+
+Cheers
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
 
 
--- 
-Wido den Hollander
-42on B.V.
+--N7e8bHrPtvXrJorejDqBEu01mxOnaBiIp
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
-Phone: +31 (0)20 700 9902
-Skype: contact42on
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlPwj9AACgkQ8dLMyEl6F23tlwCfdbSGc1J1yVGIx6gSpNQklqGc
+POcAnAokpIFEc6QmP88RKUwoums6KAYU
+=ktMe
+-----END PGP SIGNATURE-----
+
+--N7e8bHrPtvXrJorejDqBEu01mxOnaBiIp--
