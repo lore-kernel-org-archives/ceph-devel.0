@@ -1,135 +1,152 @@
-From: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Subject: v0.84 released
-Date: Mon, 18 Aug 2014 12:14:52 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1408181213200.6987@cobra.newdream.net>
+From: Loic Dachary <loic@dachary.org>
+Subject: v0.84 contributors credits
+Date: Mon, 18 Aug 2014 22:38:14 +0200
+Message-ID: <53F26436.6010308@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="s66nScE7vAmnXIFo3Cm7S11c9JiRV4E57"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail2.dachary.org ([91.121.57.175]:33511 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751930AbaHRUiV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Aug 2014 16:38:21 -0400
+Received: from [10.9.0.6] (unknown [10.0.2.28])
+	by smtp.dmail.dachary.org (Postfix) with ESMTP id D76551D0001
+	for <ceph-devel@vger.kernel.org>; Mon, 18 Aug 2014 22:38:14 +0200 (CEST)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-The next Ceph development release is here!  This release contains several 
-meaty items, including some MDS improvements for journaling, the ability 
-to remove the CephFS file system (and name it), several mon cleanups with 
-tiered pools, several OSD performance branches, a new "read forward" RADOS 
-caching mode, a prototype Kinetic OSD backend, and various radosgw 
-improvements (especially with the new standalone civetweb frontend).  And 
-there are a zillion OSD bug fixes. Things are looking pretty good for the 
-Giant release that is coming up in the next month.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--s66nScE7vAmnXIFo3Cm7S11c9JiRV4E57
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-Upgrading
----------
+Hi Ceph,
 
-* The *_kb perf counters on the monitor have been removed.  These are
-  replaced with a new set of *_bytes counters (e.g., cluster_osd_kb is
-  replaced by cluster_osd_bytes).
+Here is a sorted list of authors and organizations who contributed to v0.=
+84, by number of commits or reviews back to v0.83. The affiliation of aut=
+hors to organizations can be updated by submitting a patch to https://git=
+hub.com/ceph/ceph/blob/master/.organizationmap
 
-* The rd_kb and wr_kb fields in the JSON dumps for pool stats (accessed via
-  the 'ceph df detail -f json-pretty' and related commands) have been replaced
-  with corresponding *_bytes fields.  Similarly, the 'total_space', 'total_used',
-  and 'total_avail' fields are replaced with 'total_bytes', 
-  'total_used_bytes', and 'total_avail_bytes' fields.
+All commits are reviewed but the number of reviews is a fraction of the n=
+umber of commits. More often than not, the reviewer(s) is only mentioned =
+in the message of the merge although it means that all associated commits=
+ have been reviewed. If you are curious about how it is done, the details=
+ are at https://wiki.ceph.com/Community/Ceph_contributors_list_maintenanc=
+e_guide .=20
 
-* The 'rados df --format=json' output 'read_bytes' and 'write_bytes'
-  fields were incorrectly reporting ops; this is now fixed.
+Commits by authors
+     1	     97 Sage Weil <sweil@redhat.com>
+     2	     67 Sage Weil <sage@inktank.com>
+     3	     44 John Spray <jspray@redhat.com>
+     4	     36 Samuel Just <sam.just@inktank.com>
+     5	     23 Greg Farnum <greg@inktank.com>
+     6	     22 Josh Durgin <josh.durgin@inktank.com>
+     7	     17 Jo=E3o Eduardo Lu=EDs <joao.luis@inktank.com>
+     8	     15 John Spray <john.spray@inktank.com>
+     9	     13 Haomai Wang <haomaiwang@gmail.com>
+    10	     12 Loic Dachary <loic@dachary.org>
+    11	     12 Abhishek Lekshmanan <abhishek.lekshmanan@ril.com>
+    12	     11 Somnath Roy <somnath.roy@sandisk.com>
+    13	     10 John Wilkins <john.wilkins@inktank.com>
+    14	      9 Yehuda Sadeh <ysadey@redhat.com>
+    15	      8 Yan, Zheng <zheng.z.yan@intel.com>
+    16	      8 Ilya Dryomov <ilya.dryomov@inktank.com>
+    17	      8 Dan Mick <dan.mick@inktank.com>
+    18	      6 Yehuda Sadeh <yehuda@inktank.com>
+    19	      4 Wido den Hollander <wido@42on.com>
+    20	      4 Thorsten Behrens <tbehrens@suse.com>
+    21	      4 Matt Benjamin <matt@linuxbox.com>
+    22	      4 Ma Jianpeng <jianpeng.ma@intel.com>
+    23	      3 Dmitry Smirnov <onlyjob@member.fsf.org>
+    24	      3 Andrey Kuznetsov <Andrey_Kuznetsov@epam.com>
+    25	      2 Xiaoxi Chen <xiaoxi.chen@intel.com>
+    26	      2 Sandon Van Ness <sandon@inktank.com>
+    27	      2 Huamin Chen <hchen@redhat.com>
+    28	      1 Sylvain Munaut <s.munaut@whatever-company.com>
+    29	      1 Stephen Jahl <stephenjahl@gmail.com>
+    30	      1 Sebastien Han <sebastien.han@enovance.com>
+    31	      1 Luis Pab=F3n <lpabon@redhat.com>
+    32	      1 Kevin Dalley <kevin@kelphead.org>
+    33	      1 Kevin Cox <kevincox@kevincox.ca>
+    34	      1 Jenkins <jenkins@inktank.com>
+    35	      1 Guang Yang <yguang@yahoo-inc.com>
+    36	      1 Federico Simoncelli <fsimonce@redhat.com>
+    37	      1 Dan van der Ster <daniel.vanderster@cern.ch>
+    38	      1 Alfredo Deza <alfredo.deza@inktank.com>
+Commits by organizations
+     1	    216 Inktank <contact@inktank.com>
+     2	    154 Red Hat <contact@redhat.com>
+     3	     14 Intel <contact@intel.com>
+     4	     13 UnitedStack <contact@unitedstack.com>
+     5	     12 Reliance Jio Infocomm Ltd. <contact@ril.com>
+     6	     12 Cloudwatt <libre.licensing@cloudwatt.com>
+     7	     11 SanDisk <contact@sandisk.com>
+     8	      4 Wido 42on <contact@42on.com>
+     9	      4 The Linux Box <contact@linuxbox.com>
+    10	      4 SUSE <contact@suse.com>
+    11	      3 EPAM <contact@epam.com>
+    12	      3 Debian GNU/Linux <contact@debian.org>
+    13	      1 Yahoo! <contact@yahoo-inc.com>
+    14	      1 Whatever <contact@whatever-company.com>
+    15	      1 Unaffiliated <no@organization.net>
+    16	      1 MIT Computer Science and Artificial Intelligence Laborator=
+y <webmaster@csail.mit.edu>
+    17	      1 HGST <contact@hgst.com>
+    18	      1 eNovance <contact@enovance.com>
+    19	      1 CERN <contact@cern.ch>
+Reviews by authors (one review spans multiple commits)
+     1	     33 Sage Weil <sweil@redhat.com>
+     2	     22 Greg Farnum <greg@inktank.com>
+     3	     19 Samuel Just <sam.just@inktank.com>
+     4	     14 Josh Durgin <josh.durgin@inktank.com>
+     5	      8 Loic Dachary <loic@dachary.org>
+     6	      5 Haomai Wang <haomaiwang@gmail.com>
+     7	      4 Dan Mick <dan.mick@inktank.com>
+     8	      3 Yehuda Sadeh <ysadey@redhat.com>
+     9	      3 John Wilkins <john.wilkins@inktank.com>
+    10	      3 Jo=E3o Eduardo Lu=EDs <joao.luis@inktank.com>
+    11	      2 Sahid Orentino Ferdjaoui <sahid.ferdjaoui@cloudwatt.com>
+    12	      2 Sage Weil <sage@inktank.com>
+    13	      2 John Spray <jspray@redhat.com>
+    14	      2 Florent Flament <florent.flament@cloudwatt.com>
+    15	      1 Yehuda Sadeh <yehuda@inktank.com>
+    16	      1 Alfredo Deza <alfredo.deza@inktank.com>
+Reviews by organizations (one review spans multiple commits)
+     1	     69 Inktank <contact@inktank.com>
+     2	     38 Red Hat <contact@redhat.com>
+     3	     12 Cloudwatt <libre.licensing@cloudwatt.com>
+     4	      5 UnitedStack <contact@unitedstack.com
 
-* The 'rados df --format=json' output previously included 'read_kb' and
-  'write_kb' fields; these have been removed.  Please use 'read_bytes' and
-  'write_bytes' instead (and divide by 1024 if appropriate).
+Cheers
 
-Notable Changes
----------------
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
 
-* ceph-conf: flush log on exit (Sage Weil)
-* ceph-dencoder: refactor build a bit to limit dependencies (Sage Weil, 
-  Dan Mick)
-* ceph.spec: split out ceph-common package, other fixes (Sandon Van Ness)
-* ceph_test_librbd_fsx: fix RNG, make deterministic (Ilya Dryomov)
-* cephtool: refactor and improve CLI tests (Joao Eduardo Luis)
-* client: improved MDS session dumps (John Spray)
-* common: fix dup log messages (#9080, Sage Weil)
-* crush: include new tunables in dump (Sage Weil)
-* crush: only require rule features if the rule is used (#8963, Sage Weil)
-* crushtool: send output to stdout, not stderr (Wido den Hollander)
-* fix i386 builds (Sage Weil)
-* fix struct vs class inconsistencies (Thorsten Behrens)
-* hadoop: update hadoop tests for Hadoop 2.0 (Haumin Chen)
-* librbd, ceph-fuse: reduce cache flush overhead (Haomai Wang)
-* librbd: fix error path when opening image (#8912, Josh Durgin)
-* mds: add file system name, enabled flag (John Spray)
-* mds: boot refactor, cleanup (John Spray)
-* mds: fix journal conversion with standby-replay (John Spray)
-* mds: separate inode recovery queue (John Spray)
-* mds: session ls, evict commands (John Spray)
-* mds: submit log events in async thread (Yan, Zheng)
-* mds: use client-provided timestamp for user-visible file metadata (Yan, 
-  Zheng)
-* mds: validate journal header on load and save (John Spray)
-* misc build fixes for OS X (John Spray)
-* misc integer size cleanups (Kevin Cox)
-* mon: add get-quota commands (Joao Eduardo Luis)
-* mon: do not create file system by default (John Spray)
-* mon: fix 'ceph df' output for available space (Xiaoxi Chen)
-* mon: fix bug when no auth keys are present (#8851, Joao Eduardo Luis)
-* mon: fix compat version for MForward (Joao Eduardo Luis)
-* mon: restrict some pool properties to tiered pools (Joao Eduardo Luis)
-* msgr: misc locking fixes for fast dispatch (#8891, Sage Weil)
-* osd: add 'dump_reservations' admin socket command (Sage Weil)
-* osd: add READFORWARD caching mode (Luis Pabon)
-* osd: add header cache for KeyValueStore (Haomai Wang)
-* osd: add prototype KineticStore based on Seagate Kinetic (Josh Durgin)
-* osd: allow map cache size to be adjusted at runtime (Sage Weil)
-* osd: avoid refcounting overhead by passing a few things by ref (Somnath 
-  Roy)
-* osd: avoid sharing PG info that is not durable (Samuel Just)
-* osd: clear slow request latency info on osd up/down (Sage Weil)
-* osd: fix PG object listing/ordering bug (Guang Yang)
-* osd: fix PG stat errors with tiering (#9082, Sage Weil)
-* osd: fix bug with long object names and rename (#8701, Sage Weil)
-* osd: fix cache full -> not full requeueing (#8931, Sage Weil)
-* osd: fix gating of messages from old OSD instances (Greg Farnum)
-* osd: fix memstore bugs with collection_move_rename, lock ordering (Sage 
-  Weil)
-* osd: improve locking for KeyValueStore (Haomai Wang)
-* osd: make tiering behave if hit_sets aren't enabled (Sage Weil)
-* osd: mark pools with incomplete clones (Sage Weil)
-* osd: misc locking fixes for fast dispatch (Samuel Just, Ma Jianpeng)
-* osd: prevent old rados clients from using tiered pools (#8714, Sage 
-  Weil)
-* osd: reduce OpTracker overhead (Somnath Roy)
-* osd: set configurable hard limits on object and xattr names (Sage Weil, 
-  Haomai Wang)
-* osd: trim old EC objects quickly; verify on scrub (Samuel Just)
-* osd: work around GCC 4.8 bug in journal code (Matt Benjamin)
-* rados bench: fix arg order (Kevin Dalley)
-* rados: fix {read,write}_ops values for df output (Sage Weil)
-* rbd: add rbdmap pre- and post post- hooks, fix misc bugs (Dmitry 
-  Smirnov)
-* rbd: improve option default behavior (Josh Durgin)
-* rgw: automatically align writes to EC pool (#8442, Yehuda Sadeh)
-* rgw: fix crash on swift CORS preflight request (#8586, Yehuda Sadeh)
-* rgw: fix memory leaks (Andrey Kuznetsov)
-* rgw: fix multipart upload (#8846, Silvain Munaut, Yehuda Sadeh)
-* rgw: improve -h (Abhishek Lekshmanan)
-* rgw: improve delimited listing of bucket, misc fixes (Yehuda Sadeh)
-* rgw: misc civetweb fixes (Yehuda Sadeh)
-* rgw: powerdns backend for global namespaces (Wido den Hollander)
-* systemd: initial systemd config files (Federico Simoncelli)
 
-Getting Ceph
-------------
 
-* Git at git://github.com/ceph/ceph.git
-* Tarball at http://ceph.com/download/ceph-0.84.tar.gz
-* For packages, see http://ceph.com/docs/master/install/get-packages
-* For ceph-deploy, see http://ceph.com/docs/master/install/install-ceph-deploy
+
+
+
+
+
+
+
+
+--s66nScE7vAmnXIFo3Cm7S11c9JiRV4E57
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlPyZDYACgkQ8dLMyEl6F23PPwCbBnjkUPg59N6WK9eSn/vtXeks
+oRoAnjAya0oiqLx7haglHY39Gb2exdF1
+=xA71
+-----END PGP SIGNATURE-----
+
+--s66nScE7vAmnXIFo3Cm7S11c9JiRV4E57--
