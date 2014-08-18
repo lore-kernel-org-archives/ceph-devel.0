@@ -1,40 +1,31 @@
-From: Dan Van Der Ster <daniel.vanderster@cern.ch>
-Subject: Re: Stopping ceph daemons during the upgrade
-Date: Mon, 18 Aug 2014 15:31:52 +0000
-Message-ID: <A856D71F-CC6F-4A6A-B29B-FD19FB511482@cern.ch>
-References: <53F21994.5000202@dachary.org>
+From: Daniel Hsueh <dchsueh@alumni.uwaterloo.ca>
+Subject: Re: any reason why multiple ranged-reads not currently supported in rados-java?
+Date: Mon, 18 Aug 2014 11:52:57 -0400
+Message-ID: <CAAmmviw-GrPD4L6wAf_Lbcij5a6Gu+Kas2UjuC5V2vz1rtFLig@mail.gmail.com>
+References: <CAAmmvixquAW-s5td03UpnEhFDWujAWServHgehKzrYHRs+dsBg@mail.gmail.com>
+	<alpine.DEB.2.00.1408150839460.966@cobra.newdream.net>
+	<53EF9F1A.5090201@42on.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=Windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cernmx11.cern.ch ([188.184.36.50]:47373 "EHLO CERNMX11.cern.ch"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750762AbaHRPhY convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Aug 2014 11:37:24 -0400
-In-Reply-To: <53F21994.5000202@dachary.org>
-Content-Language: en-US
-Content-ID: <6392514FBC455E40AD18B54D4670B561@cern.ch>
+Received: from mail-wg0-f41.google.com ([74.125.82.41]:42332 "EHLO
+	mail-wg0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750915AbaHRPw6 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Aug 2014 11:52:58 -0400
+Received: by mail-wg0-f41.google.com with SMTP id z12so5263977wgg.24
+        for <ceph-devel@vger.kernel.org>; Mon, 18 Aug 2014 08:52:57 -0700 (PDT)
+In-Reply-To: <53EF9F1A.5090201@42on.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Wido den Hollander <wido@42on.com>
+Cc: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org, wido@widodh.nl
 
-Hi,
+pull request submitted
 
-On 18 Aug 2014, at 17:19, Loic Dachary <loic@dachary.org> wrote:
+thanks!
 
-> there probably is a way to do something similar with RPM packages.=20
+> A pull request is welcome, or just create a issue in the tracker on
+> http://tracker.ceph.com/
 
-That behaviour (well, close enough) just _removed_ from firefly, see:
-  https://github.com/ceph/ceph/commit/361c1f8554ce1fedfd0020cd306c41b0b=
-a25f53e
-
-I don=92t have a strong opinion if the pkg update should restart the da=
-emon or not =97 but we should try not to change this too often as it ch=
-anges our operating procedures.
-
-Cheers, Dan--
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-- 
+Daniel Hsueh <mailto:dchsueh@alumni.uwaterloo.ca>
