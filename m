@@ -1,44 +1,35 @@
 From: Gregory Farnum <greg@inktank.com>
-Subject: Re: Ceph authentication/authorization paradignms
-Date: Tue, 19 Aug 2014 14:57:59 -0700
-Message-ID: <CAPYLRzixD8O5C8K_Q0yvD=3YCMwuWQJg4HFOJ5nss4b4m_0U8g@mail.gmail.com>
-References: <1642211910.31382003.1408036197918.JavaMail.zimbra@redhat.com>
-	<1355490291.31383019.1408036230928.JavaMail.zimbra@redhat.com>
+Subject: Re: Simpler LRC configuration
+Date: Tue, 19 Aug 2014 15:02:47 -0700
+Message-ID: <CAPYLRzhLH1kSgBGG1X3m8OQz+1=zjmyBeTnEiDJNeDhb-is8+w@mail.gmail.com>
+References: <53EE3902.1080009@dachary.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f182.google.com ([209.85.220.182]:56763 "EHLO
-	mail-vc0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750880AbaHSV6A (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Aug 2014 17:58:00 -0400
-Received: by mail-vc0-f182.google.com with SMTP id hy4so8247584vcb.13
-        for <ceph-devel@vger.kernel.org>; Tue, 19 Aug 2014 14:57:59 -0700 (PDT)
-In-Reply-To: <1355490291.31383019.1408036230928.JavaMail.zimbra@redhat.com>
+Received: from mail-vc0-f173.google.com ([209.85.220.173]:45591 "EHLO
+	mail-vc0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751676AbaHSWCs convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Aug 2014 18:02:48 -0400
+Received: by mail-vc0-f173.google.com with SMTP id hy10so8234557vcb.32
+        for <ceph-devel@vger.kernel.org>; Tue, 19 Aug 2014 15:02:47 -0700 (PDT)
+In-Reply-To: <53EE3902.1080009@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Christopher R. Hertel" <crh@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Thu, Aug 14, 2014 at 10:10 AM, Christopher R. Hertel <crh@redhat.com> wrote:
-> Ceph Folks:
+On Fri, Aug 15, 2014 at 9:44 AM, Loic Dachary <loic@dachary.org> wrote:
+> Hi,
 >
-> Hi.  I am new to Ceph but I've been around in the Open Source world for a
-> while, working on a variety of different projects (mostly Windows Interop
-> stuff).  I was asked to take a look at the authentication mechanisms used in
-> Ceph, focusing on two key areas:
+> Based on Andreas suggestions for Xorbas configuration (in a previous thread) and the last G/H discussions ( https://wiki.ceph.com/Planning/CDS/CDS_Giant_and_Hammer_%28Jun_2014%29 ), here is a simpler configuration for the LRC plugin. Instead of replacing the generic description, it generates it from a user friendly set of parameters:
 >
->   * Calamari
->   * Ceph client authentication to the Ceph cluster.
+>    https://github.com/dachary/ceph/commit/a2cfda81b8f51bb77f2c2708597f7ad7e1882b3c
 >
-> I am purposefully avoiding anything to do with the internal
-> service-to-service authentication/authorization system (that is, Cephx) for
-> two reasons.  The first is that Cephx is specifically designed for Ceph's
-> many-to-many environment, and the second is that it is sufficiently isolated
-> that I don't believe it needs to be modified to work with new external
-> authentication mechanisms.
+> The more flexible configuration syntax can be retained but the system administrator is not required to understand it.
+>
+> What do people think ?
 
-I'm a little confused here. CephX is how clients authenticate to the
-Ceph cluster...how are we going to add Kerberos auth or whatever
-without getting involved in that?
-Perhaps I'm misunderstanding the scope of what you're trying to do.
+This syntax is much simpler, nice!
+As with all of the EC plugin work, that's about the level I'm working at. ;)
 -Greg
