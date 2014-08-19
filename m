@@ -1,67 +1,42 @@
-From: Dhiraj Kamble <Dhiraj.Kamble@sandisk.com>
-Subject: Swift Upload/Post failing - 403 Forbidden
-Date: Tue, 19 Aug 2014 05:34:05 +0000
-Message-ID: <AE39FC098EAC574B88212DCCB67F06AF05DA4CF9@SACMBXIP01.sdcorp.global.sandisk.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+From: Guang Yang <yguang11@outlook.com>
+Subject: OSD suicide after being down/in for one day as it needs to search large amount of objects
+Date: Tue, 19 Aug 2014 14:30:11 +0800
+Message-ID: <BLU436-SMTP1407B6BAC746323A36B7947DFD50@phx.gbl>
+Mime-Version: 1.0 (Mac OS X Mail 7.3 \(1878.6\))
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1blp0189.outbound.protection.outlook.com ([207.46.163.189]:41851
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752586AbaHSFeV convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Aug 2014 01:34:21 -0400
-Content-Language: en-US
+Received: from blu004-omc4s33.hotmail.com ([65.55.111.172]:63625 "EHLO
+	BLU004-OMC4S33.hotmail.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752633AbaHSGaV convert rfc822-to-8bit
+	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 19 Aug 2014 02:30:21 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Ceph-devel <ceph-devel@vger.kernel.org>
+Cc: david.z1003@yahoo.com
 
-Hi,
+Hi ceph-devel,
+David (cc=92ed) reported a bug (http://tracker.ceph.com/issues/9128) wh=
+ich we came across in our test cluster during our failure testing, basi=
+cally the way to reproduce it was to leave one OSD daemon down and in f=
+or a day, at the same time, keep giving write traffic. When the OSD dae=
+mon was started again, it hit suicide timeout and kill itself.
 
-Recent changes to rgw(post ceph 0.78), caused an issue while creating a key for SWIFT subuser. An empty string is entered into the .users.swift pool instead of the expected id(user:subuser). Although "radosgw-admin user info" shows the required information; when doing a swift put; rgw errors out with 403; as the required user does not match with the users in .users.swift pool.
+After some analysis (details in the bug), David found that the op threa=
+d was busy searching for missing objects and once the volume to search =
+increase, the thread is expected to work that long time, please refer t=
+o the bug for detailed logs.
 
-Doing a "rados ls -p .users.swift" will show nothing -  it's  an empty string and goes unnoticed.
-Infact, one can do Swift Uploads/Puts using an empty string as the swift user; but will give an 403 if you specify the "user:subuser" instead.
+One simple fix is to let the op thread reset the suicide timeout period=
+ically when it is doing long-time work, other fix might be to cut the w=
+ork into smaller pieces?
 
-Several users on the ceph-users mailing list have also reported similar issues.
+Any suggestion is welcome.
 
-Opened a tracker: http://tracker.ceph.com/issues/9155
-Here's the pull request:  https://github.com/ceph/ceph/pull/2281
-
-Please find below the diff.
-The fix also takes care of an user specifying an access key as an input while creating a SWIFT key - which should not be allowed(we could do some checking & clean up there). The user specifying "--gen-access-key" option is just fine; cause it just sets the "gen_access" variable to true - which is used to create the id during SWIFT key creation. An access key is required only for S3; providing one while creating a SWIFT key will cause the swift id to be set as the "access key"  instead of the expected "user:subuser" id.
-This will cause the access key to be entered into the .users.swift pool instead of the subuser "user:subuser". So we again hit 403 error when we try using expected "user:subuser" as the swift user.
-
-No doing a "rados ls -p .users.swift" will show the expected users and not an empty string or the access key(if specified).
-
-
-diff --git a/src/rgw/rgw_user.cc b/src/rgw/rgw_user.cc
-index f21670a..a8d06b1 100644
---- a/src/rgw/rgw_user.cc
-+++ b/src/rgw/rgw_user.cc
-@@ -1040,6 +1040,15 @@ int RGWAccessKeyPool::add(RGWUserAdminOpState& op_state, std::string *err_msg, b
-   int ret;
-   std::string subprocess_msg;
-
-+  if (op_state.get_key_type() == KEY_TYPE_SWIFT && !op_state.will_gen_access()) {
-+    if (op_state.get_access_key().empty()) {
-+      op_state.set_gen_access();
-+    } else {
-+      set_err_msg(err_msg, "access key was specified during SWIFT key creation");
-+      return -EINVAL;
-+    }
-+  }
-+
-   ret = check_op(op_state, &subprocess_msg);
-   if (ret < 0) {
-     set_err_msg(err_msg, "unable to parse request, " + subprocess_msg);
-
-
-Regards,
-Dhiraj
-
-
-________________________________
-
-PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
-
+Thanks,
+Guang--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
