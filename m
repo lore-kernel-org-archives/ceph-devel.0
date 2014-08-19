@@ -1,56 +1,81 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: OSD suicide after being down/in for one day as it needs to search
- large amount of objects
-Date: Tue, 19 Aug 2014 15:09:25 -0700
-Message-ID: <CAPYLRzh5eNVqPVWGgDKSOsQ6MaDVgxnki=1dzf9Nnw5UOO6HXw@mail.gmail.com>
-References: <BLU436-SMTP1407B6BAC746323A36B7947DFD50@phx.gbl>
+From: Sage Weil <sweil@redhat.com>
+Subject: OSDMap checksums
+Date: Tue, 19 Aug 2014 15:43:54 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1408191528070.28247@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f181.google.com ([209.85.220.181]:39758 "EHLO
-	mail-vc0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752076AbaHSWJ0 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Aug 2014 18:09:26 -0400
-Received: by mail-vc0-f181.google.com with SMTP id lf12so8081225vcb.26
-        for <ceph-devel@vger.kernel.org>; Tue, 19 Aug 2014 15:09:25 -0700 (PDT)
-In-Reply-To: <BLU436-SMTP1407B6BAC746323A36B7947DFD50@phx.gbl>
+Received: from cobra.newdream.net ([66.33.216.30]:36830 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751697AbaHSWny (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Aug 2014 18:43:54 -0400
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 466BA8047E
+	for <ceph-devel@vger.kernel.org>; Tue, 19 Aug 2014 15:43:54 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 0E3BB8047E
+	for <ceph-devel@vger.kernel.org>; Tue, 19 Aug 2014 15:43:54 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Guang Yang <yguang11@outlook.com>
-Cc: Ceph-devel <ceph-devel@vger.kernel.org>, david.z1003@yahoo.com
+To: ceph-devel@vger.kernel.org
 
-On Mon, Aug 18, 2014 at 11:30 PM, Guang Yang <yguang11@outlook.com> wro=
-te:
-> Hi ceph-devel,
-> David (cc=E2=80=99ed) reported a bug (http://tracker.ceph.com/issues/=
-9128) which we came across in our test cluster during our failure testi=
-ng, basically the way to reproduce it was to leave one OSD daemon down =
-and in for a day, at the same time, keep giving write traffic. When the=
- OSD daemon was started again, it hit suicide timeout and kill itself.
->
-> After some analysis (details in the bug), David found that the op thr=
-ead was busy searching for missing objects and once the volume to searc=
-h increase, the thread is expected to work that long time, please refer=
- to the bug for detailed logs.
+We have had a range of bugs come up in the past because OSDs or mons have 
+been running different versions of the code and have encoded different 
+variations of the same OSDMap epoch.  When two nodes in the system 
+disagree about what the data distribution is, all manner of things can go 
+wrong and the effects are very difficult to debug.
 
-Can you talk a little more about what's going on here? At a quick
-naive glance, I'm not seeing why leaving an OSD down and in should
-require work based on the amount of write traffic. Perhaps if the rest
-of the cluster was changing mappings...?
+Several times we've said that we should be adding a crc or checksum to the 
+canonical encoded OSDMap so that we'll know if we're getting the "right" 
+version or not.  One could imagine in a less trusted environment this 
+would be analogous to a signed version.
 
->
-> One simple fix is to let the op thread reset the suicide timeout peri=
-odically when it is doing long-time work, other fix might be to cut the=
- work into smaller pieces?
+I've started a wip-osdmap branch to do this, but have hit a few bumps.
 
-We do both of those things throughout the OSD (although I think the
-first is simpler and more common); search for the accesses to
-cct->get_heartbeat_map()->reset_timeout.
--Greg
-Software Engineer #42 @ http://inktank.com | http://ceph.com
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Generally speaking, we want only the mons (and only the leader mon) to 
+ever be allowed to encode (and checksum/sign) a new OSDMap or incremental.  
+(The only real exception here is that the MOSDMap message reencodes maps 
+with older encoding strategies for old clients, but those old clients 
+clearly won't support the new crc, so they get a free pass.)
+
+The trouble is that in general we share maps very liberally.  More 
+specifically, we share _incremental_ maps.  The incremental map will be 
+encoded so that it itself has a crc, and also it has the crc of what the 
+final OSDMap will have once the incremental has been applied, so that you 
+can verify you got the right answer.
+
+The problem is what to do if you don't.  This can happen for a few 
+different reasons, but usually it is just that we added a field to a data 
+structure that is included in the OSDMap.
+
+The main entity affected by this is the OSDs: they store a history of 
+incremntal maps *and* full maps, and share full and incremental maps with 
+clients and peers.  We don't want them to ever share a full map that did 
+not match the specified crc as it might different from the canonical 
+version in some subtle (but problematic) way.
+
+A simple strategy would be to simply go back to the mons if we ever run 
+into this and ask for original (full) copies of the OSDMaps whose 
+encodings we got wrong.  This works, but has a few potential problems:
+
+ - The general "upgrade mons first" strategy will mean mons will start 
+generating maps that older osds can't replicate, and suddently every will 
+be hammering them for full maps.
+ - We could ask our peers, but there's no guarantee that they will be any 
+better off.
+
+We could:
+
+ - Have users upgrade OSDs before mons.  That way no 'new' osdmaps will 
+get generated before the osds are able to reencode them correctly.
+ - Make the osd peers smarter about how they share maps with each other so 
+that they can also tell when they need full maps and not just 
+incrementals.
+
+...or perhaps both.  The former avoids the problem, the latter copes with 
+it.  I'm a bit unsure how to do make the latter algorithm simple (mostly 
+stateless) and efficient, though.
+
+Any other ideas?
+
+sage
