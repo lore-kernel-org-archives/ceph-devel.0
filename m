@@ -1,152 +1,229 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: v0.84 contributors credits
-Date: Mon, 18 Aug 2014 22:38:14 +0200
-Message-ID: <53F26436.6010308@dachary.org>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: object versioning
+Date: Mon, 18 Aug 2014 17:22:10 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1408181709260.28244@cobra.newdream.net>
+References: <CABBk=J9yTxfXENN8X7VUaK_cbJZ71UCBxc4pnAsMHA7-XkJriw@mail.gmail.com> <alpine.DEB.2.00.1408140917300.32572@cobra.newdream.net> <CABBk=J-qoG6CJoQGCMmjJo0nXGCcWi8HcF4rN+S237vWzg-S5w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="s66nScE7vAmnXIFo3Cm7S11c9JiRV4E57"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:33511 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751930AbaHRUiV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Aug 2014 16:38:21 -0400
-Received: from [10.9.0.6] (unknown [10.0.2.28])
-	by smtp.dmail.dachary.org (Postfix) with ESMTP id D76551D0001
-	for <ceph-devel@vger.kernel.org>; Mon, 18 Aug 2014 22:38:14 +0200 (CEST)
+Received: from cobra.newdream.net ([66.33.216.30]:58712 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752182AbaHSAWL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Aug 2014 20:22:11 -0400
+In-Reply-To: <CABBk=J-qoG6CJoQGCMmjJo0nXGCcWi8HcF4rN+S237vWzg-S5w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Yehuda Sadeh <yehuda@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Samuel Just <sam.just@inktank.com>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---s66nScE7vAmnXIFo3Cm7S11c9JiRV4E57
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+On Thu, 14 Aug 2014, Yehuda Sadeh wrote:
+> >> The current scheme is that we update the bucket index using a 2 phase
+> >> commit, and it follows up on the objects state. So when adding /
+> >> removing an object, we first tell the bucket index to 'prepare' for
+> >> the operation, then do the operation, and eventually we let the bucket
+> >> index know about the completion. For ordering we rely on the pg
+> >> versioning system that gives us insight into the timeline, so that
+> >> when two concurrent operations happen on the same object the bucket
+> >> index can figure out who won and who is dead.
+> >> This system as it is doesn't really work with versioning as we have
+> >> both the olh, and the object instances. This is one of the solutions
+> >> that we came up with:
+> >>
+> >>  - The bucket index will be the source of the truth
+> >>  - The bucket index will serve as an operational log for olh operations
+> >>
+> >> The bucket index will index every object instance in reverse order
+> >> (from new to old). The bucket index will keep entries for deletion
+> >> markers.
+> >> The bucket index will also keep operations journal for olh
+> >> modifications. Each operation in this journal will have an id that
+> >> will be increased monotonically, and that will be tied into current
+> >> olh version. The olh will be modified using idempotent operations that
+> >> will be subject to having its current version smaller than the
+> >> operation id.
+> >> The journal will be used for keeping order, and the entries in the
+> >> journal will serve as a blueprint that the gateways will need to
+> >> follow when applying changes. In order to ensure that operations that
+> >> needed to be complete were done, we'll mark the olh before going to
+> >> the bucket index, so that if the gateway died before completing the
+> >> operation, next time we try to access the object we'll know that we
+> >> need to go to the bucket index and complete the operation.
+> >>
+> >> Things will then work like this:
+> >
+> > I take it there is also a:
+> >
+> > * object read
+> >
+> > 1. look at olh
+> > 2. if marked as pending-modify,
+> >    a. check index for current head version, and use that vaue
+> >    b. if pending-modify is super old and no matching index entry exists,
+> >       remove marker
+> >    b. if index entry does exist, send async op to roll-forward the olh
+> > 3. read referenced object version
+> >
+> > ...and the 'roll-forward' on the olh would be something like
+> >
+> >  cmpxattr pending-modify-$tag == 1
+> 
+> I'm not sure we need to this comparison. What really matters is the
+> actual olh version.
 
-Hi Ceph,
+Yeah
+ 
+> >  cmpxattr olh_version == previous v
+> 
+> Maybe it should actually be cmpxattr olh_version < new v
+> 
+> >  setxattr olh_version = new v
+> >  setxattr head_version = whatever
+> >  rmxattr pending-modify-$tag
 
-Here is a sorted list of authors and organizations who contributed to v0.=
-84, by number of commits or reviews back to v0.83. The affiliation of aut=
-hors to organizations can be updated by submitting a patch to https://git=
-hub.com/ceph/ceph/blob/master/.organizationmap
+But then we also need to rmxattr pending-modify-$tag for all prior 
+modifications that are in the index/journal at the time.
 
-All commits are reviewed but the number of reviews is a fraction of the n=
-umber of commits. More often than not, the reviewer(s) is only mentioned =
-in the message of the merge although it means that all associated commits=
- have been reviewed. If you are curious about how it is done, the details=
- are at https://wiki.ceph.com/Community/Ceph_contributors_list_maintenanc=
-e_guide .=20
+> >
+> > This has the side-effect that a hot object will briefly pummel the index.
+> > That is probably fine...
+> >
+> >> * object creation
+> >>
+> >> 1. Create object instance
+> >
+> >  is there a step 0 so that a failed rgw gets garbage collected?
+> 
+> What scenario are you worried about? Incomplete operations should be
+> take care of by step (5)
 
-Commits by authors
-     1	     97 Sage Weil <sweil@redhat.com>
-     2	     67 Sage Weil <sage@inktank.com>
-     3	     44 John Spray <jspray@redhat.com>
-     4	     36 Samuel Just <sam.just@inktank.com>
-     5	     23 Greg Farnum <greg@inktank.com>
-     6	     22 Josh Durgin <josh.durgin@inktank.com>
-     7	     17 Jo=E3o Eduardo Lu=EDs <joao.luis@inktank.com>
-     8	     15 John Spray <john.spray@inktank.com>
-     9	     13 Haomai Wang <haomaiwang@gmail.com>
-    10	     12 Loic Dachary <loic@dachary.org>
-    11	     12 Abhishek Lekshmanan <abhishek.lekshmanan@ril.com>
-    12	     11 Somnath Roy <somnath.roy@sandisk.com>
-    13	     10 John Wilkins <john.wilkins@inktank.com>
-    14	      9 Yehuda Sadeh <ysadey@redhat.com>
-    15	      8 Yan, Zheng <zheng.z.yan@intel.com>
-    16	      8 Ilya Dryomov <ilya.dryomov@inktank.com>
-    17	      8 Dan Mick <dan.mick@inktank.com>
-    18	      6 Yehuda Sadeh <yehuda@inktank.com>
-    19	      4 Wido den Hollander <wido@42on.com>
-    20	      4 Thorsten Behrens <tbehrens@suse.com>
-    21	      4 Matt Benjamin <matt@linuxbox.com>
-    22	      4 Ma Jianpeng <jianpeng.ma@intel.com>
-    23	      3 Dmitry Smirnov <onlyjob@member.fsf.org>
-    24	      3 Andrey Kuznetsov <Andrey_Kuznetsov@epam.com>
-    25	      2 Xiaoxi Chen <xiaoxi.chen@intel.com>
-    26	      2 Sandon Van Ness <sandon@inktank.com>
-    27	      2 Huamin Chen <hchen@redhat.com>
-    28	      1 Sylvain Munaut <s.munaut@whatever-company.com>
-    29	      1 Stephen Jahl <stephenjahl@gmail.com>
-    30	      1 Sebastien Han <sebastien.han@enovance.com>
-    31	      1 Luis Pab=F3n <lpabon@redhat.com>
-    32	      1 Kevin Dalley <kevin@kelphead.org>
-    33	      1 Kevin Cox <kevincox@kevincox.ca>
-    34	      1 Jenkins <jenkins@inktank.com>
-    35	      1 Guang Yang <yguang@yahoo-inc.com>
-    36	      1 Federico Simoncelli <fsimonce@redhat.com>
-    37	      1 Dan van der Ster <daniel.vanderster@cern.ch>
-    38	      1 Alfredo Deza <alfredo.deza@inktank.com>
-Commits by organizations
-     1	    216 Inktank <contact@inktank.com>
-     2	    154 Red Hat <contact@redhat.com>
-     3	     14 Intel <contact@intel.com>
-     4	     13 UnitedStack <contact@unitedstack.com>
-     5	     12 Reliance Jio Infocomm Ltd. <contact@ril.com>
-     6	     12 Cloudwatt <libre.licensing@cloudwatt.com>
-     7	     11 SanDisk <contact@sandisk.com>
-     8	      4 Wido 42on <contact@42on.com>
-     9	      4 The Linux Box <contact@linuxbox.com>
-    10	      4 SUSE <contact@suse.com>
-    11	      3 EPAM <contact@epam.com>
-    12	      3 Debian GNU/Linux <contact@debian.org>
-    13	      1 Yahoo! <contact@yahoo-inc.com>
-    14	      1 Whatever <contact@whatever-company.com>
-    15	      1 Unaffiliated <no@organization.net>
-    16	      1 MIT Computer Science and Artificial Intelligence Laborator=
-y <webmaster@csail.mit.edu>
-    17	      1 HGST <contact@hgst.com>
-    18	      1 eNovance <contact@enovance.com>
-    19	      1 CERN <contact@cern.ch>
-Reviews by authors (one review spans multiple commits)
-     1	     33 Sage Weil <sweil@redhat.com>
-     2	     22 Greg Farnum <greg@inktank.com>
-     3	     19 Samuel Just <sam.just@inktank.com>
-     4	     14 Josh Durgin <josh.durgin@inktank.com>
-     5	      8 Loic Dachary <loic@dachary.org>
-     6	      5 Haomai Wang <haomaiwang@gmail.com>
-     7	      4 Dan Mick <dan.mick@inktank.com>
-     8	      3 Yehuda Sadeh <ysadey@redhat.com>
-     9	      3 John Wilkins <john.wilkins@inktank.com>
-    10	      3 Jo=E3o Eduardo Lu=EDs <joao.luis@inktank.com>
-    11	      2 Sahid Orentino Ferdjaoui <sahid.ferdjaoui@cloudwatt.com>
-    12	      2 Sage Weil <sage@inktank.com>
-    13	      2 John Spray <jspray@redhat.com>
-    14	      2 Florent Flament <florent.flament@cloudwatt.com>
-    15	      1 Yehuda Sadeh <yehuda@inktank.com>
-    16	      1 Alfredo Deza <alfredo.deza@inktank.com>
-Reviews by organizations (one review spans multiple commits)
-     1	     69 Inktank <contact@inktank.com>
-     2	     38 Red Hat <contact@redhat.com>
-     3	     12 Cloudwatt <libre.licensing@cloudwatt.com>
-     4	      5 UnitedStack <contact@unitedstack.com
+If we fail before 2 then the (partial) object version should get garbage 
+collected.
 
-Cheers
+> >> 2. Mark olh that it's about to be modified
+> >
+> >  setxattr pending-modify-$tag=1
+> >
+> >> 3. Update bucket index about new object instance
+> >
+> >  omap_setkeys journal_$object_$olhversion_$tag = pending ?
+> 
+> Yeah, something along these lines.
+> 
+> >
+> >> 4. Read bucket index object op journal
+> >>
+> >> Note that the journal should have at this point an entry that says
+> >> 'point olh to specific object version, subject to olh is at version
+> >> X'.
+> >>
+> >> 5. Apply journal ops
+> >
+> > same as roll-forward event above?  unmark olh in the same op:
+> >
+> >  cmpxattr pending-modify-$tag == 1
+> >  cmpxattr olh_version == $olh_version_old
+> >  setxattr olh_version = $olh_version_new
+> >  setxattr head_version = whatever
+> >  rmxattr pending-modify-$tag
+> >
+> >> 6. Trim journal, unmark olh
+> >
+> > Just trim the journal.
+> >
+> >  call rgw.trim_journal($object, $olh_version_new)
+> >
+> > ...which can remove all prior journal entries too, since the olh is now at
+> > that version (or something higher).
 
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
+Moving on to the others ops:
 
+> >> * object removal (olh)
+> >>
+> >> 1. Mark olh that it's about to be modified
 
+ setxattr pending-modify-$tagthing
+
+> >> 2. Update bucket index about the new deletion marker
+
+ omap_setkeys ...
+
+> >> 3. Read bucket index object op journal
+> >>
+> >> The journal entry should say something like 'mark olh as removed,
+> >> subject to olh is at version X'
+
+ call rgw.describe_olh_op $bucket $object  ?
+
+> >> 4. Apply ops
+
+ cmpxattr olh_version == $olh_version_old
+ setxattr olh_version = $olh_version_new
+ setxattr head_version = whiteout
+ rmxattr pending-modify-$tag (for all pending tags)
+
+> >> 5. Trim journal, unmark olh
+> >>
+> >> Another option is to actually remove the olh, but in this case we'll
+> >> lose the olh versioning. We can in that case use the object
+> >> non-existent state as a check, but that will not be enough as there
+> >> are some corner cases where we could end up with the olh pointing at
+> >> the wrong object.
+
+Yeah, it seems simplest to keep the olh as long as there are object 
+versions.
 
 
+> >> * object version removal
+> >>
+> >> 1. Mark olh as it will potentially be modified
 
+ setxattr pending-modify-$tag
 
+> >> 2. Update bucket index about object instance removal
 
+ omap_setkeys ...
 
+> >> 3. Read bucket index op journal
 
+ call rgw.describe_olh_op $bucket $object $tag
 
+> >> 4. apply ops journal ...
+> >> Now the journal might just say something like 'remove object
+> >> instance', which means that the olh was pointing at a different object
+> >> version. The more interesting case is when the olh pointing at this
+> >> specific object version. In this case the journal will say something
+> >> like 'first point the olh at version V2, subject to olh is at version
+> >> X. Now, remove object instance V1'.
 
---s66nScE7vAmnXIFo3Cm7S11c9JiRV4E57
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+ cmpxattr olh_version == $olh_version_old
+ setxattr olh_version = $olh_version_new
+ rmxattr pending-modify-$tag (for all pending tags)
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+It seems like one could get away with not touching the olh for removing 
+old object versions, but I'm not sure it's worth it?
 
-iEYEARECAAYFAlPyZDYACgkQ8dLMyEl6F23PPwCbBnjkUPg59N6WK9eSn/vtXeks
-oRoAnjAya0oiqLx7haglHY39Gb2exdF1
-=xA71
------END PGP SIGNATURE-----
+> >> 5. Trim journal, unmark olh
+> >>
+> >>
+> >> Note about olh marking: The olh mark will create an attr on the olh
+> >> that will have an id and a timestamp. There could be multiple marks on
+> >> the olh, and the marks should have some expiration, so that operations
+> >> that did not really start would be removed after a while.
 
---s66nScE7vAmnXIFo3Cm7S11c9JiRV4E57--
+Ah, yeah.  So it's really smoething like
+
+ setxattr pending-modify-$tag = <timestamp>
+
+There is another case here when when all versions get removed.  In that 
+case, the final op would just remove the olh entirely.  Later, when we 
+recreate the object, the object create would be
+
+1. write object version
+2. write to journal
+3. describe olh op
+4. create/update olh
+5. trim journal
+
+?
+
+sage
