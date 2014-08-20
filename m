@@ -1,324 +1,125 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: RE: Deadlock in ceph journal
-Date: Wed, 20 Aug 2014 08:33:33 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1408200832440.28244@cobra.newdream.net>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2646AE7B@SACMBXIP02.sdcorp.global.sandisk.com> <alpine.DEB.2.00.1408192052530.28244@cobra.newdream.net> <755F6B91B3BE364F9BCA11EA3F9E0C6F2646AF1D@SACMBXIP02.sdcorp.global.sandisk.com>
- <alpine.DEB.2.00.1408192149330.28244@cobra.newdream.net> <755F6B91B3BE364F9BCA11EA3F9E0C6F2646AF69@SACMBXIP02.sdcorp.global.sandisk.com>
+From: Yehuda Sadeh <yehuda@redhat.com>
+Subject: Re: RadosGW crashing on copy for one specific object
+Date: Wed, 20 Aug 2014 10:25:12 -0700
+Message-ID: <CABBk=J8G=fWC5_m0qxAaYAH0UioYA++87S84J9+23B2BxNs39g@mail.gmail.com>
+References: <CAF6-1L4zXmczyvXyD=1ZKjO67BYDoPMa3JEaKn082y5WUZY39w@mail.gmail.com>
+	<CABBk=J8qLc45ggoqdWEZVi3YF0Og9wuj_5tW_5Gng+bh65rUjg@mail.gmail.com>
+	<CAF6-1L6GWKmncQXA_e4NzaFzLqefzQ4O1qikW0zG6k7BrrMvHg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:40858 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751316AbaHTPde (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Aug 2014 11:33:34 -0400
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2646AF69@SACMBXIP02.sdcorp.global.sandisk.com>
+Received: from mail-ie0-f181.google.com ([209.85.223.181]:37272 "EHLO
+	mail-ie0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751467AbaHTRZN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Aug 2014 13:25:13 -0400
+Received: by mail-ie0-f181.google.com with SMTP id rp18so3240318iec.40
+        for <ceph-devel@vger.kernel.org>; Wed, 20 Aug 2014 10:25:13 -0700 (PDT)
+In-Reply-To: <CAF6-1L6GWKmncQXA_e4NzaFzLqefzQ4O1qikW0zG6k7BrrMvHg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
-Cc: "Samuel Just (sam.just@inktank.com)" <sam.just@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Mark Kirkwood <mark.kirkwood@catalyst.net.nz>, "jianpeng.ma@intel.com" <jianpeng.ma@intel.com>
+To: Sylvain Munaut <s.munaut@whatever-company.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-I suspect what is really needed is a drain_aio() function that will wait 
-for all pending aio ops to complete on shutdown.  What happens to those 
-IOs if the process exists while they are in flight is probably undefined; 
-we should just avoid doing that.
+On Wed, Aug 20, 2014 at 6:47 AM, Sylvain Munaut
+<s.munaut@whatever-company.com> wrote:
+> Hi,
+>
+>
+>> What does 'radosgw-admin object stat --bucket=<bucket> --object=<object>' show?
+>
+> { "name": "5ae1b8cb8a2bdc3c2d7e1868b60d76abea2536f4604d6d312df95b719470fb3b\/render-image",
+>   "size": 239879,
+>   "policy": { "acl": { "acl_user_map": [
+>                 { "user": "kp",
+>                   "acl": 15}],
+>           "acl_group_map": [],
+>           "grant_map": [
+>                 { "id": "kp",
+>                   "grant": { "type": { "type": 0},
+>                       "id": "kp",
+>                       "email": "",
+>                       "permission": { "flags": 15},
+>                       "name": "KP S3 User",
+>                       "group": 0}}]},
+>       "owner": { "id": "kp",
+>           "display_name": "KP S3 User"}},
+>   "etag": "bfe2df862d92f70cecbedbab324e3f78-1",
+>   "tag": "default.440489.1590546",
+>   "manifest": { "objs": [
+>             0,
+>             { "loc": { "bucket": { "name": "kp-render-image.bouygues",
+>                       "pool": ".rgw.kp-render-image",
+>                       "data_extra_pool": "",
+>                       "index_pool": ".rgw.kp-render-image",
+>                       "marker": "default.440489.58258",
+>                       "bucket_id": "default.440489.58258"},
+>                   "key": "",
+>                   "ns": "multipart",
+>                   "object":
+> "_multipart_5ae1b8cb8a2bdc3c2d7e1868b60d76abea2536f4604d6d312df95b719470fb3b\/render-image.8rSDD8MVD1KIXDTQDsf3g6b71dqADP_.1"},
+>               "loc_ofs": 0,
+>               "size": 239879}],
+>       "obj_size": 239879,
+>       "explicit_objs": "true",
+>       "head_obj": { "bucket": { "name": "",
+>               "pool": "",
+>               "data_extra_pool": "",
+>               "index_pool": "",
+>               "marker": "",
+>               "bucket_id": ""},
+>           "key": "",
+>           "ns": "",
+>           "object": ""},
+>       "head_size": 0,
+>       "max_head_size": 0,
+>       "prefix": "",
+>       "tail_bucket": { "name": "",
+>           "pool": "",
+>           "data_extra_pool": "",
+>           "index_pool": "",
+>           "marker": "",
+>           "bucket_id": ""},
+>       "rules": []},
+>   "attrs": { "user.rgw.content_type": "image\/png"}}
+>
+>
+>> Also, can you bump logging up? debug rgw = 20, debug ms = 1
+>
+> I'll try, but being on the production cluster, it's constantly
+> hammered with requests :p
+>
+>
 
-sage
+The object has a zero sized head, which is ok, but I think it triggers
+an issue. Can you try this:
+
+diff --git a/src/rgw/rgw_dencoder.cc b/src/rgw/rgw_dencoder.cc
+index e6dc2ba..fd12c4f 100644
+--- a/src/rgw/rgw_dencoder.cc
++++ b/src/rgw/rgw_dencoder.cc
+@@ -104,7 +104,7 @@ void RGWObjManifest::obj_iterator::update_location()
+
+   const rgw_obj& head = manifest->get_head();
+
+-  if (ofs < manifest->get_head_size()) {
++  if (ofs <= manifest->get_head_size()) {
+     location = head;
+     return;
+   }
+diff --git a/src/rgw/rgw_rados.cc b/src/rgw/rgw_rados.cc
+index 7ca4a9d..877c130 100644
+--- a/src/rgw/rgw_rados.cc
++++ b/src/rgw/rgw_rados.cc
+@@ -558,7 +558,7 @@ void RGWObjManifest::obj_iterator::operator++()
+   }
+
+   /* are we still pointing at the head? */
+-  if (ofs < head_size) {
++  if (ofs <= head_size) {
+     rule_iter = manifest->rules.begin();
+     RGWObjManifestRule *rule = &rule_iter->second;
+     ofs = MIN(head_size, obj_size);
 
 
-On Wed, 20 Aug 2014, Somnath Roy wrote:
-
-> I will also take the patch and test it out.
-> 
-> Thanks & Regards
-> Somnath
-> 
-> -----Original Message-----
-> From: Sage Weil [mailto:sweil@redhat.com] 
-> Sent: Tuesday, August 19, 2014 9:51 PM
-> To: Somnath Roy
-> Cc: Samuel Just (sam.just@inktank.com); ceph-devel@vger.kernel.org; Mark Kirkwood; jianpeng.ma@intel.com
-> Subject: RE: Deadlock in ceph journal
-> 
-> On Wed, 20 Aug 2014, Somnath Roy wrote:
-> > Thanks Sage !
-> > So, the latest master should have the fix, right ?
-> 
-> The original patch that caused the regression is reverted, but we'd like to reapply it if we sort out the issues.  wip-filejournal has the offending patch and your fix.. but I'm eager to hear if Jianpeng and Mark can confirm it's complete/correct or if there is still a problem.
-> 
-> sage
-> 
-> > 
-> > Regards
-> > Somnath
-> > 
-> > -----Original Message-----
-> > From: Sage Weil [mailto:sweil@redhat.com]
-> > Sent: Tuesday, August 19, 2014 8:55 PM
-> > To: Somnath Roy
-> > Cc: Samuel Just (sam.just@inktank.com); ceph-devel@vger.kernel.org; 
-> > Mark Kirkwood; jianpeng.ma@intel.com
-> > Subject: RE: Deadlock in ceph journal
-> > 
-> > [Copying ceph-devel, dropping ceph-users]
-> > 
-> > Yeah, that looks like a bug.  I pushed wip-filejournal that reapplies Jianpeng's original patch and this one.  I'm not certain about last other suggested fix, though, but I'm hoping that this fix explains the strange behavior Jianpeng and Mark have seen?
-> > 
-> > sage
-> > 
-> > 
-> > On Wed, 20 Aug 2014, Somnath Roy wrote:
-> > >
-> > > I think this is the issue..
-> > >
-> > >
-> > >
-> > > http://tracker.ceph.com/issues/9073
-> > >
-> > >
-> > >
-> > > Thanks & Regards
-> > >
-> > > Somnath
-> > >
-> > >
-> > >
-> > > From: Somnath Roy
-> > > Sent: Tuesday, August 19, 2014 6:25 PM
-> > > To: Sage Weil (sage@inktank.com); Samuel Just (sam.just@inktank.com)
-> > > Cc: ceph-users@lists.ceph.com
-> > > Subject: Deadlock in ceph journal
-> > >
-> > >
-> > >
-> > > Hi Sage/Sam,
-> > >
-> > > During our testing we found a potential deadlock scenario in the 
-> > > filestore journal code base. This is happening because of two reason.
-> > >
-> > >
-> > >
-> > > 1.       This is because code is not signaling aio_cond from
-> > > check_aio_completion() in case seq = 0
-> > >
-> > > 2.       Following changes in the write_thread_entry() is allowing a
-> > > very first header write with seq = 0.
-> > >
-> > >                if (writeq.empty() && !must_write_header) {
-> > >
-> > >
-> > >
-> > >
-> > >
-> > > Now, during ceph-deploy activate this is what happening.
-> > >
-> > >
-> > >
-> > > 1. The very first write of header with seq = 0 issued and it is 
-> > > waiting for aio completion. So, aio_num = 1.
-> > >
-> > > 2. superblock write came in and got into while (aio_num > 0) block 
-> > > of
-> > > write_thread_entry() and waiting on the aio_cond
-> > >
-> > > 3. The seq = 0 aio completed but not setting completed_something = 
-> > > true and as a result aio_cond is not signaled.
-> > >
-> > > 4. write_thread_entry() is getting into deadlock.
-> > >
-> > >
-> > >
-> > > This is a timing problem and if header write is returned before 
-> > > superblock write this will not happen and will be happening in case 
-> > > of block journal device only (aio is enabled).
-> > >
-> > >
-> > >
-> > > Here is the log snippet we are getting.
-> > >
-> > >
-> > >
-> > > 2014-08-19 12:59:10.029363 7f60fa33b700 10 journal 
-> > > write_thread_entry start
-> > >
-> > > 2014-08-19 12:59:10.029395 7f60fa33b700 20 journal 
-> > > prepare_multi_write queue_pos now 4096
-> > >
-> > > 2014-08-19 12:59:10.029427 7f60fa33b700 15 journal do_aio_write 
-> > > writing
-> > > 4096~0 + header
-> > >
-> > > 2014-08-19 12:59:10.029439 7f60fa33b700 20 journal write_aio_bl 
-> > > 0~4096 seq 0
-> > >
-> > > 2014-08-19 12:59:10.029442 7f60f9339700 10 journal 
-> > > write_finish_thread_entry enter
-> > >
-> > > 2014-08-19 12:59:10.029466 7f60fa33b700 20 journal write_aio_bl ..
-> > > 0~4096 in
-> > > 1
-> > >
-> > > 2014-08-19 12:59:10.029498 7f60fa33b700 20 journal write_aio_bl 
-> > > 4096~0 seq 0
-> > >
-> > > 2014-08-19 12:59:10.029505 7f60fa33b700  5 journal put_throttle 
-> > > finished 0 ops and 0 bytes, now 0 ops and 0 bytes
-> > >
-> > > 2014-08-19 12:59:10.029510 7f60fa33b700 20 journal 
-> > > write_thread_entry going to sleep
-> > >
-> > > 2014-08-19 12:59:10.029538 7f60ff178800 10 journal journal_start
-> > >
-> > > 2014-08-19 12:59:10.029566 7f60f9339700 20 journal 
-> > > write_finish_thread_entry waiting for aio(s)
-> > >
-> > > 2014-08-19 12:59:10.029726 7f60ff178800 15
-> > > filestore(/var/lib/ceph/tmp/mnt.NKfs2R) read
-> > > meta/23c2fcde/osd_superblock/0//-1 0~0
-> > >
-> > > 2014-08-19 12:59:10.029793 7f60ff178800 -1
-> > > filestore(/var/lib/ceph/tmp/mnt.NKfs2R) could not find
-> > > 23c2fcde/osd_superblock/0//-1 in index: (2) No such file or 
-> > > directory
-> > >
-> > > 2014-08-19 12:59:10.029815 7f60ff178800 10
-> > > filestore(/var/lib/ceph/tmp/mnt.NKfs2R)
-> > > FileStore::read(meta/23c2fcde/osd_superblock/0//-1) open error: (2) 
-> > > No such file or directory
-> > >
-> > > 2014-08-19 12:59:10.029892 7f60ff178800  5
-> > > filestore(/var/lib/ceph/tmp/mnt.NKfs2R) queue_transactions new 
-> > > osr(default
-> > > 0x42ea9f0)/0x42ea9f0
-> > >
-> > > 2014-08-19 12:59:10.029922 7f60ff178800 10 journal op_submit_start 2
-> > >
-> > > 2014-08-19 12:59:10.030009 7f60ff178800  5
-> > > filestore(/var/lib/ceph/tmp/mnt.NKfs2R) queue_transactions
-> > > (writeahead) 2
-> > > 0x7fff6e817080
-> > >
-> > > 2014-08-19 12:59:10.030028 7f60ff178800 10 journal 
-> > > op_journal_transactions 2
-> > > 0x7fff6e817080
-> > >
-> > > 2014-08-19 12:59:10.030039 7f60ff178800  5 journal submit_entry seq 
-> > > 2 len
-> > > 505 (0x42a76f0)
-> > >
-> > > 2014-08-19 12:59:10.030065 7f60fa33b700 20 journal 
-> > > write_thread_entry woke up
-> > >
-> > > 2014-08-19 12:59:10.030070 7f60fa33b700 20 journal 
-> > > write_thread_entry aio
-> > > throttle: aio num 1 bytes 4096 ... exp 2 min_new 4 ... pending 0
-> > >
-> > > 2014-08-19 12:59:10.030076 7f60fa33b700 20 journal 
-> > > write_thread_entry deferring until more aios complete: 1 aios with 
-> > > 4096 bytes needs 4 bytes to start a new aio (currently 0 pending)
-> > >
-> > > 2014-08-19 12:59:10.030084 7f60ff178800 10 journal op_submit_finish 
-> > > 2
-> > >
-> > > 2014-08-19 12:59:10.030389 7f60f9339700 10 journal 
-> > > write_finish_thread_entry aio 0~4096 done
-> > >
-> > > 2014-08-19 12:59:10.030402 7f60f9339700 20 journal 
-> > > check_aio_completion
-> > >
-> > > 2014-08-19 12:59:10.030406 7f60f9339700 20 journal 
-> > > check_aio_completion completed seq 0 0~4096
-> > >
-> > > 2014-08-19 12:59:10.030412 7f60f9339700 20 journal 
-> > > write_finish_thread_entry sleeping
-> > >
-> > > 2014-08-19 12:59:15.026609 7f60fab3c700 20
-> > > filestore(/var/lib/ceph/tmp/mnt.NKfs2R) sync_entry woke after 
-> > > 5.000459
-> > >
-> > > 2014-08-19 12:59:15.026659 7f60fab3c700 10 journal commit_start 
-> > > max_applied_seq 1, open_ops 0
-> > >
-> > > 2014-08-19 12:59:15.026665 7f60fab3c700 10 journal commit_start 
-> > > blocked, all open_ops have completed
-> > >
-> > > 2014-08-19 12:59:15.026670 7f60fab3c700 10 journal commit_start 
-> > > nothing to do
-> > >
-> > > 2014-08-19 12:59:15.026676 7f60fab3c700 10 journal commit_start
-> > >
-> > > 2014-08-19 12:59:15.026691 7f60fab3c700 20
-> > > filestore(/var/lib/ceph/tmp/mnt.NKfs2R) sync_entry waiting for 
-> > > max_interval
-> > > 5.000000
-> > >
-> > > 2014-08-19 12:59:20.026826 7f60fab3c700 20
-> > > filestore(/var/lib/ceph/tmp/mnt.NKfs2R) sync_entry woke after 
-> > > 5.000135
-> > >
-> > > 2014-08-19 12:59:20.026870 7f60fab3c700 10 journal commit_start 
-> > > max_applied_seq 1, open_ops 0
-> > >
-> > > 2014-08-19 12:59:20.026876 7f60fab3c700 10 journal commit_start 
-> > > blocked, all open_ops have completed
-> > >
-> > > 2014-08-19 12:59:20.026879 7f60fab3c700 10 journal commit_start 
-> > > nothing to do
-> > >
-> > > 2014-08-19 12:59:20.026891 7f60fab3c700 10 journal commit_start
-> > >
-> > >
-> > >
-> > >
-> > >
-> > > Could you please confirm this as a valid defect ?
-> > >
-> > >
-> > >
-> > > If so, sending a signal on aio_cond in case of seq = 0, could be the 
-> > > solution ?
-> > >
-> > >
-> > >
-> > > Please let me know if there is any potential workaround for this 
-> > > while deploying with ceph-deploy. Will ceph-deploy accept file path as journal ?
-> > >
-> > >
-> > >
-> > > Thanks & Regards
-> > >
-> > > Somnath
-> > >
-> > >
-> > > ____________________________________________________________________
-> > > __
-> > > ______
-> > >
-> > > PLEASE NOTE: The information contained in this electronic mail 
-> > > message is intended only for the use of the designated recipient(s) 
-> > > named above. If the reader of this message is not the intended 
-> > > recipient, you are hereby notified that you have received this 
-> > > message in error and that any review, dissemination, distribution, 
-> > > or copying of this message is strictly prohibited. If you have 
-> > > received this communication in error, please notify the sender by 
-> > > telephone or e-mail (as shown above) immediately and destroy any and 
-> > > all copies of this message in your possession (whether hard copies or electronically stored copies).
-> > >
-> > >
-> > >
-> > 
-> > ________________________________
-> > 
-> > PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
-> > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
-> > in the body of a message to majordomo@vger.kernel.org More majordomo 
-> > info at  http://vger.kernel.org/majordomo-info.html
-> > 
-> > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+Thanks,
+Yehuda
