@@ -1,206 +1,280 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: OSDMap checksums
-Date: Tue, 19 Aug 2014 21:35:21 -0700
-Message-ID: <CAPYLRzioYDorFaruE5nnQgVZrxC9vDckT6Et6KmWhFaYt4fszw@mail.gmail.com>
-References: <alpine.DEB.2.00.1408191528070.28247@cobra.newdream.net>
-	<CAPYLRziaU2R57axjLVmkSX6P7F9gwHhwHMBtHgmVq0a2pd=P3g@mail.gmail.com>
-	<alpine.DEB.2.00.1408191723440.28244@cobra.newdream.net>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Deadlock in ceph journal
+Date: Wed, 20 Aug 2014 04:38:16 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2646AF1D@SACMBXIP02.sdcorp.global.sandisk.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2646AE7B@SACMBXIP02.sdcorp.global.sandisk.com>
+ <alpine.DEB.2.00.1408192052530.28244@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f51.google.com ([209.85.216.51]:38918 "EHLO
-	mail-qa0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750850AbaHTEfX convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Aug 2014 00:35:23 -0400
-Received: by mail-qa0-f51.google.com with SMTP id k15so6587192qaq.10
-        for <ceph-devel@vger.kernel.org>; Tue, 19 Aug 2014 21:35:21 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1408191723440.28244@cobra.newdream.net>
+Received: from mail-bl2lp0203.outbound.protection.outlook.com ([207.46.163.203]:50512
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1750734AbaHTEij convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Aug 2014 00:38:39 -0400
+In-Reply-To: <alpine.DEB.2.00.1408192052530.28244@cobra.newdream.net>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sweil@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: "Samuel Just (sam.just@inktank.com)" <sam.just@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Mark Kirkwood <mark.kirkwood@catalyst.net.nz>, "jianpeng.ma@intel.com" <jianpeng.ma@intel.com>
 
-On Tue, Aug 19, 2014 at 5:32 PM, Sage Weil <sweil@redhat.com> wrote:
-> On Tue, 19 Aug 2014, Gregory Farnum wrote:
->> On Tue, Aug 19, 2014 at 3:43 PM, Sage Weil <sweil@redhat.com> wrote:
->> > We have had a range of bugs come up in the past because OSDs or mo=
-ns have
->> > been running different versions of the code and have encoded diffe=
-rent
->> > variations of the same OSDMap epoch.  When two nodes in the system
->> > disagree about what the data distribution is, all manner of things=
- can go
->> > wrong and the effects are very difficult to debug.
->> >
->> > Several times we've said that we should be adding a crc or checksu=
-m to the
->> > canonical encoded OSDMap so that we'll know if we're getting the "=
-right"
->> > version or not.  One could imagine in a less trusted environment t=
-his
->> > would be analogous to a signed version.
->> >
->> > I've started a wip-osdmap branch to do this, but have hit a few bu=
-mps.
->> >
->> > Generally speaking, we want only the mons (and only the leader mon=
-) to
->> > ever be allowed to encode (and checksum/sign) a new OSDMap or incr=
-emental.
->> > (The only real exception here is that the MOSDMap message reencode=
-s maps
->> > with older encoding strategies for old clients, but those old clie=
-nts
->> > clearly won't support the new crc, so they get a free pass.)
->> >
->> > The trouble is that in general we share maps very liberally.  More
->> > specifically, we share _incremental_ maps.  The incremental map wi=
-ll be
->> > encoded so that it itself has a crc, and also it has the crc of wh=
-at the
->> > final OSDMap will have once the incremental has been applied, so t=
-hat you
->> > can verify you got the right answer.
->> >
->> > The problem is what to do if you don't.  This can happen for a few
->> > different reasons, but usually it is just that we added a field to=
- a data
->> > structure that is included in the OSDMap.
->> >
->> > The main entity affected by this is the OSDs: they store a history=
- of
->> > incremntal maps *and* full maps, and share full and incremental ma=
-ps with
->> > clients and peers.  We don't want them to ever share a full map th=
-at did
->> > not match the specified crc as it might different from the canonic=
-al
->> > version in some subtle (but problematic) way.
->> >
->> > A simple strategy would be to simply go back to the mons if we eve=
-r run
->> > into this and ask for original (full) copies of the OSDMaps whose
->> > encodings we got wrong.  This works, but has a few potential probl=
-ems:
->> >
->> >  - The general "upgrade mons first" strategy will mean mons will s=
-tart
->> > generating maps that older osds can't replicate, and suddently eve=
-ry will
->> > be hammering them for full maps.
->> >  - We could ask our peers, but there's no guarantee that they will=
- be any
->> > better off.
->> >
->> > We could:
->> >
->> >  - Have users upgrade OSDs before mons.  That way no 'new' osdmaps=
- will
->> > get generated before the osds are able to reencode them correctly.
->> >  - Make the osd peers smarter about how they share maps with each =
-other so
->> > that they can also tell when they need full maps and not just
->> > incrementals.
->> >
->> > ...or perhaps both.  The former avoids the problem, the latter cop=
-es with
->> > it.  I'm a bit unsure how to do make the latter algorithm simple (=
-mostly
->> > stateless) and efficient, though.
->> >
->> > Any other ideas?
->>
->> How stateless do we need it to be? I don't remember all the details =
-of
->> how OSDs generate their incrementals for sharing, but:
->> 1) Going forward, we can make sure that OSDs share full maps (or
->> Incrementals that they've received from the monitor instead of
->> self-generated) whenever they didn't make use of all the data in the
->> encoded bufferlist (or, perhaps, based on some supported feature bit=
-s
->> in the OSDMap itself?)
+Thanks Sage !
+So, the latest master should have the fix, right ?
+
+Regards
+Somnath
+
+-----Original Message-----
+From: Sage Weil [mailto:sweil@redhat.com]
+Sent: Tuesday, August 19, 2014 8:55 PM
+To: Somnath Roy
+Cc: Samuel Just (sam.just@inktank.com); ceph-devel@vger.kernel.org; Mark Kirkwood; jianpeng.ma@intel.com
+Subject: RE: Deadlock in ceph journal
+
+[Copying ceph-devel, dropping ceph-users]
+
+Yeah, that looks like a bug.  I pushed wip-filejournal that reapplies Jianpeng's original patch and this one.  I'm not certain about last other suggested fix, though, but I'm hoping that this fix explains the strange behavior Jianpeng and Mark have seen?
+
+sage
+
+
+On Wed, 20 Aug 2014, Somnath Roy wrote:
 >
-> I'd planned on doing a check after we receive and apply an incrementa=
-l
-> where we reencode our map and compare the crc to the one in the
-> incremental.  If it doesn't match, we will know there is a problem.
+> I think this is the issue..
 >
->> 2) We can set up OSDs so that they query the monitor (or, optionally=
-,
->> a peer with a sufficient set of feature bits?) whenever they see a
->> checksum that doesn't match what they generate (...and eventually, d=
-o
->> something more to check their prior maps?)
 >
-> There isn't necessarily a 1:1 mapping onto feature bits.  We might ad=
-d
-> fields to encodable data structures that will subtley get reset to th=
-e
-> default by older code.  Only if we plan on relying on us being very
-> careful could we get away with feature bits...  That said, it would m=
-ake
-> our lives easier, because the mon could encode the map using the feat=
-ure
-> bits supported by all osds.  Only after they all restart will new stu=
-ff
-> kick in.  (We probably want to do that anyway).  But I still worry
-> think it would be nice to guarantee we have a bit-for-bit accurate
-> version of the osdmap before we ever use or share it.
 >
-> In any case, though, the problem is that we will eventaully reach a
-> point where we just received an incremental and realized that it lead=
-s to
-> a new OSDMap that we can't accurately recreate.  What do we do?
-> Obviously, we throw it on the floor.
+> http://tracker.ceph.com/issues/9073
+>
+>
+>
+> Thanks & Regards
+>
+> Somnath
+>
+>
+>
+> From: Somnath Roy
+> Sent: Tuesday, August 19, 2014 6:25 PM
+> To: Sage Weil (sage@inktank.com); Samuel Just (sam.just@inktank.com)
+> Cc: ceph-users@lists.ceph.com
+> Subject: Deadlock in ceph journal
+>
+>
+>
+> Hi Sage/Sam,
+>
+> During our testing we found a potential deadlock scenario in the
+> filestore journal code base. This is happening because of two reason.
+>
+>
+>
+> 1.       This is because code is not signaling aio_cond from
+> check_aio_completion() in case seq = 0
+>
+> 2.       Following changes in the write_thread_entry() is allowing a
+> very first header write with seq = 0.
+>
+>                if (writeq.empty() && !must_write_header) {
+>
+>
+>
+>
+>
+> Now, during ceph-deploy activate this is what happening.
+>
+>
+>
+> 1. The very first write of header with seq = 0 issued and it is
+> waiting for aio completion. So, aio_num = 1.
+>
+> 2. superblock write came in and got into while (aio_num > 0) block of
+> write_thread_entry() and waiting on the aio_cond
+>
+> 3. The seq = 0 aio completed but not setting completed_something =
+> true and as a result aio_cond is not signaled.
+>
+> 4. write_thread_entry() is getting into deadlock.
+>
+>
+>
+> This is a timing problem and if header write is returned before
+> superblock write this will not happen and will be happening in case of
+> block journal device only (aio is enabled).
+>
+>
+>
+> Here is the log snippet we are getting.
+>
+>
+>
+> 2014-08-19 12:59:10.029363 7f60fa33b700 10 journal write_thread_entry
+> start
+>
+> 2014-08-19 12:59:10.029395 7f60fa33b700 20 journal prepare_multi_write
+> queue_pos now 4096
+>
+> 2014-08-19 12:59:10.029427 7f60fa33b700 15 journal do_aio_write
+> writing
+> 4096~0 + header
+>
+> 2014-08-19 12:59:10.029439 7f60fa33b700 20 journal write_aio_bl 0~4096
+> seq 0
+>
+> 2014-08-19 12:59:10.029442 7f60f9339700 10 journal
+> write_finish_thread_entry enter
+>
+> 2014-08-19 12:59:10.029466 7f60fa33b700 20 journal write_aio_bl ..
+> 0~4096 in
+> 1
+>
+> 2014-08-19 12:59:10.029498 7f60fa33b700 20 journal write_aio_bl 4096~0
+> seq 0
+>
+> 2014-08-19 12:59:10.029505 7f60fa33b700  5 journal put_throttle
+> finished 0 ops and 0 bytes, now 0 ops and 0 bytes
+>
+> 2014-08-19 12:59:10.029510 7f60fa33b700 20 journal write_thread_entry
+> going to sleep
+>
+> 2014-08-19 12:59:10.029538 7f60ff178800 10 journal journal_start
+>
+> 2014-08-19 12:59:10.029566 7f60f9339700 20 journal
+> write_finish_thread_entry waiting for aio(s)
+>
+> 2014-08-19 12:59:10.029726 7f60ff178800 15
+> filestore(/var/lib/ceph/tmp/mnt.NKfs2R) read
+> meta/23c2fcde/osd_superblock/0//-1 0~0
+>
+> 2014-08-19 12:59:10.029793 7f60ff178800 -1
+> filestore(/var/lib/ceph/tmp/mnt.NKfs2R) could not find
+> 23c2fcde/osd_superblock/0//-1 in index: (2) No such file or directory
+>
+> 2014-08-19 12:59:10.029815 7f60ff178800 10
+> filestore(/var/lib/ceph/tmp/mnt.NKfs2R)
+> FileStore::read(meta/23c2fcde/osd_superblock/0//-1) open error: (2) No
+> such file or directory
+>
+> 2014-08-19 12:59:10.029892 7f60ff178800  5
+> filestore(/var/lib/ceph/tmp/mnt.NKfs2R) queue_transactions new
+> osr(default
+> 0x42ea9f0)/0x42ea9f0
+>
+> 2014-08-19 12:59:10.029922 7f60ff178800 10 journal op_submit_start 2
+>
+> 2014-08-19 12:59:10.030009 7f60ff178800  5
+> filestore(/var/lib/ceph/tmp/mnt.NKfs2R) queue_transactions
+> (writeahead) 2
+> 0x7fff6e817080
+>
+> 2014-08-19 12:59:10.030028 7f60ff178800 10 journal
+> op_journal_transactions 2
+> 0x7fff6e817080
+>
+> 2014-08-19 12:59:10.030039 7f60ff178800  5 journal submit_entry seq 2
+> len
+> 505 (0x42a76f0)
+>
+> 2014-08-19 12:59:10.030065 7f60fa33b700 20 journal write_thread_entry
+> woke up
+>
+> 2014-08-19 12:59:10.030070 7f60fa33b700 20 journal write_thread_entry
+> aio
+> throttle: aio num 1 bytes 4096 ... exp 2 min_new 4 ... pending 0
+>
+> 2014-08-19 12:59:10.030076 7f60fa33b700 20 journal write_thread_entry
+> deferring until more aios complete: 1 aios with 4096 bytes needs 4
+> bytes to start a new aio (currently 0 pending)
+>
+> 2014-08-19 12:59:10.030084 7f60ff178800 10 journal op_submit_finish 2
+>
+> 2014-08-19 12:59:10.030389 7f60f9339700 10 journal
+> write_finish_thread_entry aio 0~4096 done
+>
+> 2014-08-19 12:59:10.030402 7f60f9339700 20 journal
+> check_aio_completion
+>
+> 2014-08-19 12:59:10.030406 7f60f9339700 20 journal
+> check_aio_completion completed seq 0 0~4096
+>
+> 2014-08-19 12:59:10.030412 7f60f9339700 20 journal
+> write_finish_thread_entry sleeping
+>
+> 2014-08-19 12:59:15.026609 7f60fab3c700 20
+> filestore(/var/lib/ceph/tmp/mnt.NKfs2R) sync_entry woke after 5.000459
+>
+> 2014-08-19 12:59:15.026659 7f60fab3c700 10 journal commit_start
+> max_applied_seq 1, open_ops 0
+>
+> 2014-08-19 12:59:15.026665 7f60fab3c700 10 journal commit_start
+> blocked, all open_ops have completed
+>
+> 2014-08-19 12:59:15.026670 7f60fab3c700 10 journal commit_start
+> nothing to do
+>
+> 2014-08-19 12:59:15.026676 7f60fab3c700 10 journal commit_start
+>
+> 2014-08-19 12:59:15.026691 7f60fab3c700 20
+> filestore(/var/lib/ceph/tmp/mnt.NKfs2R) sync_entry waiting for
+> max_interval
+> 5.000000
+>
+> 2014-08-19 12:59:20.026826 7f60fab3c700 20
+> filestore(/var/lib/ceph/tmp/mnt.NKfs2R) sync_entry woke after 5.000135
+>
+> 2014-08-19 12:59:20.026870 7f60fab3c700 10 journal commit_start
+> max_applied_seq 1, open_ops 0
+>
+> 2014-08-19 12:59:20.026876 7f60fab3c700 10 journal commit_start
+> blocked, all open_ops have completed
+>
+> 2014-08-19 12:59:20.026879 7f60fab3c700 10 journal commit_start
+> nothing to do
+>
+> 2014-08-19 12:59:20.026891 7f60fab3c700 10 journal commit_start
+>
+>
+>
+>
+>
+> Could you please confirm this as a valid defect ?
+>
+>
+>
+> If so, sending a signal on aio_cond in case of seq = 0, could be the
+> solution ?
+>
+>
+>
+> Please let me know if there is any potential workaround for this while
+> deploying with ceph-deploy. Will ceph-deploy accept file path as journal ?
+>
+>
+>
+> Thanks & Regards
+>
+> Somnath
+>
+>
+> ______________________________________________________________________
+> ______
+>
+> PLEASE NOTE: The information contained in this electronic mail message
+> is intended only for the use of the designated recipient(s) named
+> above. If the reader of this message is not the intended recipient,
+> you are hereby notified that you have received this message in error
+> and that any review, dissemination, distribution, or copying of this
+> message is strictly prohibited. If you have received this
+> communication in error, please notify the sender by telephone or
+> e-mail (as shown above) immediately and destroy any and all copies of
+> this message in your possession (whether hard copies or electronically stored copies).
+>
+>
+>
 
-Right, so let's talk about how we get into that situation:
-1) Our existing OSDMap is "bad."
-  a) We were never "correct"
-  b) ...we went bad and didn't notice?
-2) The Incremental we got is "bad".
-  a) It's not the original Incremental generated by the mon cluster
-  b) ...it got corrupted?
-3) We don't understand the Incremental we got and applied it wrong
-(Any other categories I'm missing?)
+________________________________
 
-Let's leave out case 1a, because that's largely a transitional issue.
-1b should be protected against thanks to the checksums.
-2a just means that every time anybody sends an Incremental, it better
-be the original. 2b should again be protected against thanks to its
-checksum
-3 is a little tricky: apparently we don't understand the full map, but
-we're allowed to stay in the cluster according to feature bits and
-other protections. So I think we're going to need to expose special
-feature bits associated with the OSD Map, or perhaps just the encoding
-version, in order to distinguish between "this isn't working right"
-and "I don't understand it but I can keep running".
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
 
-Given that, we have two big challenges:
-1) We need to get any currently-divergent OSDMaps into sync for the
-initial upgrade to this checksummed system,
-2) We need to prevent any OSD which doesn't completely understand a
-map format from transmitting any self-generated bufferlists.
-
-The only way OSDs transmit self-generated bufferlists is if the
-peer/client they're sending to isn't contiguous with the set of
-Incrementals the OSD already has; in this case the OSD will encode and
-send its oldest OSDMap. (Or at least, this is the obvious and most
-important case where they do that.) This is a pretty rare case and I
-think we'd probably be okay with just having the peer go to the
-monitors instead if this happens?
-So then we just have the upgrade issue to deal with. I think if we
-prevent the monitors from enabling checksums until all the OSDs
-support it, and then just have the OSDs query the monitors for any
-non-conforming maps on upgrade, we should be good =E2=80=94 divergent O=
-SDMaps
-are pretty rare.
-
-Is there some scenario I'm not accounting for that's concerning you?
--Greg
-Software Engineer #42 @ http://inktank.com | http://ceph.com
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
