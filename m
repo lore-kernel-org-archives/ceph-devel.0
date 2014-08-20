@@ -1,133 +1,155 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: OSDMap checksums
-Date: Tue, 19 Aug 2014 17:32:06 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1408191723440.28244@cobra.newdream.net>
-References: <alpine.DEB.2.00.1408191528070.28247@cobra.newdream.net> <CAPYLRziaU2R57axjLVmkSX6P7F9gwHhwHMBtHgmVq0a2pd=P3g@mail.gmail.com>
+From: Dong Yuan <yuandong1222@gmail.com>
+Subject: Re: Problem balancing disk space
+Date: Wed, 20 Aug 2014 10:19:28 +0800
+Message-ID: <CAMm-wcKA8uP0pcyUh+tMFH=Gt2zze1j=WVRqk2m2AHfmi4j85w@mail.gmail.com>
+References: <53F3B6F8.40105@kepler.cl>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:37435 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751787AbaHTAcH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Aug 2014 20:32:07 -0400
-In-Reply-To: <CAPYLRziaU2R57axjLVmkSX6P7F9gwHhwHMBtHgmVq0a2pd=P3g@mail.gmail.com>
+Received: from mail-vc0-f180.google.com ([209.85.220.180]:47125 "EHLO
+	mail-vc0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751738AbaHTCTa (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Aug 2014 22:19:30 -0400
+Received: by mail-vc0-f180.google.com with SMTP id ij19so8511555vcb.11
+        for <ceph-devel@vger.kernel.org>; Tue, 19 Aug 2014 19:19:29 -0700 (PDT)
+In-Reply-To: <53F3B6F8.40105@kepler.cl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Alphe Salas <asalas@kepler.cl>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tue, 19 Aug 2014, Gregory Farnum wrote:
-> On Tue, Aug 19, 2014 at 3:43 PM, Sage Weil <sweil@redhat.com> wrote:
-> > We have had a range of bugs come up in the past because OSDs or mons have
-> > been running different versions of the code and have encoded different
-> > variations of the same OSDMap epoch.  When two nodes in the system
-> > disagree about what the data distribution is, all manner of things can go
-> > wrong and the effects are very difficult to debug.
-> >
-> > Several times we've said that we should be adding a crc or checksum to the
-> > canonical encoded OSDMap so that we'll know if we're getting the "right"
-> > version or not.  One could imagine in a less trusted environment this
-> > would be analogous to a signed version.
-> >
-> > I've started a wip-osdmap branch to do this, but have hit a few bumps.
-> >
-> > Generally speaking, we want only the mons (and only the leader mon) to
-> > ever be allowed to encode (and checksum/sign) a new OSDMap or incremental.
-> > (The only real exception here is that the MOSDMap message reencodes maps
-> > with older encoding strategies for old clients, but those old clients
-> > clearly won't support the new crc, so they get a free pass.)
-> >
-> > The trouble is that in general we share maps very liberally.  More
-> > specifically, we share _incremental_ maps.  The incremental map will be
-> > encoded so that it itself has a crc, and also it has the crc of what the
-> > final OSDMap will have once the incremental has been applied, so that you
-> > can verify you got the right answer.
-> >
-> > The problem is what to do if you don't.  This can happen for a few
-> > different reasons, but usually it is just that we added a field to a data
-> > structure that is included in the OSDMap.
-> >
-> > The main entity affected by this is the OSDs: they store a history of
-> > incremntal maps *and* full maps, and share full and incremental maps with
-> > clients and peers.  We don't want them to ever share a full map that did
-> > not match the specified crc as it might different from the canonical
-> > version in some subtle (but problematic) way.
-> >
-> > A simple strategy would be to simply go back to the mons if we ever run
-> > into this and ask for original (full) copies of the OSDMaps whose
-> > encodings we got wrong.  This works, but has a few potential problems:
-> >
-> >  - The general "upgrade mons first" strategy will mean mons will start
-> > generating maps that older osds can't replicate, and suddently every will
-> > be hammering them for full maps.
-> >  - We could ask our peers, but there's no guarantee that they will be any
-> > better off.
-> >
-> > We could:
-> >
-> >  - Have users upgrade OSDs before mons.  That way no 'new' osdmaps will
-> > get generated before the osds are able to reencode them correctly.
-> >  - Make the osd peers smarter about how they share maps with each other so
-> > that they can also tell when they need full maps and not just
-> > incrementals.
-> >
-> > ...or perhaps both.  The former avoids the problem, the latter copes with
-> > it.  I'm a bit unsure how to do make the latter algorithm simple (mostly
-> > stateless) and efficient, though.
-> >
-> > Any other ideas?
-> 
-> How stateless do we need it to be? I don't remember all the details of
-> how OSDs generate their incrementals for sharing, but:
-> 1) Going forward, we can make sure that OSDs share full maps (or
-> Incrementals that they've received from the monitor instead of
-> self-generated) whenever they didn't make use of all the data in the
-> encoded bufferlist (or, perhaps, based on some supported feature bits
-> in the OSDMap itself?)
+Data balancing is depended on the following items:
 
-I'd planned on doing a check after we receive and apply an incremental 
-where we reencode our map and compare the crc to the one in the 
-incremental.  If it doesn't match, we will know there is a problem.
+1. osd counts, more is better, while 20 may be not enough.
+2. PG counts, more is better. you can try to create a new pool with
+more PGs than default.
+3. Object size, little is better. More objects with little size is
+better than less objects with big size.
+4. Bucket type in the CrushMap. different bucket type means different
+balance algorithm.
+5. Maybe other issues.
 
-> 2) We can set up OSDs so that they query the monitor (or, optionally,
-> a peer with a sufficient set of feature bits?) whenever they see a
-> checksum that doesn't match what they generate (...and eventually, do
-> something more to check their prior maps?)
+You can use pg dump command to get details about object counts for
+each PG, this may be helpful to locate your problem.
 
-There isn't necessarily a 1:1 mapping onto feature bits.  We might add 
-fields to encodable data structures that will subtley get reset to the 
-default by older code.  Only if we plan on relying on us being very 
-careful could we get away with feature bits...  That said, it would make 
-our lives easier, because the mon could encode the map using the feature 
-bits supported by all osds.  Only after they all restart will new stuff 
-kick in.  (We probably want to do that anyway).  But I still worry 
-think it would be nice to guarantee we have a bit-for-bit accurate 
-version of the osdmap before we ever use or share it.
+On 20 August 2014 04:43, Alphe Salas <asalas@kepler.cl> wrote:
+> Hello,
+> for some reasons the balancing of disk space use on OSD is not properly
+> working. Can you please give me hint to solve that issue?
+>
+> it is supposed that the proper difference betwin min and max osd disk space
+> use, should be around 20%.
+>
+> Actually I see that it is more that 40%
+>
+> follow you will find the list of disk and real use
+>
+> osd10: Filesystem      Size  Used Avail Use% Mounted on
+> osd10: /dev/sda1       1.8T  1.1T  646G  63% /var/lib/ceph/osd/ceph-18
+> osd10: Filesystem      Size  Used Avail Use% Mounted on
+> osd10: /dev/sdb1       1.8T  1.6T  109G  94% /var/lib/ceph/osd/ceph-19
+> osd09: Filesystem      Size  Used Avail Use% Mounted on
+> osd09: /dev/sda1       1.8T  1.5T  216G  88% /var/lib/ceph/osd/ceph-16
+> osd09: Filesystem      Size  Used Avail Use% Mounted on
+> osd09: /dev/sdb1       1.8T  895G  842G  52% /var/lib/ceph/osd/ceph-17
+> osd08: Filesystem      Size  Used Avail Use% Mounted on
+> osd08: /dev/sda1       1.8T  1.6T  153G  92% /var/lib/ceph/osd/ceph-10
+> osd08: Filesystem      Size  Used Avail Use% Mounted on
+> osd08: /dev/sdb1       1.8T  1.7T   84G  96% /var/lib/ceph/osd/ceph-11
+> osd07: Filesystem      Size  Used Avail Use% Mounted on
+> osd07: /dev/sda1       1.8T  1.5T  297G  83% /var/lib/ceph/osd/ceph-14
+> osd07: Filesystem      Size  Used Avail Use% Mounted on
+> osd07: /dev/sdb1       1.8T  1.5T  268G  85% /var/lib/ceph/osd/ceph-15
+> osd06: Filesystem      Size  Used Avail Use% Mounted on
+> osd06: /dev/sda1       1.8T  1.6T  193G  89% /var/lib/ceph/osd/ceph-12
+> osd06: Filesystem      Size  Used Avail Use% Mounted on
+> osd06: /dev/sdb1       1.8T  1.4T  305G  83% /var/lib/ceph/osd/ceph-13
+> osd05: Filesystem      Size  Used Avail Use% Mounted on
+> osd05: /dev/sda1       1.8T  1.3T  434G  76% /var/lib/ceph/osd/ceph-8
+> osd05: Filesystem      Size  Used Avail Use% Mounted on
+> osd05: /dev/sdb1       1.8T  1.2T  526G  70% /var/lib/ceph/osd/ceph-9
+> osd04: Filesystem      Size  Used Avail Use% Mounted on
+> osd04: /dev/sda1       1.8T  1.6T  169G  91% /var/lib/ceph/osd/ceph-6
+> osd04: Filesystem      Size  Used Avail Use% Mounted on
+> osd04: /dev/sdb1       1.8T  1.4T  313G  82% /var/lib/ceph/osd/ceph-7
+> osd03: Filesystem      Size  Used Avail Use% Mounted on
+> osd03: /dev/sda1       1.8T  1.6T  195G  89% /var/lib/ceph/osd/ceph-4
+> osd03: Filesystem      Size  Used Avail Use% Mounted on
+> osd03: /dev/sdb1       1.8T  1.3T  425G  76% /var/lib/ceph/osd/ceph-5
+> osd02: Filesystem      Size  Used Avail Use% Mounted on
+> osd02: /dev/sda1       1.8T  1.4T  362G  80% /var/lib/ceph/osd/ceph-2
+> osd02: Filesystem      Size  Used Avail Use% Mounted on
+> osd02: /dev/sdb1       1.8T  1.5T  211G  88% /var/lib/ceph/osd/ceph-3
+> osd01: Filesystem      Size  Used Avail Use% Mounted on
+> osd01: /dev/sda1       1.8T  1.4T  304G  83% /var/lib/ceph/osd/ceph-0
+> osd01: Filesystem      Size  Used Avail Use% Mounted on
+> osd01: /dev/sdb1       1.8T  1.3T  456G  74% /var/lib/ceph/osd/ceph-1
+>
+> ceph health detail gives an inacurate estimation of the problem (the
+> percentages are wrong..)
+>
+> ceph health detail
+> HEALTH_WARN 4 near full osd(s)
+> osd.6 is near full at 85% (real 91%)
+> osd.10 is near full at 86% (real 92%)
+> osd.11 is near full at 90% (real 96%)
+> osd.19 is near full at 88% (real 94%)
+>
+>
+> Then as you can see on the above disk space use dump I get a usage span from
+> 52% to 96%.
+>
+> The question is how can I force the re balancing. I tryed with ceph osd
+> reweight-by-use 108 and still there is this amazing gap.
+>
+> actual osd tree is
+>
+> # id    weight  type name       up/down reweight
+> -1      35.8    root default
+> -2      3.58            host osd01
+> 0       1.79                    osd.0   up      1
+> 1       1.79                    osd.1   up      0.808
+> -3      3.58            host osd02
+> 2       1.79                    osd.2   up      0.9193
+> 3       1.79                    osd.3   up      1
+> -4      3.58            host osd03
+> 4       1.79                    osd.4   up      1
+> 5       1.79                    osd.5   up      1
+> -5      3.58            host osd04
+> 6       1.79                    osd.6   up      1
+> 7       1.79                    osd.7   up      1
+> -6      3.58            host osd05
+> 8       1.79                    osd.8   up      0.7892
+> 9       1.79                    osd.9   up      0.7458
+> -7      3.58            host osd08
+> 10      1.79                    osd.10  up      1
+> 11      1.79                    osd.11  up      1
+> -8      3.58            host osd06
+> 12      1.79                    osd.12  up      1
+> 13      1.79                    osd.13  up      1
+> -9      3.58            host osd07
+> 14      1.79                    osd.14  up      1
+> 15      1.79                    osd.15  up      1
+> -10     3.58            host osd09
+> 16      1.79                    osd.16  up      1
+> 17      1.79                    osd.17  up      1
+> -11     3.58            host osd10
+> 18      1.79                    osd.18  up      1
+> 19      1.79                    osd.19  up      1
+>
+> Regards,
+>
+>
+> --
+> Alphe Salas
+> I.T ingeneer
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-In any case, though, the problem is that we will eventaully reach a 
-point where we just received an incremental and realized that it leads to 
-a new OSDMap that we can't accurately recreate.  What do we do?  
-Obviously, we throw it on the floor.  We could ask a mons, but that means 
-overwhelming them.  We could ask every peer, but that means we get 100x 
-copies of the full osdmap (which may be big).  We could ask 1 (or a small 
-number of) peer(s), but then we need to have a semi-stateful thing that 
-handles the case where that peer doesn't have it and we move on to ask 
-someone else, maybe increase the breadth of our search, and when all else 
-fails eventually give up and ask the mon.
 
-> 3) We can set the monitors not to generate checksums until all the
-> OSDs are actually updated to understand them at this first switchover
-> point (which will prevent the OSDs from querying the monitors en masse
-> on upgrade).
-> 
-> Is that insufficient? My recollection is that OSDs tend to regenerate
-> the incrementals (based on cached full maps) rather than sending over
-> the encoded bufferlists they received from the monitor, and that this
-> is the real issue (because otherwise we wouldn't ever be losing data).
 
-It's the other way around.  Generally the OSDs only ever get incrementals, 
-and they apply those to generate full maps (and save them for future use).  
-There isn't actually a way to recreate an incremental.
-
-sage
-
+-- 
+Dong Yuan
+Email:yuandong1222@gmail.com
