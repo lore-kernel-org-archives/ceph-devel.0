@@ -1,66 +1,91 @@
-From: Guang Yang <yguang11@outlook.com>
-Subject: Re: OSD suicide after being down/in for one day as it needs to search large amount of objects
-Date: Wed, 20 Aug 2014 19:42:31 +0800
-Message-ID: <BLU436-SMTP149AEBB380BB925D15D777ADFD20@phx.gbl>
-References: <BLU436-SMTP1407B6BAC746323A36B7947DFD50@phx.gbl> <CAPYLRzh5eNVqPVWGgDKSOsQ6MaDVgxnki=1dzf9Nnw5UOO6HXw@mail.gmail.com>
-Mime-Version: 1.0 (Mac OS X Mail 7.3 \(1878.6\))
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Sylvain Munaut <s.munaut@whatever-company.com>
+Subject: Re: RadosGW crashing on copy for one specific object
+Date: Wed, 20 Aug 2014 15:47:25 +0200
+Message-ID: <CAF6-1L6GWKmncQXA_e4NzaFzLqefzQ4O1qikW0zG6k7BrrMvHg@mail.gmail.com>
+References: <CAF6-1L4zXmczyvXyD=1ZKjO67BYDoPMa3JEaKn082y5WUZY39w@mail.gmail.com>
+	<CABBk=J8qLc45ggoqdWEZVi3YF0Og9wuj_5tW_5Gng+bh65rUjg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from blu004-omc4s13.hotmail.com ([65.55.111.152]:62209 "EHLO
-	BLU004-OMC4S13.hotmail.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751451AbaHTLmq convert rfc822-to-8bit
-	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 20 Aug 2014 07:42:46 -0400
-In-Reply-To: <CAPYLRzh5eNVqPVWGgDKSOsQ6MaDVgxnki=1dzf9Nnw5UOO6HXw@mail.gmail.com>
+Received: from mail-pd0-f175.google.com ([209.85.192.175]:51384 "EHLO
+	mail-pd0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752477AbaHTNrb (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Aug 2014 09:47:31 -0400
+Received: by mail-pd0-f175.google.com with SMTP id r10so11600915pdi.20
+        for <ceph-devel@vger.kernel.org>; Wed, 20 Aug 2014 06:47:25 -0700 (PDT)
+In-Reply-To: <CABBk=J8qLc45ggoqdWEZVi3YF0Og9wuj_5tW_5Gng+bh65rUjg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: Ceph-devel <ceph-devel@vger.kernel.org>, david.z1003@yahoo.com
+To: Yehuda Sadeh <yehuda@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Thanks Greg.
-On Aug 20, 2014, at 6:09 AM, Gregory Farnum <greg@inktank.com> wrote:
+Hi,
 
-> On Mon, Aug 18, 2014 at 11:30 PM, Guang Yang <yguang11@outlook.com> w=
-rote:
->> Hi ceph-devel,
->> David (cc=92ed) reported a bug (http://tracker.ceph.com/issues/9128)=
- which we came across in our test cluster during our failure testing, b=
-asically the way to reproduce it was to leave one OSD daemon down and i=
-n for a day, at the same time, keep giving write traffic. When the OSD =
-daemon was started again, it hit suicide timeout and kill itself.
->>=20
->> After some analysis (details in the bug), David found that the op th=
-read was busy searching for missing objects and once the volume to sear=
-ch increase, the thread is expected to work that long time, please refe=
-r to the bug for detailed logs.
->=20
-> Can you talk a little more about what's going on here? At a quick
-> naive glance, I'm not seeing why leaving an OSD down and in should
-> require work based on the amount of write traffic. Perhaps if the res=
-t
-> of the cluster was changing mappings=85?
-We increased the down to out time interval from 5 minutes to 2 days to =
-avoid migrating data back and forth which could increase latency, so th=
-at we target to mark OSD out manually. To achieve such, we are testing =
-against some boundary cases to let the OSD down and in for like 1 day, =
-however, when we try to bring it up again, it always failed due to hit =
-the suicide timeout.
->=20
->>=20
->> One simple fix is to let the op thread reset the suicide timeout per=
-iodically when it is doing long-time work, other fix might be to cut th=
-e work into smaller pieces?
->=20
-> We do both of those things throughout the OSD (although I think the
-> first is simpler and more common); search for the accesses to
-> cct->get_heartbeat_map()->reset_timeout.
-> -Greg
-> Software Engineer #42 @ http://inktank.com | http://ceph.com
->=20
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> What does 'radosgw-admin object stat --bucket=<bucket> --object=<object>' show?
+
+{ "name": "5ae1b8cb8a2bdc3c2d7e1868b60d76abea2536f4604d6d312df95b719470fb3b\/render-image",
+  "size": 239879,
+  "policy": { "acl": { "acl_user_map": [
+                { "user": "kp",
+                  "acl": 15}],
+          "acl_group_map": [],
+          "grant_map": [
+                { "id": "kp",
+                  "grant": { "type": { "type": 0},
+                      "id": "kp",
+                      "email": "",
+                      "permission": { "flags": 15},
+                      "name": "KP S3 User",
+                      "group": 0}}]},
+      "owner": { "id": "kp",
+          "display_name": "KP S3 User"}},
+  "etag": "bfe2df862d92f70cecbedbab324e3f78-1",
+  "tag": "default.440489.1590546",
+  "manifest": { "objs": [
+            0,
+            { "loc": { "bucket": { "name": "kp-render-image.bouygues",
+                      "pool": ".rgw.kp-render-image",
+                      "data_extra_pool": "",
+                      "index_pool": ".rgw.kp-render-image",
+                      "marker": "default.440489.58258",
+                      "bucket_id": "default.440489.58258"},
+                  "key": "",
+                  "ns": "multipart",
+                  "object":
+"_multipart_5ae1b8cb8a2bdc3c2d7e1868b60d76abea2536f4604d6d312df95b719470fb3b\/render-image.8rSDD8MVD1KIXDTQDsf3g6b71dqADP_.1"},
+              "loc_ofs": 0,
+              "size": 239879}],
+      "obj_size": 239879,
+      "explicit_objs": "true",
+      "head_obj": { "bucket": { "name": "",
+              "pool": "",
+              "data_extra_pool": "",
+              "index_pool": "",
+              "marker": "",
+              "bucket_id": ""},
+          "key": "",
+          "ns": "",
+          "object": ""},
+      "head_size": 0,
+      "max_head_size": 0,
+      "prefix": "",
+      "tail_bucket": { "name": "",
+          "pool": "",
+          "data_extra_pool": "",
+          "index_pool": "",
+          "marker": "",
+          "bucket_id": ""},
+      "rules": []},
+  "attrs": { "user.rgw.content_type": "image\/png"}}
+
+
+> Also, can you bump logging up? debug rgw = 20, debug ms = 1
+
+I'll try, but being on the production cluster, it's constantly
+hammered with requests :p
+
+
+Cheers,
+
+   Sylvain
