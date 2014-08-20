@@ -1,135 +1,157 @@
-From: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: Translating a RadosGW object name into a filename
-	on disk
-Date: Wed, 20 Aug 2014 10:38:24 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1408201037370.28244@cobra.newdream.net>
-References: <CADHZLBa+5dx+kojiSh+T7GmM_asCwhPTriTNr3ob2SUya+KFhw@mail.gmail.com>
-	<CAPYLRzjaOZc+ZG4aibR18N6O3AW1JXU2440J+NSDHmxn4ircag@mail.gmail.com>
-	<CADHZLBaAwXy2XUXnTP-dLwn8gKH1Oh+J9YoFkff5bTRs-xLhmw@mail.gmail.com>
+From: Yehuda Sadeh <yehuda@redhat.com>
+Subject: Re: RadosGW crashing on copy for one specific object
+Date: Wed, 20 Aug 2014 10:44:08 -0700
+Message-ID: <CABBk=J8B-Ph_Ju7uHOuXydXdSXw1tL4v1dvPvy7P=A19XtTTTQ@mail.gmail.com>
+References: <CAF6-1L4zXmczyvXyD=1ZKjO67BYDoPMa3JEaKn082y5WUZY39w@mail.gmail.com>
+	<CABBk=J8qLc45ggoqdWEZVi3YF0Og9wuj_5tW_5Gng+bh65rUjg@mail.gmail.com>
+	<CAF6-1L6GWKmncQXA_e4NzaFzLqefzQ4O1qikW0zG6k7BrrMvHg@mail.gmail.com>
+	<CABBk=J8G=fWC5_m0qxAaYAH0UioYA++87S84J9+23B2BxNs39g@mail.gmail.com>
+	<CABBk=J851yHsd05Lk7JzBk0jDFAM8HRKC0Yz7XmntrpFkCZh=Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CADHZLBaAwXy2XUXnTP-dLwn8gKH1Oh+J9YoFkff5bTRs-xLhmw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Craig Lewis <clewis-04jk9TcbgGYP2IHM84UzcNBPR1lH4CV8@public.gmane.org>
-Cc: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph Users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ig0-f179.google.com ([209.85.213.179]:53586 "EHLO
+	mail-ig0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752166AbaHTRoK (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Aug 2014 13:44:10 -0400
+Received: by mail-ig0-f179.google.com with SMTP id h18so11606199igc.0
+        for <ceph-devel@vger.kernel.org>; Wed, 20 Aug 2014 10:44:09 -0700 (PDT)
+In-Reply-To: <CABBk=J851yHsd05Lk7JzBk0jDFAM8HRKC0Yz7XmntrpFkCZh=Q@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sylvain Munaut <s.munaut@whatever-company.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, 20 Aug 2014, Craig Lewis wrote:
-> Looks like I need to upgrade to Firefly to get ceph-kvstore-tool
-> before I can proceed.
-> I am getting some hits just from grepping the LevelDB store, but so
-> far nothing has panned out.
+If by any chance you applied the previous patch, revert it, as it's
+wrong. This might fix the issue:
 
-FWIW if you just need the tool, you can wget the .deb and 'dpkg -x foo.deb 
-/tmp/whatever' and grab the binary from there.
+diff --git a/src/rgw/rgw_rados.h b/src/rgw/rgw_rados.h
+index d50fb59..0f13590 100644
+--- a/src/rgw/rgw_rados.h
++++ b/src/rgw/rgw_rados.h
+@@ -298,6 +298,9 @@ public:
 
-sage
+   bool has_tail() {
+     if (explicit_objs) {
++      if (objs.size() == 1) {
++        return head_obj != objs[0];
++      }
+       return (objs.size() >= 2);
+     }
+     return (obj_size > head_size);
 
+Let me know if it works for you.
 
-> 
-> Thanks for the help!
-> 
-> On Tue, Aug 19, 2014 at 10:27 AM, Gregory Farnum <greg-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org> wrote:
-> > It's been a while since I worked on this, but let's see what I remember...
-> >
-> > On Thu, Aug 14, 2014 at 11:34 AM, Craig Lewis <clewis-04jk9TcbgGYP2IHM84UzcNBPR1lH4CV8@public.gmane.org> wrote:
-> >> In my effort to learn more of the details of Ceph, I'm trying to
-> >> figure out how to get from an object name in RadosGW, through the
-> >> layers, down to the files on disk.
-> >>
-> >> clewis@clewis-mac ~ $ s3cmd ls s3://cpltest/
-> >> 2014-08-13 23:02        14M  28dde9db15fdcb5a342493bc81f91151
-> >> s3://cpltest/vmware-freebsd-tools.tar.gz
-> >>
-> >> Looking at the .rgw pool's contents tells me that the cpltest bucket
-> >> is default.73886.55:
-> >> root@dev-ceph0:/var/lib/ceph/osd/ceph-0/current# rados -p .rgw ls | grep cpltest
-> >> cpltest
-> >> .bucket.meta.cpltest:default.73886.55
-> >
-> > Okay, what you're seeing here are two different types, whose names I'm
-> > not going to get right:
-> > 1) The bucket link "cpltest", which maps from the name "cpltest" to a
-> > "bucket instance". The contents of cpltest, or one of its xattrs, are
-> > pointing at ".bucket.meta.cpltest:default.73886.55"
-> > 2) The "bucket instance" .bucket.meta.cpltest:default.73886.55. I
-> > think this contains the bucket index (list of all objects), etc.
-> >
-> >> The rados objects that belong to that bucket are:
-> >> root@dev-ceph0:~# rados -p .rgw.buckets ls | grep default.73886.55
-> >> default.73886.55__shadow__RpwwfOt2X-mhwU65Qa1OHDi--4OMGvQ_1
-> >> default.73886.55__shadow__RpwwfOt2X-mhwU65Qa1OHDi--4OMGvQ_3
-> >> default.73886.55_vmware-freebsd-tools.tar.gz
-> >> default.73886.55__shadow__RpwwfOt2X-mhwU65Qa1OHDi--4OMGvQ_2
-> >> default.73886.55__shadow__RpwwfOt2X-mhwU65Qa1OHDi--4OMGvQ_4
-> >
-> > Okay, so when you ask RGW for the object vmware-freebsd-tools.tar.gz
-> > from the cpltest bucket, it will look up (or, if we're lucky, have
-> > cached) the cpltest link, and find out that the "bucket prefix" is
-> > default.73886.55. It will then try and access the object
-> > "default.73886.55_vmware-freebsd-tools.tar.gz" (whose construction I
-> > hope is obvious ? bucket instance ID as a prefix, _ as a separate,
-> > then the object name). This RADOS object is called the "head" for the
-> > RGW object. In addition to (usually) the beginning bit of data, it
-> > will also contain some xattrs with things like a "tag" for any extra
-> > RADOS objects which include data for this RGW object. In this case,
-> > that tag is "RpwwfOt2X-mhwU65Qa1OHDi--4OMGvQ". (This construction is
-> > how we do atomic overwrites of RGW objects which are larger than a
-> > single RADOS object, in addition to a few other things.)
-> >
-> > I don't think there's any way of mapping from a shadow (tail) object
-> > name back to its RGW name. but if you look at the rados object xattrs,
-> > there might (? or might not) be an attr which contains the parent
-> > object in one form or another. Check that out.
-> >
-> > (Or, if you want to check out the source, I think all the relevant
-> > bits for this are somewhere in the
-> > -Greg
-> > Software Engineer #42 @ http://inktank.com | http://ceph.com
-> >
-> >> I know those shadow__RpwwfOt2X-mhwU65Qa1OHDi--4OMGvQ_ files are the
-> >> rest of vmware-freebsd-tools.tar.gz.  I can infer that because this
-> >> bucket only has a single file (and the sum of the sizes matches).
-> >> With many files, I can't infer the link anymore.
-> >>
-> >> How do I look up that link?
-> >>
-> >> I tried reading the src/rgw/rgw_rados.cc, but I'm getting lost.
-> >>
-> >>
-> >>
-> >> My real goal is the reverse.  I recently repaired an inconsistent PG.
-> >> The primary replica had the bad data, so I want to verify that the
-> >> repaired object is correct.  I have a database that stores the SHA256
-> >> of every object.  If I can get from the filename on disk back to an S3
-> >> object, I can verify the file.  If it's bad, I can restore from the
-> >> replicated zone.
-> >>
-> >>
-> >> Aside from today's task, I think it's really handy to understand these
-> >> low level details.  I know it's been handy in the past, when I had
-> >> disk corruption under my PostgreSQL database.  Knowing (and
-> >> practicing) ahead of time really saved me a lot of downtime then.
-> >>
-> >>
-> >> Thanks for any pointers.
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+Thanks,
+Yehuda
+
+On Wed, Aug 20, 2014 at 10:33 AM, Yehuda Sadeh <yehuda@redhat.com> wrote:
+> Looking at the code some more, that change isn't going to fix it for
+> you. I'll send an updated fix soon.
+>
+> Yehuda
+>
+> On Wed, Aug 20, 2014 at 10:25 AM, Yehuda Sadeh <yehuda@redhat.com> wrote:
+>> On Wed, Aug 20, 2014 at 6:47 AM, Sylvain Munaut
+>> <s.munaut@whatever-company.com> wrote:
+>>> Hi,
+>>>
+>>>
+>>>> What does 'radosgw-admin object stat --bucket=<bucket> --object=<object>' show?
+>>>
+>>> { "name": "5ae1b8cb8a2bdc3c2d7e1868b60d76abea2536f4604d6d312df95b719470fb3b\/render-image",
+>>>   "size": 239879,
+>>>   "policy": { "acl": { "acl_user_map": [
+>>>                 { "user": "kp",
+>>>                   "acl": 15}],
+>>>           "acl_group_map": [],
+>>>           "grant_map": [
+>>>                 { "id": "kp",
+>>>                   "grant": { "type": { "type": 0},
+>>>                       "id": "kp",
+>>>                       "email": "",
+>>>                       "permission": { "flags": 15},
+>>>                       "name": "KP S3 User",
+>>>                       "group": 0}}]},
+>>>       "owner": { "id": "kp",
+>>>           "display_name": "KP S3 User"}},
+>>>   "etag": "bfe2df862d92f70cecbedbab324e3f78-1",
+>>>   "tag": "default.440489.1590546",
+>>>   "manifest": { "objs": [
+>>>             0,
+>>>             { "loc": { "bucket": { "name": "kp-render-image.bouygues",
+>>>                       "pool": ".rgw.kp-render-image",
+>>>                       "data_extra_pool": "",
+>>>                       "index_pool": ".rgw.kp-render-image",
+>>>                       "marker": "default.440489.58258",
+>>>                       "bucket_id": "default.440489.58258"},
+>>>                   "key": "",
+>>>                   "ns": "multipart",
+>>>                   "object":
+>>> "_multipart_5ae1b8cb8a2bdc3c2d7e1868b60d76abea2536f4604d6d312df95b719470fb3b\/render-image.8rSDD8MVD1KIXDTQDsf3g6b71dqADP_.1"},
+>>>               "loc_ofs": 0,
+>>>               "size": 239879}],
+>>>       "obj_size": 239879,
+>>>       "explicit_objs": "true",
+>>>       "head_obj": { "bucket": { "name": "",
+>>>               "pool": "",
+>>>               "data_extra_pool": "",
+>>>               "index_pool": "",
+>>>               "marker": "",
+>>>               "bucket_id": ""},
+>>>           "key": "",
+>>>           "ns": "",
+>>>           "object": ""},
+>>>       "head_size": 0,
+>>>       "max_head_size": 0,
+>>>       "prefix": "",
+>>>       "tail_bucket": { "name": "",
+>>>           "pool": "",
+>>>           "data_extra_pool": "",
+>>>           "index_pool": "",
+>>>           "marker": "",
+>>>           "bucket_id": ""},
+>>>       "rules": []},
+>>>   "attrs": { "user.rgw.content_type": "image\/png"}}
+>>>
+>>>
+>>>> Also, can you bump logging up? debug rgw = 20, debug ms = 1
+>>>
+>>> I'll try, but being on the production cluster, it's constantly
+>>> hammered with requests :p
+>>>
+>>>
+>>
+>> The object has a zero sized head, which is ok, but I think it triggers
+>> an issue. Can you try this:
+>>
+>> diff --git a/src/rgw/rgw_dencoder.cc b/src/rgw/rgw_dencoder.cc
+>> index e6dc2ba..fd12c4f 100644
+>> --- a/src/rgw/rgw_dencoder.cc
+>> +++ b/src/rgw/rgw_dencoder.cc
+>> @@ -104,7 +104,7 @@ void RGWObjManifest::obj_iterator::update_location()
+>>
+>>    const rgw_obj& head = manifest->get_head();
+>>
+>> -  if (ofs < manifest->get_head_size()) {
+>> +  if (ofs <= manifest->get_head_size()) {
+>>      location = head;
+>>      return;
+>>    }
+>> diff --git a/src/rgw/rgw_rados.cc b/src/rgw/rgw_rados.cc
+>> index 7ca4a9d..877c130 100644
+>> --- a/src/rgw/rgw_rados.cc
+>> +++ b/src/rgw/rgw_rados.cc
+>> @@ -558,7 +558,7 @@ void RGWObjManifest::obj_iterator::operator++()
+>>    }
+>>
+>>    /* are we still pointing at the head? */
+>> -  if (ofs < head_size) {
+>> +  if (ofs <= head_size) {
+>>      rule_iter = manifest->rules.begin();
+>>      RGWObjManifestRule *rule = &rule_iter->second;
+>>      ofs = MIN(head_size, obj_size);
+>>
+>>
+>> Thanks,
+>> Yehuda
