@@ -1,118 +1,84 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: A problem when restarting OSD
-Date: Thu, 21 Aug 2014 08:28:11 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1408210824350.31169@cobra.newdream.net>
-References: <06E7D85B3BA36C4DB207FEDE871C5348936E6B@SHSMSX101.ccr.corp.intel.com>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: Ceph authentication/authorization paradignms
+Date: Thu, 21 Aug 2014 08:59:01 -0700
+Message-ID: <CAPYLRzg3BsmQP6D7L9Bn=6kgjnnB=AA9G7Qe0QYP=qNZAANfyQ@mail.gmail.com>
+References: <1642211910.31382003.1408036197918.JavaMail.zimbra@redhat.com>
+	<1355490291.31383019.1408036230928.JavaMail.zimbra@redhat.com>
+	<CAPYLRzixD8O5C8K_Q0yvD=3YCMwuWQJg4HFOJ5nss4b4m_0U8g@mail.gmail.com>
+	<361503695.34598023.1408573203316.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:46945 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750850AbaHUP2M (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Aug 2014 11:28:12 -0400
-In-Reply-To: <06E7D85B3BA36C4DB207FEDE871C5348936E6B@SHSMSX101.ccr.corp.intel.com>
+Received: from mail-qg0-f51.google.com ([209.85.192.51]:47849 "EHLO
+	mail-qg0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750729AbaHUP7C (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Aug 2014 11:59:02 -0400
+Received: by mail-qg0-f51.google.com with SMTP id a108so8838254qge.38
+        for <ceph-devel@vger.kernel.org>; Thu, 21 Aug 2014 08:59:01 -0700 (PDT)
+In-Reply-To: <361503695.34598023.1408573203316.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
-Cc: "'ceph-devel@vger.kernel.org'" <ceph-devel@vger.kernel.org>
+To: "Christopher R. Hertel" <crh@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Thu, 21 Aug 2014, Wang, Zhiqiang wrote:
-> Hi all,
-> 
-> I ran into a problem when restarting an OSD.
-> 
-> Here is my OSD tree before restarting the OSD:
-> 
-> # id    weight  type name       up/down reweight
-> -6      8       root ssd
-> -4      4               host zqw-s1-ssd
-> 16      1                       osd.16  up      1
-> 17      1                       osd.17  up      1
-> 18      1                       osd.18  up      1
-> 19      1                       osd.19  up      1
-> -5      4               host zqw-s2-ssd
-> 20      1                       osd.20  up      1
-> 21      1                       osd.21  up      1
-> 22      1                       osd.22  up      1
-> 23      1                       osd.23  up      1
-> -1      14.56   root default
-> -2      7.28            host zqw-s1
-> 0       0.91                    osd.0   up      1
-> 1       0.91                    osd.1   up      1
-> 2       0.91                    osd.2   up      1
-> 3       0.91                    osd.3   up      1
-> 4       0.91                    osd.4   up      1
-> 5       0.91                    osd.5   up      1
-> 6       0.91                    osd.6   up      1
-> 7       0.91                    osd.7   up      1
-> -3      7.28            host zqw-s2
-> 8       0.91                    osd.8   up      1
-> 9       0.91                    osd.9   up      1
-> 10      0.91                    osd.10  up      1
-> 11      0.91                    osd.11  up      1
-> 12      0.91                    osd.12  up      1
-> 13      0.91                    osd.13  up      1
-> 14      0.91                    osd.14  up      1
-> 15      0.91                    osd.15  up      1
-> 
-> After I restart one of the OSD with id from 16 to 23, say restarting osd.16, osd.16 goes to 'root default' and 'host zqw-s1', and ceph cluster begins to do rebalance. This surely is not what I want.
-> 
-> # id    weight  type name       up/down reweight
-> -6      7       root ssd
-> -4      3               host zqw-s1-ssd
-> 17      1                       osd.17  up      1
-> 18      1                       osd.18  up      1
-> 19      1                       osd.19  up      1
-> -5      4               host zqw-s2-ssd
-> 20      1                       osd.20  up      1
-> 21      1                       osd.21  up      1
-> 22      1                       osd.22  up      1
-> 23      1                       osd.23  up      1
-> -1      15.56   root default
-> -2      8.28            host zqw-s1
-> 0       0.91                    osd.0   up      1
-> 1       0.91                    osd.1   up      1
-> 2       0.91                    osd.2   up      1
-> 3       0.91                    osd.3   up      1
-> 4       0.91                    osd.4   up      1
-> 5       0.91                    osd.5   up      1
-> 6       0.91                    osd.6   up      1
-> 7       0.91                    osd.7   up      1
-> 16      1                       osd.16  up      1
-> -3      7.28            host zqw-s2
-> 8       0.91                    osd.8   up      1
-> 9       0.91                    osd.9   up      1
-> 10      0.91                    osd.10  up      1
-> 11      0.91                    osd.11  up      1
-> 12      0.91                    osd.12  up      1
-> 13      0.91                    osd.13  up      1
-> 14      0.91                    osd.14  up      1
-> 15      0.91                    osd.15  up      1
-> 
-> After digging into the problem, I find it's because in the ceph init script, we change the OSD's crush location in some way. It uses the script 'ceph-crush-location' to get the crush location from the ceph.conf file for the restarting OSD. If there isn't such an entry in ceph.conf, it uses the default one 'host=$(hostname -s) root=default'. Since I don't have the crush location configuration in my ceph.conf (I guess most of people don't have this in their ceph.conf), when I restarting osd.16, it goes to 'root default' and 'host zqw-s1'.
-> 
-> Here is a fix for this:
-> When the ceph init script uses 'ceph osd crush create-or-move' to change the OSD's crush location, do a check first, if this OSD is already existing in the crush map, return without making the location change. This change is at: https://github.com/wonzhq/ceph/commit/efdfa23664caa531390d141bd1539878761412fe
-> 
-> What do you think?
+On Wed, Aug 20, 2014 at 3:20 PM, Christopher R. Hertel <crh@redhat.com> wrote:
+> [At end...]
+> ----- Original Message -----
+>> From: "Gregory Farnum" <greg@inktank.com>
+>> To: "Christopher R. Hertel" <crh@redhat.com>
+>> Cc: ceph-devel@vger.kernel.org
+>> Sent: Tuesday, August 19, 2014 4:57:59 PM
+>> Subject: Re: Ceph authentication/authorization paradignms
+>>
+>> On Thu, Aug 14, 2014 at 10:10 AM, Christopher R. Hertel <crh@redhat.com>
+>> wrote:
+>> > Ceph Folks:
+>> >
+>> > Hi.  I am new to Ceph but I've been around in the Open Source world for a
+>> > while, working on a variety of different projects (mostly Windows Interop
+>> > stuff).  I was asked to take a look at the authentication mechanisms used
+>> > in
+>> > Ceph, focusing on two key areas:
+>> >
+>> >   * Calamari
+>> >   * Ceph client authentication to the Ceph cluster.
+>> >
+>> > I am purposefully avoiding anything to do with the internal
+>> > service-to-service authentication/authorization system (that is, Cephx) for
+>> > two reasons.  The first is that Cephx is specifically designed for Ceph's
+>> > many-to-many environment, and the second is that it is sufficiently
+>> > isolated
+>> > that I don't believe it needs to be modified to work with new external
+>> > authentication mechanisms.
+>>
+>> I'm a little confused here. CephX is how clients authenticate to the
+>> Ceph cluster...how are we going to add Kerberos auth or whatever
+>> without getting involved in that?
+>> Perhaps I'm misunderstanding the scope of what you're trying to do.
+>> -Greg
+>>
+>
+> CephX, as I understand it, is one of two mechanisms used to do two jobs.
+>
+> The first job is to allow the client to log in to the cluster to access
+> cluster services (storage, basically).  The second is the message validation
+> that goes on between the various services within the cluster (MONitor, MDS,
+> OSD...).
+>
+> The other auth mechanism that is used is, basically, none.  In a secure
+> environment, it's safe to let your clients connect to your cluster, and
+> your cluster components communicate, without any ongoing validation.
+>
+> Anyway, the idea here is to perform the initial logon using Kerberos (or
+> LDAP), but then have CephX continue to handle the internal message validation.
+> That avoids any need for changing the deeper internals of Ceph, which is
+> particularly important because CephX is designed for the many-to-many Ceph
+> environment.
 
-The goal of this behavior is to allow hot-swapping of devices.  You can 
-pull disks out of one host and put them in another and the udev machinery 
-will start up the daemon, update the crush location, and the disk and data 
-will become available.  It's not 'ideal' in the sense that there will be 
-rebalancing, but it does make the data available to the cluster to 
-preserve data safety.
-
-We haven't come up with a great scheme yet to managing multiple trees yet.  
-The idea is that the ceph-crush-location hook can be customized to do 
-whatever is necessary, for example by putting root=ssd if the device type 
-appears to be an ssd (maybe look at the sysfs metadata, or put a marker 
-file in the osd data directory?).  You can point to your own hook for your 
-environment with
-
-  osd crush location hook = /path/to/my/script
-
-sage
-
-
-
+Right. But you'll either need to plug Kerberos into the client<->mon
+authentication pathways, or (this would be my naive choice) have some
+sort of agent that Kerberos authenticates and then gives the client
+its CephX shared secret for authenticating with the monitors (without
+the users having to get involved). Either way, there's at least a
+little CephX integration going on, right?
+Or am I completely off the mark with what you're trying to do here?
