@@ -1,91 +1,107 @@
-From: "Christopher R. Hertel" <crh@redhat.com>
-Subject: Re: Ceph authentication/authorization paradignms
-Date: Thu, 21 Aug 2014 13:56:59 -0400 (EDT)
-Message-ID: <1220650621.35093917.1408643819096.JavaMail.zimbra@redhat.com>
-References: <197304281.99.1408639382605.JavaMail.root@thunderbeast.private.linuxbox.com>
+From: Yehuda Sadeh <yehuda@redhat.com>
+Subject: Re: RadosGW crashing on copy for one specific object
+Date: Thu, 21 Aug 2014 13:39:43 -0700
+Message-ID: <CABBk=J8S_fkBMORDy9RbYLh6HWi+-EzyZefBNPmnBRWNuPOHAg@mail.gmail.com>
+References: <CAF6-1L4zXmczyvXyD=1ZKjO67BYDoPMa3JEaKn082y5WUZY39w@mail.gmail.com>
+	<CABBk=J8qLc45ggoqdWEZVi3YF0Og9wuj_5tW_5Gng+bh65rUjg@mail.gmail.com>
+	<CAF6-1L6GWKmncQXA_e4NzaFzLqefzQ4O1qikW0zG6k7BrrMvHg@mail.gmail.com>
+	<CABBk=J8G=fWC5_m0qxAaYAH0UioYA++87S84J9+23B2BxNs39g@mail.gmail.com>
+	<CABBk=J851yHsd05Lk7JzBk0jDFAM8HRKC0Yz7XmntrpFkCZh=Q@mail.gmail.com>
+	<CABBk=J8B-Ph_Ju7uHOuXydXdSXw1tL4v1dvPvy7P=A19XtTTTQ@mail.gmail.com>
+	<CAF6-1L7hSYHoNeKUCu466UHUVbVUAQ6mWzK3V9B6TTuqMkpRLA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx5-phx2.redhat.com ([209.132.183.37]:44641 "EHLO
-	mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752475AbaHUR5C (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Aug 2014 13:57:02 -0400
-In-Reply-To: <197304281.99.1408639382605.JavaMail.root@thunderbeast.private.linuxbox.com>
+Received: from mail-ig0-f170.google.com ([209.85.213.170]:34245 "EHLO
+	mail-ig0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753562AbaHUUjo convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Aug 2014 16:39:44 -0400
+Received: by mail-ig0-f170.google.com with SMTP id h3so194362igd.3
+        for <ceph-devel@vger.kernel.org>; Thu, 21 Aug 2014 13:39:43 -0700 (PDT)
+In-Reply-To: <CAF6-1L7hSYHoNeKUCu466UHUVbVUAQ6mWzK3V9B6TTuqMkpRLA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Matt W. Benjamin" <matt@linuxbox.com>
-Cc: ceph-devel@vger.kernel.org
+To: Sylvain Munaut <s.munaut@whatever-company.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Matt:
+Try this:
 
-Thanks for the pointers.  I'm currently knee-deep in traditional
-Kerberos authentication code and trying to crack the FreeIPA PAM
-API.
+diff --git a/src/rgw/rgw_rados.h b/src/rgw/rgw_rados.h
+index ed8f02d..0042df2 100644
+--- a/src/rgw/rgw_rados.h
++++ b/src/rgw/rgw_rados.h
+@@ -306,6 +306,11 @@ public:
 
-I'm a community-oriented developer.  Any deeper dive you can
-provide would be encouraging.  :)
+   bool has_tail() {
+     if (explicit_objs) {
++      if (objs.size() =3D=3D 1) {
++        map<uint64_t, RGWObjManifestPart>::iterator iter =3D objs.begi=
+n();
++        rgw_obj& obj =3D iter->second.loc;
++        return head_obj.object !=3D obj.object;
++      }
+       return (objs.size() >=3D 2);
+     }
+     return (obj_size > head_size);
 
-Chris -)-----
+Thanks,
+Yehuda
 
------ Original Message -----
-From: "Matt W. Benjamin" <matt@linuxbox.com>
-To: "Sage Weil" <sweil@redhat.com>
-Cc: "Christopher R. Hertel" <crh@redhat.com>, ceph-devel@vger.kernel.org, "Gregory Farnum" <greg@inktank.com>
-Sent: Thursday, August 21, 2014 11:43:02 AM
-Subject: Re: Ceph authentication/authorization paradignms
-
-This approach/family of approaches is certainly the one taken by all classical Kerberized file sharing systems, including AFS, DCE, and NFSv4.
-
-There's a lot of new work just coming to fruition now in both the AFS and NFSv4 communities (rxgk and RPCSEC_GSS, respectively) that are specifically designed to handle important next-generation multi-party authorization scenarios, and which I think we would be wise to at least have a look at.
-
-Regards,
-
-Matt
-
-> > 
-> > Right. But you'll either need to plug Kerberos into the
-> client<->mon
-> > authentication pathways, or (this would be my naive choice) have
-> some
-> > sort of agent that Kerberos authenticates and then gives the client
-> > its CephX shared secret for authenticating with the monitors
-> (without
-> > the users having to get involved). Either way, there's at least a
-> > little CephX integration going on, right?
-> > Or am I completely off the mark with what you're trying to do here?
-> 
-> My thought is the former.  We'd add a new CEPH_AUTH_* type, the client
-> 
-> side would call into kerberos and get a kerberos ticket to pass to the
-> 
-> mon, and the mon would call into kerberos to authenticate it.  That
-> would 
-> authenticate the session.
-> 
-> I assume there will then be some futzing around to make things behave
-> so 
-> that the mon will provide the client cephx tickets for interactions
-> with 
-> the rest of the cluster so that *only* the mon is doing non-cephx 
-> authentication.  The focus now is just to make the first step work, 
-> though...
-> 
-> sage
+On Thu, Aug 21, 2014 at 2:38 AM, Sylvain Munaut
+<s.munaut@whatever-company.com> wrote:
+> Hi,
+>
+>
+>> If by any chance you applied the previous patch, revert it, as it's
+>> wrong. This might fix the issue:
+>>
+>> diff --git a/src/rgw/rgw_rados.h b/src/rgw/rgw_rados.h
+>> index d50fb59..0f13590 100644
+>> --- a/src/rgw/rgw_rados.h
+>> +++ b/src/rgw/rgw_rados.h
+>> @@ -298,6 +298,9 @@ public:
+>>
+>>    bool has_tail() {
+>>      if (explicit_objs) {
+>> +      if (objs.size() =3D=3D 1) {
+>> +        return head_obj !=3D objs[0];
+>> +      }
+>>        return (objs.size() >=3D 2);
+>>      }
+>>      return (obj_size > head_size);
+>>
+>> Let me know if it works for you.
+>
+> It doesn't build at all.
+>
+> rgw/rgw_rados.h: In member function =E2=80=98bool RGWObjManifest::has=
+_tail()=E2=80=99:
+> rgw/rgw_rados.h:302:34: error: no match for =E2=80=98operator!=3D=E2=80=
+=99 in
+> =E2=80=98((RGWObjManifest*)this)->RGWObjManifest::head_obj !=3D
+> ((RGWObjManifest*)this)->RGWObjManifest::objs.std::map<_Key, _Tp,
+> _Compare, _Alloc>::operator[] [with _Key =3D long unsigned int, _Tp =3D
+> RGWObjManifestPart, _Compare =3D std::less<long unsigned int>, _Alloc=
+ =3D
+> std::allocator<std::pair<const long unsigned int, RGWObjManifestPart>
+>>, std::map<_Key, _Tp, _Compare, _Alloc>::mapped_type =3D
+> RGWObjManifestPart, std::map<_Key, _Tp, _Compare, _Alloc>::key_type =3D
+> long unsigned int]((* &0u))=E2=80=99
+> ...
+>
+>
+>
+> Cheers,
+>
+>    Sylvain
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
-> in
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
--- 
-Matt Benjamin
-The Linux Box
-206 South Fifth Ave. Suite 150
-Ann Arbor, MI  48104
-
-http://linuxbox.com
-
-tel.  734-761-4689 
-fax.  734-769-8938 
-cel.  734-216-5309 
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
