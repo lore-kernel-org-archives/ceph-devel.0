@@ -1,72 +1,67 @@
-From: "Christopher R. Hertel" <crh@redhat.com>
-Subject: Re: Ceph authentication/authorization paradignms
-Date: Wed, 20 Aug 2014 18:20:03 -0400 (EDT)
-Message-ID: <361503695.34598023.1408573203316.JavaMail.zimbra@redhat.com>
-References: <1642211910.31382003.1408036197918.JavaMail.zimbra@redhat.com> <1355490291.31383019.1408036230928.JavaMail.zimbra@redhat.com> <CAPYLRzixD8O5C8K_Q0yvD=3YCMwuWQJg4HFOJ5nss4b4m_0U8g@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+From: Guang Yang <yguang11@outlook.com>
+Subject: Re: OSD suicide after being down/in for one day as it needs to search large amount of objects
+Date: Thu, 21 Aug 2014 09:42:08 +0800
+Message-ID: <BLU436-SMTP247CE0903E889758CA2F943DFD30@phx.gbl>
+References: <BLU436-SMTP1407B6BAC746323A36B7947DFD50@phx.gbl> <CAPYLRzh5eNVqPVWGgDKSOsQ6MaDVgxnki=1dzf9Nnw5UOO6HXw@mail.gmail.com> <BLU436-SMTP149AEBB380BB925D15D777ADFD20@phx.gbl> <alpine.DEB.2.00.1408200816210.28244@cobra.newdream.net>
+Mime-Version: 1.0 (Mac OS X Mail 7.3 \(1878.6\))
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx3-phx2.redhat.com ([209.132.183.24]:45951 "EHLO
-	mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753273AbaHTWUE (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Aug 2014 18:20:04 -0400
-In-Reply-To: <CAPYLRzixD8O5C8K_Q0yvD=3YCMwuWQJg4HFOJ5nss4b4m_0U8g@mail.gmail.com>
+Received: from blu004-omc4s36.hotmail.com ([65.55.111.175]:55828 "EHLO
+	BLU004-OMC4S36.hotmail.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752808AbaHUBmS convert rfc822-to-8bit
+	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 20 Aug 2014 21:42:18 -0400
+In-Reply-To: <alpine.DEB.2.00.1408200816210.28244@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>, ceph-devel@vger.kernel.org
+To: Sage Weil <sweil@redhat.com>
+Cc: Gregory Farnum <greg@inktank.com>, Ceph-devel <ceph-devel@vger.kernel.org>, david.z1003@yahoo.com
 
-[At end...]
------ Original Message -----
-> From: "Gregory Farnum" <greg@inktank.com>
-> To: "Christopher R. Hertel" <crh@redhat.com>
-> Cc: ceph-devel@vger.kernel.org
-> Sent: Tuesday, August 19, 2014 4:57:59 PM
-> Subject: Re: Ceph authentication/authorization paradignms
+Thanks Sage. We will provide a patch based on this.
+
+Thanks,
+Guang
+
+On Aug 20, 2014, at 11:19 PM, Sage Weil <sweil@redhat.com> wrote:
+
+> On Wed, 20 Aug 2014, Guang Yang wrote:
+>> Thanks Greg.
+>> On Aug 20, 2014, at 6:09 AM, Gregory Farnum <greg@inktank.com> wrote:
+>> 
+>>> On Mon, Aug 18, 2014 at 11:30 PM, Guang Yang <yguang11@outlook.com> wrote:
+>>>> Hi ceph-devel,
+>>>> David (cc?ed) reported a bug (http://tracker.ceph.com/issues/9128) which we came across in our test cluster during our failure testing, basically the way to reproduce it was to leave one OSD daemon down and in for a day, at the same time, keep giving write traffic. When the OSD daemon was started again, it hit suicide timeout and kill itself.
+>>>> 
+>>>> After some analysis (details in the bug), David found that the op thread was busy searching for missing objects and once the volume to search increase, the thread is expected to work that long time, please refer to the bug for detailed logs.
+>>> 
+>>> Can you talk a little more about what's going on here? At a quick
+>>> naive glance, I'm not seeing why leaving an OSD down and in should
+>>> require work based on the amount of write traffic. Perhaps if the rest
+>>> of the cluster was changing mappings??
+>> We increased the down to out time interval from 5 minutes to 2 days to 
+>> avoid migrating data back and forth which could increase latency, so 
+>> that we target to mark OSD out manually. To achieve such, we are testing 
+>> against some boundary cases to let the OSD down and in for like 1 day, 
+>> however, when we try to bring it up again, it always failed due to hit 
+>> the suicide timeout.
 > 
-> On Thu, Aug 14, 2014 at 10:10 AM, Christopher R. Hertel <crh@redhat.com>
-> wrote:
-> > Ceph Folks:
-> >
-> > Hi.  I am new to Ceph but I've been around in the Open Source world for a
-> > while, working on a variety of different projects (mostly Windows Interop
-> > stuff).  I was asked to take a look at the authentication mechanisms used
-> > in
-> > Ceph, focusing on two key areas:
-> >
-> >   * Calamari
-> >   * Ceph client authentication to the Ceph cluster.
-> >
-> > I am purposefully avoiding anything to do with the internal
-> > service-to-service authentication/authorization system (that is, Cephx) for
-> > two reasons.  The first is that Cephx is specifically designed for Ceph's
-> > many-to-many environment, and the second is that it is sufficiently
-> > isolated
-> > that I don't believe it needs to be modified to work with new external
-> > authentication mechanisms.
+> Looking at the log snippet I see the PG had log range
 > 
-> I'm a little confused here. CephX is how clients authenticate to the
-> Ceph cluster...how are we going to add Kerberos auth or whatever
-> without getting involved in that?
-> Perhaps I'm misunderstanding the scope of what you're trying to do.
-> -Greg
+> 	5481'28667,5646'34066
+> 
+> Which is ~5500 log events.  The default max is 10k.  search_for_missing is 
+> basically going to iterate over this list and check if the object is 
+> present locally.
+> 
+> If that's slow enough to trigger a suicide (which it seems to be), teh 
+> fix is simple: as Greg says we just need to make it probe the internel 
+> heartbeat code to indicate progress.  In most contexts this is done by 
+> passing a ThreadPool::TPHandle &handle into each method and then 
+> calling handle.reset_tp_timeout() on each iteration.  The same needs to be 
+> done for search_for_missing...
+> 
+> sage
+> 
 > 
 
-CephX, as I understand it, is one of two mechanisms used to do two jobs.
-
-The first job is to allow the client to log in to the cluster to access
-cluster services (storage, basically).  The second is the message validation
-that goes on between the various services within the cluster (MONitor, MDS,
-OSD...).
-
-The other auth mechanism that is used is, basically, none.  In a secure
-environment, it's safe to let your clients connect to your cluster, and
-your cluster components communicate, without any ongoing validation.
-
-Anyway, the idea here is to perform the initial logon using Kerberos (or
-LDAP), but then have CephX continue to handle the internal message validation.
-That avoids any need for changing the deeper internals of Ceph, which is
-particularly important because CephX is designed for the many-to-many Ceph
-environment.
-
-Chris -)-----
