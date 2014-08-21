@@ -1,631 +1,424 @@
-From: Dominik Mostowiec <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: active+remapped after remove osd via ceph osd out
-Date: Thu, 21 Aug 2014 15:59:57 +0200
-Message-ID: <CAMNMNTzD_V7d3XUyfa0vVgbA=aaLaOH_0saHO+ZtEZ90JSpyyA@mail.gmail.com>
-References: <CAMNMNTwzjZHmf5Yw-kf3ty1Z5TJYjTvA+abwtwRNLcvWRWsyjw@mail.gmail.com>
-	<CAMNMNTxUQpQ8-CP-gjrcJU7Hfr1r5=-e4yKoxoDcaQ17L2VDUA@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: RE: Deadlock in ceph journal
+Date: Thu, 21 Aug 2014 08:23:02 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1408210822430.31169@cobra.newdream.net>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2646AE7B@SACMBXIP02.sdcorp.global.sandisk.com> <alpine.DEB.2.00.1408192052530.28244@cobra.newdream.net> <755F6B91B3BE364F9BCA11EA3F9E0C6F2646AF1D@SACMBXIP02.sdcorp.global.sandisk.com>
+ <alpine.DEB.2.00.1408192149330.28244@cobra.newdream.net> <755F6B91B3BE364F9BCA11EA3F9E0C6F2646AF69@SACMBXIP02.sdcorp.global.sandisk.com> <alpine.DEB.2.00.1408200832440.28244@cobra.newdream.net> <6AA21C22F0A5DA478922644AD2EC308C8B7FF7@SHSMSX101.ccr.corp.intel.com>
+ <alpine.DEB.2.00.1408202051540.28244@cobra.newdream.net> <6AA21C22F0A5DA478922644AD2EC308C8B8342@SHSMSX101.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAMNMNTxUQpQ8-CP-gjrcJU7Hfr1r5=-e4yKoxoDcaQ17L2VDUA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:46917 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751912AbaHUPXE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Aug 2014 11:23:04 -0400
+In-Reply-To: <6AA21C22F0A5DA478922644AD2EC308C8B8342@SHSMSX101.ccr.corp.intel.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "Ma, Jianpeng" <jianpeng.ma@intel.com>
+Cc: Somnath Roy <Somnath.Roy@sandisk.com>, "Samuel Just (sam.just@inktank.com)" <sam.just@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Mark Kirkwood <mark.kirkwood@catalyst.net.nz>
 
-Hi,
-I have 2 PG in active+remapped state.
+I've pushed the patch to wip-filejournal.  Mark, can you test please?
 
-ceph health detail
-HEALTH_WARN 2 pgs stuck unclean; recovery 24/348041229 degraded (0.000%)
-pg 3.1a07 is stuck unclean for 29239.046024, current state
-active+remapped, last acting [167,80,145]
-pg 3.154a is stuck unclean for 29239.039777, current state
-active+remapped, last acting [377,224,292]
-recovery 24/348041229 degraded (0.000%)
+Thanks!
+sage
 
-This happend when i call "ceph osd reweight-by-utilization 102"
 
-What can be wrong ?
+On Thu, 21 Aug 2014, Ma, Jianpeng wrote:
 
-ceph -v -> ceph version 0.67.10 (9d446bd416c52cd785ccf048ca67737ceafcdd7f)
-
-Tunables:
-ceph osd crush dump | tail -n 4
-  "tunables": { "choose_local_tries": 0,
-      "choose_local_fallback_tries": 0,
-      "choose_total_tries": 60,
-      "chooseleaf_descend_once": 1}}
-
-Cluster:
-6 racks X 3 hosts X 22 OSDs. (396 osds: 396 up, 396 in)
-
-> crushtool -i ../crush2  --min-x 0 --num-rep 3  --max-x 10624 --test --show-bad-mappings
-is clean.
-
-When 'ceph osd reweight' for all osd is 1.0 is ok, but i have nearfull OSD's.
-
-There is no missing OSD's in crushmap
-> grep device /tmp/crush.txt | grep -v osd
-# devices
-
-ceph osd dump | grep -i pool
-pool 0 'data' rep size 3 min_size 1 crush_ruleset 0 object_hash
-rjenkins pg_num 64 pgp_num 64 last_change 28459 owner 0
-crash_replay_interval 45
-pool 1 'metadata' rep size 3 min_size 1 crush_ruleset 1 object_hash
-rjenkins pg_num 64 pgp_num 64 last_change 28460 owner 0
-pool 2 'rbd' rep size 3 min_size 1 crush_ruleset 2 object_hash
-rjenkins pg_num 64 pgp_num 64 last_change 28461 owner 0
-pool 3 '.rgw.buckets' rep size 3 min_size 1 crush_ruleset 0
-object_hash rjenkins pg_num 8192 pgp_num 8192 last_change 73711 owner
-0
-pool 4 '.log' rep size 3 min_size 1 crush_ruleset 0 object_hash
-rjenkins pg_num 2048 pgp_num 2048 last_change 90517 owner 0
-pool 5 '.rgw' rep size 3 min_size 1 crush_ruleset 0 object_hash
-rjenkins pg_num 128 pgp_num 128 last_change 72467 owner 0
-pool 6 '.users.uid' rep size 3 min_size 1 crush_ruleset 0 object_hash
-rjenkins pg_num 8 pgp_num 8 last_change 28465 owner 0
-pool 7 '.users' rep size 3 min_size 1 crush_ruleset 0 object_hash
-rjenkins pg_num 8 pgp_num 8 last_change 28466 owner 0
-pool 8 '.usage' rep size 2 min_size 1 crush_ruleset 0 object_hash
-rjenkins pg_num 8 pgp_num 8 last_change 28467 owner
-18446744073709551615
-pool 9 '.intent-log' rep size 3 min_size 1 crush_ruleset 0 object_hash
-rjenkins pg_num 8 pgp_num 8 last_change 28468 owner
-18446744073709551615
-pool 10 '.rgw.control' rep size 3 min_size 1 crush_ruleset 0
-object_hash rjenkins pg_num 8 pgp_num 8 last_change 33485 owner
-18446744073709551615
-pool 11 '.rgw.gc' rep size 3 min_size 1 crush_ruleset 0 object_hash
-rjenkins pg_num 8 pgp_num 8 last_change 33487 owner
-18446744073709551615
-pool 12 '.rgw.root' rep size 2 min_size 1 crush_ruleset 0 object_hash
-rjenkins pg_num 8 pgp_num 8 last_change 44540 owner 0
-pool 13 '' rep size 2 min_size 1 crush_ruleset 0 object_hash rjenkins
-pg_num 8 pgp_num 8 last_change 46912 owner 0
-
-> ceph pg 3.1a07 query
-{ "state": "active+remapped",
-  "epoch": 181721,
-  "up": [
-        167,
-        80],
-  "acting": [
-        167,
-        80,
-        145],
-  "info": { "pgid": "3.1a07",
-      "last_update": "181719'94809",
-      "last_complete": "181719'94809",
-      "log_tail": "159997'91808",
-      "last_backfill": "MAX",
-      "purged_snaps": "[]",
-      "history": { "epoch_created": 4,
-          "last_epoch_started": 179611,
-          "last_epoch_clean": 179611,
-          "last_epoch_split": 11522,
-          "same_up_since": 179610,
-          "same_interval_since": 179610,
-          "same_primary_since": 179610,
-          "last_scrub": "160655'94695",
-          "last_scrub_stamp": "2014-08-19 04:16:20.308318",
-          "last_deep_scrub": "158290'91157",
-          "last_deep_scrub_stamp": "2014-08-12 05:15:25.557591",
-          "last_clean_scrub_stamp": "2014-08-19 04:16:20.308318"},
-      "stats": { "version": "181719'94809",
-          "reported_seq": "995830",
-          "reported_epoch": "181721",
-          "state": "active+remapped",
-          "last_fresh": "2014-08-21 14:53:14.050284",
-          "last_change": "2014-08-21 09:42:07.473356",
-          "last_active": "2014-08-21 14:53:14.050284",
-          "last_clean": "2014-08-21 07:38:51.366084",
-          "last_became_active": "2013-10-25 13:59:36.125019",
-          "last_unstale": "2014-08-21 14:53:14.050284",
-          "mapping_epoch": 179606,
-          "log_start": "159997'91808",
-          "ondisk_log_start": "159997'91808",
-          "created": 4,
-          "last_epoch_clean": 179611,
-          "parent": "0.0",
-          "parent_split_bits": 0,
-          "last_scrub": "160655'94695",
-          "last_scrub_stamp": "2014-08-19 04:16:20.308318",
-          "last_deep_scrub": "158290'91157",
-          "last_deep_scrub_stamp": "2014-08-12 05:15:25.557591",
-          "last_clean_scrub_stamp": "2014-08-19 04:16:20.308318",
-          "log_size": 3001,
-          "ondisk_log_size": 3001,
-          "stats_invalid": "0",
-          "stat_sum": { "num_bytes": 2880784014,
-              "num_objects": 12108,
-              "num_object_clones": 0,
-              "num_object_copies": 0,
-              "num_objects_missing_on_primary": 0,
-              "num_objects_degraded": 0,
-              "num_objects_unfound": 0,
-              "num_read": 645471,
-              "num_read_kb": 16973620,
-              "num_write": 111416,
-              "num_write_kb": 2459459,
-              "num_scrub_errors": 0,
-              "num_shallow_scrub_errors": 0,
-              "num_deep_scrub_errors": 0,
-              "num_objects_recovered": 48440,
-              "num_bytes_recovered": 10006953676,
-              "num_keys_recovered": 0},
-          "stat_cat_sum": {},
-          "up": [
-                167,
-                80],
-          "acting": [
-                167,
-                80,
-                145]},
-      "empty": 0,
-      "dne": 0,
-      "incomplete": 0,
-      "last_epoch_started": 179611},
-  "recovery_state": [
-        { "name": "Started\/Primary\/Active",
-          "enter_time": "2014-08-21 09:42:07.473030",
-          "might_have_unfound": [],
-          "recovery_progress": { "backfill_target": -1,
-              "waiting_on_backfill": 0,
-              "backfill_pos": "0\/\/0\/\/-1",
-              "backfill_info": { "begin": "0\/\/0\/\/-1",
-                  "end": "0\/\/0\/\/-1",
-                  "objects": []},
-              "peer_backfill_info": { "begin": "0\/\/0\/\/-1",
-                  "end": "0\/\/0\/\/-1",
-                  "objects": []},
-              "backfills_in_flight": [],
-              "pull_from_peer": [],
-              "pushing": []},
-          "scrub": { "scrubber.epoch_start": "0",
-              "scrubber.active": 0,
-              "scrubber.block_writes": 0,
-              "scrubber.finalizing": 0,
-              "scrubber.waiting_on": 0,
-              "scrubber.waiting_on_whom": []}},
-        { "name": "Started",
-          "enter_time": "2014-08-21 09:42:06.410951"}]}
-
---
-Regards
-Dominik
-
-2014-08-18 23:27 GMT+02:00 Dominik Mostowiec <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>:
-> After replace broken disk and ceph osd in it, cluster:
-> ceph health detail
-> HEALTH_WARN 2 pgs stuck unclean; recovery 60/346857819 degraded (0.000%)
-> pg 3.884 is stuck unclean for 570722.873270, current state
-> active+remapped, last acting [143,261,314]
-> pg 3.154a is stuck unclean for 577659.917066, current state
-> active+remapped, last acting [85,224,64]
-> recovery 60/346857819 degraded (0.000%)
->
-> What can be wrong?
-> It is possible this is caused by 'ceph osd reweight-by-utilization' ?
->
-> More info:
-> ceph -v
-> ceph version 0.67.9 (ba340a97c3dafc9155023da8d515eecc675c619a)
->
-> Enabled tunnables:
-> # begin crush map
-> tunable choose_local_tries 0
-> tunable choose_local_fallback_tries 0
-> tunable choose_total_tries 50
-> tunable chooseleaf_descend_once 1
->
-> df osd:
-> 143 - 78%
-> 261 - 78%
-> 314 - 80%
->
-> 85 - 76%
-> 224  76%
-> 64 - 75%
->
-> ceph osd dump | grep -i pool
-> pool 0 'data' rep size 3 min_size 1 crush_ruleset 0 object_hash
-> rjenkins pg_num 64 pgp_num 64 last_change 28459 owner 0
-> crash_replay_interval 45
-> pool 1 'metadata' rep size 3 min_size 1 crush_ruleset 1 object_hash
-> rjenkins pg_num 64 pgp_num 64 last_change 28460 owner 0
-> pool 2 'rbd' rep size 3 min_size 1 crush_ruleset 2 object_hash
-> rjenkins pg_num 64 pgp_num 64 last_change 28461 owner 0
-> pool 3 '.rgw.buckets' rep size 3 min_size 1 crush_ruleset 0
-> object_hash rjenkins pg_num 8192 pgp_num 8192 last_change 73711 owner
-> 0
-> pool 4 '.log' rep size 3 min_size 1 crush_ruleset 0 object_hash
-> rjenkins pg_num 2048 pgp_num 2048 last_change 90517 owner 0
-> pool 5 '.rgw' rep size 3 min_size 1 crush_ruleset 0 object_hash
-> rjenkins pg_num 128 pgp_num 128 last_change 72467 owner 0
-> pool 6 '.users.uid' rep size 3 min_size 1 crush_ruleset 0 object_hash
-> rjenkins pg_num 8 pgp_num 8 last_change 28465 owner 0
-> pool 7 '.users' rep size 3 min_size 1 crush_ruleset 0 object_hash
-> rjenkins pg_num 8 pgp_num 8 last_change 28466 owner 0
-> pool 8 '.usage' rep size 2 min_size 1 crush_ruleset 0 object_hash
-> rjenkins pg_num 8 pgp_num 8 last_change 28467 owner
-> 18446744073709551615
-> pool 9 '.intent-log' rep size 3 min_size 1 crush_ruleset 0 object_hash
-> rjenkins pg_num 8 pgp_num 8 last_change 28468 owner
-> 18446744073709551615
-> pool 10 '.rgw.control' rep size 3 min_size 1 crush_ruleset 0
-> object_hash rjenkins pg_num 8 pgp_num 8 last_change 33485 owner
-> 18446744073709551615
-> pool 11 '.rgw.gc' rep size 3 min_size 1 crush_ruleset 0 object_hash
-> rjenkins pg_num 8 pgp_num 8 last_change 33487 owner
-> 18446744073709551615
-> pool 12 '.rgw.root' rep size 2 min_size 1 crush_ruleset 0 object_hash
-> rjenkins pg_num 8 pgp_num 8 last_change 44540 owner 0
-> pool 13 '' rep size 2 min_size 1 crush_ruleset 0 object_hash rjenkins
-> pg_num 8 pgp_num 8 last_change 46912 owner 0
->
-> ceph pg 3.884 query
-> { "state": "active+remapped",
->   "epoch": 160655,
->   "up": [
->         143],
->   "acting": [
->         143,
->         261,
->         314],
->   "info": { "pgid": "3.884",
->       "last_update": "160655'111533",
->       "last_complete": "160655'111533",
->       "log_tail": "159997'108532",
->       "last_backfill": "MAX",
->       "purged_snaps": "[]",
->       "history": { "epoch_created": 4,
->           "last_epoch_started": 160261,
->           "last_epoch_clean": 160261,
->           "last_epoch_split": 11488,
->           "same_up_since": 160252,
->           "same_interval_since": 160260,
->           "same_primary_since": 160252,
->           "last_scrub": "155516'107396",
->           "last_scrub_stamp": "2014-08-06 03:15:18.193611",
->           "last_deep_scrub": "155516'107293",
->           "last_deep_scrub_stamp": "2014-08-03 06:45:59.215397",
->           "last_clean_scrub_stamp": "2014-08-06 03:15:18.193611"},
->       "stats": { "version": "160655'111533",
->           "reported_seq": "856860",
->           "reported_epoch": "160655",
->           "state": "active+remapped",
->           "last_fresh": "2014-08-18 23:06:47.068588",
->           "last_change": "2014-08-17 21:12:29.452628",
->           "last_active": "2014-08-18 23:06:47.068588",
->           "last_clean": "2014-08-12 08:44:00.293916",
->           "last_became_active": "2013-10-25 14:54:55.902442",
->           "last_unstale": "2014-08-18 23:06:47.068588",
->           "mapping_epoch": 160258,
->           "log_start": "159997'108532",
->           "ondisk_log_start": "159997'108532",
->           "created": 4,
->           "last_epoch_clean": 160261,
->           "parent": "0.0",
->           "parent_split_bits": 0,
->           "last_scrub": "155516'107396",
->           "last_scrub_stamp": "2014-08-06 03:15:18.193611",
->           "last_deep_scrub": "155516'107293",
->           "last_deep_scrub_stamp": "2014-08-03 06:45:59.215397",
->           "last_clean_scrub_stamp": "2014-08-06 03:15:18.193611",
->           "log_size": 3001,
->           "ondisk_log_size": 3001,
->           "stats_invalid": "0",
->           "stat_sum": { "num_bytes": 2750235192,
->               "num_objects": 12015,
->               "num_object_clones": 0,
->               "num_object_copies": 0,
->               "num_objects_missing_on_primary": 0,
->               "num_objects_degraded": 0,
->               "num_objects_unfound": 0,
->               "num_read": 708045,
->               "num_read_kb": 39418032,
->               "num_write": 120983,
->               "num_write_kb": 2383937,
->               "num_scrub_errors": 0,
->               "num_shallow_scrub_errors": 0,
->               "num_deep_scrub_errors": 0,
->               "num_objects_recovered": 44904,
->               "num_bytes_recovered": 7915543525,
->               "num_keys_recovered": 0},
->           "stat_cat_sum": {},
->           "up": [
->                 143],
->           "acting": [
->                 143,
->                 261,
->                 314]},
->       "empty": 0,
->       "dne": 0,
->       "incomplete": 0,
->       "last_epoch_started": 160261},
->   "recovery_state": [
->         { "name": "Started\/Primary\/Active",
->           "enter_time": "2014-08-17 21:12:29.452429",
->           "might_have_unfound": [],
->           "recovery_progress": { "backfill_target": -1,
->               "waiting_on_backfill": 0,
->               "backfill_pos": "0\/\/0\/\/-1",
->               "backfill_info": { "begin": "0\/\/0\/\/-1",
->                   "end": "0\/\/0\/\/-1",
->                   "objects": []},
->               "peer_backfill_info": { "begin": "0\/\/0\/\/-1",
->                   "end": "0\/\/0\/\/-1",
->                   "objects": []},
->               "backfills_in_flight": [],
->               "pull_from_peer": [],
->               "pushing": []},
->           "scrub": { "scrubber.epoch_start": "0",
->               "scrubber.active": 0,
->               "scrubber.block_writes": 0,
->               "scrubber.finalizing": 0,
->               "scrubber.waiting_on": 0,
->               "scrubber.waiting_on_whom": []}},
->         { "name": "Started",
->           "enter_time": "2014-08-17 21:12:28.436021"}]}
->
-> ---
-> Regards
-> Dominik
->
-> 2014-08-17 21:57 GMT+02:00 Dominik Mostowiec <dominikmostowiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>:
->> Hi,
->> After ceph osd out ( 1 osd ) cluster stopped rebalancing on
->> 10621 active+clean, 2 active+remapped, 1 active+degraded+remapped;
->>
->> My crushmap is clean, there is not 'empty' device's.
->> grep device /tmp/crush1.txt  | grep -v osd | grep -v '^#' | wc -l
->> 0
->>
->> Can You help me with this?
->>
->>   "up": [
->>         73],
->>   "acting": [
->>         73,
->>         102],
->> I have only one copy of this PG ?
->>
->> More info:
->> --
->> ceph health detail
->> HEALTH_WARN 1 pgs degraded; 3 pgs stuck unclean; recovery
->> 12008/346501095 degraded (0.003%)
->> pg 3.884 is stuck unclean for 478441.392837, current state
->> active+remapped, last acting [143,261,314]
->> pg 3.154a is stuck unclean for 485378.436630, current state
->> active+remapped, last acting [85,224,64]
->> pg 3.cc7 is stuck unclean for 116231.803324, current state
->> active+degraded+remapped, last acting [73,102]
->> pg 3.cc7 is active+degraded+remapped, acting [73,102]
->> recovery 12008/346501095 degraded (0.003%)
->> --
->> ceph pg dump | grep 3.cc7
->> dumped all in format plain
->> 3.cc7   12014   0       12012   0       2845541648      3870    3870
->>  active+degraded+remapped        2014-08-17 21:08:04.155348
->> 160273'273322   160273:1044675  [73]    [73,102]159997'270388
->> 2014-08-13 05:23:48.386184      159997'270388   2014-08-13
->> 05:23:48.386184
->> --
->> grep '3.cc7' /var/log/ceph/ceph-osd.73.log
->> 2014-08-17 21:06:47.494511 7f788a625700 20 osd.73 160241  kicking pg 3.cc7
->> 2014-08-17 21:06:47.494513 7f788a625700 30 osd.73 pg_epoch: 160241
->> pg[3.cc7( v 160241'273320 (155516'269452,160241'273320]
->> local-les=160026 n=12016 ec=4 les/c 160026/160026
->> 160024/160025/153162) [73]/[73,102] r=0 lpr=160025 mlcod 160241'273319
->> active+degraded+remapped] lock
->> 2014-08-17 21:06:47.494522 7f788a625700 10 osd.73 pg_epoch: 160241
->> pg[3.cc7( v 160241'273320 (155516'269452,160241'273320]
->> local-les=160026 n=12016 ec=4 les/c 160026/160026
->> 160024/160025/153162) [73]/[73,102] r=0 lpr=160025 mlcod 160241'273319
->> active+degraded+remapped] on_shutdown
->> 2014-08-17 21:06:47.494530 7f788a625700 10 osd.73 pg_epoch: 160241
->> pg[3.cc7( v 160241'273320 (155516'269452,160241'273320]
->> local-les=160026 n=12016 ec=4 les/c 160026/160026
->> 160024/160025/153162) [73]/[73,102] r=0 lpr=160025 mlcod 160241'273319
->> active+degraded+remapped] clear_primary_state
->> 2014-08-17 21:06:47.494541 7f788a625700 10 osd.73 pg_epoch: 160241
->> pg[3.cc7( v 160241'273320 (155516'269452,160241'273320]
->> local-les=160026 n=12016 ec=4 les/c 160026/160026
->> 160024/160025/153162) [73]/[73,102] r=0 lpr=160025 luod=0'0 mlcod 0'0
->> active+degraded+remapped] cancel_recovery
->> 2014-08-17 21:06:47.494548 7f788a625700 10 osd.73 pg_epoch: 160241
->> pg[3.cc7( v 160241'273320 (155516'269452,160241'273320]
->> local-les=160026 n=12016 ec=4 les/c 160026/160026
->> 160024/160025/153162) [73]/[73,102] r=0 lpr=160025 luod=0'0 mlcod 0'0
->> active+degraded+remapped] clear_recovery_state
->> 2014-08-17 21:07:00.758061 7f9819814700  1 osd.73 pg_epoch: 160244
->> pg[3.cc7( v 160241'273320 (155516'269452,160241'273320]
->> local-les=160026 n=12016 ec=4 les/c 160026/160026
->> 160244/160244/160244) [73]/[73,102] r=0 lpr=160244 pi=160025-160243/2
->> lcod 0'0 mlcod 0'0 remapped] state<Start>: transitioning to Primary
->> 2014-08-17 21:07:51.121028 7f9819814700  1 osd.73 pg_epoch: 160246
->> pg[3.cc7( v 160241'273320 (155516'269452,160241'273320]
->> local-les=160245 n=12016 ec=4 les/c 160245/160245
->> 160244/160246/160244) [73] r=0 lpr=160246 pi=160244-160245/1 lcod 0'0
->> mlcod 0'0 inactive] state<Start>: transitioning to Primary
->> 2014-08-17 21:08:02.995105 7f9818011700  1 osd.73 pg_epoch: 160248
->> pg[3.cc7( v 160241'273320 (155516'269452,160241'273320]
->> local-les=160247 n=12016 ec=4 les/c 160247/160247
->> 160244/160248/160244) [73]/[73,102] r=0 lpr=160248 pi=160246-160247/1
->> lcod 0'0 mlcod 0'0 remapped] state<Start>: transitioning to Primary
->> --
->> grep '3.cc7' /var/log/ceph/ceph-osd.102.log
->> 2014-08-17 21:06:47.554359 7f630df7a700  1 osd.102 pg_epoch: 160242
->> pg[3.cc7( v 160241'273320 (155516'269452,160241'273320]
->> local-les=160026 n=12016 ec=4 les/c 160026/160026
->> 160242/160242/160242) []/[102] r=0 lpr=160242 pi=158292-160241/12 lcod
->> 160241'273319 mlcod 0'0 remapped] state<Start>: transitioning to
->> Primary
->> 2014-08-17 21:07:00.772420 7f630b775700  1 osd.102 pg_epoch: 160244
->> pg[3.cc7( v 160241'273320 (155516'269452,160241'273320]
->> local-les=160243 n=12016 ec=4 les/c 160243/160243
->> 160244/160244/160244) [73]/[73,102] r=1 lpr=160244 pi=160242-160243/1
->> lcod 160241'273319 remapped NOTIFY] state<Start>: transitioning to
->> Stray
->> 2014-08-17 21:07:50.832077 7f62f878a700 20 osd.102 160245  kicking pg 3.cc7
->> 2014-08-17 21:07:50.832079 7f62f878a700 30 osd.102 pg_epoch: 160245
->> pg[3.cc7( v 160241'273320 (155516'269452,160241'273320]
->> local-les=160245 n=12016 ec=4 les/c 160245/160245
->> 160244/160244/160244) [73]/[73,102] r=1 lpr=160244 pi=160242-160243/1
->> luod=0'0 lcod 160241'273319 active+remapped] lock
->> 2014-08-17 21:07:50.832089 7f62f878a700 10 osd.102 pg_epoch: 160245
->> pg[3.cc7( v 160241'273320 (155516'269452,160241'273320]
->> local-les=160245 n=12016 ec=4 les/c 160245/160245
->> 160244/160244/160244) [73]/[73,102] r=1 lpr=160244 pi=160242-160243/1
->> luod=0'0 lcod 160241'273319 active+remapped] on_shutdown
->> 2014-08-17 21:07:50.832099 7f62f878a700 10 osd.102 pg_epoch: 160245
->> pg[3.cc7( v 160241'273320 (155516'269452,160241'273320]
->> local-les=160245 n=12016 ec=4 les/c 160245/160245
->> 160244/160244/160244) [73]/[73,102] r=1 lpr=160244 pi=160242-160243/1
->> luod=0'0 lcod 160241'273319 active+remapped] clear_primary_state
->> 2014-08-17 21:07:50.832109 7f62f878a700 10 osd.102 pg_epoch: 160245
->> pg[3.cc7( v 160241'273320 (155516'269452,160241'273320]
->> local-les=160245 n=12016 ec=4 les/c 160245/160245
->> 160244/160244/160244) [73]/[73,102] r=1 lpr=160244 pi=160242-160243/1
->> luod=0'0 lcod 160241'273319 active+remapped] cancel_recovery
->> 2014-08-17 21:07:50.832117 7f62f878a700 10 osd.102 pg_epoch: 160245
->> pg[3.cc7( v 160241'273320 (155516'269452,160241'273320]
->> local-les=160245 n=12016 ec=4 les/c 160245/160245
->> 160244/160244/160244) [73]/[73,102] r=1 lpr=160244 pi=160242-160243/1
->> luod=0'0 lcod 160241'273319 active+remapped] clear_recovery_state
->> 2014-08-17 21:08:02.979471 7f3d54953700  1 osd.102 pg_epoch: 160248
->> pg[3.cc7( v 160241'273320 (155516'269452,160241'273320]
->> local-les=160245 n=12016 ec=4 les/c 160245/160245
->> 160244/160248/160244) [73]/[73,102] r=1 lpr=160248 pi=160242-160247/3
->> lcod 0'0 remapped NOTIFY] state<Start>: transitioning to Stray
->> --
->> ceph pg 3.cc7 query:
->> { "state": "active+degraded+remapped",
->>   "epoch": 160273,
->>   "up": [
->>         73],
->>   "acting": [
->>         73,
->>         102],
->>   "info": { "pgid": "3.cc7",
->>       "last_update": "160273'273322",
->>       "last_complete": "160273'273322",
->>       "log_tail": "155516'269452",
->>       "last_backfill": "MAX",
->>       "purged_snaps": "[]",
->>       "history": { "epoch_created": 4,
->>           "last_epoch_started": 160249,
->>           "last_epoch_clean": 160249,
->>           "last_epoch_split": 11503,
->>           "same_up_since": 160244,
->>           "same_interval_since": 160248,
->>           "same_primary_since": 160244,
->>           "last_scrub": "159997'270388",
->>           "last_scrub_stamp": "2014-08-13 05:23:48.386184",
->>           "last_deep_scrub": "159997'270388",
->>           "last_deep_scrub_stamp": "2014-08-13 05:23:48.386184",
->>           "last_clean_scrub_stamp": "2014-08-13 05:23:48.386184"},
->>       "stats": { "version": "160273'273322",
->>           "reported_seq": "1044675",
->>           "reported_epoch": "160273",
->>           "state": "active+degraded+remapped",
->>           "last_fresh": "2014-08-17 21:25:34.935269",
->>           "last_change": "2014-08-17 21:08:04.155348",
->>           "last_active": "2014-08-17 21:25:34.935269",
->>           "last_clean": "2014-08-16 13:20:49.883438",
->>           "last_became_active": "2013-10-25 13:05:26.849618",
->>           "last_unstale": "2014-08-17 21:25:34.935269",
->>           "mapping_epoch": 160246,
->>           "log_start": "155516'269452",
->>           "ondisk_log_start": "155516'269452",
->>           "created": 4,
->>           "last_epoch_clean": 160249,
->>           "parent": "0.0",
->>           "parent_split_bits": 0,
->>           "last_scrub": "159997'270388",
->>           "last_scrub_stamp": "2014-08-13 05:23:48.386184",
->>           "last_deep_scrub": "159997'270388",
->>           "last_deep_scrub_stamp": "2014-08-13 05:23:48.386184",
->>           "last_clean_scrub_stamp": "2014-08-13 05:23:48.386184",
->>           "log_size": 3870,
->>           "ondisk_log_size": 3870,
->>           "stats_invalid": "0",
->>           "stat_sum": { "num_bytes": 2845541648,
->>               "num_objects": 12014,
->>               "num_object_clones": 0,
->>               "num_object_copies": 0,
->>               "num_objects_missing_on_primary": 0,
->>               "num_objects_degraded": 0,
->>               "num_objects_unfound": 0,
->>               "num_read": 723032,
->>               "num_read_kb": 24658206,
->>               "num_write": 118401,
->>               "num_write_kb": 2360009,
->>               "num_scrub_errors": 0,
->>               "num_shallow_scrub_errors": 0,
->>               "num_deep_scrub_errors": 0,
->>               "num_objects_recovered": 55614,
->>               "num_bytes_recovered": 10782825899,
->>               "num_keys_recovered": 0},
->>           "stat_cat_sum": {},
->>           "up": [
->>                 73],
->>           "acting": [
->>                 73,
->>                 102]},
->>       "empty": 0,
->>       "dne": 0,
->>       "incomplete": 0,
->>       "last_epoch_started": 160249},
->>   "recovery_state": [
->>         { "name": "Started\/Primary\/Active",
->>           "enter_time": "2014-08-17 21:08:04.154871",
->>           "might_have_unfound": [],
->>           "recovery_progress": { "backfill_target": -1,
->>               "waiting_on_backfill": 0,
->>               "backfill_pos": "0\/\/0\/\/-1",
->>               "backfill_info": { "begin": "0\/\/0\/\/-1",
->>                   "end": "0\/\/0\/\/-1",
->>                   "objects": []},
->>               "peer_backfill_info": { "begin": "0\/\/0\/\/-1",
->>                   "end": "0\/\/0\/\/-1",
->>                   "objects": []},
->>               "backfills_in_flight": [],
->>               "pull_from_peer": [],
->>               "pushing": []},
->>           "scrub": { "scrubber.epoch_start": "0",
->>               "scrubber.active": 0,
->>               "scrubber.block_writes": 0,
->>               "scrubber.finalizing": 0,
->>               "scrubber.waiting_on": 0,
->>               "scrubber.waiting_on_whom": []}},
->>         { "name": "Started",
->>           "enter_time": "2014-08-17 21:08:02.995104"}]}
->>
->>
->> --
->> Regards
->> Dominik
->
->
->
+> Hi sage,
+>    The pull request:https://github.com/ceph/ceph/pull/2296.
+> 
+> Mark 
+>    After sage merge this into wip-filejournal, can you test again? I think at present only you can do this work!
+> 
+> Thanks!
+> Jianpeng 
+> 
+> > -----Original Message-----
+> > From: Sage Weil [mailto:sweil@redhat.com]
+> > Sent: Thursday, August 21, 2014 11:53 AM
+> > To: Ma, Jianpeng
+> > Cc: Somnath Roy; Samuel Just (sam.just@inktank.com);
+> > ceph-devel@vger.kernel.org; Mark Kirkwood
+> > Subject: RE: Deadlock in ceph journal
+> > 
+> > On Thu, 21 Aug 2014, Ma, Jianpeng wrote:
+> > > Yes, Maybe for io_submit, it must use io_getevent. Otherwise the result is
+> > undefined.
+> > > If stop_write == true, we don't use aio. How about this way?
+> > 
+> > That seems reasonable, now that I understand why it doesn't work the other
+> > way.  Do you mind resending your original patch with a comment in the code
+> > to that effect?  ("do sync write since we don't wait for aio completions for
+> > header-only writes during shutdown")
+> > 
+> > sage
+> > 
+> > 
+> > >
+> > > Jianpeng
+> > >
+> > > > -----Original Message-----
+> > > > From: Sage Weil [mailto:sweil@redhat.com]
+> > > > Sent: Wednesday, August 20, 2014 11:34 PM
+> > > > To: Somnath Roy
+> > > > Cc: Samuel Just (sam.just@inktank.com); ceph-devel@vger.kernel.org;
+> > > > Mark Kirkwood; Ma, Jianpeng
+> > > > Subject: RE: Deadlock in ceph journal
+> > > >
+> > > > I suspect what is really needed is a drain_aio() function that will
+> > > > wait for all pending aio ops to complete on shutdown.  What happens
+> > > > to those IOs if the process exists while they are in flight is
+> > > > probably undefined; we should just avoid doing that.
+> > > >
+> > > > sage
+> > > >
+> > > >
+> > > > On Wed, 20 Aug 2014, Somnath Roy wrote:
+> > > >
+> > > > > I will also take the patch and test it out.
+> > > > >
+> > > > > Thanks & Regards
+> > > > > Somnath
+> > > > >
+> > > > > -----Original Message-----
+> > > > > From: Sage Weil [mailto:sweil@redhat.com]
+> > > > > Sent: Tuesday, August 19, 2014 9:51 PM
+> > > > > To: Somnath Roy
+> > > > > Cc: Samuel Just (sam.just@inktank.com);
+> > > > > ceph-devel@vger.kernel.org; Mark Kirkwood; jianpeng.ma@intel.com
+> > > > > Subject: RE: Deadlock in ceph journal
+> > > > >
+> > > > > On Wed, 20 Aug 2014, Somnath Roy wrote:
+> > > > > > Thanks Sage !
+> > > > > > So, the latest master should have the fix, right ?
+> > > > >
+> > > > > The original patch that caused the regression is reverted, but
+> > > > > we'd like to
+> > > > reapply it if we sort out the issues.  wip-filejournal has the
+> > > > offending patch and your fix.. but I'm eager to hear if Jianpeng and
+> > > > Mark can confirm it's complete/correct or if there is still a problem.
+> > > > >
+> > > > > sage
+> > > > >
+> > > > > >
+> > > > > > Regards
+> > > > > > Somnath
+> > > > > >
+> > > > > > -----Original Message-----
+> > > > > > From: Sage Weil [mailto:sweil@redhat.com]
+> > > > > > Sent: Tuesday, August 19, 2014 8:55 PM
+> > > > > > To: Somnath Roy
+> > > > > > Cc: Samuel Just (sam.just@inktank.com);
+> > > > > > ceph-devel@vger.kernel.org; Mark Kirkwood; jianpeng.ma@intel.com
+> > > > > > Subject: RE: Deadlock in ceph journal
+> > > > > >
+> > > > > > [Copying ceph-devel, dropping ceph-users]
+> > > > > >
+> > > > > > Yeah, that looks like a bug.  I pushed wip-filejournal that
+> > > > > > reapplies
+> > > > Jianpeng's original patch and this one.  I'm not certain about last
+> > > > other suggested fix, though, but I'm hoping that this fix explains
+> > > > the strange behavior Jianpeng and Mark have seen?
+> > > > > >
+> > > > > > sage
+> > > > > >
+> > > > > >
+> > > > > > On Wed, 20 Aug 2014, Somnath Roy wrote:
+> > > > > > >
+> > > > > > > I think this is the issue..
+> > > > > > >
+> > > > > > >
+> > > > > > >
+> > > > > > > http://tracker.ceph.com/issues/9073
+> > > > > > >
+> > > > > > >
+> > > > > > >
+> > > > > > > Thanks & Regards
+> > > > > > >
+> > > > > > > Somnath
+> > > > > > >
+> > > > > > >
+> > > > > > >
+> > > > > > > From: Somnath Roy
+> > > > > > > Sent: Tuesday, August 19, 2014 6:25 PM
+> > > > > > > To: Sage Weil (sage@inktank.com); Samuel Just
+> > > > > > > (sam.just@inktank.com)
+> > > > > > > Cc: ceph-users@lists.ceph.com
+> > > > > > > Subject: Deadlock in ceph journal
+> > > > > > >
+> > > > > > >
+> > > > > > >
+> > > > > > > Hi Sage/Sam,
+> > > > > > >
+> > > > > > > During our testing we found a potential deadlock scenario in
+> > > > > > > the filestore journal code base. This is happening because of two
+> > reason.
+> > > > > > >
+> > > > > > >
+> > > > > > >
+> > > > > > > 1.       This is because code is not signaling aio_cond from
+> > > > > > > check_aio_completion() in case seq = 0
+> > > > > > >
+> > > > > > > 2.       Following changes in the write_thread_entry() is allowing a
+> > > > > > > very first header write with seq = 0.
+> > > > > > >
+> > > > > > >                if (writeq.empty() && !must_write_header) {
+> > > > > > >
+> > > > > > >
+> > > > > > >
+> > > > > > >
+> > > > > > >
+> > > > > > > Now, during ceph-deploy activate this is what happening.
+> > > > > > >
+> > > > > > >
+> > > > > > >
+> > > > > > > 1. The very first write of header with seq = 0 issued and it
+> > > > > > > is waiting for aio completion. So, aio_num = 1.
+> > > > > > >
+> > > > > > > 2. superblock write came in and got into while (aio_num > 0)
+> > > > > > > block of
+> > > > > > > write_thread_entry() and waiting on the aio_cond
+> > > > > > >
+> > > > > > > 3. The seq = 0 aio completed but not setting
+> > > > > > > completed_something = true and as a result aio_cond is not signaled.
+> > > > > > >
+> > > > > > > 4. write_thread_entry() is getting into deadlock.
+> > > > > > >
+> > > > > > >
+> > > > > > >
+> > > > > > > This is a timing problem and if header write is returned
+> > > > > > > before superblock write this will not happen and will be
+> > > > > > > happening in case of block journal device only (aio is enabled).
+> > > > > > >
+> > > > > > >
+> > > > > > >
+> > > > > > > Here is the log snippet we are getting.
+> > > > > > >
+> > > > > > >
+> > > > > > >
+> > > > > > > 2014-08-19 12:59:10.029363 7f60fa33b700 10 journal
+> > > > > > > write_thread_entry start
+> > > > > > >
+> > > > > > > 2014-08-19 12:59:10.029395 7f60fa33b700 20 journal
+> > > > > > > prepare_multi_write queue_pos now 4096
+> > > > > > >
+> > > > > > > 2014-08-19 12:59:10.029427 7f60fa33b700 15 journal
+> > > > > > > do_aio_write writing
+> > > > > > > 4096~0 + header
+> > > > > > >
+> > > > > > > 2014-08-19 12:59:10.029439 7f60fa33b700 20 journal
+> > > > > > > write_aio_bl
+> > > > > > > 0~4096 seq 0
+> > > > > > >
+> > > > > > > 2014-08-19 12:59:10.029442 7f60f9339700 10 journal
+> > > > > > > write_finish_thread_entry enter
+> > > > > > >
+> > > > > > > 2014-08-19 12:59:10.029466 7f60fa33b700 20 journal write_aio_bl ..
+> > > > > > > 0~4096 in
+> > > > > > > 1
+> > > > > > >
+> > > > > > > 2014-08-19 12:59:10.029498 7f60fa33b700 20 journal
+> > > > > > > write_aio_bl
+> > > > > > > 4096~0 seq 0
+> > > > > > >
+> > > > > > > 2014-08-19 12:59:10.029505 7f60fa33b700  5 journal
+> > > > > > > put_throttle finished 0 ops and 0 bytes, now 0 ops and 0 bytes
+> > > > > > >
+> > > > > > > 2014-08-19 12:59:10.029510 7f60fa33b700 20 journal
+> > > > > > > write_thread_entry going to sleep
+> > > > > > >
+> > > > > > > 2014-08-19 12:59:10.029538 7f60ff178800 10 journal
+> > > > > > > journal_start
+> > > > > > >
+> > > > > > > 2014-08-19 12:59:10.029566 7f60f9339700 20 journal
+> > > > > > > write_finish_thread_entry waiting for aio(s)
+> > > > > > >
+> > > > > > > 2014-08-19 12:59:10.029726 7f60ff178800 15
+> > > > > > > filestore(/var/lib/ceph/tmp/mnt.NKfs2R) read
+> > > > > > > meta/23c2fcde/osd_superblock/0//-1 0~0
+> > > > > > >
+> > > > > > > 2014-08-19 12:59:10.029793 7f60ff178800 -1
+> > > > > > > filestore(/var/lib/ceph/tmp/mnt.NKfs2R) could not find
+> > > > > > > 23c2fcde/osd_superblock/0//-1 in index: (2) No such file or
+> > > > > > > directory
+> > > > > > >
+> > > > > > > 2014-08-19 12:59:10.029815 7f60ff178800 10
+> > > > > > > filestore(/var/lib/ceph/tmp/mnt.NKfs2R)
+> > > > > > > FileStore::read(meta/23c2fcde/osd_superblock/0//-1) open error:
+> > > > > > > (2) No such file or directory
+> > > > > > >
+> > > > > > > 2014-08-19 12:59:10.029892 7f60ff178800  5
+> > > > > > > filestore(/var/lib/ceph/tmp/mnt.NKfs2R) queue_transactions new
+> > > > > > > osr(default
+> > > > > > > 0x42ea9f0)/0x42ea9f0
+> > > > > > >
+> > > > > > > 2014-08-19 12:59:10.029922 7f60ff178800 10 journal
+> > > > > > > op_submit_start
+> > > > > > > 2
+> > > > > > >
+> > > > > > > 2014-08-19 12:59:10.030009 7f60ff178800  5
+> > > > > > > filestore(/var/lib/ceph/tmp/mnt.NKfs2R) queue_transactions
+> > > > > > > (writeahead) 2
+> > > > > > > 0x7fff6e817080
+> > > > > > >
+> > > > > > > 2014-08-19 12:59:10.030028 7f60ff178800 10 journal
+> > > > > > > op_journal_transactions 2
+> > > > > > > 0x7fff6e817080
+> > > > > > >
+> > > > > > > 2014-08-19 12:59:10.030039 7f60ff178800  5 journal
+> > > > > > > submit_entry seq
+> > > > > > > 2 len
+> > > > > > > 505 (0x42a76f0)
+> > > > > > >
+> > > > > > > 2014-08-19 12:59:10.030065 7f60fa33b700 20 journal
+> > > > > > > write_thread_entry woke up
+> > > > > > >
+> > > > > > > 2014-08-19 12:59:10.030070 7f60fa33b700 20 journal
+> > > > > > > write_thread_entry aio
+> > > > > > > throttle: aio num 1 bytes 4096 ... exp 2 min_new 4 ... pending
+> > > > > > > 0
+> > > > > > >
+> > > > > > > 2014-08-19 12:59:10.030076 7f60fa33b700 20 journal
+> > > > > > > write_thread_entry deferring until more aios complete: 1 aios
+> > > > > > > with
+> > > > > > > 4096 bytes needs 4 bytes to start a new aio (currently 0
+> > > > > > > pending)
+> > > > > > >
+> > > > > > > 2014-08-19 12:59:10.030084 7f60ff178800 10 journal
+> > > > > > > op_submit_finish
+> > > > > > > 2
+> > > > > > >
+> > > > > > > 2014-08-19 12:59:10.030389 7f60f9339700 10 journal
+> > > > > > > write_finish_thread_entry aio 0~4096 done
+> > > > > > >
+> > > > > > > 2014-08-19 12:59:10.030402 7f60f9339700 20 journal
+> > > > > > > check_aio_completion
+> > > > > > >
+> > > > > > > 2014-08-19 12:59:10.030406 7f60f9339700 20 journal
+> > > > > > > check_aio_completion completed seq 0 0~4096
+> > > > > > >
+> > > > > > > 2014-08-19 12:59:10.030412 7f60f9339700 20 journal
+> > > > > > > write_finish_thread_entry sleeping
+> > > > > > >
+> > > > > > > 2014-08-19 12:59:15.026609 7f60fab3c700 20
+> > > > > > > filestore(/var/lib/ceph/tmp/mnt.NKfs2R) sync_entry woke after
+> > > > > > > 5.000459
+> > > > > > >
+> > > > > > > 2014-08-19 12:59:15.026659 7f60fab3c700 10 journal
+> > > > > > > commit_start max_applied_seq 1, open_ops 0
+> > > > > > >
+> > > > > > > 2014-08-19 12:59:15.026665 7f60fab3c700 10 journal
+> > > > > > > commit_start blocked, all open_ops have completed
+> > > > > > >
+> > > > > > > 2014-08-19 12:59:15.026670 7f60fab3c700 10 journal
+> > > > > > > commit_start nothing to do
+> > > > > > >
+> > > > > > > 2014-08-19 12:59:15.026676 7f60fab3c700 10 journal
+> > > > > > > commit_start
+> > > > > > >
+> > > > > > > 2014-08-19 12:59:15.026691 7f60fab3c700 20
+> > > > > > > filestore(/var/lib/ceph/tmp/mnt.NKfs2R) sync_entry waiting for
+> > > > > > > max_interval
+> > > > > > > 5.000000
+> > > > > > >
+> > > > > > > 2014-08-19 12:59:20.026826 7f60fab3c700 20
+> > > > > > > filestore(/var/lib/ceph/tmp/mnt.NKfs2R) sync_entry woke after
+> > > > > > > 5.000135
+> > > > > > >
+> > > > > > > 2014-08-19 12:59:20.026870 7f60fab3c700 10 journal
+> > > > > > > commit_start max_applied_seq 1, open_ops 0
+> > > > > > >
+> > > > > > > 2014-08-19 12:59:20.026876 7f60fab3c700 10 journal
+> > > > > > > commit_start blocked, all open_ops have completed
+> > > > > > >
+> > > > > > > 2014-08-19 12:59:20.026879 7f60fab3c700 10 journal
+> > > > > > > commit_start nothing to do
+> > > > > > >
+> > > > > > > 2014-08-19 12:59:20.026891 7f60fab3c700 10 journal
+> > > > > > > commit_start
+> > > > > > >
+> > > > > > >
+> > > > > > >
+> > > > > > >
+> > > > > > >
+> > > > > > > Could you please confirm this as a valid defect ?
+> > > > > > >
+> > > > > > >
+> > > > > > >
+> > > > > > > If so, sending a signal on aio_cond in case of seq = 0, could
+> > > > > > > be the solution ?
+> > > > > > >
+> > > > > > >
+> > > > > > >
+> > > > > > > Please let me know if there is any potential workaround for
+> > > > > > > this while deploying with ceph-deploy. Will ceph-deploy accept
+> > > > > > > file path as
+> > > > journal ?
+> > > > > > >
+> > > > > > >
+> > > > > > >
+> > > > > > > Thanks & Regards
+> > > > > > >
+> > > > > > > Somnath
+> > > > > > >
+> > > > > > >
+> > > > > > >
+> > > >
+> > ________________________________________________________________
+> > > > __
+> > > > > > > __
+> > > > > > > __
+> > > > > > > ______
+> > > > > > >
+> > > > > > > PLEASE NOTE: The information contained in this electronic mail
+> > > > > > > message is intended only for the use of the designated
+> > > > > > > recipient(s) named above. If the reader of this message is not
+> > > > > > > the intended recipient, you are hereby notified that you have
+> > > > > > > received this message in error and that any review,
+> > > > > > > dissemination, distribution, or copying of this message is strictly
+> > prohibited.
+> > > > > > > If you have received this communication in error, please
+> > > > > > > notify the sender by telephone or e-mail (as shown above)
+> > > > > > > immediately and destroy any and all copies of this message in
+> > > > > > > your possession (whether
+> > > > hard copies or electronically stored copies).
+> > > > > > >
+> > > > > > >
+> > > > > > >
+> > > > > >
+> > > > > > ________________________________
+> > > > > >
+> > > > > > PLEASE NOTE: The information contained in this electronic mail
+> > > > > > message is
+> > > > intended only for the use of the designated recipient(s) named
+> > > > above. If the reader of this message is not the intended recipient,
+> > > > you are hereby notified that you have received this message in error
+> > > > and that any review, dissemination, distribution, or copying of this
+> > > > message is strictly prohibited. If you have received this
+> > > > communication in error, please notify the sender by telephone or
+> > > > e-mail (as shown above) immediately and destroy any and all copies
+> > > > of this message in your possession (whether hard copies or electronically
+> > stored copies).
+> > > > > >
+> > > > > > --
+> > > > > > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+> > > > > > in the body of a message to majordomo@vger.kernel.org More
+> > > > > > majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > > > > >
+> > > > > >
+> > > > > --
+> > > > > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+> > > > > in the body of a message to majordomo@vger.kernel.org More
+> > > > > majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > > > >
+> > > > >
+> > >
+> > >
 > --
-> Pozdrawiam
-> Dominik
-
-
-
--- 
-Pozdrawiam
-Dominik
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
