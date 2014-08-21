@@ -1,94 +1,171 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: Ceph authentication/authorization paradignms
-Date: Thu, 21 Aug 2014 09:02:51 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1408210859580.31169@cobra.newdream.net>
-References: <1642211910.31382003.1408036197918.JavaMail.zimbra@redhat.com> <1355490291.31383019.1408036230928.JavaMail.zimbra@redhat.com> <CAPYLRzixD8O5C8K_Q0yvD=3YCMwuWQJg4HFOJ5nss4b4m_0U8g@mail.gmail.com> <361503695.34598023.1408573203316.JavaMail.zimbra@redhat.com>
- <CAPYLRzg3BsmQP6D7L9Bn=6kgjnnB=AA9G7Qe0QYP=qNZAANfyQ@mail.gmail.com>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: [ceph-users] wired output of ceph df : Firefly 0.80.5
+Date: Thu, 21 Aug 2014 09:06:27 -0700
+Message-ID: <CAPYLRzi2ROL+xMekqVAbH7M6T6ODmf1zzT8EgAZjmQJVuMRp1w@mail.gmail.com>
+References: <F690D436-ABCA-45D4-9583-492EED969300@csc.fi>
+	<97499908-D142-4F14-92BB-5214561F04B3@csc.fi>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:47159 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752372AbaHUQCy (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Aug 2014 12:02:54 -0400
-In-Reply-To: <CAPYLRzg3BsmQP6D7L9Bn=6kgjnnB=AA9G7Qe0QYP=qNZAANfyQ@mail.gmail.com>
+Received: from mail-qa0-f45.google.com ([209.85.216.45]:50193 "EHLO
+	mail-qa0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751477AbaHUQG2 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Aug 2014 12:06:28 -0400
+Received: by mail-qa0-f45.google.com with SMTP id cm18so8451152qab.32
+        for <ceph-devel@vger.kernel.org>; Thu, 21 Aug 2014 09:06:27 -0700 (PDT)
+In-Reply-To: <97499908-D142-4F14-92BB-5214561F04B3@csc.fi>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: "Christopher R. Hertel" <crh@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Karan Singh <karan.singh@csc.fi>, Joao Luis <joao.luis@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, 21 Aug 2014, Gregory Farnum wrote:
-> On Wed, Aug 20, 2014 at 3:20 PM, Christopher R. Hertel <crh@redhat.com> wrote:
-> > [At end...]
-> > ----- Original Message -----
-> >> From: "Gregory Farnum" <greg@inktank.com>
-> >> To: "Christopher R. Hertel" <crh@redhat.com>
-> >> Cc: ceph-devel@vger.kernel.org
-> >> Sent: Tuesday, August 19, 2014 4:57:59 PM
-> >> Subject: Re: Ceph authentication/authorization paradignms
-> >>
-> >> On Thu, Aug 14, 2014 at 10:10 AM, Christopher R. Hertel <crh@redhat.com>
-> >> wrote:
-> >> > Ceph Folks:
-> >> >
-> >> > Hi.  I am new to Ceph but I've been around in the Open Source world for a
-> >> > while, working on a variety of different projects (mostly Windows Interop
-> >> > stuff).  I was asked to take a look at the authentication mechanisms used
-> >> > in
-> >> > Ceph, focusing on two key areas:
-> >> >
-> >> >   * Calamari
-> >> >   * Ceph client authentication to the Ceph cluster.
-> >> >
-> >> > I am purposefully avoiding anything to do with the internal
-> >> > service-to-service authentication/authorization system (that is, Cephx) for
-> >> > two reasons.  The first is that Cephx is specifically designed for Ceph's
-> >> > many-to-many environment, and the second is that it is sufficiently
-> >> > isolated
-> >> > that I don't believe it needs to be modified to work with new external
-> >> > authentication mechanisms.
-> >>
-> >> I'm a little confused here. CephX is how clients authenticate to the
-> >> Ceph cluster...how are we going to add Kerberos auth or whatever
-> >> without getting involved in that?
-> >> Perhaps I'm misunderstanding the scope of what you're trying to do.
-> >> -Greg
-> >>
-> >
-> > CephX, as I understand it, is one of two mechanisms used to do two jobs.
-> >
-> > The first job is to allow the client to log in to the cluster to access
-> > cluster services (storage, basically).  The second is the message validation
-> > that goes on between the various services within the cluster (MONitor, MDS,
-> > OSD...).
-> >
-> > The other auth mechanism that is used is, basically, none.  In a secure
-> > environment, it's safe to let your clients connect to your cluster, and
-> > your cluster components communicate, without any ongoing validation.
-> >
-> > Anyway, the idea here is to perform the initial logon using Kerberos (or
-> > LDAP), but then have CephX continue to handle the internal message validation.
-> > That avoids any need for changing the deeper internals of Ceph, which is
-> > particularly important because CephX is designed for the many-to-many Ceph
-> > environment.
-> 
-> Right. But you'll either need to plug Kerberos into the client<->mon
-> authentication pathways, or (this would be my naive choice) have some
-> sort of agent that Kerberos authenticates and then gives the client
-> its CephX shared secret for authenticating with the monitors (without
-> the users having to get involved). Either way, there's at least a
-> little CephX integration going on, right?
-> Or am I completely off the mark with what you're trying to do here?
+Yeah, this is pretty weird. Can you run "df" on each of your OSDs and
+see if any of them individually have a strange output?
+-Greg
+Software Engineer #42 @ http://inktank.com | http://ceph.com
 
-My thought is the former.  We'd add a new CEPH_AUTH_* type, the client 
-side would call into kerberos and get a kerberos ticket to pass to the 
-mon, and the mon would call into kerberos to authenticate it.  That would 
-authenticate the session.
 
-I assume there will then be some futzing around to make things behave so 
-that the mon will provide the client cephx tickets for interactions with 
-the rest of the cluster so that *only* the mon is doing non-cephx 
-authentication.  The focus now is just to make the first step work, 
-though...
-
-sage
+On Tue, Aug 12, 2014 at 6:52 AM, Karan Singh <karan.singh@csc.fi> wrote=
+:
+> Forgot to mention i am observing  EB  in ceph -s output  ,  does it m=
+ean
+> Exabyte  ;-)
+>
+>
+> # ceph -s
+>     cluster 009d3518-e60d-4f74-a26d-c08c1976263c
+>      health HEALTH_WARN 'cache-pool' at/near target max
+>      monmap e3: 3 mons at
+>      mdsmap e14: 1/1/1 up {0=3Dstorage0101-ib=3Dup:active}
+>      osdmap e194215: 402 osds: 402 up, 402 in
+>       pgmap v743051: 31168 pgs, 22 pools, 8 EB data, 378 kobjects
+>             17508 GB used, 1284 TB / 1301 TB avail
+>                31168 active+clean
+>
+>
+> - Karan Singh -
+>
+>
+> On 12 Aug 2014, at 16:45, Karan Singh <karan.singh@csc.fi> wrote:
+>
+> Hello Developers
+>
+> I have encountered some wired output of ceph df command , suddenly
+>
+>
+> When i was writing some data on cache-pool , and checked its used % ,=
+ i
+> found some used as 8E ( don=E2=80=99t know what is this ) and the use=
+d % for
+> cache-pool was 0
+>
+>
+> # ceph df
+> GLOBAL:
+>     SIZE      AVAIL     RAW USED     %RAW USED
+>     1301T     1284T     17518G       1.31
+> POOLS:
+>     NAME                   ID     USED       %USED     OBJECTS
+>     data                   0      801M       0         2
+>     metadata               1      801M       0         22
+>     rbd                    2      0          0         0
+>     .rgw                   3      3524       0         26
+>     .rgw.root              4      778        0         3
+>     .rgw.control           5      0          0         8
+>     .rgw.buckets           6      8201M      0         2298
+>     .rgw.buckets.index     7      0          0         13
+>     .users.swift           8      7          0         1
+>     volumes                9      1106G      0.08      283387
+>     images                 10     40960k     0         8
+>     backups                11     0          0         0
+>     .rgw.gc                12     0          0         32
+>     .users.uid             13     848        0         5
+>     .users                 14     16         0         2
+>     .log                   15     153k       0         37
+>                            16     0          0         0
+>     hpsl4540               21     110G       0         28152
+>     hpdl380                22     245G       0.02      62688
+>     EC-2-2                 23     6338G      0.48      4859
+>     cache-pool             24     8E         0         5849        ##=
+ What
+> is the meaning of E here , also please note used % for cache-pool is =
+0 here
+>     ssd                    25     25196M     0         5464
+>
+>
+> After some time when cache-poo used value changed to 7E and used % as
+> 644301.19  . While there were no objects in the cache-pool
+>
+>
+> # ceph df
+> GLOBAL:
+>     SIZE      AVAIL     RAW USED     %RAW USED
+>     1301T     1284T     17508G       1.31
+> POOLS:
+>     NAME                   ID     USED       %USED         OBJECTS
+>     data                   0      801M       0             2
+>     metadata               1      801M       0             22
+>     rbd                    2      0          0             0
+>     .rgw                   3      3524       0             26
+>     .rgw.root              4      778        0             3
+>     .rgw.control           5      0          0             8
+>     .rgw.buckets           6      8201M      0             2298
+>     .rgw.buckets.index     7      0          0             13
+>     .users.swift           8      7          0             1
+>     volumes                9      1106G      0.08          283387
+>     images                 10     40960k     0             8
+>     backups                11     0          0             0
+>     .rgw.gc                12     0          0             32
+>     .users.uid             13     848        0             5
+>     .users                 14     16         0             2
+>     .log                   15     153k       0             37
+>                            16     0          0             0
+>     hpsl4540               21     110G       0             28152
+>     hpdl380                22     245G       0.02          62688
+>     EC-2-2                 23     6338G      0.48          4843
+>     cache-pool             24     7E         644301.19     1056
+> ## The used % for cache-pool has become 644301.19
+>     ssd                    25     25196M     0             5464
+> #
+>
+>
+> # rados -p cache-pool ls
+> #
+>
+>
+>
+>
+> Is this a bug , if yes , then is is already known. Do you want me to =
+raise a
+> bug ticket in tracker.ceph.com ?
+>
+>
+>
+> ****************************************************************
+> Karan Singh
+> Cloud computing group
+> CSC - IT Center for Science,
+> Keilaranta 14, P. O. Box 405, FIN-02101 Espoo, Finland
+> tel. +358 9 4572001
+> fax +358 9 4572302
+> http://www.csc.fi/
+> ****************************************************************
+>
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>
+>
+>
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
