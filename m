@@ -1,80 +1,82 @@
-From: Kevin Cox <kevincox@kevincox.ca>
-Subject: Re: Wireshark Dissector and the Future
-Date: Fri, 22 Aug 2014 16:58:21 -0400
-Message-ID: <53F7AEED.2070508@kevincox.ca>
-References: <53E76408.9050000@kevincox.ca> <CAPYLRzhACDou35EOpeNp5zXf2uFRCT0EeYpTXrVGD0gYS9GQCA@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: watch/notify changes
+Date: Fri, 22 Aug 2014 14:30:25 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1408221410330.31169@cobra.newdream.net>
+References: <alpine.DEB.2.00.1408211517320.31172@cobra.newdream.net> <CAPYLRziFYx7bW5T3mnrSpGuAjxQ2oxqMomp0ffL1UyqBLDD_7g@mail.gmail.com> <alpine.DEB.2.00.1408221118290.31169@cobra.newdream.net>
+ <CAPYLRzitTEEA3gyfDO-ac12KdRjf+f1bc9_aPEc-5yNg2e3Dgw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f178.google.com ([209.85.223.178]:41108 "EHLO
-	mail-ie0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751411AbaHVU6Z convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Aug 2014 16:58:25 -0400
-Received: by mail-ie0-f178.google.com with SMTP id rd18so6919311iec.23
-        for <ceph-devel@vger.kernel.org>; Fri, 22 Aug 2014 13:58:24 -0700 (PDT)
-In-Reply-To: <CAPYLRzhACDou35EOpeNp5zXf2uFRCT0EeYpTXrVGD0gYS9GQCA@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:55292 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751731AbaHVVaZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Aug 2014 17:30:25 -0400
+In-Reply-To: <CAPYLRzitTEEA3gyfDO-ac12KdRjf+f1bc9_aPEc-5yNg2e3Dgw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Gregory Farnum <greg@inktank.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
+On Fri, 22 Aug 2014, Gregory Farnum wrote:
+> Whereas if the notify timeout is the same time length as a watch
+> timeout, we can affirmatively know on a notify reply (with or without
+> error return codes) that every client has either:
+> 1) seen the notify, or
+> 2) seen the watch connection's timeout period elapse on their side.
+> So no matter what happens in the network, after a notify cycle has
+> elapsed, every client has either seen the new data or knows that they
+> have failed and needs to re-read everything. 
 
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA256
+Okay, this makes some sense.  I think we still have several problems, 
+though, if we want this sort of guarantee.
 
-On 21/08/14 12:15, Gregory Farnum wrote:
-> On Sun, Aug 10, 2014 at 5:22 AM, Kevin Cox <kevincox@kevincox.ca> wro=
-te:
->> 3. Run the network traffic of automated tests (such as teuthology)
->> through Wireshark and check the warnings/errors.
->
-> A little late now (I've been on vacation) but I just want to register
-> a vote against option #1 =E2=80=94 nobody is going to consistently re=
-member
-> that. :) I suspect option #3 is the most practical and most likely to
-> keep it up to date; I don't know exactly how would be best to dump th=
-e
-> network traffic but I think that it should be fairly simple to dump
-> any gathered data into wireshark as part of a short teuthology test
-> that's in all the suites.
-I agree that #1 is probably not the long term solution.
+1) Notify delivery is distinct from notify ack, even more so with the 
+changes I made.  Before we acked when we returned from the callback, which 
+could take who knows how long.  Now, the client explicitly acks and need 
+not block in the callback doing whatever work they need to do.
 
-=46or running test traffic through wireshark there are two options, one=
- is
-to capture the traffic, then analyse in a separate step, or we could
-just analyse on the fly.  While just dumping the network traffic and
-analysing later is easier to set up it is probably better to run the
-analysis on the fly as the output will be a lot smaller (unless we want
-to keep the packet capture for another reason).
+2) The watch timeout generally means we give the client *at least* this 
+much time to reconnect, but frequently more.  
 
-Actually capturing the traffic is not too hard.  Either tcpdump or
-tshark can be used to capture the packets.  Then tshark can be used to
-analyse them.  Of course if tshark is doing the dumping it can analyse
-on the fly.  The display filter '-Y' option  can be used to restrict th=
-e
-output to "interesting" features.  Many are already filterable by the
-dissector (for example '-Yceph.ver.tooold||ceph.ver.toonew' will detect
-encoding versions not supported by the dissector) and more could be
-added as desired.
+I think what we probably need to do is mark the Session on the OSD if a 
+notify times out so that the guarantee is actually that either
 
-I don't however, know anything about teuthology so I will need to look
-into how to integrate that.
+1) The client acked the notify, or
+2) The client's watch disconnected (and they will be able to tell that 
+they may have missed notifies), or
+3) The client's Session was marked (and they will be notified that they 
+missed notifies)
 
-Cheers,
-Kevin
+2 and 3 will boil down to the same thing as far as the librados API goes.  
+We were thinking a combination of a callback (where there is no timeliness 
+guarantee for message delivery) and a synchronous call like watch_check() 
+where you, say, pass a timestamp and it tells you whether, as of that 
+timestamp, you may have missed any events.  Implementing that reliably is 
+going to need to involve some sort of ping with the OSD to ensure we've 
+seen any events, and/or know that we are still connected as of some time.  
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
+Anyway, given those 3 options, I don't think we need notify timeout == 
+watch timeout.  We could do a notify timeout of 1s and any slowish client 
+will get their session marked and eventually either find out they missed 
+something or find out they've been disconnected.
 
-iF4EAREIAAYFAlP3ru0ACgkQwHWKOzTVLnROSQD/dttXUaZLBH5DKXcOnjod/B8M
-xZhEWDgjImDJpe+JSwAA/0EJGe0NvK6HldoNblDs8Mg+EWKslIvd7Z49p32KJjbc
-=3DHwX/
------END PGP SIGNATURE-----
+It seems like anything stronger than 'eventually' has to be handled a bit 
+above this interface.  As in, the clients agree that they won't take any 
+action unless they know they haven't missed events as of 5 seconds ago.  
+(This will allow the watch_check(now - 5s) to not block in the general 
+case, as 5s is a wide enough window for the pings.)  If a peer gets a 
+notify timeout, they wait 5 more seconds to ensure that time elapses.
 
+> My recollection is that
+> this sequence of timeouts and notification events (or one very much
+> like it) is the theoretical lower bound if you're going to do reliable
+> information delivery, but I can't find the proof at the moment (it's
+> associated in my head with ZooKeeper's watch mechanism, but neither of
+> the papers I have on hand discuss it in any detail). If you don't have
+> reliable information delivery, what good does watch-notify do?
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I'm not familiar with any of this, but it would be useful to validate 
+whatever approach we take against that to ensure we don't botch things 
+again!
+
+sage
