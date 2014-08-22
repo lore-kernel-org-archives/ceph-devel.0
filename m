@@ -1,92 +1,116 @@
-From: David Zafman <david.zafman@inktank.com>
-Subject: Re: Building a tool which links with librados
-Date: Thu, 21 Aug 2014 17:11:52 -0700
-Message-ID: <6FE165EA-9D00-4CC4-B372-B457933BDFFE@inktank.com>
-References: <297F9FFE-3717-463F-84E3-E53EA06EDF4F@inktank.com> <CAPYLRzheVbPRzA=DH5Gru1-OaJ48Buz9pSuhFLybAvOsqhcuSw@mail.gmail.com> <alpine.DEB.2.00.1408211653540.31169@cobra.newdream.net>
-Mime-Version: 1.0 (Mac OS X Mail 7.3 \(1878.6\))
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: OSDMap checksums
+Date: Thu, 21 Aug 2014 17:38:34 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1408211709300.31169@cobra.newdream.net>
+References: <alpine.DEB.2.00.1408191528070.28247@cobra.newdream.net> <CAPYLRziaU2R57axjLVmkSX6P7F9gwHhwHMBtHgmVq0a2pd=P3g@mail.gmail.com> <alpine.DEB.2.00.1408191723440.28244@cobra.newdream.net> <CAPYLRzioYDorFaruE5nnQgVZrxC9vDckT6Et6KmWhFaYt4fszw@mail.gmail.com>
+ <alpine.DEB.2.00.1408192139210.28244@cobra.newdream.net> <CAPYLRzgU_vmOZVoGcnmVNch=adkd4WmUZbjYJ1E8JVDDrHj81Q@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f169.google.com ([209.85.192.169]:47271 "EHLO
-	mail-pd0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754630AbaHVAL4 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Aug 2014 20:11:56 -0400
-Received: by mail-pd0-f169.google.com with SMTP id y10so14683646pdj.0
-        for <ceph-devel@vger.kernel.org>; Thu, 21 Aug 2014 17:11:56 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1408211653540.31169@cobra.newdream.net>
+Received: from cobra.newdream.net ([66.33.216.30]:49871 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755648AbaHVAif (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Aug 2014 20:38:35 -0400
+In-Reply-To: <CAPYLRzgU_vmOZVoGcnmVNch=adkd4WmUZbjYJ1E8JVDDrHj81Q@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Gregory Farnum <greg@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <greg@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+
+On Tue, 19 Aug 2014, Gregory Farnum wrote:
+> As far as I can tell, checksumming incrementals are good for two
+> things besides detecting bit flips:
+> 1) It's easy to extend to signing the Incremental, which is more secure
+> 2) It protects against accidental divergence like we saw when we added
+> the extra heartbeat IP fields
+
+Thinking back, the last time we really screwed this up was
+
+	http://tracker.ceph.com/issues/8738
+
+where the mons were distributing two versions of OSDMaps with different 
+crush tunable values encoded.  This was because they were encoding the 
+full maps locally and didn't all do it the same way (because we weren't 
+doing the right feature checks there).  That bug is fixed, of course, but 
+I'd like to have assurance that we won't hit similar ones--this was far 
+from the first time something like this has happened.  Having the OSDs 
+generate full maps locally is another tier down but essentially the same 
+problem.  Any manner of bugs could lead to violating the critical 
+invariant and we would be none the wiser.
+
+> Trying to get anything more out of it seems like attacking a problem
+> at very much the wrong layer.
+
+I don't think that this is so much the solution to the problem as 
+insurance that if we miss something it won't cause irreparable damage.
+
+Here's the branch I have so far:
+
+	https://github.com/ceph/ceph/pull/2300
+
+The thing I was missing (and just added) is validation of the full OSDMap 
+crc in the monitor.  I think it is actually much harder to cope with in 
+the mon, though.  I think our only real option there is to assert.  Not 
+graceful, but it means we did something wrong by generating an incremental 
+that not all mons (let alone OSDs) could rebuild.  The OSDs, OTOH, can 
+request pristine maps from the mon if they need them.
+
+We could make a distinction between OSDMaps that vary in encoding but not 
+mapping, but I worry that is going to make things overly complex.  We get 
+a lot of certainty with a crc over the whole thing.  OTOH, it means that 
+adding simple features like 87722a42c286d4d12190b86b6d06d388e2953ba0 
+(remember previous weight when auto-marking osd out) that are only useful 
+on the mons (tho to be fair, that data probably is better of being stored 
+in the mon store and not the OSDMap, so bad example).
+
+Hrm...
+
+sage
 
 
-The import-rados feature (#8276) uses librados so in my wip-8231 branch=
- I now link with librados.   It is hard to reproduce, but I=92ll play w=
-ith that commit and branch.
 
-David Zafman
-Senior Developer
-http://www.inktank.com
-http://www.redhat.com
-
-On Aug 21, 2014, at 4:56 PM, Sage Weil <sweil@redhat.com> wrote:
-
-> On Thu, 21 Aug 2014, Gregory Farnum wrote:
->> On Thu, Aug 21, 2014 at 4:37 PM, David Zafman <david.zafman@inktank.=
-com> wrote:
->>>=20
->>> Has anyone seen anything like this from an application linked with =
-librados using valgrind?  Or a Segmentation fault on exit from such an =
-application?
->>>=20
->>> Invalid free() / delete / delete[] / realloc()
->>>    at 0x4C2A4BC: operator delete(void*) (in /usr/lib/valgrind/vgpre=
-load_memcheck-amd64-linux.so)
->>>    by 0x8195C12: std::basic_string<char, std::char_traits<char>, st=
-d::allocator<char> >::~basic_string() (in /usr/lib/x86_64-linux-gnu/lib=
-stdc++.so.6.0.16)
->>>    by 0x13890F3: coll_t::~coll_t() (osd_types.h:468)
->>>    by 0x8944DEC: __cxa_finalize (cxa_finalize.c:56)
->>>    by 0x6E1CEC5: ??? (in /src/ceph/src/.libs/librados.so.2.0.0)
->>>    by 0x725F400: ??? (in /src/ceph/src/.libs/librados.so.2.0.0)
->>>    by 0x89449D0: __run_exit_handlers (exit.c:78)
->>>    by 0x8944A54: exit (exit.c:100)
->>>    by 0x137FF37: usage(boost::program_options::options_description&=
-) (ceph_objectstore_tool.cc:1794)
->>>    by 0x1380572: main (ceph_objectstore_tool.cc:1849)
->>=20
->> This looks fairly strange to me ? why does ceph_objectstore_tool do
->> anything with librados? I thought it was just hitting the OSD
->> filesystem structure directly.
->> Also note that the crash appears to be underneath the coll_t
->> destructor, probably in destroying its string. That combined with th=
-e
->> weird librados presence makes me think memory corruption is running
->> over the stack somewhere.
->=20
-> Ah, this was fixed in 5d79605319fcde330bccce5e1b07276a98be02de in the=
-=20
-> wip-libcommon branch.  The problem is partly when we link libcommon=20
-> staticaly (ceph-objectstore-tool) and dynamically (librados) at teh s=
-ame=20
-> time.  The easy fix here is not linking librados at all.
->=20
-> Not sure why we see this sometimes and not always.. maybe link order?=
-  In=20
-> any case, wip-libcommon moves libcommon.la into a .so shared between=20
-> librados and the binary using it to avoid the problem.  Makes things=20
-> slightly more restrictive with mixed versions, but i suspect it is wo=
-rth=20
-> avoiding this sort of pain.
->=20
-> Can you cherry-pick that commit and see if it resolves this for you? =
-=20
-> And/or merge in that entire branch?
->=20
-> sage
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> >  The fact that it's shared with clients is secondary to that.
+> >
+> >> So then we just have the upgrade issue to deal with. I think if we
+> >> prevent the monitors from enabling checksums until all the OSDs
+> >> support it, and then just have the OSDs query the monitors for any
+> >> non-conforming maps on upgrade, we should be good ? divergent OSDMaps
+> >> are pretty rare.
+> >
+> > So, maybe:
+> >
+> >  - In general, the OSDs will fetch full maps from the mon if they find
+> > they can't generate them correctly from the incremental.
+> >  - We make that an exceptional case:
+> >    - When there is an actual bit flip
+> >    - On upgrade when we discover the maps went divergent ages ago
+> >    - When the mons are careless and encode an OSDMap that OSDs
+> > can't generate themselves.
+> >
+> > It's the third on I'm worried about.  We can spend a feature bit every
+> > time we change a structure in the OSDMap, but it will be expensive (in
+> > terms of feature bits) and a bit fragile (easy for a dev to modify one of
+> > those structs and not realize they also need to guard it being used)
+> > because the generic struct encoding stuff is so forgiving.
+> >
+> > I think the options are:
+> >
+> >  1- Whatever, be careful and use feature bits when needed.
+> >  2- Make the OSDs do something smart about getting full maps from peers.
+> >  3- Always have users upgrade OSDs before mons
+> >  4- Completely change the nature of incremental maps so that we patch the
+> > previous map's encoding.  This will be immune to differences in encode
+> > behavior, but will probably double the size of the incrementals (assuming
+> > we keep both the semantic and bitwise diff).
+> 
+> As long as the field isn't changing how the mapping of data works (and
+> if it is, you *need* the full guards) then I think we can just have
+> feature bits or some equivalent *within* the OSDMap encoding. If an
+> Incremental arrives with stuff you don't understand, but you meet the
+> minimum requirements to even look at it, you just stop worrying about
+> the generated checksums, and make sure not to send out any full maps
+> which you encoded yourself from that point on.
+> Right?
+> 
+> 
