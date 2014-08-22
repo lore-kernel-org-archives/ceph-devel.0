@@ -1,35 +1,53 @@
-From: David Moreau Simard <dmsimard@iweb.com>
-Subject: Re: A problem when restarting OSD
-Date: Fri, 22 Aug 2014 02:33:34 +0000
-Message-ID: <D01C1AB1.1B410%dmsimard@iweb.com>
+From: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
+Subject: RE: A problem when restarting OSD
+Date: Fri, 22 Aug 2014 02:57:58 +0000
+Message-ID: <06E7D85B3BA36C4DB207FEDE871C5348936F58@SHSMSX101.ccr.corp.intel.com>
 References: <06E7D85B3BA36C4DB207FEDE871C5348936F36@SHSMSX101.ccr.corp.intel.com>
+ <D01C1AB1.1B410%dmsimard@iweb.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=iso-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from bmx1.iweb.com ([70.38.127.135]:45514 "EHLO bmx1.iweb.com"
+Received: from mga03.intel.com ([143.182.124.21]:61658 "EHLO mga03.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755603AbaHVCdg convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Aug 2014 22:33:36 -0400
-In-Reply-To: <06E7D85B3BA36C4DB207FEDE871C5348936F36@SHSMSX101.ccr.corp.intel.com>
-Content-Language: fr-FR
-Content-ID: <AF4C29E7DF94724B89638E0BD1252D23@corp.iweb.com>
+	id S1753562AbaHVC6D convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Aug 2014 22:58:03 -0400
+In-Reply-To: <D01C1AB1.1B410%dmsimard@iweb.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>, Sage Weil <sweil@redhat.com>
+To: David Moreau Simard <dmsimard@iweb.com>, Sage Weil <sweil@redhat.com>
 Cc: "'ceph-devel@vger.kernel.org'" <ceph-devel@vger.kernel.org>
 
+Hi David,
+
+Yes, I think adding a hook in your ceph.conf can solve your problem. At=
+ least this is what I did, and it solves the problem.
+
+=46or example:
+
+[osd.3]
+osd crush location =3D "host=3Dosd02 root=3Ddefault disktype=3Dosd02_ss=
+d"
+
+You need to add this for every osd.
+
+-----Original Message-----
+=46rom: David Moreau Simard [mailto:dmsimard@iweb.com]=20
+Sent: Friday, August 22, 2014 10:34 AM
+To: Wang, Zhiqiang; Sage Weil
+Cc: 'ceph-devel@vger.kernel.org'
+Subject: Re: A problem when restarting OSD
+
 I=B9m glad you mention this because I=B9ve also been running into the s=
-ame
-issue and this took me a while to figure out too.
+ame issue and this took me a while to figure out too.
 
 Is this new behaviour ? I don=B9t remember running into this before...
 
 Sage does mention multiple trees but I=B9ve had this happen with a sing=
-le
-root.
-It is definitely not my expectation that restarting an OSD would move
-things around in the crush map.
+le root.
+It is definitely not my expectation that restarting an OSD would move t=
+hings around in the crush map.
 
 I=B9m in the process of developing a crush map, looks like this (note:
 unfinished and does not make much sense as is):
@@ -93,27 +111,25 @@ With the resulting tree:
 6	1			osd.6	up	1
 
 Would a hook really be the solution I need ?
---=20
+--
 David Moreau Simard
 
 Le 2014-08-21, 9:36 PM, =AB Wang, Zhiqiang =BB <zhiqiang.wang@intel.com=
-> a
-=E9crit :
+> a =E9crit :
 
 >Hi Sage,
 >
->Yes, I understand that we can customize the crush location hook to let
+>Yes, I understand that we can customize the crush location hook to let=
+=20
 >the OSD go to the right location. But does the ceph user have the idea=
- of
->this if he/she has more than 1 root in the crush map? At least I don't
->know this at the beginning. We need to either emphasize this or do it =
-in
->some ways for the user.
+=20
+>of this if he/she has more than 1 root in the crush map? At least I=20
+>don't know this at the beginning. We need to either emphasize this or=20
+>do it in some ways for the user.
 >
->One question for the hot-swapping support of moving an OSD to another
->host. What if the journal is not located at the same disk of the OSD? =
-Is
->the OSD still able to be available in the cluster?
+>One question for the hot-swapping support of moving an OSD to another=20
+>host. What if the journal is not located at the same disk of the OSD?=20
+>Is the OSD still able to be available in the cluster?
 >
 >-----Original Message-----
 >From: Sage Weil [mailto:sweil@redhat.com]
@@ -161,8 +177,9 @@ Is
 >> 14      0.91                    osd.14  up      1
 >> 15      0.91                    osd.15  up      1
 >>=20
->> After I restart one of the OSD with id from 16 to 23, say restarting
->>osd.16, osd.16 goes to 'root default' and 'host zqw-s1', and ceph
+>> After I restart one of the OSD with id from 16 to 23, say restarting=
+=20
+>>osd.16, osd.16 goes to 'root default' and 'host zqw-s1', and ceph=20
 >>cluster begins to do rebalance. This surely is not what I want.
 >>=20
 >> # id    weight  type name       up/down reweight
@@ -197,49 +214,50 @@ Is
 >> 14      0.91                    osd.14  up      1
 >> 15      0.91                    osd.15  up      1
 >>=20
->> After digging into the problem, I find it's because in the ceph init
->>script, we change the OSD's crush location in some way. It uses the
->>script 'ceph-crush-location' to get the crush location from the
+>> After digging into the problem, I find it's because in the ceph init=
+=20
+>>script, we change the OSD's crush location in some way. It uses the=20
+>>script 'ceph-crush-location' to get the crush location from the=20
 >>ceph.conf file for the restarting OSD. If there isn't such an entry i=
-n
+n=20
 >>ceph.conf, it uses the default one 'host=3D$(hostname -s) root=3Ddefa=
 ult'.
 >>Since I don't have the crush location configuration in my ceph.conf (=
-I
->>guess most of people don't have this in their ceph.conf), when I
+I=20
+>>guess most of people don't have this in their ceph.conf), when I=20
 >>restarting osd.16, it goes to 'root default' and 'host zqw-s1'.
 >>=20
 >> Here is a fix for this:
->> When the ceph init script uses 'ceph osd crush create-or-move' to
->> change the OSD's crush location, do a check first, if this OSD is
+>> When the ceph init script uses 'ceph osd crush create-or-move' to=20
+>> change the OSD's crush location, do a check first, if this OSD is=20
 >> already existing in the crush map, return without making the locatio=
-n
+n=20
 >> change. This change is at:
 >> https://github.com/wonzhq/ceph/commit/efdfa23664caa531390d141bd15398=
-78
+7
+>> 8
 >> 761412fe
 >>=20
 >> What do you think?
 >
 >The goal of this behavior is to allow hot-swapping of devices.  You ca=
-n
->pull disks out of one host and put them in another and the udev machin=
-ery
->will start up the daemon, update the crush location, and the disk and
->data will become available.  It's not 'ideal' in the sense that there
->will be rebalancing, but it does make the data available to the cluste=
-r
->to preserve data safety.
+n=20
+>pull disks out of one host and put them in another and the udev=20
+>machinery will start up the daemon, update the crush location, and the=
+=20
+>disk and data will become available.  It's not 'ideal' in the sense=20
+>that there will be rebalancing, but it does make the data available to=
+=20
+>the cluster to preserve data safety.
 >
->We haven't come up with a great scheme yet to managing multiple trees
->yet. =20
->The idea is that the ceph-crush-location hook can be customized to do
+>We haven't come up with a great scheme yet to managing multiple trees=20
+>yet.
+>The idea is that the ceph-crush-location hook can be customized to do=20
 >whatever is necessary, for example by putting root=3Dssd if the device=
- type
->appears to be an ssd (maybe look at the sysfs metadata, or put a marke=
-r
->file in the osd data directory?).  You can point to your own hook for
->your environment with
+=20
+>type appears to be an ssd (maybe look at the sysfs metadata, or put a=20
+>marker file in the osd data directory?).  You can point to your own=20
+>hook for your environment with
 >
 >  osd crush location hook =3D /path/to/my/script
 >
@@ -248,10 +266,9 @@ r
 >
 >
 >--
->To unsubscribe from this list: send the line "unsubscribe ceph-devel" =
-in
->the body of a message to majordomo@vger.kernel.org
->More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>To unsubscribe from this list: send the line "unsubscribe ceph-devel"=20
+>in the body of a message to majordomo@vger.kernel.org More majordomo=20
+>info at  http://vger.kernel.org/majordomo-info.html
 
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
