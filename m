@@ -1,378 +1,129 @@
-From: David Moreau Simard <dmsimard@iweb.com>
-Subject: Re: A problem when restarting OSD
-Date: Fri, 22 Aug 2014 14:14:11 +0000
-Message-ID: <D01CC72C.1B4CE%dmsimard@iweb.com>
-References: <alpine.DEB.2.00.1408220705270.31169@cobra.newdream.net>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: OSDMap checksums
+Date: Fri, 22 Aug 2014 10:08:39 -0700
+Message-ID: <CAPYLRzhstbj-mVNxzcEi8QJdKh4wRQ9ZP4_ShRAAfz8Q2=HgCQ@mail.gmail.com>
+References: <alpine.DEB.2.00.1408191528070.28247@cobra.newdream.net>
+	<CAPYLRziaU2R57axjLVmkSX6P7F9gwHhwHMBtHgmVq0a2pd=P3g@mail.gmail.com>
+	<alpine.DEB.2.00.1408191723440.28244@cobra.newdream.net>
+	<CAPYLRzioYDorFaruE5nnQgVZrxC9vDckT6Et6KmWhFaYt4fszw@mail.gmail.com>
+	<alpine.DEB.2.00.1408192139210.28244@cobra.newdream.net>
+	<CAPYLRzgU_vmOZVoGcnmVNch=adkd4WmUZbjYJ1E8JVDDrHj81Q@mail.gmail.com>
+	<alpine.DEB.2.00.1408211709300.31169@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=Windows-1252
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from bmx1.iweb.com ([70.38.127.135]:55267 "EHLO bmx1.iweb.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932088AbaHVOON convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Aug 2014 10:14:13 -0400
-In-Reply-To: <alpine.DEB.2.00.1408220705270.31169@cobra.newdream.net>
-Content-Language: fr-FR
-Content-ID: <2509A53922EBA74A8E40E915FEBFD855@corp.iweb.com>
+Received: from mail-qa0-f41.google.com ([209.85.216.41]:41936 "EHLO
+	mail-qa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932297AbaHVRIk convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Aug 2014 13:08:40 -0400
+Received: by mail-qa0-f41.google.com with SMTP id j7so9991947qaq.0
+        for <ceph-devel@vger.kernel.org>; Fri, 22 Aug 2014 10:08:39 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.00.1408211709300.31169@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sweil@redhat.com>
-Cc: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>, "'ceph-devel@vger.kernel.org'" <ceph-devel@vger.kernel.org>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Ah, that does clear things up !
-
-I didn=B9t even know that there was a toggle for =8Cosd crush update on=
- start=B9
-- my bad.
-I searched through the documentation and couldn=B9t find something on t=
-hat
-topic.
-
-Perhaps we should add a bit about that here:
-http://ceph.com/docs/master/rados/operations/crush-map/#crush-location
-
-I=B9ll open a pull request.
---=20
-David Moreau Simard
-
-
-
-Le 2014-08-22, 10:06 AM, =AB Sage Weil =BB <sweil@redhat.com> a =E9crit=
- :
-
->On Fri, 22 Aug 2014, David Moreau Simard wrote:
->> Hi Wang,
->>=20
->> Thanks, I?ll try that for the time being. This still raises a few
->> questions I?d like to discuss.
->>=20
->> I?m convinced we can agree that the CRUSH map is ultimately the
->>authority
->> as far as the location of the devices currently are.
->> My understanding is that we are relying on another source for device
->> location when (in this case) restarting OSDs: the ceph.conf file.
->>=20
->> 1) Does this imply that we probably shouldn?t specify device locatio=
-ns
->> directly in the crush map but in our ceph.conf file instead ?
->> 2) If what is in the crush map is different than what is configured =
-in
->> ceph.conf, how does Ceph decide which is the authority ? Shouldn?t i=
-t be
->> the crush map ? In this case, it appears to be the ceph.conf file.
->>=20
->> Just trying to wrap my head around the vision of how things should b=
+On Thu, Aug 21, 2014 at 5:38 PM, Sage Weil <sweil@redhat.com> wrote:
+> On Tue, 19 Aug 2014, Gregory Farnum wrote:
+>> As far as I can tell, checksumming incrementals are good for two
+>> things besides detecting bit flips:
+>> 1) It's easy to extend to signing the Incremental, which is more sec=
+ure
+>> 2) It protects against accidental divergence like we saw when we add=
+ed
+>> the extra heartbeat IP fields
+>
+> Thinking back, the last time we really screwed this up was
+>
+>         http://tracker.ceph.com/issues/8738
+>
+> where the mons were distributing two versions of OSDMaps with differe=
+nt
+> crush tunable values encoded.  This was because they were encoding th=
 e
->> managed.
->
->Generally speaking, you have three options:
->
-> - 'osd crush update on start =3D false' and do it all manually, like
->you're=20
->   used to.
-> - set 'crush location =3D a=3Db c=3Dd e=3Df' in ceph.conf.  The expec=
-tation is
->   that chef or puppet or whatever will fill this in with "host=3Dfoo
->   rack=3Dbar dc=3Dasdf".
-> - customize ceph-crush-location to do something trickier (like multip=
-le
->   trees)
->
->sage
->
->
->> --=20
->> David Moreau Simard
->>=20
->>=20
->> Le 2014-08-21, 10:57 PM, ? Wang, Zhiqiang ? <zhiqiang.wang@intel.com=
-> a
->> ?crit :
->>=20
->> >Hi David,
->> >
->> >Yes, I think adding a hook in your ceph.conf can solve your problem=
-=2E At
->> >least this is what I did, and it solves the problem.
->> >
->> >For example:
->> >
->> >[osd.3]
->> >osd crush location =3D "host=3Dosd02 root=3Ddefault disktype=3Dosd0=
-2_ssd"
->> >
->> >You need to add this for every osd.
->> >
->> >-----Original Message-----
->> >From: David Moreau Simard [mailto:dmsimard@iweb.com]
->> >Sent: Friday, August 22, 2014 10:34 AM
->> >To: Wang, Zhiqiang; Sage Weil
->> >Cc: 'ceph-devel@vger.kernel.org'
->> >Subject: Re: A problem when restarting OSD
->> >
->> >I?m glad you mention this because I?ve also been running into the s=
+> full maps locally and didn't all do it the same way (because we weren=
+'t
+> doing the right feature checks there).  That bug is fixed, of course,=
+ but
+> I'd like to have assurance that we won't hit similar ones--this was f=
+ar
+> from the first time something like this has happened.
+
+Huh, I actually can't think of any others which impacted mappings like
+this one did. That said, I agree...
+
+> Having the OSDs
+> generate full maps locally is another tier down but essentially the s=
 ame
->> >issue and this took me a while to figure out too.
->> >
->> >Is this new behaviour ? I don?t remember running into this before..=
-=2E
->> >
->> >Sage does mention multiple trees but I?ve had this happen with a si=
-ngle
->> >root.
->> >It is definitely not my expectation that restarting an OSD would mo=
-ve
->> >things around in the crush map.
->> >
->> >I?m in the process of developing a crush map, looks like this (note=
-:
->> >unfinished and does not make much sense as is):
->> >http://pastebin.com/6vBUQTCk
->> >This results in this tree:
->> ># id	weight	type name	up/down	reweight
->> >-1	18	root default
->> >-2	9		host osd02
->> >-4	2			disktype osd02_ssd
->> >3	1				osd.3	up	1
->> >9	1				osd.9	up	1
->> >-5	7			disktype osd02_spinning
->> >8	1				osd.8	up	1
->> >17	1				osd.17	up	1
->> >5	1				osd.5	up	1
->> >11	1				osd.11	up	1
->> >1	1				osd.1	up	1
->> >13	1				osd.13	up	1
->> >15	1				osd.15	up	1
->> >-3	9		host osd01
->> >-6	2			disktype osd01_ssd
->> >2	1				osd.2	up	1
->> >7	1				osd.7	up	1
->> >-7	7			disktype osd01_spinning
->> >0	1				osd.0	up	1
->> >4	1				osd.4	up	1
->> >12	1				osd.12	up	1
->> >6	1				osd.6	up	1
->> >14	1				osd.14	up	1
->> >10	1				osd.10	up	1
->> >16	1				osd.16	up	1
->> >
->> >Only restarting the OSDs on both hosts modifies the crush map:
->> >http://pastebin.com/rP8Y8qcH
->> >With the resulting tree:
->> ># id	weight	type name	up/down	reweight
->> >-1	18	root default
->> >-2	9		host osd02
->> >-4	0			disktype osd02_ssd
->> >-5	0			disktype osd02_spinning
->> >13	1			osd.13	up	1
->> >3	1			osd.3	up	1
->> >5	1			osd.5	up	1
->> >1	1			osd.1	up	1
->> >11	1			osd.11	up	1
->> >15	1			osd.15	up	1
->> >17	1			osd.17	up	1
->> >8	1			osd.8	up	1
->> >9	1			osd.9	up	1
->> >-3	9		host osd01
->> >-6	0			disktype osd01_ssd
->> >-7	0			disktype osd01_spinning
->> >0	1			osd.0	up	1
->> >10	1			osd.10	up	1
->> >12	1			osd.12	up	1
->> >14	1			osd.14	up	1
->> >16	1			osd.16	up	1
->> >2	1			osd.2	up	1
->> >4	1			osd.4	up	1
->> >7	1			osd.7	up	1
->> >6	1			osd.6	up	1
->> >
->> >Would a hook really be the solution I need ?
->> >--
->> >David Moreau Simard
->> >
->> >Le 2014-08-21, 9:36 PM, ? Wang, Zhiqiang ? <zhiqiang.wang@intel.com=
-> a
->> >?crit :
->> >
->> >>Hi Sage,
->> >>
->> >>Yes, I understand that we can customize the crush location hook to=
- let
->> >>the OSD go to the right location. But does the ceph user have the =
-idea
->> >>of this if he/she has more than 1 root in the crush map? At least =
-I
->> >>don't know this at the beginning. We need to either emphasize this=
- or
->> >>do it in some ways for the user.
->> >>
->> >>One question for the hot-swapping support of moving an OSD to anot=
-her
->> >>host. What if the journal is not located at the same disk of the O=
-SD?
->> >>Is the OSD still able to be available in the cluster?
->> >>
->> >>-----Original Message-----
->> >>From: Sage Weil [mailto:sweil@redhat.com]
->> >>Sent: Thursday, August 21, 2014 11:28 PM
->> >>To: Wang, Zhiqiang
->> >>Cc: 'ceph-devel@vger.kernel.org'
->> >>Subject: Re: A problem when restarting OSD
->> >>
->> >>On Thu, 21 Aug 2014, Wang, Zhiqiang wrote:
->> >>> Hi all,
->> >>>=20
->> >>> I ran into a problem when restarting an OSD.
->> >>>=20
->> >>> Here is my OSD tree before restarting the OSD:
->> >>>=20
->> >>> # id    weight  type name       up/down reweight
->> >>> -6      8       root ssd
->> >>> -4      4               host zqw-s1-ssd
->> >>> 16      1                       osd.16  up      1
->> >>> 17      1                       osd.17  up      1
->> >>> 18      1                       osd.18  up      1
->> >>> 19      1                       osd.19  up      1
->> >>> -5      4               host zqw-s2-ssd
->> >>> 20      1                       osd.20  up      1
->> >>> 21      1                       osd.21  up      1
->> >>> 22      1                       osd.22  up      1
->> >>> 23      1                       osd.23  up      1
->> >>> -1      14.56   root default
->> >>> -2      7.28            host zqw-s1
->> >>> 0       0.91                    osd.0   up      1
->> >>> 1       0.91                    osd.1   up      1
->> >>> 2       0.91                    osd.2   up      1
->> >>> 3       0.91                    osd.3   up      1
->> >>> 4       0.91                    osd.4   up      1
->> >>> 5       0.91                    osd.5   up      1
->> >>> 6       0.91                    osd.6   up      1
->> >>> 7       0.91                    osd.7   up      1
->> >>> -3      7.28            host zqw-s2
->> >>> 8       0.91                    osd.8   up      1
->> >>> 9       0.91                    osd.9   up      1
->> >>> 10      0.91                    osd.10  up      1
->> >>> 11      0.91                    osd.11  up      1
->> >>> 12      0.91                    osd.12  up      1
->> >>> 13      0.91                    osd.13  up      1
->> >>> 14      0.91                    osd.14  up      1
->> >>> 15      0.91                    osd.15  up      1
->> >>>=20
->> >>> After I restart one of the OSD with id from 16 to 23, say restar=
-ting
->> >>>osd.16, osd.16 goes to 'root default' and 'host zqw-s1', and ceph
->> >>>cluster begins to do rebalance. This surely is not what I want.
->> >>>=20
->> >>> # id    weight  type name       up/down reweight
->> >>> -6      7       root ssd
->> >>> -4      3               host zqw-s1-ssd
->> >>> 17      1                       osd.17  up      1
->> >>> 18      1                       osd.18  up      1
->> >>> 19      1                       osd.19  up      1
->> >>> -5      4               host zqw-s2-ssd
->> >>> 20      1                       osd.20  up      1
->> >>> 21      1                       osd.21  up      1
->> >>> 22      1                       osd.22  up      1
->> >>> 23      1                       osd.23  up      1
->> >>> -1      15.56   root default
->> >>> -2      8.28            host zqw-s1
->> >>> 0       0.91                    osd.0   up      1
->> >>> 1       0.91                    osd.1   up      1
->> >>> 2       0.91                    osd.2   up      1
->> >>> 3       0.91                    osd.3   up      1
->> >>> 4       0.91                    osd.4   up      1
->> >>> 5       0.91                    osd.5   up      1
->> >>> 6       0.91                    osd.6   up      1
->> >>> 7       0.91                    osd.7   up      1
->> >>> 16      1                       osd.16  up      1
->> >>> -3      7.28            host zqw-s2
->> >>> 8       0.91                    osd.8   up      1
->> >>> 9       0.91                    osd.9   up      1
->> >>> 10      0.91                    osd.10  up      1
->> >>> 11      0.91                    osd.11  up      1
->> >>> 12      0.91                    osd.12  up      1
->> >>> 13      0.91                    osd.13  up      1
->> >>> 14      0.91                    osd.14  up      1
->> >>> 15      0.91                    osd.15  up      1
->> >>>=20
->> >>> After digging into the problem, I find it's because in the ceph =
-init
->> >>>script, we change the OSD's crush location in some way. It uses t=
-he
->> >>>script 'ceph-crush-location' to get the crush location from the
->> >>>ceph.conf file for the restarting OSD. If there isn't such an ent=
-ry
->>in
->> >>>ceph.conf, it uses the default one 'host=3D$(hostname -s)
->>root=3Ddefault'.
->> >>>Since I don't have the crush location configuration in my ceph.co=
-nf
->>(I
->> >>>guess most of people don't have this in their ceph.conf), when I
->> >>>restarting osd.16, it goes to 'root default' and 'host zqw-s1'.
->> >>>=20
->> >>> Here is a fix for this:
->> >>> When the ceph init script uses 'ceph osd crush create-or-move' t=
-o
->> >>> change the OSD's crush location, do a check first, if this OSD i=
-s
->> >>> already existing in the crush map, return without making the
->>location
->> >>> change. This change is at:
->> >>>=20
->>https://github.com/wonzhq/ceph/commit/efdfa23664caa531390d141bd153987
->> >>> 8
->> >>> 761412fe
->> >>>=20
->> >>> What do you think?
->> >>
->> >>The goal of this behavior is to allow hot-swapping of devices.  Yo=
-u
->>can
->> >>pull disks out of one host and put them in another and the udev
->> >>machinery will start up the daemon, update the crush location, and=
- the
->> >>disk and data will become available.  It's not 'ideal' in the sens=
-e
->> >>that there will be rebalancing, but it does make the data availabl=
-e to
->> >>the cluster to preserve data safety.
->> >>
->> >>We haven't come up with a great scheme yet to managing multiple tr=
-ees
->> >>yet.
->> >>The idea is that the ceph-crush-location hook can be customized to=
- do
->> >>whatever is necessary, for example by putting root=3Dssd if the de=
-vice
->> >>type appears to be an ssd (maybe look at the sysfs metadata, or pu=
-t a
->> >>marker file in the osd data directory?).  You can point to your ow=
-n
->> >>hook for your environment with
->> >>
->> >>  osd crush location hook =3D /path/to/my/script
->> >>
->> >>sage
->> >>
->> >>
->> >>
->> >>--
->> >>To unsubscribe from this list: send the line "unsubscribe ceph-dev=
-el"
->> >>in the body of a message to majordomo@vger.kernel.org More majordo=
-mo
->> >>info at  http://vger.kernel.org/majordomo-info.html
->> >
->>=20
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>=20
->>=20
+> problem.  Any manner of bugs could lead to violating the critical
+> invariant and we would be none the wiser.
 
+=2E..but if we're really stuck on having bytewise-identical maps across
+all OSDs, that means that the OSDs (and whoever else is checking CRCs)
+*have* to all understand the entirety of the map well enough to decode
+it correctly. This is just another way of saying that they need to be
+new enough to understand every encoded feature of the OSDMap =E2=80=94 =
+which
+is another way of saying that either the monitors must restrict what
+features they put in the maps, or the OSDs must all be at least as new
+as the monitors.
+
+Now, sure, we could use this as insurance in development testing to
+make sure that monitors aren't encoding things their older OSDs won't
+understand, but we've in the past had situations where we *wanted* to
+let new OSDs see newer data that the old ones just ignored. (Namely,
+heartbeat addresses.) Maybe losing that option is a tradeoff worth
+making, but we're still going to need to have all the feature bit
+controls we presently rely on; this will just tell us (during upgrade
+testing, not earlier!) that we missed creating some.
+
+
+
+>> Trying to get anything more out of it seems like attacking a problem
+>> at very much the wrong layer.
+>
+> I don't think that this is so much the solution to the problem as
+> insurance that if we miss something it won't cause irreparable damage=
+=2E
+>
+> Here's the branch I have so far:
+>
+>         https://github.com/ceph/ceph/pull/2300
+>
+> The thing I was missing (and just added) is validation of the full OS=
+DMap
+> crc in the monitor.  I think it is actually much harder to cope with =
+in
+> the mon, though.  I think our only real option there is to assert.  N=
+ot
+> graceful, but it means we did something wrong by generating an increm=
+ental
+> that not all mons (let alone OSDs) could rebuild.  The OSDs, OTOH, ca=
+n
+> request pristine maps from the mon if they need them.
+>
+> We could make a distinction between OSDMaps that vary in encoding but=
+ not
+> mapping, but I worry that is going to make things overly complex.  We=
+ get
+> a lot of certainty with a crc over the whole thing.  OTOH, it means t=
+hat
+> adding simple features like 87722a42c286d4d12190b86b6d06d388e2953ba0
+> (remember previous weight when auto-marking osd out) that are only us=
+eful
+> on the mons (tho to be fair, that data probably is better of being st=
+ored
+> in the mon store and not the OSDMap, so bad example).
+>
+> Hrm...
+
+Yeah, being strict about CRCs in the monitor is definitely a good
+idea, and we're pretty much stuck asserting there. I'm off to look at
+the PR now and will comment more there.
+-Greg
+Software Engineer #42 @ http://inktank.com | http://ceph.com
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
