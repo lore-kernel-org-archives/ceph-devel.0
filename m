@@ -1,45 +1,71 @@
-From: =?UTF-8?B?TWljaGHFgiBTenltYcWEc2tp?= <michalszymanski91@gmail.com>
-Subject: OSD's load_pgs takes a lot of time
-Date: Tue, 26 Aug 2014 09:43:15 +0200
-Message-ID: <CADg7yx3mM+zagdcwQ6AO-omzxBM33=Gft3hvMEKDPEVysqKxBg@mail.gmail.com>
+From: yuelongguang <fastsync-9Onoh4P/yGk@public.gmane.org>
+Subject: enrich  ceph test methods,
+	what is your concern about ceph. thanks
+Date: Tue, 26 Aug 2014 16:15:32 +0800 (CST)
+Message-ID: <34917079.1c61a.14811625d15.Coremail.fastsync@163.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f46.google.com ([209.85.215.46]:54522 "EHLO
-	mail-la0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757198AbaHZHnh convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Aug 2014 03:43:37 -0400
-Received: by mail-la0-f46.google.com with SMTP id b8so14319091lan.5
-        for <ceph-devel@vger.kernel.org>; Tue, 26 Aug 2014 00:43:36 -0700 (PDT)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: multipart/mixed; boundary="===============0579682365=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-I have noticed that sometimes it takes a lot of time for an OSD to go
-back up and in. From what i can see in the logs it is stuck on
-load_pgs for a while:
-2014-08-21 15:32:04.711048 7fba11569780  0 osd.1 139 load_pgs
-2014-08-21 15:32:04.712512 7fba11569780 10 osd.1 139 load_pgs
-3.165_TEMP clearing temp
-2014-08-21 15:32:19.648610 7fba11569780 10 osd.1 139 load_pgs
-3.13b_TEMP clearing temp
-2014-08-21 15:32:34.674773 7fba11569780 10 osd.1 139 load_pgs
-3.36b_TEMP clearing temp
+--===============0579682365==
+Content-Type: multipart/alternative;
+	boundary="----=_Part_466699_1848725654.1409040932116"
 
-It happens when you restart an OSD while there was an ongoing recovery
-in the cluster. The process isn't neither IO nor CPU heavy at that
-time, and judging by strace output it mostly does futex calls and a
-little IO on PGs. I am using Ceph 0.80.5.
+------=_Part_466699_1848725654.1409040932116
+Content-Type: text/plain; charset=GBK
+Content-Transfer-Encoding: base64
 
-Have anybody noticed this behavior? Isn't it possible to clear temp fas=
-ter?
+aGksYWxsCiAKaSBhbSBwbGFubmluZyB0byBkbyBhIHRlc3Qgb24gY2VwaCwgaW5jbHVkZSBwZXJm
+b3JtYW5jZSwgdGhyb3VnaHB1dCwgc2NhbGFiaWxpdHksYXZhaWxhYmlsaXR5LgppbiBvcmRlciB0
+byBnZXQgYSBmdWxsIHRlc3QgcmVzdWx0LCBpICBob3BlIHlvdSBhbGwgY2FuIGdpdmUgbWUgc29t
+ZSBhZHZpY2UuIG1lYW53aGlsZSBpIGNhbiBzZW5kIHRoZSByZXN1bHQgdG8geW91LGlmIHlvdSBs
+aWtlLgphcyBmb3IgZWFjaCBjYXRlZ29yeSB0ZXN0KCBwZXJmb3JtYW5jZSwgdGhyb3VnaHB1dCwg
+c2NhbGFiaWxpdHksYXZhaWxhYmlsaXR5KSAgLCAgZG8geW91IGhhdmUgc29tZSBzb21lIHRlc3Qg
+aWRlYSBhbmQgdGVzdCB0b29scz8KYmFzaWNseSBpIGhhdmUga25vdyBzb21lIHRvb2xzIHRvIHRl
+c3QgdGhyb3VnaHRwdXQsaW9wcyAuICBidXQgeW91IGNhbiB0ZWxsIHRoZSB0b29scyB5b3UgcHJl
+ZmVyIGFuZCB0aGUgcmVzdWx0IHlvdSBleHBlY3QuICAKIAp0aGFua3MgdmVyeSBtdWNoCiA=
+------=_Part_466699_1848725654.1409040932116
+Content-Type: text/html; charset=GBK
+Content-Transfer-Encoding: base64
 
---=20
-Pozdrawiam
-Micha=C5=82 Szyma=C5=84ski
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+PGRpdiBzdHlsZT0ibGluZS1oZWlnaHQ6MS43O2NvbG9yOiMwMDAwMDA7Zm9udC1zaXplOjE0cHg7
+Zm9udC1mYW1pbHk6QXJpYWwiPjxkaXY+aGksYWxsPC9kaXY+PGRpdj4mbmJzcDs8L2Rpdj48ZGl2
+PmkgYW0gcGxhbm5pbmcgdG8gZG8gYSB0ZXN0IG9uIGNlcGgsIGluY2x1ZGUgcGVyZm9ybWFuY2Us
+IHRocm91Z2hwdXQsIHNjYWxhYmlsaXR5LGF2YWlsYWJpbGl0eS48L2Rpdj48ZGl2PmluIG9yZGVy
+IHRvIGdldCBhIGZ1bGwgdGVzdCByZXN1bHQsIGkmbmJzcDsgaG9wZSB5b3UgYWxsIGNhbiBnaXZl
+IG1lIHNvbWUgYWR2aWNlLiBtZWFud2hpbGUgaSBjYW4gc2VuZCB0aGUgcmVzdWx0IHRvIHlvdSxp
+ZiB5b3UgbGlrZS48L2Rpdj48ZGl2PmFzIGZvciBlYWNoIGNhdGVnb3J5IHRlc3QoIHBlcmZvcm1h
+bmNlLCB0aHJvdWdocHV0LCBzY2FsYWJpbGl0eSxhdmFpbGFiaWxpdHkpJm5ic3A7Jm5ic3A7LCZu
+YnNwOyBkbyB5b3UgaGF2ZSBzb21lIHNvbWUgdGVzdCBpZGVhIGFuZCB0ZXN0IHRvb2xzPzwvZGl2
+PjxkaXY+YmFzaWNseSBpIGhhdmUga25vdyBzb21lIHRvb2xzIHRvIHRlc3QgdGhyb3VnaHRwdXQs
+aW9wcyAuJm5ic3A7IGJ1dCB5b3UgY2FuIHRlbGwgdGhlIHRvb2xzIHlvdSBwcmVmZXImbmJzcDth
+bmQgdGhlIHJlc3VsdCB5b3UgZXhwZWN0LiZuYnNwOyZuYnNwOzwvZGl2PjxkaXY+Jm5ic3A7PC9k
+aXY+PGRpdj50aGFua3MgdmVyeSBtdWNoPC9kaXY+PGRpdj4mbmJzcDs8L2Rpdj48L2Rpdj48YnI+
+PGJyPjxzcGFuIHRpdGxlPSJuZXRlYXNlZm9vdGVyIj48c3BhbiBpZD0ibmV0ZWFzZV9tYWlsX2Zv
+b3RlciI+PC9zcGFuPjwvc3Bhbj4=
+------=_Part_466699_1848725654.1409040932116--
+
+
+--===============0579682365==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============0579682365==--
