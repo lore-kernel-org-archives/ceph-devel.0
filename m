@@ -1,71 +1,39 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: [PATCH] daemons: write pid file even when told not to daemonize
-Date: Thu, 28 Aug 2014 10:09:28 +0200
-Message-ID: <53FEE3B8.4070902@dachary.org>
-References: <or4mxyuvo4.fsf@free.home> <53D9C379.9070904@dachary.org>	<alpine.DEB.2.00.1407302129530.18917@cobra.newdream.net> <or7g1tawy9.fsf@free.home>
+From: Kostiantyn Danylov <kdanilov@mirantis.com>
+Subject: new developer - where to start contributing
+Date: Thu, 28 Aug 2014 14:12:31 +0000 (UTC)
+Message-ID: <loom.20140828T160715-242@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="Nr2DrDQCunX7GnmuciGHif47nwPt9IHTT"
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:39388 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S932262AbaH1IKT (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Aug 2014 04:10:19 -0400
-In-Reply-To: <or7g1tawy9.fsf@free.home>
+Received: from plane.gmane.org ([80.91.229.3]:53763 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750820AbaH1OPR (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 28 Aug 2014 10:15:17 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1XN0Tf-0006Cw-8z
+	for ceph-devel@vger.kernel.org; Thu, 28 Aug 2014 16:15:03 +0200
+Received: from 194.213.110.69 ([194.213.110.69])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Thu, 28 Aug 2014 16:15:03 +0200
+Received: from kdanilov by 194.213.110.69 with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Thu, 28 Aug 2014 16:15:03 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre Oliva <oliva@gnu.org>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---Nr2DrDQCunX7GnmuciGHif47nwPt9IHTT
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Hi all,
 
-Hi Alexandre,
-
-Changing this behavior is not backward compatible but it is indeed more i=
-ntuitive. Has it been a significant inconvenience so far ?
-
-Cheers
-
-On 28/08/2014 09:35, Alexandre Oliva wrote:
-> On Jul 31, 2014, Sage Weil <sweil@redhat.com> wrote:
->=20
->> On Thu, 31 Jul 2014, Loic Dachary wrote:
->>> Hi Alexandre,
->>>
->>> With this patch ceph-osd -f will try to create the default pid file :=
-=20
->>> this is a non backward compatible change. Maybe there is a way for=20
->>> systemd to capture the pid of the process and store it instead of=20
->>> requiring the deamon to create the pid file ?
->=20
->> Do we need the pid file at all when we aren't using sysinit?
->=20
-> My own monitoring scripts use it, and ceph stop use it as well.  I was
-> surprised we were not creating them in spite of an explicit command lin=
-e
-> option to do so.
->=20
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
+My name is Kostiantyn Danylov, I'm C++/C/python developer with ~9 year of
+experience, also I'm interesting in distributed systems. I would like to
+contribute to ceph. I already read documents at
+http://ceph.com/docs/master/dev/. Where I can start contributing? Probably I
+can start by fixing some 
+simple bugs, can you point me on them?
 
 
---Nr2DrDQCunX7GnmuciGHif47nwPt9IHTT
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+Thanks
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlP+47gACgkQ8dLMyEl6F2358wCfSNVvEAgE51BWB3QXp7HPCdVs
-eNoAn334whVJ+yBkbdpXuQlVcEZzbp07
-=8EFs
------END PGP SIGNATURE-----
-
---Nr2DrDQCunX7GnmuciGHif47nwPt9IHTT--
