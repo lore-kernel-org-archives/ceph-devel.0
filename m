@@ -1,31 +1,49 @@
-From: Li Wang <liwang-qfb7ZC4agRC9jIzG8Sm66w@public.gmane.org>
-Subject: RFC: A preliminary Chinese version of Calamari
-Date: Fri, 29 Aug 2014 17:45:30 +0800
-Message-ID: <54004BBA.30506@ubuntukylin.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: Cache tiering slow request issue: currently waiting for rw
+ locks
+Date: Fri, 29 Aug 2014 07:18:39 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1408290717260.28218@cobra.newdream.net>
+References: <06E7D85B3BA36C4DB207FEDE871C53489375E2@SHSMSX101.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-calamari-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:38099 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752962AbaH2OSk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 29 Aug 2014 10:18:40 -0400
+In-Reply-To: <06E7D85B3BA36C4DB207FEDE871C53489375E2@SHSMSX101.ccr.corp.intel.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
+Cc: "'ceph-devel@vger.kernel.org'" <ceph-devel@vger.kernel.org>
 
 Hi,
-   We have set up a preliminary Chinese version of Calamari at
-https://github.com/xiaoxianxia/calamari-clients-cn, major jobs done
-are translating the English words on the web interface into Chinese,
-we did not change the localization infrastructure, any help
-in this direction are appreciated,  also any suggestions, tests
-and technical involvement are welcome, to make it ready to
-be merged to the upstream.
 
-Cheers,
-Li Wang
+I've opened http://tracker.ceph.com/issues/9285 to track this.
+
+I think you're right--we need a check in agent_maybe_evict() that will 
+skip objects that are being promoted.  I suspect a flag on the 
+ObjectContext is enough?
+
+sage
+
+
+On Fri, 29 Aug 2014, Wang, Zhiqiang wrote:
+
+> Hi all,
+> 
+> I've ran into this slow request issue some time ago. The problem is like this: when running with cache tieing, there are 'slow request' warning messages in the log file like below.
+> 
+> 2014-08-29 10:18:24.669763 7f9b20f1b700  0 log [WRN] : 1 slow requests, 1 included below; oldest blocked for > 30.996595 secs
+> 2014-08-29 10:18:24.669768 7f9b20f1b700  0 log [WRN] : slow request 30.996595 seconds old, received at 2014-08-29 10:17:53.673142: osd_op(client.114176.0:144919 rb.0.17f56.6b8b4567.000000000935 [sparse-read 3440640~4096] 45.cf45084b ack+read e26168) v4 currently waiting for rw locks
+> 
+> Recently I made some changes to the log, captured this problem, and finally figured out its root cause. You can check the attachment for the logs.
+> 
+> Here is the root cause:
+> There is a cache miss when doing read. During promotion, after copying the data from base tier osd, the cache tier primary osd replicates the data to other cache tier osds. Some times this takes quite a long time. During this period of time, the promoted object may be evicted because the cache tier is full. When the primary osd finally gets the replication response and restarts the original read request, it doesn't find the object in the cache tier, and do promotion again. This loops for several times, and we'll see the 'slow request' in the logs. Theoretically, this could loops forever, and the request from the client would never be finished.
+> 
+> There is a simple fix for this:
+> Add a field in the object state, indicating the status of the promotion. It's set to true after the copy of data from base tier and before the replication. It's reset to false after the replication and the original client request starts to execute. Evicting is not allowed when this field is true.
+> 
+> What do you think?
+> 
