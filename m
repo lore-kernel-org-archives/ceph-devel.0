@@ -1,49 +1,31 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: Cache tiering slow request issue: currently waiting for rw
- locks
-Date: Fri, 29 Aug 2014 07:18:39 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1408290717260.28218@cobra.newdream.net>
-References: <06E7D85B3BA36C4DB207FEDE871C53489375E2@SHSMSX101.ccr.corp.intel.com>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+From: David Zafman <david.zafman@inktank.com>
+Subject: wip-libcommon-rebase
+Date: Fri, 29 Aug 2014 11:41:47 -0700
+Message-ID: <0B8325B3-0E41-4FED-AFF2-88219A7E46E4@inktank.com>
+Mime-Version: 1.0 (Mac OS X Mail 7.3 \(1878.6\))
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:38099 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752962AbaH2OSk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 29 Aug 2014 10:18:40 -0400
-In-Reply-To: <06E7D85B3BA36C4DB207FEDE871C53489375E2@SHSMSX101.ccr.corp.intel.com>
+Received: from mail-pa0-f46.google.com ([209.85.220.46]:47081 "EHLO
+	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753665AbaH2Slw convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 29 Aug 2014 14:41:52 -0400
+Received: by mail-pa0-f46.google.com with SMTP id eu11so7071608pac.33
+        for <ceph-devel@vger.kernel.org>; Fri, 29 Aug 2014 11:41:51 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
-Cc: "'ceph-devel@vger.kernel.org'" <ceph-devel@vger.kernel.org>
-
-Hi,
-
-I've opened http://tracker.ceph.com/issues/9285 to track this.
-
-I think you're right--we need a check in agent_maybe_evict() that will 
-skip objects that are being promoted.  I suspect a flag on the 
-ObjectContext is enough?
-
-sage
+To: adamcrume@gmail.com, sage@redhat.com
+Cc: ceph-devel@vger.kernel.org
 
 
-On Fri, 29 Aug 2014, Wang, Zhiqiang wrote:
+Adam & Sage,
 
-> Hi all,
-> 
-> I've ran into this slow request issue some time ago. The problem is like this: when running with cache tieing, there are 'slow request' warning messages in the log file like below.
-> 
-> 2014-08-29 10:18:24.669763 7f9b20f1b700  0 log [WRN] : 1 slow requests, 1 included below; oldest blocked for > 30.996595 secs
-> 2014-08-29 10:18:24.669768 7f9b20f1b700  0 log [WRN] : slow request 30.996595 seconds old, received at 2014-08-29 10:17:53.673142: osd_op(client.114176.0:144919 rb.0.17f56.6b8b4567.000000000935 [sparse-read 3440640~4096] 45.cf45084b ack+read e26168) v4 currently waiting for rw locks
-> 
-> Recently I made some changes to the log, captured this problem, and finally figured out its root cause. You can check the attachment for the logs.
-> 
-> Here is the root cause:
-> There is a cache miss when doing read. During promotion, after copying the data from base tier osd, the cache tier primary osd replicates the data to other cache tier osds. Some times this takes quite a long time. During this period of time, the promoted object may be evicted because the cache tier is full. When the primary osd finally gets the replication response and restarts the original read request, it doesn't find the object in the cache tier, and do promotion again. This loops for several times, and we'll see the 'slow request' in the logs. Theoretically, this could loops forever, and the request from the client would never be finished.
-> 
-> There is a simple fix for this:
-> Add a field in the object state, indicating the status of the promotion. It's set to true after the copy of data from base tier and before the replication. It's reset to false after the replication and the original client request starts to execute. Evicting is not allowed when this field is true.
-> 
-> What do you think?
-> 
+The commit "osd: make coll_t::META static to each file" from wip-libcommon has been merged to master.  I created a new branch with the other commits on the latest master branch called wip-libcommon-rebase.**  It required some conflict resolution in ceph.spec.in.  
+
+**No warranties are expressed or implied about the correctness or suitability of this branch for future use.
+
+David Zafman
+Senior Developer
+http://www.inktank.com
+http://www.redhat.com
+
