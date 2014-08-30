@@ -1,31 +1,56 @@
-From: David Zafman <david.zafman@inktank.com>
-Subject: wip-libcommon-rebase
-Date: Fri, 29 Aug 2014 11:41:47 -0700
-Message-ID: <0B8325B3-0E41-4FED-AFF2-88219A7E46E4@inktank.com>
-Mime-Version: 1.0 (Mac OS X Mail 7.3 \(1878.6\))
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: new developer - where to start contributing
+Date: Fri, 29 Aug 2014 17:07:48 -0700
+Message-ID: <CAPYLRzh-20dL7GHpePx33XM7NxHM-jAoOAXASKaohYKxbyfOOw@mail.gmail.com>
+References: <loom.20140828T160715-242@post.gmane.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f46.google.com ([209.85.220.46]:47081 "EHLO
-	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753665AbaH2Slw convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 29 Aug 2014 14:41:52 -0400
-Received: by mail-pa0-f46.google.com with SMTP id eu11so7071608pac.33
-        for <ceph-devel@vger.kernel.org>; Fri, 29 Aug 2014 11:41:51 -0700 (PDT)
+Received: from mail-qc0-f180.google.com ([209.85.216.180]:47203 "EHLO
+	mail-qc0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750811AbaH3AHt convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 29 Aug 2014 20:07:49 -0400
+Received: by mail-qc0-f180.google.com with SMTP id c9so3104845qcz.25
+        for <ceph-devel@vger.kernel.org>; Fri, 29 Aug 2014 17:07:49 -0700 (PDT)
+In-Reply-To: <loom.20140828T160715-242@post.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: adamcrume@gmail.com, sage@redhat.com
-Cc: ceph-devel@vger.kernel.org
+To: Kostiantyn Danylov <kdanilov@mirantis.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
+On Thu, Aug 28, 2014 at 7:12 AM, Kostiantyn Danylov
+<kdanilov@mirantis.com> wrote:
+> Hi all,
+>
+> My name is Kostiantyn Danylov, I'm C++/C/python developer with ~9 yea=
+r of
+> experience, also I'm interesting in distributed systems. I would like=
+ to
+> contribute to ceph. I already read documents at
+> http://ceph.com/docs/master/dev/. Where I can start contributing? Pro=
+bably I
+> can start by fixing some
+> simple bugs, can you point me on them?
 
-Adam & Sage,
+As with many projects we aren't very good at maintaining them, but
+there are two places that should be good to start:
+1) go to tracker.ceph.com and search for tickets marked as new-dev
+(http://tracker.ceph.com/search?utf8=3D=E2=9C=93&q=3Dnew-dev)
+2) wiki.ceph.com has a chum bucket "maintained" by the community:
+https://wiki.ceph.com/Development/Chum_Bucket
 
-The commit "osd: make coll_t::META static to each file" from wip-libcommon has been merged to master.  I created a new branch with the other commits on the latest master branch called wip-libcommon-rebase.**  It required some conflict resolution in ceph.spec.in.  
+I would avoid the copy-on-read feature in the chum bucket for now, but
+the rest will introduce you to several very different pieces of the
+code base.
 
-**No warranties are expressed or implied about the correctness or suitability of this branch for future use.
-
-David Zafman
-Senior Developer
-http://www.inktank.com
-http://www.redhat.com
-
+Aside: you might be better off figuring out if there are specific
+(small!) things you want Ceph to do and working from there; it's a big
+project with a bunch of different kinds of things to do.
+-Greg
+Software Engineer #42 @ http://inktank.com | http://ceph.com
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
