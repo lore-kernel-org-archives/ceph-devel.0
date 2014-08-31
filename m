@@ -1,35 +1,66 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: Ask help for boost::statechart in PG
-Date: Sat, 30 Aug 2014 09:14:52 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1408300913230.966@cobra.newdream.net>
-References: <CAOdVJi2e2cBOwRk8TS4Te2eZ1NO2hw26zL6M3Mq94pv60Z9vWQ@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Running a teuthology workload depending on the distribution
+Date: Sun, 31 Aug 2014 12:33:50 +0200
+Message-ID: <5402FA0E.809@dachary.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="OCQhC0qlMV9fjGFPNIHqKsbccbFUPAEaK"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:44201 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751689AbaH3QOw (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 30 Aug 2014 12:14:52 -0400
-In-Reply-To: <CAOdVJi2e2cBOwRk8TS4Te2eZ1NO2hw26zL6M3Mq94pv60Z9vWQ@mail.gmail.com>
+Received: from mail2.dachary.org ([91.121.57.175]:41428 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751046AbaHaKd5 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 31 Aug 2014 06:33:57 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: star fan <jfanix@gmail.com>
-Cc: Ceph-devel <ceph-devel@vger.kernel.org>, Loic Dachary <loic@dachary.org>
+To: Zack Cerza <zack.cerza@inktank.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Sat, 30 Aug 2014, star fan wrote:
-> I ask the question because I am not good at  boost::statechart and I
-> can't get answer from other way.
-> 
-> To help me to good understand the PG statechart, I hope someone answer
-> below questions:
-> In Initial state,
-> 1.  why there is not react function for custom_reaction< NullEvt >
-> 2. why there is not custom_reaction definition about
-> boost::statechart::result react(const MNotifyRec&);
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--OCQhC0qlMV9fjGFPNIHqKsbccbFUPAEaK
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-One thing to keep in mind is that the states form a hierarchy.  If a state 
-doesn't explicitly handle/react to an event, the parent will.  You'll 
-notice that Reset and Started both react to NullEvt, and the other states 
-are substates/children of those.
+Hi Zack,
 
-sage
+The isa erasure code plugin is only built on some architectures. The work=
+load described at
+
+https://github.com/ceph/ceph-qa-suite/blob/master/erasure-code/ec-rados-p=
+lugin%3Disa-k%3D2-m%3D1.yaml
+
+can therefore only be run on those architectures. How would you recommend=
+ that it is integrated in the upgrade suites ? Adding it to
+
+https://github.com/ceph/ceph-qa-suite/tree/master/suites/upgrade/firefly-=
+x/stress-split/9-workload
+
+for instance, at the same level as
+
+https://github.com/ceph/ceph-qa-suite/blob/master/suites/upgrade/firefly-=
+x/stress-split/9-workload/ec-rados-plugin%3Djerasure-k%3D3-m%3D1.yaml
+
+will not work because it will fail when running on precise (for instance)=
+=2E
+
+Cheers
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+
+
+--OCQhC0qlMV9fjGFPNIHqKsbccbFUPAEaK
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlQC+g4ACgkQ8dLMyEl6F224RgCfdH4oxCucO3JbvUzDz9cAdsD8
+L0IAn3RoQOFwC93H77IuVnxeHuV4QMBp
+=7wt6
+-----END PGP SIGNATURE-----
+
+--OCQhC0qlMV9fjGFPNIHqKsbccbFUPAEaK--
