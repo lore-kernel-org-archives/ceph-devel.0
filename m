@@ -1,62 +1,35 @@
-From: Alexandre Oliva <oliva@gnu.org>
-Subject: Re: [PATCH] daemons: write pid file even when told not to daemonize
-Date: Thu, 04 Sep 2014 16:48:04 -0300
-Message-ID: <ortx4n416z.fsf@free.home>
-References: <or4mxyuvo4.fsf@free.home> <53D9C379.9070904@dachary.org>
-	<alpine.DEB.2.00.1407302129530.18917@cobra.newdream.net>
-	<or7g1tawy9.fsf@free.home> <53FEE3B8.4070902@dachary.org>
-	<oriolbajch.fsf@free.home> <54003C8B.8090000@dachary.org>
+From: Cheng Cheng <ccheng.leo@gmail.com>
+Subject: Seeking for Mentor
+Date: Thu, 4 Sep 2014 16:02:49 -0400
+Message-ID: <CAC13JXaE0H8xh2rX2c+-x-c0jUGV+nKMuoG3Kg+8ZKj-TKTsFQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from linux-libre.fsfla.org ([208.118.235.54]:60611 "EHLO
-	linux-libre.fsfla.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755194AbaIDTuf convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 4 Sep 2014 15:50:35 -0400
-In-Reply-To: <54003C8B.8090000@dachary.org> (Loic Dachary's message of "Fri,
-	29 Aug 2014 10:40:43 +0200")
+Received: from mail-la0-f47.google.com ([209.85.215.47]:39235 "EHLO
+	mail-la0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755232AbaIDUDL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 4 Sep 2014 16:03:11 -0400
+Received: by mail-la0-f47.google.com with SMTP id el20so3941031lab.6
+        for <ceph-devel@vger.kernel.org>; Thu, 04 Sep 2014 13:03:09 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Aug 29, 2014, Loic Dachary <loic@dachary.org> wrote:
+Hi Ceph Developers,
 
-> After a quick glance at the systemd man page http://www.freedesktop.o=
-rg/software/systemd/man/systemd.service.html#Options it seems possible =
-to do something like
+I am just starting to use Ceph and find it is a great platform for
+hosting VM storage.
 
->     https://github.com/dachary/ceph/compare/wip-systemd?expand=3D1
+As I want to dive further and learn more about Ceph, I want to take a
+starter task to familiarize myself with Ceph codebase. In particular,
+I found this copy-on-read is an interesting task
+(https://wiki.ceph.com/Planning/Sideboard/rbd%3A_copy-on-read_for_clones).
 
-Yeah, it sure is possible in systemd to start and track daemons that
-don't have a =E2=80=9Crun in foreground=E2=80=9D option, but it's not a=
-s efficient.
+However I find it is hard to get my hands dirty without mentorship. So
+I am wondering can anyone give me some bootstrap about how to
+contribute to Ceph and how to setup developing environment?
 
-> Alternatively, shouldn't systemctl kill ceph-osd@10.service be the ca=
-nonical way of killing a process spawned by systemd ?
+Any help would be greatly appreciated!
 
-If you know what number to use after @, I guess it would.  I don't thin=
-k
-we're talking about the same version of ceph, when it comes to systemd
-config files.  Your patch doesn't modify any file present on my system
-(still running 0.80.5)
-
-> If both are impractical or frowned upon for some reason, it looks lik=
-e
-> your patch is the only way to go, indeed.
-
-It's certainly not the only way to go, but silently dropping a command
-line option sounds like a bug to me.  Of course the patch I proposed
-isn't the only way to go about that...
-
---=20
-Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
-You must be the change you wish to see in the world. -- Gandhi
-Be Free! -- http://FSFLA.org/   FSF Latin America board member
-=46ree Software Evangelist|Red Hat Brasil GNU Toolchain Engineer
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Sincerely,
+Cheng
