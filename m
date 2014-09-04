@@ -1,33 +1,28 @@
 From: Loic Dachary <loic@dachary.org>
 Subject: Re: ARM NEON optimisations for gf-complete/jerasure/ceph-erasure
-Date: Thu, 04 Sep 2014 17:21:38 +0200
-Message-ID: <54088382.4070402@dachary.org>
+Date: Thu, 04 Sep 2014 17:57:55 +0200
+Message-ID: <54088C03.10900@dachary.org>
 References: <20140904144237.GK2591@jannau.net>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="jA1CQ10oR48MgxaVveSeHLr5m151VBrGp"
+ boundary="3rHQDlmc0DPkjVU588Fj719PRONk1UPW9"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:44902 "EHLO
+Received: from mail2.dachary.org ([91.121.57.175]:44953 "EHLO
 	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1750953AbaIDPVp (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 4 Sep 2014 11:21:45 -0400
+	with ESMTP id S1751183AbaIDP6D (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 4 Sep 2014 11:58:03 -0400
 In-Reply-To: <20140904144237.GK2591@jannau.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Janne Grunau <j@jannau.net>
-Cc: ceph-devel@vger.kernel.org, Ethan Miller <elm@cs.ucsc.edu>, Kevin Greenan <kmgreen2@gmail.com>
+To: Janne Grunau <j@jannau.net>, ceph-devel@vger.kernel.org
 
 This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---jA1CQ10oR48MgxaVveSeHLr5m151VBrGp
+--3rHQDlmc0DPkjVU588Fj719PRONk1UPW9
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: quoted-printable
 
 Hi Janne,
-
-This is great news :-) Added Ethan & Kevin to the discussion.
-
-Cheers
 
 On 04/09/2014 16:42, Janne Grunau wrote:
 > Hi,
@@ -69,7 +64,18 @@ n=20
 > for arm. If someone has another idea how to avoid the #ifdefs I'm open =
 
 > for that too.
->=20
+
+Would it be possible to make use of ifunc ( https://gcc.gnu.org/onlinedoc=
+s/gcc-4.7.2/gcc/Function-Attributes.html#index-g_t_0040code_007bifunc_007=
+d-attribute-2529 ) to chose the function depending on CPU features ?
+
+http://gcc.gnu.org/onlinedocs/gcc-4.8.2/gcc/i386-and-x86-64-Options.html#=
+i386-and-x86-64-Options
+
+http://www.spinics.net/lists/ceph-devel/msg18452.html
+
+Cheers
+
 > I'm currently using the SSE/NOSSE region option which is bogus. I'm=20
 > wondering whether I should just rename that SIMD/NOSIMD (not really tru=
 e=20
@@ -96,7 +102,7 @@ n
 Lo=EFc Dachary, Artisan Logiciel Libre
 
 
---jA1CQ10oR48MgxaVveSeHLr5m151VBrGp
+--3rHQDlmc0DPkjVU588Fj719PRONk1UPW9
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -105,9 +111,9 @@ Content-Disposition: attachment; filename="signature.asc"
 Version: GnuPG v2.0.22 (GNU/Linux)
 Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
 
-iEYEARECAAYFAlQIg4IACgkQ8dLMyEl6F23pTwCgxPWWo3Y5lOwmOQzWr2fkxkf6
-DJAAnj0MECVzMz4Jo1woSSWO07b52Djv
-=qTx2
+iEYEARECAAYFAlQIjAMACgkQ8dLMyEl6F22ouQCeJQSiJri7Y+d1rN874/z1tOEP
++hAAn3A8py+wO3EUtir5ICNrpNoRW7z7
+=APFy
 -----END PGP SIGNATURE-----
 
---jA1CQ10oR48MgxaVveSeHLr5m151VBrGp--
+--3rHQDlmc0DPkjVU588Fj719PRONk1UPW9--
