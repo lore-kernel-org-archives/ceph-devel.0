@@ -1,37 +1,62 @@
-From: Patrick McGarry <patrick@inktank.com>
-Subject: Ceph Day Paris Schedule Posted
-Date: Thu, 4 Sep 2014 12:39:47 -0400
-Message-ID: <CAP8Oy=JZHT0Oi1Sf_ACq+zPOAUuiDXmbRgXkGTKzq7j+9MUVkw@mail.gmail.com>
+From: Alexandre Oliva <oliva@gnu.org>
+Subject: Re: [PATCH] daemons: write pid file even when told not to daemonize
+Date: Thu, 04 Sep 2014 16:48:04 -0300
+Message-ID: <ortx4n416z.fsf@free.home>
+References: <or4mxyuvo4.fsf@free.home> <53D9C379.9070904@dachary.org>
+	<alpine.DEB.2.00.1407302129530.18917@cobra.newdream.net>
+	<or7g1tawy9.fsf@free.home> <53FEE3B8.4070902@dachary.org>
+	<oriolbajch.fsf@free.home> <54003C8B.8090000@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f172.google.com ([209.85.220.172]:56463 "EHLO
-	mail-vc0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751523AbaIDQjs (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 4 Sep 2014 12:39:48 -0400
-Received: by mail-vc0-f172.google.com with SMTP id ij19so10938757vcb.31
-        for <ceph-devel@vger.kernel.org>; Thu, 04 Sep 2014 09:39:47 -0700 (PDT)
+Received: from linux-libre.fsfla.org ([208.118.235.54]:60611 "EHLO
+	linux-libre.fsfla.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755194AbaIDTuf convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 4 Sep 2014 15:50:35 -0400
+In-Reply-To: <54003C8B.8090000@dachary.org> (Loic Dachary's message of "Fri,
+	29 Aug 2014 10:40:43 +0200")
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>, Ceph User Committee <ceph-community@lists.ceph.com>
+To: Loic Dachary <loic@dachary.org>
+Cc: ceph-devel@vger.kernel.org
 
-Hey all,
+On Aug 29, 2014, Loic Dachary <loic@dachary.org> wrote:
 
-The schedule for Ceph Day Paris has just been finalized and posted.
-Looks like we have another great lineup of speakers (and some
-never-before-seen topics) so if you are anywhere close to Paris on 18
-Sep, you should definitely sign up soon!
+> After a quick glance at the systemd man page http://www.freedesktop.o=
+rg/software/systemd/man/systemd.service.html#Options it seems possible =
+to do something like
 
-http://ceph.com/cephdays/paris/
+>     https://github.com/dachary/ceph/compare/wip-systemd?expand=3D1
 
-If you are a contributor and would like discounted admission please
-let me know, I'd be happy to give you a code for the Eventbrite
-signup.  Thanks!
+Yeah, it sure is possible in systemd to start and track daemons that
+don't have a =E2=80=9Crun in foreground=E2=80=9D option, but it's not a=
+s efficient.
 
+> Alternatively, shouldn't systemctl kill ceph-osd@10.service be the ca=
+nonical way of killing a process spawned by systemd ?
 
-Best Regards,
+If you know what number to use after @, I guess it would.  I don't thin=
+k
+we're talking about the same version of ceph, when it comes to systemd
+config files.  Your patch doesn't modify any file present on my system
+(still running 0.80.5)
 
-Patrick McGarry
-Director Ceph Community || Red Hat
-http://ceph.com  ||  http://community.redhat.com
-@scuttlemonkey || @ceph
+> If both are impractical or frowned upon for some reason, it looks lik=
+e
+> your patch is the only way to go, indeed.
+
+It's certainly not the only way to go, but silently dropping a command
+line option sounds like a bug to me.  Of course the patch I proposed
+isn't the only way to go about that...
+
+--=20
+Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
+You must be the change you wish to see in the world. -- Gandhi
+Be Free! -- http://FSFLA.org/   FSF Latin America board member
+=46ree Software Evangelist|Red Hat Brasil GNU Toolchain Engineer
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
