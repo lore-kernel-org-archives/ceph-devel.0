@@ -1,119 +1,131 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: ARM NEON optimisations for gf-complete/jerasure/ceph-erasure
-Date: Thu, 04 Sep 2014 17:57:55 +0200
-Message-ID: <54088C03.10900@dachary.org>
-References: <20140904144237.GK2591@jannau.net>
+From: Milosz Tanski <milosz@adfin.com>
+Subject: Re: ceph data locality
+Date: Thu, 4 Sep 2014 11:59:09 -0400
+Message-ID: <CANP1eJH97O+B_rGYKbLJvpu_hLvfUj+vs-UrrBrQuTwEjxfiOQ@mail.gmail.com>
+References: <D02D591B.57E%johnugeo@cisco.com>
+	<D02D5C36.583%johnugeo@cisco.com>
+	<D02D5FAE.58B%johnugeo@cisco.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="3rHQDlmc0DPkjVU588Fj719PRONk1UPW9"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:44953 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751183AbaIDP6D (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 4 Sep 2014 11:58:03 -0400
-In-Reply-To: <20140904144237.GK2591@jannau.net>
+Received: from mail-la0-f44.google.com ([209.85.215.44]:52903 "EHLO
+	mail-la0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751389AbaIDP7L convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 4 Sep 2014 11:59:11 -0400
+Received: by mail-la0-f44.google.com with SMTP id hz20so12350361lab.3
+        for <ceph-devel@vger.kernel.org>; Thu, 04 Sep 2014 08:59:09 -0700 (PDT)
+In-Reply-To: <D02D5FAE.58B%johnugeo@cisco.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Janne Grunau <j@jannau.net>, ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---3rHQDlmc0DPkjVU588Fj719PRONk1UPW9
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Johnu,
 
-Hi Janne,
+Keep in mind HDFS was more less designed and thus optimized for MR
+jobs versus general filesystem use. It was also optimized for a case
+of hardware in the past, eg. slower networks then today (1gigE or
+less). Theres's lots of little hacks in hadoop to optimize for that,
+for example local mmaped reads in hdfs client). It will tough to beat
+MR on HDFS in that scenario and hadoop. If hadoop is a smaller piece
+in a large data-pipeline (that includes non-hadoop, regular fs work)
+then it makes more sense.
 
-On 04/09/2014 16:42, Janne Grunau wrote:
-> Hi,
->=20
-> I've started writing ARM/AArch64 NEON optimizations for gf-complete. =20
-> http://git.jannau.net/gf-complete.git/log/?h=3Dneon has proof of concep=
-t=20
-> AArch64 NEON optimisations for w8.
->=20
-> Implemented methods are so far the carry-less/polynomial multiplication=
-=20
-> and the split table. The polynomial multiplication is reasonable fast=20
-> for region multiplications (~2000MB/s on an Apple A7 at 1.3GHz) since=20
-> NEON has a 8-bit to 16-bit SIMD polynomial multiplication.
->=20
-> The split table method is still faster though, 5700MB/s on the same CPU=
-=2E =20
-> I'm actually surprised by that since it is faster (per cycle) than the =
+Now if you're talking about the hardware and network of tomorrow
+(10gigE or 40gigE) then locality of placement starts to matter less.
+=46or example the Mellanox people claim that they are able to get 20%
+more performance out of Ceph in the 40gigE scenario.
 
-> Core i7-3770 from gf-complete's manual (page 14). That suggests that=20
-> SSE3 code might not be optimal.
->=20
-> I'm currently working on integrating NEON into the build system and the=
-n=20
-> will extend the existing code to work on ARMv7-a too. Those two are=20
-> straight forward. There are a couple of other issues I would like to=20
-> discuss before I start to work on them.
->=20
-> The #if/#ifdefs in the source are starting to make the source hard to=20
-> read then more than one optimization is added. Separating arch specific=
+And if we're designing for the network for future then there's a lot
+we can clean from the Quantcast hadoop filesystem
+(http://quantcast.github.io/qfs/). Take a look at their recent
+publication: http://db.disi.unitn.eu/pages/VLDBProgram/pdf/industry/p80=
+8-ovsiannikov.pdf.
+They essentially forked KFS, added erasure coding support created a
+hadoop filesystem driver for it. They were able to get much better
+write performance by reducing write amplifications (1.5x copies versus
+3 copies) thus reducing network traffic and possibly freeing up that
+previous bandwidth for read traffic. They claim to have improved read
+performance compared to HDFS a tad.
 
-> implementations from each other and from the generic implementation=20
-> works reasonable well for the multimedia related projects I have=20
-> experience with (libav/FFmpeg, x264). There would be arch specific init=
-=20
-> functions which set the appropriate function pointers. The neon=20
-> optimisations would then live in w8_arm.c which would be only compiled =
+QFS unlike Ceph places the erasure coding logic inside of the client
+so it's not a apples-to-apples comparison. but I think you get my
+point, and it would be possible to implement a rich Ceph
+(filesystem/hadoop) client like this as well.
 
-> for arm. If someone has another idea how to avoid the #ifdefs I'm open =
+In summary, if Hadoop on Ceph is a major priority I think it would be
+best to "borrow" the good ideas for QFS and implement them in Hadoop
+Ceph filesystem and Ceph it self (letting a smart client get chunks
+directly, write chunks directly). I don't doubt that it's a lot of
+work but the results might be worth it in in terms of performance you
+get for the cost.
 
-> for that too.
 
-Would it be possible to make use of ifunc ( https://gcc.gnu.org/onlinedoc=
-s/gcc-4.7.2/gcc/Function-Attributes.html#index-g_t_0040code_007bifunc_007=
-d-attribute-2529 ) to chose the function depending on CPU features ?
+Some food for though. I don't have a horse in this particular game but
+I am interested in DFSs and VLDBs so I'm constantly reading into
+research / what folks are building.
 
-http://gcc.gnu.org/onlinedocs/gcc-4.8.2/gcc/i386-and-x86-64-Options.html#=
-i386-and-x86-64-Options
+Cheers,
+- Milosz
 
-http://www.spinics.net/lists/ceph-devel/msg18452.html
+P.S: Forgot to Reply-to-all, haven't had my coffee yet.
 
-Cheers
+On Thu, Sep 4, 2014 at 3:16 AM, Johnu George (johnugeo)
+<johnugeo@cisco.com> wrote:
+> Hi All,
+>         I was reading more on Hadoop over ceph. I heard from Noah tha=
+t
+> tuning of Hadoop on Ceph is going on. I am just curious to know if th=
+ere
+> is any reason to keep default object size as 64MB. Is it because of t=
+he
+> fact that it becomes difficult to encode
+>  getBlockLocations if blocks are divided into objects and to choose t=
+he
+> best location for tasks if no nodes in the system has a complete bloc=
+k.?
+>
+> I am wondering if someone any benchmark results for various object si=
+zes.
+> If you have them, it will be helpful if you share them.
+>
+> I see that Ceph doesn=C2=B9t place objects considering the client loc=
+ation or
+> distance between client and the osds where data is stored.(data-local=
+ity)
+> While, data locality is the key idea for HDFS block placement and
+> retrieval for maximum throughput. So, how does ceph plan to perform b=
+etter
+> than HDFS as ceph relies on random placement
+>  using hashing unlike HDFS block placement? Can someone also point ou=
+t
+> some performance results comparing ceph random placements vs hdfs loc=
+ality
+> aware placement?
+>
+> Also, Sage wrote about a way to specify a node to be primary for hado=
+op
+> like environments.
+> (http://comments.gmane.org/gmane.comp.file-systems.ceph.devel/1548 ) =
+Is
+> this through primary affinity configuration?
+>
+> Thanks,
+> Johnu
+>
 
-> I'm currently using the SSE/NOSSE region option which is bogus. I'm=20
-> wondering whether I should just rename that SIMD/NOSIMD (not really tru=
-e=20
-> since the carry less operations for w64 and w128 only use the SIMD=20
-> instruction set but are single data). That would need to have backward =
 
-> compatibility for SSE/NOSSE. The other option would be to add=20
-> NEON/NONEON flags.
->=20
-> I'm sure I find other issues to discuss when I start integrating the=20
-> NEON optimisations into jerasure and ceph.
->=20
-> thanks
->=20
-> Janne
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
 
 --=20
-Lo=EFc Dachary, Artisan Logiciel Libre
+Milosz Tanski
+CTO
+16 East 34th Street, 15th floor
+New York, NY 10016
 
-
---3rHQDlmc0DPkjVU588Fj719PRONk1UPW9
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlQIjAMACgkQ8dLMyEl6F22ouQCeJQSiJri7Y+d1rN874/z1tOEP
-+hAAn3A8py+wO3EUtir5ICNrpNoRW7z7
-=APFy
------END PGP SIGNATURE-----
-
---3rHQDlmc0DPkjVU588Fj719PRONk1UPW9--
+p: 646-253-9055
+e: milosz@adfin.com
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
