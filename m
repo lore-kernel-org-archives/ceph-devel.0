@@ -1,42 +1,60 @@
-From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: Re: ms_tcp_nodelay no effect on kernel-rbd
-Date: Thu, 4 Sep 2014 17:50:06 +0400
-Message-ID: <CALFYKtAwobOy9B0-=Kpqi680=GG-+Oogp3PB4DMPkyfHAZR9VQ@mail.gmail.com>
-References: <9E914F5BD7F48A4782456CEB550A4228061207A0@SACMBXIP02.sdcorp.global.sandisk.com>
+From: Janne Grunau <j@jannau.net>
+Subject: ARM NEON optimisations for gf-complete/jerasure/ceph-erasure
+Date: Thu, 4 Sep 2014 16:42:37 +0200
+Message-ID: <20140904144237.GK2591@jannau.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qg0-f43.google.com ([209.85.192.43]:60563 "EHLO
-	mail-qg0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750833AbaIDNuH convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 4 Sep 2014 09:50:07 -0400
-Received: by mail-qg0-f43.google.com with SMTP id f51so9967380qge.16
-        for <ceph-devel@vger.kernel.org>; Thu, 04 Sep 2014 06:50:06 -0700 (PDT)
-In-Reply-To: <9E914F5BD7F48A4782456CEB550A4228061207A0@SACMBXIP02.sdcorp.global.sandisk.com>
+Received: from soltyk.jannau.net ([185.27.253.110]:38003 "EHLO
+	soltyk.jannau.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753361AbaIDOwW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 4 Sep 2014 10:52:22 -0400
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Chaitanya Huilgol <Chaitanya.Huilgol@sandisk.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>
+To: ceph-devel@vger.kernel.org
 
-On Thu, Sep 4, 2014 at 3:39 PM, Chaitanya Huilgol
-<Chaitanya.Huilgol@sandisk.com> wrote:
-> Hi,
->
-> In our benchmarking tests we observed that the ms_tcp_nodelay in ceph.conf option is not affecting the kernel rbd and as expected we see poor latency numbers for lower queue depths and 4K rand reads. There is significant increase in latency from qd=2  to 24 and starts tapering down for higher queue depths.
-> We did not find relevant kernel_setsockopt  with TCP_NODELAY in the kernel RBD/libceph (messenger.c) source. Unless we are missing something, looks like currently the kernel RBD is not setting this and this is affecting latency numbers are lower queue depths.
->
-> I have tested with userspace fio(rbd engine) and rados bench and we see similar latency behavior when ms_tcp_nodelay is set to false. However setting this to true gives consistent low latency numbers for all queue depths
->
-> Any ideas/thoughts on this?
->
-> OS Ubuntu 14.04
-> Kernel: 3.13.0-24-generic #46-Ubuntu SMP
-> Ceph: Latest Master
+Hi,
 
-No, we don't set TCP_NODELAY in the kernel client, but I think we can
-add it as a rbd map/mount option.  Sage?
+I've started writing ARM/AArch64 NEON optimizations for gf-complete.  
+http://git.jannau.net/gf-complete.git/log/?h=neon has proof of concept 
+AArch64 NEON optimisations for w8.
 
-Thanks,
+Implemented methods are so far the carry-less/polynomial multiplication 
+and the split table. The polynomial multiplication is reasonable fast 
+for region multiplications (~2000MB/s on an Apple A7 at 1.3GHz) since 
+NEON has a 8-bit to 16-bit SIMD polynomial multiplication.
 
-                Ilya
+The split table method is still faster though, 5700MB/s on the same CPU.  
+I'm actually surprised by that since it is faster (per cycle) than the 
+Core i7-3770 from gf-complete's manual (page 14). That suggests that 
+SSE3 code might not be optimal.
+
+I'm currently working on integrating NEON into the build system and then 
+will extend the existing code to work on ARMv7-a too. Those two are 
+straight forward. There are a couple of other issues I would like to 
+discuss before I start to work on them.
+
+The #if/#ifdefs in the source are starting to make the source hard to 
+read then more than one optimization is added. Separating arch specific
+implementations from each other and from the generic implementation 
+works reasonable well for the multimedia related projects I have 
+experience with (libav/FFmpeg, x264). There would be arch specific init 
+functions which set the appropriate function pointers. The neon 
+optimisations would then live in w8_arm.c which would be only compiled 
+for arm. If someone has another idea how to avoid the #ifdefs I'm open 
+for that too.
+
+I'm currently using the SSE/NOSSE region option which is bogus. I'm 
+wondering whether I should just rename that SIMD/NOSIMD (not really true 
+since the carry less operations for w64 and w128 only use the SIMD 
+instruction set but are single data). That would need to have backward 
+compatibility for SSE/NOSSE. The other option would be to add 
+NEON/NONEON flags.
+
+I'm sure I find other issues to discuss when I start integrating the 
+NEON optimisations into jerasure and ceph.
+
+thanks
+
+Janne
