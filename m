@@ -1,160 +1,50 @@
-From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: [PATCH 2/2] libceph: resend lingering requests with a new tid
-Date: Fri,  5 Sep 2014 12:42:46 +0400
-Message-ID: <1409906566-5662-3-git-send-email-ilya.dryomov@inktank.com>
-References: <1409906566-5662-1-git-send-email-ilya.dryomov@inktank.com>
+From: Aanchal Agrawal <Aanchal.Agrawal@sandisk.com>
+Subject: Mon gets flooded with log messages for default log level
+Date: Fri, 5 Sep 2014 12:26:16 +0000
+Message-ID: <7F4FDDF05D5B3241ABA5EB82D169E31E054E7E27@SACMBXIP02.sdcorp.global.sandisk.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-we0-f171.google.com ([74.125.82.171]:55147 "EHLO
-	mail-we0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756351AbaIEImz (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Sep 2014 04:42:55 -0400
-Received: by mail-we0-f171.google.com with SMTP id u56so11518225wes.16
-        for <ceph-devel@vger.kernel.org>; Fri, 05 Sep 2014 01:42:53 -0700 (PDT)
-Received: from localhost ([109.110.66.113])
-        by mx.google.com with ESMTPSA id dc9sm1227669wib.5.2014.09.05.01.42.52
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=RC4-SHA bits=128/128);
-        Fri, 05 Sep 2014 01:42:52 -0700 (PDT)
-In-Reply-To: <1409906566-5662-1-git-send-email-ilya.dryomov@inktank.com>
+Received: from mail-bl2on0096.outbound.protection.outlook.com ([65.55.169.96]:34949
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S932083AbaIEMlL convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Sep 2014 08:41:11 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Both not yet registered (r_linger && list_empty(&r_linger_item)) and
-registered linger requests should use the new tid on resend to avoid
-the dup op detection logic on the OSDs, yet we were doing this only for
-"registered" case.  Factor out and simplify the "registered" logic and
-use the new helper for "not registered" case as well.
+Hi,
 
-Fixes: http://tracker.ceph.com/issues/8806
+With reference to commit f7d1902ccf9d5bb97cda626d718c3bb02f991a6d, 'Paxos' default level has been increased to 1.
+This cause mon to get flooded with the following message,  thus causes OS Drive(160GB) to get filled in 4-5 hours.
 
-Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
----
- net/ceph/osd_client.c |   75 ++++++++++++++++++++++++++++++++++++-------------
- 1 file changed, 55 insertions(+), 20 deletions(-)
+Log Snippet ::
+==================
+2014-09-01 16:35:11.527734 7f7efe706700 1 mon.rack6-ramp-1@0(leader).paxos(paxos active c 1..712) is_readable now=2014-09-01 16:35:11.527735 lease_expire=2014-09-01 16:35:13.637940 has v0 lc 712
+2014-09-01 16:35:11.527773 7f7efe706700 1 mon.rack6-ramp-1@0(leader).paxos(paxos active c 1..712) is_readable now=2014-09-01 16:35:11.527774 lease_expire=2014-09-01 16:35:13.637940 has v0 lc 712
+2014-09-01 16:35:11.527807 7f7efe706700 1 mon.rack6-ramp-1@0(leader).paxos(paxos active c 1..712) is_readable now=2014-09-01 16:35:11.527807 lease_expire=2014-09-01 16:35:13.637940 has v0 lc 712
+2014-09-01 16:35:11.527840 7f7efe706700 1 mon.rack6-ramp-1@0(leader).paxos(paxos active c 1..712) is_readable now=2014-09-01 16:35:11.527840 lease_expire=2014-09-01 16:35:13.637940 has v0 lc 712
+2014-09-01 16:35:11.527874 7f7efe706700 1 mon.rack6-ramp-1@0(leader).paxos(paxos active c 1..712) is_readable now=2014-09-01 16:35:11.527875 lease_expire=2014-09-01 16:35:13.637940 has v0 lc 712
+==================
 
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index 8db10b4a6553..81ee046b24d0 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -30,8 +30,11 @@ static void __send_queued(struct ceph_osd_client *osdc);
- static int __reset_osd(struct ceph_osd_client *osdc, struct ceph_osd *osd);
- static void __register_request(struct ceph_osd_client *osdc,
- 			       struct ceph_osd_request *req);
-+static void __unregister_request(struct ceph_osd_client *osdc,
-+				 struct ceph_osd_request *req);
- static void __unregister_linger_request(struct ceph_osd_client *osdc,
- 					struct ceph_osd_request *req);
-+static void __enqueue_request(struct ceph_osd_request *req);
- static void __send_request(struct ceph_osd_client *osdc,
- 			   struct ceph_osd_request *req);
- 
-@@ -892,6 +895,39 @@ __lookup_request_ge(struct ceph_osd_client *osdc,
- 	return NULL;
- }
- 
-+static void __kick_linger_request(struct ceph_osd_request *req,
-+				  bool lingering)
-+{
-+	struct ceph_osd_client *osdc = req->r_osdc;
-+	struct ceph_osd *osd = req->r_osd;
-+
-+	/*
-+	 * Linger requests need to be resent with a new tid to avoid
-+	 * the dup op detection logic on the OSDs.  Achieve this with
-+	 * a re-register dance instead of open-coding.
-+	 */
-+	ceph_osdc_get_request(req);
-+	if (!lingering)
-+		__unregister_request(osdc, req);
-+	else
-+		__unregister_linger_request(osdc, req);
-+	__register_request(osdc, req);
-+	ceph_osdc_put_request(req);
-+
-+	/*
-+	 * Unless request has been registered as both normal and
-+	 * lingering, __unregister{,_linger}_request clears r_osd.
-+	 * However, here we need to preserve r_osd to make sure we
-+	 * requeue on the same OSD.
-+	 */
-+	WARN_ON(req->r_osd || !osd);
-+	req->r_osd = osd;
-+
-+	dout("requeueing %p tid %llu osd%d lingering=%d\n", req, req->r_tid,
-+	     osd->o_osd, lingering);
-+	__enqueue_request(req);
-+}
-+
- /*
-  * Resubmit requests pending on the given osd.
-  */
-@@ -900,12 +936,14 @@ static void __kick_osd_requests(struct ceph_osd_client *osdc,
- {
- 	struct ceph_osd_request *req, *nreq;
- 	LIST_HEAD(resend);
-+	LIST_HEAD(resend_linger);
- 	int err;
- 
- 	dout("__kick_osd_requests osd%d\n", osd->o_osd);
- 	err = __reset_osd(osdc, osd);
- 	if (err)
- 		return;
-+
- 	/*
- 	 * Build up a list of requests to resend by traversing the
- 	 * osd's list of requests.  Requests for a given object are
-@@ -926,33 +964,30 @@ static void __kick_osd_requests(struct ceph_osd_client *osdc,
- 	list_for_each_entry(req, &osd->o_requests, r_osd_item) {
- 		if (!req->r_sent)
- 			break;
--		list_move_tail(&req->r_req_lru_item, &resend);
--		dout("requeueing %p tid %llu osd%d\n", req, req->r_tid,
--		     osd->o_osd);
--		if (!req->r_linger)
-+
-+		if (!req->r_linger) {
-+			dout("requeueing %p tid %llu osd%d\n", req, req->r_tid,
-+			     osd->o_osd);
-+			list_move_tail(&req->r_req_lru_item, &resend);
- 			req->r_flags |= CEPH_OSD_FLAG_RETRY;
-+		} else {
-+			list_move_tail(&req->r_req_lru_item, &resend_linger);
-+		}
- 	}
- 	list_splice(&resend, &osdc->req_unsent);
- 
- 	/*
--	 * Linger requests are re-registered before sending, which
--	 * sets up a new tid for each.  We add them to the unsent
--	 * list at the end to keep things in tid order.
-+	 * Both not yet registered and registered linger requests are
-+	 * enqueued with a new tid on the same OSD.  We add/move them
-+	 * to req_unsent/o_requests at the end to keep things in tid
-+	 * order.
- 	 */
-+	list_for_each_entry_safe(req, nreq, &resend_linger, r_req_lru_item)
-+		__kick_linger_request(req, false);
-+
- 	list_for_each_entry_safe(req, nreq, &osd->o_linger_requests,
--				 r_linger_osd_item) {
--		/*
--		 * reregister request prior to unregistering linger so
--		 * that r_osd is preserved.
--		 */
--		BUG_ON(!list_empty(&req->r_req_lru_item));
--		__register_request(osdc, req);
--		list_add_tail(&req->r_req_lru_item, &osdc->req_unsent);
--		list_add_tail(&req->r_osd_item, &req->r_osd->o_requests);
--		__unregister_linger_request(osdc, req);
--		dout("requeued lingering %p tid %llu osd%d\n", req, req->r_tid,
--		     osd->o_osd);
--	}
-+				 r_linger_osd_item)
-+		__kick_linger_request(req, true);
- }
- 
- /*
--- 
-1.7.10.4
+==================
+src/mon/Paxos.cc
+dout(1) << "is_readable now=" << ceph_clock_now(g_ceph_context) << " lease_expire=" << lease_expire
+          << " has v" << v << " lc " << last_committed << dendl;
+==================
+
+Incrementing 'log level' of this message to 2 or something else will solve this problem of mon space getting full quickly.
+
+Moreover is this message that useful to get printed with default debug level '1'?
+Let me know if I am missing something here.
+
+Thanks,
+Aanchal
+
+________________________________
+
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
 
