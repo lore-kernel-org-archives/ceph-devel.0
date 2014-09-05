@@ -1,72 +1,47 @@
-From: Cheng Cheng <ccheng.leo@gmail.com>
-Subject: Re: About the copy-on-read blueprint
-Date: Thu, 4 Sep 2014 23:50:11 -0400
-Message-ID: <CAC13JXam+9GOxvtaj=466K3CcV_U=kvcy5TyQqqzE-8G0eKFWQ@mail.gmail.com>
-References: <CAC13JXaE0H8xh2rX2c+-x-c0jUGV+nKMuoG3Kg+8ZKj-TKTsFQ@mail.gmail.com>
- <5409299C.4090801@ubuntukylin.com>
+From: Alexandre DERUMIER <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
+Subject: Re: Ceph Day Paris Schedule Posted
+Date: Fri, 05 Sep 2014 08:12:13 +0200 (CEST)
+Message-ID: <fd9d6d7a-0e12-4420-80f8-8c0d87ce3f79@mailpro>
+References: <CAP8Oy=JZHT0Oi1Sf_ACq+zPOAUuiDXmbRgXkGTKzq7j+9MUVkw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f45.google.com ([209.85.215.45]:35307 "EHLO
-	mail-la0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754844AbaIEDud (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 4 Sep 2014 23:50:33 -0400
-Received: by mail-la0-f45.google.com with SMTP id pn19so13104188lab.18
-        for <ceph-devel@vger.kernel.org>; Thu, 04 Sep 2014 20:50:31 -0700 (PDT)
-In-Reply-To: <5409299C.4090801@ubuntukylin.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Li Wang <liwang@ubuntukylin.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAP8Oy=JZHT0Oi1Sf_ACq+zPOAUuiDXmbRgXkGTKzq7j+9MUVkw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Patrick McGarry <patrick-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Cc: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, Ceph User Committee <ceph-community-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi Wang,
-
-Thanks for replying!
-
-If it is undergoing reviewing process, then can I also join for the
-code reviewing so I can get some sense about how to contribute?
-
-I also would like to contribute for other optimizations on RBD. I saw
-a three-year old thread
-(http://marc.info/?l=ceph-devel&m=129867273303846&q=raw) regarding the
-optimizations in RBD layering, and am wondering what is the current
-status for those optimizations mentioned. Maybe I can take a look on
-those topics.
-
-Thanks!
-Cheng
-
-> On Sep 4, 2014, at 11:10 PM, Li Wang <liwang@ubuntukylin.com> wrote:
->
-> This feature has been done and currently undergoing review
-> with its 3rd version. Nevertheless, we are pleasure to give any help.
-> BTW, Sage, Could you please take a little bit time to review the patch
-> we submitted one month ago.
->
-> Cheers,
-> Li Wang
->
->> On 2014/9/5 10:39, Cheng Cheng wrote:
->> Hi Ceph Developers,
->>
->> I am just starting to use Ceph and find it is a great platform for
->> hosting VM storage.
->>
->> As I want to dive further and learn more about Ceph, I want to take a
->> starter task to familiarize myself with Ceph codebase. In particular,
->> I found this copy-on-read is an interesting task
->> (https://wiki.ceph.com/Planning/Sideboard/rbd%3A_copy-on-read_for_clones).
->>
->> However I find it is hard to get my hands dirty without mentorship. So
->> I am wondering can anyone give me some bootstrap about how to
->> contribute to Ceph and how to setup developing environment?
->>
->> Any help would be greatly appreciated!
->>
->> Sincerely,
->> Cheng
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+SSB3YXMgd2FpdGluZyBmb3IgdGhlIHNjaGVkdWxlLCB0b3BpY3Mgc2VlbSB0byBiZSBpbnRlcmVz
+dGluZy4KCkknbSBnb2luZyB0byByZWdpc3RlciBub3cgOikKCkJUVywgYXJlIHRoZSBzcGVlY2hl
+cyBpbiBmcmVuY2ggb3IgZW5nbGlzaD8gKEFzIEkgc2VlIGxvaWMsc2ViYXN0aWFuIGFuZCB5YW5u
+IGFzIHNwZWFrZXJzKQoKLS0tLS0gTWFpbCBvcmlnaW5hbCAtLS0tLQoKRGU6ICJQYXRyaWNrIE1j
+R2FycnkiIDxwYXRyaWNrQGlua3RhbmsuY29tPgrDgDogIkNlcGggRGV2ZWwiIDxjZXBoLWRldmVs
+QHZnZXIua2VybmVsLm9yZz4sICJDZXBoLVVzZXIiIDxjZXBoLXVzZXJzQGNlcGguY29tPiwgIkNl
+cGggVXNlciBDb21taXR0ZWUiIDxjZXBoLWNvbW11bml0eUBsaXN0cy5jZXBoLmNvbT4KRW52b3nD
+qTogSmV1ZGkgNCBTZXB0ZW1icmUgMjAxNCAxODozOTo0NwpPYmpldDogW2NlcGgtdXNlcnNdIENl
+cGggRGF5IFBhcmlzIFNjaGVkdWxlIFBvc3RlZAoKSGV5IGFsbCwKClRoZSBzY2hlZHVsZSBmb3Ig
+Q2VwaCBEYXkgUGFyaXMgaGFzIGp1c3QgYmVlbiBmaW5hbGl6ZWQgYW5kIHBvc3RlZC4KTG9va3Mg
+bGlrZSB3ZSBoYXZlIGFub3RoZXIgZ3JlYXQgbGluZXVwIG9mIHNwZWFrZXJzIChhbmQgc29tZQpu
+ZXZlci1iZWZvcmUtc2VlbiB0b3BpY3MpIHNvIGlmIHlvdSBhcmUgYW55d2hlcmUgY2xvc2UgdG8g
+UGFyaXMgb24gMTgKU2VwLCB5b3Ugc2hvdWxkIGRlZmluaXRlbHkgc2lnbiB1cCBzb29uIQoKaHR0
+cDovL2NlcGguY29tL2NlcGhkYXlzL3BhcmlzLwoKSWYgeW91IGFyZSBhIGNvbnRyaWJ1dG9yIGFu
+ZCB3b3VsZCBsaWtlIGRpc2NvdW50ZWQgYWRtaXNzaW9uIHBsZWFzZQpsZXQgbWUga25vdywgSSdk
+IGJlIGhhcHB5IHRvIGdpdmUgeW91IGEgY29kZSBmb3IgdGhlIEV2ZW50YnJpdGUKc2lnbnVwLiBU
+aGFua3MhCgoKQmVzdCBSZWdhcmRzLAoKUGF0cmljayBNY0dhcnJ5CkRpcmVjdG9yIENlcGggQ29t
+bXVuaXR5IHx8IFJlZCBIYXQKaHR0cDovL2NlcGguY29tIHx8IGh0dHA6Ly9jb21tdW5pdHkucmVk
+aGF0LmNvbQpAc2N1dHRsZW1vbmtleSB8fCBAY2VwaApfX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJz
+QGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11
+c2Vycy1jZXBoLmNvbQpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fXwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0
+dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
