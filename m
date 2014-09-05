@@ -1,65 +1,45 @@
-From: Janne Grunau <j@jannau.net>
-Subject: Re: ARM NEON optimisations for gf-complete/jerasure/ceph-erasure
-Date: Fri, 5 Sep 2014 09:51:30 +0200
-Message-ID: <20140905075130.GM2591@jannau.net>
-References: <20140904144237.GK2591@jannau.net>
- <54088C03.10900@dachary.org>
- <CAMMD=N2GhtqrJvayV2WB7nmWPhV=ygcxrk555xFSx0gAMJQg-g@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Ilya Dryomov <ilya.dryomov@inktank.com>
+Subject: [PATCH 0/2] libceph: #8806 fix (wip-watch-tid-8806)
+Date: Fri,  5 Sep 2014 12:42:44 +0400
+Message-ID: <1409906566-5662-1-git-send-email-ilya.dryomov@inktank.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from soltyk.jannau.net ([185.27.253.110]:43906 "EHLO
-	soltyk.jannau.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751641AbaIEHvc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Sep 2014 03:51:32 -0400
-Content-Disposition: inline
-In-Reply-To: <CAMMD=N2GhtqrJvayV2WB7nmWPhV=ygcxrk555xFSx0gAMJQg-g@mail.gmail.com>
+Received: from mail-wi0-f173.google.com ([209.85.212.173]:55721 "EHLO
+	mail-wi0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755840AbaIEImu (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Sep 2014 04:42:50 -0400
+Received: by mail-wi0-f173.google.com with SMTP id cc10so405628wib.12
+        for <ceph-devel@vger.kernel.org>; Fri, 05 Sep 2014 01:42:49 -0700 (PDT)
+Received: from localhost ([109.110.66.113])
+        by mx.google.com with ESMTPSA id u5sm1207281wia.17.2014.09.05.01.42.47
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=RC4-SHA bits=128/128);
+        Fri, 05 Sep 2014 01:42:48 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: elm@cs.ucsc.edu
-Cc: Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>, Kevin Greenan <kmgreen2@gmail.com>, Ethan Miller <elm@soe.ucsc.edu>
+To: ceph-devel@vger.kernel.org
 
-Hi,
+Hello,
 
-On 2014-09-04 17:27:16 -0700, Ethan L. Miller wrote:
-> Yes, it's possible to use CPU flags to allow the use of advanced
-> instruction sets automatically.
+This is a fix for #8806 ("libceph: must use new tid when watch is
+resent").  (This problem has been fixed in userspace with commit
+5dd68b95b1d2ac0e4972609ca497d4cff28ef351.)
 
-runtime detection of supported instructions sets is with the current 
-function pointer approach possible too.
+I have tested with pre-"make notify return error code on timeout
+(#9193)" and current master - the current master propagates the notify
+error, yay!
 
->  The difficulty is that, if those
-> instructions aren't available, it's not clear which of the "basic"
-> approaches to use, since performance can vary based on a lot of
-> factors.  Even with advanced instructions, there are often multiple
-> reasonable approaches to take, as Janne's email makes clear, so it's
-> impossible to say "this algorithm is always best".
+Thanks,
 
-I agree that the current approach fits the model of implementations with 
-different cpu/memory use better. Using ifunc would be mostly orthogonal 
-to the issue of badly structured code.
- 
-> We can certainly set up a default approach if we want, though, that
-> can be overridden by compile-time flags.
+                Ilya
 
-I don't think this would be an improvement.
 
-> Incidentally, I'm starting to work on coding a version of gf-complete
-> (and associated erasure coding functions) in C++ using templates,
-> which will hopefully allow us to better separate out different
-> implementations.  We could still have run-time dispatch for the
-> desired routines, but templates should allow for more compact code and
-> better isolation of architecture-specific code.  The big drawback is
-> that C++ code isn't typically used in the kernel....
+Ilya Dryomov (2):
+  libceph: abstract out ceph_osd_request enqueue logic
+  libceph: resend lingering requests with a new tid
 
-One possible simplification for the carry less multiplication would be 
-relying on inlining and optimisations of compile time constants.  
+ net/ceph/osd_client.c |   96 +++++++++++++++++++++++++++++++++++--------------
+ 1 file changed, 69 insertions(+), 27 deletions(-)
 
-Implement one function which does a variable number of polynomial 
-reductions. The current functions would then just be thin wrappers which 
-call the general function with a compile time constant for the number of 
-reductions. Forced inlining and dead code removal will optimize branches 
-away. The same method could be used to avoid the duplication of the 
-inner loop for the optional xor with the destination.
+-- 
+1.7.10.4
 
-Janne
