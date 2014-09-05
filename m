@@ -1,46 +1,52 @@
-From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: [PATCH] libceph: select CRYPTO_CBC in addition to CRYPTO_AES
-Date: Fri,  5 Sep 2014 20:32:14 +0400
-Message-ID: <1409934734-9010-1-git-send-email-ilya.dryomov@inktank.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: ErasureCodeIsa table cache
+Date: Fri, 05 Sep 2014 23:40:51 +0200
+Message-ID: <540A2DE3.1060408@dachary.org>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="h4ok8jIdvBkgA45rcWDwMQ3AXDoXgP7gO"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f50.google.com ([209.85.215.50]:43544 "EHLO
-	mail-la0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751672AbaIEQcS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Sep 2014 12:32:18 -0400
-Received: by mail-la0-f50.google.com with SMTP id mc6so14311042lab.9
-        for <ceph-devel@vger.kernel.org>; Fri, 05 Sep 2014 09:32:17 -0700 (PDT)
-Received: from localhost ([109.110.66.113])
-        by mx.google.com with ESMTPSA id cq4sm849326lad.10.2014.09.05.09.32.15
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=RC4-SHA bits=128/128);
-        Fri, 05 Sep 2014 09:32:16 -0700 (PDT)
+Received: from mail2.dachary.org ([91.121.57.175]:45981 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752312AbaIEVk6 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Sep 2014 17:40:58 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Andreas-Joachim Peters <andreas.joachim.peters@cern.ch>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-We want "cbc(aes)" algorithm, so select CRYPTO_CBC too, not just
-CRYPTO_AES.  Otherwise on !CRYPTO_CBC kernels we fail rbd map/mount
-with
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--h4ok8jIdvBkgA45rcWDwMQ3AXDoXgP7gO
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-    libceph: error -2 building auth method x request
+Hi Andreas,
 
-Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
----
- net/ceph/Kconfig |    1 +
- 1 file changed, 1 insertion(+)
+I just created a ticket to track the work you've done http://tracker.ceph=
+=2Ecom/issues/9367 and re-opened the pull request that I inadvertently cl=
+osed by pushing a branch of the same name in the ceph repository https://=
+github.com/ceph/ceph/pull/2409. Please accept my apologies for the confus=
+ion.=20
 
-diff --git a/net/ceph/Kconfig b/net/ceph/Kconfig
-index e50cc69ae8ca..f8cceb99e732 100644
---- a/net/ceph/Kconfig
-+++ b/net/ceph/Kconfig
-@@ -3,6 +3,7 @@ config CEPH_LIB
- 	depends on INET
- 	select LIBCRC32C
- 	select CRYPTO_AES
-+	select CRYPTO_CBC
- 	select CRYPTO
- 	select KEYS
- 	default n
--- 
-1.7.10.4
+Cheers
 
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+
+
+--h4ok8jIdvBkgA45rcWDwMQ3AXDoXgP7gO
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlQKLeMACgkQ8dLMyEl6F23pKgCfYX3tPziU6Bb0Vz3QmNeYBtc3
+kH0An0opungQ/PXgfO6w/Vn3Y8GQjnQl
+=jFIg
+-----END PGP SIGNATURE-----
+
+--h4ok8jIdvBkgA45rcWDwMQ3AXDoXgP7gO--
