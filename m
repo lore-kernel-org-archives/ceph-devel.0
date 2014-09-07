@@ -1,89 +1,83 @@
-From: Milosz Tanski <milosz@adfin.com>
-Subject: Re: Storing cls and erasure code plugins in a pool
-Date: Sun, 7 Sep 2014 09:38:50 -0400
-Message-ID: <CANP1eJG=5bDx3JeFNfUgfq7TCS7QvKnAsXD+=XzcJK2vm-Uyxg@mail.gmail.com>
-References: <540C169C.9030603@dachary.org>
+From: Ilya Dryomov <ilya.dryomov@inktank.com>
+Subject: Re: [PATCH] libceph: fix a use after free issue in osdmap_set_max_osd
+Date: Sun, 7 Sep 2014 18:27:07 +0400
+Message-ID: <CALFYKtAEihrOd0WEiNk3iA9ev4EXEuTfAEAQYgveSHPeF7Jifg@mail.gmail.com>
+References: <1410084652-23031-1-git-send-email-roy.qing.li@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f48.google.com ([209.85.215.48]:55570 "EHLO
-	mail-la0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752082AbaIGNiw convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 7 Sep 2014 09:38:52 -0400
-Received: by mail-la0-f48.google.com with SMTP id ty20so4172347lab.35
-        for <ceph-devel@vger.kernel.org>; Sun, 07 Sep 2014 06:38:51 -0700 (PDT)
-In-Reply-To: <540C169C.9030603@dachary.org>
+Received: from mail-qc0-f171.google.com ([209.85.216.171]:41761 "EHLO
+	mail-qc0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752310AbaIGO1I (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 7 Sep 2014 10:27:08 -0400
+Received: by mail-qc0-f171.google.com with SMTP id x3so14713678qcv.30
+        for <ceph-devel@vger.kernel.org>; Sun, 07 Sep 2014 07:27:07 -0700 (PDT)
+In-Reply-To: <1410084652-23031-1-git-send-email-roy.qing.li@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: roy.qing.li@gmail.com
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>
 
-If you're planning on having plugins that are not shipped with the
-host software you have to worry about both API and ABI stability.
-Traditionally (and in my personal experience) keeping a C++ ABI
-compatible is hard. For those reasons, I would strongly campaign for
-having the plugins interface be in C (or et least their interface
-would be C linkage).
-
-Otherwise here's some things you can read read about C++ ABI stability
-(from the KDE people):
-https://techbase.kde.org/Policies/Binary_Compatibility_Issues_With_C++
-
-This are my 2 cents based on my past experience.
-
-On Sun, Sep 7, 2014 at 4:26 AM, Loic Dachary <loic@dachary.org> wrote:
-> Hi Ceph,
+On Sun, Sep 7, 2014 at 2:10 PM,  <roy.qing.li@gmail.com> wrote:
+> From: Li RongQing <roy.qing.li@gmail.com>
 >
-> There is a need for a cluster to share code such as cls https://githu=
-b.com/ceph/ceph/tree/master/src/cls or erasure code plugins https://git=
-hub.com/ceph/ceph/tree/master/src/erasure-code/.
+> If the state variable is krealloced successfully, map->osd_state will be
+> freed, once following two reallocation failed, and exit the function
+> without resetting map->osd_state, map->osd_state become a wild pointer.
 >
-> These plugins could have a life cycle independent of Ceph, as long as=
- they comply to the supported API ( https://github.com/ceph/ceph/blob/m=
-aster/src/erasure-code/ErasureCodeInterface.h ). For erasure code plugi=
-ns it currently works this way (or it will as soon as https://github.co=
-m/ceph/ceph/pull/2397 is merged):
+> fix it by resetting them after krealloc successfully.
 >
-> a) upgrade from Hammer to I* half the OSD nodes. The new I* have new =
-erasure code plugins
-> b) the MON will refuse to create an erasure coded pool using the new =
-I* plugins, otherwise the Hammer nodes will find themselves unable to p=
-articipate in the pool
+> Signed-off-by: Li RongQing <roy.qing.li@gmail.com>
+> ---
+>  net/ceph/osdmap.c |   20 ++++++++++----------
+>  1 file changed, 10 insertions(+), 10 deletions(-)
 >
-> Instead it could work this way:
+> diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
+> index c547e46..81e9c66 100644
+> --- a/net/ceph/osdmap.c
+> +++ b/net/ceph/osdmap.c
+> @@ -671,15 +671,19 @@ static int osdmap_set_max_osd(struct ceph_osdmap *map, int max)
+>         int i;
 >
-> a) upgrade from Hammer to I* half the OSD nodes. The new I* have new =
-erasure code plugins
-> b) the new erasure code plugins are uploaded to a "plugins" pool
-> c) an erasure coded pool is created using a new plugin from I*
-> d) the Hammer OSD downloads the plugin from the pool and can particip=
-ate in the pool
+>         state = krealloc(map->osd_state, max*sizeof(*state), GFP_NOFS);
+> +       if (!state)
+> +               return -ENOMEM;
+> +       map->osd_state = state;
+> +
+>         weight = krealloc(map->osd_weight, max*sizeof(*weight), GFP_NOFS);
+> -       addr = krealloc(map->osd_addr, max*sizeof(*addr), GFP_NOFS);
+> -       if (!state || !weight || !addr) {
+> -               kfree(state);
+> -               kfree(weight);
+> -               kfree(addr);
+> +       if (!weight)
+> +               return -ENOMEM;
+> +       map->osd_weight = weight;
 >
-> It is easier said than done and there are a lot of details to conside=
-r. However it not different from maintaining an Operating System that i=
-ncludes shared libraries and the path to do so properly is well known.
+> +       addr = krealloc(map->osd_addr, max*sizeof(*addr), GFP_NOFS);
+> +       if (!addr)
+>                 return -ENOMEM;
+> -       }
+> +       map->osd_addr = addr;
 >
-> Thoughts ?
+>         for (i = map->max_osd; i < max; i++) {
+>                 state[i] = 0;
+> @@ -687,10 +691,6 @@ static int osdmap_set_max_osd(struct ceph_osdmap *map, int max)
+>                 memset(addr + i, 0, sizeof(*addr));
+>         }
 >
-> Cheers
+> -       map->osd_state = state;
+> -       map->osd_weight = weight;
+> -       map->osd_addr = addr;
+> -
+>         if (map->osd_primary_affinity) {
+>                 u32 *affinity;
 >
 > --
-> Lo=C3=AFc Dachary, Artisan Logiciel Libre
->
+> 1.7.10.4
 
+Looks good.  I'll apply it tomorrow.
 
+Thanks,
 
---=20
-Milosz Tanski
-CTO
-16 East 34th Street, 15th floor
-New York, NY 10016
-
-p: 646-253-9055
-e: milosz@adfin.com
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+                Ilya
