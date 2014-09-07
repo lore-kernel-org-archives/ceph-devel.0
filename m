@@ -1,83 +1,113 @@
-From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: Re: [PATCH] libceph: fix a use after free issue in osdmap_set_max_osd
-Date: Sun, 7 Sep 2014 18:27:07 +0400
-Message-ID: <CALFYKtAEihrOd0WEiNk3iA9ev4EXEuTfAEAQYgveSHPeF7Jifg@mail.gmail.com>
-References: <1410084652-23031-1-git-send-email-roy.qing.li@gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Storing cls and erasure code plugins in a pool
+Date: Sun, 07 Sep 2014 18:13:20 +0200
+Message-ID: <540C8420.7020103@dachary.org>
+References: <540C169C.9030603@dachary.org> <CANP1eJG=5bDx3JeFNfUgfq7TCS7QvKnAsXD+=XzcJK2vm-Uyxg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="tnp5U1DWbe93UdLLbhK8mI6BT21X5UT2U"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f171.google.com ([209.85.216.171]:41761 "EHLO
-	mail-qc0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752310AbaIGO1I (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 7 Sep 2014 10:27:08 -0400
-Received: by mail-qc0-f171.google.com with SMTP id x3so14713678qcv.30
-        for <ceph-devel@vger.kernel.org>; Sun, 07 Sep 2014 07:27:07 -0700 (PDT)
-In-Reply-To: <1410084652-23031-1-git-send-email-roy.qing.li@gmail.com>
+Received: from mail2.dachary.org ([91.121.57.175]:46791 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752538AbaIGQN1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 7 Sep 2014 12:13:27 -0400
+In-Reply-To: <CANP1eJG=5bDx3JeFNfUgfq7TCS7QvKnAsXD+=XzcJK2vm-Uyxg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: roy.qing.li@gmail.com
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>
+To: Milosz Tanski <milosz@adfin.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Sun, Sep 7, 2014 at 2:10 PM,  <roy.qing.li@gmail.com> wrote:
-> From: Li RongQing <roy.qing.li@gmail.com>
->
-> If the state variable is krealloced successfully, map->osd_state will be
-> freed, once following two reallocation failed, and exit the function
-> without resetting map->osd_state, map->osd_state become a wild pointer.
->
-> fix it by resetting them after krealloc successfully.
->
-> Signed-off-by: Li RongQing <roy.qing.li@gmail.com>
-> ---
->  net/ceph/osdmap.c |   20 ++++++++++----------
->  1 file changed, 10 insertions(+), 10 deletions(-)
->
-> diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
-> index c547e46..81e9c66 100644
-> --- a/net/ceph/osdmap.c
-> +++ b/net/ceph/osdmap.c
-> @@ -671,15 +671,19 @@ static int osdmap_set_max_osd(struct ceph_osdmap *map, int max)
->         int i;
->
->         state = krealloc(map->osd_state, max*sizeof(*state), GFP_NOFS);
-> +       if (!state)
-> +               return -ENOMEM;
-> +       map->osd_state = state;
-> +
->         weight = krealloc(map->osd_weight, max*sizeof(*weight), GFP_NOFS);
-> -       addr = krealloc(map->osd_addr, max*sizeof(*addr), GFP_NOFS);
-> -       if (!state || !weight || !addr) {
-> -               kfree(state);
-> -               kfree(weight);
-> -               kfree(addr);
-> +       if (!weight)
-> +               return -ENOMEM;
-> +       map->osd_weight = weight;
->
-> +       addr = krealloc(map->osd_addr, max*sizeof(*addr), GFP_NOFS);
-> +       if (!addr)
->                 return -ENOMEM;
-> -       }
-> +       map->osd_addr = addr;
->
->         for (i = map->max_osd; i < max; i++) {
->                 state[i] = 0;
-> @@ -687,10 +691,6 @@ static int osdmap_set_max_osd(struct ceph_osdmap *map, int max)
->                 memset(addr + i, 0, sizeof(*addr));
->         }
->
-> -       map->osd_state = state;
-> -       map->osd_weight = weight;
-> -       map->osd_addr = addr;
-> -
->         if (map->osd_primary_affinity) {
->                 u32 *affinity;
->
-> --
-> 1.7.10.4
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--tnp5U1DWbe93UdLLbhK8mI6BT21X5UT2U
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 
-Looks good.  I'll apply it tomorrow.
 
-Thanks,
 
-                Ilya
+On 07/09/2014 15:38, Milosz Tanski wrote:
+> If you're planning on having plugins that are not shipped with the
+> host software you have to worry about both API and ABI stability.
+> Traditionally (and in my personal experience) keeping a C++ ABI
+> compatible is hard. For those reasons, I would strongly campaign for
+> having the plugins interface be in C (or et least their interface
+> would be C linkage).
+
+Hi Milosz,
+
+That's a good point indeed.
+
+> Otherwise here's some things you can read read about C++ ABI stability
+> (from the KDE people):
+> https://techbase.kde.org/Policies/Binary_Compatibility_Issues_With_C++
+
+Thanks, I did not even think C++ ABI compatibility was possible at all ;-=
+) The web site is down at the moment but I'll take a look.
+
+Cheers
+
+>=20
+> This are my 2 cents based on my past experience.
+>=20
+> On Sun, Sep 7, 2014 at 4:26 AM, Loic Dachary <loic@dachary.org> wrote:
+>> Hi Ceph,
+>>
+>> There is a need for a cluster to share code such as cls https://github=
+=2Ecom/ceph/ceph/tree/master/src/cls or erasure code plugins https://gith=
+ub.com/ceph/ceph/tree/master/src/erasure-code/.
+>>
+>> These plugins could have a life cycle independent of Ceph, as long as =
+they comply to the supported API ( https://github.com/ceph/ceph/blob/mast=
+er/src/erasure-code/ErasureCodeInterface.h ). For erasure code plugins it=
+ currently works this way (or it will as soon as https://github.com/ceph/=
+ceph/pull/2397 is merged):
+>>
+>> a) upgrade from Hammer to I* half the OSD nodes. The new I* have new e=
+rasure code plugins
+>> b) the MON will refuse to create an erasure coded pool using the new I=
+* plugins, otherwise the Hammer nodes will find themselves unable to part=
+icipate in the pool
+>>
+>> Instead it could work this way:
+>>
+>> a) upgrade from Hammer to I* half the OSD nodes. The new I* have new e=
+rasure code plugins
+>> b) the new erasure code plugins are uploaded to a "plugins" pool
+>> c) an erasure coded pool is created using a new plugin from I*
+>> d) the Hammer OSD downloads the plugin from the pool and can participa=
+te in the pool
+>>
+>> It is easier said than done and there are a lot of details to consider=
+=2E However it not different from maintaining an Operating System that in=
+cludes shared libraries and the path to do so properly is well known.
+>>
+>> Thoughts ?
+>>
+>> Cheers
+>>
+>> --
+>> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>>
+>=20
+>=20
+>=20
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--tnp5U1DWbe93UdLLbhK8mI6BT21X5UT2U
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlQMhCAACgkQ8dLMyEl6F23DTwCgpBA7uZM8x+w4fxhZxiIdVbhe
+K1sAn0ylkzF0fqvaI4mdHDYke5nl3Ra1
+=emIl
+-----END PGP SIGNATURE-----
+
+--tnp5U1DWbe93UdLLbhK8mI6BT21X5UT2U--
