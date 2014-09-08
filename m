@@ -1,106 +1,93 @@
-From: Gregory Farnum <greg@inktank.com>
+From: "Johnu George (johnugeo)" <johnugeo@cisco.com>
 Subject: Re: ceph data locality
-Date: Mon, 8 Sep 2014 12:51:06 -0700
-Message-ID: <CAPYLRzgUfXDOF3g4pHVT_+=smeCr1iUY=_WeGYSKqNngZSQPgQ@mail.gmail.com>
+Date: Mon, 8 Sep 2014 22:53:56 +0000
+Message-ID: <D033671F.70A%johnugeo@cisco.com>
 References: <D02D591B.57E%johnugeo@cisco.com>
-	<D02D5C36.583%johnugeo@cisco.com>
-	<D02D5FAE.58B%johnugeo@cisco.com>
-	<CANP1eJH97O+B_rGYKbLJvpu_hLvfUj+vs-UrrBrQuTwEjxfiOQ@mail.gmail.com>
+ <D02D5C36.583%johnugeo@cisco.com> <D02D5FAE.58B%johnugeo@cisco.com>
+ <CANP1eJH97O+B_rGYKbLJvpu_hLvfUj+vs-UrrBrQuTwEjxfiOQ@mail.gmail.com>
+ <CAPYLRzgUfXDOF3g4pHVT_+=smeCr1iUY=_WeGYSKqNngZSQPgQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="euc-kr"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f170.google.com ([209.85.216.170]:43355 "EHLO
-	mail-qc0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754246AbaIHTvH convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Sep 2014 15:51:07 -0400
-Received: by mail-qc0-f170.google.com with SMTP id r5so16630168qcx.1
-        for <ceph-devel@vger.kernel.org>; Mon, 08 Sep 2014 12:51:07 -0700 (PDT)
-In-Reply-To: <CANP1eJH97O+B_rGYKbLJvpu_hLvfUj+vs-UrrBrQuTwEjxfiOQ@mail.gmail.com>
+Received: from alln-iport-5.cisco.com ([173.37.142.92]:55829 "EHLO
+	alln-iport-5.cisco.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755047AbaIHWx5 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Sep 2014 18:53:57 -0400
+In-Reply-To: <CAPYLRzgUfXDOF3g4pHVT_+=smeCr1iUY=_WeGYSKqNngZSQPgQ@mail.gmail.com>
+Content-Language: en-US
+Content-ID: <4602DF689B9B4B4487179C1C4276B8D9@emea.cisco.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Milosz Tanski <milosz@adfin.com>
+To: Gregory Farnum <greg@inktank.com>, Milosz Tanski <milosz@adfin.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, Sep 4, 2014 at 12:16 AM, Johnu George (johnugeo)
-<johnugeo@cisco.com> wrote:
-> Hi All,
->         I was reading more on Hadoop over ceph. I heard from Noah tha=
-t
-> tuning of Hadoop on Ceph is going on. I am just curious to know if th=
-ere
-> is any reason to keep default object size as 64MB. Is it because of t=
-he
-> fact that it becomes difficult to encode
->  getBlockLocations if blocks are divided into objects and to choose t=
-he
-> best location for tasks if no nodes in the system has a complete bloc=
-k.?
-
-We used 64MB because it's the HDFS default and in some *very* stupid
-tests it seemed to be about the fastest. You could certainly make it
-smaller if you wanted, and it would probably work to multiply it by
-2-4x, but then you're using bigger objects than most people do.
-
-> I see that Ceph doesn=C2=B9t place objects considering the client loc=
-ation or
-> distance between client and the osds where data is stored.(data-local=
-ity)
-> While, data locality is the key idea for HDFS block placement and
-> retrieval for maximum throughput. So, how does ceph plan to perform b=
-etter
-> than HDFS as ceph relies on random placement
->  using hashing unlike HDFS block placement? Can someone also point ou=
-t
-> some performance results comparing ceph random placements vs hdfs loc=
-ality
-> aware placement?
-
-I don't think we have any serious performance results; there hasn't
-been enough focus on productizing it for that kind of work.
-Anecdotally I've seen people on social media claim that it's as fast
-or even many times faster than HDFS (I suspect if it's many times
-faster they had a misconfiguration somewhere in HDFS, though!).
-In any case, Ceph has two plans for being faster than HDFS:
-1) big users indicate that always writing locally is often a mistake
-and it tends to overfill certain nodes within your cluster. Plus,
-networks are much faster now so it doesn't cost as much to write over
-it, and Ceph *does* export locations so the follow-up jobs can be
-scheduled appropriately.
-
->
-> Also, Sage wrote about a way to specify a node to be primary for hado=
-op
-> like environments.
-> (http://comments.gmane.org/gmane.comp.file-systems.ceph.devel/1548 ) =
-Is
-> this through primary affinity configuration?
-
-That mechanism ("preferred" PGs) is dead. Primary affinity is a
-completely different thing.
-
-
-On Thu, Sep 4, 2014 at 8:59 AM, Milosz Tanski <milosz@adfin.com> wrote:
-> QFS unlike Ceph places the erasure coding logic inside of the client
-> so it's not a apples-to-apples comparison. but I think you get my
-> point, and it would be possible to implement a rich Ceph
-> (filesystem/hadoop) client like this as well.
->
-> In summary, if Hadoop on Ceph is a major priority I think it would be
-> best to "borrow" the good ideas for QFS and implement them in Hadoop
-> Ceph filesystem and Ceph it self (letting a smart client get chunks
-> directly, write chunks directly). I don't doubt that it's a lot of
-> work but the results might be worth it in in terms of performance you
-> get for the cost.
-
-Unfortunately implementing CephFS on top of RADOS' EC pools is going
-to be a major project which we haven't done anything to scope out yet,
-so it's going to be a while before that's really an option. But it is
-a "real" filesystem, so we still have that going for us. ;)
--Greg
-Software Engineer #42 @ http://inktank.com | http://ceph.com
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SGkgR3JlZywNCiAgICAgICBUaGFua3MuIENhbiB5b3UgZXhwbGFpbiBtb3JlIG9uICJDZXBoICpk
+b2VzKiBleHBvcnQgbG9jYXRpb25zIHNvDQp0aGUgZm9sbG93LXVwIGpvYnMgY2FuIGJlIHNjaGVk
+dWxlZCBhcHByb3ByaWF0ZWx5obE/DQoNClRoYW5rcywNCkpvaG51DQoNCg0KT24gOS84LzE0LCAx
+Mjo1MSBQTSwgIkdyZWdvcnkgRmFybnVtIiA8Z3JlZ0Bpbmt0YW5rLmNvbT4gd3JvdGU6DQoNCj5P
+biBUaHUsIFNlcCA0LCAyMDE0IGF0IDEyOjE2IEFNLCBKb2hudSBHZW9yZ2UgKGpvaG51Z2VvKQ0K
+Pjxqb2hudWdlb0BjaXNjby5jb20+IHdyb3RlOg0KPj4gSGkgQWxsLA0KPj4gICAgICAgICBJIHdh
+cyByZWFkaW5nIG1vcmUgb24gSGFkb29wIG92ZXIgY2VwaC4gSSBoZWFyZCBmcm9tIE5vYWggdGhh
+dA0KPj4gdHVuaW5nIG9mIEhhZG9vcCBvbiBDZXBoIGlzIGdvaW5nIG9uLiBJIGFtIGp1c3QgY3Vy
+aW91cyB0byBrbm93IGlmIHRoZXJlDQo+PiBpcyBhbnkgcmVhc29uIHRvIGtlZXAgZGVmYXVsdCBv
+YmplY3Qgc2l6ZSBhcyA2NE1CLiBJcyBpdCBiZWNhdXNlIG9mIHRoZQ0KPj4gZmFjdCB0aGF0IGl0
+IGJlY29tZXMgZGlmZmljdWx0IHRvIGVuY29kZQ0KPj4gIGdldEJsb2NrTG9jYXRpb25zIGlmIGJs
+b2NrcyBhcmUgZGl2aWRlZCBpbnRvIG9iamVjdHMgYW5kIHRvIGNob29zZSB0aGUNCj4+IGJlc3Qg
+bG9jYXRpb24gZm9yIHRhc2tzIGlmIG5vIG5vZGVzIGluIHRoZSBzeXN0ZW0gaGFzIGEgY29tcGxl
+dGUgYmxvY2suPw0KPg0KPldlIHVzZWQgNjRNQiBiZWNhdXNlIGl0J3MgdGhlIEhERlMgZGVmYXVs
+dCBhbmQgaW4gc29tZSAqdmVyeSogc3R1cGlkDQo+dGVzdHMgaXQgc2VlbWVkIHRvIGJlIGFib3V0
+IHRoZSBmYXN0ZXN0LiBZb3UgY291bGQgY2VydGFpbmx5IG1ha2UgaXQNCj5zbWFsbGVyIGlmIHlv
+dSB3YW50ZWQsIGFuZCBpdCB3b3VsZCBwcm9iYWJseSB3b3JrIHRvIG11bHRpcGx5IGl0IGJ5DQo+
+Mi00eCwgYnV0IHRoZW4geW91J3JlIHVzaW5nIGJpZ2dlciBvYmplY3RzIHRoYW4gbW9zdCBwZW9w
+bGUgZG8uDQo+DQo+PiBJIHNlZSB0aGF0IENlcGggZG9lc26p9nQgcGxhY2Ugb2JqZWN0cyBjb25z
+aWRlcmluZyB0aGUgY2xpZW50IGxvY2F0aW9uIG9yDQo+PiBkaXN0YW5jZSBiZXR3ZWVuIGNsaWVu
+dCBhbmQgdGhlIG9zZHMgd2hlcmUgZGF0YSBpcw0KPj5zdG9yZWQuKGRhdGEtbG9jYWxpdHkpDQo+
+PiBXaGlsZSwgZGF0YSBsb2NhbGl0eSBpcyB0aGUga2V5IGlkZWEgZm9yIEhERlMgYmxvY2sgcGxh
+Y2VtZW50IGFuZA0KPj4gcmV0cmlldmFsIGZvciBtYXhpbXVtIHRocm91Z2hwdXQuIFNvLCBob3cg
+ZG9lcyBjZXBoIHBsYW4gdG8gcGVyZm9ybQ0KPj5iZXR0ZXINCj4+IHRoYW4gSERGUyBhcyBjZXBo
+IHJlbGllcyBvbiByYW5kb20gcGxhY2VtZW50DQo+PiAgdXNpbmcgaGFzaGluZyB1bmxpa2UgSERG
+UyBibG9jayBwbGFjZW1lbnQ/IENhbiBzb21lb25lIGFsc28gcG9pbnQgb3V0DQo+PiBzb21lIHBl
+cmZvcm1hbmNlIHJlc3VsdHMgY29tcGFyaW5nIGNlcGggcmFuZG9tIHBsYWNlbWVudHMgdnMgaGRm
+cw0KPj5sb2NhbGl0eQ0KPj4gYXdhcmUgcGxhY2VtZW50Pw0KPg0KPkkgZG9uJ3QgdGhpbmsgd2Ug
+aGF2ZSBhbnkgc2VyaW91cyBwZXJmb3JtYW5jZSByZXN1bHRzOyB0aGVyZSBoYXNuJ3QNCj5iZWVu
+IGVub3VnaCBmb2N1cyBvbiBwcm9kdWN0aXppbmcgaXQgZm9yIHRoYXQga2luZCBvZiB3b3JrLg0K
+PkFuZWNkb3RhbGx5IEkndmUgc2VlbiBwZW9wbGUgb24gc29jaWFsIG1lZGlhIGNsYWltIHRoYXQg
+aXQncyBhcyBmYXN0DQo+b3IgZXZlbiBtYW55IHRpbWVzIGZhc3RlciB0aGFuIEhERlMgKEkgc3Vz
+cGVjdCBpZiBpdCdzIG1hbnkgdGltZXMNCj5mYXN0ZXIgdGhleSBoYWQgYSBtaXNjb25maWd1cmF0
+aW9uIHNvbWV3aGVyZSBpbiBIREZTLCB0aG91Z2ghKS4NCj5JbiBhbnkgY2FzZSwgQ2VwaCBoYXMg
+dHdvIHBsYW5zIGZvciBiZWluZyBmYXN0ZXIgdGhhbiBIREZTOg0KPjEpIGJpZyB1c2VycyBpbmRp
+Y2F0ZSB0aGF0IGFsd2F5cyB3cml0aW5nIGxvY2FsbHkgaXMgb2Z0ZW4gYSBtaXN0YWtlDQo+YW5k
+IGl0IHRlbmRzIHRvIG92ZXJmaWxsIGNlcnRhaW4gbm9kZXMgd2l0aGluIHlvdXIgY2x1c3Rlci4g
+UGx1cywNCj5uZXR3b3JrcyBhcmUgbXVjaCBmYXN0ZXIgbm93IHNvIGl0IGRvZXNuJ3QgY29zdCBh
+cyBtdWNoIHRvIHdyaXRlIG92ZXINCj5pdCwgYW5kIENlcGggKmRvZXMqIGV4cG9ydCBsb2NhdGlv
+bnMgc28gdGhlIGZvbGxvdy11cCBqb2JzIGNhbiBiZQ0KPnNjaGVkdWxlZCBhcHByb3ByaWF0ZWx5
+Lg0KPg0KPj4NCj4+IEFsc28sIFNhZ2Ugd3JvdGUgYWJvdXQgYSB3YXkgdG8gc3BlY2lmeSBhIG5v
+ZGUgdG8gYmUgcHJpbWFyeSBmb3IgaGFkb29wDQo+PiBsaWtlIGVudmlyb25tZW50cy4NCj4+ICho
+dHRwOi8vY29tbWVudHMuZ21hbmUub3JnL2dtYW5lLmNvbXAuZmlsZS1zeXN0ZW1zLmNlcGguZGV2
+ZWwvMTU0OCApIElzDQo+PiB0aGlzIHRocm91Z2ggcHJpbWFyeSBhZmZpbml0eSBjb25maWd1cmF0
+aW9uPw0KPg0KPlRoYXQgbWVjaGFuaXNtICgicHJlZmVycmVkIiBQR3MpIGlzIGRlYWQuIFByaW1h
+cnkgYWZmaW5pdHkgaXMgYQ0KPmNvbXBsZXRlbHkgZGlmZmVyZW50IHRoaW5nLg0KPg0KPg0KPk9u
+IFRodSwgU2VwIDQsIDIwMTQgYXQgODo1OSBBTSwgTWlsb3N6IFRhbnNraSA8bWlsb3N6QGFkZmlu
+LmNvbT4gd3JvdGU6DQo+PiBRRlMgdW5saWtlIENlcGggcGxhY2VzIHRoZSBlcmFzdXJlIGNvZGlu
+ZyBsb2dpYyBpbnNpZGUgb2YgdGhlIGNsaWVudA0KPj4gc28gaXQncyBub3QgYSBhcHBsZXMtdG8t
+YXBwbGVzIGNvbXBhcmlzb24uIGJ1dCBJIHRoaW5rIHlvdSBnZXQgbXkNCj4+IHBvaW50LCBhbmQg
+aXQgd291bGQgYmUgcG9zc2libGUgdG8gaW1wbGVtZW50IGEgcmljaCBDZXBoDQo+PiAoZmlsZXN5
+c3RlbS9oYWRvb3ApIGNsaWVudCBsaWtlIHRoaXMgYXMgd2VsbC4NCj4+DQo+PiBJbiBzdW1tYXJ5
+LCBpZiBIYWRvb3Agb24gQ2VwaCBpcyBhIG1ham9yIHByaW9yaXR5IEkgdGhpbmsgaXQgd291bGQg
+YmUNCj4+IGJlc3QgdG8gImJvcnJvdyIgdGhlIGdvb2QgaWRlYXMgZm9yIFFGUyBhbmQgaW1wbGVt
+ZW50IHRoZW0gaW4gSGFkb29wDQo+PiBDZXBoIGZpbGVzeXN0ZW0gYW5kIENlcGggaXQgc2VsZiAo
+bGV0dGluZyBhIHNtYXJ0IGNsaWVudCBnZXQgY2h1bmtzDQo+PiBkaXJlY3RseSwgd3JpdGUgY2h1
+bmtzIGRpcmVjdGx5KS4gSSBkb24ndCBkb3VidCB0aGF0IGl0J3MgYSBsb3Qgb2YNCj4+IHdvcmsg
+YnV0IHRoZSByZXN1bHRzIG1pZ2h0IGJlIHdvcnRoIGl0IGluIGluIHRlcm1zIG9mIHBlcmZvcm1h
+bmNlIHlvdQ0KPj4gZ2V0IGZvciB0aGUgY29zdC4NCj4NCj5VbmZvcnR1bmF0ZWx5IGltcGxlbWVu
+dGluZyBDZXBoRlMgb24gdG9wIG9mIFJBRE9TJyBFQyBwb29scyBpcyBnb2luZw0KPnRvIGJlIGEg
+bWFqb3IgcHJvamVjdCB3aGljaCB3ZSBoYXZlbid0IGRvbmUgYW55dGhpbmcgdG8gc2NvcGUgb3V0
+IHlldCwNCj5zbyBpdCdzIGdvaW5nIHRvIGJlIGEgd2hpbGUgYmVmb3JlIHRoYXQncyByZWFsbHkg
+YW4gb3B0aW9uLiBCdXQgaXQgaXMNCj5hICJyZWFsIiBmaWxlc3lzdGVtLCBzbyB3ZSBzdGlsbCBo
+YXZlIHRoYXQgZ29pbmcgZm9yIHVzLiA7KQ0KPi1HcmVnDQo+U29mdHdhcmUgRW5naW5lZXIgIzQy
+IEAgaHR0cDovL2lua3RhbmsuY29tIHwgaHR0cDovL2NlcGguY29tDQo+LS0NCj5UbyB1bnN1YnNj
+cmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZl
+bCIgaW4NCj50aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9y
+Zw0KPk1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jk
+b21vLWluZm8uaHRtbA0KDQo=
