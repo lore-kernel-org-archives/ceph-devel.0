@@ -1,61 +1,57 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Placement Groups : chosing the right pg_num
-Date: Sun, 07 Sep 2014 23:00:31 +0200
-Message-ID: <540CC76F.8010807@dachary.org>
+From: Aanchal Agrawal <Aanchal.Agrawal@sandisk.com>
+Subject: RE: Mon gets flooded with log messages for default log level
+Date: Mon, 8 Sep 2014 05:24:15 +0000
+Message-ID: <7F4FDDF05D5B3241ABA5EB82D169E31E054EBF45@SACMBXIP02.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="pMwGhJBCLOTocDr0Nff22fM3Qj2k9x5ED"
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:46897 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752010AbaIGVAo (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 7 Sep 2014 17:00:44 -0400
+Received: from mail-bl2on0076.outbound.protection.outlook.com ([65.55.169.76]:40640
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751398AbaIHFYV convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Sep 2014 01:24:21 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Laurent Guerby <laurent@guerby.net>, Mehdi Abaakouk <sileht@sileht.net>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: Gregory Farnum <greg@inktank.com>, Joao Eduardo Luis <joao.luis@inktank.com>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---pMwGhJBCLOTocDr0Nff22fM3Qj2k9x5ED
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Any help on this ...
 
-Hi Laurent & Mehdi,
+-----Original Message-----
+From: Aanchal Agrawal
+Sent: Friday, September 05, 2014 5:56 PM
+To: ceph-devel@vger.kernel.org
+Subject: Mon gets flooded with log messages for default log level
 
-I tried to translate our discussions about how to choose the number of pl=
-acement groups into a revision of the documentation. Here is how it looks=
- at the moment:
+Hi,
 
-   https://github.com/dachary/ceph/blob/9177da52f7aa358484f4d9074522da21c=
-9336e49/doc/rados/operations/placement-groups.rst
+With reference to commit f7d1902ccf9d5bb97cda626d718c3bb02f991a6d, 'Paxos' default level has been increased to 1.
+This cause mon to get flooded with the following message,  thus causes OS Drive(160GB) to get filled in 4-5 hours.
 
-and the corresponding pull request is at
+Log Snippet ::
+==================
+2014-09-01 16:35:11.527734 7f7efe706700 1 mon.rack6-ramp-1@0(leader).paxos(paxos active c 1..712) is_readable now=2014-09-01 16:35:11.527735 lease_expire=2014-09-01 16:35:13.637940 has v0 lc 712
+2014-09-01 16:35:11.527773 7f7efe706700 1 mon.rack6-ramp-1@0(leader).paxos(paxos active c 1..712) is_readable now=2014-09-01 16:35:11.527774 lease_expire=2014-09-01 16:35:13.637940 has v0 lc 712
+2014-09-01 16:35:11.527807 7f7efe706700 1 mon.rack6-ramp-1@0(leader).paxos(paxos active c 1..712) is_readable now=2014-09-01 16:35:11.527807 lease_expire=2014-09-01 16:35:13.637940 has v0 lc 712
+2014-09-01 16:35:11.527840 7f7efe706700 1 mon.rack6-ramp-1@0(leader).paxos(paxos active c 1..712) is_readable now=2014-09-01 16:35:11.527840 lease_expire=2014-09-01 16:35:13.637940 has v0 lc 712
+2014-09-01 16:35:11.527874 7f7efe706700 1 mon.rack6-ramp-1@0(leader).paxos(paxos active c 1..712) is_readable now=2014-09-01 16:35:11.527875 lease_expire=2014-09-01 16:35:13.637940 has v0 lc 712 ==================
 
-   https://github.com/ceph/ceph/pull/2417
+==================
+src/mon/Paxos.cc
+dout(1) << "is_readable now=" << ceph_clock_now(g_ceph_context) << " lease_expire=" << lease_expire
+          << " has v" << v << " lc " << last_committed << dendl; ==================
 
-This is a draft and I would very much appreciate your comments. I cc the =
-Ceph development list because it is entirely possible that something sign=
-ificant is missing. Someone knowledgeable will hopefully rectify my mista=
-kes ;-)
+Incrementing 'log level' of this message to 2 or something else will solve this problem of mon space getting full quickly.
 
-Cheers
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
+Moreover is this message that useful to get printed with default debug level '1'?
+Let me know if I am missing something here.
 
+Thanks,
+Aanchal
 
---pMwGhJBCLOTocDr0Nff22fM3Qj2k9x5ED
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+________________________________
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
 
-iEYEARECAAYFAlQMx28ACgkQ8dLMyEl6F20DzgCguCu9vUwrrbmtj8u5fy+HJqqN
-K7kAoK/JiY7cHk2DGfFVvBEMW4IItwE9
-=cZC5
------END PGP SIGNATURE-----
-
---pMwGhJBCLOTocDr0Nff22fM3Qj2k9x5ED--
