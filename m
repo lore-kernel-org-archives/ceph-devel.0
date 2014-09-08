@@ -1,93 +1,165 @@
-From: "Johnu George (johnugeo)" <johnugeo@cisco.com>
-Subject: Re: ceph data locality
-Date: Mon, 8 Sep 2014 22:53:56 +0000
-Message-ID: <D033671F.70A%johnugeo@cisco.com>
-References: <D02D591B.57E%johnugeo@cisco.com>
- <D02D5C36.583%johnugeo@cisco.com> <D02D5FAE.58B%johnugeo@cisco.com>
- <CANP1eJH97O+B_rGYKbLJvpu_hLvfUj+vs-UrrBrQuTwEjxfiOQ@mail.gmail.com>
- <CAPYLRzgUfXDOF3g4pHVT_+=smeCr1iUY=_WeGYSKqNngZSQPgQ@mail.gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: v0.85 released
+Date: Mon, 8 Sep 2014 15:59:16 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1409081557590.17835@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="euc-kr"
-Content-Transfer-Encoding: base64
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from alln-iport-5.cisco.com ([173.37.142.92]:55829 "EHLO
-	alln-iport-5.cisco.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755047AbaIHWx5 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Sep 2014 18:53:57 -0400
-In-Reply-To: <CAPYLRzgUfXDOF3g4pHVT_+=smeCr1iUY=_WeGYSKqNngZSQPgQ@mail.gmail.com>
-Content-Language: en-US
-Content-ID: <4602DF689B9B4B4487179C1C4276B8D9@emea.cisco.com>
+Received: from cobra.newdream.net ([66.33.216.30]:44106 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755029AbaIHW7R (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Sep 2014 18:59:17 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>, Milosz Tanski <milosz@adfin.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.orgceph-devel@vger.kernel.org, ceph-maintainers@ceph.com
 
-SGkgR3JlZywNCiAgICAgICBUaGFua3MuIENhbiB5b3UgZXhwbGFpbiBtb3JlIG9uICJDZXBoICpk
-b2VzKiBleHBvcnQgbG9jYXRpb25zIHNvDQp0aGUgZm9sbG93LXVwIGpvYnMgY2FuIGJlIHNjaGVk
-dWxlZCBhcHByb3ByaWF0ZWx5obE/DQoNClRoYW5rcywNCkpvaG51DQoNCg0KT24gOS84LzE0LCAx
-Mjo1MSBQTSwgIkdyZWdvcnkgRmFybnVtIiA8Z3JlZ0Bpbmt0YW5rLmNvbT4gd3JvdGU6DQoNCj5P
-biBUaHUsIFNlcCA0LCAyMDE0IGF0IDEyOjE2IEFNLCBKb2hudSBHZW9yZ2UgKGpvaG51Z2VvKQ0K
-Pjxqb2hudWdlb0BjaXNjby5jb20+IHdyb3RlOg0KPj4gSGkgQWxsLA0KPj4gICAgICAgICBJIHdh
-cyByZWFkaW5nIG1vcmUgb24gSGFkb29wIG92ZXIgY2VwaC4gSSBoZWFyZCBmcm9tIE5vYWggdGhh
-dA0KPj4gdHVuaW5nIG9mIEhhZG9vcCBvbiBDZXBoIGlzIGdvaW5nIG9uLiBJIGFtIGp1c3QgY3Vy
-aW91cyB0byBrbm93IGlmIHRoZXJlDQo+PiBpcyBhbnkgcmVhc29uIHRvIGtlZXAgZGVmYXVsdCBv
-YmplY3Qgc2l6ZSBhcyA2NE1CLiBJcyBpdCBiZWNhdXNlIG9mIHRoZQ0KPj4gZmFjdCB0aGF0IGl0
-IGJlY29tZXMgZGlmZmljdWx0IHRvIGVuY29kZQ0KPj4gIGdldEJsb2NrTG9jYXRpb25zIGlmIGJs
-b2NrcyBhcmUgZGl2aWRlZCBpbnRvIG9iamVjdHMgYW5kIHRvIGNob29zZSB0aGUNCj4+IGJlc3Qg
-bG9jYXRpb24gZm9yIHRhc2tzIGlmIG5vIG5vZGVzIGluIHRoZSBzeXN0ZW0gaGFzIGEgY29tcGxl
-dGUgYmxvY2suPw0KPg0KPldlIHVzZWQgNjRNQiBiZWNhdXNlIGl0J3MgdGhlIEhERlMgZGVmYXVs
-dCBhbmQgaW4gc29tZSAqdmVyeSogc3R1cGlkDQo+dGVzdHMgaXQgc2VlbWVkIHRvIGJlIGFib3V0
-IHRoZSBmYXN0ZXN0LiBZb3UgY291bGQgY2VydGFpbmx5IG1ha2UgaXQNCj5zbWFsbGVyIGlmIHlv
-dSB3YW50ZWQsIGFuZCBpdCB3b3VsZCBwcm9iYWJseSB3b3JrIHRvIG11bHRpcGx5IGl0IGJ5DQo+
-Mi00eCwgYnV0IHRoZW4geW91J3JlIHVzaW5nIGJpZ2dlciBvYmplY3RzIHRoYW4gbW9zdCBwZW9w
-bGUgZG8uDQo+DQo+PiBJIHNlZSB0aGF0IENlcGggZG9lc26p9nQgcGxhY2Ugb2JqZWN0cyBjb25z
-aWRlcmluZyB0aGUgY2xpZW50IGxvY2F0aW9uIG9yDQo+PiBkaXN0YW5jZSBiZXR3ZWVuIGNsaWVu
-dCBhbmQgdGhlIG9zZHMgd2hlcmUgZGF0YSBpcw0KPj5zdG9yZWQuKGRhdGEtbG9jYWxpdHkpDQo+
-PiBXaGlsZSwgZGF0YSBsb2NhbGl0eSBpcyB0aGUga2V5IGlkZWEgZm9yIEhERlMgYmxvY2sgcGxh
-Y2VtZW50IGFuZA0KPj4gcmV0cmlldmFsIGZvciBtYXhpbXVtIHRocm91Z2hwdXQuIFNvLCBob3cg
-ZG9lcyBjZXBoIHBsYW4gdG8gcGVyZm9ybQ0KPj5iZXR0ZXINCj4+IHRoYW4gSERGUyBhcyBjZXBo
-IHJlbGllcyBvbiByYW5kb20gcGxhY2VtZW50DQo+PiAgdXNpbmcgaGFzaGluZyB1bmxpa2UgSERG
-UyBibG9jayBwbGFjZW1lbnQ/IENhbiBzb21lb25lIGFsc28gcG9pbnQgb3V0DQo+PiBzb21lIHBl
-cmZvcm1hbmNlIHJlc3VsdHMgY29tcGFyaW5nIGNlcGggcmFuZG9tIHBsYWNlbWVudHMgdnMgaGRm
-cw0KPj5sb2NhbGl0eQ0KPj4gYXdhcmUgcGxhY2VtZW50Pw0KPg0KPkkgZG9uJ3QgdGhpbmsgd2Ug
-aGF2ZSBhbnkgc2VyaW91cyBwZXJmb3JtYW5jZSByZXN1bHRzOyB0aGVyZSBoYXNuJ3QNCj5iZWVu
-IGVub3VnaCBmb2N1cyBvbiBwcm9kdWN0aXppbmcgaXQgZm9yIHRoYXQga2luZCBvZiB3b3JrLg0K
-PkFuZWNkb3RhbGx5IEkndmUgc2VlbiBwZW9wbGUgb24gc29jaWFsIG1lZGlhIGNsYWltIHRoYXQg
-aXQncyBhcyBmYXN0DQo+b3IgZXZlbiBtYW55IHRpbWVzIGZhc3RlciB0aGFuIEhERlMgKEkgc3Vz
-cGVjdCBpZiBpdCdzIG1hbnkgdGltZXMNCj5mYXN0ZXIgdGhleSBoYWQgYSBtaXNjb25maWd1cmF0
-aW9uIHNvbWV3aGVyZSBpbiBIREZTLCB0aG91Z2ghKS4NCj5JbiBhbnkgY2FzZSwgQ2VwaCBoYXMg
-dHdvIHBsYW5zIGZvciBiZWluZyBmYXN0ZXIgdGhhbiBIREZTOg0KPjEpIGJpZyB1c2VycyBpbmRp
-Y2F0ZSB0aGF0IGFsd2F5cyB3cml0aW5nIGxvY2FsbHkgaXMgb2Z0ZW4gYSBtaXN0YWtlDQo+YW5k
-IGl0IHRlbmRzIHRvIG92ZXJmaWxsIGNlcnRhaW4gbm9kZXMgd2l0aGluIHlvdXIgY2x1c3Rlci4g
-UGx1cywNCj5uZXR3b3JrcyBhcmUgbXVjaCBmYXN0ZXIgbm93IHNvIGl0IGRvZXNuJ3QgY29zdCBh
-cyBtdWNoIHRvIHdyaXRlIG92ZXINCj5pdCwgYW5kIENlcGggKmRvZXMqIGV4cG9ydCBsb2NhdGlv
-bnMgc28gdGhlIGZvbGxvdy11cCBqb2JzIGNhbiBiZQ0KPnNjaGVkdWxlZCBhcHByb3ByaWF0ZWx5
-Lg0KPg0KPj4NCj4+IEFsc28sIFNhZ2Ugd3JvdGUgYWJvdXQgYSB3YXkgdG8gc3BlY2lmeSBhIG5v
-ZGUgdG8gYmUgcHJpbWFyeSBmb3IgaGFkb29wDQo+PiBsaWtlIGVudmlyb25tZW50cy4NCj4+ICho
-dHRwOi8vY29tbWVudHMuZ21hbmUub3JnL2dtYW5lLmNvbXAuZmlsZS1zeXN0ZW1zLmNlcGguZGV2
-ZWwvMTU0OCApIElzDQo+PiB0aGlzIHRocm91Z2ggcHJpbWFyeSBhZmZpbml0eSBjb25maWd1cmF0
-aW9uPw0KPg0KPlRoYXQgbWVjaGFuaXNtICgicHJlZmVycmVkIiBQR3MpIGlzIGRlYWQuIFByaW1h
-cnkgYWZmaW5pdHkgaXMgYQ0KPmNvbXBsZXRlbHkgZGlmZmVyZW50IHRoaW5nLg0KPg0KPg0KPk9u
-IFRodSwgU2VwIDQsIDIwMTQgYXQgODo1OSBBTSwgTWlsb3N6IFRhbnNraSA8bWlsb3N6QGFkZmlu
-LmNvbT4gd3JvdGU6DQo+PiBRRlMgdW5saWtlIENlcGggcGxhY2VzIHRoZSBlcmFzdXJlIGNvZGlu
-ZyBsb2dpYyBpbnNpZGUgb2YgdGhlIGNsaWVudA0KPj4gc28gaXQncyBub3QgYSBhcHBsZXMtdG8t
-YXBwbGVzIGNvbXBhcmlzb24uIGJ1dCBJIHRoaW5rIHlvdSBnZXQgbXkNCj4+IHBvaW50LCBhbmQg
-aXQgd291bGQgYmUgcG9zc2libGUgdG8gaW1wbGVtZW50IGEgcmljaCBDZXBoDQo+PiAoZmlsZXN5
-c3RlbS9oYWRvb3ApIGNsaWVudCBsaWtlIHRoaXMgYXMgd2VsbC4NCj4+DQo+PiBJbiBzdW1tYXJ5
-LCBpZiBIYWRvb3Agb24gQ2VwaCBpcyBhIG1ham9yIHByaW9yaXR5IEkgdGhpbmsgaXQgd291bGQg
-YmUNCj4+IGJlc3QgdG8gImJvcnJvdyIgdGhlIGdvb2QgaWRlYXMgZm9yIFFGUyBhbmQgaW1wbGVt
-ZW50IHRoZW0gaW4gSGFkb29wDQo+PiBDZXBoIGZpbGVzeXN0ZW0gYW5kIENlcGggaXQgc2VsZiAo
-bGV0dGluZyBhIHNtYXJ0IGNsaWVudCBnZXQgY2h1bmtzDQo+PiBkaXJlY3RseSwgd3JpdGUgY2h1
-bmtzIGRpcmVjdGx5KS4gSSBkb24ndCBkb3VidCB0aGF0IGl0J3MgYSBsb3Qgb2YNCj4+IHdvcmsg
-YnV0IHRoZSByZXN1bHRzIG1pZ2h0IGJlIHdvcnRoIGl0IGluIGluIHRlcm1zIG9mIHBlcmZvcm1h
-bmNlIHlvdQ0KPj4gZ2V0IGZvciB0aGUgY29zdC4NCj4NCj5VbmZvcnR1bmF0ZWx5IGltcGxlbWVu
-dGluZyBDZXBoRlMgb24gdG9wIG9mIFJBRE9TJyBFQyBwb29scyBpcyBnb2luZw0KPnRvIGJlIGEg
-bWFqb3IgcHJvamVjdCB3aGljaCB3ZSBoYXZlbid0IGRvbmUgYW55dGhpbmcgdG8gc2NvcGUgb3V0
-IHlldCwNCj5zbyBpdCdzIGdvaW5nIHRvIGJlIGEgd2hpbGUgYmVmb3JlIHRoYXQncyByZWFsbHkg
-YW4gb3B0aW9uLiBCdXQgaXQgaXMNCj5hICJyZWFsIiBmaWxlc3lzdGVtLCBzbyB3ZSBzdGlsbCBo
-YXZlIHRoYXQgZ29pbmcgZm9yIHVzLiA7KQ0KPi1HcmVnDQo+U29mdHdhcmUgRW5naW5lZXIgIzQy
-IEAgaHR0cDovL2lua3RhbmsuY29tIHwgaHR0cDovL2NlcGguY29tDQo+LS0NCj5UbyB1bnN1YnNj
-cmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZl
-bCIgaW4NCj50aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9y
-Zw0KPk1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jk
-b21vLWluZm8uaHRtbA0KDQo=
+This is the second-to-last development release before Giant that contains 
+new functionality.  The big items to land during this cycle are the 
+messenger refactoring from Matt Benjmain that lays some groundwork for 
+RDMA support, a performance improvement series from SanDisk that improves 
+performance on SSDs, lots of improvements to our new standalone 
+civetweb-based RGW frontend, and a new 'osd blocked-by' mon command that 
+allows admins to easily identify which OSDs are blocking peering progress.  
+The other big change is that the OSDs and Monitors now distinguish between 
+"misplaced" and "degraded" objects: the latter means there are fewer 
+copies than we'd like, while the former simply means the are not stored in 
+the locations where we want them to be.
+
+Also of note is a change to librbd that enables client-side caching by 
+default.  This is coupled with another option that makes the cache 
+write-through until a "flush" operations is observed: this implies that 
+the librbd user (usually a VM guest OS) supports barriers and flush and 
+that it is safe for the cache to switch into writeback mode without 
+compromising data safety or integrity.  It has long been recommended 
+practice that these options be enabled (e.g., in OpenStack environments) 
+but until now it has not been the default.
+
+We have frozen the tree for the looming Giant release, and the next 
+development release will be a release candidate with a final batch of new 
+functionality.
+
+Upgrading
+---------
+
+* The client-side caching for librbd is now enabled by default (rbd
+  cache = true).  A safety option (rbd cache writethrough until flush
+  = true) is also enabled so that writeback caching is not used until
+  the library observes a 'flush' command, indicating that the librbd
+  users is passing that operation through from the guest VM.  This
+  avoids potential data loss when used with older versions of qemu
+  that do not support flush.
+
+    leveldb_write_buffer_size = 32*1024*1024  = 33554432  // 32MB
+    leveldb_cache_size        = 512*1024*1204 = 536870912 // 512MB
+    leveldb_block_size        = 64*1024       = 65536     // 64KB
+    leveldb_compression       = false
+    leveldb_log               = ""
+
+  OSDs will still maintain the following osd-specific defaults:
+
+    leveldb_log               = ""
+
+* The 'rados getxattr ...' command used to add a gratuitous newline to the 
+  attr value; it now does not.
+
+Notable Changes
+---------------
+
+* ceph-disk: do not inadvertantly create directories (Owne Synge)
+* ceph-disk: fix dmcrypt support (Sage Weil)
+* ceph-disk: linter cleanup, logging improvements (Alfredo Deza)
+* ceph-disk: show information about dmcrypt in 'ceph-disk list' output 
+  (Sage Weil)
+* ceph-disk: use partition type UUIDs and blkid (Sage Weil)
+* ceph: fix for non-default cluster names (#8944, Dan Mick)
+* doc: document new upstream wireshark dissector (Kevin Cox)
+* doc: many install doc updates (John Wilkins)
+* librados: fix lock leaks in error paths (#9022, Paval Rallabhandi)
+* librados: fix pool existence check (#8835, Pavan Rallabhandi)
+* librbd: enable caching by default (Sage Weil)
+* librbd: fix crash using clone of flattened image (#8845, Josh Durgin)
+* librbd: store and retrieve snapshot metadata based on id (Josh Durgin)
+* mailmap: many updates (Loic Dachary)
+* mds: add min/max UID for snapshot creation/deletion (#9029, Wido den 
+  Hollander)
+* misc build errors/warnings for Fedora 20 (Boris Ranto)
+* mon: add 'osd blocked-by' command to easily see which OSDs are blocking 
+  peering progress (Sage Weil)
+* mon: add perfcounters for paxos operations (Sage Weil)
+* mon: create default EC profile if needed (Loic Dachary)
+* mon: fix crash on loopback messages and paxos timeouts (#9062, Sage 
+  Weil)
+* mon: fix divide by zero when pg_num is adjusted before OSDs are added 
+  (#9101, Sage Weil)
+* mon: fix occasional memory leak after session reset (#9176, Sage Weil)
+* mon: fix ruleset/ruleid bugs (#9044, Loic Dachary)
+* mon: make usage dumps in terms of bytes, not kB (Sage Weil)
+* mon: prevent implicit destruction of OSDs with 'osd setmaxosd ...' 
+  (#8865, Anand Bhat)
+* mon: verify all quorum members are contiguous at end of Paxos round 
+  (#9053, Sage Weil)
+* msgr: refactor to cleanly separate SimpleMessenger implemenetation, move 
+  toward Connection-based calls (Matt Benjamin, Sage Wei)
+* objectstore: clean up KeyValueDB interface for key/value backends (Sage 
+  Weil)
+* osd: add local_mtime for use by cache agent (Zhiqiang Wang)
+* osd: add superblock for KeyValueStore backend (Haomai Wang)
+* osd: add support for Intel ISA-L erasure code library (Andreas-Joachim 
+  Peters)
+* osd: do not skip promote for write-ordered reads (#9064, Samuel Just)
+* osd: fix ambigous encoding order for blacklisted clients (#9211, Sage 
+  Weil)
+* osd: fix cache flush corner case for snapshotted objects (#9054, Samuel 
+  Just)
+* osd: fix discard of old/obsolete subop replies (#9259, Samuel Just)
+* osd: fix discard of peer messages from previous intervals (Greg Farnum)
+* osd: fix dump of open fds on EMFILE (Sage Weil)
+* osd: fix journal dump (Ma Jianpeng)
+* osd: fix mon feature bit requirements bug and resulting log spam (Sage 
+  Weil)
+* osd: fix recovery chunk size usage during EC recovery (Ma Jianpeng)
+* osd: fix recovery reservation deadlock for EC pools (Samuel Just)
+* osd: fix removal of old xattrs when overwriting chained xattrs (Ma 
+  Jianpeng)
+* osd: fix requesting queueing on PG split (Samuel Just)
+* osd: force new xattrs into leveldb if fs returns E2BIG (#7779, Sage 
+  Weil)
+* osd: implement alignment on chunk sizes (Loic Dachary)
+* osd: improve prioritization of recovery of degraded over misplaced 
+  objects (Sage Weil)
+* osd: locking, sharding, caching improvements in FileStore's FDCache 
+  (Somnath Roy, Greg Farnum)
+* osd: many important bug fixes (Samuel Just)
+* osd, mon: add rocksdb support (Xinxin Shu, Sage Weil)
+* osd, mon: distinguish between "misplaced" and "degraded" objects in 
+  cluster health and PG state reporting (Sage Weil)
+* osd: refactor some ErasureCode functionality into command parent class 
+  (Loic Dachary)
+* osd: set rollback_info_completed on create (#8625, Samuel Just)
+* rados: allow setxattr value to be read from stdin (Sage Weil)
+* rados: drop gratuitous \n from getxattr command (Sage Weil)
+* rgw: add --min-rewrite-stripe-size for object restriper (Yehuda Sadeh)
+* rgw: add powerdns hook for dynamic DNS for global clusters (Wido den 
+  Hollander)
+* rgw: copy object data is target bucket is in a different pool (#9039, 
+  Yehuda Sadeh)
+* rgw: do not try to authenticate CORS preflight requests (#8718, Robert 
+  Hubbard, Yehuda Sadeh)
+* rgw: fix civetweb URL decoding (#8621, Yehuda Sadeh)
+* rgw: fix removal of objects during object creation (Patrycja Szablowska, 
+  Yehuda Sadeh)
+* rgw: fix striping for copied objects (#9089, Yehuda Sadeh)
+* rgw: fix test for identify whether an object has a tail (#9226, Yehuda 
+  Sadeh)
+* rgw: fix when stripe size is not a multiple of chunk size (#8937, Yehuda 
+  Sadeh)
+* rgw: improve civetweb logging (Yehuda Sadeh)
+* rgw: misc civetweb frontend fixes (Yehuda Sadeh)
+
+Getting Ceph
+------------
+
+* Git at git://github.com/ceph/ceph.git
+* Tarball at http://ceph.com/download/ceph-0.85.tar.gz
+* For packages, see http://ceph.com/docs/master/install/get-packages
+* For ceph-deploy, see http://ceph.com/docs/master/install/install-ceph-deploy
