@@ -1,131 +1,106 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: RE: Mon gets flooded with log messages for default log level
-Date: Mon, 8 Sep 2014 11:37:36 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1409081135530.11887@cobra.newdream.net>
-References: <7F4FDDF05D5B3241ABA5EB82D169E31E054EBF45@SACMBXIP02.sdcorp.global.sandisk.com> <alpine.DEB.2.00.1409080656220.30626@cobra.newdream.net> <755F6B91B3BE364F9BCA11EA3F9E0C6F2783971E@SACMBXIP02.sdcorp.global.sandisk.com>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: ceph data locality
+Date: Mon, 8 Sep 2014 12:51:06 -0700
+Message-ID: <CAPYLRzgUfXDOF3g4pHVT_+=smeCr1iUY=_WeGYSKqNngZSQPgQ@mail.gmail.com>
+References: <D02D591B.57E%johnugeo@cisco.com>
+	<D02D5C36.583%johnugeo@cisco.com>
+	<D02D5FAE.58B%johnugeo@cisco.com>
+	<CANP1eJH97O+B_rGYKbLJvpu_hLvfUj+vs-UrrBrQuTwEjxfiOQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:48647 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753015AbaIHShh (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Sep 2014 14:37:37 -0400
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2783971E@SACMBXIP02.sdcorp.global.sandisk.com>
+Received: from mail-qc0-f170.google.com ([209.85.216.170]:43355 "EHLO
+	mail-qc0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754246AbaIHTvH convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Sep 2014 15:51:07 -0400
+Received: by mail-qc0-f170.google.com with SMTP id r5so16630168qcx.1
+        for <ceph-devel@vger.kernel.org>; Mon, 08 Sep 2014 12:51:07 -0700 (PDT)
+In-Reply-To: <CANP1eJH97O+B_rGYKbLJvpu_hLvfUj+vs-UrrBrQuTwEjxfiOQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
-Cc: Aanchal Agrawal <Aanchal.Agrawal@sandisk.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Gregory Farnum <greg@inktank.com>, Joao Eduardo Luis <joao.luis@inktank.com>
+To: Milosz Tanski <milosz@adfin.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Somnath,
+On Thu, Sep 4, 2014 at 12:16 AM, Johnu George (johnugeo)
+<johnugeo@cisco.com> wrote:
+> Hi All,
+>         I was reading more on Hadoop over ceph. I heard from Noah tha=
+t
+> tuning of Hadoop on Ceph is going on. I am just curious to know if th=
+ere
+> is any reason to keep default object size as 64MB. Is it because of t=
+he
+> fact that it becomes difficult to encode
+>  getBlockLocations if blocks are divided into objects and to choose t=
+he
+> best location for tasks if no nodes in the system has a complete bloc=
+k.?
 
-On Mon, 8 Sep 2014, Somnath Roy wrote:
-> But, Sage, it is not happening all the time. For some reason, in some 
-> cases it is waiting for the maps to be readable. Could you please let us 
-> know why it can happen in some scenario ? By not dumping this unusual 
-> scenario , will we be missing anything ?
+We used 64MB because it's the HDFS default and in some *very* stupid
+tests it seemed to be about the fastest. You could certainly make it
+smaller if you wanted, and it would probably work to multiply it by
+2-4x, but then you're using bigger objects than most people do.
 
-The is_readable method is called from a bunch of different contexts.. 
-generally when a message is received or when a previously received 
-and queued message gets reexamined after an election or paxos round.
+> I see that Ceph doesn=C2=B9t place objects considering the client loc=
+ation or
+> distance between client and the osds where data is stored.(data-local=
+ity)
+> While, data locality is the key idea for HDFS block placement and
+> retrieval for maximum throughput. So, how does ceph plan to perform b=
+etter
+> than HDFS as ceph relies on random placement
+>  using hashing unlike HDFS block placement? Can someone also point ou=
+t
+> some performance results comparing ceph random placements vs hdfs loc=
+ality
+> aware placement?
 
-In either case, I think you're right that dout(1) is overkill; we've 
-changed it to 5.  It is useful for debugging, but level 5 should be just 
-fine I think.
+I don't think we have any serious performance results; there hasn't
+been enough focus on productizing it for that kind of work.
+Anecdotally I've seen people on social media claim that it's as fast
+or even many times faster than HDFS (I suspect if it's many times
+faster they had a misconfiguration somewhere in HDFS, though!).
+In any case, Ceph has two plans for being faster than HDFS:
+1) big users indicate that always writing locally is often a mistake
+and it tends to overfill certain nodes within your cluster. Plus,
+networks are much faster now so it doesn't cost as much to write over
+it, and Ceph *does* export locations so the follow-up jobs can be
+scheduled appropriately.
 
-sage
+>
+> Also, Sage wrote about a way to specify a node to be primary for hado=
+op
+> like environments.
+> (http://comments.gmane.org/gmane.comp.file-systems.ceph.devel/1548 ) =
+Is
+> this through primary affinity configuration?
+
+That mechanism ("preferred" PGs) is dead. Primary affinity is a
+completely different thing.
 
 
-> 
-> Thanks & Regards
-> Somnath
-> 
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
-> Sent: Monday, September 08, 2014 6:59 AM
-> To: Aanchal Agrawal
-> Cc: ceph-devel@vger.kernel.org; Gregory Farnum; Joao Eduardo Luis
-> Subject: RE: Mon gets flooded with log messages for default log level
-> 
-> Note that you can make these messages stop with
-> 
->   debug mon = 0
-> 
-> in your ceph.conf.  It looks like you are right, though: that
-> is_readable() dout line is spamming things.  We can fix that in the next release.
-> 
-> 	https://github.com/ceph/ceph/pull/2421
-> 
-> Thanks!
-> sage
-> 
-> 
-> On Mon, 8 Sep 2014, Aanchal Agrawal wrote:
-> 
-> > Any help on this ...
-> > 
-> > -----Original Message-----
-> > From: Aanchal Agrawal
-> > Sent: Friday, September 05, 2014 5:56 PM
-> > To: ceph-devel@vger.kernel.org
-> > Subject: Mon gets flooded with log messages for default log level
-> > 
-> > Hi,
-> > 
-> > With reference to commit f7d1902ccf9d5bb97cda626d718c3bb02f991a6d, 'Paxos' default level has been increased to 1.
-> > This cause mon to get flooded with the following message,  thus causes OS Drive(160GB) to get filled in 4-5 hours.
-> > 
-> > Log Snippet ::
-> > ==================
-> > 2014-09-01 16:35:11.527734 7f7efe706700 1 
-> > mon.rack6-ramp-1@0(leader).paxos(paxos active c 1..712) is_readable 
-> > now=2014-09-01 16:35:11.527735 lease_expire=2014-09-01 16:35:13.637940 
-> > has v0 lc 712
-> > 2014-09-01 16:35:11.527773 7f7efe706700 1 
-> > mon.rack6-ramp-1@0(leader).paxos(paxos active c 1..712) is_readable 
-> > now=2014-09-01 16:35:11.527774 lease_expire=2014-09-01 16:35:13.637940 
-> > has v0 lc 712
-> > 2014-09-01 16:35:11.527807 7f7efe706700 1 
-> > mon.rack6-ramp-1@0(leader).paxos(paxos active c 1..712) is_readable 
-> > now=2014-09-01 16:35:11.527807 lease_expire=2014-09-01 16:35:13.637940 
-> > has v0 lc 712
-> > 2014-09-01 16:35:11.527840 7f7efe706700 1 
-> > mon.rack6-ramp-1@0(leader).paxos(paxos active c 1..712) is_readable 
-> > now=2014-09-01 16:35:11.527840 lease_expire=2014-09-01 16:35:13.637940 
-> > has v0 lc 712
-> > 2014-09-01 16:35:11.527874 7f7efe706700 1 
-> > mon.rack6-ramp-1@0(leader).paxos(paxos active c 1..712) is_readable 
-> > now=2014-09-01 16:35:11.527875 lease_expire=2014-09-01 16:35:13.637940 
-> > has v0 lc 712 ==================
-> > 
-> > ==================
-> > src/mon/Paxos.cc
-> > dout(1) << "is_readable now=" << ceph_clock_now(g_ceph_context) << " lease_expire=" << lease_expire
-> >           << " has v" << v << " lc " << last_committed << dendl; 
-> > ==================
-> > 
-> > Incrementing 'log level' of this message to 2 or something else will solve this problem of mon space getting full quickly.
-> > 
-> > Moreover is this message that useful to get printed with default debug level '1'?
-> > Let me know if I am missing something here.
-> > 
-> > Thanks,
-> > Aanchal
-> > 
-> > ________________________________
-> > 
-> > PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
-> > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
-> > in the body of a message to majordomo@vger.kernel.org More majordomo 
-> > info at  http://vger.kernel.org/majordomo-info.html
-> > 
-> > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+On Thu, Sep 4, 2014 at 8:59 AM, Milosz Tanski <milosz@adfin.com> wrote:
+> QFS unlike Ceph places the erasure coding logic inside of the client
+> so it's not a apples-to-apples comparison. but I think you get my
+> point, and it would be possible to implement a rich Ceph
+> (filesystem/hadoop) client like this as well.
+>
+> In summary, if Hadoop on Ceph is a major priority I think it would be
+> best to "borrow" the good ideas for QFS and implement them in Hadoop
+> Ceph filesystem and Ceph it self (letting a smart client get chunks
+> directly, write chunks directly). I don't doubt that it's a lot of
+> work but the results might be worth it in in terms of performance you
+> get for the cost.
+
+Unfortunately implementing CephFS on top of RADOS' EC pools is going
+to be a major project which we haven't done anything to scope out yet,
+so it's going to be a while before that's really an option. But it is
+a "real" filesystem, so we still have that going for us. ;)
+-Greg
+Software Engineer #42 @ http://inktank.com | http://ceph.com
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
