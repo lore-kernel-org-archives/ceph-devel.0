@@ -1,165 +1,140 @@
-From: Sage Weil <sage@inktank.com>
-Subject: v0.85 released
-Date: Mon, 8 Sep 2014 15:59:16 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1409081557590.17835@cobra.newdream.net>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: ceph data locality
+Date: Mon, 8 Sep 2014 16:11:45 -0700
+Message-ID: <CAPYLRzgTxxOvV1fCa45K-T=GnqPRGwsPsbZZumGRp7ZhsbdAXg@mail.gmail.com>
+References: <D02D591B.57E%johnugeo@cisco.com>
+	<D02D5C36.583%johnugeo@cisco.com>
+	<D02D5FAE.58B%johnugeo@cisco.com>
+	<CANP1eJH97O+B_rGYKbLJvpu_hLvfUj+vs-UrrBrQuTwEjxfiOQ@mail.gmail.com>
+	<CAPYLRzgUfXDOF3g4pHVT_+=smeCr1iUY=_WeGYSKqNngZSQPgQ@mail.gmail.com>
+	<D033671F.70A%johnugeo@cisco.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:44106 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755029AbaIHW7R (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Sep 2014 18:59:17 -0400
+Received: from mail-qc0-f174.google.com ([209.85.216.174]:49426 "EHLO
+	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755102AbaIHXLr convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Sep 2014 19:11:47 -0400
+Received: by mail-qc0-f174.google.com with SMTP id i17so16397949qcy.5
+        for <ceph-devel@vger.kernel.org>; Mon, 08 Sep 2014 16:11:46 -0700 (PDT)
+In-Reply-To: <D033671F.70A%johnugeo@cisco.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.orgceph-devel@vger.kernel.org, ceph-maintainers@ceph.com
+To: "Johnu George (johnugeo)" <johnugeo@cisco.com>
+Cc: Milosz Tanski <milosz@adfin.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-This is the second-to-last development release before Giant that contains 
-new functionality.  The big items to land during this cycle are the 
-messenger refactoring from Matt Benjmain that lays some groundwork for 
-RDMA support, a performance improvement series from SanDisk that improves 
-performance on SSDs, lots of improvements to our new standalone 
-civetweb-based RGW frontend, and a new 'osd blocked-by' mon command that 
-allows admins to easily identify which OSDs are blocking peering progress.  
-The other big change is that the OSDs and Monitors now distinguish between 
-"misplaced" and "degraded" objects: the latter means there are fewer 
-copies than we'd like, while the former simply means the are not stored in 
-the locations where we want them to be.
+It implements the getBlockLocations() api (or whatever it is) in the
+Hadoop FileSystem interface. The upshot of this is that the Hadoop
+scheduler can do the exact same scheduling job on tasks with Ceph that
+it does with HDFS.
+-Greg
+Software Engineer #42 @ http://inktank.com | http://ceph.com
 
-Also of note is a change to librbd that enables client-side caching by 
-default.  This is coupled with another option that makes the cache 
-write-through until a "flush" operations is observed: this implies that 
-the librbd user (usually a VM guest OS) supports barriers and flush and 
-that it is safe for the cache to switch into writeback mode without 
-compromising data safety or integrity.  It has long been recommended 
-practice that these options be enabled (e.g., in OpenStack environments) 
-but until now it has not been the default.
-
-We have frozen the tree for the looming Giant release, and the next 
-development release will be a release candidate with a final batch of new 
-functionality.
-
-Upgrading
----------
-
-* The client-side caching for librbd is now enabled by default (rbd
-  cache = true).  A safety option (rbd cache writethrough until flush
-  = true) is also enabled so that writeback caching is not used until
-  the library observes a 'flush' command, indicating that the librbd
-  users is passing that operation through from the guest VM.  This
-  avoids potential data loss when used with older versions of qemu
-  that do not support flush.
-
-    leveldb_write_buffer_size = 32*1024*1024  = 33554432  // 32MB
-    leveldb_cache_size        = 512*1024*1204 = 536870912 // 512MB
-    leveldb_block_size        = 64*1024       = 65536     // 64KB
-    leveldb_compression       = false
-    leveldb_log               = ""
-
-  OSDs will still maintain the following osd-specific defaults:
-
-    leveldb_log               = ""
-
-* The 'rados getxattr ...' command used to add a gratuitous newline to the 
-  attr value; it now does not.
-
-Notable Changes
----------------
-
-* ceph-disk: do not inadvertantly create directories (Owne Synge)
-* ceph-disk: fix dmcrypt support (Sage Weil)
-* ceph-disk: linter cleanup, logging improvements (Alfredo Deza)
-* ceph-disk: show information about dmcrypt in 'ceph-disk list' output 
-  (Sage Weil)
-* ceph-disk: use partition type UUIDs and blkid (Sage Weil)
-* ceph: fix for non-default cluster names (#8944, Dan Mick)
-* doc: document new upstream wireshark dissector (Kevin Cox)
-* doc: many install doc updates (John Wilkins)
-* librados: fix lock leaks in error paths (#9022, Paval Rallabhandi)
-* librados: fix pool existence check (#8835, Pavan Rallabhandi)
-* librbd: enable caching by default (Sage Weil)
-* librbd: fix crash using clone of flattened image (#8845, Josh Durgin)
-* librbd: store and retrieve snapshot metadata based on id (Josh Durgin)
-* mailmap: many updates (Loic Dachary)
-* mds: add min/max UID for snapshot creation/deletion (#9029, Wido den 
-  Hollander)
-* misc build errors/warnings for Fedora 20 (Boris Ranto)
-* mon: add 'osd blocked-by' command to easily see which OSDs are blocking 
-  peering progress (Sage Weil)
-* mon: add perfcounters for paxos operations (Sage Weil)
-* mon: create default EC profile if needed (Loic Dachary)
-* mon: fix crash on loopback messages and paxos timeouts (#9062, Sage 
-  Weil)
-* mon: fix divide by zero when pg_num is adjusted before OSDs are added 
-  (#9101, Sage Weil)
-* mon: fix occasional memory leak after session reset (#9176, Sage Weil)
-* mon: fix ruleset/ruleid bugs (#9044, Loic Dachary)
-* mon: make usage dumps in terms of bytes, not kB (Sage Weil)
-* mon: prevent implicit destruction of OSDs with 'osd setmaxosd ...' 
-  (#8865, Anand Bhat)
-* mon: verify all quorum members are contiguous at end of Paxos round 
-  (#9053, Sage Weil)
-* msgr: refactor to cleanly separate SimpleMessenger implemenetation, move 
-  toward Connection-based calls (Matt Benjamin, Sage Wei)
-* objectstore: clean up KeyValueDB interface for key/value backends (Sage 
-  Weil)
-* osd: add local_mtime for use by cache agent (Zhiqiang Wang)
-* osd: add superblock for KeyValueStore backend (Haomai Wang)
-* osd: add support for Intel ISA-L erasure code library (Andreas-Joachim 
-  Peters)
-* osd: do not skip promote for write-ordered reads (#9064, Samuel Just)
-* osd: fix ambigous encoding order for blacklisted clients (#9211, Sage 
-  Weil)
-* osd: fix cache flush corner case for snapshotted objects (#9054, Samuel 
-  Just)
-* osd: fix discard of old/obsolete subop replies (#9259, Samuel Just)
-* osd: fix discard of peer messages from previous intervals (Greg Farnum)
-* osd: fix dump of open fds on EMFILE (Sage Weil)
-* osd: fix journal dump (Ma Jianpeng)
-* osd: fix mon feature bit requirements bug and resulting log spam (Sage 
-  Weil)
-* osd: fix recovery chunk size usage during EC recovery (Ma Jianpeng)
-* osd: fix recovery reservation deadlock for EC pools (Samuel Just)
-* osd: fix removal of old xattrs when overwriting chained xattrs (Ma 
-  Jianpeng)
-* osd: fix requesting queueing on PG split (Samuel Just)
-* osd: force new xattrs into leveldb if fs returns E2BIG (#7779, Sage 
-  Weil)
-* osd: implement alignment on chunk sizes (Loic Dachary)
-* osd: improve prioritization of recovery of degraded over misplaced 
-  objects (Sage Weil)
-* osd: locking, sharding, caching improvements in FileStore's FDCache 
-  (Somnath Roy, Greg Farnum)
-* osd: many important bug fixes (Samuel Just)
-* osd, mon: add rocksdb support (Xinxin Shu, Sage Weil)
-* osd, mon: distinguish between "misplaced" and "degraded" objects in 
-  cluster health and PG state reporting (Sage Weil)
-* osd: refactor some ErasureCode functionality into command parent class 
-  (Loic Dachary)
-* osd: set rollback_info_completed on create (#8625, Samuel Just)
-* rados: allow setxattr value to be read from stdin (Sage Weil)
-* rados: drop gratuitous \n from getxattr command (Sage Weil)
-* rgw: add --min-rewrite-stripe-size for object restriper (Yehuda Sadeh)
-* rgw: add powerdns hook for dynamic DNS for global clusters (Wido den 
-  Hollander)
-* rgw: copy object data is target bucket is in a different pool (#9039, 
-  Yehuda Sadeh)
-* rgw: do not try to authenticate CORS preflight requests (#8718, Robert 
-  Hubbard, Yehuda Sadeh)
-* rgw: fix civetweb URL decoding (#8621, Yehuda Sadeh)
-* rgw: fix removal of objects during object creation (Patrycja Szablowska, 
-  Yehuda Sadeh)
-* rgw: fix striping for copied objects (#9089, Yehuda Sadeh)
-* rgw: fix test for identify whether an object has a tail (#9226, Yehuda 
-  Sadeh)
-* rgw: fix when stripe size is not a multiple of chunk size (#8937, Yehuda 
-  Sadeh)
-* rgw: improve civetweb logging (Yehuda Sadeh)
-* rgw: misc civetweb frontend fixes (Yehuda Sadeh)
-
-Getting Ceph
-------------
-
-* Git at git://github.com/ceph/ceph.git
-* Tarball at http://ceph.com/download/ceph-0.85.tar.gz
-* For packages, see http://ceph.com/docs/master/install/get-packages
-* For ceph-deploy, see http://ceph.com/docs/master/install/install-ceph-deploy
+On Mon, Sep 8, 2014 at 3:53 PM, Johnu George (johnugeo)
+<johnugeo@cisco.com> wrote:
+> Hi Greg,
+>        Thanks. Can you explain more on "Ceph *does* export locations =
+so
+> the follow-up jobs can be scheduled appropriately=E2=80=9D?
+>
+> Thanks,
+> Johnu
+>
+>
+> On 9/8/14, 12:51 PM, "Gregory Farnum" <greg@inktank.com> wrote:
+>
+>>On Thu, Sep 4, 2014 at 12:16 AM, Johnu George (johnugeo)
+>><johnugeo@cisco.com> wrote:
+>>> Hi All,
+>>>         I was reading more on Hadoop over ceph. I heard from Noah t=
+hat
+>>> tuning of Hadoop on Ceph is going on. I am just curious to know if =
+there
+>>> is any reason to keep default object size as 64MB. Is it because of=
+ the
+>>> fact that it becomes difficult to encode
+>>>  getBlockLocations if blocks are divided into objects and to choose=
+ the
+>>> best location for tasks if no nodes in the system has a complete bl=
+ock.?
+>>
+>>We used 64MB because it's the HDFS default and in some *very* stupid
+>>tests it seemed to be about the fastest. You could certainly make it
+>>smaller if you wanted, and it would probably work to multiply it by
+>>2-4x, but then you're using bigger objects than most people do.
+>>
+>>> I see that Ceph doesn=C2=B9t place objects considering the client l=
+ocation or
+>>> distance between client and the osds where data is
+>>>stored.(data-locality)
+>>> While, data locality is the key idea for HDFS block placement and
+>>> retrieval for maximum throughput. So, how does ceph plan to perform
+>>>better
+>>> than HDFS as ceph relies on random placement
+>>>  using hashing unlike HDFS block placement? Can someone also point =
+out
+>>> some performance results comparing ceph random placements vs hdfs
+>>>locality
+>>> aware placement?
+>>
+>>I don't think we have any serious performance results; there hasn't
+>>been enough focus on productizing it for that kind of work.
+>>Anecdotally I've seen people on social media claim that it's as fast
+>>or even many times faster than HDFS (I suspect if it's many times
+>>faster they had a misconfiguration somewhere in HDFS, though!).
+>>In any case, Ceph has two plans for being faster than HDFS:
+>>1) big users indicate that always writing locally is often a mistake
+>>and it tends to overfill certain nodes within your cluster. Plus,
+>>networks are much faster now so it doesn't cost as much to write over
+>>it, and Ceph *does* export locations so the follow-up jobs can be
+>>scheduled appropriately.
+>>
+>>>
+>>> Also, Sage wrote about a way to specify a node to be primary for ha=
+doop
+>>> like environments.
+>>> (http://comments.gmane.org/gmane.comp.file-systems.ceph.devel/1548 =
+) Is
+>>> this through primary affinity configuration?
+>>
+>>That mechanism ("preferred" PGs) is dead. Primary affinity is a
+>>completely different thing.
+>>
+>>
+>>On Thu, Sep 4, 2014 at 8:59 AM, Milosz Tanski <milosz@adfin.com> wrot=
+e:
+>>> QFS unlike Ceph places the erasure coding logic inside of the clien=
+t
+>>> so it's not a apples-to-apples comparison. but I think you get my
+>>> point, and it would be possible to implement a rich Ceph
+>>> (filesystem/hadoop) client like this as well.
+>>>
+>>> In summary, if Hadoop on Ceph is a major priority I think it would =
+be
+>>> best to "borrow" the good ideas for QFS and implement them in Hadoo=
+p
+>>> Ceph filesystem and Ceph it self (letting a smart client get chunks
+>>> directly, write chunks directly). I don't doubt that it's a lot of
+>>> work but the results might be worth it in in terms of performance y=
+ou
+>>> get for the cost.
+>>
+>>Unfortunately implementing CephFS on top of RADOS' EC pools is going
+>>to be a major project which we haven't done anything to scope out yet=
+,
+>>so it's going to be a while before that's really an option. But it is
+>>a "real" filesystem, so we still have that going for us. ;)
+>>-Greg
+>>Software Engineer #42 @ http://inktank.com | http://ceph.com
+>>--
+>>To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+>>the body of a message to majordomo@vger.kernel.org
+>>More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
