@@ -1,126 +1,151 @@
-From: Gregory Meno <gmeno-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [ceph-calamari] RFC: A preliminary Chinese version
-	of Calamari
-Date: Wed, 3 Sep 2014 08:55:11 -0400
-Message-ID: <CAOWd=nAzfZv0ZcCpbT-Qnu0vtgCRidJ_LnBfNZD_VtizcTYSag@mail.gmail.com>
-References: <54004BBA.30506@ubuntukylin.com>
-Reply-To: gmeno-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+From: Sage Weil <sweil@redhat.com>
+Subject: RE: Cache tiering slow request issue: currently waiting for rw
+ locks
+Date: Tue, 9 Sep 2014 09:34:33 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1409090930100.17200@cobra.newdream.net>
+References: <06E7D85B3BA36C4DB207FEDE871C53489375E2@SHSMSX101.ccr.corp.intel.com> <alpine.DEB.2.00.1408290717260.28218@cobra.newdream.net> <alpine.DEB.2.00.1408291928410.13709@cobra.newdream.net> <06E7D85B3BA36C4DB207FEDE871C53489377A6@SHSMSX101.ccr.corp.intel.com>
+ <06E7D85B3BA36C4DB207FEDE871C5348937A78@SHSMSX101.ccr.corp.intel.com> <06E7D85B3BA36C4DB207FEDE871C5348938051@SHSMSX101.ccr.corp.intel.com> <06E7D85B3BA36C4DB207FEDE871C534893836D@SHSMSX101.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============1668090126=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <54004BBA.30506-qfb7ZC4agRC9jIzG8Sm66w@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Li Wang <liwang-qfb7ZC4agRC9jIzG8Sm66w@public.gmane.org>
-Cc: "ceph-calamari-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-calamari-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:57217 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757276AbaIIQee (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Sep 2014 12:34:34 -0400
+In-Reply-To: <06E7D85B3BA36C4DB207FEDE871C534893836D@SHSMSX101.ccr.corp.intel.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
+Cc: "'sam.just@inktank.com'" <sam.just@inktank.com>, "'ceph-devel@vger.kernel.org'" <ceph-devel@vger.kernel.org>
 
---===============1668090126==
-Content-Type: multipart/alternative; boundary=001a11c1312813f228050228bff7
+On Tue, 9 Sep 2014, Wang, Zhiqiang wrote:
+> Pasting the conversations in the pull request here.
+> 
+> wonzhq commented 6 days ago
+> If checking ObjectContext::RWState::waiters and ObjectContext::RWState::count for the pending requests on this object, there is still a window which the problem can happen. That is after the promotion replication and requeuing the client request, and before dequeuing the client request. Should we loop the OSD::op_wq to check the pending requests on an object? Or adding something in the ObjectContext to remember the pending requests? @athanatos @liewegas
+> 
+> liewegas commented 10 hours ago
+> Hmm, that's true that there is still that window. Is it necessary that this is completely air-tight, though? As long as we avoid evicting a newly-promoted object before the request is processed we will win. I'm afraid that a complicated mechanism to cover this could introduce more complexity than we need.
+> 
+> wonzhq commented 2 minutes ago
+> Tried to use ObjectContext::RWState::count to check the pending request. In my testing, it hit the slow request just once. I checked the log, it exactly falls into the window we talked above. So with this solution, it's possible that we still hit this issue, but much less than before. Should we go ahead with this solution?
+>
+> Sage/Sam, what do you think?
 
---001a11c1312813f228050228bff7
-Content-Type: text/plain; charset=UTF-8
+I think it is definitely worth adding that check, even if it doesn't catch 
+the requeue case, because it is still useful to defer eviction if there is 
+a request queued for that object.  That seems true at least in the 
+writeback cache mode... perhaps not so in other modes like forward.
 
-Li Wang,
+I'm still not sure what would close the hole reliably.  Perhaps a flag on 
+the obc indicating whether any request has touched it since the initial 
+promote?  Maybe that, coupled with a time limit (so that eventually we can 
+still evict in case the original request never gets processed... e.g. 
+because the client disconnected before it was requeued or something).
 
-Thank you for doing this!
+?
 
-Would you please change this so that calamari will display the correct
-locale?
+sage
 
-As it exists your branch will not display an all english version.
-
-To merge upstream I would expect this to work so that both en and zh_CN
-versions could work.
-
-I made a branch that moves strings.l20n to the correct locale
-https://github.com/ceph/calamari-clients/tree/zh_CN_version
-
-Please let me know if there is anything I can do to help.
-
-best regards,
-Gregory
-
-
-On Fri, Aug 29, 2014 at 5:45 AM, Li Wang <liwang-qfb7ZC4agRC9jIzG8Sm66w@public.gmane.org> wrote:
-
+ > 
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Wang, Zhiqiang
+> Sent: Friday, September 5, 2014 3:21 PM
+> To: Sage Weil; 'sam.just@inktank.com'
+> Cc: 'ceph-devel@vger.kernel.org'
+> Subject: RE: Cache tiering slow request issue: currently waiting for rw locks
+> 
+> I made some comments based on your comments of the pull request https://github.com/ceph/ceph/pull/2374. Can you take a look? Thx.
+> 
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Wang, Zhiqiang
+> Sent: Tuesday, September 2, 2014 2:54 PM
+> To: Sage Weil
+> Cc: 'ceph-devel@vger.kernel.org'
+> Subject: RE: Cache tiering slow request issue: currently waiting for rw locks
+> 
+> Tried the pull request, checking the object is blocked or not doesn't work. Actually this check is already done in function agent_work.
+> 
+> I tried to make a fix to add a field/flag to the object context. This is not a good idea for the following reasons:
+> 1) If making this filed/flag to be a persistent one, when resetting/clearing this flag, we need to persist it. This is not good for read request.
+> 2) If making this field/flag not to be a persistent one, when the object context is removed from the cache ' object_contexts', this field/flag is removed as well. This object is removed in the later evicting. The same issue still exists.
+> 
+> So, I came up with a fix to add a set in the class ReplicatedPG to hold all the promoting objects. This fix is at https://github.com/ceph/ceph/pull/2374. It is tested and works well. Pls review and comment, thx.
+> 
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Wang, Zhiqiang
+> Sent: Monday, September 1, 2014 9:33 AM
+> To: Sage Weil
+> Cc: 'ceph-devel@vger.kernel.org'
+> Subject: RE: Cache tiering slow request issue: currently waiting for rw locks
+> 
+> I don't think the object context is blocked at that time. It is un-blocked after the copying of data from base tier. It doesn't address the problem here. Anyway, I'll try it and see.
+> 
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
+> Sent: Saturday, August 30, 2014 10:29 AM
+> To: Wang, Zhiqiang
+> Cc: 'ceph-devel@vger.kernel.org'
+> Subject: Re: Cache tiering slow request issue: currently waiting for rw locks
+> 
 > Hi,
->   We have set up a preliminary Chinese version of Calamari at
-> https://github.com/xiaoxianxia/calamari-clients-cn, major jobs done
-> are translating the English words on the web interface into Chinese,
-> we did not change the localization infrastructure, any help
-> in this direction are appreciated,  also any suggestions, tests
-> and technical involvement are welcome, to make it ready to
-> be merged to the upstream.
->
-> Cheers,
-> Li Wang
-> _______________________________________________
-> ceph-calamari mailing list
-> ceph-calamari-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-calamari-ceph.com
->
-
---001a11c1312813f228050228bff7
-Content-Type: text/html; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"ltr">Li Wang,<div><br></div><div>Thank you for doing this!</div=
-><div><br></div><div>Would you please change this so that calamari will dis=
-play the correct locale?<br></div><div><br></div><div>As it exists your bra=
-nch will not display an all english version.</div>
-<div><br></div><div>To merge upstream I would expect this to work so that b=
-oth en and zh_CN versions could work.<br></div><div><br></div><div>I made a=
- branch that moves strings.l20n to the correct locale <a href=3D"https://gi=
-thub.com/ceph/calamari-clients/tree/zh_CN_version">https://github.com/ceph/=
-calamari-clients/tree/zh_CN_version</a><br>
-</div><div><br></div><div>Please let me know if there is anything I can do =
-to help.</div><div><br></div><div>best regards,</div><div>Gregory</div></di=
-v><div class=3D"gmail_extra"><br><br><div class=3D"gmail_quote">On Fri, Aug=
- 29, 2014 at 5:45 AM, Li Wang <span dir=3D"ltr">&lt;<a href=3D"mailto:liwan=
-g@ubuntukylin.com" target=3D"_blank">liwang-qfb7ZC4agRC9jIzG8Sm66w@public.gmane.org</a>&gt;</span> =
-wrote:<br>
-<blockquote class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:1p=
-x #ccc solid;padding-left:1ex">Hi,<br>
-=C2=A0 We have set up a preliminary Chinese version of Calamari at<br>
-<a href=3D"https://github.com/xiaoxianxia/calamari-clients-cn" target=3D"_b=
-lank">https://github.com/<u></u>xiaoxianxia/calamari-clients-<u></u>cn</a>,=
- major jobs done<br>
-are translating the English words on the web interface into Chinese,<br>
-we did not change the localization infrastructure, any help<br>
-in this direction are appreciated,=C2=A0 also any suggestions, tests<br>
-and technical involvement are welcome, to make it ready to<br>
-be merged to the upstream.<br>
-<br>
-Cheers,<br>
-Li Wang<br>
-______________________________<u></u>_________________<br>
-ceph-calamari mailing list<br>
-<a href=3D"mailto:ceph-calamari-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" target=3D"_blank">ceph-cala=
-mari-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a><br>
-<a href=3D"http://lists.ceph.com/listinfo.cgi/ceph-calamari-ceph.com" targe=
-t=3D"_blank">http://lists.ceph.com/<u></u>listinfo.cgi/ceph-calamari-<u></u=
->ceph.com</a><br>
-</blockquote></div><br></div>
-
---001a11c1312813f228050228bff7--
-
---===============1668090126==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============1668090126==--
+> 
+> Can you take a look at https://github.com/ceph/ceph/pull/2363 and see if that addresses the behavior you saw?
+> 
+> Thanks!
+> sage
+> 
+> 
+> On Fri, 29 Aug 2014, Sage Weil wrote:
+> 
+> > Hi,
+> > 
+> > I've opened http://tracker.ceph.com/issues/9285 to track this.
+> > 
+> > I think you're right--we need a check in agent_maybe_evict() that will 
+> > skip objects that are being promoted.  I suspect a flag on the 
+> > ObjectContext is enough?
+> > 
+> > sage
+> > 
+> > 
+> > On Fri, 29 Aug 2014, Wang, Zhiqiang wrote:
+> > 
+> > > Hi all,
+> > > 
+> > > I've ran into this slow request issue some time ago. The problem is like this: when running with cache tieing, there are 'slow request' warning messages in the log file like below.
+> > > 
+> > > 2014-08-29 10:18:24.669763 7f9b20f1b700  0 log [WRN] : 1 slow 
+> > > requests, 1 included below; oldest blocked for > 30.996595 secs
+> > > 2014-08-29 10:18:24.669768 7f9b20f1b700  0 log [WRN] : slow request
+> > > 30.996595 seconds old, received at 2014-08-29 10:17:53.673142: 
+> > > osd_op(client.114176.0:144919 rb.0.17f56.6b8b4567.000000000935 
+> > > [sparse-read 3440640~4096] 45.cf45084b ack+read e26168) v4 currently 
+> > > waiting for rw locks
+> > > 
+> > > Recently I made some changes to the log, captured this problem, and finally figured out its root cause. You can check the attachment for the logs.
+> > > 
+> > > Here is the root cause:
+> > > There is a cache miss when doing read. During promotion, after copying the data from base tier osd, the cache tier primary osd replicates the data to other cache tier osds. Some times this takes quite a long time. During this period of time, the promoted object may be evicted because the cache tier is full. When the primary osd finally gets the replication response and restarts the original read request, it doesn't find the object in the cache tier, and do promotion again. This loops for several times, and we'll see the 'slow request' in the logs. Theoretically, this could loops forever, and the request from the client would never be finished.
+> > > 
+> > > There is a simple fix for this:
+> > > Add a field in the object state, indicating the status of the promotion. It's set to true after the copy of data from base tier and before the replication. It's reset to false after the replication and the original client request starts to execute. Evicting is not allowed when this field is true.
+> > > 
+> > > What do you think?
+> > > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> > in the body of a message to majordomo@vger.kernel.org More majordomo 
+> > info at  http://vger.kernel.org/majordomo-info.html
+> > 
+> > 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
