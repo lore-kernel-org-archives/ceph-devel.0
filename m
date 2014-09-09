@@ -1,27 +1,37 @@
-From: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
+From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
 Subject: RE: Cache tiering slow request issue: currently waiting for rw locks
-Date: Tue, 9 Sep 2014 07:12:34 +0000
-Message-ID: <06E7D85B3BA36C4DB207FEDE871C534893836D@SHSMSX101.ccr.corp.intel.com>
+Date: Tue, 9 Sep 2014 08:45:22 +0000
+Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC020A8980@shsmsx102.ccr.corp.intel.com>
 References: <06E7D85B3BA36C4DB207FEDE871C53489375E2@SHSMSX101.ccr.corp.intel.com>
  <alpine.DEB.2.00.1408290717260.28218@cobra.newdream.net>
  <alpine.DEB.2.00.1408291928410.13709@cobra.newdream.net>
  <06E7D85B3BA36C4DB207FEDE871C53489377A6@SHSMSX101.ccr.corp.intel.com>
  <06E7D85B3BA36C4DB207FEDE871C5348937A78@SHSMSX101.ccr.corp.intel.com>
  <06E7D85B3BA36C4DB207FEDE871C5348938051@SHSMSX101.ccr.corp.intel.com>
+ <06E7D85B3BA36C4DB207FEDE871C534893836D@SHSMSX101.ccr.corp.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga14.intel.com ([192.55.52.115]:36397 "EHLO mga14.intel.com"
+Received: from mga14.intel.com ([192.55.52.115]:60176 "EHLO mga14.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755826AbaIIHMj convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Sep 2014 03:12:39 -0400
-In-Reply-To: <06E7D85B3BA36C4DB207FEDE871C5348938051@SHSMSX101.ccr.corp.intel.com>
+	id S932234AbaIIIp0 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Sep 2014 04:45:26 -0400
+In-Reply-To: <06E7D85B3BA36C4DB207FEDE871C534893836D@SHSMSX101.ccr.corp.intel.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, "'sam.just@inktank.com'" <sam.just@inktank.com>
+To: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>, Sage Weil <sweil@redhat.com>, "'sam.just@inktank.com'" <sam.just@inktank.com>
 Cc: "'ceph-devel@vger.kernel.org'" <ceph-devel@vger.kernel.org>
+
+can we set the cache_min_evict_age to a reasonable larger number (say 5min? 10min?)  to walk around the window?-----If a request cannot finished in  minutes, that indicate there should be some issue in the cluster.
+
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Wang, Zhiqiang
+Sent: Tuesday, September 9, 2014 3:13 PM
+To: Sage Weil; 'sam.just@inktank.com'
+Cc: 'ceph-devel@vger.kernel.org'
+Subject: RE: Cache tiering slow request issue: currently waiting for rw locks
 
 Pasting the conversations in the pull request here.
 
@@ -127,6 +137,8 @@ On Fri, 29 Aug 2014, Sage Weil wrote:
 > info at  http://vger.kernel.org/majordomo-info.html
 > 
 > 
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
 --
