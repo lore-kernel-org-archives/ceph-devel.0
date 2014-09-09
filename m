@@ -1,213 +1,103 @@
-From: Somnath Roy <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>
-Subject: OpTracker optimization
-Date: Tue, 9 Sep 2014 20:33:03 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2783A845@SACMBXIP02.sdcorp.global.sandisk.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: [PATCH] daemons: write pid file even when told not to
+ daemonize
+Date: Tue, 9 Sep 2014 15:21:16 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1409091520440.11887@cobra.newdream.net>
+References: <or4mxyuvo4.fsf@free.home>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============1276760833=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-Content-Language: en-US
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: "Samuel Just (sam.just-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org)" <sam.just-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>, "Sage Weil
-	(sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org)" <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:35837 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752345AbaIIWVQ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Sep 2014 18:21:16 -0400
+In-Reply-To: <or4mxyuvo4.fsf@free.home>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Alexandre Oliva <oliva@gnu.org>
+Cc: ceph-devel@vger.kernel.org
 
---===============1276760833==
-Content-Language: en-US
-Content-Type: multipart/alternative;
-	boundary="_000_755F6B91B3BE364F9BCA11EA3F9E0C6F2783A845SACMBXIP02sdcor_"
+I'm inlined to just apply this original patch.  Is there any reason *not* 
+to create a pid file when -f is used?  It's a change from previous 
+behavior, but is there any possible harm that can come of it?
 
---_000_755F6B91B3BE364F9BCA11EA3F9E0C6F2783A845SACMBXIP02sdcor_
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
-
-Hi Sam/Sage,
-As we discussed earlier, enabling the present OpTracker code degrading perf=
-ormance severely. For example, in my setup a single OSD node with 10 client=
-s is reaching ~103K read iops with io served from memory while optracking i=
-s disabled but enabling optracker it is reduced to ~39K iops. Probably, run=
-ning OSD without enabling OpTracker is not an option for many of Ceph users=
-.
-Now, by sharding the Optracker:: ops_in_flight_lock (thus xlist ops_in_flig=
-ht) and removing some other bottlenecks I am able to match the performance =
-of OpTracking enabled OSD with OpTracking disabled, but with the expense of=
- ~1 extra cpu core.
-In this process I have also fixed the following tracker.
-
-http://tracker.ceph.com/issues/9384
+sage
 
 
-and probably http://tracker.ceph.com/issues/8885 too.
+On Wed, 30 Jul 2014, Alexandre Oliva wrote:
 
-
-
-I have created following pull request for the same. Please review it.
-
-
-
-https://github.com/ceph/ceph/pull/2440
-
-
-
-Thanks & Regards
-
-Somnath
-
-
-________________________________
-
-PLEASE NOTE: The information contained in this electronic mail message is i=
-ntended only for the use of the designated recipient(s) named above. If the=
- reader of this message is not the intended recipient, you are hereby notif=
-ied that you have received this message in error and that any review, disse=
-mination, distribution, or copying of this message is strictly prohibited. =
-If you have received this communication in error, please notify the sender =
-by telephone or e-mail (as shown above) immediately and destroy any and all=
- copies of this message in your possession (whether hard copies or electron=
-ically stored copies).
-
-
---_000_755F6B91B3BE364F9BCA11EA3F9E0C6F2783A845SACMBXIP02sdcor_
-Content-Type: text/html; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
-
-<html xmlns:v=3D"urn:schemas-microsoft-com:vml" xmlns:o=3D"urn:schemas-micr=
-osoft-com:office:office" xmlns:w=3D"urn:schemas-microsoft-com:office:word" =
-xmlns:m=3D"http://schemas.microsoft.com/office/2004/12/omml" xmlns=3D"http:=
-//www.w3.org/TR/REC-html40">
-<head>
-<meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3Dus-ascii"=
->
-<meta name=3D"Generator" content=3D"Microsoft Word 14 (filtered medium)">
-<style><!--
-/* Font Definitions */
-@font-face
-	{font-family:Calibri;
-	panose-1:2 15 5 2 2 2 4 3 2 4;}
-@font-face
-	{font-family:Consolas;
-	panose-1:2 11 6 9 2 2 4 3 2 4;}
-/* Style Definitions */
-p.MsoNormal, li.MsoNormal, div.MsoNormal
-	{margin:0in;
-	margin-bottom:.0001pt;
-	font-size:11.0pt;
-	font-family:"Calibri","sans-serif";}
-a:link, span.MsoHyperlink
-	{mso-style-priority:99;
-	color:blue;
-	text-decoration:underline;}
-a:visited, span.MsoHyperlinkFollowed
-	{mso-style-priority:99;
-	color:purple;
-	text-decoration:underline;}
-p.MsoPlainText, li.MsoPlainText, div.MsoPlainText
-	{mso-style-priority:99;
-	mso-style-link:"Plain Text Char";
-	margin:0in;
-	margin-bottom:.0001pt;
-	font-size:11.0pt;
-	font-family:"Calibri","sans-serif";}
-span.EmailStyle17
-	{mso-style-type:personal-compose;
-	font-family:"Calibri","sans-serif";
-	color:windowtext;}
-span.PlainTextChar
-	{mso-style-name:"Plain Text Char";
-	mso-style-priority:99;
-	mso-style-link:"Plain Text";
-	font-family:"Calibri","sans-serif";}
-.MsoChpDefault
-	{mso-style-type:export-only;
-	font-family:"Calibri","sans-serif";}
-@page WordSection1
-	{size:8.5in 11.0in;
-	margin:1.0in 1.0in 1.0in 1.0in;}
-div.WordSection1
-	{page:WordSection1;}
---></style><!--[if gte mso 9]><xml>
-<o:shapedefaults v:ext=3D"edit" spidmax=3D"1026" />
-</xml><![endif]--><!--[if gte mso 9]><xml>
-<o:shapelayout v:ext=3D"edit">
-<o:idmap v:ext=3D"edit" data=3D"1" />
-</o:shapelayout></xml><![endif]-->
-</head>
-<body lang=3D"EN-US" link=3D"blue" vlink=3D"purple">
-<div class=3D"WordSection1">
-<p class=3D"MsoNormal">Hi Sam/Sage,<o:p></o:p></p>
-<p class=3D"MsoNormal">As we discussed earlier, enabling the present OpTrac=
-ker code degrading performance severely. For example, in my setup a single =
-OSD node with 10 clients is reaching ~103K read iops with io served from me=
-mory while optracking is disabled
- but enabling optracker it is reduced to ~39K iops. Probably, running OSD w=
-ithout enabling OpTracker is not an option for many of Ceph users.
-<o:p></o:p></p>
-<p class=3D"MsoNormal">Now, by sharding the Optracker::<span style=3D"color=
-:black;background:white;mso-highlight:white"> ops_in_flight_lock</span><spa=
-n style=3D"color:black"> (thus xlist
-<span style=3D"background:white;mso-highlight:white">ops_in_flight</span>) =
-and removing some other bottlenecks I am able to match the performance of O=
-pTracking enabled OSD with OpTracking disabled, but with the expense of ~1 =
-extra cpu core.<o:p></o:p></span></p>
-<p class=3D"MsoNormal"><span style=3D"color:black">In this process I have a=
-lso fixed the following tracker.<o:p></o:p></span></p>
-<p class=3D"MsoNormal"><span style=3D"color:black"><o:p>&nbsp;</o:p></span>=
-</p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D"><a href=3D"http://trac=
-ker.ceph.com/issues/9384">http://tracker.ceph.com/issues/9384</a><o:p></o:p=
-></span></p>
-<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
-<p class=3D"MsoPlainText">and probably <a href=3D"http://tracker.ceph.com/i=
-ssues/8885">
-http://tracker.ceph.com/issues/8885</a> too.<o:p></o:p></p>
-<p class=3D"MsoPlainText"><o:p>&nbsp;</o:p></p>
-<p class=3D"MsoPlainText">I have created following pull request for the sam=
-e. Please review it.<o:p></o:p></p>
-<p class=3D"MsoPlainText"><o:p>&nbsp;</o:p></p>
-<p class=3D"MsoPlainText"><a href=3D"https://github.com/ceph/ceph/pull/2440=
-">https://github.com/ceph/ceph/pull/2440</a><o:p></o:p></p>
-<p class=3D"MsoPlainText"><o:p>&nbsp;</o:p></p>
-<p class=3D"MsoPlainText">Thanks &amp; Regards<o:p></o:p></p>
-<p class=3D"MsoPlainText">Somnath<o:p></o:p></p>
-<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
-</div>
-<br>
-<hr>
-<font face=3D"Arial" color=3D"Gray" size=3D"2"><br>
-PLEASE NOTE: The information contained in this electronic mail message is i=
-ntended only for the use of the designated recipient(s) named above. If the=
- reader of this message is not the intended recipient, you are hereby notif=
-ied that you have received this
- message in error and that any review, dissemination, distribution, or copy=
-ing of this message is strictly prohibited. If you have received this commu=
-nication in error, please notify the sender by telephone or e-mail (as show=
-n above) immediately and destroy
- any and all copies of this message in your possession (whether hard copies=
- or electronically stored copies).<br>
-<br>
-</font>
-</body>
-</html>
-
---_000_755F6B91B3BE364F9BCA11EA3F9E0C6F2783A845SACMBXIP02sdcor_--
-
---===============1276760833==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============1276760833==--
+> systemd wants to run daemons in foreground, but daemons wouldn't write
+> out the pid file with -f.  Fixed.
+> 
+> Signed-off-by: Alexandre Oliva <oliva@gnu.org>
+> ---
+>  src/ceph_mon.cc           |    3 +--
+>  src/common/config.cc      |    2 --
+>  src/global/global_init.cc |   10 +++++++++-
+>  3 files changed, 10 insertions(+), 5 deletions(-)
+> 
+> diff --git a/src/ceph_mon.cc b/src/ceph_mon.cc
+> index 4e84b4d..14dd6da 100644
+> --- a/src/ceph_mon.cc
+> +++ b/src/ceph_mon.cc
+> @@ -406,8 +406,7 @@ int main(int argc, const char **argv)
+>    // screwing us over
+>    Preforker prefork;
+>    if (!(flags & CINIT_FLAG_NO_DAEMON_ACTIONS)) {
+> -    if (g_conf->daemonize) {
+> -      global_init_prefork(g_ceph_context, 0);
+> +    if (global_init_prefork(g_ceph_context, 0) >= 0) {
+>        prefork.prefork();
+>        if (prefork.is_parent()) {
+>  	return prefork.parent_wait();
+> diff --git a/src/common/config.cc b/src/common/config.cc
+> index 0ee7f58..4e3b6fe 100644
+> --- a/src/common/config.cc
+> +++ b/src/common/config.cc
+> @@ -389,12 +389,10 @@ int md_config_t::parse_argv(std::vector<const char*>& args)
+>      }
+>      else if (ceph_argparse_flag(args, i, "--foreground", "-f", (char*)NULL)) {
+>        set_val_or_die("daemonize", "false");
+> -      set_val_or_die("pid_file", "");
+>      }
+>      else if (ceph_argparse_flag(args, i, "-d", (char*)NULL)) {
+>        set_val_or_die("daemonize", "false");
+>        set_val_or_die("log_file", "");
+> -      set_val_or_die("pid_file", "");
+>        set_val_or_die("log_to_stderr", "true");
+>        set_val_or_die("err_to_stderr", "true");
+>        set_val_or_die("log_to_syslog", "false");
+> diff --git a/src/global/global_init.cc b/src/global/global_init.cc
+> index 7b20343..f03677c 100644
+> --- a/src/global/global_init.cc
+> +++ b/src/global/global_init.cc
+> @@ -166,8 +166,16 @@ int global_init_prefork(CephContext *cct, int flags)
+>    if (g_code_env != CODE_ENVIRONMENT_DAEMON)
+>      return -1;
+>    const md_config_t *conf = cct->_conf;
+> -  if (!conf->daemonize)
+> +  if (!conf->daemonize) {
+> +    if (atexit(pidfile_remove_void)) {
+> +      derr << "global_init_daemonize: failed to set pidfile_remove function "
+> +	   << "to run at exit." << dendl;
+> +    }
+> +
+> +    pidfile_write(g_conf);
+> +
+>      return -1;
+> +  }
+>  
+>    // stop log thread
+>    g_ceph_context->_log->flush();
+> 
+> -- 
+> Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
+> You must be the change you wish to see in the world. -- Gandhi
+> Be Free! -- http://FSFLA.org/   FSF Latin America board member
+> Free Software Evangelist|Red Hat Brasil GNU Toolchain Engineer
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
