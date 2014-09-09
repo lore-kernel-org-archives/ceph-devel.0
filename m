@@ -1,15 +1,15 @@
-From: Somnath Roy <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>
+From: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Subject: Re: OSD is crashing while running admin socket
-Date: Tue, 9 Sep 2014 00:49:50 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F27839B04@SACMBXIP02.sdcorp.global.sandisk.com>
+Date: Mon, 8 Sep 2014 17:59:15 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1409081758480.17200@cobra.newdream.net>
 References: <755F6B91B3BE364F9BCA11EA3F9E0C6F27839A9D@SACMBXIP02.sdcorp.global.sandisk.com>
 	<CA+4uBUYoCL1WjyX4TkEfRuJgtCWgTD2cyJBab3cOY04gBuae=Q@mail.gmail.com>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F27839B04@SACMBXIP02.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CA+4uBUYoCL1WjyX4TkEfRuJgtCWgTD2cyJBab3cOY04gBuae=Q@mail.gmail.com>
-Content-Language: en-US
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F27839B04-cXZ6iGhjG0i+xgsn/SD5JjJ2aSJ780jGSxCzGc5ayCJWk0Htik3J/w@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -19,139 +19,215 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Samuel Just <sam.just-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Cc: "Sage Weil (sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org)" <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Somnath Roy <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>
+Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-Q3JlYXRlZCB0aGUgZm9sbG93aW5nIHRyYWNrZXIgYW5kIGFzc2lnbmVkIHRvIG1lLg0KDQpodHRw
-Oi8vdHJhY2tlci5jZXBoLmNvbS9pc3N1ZXMvOTM4NA0KDQpUaGFua3MgJiBSZWdhcmRzDQpTb21u
-YXRoDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBTYW11ZWwgSnVzdCBbbWFp
-bHRvOnNhbS5qdXN0QGlua3RhbmsuY29tXQ0KU2VudDogTW9uZGF5LCBTZXB0ZW1iZXIgMDgsIDIw
-MTQgNToyMiBQTQ0KVG86IFNvbW5hdGggUm95DQpDYzogU2FnZSBXZWlsIChzd2VpbEByZWRoYXQu
-Y29tKTsgY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc7IGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5j
-b20NClN1YmplY3Q6IFJlOiBPU0QgaXMgY3Jhc2hpbmcgd2hpbGUgcnVubmluZyBhZG1pbiBzb2Nr
-ZXQNCg0KVGhhdCBzZWVtcyByZWFzb25hYmxlLiAgQnVnIGF3YXkhDQotU2FtDQoNCk9uIE1vbiwg
-U2VwIDgsIDIwMTQgYXQgNToxMSBQTSwgU29tbmF0aCBSb3kgPFNvbW5hdGguUm95QHNhbmRpc2su
-Y29tPiB3cm90ZToNCj4gSGkgU2FnZS9TYW0sDQo+DQo+DQo+DQo+IEkgZmFjZWQgYSBjcmFzaCBp
-biBPU0Qgd2l0aCBsYXRlc3QgQ2VwaCBtYXN0ZXIuIEhlcmUgaXMgdGhlIGxvZyB0cmFjZQ0KPiBm
-b3IgdGhlIHNhbWUuDQo+DQo+DQo+DQo+IGNlcGggdmVyc2lvbiAwLjg1LTY3Ny1nZDU3NzdjNA0K
-PiAoZDU3NzdjNDIxNTQ4ZTdmMDM5YmIyYzc3Y2IwZGYyZTljNzQwNDcyMykNCj4NCj4gMTogY2Vw
-aC1vc2QoKSBbMHg5OTBkZWZdDQo+DQo+IDI6ICgoKSsweGZiYjApIFsweDdmNzJhZTZlNmJiMF0N
-Cj4NCj4gMzogKGdzaWduYWwoKSsweDM3KSBbMHg3ZjcyYWNjMDhmNzddDQo+DQo+IDQ6IChhYm9y
-dCgpKzB4MTQ4KSBbMHg3ZjcyYWNjMGM1ZThdDQo+DQo+IDU6IChfX2dudV9jeHg6Ol9fdmVyYm9z
-ZV90ZXJtaW5hdGVfaGFuZGxlcigpKzB4MTU1KSBbMHg3ZjcyYWQ1MTQ2ZTVdDQo+DQo+IDY6ICgo
-KSsweDVlODU2KSBbMHg3ZjcyYWQ1MTI4NTZdDQo+DQo+IDc6ICgoKSsweDVlODgzKSBbMHg3Zjcy
-YWQ1MTI4ODNdDQo+DQo+IDg6ICgoKSsweDVlYWFlKSBbMHg3ZjcyYWQ1MTJhYWVdDQo+DQo+IDk6
-IChjZXBoOjpidWZmZXI6Omxpc3Q6OnN1YnN0cl9vZihjZXBoOjpidWZmZXI6Omxpc3QgY29uc3Qm
-LCB1bnNpZ25lZA0KPiBpbnQsIHVuc2lnbmVkIGludCkrMHgyNzcpIFsweGE4ODc0N10NCj4NCj4g
-MTA6IChjZXBoOjpidWZmZXI6Omxpc3Q6OndyaXRlKGludCwgaW50LCBzdGQ6Om9zdHJlYW0mKSBj
-b25zdCsweDgxKQ0KPiBbMHhhODk1NDFdDQo+DQo+IDExOiAob3BlcmF0b3I8PChzdGQ6Om9zdHJl
-YW0mLCBPU0RPcCBjb25zdCYpKzB4MWY2KSBbMHg3MTdhMTZdDQo+DQo+IDEyOiAoTU9TRE9wOjpw
-cmludChzdGQ6Om9zdHJlYW0mKSBjb25zdCsweDE3MikgWzB4NmU1ZTMyXQ0KPg0KPiAxMzogKFRy
-YWNrZWRPcDo6ZHVtcCh1dGltZV90LCBjZXBoOjpGb3JtYXR0ZXIqKSBjb25zdCsweDIyMykNCj4g
-WzB4NmI2NDgzXQ0KPg0KPiAxNDogKE9wVHJhY2tlcjo6ZHVtcF9vcHNfaW5fZmxpZ2h0KGNlcGg6
-OkZvcm1hdHRlciopKzB4YTcpIFsweDZiNzA1N10NCj4NCj4gMTU6IChPU0Q6OmFzb2tfY29tbWFu
-ZChzdGQ6OnN0cmluZywgc3RkOjptYXA8c3RkOjpzdHJpbmcsDQo+IGJvb3N0Ojp2YXJpYW50PHN0
-ZDo6c3RyaW5nLCBib29sLCBsb25nLCBkb3VibGUsDQo+IHN0ZDo6dmVjdG9yPHN0ZDo6c3RyaW5n
-LCBzdGQ6OmFsbG9jYXRvcjxzdGQ6OnN0cmluZz4gPiwNCj4gYm9vc3Q6OmRldGFpbDo6dmFyaWFu
-dDo6dm9pZF8sIGJvb3N0OjpkZXRhaWw6OnZhcmlhbnQ6OnZvaWRfLA0KPiBib29zdDo6ZGV0YWls
-Ojp2YXJpYW50Ojp2b2lkXywgYm9vc3Q6OmRldGFpbDo6dmFyaWFudDo6dm9pZF8sDQo+IGJvb3N0
-OjpkZXRhaWw6OnZhcmlhbnQ6OnZvaWRfLCBib29zdDo6ZGV0YWlsOjp2YXJpYW50Ojp2b2lkXywN
-Cj4gYm9vc3Q6OmRldGFpbDo6dmFyaWFudDo6dm9pZF8sIGJvb3N0OjpkZXRhaWw6OnZhcmlhbnQ6
-OnZvaWRfLA0KPiBib29zdDo6ZGV0YWlsOjp2YXJpYW50Ojp2b2lkXywgYm9vc3Q6OmRldGFpbDo6
-dmFyaWFudDo6dm9pZF8sDQo+IGJvb3N0OjpkZXRhaWw6OnZhcmlhbnQ6OnZvaWRfLCBib29zdDo6
-ZGV0YWlsOjp2YXJpYW50Ojp2b2lkXywNCj4gYm9vc3Q6OmRldGFpbDo6dmFyaWFudDo6dm9pZF8s
-IGJvb3N0OjpkZXRhaWw6OnZhcmlhbnQ6OnZvaWRfLA0KPiBib29zdDo6ZGV0YWlsOjp2YXJpYW50
-Ojp2b2lkXz4sIHN0ZDo6bGVzczxzdGQ6OnN0cmluZz4sDQo+IHN0ZDo6YWxsb2NhdG9yPHN0ZDo6
-cGFpcjxzdGQ6OnN0cmluZyBjb25zdCwNCj4gYm9vc3Q6OnZhcmlhbnQ8c3RkOjpzdHJpbmcsIGJv
-b2wsIGxvbmcsIGRvdWJsZSwNCj4gc3RkOjp2ZWN0b3I8c3RkOjpzdHJpbmcsIHN0ZDo6YWxsb2Nh
-dG9yPHN0ZDo6c3RyaW5nPiA+LA0KPiBib29zdDo6ZGV0YWlsOjp2YXJpYW50Ojp2b2lkXywgYm9v
-c3Q6OmRldGFpbDo6dmFyaWFudDo6dm9pZF8sDQo+IGJvb3N0OjpkZXRhaWw6OnZhcmlhbnQ6OnZv
-aWRfLCBib29zdDo6ZGV0YWlsOjp2YXJpYW50Ojp2b2lkXywNCj4gYm9vc3Q6OmRldGFpbDo6dmFy
-aWFudDo6dm9pZF8sIGJvb3N0OjpkZXRhaWw6OnZhcmlhbnQ6OnZvaWRfLA0KPiBib29zdDo6ZGV0
-YWlsOjp2YXJpYW50Ojp2b2lkXywgYm9vc3Q6OmRldGFpbDo6dmFyaWFudDo6dm9pZF8sDQo+IGJv
-b3N0OjpkZXRhaWw6OnZhcmlhbnQ6OnZvaWRfLCBib29zdDo6ZGV0YWlsOjp2YXJpYW50Ojp2b2lk
-XywNCj4gYm9vc3Q6OmRldGFpbDo6dmFyaWFudDo6dm9pZF8sIGJvb3N0OjpkZXRhaWw6OnZhcmlh
-bnQ6OnZvaWRfLA0KPiBib29zdDo6ZGV0YWlsOjp2YXJpYW50Ojp2b2lkXywgYm9vc3Q6OmRldGFp
-bDo6dmFyaWFudDo6dm9pZF8sDQo+IGJvb3N0OjpkZXRhaWw6OnZhcmlhbnQ6OnZvaWRfPiA+ID4g
-PiYsIHN0ZDo6c3RyaW5nLA0KPiBzdGQ6Om9zdHJlYW0mKSsweDFkNykgWzB4NjEyY2I3XQ0KPg0K
-PiAxNjogKE9TRFNvY2tldEhvb2s6OmNhbGwoc3RkOjpzdHJpbmcsIHN0ZDo6bWFwPHN0ZDo6c3Ry
-aW5nLA0KPiBib29zdDo6dmFyaWFudDxzdGQ6OnN0cmluZywgYm9vbCwgbG9uZywgZG91YmxlLA0K
-PiBzdGQ6OnZlY3RvcjxzdGQ6OnN0cmluZywgc3RkOjphbGxvY2F0b3I8c3RkOjpzdHJpbmc+ID4s
-DQo+IGJvb3N0OjpkZXRhaWw6OnZhcmlhbnQ6OnZvaWRfLCBib29zdDo6ZGV0YWlsOjp2YXJpYW50
-Ojp2b2lkXywNCj4gYm9vc3Q6OmRldGFpbDo6dmFyaWFudDo6dm9pZF8sIGJvb3N0OjpkZXRhaWw6
-OnZhcmlhbnQ6OnZvaWRfLA0KPiBib29zdDo6ZGV0YWlsOjp2YXJpYW50Ojp2b2lkXywgYm9vc3Q6
-OmRldGFpbDo6dmFyaWFudDo6dm9pZF8sDQo+IGJvb3N0OjpkZXRhaWw6OnZhcmlhbnQ6OnZvaWRf
-LCBib29zdDo6ZGV0YWlsOjp2YXJpYW50Ojp2b2lkXywNCj4gYm9vc3Q6OmRldGFpbDo6dmFyaWFu
-dDo6dm9pZF8sIGJvb3N0OjpkZXRhaWw6OnZhcmlhbnQ6OnZvaWRfLA0KPiBib29zdDo6ZGV0YWls
-Ojp2YXJpYW50Ojp2b2lkXywgYm9vc3Q6OmRldGFpbDo6dmFyaWFudDo6dm9pZF8sDQo+IGJvb3N0
-OjpkZXRhaWw6OnZhcmlhbnQ6OnZvaWRfLCBib29zdDo6ZGV0YWlsOjp2YXJpYW50Ojp2b2lkXywN
-Cj4gYm9vc3Q6OmRldGFpbDo6dmFyaWFudDo6dm9pZF8+LCBzdGQ6Omxlc3M8c3RkOjpzdHJpbmc+
-LA0KPiBzdGQ6OmFsbG9jYXRvcjxzdGQ6OnBhaXI8c3RkOjpzdHJpbmcgY29uc3QsDQo+IGJvb3N0
-Ojp2YXJpYW50PHN0ZDo6c3RyaW5nLCBib29sLCBsb25nLCBkb3VibGUsDQo+IHN0ZDo6dmVjdG9y
-PHN0ZDo6c3RyaW5nLCBzdGQ6OmFsbG9jYXRvcjxzdGQ6OnN0cmluZz4gPiwNCj4gYm9vc3Q6OmRl
-dGFpbDo6dmFyaWFudDo6dm9pZF8sIGJvb3N0OjpkZXRhaWw6OnZhcmlhbnQ6OnZvaWRfLA0KPiBi
-b29zdDo6ZGV0YWlsOjp2YXJpYW50Ojp2b2lkXywgYm9vc3Q6OmRldGFpbDo6dmFyaWFudDo6dm9p
-ZF8sDQo+IGJvb3N0OjpkZXRhaWw6OnZhcmlhbnQ6OnZvaWRfLCBib29zdDo6ZGV0YWlsOjp2YXJp
-YW50Ojp2b2lkXywNCj4gYm9vc3Q6OmRldGFpbDo6dmFyaWFudDo6dm9pZF8sIGJvb3N0OjpkZXRh
-aWw6OnZhcmlhbnQ6OnZvaWRfLA0KPiBib29zdDo6ZGV0YWlsOjp2YXJpYW50Ojp2b2lkXywgYm9v
-c3Q6OmRldGFpbDo6dmFyaWFudDo6dm9pZF8sDQo+IGJvb3N0OjpkZXRhaWw6OnZhcmlhbnQ6OnZv
-aWRfLCBib29zdDo6ZGV0YWlsOjp2YXJpYW50Ojp2b2lkXywNCj4gYm9vc3Q6OmRldGFpbDo6dmFy
-aWFudDo6dm9pZF8sIGJvb3N0OjpkZXRhaWw6OnZhcmlhbnQ6OnZvaWRfLA0KPiBib29zdDo6ZGV0
-YWlsOjp2YXJpYW50Ojp2b2lkXz4gPiA+ID4mLCBzdGQ6OnN0cmluZywNCj4gY2VwaDo6YnVmZmVy
-OjpsaXN0JikrMHg2NykgWzB4NjdjOGI3XQ0KPg0KPiAxNzogKEFkbWluU29ja2V0Ojpkb19hY2Nl
-cHQoKSsweDEwMDcpIFsweGE3OTgxN10NCj4NCj4gMTg6IChBZG1pblNvY2tldDo6ZW50cnkoKSsw
-eDI1OCkgWzB4YTdiNDQ4XQ0KPg0KPiAxOTogKCgpKzB4N2Y2ZSkgWzB4N2Y3MmFlNmRlZjZlXQ0K
-Pg0KPiAyMDogKGNsb25lKCkrMHg2ZCkgWzB4N2Y3MmFjY2NjOWNkXQ0KPg0KPiBOT1RFOiBhIGNv
-cHkgb2YgdGhlIGV4ZWN1dGFibGUsIG9yIGBvYmpkdW1wIC1yZFMgPGV4ZWN1dGFibGU+YCBpcw0K
-PiBuZWVkZWQgdG8gaW50ZXJwcmV0IHRoaXMuDQo+DQo+DQo+DQo+IFN0ZXBzIHRvIHJlcHJvZHVj
-ZToNCj4NCj4gLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCj4NCj4NCj4NCj4gMS4gICAgICAgUnVu
-IGlvcw0KPg0KPiAyLiAgICAgICBXaGlsZSBpb3MgcnVubmluZyAsIHJ1biB0aGUgZm9sbG93aW5n
-IGNvbW1hbmQgY29udGludW91c2x5Lg0KPg0KPg0KPg0KPiDigJxjZXBoIC0tYWRtaW4tZGFlbW9u
-IC92YXIvcnVuL2NlcGgvY2VwaC1vc2QuMC5hc29rIGR1bXBfb3BzX2luX2ZsaWdodOKAnQ0KPg0K
-Pg0KPg0KPiAzLiAgICAgICBBdCBzb21lIHBvaW50IHRoZSBvc2Qgd2lsbCBiZSBjcmFzaGVkLg0K
-Pg0KPg0KPg0KPiBJIHRoaW5rIEkgaGF2ZSByb290IGNhdXNlZCBpdC4uDQo+DQo+DQo+DQo+IDEu
-ICAgICAgIE9wVHJhY2tlcjo6UmVtb3ZlT25EZWxldGU6Om9wZXJhdG9yKCkgaXMgY2FsbGluZw0K
-PiBvcC0+X3VucmVnaXN0ZXJlZCgpIHdoaWNoIGNsZWFycyBvdXQgbWVzc2FnZS0+ZGF0YSgpIGFu
-ZCBwYXlsb2FkDQo+DQo+IDIuICAgICAgIEFmdGVyIHRoYXQsIGlmIG9wdHJhY2tpbmcgaXMgZW5h
-YmxlZCB3ZSBhcmUgY2FsbGluZw0KPiB1bnJlZ2lzdGVyX2luZmxpZ2h0X29wKCkgd2hpY2ggcmVt
-b3ZlZCB0aGUgb3AgZnJvbSB0aGUgeGxpc3QuDQo+DQo+IDMuICAgICAgIE5vdywgd2hpbGUgZHVt
-cGluZyBvcHMsIHdlIGFyZSBjYWxsaW5nDQo+IF9kdW1wX29wX2Rlc2NyaXB0b3JfdW5sb2NrZWQo
-KSBmcm9tIFRyYWNrZWRPUDo6ZHVtcCwgd2hpY2ggdHJpZXMgdG8NCj4gcHJpbnQgdGhlIG1lc3Nh
-Z2UuDQo+DQo+IDQuICAgICAgIFNvLCB0aGVyZSBpcyBhIHJhY2UgY29uZGl0aW9uIHdoZW4gaXQg
-dHJpZXMgdG8gcHJpbnQgdGhlIG1lc3NhZ2UNCj4gd2hvZXMgb3BzIChkYXRhKSBmaWVsZCBpcyBh
-bHJlYWR5IGNsZWFyZWQuDQo+DQo+DQo+DQo+IEZpeCBjb3VsZCBiZSwgY2FsbCB0aGlzIG9wLT5f
-dW5yZWdpc3RlcmVkIChpbiBjYXNlIG9wdHJhY2tpbmcgaXMNCj4gZW5hYmxlZCkgYWZ0ZXIgaXQg
-aXMgcmVtb3ZlZCBmcm9tIHhsaXN0Lg0KPg0KPg0KPg0KPiBXaXRoIHRoaXMgZml4LCBJIGFtIG5v
-dCBnZXR0aW5nIHRoZSBjcmFzaCBhbnltb3JlLg0KPg0KPg0KPg0KPiBJZiBteSBvYnNlcnZhdGlv
-biBpcyBjb3JyZWN0LCBwbGVhc2UgbGV0IG1lIGtub3cuIEkgd2lsbCByYWlzZSBhIGJ1Zw0KPiBh
-bmQgd2lsbCBmaXggdGhhdCBhcyBwYXJ0IG9mIHRoZSBvdmVyYWxsIG9wdHJhY2tlciBwZXJmb3Jt
-YW5jZQ0KPiBpbXByb3ZlbWVudCAoSSB3aWxsIHN1Ym1pdCB0aGF0IHB1bGwgcmVxdWVzdCBzb29u
-KS4NCj4NCj4NCj4NCj4gVGhhbmtzICYgUmVnYXJkcw0KPg0KPiBTb21uYXRoDQo+DQo+DQo+IF9f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fDQo+DQo+IFBMRUFTRSBOT1RFOiBUaGUgaW5m
-b3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBtYWlsIG1lc3NhZ2UNCj4gaXMg
-aW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRlZCByZWNpcGllbnQocykg
-bmFtZWQNCj4gYWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNzYWdlIGlzIG5vdCB0aGUg
-aW50ZW5kZWQgcmVjaXBpZW50LA0KPiB5b3UgYXJlIGhlcmVieSBub3RpZmllZCB0aGF0IHlvdSBo
-YXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvcg0KPiBhbmQgdGhhdCBhbnkgcmV2aWV3
-LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2YgdGhpcw0KPiBtZXNz
-YWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMNCj4g
-Y29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHRlbGVw
-aG9uZSBvcg0KPiBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVzdHJv
-eSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YNCj4gdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lv
-biAod2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4N
-Cj4NCg0KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCg0KUExFQVNFIE5PVEU6IFRo
-ZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVzc2FnZSBp
-cyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVudChz
-KSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRoZSBp
-bnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhhdmUg
-cmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZpZXcsIGRpc3Nl
-bWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzIG1lc3NhZ2UgaXMgc3Ry
-aWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0aW9u
-IGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25lIG9yIGUtbWFp
-bCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxsIGNv
-cGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQgY29w
-aWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KDQpfX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApj
-ZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5j
-Z2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
+On Tue, 9 Sep 2014, Somnath Roy wrote:
+> Created the following tracker and assigned to me.
+> 
+> http://tracker.ceph.com/issues/9384
+
+By the way, this might be the same as or similar to
+http://tracker.ceph.com/issues/8885
+
+Thanks!
+sage
+
+
+> 
+> Thanks & Regards
+> Somnath
+> 
+> -----Original Message-----
+> From: Samuel Just [mailto:sam.just-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org]
+> Sent: Monday, September 08, 2014 5:22 PM
+> To: Somnath Roy
+> Cc: Sage Weil (sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org); ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> Subject: Re: OSD is crashing while running admin socket
+> 
+> That seems reasonable.  Bug away!
+> -Sam
+> 
+> On Mon, Sep 8, 2014 at 5:11 PM, Somnath Roy <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org> wrote:
+> > Hi Sage/Sam,
+> >
+> >
+> >
+> > I faced a crash in OSD with latest Ceph master. Here is the log trace
+> > for the same.
+> >
+> >
+> >
+> > ceph version 0.85-677-gd5777c4
+> > (d5777c421548e7f039bb2c77cb0df2e9c7404723)
+> >
+> > 1: ceph-osd() [0x990def]
+> >
+> > 2: (()+0xfbb0) [0x7f72ae6e6bb0]
+> >
+> > 3: (gsignal()+0x37) [0x7f72acc08f77]
+> >
+> > 4: (abort()+0x148) [0x7f72acc0c5e8]
+> >
+> > 5: (__gnu_cxx::__verbose_terminate_handler()+0x155) [0x7f72ad5146e5]
+> >
+> > 6: (()+0x5e856) [0x7f72ad512856]
+> >
+> > 7: (()+0x5e883) [0x7f72ad512883]
+> >
+> > 8: (()+0x5eaae) [0x7f72ad512aae]
+> >
+> > 9: (ceph::buffer::list::substr_of(ceph::buffer::list const&, unsigned
+> > int, unsigned int)+0x277) [0xa88747]
+> >
+> > 10: (ceph::buffer::list::write(int, int, std::ostream&) const+0x81)
+> > [0xa89541]
+> >
+> > 11: (operator<<(std::ostream&, OSDOp const&)+0x1f6) [0x717a16]
+> >
+> > 12: (MOSDOp::print(std::ostream&) const+0x172) [0x6e5e32]
+> >
+> > 13: (TrackedOp::dump(utime_t, ceph::Formatter*) const+0x223)
+> > [0x6b6483]
+> >
+> > 14: (OpTracker::dump_ops_in_flight(ceph::Formatter*)+0xa7) [0x6b7057]
+> >
+> > 15: (OSD::asok_command(std::string, std::map<std::string,
+> > boost::variant<std::string, bool, long, double,
+> > std::vector<std::string, std::allocator<std::string> >,
+> > boost::detail::variant::void_, boost::detail::variant::void_,
+> > boost::detail::variant::void_, boost::detail::variant::void_,
+> > boost::detail::variant::void_, boost::detail::variant::void_,
+> > boost::detail::variant::void_, boost::detail::variant::void_,
+> > boost::detail::variant::void_, boost::detail::variant::void_,
+> > boost::detail::variant::void_, boost::detail::variant::void_,
+> > boost::detail::variant::void_, boost::detail::variant::void_,
+> > boost::detail::variant::void_>, std::less<std::string>,
+> > std::allocator<std::pair<std::string const,
+> > boost::variant<std::string, bool, long, double,
+> > std::vector<std::string, std::allocator<std::string> >,
+> > boost::detail::variant::void_, boost::detail::variant::void_,
+> > boost::detail::variant::void_, boost::detail::variant::void_,
+> > boost::detail::variant::void_, boost::detail::variant::void_,
+> > boost::detail::variant::void_, boost::detail::variant::void_,
+> > boost::detail::variant::void_, boost::detail::variant::void_,
+> > boost::detail::variant::void_, boost::detail::variant::void_,
+> > boost::detail::variant::void_, boost::detail::variant::void_,
+> > boost::detail::variant::void_> > > >&, std::string,
+> > std::ostream&)+0x1d7) [0x612cb7]
+> >
+> > 16: (OSDSocketHook::call(std::string, std::map<std::string,
+> > boost::variant<std::string, bool, long, double,
+> > std::vector<std::string, std::allocator<std::string> >,
+> > boost::detail::variant::void_, boost::detail::variant::void_,
+> > boost::detail::variant::void_, boost::detail::variant::void_,
+> > boost::detail::variant::void_, boost::detail::variant::void_,
+> > boost::detail::variant::void_, boost::detail::variant::void_,
+> > boost::detail::variant::void_, boost::detail::variant::void_,
+> > boost::detail::variant::void_, boost::detail::variant::void_,
+> > boost::detail::variant::void_, boost::detail::variant::void_,
+> > boost::detail::variant::void_>, std::less<std::string>,
+> > std::allocator<std::pair<std::string const,
+> > boost::variant<std::string, bool, long, double,
+> > std::vector<std::string, std::allocator<std::string> >,
+> > boost::detail::variant::void_, boost::detail::variant::void_,
+> > boost::detail::variant::void_, boost::detail::variant::void_,
+> > boost::detail::variant::void_, boost::detail::variant::void_,
+> > boost::detail::variant::void_, boost::detail::variant::void_,
+> > boost::detail::variant::void_, boost::detail::variant::void_,
+> > boost::detail::variant::void_, boost::detail::variant::void_,
+> > boost::detail::variant::void_, boost::detail::variant::void_,
+> > boost::detail::variant::void_> > > >&, std::string,
+> > ceph::buffer::list&)+0x67) [0x67c8b7]
+> >
+> > 17: (AdminSocket::do_accept()+0x1007) [0xa79817]
+> >
+> > 18: (AdminSocket::entry()+0x258) [0xa7b448]
+> >
+> > 19: (()+0x7f6e) [0x7f72ae6def6e]
+> >
+> > 20: (clone()+0x6d) [0x7f72acccc9cd]
+> >
+> > NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+> > needed to interpret this.
+> >
+> >
+> >
+> > Steps to reproduce:
+> >
+> > -----------------------
+> >
+> >
+> >
+> > 1.       Run ios
+> >
+> > 2.       While ios running , run the following command continuously.
+> >
+> >
+> >
+> > ?ceph --admin-daemon /var/run/ceph/ceph-osd.0.asok dump_ops_in_flight?
+> >
+> >
+> >
+> > 3.       At some point the osd will be crashed.
+> >
+> >
+> >
+> > I think I have root caused it..
+> >
+> >
+> >
+> > 1.       OpTracker::RemoveOnDelete::operator() is calling
+> > op->_unregistered() which clears out message->data() and payload
+> >
+> > 2.       After that, if optracking is enabled we are calling
+> > unregister_inflight_op() which removed the op from the xlist.
+> >
+> > 3.       Now, while dumping ops, we are calling
+> > _dump_op_descriptor_unlocked() from TrackedOP::dump, which tries to
+> > print the message.
+> >
+> > 4.       So, there is a race condition when it tries to print the message
+> > whoes ops (data) field is already cleared.
+> >
+> >
+> >
+> > Fix could be, call this op->_unregistered (in case optracking is
+> > enabled) after it is removed from xlist.
+> >
+> >
+> >
+> > With this fix, I am not getting the crash anymore.
+> >
+> >
+> >
+> > If my observation is correct, please let me know. I will raise a bug
+> > and will fix that as part of the overall optracker performance
+> > improvement (I will submit that pull request soon).
+> >
+> >
+> >
+> > Thanks & Regards
+> >
+> > Somnath
+> >
+> >
+> > ________________________________
+> >
+> > PLEASE NOTE: The information contained in this electronic mail message
+> > is intended only for the use of the designated recipient(s) named
+> > above. If the reader of this message is not the intended recipient,
+> > you are hereby notified that you have received this message in error
+> > and that any review, dissemination, distribution, or copying of this
+> > message is strictly prohibited. If you have received this
+> > communication in error, please notify the sender by telephone or
+> > e-mail (as shown above) immediately and destroy any and all copies of
+> > this message in your possession (whether hard copies or electronically stored copies).
+> >
+> 
+> ________________________________
+> 
+> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+> 
+> 
