@@ -1,504 +1,441 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: FW: CURSH optimization for unbalanced pg distribution
-Date: Tue, 09 Sep 2014 21:16:36 -0500
-Message-ID: <540FB484.6050005@redhat.com>
-References: <51FC7A40FB29414D88A121A7FFEF9A4710DC2188@SHSMSX104.ccr.corp.intel.com> <53299E33.5060809@inktank.com> <alpine.DEB.2.00.1403190814520.316@cobra.newdream.net> <51FC7A40FB29414D88A121A7FFEF9A4710DC3018@SHSMSX104.ccr.corp.intel.com> <540F0252.7040609@dachary.org> <51FC7A40FB29414D88A121A7FFEF9A4710F570D6@SHSMSX104.ccr.corp.intel.com> <alpine.DEB.2.00.1409091805530.17200@cobra.newdream.net> <51FC7A40FB29414D88A121A7FFEF9A4710F5D3CF@SHSMSX104.ccr.corp.intel.com>
+From: "He, Yujie" <yujie.he@intel.com>
+Subject: RE: FW: CURSH optimization for unbalanced pg distribution
+Date: Wed, 10 Sep 2014 02:56:42 +0000
+Message-ID: <D86DC54A064CFF4B94C071A8FA3DAA95B7A0A8@SHSMSX103.ccr.corp.intel.com>
+References: <51FC7A40FB29414D88A121A7FFEF9A4710DC2188@SHSMSX104.ccr.corp.intel.com>
+ <53299E33.5060809@inktank.com>
+ <alpine.DEB.2.00.1403190814520.316@cobra.newdream.net>
+ <51FC7A40FB29414D88A121A7FFEF9A4710DC3018@SHSMSX104.ccr.corp.intel.com>
+ <540F0252.7040609@dachary.org>
+ <51FC7A40FB29414D88A121A7FFEF9A4710F570D6@SHSMSX104.ccr.corp.intel.com>
+ <alpine.DEB.2.00.1409091805530.17200@cobra.newdream.net>
+ <51FC7A40FB29414D88A121A7FFEF9A4710F5D3CF@SHSMSX104.ccr.corp.intel.com>
+ <540FB484.6050005@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=GB2312
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f181.google.com ([209.85.213.181]:41910 "EHLO
-	mail-ig0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751222AbaIJCQj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Sep 2014 22:16:39 -0400
-Received: by mail-ig0-f181.google.com with SMTP id h15so5621565igd.2
-        for <ceph-devel@vger.kernel.org>; Tue, 09 Sep 2014 19:16:39 -0700 (PDT)
-In-Reply-To: <51FC7A40FB29414D88A121A7FFEF9A4710F5D3CF@SHSMSX104.ccr.corp.intel.com>
+Received: from mga11.intel.com ([192.55.52.93]:2639 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751501AbaIJC5O (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 9 Sep 2014 22:57:14 -0400
+In-Reply-To: <540FB484.6050005@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Zhang, Jian" <jian.zhang@intel.com>, Sage Weil <sweil@redhat.com>
-Cc: Loic Dachary <loic@dachary.org>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "He, Yujie" <yujie.he@intel.com>
+To: Mark Nelson <mark.nelson@inktank.com>, "Zhang, Jian" <jian.zhang@intel.com>, Sage Weil <sweil@redhat.com>
+Cc: Loic Dachary <loic@dachary.org>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Very interesting!  I will need to sit down and read through the
-attachments tomorrow.  Did you find that this method was superior to
-simply reweighing the OSDs based on the quality of the distribution
-using the Jenkins hash?  Clearly this isn't easy with lots of pools,
-though with some fancy crush rule management you might be able to get
-around it to a limited extent.
-
-I haven't done any extensive analysis, but I've also wondered if simply
-replacing Jenkins with something like City, Murmur3, or Spooky might
-improve distribution quality (and especially whether it would improve
-distribution quality given small changes in the input).
-
-Really glad you guys are looking into this!
-
-Mark
-
-On 09/09/2014 08:32 PM, Zhang, Jian wrote:
-> Thanks.
->=20
-> Created a feature here: http://tracker.ceph.com/issues/9410, to inclu=
-de all the attachments. .
-> http://tracker.ceph.com/attachments/download/1383/adaptive-crush-modi=
-fy.patch
-> http://tracker.ceph.com/attachments/download/1384/crush_proposals.pdf
-> http://tracker.ceph.com/attachments/download/1385/crush_optimization.=
-pdf
->=20
->=20
-> Hi all,
->      Several months ago we met an issue of read performance issues (1=
-7% degradation) when working on ceph object storage performance evaluat=
-ion with 10M objects (scaling from 10K objects to 1Million objects) , a=
-nd found the root cause is unbalanced pg distribution among all osd dis=
-ks, leading to unbalanced data distribution. We did some further invest=
-igation then and identified that CRUSH failed to map pgs evenly to each=
- osd. Please refer to the attached pdf (crush_proposals) for details.
->=20
-> Key Message:
->      As mentioned in the attached pdf, we described possible optimiza=
-tion proposals (http://tracker.ceph.com/attachments/download/1384/crush=
-_proposals.pdf) for CRUSH and got some feedback from community (http://=
-permalink.gmane.org/gmane.comp.file-systems.ceph.devel/18979 ) . Sage s=
-uggested us take the idea of "Change placement strategy only for step o=
-f selecting devices from hosts", by adding a new bucket type called "li=
-near", and applying a modulo-like hash function to this kind of buckets=
- to achieve balanced distribution. We followed this suggestion and desi=
-gned an optimized CRUSH algorithm, with new hash methods and an adaptiv=
-e module. Please refer to the Design and Implementation part for detail=
-s. We also wrote some POC for it, see the attached patch. And as a resu=
-lt, we got more than 10% read performance improvement using the optimiz=
-ed CRUSH algorithm.
->=20
-> Design and Implementation:
-> 1.Problem Identification
-> 1.1 Input key (pps) space of CRUSH is not uniform
->      Since PG# on the nested devices of a host is not uniform even if=
- we select the device using simple modulo operation, we decide to chang=
-e the algorithm of hashing raw pg to pps.
-> 1.2 Algorithm of selecting items from buckets is not uniform
->      After we get uniform input key space, we should make the procedu=
-re of selecting devices from host be uniform. Since current CRUSH algor=
-ithm uses Jenkins hash based strategies and failed to reach the goal, w=
-e decide to add a new bucket type and apply new (modulo based) hash alg=
-orithm to make it.
-> 2.Design
-> 2.1New pps hash algorithm
->      We design the new pps hash algorithm based on the "Congruential =
-pseudo-random number generator" (http://comjnl.oxfordjournals.org/conte=
-nt/10/1/74.full.pdf) . It defines a bijection between the original sequ=
-ence {0, ...,2^N-1} and some permutation of it. In other words, given d=
-ifferent keys between 0 and 2^N-1, the generator will produce different=
- integers, but within the same range {0,...,2^N-1}.
->      Assume there are np PGs in a pool, we can regard pgid (0=A1=DCpg=
-id<2^n, np=A1=DC2^n<2*np) as the key, and then it will be hashed into a=
- pps value between 0 and 2^n-1. Since PG# in a pool is usually 2^N, the=
- generator just shuffles the original pgid sequence as output in this c=
-ase, making the key space consisting of a permutation of {0,...,2^n-1},=
- which achieves the best uniformity. Moreover, poolid can be regarded a=
-s a seed in the generator, producing different pps value even with the =
-same pgid but different poolid. Therefore, pgid sequences of various po=
-ols are mapped into distinct pps sequences, getting rid of PG overlappi=
-ng.
-> 2.2 New bucket type, Linear
->      We introduce a new bucket type called "linear", and apply a new =
-modulo based hash algorithm to it. As the pps values assigned to each h=
-ost are a pseudo-random subset of the original permutation and is possi=
-bly out of uniformity, in which situation applying modulo operation dir=
-ectly on integers in the subset cannot produce balanced distribution am=
-ong disks in the host. To decrease deviation of the subset, we apply a =
-balance parameter 1/balance_param to the key before conducting the modu=
-lo method.
->      For osd failure and recovery, it assumes that items nested in th=
-is kind of bucket will not be removed, nor new items are added, same as=
- the UNIFORM bucket. Linear host will not introduce more data movement =
-than the uniform bucket.
-> 2.3 Adaptive Strategy
->      Since there is no one constant balance parameter applying for al=
-l cases that will result in the best PG distribution. We make it an ada=
-ptive procedure by adjusting the balance parameter automatically during=
- the preparation for creating a new pool, according to different cluste=
-r topology, PG# and replica#, in order to gain a most uniform distribut=
-ion.
->      1) Try different balance_param when preparing for a new pool
->      a. Iteratively call CRUSH(map, ruleno, x, balance_param) to get =
-corresponding PG distribution with different balance_params
-> =A1=A1=A1=A1b. Calculate stdev of PG# among all osds
-> =A1=A1  c. Choose the balance_param with the minimal stdev
->   	2) Add a member variable to pool struct pg_pool_t to save the best=
- balance_param value
->      The adaptive procedure can be described as following:
->      Input: cluster map, total PG number m, adaptive retry times n
->      Output: local optimal balance parameter balance_param min_pg_std=
-ev =3D MAX; balance_param =3D a; // initial value for trial from 0 to n=
- {
->      for pgid from 0 to m {
->          calculate pps using the new generator in 2.1;
->          for bucket b in cluster map // apply CRUSH algorithm
->              apply corresponding bucket hashing algorithm and get a o=
-sd list for pgid
->      }
->      calculate pg_stdev_a by gathering all osd lists; // stdev of PG =
-distribution among all osds
->      if pg_stdev_a < min_pg_stdev {
->          min_pg_stdev =3D pg_stdev_a;
->          balance_param =3D a;
->      }
->      adjust a to a new value;
-> }
->=20
->=20
-> Evaluation:
->      We evaluated the performance of optimized and current CRUSH in a=
- cluster consisting of 4 hosts, and each attaching with 10x1T disks. We=
- designed two test cases, for the first one, by creating a pool with 20=
-48 pgs, 2 replicas, preparing 100 million 128KB objects, and then evalu=
-ating read performance of these objects; for the second one, by creatin=
-g a pool with 2048 pgs, 3 replicas, preparing 1 million 10MB objects, a=
-nd then evaluating read performance of these objects.
->      We compared the PG & data distribution and read performance of t=
-he two CRUSH algorithms, and got results as follows:
-> 1.PG and data distribution is more balanced using optimized CRUSH alg=
-orithm
->      a) For 2048 PGs with 3 replicas, stdev of PG# on 40 osds decreas=
-es from 12.13 to 5.17; for 2048 PGs with 2 replicas, stdev of PG# on 40=
- osds decreases from 10.09 to 6.50
->      b) For 1 million 10MB objects with 3 replicas, stdev of disk use=
-% on 40 osds decreases from 0.068 to 0.026; for 100 million 128KB objec=
-ts with 2 replicas, stdev of disk use% on 40 osds decreases from 0.067 =
-to 0.042
-> 2.Large scaled performance is improved since data distribution is mor=
-e balanced
->      a) More than 10% performance improvement for 128K and 10M read
->      b) Write performance not impacted
-> Detailed performance data can be found in the http://tracker.ceph.com=
-/attachments/download/1385/crush_optimization.pdf .
->=20
-> We also created a pull request: https://github.com/ceph/ceph/pull/240=
-2
->=20
->=20
-> Thanks
-> Jian
->=20
->=20
-> -----Original Message-----
-> From: Sage Weil [mailto:sweil@redhat.com]
-> Sent: Wednesday, September 10, 2014 9:06 AM
-> To: Zhang, Jian
-> Cc: Loic Dachary; ceph-devel@vger.kernel.org; He, Yujie
-> Subject: RE: FW: CURSH optimization for unbalanced pg distribution
->=20
-> The lists are rejecting the email because of the big attachments.  Se=
-nd with links instead?
->=20
-> On Tue, 9 Sep 2014, Zhang, Jian wrote:
->=20
->> Yujie sent out the following email yesterday, but it seems it was mi=
-ssed. Resending it.
->>
->> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
->> Hi all,
->> ?  Several months ago we met an issue of read performance issues (17=
-% degradation) when working on ceph object storage performance evaluati=
-on with 10M objects (scaling from 10K objects to 1Million objects) , an=
-d found the root cause is unbalanced pg distribution among all osd disk=
-s, leading to unbalanced data distribution. We did some further investi=
-gation then and identified that CRUSH failed to map pgs evenly to each =
-osd. Please refer to the attached pdf (crush_proposals) for details.
->>
->> Key Message:
->> ?  As mentioned in the attached pdf, we described possible optimizat=
-ion proposals for CRUSH and got some feedback from community (http://pe=
-rmalink.gmane.org/gmane.comp.file-systems.ceph.devel/18979) . Sage sugg=
-ested us take the idea of "Change placement strategy only for step of s=
-electing devices from hosts", by adding a new bucket type called ?linea=
-r?, and applying a modulo-like hash function to this kind of buckets to=
- achieve balanced distribution. We followed this suggestion and designe=
-d an optimized CRUSH algorithm, with new hash methods and an adaptive m=
-odule. Please refer to the Design and Implementation part for details. =
-We also wrote some POC for it, see the attached patch. And as a result,=
- we got more than 10% read performance improvement using the optimized =
-CRUSH algorithm.
->>
->> Design and Implementation:
->> 1.   Problem Identification
->> 1.1  Input key (pps) space of CRUSH is not uniform
->>      Since PG# on the nested devices of a host is not uniform even i=
-f we select the device using simple modulo operation, we decide to chan=
-ge the algorithm of hashing raw pg to pps.
->> 1.2  Algorithm of selecting items from buckets is not uniform
->>      After we get uniform input key space, we should make the proced=
-ure of selecting devices from host be uniform. Since current CRUSH algo=
-rithm uses Jenkins hash based strategies and failed to reach the goal, =
-we decide to add a new bucket type and apply new (modulo based) hash al=
-gorithm to make it.
->> 2.   Design
->> 2.1  New pps hash algorithm
->>      We design the new pps hash algorithm based on the "Congruential=
- pseudo-random number generator" (http://comjnl.oxfordjournals.org/cont=
-ent/10/1/74.full.pdf) . It defines a bijection between the original seq=
-uence {0, ...,2^N-1} and some permutation of it. In other words, given =
-different keys between 0 and 2^N-1, the generator will produce differen=
-t integers, but within the same range {0,...,2^N-1}.
->>      Assume there are np PGs in a pool, we can regard pgid (0?pgid<2=
-^n, np?2^n<2*np) as the key, and then it will be hashed into a pps valu=
-e between 0 and 2^n-1. Since PG# in a pool is usually 2^N, the generato=
-r just shuffles the original pgid sequence as output in this case, maki=
-ng the key space consisting of a permutation of {0,...,2^n-1}, which ac=
-hieves the best uniformity. Moreover, poolid can be regarded as a seed =
-in the generator, producing different pps value even with the same pgid=
- but different poolid. Therefore, pgid sequences of various pools are m=
-apped into distinct pps sequences, getting rid of PG overlapping.
->> 2.2  New bucket type, Linear
->>      We introduce a new bucket type called "linear", and apply a new=
- modulo based hash algorithm to it. As the pps values assigned to each =
-host are a pseudo-random subset of the original permutation and is poss=
-ibly out of uniformity, in which situation applying modulo operation di=
-rectly on integers in the subset cannot produce balanced distribution a=
-mong disks in the host. To decrease deviation of the subset, we apply a=
- balance parameter 1/balance_param to the key before conducting the mod=
-ulo method.
->>      For osd failure and recovery, it assumes that items nested in t=
-his kind of bucket will not be removed, nor new items are added, same a=
-s the UNIFORM bucket. Linear host will not introduce more data movement=
- than the uniform bucket.
->> 2.3  Adaptive Strategy
->>      Since there is no one constant balance parameter applying for a=
-ll cases that will result in the best PG distribution. We make it an ad=
-aptive procedure by adjusting the balance parameter automatically durin=
-g the preparation for creating a new pool, according to different clust=
-er topology, PG# and replica#, in order to gain a most uniform distribu=
-tion.
->> ??1) Try different balance_param when preparing for a new pool
->> ????- Iteratively call CRUSH(map, ruleno, x, balance_param) to get
->> corresponding PG distribution with different balance_params
->> ????- Calculate stdev of PG# among all osds
->> ????- Choose the balance_param with the minimal stdev
->>   	2) Add a member variable to pool struct pg_pool_t to save the bes=
-t
->> balance_param value ??The adaptive procedure can be described as fol=
-lowing:
->> Input: cluster map, total PG number m, adaptive retry times n
->> Output: local optimal balance parameter balance_param min_pg_stdev =3D=
- MAX; balance_param =3D a; // initial value for trial from 0 to n {
->>      for pgid from 0 to m {
->>          calculate pps using the new generator in 2.1;
->>          for bucket b in cluster map // apply CRUSH algorithm
->>              apply corresponding bucket hashing algorithm and get a =
-osd list for pgid
->>      }
->>      calculate pg_stdev_a by gathering all osd lists; // stdev of PG=
- distribution among all osds
->>      if pg_stdev_a < min_pg_stdev {
->>          min_pg_stdev =3D pg_stdev_a;
->>          balance_param =3D a;
->>      }
->>      adjust a to a new value;
->> }
->>
->>
->> Evaluation:
->>      We evaluated the performance of optimized and current CRUSH in =
-a cluster consisting of 4 hosts, and each attaching with 10x1T disks. W=
-e designed two test cases, for the first one, by creating a pool with 2=
-048 pgs, 2 replicas, preparing 100 million 128KB objects, and then eval=
-uating read performance of these objects; for the second one, by creati=
-ng a pool with 2048 pgs, 3 replicas, preparing 1 million 10MB objects, =
-and then evaluating read performance of these objects.
->>      We compared the PG & data distribution and read performance of =
-the two CRUSH algorithms, and got results as follows:
->> 1.   PG and data distribution is more balanced using optimized CRUSH=
- algorithm
->> ??a) For 2048 PGs with 3 replicas, stdev of PG# on 40 osds decreases
->> from 12.13 to 5.17; for 2048 PGs with 2 replicas, stdev of PG# on 40
->> osds decreases from 10.09 to 6.50
->> ??b) For 1 million 10MB objects with 3 replicas, stdev of disk use% =
-on 40 osds decreases from 0.068 to 0.026; for 100 million 128KB objects=
- with 2 replicas, stdev of disk use% on 40 osds decreases from 0.067 to=
- 0.042
->> 2.   Large scaled performance is improved since data distribution is=
- more balanced
->> ??a) More than 10% performance improvement for 128K and 10M read
->> ??b) Write performance not impacted
->> Detailed performance data can be found in the attached pdf (crush_op=
-timization).
->>
->> We also created a pull request: https://github.com/ceph/ceph/pull/24=
-02
->>
->> Thanks
->> Jian
->>
->>
->> -----Original Message-----
->> From: Loic Dachary [mailto:loic@dachary.org]
->> Sent: Tuesday, September 09, 2014 9:36 PM
->> To: Zhang, Jian; ceph-devel@vger.kernel.org
->> Subject: Re: FW: CURSH optimization for unbalanced pg distribution
->>
->>
->>
->> On 20/03/2014 04:54, Zhang, Jian wrote:
->>> Forwarding per Sage's suggestion.
->>
->> Very interesting discussion :-) For the record the corresponding pul=
-l
->> request is https://github.com/ceph/ceph/pull/2402
->>
->>>
->>>
->>> -----Original Message-----
->>> From: Sage Weil [mailto:sage@inktank.com]
->>> Sent: Wednesday, March 19, 2014 11:29 PM
->>> To: Mark Nelson
->>> Cc: Zhang, Jian; Duan, Jiangang; He, Yujie
->>> Subject: Re: CURSH optimization for unbalanced pg distribution
->>>
->>> On Wed, 19 Mar 2014, Mark Nelson wrote:
->>>> On 03/19/2014 03:24 AM, Zhang, Jian wrote:
->>>>> For more detail data, please refer to the *Testing results* part.
->>>>>
->>>>> *Optimization proposals: *
->>>>>
->>>>> After we dived into the source code of CRUSH and related papers,
->>>>> we proposed two possible optimizations:
->>>>>
->>>>> 1.Add different hash algorithms, as an alternative for the
->>>>> Jenkin's hash, e.g. algorithm that will produce even values when
->>>>> range of input value (pg#) is relatively small. Or add new bucket
->>>>> type at the same time if necessary.
->>>
->>> This *might* work, but I don't have a strong intuition about it.  T=
-he modeling we've done now has essentially assumed a statistically unif=
-orm distribution, which has some inherent inbalance for low values of n=
- (num pgs in our case).  I have generally assumed we can't do better th=
-an "random", and still have the other properties we want (independent, =
-deterministic placement), but it may be possible.
->>>
->>>>>
->>>>> 2.Find a better replica placement strategy instead of current
->>>>> retry logic of crush_choose_firstn, which may cause CRUSH to beha=
-ve badly.
->>>>>
->>>>> We find there are several threshold of retry times by referring t=
-o
->>>>> code, choose_total_tries, choose_local_tries and choose_local_fal=
-lback_tries.
->>>>> They are used to decide whether to do a retry_bucket,
->>>>> retry_descent or use permutation to do an exhaustive bucket
->>>>> search. We are wondering if there is another retry strategy:
->>>>>
->>>>> a)Backtracking retry. Now the logic of crush_choose_firstn can
->>>>> only issue an retry either from the initial bucket(retry_descent)
->>>>> or from the current bucket (retry_bucket), how about retrying the=
- intervening buckets?
->>>>>
->>>>> b)Adjust threshold of retry times by other values. We do noticed
->>>>> that the 'optimal' crush tunable could be used to make it, but we
->>>>> still encounter unbalanced [g distribution by using the optimal s=
-trategy.
->>>>> Please refer to 4 of the Testing results part.
->>>>>
->>>>> c)Add an mechanism that can adjust above mentioned thresholds
->>>>> adaptively. Maybe we can record the retry times of the previous
->>>>> call for CRUSH, and adjust retry thresholds automatically accordi=
-ng to the record.
->>>
->>> I suggest ignoring all of this retry logic.  The original version o=
-f
->>> CRUSH has the local retries to try to make data move "less far", bu=
-t
->>> when we went back a year ago and did a statistical analysis of the
->>> distribution we found that *all* of these hacks degraded the qualit=
-y
->>> of the placement,a nd by turning them all off (setting the 'optimal=
-'
->>> values which zeroes them all out excent for total_retries) we got
->>> something that was indistinguishable from a uniform distribution.
->>>
->>>>> 3.Add soft link for pg directories. During pg creation, we can
->>>>> create soft links for the pgs if pg# on the selected osd is more
->>>>> than some threshold, say 10% more than desired average number, to
->>>>> move objects that will be stored in this pg to another osd.
->>>>> Balanced disk utilization may be gained in this way.
->>>
->>> I think you need to be careful, but yes, this is an option.  There
->>> is a similar exception mechanism in place that is used for other
->>> purposes and something similar could be done here.  The main
->>> challenge will be in ensuring that the soft links/exceptions follow
->>> the same overall policy that CRUSH does after the raw mapping is
->>> performed.  This is an option, but I would put it toward the bottom=
- of the list...
->>>
->>>>> 4.Change placement strategy only for step of selecting devices
->>>>> from hosts. We found in our testing results that pg distribution
->>>>> was balanced among hosts, which is reasonable since pg# of each
->>>>> host is above 1K (according to the current BKM that pg# per osd
->>>>> should be about 100). So how about we apply CRUSH only on the
->>>>> interval buckets and find another simple but more balanced method=
- to choose osd from host?
->>>
->>> This idea has a lot of potential.  For example:
->>>
->>> If you know the chassis can hold 12 disks, you can force the bucket
->>> size to twelve and somehow prevent users from adjusting the
->>> structure of the tree.  Then you can use a simple mapping that is
->>> truly flat (like a linear mapping, disk =3D x % num_disks) for that=
- bucket/subtree.
->>> The downside of course is that if you remove a disk *everything*
->>> reshuffles, hence some sort of guardrails to prevent a user from
->>> inadvertantly doing that.  If a disk *does* fail, you just need to
->>> make sure the disk is marked "out" but not removed from the CRUSH h=
-ierarchy and the normal retry will kick in.
->>>
->>> Note that all this is reall doing is increasing the size of the "bu=
-ckets"
->>> that we are (pseudo)randomly distribution over.  It is still a
->>> random/uniform distribution, but the N value is 12 times bigger (fo=
-r
->>> a
->>> 12 disk chassis) and as a result the variance is substantially lowe=
-r.
->>>
->>> I would suggest making a new bucket type that is called 'linear' an=
-d
->>> does a simple modulo and trying this out.  We will need a bunch of
->>> additional safety checks to help users avoid doing silly things
->>> (like adjusting the number of items in the linear buckets, which
->>> reshuffle
->>> everything) but that wouldn't be needed for an initial analysis of =
-the performance impact.
->>>
->>> Do you mind if we shift this thread over to ceph-devel?  I think
->>> there are lots of people who would be interested in this discussion=
-=2E
->>> We can of course leave off your attachment if you prefer.
->>>
->>> Thanks!
->>> sage
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
-l"
->>> in the body of a message to majordomo@vger.kernel.org More majordom=
-o
->>> info at  http://vger.kernel.org/majordomo-info.html
->>>
->>
->> --
->> Lo?c Dachary, Artisan Logiciel Libre
->>
->>
-> N=8B=A7=B2=E6=ECr=B8=9By=FA=E8=9A=D8b=B2X=AC=B6=C7=A7v=D8^=81=7F)=DE=BA=
-{.n=81=7F+=89=B7=9Cz=98]z=F7=A5=8A{ay=81=7F=1D=CA=87=DA=99=81=7F,j=07=AD=
-=A2f=A3=A2=B7h=9A=8B=E0z=81=7F=1E=AEw=A5=A2=81=7F=0C=A2=B7=A6j:+v=89=A8=
-=8Aw=E8j=D8m=B6=9F=81=7F=81=7F=07=AB=91=EA=E7zZ+=83=F9=9A=8E=8A=DD=A2j"=
-=9D=FA!tml=3D
->=20
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SGkgbWFyaywNCkluIG15IG9waW5pb24sIHRoZSBtZXRob2Qgb2YgcmV3ZWlnaHRpbmcgb3NkIGJh
+c2VkIG9uIGN1cnJlbnQgcGcgZGlzdHJpYnV0aW9uIG1heSBub3Qgd29yayB3ZWxsIGlmIHdlIG5l
+ZWQgdG8gY3JlYXRlIG1vcmUgcG9vbHMgbGF0ZXIuIFNpbmNlIHRoYXQgaWYgd2UgcmV3ZWlnaHQg
+YWxsIG9zZHMgYWdhaW4gYWZ0ZXIgY3JlYXRpbmcgbmV3IHBvb2xzLCB0aGVyZSB3aWxsIGJlIGEg
+cmVzaHVmZmxlIG9mIGRhdGEgb24gYWxsIG9zZHMuIEluIG91ciBwcm9wb3NhbCwgd2UganVzdCBh
+cHBseSB0aGUgcG9vbHMgd2l0aCByZXNwZWN0aXZlIHBhcmFtZXRlcnMsIHRyeWluZyB0byBhY2hp
+ZXZlIGJhbGFuY2VkIHBnIGRpc3RyaWJ1dGlvbiBmb3IgZWFjaCBwb29sLCB3aXRob3V0IGluZmx1
+ZW5jZSB0byBwb29scyBjcmVhdGVkIGluIHRoZSBmdXR1cmUuDQoNCkZvciBvdGhlciBoYXNoIGFs
+Z29yaXRobXMsIHdlIGRpZCB0cmllZCB0aGUgQ2l0eSBhbGdvcml0aG0sIGJ1dCBnb3Qgbm8gYmV0
+dGVyIHJlc3VsdHMgdGhhbiBKZW5raW5zLiBNYXliZSB3ZSBuZWVkIHRvIHRha2UgYSBsb29rIGF0
+IG90aGVycy4NCg0KVGhhbmtzLA0KWXVqaWUNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0N
+CkZyb206IE1hcmsgTmVsc29uIFttYWlsdG86bWFyay5uZWxzb25AaW5rdGFuay5jb21dIA0KU2Vu
+dDogV2VkbmVzZGF5LCBTZXB0ZW1iZXIgMTAsIDIwMTQgMTA6MTcgQU0NClRvOiBaaGFuZywgSmlh
+bjsgU2FnZSBXZWlsDQpDYzogTG9pYyBEYWNoYXJ5OyBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9y
+ZzsgSGUsIFl1amllDQpTdWJqZWN0OiBSZTogRlc6IENVUlNIIG9wdGltaXphdGlvbiBmb3IgdW5i
+YWxhbmNlZCBwZyBkaXN0cmlidXRpb24NCg0KVmVyeSBpbnRlcmVzdGluZyEgIEkgd2lsbCBuZWVk
+IHRvIHNpdCBkb3duIGFuZCByZWFkIHRocm91Z2ggdGhlIGF0dGFjaG1lbnRzIHRvbW9ycm93LiAg
+RGlkIHlvdSBmaW5kIHRoYXQgdGhpcyBtZXRob2Qgd2FzIHN1cGVyaW9yIHRvIHNpbXBseSByZXdl
+aWdoaW5nIHRoZSBPU0RzIGJhc2VkIG9uIHRoZSBxdWFsaXR5IG9mIHRoZSBkaXN0cmlidXRpb24g
+dXNpbmcgdGhlIEplbmtpbnMgaGFzaD8gIENsZWFybHkgdGhpcyBpc24ndCBlYXN5IHdpdGggbG90
+cyBvZiBwb29scywgdGhvdWdoIHdpdGggc29tZSBmYW5jeSBjcnVzaCBydWxlIG1hbmFnZW1lbnQg
+eW91IG1pZ2h0IGJlIGFibGUgdG8gZ2V0IGFyb3VuZCBpdCB0byBhIGxpbWl0ZWQgZXh0ZW50Lg0K
+DQpJIGhhdmVuJ3QgZG9uZSBhbnkgZXh0ZW5zaXZlIGFuYWx5c2lzLCBidXQgSSd2ZSBhbHNvIHdv
+bmRlcmVkIGlmIHNpbXBseSByZXBsYWNpbmcgSmVua2lucyB3aXRoIHNvbWV0aGluZyBsaWtlIENp
+dHksIE11cm11cjMsIG9yIFNwb29reSBtaWdodCBpbXByb3ZlIGRpc3RyaWJ1dGlvbiBxdWFsaXR5
+IChhbmQgZXNwZWNpYWxseSB3aGV0aGVyIGl0IHdvdWxkIGltcHJvdmUgZGlzdHJpYnV0aW9uIHF1
+YWxpdHkgZ2l2ZW4gc21hbGwgY2hhbmdlcyBpbiB0aGUgaW5wdXQpLg0KDQpSZWFsbHkgZ2xhZCB5
+b3UgZ3V5cyBhcmUgbG9va2luZyBpbnRvIHRoaXMhDQoNCk1hcmsNCg0KT24gMDkvMDkvMjAxNCAw
+ODozMiBQTSwgWmhhbmcsIEppYW4gd3JvdGU6DQo+IFRoYW5rcy4NCj4gDQo+IENyZWF0ZWQgYSBm
+ZWF0dXJlIGhlcmU6IGh0dHA6Ly90cmFja2VyLmNlcGguY29tL2lzc3Vlcy85NDEwLCB0byBpbmNs
+dWRlIGFsbCB0aGUgYXR0YWNobWVudHMuIC4NCj4gaHR0cDovL3RyYWNrZXIuY2VwaC5jb20vYXR0
+YWNobWVudHMvZG93bmxvYWQvMTM4My9hZGFwdGl2ZS1jcnVzaC1tb2RpZg0KPiB5LnBhdGNoIA0K
+PiBodHRwOi8vdHJhY2tlci5jZXBoLmNvbS9hdHRhY2htZW50cy9kb3dubG9hZC8xMzg0L2NydXNo
+X3Byb3Bvc2Fscy5wZGYNCj4gaHR0cDovL3RyYWNrZXIuY2VwaC5jb20vYXR0YWNobWVudHMvZG93
+bmxvYWQvMTM4NS9jcnVzaF9vcHRpbWl6YXRpb24ucA0KPiBkZg0KPiANCj4gDQo+IEhpIGFsbCwN
+Cj4gICAgICBTZXZlcmFsIG1vbnRocyBhZ28gd2UgbWV0IGFuIGlzc3VlIG9mIHJlYWQgcGVyZm9y
+bWFuY2UgaXNzdWVzICgxNyUgZGVncmFkYXRpb24pIHdoZW4gd29ya2luZyBvbiBjZXBoIG9iamVj
+dCBzdG9yYWdlIHBlcmZvcm1hbmNlIGV2YWx1YXRpb24gd2l0aCAxME0gb2JqZWN0cyAoc2NhbGlu
+ZyBmcm9tIDEwSyBvYmplY3RzIHRvIDFNaWxsaW9uIG9iamVjdHMpICwgYW5kIGZvdW5kIHRoZSBy
+b290IGNhdXNlIGlzIHVuYmFsYW5jZWQgcGcgZGlzdHJpYnV0aW9uIGFtb25nIGFsbCBvc2QgZGlz
+a3MsIGxlYWRpbmcgdG8gdW5iYWxhbmNlZCBkYXRhIGRpc3RyaWJ1dGlvbi4gV2UgZGlkIHNvbWUg
+ZnVydGhlciBpbnZlc3RpZ2F0aW9uIHRoZW4gYW5kIGlkZW50aWZpZWQgdGhhdCBDUlVTSCBmYWls
+ZWQgdG8gbWFwIHBncyBldmVubHkgdG8gZWFjaCBvc2QuIFBsZWFzZSByZWZlciB0byB0aGUgYXR0
+YWNoZWQgcGRmIChjcnVzaF9wcm9wb3NhbHMpIGZvciBkZXRhaWxzLg0KPiANCj4gS2V5IE1lc3Nh
+Z2U6DQo+ICAgICAgQXMgbWVudGlvbmVkIGluIHRoZSBhdHRhY2hlZCBwZGYsIHdlIGRlc2NyaWJl
+ZCBwb3NzaWJsZSBvcHRpbWl6YXRpb24gcHJvcG9zYWxzIChodHRwOi8vdHJhY2tlci5jZXBoLmNv
+bS9hdHRhY2htZW50cy9kb3dubG9hZC8xMzg0L2NydXNoX3Byb3Bvc2Fscy5wZGYpIGZvciBDUlVT
+SCBhbmQgZ290IHNvbWUgZmVlZGJhY2sgZnJvbSBjb21tdW5pdHkgKGh0dHA6Ly9wZXJtYWxpbmsu
+Z21hbmUub3JnL2dtYW5lLmNvbXAuZmlsZS1zeXN0ZW1zLmNlcGguZGV2ZWwvMTg5NzkgKSAuIFNh
+Z2Ugc3VnZ2VzdGVkIHVzIHRha2UgdGhlIGlkZWEgb2YgIkNoYW5nZSBwbGFjZW1lbnQgc3RyYXRl
+Z3kgb25seSBmb3Igc3RlcCBvZiBzZWxlY3RpbmcgZGV2aWNlcyBmcm9tIGhvc3RzIiwgYnkgYWRk
+aW5nIGEgbmV3IGJ1Y2tldCB0eXBlIGNhbGxlZCAibGluZWFyIiwgYW5kIGFwcGx5aW5nIGEgbW9k
+dWxvLWxpa2UgaGFzaCBmdW5jdGlvbiB0byB0aGlzIGtpbmQgb2YgYnVja2V0cyB0byBhY2hpZXZl
+IGJhbGFuY2VkIGRpc3RyaWJ1dGlvbi4gV2UgZm9sbG93ZWQgdGhpcyBzdWdnZXN0aW9uIGFuZCBk
+ZXNpZ25lZCBhbiBvcHRpbWl6ZWQgQ1JVU0ggYWxnb3JpdGhtLCB3aXRoIG5ldyBoYXNoIG1ldGhv
+ZHMgYW5kIGFuIGFkYXB0aXZlIG1vZHVsZS4gUGxlYXNlIHJlZmVyIHRvIHRoZSBEZXNpZ24gYW5k
+IEltcGxlbWVudGF0aW9uIHBhcnQgZm9yIGRldGFpbHMuIFdlIGFsc28gd3JvdGUgc29tZSBQT0Mg
+Zm9yIGl0LCBzZWUgdGhlIGF0dGFjaGVkIHBhdGNoLiBBbmQgYXMgYSByZXN1bHQsIHdlIGdvdCBt
+b3JlIHRoYW4gMTAlIHJlYWQgcGVyZm9ybWFuY2UgaW1wcm92ZW1lbnQgdXNpbmcgdGhlIG9wdGlt
+aXplZCBDUlVTSCBhbGdvcml0aG0uDQo+IA0KPiBEZXNpZ24gYW5kIEltcGxlbWVudGF0aW9uOg0K
+PiAxLlByb2JsZW0gSWRlbnRpZmljYXRpb24NCj4gMS4xIElucHV0IGtleSAocHBzKSBzcGFjZSBv
+ZiBDUlVTSCBpcyBub3QgdW5pZm9ybQ0KPiAgICAgIFNpbmNlIFBHIyBvbiB0aGUgbmVzdGVkIGRl
+dmljZXMgb2YgYSBob3N0IGlzIG5vdCB1bmlmb3JtIGV2ZW4gaWYgd2Ugc2VsZWN0IHRoZSBkZXZp
+Y2UgdXNpbmcgc2ltcGxlIG1vZHVsbyBvcGVyYXRpb24sIHdlIGRlY2lkZSB0byBjaGFuZ2UgdGhl
+IGFsZ29yaXRobSBvZiBoYXNoaW5nIHJhdyBwZyB0byBwcHMuDQo+IDEuMiBBbGdvcml0aG0gb2Yg
+c2VsZWN0aW5nIGl0ZW1zIGZyb20gYnVja2V0cyBpcyBub3QgdW5pZm9ybQ0KPiAgICAgIEFmdGVy
+IHdlIGdldCB1bmlmb3JtIGlucHV0IGtleSBzcGFjZSwgd2Ugc2hvdWxkIG1ha2UgdGhlIHByb2Nl
+ZHVyZSBvZiBzZWxlY3RpbmcgZGV2aWNlcyBmcm9tIGhvc3QgYmUgdW5pZm9ybS4gU2luY2UgY3Vy
+cmVudCBDUlVTSCBhbGdvcml0aG0gdXNlcyBKZW5raW5zIGhhc2ggYmFzZWQgc3RyYXRlZ2llcyBh
+bmQgZmFpbGVkIHRvIHJlYWNoIHRoZSBnb2FsLCB3ZSBkZWNpZGUgdG8gYWRkIGEgbmV3IGJ1Y2tl
+dCB0eXBlIGFuZCBhcHBseSBuZXcgKG1vZHVsbyBiYXNlZCkgaGFzaCBhbGdvcml0aG0gdG8gbWFr
+ZSBpdC4NCj4gMi5EZXNpZ24NCj4gMi4xTmV3IHBwcyBoYXNoIGFsZ29yaXRobQ0KPiAgICAgIFdl
+IGRlc2lnbiB0aGUgbmV3IHBwcyBoYXNoIGFsZ29yaXRobSBiYXNlZCBvbiB0aGUgIkNvbmdydWVu
+dGlhbCBwc2V1ZG8tcmFuZG9tIG51bWJlciBnZW5lcmF0b3IiIChodHRwOi8vY29tam5sLm94Zm9y
+ZGpvdXJuYWxzLm9yZy9jb250ZW50LzEwLzEvNzQuZnVsbC5wZGYpIC4gSXQgZGVmaW5lcyBhIGJp
+amVjdGlvbiBiZXR3ZWVuIHRoZSBvcmlnaW5hbCBzZXF1ZW5jZSB7MCwgLi4uLDJeTi0xfSBhbmQg
+c29tZSBwZXJtdXRhdGlvbiBvZiBpdC4gSW4gb3RoZXIgd29yZHMsIGdpdmVuIGRpZmZlcmVudCBr
+ZXlzIGJldHdlZW4gMCBhbmQgMl5OLTEsIHRoZSBnZW5lcmF0b3Igd2lsbCBwcm9kdWNlIGRpZmZl
+cmVudCBpbnRlZ2VycywgYnV0IHdpdGhpbiB0aGUgc2FtZSByYW5nZSB7MCwuLi4sMl5OLTF9Lg0K
+PiAgICAgIEFzc3VtZSB0aGVyZSBhcmUgbnAgUEdzIGluIGEgcG9vbCwgd2UgY2FuIHJlZ2FyZCBw
+Z2lkICgw4omkcGdpZDwyXm4sIG5w4omkMl5uPDIqbnApIGFzIHRoZSBrZXksIGFuZCB0aGVuIGl0
+IHdpbGwgYmUgaGFzaGVkIGludG8gYSBwcHMgdmFsdWUgYmV0d2VlbiAwIGFuZCAyXm4tMS4gU2lu
+Y2UgUEcjIGluIGEgcG9vbCBpcyB1c3VhbGx5IDJeTiwgdGhlIGdlbmVyYXRvciBqdXN0IHNodWZm
+bGVzIHRoZSBvcmlnaW5hbCBwZ2lkIHNlcXVlbmNlIGFzIG91dHB1dCBpbiB0aGlzIGNhc2UsIG1h
+a2luZyB0aGUga2V5IHNwYWNlIGNvbnNpc3Rpbmcgb2YgYSBwZXJtdXRhdGlvbiBvZiB7MCwuLi4s
+Ml5uLTF9LCB3aGljaCBhY2hpZXZlcyB0aGUgYmVzdCB1bmlmb3JtaXR5LiBNb3Jlb3ZlciwgcG9v
+bGlkIGNhbiBiZSByZWdhcmRlZCBhcyBhIHNlZWQgaW4gdGhlIGdlbmVyYXRvciwgcHJvZHVjaW5n
+IGRpZmZlcmVudCBwcHMgdmFsdWUgZXZlbiB3aXRoIHRoZSBzYW1lIHBnaWQgYnV0IGRpZmZlcmVu
+dCBwb29saWQuIFRoZXJlZm9yZSwgcGdpZCBzZXF1ZW5jZXMgb2YgdmFyaW91cyBwb29scyBhcmUg
+bWFwcGVkIGludG8gZGlzdGluY3QgcHBzIHNlcXVlbmNlcywgZ2V0dGluZyByaWQgb2YgUEcgb3Zl
+cmxhcHBpbmcuDQo+IDIuMiBOZXcgYnVja2V0IHR5cGUsIExpbmVhcg0KPiAgICAgIFdlIGludHJv
+ZHVjZSBhIG5ldyBidWNrZXQgdHlwZSBjYWxsZWQgImxpbmVhciIsIGFuZCBhcHBseSBhIG5ldyBt
+b2R1bG8gYmFzZWQgaGFzaCBhbGdvcml0aG0gdG8gaXQuIEFzIHRoZSBwcHMgdmFsdWVzIGFzc2ln
+bmVkIHRvIGVhY2ggaG9zdCBhcmUgYSBwc2V1ZG8tcmFuZG9tIHN1YnNldCBvZiB0aGUgb3JpZ2lu
+YWwgcGVybXV0YXRpb24gYW5kIGlzIHBvc3NpYmx5IG91dCBvZiB1bmlmb3JtaXR5LCBpbiB3aGlj
+aCBzaXR1YXRpb24gYXBwbHlpbmcgbW9kdWxvIG9wZXJhdGlvbiBkaXJlY3RseSBvbiBpbnRlZ2Vy
+cyBpbiB0aGUgc3Vic2V0IGNhbm5vdCBwcm9kdWNlIGJhbGFuY2VkIGRpc3RyaWJ1dGlvbiBhbW9u
+ZyBkaXNrcyBpbiB0aGUgaG9zdC4gVG8gZGVjcmVhc2UgZGV2aWF0aW9uIG9mIHRoZSBzdWJzZXQs
+IHdlIGFwcGx5IGEgYmFsYW5jZSBwYXJhbWV0ZXIgMS9iYWxhbmNlX3BhcmFtIHRvIHRoZSBrZXkg
+YmVmb3JlIGNvbmR1Y3RpbmcgdGhlIG1vZHVsbyBtZXRob2QuDQo+ICAgICAgRm9yIG9zZCBmYWls
+dXJlIGFuZCByZWNvdmVyeSwgaXQgYXNzdW1lcyB0aGF0IGl0ZW1zIG5lc3RlZCBpbiB0aGlzIGtp
+bmQgb2YgYnVja2V0IHdpbGwgbm90IGJlIHJlbW92ZWQsIG5vciBuZXcgaXRlbXMgYXJlIGFkZGVk
+LCBzYW1lIGFzIHRoZSBVTklGT1JNIGJ1Y2tldC4gTGluZWFyIGhvc3Qgd2lsbCBub3QgaW50cm9k
+dWNlIG1vcmUgZGF0YSBtb3ZlbWVudCB0aGFuIHRoZSB1bmlmb3JtIGJ1Y2tldC4NCj4gMi4zIEFk
+YXB0aXZlIFN0cmF0ZWd5DQo+ICAgICAgU2luY2UgdGhlcmUgaXMgbm8gb25lIGNvbnN0YW50IGJh
+bGFuY2UgcGFyYW1ldGVyIGFwcGx5aW5nIGZvciBhbGwgY2FzZXMgdGhhdCB3aWxsIHJlc3VsdCBp
+biB0aGUgYmVzdCBQRyBkaXN0cmlidXRpb24uIFdlIG1ha2UgaXQgYW4gYWRhcHRpdmUgcHJvY2Vk
+dXJlIGJ5IGFkanVzdGluZyB0aGUgYmFsYW5jZSBwYXJhbWV0ZXIgYXV0b21hdGljYWxseSBkdXJp
+bmcgdGhlIHByZXBhcmF0aW9uIGZvciBjcmVhdGluZyBhIG5ldyBwb29sLCBhY2NvcmRpbmcgdG8g
+ZGlmZmVyZW50IGNsdXN0ZXIgdG9wb2xvZ3ksIFBHIyBhbmQgcmVwbGljYSMsIGluIG9yZGVyIHRv
+IGdhaW4gYSBtb3N0IHVuaWZvcm0gZGlzdHJpYnV0aW9uLg0KPiAgICAgIDEpIFRyeSBkaWZmZXJl
+bnQgYmFsYW5jZV9wYXJhbSB3aGVuIHByZXBhcmluZyBmb3IgYSBuZXcgcG9vbA0KPiAgICAgIGEu
+IEl0ZXJhdGl2ZWx5IGNhbGwgQ1JVU0gobWFwLCBydWxlbm8sIHgsIGJhbGFuY2VfcGFyYW0pIHRv
+IGdldCBjb3JyZXNwb25kaW5nIFBHIGRpc3RyaWJ1dGlvbiB3aXRoIGRpZmZlcmVudCBiYWxhbmNl
+X3BhcmFtcw0KPiDjgIDjgIBiLiBDYWxjdWxhdGUgc3RkZXYgb2YgUEcjIGFtb25nIGFsbCBvc2Rz
+DQo+IOOAgCAgYy4gQ2hvb3NlIHRoZSBiYWxhbmNlX3BhcmFtIHdpdGggdGhlIG1pbmltYWwgc3Rk
+ZXYNCj4gICAJMikgQWRkIGEgbWVtYmVyIHZhcmlhYmxlIHRvIHBvb2wgc3RydWN0IHBnX3Bvb2xf
+dCB0byBzYXZlIHRoZSBiZXN0IGJhbGFuY2VfcGFyYW0gdmFsdWUNCj4gICAgICBUaGUgYWRhcHRp
+dmUgcHJvY2VkdXJlIGNhbiBiZSBkZXNjcmliZWQgYXMgZm9sbG93aW5nOg0KPiAgICAgIElucHV0
+OiBjbHVzdGVyIG1hcCwgdG90YWwgUEcgbnVtYmVyIG0sIGFkYXB0aXZlIHJldHJ5IHRpbWVzIG4N
+Cj4gICAgICBPdXRwdXQ6IGxvY2FsIG9wdGltYWwgYmFsYW5jZSBwYXJhbWV0ZXIgYmFsYW5jZV9w
+YXJhbSBtaW5fcGdfc3RkZXYgPSBNQVg7IGJhbGFuY2VfcGFyYW0gPSBhOyAvLyBpbml0aWFsIHZh
+bHVlIGZvciB0cmlhbCBmcm9tIDAgdG8gbiB7DQo+ICAgICAgZm9yIHBnaWQgZnJvbSAwIHRvIG0g
+ew0KPiAgICAgICAgICBjYWxjdWxhdGUgcHBzIHVzaW5nIHRoZSBuZXcgZ2VuZXJhdG9yIGluIDIu
+MTsNCj4gICAgICAgICAgZm9yIGJ1Y2tldCBiIGluIGNsdXN0ZXIgbWFwIC8vIGFwcGx5IENSVVNI
+IGFsZ29yaXRobQ0KPiAgICAgICAgICAgICAgYXBwbHkgY29ycmVzcG9uZGluZyBidWNrZXQgaGFz
+aGluZyBhbGdvcml0aG0gYW5kIGdldCBhIG9zZCBsaXN0IGZvciBwZ2lkDQo+ICAgICAgfQ0KPiAg
+ICAgIGNhbGN1bGF0ZSBwZ19zdGRldl9hIGJ5IGdhdGhlcmluZyBhbGwgb3NkIGxpc3RzOyAvLyBz
+dGRldiBvZiBQRyBkaXN0cmlidXRpb24gYW1vbmcgYWxsIG9zZHMNCj4gICAgICBpZiBwZ19zdGRl
+dl9hIDwgbWluX3BnX3N0ZGV2IHsNCj4gICAgICAgICAgbWluX3BnX3N0ZGV2ID0gcGdfc3RkZXZf
+YTsNCj4gICAgICAgICAgYmFsYW5jZV9wYXJhbSA9IGE7DQo+ICAgICAgfQ0KPiAgICAgIGFkanVz
+dCBhIHRvIGEgbmV3IHZhbHVlOw0KPiB9DQo+IA0KPiANCj4gRXZhbHVhdGlvbjoNCj4gICAgICBX
+ZSBldmFsdWF0ZWQgdGhlIHBlcmZvcm1hbmNlIG9mIG9wdGltaXplZCBhbmQgY3VycmVudCBDUlVT
+SCBpbiBhIGNsdXN0ZXIgY29uc2lzdGluZyBvZiA0IGhvc3RzLCBhbmQgZWFjaCBhdHRhY2hpbmcg
+d2l0aCAxMHgxVCBkaXNrcy4gV2UgZGVzaWduZWQgdHdvIHRlc3QgY2FzZXMsIGZvciB0aGUgZmly
+c3Qgb25lLCBieSBjcmVhdGluZyBhIHBvb2wgd2l0aCAyMDQ4IHBncywgMiByZXBsaWNhcywgcHJl
+cGFyaW5nIDEwMCBtaWxsaW9uIDEyOEtCIG9iamVjdHMsIGFuZCB0aGVuIGV2YWx1YXRpbmcgcmVh
+ZCBwZXJmb3JtYW5jZSBvZiB0aGVzZSBvYmplY3RzOyBmb3IgdGhlIHNlY29uZCBvbmUsIGJ5IGNy
+ZWF0aW5nIGEgcG9vbCB3aXRoIDIwNDggcGdzLCAzIHJlcGxpY2FzLCBwcmVwYXJpbmcgMSBtaWxs
+aW9uIDEwTUIgb2JqZWN0cywgYW5kIHRoZW4gZXZhbHVhdGluZyByZWFkIHBlcmZvcm1hbmNlIG9m
+IHRoZXNlIG9iamVjdHMuDQo+ICAgICAgV2UgY29tcGFyZWQgdGhlIFBHICYgZGF0YSBkaXN0cmli
+dXRpb24gYW5kIHJlYWQgcGVyZm9ybWFuY2Ugb2YgdGhlIHR3byBDUlVTSCBhbGdvcml0aG1zLCBh
+bmQgZ290IHJlc3VsdHMgYXMgZm9sbG93czoNCj4gMS5QRyBhbmQgZGF0YSBkaXN0cmlidXRpb24g
+aXMgbW9yZSBiYWxhbmNlZCB1c2luZyBvcHRpbWl6ZWQgQ1JVU0ggYWxnb3JpdGhtDQo+ICAgICAg
+YSkgRm9yIDIwNDggUEdzIHdpdGggMyByZXBsaWNhcywgc3RkZXYgb2YgUEcjIG9uIDQwIG9zZHMg
+ZGVjcmVhc2VzIGZyb20gMTIuMTMgdG8gNS4xNzsgZm9yIDIwNDggUEdzIHdpdGggMiByZXBsaWNh
+cywgc3RkZXYgb2YgUEcjIG9uIDQwIG9zZHMgZGVjcmVhc2VzIGZyb20gMTAuMDkgdG8gNi41MA0K
+PiAgICAgIGIpIEZvciAxIG1pbGxpb24gMTBNQiBvYmplY3RzIHdpdGggMyByZXBsaWNhcywgc3Rk
+ZXYgb2YgZGlzayB1c2UlIA0KPiBvbiA0MCBvc2RzIGRlY3JlYXNlcyBmcm9tIDAuMDY4IHRvIDAu
+MDI2OyBmb3IgMTAwIG1pbGxpb24gMTI4S0Igb2JqZWN0cyB3aXRoIDIgcmVwbGljYXMsIHN0ZGV2
+IG9mIGRpc2sgdXNlJSBvbiA0MCBvc2RzIGRlY3JlYXNlcyBmcm9tIDAuMDY3IHRvIDAuMDQyIDIu
+TGFyZ2Ugc2NhbGVkIHBlcmZvcm1hbmNlIGlzIGltcHJvdmVkIHNpbmNlIGRhdGEgZGlzdHJpYnV0
+aW9uIGlzIG1vcmUgYmFsYW5jZWQNCj4gICAgICBhKSBNb3JlIHRoYW4gMTAlIHBlcmZvcm1hbmNl
+IGltcHJvdmVtZW50IGZvciAxMjhLIGFuZCAxME0gcmVhZA0KPiAgICAgIGIpIFdyaXRlIHBlcmZv
+cm1hbmNlIG5vdCBpbXBhY3RlZCBEZXRhaWxlZCBwZXJmb3JtYW5jZSBkYXRhIGNhbiANCj4gYmUg
+Zm91bmQgaW4gdGhlIGh0dHA6Ly90cmFja2VyLmNlcGguY29tL2F0dGFjaG1lbnRzL2Rvd25sb2Fk
+LzEzODUvY3J1c2hfb3B0aW1pemF0aW9uLnBkZiAuDQo+IA0KPiBXZSBhbHNvIGNyZWF0ZWQgYSBw
+dWxsIHJlcXVlc3Q6IGh0dHBzOi8vZ2l0aHViLmNvbS9jZXBoL2NlcGgvcHVsbC8yNDAyDQo+IA0K
+PiANCj4gVGhhbmtzDQo+IEppYW4NCj4gDQo+IA0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0t
+LQ0KPiBGcm9tOiBTYWdlIFdlaWwgW21haWx0bzpzd2VpbEByZWRoYXQuY29tXQ0KPiBTZW50OiBX
+ZWRuZXNkYXksIFNlcHRlbWJlciAxMCwgMjAxNCA5OjA2IEFNDQo+IFRvOiBaaGFuZywgSmlhbg0K
+PiBDYzogTG9pYyBEYWNoYXJ5OyBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZzsgSGUsIFl1amll
+DQo+IFN1YmplY3Q6IFJFOiBGVzogQ1VSU0ggb3B0aW1pemF0aW9uIGZvciB1bmJhbGFuY2VkIHBn
+IGRpc3RyaWJ1dGlvbg0KPiANCj4gVGhlIGxpc3RzIGFyZSByZWplY3RpbmcgdGhlIGVtYWlsIGJl
+Y2F1c2Ugb2YgdGhlIGJpZyBhdHRhY2htZW50cy4gIFNlbmQgd2l0aCBsaW5rcyBpbnN0ZWFkPw0K
+PiANCj4gT24gVHVlLCA5IFNlcCAyMDE0LCBaaGFuZywgSmlhbiB3cm90ZToNCj4gDQo+PiBZdWpp
+ZSBzZW50IG91dCB0aGUgZm9sbG93aW5nIGVtYWlsIHllc3RlcmRheSwgYnV0IGl0IHNlZW1zIGl0
+IHdhcyBtaXNzZWQuIFJlc2VuZGluZyBpdC4NCj4+DQo+PiA9PT09PT09PT09PT09DQo+PiBIaSBh
+bGwsDQo+PiA/ICBTZXZlcmFsIG1vbnRocyBhZ28gd2UgbWV0IGFuIGlzc3VlIG9mIHJlYWQgcGVy
+Zm9ybWFuY2UgaXNzdWVzICgxNyUgZGVncmFkYXRpb24pIHdoZW4gd29ya2luZyBvbiBjZXBoIG9i
+amVjdCBzdG9yYWdlIHBlcmZvcm1hbmNlIGV2YWx1YXRpb24gd2l0aCAxME0gb2JqZWN0cyAoc2Nh
+bGluZyBmcm9tIDEwSyBvYmplY3RzIHRvIDFNaWxsaW9uIG9iamVjdHMpICwgYW5kIGZvdW5kIHRo
+ZSByb290IGNhdXNlIGlzIHVuYmFsYW5jZWQgcGcgZGlzdHJpYnV0aW9uIGFtb25nIGFsbCBvc2Qg
+ZGlza3MsIGxlYWRpbmcgdG8gdW5iYWxhbmNlZCBkYXRhIGRpc3RyaWJ1dGlvbi4gV2UgZGlkIHNv
+bWUgZnVydGhlciBpbnZlc3RpZ2F0aW9uIHRoZW4gYW5kIGlkZW50aWZpZWQgdGhhdCBDUlVTSCBm
+YWlsZWQgdG8gbWFwIHBncyBldmVubHkgdG8gZWFjaCBvc2QuIFBsZWFzZSByZWZlciB0byB0aGUg
+YXR0YWNoZWQgcGRmIChjcnVzaF9wcm9wb3NhbHMpIGZvciBkZXRhaWxzLg0KPj4NCj4+IEtleSBN
+ZXNzYWdlOg0KPj4gPyAgQXMgbWVudGlvbmVkIGluIHRoZSBhdHRhY2hlZCBwZGYsIHdlIGRlc2Ny
+aWJlZCBwb3NzaWJsZSBvcHRpbWl6YXRpb24gcHJvcG9zYWxzIGZvciBDUlVTSCBhbmQgZ290IHNv
+bWUgZmVlZGJhY2sgZnJvbSBjb21tdW5pdHkgKGh0dHA6Ly9wZXJtYWxpbmsuZ21hbmUub3JnL2dt
+YW5lLmNvbXAuZmlsZS1zeXN0ZW1zLmNlcGguZGV2ZWwvMTg5NzkpIC4gU2FnZSBzdWdnZXN0ZWQg
+dXMgdGFrZSB0aGUgaWRlYSBvZiAiQ2hhbmdlIHBsYWNlbWVudCBzdHJhdGVneSBvbmx5IGZvciBz
+dGVwIG9mIHNlbGVjdGluZyBkZXZpY2VzIGZyb20gaG9zdHMiLCBieSBhZGRpbmcgYSBuZXcgYnVj
+a2V0IHR5cGUgY2FsbGVkID9saW5lYXI/LCBhbmQgYXBwbHlpbmcgYSBtb2R1bG8tbGlrZSBoYXNo
+IGZ1bmN0aW9uIHRvIHRoaXMga2luZCBvZiBidWNrZXRzIHRvIGFjaGlldmUgYmFsYW5jZWQgZGlz
+dHJpYnV0aW9uLiBXZSBmb2xsb3dlZCB0aGlzIHN1Z2dlc3Rpb24gYW5kIGRlc2lnbmVkIGFuIG9w
+dGltaXplZCBDUlVTSCBhbGdvcml0aG0sIHdpdGggbmV3IGhhc2ggbWV0aG9kcyBhbmQgYW4gYWRh
+cHRpdmUgbW9kdWxlLiBQbGVhc2UgcmVmZXIgdG8gdGhlIERlc2lnbiBhbmQgSW1wbGVtZW50YXRp
+b24gcGFydCBmb3IgZGV0YWlscy4gV2UgYWxzbyB3cm90ZSBzb21lIFBPQyBmb3IgaXQsIHNlZSB0
+aGUgYXR0YWNoZWQgcGF0Y2guIEFuZCBhcyBhIHJlc3VsdCwgd2UgZ290IG1vcmUgdGhhbiAxMCUg
+cmVhZCBwZXJmb3JtYW5jZSBpbXByb3ZlbWVudCB1c2luZyB0aGUgb3B0aW1pemVkIENSVVNIIGFs
+Z29yaXRobS4NCj4+DQo+PiBEZXNpZ24gYW5kIEltcGxlbWVudGF0aW9uOg0KPj4gMS4gICBQcm9i
+bGVtIElkZW50aWZpY2F0aW9uDQo+PiAxLjEgIElucHV0IGtleSAocHBzKSBzcGFjZSBvZiBDUlVT
+SCBpcyBub3QgdW5pZm9ybQ0KPj4gICAgICBTaW5jZSBQRyMgb24gdGhlIG5lc3RlZCBkZXZpY2Vz
+IG9mIGEgaG9zdCBpcyBub3QgdW5pZm9ybSBldmVuIGlmIHdlIHNlbGVjdCB0aGUgZGV2aWNlIHVz
+aW5nIHNpbXBsZSBtb2R1bG8gb3BlcmF0aW9uLCB3ZSBkZWNpZGUgdG8gY2hhbmdlIHRoZSBhbGdv
+cml0aG0gb2YgaGFzaGluZyByYXcgcGcgdG8gcHBzLg0KPj4gMS4yICBBbGdvcml0aG0gb2Ygc2Vs
+ZWN0aW5nIGl0ZW1zIGZyb20gYnVja2V0cyBpcyBub3QgdW5pZm9ybQ0KPj4gICAgICBBZnRlciB3
+ZSBnZXQgdW5pZm9ybSBpbnB1dCBrZXkgc3BhY2UsIHdlIHNob3VsZCBtYWtlIHRoZSBwcm9jZWR1
+cmUgb2Ygc2VsZWN0aW5nIGRldmljZXMgZnJvbSBob3N0IGJlIHVuaWZvcm0uIFNpbmNlIGN1cnJl
+bnQgQ1JVU0ggYWxnb3JpdGhtIHVzZXMgSmVua2lucyBoYXNoIGJhc2VkIHN0cmF0ZWdpZXMgYW5k
+IGZhaWxlZCB0byByZWFjaCB0aGUgZ29hbCwgd2UgZGVjaWRlIHRvIGFkZCBhIG5ldyBidWNrZXQg
+dHlwZSBhbmQgYXBwbHkgbmV3IChtb2R1bG8gYmFzZWQpIGhhc2ggYWxnb3JpdGhtIHRvIG1ha2Ug
+aXQuDQo+PiAyLiAgIERlc2lnbg0KPj4gMi4xICBOZXcgcHBzIGhhc2ggYWxnb3JpdGhtDQo+PiAg
+ICAgIFdlIGRlc2lnbiB0aGUgbmV3IHBwcyBoYXNoIGFsZ29yaXRobSBiYXNlZCBvbiB0aGUgIkNv
+bmdydWVudGlhbCBwc2V1ZG8tcmFuZG9tIG51bWJlciBnZW5lcmF0b3IiIChodHRwOi8vY29tam5s
+Lm94Zm9yZGpvdXJuYWxzLm9yZy9jb250ZW50LzEwLzEvNzQuZnVsbC5wZGYpIC4gSXQgZGVmaW5l
+cyBhIGJpamVjdGlvbiBiZXR3ZWVuIHRoZSBvcmlnaW5hbCBzZXF1ZW5jZSB7MCwgLi4uLDJeTi0x
+fSBhbmQgc29tZSBwZXJtdXRhdGlvbiBvZiBpdC4gSW4gb3RoZXIgd29yZHMsIGdpdmVuIGRpZmZl
+cmVudCBrZXlzIGJldHdlZW4gMCBhbmQgMl5OLTEsIHRoZSBnZW5lcmF0b3Igd2lsbCBwcm9kdWNl
+IGRpZmZlcmVudCBpbnRlZ2VycywgYnV0IHdpdGhpbiB0aGUgc2FtZSByYW5nZSB7MCwuLi4sMl5O
+LTF9Lg0KPj4gICAgICBBc3N1bWUgdGhlcmUgYXJlIG5wIFBHcyBpbiBhIHBvb2wsIHdlIGNhbiBy
+ZWdhcmQgcGdpZCAoMD9wZ2lkPDJebiwgbnA/Ml5uPDIqbnApIGFzIHRoZSBrZXksIGFuZCB0aGVu
+IGl0IHdpbGwgYmUgaGFzaGVkIGludG8gYSBwcHMgdmFsdWUgYmV0d2VlbiAwIGFuZCAyXm4tMS4g
+U2luY2UgUEcjIGluIGEgcG9vbCBpcyB1c3VhbGx5IDJeTiwgdGhlIGdlbmVyYXRvciBqdXN0IHNo
+dWZmbGVzIHRoZSBvcmlnaW5hbCBwZ2lkIHNlcXVlbmNlIGFzIG91dHB1dCBpbiB0aGlzIGNhc2Us
+IG1ha2luZyB0aGUga2V5IHNwYWNlIGNvbnNpc3Rpbmcgb2YgYSBwZXJtdXRhdGlvbiBvZiB7MCwu
+Li4sMl5uLTF9LCB3aGljaCBhY2hpZXZlcyB0aGUgYmVzdCB1bmlmb3JtaXR5LiBNb3Jlb3Zlciwg
+cG9vbGlkIGNhbiBiZSByZWdhcmRlZCBhcyBhIHNlZWQgaW4gdGhlIGdlbmVyYXRvciwgcHJvZHVj
+aW5nIGRpZmZlcmVudCBwcHMgdmFsdWUgZXZlbiB3aXRoIHRoZSBzYW1lIHBnaWQgYnV0IGRpZmZl
+cmVudCBwb29saWQuIFRoZXJlZm9yZSwgcGdpZCBzZXF1ZW5jZXMgb2YgdmFyaW91cyBwb29scyBh
+cmUgbWFwcGVkIGludG8gZGlzdGluY3QgcHBzIHNlcXVlbmNlcywgZ2V0dGluZyByaWQgb2YgUEcg
+b3ZlcmxhcHBpbmcuDQo+PiAyLjIgIE5ldyBidWNrZXQgdHlwZSwgTGluZWFyDQo+PiAgICAgIFdl
+IGludHJvZHVjZSBhIG5ldyBidWNrZXQgdHlwZSBjYWxsZWQgImxpbmVhciIsIGFuZCBhcHBseSBh
+IG5ldyBtb2R1bG8gYmFzZWQgaGFzaCBhbGdvcml0aG0gdG8gaXQuIEFzIHRoZSBwcHMgdmFsdWVz
+IGFzc2lnbmVkIHRvIGVhY2ggaG9zdCBhcmUgYSBwc2V1ZG8tcmFuZG9tIHN1YnNldCBvZiB0aGUg
+b3JpZ2luYWwgcGVybXV0YXRpb24gYW5kIGlzIHBvc3NpYmx5IG91dCBvZiB1bmlmb3JtaXR5LCBp
+biB3aGljaCBzaXR1YXRpb24gYXBwbHlpbmcgbW9kdWxvIG9wZXJhdGlvbiBkaXJlY3RseSBvbiBp
+bnRlZ2VycyBpbiB0aGUgc3Vic2V0IGNhbm5vdCBwcm9kdWNlIGJhbGFuY2VkIGRpc3RyaWJ1dGlv
+biBhbW9uZyBkaXNrcyBpbiB0aGUgaG9zdC4gVG8gZGVjcmVhc2UgZGV2aWF0aW9uIG9mIHRoZSBz
+dWJzZXQsIHdlIGFwcGx5IGEgYmFsYW5jZSBwYXJhbWV0ZXIgMS9iYWxhbmNlX3BhcmFtIHRvIHRo
+ZSBrZXkgYmVmb3JlIGNvbmR1Y3RpbmcgdGhlIG1vZHVsbyBtZXRob2QuDQo+PiAgICAgIEZvciBv
+c2QgZmFpbHVyZSBhbmQgcmVjb3ZlcnksIGl0IGFzc3VtZXMgdGhhdCBpdGVtcyBuZXN0ZWQgaW4g
+dGhpcyBraW5kIG9mIGJ1Y2tldCB3aWxsIG5vdCBiZSByZW1vdmVkLCBub3IgbmV3IGl0ZW1zIGFy
+ZSBhZGRlZCwgc2FtZSBhcyB0aGUgVU5JRk9STSBidWNrZXQuIExpbmVhciBob3N0IHdpbGwgbm90
+IGludHJvZHVjZSBtb3JlIGRhdGEgbW92ZW1lbnQgdGhhbiB0aGUgdW5pZm9ybSBidWNrZXQuDQo+
+PiAyLjMgIEFkYXB0aXZlIFN0cmF0ZWd5DQo+PiAgICAgIFNpbmNlIHRoZXJlIGlzIG5vIG9uZSBj
+b25zdGFudCBiYWxhbmNlIHBhcmFtZXRlciBhcHBseWluZyBmb3IgYWxsIGNhc2VzIHRoYXQgd2ls
+bCByZXN1bHQgaW4gdGhlIGJlc3QgUEcgZGlzdHJpYnV0aW9uLiBXZSBtYWtlIGl0IGFuIGFkYXB0
+aXZlIHByb2NlZHVyZSBieSBhZGp1c3RpbmcgdGhlIGJhbGFuY2UgcGFyYW1ldGVyIGF1dG9tYXRp
+Y2FsbHkgZHVyaW5nIHRoZSBwcmVwYXJhdGlvbiBmb3IgY3JlYXRpbmcgYSBuZXcgcG9vbCwgYWNj
+b3JkaW5nIHRvIGRpZmZlcmVudCBjbHVzdGVyIHRvcG9sb2d5LCBQRyMgYW5kIHJlcGxpY2EjLCBp
+biBvcmRlciB0byBnYWluIGEgbW9zdCB1bmlmb3JtIGRpc3RyaWJ1dGlvbi4NCj4+ID8/MSkgVHJ5
+IGRpZmZlcmVudCBiYWxhbmNlX3BhcmFtIHdoZW4gcHJlcGFyaW5nIGZvciBhIG5ldyBwb29sDQo+
+PiA/Pz8/LSBJdGVyYXRpdmVseSBjYWxsIENSVVNIKG1hcCwgcnVsZW5vLCB4LCBiYWxhbmNlX3Bh
+cmFtKSB0byBnZXQgDQo+PiBjb3JyZXNwb25kaW5nIFBHIGRpc3RyaWJ1dGlvbiB3aXRoIGRpZmZl
+cmVudCBiYWxhbmNlX3BhcmFtcw0KPj4gPz8/Py0gQ2FsY3VsYXRlIHN0ZGV2IG9mIFBHIyBhbW9u
+ZyBhbGwgb3Nkcw0KPj4gPz8/Py0gQ2hvb3NlIHRoZSBiYWxhbmNlX3BhcmFtIHdpdGggdGhlIG1p
+bmltYWwgc3RkZXYNCj4+ICAgCTIpIEFkZCBhIG1lbWJlciB2YXJpYWJsZSB0byBwb29sIHN0cnVj
+dCBwZ19wb29sX3QgdG8gc2F2ZSB0aGUgYmVzdCANCj4+IGJhbGFuY2VfcGFyYW0gdmFsdWUgPz9U
+aGUgYWRhcHRpdmUgcHJvY2VkdXJlIGNhbiBiZSBkZXNjcmliZWQgYXMgZm9sbG93aW5nOg0KPj4g
+SW5wdXQ6IGNsdXN0ZXIgbWFwLCB0b3RhbCBQRyBudW1iZXIgbSwgYWRhcHRpdmUgcmV0cnkgdGlt
+ZXMgbg0KPj4gT3V0cHV0OiBsb2NhbCBvcHRpbWFsIGJhbGFuY2UgcGFyYW1ldGVyIGJhbGFuY2Vf
+cGFyYW0gbWluX3BnX3N0ZGV2ID0gTUFYOyBiYWxhbmNlX3BhcmFtID0gYTsgLy8gaW5pdGlhbCB2
+YWx1ZSBmb3IgdHJpYWwgZnJvbSAwIHRvIG4gew0KPj4gICAgICBmb3IgcGdpZCBmcm9tIDAgdG8g
+bSB7DQo+PiAgICAgICAgICBjYWxjdWxhdGUgcHBzIHVzaW5nIHRoZSBuZXcgZ2VuZXJhdG9yIGlu
+IDIuMTsNCj4+ICAgICAgICAgIGZvciBidWNrZXQgYiBpbiBjbHVzdGVyIG1hcCAvLyBhcHBseSBD
+UlVTSCBhbGdvcml0aG0NCj4+ICAgICAgICAgICAgICBhcHBseSBjb3JyZXNwb25kaW5nIGJ1Y2tl
+dCBoYXNoaW5nIGFsZ29yaXRobSBhbmQgZ2V0IGEgb3NkIGxpc3QgZm9yIHBnaWQNCj4+ICAgICAg
+fQ0KPj4gICAgICBjYWxjdWxhdGUgcGdfc3RkZXZfYSBieSBnYXRoZXJpbmcgYWxsIG9zZCBsaXN0
+czsgLy8gc3RkZXYgb2YgUEcgZGlzdHJpYnV0aW9uIGFtb25nIGFsbCBvc2RzDQo+PiAgICAgIGlm
+IHBnX3N0ZGV2X2EgPCBtaW5fcGdfc3RkZXYgew0KPj4gICAgICAgICAgbWluX3BnX3N0ZGV2ID0g
+cGdfc3RkZXZfYTsNCj4+ICAgICAgICAgIGJhbGFuY2VfcGFyYW0gPSBhOw0KPj4gICAgICB9DQo+
+PiAgICAgIGFkanVzdCBhIHRvIGEgbmV3IHZhbHVlOw0KPj4gfQ0KPj4NCj4+DQo+PiBFdmFsdWF0
+aW9uOg0KPj4gICAgICBXZSBldmFsdWF0ZWQgdGhlIHBlcmZvcm1hbmNlIG9mIG9wdGltaXplZCBh
+bmQgY3VycmVudCBDUlVTSCBpbiBhIGNsdXN0ZXIgY29uc2lzdGluZyBvZiA0IGhvc3RzLCBhbmQg
+ZWFjaCBhdHRhY2hpbmcgd2l0aCAxMHgxVCBkaXNrcy4gV2UgZGVzaWduZWQgdHdvIHRlc3QgY2Fz
+ZXMsIGZvciB0aGUgZmlyc3Qgb25lLCBieSBjcmVhdGluZyBhIHBvb2wgd2l0aCAyMDQ4IHBncywg
+MiByZXBsaWNhcywgcHJlcGFyaW5nIDEwMCBtaWxsaW9uIDEyOEtCIG9iamVjdHMsIGFuZCB0aGVu
+IGV2YWx1YXRpbmcgcmVhZCBwZXJmb3JtYW5jZSBvZiB0aGVzZSBvYmplY3RzOyBmb3IgdGhlIHNl
+Y29uZCBvbmUsIGJ5IGNyZWF0aW5nIGEgcG9vbCB3aXRoIDIwNDggcGdzLCAzIHJlcGxpY2FzLCBw
+cmVwYXJpbmcgMSBtaWxsaW9uIDEwTUIgb2JqZWN0cywgYW5kIHRoZW4gZXZhbHVhdGluZyByZWFk
+IHBlcmZvcm1hbmNlIG9mIHRoZXNlIG9iamVjdHMuDQo+PiAgICAgIFdlIGNvbXBhcmVkIHRoZSBQ
+RyAmIGRhdGEgZGlzdHJpYnV0aW9uIGFuZCByZWFkIHBlcmZvcm1hbmNlIG9mIHRoZSB0d28gQ1JV
+U0ggYWxnb3JpdGhtcywgYW5kIGdvdCByZXN1bHRzIGFzIGZvbGxvd3M6DQo+PiAxLiAgIFBHIGFu
+ZCBkYXRhIGRpc3RyaWJ1dGlvbiBpcyBtb3JlIGJhbGFuY2VkIHVzaW5nIG9wdGltaXplZCBDUlVT
+SCBhbGdvcml0aG0NCj4+ID8/YSkgRm9yIDIwNDggUEdzIHdpdGggMyByZXBsaWNhcywgc3RkZXYg
+b2YgUEcjIG9uIDQwIG9zZHMgZGVjcmVhc2VzIA0KPj4gZnJvbSAxMi4xMyB0byA1LjE3OyBmb3Ig
+MjA0OCBQR3Mgd2l0aCAyIHJlcGxpY2FzLCBzdGRldiBvZiBQRyMgb24gNDAgDQo+PiBvc2RzIGRl
+Y3JlYXNlcyBmcm9tIDEwLjA5IHRvIDYuNTANCj4+ID8/YikgRm9yIDEgbWlsbGlvbiAxME1CIG9i
+amVjdHMgd2l0aCAzIHJlcGxpY2FzLCBzdGRldiBvZiBkaXNrIHVzZSUgb24gNDAgb3NkcyBkZWNy
+ZWFzZXMgZnJvbSAwLjA2OCB0byAwLjAyNjsgZm9yIDEwMCBtaWxsaW9uIDEyOEtCIG9iamVjdHMg
+d2l0aCAyIHJlcGxpY2FzLCBzdGRldiBvZiBkaXNrIHVzZSUgb24gNDAgb3NkcyBkZWNyZWFzZXMg
+ZnJvbSAwLjA2NyB0byAwLjA0Mg0KPj4gMi4gICBMYXJnZSBzY2FsZWQgcGVyZm9ybWFuY2UgaXMg
+aW1wcm92ZWQgc2luY2UgZGF0YSBkaXN0cmlidXRpb24gaXMgbW9yZSBiYWxhbmNlZA0KPj4gPz9h
+KSBNb3JlIHRoYW4gMTAlIHBlcmZvcm1hbmNlIGltcHJvdmVtZW50IGZvciAxMjhLIGFuZCAxME0g
+cmVhZA0KPj4gPz9iKSBXcml0ZSBwZXJmb3JtYW5jZSBub3QgaW1wYWN0ZWQNCj4+IERldGFpbGVk
+IHBlcmZvcm1hbmNlIGRhdGEgY2FuIGJlIGZvdW5kIGluIHRoZSBhdHRhY2hlZCBwZGYgKGNydXNo
+X29wdGltaXphdGlvbikuDQo+Pg0KPj4gV2UgYWxzbyBjcmVhdGVkIGEgcHVsbCByZXF1ZXN0OiAN
+Cj4+IGh0dHBzOi8vZ2l0aHViLmNvbS9jZXBoL2NlcGgvcHVsbC8yNDAyDQo+Pg0KPj4gVGhhbmtz
+DQo+PiBKaWFuDQo+Pg0KPj4NCj4+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+PiBGcm9t
+OiBMb2ljIERhY2hhcnkgW21haWx0bzpsb2ljQGRhY2hhcnkub3JnXQ0KPj4gU2VudDogVHVlc2Rh
+eSwgU2VwdGVtYmVyIDA5LCAyMDE0IDk6MzYgUE0NCj4+IFRvOiBaaGFuZywgSmlhbjsgY2VwaC1k
+ZXZlbEB2Z2VyLmtlcm5lbC5vcmcNCj4+IFN1YmplY3Q6IFJlOiBGVzogQ1VSU0ggb3B0aW1pemF0
+aW9uIGZvciB1bmJhbGFuY2VkIHBnIGRpc3RyaWJ1dGlvbg0KPj4NCj4+DQo+Pg0KPj4gT24gMjAv
+MDMvMjAxNCAwNDo1NCwgWmhhbmcsIEppYW4gd3JvdGU6DQo+Pj4gRm9yd2FyZGluZyBwZXIgU2Fn
+ZSdzIHN1Z2dlc3Rpb24uDQo+Pg0KPj4gVmVyeSBpbnRlcmVzdGluZyBkaXNjdXNzaW9uIDotKSBG
+b3IgdGhlIHJlY29yZCB0aGUgY29ycmVzcG9uZGluZyBwdWxsIA0KPj4gcmVxdWVzdCBpcyBodHRw
+czovL2dpdGh1Yi5jb20vY2VwaC9jZXBoL3B1bGwvMjQwMg0KPj4NCj4+Pg0KPj4+DQo+Pj4gLS0t
+LS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4+PiBGcm9tOiBTYWdlIFdlaWwgW21haWx0bzpzYWdl
+QGlua3RhbmsuY29tXQ0KPj4+IFNlbnQ6IFdlZG5lc2RheSwgTWFyY2ggMTksIDIwMTQgMTE6Mjkg
+UE0NCj4+PiBUbzogTWFyayBOZWxzb24NCj4+PiBDYzogWmhhbmcsIEppYW47IER1YW4sIEppYW5n
+YW5nOyBIZSwgWXVqaWUNCj4+PiBTdWJqZWN0OiBSZTogQ1VSU0ggb3B0aW1pemF0aW9uIGZvciB1
+bmJhbGFuY2VkIHBnIGRpc3RyaWJ1dGlvbg0KPj4+DQo+Pj4gT24gV2VkLCAxOSBNYXIgMjAxNCwg
+TWFyayBOZWxzb24gd3JvdGU6DQo+Pj4+IE9uIDAzLzE5LzIwMTQgMDM6MjQgQU0sIFpoYW5nLCBK
+aWFuIHdyb3RlOg0KPj4+Pj4gRm9yIG1vcmUgZGV0YWlsIGRhdGEsIHBsZWFzZSByZWZlciB0byB0
+aGUgKlRlc3RpbmcgcmVzdWx0cyogcGFydC4NCj4+Pj4+DQo+Pj4+PiAqT3B0aW1pemF0aW9uIHBy
+b3Bvc2FsczogKg0KPj4+Pj4NCj4+Pj4+IEFmdGVyIHdlIGRpdmVkIGludG8gdGhlIHNvdXJjZSBj
+b2RlIG9mIENSVVNIIGFuZCByZWxhdGVkIHBhcGVycywgDQo+Pj4+PiB3ZSBwcm9wb3NlZCB0d28g
+cG9zc2libGUgb3B0aW1pemF0aW9uczoNCj4+Pj4+DQo+Pj4+PiAxLkFkZCBkaWZmZXJlbnQgaGFz
+aCBhbGdvcml0aG1zLCBhcyBhbiBhbHRlcm5hdGl2ZSBmb3IgdGhlIA0KPj4+Pj4gSmVua2luJ3Mg
+aGFzaCwgZS5nLiBhbGdvcml0aG0gdGhhdCB3aWxsIHByb2R1Y2UgZXZlbiB2YWx1ZXMgd2hlbiAN
+Cj4+Pj4+IHJhbmdlIG9mIGlucHV0IHZhbHVlIChwZyMpIGlzIHJlbGF0aXZlbHkgc21hbGwuIE9y
+IGFkZCBuZXcgYnVja2V0IA0KPj4+Pj4gdHlwZSBhdCB0aGUgc2FtZSB0aW1lIGlmIG5lY2Vzc2Fy
+eS4NCj4+Pg0KPj4+IFRoaXMgKm1pZ2h0KiB3b3JrLCBidXQgSSBkb24ndCBoYXZlIGEgc3Ryb25n
+IGludHVpdGlvbiBhYm91dCBpdC4gIFRoZSBtb2RlbGluZyB3ZSd2ZSBkb25lIG5vdyBoYXMgZXNz
+ZW50aWFsbHkgYXNzdW1lZCBhIHN0YXRpc3RpY2FsbHkgdW5pZm9ybSBkaXN0cmlidXRpb24sIHdo
+aWNoIGhhcyBzb21lIGluaGVyZW50IGluYmFsYW5jZSBmb3IgbG93IHZhbHVlcyBvZiBuIChudW0g
+cGdzIGluIG91ciBjYXNlKS4gIEkgaGF2ZSBnZW5lcmFsbHkgYXNzdW1lZCB3ZSBjYW4ndCBkbyBi
+ZXR0ZXIgdGhhbiAicmFuZG9tIiwgYW5kIHN0aWxsIGhhdmUgdGhlIG90aGVyIHByb3BlcnRpZXMg
+d2Ugd2FudCAoaW5kZXBlbmRlbnQsIGRldGVybWluaXN0aWMgcGxhY2VtZW50KSwgYnV0IGl0IG1h
+eSBiZSBwb3NzaWJsZS4NCj4+Pg0KPj4+Pj4NCj4+Pj4+IDIuRmluZCBhIGJldHRlciByZXBsaWNh
+IHBsYWNlbWVudCBzdHJhdGVneSBpbnN0ZWFkIG9mIGN1cnJlbnQgDQo+Pj4+PiByZXRyeSBsb2dp
+YyBvZiBjcnVzaF9jaG9vc2VfZmlyc3RuLCB3aGljaCBtYXkgY2F1c2UgQ1JVU0ggdG8gYmVoYXZl
+IGJhZGx5Lg0KPj4+Pj4NCj4+Pj4+IFdlIGZpbmQgdGhlcmUgYXJlIHNldmVyYWwgdGhyZXNob2xk
+IG9mIHJldHJ5IHRpbWVzIGJ5IHJlZmVycmluZyB0byANCj4+Pj4+IGNvZGUsIGNob29zZV90b3Rh
+bF90cmllcywgY2hvb3NlX2xvY2FsX3RyaWVzIGFuZCBjaG9vc2VfbG9jYWxfZmFsbGJhY2tfdHJp
+ZXMuDQo+Pj4+PiBUaGV5IGFyZSB1c2VkIHRvIGRlY2lkZSB3aGV0aGVyIHRvIGRvIGEgcmV0cnlf
+YnVja2V0LCANCj4+Pj4+IHJldHJ5X2Rlc2NlbnQgb3IgdXNlIHBlcm11dGF0aW9uIHRvIGRvIGFu
+IGV4aGF1c3RpdmUgYnVja2V0IA0KPj4+Pj4gc2VhcmNoLiBXZSBhcmUgd29uZGVyaW5nIGlmIHRo
+ZXJlIGlzIGFub3RoZXIgcmV0cnkgc3RyYXRlZ3k6DQo+Pj4+Pg0KPj4+Pj4gYSlCYWNrdHJhY2tp
+bmcgcmV0cnkuIE5vdyB0aGUgbG9naWMgb2YgY3J1c2hfY2hvb3NlX2ZpcnN0biBjYW4gDQo+Pj4+
+PiBvbmx5IGlzc3VlIGFuIHJldHJ5IGVpdGhlciBmcm9tIHRoZSBpbml0aWFsIGJ1Y2tldChyZXRy
+eV9kZXNjZW50KSANCj4+Pj4+IG9yIGZyb20gdGhlIGN1cnJlbnQgYnVja2V0IChyZXRyeV9idWNr
+ZXQpLCBob3cgYWJvdXQgcmV0cnlpbmcgdGhlIGludGVydmVuaW5nIGJ1Y2tldHM/DQo+Pj4+Pg0K
+Pj4+Pj4gYilBZGp1c3QgdGhyZXNob2xkIG9mIHJldHJ5IHRpbWVzIGJ5IG90aGVyIHZhbHVlcy4g
+V2UgZG8gbm90aWNlZCANCj4+Pj4+IHRoYXQgdGhlICdvcHRpbWFsJyBjcnVzaCB0dW5hYmxlIGNv
+dWxkIGJlIHVzZWQgdG8gbWFrZSBpdCwgYnV0IHdlIA0KPj4+Pj4gc3RpbGwgZW5jb3VudGVyIHVu
+YmFsYW5jZWQgW2cgZGlzdHJpYnV0aW9uIGJ5IHVzaW5nIHRoZSBvcHRpbWFsIHN0cmF0ZWd5Lg0K
+Pj4+Pj4gUGxlYXNlIHJlZmVyIHRvIDQgb2YgdGhlIFRlc3RpbmcgcmVzdWx0cyBwYXJ0Lg0KPj4+
+Pj4NCj4+Pj4+IGMpQWRkIGFuIG1lY2hhbmlzbSB0aGF0IGNhbiBhZGp1c3QgYWJvdmUgbWVudGlv
+bmVkIHRocmVzaG9sZHMgDQo+Pj4+PiBhZGFwdGl2ZWx5LiBNYXliZSB3ZSBjYW4gcmVjb3JkIHRo
+ZSByZXRyeSB0aW1lcyBvZiB0aGUgcHJldmlvdXMgDQo+Pj4+PiBjYWxsIGZvciBDUlVTSCwgYW5k
+IGFkanVzdCByZXRyeSB0aHJlc2hvbGRzIGF1dG9tYXRpY2FsbHkgYWNjb3JkaW5nIHRvIHRoZSBy
+ZWNvcmQuDQo+Pj4NCj4+PiBJIHN1Z2dlc3QgaWdub3JpbmcgYWxsIG9mIHRoaXMgcmV0cnkgbG9n
+aWMuICBUaGUgb3JpZ2luYWwgdmVyc2lvbiBvZiANCj4+PiBDUlVTSCBoYXMgdGhlIGxvY2FsIHJl
+dHJpZXMgdG8gdHJ5IHRvIG1ha2UgZGF0YSBtb3ZlICJsZXNzIGZhciIsIGJ1dCANCj4+PiB3aGVu
+IHdlIHdlbnQgYmFjayBhIHllYXIgYWdvIGFuZCBkaWQgYSBzdGF0aXN0aWNhbCBhbmFseXNpcyBv
+ZiB0aGUgDQo+Pj4gZGlzdHJpYnV0aW9uIHdlIGZvdW5kIHRoYXQgKmFsbCogb2YgdGhlc2UgaGFj
+a3MgZGVncmFkZWQgdGhlIHF1YWxpdHkgDQo+Pj4gb2YgdGhlIHBsYWNlbWVudCxhIG5kIGJ5IHR1
+cm5pbmcgdGhlbSBhbGwgb2ZmIChzZXR0aW5nIHRoZSAnb3B0aW1hbCcNCj4+PiB2YWx1ZXMgd2hp
+Y2ggemVyb2VzIHRoZW0gYWxsIG91dCBleGNlbnQgZm9yIHRvdGFsX3JldHJpZXMpIHdlIGdvdCAN
+Cj4+PiBzb21ldGhpbmcgdGhhdCB3YXMgaW5kaXN0aW5ndWlzaGFibGUgZnJvbSBhIHVuaWZvcm0g
+ZGlzdHJpYnV0aW9uLg0KPj4+DQo+Pj4+PiAzLkFkZCBzb2Z0IGxpbmsgZm9yIHBnIGRpcmVjdG9y
+aWVzLiBEdXJpbmcgcGcgY3JlYXRpb24sIHdlIGNhbiANCj4+Pj4+IGNyZWF0ZSBzb2Z0IGxpbmtz
+IGZvciB0aGUgcGdzIGlmIHBnIyBvbiB0aGUgc2VsZWN0ZWQgb3NkIGlzIG1vcmUgDQo+Pj4+PiB0
+aGFuIHNvbWUgdGhyZXNob2xkLCBzYXkgMTAlIG1vcmUgdGhhbiBkZXNpcmVkIGF2ZXJhZ2UgbnVt
+YmVyLCB0byANCj4+Pj4+IG1vdmUgb2JqZWN0cyB0aGF0IHdpbGwgYmUgc3RvcmVkIGluIHRoaXMg
+cGcgdG8gYW5vdGhlciBvc2QuDQo+Pj4+PiBCYWxhbmNlZCBkaXNrIHV0aWxpemF0aW9uIG1heSBi
+ZSBnYWluZWQgaW4gdGhpcyB3YXkuDQo+Pj4NCj4+PiBJIHRoaW5rIHlvdSBuZWVkIHRvIGJlIGNh
+cmVmdWwsIGJ1dCB5ZXMsIHRoaXMgaXMgYW4gb3B0aW9uLiAgVGhlcmUgDQo+Pj4gaXMgYSBzaW1p
+bGFyIGV4Y2VwdGlvbiBtZWNoYW5pc20gaW4gcGxhY2UgdGhhdCBpcyB1c2VkIGZvciBvdGhlciAN
+Cj4+PiBwdXJwb3NlcyBhbmQgc29tZXRoaW5nIHNpbWlsYXIgY291bGQgYmUgZG9uZSBoZXJlLiAg
+VGhlIG1haW4gDQo+Pj4gY2hhbGxlbmdlIHdpbGwgYmUgaW4gZW5zdXJpbmcgdGhhdCB0aGUgc29m
+dCBsaW5rcy9leGNlcHRpb25zIGZvbGxvdyANCj4+PiB0aGUgc2FtZSBvdmVyYWxsIHBvbGljeSB0
+aGF0IENSVVNIIGRvZXMgYWZ0ZXIgdGhlIHJhdyBtYXBwaW5nIGlzIA0KPj4+IHBlcmZvcm1lZC4g
+IFRoaXMgaXMgYW4gb3B0aW9uLCBidXQgSSB3b3VsZCBwdXQgaXQgdG93YXJkIHRoZSBib3R0b20g
+b2YgdGhlIGxpc3QuLi4NCj4+Pg0KPj4+Pj4gNC5DaGFuZ2UgcGxhY2VtZW50IHN0cmF0ZWd5IG9u
+bHkgZm9yIHN0ZXAgb2Ygc2VsZWN0aW5nIGRldmljZXMgDQo+Pj4+PiBmcm9tIGhvc3RzLiBXZSBm
+b3VuZCBpbiBvdXIgdGVzdGluZyByZXN1bHRzIHRoYXQgcGcgZGlzdHJpYnV0aW9uIA0KPj4+Pj4g
+d2FzIGJhbGFuY2VkIGFtb25nIGhvc3RzLCB3aGljaCBpcyByZWFzb25hYmxlIHNpbmNlIHBnIyBv
+ZiBlYWNoIA0KPj4+Pj4gaG9zdCBpcyBhYm92ZSAxSyAoYWNjb3JkaW5nIHRvIHRoZSBjdXJyZW50
+IEJLTSB0aGF0IHBnIyBwZXIgb3NkIA0KPj4+Pj4gc2hvdWxkIGJlIGFib3V0IDEwMCkuIFNvIGhv
+dyBhYm91dCB3ZSBhcHBseSBDUlVTSCBvbmx5IG9uIHRoZSANCj4+Pj4+IGludGVydmFsIGJ1Y2tl
+dHMgYW5kIGZpbmQgYW5vdGhlciBzaW1wbGUgYnV0IG1vcmUgYmFsYW5jZWQgbWV0aG9kIHRvIGNo
+b29zZSBvc2QgZnJvbSBob3N0Pw0KPj4+DQo+Pj4gVGhpcyBpZGVhIGhhcyBhIGxvdCBvZiBwb3Rl
+bnRpYWwuICBGb3IgZXhhbXBsZToNCj4+Pg0KPj4+IElmIHlvdSBrbm93IHRoZSBjaGFzc2lzIGNh
+biBob2xkIDEyIGRpc2tzLCB5b3UgY2FuIGZvcmNlIHRoZSBidWNrZXQgDQo+Pj4gc2l6ZSB0byB0
+d2VsdmUgYW5kIHNvbWVob3cgcHJldmVudCB1c2VycyBmcm9tIGFkanVzdGluZyB0aGUgDQo+Pj4g
+c3RydWN0dXJlIG9mIHRoZSB0cmVlLiAgVGhlbiB5b3UgY2FuIHVzZSBhIHNpbXBsZSBtYXBwaW5n
+IHRoYXQgaXMgDQo+Pj4gdHJ1bHkgZmxhdCAobGlrZSBhIGxpbmVhciBtYXBwaW5nLCBkaXNrID0g
+eCAlIG51bV9kaXNrcykgZm9yIHRoYXQgYnVja2V0L3N1YnRyZWUuDQo+Pj4gVGhlIGRvd25zaWRl
+IG9mIGNvdXJzZSBpcyB0aGF0IGlmIHlvdSByZW1vdmUgYSBkaXNrICpldmVyeXRoaW5nKiANCj4+
+PiByZXNodWZmbGVzLCBoZW5jZSBzb21lIHNvcnQgb2YgZ3VhcmRyYWlscyB0byBwcmV2ZW50IGEg
+dXNlciBmcm9tIA0KPj4+IGluYWR2ZXJ0YW50bHkgZG9pbmcgdGhhdC4gIElmIGEgZGlzayAqZG9l
+cyogZmFpbCwgeW91IGp1c3QgbmVlZCB0byANCj4+PiBtYWtlIHN1cmUgdGhlIGRpc2sgaXMgbWFy
+a2VkICJvdXQiIGJ1dCBub3QgcmVtb3ZlZCBmcm9tIHRoZSBDUlVTSCBoaWVyYXJjaHkgYW5kIHRo
+ZSBub3JtYWwgcmV0cnkgd2lsbCBraWNrIGluLg0KPj4+DQo+Pj4gTm90ZSB0aGF0IGFsbCB0aGlz
+IGlzIHJlYWxsIGRvaW5nIGlzIGluY3JlYXNpbmcgdGhlIHNpemUgb2YgdGhlICJidWNrZXRzIg0K
+Pj4+IHRoYXQgd2UgYXJlIChwc2V1ZG8pcmFuZG9tbHkgZGlzdHJpYnV0aW9uIG92ZXIuICBJdCBp
+cyBzdGlsbCBhIA0KPj4+IHJhbmRvbS91bmlmb3JtIGRpc3RyaWJ1dGlvbiwgYnV0IHRoZSBOIHZh
+bHVlIGlzIDEyIHRpbWVzIGJpZ2dlciAoZm9yIA0KPj4+IGENCj4+PiAxMiBkaXNrIGNoYXNzaXMp
+IGFuZCBhcyBhIHJlc3VsdCB0aGUgdmFyaWFuY2UgaXMgc3Vic3RhbnRpYWxseSBsb3dlci4NCj4+
+Pg0KPj4+IEkgd291bGQgc3VnZ2VzdCBtYWtpbmcgYSBuZXcgYnVja2V0IHR5cGUgdGhhdCBpcyBj
+YWxsZWQgJ2xpbmVhcicgYW5kIA0KPj4+IGRvZXMgYSBzaW1wbGUgbW9kdWxvIGFuZCB0cnlpbmcg
+dGhpcyBvdXQuICBXZSB3aWxsIG5lZWQgYSBidW5jaCBvZiANCj4+PiBhZGRpdGlvbmFsIHNhZmV0
+eSBjaGVja3MgdG8gaGVscCB1c2VycyBhdm9pZCBkb2luZyBzaWxseSB0aGluZ3MgDQo+Pj4gKGxp
+a2UgYWRqdXN0aW5nIHRoZSBudW1iZXIgb2YgaXRlbXMgaW4gdGhlIGxpbmVhciBidWNrZXRzLCB3
+aGljaCANCj4+PiByZXNodWZmbGUNCj4+PiBldmVyeXRoaW5nKSBidXQgdGhhdCB3b3VsZG4ndCBi
+ZSBuZWVkZWQgZm9yIGFuIGluaXRpYWwgYW5hbHlzaXMgb2YgdGhlIHBlcmZvcm1hbmNlIGltcGFj
+dC4NCj4+Pg0KPj4+IERvIHlvdSBtaW5kIGlmIHdlIHNoaWZ0IHRoaXMgdGhyZWFkIG92ZXIgdG8g
+Y2VwaC1kZXZlbD8gIEkgdGhpbmsgDQo+Pj4gdGhlcmUgYXJlIGxvdHMgb2YgcGVvcGxlIHdobyB3
+b3VsZCBiZSBpbnRlcmVzdGVkIGluIHRoaXMgZGlzY3Vzc2lvbi4NCj4+PiBXZSBjYW4gb2YgY291
+cnNlIGxlYXZlIG9mZiB5b3VyIGF0dGFjaG1lbnQgaWYgeW91IHByZWZlci4NCj4+Pg0KPj4+IFRo
+YW5rcyENCj4+PiBzYWdlDQo+Pj4gLS0NCj4+PiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlz
+dDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCINCj4+PiBpbiB0aGUgYm9k
+eSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9t
+byANCj4+PiBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0
+bWwNCj4+Pg0KPj4NCj4+IC0tDQo+PiBMbz9jIERhY2hhcnksIEFydGlzYW4gTG9naWNpZWwgTGli
+cmUNCj4+DQo+Pg0KPiBO5aul5Y+J6Z2j56yhee6Mt+awimLnnoLug5HljYN26LGdPynol5N7Lm4/
+K+Wjj+a4ruamj3rps5DlpqBheT8d6JWg6LeIPyxqIO6Em2bvvILnqZDmrp3phJc/HueVkOOCoj8N
+CuKSju6bkDorduWivuWmm+mRmuixsOeomz8/IOePo+i1mXpaK+WHkuauoOWouO6VkCLmv58hdG1s
+PQ0KPiANCg0K
