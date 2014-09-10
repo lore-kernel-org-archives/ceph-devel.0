@@ -1,17 +1,23 @@
 From: Ilya Dryomov <ilya.dryomov@inktank.com>
 Subject: Re: [PATCH net-next 2/5] ceph: Convert pr_warning to pr_warn
-Date: Wed, 10 Sep 2014 16:30:48 +0400
-Message-ID: <CALFYKtBsETt-PPmENUtKZuypqMH0rF2+ZOm0Dv0jWn1_yutFhA@mail.gmail.com>
+Date: Wed, 10 Sep 2014 16:38:07 +0400
+Message-ID: <CALFYKtCiGXhMZ-f0B=TGSNGZCng8NVYWCV-wwOHq3xPdKO+-Kw@mail.gmail.com>
 References: <cover.1410322181.git.joe@perches.com>
 	<714b7551f5a6ea5e721fed705568a39eeae4623b.1410322181.git.joe@perches.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-qg0-f53.google.com ([209.85.192.53]:64419 "EHLO
+	mail-qg0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751225AbaIJMiJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Sep 2014 08:38:09 -0400
+Received: by mail-qg0-f53.google.com with SMTP id q108so1749619qgd.26
+        for <ceph-devel@vger.kernel.org>; Wed, 10 Sep 2014 05:38:08 -0700 (PDT)
 In-Reply-To: <714b7551f5a6ea5e721fed705568a39eeae4623b.1410322181.git.joe@perches.com>
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
 To: Joe Perches <joe@perches.com>
 Cc: netdev@vger.kernel.org, Sage Weil <sage@inktank.com>, "David S. Miller" <davem@davemloft.net>, Ceph Development <ceph-devel@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
 
 On Wed, Sep 10, 2014 at 8:17 AM, Joe Perches <joe@perches.com> wrote:
 > Use the more common pr_warn.
@@ -116,108 +122,10 @@ On Wed, Sep 10, 2014 at 8:17 AM, Joe Perches <joe@perches.com> wrote:
 > +       pr_warn("%s%lld %s %s\n",
 > +               ENTITY_NAME(con->peer_name),
 > +               ceph_pr_addr(&con->peer_addr.in_addr), con->error_msg);
->         dout("fault %p state %lu to peer %s\n",
->              con, con->state, ceph_pr_addr(&con->peer_addr.in_addr));
->
-> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-> index 30f6faf..8ebb748 100644
-> --- a/net/ceph/osd_client.c
-> +++ b/net/ceph/osd_client.c
-> @@ -1774,8 +1774,8 @@ static void handle_reply(struct ceph_osd_client *osdc, struct ceph_msg *msg,
->         }
->         bytes = le32_to_cpu(msg->hdr.data_len);
->         if (payload_len != bytes) {
-> -               pr_warning("sum of op payload lens %d != data_len %d",
-> -                          payload_len, bytes);
-> +               pr_warn("sum of op payload lens %d != data_len %d\n",
-> +                       payload_len, bytes);
->                 goto bad_put;
->         }
->
-> @@ -2797,10 +2797,10 @@ static struct ceph_msg *get_reply(struct ceph_connection *con,
->         ceph_msg_revoke_incoming(req->r_reply);
->
->         if (front_len > req->r_reply->front_alloc_len) {
-> -               pr_warning("get_reply front %d > preallocated %d (%u#%llu)\n",
-> -                          front_len, req->r_reply->front_alloc_len,
-> -                          (unsigned int)con->peer_name.type,
-> -                          le64_to_cpu(con->peer_name.num));
-> +               pr_warn("get_reply front %d > preallocated %d (%u#%llu)\n",
-> +                       front_len, req->r_reply->front_alloc_len,
-> +                       (unsigned int)con->peer_name.type,
-> +                       le64_to_cpu(con->peer_name.num));
->                 m = ceph_msg_new(CEPH_MSG_OSD_OPREPLY, front_len, GFP_NOFS,
->                                  false);
->                 if (!m)
-> @@ -2823,8 +2823,7 @@ static struct ceph_msg *get_reply(struct ceph_connection *con,
->                         if (osd_data->pages &&
->                                 unlikely(osd_data->length < data_len)) {
->
-> -                               pr_warning("tid %lld reply has %d bytes "
-> -                                       "we had only %llu bytes ready\n",
-> +                               pr_warn("tid %lld reply has %d bytes we had only %llu bytes ready\n",
->                                         tid, data_len, osd_data->length);
->                                 *skip = 1;
->                                 ceph_msg_put(m);
-> diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
-> index c547e46..ae5a507 100644
-> --- a/net/ceph/osdmap.c
-> +++ b/net/ceph/osdmap.c
-> @@ -521,11 +521,11 @@ static int decode_pool(void **p, void *end, struct ceph_pg_pool_info *pi)
->         ev = ceph_decode_8(p);  /* encoding version */
->         cv = ceph_decode_8(p); /* compat version */
->         if (ev < 5) {
-> -               pr_warning("got v %d < 5 cv %d of ceph_pg_pool\n", ev, cv);
-> +               pr_warn("got v %d < 5 cv %d of ceph_pg_pool\n", ev, cv);
->                 return -EINVAL;
->         }
->         if (cv > 9) {
-> -               pr_warning("got v %d cv %d > 9 of ceph_pg_pool\n", ev, cv);
-> +               pr_warn("got v %d cv %d > 9 of ceph_pg_pool\n", ev, cv);
->                 return -EINVAL;
->         }
->         len = ceph_decode_32(p);
-> @@ -729,9 +729,9 @@ static int get_osdmap_client_data_v(void **p, void *end,
->
->                 ceph_decode_8_safe(p, end, struct_compat, e_inval);
->                 if (struct_compat > OSDMAP_WRAPPER_COMPAT_VER) {
-> -                       pr_warning("got v %d cv %d > %d of %s ceph_osdmap\n",
-> -                                  struct_v, struct_compat,
-> -                                  OSDMAP_WRAPPER_COMPAT_VER, prefix);
-> +                       pr_warn("got v %d cv %d > %d of %s ceph_osdmap\n",
-> +                               struct_v, struct_compat,
-> +                               OSDMAP_WRAPPER_COMPAT_VER, prefix);
->                         return -EINVAL;
->                 }
->                 *p += 4; /* ignore wrapper struct_len */
-> @@ -739,9 +739,9 @@ static int get_osdmap_client_data_v(void **p, void *end,
->                 ceph_decode_8_safe(p, end, struct_v, e_inval);
->                 ceph_decode_8_safe(p, end, struct_compat, e_inval);
->                 if (struct_compat > OSDMAP_CLIENT_DATA_COMPAT_VER) {
-> -                       pr_warning("got v %d cv %d > %d of %s ceph_osdmap client data\n",
-> -                                  struct_v, struct_compat,
-> -                                  OSDMAP_CLIENT_DATA_COMPAT_VER, prefix);
-> +                       pr_warn("got v %d cv %d > %d of %s ceph_osdmap client data\n",
-> +                               struct_v, struct_compat,
-> +                               OSDMAP_CLIENT_DATA_COMPAT_VER, prefix);
->                         return -EINVAL;
->                 }
->                 *p += 4; /* ignore client data struct_len */
-> @@ -751,8 +751,8 @@ static int get_osdmap_client_data_v(void **p, void *end,
->                 *p -= 1;
->                 ceph_decode_16_safe(p, end, version, e_inval);
->                 if (version < 6) {
-> -                       pr_warning("got v %d < 6 of %s ceph_osdmap\n", version,
-> -                                  prefix);
-> +                       pr_warn("got v %d < 6 of %s ceph_osdmap\n",
-> +                               version, prefix);
->                         return -EINVAL;
->                 }
->
-> --
-> 1.8.1.2.459.gbcd45b4.dirty
 
-Looks good.  I'll take it though ceph tree to avoid possible conflicts?
+Just wondering, why did you move ENITITY_NAME argument to the next
+line?  I see you are doing this pretty consistently.  Is this a style
+guideline or something?
 
 Thanks,
 
