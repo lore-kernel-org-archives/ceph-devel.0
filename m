@@ -1,44 +1,53 @@
 From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: [PATCH 0/3] libceph: #8979 fix (wip-auth-8979)
-Date: Wed, 10 Sep 2014 11:54:28 +0400
-Message-ID: <1410335671-4581-1-git-send-email-ilya.dryomov@inktank.com>
+Subject: [PATCH 1/3] libceph: gracefully handle large reply messages from the mon
+Date: Wed, 10 Sep 2014 11:54:29 +0400
+Message-ID: <1410335671-4581-2-git-send-email-ilya.dryomov@inktank.com>
+References: <1410335671-4581-1-git-send-email-ilya.dryomov@inktank.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f180.google.com ([209.85.217.180]:44932 "EHLO
-	mail-lb0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751181AbaIJHyf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Sep 2014 03:54:35 -0400
-Received: by mail-lb0-f180.google.com with SMTP id b12so3398559lbj.39
-        for <ceph-devel@vger.kernel.org>; Wed, 10 Sep 2014 00:54:34 -0700 (PDT)
-Received: from localhost ([109.110.67.183])
-        by mx.google.com with ESMTPSA id my10sm5364041lbb.9.2014.09.10.00.54.32
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=RC4-SHA bits=128/128);
-        Wed, 10 Sep 2014 00:54:33 -0700 (PDT)
+Received: from mail-lb0-f170.google.com ([209.85.217.170]:42760 "EHLO
+	mail-lb0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751283AbaIJHyi (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Sep 2014 03:54:38 -0400
+Received: by mail-lb0-f170.google.com with SMTP id u10so3796476lbd.29
+        for <ceph-devel@vger.kernel.org>; Wed, 10 Sep 2014 00:54:36 -0700 (PDT)
+In-Reply-To: <1410335671-4581-1-git-send-email-ilya.dryomov@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
+Cc: Sage Weil <sage@redhat.com>
 
-Hello,
+From: Sage Weil <sage@redhat.com>
 
-This is a fix for #8979 ("GPF kernel panics - auth?"), based on Sage's
-wip-8979 branch.
+We preallocate a few of the message types we get back from the mon.  If we
+get a larger message than we are expecting, fall back to trying to allocate
+a new one instead of blindly using the one we have.
 
-Thanks,
+CC: stable@vger.kernel.org
+Signed-off-by: Sage Weil <sage@redhat.com>
+---
+ net/ceph/mon_client.c |    8 ++++++++
+ 1 file changed, 8 insertions(+)
 
-                Ilya
-
-
-Ilya Dryomov (2):
-  libceph: add process_one_ticket() helper
-  libceph: do not hard code max auth ticket len
-
-Sage Weil (1):
-  libceph: gracefully handle large reply messages from the mon
-
- net/ceph/auth_x.c     |  256 ++++++++++++++++++++++++++-----------------------
- net/ceph/mon_client.c |    8 ++
- 2 files changed, 143 insertions(+), 121 deletions(-)
-
+diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
+index 067d3af2eaf6..61fcfc304f68 100644
+--- a/net/ceph/mon_client.c
++++ b/net/ceph/mon_client.c
+@@ -1181,7 +1181,15 @@ static struct ceph_msg *mon_alloc_msg(struct ceph_connection *con,
+ 	if (!m) {
+ 		pr_info("alloc_msg unknown type %d\n", type);
+ 		*skip = 1;
++	} else if (front_len > m->front_alloc_len) {
++		pr_warning("mon_alloc_msg front %d > prealloc %d (%u#%llu)\n",
++			   front_len, m->front_alloc_len,
++			   (unsigned int)con->peer_name.type,
++			   le64_to_cpu(con->peer_name.num));
++		ceph_msg_put(m);
++		m = ceph_msg_new(type, front_len, GFP_NOFS, false);
+ 	}
++
+ 	return m;
+ }
+ 
 -- 
 1.7.10.4
 
