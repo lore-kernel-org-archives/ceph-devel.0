@@ -1,214 +1,231 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: RE: FW: CURSH optimization for unbalanced pg distribution
-Date: Tue, 9 Sep 2014 18:06:12 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1409091805530.17200@cobra.newdream.net>
-References: <51FC7A40FB29414D88A121A7FFEF9A4710DC2188@SHSMSX104.ccr.corp.intel.com> <53299E33.5060809@inktank.com> <alpine.DEB.2.00.1403190814520.316@cobra.newdream.net> <51FC7A40FB29414D88A121A7FFEF9A4710DC3018@SHSMSX104.ccr.corp.intel.com>
- <540F0252.7040609@dachary.org> <51FC7A40FB29414D88A121A7FFEF9A4710F570D6@SHSMSX104.ccr.corp.intel.com>
+From: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
+Subject: RE: Cache tiering slow request issue: currently waiting for rw locks
+Date: Wed, 10 Sep 2014 01:13:38 +0000
+Message-ID: <06E7D85B3BA36C4DB207FEDE871C534893C5FD@SHSMSX101.ccr.corp.intel.com>
+References: <06E7D85B3BA36C4DB207FEDE871C53489375E2@SHSMSX101.ccr.corp.intel.com>
+ <alpine.DEB.2.00.1408290717260.28218@cobra.newdream.net>
+ <alpine.DEB.2.00.1408291928410.13709@cobra.newdream.net>
+ <06E7D85B3BA36C4DB207FEDE871C53489377A6@SHSMSX101.ccr.corp.intel.com>
+ <06E7D85B3BA36C4DB207FEDE871C5348937A78@SHSMSX101.ccr.corp.intel.com>
+ <06E7D85B3BA36C4DB207FEDE871C5348938051@SHSMSX101.ccr.corp.intel.com>
+ <06E7D85B3BA36C4DB207FEDE871C534893836D@SHSMSX101.ccr.corp.intel.com>
+ <alpine.DEB.2.00.1409090930100.17200@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:39729 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751176AbaIJBGM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Sep 2014 21:06:12 -0400
-In-Reply-To: <51FC7A40FB29414D88A121A7FFEF9A4710F570D6@SHSMSX104.ccr.corp.intel.com>
+Received: from mga11.intel.com ([192.55.52.93]:57589 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751379AbaIJBN7 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Sep 2014 21:13:59 -0400
+In-Reply-To: <alpine.DEB.2.00.1409090930100.17200@cobra.newdream.net>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Zhang, Jian" <jian.zhang@intel.com>
-Cc: Loic Dachary <loic@dachary.org>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "He, Yujie" <yujie.he@intel.com>
+To: Sage Weil <sweil@redhat.com>
+Cc: "'sam.just@inktank.com'" <sam.just@inktank.com>, "'ceph-devel@vger.kernel.org'" <ceph-devel@vger.kernel.org>
 
-The lists are rejecting the email because of the big attachments.  Send 
-with links instead?
-
-On Tue, 9 Sep 2014, Zhang, Jian wrote:
-
-> Yujie sent out the following email yesterday, but it seems it was missed. Resending it. 
-> 
-> =============
-> Hi all,
-> ?  Several months ago we met an issue of read performance issues (17% degradation) when working on ceph object storage performance evaluation with 10M objects (scaling from 10K objects to 1Million objects) , and found the root cause is unbalanced pg distribution among all osd disks, leading to unbalanced data distribution. We did some further investigation then and identified that CRUSH failed to map pgs evenly to each osd. Please refer to the attached pdf (crush_proposals) for details.
-> 
-> Key Message:
-> ?  As mentioned in the attached pdf, we described possible optimization proposals for CRUSH and got some feedback from community (http://permalink.gmane.org/gmane.comp.file-systems.ceph.devel/18979) . Sage suggested us take the idea of "Change placement strategy only for step of selecting devices from hosts", by adding a new bucket type called ?linear?, and applying a modulo-like hash function to this kind of buckets to achieve balanced distribution. We followed this suggestion and designed an optimized CRUSH algorithm, with new hash methods and an adaptive module. Please refer to the Design and Implementation part for details. We also wrote some POC for it, see the attached patch. And as a result, we got more than 10% read performance improvement using the optimized CRUSH algorithm.
-> 
-> Design and Implementation:
-> 1.   Problem Identification
-> 1.1  Input key (pps) space of CRUSH is not uniform
->     Since PG# on the nested devices of a host is not uniform even if we select the device using simple modulo operation, we decide to change the algorithm of hashing raw pg to pps.
-> 1.2  Algorithm of selecting items from buckets is not uniform
->     After we get uniform input key space, we should make the procedure of selecting devices from host be uniform. Since current CRUSH algorithm uses Jenkins hash based strategies and failed to reach the goal, we decide to add a new bucket type and apply new (modulo based) hash algorithm to make it.
-> 2.   Design
-> 2.1  New pps hash algorithm
->     We design the new pps hash algorithm based on the "Congruential pseudo-random number generator" (http://comjnl.oxfordjournals.org/content/10/1/74.full.pdf) . It defines a bijection between the original sequence {0, ...,2^N-1} and some permutation of it. In other words, given different keys between 0 and 2^N-1, the generator will produce different integers, but within the same range {0,...,2^N-1}. 
->     Assume there are np PGs in a pool, we can regard pgid (0?pgid<2^n, np?2^n<2*np) as the key, and then it will be hashed into a pps value between 0 and 2^n-1. Since PG# in a pool is usually 2^N, the generator just shuffles the original pgid sequence as output in this case, making the key space consisting of a permutation of {0,...,2^n-1}, which achieves the best uniformity. Moreover, poolid can be regarded as a seed in the generator, producing different pps value even with the same pgid but different poolid. Therefore, pgid sequences of various pools are mapped into distinct pps sequences, getting rid of PG overlapping.
-> 2.2  New bucket type, Linear
->     We introduce a new bucket type called "linear", and apply a new modulo based hash algorithm to it. As the pps values assigned to each host are a pseudo-random subset of the original permutation and is possibly out of uniformity, in which situation applying modulo operation directly on integers in the subset cannot produce balanced distribution among disks in the host. To decrease deviation of the subset, we apply a balance parameter 1/balance_param to the key before conducting the modulo method.
->     For osd failure and recovery, it assumes that items nested in this kind of bucket will not be removed, nor new items are added, same as the UNIFORM bucket. Linear host will not introduce more data movement than the uniform bucket.
-> 2.3  Adaptive Strategy
->     Since there is no one constant balance parameter applying for all cases that will result in the best PG distribution. We make it an adaptive procedure by adjusting the balance parameter automatically during the preparation for creating a new pool, according to different cluster topology, PG# and replica#, in order to gain a most uniform distribution.
-> ??1) Try different balance_param when preparing for a new pool
-> ????- Iteratively call CRUSH(map, ruleno, x, balance_param) to get corresponding PG distribution with different balance_params
-> ????- Calculate stdev of PG# among all osds
-> ????- Choose the balance_param with the minimal stdev 
->  	2) Add a member variable to pool struct pg_pool_t to save the best balance_param value
-> ??The adaptive procedure can be described as following:
-> Input: cluster map, total PG number m, adaptive retry times n
-> Output: local optimal balance parameter balance_param min_pg_stdev = MAX; balance_param = a; // initial value for trial from 0 to n { 
->     for pgid from 0 to m {
->         calculate pps using the new generator in 2.1;
->         for bucket b in cluster map // apply CRUSH algorithm
->             apply corresponding bucket hashing algorithm and get a osd list for pgid
->     }
->     calculate pg_stdev_a by gathering all osd lists; // stdev of PG distribution among all osds
->     if pg_stdev_a < min_pg_stdev {
->         min_pg_stdev = pg_stdev_a;
->         balance_param = a; 
->     }
->     adjust a to a new value;
-> }
-> 
-> 
-> Evaluation:
->     We evaluated the performance of optimized and current CRUSH in a cluster consisting of 4 hosts, and each attaching with 10x1T disks. We designed two test cases, for the first one, by creating a pool with 2048 pgs, 2 replicas, preparing 100 million 128KB objects, and then evaluating read performance of these objects; for the second one, by creating a pool with 2048 pgs, 3 replicas, preparing 1 million 10MB objects, and then evaluating read performance of these objects.
->     We compared the PG & data distribution and read performance of the two CRUSH algorithms, and got results as follows:
-> 1.   PG and data distribution is more balanced using optimized CRUSH algorithm
-> ??a) For 2048 PGs with 3 replicas, stdev of PG# on 40 osds decreases from 12.13 to 5.17; for 2048 PGs with 2 replicas, stdev of PG# on 40 osds decreases from 10.09 to 6.50
-> ??b) For 1 million 10MB objects with 3 replicas, stdev of disk use% on 40 osds decreases from 0.068 to 0.026; for 100 million 128KB objects with 2 replicas, stdev of disk use% on 40 osds decreases from 0.067 to 0.042
-> 2.   Large scaled performance is improved since data distribution is more balanced
-> ??a) More than 10% performance improvement for 128K and 10M read
-> ??b) Write performance not impacted
-> Detailed performance data can be found in the attached pdf (crush_optimization).
-> 
-> We also created a pull request: https://github.com/ceph/ceph/pull/2402
-> 
-> Thanks
-> Jian
-> 
-> 
 > -----Original Message-----
-> From: Loic Dachary [mailto:loic@dachary.org] 
-> Sent: Tuesday, September 09, 2014 9:36 PM
-> To: Zhang, Jian; ceph-devel@vger.kernel.org
-> Subject: Re: FW: CURSH optimization for unbalanced pg distribution
+> From: Sage Weil [mailto:sweil@redhat.com]
+> Sent: Wednesday, September 10, 2014 12:35 AM
+> To: Wang, Zhiqiang
+> Cc: 'sam.just@inktank.com'; 'ceph-devel@vger.kernel.org'
+> Subject: RE: Cache tiering slow request issue: currently waiting for rw locks
 > 
+> On Tue, 9 Sep 2014, Wang, Zhiqiang wrote:
+> > Pasting the conversations in the pull request here.
+> >
+> > wonzhq commented 6 days ago
+> > If checking ObjectContext::RWState::waiters and
+> > ObjectContext::RWState::count for the pending requests on this object,
+> > there is still a window which the problem can happen. That is after
+> > the promotion replication and requeuing the client request, and before
+> > dequeuing the client request. Should we loop the OSD::op_wq to check
+> > the pending requests on an object? Or adding something in the
+> > ObjectContext to remember the pending requests? @athanatos @liewegas
+> >
+> > liewegas commented 10 hours ago
+> > Hmm, that's true that there is still that window. Is it necessary that this is
+> completely air-tight, though? As long as we avoid evicting a newly-promoted
+> object before the request is processed we will win. I'm afraid that a
+> complicated mechanism to cover this could introduce more complexity than we
+> need.
+> >
+> > wonzhq commented 2 minutes ago
+> > Tried to use ObjectContext::RWState::count to check the pending request. In
+> my testing, it hit the slow request just once. I checked the log, it exactly falls
+> into the window we talked above. So with this solution, it's possible that we still
+> hit this issue, but much less than before. Should we go ahead with this
+> solution?
+> >
+> > Sage/Sam, what do you think?
 > 
+> I think it is definitely worth adding that check, even if it doesn't catch the
+> requeue case, because it is still useful to defer eviction if there is a request
+> queued for that object.  That seems true at least in the writeback cache
+> mode... perhaps not so in other modes like forward.
+
+OK, I'll add this check first. But why we don't want this check in the forward mode?
+
+> I'm still not sure what would close the hole reliably.  Perhaps a flag on the obc
+> indicating whether any request has touched it since the initial promote?
+> Maybe that, coupled with a time limit (so that eventually we can still evict in
+> case the original request never gets processed... e.g.
+> because the client disconnected before it was requeued or something).
+
+I've tried to add a flag in the obc before. But for some reasons, this didn't work well. I set
+the flag since the initial promote. But later when checking this flag after the promotion,
+sometimes this flag is not set. I haven't figured out the reason for this yet. I'm guessing it's
+because we don't hold every obc in the 'object_contexts'. An obc is removed from it under
+some conditions (e.g., reaching its size limit). So when an obc is removed, and the flag is not
+persisted, we lose this flag when doing another 'get_object_context'. Is this true?
+
 > 
-> On 20/03/2014 04:54, Zhang, Jian wrote:
-> > Forwarding per Sage's suggestion. 
+> ?
 > 
-> Very interesting discussion :-) For the record the corresponding pull request is https://github.com/ceph/ceph/pull/2402
+> sage
 > 
-> > 
-> > 
+>  >
 > > -----Original Message-----
-> > From: Sage Weil [mailto:sage@inktank.com]
-> > Sent: Wednesday, March 19, 2014 11:29 PM
-> > To: Mark Nelson
-> > Cc: Zhang, Jian; Duan, Jiangang; He, Yujie
-> > Subject: Re: CURSH optimization for unbalanced pg distribution
-> > 
-> > On Wed, 19 Mar 2014, Mark Nelson wrote:
-> >> On 03/19/2014 03:24 AM, Zhang, Jian wrote:
-> >>> For more detail data, please refer to the *Testing results* part.
-> >>>
-> >>> *Optimization proposals: *
-> >>>
-> >>> After we dived into the source code of CRUSH and related papers, we 
-> >>> proposed two possible optimizations:
-> >>>
-> >>> 1.Add different hash algorithms, as an alternative for the Jenkin's 
-> >>> hash, e.g. algorithm that will produce even values when range of 
-> >>> input value (pg#) is relatively small. Or add new bucket type at the 
-> >>> same time if necessary.
-> > 
-> > This *might* work, but I don't have a strong intuition about it.  The modeling we've done now has essentially assumed a statistically uniform distribution, which has some inherent inbalance for low values of n (num pgs in our case).  I have generally assumed we can't do better than "random", and still have the other properties we want (independent, deterministic placement), but it may be possible.
-> > 
-> >>>
-> >>> 2.Find a better replica placement strategy instead of current retry 
-> >>> logic of crush_choose_firstn, which may cause CRUSH to behave badly.
-> >>>
-> >>> We find there are several threshold of retry times by referring to 
-> >>> code, choose_total_tries, choose_local_tries and choose_local_fallback_tries.
-> >>> They are used to decide whether to do a retry_bucket, retry_descent 
-> >>> or use permutation to do an exhaustive bucket search. We are 
-> >>> wondering if there is another retry strategy:
-> >>>
-> >>> a)Backtracking retry. Now the logic of crush_choose_firstn can only 
-> >>> issue an retry either from the initial bucket(retry_descent) or from 
-> >>> the current bucket (retry_bucket), how about retrying the intervening buckets?
-> >>>
-> >>> b)Adjust threshold of retry times by other values. We do noticed 
-> >>> that the 'optimal' crush tunable could be used to make it, but we 
-> >>> still encounter unbalanced [g distribution by using the optimal strategy.
-> >>> Please refer to 4 of the Testing results part.
-> >>>
-> >>> c)Add an mechanism that can adjust above mentioned thresholds 
-> >>> adaptively. Maybe we can record the retry times of the previous call 
-> >>> for CRUSH, and adjust retry thresholds automatically according to the record.
-> > 
-> > I suggest ignoring all of this retry logic.  The original version of 
-> > CRUSH has the local retries to try to make data move "less far", but 
-> > when we went back a year ago and did a statistical analysis of the 
-> > distribution we found that *all* of these hacks degraded the quality 
-> > of the placement,a nd by turning them all off (setting the 'optimal' 
-> > values which zeroes them all out excent for total_retries) we got 
-> > something that was indistinguishable from a uniform distribution.
-> > 
-> >>> 3.Add soft link for pg directories. During pg creation, we can 
-> >>> create soft links for the pgs if pg# on the selected osd is more 
-> >>> than some threshold, say 10% more than desired average number, to 
-> >>> move objects that will be stored in this pg to another osd. Balanced 
-> >>> disk utilization may be gained in this way.
-> > 
-> > I think you need to be careful, but yes, this is an option.  There is 
-> > a similar exception mechanism in place that is used for other purposes 
-> > and something similar could be done here.  The main challenge will be 
-> > in ensuring that the soft links/exceptions follow the same overall 
-> > policy that CRUSH does after the raw mapping is performed.  This is an 
-> > option, but I would put it toward the bottom of the list...
-> > 
-> >>> 4.Change placement strategy only for step of selecting devices from 
-> >>> hosts. We found in our testing results that pg distribution was 
-> >>> balanced among hosts, which is reasonable since pg# of each host is 
-> >>> above 1K (according to the current BKM that pg# per osd should be 
-> >>> about 100). So how about we apply CRUSH only on the interval buckets 
-> >>> and find another simple but more balanced method to choose osd from host?
-> > 
-> > This idea has a lot of potential.  For example:
-> > 
-> > If you know the chassis can hold 12 disks, you can force the bucket 
-> > size to twelve and somehow prevent users from adjusting the structure 
-> > of the tree.  Then you can use a simple mapping that is truly flat 
-> > (like a linear mapping, disk = x % num_disks) for that bucket/subtree.  
-> > The downside of course is that if you remove a disk *everything* 
-> > reshuffles, hence some sort of guardrails to prevent a user from 
-> > inadvertantly doing that.  If a disk *does* fail, you just need to 
-> > make sure the disk is marked "out" but not removed from the CRUSH hierarchy and the normal retry will kick in.
-> > 
-> > Note that all this is reall doing is increasing the size of the "buckets" 
-> > that we are (pseudo)randomly distribution over.  It is still a 
-> > random/uniform distribution, but the N value is 12 times bigger (for a 
-> > 12 disk chassis) and as a result the variance is substantially lower.
-> > 
-> > I would suggest making a new bucket type that is called 'linear' and 
-> > does a simple modulo and trying this out.  We will need a bunch of 
-> > additional safety checks to help users avoid doing silly things (like 
-> > adjusting the number of items in the linear buckets, which reshuffle 
-> > everything) but that wouldn't be needed for an initial analysis of the performance impact.
-> > 
-> > Do you mind if we shift this thread over to ceph-devel?  I think there 
-> > are lots of people who would be interested in this discussion.  We can 
-> > of course leave off your attachment if you prefer.
-> > 
+> > From: ceph-devel-owner@vger.kernel.org
+> > [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Wang, Zhiqiang
+> > Sent: Friday, September 5, 2014 3:21 PM
+> > To: Sage Weil; 'sam.just@inktank.com'
+> > Cc: 'ceph-devel@vger.kernel.org'
+> > Subject: RE: Cache tiering slow request issue: currently waiting for
+> > rw locks
+> >
+> > I made some comments based on your comments of the pull request
+> https://github.com/ceph/ceph/pull/2374. Can you take a look? Thx.
+> >
+> > -----Original Message-----
+> > From: ceph-devel-owner@vger.kernel.org
+> > [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Wang, Zhiqiang
+> > Sent: Tuesday, September 2, 2014 2:54 PM
+> > To: Sage Weil
+> > Cc: 'ceph-devel@vger.kernel.org'
+> > Subject: RE: Cache tiering slow request issue: currently waiting for
+> > rw locks
+> >
+> > Tried the pull request, checking the object is blocked or not doesn't work.
+> Actually this check is already done in function agent_work.
+> >
+> > I tried to make a fix to add a field/flag to the object context. This is not a good
+> idea for the following reasons:
+> > 1) If making this filed/flag to be a persistent one, when resetting/clearing this
+> flag, we need to persist it. This is not good for read request.
+> > 2) If making this field/flag not to be a persistent one, when the object context
+> is removed from the cache ' object_contexts', this field/flag is removed as well.
+> This object is removed in the later evicting. The same issue still exists.
+> >
+> > So, I came up with a fix to add a set in the class ReplicatedPG to hold all the
+> promoting objects. This fix is at https://github.com/ceph/ceph/pull/2374. It is
+> tested and works well. Pls review and comment, thx.
+> >
+> > -----Original Message-----
+> > From: ceph-devel-owner@vger.kernel.org
+> > [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Wang, Zhiqiang
+> > Sent: Monday, September 1, 2014 9:33 AM
+> > To: Sage Weil
+> > Cc: 'ceph-devel@vger.kernel.org'
+> > Subject: RE: Cache tiering slow request issue: currently waiting for
+> > rw locks
+> >
+> > I don't think the object context is blocked at that time. It is un-blocked after
+> the copying of data from base tier. It doesn't address the problem here.
+> Anyway, I'll try it and see.
+> >
+> > -----Original Message-----
+> > From: ceph-devel-owner@vger.kernel.org
+> > [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
+> > Sent: Saturday, August 30, 2014 10:29 AM
+> > To: Wang, Zhiqiang
+> > Cc: 'ceph-devel@vger.kernel.org'
+> > Subject: Re: Cache tiering slow request issue: currently waiting for
+> > rw locks
+> >
+> > Hi,
+> >
+> > Can you take a look at https://github.com/ceph/ceph/pull/2363 and see if
+> that addresses the behavior you saw?
+> >
 > > Thanks!
 > > sage
+> >
+> >
+> > On Fri, 29 Aug 2014, Sage Weil wrote:
+> >
+> > > Hi,
+> > >
+> > > I've opened http://tracker.ceph.com/issues/9285 to track this.
+> > >
+> > > I think you're right--we need a check in agent_maybe_evict() that
+> > > will skip objects that are being promoted.  I suspect a flag on the
+> > > ObjectContext is enough?
+> > >
+> > > sage
+> > >
+> > >
+> > > On Fri, 29 Aug 2014, Wang, Zhiqiang wrote:
+> > >
+> > > > Hi all,
+> > > >
+> > > > I've ran into this slow request issue some time ago. The problem is like
+> this: when running with cache tieing, there are 'slow request' warning
+> messages in the log file like below.
+> > > >
+> > > > 2014-08-29 10:18:24.669763 7f9b20f1b700  0 log [WRN] : 1 slow
+> > > > requests, 1 included below; oldest blocked for > 30.996595 secs
+> > > > 2014-08-29 10:18:24.669768 7f9b20f1b700  0 log [WRN] : slow
+> > > > request
+> > > > 30.996595 seconds old, received at 2014-08-29 10:17:53.673142:
+> > > > osd_op(client.114176.0:144919 rb.0.17f56.6b8b4567.000000000935
+> > > > [sparse-read 3440640~4096] 45.cf45084b ack+read e26168) v4
+> > > > currently waiting for rw locks
+> > > >
+> > > > Recently I made some changes to the log, captured this problem, and
+> finally figured out its root cause. You can check the attachment for the logs.
+> > > >
+> > > > Here is the root cause:
+> > > > There is a cache miss when doing read. During promotion, after copying
+> the data from base tier osd, the cache tier primary osd replicates the data to
+> other cache tier osds. Some times this takes quite a long time. During this
+> period of time, the promoted object may be evicted because the cache tier is
+> full. When the primary osd finally gets the replication response and restarts the
+> original read request, it doesn't find the object in the cache tier, and do
+> promotion again. This loops for several times, and we'll see the 'slow request'
+> in the logs. Theoretically, this could loops forever, and the request from the
+> client would never be finished.
+> > > >
+> > > > There is a simple fix for this:
+> > > > Add a field in the object state, indicating the status of the promotion. It's
+> set to true after the copy of data from base tier and before the replication. It's
+> reset to false after the replication and the original client request starts to
+> execute. Evicting is not allowed when this field is true.
+> > > >
+> > > > What do you think?
+> > > >
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+> > > in the body of a message to majordomo@vger.kernel.org More majordomo
+> > > info at  http://vger.kernel.org/majordomo-info.html
+> > >
+> > >
 > > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
-> > in the body of a message to majordomo@vger.kernel.org More majordomo 
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+> > in the body of a message to majordomo@vger.kernel.org More majordomo
 > > info at  http://vger.kernel.org/majordomo-info.html
-> > 
-> 
-> --
-> Lo?c Dachary, Artisan Logiciel Libre
-> 
-> 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+> > in the body of a message to majordomo@vger.kernel.org More majordomo
+> > info at  http://vger.kernel.org/majordomo-info.html
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+> > in the body of a message to majordomo@vger.kernel.org More majordomo
+> > info at  http://vger.kernel.org/majordomo-info.html
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+> > in the body of a message to majordomo@vger.kernel.org More majordomo
+> > info at  http://vger.kernel.org/majordomo-info.html
+> >
+> >
