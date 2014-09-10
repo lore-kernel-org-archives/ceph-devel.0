@@ -1,52 +1,77 @@
-From: Scottix <scottix@gmail.com>
-Subject: Re: [ceph-users] [ANN] ceph-deploy 1.5.14 released
-Date: Wed, 10 Sep 2014 09:56:26 -0700
-Message-ID: <CANKFHZ_hre2qK8wtXPJFP17OZwk6eHp9bZO-XkZ-XNyZtG1Gcg@mail.gmail.com>
-References: <CANtztVyrYxq7SiyPTbgKSvraq82KgoZgW=269F=H2aCM81Yq8g@mail.gmail.com>
+From: Samuel Just <sam.just@inktank.com>
+Subject: Re: OpTracker optimization
+Date: Wed, 10 Sep 2014 11:16:51 -0700
+Message-ID: <CA+4uBUbSrYhy8=ZPKZ7dOTh0sNNCs5mC3ttgBH+qoWO+58UdvA@mail.gmail.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2783A845@SACMBXIP02.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f52.google.com ([209.85.215.52]:45757 "EHLO
-	mail-la0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752676AbaIJQ5I (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Sep 2014 12:57:08 -0400
-Received: by mail-la0-f52.google.com with SMTP id b8so10264294lan.11
-        for <ceph-devel@vger.kernel.org>; Wed, 10 Sep 2014 09:57:06 -0700 (PDT)
-In-Reply-To: <CANtztVyrYxq7SiyPTbgKSvraq82KgoZgW=269F=H2aCM81Yq8g@mail.gmail.com>
+Received: from mail-qa0-f43.google.com ([209.85.216.43]:32940 "EHLO
+	mail-qa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751263AbaIJSQw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Sep 2014 14:16:52 -0400
+Received: by mail-qa0-f43.google.com with SMTP id cm18so18057215qab.30
+        for <ceph-devel@vger.kernel.org>; Wed, 10 Sep 2014 11:16:52 -0700 (PDT)
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2783A845@SACMBXIP02.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alfredo Deza <alfredo.deza@inktank.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
+To: Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: "Sage Weil (sweil@redhat.com)" <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
 
-Suggestion:
-Can you link to a changelog of any new features or major bug fixes
-when you do new releases.
+Added a comment about the approach.
+-Sam
 
-Thanks,
-Scottix
-
-On Wed, Sep 10, 2014 at 6:45 AM, Alfredo Deza <alfredo.deza@inktank.com> wrote:
-> Hi All,
+On Tue, Sep 9, 2014 at 1:33 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
+> Hi Sam/Sage,
 >
-> There is a new bug-fix release of ceph-deploy that helps prevent the
-> environment variable
-> issues that sometimes may cause issues when depending on them on remote hosts.
+> As we discussed earlier, enabling the present OpTracker code degrading
+> performance severely. For example, in my setup a single OSD node with 10
+> clients is reaching ~103K read iops with io served from memory while
+> optracking is disabled but enabling optracker it is reduced to ~39K iops.
+> Probably, running OSD without enabling OpTracker is not an option for many
+> of Ceph users.
 >
-> It is also now possible to specify public and cluster networks when
-> creating a new ceph.conf file.
+> Now, by sharding the Optracker:: ops_in_flight_lock (thus xlist
+> ops_in_flight) and removing some other bottlenecks I am able to match the
+> performance of OpTracking enabled OSD with OpTracking disabled, but with the
+> expense of ~1 extra cpu core.
 >
-> Make sure you update!
+> In this process I have also fixed the following tracker.
 >
 >
-> -Alfredo
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users@lists.ceph.com
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
-
-
--- 
-Follow Me: @Scottix
-http://about.me/scottix
-Scottix@Gmail.com
+>
+> http://tracker.ceph.com/issues/9384
+>
+>
+>
+> and probably http://tracker.ceph.com/issues/8885 too.
+>
+>
+>
+> I have created following pull request for the same. Please review it.
+>
+>
+>
+> https://github.com/ceph/ceph/pull/2440
+>
+>
+>
+> Thanks & Regards
+>
+> Somnath
+>
+>
+>
+>
+> ________________________________
+>
+> PLEASE NOTE: The information contained in this electronic mail message is
+> intended only for the use of the designated recipient(s) named above. If the
+> reader of this message is not the intended recipient, you are hereby
+> notified that you have received this message in error and that any review,
+> dissemination, distribution, or copying of this message is strictly
+> prohibited. If you have received this communication in error, please notify
+> the sender by telephone or e-mail (as shown above) immediately and destroy
+> any and all copies of this message in your possession (whether hard copies
+> or electronically stored copies).
+>
