@@ -1,132 +1,100 @@
-From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: Re: [PATCH net-next 2/5] ceph: Convert pr_warning to pr_warn
-Date: Wed, 10 Sep 2014 16:38:07 +0400
-Message-ID: <CALFYKtCiGXhMZ-f0B=TGSNGZCng8NVYWCV-wwOHq3xPdKO+-Kw@mail.gmail.com>
-References: <cover.1410322181.git.joe@perches.com>
-	<714b7551f5a6ea5e721fed705568a39eeae4623b.1410322181.git.joe@perches.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: RE: Question to RWLock & reverse DNS ip=>hostname
+Date: Wed, 10 Sep 2014 05:40:15 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1409100537440.17200@cobra.newdream.net>
+References: <3472A07E6605974CBC9BC573F1BC02E4AE7B5737@CERNXCHG44.cern.ch> <alpine.DEB.2.00.1409091050040.11887@cobra.newdream.net>, <CAPYLRzj7K6MadhMVDRtsusKxo3nMWEe+-Ed5uNryMMsk8-s4ng@mail.gmail.com>
+ <3472A07E6605974CBC9BC573F1BC02E4AE7BCB2D@CERNXCHG44.cern.ch>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qg0-f53.google.com ([209.85.192.53]:64419 "EHLO
-	mail-qg0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751225AbaIJMiJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Sep 2014 08:38:09 -0400
-Received: by mail-qg0-f53.google.com with SMTP id q108so1749619qgd.26
-        for <ceph-devel@vger.kernel.org>; Wed, 10 Sep 2014 05:38:08 -0700 (PDT)
-In-Reply-To: <714b7551f5a6ea5e721fed705568a39eeae4623b.1410322181.git.joe@perches.com>
+Received: from cobra.newdream.net ([66.33.216.30]:46525 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751003AbaIJMkQ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Sep 2014 08:40:16 -0400
+In-Reply-To: <3472A07E6605974CBC9BC573F1BC02E4AE7BCB2D@CERNXCHG44.cern.ch>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Joe Perches <joe@perches.com>
-Cc: netdev@vger.kernel.org, Sage Weil <sage@inktank.com>, "David S. Miller" <davem@davemloft.net>, Ceph Development <ceph-devel@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>
+Cc: Gregory Farnum <greg@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, Sep 10, 2014 at 8:17 AM, Joe Perches <joe@perches.com> wrote:
-> Use the more common pr_warn.
->
-> Other miscellanea:
->
-> o Coalesce formats
-> o Realign arguments
->
-> Signed-off-by: Joe Perches <joe@perches.com>
-> ---
->  net/ceph/ceph_common.c | 15 +++++++++------
->  net/ceph/messenger.c   | 19 ++++++++++---------
->  net/ceph/osd_client.c  | 15 +++++++--------
->  net/ceph/osdmap.c      | 20 ++++++++++----------
->  4 files changed, 36 insertions(+), 33 deletions(-)
->
-> diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
-> index 1675021..58fbfe1 100644
-> --- a/net/ceph/ceph_common.c
-> +++ b/net/ceph/ceph_common.c
-> @@ -293,17 +293,20 @@ static int get_secret(struct ceph_crypto_key *dst, const char *name) {
->                 key_err = PTR_ERR(ukey);
->                 switch (key_err) {
->                 case -ENOKEY:
-> -                       pr_warning("ceph: Mount failed due to key not found: %s\n", name);
-> +                       pr_warn("ceph: Mount failed due to key not found: %s\n",
-> +                               name);
->                         break;
->                 case -EKEYEXPIRED:
-> -                       pr_warning("ceph: Mount failed due to expired key: %s\n", name);
-> +                       pr_warn("ceph: Mount failed due to expired key: %s\n",
-> +                               name);
->                         break;
->                 case -EKEYREVOKED:
-> -                       pr_warning("ceph: Mount failed due to revoked key: %s\n", name);
-> +                       pr_warn("ceph: Mount failed due to revoked key: %s\n",
-> +                               name);
->                         break;
->                 default:
-> -                       pr_warning("ceph: Mount failed due to unknown key error"
-> -                              " %d: %s\n", key_err, name);
-> +                       pr_warn("ceph: Mount failed due to unknown key error %d: %s\n",
-> +                               key_err, name);
->                 }
->                 err = -EPERM;
->                 goto out;
-> @@ -433,7 +436,7 @@ ceph_parse_options(char *options, const char *dev_name,
->
->                         /* misc */
->                 case Opt_osdtimeout:
-> -                       pr_warning("ignoring deprecated osdtimeout option\n");
-> +                       pr_warn("ignoring deprecated osdtimeout option\n");
->                         break;
->                 case Opt_osdkeepalivetimeout:
->                         opt->osd_keepalive_timeout = intval;
-> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-> index b2f571d..a7203be 100644
-> --- a/net/ceph/messenger.c
-> +++ b/net/ceph/messenger.c
-> @@ -1937,11 +1937,11 @@ static int process_banner(struct ceph_connection *con)
->                    sizeof(con->peer_addr)) != 0 &&
->             !(addr_is_blank(&con->actual_peer_addr.in_addr) &&
->               con->actual_peer_addr.nonce == con->peer_addr.nonce)) {
-> -               pr_warning("wrong peer, want %s/%d, got %s/%d\n",
-> -                          ceph_pr_addr(&con->peer_addr.in_addr),
-> -                          (int)le32_to_cpu(con->peer_addr.nonce),
-> -                          ceph_pr_addr(&con->actual_peer_addr.in_addr),
-> -                          (int)le32_to_cpu(con->actual_peer_addr.nonce));
-> +               pr_warn("wrong peer, want %s/%d, got %s/%d\n",
-> +                       ceph_pr_addr(&con->peer_addr.in_addr),
-> +                       (int)le32_to_cpu(con->peer_addr.nonce),
-> +                       ceph_pr_addr(&con->actual_peer_addr.in_addr),
-> +                       (int)le32_to_cpu(con->actual_peer_addr.nonce));
->                 con->error_msg = "wrong peer at address";
->                 return -1;
->         }
-> @@ -2302,7 +2302,7 @@ static int read_partial_message(struct ceph_connection *con)
->
->                 BUG_ON(!con->in_msg ^ skip);
->                 if (con->in_msg && data_len > con->in_msg->data_length) {
-> -                       pr_warning("%s skipping long message (%u > %zd)\n",
-> +                       pr_warn("%s skipping long message (%u > %zd)\n",
->                                 __func__, data_len, con->in_msg->data_length);
->                         ceph_msg_put(con->in_msg);
->                         con->in_msg = NULL;
-> @@ -2712,7 +2712,7 @@ static bool con_sock_closed(struct ceph_connection *con)
->         CASE(OPEN);
->         CASE(STANDBY);
->         default:
-> -               pr_warning("%s con %p unrecognized state %lu\n",
-> +               pr_warn("%s con %p unrecognized state %lu\n",
->                         __func__, con, con->state);
->                 con->error_msg = "unrecognized con state";
->                 BUG();
-> @@ -2828,8 +2828,9 @@ static void con_work(struct work_struct *work)
->   */
->  static void con_fault(struct ceph_connection *con)
->  {
-> -       pr_warning("%s%lld %s %s\n", ENTITY_NAME(con->peer_name),
-> -              ceph_pr_addr(&con->peer_addr.in_addr), con->error_msg);
-> +       pr_warn("%s%lld %s %s\n",
-> +               ENTITY_NAME(con->peer_name),
-> +               ceph_pr_addr(&con->peer_addr.in_addr), con->error_msg);
+On Wed, 10 Sep 2014, Andreas Joachim Peters wrote:
+> We did a lot of testing of RW locks in another multi-threaded project 
+> and we use successfully "PTHREAD_RWLOCK_PREFER_WRITER_NP" which works 
+> perfectly fine if you avoid recursive read locks. It is probably good 
+> practice to avoid any recursive mutex in general.
 
-Just wondering, why did you move ENITITY_NAME argument to the next
-line?  I see you are doing this pretty consistently.  Is this a style
-guideline or something?
+The good news is that there are (I believe) no recursive uses of the 
+mutexes or rwlocks in the code base.  Our lockdep dependency checking 
+system throws errors if it detects any recursion.  There might be a few 
+exceptions that are explicitly marked recursive via the constructor.  
+ 
+> If one stay's with the default RW mutex without setting attributes we 
+> have seen that you starve writers for long periods if there is a 
+> contention on the read mutex (n-reader >> n-writer). I agree this is a 
+> very 'sensitive' topic but could well be an origin for threading 
+> scalability problems - depends how and where you use the RW locks in 
+> CEPH.
 
-Thanks,
+Yeah!
 
-                Ilya
+I suspect the way to approach this would be to make reader vs writer 
+favortism explicit in the constructor arguments, which no change in 
+behavior, and then a series of patches that switch to writer-favortism...
+
+sage
+
+> 
+> Cheers Andreas.
+> 
+> ________________________________________
+> From: Gregory Farnum [greg@inktank.com]
+> Sent: 09 September 2014 21:56
+> To: Sage Weil
+> Cc: Andreas Joachim Peters; ceph-devel@vger.kernel.org
+> Subject: Re: Question to RWLock & reverse DNS ip=>hostname
+> 
+> On Tue, Sep 9, 2014 at 10:50 AM, Sage Weil <sweil@redhat.com> wrote:
+> > On Tue, 9 Sep 2014, Andreas Joachim Peters wrote:
+> >> Hi,
+> >> by chance I had a look to the RWLock class. To my best knowledge the way
+> >> you create RW locks it defaults to writer-starvation e.g. all readers
+> >> will always jump a head of a pending writer. I cannot imagine that you
+> >> never have the opposite requirement in the CEPH multithreaded code but I
+> >> didn't review where it is used. In case you are aware, you can just
+> >> ignore this comment, otherwise one could add the option to create a
+> >> writer-prefering RWLock at construction time using e.g.
+> >> pthread_rwlockattr_setkind_np(&attr, PTHREAD_RWLOCK_PREFER_WRITER_NP)
+> >
+> > Hmm, I was not aware.  Perhaps we should make the reader vs writer
+> > preference explicit during construction?
+> 
+> Yeah, this is interesting as I thought I'd learned somewhere that the
+> default behavior was to prefer writers. Poking around the internet
+> makes me wonder if we actually want to make any changes ? best I can
+> tell PTHREAD_RWLOCK_PREFER_WRITER_NP does not actually behave the way
+> one wants (as part of the spec!) because pthreads requires recursive
+> locking, so we'd have to use
+> PTHREAD_RWLOCK_PREFER_WRITER_NONRECURSIVE_NP. But we'd probably want
+> to profile the performance changes (and, uh, run tests to make sure we
+> don't deadlock somehow) before putting any such code upstream.
+> 
+> >> Another question: I couldn't find a base implementation to translate
+> >> IPV4/6 ip's to host names? Is there same configuration table/method
+> >> allowing to get back from an OSD address retrieved via
+> >> OSDMap::get_addr() the original host name avoiding the use of DNS
+> >> lookups?
+> >
+> > I don't think we are doing reverse DNS lookups anywhere in the ceph
+> > code ...
+> 
+> In particular I think we've looked at doing this before and been
+> unable to reliably map to the *proper* hostname in cases where servers
+> have multiple NICs.
+> -Greg
+> Software Engineer #42 @ http://inktank.com | http://ceph.com
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
