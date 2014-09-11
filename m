@@ -1,51 +1,57 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: jerasure buffer misaligned
-Date: Thu, 11 Sep 2014 23:04:32 +0200
-Message-ID: <54120E60.3030704@dachary.org>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: set_alloc_hint old osds
+Date: Thu, 11 Sep 2014 14:05:13 -0700
+Message-ID: <CAPYLRzjMehaQJpHfWGPXfRfAVi9Hewu_-MC+k2_urMf6WJoX6A@mail.gmail.com>
+References: <CA+4uBUaAW7Umzg=jb-ksWx_ief2f1oq498KrBJY22ZBATU6EMA@mail.gmail.com>
+	<CAPYLRziC+VH87z3A2yv1hRQX3H8-jSHuC1Or3T+VF2oe92xE4A@mail.gmail.com>
+	<CA+4uBUaKubMmKXV5-ROwkO-CsxW3+bXb-TPmXa9aAnZLgJLtwQ@mail.gmail.com>
+	<CAPYLRzigyvOr_1-xYeq-kDVEowS3pXjd_6t7j-=W0sUOsRqHyw@mail.gmail.com>
+	<CA+4uBUb_0K35iYGnEfjprZXpM362=qqMmw0esjJqwRnFKESJCw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="ODF2axLpba1iF7Es4JENcVmbLKiKpt0vO"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:50188 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1755785AbaIKVEi (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Sep 2014 17:04:38 -0400
+Received: from mail-qg0-f47.google.com ([209.85.192.47]:62287 "EHLO
+	mail-qg0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755942AbaIKVFO (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Sep 2014 17:05:14 -0400
+Received: by mail-qg0-f47.google.com with SMTP id i50so7121457qgf.6
+        for <ceph-devel@vger.kernel.org>; Thu, 11 Sep 2014 14:05:13 -0700 (PDT)
+In-Reply-To: <CA+4uBUb_0K35iYGnEfjprZXpM362=qqMmw0esjJqwRnFKESJCw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Janne Grunau <j@jannau.net>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Samuel Just <sam.just@inktank.com>
+Cc: Ilya Dryomov <ilya.dryomov@inktank.com>, Ilya Dryomov <idryomov@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---ODF2axLpba1iF7Es4JENcVmbLKiKpt0vO
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Oh, in that case the peers could just share their supported ops with
+the primary or something (like we do with mon commands). That sounds
+good to me, anyway?
+-Greg
 
-Hi Janne,
-
-In the context of jerasure buffers you found to be misaligned, ( http://t=
-racker.ceph.com/issues/9408 ) it would help fix it if you had a simple wa=
-y to reproduce it. I read the code once more and I don't see something ob=
-viously wrong.=20
-
-Cheers
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-
-
---ODF2axLpba1iF7Es4JENcVmbLKiKpt0vO
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlQSDmAACgkQ8dLMyEl6F23AvACeKa+bsypab2JosVRgG93choxQ
-pKQAoLb9UzGv4oqFmcrEnFz/rmFjPji5
-=HuSp
------END PGP SIGNATURE-----
-
---ODF2axLpba1iF7Es4JENcVmbLKiKpt0vO--
+On Thu, Sep 11, 2014 at 1:46 PM, Samuel Just <sam.just@inktank.com> wrote:
+> No, we don't put the transaction into the pg log.
+> -Sam
+>
+> On Thu, Sep 11, 2014 at 1:40 PM, Gregory Farnum <greg@inktank.com> wrote:
+>> Does the hint not go into the pg log? Which could be retried on an older OSD?
+>>
+>> On Thu, Sep 11, 2014 at 1:33 PM, Samuel Just <sam.just@inktank.com> wrote:
+>>> That part is harmless, the transaction would be recreated for the new
+>>> acting set taking into account the new acting set features.  It
+>>> doesn't have any actual affect on the contents of the object.
+>>> -Sam
+>>>
+>>> On Thu, Sep 11, 2014 at 1:30 PM, Gregory Farnum <greg@inktank.com> wrote:
+>>>> On Thu, Sep 11, 2014 at 1:19 PM, Samuel Just <sam.just@inktank.com> wrote:
+>>>>> http://tracker.ceph.com/issues/9419
+>>>>>
+>>>>> librbd unconditionally sends set_alloc_hint.  Do we require that users
+>>>>> upgrade the osds first?  Also, should the primary respond with
+>>>>> ENOTSUPP if any replicas don't support it?
+>>>>
+>>>> Something closer to the second option, I think...but then you run into
+>>>> the problem where maybe the PG gets moved from a set of new OSDs to a
+>>>> set of old ones that don't support the op. :/ I think for anything
+>>>> that goes to disk you need to go through a full features-in-the-osdmap
+>>>> process like we did for erasure coding.
+>>>> -Greg
+>>>> Software Engineer #42 @ http://inktank.com | http://ceph.com
