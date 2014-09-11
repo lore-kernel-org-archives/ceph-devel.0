@@ -1,200 +1,23 @@
 From: Samuel Just <sam.just@inktank.com>
-Subject: Re: OpTracker optimization
-Date: Thu, 11 Sep 2014 11:30:59 -0700
-Message-ID: <CA+4uBUYRdp=VFc1T=WPf7HRXgfD7MEqEM5yhEKRe7_M_s_dh-w@mail.gmail.com>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2783A845@SACMBXIP02.sdcorp.global.sandisk.com>
-	<CA+4uBUbSrYhy8=ZPKZ7dOTh0sNNCs5mC3ttgBH+qoWO+58UdvA@mail.gmail.com>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F2783C56D@SACMBXIP02.sdcorp.global.sandisk.com>
-	<CA+4uBUbTBksZbRxR9RCTws-O--2N+QnHN5aS_Kx-D7yVeEmiDw@mail.gmail.com>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F2783C636@SACMBXIP02.sdcorp.global.sandisk.com>
-	<CA+4uBUaaycvVCnjtDCEZO3i9iFB7FifK-+xZwtEcemC7XGPiTg@mail.gmail.com>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F2783C65C@SACMBXIP02.sdcorp.global.sandisk.com>
-	<CA+4uBUboaU=1uWT7_kNB+ViK0sOOeB4hJKpCVQ397OjWpY83tQ@mail.gmail.com>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F2783C7E4@SACMBXIP02.sdcorp.global.sandisk.com>
-	<alpine.DEB.2.00.1409102032440.17200@cobra.newdream.net>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F2783CED4@SACMBXIP02.sdcorp.global.sandisk.com>
+Subject: set_alloc_hint old osds
+Date: Thu, 11 Sep 2014 13:19:58 -0700
+Message-ID: <CA+4uBUaAW7Umzg=jb-ksWx_ief2f1oq498KrBJY22ZBATU6EMA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f41.google.com ([209.85.216.41]:38897 "EHLO
-	mail-qa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751091AbaIKSgZ convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Sep 2014 14:36:25 -0400
-Received: by mail-qa0-f41.google.com with SMTP id f12so3843714qad.0
-        for <ceph-devel@vger.kernel.org>; Thu, 11 Sep 2014 11:36:22 -0700 (PDT)
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2783CED4@SACMBXIP02.sdcorp.global.sandisk.com>
+Received: from mail-qa0-f45.google.com ([209.85.216.45]:52131 "EHLO
+	mail-qa0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755165AbaIKUT7 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Sep 2014 16:19:59 -0400
+Received: by mail-qa0-f45.google.com with SMTP id s7so3987533qap.18
+        for <ceph-devel@vger.kernel.org>; Thu, 11 Sep 2014 13:19:58 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
-Cc: Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
+To: Ilya Dryomov <ilya.dryomov@inktank.com>, Ilya Dryomov <idryomov@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Just added it to wip-sam-testing.
+http://tracker.ceph.com/issues/9419
+
+librbd unconditionally sends set_alloc_hint.  Do we require that users
+upgrade the osds first?  Also, should the primary respond with
+ENOTSUPP if any replicas don't support it?
 -Sam
-
-On Thu, Sep 11, 2014 at 11:30 AM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
-> Sam/Sage,
-> I have addressed all of your comments and pushed the changes to the same pull request.
->
-> https://github.com/ceph/ceph/pull/2440
->
-> Thanks & Regards
-> Somnath
->
-> -----Original Message-----
-> From: Sage Weil [mailto:sweil@redhat.com]
-> Sent: Wednesday, September 10, 2014 8:33 PM
-> To: Somnath Roy
-> Cc: Samuel Just; ceph-devel@vger.kernel.org; ceph-users@lists.ceph.com
-> Subject: RE: OpTracker optimization
->
-> I had two substantiative comments on the first patch and then some trivial
-> whitespace nits.    Otherwise looks good!
->
-> tahnks-
-> sage
->
-> On Thu, 11 Sep 2014, Somnath Roy wrote:
->
->> Sam/Sage,
->> I have incorporated all of your comments. Please have a look at the same pull request.
->>
->> https://github.com/ceph/ceph/pull/2440
->>
->> Thanks & Regards
->> Somnath
->>
->> -----Original Message-----
->> From: Samuel Just [mailto:sam.just@inktank.com]
->> Sent: Wednesday, September 10, 2014 3:25 PM
->> To: Somnath Roy
->> Cc: Sage Weil (sweil@redhat.com); ceph-devel@vger.kernel.org;
->> ceph-users@lists.ceph.com
->> Subject: Re: OpTracker optimization
->>
->> Oh, I changed my mind, your approach is fine.  I was unclear.
->> Currently, I just need you to address the other comments.
->> -Sam
->>
->> On Wed, Sep 10, 2014 at 3:13 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
->> > As I understand, you want me to implement the following.
->> >
->> > 1.  Keep this implementation one sharded optracker for the ios going through ms_dispatch path.
->> >
->> > 2. Additionally, for ios going through ms_fast_dispatch, you want me
->> > to implement optracker (without internal shard) per opwq shard
->> >
->> > Am I right ?
->> >
->> > Thanks & Regards
->> > Somnath
->> >
->> > -----Original Message-----
->> > From: Samuel Just [mailto:sam.just@inktank.com]
->> > Sent: Wednesday, September 10, 2014 3:08 PM
->> > To: Somnath Roy
->> > Cc: Sage Weil (sweil@redhat.com); ceph-devel@vger.kernel.org;
->> > ceph-users@lists.ceph.com
->> > Subject: Re: OpTracker optimization
->> >
->> > I don't quite understand.
->> > -Sam
->> >
->> > On Wed, Sep 10, 2014 at 2:38 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
->> >> Thanks Sam.
->> >> So, you want me to go with optracker/shadedopWq , right ?
->> >>
->> >> Regards
->> >> Somnath
->> >>
->> >> -----Original Message-----
->> >> From: Samuel Just [mailto:sam.just@inktank.com]
->> >> Sent: Wednesday, September 10, 2014 2:36 PM
->> >> To: Somnath Roy
->> >> Cc: Sage Weil (sweil@redhat.com); ceph-devel@vger.kernel.org;
->> >> ceph-users@lists.ceph.com
->> >> Subject: Re: OpTracker optimization
->> >>
->> >> Responded with cosmetic nonsense.  Once you've got that and the other comments addressed, I can put it in wip-sam-testing.
->> >> -Sam
->> >>
->> >> On Wed, Sep 10, 2014 at 1:30 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
->> >>> Thanks Sam..I responded back :-)
->> >>>
->> >>> -----Original Message-----
->> >>> From: ceph-devel-owner@vger.kernel.org
->> >>> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Samuel Just
->> >>> Sent: Wednesday, September 10, 2014 11:17 AM
->> >>> To: Somnath Roy
->> >>> Cc: Sage Weil (sweil@redhat.com); ceph-devel@vger.kernel.org;
->> >>> ceph-users@lists.ceph.com
->> >>> Subject: Re: OpTracker optimization
->> >>>
->> >>> Added a comment about the approach.
->> >>> -Sam
->> >>>
->> >>> On Tue, Sep 9, 2014 at 1:33 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
->> >>>> Hi Sam/Sage,
->> >>>>
->> >>>> As we discussed earlier, enabling the present OpTracker code
->> >>>> degrading performance severely. For example, in my setup a single
->> >>>> OSD node with
->> >>>> 10 clients is reaching ~103K read iops with io served from memory
->> >>>> while optracking is disabled but enabling optracker it is reduced to ~39K iops.
->> >>>> Probably, running OSD without enabling OpTracker is not an option
->> >>>> for many of Ceph users.
->> >>>>
->> >>>> Now, by sharding the Optracker:: ops_in_flight_lock (thus xlist
->> >>>> ops_in_flight) and removing some other bottlenecks I am able to
->> >>>> match the performance of OpTracking enabled OSD with OpTracking
->> >>>> disabled, but with the expense of ~1 extra cpu core.
->> >>>>
->> >>>> In this process I have also fixed the following tracker.
->> >>>>
->> >>>>
->> >>>>
->> >>>> http://tracker.ceph.com/issues/9384
->> >>>>
->> >>>>
->> >>>>
->> >>>> and probably http://tracker.ceph.com/issues/8885 too.
->> >>>>
->> >>>>
->> >>>>
->> >>>> I have created following pull request for the same. Please review it.
->> >>>>
->> >>>>
->> >>>>
->> >>>> https://github.com/ceph/ceph/pull/2440
->> >>>>
->> >>>>
->> >>>>
->> >>>> Thanks & Regards
->> >>>>
->> >>>> Somnath
->> >>>>
->> >>>>
->> >>>>
->> >>>>
->> >>>> ________________________________
->> >>>>
->> >>>> PLEASE NOTE: The information contained in this electronic mail
->> >>>> message is intended only for the use of the designated
->> >>>> recipient(s) named above. If the reader of this message is not
->> >>>> the intended recipient, you are hereby notified that you have
->> >>>> received this message in error and that any review,
->> >>>> dissemination, distribution, or copying of this message is
->> >>>> strictly prohibited. If you have received this communication in
->> >>>> error, please notify the sender by telephone or e-mail (as shown
->> >>>> above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
->> >>>>
->> >>> --
->> >>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->> >>> in the body of a message to majordomo@vger.kernel.org More
->> >>> majordomo info at  http://vger.kernel.org/majordomo-info.html
->> >>>
->> >>> ________________________________
->> >>>
->> >>> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
->> >>>
->>
