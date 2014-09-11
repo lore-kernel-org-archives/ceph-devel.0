@@ -1,123 +1,169 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
+From: Sage Weil <sweil@redhat.com>
 Subject: RE: OpTracker optimization
-Date: Thu, 11 Sep 2014 01:52:16 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2783C7E4@SACMBXIP02.sdcorp.global.sandisk.com>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2783A845@SACMBXIP02.sdcorp.global.sandisk.com>
-	<CA+4uBUbSrYhy8=ZPKZ7dOTh0sNNCs5mC3ttgBH+qoWO+58UdvA@mail.gmail.com>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F2783C56D@SACMBXIP02.sdcorp.global.sandisk.com>
-	<CA+4uBUbTBksZbRxR9RCTws-O--2N+QnHN5aS_Kx-D7yVeEmiDw@mail.gmail.com>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F2783C636@SACMBXIP02.sdcorp.global.sandisk.com>
-	<CA+4uBUaaycvVCnjtDCEZO3i9iFB7FifK-+xZwtEcemC7XGPiTg@mail.gmail.com>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F2783C65C@SACMBXIP02.sdcorp.global.sandisk.com>
- <CA+4uBUboaU=1uWT7_kNB+ViK0sOOeB4hJKpCVQ397OjWpY83tQ@mail.gmail.com>
+Date: Wed, 10 Sep 2014 20:33:22 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1409102032440.17200@cobra.newdream.net>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2783A845@SACMBXIP02.sdcorp.global.sandisk.com> <CA+4uBUbSrYhy8=ZPKZ7dOTh0sNNCs5mC3ttgBH+qoWO+58UdvA@mail.gmail.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F2783C56D@SACMBXIP02.sdcorp.global.sandisk.com>
+ <CA+4uBUbTBksZbRxR9RCTws-O--2N+QnHN5aS_Kx-D7yVeEmiDw@mail.gmail.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F2783C636@SACMBXIP02.sdcorp.global.sandisk.com> <CA+4uBUaaycvVCnjtDCEZO3i9iFB7FifK-+xZwtEcemC7XGPiTg@mail.gmail.com>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F2783C65C@SACMBXIP02.sdcorp.global.sandisk.com> <CA+4uBUboaU=1uWT7_kNB+ViK0sOOeB4hJKpCVQ397OjWpY83tQ@mail.gmail.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F2783C7E4@SACMBXIP02.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bl2on0056.outbound.protection.outlook.com ([65.55.169.56]:1122
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1750970AbaIKBwW (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 10 Sep 2014 21:52:22 -0400
-In-Reply-To: <CA+4uBUboaU=1uWT7_kNB+ViK0sOOeB4hJKpCVQ397OjWpY83tQ@mail.gmail.com>
-Content-Language: en-US
+Received: from cobra.newdream.net ([66.33.216.30]:53304 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750967AbaIKDdX (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Sep 2014 23:33:23 -0400
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2783C7E4@SACMBXIP02.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sam.just@inktank.com>
-Cc: "Sage Weil (sweil@redhat.com)" <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
+To: Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: Samuel Just <sam.just@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
 
-U2FtL1NhZ2UsDQpJIGhhdmUgaW5jb3Jwb3JhdGVkIGFsbCBvZiB5b3VyIGNvbW1lbnRzLiBQbGVh
-c2UgaGF2ZSBhIGxvb2sgYXQgdGhlIHNhbWUgcHVsbCByZXF1ZXN0Lg0KDQpodHRwczovL2dpdGh1
-Yi5jb20vY2VwaC9jZXBoL3B1bGwvMjQ0MA0KDQpUaGFua3MgJiBSZWdhcmRzDQpTb21uYXRoDQoN
-Ci0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBTYW11ZWwgSnVzdCBbbWFpbHRvOnNh
-bS5qdXN0QGlua3RhbmsuY29tXSANClNlbnQ6IFdlZG5lc2RheSwgU2VwdGVtYmVyIDEwLCAyMDE0
-IDM6MjUgUE0NClRvOiBTb21uYXRoIFJveQ0KQ2M6IFNhZ2UgV2VpbCAoc3dlaWxAcmVkaGF0LmNv
-bSk7IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnOyBjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29t
-DQpTdWJqZWN0OiBSZTogT3BUcmFja2VyIG9wdGltaXphdGlvbg0KDQpPaCwgSSBjaGFuZ2VkIG15
-IG1pbmQsIHlvdXIgYXBwcm9hY2ggaXMgZmluZS4gIEkgd2FzIHVuY2xlYXIuDQpDdXJyZW50bHks
-IEkganVzdCBuZWVkIHlvdSB0byBhZGRyZXNzIHRoZSBvdGhlciBjb21tZW50cy4NCi1TYW0NCg0K
-T24gV2VkLCBTZXAgMTAsIDIwMTQgYXQgMzoxMyBQTSwgU29tbmF0aCBSb3kgPFNvbW5hdGguUm95
-QHNhbmRpc2suY29tPiB3cm90ZToNCj4gQXMgSSB1bmRlcnN0YW5kLCB5b3Ugd2FudCBtZSB0byBp
-bXBsZW1lbnQgdGhlIGZvbGxvd2luZy4NCj4NCj4gMS4gIEtlZXAgdGhpcyBpbXBsZW1lbnRhdGlv
-biBvbmUgc2hhcmRlZCBvcHRyYWNrZXIgZm9yIHRoZSBpb3MgZ29pbmcgdGhyb3VnaCBtc19kaXNw
-YXRjaCBwYXRoLg0KPg0KPiAyLiBBZGRpdGlvbmFsbHksIGZvciBpb3MgZ29pbmcgdGhyb3VnaCBt
-c19mYXN0X2Rpc3BhdGNoLCB5b3Ugd2FudCBtZSANCj4gdG8gaW1wbGVtZW50IG9wdHJhY2tlciAo
-d2l0aG91dCBpbnRlcm5hbCBzaGFyZCkgcGVyIG9wd3Egc2hhcmQNCj4NCj4gQW0gSSByaWdodCA/
-DQo+DQo+IFRoYW5rcyAmIFJlZ2FyZHMNCj4gU29tbmF0aA0KPg0KPiAtLS0tLU9yaWdpbmFsIE1l
-c3NhZ2UtLS0tLQ0KPiBGcm9tOiBTYW11ZWwgSnVzdCBbbWFpbHRvOnNhbS5qdXN0QGlua3Rhbmsu
-Y29tXQ0KPiBTZW50OiBXZWRuZXNkYXksIFNlcHRlbWJlciAxMCwgMjAxNCAzOjA4IFBNDQo+IFRv
-OiBTb21uYXRoIFJveQ0KPiBDYzogU2FnZSBXZWlsIChzd2VpbEByZWRoYXQuY29tKTsgY2VwaC1k
-ZXZlbEB2Z2VyLmtlcm5lbC5vcmc7IA0KPiBjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tDQo+IFN1
-YmplY3Q6IFJlOiBPcFRyYWNrZXIgb3B0aW1pemF0aW9uDQo+DQo+IEkgZG9uJ3QgcXVpdGUgdW5k
-ZXJzdGFuZC4NCj4gLVNhbQ0KPg0KPiBPbiBXZWQsIFNlcCAxMCwgMjAxNCBhdCAyOjM4IFBNLCBT
-b21uYXRoIFJveSA8U29tbmF0aC5Sb3lAc2FuZGlzay5jb20+IHdyb3RlOg0KPj4gVGhhbmtzIFNh
-bS4NCj4+IFNvLCB5b3Ugd2FudCBtZSB0byBnbyB3aXRoIG9wdHJhY2tlci9zaGFkZWRvcFdxICwg
-cmlnaHQgPw0KPj4NCj4+IFJlZ2FyZHMNCj4+IFNvbW5hdGgNCj4+DQo+PiAtLS0tLU9yaWdpbmFs
-IE1lc3NhZ2UtLS0tLQ0KPj4gRnJvbTogU2FtdWVsIEp1c3QgW21haWx0bzpzYW0uanVzdEBpbmt0
-YW5rLmNvbV0NCj4+IFNlbnQ6IFdlZG5lc2RheSwgU2VwdGVtYmVyIDEwLCAyMDE0IDI6MzYgUE0N
-Cj4+IFRvOiBTb21uYXRoIFJveQ0KPj4gQ2M6IFNhZ2UgV2VpbCAoc3dlaWxAcmVkaGF0LmNvbSk7
-IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnOyANCj4+IGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5j
-b20NCj4+IFN1YmplY3Q6IFJlOiBPcFRyYWNrZXIgb3B0aW1pemF0aW9uDQo+Pg0KPj4gUmVzcG9u
-ZGVkIHdpdGggY29zbWV0aWMgbm9uc2Vuc2UuICBPbmNlIHlvdSd2ZSBnb3QgdGhhdCBhbmQgdGhl
-IG90aGVyIGNvbW1lbnRzIGFkZHJlc3NlZCwgSSBjYW4gcHV0IGl0IGluIHdpcC1zYW0tdGVzdGlu
-Zy4NCj4+IC1TYW0NCj4+DQo+PiBPbiBXZWQsIFNlcCAxMCwgMjAxNCBhdCAxOjMwIFBNLCBTb21u
-YXRoIFJveSA8U29tbmF0aC5Sb3lAc2FuZGlzay5jb20+IHdyb3RlOg0KPj4+IFRoYW5rcyBTYW0u
-LkkgcmVzcG9uZGVkIGJhY2sgOi0pDQo+Pj4NCj4+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0t
-LQ0KPj4+IEZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnIA0KPj4+IFttYWls
-dG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFsZiBPZiBTYW11ZWwg
-SnVzdA0KPj4+IFNlbnQ6IFdlZG5lc2RheSwgU2VwdGVtYmVyIDEwLCAyMDE0IDExOjE3IEFNDQo+
-Pj4gVG86IFNvbW5hdGggUm95DQo+Pj4gQ2M6IFNhZ2UgV2VpbCAoc3dlaWxAcmVkaGF0LmNvbSk7
-IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnOyANCj4+PiBjZXBoLXVzZXJzQGxpc3RzLmNlcGgu
-Y29tDQo+Pj4gU3ViamVjdDogUmU6IE9wVHJhY2tlciBvcHRpbWl6YXRpb24NCj4+Pg0KPj4+IEFk
-ZGVkIGEgY29tbWVudCBhYm91dCB0aGUgYXBwcm9hY2guDQo+Pj4gLVNhbQ0KPj4+DQo+Pj4gT24g
-VHVlLCBTZXAgOSwgMjAxNCBhdCAxOjMzIFBNLCBTb21uYXRoIFJveSA8U29tbmF0aC5Sb3lAc2Fu
-ZGlzay5jb20+IHdyb3RlOg0KPj4+PiBIaSBTYW0vU2FnZSwNCj4+Pj4NCj4+Pj4gQXMgd2UgZGlz
-Y3Vzc2VkIGVhcmxpZXIsIGVuYWJsaW5nIHRoZSBwcmVzZW50IE9wVHJhY2tlciBjb2RlIA0KPj4+
-PiBkZWdyYWRpbmcgcGVyZm9ybWFuY2Ugc2V2ZXJlbHkuIEZvciBleGFtcGxlLCBpbiBteSBzZXR1
-cCBhIHNpbmdsZSANCj4+Pj4gT1NEIG5vZGUgd2l0aA0KPj4+PiAxMCBjbGllbnRzIGlzIHJlYWNo
-aW5nIH4xMDNLIHJlYWQgaW9wcyB3aXRoIGlvIHNlcnZlZCBmcm9tIG1lbW9yeSANCj4+Pj4gd2hp
-bGUgb3B0cmFja2luZyBpcyBkaXNhYmxlZCBidXQgZW5hYmxpbmcgb3B0cmFja2VyIGl0IGlzIHJl
-ZHVjZWQgdG8gfjM5SyBpb3BzLg0KPj4+PiBQcm9iYWJseSwgcnVubmluZyBPU0Qgd2l0aG91dCBl
-bmFibGluZyBPcFRyYWNrZXIgaXMgbm90IGFuIG9wdGlvbiANCj4+Pj4gZm9yIG1hbnkgb2YgQ2Vw
-aCB1c2Vycy4NCj4+Pj4NCj4+Pj4gTm93LCBieSBzaGFyZGluZyB0aGUgT3B0cmFja2VyOjogb3Bz
-X2luX2ZsaWdodF9sb2NrICh0aHVzIHhsaXN0DQo+Pj4+IG9wc19pbl9mbGlnaHQpIGFuZCByZW1v
-dmluZyBzb21lIG90aGVyIGJvdHRsZW5lY2tzIEkgYW0gYWJsZSB0byANCj4+Pj4gbWF0Y2ggdGhl
-IHBlcmZvcm1hbmNlIG9mIE9wVHJhY2tpbmcgZW5hYmxlZCBPU0Qgd2l0aCBPcFRyYWNraW5nIA0K
-Pj4+PiBkaXNhYmxlZCwgYnV0IHdpdGggdGhlIGV4cGVuc2Ugb2YgfjEgZXh0cmEgY3B1IGNvcmUu
-DQo+Pj4+DQo+Pj4+IEluIHRoaXMgcHJvY2VzcyBJIGhhdmUgYWxzbyBmaXhlZCB0aGUgZm9sbG93
-aW5nIHRyYWNrZXIuDQo+Pj4+DQo+Pj4+DQo+Pj4+DQo+Pj4+IGh0dHA6Ly90cmFja2VyLmNlcGgu
-Y29tL2lzc3Vlcy85Mzg0DQo+Pj4+DQo+Pj4+DQo+Pj4+DQo+Pj4+IGFuZCBwcm9iYWJseSBodHRw
-Oi8vdHJhY2tlci5jZXBoLmNvbS9pc3N1ZXMvODg4NSB0b28uDQo+Pj4+DQo+Pj4+DQo+Pj4+DQo+
-Pj4+IEkgaGF2ZSBjcmVhdGVkIGZvbGxvd2luZyBwdWxsIHJlcXVlc3QgZm9yIHRoZSBzYW1lLiBQ
-bGVhc2UgcmV2aWV3IGl0Lg0KPj4+Pg0KPj4+Pg0KPj4+Pg0KPj4+PiBodHRwczovL2dpdGh1Yi5j
-b20vY2VwaC9jZXBoL3B1bGwvMjQ0MA0KPj4+Pg0KPj4+Pg0KPj4+Pg0KPj4+PiBUaGFua3MgJiBS
-ZWdhcmRzDQo+Pj4+DQo+Pj4+IFNvbW5hdGgNCj4+Pj4NCj4+Pj4NCj4+Pj4NCj4+Pj4NCj4+Pj4g
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCj4+Pj4NCj4+Pj4gUExFQVNFIE5PVEU6
-IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwgDQo+Pj4+
-IG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRlZCBy
-ZWNpcGllbnQocykgDQo+Pj4+IG5hbWVkIGFib3ZlLiBJZiB0aGUgcmVhZGVyIG9mIHRoaXMgbWVz
-c2FnZSBpcyBub3QgdGhlIGludGVuZGVkIA0KPj4+PiByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5
-IG5vdGlmaWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyANCj4+Pj4gbWVzc2FnZSBpbiBl
-cnJvciBhbmQgdGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIA0K
-Pj4+PiBvciBjb3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBpcyBzdHJpY3RseSBwcm9oaWJpdGVkLiBJ
-ZiB5b3UgaGF2ZSANCj4+Pj4gcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0aW9uIGluIGVycm9yLCBw
-bGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgDQo+Pj4+IHRlbGVwaG9uZSBvciBlLW1haWwgKGFz
-IHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVzdHJveSBhbnkgDQo+Pj4+IGFuZCBhbGwg
-Y29waWVzIG9mIHRoaXMgbWVzc2FnZSBpbiB5b3VyIHBvc3Nlc3Npb24gKHdoZXRoZXIgaGFyZCBj
-b3BpZXMgb3IgZWxlY3Ryb25pY2FsbHkgc3RvcmVkIGNvcGllcykuDQo+Pj4+DQo+Pj4gLS0NCj4+
-PiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3Jp
-YmUgY2VwaC1kZXZlbCINCj4+PiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21v
-QHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyANCj4+PiBpbmZvIGF0ICBodHRwOi8vdmdl
-ci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCj4+Pg0KPj4+IF9fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fDQo+Pj4NCj4+PiBQTEVBU0UgTk9URTogVGhlIGluZm9ybWF0aW9u
-IGNvbnRhaW5lZCBpbiB0aGlzIGVsZWN0cm9uaWMgbWFpbCBtZXNzYWdlIGlzIGludGVuZGVkIG9u
-bHkgZm9yIHRoZSB1c2Ugb2YgdGhlIGRlc2lnbmF0ZWQgcmVjaXBpZW50KHMpIG5hbWVkIGFib3Zl
-LiBJZiB0aGUgcmVhZGVyIG9mIHRoaXMgbWVzc2FnZSBpcyBub3QgdGhlIGludGVuZGVkIHJlY2lw
-aWVudCwgeW91IGFyZSBoZXJlYnkgbm90aWZpZWQgdGhhdCB5b3UgaGF2ZSByZWNlaXZlZCB0aGlz
-IG1lc3NhZ2UgaW4gZXJyb3IgYW5kIHRoYXQgYW55IHJldmlldywgZGlzc2VtaW5hdGlvbiwgZGlz
-dHJpYnV0aW9uLCBvciBjb3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBpcyBzdHJpY3RseSBwcm9oaWJp
-dGVkLiBJZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGNvbW11bmljYXRpb24gaW4gZXJyb3IsIHBs
-ZWFzZSBub3RpZnkgdGhlIHNlbmRlciBieSB0ZWxlcGhvbmUgb3IgZS1tYWlsIChhcyBzaG93biBh
-Ym92ZSkgaW1tZWRpYXRlbHkgYW5kIGRlc3Ryb3kgYW55IGFuZCBhbGwgY29waWVzIG9mIHRoaXMg
-bWVzc2FnZSBpbiB5b3VyIHBvc3Nlc3Npb24gKHdoZXRoZXIgaGFyZCBjb3BpZXMgb3IgZWxlY3Ry
-b25pY2FsbHkgc3RvcmVkIGNvcGllcykuDQo+Pj4NCg==
+I had two substantiative comments on the first patch and then some trivial 
+whitespace nits.    Otherwise looks good!
+
+tahnks-
+sage
+
+On Thu, 11 Sep 2014, Somnath Roy wrote:
+
+> Sam/Sage,
+> I have incorporated all of your comments. Please have a look at the same pull request.
+> 
+> https://github.com/ceph/ceph/pull/2440
+> 
+> Thanks & Regards
+> Somnath
+> 
+> -----Original Message-----
+> From: Samuel Just [mailto:sam.just@inktank.com] 
+> Sent: Wednesday, September 10, 2014 3:25 PM
+> To: Somnath Roy
+> Cc: Sage Weil (sweil@redhat.com); ceph-devel@vger.kernel.org; ceph-users@lists.ceph.com
+> Subject: Re: OpTracker optimization
+> 
+> Oh, I changed my mind, your approach is fine.  I was unclear.
+> Currently, I just need you to address the other comments.
+> -Sam
+> 
+> On Wed, Sep 10, 2014 at 3:13 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
+> > As I understand, you want me to implement the following.
+> >
+> > 1.  Keep this implementation one sharded optracker for the ios going through ms_dispatch path.
+> >
+> > 2. Additionally, for ios going through ms_fast_dispatch, you want me 
+> > to implement optracker (without internal shard) per opwq shard
+> >
+> > Am I right ?
+> >
+> > Thanks & Regards
+> > Somnath
+> >
+> > -----Original Message-----
+> > From: Samuel Just [mailto:sam.just@inktank.com]
+> > Sent: Wednesday, September 10, 2014 3:08 PM
+> > To: Somnath Roy
+> > Cc: Sage Weil (sweil@redhat.com); ceph-devel@vger.kernel.org; 
+> > ceph-users@lists.ceph.com
+> > Subject: Re: OpTracker optimization
+> >
+> > I don't quite understand.
+> > -Sam
+> >
+> > On Wed, Sep 10, 2014 at 2:38 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
+> >> Thanks Sam.
+> >> So, you want me to go with optracker/shadedopWq , right ?
+> >>
+> >> Regards
+> >> Somnath
+> >>
+> >> -----Original Message-----
+> >> From: Samuel Just [mailto:sam.just@inktank.com]
+> >> Sent: Wednesday, September 10, 2014 2:36 PM
+> >> To: Somnath Roy
+> >> Cc: Sage Weil (sweil@redhat.com); ceph-devel@vger.kernel.org; 
+> >> ceph-users@lists.ceph.com
+> >> Subject: Re: OpTracker optimization
+> >>
+> >> Responded with cosmetic nonsense.  Once you've got that and the other comments addressed, I can put it in wip-sam-testing.
+> >> -Sam
+> >>
+> >> On Wed, Sep 10, 2014 at 1:30 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
+> >>> Thanks Sam..I responded back :-)
+> >>>
+> >>> -----Original Message-----
+> >>> From: ceph-devel-owner@vger.kernel.org 
+> >>> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Samuel Just
+> >>> Sent: Wednesday, September 10, 2014 11:17 AM
+> >>> To: Somnath Roy
+> >>> Cc: Sage Weil (sweil@redhat.com); ceph-devel@vger.kernel.org; 
+> >>> ceph-users@lists.ceph.com
+> >>> Subject: Re: OpTracker optimization
+> >>>
+> >>> Added a comment about the approach.
+> >>> -Sam
+> >>>
+> >>> On Tue, Sep 9, 2014 at 1:33 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
+> >>>> Hi Sam/Sage,
+> >>>>
+> >>>> As we discussed earlier, enabling the present OpTracker code 
+> >>>> degrading performance severely. For example, in my setup a single 
+> >>>> OSD node with
+> >>>> 10 clients is reaching ~103K read iops with io served from memory 
+> >>>> while optracking is disabled but enabling optracker it is reduced to ~39K iops.
+> >>>> Probably, running OSD without enabling OpTracker is not an option 
+> >>>> for many of Ceph users.
+> >>>>
+> >>>> Now, by sharding the Optracker:: ops_in_flight_lock (thus xlist
+> >>>> ops_in_flight) and removing some other bottlenecks I am able to 
+> >>>> match the performance of OpTracking enabled OSD with OpTracking 
+> >>>> disabled, but with the expense of ~1 extra cpu core.
+> >>>>
+> >>>> In this process I have also fixed the following tracker.
+> >>>>
+> >>>>
+> >>>>
+> >>>> http://tracker.ceph.com/issues/9384
+> >>>>
+> >>>>
+> >>>>
+> >>>> and probably http://tracker.ceph.com/issues/8885 too.
+> >>>>
+> >>>>
+> >>>>
+> >>>> I have created following pull request for the same. Please review it.
+> >>>>
+> >>>>
+> >>>>
+> >>>> https://github.com/ceph/ceph/pull/2440
+> >>>>
+> >>>>
+> >>>>
+> >>>> Thanks & Regards
+> >>>>
+> >>>> Somnath
+> >>>>
+> >>>>
+> >>>>
+> >>>>
+> >>>> ________________________________
+> >>>>
+> >>>> PLEASE NOTE: The information contained in this electronic mail 
+> >>>> message is intended only for the use of the designated recipient(s) 
+> >>>> named above. If the reader of this message is not the intended 
+> >>>> recipient, you are hereby notified that you have received this 
+> >>>> message in error and that any review, dissemination, distribution, 
+> >>>> or copying of this message is strictly prohibited. If you have 
+> >>>> received this communication in error, please notify the sender by 
+> >>>> telephone or e-mail (as shown above) immediately and destroy any 
+> >>>> and all copies of this message in your possession (whether hard copies or electronically stored copies).
+> >>>>
+> >>> --
+> >>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+> >>> in the body of a message to majordomo@vger.kernel.org More majordomo 
+> >>> info at  http://vger.kernel.org/majordomo-info.html
+> >>>
+> >>> ________________________________
+> >>>
+> >>> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+> >>>
+> 
