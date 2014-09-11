@@ -1,95 +1,198 @@
-From: Alex Elder <elder@ieee.org>
-Subject: Re: [PATCH] rbd: do not return -ERANGE on auth failure
-Date: Thu, 11 Sep 2014 11:46:43 -0500
-Message-ID: <5411D1F3.1020300@ieee.org>
-References: <1410448246-6635-1-git-send-email-ilya.dryomov@inktank.com>	<5411BE6F.1040202@ieee.org> <CALFYKtAH_9nQWWyOEcEectWzWQxsNBVHRSPVt_QbU8rfG1_YFA@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: OpTracker optimization
+Date: Thu, 11 Sep 2014 18:30:00 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2783CED4@SACMBXIP02.sdcorp.global.sandisk.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2783A845@SACMBXIP02.sdcorp.global.sandisk.com>
+	<CA+4uBUbSrYhy8=ZPKZ7dOTh0sNNCs5mC3ttgBH+qoWO+58UdvA@mail.gmail.com>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F2783C56D@SACMBXIP02.sdcorp.global.sandisk.com>
+	<CA+4uBUbTBksZbRxR9RCTws-O--2N+QnHN5aS_Kx-D7yVeEmiDw@mail.gmail.com>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F2783C636@SACMBXIP02.sdcorp.global.sandisk.com>
+	<CA+4uBUaaycvVCnjtDCEZO3i9iFB7FifK-+xZwtEcemC7XGPiTg@mail.gmail.com>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F2783C65C@SACMBXIP02.sdcorp.global.sandisk.com>
+	<CA+4uBUboaU=1uWT7_kNB+ViK0sOOeB4hJKpCVQ397OjWpY83tQ@mail.gmail.com>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F2783C7E4@SACMBXIP02.sdcorp.global.sandisk.com>
+	<alpine.DEB.2.00.1409102032440.17200@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f180.google.com ([209.85.213.180]:34131 "EHLO
-	mail-ig0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755905AbaIKQqo (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Sep 2014 12:46:44 -0400
-Received: by mail-ig0-f180.google.com with SMTP id hn15so1355478igb.7
-        for <ceph-devel@vger.kernel.org>; Thu, 11 Sep 2014 09:46:44 -0700 (PDT)
-In-Reply-To: <CALFYKtAH_9nQWWyOEcEectWzWQxsNBVHRSPVt_QbU8rfG1_YFA@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <ilya.dryomov@inktank.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.00.1409102032440.17200-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On 09/11/2014 11:17 AM, Ilya Dryomov wrote:
-> On Thu, Sep 11, 2014 at 7:23 PM, Alex Elder <elder@ieee.org> wrote:
->> On 09/11/2014 10:10 AM, Ilya Dryomov wrote:
->>> Trying to map an image out of a pool for which we don't have an 'x'
->>> permission bit fails with -ERANGE from ceph_extract_encoded_string()
->>> due to an unsigned vs signed bug.  Fix it and get rid of the -ENIVAL
->>> sink, thus exposing rbd::get_id cls method return value.  (I've seen
->>> a bunch of unexplained -ERANGE reports, I bet this is it).
->>>
->>> Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
->>
->> I often think people are annoyed by my explicit type casts
->> all over the place.  This (missed) one matters a lot.
->>
->> I think the -EINVAL was to ensure an error code that was
->> expected by a write() call would be returned.
-> 
-> Yeah, the way it's written it's possible in theory to get a positive
-> return value from rbd_dev_image_id().  Looking deeper, this sizeof() is
-> not needed at all - ceph_extract_encoded_string() deals with short
-> buffers as it should.  As for the ret == sizeof(u32) (i.e. an empty
-> string), neither userspace nor us check against empty strings in
-> similar cases (object prefix, snapshot name, etc).
-> 
-> With the above in mind, how about this?
-> 
-> From 3ded0a7fee82f2204c58b4fc00fc74f05331514d Mon Sep 17 00:00:00 2001
-> From: Ilya Dryomov <ilya.dryomov@inktank.com>
-> Date: Thu, 11 Sep 2014 18:49:18 +0400
-> Subject: [PATCH] rbd: do not return -ERANGE on auth failures
-> 
-> Trying to map an image out of a pool for which we don't have an 'x'
-> permission bit fails with -ERANGE from ceph_extract_encoded_string()
-> due to an unsigned vs signed bug.  Fix it and get rid of the -EINVAL
-> sink, thus propagating rbd::get_id cls method errors.  (I've seen
-> a bunch of unexplained -ERANGE reports, I bet this is it).
-> 
-> Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
+Sam/Sage,
+I have addressed all of your comments and pushed the changes to the same pull request.
 
-So now we know that the value returned by rbd_dev_image_id()
-will be either 0 or a negative errno.  It could still
-return something that write(2) isn't defined to return,
-but at least it's an error.  That's OK with me...
+https://github.com/ceph/ceph/pull/2440
 
-Reviewed-by: Alex Elder <elder@linaro.org>
+Thanks & Regards
+Somnath
 
-> ---
->  drivers/block/rbd.c |    4 +---
->  1 file changed, 1 insertion(+), 3 deletions(-)
-> 
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 4b97baf8afa3..ce457db5d847 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -4924,7 +4924,7 @@ static int rbd_dev_image_id(struct rbd_device *rbd_dev)
->                 ret = image_id ? 0 : -ENOMEM;
->                 if (!ret)
->                         rbd_dev->image_format = 1;
-> -       } else if (ret > sizeof (__le32)) {
-> +       } else if (ret >= 0) {
->                 void *p = response;
-> 
->                 image_id = ceph_extract_encoded_string(&p, p + ret,
-> @@ -4932,8 +4932,6 @@ static int rbd_dev_image_id(struct rbd_device *rbd_dev)
->                 ret = PTR_ERR_OR_ZERO(image_id);
->                 if (!ret)
->                         rbd_dev->image_format = 2;
-> -       } else {
-> -               ret = -EINVAL;
->         }
-> 
->         if (!ret) {
-> 
+-----Original Message-----
+From: Sage Weil [mailto:sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org] 
+Sent: Wednesday, September 10, 2014 8:33 PM
+To: Somnath Roy
+Cc: Samuel Just; ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Subject: RE: OpTracker optimization
 
+I had two substantiative comments on the first patch and then some trivial 
+whitespace nits.    Otherwise looks good!
+
+tahnks-
+sage
+
+On Thu, 11 Sep 2014, Somnath Roy wrote:
+
+> Sam/Sage,
+> I have incorporated all of your comments. Please have a look at the same pull request.
+> 
+> https://github.com/ceph/ceph/pull/2440
+> 
+> Thanks & Regards
+> Somnath
+> 
+> -----Original Message-----
+> From: Samuel Just [mailto:sam.just-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org]
+> Sent: Wednesday, September 10, 2014 3:25 PM
+> To: Somnath Roy
+> Cc: Sage Weil (sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org); ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; 
+> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> Subject: Re: OpTracker optimization
+> 
+> Oh, I changed my mind, your approach is fine.  I was unclear.
+> Currently, I just need you to address the other comments.
+> -Sam
+> 
+> On Wed, Sep 10, 2014 at 3:13 PM, Somnath Roy <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org> wrote:
+> > As I understand, you want me to implement the following.
+> >
+> > 1.  Keep this implementation one sharded optracker for the ios going through ms_dispatch path.
+> >
+> > 2. Additionally, for ios going through ms_fast_dispatch, you want me 
+> > to implement optracker (without internal shard) per opwq shard
+> >
+> > Am I right ?
+> >
+> > Thanks & Regards
+> > Somnath
+> >
+> > -----Original Message-----
+> > From: Samuel Just [mailto:sam.just-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org]
+> > Sent: Wednesday, September 10, 2014 3:08 PM
+> > To: Somnath Roy
+> > Cc: Sage Weil (sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org); ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; 
+> > ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> > Subject: Re: OpTracker optimization
+> >
+> > I don't quite understand.
+> > -Sam
+> >
+> > On Wed, Sep 10, 2014 at 2:38 PM, Somnath Roy <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org> wrote:
+> >> Thanks Sam.
+> >> So, you want me to go with optracker/shadedopWq , right ?
+> >>
+> >> Regards
+> >> Somnath
+> >>
+> >> -----Original Message-----
+> >> From: Samuel Just [mailto:sam.just-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org]
+> >> Sent: Wednesday, September 10, 2014 2:36 PM
+> >> To: Somnath Roy
+> >> Cc: Sage Weil (sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org); ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; 
+> >> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> >> Subject: Re: OpTracker optimization
+> >>
+> >> Responded with cosmetic nonsense.  Once you've got that and the other comments addressed, I can put it in wip-sam-testing.
+> >> -Sam
+> >>
+> >> On Wed, Sep 10, 2014 at 1:30 PM, Somnath Roy <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org> wrote:
+> >>> Thanks Sam..I responded back :-)
+> >>>
+> >>> -----Original Message-----
+> >>> From: ceph-devel-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org 
+> >>> [mailto:ceph-devel-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org] On Behalf Of Samuel Just
+> >>> Sent: Wednesday, September 10, 2014 11:17 AM
+> >>> To: Somnath Roy
+> >>> Cc: Sage Weil (sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org); ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; 
+> >>> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> >>> Subject: Re: OpTracker optimization
+> >>>
+> >>> Added a comment about the approach.
+> >>> -Sam
+> >>>
+> >>> On Tue, Sep 9, 2014 at 1:33 PM, Somnath Roy <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org> wrote:
+> >>>> Hi Sam/Sage,
+> >>>>
+> >>>> As we discussed earlier, enabling the present OpTracker code 
+> >>>> degrading performance severely. For example, in my setup a single 
+> >>>> OSD node with
+> >>>> 10 clients is reaching ~103K read iops with io served from memory 
+> >>>> while optracking is disabled but enabling optracker it is reduced to ~39K iops.
+> >>>> Probably, running OSD without enabling OpTracker is not an option 
+> >>>> for many of Ceph users.
+> >>>>
+> >>>> Now, by sharding the Optracker:: ops_in_flight_lock (thus xlist
+> >>>> ops_in_flight) and removing some other bottlenecks I am able to 
+> >>>> match the performance of OpTracking enabled OSD with OpTracking 
+> >>>> disabled, but with the expense of ~1 extra cpu core.
+> >>>>
+> >>>> In this process I have also fixed the following tracker.
+> >>>>
+> >>>>
+> >>>>
+> >>>> http://tracker.ceph.com/issues/9384
+> >>>>
+> >>>>
+> >>>>
+> >>>> and probably http://tracker.ceph.com/issues/8885 too.
+> >>>>
+> >>>>
+> >>>>
+> >>>> I have created following pull request for the same. Please review it.
+> >>>>
+> >>>>
+> >>>>
+> >>>> https://github.com/ceph/ceph/pull/2440
+> >>>>
+> >>>>
+> >>>>
+> >>>> Thanks & Regards
+> >>>>
+> >>>> Somnath
+> >>>>
+> >>>>
+> >>>>
+> >>>>
+> >>>> ________________________________
+> >>>>
+> >>>> PLEASE NOTE: The information contained in this electronic mail 
+> >>>> message is intended only for the use of the designated 
+> >>>> recipient(s) named above. If the reader of this message is not 
+> >>>> the intended recipient, you are hereby notified that you have 
+> >>>> received this message in error and that any review, 
+> >>>> dissemination, distribution, or copying of this message is 
+> >>>> strictly prohibited. If you have received this communication in 
+> >>>> error, please notify the sender by telephone or e-mail (as shown 
+> >>>> above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+> >>>>
+> >>> --
+> >>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+> >>> in the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org More 
+> >>> majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >>>
+> >>> ________________________________
+> >>>
+> >>> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+> >>>
+> 
