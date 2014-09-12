@@ -1,103 +1,174 @@
-From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
-Subject: RE: osd cpu usage is bigger than 100%
-Date: Fri, 12 Sep 2014 01:01:12 +0000
-Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC020B8DED@shsmsx102.ccr.corp.intel.com>
-References: <CAPaK2r_nZDsDoHmUk6kPXCDmZcHweUM4+zEcu8c4KL8gg1QWQg@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>
+Subject: Regarding key/value interface
+Date: Fri, 12 Sep 2014 01:11:57 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2783D176@SACMBXIP02.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:63989 "EHLO mga02.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751583AbaILBDS (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 11 Sep 2014 21:03:18 -0400
-In-Reply-To: <CAPaK2r_nZDsDoHmUk6kPXCDmZcHweUM4+zEcu8c4KL8gg1QWQg@mail.gmail.com>
+Content-Type: multipart/mixed; boundary="===============2139055991=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 Content-Language: en-US
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: yue longguang <yuelongguang@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: "Sage Weil (sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org)" <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "Haomai Wang
+	(haomaiwang-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org)" <haomaiwang-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-MS4gMTIlIHdhIGlzIHF1aXRlIG5vcm1hbCwgd2l0aCBtb3JlIGRpc2tzIGFuZCBtb3JlIGxvYWQg
-LHlvdSBjb3VsZCBldmVuIHNlZSAzMCUrIG9uIHJhbmRvbSB3cml0ZSBjYXNlDQoyLiAgT3VyIEJL
-TSBpcyBzZXQgb3NkX29wX3RocmVhZHMgdG8gMjAsDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0t
-LS0tDQpGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgt
-ZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgeXVlIGxvbmdndWFuZw0K
-U2VudDogVGh1cnNkYXksIFNlcHRlbWJlciAxMSwgMjAxNCAzOjQ0IFBNDQpUbzogY2VwaC1kZXZl
-bEB2Z2VyLmtlcm5lbC5vcmcNClN1YmplY3Q6IG9zZCBjcHUgdXNhZ2UgaXMgYmlnZ2VyIHRoYW4g
-MTAwJQ0KDQpoaSxhbGwNCmkgYW0gdGVzdGluZyAgIHJiZCBwZXJmb3JtYW5jZSwgbm93IHRoZXJl
-IGlzIG9ubHkgb25lIHZtIHdoaWNoIGlzDQp1c2luZyAgcmJkIGFzIGl0cyBkaXNrLCBhbmQgaW5z
-aWRlIGl0ICBmaW8gaXMgZG9pbmcgci93Lg0KdGhlIGJpZyBkaWZmZW5lbmNlIGlzIHRoYXQgaSBz
-ZXQgYSBiaWcgaW9kZXB0aCBvdGhlciB0aGFuIGlvZGVwdGg9MS4NCmFjY29yZGluZyB0byBteSB0
-ZXN0LCAgdGhlIGJpZ2dlciBpb2RlcHRoLCB0aGUgYmlnZ2VyIGNwdSB1c2FnZS4NCg0KYW5hbHlz
-ZSAgdGhlIG91dHB1dCBvZiB0b3AgY29tbWFuZC4NCjEuDQoxMiUgd2EsICBpZiBpdCBtZWFucyBk
-aXNrIHNwZWVkIGlzIG5vdCBmYXN0IGVub3VnaD8NCg0KMi4gZnJvbSB3aGVyZSAgd2UgIGNhbiBr
-bm93ICB3aGV0aGVyIGNlcGgncyBudW1iZXIgb2YgdGhyZWFkcyAgaXMgZW5vdWdoIG9yIG5vdD8N
-Cg0KDQpob3cgZG8geW91IHRoaW5rIGFib3V0IGl0LCAgd2hpY2ggcGFydCBpcyB1c2luZyB1cCBj
-cHU/IGkgd2FudCB0byBmaW5kIHRoZSByb290IGNhdXNlLCB3aHkgYmlnIGlvZGVwdGggbGVhZHMg
-dG8gaGlnaCBjcHUgdXNhZ2UuDQoNCg0KLS0tZGVmYXVsdCBvcHRpb25zLS0tLQ0Kb3NkX29wX3Ro
-cmVhZHMiOiAiMiIsDQogICJvc2RfZGlza190aHJlYWRzIjogIjEiLA0KICAib3NkX3JlY292ZXJ5
-X3RocmVhZHMiOiAiMSIsDQoiZmlsZXN0b3JlX29wX3RocmVhZHMiOiAiMiIsDQoNCg0KdGhhbmtz
-DQoNCi0tLS0tLS0tLS10b3AtLS0tLS0tLS0tLS0tLS1pb2RlcHRoPTE2LS0tLS0tLS0tLS0tLS0t
-LS0NCnRvcCAtIDE1OjI3OjM0IHVwIDIgZGF5cywgIDY6MDMsICAyIHVzZXJzLCAgbG9hZCBhdmVy
-YWdlOiAwLjQ5LCAwLjU2LCAwLjYyDQpUYXNrczogIDk3IHRvdGFsLCAgIDEgcnVubmluZywgIDk2
-IHNsZWVwaW5nLCAgIDAgc3RvcHBlZCwgICAwIHpvbWJpZQ0KQ3B1KHMpOiAxOS4wJXVzLCAgOC4x
-JXN5LCAgMC4wJW5pLCA1OS4zJWlkLCAxMi4xJXdhLCAgMC4wJWhpLCAgMC44JXNpLCAgMC43JXN0
-DQpNZW06ICAgMTkyMjU0MGsgdG90YWwsICAxODUzMTgwayB1c2VkLCAgICA2OTM2MGsgZnJlZSwg
-ICAgIDcwMTJrIGJ1ZmZlcnMNClN3YXA6ICAxMDQ4NTY4ayB0b3RhbCwgICAgNzY3OTZrIHVzZWQs
-ICAgOTcxNzcyayBmcmVlLCAgMTAzNDI3MmsgY2FjaGVkDQogIFBJRCBVU0VSICAgICAgUFIgIE5J
-ICBWSVJUICBSRVMgIFNIUiBTICVDUFUgJU1FTSAgICBUSU1FKyAgQ09NTUFORA0KIDI3NjMgcm9v
-dCAgICAgIDIwICAgMCAxMTEybSAzODZtIDUwMjggUyA2MC44IDIwLjYgMjAwOjQzLjQ3IGNlcGgt
-b3NkDQoNCiAtLS0tLS0tLS0tLS0tdG9wLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0NCnRvcCAtIDE5OjUwOjA4IHVwIDEgZGF5LCAxMDoyNiwgIDIgdXNlcnMsICBs
-b2FkIGF2ZXJhZ2U6IDEuNTUsIDAuOTcsIDAuODENClRhc2tzOiAgOTcgdG90YWwsICAgMSBydW5u
-aW5nLCAgOTYgc2xlZXBpbmcsICAgMCBzdG9wcGVkLCAgIDAgem9tYmllDQpDcHUocyk6IDM3LjYl
-dXMsIDE0LjIlc3ksICAwLjAlbmksIDM3LjAlaWQsICA5LjQld2EsICAwLjAlaGksICAxLjMlc2ks
-ICAwLjUlc3QNCk1lbTogICAxOTIyNTQwayB0b3RhbCwgIDE4MjAxOTZrIHVzZWQsICAgMTAyMzQ0
-ayBmcmVlLCAgICAyMzEwMGsgYnVmZmVycw0KU3dhcDogIDEwNDg1NjhrIHRvdGFsLCAgICA5MTcy
-NGsgdXNlZCwgICA5NTY4NDRrIGZyZWUsICAxMDUyMjkyayBjYWNoZWQNCg0KICBQSUQgVVNFUiAg
-ICAgIFBSICBOSSAgVklSVCAgUkVTICBTSFIgUyAlQ1BVICVNRU0gICAgVElNRSsgIENPTU1BTkQN
-CiA0MzEyIHJvb3QgICAgICAyMCAgIDAgMTEwMG0gMzM3bSA1MTkyIFMgMTA3LjMgMTguMCAgODg6
-MzMuMjcgY2VwaC1vc2QNCiAxNzA0IHJvb3QgICAgICAyMCAgIDAgIDUxNG0gMjcybSAzNjQ4IFMg
-IDAuNyAxNC41ICAgMzoyNy4xOSBjZXBoLW1vbg0KDQoNCg0KLS0tLS0tLS0tLS0tLS1pb3N0YXQt
-LS0tLS0tLS0tLS0tLS0tLS0NCg0KRGV2aWNlOiAgICAgICAgIHJycW0vcyAgIHdycW0vcyAgICAg
-ci9zICAgICB3L3MgICByc2VjL3MgICB3c2VjL3MNCmF2Z3JxLXN6IGF2Z3F1LXN6ICAgYXdhaXQg
-IHN2Y3RtICAldXRpbA0KdmRkICAgICAgICAgICAgICAgNS41MCAgIDEzNy41MCAgMjQ3LjAwICA3
-ODIuMDAgIDI4OTYuMDAgIDg3NzMuMDANCjExLjM0ICAgICA3LjA4ICAgIDMuNTUgICAwLjYzICA2
-NS4wNQ0KDQpEZXZpY2U6ICAgICAgICAgcnJxbS9zICAgd3JxbS9zICAgICByL3MgICAgIHcvcyAg
-IHJzZWMvcyAgIHdzZWMvcw0KYXZncnEtc3ogYXZncXUtc3ogICBhd2FpdCAgc3ZjdG0gICV1dGls
-DQp2ZGQgICAgICAgICAgICAgICA5LjUwICAgMTE5LjAwICAzMjcuNTAgIDQ1OC41MCAgMzk0MC4w
-MCAgNDczMy41MA0KMTEuMDMgICAgMTIuMDMgICAxOS42NiAgIDAuNzAgIDU1LjQwDQoNCkRldmlj
-ZTogICAgICAgICBycnFtL3MgICB3cnFtL3MgICAgIHIvcyAgICAgdy9zICAgcnNlYy9zICAgd3Nl
-Yy9zDQphdmdycS1zeiBhdmdxdS1zeiAgIGF3YWl0ICBzdmN0bSAgJXV0aWwNCnZkZCAgICAgICAg
-ICAgICAgMTUuNTAgICAgMTAuNTAgIDMyNC4wMCAgNTU5LjUwICAzNzg0LjAwICAzMzk4LjAwDQo4
-LjEzICAgICAxLjk4ICAgIDIuMjIgICAwLjgxICA3MS4yNQ0KDQpEZXZpY2U6ICAgICAgICAgcnJx
-bS9zICAgd3JxbS9zICAgICByL3MgICAgIHcvcyAgIHJzZWMvcyAgIHdzZWMvcw0KYXZncnEtc3og
-YXZncXUtc3ogICBhd2FpdCAgc3ZjdG0gICV1dGlsDQp2ZGQgICAgICAgICAgICAgICA0LjUwICAg
-MjUzLjUwICAyNzMuNTAgIDgwMy4wMCAgMzA1Ni4wMCAxMjE1NS4wMA0KMTQuMTMgICAgIDQuNzAg
-ICAgNC4zMiAgIDAuNTUgIDU5LjU1DQoNCkRldmljZTogICAgICAgICBycnFtL3MgICB3cnFtL3Mg
-ICAgIHIvcyAgICAgdy9zICAgcnNlYy9zICAgd3NlYy9zDQphdmdycS1zeiBhdmdxdS1zeiAgIGF3
-YWl0ICBzdmN0bSAgJXV0aWwNCnZkZCAgICAgICAgICAgICAgMTAuMDAgICAgIDYuMDAgIDI5NC4w
-MCAgNDg4LjAwICAzMjAwLjAwICAyOTMzLjUwDQo3Ljg0ICAgICAxLjEwICAgIDEuNDkgICAwLjcw
-ICA1NC44NQ0KDQpEZXZpY2U6ICAgICAgICAgcnJxbS9zICAgd3JxbS9zICAgICByL3MgICAgIHcv
-cyAgIHJzZWMvcyAgIHdzZWMvcw0KYXZncnEtc3ogYXZncXUtc3ogICBhd2FpdCAgc3ZjdG0gICV1
-dGlsDQp2ZGQgICAgICAgICAgICAgIDEwLjAwICAgIDE0LjAwICAzMzMuMDAgIDY0NS4wMCAgMzc4
-MC4wMCAgMzg0Ni4wMA0KNy44MCAgICAgMi4xMyAgICAyLjE1ICAgMC45MCAgODcuNTUNCg0KRGV2
-aWNlOiAgICAgICAgIHJycW0vcyAgIHdycW0vcyAgICAgci9zICAgICB3L3MgICByc2VjL3MgICB3
-c2VjL3MNCmF2Z3JxLXN6IGF2Z3F1LXN6ICAgYXdhaXQgIHN2Y3RtICAldXRpbA0KdmRkICAgICAg
-ICAgICAgICAxMS4wMCAgIDI0MC41MCAgMjU5LjAwICA1NzkuMDAgIDMxNDQuMDAgMTAwMzUuNTAN
-CjE1LjczICAgICA4LjUxICAgMTAuMTggICAwLjg0ICA3MC4yMA0KDQpEZXZpY2U6ICAgICAgICAg
-cnJxbS9zICAgd3JxbS9zICAgICByL3MgICAgIHcvcyAgIHJzZWMvcyAgIHdzZWMvcw0KYXZncnEt
-c3ogYXZncXUtc3ogICBhd2FpdCAgc3ZjdG0gICV1dGlsDQp2ZGQgICAgICAgICAgICAgIDEwLjUw
-ICAgIDE3LjAwICAzMTguNTAgIDcwNy4wMCAgMzg3Ni4wMCAgNDA4NC41MA0KNy43NiAgICAgMS4z
-MiAgICAxLjMwICAgMC42MSAgNjIuNjUNCg0KRGV2aWNlOiAgICAgICAgIHJycW0vcyAgIHdycW0v
-cyAgICAgci9zICAgICB3L3MgICByc2VjL3MgICB3c2VjL3MNCmF2Z3JxLXN6IGF2Z3F1LXN6ICAg
-YXdhaXQgIHN2Y3RtICAldXRpbA0KdmRkICAgICAgICAgICAgICAgNC41MCAgIDIwOC4wMCAgMjMz
-LjUwICA5MTguMDAgIDI2NDguMDAgMTkyMTQuNTANCjE4Ljk5ICAgICA1LjQzICAgIDQuNzEgICAw
-LjU1ICA2My4yMA0KDQpEZXZpY2U6ICAgICAgICAgcnJxbS9zICAgd3JxbS9zICAgICByL3MgICAg
-IHcvcyAgIHJzZWMvcyAgIHdzZWMvcw0KYXZncnEtc3ogYXZncXUtc3ogICBhd2FpdCAgc3ZjdG0g
-ICV1dGlsDQp2ZGQgICAgICAgICAgICAgICA3LjAwICAgICAxLjUwICAzMDYuMDAgIDIxMi4wMCAg
-MzM3Ni4wMCAgMjE3Ni41MA0KMTAuNzIgICAgIDEuMDMgICAgMS44MyAgIDAuOTYgIDQ5LjcwDQot
-LQ0KVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2Ny
-aWJlIGNlcGgtZGV2ZWwiIGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdl
-ci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5v
-cmcvbWFqb3Jkb21vLWluZm8uaHRtbA0K
+--===============2139055991==
+Content-Language: en-US
+Content-Type: multipart/alternative;
+	boundary="_000_755F6B91B3BE364F9BCA11EA3F9E0C6F2783D176SACMBXIP02sdcor_"
+
+--_000_755F6B91B3BE364F9BCA11EA3F9E0C6F2783D176SACMBXIP02sdcor_
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+
+Hi Sage/Haomai,
+If I have a key/value backend that support transaction, range queries (and =
+I don't need any explicit caching etc.) and I want to replace filestore (an=
+d leveldb omap) with that,  which interface you recommend me to derive from=
+ , directly ObjectStore or  KeyValueDB ?
+I have already integrated this backend by deriving from ObjectStore interfa=
+ces earlier (pre keyvalueinteface days) but not tested thoroughly enough to=
+ see what functionality is broken (Basic functionalities of RGW/RBD are wor=
+king fine).
+Basically, I want to know what are the advantages (and disadvantages) of de=
+riving it from the new key/value interfaces ?
+Also, what state is it in ? Is it feature complete and supporting all the O=
+bjectStore interfaces like clone and all ?
+
+Thanks & Regards
+Somnath
+
+________________________________
+
+PLEASE NOTE: The information contained in this electronic mail message is i=
+ntended only for the use of the designated recipient(s) named above. If the=
+ reader of this message is not the intended recipient, you are hereby notif=
+ied that you have received this message in error and that any review, disse=
+mination, distribution, or copying of this message is strictly prohibited. =
+If you have received this communication in error, please notify the sender =
+by telephone or e-mail (as shown above) immediately and destroy any and all=
+ copies of this message in your possession (whether hard copies or electron=
+ically stored copies).
+
+
+--_000_755F6B91B3BE364F9BCA11EA3F9E0C6F2783D176SACMBXIP02sdcor_
+Content-Type: text/html; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+
+<html xmlns:v=3D"urn:schemas-microsoft-com:vml" xmlns:o=3D"urn:schemas-micr=
+osoft-com:office:office" xmlns:w=3D"urn:schemas-microsoft-com:office:word" =
+xmlns:m=3D"http://schemas.microsoft.com/office/2004/12/omml" xmlns=3D"http:=
+//www.w3.org/TR/REC-html40">
+<head>
+<meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3Dus-ascii"=
+>
+<meta name=3D"Generator" content=3D"Microsoft Word 14 (filtered medium)">
+<style><!--
+/* Font Definitions */
+@font-face
+	{font-family:Calibri;
+	panose-1:2 15 5 2 2 2 4 3 2 4;}
+@font-face
+	{font-family:Consolas;
+	panose-1:2 11 6 9 2 2 4 3 2 4;}
+/* Style Definitions */
+p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin:0in;
+	margin-bottom:.0001pt;
+	font-size:11.0pt;
+	font-family:"Calibri","sans-serif";}
+a:link, span.MsoHyperlink
+	{mso-style-priority:99;
+	color:blue;
+	text-decoration:underline;}
+a:visited, span.MsoHyperlinkFollowed
+	{mso-style-priority:99;
+	color:purple;
+	text-decoration:underline;}
+span.EmailStyle17
+	{mso-style-type:personal-compose;
+	font-family:"Calibri","sans-serif";
+	color:windowtext;}
+.MsoChpDefault
+	{mso-style-type:export-only;
+	font-family:"Calibri","sans-serif";}
+@page WordSection1
+	{size:8.5in 11.0in;
+	margin:1.0in 1.0in 1.0in 1.0in;}
+div.WordSection1
+	{page:WordSection1;}
+--></style><!--[if gte mso 9]><xml>
+<o:shapedefaults v:ext=3D"edit" spidmax=3D"1026" />
+</xml><![endif]--><!--[if gte mso 9]><xml>
+<o:shapelayout v:ext=3D"edit">
+<o:idmap v:ext=3D"edit" data=3D"1" />
+</o:shapelayout></xml><![endif]-->
+</head>
+<body lang=3D"EN-US" link=3D"blue" vlink=3D"purple">
+<div class=3D"WordSection1">
+<p class=3D"MsoNormal">Hi Sage/Haomai,<o:p></o:p></p>
+<p class=3D"MsoNormal">If I have a key/value backend that support transacti=
+on, range queries (and I don&#8217;t need any explicit caching etc.) and I =
+want to replace filestore (and leveldb omap) with that, &nbsp;which interfa=
+ce you recommend me to derive from , directly
+ ObjectStore or &nbsp;<span style=3D"color:black;background:white;mso-highl=
+ight:white">KeyValueDB</span><span style=3D"color:black"> ?<o:p></o:p></spa=
+n></p>
+<p class=3D"MsoNormal"><span style=3D"color:black">I have already integrate=
+d this backend by deriving from ObjectStore interfaces earlier (pre keyvalu=
+einteface days) but not tested thoroughly enough to see what functionality =
+is broken (Basic functionalities of
+ RGW/RBD are working fine).<o:p></o:p></span></p>
+<p class=3D"MsoNormal"><span style=3D"color:black">Basically, I want to kno=
+w what are the advantages (and disadvantages) of deriving it from the new k=
+ey/value interfaces ?<o:p></o:p></span></p>
+<p class=3D"MsoNormal"><span style=3D"color:black">Also, what state is it i=
+n ? Is it feature complete and supporting all the ObjectStore interfaces li=
+ke clone and all ?<o:p></o:p></span></p>
+<p class=3D"MsoNormal"><span style=3D"color:black"><o:p>&nbsp;</o:p></span>=
+</p>
+<p class=3D"MsoNormal"><span style=3D"color:black">Thanks &amp; Regards<o:p=
+></o:p></span></p>
+<p class=3D"MsoNormal"><span style=3D"color:black">Somnath</span><o:p></o:p=
+></p>
+</div>
+<br>
+<hr>
+<font face=3D"Arial" color=3D"Gray" size=3D"2"><br>
+PLEASE NOTE: The information contained in this electronic mail message is i=
+ntended only for the use of the designated recipient(s) named above. If the=
+ reader of this message is not the intended recipient, you are hereby notif=
+ied that you have received this
+ message in error and that any review, dissemination, distribution, or copy=
+ing of this message is strictly prohibited. If you have received this commu=
+nication in error, please notify the sender by telephone or e-mail (as show=
+n above) immediately and destroy
+ any and all copies of this message in your possession (whether hard copies=
+ or electronically stored copies).<br>
+<br>
+</font>
+</body>
+</html>
+
+--_000_755F6B91B3BE364F9BCA11EA3F9E0C6F2783D176SACMBXIP02sdcor_--
+
+--===============2139055991==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============2139055991==--
