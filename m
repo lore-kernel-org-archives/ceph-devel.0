@@ -1,64 +1,108 @@
 From: Loic Dachary <loic@dachary.org>
-Subject: Re: jerasure buffer misaligned
-Date: Fri, 12 Sep 2014 11:34:46 +0200
-Message-ID: <5412BE36.5090008@dachary.org>
-References: <54120E60.3030704@dachary.org> <20140912091705.GQ2591@jannau.net>
+Subject: Re: [PATCH] daemons: write pid file even when told not to daemonize
+Date: Fri, 12 Sep 2014 12:22:32 +0200
+Message-ID: <5412C968.4070207@dachary.org>
+References: <or4mxyuvo4.fsf@free.home>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="BcsuphspUSABGC0weVGh8bwDCo2OnbnK6"
+ boundary="CftSW3pnV5DEFSOOf3kKfaDPlSKuOqooM"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:50582 "EHLO
+Received: from mail2.dachary.org ([91.121.57.175]:50613 "EHLO
 	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1753884AbaILJf0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 12 Sep 2014 05:35:26 -0400
-In-Reply-To: <20140912091705.GQ2591@jannau.net>
+	with ESMTP id S1753428AbaILKW4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 12 Sep 2014 06:22:56 -0400
+In-Reply-To: <or4mxyuvo4.fsf@free.home>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Janne Grunau <j@jannau.net>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Alexandre Oliva <oliva@gnu.org>, ceph-devel@vger.kernel.org
 
 This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---BcsuphspUSABGC0weVGh8bwDCo2OnbnK6
+--CftSW3pnV5DEFSOOf3kKfaDPlSKuOqooM
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: quoted-printable
 
+Hi Alexandre,
 
-
-On 12/09/2014 11:17, Janne Grunau wrote:
-> Hi Loic,
->=20
-> On 2014-09-11 23:04:32 +0200, Loic Dachary wrote:
->>
->> In the context of jerasure buffers you found to be misaligned, (=20
->> http://tracker.ceph.com/issues/9408 ) it would help fix it if you had =
-
->> a simple way to reproduce it.
->=20
-> I've updated the issues with a way to reproduce it. You don't need work=
-=20
-> on it since I've already removed the offending code in my effort to=20
-> reduce memory management overhead for small sizes.
-
-Nice :-) I'm curious about the offending code you had to remove. Where wa=
-s it ?
+I applied the patch locally and running make check.
 
 Cheers
 
+On 31/07/2014 04:08, Alexandre Oliva wrote:
+> systemd wants to run daemons in foreground, but daemons wouldn't write
+> out the pid file with -f.  Fixed.
 >=20
-> Janne
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Signed-off-by: Alexandre Oliva <oliva@gnu.org>
+> ---
+>  src/ceph_mon.cc           |    3 +--
+>  src/common/config.cc      |    2 --
+>  src/global/global_init.cc |   10 +++++++++-
+>  3 files changed, 10 insertions(+), 5 deletions(-)
+>=20
+> diff --git a/src/ceph_mon.cc b/src/ceph_mon.cc
+> index 4e84b4d..14dd6da 100644
+> --- a/src/ceph_mon.cc
+> +++ b/src/ceph_mon.cc
+> @@ -406,8 +406,7 @@ int main(int argc, const char **argv)
+>    // screwing us over
+>    Preforker prefork;
+>    if (!(flags & CINIT_FLAG_NO_DAEMON_ACTIONS)) {
+> -    if (g_conf->daemonize) {
+> -      global_init_prefork(g_ceph_context, 0);
+> +    if (global_init_prefork(g_ceph_context, 0) >=3D 0) {
+>        prefork.prefork();
+>        if (prefork.is_parent()) {
+>  	return prefork.parent_wait();
+> diff --git a/src/common/config.cc b/src/common/config.cc
+> index 0ee7f58..4e3b6fe 100644
+> --- a/src/common/config.cc
+> +++ b/src/common/config.cc
+> @@ -389,12 +389,10 @@ int md_config_t::parse_argv(std::vector<const cha=
+r*>& args)
+>      }
+>      else if (ceph_argparse_flag(args, i, "--foreground", "-f", (char*)=
+NULL)) {
+>        set_val_or_die("daemonize", "false");
+> -      set_val_or_die("pid_file", "");
+>      }
+>      else if (ceph_argparse_flag(args, i, "-d", (char*)NULL)) {
+>        set_val_or_die("daemonize", "false");
+>        set_val_or_die("log_file", "");
+> -      set_val_or_die("pid_file", "");
+>        set_val_or_die("log_to_stderr", "true");
+>        set_val_or_die("err_to_stderr", "true");
+>        set_val_or_die("log_to_syslog", "false");
+> diff --git a/src/global/global_init.cc b/src/global/global_init.cc
+> index 7b20343..f03677c 100644
+> --- a/src/global/global_init.cc
+> +++ b/src/global/global_init.cc
+> @@ -166,8 +166,16 @@ int global_init_prefork(CephContext *cct, int flag=
+s)
+>    if (g_code_env !=3D CODE_ENVIRONMENT_DAEMON)
+>      return -1;
+>    const md_config_t *conf =3D cct->_conf;
+> -  if (!conf->daemonize)
+> +  if (!conf->daemonize) {
+> +    if (atexit(pidfile_remove_void)) {
+> +      derr << "global_init_daemonize: failed to set pidfile_remove fun=
+ction "
+> +	   << "to run at exit." << dendl;
+> +    }
+> +
+> +    pidfile_write(g_conf);
+> +
+>      return -1;
+> +  }
+> =20
+>    // stop log thread
+>    g_ceph_context->_log->flush();
 >=20
 
 --=20
 Lo=EFc Dachary, Artisan Logiciel Libre
 
 
---BcsuphspUSABGC0weVGh8bwDCo2OnbnK6
+--CftSW3pnV5DEFSOOf3kKfaDPlSKuOqooM
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -67,9 +111,9 @@ Content-Disposition: attachment; filename="signature.asc"
 Version: GnuPG v2.0.22 (GNU/Linux)
 Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
 
-iEYEARECAAYFAlQSvjYACgkQ8dLMyEl6F22klACffBrOK0nmgTePaBGlTh6ORdh3
-NVoAnA6RyhMxcgU5cJwAezwu+o7giUsw
-=/u9O
+iEYEARECAAYFAlQSyWgACgkQ8dLMyEl6F21eVQCdHVovelOauAx7btLHFqzZpn5Z
+NGIAoInbw9xweCKk8hCT3tAh9BRUROdl
+=PTdf
 -----END PGP SIGNATURE-----
 
---BcsuphspUSABGC0weVGh8bwDCo2OnbnK6--
+--CftSW3pnV5DEFSOOf3kKfaDPlSKuOqooM--
