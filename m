@@ -1,127 +1,105 @@
-From: Sage Weil <sweil@redhat.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
 Subject: RE: Regarding key/value interface
-Date: Thu, 11 Sep 2014 21:10:24 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1409112108440.29849@cobra.newdream.net>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2783D176@SACMBXIP02.sdcorp.global.sandisk.com> <alpine.DEB.2.00.1409111825480.513@cobra.newdream.net> <755F6B91B3BE364F9BCA11EA3F9E0C6F2783D2E3@SACMBXIP02.sdcorp.global.sandisk.com> <alpine.DEB.2.00.1409111851240.513@cobra.newdream.net>
- <755F6B91B3BE364F9BCA11EA3F9E0C6F2783D36C@SACMBXIP02.sdcorp.global.sandisk.com>
+Date: Fri, 12 Sep 2014 04:37:00 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2783D3B9@SACMBXIP02.sdcorp.global.sandisk.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2783D176@SACMBXIP02.sdcorp.global.sandisk.com>
+	<alpine.DEB.2.00.1409111825480.513@cobra.newdream.net>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F2783D2E3@SACMBXIP02.sdcorp.global.sandisk.com>
+ <CACJqLyZjaMwwpq2TAxCCxN33NbrngVCyOxrYawPd7wPWhdj8sA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:34667 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751837AbaILEKZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 12 Sep 2014 00:10:25 -0400
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2783D36C@SACMBXIP02.sdcorp.global.sandisk.com>
+Received: from [207.46.100.79] ([207.46.100.79]:65509 "EHLO
+	na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751376AbaILEhP (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 12 Sep 2014 00:37:15 -0400
+In-Reply-To: <CACJqLyZjaMwwpq2TAxCCxN33NbrngVCyOxrYawPd7wPWhdj8sA@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
-Cc: "Haomai Wang (haomaiwang@gmail.com)" <haomaiwang@gmail.com>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Haomai Wang <haomaiwang@gmail.com>
+Cc: Sage Weil <sweil@redhat.com>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Fri, 12 Sep 2014, Somnath Roy wrote:
-> Thanks Sage...
-> Basically, we are doing similar chunking in our current implementation which is derived from objectstore. 
-> Moving to Key/value will save us from that :-)
-> Also, I was thinking, we may want to do compression (later may be dedupe ?) on that Key/value layer as well.
-> 
-> Yes, partial read/write is definitely performance killer for object stores and our objectstore is no exception. We need to see how we can counter that.
-> 
-> But, I think these are enough reason for me now to move our implementation to the key/value interfaces. 
-
-Sounds good.
-
-By the way, hopefully this is a pretty painless process of wrapping your 
-kv library with the KeyValueDB interface.  If not, that will be good to 
-know.  I'm hoping it will fit well with a broad range of backends, but so 
-far we've only done leveldb/rocksdb (same interface) and kinetic.  I'd 
-like to see us try LMDB in this context as well...
-
-sage
-
-> 
-> Regards
-> Somnath
-> 
-> 
-> -----Original Message-----
-> From: Sage Weil [mailto:sweil@redhat.com] 
-> Sent: Thursday, September 11, 2014 6:55 PM
-> To: Somnath Roy
-> Cc: Haomai Wang (haomaiwang@gmail.com); ceph-users@lists.ceph.com; ceph-devel@vger.kernel.org
-> Subject: RE: Regarding key/value interface
-> 
-> On Fri, 12 Sep 2014, Somnath Roy wrote:
-> > Make perfect sense Sage..
-> > 
-> > Regarding striping of filedata, You are saying KeyValue interface will do the following for me?
-> > 
-> > 1. Say in case of rbd image of order 4 MB, a write request coming to Key/Value interface, it will  chunk the object (say full 4MB) in smaller sizes (configurable ?) and stripe it as multiple key/value pair ?
-> > 
-> > 2. Also, while reading it will take care of accumulating and send it back.
-> 
-> Precisely.
-> 
-> A smarter thing we might want to make it do in the future would be to take a 4 KB write create a new key that logically overwrites part of the larger, say, 1MB key, and apply it on read.  And maybe give up and rewrite the entire 1MB stripe after too many small overwrites have accumulated.  
-> Something along those lines to reduce the cost of small IOs to large objects.
-> 
-> sage
-> 
-> 
-> 
->  > 
-> > Thanks & Regards
-> > Somnath
-> > 
-> > 
-> > -----Original Message-----
-> > From: Sage Weil [mailto:sweil@redhat.com]
-> > Sent: Thursday, September 11, 2014 6:31 PM
-> > To: Somnath Roy
-> > Cc: Haomai Wang (haomaiwang@gmail.com); ceph-users@lists.ceph.com; 
-> > ceph-devel@vger.kernel.org
-> > Subject: Re: Regarding key/value interface
-> > 
-> > Hi Somnath,
-> > 
-> > On Fri, 12 Sep 2014, Somnath Roy wrote:
-> > >
-> > > Hi Sage/Haomai,
-> > >
-> > > If I have a key/value backend that support transaction, range 
-> > > queries (and I don?t need any explicit caching etc.) and I want to 
-> > > replace filestore (and leveldb omap) with that,  which interface you 
-> > > recommend me to derive from , directly ObjectStore or  KeyValueDB ?
-> > >
-> > > I have already integrated this backend by deriving from ObjectStore 
-> > > interfaces earlier (pre keyvalueinteface days) but not tested 
-> > > thoroughly enough to see what functionality is broken (Basic 
-> > > functionalities of RGW/RBD are working fine).
-> > >
-> > > Basically, I want to know what are the advantages (and 
-> > > disadvantages) of deriving it from the new key/value interfaces ?
-> > >
-> > > Also, what state is it in ? Is it feature complete and supporting 
-> > > all the ObjectStore interfaces like clone and all ?
-> > 
-> > Everything is supported, I think, for perhaps some IO hints that don't make sense in a k/v context.  The big things that you get by using KeyValueStore and plugging into the lower-level interface are:
-> > 
-> >  - striping of file data across keys
-> >  - efficient clone
-> >  - a zillion smaller methods that aren't conceptually difficult to implement bug tedious and to do so.
-> > 
-> > The other nice thing about reusing this code is that you can use a leveldb or rocksdb backend as a reference for testing or performance or whatever.
-> > 
-> > The main thing that will be a challenge going forward, I predict, is making storage of the object byte payload in key/value pairs efficient.  I think KeyValuestore is doing some simple striping, but it will suffer for small overwrites (like 512-byte or 4k writes from an RBD).  There are probably some pretty simple heuristics and tricks that can be done to mitigate the most common patterns, but there is no simple solution since the backends generally don't support partial value updates (I assume yours doesn't either?).  But, any work done here will benefit the other backends too so that would be a win..
-> > 
-> > sage
-> > 
-> > ________________________________
-> > 
-> > PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
-> > 
-> > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+SGkgSGFvbWFpLA0KPDxpbmxpbmUuDQoNClRoYW5rcyAmIFJlZ2FyZHMNClNvbW5hdGgNCg0KLS0t
+LS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IEhhb21haSBXYW5nIFttYWlsdG86aGFvbWFp
+d2FuZ0BnbWFpbC5jb21dIA0KU2VudDogVGh1cnNkYXksIFNlcHRlbWJlciAxMSwgMjAxNCA3OjI4
+IFBNDQpUbzogU29tbmF0aCBSb3kNCkNjOiBTYWdlIFdlaWw7IGNlcGgtdXNlcnNAbGlzdHMuY2Vw
+aC5jb207IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQpTdWJqZWN0OiBSZTogUmVnYXJkaW5n
+IGtleS92YWx1ZSBpbnRlcmZhY2UNCg0KT24gRnJpLCBTZXAgMTIsIDIwMTQgYXQgOTo0NiBBTSwg
+U29tbmF0aCBSb3kgPFNvbW5hdGguUm95QHNhbmRpc2suY29tPiB3cm90ZToNCj4NCj4gTWFrZSBw
+ZXJmZWN0IHNlbnNlIFNhZ2UuLg0KPg0KPiBSZWdhcmRpbmcgc3RyaXBpbmcgb2YgZmlsZWRhdGEs
+IFlvdSBhcmUgc2F5aW5nIEtleVZhbHVlIGludGVyZmFjZSB3aWxsIGRvIHRoZSBmb2xsb3dpbmcg
+Zm9yIG1lPw0KPg0KPiAxLiBTYXkgaW4gY2FzZSBvZiByYmQgaW1hZ2Ugb2Ygb3JkZXIgNCBNQiwg
+YSB3cml0ZSByZXF1ZXN0IGNvbWluZyB0byBLZXkvVmFsdWUgaW50ZXJmYWNlLCBpdCB3aWxsICBj
+aHVuayB0aGUgb2JqZWN0IChzYXkgZnVsbCA0TUIpIGluIHNtYWxsZXIgc2l6ZXMgKGNvbmZpZ3Vy
+YWJsZSA/KSBhbmQgc3RyaXBlIGl0IGFzIG11bHRpcGxlIGtleS92YWx1ZSBwYWlyID8NCg0KDQpZ
+ZXMsIGFuZCB0aGUgc3RyaXBlIHNpemUgY2FuIGJlIGNvbmZpZ3VyYXRlZC4NCg0KW1NvbW5hdGhd
+IFRoYXQncyBncmVhdCwgdGhhbmtzDQoNCj4NCj4NCj4gMi4gQWxzbywgd2hpbGUgcmVhZGluZyBp
+dCB3aWxsIHRha2UgY2FyZSBvZiBhY2N1bXVsYXRpbmcgYW5kIHNlbmQgaXQgYmFjay4NCg0KDQoN
+CkRvIHlvdSBoYXZlIGFueSBvdGhlciBpZGVhPyANCg0KW1NvbW5hdGhdIE5vLCBJIHdhcyBqdXN0
+IGFza2luZw0KDQpCeSB0aGUgd2F5LCBjb3VsZCB5b3UgdGVsbCBtb3JlIGFib3V0IHlvdXIga2V5
+L3ZhbHVlIGludGVyZmFjZS4gSSdtIGRvaW5nIHNvbWUgam9icyBmb3IgTlZNZSBpbnRlcmZhY2Ug
+d2l0aCBpbnRlbCBOVk1lIFNTRC4NCg0KW1NvbW5hdGhdIEl0IGhhcyB0aGUgZm9sbG93aW5nIGlu
+dGVyZmFjZXMuDQoNCjEuIEluaXQgJiBzaHV0ZG93bg0KDQoyLiAgSXQgaGFzIGNvbnRhaW5lciBj
+b25jZXB0DQoNCjMuICBSZWFkL3dyaXRlIG9iamVjdHMsIGRlbGV0ZSBvYmplY3RzLCBlbnVtZXJh
+dGUgb2JqZWN0cywgbXVsdGkgcHV0L2dldCBzdXBwb3J0DQoNCjQuIFRyYW5zYWN0aW9uIHNlbWFu
+dGljcw0KDQo1LiBSYW5nZSBxdWVyeSBzdXBwb3J0DQoNCjYuIENvbnRhaW5lciBsZXZlbCBzbmFw
+c2hvdA0KDQo3LiAgc3RhdGlzdGljcw0KDQpMZXQgbWUga25vdyBpZiB5b3UgbmVlZCBhbnl0aGlu
+ZyBzcGVjaWZpY3MuDQoNClRoYW5rcyAmIFJlZ2FyZHMNClNvbW5hdGgNCg0KPg0KPg0KPg0KPiBU
+aGFua3MgJiBSZWdhcmRzDQo+IFNvbW5hdGgNCj4NCj4NCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdl
+LS0tLS0NCj4gRnJvbTogU2FnZSBXZWlsIFttYWlsdG86c3dlaWxAcmVkaGF0LmNvbV0NCj4gU2Vu
+dDogVGh1cnNkYXksIFNlcHRlbWJlciAxMSwgMjAxNCA2OjMxIFBNDQo+IFRvOiBTb21uYXRoIFJv
+eQ0KPiBDYzogSGFvbWFpIFdhbmcgKGhhb21haXdhbmdAZ21haWwuY29tKTsgY2VwaC11c2Vyc0Bs
+aXN0cy5jZXBoLmNvbTsgDQo+IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQo+IFN1YmplY3Q6
+IFJlOiBSZWdhcmRpbmcga2V5L3ZhbHVlIGludGVyZmFjZQ0KPg0KPiBIaSBTb21uYXRoLA0KPg0K
+PiBPbiBGcmksIDEyIFNlcCAyMDE0LCBTb21uYXRoIFJveSB3cm90ZToNCj4gPg0KPiA+IEhpIFNh
+Z2UvSGFvbWFpLA0KPiA+DQo+ID4gSWYgSSBoYXZlIGEga2V5L3ZhbHVlIGJhY2tlbmQgdGhhdCBz
+dXBwb3J0IHRyYW5zYWN0aW9uLCByYW5nZSANCj4gPiBxdWVyaWVzIChhbmQgSSBkb24/dCBuZWVk
+IGFueSBleHBsaWNpdCBjYWNoaW5nIGV0Yy4pIGFuZCBJIHdhbnQgdG8gDQo+ID4gcmVwbGFjZSBm
+aWxlc3RvcmUgKGFuZCBsZXZlbGRiIG9tYXApIHdpdGggdGhhdCwgIHdoaWNoIGludGVyZmFjZSB5
+b3UgDQo+ID4gcmVjb21tZW5kIG1lIHRvIGRlcml2ZSBmcm9tICwgZGlyZWN0bHkgT2JqZWN0U3Rv
+cmUgb3IgIEtleVZhbHVlREIgPw0KPiA+DQo+ID4gSSBoYXZlIGFscmVhZHkgaW50ZWdyYXRlZCB0
+aGlzIGJhY2tlbmQgYnkgZGVyaXZpbmcgZnJvbSBPYmplY3RTdG9yZSANCj4gPiBpbnRlcmZhY2Vz
+IGVhcmxpZXIgKHByZSBrZXl2YWx1ZWludGVmYWNlIGRheXMpIGJ1dCBub3QgdGVzdGVkIA0KPiA+
+IHRob3JvdWdobHkgZW5vdWdoIHRvIHNlZSB3aGF0IGZ1bmN0aW9uYWxpdHkgaXMgYnJva2VuIChC
+YXNpYyANCj4gPiBmdW5jdGlvbmFsaXRpZXMgb2YgUkdXL1JCRCBhcmUgd29ya2luZyBmaW5lKS4N
+Cj4gPg0KPiA+IEJhc2ljYWxseSwgSSB3YW50IHRvIGtub3cgd2hhdCBhcmUgdGhlIGFkdmFudGFn
+ZXMgKGFuZCANCj4gPiBkaXNhZHZhbnRhZ2VzKSBvZiBkZXJpdmluZyBpdCBmcm9tIHRoZSBuZXcg
+a2V5L3ZhbHVlIGludGVyZmFjZXMgPw0KPiA+DQo+ID4gQWxzbywgd2hhdCBzdGF0ZSBpcyBpdCBp
+biA/IElzIGl0IGZlYXR1cmUgY29tcGxldGUgYW5kIHN1cHBvcnRpbmcgDQo+ID4gYWxsIHRoZSBP
+YmplY3RTdG9yZSBpbnRlcmZhY2VzIGxpa2UgY2xvbmUgYW5kIGFsbCA/DQo+DQo+IEV2ZXJ5dGhp
+bmcgaXMgc3VwcG9ydGVkLCBJIHRoaW5rLCBmb3IgcGVyaGFwcyBzb21lIElPIGhpbnRzIHRoYXQg
+ZG9uJ3QgbWFrZSBzZW5zZSBpbiBhIGsvdiBjb250ZXh0LiAgVGhlIGJpZyB0aGluZ3MgdGhhdCB5
+b3UgZ2V0IGJ5IHVzaW5nIEtleVZhbHVlU3RvcmUgYW5kIHBsdWdnaW5nIGludG8gdGhlIGxvd2Vy
+LWxldmVsIGludGVyZmFjZSBhcmU6DQo+DQo+ICAtIHN0cmlwaW5nIG9mIGZpbGUgZGF0YSBhY3Jv
+c3Mga2V5cw0KPiAgLSBlZmZpY2llbnQgY2xvbmUNCj4gIC0gYSB6aWxsaW9uIHNtYWxsZXIgbWV0
+aG9kcyB0aGF0IGFyZW4ndCBjb25jZXB0dWFsbHkgZGlmZmljdWx0IHRvIGltcGxlbWVudCBidWcg
+dGVkaW91cyBhbmQgdG8gZG8gc28uDQo+DQo+IFRoZSBvdGhlciBuaWNlIHRoaW5nIGFib3V0IHJl
+dXNpbmcgdGhpcyBjb2RlIGlzIHRoYXQgeW91IGNhbiB1c2UgYSBsZXZlbGRiIG9yIHJvY2tzZGIg
+YmFja2VuZCBhcyBhIHJlZmVyZW5jZSBmb3IgdGVzdGluZyBvciBwZXJmb3JtYW5jZSBvciB3aGF0
+ZXZlci4NCj4NCj4gVGhlIG1haW4gdGhpbmcgdGhhdCB3aWxsIGJlIGEgY2hhbGxlbmdlIGdvaW5n
+IGZvcndhcmQsIEkgcHJlZGljdCwgaXMgbWFraW5nIHN0b3JhZ2Ugb2YgdGhlIG9iamVjdCBieXRl
+IHBheWxvYWQgaW4ga2V5L3ZhbHVlIHBhaXJzIGVmZmljaWVudC4gIEkgdGhpbmsgS2V5VmFsdWVz
+dG9yZSBpcyBkb2luZyBzb21lIHNpbXBsZSBzdHJpcGluZywgYnV0IGl0IHdpbGwgc3VmZmVyIGZv
+ciBzbWFsbCBvdmVyd3JpdGVzIChsaWtlIDUxMi1ieXRlIG9yIDRrIHdyaXRlcyBmcm9tIGFuIFJC
+RCkuICBUaGVyZSBhcmUgcHJvYmFibHkgc29tZSBwcmV0dHkgc2ltcGxlIGhldXJpc3RpY3MgYW5k
+IHRyaWNrcyB0aGF0IGNhbiBiZSBkb25lIHRvIG1pdGlnYXRlIHRoZSBtb3N0IGNvbW1vbiBwYXR0
+ZXJucywgYnV0IHRoZXJlIGlzIG5vIHNpbXBsZSBzb2x1dGlvbiBzaW5jZSB0aGUgYmFja2VuZHMg
+Z2VuZXJhbGx5IGRvbid0IHN1cHBvcnQgcGFydGlhbCB2YWx1ZSB1cGRhdGVzIChJIGFzc3VtZSB5
+b3VycyBkb2Vzbid0IGVpdGhlcj8pLiAgQnV0LCBhbnkgd29yayBkb25lIGhlcmUgd2lsbCBiZW5l
+Zml0IHRoZSBvdGhlciBiYWNrZW5kcyB0b28gc28gdGhhdCB3b3VsZCBiZSBhIHdpbi4uDQo+DQo+
+IHNhZ2UNCj4NCj4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCj4NCj4gUExFQVNF
+IE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwg
+bWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJl
+Y2lwaWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMg
+bm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQg
+eW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZp
+ZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzIG1lc3Nh
+Z2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21t
+dW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25l
+IG9yIGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBh
+bmQgYWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVy
+IGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KPg0KDQoNCg0K
+LS0gDQoNCkJlc3QgUmVnYXJkcywNCg0KV2hlYXQNCg==
