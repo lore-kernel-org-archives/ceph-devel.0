@@ -1,12 +1,12 @@
 From: Haomai Wang <haomaiwang-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Subject: Re: Regarding key/value interface
-Date: Fri, 12 Sep 2014 10:24:54 +0800
-Message-ID: <CACJqLyZk7-v3S9KDtQSwcHJp_4tsHw6m2qxbNGR6sfhZD_mVCA@mail.gmail.com>
+Date: Fri, 12 Sep 2014 10:27:04 +0800
+Message-ID: <CACJqLya9HOAx4W6j7jZR0z9GzdPq620KC9P8OWfaH7Z4__6=Eg@mail.gmail.com>
 References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2783D176@SACMBXIP02.sdcorp.global.sandisk.com>
 	<alpine.DEB.2.00.1409111825480.513@cobra.newdream.net>
 	<755F6B91B3BE364F9BCA11EA3F9E0C6F2783D2E3@SACMBXIP02.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0698436017=="
+Content-Type: multipart/mixed; boundary="===============1480638876=="
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2783D2E3-cXZ6iGhjG0i+xgsn/SD5JjJ2aSJ780jGSxCzGc5ayCJWk0Htik3J/w@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
@@ -22,10 +22,10 @@ To: Somnath Roy <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>
 Cc: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
---===============0698436017==
-Content-Type: multipart/alternative; boundary=047d7bfe95229630ed0502d4fd5f
+--===============1480638876==
+Content-Type: multipart/alternative; boundary=089e013d16f058b5800502d50525
 
---047d7bfe95229630ed0502d4fd5f
+--089e013d16f058b5800502d50525
 Content-Type: text/plain; charset=UTF-8
 
 On Fri, Sep 12, 2014 at 9:46 AM, Somnath Roy <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>
@@ -40,11 +40,10 @@ wrote:
 > Key/Value interface, it will  chunk the object (say full 4MB) in smaller
 > sizes (configurable ?) and stripe it as multiple key/value pair ?
 >
-
+>
 Yes, and the stripe size can be configurated.
 
 
->
 > 2. Also, while reading it will take care of accumulating and send it back.
 >
 
@@ -134,7 +133,7 @@ Best Regards,
 
 Wheat
 
---047d7bfe95229630ed0502d4fd5f
+--089e013d16f058b5800502d50525
 Content-Type: text/html; charset=UTF-8
 Content-Transfer-Encoding: quoted-printable
 
@@ -142,30 +141,34 @@ Content-Transfer-Encoding: quoted-printable
 _quote">On Fri, Sep 12, 2014 at 9:46 AM, Somnath Roy <span dir=3D"ltr">&lt;=
 <a href=3D"mailto:Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org" target=3D"_blank">Somnath.Roy@sa=
 ndisk.com</a>&gt;</span> wrote:<br><blockquote class=3D"gmail_quote" style=
-=3D"margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">Make per=
-fect sense Sage..<br>
+=3D"margin:0px 0px 0px 0.8ex;border-left-width:1px;border-left-color:rgb(20=
+4,204,204);border-left-style:solid;padding-left:1ex">Make perfect sense Sag=
+e..<br>
 <br>
 Regarding striping of filedata, You are saying KeyValue interface will do t=
 he following for me?<br>
 <br>
 1. Say in case of rbd image of order 4 MB, a write request coming to Key/Va=
 lue interface, it will=C2=A0 chunk the object (say full 4MB) in smaller siz=
-es (configurable ?) and stripe it as multiple key/value pair ?<br></blockqu=
-ote><div><br></div><div>Yes, and the stripe size can be configurated.=C2=A0=
-</div><div>=C2=A0</div><blockquote class=3D"gmail_quote" style=3D"margin:0 =
-0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">
-<br>
+es (configurable ?) and stripe it as multiple key/value pair ?<br>
+<br></blockquote><br class=3D""><div><span style=3D"font-family:arial,sans-=
+serif;font-size:16px">Yes, and the stripe size can be configurated.=C2=A0</=
+span></div><div>=C2=A0</div><blockquote class=3D"gmail_quote" style=3D"marg=
+in:0px 0px 0px 0.8ex;border-left-width:1px;border-left-color:rgb(204,204,20=
+4);border-left-style:solid;padding-left:1ex">
 2. Also, while reading it will take care of accumulating and send it back.<=
-br></blockquote><div><br></div><div>Do you have any other idea? By the way,=
- could you tell more about your key/value interface. I&#39;m doing some job=
-s for NVMe interface with intel NVMe SSD.=C2=A0</div><div>=C2=A0</div><bloc=
-kquote class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:1px #cc=
-c solid;padding-left:1ex">
+br></blockquote><div><br></div><div><span style=3D"font-family:arial,sans-s=
+erif;font-size:16px">Do you have any other idea? By the way, could you tell=
+ more about your key/value interface. I&#39;m doing some jobs for NVMe inte=
+rface with intel NVMe SSD.=C2=A0</span></div><div>=C2=A0</div><blockquote c=
+lass=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;border-left-width:1p=
+x;border-left-color:rgb(204,204,204);border-left-style:solid;padding-left:1=
+ex">
 <br>
 <br>
 Thanks &amp; Regards<br>
-<span class=3D"HOEnZb"><font color=3D"#888888">Somnath<br>
-</font></span><div class=3D"HOEnZb"><div class=3D"h5"><br>
+<span class=3D""><font color=3D"#888888">Somnath<br>
+</font></span><div class=3D""><div class=3D"h5"><br>
 <br>
 -----Original Message-----<br>
 From: Sage Weil [mailto:<a href=3D"mailto:sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org">sweil-H+wXaHxf7aJhl2p70BpVqQ@public.gmane.org=
@@ -230,8 +233,8 @@ nds too so that would be a win..<br>
 <br>
 sage<br>
 <br>
-</div></div><div class=3D"HOEnZb"><div class=3D"h5">_______________________=
-_________<br>
+</div></div><div class=3D""><div class=3D"h5">_____________________________=
+___<br>
 <br>
 PLEASE NOTE: The information contained in this electronic mail message is i=
 ntended only for the use of the designated recipient(s) named above. If the=
@@ -254,9 +257,9 @@ ically stored copies).<br>
 <p>Best Regards,</p><p>Wheat</p>
 </div></div>
 
---047d7bfe95229630ed0502d4fd5f--
+--089e013d16f058b5800502d50525--
 
---===============0698436017==
+--===============1480638876==
 Content-Type: text/plain; charset="us-ascii"
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7bit
@@ -267,4 +270,4 @@ ceph-users mailing list
 ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 
---===============0698436017==--
+--===============1480638876==--
