@@ -1,104 +1,241 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Tools and archive to check for non regression of erasure coded content
-Date: Sat, 13 Sep 2014 13:50:33 +0200
-Message-ID: <54142F89.4060804@dachary.org>
+From: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: OpTracker optimization
+Date: Sat, 13 Sep 2014 07:32:06 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1409130731180.29849@cobra.newdream.net>
+References: <0b0459cc-3a8b-485f-9c69-d64c92d6c3dd@mailpro>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="JrK17XaUUcdGcm0bulvixFdJ1Vlrd3QXo"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:51343 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751652AbaIMLuo (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 13 Sep 2014 07:50:44 -0400
-Received: from [10.9.0.6] (unknown [10.0.2.28])
-	by smtp.dmail.dachary.org (Postfix) with ESMTP id DC1F042B18
-	for <ceph-devel@vger.kernel.org>; Sat, 13 Sep 2014 13:50:33 +0200 (CEST)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <0b0459cc-3a8b-485f-9c69-d64c92d6c3dd@mailpro>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Alexandre DERUMIER <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
+Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---JrK17XaUUcdGcm0bulvixFdJ1Vlrd3QXo
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+On Sat, 13 Sep 2014, Alexandre DERUMIER wrote:
+> Hi,
+> as ceph user, It could be wonderfull to have it for Giant,
+> optracker performance impact is really huge (See my ssd benchmark on ceph user mailing)
 
-Hi Ceph,
+Definitely.  More importantly, it resolves a few crashes we've observed. 
+It's going through some testing right now, but once that's done it'll go 
+into giant.
 
-An erasure coded object stored in Firefly when it was first introduced mu=
-st be decoded by all versions after Firefly. The encoding is done by eras=
-ure code plugins[1] and they evolve over time[2]. There needs to be a too=
-l to check that all content encoded by a given version of the plugin can =
-also be encoded by all subsequent versions of the same plugin.
-
-The general idea is to archive objects created with a given Ceph version =
-and check them will all subsequent versions, via a teuthology workunit ru=
-n on all supported distributions and architectures.
-
-The ceph_erasure_code_non_regression command[3] creates an object and sto=
-re it on disk or read an object from disk and checks that it can be read.=
- It is used to create objects for all relevant variations of parameters o=
-f a given erasure code plugin. For instance:
-
-ceph_erasure_code_non_regression --stripe-width 4651 --parameter packetsi=
-ze=3D32 --plugin jerasure --parameter technique=3Dblaum_roth --parameter =
-k=3D6 --parameter m=3D2 --create --base ../../ceph-erasure-code-corpus/v0=
-=2E85-764-gf3a1532
-ceph_erasure_code_non_regression --stripe-width 4651 --parameter packetsi=
-ze=3D32 --plugin jerasure --parameter technique=3Dliber8tion --parameter =
-k=3D6 --parameter m=3D2 --create --base ../../ceph-erasure-code-corpus/v0=
-=2E85-764-gf3a1532
-etc.
-
-The script[4] and the objects are archived in a repository [5] that can b=
-e checked by later Ceph versions. The same script is used for checking an=
-d creating the objects so that there is no risk of confusion. These scrip=
-ts are stored per version because a given script is developed for a given=
- version of the plugins.=20
-
-The encode-decode-non-regression.sh[6] workunit uses these scripts when r=
-un from teuthology[7] and will run all of them, up to and including the c=
-urrently running ceph version. This ultimately ensures that all archived =
-objects can be read on all supported distributions and architectures.
-
-See also http://tracker.ceph.com/issues/9420 which is the ticket associat=
-ed to this work.
-
-Although this all sound sensible to me right now, I would be very interes=
-ted to hear about ideas to make this easier or better :-)
-
-Cheers
-
-[1] firefly erasure code plugins https://github.com/ceph/ceph/tree/firefl=
-y/src/erasure-code
-[2] giant erasure code plugins https://github.com/ceph/ceph/tree/v0.85/sr=
-c/erasure-code
-[3] ceph_erasure_code_non_regression https://github.com/dachary/ceph/comm=
-it/497a82b2b3113dae724a43d8d4c7e430acf44120
-[4] non-regression.sh https://github.com/dachary/ceph-erasure-code-corpus=
-/blob/master/v0.80.5-226-g71d2562/non-regression.sh
-[5] ceph-erasure-code-corpus https://github.com/dachary/ceph-erasure-code=
--corpus
-[6] encode-decode-non-regression.sh https://github.com/dachary/ceph/commi=
-t/4f7a9f83fb1f037662861e8782c9b90566dcaa31
-[7] non regression workload https://github.com/ceph/ceph-qa-suite/pull/13=
-6
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
+sage
 
 
---JrK17XaUUcdGcm0bulvixFdJ1Vlrd3QXo
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlQUL4kACgkQ8dLMyEl6F20LrQCcDur7XmfMAIpB/UVXq/vua2Db
-HBIAn3JUu7M5+nqT4GAkBeagZ+ZVOfRK
-=wjel
------END PGP SIGNATURE-----
-
---JrK17XaUUcdGcm0bulvixFdJ1Vlrd3QXo--
+> 
+> Regards,
+> 
+> Alexandre Derumier
+> 
+> ----- Mail original ----- 
+> 
+> De: "Somnath Roy" <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org> 
+> ?: "Samuel Just" <sam.just-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org> 
+> Cc: "Sage Weil" <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org 
+> Envoy?: Samedi 13 Septembre 2014 10:03:52 
+> Objet: Re: [ceph-users] OpTracker optimization 
+> 
+> Sam/Sage, 
+> I saw Giant is forked off today. We need the pull request (https://github.com/ceph/ceph/pull/2440) to be in Giant. So, could you please merge this into Giant when it will be ready ? 
+> 
+> Thanks & Regards 
+> Somnath 
+> 
+> -----Original Message----- 
+> From: Samuel Just [mailto:sam.just-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org] 
+> Sent: Thursday, September 11, 2014 11:31 AM 
+> To: Somnath Roy 
+> Cc: Sage Weil; ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org 
+> Subject: Re: OpTracker optimization 
+> 
+> Just added it to wip-sam-testing. 
+> -Sam 
+> 
+> On Thu, Sep 11, 2014 at 11:30 AM, Somnath Roy <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org> wrote: 
+> > Sam/Sage, 
+> > I have addressed all of your comments and pushed the changes to the same pull request. 
+> > 
+> > https://github.com/ceph/ceph/pull/2440 
+> > 
+> > Thanks & Regards 
+> > Somnath 
+> > 
+> > -----Original Message----- 
+> > From: Sage Weil [mailto:sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org] 
+> > Sent: Wednesday, September 10, 2014 8:33 PM 
+> > To: Somnath Roy 
+> > Cc: Samuel Just; ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org 
+> > Subject: RE: OpTracker optimization 
+> > 
+> > I had two substantiative comments on the first patch and then some trivial 
+> > whitespace nits. Otherwise looks good! 
+> > 
+> > tahnks- 
+> > sage 
+> > 
+> > On Thu, 11 Sep 2014, Somnath Roy wrote: 
+> > 
+> >> Sam/Sage, 
+> >> I have incorporated all of your comments. Please have a look at the same pull request. 
+> >> 
+> >> https://github.com/ceph/ceph/pull/2440 
+> >> 
+> >> Thanks & Regards 
+> >> Somnath 
+> >> 
+> >> -----Original Message----- 
+> >> From: Samuel Just [mailto:sam.just-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org] 
+> >> Sent: Wednesday, September 10, 2014 3:25 PM 
+> >> To: Somnath Roy 
+> >> Cc: Sage Weil (sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org); ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; 
+> >> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org 
+> >> Subject: Re: OpTracker optimization 
+> >> 
+> >> Oh, I changed my mind, your approach is fine. I was unclear. 
+> >> Currently, I just need you to address the other comments. 
+> >> -Sam 
+> >> 
+> >> On Wed, Sep 10, 2014 at 3:13 PM, Somnath Roy <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org> wrote: 
+> >> > As I understand, you want me to implement the following. 
+> >> > 
+> >> > 1. Keep this implementation one sharded optracker for the ios going through ms_dispatch path. 
+> >> > 
+> >> > 2. Additionally, for ios going through ms_fast_dispatch, you want 
+> >> > me to implement optracker (without internal shard) per opwq shard 
+> >> > 
+> >> > Am I right ? 
+> >> > 
+> >> > Thanks & Regards 
+> >> > Somnath 
+> >> > 
+> >> > -----Original Message----- 
+> >> > From: Samuel Just [mailto:sam.just-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org] 
+> >> > Sent: Wednesday, September 10, 2014 3:08 PM 
+> >> > To: Somnath Roy 
+> >> > Cc: Sage Weil (sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org); ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; 
+> >> > ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org 
+> >> > Subject: Re: OpTracker optimization 
+> >> > 
+> >> > I don't quite understand. 
+> >> > -Sam 
+> >> > 
+> >> > On Wed, Sep 10, 2014 at 2:38 PM, Somnath Roy <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org> wrote: 
+> >> >> Thanks Sam. 
+> >> >> So, you want me to go with optracker/shadedopWq , right ? 
+> >> >> 
+> >> >> Regards 
+> >> >> Somnath 
+> >> >> 
+> >> >> -----Original Message----- 
+> >> >> From: Samuel Just [mailto:sam.just-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org] 
+> >> >> Sent: Wednesday, September 10, 2014 2:36 PM 
+> >> >> To: Somnath Roy 
+> >> >> Cc: Sage Weil (sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org); ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; 
+> >> >> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org 
+> >> >> Subject: Re: OpTracker optimization 
+> >> >> 
+> >> >> Responded with cosmetic nonsense. Once you've got that and the other comments addressed, I can put it in wip-sam-testing. 
+> >> >> -Sam 
+> >> >> 
+> >> >> On Wed, Sep 10, 2014 at 1:30 PM, Somnath Roy <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org> wrote: 
+> >> >>> Thanks Sam..I responded back :-) 
+> >> >>> 
+> >> >>> -----Original Message----- 
+> >> >>> From: ceph-devel-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org 
+> >> >>> [mailto:ceph-devel-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org] On Behalf Of Samuel 
+> >> >>> Just 
+> >> >>> Sent: Wednesday, September 10, 2014 11:17 AM 
+> >> >>> To: Somnath Roy 
+> >> >>> Cc: Sage Weil (sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org); ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; 
+> >> >>> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org 
+> >> >>> Subject: Re: OpTracker optimization 
+> >> >>> 
+> >> >>> Added a comment about the approach. 
+> >> >>> -Sam 
+> >> >>> 
+> >> >>> On Tue, Sep 9, 2014 at 1:33 PM, Somnath Roy <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org> wrote: 
+> >> >>>> Hi Sam/Sage, 
+> >> >>>> 
+> >> >>>> As we discussed earlier, enabling the present OpTracker code 
+> >> >>>> degrading performance severely. For example, in my setup a 
+> >> >>>> single OSD node with 
+> >> >>>> 10 clients is reaching ~103K read iops with io served from 
+> >> >>>> memory while optracking is disabled but enabling optracker it is reduced to ~39K iops. 
+> >> >>>> Probably, running OSD without enabling OpTracker is not an 
+> >> >>>> option for many of Ceph users. 
+> >> >>>> 
+> >> >>>> Now, by sharding the Optracker:: ops_in_flight_lock (thus xlist 
+> >> >>>> ops_in_flight) and removing some other bottlenecks I am able to 
+> >> >>>> match the performance of OpTracking enabled OSD with OpTracking 
+> >> >>>> disabled, but with the expense of ~1 extra cpu core. 
+> >> >>>> 
+> >> >>>> In this process I have also fixed the following tracker. 
+> >> >>>> 
+> >> >>>> 
+> >> >>>> 
+> >> >>>> http://tracker.ceph.com/issues/9384 
+> >> >>>> 
+> >> >>>> 
+> >> >>>> 
+> >> >>>> and probably http://tracker.ceph.com/issues/8885 too. 
+> >> >>>> 
+> >> >>>> 
+> >> >>>> 
+> >> >>>> I have created following pull request for the same. Please review it. 
+> >> >>>> 
+> >> >>>> 
+> >> >>>> 
+> >> >>>> https://github.com/ceph/ceph/pull/2440 
+> >> >>>> 
+> >> >>>> 
+> >> >>>> 
+> >> >>>> Thanks & Regards 
+> >> >>>> 
+> >> >>>> Somnath 
+> >> >>>> 
+> >> >>>> 
+> >> >>>> 
+> >> >>>> 
+> >> >>>> ________________________________ 
+> >> >>>> 
+> >> >>>> PLEASE NOTE: The information contained in this electronic mail 
+> >> >>>> message is intended only for the use of the designated 
+> >> >>>> recipient(s) named above. If the reader of this message is not 
+> >> >>>> the intended recipient, you are hereby notified that you have 
+> >> >>>> received this message in error and that any review, 
+> >> >>>> dissemination, distribution, or copying of this message is 
+> >> >>>> strictly prohibited. If you have received this communication in 
+> >> >>>> error, please notify the sender by telephone or e-mail (as shown 
+> >> >>>> above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies). 
+> >> >>>> 
+> >> >>> -- 
+> >> >>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> >> >>> in the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org More 
+> >> >>> majordomo info at http://vger.kernel.org/majordomo-info.html 
+> >> >>> 
+> >> >>> ________________________________ 
+> >> >>> 
+> >> >>> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies). 
+> >> >>> 
+> >> 
+> _______________________________________________ 
+> ceph-users mailing list 
+> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org 
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
