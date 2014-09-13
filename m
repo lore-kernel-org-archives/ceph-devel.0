@@ -1,218 +1,260 @@
-From: Somnath Roy <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: OpTracker optimization
-Date: Sat, 13 Sep 2014 08:03:52 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2783E75D@SACMBXIP02.sdcorp.global.sandisk.com>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2783A845@SACMBXIP02.sdcorp.global.sandisk.com>
-	<CA+4uBUbSrYhy8=ZPKZ7dOTh0sNNCs5mC3ttgBH+qoWO+58UdvA@mail.gmail.com>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F2783C56D@SACMBXIP02.sdcorp.global.sandisk.com>
-	<CA+4uBUbTBksZbRxR9RCTws-O--2N+QnHN5aS_Kx-D7yVeEmiDw@mail.gmail.com>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F2783C636@SACMBXIP02.sdcorp.global.sandisk.com>
-	<CA+4uBUaaycvVCnjtDCEZO3i9iFB7FifK-+xZwtEcemC7XGPiTg@mail.gmail.com>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F2783C65C@SACMBXIP02.sdcorp.global.sandisk.com>
-	<CA+4uBUboaU=1uWT7_kNB+ViK0sOOeB4hJKpCVQ397OjWpY83tQ@mail.gmail.com>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F2783C7E4@SACMBXIP02.sdcorp.global.sandisk.com>
-	<alpine.DEB.2.00.1409102032440.17200@cobra.newdream.net>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F2783CED4@SACMBXIP02.sdcorp.global.sandisk.com>
-	<CA+4uBUYRdp=VFc1T=WPf7HRXgfD7MEqEM5yhEKRe7_M_s_dh-w@mail.gmail.com>
+From: Alexandre DERUMIER <aderumier@odiso.com>
+Subject: Re: [ceph-users] OpTracker optimization
+Date: Sat, 13 Sep 2014 11:00:42 +0200 (CEST)
+Message-ID: <0b0459cc-3a8b-485f-9c69-d64c92d6c3dd@mailpro>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2783E75D@SACMBXIP02.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CA+4uBUYRdp=VFc1T=WPf7HRXgfD7MEqEM5yhEKRe7_M_s_dh-w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Content-Language: en-US
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Samuel Just <sam.just-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Cc: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mailpro.odiso.net ([89.248.209.98]:49521 "EHLO
+	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751765AbaIMJAw convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 13 Sep 2014 05:00:52 -0400
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2783E75D@SACMBXIP02.sdcorp.global.sandisk.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org, ceph-users@lists.ceph.com, Samuel Just <sam.just@inktank.com>
 
-Sam/Sage,
-I saw Giant is forked off today. We need the pull request (https://github.com/ceph/ceph/pull/2440) to be in Giant. So, could you please merge this into Giant when it will be ready ?
+Hi,
+as ceph user, It could be wonderfull to have it for Giant,
+optracker performance impact is really huge (See my ssd benchmark on ce=
+ph user mailing)
 
-Thanks & Regards
-Somnath
+Regards,
 
------Original Message-----
-From: Samuel Just [mailto:sam.just-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org] 
-Sent: Thursday, September 11, 2014 11:31 AM
-To: Somnath Roy
-Cc: Sage Weil; ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Subject: Re: OpTracker optimization
+Alexandre Derumier
 
-Just added it to wip-sam-testing.
--Sam
+----- Mail original -----=20
 
-On Thu, Sep 11, 2014 at 11:30 AM, Somnath Roy <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org> wrote:
-> Sam/Sage,
-> I have addressed all of your comments and pushed the changes to the same pull request.
->
-> https://github.com/ceph/ceph/pull/2440
->
-> Thanks & Regards
-> Somnath
->
-> -----Original Message-----
-> From: Sage Weil [mailto:sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org]
-> Sent: Wednesday, September 10, 2014 8:33 PM
-> To: Somnath Roy
-> Cc: Samuel Just; ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> Subject: RE: OpTracker optimization
->
-> I had two substantiative comments on the first patch and then some trivial
-> whitespace nits.    Otherwise looks good!
->
-> tahnks-
-> sage
->
-> On Thu, 11 Sep 2014, Somnath Roy wrote:
->
->> Sam/Sage,
->> I have incorporated all of your comments. Please have a look at the same pull request.
->>
->> https://github.com/ceph/ceph/pull/2440
->>
->> Thanks & Regards
->> Somnath
->>
->> -----Original Message-----
->> From: Samuel Just [mailto:sam.just-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org]
->> Sent: Wednesday, September 10, 2014 3:25 PM
->> To: Somnath Roy
->> Cc: Sage Weil (sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org); ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; 
->> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
->> Subject: Re: OpTracker optimization
->>
->> Oh, I changed my mind, your approach is fine.  I was unclear.
->> Currently, I just need you to address the other comments.
->> -Sam
->>
->> On Wed, Sep 10, 2014 at 3:13 PM, Somnath Roy <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org> wrote:
->> > As I understand, you want me to implement the following.
->> >
->> > 1.  Keep this implementation one sharded optracker for the ios going through ms_dispatch path.
->> >
->> > 2. Additionally, for ios going through ms_fast_dispatch, you want 
->> > me to implement optracker (without internal shard) per opwq shard
->> >
->> > Am I right ?
->> >
->> > Thanks & Regards
->> > Somnath
->> >
->> > -----Original Message-----
->> > From: Samuel Just [mailto:sam.just-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org]
->> > Sent: Wednesday, September 10, 2014 3:08 PM
->> > To: Somnath Roy
->> > Cc: Sage Weil (sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org); ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; 
->> > ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
->> > Subject: Re: OpTracker optimization
->> >
->> > I don't quite understand.
->> > -Sam
->> >
->> > On Wed, Sep 10, 2014 at 2:38 PM, Somnath Roy <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org> wrote:
->> >> Thanks Sam.
->> >> So, you want me to go with optracker/shadedopWq , right ?
->> >>
->> >> Regards
->> >> Somnath
->> >>
->> >> -----Original Message-----
->> >> From: Samuel Just [mailto:sam.just-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org]
->> >> Sent: Wednesday, September 10, 2014 2:36 PM
->> >> To: Somnath Roy
->> >> Cc: Sage Weil (sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org); ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; 
->> >> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
->> >> Subject: Re: OpTracker optimization
->> >>
->> >> Responded with cosmetic nonsense.  Once you've got that and the other comments addressed, I can put it in wip-sam-testing.
->> >> -Sam
->> >>
->> >> On Wed, Sep 10, 2014 at 1:30 PM, Somnath Roy <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org> wrote:
->> >>> Thanks Sam..I responded back :-)
->> >>>
->> >>> -----Original Message-----
->> >>> From: ceph-devel-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org 
->> >>> [mailto:ceph-devel-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org] On Behalf Of Samuel 
->> >>> Just
->> >>> Sent: Wednesday, September 10, 2014 11:17 AM
->> >>> To: Somnath Roy
->> >>> Cc: Sage Weil (sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org); ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; 
->> >>> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
->> >>> Subject: Re: OpTracker optimization
->> >>>
->> >>> Added a comment about the approach.
->> >>> -Sam
->> >>>
->> >>> On Tue, Sep 9, 2014 at 1:33 PM, Somnath Roy <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org> wrote:
->> >>>> Hi Sam/Sage,
->> >>>>
->> >>>> As we discussed earlier, enabling the present OpTracker code 
->> >>>> degrading performance severely. For example, in my setup a 
->> >>>> single OSD node with
->> >>>> 10 clients is reaching ~103K read iops with io served from 
->> >>>> memory while optracking is disabled but enabling optracker it is reduced to ~39K iops.
->> >>>> Probably, running OSD without enabling OpTracker is not an 
->> >>>> option for many of Ceph users.
->> >>>>
->> >>>> Now, by sharding the Optracker:: ops_in_flight_lock (thus xlist
->> >>>> ops_in_flight) and removing some other bottlenecks I am able to 
->> >>>> match the performance of OpTracking enabled OSD with OpTracking 
->> >>>> disabled, but with the expense of ~1 extra cpu core.
->> >>>>
->> >>>> In this process I have also fixed the following tracker.
->> >>>>
->> >>>>
->> >>>>
->> >>>> http://tracker.ceph.com/issues/9384
->> >>>>
->> >>>>
->> >>>>
->> >>>> and probably http://tracker.ceph.com/issues/8885 too.
->> >>>>
->> >>>>
->> >>>>
->> >>>> I have created following pull request for the same. Please review it.
->> >>>>
->> >>>>
->> >>>>
->> >>>> https://github.com/ceph/ceph/pull/2440
->> >>>>
->> >>>>
->> >>>>
->> >>>> Thanks & Regards
->> >>>>
->> >>>> Somnath
->> >>>>
->> >>>>
->> >>>>
->> >>>>
->> >>>> ________________________________
->> >>>>
->> >>>> PLEASE NOTE: The information contained in this electronic mail 
->> >>>> message is intended only for the use of the designated
->> >>>> recipient(s) named above. If the reader of this message is not 
->> >>>> the intended recipient, you are hereby notified that you have 
->> >>>> received this message in error and that any review, 
->> >>>> dissemination, distribution, or copying of this message is 
->> >>>> strictly prohibited. If you have received this communication in 
->> >>>> error, please notify the sender by telephone or e-mail (as shown
->> >>>> above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
->> >>>>
->> >>> --
->> >>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->> >>> in the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org More 
->> >>> majordomo info at  http://vger.kernel.org/majordomo-info.html
->> >>>
->> >>> ________________________________
->> >>>
->> >>> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
->> >>>
->>
+De: "Somnath Roy" <Somnath.Roy@sandisk.com>=20
+=C3=80: "Samuel Just" <sam.just@inktank.com>=20
+Cc: "Sage Weil" <sweil@redhat.com>, ceph-devel@vger.kernel.org, ceph-us=
+ers@lists.ceph.com=20
+Envoy=C3=A9: Samedi 13 Septembre 2014 10:03:52=20
+Objet: Re: [ceph-users] OpTracker optimization=20
+
+Sam/Sage,=20
+I saw Giant is forked off today. We need the pull request (https://gith=
+ub.com/ceph/ceph/pull/2440) to be in Giant. So, could you please merge =
+this into Giant when it will be ready ?=20
+
+Thanks & Regards=20
+Somnath=20
+
+-----Original Message-----=20
+=46rom: Samuel Just [mailto:sam.just@inktank.com]=20
+Sent: Thursday, September 11, 2014 11:31 AM=20
+To: Somnath Roy=20
+Cc: Sage Weil; ceph-devel@vger.kernel.org; ceph-users@lists.ceph.com=20
+Subject: Re: OpTracker optimization=20
+
+Just added it to wip-sam-testing.=20
+-Sam=20
+
+On Thu, Sep 11, 2014 at 11:30 AM, Somnath Roy <Somnath.Roy@sandisk.com>=
+ wrote:=20
+> Sam/Sage,=20
+> I have addressed all of your comments and pushed the changes to the s=
+ame pull request.=20
+>=20
+> https://github.com/ceph/ceph/pull/2440=20
+>=20
+> Thanks & Regards=20
+> Somnath=20
+>=20
+> -----Original Message-----=20
+> From: Sage Weil [mailto:sweil@redhat.com]=20
+> Sent: Wednesday, September 10, 2014 8:33 PM=20
+> To: Somnath Roy=20
+> Cc: Samuel Just; ceph-devel@vger.kernel.org; ceph-users@lists.ceph.co=
+m=20
+> Subject: RE: OpTracker optimization=20
+>=20
+> I had two substantiative comments on the first patch and then some tr=
+ivial=20
+> whitespace nits. Otherwise looks good!=20
+>=20
+> tahnks-=20
+> sage=20
+>=20
+> On Thu, 11 Sep 2014, Somnath Roy wrote:=20
+>=20
+>> Sam/Sage,=20
+>> I have incorporated all of your comments. Please have a look at the =
+same pull request.=20
+>>=20
+>> https://github.com/ceph/ceph/pull/2440=20
+>>=20
+>> Thanks & Regards=20
+>> Somnath=20
+>>=20
+>> -----Original Message-----=20
+>> From: Samuel Just [mailto:sam.just@inktank.com]=20
+>> Sent: Wednesday, September 10, 2014 3:25 PM=20
+>> To: Somnath Roy=20
+>> Cc: Sage Weil (sweil@redhat.com); ceph-devel@vger.kernel.org;=20
+>> ceph-users@lists.ceph.com=20
+>> Subject: Re: OpTracker optimization=20
+>>=20
+>> Oh, I changed my mind, your approach is fine. I was unclear.=20
+>> Currently, I just need you to address the other comments.=20
+>> -Sam=20
+>>=20
+>> On Wed, Sep 10, 2014 at 3:13 PM, Somnath Roy <Somnath.Roy@sandisk.co=
+m> wrote:=20
+>> > As I understand, you want me to implement the following.=20
+>> >=20
+>> > 1. Keep this implementation one sharded optracker for the ios goin=
+g through ms_dispatch path.=20
+>> >=20
+>> > 2. Additionally, for ios going through ms_fast_dispatch, you want=20
+>> > me to implement optracker (without internal shard) per opwq shard=20
+>> >=20
+>> > Am I right ?=20
+>> >=20
+>> > Thanks & Regards=20
+>> > Somnath=20
+>> >=20
+>> > -----Original Message-----=20
+>> > From: Samuel Just [mailto:sam.just@inktank.com]=20
+>> > Sent: Wednesday, September 10, 2014 3:08 PM=20
+>> > To: Somnath Roy=20
+>> > Cc: Sage Weil (sweil@redhat.com); ceph-devel@vger.kernel.org;=20
+>> > ceph-users@lists.ceph.com=20
+>> > Subject: Re: OpTracker optimization=20
+>> >=20
+>> > I don't quite understand.=20
+>> > -Sam=20
+>> >=20
+>> > On Wed, Sep 10, 2014 at 2:38 PM, Somnath Roy <Somnath.Roy@sandisk.=
+com> wrote:=20
+>> >> Thanks Sam.=20
+>> >> So, you want me to go with optracker/shadedopWq , right ?=20
+>> >>=20
+>> >> Regards=20
+>> >> Somnath=20
+>> >>=20
+>> >> -----Original Message-----=20
+>> >> From: Samuel Just [mailto:sam.just@inktank.com]=20
+>> >> Sent: Wednesday, September 10, 2014 2:36 PM=20
+>> >> To: Somnath Roy=20
+>> >> Cc: Sage Weil (sweil@redhat.com); ceph-devel@vger.kernel.org;=20
+>> >> ceph-users@lists.ceph.com=20
+>> >> Subject: Re: OpTracker optimization=20
+>> >>=20
+>> >> Responded with cosmetic nonsense. Once you've got that and the ot=
+her comments addressed, I can put it in wip-sam-testing.=20
+>> >> -Sam=20
+>> >>=20
+>> >> On Wed, Sep 10, 2014 at 1:30 PM, Somnath Roy <Somnath.Roy@sandisk=
+=2Ecom> wrote:=20
+>> >>> Thanks Sam..I responded back :-)=20
+>> >>>=20
+>> >>> -----Original Message-----=20
+>> >>> From: ceph-devel-owner@vger.kernel.org=20
+>> >>> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Samuel=20
+>> >>> Just=20
+>> >>> Sent: Wednesday, September 10, 2014 11:17 AM=20
+>> >>> To: Somnath Roy=20
+>> >>> Cc: Sage Weil (sweil@redhat.com); ceph-devel@vger.kernel.org;=20
+>> >>> ceph-users@lists.ceph.com=20
+>> >>> Subject: Re: OpTracker optimization=20
+>> >>>=20
+>> >>> Added a comment about the approach.=20
+>> >>> -Sam=20
+>> >>>=20
+>> >>> On Tue, Sep 9, 2014 at 1:33 PM, Somnath Roy <Somnath.Roy@sandisk=
+=2Ecom> wrote:=20
+>> >>>> Hi Sam/Sage,=20
+>> >>>>=20
+>> >>>> As we discussed earlier, enabling the present OpTracker code=20
+>> >>>> degrading performance severely. For example, in my setup a=20
+>> >>>> single OSD node with=20
+>> >>>> 10 clients is reaching ~103K read iops with io served from=20
+>> >>>> memory while optracking is disabled but enabling optracker it i=
+s reduced to ~39K iops.=20
+>> >>>> Probably, running OSD without enabling OpTracker is not an=20
+>> >>>> option for many of Ceph users.=20
+>> >>>>=20
+>> >>>> Now, by sharding the Optracker:: ops_in_flight_lock (thus xlist=
+=20
+>> >>>> ops_in_flight) and removing some other bottlenecks I am able to=
+=20
+>> >>>> match the performance of OpTracking enabled OSD with OpTracking=
+=20
+>> >>>> disabled, but with the expense of ~1 extra cpu core.=20
+>> >>>>=20
+>> >>>> In this process I have also fixed the following tracker.=20
+>> >>>>=20
+>> >>>>=20
+>> >>>>=20
+>> >>>> http://tracker.ceph.com/issues/9384=20
+>> >>>>=20
+>> >>>>=20
+>> >>>>=20
+>> >>>> and probably http://tracker.ceph.com/issues/8885 too.=20
+>> >>>>=20
+>> >>>>=20
+>> >>>>=20
+>> >>>> I have created following pull request for the same. Please revi=
+ew it.=20
+>> >>>>=20
+>> >>>>=20
+>> >>>>=20
+>> >>>> https://github.com/ceph/ceph/pull/2440=20
+>> >>>>=20
+>> >>>>=20
+>> >>>>=20
+>> >>>> Thanks & Regards=20
+>> >>>>=20
+>> >>>> Somnath=20
+>> >>>>=20
+>> >>>>=20
+>> >>>>=20
+>> >>>>=20
+>> >>>> ________________________________=20
+>> >>>>=20
+>> >>>> PLEASE NOTE: The information contained in this electronic mail=20
+>> >>>> message is intended only for the use of the designated=20
+>> >>>> recipient(s) named above. If the reader of this message is not=20
+>> >>>> the intended recipient, you are hereby notified that you have=20
+>> >>>> received this message in error and that any review,=20
+>> >>>> dissemination, distribution, or copying of this message is=20
+>> >>>> strictly prohibited. If you have received this communication in=
+=20
+>> >>>> error, please notify the sender by telephone or e-mail (as show=
+n=20
+>> >>>> above) immediately and destroy any and all copies of this messa=
+ge in your possession (whether hard copies or electronically stored cop=
+ies).=20
+>> >>>>=20
+>> >>> --=20
+>> >>> To unsubscribe from this list: send the line "unsubscribe ceph-d=
+evel"=20
+>> >>> in the body of a message to majordomo@vger.kernel.org More=20
+>> >>> majordomo info at http://vger.kernel.org/majordomo-info.html=20
+>> >>>=20
+>> >>> ________________________________=20
+>> >>>=20
+>> >>> PLEASE NOTE: The information contained in this electronic mail m=
+essage is intended only for the use of the designated recipient(s) name=
+d above. If the reader of this message is not the intended recipient, y=
+ou are hereby notified that you have received this message in error and=
+ that any review, dissemination, distribution, or copying of this messa=
+ge is strictly prohibited. If you have received this communication in e=
+rror, please notify the sender by telephone or e-mail (as shown above) =
+immediately and destroy any and all copies of this message in your poss=
+ession (whether hard copies or electronically stored copies).=20
+>> >>>=20
+>>=20
+_______________________________________________=20
+ceph-users mailing list=20
+ceph-users@lists.ceph.com=20
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com=20
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
