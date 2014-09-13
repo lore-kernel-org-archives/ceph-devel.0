@@ -1,10 +1,24 @@
 From: Somnath Roy <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>
-Subject: OSD is crashing during delete operation
-Date: Fri, 12 Sep 2014 21:02:26 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2783E50B@SACMBXIP02.sdcorp.global.sandisk.com>
+Subject: Re: OpTracker optimization
+Date: Sat, 13 Sep 2014 08:03:52 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2783E75D@SACMBXIP02.sdcorp.global.sandisk.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2783A845@SACMBXIP02.sdcorp.global.sandisk.com>
+	<CA+4uBUbSrYhy8=ZPKZ7dOTh0sNNCs5mC3ttgBH+qoWO+58UdvA@mail.gmail.com>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F2783C56D@SACMBXIP02.sdcorp.global.sandisk.com>
+	<CA+4uBUbTBksZbRxR9RCTws-O--2N+QnHN5aS_Kx-D7yVeEmiDw@mail.gmail.com>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F2783C636@SACMBXIP02.sdcorp.global.sandisk.com>
+	<CA+4uBUaaycvVCnjtDCEZO3i9iFB7FifK-+xZwtEcemC7XGPiTg@mail.gmail.com>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F2783C65C@SACMBXIP02.sdcorp.global.sandisk.com>
+	<CA+4uBUboaU=1uWT7_kNB+ViK0sOOeB4hJKpCVQ397OjWpY83tQ@mail.gmail.com>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F2783C7E4@SACMBXIP02.sdcorp.global.sandisk.com>
+	<alpine.DEB.2.00.1409102032440.17200@cobra.newdream.net>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F2783CED4@SACMBXIP02.sdcorp.global.sandisk.com>
+	<CA+4uBUYRdp=VFc1T=WPf7HRXgfD7MEqEM5yhEKRe7_M_s_dh-w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============1697384427=="
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CA+4uBUYRdp=VFc1T=WPf7HRXgfD7MEqEM5yhEKRe7_M_s_dh-w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Content-Language: en-US
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
@@ -15,198 +29,190 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "Sage Weil
-	(sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org)" <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Samuel Just <sam.just-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Cc: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
---===============1697384427==
-Content-Language: en-US
-Content-Type: multipart/alternative;
-	boundary="_000_755F6B91B3BE364F9BCA11EA3F9E0C6F2783E50BSACMBXIP02sdcor_"
-
---_000_755F6B91B3BE364F9BCA11EA3F9E0C6F2783E50BSACMBXIP02sdcor_
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
-
-Hi,
-
-We are facing a crash while deleting large number of objects. Here is the t=
-race.
-
-2014-09-12 13:48:06.820524 7fb56596d700 -1 os/FDCache.h: In function 'void =
-FDCache::clear(const ghobject_t&)' thread 7fb56596d700 time 2014-09-12 13:4=
-8:06.815407
-os/FDCache.h: 89: FAILED assert(!registry[registry_id].lookup(hoid))
-
-ceph version 0.84-998-gfcf8059 (fcf805972124dac1eae18b1cfd286790462b8ec8)
-1: (ceph::__ceph_assert_fail(char const*, char const*, int, char const*)+0x=
-8b) [0xa82a0b]
-2: (FileStore::lfn_unlink(coll_t, ghobject_t const&, SequencerPosition cons=
-t&, bool)+0x54b) [0x8918eb]
-3: (FileStore::_remove(coll_t, ghobject_t const&, SequencerPosition const&)=
-+0x8b) [0x891d8b]
-4: (FileStore::_do_transaction(ObjectStore::Transaction&, unsigned long, in=
-t, ThreadPool::TPHandle*)+0x25ce) [0x8a0fae]
-5: (FileStore::_do_transactions(std::list<ObjectStore::Transaction*, std::a=
-llocator<ObjectStore::Transaction*> >&, unsigned long, ThreadPool::TPHandle=
-*)+0x44) [0x8a32a4]
-6: (FileStore::_do_op(FileStore::OpSequencer*, ThreadPool::TPHandle&)+0x169=
-) [0x8a3479]
-7: (ThreadPool::worker(ThreadPool::WorkThread*)+0xac0) [0xa707b0]
-8: (ThreadPool::WorkThread::entry()+0x10) [0xa72b30]
-9: (()+0x7f6e) [0x7fb570cd7f6e]
-10: (clone()+0x6d) [0x7fb56f2c59cd]
-
-Is this a known issue ?
+Sam/Sage,
+I saw Giant is forked off today. We need the pull request (https://github.com/ceph/ceph/pull/2440) to be in Giant. So, could you please merge this into Giant when it will be ready ?
 
 Thanks & Regards
 Somnath
 
+-----Original Message-----
+From: Samuel Just [mailto:sam.just-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org] 
+Sent: Thursday, September 11, 2014 11:31 AM
+To: Somnath Roy
+Cc: Sage Weil; ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Subject: Re: OpTracker optimization
 
-________________________________
+Just added it to wip-sam-testing.
+-Sam
 
-PLEASE NOTE: The information contained in this electronic mail message is i=
-ntended only for the use of the designated recipient(s) named above. If the=
- reader of this message is not the intended recipient, you are hereby notif=
-ied that you have received this message in error and that any review, disse=
-mination, distribution, or copying of this message is strictly prohibited. =
-If you have received this communication in error, please notify the sender =
-by telephone or e-mail (as shown above) immediately and destroy any and all=
- copies of this message in your possession (whether hard copies or electron=
-ically stored copies).
-
-
---_000_755F6B91B3BE364F9BCA11EA3F9E0C6F2783E50BSACMBXIP02sdcor_
-Content-Type: text/html; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
-
-<html xmlns:v=3D"urn:schemas-microsoft-com:vml" xmlns:o=3D"urn:schemas-micr=
-osoft-com:office:office" xmlns:w=3D"urn:schemas-microsoft-com:office:word" =
-xmlns:m=3D"http://schemas.microsoft.com/office/2004/12/omml" xmlns=3D"http:=
-//www.w3.org/TR/REC-html40">
-<head>
-<meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3Dus-ascii"=
+On Thu, Sep 11, 2014 at 11:30 AM, Somnath Roy <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org> wrote:
+> Sam/Sage,
+> I have addressed all of your comments and pushed the changes to the same pull request.
 >
-<meta name=3D"Generator" content=3D"Microsoft Word 14 (filtered medium)">
-<style><!--
-/* Font Definitions */
-@font-face
-	{font-family:Calibri;
-	panose-1:2 15 5 2 2 2 4 3 2 4;}
-/* Style Definitions */
-p.MsoNormal, li.MsoNormal, div.MsoNormal
-	{margin:0in;
-	margin-bottom:.0001pt;
-	font-size:11.0pt;
-	font-family:"Calibri","sans-serif";}
-a:link, span.MsoHyperlink
-	{mso-style-priority:99;
-	color:blue;
-	text-decoration:underline;}
-a:visited, span.MsoHyperlinkFollowed
-	{mso-style-priority:99;
-	color:purple;
-	text-decoration:underline;}
-span.EmailStyle17
-	{mso-style-type:personal-compose;
-	font-family:"Calibri","sans-serif";
-	color:windowtext;}
-.MsoChpDefault
-	{mso-style-type:export-only;
-	font-family:"Calibri","sans-serif";}
-@page WordSection1
-	{size:8.5in 11.0in;
-	margin:1.0in 1.0in 1.0in 1.0in;}
-div.WordSection1
-	{page:WordSection1;}
---></style><!--[if gte mso 9]><xml>
-<o:shapedefaults v:ext=3D"edit" spidmax=3D"1026" />
-</xml><![endif]--><!--[if gte mso 9]><xml>
-<o:shapelayout v:ext=3D"edit">
-<o:idmap v:ext=3D"edit" data=3D"1" />
-</o:shapelayout></xml><![endif]-->
-</head>
-<body lang=3D"EN-US" link=3D"blue" vlink=3D"purple">
-<div class=3D"WordSection1">
-<p class=3D"MsoNormal">Hi,<o:p></o:p></p>
-<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
-<p class=3D"MsoNormal">We are facing a crash while deleting large number of=
- objects. Here is the trace.<o:p></o:p></p>
-<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D">2014-09-12 13:48:06.82=
-0524 7fb56596d700 -1 os/FDCache.h: In function 'void FDCache::clear(const g=
-hobject_t&amp;)' thread 7fb56596d700 time 2014-09-12 13:48:06.815407<o:p></=
-o:p></span></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D">os/FDCache.h: 89: FAIL=
-ED assert(!registry[registry_id].lookup(hoid))<o:p></o:p></span></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D"><o:p>&nbsp;</o:p></spa=
-n></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D">ceph version 0.84-998-=
-gfcf8059 (fcf805972124dac1eae18b1cfd286790462b8ec8)<o:p></o:p></span></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D">1: (ceph::__ceph_asser=
-t_fail(char const*, char const*, int, char const*)&#43;0x8b) [0xa82a0b]<o:p=
-></o:p></span></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D">2: (FileStore::lfn_unl=
-ink(coll_t, ghobject_t const&amp;, SequencerPosition const&amp;, bool)&#43;=
-0x54b) [0x8918eb]<o:p></o:p></span></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D">3: (FileStore::_remove=
-(coll_t, ghobject_t const&amp;, SequencerPosition const&amp;)&#43;0x8b) [0x=
-891d8b]<o:p></o:p></span></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D">4: (FileStore::_do_tra=
-nsaction(ObjectStore::Transaction&amp;, unsigned long, int, ThreadPool::TPH=
-andle*)&#43;0x25ce) [0x8a0fae]<o:p></o:p></span></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D">5: (FileStore::_do_tra=
-nsactions(std::list&lt;ObjectStore::Transaction*, std::allocator&lt;ObjectS=
-tore::Transaction*&gt; &gt;&amp;, unsigned long, ThreadPool::TPHandle*)&#43=
-;0x44) [0x8a32a4]<o:p></o:p></span></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D">6: (FileStore::_do_op(=
-FileStore::OpSequencer*, ThreadPool::TPHandle&amp;)&#43;0x169) [0x8a3479]<o=
-:p></o:p></span></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D">7: (ThreadPool::worker=
-(ThreadPool::WorkThread*)&#43;0xac0) [0xa707b0]<o:p></o:p></span></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D">8: (ThreadPool::WorkTh=
-read::entry()&#43;0x10) [0xa72b30]<o:p></o:p></span></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D">9: (()&#43;0x7f6e) [0x=
-7fb570cd7f6e]<o:p></o:p></span></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D">10: (clone()&#43;0x6d)=
- [0x7fb56f2c59cd]<o:p></o:p></span></p>
-<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
-<p class=3D"MsoNormal">Is this a known issue ?<o:p></o:p></p>
-<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
-<p class=3D"MsoNormal">Thanks &amp; Regards<o:p></o:p></p>
-<p class=3D"MsoNormal">Somnath<o:p></o:p></p>
-<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
-</div>
-<br>
-<hr>
-<font face=3D"Arial" color=3D"Gray" size=3D"2"><br>
-PLEASE NOTE: The information contained in this electronic mail message is i=
-ntended only for the use of the designated recipient(s) named above. If the=
- reader of this message is not the intended recipient, you are hereby notif=
-ied that you have received this
- message in error and that any review, dissemination, distribution, or copy=
-ing of this message is strictly prohibited. If you have received this commu=
-nication in error, please notify the sender by telephone or e-mail (as show=
-n above) immediately and destroy
- any and all copies of this message in your possession (whether hard copies=
- or electronically stored copies).<br>
-<br>
-</font>
-</body>
-</html>
-
---_000_755F6B91B3BE364F9BCA11EA3F9E0C6F2783E50BSACMBXIP02sdcor_--
-
---===============1697384427==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============1697384427==--
+> https://github.com/ceph/ceph/pull/2440
+>
+> Thanks & Regards
+> Somnath
+>
+> -----Original Message-----
+> From: Sage Weil [mailto:sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org]
+> Sent: Wednesday, September 10, 2014 8:33 PM
+> To: Somnath Roy
+> Cc: Samuel Just; ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> Subject: RE: OpTracker optimization
+>
+> I had two substantiative comments on the first patch and then some trivial
+> whitespace nits.    Otherwise looks good!
+>
+> tahnks-
+> sage
+>
+> On Thu, 11 Sep 2014, Somnath Roy wrote:
+>
+>> Sam/Sage,
+>> I have incorporated all of your comments. Please have a look at the same pull request.
+>>
+>> https://github.com/ceph/ceph/pull/2440
+>>
+>> Thanks & Regards
+>> Somnath
+>>
+>> -----Original Message-----
+>> From: Samuel Just [mailto:sam.just-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org]
+>> Sent: Wednesday, September 10, 2014 3:25 PM
+>> To: Somnath Roy
+>> Cc: Sage Weil (sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org); ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; 
+>> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+>> Subject: Re: OpTracker optimization
+>>
+>> Oh, I changed my mind, your approach is fine.  I was unclear.
+>> Currently, I just need you to address the other comments.
+>> -Sam
+>>
+>> On Wed, Sep 10, 2014 at 3:13 PM, Somnath Roy <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org> wrote:
+>> > As I understand, you want me to implement the following.
+>> >
+>> > 1.  Keep this implementation one sharded optracker for the ios going through ms_dispatch path.
+>> >
+>> > 2. Additionally, for ios going through ms_fast_dispatch, you want 
+>> > me to implement optracker (without internal shard) per opwq shard
+>> >
+>> > Am I right ?
+>> >
+>> > Thanks & Regards
+>> > Somnath
+>> >
+>> > -----Original Message-----
+>> > From: Samuel Just [mailto:sam.just-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org]
+>> > Sent: Wednesday, September 10, 2014 3:08 PM
+>> > To: Somnath Roy
+>> > Cc: Sage Weil (sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org); ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; 
+>> > ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+>> > Subject: Re: OpTracker optimization
+>> >
+>> > I don't quite understand.
+>> > -Sam
+>> >
+>> > On Wed, Sep 10, 2014 at 2:38 PM, Somnath Roy <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org> wrote:
+>> >> Thanks Sam.
+>> >> So, you want me to go with optracker/shadedopWq , right ?
+>> >>
+>> >> Regards
+>> >> Somnath
+>> >>
+>> >> -----Original Message-----
+>> >> From: Samuel Just [mailto:sam.just-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org]
+>> >> Sent: Wednesday, September 10, 2014 2:36 PM
+>> >> To: Somnath Roy
+>> >> Cc: Sage Weil (sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org); ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; 
+>> >> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+>> >> Subject: Re: OpTracker optimization
+>> >>
+>> >> Responded with cosmetic nonsense.  Once you've got that and the other comments addressed, I can put it in wip-sam-testing.
+>> >> -Sam
+>> >>
+>> >> On Wed, Sep 10, 2014 at 1:30 PM, Somnath Roy <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org> wrote:
+>> >>> Thanks Sam..I responded back :-)
+>> >>>
+>> >>> -----Original Message-----
+>> >>> From: ceph-devel-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org 
+>> >>> [mailto:ceph-devel-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org] On Behalf Of Samuel 
+>> >>> Just
+>> >>> Sent: Wednesday, September 10, 2014 11:17 AM
+>> >>> To: Somnath Roy
+>> >>> Cc: Sage Weil (sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org); ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; 
+>> >>> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+>> >>> Subject: Re: OpTracker optimization
+>> >>>
+>> >>> Added a comment about the approach.
+>> >>> -Sam
+>> >>>
+>> >>> On Tue, Sep 9, 2014 at 1:33 PM, Somnath Roy <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org> wrote:
+>> >>>> Hi Sam/Sage,
+>> >>>>
+>> >>>> As we discussed earlier, enabling the present OpTracker code 
+>> >>>> degrading performance severely. For example, in my setup a 
+>> >>>> single OSD node with
+>> >>>> 10 clients is reaching ~103K read iops with io served from 
+>> >>>> memory while optracking is disabled but enabling optracker it is reduced to ~39K iops.
+>> >>>> Probably, running OSD without enabling OpTracker is not an 
+>> >>>> option for many of Ceph users.
+>> >>>>
+>> >>>> Now, by sharding the Optracker:: ops_in_flight_lock (thus xlist
+>> >>>> ops_in_flight) and removing some other bottlenecks I am able to 
+>> >>>> match the performance of OpTracking enabled OSD with OpTracking 
+>> >>>> disabled, but with the expense of ~1 extra cpu core.
+>> >>>>
+>> >>>> In this process I have also fixed the following tracker.
+>> >>>>
+>> >>>>
+>> >>>>
+>> >>>> http://tracker.ceph.com/issues/9384
+>> >>>>
+>> >>>>
+>> >>>>
+>> >>>> and probably http://tracker.ceph.com/issues/8885 too.
+>> >>>>
+>> >>>>
+>> >>>>
+>> >>>> I have created following pull request for the same. Please review it.
+>> >>>>
+>> >>>>
+>> >>>>
+>> >>>> https://github.com/ceph/ceph/pull/2440
+>> >>>>
+>> >>>>
+>> >>>>
+>> >>>> Thanks & Regards
+>> >>>>
+>> >>>> Somnath
+>> >>>>
+>> >>>>
+>> >>>>
+>> >>>>
+>> >>>> ________________________________
+>> >>>>
+>> >>>> PLEASE NOTE: The information contained in this electronic mail 
+>> >>>> message is intended only for the use of the designated
+>> >>>> recipient(s) named above. If the reader of this message is not 
+>> >>>> the intended recipient, you are hereby notified that you have 
+>> >>>> received this message in error and that any review, 
+>> >>>> dissemination, distribution, or copying of this message is 
+>> >>>> strictly prohibited. If you have received this communication in 
+>> >>>> error, please notify the sender by telephone or e-mail (as shown
+>> >>>> above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+>> >>>>
+>> >>> --
+>> >>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>> >>> in the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org More 
+>> >>> majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> >>>
+>> >>> ________________________________
+>> >>>
+>> >>> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+>> >>>
+>>
