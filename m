@@ -1,267 +1,119 @@
 From: Janne Grunau <j@jannau.net>
-Subject: [PATCH 1/3] buffer: add an aligned buffer with less alignment than a page
-Date: Mon, 15 Sep 2014 17:55:06 +0200
-Message-ID: <1410796508-28711-1-git-send-email-j@jannau.net>
+Subject: [PATCH 2/3] ec: make use of added aligned buffers
+Date: Mon, 15 Sep 2014 17:55:07 +0200
+Message-ID: <1410796508-28711-2-git-send-email-j@jannau.net>
+References: <1410796508-28711-1-git-send-email-j@jannau.net>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from soltyk.jannau.net ([185.27.253.110]:60148 "EHLO
+Received: from soltyk.jannau.net ([185.27.253.110]:60149 "EHLO
 	soltyk.jannau.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753920AbaIOQBS (ORCPT
+	with ESMTP id S1753932AbaIOQBS (ORCPT
 	<rfc822;ceph-devel@vger.kernel.org>); Mon, 15 Sep 2014 12:01:18 -0400
 Received: from coburn.home.jannau.net (55d46944.access.ecotel.net [85.212.105.68])
-	by soltyk.jannau.net (Postfix) with ESMTPSA id 391453E18D6
-	for <ceph-devel@vger.kernel.org>; Mon, 15 Sep 2014 17:55:11 +0200 (CEST)
+	by soltyk.jannau.net (Postfix) with ESMTPSA id 3327F3E1958
+	for <ceph-devel@vger.kernel.org>; Mon, 15 Sep 2014 17:55:12 +0200 (CEST)
+In-Reply-To: <1410796508-28711-1-git-send-email-j@jannau.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-SIMD optimized erasure code computation needs aligned memory. Buffers
-aligned to a page boundary are wasted on it though. The buffers used
-for the erasure code computation are typical smaller than a page.
+Requiring page aligned buffers and realigning the input if necessary
+creates measurable oberhead. ceph_erasure_code_benchmark is ~30% faster
+with this change for technique=reed_sol_van,k=2,m=1.
 
-Currently an alignement of 16 bytes is enough for the used
-SIMD instruction sets (SSE4 and NEON).
+Also prevents a misaligned buffer when bufferlist::c_str(bufferlist)
+has to allocate a new buffer to provide continuous one. See bug #9408
 
 Signed-off-by: Janne Grunau <j@jannau.net>
 ---
- configure.ac         |   9 +++++
- src/common/buffer.cc | 100 +++++++++++++++++++++++++++++++++++++++++++++++++++
- src/include/buffer.h |  10 ++++++
- 3 files changed, 119 insertions(+)
+ src/erasure-code/ErasureCode.cc | 46 +++++++++++++++++++++++++----------------
+ src/erasure-code/ErasureCode.h  |  3 ++-
+ 2 files changed, 30 insertions(+), 19 deletions(-)
 
-diff --git a/configure.ac b/configure.ac
-index cccf2d9..1bb27c4 100644
---- a/configure.ac
-+++ b/configure.ac
-@@ -793,6 +793,15 @@ AC_MSG_RESULT([no])
- ])
+diff --git a/src/erasure-code/ErasureCode.cc b/src/erasure-code/ErasureCode.cc
+index 5953f49..078f60b 100644
+--- a/src/erasure-code/ErasureCode.cc
++++ b/src/erasure-code/ErasureCode.cc
+@@ -54,22 +54,38 @@ int ErasureCode::minimum_to_decode_with_cost(const set<int> &want_to_read,
+ }
  
- #
-+# Check for functions to provide aligned memory
-+#
-+AC_CHECK_HEADERS([malloc.h])
-+AC_CHECK_FUNCS([posix_memalign _aligned_malloc memalign aligned_malloc],
-+               [found_memalign=yes; break])
-+
-+AS_IF([test "x$found_memalign" != "xyes"], [AC_MSG_WARN([No function for aligned memory allocation found])])
-+
-+#
- # Check for pthread spinlock (depends on ACX_PTHREAD)
- #
- saved_LIBS="$LIBS"
-diff --git a/src/common/buffer.cc b/src/common/buffer.cc
-index b141759..acc221f 100644
---- a/src/common/buffer.cc
-+++ b/src/common/buffer.cc
-@@ -30,6 +30,10 @@
- #include <sys/uio.h>
- #include <limits.h>
- 
-+#ifdef HAVE_MALLOC_H
-+#include <malloc.h>
-+#endif
-+
- namespace ceph {
- 
- #ifdef BUFFER_DEBUG
-@@ -155,9 +159,15 @@ static simple_spinlock_t buffer_debug_lock = SIMPLE_SPINLOCK_INITIALIZER;
-     virtual int zero_copy_to_fd(int fd, loff_t *offset) {
-       return -ENOTSUP;
-     }
-+    virtual bool is_aligned() {
-+      return ((long)data & ~CEPH_ALIGN_MASK) == 0;
-+    }
-     virtual bool is_page_aligned() {
-       return ((long)data & ~CEPH_PAGE_MASK) == 0;
-     }
-+    bool is_n_align_sized() {
-+      return (len & ~CEPH_ALIGN_MASK) == 0;
-+    }
-     bool is_n_page_sized() {
-       return (len & ~CEPH_PAGE_MASK) == 0;
-     }
-@@ -209,6 +219,41 @@ static simple_spinlock_t buffer_debug_lock = SIMPLE_SPINLOCK_INITIALIZER;
-     }
-   };
- 
-+  class buffer::raw_aligned : public buffer::raw {
-+  public:
-+    raw_aligned(unsigned l) : raw(l) {
-+      if (len) {
-+#if HAVE_POSIX_MEMALIGN
-+        if (posix_memalign((void **) &data, CEPH_ALIGN, len))
-+          data = 0;
-+#elif HAVE__ALIGNED_MALLOC
-+        data = _aligned_malloc(len, CEPH_ALIGN);
-+#elif HAVE_MEMALIGN
-+        data = memalign(CEPH_ALIGN, len);
-+#elif HAVE_ALIGNED_MALLOC
-+        data = aligned_malloc((len + CEPH_ALIGN - 1) & ~CEPH_ALIGN_MASK,
-+                              CEPH_ALIGN);
-+#else
-+        data = malloc(len);
-+#endif
-+        if (!data)
-+          throw bad_alloc();
-+      } else {
-+        data = 0;
-+      }
-+      inc_total_alloc(len);
-+      bdout << "raw_aligned " << this << " alloc " << (void *)data << " " << l << " " << buffer::get_total_alloc() << bendl;
-+    }
-+    ~raw_aligned() {
-+      free(data);
-+      dec_total_alloc(len);
-+      bdout << "raw_aligned " << this << " free " << (void *)data << " " << buffer::get_total_alloc() << bendl;
-+    }
-+    raw* clone_empty() {
-+      return new raw_aligned(len);
-+    }
-+  };
-+
- #ifndef __CYGWIN__
-   class buffer::raw_mmap_pages : public buffer::raw {
-   public:
-@@ -334,6 +379,10 @@ static simple_spinlock_t buffer_debug_lock = SIMPLE_SPINLOCK_INITIALIZER;
-       return true;
-     }
- 
-+    bool is_aligned() {
-+      return false;
-+    }
-+
-     bool is_page_aligned() {
-       return false;
-     }
-@@ -520,6 +569,9 @@ static simple_spinlock_t buffer_debug_lock = SIMPLE_SPINLOCK_INITIALIZER;
-   buffer::raw* buffer::create_static(unsigned len, char *buf) {
-     return new raw_static(buf, len);
-   }
-+  buffer::raw* buffer::create_aligned(unsigned len) {
-+    return new raw_aligned(len);
-+  }
-   buffer::raw* buffer::create_page_aligned(unsigned len) {
- #ifndef __CYGWIN__
-     //return new raw_mmap_pages(len);
-@@ -1013,6 +1065,16 @@ static simple_spinlock_t buffer_debug_lock = SIMPLE_SPINLOCK_INITIALIZER;
-     return true;
-   }
- 
-+  bool buffer::list::is_aligned() const
-+  {
-+    for (std::list<ptr>::const_iterator it = _buffers.begin();
-+         it != _buffers.end();
-+         ++it)
-+      if (!it->is_aligned())
-+        return false;
-+    return true;
-+  }
-+
-   bool buffer::list::is_page_aligned() const
-   {
-     for (std::list<ptr>::const_iterator it = _buffers.begin();
-@@ -1101,6 +1163,44 @@ static simple_spinlock_t buffer_debug_lock = SIMPLE_SPINLOCK_INITIALIZER;
-     _buffers.push_back(nb);
-   }
- 
-+void buffer::list::rebuild_aligned()
-+{
-+  std::list<ptr>::iterator p = _buffers.begin();
-+  while (p != _buffers.end()) {
-+    // keep anything that's already page sized+aligned
-+    if (p->is_aligned() && p->is_n_align_sized()) {
-+      /*cout << " segment " << (void*)p->c_str()
-+             << " offset " << ((unsigned long)p->c_str() & ~CEPH_ALIGN_MASK)
-+             << " length " << p->length()
-+             << " " << (p->length() & ~CEPH_ALIGN_MASK) << " ok" << std::endl;
-+      */
-+      ++p;
-+      continue;
-+    }
-+
-+    // consolidate unaligned items, until we get something that is sized+aligned
-+    list unaligned;
-+    unsigned offset = 0;
-+    do {
-+      /*cout << " segment " << (void*)p->c_str()
-+             << " offset " << ((unsigned long)p->c_str() & ~CEPH_ALIGN_MASK)
-+             << " length " << p->length() << " " << (p->length() & ~CEPH_ALIGN_MASK)
-+             << " overall offset " << offset << " " << (offset & ~CEPH_ALIGN_MASK)
-+             << " not ok" << std::endl;
-+      */
-+      offset += p->length();
-+      unaligned.push_back(*p);
-+      _buffers.erase(p++);
-+    } while (p != _buffers.end() &&
-+	     (!p->is_aligned() ||
-+	      !p->is_n_align_sized() ||
-+	      (offset & ~CEPH_ALIGN_MASK)));
-+    ptr nb(buffer::create_aligned(unaligned._len));
-+    unaligned.rebuild(nb);
-+    _buffers.insert(p, unaligned._buffers.front());
-+  }
-+}
-+
- void buffer::list::rebuild_page_aligned()
+ int ErasureCode::encode_prepare(const bufferlist &raw,
+-                                bufferlist *prepared) const
++                                map<int, bufferlist> &encoded) const
  {
-   std::list<ptr>::iterator p = _buffers.begin();
-diff --git a/src/include/buffer.h b/src/include/buffer.h
-index e5c1b50..ea362e7 100644
---- a/src/include/buffer.h
-+++ b/src/include/buffer.h
-@@ -56,6 +56,9 @@
- # include <assert.h>
- #endif
- 
-+#define CEPH_ALIGN 16
-+#define CEPH_ALIGN_MASK (~(CEPH_ALIGN - 1LLU))
+   unsigned int k = get_data_chunk_count();
+   unsigned int m = get_chunk_count() - k;
+   unsigned blocksize = get_chunk_size(raw.length());
+-  unsigned padded_length = blocksize * k;
+-  *prepared = raw;
+-  if (padded_length - raw.length() > 0) {
+-    bufferptr pad(padded_length - raw.length());
+-    pad.zero();
+-    prepared->push_back(pad);
++  unsigned pad_len = blocksize * k - raw.length();
 +
- namespace ceph {
++  bufferlist prepared = raw;
++
++  if (!prepared.is_aligned()) {
++    prepared.rebuild_aligned();
++  }
++
++  for (unsigned int i = 0; i < k - !!pad_len; i++) {
++    int chunk_index = chunk_mapping.size() > 0 ? chunk_mapping[i] : i;
++    bufferlist &chunk = encoded[chunk_index];
++    chunk.substr_of(prepared, i * blocksize, blocksize);
++  }
++  if (pad_len > 0) {
++    int chunk_index = chunk_mapping.size() > 0 ? chunk_mapping[k - 1] : k - 1;
++    bufferlist &chunk = encoded[chunk_index];
++    bufferptr padded(buffer::create_aligned(blocksize));
++    raw.copy((k - 1) * blocksize, blocksize - pad_len, padded.c_str());
++    padded.zero(blocksize - pad_len, pad_len);
++    chunk.push_back(padded);
+   }
+-  unsigned coding_length = blocksize * m;
+-  bufferptr coding(buffer::create_page_aligned(coding_length));
+-  prepared->push_back(coding);
+-  prepared->rebuild_page_aligned();
++  for (unsigned int i = k; i < k + m; i++) {
++    int chunk_index = chunk_mapping.size() > 0 ? chunk_mapping[i] : i;
++    bufferlist &chunk = encoded[chunk_index];
++    chunk.push_back(buffer::create_aligned(blocksize));
++  }
++
+   return 0;
+ }
  
- class buffer {
-@@ -124,6 +127,7 @@ private:
-    */
-   class raw;
-   class raw_malloc;
-+  class raw_aligned;
-   class raw_static;
-   class raw_mmap_pages;
-   class raw_posix_aligned;
-@@ -144,6 +148,7 @@ public:
-   static raw* create_malloc(unsigned len);
-   static raw* claim_malloc(unsigned len, char *buf);
-   static raw* create_static(unsigned len, char *buf);
-+  static raw* create_aligned(unsigned len);
-   static raw* create_page_aligned(unsigned len);
-   static raw* create_zero_copy(unsigned len, int fd, int64_t *offset);
+@@ -80,15 +96,9 @@ int ErasureCode::encode(const set<int> &want_to_encode,
+   unsigned int k = get_data_chunk_count();
+   unsigned int m = get_chunk_count() - k;
+   bufferlist out;
+-  int err = encode_prepare(in, &out);
++  int err = encode_prepare(in, *encoded);
+   if (err)
+     return err;
+-  unsigned blocksize = get_chunk_size(in.length());
+-  for (unsigned int i = 0; i < k + m; i++) {
+-    int chunk_index = chunk_mapping.size() > 0 ? chunk_mapping[i] : i;
+-    bufferlist &chunk = (*encoded)[chunk_index];
+-    chunk.substr_of(out, i * blocksize, blocksize);
+-  }
+   encode_chunks(want_to_encode, encoded);
+   for (unsigned int i = 0; i < k + m; i++) {
+     if (want_to_encode.count(i) == 0)
+diff --git a/src/erasure-code/ErasureCode.h b/src/erasure-code/ErasureCode.h
+index 7aaea95..62aa383 100644
+--- a/src/erasure-code/ErasureCode.h
++++ b/src/erasure-code/ErasureCode.h
+@@ -46,7 +46,8 @@ namespace ceph {
+                                             const map<int, int> &available,
+                                             set<int> *minimum);
  
-@@ -177,7 +182,9 @@ public:
-     bool at_buffer_head() const { return _off == 0; }
-     bool at_buffer_tail() const;
+-    int encode_prepare(const bufferlist &raw, bufferlist *prepared) const;
++    int encode_prepare(const bufferlist &raw,
++                       map<int, bufferlist> &encoded) const;
  
-+    bool is_aligned() const { return ((long)c_str() & ~CEPH_ALIGN_MASK) == 0; }
-     bool is_page_aligned() const { return ((long)c_str() & ~CEPH_PAGE_MASK) == 0; }
-+    bool is_n_align_sized() const { return (length() & ~CEPH_ALIGN_MASK) == 0; }
-     bool is_n_page_sized() const { return (length() & ~CEPH_PAGE_MASK) == 0; }
- 
-     // accessors
-@@ -344,7 +351,9 @@ public:
-     bool contents_equal(buffer::list& other);
- 
-     bool can_zero_copy() const;
-+    bool is_aligned() const;
-     bool is_page_aligned() const;
-+    bool is_n_align_sized() const;
-     bool is_n_page_sized() const;
- 
-     bool is_zero() const;
-@@ -382,6 +391,7 @@ public:
-     bool is_contiguous();
-     void rebuild();
-     void rebuild(ptr& nb);
-+    void rebuild_aligned();
-     void rebuild_page_aligned();
- 
-     // sort-of-like-assignment-op
+     virtual int encode(const set<int> &want_to_encode,
+                        const bufferlist &in,
 -- 
 2.1.0
 
