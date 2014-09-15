@@ -1,153 +1,443 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Tools and archive to check for non regression of erasure coded
- content
-Date: Mon, 15 Sep 2014 10:45:05 +0200
-Message-ID: <5416A711.7030402@dachary.org>
-References: <54142F89.4060804@dachary.org> <3472A07E6605974CBC9BC573F1BC02E4AE7C82EB@CERNXCHG44.cern.ch>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="HJDMuxjguIPuPpccfWocJVoRi07cp8CHT"
+From: "Yan, Zheng" <zyan@redhat.com>
+Subject: [PATCH] ceph: include the initial ACL in create/mkdir/mknod MDS requests
+Date: Mon, 15 Sep 2014 21:29:32 +0800
+Message-ID: <1410787772-9903-1-git-send-email-zyan@redhat.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:52163 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752451AbaIOIpT (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 15 Sep 2014 04:45:19 -0400
-In-Reply-To: <3472A07E6605974CBC9BC573F1BC02E4AE7C82EB@CERNXCHG44.cern.ch>
+Received: from mx1.redhat.com ([209.132.183.28]:6136 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751740AbaION3q (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 15 Sep 2014 09:29:46 -0400
+Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
+	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id s8FDTjaI027945
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
+	for <ceph-devel@vger.kernel.org>; Mon, 15 Sep 2014 09:29:45 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>, Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: "Yan, Zheng" <zyan@redhat.com>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---HJDMuxjguIPuPpccfWocJVoRi07cp8CHT
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Current code set new file/directory's initial ACL in a non-atomic manner.
+Client first sends request to MDS to create new file/directory, then set
+the initial ACL after the new file/directory is successfully created.
 
+The fix is include the initial ACL in create/mkdir/mknod MDS requests.
+So MDS can handle creating file/directory and setting the initial ACL in
+one request.
 
-Hi Andreas,
+Signed-off-by: Yan, Zheng <zyan@redhat.com>
+---
+ fs/ceph/acl.c        | 124 +++++++++++++++++++++++++++++++++++++++++----------
+ fs/ceph/dir.c        |  41 ++++++++++++-----
+ fs/ceph/file.c       |  27 ++++++++---
+ fs/ceph/mds_client.c |   1 -
+ fs/ceph/super.h      |  27 ++++++++---
+ 5 files changed, 174 insertions(+), 46 deletions(-)
 
+diff --git a/fs/ceph/acl.c b/fs/ceph/acl.c
+index cebf2eb..2b7f497 100644
+--- a/fs/ceph/acl.c
++++ b/fs/ceph/acl.c
+@@ -169,36 +169,112 @@ out:
+ 	return ret;
+ }
+ 
+-int ceph_init_acl(struct dentry *dentry, struct inode *inode, struct inode *dir)
++int ceph_pre_init_acls(struct inode *dir, umode_t *mode,
++		       struct ceph_acls_info *info)
+ {
+-	struct posix_acl *default_acl, *acl;
+-	umode_t new_mode = inode->i_mode;
+-	int error;
+-
+-	error = posix_acl_create(dir, &new_mode, &default_acl, &acl);
+-	if (error)
+-		return error;
+-
+-	if (!default_acl && !acl) {
+-		cache_no_acl(inode);
+-		if (new_mode != inode->i_mode) {
+-			struct iattr newattrs = {
+-				.ia_mode = new_mode,
+-				.ia_valid = ATTR_MODE,
+-			};
+-			error = ceph_setattr(dentry, &newattrs);
++	struct posix_acl *acl, *default_acl;
++	size_t buf_size, name_len1, name_len2, val_size1, val_size2;
++	struct page **pages = NULL;
++	void  *p, *xattr_buf = NULL;
++	int err, i, nr_pages;
++
++	err = posix_acl_create(dir, mode, &default_acl, &acl);
++	if (err)
++		return err;
++
++	if (acl) {
++		int ret = posix_acl_equiv_mode(acl, mode);
++		if (ret < 0)
++			goto out_err;
++		if (ret == 0) {
++			posix_acl_release(acl);
++			acl = NULL;
+ 		}
+-		return error;
+ 	}
+ 
++	if (!default_acl && !acl)
++		return 0;
++
++	buf_size = 4;
++	if (acl) {
++		name_len1 = strlen(POSIX_ACL_XATTR_ACCESS);
++		val_size1 = posix_acl_xattr_size(acl->a_count);
++		buf_size += 8 + name_len1 + val_size1;
++	} else {
++		name_len1 = val_size1 = 0;
++	}
+ 	if (default_acl) {
+-		error = ceph_set_acl(inode, default_acl, ACL_TYPE_DEFAULT);
+-		posix_acl_release(default_acl);
++		name_len2 = strlen(POSIX_ACL_XATTR_DEFAULT);
++		val_size2 = posix_acl_xattr_size(default_acl->a_count);
++		buf_size += 8 + name_len2 + val_size2;
++	} else {
++		name_len2 = val_size2 = 0;
+ 	}
++
++	err = -ENOMEM;
++	nr_pages = calc_pages_for(0, buf_size);
++	pages = kmalloc(sizeof(struct page*) * nr_pages, GFP_NOFS);
++	if (!pages)
++		goto out_err;
++	xattr_buf = kmalloc(PAGE_SIZE * nr_pages, GFP_NOFS);
++	if (!xattr_buf)
++		goto out_err;
++
++	pages[0] = virt_to_page(xattr_buf);
++	for (i = 1; i < nr_pages; i++)
++		pages[i] = pages[0] + i;
++
++	p = xattr_buf;
++	ceph_encode_32(&p, acl && default_acl ? 2 : 1);
++
+ 	if (acl) {
+-		if (!error)
+-			error = ceph_set_acl(inode, acl, ACL_TYPE_ACCESS);
+-		posix_acl_release(acl);
++		ceph_encode_32(&p, name_len1);
++		memcpy(p, POSIX_ACL_XATTR_ACCESS, name_len1);
++		p += name_len1;
++		ceph_encode_32(&p, val_size1);
++		err = posix_acl_to_xattr(&init_user_ns, acl, p, val_size1);
++		if (err < 0)
++			goto out_err;
++		p += val_size1;
+ 	}
+-	return error;
++	if (default_acl) {
++		ceph_encode_32(&p, name_len2);
++		memcpy(p, POSIX_ACL_XATTR_DEFAULT, name_len2);
++		p += name_len2;
++		ceph_encode_32(&p, val_size2);
++		err = posix_acl_to_xattr(&init_user_ns, default_acl, p, val_size2);
++		if (err < 0)
++			goto out_err;
++		p += val_size2;
++	}
++
++	info->acl = acl;
++	info->default_acl = default_acl;
++	info->xattr_buf = xattr_buf;
++	info->buf_pages = pages;
++	info->buf_size = buf_size;
++	return 0;
++
++out_err:
++	posix_acl_release(acl);
++	posix_acl_release(default_acl);
++	kfree(pages);
++	kfree(xattr_buf);
++	return err;
++}
++
++void ceph_init_inode_acls(struct inode* inode, struct ceph_acls_info *info)
++{
++	if (!inode)
++		return;
++	ceph_set_cached_acl(inode, ACL_TYPE_ACCESS, info->acl);
++	ceph_set_cached_acl(inode, ACL_TYPE_DEFAULT, info->default_acl);
++}
++
++void ceph_release_acls_info(struct ceph_acls_info *info)
++{
++	posix_acl_release(info->acl);
++	posix_acl_release(info->default_acl);
++	kfree(info->buf_pages);
++	kfree(info->xattr_buf);
+ }
+diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+index c29d6ae..ea576b5 100644
+--- a/fs/ceph/dir.c
++++ b/fs/ceph/dir.c
+@@ -682,17 +682,22 @@ static int ceph_mknod(struct inode *dir, struct dentry *dentry,
+ 	struct ceph_fs_client *fsc = ceph_sb_to_client(dir->i_sb);
+ 	struct ceph_mds_client *mdsc = fsc->mdsc;
+ 	struct ceph_mds_request *req;
++	struct ceph_acls_info acls = {};
+ 	int err;
+ 
+ 	if (ceph_snap(dir) != CEPH_NOSNAP)
+ 		return -EROFS;
+ 
++	err = ceph_pre_init_acls(dir, &mode, &acls);
++	if (err < 0)
++		return err;
++
+ 	dout("mknod in dir %p dentry %p mode 0%ho rdev %d\n",
+ 	     dir, dentry, mode, rdev);
+ 	req = ceph_mdsc_create_request(mdsc, CEPH_MDS_OP_MKNOD, USE_AUTH_MDS);
+ 	if (IS_ERR(req)) {
+-		d_drop(dentry);
+-		return PTR_ERR(req);
++		err = PTR_ERR(req);
++		goto out;
+ 	}
+ 	req->r_dentry = dget(dentry);
+ 	req->r_num_caps = 2;
+@@ -701,15 +706,20 @@ static int ceph_mknod(struct inode *dir, struct dentry *dentry,
+ 	req->r_args.mknod.rdev = cpu_to_le32(rdev);
+ 	req->r_dentry_drop = CEPH_CAP_FILE_SHARED;
+ 	req->r_dentry_unless = CEPH_CAP_FILE_EXCL;
++	if (acls.buf_size) {
++		req->r_pages = acls.buf_pages;
++		req->r_data_len = acls.buf_size;
++	}
+ 	err = ceph_mdsc_do_request(mdsc, dir, req);
+ 	if (!err && !req->r_reply_info.head->is_dentry)
+ 		err = ceph_handle_notrace_create(dir, dentry);
+ 	ceph_mdsc_put_request(req);
+-
++out:
+ 	if (!err)
+-		ceph_init_acl(dentry, dentry->d_inode, dir);
++		ceph_init_inode_acls(dentry->d_inode, &acls);
+ 	else
+ 		d_drop(dentry);
++	ceph_release_acls_info(&acls);
+ 	return err;
+ }
+ 
+@@ -733,8 +743,8 @@ static int ceph_symlink(struct inode *dir, struct dentry *dentry,
+ 	dout("symlink in dir %p dentry %p to '%s'\n", dir, dentry, dest);
+ 	req = ceph_mdsc_create_request(mdsc, CEPH_MDS_OP_SYMLINK, USE_AUTH_MDS);
+ 	if (IS_ERR(req)) {
+-		d_drop(dentry);
+-		return PTR_ERR(req);
++		err = PTR_ERR(req);
++		goto out;
+ 	}
+ 	req->r_dentry = dget(dentry);
+ 	req->r_num_caps = 2;
+@@ -746,9 +756,8 @@ static int ceph_symlink(struct inode *dir, struct dentry *dentry,
+ 	if (!err && !req->r_reply_info.head->is_dentry)
+ 		err = ceph_handle_notrace_create(dir, dentry);
+ 	ceph_mdsc_put_request(req);
+-	if (!err)
+-		ceph_init_acl(dentry, dentry->d_inode, dir);
+-	else
++out:
++	if (err)
+ 		d_drop(dentry);
+ 	return err;
+ }
+@@ -758,6 +767,7 @@ static int ceph_mkdir(struct inode *dir, struct dentry *dentry, umode_t mode)
+ 	struct ceph_fs_client *fsc = ceph_sb_to_client(dir->i_sb);
+ 	struct ceph_mds_client *mdsc = fsc->mdsc;
+ 	struct ceph_mds_request *req;
++	struct ceph_acls_info acls = {};
+ 	int err = -EROFS;
+ 	int op;
+ 
+@@ -772,6 +782,12 @@ static int ceph_mkdir(struct inode *dir, struct dentry *dentry, umode_t mode)
+ 	} else {
+ 		goto out;
+ 	}
++
++	mode |= S_IFDIR;
++	err = ceph_pre_init_acls(dir, &mode, &acls);
++	if (err < 0)
++		goto out;
++
+ 	req = ceph_mdsc_create_request(mdsc, op, USE_AUTH_MDS);
+ 	if (IS_ERR(req)) {
+ 		err = PTR_ERR(req);
+@@ -784,15 +800,20 @@ static int ceph_mkdir(struct inode *dir, struct dentry *dentry, umode_t mode)
+ 	req->r_args.mkdir.mode = cpu_to_le32(mode);
+ 	req->r_dentry_drop = CEPH_CAP_FILE_SHARED;
+ 	req->r_dentry_unless = CEPH_CAP_FILE_EXCL;
++	if (acls.buf_size) {
++		req->r_pages = acls.buf_pages;
++		req->r_data_len = acls.buf_size;
++	}
+ 	err = ceph_mdsc_do_request(mdsc, dir, req);
+ 	if (!err && !req->r_reply_info.head->is_dentry)
+ 		err = ceph_handle_notrace_create(dir, dentry);
+ 	ceph_mdsc_put_request(req);
+ out:
+ 	if (!err)
+-		ceph_init_acl(dentry, dentry->d_inode, dir);
++		ceph_init_inode_acls(dentry->d_inode, &acls);
+ 	else
+ 		d_drop(dentry);
++	ceph_release_acls_info(&acls);
+ 	return err;
+ }
+ 
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index 2eb02f8..46a0525f 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -235,6 +235,7 @@ int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
+ 	struct ceph_mds_client *mdsc = fsc->mdsc;
+ 	struct ceph_mds_request *req;
+ 	struct dentry *dn;
++	struct ceph_acls_info acls = {};
+ 	int err;
+ 
+ 	dout("atomic_open %p dentry %p '%.*s' %s flags %d mode 0%o\n",
+@@ -248,22 +249,34 @@ int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
+ 	if (err < 0)
+ 		return err;
+ 
++	if (flags & O_CREAT) {
++		err = ceph_pre_init_acls(dir, &mode, &acls);
++		if (err < 0)
++			return err;
++	}
++
+ 	/* do the open */
+ 	req = prepare_open_request(dir->i_sb, flags, mode);
+-	if (IS_ERR(req))
+-		return PTR_ERR(req);
++	if (IS_ERR(req)) {
++		err = PTR_ERR(req);
++		goto out_acl;
++	}
+ 	req->r_dentry = dget(dentry);
+ 	req->r_num_caps = 2;
+ 	if (flags & O_CREAT) {
+ 		req->r_dentry_drop = CEPH_CAP_FILE_SHARED;
+ 		req->r_dentry_unless = CEPH_CAP_FILE_EXCL;
++		if (acls.buf_size) {
++			req->r_pages = acls.buf_pages;
++			req->r_data_len = acls.buf_size;
++		}
+ 	}
+ 	req->r_locked_dir = dir;           /* caller holds dir->i_mutex */
+ 	err = ceph_mdsc_do_request(mdsc,
+ 				   (flags & (O_CREAT|O_TRUNC)) ? dir : NULL,
+ 				   req);
+ 	if (err)
+-		goto out_err;
++		goto out_req;
+ 
+ 	err = ceph_handle_snapdir(req, dentry, err);
+ 	if (err == 0 && (flags & O_CREAT) && !req->r_reply_info.head->is_dentry)
+@@ -278,7 +291,7 @@ int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
+ 		dn = NULL;
+ 	}
+ 	if (err)
+-		goto out_err;
++		goto out_req;
+ 	if (dn || dentry->d_inode == NULL || S_ISLNK(dentry->d_inode->i_mode)) {
+ 		/* make vfs retry on splice, ENOENT, or symlink */
+ 		dout("atomic_open finish_no_open on dn %p\n", dn);
+@@ -286,15 +299,17 @@ int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
+ 	} else {
+ 		dout("atomic_open finish_open on dn %p\n", dn);
+ 		if (req->r_op == CEPH_MDS_OP_CREATE && req->r_reply_info.has_create_ino) {
+-			ceph_init_acl(dentry, dentry->d_inode, dir);
++			ceph_init_inode_acls(dentry->d_inode, &acls);
+ 			*opened |= FILE_CREATED;
+ 		}
+ 		err = finish_open(file, dentry, ceph_open, opened);
+ 	}
+-out_err:
++out_req:
+ 	if (!req->r_err && req->r_target_inode)
+ 		ceph_put_fmode(ceph_inode(req->r_target_inode), req->r_fmode);
+ 	ceph_mdsc_put_request(req);
++out_acl:
++	ceph_release_acls_info(&acls);
+ 	dout("atomic_open result=%d\n", err);
+ 	return err;
+ }
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index a17fc49..8a397f2 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -1848,7 +1848,6 @@ static struct ceph_msg *create_request_message(struct ceph_mds_client *mdsc,
+ 	msg->hdr.front_len = cpu_to_le32(msg->front.iov_len);
+ 
+ 	if (req->r_data_len) {
+-		/* outbound data set only by ceph_sync_setxattr() */
+ 		BUG_ON(!req->r_pages);
+ 		ceph_msg_data_add_pages(msg, req->r_pages, req->r_data_len, 0);
+ 	}
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index 12b2074..ad76163 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -733,15 +733,25 @@ extern void __ceph_build_xattrs_blob(struct ceph_inode_info *ci);
+ extern void __ceph_destroy_xattrs(struct ceph_inode_info *ci);
+ extern void __init ceph_xattr_init(void);
+ extern void ceph_xattr_exit(void);
++extern const struct xattr_handler *ceph_xattr_handlers[];
+ 
+ /* acl.c */
+-extern const struct xattr_handler *ceph_xattr_handlers[];
++struct ceph_acls_info {
++	void *default_acl;
++	void *acl;
++	void *xattr_buf;
++	struct page **buf_pages;
++	size_t buf_size;
++};
+ 
+ #ifdef CONFIG_CEPH_FS_POSIX_ACL
+ 
+ struct posix_acl *ceph_get_acl(struct inode *, int);
+ int ceph_set_acl(struct inode *inode, struct posix_acl *acl, int type);
+-int ceph_init_acl(struct dentry *, struct inode *, struct inode *);
++int ceph_pre_init_acls(struct inode *dir, umode_t *mode,
++		       struct ceph_acls_info *info);
++void ceph_init_inode_acls(struct inode *inode, struct ceph_acls_info *info);
++void ceph_release_acls_info(struct ceph_acls_info *info);
+ 
+ static inline void ceph_forget_all_cached_acls(struct inode *inode)
+ {
+@@ -753,12 +763,19 @@ static inline void ceph_forget_all_cached_acls(struct inode *inode)
+ #define ceph_get_acl NULL
+ #define ceph_set_acl NULL
+ 
+-static inline int ceph_init_acl(struct dentry *dentry, struct inode *inode,
+-				struct inode *dir)
++
++static inline int ceph_pre_init_acls(struct inode *dir, umode_t *mode,
++				     struct ceph_acls_info *info)
+ {
+ 	return 0;
+ }
+-
++static inline void ceph_init_inode_acls(struct inode *inode,
++					struct ceph_acls_info *info)
++{
++}
++static inline void ceph_release_acls_info(struct ceph_acls_info *info)
++{
++}
+ static inline int ceph_acl_chmod(struct dentry *dentry, struct inode *inode)
+ {
+ 	return 0;
+-- 
+1.9.3
 
-On 15/09/2014 09:27, Andreas Joachim Peters wrote:> Hi Loic,
-> I saw (if i am not mistaken) that you actually test only encoding ... s=
-o your idea is to guarantee that the encoding results in the same output =
-and the encoding/decoding functionality is validated by the unit tests in=
- each new version?=20
-
-You are correct: it only partially checks the encoding. It should also tr=
-y decoding with various combinations of erasures and check that the conte=
-nt can actually be reconstructed. I did not go after that because the exi=
-sting unit tests already perform this verification. But it should also be=
- done in this context because the code may have changed in a way that mak=
-es backward compatibility slightly different when it comes to decoding wi=
-th erasures. Since the unit tests focus on the version currently develope=
-d, there is a chance that a subtle difference is missed.
-
-> In principle this restricts the encoding to never change the alignment =
-in the future, which might be not optimal. We might get larger registers =
-in the future on new CPUs and the alignment might change or they might de=
-al perfectly with 1-byte alignments. I suggest  to make sure that the new=
- version can decode the old format, but it does not need to imply that it=
- encodes it in exactly the same way ... this is slighly more complicated =
-however I would feel more comfortable if you would do the brute-force dec=
-oding check in this infrastructure for all plug-ins and leave the flexibi=
-lity to change the encoding format in the future.
-
-This is a very good point. I'm not sure what the correct answer is but I =
-would also be inclined to leave it until we face a format change.
-
-Cheers
-
->=20
-> Cheers Andreas.
->=20
-> ________________________________________
-> From: ceph-devel-owner@vger.kernel.org [ceph-devel-owner@vger.kernel.or=
-g] on behalf of Loic Dachary [loic@dachary.org]
-> Sent: 13 September 2014 13:50
-> To: Ceph Development
-> Subject: Tools and archive to check for non regression of erasure coded=
- content
->=20
-> Hi Ceph,
->=20
-> An erasure coded object stored in Firefly when it was first introduced =
-must be decoded by all versions after Firefly. The encoding is done by er=
-asure code plugins[1] and they evolve over time[2]. There needs to be a t=
-ool to check that all content encoded by a given version of the plugin ca=
-n also be encoded by all subsequent versions of the same plugin.
->=20
-> The general idea is to archive objects created with a given Ceph versio=
-n and check them will all subsequent versions, via a teuthology workunit =
-run on all supported distributions and architectures.
->=20
-> The ceph_erasure_code_non_regression command[3] creates an object and s=
-tore it on disk or read an object from disk and checks that it can be rea=
-d. It is used to create objects for all relevant variations of parameters=
- of a given erasure code plugin. For instance:
->=20
-> ceph_erasure_code_non_regression --stripe-width 4651 --parameter packet=
-size=3D32 --plugin jerasure --parameter technique=3Dblaum_roth --paramete=
-r k=3D6 --parameter m=3D2 --create --base ../../ceph-erasure-code-corpus/=
-v0.85-764-gf3a1532
-> ceph_erasure_code_non_regression --stripe-width 4651 --parameter packet=
-size=3D32 --plugin jerasure --parameter technique=3Dliber8tion --paramete=
-r k=3D6 --parameter m=3D2 --create --base ../../ceph-erasure-code-corpus/=
-v0.85-764-gf3a1532
-> etc.
->=20
-> The script[4] and the objects are archived in a repository [5] that can=
- be checked by later Ceph versions. The same script is used for checking =
-and creating the objects so that there is no risk of confusion. These scr=
-ipts are stored per version because a given script is developed for a giv=
-en version of the plugins.
->=20
-> The encode-decode-non-regression.sh[6] workunit uses these scripts when=
- run from teuthology[7] and will run all of them, up to and including the=
- currently running ceph version. This ultimately ensures that all archive=
-d objects can be read on all supported distributions and architectures.
->=20
-> See also http://tracker.ceph.com/issues/9420 which is the ticket associ=
-ated to this work.
->=20
-> Although this all sound sensible to me right now, I would be very inter=
-ested to hear about ideas to make this easier or better :-)
->=20
-> Cheers
->=20
-> [1] firefly erasure code plugins https://github.com/ceph/ceph/tree/fire=
-fly/src/erasure-code
-> [2] giant erasure code plugins https://github.com/ceph/ceph/tree/v0.85/=
-src/erasure-code
-> [3] ceph_erasure_code_non_regression https://github.com/dachary/ceph/co=
-mmit/497a82b2b3113dae724a43d8d4c7e430acf44120
-> [4] non-regression.sh https://github.com/dachary/ceph-erasure-code-corp=
-us/blob/master/v0.80.5-226-g71d2562/non-regression.sh
-> [5] ceph-erasure-code-corpus https://github.com/dachary/ceph-erasure-co=
-de-corpus
-> [6] encode-decode-non-regression.sh https://github.com/dachary/ceph/com=
-mit/4f7a9f83fb1f037662861e8782c9b90566dcaa31
-> [7] non regression workload https://github.com/ceph/ceph-qa-suite/pull/=
-136
-> --
-> Lo=EFc Dachary, Artisan Logiciel Libre
->=20
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-
-
---HJDMuxjguIPuPpccfWocJVoRi07cp8CHT
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlQWpxEACgkQ8dLMyEl6F22imQCgm5m+jEamfuyZyWfQmJjF4xsv
-ZBkAn3krQns3GDd1WER+uIWGJFUPlpoL
-=ObC+
------END PGP SIGNATURE-----
-
---HJDMuxjguIPuPpccfWocJVoRi07cp8CHT--
