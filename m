@@ -1,87 +1,173 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: OSD is crashing during delete operation
-Date: Mon, 15 Sep 2014 22:26:22 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F278440E3@SACMBXIP02.sdcorp.global.sandisk.com>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2783E50B@SACMBXIP02.sdcorp.global.sandisk.com>
+From: "Ma, Jianpeng" <jianpeng.ma@intel.com>
+Subject: RE: [PATCH 2/3] ec: make use of added aligned buffers
+Date: Mon, 15 Sep 2014 23:56:44 +0000
+Message-ID: <6AA21C22F0A5DA478922644AD2EC308C8C77BB@SHSMSX101.ccr.corp.intel.com>
+References: <1410796508-28711-1-git-send-email-j@jannau.net>
+ <1410796508-28711-2-git-send-email-j@jannau.net>
+ <54171FDD.4070701@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2on0071.outbound.protection.outlook.com ([207.46.100.71]:44928
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1755889AbaIOW01 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 15 Sep 2014 18:26:27 -0400
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2783E50B@SACMBXIP02.sdcorp.global.sandisk.com>
+Received: from mga11.intel.com ([192.55.52.93]:7636 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754085AbaIOX44 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 15 Sep 2014 19:56:56 -0400
+In-Reply-To: <54171FDD.4070701@dachary.org>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Sage Weil	(sweil@redhat.com)" <sweil@redhat.com>, "Samuel Just (sam.just@inktank.com)" <sam.just@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>, Janne Grunau <j@jannau.net>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Sage/Sam,
+If we modify bufferlist::c_str()  to bufferlist::c_str(bool align).
+If (align)
+  Posix_memalign(data, CEPH_PAGE_SIZE, len)
+Else
+  Origin code.
 
-I am able to reproduce this crash even with rados bench while deleting objects. I have raised the following tracker.
+I think this is simple and correctly code.
 
-http://tracker.ceph.com/issues/9480
+Jianpeng
+Thanks!
 
-I have root caused it, it seems to be happening because one of my earlier changes :-( .. Here is the rot cause.
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org
+> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Loic Dachary
+> Sent: Tuesday, September 16, 2014 1:20 AM
+> To: Janne Grunau; ceph-devel@vger.kernel.org
+> Subject: Re: [PATCH 2/3] ec: make use of added aligned buffers
+>=20
+> Hi Janne,
+>=20
+> See below:
+>=20
+> On 15/09/2014 17:55, Janne Grunau wrote:
+> > Requiring page aligned buffers and realigning the input if necessar=
+y
+> > creates measurable oberhead. ceph_erasure_code_benchmark is ~30%
+> > faster with this change for technique=3Dreed_sol_van,k=3D2,m=3D1.
+> >
+> > Also prevents a misaligned buffer when bufferlist::c_str(bufferlist=
+)
+> > has to allocate a new buffer to provide continuous one. See bug #94=
+08
+> >
+> > Signed-off-by: Janne Grunau <j@jannau.net>
+> > ---
+> >  src/erasure-code/ErasureCode.cc | 46
+> > +++++++++++++++++++++++++----------------
+> >  src/erasure-code/ErasureCode.h  |  3 ++-
+> >  2 files changed, 30 insertions(+), 19 deletions(-)
+> >
+> > diff --git a/src/erasure-code/ErasureCode.cc
+> > b/src/erasure-code/ErasureCode.cc index 5953f49..078f60b 100644
+> > --- a/src/erasure-code/ErasureCode.cc
+> > +++ b/src/erasure-code/ErasureCode.cc
+> > @@ -54,22 +54,38 @@ int
+> ErasureCode::minimum_to_decode_with_cost(const
+> > set<int> &want_to_read,  }
+> >
+> >  int ErasureCode::encode_prepare(const bufferlist &raw,
+> > -                                bufferlist *prepared) const
+> > +                                map<int, bufferlist> &encoded)
+> const
+> >  {
+> >    unsigned int k =3D get_data_chunk_count();
+> >    unsigned int m =3D get_chunk_count() - k;
+> >    unsigned blocksize =3D get_chunk_size(raw.length());
+> > -  unsigned padded_length =3D blocksize * k;
+> > -  *prepared =3D raw;
+> > -  if (padded_length - raw.length() > 0) {
+> > -    bufferptr pad(padded_length - raw.length());
+> > -    pad.zero();
+> > -    prepared->push_back(pad);
+> > +  unsigned pad_len =3D blocksize * k - raw.length();
+> > +
+> > +  bufferlist prepared =3D raw;
+> > +
+> > +  if (!prepared.is_aligned()) {
+> > +    prepared.rebuild_aligned();
+> > +  }
+> > +
+> > +  for (unsigned int i =3D 0; i < k - !!pad_len; i++) {
+> > +    int chunk_index =3D chunk_mapping.size() > 0 ? chunk_mapping[i=
+] : i;
+> > +    bufferlist &chunk =3D encoded[chunk_index];
+> > +    chunk.substr_of(prepared, i * blocksize, blocksize);  }
+>=20
+> It is possible for more than one chunk to be padding. It's a border c=
+ase but... for
+> instance with alignment =3D 16, k=3D12 and in of length 1550 you end =
+up with two
+> padding chunks because the blocksize is 144.
+>=20
+> > +  if (pad_len > 0) {
+> > +    int chunk_index =3D chunk_mapping.size() > 0 ? chunk_mapping[k=
+ - 1] : k -
+> 1;
+> > +    bufferlist &chunk =3D encoded[chunk_index];
+> > +    bufferptr padded(buffer::create_aligned(blocksize));
+> > +    raw.copy((k - 1) * blocksize, blocksize - pad_len, padded.c_st=
+r());
+> > +    padded.zero(blocksize - pad_len, pad_len);
+> > +    chunk.push_back(padded);
+> >    }
+> > -  unsigned coding_length =3D blocksize * m;
+> > -  bufferptr coding(buffer::create_page_aligned(coding_length));
+> > -  prepared->push_back(coding);
+> > -  prepared->rebuild_page_aligned();
+> > +  for (unsigned int i =3D k; i < k + m; i++) {
+> > +    int chunk_index =3D chunk_mapping.size() > 0 ? chunk_mapping[i=
+] : i;
+> > +    bufferlist &chunk =3D encoded[chunk_index];
+> > +    chunk.push_back(buffer::create_aligned(blocksize));
+> > +  }
+> > +
+> >    return 0;
+> >  }
+> >
+> > @@ -80,15 +96,9 @@ int ErasureCode::encode(const set<int>
+> &want_to_encode,
+> >    unsigned int k =3D get_data_chunk_count();
+> >    unsigned int m =3D get_chunk_count() - k;
+> >    bufferlist out;
+> > -  int err =3D encode_prepare(in, &out);
+> > +  int err =3D encode_prepare(in, *encoded);
+> >    if (err)
+> >      return err;
+> > -  unsigned blocksize =3D get_chunk_size(in.length());
+> > -  for (unsigned int i =3D 0; i < k + m; i++) {
+> > -    int chunk_index =3D chunk_mapping.size() > 0 ? chunk_mapping[i=
+] : i;
+> > -    bufferlist &chunk =3D (*encoded)[chunk_index];
+> > -    chunk.substr_of(out, i * blocksize, blocksize);
+> > -  }
+> >    encode_chunks(want_to_encode, encoded);
+> >    for (unsigned int i =3D 0; i < k + m; i++) {
+> >      if (want_to_encode.count(i) =3D=3D 0) diff --git
+> > a/src/erasure-code/ErasureCode.h b/src/erasure-code/ErasureCode.h
+> > index 7aaea95..62aa383 100644
+> > --- a/src/erasure-code/ErasureCode.h
+> > +++ b/src/erasure-code/ErasureCode.h
+> > @@ -46,7 +46,8 @@ namespace ceph {
+> >                                              const map<int, int>
+> &available,
+> >                                              set<int> *minimum);
+> >
+> > -    int encode_prepare(const bufferlist &raw, bufferlist *prepared=
+) const;
+> > +    int encode_prepare(const bufferlist &raw,
+> > +                       map<int, bufferlist> &encoded) const;
+> >
+> >      virtual int encode(const set<int> &want_to_encode,
+> >                         const bufferlist &in,
+> >
+>=20
+> --
+> Lo=EFc Dachary, Artisan Logiciel Libre
 
-1. The FDCache.clear() and thus SharedLRU::clear() is not able to remove the object from SharedLRU::weak_refs since the FDCache ref is hold by some other threads. Assert is preventing the FD leak.
-
-2. Now, only lfn_open() other than lfn_unlink() works with fdcache and fdcache.lookup() I removed earlier from the scope of Index lock as part of optimization. We thought in cache of Cache hit there is no need to call get_index() and lock it.
-
-3. Moving fdcache.lookup within index lock seems to be fixing the issue.
-
-4. Now, the logic is matching Firefly.
-
-But, I am not sure whether this should prevent the FD leak in all scenarios. What about the following scenario.
-
-1. Thread A, got the index write lock and got a hit in the fdcache. The FD is returned to the caller. The shared_ptr ref will be still 1.
-
-2. By that time, Thread B tries to remove it from lfn_unlink(). Got the index write lock successfully and called fdcache.clear().
-
-3. At this point, FDRef will not be deleted since thread A is working with it (ref = 1). This will result an assert if the FD is not removed before assert is checking for lookup. A valid race condition.
-
-Somehow, I am not able to hit this scenario and I believe similar race condition are there in Firefly as well.
-
-So, my question is, will the fix on lfn_open() be sufficient ?
-
-Thanks & Regards
-Somnath
-
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-From: ceph-users [mailto:ceph-users-bounces@lists.ceph.com] On Behalf Of Somnath Roy
-Sent: Friday, September 12, 2014 2:02 PM
-To: ceph-users@lists.ceph.com; Sage Weil (sweil@redhat.com)
-Cc: ceph-devel@vger.kernel.org
-Subject: [ceph-users] OSD is crashing during delete operation
-
-Hi,
-
-We are facing a crash while deleting large number of objects. Here is the trace.
-
-2014-09-12 13:48:06.820524 7fb56596d700 -1 os/FDCache.h: In function 'void FDCache::clear(const ghobject_t&)' thread 7fb56596d700 time 2014-09-12 13:48:06.815407
-os/FDCache.h: 89: FAILED assert(!registry[registry_id].lookup(hoid))
-
-ceph version 0.84-998-gfcf8059 (fcf805972124dac1eae18b1cfd286790462b8ec8)
-1: (ceph::__ceph_assert_fail(char const*, char const*, int, char const*)+0x8b) [0xa82a0b]
-2: (FileStore::lfn_unlink(coll_t, ghobject_t const&, SequencerPosition const&, bool)+0x54b) [0x8918eb]
-3: (FileStore::_remove(coll_t, ghobject_t const&, SequencerPosition const&)+0x8b) [0x891d8b]
-4: (FileStore::_do_transaction(ObjectStore::Transaction&, unsigned long, int, ThreadPool::TPHandle*)+0x25ce) [0x8a0fae]
-5: (FileStore::_do_transactions(std::list<ObjectStore::Transaction*, std::allocator<ObjectStore::Transaction*> >&, unsigned long, ThreadPool::TPHandle*)+0x44) [0x8a32a4]
-6: (FileStore::_do_op(FileStore::OpSequencer*, ThreadPool::TPHandle&)+0x169) [0x8a3479]
-7: (ThreadPool::worker(ThreadPool::WorkThread*)+0xac0) [0xa707b0]
-8: (ThreadPool::WorkThread::entry()+0x10) [0xa72b30]
-9: (()+0x7f6e) [0x7fb570cd7f6e]
-10: (clone()+0x6d) [0x7fb56f2c59cd]
-
-Is this a known issue ?
-
-Thanks & Regards
-Somnath
-
-
-________________________________________
-
-PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
