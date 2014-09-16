@@ -1,191 +1,54 @@
-From: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
-Subject: RE: Cache tiering slow request issue: currently waiting for rw locks
-Date: Tue, 16 Sep 2014 08:38:56 +0000
-Message-ID: <06E7D85B3BA36C4DB207FEDE871C5348942F5A@SHSMSX101.ccr.corp.intel.com>
-References: <06E7D85B3BA36C4DB207FEDE871C53489375E2@SHSMSX101.ccr.corp.intel.com>
- <alpine.DEB.2.00.1408290717260.28218@cobra.newdream.net>
- <alpine.DEB.2.00.1408291928410.13709@cobra.newdream.net>
- <06E7D85B3BA36C4DB207FEDE871C53489377A6@SHSMSX101.ccr.corp.intel.com>
- <06E7D85B3BA36C4DB207FEDE871C5348937A78@SHSMSX101.ccr.corp.intel.com>
- <06E7D85B3BA36C4DB207FEDE871C5348938051@SHSMSX101.ccr.corp.intel.com>
- <06E7D85B3BA36C4DB207FEDE871C534893836D@SHSMSX101.ccr.corp.intel.com>
- <alpine.DEB.2.00.1409090930100.17200@cobra.newdream.net>
+From: Daniel Swarbrick <daniel.swarbrick-EIkl63zCoXaH+58JC4qpiA@public.gmane.org>
+Subject: Re: Crushmap ruleset for rack aware PG placement
+Date: Tue, 16 Sep 2014 12:02:36 +0200
+Message-ID: <lv91s9$4j2$1@ger.gmane.org>
+References: <CADgBPFCVUVQZtHNkSsuMhskL2X-FTBTYy6zcav3CRpNCBGHJgg@mail.gmail.com>
+	<alpine.DEB.2.00.1409150826060.513@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga14.intel.com ([192.55.52.115]:27482 "EHLO mga14.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752793AbaIPIjA convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Sep 2014 04:39:00 -0400
-In-Reply-To: <alpine.DEB.2.00.1409090930100.17200@cobra.newdream.net>
-Content-Language: en-US
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: "'sam.just@inktank.com'" <sam.just@inktank.com>, "'ceph-devel@vger.kernel.org'" <ceph-devel@vger.kernel.org>
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.00.1409150826060.513-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-So, for this issue:
-1) Checking the pending request on the obc can't completely solve the problem because of the window.
-2) It's also not a good idea to put a flag in the obc to indicate it's doing promotion. This is because the obc will be deleted after the promotion replication. If making this flag persistent to disk (part of object_info_t) before deletion, we'll need to persist it again when resetting this flag later.
-
-In my original pull request, I added a set in the PG to track all the promoting objects. I updated it with the following changes:
-1) Make it a map to record the time when it starts promotion. If an object stays in this map for more than 60s during eviction, we evict it anyway.
-2) Addressed Sam's comments to clear the map on on_change, and remove the object from the map if the corresponding request is discarded.
-These updates are pushed to the original pull request https://github.com/ceph/ceph/pull/2374. Pls take a look, thx.
-
------Original Message-----
-From: Sage Weil [mailto:sweil@redhat.com] 
-Sent: Wednesday, September 10, 2014 12:35 AM
-To: Wang, Zhiqiang
-Cc: 'sam.just@inktank.com'; 'ceph-devel@vger.kernel.org'
-Subject: RE: Cache tiering slow request issue: currently waiting for rw locks
-
-On Tue, 9 Sep 2014, Wang, Zhiqiang wrote:
-> Pasting the conversations in the pull request here.
-> 
-> wonzhq commented 6 days ago
-> If checking ObjectContext::RWState::waiters and 
-> ObjectContext::RWState::count for the pending requests on this object, 
-> there is still a window which the problem can happen. That is after 
-> the promotion replication and requeuing the client request, and before 
-> dequeuing the client request. Should we loop the OSD::op_wq to check 
-> the pending requests on an object? Or adding something in the 
-> ObjectContext to remember the pending requests? @athanatos @liewegas
-> 
-> liewegas commented 10 hours ago
-> Hmm, that's true that there is still that window. Is it necessary that this is completely air-tight, though? As long as we avoid evicting a newly-promoted object before the request is processed we will win. I'm afraid that a complicated mechanism to cover this could introduce more complexity than we need.
-> 
-> wonzhq commented 2 minutes ago
-> Tried to use ObjectContext::RWState::count to check the pending request. In my testing, it hit the slow request just once. I checked the log, it exactly falls into the window we talked above. So with this solution, it's possible that we still hit this issue, but much less than before. Should we go ahead with this solution?
+On 15/09/14 17:28, Sage Weil wrote:
 >
-> Sage/Sam, what do you think?
+> rule myrule {
+> 	ruleset 1
+> 	type replicated
+> 	min_size 1
+> 	max_size 10
+> 	step take default
+> 	step choose firstn 2 type rack
+> 	step chooseleaf firstn 2 type host
+> 	step emit
+> }
+>
+> That will give you 4 osds, spread across 2 hosts in each rack.  The pool 
+> size (replication factor) is 3, so RADOS will just use the first three (2 
+> hosts in first rack, 1 host in second rack).
 
-I think it is definitely worth adding that check, even if it doesn't catch the requeue case, because it is still useful to defer eviction if there is a request queued for that object.  That seems true at least in the writeback cache mode... perhaps not so in other modes like forward.
+I have a similar requirement, where we currently have four nodes, two in
+each fire zone, with pool size 3. At the moment, due to the number of
+nodes, we are guaranteed at least one replica in each fire zone (which
+we represent with bucket type "room"). If we add more nodes in future,
+the current ruleset may cause all three replicas of a PG to land in a
+single zone.
 
-I'm still not sure what would close the hole reliably.  Perhaps a flag on the obc indicating whether any request has touched it since the initial promote?  Maybe that, coupled with a time limit (so that eventually we can still evict in case the original request never gets processed... e.g. 
-because the client disconnected before it was requeued or something).
+I tried the ruleset suggested above (replacing "rack" with "room"), but
+when testing it with crushtool --test --show-utilization, I simply get
+segfaults. No amount of fiddling around seems to make it work - even
+adding two new hypothetical nodes to the crushmap doesn't help.
 
-?
-
-sage
-
- > 
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org 
-> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Wang, Zhiqiang
-> Sent: Friday, September 5, 2014 3:21 PM
-> To: Sage Weil; 'sam.just@inktank.com'
-> Cc: 'ceph-devel@vger.kernel.org'
-> Subject: RE: Cache tiering slow request issue: currently waiting for 
-> rw locks
-> 
-> I made some comments based on your comments of the pull request https://github.com/ceph/ceph/pull/2374. Can you take a look? Thx.
-> 
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org 
-> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Wang, Zhiqiang
-> Sent: Tuesday, September 2, 2014 2:54 PM
-> To: Sage Weil
-> Cc: 'ceph-devel@vger.kernel.org'
-> Subject: RE: Cache tiering slow request issue: currently waiting for 
-> rw locks
-> 
-> Tried the pull request, checking the object is blocked or not doesn't work. Actually this check is already done in function agent_work.
-> 
-> I tried to make a fix to add a field/flag to the object context. This is not a good idea for the following reasons:
-> 1) If making this filed/flag to be a persistent one, when resetting/clearing this flag, we need to persist it. This is not good for read request.
-> 2) If making this field/flag not to be a persistent one, when the object context is removed from the cache ' object_contexts', this field/flag is removed as well. This object is removed in the later evicting. The same issue still exists.
-> 
-> So, I came up with a fix to add a set in the class ReplicatedPG to hold all the promoting objects. This fix is at https://github.com/ceph/ceph/pull/2374. It is tested and works well. Pls review and comment, thx.
-> 
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org 
-> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Wang, Zhiqiang
-> Sent: Monday, September 1, 2014 9:33 AM
-> To: Sage Weil
-> Cc: 'ceph-devel@vger.kernel.org'
-> Subject: RE: Cache tiering slow request issue: currently waiting for 
-> rw locks
-> 
-> I don't think the object context is blocked at that time. It is un-blocked after the copying of data from base tier. It doesn't address the problem here. Anyway, I'll try it and see.
-> 
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org 
-> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
-> Sent: Saturday, August 30, 2014 10:29 AM
-> To: Wang, Zhiqiang
-> Cc: 'ceph-devel@vger.kernel.org'
-> Subject: Re: Cache tiering slow request issue: currently waiting for 
-> rw locks
-> 
-> Hi,
-> 
-> Can you take a look at https://github.com/ceph/ceph/pull/2363 and see if that addresses the behavior you saw?
-> 
-> Thanks!
-> sage
-> 
-> 
-> On Fri, 29 Aug 2014, Sage Weil wrote:
-> 
-> > Hi,
-> > 
-> > I've opened http://tracker.ceph.com/issues/9285 to track this.
-> > 
-> > I think you're right--we need a check in agent_maybe_evict() that 
-> > will skip objects that are being promoted.  I suspect a flag on the 
-> > ObjectContext is enough?
-> > 
-> > sage
-> > 
-> > 
-> > On Fri, 29 Aug 2014, Wang, Zhiqiang wrote:
-> > 
-> > > Hi all,
-> > > 
-> > > I've ran into this slow request issue some time ago. The problem is like this: when running with cache tieing, there are 'slow request' warning messages in the log file like below.
-> > > 
-> > > 2014-08-29 10:18:24.669763 7f9b20f1b700  0 log [WRN] : 1 slow 
-> > > requests, 1 included below; oldest blocked for > 30.996595 secs
-> > > 2014-08-29 10:18:24.669768 7f9b20f1b700  0 log [WRN] : slow 
-> > > request
-> > > 30.996595 seconds old, received at 2014-08-29 10:17:53.673142: 
-> > > osd_op(client.114176.0:144919 rb.0.17f56.6b8b4567.000000000935 
-> > > [sparse-read 3440640~4096] 45.cf45084b ack+read e26168) v4 
-> > > currently waiting for rw locks
-> > > 
-> > > Recently I made some changes to the log, captured this problem, and finally figured out its root cause. You can check the attachment for the logs.
-> > > 
-> > > Here is the root cause:
-> > > There is a cache miss when doing read. During promotion, after copying the data from base tier osd, the cache tier primary osd replicates the data to other cache tier osds. Some times this takes quite a long time. During this period of time, the promoted object may be evicted because the cache tier is full. When the primary osd finally gets the replication response and restarts the original read request, it doesn't find the object in the cache tier, and do promotion again. This loops for several times, and we'll see the 'slow request' in the logs. Theoretically, this could loops forever, and the request from the client would never be finished.
-> > > 
-> > > There is a simple fix for this:
-> > > Add a field in the object state, indicating the status of the promotion. It's set to true after the copy of data from base tier and before the replication. It's reset to false after the replication and the original client request starts to execute. Evicting is not allowed when this field is true.
-> > > 
-> > > What do you think?
-> > > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
-> > in the body of a message to majordomo@vger.kernel.org More majordomo 
-> > info at  http://vger.kernel.org/majordomo-info.html
-> > 
-> > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
-> in the body of a message to majordomo@vger.kernel.org More majordomo 
-> info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
-> in the body of a message to majordomo@vger.kernel.org More majordomo 
-> info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
-> in the body of a message to majordomo@vger.kernel.org More majordomo 
-> info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
-> in the body of a message to majordomo@vger.kernel.org More majordomo 
-> info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+What could I perhaps be doing wrong?
