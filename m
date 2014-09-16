@@ -1,217 +1,309 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: [PATCH] ceph: request xattrs if xattr_version is zero
-Date: Tue, 16 Sep 2014 15:10:53 +0800
-Message-ID: <1410851453-11107-1-git-send-email-zyan@redhat.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: [PATCH 2/3] ec: make use of added aligned buffers
+Date: Tue, 16 Sep 2014 09:55:11 +0200
+Message-ID: <5417ECDF.3090706@dachary.org>
+References: <1410796508-28711-1-git-send-email-j@jannau.net> <1410796508-28711-2-git-send-email-j@jannau.net> <54171FDD.4070701@dachary.org> <6AA21C22F0A5DA478922644AD2EC308C8C77BB@SHSMSX101.ccr.corp.intel.com> <alpine.DEB.2.00.1409151701490.20829@cobra.newdream.net> <6AA21C22F0A5DA478922644AD2EC308C8C77D4@SHSMSX101.ccr.corp.intel.com> <5417DCEB.8050805@dachary.org> <6AA21C22F0A5DA478922644AD2EC308C8C7911@SHSMSX101.ccr.corp.intel.com>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="9M3gPpuDU9cgjfiPcmmPsM5KSfdQxJUsU"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:34098 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752026AbaIPHLF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 16 Sep 2014 03:11:05 -0400
-Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id s8G7B5UR029206
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
-	for <ceph-devel@vger.kernel.org>; Tue, 16 Sep 2014 03:11:05 -0400
+Received: from mail2.dachary.org ([91.121.57.175]:53084 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1753078AbaIPHzU (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Sep 2014 03:55:20 -0400
+In-Reply-To: <6AA21C22F0A5DA478922644AD2EC308C8C7911@SHSMSX101.ccr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: "Yan, Zheng" <zyan@redhat.com>
+To: "Ma, Jianpeng" <jianpeng.ma@intel.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Following sequence of events can happen.
- - Client releases an inode, queues cap release message.
- - A 'lookup' reply brings the same inode back, but the reply
-   doesn't contain xattrs because MDS didn't receive the cap release
-   message and thought client already has up-to-data xattrs.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--9M3gPpuDU9cgjfiPcmmPsM5KSfdQxJUsU
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-The fix is force sending a getattr request to MDS if xattrs_version is 0.
-The getattr mask is set to CEPH_STAT_CAP_XATTR, so MDS knows client does
-not have xattr.
 
-Signed-off-by: Yan, Zheng <zyan@redhat.com>
----
- fs/ceph/file.c  |  5 ++---
- fs/ceph/inode.c |  8 ++++----
- fs/ceph/ioctl.c |  4 ++--
- fs/ceph/super.h |  2 +-
- fs/ceph/xattr.c | 29 ++++++++++-------------------
- 5 files changed, 19 insertions(+), 29 deletions(-)
 
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index 46a0525f..bf926fb 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -841,8 +841,7 @@ again:
- 	ceph_put_cap_refs(ci, got);
- 
- 	if (checkeof && ret >= 0) {
--		int statret = ceph_do_getattr(inode,
--					      CEPH_STAT_CAP_SIZE);
-+		int statret = ceph_do_getattr(inode, CEPH_STAT_CAP_SIZE, false);
- 
- 		/* hit EOF or hole? */
- 		if (statret == 0 && iocb->ki_pos < inode->i_size &&
-@@ -1010,7 +1009,7 @@ static loff_t ceph_llseek(struct file *file, loff_t offset, int whence)
- 	mutex_lock(&inode->i_mutex);
- 
- 	if (whence == SEEK_END || whence == SEEK_DATA || whence == SEEK_HOLE) {
--		ret = ceph_do_getattr(inode, CEPH_STAT_CAP_SIZE);
-+		ret = ceph_do_getattr(inode, CEPH_STAT_CAP_SIZE, false);
- 		if (ret < 0) {
- 			offset = ret;
- 			goto out;
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index 04c89c2..40e6289 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -1907,7 +1907,7 @@ out_put:
-  * Verify that we have a lease on the given mask.  If not,
-  * do a getattr against an mds.
-  */
--int ceph_do_getattr(struct inode *inode, int mask)
-+int ceph_do_getattr(struct inode *inode, int mask, bool force)
- {
- 	struct ceph_fs_client *fsc = ceph_sb_to_client(inode->i_sb);
- 	struct ceph_mds_client *mdsc = fsc->mdsc;
-@@ -1920,7 +1920,7 @@ int ceph_do_getattr(struct inode *inode, int mask)
- 	}
- 
- 	dout("do_getattr inode %p mask %s mode 0%o\n", inode, ceph_cap_string(mask), inode->i_mode);
--	if (ceph_caps_issued_mask(ceph_inode(inode), mask, 1))
-+	if (!force && ceph_caps_issued_mask(ceph_inode(inode), mask, 1))
- 		return 0;
- 
- 	req = ceph_mdsc_create_request(mdsc, CEPH_MDS_OP_GETATTR, USE_ANY_MDS);
-@@ -1948,7 +1948,7 @@ int ceph_permission(struct inode *inode, int mask)
- 	if (mask & MAY_NOT_BLOCK)
- 		return -ECHILD;
- 
--	err = ceph_do_getattr(inode, CEPH_CAP_AUTH_SHARED);
-+	err = ceph_do_getattr(inode, CEPH_CAP_AUTH_SHARED, false);
- 
- 	if (!err)
- 		err = generic_permission(inode, mask);
-@@ -1966,7 +1966,7 @@ int ceph_getattr(struct vfsmount *mnt, struct dentry *dentry,
- 	struct ceph_inode_info *ci = ceph_inode(inode);
- 	int err;
- 
--	err = ceph_do_getattr(inode, CEPH_STAT_CAP_INODE_ALL);
-+	err = ceph_do_getattr(inode, CEPH_STAT_CAP_INODE_ALL, false);
- 	if (!err) {
- 		generic_fillattr(inode, stat);
- 		stat->ino = ceph_translate_ino(inode->i_sb, inode->i_ino);
-diff --git a/fs/ceph/ioctl.c b/fs/ceph/ioctl.c
-index a822a6e..d7dc812 100644
---- a/fs/ceph/ioctl.c
-+++ b/fs/ceph/ioctl.c
-@@ -19,7 +19,7 @@ static long ceph_ioctl_get_layout(struct file *file, void __user *arg)
- 	struct ceph_ioctl_layout l;
- 	int err;
- 
--	err = ceph_do_getattr(file_inode(file), CEPH_STAT_CAP_LAYOUT);
-+	err = ceph_do_getattr(file_inode(file), CEPH_STAT_CAP_LAYOUT, false);
- 	if (!err) {
- 		l.stripe_unit = ceph_file_layout_su(ci->i_layout);
- 		l.stripe_count = ceph_file_layout_stripe_count(ci->i_layout);
-@@ -74,7 +74,7 @@ static long ceph_ioctl_set_layout(struct file *file, void __user *arg)
- 		return -EFAULT;
- 
- 	/* validate changed params against current layout */
--	err = ceph_do_getattr(file_inode(file), CEPH_STAT_CAP_LAYOUT);
-+	err = ceph_do_getattr(file_inode(file), CEPH_STAT_CAP_LAYOUT, false);
- 	if (err)
- 		return err;
- 
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index 0cfb1ec..8405a79 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -714,7 +714,7 @@ extern void ceph_queue_vmtruncate(struct inode *inode);
- extern void ceph_queue_invalidate(struct inode *inode);
- extern void ceph_queue_writeback(struct inode *inode);
- 
--extern int ceph_do_getattr(struct inode *inode, int mask);
-+extern int ceph_do_getattr(struct inode *inode, int mask, bool force);
- extern int ceph_permission(struct inode *inode, int mask);
- extern int ceph_setattr(struct dentry *dentry, struct iattr *attr);
- extern int ceph_getattr(struct vfsmount *mnt, struct dentry *dentry,
-diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
-index 12f58d2..eab3e2f 100644
---- a/fs/ceph/xattr.c
-+++ b/fs/ceph/xattr.c
-@@ -736,24 +736,20 @@ ssize_t __ceph_getxattr(struct inode *inode, const char *name, void *value,
- 	dout("getxattr %p ver=%lld index_ver=%lld\n", inode,
- 	     ci->i_xattrs.version, ci->i_xattrs.index_version);
- 
--	if (__ceph_caps_issued_mask(ci, CEPH_CAP_XATTR_SHARED, 1) &&
--	    (ci->i_xattrs.index_version >= ci->i_xattrs.version)) {
--		goto get_xattr;
--	} else {
-+	if (ci->i_xattrs.version == 0 ||
-+	    !__ceph_caps_issued_mask(ci, CEPH_CAP_XATTR_SHARED, 1)) {
- 		spin_unlock(&ci->i_ceph_lock);
- 		/* get xattrs from mds (if we don't already have them) */
--		err = ceph_do_getattr(inode, CEPH_STAT_CAP_XATTR);
-+		err = ceph_do_getattr(inode, CEPH_STAT_CAP_XATTR, true);
- 		if (err)
- 			return err;
-+		spin_lock(&ci->i_ceph_lock);
- 	}
- 
--	spin_lock(&ci->i_ceph_lock);
--
- 	err = __build_xattrs(inode);
- 	if (err < 0)
- 		goto out;
- 
--get_xattr:
- 	err = -ENODATA;  /* == ENOATTR */
- 	xattr = __get_xattr(ci, name);
- 	if (!xattr)
-@@ -798,23 +794,18 @@ ssize_t ceph_listxattr(struct dentry *dentry, char *names, size_t size)
- 	dout("listxattr %p ver=%lld index_ver=%lld\n", inode,
- 	     ci->i_xattrs.version, ci->i_xattrs.index_version);
- 
--	if (__ceph_caps_issued_mask(ci, CEPH_CAP_XATTR_SHARED, 1) &&
--	    (ci->i_xattrs.index_version >= ci->i_xattrs.version)) {
--		goto list_xattr;
--	} else {
-+	if (ci->i_xattrs.version == 0 ||
-+	    !__ceph_caps_issued_mask(ci, CEPH_CAP_XATTR_SHARED, 1)) {
- 		spin_unlock(&ci->i_ceph_lock);
--		err = ceph_do_getattr(inode, CEPH_STAT_CAP_XATTR);
-+		err = ceph_do_getattr(inode, CEPH_STAT_CAP_XATTR, true);
- 		if (err)
- 			return err;
-+		spin_lock(&ci->i_ceph_lock);
- 	}
- 
--	spin_lock(&ci->i_ceph_lock);
--
- 	err = __build_xattrs(inode);
- 	if (err < 0)
- 		goto out;
--
--list_xattr:
- 	/*
- 	 * Start with virtual dir xattr names (if any) (including
- 	 * terminating '\0' characters for each).
-@@ -968,7 +959,7 @@ int __ceph_setxattr(struct dentry *dentry, const char *name,
- retry:
- 	issued = __ceph_caps_issued(ci, NULL);
- 	dout("setxattr %p issued %s\n", inode, ceph_cap_string(issued));
--	if (!(issued & CEPH_CAP_XATTR_EXCL))
-+	if (ci->i_xattrs.version == 0 || !(issued & CEPH_CAP_XATTR_EXCL))
- 		goto do_sync;
- 	__build_xattrs(inode);
- 
-@@ -1077,7 +1068,7 @@ retry:
- 	issued = __ceph_caps_issued(ci, NULL);
- 	dout("removexattr %p issued %s\n", inode, ceph_cap_string(issued));
- 
--	if (!(issued & CEPH_CAP_XATTR_EXCL))
-+	if (ci->i_xattrs.version == 0 && !(issued & CEPH_CAP_XATTR_EXCL))
- 		goto do_sync;
- 	__build_xattrs(inode);
- 
--- 
-1.9.3
+On 16/09/2014 08:59, Ma, Jianpeng wrote:
+>> -----Original Message-----
+>> From: Loic Dachary [mailto:loic@dachary.org]
+>> Sent: Tuesday, September 16, 2014 2:47 PM
+>> To: Ma, Jianpeng
+>> Cc: ceph-devel@vger.kernel.org
+>> Subject: Re: [PATCH 2/3] ec: make use of added aligned buffers
+>>
+>>
+>>
+>> On 16/09/2014 02:08, Ma, Jianpeng wrote:
+>>>> -----Original Message-----
+>>>> From: Sage Weil [mailto:sweil@redhat.com]
+>>>> Sent: Tuesday, September 16, 2014 8:02 AM
+>>>> To: Ma, Jianpeng
+>>>> Cc: Loic Dachary; Janne Grunau; ceph-devel@vger.kernel.org
+>>>> Subject: RE: [PATCH 2/3] ec: make use of added aligned buffers
+>>>>
+>>>> On Mon, 15 Sep 2014, Ma, Jianpeng wrote:
+>>>>> If we modify bufferlist::c_str()  to bufferlist::c_str(bool align).=
 
+>>>>> If (align)
+>>>>>   Posix_memalign(data, CEPH_PAGE_SIZE, len) Else
+>>>>>   Origin code.
+>>>>
+>>>> Alignment isn't really a bool, it's an int.  c_str(int align=3D1) ?
+>>>>
+>>> I mean if we need a align memory after bufferlist::c_str. We can set
+>>> the align =3D true; Now bufferlist::c_str depend on the size when usi=
+ng rebuild if
+>> bufferlist have more prt.
+>>>
+>>> BTW, we also can change the rebuild() && rebuild(ptr). Merge two func=
+ into
+>> one rebuild(bool align).
+>>> By judge the parameter align to alloc align memory or not.
+>>>
+>>> Or am I missing something?
+>>
+>> I don't think there is a need for c_str(int align). We make every effo=
+rt to allocate
+>> buffers that are properly aligned. If c_str() does not return an align=
+ed buffer,
+>> the proper fix is to align the allocated buffer at the source, not to =
+allocate a
+>> new aligned buffer and copy the content of the non aligned buffer into=
+ it.
+>>
+>=20
+>> Do you see a reason why that would be a bad way to deal with alignment=
+ ?
+>  We only guarantee memory align after c_str and don't depend on the pre=
+vious steps.
+
+This is a benefit indeed: less room for error in general.
+
+> If encode[i] have more ptr suppose they all aligned memory.
+> But how to guarantee aligned memory after c_str.
+> If bufferlist have more ptr, the aligned memory depend on the size of b=
+ufferlist.
+
+The ErasureCode::encode_prepare prepares the allocated buffer so that
+
+*) it holds enough room to contain all chunks
+*) c_str() on a chunk boundary will return a pointer that does not requir=
+e allocating memory
+
+The ErasureCodeJerasure::get_chunk_size function determines the size of t=
+he buffer allocated by encode_prepare and further guarantees that each ch=
+unk is:
+
+*) size aligned on 16 bytes
+*) memory aligned on 16 bytes so that SIMD instructions can use it withou=
+t moving it
+
+In other words, if c_str() had to re-allocate the buffer because it is no=
+t aligned, it would mean that the allocation of the buffer is not done as=
+ it should.
+
+Cheers
+
+> Jianpeng
+>>
+>> Cheers
+>>
+>>>
+>>> Jianpeng
+>>>> sage
+>>>>
+>>>>>
+>>>>> I think this is simple and correctly code.
+>>>>>
+>>>>> Jianpeng
+>>>>> Thanks!
+>>>>>
+>>>>>> -----Original Message-----
+>>>>>> From: ceph-devel-owner@vger.kernel.org
+>>>>>> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Loic Dachar=
+y
+>>>>>> Sent: Tuesday, September 16, 2014 1:20 AM
+>>>>>> To: Janne Grunau; ceph-devel@vger.kernel.org
+>>>>>> Subject: Re: [PATCH 2/3] ec: make use of added aligned buffers
+>>>>>>
+>>>>>> Hi Janne,
+>>>>>>
+>>>>>> See below:
+>>>>>>
+>>>>>> On 15/09/2014 17:55, Janne Grunau wrote:
+>>>>>>> Requiring page aligned buffers and realigning the input if
+>>>>>>> necessary creates measurable oberhead.
+>> ceph_erasure_code_benchmark
+>>>>>>> is ~30% faster with this change for technique=3Dreed_sol_van,k=3D=
+2,m=3D1.
+>>>>>>>
+>>>>>>> Also prevents a misaligned buffer when
+>>>>>>> bufferlist::c_str(bufferlist) has to allocate a new buffer to
+>>>>>>> provide continuous one. See bug #9408
+>>>>>>>
+>>>>>>> Signed-off-by: Janne Grunau <j@jannau.net>
+>>>>>>> ---
+>>>>>>>  src/erasure-code/ErasureCode.cc | 46
+>>>>>>> +++++++++++++++++++++++++----------------
+>>>>>>>  src/erasure-code/ErasureCode.h  |  3 ++-
+>>>>>>>  2 files changed, 30 insertions(+), 19 deletions(-)
+>>>>>>>
+>>>>>>> diff --git a/src/erasure-code/ErasureCode.cc
+>>>>>>> b/src/erasure-code/ErasureCode.cc index 5953f49..078f60b 100644
+>>>>>>> --- a/src/erasure-code/ErasureCode.cc
+>>>>>>> +++ b/src/erasure-code/ErasureCode.cc
+>>>>>>> @@ -54,22 +54,38 @@ int
+>>>>>> ErasureCode::minimum_to_decode_with_cost(const
+>>>>>>> set<int> &want_to_read,  }
+>>>>>>>
+>>>>>>>  int ErasureCode::encode_prepare(const bufferlist &raw,
+>>>>>>> -                                bufferlist *prepared) const
+>>>>>>> +                                map<int, bufferlist> &encoded)
+>>>>>> const
+>>>>>>>  {
+>>>>>>>    unsigned int k =3D get_data_chunk_count();
+>>>>>>>    unsigned int m =3D get_chunk_count() - k;
+>>>>>>>    unsigned blocksize =3D get_chunk_size(raw.length());
+>>>>>>> -  unsigned padded_length =3D blocksize * k;
+>>>>>>> -  *prepared =3D raw;
+>>>>>>> -  if (padded_length - raw.length() > 0) {
+>>>>>>> -    bufferptr pad(padded_length - raw.length());
+>>>>>>> -    pad.zero();
+>>>>>>> -    prepared->push_back(pad);
+>>>>>>> +  unsigned pad_len =3D blocksize * k - raw.length();
+>>>>>>> +
+>>>>>>> +  bufferlist prepared =3D raw;
+>>>>>>> +
+>>>>>>> +  if (!prepared.is_aligned()) {
+>>>>>>> +    prepared.rebuild_aligned();
+>>>>>>> +  }
+>>>>>>> +
+>>>>>>> +  for (unsigned int i =3D 0; i < k - !!pad_len; i++) {
+>>>>>>> +    int chunk_index =3D chunk_mapping.size() > 0 ? chunk_mapping=
+[i] : i;
+>>>>>>> +    bufferlist &chunk =3D encoded[chunk_index];
+>>>>>>> +    chunk.substr_of(prepared, i * blocksize, blocksize);  }
+>>>>>>
+>>>>>> It is possible for more than one chunk to be padding. It's a borde=
+r
+>>>>>> case but... for instance with alignment =3D 16, k=3D12 and in of l=
+ength
+>>>>>> 1550 you end up with two padding chunks because the blocksize is 1=
+44.
+>>>>>>
+>>>>>>> +  if (pad_len > 0) {
+>>>>>>> +    int chunk_index =3D chunk_mapping.size() > 0 ? chunk_mapping=
+[k
+>>>>>>> + - 1] : k -
+>>>>>> 1;
+>>>>>>> +    bufferlist &chunk =3D encoded[chunk_index];
+>>>>>>> +    bufferptr padded(buffer::create_aligned(blocksize));
+>>>>>>> +    raw.copy((k - 1) * blocksize, blocksize - pad_len, padded.c_=
+str());
+>>>>>>> +    padded.zero(blocksize - pad_len, pad_len);
+>>>>>>> +    chunk.push_back(padded);
+>>>>>>>    }
+>>>>>>> -  unsigned coding_length =3D blocksize * m;
+>>>>>>> -  bufferptr coding(buffer::create_page_aligned(coding_length));
+>>>>>>> -  prepared->push_back(coding);
+>>>>>>> -  prepared->rebuild_page_aligned();
+>>>>>>> +  for (unsigned int i =3D k; i < k + m; i++) {
+>>>>>>> +    int chunk_index =3D chunk_mapping.size() > 0 ? chunk_mapping=
+[i] : i;
+>>>>>>> +    bufferlist &chunk =3D encoded[chunk_index];
+>>>>>>> +    chunk.push_back(buffer::create_aligned(blocksize));
+>>>>>>> +  }
+>>>>>>> +
+>>>>>>>    return 0;
+>>>>>>>  }
+>>>>>>>
+>>>>>>> @@ -80,15 +96,9 @@ int ErasureCode::encode(const set<int>
+>>>>>> &want_to_encode,
+>>>>>>>    unsigned int k =3D get_data_chunk_count();
+>>>>>>>    unsigned int m =3D get_chunk_count() - k;
+>>>>>>>    bufferlist out;
+>>>>>>> -  int err =3D encode_prepare(in, &out);
+>>>>>>> +  int err =3D encode_prepare(in, *encoded);
+>>>>>>>    if (err)
+>>>>>>>      return err;
+>>>>>>> -  unsigned blocksize =3D get_chunk_size(in.length());
+>>>>>>> -  for (unsigned int i =3D 0; i < k + m; i++) {
+>>>>>>> -    int chunk_index =3D chunk_mapping.size() > 0 ? chunk_mapping=
+[i] : i;
+>>>>>>> -    bufferlist &chunk =3D (*encoded)[chunk_index];
+>>>>>>> -    chunk.substr_of(out, i * blocksize, blocksize);
+>>>>>>> -  }
+>>>>>>>    encode_chunks(want_to_encode, encoded);
+>>>>>>>    for (unsigned int i =3D 0; i < k + m; i++) {
+>>>>>>>      if (want_to_encode.count(i) =3D=3D 0) diff --git
+>>>>>>> a/src/erasure-code/ErasureCode.h b/src/erasure-code/ErasureCode.h=
+
+>>>>>>> index 7aaea95..62aa383 100644
+>>>>>>> --- a/src/erasure-code/ErasureCode.h
+>>>>>>> +++ b/src/erasure-code/ErasureCode.h
+>>>>>>> @@ -46,7 +46,8 @@ namespace ceph {
+>>>>>>>                                              const map<int,
+>>>> int>
+>>>>>> &available,
+>>>>>>>                                              set<int>
+>>>> *minimum);
+>>>>>>>
+>>>>>>> -    int encode_prepare(const bufferlist &raw, bufferlist *prepar=
+ed)
+>>>> const;
+>>>>>>> +    int encode_prepare(const bufferlist &raw,
+>>>>>>> +                       map<int, bufferlist> &encoded) const;
+>>>>>>>
+>>>>>>>      virtual int encode(const set<int> &want_to_encode,
+>>>>>>>                         const bufferlist &in,
+>>>>>>>
+>>>>>>
+>>>>>> --
+>>>>>> Lo?c Dachary, Artisan Logiciel Libre
+>>>>>
+>>>>> --
+>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
+l"
+>>>>> in the body of a message to majordomo@vger.kernel.org More majordom=
+o
+>>>>> info at  http://vger.kernel.org/majordomo-info.html
+>>>>>
+>>>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+
+>>> in the body of a message to majordomo@vger.kernel.org More majordomo
+>>> info at  http://vger.kernel.org/majordomo-info.html
+>>>
+>>
+>> --
+>> Lo=EFc Dachary, Artisan Logiciel Libre
+>=20
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+
+
+--9M3gPpuDU9cgjfiPcmmPsM5KSfdQxJUsU
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlQX7N8ACgkQ8dLMyEl6F20iuQCeMGu0AW9Cf44sxJEQdBMmN5cM
+n9gAnR+OC2aijTVsK5DN6GXHBksZhJXT
+=ePX3
+-----END PGP SIGNATURE-----
+
+--9M3gPpuDU9cgjfiPcmmPsM5KSfdQxJUsU--
