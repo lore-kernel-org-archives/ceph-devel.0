@@ -1,429 +1,601 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: [PATCH 3/3] ceph: include the initial ACL in create/mkdir/mknod MDS requests
-Date: Tue, 16 Sep 2014 21:39:19 +0800
-Message-ID: <1410874759-11562-3-git-send-email-zyan@redhat.com>
-References: <1410874759-11562-1-git-send-email-zyan@redhat.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: New Defects reported by Coverity Scan for ceph (fwd)
+Date: Tue, 16 Sep 2014 14:44:44 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1409161444400.20205@cobra.newdream.net>
+Mime-Version: 1.0
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1407779075-1410903884=:20205"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:16835 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753259AbaIPNjg (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 16 Sep 2014 09:39:36 -0400
-Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id s8GDdaW7029434
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
-	for <ceph-devel@vger.kernel.org>; Tue, 16 Sep 2014 09:39:36 -0400
-In-Reply-To: <1410874759-11562-1-git-send-email-zyan@redhat.com>
+Received: from cobra.newdream.net ([66.33.216.30]:46253 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753033AbaIPVop (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Sep 2014 17:44:45 -0400
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id CD4A380079
+	for <ceph-devel@vger.kernel.org>; Tue, 16 Sep 2014 14:44:44 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 51AF880079
+	for <ceph-devel@vger.kernel.org>; Tue, 16 Sep 2014 14:44:44 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
-Cc: "Yan, Zheng" <zyan@redhat.com>
 
-Current code set new file/directory's initial ACL in a non-atomic
-manner.
-Client first sends request to MDS to create new file/directory, then set
-the initial ACL after the new file/directory is successfully created.
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-The fix is include the initial ACL in create/mkdir/mknod MDS requests.
-So MDS can handle creating file/directory and setting the initial ACL in
-one request.
+--557981400-1407779075-1410903884=:20205
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 
-Signed-off-by: Yan, Zheng <zyan@redhat.com>
----
- fs/ceph/acl.c   | 125 ++++++++++++++++++++++++++++++++++++++++++++------------
- fs/ceph/dir.c   |  41 ++++++++++++++-----
- fs/ceph/file.c  |  27 +++++++++---
- fs/ceph/super.h |  24 ++++++++---
- 4 files changed, 170 insertions(+), 47 deletions(-)
 
-diff --git a/fs/ceph/acl.c b/fs/ceph/acl.c
-index cebf2eb..5bd853b 100644
---- a/fs/ceph/acl.c
-+++ b/fs/ceph/acl.c
-@@ -169,36 +169,109 @@ out:
- 	return ret;
- }
- 
--int ceph_init_acl(struct dentry *dentry, struct inode *inode, struct inode *dir)
-+int ceph_pre_init_acls(struct inode *dir, umode_t *mode,
-+		       struct ceph_acls_info *info)
- {
--	struct posix_acl *default_acl, *acl;
--	umode_t new_mode = inode->i_mode;
--	int error;
--
--	error = posix_acl_create(dir, &new_mode, &default_acl, &acl);
--	if (error)
--		return error;
--
--	if (!default_acl && !acl) {
--		cache_no_acl(inode);
--		if (new_mode != inode->i_mode) {
--			struct iattr newattrs = {
--				.ia_mode = new_mode,
--				.ia_valid = ATTR_MODE,
--			};
--			error = ceph_setattr(dentry, &newattrs);
-+	struct posix_acl *acl, *default_acl;
-+	size_t val_size1 = 0, val_size2 = 0;
-+	struct ceph_pagelist *pagelist = NULL;
-+	void *tmp_buf = NULL;
-+	int err;
-+
-+	err = posix_acl_create(dir, mode, &default_acl, &acl);
-+	if (err)
-+		return err;
-+
-+	if (acl) {
-+		int ret = posix_acl_equiv_mode(acl, mode);
-+		if (ret < 0)
-+			goto out_err;
-+		if (ret == 0) {
-+			posix_acl_release(acl);
-+			acl = NULL;
- 		}
--		return error;
- 	}
- 
--	if (default_acl) {
--		error = ceph_set_acl(inode, default_acl, ACL_TYPE_DEFAULT);
--		posix_acl_release(default_acl);
--	}
-+	if (!default_acl && !acl)
-+		return 0;
-+
-+	if (acl)
-+		val_size1 = posix_acl_xattr_size(acl->a_count);
-+	if (default_acl)
-+		val_size2 = posix_acl_xattr_size(default_acl->a_count);
-+
-+	err = -ENOMEM;
-+	tmp_buf = kmalloc(max(val_size1, val_size2), GFP_NOFS);
-+	if (!tmp_buf)
-+		goto out_err;
-+	pagelist = kmalloc(sizeof(struct ceph_pagelist), GFP_NOFS);
-+	if (!pagelist)
-+		goto out_err;
-+	ceph_pagelist_init(pagelist);
-+
-+	err = ceph_pagelist_reserve(pagelist, PAGE_SIZE);
-+	if (err)
-+		goto out_err;
-+
-+	ceph_pagelist_encode_32(pagelist, acl && default_acl ? 2 : 1);
-+
- 	if (acl) {
--		if (!error)
--			error = ceph_set_acl(inode, acl, ACL_TYPE_ACCESS);
--		posix_acl_release(acl);
-+		size_t len = strlen(POSIX_ACL_XATTR_ACCESS);
-+		err = ceph_pagelist_reserve(pagelist, len + val_size1 + 8);
-+		if (err)
-+			goto out_err;
-+		ceph_pagelist_encode_string(pagelist, POSIX_ACL_XATTR_ACCESS,
-+					    len);
-+		err = posix_acl_to_xattr(&init_user_ns, acl,
-+					 tmp_buf, val_size1);
-+		if (err < 0)
-+			goto out_err;
-+		ceph_pagelist_encode_32(pagelist, val_size1);
-+		ceph_pagelist_append(pagelist, tmp_buf, val_size1);
- 	}
--	return error;
-+	if (default_acl) {
-+		size_t len = strlen(POSIX_ACL_XATTR_DEFAULT);
-+		err = ceph_pagelist_reserve(pagelist, len + val_size2 + 8);
-+		if (err)
-+			goto out_err;
-+		err = ceph_pagelist_encode_string(pagelist,
-+						  POSIX_ACL_XATTR_DEFAULT, len);
-+		err = posix_acl_to_xattr(&init_user_ns, default_acl,
-+					 tmp_buf, val_size2);
-+		if (err < 0)
-+			goto out_err;
-+		ceph_pagelist_encode_32(pagelist, val_size2);
-+		ceph_pagelist_append(pagelist, tmp_buf, val_size2);
-+	}
-+
-+	kfree(tmp_buf);
-+
-+	info->acl = acl;
-+	info->default_acl = default_acl;
-+	info->pagelist = pagelist;
-+	return 0;
-+
-+out_err:
-+	posix_acl_release(acl);
-+	posix_acl_release(default_acl);
-+	kfree(tmp_buf);
-+	if (pagelist)
-+		ceph_pagelist_release(pagelist);
-+	return err;
-+}
-+
-+void ceph_init_inode_acls(struct inode* inode, struct ceph_acls_info *info)
-+{
-+	if (!inode)
-+		return;
-+	ceph_set_cached_acl(inode, ACL_TYPE_ACCESS, info->acl);
-+	ceph_set_cached_acl(inode, ACL_TYPE_DEFAULT, info->default_acl);
-+}
-+
-+void ceph_release_acls_info(struct ceph_acls_info *info)
-+{
-+	posix_acl_release(info->acl);
-+	posix_acl_release(info->default_acl);
-+	if (info->pagelist)
-+		ceph_pagelist_release(info->pagelist);
- }
-diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-index c29d6ae..26be849 100644
---- a/fs/ceph/dir.c
-+++ b/fs/ceph/dir.c
-@@ -682,17 +682,22 @@ static int ceph_mknod(struct inode *dir, struct dentry *dentry,
- 	struct ceph_fs_client *fsc = ceph_sb_to_client(dir->i_sb);
- 	struct ceph_mds_client *mdsc = fsc->mdsc;
- 	struct ceph_mds_request *req;
-+	struct ceph_acls_info acls = {};
- 	int err;
- 
- 	if (ceph_snap(dir) != CEPH_NOSNAP)
- 		return -EROFS;
- 
-+	err = ceph_pre_init_acls(dir, &mode, &acls);
-+	if (err < 0)
-+		return err;
-+
- 	dout("mknod in dir %p dentry %p mode 0%ho rdev %d\n",
- 	     dir, dentry, mode, rdev);
- 	req = ceph_mdsc_create_request(mdsc, CEPH_MDS_OP_MKNOD, USE_AUTH_MDS);
- 	if (IS_ERR(req)) {
--		d_drop(dentry);
--		return PTR_ERR(req);
-+		err = PTR_ERR(req);
-+		goto out;
- 	}
- 	req->r_dentry = dget(dentry);
- 	req->r_num_caps = 2;
-@@ -701,15 +706,20 @@ static int ceph_mknod(struct inode *dir, struct dentry *dentry,
- 	req->r_args.mknod.rdev = cpu_to_le32(rdev);
- 	req->r_dentry_drop = CEPH_CAP_FILE_SHARED;
- 	req->r_dentry_unless = CEPH_CAP_FILE_EXCL;
-+	if (acls.pagelist) {
-+		req->r_pagelist = acls.pagelist;
-+		acls.pagelist = NULL;
-+	}
- 	err = ceph_mdsc_do_request(mdsc, dir, req);
- 	if (!err && !req->r_reply_info.head->is_dentry)
- 		err = ceph_handle_notrace_create(dir, dentry);
- 	ceph_mdsc_put_request(req);
--
-+out:
- 	if (!err)
--		ceph_init_acl(dentry, dentry->d_inode, dir);
-+		ceph_init_inode_acls(dentry->d_inode, &acls);
- 	else
- 		d_drop(dentry);
-+	ceph_release_acls_info(&acls);
- 	return err;
- }
- 
-@@ -733,8 +743,8 @@ static int ceph_symlink(struct inode *dir, struct dentry *dentry,
- 	dout("symlink in dir %p dentry %p to '%s'\n", dir, dentry, dest);
- 	req = ceph_mdsc_create_request(mdsc, CEPH_MDS_OP_SYMLINK, USE_AUTH_MDS);
- 	if (IS_ERR(req)) {
--		d_drop(dentry);
--		return PTR_ERR(req);
-+		err = PTR_ERR(req);
-+		goto out;
- 	}
- 	req->r_dentry = dget(dentry);
- 	req->r_num_caps = 2;
-@@ -746,9 +756,8 @@ static int ceph_symlink(struct inode *dir, struct dentry *dentry,
- 	if (!err && !req->r_reply_info.head->is_dentry)
- 		err = ceph_handle_notrace_create(dir, dentry);
- 	ceph_mdsc_put_request(req);
--	if (!err)
--		ceph_init_acl(dentry, dentry->d_inode, dir);
--	else
-+out:
-+	if (err)
- 		d_drop(dentry);
- 	return err;
- }
-@@ -758,6 +767,7 @@ static int ceph_mkdir(struct inode *dir, struct dentry *dentry, umode_t mode)
- 	struct ceph_fs_client *fsc = ceph_sb_to_client(dir->i_sb);
- 	struct ceph_mds_client *mdsc = fsc->mdsc;
- 	struct ceph_mds_request *req;
-+	struct ceph_acls_info acls = {};
- 	int err = -EROFS;
- 	int op;
- 
-@@ -772,6 +782,12 @@ static int ceph_mkdir(struct inode *dir, struct dentry *dentry, umode_t mode)
- 	} else {
- 		goto out;
- 	}
-+
-+	mode |= S_IFDIR;
-+	err = ceph_pre_init_acls(dir, &mode, &acls);
-+	if (err < 0)
-+		goto out;
-+
- 	req = ceph_mdsc_create_request(mdsc, op, USE_AUTH_MDS);
- 	if (IS_ERR(req)) {
- 		err = PTR_ERR(req);
-@@ -784,15 +800,20 @@ static int ceph_mkdir(struct inode *dir, struct dentry *dentry, umode_t mode)
- 	req->r_args.mkdir.mode = cpu_to_le32(mode);
- 	req->r_dentry_drop = CEPH_CAP_FILE_SHARED;
- 	req->r_dentry_unless = CEPH_CAP_FILE_EXCL;
-+	if (acls.pagelist) {
-+		req->r_pagelist = acls.pagelist;
-+		acls.pagelist = NULL;
-+	}
- 	err = ceph_mdsc_do_request(mdsc, dir, req);
- 	if (!err && !req->r_reply_info.head->is_dentry)
- 		err = ceph_handle_notrace_create(dir, dentry);
- 	ceph_mdsc_put_request(req);
- out:
- 	if (!err)
--		ceph_init_acl(dentry, dentry->d_inode, dir);
-+		ceph_init_inode_acls(dentry->d_inode, &acls);
- 	else
- 		d_drop(dentry);
-+	ceph_release_acls_info(&acls);
- 	return err;
- }
- 
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index e520317..1c1df08 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -235,6 +235,7 @@ int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
- 	struct ceph_mds_client *mdsc = fsc->mdsc;
- 	struct ceph_mds_request *req;
- 	struct dentry *dn;
-+	struct ceph_acls_info acls = {};
- 	int err;
- 
- 	dout("atomic_open %p dentry %p '%.*s' %s flags %d mode 0%o\n",
-@@ -248,22 +249,34 @@ int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
- 	if (err < 0)
- 		return err;
- 
-+	if (flags & O_CREAT) {
-+		err = ceph_pre_init_acls(dir, &mode, &acls);
-+		if (err < 0)
-+			return err;
-+	}
-+
- 	/* do the open */
- 	req = prepare_open_request(dir->i_sb, flags, mode);
--	if (IS_ERR(req))
--		return PTR_ERR(req);
-+	if (IS_ERR(req)) {
-+		err = PTR_ERR(req);
-+		goto out_acl;
-+	}
- 	req->r_dentry = dget(dentry);
- 	req->r_num_caps = 2;
- 	if (flags & O_CREAT) {
- 		req->r_dentry_drop = CEPH_CAP_FILE_SHARED;
- 		req->r_dentry_unless = CEPH_CAP_FILE_EXCL;
-+		if (acls.pagelist) {
-+			req->r_pagelist = acls.pagelist;
-+			acls.pagelist = NULL;
-+		}
- 	}
- 	req->r_locked_dir = dir;           /* caller holds dir->i_mutex */
- 	err = ceph_mdsc_do_request(mdsc,
- 				   (flags & (O_CREAT|O_TRUNC)) ? dir : NULL,
- 				   req);
- 	if (err)
--		goto out_err;
-+		goto out_req;
- 
- 	err = ceph_handle_snapdir(req, dentry, err);
- 	if (err == 0 && (flags & O_CREAT) && !req->r_reply_info.head->is_dentry)
-@@ -278,7 +291,7 @@ int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
- 		dn = NULL;
- 	}
- 	if (err)
--		goto out_err;
-+		goto out_req;
- 	if (dn || dentry->d_inode == NULL || S_ISLNK(dentry->d_inode->i_mode)) {
- 		/* make vfs retry on splice, ENOENT, or symlink */
- 		dout("atomic_open finish_no_open on dn %p\n", dn);
-@@ -286,15 +299,17 @@ int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
- 	} else {
- 		dout("atomic_open finish_open on dn %p\n", dn);
- 		if (req->r_op == CEPH_MDS_OP_CREATE && req->r_reply_info.has_create_ino) {
--			ceph_init_acl(dentry, dentry->d_inode, dir);
-+			ceph_init_inode_acls(dentry->d_inode, &acls);
- 			*opened |= FILE_CREATED;
- 		}
- 		err = finish_open(file, dentry, ceph_open, opened);
- 	}
--out_err:
-+out_req:
- 	if (!req->r_err && req->r_target_inode)
- 		ceph_put_fmode(ceph_inode(req->r_target_inode), req->r_fmode);
- 	ceph_mdsc_put_request(req);
-+out_acl:
-+	ceph_release_acls_info(&acls);
- 	dout("atomic_open result=%d\n", err);
- 	return err;
- }
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index bbb44cd..f62a098 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -733,15 +733,23 @@ extern void __ceph_build_xattrs_blob(struct ceph_inode_info *ci);
- extern void __ceph_destroy_xattrs(struct ceph_inode_info *ci);
- extern void __init ceph_xattr_init(void);
- extern void ceph_xattr_exit(void);
-+extern const struct xattr_handler *ceph_xattr_handlers[];
- 
- /* acl.c */
--extern const struct xattr_handler *ceph_xattr_handlers[];
-+struct ceph_acls_info {
-+	void *default_acl;
-+	void *acl;
-+	struct ceph_pagelist *pagelist;
-+};
- 
- #ifdef CONFIG_CEPH_FS_POSIX_ACL
- 
- struct posix_acl *ceph_get_acl(struct inode *, int);
- int ceph_set_acl(struct inode *inode, struct posix_acl *acl, int type);
--int ceph_init_acl(struct dentry *, struct inode *, struct inode *);
-+int ceph_pre_init_acls(struct inode *dir, umode_t *mode,
-+		       struct ceph_acls_info *info);
-+void ceph_init_inode_acls(struct inode *inode, struct ceph_acls_info *info);
-+void ceph_release_acls_info(struct ceph_acls_info *info);
- 
- static inline void ceph_forget_all_cached_acls(struct inode *inode)
- {
-@@ -753,12 +761,18 @@ static inline void ceph_forget_all_cached_acls(struct inode *inode)
- #define ceph_get_acl NULL
- #define ceph_set_acl NULL
- 
--static inline int ceph_init_acl(struct dentry *dentry, struct inode *inode,
--				struct inode *dir)
-+static inline int ceph_pre_init_acls(struct inode *dir, umode_t *mode,
-+				     struct ceph_acls_info *info)
- {
- 	return 0;
- }
--
-+static inline void ceph_init_inode_acls(struct inode *inode,
-+					struct ceph_acls_info *info)
-+{
-+}
-+static inline void ceph_release_acls_info(struct ceph_acls_info *info)
-+{
-+}
- static inline int ceph_acl_chmod(struct dentry *dentry, struct inode *inode)
- {
- 	return 0;
--- 
-1.9.3
+--557981400-1407779075-1410903884=:20205
+Content-Type: MESSAGE/RFC822; CHARSET=US-ASCII
+Content-ID: <alpine.DEB.2.00.1409161444410.20205@cobra.newdream.net>
+Content-Description: Forwarded Message
+Content-Disposition: inline
 
+Return-Path: <scan-admin@coverity.com>
+X-Original-To: sage@cobra.newdream.net
+Delivered-To: sage@cobra.newdream.net
+Received: from destro.newdream.net (destro.newdream.net [66.33.216.68])
+	by cobra.newdream.net (Postfix) with ESMTP id 412E980079
+	for <sage@cobra.newdream.net>; Tue, 16 Sep 2014 14:40:14 -0700 (PDT)
+Received: by destro.newdream.net (Postfix)
+	id 3F3C6120F20; Tue, 16 Sep 2014 14:40:14 -0700 (PDT)
+Delivered-To: sage@destro.newdream.net
+Received: from diehard.dreamhost.com (caiajhbdcbfh.dreamhost.com
+	[208.97.132.157])
+	by destro.newdream.net (Postfix) with ESMTP id 3C648120EDD
+	for <sage@newdream.net>; Tue, 16 Sep 2014 14:40:14 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+	by diehard.dreamhost.com (Postfix) with ESMTP id 389C217BE011
+	for <sage@newdream.net>; Tue, 16 Sep 2014 14:40:14 -0700 (PDT)
+X-DH-Virus-Scanned: Debian amavisd-new at diehard.dreamhost.com
+X-Spam-Flag: NO
+X-Spam-Score: 0
+X-Spam-Level: 
+X-Spam-Status: No, score=x tagged_above=-999 required=999 WHITELISTED tests=[]
+	autolearn=unavailable
+Received: from connor.dreamhost.com ([208.97.132.17])
+	by localhost (diehard.dreamhost.com [208.97.132.157]) (amavisd-new,
+	port 10024) with ESMTP id Hsg7ZYYKjjjK for <sage@newdream.net>;
+	Tue, 16 Sep 2014 14:40:14 -0700 (PDT)
+Received: from scanrelay.coverity.com (scanrelay.coverity.com [209.249.196.67])
+	by connor.dreamhost.com (Postfix) with ESMTP id C25F32CA802C
+	for <sage@newdream.net>; Tue, 16 Sep 2014 14:40:13 -0700 (PDT)
+Received: from localhost.localdomain ([208.69.177.215]) by
+	scanrelay.coverity.com with Microsoft SMTPSVC(7.5.7601.17514);
+	Tue, 16 Sep 2014 14:40:17 -0700
+Date: Tue, 16 Sep 2014 14:40:12 -0700
+From: scan-admin@coverity.com
+Message-ID: <5418ae3ce3e39_2a5b6c7334536a4@scan.coverity.com.mail>
+Subject: New Defects reported by Coverity Scan for ceph
+Mime-Version: 1.0
+Content-Type: text/plain;
+ charset=UTF-8
+Content-Transfer-Encoding: 7bit
+X-OriginalArrivalTime: 16 Sep 2014 21:40:17.0838 (UTC)
+	FILETIME=[CEC794E0:01CFD1F6]
+To: undisclosed-recipients:;
+X-Spambayes-Classification: ham; 0.00
+
+
+
+Hi,
+
+
+Please find the latest report on new defect(s) introduced to ceph found with Coverity Scan.
+
+Defect(s) Reported-by: Coverity Scan
+Showing 20 of 38 defect(s)
+
+
+** CID 717233:  Uninitialized scalar field  (UNINIT_CTOR)
+/mds/Capability.h: 249 in Capability::Capability(CInode *, unsigned long, client_t)()
+
+** CID 1238869:  Value not atomically updated  (ATOMICITY)
+/osdc/Objecter.cc: 3055 in Objecter::handle_pool_op_reply(MPoolOpReply *)()
+/osdc/Objecter.cc: 3055 in Objecter::handle_pool_op_reply(MPoolOpReply *)()
+/osdc/Objecter.cc: 3055 in Objecter::handle_pool_op_reply(MPoolOpReply *)()
+
+** CID 1238870:  Unchecked return value  (CHECKED_RETURN)
+/test/test_snap_mapper.cc: 562 in MapperVerifier::remove_oid()()
+
+** CID 1238871:  Dereference after null check  (FORWARD_NULL)
+/mds/Server.cc: 6988 in Server::do_rename_rollback(ceph::buffer::list &, int, std::tr1::shared_ptr<MDRequestImpl> &, bool)()
+/mds/Server.cc: 7107 in Server::do_rename_rollback(ceph::buffer::list &, int, std::tr1::shared_ptr<MDRequestImpl> &, bool)()
+
+** CID 1238872:  Unchecked return value  (CHECKED_RETURN)
+/tools/ceph_objectstore_tool.cc: 1284 in do_import_rados(std::basic_string<char, std::char_traits<char>, std::allocator<char>>)()
+
+** CID 1238873:  Unchecked return value  (CHECKED_RETURN)
+/rbd_replay/Replayer.cc: 154 in rbd_replay::Replayer::run(const std::basic_string<char, std::char_traits<char>, std::allocator<char>>&)()
+
+** CID 1238874:  Missing unlock  (LOCK)
+/osdc/Objecter.cc: 1855 in Objecter::op_cancel(Objecter::OSDSession *, unsigned long, int)()
+
+** CID 1238875:  Unrecoverable parse warning  (PARSE_ERROR)
+/client/Client.cc: 7737 in ()
+
+** CID 1238876:  Unrecoverable parse warning  (PARSE_ERROR)
+/client/Client.cc: 7735 in ()
+
+** CID 1238877:  Missing unlock  (LOCK)
+/common/Timer.cc: 240 in RWTimer::shutdown()()
+
+** CID 1238878:  Unrecoverable parse warning  (PARSE_ERROR)
+/client/Client.cc: 7734 in ()
+
+** CID 1238879:  Thread deadlock  (ORDER_REVERSAL)
+
+
+** CID 1238880:  Thread deadlock  (ORDER_REVERSAL)
+
+
+
+** CID 1238881:  Thread deadlock  (ORDER_REVERSAL)
+
+
+
+** CID 1238882:  Thread deadlock  (ORDER_REVERSAL)
+
+
+** CID 1238883:  Improper use of negative value  (NEGATIVE_RETURNS)
+/mds/MDS.cc: 962 in MDS::handle_mds_map(MMDSMap *)()
+
+** CID 1238884:  Unrecoverable parse warning  (PARSE_ERROR)
+/client/Client.cc: 7733 in ()
+
+** CID 1238885:  Thread deadlock  (ORDER_REVERSAL)
+
+
+** CID 1238886:  Thread deadlock  (ORDER_REVERSAL)
+
+
+** CID 1238887:  Thread deadlock  (ORDER_REVERSAL)
+
+
+
+________________________________________________________________________________________________________
+*** CID 717233:  Uninitialized scalar field  (UNINIT_CTOR)
+/mds/Capability.h: 249 in Capability::Capability(CInode *, unsigned long, client_t)()
+243         suppress(0), state(0),
+244         client_follows(0), client_xattr_version(0),
+245         client_inline_version(0),
+246         item_session_caps(this), item_snaprealm_caps(this), item_revoking_caps(this) {
+247         g_num_cap++;
+248         g_num_capa++;
+>>>     CID 717233:  Uninitialized scalar field  (UNINIT_CTOR)
+>>>     Non-static class member "num_revoke_warnings" is not initialized in this constructor nor in any functions that it calls.
+249       }
+250       ~Capability() {
+251         g_num_cap--;
+252         g_num_caps++;
+253       }
+254     
+
+________________________________________________________________________________________________________
+*** CID 1238869:  Value not atomically updated  (ATOMICITY)
+/osdc/Objecter.cc: 3055 in Objecter::handle_pool_op_reply(MPoolOpReply *)()
+3049         if (!rwlock.is_wlocked()) {
+3050           rwlock.unlock();
+3051           rwlock.get_write();
+3052         }
+3053         iter = pool_ops.find(tid);
+3054         if (iter != pool_ops.end()) {
+>>>     CID 1238869:  Value not atomically updated  (ATOMICITY)
+>>>     Using an unreliable value of "op" inside the second locked section. If the data that "op" depends on was changed by another thread, this use might be incorrect.
+3055           _finish_pool_op(op);
+3056         }
+3057       } else {
+3058         ldout(cct, 10) << "unknown request " << tid << dendl;
+3059       }
+3060       rwlock.unlock();
+/osdc/Objecter.cc: 3055 in Objecter::handle_pool_op_reply(MPoolOpReply *)()
+3049         if (!rwlock.is_wlocked()) {
+3050           rwlock.unlock();
+3051           rwlock.get_write();
+3052         }
+3053         iter = pool_ops.find(tid);
+3054         if (iter != pool_ops.end()) {
+>>>     CID 1238869:  Value not atomically updated  (ATOMICITY)
+>>>     Using an unreliable value of "op" inside the second locked section. If the data that "op" depends on was changed by another thread, this use might be incorrect.
+3055           _finish_pool_op(op);
+3056         }
+3057       } else {
+3058         ldout(cct, 10) << "unknown request " << tid << dendl;
+3059       }
+3060       rwlock.unlock();
+/osdc/Objecter.cc: 3055 in Objecter::handle_pool_op_reply(MPoolOpReply *)()
+3049         if (!rwlock.is_wlocked()) {
+3050           rwlock.unlock();
+3051           rwlock.get_write();
+3052         }
+3053         iter = pool_ops.find(tid);
+3054         if (iter != pool_ops.end()) {
+>>>     CID 1238869:  Value not atomically updated  (ATOMICITY)
+>>>     Using an unreliable value of "op" inside the second locked section. If the data that "op" depends on was changed by another thread, this use might be incorrect.
+3055           _finish_pool_op(op);
+3056         }
+3057       } else {
+3058         ldout(cct, 10) << "unknown request " << tid << dendl;
+3059       }
+3060       rwlock.unlock();
+
+________________________________________________________________________________________________________
+*** CID 1238870:  Unchecked return value  (CHECKED_RETURN)
+/test/test_snap_mapper.cc: 562 in MapperVerifier::remove_oid()()
+556     	snap_to_hobject.find(*i);
+557           assert(j->second.count(obj->first));
+558           j->second.erase(obj->first);
+559         }
+560         {
+561           PausyAsyncMap::Transaction t;
+>>>     CID 1238870:  Unchecked return value  (CHECKED_RETURN)
+>>>     Calling "remove_oid" without checking return value (as is done elsewhere 8 out of 10 times).
+562           mapper->remove_oid(
+563     	obj->first,
+564     	&t);
+565           driver->submit(&t);
+566         }
+567         hobject_to_snap.erase(obj);
+
+________________________________________________________________________________________________________
+*** CID 1238871:  Dereference after null check  (FORWARD_NULL)
+/mds/Server.cc: 6988 in Server::do_rename_rollback(ceph::buffer::list &, int, std::tr1::shared_ptr<MDRequestImpl> &, bool)()
+6982       // slave
+6983       assert(!destdn || destdn->authority().first != whoami);
+6984       assert(!straydn || straydn->authority().first != whoami);
+6985     
+6986       bool force_journal_src = false;
+6987       bool force_journal_dest = false;
+>>>     CID 1238871:  Dereference after null check  (FORWARD_NULL)
+>>>     Passing null pointer "srcdn" to "authority", which dereferences it. (The dereference happens because this is a virtual function call.)
+6988       if (in && in->is_dir() && srcdn->authority().first != whoami)
+6989         force_journal_src = _need_force_journal(in, false);
+6990       if (in && target && target->is_dir())
+6991         force_journal_dest = _need_force_journal(in, true);
+6992       
+6993       version_t srcdnpv = 0;
+/mds/Server.cc: 7107 in Server::do_rename_rollback(ceph::buffer::list &, int, std::tr1::shared_ptr<MDRequestImpl> &, bool)()
+7101         le->commit.add_primary_dentry(target->get_projected_parent_dn(), target, true);
+7102       }
+7103     
+7104       if (force_journal_dest) {
+7105         dout(10) << " noting rename target ino " << target->ino() << " in metablob" << dendl;
+7106         le->commit.renamed_dirino = target->ino();
+>>>     CID 1238871:  Dereference after null check  (FORWARD_NULL)
+>>>     Passing null pointer "srcdn" to "authority", which dereferences it. (The dereference happens because this is a virtual function call.)
+7107       } else if (force_journal_src || (in && in->is_dir() && srcdn->authority().first == whoami)) {
+7108         dout(10) << " noting renamed dir ino " << in->ino() << " in metablob" << dendl;
+7109         le->commit.renamed_dirino = in->ino();
+7110       }
+7111       
+7112       if (target && target->is_dir()) {
+
+________________________________________________________________________________________________________
+*** CID 1238872:  Unchecked return value  (CHECKED_RETURN)
+/tools/ceph_objectstore_tool.cc: 1284 in do_import_rados(std::basic_string<char, std::char_traits<char>, std::allocator<char>>)()
+1278       }
+1279       ret = cluster.conf_parse_env(NULL);
+1280       if (ret) {
+1281         cerr << "Error " << ret << " in cluster.conf_read_env" << std::endl;
+1282         return ret;
+1283       }
+>>>     CID 1238872:  Unchecked return value  (CHECKED_RETURN)
+>>>     Calling "connect" without checking return value (as is done elsewhere 14 out of 17 times).
+1284       cluster.connect();
+1285     
+1286       ret = cluster.ioctx_create(pool.c_str(), ioctx);
+1287       if (ret < 0) {
+1288         cerr << "ioctx_create " << pool << " failed with " << ret << std::endl;
+1289         return ret;
+
+________________________________________________________________________________________________________
+*** CID 1238873:  Unchecked return value  (CHECKED_RETURN)
+/rbd_replay/Replayer.cc: 154 in rbd_replay::Replayer::run(const std::basic_string<char, std::char_traits<char>, std::allocator<char>>&)()
+148       return m_action_trackers[id % m_num_action_trackers];
+149     }
+150     
+151     void Replayer::run(const std::string& replay_file) {
+152       {
+153         librados::Rados rados;
+>>>     CID 1238873:  Unchecked return value  (CHECKED_RETURN)
+>>>     Calling "init" without checking return value (as is done elsewhere 11 out of 12 times).
+154         rados.init(NULL);
+155         int r = rados.init_with_context(g_ceph_context);
+156         if (r) {
+157           cerr << "Unable to read conf file: " << r << std::endl;
+158           goto out;
+159         }
+
+________________________________________________________________________________________________________
+*** CID 1238874:  Missing unlock  (LOCK)
+/osdc/Objecter.cc: 1855 in Objecter::op_cancel(Objecter::OSDSession *, unsigned long, int)()
+1849     
+1850       s->lock.get_write();
+1851     
+1852       map<ceph_tid_t, Op*>::iterator p = s->ops.find(tid);
+1853       if (p == s->ops.end()) {
+1854         ldout(cct, 10) << __func__ << " tid " << tid << " dne" << dendl;
+>>>     CID 1238874:  Missing unlock  (LOCK)
+>>>     Returning without unlocking "s->lock.L".
+1855         return -ENOENT;
+1856       }
+1857     
+1858       if (s->con) {
+1859         ldout(cct, 20) << " revoking rx buffer for " << tid
+1860     		   << " on " << s->con << dendl;
+
+________________________________________________________________________________________________________
+*** CID 1238875:  Unrecoverable parse warning  (PARSE_ERROR)
+/client/Client.cc: 7737 in ()
+7731     const Client::VXattr Client::_dir_vxattrs[] = {
+7732       {
+7733         name: "ceph.dir.layout",
+7734         getxattr_cb: &Client::_vxattrcb_layout,
+7735         readonly: false,
+7736         hidden: true,
+>>>     CID 1238875:  Unrecoverable parse warning  (PARSE_ERROR)
+>>>     designator may not specify a non-POD subobject
+7737         exists_cb: &Client::_vxattrcb_layout_exists,
+7738       },
+7739       XATTR_LAYOUT_FIELD(dir, layout, stripe_unit),
+7740       XATTR_LAYOUT_FIELD(dir, layout, stripe_count),
+7741       XATTR_LAYOUT_FIELD(dir, layout, object_size),
+7742       XATTR_LAYOUT_FIELD(dir, layout, pool),
+
+________________________________________________________________________________________________________
+*** CID 1238876:  Unrecoverable parse warning  (PARSE_ERROR)
+/client/Client.cc: 7735 in ()
+7729     }
+7730     
+7731     const Client::VXattr Client::_dir_vxattrs[] = {
+7732       {
+7733         name: "ceph.dir.layout",
+7734         getxattr_cb: &Client::_vxattrcb_layout,
+>>>     CID 1238876:  Unrecoverable parse warning  (PARSE_ERROR)
+>>>     designator may not specify a non-POD subobject
+7735         readonly: false,
+7736         hidden: true,
+7737         exists_cb: &Client::_vxattrcb_layout_exists,
+7738       },
+7739       XATTR_LAYOUT_FIELD(dir, layout, stripe_unit),
+7740       XATTR_LAYOUT_FIELD(dir, layout, stripe_count),
+
+________________________________________________________________________________________________________
+*** CID 1238877:  Missing unlock  (LOCK)
+/common/Timer.cc: 240 in RWTimer::shutdown()()
+234         rwlock.unlock();
+235         thread->join();
+236         rwlock.get_write();
+237         delete thread;
+238         thread = NULL;
+239       }
+>>>     CID 1238877:  Missing unlock  (LOCK)
+>>>     Returning without unlocking "this->rwlock->L".
+240     }
+241     
+242     void RWTimer::timer_thread()
+243     {
+244       rwlock.get_write();
+245       ldout(cct,10) << "timer_thread starting" << dendl;
+
+________________________________________________________________________________________________________
+*** CID 1238878:  Unrecoverable parse warning  (PARSE_ERROR)
+/client/Client.cc: 7734 in ()
+7728       exists_cb: &Client::_vxattrcb_layout_exists,			\
+7729     }
+7730     
+7731     const Client::VXattr Client::_dir_vxattrs[] = {
+7732       {
+7733         name: "ceph.dir.layout",
+>>>     CID 1238878:  Unrecoverable parse warning  (PARSE_ERROR)
+>>>     designator may not specify a non-POD subobject
+7734         getxattr_cb: &Client::_vxattrcb_layout,
+7735         readonly: false,
+7736         hidden: true,
+7737         exists_cb: &Client::_vxattrcb_layout_exists,
+7738       },
+7739       XATTR_LAYOUT_FIELD(dir, layout, stripe_unit),
+
+________________________________________________________________________________________________________
+*** CID 1238879:  Thread deadlock  (ORDER_REVERSAL)
+/librados/IoCtxImpl.cc: 1122 in librados::IoCtxImpl::notify(const object_t &, unsigned long, ceph::buffer::list &)()
+1116       prepare_assert_ops(&rd);
+1117       rd.notify(cookie, ver, inbl);
+1118     
+1119       // Issue RADOS op
+1120       C_SaferCond onack;
+1121       version_t objver;
+>>>     CID 1238879:  Thread deadlock  (ORDER_REVERSAL)
+>>>     Calling "linger_read" acquires lock "RWLock.L" while holding lock "Mutex._m" (count: 14 / 29).
+1122       wc->linger_id = objecter->linger_read(oid, oloc, rd, snap_seq, inbl, NULL, 0,
+1123     					&onack, &objver);
+1124       lock->Unlock();
+1125     
+1126       ldout(client->cct, 10) << __func__ << " issued linger op " << wc->linger_id << dendl;
+1127       int r_issue = onack.wait();
+
+________________________________________________________________________________________________________
+*** CID 1238880:  Thread deadlock  (ORDER_REVERSAL)
+/test/osd/RadosModel.h: 728 in WriteOp::_begin()()
+722         if (do_append) {
+723           ObjectDesc old_value;
+724           bool found = context->find_object(oid, &old_value);
+725           uint64_t prev_length = found && old_value.has_contents() ?
+726     	old_value.most_recent_gen()->get_length(old_value.most_recent()) :
+727     	0;
+>>>     CID 1238880:  Thread deadlock  (ORDER_REVERSAL)
+>>>     Calling "pool_required_alignment" acquires lock "RWLock.L" while holding lock "Mutex._m" (count: 14 / 29).
+728           cont_gen = new AppendGenerator(
+729     	prev_length,
+730     	(context->io_ctx.pool_requires_alignment() ?
+731     	 context->io_ctx.pool_required_alignment() : 0),
+732     	context->min_stride_size,
+733     	context->max_stride_size,
+/test/osd/RadosModel.h: 728 in WriteOp::_begin()()
+722         if (do_append) {
+723           ObjectDesc old_value;
+724           bool found = context->find_object(oid, &old_value);
+725           uint64_t prev_length = found && old_value.has_contents() ?
+726     	old_value.most_recent_gen()->get_length(old_value.most_recent()) :
+727     	0;
+>>>     CID 1238880:  Thread deadlock  (ORDER_REVERSAL)
+>>>     Calling "pool_requires_alignment" acquires lock "RWLock.L" while holding lock "Mutex._m" (count: 14 / 29).
+728           cont_gen = new AppendGenerator(
+729     	prev_length,
+730     	(context->io_ctx.pool_requires_alignment() ?
+731     	 context->io_ctx.pool_required_alignment() : 0),
+732     	context->min_stride_size,
+733     	context->max_stride_size,
+
+________________________________________________________________________________________________________
+*** CID 1238881:  Thread deadlock  (ORDER_REVERSAL)
+/test/osd/RadosModel.h: 1251 in SnapRemoveOp::_begin()()
+1245         uint64_t snap = context->snaps[to_remove];
+1246         context->remove_snap(to_remove);
+1247     
+1248         if (context->pool_snaps) {
+1249           string snapname;
+1250     
+>>>     CID 1238881:  Thread deadlock  (ORDER_REVERSAL)
+>>>     Calling "snap_get_name" acquires lock "RWLock.L" while holding lock "Mutex._m" (count: 14 / 29).
+1251           assert(!context->io_ctx.snap_get_name(snap, &snapname));
+1252           assert(!context->io_ctx.snap_remove(snapname.c_str()));
+1253          } else {
+1254           assert(!context->io_ctx.selfmanaged_snap_remove(snap));
+1255     
+1256           vector<uint64_t> snapset(context->snaps.size());
+/test/osd/RadosModel.h: 1252 in SnapRemoveOp::_begin()()
+1246         context->remove_snap(to_remove);
+1247     
+1248         if (context->pool_snaps) {
+1249           string snapname;
+1250     
+1251           assert(!context->io_ctx.snap_get_name(snap, &snapname));
+>>>     CID 1238881:  Thread deadlock  (ORDER_REVERSAL)
+>>>     Calling "snap_remove" acquires lock "RWLock.L" while holding lock "Mutex._m" (count: 14 / 29).
+1252           assert(!context->io_ctx.snap_remove(snapname.c_str()));
+1253          } else {
+1254           assert(!context->io_ctx.selfmanaged_snap_remove(snap));
+1255     
+1256           vector<uint64_t> snapset(context->snaps.size());
+1257           int j = 0;
+
+________________________________________________________________________________________________________
+*** CID 1238882:  Thread deadlock  (ORDER_REVERSAL)
+/librados/RadosClient.cc: 786 in librados::RadosClient::osd_command(int, std::vector<std::basic_string<char, std::char_traits<char>, std::allocator<char>>, std::allocator<std::basic_string<char, std::char_traits<char>, std::allocator<char>>>> &, const ceph::buffer::list &, ceph::buffer::list *, std::basic_string<char, std::char_traits<char>, std::allocator<char>>*)()
+780     
+781       if (osd < 0)
+782         return -EINVAL;
+783     
+784       lock.Lock();
+785       // XXX do anything with tid?
+>>>     CID 1238882:  Thread deadlock  (ORDER_REVERSAL)
+>>>     Calling "osd_command" acquires lock "RWLock.L" while holding lock "Mutex._m" (count: 14 / 29).
+786       int r = objecter->osd_command(osd, cmd, inbl, &tid, poutbl, prs,
+787     			 new C_SafeCond(&mylock, &cond, &done, &ret));
+788       lock.Unlock();
+789       if (r != 0)
+790         return r;
+791       mylock.Lock();
+
+________________________________________________________________________________________________________
+*** CID 1238883:  Improper use of negative value  (NEGATIVE_RETURNS)
+/mds/MDS.cc: 962 in MDS::handle_mds_map(MMDSMap *)()
+956       }
+957     
+958       // see who i am
+959       addr = messenger->get_myaddr();
+960       whoami = mdsmap->get_rank_gid(monc->get_global_id());
+961       state = mdsmap->get_state_gid(monc->get_global_id());
+>>>     CID 1238883:  Improper use of negative value  (NEGATIVE_RETURNS)
+>>>     Assigning: signed variable "this->incarnation" = "get_inc_gid".
+962       incarnation = mdsmap->get_inc_gid(monc->get_global_id());
+963       dout(10) << "map says i am " << addr << " mds." << whoami << "." << incarnation
+964     	   << " state " << ceph_mds_state_name(state) << dendl;
+965     
+966       // mark down any failed peers
+967       for (map<uint64_t,MDSMap::mds_info_t>::const_iterator p = oldmap->get_mds_info().begin();
+
+________________________________________________________________________________________________________
+*** CID 1238884:  Unrecoverable parse warning  (PARSE_ERROR)
+/client/Client.cc: 7733 in ()
+7727       hidden: true,							\
+7728       exists_cb: &Client::_vxattrcb_layout_exists,			\
+7729     }
+7730     
+7731     const Client::VXattr Client::_dir_vxattrs[] = {
+7732       {
+>>>     CID 1238884:  Unrecoverable parse warning  (PARSE_ERROR)
+>>>     designator may not specify a non-POD subobject
+7733         name: "ceph.dir.layout",
+7734         getxattr_cb: &Client::_vxattrcb_layout,
+7735         readonly: false,
+7736         hidden: true,
+7737         exists_cb: &Client::_vxattrcb_layout_exists,
+7738       },
+
+________________________________________________________________________________________________________
+*** CID 1238885:  Thread deadlock  (ORDER_REVERSAL)
+/librados/RadosClient.cc: 702 in librados::RadosClient::do_watch_notify(MWatchNotify *)()
+696           // trigger the callback
+697           lock.Unlock();
+698           wc->watch_ctx->notify(m->opcode, m->ver, m->bl);
+699           lock.Lock();
+700     
+701           // send ACK back to the OSD
+>>>     CID 1238885:  Thread deadlock  (ORDER_REVERSAL)
+>>>     Calling "_notify_ack" acquires lock "RWLock.L" while holding lock "Mutex._m" (count: 14 / 29).
+702           wc->io_ctx_impl->_notify_ack(wc->oid, m->notify_id, m->ver, m->cookie);
+703     
+704           ldout(cct,10) << __func__ << " notify done" << dendl;
+705           wc->put();
+706         }
+707       } else {
+
+________________________________________________________________________________________________________
+*** CID 1238886:  Thread deadlock  (ORDER_REVERSAL)
+/client/SyntheticClient.cc: 2391 in SyntheticClient::object_rw(int, int, int, int, double, double)()
+2385           m.ops.push_back(op);
+2386           if (do_sync) {
+2387             OSDOp op;
+2388             op.op.op = CEPH_OSD_OP_STARTSYNC;
+2389     	m.ops.push_back(op);
+2390           }
+>>>     CID 1238886:  Thread deadlock  (ORDER_REVERSAL)
+>>>     Calling "mutate" acquires lock "RWLock.L" while holding lock "Mutex._m" (count: 14 / 29).
+2391           client->objecter->mutate(oid, oloc, m, snapc, ceph_clock_now(client->cct), 0,
+2392     			       NULL, new C_Ref(lock, cond, &unack));
+2393           /*client->objecter->write(oid, layout, 0, osize, snapc, bl, 0,
+2394     			      new C_Ref(lock, cond, &unack),
+2395     			      new C_Ref(lock, cond, &unsafe));*/
+2396         } else {
+
+________________________________________________________________________________________________________
+*** CID 1238887:  Thread deadlock  (ORDER_REVERSAL)
+/librados/RadosClient.cc: 808 in librados::RadosClient::pg_command(pg_t, std::vector<std::basic_string<char, std::char_traits<char>, std::allocator<char>>, std::allocator<std::basic_string<char, std::char_traits<char>, std::allocator<char>>>> &, const ceph::buffer::list &, ceph::buffer::list *, std::basic_string<char, std::char_traits<char>, std::allocator<char>>*)()
+802       Mutex mylock("RadosClient::pg_command::mylock");
+803       Cond cond;
+804       bool done;
+805       int ret;
+806       ceph_tid_t tid;
+807       lock.Lock();
+>>>     CID 1238887:  Thread deadlock  (ORDER_REVERSAL)
+>>>     Calling "pg_command" acquires lock "RWLock.L" while holding lock "Mutex._m" (count: 14 / 29).
+808       int r = objecter->pg_command(pgid, cmd, inbl, &tid, poutbl, prs,
+809     		        new C_SafeCond(&mylock, &cond, &done, &ret));
+810       lock.Unlock();
+811       if (r != 0)
+812         return r;
+813       mylock.Lock();
+
+
+________________________________________________________________________________________________________
+To view the defects in Coverity Scan visit, http://scan.coverity.com/projects/25?tab=overview
+
+To unsubscribe from the email notification for new defects, http://scan5.coverity.com/cgi-bin/unsubscribe.py
+
+
+
+
+--557981400-1407779075-1410903884=:20205--
