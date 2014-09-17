@@ -1,63 +1,65 @@
 From: Somnath Roy <Somnath.Roy@sandisk.com>
 Subject: RE: severe librbd performance degradation in Giant
-Date: Wed, 17 Sep 2014 21:01:06 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F278459AA@SACMBXIP02.sdcorp.global.sandisk.com>
+Date: Wed, 17 Sep 2014 21:08:38 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F278459D8@SACMBXIP02.sdcorp.global.sandisk.com>
 References: <755F6B91B3BE364F9BCA11EA3F9E0C6F27845984@SACMBXIP02.sdcorp.global.sandisk.com>
- <5419F628.4030506@redhat.com>
+ <BA7B69AA-4906-4836-A2F6-5A6EE756A548@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2on0053.outbound.protection.outlook.com ([207.46.100.53]:64384
+Received: from mail-by2on0053.outbound.protection.outlook.com ([207.46.100.53]:46976
 	"EHLO na01-by2-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1756757AbaIQVCp convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Sep 2014 17:02:45 -0400
-In-Reply-To: <5419F628.4030506@redhat.com>
+	id S1756723AbaIQVIm (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 17 Sep 2014 17:08:42 -0400
+In-Reply-To: <BA7B69AA-4906-4836-A2F6-5A6EE756A548@profihost.ag>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mark.nelson@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Mark,
-All are running with concurrency 32.
-
-Thanks & Regards
-Somnath
-
------Original Message-----
-From: Mark Nelson [mailto:mark.nelson@inktank.com] 
-Sent: Wednesday, September 17, 2014 1:59 PM
-To: Somnath Roy; ceph-devel@vger.kernel.org
-Subject: Re: severe librbd performance degradation in Giant
-
-On 09/17/2014 03:55 PM, Somnath Roy wrote:
-> Hi Sage,
-> We are experiencing severe librbd performance degradation in Giant over firefly release. Here is the experiment we did to isolate it as a librbd problem.
->
-> 1. Single OSD is running latest Giant and client is running fio rbd on top of firefly based librbd/librados. For one client it is giving ~11-12K  iops (4K RR).
-> 2. Single OSD is running Giant and client is running fio rbd on top of Giant based librbd/librados. For one client it is giving ~1.9K  iops (4K RR).
-> 3. Single OSD is running latest Giant and client is running Giant based ceph_smaiobench on top of giant librados. For one client it is giving ~11-12K  iops (4K RR).
-> 4. Giant RGW on top of Giant OSD is also scaling.
->
->
-> So, it is obvious from the above that recent librbd has issues. I will raise a tracker to track this.
-
-Hi Somnath,
-
-How much concurrency?
-
->
-> Thanks & Regards
-> Somnath
->
-> ________________________________
->
-> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
-> in the body of a message to majordomo@vger.kernel.org More majordomo 
-> info at  http://vger.kernel.org/majordomo-info.html
->
-
+QnV0LCB0aGlzIHRpbWUgaXMgfjEwWCBkZWdyYWRhdGlvbiA6LSgNCg0KLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+DQpGcm9tOiBTdGVmYW4gUHJpZWJlIC0gUHJvZmlob3N0IEFHIFttYWlsdG86cy5wcmllYmVAcHJv
+Zmlob3N0LmFnXSANClNlbnQ6IFdlZG5lc2RheSwgU2VwdGVtYmVyIDE3LCAyMDE0IDI6MDIgUE0N
+ClRvOiBTb21uYXRoIFJveQ0KQ2M6IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQpTdWJqZWN0
+OiBSZTogc2V2ZXJlIGxpYnJiZCBwZXJmb3JtYW5jZSBkZWdyYWRhdGlvbiBpbiBHaWFudA0KDQpJ
+IHJlcG9ydGVkIHRoZSBzYW1lIGZvciBsaWJyYmQgSSdtIGZpcmVmbHkgYWZ0ZXIgdXBncmFkaW5n
+IGZyb20gZHVtcGxpbmcgaGVyZToNCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9waXBlcm1haWwvY2Vw
+aC11c2Vycy1jZXBoLmNvbS8yMDE0LUp1bmUvMDQwNjY0Lmh0bWwNCg0KU3RlZmFuDQoNCkV4Y3Vz
+ZSBteSB0eXBvIHNlbnQgZnJvbSBteSBtb2JpbGUgcGhvbmUuDQoNCkFtIDE3LjA5LjIwMTQgdW0g
+MjI6NTUgc2NocmllYiBTb21uYXRoIFJveSA8U29tbmF0aC5Sb3lAc2FuZGlzay5jb20+Og0KSGkg
+U2FnZSwNCldlIGFyZSBleHBlcmllbmNpbmcgc2V2ZXJlIGxpYnJiZCBwZXJmb3JtYW5jZSBkZWdy
+YWRhdGlvbiBpbiBHaWFudCBvdmVyIGZpcmVmbHkgcmVsZWFzZS4gSGVyZSBpcyB0aGUgZXhwZXJp
+bWVudCB3ZSBkaWQgdG8gaXNvbGF0ZSBpdCBhcyBhIGxpYnJiZCBwcm9ibGVtLg0KDQoxLiBTaW5n
+bGUgT1NEIGlzIHJ1bm5pbmcgbGF0ZXN0IEdpYW50IGFuZCBjbGllbnQgaXMgcnVubmluZyBmaW8g
+cmJkIG9uIHRvcCBvZiBmaXJlZmx5IGJhc2VkIGxpYnJiZC9saWJyYWRvcy4gRm9yIG9uZSBjbGll
+bnQgaXQgaXMgZ2l2aW5nIH4xMS0xMksgwqBpb3BzICg0SyBSUikuDQoyLiBTaW5nbGUgT1NEIGlz
+IHJ1bm5pbmcgR2lhbnQgYW5kIGNsaWVudCBpcyBydW5uaW5nIGZpbyByYmQgb24gdG9wIG9mIEdp
+YW50IGJhc2VkIGxpYnJiZC9saWJyYWRvcy4gRm9yIG9uZSBjbGllbnQgaXQgaXMgZ2l2aW5nIH4x
+LjlLIMKgaW9wcyAoNEsgUlIpLg0KMy4gU2luZ2xlIE9TRCBpcyBydW5uaW5nIGxhdGVzdCBHaWFu
+dCBhbmQgY2xpZW50IGlzIHJ1bm5pbmcgR2lhbnQgYmFzZWQgY2VwaF9zbWFpb2JlbmNoIG9uIHRv
+cCBvZiBnaWFudCBsaWJyYWRvcy4gRm9yIG9uZSBjbGllbnQgaXQgaXMgZ2l2aW5nIH4xMS0xMksg
+wqBpb3BzICg0SyBSUikuDQo0LiBHaWFudCBSR1cgb24gdG9wIG9mIEdpYW50IE9TRCBpcyBhbHNv
+IHNjYWxpbmcuDQoNCg0KU28sIGl0IGlzIG9idmlvdXMgZnJvbSB0aGUgYWJvdmUgdGhhdCByZWNl
+bnQgbGlicmJkIGhhcyBpc3N1ZXMuIEkgd2lsbCByYWlzZSBhIHRyYWNrZXIgdG8gdHJhY2sgdGhp
+cy4NCg0KVGhhbmtzICYgUmVnYXJkcw0KU29tbmF0aA0KDQpfX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fXw0KDQpQTEVBU0UgTk9URTogVGhlIGluZm9ybWF0aW9uIGNvbnRhaW5lZCBpbiB0
+aGlzIGVsZWN0cm9uaWMgbWFpbCBtZXNzYWdlIGlzIGludGVuZGVkIG9ubHkgZm9yIHRoZSB1c2Ug
+b2YgdGhlIGRlc2lnbmF0ZWQgcmVjaXBpZW50KHMpIG5hbWVkIGFib3ZlLiBJZiB0aGUgcmVhZGVy
+IG9mIHRoaXMgbWVzc2FnZSBpcyBub3QgdGhlIGludGVuZGVkIHJlY2lwaWVudCwgeW91IGFyZSBo
+ZXJlYnkgbm90aWZpZWQgdGhhdCB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIG1lc3NhZ2UgaW4gZXJy
+b3IgYW5kIHRoYXQgYW55IHJldmlldywgZGlzc2VtaW5hdGlvbiwgZGlzdHJpYnV0aW9uLCBvciBj
+b3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBpcyBzdHJpY3RseSBwcm9oaWJpdGVkLiBJZiB5b3UgaGF2
+ZSByZWNlaXZlZCB0aGlzIGNvbW11bmljYXRpb24gaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhl
+IHNlbmRlciBieSB0ZWxlcGhvbmUgb3IgZS1tYWlsIChhcyBzaG93biBhYm92ZSkgaW1tZWRpYXRl
+bHkgYW5kIGRlc3Ryb3kgYW55IGFuZCBhbGwgY29waWVzIG9mIHRoaXMgbWVzc2FnZSBpbiB5b3Vy
+IHBvc3Nlc3Npb24gKHdoZXRoZXIgaGFyZCBjb3BpZXMgb3IgZWxlY3Ryb25pY2FsbHkgc3RvcmVk
+IGNvcGllcykuDQoNCi0tDQpUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUg
+bGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4NCnRoZSBib2R5IG9mIGEgbWVzc2FnZSB0
+byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnDQpNb3JlIG1ham9yZG9tbyBpbmZvIGF0IMKgaHR0
+cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo=
