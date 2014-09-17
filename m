@@ -1,26 +1,41 @@
 From: Somnath Roy <Somnath.Roy@sandisk.com>
 Subject: RE: severe librbd performance degradation in Giant
-Date: Wed, 17 Sep 2014 21:38:47 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F27845A2A@SACMBXIP02.sdcorp.global.sandisk.com>
+Date: Wed, 17 Sep 2014 21:44:26 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F27845A50@SACMBXIP02.sdcorp.global.sandisk.com>
 References: <755F6B91B3BE364F9BCA11EA3F9E0C6F27845984@SACMBXIP02.sdcorp.global.sandisk.com>
  <5419FB1B.4020202@inktank.com>
  <755F6B91B3BE364F9BCA11EA3F9E0C6F278459F8@SACMBXIP02.sdcorp.global.sandisk.com>
  <alpine.DEB.2.00.1409171435320.20205@cobra.newdream.net>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F27845A2A@SACMBXIP02.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2on0081.outbound.protection.outlook.com ([207.46.100.81]:57561
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+Received: from mail-bl2on0071.outbound.protection.outlook.com ([65.55.169.71]:21859
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1756628AbaIQVkw convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Sep 2014 17:40:52 -0400
-In-Reply-To: <alpine.DEB.2.00.1409171435320.20205@cobra.newdream.net>
+	id S1755726AbaIQVob convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Sep 2014 17:44:31 -0400
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F27845A2A@SACMBXIP02.sdcorp.global.sandisk.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sweil@redhat.com>
 Cc: Josh Durgin <josh.durgin@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+
+Created a tracker for this.
+
+http://tracker.ceph.com/issues/9513
+
+Thanks & Regards
+Somnath
+
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Somnath Roy
+Sent: Wednesday, September 17, 2014 2:39 PM
+To: Sage Weil
+Cc: Josh Durgin; ceph-devel@vger.kernel.org
+Subject: RE: severe librbd performance degradation in Giant
 
 Sage,
 It's a 4K random read.
@@ -29,7 +44,7 @@ Thanks & Regards
 Somnath
 
 -----Original Message-----
-From: Sage Weil [mailto:sweil@redhat.com] 
+From: Sage Weil [mailto:sweil@redhat.com]
 Sent: Wednesday, September 17, 2014 2:36 PM
 To: Somnath Roy
 Cc: Josh Durgin; ceph-devel@vger.kernel.org
@@ -93,3 +108,5 @@ On Wed, 17 Sep 2014, Somnath Roy wrote:
 > info at  http://vger.kernel.org/majordomo-info.html
 > 
 > 
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
