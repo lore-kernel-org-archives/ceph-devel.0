@@ -1,134 +1,237 @@
-From: Abhishek L <abhishek.lekshmanan@gmail.com>
-Subject: Re: RadosGW objects to Rados object mapping
-Date: Wed, 17 Sep 2014 23:53:29 +0530
-Message-ID: <87iokm86lz.fsf@gmail.com>
-References: <87wq92ia4z.fsf@gmail.com> <CABBk=J8a-Wh4x8mbR83Ympk2zeYCS1ko1z92ffru-XbtwE+FRQ@mail.gmail.com>
+From: "Johnu George (johnugeo)" <johnugeo@cisco.com>
+Subject: Re: [ceph-users] Crushmap ruleset for rack aware PG placement
+Date: Wed, 17 Sep 2014 20:03:16 +0000
+Message-ID: <D03F35D4.BDC%johnugeo@cisco.com>
+References: <CADgBPFCVUVQZtHNkSsuMhskL2X-FTBTYy6zcav3CRpNCBGHJgg@mail.gmail.com>
+ <alpine.DEB.2.00.1409150826060.513@cobra.newdream.net>
+ <lv91s9$4j2$1@ger.gmane.org> <54184711.3080002@dachary.org>
+ <lv9p5b$1h1$1@ger.gmane.org> <D03E84B7.B8D%johnugeo@cisco.com>
+ <541945F8.60001@dachary.org> <D03EEB71.BBF%johnugeo@cisco.com>
+ <5419B25B.3010508@dachary.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; boundary="=-=-=";
-	micalg=pgp-sha1; protocol="application/pgp-signature"
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f46.google.com ([209.85.220.46]:34970 "EHLO
-	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756050AbaIQSZD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Sep 2014 14:25:03 -0400
-Received: by mail-pa0-f46.google.com with SMTP id kq14so2671342pab.19
-        for <ceph-devel@vger.kernel.org>; Wed, 17 Sep 2014 11:25:03 -0700 (PDT)
-In-reply-to: <CABBk=J8a-Wh4x8mbR83Ympk2zeYCS1ko1z92ffru-XbtwE+FRQ@mail.gmail.com>
+Received: from rcdn-iport-3.cisco.com ([173.37.86.74]:64770 "EHLO
+	rcdn-iport-3.cisco.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757207AbaIQUDS convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Sep 2014 16:03:18 -0400
+In-Reply-To: <5419B25B.3010508@dachary.org>
+Content-Language: en-US
+Content-ID: <5E97BF56D12C874AB25B87B20EE99B21@emea.cisco.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh <yehuda@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>, ceph-devel <ceph-devel@vger.kernel.org>
 
---=-=-=
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Loic,
+      You are right.  Are we planning to support configurations where
+replica number is different from the number of osds selected from a  ru=
+le?
+If not, One solution is to add a validation check when a rule is activa=
+ted
+for a pool of a specific replica.
 
+Johnu
 
-Yehuda Sadeh writes:
+On 9/17/14, 9:10 AM, "Loic Dachary" <loic@dachary.org> wrote:
 
-> On Wed, Sep 17, 2014 at 7:39 AM, Abhishek L
-> <abhishek.lekshmanan@gmail.com> wrote:
->>
->> Hi,
->>
->> I'm trying to understand the internals of RadosGW, on how
->> buckets/containers, objects are mapped back to rados objects. I couldn't
->> find any docs, however a previous mailing list discussion[1] explained
->> how an S3/Swift objects are cut into rados objects and about manifests. =
-I was
->> able to construct back a file uploaded to RadosGW by getting the rados
->> objects by using the manifest to figure out the rados object names.
->> For eg:
->> ```
->> # random.txt is an 8 MB text file
->> [r@ra:~/ceph/src]$ s3 -us put my-first-bucket/random filename=3Drandom.t=
-xt
->> [r@ra:~/ceph/src]$ ./radosgw-admin object stat --bucket=3Dmy-first-bucke=
-t --object=3Drandom  | grep prefix
->>       "prefix": "._op2xmptte2DD7z3_9EjQKgmmRcWRWL_",
->>
->> ```
->>
->> And then getting the objects via rados and joining back
->>
->> ```
->> [r@ra:~/ceph/src]$ ./rados --pool .rgw.buckets ls | grep _op2xm
->> default.4124.1__shadow_._op2xmptte2DD7z3_9EjQKgmmRcWRWL_2
->> default.4124.1__shadow_._op2xmptte2DD7z3_9EjQKgmmRcWRWL_1
->> [r@ra:~/ceph/src]$ ./rados get default.4124.1_random random.part0 --pool=
- .rgw.buckets
->> [r@ra:~/ceph/src]$ ./rados get default.4124.1__shadow_._op2xmptte2DD7z3_=
-9EjQKgmmRcWRWL_1 random.part1 --pool .rgw.buckets
->> [r@ra:~/ceph/src]$ ./rados get default.4124.1__shadow_._op2xmptte2DD7z3_=
-9EjQKgmmRcWRWL_2 random.part2 --pool .rgw.buckets
->>
->> # Now join the objects back
->> [r@ra:~/ceph/src]$ cat random.part0 random.part1 random.part2 > random.r=
-ados.txt
->> [r@ra:~/ceph/src]$ diff random.txt random.rados.txt
->> ```
->>
->> I'm trying to find similiar information on how radosgw ends up storing
->> the buckets & metadata into rados objects, what information is
->> contained within them and how they are updated when say an object is
->> added etc. I was able to find the bucket name & bucket meta data being
->> stored in .rgw pool, but not sure how the bucket knows the objects it
->> has or buckets owned by user etc.
->>
+>Hi,
 >
-> The bucket doesn't know who owns each object, this info is stored in
-> the object's info. The bucket index is stored as omap information in
-> the bucket instance object.=20
+>If the number of replica desired is 1, then
+>
+>https://github.com/ceph/ceph/blob/firefly/src/crush/CrushWrapper.h#L91=
+5
+>
+>will be called with maxout =3D 1 and scratch will be maxout * 3. But i=
+f the
+>rule always selects 4 items, then it overflows. Is it what you also re=
+ad ?
+>
+>Cheers
+>
+>On 17/09/2014 16:42, Johnu George (johnugeo) wrote:
+>> Adding ceph-devel
+>>=20
+>> On 9/17/14, 1:27 AM, "Loic Dachary" <loic@dachary.org> wrote:
+>>=20
+>>>
+>>> Could you resend with ceph-devel in cc ? It's better for archive
+>>>purposes
+>>> ;-)
+>>>
+>>> On 17/09/2014 09:37, Johnu George (johnugeo) wrote:
+>>>> Hi Sage,
+>>>>          I was looking at the crash that was reported in this mail
+>>>> chain.
+>>>> I am seeing that the crash happens when number of replicas configu=
+red
+>>>>is
+>>>> less than total number of osds to be selected as per rule. This is
+>>>> because, the crush temporary buffers are allocated as per num_rep
+>>>>size.
+>>>> (scratch array has size num_rep * 3) So, when number of osds to be
+>>>> selected is more, buffer overflow happens and it causes error/cras=
+h. I
+>>>> saw
+>>>> your earlier comment in this mail  where you asked to create a rul=
+e
+>>>>that
+>>>> selects two osds per rack(2 racks) with num_rep=3D3. I feel that b=
+uffer
+>>>> overflow issue should happen in this situation too, that can cause
+>>>>'out
+>>>> of
+>>>> array' access. Am I wrong somewhere or am I missing something?
+>>>>
+>>>> Johnu
+>>>>
+>>>> On 9/16/14, 9:39 AM, "Daniel Swarbrick"
+>>>> <daniel.swarbrick@profitbricks.com> wrote:
+>>>>
+>>>>> Hi Loic,
+>>>>>
+>>>>> Thanks for providing a detailed example. I'm able to run the exam=
+ple
+>>>>> that you provide, and also got my own live crushmap to produce so=
+me
+>>>>> results, when I appended the "--num-rep 3" option to the command.
+>>>>> Without that option, even your example is throwing segfaults - ma=
+ybe
+>>>>>a
+>>>>> bug in crushtool?
+>>>>>
+>>>>> One other area I wasn't sure about - can the final "chooseleaf" s=
+tep
+>>>>> specify "firstn 0" for simplicity's sake (and to automatically
+>>>>>handle a
+>>>>> larger pool size in future) ? Would there be any downside to this=
+?
+>>>>>
+>>>>> Cheers
+>>>>>
+>>>>> On 16/09/14 16:20, Loic Dachary wrote:
+>>>>>> Hi Daniel,
+>>>>>>
+>>>>>> When I run
+>>>>>>
+>>>>>> crushtool --outfn crushmap --build --num_osds 100 host straw 2 r=
+ack
+>>>>>> straw 10 default straw 0
+>>>>>> crushtool -d crushmap -o crushmap.txt
+>>>>>> cat >> crushmap.txt <<EOF
+>>>>>> rule myrule {
+>>>>>> 	ruleset 1
+>>>>>> 	type replicated
+>>>>>> 	min_size 1
+>>>>>> 	max_size 10
+>>>>>> 	step take default
+>>>>>> 	step choose firstn 2 type rack
+>>>>>> 	step chooseleaf firstn 2 type host
+>>>>>> 	step emit
+>>>>>> }
+>>>>>> EOF
+>>>>>> crushtool -c crushmap.txt -o crushmap
+>>>>>> crushtool -i crushmap --test --show-utilization --rule 1 --min-x=
+ 1
+>>>>>> --max-x 10 --num-rep 3
+>>>>>>
+>>>>>> I get
+>>>>>>
+>>>>>> rule 1 (myrule), x =3D 1..10, numrep =3D 3..3
+>>>>>> CRUSH rule 1 x 1 [79,69,10]
+>>>>>> CRUSH rule 1 x 2 [56,58,60]
+>>>>>> CRUSH rule 1 x 3 [30,26,19]
+>>>>>> CRUSH rule 1 x 4 [14,8,69]
+>>>>>> CRUSH rule 1 x 5 [7,4,88]
+>>>>>> CRUSH rule 1 x 6 [54,52,37]
+>>>>>> CRUSH rule 1 x 7 [69,67,19]
+>>>>>> CRUSH rule 1 x 8 [51,46,83]
+>>>>>> CRUSH rule 1 x 9 [55,56,35]
+>>>>>> CRUSH rule 1 x 10 [54,51,95]
+>>>>>> rule 1 (myrule) num_rep 3 result size =3D=3D 3:	10/10
+>>>>>>
+>>>>>> What command are you running to get a core dump ?
+>>>>>>
+>>>>>> Cheers
+>>>>>>
+>>>>>> On 16/09/2014 12:02, Daniel Swarbrick wrote:
+>>>>>>> On 15/09/14 17:28, Sage Weil wrote:
+>>>>>>>> rule myrule {
+>>>>>>>> 	ruleset 1
+>>>>>>>> 	type replicated
+>>>>>>>> 	min_size 1
+>>>>>>>> 	max_size 10
+>>>>>>>> 	step take default
+>>>>>>>> 	step choose firstn 2 type rack
+>>>>>>>> 	step chooseleaf firstn 2 type host
+>>>>>>>> 	step emit
+>>>>>>>> }
+>>>>>>>>
+>>>>>>>> That will give you 4 osds, spread across 2 hosts in each rack.
+>>>>>>>>The
+>>>>>>>> pool=20
+>>>>>>>> size (replication factor) is 3, so RADOS will just use the fir=
+st
+>>>>>>>> three (2=20
+>>>>>>>> hosts in first rack, 1 host in second rack).
+>>>>>>> I have a similar requirement, where we currently have four node=
+s,
+>>>>>>>two
+>>>>>>> in
+>>>>>>> each fire zone, with pool size 3. At the moment, due to the num=
+ber
+>>>>>>>of
+>>>>>>> nodes, we are guaranteed at least one replica in each fire zone
+>>>>>>> (which
+>>>>>>> we represent with bucket type "room"). If we add more nodes in
+>>>>>>> future,
+>>>>>>> the current ruleset may cause all three replicas of a PG to lan=
+d
+>>>>>>>in a
+>>>>>>> single zone.
+>>>>>>>
+>>>>>>> I tried the ruleset suggested above (replacing "rack" with "roo=
+m"),
+>>>>>>> but
+>>>>>>> when testing it with crushtool --test --show-utilization, I sim=
+ply
+>>>>>>> get
+>>>>>>> segfaults. No amount of fiddling around seems to make it work -
+>>>>>>>even
+>>>>>>> adding two new hypothetical nodes to the crushmap doesn't help.
+>>>>>>>
+>>>>>>> What could I perhaps be doing wrong?
+>>>>>>>
+>>>>>>> _______________________________________________
+>>>>>>> ceph-users mailing list
+>>>>>>> ceph-users@lists.ceph.com
+>>>>>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>>>>>>>
+>>>>>>
+>>>>>>
+>>>>>> _______________________________________________
+>>>>>> ceph-users mailing list
+>>>>>> ceph-users@lists.ceph.com
+>>>>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>>>>>
+>>>>>
+>>>>> _______________________________________________
+>>>>> ceph-users mailing list
+>>>>> ceph-users@lists.ceph.com
+>>>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>>>>
+>>>
+>>> --=20
+>>> Lo=EFc Dachary, Artisan Logiciel Libre
+>>>
+>>=20
+>
+>--=20
+>Lo=EFc Dachary, Artisan Logiciel Libre
+>
 
-Ah thanks, I was able to list the objects for the buckets, by getting
-omapkeys from the buckets.index pool
-
-```
-[r@ra:~/ceph/src](=E2=8E=87 master)$ ./rados -p .rgw.buckets.index ls
-.dir.defualt.4124.2
-.dir.default.4124.1
-
-[r@ra:~/ceph/src](=E2=8E=87 master)$ ./rados -p .rgw.buckets.index listomap=
-keys .dir.default.4124.1
-big-object
-file-1
-object-8
-random
-```
-=20
-> The list of buckets per user is kept in
-> the user metadata object (also as omap information). There's a rados
-> command that lets you list the omap keys for each rados object.
-
-This also I was able to get by inspecting the <uid>.buckets objects in
-users.uid pool.
-
-```
-
-./rados -p .users.uid listomapkeys testid.buckets
-another-bucket
-my-first-bucket
-```
-
-Thanks for the info. I'll try to combine these mailing list discussions
-to something of a starting point for storage in radosgw developer docs.=20
-
-Cheers
-=2D-=20
-Abhishek
-
---=-=-=
-Content-Type: application/pgp-signature; name="signature.asc"; description="Digital signature"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
-
-iQEcBAEBAgAGBQJUGdGhAAoJEPnwZB8bZe1fk+kH/iz7JEjBzdp+O1JRUSrgZAS5
-N1hgLcKNsxbnhhOVh/k1PL74MR/0JCacC/JCNgJPx6YNGvVWMBqt/rEgyaCK+j1m
-vDs7q6ZYByjRsNI3JkSeDyV2acsUaDglKFsotruFdt7elQ05ysdM13moLo0xUL2B
-iogGeFZteoqRtR8gyy3DbCulPzGq7hl4iy9vzFLnB8fYcFiIXqKzIOuc84xWAO5a
-Ro9z/xOGzD8BnFYPlnTgXLku4Mt53wuGbmUHgmIy70n84iLxXFpiTiOCzyK22xgD
-+GfiHWIULSgNf2SBl3LVBrcrR/jBQDFGqrTZy30CYumHfCPNrwNWCb1X7VshD9s=
-=hLn6
------END PGP SIGNATURE-----
---=-=-=--
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
