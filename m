@@ -1,191 +1,154 @@
-From: "Johnu George (johnugeo)" <johnugeo@cisco.com>
-Subject: Re: [ceph-users] Crushmap ruleset for rack aware PG placement
-Date: Wed, 17 Sep 2014 14:42:45 +0000
-Message-ID: <D03EEB71.BBF%johnugeo@cisco.com>
-References: <CADgBPFCVUVQZtHNkSsuMhskL2X-FTBTYy6zcav3CRpNCBGHJgg@mail.gmail.com>
- <alpine.DEB.2.00.1409150826060.513@cobra.newdream.net>
- <lv91s9$4j2$1@ger.gmane.org> <54184711.3080002@dachary.org>
- <lv9p5b$1h1$1@ger.gmane.org> <D03E84B7.B8D%johnugeo@cisco.com>
- <541945F8.60001@dachary.org>
+From: Mark Nelson <mark.nelson@inktank.com>
+Subject: Re: puzzled with the design pattern of ceph journal, really ruining
+ performance
+Date: Wed, 17 Sep 2014 10:01:06 -0500
+Message-ID: <5419A232.8080508@redhat.com>
+References: <872acc52-387a-4ca1-bd43-a3825a2746cc@mailpro>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
+Content-Type: text/plain; charset=UTF-8;
+	format=flowed
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from rcdn-iport-9.cisco.com ([173.37.86.80]:52029 "EHLO
-	rcdn-iport-9.cisco.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754786AbaIQOmr convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Sep 2014 10:42:47 -0400
-In-Reply-To: <541945F8.60001@dachary.org>
-Content-Language: en-US
-Content-ID: <E077811EFF251B46A5A6601BDAC68A5F@emea.cisco.com>
+Received: from mail-ie0-f179.google.com ([209.85.223.179]:44611 "EHLO
+	mail-ie0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755370AbaIQPBE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Sep 2014 11:01:04 -0400
+Received: by mail-ie0-f179.google.com with SMTP id rl12so1904783iec.38
+        for <ceph-devel@vger.kernel.org>; Wed, 17 Sep 2014 08:01:03 -0700 (PDT)
+In-Reply-To: <872acc52-387a-4ca1-bd43-a3825a2746cc@mailpro>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
-Cc: Loic Dachary <loic@dachary.org>
+To: Alexandre DERUMIER <aderumier@odiso.com>, Xiaoxi Chen <xiaoxi.chen@intel.com>
+Cc: Somnath Roy <Somnath.Roy@sandisk.com>, ?? <zay11022@gmail.com>, ceph-devel@vger.kernel.org
 
-Adding ceph-devel=20
+On 09/17/2014 09:20 AM, Alexandre DERUMIER wrote:
+>>> 2. Have you got any data to prove the O_DSYNC or fdatasync  kill th=
+e performance of journal?   In our previous test, the journal SSD (use =
+a partition of a SSD as a journal for a particular OSD, and 4 OSD share=
+ a >>same SSD) could reach its peak performance (300-400MB/s)
+>
+> Hi,
+>
+> I have done some bench here:
+>
+> http://www.mail-archive.com/ceph-users@lists.ceph.com/msg12950.html
+>
+> Some ssd models have really bad performance with O_DSYNC (crucial m55=
+0 - 312 iops on 4k block).
+> Benching 1 osd,I can see big latencies for some seconds when O_DSYNC =
+occur
 
-On 9/17/14, 1:27 AM, "Loic Dachary" <loic@dachary.org> wrote:
+=46WIW, the journal will coalesce writes quickly when there are many=20
+concurrent 4k client writes.  Once you hit around 8 4k IOs per OSD, the=
+=20
+journal will start coalescing.  For say 100-150 IOPs (what a spinning=20
+disk can handle), expect around 9ish 100KB journal writes (with padding=
+=20
+and header/footer for each client IO).  What we've seen is that some=20
+drives that aren't that great at 4K O_DSYNC writes are still reasonably=
+=20
+good with 8+ concurrent larger O_DSYNC writes.
 
 >
->Could you resend with ceph-devel in cc ? It's better for archive purpo=
-ses
->;-)
 >
->On 17/09/2014 09:37, Johnu George (johnugeo) wrote:
->> Hi Sage,
->>          I was looking at the crash that was reported in this mail
->>chain.
->> I am seeing that the crash happens when number of replicas configure=
-d is
->> less than total number of osds to be selected as per rule. This is
->> because, the crush temporary buffers are allocated as per num_rep si=
-ze.
->> (scratch array has size num_rep * 3) So, when number of osds to be
->> selected is more, buffer overflow happens and it causes error/crash.=
- I
->>saw
->> your earlier comment in this mail  where you asked to create a rule =
-that
->> selects two osds per rack(2 racks) with num_rep=3D3. I feel that buf=
-fer
->> overflow issue should happen in this situation too, that can cause '=
-out
->>of
->> array' access. Am I wrong somewhere or am I missing something?
->>=20
->> Johnu
->>=20
->> On 9/16/14, 9:39 AM, "Daniel Swarbrick"
->> <daniel.swarbrick@profitbricks.com> wrote:
->>=20
->>> Hi Loic,
->>>
->>> Thanks for providing a detailed example. I'm able to run the exampl=
-e
->>> that you provide, and also got my own live crushmap to produce some
->>> results, when I appended the "--num-rep 3" option to the command.
->>> Without that option, even your example is throwing segfaults - mayb=
-e a
->>> bug in crushtool?
->>>
->>> One other area I wasn't sure about - can the final "chooseleaf" ste=
-p
->>> specify "firstn 0" for simplicity's sake (and to automatically hand=
-le a
->>> larger pool size in future) ? Would there be any downside to this?
->>>
->>> Cheers
->>>
->>> On 16/09/14 16:20, Loic Dachary wrote:
->>>> Hi Daniel,
->>>>
->>>> When I run
->>>>
->>>> crushtool --outfn crushmap --build --num_osds 100 host straw 2 rac=
-k
->>>> straw 10 default straw 0
->>>> crushtool -d crushmap -o crushmap.txt
->>>> cat >> crushmap.txt <<EOF
->>>> rule myrule {
->>>> 	ruleset 1
->>>> 	type replicated
->>>> 	min_size 1
->>>> 	max_size 10
->>>> 	step take default
->>>> 	step choose firstn 2 type rack
->>>> 	step chooseleaf firstn 2 type host
->>>> 	step emit
->>>> }
->>>> EOF
->>>> crushtool -c crushmap.txt -o crushmap
->>>> crushtool -i crushmap --test --show-utilization --rule 1 --min-x 1
->>>> --max-x 10 --num-rep 3
->>>>
->>>> I get
->>>>
->>>> rule 1 (myrule), x =3D 1..10, numrep =3D 3..3
->>>> CRUSH rule 1 x 1 [79,69,10]
->>>> CRUSH rule 1 x 2 [56,58,60]
->>>> CRUSH rule 1 x 3 [30,26,19]
->>>> CRUSH rule 1 x 4 [14,8,69]
->>>> CRUSH rule 1 x 5 [7,4,88]
->>>> CRUSH rule 1 x 6 [54,52,37]
->>>> CRUSH rule 1 x 7 [69,67,19]
->>>> CRUSH rule 1 x 8 [51,46,83]
->>>> CRUSH rule 1 x 9 [55,56,35]
->>>> CRUSH rule 1 x 10 [54,51,95]
->>>> rule 1 (myrule) num_rep 3 result size =3D=3D 3:	10/10
->>>>
->>>> What command are you running to get a core dump ?
->>>>
->>>> Cheers
->>>>
->>>> On 16/09/2014 12:02, Daniel Swarbrick wrote:
->>>>> On 15/09/14 17:28, Sage Weil wrote:
->>>>>> rule myrule {
->>>>>> 	ruleset 1
->>>>>> 	type replicated
->>>>>> 	min_size 1
->>>>>> 	max_size 10
->>>>>> 	step take default
->>>>>> 	step choose firstn 2 type rack
->>>>>> 	step chooseleaf firstn 2 type host
->>>>>> 	step emit
->>>>>> }
->>>>>>
->>>>>> That will give you 4 osds, spread across 2 hosts in each rack.  =
-The
->>>>>> pool=20
->>>>>> size (replication factor) is 3, so RADOS will just use the first
->>>>>> three (2=20
->>>>>> hosts in first rack, 1 host in second rack).
->>>>> I have a similar requirement, where we currently have four nodes,=
- two
->>>>> in
->>>>> each fire zone, with pool size 3. At the moment, due to the numbe=
-r of
->>>>> nodes, we are guaranteed at least one replica in each fire zone
->>>>>(which
->>>>> we represent with bucket type "room"). If we add more nodes in
->>>>>future,
->>>>> the current ruleset may cause all three replicas of a PG to land =
-in a
->>>>> single zone.
->>>>>
->>>>> I tried the ruleset suggested above (replacing "rack" with "room"=
-),
->>>>>but
->>>>> when testing it with crushtool --test --show-utilization, I simpl=
-y
->>>>>get
->>>>> segfaults. No amount of fiddling around seems to make it work - e=
-ven
->>>>> adding two new hypothetical nodes to the crushmap doesn't help.
->>>>>
->>>>> What could I perhaps be doing wrong?
->>>>>
->>>>> _______________________________________________
->>>>> ceph-users mailing list
->>>>> ceph-users@lists.ceph.com
->>>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->>>>>
->>>>
->>>>
->>>> _______________________________________________
->>>> ceph-users mailing list
->>>> ceph-users@lists.ceph.com
->>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->>>
->>>
->>> _______________________________________________
->>> ceph-users mailing list
->>> ceph-users@lists.ceph.com
->>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->>=20
 >
->--=20
->Lo=EFc Dachary, Artisan Logiciel Libre
+> crucial m550
+> ------------
+> #fio --filename=3D/dev/sdb --direct=3D1 --rw=3Dwrite --bs=3D4k --numj=
+obs=3D2
+> --group_reporting --invalidate=3D0 --name=3Dab --sync=3D1
+> bw=3D1249.9KB/s, iops=3D312
+>
+> intel s3500
+> -----------
+> fio --filename=3D/dev/sdb --direct=3D1 --rw=3Dwrite --bs=3D4k --numjo=
+bs=3D2
+> --group_reporting --invalidate=3D0 --name=3Dab --sync=3D1
+> #bw=3D41794KB/s, iops=3D10448
+>
+> ----- Mail original -----
+>
+> De: "Xiaoxi Chen" <xiaoxi.chen@intel.com>
+> =C3=80: "Somnath Roy" <Somnath.Roy@sandisk.com>, "??" <zay11022@gmail=
+=2Ecom>, ceph-devel@vger.kernel.org
+> Envoy=C3=A9: Mercredi 17 Septembre 2014 09:59:37
+> Objet: RE: puzzled with the design pattern of ceph journal, really ru=
+ining performance
+>
+> Hi Nicheal,
+>
+> 1. The main purpose of journal is provide transaction semantics (prev=
+ent partially update). Peer is not enough for this need because ceph wr=
+ites all replica at the same time, so when crush, you have no idea abou=
+t which replica has right data. For example, say if we have 2 replica, =
+user update a 4M object and the primary OSD crush when the first 2M was=
+ written , secondary OSD may also failed when the first 3MB was written=
+=2E So both versions in primary/secondary are neither the new value, no=
+r the old value, and have no way to recover. So share the same idea as =
+database, we need to have a journal to support transaction and prevent =
+this happen. For some backend support transaction, BTRFS as an instance=
+, we don't need a journal, we can write the journal and data disk at th=
+e same time, the journal here is just try to help performance, since it=
+ only do sequential write and we suspect it should be faster than backe=
+nd OSD.
+>
+> 2. Have you got any data to prove the O_DSYNC or fdatasync kill the p=
+erformance of journal? In our previous test, the journal SSD (use a par=
+tition of a SSD as a journal for a particular OSD, and 4 OSD share a sa=
+me SSD) could reach its peak performance (300-400MB/s)
+>
+> Xiaoxi
+>
+>
+>
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.=
+kernel.org] On Behalf Of Somnath Roy
+> Sent: Wednesday, September 17, 2014 3:30 PM
+> To: =E5=A7=9A=E5=AE=81; ceph-devel@vger.kernel.org
+> Subject: RE: puzzled with the design pattern of ceph journal, really =
+ruining performance
+>
+> Hi Nicheal,
+> Not only recovery , IMHO the main purpose of ceph journal is to suppo=
+rt transaction semantics since XFS doesn't have that. I guess it can't =
+be achieved with pg_log/pg_info.
+>
+> Thanks & Regards
+> Somnath
+>
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.=
+kernel.org] On Behalf Of ??
+> Sent: Tuesday, September 16, 2014 11:29 PM
+> To: ceph-devel@vger.kernel.org
+> Subject: puzzled with the design pattern of ceph journal, really ruin=
+ing performance
+>
+> Hi, guys
+>
+> I analyze the architecture of the ceph souce code.
+>
+> I know that, in order to keep journal atomic and consistent, the jour=
+nal write mode should be set with O_DSYNC or called fdatasync() system =
+call after every write operation. However, this kind of operation is re=
+ally killing the performance as well as achieving high committing laten=
+cy, even if SSD is used as journal disk. If the SSD has capacitor to ke=
+ep the data safe when the system crashes, we can set the mount option n=
+obarrier or SSD itself will ignore the FLUSH REQUEST. So the performanc=
+e would be better.
+>
+> So can it be instead by other strategies?
+> As far as I am concerned, I think the most important part is pg_log a=
+nd pg_info. It will guides the crashed osd recovery its objects from th=
+e peers. Therefore, if we can keep pg_log at a consistent point, we can=
+ recovery data without journal. So can we just use an "undo"
+> strategy on pg_log and neglect ceph journal? It will save lots of ban=
+dwidth, and also based on the consistent pg_log epoch, we can always re=
+covery data from its peering osd, right? But this will lead to recovery=
+ more objects if the osd crash.
+>
+> Nicheal
 >
 
 --
