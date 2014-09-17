@@ -1,41 +1,41 @@
-From: =?UTF-8?B?5aea5a6B?= <zay11022@gmail.com>
-Subject: puzzled with the design pattern of ceph journal, really ruining performance
-Date: Wed, 17 Sep 2014 14:29:22 +0800
-Message-ID: <CALZt5jz45E_KLHYgmT0eCYc9RJ7wMWuzqk6VeJthMyX98YEytg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: "Yan, Zheng" <zyan@redhat.com>
+Subject: [PATCH] ceph: remove redundant io_iter_advance()
+Date: Wed, 17 Sep 2014 15:13:16 +0800
+Message-ID: <1410937996-13013-1-git-send-email-zyan@redhat.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oa0-f66.google.com ([209.85.219.66]:47090 "EHLO
-	mail-oa0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751174AbaIQG3X (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Sep 2014 02:29:23 -0400
-Received: by mail-oa0-f66.google.com with SMTP id o6so176763oag.1
-        for <ceph-devel@vger.kernel.org>; Tue, 16 Sep 2014 23:29:22 -0700 (PDT)
+Received: from mx1.redhat.com ([209.132.183.28]:54480 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751406AbaIQHNc (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 17 Sep 2014 03:13:32 -0400
+Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id s8H7DWT1017757
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
+	for <ceph-devel@vger.kernel.org>; Wed, 17 Sep 2014 03:13:32 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
+Cc: "Yan, Zheng" <zyan@redhat.com>
 
-Hi, guys
+ceph_sync_read and generic_file_read_iter() have already advanced the
+IO iterator.
 
-I analyze the architecture of the ceph souce code.
+Signed-off-by: Yan, Zheng <zyan@redhat.com>
+---
+ fs/ceph/file.c | 1 -
+ 1 file changed, 1 deletion(-)
 
-I know that, in order to keep journal atomic and consistent, the
-journal write mode should be set with O_DSYNC or called fdatasync()
-system call after every write operation. However, this kind of
-operation is really killing the performance as well as achieving high
-committing latency, even if SSD is used as journal disk. If the SSD
-has capacitor to keep the data safe when the system crashes, we can
-set the mount option nobarrier or SSD itself will ignore the FLUSH
-REQUEST. So the performance would be better.
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index 1c1df08..d7e0da8 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -850,7 +850,6 @@ again:
+ 			     ", reading more\n", iocb->ki_pos,
+ 			     inode->i_size);
+ 
+-			iov_iter_advance(to, ret);
+ 			read += ret;
+ 			len -= ret;
+ 			checkeof = 0;
+-- 
+1.9.3
 
-So can it be instead by other strategies?
-As far as I am concerned, I think the most important part is pg_log
-and pg_info. It will guides the crashed osd recovery its objects from
-the peers. Therefore, if we can keep pg_log at a consistent point, we
-can recovery data without journal. So can we just use an "undo"
-strategy on pg_log and neglect ceph journal?  It will save lots of
-bandwidth, and also based on the consistent pg_log epoch, we can
-always recovery data from its peering osd, right? But this will lead
-to recovery more objects if the osd crash.
-
-Nicheal
