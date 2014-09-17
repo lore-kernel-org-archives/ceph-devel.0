@@ -1,20 +1,44 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: severe librbd performance degradation in Giant
-Date: Wed, 17 Sep 2014 14:20:27 -0700
-Message-ID: <5419FB1B.4020202@inktank.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: severe librbd performance degradation in Giant
+Date: Wed, 17 Sep 2014 21:29:20 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F278459F8@SACMBXIP02.sdcorp.global.sandisk.com>
 References: <755F6B91B3BE364F9BCA11EA3F9E0C6F27845984@SACMBXIP02.sdcorp.global.sandisk.com>
+ <5419FB1B.4020202@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:35868 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756584AbaIQV2o (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Sep 2014 17:28:44 -0400
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F27845984@SACMBXIP02.sdcorp.global.sandisk.com>
+Received: from mail-bn1bon0070.outbound.protection.outlook.com ([157.56.111.70]:21531
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1757330AbaIQVah convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Sep 2014 17:30:37 -0400
+In-Reply-To: <5419FB1B.4020202@inktank.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Josh Durgin <josh.durgin@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+
+I set the following in the client side /etc/ceph/ceph.conf where I am running fio rbd.
+
+rbd_cache_writethrough_until_flush = false
+
+But, no difference. BTW, I am doing Random read, not write. Still this setting applies ?
+
+Next, I tried to tweak the rbd_cache setting to false and I *got back* the old performance. Now, it is similar to firefly throughput !
+
+So, loks like rbd_cache=true was the culprit.
+
+Thanks Josh !
+
+Regards
+Somnath
+
+-----Original Message-----
+From: Josh Durgin [mailto:josh.durgin@inktank.com]
+Sent: Wednesday, September 17, 2014 2:20 PM
+To: Somnath Roy; ceph-devel@vger.kernel.org
+Subject: Re: severe librbd performance degradation in Giant
 
 On 09/17/2014 01:55 PM, Somnath Roy wrote:
 > Hi Sage,
@@ -33,8 +57,11 @@ For giant the default cache settings changed to:
 rbd cache = true
 rbd cache writethrough until flush = true
 
-If fio isn't sending flushes as the test is running, the cache will
-stay in writethrough mode. Does the difference remain if you set rbd
-cache writethrough until flush = false ?
+If fio isn't sending flushes as the test is running, the cache will stay in writethrough mode. Does the difference remain if you set rbd cache writethrough until flush = false ?
 
 Josh
+
+________________________________
+
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+
