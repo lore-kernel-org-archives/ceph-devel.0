@@ -1,41 +1,66 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: [PATCH] ceph: remove redundant io_iter_advance()
-Date: Wed, 17 Sep 2014 15:13:16 +0800
-Message-ID: <1410937996-13013-1-git-send-email-zyan@redhat.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: puzzled with the design pattern of ceph journal, really ruining
+ performance
+Date: Wed, 17 Sep 2014 07:29:49 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F27844F1E@SACMBXIP02.sdcorp.global.sandisk.com>
+References: <CALZt5jz45E_KLHYgmT0eCYc9RJ7wMWuzqk6VeJthMyX98YEytg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:54480 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751406AbaIQHNc (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 17 Sep 2014 03:13:32 -0400
-Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id s8H7DWT1017757
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
-	for <ceph-devel@vger.kernel.org>; Wed, 17 Sep 2014 03:13:32 -0400
+Received: from mail-bn1bon0093.outbound.protection.outlook.com ([157.56.111.93]:31937
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751441AbaIQH3x (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 17 Sep 2014 03:29:53 -0400
+In-Reply-To: <CALZt5jz45E_KLHYgmT0eCYc9RJ7wMWuzqk6VeJthMyX98YEytg@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: "Yan, Zheng" <zyan@redhat.com>
+To: =?utf-8?B?5aea5a6B?= <zay11022@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-ceph_sync_read and generic_file_read_iter() have already advanced the
-IO iterator.
-
-Signed-off-by: Yan, Zheng <zyan@redhat.com>
----
- fs/ceph/file.c | 1 -
- 1 file changed, 1 deletion(-)
-
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index 1c1df08..d7e0da8 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -850,7 +850,6 @@ again:
- 			     ", reading more\n", iocb->ki_pos,
- 			     inode->i_size);
- 
--			iov_iter_advance(to, ret);
- 			read += ret;
- 			len -= ret;
- 			checkeof = 0;
--- 
-1.9.3
-
+SGkgTmljaGVhbCwNCk5vdCBvbmx5IHJlY292ZXJ5ICwgSU1ITyB0aGUgbWFpbiBwdXJwb3NlIG9m
+IGNlcGggam91cm5hbCBpcyB0byBzdXBwb3J0IHRyYW5zYWN0aW9uIHNlbWFudGljcyBzaW5jZSBY
+RlMgZG9lc24ndCBoYXZlIHRoYXQuIEkgZ3Vlc3MgaXQgY2FuJ3QgYmUgYWNoaWV2ZWQgd2l0aCBw
+Z19sb2cvcGdfaW5mby4NCg0KVGhhbmtzICYgUmVnYXJkcw0KU29tbmF0aA0KDQotLS0tLU9yaWdp
+bmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcg
+W21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mID8/
+DQpTZW50OiBUdWVzZGF5LCBTZXB0ZW1iZXIgMTYsIDIwMTQgMTE6MjkgUE0NClRvOiBjZXBoLWRl
+dmVsQHZnZXIua2VybmVsLm9yZw0KU3ViamVjdDogcHV6emxlZCB3aXRoIHRoZSBkZXNpZ24gcGF0
+dGVybiBvZiBjZXBoIGpvdXJuYWwsIHJlYWxseSBydWluaW5nIHBlcmZvcm1hbmNlDQoNCkhpLCBn
+dXlzDQoNCkkgYW5hbHl6ZSB0aGUgYXJjaGl0ZWN0dXJlIG9mIHRoZSBjZXBoIHNvdWNlIGNvZGUu
+DQoNCkkga25vdyB0aGF0LCBpbiBvcmRlciB0byBrZWVwIGpvdXJuYWwgYXRvbWljIGFuZCBjb25z
+aXN0ZW50LCB0aGUgam91cm5hbCB3cml0ZSBtb2RlIHNob3VsZCBiZSBzZXQgd2l0aCBPX0RTWU5D
+IG9yIGNhbGxlZCBmZGF0YXN5bmMoKSBzeXN0ZW0gY2FsbCBhZnRlciBldmVyeSB3cml0ZSBvcGVy
+YXRpb24uIEhvd2V2ZXIsIHRoaXMga2luZCBvZiBvcGVyYXRpb24gaXMgcmVhbGx5IGtpbGxpbmcg
+dGhlIHBlcmZvcm1hbmNlIGFzIHdlbGwgYXMgYWNoaWV2aW5nIGhpZ2ggY29tbWl0dGluZyBsYXRl
+bmN5LCBldmVuIGlmIFNTRCBpcyB1c2VkIGFzIGpvdXJuYWwgZGlzay4gSWYgdGhlIFNTRCBoYXMg
+Y2FwYWNpdG9yIHRvIGtlZXAgdGhlIGRhdGEgc2FmZSB3aGVuIHRoZSBzeXN0ZW0gY3Jhc2hlcywg
+d2UgY2FuIHNldCB0aGUgbW91bnQgb3B0aW9uIG5vYmFycmllciBvciBTU0QgaXRzZWxmIHdpbGwg
+aWdub3JlIHRoZSBGTFVTSCBSRVFVRVNULiBTbyB0aGUgcGVyZm9ybWFuY2Ugd291bGQgYmUgYmV0
+dGVyLg0KDQpTbyBjYW4gaXQgYmUgaW5zdGVhZCBieSBvdGhlciBzdHJhdGVnaWVzPw0KQXMgZmFy
+IGFzIEkgYW0gY29uY2VybmVkLCBJIHRoaW5rIHRoZSBtb3N0IGltcG9ydGFudCBwYXJ0IGlzIHBn
+X2xvZyBhbmQgcGdfaW5mby4gSXQgd2lsbCBndWlkZXMgdGhlIGNyYXNoZWQgb3NkIHJlY292ZXJ5
+IGl0cyBvYmplY3RzIGZyb20gdGhlIHBlZXJzLiBUaGVyZWZvcmUsIGlmIHdlIGNhbiBrZWVwIHBn
+X2xvZyBhdCBhIGNvbnNpc3RlbnQgcG9pbnQsIHdlIGNhbiByZWNvdmVyeSBkYXRhIHdpdGhvdXQg
+am91cm5hbC4gU28gY2FuIHdlIGp1c3QgdXNlIGFuICJ1bmRvIg0Kc3RyYXRlZ3kgb24gcGdfbG9n
+IGFuZCBuZWdsZWN0IGNlcGggam91cm5hbD8gIEl0IHdpbGwgc2F2ZSBsb3RzIG9mIGJhbmR3aWR0
+aCwgYW5kIGFsc28gYmFzZWQgb24gdGhlIGNvbnNpc3RlbnQgcGdfbG9nIGVwb2NoLCB3ZSBjYW4g
+YWx3YXlzIHJlY292ZXJ5IGRhdGEgZnJvbSBpdHMgcGVlcmluZyBvc2QsIHJpZ2h0PyBCdXQgdGhp
+cyB3aWxsIGxlYWQgdG8gcmVjb3ZlcnkgbW9yZSBvYmplY3RzIGlmIHRoZSBvc2QgY3Jhc2guDQoN
+Ck5pY2hlYWwNCi0tDQpUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGlu
+ZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1h
+am9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3Zn
+ZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQoNCl9fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fDQoNClBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGlu
+IHRoaXMgZWxlY3Ryb25pYyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVz
+ZSBvZiB0aGUgZGVzaWduYXRlZCByZWNpcGllbnQocykgbmFtZWQgYWJvdmUuIElmIHRoZSByZWFk
+ZXIgb2YgdGhpcyBtZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJl
+IGhlcmVieSBub3RpZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBl
+cnJvciBhbmQgdGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9y
+IGNvcHlpbmcgb2YgdGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBo
+YXZlIHJlY2VpdmVkIHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0
+aGUgc2VuZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlh
+dGVseSBhbmQgZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlv
+dXIgcG9zc2Vzc2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9y
+ZWQgY29waWVzKS4NCg0K
