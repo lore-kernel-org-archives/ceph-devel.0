@@ -1,141 +1,117 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Re: severe librbd performance degradation in Giant
-Date: Thu, 18 Sep 2014 10:27:56 +0800
-Message-ID: <CACJqLyYQDrHyxMEtiMKMNaBQ_fHuu-hGqO_ZNHra0+VsUZrzXQ@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: severe librbd performance degradation in Giant
+Date: Thu, 18 Sep 2014 03:03:54 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F27845F05@SACMBXIP02.sdcorp.global.sandisk.com>
 References: <755F6B91B3BE364F9BCA11EA3F9E0C6F27845984@SACMBXIP02.sdcorp.global.sandisk.com>
 	<5419FB1B.4020202@inktank.com>
 	<755F6B91B3BE364F9BCA11EA3F9E0C6F278459F8@SACMBXIP02.sdcorp.global.sandisk.com>
 	<alpine.DEB.2.00.1409171435320.20205@cobra.newdream.net>
 	<755F6B91B3BE364F9BCA11EA3F9E0C6F27845A2A@SACMBXIP02.sdcorp.global.sandisk.com>
 	<755F6B91B3BE364F9BCA11EA3F9E0C6F27845B22@SACMBXIP02.sdcorp.global.sandisk.com>
+ <CACJqLyYQDrHyxMEtiMKMNaBQ_fHuu-hGqO_ZNHra0+VsUZrzXQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-we0-f170.google.com ([74.125.82.170]:63104 "EHLO
-	mail-we0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756686AbaIRC15 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Sep 2014 22:27:57 -0400
-Received: by mail-we0-f170.google.com with SMTP id u57so188210wes.1
-        for <ceph-devel@vger.kernel.org>; Wed, 17 Sep 2014 19:27:56 -0700 (PDT)
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F27845B22@SACMBXIP02.sdcorp.global.sandisk.com>
+Received: from mail-bn1bon0055.outbound.protection.outlook.com ([157.56.111.55]:54640
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1757397AbaIRDD7 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 17 Sep 2014 23:03:59 -0400
+In-Reply-To: <CACJqLyYQDrHyxMEtiMKMNaBQ_fHuu-hGqO_ZNHra0+VsUZrzXQ@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
+To: Haomai Wang <haomaiwang@gmail.com>
 Cc: Sage Weil <sweil@redhat.com>, Josh Durgin <josh.durgin@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-According http://tracker.ceph.com/issues/9513, do you mean that rbd
-cache will make 10x performance degradation for random read?
-
-On Thu, Sep 18, 2014 at 7:44 AM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
-> Josh/Sage,
-> I should mention that even after turning off rbd cache I am getting ~20% degradation over Firefly.
->
-> Thanks & Regards
-> Somnath
->
-> -----Original Message-----
-> From: Somnath Roy
-> Sent: Wednesday, September 17, 2014 2:44 PM
-> To: Sage Weil
-> Cc: Josh Durgin; ceph-devel@vger.kernel.org
-> Subject: RE: severe librbd performance degradation in Giant
->
-> Created a tracker for this.
->
-> http://tracker.ceph.com/issues/9513
->
-> Thanks & Regards
-> Somnath
->
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Somnath Roy
-> Sent: Wednesday, September 17, 2014 2:39 PM
-> To: Sage Weil
-> Cc: Josh Durgin; ceph-devel@vger.kernel.org
-> Subject: RE: severe librbd performance degradation in Giant
->
-> Sage,
-> It's a 4K random read.
->
-> Thanks & Regards
-> Somnath
->
-> -----Original Message-----
-> From: Sage Weil [mailto:sweil@redhat.com]
-> Sent: Wednesday, September 17, 2014 2:36 PM
-> To: Somnath Roy
-> Cc: Josh Durgin; ceph-devel@vger.kernel.org
-> Subject: RE: severe librbd performance degradation in Giant
->
-> What was the io pattern?  Sequential or random?  For random a slowdown makes sense (tho maybe not 10x!) but not for sequentail....
->
-> s
->
-> On Wed, 17 Sep 2014, Somnath Roy wrote:
->
->> I set the following in the client side /etc/ceph/ceph.conf where I am running fio rbd.
->>
->> rbd_cache_writethrough_until_flush = false
->>
->> But, no difference. BTW, I am doing Random read, not write. Still this setting applies ?
->>
->> Next, I tried to tweak the rbd_cache setting to false and I *got back* the old performance. Now, it is similar to firefly throughput !
->>
->> So, loks like rbd_cache=true was the culprit.
->>
->> Thanks Josh !
->>
->> Regards
->> Somnath
->>
->> -----Original Message-----
->> From: Josh Durgin [mailto:josh.durgin@inktank.com]
->> Sent: Wednesday, September 17, 2014 2:20 PM
->> To: Somnath Roy; ceph-devel@vger.kernel.org
->> Subject: Re: severe librbd performance degradation in Giant
->>
->> On 09/17/2014 01:55 PM, Somnath Roy wrote:
->> > Hi Sage,
->> > We are experiencing severe librbd performance degradation in Giant over firefly release. Here is the experiment we did to isolate it as a librbd problem.
->> >
->> > 1. Single OSD is running latest Giant and client is running fio rbd on top of firefly based librbd/librados. For one client it is giving ~11-12K  iops (4K RR).
->> > 2. Single OSD is running Giant and client is running fio rbd on top of Giant based librbd/librados. For one client it is giving ~1.9K  iops (4K RR).
->> > 3. Single OSD is running latest Giant and client is running Giant based ceph_smaiobench on top of giant librados. For one client it is giving ~11-12K  iops (4K RR).
->> > 4. Giant RGW on top of Giant OSD is also scaling.
->> >
->> >
->> > So, it is obvious from the above that recent librbd has issues. I will raise a tracker to track this.
->>
->> For giant the default cache settings changed to:
->>
->> rbd cache = true
->> rbd cache writethrough until flush = true
->>
->> If fio isn't sending flushes as the test is running, the cache will stay in writethrough mode. Does the difference remain if you set rbd cache writethrough until flush = false ?
->>
->> Josh
->>
->> ________________________________
->>
->> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->> in the body of a message to majordomo@vger.kernel.org More majordomo
->> info at  http://vger.kernel.org/majordomo-info.html
->>
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
-
--- 
-Best Regards,
-
-Wheat
+WWVzIEhhb21haS4uLg0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogSGFvbWFp
+IFdhbmcgW21haWx0bzpoYW9tYWl3YW5nQGdtYWlsLmNvbV0gDQpTZW50OiBXZWRuZXNkYXksIFNl
+cHRlbWJlciAxNywgMjAxNCA3OjI4IFBNDQpUbzogU29tbmF0aCBSb3kNCkNjOiBTYWdlIFdlaWw7
+IEpvc2ggRHVyZ2luOyBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KU3ViamVjdDogUmU6IHNl
+dmVyZSBsaWJyYmQgcGVyZm9ybWFuY2UgZGVncmFkYXRpb24gaW4gR2lhbnQNCg0KQWNjb3JkaW5n
+IGh0dHA6Ly90cmFja2VyLmNlcGguY29tL2lzc3Vlcy85NTEzLCBkbyB5b3UgbWVhbiB0aGF0IHJi
+ZCBjYWNoZSB3aWxsIG1ha2UgMTB4IHBlcmZvcm1hbmNlIGRlZ3JhZGF0aW9uIGZvciByYW5kb20g
+cmVhZD8NCg0KT24gVGh1LCBTZXAgMTgsIDIwMTQgYXQgNzo0NCBBTSwgU29tbmF0aCBSb3kgPFNv
+bW5hdGguUm95QHNhbmRpc2suY29tPiB3cm90ZToNCj4gSm9zaC9TYWdlLA0KPiBJIHNob3VsZCBt
+ZW50aW9uIHRoYXQgZXZlbiBhZnRlciB0dXJuaW5nIG9mZiByYmQgY2FjaGUgSSBhbSBnZXR0aW5n
+IH4yMCUgZGVncmFkYXRpb24gb3ZlciBGaXJlZmx5Lg0KPg0KPiBUaGFua3MgJiBSZWdhcmRzDQo+
+IFNvbW5hdGgNCj4NCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogU29tbmF0
+aCBSb3kNCj4gU2VudDogV2VkbmVzZGF5LCBTZXB0ZW1iZXIgMTcsIDIwMTQgMjo0NCBQTQ0KPiBU
+bzogU2FnZSBXZWlsDQo+IENjOiBKb3NoIER1cmdpbjsgY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5v
+cmcNCj4gU3ViamVjdDogUkU6IHNldmVyZSBsaWJyYmQgcGVyZm9ybWFuY2UgZGVncmFkYXRpb24g
+aW4gR2lhbnQNCj4NCj4gQ3JlYXRlZCBhIHRyYWNrZXIgZm9yIHRoaXMuDQo+DQo+IGh0dHA6Ly90
+cmFja2VyLmNlcGguY29tL2lzc3Vlcy85NTEzDQo+DQo+IFRoYW5rcyAmIFJlZ2FyZHMNCj4gU29t
+bmF0aA0KPg0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBjZXBoLWRldmVs
+LW93bmVyQHZnZXIua2VybmVsLm9yZyANCj4gW21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIu
+a2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIFNvbW5hdGggUm95DQo+IFNlbnQ6IFdlZG5lc2RheSwg
+U2VwdGVtYmVyIDE3LCAyMDE0IDI6MzkgUE0NCj4gVG86IFNhZ2UgV2VpbA0KPiBDYzogSm9zaCBE
+dXJnaW47IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQo+IFN1YmplY3Q6IFJFOiBzZXZlcmUg
+bGlicmJkIHBlcmZvcm1hbmNlIGRlZ3JhZGF0aW9uIGluIEdpYW50DQo+DQo+IFNhZ2UsDQo+IEl0
+J3MgYSA0SyByYW5kb20gcmVhZC4NCj4NCj4gVGhhbmtzICYgUmVnYXJkcw0KPiBTb21uYXRoDQo+
+DQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IFNhZ2UgV2VpbCBbbWFpbHRv
+OnN3ZWlsQHJlZGhhdC5jb21dDQo+IFNlbnQ6IFdlZG5lc2RheSwgU2VwdGVtYmVyIDE3LCAyMDE0
+IDI6MzYgUE0NCj4gVG86IFNvbW5hdGggUm95DQo+IENjOiBKb3NoIER1cmdpbjsgY2VwaC1kZXZl
+bEB2Z2VyLmtlcm5lbC5vcmcNCj4gU3ViamVjdDogUkU6IHNldmVyZSBsaWJyYmQgcGVyZm9ybWFu
+Y2UgZGVncmFkYXRpb24gaW4gR2lhbnQNCj4NCj4gV2hhdCB3YXMgdGhlIGlvIHBhdHRlcm4/ICBT
+ZXF1ZW50aWFsIG9yIHJhbmRvbT8gIEZvciByYW5kb20gYSBzbG93ZG93biBtYWtlcyBzZW5zZSAo
+dGhvIG1heWJlIG5vdCAxMHghKSBidXQgbm90IGZvciBzZXF1ZW50YWlsLi4uLg0KPg0KPiBzDQo+
+DQo+IE9uIFdlZCwgMTcgU2VwIDIwMTQsIFNvbW5hdGggUm95IHdyb3RlOg0KPg0KPj4gSSBzZXQg
+dGhlIGZvbGxvd2luZyBpbiB0aGUgY2xpZW50IHNpZGUgL2V0Yy9jZXBoL2NlcGguY29uZiB3aGVy
+ZSBJIGFtIHJ1bm5pbmcgZmlvIHJiZC4NCj4+DQo+PiByYmRfY2FjaGVfd3JpdGV0aHJvdWdoX3Vu
+dGlsX2ZsdXNoID0gZmFsc2UNCj4+DQo+PiBCdXQsIG5vIGRpZmZlcmVuY2UuIEJUVywgSSBhbSBk
+b2luZyBSYW5kb20gcmVhZCwgbm90IHdyaXRlLiBTdGlsbCB0aGlzIHNldHRpbmcgYXBwbGllcyA/
+DQo+Pg0KPj4gTmV4dCwgSSB0cmllZCB0byB0d2VhayB0aGUgcmJkX2NhY2hlIHNldHRpbmcgdG8g
+ZmFsc2UgYW5kIEkgKmdvdCBiYWNrKiB0aGUgb2xkIHBlcmZvcm1hbmNlLiBOb3csIGl0IGlzIHNp
+bWlsYXIgdG8gZmlyZWZseSB0aHJvdWdocHV0ICENCj4+DQo+PiBTbywgbG9rcyBsaWtlIHJiZF9j
+YWNoZT10cnVlIHdhcyB0aGUgY3VscHJpdC4NCj4+DQo+PiBUaGFua3MgSm9zaCAhDQo+Pg0KPj4g
+UmVnYXJkcw0KPj4gU29tbmF0aA0KPj4NCj4+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+
+PiBGcm9tOiBKb3NoIER1cmdpbiBbbWFpbHRvOmpvc2guZHVyZ2luQGlua3RhbmsuY29tXQ0KPj4g
+U2VudDogV2VkbmVzZGF5LCBTZXB0ZW1iZXIgMTcsIDIwMTQgMjoyMCBQTQ0KPj4gVG86IFNvbW5h
+dGggUm95OyBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KPj4gU3ViamVjdDogUmU6IHNldmVy
+ZSBsaWJyYmQgcGVyZm9ybWFuY2UgZGVncmFkYXRpb24gaW4gR2lhbnQNCj4+DQo+PiBPbiAwOS8x
+Ny8yMDE0IDAxOjU1IFBNLCBTb21uYXRoIFJveSB3cm90ZToNCj4+ID4gSGkgU2FnZSwNCj4+ID4g
+V2UgYXJlIGV4cGVyaWVuY2luZyBzZXZlcmUgbGlicmJkIHBlcmZvcm1hbmNlIGRlZ3JhZGF0aW9u
+IGluIEdpYW50IG92ZXIgZmlyZWZseSByZWxlYXNlLiBIZXJlIGlzIHRoZSBleHBlcmltZW50IHdl
+IGRpZCB0byBpc29sYXRlIGl0IGFzIGEgbGlicmJkIHByb2JsZW0uDQo+PiA+DQo+PiA+IDEuIFNp
+bmdsZSBPU0QgaXMgcnVubmluZyBsYXRlc3QgR2lhbnQgYW5kIGNsaWVudCBpcyBydW5uaW5nIGZp
+byByYmQgb24gdG9wIG9mIGZpcmVmbHkgYmFzZWQgbGlicmJkL2xpYnJhZG9zLiBGb3Igb25lIGNs
+aWVudCBpdCBpcyBnaXZpbmcgfjExLTEySyAgaW9wcyAoNEsgUlIpLg0KPj4gPiAyLiBTaW5nbGUg
+T1NEIGlzIHJ1bm5pbmcgR2lhbnQgYW5kIGNsaWVudCBpcyBydW5uaW5nIGZpbyByYmQgb24gdG9w
+IG9mIEdpYW50IGJhc2VkIGxpYnJiZC9saWJyYWRvcy4gRm9yIG9uZSBjbGllbnQgaXQgaXMgZ2l2
+aW5nIH4xLjlLICBpb3BzICg0SyBSUikuDQo+PiA+IDMuIFNpbmdsZSBPU0QgaXMgcnVubmluZyBs
+YXRlc3QgR2lhbnQgYW5kIGNsaWVudCBpcyBydW5uaW5nIEdpYW50IGJhc2VkIGNlcGhfc21haW9i
+ZW5jaCBvbiB0b3Agb2YgZ2lhbnQgbGlicmFkb3MuIEZvciBvbmUgY2xpZW50IGl0IGlzIGdpdmlu
+ZyB+MTEtMTJLICBpb3BzICg0SyBSUikuDQo+PiA+IDQuIEdpYW50IFJHVyBvbiB0b3Agb2YgR2lh
+bnQgT1NEIGlzIGFsc28gc2NhbGluZy4NCj4+ID4NCj4+ID4NCj4+ID4gU28sIGl0IGlzIG9idmlv
+dXMgZnJvbSB0aGUgYWJvdmUgdGhhdCByZWNlbnQgbGlicmJkIGhhcyBpc3N1ZXMuIEkgd2lsbCBy
+YWlzZSBhIHRyYWNrZXIgdG8gdHJhY2sgdGhpcy4NCj4+DQo+PiBGb3IgZ2lhbnQgdGhlIGRlZmF1
+bHQgY2FjaGUgc2V0dGluZ3MgY2hhbmdlZCB0bzoNCj4+DQo+PiByYmQgY2FjaGUgPSB0cnVlDQo+
+PiByYmQgY2FjaGUgd3JpdGV0aHJvdWdoIHVudGlsIGZsdXNoID0gdHJ1ZQ0KPj4NCj4+IElmIGZp
+byBpc24ndCBzZW5kaW5nIGZsdXNoZXMgYXMgdGhlIHRlc3QgaXMgcnVubmluZywgdGhlIGNhY2hl
+IHdpbGwgc3RheSBpbiB3cml0ZXRocm91Z2ggbW9kZS4gRG9lcyB0aGUgZGlmZmVyZW5jZSByZW1h
+aW4gaWYgeW91IHNldCByYmQgY2FjaGUgd3JpdGV0aHJvdWdoIHVudGlsIGZsdXNoID0gZmFsc2Ug
+Pw0KPj4NCj4+IEpvc2gNCj4+DQo+PiBfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXw0K
+Pj4NCj4+IFBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxl
+Y3Ryb25pYyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUg
+ZGVzaWduYXRlZCByZWNpcGllbnQocykgbmFtZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhp
+cyBtZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBu
+b3RpZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQg
+dGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcg
+b2YgdGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2Vp
+dmVkIHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVy
+IGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQg
+ZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vz
+c2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVz
+KS4NCj4+DQo+PiAtLQ0KPj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhl
+IGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiDQo+PiBpbiB0aGUgYm9keSBvZiBhIG1lc3Nh
+Z2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyANCj4+IGluZm8g
+YXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KPj4NCj4+DQo+
+IC0tDQo+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1
+YnNjcmliZSBjZXBoLWRldmVsIiANCj4gaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9y
+ZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gDQo+IGluZm8gYXQgIGh0dHA6Ly92
+Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KPiAtLQ0KPiBUbyB1bnN1YnNjcmli
+ZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIg
+DQo+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3Jn
+IE1vcmUgbWFqb3Jkb21vIA0KPiBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9y
+ZG9tby1pbmZvLmh0bWwNCg0KDQoNCi0tDQpCZXN0IFJlZ2FyZHMsDQoNCldoZWF0DQo=
