@@ -1,155 +1,99 @@
-From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
-Subject: RE: puzzled with the design pattern of ceph journal, really ruining
- performance
-Date: Thu, 18 Sep 2014 01:05:18 +0000
-Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC020BD19A@shsmsx102.ccr.corp.intel.com>
-References: <5419A232.8080508@redhat.com>
- <ec560ceb-14b3-4706-aeaf-5622290561db@mailpro>
+From: "Yan, Zheng" <ukernel@gmail.com>
+Subject: Re: [PATCH] ceph: remove redundant code for max file size verification
+Date: Thu, 18 Sep 2014 09:11:26 +0800
+Message-ID: <CAAM7YAkZun780YD+mqieuNj2uF6-oBo=ohg0GkdapJehwxDnBw@mail.gmail.com>
+References: <00fd01cfd259$81ef7530$85ce5f90$@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:21638 "EHLO mga11.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753389AbaIRBFW (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 17 Sep 2014 21:05:22 -0400
-In-Reply-To: <ec560ceb-14b3-4706-aeaf-5622290561db@mailpro>
-Content-Language: en-US
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre DERUMIER <aderumier@odiso.com>, Mark Nelson <mark.nelson@inktank.com>
-Cc: Somnath Roy <Somnath.Roy@sandisk.com>, ?? <zay11022@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <00fd01cfd259$81ef7530$85ce5f90$@samsung.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Chao Yu <chao2.yu@samsung.com>
+Cc: Sage Weil <sage@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>, linux-kernel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-PldoZW4gYmVuY2hpbmcgdGhlIGNydWNpYWwgbTU1MCwgSSBvbmx5IHNlZSB0aW1lIHRvIHRpbWUg
-KG1heWJlIGVhY2ggMzBzLGRvbid0IHJlbWVtYmVyIGV4YWN0bHkpLCBpb3Mgc2xvd2luZyBkb2lu
-ZyB0byAyMDAgZm9yIDEgb3IgMiBzZWNvbmRzIHRoZW4gZ29pbmcgdXAgdG8gbm9ybWFsIHNwZWVk
-IGFyb3VuZCA0MDAwaW9wcw0KDQpXb3csIHRoYXQgaW5kaWNhdGUgbTU1MCBpcyBidXN5aW5nIHdp
-dGggZ2FyYmFnZSBjb2xsZWN0aW9uICwgbWF5YmUganVzdCB0cnkgdG8gb3ZlcnByb3Zpc2lvbiBh
-IGJpdCAoc2F5IGlmIHlvdSBoYXZlIGEgNDAwRyBzc2QgLCBidXQgb25seSBwYXJ0aXRpb24gfjMw
-MEcpLCBvdmVycHJvdmlzaW9uIFNTRCBnZW5lcmFsbHkgYm90aCBoZWxwIHBlcmZvcm1hbmNlIGFu
-ZCBkdXJhYmlsaXR5LiBBY3R1YWxseSBpZiB5b3UgbG9vayBhdCB0aGUgZGlmZmVyZW5jZSBzcGVj
-IGJldHdlZW4gSW50ZWwgUzM1MDAgYW5kIFMzNzAwLCB0aGUgcm9vdCBjYXVzZSBpcyBkaWZmZXJl
-bnQgb3ZlciBwcm92aXNpb24gcmF0aW8gOikNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0N
-CkZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnIFttYWlsdG86Y2VwaC1kZXZl
-bC1vd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFsZiBPZiBBbGV4YW5kcmUgREVSVU1JRVIN
-ClNlbnQ6IFRodXJzZGF5LCBTZXB0ZW1iZXIgMTgsIDIwMTQgNToxMyBBTQ0KVG86IE1hcmsgTmVs
-c29uDQpDYzogU29tbmF0aCBSb3k7ID8/OyBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZzsgQ2hl
-biwgWGlhb3hpDQpTdWJqZWN0OiBSZTogcHV6emxlZCB3aXRoIHRoZSBkZXNpZ24gcGF0dGVybiBv
-ZiBjZXBoIGpvdXJuYWwsIHJlYWxseSBydWluaW5nIHBlcmZvcm1hbmNlDQoNCj4+RldJVywgdGhl
-IGpvdXJuYWwgd2lsbCBjb2FsZXNjZSB3cml0ZXMgcXVpY2tseSB3aGVuIHRoZXJlIGFyZSBtYW55
-IA0KPj5jb25jdXJyZW50IDRrIGNsaWVudCB3cml0ZXMuICBPbmNlIHlvdSBoaXQgYXJvdW5kIDgg
-NGsgSU9zIHBlciBPU0QsIA0KPj50aGUgam91cm5hbCB3aWxsIHN0YXJ0IGNvYWxlc2NpbmcuICBG
-b3Igc2F5IDEwMC0xNTAgSU9QcyAod2hhdCBhIA0KPj5zcGlubmluZyBkaXNrIGNhbiBoYW5kbGUp
-LCBleHBlY3QgYXJvdW5kIDlpc2ggMTAwS0Igam91cm5hbCB3cml0ZXMgDQo+Pih3aXRoIHBhZGRp
-bmcgYW5kIGhlYWRlci9mb290ZXIgZm9yIGVhY2ggY2xpZW50IElPKS4gIFdoYXQgd2UndmUgc2Vl
-biANCj4+aXMgdGhhdCBzb21lIGRyaXZlcyB0aGF0IGFyZW4ndCB0aGF0IGdyZWF0IGF0IDRLIE9f
-RFNZTkMgd3JpdGVzIGFyZSANCj4+c3RpbGwgcmVhc29uYWJseSBnb29kIHdpdGggOCsgY29uY3Vy
-cmVudCBsYXJnZXIgT19EU1lOQyB3cml0ZXMuDQoNClllcywgaW5kZWVkLCBpdCdzIG5vdCB0aGF0
-IGJhZC4gKGhvcGVmdWxseSA7KQ0KDQpXaGVuIGJlbmNoaW5nIHRoZSBjcnVjaWFsIG01NTAsIEkg
-b25seSBzZWUgdGltZSB0byB0aW1lIChtYXliZSBlYWNoIDMwcyxkb24ndCByZW1lbWJlciBleGFj
-dGx5KSwgaW9zIHNsb3dpbmcgZG9pbmcgdG8gMjAwIGZvciAxIG9yIDIgc2Vjb25kcyB0aGVuIGdv
-aW5nIHVwIHRvIG5vcm1hbCBzcGVlZCBhcm91bmQgNDAwMGlvcHMuDQoNCndpdGggaW50ZWwgczM1
-MDAsIEkgaGF2ZSBjb25zdGFudCB3cml0ZSBhdCA1MDAwaW9wcy4NCg0KDQpCVFcsIGRvZXMgcmJk
-IGNsaWVudCBjYWNoZSBhbHNvIGhlbHAgZm9yIGNvYWxlc2Npbmcgd3JpdGUgKGNsaWVudCBzaWRl
-KSwgdGhlbiBoZWxwIGFsc28gdGhlIGpvdXJuYWwgPw0KDQoNCg0KDQoNCi0tLS0tIE1haWwgb3Jp
-Z2luYWwgLS0tLS0gDQoNCkRlOiAiTWFyayBOZWxzb24iIDxtYXJrLm5lbHNvbkBpbmt0YW5rLmNv
-bT4NCsOAOiAiQWxleGFuZHJlIERFUlVNSUVSIiA8YWRlcnVtaWVyQG9kaXNvLmNvbT4sICJYaWFv
-eGkgQ2hlbiIgPHhpYW94aS5jaGVuQGludGVsLmNvbT4NCkNjOiAiU29tbmF0aCBSb3kiIDxTb21u
-YXRoLlJveUBzYW5kaXNrLmNvbT4sICI/PyIgPHpheTExMDIyQGdtYWlsLmNvbT4sIGNlcGgtZGV2
-ZWxAdmdlci5rZXJuZWwub3JnDQpFbnZvecOpOiBNZXJjcmVkaSAxNyBTZXB0ZW1icmUgMjAxNCAx
-NzowMTowNg0KT2JqZXQ6IFJlOiBwdXp6bGVkIHdpdGggdGhlIGRlc2lnbiBwYXR0ZXJuIG9mIGNl
-cGggam91cm5hbCwgcmVhbGx5IHJ1aW5pbmcgcGVyZm9ybWFuY2UgDQoNCk9uIDA5LzE3LzIwMTQg
-MDk6MjAgQU0sIEFsZXhhbmRyZSBERVJVTUlFUiB3cm90ZTogDQo+Pj4gMi4gSGF2ZSB5b3UgZ290
-IGFueSBkYXRhIHRvIHByb3ZlIHRoZSBPX0RTWU5DIG9yIGZkYXRhc3luYyBraWxsIHRoZSANCj4+
-PiBwZXJmb3JtYW5jZSBvZiBqb3VybmFsPyBJbiBvdXIgcHJldmlvdXMgdGVzdCwgdGhlIGpvdXJu
-YWwgU1NEICh1c2UgYSANCj4+PiBwYXJ0aXRpb24gb2YgYSBTU0QgYXMgYSBqb3VybmFsIGZvciBh
-IHBhcnRpY3VsYXIgT1NELCBhbmQgNCBPU0QgDQo+Pj4gc2hhcmUgYSA+PnNhbWUgU1NEKSBjb3Vs
-ZCByZWFjaCBpdHMgcGVhayBwZXJmb3JtYW5jZSAoMzAwLTQwME1CL3MpDQo+IA0KPiBIaSwNCj4g
-DQo+IEkgaGF2ZSBkb25lIHNvbWUgYmVuY2ggaGVyZTogDQo+IA0KPiBodHRwOi8vd3d3Lm1haWwt
-YXJjaGl2ZS5jb20vY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbS9tc2cxMjk1MC5odG1sDQo+IA0K
-PiBTb21lIHNzZCBtb2RlbHMgaGF2ZSByZWFsbHkgYmFkIHBlcmZvcm1hbmNlIHdpdGggT19EU1lO
-QyAoY3J1Y2lhbCBtNTUwIC0gMzEyIGlvcHMgb24gNGsgYmxvY2spLiANCj4gQmVuY2hpbmcgMSBv
-c2QsSSBjYW4gc2VlIGJpZyBsYXRlbmNpZXMgZm9yIHNvbWUgc2Vjb25kcyB3aGVuIE9fRFNZTkMg
-DQo+IG9jY3VyDQoNCkZXSVcsIHRoZSBqb3VybmFsIHdpbGwgY29hbGVzY2Ugd3JpdGVzIHF1aWNr
-bHkgd2hlbiB0aGVyZSBhcmUgbWFueSBjb25jdXJyZW50IDRrIGNsaWVudCB3cml0ZXMuIE9uY2Ug
-eW91IGhpdCBhcm91bmQgOCA0ayBJT3MgcGVyIE9TRCwgdGhlIGpvdXJuYWwgd2lsbCBzdGFydCBj
-b2FsZXNjaW5nLiBGb3Igc2F5IDEwMC0xNTAgSU9QcyAod2hhdCBhIHNwaW5uaW5nIGRpc2sgY2Fu
-IGhhbmRsZSksIGV4cGVjdCBhcm91bmQgOWlzaCAxMDBLQiBqb3VybmFsIHdyaXRlcyAod2l0aCBw
-YWRkaW5nIGFuZCBoZWFkZXIvZm9vdGVyIGZvciBlYWNoIGNsaWVudCBJTykuIFdoYXQgd2UndmUg
-c2VlbiBpcyB0aGF0IHNvbWUgZHJpdmVzIHRoYXQgYXJlbid0IHRoYXQgZ3JlYXQgYXQgNEsgT19E
-U1lOQyB3cml0ZXMgYXJlIHN0aWxsIHJlYXNvbmFibHkgZ29vZCB3aXRoIDgrIGNvbmN1cnJlbnQg
-bGFyZ2VyIE9fRFNZTkMgd3JpdGVzLiANCg0KPiANCj4gDQo+IA0KPiBjcnVjaWFsIG01NTANCj4g
-LS0tLS0tLS0tLS0tDQo+ICNmaW8gLS1maWxlbmFtZT0vZGV2L3NkYiAtLWRpcmVjdD0xIC0tcnc9
-d3JpdGUgLS1icz00ayAtLW51bWpvYnM9MiANCj4gLS1ncm91cF9yZXBvcnRpbmcgLS1pbnZhbGlk
-YXRlPTAgLS1uYW1lPWFiIC0tc3luYz0xIGJ3PTEyNDkuOUtCL3MsIA0KPiBpb3BzPTMxMg0KPiAN
-Cj4gaW50ZWwgczM1MDANCj4gLS0tLS0tLS0tLS0NCj4gZmlvIC0tZmlsZW5hbWU9L2Rldi9zZGIg
-LS1kaXJlY3Q9MSAtLXJ3PXdyaXRlIC0tYnM9NGsgLS1udW1qb2JzPTIgDQo+IC0tZ3JvdXBfcmVw
-b3J0aW5nIC0taW52YWxpZGF0ZT0wIC0tbmFtZT1hYiAtLXN5bmM9MSAjYnc9NDE3OTRLQi9zLCAN
-Cj4gaW9wcz0xMDQ0OA0KPiANCj4gLS0tLS0gTWFpbCBvcmlnaW5hbCAtLS0tLQ0KPiANCj4gRGU6
-ICJYaWFveGkgQ2hlbiIgPHhpYW94aS5jaGVuQGludGVsLmNvbT4NCj4gw4A6ICJTb21uYXRoIFJv
-eSIgPFNvbW5hdGguUm95QHNhbmRpc2suY29tPiwgIj8/IiA8emF5MTEwMjJAZ21haWwuY29tPiwg
-DQo+IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQo+IEVudm95w6k6IE1lcmNyZWRpIDE3IFNl
-cHRlbWJyZSAyMDE0IDA5OjU5OjM3DQo+IE9iamV0OiBSRTogcHV6emxlZCB3aXRoIHRoZSBkZXNp
-Z24gcGF0dGVybiBvZiBjZXBoIGpvdXJuYWwsIHJlYWxseSANCj4gcnVpbmluZyBwZXJmb3JtYW5j
-ZQ0KPiANCj4gSGkgTmljaGVhbCwNCj4gDQo+IDEuIFRoZSBtYWluIHB1cnBvc2Ugb2Ygam91cm5h
-bCBpcyBwcm92aWRlIHRyYW5zYWN0aW9uIHNlbWFudGljcyAocHJldmVudCBwYXJ0aWFsbHkgdXBk
-YXRlKS4gUGVlciBpcyBub3QgZW5vdWdoIGZvciB0aGlzIG5lZWQgYmVjYXVzZSBjZXBoIHdyaXRl
-cyBhbGwgcmVwbGljYSBhdCB0aGUgc2FtZSB0aW1lLCBzbyB3aGVuIGNydXNoLCB5b3UgaGF2ZSBu
-byBpZGVhIGFib3V0IHdoaWNoIHJlcGxpY2EgaGFzIHJpZ2h0IGRhdGEuIEZvciBleGFtcGxlLCBz
-YXkgaWYgd2UgaGF2ZSAyIHJlcGxpY2EsIHVzZXIgdXBkYXRlIGEgNE0gb2JqZWN0IGFuZCB0aGUg
-cHJpbWFyeSBPU0QgY3J1c2ggd2hlbiB0aGUgZmlyc3QgMk0gd2FzIHdyaXR0ZW4gLCBzZWNvbmRh
-cnkgT1NEIG1heSBhbHNvIGZhaWxlZCB3aGVuIHRoZSBmaXJzdCAzTUIgd2FzIHdyaXR0ZW4uIFNv
-IGJvdGggdmVyc2lvbnMgaW4gcHJpbWFyeS9zZWNvbmRhcnkgYXJlIG5laXRoZXIgdGhlIG5ldyB2
-YWx1ZSwgbm9yIHRoZSBvbGQgdmFsdWUsIGFuZCBoYXZlIG5vIHdheSB0byByZWNvdmVyLiBTbyBz
-aGFyZSB0aGUgc2FtZSBpZGVhIGFzIGRhdGFiYXNlLCB3ZSBuZWVkIHRvIGhhdmUgYSBqb3VybmFs
-IHRvIHN1cHBvcnQgdHJhbnNhY3Rpb24gYW5kIHByZXZlbnQgdGhpcyBoYXBwZW4uIEZvciBzb21l
-IGJhY2tlbmQgc3VwcG9ydCB0cmFuc2FjdGlvbiwgQlRSRlMgYXMgYW4gaW5zdGFuY2UsIHdlIGRv
-bid0IG5lZWQgYSBqb3VybmFsLCB3ZSBjYW4gd3JpdGUgdGhlIGpvdXJuYWwgYW5kIGRhdGEgZGlz
-ayBhdCB0aGUgc2FtZSB0aW1lLCB0aGUgam91cm5hbCBoZXJlIGlzIGp1c3QgdHJ5IHRvIGhlbHAg
-cGVyZm9ybWFuY2UsIHNpbmNlIGl0IG9ubHkgZG8gc2VxdWVudGlhbCB3cml0ZSBhbmQgd2Ugc3Vz
-cGVjdCBpdCBzaG91bGQgYmUgZmFzdGVyIHRoYW4gYmFja2VuZCBPU0QuIA0KPiANCj4gMi4gSGF2
-ZSB5b3UgZ290IGFueSBkYXRhIHRvIHByb3ZlIHRoZSBPX0RTWU5DIG9yIGZkYXRhc3luYyBraWxs
-IHRoZSANCj4gcGVyZm9ybWFuY2Ugb2Ygam91cm5hbD8gSW4gb3VyIHByZXZpb3VzIHRlc3QsIHRo
-ZSBqb3VybmFsIFNTRCAodXNlIGEgDQo+IHBhcnRpdGlvbiBvZiBhIFNTRCBhcyBhIGpvdXJuYWwg
-Zm9yIGEgcGFydGljdWxhciBPU0QsIGFuZCA0IE9TRCBzaGFyZSANCj4gYSBzYW1lIFNTRCkgY291
-bGQgcmVhY2ggaXRzIHBlYWsgcGVyZm9ybWFuY2UgKDMwMC00MDBNQi9zKQ0KPiANCj4gWGlhb3hp
-DQo+IA0KPiANCj4gDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IGNlcGgt
-ZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnIA0KPiBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJA
-dmdlci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgU29tbmF0aCBSb3kNCj4gU2VudDogV2VkbmVz
-ZGF5LCBTZXB0ZW1iZXIgMTcsIDIwMTQgMzozMCBQTQ0KPiBUbzog5aea5a6BOyBjZXBoLWRldmVs
-QHZnZXIua2VybmVsLm9yZw0KPiBTdWJqZWN0OiBSRTogcHV6emxlZCB3aXRoIHRoZSBkZXNpZ24g
-cGF0dGVybiBvZiBjZXBoIGpvdXJuYWwsIHJlYWxseSANCj4gcnVpbmluZyBwZXJmb3JtYW5jZQ0K
-PiANCj4gSGkgTmljaGVhbCwNCj4gTm90IG9ubHkgcmVjb3ZlcnkgLCBJTUhPIHRoZSBtYWluIHB1
-cnBvc2Ugb2YgY2VwaCBqb3VybmFsIGlzIHRvIHN1cHBvcnQgdHJhbnNhY3Rpb24gc2VtYW50aWNz
-IHNpbmNlIFhGUyBkb2Vzbid0IGhhdmUgdGhhdC4gSSBndWVzcyBpdCBjYW4ndCBiZSBhY2hpZXZl
-ZCB3aXRoIHBnX2xvZy9wZ19pbmZvLiANCj4gDQo+IFRoYW5rcyAmIFJlZ2FyZHMNCj4gU29tbmF0
-aA0KPiANCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogY2VwaC1kZXZlbC1v
-d25lckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVs
-Lm9yZ10gT24gQmVoYWxmIE9mID8/IA0KPiBTZW50OiBUdWVzZGF5LCBTZXB0ZW1iZXIgMTYsIDIw
-MTQgMTE6MjkgUE0NCj4gVG86IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQo+IFN1YmplY3Q6
-IHB1enpsZWQgd2l0aCB0aGUgZGVzaWduIHBhdHRlcm4gb2YgY2VwaCBqb3VybmFsLCByZWFsbHkg
-DQo+IHJ1aW5pbmcgcGVyZm9ybWFuY2UNCj4gDQo+IEhpLCBndXlzDQo+IA0KPiBJIGFuYWx5emUg
-dGhlIGFyY2hpdGVjdHVyZSBvZiB0aGUgY2VwaCBzb3VjZSBjb2RlLiANCj4gDQo+IEkga25vdyB0
-aGF0LCBpbiBvcmRlciB0byBrZWVwIGpvdXJuYWwgYXRvbWljIGFuZCBjb25zaXN0ZW50LCB0aGUg
-am91cm5hbCB3cml0ZSBtb2RlIHNob3VsZCBiZSBzZXQgd2l0aCBPX0RTWU5DIG9yIGNhbGxlZCBm
-ZGF0YXN5bmMoKSBzeXN0ZW0gY2FsbCBhZnRlciBldmVyeSB3cml0ZSBvcGVyYXRpb24uIEhvd2V2
-ZXIsIHRoaXMga2luZCBvZiBvcGVyYXRpb24gaXMgcmVhbGx5IGtpbGxpbmcgdGhlIHBlcmZvcm1h
-bmNlIGFzIHdlbGwgYXMgYWNoaWV2aW5nIGhpZ2ggY29tbWl0dGluZyBsYXRlbmN5LCBldmVuIGlm
-IFNTRCBpcyB1c2VkIGFzIGpvdXJuYWwgZGlzay4gSWYgdGhlIFNTRCBoYXMgY2FwYWNpdG9yIHRv
-IGtlZXAgdGhlIGRhdGEgc2FmZSB3aGVuIHRoZSBzeXN0ZW0gY3Jhc2hlcywgd2UgY2FuIHNldCB0
-aGUgbW91bnQgb3B0aW9uIG5vYmFycmllciBvciBTU0QgaXRzZWxmIHdpbGwgaWdub3JlIHRoZSBG
-TFVTSCBSRVFVRVNULiBTbyB0aGUgcGVyZm9ybWFuY2Ugd291bGQgYmUgYmV0dGVyLiANCj4gDQo+
-IFNvIGNhbiBpdCBiZSBpbnN0ZWFkIGJ5IG90aGVyIHN0cmF0ZWdpZXM/IA0KPiBBcyBmYXIgYXMg
-SSBhbSBjb25jZXJuZWQsIEkgdGhpbmsgdGhlIG1vc3QgaW1wb3J0YW50IHBhcnQgaXMgcGdfbG9n
-IGFuZCBwZ19pbmZvLiBJdCB3aWxsIGd1aWRlcyB0aGUgY3Jhc2hlZCBvc2QgcmVjb3ZlcnkgaXRz
-IG9iamVjdHMgZnJvbSB0aGUgcGVlcnMuIFRoZXJlZm9yZSwgaWYgd2UgY2FuIGtlZXAgcGdfbG9n
-IGF0IGEgY29uc2lzdGVudCBwb2ludCwgd2UgY2FuIHJlY292ZXJ5IGRhdGEgd2l0aG91dCBqb3Vy
-bmFsLiBTbyBjYW4gd2UganVzdCB1c2UgYW4gInVuZG8iIA0KPiBzdHJhdGVneSBvbiBwZ19sb2cg
-YW5kIG5lZ2xlY3QgY2VwaCBqb3VybmFsPyBJdCB3aWxsIHNhdmUgbG90cyBvZiBiYW5kd2lkdGgs
-IGFuZCBhbHNvIGJhc2VkIG9uIHRoZSBjb25zaXN0ZW50IHBnX2xvZyBlcG9jaCwgd2UgY2FuIGFs
-d2F5cyByZWNvdmVyeSBkYXRhIGZyb20gaXRzIHBlZXJpbmcgb3NkLCByaWdodD8gQnV0IHRoaXMg
-d2lsbCBsZWFkIHRvIHJlY292ZXJ5IG1vcmUgb2JqZWN0cyBpZiB0aGUgb3NkIGNyYXNoLiANCj4g
-DQo+IE5pY2hlYWwNCj4gDQotLQ0KVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQg
-dGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluIHRoZSBib2R5IG9mIGEgbWVzc2Fn
-ZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0
-dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0K
+On Wed, Sep 17, 2014 at 5:26 PM, Chao Yu <chao2.yu@samsung.com> wrote:
+> Both ceph_update_writeable_page and ceph_setattr will verify file size
+> with max size ceph supported.
+> There are two caller for ceph_update_writeable_page, ceph_write_begin and
+> ceph_page_mkwrite. For ceph_write_begin, we have already verified the size in
+> generic_write_checks of ceph_write_iter; for ceph_page_mkwrite, we have no
+> chance to change file size when mmap. Likewise we have already verified the size
+> in inode_change_ok when we call ceph_setattr.
+> So let's remove the redundant code for max file size verification.
+>
+> Signed-off-by: Chao Yu <chao2.yu@samsung.com>
+> ---
+>  fs/ceph/addr.c  | 9 ---------
+>  fs/ceph/inode.c | 6 ------
+>  2 files changed, 15 deletions(-)
+>
+> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+> index 90b3954..18c06bb 100644
+> --- a/fs/ceph/addr.c
+> +++ b/fs/ceph/addr.c
+> @@ -1076,12 +1076,6 @@ retry_locked:
+>         /* past end of file? */
+>         i_size = inode->i_size;   /* caller holds i_mutex */
+>
+> -       if (i_size + len > inode->i_sb->s_maxbytes) {
+> -               /* file is too big */
+> -               r = -EINVAL;
+> -               goto fail;
+> -       }
+> -
+>         if (page_off >= i_size ||
+>             (pos_in_page == 0 && (pos+len) >= i_size &&
+>              end_in_page - pos_in_page != PAGE_CACHE_SIZE)) {
+> @@ -1099,9 +1093,6 @@ retry_locked:
+>         if (r < 0)
+>                 goto fail_nosnap;
+>         goto retry_locked;
+> -
+> -fail:
+> -       up_read(&mdsc->snap_rwsem);
+>  fail_nosnap:
+>         unlock_page(page);
+>         return r;
+> diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+> index 04c89c2..25c242e 100644
+> --- a/fs/ceph/inode.c
+> +++ b/fs/ceph/inode.c
+> @@ -1813,10 +1813,6 @@ int ceph_setattr(struct dentry *dentry, struct iattr *attr)
+>         if (ia_valid & ATTR_SIZE) {
+>                 dout("setattr %p size %lld -> %lld\n", inode,
+>                      inode->i_size, attr->ia_size);
+> -               if (attr->ia_size > inode->i_sb->s_maxbytes) {
+> -                       err = -EINVAL;
+> -                       goto out;
+> -               }
+>                 if ((issued & CEPH_CAP_FILE_EXCL) &&
+>                     attr->ia_size > inode->i_size) {
+>                         inode->i_size = attr->ia_size;
+> @@ -1896,8 +1892,6 @@ int ceph_setattr(struct dentry *dentry, struct iattr *attr)
+>         if (mask & CEPH_SETATTR_SIZE)
+>                 __ceph_do_pending_vmtruncate(inode);
+>         return err;
+> -out:
+> -       spin_unlock(&ci->i_ceph_lock);
+>  out_put:
+>         ceph_mdsc_put_request(req);
+>         return err;
+> --
+> 2.0.1.474.g72c7794
+>
+>
+
+Reviewed-by: Yan, Zheng <zyan@redhat.com>
+
+I added  this to testing branch of client-client.
+
+Thanks
+Yan, Zheng
+
+
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Please read the FAQ at  http://www.tux.org/lkml/
