@@ -1,96 +1,158 @@
-From: Dan Van Der Ster <daniel.vanderster@cern.ch>
-Subject: snap_trimming + backfilling is inefficient with many purged_snaps
-Date: Thu, 18 Sep 2014 12:50:44 +0000
-Message-ID: <D197E5D4-598B-4574-852E-C9F0CA10133E@cern.ch>
-References: <CAPUexz-ff+fTmU0J0TrJ80p+6334BBPvM7EWW5=eGa8uEomRew@mail.gmail.com>
+From: M Ranga Swami Reddy <swamireddy@gmail.com>
+Subject: Re: Fwd: S3 API Compatibility support
+Date: Thu, 18 Sep 2014 18:20:56 +0530
+Message-ID: <CANA9Uk49OgVtOSW9Yria-3ig8L8doV3X1ZqL+C_E0e4e9ShQxQ@mail.gmail.com>
+References: <CANA9Uk55UZXtKzS=urk3Q+KY=DoWoTaCRf=rKiEtjt9y7FYw7A@mail.gmail.com>
+	<CANA9Uk6E9t30Ve3pKhZa1cW4g6N7JjzG8JgiwOoDa9TWdNEagQ@mail.gmail.com>
+	<alpine.DEB.2.00.1407250848060.22752@cobra.newdream.net>
+	<CANA9Uk468XOE1cr935HY1y+tSnu-xp6QPaj7uCpZNQbJhg-pOA@mail.gmail.com>
+	<CABBk=J8+3K28M-RNf+ULx0TnTMmGxdymJDLeFMft-EX8PhS_4A@mail.gmail.com>
+	<CANA9Uk4JGm_2L_VnGsOgfpsX17=Ja4LLDaVNXzKJe-ZkY=ya9A@mail.gmail.com>
+	<CABBk=J-fSR8mc7LQBLcUQDPkgC8NaSfvRB-2ED71qSvQzLX8Cw@mail.gmail.com>
+	<CANA9Uk75TsXUyfMSibJRMeaWFEMKj-RxyFQqp=s1YZerNzM0mw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cernmx13.cern.ch ([188.184.36.46]:49816 "EHLO CERNMX13.cern.ch"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751099AbaIRMur (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 18 Sep 2014 08:50:47 -0400
-Content-Language: en-US
-Content-ID: <055AD6C43A0D3A4EAEB59A4D8A0CB413@cern.ch>
+Received: from mail-lb0-f174.google.com ([209.85.217.174]:51854 "EHLO
+	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751099AbaIRMu6 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 18 Sep 2014 08:50:58 -0400
+Received: by mail-lb0-f174.google.com with SMTP id l4so1054874lbv.19
+        for <ceph-devel@vger.kernel.org>; Thu, 18 Sep 2014 05:50:56 -0700 (PDT)
+In-Reply-To: <CANA9Uk75TsXUyfMSibJRMeaWFEMKj-RxyFQqp=s1YZerNzM0mw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
-Cc: Florian Haas <florian@hastexo.com>
+To: Yehuda Sadeh <yehuda@redhat.com>
+Cc: Sage Weil <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-KG1vdmluZyB0aGlzIGRpc2N1c3Npb24gdG8gLWRldmVsKQ0KDQo+IEJlZ2luIGZvcndhcmRlZCBt
-ZXNzYWdlOg0KPiANCj4gRnJvbTogRmxvcmlhbiBIYWFzIDxmbG9yaWFuQGhhc3RleG8uY29tPg0K
-PiBEYXRlOiAxNyBTZXAgMjAxNCAxODowMjowOSBDRVNUDQo+IFN1YmplY3Q6IFJlOiBbY2VwaC11
-c2Vyc10gUkdXIGh1bmcsIDIgT1NEcyB1c2luZyAxMDAlIENQVQ0KPiBUbzogRGFuIFZhbiBEZXIg
-U3RlciA8ZGFuaWVsLnZhbmRlcnN0ZXJAY2Vybi5jaD4NCj4gQ2M6IENyYWlnIExld2lzIDxjbGV3
-aXNAY2VudHJhbGRlc2t0b3AuY29tPiwgImNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20iIDxjZXBo
-LXVzZXJzQGxpc3RzLmNlcGguY29tPg0KPiANCj4gT24gV2VkLCBTZXAgMTcsIDIwMTQgYXQgNTo0
-MiBQTSwgRGFuIFZhbiBEZXIgU3Rlcg0KPiA8ZGFuaWVsLnZhbmRlcnN0ZXJAY2Vybi5jaD4gd3Jv
-dGU6DQo+PiBGcm9tOiBGbG9yaWFuIEhhYXMgPGZsb3JpYW5AaGFzdGV4by5jb20+DQo+PiBTZW50
-OiBTZXAgMTcsIDIwMTQgNTozMyBQTQ0KPj4gVG86IERhbiBWYW4gRGVyIFN0ZXINCj4+IENjOiBD
-cmFpZyBMZXdpcyA8Y2xld2lzQGNlbnRyYWxkZXNrdG9wLmNvbT47Y2VwaC11c2Vyc0BsaXN0cy5j
-ZXBoLmNvbQ0KPj4gU3ViamVjdDogUmU6IFtjZXBoLXVzZXJzXSBSR1cgaHVuZywgMiBPU0RzIHVz
-aW5nIDEwMCUgQ1BVDQo+PiANCj4+IE9uIFdlZCwgU2VwIDE3LCAyMDE0IGF0IDU6MjQgUE0sIERh
-biBWYW4gRGVyIFN0ZXINCj4+IDxkYW5pZWwudmFuZGVyc3RlckBjZXJuLmNoPiB3cm90ZToNCj4+
-PiBIaSBGbG9yaWFuLA0KPj4+IA0KPj4+PiBPbiAxNyBTZXAgMjAxNCwgYXQgMTc6MDksIEZsb3Jp
-YW4gSGFhcyA8ZmxvcmlhbkBoYXN0ZXhvLmNvbT4gd3JvdGU6DQo+Pj4+IA0KPj4+PiBIaSBDcmFp
-ZywNCj4+Pj4gDQo+Pj4+IGp1c3QgZHVnIHRoaXMgdXAgaW4gdGhlIGxpc3QgYXJjaGl2ZXMuDQo+
-Pj4+IA0KPj4+PiBPbiBGcmksIE1hciAyOCwgMjAxNCBhdCAyOjA0IEFNLCBDcmFpZyBMZXdpcyA8
-Y2xld2lzQGNlbnRyYWxkZXNrdG9wLmNvbT4NCj4+Pj4gd3JvdGU6DQo+Pj4+PiBJbiB0aGUgaW50
-ZXJlc3Qgb2YgcmVtb3ZpbmcgdmFyaWFibGVzLCBJIHJlbW92ZWQgYWxsIHNuYXBzaG90cyBvbiBh
-bGwNCj4+Pj4+IHBvb2xzLA0KPj4+Pj4gdGhlbiByZXN0YXJ0ZWQgYWxsIGNlcGggZGFlbW9ucyBh
-dCB0aGUgc2FtZSB0aW1lLiAgVGhpcyBicm91Z2h0IHVwIG9zZC44DQo+Pj4+PiBhcw0KPj4+Pj4g
-d2VsbC4NCj4+Pj4gDQo+Pj4+IFNvIGp1c3QgdG8gc3VtbWFyaXplIHRoaXM6IHlvdXIgMTAwJSBD
-UFUgcHJvYmxlbSBhdCB0aGUgdGltZSB3ZW50IGF3YXkNCj4+Pj4gYWZ0ZXIgeW91IHJlbW92ZWQg
-YWxsIHNuYXBzaG90cywgYW5kIHRoZSBhY3R1YWwgY2F1c2Ugb2YgdGhlIGlzc3VlIHdhcw0KPj4+
-PiBuZXZlciBmb3VuZD8NCj4+Pj4gDQo+Pj4+IEkgYW0gc2VlaW5nIGEgc2ltaWxhciBpc3N1ZSBu
-b3csIGFuZCBoYXZlIGZpbGVkDQo+Pj4+IGh0dHA6Ly90cmFja2VyLmNlcGguY29tL2lzc3Vlcy85
-NTAzIHRvIG1ha2Ugc3VyZSBpdCBkb2Vzbid0IGdldCBsb3N0DQo+Pj4+IGFnYWluLiBDYW4geW91
-IHRha2UgYSBsb29rIGF0IHRoYXQgaXNzdWUgYW5kIGxldCBtZSBrbm93IGlmIGFueXRoaW5nDQo+
-Pj4+IGluIHRoZSBkZXNjcmlwdGlvbiBzb3VuZHMgZmFtaWxpYXI/DQo+Pj4gDQo+Pj4gDQo+Pj4g
-Q291bGQgeW91ciB0aWNrZXQgYmUgcmVsYXRlZCB0byB0aGUgc25hcCB0cmltbWluZyBpc3N1ZSBJ
-4oCZdmUgZmluYWxseQ0KPj4+IG5hcnJvd2VkIGRvd24gaW4gdGhlIHBhc3QgY291cGxlIGRheXM/
-DQo+Pj4gDQo+Pj4gIGh0dHA6Ly90cmFja2VyLmNlcGguY29tL2lzc3Vlcy85NDg3DQo+Pj4gDQo+
-Pj4gQnVtcCB1cCBkZWJ1Z19vc2QgdG8gMjAgdGhlbiBjaGVjayB0aGUgbG9nIGR1cmluZyBvbmUg
-b2YgeW91ciBpbmNpZGVudHMuDQo+Pj4gSWYgaXQgaXMgYnVzeSBsb2dnaW5nIHRoZSBzbmFwX3Ry
-aW1tZXIgbWVzc2FnZXMsIHRoZW4gaXTigJlzIHRoZSBzYW1lIGlzc3VlLg0KPj4+IChUaGUgaXNz
-dWUgaXMgdGhhdCByYmQgcG9vbHMgaGF2ZSBtYW55IHB1cmdlZF9zbmFwcywgYnV0IHNvbWV0aW1l
-cyBhZnRlcg0KPj4+IGJhY2tmaWxsaW5nIGEgUEcgdGhlIHB1cmdlZF9zbmFwcyBsaXN0IGlzIGxv
-c3QgYW5kIHRodXMgdGhlIHNuYXAgdHJpbW1lcg0KPj4+IGJlY29tZXMgdmVyeSBidXN5IHdoaWxz
-dCByZS10cmltbWluZyB0aG91c2FuZHMgb2Ygc25hcHMuIER1cmluZyB0aGF0IHRpbWUgKGENCj4+
-PiBmZXcgbWludXRlcyBvbiBteSBjbHVzdGVyKSB0aGUgT1NEIGlzIGJsb2NrZWQuKQ0KPj4gDQo+
-PiBUaGF0IHNvdW5kcyBwcm9taXNpbmcsIHRoYW5rIHlvdSEgZGVidWdfb3NkPTEwIHNob3VsZCBh
-Y3R1YWxseSBiZQ0KPj4gc3VmZmljaWVudCBhcyB0aG9zZSBzbmFwX3RyaW0gbWVzc2FnZXMgZ2V0
-IGxvZ2dlZCBhdCB0aGF0IGxldmVsLiA6KQ0KPj4gDQo+PiBEbyBJIHVuZGVyc3RhbmQgeW91ciBp
-c3N1ZSByZXBvcnQgY29ycmVjdGx5IGluIHRoYXQgeW91IGhhdmUgZm91bmQNCj4+IHNldHRpbmcg
-b3NkX3NuYXBfdHJpbV9zbGVlcCB0byBiZSBpbmVmZmVjdGl2ZSwgYmVjYXVzZSBpdCdzIGJlaW5n
-DQo+PiBhcHBsaWVkIHdoZW4gaXRlcmF0aW5nIGZyb20gUEcgdG8gUEcsIHJhdGhlciB0aGFuIGZy
-b20gc25hcCB0byBzbmFwPw0KPj4gSWYgc28sIHRoZW4gSSdtIGd1ZXNzaW5nIHRoYXQgdGhhdCBj
-YW4gaGFyZGx5IGJlIGludGVudGlvbmFs4oCmDQoNCg0KSeKAmW0gYmVnaW5uaW5nIHRvIGFncmVl
-IHdpdGggeW91IG9uIHRoYXQgZ3Vlc3MuIEFGQUlDVCwgdGhlIG5vcm1hbCBiZWhhdmlvciBvZiB0
-aGUgc25hcCB0cmltbWVyIGlzIHRvIHRyaW0gb25lIHNpbmdsZSBzbmFwLCB0aGUgb25lIHdoaWNo
-IGlzIGluIHRoZSBzbmFwX3RyaW1xIGJ1dCBub3QgeWV0IGluIHB1cmdlZF9zbmFwcy4gU28gdGhl
-IG9ubHkgdGltZSB0aGUgY3VycmVudCBzbGVlcCBpbXBsZW1lbnRhdGlvbiBjb3VsZCBiZSB1c2Vm
-dWwgaXMgaWYgd2Ugcm3igJlkIGEgc25hcCBhY3Jvc3MgbWFueSBQR3MgYXQgb25jZSwgZS5nLiBy
-bSBhIHBvb2wgc25hcCBvciBhbiByYmQgc25hcC4gQnV0IHRob3NlIGFyZW7igJl0IGEgaHVnZSBw
-cm9ibGVtIGFueXdheSBzaW5jZSB5b3XigJlkIGF0IG1vc3QgbmVlZCB0byB0cmltIE8oMTAwKSBQ
-R3MuDQoNCldlIGNvdWxkIG1vdmUgdGhlIHNuYXAgdHJpbSBzbGVlcCBpbnRvIHRoZSBTbmFwVHJp
-bW1lciBzdGF0ZSBtYWNoaW5lLCBmb3IgZXhhbXBsZSBpbiBSZXBsaWNhdGVkUEc6Ok5vdFRyaW1t
-aW5nOjpyZWFjdC4gVGhpcyBzaG91bGQgYWxsb3cgb3RoZXIgSU9zIHRvIGdldCB0aHJvdWdoIHRv
-IHRoZSBPU0QsIGJ1dCBvZiBjb3Vyc2UgdGhlIHRyaW1taW5nIFBHIHdvdWxkIHJlbWFpbiBsb2Nr
-ZWQuIEFuZCBpdCB3b3VsZCBiZSBsb2NrZWQgZm9yIGV2ZW4gbG9uZ2VyIG5vdyBkdWUgdG8gdGhl
-IHNsZWVwLg0KDQpUbyBzb2x2ZSB0aGF0IHdlIGNvdWxkIGxpbWl0IHRoZSBudW1iZXIgb2YgdHJp
-bXMgcGVyIGluc3RhbmNlIG9mIHRoZSBTbmFwVHJpbW1lciwgbGlrZSBJ4oCZdmUgZG9uZSBpbiB0
-aGlzIHB1bGwgcmVxOiBodHRwczovL2dpdGh1Yi5jb20vY2VwaC9jZXBoL3B1bGwvMjUxNg0KQnJl
-YWtpbmcgb3V0IG9mIHRoZSB0cmltbWVyIGxpa2UgdGhhdCBzaG91bGQgYWxsb3cgSU9zIHRvIHRo
-ZSB0cmltbWluZyBQRyB0byBnZXQgdGhyb3VnaC4NCg0KVGhlIHNlY29uZCBhc3BlY3Qgb2YgdGhp
-cyBpc3N1ZSBpcyB3aHkgYXJlIHRoZSBwdXJnZWRfc25hcHMgYmVpbmcgbG9zdCB0byBiZWdpbiB3
-aXRoLiBJ4oCZdmUgbWFuYWdlZCB0byByZXByb2R1Y2UgdGhhdCBvbiBteSB0ZXN0IGNsdXN0ZXIu
-IEFsbCB5b3UgaGF2ZSB0byBkbyBpcyBjcmVhdGUgbWFueSBwb29sIHNuYXBzIChlLmcuIG9mIGEg
-bmVhcmx5IGVtcHR5IHBvb2wpLCB0aGVuIHJtc25hcCBhbGwgdGhvc2Ugc25hcHNob3RzLiBUaGVu
-IHVzZSBjcnVzaCByZXdlaWdodCB0byBtb3ZlIHRoZSBQR3MgYXJvdW5kLiBXaXRoIGRlYnVnX29z
-ZD49MTAsIHlvdSB3aWxsIHNlZSAiYWRkaW5nIHNuYXAgMSB0byBwdXJnZWRfc25hcHPigJ0sIHdo
-aWNoIGlzIG9uZSBzaWduYXR1cmUgb2YgdGhpcyBsb3N0IHB1cmdlZF9zbmFwcyBpc3N1ZS4gVG8g
-cmVwcm9kdWNlIHNsb3cgcmVxdWVzdHMgdGhlIG51bWJlciBvZiBzbmFwcyBwdXJnZWQgbmVlZHMg
-dG8gYmUgTygxMDAwMCkuDQoNCkxvb2tpbmcgZm9yd2FyZCB0byBhbnkgaWRlYXMgc29tZW9uZSBt
-aWdodCBoYXZlLg0KDQpDaGVlcnMsIERhbg0KDQoNCg0K
+Hi ,
+
+Could you please check and clarify the below question on object
+lifecycle and notification S3 APIs support:
+
+1. To support the bucket lifecycle - we need to support the
+moving/deleting the objects/buckets based lifecycle settings.
+For ex: If an object lifecyle set as below:
+          1. Archive it after 10 days - means move this object to low
+cost object storage after 10 days of the creation date.
+           2. Remove this object after 90days - mean remove this
+object from the low cost object after 90days of creation date.
+
+Q1- Does the ceph support the above concept like moving to low cost
+storage and delete from that storage?
+
+2. To support the object notifications:
+      - First there should be low cost and high availability storage
+with single replica only. If an object created with this type of
+object storage,
+        There could be chances that object could lose, so if an object
+of this type of storage lost, set the notifications.
+
+Q2- Does Ceph support low cost and high availability storage type?
+
+Thanks
+
+On Fri, Sep 12, 2014 at 8:00 PM, M Ranga Swami Reddy
+<swamireddy@gmail.com> wrote:
+> Hi Yehuda,
+>
+> Could you please check and clarify the below question on object
+> lifecycle and notification S3 APIs support:
+>
+> 1. To support the bucket lifecycle - we need to support the
+> moving/deleting the objects/buckets based lifecycle settings.
+> For ex: If an object lifecyle set as below:
+>           1. Archive it after 10 days - means move this object to low
+> cost object storage after 10 days of the creation date.
+>            2. Remove this object after 90days - mean remove this
+> object from the low cost object after 90days of creation date.
+>
+> Q1- Does the ceph support the above concept like moving to low cost
+> storage and delete from that storage?
+>
+> 2. To support the object notifications:
+>       - First there should be low cost and high availability storage
+> with single replica only. If an object created with this type of
+> object storage,
+>         There could be chances that object could lose, so if an object
+> of this type of storage lost, set the notifications.
+>
+> Q2- Does Ceph support low cost and high availability storage type?
+>
+> Thanks
+> Swami
+>
+>
+>
+>
+>
+>
+>
+> On Tue, Jul 29, 2014 at 1:35 AM, Yehuda Sadeh <yehuda@redhat.com> wrote:
+>> Bucket lifecycle:
+>> http://tracker.ceph.com/issues/8929
+>>
+>> Bucket notification:
+>> http://tracker.ceph.com/issues/8956
+>>
+>> On Sun, Jul 27, 2014 at 12:54 AM, M Ranga Swami Reddy
+>> <swamireddy@gmail.com> wrote:
+>>> Good no know the details. Can you please share the issue ID for bucket
+>>> lifecycle? My team also could start help here.
+>>> Regarding the notification - Do we have the issue ID?
+>>> Yes, the object versioning will be backlog one - I strongly feel we
+>>> start working on this asap.
+>>>
+>>> Thanks
+>>> Swami
+>>>
+>>> On Fri, Jul 25, 2014 at 11:31 PM, Yehuda Sadeh <yehuda@redhat.com> wrote:
+>>>> On Fri, Jul 25, 2014 at 10:14 AM, M Ranga Swami Reddy
+>>>> <swamireddy@gmail.com> wrote:
+>>>>> Thanks for quick reply.
+>>>>> Yes,  versioned object - missing in ceph ATM
+>>>>> Iam looking for: bucket lifecylce (get/put/delete), bucket location,
+>>>>> put object notification and object restore (ie versioned object) S3
+>>>>> API support.
+>>>>> Please let me now any of the above work is in progress or some one
+>>>>> planned to work on.
+>>>>
+>>>>
+>>>> I opened an issue for bucket lifecycle (we already had an issue open
+>>>> for object expiration though). We do have bucket location already
+>>>> (part of the multi-region feature). Object versioning is definitely on
+>>>> our backlog and one that we'll hopefully implement sooner rather
+>>>> later.
+>>>> With regard to object notification, it'll require having a
+>>>> notification service which is a bit out of the scope. Integrating the
+>>>> gateway with such a service whouldn't be hard, but we'll need to have
+>>>> that first.
+>>>>
+>>>> Yehuda
+>>>>
+>>>>>
+>>>>> Thanks
+>>>>> Swami
+>>>>>
+>>>>>
+>>>>> On Fri, Jul 25, 2014 at 9:19 PM, Sage Weil <sweil@redhat.com> wrote:
+>>>>>> On Fri, 25 Jul 2014, M Ranga Swami Reddy wrote:
+>>>>>>> Hi Team: As per the ceph document a few S3 APIs compatibility not supported.
+>>>>>>>
+>>>>>>> Link: http://ceph.com/docs/master/radosgw/s3/
+>>>>>>>
+>>>>>>> Is there plan to support the ?n supported item in the above table?
+>>>>>>> or
+>>>>>>> Any working on this?
+>>>>>>
+>>>>>> Yes.  Unfortunately this table isn't particularly detailed or accurate or
+>>>>>> up to date.   The main gap, I think, is versioned objects.
+>>>>>>
+>>>>>> Are there specfiic parts of the S3 API that are missing that you need?
+>>>>>> That sort of info is very helpful for prioritizing effort...
+>>>>>>
+>>>>>> sage
+>>>>> --
+>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
