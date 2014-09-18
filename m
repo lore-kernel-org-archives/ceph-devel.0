@@ -1,36 +1,57 @@
-From: Sage Weil <sweil@redhat.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
 Subject: RE: severe librbd performance degradation in Giant
-Date: Wed, 17 Sep 2014 20:52:36 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1409172051300.24517@cobra.newdream.net>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F27845984@SACMBXIP02.sdcorp.global.sandisk.com> <5419FB1B.4020202@inktank.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F278459F8@SACMBXIP02.sdcorp.global.sandisk.com> <alpine.DEB.2.00.1409171435320.20205@cobra.newdream.net>
- <755F6B91B3BE364F9BCA11EA3F9E0C6F27845A2A@SACMBXIP02.sdcorp.global.sandisk.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F27845B22@SACMBXIP02.sdcorp.global.sandisk.com> <CACJqLyYQDrHyxMEtiMKMNaBQ_fHuu-hGqO_ZNHra0+VsUZrzXQ@mail.gmail.com>
+Date: Thu, 18 Sep 2014 06:24:35 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F27845FE2@SACMBXIP02.sdcorp.global.sandisk.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F27845984@SACMBXIP02.sdcorp.global.sandisk.com>
+ <5419FB1B.4020202@inktank.com>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F278459F8@SACMBXIP02.sdcorp.global.sandisk.com>
+ <alpine.DEB.2.00.1409171435320.20205@cobra.newdream.net>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F27845A2A@SACMBXIP02.sdcorp.global.sandisk.com>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F27845B22@SACMBXIP02.sdcorp.global.sandisk.com>
+ <CACJqLyYQDrHyxMEtiMKMNaBQ_fHuu-hGqO_ZNHra0+VsUZrzXQ@mail.gmail.com>
  <755F6B91B3BE364F9BCA11EA3F9E0C6F27845F05@SACMBXIP02.sdcorp.global.sandisk.com>
+ <alpine.DEB.2.00.1409172051300.24517@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:58823 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757287AbaIRDwg (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Sep 2014 23:52:36 -0400
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F27845F05@SACMBXIP02.sdcorp.global.sandisk.com>
+Received: from mail-bl2on0059.outbound.protection.outlook.com ([65.55.169.59]:30640
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1757545AbaIRGYj convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 18 Sep 2014 02:24:39 -0400
+In-Reply-To: <alpine.DEB.2.00.1409172051300.24517@cobra.newdream.net>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
+To: Sage Weil <sweil@redhat.com>
 Cc: Haomai Wang <haomaiwang@gmail.com>, Josh Durgin <josh.durgin@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+
+Sage,
+Any reason why the cache is by default enabled in Giant ?
+Regarding profiling, I will try if I can run Vtune/mutrace on this.
+
+Thanks & Regards
+Somnath
+
+-----Original Message-----
+From: Sage Weil [mailto:sweil@redhat.com] 
+Sent: Wednesday, September 17, 2014 8:53 PM
+To: Somnath Roy
+Cc: Haomai Wang; Josh Durgin; ceph-devel@vger.kernel.org
+Subject: RE: severe librbd performance degradation in Giant
 
 On Thu, 18 Sep 2014, Somnath Roy wrote:
 > Yes Haomai...
 
-I would love to what a profiler says about the matter.  There is going 
-to be some overhead on the client associated with the cache for a 
-random io workload, but 10x is a problem!
+I would love to what a profiler says about the matter.  There is going to be some overhead on the client associated with the cache for a random io workload, but 10x is a problem!
 
 sage
 
 
 > 
 > -----Original Message-----
-> From: Haomai Wang [mailto:haomaiwang@gmail.com] 
+> From: Haomai Wang [mailto:haomaiwang@gmail.com]
 > Sent: Wednesday, September 17, 2014 7:28 PM
 > To: Somnath Roy
 > Cc: Sage Weil; Josh Durgin; ceph-devel@vger.kernel.org
@@ -134,8 +155,8 @@ sage
 > >>
 > >> --
 > >> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
-> >> in the body of a message to majordomo@vger.kernel.org More majordomo 
-> >> info at  http://vger.kernel.org/majordomo-info.html
+> >> in the body of a message to majordomo@vger.kernel.org More 
+> >> majordomo info at  http://vger.kernel.org/majordomo-info.html
 > >>
 > >>
 > > --
@@ -153,4 +174,5 @@ sage
 > Best Regards,
 > 
 > Wheat
-> N?????r??y??????X???v???)?{.n?????z?]z????ay?????j??f???h??????w??????j:+v???w????????????zZ+???????j"????i
+> N?????r??y??????X???v???)?{.n?????z?]z????ay?????j ??f???h??????w???
+???j:+v???w???????? ????zZ+???????j"????i
