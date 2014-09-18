@@ -1,139 +1,129 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: severe librbd performance degradation in Giant
-Date: Thu, 18 Sep 2014 18:02:49 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2784639B@SACMBXIP02.sdcorp.global.sandisk.com>
-References: <CACJqLyYQDrHyxMEtiMKMNaBQ_fHuu-hGqO_ZNHra0+VsUZrzXQ@mail.gmail.com>
- <1ab9d756-bbc9-4fbe-8f51-0a33dbab1a8d@mailpro>
+From: Florian Haas <florian@hastexo.com>
+Subject: Re: snap_trimming + backfilling is inefficient with many purged_snaps
+Date: Thu, 18 Sep 2014 21:03:18 +0200
+Message-ID: <CAPUexz_H7-b8SY6J+dLnAyw663eHXoLKYccB1edwH9XgFBZCpw@mail.gmail.com>
+References: <CAPUexz-ff+fTmU0J0TrJ80p+6334BBPvM7EWW5=eGa8uEomRew@mail.gmail.com>
+ <D197E5D4-598B-4574-852E-C9F0CA10133E@cern.ch> <CAPUexz9XeNMJvjCeM_7N0_TQOS6_xBOdgnKm9j4FNDib3+FjMg@mail.gmail.com>
+ <541b2add.ea5cb40a.250c.3ed0SMTPIN_ADDED_BROKEN@mx.google.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from [207.46.100.67] ([207.46.100.67]:35936 "EHLO
-	na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-	id S932117AbaIRSDR (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 18 Sep 2014 14:03:17 -0400
-In-Reply-To: <1ab9d756-bbc9-4fbe-8f51-0a33dbab1a8d@mailpro>
-Content-Language: en-US
+Received: from mail-qg0-f46.google.com ([209.85.192.46]:59640 "EHLO
+	mail-qg0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751235AbaIRTDj convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 18 Sep 2014 15:03:39 -0400
+Received: by mail-qg0-f46.google.com with SMTP id q108so1069775qgd.33
+        for <ceph-devel@vger.kernel.org>; Thu, 18 Sep 2014 12:03:38 -0700 (PDT)
+In-Reply-To: <541b2add.ea5cb40a.250c.3ed0SMTPIN_ADDED_BROKEN@mx.google.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre DERUMIER <aderumier@odiso.com>, Haomai Wang <haomaiwang@gmail.com>
-Cc: Sage Weil <sweil@redhat.com>, Josh Durgin <josh.durgin@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Mango Thirtyfour <daniel.vanderster@cern.ch>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-QWxleGFuZHJlLA0KV2hhdCB0b29sIGFyZSB5b3UgdXNpbmcgPyBJIHVzZWQgZmlvIHJiZC4NCg0K
-QWxzbywgSSBob3BlIHlvdSBoYXZlIEdpYW50IHBhY2thZ2UgaW5zdGFsbGVkIGluIHRoZSBjbGll
-bnQgc2lkZSBhcyB3ZWxsIGFuZCByYmRfY2FjaGUgPXRydWUgaXMgc2V0IG9uIHRoZSBjbGllbnQg
-Y29uZiBmaWxlLg0KRllJLCBmaXJlZmx5IGxpYnJiZCArIGxpYnJhZG9zIGFuZCBHaWFudCBjbHVz
-dGVyIHdpbGwgd29yayBzZWFtbGVzc2x5IGFuZCBJIGhhZCB0byBtYWtlIHN1cmUgZmlvIHJiZCBp
-cyByZWFsbHkgbG9hZGluZyBnaWFudCBsaWJyYmQgKGlmIHlvdSBoYXZlIG11bHRpcGxlIGNvcGll
-cyBhcm91bmQgLCB3aGljaCB3YXMgaW4gbXkgY2FzZSkgZm9yIHJlcHJvZHVjaW5nIGl0Lg0KDQpU
-aGFua3MgJiBSZWdhcmRzDQpTb21uYXRoDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpG
-cm9tOiBBbGV4YW5kcmUgREVSVU1JRVIgW21haWx0bzphZGVydW1pZXJAb2Rpc28uY29tXSANClNl
-bnQ6IFRodXJzZGF5LCBTZXB0ZW1iZXIgMTgsIDIwMTQgMjo0OSBBTQ0KVG86IEhhb21haSBXYW5n
-DQpDYzogU2FnZSBXZWlsOyBKb3NoIER1cmdpbjsgY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc7
-IFNvbW5hdGggUm95DQpTdWJqZWN0OiBSZTogc2V2ZXJlIGxpYnJiZCBwZXJmb3JtYW5jZSBkZWdy
-YWRhdGlvbiBpbiBHaWFudA0KDQo+PkFjY29yZGluZyBodHRwOi8vdHJhY2tlci5jZXBoLmNvbS9p
-c3N1ZXMvOTUxMywgZG8geW91IG1lYW4gdGhhdCByYmQgDQo+PmNhY2hlIHdpbGwgbWFrZSAxMHgg
-cGVyZm9ybWFuY2UgZGVncmFkYXRpb24gZm9yIHJhbmRvbSByZWFkPw0KDQpIaSwgb24gbXkgc2lk
-ZSwgSSBkb24ndCBzZWUgYW55IGRlZ3JhZGF0aW9uIHBlcmZvcm1hbmNlIG9uIHJlYWQgKHNlcSBv
-ciByYW5kKSAgd2l0aCBvciB3aXRob3V0Lg0KDQpmaXJlZmx5IDogYXJvdW5kIDEyMDAwaW9wcyAo
-d2l0aCBvciB3aXRob3V0IHJiZF9jYWNoZSkgZ2lhbnQgOiBhcm91bmQgMTIwMDBpb3BzICAod2l0
-aCBvciB3aXRob3V0IHJiZF9jYWNoZSkNCg0KKGFuZCBJIGNhbiByZWFjaCBhcm91bmQgMjAwMDAt
-MzAwMDAgaW9wcyBvbiBnaWFudCB3aXRoIGRpc2FibGluZyBvcHRyYWNrZXIpLg0KDQoNCnJiZF9j
-YWNoZSBvbmx5IGltcHJvdmUgd3JpdGUgcGVyZm9ybWFuY2UgZm9yIG1lICg0ayBibG9jayApDQoN
-Cg0KDQotLS0tLSBNYWlsIG9yaWdpbmFsIC0tLS0tIA0KDQpEZTogIkhhb21haSBXYW5nIiA8aGFv
-bWFpd2FuZ0BnbWFpbC5jb20+DQrDgDogIlNvbW5hdGggUm95IiA8U29tbmF0aC5Sb3lAc2FuZGlz
-ay5jb20+DQpDYzogIlNhZ2UgV2VpbCIgPHN3ZWlsQHJlZGhhdC5jb20+LCAiSm9zaCBEdXJnaW4i
-IDxqb3NoLmR1cmdpbkBpbmt0YW5rLmNvbT4sIGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQpF
-bnZvecOpOiBKZXVkaSAxOCBTZXB0ZW1icmUgMjAxNCAwNDoyNzo1Ng0KT2JqZXQ6IFJlOiBzZXZl
-cmUgbGlicmJkIHBlcmZvcm1hbmNlIGRlZ3JhZGF0aW9uIGluIEdpYW50IA0KDQpBY2NvcmRpbmcg
-aHR0cDovL3RyYWNrZXIuY2VwaC5jb20vaXNzdWVzLzk1MTMsIGRvIHlvdSBtZWFuIHRoYXQgcmJk
-IGNhY2hlIHdpbGwgbWFrZSAxMHggcGVyZm9ybWFuY2UgZGVncmFkYXRpb24gZm9yIHJhbmRvbSBy
-ZWFkPyANCg0KT24gVGh1LCBTZXAgMTgsIDIwMTQgYXQgNzo0NCBBTSwgU29tbmF0aCBSb3kgPFNv
-bW5hdGguUm95QHNhbmRpc2suY29tPiB3cm90ZTogDQo+IEpvc2gvU2FnZSwNCj4gSSBzaG91bGQg
-bWVudGlvbiB0aGF0IGV2ZW4gYWZ0ZXIgdHVybmluZyBvZmYgcmJkIGNhY2hlIEkgYW0gZ2V0dGlu
-ZyB+MjAlIGRlZ3JhZGF0aW9uIG92ZXIgRmlyZWZseS4gDQo+IA0KPiBUaGFua3MgJiBSZWdhcmRz
-DQo+IFNvbW5hdGgNCj4gDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IFNv
-bW5hdGggUm95DQo+IFNlbnQ6IFdlZG5lc2RheSwgU2VwdGVtYmVyIDE3LCAyMDE0IDI6NDQgUE0N
-Cj4gVG86IFNhZ2UgV2VpbA0KPiBDYzogSm9zaCBEdXJnaW47IGNlcGgtZGV2ZWxAdmdlci5rZXJu
-ZWwub3JnDQo+IFN1YmplY3Q6IFJFOiBzZXZlcmUgbGlicmJkIHBlcmZvcm1hbmNlIGRlZ3JhZGF0
-aW9uIGluIEdpYW50DQo+IA0KPiBDcmVhdGVkIGEgdHJhY2tlciBmb3IgdGhpcy4gDQo+IA0KPiBo
-dHRwOi8vdHJhY2tlci5jZXBoLmNvbS9pc3N1ZXMvOTUxMw0KPiANCj4gVGhhbmtzICYgUmVnYXJk
-cw0KPiBTb21uYXRoDQo+IA0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBj
-ZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyANCj4gW21haWx0bzpjZXBoLWRldmVsLW93
-bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIFNvbW5hdGggUm95DQo+IFNlbnQ6IFdl
-ZG5lc2RheSwgU2VwdGVtYmVyIDE3LCAyMDE0IDI6MzkgUE0NCj4gVG86IFNhZ2UgV2VpbA0KPiBD
-YzogSm9zaCBEdXJnaW47IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQo+IFN1YmplY3Q6IFJF
-OiBzZXZlcmUgbGlicmJkIHBlcmZvcm1hbmNlIGRlZ3JhZGF0aW9uIGluIEdpYW50DQo+IA0KPiBT
-YWdlLA0KPiBJdCdzIGEgNEsgcmFuZG9tIHJlYWQuIA0KPiANCj4gVGhhbmtzICYgUmVnYXJkcw0K
-PiBTb21uYXRoDQo+IA0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBTYWdl
-IFdlaWwgW21haWx0bzpzd2VpbEByZWRoYXQuY29tXQ0KPiBTZW50OiBXZWRuZXNkYXksIFNlcHRl
-bWJlciAxNywgMjAxNCAyOjM2IFBNDQo+IFRvOiBTb21uYXRoIFJveQ0KPiBDYzogSm9zaCBEdXJn
-aW47IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQo+IFN1YmplY3Q6IFJFOiBzZXZlcmUgbGli
-cmJkIHBlcmZvcm1hbmNlIGRlZ3JhZGF0aW9uIGluIEdpYW50DQo+IA0KPiBXaGF0IHdhcyB0aGUg
-aW8gcGF0dGVybj8gU2VxdWVudGlhbCBvciByYW5kb20/IEZvciByYW5kb20gYSBzbG93ZG93biBt
-YWtlcyBzZW5zZSAodGhvIG1heWJlIG5vdCAxMHghKSBidXQgbm90IGZvciBzZXF1ZW50YWlsLi4u
-LiANCj4gDQo+IHMNCj4gDQo+IE9uIFdlZCwgMTcgU2VwIDIwMTQsIFNvbW5hdGggUm95IHdyb3Rl
-OiANCj4gDQo+PiBJIHNldCB0aGUgZm9sbG93aW5nIGluIHRoZSBjbGllbnQgc2lkZSAvZXRjL2Nl
-cGgvY2VwaC5jb25mIHdoZXJlIEkgYW0gcnVubmluZyBmaW8gcmJkLiANCj4+IA0KPj4gcmJkX2Nh
-Y2hlX3dyaXRldGhyb3VnaF91bnRpbF9mbHVzaCA9IGZhbHNlDQo+PiANCj4+IEJ1dCwgbm8gZGlm
-ZmVyZW5jZS4gQlRXLCBJIGFtIGRvaW5nIFJhbmRvbSByZWFkLCBub3Qgd3JpdGUuIFN0aWxsIHRo
-aXMgc2V0dGluZyBhcHBsaWVzID8gDQo+PiANCj4+IE5leHQsIEkgdHJpZWQgdG8gdHdlYWsgdGhl
-IHJiZF9jYWNoZSBzZXR0aW5nIHRvIGZhbHNlIGFuZCBJICpnb3QgYmFjayogdGhlIG9sZCBwZXJm
-b3JtYW5jZS4gTm93LCBpdCBpcyBzaW1pbGFyIHRvIGZpcmVmbHkgdGhyb3VnaHB1dCAhIA0KPj4g
-DQo+PiBTbywgbG9rcyBsaWtlIHJiZF9jYWNoZT10cnVlIHdhcyB0aGUgY3VscHJpdC4gDQo+PiAN
-Cj4+IFRoYW5rcyBKb3NoICEgDQo+PiANCj4+IFJlZ2FyZHMNCj4+IFNvbW5hdGgNCj4+IA0KPj4g
-LS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4+IEZyb206IEpvc2ggRHVyZ2luIFttYWlsdG86
-am9zaC5kdXJnaW5AaW5rdGFuay5jb21dDQo+PiBTZW50OiBXZWRuZXNkYXksIFNlcHRlbWJlciAx
-NywgMjAxNCAyOjIwIFBNDQo+PiBUbzogU29tbmF0aCBSb3k7IGNlcGgtZGV2ZWxAdmdlci5rZXJu
-ZWwub3JnDQo+PiBTdWJqZWN0OiBSZTogc2V2ZXJlIGxpYnJiZCBwZXJmb3JtYW5jZSBkZWdyYWRh
-dGlvbiBpbiBHaWFudA0KPj4gDQo+PiBPbiAwOS8xNy8yMDE0IDAxOjU1IFBNLCBTb21uYXRoIFJv
-eSB3cm90ZTogDQo+PiA+IEhpIFNhZ2UsDQo+PiA+IFdlIGFyZSBleHBlcmllbmNpbmcgc2V2ZXJl
-IGxpYnJiZCBwZXJmb3JtYW5jZSBkZWdyYWRhdGlvbiBpbiBHaWFudCBvdmVyIGZpcmVmbHkgcmVs
-ZWFzZS4gSGVyZSBpcyB0aGUgZXhwZXJpbWVudCB3ZSBkaWQgdG8gaXNvbGF0ZSBpdCBhcyBhIGxp
-YnJiZCBwcm9ibGVtLiANCj4+ID4gDQo+PiA+IDEuIFNpbmdsZSBPU0QgaXMgcnVubmluZyBsYXRl
-c3QgR2lhbnQgYW5kIGNsaWVudCBpcyBydW5uaW5nIGZpbyByYmQgb24gdG9wIG9mIGZpcmVmbHkg
-YmFzZWQgbGlicmJkL2xpYnJhZG9zLiBGb3Igb25lIGNsaWVudCBpdCBpcyBnaXZpbmcgfjExLTEy
-SyBpb3BzICg0SyBSUikuIA0KPj4gPiAyLiBTaW5nbGUgT1NEIGlzIHJ1bm5pbmcgR2lhbnQgYW5k
-IGNsaWVudCBpcyBydW5uaW5nIGZpbyByYmQgb24gdG9wIG9mIEdpYW50IGJhc2VkIGxpYnJiZC9s
-aWJyYWRvcy4gRm9yIG9uZSBjbGllbnQgaXQgaXMgZ2l2aW5nIH4xLjlLIGlvcHMgKDRLIFJSKS4g
-DQo+PiA+IDMuIFNpbmdsZSBPU0QgaXMgcnVubmluZyBsYXRlc3QgR2lhbnQgYW5kIGNsaWVudCBp
-cyBydW5uaW5nIEdpYW50IGJhc2VkIGNlcGhfc21haW9iZW5jaCBvbiB0b3Agb2YgZ2lhbnQgbGli
-cmFkb3MuIEZvciBvbmUgY2xpZW50IGl0IGlzIGdpdmluZyB+MTEtMTJLIGlvcHMgKDRLIFJSKS4g
-DQo+PiA+IDQuIEdpYW50IFJHVyBvbiB0b3Agb2YgR2lhbnQgT1NEIGlzIGFsc28gc2NhbGluZy4g
-DQo+PiA+IA0KPj4gPiANCj4+ID4gU28sIGl0IGlzIG9idmlvdXMgZnJvbSB0aGUgYWJvdmUgdGhh
-dCByZWNlbnQgbGlicmJkIGhhcyBpc3N1ZXMuIEkgd2lsbCByYWlzZSBhIHRyYWNrZXIgdG8gdHJh
-Y2sgdGhpcy4gDQo+PiANCj4+IEZvciBnaWFudCB0aGUgZGVmYXVsdCBjYWNoZSBzZXR0aW5ncyBj
-aGFuZ2VkIHRvOiANCj4+IA0KPj4gcmJkIGNhY2hlID0gdHJ1ZQ0KPj4gcmJkIGNhY2hlIHdyaXRl
-dGhyb3VnaCB1bnRpbCBmbHVzaCA9IHRydWUNCj4+IA0KPj4gSWYgZmlvIGlzbid0IHNlbmRpbmcg
-Zmx1c2hlcyBhcyB0aGUgdGVzdCBpcyBydW5uaW5nLCB0aGUgY2FjaGUgd2lsbCBzdGF5IGluIHdy
-aXRldGhyb3VnaCBtb2RlLiBEb2VzIHRoZSBkaWZmZXJlbmNlIHJlbWFpbiBpZiB5b3Ugc2V0IHJi
-ZCBjYWNoZSB3cml0ZXRocm91Z2ggdW50aWwgZmx1c2ggPSBmYWxzZSA/IA0KPj4gDQo+PiBKb3No
-DQo+PiANCj4+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fDQo+PiANCj4+IFBMRUFT
-RSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBtYWls
-IG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRlZCBy
-ZWNpcGllbnQocykgbmFtZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNzYWdlIGlz
-IG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3RpZmllZCB0aGF0
-IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhhdCBhbnkgcmV2
-aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2YgdGhpcyBtZXNz
-YWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgY29t
-bXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9u
-ZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVzdHJveSBhbnkg
-YW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lvbiAod2hldGhl
-ciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4gDQo+PiANCj4+
-IC0tDQo+PiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5z
-dWJzY3JpYmUgY2VwaC1kZXZlbCIgDQo+PiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFq
-b3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyANCj4+IGluZm8gYXQgaHR0cDov
-L3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+PiANCj4+IA0KPiAtLQ0KPiBU
-byB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUg
-Y2VwaC1kZXZlbCIgDQo+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdl
-ci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIA0KPiBpbmZvIGF0IGh0dHA6Ly92Z2VyLmtlcm5l
-bC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KPiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRo
-aXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgDQo+IGluIHRo
-ZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFq
-b3Jkb21vIA0KPiBpbmZvIGF0IGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8u
-aHRtbA0KDQoNCg0KLS0NCkJlc3QgUmVnYXJkcywgDQoNCldoZWF0DQotLQ0KVG8gdW5zdWJzY3Jp
-YmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwi
-IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1v
-cmUgbWFqb3Jkb21vIGluZm8gYXQgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5m
-by5odG1sIA0K
+On Thu, Sep 18, 2014 at 8:56 PM, Mango Thirtyfour
+<daniel.vanderster@cern.ch> wrote:
+> Hi Florian,
+>
+> On Sep 18, 2014 7:03 PM, Florian Haas <florian@hastexo.com> wrote:
+>>
+>> Hi Dan,
+>>
+>> saw the pull request, and can confirm your observations, at least
+>> partially. Comments inline.
+>>
+>> On Thu, Sep 18, 2014 at 2:50 PM, Dan Van Der Ster
+>> <daniel.vanderster@cern.ch> wrote:
+>> >>> Do I understand your issue report correctly in that you have fou=
+nd
+>> >>> setting osd_snap_trim_sleep to be ineffective, because it's bein=
+g
+>> >>> applied when iterating from PG to PG, rather than from snap to s=
+nap?
+>> >>> If so, then I'm guessing that that can hardly be intentional=E2=80=
+=A6
+>> >
+>> >
+>> > I=E2=80=99m beginning to agree with you on that guess. AFAICT, the=
+ normal behavior of the snap trimmer is to trim one single snap, the on=
+e which is in the snap_trimq but not yet in purged_snaps. So the only t=
+ime the current sleep implementation could be useful is if we rm=E2=80=99=
+d a snap across many PGs at once, e.g. rm a pool snap or an rbd snap. B=
+ut those aren=E2=80=99t a huge problem anyway since you=E2=80=99d at mo=
+st need to trim O(100) PGs.
+>>
+>> Hmm. I'm actually seeing this in a system where the problematic snap=
+s
+>> could *only* have been RBD snaps.
+>>
+>
+> True, as am I. The current sleep is useful in this case, but since we=
+'d normally only expect up to ~100 of these PGs per OSD, the trimming o=
+f 1 snap across all of those PGs would finish rather quickly anyway. La=
+tency would surely be increased momentarily, but I wouldn't expect 90s =
+slow requests like I have with the 30000 snap_trimq single PG.
+>
+> Possibly the sleep is useful in both places.
+>
+>> > We could move the snap trim sleep into the SnapTrimmer state machi=
+ne, for example in ReplicatedPG::NotTrimming::react. This should allow =
+other IOs to get through to the OSD, but of course the trimming PG woul=
+d remain locked. And it would be locked for even longer now due to the =
+sleep.
+>> >
+>> > To solve that we could limit the number of trims per instance of t=
+he SnapTrimmer, like I=E2=80=99ve done in this pull req: https://github=
+=2Ecom/ceph/ceph/pull/2516
+>> > Breaking out of the trimmer like that should allow IOs to the trim=
+ming PG to get through.
+>> >
+>> > The second aspect of this issue is why are the purged_snaps being =
+lost to begin with. I=E2=80=99ve managed to reproduce that on my test c=
+luster. All you have to do is create many pool snaps (e.g. of a nearly =
+empty pool), then rmsnap all those snapshots. Then use crush reweight t=
+o move the PGs around. With debug_osd>=3D10, you will see "adding snap =
+1 to purged_snaps=E2=80=9D, which is one signature of this lost purged_=
+snaps issue. To reproduce slow requests the number of snaps purged need=
+s to be O(10000).
+>>
+>> Hmmm, I'm not sure if I confirm that. I see "adding snap X to
+>> purged_snaps", but only after the snap has been purged. See
+>> https://gist.github.com/fghaas/88db3cd548983a92aa35. Of course, the
+>> fact that the OSD tries to trim a snap only to get an ENOENT is
+>> probably indicative of something being fishy with the snaptrimq and/=
+or
+>> the purged_snaps list as well.
+>>
+>
+> With such a long snap_trimq there in your log, I suspect you're seein=
+g the exact same behavior as I am. In my case the first snap trimmed is=
+ snap 1, of course because that is the first rm'd snap, and the content=
+s of your pool are surely different. I also see the ENOENT messages... =
+again confirming those snaps were already trimmed. Anyway, what I've ob=
+served is that a large snap_trimq like that will block the OSD until th=
+ey are all re-trimmed.
+
+That's... a mess.
+
+So what is your workaround for recovery? My hunch would be to
+
+- stop all access to the cluster;
+- set nodown and noout so that other OSDs don't mark spinning OSDs
+down (which would cause all sorts of primary and PG reassignments,
+useless backfill/recovery when mon osd down out interval expires,
+etc.);
+- set osd_snap_trim_sleep to a ridiculously high value like 10 or 30
+so that at least *between* PGs, the OSD has a chance to respond to
+heartbeats and do whatever else it needs to do;
+- let the snap trim play itself out over several hours (days?).
+
+That sounds utterly awful, but if anyone has a better idea (other than
+"wait until the patch is merged"), I'd be all ears.
+
+Cheers
+=46lorian
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
