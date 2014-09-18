@@ -1,62 +1,183 @@
-From: Janne Grunau <j@jannau.net>
-Subject: Re: v2 aligned buffer changes for erasure codes
-Date: Thu, 18 Sep 2014 15:23:55 +0200
-Message-ID: <20140918132355.GD25730@jannau.net>
-References: <1410796508-28711-1-git-send-email-j@jannau.net>
- <1411036435-18860-1-git-send-email-j@jannau.net>
- <3472A07E6605974CBC9BC573F1BC02E4AE7D1265@CERNXCHG44.cern.ch>
- <20140918124039.GB25730@jannau.net>
- <3472A07E6605974CBC9BC573F1BC02E4AE7D1488@CERNXCHG44.cern.ch>
+From: Sage Weil <sweil@redhat.com>
+Subject: RE: severe librbd performance degradation in Giant
+Date: Thu, 18 Sep 2014 07:11:21 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1409180709550.24517@cobra.newdream.net>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F27845984@SACMBXIP02.sdcorp.global.sandisk.com> <5419FB1B.4020202@inktank.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F278459F8@SACMBXIP02.sdcorp.global.sandisk.com> <alpine.DEB.2.00.1409171435320.20205@cobra.newdream.net>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F27845A2A@SACMBXIP02.sdcorp.global.sandisk.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F27845B22@SACMBXIP02.sdcorp.global.sandisk.com> <CACJqLyYQDrHyxMEtiMKMNaBQ_fHuu-hGqO_ZNHra0+VsUZrzXQ@mail.gmail.com>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F27845F05@SACMBXIP02.sdcorp.global.sandisk.com> <alpine.DEB.2.00.1409172051300.24517@cobra.newdream.net> <755F6B91B3BE364F9BCA11EA3F9E0C6F27845FE2@SACMBXIP02.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from soltyk.jannau.net ([185.27.253.110]:45312 "EHLO
-	soltyk.jannau.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755755AbaIRNX6 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 18 Sep 2014 09:23:58 -0400
-Content-Disposition: inline
-In-Reply-To: <3472A07E6605974CBC9BC573F1BC02E4AE7D1488@CERNXCHG44.cern.ch>
+Received: from cobra.newdream.net ([66.33.216.30]:34130 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754921AbaIROLW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 18 Sep 2014 10:11:22 -0400
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F27845FE2@SACMBXIP02.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: Haomai Wang <haomaiwang@gmail.com>, Josh Durgin <josh.durgin@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 2014-09-18 13:01:03 +0000, Andreas Joachim Peters wrote:
-> 
-> >> For encoding there is normally a single buffer split 'virtually' 
-> >> into
-> >> k pieces. To make all pieces starting at an aligned address one 
-> >> needs
-> >> to align the chunk size to e.g. 16*k.
-> 
-> >I don't get that. How is the buffer splitted? into k (+ m) chunk size
-> >parts? As long as the start and the length are both 16 (or 32) byte
-> >aligned all parts are properly aligned too. I don't see where the k
-> >comes into play.
-> 
-> The original data block to encode has to be split into k equally long 
-> pieces. Each piece is given as one of the k input buffers to the 
-> erasure code algorithm producing m output buffers and each piece has 
-> to have an aligned starting address and length.
-> 
-> If you deal with 128 byte data input buffers for k=4 it splits like
-> 
-> offset=00 len=32 as chunk1
-> offset=32 len=32 as chunk2
-> offset=64 len=32 as chunk3
-> offset=96 len=32 as chunk4
-> 
-> If the desired IO size would be 196 bytes the 32 byte alignment 
-> requirement blows this buffer up to 256 bytes:
-> 
-> offset=00 len=64 as chunk1
-> offset=64 len=64 as chunk2
-> offset=128 len=64 as chunk3
-> offset=196 len=64 as chunk4
+On Thu, 18 Sep 2014, Somnath Roy wrote:
+> Sage,
+> Any reason why the cache is by default enabled in Giant ?
 
-I fail to see how the 32 * k is related to alignment. It's only used for 
-to pad the total size so it becomes a mulitple of k * 32. That is ok 
-since we want k 32-byte aligned chunks. The alignment for each chunk is 
-just 32-bytes.
+It's recommended practice to turn it on.  It improves performance in 
+general (especially with HDD OSDs).  Do you mind comparing sequential 
+small IOs?
 
-Janne
+sage
+
+> Regarding profiling, I will try if I can run Vtune/mutrace on this.
+> 
+> Thanks & Regards
+> Somnath
+> 
+> -----Original Message-----
+> From: Sage Weil [mailto:sweil@redhat.com] 
+> Sent: Wednesday, September 17, 2014 8:53 PM
+> To: Somnath Roy
+> Cc: Haomai Wang; Josh Durgin; ceph-devel@vger.kernel.org
+> Subject: RE: severe librbd performance degradation in Giant
+> 
+> On Thu, 18 Sep 2014, Somnath Roy wrote:
+> > Yes Haomai...
+> 
+> I would love to what a profiler says about the matter.  There is going to be some overhead on the client associated with the cache for a random io workload, but 10x is a problem!
+> 
+> sage
+> 
+> 
+> > 
+> > -----Original Message-----
+> > From: Haomai Wang [mailto:haomaiwang@gmail.com]
+> > Sent: Wednesday, September 17, 2014 7:28 PM
+> > To: Somnath Roy
+> > Cc: Sage Weil; Josh Durgin; ceph-devel@vger.kernel.org
+> > Subject: Re: severe librbd performance degradation in Giant
+> > 
+> > According http://tracker.ceph.com/issues/9513, do you mean that rbd cache will make 10x performance degradation for random read?
+> > 
+> > On Thu, Sep 18, 2014 at 7:44 AM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
+> > > Josh/Sage,
+> > > I should mention that even after turning off rbd cache I am getting ~20% degradation over Firefly.
+> > >
+> > > Thanks & Regards
+> > > Somnath
+> > >
+> > > -----Original Message-----
+> > > From: Somnath Roy
+> > > Sent: Wednesday, September 17, 2014 2:44 PM
+> > > To: Sage Weil
+> > > Cc: Josh Durgin; ceph-devel@vger.kernel.org
+> > > Subject: RE: severe librbd performance degradation in Giant
+> > >
+> > > Created a tracker for this.
+> > >
+> > > http://tracker.ceph.com/issues/9513
+> > >
+> > > Thanks & Regards
+> > > Somnath
+> > >
+> > > -----Original Message-----
+> > > From: ceph-devel-owner@vger.kernel.org 
+> > > [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Somnath Roy
+> > > Sent: Wednesday, September 17, 2014 2:39 PM
+> > > To: Sage Weil
+> > > Cc: Josh Durgin; ceph-devel@vger.kernel.org
+> > > Subject: RE: severe librbd performance degradation in Giant
+> > >
+> > > Sage,
+> > > It's a 4K random read.
+> > >
+> > > Thanks & Regards
+> > > Somnath
+> > >
+> > > -----Original Message-----
+> > > From: Sage Weil [mailto:sweil@redhat.com]
+> > > Sent: Wednesday, September 17, 2014 2:36 PM
+> > > To: Somnath Roy
+> > > Cc: Josh Durgin; ceph-devel@vger.kernel.org
+> > > Subject: RE: severe librbd performance degradation in Giant
+> > >
+> > > What was the io pattern?  Sequential or random?  For random a slowdown makes sense (tho maybe not 10x!) but not for sequentail....
+> > >
+> > > s
+> > >
+> > > On Wed, 17 Sep 2014, Somnath Roy wrote:
+> > >
+> > >> I set the following in the client side /etc/ceph/ceph.conf where I am running fio rbd.
+> > >>
+> > >> rbd_cache_writethrough_until_flush = false
+> > >>
+> > >> But, no difference. BTW, I am doing Random read, not write. Still this setting applies ?
+> > >>
+> > >> Next, I tried to tweak the rbd_cache setting to false and I *got back* the old performance. Now, it is similar to firefly throughput !
+> > >>
+> > >> So, loks like rbd_cache=true was the culprit.
+> > >>
+> > >> Thanks Josh !
+> > >>
+> > >> Regards
+> > >> Somnath
+> > >>
+> > >> -----Original Message-----
+> > >> From: Josh Durgin [mailto:josh.durgin@inktank.com]
+> > >> Sent: Wednesday, September 17, 2014 2:20 PM
+> > >> To: Somnath Roy; ceph-devel@vger.kernel.org
+> > >> Subject: Re: severe librbd performance degradation in Giant
+> > >>
+> > >> On 09/17/2014 01:55 PM, Somnath Roy wrote:
+> > >> > Hi Sage,
+> > >> > We are experiencing severe librbd performance degradation in Giant over firefly release. Here is the experiment we did to isolate it as a librbd problem.
+> > >> >
+> > >> > 1. Single OSD is running latest Giant and client is running fio rbd on top of firefly based librbd/librados. For one client it is giving ~11-12K  iops (4K RR).
+> > >> > 2. Single OSD is running Giant and client is running fio rbd on top of Giant based librbd/librados. For one client it is giving ~1.9K  iops (4K RR).
+> > >> > 3. Single OSD is running latest Giant and client is running Giant based ceph_smaiobench on top of giant librados. For one client it is giving ~11-12K  iops (4K RR).
+> > >> > 4. Giant RGW on top of Giant OSD is also scaling.
+> > >> >
+> > >> >
+> > >> > So, it is obvious from the above that recent librbd has issues. I will raise a tracker to track this.
+> > >>
+> > >> For giant the default cache settings changed to:
+> > >>
+> > >> rbd cache = true
+> > >> rbd cache writethrough until flush = true
+> > >>
+> > >> If fio isn't sending flushes as the test is running, the cache will stay in writethrough mode. Does the difference remain if you set rbd cache writethrough until flush = false ?
+> > >>
+> > >> Josh
+> > >>
+> > >> ________________________________
+> > >>
+> > >> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+> > >>
+> > >> --
+> > >> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+> > >> in the body of a message to majordomo@vger.kernel.org More 
+> > >> majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > >>
+> > >>
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> > > in the body of a message to majordomo@vger.kernel.org More majordomo 
+> > > info at  http://vger.kernel.org/majordomo-info.html
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> > > in the body of a message to majordomo@vger.kernel.org More majordomo 
+> > > info at  http://vger.kernel.org/majordomo-info.html
+> > 
+> > 
+> > 
+> > --
+> > Best Regards,
+> > 
+> > Wheat
+> > N?????r??y??????X???v???)?{.n?????z?]z????ay?????j ??f???h??????w???
+> ???j:+v???w???????? ????zZ+???????j"????i
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
