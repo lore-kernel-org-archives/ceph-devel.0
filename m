@@ -1,52 +1,96 @@
-From: Janne Grunau <j@jannau.net>
-Subject: Re: v2 aligned buffer changes for erasure codes
-Date: Thu, 18 Sep 2014 14:40:39 +0200
-Message-ID: <20140918124039.GB25730@jannau.net>
-References: <1410796508-28711-1-git-send-email-j@jannau.net>
- <1411036435-18860-1-git-send-email-j@jannau.net>
- <3472A07E6605974CBC9BC573F1BC02E4AE7D1265@CERNXCHG44.cern.ch>
+From: Dan Van Der Ster <daniel.vanderster@cern.ch>
+Subject: snap_trimming + backfilling is inefficient with many purged_snaps
+Date: Thu, 18 Sep 2014 12:50:44 +0000
+Message-ID: <D197E5D4-598B-4574-852E-C9F0CA10133E@cern.ch>
+References: <CAPUexz-ff+fTmU0J0TrJ80p+6334BBPvM7EWW5=eGa8uEomRew@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from soltyk.jannau.net ([185.27.253.110]:45213 "EHLO
-	soltyk.jannau.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751080AbaIRMkk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 18 Sep 2014 08:40:40 -0400
-Content-Disposition: inline
-In-Reply-To: <3472A07E6605974CBC9BC573F1BC02E4AE7D1265@CERNXCHG44.cern.ch>
+Received: from cernmx13.cern.ch ([188.184.36.46]:49816 "EHLO CERNMX13.cern.ch"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751099AbaIRMur (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 18 Sep 2014 08:50:47 -0400
+Content-Language: en-US
+Content-ID: <055AD6C43A0D3A4EAEB59A4D8A0CB413@cern.ch>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
+Cc: Florian Haas <florian@hastexo.com>
 
-Hi,
-
-On 2014-09-18 12:18:59 +0000, Andreas Joachim Peters wrote:
-> 
-> => (src/erasure-code/isa/README claims it needs 16*k byte aligned buffers
-> 
-> I should update the README since it is misleading ... it should say 
-> 8*k or 16*k byte aligned chunk size depending on the compiler/platform 
-> used, it is not the alignment of the allocated buffer addresses.The 
-> get_alignment in the plug-in function is used to compute the chunk 
-> size for the encoding (as I said not the start address alignment). 
-
-I've seen that
-
-> If you pass k buffers for decoding each buffer should be aligned at 
-> least to 16 or as you pointed out better 32 bytes. 
-
-ok, that makes sense
-
-> For encoding there is normally a single buffer split 'virtually' into 
-> k pieces. To make all pieces starting at an aligned address one needs 
-> to align the chunk size to e.g. 16*k.
-
-I don't get that. How is the buffer splitted? into k (+ m) chunk size 
-parts? As long as the start and the length are both 16 (or 32) byte 
-aligned all parts are properly aligned too. I don't see where the k 
-comes into play.
-
-cheers
-
-Janne
+KG1vdmluZyB0aGlzIGRpc2N1c3Npb24gdG8gLWRldmVsKQ0KDQo+IEJlZ2luIGZvcndhcmRlZCBt
+ZXNzYWdlOg0KPiANCj4gRnJvbTogRmxvcmlhbiBIYWFzIDxmbG9yaWFuQGhhc3RleG8uY29tPg0K
+PiBEYXRlOiAxNyBTZXAgMjAxNCAxODowMjowOSBDRVNUDQo+IFN1YmplY3Q6IFJlOiBbY2VwaC11
+c2Vyc10gUkdXIGh1bmcsIDIgT1NEcyB1c2luZyAxMDAlIENQVQ0KPiBUbzogRGFuIFZhbiBEZXIg
+U3RlciA8ZGFuaWVsLnZhbmRlcnN0ZXJAY2Vybi5jaD4NCj4gQ2M6IENyYWlnIExld2lzIDxjbGV3
+aXNAY2VudHJhbGRlc2t0b3AuY29tPiwgImNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20iIDxjZXBo
+LXVzZXJzQGxpc3RzLmNlcGguY29tPg0KPiANCj4gT24gV2VkLCBTZXAgMTcsIDIwMTQgYXQgNTo0
+MiBQTSwgRGFuIFZhbiBEZXIgU3Rlcg0KPiA8ZGFuaWVsLnZhbmRlcnN0ZXJAY2Vybi5jaD4gd3Jv
+dGU6DQo+PiBGcm9tOiBGbG9yaWFuIEhhYXMgPGZsb3JpYW5AaGFzdGV4by5jb20+DQo+PiBTZW50
+OiBTZXAgMTcsIDIwMTQgNTozMyBQTQ0KPj4gVG86IERhbiBWYW4gRGVyIFN0ZXINCj4+IENjOiBD
+cmFpZyBMZXdpcyA8Y2xld2lzQGNlbnRyYWxkZXNrdG9wLmNvbT47Y2VwaC11c2Vyc0BsaXN0cy5j
+ZXBoLmNvbQ0KPj4gU3ViamVjdDogUmU6IFtjZXBoLXVzZXJzXSBSR1cgaHVuZywgMiBPU0RzIHVz
+aW5nIDEwMCUgQ1BVDQo+PiANCj4+IE9uIFdlZCwgU2VwIDE3LCAyMDE0IGF0IDU6MjQgUE0sIERh
+biBWYW4gRGVyIFN0ZXINCj4+IDxkYW5pZWwudmFuZGVyc3RlckBjZXJuLmNoPiB3cm90ZToNCj4+
+PiBIaSBGbG9yaWFuLA0KPj4+IA0KPj4+PiBPbiAxNyBTZXAgMjAxNCwgYXQgMTc6MDksIEZsb3Jp
+YW4gSGFhcyA8ZmxvcmlhbkBoYXN0ZXhvLmNvbT4gd3JvdGU6DQo+Pj4+IA0KPj4+PiBIaSBDcmFp
+ZywNCj4+Pj4gDQo+Pj4+IGp1c3QgZHVnIHRoaXMgdXAgaW4gdGhlIGxpc3QgYXJjaGl2ZXMuDQo+
+Pj4+IA0KPj4+PiBPbiBGcmksIE1hciAyOCwgMjAxNCBhdCAyOjA0IEFNLCBDcmFpZyBMZXdpcyA8
+Y2xld2lzQGNlbnRyYWxkZXNrdG9wLmNvbT4NCj4+Pj4gd3JvdGU6DQo+Pj4+PiBJbiB0aGUgaW50
+ZXJlc3Qgb2YgcmVtb3ZpbmcgdmFyaWFibGVzLCBJIHJlbW92ZWQgYWxsIHNuYXBzaG90cyBvbiBh
+bGwNCj4+Pj4+IHBvb2xzLA0KPj4+Pj4gdGhlbiByZXN0YXJ0ZWQgYWxsIGNlcGggZGFlbW9ucyBh
+dCB0aGUgc2FtZSB0aW1lLiAgVGhpcyBicm91Z2h0IHVwIG9zZC44DQo+Pj4+PiBhcw0KPj4+Pj4g
+d2VsbC4NCj4+Pj4gDQo+Pj4+IFNvIGp1c3QgdG8gc3VtbWFyaXplIHRoaXM6IHlvdXIgMTAwJSBD
+UFUgcHJvYmxlbSBhdCB0aGUgdGltZSB3ZW50IGF3YXkNCj4+Pj4gYWZ0ZXIgeW91IHJlbW92ZWQg
+YWxsIHNuYXBzaG90cywgYW5kIHRoZSBhY3R1YWwgY2F1c2Ugb2YgdGhlIGlzc3VlIHdhcw0KPj4+
+PiBuZXZlciBmb3VuZD8NCj4+Pj4gDQo+Pj4+IEkgYW0gc2VlaW5nIGEgc2ltaWxhciBpc3N1ZSBu
+b3csIGFuZCBoYXZlIGZpbGVkDQo+Pj4+IGh0dHA6Ly90cmFja2VyLmNlcGguY29tL2lzc3Vlcy85
+NTAzIHRvIG1ha2Ugc3VyZSBpdCBkb2Vzbid0IGdldCBsb3N0DQo+Pj4+IGFnYWluLiBDYW4geW91
+IHRha2UgYSBsb29rIGF0IHRoYXQgaXNzdWUgYW5kIGxldCBtZSBrbm93IGlmIGFueXRoaW5nDQo+
+Pj4+IGluIHRoZSBkZXNjcmlwdGlvbiBzb3VuZHMgZmFtaWxpYXI/DQo+Pj4gDQo+Pj4gDQo+Pj4g
+Q291bGQgeW91ciB0aWNrZXQgYmUgcmVsYXRlZCB0byB0aGUgc25hcCB0cmltbWluZyBpc3N1ZSBJ
+4oCZdmUgZmluYWxseQ0KPj4+IG5hcnJvd2VkIGRvd24gaW4gdGhlIHBhc3QgY291cGxlIGRheXM/
+DQo+Pj4gDQo+Pj4gIGh0dHA6Ly90cmFja2VyLmNlcGguY29tL2lzc3Vlcy85NDg3DQo+Pj4gDQo+
+Pj4gQnVtcCB1cCBkZWJ1Z19vc2QgdG8gMjAgdGhlbiBjaGVjayB0aGUgbG9nIGR1cmluZyBvbmUg
+b2YgeW91ciBpbmNpZGVudHMuDQo+Pj4gSWYgaXQgaXMgYnVzeSBsb2dnaW5nIHRoZSBzbmFwX3Ry
+aW1tZXIgbWVzc2FnZXMsIHRoZW4gaXTigJlzIHRoZSBzYW1lIGlzc3VlLg0KPj4+IChUaGUgaXNz
+dWUgaXMgdGhhdCByYmQgcG9vbHMgaGF2ZSBtYW55IHB1cmdlZF9zbmFwcywgYnV0IHNvbWV0aW1l
+cyBhZnRlcg0KPj4+IGJhY2tmaWxsaW5nIGEgUEcgdGhlIHB1cmdlZF9zbmFwcyBsaXN0IGlzIGxv
+c3QgYW5kIHRodXMgdGhlIHNuYXAgdHJpbW1lcg0KPj4+IGJlY29tZXMgdmVyeSBidXN5IHdoaWxz
+dCByZS10cmltbWluZyB0aG91c2FuZHMgb2Ygc25hcHMuIER1cmluZyB0aGF0IHRpbWUgKGENCj4+
+PiBmZXcgbWludXRlcyBvbiBteSBjbHVzdGVyKSB0aGUgT1NEIGlzIGJsb2NrZWQuKQ0KPj4gDQo+
+PiBUaGF0IHNvdW5kcyBwcm9taXNpbmcsIHRoYW5rIHlvdSEgZGVidWdfb3NkPTEwIHNob3VsZCBh
+Y3R1YWxseSBiZQ0KPj4gc3VmZmljaWVudCBhcyB0aG9zZSBzbmFwX3RyaW0gbWVzc2FnZXMgZ2V0
+IGxvZ2dlZCBhdCB0aGF0IGxldmVsLiA6KQ0KPj4gDQo+PiBEbyBJIHVuZGVyc3RhbmQgeW91ciBp
+c3N1ZSByZXBvcnQgY29ycmVjdGx5IGluIHRoYXQgeW91IGhhdmUgZm91bmQNCj4+IHNldHRpbmcg
+b3NkX3NuYXBfdHJpbV9zbGVlcCB0byBiZSBpbmVmZmVjdGl2ZSwgYmVjYXVzZSBpdCdzIGJlaW5n
+DQo+PiBhcHBsaWVkIHdoZW4gaXRlcmF0aW5nIGZyb20gUEcgdG8gUEcsIHJhdGhlciB0aGFuIGZy
+b20gc25hcCB0byBzbmFwPw0KPj4gSWYgc28sIHRoZW4gSSdtIGd1ZXNzaW5nIHRoYXQgdGhhdCBj
+YW4gaGFyZGx5IGJlIGludGVudGlvbmFs4oCmDQoNCg0KSeKAmW0gYmVnaW5uaW5nIHRvIGFncmVl
+IHdpdGggeW91IG9uIHRoYXQgZ3Vlc3MuIEFGQUlDVCwgdGhlIG5vcm1hbCBiZWhhdmlvciBvZiB0
+aGUgc25hcCB0cmltbWVyIGlzIHRvIHRyaW0gb25lIHNpbmdsZSBzbmFwLCB0aGUgb25lIHdoaWNo
+IGlzIGluIHRoZSBzbmFwX3RyaW1xIGJ1dCBub3QgeWV0IGluIHB1cmdlZF9zbmFwcy4gU28gdGhl
+IG9ubHkgdGltZSB0aGUgY3VycmVudCBzbGVlcCBpbXBsZW1lbnRhdGlvbiBjb3VsZCBiZSB1c2Vm
+dWwgaXMgaWYgd2Ugcm3igJlkIGEgc25hcCBhY3Jvc3MgbWFueSBQR3MgYXQgb25jZSwgZS5nLiBy
+bSBhIHBvb2wgc25hcCBvciBhbiByYmQgc25hcC4gQnV0IHRob3NlIGFyZW7igJl0IGEgaHVnZSBw
+cm9ibGVtIGFueXdheSBzaW5jZSB5b3XigJlkIGF0IG1vc3QgbmVlZCB0byB0cmltIE8oMTAwKSBQ
+R3MuDQoNCldlIGNvdWxkIG1vdmUgdGhlIHNuYXAgdHJpbSBzbGVlcCBpbnRvIHRoZSBTbmFwVHJp
+bW1lciBzdGF0ZSBtYWNoaW5lLCBmb3IgZXhhbXBsZSBpbiBSZXBsaWNhdGVkUEc6Ok5vdFRyaW1t
+aW5nOjpyZWFjdC4gVGhpcyBzaG91bGQgYWxsb3cgb3RoZXIgSU9zIHRvIGdldCB0aHJvdWdoIHRv
+IHRoZSBPU0QsIGJ1dCBvZiBjb3Vyc2UgdGhlIHRyaW1taW5nIFBHIHdvdWxkIHJlbWFpbiBsb2Nr
+ZWQuIEFuZCBpdCB3b3VsZCBiZSBsb2NrZWQgZm9yIGV2ZW4gbG9uZ2VyIG5vdyBkdWUgdG8gdGhl
+IHNsZWVwLg0KDQpUbyBzb2x2ZSB0aGF0IHdlIGNvdWxkIGxpbWl0IHRoZSBudW1iZXIgb2YgdHJp
+bXMgcGVyIGluc3RhbmNlIG9mIHRoZSBTbmFwVHJpbW1lciwgbGlrZSBJ4oCZdmUgZG9uZSBpbiB0
+aGlzIHB1bGwgcmVxOiBodHRwczovL2dpdGh1Yi5jb20vY2VwaC9jZXBoL3B1bGwvMjUxNg0KQnJl
+YWtpbmcgb3V0IG9mIHRoZSB0cmltbWVyIGxpa2UgdGhhdCBzaG91bGQgYWxsb3cgSU9zIHRvIHRo
+ZSB0cmltbWluZyBQRyB0byBnZXQgdGhyb3VnaC4NCg0KVGhlIHNlY29uZCBhc3BlY3Qgb2YgdGhp
+cyBpc3N1ZSBpcyB3aHkgYXJlIHRoZSBwdXJnZWRfc25hcHMgYmVpbmcgbG9zdCB0byBiZWdpbiB3
+aXRoLiBJ4oCZdmUgbWFuYWdlZCB0byByZXByb2R1Y2UgdGhhdCBvbiBteSB0ZXN0IGNsdXN0ZXIu
+IEFsbCB5b3UgaGF2ZSB0byBkbyBpcyBjcmVhdGUgbWFueSBwb29sIHNuYXBzIChlLmcuIG9mIGEg
+bmVhcmx5IGVtcHR5IHBvb2wpLCB0aGVuIHJtc25hcCBhbGwgdGhvc2Ugc25hcHNob3RzLiBUaGVu
+IHVzZSBjcnVzaCByZXdlaWdodCB0byBtb3ZlIHRoZSBQR3MgYXJvdW5kLiBXaXRoIGRlYnVnX29z
+ZD49MTAsIHlvdSB3aWxsIHNlZSAiYWRkaW5nIHNuYXAgMSB0byBwdXJnZWRfc25hcHPigJ0sIHdo
+aWNoIGlzIG9uZSBzaWduYXR1cmUgb2YgdGhpcyBsb3N0IHB1cmdlZF9zbmFwcyBpc3N1ZS4gVG8g
+cmVwcm9kdWNlIHNsb3cgcmVxdWVzdHMgdGhlIG51bWJlciBvZiBzbmFwcyBwdXJnZWQgbmVlZHMg
+dG8gYmUgTygxMDAwMCkuDQoNCkxvb2tpbmcgZm9yd2FyZCB0byBhbnkgaWRlYXMgc29tZW9uZSBt
+aWdodCBoYXZlLg0KDQpDaGVlcnMsIERhbg0KDQoNCg0K
