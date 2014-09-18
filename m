@@ -1,250 +1,141 @@
-From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
-Subject: RE: [ceph-users] Crushmap ruleset for rack aware PG placement
-Date: Thu, 18 Sep 2014 02:03:36 +0000
-Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC020BD242@shsmsx102.ccr.corp.intel.com>
-References: <CADgBPFCVUVQZtHNkSsuMhskL2X-FTBTYy6zcav3CRpNCBGHJgg@mail.gmail.com>
- <alpine.DEB.2.00.1409150826060.513@cobra.newdream.net>
- <lv91s9$4j2$1@ger.gmane.org> <54184711.3080002@dachary.org>
- <lv9p5b$1h1$1@ger.gmane.org> <D03E84B7.B8D%johnugeo@cisco.com>
- <541945F8.60001@dachary.org> <D03EEB71.BBF%johnugeo@cisco.com>
- <5419B25B.3010508@dachary.org> <D03F35D4.BDC%johnugeo@cisco.com>
- <5419EB00.70307@dachary.org> <D03F5B09.BFE%johnugeo@cisco.com>
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: Re: severe librbd performance degradation in Giant
+Date: Thu, 18 Sep 2014 10:27:56 +0800
+Message-ID: <CACJqLyYQDrHyxMEtiMKMNaBQ_fHuu-hGqO_ZNHra0+VsUZrzXQ@mail.gmail.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F27845984@SACMBXIP02.sdcorp.global.sandisk.com>
+	<5419FB1B.4020202@inktank.com>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F278459F8@SACMBXIP02.sdcorp.global.sandisk.com>
+	<alpine.DEB.2.00.1409171435320.20205@cobra.newdream.net>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F27845A2A@SACMBXIP02.sdcorp.global.sandisk.com>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F27845B22@SACMBXIP02.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga14.intel.com ([192.55.52.115]:33367 "EHLO mga14.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755705AbaIRCDs convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Sep 2014 22:03:48 -0400
-In-Reply-To: <D03F5B09.BFE%johnugeo@cisco.com>
-Content-Language: en-US
+Received: from mail-we0-f170.google.com ([74.125.82.170]:63104 "EHLO
+	mail-we0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756686AbaIRC15 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Sep 2014 22:27:57 -0400
+Received: by mail-we0-f170.google.com with SMTP id u57so188210wes.1
+        for <ceph-devel@vger.kernel.org>; Wed, 17 Sep 2014 19:27:56 -0700 (PDT)
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F27845B22@SACMBXIP02.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Johnu George (johnugeo)" <johnugeo@cisco.com>, Loic Dachary <loic@dachary.org>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: Sage Weil <sweil@redhat.com>, Josh Durgin <josh.durgin@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-The rule has max_size, can we just use that value?
+According http://tracker.ceph.com/issues/9513, do you mean that rbd
+cache will make 10x performance degradation for random read?
 
------Original Message-----
-=46rom: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.=
-kernel.org] On Behalf Of Johnu George (johnugeo)
-Sent: Thursday, September 18, 2014 6:41 AM
-To: Loic Dachary; ceph-devel
-Subject: Re: [ceph-users] Crushmap ruleset for rack aware PG placement
+On Thu, Sep 18, 2014 at 7:44 AM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
+> Josh/Sage,
+> I should mention that even after turning off rbd cache I am getting ~20% degradation over Firefly.
+>
+> Thanks & Regards
+> Somnath
+>
+> -----Original Message-----
+> From: Somnath Roy
+> Sent: Wednesday, September 17, 2014 2:44 PM
+> To: Sage Weil
+> Cc: Josh Durgin; ceph-devel@vger.kernel.org
+> Subject: RE: severe librbd performance degradation in Giant
+>
+> Created a tracker for this.
+>
+> http://tracker.ceph.com/issues/9513
+>
+> Thanks & Regards
+> Somnath
+>
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Somnath Roy
+> Sent: Wednesday, September 17, 2014 2:39 PM
+> To: Sage Weil
+> Cc: Josh Durgin; ceph-devel@vger.kernel.org
+> Subject: RE: severe librbd performance degradation in Giant
+>
+> Sage,
+> It's a 4K random read.
+>
+> Thanks & Regards
+> Somnath
+>
+> -----Original Message-----
+> From: Sage Weil [mailto:sweil@redhat.com]
+> Sent: Wednesday, September 17, 2014 2:36 PM
+> To: Somnath Roy
+> Cc: Josh Durgin; ceph-devel@vger.kernel.org
+> Subject: RE: severe librbd performance degradation in Giant
+>
+> What was the io pattern?  Sequential or random?  For random a slowdown makes sense (tho maybe not 10x!) but not for sequentail....
+>
+> s
+>
+> On Wed, 17 Sep 2014, Somnath Roy wrote:
+>
+>> I set the following in the client side /etc/ceph/ceph.conf where I am running fio rbd.
+>>
+>> rbd_cache_writethrough_until_flush = false
+>>
+>> But, no difference. BTW, I am doing Random read, not write. Still this setting applies ?
+>>
+>> Next, I tried to tweak the rbd_cache setting to false and I *got back* the old performance. Now, it is similar to firefly throughput !
+>>
+>> So, loks like rbd_cache=true was the culprit.
+>>
+>> Thanks Josh !
+>>
+>> Regards
+>> Somnath
+>>
+>> -----Original Message-----
+>> From: Josh Durgin [mailto:josh.durgin@inktank.com]
+>> Sent: Wednesday, September 17, 2014 2:20 PM
+>> To: Somnath Roy; ceph-devel@vger.kernel.org
+>> Subject: Re: severe librbd performance degradation in Giant
+>>
+>> On 09/17/2014 01:55 PM, Somnath Roy wrote:
+>> > Hi Sage,
+>> > We are experiencing severe librbd performance degradation in Giant over firefly release. Here is the experiment we did to isolate it as a librbd problem.
+>> >
+>> > 1. Single OSD is running latest Giant and client is running fio rbd on top of firefly based librbd/librados. For one client it is giving ~11-12K  iops (4K RR).
+>> > 2. Single OSD is running Giant and client is running fio rbd on top of Giant based librbd/librados. For one client it is giving ~1.9K  iops (4K RR).
+>> > 3. Single OSD is running latest Giant and client is running Giant based ceph_smaiobench on top of giant librados. For one client it is giving ~11-12K  iops (4K RR).
+>> > 4. Giant RGW on top of Giant OSD is also scaling.
+>> >
+>> >
+>> > So, it is obvious from the above that recent librbd has issues. I will raise a tracker to track this.
+>>
+>> For giant the default cache settings changed to:
+>>
+>> rbd cache = true
+>> rbd cache writethrough until flush = true
+>>
+>> If fio isn't sending flushes as the test is running, the cache will stay in writethrough mode. Does the difference remain if you set rbd cache writethrough until flush = false ?
+>>
+>> Josh
+>>
+>> ________________________________
+>>
+>> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>> in the body of a message to majordomo@vger.kernel.org More majordomo
+>> info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-In such a case, we can initialize scratch array in
-crush/CrushWrapper.h#L919 with maximum number of osds that can be selec=
-ted. Since we know the rule no, it should be possible to calculate the =
-maximum osds that can be selected.
 
-Johnu
 
-On 9/17/14, 1:11 PM, "Loic Dachary" <loic@dachary.org> wrote:
+-- 
+Best Regards,
 
->
->
->On 17/09/2014 22:03, Johnu George (johnugeo) wrote:
->> Loic,
->>       You are right.  Are we planning to support configurations wher=
-e =20
->>replica number is different from the number of osds selected from a=20
->>rule?
->
->I think crush should support it, yes. If a rule can provide 10 OSDs=20
->there is no reason for it to fail to provide just one.
->
->Cheers
->
->> If not, One solution is to add a validation check when a rule is=20
->>activated  for a pool of a specific replica.
->>=20
->> Johnu
->>=20
->> On 9/17/14, 9:10 AM, "Loic Dachary" <loic@dachary.org> wrote:
->>=20
->>> Hi,
->>>
->>> If the number of replica desired is 1, then
->>>
->>> https://github.com/ceph/ceph/blob/firefly/src/crush/CrushWrapper.h#=
-L
->>> 915
->>>
->>> will be called with maxout =3D 1 and scratch will be maxout * 3. Bu=
-t=20
->>>if the  rule always selects 4 items, then it overflows. Is it what=20
->>>you also read ?
->>>
->>> Cheers
->>>
->>> On 17/09/2014 16:42, Johnu George (johnugeo) wrote:
->>>> Adding ceph-devel
->>>>
->>>> On 9/17/14, 1:27 AM, "Loic Dachary" <loic@dachary.org> wrote:
->>>>
->>>>>
->>>>> Could you resend with ceph-devel in cc ? It's better for archive=20
->>>>> purposes
->>>>> ;-)
->>>>>
->>>>> On 17/09/2014 09:37, Johnu George (johnugeo) wrote:
->>>>>> Hi Sage,
->>>>>>          I was looking at the crash that was reported in this=20
->>>>>>mail  chain.
->>>>>> I am seeing that the crash happens when number of replicas=20
->>>>>>configured  is  less than total number of osds to be selected as=20
->>>>>>per rule. This is  because, the crush temporary buffers are=20
->>>>>>allocated as per num_rep  size.
->>>>>> (scratch array has size num_rep * 3) So, when number of osds to=20
->>>>>>be  selected is more, buffer overflow happens and it causes=20
->>>>>>error/crash. I  saw  your earlier comment in this mail  where you=
-=20
->>>>>>asked to create a rule  that  selects two osds per rack(2 racks)=20
->>>>>>with num_rep=3D3. I feel that buffer  overflow issue should happe=
-n=20
->>>>>>in this situation too, that can cause  'out  of  array' access. A=
-m=20
->>>>>>I wrong somewhere or am I missing something?
->>>>>>
->>>>>> Johnu
->>>>>>
->>>>>> On 9/16/14, 9:39 AM, "Daniel Swarbrick"
->>>>>> <daniel.swarbrick@profitbricks.com> wrote:
->>>>>>
->>>>>>> Hi Loic,
->>>>>>>
->>>>>>> Thanks for providing a detailed example. I'm able to run the=20
->>>>>>>example  that you provide, and also got my own live crushmap to=20
->>>>>>>produce some  results, when I appended the "--num-rep 3" option=20
->>>>>>>to the command.
->>>>>>> Without that option, even your example is throwing segfaults -=20
->>>>>>>maybe  a  bug in crushtool?
->>>>>>>
->>>>>>> One other area I wasn't sure about - can the final "chooseleaf"
->>>>>>>step
->>>>>>> specify "firstn 0" for simplicity's sake (and to automatically =
-=20
->>>>>>>handle a  larger pool size in future) ? Would there be any=20
->>>>>>>downside to this?
->>>>>>>
->>>>>>> Cheers
->>>>>>>
->>>>>>> On 16/09/14 16:20, Loic Dachary wrote:
->>>>>>>> Hi Daniel,
->>>>>>>>
->>>>>>>> When I run
->>>>>>>>
->>>>>>>> crushtool --outfn crushmap --build --num_osds 100 host straw 2=
-=20
->>>>>>>>rack  straw 10 default straw 0  crushtool -d crushmap -o=20
->>>>>>>>crushmap.txt  cat >> crushmap.txt <<EOF  rule myrule {
->>>>>>>> 	ruleset 1
->>>>>>>> 	type replicated
->>>>>>>> 	min_size 1
->>>>>>>> 	max_size 10
->>>>>>>> 	step take default
->>>>>>>> 	step choose firstn 2 type rack
->>>>>>>> 	step chooseleaf firstn 2 type host
->>>>>>>> 	step emit
->>>>>>>> }
->>>>>>>> EOF
->>>>>>>> crushtool -c crushmap.txt -o crushmap  crushtool -i crushmap=20
->>>>>>>>--test --show-utilization --rule 1 --min-x 1  --max-x 10=20
->>>>>>>>--num-rep 3
->>>>>>>>
->>>>>>>> I get
->>>>>>>>
->>>>>>>> rule 1 (myrule), x =3D 1..10, numrep =3D 3..3 CRUSH rule 1 x 1=
-=20
->>>>>>>> [79,69,10] CRUSH rule 1 x 2 [56,58,60] CRUSH rule 1 x 3=20
->>>>>>>> [30,26,19] CRUSH rule 1 x 4 [14,8,69] CRUSH rule 1 x 5 [7,4,88=
-]=20
->>>>>>>> CRUSH rule 1 x 6 [54,52,37] CRUSH rule 1 x 7 [69,67,19] CRUSH=20
->>>>>>>> rule 1 x 8 [51,46,83] CRUSH rule 1 x 9 [55,56,35] CRUSH rule 1=
-=20
->>>>>>>> x 10 [54,51,95]
->>>>>>>> rule 1 (myrule) num_rep 3 result size =3D=3D 3:	10/10
->>>>>>>>
->>>>>>>> What command are you running to get a core dump ?
->>>>>>>>
->>>>>>>> Cheers
->>>>>>>>
->>>>>>>> On 16/09/2014 12:02, Daniel Swarbrick wrote:
->>>>>>>>> On 15/09/14 17:28, Sage Weil wrote:
->>>>>>>>>> rule myrule {
->>>>>>>>>> 	ruleset 1
->>>>>>>>>> 	type replicated
->>>>>>>>>> 	min_size 1
->>>>>>>>>> 	max_size 10
->>>>>>>>>> 	step take default
->>>>>>>>>> 	step choose firstn 2 type rack
->>>>>>>>>> 	step chooseleaf firstn 2 type host
->>>>>>>>>> 	step emit
->>>>>>>>>> }
->>>>>>>>>>
->>>>>>>>>> That will give you 4 osds, spread across 2 hosts in each rac=
-k.
->>>>>>>>>> The
->>>>>>>>>> pool
->>>>>>>>>> size (replication factor) is 3, so RADOS will just use the=20
->>>>>>>>>> first three (2 hosts in first rack, 1 host in second rack).
->>>>>>>>> I have a similar requirement, where we currently have four=20
->>>>>>>>>nodes,  two  in  each fire zone, with pool size 3. At the=20
->>>>>>>>>moment, due to the number  of  nodes, we are guaranteed at=20
->>>>>>>>>least one replica in each fire zone  (which  we represent with=
-=20
->>>>>>>>>bucket type "room"). If we add more nodes in  future,  the=20
->>>>>>>>>current ruleset may cause all three replicas of a PG to land =20
->>>>>>>>>in a  single zone.
->>>>>>>>>
->>>>>>>>> I tried the ruleset suggested above (replacing "rack" with=20
->>>>>>>>>"room"),  but  when testing it with crushtool --test=20
->>>>>>>>>--show-utilization, I simply  get  segfaults. No amount of=20
->>>>>>>>>fiddling around seems to make it work -  even  adding two new=20
->>>>>>>>>hypothetical nodes to the crushmap doesn't help.
->>>>>>>>>
->>>>>>>>> What could I perhaps be doing wrong?
->>>>>>>>>
->>>>>>>>> _______________________________________________
->>>>>>>>> ceph-users mailing list
->>>>>>>>> ceph-users@lists.ceph.com
->>>>>>>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->>>>>>>>>
->>>>>>>>
->>>>>>>>
->>>>>>>> _______________________________________________
->>>>>>>> ceph-users mailing list
->>>>>>>> ceph-users@lists.ceph.com
->>>>>>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->>>>>>>
->>>>>>>
->>>>>>> _______________________________________________
->>>>>>> ceph-users mailing list
->>>>>>> ceph-users@lists.ceph.com
->>>>>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->>>>>>
->>>>>
->>>>> --
->>>>> Lo=EFc Dachary, Artisan Logiciel Libre
->>>>>
->>>>
->>>
->>> --
->>> Lo=EFc Dachary, Artisan Logiciel Libre
->>>
->>=20
->
->--
->Lo=EFc Dachary, Artisan Logiciel Libre
->
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Wheat
