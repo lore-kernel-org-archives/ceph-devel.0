@@ -1,33 +1,189 @@
-From: Zhao zhiming <zhaozhiming003@gmail.com>
-Subject: How to use radosgw-admin to delete some or all users?
-Date: Thu, 18 Sep 2014 15:53:27 +0800
-Message-ID: <1464A418-AB3C-46C6-8D20-8FA796538A62@gmail.com>
-Mime-Version: 1.0 (Mac OS X Mail 7.3 \(1878.6\))
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+Subject: RE: severe librbd performance degradation in Giant
+Date: Thu, 18 Sep 2014 08:45:34 +0000
+Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC020BD6D2@shsmsx102.ccr.corp.intel.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F27845984@SACMBXIP02.sdcorp.global.sandisk.com>
+ <5419FB1B.4020202@inktank.com>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F278459F8@SACMBXIP02.sdcorp.global.sandisk.com>
+ <alpine.DEB.2.00.1409171435320.20205@cobra.newdream.net>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F27845A2A@SACMBXIP02.sdcorp.global.sandisk.com>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F27845B22@SACMBXIP02.sdcorp.global.sandisk.com>
+ <CACJqLyYQDrHyxMEtiMKMNaBQ_fHuu-hGqO_ZNHra0+VsUZrzXQ@mail.gmail.com>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F27845F05@SACMBXIP02.sdcorp.global.sandisk.com>
+ <alpine.DEB.2.00.1409172051300.24517@cobra.newdream.net>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F27845FE2@SACMBXIP02.sdcorp.global.sandisk.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f169.google.com ([209.85.192.169]:35774 "EHLO
-	mail-pd0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751080AbaIRHxi convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 18 Sep 2014 03:53:38 -0400
-Received: by mail-pd0-f169.google.com with SMTP id fp1so883607pdb.28
-        for <ceph-devel@vger.kernel.org>; Thu, 18 Sep 2014 00:53:38 -0700 (PDT)
-Received: from [171.219.181.6] ([171.219.181.6])
-        by mx.google.com with ESMTPSA id iq3sm18848796pbb.71.2014.09.18.00.53.35
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
-        Thu, 18 Sep 2014 00:53:37 -0700 (PDT)
+Received: from mga09.intel.com ([134.134.136.24]:46302 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751892AbaIRIpl convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 18 Sep 2014 04:45:41 -0400
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F27845FE2@SACMBXIP02.sdcorp.global.sandisk.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Somnath Roy <Somnath.Roy@sandisk.com>, Sage Weil <sweil@redhat.com>
+Cc: Haomai Wang <haomaiwang@gmail.com>, Josh Durgin <josh.durgin@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-HI ALL,
-	I know radosgw-admin can delete one user with command =91radosgw-admin=
- user rm uid=3Dxxx=92, I want to know have some commands to delete mult=
-iple or all users?
+Same question as Somnath,  some customer of us not feeling that comfortable with cache, they still have some consistent concern.
 
-thanks. --
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Somnath Roy
+Sent: Thursday, September 18, 2014 2:25 PM
+To: Sage Weil
+Cc: Haomai Wang; Josh Durgin; ceph-devel@vger.kernel.org
+Subject: RE: severe librbd performance degradation in Giant
+
+Sage,
+Any reason why the cache is by default enabled in Giant ?
+Regarding profiling, I will try if I can run Vtune/mutrace on this.
+
+Thanks & Regards
+Somnath
+
+-----Original Message-----
+From: Sage Weil [mailto:sweil@redhat.com]
+Sent: Wednesday, September 17, 2014 8:53 PM
+To: Somnath Roy
+Cc: Haomai Wang; Josh Durgin; ceph-devel@vger.kernel.org
+Subject: RE: severe librbd performance degradation in Giant
+
+On Thu, 18 Sep 2014, Somnath Roy wrote:
+> Yes Haomai...
+
+I would love to what a profiler says about the matter.  There is going to be some overhead on the client associated with the cache for a random io workload, but 10x is a problem!
+
+sage
+
+
+> 
+> -----Original Message-----
+> From: Haomai Wang [mailto:haomaiwang@gmail.com]
+> Sent: Wednesday, September 17, 2014 7:28 PM
+> To: Somnath Roy
+> Cc: Sage Weil; Josh Durgin; ceph-devel@vger.kernel.org
+> Subject: Re: severe librbd performance degradation in Giant
+> 
+> According http://tracker.ceph.com/issues/9513, do you mean that rbd cache will make 10x performance degradation for random read?
+> 
+> On Thu, Sep 18, 2014 at 7:44 AM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
+> > Josh/Sage,
+> > I should mention that even after turning off rbd cache I am getting ~20% degradation over Firefly.
+> >
+> > Thanks & Regards
+> > Somnath
+> >
+> > -----Original Message-----
+> > From: Somnath Roy
+> > Sent: Wednesday, September 17, 2014 2:44 PM
+> > To: Sage Weil
+> > Cc: Josh Durgin; ceph-devel@vger.kernel.org
+> > Subject: RE: severe librbd performance degradation in Giant
+> >
+> > Created a tracker for this.
+> >
+> > http://tracker.ceph.com/issues/9513
+> >
+> > Thanks & Regards
+> > Somnath
+> >
+> > -----Original Message-----
+> > From: ceph-devel-owner@vger.kernel.org 
+> > [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Somnath Roy
+> > Sent: Wednesday, September 17, 2014 2:39 PM
+> > To: Sage Weil
+> > Cc: Josh Durgin; ceph-devel@vger.kernel.org
+> > Subject: RE: severe librbd performance degradation in Giant
+> >
+> > Sage,
+> > It's a 4K random read.
+> >
+> > Thanks & Regards
+> > Somnath
+> >
+> > -----Original Message-----
+> > From: Sage Weil [mailto:sweil@redhat.com]
+> > Sent: Wednesday, September 17, 2014 2:36 PM
+> > To: Somnath Roy
+> > Cc: Josh Durgin; ceph-devel@vger.kernel.org
+> > Subject: RE: severe librbd performance degradation in Giant
+> >
+> > What was the io pattern?  Sequential or random?  For random a slowdown makes sense (tho maybe not 10x!) but not for sequentail....
+> >
+> > s
+> >
+> > On Wed, 17 Sep 2014, Somnath Roy wrote:
+> >
+> >> I set the following in the client side /etc/ceph/ceph.conf where I am running fio rbd.
+> >>
+> >> rbd_cache_writethrough_until_flush = false
+> >>
+> >> But, no difference. BTW, I am doing Random read, not write. Still this setting applies ?
+> >>
+> >> Next, I tried to tweak the rbd_cache setting to false and I *got back* the old performance. Now, it is similar to firefly throughput !
+> >>
+> >> So, loks like rbd_cache=true was the culprit.
+> >>
+> >> Thanks Josh !
+> >>
+> >> Regards
+> >> Somnath
+> >>
+> >> -----Original Message-----
+> >> From: Josh Durgin [mailto:josh.durgin@inktank.com]
+> >> Sent: Wednesday, September 17, 2014 2:20 PM
+> >> To: Somnath Roy; ceph-devel@vger.kernel.org
+> >> Subject: Re: severe librbd performance degradation in Giant
+> >>
+> >> On 09/17/2014 01:55 PM, Somnath Roy wrote:
+> >> > Hi Sage,
+> >> > We are experiencing severe librbd performance degradation in Giant over firefly release. Here is the experiment we did to isolate it as a librbd problem.
+> >> >
+> >> > 1. Single OSD is running latest Giant and client is running fio rbd on top of firefly based librbd/librados. For one client it is giving ~11-12K  iops (4K RR).
+> >> > 2. Single OSD is running Giant and client is running fio rbd on top of Giant based librbd/librados. For one client it is giving ~1.9K  iops (4K RR).
+> >> > 3. Single OSD is running latest Giant and client is running Giant based ceph_smaiobench on top of giant librados. For one client it is giving ~11-12K  iops (4K RR).
+> >> > 4. Giant RGW on top of Giant OSD is also scaling.
+> >> >
+> >> >
+> >> > So, it is obvious from the above that recent librbd has issues. I will raise a tracker to track this.
+> >>
+> >> For giant the default cache settings changed to:
+> >>
+> >> rbd cache = true
+> >> rbd cache writethrough until flush = true
+> >>
+> >> If fio isn't sending flushes as the test is running, the cache will stay in writethrough mode. Does the difference remain if you set rbd cache writethrough until flush = false ?
+> >>
+> >> Josh
+> >>
+> >> ________________________________
+> >>
+> >> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+> >>
+> >> --
+> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+> >> in the body of a message to majordomo@vger.kernel.org More 
+> >> majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >>
+> >>
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> > in the body of a message to majordomo@vger.kernel.org More majordomo 
+> > info at  http://vger.kernel.org/majordomo-info.html
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> > in the body of a message to majordomo@vger.kernel.org More majordomo 
+> > info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+> 
+> --
+> Best Regards,
+> 
+> Wheat
+> N?????r??y??????X???v???)?{.n?????z?]z????ay?????j ??f???h??????w???
+???j:+v???w???????? ????zZ+???????j"????i
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
