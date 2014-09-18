@@ -1,84 +1,55 @@
-From: Florian Haas <florian@hastexo.com>
-Subject: Re: snap_trimming + backfilling is inefficient with many purged_snaps
-Date: Thu, 18 Sep 2014 19:03:59 +0200
-Message-ID: <CAPUexz9XeNMJvjCeM_7N0_TQOS6_xBOdgnKm9j4FNDib3+FjMg@mail.gmail.com>
-References: <CAPUexz-ff+fTmU0J0TrJ80p+6334BBPvM7EWW5=eGa8uEomRew@mail.gmail.com>
- <D197E5D4-598B-4574-852E-C9F0CA10133E@cern.ch>
+From: "Robin H. Johnson" <robbat2@gentoo.org>
+Subject: radosgw-admin list users?
+Date: Thu, 18 Sep 2014 17:27:46 +0000
+Message-ID: <robbat2-20140918T171125-842049841Z@orbis-terrarum.net>
+References: <1464A418-AB3C-46C6-8D20-8FA796538A62@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f177.google.com ([209.85.216.177]:55313 "EHLO
-	mail-qc0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932117AbaIRREU convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 18 Sep 2014 13:04:20 -0400
-Received: by mail-qc0-f177.google.com with SMTP id o8so1717081qcw.22
-        for <ceph-devel@vger.kernel.org>; Thu, 18 Sep 2014 10:04:19 -0700 (PDT)
-In-Reply-To: <D197E5D4-598B-4574-852E-C9F0CA10133E@cern.ch>
+Received: from smtp.gentoo.org ([140.211.166.183]:53991 "EHLO smtp.gentoo.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932117AbaIRR2B (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 18 Sep 2014 13:28:01 -0400
+Received: from grubbs.orbis-terrarum.net (localhost [127.0.0.1])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-SHA (256/256 bits))
+	(No client certificate requested)
+	by smtp.gentoo.org (Postfix) with ESMTPS id D896F340278
+	for <ceph-devel@vger.kernel.org>; Thu, 18 Sep 2014 17:27:55 +0000 (UTC)
+Content-Disposition: inline
+In-Reply-To: <1464A418-AB3C-46C6-8D20-8FA796538A62@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dan Van Der Ster <daniel.vanderster@cern.ch>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hi Dan,
+Related to this thread, radosgw-admin doesn't seem to have anything to
+list the users.
 
-saw the pull request, and can confirm your observations, at least
-partially. Comments inline.
+The closest I have as a hack is:
+rados ls --pool=3D.users.uid |sed 's,.buckets$,,g' |sort |uniq
 
-On Thu, Sep 18, 2014 at 2:50 PM, Dan Van Der Ster
-<daniel.vanderster@cern.ch> wrote:
->>> Do I understand your issue report correctly in that you have found
->>> setting osd_snap_trim_sleep to be ineffective, because it's being
->>> applied when iterating from PG to PG, rather than from snap to snap=
-?
->>> If so, then I'm guessing that that can hardly be intentional=E2=80=A6
->
->
-> I=E2=80=99m beginning to agree with you on that guess. AFAICT, the no=
-rmal behavior of the snap trimmer is to trim one single snap, the one w=
-hich is in the snap_trimq but not yet in purged_snaps. So the only time=
- the current sleep implementation could be useful is if we rm=E2=80=99d=
- a snap across many PGs at once, e.g. rm a pool snap or an rbd snap. Bu=
-t those aren=E2=80=99t a huge problem anyway since you=E2=80=99d at mos=
-t need to trim O(100) PGs.
+But this does require internal knowledge of how it's stored, and I don'=
+t
+want to rely on it.
 
-Hmm. I'm actually seeing this in a system where the problematic snaps
-could *only* have been RBD snaps.
+On Thu, Sep 18, 2014 at 03:53:27PM +0800,  Zhao zhiming wrote:
+> HI ALL,
+> 	I know radosgw-admin can delete one user with command =E2=80=98rados=
+gw-admin user rm uid=3Dxxx=E2=80=99, I want to know have some commands =
+to delete multiple or all users?
+>=20
+> thanks. --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
 
-> We could move the snap trim sleep into the SnapTrimmer state machine,=
- for example in ReplicatedPG::NotTrimming::react. This should allow oth=
-er IOs to get through to the OSD, but of course the trimming PG would r=
-emain locked. And it would be locked for even longer now due to the sle=
-ep.
->
-> To solve that we could limit the number of trims per instance of the =
-SnapTrimmer, like I=E2=80=99ve done in this pull req: https://github.co=
-m/ceph/ceph/pull/2516
-> Breaking out of the trimmer like that should allow IOs to the trimmin=
-g PG to get through.
->
-> The second aspect of this issue is why are the purged_snaps being los=
-t to begin with. I=E2=80=99ve managed to reproduce that on my test clus=
-ter. All you have to do is create many pool snaps (e.g. of a nearly emp=
-ty pool), then rmsnap all those snapshots. Then use crush reweight to m=
-ove the PGs around. With debug_osd>=3D10, you will see "adding snap 1 t=
-o purged_snaps=E2=80=9D, which is one signature of this lost purged_sna=
-ps issue. To reproduce slow requests the number of snaps purged needs t=
-o be O(10000).
-
-Hmmm, I'm not sure if I confirm that. I see "adding snap X to
-purged_snaps", but only after the snap has been purged. See
-https://gist.github.com/fghaas/88db3cd548983a92aa35. Of course, the
-fact that the OSD tries to trim a snap only to get an ENOENT is
-probably indicative of something being fishy with the snaptrimq and/or
-the purged_snaps list as well.
-
-> Looking forward to any ideas someone might have.
-
-So am I. :)
-
-Cheers,
-=46lorian
+--=20
+Robin Hugh Johnson
+Gentoo Linux: Developer, Infrastructure Lead
+E-Mail     : robbat2@gentoo.org
+GnuPG FP   : 11ACBA4F 4778E3F6 E4EDF38E B27B944E 34884E85
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
