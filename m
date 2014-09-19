@@ -1,166 +1,282 @@
-From: "Shu, Xinxin" <xinxin.shu@intel.com>
-Subject: RE: severe librbd performance degradation in Giant
-Date: Fri, 19 Sep 2014 13:02:04 +0000
-Message-ID: <75674D092A819E4189E91166C74CB90D0144104E@shsmsx102.ccr.corp.intel.com>
-References: <CACJqLyYQDrHyxMEtiMKMNaBQ_fHuu-hGqO_ZNHra0+VsUZrzXQ@mail.gmail.com>
- <1ab9d756-bbc9-4fbe-8f51-0a33dbab1a8d@mailpro>
- <755F6B91B3BE364F9BCA11EA3F9E0C6F2784639B@SACMBXIP02.sdcorp.global.sandisk.com>
- <75674D092A819E4189E91166C74CB90D01440AE4@shsmsx102.ccr.corp.intel.com>
- <541BD2F2.9030500@profihost.ag>
+From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Subject: Re: severe librbd performance degradation in Giant
+Date: Fri, 19 Sep 2014 15:31:14 +0200
+Message-ID: <541C3022.5040107@profihost.ag>
+References: <CACJqLyYQDrHyxMEtiMKMNaBQ_fHuu-hGqO_ZNHra0+VsUZrzXQ@mail.gmail.com> <1ab9d756-bbc9-4fbe-8f51-0a33dbab1a8d@mailpro> <755F6B91B3BE364F9BCA11EA3F9E0C6F2784639B@SACMBXIP02.sdcorp.global.sandisk.com> <75674D092A819E4189E91166C74CB90D01440AE4@shsmsx102.ccr.corp.intel.com> <541BD2F2.9030500@profihost.ag> <75674D092A819E4189E91166C74CB90D0144104E@shsmsx102.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:28861 "EHLO mga11.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754085AbaISNDM (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 19 Sep 2014 09:03:12 -0400
-In-Reply-To: <541BD2F2.9030500@profihost.ag>
-Content-Language: en-US
+Received: from mail-ph.de-nserver.de ([85.158.179.214]:40607 "EHLO
+	mail-ph.de-nserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755978AbaISNbR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 19 Sep 2014 09:31:17 -0400
+In-Reply-To: <75674D092A819E4189E91166C74CB90D0144104E@shsmsx102.ccr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe <s.priebe@profihost.ag>, Somnath Roy <Somnath.Roy@sandisk.com>, Alexandre DERUMIER <aderumier@odiso.com>, Haomai Wang <haomaiwang@gmail.com>
+To: "Shu, Xinxin" <xinxin.shu@intel.com>, Somnath Roy <Somnath.Roy@sandisk.com>, Alexandre DERUMIER <aderumier@odiso.com>, Haomai Wang <haomaiwang@gmail.com>
 Cc: Sage Weil <sweil@redhat.com>, Josh Durgin <josh.durgin@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-IDEyIHggSW50ZWwgREMgMzcwMCAyMDBHQiwgZXZlcnkgU1NEIGhhcyB0d28gT1NEcy4NCg0KQ2hl
-ZXJzLA0KeGlueGluDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBTdGVmYW4g
-UHJpZWJlIFttYWlsdG86cy5wcmllYmVAcHJvZmlob3N0LmFnXSANClNlbnQ6IEZyaWRheSwgU2Vw
-dGVtYmVyIDE5LCAyMDE0IDI6NTQgUE0NClRvOiBTaHUsIFhpbnhpbjsgU29tbmF0aCBSb3k7IEFs
-ZXhhbmRyZSBERVJVTUlFUjsgSGFvbWFpIFdhbmcNCkNjOiBTYWdlIFdlaWw7IEpvc2ggRHVyZ2lu
-OyBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KU3ViamVjdDogUmU6IHNldmVyZSBsaWJyYmQg
-cGVyZm9ybWFuY2UgZGVncmFkYXRpb24gaW4gR2lhbnQNCg0KQW0gMTkuMDkuMjAxNCAwMzowOCwg
-c2NocmllYiBTaHUsIFhpbnhpbjoNCj4gSSBhbHNvIG9ic2VydmVkIHBlcmZvcm1hbmNlIGRlZ3Jh
-ZGF0aW9uIG9uIG15IGZ1bGwgU1NEIHNldHVwICwgIEkgY2FuIA0KPiBnb3QgIH4yNzBLIElPUFMg
-Zm9yIDRLQiByYW5kb20gcmVhZCB3aXRoIDAuODAuNCAsIGJ1dCB3aXRoIGxhdGVzdCANCj4gbWFz
-dGVyICwgSSBvbmx5IGdvdCB+MTJLIElPUFMNCg0KVGhpcyBhcmUgaW1wcmVzc2l2ZSBudW1iZXJz
-LiBDYW4geW91IHRlbGwgbWUgaG93IG1hbnkgT1NEcyB5b3UgaGF2ZSBhbmQgd2hpY2ggU1NEcyB5
-b3UgdXNlPw0KDQpUaGFua3MsDQpTdGVmYW4NCg0KDQo+IENoZWVycywNCj4geGlueGluDQo+DQo+
-IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdl
-ci5rZXJuZWwub3JnIA0KPiBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3Jn
-XSBPbiBCZWhhbGYgT2YgU29tbmF0aCBSb3kNCj4gU2VudDogRnJpZGF5LCBTZXB0ZW1iZXIgMTks
-IDIwMTQgMjowMyBBTQ0KPiBUbzogQWxleGFuZHJlIERFUlVNSUVSOyBIYW9tYWkgV2FuZw0KPiBD
-YzogU2FnZSBXZWlsOyBKb3NoIER1cmdpbjsgY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNCj4g
-U3ViamVjdDogUkU6IHNldmVyZSBsaWJyYmQgcGVyZm9ybWFuY2UgZGVncmFkYXRpb24gaW4gR2lh
-bnQNCj4NCj4gQWxleGFuZHJlLA0KPiBXaGF0IHRvb2wgYXJlIHlvdSB1c2luZyA/IEkgdXNlZCBm
-aW8gcmJkLg0KPg0KPiBBbHNvLCBJIGhvcGUgeW91IGhhdmUgR2lhbnQgcGFja2FnZSBpbnN0YWxs
-ZWQgaW4gdGhlIGNsaWVudCBzaWRlIGFzIHdlbGwgYW5kIHJiZF9jYWNoZSA9dHJ1ZSBpcyBzZXQg
-b24gdGhlIGNsaWVudCBjb25mIGZpbGUuDQo+IEZZSSwgZmlyZWZseSBsaWJyYmQgKyBsaWJyYWRv
-cyBhbmQgR2lhbnQgY2x1c3RlciB3aWxsIHdvcmsgc2VhbWxlc3NseSBhbmQgSSBoYWQgdG8gbWFr
-ZSBzdXJlIGZpbyByYmQgaXMgcmVhbGx5IGxvYWRpbmcgZ2lhbnQgbGlicmJkIChpZiB5b3UgaGF2
-ZSBtdWx0aXBsZSBjb3BpZXMgYXJvdW5kICwgd2hpY2ggd2FzIGluIG15IGNhc2UpIGZvciByZXBy
-b2R1Y2luZyBpdC4NCj4NCj4gVGhhbmtzICYgUmVnYXJkcw0KPiBTb21uYXRoDQo+DQo+IC0tLS0t
-T3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IEFsZXhhbmRyZSBERVJVTUlFUiBbbWFpbHRv
-OmFkZXJ1bWllckBvZGlzby5jb21dDQo+IFNlbnQ6IFRodXJzZGF5LCBTZXB0ZW1iZXIgMTgsIDIw
-MTQgMjo0OSBBTQ0KPiBUbzogSGFvbWFpIFdhbmcNCj4gQ2M6IFNhZ2UgV2VpbDsgSm9zaCBEdXJn
-aW47IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnOyBTb21uYXRoIFJveQ0KPiBTdWJqZWN0OiBS
-ZTogc2V2ZXJlIGxpYnJiZCBwZXJmb3JtYW5jZSBkZWdyYWRhdGlvbiBpbiBHaWFudA0KPg0KPj4+
-IEFjY29yZGluZyBodHRwOi8vdHJhY2tlci5jZXBoLmNvbS9pc3N1ZXMvOTUxMywgZG8geW91IG1l
-YW4gdGhhdCByYmQgDQo+Pj4gY2FjaGUgd2lsbCBtYWtlIDEweCBwZXJmb3JtYW5jZSBkZWdyYWRh
-dGlvbiBmb3IgcmFuZG9tIHJlYWQ/DQo+DQo+IEhpLCBvbiBteSBzaWRlLCBJIGRvbid0IHNlZSBh
-bnkgZGVncmFkYXRpb24gcGVyZm9ybWFuY2Ugb24gcmVhZCAoc2VxIG9yIHJhbmQpICB3aXRoIG9y
-IHdpdGhvdXQuDQo+DQo+IGZpcmVmbHkgOiBhcm91bmQgMTIwMDBpb3BzICh3aXRoIG9yIHdpdGhv
-dXQgcmJkX2NhY2hlKSBnaWFudCA6IGFyb3VuZCANCj4gMTIwMDBpb3BzICAod2l0aCBvciB3aXRo
-b3V0IHJiZF9jYWNoZSkNCj4NCj4gKGFuZCBJIGNhbiByZWFjaCBhcm91bmQgMjAwMDAtMzAwMDAg
-aW9wcyBvbiBnaWFudCB3aXRoIGRpc2FibGluZyBvcHRyYWNrZXIpLg0KPg0KPg0KPiByYmRfY2Fj
-aGUgb25seSBpbXByb3ZlIHdyaXRlIHBlcmZvcm1hbmNlIGZvciBtZSAoNGsgYmxvY2sgKQ0KPg0K
-Pg0KPg0KPiAtLS0tLSBNYWlsIG9yaWdpbmFsIC0tLS0tDQo+DQo+IERlOiAiSGFvbWFpIFdhbmci
-IDxoYW9tYWl3YW5nQGdtYWlsLmNvbT4NCj4gw4A6ICJTb21uYXRoIFJveSIgPFNvbW5hdGguUm95
-QHNhbmRpc2suY29tPg0KPiBDYzogIlNhZ2UgV2VpbCIgPHN3ZWlsQHJlZGhhdC5jb20+LCAiSm9z
-aCBEdXJnaW4iIA0KPiA8am9zaC5kdXJnaW5AaW5rdGFuay5jb20+LCBjZXBoLWRldmVsQHZnZXIu
-a2VybmVsLm9yZw0KPiBFbnZvecOpOiBKZXVkaSAxOCBTZXB0ZW1icmUgMjAxNCAwNDoyNzo1Ng0K
-PiBPYmpldDogUmU6IHNldmVyZSBsaWJyYmQgcGVyZm9ybWFuY2UgZGVncmFkYXRpb24gaW4gR2lh
-bnQNCj4NCj4gQWNjb3JkaW5nIGh0dHA6Ly90cmFja2VyLmNlcGguY29tL2lzc3Vlcy85NTEzLCBk
-byB5b3UgbWVhbiB0aGF0IHJiZCBjYWNoZSB3aWxsIG1ha2UgMTB4IHBlcmZvcm1hbmNlIGRlZ3Jh
-ZGF0aW9uIGZvciByYW5kb20gcmVhZD8NCj4NCj4gT24gVGh1LCBTZXAgMTgsIDIwMTQgYXQgNzo0
-NCBBTSwgU29tbmF0aCBSb3kgPFNvbW5hdGguUm95QHNhbmRpc2suY29tPiB3cm90ZToNCj4+IEpv
-c2gvU2FnZSwNCj4+IEkgc2hvdWxkIG1lbnRpb24gdGhhdCBldmVuIGFmdGVyIHR1cm5pbmcgb2Zm
-IHJiZCBjYWNoZSBJIGFtIGdldHRpbmcgfjIwJSBkZWdyYWRhdGlvbiBvdmVyIEZpcmVmbHkuDQo+
-Pg0KPj4gVGhhbmtzICYgUmVnYXJkcw0KPj4gU29tbmF0aA0KPj4NCj4+IC0tLS0tT3JpZ2luYWwg
-TWVzc2FnZS0tLS0tDQo+PiBGcm9tOiBTb21uYXRoIFJveQ0KPj4gU2VudDogV2VkbmVzZGF5LCBT
-ZXB0ZW1iZXIgMTcsIDIwMTQgMjo0NCBQTQ0KPj4gVG86IFNhZ2UgV2VpbA0KPj4gQ2M6IEpvc2gg
-RHVyZ2luOyBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KPj4gU3ViamVjdDogUkU6IHNldmVy
-ZSBsaWJyYmQgcGVyZm9ybWFuY2UgZGVncmFkYXRpb24gaW4gR2lhbnQNCj4+DQo+PiBDcmVhdGVk
-IGEgdHJhY2tlciBmb3IgdGhpcy4NCj4+DQo+PiBodHRwOi8vdHJhY2tlci5jZXBoLmNvbS9pc3N1
-ZXMvOTUxMw0KPj4NCj4+IFRoYW5rcyAmIFJlZ2FyZHMNCj4+IFNvbW5hdGgNCj4+DQo+PiAtLS0t
-LU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPj4gRnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtl
-cm5lbC5vcmcgDQo+PiBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnXSBP
-biBCZWhhbGYgT2YgU29tbmF0aCBSb3kNCj4+IFNlbnQ6IFdlZG5lc2RheSwgU2VwdGVtYmVyIDE3
-LCAyMDE0IDI6MzkgUE0NCj4+IFRvOiBTYWdlIFdlaWwNCj4+IENjOiBKb3NoIER1cmdpbjsgY2Vw
-aC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNCj4+IFN1YmplY3Q6IFJFOiBzZXZlcmUgbGlicmJkIHBl
-cmZvcm1hbmNlIGRlZ3JhZGF0aW9uIGluIEdpYW50DQo+Pg0KPj4gU2FnZSwNCj4+IEl0J3MgYSA0
-SyByYW5kb20gcmVhZC4NCj4+DQo+PiBUaGFua3MgJiBSZWdhcmRzDQo+PiBTb21uYXRoDQo+Pg0K
-Pj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4+IEZyb206IFNhZ2UgV2VpbCBbbWFpbHRv
-OnN3ZWlsQHJlZGhhdC5jb21dDQo+PiBTZW50OiBXZWRuZXNkYXksIFNlcHRlbWJlciAxNywgMjAx
-NCAyOjM2IFBNDQo+PiBUbzogU29tbmF0aCBSb3kNCj4+IENjOiBKb3NoIER1cmdpbjsgY2VwaC1k
-ZXZlbEB2Z2VyLmtlcm5lbC5vcmcNCj4+IFN1YmplY3Q6IFJFOiBzZXZlcmUgbGlicmJkIHBlcmZv
-cm1hbmNlIGRlZ3JhZGF0aW9uIGluIEdpYW50DQo+Pg0KPj4gV2hhdCB3YXMgdGhlIGlvIHBhdHRl
-cm4/IFNlcXVlbnRpYWwgb3IgcmFuZG9tPyBGb3IgcmFuZG9tIGEgc2xvd2Rvd24gbWFrZXMgc2Vu
-c2UgKHRobyBtYXliZSBub3QgMTB4ISkgYnV0IG5vdCBmb3Igc2VxdWVudGFpbC4uLi4NCj4+DQo+
-PiBzDQo+Pg0KPj4gT24gV2VkLCAxNyBTZXAgMjAxNCwgU29tbmF0aCBSb3kgd3JvdGU6DQo+Pg0K
-Pj4+IEkgc2V0IHRoZSBmb2xsb3dpbmcgaW4gdGhlIGNsaWVudCBzaWRlIC9ldGMvY2VwaC9jZXBo
-LmNvbmYgd2hlcmUgSSBhbSBydW5uaW5nIGZpbyByYmQuDQo+Pj4NCj4+PiByYmRfY2FjaGVfd3Jp
-dGV0aHJvdWdoX3VudGlsX2ZsdXNoID0gZmFsc2UNCj4+Pg0KPj4+IEJ1dCwgbm8gZGlmZmVyZW5j
-ZS4gQlRXLCBJIGFtIGRvaW5nIFJhbmRvbSByZWFkLCBub3Qgd3JpdGUuIFN0aWxsIHRoaXMgc2V0
-dGluZyBhcHBsaWVzID8NCj4+Pg0KPj4+IE5leHQsIEkgdHJpZWQgdG8gdHdlYWsgdGhlIHJiZF9j
-YWNoZSBzZXR0aW5nIHRvIGZhbHNlIGFuZCBJICpnb3QgYmFjayogdGhlIG9sZCBwZXJmb3JtYW5j
-ZS4gTm93LCBpdCBpcyBzaW1pbGFyIHRvIGZpcmVmbHkgdGhyb3VnaHB1dCAhDQo+Pj4NCj4+PiBT
-bywgbG9rcyBsaWtlIHJiZF9jYWNoZT10cnVlIHdhcyB0aGUgY3VscHJpdC4NCj4+Pg0KPj4+IFRo
-YW5rcyBKb3NoICENCj4+Pg0KPj4+IFJlZ2FyZHMNCj4+PiBTb21uYXRoDQo+Pj4NCj4+PiAtLS0t
-LU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPj4+IEZyb206IEpvc2ggRHVyZ2luIFttYWlsdG86am9z
-aC5kdXJnaW5AaW5rdGFuay5jb21dDQo+Pj4gU2VudDogV2VkbmVzZGF5LCBTZXB0ZW1iZXIgMTcs
-IDIwMTQgMjoyMCBQTQ0KPj4+IFRvOiBTb21uYXRoIFJveTsgY2VwaC1kZXZlbEB2Z2VyLmtlcm5l
-bC5vcmcNCj4+PiBTdWJqZWN0OiBSZTogc2V2ZXJlIGxpYnJiZCBwZXJmb3JtYW5jZSBkZWdyYWRh
-dGlvbiBpbiBHaWFudA0KPj4+DQo+Pj4gT24gMDkvMTcvMjAxNCAwMTo1NSBQTSwgU29tbmF0aCBS
-b3kgd3JvdGU6DQo+Pj4+IEhpIFNhZ2UsDQo+Pj4+IFdlIGFyZSBleHBlcmllbmNpbmcgc2V2ZXJl
-IGxpYnJiZCBwZXJmb3JtYW5jZSBkZWdyYWRhdGlvbiBpbiBHaWFudCBvdmVyIGZpcmVmbHkgcmVs
-ZWFzZS4gSGVyZSBpcyB0aGUgZXhwZXJpbWVudCB3ZSBkaWQgdG8gaXNvbGF0ZSBpdCBhcyBhIGxp
-YnJiZCBwcm9ibGVtLg0KPj4+Pg0KPj4+PiAxLiBTaW5nbGUgT1NEIGlzIHJ1bm5pbmcgbGF0ZXN0
-IEdpYW50IGFuZCBjbGllbnQgaXMgcnVubmluZyBmaW8gcmJkIG9uIHRvcCBvZiBmaXJlZmx5IGJh
-c2VkIGxpYnJiZC9saWJyYWRvcy4gRm9yIG9uZSBjbGllbnQgaXQgaXMgZ2l2aW5nIH4xMS0xMksg
-aW9wcyAoNEsgUlIpLg0KPj4+PiAyLiBTaW5nbGUgT1NEIGlzIHJ1bm5pbmcgR2lhbnQgYW5kIGNs
-aWVudCBpcyBydW5uaW5nIGZpbyByYmQgb24gdG9wIG9mIEdpYW50IGJhc2VkIGxpYnJiZC9saWJy
-YWRvcy4gRm9yIG9uZSBjbGllbnQgaXQgaXMgZ2l2aW5nIH4xLjlLIGlvcHMgKDRLIFJSKS4NCj4+
-Pj4gMy4gU2luZ2xlIE9TRCBpcyBydW5uaW5nIGxhdGVzdCBHaWFudCBhbmQgY2xpZW50IGlzIHJ1
-bm5pbmcgR2lhbnQgYmFzZWQgY2VwaF9zbWFpb2JlbmNoIG9uIHRvcCBvZiBnaWFudCBsaWJyYWRv
-cy4gRm9yIG9uZSBjbGllbnQgaXQgaXMgZ2l2aW5nIH4xMS0xMksgaW9wcyAoNEsgUlIpLg0KPj4+
-PiA0LiBHaWFudCBSR1cgb24gdG9wIG9mIEdpYW50IE9TRCBpcyBhbHNvIHNjYWxpbmcuDQo+Pj4+
-DQo+Pj4+DQo+Pj4+IFNvLCBpdCBpcyBvYnZpb3VzIGZyb20gdGhlIGFib3ZlIHRoYXQgcmVjZW50
-IGxpYnJiZCBoYXMgaXNzdWVzLiBJIHdpbGwgcmFpc2UgYSB0cmFja2VyIHRvIHRyYWNrIHRoaXMu
-DQo+Pj4NCj4+PiBGb3IgZ2lhbnQgdGhlIGRlZmF1bHQgY2FjaGUgc2V0dGluZ3MgY2hhbmdlZCB0
-bzoNCj4+Pg0KPj4+IHJiZCBjYWNoZSA9IHRydWUNCj4+PiByYmQgY2FjaGUgd3JpdGV0aHJvdWdo
-IHVudGlsIGZsdXNoID0gdHJ1ZQ0KPj4+DQo+Pj4gSWYgZmlvIGlzbid0IHNlbmRpbmcgZmx1c2hl
-cyBhcyB0aGUgdGVzdCBpcyBydW5uaW5nLCB0aGUgY2FjaGUgd2lsbCBzdGF5IGluIHdyaXRldGhy
-b3VnaCBtb2RlLiBEb2VzIHRoZSBkaWZmZXJlbmNlIHJlbWFpbiBpZiB5b3Ugc2V0IHJiZCBjYWNo
-ZSB3cml0ZXRocm91Z2ggdW50aWwgZmx1c2ggPSBmYWxzZSA/DQo+Pj4NCj4+PiBKb3NoDQo+Pj4N
-Cj4+PiBfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXw0KPj4+DQo+Pj4gUExFQVNFIE5P
-VEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVz
-c2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lw
-aWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90
-IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91
-IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZpZXcs
-IGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzIG1lc3NhZ2Ug
-aXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5p
-Y2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25lIG9y
-IGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQg
-YWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhh
-cmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KPj4+DQo+Pj4gLS0N
-Cj4+PiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJz
-Y3JpYmUgY2VwaC1kZXZlbCINCj4+PiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jk
-b21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyANCj4+PiBpbmZvIGF0IGh0dHA6Ly92
-Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KPj4+DQo+Pj4NCj4+IC0tDQo+PiBU
-byB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUg
-Y2VwaC1kZXZlbCINCj4+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdl
-ci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIA0KPj4gaW5mbyBhdCBodHRwOi8vdmdlci5rZXJu
-ZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCj4+IC0tDQo+PiBUbyB1bnN1YnNjcmliZSBmcm9t
-IHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCINCj4+IGlu
-IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUg
-bWFqb3Jkb21vIA0KPj4gaW5mbyBhdCBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1p
-bmZvLmh0bWwNCj4NCj4NCj4NCj4gLS0NCj4gQmVzdCBSZWdhcmRzLA0KPg0KPiBXaGVhdA0KPiAt
-LQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJz
-Y3JpYmUgY2VwaC1kZXZlbCIgaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2
-Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCBodHRwOi8vdmdlci5rZXJuZWwu
-b3JnL21ham9yZG9tby1pbmZvLmh0bWwNCj4gTiAgICAgciAgeSAgIGIgWCAgx6d2IF4gKd66ey5u
-ICsgICB6IF16ICAge2F5IB3Kh9qZICxqICAgZiAgIGggICB6IB4gdyAgICAgICBqOit2ICAgdyBq
-IG0gICAgICAgICB6WisgICAgIN2iaiIgICEgaQ0KPiBOICAgICByICB5ICAgYiBYICDHp3YgXiAp
-3rp7Lm4gKyAgIHogXXogICB7YXkgHcqH2pkgLGogICBmICAgaCAgIHogHiB3ICAgDQogICBqOit2
-ICAgdyBqIG0gICAgICAgICB6WisgICAgIN2iaiIgICF0bWw9DQo+DQo=
+Am 19.09.2014 um 15:02 schrieb Shu, Xinxin:
+>  12 x Intel DC 3700 200GB, every SSD has two OSDs.
+
+Crazy, I've 56 SSDs and can=C3=84t go above 20 000 iops.
+
+Gr=C3=BC=C3=9Fe Stefan
+
+> Cheers,
+> xinxin
+>=20
+> -----Original Message-----
+> From: Stefan Priebe [mailto:s.priebe@profihost.ag]=20
+> Sent: Friday, September 19, 2014 2:54 PM
+> To: Shu, Xinxin; Somnath Roy; Alexandre DERUMIER; Haomai Wang
+> Cc: Sage Weil; Josh Durgin; ceph-devel@vger.kernel.org
+> Subject: Re: severe librbd performance degradation in Giant
+>=20
+> Am 19.09.2014 03:08, schrieb Shu, Xinxin:
+>> I also observed performance degradation on my full SSD setup ,  I ca=
+n=20
+>> got  ~270K IOPS for 4KB random read with 0.80.4 , but with latest=20
+>> master , I only got ~12K IOPS
+>=20
+> This are impressive numbers. Can you tell me how many OSDs you have a=
+nd which SSDs you use?
+>=20
+> Thanks,
+> Stefan
+>=20
+>=20
+>> Cheers,
+>> xinxin
+>>
+>> -----Original Message-----
+>> From: ceph-devel-owner@vger.kernel.org=20
+>> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Somnath Roy
+>> Sent: Friday, September 19, 2014 2:03 AM
+>> To: Alexandre DERUMIER; Haomai Wang
+>> Cc: Sage Weil; Josh Durgin; ceph-devel@vger.kernel.org
+>> Subject: RE: severe librbd performance degradation in Giant
+>>
+>> Alexandre,
+>> What tool are you using ? I used fio rbd.
+>>
+>> Also, I hope you have Giant package installed in the client side as =
+well and rbd_cache =3Dtrue is set on the client conf file.
+>> FYI, firefly librbd + librados and Giant cluster will work seamlessl=
+y and I had to make sure fio rbd is really loading giant librbd (if you=
+ have multiple copies around , which was in my case) for reproducing it=
+=2E
+>>
+>> Thanks & Regards
+>> Somnath
+>>
+>> -----Original Message-----
+>> From: Alexandre DERUMIER [mailto:aderumier@odiso.com]
+>> Sent: Thursday, September 18, 2014 2:49 AM
+>> To: Haomai Wang
+>> Cc: Sage Weil; Josh Durgin; ceph-devel@vger.kernel.org; Somnath Roy
+>> Subject: Re: severe librbd performance degradation in Giant
+>>
+>>>> According http://tracker.ceph.com/issues/9513, do you mean that rb=
+d=20
+>>>> cache will make 10x performance degradation for random read?
+>>
+>> Hi, on my side, I don't see any degradation performance on read (seq=
+ or rand)  with or without.
+>>
+>> firefly : around 12000iops (with or without rbd_cache) giant : aroun=
+d=20
+>> 12000iops  (with or without rbd_cache)
+>>
+>> (and I can reach around 20000-30000 iops on giant with disabling opt=
+racker).
+>>
+>>
+>> rbd_cache only improve write performance for me (4k block )
+>>
+>>
+>>
+>> ----- Mail original -----
+>>
+>> De: "Haomai Wang" <haomaiwang@gmail.com>
+>> =C3=80: "Somnath Roy" <Somnath.Roy@sandisk.com>
+>> Cc: "Sage Weil" <sweil@redhat.com>, "Josh Durgin"=20
+>> <josh.durgin@inktank.com>, ceph-devel@vger.kernel.org
+>> Envoy=C3=A9: Jeudi 18 Septembre 2014 04:27:56
+>> Objet: Re: severe librbd performance degradation in Giant
+>>
+>> According http://tracker.ceph.com/issues/9513, do you mean that rbd =
+cache will make 10x performance degradation for random read?
+>>
+>> On Thu, Sep 18, 2014 at 7:44 AM, Somnath Roy <Somnath.Roy@sandisk.co=
+m> wrote:
+>>> Josh/Sage,
+>>> I should mention that even after turning off rbd cache I am getting=
+ ~20% degradation over Firefly.
+>>>
+>>> Thanks & Regards
+>>> Somnath
+>>>
+>>> -----Original Message-----
+>>> From: Somnath Roy
+>>> Sent: Wednesday, September 17, 2014 2:44 PM
+>>> To: Sage Weil
+>>> Cc: Josh Durgin; ceph-devel@vger.kernel.org
+>>> Subject: RE: severe librbd performance degradation in Giant
+>>>
+>>> Created a tracker for this.
+>>>
+>>> http://tracker.ceph.com/issues/9513
+>>>
+>>> Thanks & Regards
+>>> Somnath
+>>>
+>>> -----Original Message-----
+>>> From: ceph-devel-owner@vger.kernel.org=20
+>>> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Somnath Roy
+>>> Sent: Wednesday, September 17, 2014 2:39 PM
+>>> To: Sage Weil
+>>> Cc: Josh Durgin; ceph-devel@vger.kernel.org
+>>> Subject: RE: severe librbd performance degradation in Giant
+>>>
+>>> Sage,
+>>> It's a 4K random read.
+>>>
+>>> Thanks & Regards
+>>> Somnath
+>>>
+>>> -----Original Message-----
+>>> From: Sage Weil [mailto:sweil@redhat.com]
+>>> Sent: Wednesday, September 17, 2014 2:36 PM
+>>> To: Somnath Roy
+>>> Cc: Josh Durgin; ceph-devel@vger.kernel.org
+>>> Subject: RE: severe librbd performance degradation in Giant
+>>>
+>>> What was the io pattern? Sequential or random? For random a slowdow=
+n makes sense (tho maybe not 10x!) but not for sequentail....
+>>>
+>>> s
+>>>
+>>> On Wed, 17 Sep 2014, Somnath Roy wrote:
+>>>
+>>>> I set the following in the client side /etc/ceph/ceph.conf where I=
+ am running fio rbd.
+>>>>
+>>>> rbd_cache_writethrough_until_flush =3D false
+>>>>
+>>>> But, no difference. BTW, I am doing Random read, not write. Still =
+this setting applies ?
+>>>>
+>>>> Next, I tried to tweak the rbd_cache setting to false and I *got b=
+ack* the old performance. Now, it is similar to firefly throughput !
+>>>>
+>>>> So, loks like rbd_cache=3Dtrue was the culprit.
+>>>>
+>>>> Thanks Josh !
+>>>>
+>>>> Regards
+>>>> Somnath
+>>>>
+>>>> -----Original Message-----
+>>>> From: Josh Durgin [mailto:josh.durgin@inktank.com]
+>>>> Sent: Wednesday, September 17, 2014 2:20 PM
+>>>> To: Somnath Roy; ceph-devel@vger.kernel.org
+>>>> Subject: Re: severe librbd performance degradation in Giant
+>>>>
+>>>> On 09/17/2014 01:55 PM, Somnath Roy wrote:
+>>>>> Hi Sage,
+>>>>> We are experiencing severe librbd performance degradation in Gian=
+t over firefly release. Here is the experiment we did to isolate it as =
+a librbd problem.
+>>>>>
+>>>>> 1. Single OSD is running latest Giant and client is running fio r=
+bd on top of firefly based librbd/librados. For one client it is giving=
+ ~11-12K iops (4K RR).
+>>>>> 2. Single OSD is running Giant and client is running fio rbd on t=
+op of Giant based librbd/librados. For one client it is giving ~1.9K io=
+ps (4K RR).
+>>>>> 3. Single OSD is running latest Giant and client is running Giant=
+ based ceph_smaiobench on top of giant librados. For one client it is g=
+iving ~11-12K iops (4K RR).
+>>>>> 4. Giant RGW on top of Giant OSD is also scaling.
+>>>>>
+>>>>>
+>>>>> So, it is obvious from the above that recent librbd has issues. I=
+ will raise a tracker to track this.
+>>>>
+>>>> For giant the default cache settings changed to:
+>>>>
+>>>> rbd cache =3D true
+>>>> rbd cache writethrough until flush =3D true
+>>>>
+>>>> If fio isn't sending flushes as the test is running, the cache wil=
+l stay in writethrough mode. Does the difference remain if you set rbd =
+cache writethrough until flush =3D false ?
+>>>>
+>>>> Josh
+>>>>
+>>>> ________________________________
+>>>>
+>>>> PLEASE NOTE: The information contained in this electronic mail mes=
+sage is intended only for the use of the designated recipient(s) named =
+above. If the reader of this message is not the intended recipient, you=
+ are hereby notified that you have received this message in error and t=
+hat any review, dissemination, distribution, or copying of this message=
+ is strictly prohibited. If you have received this communication in err=
+or, please notify the sender by telephone or e-mail (as shown above) im=
+mediately and destroy any and all copies of this message in your posses=
+sion (whether hard copies or electronically stored copies).
+>>>>
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe ceph-dev=
+el"
+>>>> in the body of a message to majordomo@vger.kernel.org More majordo=
+mo=20
+>>>> info at http://vger.kernel.org/majordomo-info.html
+>>>>
+>>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
+l"
+>>> in the body of a message to majordomo@vger.kernel.org More majordom=
+o=20
+>>> info at http://vger.kernel.org/majordomo-info.html
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
+l"
+>>> in the body of a message to majordomo@vger.kernel.org More majordom=
+o=20
+>>> info at http://vger.kernel.org/majordomo-info.html
+>>
+>>
+>>
+>> --
+>> Best Regards,
+>>
+>> Wheat
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in the body of a message to majordomo@vger.kernel.org More majordomo =
+info at http://vger.kernel.org/majordomo-info.html
+>> N     r  y   b X  =C7=A7v ^ )=DE=BA{.n +   z ]z   {ay =1D=CA=87=DA=99=
+ ,j   f   h   z =1E w       j:+v   w j m         zZ+     =DD=A2j"  ! i
+>> N     r  y   b X  =C7=A7v ^ )=DE=BA{.n +   z ]z   {ay =1D=CA=87=DA=99=
+ ,j   f   h   z =1E w  =20
+>    j:+v   w j m         zZ+     =DD=A2j"  !tml=3D
+>>
+> N=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDr=EF=BF=BD=EF=BF=BDy=EF=
+=BF=BD=EF=BF=BD=EF=BF=BDb=EF=BF=BDX=EF=BF=BD=EF=BF=BD=C7=A7v=EF=BF=BD^=EF=
+=BF=BD)=DE=BA{.n=EF=BF=BD+=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD]z=EF=BF=
+=BD=EF=BF=BD=EF=BF=BD{ay=EF=BF=BD=1D=CA=87=DA=99=EF=BF=BD,j=07=EF=BF=BD=
+=EF=BF=BDf=EF=BF=BD=EF=BF=BD=EF=BF=BDh=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=
+=BD=1E=EF=BF=BDw=EF=BF=BD=EF=BF=BD=EF=BF=BD=0C=EF=BF=BD=EF=BF=BD=EF=BF=BD=
+j:+v=EF=BF=BD=EF=BF=BD=EF=BF=BDw=EF=BF=BDj=EF=BF=BDm=EF=BF=BD=EF=BF=BD=EF=
+=BF=BD=EF=BF=BD=07=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDzZ+=EF=BF=BD=EF=BF=
+=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=DD=A2j"=EF=BF=BD=EF=BF=BD!tml=3D
+>=20
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
