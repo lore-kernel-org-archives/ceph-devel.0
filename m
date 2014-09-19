@@ -1,178 +1,269 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: [PATCH v2 2/3] ec: use 32-byte aligned buffers
-Date: Fri, 19 Sep 2014 11:47:22 +0200
-Message-ID: <541BFBAA.9070108@dachary.org>
-References: <1410796508-28711-1-git-send-email-j@jannau.net> <1411036435-18860-1-git-send-email-j@jannau.net> <1411036435-18860-3-git-send-email-j@jannau.net>
+From: Alexandre DERUMIER <aderumier@odiso.com>
+Subject: Re: severe librbd performance degradation in Giant
+Date: Fri, 19 Sep 2014 12:09:41 +0200 (CEST)
+Message-ID: <05b6cb89-4c21-4377-8418-0c9a24fd1e62@mailpro>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2784639B@SACMBXIP02.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="oHtMhaqwHj2JVHA5TnO93tDv2OroPT8Vw"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:55700 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751336AbaISJr3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 19 Sep 2014 05:47:29 -0400
-In-Reply-To: <1411036435-18860-3-git-send-email-j@jannau.net>
+Received: from mailpro.odiso.net ([89.248.209.98]:55729 "EHLO
+	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751147AbaISKJv convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 19 Sep 2014 06:09:51 -0400
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2784639B@SACMBXIP02.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Janne Grunau <j@jannau.net>, ceph-devel@vger.kernel.org
+To: Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: Sage Weil <sweil@redhat.com>, Josh Durgin <josh.durgin@inktank.com>, ceph-devel@vger.kernel.org, Haomai Wang <haomaiwang@gmail.com>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---oHtMhaqwHj2JVHA5TnO93tDv2OroPT8Vw
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+>>What tool are you using ? I used fio rbd.=20
 
-Hi Janne,
+fio rbd too
 
-This looks good ! The 32 byte aligned buffer applies to the diff related =
-to buffer.h though, could you update the title ? I tend to prefer erasure=
--code over ec : it is easier to grep / search ;-)
 
-Cheers
+[global]
+ioengine=3Drbd
+clientname=3Dadmin
+pool=3Dtest
+rbdname=3Dtest
+invalidate=3D0=20
+#rw=3Dread
+#rw=3Drandwrite
+#rw=3Dwrite
+rw=3Drandread
+bs=3D4k
+direct=3D1
+numjobs=3D2
+group_reporting=3D1
+size=3D10G
 
-On 18/09/2014 12:33, Janne Grunau wrote:
-> Requiring page aligned buffers and realigning the input if necessary
-> creates measurable oberhead. ceph_erasure_code_benchmark is ~30% faster=
+[rbd_iodepth32]
+iodepth=3D32
 
-> with this change for technique=3Dreed_sol_van,k=3D2,m=3D1.
+
+
+I just notice something strange
+
+with rbd_cache=3Dtrue , I got around 60000iops  (and I don't see any ne=
+twork traffic)
+
+So maybe they are a bug in fio ?
+maybe this is related to:
+
+
+http://tracker.ceph.com/issues/9391
+"fio rbd driver rewrites same blocks"
+
+----- Mail original -----=20
+
+De: "Somnath Roy" <Somnath.Roy@sandisk.com>=20
+=C3=80: "Alexandre DERUMIER" <aderumier@odiso.com>, "Haomai Wang" <haom=
+aiwang@gmail.com>=20
+Cc: "Sage Weil" <sweil@redhat.com>, "Josh Durgin" <josh.durgin@inktank.=
+com>, ceph-devel@vger.kernel.org=20
+Envoy=C3=A9: Jeudi 18 Septembre 2014 20:02:49=20
+Objet: RE: severe librbd performance degradation in Giant=20
+
+Alexandre,=20
+What tool are you using ? I used fio rbd.=20
+
+Also, I hope you have Giant package installed in the client side as wel=
+l and rbd_cache =3Dtrue is set on the client conf file.=20
+=46YI, firefly librbd + librados and Giant cluster will work seamlessly=
+ and I had to make sure fio rbd is really loading giant librbd (if you =
+have multiple copies around , which was in my case) for reproducing it.=
+=20
+
+Thanks & Regards=20
+Somnath=20
+
+-----Original Message-----=20
+=46rom: Alexandre DERUMIER [mailto:aderumier@odiso.com]=20
+Sent: Thursday, September 18, 2014 2:49 AM=20
+To: Haomai Wang=20
+Cc: Sage Weil; Josh Durgin; ceph-devel@vger.kernel.org; Somnath Roy=20
+Subject: Re: severe librbd performance degradation in Giant=20
+
+>>According http://tracker.ceph.com/issues/9513, do you mean that rbd=20
+>>cache will make 10x performance degradation for random read?=20
+
+Hi, on my side, I don't see any degradation performance on read (seq or=
+ rand) with or without.=20
+
+firefly : around 12000iops (with or without rbd_cache) giant : around 1=
+2000iops (with or without rbd_cache)=20
+
+(and I can reach around 20000-30000 iops on giant with disabling optrac=
+ker).=20
+
+
+rbd_cache only improve write performance for me (4k block )=20
+
+
+
+----- Mail original -----=20
+
+De: "Haomai Wang" <haomaiwang@gmail.com>=20
+=C3=80: "Somnath Roy" <Somnath.Roy@sandisk.com>=20
+Cc: "Sage Weil" <sweil@redhat.com>, "Josh Durgin" <josh.durgin@inktank.=
+com>, ceph-devel@vger.kernel.org=20
+Envoy=C3=A9: Jeudi 18 Septembre 2014 04:27:56=20
+Objet: Re: severe librbd performance degradation in Giant=20
+
+According http://tracker.ceph.com/issues/9513, do you mean that rbd cac=
+he will make 10x performance degradation for random read?=20
+
+On Thu, Sep 18, 2014 at 7:44 AM, Somnath Roy <Somnath.Roy@sandisk.com> =
+wrote:=20
+> Josh/Sage,=20
+> I should mention that even after turning off rbd cache I am getting ~=
+20% degradation over Firefly.=20
 >=20
-> Also prevents a misaligned buffer when bufferlist::c_str(bufferlist)
-> has to allocate a new buffer to provide continuous one. See bug #9408
+> Thanks & Regards=20
+> Somnath=20
 >=20
-> Signed-off-by: Janne Grunau <j@jannau.net>
-> ---
->  src/erasure-code/ErasureCode.cc | 57 ++++++++++++++++++++++++++++-----=
---------
->  src/erasure-code/ErasureCode.h  |  3 ++-
->  2 files changed, 41 insertions(+), 19 deletions(-)
+> -----Original Message-----=20
+> From: Somnath Roy=20
+> Sent: Wednesday, September 17, 2014 2:44 PM=20
+> To: Sage Weil=20
+> Cc: Josh Durgin; ceph-devel@vger.kernel.org=20
+> Subject: RE: severe librbd performance degradation in Giant=20
 >=20
-> diff --git a/src/erasure-code/ErasureCode.cc b/src/erasure-code/Erasure=
-Code.cc
-> index 5953f49..7aa5235 100644
-> --- a/src/erasure-code/ErasureCode.cc
-> +++ b/src/erasure-code/ErasureCode.cc
-> @@ -54,22 +54,49 @@ int ErasureCode::minimum_to_decode_with_cost(const =
-set<int> &want_to_read,
->  }
-> =20
->  int ErasureCode::encode_prepare(const bufferlist &raw,
-> -                                bufferlist *prepared) const
-> +                                map<int, bufferlist> &encoded) const
->  {
->    unsigned int k =3D get_data_chunk_count();
->    unsigned int m =3D get_chunk_count() - k;
->    unsigned blocksize =3D get_chunk_size(raw.length());
-> -  unsigned padded_length =3D blocksize * k;
-> -  *prepared =3D raw;
-> -  if (padded_length - raw.length() > 0) {
-> -    bufferptr pad(padded_length - raw.length());
-> -    pad.zero();
-> -    prepared->push_back(pad);
-> +  unsigned pad_len =3D blocksize * k - raw.length();
-> +  unsigned padded_chunks =3D k - raw.length() / blocksize;
-> +  bufferlist prepared =3D raw;
-> +
-> +  if (!prepared.is_aligned()) {
-> +    // splice padded chunks off to make the rebuild faster
-> +    if (padded_chunks)
-> +      prepared.splice((k - padded_chunks) * blocksize,
-> +                      padded_chunks * blocksize - pad_len);
-> +    prepared.rebuild_aligned();
-> +  }
-> +
-> +  for (unsigned int i =3D 0; i < k - padded_chunks; i++) {
-> +    int chunk_index =3D chunk_mapping.size() > 0 ? chunk_mapping[i] : =
-i;
-> +    bufferlist &chunk =3D encoded[chunk_index];
-> +    chunk.substr_of(prepared, i * blocksize, blocksize);
-> +  }
-> +  if (padded_chunks) {
-> +    unsigned remainder =3D raw.length() - (k - padded_chunks) * blocks=
-ize;
-> +    bufferlist padded;
-> +    bufferptr buf(buffer::create_aligned(padded_chunks * blocksize));
-> +
-> +    raw.copy((k - padded_chunks) * blocksize, remainder, buf.c_str());=
+> Created a tracker for this.=20
+>=20
+> http://tracker.ceph.com/issues/9513=20
+>=20
+> Thanks & Regards=20
+> Somnath=20
+>=20
+> -----Original Message-----=20
+> From: ceph-devel-owner@vger.kernel.org=20
+> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Somnath Roy=20
+> Sent: Wednesday, September 17, 2014 2:39 PM=20
+> To: Sage Weil=20
+> Cc: Josh Durgin; ceph-devel@vger.kernel.org=20
+> Subject: RE: severe librbd performance degradation in Giant=20
+>=20
+> Sage,=20
+> It's a 4K random read.=20
+>=20
+> Thanks & Regards=20
+> Somnath=20
+>=20
+> -----Original Message-----=20
+> From: Sage Weil [mailto:sweil@redhat.com]=20
+> Sent: Wednesday, September 17, 2014 2:36 PM=20
+> To: Somnath Roy=20
+> Cc: Josh Durgin; ceph-devel@vger.kernel.org=20
+> Subject: RE: severe librbd performance degradation in Giant=20
+>=20
+> What was the io pattern? Sequential or random? For random a slowdown =
+makes sense (tho maybe not 10x!) but not for sequentail....=20
+>=20
+> s=20
+>=20
+> On Wed, 17 Sep 2014, Somnath Roy wrote:=20
+>=20
+>> I set the following in the client side /etc/ceph/ceph.conf where I a=
+m running fio rbd.=20
+>>=20
+>> rbd_cache_writethrough_until_flush =3D false=20
+>>=20
+>> But, no difference. BTW, I am doing Random read, not write. Still th=
+is setting applies ?=20
+>>=20
+>> Next, I tried to tweak the rbd_cache setting to false and I *got bac=
+k* the old performance. Now, it is similar to firefly throughput !=20
+>>=20
+>> So, loks like rbd_cache=3Dtrue was the culprit.=20
+>>=20
+>> Thanks Josh !=20
+>>=20
+>> Regards=20
+>> Somnath=20
+>>=20
+>> -----Original Message-----=20
+>> From: Josh Durgin [mailto:josh.durgin@inktank.com]=20
+>> Sent: Wednesday, September 17, 2014 2:20 PM=20
+>> To: Somnath Roy; ceph-devel@vger.kernel.org=20
+>> Subject: Re: severe librbd performance degradation in Giant=20
+>>=20
+>> On 09/17/2014 01:55 PM, Somnath Roy wrote:=20
+>> > Hi Sage,=20
+>> > We are experiencing severe librbd performance degradation in Giant=
+ over firefly release. Here is the experiment we did to isolate it as a=
+ librbd problem.=20
+>> >=20
+>> > 1. Single OSD is running latest Giant and client is running fio rb=
+d on top of firefly based librbd/librados. For one client it is giving =
+~11-12K iops (4K RR).=20
+>> > 2. Single OSD is running Giant and client is running fio rbd on to=
+p of Giant based librbd/librados. For one client it is giving ~1.9K iop=
+s (4K RR).=20
+>> > 3. Single OSD is running latest Giant and client is running Giant =
+based ceph_smaiobench on top of giant librados. For one client it is gi=
+ving ~11-12K iops (4K RR).=20
+>> > 4. Giant RGW on top of Giant OSD is also scaling.=20
+>> >=20
+>> >=20
+>> > So, it is obvious from the above that recent librbd has issues. I =
+will raise a tracker to track this.=20
+>>=20
+>> For giant the default cache settings changed to:=20
+>>=20
+>> rbd cache =3D true=20
+>> rbd cache writethrough until flush =3D true=20
+>>=20
+>> If fio isn't sending flushes as the test is running, the cache will =
+stay in writethrough mode. Does the difference remain if you set rbd ca=
+che writethrough until flush =3D false ?=20
+>>=20
+>> Josh=20
+>>=20
+>> ________________________________=20
+>>=20
+>> PLEASE NOTE: The information contained in this electronic mail messa=
+ge is intended only for the use of the designated recipient(s) named ab=
+ove. If the reader of this message is not the intended recipient, you a=
+re hereby notified that you have received this message in error and tha=
+t any review, dissemination, distribution, or copying of this message i=
+s strictly prohibited. If you have received this communication in error=
+, please notify the sender by telephone or e-mail (as shown above) imme=
+diately and destroy any and all copies of this message in your possessi=
+on (whether hard copies or electronically stored copies).=20
+>>=20
+>> --=20
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+"=20
+>> in the body of a message to majordomo@vger.kernel.org More majordomo=
+=20
+>> info at http://vger.kernel.org/majordomo-info.html=20
+>>=20
+>>=20
+> --=20
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+=20
+> in the body of a message to majordomo@vger.kernel.org More majordomo=20
+> info at http://vger.kernel.org/majordomo-info.html=20
+> --=20
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+=20
+> in the body of a message to majordomo@vger.kernel.org More majordomo=20
+> info at http://vger.kernel.org/majordomo-info.html=20
 
-> +    buf.zero(remainder, pad_len);
-> +    padded.push_back(buf);
-> +
-> +    for (unsigned int i =3D k - padded_chunks; i < k; i++) {
-> +      int chunk_index =3D chunk_mapping.size() > 0 ? chunk_mapping[i] =
-: i;
-> +      bufferlist &chunk =3D encoded[chunk_index];
-> +      chunk.substr_of(padded, (i - (k - padded_chunks)) * blocksize, b=
-locksize);
-> +    }
-> +  }
-> +  for (unsigned int i =3D k; i < k + m; i++) {
-> +    int chunk_index =3D chunk_mapping.size() > 0 ? chunk_mapping[i] : =
-i;
-> +    bufferlist &chunk =3D encoded[chunk_index];
-> +    chunk.push_back(buffer::create_aligned(blocksize));
->    }
-> -  unsigned coding_length =3D blocksize * m;
-> -  bufferptr coding(buffer::create_page_aligned(coding_length));
-> -  prepared->push_back(coding);
-> -  prepared->rebuild_page_aligned();
-> +
->    return 0;
->  }
-> =20
-> @@ -80,15 +107,9 @@ int ErasureCode::encode(const set<int> &want_to_enc=
-ode,
->    unsigned int k =3D get_data_chunk_count();
->    unsigned int m =3D get_chunk_count() - k;
->    bufferlist out;
-> -  int err =3D encode_prepare(in, &out);
-> +  int err =3D encode_prepare(in, *encoded);
->    if (err)
->      return err;
-> -  unsigned blocksize =3D get_chunk_size(in.length());
-> -  for (unsigned int i =3D 0; i < k + m; i++) {
-> -    int chunk_index =3D chunk_mapping.size() > 0 ? chunk_mapping[i] : =
-i;
-> -    bufferlist &chunk =3D (*encoded)[chunk_index];
-> -    chunk.substr_of(out, i * blocksize, blocksize);
-> -  }
->    encode_chunks(want_to_encode, encoded);
->    for (unsigned int i =3D 0; i < k + m; i++) {
->      if (want_to_encode.count(i) =3D=3D 0)
-> diff --git a/src/erasure-code/ErasureCode.h b/src/erasure-code/ErasureC=
-ode.h
-> index 7aaea95..62aa383 100644
-> --- a/src/erasure-code/ErasureCode.h
-> +++ b/src/erasure-code/ErasureCode.h
-> @@ -46,7 +46,8 @@ namespace ceph {
->                                              const map<int, int> &avail=
-able,
->                                              set<int> *minimum);
-> =20
-> -    int encode_prepare(const bufferlist &raw, bufferlist *prepared) co=
-nst;
-> +    int encode_prepare(const bufferlist &raw,
-> +                       map<int, bufferlist> &encoded) const;
-> =20
->      virtual int encode(const set<int> &want_to_encode,
->                         const bufferlist &in,
->=20
+
 
 --=20
-Lo=EFc Dachary, Artisan Logiciel Libre
+Best Regards,=20
 
-
---oHtMhaqwHj2JVHA5TnO93tDv2OroPT8Vw
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlQb+6oACgkQ8dLMyEl6F23r4QCeLXkK2D+i5h8l8qfSvBvVcPKn
-SiIAoK4vXXbe3KtA4KgYY/PL9kE5yFp9
-=4QR2
------END PGP SIGNATURE-----
-
---oHtMhaqwHj2JVHA5TnO93tDv2OroPT8Vw--
+Wheat=20
+--=20
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n the body of a message to majordomo@vger.kernel.org More majordomo inf=
+o at http://vger.kernel.org/majordomo-info.html=20
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
