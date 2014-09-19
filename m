@@ -1,93 +1,169 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: [PATCH] ceph: move ceph_find_inode() outside the s_mutex
-Date: Thu, 18 Sep 2014 22:21:16 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1409182221000.18018@cobra.newdream.net>
-References: <1410919069-12326-1-git-send-email-zyan@redhat.com>
+From: M Ranga Swami Reddy <swamireddy@gmail.com>
+Subject: Re: Fwd: S3 API Compatibility support
+Date: Fri, 19 Sep 2014 10:54:40 +0530
+Message-ID: <CANA9Uk6LTc=HEV5mb+q1-QR3P-gPhAOYst-p9MHkQfxDBga-rA@mail.gmail.com>
+References: <CANA9Uk55UZXtKzS=urk3Q+KY=DoWoTaCRf=rKiEtjt9y7FYw7A@mail.gmail.com>
+	<CANA9Uk6E9t30Ve3pKhZa1cW4g6N7JjzG8JgiwOoDa9TWdNEagQ@mail.gmail.com>
+	<alpine.DEB.2.00.1407250848060.22752@cobra.newdream.net>
+	<CANA9Uk468XOE1cr935HY1y+tSnu-xp6QPaj7uCpZNQbJhg-pOA@mail.gmail.com>
+	<CABBk=J8+3K28M-RNf+ULx0TnTMmGxdymJDLeFMft-EX8PhS_4A@mail.gmail.com>
+	<CANA9Uk4JGm_2L_VnGsOgfpsX17=Ja4LLDaVNXzKJe-ZkY=ya9A@mail.gmail.com>
+	<CABBk=J-fSR8mc7LQBLcUQDPkgC8NaSfvRB-2ED71qSvQzLX8Cw@mail.gmail.com>
+	<CANA9Uk75TsXUyfMSibJRMeaWFEMKj-RxyFQqp=s1YZerNzM0mw@mail.gmail.com>
+	<CANA9Uk49OgVtOSW9Yria-3ig8L8doV3X1ZqL+C_E0e4e9ShQxQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:40565 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756520AbaISFVQ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 19 Sep 2014 01:21:16 -0400
-In-Reply-To: <1410919069-12326-1-git-send-email-zyan@redhat.com>
+Received: from mail-la0-f50.google.com ([209.85.215.50]:42841 "EHLO
+	mail-la0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752074AbaISFYm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 19 Sep 2014 01:24:42 -0400
+Received: by mail-la0-f50.google.com with SMTP id ty20so2456861lab.37
+        for <ceph-devel@vger.kernel.org>; Thu, 18 Sep 2014 22:24:40 -0700 (PDT)
+In-Reply-To: <CANA9Uk49OgVtOSW9Yria-3ig8L8doV3X1ZqL+C_E0e4e9ShQxQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zyan@redhat.com>
-Cc: ceph-devel@vger.kernel.org
+To: Yehuda Sadeh <yehuda@redhat.com>
+Cc: Sage Weil <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, 17 Sep 2014, Yan, Zheng wrote:
-> ceph_find_inode() may wait on freeing inode, using it inside the s_mutex
-> may cause deadlock. (the freeing inode is waiting for OSD read reply, but
-> dispatch thread is blocked by the s_mutex)
-> 
-> Signed-off-by: Yan, Zheng <zyan@redhat.com>
+Hi Sage,
+Could you please advise, if Ceph support the low cost object
+storages(like Amazon Glacier or RRS) for archiving objects like log
+file etc.?
 
-Reviewed-by: Sage Weil <sage@redhat.com>
+Thanks
+Swami
 
-> ---
->  fs/ceph/caps.c       | 11 ++++++-----
->  fs/ceph/mds_client.c |  7 ++++---
->  2 files changed, 10 insertions(+), 8 deletions(-)
-> 
-> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-> index 6d1cd45..b3b0a91 100644
-> --- a/fs/ceph/caps.c
-> +++ b/fs/ceph/caps.c
-> @@ -3045,6 +3045,12 @@ void ceph_handle_caps(struct ceph_mds_session *session,
->  		}
->  	}
->  
-> +	/* lookup ino */
-> +	inode = ceph_find_inode(sb, vino);
-> +	ci = ceph_inode(inode);
-> +	dout(" op %s ino %llx.%llx inode %p\n", ceph_cap_op_name(op), vino.ino,
-> +	     vino.snap, inode);
-> +
->  	mutex_lock(&session->s_mutex);
->  	session->s_seq++;
->  	dout(" mds%d seq %lld cap seq %u\n", session->s_mds, session->s_seq,
-> @@ -3053,11 +3059,6 @@ void ceph_handle_caps(struct ceph_mds_session *session,
->  	if (op == CEPH_CAP_OP_IMPORT)
->  		ceph_add_cap_releases(mdsc, session);
->  
-> -	/* lookup ino */
-> -	inode = ceph_find_inode(sb, vino);
-> -	ci = ceph_inode(inode);
-> -	dout(" op %s ino %llx.%llx inode %p\n", ceph_cap_op_name(op), vino.ino,
-> -	     vino.snap, inode);
->  	if (!inode) {
->  		dout(" i don't have ino %llx\n", vino.ino);
->  
-> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> index 80d9f07..c27e204 100644
-> --- a/fs/ceph/mds_client.c
-> +++ b/fs/ceph/mds_client.c
-> @@ -2947,14 +2947,15 @@ static void handle_lease(struct ceph_mds_client *mdsc,
->  	if (dname.len != get_unaligned_le32(h+1))
->  		goto bad;
->  
-> -	mutex_lock(&session->s_mutex);
-> -	session->s_seq++;
-> -
->  	/* lookup inode */
->  	inode = ceph_find_inode(sb, vino);
->  	dout("handle_lease %s, ino %llx %p %.*s\n",
->  	     ceph_lease_op_name(h->action), vino.ino, inode,
->  	     dname.len, dname.name);
-> +
-> +	mutex_lock(&session->s_mutex);
-> +	session->s_seq++;
-> +
->  	if (inode == NULL) {
->  		dout("handle_lease no inode %llx\n", vino.ino);
->  		goto release;
-> -- 
-> 1.9.3
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+On Thu, Sep 18, 2014 at 6:20 PM, M Ranga Swami Reddy
+<swamireddy@gmail.com> wrote:
+> Hi ,
+>
+> Could you please check and clarify the below question on object
+> lifecycle and notification S3 APIs support:
+>
+> 1. To support the bucket lifecycle - we need to support the
+> moving/deleting the objects/buckets based lifecycle settings.
+> For ex: If an object lifecyle set as below:
+>           1. Archive it after 10 days - means move this object to low
+> cost object storage after 10 days of the creation date.
+>            2. Remove this object after 90days - mean remove this
+> object from the low cost object after 90days of creation date.
+>
+> Q1- Does the ceph support the above concept like moving to low cost
+> storage and delete from that storage?
+>
+> 2. To support the object notifications:
+>       - First there should be low cost and high availability storage
+> with single replica only. If an object created with this type of
+> object storage,
+>         There could be chances that object could lose, so if an object
+> of this type of storage lost, set the notifications.
+>
+> Q2- Does Ceph support low cost and high availability storage type?
+>
+> Thanks
+>
+> On Fri, Sep 12, 2014 at 8:00 PM, M Ranga Swami Reddy
+> <swamireddy@gmail.com> wrote:
+>> Hi Yehuda,
+>>
+>> Could you please check and clarify the below question on object
+>> lifecycle and notification S3 APIs support:
+>>
+>> 1. To support the bucket lifecycle - we need to support the
+>> moving/deleting the objects/buckets based lifecycle settings.
+>> For ex: If an object lifecyle set as below:
+>>           1. Archive it after 10 days - means move this object to low
+>> cost object storage after 10 days of the creation date.
+>>            2. Remove this object after 90days - mean remove this
+>> object from the low cost object after 90days of creation date.
+>>
+>> Q1- Does the ceph support the above concept like moving to low cost
+>> storage and delete from that storage?
+>>
+>> 2. To support the object notifications:
+>>       - First there should be low cost and high availability storage
+>> with single replica only. If an object created with this type of
+>> object storage,
+>>         There could be chances that object could lose, so if an object
+>> of this type of storage lost, set the notifications.
+>>
+>> Q2- Does Ceph support low cost and high availability storage type?
+>>
+>> Thanks
+>> Swami
+>>
+>>
+>>
+>>
+>>
+>>
+>>
+>> On Tue, Jul 29, 2014 at 1:35 AM, Yehuda Sadeh <yehuda@redhat.com> wrote:
+>>> Bucket lifecycle:
+>>> http://tracker.ceph.com/issues/8929
+>>>
+>>> Bucket notification:
+>>> http://tracker.ceph.com/issues/8956
+>>>
+>>> On Sun, Jul 27, 2014 at 12:54 AM, M Ranga Swami Reddy
+>>> <swamireddy@gmail.com> wrote:
+>>>> Good no know the details. Can you please share the issue ID for bucket
+>>>> lifecycle? My team also could start help here.
+>>>> Regarding the notification - Do we have the issue ID?
+>>>> Yes, the object versioning will be backlog one - I strongly feel we
+>>>> start working on this asap.
+>>>>
+>>>> Thanks
+>>>> Swami
+>>>>
+>>>> On Fri, Jul 25, 2014 at 11:31 PM, Yehuda Sadeh <yehuda@redhat.com> wrote:
+>>>>> On Fri, Jul 25, 2014 at 10:14 AM, M Ranga Swami Reddy
+>>>>> <swamireddy@gmail.com> wrote:
+>>>>>> Thanks for quick reply.
+>>>>>> Yes,  versioned object - missing in ceph ATM
+>>>>>> Iam looking for: bucket lifecylce (get/put/delete), bucket location,
+>>>>>> put object notification and object restore (ie versioned object) S3
+>>>>>> API support.
+>>>>>> Please let me now any of the above work is in progress or some one
+>>>>>> planned to work on.
+>>>>>
+>>>>>
+>>>>> I opened an issue for bucket lifecycle (we already had an issue open
+>>>>> for object expiration though). We do have bucket location already
+>>>>> (part of the multi-region feature). Object versioning is definitely on
+>>>>> our backlog and one that we'll hopefully implement sooner rather
+>>>>> later.
+>>>>> With regard to object notification, it'll require having a
+>>>>> notification service which is a bit out of the scope. Integrating the
+>>>>> gateway with such a service whouldn't be hard, but we'll need to have
+>>>>> that first.
+>>>>>
+>>>>> Yehuda
+>>>>>
+>>>>>>
+>>>>>> Thanks
+>>>>>> Swami
+>>>>>>
+>>>>>>
+>>>>>> On Fri, Jul 25, 2014 at 9:19 PM, Sage Weil <sweil@redhat.com> wrote:
+>>>>>>> On Fri, 25 Jul 2014, M Ranga Swami Reddy wrote:
+>>>>>>>> Hi Team: As per the ceph document a few S3 APIs compatibility not supported.
+>>>>>>>>
+>>>>>>>> Link: http://ceph.com/docs/master/radosgw/s3/
+>>>>>>>>
+>>>>>>>> Is there plan to support the ?n supported item in the above table?
+>>>>>>>> or
+>>>>>>>> Any working on this?
+>>>>>>>
+>>>>>>> Yes.  Unfortunately this table isn't particularly detailed or accurate or
+>>>>>>> up to date.   The main gap, I think, is versioned objects.
+>>>>>>>
+>>>>>>> Are there specfiic parts of the S3 API that are missing that you need?
+>>>>>>> That sort of info is very helpful for prioritizing effort...
+>>>>>>>
+>>>>>>> sage
+>>>>>> --
+>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
