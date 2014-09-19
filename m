@@ -1,257 +1,240 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: severe librbd performance degradation in Giant
-Date: Fri, 19 Sep 2014 08:28:04 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1409190826260.18018@cobra.newdream.net>
-References: <260f7b0e-3db6-4c27-814a-9d2d690cd965@mailpro>
+From: M Ranga Swami Reddy <swamireddy@gmail.com>
+Subject: Re: Fwd: S3 API Compatibility support
+Date: Fri, 19 Sep 2014 21:02:02 +0530
+Message-ID: <CANA9Uk6_zg7f6UQKNoBWLB_VEUJ+oicz4fe-tq7y3upFWoZEGA@mail.gmail.com>
+References: <CANA9Uk55UZXtKzS=urk3Q+KY=DoWoTaCRf=rKiEtjt9y7FYw7A@mail.gmail.com>
+	<CANA9Uk6E9t30Ve3pKhZa1cW4g6N7JjzG8JgiwOoDa9TWdNEagQ@mail.gmail.com>
+	<alpine.DEB.2.00.1407250848060.22752@cobra.newdream.net>
+	<CANA9Uk468XOE1cr935HY1y+tSnu-xp6QPaj7uCpZNQbJhg-pOA@mail.gmail.com>
+	<CABBk=J8+3K28M-RNf+ULx0TnTMmGxdymJDLeFMft-EX8PhS_4A@mail.gmail.com>
+	<CANA9Uk4JGm_2L_VnGsOgfpsX17=Ja4LLDaVNXzKJe-ZkY=ya9A@mail.gmail.com>
+	<CABBk=J-fSR8mc7LQBLcUQDPkgC8NaSfvRB-2ED71qSvQzLX8Cw@mail.gmail.com>
+	<CANA9Uk75TsXUyfMSibJRMeaWFEMKj-RxyFQqp=s1YZerNzM0mw@mail.gmail.com>
+	<CANA9Uk49OgVtOSW9Yria-3ig8L8doV3X1ZqL+C_E0e4e9ShQxQ@mail.gmail.com>
+	<CANA9Uk6LTc=HEV5mb+q1-QR3P-gPhAOYst-p9MHkQfxDBga-rA@mail.gmail.com>
+	<alpine.DEB.2.00.1409182234140.18018@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:44192 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756990AbaISP2G (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 19 Sep 2014 11:28:06 -0400
-In-Reply-To: <260f7b0e-3db6-4c27-814a-9d2d690cd965@mailpro>
+Received: from mail-la0-f51.google.com ([209.85.215.51]:48006 "EHLO
+	mail-la0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756232AbaISPcF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 19 Sep 2014 11:32:05 -0400
+Received: by mail-la0-f51.google.com with SMTP id gi9so3310756lab.24
+        for <ceph-devel@vger.kernel.org>; Fri, 19 Sep 2014 08:32:03 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.00.1409182234140.18018@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre DERUMIER <aderumier@odiso.com>
-Cc: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>, Josh Durgin <josh.durgin@inktank.com>, ceph-devel@vger.kernel.org, Xinxin Shu <xinxin.shu@intel.com>, Somnath Roy <Somnath.Roy@sandisk.com>, Haomai Wang <haomaiwang@gmail.com>
+To: Sage Weil <sweil@redhat.com>
+Cc: Yehuda Sadeh <yehuda@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Fri, 19 Sep 2014, Alexandre DERUMIER wrote:
-> >>Crazy, I've 56 SSDs and can?t go above 20 000 iops.
-> 
-> I just notice than my fio benchmark is cpu bound...
-> 
-> I can reach around 40000iops. Don't have more client machines for the moment to bench
+Hi Sage,
+Thanks for quick reply.
 
-A quick aside on the fio testing: Mark noticed a few weeks back that the 
-fio rbd driver is doing quite the right thing when you turn up the number 
-of threads: each one issues its own IOs but they touch the same blocks in 
-the image (or something like that).  See
+>Ceph doesn't interact at all with AWS services like Glacier, if that's
 
-	http://tracker.ceph.com/issues/9391
+No. I meant that - Ceph interaction with a glacier and RRS type of
+storages along with currently used OSD (or standard storage).
 
-It would be great to get this fixed in fio...
+>what you mean.
+>For RRS, though, I assume you mean the ability to create buckets with
+>reduced redundancy with radosgw?  That is supported, although not quite
+>the way AWS does it.  You can create different pools that back RGW
+>buckets, and each bucket is stored in one of those pools.  So you could
+>make one of them 2x instead of 3x, or use an erasure code of your choice.
 
-sage
+Yes, we can confiure ceph to use 2x replicas, which will look like
+reduced redundancy, but AWS uses a separate RRS storage-low cost
+(instead of
+standard) storage for this purpose. I am checking, if we could
+similarly in ceph too.
 
+>What isn't currently supported is the ability to reduce the redundancy of
+>individual objects in a bucket.  I don't think there is anything
+>architecturally preventing that, but it is not implemented or supported.
 
-> 
-> 
-> ----- Mail original ----- 
-> 
-> De: "Stefan Priebe - Profihost AG" <s.priebe@profihost.ag> 
-> ?: "Xinxin Shu" <xinxin.shu@intel.com>, "Somnath Roy" <Somnath.Roy@sandisk.com>, "Alexandre DERUMIER" <aderumier@odiso.com>, "Haomai Wang" <haomaiwang@gmail.com> 
-> Cc: "Sage Weil" <sweil@redhat.com>, "Josh Durgin" <josh.durgin@inktank.com>, ceph-devel@vger.kernel.org 
-> Envoy?: Vendredi 19 Septembre 2014 15:31:14 
-> Objet: Re: severe librbd performance degradation in Giant 
-> 
-> Am 19.09.2014 um 15:02 schrieb Shu, Xinxin: 
-> > 12 x Intel DC 3700 200GB, every SSD has two OSDs. 
-> 
-> Crazy, I've 56 SSDs and can?t go above 20 000 iops. 
-> 
-> Gr??e Stefan 
-> 
-> > Cheers, 
-> > xinxin 
-> > 
-> > -----Original Message----- 
-> > From: Stefan Priebe [mailto:s.priebe@profihost.ag] 
-> > Sent: Friday, September 19, 2014 2:54 PM 
-> > To: Shu, Xinxin; Somnath Roy; Alexandre DERUMIER; Haomai Wang 
-> > Cc: Sage Weil; Josh Durgin; ceph-devel@vger.kernel.org 
-> > Subject: Re: severe librbd performance degradation in Giant 
-> > 
-> > Am 19.09.2014 03:08, schrieb Shu, Xinxin: 
-> >> I also observed performance degradation on my full SSD setup , I can 
-> >> got ~270K IOPS for 4KB random read with 0.80.4 , but with latest 
-> >> master , I only got ~12K IOPS 
-> > 
-> > This are impressive numbers. Can you tell me how many OSDs you have and which SSDs you use? 
-> > 
-> > Thanks, 
-> > Stefan 
-> > 
-> > 
-> >> Cheers, 
-> >> xinxin 
-> >> 
-> >> -----Original Message----- 
-> >> From: ceph-devel-owner@vger.kernel.org 
-> >> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Somnath Roy 
-> >> Sent: Friday, September 19, 2014 2:03 AM 
-> >> To: Alexandre DERUMIER; Haomai Wang 
-> >> Cc: Sage Weil; Josh Durgin; ceph-devel@vger.kernel.org 
-> >> Subject: RE: severe librbd performance degradation in Giant 
-> >> 
-> >> Alexandre, 
-> >> What tool are you using ? I used fio rbd. 
-> >> 
-> >> Also, I hope you have Giant package installed in the client side as well and rbd_cache =true is set on the client conf file. 
-> >> FYI, firefly librbd + librados and Giant cluster will work seamlessly and I had to make sure fio rbd is really loading giant librbd (if you have multiple copies around , which was in my case) for reproducing it. 
-> >> 
-> >> Thanks & Regards 
-> >> Somnath 
-> >> 
-> >> -----Original Message----- 
-> >> From: Alexandre DERUMIER [mailto:aderumier@odiso.com] 
-> >> Sent: Thursday, September 18, 2014 2:49 AM 
-> >> To: Haomai Wang 
-> >> Cc: Sage Weil; Josh Durgin; ceph-devel@vger.kernel.org; Somnath Roy 
-> >> Subject: Re: severe librbd performance degradation in Giant 
-> >> 
-> >>>> According http://tracker.ceph.com/issues/9513, do you mean that rbd 
-> >>>> cache will make 10x performance degradation for random read? 
-> >> 
-> >> Hi, on my side, I don't see any degradation performance on read (seq or rand) with or without. 
-> >> 
-> >> firefly : around 12000iops (with or without rbd_cache) giant : around 
-> >> 12000iops (with or without rbd_cache) 
-> >> 
-> >> (and I can reach around 20000-30000 iops on giant with disabling optracker). 
-> >> 
-> >> 
-> >> rbd_cache only improve write performance for me (4k block ) 
-> >> 
-> >> 
-> >> 
-> >> ----- Mail original ----- 
-> >> 
-> >> De: "Haomai Wang" <haomaiwang@gmail.com> 
-> >> ?: "Somnath Roy" <Somnath.Roy@sandisk.com> 
-> >> Cc: "Sage Weil" <sweil@redhat.com>, "Josh Durgin" 
-> >> <josh.durgin@inktank.com>, ceph-devel@vger.kernel.org 
-> >> Envoy?: Jeudi 18 Septembre 2014 04:27:56 
-> >> Objet: Re: severe librbd performance degradation in Giant 
-> >> 
-> >> According http://tracker.ceph.com/issues/9513, do you mean that rbd cache will make 10x performance degradation for random read? 
-> >> 
-> >> On Thu, Sep 18, 2014 at 7:44 AM, Somnath Roy <Somnath.Roy@sandisk.com> wrote: 
-> >>> Josh/Sage, 
-> >>> I should mention that even after turning off rbd cache I am getting ~20% degradation over Firefly. 
-> >>> 
-> >>> Thanks & Regards 
-> >>> Somnath 
-> >>> 
-> >>> -----Original Message----- 
-> >>> From: Somnath Roy 
-> >>> Sent: Wednesday, September 17, 2014 2:44 PM 
-> >>> To: Sage Weil 
-> >>> Cc: Josh Durgin; ceph-devel@vger.kernel.org 
-> >>> Subject: RE: severe librbd performance degradation in Giant 
-> >>> 
-> >>> Created a tracker for this. 
-> >>> 
-> >>> http://tracker.ceph.com/issues/9513 
-> >>> 
-> >>> Thanks & Regards 
-> >>> Somnath 
-> >>> 
-> >>> -----Original Message----- 
-> >>> From: ceph-devel-owner@vger.kernel.org 
-> >>> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Somnath Roy 
-> >>> Sent: Wednesday, September 17, 2014 2:39 PM 
-> >>> To: Sage Weil 
-> >>> Cc: Josh Durgin; ceph-devel@vger.kernel.org 
-> >>> Subject: RE: severe librbd performance degradation in Giant 
-> >>> 
-> >>> Sage, 
-> >>> It's a 4K random read. 
-> >>> 
-> >>> Thanks & Regards 
-> >>> Somnath 
-> >>> 
-> >>> -----Original Message----- 
-> >>> From: Sage Weil [mailto:sweil@redhat.com] 
-> >>> Sent: Wednesday, September 17, 2014 2:36 PM 
-> >>> To: Somnath Roy 
-> >>> Cc: Josh Durgin; ceph-devel@vger.kernel.org 
-> >>> Subject: RE: severe librbd performance degradation in Giant 
-> >>> 
-> >>> What was the io pattern? Sequential or random? For random a slowdown makes sense (tho maybe not 10x!) but not for sequentail.... 
-> >>> 
-> >>> s 
-> >>> 
-> >>> On Wed, 17 Sep 2014, Somnath Roy wrote: 
-> >>> 
-> >>>> I set the following in the client side /etc/ceph/ceph.conf where I am running fio rbd. 
-> >>>> 
-> >>>> rbd_cache_writethrough_until_flush = false 
-> >>>> 
-> >>>> But, no difference. BTW, I am doing Random read, not write. Still this setting applies ? 
-> >>>> 
-> >>>> Next, I tried to tweak the rbd_cache setting to false and I *got back* the old performance. Now, it is similar to firefly throughput ! 
-> >>>> 
-> >>>> So, loks like rbd_cache=true was the culprit. 
-> >>>> 
-> >>>> Thanks Josh ! 
-> >>>> 
-> >>>> Regards 
-> >>>> Somnath 
-> >>>> 
-> >>>> -----Original Message----- 
-> >>>> From: Josh Durgin [mailto:josh.durgin@inktank.com] 
-> >>>> Sent: Wednesday, September 17, 2014 2:20 PM 
-> >>>> To: Somnath Roy; ceph-devel@vger.kernel.org 
-> >>>> Subject: Re: severe librbd performance degradation in Giant 
-> >>>> 
-> >>>> On 09/17/2014 01:55 PM, Somnath Roy wrote: 
-> >>>>> Hi Sage, 
-> >>>>> We are experiencing severe librbd performance degradation in Giant over firefly release. Here is the experiment we did to isolate it as a librbd problem. 
-> >>>>> 
-> >>>>> 1. Single OSD is running latest Giant and client is running fio rbd on top of firefly based librbd/librados. For one client it is giving ~11-12K iops (4K RR). 
-> >>>>> 2. Single OSD is running Giant and client is running fio rbd on top of Giant based librbd/librados. For one client it is giving ~1.9K iops (4K RR). 
-> >>>>> 3. Single OSD is running latest Giant and client is running Giant based ceph_smaiobench on top of giant librados. For one client it is giving ~11-12K iops (4K RR). 
-> >>>>> 4. Giant RGW on top of Giant OSD is also scaling. 
-> >>>>> 
-> >>>>> 
-> >>>>> So, it is obvious from the above that recent librbd has issues. I will raise a tracker to track this. 
-> >>>> 
-> >>>> For giant the default cache settings changed to: 
-> >>>> 
-> >>>> rbd cache = true 
-> >>>> rbd cache writethrough until flush = true 
-> >>>> 
-> >>>> If fio isn't sending flushes as the test is running, the cache will stay in writethrough mode. Does the difference remain if you set rbd cache writethrough until flush = false ? 
-> >>>> 
-> >>>> Josh 
-> >>>> 
-> >>>> ________________________________ 
-> >>>> 
-> >>>> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies). 
-> >>>> 
-> >>>> -- 
-> >>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
-> >>>> in the body of a message to majordomo@vger.kernel.org More majordomo 
-> >>>> info at http://vger.kernel.org/majordomo-info.html 
-> >>>> 
-> >>>> 
-> >>> -- 
-> >>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
-> >>> in the body of a message to majordomo@vger.kernel.org More majordomo 
-> >>> info at http://vger.kernel.org/majordomo-info.html 
-> >>> -- 
-> >>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
-> >>> in the body of a message to majordomo@vger.kernel.org More majordomo 
-> >>> info at http://vger.kernel.org/majordomo-info.html 
-> >> 
-> >> 
-> >> 
-> >> -- 
-> >> Best Regards, 
-> >> 
-> >> Wheat 
-> >> -- 
-> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at http://vger.kernel.org/majordomo-info.html 
-> >> N r y b X ?v ^ )?{.n + z ]z {ay ?? ,j f h z w j:+v w j m zZ+ ?j" ! i 
-> >> N r y b X ?v ^ )?{.n + z ]z {ay ?? ,j f h z w 
-> > j:+v w j m zZ+ ?j" !tml= 
-> >> 
-> > N???????????????r??????y?????????b???X???????v???^???)?{.n???+?????????z???]z?????????{ay????????,j??????f?????????h?????????z??????w??????????????????j:+v?????????w???j???m????????????????????????zZ+????????????????j"??????!tml= 
-> > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+OK. Do we have the issue id for the above? Else, we can file one. Please advise.
+
+>When we look at the S3 archival features in more detail (soon!) I'm sure
+>this will come up!  The current plan is to address object versioning
+>first.  That is, unless a developer surfaces who wants to start hacking on
+>this right away...
+
+Great to know this. Even we are keen with S3 support in Ceph and we
+are happy support you here.
+
+Thanks
+Swami
+
+On Fri, Sep 19, 2014 at 11:08 AM, Sage Weil <sweil@redhat.com> wrote:
+> On Fri, 19 Sep 2014, M Ranga Swami Reddy wrote:
+>> Hi Sage,
+>> Could you please advise, if Ceph support the low cost object
+>> storages(like Amazon Glacier or RRS) for archiving objects like log
+>> file etc.?
+>
+> Ceph doesn't interact at all with AWS services like Glacier, if that's
+> what you mean.
+>
+> For RRS, though, I assume you mean the ability to create buckets with
+> reduced redundancy with radosgw?  That is supported, although not quite
+> the way AWS does it.  You can create different pools that back RGW
+> buckets, and each bucket is stored in one of those pools.  So you could
+> make one of them 2x instead of 3x, or use an erasure code of your choice.
+>
+> What isn't currently supported is the ability to reduce the redundancy of
+> individual objects in a bucket.  I don't think there is anything
+> architecturally preventing that, but it is not implemented or supported.
+>
+> When we look at the S3 archival features in more detail (soon!) I'm sure
+> this will come up!  The current plan is to address object versioning
+> first.  That is, unless a developer surfaces who wants to start hacking on
+> this right away...
+>
+> sage
+>
+>
+>
+>>
+>> Thanks
+>> Swami
+>>
+>> On Thu, Sep 18, 2014 at 6:20 PM, M Ranga Swami Reddy
+>> <swamireddy@gmail.com> wrote:
+>> > Hi ,
+>> >
+>> > Could you please check and clarify the below question on object
+>> > lifecycle and notification S3 APIs support:
+>> >
+>> > 1. To support the bucket lifecycle - we need to support the
+>> > moving/deleting the objects/buckets based lifecycle settings.
+>> > For ex: If an object lifecyle set as below:
+>> >           1. Archive it after 10 days - means move this object to low
+>> > cost object storage after 10 days of the creation date.
+>> >            2. Remove this object after 90days - mean remove this
+>> > object from the low cost object after 90days of creation date.
+>> >
+>> > Q1- Does the ceph support the above concept like moving to low cost
+>> > storage and delete from that storage?
+>> >
+>> > 2. To support the object notifications:
+>> >       - First there should be low cost and high availability storage
+>> > with single replica only. If an object created with this type of
+>> > object storage,
+>> >         There could be chances that object could lose, so if an object
+>> > of this type of storage lost, set the notifications.
+>> >
+>> > Q2- Does Ceph support low cost and high availability storage type?
+>> >
+>> > Thanks
+>> >
+>> > On Fri, Sep 12, 2014 at 8:00 PM, M Ranga Swami Reddy
+>> > <swamireddy@gmail.com> wrote:
+>> >> Hi Yehuda,
+>> >>
+>> >> Could you please check and clarify the below question on object
+>> >> lifecycle and notification S3 APIs support:
+>> >>
+>> >> 1. To support the bucket lifecycle - we need to support the
+>> >> moving/deleting the objects/buckets based lifecycle settings.
+>> >> For ex: If an object lifecyle set as below:
+>> >>           1. Archive it after 10 days - means move this object to low
+>> >> cost object storage after 10 days of the creation date.
+>> >>            2. Remove this object after 90days - mean remove this
+>> >> object from the low cost object after 90days of creation date.
+>> >>
+>> >> Q1- Does the ceph support the above concept like moving to low cost
+>> >> storage and delete from that storage?
+>> >>
+>> >> 2. To support the object notifications:
+>> >>       - First there should be low cost and high availability storage
+>> >> with single replica only. If an object created with this type of
+>> >> object storage,
+>> >>         There could be chances that object could lose, so if an object
+>> >> of this type of storage lost, set the notifications.
+>> >>
+>> >> Q2- Does Ceph support low cost and high availability storage type?
+>> >>
+>> >> Thanks
+>> >> Swami
+>> >>
+>> >>
+>> >>
+>> >>
+>> >>
+>> >>
+>> >>
+>> >> On Tue, Jul 29, 2014 at 1:35 AM, Yehuda Sadeh <yehuda@redhat.com> wrote:
+>> >>> Bucket lifecycle:
+>> >>> http://tracker.ceph.com/issues/8929
+>> >>>
+>> >>> Bucket notification:
+>> >>> http://tracker.ceph.com/issues/8956
+>> >>>
+>> >>> On Sun, Jul 27, 2014 at 12:54 AM, M Ranga Swami Reddy
+>> >>> <swamireddy@gmail.com> wrote:
+>> >>>> Good no know the details. Can you please share the issue ID for bucket
+>> >>>> lifecycle? My team also could start help here.
+>> >>>> Regarding the notification - Do we have the issue ID?
+>> >>>> Yes, the object versioning will be backlog one - I strongly feel we
+>> >>>> start working on this asap.
+>> >>>>
+>> >>>> Thanks
+>> >>>> Swami
+>> >>>>
+>> >>>> On Fri, Jul 25, 2014 at 11:31 PM, Yehuda Sadeh <yehuda@redhat.com> wrote:
+>> >>>>> On Fri, Jul 25, 2014 at 10:14 AM, M Ranga Swami Reddy
+>> >>>>> <swamireddy@gmail.com> wrote:
+>> >>>>>> Thanks for quick reply.
+>> >>>>>> Yes,  versioned object - missing in ceph ATM
+>> >>>>>> Iam looking for: bucket lifecylce (get/put/delete), bucket location,
+>> >>>>>> put object notification and object restore (ie versioned object) S3
+>> >>>>>> API support.
+>> >>>>>> Please let me now any of the above work is in progress or some one
+>> >>>>>> planned to work on.
+>> >>>>>
+>> >>>>>
+>> >>>>> I opened an issue for bucket lifecycle (we already had an issue open
+>> >>>>> for object expiration though). We do have bucket location already
+>> >>>>> (part of the multi-region feature). Object versioning is definitely on
+>> >>>>> our backlog and one that we'll hopefully implement sooner rather
+>> >>>>> later.
+>> >>>>> With regard to object notification, it'll require having a
+>> >>>>> notification service which is a bit out of the scope. Integrating the
+>> >>>>> gateway with such a service whouldn't be hard, but we'll need to have
+>> >>>>> that first.
+>> >>>>>
+>> >>>>> Yehuda
+>> >>>>>
+>> >>>>>>
+>> >>>>>> Thanks
+>> >>>>>> Swami
+>> >>>>>>
+>> >>>>>>
+>> >>>>>> On Fri, Jul 25, 2014 at 9:19 PM, Sage Weil <sweil@redhat.com> wrote:
+>> >>>>>>> On Fri, 25 Jul 2014, M Ranga Swami Reddy wrote:
+>> >>>>>>>> Hi Team: As per the ceph document a few S3 APIs compatibility not supported.
+>> >>>>>>>>
+>> >>>>>>>> Link: http://ceph.com/docs/master/radosgw/s3/
+>> >>>>>>>>
+>> >>>>>>>> Is there plan to support the ?n supported item in the above table?
+>> >>>>>>>> or
+>> >>>>>>>> Any working on this?
+>> >>>>>>>
+>> >>>>>>> Yes.  Unfortunately this table isn't particularly detailed or accurate or
+>> >>>>>>> up to date.   The main gap, I think, is versioned objects.
+>> >>>>>>>
+>> >>>>>>> Are there specfiic parts of the S3 API that are missing that you need?
+>> >>>>>>> That sort of info is very helpful for prioritizing effort...
+>> >>>>>>>
+>> >>>>>>> sage
+>> >>>>>> --
+>> >>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> >>>>>> the body of a message to majordomo@vger.kernel.org
+>> >>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
