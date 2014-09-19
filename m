@@ -1,130 +1,166 @@
 From: Sage Weil <sweil@redhat.com>
-Subject: Re: [PATCH 1/3] libceph: reference counting pagelist
-Date: Thu, 18 Sep 2014 22:04:14 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1409182203260.18018@cobra.newdream.net>
-References: <1410874759-11562-1-git-send-email-zyan@redhat.com>
+Subject: Re: [PATCH 2/3] ceph: use pagelist to present MDS request data
+Date: Thu, 18 Sep 2014 22:06:06 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1409182205490.18018@cobra.newdream.net>
+References: <1410874759-11562-1-git-send-email-zyan@redhat.com> <1410874759-11562-2-git-send-email-zyan@redhat.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:40468 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:40485 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752039AbaISFEP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 19 Sep 2014 01:04:15 -0400
-In-Reply-To: <1410874759-11562-1-git-send-email-zyan@redhat.com>
+	with ESMTP id S1751294AbaISFGG (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 19 Sep 2014 01:06:06 -0400
+In-Reply-To: <1410874759-11562-2-git-send-email-zyan@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "Yan, Zheng" <zyan@redhat.com>
 Cc: ceph-devel@vger.kernel.org
 
 On Tue, 16 Sep 2014, Yan, Zheng wrote:
-> this allow pagelist to present data that may be sent multiple times.
-
-Hmm, actually we probably should use the kref code for this, even though 
-the refcounting is trivial.
-
-sage
-
+> Current code uses page array to present MDS request data. Pages in the
+> array are allocated/freed by caller of ceph_mdsc_do_request(). If request
+> is interrupted, the pages can be freed while they are still being used by
+> the request message.
+> 
+> The fix is use pagelist to present MDS request data. Pagelist is
+> reference counted.
 > 
 > Signed-off-by: Yan, Zheng <zyan@redhat.com>
+
+So much nicer!
+
+Reviewed-by: Sage Weil <sage@redhat.com>
+
 > ---
->  fs/ceph/mds_client.c          | 1 -
->  include/linux/ceph/pagelist.h | 5 ++++-
->  net/ceph/messenger.c          | 4 +---
->  net/ceph/pagelist.c           | 8 ++++++--
->  4 files changed, 11 insertions(+), 7 deletions(-)
+>  fs/ceph/mds_client.c | 14 +++++++++-----
+>  fs/ceph/mds_client.h |  4 +---
+>  fs/ceph/xattr.c      | 46 ++++++++++++++++------------------------------
+>  3 files changed, 26 insertions(+), 38 deletions(-)
 > 
 > diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> index a17fc49..30d7338 100644
+> index 30d7338..80d9f07 100644
 > --- a/fs/ceph/mds_client.c
 > +++ b/fs/ceph/mds_client.c
-> @@ -2796,7 +2796,6 @@ fail:
->  	mutex_unlock(&session->s_mutex);
->  fail_nomsg:
->  	ceph_pagelist_release(pagelist);
-> -	kfree(pagelist);
->  fail_nopagelist:
->  	pr_err("error %d preparing reconnect for mds%d\n", err, mds);
->  	return;
-> diff --git a/include/linux/ceph/pagelist.h b/include/linux/ceph/pagelist.h
-> index 9660d6b..5f871d8 100644
-> --- a/include/linux/ceph/pagelist.h
-> +++ b/include/linux/ceph/pagelist.h
-> @@ -2,6 +2,7 @@
->  #define __FS_CEPH_PAGELIST_H
+> @@ -542,6 +542,8 @@ void ceph_mdsc_release_request(struct kref *kref)
+>  	}
+>  	kfree(req->r_path1);
+>  	kfree(req->r_path2);
+> +	if (req->r_pagelist)
+> +		ceph_pagelist_release(req->r_pagelist);
+>  	put_request_session(req);
+>  	ceph_unreserve_caps(req->r_mdsc, &req->r_caps_reservation);
+>  	kfree(req);
+> @@ -1847,13 +1849,15 @@ static struct ceph_msg *create_request_message(struct ceph_mds_client *mdsc,
+>  	msg->front.iov_len = p - msg->front.iov_base;
+>  	msg->hdr.front_len = cpu_to_le32(msg->front.iov_len);
 >  
->  #include <linux/list.h>
-> +#include <linux/atomic.h>
+> -	if (req->r_data_len) {
+> -		/* outbound data set only by ceph_sync_setxattr() */
+> -		BUG_ON(!req->r_pages);
+> -		ceph_msg_data_add_pages(msg, req->r_pages, req->r_data_len, 0);
+> +	if (req->r_pagelist) {
+> +		struct ceph_pagelist *pagelist = req->r_pagelist;
+> +		atomic_inc(&pagelist->refcnt);
+> +		ceph_msg_data_add_pagelist(msg, pagelist);
+> +		msg->hdr.data_len = cpu_to_le32(pagelist->length);
+> +	} else {
+> +		msg->hdr.data_len = 0;
+>  	}
 >  
->  struct ceph_pagelist {
->  	struct list_head head;
-> @@ -10,6 +11,7 @@ struct ceph_pagelist {
->  	size_t room;
->  	struct list_head free_list;
->  	size_t num_pages_free;
-> +	atomic_t refcnt;
->  };
+> -	msg->hdr.data_len = cpu_to_le32(req->r_data_len);
+>  	msg->hdr.data_off = cpu_to_le16(0);
 >  
->  struct ceph_pagelist_cursor {
-> @@ -26,9 +28,10 @@ static inline void ceph_pagelist_init(struct ceph_pagelist *pl)
->  	pl->room = 0;
->  	INIT_LIST_HEAD(&pl->free_list);
->  	pl->num_pages_free = 0;
-> +	atomic_set(&pl->refcnt, 1);
->  }
+>  out_free2:
+> diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
+> index e00737c..23015f7 100644
+> --- a/fs/ceph/mds_client.h
+> +++ b/fs/ceph/mds_client.h
+> @@ -202,9 +202,7 @@ struct ceph_mds_request {
+>  	bool r_direct_is_hash;  /* true if r_direct_hash is valid */
 >  
-> -extern int ceph_pagelist_release(struct ceph_pagelist *pl);
-> +extern void ceph_pagelist_release(struct ceph_pagelist *pl);
+>  	/* data payload is used for xattr ops */
+> -	struct page **r_pages;
+> -	int r_num_pages;
+> -	int r_data_len;
+> +	struct ceph_pagelist *r_pagelist;
 >  
->  extern int ceph_pagelist_append(struct ceph_pagelist *pl, const void *d, size_t l);
+>  	/* what caps shall we drop? */
+>  	int r_inode_drop, r_inode_unless;
+> diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
+> index eab3e2f..c7b18b2 100644
+> --- a/fs/ceph/xattr.c
+> +++ b/fs/ceph/xattr.c
+> @@ -1,4 +1,5 @@
+>  #include <linux/ceph/ceph_debug.h>
+> +#include <linux/ceph/pagelist.h>
 >  
-> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-> index e7d9411..9764c77 100644
-> --- a/net/ceph/messenger.c
-> +++ b/net/ceph/messenger.c
-> @@ -3071,10 +3071,8 @@ static void ceph_msg_data_destroy(struct ceph_msg_data *data)
->  		return;
->  
->  	WARN_ON(!list_empty(&data->links));
-> -	if (data->type == CEPH_MSG_DATA_PAGELIST) {
-> +	if (data->type == CEPH_MSG_DATA_PAGELIST)
->  		ceph_pagelist_release(data->pagelist);
-> -		kfree(data->pagelist);
+>  #include "super.h"
+>  #include "mds_client.h"
+> @@ -852,28 +853,17 @@ static int ceph_sync_setxattr(struct dentry *dentry, const char *name,
+>  	struct ceph_mds_request *req;
+>  	struct ceph_mds_client *mdsc = fsc->mdsc;
+>  	int err;
+> -	int i, nr_pages;
+> -	struct page **pages = NULL;
+> -	void *kaddr;
+> -
+> -	/* copy value into some pages */
+> -	nr_pages = calc_pages_for(0, size);
+> -	if (nr_pages) {
+> -		pages = kmalloc(sizeof(pages[0])*nr_pages, GFP_NOFS);
+> -		if (!pages)
+> -			return -ENOMEM;
+> -		err = -ENOMEM;
+> -		for (i = 0; i < nr_pages; i++) {
+> -			pages[i] = __page_cache_alloc(GFP_NOFS);
+> -			if (!pages[i]) {
+> -				nr_pages = i;
+> -				goto out;
+> -			}
+> -			kaddr = kmap(pages[i]);
+> -			memcpy(kaddr, value + i*PAGE_CACHE_SIZE,
+> -			       min(PAGE_CACHE_SIZE, size-i*PAGE_CACHE_SIZE));
+> -		}
 > -	}
->  	kmem_cache_free(ceph_msg_data_cache, data);
->  }
+> +	struct ceph_pagelist *pagelist;
+> +
+> +	/* copy value into pagelist */
+> +	pagelist = kmalloc(sizeof(*pagelist), GFP_NOFS);
+> +	if (!pagelist)
+> +		return -ENOMEM;
+> +
+> +	ceph_pagelist_init(pagelist);
+> +	err = ceph_pagelist_append(pagelist, value, size);
+> +	if (err)
+> +		goto out;
 >  
-> diff --git a/net/ceph/pagelist.c b/net/ceph/pagelist.c
-> index 92866be..f70b651 100644
-> --- a/net/ceph/pagelist.c
-> +++ b/net/ceph/pagelist.c
-> @@ -1,5 +1,6 @@
->  #include <linux/module.h>
->  #include <linux/gfp.h>
-> +#include <linux/slab.h>
->  #include <linux/pagemap.h>
->  #include <linux/highmem.h>
->  #include <linux/ceph/pagelist.h>
-> @@ -13,8 +14,10 @@ static void ceph_pagelist_unmap_tail(struct ceph_pagelist *pl)
->  	}
->  }
+>  	dout("setxattr value=%.*s\n", (int)size, value);
 >  
-> -int ceph_pagelist_release(struct ceph_pagelist *pl)
-> +void ceph_pagelist_release(struct ceph_pagelist *pl)
->  {
-> +	if (!atomic_dec_and_test(&pl->refcnt))
-> +		return;
->  	ceph_pagelist_unmap_tail(pl);
->  	while (!list_empty(&pl->head)) {
->  		struct page *page = list_first_entry(&pl->head, struct page,
-> @@ -23,7 +26,8 @@ int ceph_pagelist_release(struct ceph_pagelist *pl)
->  		__free_page(page);
->  	}
->  	ceph_pagelist_free_reserve(pl);
-> -	return 0;
-> +	kfree(pl);
-> +	return;
+> @@ -894,9 +884,8 @@ static int ceph_sync_setxattr(struct dentry *dentry, const char *name,
+>  	req->r_args.setxattr.flags = cpu_to_le32(flags);
+>  	req->r_path2 = kstrdup(name, GFP_NOFS);
+>  
+> -	req->r_pages = pages;
+> -	req->r_num_pages = nr_pages;
+> -	req->r_data_len = size;
+> +	req->r_pagelist = pagelist;
+> +	pagelist = NULL;
+>  
+>  	dout("xattr.ver (before): %lld\n", ci->i_xattrs.version);
+>  	err = ceph_mdsc_do_request(mdsc, NULL, req);
+> @@ -904,11 +893,8 @@ static int ceph_sync_setxattr(struct dentry *dentry, const char *name,
+>  	dout("xattr.ver (after): %lld\n", ci->i_xattrs.version);
+>  
+>  out:
+> -	if (pages) {
+> -		for (i = 0; i < nr_pages; i++)
+> -			__free_page(pages[i]);
+> -		kfree(pages);
+> -	}
+> +	if (pagelist)
+> +		ceph_pagelist_release(pagelist);
+>  	return err;
 >  }
->  EXPORT_SYMBOL(ceph_pagelist_release);
 >  
 > -- 
 > 1.9.3
