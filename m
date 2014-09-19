@@ -1,160 +1,81 @@
-From: "Shu, Xinxin" <xinxin.shu@intel.com>
-Subject: RE: severe librbd performance degradation in Giant
-Date: Fri, 19 Sep 2014 01:10:14 +0000
-Message-ID: <75674D092A819E4189E91166C74CB90D01440B01@shsmsx102.ccr.corp.intel.com>
-References: <CACJqLyYQDrHyxMEtiMKMNaBQ_fHuu-hGqO_ZNHra0+VsUZrzXQ@mail.gmail.com>
- <1ab9d756-bbc9-4fbe-8f51-0a33dbab1a8d@mailpro>
- <755F6B91B3BE364F9BCA11EA3F9E0C6F2784639B@SACMBXIP02.sdcorp.global.sandisk.com>
- <75674D092A819E4189E91166C74CB90D01440AE4@shsmsx102.ccr.corp.intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+From: Zhao zhiming <zhaozhiming003@gmail.com>
+Subject: Re: radosgw-admin list users?
+Date: Fri, 19 Sep 2014 10:35:58 +0800
+Message-ID: <FD7981E0-88DA-4E62-A279-B4046E5341D2@gmail.com>
+References: <1464A418-AB3C-46C6-8D20-8FA796538A62@gmail.com> <robbat2-20140918T171125-842049841Z@orbis-terrarum.net> <CABBk=J8bUPZLCxfJy5X9-X=oZzwZQW_ftvOR-=VFeLQpygx7aQ@mail.gmail.com> <robbat2-20140918T195955-487876044Z@orbis-terrarum.net>
+Mime-Version: 1.0 (Mac OS X Mail 7.3 \(1878.6\))
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga14.intel.com ([192.55.52.115]:52411 "EHLO mga14.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751212AbaISBKe (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 18 Sep 2014 21:10:34 -0400
-In-Reply-To: <75674D092A819E4189E91166C74CB90D01440AE4@shsmsx102.ccr.corp.intel.com>
-Content-Language: en-US
+Received: from mail-pa0-f45.google.com ([209.85.220.45]:46567 "EHLO
+	mail-pa0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751103AbaISCgK convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 18 Sep 2014 22:36:10 -0400
+Received: by mail-pa0-f45.google.com with SMTP id rd3so2845840pab.4
+        for <ceph-devel@vger.kernel.org>; Thu, 18 Sep 2014 19:36:09 -0700 (PDT)
+In-Reply-To: <robbat2-20140918T195955-487876044Z@orbis-terrarum.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Shu, Xinxin" <xinxin.shu@intel.com>, Somnath Roy <Somnath.Roy@sandisk.com>, Alexandre DERUMIER <aderumier@odiso.com>, Haomai Wang <haomaiwang@gmail.com>
-Cc: Sage Weil <sweil@redhat.com>, Josh Durgin <josh.durgin@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Robin H. Johnson" <robbat2@gentoo.org>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-TXkgYmFkICwgd2l0aCBsYXRlc3QgbWFzdGVyICwgd2UgZ290IH4gMTIwSyBJT1BTLg0KDQpDaGVl
-cnMsDQp4aW54aW4NCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IGNlcGgtZGV2
-ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtl
-cm5lbC5vcmddIE9uIEJlaGFsZiBPZiBTaHUsIFhpbnhpbg0KU2VudDogRnJpZGF5LCBTZXB0ZW1i
-ZXIgMTksIDIwMTQgOTowOCBBTQ0KVG86IFNvbW5hdGggUm95OyBBbGV4YW5kcmUgREVSVU1JRVI7
-IEhhb21haSBXYW5nDQpDYzogU2FnZSBXZWlsOyBKb3NoIER1cmdpbjsgY2VwaC1kZXZlbEB2Z2Vy
-Lmtlcm5lbC5vcmcNClN1YmplY3Q6IFJFOiBzZXZlcmUgbGlicmJkIHBlcmZvcm1hbmNlIGRlZ3Jh
-ZGF0aW9uIGluIEdpYW50DQoNCkkgYWxzbyBvYnNlcnZlZCBwZXJmb3JtYW5jZSBkZWdyYWRhdGlv
-biBvbiBteSBmdWxsIFNTRCBzZXR1cCAsICBJIGNhbiBnb3QgIH4yNzBLIElPUFMgZm9yIDRLQiBy
-YW5kb20gcmVhZCB3aXRoIDAuODAuNCAsIGJ1dCB3aXRoIGxhdGVzdCBtYXN0ZXIgLCBJIG9ubHkg
-Z290IH4xMksgSU9QUyANCg0KQ2hlZXJzLA0KeGlueGluDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2Fn
-ZS0tLS0tDQpGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmNl
-cGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgU29tbmF0aCBSb3kN
-ClNlbnQ6IEZyaWRheSwgU2VwdGVtYmVyIDE5LCAyMDE0IDI6MDMgQU0NClRvOiBBbGV4YW5kcmUg
-REVSVU1JRVI7IEhhb21haSBXYW5nDQpDYzogU2FnZSBXZWlsOyBKb3NoIER1cmdpbjsgY2VwaC1k
-ZXZlbEB2Z2VyLmtlcm5lbC5vcmcNClN1YmplY3Q6IFJFOiBzZXZlcmUgbGlicmJkIHBlcmZvcm1h
-bmNlIGRlZ3JhZGF0aW9uIGluIEdpYW50DQoNCkFsZXhhbmRyZSwNCldoYXQgdG9vbCBhcmUgeW91
-IHVzaW5nID8gSSB1c2VkIGZpbyByYmQuDQoNCkFsc28sIEkgaG9wZSB5b3UgaGF2ZSBHaWFudCBw
-YWNrYWdlIGluc3RhbGxlZCBpbiB0aGUgY2xpZW50IHNpZGUgYXMgd2VsbCBhbmQgcmJkX2NhY2hl
-ID10cnVlIGlzIHNldCBvbiB0aGUgY2xpZW50IGNvbmYgZmlsZS4NCkZZSSwgZmlyZWZseSBsaWJy
-YmQgKyBsaWJyYWRvcyBhbmQgR2lhbnQgY2x1c3RlciB3aWxsIHdvcmsgc2VhbWxlc3NseSBhbmQg
-SSBoYWQgdG8gbWFrZSBzdXJlIGZpbyByYmQgaXMgcmVhbGx5IGxvYWRpbmcgZ2lhbnQgbGlicmJk
-IChpZiB5b3UgaGF2ZSBtdWx0aXBsZSBjb3BpZXMgYXJvdW5kICwgd2hpY2ggd2FzIGluIG15IGNh
-c2UpIGZvciByZXByb2R1Y2luZyBpdC4NCg0KVGhhbmtzICYgUmVnYXJkcw0KU29tbmF0aA0KDQot
-LS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogQWxleGFuZHJlIERFUlVNSUVSIFttYWls
-dG86YWRlcnVtaWVyQG9kaXNvLmNvbV0NClNlbnQ6IFRodXJzZGF5LCBTZXB0ZW1iZXIgMTgsIDIw
-MTQgMjo0OSBBTQ0KVG86IEhhb21haSBXYW5nDQpDYzogU2FnZSBXZWlsOyBKb3NoIER1cmdpbjsg
-Y2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc7IFNvbW5hdGggUm95DQpTdWJqZWN0OiBSZTogc2V2
-ZXJlIGxpYnJiZCBwZXJmb3JtYW5jZSBkZWdyYWRhdGlvbiBpbiBHaWFudA0KDQo+PkFjY29yZGlu
-ZyBodHRwOi8vdHJhY2tlci5jZXBoLmNvbS9pc3N1ZXMvOTUxMywgZG8geW91IG1lYW4gdGhhdCBy
-YmQgDQo+PmNhY2hlIHdpbGwgbWFrZSAxMHggcGVyZm9ybWFuY2UgZGVncmFkYXRpb24gZm9yIHJh
-bmRvbSByZWFkPw0KDQpIaSwgb24gbXkgc2lkZSwgSSBkb24ndCBzZWUgYW55IGRlZ3JhZGF0aW9u
-IHBlcmZvcm1hbmNlIG9uIHJlYWQgKHNlcSBvciByYW5kKSAgd2l0aCBvciB3aXRob3V0Lg0KDQpm
-aXJlZmx5IDogYXJvdW5kIDEyMDAwaW9wcyAod2l0aCBvciB3aXRob3V0IHJiZF9jYWNoZSkgZ2lh
-bnQgOiBhcm91bmQgMTIwMDBpb3BzICAod2l0aCBvciB3aXRob3V0IHJiZF9jYWNoZSkNCg0KKGFu
-ZCBJIGNhbiByZWFjaCBhcm91bmQgMjAwMDAtMzAwMDAgaW9wcyBvbiBnaWFudCB3aXRoIGRpc2Fi
-bGluZyBvcHRyYWNrZXIpLg0KDQoNCnJiZF9jYWNoZSBvbmx5IGltcHJvdmUgd3JpdGUgcGVyZm9y
-bWFuY2UgZm9yIG1lICg0ayBibG9jayApDQoNCg0KDQotLS0tLSBNYWlsIG9yaWdpbmFsIC0tLS0t
-IA0KDQpEZTogIkhhb21haSBXYW5nIiA8aGFvbWFpd2FuZ0BnbWFpbC5jb20+DQrDgDogIlNvbW5h
-dGggUm95IiA8U29tbmF0aC5Sb3lAc2FuZGlzay5jb20+DQpDYzogIlNhZ2UgV2VpbCIgPHN3ZWls
-QHJlZGhhdC5jb20+LCAiSm9zaCBEdXJnaW4iIDxqb3NoLmR1cmdpbkBpbmt0YW5rLmNvbT4sIGNl
-cGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQpFbnZvecOpOiBKZXVkaSAxOCBTZXB0ZW1icmUgMjAx
-NCAwNDoyNzo1Ng0KT2JqZXQ6IFJlOiBzZXZlcmUgbGlicmJkIHBlcmZvcm1hbmNlIGRlZ3JhZGF0
-aW9uIGluIEdpYW50IA0KDQpBY2NvcmRpbmcgaHR0cDovL3RyYWNrZXIuY2VwaC5jb20vaXNzdWVz
-Lzk1MTMsIGRvIHlvdSBtZWFuIHRoYXQgcmJkIGNhY2hlIHdpbGwgbWFrZSAxMHggcGVyZm9ybWFu
-Y2UgZGVncmFkYXRpb24gZm9yIHJhbmRvbSByZWFkPyANCg0KT24gVGh1LCBTZXAgMTgsIDIwMTQg
-YXQgNzo0NCBBTSwgU29tbmF0aCBSb3kgPFNvbW5hdGguUm95QHNhbmRpc2suY29tPiB3cm90ZTog
-DQo+IEpvc2gvU2FnZSwNCj4gSSBzaG91bGQgbWVudGlvbiB0aGF0IGV2ZW4gYWZ0ZXIgdHVybmlu
-ZyBvZmYgcmJkIGNhY2hlIEkgYW0gZ2V0dGluZyB+MjAlIGRlZ3JhZGF0aW9uIG92ZXIgRmlyZWZs
-eS4gDQo+IA0KPiBUaGFua3MgJiBSZWdhcmRzDQo+IFNvbW5hdGgNCj4gDQo+IC0tLS0tT3JpZ2lu
-YWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IFNvbW5hdGggUm95DQo+IFNlbnQ6IFdlZG5lc2RheSwg
-U2VwdGVtYmVyIDE3LCAyMDE0IDI6NDQgUE0NCj4gVG86IFNhZ2UgV2VpbA0KPiBDYzogSm9zaCBE
-dXJnaW47IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQo+IFN1YmplY3Q6IFJFOiBzZXZlcmUg
-bGlicmJkIHBlcmZvcm1hbmNlIGRlZ3JhZGF0aW9uIGluIEdpYW50DQo+IA0KPiBDcmVhdGVkIGEg
-dHJhY2tlciBmb3IgdGhpcy4gDQo+IA0KPiBodHRwOi8vdHJhY2tlci5jZXBoLmNvbS9pc3N1ZXMv
-OTUxMw0KPiANCj4gVGhhbmtzICYgUmVnYXJkcw0KPiBTb21uYXRoDQo+IA0KPiAtLS0tLU9yaWdp
-bmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9y
-ZyANCj4gW21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxm
-IE9mIFNvbW5hdGggUm95DQo+IFNlbnQ6IFdlZG5lc2RheSwgU2VwdGVtYmVyIDE3LCAyMDE0IDI6
-MzkgUE0NCj4gVG86IFNhZ2UgV2VpbA0KPiBDYzogSm9zaCBEdXJnaW47IGNlcGgtZGV2ZWxAdmdl
-ci5rZXJuZWwub3JnDQo+IFN1YmplY3Q6IFJFOiBzZXZlcmUgbGlicmJkIHBlcmZvcm1hbmNlIGRl
-Z3JhZGF0aW9uIGluIEdpYW50DQo+IA0KPiBTYWdlLA0KPiBJdCdzIGEgNEsgcmFuZG9tIHJlYWQu
-IA0KPiANCj4gVGhhbmtzICYgUmVnYXJkcw0KPiBTb21uYXRoDQo+IA0KPiAtLS0tLU9yaWdpbmFs
-IE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBTYWdlIFdlaWwgW21haWx0bzpzd2VpbEByZWRoYXQuY29t
-XQ0KPiBTZW50OiBXZWRuZXNkYXksIFNlcHRlbWJlciAxNywgMjAxNCAyOjM2IFBNDQo+IFRvOiBT
-b21uYXRoIFJveQ0KPiBDYzogSm9zaCBEdXJnaW47IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3Jn
-DQo+IFN1YmplY3Q6IFJFOiBzZXZlcmUgbGlicmJkIHBlcmZvcm1hbmNlIGRlZ3JhZGF0aW9uIGlu
-IEdpYW50DQo+IA0KPiBXaGF0IHdhcyB0aGUgaW8gcGF0dGVybj8gU2VxdWVudGlhbCBvciByYW5k
-b20/IEZvciByYW5kb20gYSBzbG93ZG93biBtYWtlcyBzZW5zZSAodGhvIG1heWJlIG5vdCAxMHgh
-KSBidXQgbm90IGZvciBzZXF1ZW50YWlsLi4uLiANCj4gDQo+IHMNCj4gDQo+IE9uIFdlZCwgMTcg
-U2VwIDIwMTQsIFNvbW5hdGggUm95IHdyb3RlOiANCj4gDQo+PiBJIHNldCB0aGUgZm9sbG93aW5n
-IGluIHRoZSBjbGllbnQgc2lkZSAvZXRjL2NlcGgvY2VwaC5jb25mIHdoZXJlIEkgYW0gcnVubmlu
-ZyBmaW8gcmJkLiANCj4+IA0KPj4gcmJkX2NhY2hlX3dyaXRldGhyb3VnaF91bnRpbF9mbHVzaCA9
-IGZhbHNlDQo+PiANCj4+IEJ1dCwgbm8gZGlmZmVyZW5jZS4gQlRXLCBJIGFtIGRvaW5nIFJhbmRv
-bSByZWFkLCBub3Qgd3JpdGUuIFN0aWxsIHRoaXMgc2V0dGluZyBhcHBsaWVzID8gDQo+PiANCj4+
-IE5leHQsIEkgdHJpZWQgdG8gdHdlYWsgdGhlIHJiZF9jYWNoZSBzZXR0aW5nIHRvIGZhbHNlIGFu
-ZCBJICpnb3QgYmFjayogdGhlIG9sZCBwZXJmb3JtYW5jZS4gTm93LCBpdCBpcyBzaW1pbGFyIHRv
-IGZpcmVmbHkgdGhyb3VnaHB1dCAhIA0KPj4gDQo+PiBTbywgbG9rcyBsaWtlIHJiZF9jYWNoZT10
-cnVlIHdhcyB0aGUgY3VscHJpdC4gDQo+PiANCj4+IFRoYW5rcyBKb3NoICEgDQo+PiANCj4+IFJl
-Z2FyZHMNCj4+IFNvbW5hdGgNCj4+IA0KPj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4+
-IEZyb206IEpvc2ggRHVyZ2luIFttYWlsdG86am9zaC5kdXJnaW5AaW5rdGFuay5jb21dDQo+PiBT
-ZW50OiBXZWRuZXNkYXksIFNlcHRlbWJlciAxNywgMjAxNCAyOjIwIFBNDQo+PiBUbzogU29tbmF0
-aCBSb3k7IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQo+PiBTdWJqZWN0OiBSZTogc2V2ZXJl
-IGxpYnJiZCBwZXJmb3JtYW5jZSBkZWdyYWRhdGlvbiBpbiBHaWFudA0KPj4gDQo+PiBPbiAwOS8x
-Ny8yMDE0IDAxOjU1IFBNLCBTb21uYXRoIFJveSB3cm90ZTogDQo+PiA+IEhpIFNhZ2UsDQo+PiA+
-IFdlIGFyZSBleHBlcmllbmNpbmcgc2V2ZXJlIGxpYnJiZCBwZXJmb3JtYW5jZSBkZWdyYWRhdGlv
-biBpbiBHaWFudCBvdmVyIGZpcmVmbHkgcmVsZWFzZS4gSGVyZSBpcyB0aGUgZXhwZXJpbWVudCB3
-ZSBkaWQgdG8gaXNvbGF0ZSBpdCBhcyBhIGxpYnJiZCBwcm9ibGVtLiANCj4+ID4gDQo+PiA+IDEu
-IFNpbmdsZSBPU0QgaXMgcnVubmluZyBsYXRlc3QgR2lhbnQgYW5kIGNsaWVudCBpcyBydW5uaW5n
-IGZpbyByYmQgb24gdG9wIG9mIGZpcmVmbHkgYmFzZWQgbGlicmJkL2xpYnJhZG9zLiBGb3Igb25l
-IGNsaWVudCBpdCBpcyBnaXZpbmcgfjExLTEySyBpb3BzICg0SyBSUikuIA0KPj4gPiAyLiBTaW5n
-bGUgT1NEIGlzIHJ1bm5pbmcgR2lhbnQgYW5kIGNsaWVudCBpcyBydW5uaW5nIGZpbyByYmQgb24g
-dG9wIG9mIEdpYW50IGJhc2VkIGxpYnJiZC9saWJyYWRvcy4gRm9yIG9uZSBjbGllbnQgaXQgaXMg
-Z2l2aW5nIH4xLjlLIGlvcHMgKDRLIFJSKS4gDQo+PiA+IDMuIFNpbmdsZSBPU0QgaXMgcnVubmlu
-ZyBsYXRlc3QgR2lhbnQgYW5kIGNsaWVudCBpcyBydW5uaW5nIEdpYW50IGJhc2VkIGNlcGhfc21h
-aW9iZW5jaCBvbiB0b3Agb2YgZ2lhbnQgbGlicmFkb3MuIEZvciBvbmUgY2xpZW50IGl0IGlzIGdp
-dmluZyB+MTEtMTJLIGlvcHMgKDRLIFJSKS4gDQo+PiA+IDQuIEdpYW50IFJHVyBvbiB0b3Agb2Yg
-R2lhbnQgT1NEIGlzIGFsc28gc2NhbGluZy4gDQo+PiA+IA0KPj4gPiANCj4+ID4gU28sIGl0IGlz
-IG9idmlvdXMgZnJvbSB0aGUgYWJvdmUgdGhhdCByZWNlbnQgbGlicmJkIGhhcyBpc3N1ZXMuIEkg
-d2lsbCByYWlzZSBhIHRyYWNrZXIgdG8gdHJhY2sgdGhpcy4gDQo+PiANCj4+IEZvciBnaWFudCB0
-aGUgZGVmYXVsdCBjYWNoZSBzZXR0aW5ncyBjaGFuZ2VkIHRvOiANCj4+IA0KPj4gcmJkIGNhY2hl
-ID0gdHJ1ZQ0KPj4gcmJkIGNhY2hlIHdyaXRldGhyb3VnaCB1bnRpbCBmbHVzaCA9IHRydWUNCj4+
-IA0KPj4gSWYgZmlvIGlzbid0IHNlbmRpbmcgZmx1c2hlcyBhcyB0aGUgdGVzdCBpcyBydW5uaW5n
-LCB0aGUgY2FjaGUgd2lsbCBzdGF5IGluIHdyaXRldGhyb3VnaCBtb2RlLiBEb2VzIHRoZSBkaWZm
-ZXJlbmNlIHJlbWFpbiBpZiB5b3Ugc2V0IHJiZCBjYWNoZSB3cml0ZXRocm91Z2ggdW50aWwgZmx1
-c2ggPSBmYWxzZSA/IA0KPj4gDQo+PiBKb3NoDQo+PiANCj4+IF9fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fDQo+PiANCj4+IFBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFp
-bmVkIGluIHRoaXMgZWxlY3Ryb25pYyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3Ig
-dGhlIHVzZSBvZiB0aGUgZGVzaWduYXRlZCByZWNpcGllbnQocykgbmFtZWQgYWJvdmUuIElmIHRo
-ZSByZWFkZXIgb2YgdGhpcyBtZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5
-b3UgYXJlIGhlcmVieSBub3RpZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2Fn
-ZSBpbiBlcnJvciBhbmQgdGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRp
-b24sIG9yIGNvcHlpbmcgb2YgdGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElm
-IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5v
-dGlmeSB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBp
-bW1lZGlhdGVseSBhbmQgZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdl
-IGluIHlvdXIgcG9zc2Vzc2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxs
-eSBzdG9yZWQgY29waWVzKS4gDQo+PiANCj4+IC0tDQo+PiBUbyB1bnN1YnNjcmliZSBmcm9tIHRo
-aXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgDQo+PiBpbiB0
-aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1h
-am9yZG9tbyANCj4+IGluZm8gYXQgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5m
-by5odG1sDQo+PiANCj4+IA0KPiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDog
-c2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgDQo+IGluIHRoZSBib2R5IG9m
-IGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIA0K
-PiBpbmZvIGF0IGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KPiAt
-LQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJz
-Y3JpYmUgY2VwaC1kZXZlbCIgDQo+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRv
-bW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIA0KPiBpbmZvIGF0IGh0dHA6Ly92Z2Vy
-Lmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KDQoNCg0KLS0NCkJlc3QgUmVnYXJkcywg
-DQoNCldoZWF0DQotLQ0KVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxp
-bmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBt
-YWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIGluZm8gYXQgaHR0cDovL3Zn
-ZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQpOICAgICByICB5ICAgYiBYICDHp3Yg
-XiAp3rp7Lm4gKyAgIHogXXogICB7YXkgHcqH2pkgLGogICBmICAgaCAgIHogHiB3ICAgICAgIGo6
-K3YgICB3IGogbSAgICAgICAgIHpaKyAgICAg3aJqIiAgISBpDQoEIHsubiArICAgICAgICslICBs
-endtICBiIOunsiAgciAgecepINevelggIBcgINyofSAgIMageiAmajordiAgICAgICAgelorICAr
-emYgICBoICAgfiAgICBpICAgeiAeIHcgICA/ICAgICYgKd+iG2YNCg==
+Thanks Robin and Yehuda, but I want to how to delete multiple users.
+
+I use 'radosgw-admin metadata list user=92 to list all users, and found=
+ some users have unreadable code.
+
+radosgw-admin metadata list user
+[
+    "zzm1",
+    "?zzm1",
+    "?zzm1=94]
+
+and I can=92t delete these unreadable users.
+
+radosgw-admin user rm =97uid=3D"?zzm1"
+could not remove user: unable to remove user, user does not exist
+
+so I want to know, do rgw admin have command to delete multiply or all =
+users?
+
+Thanks.
+
+On Sep 19, 2014, at 4:01 AM, Robin H. Johnson <robbat2@gentoo.org> wrot=
+e:
+
+> On Thu, Sep 18, 2014 at 10:38:19AM -0700,  Yehuda Sadeh wrote:
+>> On Thu, Sep 18, 2014 at 10:27 AM, Robin H. Johnson <robbat2@gentoo.o=
+rg> wrote:
+>>> Related to this thread, radosgw-admin doesn't seem to have anything=
+ to
+>>> list the users.
+>>>=20
+>>> The closest I have as a hack is:
+>>> rados ls --pool=3D.users.uid |sed 's,.buckets$,,g' |sort |uniq
+>>>=20
+>>=20
+>> Try:
+>>=20
+>> $ radosgw-admin metadata list user
+> Ooh nice!
+> Nothing in the --help output says 'metadata list' takes arguments (an=
+d
+> the manpage for radosgw-admin doesn't even have the metadata commands=
+).
+>=20
+> --=20
+> Robin Hugh Johnson
+> Gentoo Linux: Developer, Infrastructure Lead
+> E-Mail     : robbat2@gentoo.org
+> GnuPG FP   : 11ACBA4F 4778E3F6 E4EDF38E B27B944E 34884E85
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
