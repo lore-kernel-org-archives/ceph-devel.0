@@ -1,282 +1,190 @@
-From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+From: David Moreau Simard <dmsimard@iweb.com>
 Subject: Re: severe librbd performance degradation in Giant
-Date: Fri, 19 Sep 2014 15:31:14 +0200
-Message-ID: <541C3022.5040107@profihost.ag>
-References: <CACJqLyYQDrHyxMEtiMKMNaBQ_fHuu-hGqO_ZNHra0+VsUZrzXQ@mail.gmail.com> <1ab9d756-bbc9-4fbe-8f51-0a33dbab1a8d@mailpro> <755F6B91B3BE364F9BCA11EA3F9E0C6F2784639B@SACMBXIP02.sdcorp.global.sandisk.com> <75674D092A819E4189E91166C74CB90D01440AE4@shsmsx102.ccr.corp.intel.com> <541BD2F2.9030500@profihost.ag> <75674D092A819E4189E91166C74CB90D0144104E@shsmsx102.ccr.corp.intel.com>
+Date: Fri, 19 Sep 2014 13:49:52 +0000
+Message-ID: <D041AC28.24247%dmsimard@iweb.com>
+References: <541C3022.5040107@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ph.de-nserver.de ([85.158.179.214]:40607 "EHLO
-	mail-ph.de-nserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755978AbaISNbR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 19 Sep 2014 09:31:17 -0400
-In-Reply-To: <75674D092A819E4189E91166C74CB90D0144104E@shsmsx102.ccr.corp.intel.com>
+Received: from bmx1.iweb.com ([70.38.127.135]:60365 "EHLO bmx1.iweb.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756231AbaISNt4 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 19 Sep 2014 09:49:56 -0400
+In-Reply-To: <541C3022.5040107@profihost.ag>
+Content-Language: fr-FR
+Content-ID: <C00BCEB318D870408CAABE98095A75B4@corp.iweb.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Shu, Xinxin" <xinxin.shu@intel.com>, Somnath Roy <Somnath.Roy@sandisk.com>, Alexandre DERUMIER <aderumier@odiso.com>, Haomai Wang <haomaiwang@gmail.com>
+To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>, "Shu, Xinxin" <xinxin.shu@intel.com>, Somnath Roy <Somnath.Roy@sandisk.com>, Alexandre DERUMIER <aderumier@odiso.com>, Haomai Wang <haomaiwang@gmail.com>
 Cc: Sage Weil <sweil@redhat.com>, Josh Durgin <josh.durgin@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Am 19.09.2014 um 15:02 schrieb Shu, Xinxin:
->  12 x Intel DC 3700 200GB, every SSD has two OSDs.
-
-Crazy, I've 56 SSDs and can=C3=84t go above 20 000 iops.
-
-Gr=C3=BC=C3=9Fe Stefan
-
-> Cheers,
-> xinxin
->=20
-> -----Original Message-----
-> From: Stefan Priebe [mailto:s.priebe@profihost.ag]=20
-> Sent: Friday, September 19, 2014 2:54 PM
-> To: Shu, Xinxin; Somnath Roy; Alexandre DERUMIER; Haomai Wang
-> Cc: Sage Weil; Josh Durgin; ceph-devel@vger.kernel.org
-> Subject: Re: severe librbd performance degradation in Giant
->=20
-> Am 19.09.2014 03:08, schrieb Shu, Xinxin:
->> I also observed performance degradation on my full SSD setup ,  I ca=
-n=20
->> got  ~270K IOPS for 4KB random read with 0.80.4 , but with latest=20
->> master , I only got ~12K IOPS
->=20
-> This are impressive numbers. Can you tell me how many OSDs you have a=
-nd which SSDs you use?
->=20
-> Thanks,
-> Stefan
->=20
->=20
->> Cheers,
->> xinxin
->>
->> -----Original Message-----
->> From: ceph-devel-owner@vger.kernel.org=20
->> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Somnath Roy
->> Sent: Friday, September 19, 2014 2:03 AM
->> To: Alexandre DERUMIER; Haomai Wang
->> Cc: Sage Weil; Josh Durgin; ceph-devel@vger.kernel.org
->> Subject: RE: severe librbd performance degradation in Giant
->>
->> Alexandre,
->> What tool are you using ? I used fio rbd.
->>
->> Also, I hope you have Giant package installed in the client side as =
-well and rbd_cache =3Dtrue is set on the client conf file.
->> FYI, firefly librbd + librados and Giant cluster will work seamlessl=
-y and I had to make sure fio rbd is really loading giant librbd (if you=
- have multiple copies around , which was in my case) for reproducing it=
-=2E
->>
->> Thanks & Regards
->> Somnath
->>
->> -----Original Message-----
->> From: Alexandre DERUMIER [mailto:aderumier@odiso.com]
->> Sent: Thursday, September 18, 2014 2:49 AM
->> To: Haomai Wang
->> Cc: Sage Weil; Josh Durgin; ceph-devel@vger.kernel.org; Somnath Roy
->> Subject: Re: severe librbd performance degradation in Giant
->>
->>>> According http://tracker.ceph.com/issues/9513, do you mean that rb=
-d=20
->>>> cache will make 10x performance degradation for random read?
->>
->> Hi, on my side, I don't see any degradation performance on read (seq=
- or rand)  with or without.
->>
->> firefly : around 12000iops (with or without rbd_cache) giant : aroun=
-d=20
->> 12000iops  (with or without rbd_cache)
->>
->> (and I can reach around 20000-30000 iops on giant with disabling opt=
-racker).
->>
->>
->> rbd_cache only improve write performance for me (4k block )
->>
->>
->>
->> ----- Mail original -----
->>
->> De: "Haomai Wang" <haomaiwang@gmail.com>
->> =C3=80: "Somnath Roy" <Somnath.Roy@sandisk.com>
->> Cc: "Sage Weil" <sweil@redhat.com>, "Josh Durgin"=20
->> <josh.durgin@inktank.com>, ceph-devel@vger.kernel.org
->> Envoy=C3=A9: Jeudi 18 Septembre 2014 04:27:56
->> Objet: Re: severe librbd performance degradation in Giant
->>
->> According http://tracker.ceph.com/issues/9513, do you mean that rbd =
-cache will make 10x performance degradation for random read?
->>
->> On Thu, Sep 18, 2014 at 7:44 AM, Somnath Roy <Somnath.Roy@sandisk.co=
-m> wrote:
->>> Josh/Sage,
->>> I should mention that even after turning off rbd cache I am getting=
- ~20% degradation over Firefly.
->>>
->>> Thanks & Regards
->>> Somnath
->>>
->>> -----Original Message-----
->>> From: Somnath Roy
->>> Sent: Wednesday, September 17, 2014 2:44 PM
->>> To: Sage Weil
->>> Cc: Josh Durgin; ceph-devel@vger.kernel.org
->>> Subject: RE: severe librbd performance degradation in Giant
->>>
->>> Created a tracker for this.
->>>
->>> http://tracker.ceph.com/issues/9513
->>>
->>> Thanks & Regards
->>> Somnath
->>>
->>> -----Original Message-----
->>> From: ceph-devel-owner@vger.kernel.org=20
->>> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Somnath Roy
->>> Sent: Wednesday, September 17, 2014 2:39 PM
->>> To: Sage Weil
->>> Cc: Josh Durgin; ceph-devel@vger.kernel.org
->>> Subject: RE: severe librbd performance degradation in Giant
->>>
->>> Sage,
->>> It's a 4K random read.
->>>
->>> Thanks & Regards
->>> Somnath
->>>
->>> -----Original Message-----
->>> From: Sage Weil [mailto:sweil@redhat.com]
->>> Sent: Wednesday, September 17, 2014 2:36 PM
->>> To: Somnath Roy
->>> Cc: Josh Durgin; ceph-devel@vger.kernel.org
->>> Subject: RE: severe librbd performance degradation in Giant
->>>
->>> What was the io pattern? Sequential or random? For random a slowdow=
-n makes sense (tho maybe not 10x!) but not for sequentail....
->>>
->>> s
->>>
->>> On Wed, 17 Sep 2014, Somnath Roy wrote:
->>>
->>>> I set the following in the client side /etc/ceph/ceph.conf where I=
- am running fio rbd.
->>>>
->>>> rbd_cache_writethrough_until_flush =3D false
->>>>
->>>> But, no difference. BTW, I am doing Random read, not write. Still =
-this setting applies ?
->>>>
->>>> Next, I tried to tweak the rbd_cache setting to false and I *got b=
-ack* the old performance. Now, it is similar to firefly throughput !
->>>>
->>>> So, loks like rbd_cache=3Dtrue was the culprit.
->>>>
->>>> Thanks Josh !
->>>>
->>>> Regards
->>>> Somnath
->>>>
->>>> -----Original Message-----
->>>> From: Josh Durgin [mailto:josh.durgin@inktank.com]
->>>> Sent: Wednesday, September 17, 2014 2:20 PM
->>>> To: Somnath Roy; ceph-devel@vger.kernel.org
->>>> Subject: Re: severe librbd performance degradation in Giant
->>>>
->>>> On 09/17/2014 01:55 PM, Somnath Roy wrote:
->>>>> Hi Sage,
->>>>> We are experiencing severe librbd performance degradation in Gian=
-t over firefly release. Here is the experiment we did to isolate it as =
-a librbd problem.
->>>>>
->>>>> 1. Single OSD is running latest Giant and client is running fio r=
-bd on top of firefly based librbd/librados. For one client it is giving=
- ~11-12K iops (4K RR).
->>>>> 2. Single OSD is running Giant and client is running fio rbd on t=
-op of Giant based librbd/librados. For one client it is giving ~1.9K io=
-ps (4K RR).
->>>>> 3. Single OSD is running latest Giant and client is running Giant=
- based ceph_smaiobench on top of giant librados. For one client it is g=
-iving ~11-12K iops (4K RR).
->>>>> 4. Giant RGW on top of Giant OSD is also scaling.
->>>>>
->>>>>
->>>>> So, it is obvious from the above that recent librbd has issues. I=
- will raise a tracker to track this.
->>>>
->>>> For giant the default cache settings changed to:
->>>>
->>>> rbd cache =3D true
->>>> rbd cache writethrough until flush =3D true
->>>>
->>>> If fio isn't sending flushes as the test is running, the cache wil=
-l stay in writethrough mode. Does the difference remain if you set rbd =
-cache writethrough until flush =3D false ?
->>>>
->>>> Josh
->>>>
->>>> ________________________________
->>>>
->>>> PLEASE NOTE: The information contained in this electronic mail mes=
-sage is intended only for the use of the designated recipient(s) named =
-above. If the reader of this message is not the intended recipient, you=
- are hereby notified that you have received this message in error and t=
-hat any review, dissemination, distribution, or copying of this message=
- is strictly prohibited. If you have received this communication in err=
-or, please notify the sender by telephone or e-mail (as shown above) im=
-mediately and destroy any and all copies of this message in your posses=
-sion (whether hard copies or electronically stored copies).
->>>>
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-dev=
-el"
->>>> in the body of a message to majordomo@vger.kernel.org More majordo=
-mo=20
->>>> info at http://vger.kernel.org/majordomo-info.html
->>>>
->>>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
-l"
->>> in the body of a message to majordomo@vger.kernel.org More majordom=
-o=20
->>> info at http://vger.kernel.org/majordomo-info.html
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
-l"
->>> in the body of a message to majordomo@vger.kernel.org More majordom=
-o=20
->>> info at http://vger.kernel.org/majordomo-info.html
->>
->>
->>
->> --
->> Best Regards,
->>
->> Wheat
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in the body of a message to majordomo@vger.kernel.org More majordomo =
-info at http://vger.kernel.org/majordomo-info.html
->> N     r  y   b X  =C7=A7v ^ )=DE=BA{.n +   z ]z   {ay =1D=CA=87=DA=99=
- ,j   f   h   z =1E w       j:+v   w j m         zZ+     =DD=A2j"  ! i
->> N     r  y   b X  =C7=A7v ^ )=DE=BA{.n +   z ]z   {ay =1D=CA=87=DA=99=
- ,j   f   h   z =1E w  =20
->    j:+v   w j m         zZ+     =DD=A2j"  !tml=3D
->>
-> N=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDr=EF=BF=BD=EF=BF=BDy=EF=
-=BF=BD=EF=BF=BD=EF=BF=BDb=EF=BF=BDX=EF=BF=BD=EF=BF=BD=C7=A7v=EF=BF=BD^=EF=
-=BF=BD)=DE=BA{.n=EF=BF=BD+=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD]z=EF=BF=
-=BD=EF=BF=BD=EF=BF=BD{ay=EF=BF=BD=1D=CA=87=DA=99=EF=BF=BD,j=07=EF=BF=BD=
-=EF=BF=BDf=EF=BF=BD=EF=BF=BD=EF=BF=BDh=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=
-=BD=1E=EF=BF=BDw=EF=BF=BD=EF=BF=BD=EF=BF=BD=0C=EF=BF=BD=EF=BF=BD=EF=BF=BD=
-j:+v=EF=BF=BD=EF=BF=BD=EF=BF=BDw=EF=BF=BDj=EF=BF=BDm=EF=BF=BD=EF=BF=BD=EF=
-=BF=BD=EF=BF=BD=07=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDzZ+=EF=BF=BD=EF=BF=
-=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=DD=A2j"=EF=BF=BD=EF=BF=BD!tml=3D
->=20
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+TnVtYmVycyB2YXJ5IGEgbG90IGZyb20gYnJhbmQgdG8gYnJhbmQgYW5kIGZyb20gbW9kZWwgdG8g
+bW9kZWwuDQoNCkp1c3Qgd2l0aGluIEludGVsLCB5b3UnZCBiZSBzdXJwcmlzZWQgYXQgdGhlIGxh
+cmdlIGRpZmZlcmVuY2UgYmV0d2VlbiBEQw0KUzM1MDAgYW5kIERDIFMzNzAwOg0KaHR0cDovL2Fy
+ay5pbnRlbC5jb20vY29tcGFyZS83NTY4MCw3MTkxNA0KLS0gDQpEYXZpZCBNb3JlYXUgU2ltYXJk
+DQoNCg0KTGUgMjAxNC0wOS0xOSwgOTozMSBBTSwgwqsgU3RlZmFuIFByaWViZSAtIFByb2ZpaG9z
+dCBBRyDCuw0KPHMucHJpZWJlQHByb2ZpaG9zdC5hZz4gYSDDqWNyaXQgOg0KDQo+QW0gMTkuMDku
+MjAxNCB1bSAxNTowMiBzY2hyaWViIFNodSwgWGlueGluOg0KPj4gIDEyIHggSW50ZWwgREMgMzcw
+MCAyMDBHQiwgZXZlcnkgU1NEIGhhcyB0d28gT1NEcy4NCj4NCj5DcmF6eSwgSSd2ZSA1NiBTU0Rz
+IGFuZCBjYW7DhHQgZ28gYWJvdmUgMjAgMDAwIGlvcHMuDQo+DQo+R3LDvMOfZSBTdGVmYW4NCj4N
+Cj4+IENoZWVycywNCj4+IHhpbnhpbg0KPj4gDQo+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0t
+LQ0KPj4gRnJvbTogU3RlZmFuIFByaWViZSBbbWFpbHRvOnMucHJpZWJlQHByb2ZpaG9zdC5hZ10N
+Cj4+IFNlbnQ6IEZyaWRheSwgU2VwdGVtYmVyIDE5LCAyMDE0IDI6NTQgUE0NCj4+IFRvOiBTaHUs
+IFhpbnhpbjsgU29tbmF0aCBSb3k7IEFsZXhhbmRyZSBERVJVTUlFUjsgSGFvbWFpIFdhbmcNCj4+
+IENjOiBTYWdlIFdlaWw7IEpvc2ggRHVyZ2luOyBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0K
+Pj4gU3ViamVjdDogUmU6IHNldmVyZSBsaWJyYmQgcGVyZm9ybWFuY2UgZGVncmFkYXRpb24gaW4g
+R2lhbnQNCj4+IA0KPj4gQW0gMTkuMDkuMjAxNCAwMzowOCwgc2NocmllYiBTaHUsIFhpbnhpbjoN
+Cj4+PiBJIGFsc28gb2JzZXJ2ZWQgcGVyZm9ybWFuY2UgZGVncmFkYXRpb24gb24gbXkgZnVsbCBT
+U0Qgc2V0dXAgLCAgSSBjYW4NCj4+PiBnb3QgIH4yNzBLIElPUFMgZm9yIDRLQiByYW5kb20gcmVh
+ZCB3aXRoIDAuODAuNCAsIGJ1dCB3aXRoIGxhdGVzdA0KPj4+IG1hc3RlciAsIEkgb25seSBnb3Qg
+fjEySyBJT1BTDQo+PiANCj4+IFRoaXMgYXJlIGltcHJlc3NpdmUgbnVtYmVycy4gQ2FuIHlvdSB0
+ZWxsIG1lIGhvdyBtYW55IE9TRHMgeW91IGhhdmUgYW5kDQo+PndoaWNoIFNTRHMgeW91IHVzZT8N
+Cj4+IA0KPj4gVGhhbmtzLA0KPj4gU3RlZmFuDQo+PiANCj4+IA0KPj4+IENoZWVycywNCj4+PiB4
+aW54aW4NCj4+Pg0KPj4+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+Pj4gRnJvbTogY2Vw
+aC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcNCj4+PiBbbWFpbHRvOmNlcGgtZGV2ZWwtb3du
+ZXJAdmdlci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgU29tbmF0aCBSb3kNCj4+PiBTZW50OiBG
+cmlkYXksIFNlcHRlbWJlciAxOSwgMjAxNCAyOjAzIEFNDQo+Pj4gVG86IEFsZXhhbmRyZSBERVJV
+TUlFUjsgSGFvbWFpIFdhbmcNCj4+PiBDYzogU2FnZSBXZWlsOyBKb3NoIER1cmdpbjsgY2VwaC1k
+ZXZlbEB2Z2VyLmtlcm5lbC5vcmcNCj4+PiBTdWJqZWN0OiBSRTogc2V2ZXJlIGxpYnJiZCBwZXJm
+b3JtYW5jZSBkZWdyYWRhdGlvbiBpbiBHaWFudA0KPj4+DQo+Pj4gQWxleGFuZHJlLA0KPj4+IFdo
+YXQgdG9vbCBhcmUgeW91IHVzaW5nID8gSSB1c2VkIGZpbyByYmQuDQo+Pj4NCj4+PiBBbHNvLCBJ
+IGhvcGUgeW91IGhhdmUgR2lhbnQgcGFja2FnZSBpbnN0YWxsZWQgaW4gdGhlIGNsaWVudCBzaWRl
+IGFzDQo+Pj53ZWxsIGFuZCByYmRfY2FjaGUgPXRydWUgaXMgc2V0IG9uIHRoZSBjbGllbnQgY29u
+ZiBmaWxlLg0KPj4+IEZZSSwgZmlyZWZseSBsaWJyYmQgKyBsaWJyYWRvcyBhbmQgR2lhbnQgY2x1
+c3RlciB3aWxsIHdvcmsgc2VhbWxlc3NseQ0KPj4+YW5kIEkgaGFkIHRvIG1ha2Ugc3VyZSBmaW8g
+cmJkIGlzIHJlYWxseSBsb2FkaW5nIGdpYW50IGxpYnJiZCAoaWYgeW91DQo+Pj5oYXZlIG11bHRp
+cGxlIGNvcGllcyBhcm91bmQgLCB3aGljaCB3YXMgaW4gbXkgY2FzZSkgZm9yIHJlcHJvZHVjaW5n
+IGl0Lg0KPj4+DQo+Pj4gVGhhbmtzICYgUmVnYXJkcw0KPj4+IFNvbW5hdGgNCj4+Pg0KPj4+IC0t
+LS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+Pj4gRnJvbTogQWxleGFuZHJlIERFUlVNSUVSIFtt
+YWlsdG86YWRlcnVtaWVyQG9kaXNvLmNvbV0NCj4+PiBTZW50OiBUaHVyc2RheSwgU2VwdGVtYmVy
+IDE4LCAyMDE0IDI6NDkgQU0NCj4+PiBUbzogSGFvbWFpIFdhbmcNCj4+PiBDYzogU2FnZSBXZWls
+OyBKb3NoIER1cmdpbjsgY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc7IFNvbW5hdGggUm95DQo+
+Pj4gU3ViamVjdDogUmU6IHNldmVyZSBsaWJyYmQgcGVyZm9ybWFuY2UgZGVncmFkYXRpb24gaW4g
+R2lhbnQNCj4+Pg0KPj4+Pj4gQWNjb3JkaW5nIGh0dHA6Ly90cmFja2VyLmNlcGguY29tL2lzc3Vl
+cy85NTEzLCBkbyB5b3UgbWVhbiB0aGF0IHJiZA0KPj4+Pj4gY2FjaGUgd2lsbCBtYWtlIDEweCBw
+ZXJmb3JtYW5jZSBkZWdyYWRhdGlvbiBmb3IgcmFuZG9tIHJlYWQ/DQo+Pj4NCj4+PiBIaSwgb24g
+bXkgc2lkZSwgSSBkb24ndCBzZWUgYW55IGRlZ3JhZGF0aW9uIHBlcmZvcm1hbmNlIG9uIHJlYWQg
+KHNlcQ0KPj4+b3IgcmFuZCkgIHdpdGggb3Igd2l0aG91dC4NCj4+Pg0KPj4+IGZpcmVmbHkgOiBh
+cm91bmQgMTIwMDBpb3BzICh3aXRoIG9yIHdpdGhvdXQgcmJkX2NhY2hlKSBnaWFudCA6IGFyb3Vu
+ZA0KPj4+IDEyMDAwaW9wcyAgKHdpdGggb3Igd2l0aG91dCByYmRfY2FjaGUpDQo+Pj4NCj4+PiAo
+YW5kIEkgY2FuIHJlYWNoIGFyb3VuZCAyMDAwMC0zMDAwMCBpb3BzIG9uIGdpYW50IHdpdGggZGlz
+YWJsaW5nDQo+Pj5vcHRyYWNrZXIpLg0KPj4+DQo+Pj4NCj4+PiByYmRfY2FjaGUgb25seSBpbXBy
+b3ZlIHdyaXRlIHBlcmZvcm1hbmNlIGZvciBtZSAoNGsgYmxvY2sgKQ0KPj4+DQo+Pj4NCj4+Pg0K
+Pj4+IC0tLS0tIE1haWwgb3JpZ2luYWwgLS0tLS0NCj4+Pg0KPj4+IERlOiAiSGFvbWFpIFdhbmci
+IDxoYW9tYWl3YW5nQGdtYWlsLmNvbT4NCj4+PiDDgDogIlNvbW5hdGggUm95IiA8U29tbmF0aC5S
+b3lAc2FuZGlzay5jb20+DQo+Pj4gQ2M6ICJTYWdlIFdlaWwiIDxzd2VpbEByZWRoYXQuY29tPiwg
+Ikpvc2ggRHVyZ2luIg0KPj4+IDxqb3NoLmR1cmdpbkBpbmt0YW5rLmNvbT4sIGNlcGgtZGV2ZWxA
+dmdlci5rZXJuZWwub3JnDQo+Pj4gRW52b3nDqTogSmV1ZGkgMTggU2VwdGVtYnJlIDIwMTQgMDQ6
+Mjc6NTYNCj4+PiBPYmpldDogUmU6IHNldmVyZSBsaWJyYmQgcGVyZm9ybWFuY2UgZGVncmFkYXRp
+b24gaW4gR2lhbnQNCj4+Pg0KPj4+IEFjY29yZGluZyBodHRwOi8vdHJhY2tlci5jZXBoLmNvbS9p
+c3N1ZXMvOTUxMywgZG8geW91IG1lYW4gdGhhdCByYmQNCj4+PmNhY2hlIHdpbGwgbWFrZSAxMHgg
+cGVyZm9ybWFuY2UgZGVncmFkYXRpb24gZm9yIHJhbmRvbSByZWFkPw0KPj4+DQo+Pj4gT24gVGh1
+LCBTZXAgMTgsIDIwMTQgYXQgNzo0NCBBTSwgU29tbmF0aCBSb3kgPFNvbW5hdGguUm95QHNhbmRp
+c2suY29tPg0KPj4+d3JvdGU6DQo+Pj4+IEpvc2gvU2FnZSwNCj4+Pj4gSSBzaG91bGQgbWVudGlv
+biB0aGF0IGV2ZW4gYWZ0ZXIgdHVybmluZyBvZmYgcmJkIGNhY2hlIEkgYW0gZ2V0dGluZw0KPj4+
+Pn4yMCUgZGVncmFkYXRpb24gb3ZlciBGaXJlZmx5Lg0KPj4+Pg0KPj4+PiBUaGFua3MgJiBSZWdh
+cmRzDQo+Pj4+IFNvbW5hdGgNCj4+Pj4NCj4+Pj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0N
+Cj4+Pj4gRnJvbTogU29tbmF0aCBSb3kNCj4+Pj4gU2VudDogV2VkbmVzZGF5LCBTZXB0ZW1iZXIg
+MTcsIDIwMTQgMjo0NCBQTQ0KPj4+PiBUbzogU2FnZSBXZWlsDQo+Pj4+IENjOiBKb3NoIER1cmdp
+bjsgY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNCj4+Pj4gU3ViamVjdDogUkU6IHNldmVyZSBs
+aWJyYmQgcGVyZm9ybWFuY2UgZGVncmFkYXRpb24gaW4gR2lhbnQNCj4+Pj4NCj4+Pj4gQ3JlYXRl
+ZCBhIHRyYWNrZXIgZm9yIHRoaXMuDQo+Pj4+DQo+Pj4+IGh0dHA6Ly90cmFja2VyLmNlcGguY29t
+L2lzc3Vlcy85NTEzDQo+Pj4+DQo+Pj4+IFRoYW5rcyAmIFJlZ2FyZHMNCj4+Pj4gU29tbmF0aA0K
+Pj4+Pg0KPj4+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPj4+PiBGcm9tOiBjZXBoLWRl
+dmVsLW93bmVyQHZnZXIua2VybmVsLm9yZw0KPj4+PiBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJA
+dmdlci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgU29tbmF0aCBSb3kNCj4+Pj4gU2VudDogV2Vk
+bmVzZGF5LCBTZXB0ZW1iZXIgMTcsIDIwMTQgMjozOSBQTQ0KPj4+PiBUbzogU2FnZSBXZWlsDQo+
+Pj4+IENjOiBKb3NoIER1cmdpbjsgY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNCj4+Pj4gU3Vi
+amVjdDogUkU6IHNldmVyZSBsaWJyYmQgcGVyZm9ybWFuY2UgZGVncmFkYXRpb24gaW4gR2lhbnQN
+Cj4+Pj4NCj4+Pj4gU2FnZSwNCj4+Pj4gSXQncyBhIDRLIHJhbmRvbSByZWFkLg0KPj4+Pg0KPj4+
+PiBUaGFua3MgJiBSZWdhcmRzDQo+Pj4+IFNvbW5hdGgNCj4+Pj4NCj4+Pj4gLS0tLS1PcmlnaW5h
+bCBNZXNzYWdlLS0tLS0NCj4+Pj4gRnJvbTogU2FnZSBXZWlsIFttYWlsdG86c3dlaWxAcmVkaGF0
+LmNvbV0NCj4+Pj4gU2VudDogV2VkbmVzZGF5LCBTZXB0ZW1iZXIgMTcsIDIwMTQgMjozNiBQTQ0K
+Pj4+PiBUbzogU29tbmF0aCBSb3kNCj4+Pj4gQ2M6IEpvc2ggRHVyZ2luOyBjZXBoLWRldmVsQHZn
+ZXIua2VybmVsLm9yZw0KPj4+PiBTdWJqZWN0OiBSRTogc2V2ZXJlIGxpYnJiZCBwZXJmb3JtYW5j
+ZSBkZWdyYWRhdGlvbiBpbiBHaWFudA0KPj4+Pg0KPj4+PiBXaGF0IHdhcyB0aGUgaW8gcGF0dGVy
+bj8gU2VxdWVudGlhbCBvciByYW5kb20/IEZvciByYW5kb20gYSBzbG93ZG93bg0KPj4+Pm1ha2Vz
+IHNlbnNlICh0aG8gbWF5YmUgbm90IDEweCEpIGJ1dCBub3QgZm9yIHNlcXVlbnRhaWwuLi4uDQo+
+Pj4+DQo+Pj4+IHMNCj4+Pj4NCj4+Pj4gT24gV2VkLCAxNyBTZXAgMjAxNCwgU29tbmF0aCBSb3kg
+d3JvdGU6DQo+Pj4+DQo+Pj4+PiBJIHNldCB0aGUgZm9sbG93aW5nIGluIHRoZSBjbGllbnQgc2lk
+ZSAvZXRjL2NlcGgvY2VwaC5jb25mIHdoZXJlIEkNCj4+Pj4+YW0gcnVubmluZyBmaW8gcmJkLg0K
+Pj4+Pj4NCj4+Pj4+IHJiZF9jYWNoZV93cml0ZXRocm91Z2hfdW50aWxfZmx1c2ggPSBmYWxzZQ0K
+Pj4+Pj4NCj4+Pj4+IEJ1dCwgbm8gZGlmZmVyZW5jZS4gQlRXLCBJIGFtIGRvaW5nIFJhbmRvbSBy
+ZWFkLCBub3Qgd3JpdGUuIFN0aWxsDQo+Pj4+PnRoaXMgc2V0dGluZyBhcHBsaWVzID8NCj4+Pj4+
+DQo+Pj4+PiBOZXh0LCBJIHRyaWVkIHRvIHR3ZWFrIHRoZSByYmRfY2FjaGUgc2V0dGluZyB0byBm
+YWxzZSBhbmQgSSAqZ290DQo+Pj4+PmJhY2sqIHRoZSBvbGQgcGVyZm9ybWFuY2UuIE5vdywgaXQg
+aXMgc2ltaWxhciB0byBmaXJlZmx5IHRocm91Z2hwdXQgIQ0KPj4+Pj4NCj4+Pj4+IFNvLCBsb2tz
+IGxpa2UgcmJkX2NhY2hlPXRydWUgd2FzIHRoZSBjdWxwcml0Lg0KPj4+Pj4NCj4+Pj4+IFRoYW5r
+cyBKb3NoICENCj4+Pj4+DQo+Pj4+PiBSZWdhcmRzDQo+Pj4+PiBTb21uYXRoDQo+Pj4+Pg0KPj4+
+Pj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4+Pj4+IEZyb206IEpvc2ggRHVyZ2luIFtt
+YWlsdG86am9zaC5kdXJnaW5AaW5rdGFuay5jb21dDQo+Pj4+PiBTZW50OiBXZWRuZXNkYXksIFNl
+cHRlbWJlciAxNywgMjAxNCAyOjIwIFBNDQo+Pj4+PiBUbzogU29tbmF0aCBSb3k7IGNlcGgtZGV2
+ZWxAdmdlci5rZXJuZWwub3JnDQo+Pj4+PiBTdWJqZWN0OiBSZTogc2V2ZXJlIGxpYnJiZCBwZXJm
+b3JtYW5jZSBkZWdyYWRhdGlvbiBpbiBHaWFudA0KPj4+Pj4NCj4+Pj4+IE9uIDA5LzE3LzIwMTQg
+MDE6NTUgUE0sIFNvbW5hdGggUm95IHdyb3RlOg0KPj4+Pj4+IEhpIFNhZ2UsDQo+Pj4+Pj4gV2Ug
+YXJlIGV4cGVyaWVuY2luZyBzZXZlcmUgbGlicmJkIHBlcmZvcm1hbmNlIGRlZ3JhZGF0aW9uIGlu
+IEdpYW50DQo+Pj4+Pj5vdmVyIGZpcmVmbHkgcmVsZWFzZS4gSGVyZSBpcyB0aGUgZXhwZXJpbWVu
+dCB3ZSBkaWQgdG8gaXNvbGF0ZSBpdCBhcw0KPj4+Pj4+YSBsaWJyYmQgcHJvYmxlbS4NCj4+Pj4+
+Pg0KPj4+Pj4+IDEuIFNpbmdsZSBPU0QgaXMgcnVubmluZyBsYXRlc3QgR2lhbnQgYW5kIGNsaWVu
+dCBpcyBydW5uaW5nIGZpbyByYmQNCj4+Pj4+Pm9uIHRvcCBvZiBmaXJlZmx5IGJhc2VkIGxpYnJi
+ZC9saWJyYWRvcy4gRm9yIG9uZSBjbGllbnQgaXQgaXMgZ2l2aW5nDQo+Pj4+Pj5+MTEtMTJLIGlv
+cHMgKDRLIFJSKS4NCj4+Pj4+PiAyLiBTaW5nbGUgT1NEIGlzIHJ1bm5pbmcgR2lhbnQgYW5kIGNs
+aWVudCBpcyBydW5uaW5nIGZpbyByYmQgb24gdG9wDQo+Pj4+Pj5vZiBHaWFudCBiYXNlZCBsaWJy
+YmQvbGlicmFkb3MuIEZvciBvbmUgY2xpZW50IGl0IGlzIGdpdmluZyB+MS45Sw0KPj4+Pj4+aW9w
+cyAoNEsgUlIpLg0KPj4+Pj4+IDMuIFNpbmdsZSBPU0QgaXMgcnVubmluZyBsYXRlc3QgR2lhbnQg
+YW5kIGNsaWVudCBpcyBydW5uaW5nIEdpYW50DQo+Pj4+Pj5iYXNlZCBjZXBoX3NtYWlvYmVuY2gg
+b24gdG9wIG9mIGdpYW50IGxpYnJhZG9zLiBGb3Igb25lIGNsaWVudCBpdCBpcw0KPj4+Pj4+Z2l2
+aW5nIH4xMS0xMksgaW9wcyAoNEsgUlIpLg0KPj4+Pj4+IDQuIEdpYW50IFJHVyBvbiB0b3Agb2Yg
+R2lhbnQgT1NEIGlzIGFsc28gc2NhbGluZy4NCj4+Pj4+Pg0KPj4+Pj4+DQo+Pj4+Pj4gU28sIGl0
+IGlzIG9idmlvdXMgZnJvbSB0aGUgYWJvdmUgdGhhdCByZWNlbnQgbGlicmJkIGhhcyBpc3N1ZXMu
+IEkNCj4+Pj4+PndpbGwgcmFpc2UgYSB0cmFja2VyIHRvIHRyYWNrIHRoaXMuDQo+Pj4+Pg0KPj4+
+Pj4gRm9yIGdpYW50IHRoZSBkZWZhdWx0IGNhY2hlIHNldHRpbmdzIGNoYW5nZWQgdG86DQo+Pj4+
+Pg0KPj4+Pj4gcmJkIGNhY2hlID0gdHJ1ZQ0KPj4+Pj4gcmJkIGNhY2hlIHdyaXRldGhyb3VnaCB1
+bnRpbCBmbHVzaCA9IHRydWUNCj4+Pj4+DQo+Pj4+PiBJZiBmaW8gaXNuJ3Qgc2VuZGluZyBmbHVz
+aGVzIGFzIHRoZSB0ZXN0IGlzIHJ1bm5pbmcsIHRoZSBjYWNoZSB3aWxsDQo+Pj4+PnN0YXkgaW4g
+d3JpdGV0aHJvdWdoIG1vZGUuIERvZXMgdGhlIGRpZmZlcmVuY2UgcmVtYWluIGlmIHlvdSBzZXQg
+cmJkDQo+Pj4+PmNhY2hlIHdyaXRldGhyb3VnaCB1bnRpbCBmbHVzaCA9IGZhbHNlID8NCj4+Pj4+
+DQo+Pj4+PiBKb3NoDQo+Pj4+Pg0KPj4+Pj4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X18NCj4+Pj4+DQo+Pj4+PiBQTEVBU0UgTk9URTogVGhlIGluZm9ybWF0aW9uIGNvbnRhaW5lZCBp
+biB0aGlzIGVsZWN0cm9uaWMgbWFpbA0KPj4+Pj5tZXNzYWdlIGlzIGludGVuZGVkIG9ubHkgZm9y
+IHRoZSB1c2Ugb2YgdGhlIGRlc2lnbmF0ZWQgcmVjaXBpZW50KHMpDQo+Pj4+Pm5hbWVkIGFib3Zl
+LiBJZiB0aGUgcmVhZGVyIG9mIHRoaXMgbWVzc2FnZSBpcyBub3QgdGhlIGludGVuZGVkDQo+Pj4+
+PnJlY2lwaWVudCwgeW91IGFyZSBoZXJlYnkgbm90aWZpZWQgdGhhdCB5b3UgaGF2ZSByZWNlaXZl
+ZCB0aGlzDQo+Pj4+Pm1lc3NhZ2UgaW4gZXJyb3IgYW5kIHRoYXQgYW55IHJldmlldywgZGlzc2Vt
+aW5hdGlvbiwgZGlzdHJpYnV0aW9uLCBvcg0KPj4+Pj5jb3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBp
+cyBzdHJpY3RseSBwcm9oaWJpdGVkLiBJZiB5b3UgaGF2ZSByZWNlaXZlZA0KPj4+Pj50aGlzIGNv
+bW11bmljYXRpb24gaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlciBieSB0ZWxlcGhv
+bmUgb3INCj4+Pj4+ZS1tYWlsIChhcyBzaG93biBhYm92ZSkgaW1tZWRpYXRlbHkgYW5kIGRlc3Ry
+b3kgYW55IGFuZCBhbGwgY29waWVzIG9mDQo+Pj4+PnRoaXMgbWVzc2FnZSBpbiB5b3VyIHBvc3Nl
+c3Npb24gKHdoZXRoZXIgaGFyZCBjb3BpZXMgb3INCj4+Pj4+ZWxlY3Ryb25pY2FsbHkgc3RvcmVk
+IGNvcGllcykuDQo+Pj4+Pg0KPj4+Pj4gLS0NCj4+Pj4+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhp
+cyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIg0KPj4+Pj4gaW4g
+dGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBt
+YWpvcmRvbW8NCj4+Pj4+IGluZm8gYXQgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8t
+aW5mby5odG1sDQo+Pj4+Pg0KPj4+Pj4NCj4+Pj4gLS0NCj4+Pj4gVG8gdW5zdWJzY3JpYmUgZnJv
+bSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiDQo+Pj4+
+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1v
+cmUgbWFqb3Jkb21vDQo+Pj4+IGluZm8gYXQgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRv
+bW8taW5mby5odG1sDQo+Pj4+IC0tDQo+Pj4+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0
+OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIg0KPj4+PiBpbiB0aGUgYm9k
+eSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9t
+bw0KPj4+PiBpbmZvIGF0IGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRt
+bA0KPj4+DQo+Pj4NCj4+Pg0KPj4+IC0tDQo+Pj4gQmVzdCBSZWdhcmRzLA0KPj4+DQo+Pj4gV2hl
+YXQNCj4+PiAtLQ0KPj4+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBs
+aW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIg0KPj4+aW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdl
+IHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8NCj4+PmluZm8gYXQg
+aHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+Pj4gTiAgICAgciAg
+eSAgIGIgWCAgx6d2IF4gKd66ey5uICsgICB6IF16ICAge2F5IB3Kh9qZICxqICAgZiAgIGggICB6
+IB4gdw0KPj4+ICBqOit2ICAgdyBqIG0gICAgICAgICB6WisgICAgIN2iaiIgICEgaQ0KPj4+IE4g
+ICAgIHIgIHkgICBiIFggIMendiBeICneunsubiArICAgeiBdeiAgIHtheSAdyofamSAsaiAgIGYg
+ICBoICAgeiAeIHcNCj4+ICAgIGo6K3YgICB3IGogbSAgICAgICAgIHpaKyAgICAg3aJqIiAgIXRt
+bD0NCj4+Pg0KPj4gDQo+Pk7vv73vv73vv73vv73vv71y77+977+9ee+/ve+/ve+/vWLvv71Y77+9
+77+9x6d277+9Xu+/vSneunsubu+/vSvvv73vv73vv71677+9XXrvv73vv73vv717YXnvv70dyofa
+me+/vSxqB++/ve+/vWbvv73vv73vv71o77+977+977+9eu+/vR7vv71377+977+977+9DO+/ve+/
+ve+/vQ0KPj5qOit277+977+977+9d++/vWrvv71t77+977+977+977+9B++/ve+/ve+/ve+/vXpa
+K++/ve+/ve+/ve+/ve+/vd2iaiLvv73vv70hdG1sPQ0KPj4gDQo+LS0NCj5UbyB1bnN1YnNjcmli
+ZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIg
+aW4NCj50aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZw0K
+Pk1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21v
+LWluZm8uaHRtbA0KDQo=
