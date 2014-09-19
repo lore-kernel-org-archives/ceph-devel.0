@@ -1,55 +1,257 @@
-From: Florian Haas <florian@hastexo.com>
-Subject: Re: snap_trimming + backfilling is inefficient with many purged_snaps
-Date: Fri, 19 Sep 2014 08:12:57 +0200
-Message-ID: <CAPUexz-GYF4R95k8QzvdGDKtzez0Qm6SnJt1=4YJEGB8ty7Ggg@mail.gmail.com>
-References: <CAPUexz-ff+fTmU0J0TrJ80p+6334BBPvM7EWW5=eGa8uEomRew@mail.gmail.com>
- <D197E5D4-598B-4574-852E-C9F0CA10133E@cern.ch> <CAPUexz9XeNMJvjCeM_7N0_TQOS6_xBOdgnKm9j4FNDib3+FjMg@mail.gmail.com>
- <541b2add.ea5cb40a.250c.3ed0SMTPIN_ADDED_BROKEN@mx.google.com>
- <CAPUexz_H7-b8SY6J+dLnAyw663eHXoLKYccB1edwH9XgFBZCpw@mail.gmail.com>
- <07f3373f39ff2f738d76bc9f23f07297@webmail.vanderster.com> <CAPUexz9P264L4fj4eSdb3KbnTS+ewvE7WdKCw5ijjEO_u8URYA@mail.gmail.com>
- <alpine.DEB.2.00.1409181446110.19460@cobra.newdream.net> <CAPUexz-HXn=x_b=CJev46jWFsSrUpXc7UO7kzWcRe4Yrm6VL3g@mail.gmail.com>
- <alpine.DEB.2.00.1409181526260.19460@cobra.newdream.net>
+From: Stefan Priebe <s.priebe@profihost.ag>
+Subject: Re: severe librbd performance degradation in Giant
+Date: Fri, 19 Sep 2014 08:53:38 +0200
+Message-ID: <541BD2F2.9030500@profihost.ag>
+References: <CACJqLyYQDrHyxMEtiMKMNaBQ_fHuu-hGqO_ZNHra0+VsUZrzXQ@mail.gmail.com> <1ab9d756-bbc9-4fbe-8f51-0a33dbab1a8d@mailpro> <755F6B91B3BE364F9BCA11EA3F9E0C6F2784639B@SACMBXIP02.sdcorp.global.sandisk.com> <75674D092A819E4189E91166C74CB90D01440AE4@shsmsx102.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=UTF-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f174.google.com ([209.85.216.174]:42622 "EHLO
-	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755888AbaISGNU (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 19 Sep 2014 02:13:20 -0400
-Received: by mail-qc0-f174.google.com with SMTP id m20so2563206qcx.19
-        for <ceph-devel@vger.kernel.org>; Thu, 18 Sep 2014 23:13:19 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1409181526260.19460@cobra.newdream.net>
+Received: from mail-ph.de-nserver.de ([85.158.179.214]:48176 "EHLO
+	mail-ph.de-nserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753149AbaISGxl (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 19 Sep 2014 02:53:41 -0400
+In-Reply-To: <75674D092A819E4189E91166C74CB90D01440AE4@shsmsx102.ccr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Dan van der Ster <daniel.vanderster@cern.ch>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Shu, Xinxin" <xinxin.shu@intel.com>, Somnath Roy <Somnath.Roy@sandisk.com>, Alexandre DERUMIER <aderumier@odiso.com>, Haomai Wang <haomaiwang@gmail.com>
+Cc: Sage Weil <sweil@redhat.com>, Josh Durgin <josh.durgin@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Fri, Sep 19, 2014 at 12:27 AM, Sage Weil <sweil@redhat.com> wrote:
-> On Fri, 19 Sep 2014, Florian Haas wrote:
->> Hi Sage,
+Am 19.09.2014 03:08, schrieb Shu, Xinxin:
+> I also observed performance degradation on my full SSD setup ,  I can=
+ got  ~270K IOPS for 4KB random read with 0.80.4 , but with latest mast=
+er , I only got ~12K IOPS
+
+This are impressive numbers. Can you tell me how many OSDs you have and=
+=20
+which SSDs you use?
+
+Thanks,
+Stefan
+
+
+> Cheers,
+> xinxin
+>
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.=
+kernel.org] On Behalf Of Somnath Roy
+> Sent: Friday, September 19, 2014 2:03 AM
+> To: Alexandre DERUMIER; Haomai Wang
+> Cc: Sage Weil; Josh Durgin; ceph-devel@vger.kernel.org
+> Subject: RE: severe librbd performance degradation in Giant
+>
+> Alexandre,
+> What tool are you using ? I used fio rbd.
+>
+> Also, I hope you have Giant package installed in the client side as w=
+ell and rbd_cache =3Dtrue is set on the client conf file.
+> FYI, firefly librbd + librados and Giant cluster will work seamlessly=
+ and I had to make sure fio rbd is really loading giant librbd (if you =
+have multiple copies around , which was in my case) for reproducing it.
+>
+> Thanks & Regards
+> Somnath
+>
+> -----Original Message-----
+> From: Alexandre DERUMIER [mailto:aderumier@odiso.com]
+> Sent: Thursday, September 18, 2014 2:49 AM
+> To: Haomai Wang
+> Cc: Sage Weil; Josh Durgin; ceph-devel@vger.kernel.org; Somnath Roy
+> Subject: Re: severe librbd performance degradation in Giant
+>
+>>> According http://tracker.ceph.com/issues/9513, do you mean that rbd
+>>> cache will make 10x performance degradation for random read?
+>
+> Hi, on my side, I don't see any degradation performance on read (seq =
+or rand)  with or without.
+>
+> firefly : around 12000iops (with or without rbd_cache) giant : around=
+ 12000iops  (with or without rbd_cache)
+>
+> (and I can reach around 20000-30000 iops on giant with disabling optr=
+acker).
+>
+>
+> rbd_cache only improve write performance for me (4k block )
+>
+>
+>
+> ----- Mail original -----
+>
+> De: "Haomai Wang" <haomaiwang@gmail.com>
+> =C3=80: "Somnath Roy" <Somnath.Roy@sandisk.com>
+> Cc: "Sage Weil" <sweil@redhat.com>, "Josh Durgin" <josh.durgin@inktan=
+k.com>, ceph-devel@vger.kernel.org
+> Envoy=C3=A9: Jeudi 18 Septembre 2014 04:27:56
+> Objet: Re: severe librbd performance degradation in Giant
+>
+> According http://tracker.ceph.com/issues/9513, do you mean that rbd c=
+ache will make 10x performance degradation for random read?
+>
+> On Thu, Sep 18, 2014 at 7:44 AM, Somnath Roy <Somnath.Roy@sandisk.com=
+> wrote:
+>> Josh/Sage,
+>> I should mention that even after turning off rbd cache I am getting =
+~20% degradation over Firefly.
 >>
->> was the off-list reply intentional?
->
-> Whoops!  Nope :)
->
->> On Thu, Sep 18, 2014 at 11:47 PM, Sage Weil <sweil@redhat.com> wrote:
->> >> So, disaster is a pretty good description. Would anyone from the core
->> >> team like to suggest another course of action or workaround, or are
->> >> Dan and I generally on the right track to make the best out of a
->> >> pretty bad situation?
->> >
->> > The short term fix would probably be to just prevent backfill for the time
->> > being until the bug is fixed.
+>> Thanks & Regards
+>> Somnath
 >>
->> As in, osd max backfills = 0?
+>> -----Original Message-----
+>> From: Somnath Roy
+>> Sent: Wednesday, September 17, 2014 2:44 PM
+>> To: Sage Weil
+>> Cc: Josh Durgin; ceph-devel@vger.kernel.org
+>> Subject: RE: severe librbd performance degradation in Giant
+>>
+>> Created a tracker for this.
+>>
+>> http://tracker.ceph.com/issues/9513
+>>
+>> Thanks & Regards
+>> Somnath
+>>
+>> -----Original Message-----
+>> From: ceph-devel-owner@vger.kernel.org
+>> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Somnath Roy
+>> Sent: Wednesday, September 17, 2014 2:39 PM
+>> To: Sage Weil
+>> Cc: Josh Durgin; ceph-devel@vger.kernel.org
+>> Subject: RE: severe librbd performance degradation in Giant
+>>
+>> Sage,
+>> It's a 4K random read.
+>>
+>> Thanks & Regards
+>> Somnath
+>>
+>> -----Original Message-----
+>> From: Sage Weil [mailto:sweil@redhat.com]
+>> Sent: Wednesday, September 17, 2014 2:36 PM
+>> To: Somnath Roy
+>> Cc: Josh Durgin; ceph-devel@vger.kernel.org
+>> Subject: RE: severe librbd performance degradation in Giant
+>>
+>> What was the io pattern? Sequential or random? For random a slowdown=
+ makes sense (tho maybe not 10x!) but not for sequentail....
+>>
+>> s
+>>
+>> On Wed, 17 Sep 2014, Somnath Roy wrote:
+>>
+>>> I set the following in the client side /etc/ceph/ceph.conf where I =
+am running fio rbd.
+>>>
+>>> rbd_cache_writethrough_until_flush =3D false
+>>>
+>>> But, no difference. BTW, I am doing Random read, not write. Still t=
+his setting applies ?
+>>>
+>>> Next, I tried to tweak the rbd_cache setting to false and I *got ba=
+ck* the old performance. Now, it is similar to firefly throughput !
+>>>
+>>> So, loks like rbd_cache=3Dtrue was the culprit.
+>>>
+>>> Thanks Josh !
+>>>
+>>> Regards
+>>> Somnath
+>>>
+>>> -----Original Message-----
+>>> From: Josh Durgin [mailto:josh.durgin@inktank.com]
+>>> Sent: Wednesday, September 17, 2014 2:20 PM
+>>> To: Somnath Roy; ceph-devel@vger.kernel.org
+>>> Subject: Re: severe librbd performance degradation in Giant
+>>>
+>>> On 09/17/2014 01:55 PM, Somnath Roy wrote:
+>>>> Hi Sage,
+>>>> We are experiencing severe librbd performance degradation in Giant=
+ over firefly release. Here is the experiment we did to isolate it as a=
+ librbd problem.
+>>>>
+>>>> 1. Single OSD is running latest Giant and client is running fio rb=
+d on top of firefly based librbd/librados. For one client it is giving =
+~11-12K iops (4K RR).
+>>>> 2. Single OSD is running Giant and client is running fio rbd on to=
+p of Giant based librbd/librados. For one client it is giving ~1.9K iop=
+s (4K RR).
+>>>> 3. Single OSD is running latest Giant and client is running Giant =
+based ceph_smaiobench on top of giant librados. For one client it is gi=
+ving ~11-12K iops (4K RR).
+>>>> 4. Giant RGW on top of Giant OSD is also scaling.
+>>>>
+>>>>
+>>>> So, it is obvious from the above that recent librbd has issues. I =
+will raise a tracker to track this.
+>>>
+>>> For giant the default cache settings changed to:
+>>>
+>>> rbd cache =3D true
+>>> rbd cache writethrough until flush =3D true
+>>>
+>>> If fio isn't sending flushes as the test is running, the cache will=
+ stay in writethrough mode. Does the difference remain if you set rbd c=
+ache writethrough until flush =3D false ?
+>>>
+>>> Josh
+>>>
+>>> ________________________________
+>>>
+>>> PLEASE NOTE: The information contained in this electronic mail mess=
+age is intended only for the use of the designated recipient(s) named a=
+bove. If the reader of this message is not the intended recipient, you =
+are hereby notified that you have received this message in error and th=
+at any review, dissemination, distribution, or copying of this message =
+is strictly prohibited. If you have received this communication in erro=
+r, please notify the sender by telephone or e-mail (as shown above) imm=
+ediately and destroy any and all copies of this message in your possess=
+ion (whether hard copies or electronically stored copies).
+>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
+l"
+>>> in the body of a message to majordomo@vger.kernel.org More majordom=
+o
+>>> info at http://vger.kernel.org/majordomo-info.html
+>>>
+>>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+"
+>> in the body of a message to majordomo@vger.kernel.org More majordomo
+>> info at http://vger.kernel.org/majordomo-info.html
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+"
+>> in the body of a message to majordomo@vger.kernel.org More majordomo
+>> info at http://vger.kernel.org/majordomo-info.html
 >
-> Yeah :)
 >
-> Just managed to reproduce the problem...
 >
-> sage
-
-Saw the wip branch. Color me freakishly impressed on the turnaround. :) Thanks!
-
-Cheers,
-Florian
+> --
+> Best Regards,
+>
+> Wheat
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in the body of a message to majordomo@vger.kernel.org More majordomo i=
+nfo at http://vger.kernel.org/majordomo-info.html
+> N     r  y   b X  =C7=A7v ^ )=DE=BA{.n +   z ]z   {ay =1D=CA=87=DA=99=
+ ,j   f   h   z =1E w       j:+v   w j m         zZ+     =DD=A2j"  ! i
+> N=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDr=EF=BF=BD=EF=BF=BDy=EF=
+=BF=BD=EF=BF=BD=EF=BF=BDb=EF=BF=BDX=EF=BF=BD=EF=BF=BD=C7=A7v=EF=BF=BD^=EF=
+=BF=BD)=DE=BA{.n=EF=BF=BD+=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD]z=EF=BF=
+=BD=EF=BF=BD=EF=BF=BD{ay=EF=BF=BD=1D=CA=87=DA=99=EF=BF=BD,j=07=EF=BF=BD=
+=EF=BF=BDf=EF=BF=BD=EF=BF=BD=EF=BF=BDh=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=
+=BD=1E=EF=BF=BDw=EF=BF=BD=EF=BF=BD=EF=BF=BD=0C=EF=BF=BD=EF=BF=BD=EF=BF=BD=
+j:+v=EF=BF=BD=EF=BF=BD=EF=BF=BDw=EF=BF=BDj=EF=BF=BDm=EF=BF=BD=EF=BF=BD=EF=
+=BF=BD=EF=BF=BD=07=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDzZ+=EF=BF=BD=EF=BF=
+=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=DD=A2j"=EF=BF=BD=EF=BF=BD!tml=3D
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
