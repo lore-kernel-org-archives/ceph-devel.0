@@ -1,59 +1,95 @@
 From: Alexandre DERUMIER <aderumier@odiso.com>
 Subject: Re: severe librbd performance degradation in Giant
-Date: Fri, 19 Sep 2014 12:09:41 +0200 (CEST)
-Message-ID: <05b6cb89-4c21-4377-8418-0c9a24fd1e62@mailpro>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2784639B@SACMBXIP02.sdcorp.global.sandisk.com>
+Date: Fri, 19 Sep 2014 13:30:24 +0200 (CEST)
+Message-ID: <94939606-a571-4cb1-8c8d-15c3c3231a76@mailpro>
+References: <05b6cb89-4c21-4377-8418-0c9a24fd1e62@mailpro>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.209.98]:55729 "EHLO
+Received: from mailpro.odiso.net ([89.248.209.98]:55222 "EHLO
 	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751147AbaISKJv convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 19 Sep 2014 06:09:51 -0400
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2784639B@SACMBXIP02.sdcorp.global.sandisk.com>
+	with ESMTP id S1755437AbaISLaf convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 19 Sep 2014 07:30:35 -0400
+In-Reply-To: <05b6cb89-4c21-4377-8418-0c9a24fd1e62@mailpro>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Somnath Roy <Somnath.Roy@sandisk.com>
 Cc: Sage Weil <sweil@redhat.com>, Josh Durgin <josh.durgin@inktank.com>, ceph-devel@vger.kernel.org, Haomai Wang <haomaiwang@gmail.com>
 
+>> with rbd_cache=3Dtrue , I got around 60000iops (and I don't see any =
+network traffic)=20
+>>
+>>So maybe they are a bug in fio ?=20
+>>maybe this is related to:=20
+
+Oh, sorry, this was my fault, I didn't fill the rbd with datas before d=
+oing the bench
+
+Now the results are (for 1 osd)
+
+firefly
+------
+ bw=3D37460KB/s, iops=3D9364
+
+giant
+-----
+ bw=3D32741KB/s, iops=3D8185
+
+
+So, a little regression
+
+(the results are equals rbd_cache=3Dtrue|false)
+
+
+I'll try to compare with more osds
+
+----- Mail original -----=20
+
+De: "Alexandre DERUMIER" <aderumier@odiso.com>=20
+=C3=80: "Somnath Roy" <Somnath.Roy@sandisk.com>=20
+Cc: "Sage Weil" <sweil@redhat.com>, "Josh Durgin" <josh.durgin@inktank.=
+com>, ceph-devel@vger.kernel.org, "Haomai Wang" <haomaiwang@gmail.com>=20
+Envoy=C3=A9: Vendredi 19 Septembre 2014 12:09:41=20
+Objet: Re: severe librbd performance degradation in Giant=20
+
 >>What tool are you using ? I used fio rbd.=20
 
-fio rbd too
+fio rbd too=20
 
 
-[global]
-ioengine=3Drbd
-clientname=3Dadmin
-pool=3Dtest
-rbdname=3Dtest
+[global]=20
+ioengine=3Drbd=20
+clientname=3Dadmin=20
+pool=3Dtest=20
+rbdname=3Dtest=20
 invalidate=3D0=20
-#rw=3Dread
-#rw=3Drandwrite
-#rw=3Dwrite
-rw=3Drandread
-bs=3D4k
-direct=3D1
-numjobs=3D2
-group_reporting=3D1
-size=3D10G
+#rw=3Dread=20
+#rw=3Drandwrite=20
+#rw=3Dwrite=20
+rw=3Drandread=20
+bs=3D4k=20
+direct=3D1=20
+numjobs=3D2=20
+group_reporting=3D1=20
+size=3D10G=20
 
-[rbd_iodepth32]
-iodepth=3D32
-
-
-
-I just notice something strange
-
-with rbd_cache=3Dtrue , I got around 60000iops  (and I don't see any ne=
-twork traffic)
-
-So maybe they are a bug in fio ?
-maybe this is related to:
+[rbd_iodepth32]=20
+iodepth=3D32=20
 
 
-http://tracker.ceph.com/issues/9391
-"fio rbd driver rewrites same blocks"
+
+I just notice something strange=20
+
+with rbd_cache=3Dtrue , I got around 60000iops (and I don't see any net=
+work traffic)=20
+
+So maybe they are a bug in fio ?=20
+maybe this is related to:=20
+
+
+http://tracker.ceph.com/issues/9391=20
+"fio rbd driver rewrites same blocks"=20
 
 ----- Mail original -----=20
 
@@ -262,6 +298,11 @@ Wheat=20
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n the body of a message to majordomo@vger.kernel.org More majordomo inf=
 o at http://vger.kernel.org/majordomo-info.html=20
+--=20
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n=20
+the body of a message to majordomo@vger.kernel.org=20
+More majordomo info at http://vger.kernel.org/majordomo-info.html=20
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
