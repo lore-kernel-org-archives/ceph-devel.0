@@ -1,51 +1,130 @@
-From: Dan Van Der Ster <daniel.vanderster@cern.ch>
-Subject: Re: snap_trimming + backfilling is inefficient with many
- purged_snaps
-Date: Fri, 19 Sep 2014 08:41:56 +0000
-Message-ID: <1878E4A4-2363-4717-ABEC-B587B0337D6B@cern.ch>
-References: <CAPUexz-ff+fTmU0J0TrJ80p+6334BBPvM7EWW5=eGa8uEomRew@mail.gmail.com>
- <D197E5D4-598B-4574-852E-C9F0CA10133E@cern.ch>
- <CAPUexz9XeNMJvjCeM_7N0_TQOS6_xBOdgnKm9j4FNDib3+FjMg@mail.gmail.com>
- <541b2add.ea5cb40a.250c.3ed0SMTPIN_ADDED_BROKEN@mx.google.com>
- <CAPUexz_H7-b8SY6J+dLnAyw663eHXoLKYccB1edwH9XgFBZCpw@mail.gmail.com>
- <07f3373f39ff2f738d76bc9f23f07297@webmail.vanderster.com>
- <CAPUexz9P264L4fj4eSdb3KbnTS+ewvE7WdKCw5ijjEO_u8URYA@mail.gmail.com>
- <alpine.DEB.2.00.1409181446110.19460@cobra.newdream.net>
- <CAPUexz-HXn=x_b=CJev46jWFsSrUpXc7UO7kzWcRe4Yrm6VL3g@mail.gmail.com>
- <alpine.DEB.2.00.1409181526260.19460@cobra.newdream.net>
- <CAPUexz-GYF4R95k8QzvdGDKtzez0Qm6SnJt1=4YJEGB8ty7Ggg@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: v2 aligned buffer changes for erasure codes
+Date: Fri, 19 Sep 2014 11:18:40 +0200
+Message-ID: <541BF4F0.4000203@dachary.org>
+References: <1410796508-28711-1-git-send-email-j@jannau.net>,<1411036435-18860-1-git-send-email-j@jannau.net>,<3472A07E6605974CBC9BC573F1BC02E4AE7D1265@CERNXCHG44.cern.ch> <3472A07E6605974CBC9BC573F1BC02E4AE7D13BB@CERNXCHG44.cern.ch>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="GrRkS8TnPIL0IveVJ1PIcI5pumBO2pR9H"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cernmx11.cern.ch ([188.184.36.50]:25779 "EHLO CERNMX11.cern.ch"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755561AbaISImA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 19 Sep 2014 04:42:00 -0400
-In-Reply-To: <CAPUexz-GYF4R95k8QzvdGDKtzez0Qm6SnJt1=4YJEGB8ty7Ggg@mail.gmail.com>
-Content-Language: en-US
-Content-ID: <00558AD63C494046B7BE1000DE5C3E98@cern.ch>
+Received: from mail2.dachary.org ([91.121.57.175]:55681 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751668AbaISJSq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 19 Sep 2014 05:18:46 -0400
+In-Reply-To: <3472A07E6605974CBC9BC573F1BC02E4AE7D13BB@CERNXCHG44.cern.ch>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Florian Haas <florian@hastexo.com>
-Cc: Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>, Janne Grunau <j@jannau.net>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-PiBPbiAxOSBTZXAgMjAxNCwgYXQgMDg6MTIsIEZsb3JpYW4gSGFhcyA8ZmxvcmlhbkBoYXN0ZXhv
-LmNvbT4gd3JvdGU6DQo+IA0KPiBPbiBGcmksIFNlcCAxOSwgMjAxNCBhdCAxMjoyNyBBTSwgU2Fn
-ZSBXZWlsIDxzd2VpbEByZWRoYXQuY29tPiB3cm90ZToNCj4+IE9uIEZyaSwgMTkgU2VwIDIwMTQs
-IEZsb3JpYW4gSGFhcyB3cm90ZToNCj4+PiBIaSBTYWdlLA0KPj4+IA0KPj4+IHdhcyB0aGUgb2Zm
-LWxpc3QgcmVwbHkgaW50ZW50aW9uYWw/DQo+PiANCj4+IFdob29wcyEgIE5vcGUgOikNCj4+IA0K
-Pj4+IE9uIFRodSwgU2VwIDE4LCAyMDE0IGF0IDExOjQ3IFBNLCBTYWdlIFdlaWwgPHN3ZWlsQHJl
-ZGhhdC5jb20+IHdyb3RlOg0KPj4+Pj4gU28sIGRpc2FzdGVyIGlzIGEgcHJldHR5IGdvb2QgZGVz
-Y3JpcHRpb24uIFdvdWxkIGFueW9uZSBmcm9tIHRoZSBjb3JlDQo+Pj4+PiB0ZWFtIGxpa2UgdG8g
-c3VnZ2VzdCBhbm90aGVyIGNvdXJzZSBvZiBhY3Rpb24gb3Igd29ya2Fyb3VuZCwgb3IgYXJlDQo+
-Pj4+PiBEYW4gYW5kIEkgZ2VuZXJhbGx5IG9uIHRoZSByaWdodCB0cmFjayB0byBtYWtlIHRoZSBi
-ZXN0IG91dCBvZiBhDQo+Pj4+PiBwcmV0dHkgYmFkIHNpdHVhdGlvbj8NCj4+Pj4gDQo+Pj4+IFRo
-ZSBzaG9ydCB0ZXJtIGZpeCB3b3VsZCBwcm9iYWJseSBiZSB0byBqdXN0IHByZXZlbnQgYmFja2Zp
-bGwgZm9yIHRoZSB0aW1lDQo+Pj4+IGJlaW5nIHVudGlsIHRoZSBidWcgaXMgZml4ZWQuDQo+Pj4g
-DQo+Pj4gQXMgaW4sIG9zZCBtYXggYmFja2ZpbGxzID0gMD8NCj4+IA0KPj4gWWVhaCA6KQ0KPj4g
-DQo+PiBKdXN0IG1hbmFnZWQgdG8gcmVwcm9kdWNlIHRoZSBwcm9ibGVtLi4uDQo+PiANCj4+IHNh
-Z2UNCj4gDQo+IFNhdyB0aGUgd2lwIGJyYW5jaC4gQ29sb3IgbWUgZnJlYWtpc2hseSBpbXByZXNz
-ZWQgb24gdGhlIHR1cm5hcm91bmQuIDopIFRoYW5rcyENCg0KSW5kZWVkIDopIFRoYW5rcyBTYWdl
-IQ0Kd2lwLTk0ODctZHVtcGxpbmcgZml4ZXMgdGhlIHByb2JsZW0gb24gbXkgdGVzdCBjbHVzdGVy
-LiBUcnlpbmcgaW4gcHJvZCBub3figKYNCkNoZWVycywgRGFu
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--GrRkS8TnPIL0IveVJ1PIcI5pumBO2pR9H
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
+
+Hi Andreas,
+
+The per_chunk_alignment addresses a backward compatible change in the way=
+ they are calculated. The problem was that the initial calculation lead t=
+o oversized chunks. The long explanation is at https://github.com/ceph/ce=
+ph/commit/c7daaaf5e63d0bd1d444385e62611fe276f6ce29
+
+Please let me know if you see something wrong :-)
+
+Cheers
+
+On 18/09/2014 14:34, Andreas Joachim Peters wrote:
+> Hi Janne/Loic,=20
+> there is more confusion atleast on my side ...
+>=20
+> I had now a look at the jerasure plug-in and I am now slightly confused=
+ why you have two ways to return in get_alignment ... one is as I assume =
+and another one is "per_chunk_alignment" ... what should the function ret=
+urn Loic?
+>=20
+> Cheers Andreas.
+> ________________________________________
+> From: ceph-devel-owner@vger.kernel.org [ceph-devel-owner@vger.kernel.or=
+g] on behalf of Andreas Joachim Peters [Andreas.Joachim.Peters@cern.ch]
+> Sent: 18 September 2014 14:18
+> To: Janne Grunau; ceph-devel@vger.kernel.org
+> Subject: RE: v2 aligned buffer changes for erasure codes
+>=20
+> Hi Janne,
+> =3D> (src/erasure-code/isa/README claims it needs 16*k byte aligned buf=
+fers
+>=20
+> I should update the README since it is misleading ... it should say 8*k=
+ or 16*k byte aligned chunk size depending on the compiler/platform used,=
+ it is not the alignment of the allocated buffer addresses.The get_alignm=
+ent in the plug-in function is used to compute the chunk size for the enc=
+oding (as I said not the start address alignment).
+>=20
+> If you pass k buffers for decoding each buffer should be aligned at lea=
+st to 16 or as you pointed out better 32 bytes.
+>=20
+> For encoding there is normally a single buffer split 'virtually' into k=
+ pieces. To make all pieces starting at an aligned address one needs to a=
+lign the chunk size to e.g. 16*k. For the best possible performance on al=
+l platforms we should change the get_alignment function in the ISA plug-i=
+n to return 32*k if there are no other objections ?!?!
+>=20
+> Cheers Andreas.
+> ________________________________________
+> From: ceph-devel-owner@vger.kernel.org [ceph-devel-owner@vger.kernel.or=
+g] on behalf of Janne Grunau [j@jannau.net]
+> Sent: 18 September 2014 12:33
+> To: ceph-devel@vger.kernel.org
+> Subject: v2 aligned buffer changes for erasure codes
+>=20
+> Hi,
+>=20
+> following a is an updated patchset. It passes now make check in src
+>=20
+> It has following changes:
+>  * use 32-byte alignment since the isa plugin use AVX2
+>    (src/erasure-code/isa/README claims it needs 16*k byte aligned buffe=
+rs
+>    but I can't see a reason why it would need more than 32-bytes
+>  * ErasureCode::encode_prepare() handles more than one chunk with paddi=
+ng
+>=20
+> cheers
+>=20
+> Janne
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+
+
+--GrRkS8TnPIL0IveVJ1PIcI5pumBO2pR9H
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlQb9PAACgkQ8dLMyEl6F21f4gCfZZVQyr9MiupvcjreGZsiS1f/
+anYAn2KeO64MxEVmfQV8zeHrXMe/stxG
+=nV4T
+-----END PGP SIGNATURE-----
+
+--GrRkS8TnPIL0IveVJ1PIcI5pumBO2pR9H--
