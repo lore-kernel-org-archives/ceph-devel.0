@@ -1,15 +1,15 @@
 From: Sage Weil <sweil@redhat.com>
 Subject: Re: [PATCH 1/3] libceph: reference counting pagelist
-Date: Thu, 18 Sep 2014 22:01:51 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1409182201390.18018@cobra.newdream.net>
+Date: Thu, 18 Sep 2014 22:04:14 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1409182203260.18018@cobra.newdream.net>
 References: <1410874759-11562-1-git-send-email-zyan@redhat.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:40460 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:40468 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751008AbaISFBw (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 19 Sep 2014 01:01:52 -0400
+	with ESMTP id S1752039AbaISFEP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 19 Sep 2014 01:04:15 -0400
 In-Reply-To: <1410874759-11562-1-git-send-email-zyan@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -18,12 +18,14 @@ Cc: ceph-devel@vger.kernel.org
 
 On Tue, 16 Sep 2014, Yan, Zheng wrote:
 > this allow pagelist to present data that may be sent multiple times.
+
+Hmm, actually we probably should use the kref code for this, even though 
+the refcounting is trivial.
+
+sage
+
 > 
 > Signed-off-by: Yan, Zheng <zyan@redhat.com>
-
-Reviewed-by: Sage Weil <sage@redhat.com>
-
-
 > ---
 >  fs/ceph/mds_client.c          | 1 -
 >  include/linux/ceph/pagelist.h | 5 ++++-
