@@ -1,261 +1,293 @@
-From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: Re: [PATCH 2/2] libceph: resend lingering requests with a new tid
-Date: Tue, 23 Sep 2014 20:18:58 +0400
-Message-ID: <CALFYKtAG-3-_XOf0LHhM_BmH7wybtU6EyARpxVbhWj3KTxzkjg@mail.gmail.com>
-References: <1409906566-5662-1-git-send-email-ilya.dryomov@inktank.com>
-	<1409906566-5662-3-git-send-email-ilya.dryomov@inktank.com>
-	<54201D9D.2040909@ieee.org>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: Impact of page cache on OSD read performance for SSD
+Date: Tue, 23 Sep 2014 18:05:17 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F278492BA@SACMBXIP02.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f170.google.com ([209.85.216.170]:51042 "EHLO
-	mail-qc0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932119AbaIWQS7 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Sep 2014 12:18:59 -0400
-Received: by mail-qc0-f170.google.com with SMTP id c9so2002413qcz.15
-        for <ceph-devel@vger.kernel.org>; Tue, 23 Sep 2014 09:18:58 -0700 (PDT)
-In-Reply-To: <54201D9D.2040909@ieee.org>
+Received: from mail-bn1on0093.outbound.protection.outlook.com ([157.56.110.93]:2082
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1755777AbaIWSFW convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Sep 2014 14:05:22 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@ieee.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Mon, Sep 22, 2014 at 5:01 PM, Alex Elder <elder@ieee.org> wrote:
-> On 09/05/2014 03:42 AM, Ilya Dryomov wrote:
->> Both not yet registered (r_linger && list_empty(&r_linger_item)) and
->> registered linger requests should use the new tid on resend to avoid
->> the dup op detection logic on the OSDs, yet we were doing this only for
->> "registered" case.  Factor out and simplify the "registered" logic and
->> use the new helper for "not registered" case as well.
->>
->> Fixes: http://tracker.ceph.com/issues/8806
->
-> The issue description describes the failure scenario nicely.
-> These linger requests are a nice service to provide but they
-> sure have proved tricky to get right...
->
-> After reviewing almost everything I came up with one "big"
-> question and I don't have time right now to investigate the
-> answer so I hope you will.  See below for the question in
-> context.
->
-> With that exception, the logic looks correct to me.  I have
-> some suggestions below for you to consider.  Let me know
-> what you intend to do, and if you are sure my big question
-> is not an issue you can go ahead and add this:
->
->     Reviewed-by: Alex Elder <elder@linaro.org>
->
-> If not, please update and give me a chance to look at it
-> again.  Thanks.
->
->                                         -Alex
->
->> Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
->> ---
->>  net/ceph/osd_client.c |   75 ++++++++++++++++++++++++++++++++++++-------------
->>  1 file changed, 55 insertions(+), 20 deletions(-)
->>
->> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
->> index 8db10b4a6553..81ee046b24d0 100644
->> --- a/net/ceph/osd_client.c
->> +++ b/net/ceph/osd_client.c
->> @@ -30,8 +30,11 @@ static void __send_queued(struct ceph_osd_client *osdc);
->>  static int __reset_osd(struct ceph_osd_client *osdc, struct ceph_osd *osd);
->>  static void __register_request(struct ceph_osd_client *osdc,
->>                              struct ceph_osd_request *req);
->> +static void __unregister_request(struct ceph_osd_client *osdc,
->> +                              struct ceph_osd_request *req);
->>  static void __unregister_linger_request(struct ceph_osd_client *osdc,
->>                                       struct ceph_osd_request *req);
->> +static void __enqueue_request(struct ceph_osd_request *req);
->>  static void __send_request(struct ceph_osd_client *osdc,
->>                          struct ceph_osd_request *req);
->>
->> @@ -892,6 +895,39 @@ __lookup_request_ge(struct ceph_osd_client *osdc,
->>       return NULL;
->>  }
->>
->> +static void __kick_linger_request(struct ceph_osd_request *req,
->> +                               bool lingering)
->
-> I think "committed" or maybe "acknowledged" might be a better
-> name than "lingering".  All of them are marked to linger, so
-> something other than "lingering" might be a little clearer.
+Hi Sage,
+I have created the following setup in order to examine how a single OSD is behaving if say ~80-90% of ios hitting the SSDs.
 
-I'll change it to "registered".  acked can be confused with an actual
-ack and nothing actually gets committed on the server side, just some
-data structures are set up.
+My test includes the following steps.
 
->
->> +{
->> +     struct ceph_osd_client *osdc = req->r_osdc;
->> +     struct ceph_osd *osd = req->r_osd;
->> +
->> +     /*
->> +      * Linger requests need to be resent with a new tid to avoid
->> +      * the dup op detection logic on the OSDs.  Achieve this with
->> +      * a re-register dance instead of open-coding.
->
-> This comment is more oriented toward this particular commit
-> rather than what's really going on in the code.  I.e., you
-> should instead say"Re-register each request--whether or not
-> we know it's been committed to disk on the OSD.  If we ever
-> sent a linger request we must assume it's been committed, so
-> even un-acknowledged linger requests need a new TID." or
-> something like that (or maybe something simpler).
->
->> +      */
->> +     ceph_osdc_get_request(req);
->
-> As a rule, when there's an if-else, I prefer to avoid
-> negating the condition.  It's a subtle style thing, but
-> to me it makes it slightly easier to mentally parse
-> (occasionally avoiding a double negative).  There's
-> another instance of this a little further down.
+        1. Created a single OSD cluster.
+        2. Created two rbd images (110GB each) on 2 different pools.
+        3. Populated entire image, so my working set is ~210GB. My system memory is ~16GB.
+        4. Dumped page cache before every run.
+        5. Ran fio_rbd (QD 32, 8 instances) in parallel on these two images.
 
-Never really thought about this.  I'll get rid of negation.
+Here is my disk iops/bandwidth..
 
->
->> +     if (!lingering)
->> +             __unregister_request(osdc, req);
->> +     else
->> +             __unregister_linger_request(osdc, req);
->> +     __register_request(osdc, req);
->> +     ceph_osdc_put_request(req);
->> +
->> +     /*
->> +      * Unless request has been registered as both normal and
->> +      * lingering, __unregister{,_linger}_request clears r_osd.
->> +      * However, here we need to preserve r_osd to make sure we
->> +      * requeue on the same OSD.
->> +      */
->> +     WARN_ON(req->r_osd || !osd);
->> +     req->r_osd = osd;
->> +
->> +     dout("requeueing %p tid %llu osd%d lingering=%d\n", req, req->r_tid,
->> +          osd->o_osd, lingering);
->> +     __enqueue_request(req);
->> +}
->> +
->>  /*
->>   * Resubmit requests pending on the given osd.
->>   */
->> @@ -900,12 +936,14 @@ static void __kick_osd_requests(struct ceph_osd_client *osdc,
->>  {
->>       struct ceph_osd_request *req, *nreq;
->>       LIST_HEAD(resend);
->> +     LIST_HEAD(resend_linger);
->>       int err;
->>
->>       dout("__kick_osd_requests osd%d\n", osd->o_osd);
->>       err = __reset_osd(osdc, osd);
->>       if (err)
->>               return;
->> +
->>       /*
->>        * Build up a list of requests to resend by traversing the
->>        * osd's list of requests.  Requests for a given object are
->
-> This block of comments (starting with the above but not shown
-> here) should be updated to reflect the modified logic.  Linger
-> requests are re-sent separate from (and before) non-linger
-> requests.  In both cases, only in-flight requests are re-sent,
-> and within each type, their original order is preserved.  The
-> comment only describes one list of requests to be re-sent, but
-> there are now two.
->
->> @@ -926,33 +964,30 @@ static void __kick_osd_requests(struct ceph_osd_client *osdc,
->>       list_for_each_entry(req, &osd->o_requests, r_osd_item) {
->>               if (!req->r_sent)
->>                       break;
->> -             list_move_tail(&req->r_req_lru_item, &resend);
->> -             dout("requeueing %p tid %llu osd%d\n", req, req->r_tid,
->> -                  osd->o_osd);
->> -             if (!req->r_linger)
->> +
->> +             if (!req->r_linger) {
->> +                     dout("requeueing %p tid %llu osd%d\n", req, req->r_tid,
->> +                          osd->o_osd);
->> +                     list_move_tail(&req->r_req_lru_item, &resend);
->>                       req->r_flags |= CEPH_OSD_FLAG_RETRY;
->> +             } else {
->> +                     list_move_tail(&req->r_req_lru_item, &resend_linger);
->> +             }
->>       }
->>       list_splice(&resend, &osdc->req_unsent);
->>
->>       /*
->> -      * Linger requests are re-registered before sending, which
->> -      * sets up a new tid for each.  We add them to the unsent
->> -      * list at the end to keep things in tid order.
->> +      * Both not yet registered and registered linger requests are
->> +      * enqueued with a new tid on the same OSD.  We add/move them
->> +      * to req_unsent/o_requests at the end to keep things in tid
->> +      * order.
->>        */
->
-> OK, here's my big question.  By re-sending all linger requests
-> before all non-lingering ones, the re-sent messages can get done
-> in an order different from their original order.  For example,
-> suppose at the time of a reset we have
->
->     non-linger tid 1
->     linger tid 2
->     non-linger tid 3
->     linger tid 4
->
-> When they're re-sent, it might be:
->
->     linger tid 10 (was 2)
->     linger tid 11 (was 4)
->     non-linger tid 12 (was 1)
->     non-linger tid 13 (was 3)
->
-> Is that OK?
+        root@emsclient:~/fio_test# fio rad_resd_disk.job
+        random-reads: (g=0): rw=randread, bs=4K-4K/4K-4K, ioengine=libaio, iodepth=64
+        2.0.8
+        Starting 1 process
+        Jobs: 1 (f=1): [r] [100.0% done] [154.1M/0K /s] [39.7K/0  iops] [eta 00m:00s]
+        random-reads: (groupid=0, jobs=1): err= 0: pid=1431
+        read : io=9316.4MB, bw=158994KB/s, iops=39748 , runt= 60002msec
 
-I'm not sure I understand.  We resend both types of r_linger requests
-*after* non-lingering ones.  However, I can see how lingering requests
-can be resent in a different from original order.
+My fio_rbd config..
 
-We have three types of requests: normal, not-yet-registered linger and
-registered linger requests.  Only normal requests can be resent with
-the same tid, which means that only for normal requests do we have to
-worry about the order.  So we make a resend list out of these requests
-and splice it onto the front of the req_unsent list.  That preserves
-the tid order among normal requests and is exactly what the old code
-did.
+[global]
+ioengine=rbd
+clientname=admin
+pool=rbd1
+rbdname=ceph_regression_test1
+invalidate=0    # mandatory
+rw=randread
+bs=4k
+direct=1
+time_based
+runtime=2m
+size=109G
+numjobs=8
+[rbd_iodepth32]
+iodepth=32
 
-Then we process resend_linger list of not-yet-registered linger
-requests.  The relative tid order among these requests is preserved
-naturally and they are added to the end of req_unsent, which keeps
-req_unsent sorted by tid.  Registered linger requests are then
-processed similarly, keeping req_unsent ordered.
+Now, I have run Giant Ceph on top of that..
 
-What can happen is:
+1. OSD config with 25 shards/1 thread per shard :
+-------------------------------------------------------
 
-    registered linger A tid 2
-    registered linger B tid 10
-    not-yet-registered linger C tid 30
-    not-yet-registered linger D tid 31
+         avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+          22.04    0.00   16.46   45.86    0.00   15.64
 
-    <connection reset>
+Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
+sda               0.00     9.00    0.00    6.00     0.00    92.00    30.67     0.01    1.33    0.00    1.33   1.33   0.80
+sdd               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+sde               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+sdg               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+sdf               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+sdh             181.00     0.00 34961.00    0.00 176740.00     0.00    10.11   102.71    2.92    2.92    0.00   0.03 100.00
+sdc               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+sdb               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
 
-    req_unsent after processing all pending requests:
 
-    not-yet-registered linger C tid 55 (was 30)
-    not-yet-registered linger D tid 56 (was 31)
-    not-yet-registered linger A tid 57 (was 2, was registered)
-    not-yet-registered linger B tid 58 (was 10, was registered)
+ceph -s:
+ ----------
+root@emsclient:~# ceph -s
+    cluster 94991097-7638-4240-b922-f525300a9026
+     health HEALTH_OK
+     monmap e1: 1 mons at {a=10.196.123.24:6789/0}, election epoch 1, quorum 0 a
+     osdmap e498: 1 osds: 1 up, 1 in
+      pgmap v386366: 832 pgs, 7 pools, 308 GB data, 247 kobjects
+            366 GB used, 1122 GB / 1489 GB avail
+                 832 active+clean
+  client io 75215 kB/s rd, 18803 op/s
 
-and then the list of registered linger requests after everything
-settles down will look like C D A B instead of A B C D, although it
-will still be in tid order.  I suppose I could fix it, but I'm not sure
-if it matters or not.  The old code was prone to this too, but then we
-now know it was wrong, although in a different respect.
+ cpu util:
+----------
+ Gradually decreases from ~21 core (serving from cache) to ~10 core (while serving from disks).
 
-I'll have to look harder and think about this..
+ My Analysis:
+-----------------
+ In this case "All is Well"  till ios are served from cache (XFS is smart enough to cache some data ) . Once started hitting disks and throughput is decreasing. As you can see, disk is giving ~35K iops , but, OSD throughput is only ~18.8K ! So, cache miss in case of buffered io seems to be very
+ expensive.  Half of the iops are waste. Also, looking at the bandwidth, it is obvious, not everything is 4K read, May be kernel read_ahead is kicking (?).
 
-Thanks,
 
-                Ilya
+Now, I thought of making ceph disk read as direct_io and do the same experiment. I have changed the FileStore::read to do the direct_io only. Rest kept as is. Here is the result with that.
+
+
+Iostat:
+-------
+
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+          24.77    0.00   19.52   21.36    0.00   34.36
+
+Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
+sda               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+sdd               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+sde               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+sdg               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+sdf               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+sdh               0.00     0.00 25295.00    0.00 101180.00     0.00     8.00    12.73    0.50    0.50    0.00   0.04 100.80
+sdc               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+sdb               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+
+ceph -s:
+ --------
+root@emsclient:~/fio_test# ceph -s
+    cluster 94991097-7638-4240-b922-f525300a9026
+     health HEALTH_OK
+     monmap e1: 1 mons at {a=10.196.123.24:6789/0}, election epoch 1, quorum 0 a
+     osdmap e522: 1 osds: 1 up, 1 in
+      pgmap v386711: 832 pgs, 7 pools, 308 GB data, 247 kobjects
+            366 GB used, 1122 GB / 1489 GB avail
+                 832 active+clean
+  client io 100 MB/s rd, 25618 op/s
+
+cpu util:
+--------
+  ~14 core while serving from disks.
+
+ My Analysis:
+ ---------------
+No surprises here. Whatever is disk throughput ceph throughput is almost matching.
+
+
+Let's tweak the shard/thread settings and see the impact.
+
+
+2. OSD config with 36 shards and 1 thread/shard:
+-----------------------------------------------------------
+
+   Buffered read:
+   ------------------
+  No change, output is very similar to 25 shards.
+
+
+  direct_io read:
+  ------------------
+       Iostat:
+      ----------
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+          33.33    0.00   28.22   23.11    0.00   15.34
+
+Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
+sda               0.00     0.00    0.00    2.00     0.00    12.00    12.00     0.00    0.00    0.00    0.00   0.00   0.00
+sdd               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+sde               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+sdg               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+sdf               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+sdh               0.00     0.00 31987.00    0.00 127948.00     0.00     8.00    18.06    0.56    0.56    0.00   0.03 100.40
+sdc               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+sdb               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+
+       ceph -s:
+    --------------
+root@emsclient:~/fio_test# ceph -s
+    cluster 94991097-7638-4240-b922-f525300a9026
+     health HEALTH_OK
+     monmap e1: 1 mons at {a=10.196.123.24:6789/0}, election epoch 1, quorum 0 a
+     osdmap e525: 1 osds: 1 up, 1 in
+      pgmap v386746: 832 pgs, 7 pools, 308 GB data, 247 kobjects
+            366 GB used, 1122 GB / 1489 GB avail
+                 832 active+clean
+  client io 127 MB/s rd, 32763 op/s
+
+        cpu util:
+   --------------
+       ~19 core while serving from disks.
+
+         Analysis:
+------------------
+        It is scaling with increased number of shards/threads. The parallelism also increased significantly.
+
+
+3. OSD config with 48 shards and 1 thread/shard:
+ ----------------------------------------------------------
+    Buffered read:
+   -------------------
+    No change, output is very similar to 25 shards.
+
+
+   direct_io read:
+    -----------------
+       Iostat:
+      --------
+
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+          37.50    0.00   33.72   20.03    0.00    8.75
+
+Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
+sda               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+sdd               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+sde               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+sdg               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+sdf               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+sdh               0.00     0.00 35360.00    0.00 141440.00     0.00     8.00    22.25    0.62    0.62    0.00   0.03 100.40
+sdc               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+sdb               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+
+         ceph -s:
+       --------------
+root@emsclient:~/fio_test# ceph -s
+    cluster 94991097-7638-4240-b922-f525300a9026
+     health HEALTH_OK
+     monmap e1: 1 mons at {a=10.196.123.24:6789/0}, election epoch 1, quorum 0 a
+     osdmap e534: 1 osds: 1 up, 1 in
+      pgmap v386830: 832 pgs, 7 pools, 308 GB data, 247 kobjects
+            366 GB used, 1122 GB / 1489 GB avail
+                 832 active+clean
+  client io 138 MB/s rd, 35582 op/s
+
+         cpu util:
+ ----------------
+        ~22.5 core while serving from disks.
+
+          Analysis:
+ --------------------
+        It is scaling with increased number of shards/threads. The parallelism also increased significantly.
+
+
+
+4. OSD config with 64 shards and 1 thread/shard:
+ ---------------------------------------------------------
+      Buffered read:
+     ------------------
+     No change, output is very similar to 25 shards.
+
+
+     direct_io read:
+     -------------------
+       Iostat:
+      ---------
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+          40.18    0.00   34.84   19.81    0.00    5.18
+
+Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
+sda               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+sdd               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+sde               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+sdg               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+sdf               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+sdh               0.00     0.00 39114.00    0.00 156460.00     0.00     8.00    35.58    0.90    0.90    0.00   0.03 100.40
+sdc               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+sdb               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+
+       ceph -s:
+ ---------------
+root@emsclient:~/fio_test# ceph -s
+    cluster 94991097-7638-4240-b922-f525300a9026
+     health HEALTH_OK
+     monmap e1: 1 mons at {a=10.196.123.24:6789/0}, election epoch 1, quorum 0 a
+     osdmap e537: 1 osds: 1 up, 1 in
+      pgmap v386865: 832 pgs, 7 pools, 308 GB data, 247 kobjects
+            366 GB used, 1122 GB / 1489 GB avail
+                 832 active+clean
+  client io 153 MB/s rd, 39172 op/s
+
+      cpu util:
+----------------
+    ~24.5 core while serving from disks. ~3% cpu left.
+
+       Analysis:
+------------------
+      It is scaling with increased number of shards/threads. The parallelism also increased significantly. It is disk bound now.
+
+
+Summary:
+
+So, it seems buffered IO has significant impact on performance in case backend is SSD.
+My question is,  if the workload is very random and storage(SSD) is very huge compare to system memory, shouldn't we always go for direct_io instead of buffered io from Ceph ?
+
+Please share your thoughts/suggestion on this.
+
+Thanks & Regards
+Somnath
+
+________________________________
+
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+
