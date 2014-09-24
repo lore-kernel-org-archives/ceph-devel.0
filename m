@@ -1,96 +1,445 @@
-From: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: Can ceph-deploy be used with 'osd objectstore =
- keyvaluestore-dev' in config file ?
-Date: Wed, 24 Sep 2014 06:03:50 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1409240556450.27396@cobra.newdream.net>
-References: <541B9EFA.1010408@gmail.com> <541BC6F9.5080401@catalyst.net.nz>
-	<541BE6E7.5010500@gmail.com> <542111BD.8040503@gmail.com>
-	<542120A9.5060203@catalyst.net.nz> <54212E40.3030509@gmail.com>
-	<5422277F.6080405@gmail.com> <54222A4D.5000208@catalyst.net.nz>
-	<54222C7A.9060508@gmail.com> <5422306A.4070503@catalyst.net.nz>
+From: Mark Nelson <mark.nelson@inktank.com>
+Subject: Re: Impact of page cache on OSD read performance for SSD
+Date: Wed, 24 Sep 2014 08:27:40 -0500
+Message-ID: <5422C6CC.6080801@redhat.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F278492BA@SACMBXIP02.sdcorp.global.sandisk.com> <CANP1eJEh0DmMOk57Pw4zCfm2oQfiKYFGdNqtHpfQZJomUAt77w@mail.gmail.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F278493DC@SACMBXIP02.sdcorp.global.sandisk.com> <alpine.DEB.2.00.1409231229120.27396@cobra.newdream.net> <CACJqLyYgcJq0-x6aOjTAA4ig0NYFPRm6Zxn+8RfB1eL9oZu7Jg@mail.gmail.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F27849836@SACMBXIP02.sdcorp.global.sandisk.com> <CACJqLyb=2s8gtXyqoUC-t6bKjrikqWk9q3T_bf6KKrwQUHKeMQ@mail.gmail.com> <alpine.DEB.2.00.1409240536100.27396@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <5422306A.4070503-6STWZtX7tXAqAMOr+u8IRA@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Mark Kirkwood <mark.kirkwood-6STWZtX7tXAqAMOr+u8IRA@public.gmane.org>
-Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Aegeaner <xihuke-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-qg0-f43.google.com ([209.85.192.43]:65285 "EHLO
+	mail-qg0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751012AbaIXN1q (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Sep 2014 09:27:46 -0400
+Received: by mail-qg0-f43.google.com with SMTP id f51so5843449qge.2
+        for <ceph-devel@vger.kernel.org>; Wed, 24 Sep 2014 06:27:45 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.00.1409240536100.27396@cobra.newdream.net>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>, Haomai Wang <haomaiwang@gmail.com>
+Cc: Somnath Roy <Somnath.Roy@sandisk.com>, Milosz Tanski <milosz@adfin.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, 24 Sep 2014, Mark Kirkwood wrote:
-> On 24/09/14 14:29, Aegeaner wrote:
-> > I run ceph on Red Hat Enterprise Linux Server 6.4 Santiago, and when I
-> > run "service ceph start" i got:
-> >
-> > # service ceph start
-> >
-> >     ERROR:ceph-disk:Failed to activate
-> >     ceph-disk: Does not look like a Ceph OSD, or incompatible version:
-> >     /var/lib/ceph/tmp/mnt.I71N5T
-> >     mount: /dev/hioa1 already mounted or /var/lib/ceph/tmp/mnt.02sVHj busy
-> >     ceph-disk: Mounting filesystem failed: Command '['/bin/mount', '-t',
-> >     'xfs', '-o', 'noatime', '--',
-> >
-> '/dev/disk/by-parttypeuuid/4fbd7e29-9d25-41b8-afd0-062c0ceff05d.6d726c93-41f9-453d-858e-ab4132b5c8fd',
-> >     '/var/lib/ceph/tmp/mnt.02sVHj']' returned non-zero exit status 32
-> >     ceph-disk: Error: One or more partitions failed to activate
-> >
-> > Someone told me "service ceph start" still tries to call ceph-disk which
-> > will create a filestore type OSD, and create a journal partition, is it
-> > true?
-> >
-> > ls -l /dev/disk/by-parttypeuuid/
-> >
-> >     lrwxrwxrwx. 1 root root 11 9?  23 16:56
-> >
-> 45b0969e-9b03-4f30-b4c6-b4b80ceff106.00dbee5e-fb68-47c4-aa58-924c904c4383
-> >     -> ../../hioa2
-> >     lrwxrwxrwx. 1 root root 10 9?  23 17:02
-> >
-> 45b0969e-9b03-4f30-b4c6-b4b80ceff106.c30e5b97-b914-4eb8-8306-a9649e1c20ba
-> >     -> ../../sdb2
-> >     lrwxrwxrwx. 1 root root 11 9?  23 16:56
-> >
-> 4fbd7e29-9d25-41b8-afd0-062c0ceff05d.6d726c93-41f9-453d-858e-ab4132b5c8fd
-> >     -> ../../hioa1
-> >     lrwxrwxrwx. 1 root root 10 9?  23 17:02
-> >
-> 4fbd7e29-9d25-41b8-afd0-062c0ceff05d.b56ec699-e134-4b90-8f55-4952453e1b7e
-> >     -> ../../sdb1
-> >     lrwxrwxrwx. 1 root root 11 9?  23 16:52
-> >
-> 89c57f98-2fe5-4dc0-89c1-f3ad0ceff2be.6d726c93-41f9-453d-858e-ab4132b5c8fd
-> >     -> ../../hioa1
-> >
-> > There seems to be two hioa1 partitions there, maybe remained from last
-> > time I create the OSD using ceph-deploy osd prepare?
-> >
-> 
-> Crap - it is fighting you, yes - looks like the startup script has tried 
-> to build an osd for you using ceph-disk (which will make two partitions 
-> by default). So that's toasted the setup that your script did.
-> 
-> Growl - that's made it more complicated for sure.
+On 09/24/2014 07:38 AM, Sage Weil wrote:
+> On Wed, 24 Sep 2014, Haomai Wang wrote:
+>> I agree with that direct read will help for disk read. But if read data
+>> is hot and small enough to fit in memory, page cache is a good place to
+>> hold data cache. If discard page cache, we need to implement a cache to
+>> provide with effective lookup impl.
+>
+> This is true for some workloads, but not necessarily true for all.  Many
+> clients (notably RBD) will be caching at the client side (in VM's fs, and
+> possibly in librbd itself) such that caching at the OSD is largely wasted
+> effort.  For RGW the often is likely true, unless there is a varnish cache
+> or something in front.
+>
+> We should probably have a direct_io config option for filestore.  But even
+> better would be some hint from the client about whether it is caching or
+> not so that FileStore could conditionally cache...
 
-Hrm, yeah.  I think ceph-disk needs to have an option (via ceph.conf) that 
-will avoid creating a journal [partition], and we need to make sure that 
-the journal behavior is all conditional on the journal symlink being 
-present.  Do you mind opening a bug for this?  It could condition itself 
-off of the osd objectstore option (we'd need to teach ceph-diska bout the 
-varoius backends), or we could add a secondary option (awkware to 
-configure), or we could call into ceph-osd with something like 'ceph-osd 
--i 0 --does-backend-need-journal' so that a call into the backend 
-code itself can control things.  The latter is probably ideal.
+I like the hinting idea.  Having said that, if the effect being seen is 
+due to page cache, it seems like something is off.  We've seen 
+performance issues in the kernel before so it's not unprecedented. 
+Working around it with direct IO could be the right way to go, but it 
+might be that this is something that could be fixed higher up and 
+improve performance in other scenarios too.  I'd hate to let it go by 
+the wayside of we could find something actionable.
 
-Opened http://tracker.ceph.com/issues/9580 and copying ceph-devel
+>
+> sage
+>
+>   >
+>> BTW, whether to use direct io we can refer to MySQL Innodb engine with
+>> direct io and PostgreSQL with page cache.
+>>
+>> On Wed, Sep 24, 2014 at 10:29 AM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
+>>> Haomai,
+>>> I am considering only about random reads and the changes I made only affecting reads. For write, I have not measured yet. But, yes, page cache may be helpful for write coalescing. Still need to evaluate how it is behaving comparing direct_io on SSD though. I think Ceph code path will be much shorter if we use direct_io in the write path where it is actually executing the transactions. Probably, the sync thread and all will not be needed.
+>>>
+>>> I am trying to analyze where is the extra reads coming from in case of buffered io by using blktrace etc. This should give us a clear understanding what exactly is going on there and it may turn out that tuning kernel parameters only  we can achieve similar performance as direct_io.
+>>>
+>>> Thanks & Regards
+>>> Somnath
+>>>
+>>> -----Original Message-----
+>>> From: Haomai Wang [mailto:haomaiwang@gmail.com]
+>>> Sent: Tuesday, September 23, 2014 7:07 PM
+>>> To: Sage Weil
+>>> Cc: Somnath Roy; Milosz Tanski; ceph-devel@vger.kernel.org
+>>> Subject: Re: Impact of page cache on OSD read performance for SSD
+>>>
+>>> Good point, but do you have considered that the impaction for write ops? And if skip page cache, FileStore is responsible for data cache?
+>>>
+>>> On Wed, Sep 24, 2014 at 3:29 AM, Sage Weil <sweil@redhat.com> wrote:
+>>>> On Tue, 23 Sep 2014, Somnath Roy wrote:
+>>>>> Milosz,
+>>>>> Thanks for the response. I will see if I can get any information out of perf.
+>>>>>
+>>>>> Here is my OS information.
+>>>>>
+>>>>> root@emsclient:~# lsb_release -a
+>>>>> No LSB modules are available.
+>>>>> Distributor ID: Ubuntu
+>>>>> Description:    Ubuntu 13.10
+>>>>> Release:        13.10
+>>>>> Codename:       saucy
+>>>>> root@emsclient:~# uname -a
+>>>>> Linux emsclient 3.11.0-12-generic #19-Ubuntu SMP Wed Oct 9 16:20:46
+>>>>> UTC 2013 x86_64 x86_64 x86_64 GNU/Linux
+>>>>>
+>>>>> BTW, it's not a 45% drop, as you can see, by tuning the OSD parameter I was able to get almost *2X* performance improvement with direct_io.
+>>>>> It's not only page cache (memory) lookup, in case of buffered_io  the following could be problem.
+>>>>>
+>>>>> 1. Double copy (disk -> file buffer cache, file buffer cache -> user
+>>>>> buffer)
+>>>>>
+>>>>> 2. As the iostat output shows, it is not reading 4K only, it is
+>>>>> reading more data from disk as required and in the end it will be
+>>>>> wasted in case of random workload..
+>>>>
+>>>> It might be worth using blktrace to see what the IOs it is issueing are.
+>>>> Which ones are > 4K and what they point to...
+>>>>
+>>>> sage
+>>>>
+>>>>
+>>>>>
+>>>>> Thanks & Regards
+>>>>> Somnath
+>>>>>
+>>>>> -----Original Message-----
+>>>>> From: Milosz Tanski [mailto:milosz@adfin.com]
+>>>>> Sent: Tuesday, September 23, 2014 12:09 PM
+>>>>> To: Somnath Roy
+>>>>> Cc: ceph-devel@vger.kernel.org
+>>>>> Subject: Re: Impact of page cache on OSD read performance for SSD
+>>>>>
+>>>>> Somnath,
+>>>>>
+>>>>> I wonder if there's a bottleneck or a point of contention for the kernel. For a entirely uncached workload I expect the page cache lookup to cause a slow down (since the lookup should be wasted). What I wouldn't expect is a 45% performance drop. Memory speed should be one magnitude faster then a modern SATA SSD drive (so it should be more negligible overhead).
+>>>>>
+>>>>> Is there anyway you could perform the same test but monitor what's going on with the OSD process using the perf tool? Whatever is the default cpu time spent hardware counter is fine. Make sure you have the kernel debug info package installed so can get symbol information for kernel and module calls. With any luck the diff in perf output in two runs will show us the culprit.
+>>>>>
+>>>>> Also, can you tell us what OS/kernel version you're using on the OSD machines?
+>>>>>
+>>>>> - Milosz
+>>>>>
+>>>>> On Tue, Sep 23, 2014 at 2:05 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
+>>>>>> Hi Sage,
+>>>>>> I have created the following setup in order to examine how a single OSD is behaving if say ~80-90% of ios hitting the SSDs.
+>>>>>>
+>>>>>> My test includes the following steps.
+>>>>>>
+>>>>>>          1. Created a single OSD cluster.
+>>>>>>          2. Created two rbd images (110GB each) on 2 different pools.
+>>>>>>          3. Populated entire image, so my working set is ~210GB. My system memory is ~16GB.
+>>>>>>          4. Dumped page cache before every run.
+>>>>>>          5. Ran fio_rbd (QD 32, 8 instances) in parallel on these two images.
+>>>>>>
+>>>>>> Here is my disk iops/bandwidth..
+>>>>>>
+>>>>>>          root@emsclient:~/fio_test# fio rad_resd_disk.job
+>>>>>>          random-reads: (g=0): rw=randread, bs=4K-4K/4K-4K, ioengine=libaio, iodepth=64
+>>>>>>          2.0.8
+>>>>>>          Starting 1 process
+>>>>>>          Jobs: 1 (f=1): [r] [100.0% done] [154.1M/0K /s] [39.7K/0  iops] [eta 00m:00s]
+>>>>>>          random-reads: (groupid=0, jobs=1): err= 0: pid=1431
+>>>>>>          read : io=9316.4MB, bw=158994KB/s, iops=39748 , runt=
+>>>>>> 60002msec
+>>>>>>
+>>>>>> My fio_rbd config..
+>>>>>>
+>>>>>> [global]
+>>>>>> ioengine=rbd
+>>>>>> clientname=admin
+>>>>>> pool=rbd1
+>>>>>> rbdname=ceph_regression_test1
+>>>>>> invalidate=0    # mandatory
+>>>>>> rw=randread
+>>>>>> bs=4k
+>>>>>> direct=1
+>>>>>> time_based
+>>>>>> runtime=2m
+>>>>>> size=109G
+>>>>>> numjobs=8
+>>>>>> [rbd_iodepth32]
+>>>>>> iodepth=32
+>>>>>>
+>>>>>> Now, I have run Giant Ceph on top of that..
+>>>>>>
+>>>>>> 1. OSD config with 25 shards/1 thread per shard :
+>>>>>> -------------------------------------------------------
+>>>>>>
+>>>>>>           avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+>>>>>>            22.04    0.00   16.46   45.86    0.00   15.64
+>>>>>>
+>>>>>> Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
+>>>>>> sda               0.00     9.00    0.00    6.00     0.00    92.00    30.67     0.01    1.33    0.00    1.33   1.33   0.80
+>>>>>> sdd               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+>>>>>> sde               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+>>>>>> sdg               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+>>>>>> sdf               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+>>>>>> sdh             181.00     0.00 34961.00    0.00 176740.00     0.00    10.11   102.71    2.92    2.92    0.00   0.03 100.00
+>>>>>> sdc               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+>>>>>> sdb               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+>>>>>>
+>>>>>>
+>>>>>> ceph -s:
+>>>>>>   ----------
+>>>>>> root@emsclient:~# ceph -s
+>>>>>>      cluster 94991097-7638-4240-b922-f525300a9026
+>>>>>>       health HEALTH_OK
+>>>>>>       monmap e1: 1 mons at {a=10.196.123.24:6789/0}, election epoch 1, quorum 0 a
+>>>>>>       osdmap e498: 1 osds: 1 up, 1 in
+>>>>>>        pgmap v386366: 832 pgs, 7 pools, 308 GB data, 247 kobjects
+>>>>>>              366 GB used, 1122 GB / 1489 GB avail
+>>>>>>                   832 active+clean
+>>>>>>    client io 75215 kB/s rd, 18803 op/s
+>>>>>>
+>>>>>>   cpu util:
+>>>>>> ----------
+>>>>>>   Gradually decreases from ~21 core (serving from cache) to ~10 core (while serving from disks).
+>>>>>>
+>>>>>>   My Analysis:
+>>>>>> -----------------
+>>>>>>   In this case "All is Well"  till ios are served from cache (XFS is
+>>>>>> smart enough to cache some data ) . Once started hitting disks and throughput is decreasing. As you can see, disk is giving ~35K iops , but, OSD throughput is only ~18.8K ! So, cache miss in case of buffered io seems to be very  expensive.  Half of the iops are waste. Also, looking at the bandwidth, it is obvious, not everything is 4K read, May be kernel read_ahead is kicking (?).
+>>>>>>
+>>>>>>
+>>>>>> Now, I thought of making ceph disk read as direct_io and do the same experiment. I have changed the FileStore::read to do the direct_io only. Rest kept as is. Here is the result with that.
+>>>>>>
+>>>>>>
+>>>>>> Iostat:
+>>>>>> -------
+>>>>>>
+>>>>>> avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+>>>>>>            24.77    0.00   19.52   21.36    0.00   34.36
+>>>>>>
+>>>>>> Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
+>>>>>> sda               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+>>>>>> sdd               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+>>>>>> sde               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+>>>>>> sdg               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+>>>>>> sdf               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+>>>>>> sdh               0.00     0.00 25295.00    0.00 101180.00     0.00     8.00    12.73    0.50    0.50    0.00   0.04 100.80
+>>>>>> sdc               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+>>>>>> sdb               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+>>>>>>
+>>>>>> ceph -s:
+>>>>>>   --------
+>>>>>> root@emsclient:~/fio_test# ceph -s
+>>>>>>      cluster 94991097-7638-4240-b922-f525300a9026
+>>>>>>       health HEALTH_OK
+>>>>>>       monmap e1: 1 mons at {a=10.196.123.24:6789/0}, election epoch 1, quorum 0 a
+>>>>>>       osdmap e522: 1 osds: 1 up, 1 in
+>>>>>>        pgmap v386711: 832 pgs, 7 pools, 308 GB data, 247 kobjects
+>>>>>>              366 GB used, 1122 GB / 1489 GB avail
+>>>>>>                   832 active+clean
+>>>>>>    client io 100 MB/s rd, 25618 op/s
+>>>>>>
+>>>>>> cpu util:
+>>>>>> --------
+>>>>>>    ~14 core while serving from disks.
+>>>>>>
+>>>>>>   My Analysis:
+>>>>>>   ---------------
+>>>>>> No surprises here. Whatever is disk throughput ceph throughput is almost matching.
+>>>>>>
+>>>>>>
+>>>>>> Let's tweak the shard/thread settings and see the impact.
+>>>>>>
+>>>>>>
+>>>>>> 2. OSD config with 36 shards and 1 thread/shard:
+>>>>>> -----------------------------------------------------------
+>>>>>>
+>>>>>>     Buffered read:
+>>>>>>     ------------------
+>>>>>>    No change, output is very similar to 25 shards.
+>>>>>>
+>>>>>>
+>>>>>>    direct_io read:
+>>>>>>    ------------------
+>>>>>>         Iostat:
+>>>>>>        ----------
+>>>>>> avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+>>>>>>            33.33    0.00   28.22   23.11    0.00   15.34
+>>>>>>
+>>>>>> Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
+>>>>>> sda               0.00     0.00    0.00    2.00     0.00    12.00    12.00     0.00    0.00    0.00    0.00   0.00   0.00
+>>>>>> sdd               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+>>>>>> sde               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+>>>>>> sdg               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+>>>>>> sdf               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+>>>>>> sdh               0.00     0.00 31987.00    0.00 127948.00     0.00     8.00    18.06    0.56    0.56    0.00   0.03 100.40
+>>>>>> sdc               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+>>>>>> sdb               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+>>>>>>
+>>>>>>         ceph -s:
+>>>>>>      --------------
+>>>>>> root@emsclient:~/fio_test# ceph -s
+>>>>>>      cluster 94991097-7638-4240-b922-f525300a9026
+>>>>>>       health HEALTH_OK
+>>>>>>       monmap e1: 1 mons at {a=10.196.123.24:6789/0}, election epoch 1, quorum 0 a
+>>>>>>       osdmap e525: 1 osds: 1 up, 1 in
+>>>>>>        pgmap v386746: 832 pgs, 7 pools, 308 GB data, 247 kobjects
+>>>>>>              366 GB used, 1122 GB / 1489 GB avail
+>>>>>>                   832 active+clean
+>>>>>>    client io 127 MB/s rd, 32763 op/s
+>>>>>>
+>>>>>>          cpu util:
+>>>>>>     --------------
+>>>>>>         ~19 core while serving from disks.
+>>>>>>
+>>>>>>           Analysis:
+>>>>>> ------------------
+>>>>>>          It is scaling with increased number of shards/threads. The parallelism also increased significantly.
+>>>>>>
+>>>>>>
+>>>>>> 3. OSD config with 48 shards and 1 thread/shard:
+>>>>>>   ----------------------------------------------------------
+>>>>>>      Buffered read:
+>>>>>>     -------------------
+>>>>>>      No change, output is very similar to 25 shards.
+>>>>>>
+>>>>>>
+>>>>>>     direct_io read:
+>>>>>>      -----------------
+>>>>>>         Iostat:
+>>>>>>        --------
+>>>>>>
+>>>>>> avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+>>>>>>            37.50    0.00   33.72   20.03    0.00    8.75
+>>>>>>
+>>>>>> Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
+>>>>>> sda               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+>>>>>> sdd               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+>>>>>> sde               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+>>>>>> sdg               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+>>>>>> sdf               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+>>>>>> sdh               0.00     0.00 35360.00    0.00 141440.00     0.00     8.00    22.25    0.62    0.62    0.00   0.03 100.40
+>>>>>> sdc               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+>>>>>> sdb               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+>>>>>>
+>>>>>>           ceph -s:
+>>>>>>         --------------
+>>>>>> root@emsclient:~/fio_test# ceph -s
+>>>>>>      cluster 94991097-7638-4240-b922-f525300a9026
+>>>>>>       health HEALTH_OK
+>>>>>>       monmap e1: 1 mons at {a=10.196.123.24:6789/0}, election epoch 1, quorum 0 a
+>>>>>>       osdmap e534: 1 osds: 1 up, 1 in
+>>>>>>        pgmap v386830: 832 pgs, 7 pools, 308 GB data, 247 kobjects
+>>>>>>              366 GB used, 1122 GB / 1489 GB avail
+>>>>>>                   832 active+clean
+>>>>>>    client io 138 MB/s rd, 35582 op/s
+>>>>>>
+>>>>>>           cpu util:
+>>>>>>   ----------------
+>>>>>>          ~22.5 core while serving from disks.
+>>>>>>
+>>>>>>            Analysis:
+>>>>>>   --------------------
+>>>>>>          It is scaling with increased number of shards/threads. The parallelism also increased significantly.
+>>>>>>
+>>>>>>
+>>>>>>
+>>>>>> 4. OSD config with 64 shards and 1 thread/shard:
+>>>>>>   ---------------------------------------------------------
+>>>>>>        Buffered read:
+>>>>>>       ------------------
+>>>>>>       No change, output is very similar to 25 shards.
+>>>>>>
+>>>>>>
+>>>>>>       direct_io read:
+>>>>>>       -------------------
+>>>>>>         Iostat:
+>>>>>>        ---------
+>>>>>> avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+>>>>>>            40.18    0.00   34.84   19.81    0.00    5.18
+>>>>>>
+>>>>>> Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
+>>>>>> sda               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+>>>>>> sdd               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+>>>>>> sde               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+>>>>>> sdg               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+>>>>>> sdf               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+>>>>>> sdh               0.00     0.00 39114.00    0.00 156460.00     0.00     8.00    35.58    0.90    0.90    0.00   0.03 100.40
+>>>>>> sdc               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+>>>>>> sdb               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+>>>>>>
+>>>>>>         ceph -s:
+>>>>>>   ---------------
+>>>>>> root@emsclient:~/fio_test# ceph -s
+>>>>>>      cluster 94991097-7638-4240-b922-f525300a9026
+>>>>>>       health HEALTH_OK
+>>>>>>       monmap e1: 1 mons at {a=10.196.123.24:6789/0}, election epoch 1, quorum 0 a
+>>>>>>       osdmap e537: 1 osds: 1 up, 1 in
+>>>>>>        pgmap v386865: 832 pgs, 7 pools, 308 GB data, 247 kobjects
+>>>>>>              366 GB used, 1122 GB / 1489 GB avail
+>>>>>>                   832 active+clean
+>>>>>>    client io 153 MB/s rd, 39172 op/s
+>>>>>>
+>>>>>>        cpu util:
+>>>>>> ----------------
+>>>>>>      ~24.5 core while serving from disks. ~3% cpu left.
+>>>>>>
+>>>>>>         Analysis:
+>>>>>> ------------------
+>>>>>>        It is scaling with increased number of shards/threads. The parallelism also increased significantly. It is disk bound now.
+>>>>>>
+>>>>>>
+>>>>>> Summary:
+>>>>>>
+>>>>>> So, it seems buffered IO has significant impact on performance in case backend is SSD.
+>>>>>> My question is,  if the workload is very random and storage(SSD) is very huge compare to system memory, shouldn't we always go for direct_io instead of buffered io from Ceph ?
+>>>>>>
+>>>>>> Please share your thoughts/suggestion on this.
+>>>>>>
+>>>>>> Thanks & Regards
+>>>>>> Somnath
+>>>>>>
+>>>>>> ________________________________
+>>>>>>
+>>>>>> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+>>>>>>
+>>>>>> --
+>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>>>>>> in the body of a message to majordomo@vger.kernel.org More
+>>>>>> majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>>
+>>>>>
+>>>>>
+>>>>> --
+>>>>> Milosz Tanski
+>>>>> CTO
+>>>>> 16 East 34th Street, 15th floor
+>>>>> New York, NY 10016
+>>>>>
+>>>>> p: 646-253-9055
+>>>>> e: milosz@adfin.com
+>>>>> N?????r??y??????X???v???)?{.n?????z?]z????ay? ????j ??f???h?????
+>>>>> ?w??? ???j:+v???w???????? ????zZ+???????j"????i
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>>>> in the body of a message to majordomo@vger.kernel.org More majordomo
+>>>> info at  http://vger.kernel.org/majordomo-info.html
+>>>
+>>>
+>>>
+>>> --
+>>> Best Regards,
+>>>
+>>> Wheat
+>>
+>>
+>>
+>> --
+>> Best Regards,
+>>
+>> Wheat
+>>
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
 
-sage
