@@ -1,445 +1,319 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: Impact of page cache on OSD read performance for SSD
-Date: Wed, 24 Sep 2014 08:27:40 -0500
-Message-ID: <5422C6CC.6080801@redhat.com>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F278492BA@SACMBXIP02.sdcorp.global.sandisk.com> <CANP1eJEh0DmMOk57Pw4zCfm2oQfiKYFGdNqtHpfQZJomUAt77w@mail.gmail.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F278493DC@SACMBXIP02.sdcorp.global.sandisk.com> <alpine.DEB.2.00.1409231229120.27396@cobra.newdream.net> <CACJqLyYgcJq0-x6aOjTAA4ig0NYFPRm6Zxn+8RfB1eL9oZu7Jg@mail.gmail.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F27849836@SACMBXIP02.sdcorp.global.sandisk.com> <CACJqLyb=2s8gtXyqoUC-t6bKjrikqWk9q3T_bf6KKrwQUHKeMQ@mail.gmail.com> <alpine.DEB.2.00.1409240536100.27396@cobra.newdream.net>
+From: M Ranga Swami Reddy <swamireddy@gmail.com>
+Subject: Re: Fwd: S3 API Compatibility support
+Date: Wed, 24 Sep 2014 19:33:00 +0530
+Message-ID: <CANA9Uk7BDUrSwMiD6JhP+bDhwR8BJ8thsv2UaCcgFO63oUNoag@mail.gmail.com>
+References: <CANA9Uk55UZXtKzS=urk3Q+KY=DoWoTaCRf=rKiEtjt9y7FYw7A@mail.gmail.com>
+	<CANA9Uk6E9t30Ve3pKhZa1cW4g6N7JjzG8JgiwOoDa9TWdNEagQ@mail.gmail.com>
+	<alpine.DEB.2.00.1407250848060.22752@cobra.newdream.net>
+	<CANA9Uk468XOE1cr935HY1y+tSnu-xp6QPaj7uCpZNQbJhg-pOA@mail.gmail.com>
+	<CABBk=J8+3K28M-RNf+ULx0TnTMmGxdymJDLeFMft-EX8PhS_4A@mail.gmail.com>
+	<CANA9Uk4JGm_2L_VnGsOgfpsX17=Ja4LLDaVNXzKJe-ZkY=ya9A@mail.gmail.com>
+	<CABBk=J-fSR8mc7LQBLcUQDPkgC8NaSfvRB-2ED71qSvQzLX8Cw@mail.gmail.com>
+	<CANA9Uk75TsXUyfMSibJRMeaWFEMKj-RxyFQqp=s1YZerNzM0mw@mail.gmail.com>
+	<CANA9Uk49OgVtOSW9Yria-3ig8L8doV3X1ZqL+C_E0e4e9ShQxQ@mail.gmail.com>
+	<CANA9Uk6LTc=HEV5mb+q1-QR3P-gPhAOYst-p9MHkQfxDBga-rA@mail.gmail.com>
+	<alpine.DEB.2.00.1409182234140.18018@cobra.newdream.net>
+	<CANA9Uk6_zg7f6UQKNoBWLB_VEUJ+oicz4fe-tq7y3upFWoZEGA@mail.gmail.com>
+	<alpine.DEB.2.00.1409190833500.18018@cobra.newdream.net>
+	<CANA9Uk5ae+3EBemx=UrRgNoMowUS1SBor=wV4RjWxj8kNn_Svw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qg0-f43.google.com ([209.85.192.43]:65285 "EHLO
-	mail-qg0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751012AbaIXN1q (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Sep 2014 09:27:46 -0400
-Received: by mail-qg0-f43.google.com with SMTP id f51so5843449qge.2
-        for <ceph-devel@vger.kernel.org>; Wed, 24 Sep 2014 06:27:45 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1409240536100.27396@cobra.newdream.net>
+Received: from mail-la0-f44.google.com ([209.85.215.44]:43514 "EHLO
+	mail-la0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751352AbaIXODD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Sep 2014 10:03:03 -0400
+Received: by mail-la0-f44.google.com with SMTP id gi9so410261lab.31
+        for <ceph-devel@vger.kernel.org>; Wed, 24 Sep 2014 07:03:01 -0700 (PDT)
+In-Reply-To: <CANA9Uk5ae+3EBemx=UrRgNoMowUS1SBor=wV4RjWxj8kNn_Svw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, Haomai Wang <haomaiwang@gmail.com>
-Cc: Somnath Roy <Somnath.Roy@sandisk.com>, Milosz Tanski <milosz@adfin.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: Yehuda Sadeh <yehuda@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On 09/24/2014 07:38 AM, Sage Weil wrote:
-> On Wed, 24 Sep 2014, Haomai Wang wrote:
->> I agree with that direct read will help for disk read. But if read data
->> is hot and small enough to fit in memory, page cache is a good place to
->> hold data cache. If discard page cache, we need to implement a cache to
->> provide with effective lookup impl.
->
-> This is true for some workloads, but not necessarily true for all.  Many
-> clients (notably RBD) will be caching at the client side (in VM's fs, and
-> possibly in librbd itself) such that caching at the OSD is largely wasted
-> effort.  For RGW the often is likely true, unless there is a varnish cache
-> or something in front.
->
-> We should probably have a direct_io config option for filestore.  But even
-> better would be some hint from the client about whether it is caching or
-> not so that FileStore could conditionally cache...
+>>There is the main #4099 issue for object expiration, but there is no real
+>>detail there.  The plan is (as always) to have equivalent functionality to S3.
 
-I like the hinting idea.  Having said that, if the effect being seen is 
-due to page cache, it seems like something is off.  We've seen 
-performance issues in the kernel before so it's not unprecedented. 
-Working around it with direct IO could be the right way to go, but it 
-might be that this is something that could be fixed higher up and 
-improve performance in other scenarios too.  I'd hate to let it go by 
-the wayside of we could find something actionable.
+>>Do you mind creating a new feature ticket that specifically references the
+>>ability to move objects to a second storage tier based on policy?  Any
+>>references to AWS docs about the API or functionality would be helpful in
+>>the ticket.
 
+
+>Sure, I will create a new feature ticket and add the needful information  there.
+
+Created a new ticket: http://tracker.ceph.com/issues/9581
+
+
+Thanks
+Swami
+
+On Fri, Sep 19, 2014 at 9:23 PM, M Ranga Swami Reddy
+<swamireddy@gmail.com> wrote:
+>>What do you mean by "RRS storage-low cost storage"?  My read of the RRS
+>>numbers is that they simply have a different tier of S3 that runs fewer
+>>replicas and (probably) cheaper disks.  In radosgw-land, this would just
+>>be a different rados pool with 2x replicas and (probably) a CRUSH rule
+>>mapping it to different hardware (with bigger and/or cheaper disks).
 >
-> sage
+> Thats correct. If we could do the with a different rados pool  using
+> 2x replicas along with CURSH
+> mapping it to different h/w (with bigger and cheaper disks) , then its
+> same as RRS support in AWS.
 >
->   >
->> BTW, whether to use direct io we can refer to MySQL Innodb engine with
->> direct io and PostgreSQL with page cache.
+>
+>>> >What isn't currently supported is the ability to reduce the redundancy of
+>>> >individual objects in a bucket.  I don't think there is anything
+>>> >architecturally preventing that, but it is not implemented or supported.
+>>>
+>>> OK. Do we have the issue id for the above? Else, we can file one. Please advise.
+>
+>>There is the main #4099 issue for object expiration, but there is no real
+>>detail there.  The plan is (as always) to have equivalent functionality to S3.
+>
+>>Do you mind creating a new feature ticket that specifically references the
+>>ability to move objects to a second storage tier based on policy?  Any
+>>references to AWS docs about the API or functionality would be helpful in
+>>the ticket.
+>
+>
+> Sure, I will create a new feature ticket and add the needful information  there.
+>
+> Thanks
+> Swami
+>
+> On Fri, Sep 19, 2014 at 9:08 PM, Sage Weil <sweil@redhat.com> wrote:
+>> On Fri, 19 Sep 2014, M Ranga Swami Reddy wrote:
+>>> Hi Sage,
+>>> Thanks for quick reply.
+>>>
+>>> >what you mean.
+>>> >For RRS, though, I assume you mean the ability to create buckets with
+>>> >reduced redundancy with radosgw?  That is supported, although not quite
+>>> >the way AWS does it.  You can create different pools that back RGW
+>>> >buckets, and each bucket is stored in one of those pools.  So you could
+>>> >make one of them 2x instead of 3x, or use an erasure code of your choice.
+>>>
+>>> Yes, we can confiure ceph to use 2x replicas, which will look like
+>>> reduced redundancy, but AWS uses a separate RRS storage-low cost
+>>> (instead of
+>>> standard) storage for this purpose. I am checking, if we could
+>>> similarly in ceph too.
 >>
->> On Wed, Sep 24, 2014 at 10:29 AM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
->>> Haomai,
->>> I am considering only about random reads and the changes I made only affecting reads. For write, I have not measured yet. But, yes, page cache may be helpful for write coalescing. Still need to evaluate how it is behaving comparing direct_io on SSD though. I think Ceph code path will be much shorter if we use direct_io in the write path where it is actually executing the transactions. Probably, the sync thread and all will not be needed.
+>> What do you mean by "RRS storage-low cost storage"?  My read of the RRS
+>> numbers is that they simply have a different tier of S3 that runs fewer
+>> replicas and (probably) cheaper disks.  In radosgw-land, this would just
+>> be a different rados pool with 2x replicas and (probably) a CRUSH rule
+>> mapping it to different hardware (with bigger and/or cheaper disks).
+>>
+>>> >What isn't currently supported is the ability to reduce the redundancy of
+>>> >individual objects in a bucket.  I don't think there is anything
+>>> >architecturally preventing that, but it is not implemented or supported.
 >>>
->>> I am trying to analyze where is the extra reads coming from in case of buffered io by using blktrace etc. This should give us a clear understanding what exactly is going on there and it may turn out that tuning kernel parameters only  we can achieve similar performance as direct_io.
+>>> OK. Do we have the issue id for the above? Else, we can file one. Please advise.
+>>
+>> There is the main #4099 issue for object expiration, but there is no real
+>> detail there.  The plan is (as always) to have equivalent functionality to
+>> S3.
+>>
+>> Do you mind creating a new feature ticket that specifically references the
+>> ability to move objects to a second storage tier based on policy?  Any
+>> references to AWS docs about the API or functionality would be helpful in
+>> the ticket.
+>>
+>>> >When we look at the S3 archival features in more detail (soon!) I'm sure
+>>> >this will come up!  The current plan is to address object versioning
+>>> >first.  That is, unless a developer surfaces who wants to start hacking on
+>>> >this right away...
 >>>
->>> Thanks & Regards
->>> Somnath
+>>> Great to know this. Even we are keen with S3 support in Ceph and we
+>>> are happy support you here.
+>>
+>> Great to hear!
+>>
+>> Thanks-
+>> sage
+>>
+>>
 >>>
->>> -----Original Message-----
->>> From: Haomai Wang [mailto:haomaiwang@gmail.com]
->>> Sent: Tuesday, September 23, 2014 7:07 PM
->>> To: Sage Weil
->>> Cc: Somnath Roy; Milosz Tanski; ceph-devel@vger.kernel.org
->>> Subject: Re: Impact of page cache on OSD read performance for SSD
+>>> Thanks
+>>> Swami
 >>>
->>> Good point, but do you have considered that the impaction for write ops? And if skip page cache, FileStore is responsible for data cache?
->>>
->>> On Wed, Sep 24, 2014 at 3:29 AM, Sage Weil <sweil@redhat.com> wrote:
->>>> On Tue, 23 Sep 2014, Somnath Roy wrote:
->>>>> Milosz,
->>>>> Thanks for the response. I will see if I can get any information out of perf.
->>>>>
->>>>> Here is my OS information.
->>>>>
->>>>> root@emsclient:~# lsb_release -a
->>>>> No LSB modules are available.
->>>>> Distributor ID: Ubuntu
->>>>> Description:    Ubuntu 13.10
->>>>> Release:        13.10
->>>>> Codename:       saucy
->>>>> root@emsclient:~# uname -a
->>>>> Linux emsclient 3.11.0-12-generic #19-Ubuntu SMP Wed Oct 9 16:20:46
->>>>> UTC 2013 x86_64 x86_64 x86_64 GNU/Linux
->>>>>
->>>>> BTW, it's not a 45% drop, as you can see, by tuning the OSD parameter I was able to get almost *2X* performance improvement with direct_io.
->>>>> It's not only page cache (memory) lookup, in case of buffered_io  the following could be problem.
->>>>>
->>>>> 1. Double copy (disk -> file buffer cache, file buffer cache -> user
->>>>> buffer)
->>>>>
->>>>> 2. As the iostat output shows, it is not reading 4K only, it is
->>>>> reading more data from disk as required and in the end it will be
->>>>> wasted in case of random workload..
->>>>
->>>> It might be worth using blktrace to see what the IOs it is issueing are.
->>>> Which ones are > 4K and what they point to...
->>>>
->>>> sage
->>>>
->>>>
->>>>>
->>>>> Thanks & Regards
->>>>> Somnath
->>>>>
->>>>> -----Original Message-----
->>>>> From: Milosz Tanski [mailto:milosz@adfin.com]
->>>>> Sent: Tuesday, September 23, 2014 12:09 PM
->>>>> To: Somnath Roy
->>>>> Cc: ceph-devel@vger.kernel.org
->>>>> Subject: Re: Impact of page cache on OSD read performance for SSD
->>>>>
->>>>> Somnath,
->>>>>
->>>>> I wonder if there's a bottleneck or a point of contention for the kernel. For a entirely uncached workload I expect the page cache lookup to cause a slow down (since the lookup should be wasted). What I wouldn't expect is a 45% performance drop. Memory speed should be one magnitude faster then a modern SATA SSD drive (so it should be more negligible overhead).
->>>>>
->>>>> Is there anyway you could perform the same test but monitor what's going on with the OSD process using the perf tool? Whatever is the default cpu time spent hardware counter is fine. Make sure you have the kernel debug info package installed so can get symbol information for kernel and module calls. With any luck the diff in perf output in two runs will show us the culprit.
->>>>>
->>>>> Also, can you tell us what OS/kernel version you're using on the OSD machines?
->>>>>
->>>>> - Milosz
->>>>>
->>>>> On Tue, Sep 23, 2014 at 2:05 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
->>>>>> Hi Sage,
->>>>>> I have created the following setup in order to examine how a single OSD is behaving if say ~80-90% of ios hitting the SSDs.
->>>>>>
->>>>>> My test includes the following steps.
->>>>>>
->>>>>>          1. Created a single OSD cluster.
->>>>>>          2. Created two rbd images (110GB each) on 2 different pools.
->>>>>>          3. Populated entire image, so my working set is ~210GB. My system memory is ~16GB.
->>>>>>          4. Dumped page cache before every run.
->>>>>>          5. Ran fio_rbd (QD 32, 8 instances) in parallel on these two images.
->>>>>>
->>>>>> Here is my disk iops/bandwidth..
->>>>>>
->>>>>>          root@emsclient:~/fio_test# fio rad_resd_disk.job
->>>>>>          random-reads: (g=0): rw=randread, bs=4K-4K/4K-4K, ioengine=libaio, iodepth=64
->>>>>>          2.0.8
->>>>>>          Starting 1 process
->>>>>>          Jobs: 1 (f=1): [r] [100.0% done] [154.1M/0K /s] [39.7K/0  iops] [eta 00m:00s]
->>>>>>          random-reads: (groupid=0, jobs=1): err= 0: pid=1431
->>>>>>          read : io=9316.4MB, bw=158994KB/s, iops=39748 , runt=
->>>>>> 60002msec
->>>>>>
->>>>>> My fio_rbd config..
->>>>>>
->>>>>> [global]
->>>>>> ioengine=rbd
->>>>>> clientname=admin
->>>>>> pool=rbd1
->>>>>> rbdname=ceph_regression_test1
->>>>>> invalidate=0    # mandatory
->>>>>> rw=randread
->>>>>> bs=4k
->>>>>> direct=1
->>>>>> time_based
->>>>>> runtime=2m
->>>>>> size=109G
->>>>>> numjobs=8
->>>>>> [rbd_iodepth32]
->>>>>> iodepth=32
->>>>>>
->>>>>> Now, I have run Giant Ceph on top of that..
->>>>>>
->>>>>> 1. OSD config with 25 shards/1 thread per shard :
->>>>>> -------------------------------------------------------
->>>>>>
->>>>>>           avg-cpu:  %user   %nice %system %iowait  %steal   %idle
->>>>>>            22.04    0.00   16.46   45.86    0.00   15.64
->>>>>>
->>>>>> Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
->>>>>> sda               0.00     9.00    0.00    6.00     0.00    92.00    30.67     0.01    1.33    0.00    1.33   1.33   0.80
->>>>>> sdd               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->>>>>> sde               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->>>>>> sdg               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->>>>>> sdf               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->>>>>> sdh             181.00     0.00 34961.00    0.00 176740.00     0.00    10.11   102.71    2.92    2.92    0.00   0.03 100.00
->>>>>> sdc               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->>>>>> sdb               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->>>>>>
->>>>>>
->>>>>> ceph -s:
->>>>>>   ----------
->>>>>> root@emsclient:~# ceph -s
->>>>>>      cluster 94991097-7638-4240-b922-f525300a9026
->>>>>>       health HEALTH_OK
->>>>>>       monmap e1: 1 mons at {a=10.196.123.24:6789/0}, election epoch 1, quorum 0 a
->>>>>>       osdmap e498: 1 osds: 1 up, 1 in
->>>>>>        pgmap v386366: 832 pgs, 7 pools, 308 GB data, 247 kobjects
->>>>>>              366 GB used, 1122 GB / 1489 GB avail
->>>>>>                   832 active+clean
->>>>>>    client io 75215 kB/s rd, 18803 op/s
->>>>>>
->>>>>>   cpu util:
->>>>>> ----------
->>>>>>   Gradually decreases from ~21 core (serving from cache) to ~10 core (while serving from disks).
->>>>>>
->>>>>>   My Analysis:
->>>>>> -----------------
->>>>>>   In this case "All is Well"  till ios are served from cache (XFS is
->>>>>> smart enough to cache some data ) . Once started hitting disks and throughput is decreasing. As you can see, disk is giving ~35K iops , but, OSD throughput is only ~18.8K ! So, cache miss in case of buffered io seems to be very  expensive.  Half of the iops are waste. Also, looking at the bandwidth, it is obvious, not everything is 4K read, May be kernel read_ahead is kicking (?).
->>>>>>
->>>>>>
->>>>>> Now, I thought of making ceph disk read as direct_io and do the same experiment. I have changed the FileStore::read to do the direct_io only. Rest kept as is. Here is the result with that.
->>>>>>
->>>>>>
->>>>>> Iostat:
->>>>>> -------
->>>>>>
->>>>>> avg-cpu:  %user   %nice %system %iowait  %steal   %idle
->>>>>>            24.77    0.00   19.52   21.36    0.00   34.36
->>>>>>
->>>>>> Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
->>>>>> sda               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->>>>>> sdd               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->>>>>> sde               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->>>>>> sdg               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->>>>>> sdf               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->>>>>> sdh               0.00     0.00 25295.00    0.00 101180.00     0.00     8.00    12.73    0.50    0.50    0.00   0.04 100.80
->>>>>> sdc               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->>>>>> sdb               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->>>>>>
->>>>>> ceph -s:
->>>>>>   --------
->>>>>> root@emsclient:~/fio_test# ceph -s
->>>>>>      cluster 94991097-7638-4240-b922-f525300a9026
->>>>>>       health HEALTH_OK
->>>>>>       monmap e1: 1 mons at {a=10.196.123.24:6789/0}, election epoch 1, quorum 0 a
->>>>>>       osdmap e522: 1 osds: 1 up, 1 in
->>>>>>        pgmap v386711: 832 pgs, 7 pools, 308 GB data, 247 kobjects
->>>>>>              366 GB used, 1122 GB / 1489 GB avail
->>>>>>                   832 active+clean
->>>>>>    client io 100 MB/s rd, 25618 op/s
->>>>>>
->>>>>> cpu util:
->>>>>> --------
->>>>>>    ~14 core while serving from disks.
->>>>>>
->>>>>>   My Analysis:
->>>>>>   ---------------
->>>>>> No surprises here. Whatever is disk throughput ceph throughput is almost matching.
->>>>>>
->>>>>>
->>>>>> Let's tweak the shard/thread settings and see the impact.
->>>>>>
->>>>>>
->>>>>> 2. OSD config with 36 shards and 1 thread/shard:
->>>>>> -----------------------------------------------------------
->>>>>>
->>>>>>     Buffered read:
->>>>>>     ------------------
->>>>>>    No change, output is very similar to 25 shards.
->>>>>>
->>>>>>
->>>>>>    direct_io read:
->>>>>>    ------------------
->>>>>>         Iostat:
->>>>>>        ----------
->>>>>> avg-cpu:  %user   %nice %system %iowait  %steal   %idle
->>>>>>            33.33    0.00   28.22   23.11    0.00   15.34
->>>>>>
->>>>>> Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
->>>>>> sda               0.00     0.00    0.00    2.00     0.00    12.00    12.00     0.00    0.00    0.00    0.00   0.00   0.00
->>>>>> sdd               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->>>>>> sde               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->>>>>> sdg               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->>>>>> sdf               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->>>>>> sdh               0.00     0.00 31987.00    0.00 127948.00     0.00     8.00    18.06    0.56    0.56    0.00   0.03 100.40
->>>>>> sdc               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->>>>>> sdb               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->>>>>>
->>>>>>         ceph -s:
->>>>>>      --------------
->>>>>> root@emsclient:~/fio_test# ceph -s
->>>>>>      cluster 94991097-7638-4240-b922-f525300a9026
->>>>>>       health HEALTH_OK
->>>>>>       monmap e1: 1 mons at {a=10.196.123.24:6789/0}, election epoch 1, quorum 0 a
->>>>>>       osdmap e525: 1 osds: 1 up, 1 in
->>>>>>        pgmap v386746: 832 pgs, 7 pools, 308 GB data, 247 kobjects
->>>>>>              366 GB used, 1122 GB / 1489 GB avail
->>>>>>                   832 active+clean
->>>>>>    client io 127 MB/s rd, 32763 op/s
->>>>>>
->>>>>>          cpu util:
->>>>>>     --------------
->>>>>>         ~19 core while serving from disks.
->>>>>>
->>>>>>           Analysis:
->>>>>> ------------------
->>>>>>          It is scaling with increased number of shards/threads. The parallelism also increased significantly.
->>>>>>
->>>>>>
->>>>>> 3. OSD config with 48 shards and 1 thread/shard:
->>>>>>   ----------------------------------------------------------
->>>>>>      Buffered read:
->>>>>>     -------------------
->>>>>>      No change, output is very similar to 25 shards.
->>>>>>
->>>>>>
->>>>>>     direct_io read:
->>>>>>      -----------------
->>>>>>         Iostat:
->>>>>>        --------
->>>>>>
->>>>>> avg-cpu:  %user   %nice %system %iowait  %steal   %idle
->>>>>>            37.50    0.00   33.72   20.03    0.00    8.75
->>>>>>
->>>>>> Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
->>>>>> sda               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->>>>>> sdd               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->>>>>> sde               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->>>>>> sdg               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->>>>>> sdf               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->>>>>> sdh               0.00     0.00 35360.00    0.00 141440.00     0.00     8.00    22.25    0.62    0.62    0.00   0.03 100.40
->>>>>> sdc               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->>>>>> sdb               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->>>>>>
->>>>>>           ceph -s:
->>>>>>         --------------
->>>>>> root@emsclient:~/fio_test# ceph -s
->>>>>>      cluster 94991097-7638-4240-b922-f525300a9026
->>>>>>       health HEALTH_OK
->>>>>>       monmap e1: 1 mons at {a=10.196.123.24:6789/0}, election epoch 1, quorum 0 a
->>>>>>       osdmap e534: 1 osds: 1 up, 1 in
->>>>>>        pgmap v386830: 832 pgs, 7 pools, 308 GB data, 247 kobjects
->>>>>>              366 GB used, 1122 GB / 1489 GB avail
->>>>>>                   832 active+clean
->>>>>>    client io 138 MB/s rd, 35582 op/s
->>>>>>
->>>>>>           cpu util:
->>>>>>   ----------------
->>>>>>          ~22.5 core while serving from disks.
->>>>>>
->>>>>>            Analysis:
->>>>>>   --------------------
->>>>>>          It is scaling with increased number of shards/threads. The parallelism also increased significantly.
->>>>>>
->>>>>>
->>>>>>
->>>>>> 4. OSD config with 64 shards and 1 thread/shard:
->>>>>>   ---------------------------------------------------------
->>>>>>        Buffered read:
->>>>>>       ------------------
->>>>>>       No change, output is very similar to 25 shards.
->>>>>>
->>>>>>
->>>>>>       direct_io read:
->>>>>>       -------------------
->>>>>>         Iostat:
->>>>>>        ---------
->>>>>> avg-cpu:  %user   %nice %system %iowait  %steal   %idle
->>>>>>            40.18    0.00   34.84   19.81    0.00    5.18
->>>>>>
->>>>>> Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
->>>>>> sda               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->>>>>> sdd               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->>>>>> sde               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->>>>>> sdg               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->>>>>> sdf               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->>>>>> sdh               0.00     0.00 39114.00    0.00 156460.00     0.00     8.00    35.58    0.90    0.90    0.00   0.03 100.40
->>>>>> sdc               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->>>>>> sdb               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->>>>>>
->>>>>>         ceph -s:
->>>>>>   ---------------
->>>>>> root@emsclient:~/fio_test# ceph -s
->>>>>>      cluster 94991097-7638-4240-b922-f525300a9026
->>>>>>       health HEALTH_OK
->>>>>>       monmap e1: 1 mons at {a=10.196.123.24:6789/0}, election epoch 1, quorum 0 a
->>>>>>       osdmap e537: 1 osds: 1 up, 1 in
->>>>>>        pgmap v386865: 832 pgs, 7 pools, 308 GB data, 247 kobjects
->>>>>>              366 GB used, 1122 GB / 1489 GB avail
->>>>>>                   832 active+clean
->>>>>>    client io 153 MB/s rd, 39172 op/s
->>>>>>
->>>>>>        cpu util:
->>>>>> ----------------
->>>>>>      ~24.5 core while serving from disks. ~3% cpu left.
->>>>>>
->>>>>>         Analysis:
->>>>>> ------------------
->>>>>>        It is scaling with increased number of shards/threads. The parallelism also increased significantly. It is disk bound now.
->>>>>>
->>>>>>
->>>>>> Summary:
->>>>>>
->>>>>> So, it seems buffered IO has significant impact on performance in case backend is SSD.
->>>>>> My question is,  if the workload is very random and storage(SSD) is very huge compare to system memory, shouldn't we always go for direct_io instead of buffered io from Ceph ?
->>>>>>
->>>>>> Please share your thoughts/suggestion on this.
->>>>>>
->>>>>> Thanks & Regards
->>>>>> Somnath
->>>>>>
->>>>>> ________________________________
->>>>>>
->>>>>> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
->>>>>>
->>>>>> --
->>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->>>>>> in the body of a message to majordomo@vger.kernel.org More
->>>>>> majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>>
->>>>>
->>>>>
->>>>> --
->>>>> Milosz Tanski
->>>>> CTO
->>>>> 16 East 34th Street, 15th floor
->>>>> New York, NY 10016
->>>>>
->>>>> p: 646-253-9055
->>>>> e: milosz@adfin.com
->>>>> N?????r??y??????X???v???)?{.n?????z?]z????ay? ????j ??f???h?????
->>>>> ?w??? ???j:+v???w???????? ????zZ+???????j"????i
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->>>> in the body of a message to majordomo@vger.kernel.org More majordomo
->>>> info at  http://vger.kernel.org/majordomo-info.html
->>>
->>>
->>>
+>>> On Fri, Sep 19, 2014 at 11:08 AM, Sage Weil <sweil@redhat.com> wrote:
+>>> > On Fri, 19 Sep 2014, M Ranga Swami Reddy wrote:
+>>> >> Hi Sage,
+>>> >> Could you please advise, if Ceph support the low cost object
+>>> >> storages(like Amazon Glacier or RRS) for archiving objects like log
+>>> >> file etc.?
+>>> >
+>>> > Ceph doesn't interact at all with AWS services like Glacier, if that's
+>>> > what you mean.
+>>> >
+>>> > For RRS, though, I assume you mean the ability to create buckets with
+>>> > reduced redundancy with radosgw?  That is supported, although not quite
+>>> > the way AWS does it.  You can create different pools that back RGW
+>>> > buckets, and each bucket is stored in one of those pools.  So you could
+>>> > make one of them 2x instead of 3x, or use an erasure code of your choice.
+>>> >
+>>> > What isn't currently supported is the ability to reduce the redundancy of
+>>> > individual objects in a bucket.  I don't think there is anything
+>>> > architecturally preventing that, but it is not implemented or supported.
+>>> >
+>>> > When we look at the S3 archival features in more detail (soon!) I'm sure
+>>> > this will come up!  The current plan is to address object versioning
+>>> > first.  That is, unless a developer surfaces who wants to start hacking on
+>>> > this right away...
+>>> >
+>>> > sage
+>>> >
+>>> >
+>>> >
+>>> >>
+>>> >> Thanks
+>>> >> Swami
+>>> >>
+>>> >> On Thu, Sep 18, 2014 at 6:20 PM, M Ranga Swami Reddy
+>>> >> <swamireddy@gmail.com> wrote:
+>>> >> > Hi ,
+>>> >> >
+>>> >> > Could you please check and clarify the below question on object
+>>> >> > lifecycle and notification S3 APIs support:
+>>> >> >
+>>> >> > 1. To support the bucket lifecycle - we need to support the
+>>> >> > moving/deleting the objects/buckets based lifecycle settings.
+>>> >> > For ex: If an object lifecyle set as below:
+>>> >> >           1. Archive it after 10 days - means move this object to low
+>>> >> > cost object storage after 10 days of the creation date.
+>>> >> >            2. Remove this object after 90days - mean remove this
+>>> >> > object from the low cost object after 90days of creation date.
+>>> >> >
+>>> >> > Q1- Does the ceph support the above concept like moving to low cost
+>>> >> > storage and delete from that storage?
+>>> >> >
+>>> >> > 2. To support the object notifications:
+>>> >> >       - First there should be low cost and high availability storage
+>>> >> > with single replica only. If an object created with this type of
+>>> >> > object storage,
+>>> >> >         There could be chances that object could lose, so if an object
+>>> >> > of this type of storage lost, set the notifications.
+>>> >> >
+>>> >> > Q2- Does Ceph support low cost and high availability storage type?
+>>> >> >
+>>> >> > Thanks
+>>> >> >
+>>> >> > On Fri, Sep 12, 2014 at 8:00 PM, M Ranga Swami Reddy
+>>> >> > <swamireddy@gmail.com> wrote:
+>>> >> >> Hi Yehuda,
+>>> >> >>
+>>> >> >> Could you please check and clarify the below question on object
+>>> >> >> lifecycle and notification S3 APIs support:
+>>> >> >>
+>>> >> >> 1. To support the bucket lifecycle - we need to support the
+>>> >> >> moving/deleting the objects/buckets based lifecycle settings.
+>>> >> >> For ex: If an object lifecyle set as below:
+>>> >> >>           1. Archive it after 10 days - means move this object to low
+>>> >> >> cost object storage after 10 days of the creation date.
+>>> >> >>            2. Remove this object after 90days - mean remove this
+>>> >> >> object from the low cost object after 90days of creation date.
+>>> >> >>
+>>> >> >> Q1- Does the ceph support the above concept like moving to low cost
+>>> >> >> storage and delete from that storage?
+>>> >> >>
+>>> >> >> 2. To support the object notifications:
+>>> >> >>       - First there should be low cost and high availability storage
+>>> >> >> with single replica only. If an object created with this type of
+>>> >> >> object storage,
+>>> >> >>         There could be chances that object could lose, so if an object
+>>> >> >> of this type of storage lost, set the notifications.
+>>> >> >>
+>>> >> >> Q2- Does Ceph support low cost and high availability storage type?
+>>> >> >>
+>>> >> >> Thanks
+>>> >> >> Swami
+>>> >> >>
+>>> >> >>
+>>> >> >>
+>>> >> >>
+>>> >> >>
+>>> >> >>
+>>> >> >>
+>>> >> >> On Tue, Jul 29, 2014 at 1:35 AM, Yehuda Sadeh <yehuda@redhat.com> wrote:
+>>> >> >>> Bucket lifecycle:
+>>> >> >>> http://tracker.ceph.com/issues/8929
+>>> >> >>>
+>>> >> >>> Bucket notification:
+>>> >> >>> http://tracker.ceph.com/issues/8956
+>>> >> >>>
+>>> >> >>> On Sun, Jul 27, 2014 at 12:54 AM, M Ranga Swami Reddy
+>>> >> >>> <swamireddy@gmail.com> wrote:
+>>> >> >>>> Good no know the details. Can you please share the issue ID for bucket
+>>> >> >>>> lifecycle? My team also could start help here.
+>>> >> >>>> Regarding the notification - Do we have the issue ID?
+>>> >> >>>> Yes, the object versioning will be backlog one - I strongly feel we
+>>> >> >>>> start working on this asap.
+>>> >> >>>>
+>>> >> >>>> Thanks
+>>> >> >>>> Swami
+>>> >> >>>>
+>>> >> >>>> On Fri, Jul 25, 2014 at 11:31 PM, Yehuda Sadeh <yehuda@redhat.com> wrote:
+>>> >> >>>>> On Fri, Jul 25, 2014 at 10:14 AM, M Ranga Swami Reddy
+>>> >> >>>>> <swamireddy@gmail.com> wrote:
+>>> >> >>>>>> Thanks for quick reply.
+>>> >> >>>>>> Yes,  versioned object - missing in ceph ATM
+>>> >> >>>>>> Iam looking for: bucket lifecylce (get/put/delete), bucket location,
+>>> >> >>>>>> put object notification and object restore (ie versioned object) S3
+>>> >> >>>>>> API support.
+>>> >> >>>>>> Please let me now any of the above work is in progress or some one
+>>> >> >>>>>> planned to work on.
+>>> >> >>>>>
+>>> >> >>>>>
+>>> >> >>>>> I opened an issue for bucket lifecycle (we already had an issue open
+>>> >> >>>>> for object expiration though). We do have bucket location already
+>>> >> >>>>> (part of the multi-region feature). Object versioning is definitely on
+>>> >> >>>>> our backlog and one that we'll hopefully implement sooner rather
+>>> >> >>>>> later.
+>>> >> >>>>> With regard to object notification, it'll require having a
+>>> >> >>>>> notification service which is a bit out of the scope. Integrating the
+>>> >> >>>>> gateway with such a service whouldn't be hard, but we'll need to have
+>>> >> >>>>> that first.
+>>> >> >>>>>
+>>> >> >>>>> Yehuda
+>>> >> >>>>>
+>>> >> >>>>>>
+>>> >> >>>>>> Thanks
+>>> >> >>>>>> Swami
+>>> >> >>>>>>
+>>> >> >>>>>>
+>>> >> >>>>>> On Fri, Jul 25, 2014 at 9:19 PM, Sage Weil <sweil@redhat.com> wrote:
+>>> >> >>>>>>> On Fri, 25 Jul 2014, M Ranga Swami Reddy wrote:
+>>> >> >>>>>>>> Hi Team: As per the ceph document a few S3 APIs compatibility not supported.
+>>> >> >>>>>>>>
+>>> >> >>>>>>>> Link: http://ceph.com/docs/master/radosgw/s3/
+>>> >> >>>>>>>>
+>>> >> >>>>>>>> Is there plan to support the ?n supported item in the above table?
+>>> >> >>>>>>>> or
+>>> >> >>>>>>>> Any working on this?
+>>> >> >>>>>>>
+>>> >> >>>>>>> Yes.  Unfortunately this table isn't particularly detailed or accurate or
+>>> >> >>>>>>> up to date.   The main gap, I think, is versioned objects.
+>>> >> >>>>>>>
+>>> >> >>>>>>> Are there specfiic parts of the S3 API that are missing that you need?
+>>> >> >>>>>>> That sort of info is very helpful for prioritizing effort...
+>>> >> >>>>>>>
+>>> >> >>>>>>> sage
+>>> >> >>>>>> --
+>>> >> >>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> >> >>>>>> the body of a message to majordomo@vger.kernel.org
+>>> >> >>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>> >> --
+>>> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> >> the body of a message to majordomo@vger.kernel.org
+>>> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>> >>
+>>> >>
 >>> --
->>> Best Regards,
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >>>
->>> Wheat
->>
->>
->>
->> --
->> Best Regards,
->>
->> Wheat
->>
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-
+>>>
