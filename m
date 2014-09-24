@@ -1,383 +1,362 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Re: Impact of page cache on OSD read performance for SSD
-Date: Wed, 24 Sep 2014 10:06:48 +0800
-Message-ID: <CACJqLyYgcJq0-x6aOjTAA4ig0NYFPRm6Zxn+8RfB1eL9oZu7Jg@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Impact of page cache on OSD read performance for SSD
+Date: Wed, 24 Sep 2014 02:29:20 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F27849836@SACMBXIP02.sdcorp.global.sandisk.com>
 References: <755F6B91B3BE364F9BCA11EA3F9E0C6F278492BA@SACMBXIP02.sdcorp.global.sandisk.com>
 	<CANP1eJEh0DmMOk57Pw4zCfm2oQfiKYFGdNqtHpfQZJomUAt77w@mail.gmail.com>
 	<755F6B91B3BE364F9BCA11EA3F9E0C6F278493DC@SACMBXIP02.sdcorp.global.sandisk.com>
 	<alpine.DEB.2.00.1409231229120.27396@cobra.newdream.net>
+ <CACJqLyYgcJq0-x6aOjTAA4ig0NYFPRm6Zxn+8RfB1eL9oZu7Jg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-we0-f181.google.com ([74.125.82.181]:62037 "EHLO
-	mail-we0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752008AbaIXCGt convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Sep 2014 22:06:49 -0400
-Received: by mail-we0-f181.google.com with SMTP id w61so3586809wes.12
-        for <ceph-devel@vger.kernel.org>; Tue, 23 Sep 2014 19:06:48 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1409231229120.27396@cobra.newdream.net>
+Received: from mail-bn1on0070.outbound.protection.outlook.com ([157.56.110.70]:39505
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1753338AbaIXCbH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 23 Sep 2014 22:31:07 -0400
+In-Reply-To: <CACJqLyYgcJq0-x6aOjTAA4ig0NYFPRm6Zxn+8RfB1eL9oZu7Jg@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Somnath Roy <Somnath.Roy@sandisk.com>, Milosz Tanski <milosz@adfin.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Haomai Wang <haomaiwang@gmail.com>, Sage Weil <sweil@redhat.com>
+Cc: Milosz Tanski <milosz@adfin.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Good point, but do you have considered that the impaction for write
-ops? And if skip page cache, FileStore is responsible for data cache?
-
-On Wed, Sep 24, 2014 at 3:29 AM, Sage Weil <sweil@redhat.com> wrote:
-> On Tue, 23 Sep 2014, Somnath Roy wrote:
->> Milosz,
->> Thanks for the response. I will see if I can get any information out of perf.
->>
->> Here is my OS information.
->>
->> root@emsclient:~# lsb_release -a
->> No LSB modules are available.
->> Distributor ID: Ubuntu
->> Description:    Ubuntu 13.10
->> Release:        13.10
->> Codename:       saucy
->> root@emsclient:~# uname -a
->> Linux emsclient 3.11.0-12-generic #19-Ubuntu SMP Wed Oct 9 16:20:46 UTC 2013 x86_64 x86_64 x86_64 GNU/Linux
->>
->> BTW, it's not a 45% drop, as you can see, by tuning the OSD parameter I was able to get almost *2X* performance improvement with direct_io.
->> It's not only page cache (memory) lookup, in case of buffered_io  the following could be problem.
->>
->> 1. Double copy (disk -> file buffer cache, file buffer cache -> user buffer)
->>
->> 2. As the iostat output shows, it is not reading 4K only, it is reading
->> more data from disk as required and in the end it will be wasted in case
->> of random workload..
->
-> It might be worth using blktrace to see what the IOs it is issueing are.
-> Which ones are > 4K and what they point to...
->
-> sage
->
->
->>
->> Thanks & Regards
->> Somnath
->>
->> -----Original Message-----
->> From: Milosz Tanski [mailto:milosz@adfin.com]
->> Sent: Tuesday, September 23, 2014 12:09 PM
->> To: Somnath Roy
->> Cc: ceph-devel@vger.kernel.org
->> Subject: Re: Impact of page cache on OSD read performance for SSD
->>
->> Somnath,
->>
->> I wonder if there's a bottleneck or a point of contention for the kernel. For a entirely uncached workload I expect the page cache lookup to cause a slow down (since the lookup should be wasted). What I wouldn't expect is a 45% performance drop. Memory speed should be one magnitude faster then a modern SATA SSD drive (so it should be more negligible overhead).
->>
->> Is there anyway you could perform the same test but monitor what's going on with the OSD process using the perf tool? Whatever is the default cpu time spent hardware counter is fine. Make sure you have the kernel debug info package installed so can get symbol information for kernel and module calls. With any luck the diff in perf output in two runs will show us the culprit.
->>
->> Also, can you tell us what OS/kernel version you're using on the OSD machines?
->>
->> - Milosz
->>
->> On Tue, Sep 23, 2014 at 2:05 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
->> > Hi Sage,
->> > I have created the following setup in order to examine how a single OSD is behaving if say ~80-90% of ios hitting the SSDs.
->> >
->> > My test includes the following steps.
->> >
->> >         1. Created a single OSD cluster.
->> >         2. Created two rbd images (110GB each) on 2 different pools.
->> >         3. Populated entire image, so my working set is ~210GB. My system memory is ~16GB.
->> >         4. Dumped page cache before every run.
->> >         5. Ran fio_rbd (QD 32, 8 instances) in parallel on these two images.
->> >
->> > Here is my disk iops/bandwidth..
->> >
->> >         root@emsclient:~/fio_test# fio rad_resd_disk.job
->> >         random-reads: (g=0): rw=randread, bs=4K-4K/4K-4K, ioengine=libaio, iodepth=64
->> >         2.0.8
->> >         Starting 1 process
->> >         Jobs: 1 (f=1): [r] [100.0% done] [154.1M/0K /s] [39.7K/0  iops] [eta 00m:00s]
->> >         random-reads: (groupid=0, jobs=1): err= 0: pid=1431
->> >         read : io=9316.4MB, bw=158994KB/s, iops=39748 , runt=
->> > 60002msec
->> >
->> > My fio_rbd config..
->> >
->> > [global]
->> > ioengine=rbd
->> > clientname=admin
->> > pool=rbd1
->> > rbdname=ceph_regression_test1
->> > invalidate=0    # mandatory
->> > rw=randread
->> > bs=4k
->> > direct=1
->> > time_based
->> > runtime=2m
->> > size=109G
->> > numjobs=8
->> > [rbd_iodepth32]
->> > iodepth=32
->> >
->> > Now, I have run Giant Ceph on top of that..
->> >
->> > 1. OSD config with 25 shards/1 thread per shard :
->> > -------------------------------------------------------
->> >
->> >          avg-cpu:  %user   %nice %system %iowait  %steal   %idle
->> >           22.04    0.00   16.46   45.86    0.00   15.64
->> >
->> > Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
->> > sda               0.00     9.00    0.00    6.00     0.00    92.00    30.67     0.01    1.33    0.00    1.33   1.33   0.80
->> > sdd               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->> > sde               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->> > sdg               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->> > sdf               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->> > sdh             181.00     0.00 34961.00    0.00 176740.00     0.00    10.11   102.71    2.92    2.92    0.00   0.03 100.00
->> > sdc               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->> > sdb               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->> >
->> >
->> > ceph -s:
->> >  ----------
->> > root@emsclient:~# ceph -s
->> >     cluster 94991097-7638-4240-b922-f525300a9026
->> >      health HEALTH_OK
->> >      monmap e1: 1 mons at {a=10.196.123.24:6789/0}, election epoch 1, quorum 0 a
->> >      osdmap e498: 1 osds: 1 up, 1 in
->> >       pgmap v386366: 832 pgs, 7 pools, 308 GB data, 247 kobjects
->> >             366 GB used, 1122 GB / 1489 GB avail
->> >                  832 active+clean
->> >   client io 75215 kB/s rd, 18803 op/s
->> >
->> >  cpu util:
->> > ----------
->> >  Gradually decreases from ~21 core (serving from cache) to ~10 core (while serving from disks).
->> >
->> >  My Analysis:
->> > -----------------
->> >  In this case "All is Well"  till ios are served from cache (XFS is
->> > smart enough to cache some data ) . Once started hitting disks and throughput is decreasing. As you can see, disk is giving ~35K iops , but, OSD throughput is only ~18.8K ! So, cache miss in case of buffered io seems to be very  expensive.  Half of the iops are waste. Also, looking at the bandwidth, it is obvious, not everything is 4K read, May be kernel read_ahead is kicking (?).
->> >
->> >
->> > Now, I thought of making ceph disk read as direct_io and do the same experiment. I have changed the FileStore::read to do the direct_io only. Rest kept as is. Here is the result with that.
->> >
->> >
->> > Iostat:
->> > -------
->> >
->> > avg-cpu:  %user   %nice %system %iowait  %steal   %idle
->> >           24.77    0.00   19.52   21.36    0.00   34.36
->> >
->> > Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
->> > sda               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->> > sdd               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->> > sde               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->> > sdg               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->> > sdf               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->> > sdh               0.00     0.00 25295.00    0.00 101180.00     0.00     8.00    12.73    0.50    0.50    0.00   0.04 100.80
->> > sdc               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->> > sdb               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->> >
->> > ceph -s:
->> >  --------
->> > root@emsclient:~/fio_test# ceph -s
->> >     cluster 94991097-7638-4240-b922-f525300a9026
->> >      health HEALTH_OK
->> >      monmap e1: 1 mons at {a=10.196.123.24:6789/0}, election epoch 1, quorum 0 a
->> >      osdmap e522: 1 osds: 1 up, 1 in
->> >       pgmap v386711: 832 pgs, 7 pools, 308 GB data, 247 kobjects
->> >             366 GB used, 1122 GB / 1489 GB avail
->> >                  832 active+clean
->> >   client io 100 MB/s rd, 25618 op/s
->> >
->> > cpu util:
->> > --------
->> >   ~14 core while serving from disks.
->> >
->> >  My Analysis:
->> >  ---------------
->> > No surprises here. Whatever is disk throughput ceph throughput is almost matching.
->> >
->> >
->> > Let's tweak the shard/thread settings and see the impact.
->> >
->> >
->> > 2. OSD config with 36 shards and 1 thread/shard:
->> > -----------------------------------------------------------
->> >
->> >    Buffered read:
->> >    ------------------
->> >   No change, output is very similar to 25 shards.
->> >
->> >
->> >   direct_io read:
->> >   ------------------
->> >        Iostat:
->> >       ----------
->> > avg-cpu:  %user   %nice %system %iowait  %steal   %idle
->> >           33.33    0.00   28.22   23.11    0.00   15.34
->> >
->> > Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
->> > sda               0.00     0.00    0.00    2.00     0.00    12.00    12.00     0.00    0.00    0.00    0.00   0.00   0.00
->> > sdd               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->> > sde               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->> > sdg               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->> > sdf               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->> > sdh               0.00     0.00 31987.00    0.00 127948.00     0.00     8.00    18.06    0.56    0.56    0.00   0.03 100.40
->> > sdc               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->> > sdb               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->> >
->> >        ceph -s:
->> >     --------------
->> > root@emsclient:~/fio_test# ceph -s
->> >     cluster 94991097-7638-4240-b922-f525300a9026
->> >      health HEALTH_OK
->> >      monmap e1: 1 mons at {a=10.196.123.24:6789/0}, election epoch 1, quorum 0 a
->> >      osdmap e525: 1 osds: 1 up, 1 in
->> >       pgmap v386746: 832 pgs, 7 pools, 308 GB data, 247 kobjects
->> >             366 GB used, 1122 GB / 1489 GB avail
->> >                  832 active+clean
->> >   client io 127 MB/s rd, 32763 op/s
->> >
->> >         cpu util:
->> >    --------------
->> >        ~19 core while serving from disks.
->> >
->> >          Analysis:
->> > ------------------
->> >         It is scaling with increased number of shards/threads. The parallelism also increased significantly.
->> >
->> >
->> > 3. OSD config with 48 shards and 1 thread/shard:
->> >  ----------------------------------------------------------
->> >     Buffered read:
->> >    -------------------
->> >     No change, output is very similar to 25 shards.
->> >
->> >
->> >    direct_io read:
->> >     -----------------
->> >        Iostat:
->> >       --------
->> >
->> > avg-cpu:  %user   %nice %system %iowait  %steal   %idle
->> >           37.50    0.00   33.72   20.03    0.00    8.75
->> >
->> > Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
->> > sda               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->> > sdd               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->> > sde               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->> > sdg               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->> > sdf               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->> > sdh               0.00     0.00 35360.00    0.00 141440.00     0.00     8.00    22.25    0.62    0.62    0.00   0.03 100.40
->> > sdc               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->> > sdb               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->> >
->> >          ceph -s:
->> >        --------------
->> > root@emsclient:~/fio_test# ceph -s
->> >     cluster 94991097-7638-4240-b922-f525300a9026
->> >      health HEALTH_OK
->> >      monmap e1: 1 mons at {a=10.196.123.24:6789/0}, election epoch 1, quorum 0 a
->> >      osdmap e534: 1 osds: 1 up, 1 in
->> >       pgmap v386830: 832 pgs, 7 pools, 308 GB data, 247 kobjects
->> >             366 GB used, 1122 GB / 1489 GB avail
->> >                  832 active+clean
->> >   client io 138 MB/s rd, 35582 op/s
->> >
->> >          cpu util:
->> >  ----------------
->> >         ~22.5 core while serving from disks.
->> >
->> >           Analysis:
->> >  --------------------
->> >         It is scaling with increased number of shards/threads. The parallelism also increased significantly.
->> >
->> >
->> >
->> > 4. OSD config with 64 shards and 1 thread/shard:
->> >  ---------------------------------------------------------
->> >       Buffered read:
->> >      ------------------
->> >      No change, output is very similar to 25 shards.
->> >
->> >
->> >      direct_io read:
->> >      -------------------
->> >        Iostat:
->> >       ---------
->> > avg-cpu:  %user   %nice %system %iowait  %steal   %idle
->> >           40.18    0.00   34.84   19.81    0.00    5.18
->> >
->> > Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
->> > sda               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->> > sdd               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->> > sde               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->> > sdg               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->> > sdf               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->> > sdh               0.00     0.00 39114.00    0.00 156460.00     0.00     8.00    35.58    0.90    0.90    0.00   0.03 100.40
->> > sdc               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->> > sdb               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->> >
->> >        ceph -s:
->> >  ---------------
->> > root@emsclient:~/fio_test# ceph -s
->> >     cluster 94991097-7638-4240-b922-f525300a9026
->> >      health HEALTH_OK
->> >      monmap e1: 1 mons at {a=10.196.123.24:6789/0}, election epoch 1, quorum 0 a
->> >      osdmap e537: 1 osds: 1 up, 1 in
->> >       pgmap v386865: 832 pgs, 7 pools, 308 GB data, 247 kobjects
->> >             366 GB used, 1122 GB / 1489 GB avail
->> >                  832 active+clean
->> >   client io 153 MB/s rd, 39172 op/s
->> >
->> >       cpu util:
->> > ----------------
->> >     ~24.5 core while serving from disks. ~3% cpu left.
->> >
->> >        Analysis:
->> > ------------------
->> >       It is scaling with increased number of shards/threads. The parallelism also increased significantly. It is disk bound now.
->> >
->> >
->> > Summary:
->> >
->> > So, it seems buffered IO has significant impact on performance in case backend is SSD.
->> > My question is,  if the workload is very random and storage(SSD) is very huge compare to system memory, shouldn't we always go for direct_io instead of buffered io from Ceph ?
->> >
->> > Please share your thoughts/suggestion on this.
->> >
->> > Thanks & Regards
->> > Somnath
->> >
->> > ________________________________
->> >
->> > PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
->> >
->> > --
->> > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->> > in the body of a message to majordomo@vger.kernel.org More majordomo
->> > info at  http://vger.kernel.org/majordomo-info.html
->>
->>
->>
->> --
->> Milosz Tanski
->> CTO
->> 16 East 34th Street, 15th floor
->> New York, NY 10016
->>
->> p: 646-253-9055
->> e: milosz@adfin.com
->> N?????r??y??????X???v???)?{.n?????z?]z????ay? ????j ??f???h????? ?w??? ???j:+v???w???????? ????zZ+???????j"????i
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
-
--- 
-Best Regards,
-
-Wheat
+SGFvbWFpLA0KSSBhbSBjb25zaWRlcmluZyBvbmx5IGFib3V0IHJhbmRvbSByZWFkcyBhbmQgdGhl
+IGNoYW5nZXMgSSBtYWRlIG9ubHkgYWZmZWN0aW5nIHJlYWRzLiBGb3Igd3JpdGUsIEkgaGF2ZSBu
+b3QgbWVhc3VyZWQgeWV0LiBCdXQsIHllcywgcGFnZSBjYWNoZSBtYXkgYmUgaGVscGZ1bCBmb3Ig
+d3JpdGUgY29hbGVzY2luZy4gU3RpbGwgbmVlZCB0byBldmFsdWF0ZSBob3cgaXQgaXMgYmVoYXZp
+bmcgY29tcGFyaW5nIGRpcmVjdF9pbyBvbiBTU0QgdGhvdWdoLiBJIHRoaW5rIENlcGggY29kZSBw
+YXRoIHdpbGwgYmUgbXVjaCBzaG9ydGVyIGlmIHdlIHVzZSBkaXJlY3RfaW8gaW4gdGhlIHdyaXRl
+IHBhdGggd2hlcmUgaXQgaXMgYWN0dWFsbHkgZXhlY3V0aW5nIHRoZSB0cmFuc2FjdGlvbnMuIFBy
+b2JhYmx5LCB0aGUgc3luYyB0aHJlYWQgYW5kIGFsbCB3aWxsIG5vdCBiZSBuZWVkZWQuDQoNCkkg
+YW0gdHJ5aW5nIHRvIGFuYWx5emUgd2hlcmUgaXMgdGhlIGV4dHJhIHJlYWRzIGNvbWluZyBmcm9t
+IGluIGNhc2Ugb2YgYnVmZmVyZWQgaW8gYnkgdXNpbmcgYmxrdHJhY2UgZXRjLiBUaGlzIHNob3Vs
+ZCBnaXZlIHVzIGEgY2xlYXIgdW5kZXJzdGFuZGluZyB3aGF0IGV4YWN0bHkgaXMgZ29pbmcgb24g
+dGhlcmUgYW5kIGl0IG1heSB0dXJuIG91dCB0aGF0IHR1bmluZyBrZXJuZWwgcGFyYW1ldGVycyBv
+bmx5ICB3ZSBjYW4gYWNoaWV2ZSBzaW1pbGFyIHBlcmZvcm1hbmNlIGFzIGRpcmVjdF9pby4NCg0K
+VGhhbmtzICYgUmVnYXJkcw0KU29tbmF0aA0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0K
+RnJvbTogSGFvbWFpIFdhbmcgW21haWx0bzpoYW9tYWl3YW5nQGdtYWlsLmNvbV0gDQpTZW50OiBU
+dWVzZGF5LCBTZXB0ZW1iZXIgMjMsIDIwMTQgNzowNyBQTQ0KVG86IFNhZ2UgV2VpbA0KQ2M6IFNv
+bW5hdGggUm95OyBNaWxvc3ogVGFuc2tpOyBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KU3Vi
+amVjdDogUmU6IEltcGFjdCBvZiBwYWdlIGNhY2hlIG9uIE9TRCByZWFkIHBlcmZvcm1hbmNlIGZv
+ciBTU0QNCg0KR29vZCBwb2ludCwgYnV0IGRvIHlvdSBoYXZlIGNvbnNpZGVyZWQgdGhhdCB0aGUg
+aW1wYWN0aW9uIGZvciB3cml0ZSBvcHM/IEFuZCBpZiBza2lwIHBhZ2UgY2FjaGUsIEZpbGVTdG9y
+ZSBpcyByZXNwb25zaWJsZSBmb3IgZGF0YSBjYWNoZT8NCg0KT24gV2VkLCBTZXAgMjQsIDIwMTQg
+YXQgMzoyOSBBTSwgU2FnZSBXZWlsIDxzd2VpbEByZWRoYXQuY29tPiB3cm90ZToNCj4gT24gVHVl
+LCAyMyBTZXAgMjAxNCwgU29tbmF0aCBSb3kgd3JvdGU6DQo+PiBNaWxvc3osDQo+PiBUaGFua3Mg
+Zm9yIHRoZSByZXNwb25zZS4gSSB3aWxsIHNlZSBpZiBJIGNhbiBnZXQgYW55IGluZm9ybWF0aW9u
+IG91dCBvZiBwZXJmLg0KPj4NCj4+IEhlcmUgaXMgbXkgT1MgaW5mb3JtYXRpb24uDQo+Pg0KPj4g
+cm9vdEBlbXNjbGllbnQ6fiMgbHNiX3JlbGVhc2UgLWENCj4+IE5vIExTQiBtb2R1bGVzIGFyZSBh
+dmFpbGFibGUuDQo+PiBEaXN0cmlidXRvciBJRDogVWJ1bnR1DQo+PiBEZXNjcmlwdGlvbjogICAg
+VWJ1bnR1IDEzLjEwDQo+PiBSZWxlYXNlOiAgICAgICAgMTMuMTANCj4+IENvZGVuYW1lOiAgICAg
+ICBzYXVjeQ0KPj4gcm9vdEBlbXNjbGllbnQ6fiMgdW5hbWUgLWENCj4+IExpbnV4IGVtc2NsaWVu
+dCAzLjExLjAtMTItZ2VuZXJpYyAjMTktVWJ1bnR1IFNNUCBXZWQgT2N0IDkgMTY6MjA6NDYgDQo+
+PiBVVEMgMjAxMyB4ODZfNjQgeDg2XzY0IHg4Nl82NCBHTlUvTGludXgNCj4+DQo+PiBCVFcsIGl0
+J3Mgbm90IGEgNDUlIGRyb3AsIGFzIHlvdSBjYW4gc2VlLCBieSB0dW5pbmcgdGhlIE9TRCBwYXJh
+bWV0ZXIgSSB3YXMgYWJsZSB0byBnZXQgYWxtb3N0ICoyWCogcGVyZm9ybWFuY2UgaW1wcm92ZW1l
+bnQgd2l0aCBkaXJlY3RfaW8uDQo+PiBJdCdzIG5vdCBvbmx5IHBhZ2UgY2FjaGUgKG1lbW9yeSkg
+bG9va3VwLCBpbiBjYXNlIG9mIGJ1ZmZlcmVkX2lvICB0aGUgZm9sbG93aW5nIGNvdWxkIGJlIHBy
+b2JsZW0uDQo+Pg0KPj4gMS4gRG91YmxlIGNvcHkgKGRpc2sgLT4gZmlsZSBidWZmZXIgY2FjaGUs
+IGZpbGUgYnVmZmVyIGNhY2hlIC0+IHVzZXIgDQo+PiBidWZmZXIpDQo+Pg0KPj4gMi4gQXMgdGhl
+IGlvc3RhdCBvdXRwdXQgc2hvd3MsIGl0IGlzIG5vdCByZWFkaW5nIDRLIG9ubHksIGl0IGlzIA0K
+Pj4gcmVhZGluZyBtb3JlIGRhdGEgZnJvbSBkaXNrIGFzIHJlcXVpcmVkIGFuZCBpbiB0aGUgZW5k
+IGl0IHdpbGwgYmUgDQo+PiB3YXN0ZWQgaW4gY2FzZSBvZiByYW5kb20gd29ya2xvYWQuLg0KPg0K
+PiBJdCBtaWdodCBiZSB3b3J0aCB1c2luZyBibGt0cmFjZSB0byBzZWUgd2hhdCB0aGUgSU9zIGl0
+IGlzIGlzc3VlaW5nIGFyZS4NCj4gV2hpY2ggb25lcyBhcmUgPiA0SyBhbmQgd2hhdCB0aGV5IHBv
+aW50IHRvLi4uDQo+DQo+IHNhZ2UNCj4NCj4NCj4+DQo+PiBUaGFua3MgJiBSZWdhcmRzDQo+PiBT
+b21uYXRoDQo+Pg0KPj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4+IEZyb206IE1pbG9z
+eiBUYW5za2kgW21haWx0bzptaWxvc3pAYWRmaW4uY29tXQ0KPj4gU2VudDogVHVlc2RheSwgU2Vw
+dGVtYmVyIDIzLCAyMDE0IDEyOjA5IFBNDQo+PiBUbzogU29tbmF0aCBSb3kNCj4+IENjOiBjZXBo
+LWRldmVsQHZnZXIua2VybmVsLm9yZw0KPj4gU3ViamVjdDogUmU6IEltcGFjdCBvZiBwYWdlIGNh
+Y2hlIG9uIE9TRCByZWFkIHBlcmZvcm1hbmNlIGZvciBTU0QNCj4+DQo+PiBTb21uYXRoLA0KPj4N
+Cj4+IEkgd29uZGVyIGlmIHRoZXJlJ3MgYSBib3R0bGVuZWNrIG9yIGEgcG9pbnQgb2YgY29udGVu
+dGlvbiBmb3IgdGhlIGtlcm5lbC4gRm9yIGEgZW50aXJlbHkgdW5jYWNoZWQgd29ya2xvYWQgSSBl
+eHBlY3QgdGhlIHBhZ2UgY2FjaGUgbG9va3VwIHRvIGNhdXNlIGEgc2xvdyBkb3duIChzaW5jZSB0
+aGUgbG9va3VwIHNob3VsZCBiZSB3YXN0ZWQpLiBXaGF0IEkgd291bGRuJ3QgZXhwZWN0IGlzIGEg
+NDUlIHBlcmZvcm1hbmNlIGRyb3AuIE1lbW9yeSBzcGVlZCBzaG91bGQgYmUgb25lIG1hZ25pdHVk
+ZSBmYXN0ZXIgdGhlbiBhIG1vZGVybiBTQVRBIFNTRCBkcml2ZSAoc28gaXQgc2hvdWxkIGJlIG1v
+cmUgbmVnbGlnaWJsZSBvdmVyaGVhZCkuDQo+Pg0KPj4gSXMgdGhlcmUgYW55d2F5IHlvdSBjb3Vs
+ZCBwZXJmb3JtIHRoZSBzYW1lIHRlc3QgYnV0IG1vbml0b3Igd2hhdCdzIGdvaW5nIG9uIHdpdGgg
+dGhlIE9TRCBwcm9jZXNzIHVzaW5nIHRoZSBwZXJmIHRvb2w/IFdoYXRldmVyIGlzIHRoZSBkZWZh
+dWx0IGNwdSB0aW1lIHNwZW50IGhhcmR3YXJlIGNvdW50ZXIgaXMgZmluZS4gTWFrZSBzdXJlIHlv
+dSBoYXZlIHRoZSBrZXJuZWwgZGVidWcgaW5mbyBwYWNrYWdlIGluc3RhbGxlZCBzbyBjYW4gZ2V0
+IHN5bWJvbCBpbmZvcm1hdGlvbiBmb3Iga2VybmVsIGFuZCBtb2R1bGUgY2FsbHMuIFdpdGggYW55
+IGx1Y2sgdGhlIGRpZmYgaW4gcGVyZiBvdXRwdXQgaW4gdHdvIHJ1bnMgd2lsbCBzaG93IHVzIHRo
+ZSBjdWxwcml0Lg0KPj4NCj4+IEFsc28sIGNhbiB5b3UgdGVsbCB1cyB3aGF0IE9TL2tlcm5lbCB2
+ZXJzaW9uIHlvdSdyZSB1c2luZyBvbiB0aGUgT1NEIG1hY2hpbmVzPw0KPj4NCj4+IC0gTWlsb3N6
+DQo+Pg0KPj4gT24gVHVlLCBTZXAgMjMsIDIwMTQgYXQgMjowNSBQTSwgU29tbmF0aCBSb3kgPFNv
+bW5hdGguUm95QHNhbmRpc2suY29tPiB3cm90ZToNCj4+ID4gSGkgU2FnZSwNCj4+ID4gSSBoYXZl
+IGNyZWF0ZWQgdGhlIGZvbGxvd2luZyBzZXR1cCBpbiBvcmRlciB0byBleGFtaW5lIGhvdyBhIHNp
+bmdsZSBPU0QgaXMgYmVoYXZpbmcgaWYgc2F5IH44MC05MCUgb2YgaW9zIGhpdHRpbmcgdGhlIFNT
+RHMuDQo+PiA+DQo+PiA+IE15IHRlc3QgaW5jbHVkZXMgdGhlIGZvbGxvd2luZyBzdGVwcy4NCj4+
+ID4NCj4+ID4gICAgICAgICAxLiBDcmVhdGVkIGEgc2luZ2xlIE9TRCBjbHVzdGVyLg0KPj4gPiAg
+ICAgICAgIDIuIENyZWF0ZWQgdHdvIHJiZCBpbWFnZXMgKDExMEdCIGVhY2gpIG9uIDIgZGlmZmVy
+ZW50IHBvb2xzLg0KPj4gPiAgICAgICAgIDMuIFBvcHVsYXRlZCBlbnRpcmUgaW1hZ2UsIHNvIG15
+IHdvcmtpbmcgc2V0IGlzIH4yMTBHQi4gTXkgc3lzdGVtIG1lbW9yeSBpcyB+MTZHQi4NCj4+ID4g
+ICAgICAgICA0LiBEdW1wZWQgcGFnZSBjYWNoZSBiZWZvcmUgZXZlcnkgcnVuLg0KPj4gPiAgICAg
+ICAgIDUuIFJhbiBmaW9fcmJkIChRRCAzMiwgOCBpbnN0YW5jZXMpIGluIHBhcmFsbGVsIG9uIHRo
+ZXNlIHR3byBpbWFnZXMuDQo+PiA+DQo+PiA+IEhlcmUgaXMgbXkgZGlzayBpb3BzL2JhbmR3aWR0
+aC4uDQo+PiA+DQo+PiA+ICAgICAgICAgcm9vdEBlbXNjbGllbnQ6fi9maW9fdGVzdCMgZmlvIHJh
+ZF9yZXNkX2Rpc2suam9iDQo+PiA+ICAgICAgICAgcmFuZG9tLXJlYWRzOiAoZz0wKTogcnc9cmFu
+ZHJlYWQsIGJzPTRLLTRLLzRLLTRLLCBpb2VuZ2luZT1saWJhaW8sIGlvZGVwdGg9NjQNCj4+ID4g
+ICAgICAgICAyLjAuOA0KPj4gPiAgICAgICAgIFN0YXJ0aW5nIDEgcHJvY2Vzcw0KPj4gPiAgICAg
+ICAgIEpvYnM6IDEgKGY9MSk6IFtyXSBbMTAwLjAlIGRvbmVdIFsxNTQuMU0vMEsgL3NdIFszOS43
+Sy8wICBpb3BzXSBbZXRhIDAwbTowMHNdDQo+PiA+ICAgICAgICAgcmFuZG9tLXJlYWRzOiAoZ3Jv
+dXBpZD0wLCBqb2JzPTEpOiBlcnI9IDA6IHBpZD0xNDMxDQo+PiA+ICAgICAgICAgcmVhZCA6IGlv
+PTkzMTYuNE1CLCBidz0xNTg5OTRLQi9zLCBpb3BzPTM5NzQ4ICwgcnVudD0gDQo+PiA+IDYwMDAy
+bXNlYw0KPj4gPg0KPj4gPiBNeSBmaW9fcmJkIGNvbmZpZy4uDQo+PiA+DQo+PiA+IFtnbG9iYWxd
+DQo+PiA+IGlvZW5naW5lPXJiZA0KPj4gPiBjbGllbnRuYW1lPWFkbWluDQo+PiA+IHBvb2w9cmJk
+MQ0KPj4gPiByYmRuYW1lPWNlcGhfcmVncmVzc2lvbl90ZXN0MQ0KPj4gPiBpbnZhbGlkYXRlPTAg
+ICAgIyBtYW5kYXRvcnkNCj4+ID4gcnc9cmFuZHJlYWQNCj4+ID4gYnM9NGsNCj4+ID4gZGlyZWN0
+PTENCj4+ID4gdGltZV9iYXNlZA0KPj4gPiBydW50aW1lPTJtDQo+PiA+IHNpemU9MTA5Rw0KPj4g
+PiBudW1qb2JzPTgNCj4+ID4gW3JiZF9pb2RlcHRoMzJdDQo+PiA+IGlvZGVwdGg9MzINCj4+ID4N
+Cj4+ID4gTm93LCBJIGhhdmUgcnVuIEdpYW50IENlcGggb24gdG9wIG9mIHRoYXQuLg0KPj4gPg0K
+Pj4gPiAxLiBPU0QgY29uZmlnIHdpdGggMjUgc2hhcmRzLzEgdGhyZWFkIHBlciBzaGFyZCA6DQo+
+PiA+IC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0NCj4+ID4NCj4+ID4gICAgICAgICAgYXZnLWNwdTogICV1c2VyICAgJW5pY2UgJXN5c3RlbSAl
+aW93YWl0ICAlc3RlYWwgICAlaWRsZQ0KPj4gPiAgICAgICAgICAgMjIuMDQgICAgMC4wMCAgIDE2
+LjQ2ICAgNDUuODYgICAgMC4wMCAgIDE1LjY0DQo+PiA+DQo+PiA+IERldmljZTogICAgICAgICBy
+cnFtL3MgICB3cnFtL3MgICAgIHIvcyAgICAgdy9zICAgIHJrQi9zICAgIHdrQi9zIGF2Z3JxLXN6
+IGF2Z3F1LXN6ICAgYXdhaXQgcl9hd2FpdCB3X2F3YWl0ICBzdmN0bSAgJXV0aWwNCj4+ID4gc2Rh
+ICAgICAgICAgICAgICAgMC4wMCAgICAgOS4wMCAgICAwLjAwICAgIDYuMDAgICAgIDAuMDAgICAg
+OTIuMDAgICAgMzAuNjcgICAgIDAuMDEgICAgMS4zMyAgICAwLjAwICAgIDEuMzMgICAxLjMzICAg
+MC44MA0KPj4gPiBzZGQgICAgICAgICAgICAgICAwLjAwICAgICAwLjAwICAgIDAuMDAgICAgMC4w
+MCAgICAgMC4wMCAgICAgMC4wMCAgICAgMC4wMCAgICAgMC4wMCAgICAwLjAwICAgIDAuMDAgICAg
+MC4wMCAgIDAuMDAgICAwLjAwDQo+PiA+IHNkZSAgICAgICAgICAgICAgIDAuMDAgICAgIDAuMDAg
+ICAgMC4wMCAgICAwLjAwICAgICAwLjAwICAgICAwLjAwICAgICAwLjAwICAgICAwLjAwICAgIDAu
+MDAgICAgMC4wMCAgICAwLjAwICAgMC4wMCAgIDAuMDANCj4+ID4gc2RnICAgICAgICAgICAgICAg
+MC4wMCAgICAgMC4wMCAgICAwLjAwICAgIDAuMDAgICAgIDAuMDAgICAgIDAuMDAgICAgIDAuMDAg
+ICAgIDAuMDAgICAgMC4wMCAgICAwLjAwICAgIDAuMDAgICAwLjAwICAgMC4wMA0KPj4gPiBzZGYg
+ICAgICAgICAgICAgICAwLjAwICAgICAwLjAwICAgIDAuMDAgICAgMC4wMCAgICAgMC4wMCAgICAg
+MC4wMCAgICAgMC4wMCAgICAgMC4wMCAgICAwLjAwICAgIDAuMDAgICAgMC4wMCAgIDAuMDAgICAw
+LjAwDQo+PiA+IHNkaCAgICAgICAgICAgICAxODEuMDAgICAgIDAuMDAgMzQ5NjEuMDAgICAgMC4w
+MCAxNzY3NDAuMDAgICAgIDAuMDAgICAgMTAuMTEgICAxMDIuNzEgICAgMi45MiAgICAyLjkyICAg
+IDAuMDAgICAwLjAzIDEwMC4wMA0KPj4gPiBzZGMgICAgICAgICAgICAgICAwLjAwICAgICAwLjAw
+ICAgIDAuMDAgICAgMC4wMCAgICAgMC4wMCAgICAgMC4wMCAgICAgMC4wMCAgICAgMC4wMCAgICAw
+LjAwICAgIDAuMDAgICAgMC4wMCAgIDAuMDAgICAwLjAwDQo+PiA+IHNkYiAgICAgICAgICAgICAg
+IDAuMDAgICAgIDAuMDAgICAgMC4wMCAgICAwLjAwICAgICAwLjAwICAgICAwLjAwICAgICAwLjAw
+ICAgICAwLjAwICAgIDAuMDAgICAgMC4wMCAgICAwLjAwICAgMC4wMCAgIDAuMDANCj4+ID4NCj4+
+ID4NCj4+ID4gY2VwaCAtczoNCj4+ID4gIC0tLS0tLS0tLS0NCj4+ID4gcm9vdEBlbXNjbGllbnQ6
+fiMgY2VwaCAtcw0KPj4gPiAgICAgY2x1c3RlciA5NDk5MTA5Ny03NjM4LTQyNDAtYjkyMi1mNTI1
+MzAwYTkwMjYNCj4+ID4gICAgICBoZWFsdGggSEVBTFRIX09LDQo+PiA+ICAgICAgbW9ubWFwIGUx
+OiAxIG1vbnMgYXQge2E9MTAuMTk2LjEyMy4yNDo2Nzg5LzB9LCBlbGVjdGlvbiBlcG9jaCAxLCBx
+dW9ydW0gMCBhDQo+PiA+ICAgICAgb3NkbWFwIGU0OTg6IDEgb3NkczogMSB1cCwgMSBpbg0KPj4g
+PiAgICAgICBwZ21hcCB2Mzg2MzY2OiA4MzIgcGdzLCA3IHBvb2xzLCAzMDggR0IgZGF0YSwgMjQ3
+IGtvYmplY3RzDQo+PiA+ICAgICAgICAgICAgIDM2NiBHQiB1c2VkLCAxMTIyIEdCIC8gMTQ4OSBH
+QiBhdmFpbA0KPj4gPiAgICAgICAgICAgICAgICAgIDgzMiBhY3RpdmUrY2xlYW4NCj4+ID4gICBj
+bGllbnQgaW8gNzUyMTUga0IvcyByZCwgMTg4MDMgb3Avcw0KPj4gPg0KPj4gPiAgY3B1IHV0aWw6
+DQo+PiA+IC0tLS0tLS0tLS0NCj4+ID4gIEdyYWR1YWxseSBkZWNyZWFzZXMgZnJvbSB+MjEgY29y
+ZSAoc2VydmluZyBmcm9tIGNhY2hlKSB0byB+MTAgY29yZSAod2hpbGUgc2VydmluZyBmcm9tIGRp
+c2tzKS4NCj4+ID4NCj4+ID4gIE15IEFuYWx5c2lzOg0KPj4gPiAtLS0tLS0tLS0tLS0tLS0tLQ0K
+Pj4gPiAgSW4gdGhpcyBjYXNlICJBbGwgaXMgV2VsbCIgIHRpbGwgaW9zIGFyZSBzZXJ2ZWQgZnJv
+bSBjYWNoZSAoWEZTIGlzIA0KPj4gPiBzbWFydCBlbm91Z2ggdG8gY2FjaGUgc29tZSBkYXRhICkg
+LiBPbmNlIHN0YXJ0ZWQgaGl0dGluZyBkaXNrcyBhbmQgdGhyb3VnaHB1dCBpcyBkZWNyZWFzaW5n
+LiBBcyB5b3UgY2FuIHNlZSwgZGlzayBpcyBnaXZpbmcgfjM1SyBpb3BzICwgYnV0LCBPU0QgdGhy
+b3VnaHB1dCBpcyBvbmx5IH4xOC44SyAhIFNvLCBjYWNoZSBtaXNzIGluIGNhc2Ugb2YgYnVmZmVy
+ZWQgaW8gc2VlbXMgdG8gYmUgdmVyeSAgZXhwZW5zaXZlLiAgSGFsZiBvZiB0aGUgaW9wcyBhcmUg
+d2FzdGUuIEFsc28sIGxvb2tpbmcgYXQgdGhlIGJhbmR3aWR0aCwgaXQgaXMgb2J2aW91cywgbm90
+IGV2ZXJ5dGhpbmcgaXMgNEsgcmVhZCwgTWF5IGJlIGtlcm5lbCByZWFkX2FoZWFkIGlzIGtpY2tp
+bmcgKD8pLg0KPj4gPg0KPj4gPg0KPj4gPiBOb3csIEkgdGhvdWdodCBvZiBtYWtpbmcgY2VwaCBk
+aXNrIHJlYWQgYXMgZGlyZWN0X2lvIGFuZCBkbyB0aGUgc2FtZSBleHBlcmltZW50LiBJIGhhdmUg
+Y2hhbmdlZCB0aGUgRmlsZVN0b3JlOjpyZWFkIHRvIGRvIHRoZSBkaXJlY3RfaW8gb25seS4gUmVz
+dCBrZXB0IGFzIGlzLiBIZXJlIGlzIHRoZSByZXN1bHQgd2l0aCB0aGF0Lg0KPj4gPg0KPj4gPg0K
+Pj4gPiBJb3N0YXQ6DQo+PiA+IC0tLS0tLS0NCj4+ID4NCj4+ID4gYXZnLWNwdTogICV1c2VyICAg
+JW5pY2UgJXN5c3RlbSAlaW93YWl0ICAlc3RlYWwgICAlaWRsZQ0KPj4gPiAgICAgICAgICAgMjQu
+NzcgICAgMC4wMCAgIDE5LjUyICAgMjEuMzYgICAgMC4wMCAgIDM0LjM2DQo+PiA+DQo+PiA+IERl
+dmljZTogICAgICAgICBycnFtL3MgICB3cnFtL3MgICAgIHIvcyAgICAgdy9zICAgIHJrQi9zICAg
+IHdrQi9zIGF2Z3JxLXN6IGF2Z3F1LXN6ICAgYXdhaXQgcl9hd2FpdCB3X2F3YWl0ICBzdmN0bSAg
+JXV0aWwNCj4+ID4gc2RhICAgICAgICAgICAgICAgMC4wMCAgICAgMC4wMCAgICAwLjAwICAgIDAu
+MDAgICAgIDAuMDAgICAgIDAuMDAgICAgIDAuMDAgICAgIDAuMDAgICAgMC4wMCAgICAwLjAwICAg
+IDAuMDAgICAwLjAwICAgMC4wMA0KPj4gPiBzZGQgICAgICAgICAgICAgICAwLjAwICAgICAwLjAw
+ICAgIDAuMDAgICAgMC4wMCAgICAgMC4wMCAgICAgMC4wMCAgICAgMC4wMCAgICAgMC4wMCAgICAw
+LjAwICAgIDAuMDAgICAgMC4wMCAgIDAuMDAgICAwLjAwDQo+PiA+IHNkZSAgICAgICAgICAgICAg
+IDAuMDAgICAgIDAuMDAgICAgMC4wMCAgICAwLjAwICAgICAwLjAwICAgICAwLjAwICAgICAwLjAw
+ICAgICAwLjAwICAgIDAuMDAgICAgMC4wMCAgICAwLjAwICAgMC4wMCAgIDAuMDANCj4+ID4gc2Rn
+ICAgICAgICAgICAgICAgMC4wMCAgICAgMC4wMCAgICAwLjAwICAgIDAuMDAgICAgIDAuMDAgICAg
+IDAuMDAgICAgIDAuMDAgICAgIDAuMDAgICAgMC4wMCAgICAwLjAwICAgIDAuMDAgICAwLjAwICAg
+MC4wMA0KPj4gPiBzZGYgICAgICAgICAgICAgICAwLjAwICAgICAwLjAwICAgIDAuMDAgICAgMC4w
+MCAgICAgMC4wMCAgICAgMC4wMCAgICAgMC4wMCAgICAgMC4wMCAgICAwLjAwICAgIDAuMDAgICAg
+MC4wMCAgIDAuMDAgICAwLjAwDQo+PiA+IHNkaCAgICAgICAgICAgICAgIDAuMDAgICAgIDAuMDAg
+MjUyOTUuMDAgICAgMC4wMCAxMDExODAuMDAgICAgIDAuMDAgICAgIDguMDAgICAgMTIuNzMgICAg
+MC41MCAgICAwLjUwICAgIDAuMDAgICAwLjA0IDEwMC44MA0KPj4gPiBzZGMgICAgICAgICAgICAg
+ICAwLjAwICAgICAwLjAwICAgIDAuMDAgICAgMC4wMCAgICAgMC4wMCAgICAgMC4wMCAgICAgMC4w
+MCAgICAgMC4wMCAgICAwLjAwICAgIDAuMDAgICAgMC4wMCAgIDAuMDAgICAwLjAwDQo+PiA+IHNk
+YiAgICAgICAgICAgICAgIDAuMDAgICAgIDAuMDAgICAgMC4wMCAgICAwLjAwICAgICAwLjAwICAg
+ICAwLjAwICAgICAwLjAwICAgICAwLjAwICAgIDAuMDAgICAgMC4wMCAgICAwLjAwICAgMC4wMCAg
+IDAuMDANCj4+ID4NCj4+ID4gY2VwaCAtczoNCj4+ID4gIC0tLS0tLS0tDQo+PiA+IHJvb3RAZW1z
+Y2xpZW50On4vZmlvX3Rlc3QjIGNlcGggLXMNCj4+ID4gICAgIGNsdXN0ZXIgOTQ5OTEwOTctNzYz
+OC00MjQwLWI5MjItZjUyNTMwMGE5MDI2DQo+PiA+ICAgICAgaGVhbHRoIEhFQUxUSF9PSw0KPj4g
+PiAgICAgIG1vbm1hcCBlMTogMSBtb25zIGF0IHthPTEwLjE5Ni4xMjMuMjQ6Njc4OS8wfSwgZWxl
+Y3Rpb24gZXBvY2ggMSwgcXVvcnVtIDAgYQ0KPj4gPiAgICAgIG9zZG1hcCBlNTIyOiAxIG9zZHM6
+IDEgdXAsIDEgaW4NCj4+ID4gICAgICAgcGdtYXAgdjM4NjcxMTogODMyIHBncywgNyBwb29scywg
+MzA4IEdCIGRhdGEsIDI0NyBrb2JqZWN0cw0KPj4gPiAgICAgICAgICAgICAzNjYgR0IgdXNlZCwg
+MTEyMiBHQiAvIDE0ODkgR0IgYXZhaWwNCj4+ID4gICAgICAgICAgICAgICAgICA4MzIgYWN0aXZl
+K2NsZWFuDQo+PiA+ICAgY2xpZW50IGlvIDEwMCBNQi9zIHJkLCAyNTYxOCBvcC9zDQo+PiA+DQo+
+PiA+IGNwdSB1dGlsOg0KPj4gPiAtLS0tLS0tLQ0KPj4gPiAgIH4xNCBjb3JlIHdoaWxlIHNlcnZp
+bmcgZnJvbSBkaXNrcy4NCj4+ID4NCj4+ID4gIE15IEFuYWx5c2lzOg0KPj4gPiAgLS0tLS0tLS0t
+LS0tLS0tDQo+PiA+IE5vIHN1cnByaXNlcyBoZXJlLiBXaGF0ZXZlciBpcyBkaXNrIHRocm91Z2hw
+dXQgY2VwaCB0aHJvdWdocHV0IGlzIGFsbW9zdCBtYXRjaGluZy4NCj4+ID4NCj4+ID4NCj4+ID4g
+TGV0J3MgdHdlYWsgdGhlIHNoYXJkL3RocmVhZCBzZXR0aW5ncyBhbmQgc2VlIHRoZSBpbXBhY3Qu
+DQo+PiA+DQo+PiA+DQo+PiA+IDIuIE9TRCBjb25maWcgd2l0aCAzNiBzaGFyZHMgYW5kIDEgdGhy
+ZWFkL3NoYXJkOg0KPj4gPiAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLQ0KPj4gPg0KPj4gPiAgICBCdWZmZXJlZCByZWFkOg0KPj4gPiAg
+ICAtLS0tLS0tLS0tLS0tLS0tLS0NCj4+ID4gICBObyBjaGFuZ2UsIG91dHB1dCBpcyB2ZXJ5IHNp
+bWlsYXIgdG8gMjUgc2hhcmRzLg0KPj4gPg0KPj4gPg0KPj4gPiAgIGRpcmVjdF9pbyByZWFkOg0K
+Pj4gPiAgIC0tLS0tLS0tLS0tLS0tLS0tLQ0KPj4gPiAgICAgICAgSW9zdGF0Og0KPj4gPiAgICAg
+ICAtLS0tLS0tLS0tDQo+PiA+IGF2Zy1jcHU6ICAldXNlciAgICVuaWNlICVzeXN0ZW0gJWlvd2Fp
+dCAgJXN0ZWFsICAgJWlkbGUNCj4+ID4gICAgICAgICAgIDMzLjMzICAgIDAuMDAgICAyOC4yMiAg
+IDIzLjExICAgIDAuMDAgICAxNS4zNA0KPj4gPg0KPj4gPiBEZXZpY2U6ICAgICAgICAgcnJxbS9z
+ICAgd3JxbS9zICAgICByL3MgICAgIHcvcyAgICBya0IvcyAgICB3a0IvcyBhdmdycS1zeiBhdmdx
+dS1zeiAgIGF3YWl0IHJfYXdhaXQgd19hd2FpdCAgc3ZjdG0gICV1dGlsDQo+PiA+IHNkYSAgICAg
+ICAgICAgICAgIDAuMDAgICAgIDAuMDAgICAgMC4wMCAgICAyLjAwICAgICAwLjAwICAgIDEyLjAw
+ICAgIDEyLjAwICAgICAwLjAwICAgIDAuMDAgICAgMC4wMCAgICAwLjAwICAgMC4wMCAgIDAuMDAN
+Cj4+ID4gc2RkICAgICAgICAgICAgICAgMC4wMCAgICAgMC4wMCAgICAwLjAwICAgIDAuMDAgICAg
+IDAuMDAgICAgIDAuMDAgICAgIDAuMDAgICAgIDAuMDAgICAgMC4wMCAgICAwLjAwICAgIDAuMDAg
+ICAwLjAwICAgMC4wMA0KPj4gPiBzZGUgICAgICAgICAgICAgICAwLjAwICAgICAwLjAwICAgIDAu
+MDAgICAgMC4wMCAgICAgMC4wMCAgICAgMC4wMCAgICAgMC4wMCAgICAgMC4wMCAgICAwLjAwICAg
+IDAuMDAgICAgMC4wMCAgIDAuMDAgICAwLjAwDQo+PiA+IHNkZyAgICAgICAgICAgICAgIDAuMDAg
+ICAgIDAuMDAgICAgMC4wMCAgICAwLjAwICAgICAwLjAwICAgICAwLjAwICAgICAwLjAwICAgICAw
+LjAwICAgIDAuMDAgICAgMC4wMCAgICAwLjAwICAgMC4wMCAgIDAuMDANCj4+ID4gc2RmICAgICAg
+ICAgICAgICAgMC4wMCAgICAgMC4wMCAgICAwLjAwICAgIDAuMDAgICAgIDAuMDAgICAgIDAuMDAg
+ICAgIDAuMDAgICAgIDAuMDAgICAgMC4wMCAgICAwLjAwICAgIDAuMDAgICAwLjAwICAgMC4wMA0K
+Pj4gPiBzZGggICAgICAgICAgICAgICAwLjAwICAgICAwLjAwIDMxOTg3LjAwICAgIDAuMDAgMTI3
+OTQ4LjAwICAgICAwLjAwICAgICA4LjAwICAgIDE4LjA2ICAgIDAuNTYgICAgMC41NiAgICAwLjAw
+ICAgMC4wMyAxMDAuNDANCj4+ID4gc2RjICAgICAgICAgICAgICAgMC4wMCAgICAgMC4wMCAgICAw
+LjAwICAgIDAuMDAgICAgIDAuMDAgICAgIDAuMDAgICAgIDAuMDAgICAgIDAuMDAgICAgMC4wMCAg
+ICAwLjAwICAgIDAuMDAgICAwLjAwICAgMC4wMA0KPj4gPiBzZGIgICAgICAgICAgICAgICAwLjAw
+ICAgICAwLjAwICAgIDAuMDAgICAgMC4wMCAgICAgMC4wMCAgICAgMC4wMCAgICAgMC4wMCAgICAg
+MC4wMCAgICAwLjAwICAgIDAuMDAgICAgMC4wMCAgIDAuMDAgICAwLjAwDQo+PiA+DQo+PiA+ICAg
+ICAgICBjZXBoIC1zOg0KPj4gPiAgICAgLS0tLS0tLS0tLS0tLS0NCj4+ID4gcm9vdEBlbXNjbGll
+bnQ6fi9maW9fdGVzdCMgY2VwaCAtcw0KPj4gPiAgICAgY2x1c3RlciA5NDk5MTA5Ny03NjM4LTQy
+NDAtYjkyMi1mNTI1MzAwYTkwMjYNCj4+ID4gICAgICBoZWFsdGggSEVBTFRIX09LDQo+PiA+ICAg
+ICAgbW9ubWFwIGUxOiAxIG1vbnMgYXQge2E9MTAuMTk2LjEyMy4yNDo2Nzg5LzB9LCBlbGVjdGlv
+biBlcG9jaCAxLCBxdW9ydW0gMCBhDQo+PiA+ICAgICAgb3NkbWFwIGU1MjU6IDEgb3NkczogMSB1
+cCwgMSBpbg0KPj4gPiAgICAgICBwZ21hcCB2Mzg2NzQ2OiA4MzIgcGdzLCA3IHBvb2xzLCAzMDgg
+R0IgZGF0YSwgMjQ3IGtvYmplY3RzDQo+PiA+ICAgICAgICAgICAgIDM2NiBHQiB1c2VkLCAxMTIy
+IEdCIC8gMTQ4OSBHQiBhdmFpbA0KPj4gPiAgICAgICAgICAgICAgICAgIDgzMiBhY3RpdmUrY2xl
+YW4NCj4+ID4gICBjbGllbnQgaW8gMTI3IE1CL3MgcmQsIDMyNzYzIG9wL3MNCj4+ID4NCj4+ID4g
+ICAgICAgICBjcHUgdXRpbDoNCj4+ID4gICAgLS0tLS0tLS0tLS0tLS0NCj4+ID4gICAgICAgIH4x
+OSBjb3JlIHdoaWxlIHNlcnZpbmcgZnJvbSBkaXNrcy4NCj4+ID4NCj4+ID4gICAgICAgICAgQW5h
+bHlzaXM6DQo+PiA+IC0tLS0tLS0tLS0tLS0tLS0tLQ0KPj4gPiAgICAgICAgIEl0IGlzIHNjYWxp
+bmcgd2l0aCBpbmNyZWFzZWQgbnVtYmVyIG9mIHNoYXJkcy90aHJlYWRzLiBUaGUgcGFyYWxsZWxp
+c20gYWxzbyBpbmNyZWFzZWQgc2lnbmlmaWNhbnRseS4NCj4+ID4NCj4+ID4NCj4+ID4gMy4gT1NE
+IGNvbmZpZyB3aXRoIDQ4IHNoYXJkcyBhbmQgMSB0aHJlYWQvc2hhcmQ6DQo+PiA+ICAtLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQo+PiA+
+ICAgICBCdWZmZXJlZCByZWFkOg0KPj4gPiAgICAtLS0tLS0tLS0tLS0tLS0tLS0tDQo+PiA+ICAg
+ICBObyBjaGFuZ2UsIG91dHB1dCBpcyB2ZXJ5IHNpbWlsYXIgdG8gMjUgc2hhcmRzLg0KPj4gPg0K
+Pj4gPg0KPj4gPiAgICBkaXJlY3RfaW8gcmVhZDoNCj4+ID4gICAgIC0tLS0tLS0tLS0tLS0tLS0t
+DQo+PiA+ICAgICAgICBJb3N0YXQ6DQo+PiA+ICAgICAgIC0tLS0tLS0tDQo+PiA+DQo+PiA+IGF2
+Zy1jcHU6ICAldXNlciAgICVuaWNlICVzeXN0ZW0gJWlvd2FpdCAgJXN0ZWFsICAgJWlkbGUNCj4+
+ID4gICAgICAgICAgIDM3LjUwICAgIDAuMDAgICAzMy43MiAgIDIwLjAzICAgIDAuMDAgICAgOC43
+NQ0KPj4gPg0KPj4gPiBEZXZpY2U6ICAgICAgICAgcnJxbS9zICAgd3JxbS9zICAgICByL3MgICAg
+IHcvcyAgICBya0IvcyAgICB3a0IvcyBhdmdycS1zeiBhdmdxdS1zeiAgIGF3YWl0IHJfYXdhaXQg
+d19hd2FpdCAgc3ZjdG0gICV1dGlsDQo+PiA+IHNkYSAgICAgICAgICAgICAgIDAuMDAgICAgIDAu
+MDAgICAgMC4wMCAgICAwLjAwICAgICAwLjAwICAgICAwLjAwICAgICAwLjAwICAgICAwLjAwICAg
+IDAuMDAgICAgMC4wMCAgICAwLjAwICAgMC4wMCAgIDAuMDANCj4+ID4gc2RkICAgICAgICAgICAg
+ICAgMC4wMCAgICAgMC4wMCAgICAwLjAwICAgIDAuMDAgICAgIDAuMDAgICAgIDAuMDAgICAgIDAu
+MDAgICAgIDAuMDAgICAgMC4wMCAgICAwLjAwICAgIDAuMDAgICAwLjAwICAgMC4wMA0KPj4gPiBz
+ZGUgICAgICAgICAgICAgICAwLjAwICAgICAwLjAwICAgIDAuMDAgICAgMC4wMCAgICAgMC4wMCAg
+ICAgMC4wMCAgICAgMC4wMCAgICAgMC4wMCAgICAwLjAwICAgIDAuMDAgICAgMC4wMCAgIDAuMDAg
+ICAwLjAwDQo+PiA+IHNkZyAgICAgICAgICAgICAgIDAuMDAgICAgIDAuMDAgICAgMC4wMCAgICAw
+LjAwICAgICAwLjAwICAgICAwLjAwICAgICAwLjAwICAgICAwLjAwICAgIDAuMDAgICAgMC4wMCAg
+ICAwLjAwICAgMC4wMCAgIDAuMDANCj4+ID4gc2RmICAgICAgICAgICAgICAgMC4wMCAgICAgMC4w
+MCAgICAwLjAwICAgIDAuMDAgICAgIDAuMDAgICAgIDAuMDAgICAgIDAuMDAgICAgIDAuMDAgICAg
+MC4wMCAgICAwLjAwICAgIDAuMDAgICAwLjAwICAgMC4wMA0KPj4gPiBzZGggICAgICAgICAgICAg
+ICAwLjAwICAgICAwLjAwIDM1MzYwLjAwICAgIDAuMDAgMTQxNDQwLjAwICAgICAwLjAwICAgICA4
+LjAwICAgIDIyLjI1ICAgIDAuNjIgICAgMC42MiAgICAwLjAwICAgMC4wMyAxMDAuNDANCj4+ID4g
+c2RjICAgICAgICAgICAgICAgMC4wMCAgICAgMC4wMCAgICAwLjAwICAgIDAuMDAgICAgIDAuMDAg
+ICAgIDAuMDAgICAgIDAuMDAgICAgIDAuMDAgICAgMC4wMCAgICAwLjAwICAgIDAuMDAgICAwLjAw
+ICAgMC4wMA0KPj4gPiBzZGIgICAgICAgICAgICAgICAwLjAwICAgICAwLjAwICAgIDAuMDAgICAg
+MC4wMCAgICAgMC4wMCAgICAgMC4wMCAgICAgMC4wMCAgICAgMC4wMCAgICAwLjAwICAgIDAuMDAg
+ICAgMC4wMCAgIDAuMDAgICAwLjAwDQo+PiA+DQo+PiA+ICAgICAgICAgIGNlcGggLXM6DQo+PiA+
+ICAgICAgICAtLS0tLS0tLS0tLS0tLQ0KPj4gPiByb290QGVtc2NsaWVudDp+L2Zpb190ZXN0IyBj
+ZXBoIC1zDQo+PiA+ICAgICBjbHVzdGVyIDk0OTkxMDk3LTc2MzgtNDI0MC1iOTIyLWY1MjUzMDBh
+OTAyNg0KPj4gPiAgICAgIGhlYWx0aCBIRUFMVEhfT0sNCj4+ID4gICAgICBtb25tYXAgZTE6IDEg
+bW9ucyBhdCB7YT0xMC4xOTYuMTIzLjI0OjY3ODkvMH0sIGVsZWN0aW9uIGVwb2NoIDEsIHF1b3J1
+bSAwIGENCj4+ID4gICAgICBvc2RtYXAgZTUzNDogMSBvc2RzOiAxIHVwLCAxIGluDQo+PiA+ICAg
+ICAgIHBnbWFwIHYzODY4MzA6IDgzMiBwZ3MsIDcgcG9vbHMsIDMwOCBHQiBkYXRhLCAyNDcga29i
+amVjdHMNCj4+ID4gICAgICAgICAgICAgMzY2IEdCIHVzZWQsIDExMjIgR0IgLyAxNDg5IEdCIGF2
+YWlsDQo+PiA+ICAgICAgICAgICAgICAgICAgODMyIGFjdGl2ZStjbGVhbg0KPj4gPiAgIGNsaWVu
+dCBpbyAxMzggTUIvcyByZCwgMzU1ODIgb3Avcw0KPj4gPg0KPj4gPiAgICAgICAgICBjcHUgdXRp
+bDoNCj4+ID4gIC0tLS0tLS0tLS0tLS0tLS0NCj4+ID4gICAgICAgICB+MjIuNSBjb3JlIHdoaWxl
+IHNlcnZpbmcgZnJvbSBkaXNrcy4NCj4+ID4NCj4+ID4gICAgICAgICAgIEFuYWx5c2lzOg0KPj4g
+PiAgLS0tLS0tLS0tLS0tLS0tLS0tLS0NCj4+ID4gICAgICAgICBJdCBpcyBzY2FsaW5nIHdpdGgg
+aW5jcmVhc2VkIG51bWJlciBvZiBzaGFyZHMvdGhyZWFkcy4gVGhlIHBhcmFsbGVsaXNtIGFsc28g
+aW5jcmVhc2VkIHNpZ25pZmljYW50bHkuDQo+PiA+DQo+PiA+DQo+PiA+DQo+PiA+IDQuIE9TRCBj
+b25maWcgd2l0aCA2NCBzaGFyZHMgYW5kIDEgdGhyZWFkL3NoYXJkOg0KPj4gPiAgLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQo+PiA+ICAg
+ICAgIEJ1ZmZlcmVkIHJlYWQ6DQo+PiA+ICAgICAgLS0tLS0tLS0tLS0tLS0tLS0tDQo+PiA+ICAg
+ICAgTm8gY2hhbmdlLCBvdXRwdXQgaXMgdmVyeSBzaW1pbGFyIHRvIDI1IHNoYXJkcy4NCj4+ID4N
+Cj4+ID4NCj4+ID4gICAgICBkaXJlY3RfaW8gcmVhZDoNCj4+ID4gICAgICAtLS0tLS0tLS0tLS0t
+LS0tLS0tDQo+PiA+ICAgICAgICBJb3N0YXQ6DQo+PiA+ICAgICAgIC0tLS0tLS0tLQ0KPj4gPiBh
+dmctY3B1OiAgJXVzZXIgICAlbmljZSAlc3lzdGVtICVpb3dhaXQgICVzdGVhbCAgICVpZGxlDQo+
+PiA+ICAgICAgICAgICA0MC4xOCAgICAwLjAwICAgMzQuODQgICAxOS44MSAgICAwLjAwICAgIDUu
+MTgNCj4+ID4NCj4+ID4gRGV2aWNlOiAgICAgICAgIHJycW0vcyAgIHdycW0vcyAgICAgci9zICAg
+ICB3L3MgICAgcmtCL3MgICAgd2tCL3MgYXZncnEtc3ogYXZncXUtc3ogICBhd2FpdCByX2F3YWl0
+IHdfYXdhaXQgIHN2Y3RtICAldXRpbA0KPj4gPiBzZGEgICAgICAgICAgICAgICAwLjAwICAgICAw
+LjAwICAgIDAuMDAgICAgMC4wMCAgICAgMC4wMCAgICAgMC4wMCAgICAgMC4wMCAgICAgMC4wMCAg
+ICAwLjAwICAgIDAuMDAgICAgMC4wMCAgIDAuMDAgICAwLjAwDQo+PiA+IHNkZCAgICAgICAgICAg
+ICAgIDAuMDAgICAgIDAuMDAgICAgMC4wMCAgICAwLjAwICAgICAwLjAwICAgICAwLjAwICAgICAw
+LjAwICAgICAwLjAwICAgIDAuMDAgICAgMC4wMCAgICAwLjAwICAgMC4wMCAgIDAuMDANCj4+ID4g
+c2RlICAgICAgICAgICAgICAgMC4wMCAgICAgMC4wMCAgICAwLjAwICAgIDAuMDAgICAgIDAuMDAg
+ICAgIDAuMDAgICAgIDAuMDAgICAgIDAuMDAgICAgMC4wMCAgICAwLjAwICAgIDAuMDAgICAwLjAw
+ICAgMC4wMA0KPj4gPiBzZGcgICAgICAgICAgICAgICAwLjAwICAgICAwLjAwICAgIDAuMDAgICAg
+MC4wMCAgICAgMC4wMCAgICAgMC4wMCAgICAgMC4wMCAgICAgMC4wMCAgICAwLjAwICAgIDAuMDAg
+ICAgMC4wMCAgIDAuMDAgICAwLjAwDQo+PiA+IHNkZiAgICAgICAgICAgICAgIDAuMDAgICAgIDAu
+MDAgICAgMC4wMCAgICAwLjAwICAgICAwLjAwICAgICAwLjAwICAgICAwLjAwICAgICAwLjAwICAg
+IDAuMDAgICAgMC4wMCAgICAwLjAwICAgMC4wMCAgIDAuMDANCj4+ID4gc2RoICAgICAgICAgICAg
+ICAgMC4wMCAgICAgMC4wMCAzOTExNC4wMCAgICAwLjAwIDE1NjQ2MC4wMCAgICAgMC4wMCAgICAg
+OC4wMCAgICAzNS41OCAgICAwLjkwICAgIDAuOTAgICAgMC4wMCAgIDAuMDMgMTAwLjQwDQo+PiA+
+IHNkYyAgICAgICAgICAgICAgIDAuMDAgICAgIDAuMDAgICAgMC4wMCAgICAwLjAwICAgICAwLjAw
+ICAgICAwLjAwICAgICAwLjAwICAgICAwLjAwICAgIDAuMDAgICAgMC4wMCAgICAwLjAwICAgMC4w
+MCAgIDAuMDANCj4+ID4gc2RiICAgICAgICAgICAgICAgMC4wMCAgICAgMC4wMCAgICAwLjAwICAg
+IDAuMDAgICAgIDAuMDAgICAgIDAuMDAgICAgIDAuMDAgICAgIDAuMDAgICAgMC4wMCAgICAwLjAw
+ICAgIDAuMDAgICAwLjAwICAgMC4wMA0KPj4gPg0KPj4gPiAgICAgICAgY2VwaCAtczoNCj4+ID4g
+IC0tLS0tLS0tLS0tLS0tLQ0KPj4gPiByb290QGVtc2NsaWVudDp+L2Zpb190ZXN0IyBjZXBoIC1z
+DQo+PiA+ICAgICBjbHVzdGVyIDk0OTkxMDk3LTc2MzgtNDI0MC1iOTIyLWY1MjUzMDBhOTAyNg0K
+Pj4gPiAgICAgIGhlYWx0aCBIRUFMVEhfT0sNCj4+ID4gICAgICBtb25tYXAgZTE6IDEgbW9ucyBh
+dCB7YT0xMC4xOTYuMTIzLjI0OjY3ODkvMH0sIGVsZWN0aW9uIGVwb2NoIDEsIHF1b3J1bSAwIGEN
+Cj4+ID4gICAgICBvc2RtYXAgZTUzNzogMSBvc2RzOiAxIHVwLCAxIGluDQo+PiA+ICAgICAgIHBn
+bWFwIHYzODY4NjU6IDgzMiBwZ3MsIDcgcG9vbHMsIDMwOCBHQiBkYXRhLCAyNDcga29iamVjdHMN
+Cj4+ID4gICAgICAgICAgICAgMzY2IEdCIHVzZWQsIDExMjIgR0IgLyAxNDg5IEdCIGF2YWlsDQo+
+PiA+ICAgICAgICAgICAgICAgICAgODMyIGFjdGl2ZStjbGVhbg0KPj4gPiAgIGNsaWVudCBpbyAx
+NTMgTUIvcyByZCwgMzkxNzIgb3Avcw0KPj4gPg0KPj4gPiAgICAgICBjcHUgdXRpbDoNCj4+ID4g
+LS0tLS0tLS0tLS0tLS0tLQ0KPj4gPiAgICAgfjI0LjUgY29yZSB3aGlsZSBzZXJ2aW5nIGZyb20g
+ZGlza3MuIH4zJSBjcHUgbGVmdC4NCj4+ID4NCj4+ID4gICAgICAgIEFuYWx5c2lzOg0KPj4gPiAt
+LS0tLS0tLS0tLS0tLS0tLS0NCj4+ID4gICAgICAgSXQgaXMgc2NhbGluZyB3aXRoIGluY3JlYXNl
+ZCBudW1iZXIgb2Ygc2hhcmRzL3RocmVhZHMuIFRoZSBwYXJhbGxlbGlzbSBhbHNvIGluY3JlYXNl
+ZCBzaWduaWZpY2FudGx5LiBJdCBpcyBkaXNrIGJvdW5kIG5vdy4NCj4+ID4NCj4+ID4NCj4+ID4g
+U3VtbWFyeToNCj4+ID4NCj4+ID4gU28sIGl0IHNlZW1zIGJ1ZmZlcmVkIElPIGhhcyBzaWduaWZp
+Y2FudCBpbXBhY3Qgb24gcGVyZm9ybWFuY2UgaW4gY2FzZSBiYWNrZW5kIGlzIFNTRC4NCj4+ID4g
+TXkgcXVlc3Rpb24gaXMsICBpZiB0aGUgd29ya2xvYWQgaXMgdmVyeSByYW5kb20gYW5kIHN0b3Jh
+Z2UoU1NEKSBpcyB2ZXJ5IGh1Z2UgY29tcGFyZSB0byBzeXN0ZW0gbWVtb3J5LCBzaG91bGRuJ3Qg
+d2UgYWx3YXlzIGdvIGZvciBkaXJlY3RfaW8gaW5zdGVhZCBvZiBidWZmZXJlZCBpbyBmcm9tIENl
+cGggPw0KPj4gPg0KPj4gPiBQbGVhc2Ugc2hhcmUgeW91ciB0aG91Z2h0cy9zdWdnZXN0aW9uIG9u
+IHRoaXMuDQo+PiA+DQo+PiA+IFRoYW5rcyAmIFJlZ2FyZHMNCj4+ID4gU29tbmF0aA0KPj4gPg0K
+Pj4gPiBfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXw0KPj4gPg0KPj4gPiBQTEVBU0Ug
+Tk9URTogVGhlIGluZm9ybWF0aW9uIGNvbnRhaW5lZCBpbiB0aGlzIGVsZWN0cm9uaWMgbWFpbCBt
+ZXNzYWdlIGlzIGludGVuZGVkIG9ubHkgZm9yIHRoZSB1c2Ugb2YgdGhlIGRlc2lnbmF0ZWQgcmVj
+aXBpZW50KHMpIG5hbWVkIGFib3ZlLiBJZiB0aGUgcmVhZGVyIG9mIHRoaXMgbWVzc2FnZSBpcyBu
+b3QgdGhlIGludGVuZGVkIHJlY2lwaWVudCwgeW91IGFyZSBoZXJlYnkgbm90aWZpZWQgdGhhdCB5
+b3UgaGF2ZSByZWNlaXZlZCB0aGlzIG1lc3NhZ2UgaW4gZXJyb3IgYW5kIHRoYXQgYW55IHJldmll
+dywgZGlzc2VtaW5hdGlvbiwgZGlzdHJpYnV0aW9uLCBvciBjb3B5aW5nIG9mIHRoaXMgbWVzc2Fn
+ZSBpcyBzdHJpY3RseSBwcm9oaWJpdGVkLiBJZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGNvbW11
+bmljYXRpb24gaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlciBieSB0ZWxlcGhvbmUg
+b3IgZS1tYWlsIChhcyBzaG93biBhYm92ZSkgaW1tZWRpYXRlbHkgYW5kIGRlc3Ryb3kgYW55IGFu
+ZCBhbGwgY29waWVzIG9mIHRoaXMgbWVzc2FnZSBpbiB5b3VyIHBvc3Nlc3Npb24gKHdoZXRoZXIg
+aGFyZCBjb3BpZXMgb3IgZWxlY3Ryb25pY2FsbHkgc3RvcmVkIGNvcGllcykuDQo+PiA+DQo+PiA+
+IC0tDQo+PiA+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1
+bnN1YnNjcmliZSBjZXBoLWRldmVsIg0KPj4gPiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8g
+bWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIA0KPj4gPiBtYWpvcmRvbW8gaW5mbyBhdCAg
+aHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+Pg0KPj4NCj4+DQo+
+PiAtLQ0KPj4gTWlsb3N6IFRhbnNraQ0KPj4gQ1RPDQo+PiAxNiBFYXN0IDM0dGggU3RyZWV0LCAx
+NXRoIGZsb29yDQo+PiBOZXcgWW9yaywgTlkgMTAwMTYNCj4+DQo+PiBwOiA2NDYtMjUzLTkwNTUN
+Cj4+IGU6IG1pbG9zekBhZGZpbi5jb20NCj4+IE4/Pz8/P3I/P3k/Pz8/Pz9YPz8/dj8/Pyk/ey5u
+Pz8/Pz96P116Pz8/P2F5PyA/Pz8/aiA/P2Y/Pz9oPz8/Pz8gDQo+PiA/dz8/PyA/Pz9qOit2Pz8/
+dz8/Pz8/Pz8/ID8/Pz96Wis/Pz8/Pz8/aiI/Pz8/aQ0KPiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBm
+cm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgDQo+
+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1v
+cmUgbWFqb3Jkb21vIA0KPiBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9t
+by1pbmZvLmh0bWwNCg0KDQoNCi0tDQpCZXN0IFJlZ2FyZHMsDQoNCldoZWF0DQo=
