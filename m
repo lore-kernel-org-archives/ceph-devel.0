@@ -1,56 +1,138 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: BlaumRoth with w=7 : what are the consequences ?
-Date: Wed, 24 Sep 2014 18:51:07 +0200
-Message-ID: <5422F67B.3000302@dachary.org>
+From: Florian Haas <florian.haas@hastexo.com>
+Subject: Re: [ceph-users] Status of snapshots in CephFS
+Date: Wed, 24 Sep 2014 19:27:19 +0100
+Message-ID: <54230D07.8000108@hastexo.com>
+References: <CAPUexz_pGTXdjbw90HKDQPzfXQNY=vormfxwvDLWpMvhD+eOYA@mail.gmail.com> <alpine.DEB.2.00.1409190820570.18018@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="lS8tvcpPsUH8EB5WaSWK0Jh6DHmAAJhaC"
+ boundary="HIrrv24bSQMwvGKVULjgvnbbwHWd7Txcr"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:59145 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751940AbaIXQvM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Sep 2014 12:51:12 -0400
+Received: from mail-wi0-f181.google.com ([209.85.212.181]:42357 "EHLO
+	mail-wi0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752661AbaIXS1X (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Sep 2014 14:27:23 -0400
+Received: by mail-wi0-f181.google.com with SMTP id z2so7893920wiv.14
+        for <ceph-devel@vger.kernel.org>; Wed, 24 Sep 2014 11:27:21 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.00.1409190820570.18018@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Kevin Greenan <kmgreen2@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
 This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---lS8tvcpPsUH8EB5WaSWK0Jh6DHmAAJhaC
-Content-Type: text/plain; charset=ISO-8859-1
+--HIrrv24bSQMwvGKVULjgvnbbwHWd7Txcr
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
 
-Hi Kevin,
+On Fri, Sep 19, 2014 at 5:25 PM, Sage Weil <sweil@redhat.com> wrote:
+> On Fri, 19 Sep 2014, Florian Haas wrote:
+>> Hello everyone,
+>>
+>> Just thought I'd circle back on some discussions I've had with people
+>> earlier in the year:
+>>
+>> Shortly before firefly, snapshot support for CephFS clients was
+>> effectively disabled by default at the MDS level, and can only be
+>> enabled after accepting a scary warning that your filesystem is highly=
 
-When implementing the plugin for Ceph, the check for isprime(w+1) was not=
- added and w=3D7 was made the default for the BlaumRoth technique. As a r=
-esult all content encoded with the BlaumRoth technique have used this par=
-ameter. I do not know what the consequences are. It does not crash and fr=
-om what I've tried content can be encoded/decoded/repaired fine. But mayb=
-e I was lucky ?=20
+>> likely to break if snapshot support is enabled. Has any progress been
+>> made on this in the interim?
+>>
+>> With libcephfs support slowly maturing in Ganesha, the option of
+>> deploying a Ceph-backed userspace NFS server is becoming more
+>> attractive -- and it's probably a better use of resources than mapping=
 
-Your expert opinion on the consequence of chosing w=3D7 would be greatly =
-appreciated :-)
+>> a boatload of RBDs on an NFS head node and then exporting all the data=
 
-Cheers
+>> from there. Recent snapshot trimming issues notwithstanding, RBD
+>> snapshot support is reasonably stable, but even so, making snapshot
+>> data available via NFS, that way, is rather ugly. In addition, the
+>> libcephfs/Ganesha approach would obviously include much better
+>> horizontal scalability.
+>
+> We haven't done any work on snapshot stability.  It is probably moderat=
+ely
+> stable if snapshots are only done at the root or at a consistent point =
+in
+> the hierarcy (as opposed to random directories), but there are still so=
+me
+> basic problems that need to be resolved.  I would not suggest deploying=
 
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
+> this in production!  But some stress testing woudl as always be very
+> welcome.  :)
+
+OK, on a semi-related note: is there any reasonably current
+authoritative list of features that are supported and unsupported in
+either ceph-fuse or kernel cephfs, and if so, at what minimal version?
+
+The most comprehensive overview that seems to be available is one from
+Greg, which however is a year and a half old:
+
+http://ceph.com/dev-notes/cephfs-mds-status-discussion/
+
+>> In addition, https://github.com/nfs-ganesha/nfs-ganesha/wiki/ReleaseNo=
+tes_2.0#CEPH
+>> states:
+>>
+>> "The current requirement to build and use the Ceph FSAL is a Ceph
+>> build environment which includes Ceph client enhancements staged on
+>> the libwipcephfs development branch. These changes are expected to be
+>> part of the Ceph Firefly release."
+>>
+>> ... though it's not clear whether they ever did make it into firefly.
+>> Could someone in the know comment on that?
+>
+> I think this is referring to the libcephfs API changes that the cohortf=
+s
+> folks did.  That all merged shortly before firefly.
+
+Great, thanks for the clarification.
+
+> By the way, we have some basic samba integration tests in our regular
+> regression tests, but nothing based on ganesha.  If you really want thi=
+s
+> to the work, the most valuable thing you could do would be to help
+> get the tests written and integrated into ceph-qa-suite.git.  Probably =
+the
+> biggest piece of work there is creating a task/ganesha.py that installs=
+
+> and configures ganesha with the ceph FSAL.
+
+Hmmm, given the excellent writeup that Niels de Vos of Gluster fame
+wrote about this topic, I might actually be able to cargo-cult some of
+what's in the Samba task and adapt it for ganesha.
+
+Sorry while I'm being ignorant about Teuthology: what platform does it
+normally run on? I ask because I understand most of your testing is done
+on Ubuntu, and Ubuntu currently doesn't ship a Ganesha package, which
+would make the install task a bit more complex.
+
+Cheers,
+Florian
 
 
---lS8tvcpPsUH8EB5WaSWK0Jh6DHmAAJhaC
+--HIrrv24bSQMwvGKVULjgvnbbwHWd7Txcr
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+Version: GnuPG v1
 
-iEYEARECAAYFAlQi9nsACgkQ8dLMyEl6F22ccACePZTbfA1S1ikKMfFXGPV0gYXR
-z2QAoJeTdaau7ltMcZHXs/eng6KOxQ8d
-=IqDq
+iQIcBAEBAgAGBQJUIw0HAAoJEEqtGHdMPKEn6MgP/2gBtPH6FlA5bp6iv1kIUEQI
++iM8BZv2WhWTB0ytRU1TzEc2GEZ/5Z4eEVjIKCP+tm2zpvd8RV4C2bG6vgX+DvtL
+NP3NGjypWH6kSr0yt+Q4IlP1fFdmoQ4KKCSk7uPI84rT8KGY+g/mF4Bf9P0YhrSA
+HBI1/nuS9Uy8RrNHvnmL/bjZTs6jDA4h2idbfzPnSPEHQlf4K0MI2aMidTG6IAVd
+dbZEQGdZA1mqy2jeEoz6UVQo2JvbcNxt7FAjgM8nLPpImXj34nplW11HeU+jGJln
++yAVX94D+iYtV2BczAz2oGbLDLStcxhpeAO6rHRSK97/QSbonSrEDJeE5ZD+r9ga
+2OXC9m93USojycGTNxG+e/zW4k6e8r7CRTc40AxPM08i285rDa7n4XrdgCyz44xc
+RSIDN7qYvuYqbrPAPQ/sLvsnCgAPie5bXkx/IFz8ezwUXwxUBA3k2E+HliJLmehD
+ivBfRAzDXIbHsUWnAPKXRLtGEMCRYd5B31DvFjBNtzO4lqOP5BMERkvs3LCCe+GZ
+XirdjoR12UDtVyBJpl+heuKlwcSNkycVmGiVz2/DFacnjiqaG2pFFSQoN4xgWfEq
+OI2I1dL5pE9icOX0dHypYeOdK5rlPgZ/USeHetVaSzA9VcpuqvzDSK890AON2+4E
+ZCACXuPcse6C0dMSMD5B
+=b70K
 -----END PGP SIGNATURE-----
 
---lS8tvcpPsUH8EB5WaSWK0Jh6DHmAAJhaC--
+--HIrrv24bSQMwvGKVULjgvnbbwHWd7Txcr--
