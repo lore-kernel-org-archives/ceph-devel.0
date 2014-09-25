@@ -1,77 +1,73 @@
-From: John Spray <john.spray@redhat.com>
-Subject: Re: New Defects reported by Coverity Scan for ceph (fwd)
-Date: Thu, 25 Sep 2014 16:27:44 +0100
-Message-ID: <CAGd4Wr3DUGJNU7EjsPUKFjeVWB1AyjrFTG=nbC_CxfciPB43cw@mail.gmail.com>
-References: <alpine.DEB.2.00.1409250801580.14861@cobra.newdream.net>
+From: Mike Dawson <mike.dawson@cloudapt.com>
+Subject: Re: v0.67.11 dumpling released
+Date: Thu, 25 Sep 2014 11:47:25 -0400
+Message-ID: <5424390D.6010203@cloudapt.com>
+References: <alpine.DEB.2.00.1409250808190.15854@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f43.google.com ([209.85.215.43]:58481 "EHLO
-	mail-la0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751921AbaIYP1q (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Sep 2014 11:27:46 -0400
-Received: by mail-la0-f43.google.com with SMTP id gb8so3279131lab.16
-        for <ceph-devel@vger.kernel.org>; Thu, 25 Sep 2014 08:27:45 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1409250801580.14861@cobra.newdream.net>
+Received: from mail-ig0-f172.google.com ([209.85.213.172]:47837 "EHLO
+	mail-ig0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751937AbaIYPra (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Sep 2014 11:47:30 -0400
+Received: by mail-ig0-f172.google.com with SMTP id a13so8702807igq.17
+        for <ceph-devel@vger.kernel.org>; Thu, 25 Sep 2014 08:47:30 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.00.1409250808190.15854@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org, ceph-users@ceph.com, ceph-maintainers@ceph.com
 
-Nice to see that coverity and lockdep agree :-)
+On 9/25/2014 11:09 AM, Sage Weil wrote:
+> v0.67.11 "Dumpling"
+> ===================
+>
+> This stable update for Dumpling fixes several important bugs that affect a
+> small set of users.
+>
+> We recommend that all Dumpling users upgrade at their convenience.  If
+> none of these issues are affecting your deployment there is no urgency.
+>
+>
+> Notable Changes
+> ---------------
+>
+> * common: fix sending dup cluster log items (#9080 Sage Weil)
+> * doc: several doc updates (Alfredo Deza)
+> * libcephfs-java: fix build against older JNI headesr (Greg Farnum)
+> * librados: fix crash in op timeout path (#9362 Matthias Kiefer, Sage Weil)
+> * librbd: fix crash using clone of flattened image (#8845 Josh Durgin)
+> * librbd: fix error path cleanup when failing to open image (#8912 Josh Durgin)
+> * mon: fix crash when adjusting pg_num before any OSDs are added (#9052
+>    Sage Weil)
+> * mon: reduce log noise from paxos (Aanchal Agrawal, Sage Weil)
+> * osd: allow scrub and snap trim thread pool IO priority to be adjusted
+>    (Sage Weil)
 
-This should go away with the fix for #9562.
+Sage,
 
-John
+Thanks for the great work! Could you provide any links describing how to 
+tune the scrub and snap trim thread pool IO priority? I couldn't find 
+these settings in the docs.
 
-On Thu, Sep 25, 2014 at 4:02 PM, Sage Weil <sweil@redhat.com> wrote:
+IIUC, 0.67.11 does not include the proposed changes to address #9487 or 
+#9503, right?
+
+Thanks,
+Mike Dawson
+
+
+> * osd: fix mount/remount sync race (#9144 Sage Weil)
 >
+> Getting Ceph
+> ------------
 >
-> ---------- Forwarded message ----------
-> From: scan-admin@coverity.com
-> To: undisclosed-recipients:;
-> Cc:
-> Date: Thu, 25 Sep 2014 06:18:46 -0700
-> Subject: New Defects reported by Coverity Scan for ceph
->
->
-> Hi,
->
->
-> Please find the latest report on new defect(s) introduced to ceph found with Coverity Scan.
->
-> Defect(s) Reported-by: Coverity Scan
-> Showing 1 of 1 defect(s)
->
->
-> ** CID 1241497:  Thread deadlock  (ORDER_REVERSAL)
->
->
->
-> ________________________________________________________________________________________________________
-> *** CID 1241497:  Thread deadlock  (ORDER_REVERSAL)
-> /osdc/Filer.cc: 314 in Filer::_do_purge_range(PurgeRange *, int)()
-> 308         return;
-> 309       }
-> 310
-> 311       int max = 10 - pr->uncommitted;
-> 312       while (pr->num > 0 && max > 0) {
-> 313         object_t oid = file_object_t(pr->ino, pr->first);
->>>>     CID 1241497:  Thread deadlock  (ORDER_REVERSAL)
->>>>     Calling "get_osdmap_read" acquires lock "RWLock.L" while holding lock "Mutex._m" (count: 15 / 30).
-> 314         const OSDMap *osdmap = objecter->get_osdmap_read();
-> 315         object_locator_t oloc = osdmap->file_to_object_locator(pr->layout);
-> 316         objecter->put_osdmap_read();
-> 317         objecter->remove(oid, oloc, pr->snapc, pr->mtime, pr->flags,
-> 318                          NULL, new C_PurgeRange(this, pr));
-> 319         pr->uncommitted++;
->
->
-> ________________________________________________________________________________________________________
-> To view the defects in Coverity Scan visit, http://scan.coverity.com/projects/25?tab=overview
->
-> To unsubscribe from the email notification for new defects, http://scan5.coverity.com/cgi-bin/unsubscribe.py
->
->
->
+> * Git at git://github.com/ceph/ceph.git
+> * Tarball at http://ceph.com/download/ceph-0.67.11.tar.gz
+> * For packages, see http://ceph.com/docs/master/install/get-packages
+> * For ceph-deploy, see http://ceph.com/docs/master/install/install-ceph-deploy
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 >
