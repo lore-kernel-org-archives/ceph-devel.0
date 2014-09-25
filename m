@@ -1,53 +1,25 @@
-From: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Subject: v0.67.11 dumpling released
-Date: Thu, 25 Sep 2014 08:09:37 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1409250808190.15854@cobra.newdream.net>
+From: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>
+Subject: EC-ISA buffer alignment
+Date: Thu, 25 Sep 2014 15:18:28 +0000
+Message-ID: <3472A07E6605974CBC9BC573F1BC02E4AE7D9EC3@CERNXCHG44.cern.ch>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Transfer-Encoding: 8BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cernmx11.cern.ch ([188.184.36.50]:40514 "EHLO CERNMX11.cern.ch"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752600AbaIYPSc convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Sep 2014 11:18:32 -0400
+Content-Language: en-GB
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-v0.67.11 "Dumpling"
-===================
+Hi all, 
+find attached a pull request to honor 32 byte buffer alignment independent of compilation environment (vector size) as it was discussed on the list beforehand.
 
-This stable update for Dumpling fixes several important bugs that affect a 
-small set of users.
+https://github.com/ceph/ceph/pull/2573
 
-We recommend that all Dumpling users upgrade at their convenience.  If 
-none of these issues are affecting your deployment there is no urgency.
+Cheers Andreas.
 
 
-Notable Changes
----------------
-
-* common: fix sending dup cluster log items (#9080 Sage Weil)
-* doc: several doc updates (Alfredo Deza)
-* libcephfs-java: fix build against older JNI headesr (Greg Farnum)
-* librados: fix crash in op timeout path (#9362 Matthias Kiefer, Sage Weil)
-* librbd: fix crash using clone of flattened image (#8845 Josh Durgin)
-* librbd: fix error path cleanup when failing to open image (#8912 Josh Durgin)
-* mon: fix crash when adjusting pg_num before any OSDs are added (#9052 
-  Sage Weil)
-* mon: reduce log noise from paxos (Aanchal Agrawal, Sage Weil)
-* osd: allow scrub and snap trim thread pool IO priority to be adjusted 
-  (Sage Weil)
-* osd: fix mount/remount sync race (#9144 Sage Weil)
-
-Getting Ceph
-------------
-
-* Git at git://github.com/ceph/ceph.git
-* Tarball at http://ceph.com/download/ceph-0.67.11.tar.gz
-* For packages, see http://ceph.com/docs/master/install/get-packages
-* For ceph-deploy, see http://ceph.com/docs/master/install/install-ceph-deploy
