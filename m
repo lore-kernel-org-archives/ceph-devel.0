@@ -1,188 +1,71 @@
-From: Igor Fedotov <ifedotov@mirantis.com>
-Subject: Re: Adding Data-At-Rest compression support to Ceph
-Date: Mon, 28 Sep 2015 19:56:29 +0300
-Message-ID: <5609713D.7050607@mirantis.com>
-References: <56018A05.6090100@mirantis.com>
- <alpine.DEB.2.00.1509221201570.11876@cobra.newdream.net>
- <56029F66.3070503@mirantis.com>
- <alpine.DEB.2.00.1509230613410.11876@cobra.newdream.net>
- <CAJ4mKGanEtC3yX5Y2SA+698FEtNupOVcpFnoDLoJ7Hwo1ruSGw@mail.gmail.com>
- <5602C48C.4010009@mirantis.com>
- <CAJ4mKGZLc1AzAbhEKpjSdUd21dXWgVxiLjjETHuP+EwVCA8EoA@mail.gmail.com>
- <5604131E.2030408@mirantis.com>
- <alpine.DEB.2.00.1509240829540.13265@cobra.newdream.net>
- <56041D16.6060805@mirantis.com>
- <alpine.DEB.2.00.1509240900540.13265@cobra.newdream.net>
- <560423DD.3080701@mirantis.com>
- <CAANLjFqLAHV2NEpc0-p3Ft4kqd3S+L_EpQTAFGa7vd4gT8fS_w@mail.gmail.com>
- <CAN=+7FUrBdTc7hD1mQNs5GPO_uKUZsbxR73VU8P9KqaiZ_hAJA@mail.gmail.com>
- <5605372E.9020004@mirantis.com>
- <alpine.DEB.2.00.1509250710190.13265@cobra.newdream.net>
+From: scan-admin@coverity.com
+Subject: New Defects reported by Coverity Scan for ceph
+Date: Thu, 25 Sep 2014 06:18:46 -0700
+Message-ID: <5424163634449_26ad92732c8958d@scan.coverity.com.mail>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Type: text/plain;
+ charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f52.google.com ([209.85.215.52]:35353 "EHLO
-	mail-la0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933992AbbI1Q4d (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Sep 2015 12:56:33 -0400
-Received: by laer8 with SMTP id r8so38400039lae.2
-        for <ceph-devel@vger.kernel.org>; Mon, 28 Sep 2015 09:56:31 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1509250710190.13265@cobra.newdream.net>
+Received: from smtprelay4.synopsys.com ([198.182.47.9]:34092 "EHLO
+	smtprelay.synopsys.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934480AbbI1RUZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Sep 2015 13:20:25 -0400
+Received: from us02secmta2.synopsys.com (us02secmta2.synopsys.com [10.12.235.98])
+	by smtprelay.synopsys.com (Postfix) with ESMTP id B740D24E13F3
+	for <ceph-devel@vger.kernel.org>; Mon, 28 Sep 2015 10:20:24 -0700 (PDT)
+Received: from us02secmta2.internal.synopsys.com (us02secmta2.internal.synopsys.com [127.0.0.1])
+	by us02secmta2.internal.synopsys.com (Service) with ESMTP id A98D155F23
+	for <ceph-devel@vger.kernel.org>; Mon, 28 Sep 2015 10:20:24 -0700 (PDT)
+Received: from mailhost.synopsys.com (unknown [10.13.184.66])
+	by us02secmta2.internal.synopsys.com (Service) with ESMTP id 902DF55F22
+	for <ceph-devel@vger.kernel.org>; Mon, 28 Sep 2015 10:20:24 -0700 (PDT)
+Received: from mailhost.synopsys.com (localhost [127.0.0.1])
+	by mailhost.synopsys.com (Postfix) with ESMTP id 82AB0528
+	for <ceph-devel@vger.kernel.org>; Mon, 28 Sep 2015 10:20:24 -0700 (PDT)
+Received: from scanrelay.coverity.com (scanrelay.internal.synopsys.com [10.0.8.65])
+	by mailhost.synopsys.com (Postfix) with ESMTP id 78EE8525
+	for <ceph-devel@vger.kernel.org>; Mon, 28 Sep 2015 10:20:24 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Samuel Just <sjust@redhat.com>, Robert LeBlanc <robert@leblancnet.us>, Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
 
-On 25.09.2015 17:14, Sage Weil wrote:
-> On Fri, 25 Sep 2015, Igor Fedotov wrote:
->> Another thing to note is that we don't have the whole object ready for
->> compression. We just have some new data block written(appended) to the object.
->> And we should either compress that block and save mentioned mapping data or
->> decompress the existing object data and do full compression again.
->> And IMO introducing seek points is largely similar to what we were talking
->> about - it requires a sort of offset mapping as well.
->>
->> Probably compression at OSD has some Pros as well. But it wouldn't eliminate
->> the need to "muck with stripe sizes or anything".
-> I think the best option here is going to be to compress the "stripe unit".
-> I.e., if you have a stripe_size of 64K, and are doing k=4 m=2, then the
-> stripe unit is 16K (64/4).  Then each shard has an independent unit it can
-> compress/decompress and we don't break the ability to read a small extent
-> by talking to only a single shard.
-Sage, are you considering compression applied after erasure coding here?
-Please note that one needs to compress additional 50% of data this way. 
-Generated 'm' chunks need to be processed as well.
-And you lose an ability to perform recovery on OSD down without applying 
-decompression ( and probably another compression) to remaining shards.
+Hi,
 
-Contrary doing compression before EC produces reduced data set for EC  ( 
-some CPU cycles saving)  and is suitable for recovery procedure not 
-involving additional decompression/compression pair.
-But I suppose 'stripe unit' from the above wouldn't work in this case - 
-compression entity has to produce  blocks having "stripe unit" size. 
-This way you can fit all compressed data into single shard only. But 
-that's hard to achieve....
 
-Thus as usual we should choose what drawbacks(benefits) are less(more) 
-important here:
-ability to read small extent from single shard + increased data set for 
-compression vs. ability to omit total decompression on recovery + 
-reduced data set for EC.
+Please find the latest report on new defect(s) introduced to ceph found with Coverity Scan.
+
+Defect(s) Reported-by: Coverity Scan
+Showing 1 of 1 defect(s)
+
+
+** CID 1241497:  Thread deadlock  (ORDER_REVERSAL)
 
 
 
->
-> *Maybe* the shard could compress contiguous stripe units if multiple
-> stripes are written together..
->
-> In any case, though, there will some metadata it has to track with the
-> object, because the stripe units are no longer fixed size, and there will
-> be object_size/stripe_size of them.  I forget if we are already storing a
-> CRC for each stripe unit or if it is for the entire shard... if it's the
-> former then this won't be a huge change, I think.
->
-> sage
->
->
->
->> On 24.09.2015 20:53, Samuel Just wrote:
->>> The catch is that currently accessing 4k in the middle of a 4MB object
->>> does not require reading the whole object, so you'd need some kind of
->>> logical offset -> compressed offset mapping.
->>> -Sam
->>>
->>> On Thu, Sep 24, 2015 at 10:36 AM, Robert LeBlanc <robert@leblancnet.us>
->>> wrote:
->>>> -----BEGIN PGP SIGNED MESSAGE-----
->>>> Hash: SHA256
->>>>
->>>> I'm probably missing something, but since we are talking about data at
->>>> rest, can't we just have the OSD compress the object as it goes to
->>>> disk? Instead of
->>>> rbd\udata.1ba49c10d9b00c.0000000000006859__head_2AD1002B__11 it would
->>>> be
->>>> rbd\udata.1ba49c10d9b00c.0000000000006859__head_2AD1002B__11.{gz,xz,bz2,lzo,etc}.
->>>> Then it seems that you don't have to muck with stripe sizes or
->>>> anything. For compressible objects they would be less than 4MB, some
->>>> of theses algorithms already say if it is not compressible enough,
->>>> just store it.
->>>>
->>>> Something like zlib Z_FULL_FLUSH may help provide some seek points
->>>> within an archive to prevent decompressing the whole object for reads?
->>>>
->>>> - ----------------
->>>> Robert LeBlanc
->>>> PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
->>>>
->>>>
->>>> On Thu, Sep 24, 2015 at 10:25 AM, Igor Fedotov  wrote:
->>>>> On 24.09.2015 19:03, Sage Weil wrote:
->>>>>> On Thu, 24 Sep 2015, Igor Fedotov wrote:
->>>>>>
->>>>>> Dynamic stripe sizes are possible but it's a significant change from
->>>>>> the
->>>>>> way the EC pool currently works. I would make that a separate project
->>>>>> (as
->>>>>> its useful in its own right) and not complicate the compression
->>>>>> situation.
->>>>>> Or, if it simplifies the compression approach, then I'd make that
->>>>>> change
->>>>>> first. sage
->>>>> Just to clarify a bit. What I saw when played with Ceph. Please correct
->>>>> me
->>>>> if I'm wrong..
->>>>>
->>>>> For low-level RADOS access client data written to EC pool has to be
->>>>> aligned
->>>>> with stripe size . The last block can be unaligned though but no more
->>>>> appends are permitted in this case.
->>>>> Data copied from cache goes in blocks up to 8Mb size. In general case
->>>>> the
->>>>> last block seems to have unaligned size too.
->>>>>
->>>>> EC pool additionally performs alignment of the incoming blocks to stripe
->>>>> bound internally. This way blocks going to EC lib are always aligned.
->>>>> We should probably perform compression prior to this alignment.
->>>>> Thus some dependency on stripe size is present in EC pools but it's not
->>>>> that
->>>>> strict.
->>>>>
->>>>> Thanks,
->>>>> Igor
->>>>>
->>>>> --
->>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>>> the body of a message to majordomo@vger.kernel.org
->>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>> -----BEGIN PGP SIGNATURE-----
->>>> Version: Mailvelope v1.1.0
->>>> Comment: https://www.mailvelope.com
->>>>
->>>> wsFcBAEBCAAQBQJWBDSDCRDmVDuy+mK58QAAmwwP/3q0tbLZA95RVsvSLrXk
->>>> ipuhjiGPvAX8o2kTYFtf5tXkMuiJIJIy+WK1uD6zs+CXM/2JR6SJthS3tE9A
->>>> meaFW7W5lropbWKRZ8TkpUNQAXDyRrpSEcTDBWciq+EOca5tlP+17KDevVnZ
->>>> PWDCNPlZmbHyBy91iJju4TTzaJYoD8mXU/+4xLCicePDPomlpO4oyndDfOmI
->>>> JP5uRDmgP0ecsxfcyoYSTCJylfnBsmK0IMyxZoV2Mx+SEcqgtECPCOY7Uc/4
->>>> wwXGhu//zO7twyOvtsk4OQGjLX9wpSpVWz+zcR2RYiYfw3YSTSzGvbBC5hpb
->>>> pfQya5DbypJra2oz5BZkikvwYPhxPoI0FcdTCYFFxclm0jMwQqh2b141kN8Z
->>>> eR7v8ttfnbACumWP74j2KSpHRm/1l65nN4wqzg3ovoesjoJDvb2miz8AX7ag
->>>> FXVa54JpIcoIzCkIkqvpCfzhatGU55yQiyt7aFAhJfpmP/cNpxmAete8buTK
->>>> 6aFMiYWFJe+md/bLOrk5g/cyr9BUq+tHT7Qf+mRmgw9fuECUXMXMzf6vOUk8
->>>> 0JnYiYVk0j+twZeuDaVPBrXEMKuYuq7NlILuHJDF3meRPM2xekan8ARZoJxL
->>>> XAOzvaEFly0TH5DJfItSVOL86qtp+1orULSrVbtvolxzQtv8xiNOzJYBKEnO
->>>> ouVI
->>>> =d8mm
->>>> -----END PGP SIGNATURE-----
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
+________________________________________________________________________________________________________
+*** CID 1241497:  Thread deadlock  (ORDER_REVERSAL)
+/osdc/Filer.cc: 314 in Filer::_do_purge_range(PurgeRange *, int)()
+308         return;
+309       }
+310     
+311       int max = 10 - pr->uncommitted;
+312       while (pr->num > 0 && max > 0) {
+313         object_t oid = file_object_t(pr->ino, pr->first);
+>>>     CID 1241497:  Thread deadlock  (ORDER_REVERSAL)
+>>>     Calling "get_osdmap_read" acquires lock "RWLock.L" while holding lock "Mutex._m" (count: 15 / 30).
+314         const OSDMap *osdmap = objecter->get_osdmap_read();
+315         object_locator_t oloc = osdmap->file_to_object_locator(pr->layout);
+316         objecter->put_osdmap_read();
+317         objecter->remove(oid, oloc, pr->snapc, pr->mtime, pr->flags,
+318     		     NULL, new C_PurgeRange(this, pr));
+319         pr->uncommitted++;
+
+
+________________________________________________________________________________________________________
+To view the defects in Coverity Scan visit, http://scan.coverity.com/projects/25?tab=overview
+
+To unsubscribe from the email notification for new defects, http://scan5.coverity.com/cgi-bin/unsubscribe.py
+
+
 
