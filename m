@@ -1,14 +1,16 @@
-From: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+From: Dan Van Der Ster <daniel.vanderster-vJEk5272eHo@public.gmane.org>
 Subject: Re: v0.67.11 dumpling released
-Date: Thu, 25 Sep 2014 08:53:52 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1409250852020.16795@cobra.newdream.net>
+Date: Thu, 25 Sep 2014 15:55:01 +0000
+Message-ID: <70392B2C-5476-4221-86A0-307180085655@cern.ch>
 References: <alpine.DEB.2.00.1409250808190.15854@cobra.newdream.net>
 	<5424390D.6010203@cloudapt.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 In-Reply-To: <5424390D.6010203-ffsCFlcjuZBWk0Htik3J/w@public.gmane.org>
+Content-Language: en-US
+Content-ID: <553ADE74FF5902499F4E8064A7D07EF7-vJEk5272eHo@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -19,56 +21,42 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 To: Mike Dawson <mike.dawson-ffsCFlcjuZBWk0Htik3J/w@public.gmane.org>
-Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org
+Cc: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On Thu, 25 Sep 2014, Mike Dawson wrote:
-> On 9/25/2014 11:09 AM, Sage Weil wrote:
-> > v0.67.11 "Dumpling"
-> > ===================
-> > 
-> > This stable update for Dumpling fixes several important bugs that affect a
-> > small set of users.
-> > 
-> > We recommend that all Dumpling users upgrade at their convenience.  If
-> > none of these issues are affecting your deployment there is no urgency.
-> > 
-> > 
-> > Notable Changes
-> > ---------------
-> > 
-> > * common: fix sending dup cluster log items (#9080 Sage Weil)
-> > * doc: several doc updates (Alfredo Deza)
-> > * libcephfs-java: fix build against older JNI headesr (Greg Farnum)
-> > * librados: fix crash in op timeout path (#9362 Matthias Kiefer, Sage Weil)
-> > * librbd: fix crash using clone of flattened image (#8845 Josh Durgin)
-> > * librbd: fix error path cleanup when failing to open image (#8912 Josh
-> > Durgin)
-> > * mon: fix crash when adjusting pg_num before any OSDs are added (#9052
-> >    Sage Weil)
-> > * mon: reduce log noise from paxos (Aanchal Agrawal, Sage Weil)
-> > * osd: allow scrub and snap trim thread pool IO priority to be adjusted
-> >    (Sage Weil)
-> 
-> Sage,
-> 
-> Thanks for the great work! Could you provide any links describing how to tune
-> the scrub and snap trim thread pool IO priority? I couldn't find these
-> settings in the docs.
-
-It's 
-
- osd disk thread ioprio class = idle
- osd disk thread ioprio priority = 0
-
-Note that this is a short-term solution; we eventaully want to send all IO 
-through the same queue so that we can prioritize things more carefully.  
-This setting will most likely go away in the future.
-
-> IIUC, 0.67.11 does not include the proposed changes to address #9487 or 
-> #9503, right?
-
-Correct.  That will come later once it's gone through more testing.
-
-Thanks!
-sage
+SGkgTWlrZSwNCg0KPiBPbiAyNSBTZXAgMjAxNCwgYXQgMTc6NDcsIE1pa2UgRGF3c29uIDxtaWtl
+LmRhd3NvbkBjbG91ZGFwdC5jb20+IHdyb3RlOg0KPiANCj4gT24gOS8yNS8yMDE0IDExOjA5IEFN
+LCBTYWdlIFdlaWwgd3JvdGU6DQo+PiB2MC42Ny4xMSAiRHVtcGxpbmciDQo+PiA9PT09PT09PT09
+PT09PT09PT09DQo+PiANCj4+IFRoaXMgc3RhYmxlIHVwZGF0ZSBmb3IgRHVtcGxpbmcgZml4ZXMg
+c2V2ZXJhbCBpbXBvcnRhbnQgYnVncyB0aGF0IGFmZmVjdCBhDQo+PiBzbWFsbCBzZXQgb2YgdXNl
+cnMuDQo+PiANCj4+IFdlIHJlY29tbWVuZCB0aGF0IGFsbCBEdW1wbGluZyB1c2VycyB1cGdyYWRl
+IGF0IHRoZWlyIGNvbnZlbmllbmNlLiAgSWYNCj4+IG5vbmUgb2YgdGhlc2UgaXNzdWVzIGFyZSBh
+ZmZlY3RpbmcgeW91ciBkZXBsb3ltZW50IHRoZXJlIGlzIG5vIHVyZ2VuY3kuDQo+PiANCj4+IA0K
+Pj4gTm90YWJsZSBDaGFuZ2VzDQo+PiAtLS0tLS0tLS0tLS0tLS0NCj4+IA0KPj4gKiBjb21tb246
+IGZpeCBzZW5kaW5nIGR1cCBjbHVzdGVyIGxvZyBpdGVtcyAoIzkwODAgU2FnZSBXZWlsKQ0KPj4g
+KiBkb2M6IHNldmVyYWwgZG9jIHVwZGF0ZXMgKEFsZnJlZG8gRGV6YSkNCj4+ICogbGliY2VwaGZz
+LWphdmE6IGZpeCBidWlsZCBhZ2FpbnN0IG9sZGVyIEpOSSBoZWFkZXNyIChHcmVnIEZhcm51bSkN
+Cj4+ICogbGlicmFkb3M6IGZpeCBjcmFzaCBpbiBvcCB0aW1lb3V0IHBhdGggKCM5MzYyIE1hdHRo
+aWFzIEtpZWZlciwgU2FnZSBXZWlsKQ0KPj4gKiBsaWJyYmQ6IGZpeCBjcmFzaCB1c2luZyBjbG9u
+ZSBvZiBmbGF0dGVuZWQgaW1hZ2UgKCM4ODQ1IEpvc2ggRHVyZ2luKQ0KPj4gKiBsaWJyYmQ6IGZp
+eCBlcnJvciBwYXRoIGNsZWFudXAgd2hlbiBmYWlsaW5nIHRvIG9wZW4gaW1hZ2UgKCM4OTEyIEpv
+c2ggRHVyZ2luKQ0KPj4gKiBtb246IGZpeCBjcmFzaCB3aGVuIGFkanVzdGluZyBwZ19udW0gYmVm
+b3JlIGFueSBPU0RzIGFyZSBhZGRlZCAoIzkwNTINCj4+ICAgU2FnZSBXZWlsKQ0KPj4gKiBtb246
+IHJlZHVjZSBsb2cgbm9pc2UgZnJvbSBwYXhvcyAoQWFuY2hhbCBBZ3Jhd2FsLCBTYWdlIFdlaWwp
+DQo+PiAqIG9zZDogYWxsb3cgc2NydWIgYW5kIHNuYXAgdHJpbSB0aHJlYWQgcG9vbCBJTyBwcmlv
+cml0eSB0byBiZSBhZGp1c3RlZA0KPj4gICAoU2FnZSBXZWlsKQ0KPiANCj4gU2FnZSwNCj4gDQo+
+IFRoYW5rcyBmb3IgdGhlIGdyZWF0IHdvcmshIENvdWxkIHlvdSBwcm92aWRlIGFueSBsaW5rcyBk
+ZXNjcmliaW5nIGhvdyB0byB0dW5lIHRoZSBzY3J1YiBhbmQgc25hcCB0cmltIHRocmVhZCBwb29s
+IElPIHByaW9yaXR5PyBJIGNvdWxkbid0IGZpbmQgdGhlc2Ugc2V0dGluZ3MgaW4gdGhlIGRvY3Mu
+DQoNCkkgdXNlOg0KDQpbb3NkXQ0KICBvc2QgZGlzayB0aHJlYWQgaW9wcmlvIGNsYXNzID0gMw0K
+ICBvc2QgZGlzayB0aHJlYWQgaW9wcmlvIHByaW9yaXR5ID0gMA0KDQpZb3XigJlsbCBuZWVkIHRv
+IHVzZSB0aGUgY2ZxIGlvIHNjaGVkdWxlciBmb3IgdGhvc2UgdG8gaGF2ZSBhbiBlZmZlY3QuDQoN
+CkZZSSwgSSBjYW4gbWFrZSBzY3J1YnMgZ2VuZXJhbGx5IHRyYW5zcGFyZW50IGJ5IGFsc28gYWRk
+aW5nOg0KDQogIG9zZCBzY3J1YiBzbGVlcCA9IC4xDQogIG9zZCBzY3J1YiBjaHVuayBtYXggPSA1
+DQogIG9zZCBkZWVwIHNjcnViIHN0cmlkZSA9IDEwNDg1NzYNCg0KWW91ciBtaWxlYWdlIG1heSB2
+YXJ5Lg0KDQo+IElJVUMsIDAuNjcuMTEgZG9lcyBub3QgaW5jbHVkZSB0aGUgcHJvcG9zZWQgY2hh
+bmdlcyB0byBhZGRyZXNzICM5NDg3IG9yICM5NTAzLCByaWdodD8NCg0KVGhvc2UgZGlkbuKAmXQg
+bWFrZSBpdC4NCg0KQ2hlZXJzLCBEYW4NCg0KDQoNCl9fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0CmNlcGgtdXNlcnNA
+bGlzdHMuY2VwaC5jb20KaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVz
+ZXJzLWNlcGguY29tCg==
