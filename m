@@ -1,59 +1,65 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Weekly performance meeting
-Date: Thu, 25 Sep 2014 11:27:00 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1409250856010.12347@cobra.newdream.net>
+From: "Matt W. Benjamin" <matt@linuxbox.com>
+Subject: Re: Weekly performance meeting
+Date: Thu, 25 Sep 2014 15:03:14 -0400 (EDT)
+Message-ID: <521552319.165.1411671794231.JavaMail.root@thunderbeast.private.linuxbox.com>
+References: <alpine.DEB.2.00.1409250856010.12347@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:40806 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754063AbaIYS1A (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Sep 2014 14:27:00 -0400
+Received: from aa.linuxbox.com ([69.128.83.226]:3139 "EHLO aa.linuxbox.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750889AbaIYTDy (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 25 Sep 2014 15:03:54 -0400
+In-Reply-To: <alpine.DEB.2.00.1409250856010.12347@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Somnath.Roy@sandisk.com, Allen.Samuels@sandisk.com, dieter.kasper@ts.fujitsu.com, PVonStamwitz@us.fujitsu.com, xinxin.shu@intel.com, haomaiwang@gmail.com, s.priebe@profihost.ag, xiaoxi.chen@intel.com, milosz@adfin.com, zhiqiang.wang@intel.com, jianpeng.ma@intel.com, gdror@mellanox.com, vuhuong@mellanox.com, mark.nelson@inktank.com
+To: Sage Weil <sweil@redhat.com>
+Cc: Somnath Roy <Somnath.Roy@sandisk.com>, Allen Samuels <Allen.Samuels@sandisk.com>, dieter kasper <dieter.kasper@ts.fujitsu.com>, PVonStamwitz@us.fujitsu.com, xinxin shu <xinxin.shu@intel.com>, haomaiwang@gmail.com, s priebe <s.priebe@profihost.ag>, xiaoxi chen <xiaoxi.chen@intel.com>, milosz@adfin.com, zhiqiang wang <zhiqiang.wang@intel.com>, jianpeng ma <jianpeng.ma@intel.com>, gdror@mellanox.com, vuhuong@mellanox.com, mark nelson <mark.nelson@inktank.com>, ceph-devel@vger.kernel.org
 
-Hi everyone,
+Hi Sage,
 
-A number of people have approached me about how to get more involved with 
-the current work on improving performance and how to better coordinate 
-with other interested parties.  A few meetings have taken place offline 
-with good results but only a few interested parties were involved.
+Great idea, we'd certainly be interested in attending.
 
-Ideally, we'd like to move as much of this dicussion into the public 
-forums: ceph-devel@vger.kernel.org and #ceph-devel.  That isn't always 
-sufficient, however.  I'd like to also set up a regular weekly meeting 
-using google hangouts or bluejeans so that all interested parties can 
-share progress.  There are a lot of things we can do during the Hammer 
-cycle to improve things but it will require some coordination of effort.
+We have a variety of potentially relevant work, some (but not all) at least tangentially related to RDMA.  Our attention is necessarily split between upstream and internal branches (that currently don't have CRUSH, PGs, etc), but we'd like to upstream as much generally useful work as we can.
 
-Among other things, we can discuss:
+Thanks,
 
- - observed performance limitations
- - high level strategies for addressing them
- - proposed patch sets and their performance impact
- - anything else that will move us forward
+Matt
 
-One challenge is timezones: there are developers in the US, China, Europe, 
-and Israel who may want to join.  As a starting point, how about next 
-Wednesday, 15:00 UTC?  If I didn't do my tz math wrong, that's
+----- "Sage Weil" <sweil@redhat.com> wrote:
 
-  8:00 (PDT, California)
- 15:00 (UTC)
- 18:00 (IDT, Israel)
- 23:00 (CST, China)
+> Hi everyone,
+> 
+> A number of people have approached me about how to get more involved
+> with 
+> the current work on improving performance and how to better coordinate
+> 
+> with other interested parties.  A few meetings have taken place
+> offline 
+> with good results but only a few interested parties were involved.
+> 
+> Ideally, we'd like to move as much of this dicussion into the public 
+> forums: ceph-devel@vger.kernel.org and #ceph-devel.  That isn't always
+> 
+> sufficient, however.  I'd like to also set up a regular weekly meeting
+> 
+> using google hangouts or bluejeans so that all interested parties can
+> 
+> share progress.  There are a lot of things we can do during the Hammer
+> 
+> cycle to improve things but it will require some coordination of
+> effort.
+> 
 
-That is surely not the ideal time for everyone but it can hopefully be a 
-starting point.
+-- 
+Matt Benjamin
+The Linux Box
+206 South Fifth Ave. Suite 150
+Ann Arbor, MI  48104
 
-I've also created an etherpad for collecting discussion/agenda items at
+http://linuxbox.com
 
-	http://pad.ceph.com/p/performance_weekly
-
-Is there interest here?  Please let everyone know if you are actively 
-working in this area and/or would like to join, and update the pad above 
-with the topics you would like to discuss.
-
-Thanks!
-sage
+tel.  734-761-4689 
+fax.  734-769-8938 
+cel.  734-216-5309 
