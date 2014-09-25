@@ -1,496 +1,116 @@
 From: Sage Weil <sweil@redhat.com>
-Subject: RE: Impact of page cache on OSD read performance for SSD
-Date: Thu, 25 Sep 2014 07:29:50 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1409250727210.6593@cobra.newdream.net>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F278492BA@SACMBXIP02.sdcorp.global.sandisk.com> <CANP1eJEh0DmMOk57Pw4zCfm2oQfiKYFGdNqtHpfQZJomUAt77w@mail.gmail.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F278493DC@SACMBXIP02.sdcorp.global.sandisk.com>
- <alpine.DEB.2.00.1409231229120.27396@cobra.newdream.net> <CACJqLyYgcJq0-x6aOjTAA4ig0NYFPRm6Zxn+8RfB1eL9oZu7Jg@mail.gmail.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F27849836@SACMBXIP02.sdcorp.global.sandisk.com> <CACJqLyb=2s8gtXyqoUC-t6bKjrikqWk9q3T_bf6KKrwQUHKeMQ@mail.gmail.com>
- <alpine.DEB.2.00.1409240536100.27396@cobra.newdream.net> <CACJqLyZiTw8KkJdjrku1Y5MROdztFFZigGC9iqzSvGAUAQG+sw@mail.gmail.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F2784A2CE@SACMBXIP02.sdcorp.global.sandisk.com> <CACJqLyaKx_YRQX1xPs1+DYsjPHyRgpQqgAXn_y0EmSRwiaYfsg@mail.gmail.com>
- <755F6B91B3BE364F9BCA11EA3F9E0C6F2784A397@SACMBXIP02.sdcorp.global.sandisk.com>
+Subject: New Defects reported by Coverity Scan for ceph (fwd)
+Date: Thu, 25 Sep 2014 08:02:09 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1409250801580.14861@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-825215298-1411657329=:14861"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:38917 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:39202 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751937AbaIYO3v (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Sep 2014 10:29:51 -0400
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2784A397@SACMBXIP02.sdcorp.global.sandisk.com>
+	with ESMTP id S1752130AbaIYPCK (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Sep 2014 11:02:10 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
-Cc: Haomai Wang <haomaiwang@gmail.com>, Milosz Tanski <milosz@adfin.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org, john.spray@redhat.com
 
-On Thu, 25 Sep 2014, Somnath Roy wrote:
-> It will be definitely hampered.
-> There will not be a single solution fits all. These parameters needs to be tuned based on the workload.
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-Can you do a test to see if fadvise with FADV_RANDOM is sufficient to 
-prevent the readahead behavior?  If so, we can potentially accomplish this 
-with proper IO hinting from the clients.
+--557981400-825215298-1411657329=:14861
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 
-sage
 
-> 
-> Thanks & Regards
-> Somnath
-> 
-> -----Original Message-----
-> From: Haomai Wang [mailto:haomaiwang@gmail.com] 
-> Sent: Wednesday, September 24, 2014 7:56 PM
-> To: Somnath Roy
-> Cc: Sage Weil; Milosz Tanski; ceph-devel@vger.kernel.org
-> Subject: Re: Impact of page cache on OSD read performance for SSD
-> 
-> On Thu, Sep 25, 2014 at 7:49 AM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
-> > Hi,
-> > After going through the blktrace, I think I have figured out what is 
-> > going on there. I think kernel read_ahead is causing the extra reads 
-> > in case of buffered read. If I set read_ahead = 0 , the performance I 
-> > am getting similar (or more when cache hit actually happens) to 
-> > direct_io :-)
-> 
-> Hmm, BTW if set read_ahead=0, what about seq read performance compared to before?
-> 
-> > IMHO, if any user doesn't want these nasty kernel effects and be sure of the random work pattern, we should provide a configurable direct_io read option (Need to quantify direct_io write also) as Sage suggested.
-> >
-> > Thanks & Regards
-> > Somnath
-> >
-> >
-> > -----Original Message-----
-> > From: Haomai Wang [mailto:haomaiwang@gmail.com]
-> > Sent: Wednesday, September 24, 2014 9:06 AM
-> > To: Sage Weil
-> > Cc: Somnath Roy; Milosz Tanski; ceph-devel@vger.kernel.org
-> > Subject: Re: Impact of page cache on OSD read performance for SSD
-> >
-> > On Wed, Sep 24, 2014 at 8:38 PM, Sage Weil <sweil@redhat.com> wrote:
-> >> On Wed, 24 Sep 2014, Haomai Wang wrote:
-> >>> I agree with that direct read will help for disk read. But if read 
-> >>> data is hot and small enough to fit in memory, page cache is a good 
-> >>> place to hold data cache. If discard page cache, we need to 
-> >>> implement a cache to provide with effective lookup impl.
-> >>
-> >> This is true for some workloads, but not necessarily true for all.
-> >> Many clients (notably RBD) will be caching at the client side (in 
-> >> VM's fs, and possibly in librbd itself) such that caching at the OSD 
-> >> is largely wasted effort.  For RGW the often is likely true, unless 
-> >> there is a varnish cache or something in front.
-> >
-> > Still now, I don't think librbd cache can meet all the cache demand for rbd usage. Even though we have a effective librbd cache impl, we still need a buffer cache in ObjectStore level just like what database did. Client cache and host cache are both needed.
-> >
-> >>
-> >> We should probably have a direct_io config option for filestore.  But 
-> >> even better would be some hint from the client about whether it is 
-> >> caching or not so that FileStore could conditionally cache...
-> >
-> > Yes, I remember we already did some early works like it.
-> >
-> >>
-> >> sage
-> >>
-> >>  >
-> >>> BTW, whether to use direct io we can refer to MySQL Innodb engine 
-> >>> with direct io and PostgreSQL with page cache.
-> >>>
-> >>> On Wed, Sep 24, 2014 at 10:29 AM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
-> >>> > Haomai,
-> >>> > I am considering only about random reads and the changes I made only affecting reads. For write, I have not measured yet. But, yes, page cache may be helpful for write coalescing. Still need to evaluate how it is behaving comparing direct_io on SSD though. I think Ceph code path will be much shorter if we use direct_io in the write path where it is actually executing the transactions. Probably, the sync thread and all will not be needed.
-> >>> >
-> >>> > I am trying to analyze where is the extra reads coming from in case of buffered io by using blktrace etc. This should give us a clear understanding what exactly is going on there and it may turn out that tuning kernel parameters only  we can achieve similar performance as direct_io.
-> >>> >
-> >>> > Thanks & Regards
-> >>> > Somnath
-> >>> >
-> >>> > -----Original Message-----
-> >>> > From: Haomai Wang [mailto:haomaiwang@gmail.com]
-> >>> > Sent: Tuesday, September 23, 2014 7:07 PM
-> >>> > To: Sage Weil
-> >>> > Cc: Somnath Roy; Milosz Tanski; ceph-devel@vger.kernel.org
-> >>> > Subject: Re: Impact of page cache on OSD read performance for SSD
-> >>> >
-> >>> > Good point, but do you have considered that the impaction for write ops? And if skip page cache, FileStore is responsible for data cache?
-> >>> >
-> >>> > On Wed, Sep 24, 2014 at 3:29 AM, Sage Weil <sweil@redhat.com> wrote:
-> >>> >> On Tue, 23 Sep 2014, Somnath Roy wrote:
-> >>> >>> Milosz,
-> >>> >>> Thanks for the response. I will see if I can get any information out of perf.
-> >>> >>>
-> >>> >>> Here is my OS information.
-> >>> >>>
-> >>> >>> root@emsclient:~# lsb_release -a No LSB modules are available.
-> >>> >>> Distributor ID: Ubuntu
-> >>> >>> Description:    Ubuntu 13.10
-> >>> >>> Release:        13.10
-> >>> >>> Codename:       saucy
-> >>> >>> root@emsclient:~# uname -a
-> >>> >>> Linux emsclient 3.11.0-12-generic #19-Ubuntu SMP Wed Oct 9
-> >>> >>> 16:20:46 UTC 2013 x86_64 x86_64 x86_64 GNU/Linux
-> >>> >>>
-> >>> >>> BTW, it's not a 45% drop, as you can see, by tuning the OSD parameter I was able to get almost *2X* performance improvement with direct_io.
-> >>> >>> It's not only page cache (memory) lookup, in case of buffered_io  the following could be problem.
-> >>> >>>
-> >>> >>> 1. Double copy (disk -> file buffer cache, file buffer cache -> 
-> >>> >>> user
-> >>> >>> buffer)
-> >>> >>>
-> >>> >>> 2. As the iostat output shows, it is not reading 4K only, it is 
-> >>> >>> reading more data from disk as required and in the end it will 
-> >>> >>> be wasted in case of random workload..
-> >>> >>
-> >>> >> It might be worth using blktrace to see what the IOs it is issueing are.
-> >>> >> Which ones are > 4K and what they point to...
-> >>> >>
-> >>> >> sage
-> >>> >>
-> >>> >>
-> >>> >>>
-> >>> >>> Thanks & Regards
-> >>> >>> Somnath
-> >>> >>>
-> >>> >>> -----Original Message-----
-> >>> >>> From: Milosz Tanski [mailto:milosz@adfin.com]
-> >>> >>> Sent: Tuesday, September 23, 2014 12:09 PM
-> >>> >>> To: Somnath Roy
-> >>> >>> Cc: ceph-devel@vger.kernel.org
-> >>> >>> Subject: Re: Impact of page cache on OSD read performance for 
-> >>> >>> SSD
-> >>> >>>
-> >>> >>> Somnath,
-> >>> >>>
-> >>> >>> I wonder if there's a bottleneck or a point of contention for the kernel. For a entirely uncached workload I expect the page cache lookup to cause a slow down (since the lookup should be wasted). What I wouldn't expect is a 45% performance drop. Memory speed should be one magnitude faster then a modern SATA SSD drive (so it should be more negligible overhead).
-> >>> >>>
-> >>> >>> Is there anyway you could perform the same test but monitor what's going on with the OSD process using the perf tool? Whatever is the default cpu time spent hardware counter is fine. Make sure you have the kernel debug info package installed so can get symbol information for kernel and module calls. With any luck the diff in perf output in two runs will show us the culprit.
-> >>> >>>
-> >>> >>> Also, can you tell us what OS/kernel version you're using on the OSD machines?
-> >>> >>>
-> >>> >>> - Milosz
-> >>> >>>
-> >>> >>> On Tue, Sep 23, 2014 at 2:05 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
-> >>> >>> > Hi Sage,
-> >>> >>> > I have created the following setup in order to examine how a single OSD is behaving if say ~80-90% of ios hitting the SSDs.
-> >>> >>> >
-> >>> >>> > My test includes the following steps.
-> >>> >>> >
-> >>> >>> >         1. Created a single OSD cluster.
-> >>> >>> >         2. Created two rbd images (110GB each) on 2 different pools.
-> >>> >>> >         3. Populated entire image, so my working set is ~210GB. My system memory is ~16GB.
-> >>> >>> >         4. Dumped page cache before every run.
-> >>> >>> >         5. Ran fio_rbd (QD 32, 8 instances) in parallel on these two images.
-> >>> >>> >
-> >>> >>> > Here is my disk iops/bandwidth..
-> >>> >>> >
-> >>> >>> >         root@emsclient:~/fio_test# fio rad_resd_disk.job
-> >>> >>> >         random-reads: (g=0): rw=randread, bs=4K-4K/4K-4K, ioengine=libaio, iodepth=64
-> >>> >>> >         2.0.8
-> >>> >>> >         Starting 1 process
-> >>> >>> >         Jobs: 1 (f=1): [r] [100.0% done] [154.1M/0K /s] [39.7K/0  iops] [eta 00m:00s]
-> >>> >>> >         random-reads: (groupid=0, jobs=1): err= 0: pid=1431
-> >>> >>> >         read : io=9316.4MB, bw=158994KB/s, iops=39748 , runt= 
-> >>> >>> > 60002msec
-> >>> >>> >
-> >>> >>> > My fio_rbd config..
-> >>> >>> >
-> >>> >>> > [global]
-> >>> >>> > ioengine=rbd
-> >>> >>> > clientname=admin
-> >>> >>> > pool=rbd1
-> >>> >>> > rbdname=ceph_regression_test1
-> >>> >>> > invalidate=0    # mandatory
-> >>> >>> > rw=randread
-> >>> >>> > bs=4k
-> >>> >>> > direct=1
-> >>> >>> > time_based
-> >>> >>> > runtime=2m
-> >>> >>> > size=109G
-> >>> >>> > numjobs=8
-> >>> >>> > [rbd_iodepth32]
-> >>> >>> > iodepth=32
-> >>> >>> >
-> >>> >>> > Now, I have run Giant Ceph on top of that..
-> >>> >>> >
-> >>> >>> > 1. OSD config with 25 shards/1 thread per shard :
-> >>> >>> > -------------------------------------------------------
-> >>> >>> >
-> >>> >>> >          avg-cpu:  %user   %nice %system %iowait  %steal   %idle
-> >>> >>> >           22.04    0.00   16.46   45.86    0.00   15.64
-> >>> >>> >
-> >>> >>> > Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
-> >>> >>> > sda               0.00     9.00    0.00    6.00     0.00    92.00    30.67     0.01    1.33    0.00    1.33   1.33   0.80
-> >>> >>> > sdd               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
-> >>> >>> > sde               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
-> >>> >>> > sdg               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
-> >>> >>> > sdf               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
-> >>> >>> > sdh             181.00     0.00 34961.00    0.00 176740.00     0.00    10.11   102.71    2.92    2.92    0.00   0.03 100.00
-> >>> >>> > sdc               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
-> >>> >>> > sdb               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
-> >>> >>> >
-> >>> >>> >
-> >>> >>> > ceph -s:
-> >>> >>> >  ----------
-> >>> >>> > root@emsclient:~# ceph -s
-> >>> >>> >     cluster 94991097-7638-4240-b922-f525300a9026
-> >>> >>> >      health HEALTH_OK
-> >>> >>> >      monmap e1: 1 mons at {a=10.196.123.24:6789/0}, election epoch 1, quorum 0 a
-> >>> >>> >      osdmap e498: 1 osds: 1 up, 1 in
-> >>> >>> >       pgmap v386366: 832 pgs, 7 pools, 308 GB data, 247 kobjects
-> >>> >>> >             366 GB used, 1122 GB / 1489 GB avail
-> >>> >>> >                  832 active+clean
-> >>> >>> >   client io 75215 kB/s rd, 18803 op/s
-> >>> >>> >
-> >>> >>> >  cpu util:
-> >>> >>> > ----------
-> >>> >>> >  Gradually decreases from ~21 core (serving from cache) to ~10 core (while serving from disks).
-> >>> >>> >
-> >>> >>> >  My Analysis:
-> >>> >>> > -----------------
-> >>> >>> >  In this case "All is Well"  till ios are served from cache 
-> >>> >>> > (XFS is smart enough to cache some data ) . Once started hitting disks and throughput is decreasing. As you can see, disk is giving ~35K iops , but, OSD throughput is only ~18.8K ! So, cache miss in case of buffered io seems to be very  expensive.  Half of the iops are waste. Also, looking at the bandwidth, it is obvious, not everything is 4K read, May be kernel read_ahead is kicking (?).
-> >>> >>> >
-> >>> >>> >
-> >>> >>> > Now, I thought of making ceph disk read as direct_io and do the same experiment. I have changed the FileStore::read to do the direct_io only. Rest kept as is. Here is the result with that.
-> >>> >>> >
-> >>> >>> >
-> >>> >>> > Iostat:
-> >>> >>> > -------
-> >>> >>> >
-> >>> >>> > avg-cpu:  %user   %nice %system %iowait  %steal   %idle
-> >>> >>> >           24.77    0.00   19.52   21.36    0.00   34.36
-> >>> >>> >
-> >>> >>> > Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
-> >>> >>> > sda               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
-> >>> >>> > sdd               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
-> >>> >>> > sde               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
-> >>> >>> > sdg               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
-> >>> >>> > sdf               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
-> >>> >>> > sdh               0.00     0.00 25295.00    0.00 101180.00     0.00     8.00    12.73    0.50    0.50    0.00   0.04 100.80
-> >>> >>> > sdc               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
-> >>> >>> > sdb               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
-> >>> >>> >
-> >>> >>> > ceph -s:
-> >>> >>> >  --------
-> >>> >>> > root@emsclient:~/fio_test# ceph -s
-> >>> >>> >     cluster 94991097-7638-4240-b922-f525300a9026
-> >>> >>> >      health HEALTH_OK
-> >>> >>> >      monmap e1: 1 mons at {a=10.196.123.24:6789/0}, election epoch 1, quorum 0 a
-> >>> >>> >      osdmap e522: 1 osds: 1 up, 1 in
-> >>> >>> >       pgmap v386711: 832 pgs, 7 pools, 308 GB data, 247 kobjects
-> >>> >>> >             366 GB used, 1122 GB / 1489 GB avail
-> >>> >>> >                  832 active+clean
-> >>> >>> >   client io 100 MB/s rd, 25618 op/s
-> >>> >>> >
-> >>> >>> > cpu util:
-> >>> >>> > --------
-> >>> >>> >   ~14 core while serving from disks.
-> >>> >>> >
-> >>> >>> >  My Analysis:
-> >>> >>> >  ---------------
-> >>> >>> > No surprises here. Whatever is disk throughput ceph throughput is almost matching.
-> >>> >>> >
-> >>> >>> >
-> >>> >>> > Let's tweak the shard/thread settings and see the impact.
-> >>> >>> >
-> >>> >>> >
-> >>> >>> > 2. OSD config with 36 shards and 1 thread/shard:
-> >>> >>> > -----------------------------------------------------------
-> >>> >>> >
-> >>> >>> >    Buffered read:
-> >>> >>> >    ------------------
-> >>> >>> >   No change, output is very similar to 25 shards.
-> >>> >>> >
-> >>> >>> >
-> >>> >>> >   direct_io read:
-> >>> >>> >   ------------------
-> >>> >>> >        Iostat:
-> >>> >>> >       ----------
-> >>> >>> > avg-cpu:  %user   %nice %system %iowait  %steal   %idle
-> >>> >>> >           33.33    0.00   28.22   23.11    0.00   15.34
-> >>> >>> >
-> >>> >>> > Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
-> >>> >>> > sda               0.00     0.00    0.00    2.00     0.00    12.00    12.00     0.00    0.00    0.00    0.00   0.00   0.00
-> >>> >>> > sdd               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
-> >>> >>> > sde               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
-> >>> >>> > sdg               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
-> >>> >>> > sdf               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
-> >>> >>> > sdh               0.00     0.00 31987.00    0.00 127948.00     0.00     8.00    18.06    0.56    0.56    0.00   0.03 100.40
-> >>> >>> > sdc               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
-> >>> >>> > sdb               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
-> >>> >>> >
-> >>> >>> >        ceph -s:
-> >>> >>> >     --------------
-> >>> >>> > root@emsclient:~/fio_test# ceph -s
-> >>> >>> >     cluster 94991097-7638-4240-b922-f525300a9026
-> >>> >>> >      health HEALTH_OK
-> >>> >>> >      monmap e1: 1 mons at {a=10.196.123.24:6789/0}, election epoch 1, quorum 0 a
-> >>> >>> >      osdmap e525: 1 osds: 1 up, 1 in
-> >>> >>> >       pgmap v386746: 832 pgs, 7 pools, 308 GB data, 247 kobjects
-> >>> >>> >             366 GB used, 1122 GB / 1489 GB avail
-> >>> >>> >                  832 active+clean
-> >>> >>> >   client io 127 MB/s rd, 32763 op/s
-> >>> >>> >
-> >>> >>> >         cpu util:
-> >>> >>> >    --------------
-> >>> >>> >        ~19 core while serving from disks.
-> >>> >>> >
-> >>> >>> >          Analysis:
-> >>> >>> > ------------------
-> >>> >>> >         It is scaling with increased number of shards/threads. The parallelism also increased significantly.
-> >>> >>> >
-> >>> >>> >
-> >>> >>> > 3. OSD config with 48 shards and 1 thread/shard:
-> >>> >>> >  ----------------------------------------------------------
-> >>> >>> >     Buffered read:
-> >>> >>> >    -------------------
-> >>> >>> >     No change, output is very similar to 25 shards.
-> >>> >>> >
-> >>> >>> >
-> >>> >>> >    direct_io read:
-> >>> >>> >     -----------------
-> >>> >>> >        Iostat:
-> >>> >>> >       --------
-> >>> >>> >
-> >>> >>> > avg-cpu:  %user   %nice %system %iowait  %steal   %idle
-> >>> >>> >           37.50    0.00   33.72   20.03    0.00    8.75
-> >>> >>> >
-> >>> >>> > Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
-> >>> >>> > sda               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
-> >>> >>> > sdd               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
-> >>> >>> > sde               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
-> >>> >>> > sdg               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
-> >>> >>> > sdf               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
-> >>> >>> > sdh               0.00     0.00 35360.00    0.00 141440.00     0.00     8.00    22.25    0.62    0.62    0.00   0.03 100.40
-> >>> >>> > sdc               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
-> >>> >>> > sdb               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
-> >>> >>> >
-> >>> >>> >          ceph -s:
-> >>> >>> >        --------------
-> >>> >>> > root@emsclient:~/fio_test# ceph -s
-> >>> >>> >     cluster 94991097-7638-4240-b922-f525300a9026
-> >>> >>> >      health HEALTH_OK
-> >>> >>> >      monmap e1: 1 mons at {a=10.196.123.24:6789/0}, election epoch 1, quorum 0 a
-> >>> >>> >      osdmap e534: 1 osds: 1 up, 1 in
-> >>> >>> >       pgmap v386830: 832 pgs, 7 pools, 308 GB data, 247 kobjects
-> >>> >>> >             366 GB used, 1122 GB / 1489 GB avail
-> >>> >>> >                  832 active+clean
-> >>> >>> >   client io 138 MB/s rd, 35582 op/s
-> >>> >>> >
-> >>> >>> >          cpu util:
-> >>> >>> >  ----------------
-> >>> >>> >         ~22.5 core while serving from disks.
-> >>> >>> >
-> >>> >>> >           Analysis:
-> >>> >>> >  --------------------
-> >>> >>> >         It is scaling with increased number of shards/threads. The parallelism also increased significantly.
-> >>> >>> >
-> >>> >>> >
-> >>> >>> >
-> >>> >>> > 4. OSD config with 64 shards and 1 thread/shard:
-> >>> >>> >  ---------------------------------------------------------
-> >>> >>> >       Buffered read:
-> >>> >>> >      ------------------
-> >>> >>> >      No change, output is very similar to 25 shards.
-> >>> >>> >
-> >>> >>> >
-> >>> >>> >      direct_io read:
-> >>> >>> >      -------------------
-> >>> >>> >        Iostat:
-> >>> >>> >       ---------
-> >>> >>> > avg-cpu:  %user   %nice %system %iowait  %steal   %idle
-> >>> >>> >           40.18    0.00   34.84   19.81    0.00    5.18
-> >>> >>> >
-> >>> >>> > Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
-> >>> >>> > sda               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
-> >>> >>> > sdd               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
-> >>> >>> > sde               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
-> >>> >>> > sdg               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
-> >>> >>> > sdf               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
-> >>> >>> > sdh               0.00     0.00 39114.00    0.00 156460.00     0.00     8.00    35.58    0.90    0.90    0.00   0.03 100.40
-> >>> >>> > sdc               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
-> >>> >>> > sdb               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
-> >>> >>> >
-> >>> >>> >        ceph -s:
-> >>> >>> >  ---------------
-> >>> >>> > root@emsclient:~/fio_test# ceph -s
-> >>> >>> >     cluster 94991097-7638-4240-b922-f525300a9026
-> >>> >>> >      health HEALTH_OK
-> >>> >>> >      monmap e1: 1 mons at {a=10.196.123.24:6789/0}, election epoch 1, quorum 0 a
-> >>> >>> >      osdmap e537: 1 osds: 1 up, 1 in
-> >>> >>> >       pgmap v386865: 832 pgs, 7 pools, 308 GB data, 247 kobjects
-> >>> >>> >             366 GB used, 1122 GB / 1489 GB avail
-> >>> >>> >                  832 active+clean
-> >>> >>> >   client io 153 MB/s rd, 39172 op/s
-> >>> >>> >
-> >>> >>> >       cpu util:
-> >>> >>> > ----------------
-> >>> >>> >     ~24.5 core while serving from disks. ~3% cpu left.
-> >>> >>> >
-> >>> >>> >        Analysis:
-> >>> >>> > ------------------
-> >>> >>> >       It is scaling with increased number of shards/threads. The parallelism also increased significantly. It is disk bound now.
-> >>> >>> >
-> >>> >>> >
-> >>> >>> > Summary:
-> >>> >>> >
-> >>> >>> > So, it seems buffered IO has significant impact on performance in case backend is SSD.
-> >>> >>> > My question is,  if the workload is very random and storage(SSD) is very huge compare to system memory, shouldn't we always go for direct_io instead of buffered io from Ceph ?
-> >>> >>> >
-> >>> >>> > Please share your thoughts/suggestion on this.
-> >>> >>> >
-> >>> >>> > Thanks & Regards
-> >>> >>> > Somnath
-> >>> >>> >
-> >>> >>> > ________________________________
-> >>> >>> >
-> >>> >>> > PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
-> >>> >>> >
-> >>> >>> > --
-> >>> >>> > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
-> >>> >>> > in the body of a message to majordomo@vger.kernel.org More 
-> >>> >>> > majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >>> >>>
-> >>> >>>
-> >>> >>>
-> >>> >>> --
-> >>> >>> Milosz Tanski
-> >>> >>> CTO
-> >>> >>> 16 East 34th Street, 15th floor
-> >>> >>> New York, NY 10016
-> >>> >>>
-> >>> >>> p: 646-253-9055
-> >>> >>> e: milosz@adfin.com
-> >>> >>> N?????r??y??????X???v???)?{.n?????z?]z????ay? ????j ??f???h?????
-> >>> >>> ?w??? ???j:+v???w???????? ????zZ+???????j"????i
-> >>> >> --
-> >>> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
-> >>> >> in the body of a message to majordomo@vger.kernel.org More 
-> >>> >> majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >>> >
-> >>> >
-> >>> >
-> >>> > --
-> >>> > Best Regards,
-> >>> >
-> >>> > Wheat
-> >>>
-> >>>
-> >>>
-> >>> --
-> >>> Best Regards,
-> >>>
-> >>> Wheat
-> >>>
-> >>>
-> >
-> >
-> >
-> > --
-> > Best Regards,
-> >
-> > Wheat
-> 
-> 
-> 
-> --
-> Best Regards,
-> 
-> Wheat
-> N?????r??y??????X???v???)?{.n?????z?]z????ay?????j??f???h??????w??????j:+v???w????????????zZ+???????j"????i
+--557981400-825215298-1411657329=:14861
+Content-Type: MESSAGE/RFC822; CHARSET=US-ASCII
+Content-ID: <alpine.DEB.2.00.1409250801581.14861@cobra.newdream.net>
+Content-Description: Forwarded Message
+Content-Disposition: inline
+
+Return-Path: <scan-admin@coverity.com>
+X-Original-To: sage@cobra.newdream.net
+Delivered-To: sage@cobra.newdream.net
+Received: from destro.newdream.net (destro.newdream.net [66.33.216.68])
+	by cobra.newdream.net (Postfix) with ESMTP id 6C7BC80079
+	for <sage@cobra.newdream.net>; Thu, 25 Sep 2014 06:19:45 -0700 (PDT)
+Received: by destro.newdream.net (Postfix)
+	id 6A3431211D6; Thu, 25 Sep 2014 06:19:45 -0700 (PDT)
+Delivered-To: sage@destro.newdream.net
+Received: from madmax.dreamhost.com (caiajhbdcbdj.dreamhost.com
+	[208.97.132.139])
+	by destro.newdream.net (Postfix) with ESMTP id 693401211BB
+	for <sage@newdream.net>; Thu, 25 Sep 2014 06:19:45 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+	by madmax.dreamhost.com (Postfix) with ESMTP id 65D69FD800D
+	for <sage@newdream.net>; Thu, 25 Sep 2014 06:19:45 -0700 (PDT)
+X-DH-Virus-Scanned: Debian amavisd-new at madmax.dreamhost.com
+X-Spam-Flag: NO
+X-Spam-Score: 0
+X-Spam-Level: 
+X-Spam-Status: No, score=x tagged_above=-999 required=999 WHITELISTED tests=[]
+	autolearn=unavailable
+Received: from terminator.dreamhost.com ([208.97.132.17])
+	by localhost (madmax.dreamhost.com [208.97.132.139]) (amavisd-new,
+	port 10024) with ESMTP id 3XOxBMJfG5Cv for <sage@newdream.net>;
+	Thu, 25 Sep 2014 06:19:45 -0700 (PDT)
+Received: from scanrelay.coverity.com (scanrelay.coverity.com [209.249.196.67])
+	by terminator.dreamhost.com (Postfix) with ESMTP id 4509C288406E
+	for <sage@newdream.net>; Thu, 25 Sep 2014 06:19:45 -0700 (PDT)
+Received: from localhost.localdomain ([208.69.177.215]) by
+	scanrelay.coverity.com with Microsoft SMTPSVC(7.5.7601.17514);
+	Thu, 25 Sep 2014 06:18:54 -0700
+Date: Thu, 25 Sep 2014 06:18:46 -0700
+From: scan-admin@coverity.com
+Message-ID: <5424163634449_26ad92732c8958d@scan.coverity.com.mail>
+Subject: New Defects reported by Coverity Scan for ceph
+Mime-Version: 1.0
+Content-Type: text/plain;
+ charset=UTF-8
+Content-Transfer-Encoding: 7bit
+X-OriginalArrivalTime: 25 Sep 2014 13:18:54.0594 (UTC)
+	FILETIME=[417C9620:01CFD8C3]
+To: undisclosed-recipients:;
+X-Spambayes-Classification: ham; 0.00
+
+
+
+Hi,
+
+
+Please find the latest report on new defect(s) introduced to ceph found with Coverity Scan.
+
+Defect(s) Reported-by: Coverity Scan
+Showing 1 of 1 defect(s)
+
+
+** CID 1241497:  Thread deadlock  (ORDER_REVERSAL)
+
+
+
+________________________________________________________________________________________________________
+*** CID 1241497:  Thread deadlock  (ORDER_REVERSAL)
+/osdc/Filer.cc: 314 in Filer::_do_purge_range(PurgeRange *, int)()
+308         return;
+309       }
+310     
+311       int max = 10 - pr->uncommitted;
+312       while (pr->num > 0 && max > 0) {
+313         object_t oid = file_object_t(pr->ino, pr->first);
+>>>     CID 1241497:  Thread deadlock  (ORDER_REVERSAL)
+>>>     Calling "get_osdmap_read" acquires lock "RWLock.L" while holding lock "Mutex._m" (count: 15 / 30).
+314         const OSDMap *osdmap = objecter->get_osdmap_read();
+315         object_locator_t oloc = osdmap->file_to_object_locator(pr->layout);
+316         objecter->put_osdmap_read();
+317         objecter->remove(oid, oloc, pr->snapc, pr->mtime, pr->flags,
+318     		     NULL, new C_PurgeRange(this, pr));
+319         pr->uncommitted++;
+
+
+________________________________________________________________________________________________________
+To view the defects in Coverity Scan visit, http://scan.coverity.com/projects/25?tab=overview
+
+To unsubscribe from the email notification for new defects, http://scan5.coverity.com/cgi-bin/unsubscribe.py
+
+
+
+
+--557981400-825215298-1411657329=:14861--
