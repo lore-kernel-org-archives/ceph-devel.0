@@ -1,149 +1,205 @@
-From: Loic Dachary <loic@dachary.org>
+From: Milosz Tanski <milosz@adfin.com>
 Subject: Re: Weekly performance meeting
-Date: Fri, 26 Sep 2014 10:56:16 +0200
-Message-ID: <54252A30.8020800@dachary.org>
-References: <alpine.DEB.2.00.1409250856010.12347@cobra.newdream.net> <542514DE.6070807@dachary.org> <51FC7A40FB29414D88A121A7FFEF9A4710F71A35@SHSMSX104.ccr.corp.intel.com>
+Date: Fri, 26 Sep 2014 08:58:56 -0400
+Message-ID: <CANP1eJGTx6vwBgnKZjHmwwwDbYOTs-Q6sUjYAt7ei1YqsDdeaQ@mail.gmail.com>
+References: <alpine.DEB.2.00.1409250856010.12347@cobra.newdream.net>
+	<CACJqLyba+ODROaTno844jCt8JHuhb35A_f4qAawrmUQa+oR=Fg@mail.gmail.com>
+	<CAMm-wcJVtmbgr0wW28OmVg+7B_DMszSM0E7YTUJFFNiBuC7OVg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="cu4W6k9SHoGoLOEcI2MprBxW6wdN2gqla"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:60480 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1753728AbaIZI4W (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 26 Sep 2014 04:56:22 -0400
-In-Reply-To: <51FC7A40FB29414D88A121A7FFEF9A4710F71A35@SHSMSX104.ccr.corp.intel.com>
+Received: from mail-lb0-f169.google.com ([209.85.217.169]:55456 "EHLO
+	mail-lb0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753957AbaIZM66 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 26 Sep 2014 08:58:58 -0400
+Received: by mail-lb0-f169.google.com with SMTP id u10so1036521lbd.28
+        for <ceph-devel@vger.kernel.org>; Fri, 26 Sep 2014 05:58:56 -0700 (PDT)
+In-Reply-To: <CAMm-wcJVtmbgr0wW28OmVg+7B_DMszSM0E7YTUJFFNiBuC7OVg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Zhang, Jian" <jian.zhang@intel.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Dong Yuan <yuandong1222@gmail.com>
+Cc: Haomai Wang <haomaiwang@gmail.com>, Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Somnath Roy <Somnath.Roy@sandisk.com>, Allen Samuels <Allen.Samuels@sandisk.com>, Kasper Dieter <dieter.kasper@ts.fujitsu.com>, PVonStamwitz@us.fujitsu.com, "Shu, Xinxin" <xinxin.shu@intel.com>, Stefan Priebe - Profihost AG <s.priebe@profihost.ag>, xiaoxi.chen@intel.com, "Wang, Zhiqiang" <zhiqiang.wang@intel.com>, jianpeng.ma@intel.com, gdror@mellanox.com, vuhuong@mellanox.com, Mark Nelson <mark.nelson@inktank.com>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---cu4W6k9SHoGoLOEcI2MprBxW6wdN2gqla
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+On Fri, Sep 26, 2014 at 2:30 AM, Dong Yuan <yuandong1222@gmail.com> wrote:
+> Some data can support Haomai's points.
+>
+>> 1. encode/decode plays remarkable latency, especially in
+>> ObjectStore::Transaction. I'm urgen in refactor ObjectStore API to
+>> avoid encode/decode codes. It seemed has be signed in note(- remove
+>> serialization from ObjectStore::Transaction (ymmv))
+>
+> My environment, single OSD on a single SSD with filestore_blackhole = true.
+>
+> With All transaction encode, 10000 4K WriteFull operations by single
+> thread need about 14.3s. While without transaction encode, the same
+> test can be finished in about 11.5s.
+>
+> Considering the FileStore needs to decode the bufferlist too,
+> encode/decode cost more than 20% time!
+>
+> Oprofile results can validate this problem too: methods used by
+> encode/decode sometimes take 9 of the top 10.
+>
+>> 2. obvious latency for threadpool/workqueue model. Do we consider to
+>> impl performance optimization workqueue to replace existing critical
+>> workqueue such as op_wq in OSD.h and op_wq in FileStore.h. Now in my
+>> AsyncMessenger impl, I will try to use custom and simple workqueue
+>> impl to improve performance.
+>
+> When I analyze the latency of a 4K object WriteFull operation, I put
+> static probes into codes to measure times used by OpWQ. I test 10000
+> 4K object WriteFull operations and average the results.
+>
+> I found it spends 158us for the OpWQ for each IO, including 30us to
+> enqueue, 108us in the queue, and 20us to dequeue. It takes more than
+> 20% time of PG layer (not including msg and os layer) when encode is
+> ignored.
+>
+> Maybe a more effective ThreadPool/WorkQueue Model is needed or at
+> least some improvement for WorkQueues in the IO path to reduce the
+> latency.
 
-Hi,
+There's a number of things here. I haven't look at the code in Giant
+so take my statements here with a grain of salt.
 
-I added
+First, I have recently submitted a series of patches to kernel to add
+a new preadv2 syscall that lets you do a "fast read" out of the page
+cache the point being that you can skip the whole disk IO queue in
+user space in the cases it's already cached (thus reducing the
+latency). Obviously this doesn't do much for writes (yet, Christoph
+Heldwig is working on that). Samba expressed an interest using these
+new syscalls as well.
 
-  - isa : performances improvement expected ~20% [jian.zhang]
+LWN article about it: http://lwn.net/Articles/612483/
+Here's the latest patch:
+http://thread.gmane.org/gmane.linux.kernel.aio.general/4306
+The architecture that would benefit from "fast reads":
+http://i.imgur.com/f8Pla7j.png
+Previous version of the patch (mostly because there was a lot more
+conversation there): https://lkml.org/lkml/2014/9/17/671
 
-to http://pad.ceph.com/p/performance_weekly . Do you have more informatio=
-n about this degradation ?
+Second, when you have a very fast SSD device that can do up to 100k
+iops the naive queueing/thread pool implementation becomes an issue.
+Like you mentioned it's a lot of extra latency. The solution for this
+is not easy and thankfully people have done lots of research work for
+you, you'll still need lots of trial an error to get it figured out.
+Here's some common strategies:
 
-Cheers
+You're going to consider your queue. Obviously you're going to want to
+get away from a single crude mutex. First is multiple queues each with
+mutex / non-locking queues? Then if you choose non-locking how are you
+going to build your queueing system. Is it going to be a single MPMC
+queue (slowest), MPSC (faster, but things will get stuck behind slow
+requests), MPSC with work stealing (complicated) or FastFlow style
+network of SPSC (needs arbiter thread).
+- How do you handle empty queue? Spin with fallback reduces latency
+but it does waste CPU cycles which could be used by a different OSD
+process / EC decoding.
+- Eventcount versus Seamphore (for blocking / notification) after all
+you don't want to spin forever. You really want an Eventcount since
+you don't want to have have a mutex with you're semaphore (since
+that's what you tried getting rid of). Here you get into platform
+specific implementations (futexes).
+- If the queue has priorities, is it okay if our priorities aren't
+perfectly enforced? In general this really complicates things and you
+pretty much best off having a FastFlow like queue so your arbiter
+thread can do some kind of prioritization.
 
-On 26/09/2014 10:37, Zhang, Jian wrote:
-> Loic,=20
-> Sorry for the confusion. We have observed up to ~20% EC performance deg=
-radation and have some initial findings and want to have a discussion. =20
->=20
-> Thanks
-> Jian
->=20
->=20
-> -----Original Message-----
-> From: Loic Dachary [mailto:loic@dachary.org]=20
-> Sent: Friday, September 26, 2014 3:25 PM
-> To: ceph-devel@vger.kernel.org; Zhang, Jian
-> Subject: Re: Weekly performance meeting
->=20
-> Hi,
->=20
-> I added a section to http://pad.ceph.com/p/performance_weekly about the=
- current efforts to optimize/benchmark erasure code plugins. @Zhang, Jian=
- : the ISA erasure code plugin Andreas Peters worked on is not mentioned =
-because it does not need any optimization, as far as I can tell ;-)=20
->=20
-> Cheers
->=20
-> On 25/09/2014 20:27, Sage Weil wrote:
->> Hi everyone,
+>
+> On 26 September 2014 10:27, Haomai Wang <haomaiwang@gmail.com> wrote:
+>> Thanks for sage!
 >>
->> A number of people have approached me about how to get more involved=20
->> with the current work on improving performance and how to better=20
->> coordinate with other interested parties.  A few meetings have taken=20
->> place offline with good results but only a few interested parties were=
- involved.
+>> I'm on the flight at Oct 1. :-(
 >>
->> Ideally, we'd like to move as much of this dicussion into the public
->> forums: ceph-devel@vger.kernel.org and #ceph-devel.  That isn't always=
-=20
->> sufficient, however.  I'd like to also set up a regular weekly meeting=
-=20
->> using google hangouts or bluejeans so that all interested parties can =
+>> Now my team is mainly worked on the performance of ceph, we have
+>> observed these points:
+>>
+>> 1. encode/decode plays remarkable latency, especially in
+>> ObjectStore::Transaction. I'm urgen in refactor ObjectStore API to
+>> avoid encode/decode codes. It seemed has be signed in note(- remove
+>> serialization from ObjectStore::Transaction (ymmv))
+>> 2. obvious latency for threadpool/workqueue model. Do we consider to
+>> impl performance optimization workqueue to replace existing critical
+>> workqueue such as op_wq in OSD.h and op_wq in FileStore.h. Now in my
+>> AsyncMessenger impl, I will try to use custom and simple workqueue
+>> impl to improve performance.
+>> 3. Large lock in client library such as ObjectCacher
+>>
+>>
+>> On Fri, Sep 26, 2014 at 2:27 AM, Sage Weil <sweil@redhat.com> wrote:
+>>> Hi everyone,
+>>>
+>>> A number of people have approached me about how to get more involved with
+>>> the current work on improving performance and how to better coordinate
+>>> with other interested parties.  A few meetings have taken place offline
+>>> with good results but only a few interested parties were involved.
+>>>
+>>> Ideally, we'd like to move as much of this dicussion into the public
+>>> forums: ceph-devel@vger.kernel.org and #ceph-devel.  That isn't always
+>>> sufficient, however.  I'd like to also set up a regular weekly meeting
+>>> using google hangouts or bluejeans so that all interested parties can
+>>> share progress.  There are a lot of things we can do during the Hammer
+>>> cycle to improve things but it will require some coordination of effort.
+>>>
+>>> Among other things, we can discuss:
+>>>
+>>>  - observed performance limitations
+>>>  - high level strategies for addressing them
+>>>  - proposed patch sets and their performance impact
+>>>  - anything else that will move us forward
+>>>
+>>> One challenge is timezones: there are developers in the US, China, Europe,
+>>> and Israel who may want to join.  As a starting point, how about next
+>>> Wednesday, 15:00 UTC?  If I didn't do my tz math wrong, that's
+>>>
+>>>   8:00 (PDT, California)
+>>>  15:00 (UTC)
+>>>  18:00 (IDT, Israel)
+>>>  23:00 (CST, China)
 
->> share progress.  There are a lot of things we can do during the Hammer=
-=20
->> cycle to improve things but it will require some coordination of effor=
-t.
->>
->> Among other things, we can discuss:
->>
->>  - observed performance limitations
->>  - high level strategies for addressing them
->>  - proposed patch sets and their performance impact
->>  - anything else that will move us forward
->>
->> One challenge is timezones: there are developers in the US, China,=20
->> Europe, and Israel who may want to join.  As a starting point, how=20
->> about next Wednesday, 15:00 UTC?  If I didn't do my tz math wrong,=20
->> that's
->>
->>   8:00 (PDT, California)
->>  15:00 (UTC)
->>  18:00 (IDT, Israel)
->>  23:00 (CST, China)
->>
->> That is surely not the ideal time for everyone but it can hopefully be=
-=20
->> a starting point.
->>
->> I've also created an etherpad for collecting discussion/agenda items=20
->> at
->>
->> 	http://pad.ceph.com/p/performance_weekly
->>
->> Is there interest here?  Please let everyone know if you are actively =
+I'd love to participate and contributed to the discussion and solution
+but due to my obligations it's hard to commit to a weekly time so it's
+my hope that a lot of this is done on the mailing list.
 
->> working in this area and/or would like to join, and update the pad=20
->> above with the topics you would like to discuss.
+>>>
+>>> That is surely not the ideal time for everyone but it can hopefully be a
+>>> starting point.
+>>>
+>>> I've also created an etherpad for collecting discussion/agenda items at
+>>>
+>>>         http://pad.ceph.com/p/performance_weekly
+>>>
+>>> Is there interest here?  Please let everyone know if you are actively
+>>> working in this area and/or would like to join, and update the pad above
+>>> with the topics you would like to discuss.
+>>>
+>>> Thanks!
+>>> sage
 >>
->> Thanks!
->> sage
+>>
+>>
 >> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" =
-
->> in the body of a message to majordomo@vger.kernel.org More majordomo=20
->> info at  http://vger.kernel.org/majordomo-info.html
+>> Best Regards,
 >>
->=20
+>> Wheat
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
+>
 > --
-> Lo=EFc Dachary, Artisan Logiciel Libre
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
+> Dong Yuan
+> Email:yuandong1222@gmail.com
 
 
---cu4W6k9SHoGoLOEcI2MprBxW6wdN2gqla
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+-- 
+Milosz Tanski
+CTO
+16 East 34th Street, 15th floor
+New York, NY 10016
 
-iEYEARECAAYFAlQlKjAACgkQ8dLMyEl6F2316QCffQT2oN4q2GQWQTb+foDpN4WI
-8OwAoMJxx4KZ1E+6Ui5ZBLrLWayLhZ61
-=/Dg9
------END PGP SIGNATURE-----
-
---cu4W6k9SHoGoLOEcI2MprBxW6wdN2gqla--
+p: 646-253-9055
+e: milosz@adfin.com
