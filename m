@@ -1,172 +1,114 @@
-From: Dong Yuan <yuandong1222@gmail.com>
+From: Loic Dachary <loic@dachary.org>
 Subject: Re: Weekly performance meeting
-Date: Fri, 26 Sep 2014 15:20:06 +0800
-Message-ID: <CAMm-wcLahhFD=w8-ApMADPWuiVjU8z_irJ+QB2mDTOHMZpTSkQ@mail.gmail.com>
+Date: Fri, 26 Sep 2014 09:25:18 +0200
+Message-ID: <542514DE.6070807@dachary.org>
 References: <alpine.DEB.2.00.1409250856010.12347@cobra.newdream.net>
-	<CACJqLyba+ODROaTno844jCt8JHuhb35A_f4qAawrmUQa+oR=Fg@mail.gmail.com>
-	<CAMm-wcJVtmbgr0wW28OmVg+7B_DMszSM0E7YTUJFFNiBuC7OVg@mail.gmail.com>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F2784B210@SACMBXIP02.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="s4332EU0dwMxdqKwrwotOUHuMxD9TUd68"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f172.google.com ([209.85.220.172]:55869 "EHLO
-	mail-vc0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753986AbaIZHUH convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 26 Sep 2014 03:20:07 -0400
-Received: by mail-vc0-f172.google.com with SMTP id hy10so8958686vcb.31
-        for <ceph-devel@vger.kernel.org>; Fri, 26 Sep 2014 00:20:06 -0700 (PDT)
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2784B210@SACMBXIP02.sdcorp.global.sandisk.com>
+Received: from mail2.dachary.org ([91.121.57.175]:60421 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1753683AbaIZHZY (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 26 Sep 2014 03:25:24 -0400
+In-Reply-To: <alpine.DEB.2.00.1409250856010.12347@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
-Cc: Haomai Wang <haomaiwang@gmail.com>, Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Allen Samuels <Allen.Samuels@sandisk.com>, "dieter.kasper@ts.fujitsu.com" <dieter.kasper@ts.fujitsu.com>, "PVonStamwitz@us.fujitsu.com" <PVonStamwitz@us.fujitsu.com>, "Shu, Xinxin" <xinxin.shu@intel.com>, Stefan Priebe - Profihost AG <s.priebe@profihost.ag>, "xiaoxi.chen@intel.com" <xiaoxi.chen@intel.com>, Milosz Tanski <milosz@adfin.com>, "zhiqiang.wang@intel.com" <zhiqiang.wang@intel.com>, "jianpeng.ma@intel.com" <jianpeng.ma@intel.com>, "gdror@mellanox.com" <gdror@mellanox.com>, "vuhuong@mellanox.com" <vuhuong@mellanox.com>, Mark Nelson <mark.nelson@inktank.com>
+To: ceph-devel@vger.kernel.org, "Zhang, Jian" <jian.zhang@intel.com>
 
-> Have you tried this with latest shardedpool/WQ model which is already in the Giant branch ?
-> IOS will be going with this path in the latest code not with op_wq.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--s4332EU0dwMxdqKwrwotOUHuMxD9TUd68
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-Not yet. I mainly work on firefly now.
+Hi,
 
-I think I will try it when I have time and I will give the report. :)
+I added a section to http://pad.ceph.com/p/performance_weekly about the c=
+urrent efforts to optimize/benchmark erasure code plugins. @Zhang, Jian :=
+ the ISA erasure code plugin Andreas Peters worked on is not mentioned be=
+cause it does not need any optimization, as far as I can tell ;-)
 
-> Yes, we also saw encode/decode was consuming lot of cpu times and if I remember correctly profiler was pointing bufferlist::append in many of such cases.
+Cheers
 
-As right as my glove. :)
+On 25/09/2014 20:27, Sage Weil wrote:
+> Hi everyone,
+>=20
+> A number of people have approached me about how to get more involved wi=
+th=20
+> the current work on improving performance and how to better coordinate =
 
-On 26 September 2014 14:40, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
-> Haomai/Dong
-> Have you tried this with latest shardedpool/WQ model which is already in the Giant branch ?
-> IOS will be going with this path in the latest code not with op_wq.
-> Yes, we also saw encode/decode was consuming lot of cpu times and if I remember correctly profiler was pointing bufferlist::append in many of such cases.
->
-> Thanks & Regards
-> Somnath
->
-> -----Original Message-----
-> From: Dong Yuan [mailto:yuandong1222@gmail.com]
-> Sent: Thursday, September 25, 2014 11:31 PM
-> To: Haomai Wang
-> Cc: Sage Weil; ceph-devel@vger.kernel.org; Somnath Roy; Allen Samuels; dieter.kasper@ts.fujitsu.com; PVonStamwitz@us.fujitsu.com; Shu, Xinxin; Stefan Priebe - Profihost AG; xiaoxi.chen@intel.com; Milosz Tanski; zhiqiang.wang@intel.com; jianpeng.ma@intel.com; gdror@mellanox.com; vuhuong@mellanox.com; Mark Nelson
-> Subject: Re: Weekly performance meeting
->
-> Some data can support Haomai's points.
->
->> 1. encode/decode plays remarkable latency, especially in
->> ObjectStore::Transaction. I'm urgen in refactor ObjectStore API to
->> avoid encode/decode codes. It seemed has be signed in note(- remove
->> serialization from ObjectStore::Transaction (ymmv))
->
-> My environment, single OSD on a single SSD with filestore_blackhole = true.
->
-> With All transaction encode, 10000 4K WriteFull operations by single thread need about 14.3s. While without transaction encode, the same test can be finished in about 11.5s.
->
-> Considering the FileStore needs to decode the bufferlist too, encode/decode cost more than 20% time!
->
-> Oprofile results can validate this problem too: methods used by encode/decode sometimes take 9 of the top 10.
->
->> 2. obvious latency for threadpool/workqueue model. Do we consider to
->> impl performance optimization workqueue to replace existing critical
->> workqueue such as op_wq in OSD.h and op_wq in FileStore.h. Now in my
->> AsyncMessenger impl, I will try to use custom and simple workqueue
->> impl to improve performance.
->
-> When I analyze the latency of a 4K object WriteFull operation, I put static probes into codes to measure times used by OpWQ. I test 10000 4K object WriteFull operations and average the results.
->
-> I found it spends 158us for the OpWQ for each IO, including 30us to enqueue, 108us in the queue, and 20us to dequeue. It takes more than 20% time of PG layer (not including msg and os layer) when encode is ignored.
->
-> Maybe a more effective ThreadPool/WorkQueue Model is needed or at least some improvement for WorkQueues in the IO path to reduce the latency.
->
-> On 26 September 2014 10:27, Haomai Wang <haomaiwang@gmail.com> wrote:
->> Thanks for sage!
->>
->> I'm on the flight at Oct 1. :-(
->>
->> Now my team is mainly worked on the performance of ceph, we have
->> observed these points:
->>
->> 1. encode/decode plays remarkable latency, especially in
->> ObjectStore::Transaction. I'm urgen in refactor ObjectStore API to
->> avoid encode/decode codes. It seemed has be signed in note(- remove
->> serialization from ObjectStore::Transaction (ymmv)) 2. obvious latency
->> for threadpool/workqueue model. Do we consider to impl performance
->> optimization workqueue to replace existing critical workqueue such as
->> op_wq in OSD.h and op_wq in FileStore.h. Now in my AsyncMessenger
->> impl, I will try to use custom and simple workqueue impl to improve
->> performance.
->> 3. Large lock in client library such as ObjectCacher
->>
->>
->> On Fri, Sep 26, 2014 at 2:27 AM, Sage Weil <sweil@redhat.com> wrote:
->>> Hi everyone,
->>>
->>> A number of people have approached me about how to get more involved
->>> with the current work on improving performance and how to better
->>> coordinate with other interested parties.  A few meetings have taken
->>> place offline with good results but only a few interested parties were involved.
->>>
->>> Ideally, we'd like to move as much of this dicussion into the public
->>> forums: ceph-devel@vger.kernel.org and #ceph-devel.  That isn't
->>> always sufficient, however.  I'd like to also set up a regular weekly
->>> meeting using google hangouts or bluejeans so that all interested
->>> parties can share progress.  There are a lot of things we can do
->>> during the Hammer cycle to improve things but it will require some coordination of effort.
->>>
->>> Among other things, we can discuss:
->>>
->>>  - observed performance limitations
->>>  - high level strategies for addressing them
->>>  - proposed patch sets and their performance impact
->>>  - anything else that will move us forward
->>>
->>> One challenge is timezones: there are developers in the US, China,
->>> Europe, and Israel who may want to join.  As a starting point, how
->>> about next Wednesday, 15:00 UTC?  If I didn't do my tz math wrong,
->>> that's
->>>
->>>   8:00 (PDT, California)
->>>  15:00 (UTC)
->>>  18:00 (IDT, Israel)
->>>  23:00 (CST, China)
->>>
->>> That is surely not the ideal time for everyone but it can hopefully
->>> be a starting point.
->>>
->>> I've also created an etherpad for collecting discussion/agenda items
->>> at
->>>
->>>         http://pad.ceph.com/p/performance_weekly
->>>
->>> Is there interest here?  Please let everyone know if you are actively
->>> working in this area and/or would like to join, and update the pad
->>> above with the topics you would like to discuss.
->>>
->>> Thanks!
->>> sage
->>
->>
->>
->> --
->> Best Regards,
->>
->> Wheat
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->> in the body of a message to majordomo@vger.kernel.org More majordomo
->> info at  http://vger.kernel.org/majordomo-info.html
->
->
->
+> with other interested parties.  A few meetings have taken place offline=
+=20
+> with good results but only a few interested parties were involved.
+>=20
+> Ideally, we'd like to move as much of this dicussion into the public=20
+> forums: ceph-devel@vger.kernel.org and #ceph-devel.  That isn't always =
+
+> sufficient, however.  I'd like to also set up a regular weekly meeting =
+
+> using google hangouts or bluejeans so that all interested parties can=20
+> share progress.  There are a lot of things we can do during the Hammer =
+
+> cycle to improve things but it will require some coordination of effort=
+=2E
+>=20
+> Among other things, we can discuss:
+>=20
+>  - observed performance limitations
+>  - high level strategies for addressing them
+>  - proposed patch sets and their performance impact
+>  - anything else that will move us forward
+>=20
+> One challenge is timezones: there are developers in the US, China, Euro=
+pe,=20
+> and Israel who may want to join.  As a starting point, how about next=20
+> Wednesday, 15:00 UTC?  If I didn't do my tz math wrong, that's
+>=20
+>   8:00 (PDT, California)
+>  15:00 (UTC)
+>  18:00 (IDT, Israel)
+>  23:00 (CST, China)
+>=20
+> That is surely not the ideal time for everyone but it can hopefully be =
+a=20
+> starting point.
+>=20
+> I've also created an etherpad for collecting discussion/agenda items at=
+
+>=20
+> 	http://pad.ceph.com/p/performance_weekly
+>=20
+> Is there interest here?  Please let everyone know if you are actively=20
+> working in this area and/or would like to join, and update the pad abov=
+e=20
+> with the topics you would like to discuss.
+>=20
+> Thanks!
+> sage
 > --
-> Dong Yuan
-> Email:yuandong1222@gmail.com
->
-> ________________________________
->
-> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
->
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
 
 
+--s4332EU0dwMxdqKwrwotOUHuMxD9TUd68
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
--- 
-Dong Yuan
-Email:yuandong1222@gmail.com
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlQlFN4ACgkQ8dLMyEl6F20uZgCfZRabB61io8IZ7sdQ693EsLtm
+WOcAoJS0TbUPqDr5i9E4/XL05uZv0NUS
+=F5ax
+-----END PGP SIGNATURE-----
+
+--s4332EU0dwMxdqKwrwotOUHuMxD9TUd68--
