@@ -1,39 +1,43 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: storlets
-Date: Fri, 26 Sep 2014 09:20:16 -0700
-Message-ID: <CABBk=J9S3Y_6aWSj82ixtFUk-+8aDdtudZHRG0iVARy70ikuMw@mail.gmail.com>
-References: <alpine.DEB.2.00.1409260641260.30637@cobra.newdream.net>
+From: Craig Lewis <clewis@centraldesktop.com>
+Subject: Re: RGW URL Parsing
+Date: Fri, 26 Sep 2014 15:54:01 -0700
+Message-ID: <CADHZLBb-_QT2dttecDkYvsHPvFs4CVOsTMhuZOZP+DFf3jPNJQ@mail.gmail.com>
+References: <CADHZLBbpjftiH+rxBAKz3SdgHVaxJQ=_fQTwU5B8wM7gTqmj8g@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f170.google.com ([209.85.192.170]:61309 "EHLO
-	mail-pd0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751076AbaIZQUR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 26 Sep 2014 12:20:17 -0400
-Received: by mail-pd0-f170.google.com with SMTP id y13so13073890pdi.1
-        for <ceph-devel@vger.kernel.org>; Fri, 26 Sep 2014 09:20:17 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1409260641260.30637@cobra.newdream.net>
+Received: from mail-wg0-f51.google.com ([74.125.82.51]:52025 "EHLO
+	mail-wg0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754819AbaIZWyX (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 26 Sep 2014 18:54:23 -0400
+Received: by mail-wg0-f51.google.com with SMTP id b13so1874371wgh.22
+        for <ceph-devel@vger.kernel.org>; Fri, 26 Sep 2014 15:54:22 -0700 (PDT)
+In-Reply-To: <CADHZLBbpjftiH+rxBAKz3SdgHVaxJQ=_fQTwU5B8wM7gTqmj8g@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Ceph Devel <ceph-devel@vger.kernel.org>, Yehuda Sadeh <yehuda@inktank.com>
 
-On Fri, Sep 26, 2014 at 6:43 AM, Sage Weil <sweil@redhat.com> wrote:
-> http://domino.research.ibm.com/library/cyberdig.nsf/papers/7233ABCCEC84F0BF85257D3100559FD6/$File/H-0320.pdf
-> http://researchweb.watson.ibm.com/haifa/projects/storage/datastores/papers/StorletEnginePaper_CameraReady.pdf
->
-> This is similar in concept to rados classes for the zerovm stuff, done in
-> the context of swift.  It would be great to create a model for doing
-> this sort of computation with RGW that takes advantage of rados classes
-> where possible.  It's tricky because we're striping data...
->
+Sorry for the re-post.  I forgot to disable HTML.
 
-These can still run on the rgw nodes (similar to the storlets running
-on the proxy nodes in the swift case). Ones that run on the data nodes
-will need to be stripe-aware obviously. Another possibility is to not
-stripe, and have a large object size limit. Swift has a 5GB object
-size limit iirc, so it's not much different. Of course, there are
-other issues in ceph with larger objects (e.g., deep scrubbing), so
-these will need to be addressed too.
 
-Yehuda
+I've been slacking on my RGW Snapshots blueprint, but I'm getting back into it.
+
+I started working on the URL parsing, to parse the query string in
+http://bucket.cluster.com/object?snapshot=snapname
+
+
+I found the url_decode in src/rgw/rgw_common.cc, but I notice that
+it's not really parsing the URL.  It's just decoding the + and %
+escape sequences.
+
+Rather than re-implementing URL parsing, I was thinking of replacing
+url_decode with something that returns a Civet structure.  No idea
+what yet, I wanted to get some opinions before I put much effort into
+it.  I wasn't sure how tightly RGW should be coupled to Civet.  It
+looks like it's already linked, so I don't see any harm.
+
+
+I'm definitely a junior dev here, and I'm always leery when a junior
+dev proposes a refactor.  ;-)
+
+Opinions?
