@@ -1,99 +1,103 @@
-From: Dong Yuan <yuandong1222@gmail.com>
-Subject: Re: Latency Improvement Report for ShardedOpWQ
-Date: Sun, 28 Sep 2014 15:19:29 +0800
-Message-ID: <CAMm-wc+4uto+VShkX8+Rbm+v49RUD4PO1RzKm0THhpyAGkKwYQ@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Latency Improvement Report for ShardedOpWQ
+Date: Sun, 28 Sep 2014 09:01:40 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2784C8AD@SACMBXIP02.sdcorp.global.sandisk.com>
 References: <CAMm-wcKSiQHJW5y_mg5S3t17sY902TnG2G=b5Xen6W9Raa-1aQ@mail.gmail.com>
 	<755F6B91B3BE364F9BCA11EA3F9E0C6F2784C85E@SACMBXIP02.sdcorp.global.sandisk.com>
+ <CAMm-wc+4uto+VShkX8+Rbm+v49RUD4PO1RzKm0THhpyAGkKwYQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-we0-f179.google.com ([74.125.82.179]:43788 "EHLO
-	mail-we0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750882AbaI1HTa convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 28 Sep 2014 03:19:30 -0400
-Received: by mail-we0-f179.google.com with SMTP id u56so3587408wes.10
-        for <ceph-devel@vger.kernel.org>; Sun, 28 Sep 2014 00:19:29 -0700 (PDT)
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2784C85E@SACMBXIP02.sdcorp.global.sandisk.com>
+Received: from mail-bn1bon0070.outbound.protection.outlook.com ([157.56.111.70]:53309
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751049AbaI1JBo (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 28 Sep 2014 05:01:44 -0400
+In-Reply-To: <CAMm-wc+4uto+VShkX8+Rbm+v49RUD4PO1RzKm0THhpyAGkKwYQ@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
+To: Dong Yuan <yuandong1222@gmail.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Somnath,
-
-I totally agree with you.
-
-I read the code about  sharded TP and the new OSD OpWQ. In the new
-implementation, there is not  single lock for all PGs, but each lock
-for a subset of PGs(Am I right?).   It is very useful to reduce lock
-contention and so increase parallelism. It is an awesome work!
-
-While I am working on the latency of single IO (mainly 4K random
-write), I notice the OpWQ spent about 100+us to transfer an IO from
-msg dispatcher to OpWQ worker thread, Do you have any idea to reduce
-the time span?
-
-Thanks for your help.
-Dong.
-
-On 28 September 2014 13:46, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
-> Hi Dong,
-> I don't think in case of single client scenario there is much benefit. Single client has a limitation. The benefit with sharded TP is, a single OSD is scaling much more with the increase of clients since it is increasing parallelism (by reducing lock contention) in the filestore level. A quick check could be like this.
->
-> 1. Create a single node, single OSD cluster and try putting load with increasing number of clients like 1,3, 5, 8,10. Small workload serving from memory should be ideal.
-> 2. Compare the code with sharded TP against say firefly. You should be seeing firefly is not scaling with increasing number of clients.
-> 3. try top -H on two different case and you should be seeing more threads in case of sharded tp were working in parallel than firefly.
->
-> Also, I am sure this latency result will not hold true in high workload , there you should be seeing more contention and as a result more latency.
->
-> Thanks & Regards
-> Somnath
->
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Dong Yuan
-> Sent: Saturday, September 27, 2014 8:45 PM
-> To: ceph-devel
-> Subject: Latency Improvement Report for ShardedOpWQ
->
-> ===== Test Purpose =====
->
-> Measure whether and how much Sharded OpWQ is better than Traditional OpWQ for random write scene.
->
-> ===== Test Case =====
->
-> 4K Object WriteFull for 1w times.
->
-> ===== Test Method =====
->
-> Put the following static probes into codes when running tests to get the time span between enqeueue and dequeue of OpWQ.
->
-> Start: PG::enqueue_op before osd->op_wq.equeue call
-> End: OSD::dequeue_op.entry
->
-> ===== Test Result =====
->
-> Traditional OpWQ: 109us(AVG), 40us(MIN)
-> ShardedOpWQ: 97us(AVG), 32us(MIN)
->
-> ===== Test Conclusion =====
->
-> No Remarkably Improvement for Latency
->
->
-> --
-> Dong Yuan
-> Email:yuandong1222@gmail.com
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-> ________________________________
->
-> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
->
-
-
-
--- 
-Dong Yuan
-Email:yuandong1222@gmail.com
+RG9uZywNClRoaXMgaXMgbW9zdGx5IGJlY2F1c2Ugb2YgbG9jayBjb250ZW50aW9uIG1heSBiZS4g
+DQpZb3UgY2FuIHR3ZWFrIHRoZSBudW1iZXIgb2Ygc2hhcmRzIGluIGNhc2Ugb2Ygc2hhcmRlZCBX
+USB0byBzZWUgaWYgaXQgaXMgaW1wcm92aW5nIHRoaXMgbnVtYmVyIG9yIG5vdC4gDQpUaGVyZSBp
+cyBzdGlsbCBvbmUgZ2xvYmFsIGxvY2sgd2UgaGF2ZTsgdGhpcyBpcyB0byBwcm90ZWN0IHBnX2Zv
+cl9wcm9jZXNzaW5nKCkgYW5kIHRoaXMgd2UgY2FuJ3QgZ2V0IHJpZCBvZiBzaW5jZSB3ZSBuZWVk
+IHRvIG1haW50YWluIG9wIG9yZGVyIHdpdGhpbiBhIHBnLiBUaGlzIGNvdWxkIGJlIGluY3JlYXNp
+bmcgbGF0ZW5jeSBhcyB3ZWxsLiBJIHdvdWxkIHN1Z2dlc3QgeW91IHRvIG1lYXN1cmUgdGhpcyBu
+dW1iZXIgaW4gZGlmZmVyZW50IHN0YWdlcyB3aXRoaW4gU2hhcmRlZE9wV1E6Ol9wcm9jZXNzKCkg
+bGlrZSBhZnRlciBkZXF1ZXVlIGZyb20gcHF1ZXVlIGFuZCBhZnRlciBnZXR0aW5nIHRoZSBwZ2xv
+Y2sgYW5kIHBvcHBpbmcgdGhlIG9wcyBmcm9tIHBnX2Zvcl9wcm9jZXNzaW5nKCkuDQoNCkFsc28s
+IGtlZXAgaW4gbWluZCB0aGVyZSBpcyBjb250ZXh0IHN3aXRjaCBoYXBwZW5pbmcgYW5kIHRoaXMg
+Y291bGQgYmUgZXhwZW5zaXZlIGRlcGVuZGluZyBvbiB0aGUgZGF0YSBjb3B5IGV0Yy4gSXQncyB3
+b3J0aCB0cnlpbmcgdGhpcyBleHBlcmltZW50IGJ5IHBpbm5pbmcgT1NEIHRvIG1heSBiZSBhY3R1
+YWwgcGh5c2ljYWwgY29yZXMgPw0KDQpUaGFua3MgJiBSZWdhcmRzDQpTb21uYXRoDQoNCi0tLS0t
+T3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBEb25nIFl1YW4gW21haWx0bzp5dWFuZG9uZzEy
+MjJAZ21haWwuY29tXSANClNlbnQ6IFN1bmRheSwgU2VwdGVtYmVyIDI4LCAyMDE0IDEyOjE5IEFN
+DQpUbzogU29tbmF0aCBSb3kNCkNjOiBjZXBoLWRldmVsDQpTdWJqZWN0OiBSZTogTGF0ZW5jeSBJ
+bXByb3ZlbWVudCBSZXBvcnQgZm9yIFNoYXJkZWRPcFdRDQoNCkhpIFNvbW5hdGgsDQoNCkkgdG90
+YWxseSBhZ3JlZSB3aXRoIHlvdS4NCg0KSSByZWFkIHRoZSBjb2RlIGFib3V0ICBzaGFyZGVkIFRQ
+IGFuZCB0aGUgbmV3IE9TRCBPcFdRLiBJbiB0aGUgbmV3IGltcGxlbWVudGF0aW9uLCB0aGVyZSBp
+cyBub3QgIHNpbmdsZSBsb2NrIGZvciBhbGwgUEdzLCBidXQgZWFjaCBsb2NrDQpmb3IgYSBzdWJz
+ZXQgb2YgUEdzKEFtIEkgcmlnaHQ/KS4gICBJdCBpcyB2ZXJ5IHVzZWZ1bCB0byByZWR1Y2UgbG9j
+aw0KY29udGVudGlvbiBhbmQgc28gaW5jcmVhc2UgcGFyYWxsZWxpc20uIEl0IGlzIGFuIGF3ZXNv
+bWUgd29yayENCg0KV2hpbGUgSSBhbSB3b3JraW5nIG9uIHRoZSBsYXRlbmN5IG9mIHNpbmdsZSBJ
+TyAobWFpbmx5IDRLIHJhbmRvbSB3cml0ZSksIEkgbm90aWNlIHRoZSBPcFdRIHNwZW50IGFib3V0
+IDEwMCt1cyB0byB0cmFuc2ZlciBhbiBJTyBmcm9tIG1zZyBkaXNwYXRjaGVyIHRvIE9wV1Egd29y
+a2VyIHRocmVhZCwgRG8geW91IGhhdmUgYW55IGlkZWEgdG8gcmVkdWNlIHRoZSB0aW1lIHNwYW4/
+DQoNClRoYW5rcyBmb3IgeW91ciBoZWxwLg0KRG9uZy4NCg0KT24gMjggU2VwdGVtYmVyIDIwMTQg
+MTM6NDYsIFNvbW5hdGggUm95IDxTb21uYXRoLlJveUBzYW5kaXNrLmNvbT4gd3JvdGU6DQo+IEhp
+IERvbmcsDQo+IEkgZG9uJ3QgdGhpbmsgaW4gY2FzZSBvZiBzaW5nbGUgY2xpZW50IHNjZW5hcmlv
+IHRoZXJlIGlzIG11Y2ggYmVuZWZpdC4gU2luZ2xlIGNsaWVudCBoYXMgYSBsaW1pdGF0aW9uLiBU
+aGUgYmVuZWZpdCB3aXRoIHNoYXJkZWQgVFAgaXMsIGEgc2luZ2xlIE9TRCBpcyBzY2FsaW5nIG11
+Y2ggbW9yZSB3aXRoIHRoZSBpbmNyZWFzZSBvZiBjbGllbnRzIHNpbmNlIGl0IGlzIGluY3JlYXNp
+bmcgcGFyYWxsZWxpc20gKGJ5IHJlZHVjaW5nIGxvY2sgY29udGVudGlvbikgaW4gdGhlIGZpbGVz
+dG9yZSBsZXZlbC4gQSBxdWljayBjaGVjayBjb3VsZCBiZSBsaWtlIHRoaXMuDQo+DQo+IDEuIENy
+ZWF0ZSBhIHNpbmdsZSBub2RlLCBzaW5nbGUgT1NEIGNsdXN0ZXIgYW5kIHRyeSBwdXR0aW5nIGxv
+YWQgd2l0aCBpbmNyZWFzaW5nIG51bWJlciBvZiBjbGllbnRzIGxpa2UgMSwzLCA1LCA4LDEwLiBT
+bWFsbCB3b3JrbG9hZCBzZXJ2aW5nIGZyb20gbWVtb3J5IHNob3VsZCBiZSBpZGVhbC4NCj4gMi4g
+Q29tcGFyZSB0aGUgY29kZSB3aXRoIHNoYXJkZWQgVFAgYWdhaW5zdCBzYXkgZmlyZWZseS4gWW91
+IHNob3VsZCBiZSBzZWVpbmcgZmlyZWZseSBpcyBub3Qgc2NhbGluZyB3aXRoIGluY3JlYXNpbmcg
+bnVtYmVyIG9mIGNsaWVudHMuDQo+IDMuIHRyeSB0b3AgLUggb24gdHdvIGRpZmZlcmVudCBjYXNl
+IGFuZCB5b3Ugc2hvdWxkIGJlIHNlZWluZyBtb3JlIHRocmVhZHMgaW4gY2FzZSBvZiBzaGFyZGVk
+IHRwIHdlcmUgd29ya2luZyBpbiBwYXJhbGxlbCB0aGFuIGZpcmVmbHkuDQo+DQo+IEFsc28sIEkg
+YW0gc3VyZSB0aGlzIGxhdGVuY3kgcmVzdWx0IHdpbGwgbm90IGhvbGQgdHJ1ZSBpbiBoaWdoIHdv
+cmtsb2FkICwgdGhlcmUgeW91IHNob3VsZCBiZSBzZWVpbmcgbW9yZSBjb250ZW50aW9uIGFuZCBh
+cyBhIHJlc3VsdCBtb3JlIGxhdGVuY3kuDQo+DQo+IFRoYW5rcyAmIFJlZ2FyZHMNCj4gU29tbmF0
+aA0KPg0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBjZXBoLWRldmVsLW93
+bmVyQHZnZXIua2VybmVsLm9yZyANCj4gW21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIua2Vy
+bmVsLm9yZ10gT24gQmVoYWxmIE9mIERvbmcgWXVhbg0KPiBTZW50OiBTYXR1cmRheSwgU2VwdGVt
+YmVyIDI3LCAyMDE0IDg6NDUgUE0NCj4gVG86IGNlcGgtZGV2ZWwNCj4gU3ViamVjdDogTGF0ZW5j
+eSBJbXByb3ZlbWVudCBSZXBvcnQgZm9yIFNoYXJkZWRPcFdRDQo+DQo+ID09PT09IFRlc3QgUHVy
+cG9zZSA9PT09PQ0KPg0KPiBNZWFzdXJlIHdoZXRoZXIgYW5kIGhvdyBtdWNoIFNoYXJkZWQgT3BX
+USBpcyBiZXR0ZXIgdGhhbiBUcmFkaXRpb25hbCBPcFdRIGZvciByYW5kb20gd3JpdGUgc2NlbmUu
+DQo+DQo+ID09PT09IFRlc3QgQ2FzZSA9PT09PQ0KPg0KPiA0SyBPYmplY3QgV3JpdGVGdWxsIGZv
+ciAxdyB0aW1lcy4NCj4NCj4gPT09PT0gVGVzdCBNZXRob2QgPT09PT0NCj4NCj4gUHV0IHRoZSBm
+b2xsb3dpbmcgc3RhdGljIHByb2JlcyBpbnRvIGNvZGVzIHdoZW4gcnVubmluZyB0ZXN0cyB0byBn
+ZXQgdGhlIHRpbWUgc3BhbiBiZXR3ZWVuIGVucWV1ZXVlIGFuZCBkZXF1ZXVlIG9mIE9wV1EuDQo+
+DQo+IFN0YXJ0OiBQRzo6ZW5xdWV1ZV9vcCBiZWZvcmUgb3NkLT5vcF93cS5lcXVldWUgY2FsbA0K
+PiBFbmQ6IE9TRDo6ZGVxdWV1ZV9vcC5lbnRyeQ0KPg0KPiA9PT09PSBUZXN0IFJlc3VsdCA9PT09
+PQ0KPg0KPiBUcmFkaXRpb25hbCBPcFdROiAxMDl1cyhBVkcpLCA0MHVzKE1JTikNCj4gU2hhcmRl
+ZE9wV1E6IDk3dXMoQVZHKSwgMzJ1cyhNSU4pDQo+DQo+ID09PT09IFRlc3QgQ29uY2x1c2lvbiA9
+PT09PQ0KPg0KPiBObyBSZW1hcmthYmx5IEltcHJvdmVtZW50IGZvciBMYXRlbmN5DQo+DQo+DQo+
+IC0tDQo+IERvbmcgWXVhbg0KPiBFbWFpbDp5dWFuZG9uZzEyMjJAZ21haWwuY29tDQo+IC0tDQo+
+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmli
+ZSBjZXBoLWRldmVsIiANCj4gaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2
+Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gDQo+IGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtl
+cm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KPg0KPiBfX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fXw0KPg0KPiBQTEVBU0UgTk9URTogVGhlIGluZm9ybWF0aW9uIGNvbnRhaW5lZCBp
+biB0aGlzIGVsZWN0cm9uaWMgbWFpbCBtZXNzYWdlIGlzIGludGVuZGVkIG9ubHkgZm9yIHRoZSB1
+c2Ugb2YgdGhlIGRlc2lnbmF0ZWQgcmVjaXBpZW50KHMpIG5hbWVkIGFib3ZlLiBJZiB0aGUgcmVh
+ZGVyIG9mIHRoaXMgbWVzc2FnZSBpcyBub3QgdGhlIGludGVuZGVkIHJlY2lwaWVudCwgeW91IGFy
+ZSBoZXJlYnkgbm90aWZpZWQgdGhhdCB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIG1lc3NhZ2UgaW4g
+ZXJyb3IgYW5kIHRoYXQgYW55IHJldmlldywgZGlzc2VtaW5hdGlvbiwgZGlzdHJpYnV0aW9uLCBv
+ciBjb3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBpcyBzdHJpY3RseSBwcm9oaWJpdGVkLiBJZiB5b3Ug
+aGF2ZSByZWNlaXZlZCB0aGlzIGNvbW11bmljYXRpb24gaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkg
+dGhlIHNlbmRlciBieSB0ZWxlcGhvbmUgb3IgZS1tYWlsIChhcyBzaG93biBhYm92ZSkgaW1tZWRp
+YXRlbHkgYW5kIGRlc3Ryb3kgYW55IGFuZCBhbGwgY29waWVzIG9mIHRoaXMgbWVzc2FnZSBpbiB5
+b3VyIHBvc3Nlc3Npb24gKHdoZXRoZXIgaGFyZCBjb3BpZXMgb3IgZWxlY3Ryb25pY2FsbHkgc3Rv
+cmVkIGNvcGllcykuDQo+DQoNCg0KDQotLQ0KRG9uZyBZdWFuDQpFbWFpbDp5dWFuZG9uZzEyMjJA
+Z21haWwuY29tDQo=
