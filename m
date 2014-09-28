@@ -1,47 +1,68 @@
-From: Dong Yuan <yuandong1222@gmail.com>
-Subject: Latency Improvement Report for ShardedOpWQ
-Date: Sun, 28 Sep 2014 11:45:14 +0800
-Message-ID: <CAMm-wcKSiQHJW5y_mg5S3t17sY902TnG2G=b5Xen6W9Raa-1aQ@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Latency Improvement Report for ShardedOpWQ
+Date: Sun, 28 Sep 2014 05:46:50 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2784C85E@SACMBXIP02.sdcorp.global.sandisk.com>
+References: <CAMm-wcKSiQHJW5y_mg5S3t17sY902TnG2G=b5Xen6W9Raa-1aQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-we0-f169.google.com ([74.125.82.169]:49105 "EHLO
-	mail-we0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752262AbaI1DpP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 27 Sep 2014 23:45:15 -0400
-Received: by mail-we0-f169.google.com with SMTP id k48so11402279wev.0
-        for <ceph-devel@vger.kernel.org>; Sat, 27 Sep 2014 20:45:14 -0700 (PDT)
+Received: from mail-bl2on0097.outbound.protection.outlook.com ([65.55.169.97]:56544
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1750784AbaI1Fqy (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 28 Sep 2014 01:46:54 -0400
+In-Reply-To: <CAMm-wcKSiQHJW5y_mg5S3t17sY902TnG2G=b5Xen6W9Raa-1aQ@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Dong Yuan <yuandong1222@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-===== Test Purpose =====
-
-Measure whether and how much Sharded OpWQ is better than Traditional
-OpWQ for random write scene.
-
-===== Test Case =====
-
-4K Object WriteFull for 1w times.
-
-===== Test Method =====
-
-Put the following static probes into codes when running tests to get
-the time span between enqeueue and dequeue of OpWQ.
-
-Start: PG::enqueue_op before osd->op_wq.equeue call
-End: OSD::dequeue_op.entry
-
-===== Test Result =====
-
-Traditional OpWQ: 109us(AVG), 40us(MIN)
-ShardedOpWQ: 97us(AVG), 32us(MIN)
-
-===== Test Conclusion =====
-
-No Remarkably Improvement for Latency
-
-
--- 
-Dong Yuan
-Email:yuandong1222@gmail.com
+SGkgRG9uZywNCkkgZG9uJ3QgdGhpbmsgaW4gY2FzZSBvZiBzaW5nbGUgY2xpZW50IHNjZW5hcmlv
+IHRoZXJlIGlzIG11Y2ggYmVuZWZpdC4gU2luZ2xlIGNsaWVudCBoYXMgYSBsaW1pdGF0aW9uLiBU
+aGUgYmVuZWZpdCB3aXRoIHNoYXJkZWQgVFAgaXMsIGEgc2luZ2xlIE9TRCBpcyBzY2FsaW5nIG11
+Y2ggbW9yZSB3aXRoIHRoZSBpbmNyZWFzZSBvZiBjbGllbnRzIHNpbmNlIGl0IGlzIGluY3JlYXNp
+bmcgcGFyYWxsZWxpc20gKGJ5IHJlZHVjaW5nIGxvY2sgY29udGVudGlvbikgaW4gdGhlIGZpbGVz
+dG9yZSBsZXZlbC4gQSBxdWljayBjaGVjayBjb3VsZCBiZSBsaWtlIHRoaXMuDQoNCjEuIENyZWF0
+ZSBhIHNpbmdsZSBub2RlLCBzaW5nbGUgT1NEIGNsdXN0ZXIgYW5kIHRyeSBwdXR0aW5nIGxvYWQg
+d2l0aCBpbmNyZWFzaW5nIG51bWJlciBvZiBjbGllbnRzIGxpa2UgMSwzLCA1LCA4LDEwLiBTbWFs
+bCB3b3JrbG9hZCBzZXJ2aW5nIGZyb20gbWVtb3J5IHNob3VsZCBiZSBpZGVhbC4NCjIuIENvbXBh
+cmUgdGhlIGNvZGUgd2l0aCBzaGFyZGVkIFRQIGFnYWluc3Qgc2F5IGZpcmVmbHkuIFlvdSBzaG91
+bGQgYmUgc2VlaW5nIGZpcmVmbHkgaXMgbm90IHNjYWxpbmcgd2l0aCBpbmNyZWFzaW5nIG51bWJl
+ciBvZiBjbGllbnRzLg0KMy4gdHJ5IHRvcCAtSCBvbiB0d28gZGlmZmVyZW50IGNhc2UgYW5kIHlv
+dSBzaG91bGQgYmUgc2VlaW5nIG1vcmUgdGhyZWFkcyBpbiBjYXNlIG9mIHNoYXJkZWQgdHAgd2Vy
+ZSB3b3JraW5nIGluIHBhcmFsbGVsIHRoYW4gZmlyZWZseS4NCg0KQWxzbywgSSBhbSBzdXJlIHRo
+aXMgbGF0ZW5jeSByZXN1bHQgd2lsbCBub3QgaG9sZCB0cnVlIGluIGhpZ2ggd29ya2xvYWQgLCB0
+aGVyZSB5b3Ugc2hvdWxkIGJlIHNlZWluZyBtb3JlIGNvbnRlbnRpb24gYW5kIGFzIGEgcmVzdWx0
+IG1vcmUgbGF0ZW5jeS4NCg0KVGhhbmtzICYgUmVnYXJkcw0KU29tbmF0aA0KDQotLS0tLU9yaWdp
+bmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcg
+W21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIERv
+bmcgWXVhbg0KU2VudDogU2F0dXJkYXksIFNlcHRlbWJlciAyNywgMjAxNCA4OjQ1IFBNDQpUbzog
+Y2VwaC1kZXZlbA0KU3ViamVjdDogTGF0ZW5jeSBJbXByb3ZlbWVudCBSZXBvcnQgZm9yIFNoYXJk
+ZWRPcFdRDQoNCj09PT09IFRlc3QgUHVycG9zZSA9PT09PQ0KDQpNZWFzdXJlIHdoZXRoZXIgYW5k
+IGhvdyBtdWNoIFNoYXJkZWQgT3BXUSBpcyBiZXR0ZXIgdGhhbiBUcmFkaXRpb25hbCBPcFdRIGZv
+ciByYW5kb20gd3JpdGUgc2NlbmUuDQoNCj09PT09IFRlc3QgQ2FzZSA9PT09PQ0KDQo0SyBPYmpl
+Y3QgV3JpdGVGdWxsIGZvciAxdyB0aW1lcy4NCg0KPT09PT0gVGVzdCBNZXRob2QgPT09PT0NCg0K
+UHV0IHRoZSBmb2xsb3dpbmcgc3RhdGljIHByb2JlcyBpbnRvIGNvZGVzIHdoZW4gcnVubmluZyB0
+ZXN0cyB0byBnZXQgdGhlIHRpbWUgc3BhbiBiZXR3ZWVuIGVucWV1ZXVlIGFuZCBkZXF1ZXVlIG9m
+IE9wV1EuDQoNClN0YXJ0OiBQRzo6ZW5xdWV1ZV9vcCBiZWZvcmUgb3NkLT5vcF93cS5lcXVldWUg
+Y2FsbA0KRW5kOiBPU0Q6OmRlcXVldWVfb3AuZW50cnkNCg0KPT09PT0gVGVzdCBSZXN1bHQgPT09
+PT0NCg0KVHJhZGl0aW9uYWwgT3BXUTogMTA5dXMoQVZHKSwgNDB1cyhNSU4pDQpTaGFyZGVkT3BX
+UTogOTd1cyhBVkcpLCAzMnVzKE1JTikNCg0KPT09PT0gVGVzdCBDb25jbHVzaW9uID09PT09DQoN
+Ck5vIFJlbWFya2FibHkgSW1wcm92ZW1lbnQgZm9yIExhdGVuY3kNCg0KDQotLQ0KRG9uZyBZdWFu
+DQpFbWFpbDp5dWFuZG9uZzEyMjJAZ21haWwuY29tDQotLQ0KVG8gdW5zdWJzY3JpYmUgZnJvbSB0
+aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluIHRoZSBi
+b2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jk
+b21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0K
+DQpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXw0KDQpQTEVBU0UgTk9URTogVGhlIGlu
+Zm9ybWF0aW9uIGNvbnRhaW5lZCBpbiB0aGlzIGVsZWN0cm9uaWMgbWFpbCBtZXNzYWdlIGlzIGlu
+dGVuZGVkIG9ubHkgZm9yIHRoZSB1c2Ugb2YgdGhlIGRlc2lnbmF0ZWQgcmVjaXBpZW50KHMpIG5h
+bWVkIGFib3ZlLiBJZiB0aGUgcmVhZGVyIG9mIHRoaXMgbWVzc2FnZSBpcyBub3QgdGhlIGludGVu
+ZGVkIHJlY2lwaWVudCwgeW91IGFyZSBoZXJlYnkgbm90aWZpZWQgdGhhdCB5b3UgaGF2ZSByZWNl
+aXZlZCB0aGlzIG1lc3NhZ2UgaW4gZXJyb3IgYW5kIHRoYXQgYW55IHJldmlldywgZGlzc2VtaW5h
+dGlvbiwgZGlzdHJpYnV0aW9uLCBvciBjb3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBpcyBzdHJpY3Rs
+eSBwcm9oaWJpdGVkLiBJZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGNvbW11bmljYXRpb24gaW4g
+ZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlciBieSB0ZWxlcGhvbmUgb3IgZS1tYWlsIChh
+cyBzaG93biBhYm92ZSkgaW1tZWRpYXRlbHkgYW5kIGRlc3Ryb3kgYW55IGFuZCBhbGwgY29waWVz
+IG9mIHRoaXMgbWVzc2FnZSBpbiB5b3VyIHBvc3Nlc3Npb24gKHdoZXRoZXIgaGFyZCBjb3BpZXMg
+b3IgZWxlY3Ryb25pY2FsbHkgc3RvcmVkIGNvcGllcykuDQoNCg==
