@@ -1,68 +1,99 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: Latency Improvement Report for ShardedOpWQ
-Date: Sun, 28 Sep 2014 05:46:50 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2784C85E@SACMBXIP02.sdcorp.global.sandisk.com>
+From: Dong Yuan <yuandong1222@gmail.com>
+Subject: Re: Latency Improvement Report for ShardedOpWQ
+Date: Sun, 28 Sep 2014 15:19:29 +0800
+Message-ID: <CAMm-wc+4uto+VShkX8+Rbm+v49RUD4PO1RzKm0THhpyAGkKwYQ@mail.gmail.com>
 References: <CAMm-wcKSiQHJW5y_mg5S3t17sY902TnG2G=b5Xen6W9Raa-1aQ@mail.gmail.com>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F2784C85E@SACMBXIP02.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bl2on0097.outbound.protection.outlook.com ([65.55.169.97]:56544
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1750784AbaI1Fqy (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 28 Sep 2014 01:46:54 -0400
-In-Reply-To: <CAMm-wcKSiQHJW5y_mg5S3t17sY902TnG2G=b5Xen6W9Raa-1aQ@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-we0-f179.google.com ([74.125.82.179]:43788 "EHLO
+	mail-we0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750882AbaI1HTa convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 28 Sep 2014 03:19:30 -0400
+Received: by mail-we0-f179.google.com with SMTP id u56so3587408wes.10
+        for <ceph-devel@vger.kernel.org>; Sun, 28 Sep 2014 00:19:29 -0700 (PDT)
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2784C85E@SACMBXIP02.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dong Yuan <yuandong1222@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-SGkgRG9uZywNCkkgZG9uJ3QgdGhpbmsgaW4gY2FzZSBvZiBzaW5nbGUgY2xpZW50IHNjZW5hcmlv
-IHRoZXJlIGlzIG11Y2ggYmVuZWZpdC4gU2luZ2xlIGNsaWVudCBoYXMgYSBsaW1pdGF0aW9uLiBU
-aGUgYmVuZWZpdCB3aXRoIHNoYXJkZWQgVFAgaXMsIGEgc2luZ2xlIE9TRCBpcyBzY2FsaW5nIG11
-Y2ggbW9yZSB3aXRoIHRoZSBpbmNyZWFzZSBvZiBjbGllbnRzIHNpbmNlIGl0IGlzIGluY3JlYXNp
-bmcgcGFyYWxsZWxpc20gKGJ5IHJlZHVjaW5nIGxvY2sgY29udGVudGlvbikgaW4gdGhlIGZpbGVz
-dG9yZSBsZXZlbC4gQSBxdWljayBjaGVjayBjb3VsZCBiZSBsaWtlIHRoaXMuDQoNCjEuIENyZWF0
-ZSBhIHNpbmdsZSBub2RlLCBzaW5nbGUgT1NEIGNsdXN0ZXIgYW5kIHRyeSBwdXR0aW5nIGxvYWQg
-d2l0aCBpbmNyZWFzaW5nIG51bWJlciBvZiBjbGllbnRzIGxpa2UgMSwzLCA1LCA4LDEwLiBTbWFs
-bCB3b3JrbG9hZCBzZXJ2aW5nIGZyb20gbWVtb3J5IHNob3VsZCBiZSBpZGVhbC4NCjIuIENvbXBh
-cmUgdGhlIGNvZGUgd2l0aCBzaGFyZGVkIFRQIGFnYWluc3Qgc2F5IGZpcmVmbHkuIFlvdSBzaG91
-bGQgYmUgc2VlaW5nIGZpcmVmbHkgaXMgbm90IHNjYWxpbmcgd2l0aCBpbmNyZWFzaW5nIG51bWJl
-ciBvZiBjbGllbnRzLg0KMy4gdHJ5IHRvcCAtSCBvbiB0d28gZGlmZmVyZW50IGNhc2UgYW5kIHlv
-dSBzaG91bGQgYmUgc2VlaW5nIG1vcmUgdGhyZWFkcyBpbiBjYXNlIG9mIHNoYXJkZWQgdHAgd2Vy
-ZSB3b3JraW5nIGluIHBhcmFsbGVsIHRoYW4gZmlyZWZseS4NCg0KQWxzbywgSSBhbSBzdXJlIHRo
-aXMgbGF0ZW5jeSByZXN1bHQgd2lsbCBub3QgaG9sZCB0cnVlIGluIGhpZ2ggd29ya2xvYWQgLCB0
-aGVyZSB5b3Ugc2hvdWxkIGJlIHNlZWluZyBtb3JlIGNvbnRlbnRpb24gYW5kIGFzIGEgcmVzdWx0
-IG1vcmUgbGF0ZW5jeS4NCg0KVGhhbmtzICYgUmVnYXJkcw0KU29tbmF0aA0KDQotLS0tLU9yaWdp
-bmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcg
-W21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIERv
-bmcgWXVhbg0KU2VudDogU2F0dXJkYXksIFNlcHRlbWJlciAyNywgMjAxNCA4OjQ1IFBNDQpUbzog
-Y2VwaC1kZXZlbA0KU3ViamVjdDogTGF0ZW5jeSBJbXByb3ZlbWVudCBSZXBvcnQgZm9yIFNoYXJk
-ZWRPcFdRDQoNCj09PT09IFRlc3QgUHVycG9zZSA9PT09PQ0KDQpNZWFzdXJlIHdoZXRoZXIgYW5k
-IGhvdyBtdWNoIFNoYXJkZWQgT3BXUSBpcyBiZXR0ZXIgdGhhbiBUcmFkaXRpb25hbCBPcFdRIGZv
-ciByYW5kb20gd3JpdGUgc2NlbmUuDQoNCj09PT09IFRlc3QgQ2FzZSA9PT09PQ0KDQo0SyBPYmpl
-Y3QgV3JpdGVGdWxsIGZvciAxdyB0aW1lcy4NCg0KPT09PT0gVGVzdCBNZXRob2QgPT09PT0NCg0K
-UHV0IHRoZSBmb2xsb3dpbmcgc3RhdGljIHByb2JlcyBpbnRvIGNvZGVzIHdoZW4gcnVubmluZyB0
-ZXN0cyB0byBnZXQgdGhlIHRpbWUgc3BhbiBiZXR3ZWVuIGVucWV1ZXVlIGFuZCBkZXF1ZXVlIG9m
-IE9wV1EuDQoNClN0YXJ0OiBQRzo6ZW5xdWV1ZV9vcCBiZWZvcmUgb3NkLT5vcF93cS5lcXVldWUg
-Y2FsbA0KRW5kOiBPU0Q6OmRlcXVldWVfb3AuZW50cnkNCg0KPT09PT0gVGVzdCBSZXN1bHQgPT09
-PT0NCg0KVHJhZGl0aW9uYWwgT3BXUTogMTA5dXMoQVZHKSwgNDB1cyhNSU4pDQpTaGFyZGVkT3BX
-UTogOTd1cyhBVkcpLCAzMnVzKE1JTikNCg0KPT09PT0gVGVzdCBDb25jbHVzaW9uID09PT09DQoN
-Ck5vIFJlbWFya2FibHkgSW1wcm92ZW1lbnQgZm9yIExhdGVuY3kNCg0KDQotLQ0KRG9uZyBZdWFu
-DQpFbWFpbDp5dWFuZG9uZzEyMjJAZ21haWwuY29tDQotLQ0KVG8gdW5zdWJzY3JpYmUgZnJvbSB0
-aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluIHRoZSBi
-b2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jk
-b21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0K
-DQpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXw0KDQpQTEVBU0UgTk9URTogVGhlIGlu
-Zm9ybWF0aW9uIGNvbnRhaW5lZCBpbiB0aGlzIGVsZWN0cm9uaWMgbWFpbCBtZXNzYWdlIGlzIGlu
-dGVuZGVkIG9ubHkgZm9yIHRoZSB1c2Ugb2YgdGhlIGRlc2lnbmF0ZWQgcmVjaXBpZW50KHMpIG5h
-bWVkIGFib3ZlLiBJZiB0aGUgcmVhZGVyIG9mIHRoaXMgbWVzc2FnZSBpcyBub3QgdGhlIGludGVu
-ZGVkIHJlY2lwaWVudCwgeW91IGFyZSBoZXJlYnkgbm90aWZpZWQgdGhhdCB5b3UgaGF2ZSByZWNl
-aXZlZCB0aGlzIG1lc3NhZ2UgaW4gZXJyb3IgYW5kIHRoYXQgYW55IHJldmlldywgZGlzc2VtaW5h
-dGlvbiwgZGlzdHJpYnV0aW9uLCBvciBjb3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBpcyBzdHJpY3Rs
-eSBwcm9oaWJpdGVkLiBJZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGNvbW11bmljYXRpb24gaW4g
-ZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlciBieSB0ZWxlcGhvbmUgb3IgZS1tYWlsIChh
-cyBzaG93biBhYm92ZSkgaW1tZWRpYXRlbHkgYW5kIGRlc3Ryb3kgYW55IGFuZCBhbGwgY29waWVz
-IG9mIHRoaXMgbWVzc2FnZSBpbiB5b3VyIHBvc3Nlc3Npb24gKHdoZXRoZXIgaGFyZCBjb3BpZXMg
-b3IgZWxlY3Ryb25pY2FsbHkgc3RvcmVkIGNvcGllcykuDQoNCg==
+Hi Somnath,
+
+I totally agree with you.
+
+I read the code about  sharded TP and the new OSD OpWQ. In the new
+implementation, there is not  single lock for all PGs, but each lock
+for a subset of PGs(Am I right?).   It is very useful to reduce lock
+contention and so increase parallelism. It is an awesome work!
+
+While I am working on the latency of single IO (mainly 4K random
+write), I notice the OpWQ spent about 100+us to transfer an IO from
+msg dispatcher to OpWQ worker thread, Do you have any idea to reduce
+the time span?
+
+Thanks for your help.
+Dong.
+
+On 28 September 2014 13:46, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
+> Hi Dong,
+> I don't think in case of single client scenario there is much benefit. Single client has a limitation. The benefit with sharded TP is, a single OSD is scaling much more with the increase of clients since it is increasing parallelism (by reducing lock contention) in the filestore level. A quick check could be like this.
+>
+> 1. Create a single node, single OSD cluster and try putting load with increasing number of clients like 1,3, 5, 8,10. Small workload serving from memory should be ideal.
+> 2. Compare the code with sharded TP against say firefly. You should be seeing firefly is not scaling with increasing number of clients.
+> 3. try top -H on two different case and you should be seeing more threads in case of sharded tp were working in parallel than firefly.
+>
+> Also, I am sure this latency result will not hold true in high workload , there you should be seeing more contention and as a result more latency.
+>
+> Thanks & Regards
+> Somnath
+>
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Dong Yuan
+> Sent: Saturday, September 27, 2014 8:45 PM
+> To: ceph-devel
+> Subject: Latency Improvement Report for ShardedOpWQ
+>
+> ===== Test Purpose =====
+>
+> Measure whether and how much Sharded OpWQ is better than Traditional OpWQ for random write scene.
+>
+> ===== Test Case =====
+>
+> 4K Object WriteFull for 1w times.
+>
+> ===== Test Method =====
+>
+> Put the following static probes into codes when running tests to get the time span between enqeueue and dequeue of OpWQ.
+>
+> Start: PG::enqueue_op before osd->op_wq.equeue call
+> End: OSD::dequeue_op.entry
+>
+> ===== Test Result =====
+>
+> Traditional OpWQ: 109us(AVG), 40us(MIN)
+> ShardedOpWQ: 97us(AVG), 32us(MIN)
+>
+> ===== Test Conclusion =====
+>
+> No Remarkably Improvement for Latency
+>
+>
+> --
+> Dong Yuan
+> Email:yuandong1222@gmail.com
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+> ________________________________
+>
+> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+>
+
+
+
+-- 
+Dong Yuan
+Email:yuandong1222@gmail.com
