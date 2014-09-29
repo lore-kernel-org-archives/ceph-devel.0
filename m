@@ -1,57 +1,36 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: jerasure: galois_uninit_default_field
-Date: Mon, 29 Sep 2014 14:11:24 +0200
-Message-ID: <54294C6C.5090307@dachary.org>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="3psG0LUmFtwg0tPWg3EU1bGx8a8UgeMcC"
+From: Janne Grunau <j@jannau.net>
+Subject: [PATCH v3 0/4] buffer alignment for erasure code SIMD
+Date: Mon, 29 Sep 2014 14:34:28 +0200
+Message-ID: <1411994072-18850-1-git-send-email-j@jannau.net>
+References: <1410796508-28711-1-git-send-email-j@jannau.net>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:33961 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1753498AbaI2MLb (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Sep 2014 08:11:31 -0400
+Received: from soltyk.jannau.net ([185.27.253.110]:42034 "EHLO
+	soltyk.jannau.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753362AbaI2Mej (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Sep 2014 08:34:39 -0400
+Received: from coburn.home.jannau.net (55d46691.access.ecotel.net [85.212.102.145])
+	by soltyk.jannau.net (Postfix) with ESMTPSA id B193C3E1989
+	for <ceph-devel@vger.kernel.org>; Mon, 29 Sep 2014 14:34:36 +0200 (CEST)
+In-Reply-To: <1410796508-28711-1-git-send-email-j@jannau.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Kevin Greenan <kmgreen2@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
-
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---3psG0LUmFtwg0tPWg3EU1bGx8a8UgeMcC
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+To: ceph-devel@vger.kernel.org
 
 Hi,
 
-The following patch helps maintain the caller program valgrind clean:
+reworked patchset to address the comments in https://github.com/ceph/ceph/pull/2558
 
-    https://bitbucket.org/jimplank/jerasure/pull-request/24/define-galois=
-_uninit_default_field/diff
+variable alignment instead of the hardcoded 32-byte alignment
+fixed copy and paste error in a comment
+change buffer alignment for decoding too (much simpler than the encoding
+changes)
 
-Please let me know if you would like that done differently and I'll work =
-on it.
+I'll do a github pull request once the last make check run finishes
+locally.
 
-Cheers
+Also available from http://git.jannau.net/ceph.git/log/?h=buffer_align
 
-Reference: http://tracker.ceph.com/issues/8741
+regards
 
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
+Janne
 
-
-
---3psG0LUmFtwg0tPWg3EU1bGx8a8UgeMcC
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlQpTGwACgkQ8dLMyEl6F23m/wCcCnQEcZDV1QD4a366ok7s61ME
-emEAoJIBG8kH9XiFTCTO3DYvYtdFYSaF
-=7EpJ
------END PGP SIGNATURE-----
-
---3psG0LUmFtwg0tPWg3EU1bGx8a8UgeMcC--
