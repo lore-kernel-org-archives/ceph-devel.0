@@ -1,36 +1,36 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: ceph-disk vs keyvaluestore
-Date: Mon, 29 Sep 2014 21:05:36 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1409292103250.6593@cobra.newdream.net>
-References: <alpine.DEB.2.00.1409291645320.20141@cobra.newdream.net> <CACJqLyaY90afTC8UCn6jTOWNhJyvyGEaEwiou4S8_sX0hUnB6g@mail.gmail.com> <CACJqLyZpG7rPB1oi0jAxL2+B-xhRrWMg8oyFNqp10cm=+DmgLg@mail.gmail.com>
+From: Nicheal <zay11022@gmail.com>
+Subject: why index (collectionIndex) need a lock?
+Date: Tue, 30 Sep 2014 15:08:58 +0800
+Message-ID: <CALZt5jwhBNifcagmsGBZiEC99Q0TvDFPy45f05hidVZedKEK-w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:51175 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750830AbaI3EFh (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Sep 2014 00:05:37 -0400
-In-Reply-To: <CACJqLyZpG7rPB1oi0jAxL2+B-xhRrWMg8oyFNqp10cm=+DmgLg@mail.gmail.com>
+Received: from mail-ob0-f194.google.com ([209.85.214.194]:38549 "EHLO
+	mail-ob0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750846AbaI3HI7 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Sep 2014 03:08:59 -0400
+Received: by mail-ob0-f194.google.com with SMTP id vb8so1184578obc.9
+        for <ceph-devel@vger.kernel.org>; Tue, 30 Sep 2014 00:08:58 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomaiwang@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Mark Kirkwood <mark.kirkwood@catalyst.net.nz>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tue, 30 Sep 2014, Haomai Wang wrote:
-> Hi sage,
-> 
-> What do you think use existing ObjectStore::peek_journal_fsid
-> interface to detect whether journal needed.
-> 
-> KeyValueStore and MemStore could set passing argument "fsid" to zero
-> to indicate no journal.
+Dear develops,
 
-I'm not sure it's a good fit... it's called on an existing store and tells 
-you something about it.  I would probably expect a zeroed fsid to mean 
-that the specified journal is empty or does not exist, not that it doesn't 
-need to exist.
+I go through the files (hashIndex, LFNIndex and CollectionIndex), I
+cannot find any parameters need to grasp a lock. And basically,
+(hashIndex, LFNIndex and CollectionIndex) is used to manage a
+collection of objects.
 
-What we need, on the other hand, is something that just tells us whether 
-we should create a journal...
+Thus, just in one case, when the spilt or merge is on going, then
+lookup() path function is called to get the object path. It may obtain
+a wrong path, right?
 
-sage
+If so, why not using a state parameter in the class CollectionIndex or
+HashIndex indicating the current state of this collection (split,
+merge on going or none) and grasp a lock when the state changes. Why
+always lock the index before lookup() path or lfn_find()?
+
+Any other reasons?
+
+Nicheal
