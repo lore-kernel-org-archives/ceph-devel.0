@@ -1,36 +1,47 @@
-From: Nicheal <zay11022@gmail.com>
-Subject: why index (collectionIndex) need a lock?
-Date: Tue, 30 Sep 2014 15:08:58 +0800
-Message-ID: <CALZt5jwhBNifcagmsGBZiEC99Q0TvDFPy45f05hidVZedKEK-w@mail.gmail.com>
+From: Plato Zhang <sangongs@gmail.com>
+Subject: design a rados-based distributed kv store support scan op
+Date: Tue, 30 Sep 2014 17:23:15 +0800
+Message-ID: <CAJu7gM0T0nMjFtnPKh1ZT+BjV_-OOWmB6X0zQDUwGkmGfM0uPA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f194.google.com ([209.85.214.194]:38549 "EHLO
-	mail-ob0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750846AbaI3HI7 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Sep 2014 03:08:59 -0400
-Received: by mail-ob0-f194.google.com with SMTP id vb8so1184578obc.9
-        for <ceph-devel@vger.kernel.org>; Tue, 30 Sep 2014 00:08:58 -0700 (PDT)
+Received: from mail-we0-f171.google.com ([74.125.82.171]:45858 "EHLO
+	mail-we0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751170AbaI3JXQ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Sep 2014 05:23:16 -0400
+Received: by mail-we0-f171.google.com with SMTP id w61so1869045wes.16
+        for <ceph-devel@vger.kernel.org>; Tue, 30 Sep 2014 02:23:15 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Dear develops,
+Hi all,
 
-I go through the files (hashIndex, LFNIndex and CollectionIndex), I
-cannot find any parameters need to grasp a lock. And basically,
-(hashIndex, LFNIndex and CollectionIndex) is used to manage a
-collection of objects.
+We plan to develop a new distributed key-value storage engine, which
+would based on rados and supoort range-scan operation. Besides, it'll
+be open source.
 
-Thus, just in one case, when the spilt or merge is on going, then
-lookup() path function is called to get the object path. It may obtain
-a wrong path, right?
+We know rados is already a kv storage engine, and can do pretty well
+if we use KeyValueStore.
+However, it lacks the ability of scanning a key range, since keys are
+hashed into pgs.
 
-If so, why not using a state parameter in the class CollectionIndex or
-HashIndex indicating the current state of this collection (split,
-merge on going or none) and grasp a lock when the state changes. Why
-always lock the index before lookup() path or lfn_find()?
+In our scenarios, scanning is a common need. We considered the way of
+splitting our key space into fixed number of ranges, mapping each
+range to a rados object, and then storing key/value pairs in rados
+objects. However, there are two main disadvantages:
+1. We can not adjust the number of ranges as the cluster scales.
+2. For a good splitting, we must properly predict the distribution of
+keys, or we'll encounter serious load-balance problem.
 
-Any other reasons?
+So we decide to develop a new service based on rados (we want to use
+rados for unifying our storage infrastructure).
 
-Nicheal
+Before we start, we want to do some inquiries:
+1. Is there already any similar system/module(scan-supported &&
+rados-based) existed?
+2. Except for the basic key-value functions, what features are you
+most interested in?
+3. Other suggestions?
+
+Thanks!
