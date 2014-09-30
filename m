@@ -1,92 +1,70 @@
-From: Ric Wheeler <rwheeler@redhat.com>
-Subject: Re: New Defects reported by Coverity Scan for ceph (fwd)
-Date: Tue, 30 Sep 2014 13:41:46 -0400
-Message-ID: <542AEB5A.9070804@redhat.com>
-References: <alpine.DEB.2.00.1409300658510.6593@cobra.newdream.net> <CAPYLRzj3mMCcMsAXC0CM7g6z7ZwUty4_E74ymy3-p5kWXd8i1w@mail.gmail.com> <alpine.DEB.2.00.1409301037300.17090@cobra.newdream.net>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: why index (collectionIndex) need a lock?
+Date: Tue, 30 Sep 2014 17:42:55 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2784E092@SACMBXIP02.sdcorp.global.sandisk.com>
+References: <CALZt5jwhBNifcagmsGBZiEC99Q0TvDFPy45f05hidVZedKEK-w@mail.gmail.com>
+ <CAPYLRzg=y1YKsZAACdwT08UiSVf_wZ8G1TFa7MYLOu8xV-fZyw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:23496 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752848AbaI3Rmw (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 30 Sep 2014 13:42:52 -0400
-In-Reply-To: <alpine.DEB.2.00.1409301037300.17090@cobra.newdream.net>
+Received: from mail-by2on0084.outbound.protection.outlook.com ([207.46.100.84]:60978
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1753117AbaI3RnA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 30 Sep 2014 13:43:00 -0400
+In-Reply-To: <CAPYLRzg=y1YKsZAACdwT08UiSVf_wZ8G1TFa7MYLOu8xV-fZyw@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, Gregory Farnum <greg@inktank.com>
-Cc: Loic Dachary <loic@dachary.org>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Jeff Darcy <jdarcy@redhat.com>, Kaleb Keithley <kaleb@redhat.com>
+To: Gregory Farnum <greg@inktank.com>, Nicheal <zay11022@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 09/30/2014 01:38 PM, Sage Weil wrote:
-> On Tue, 30 Sep 2014, Gregory Farnum wrote:
->> On Tue, Sep 30, 2014 at 6:59 AM, Sage Weil <sweil@redhat.com> wrote:
->>> Looks like recent changes from Greg, Loic, and I.
->>>
->>> ---------- Forwarded message ----------
->>> From: scan-admin@coverity.com
->>> To: undisclosed-recipients:;
->>> Cc:
->>> Date: Tue, 30 Sep 2014 06:21:08 -0700
->>> Subject: New Defects reported by Coverity Scan for ceph
->>>
->>>
->>> Hi,
->>>
->>>
->>> Please find the latest report on new defect(s) introduced to ceph found with Coverity Scan.
->>>
->>> Defect(s) Reported-by: Coverity Scan
->>> Showing 4 of 4 defect(s)
->>>
->>>
->>> ** CID 1242019:  Data race condition  (MISSING_LOCK)
->>> /msg/Pipe.cc: 230 in Pipe::DelayedDelivery::entry()()
->>>
->>> ** CID 1242021:  Resource leak  (RESOURCE_LEAK)
->>> /test/librados/tier.cc: 1026 in LibRadosTwoPoolsPP_EvictSnap2_Test::TestBody()()
->>> /test/librados/tier.cc: 1022 in LibRadosTwoPoolsPP_EvictSnap2_Test::TestBody()()
->>> /test/librados/tier.cc: 1040 in LibRadosTwoPoolsPP_EvictSnap2_Test::TestBody()()
->>> /test/librados/tier.cc: 1037 in LibRadosTwoPoolsPP_EvictSnap2_Test::TestBody()()
->>>
->>> ** CID 1242020:  Resource leak  (RESOURCE_LEAK)
->>> /test/librados/aio.cc: 168 in LibRadosAio_TooBig_Test::TestBody()()
->>>
->>> ** CID 1242018:  Resource leak  (RESOURCE_LEAK)
->>> /test/librados/aio.cc: 188 in LibRadosAio_TooBigPP_Test::TestBody()()
->>> /test/librados/aio.cc: 190 in LibRadosAio_TooBigPP_Test::TestBody()()
->>> /test/librados/aio.cc: 187 in LibRadosAio_TooBigPP_Test::TestBody()()
->>>
->>>
->>> ________________________________________________________________________________________________________
->>> *** CID 1242019:  Data race condition  (MISSING_LOCK)
->>> /msg/Pipe.cc: 230 in Pipe::DelayedDelivery::entry()()
->>> 224         if (flush_count > 0) {
->>> 225           --flush_count;
->>> 226           active_flush = true;
->>> 227         }
->>> 228         if (pipe->in_q->can_fast_dispatch(m)) {
->>> 229           if (!stop_fast_dispatching_flag) {
->>>>>>      CID 1242019:  Data race condition  (MISSING_LOCK)
->>>>>>      Accessing "this->delay_dispatching" without holding lock "Mutex._m". Elsewhere, "_ZN4Pipe15DelayedDeliveryE.delay_dispatching" is accessed with "Mutex._m" held 1 out of 2 times (1 of these accesses strongly imply that it is necessary).
->>> 230             delay_dispatching = true;
->>> 231             delay_lock.Unlock();
->>> 232             pipe->in_q->fast_dispatch(m);
->>> 233             delay_lock.Lock();
->>> 234             delay_dispatching = false;
->>> 235             if (stop_fast_dispatching_flag) {
->> This one's a false positive. (delay_dispatching is protected by the
->> delay_lock, but I think it's picking up on the Pipe::lock which is
->> held when DelayedDelivery is constructed and initialized.) Is there a
->> way I should annotate this, or is it something we need to adjust in
->> the Coverity web interface?
-> There are annotations but I don't know how they work.  I've been marking
-> them through the web interface...
->
-> sage
->
-
-Jeff and Kaleb (last I remember) had more expertise in coverity magic - they 
-might know how to annotate those false positives...
-
-ric
-
+QWxzbywgSSBkb24ndCB0aGluayB0aGlzIGxvY2sgaGFzIGJpZyBpbXBhY3QgdG8gcGVyZm9ybWFu
+Y2Ugc2luY2UgaXQgaXMgYWxyZWFkeSBzaGFyZGVkIHRvIGluZGV4IGxldmVsLiBJIHRyaWVkIHdp
+dGggcmVhZGVyL3dyaXRlciBpbXBsZW1lbnRhdGlvbiBvZiB0aGlzIGxvY2sgKGxvZ2ljIHdpbGwg
+YmUgc29tZXdoYXQgc2ltaWxhciB0byB5b3VyIHN0YXRlIGNvbmNlcHQpIGFuZCBub3QgZ2V0dGlu
+ZyBhbnkgYmVuZWZpdCAuDQoNClRoYW5rcyAmIFJlZ2FyZHMNClNvbW5hdGgNCg0KLS0tLS1Pcmln
+aW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3Jn
+IFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFsZiBPZiBH
+cmVnb3J5IEZhcm51bQ0KU2VudDogVHVlc2RheSwgU2VwdGVtYmVyIDMwLCAyMDE0IDEwOjI0IEFN
+DQpUbzogTmljaGVhbA0KQ2M6IGNlcGgtZGV2ZWwNClN1YmplY3Q6IFJlOiB3aHkgaW5kZXggKGNv
+bGxlY3Rpb25JbmRleCkgbmVlZCBhIGxvY2s/DQoNCk9uIFR1ZSwgU2VwIDMwLCAyMDE0IGF0IDEy
+OjA4IEFNLCBOaWNoZWFsIDx6YXkxMTAyMkBnbWFpbC5jb20+IHdyb3RlOg0KPiBEZWFyIGRldmVs
+b3BzLA0KPg0KPiBJIGdvIHRocm91Z2ggdGhlIGZpbGVzIChoYXNoSW5kZXgsIExGTkluZGV4IGFu
+ZCBDb2xsZWN0aW9uSW5kZXgpLCBJDQo+IGNhbm5vdCBmaW5kIGFueSBwYXJhbWV0ZXJzIG5lZWQg
+dG8gZ3Jhc3AgYSBsb2NrLiBBbmQgYmFzaWNhbGx5LA0KPiAoaGFzaEluZGV4LCBMRk5JbmRleCBh
+bmQgQ29sbGVjdGlvbkluZGV4KSBpcyB1c2VkIHRvIG1hbmFnZSBhDQo+IGNvbGxlY3Rpb24gb2Yg
+b2JqZWN0cy4NCj4NCj4gVGh1cywganVzdCBpbiBvbmUgY2FzZSwgd2hlbiB0aGUgc3BpbHQgb3Ig
+bWVyZ2UgaXMgb24gZ29pbmcsIHRoZW4NCj4gbG9va3VwKCkgcGF0aCBmdW5jdGlvbiBpcyBjYWxs
+ZWQgdG8gZ2V0IHRoZSBvYmplY3QgcGF0aC4gSXQgbWF5IG9idGFpbg0KPiBhIHdyb25nIHBhdGgs
+IHJpZ2h0Pw0KPg0KPiBJZiBzbywgd2h5IG5vdCB1c2luZyBhIHN0YXRlIHBhcmFtZXRlciBpbiB0
+aGUgY2xhc3MgQ29sbGVjdGlvbkluZGV4IG9yDQo+IEhhc2hJbmRleCBpbmRpY2F0aW5nIHRoZSBj
+dXJyZW50IHN0YXRlIG9mIHRoaXMgY29sbGVjdGlvbiAoc3BsaXQsDQo+IG1lcmdlIG9uIGdvaW5n
+IG9yIG5vbmUpIGFuZCBncmFzcCBhIGxvY2sgd2hlbiB0aGUgc3RhdGUgY2hhbmdlcy4gV2h5DQo+
+IGFsd2F5cyBsb2NrIHRoZSBpbmRleCBiZWZvcmUgbG9va3VwKCkgcGF0aCBvciBsZm5fZmluZCgp
+Pw0KPg0KPiBBbnkgb3RoZXIgcmVhc29ucz8NCg0KV2VsbCwgeW91J3ZlIGp1c3QgbmFtZWQgd2h5
+IHdlIGhhdmUgdGhlIGxvY2sg4oCUIGl0J3MgdG8gcHJldmVudCBtdWx0aXBsZSB1c2VycyBzaW11
+bHRhbmVvdXNseSBtYWtpbmcgY2hhbmdlcyB0byB0aGUgKmZpbGVzeXN0ZW0qIHRoYXQgd2UgY2Fu
+J3QgaGFuZGxlLiBJbiBwYXJ0aWN1bGFyLCBubyBzaW11bHRhbmVvdXMgb3BzIGNhbiBydW4gYWdh
+aW5zdCB0aGUgc2FtZSBDb2xsZWN0aW9uLiBUaGlzIGlzIHRvIHByZXZlbnQgc2l0dWF0aW9ucyB3
+aGVyZSBhIHJlYWRlciBjb21lcyBpbiBhbmQgYnVpbGRzIHVwIHRoZSBwYXRoIGZvciBhbiBvYmpl
+Y3QgaXQgbmVlZHMgdG8gbG9vayBhdCwgdGhlbiBhIHdyaXRlciBjcmVhdGVzIGEgbmV3IGZpbGUg
+d2hpY2ggaW5pdGlhdGVzIGNvbGxlY3Rpb24gc3BsaXQgYW5kIHRoZSByZWFkZXIncyBwYXRoIGlz
+IHN1ZGRlbmx5IGludmFsaWQuDQotR3JlZw0KU29mdHdhcmUgRW5naW5lZXIgIzQyIEAgaHR0cDov
+L2lua3RhbmsuY29tIHwgaHR0cDovL2NlcGguY29tDQotLQ0KVG8gdW5zdWJzY3JpYmUgZnJvbSB0
+aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluIHRoZSBi
+b2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jk
+b21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0K
+DQpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXw0KDQpQTEVBU0UgTk9URTogVGhlIGlu
+Zm9ybWF0aW9uIGNvbnRhaW5lZCBpbiB0aGlzIGVsZWN0cm9uaWMgbWFpbCBtZXNzYWdlIGlzIGlu
+dGVuZGVkIG9ubHkgZm9yIHRoZSB1c2Ugb2YgdGhlIGRlc2lnbmF0ZWQgcmVjaXBpZW50KHMpIG5h
+bWVkIGFib3ZlLiBJZiB0aGUgcmVhZGVyIG9mIHRoaXMgbWVzc2FnZSBpcyBub3QgdGhlIGludGVu
+ZGVkIHJlY2lwaWVudCwgeW91IGFyZSBoZXJlYnkgbm90aWZpZWQgdGhhdCB5b3UgaGF2ZSByZWNl
+aXZlZCB0aGlzIG1lc3NhZ2UgaW4gZXJyb3IgYW5kIHRoYXQgYW55IHJldmlldywgZGlzc2VtaW5h
+dGlvbiwgZGlzdHJpYnV0aW9uLCBvciBjb3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBpcyBzdHJpY3Rs
+eSBwcm9oaWJpdGVkLiBJZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGNvbW11bmljYXRpb24gaW4g
+ZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlciBieSB0ZWxlcGhvbmUgb3IgZS1tYWlsIChh
+cyBzaG93biBhYm92ZSkgaW1tZWRpYXRlbHkgYW5kIGRlc3Ryb3kgYW55IGFuZCBhbGwgY29waWVz
+IG9mIHRoaXMgbWVzc2FnZSBpbiB5b3VyIHBvc3Nlc3Npb24gKHdoZXRoZXIgaGFyZCBjb3BpZXMg
+b3IgZWxlY3Ryb25pY2FsbHkgc3RvcmVkIGNvcGllcykuDQoNCg==
