@@ -1,70 +1,51 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: why index (collectionIndex) need a lock?
-Date: Tue, 30 Sep 2014 17:42:55 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2784E092@SACMBXIP02.sdcorp.global.sandisk.com>
-References: <CALZt5jwhBNifcagmsGBZiEC99Q0TvDFPy45f05hidVZedKEK-w@mail.gmail.com>
- <CAPYLRzg=y1YKsZAACdwT08UiSVf_wZ8G1TFa7MYLOu8xV-fZyw@mail.gmail.com>
+From: Mark Nelson <mark.nelson@inktank.com>
+Subject: Weekly Ceph Performance Meeting Invitation
+Date: Tue, 30 Sep 2014 14:27:59 -0500
+Message-ID: <542B043F.6020600@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2on0084.outbound.protection.outlook.com ([207.46.100.84]:60978
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1753117AbaI3RnA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 30 Sep 2014 13:43:00 -0400
-In-Reply-To: <CAPYLRzg=y1YKsZAACdwT08UiSVf_wZ8G1TFa7MYLOu8xV-fZyw@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-ie0-f169.google.com ([209.85.223.169]:48911 "EHLO
+	mail-ie0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753446AbaI3T2D (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Sep 2014 15:28:03 -0400
+Received: by mail-ie0-f169.google.com with SMTP id tr6so5597178ieb.28
+        for <ceph-devel@vger.kernel.org>; Tue, 30 Sep 2014 12:28:02 -0700 (PDT)
+Received: from [192.168.1.3] (184-97-176-165.mpls.qwest.net. [184.97.176.165])
+        by mx.google.com with ESMTPSA id c7sm13783361igx.11.2014.09.30.12.27.59
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
+        Tue, 30 Sep 2014 12:28:00 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>, Nicheal <zay11022@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-QWxzbywgSSBkb24ndCB0aGluayB0aGlzIGxvY2sgaGFzIGJpZyBpbXBhY3QgdG8gcGVyZm9ybWFu
-Y2Ugc2luY2UgaXQgaXMgYWxyZWFkeSBzaGFyZGVkIHRvIGluZGV4IGxldmVsLiBJIHRyaWVkIHdp
-dGggcmVhZGVyL3dyaXRlciBpbXBsZW1lbnRhdGlvbiBvZiB0aGlzIGxvY2sgKGxvZ2ljIHdpbGwg
-YmUgc29tZXdoYXQgc2ltaWxhciB0byB5b3VyIHN0YXRlIGNvbmNlcHQpIGFuZCBub3QgZ2V0dGlu
-ZyBhbnkgYmVuZWZpdCAuDQoNClRoYW5rcyAmIFJlZ2FyZHMNClNvbW5hdGgNCg0KLS0tLS1Pcmln
-aW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3Jn
-IFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFsZiBPZiBH
-cmVnb3J5IEZhcm51bQ0KU2VudDogVHVlc2RheSwgU2VwdGVtYmVyIDMwLCAyMDE0IDEwOjI0IEFN
-DQpUbzogTmljaGVhbA0KQ2M6IGNlcGgtZGV2ZWwNClN1YmplY3Q6IFJlOiB3aHkgaW5kZXggKGNv
-bGxlY3Rpb25JbmRleCkgbmVlZCBhIGxvY2s/DQoNCk9uIFR1ZSwgU2VwIDMwLCAyMDE0IGF0IDEy
-OjA4IEFNLCBOaWNoZWFsIDx6YXkxMTAyMkBnbWFpbC5jb20+IHdyb3RlOg0KPiBEZWFyIGRldmVs
-b3BzLA0KPg0KPiBJIGdvIHRocm91Z2ggdGhlIGZpbGVzIChoYXNoSW5kZXgsIExGTkluZGV4IGFu
-ZCBDb2xsZWN0aW9uSW5kZXgpLCBJDQo+IGNhbm5vdCBmaW5kIGFueSBwYXJhbWV0ZXJzIG5lZWQg
-dG8gZ3Jhc3AgYSBsb2NrLiBBbmQgYmFzaWNhbGx5LA0KPiAoaGFzaEluZGV4LCBMRk5JbmRleCBh
-bmQgQ29sbGVjdGlvbkluZGV4KSBpcyB1c2VkIHRvIG1hbmFnZSBhDQo+IGNvbGxlY3Rpb24gb2Yg
-b2JqZWN0cy4NCj4NCj4gVGh1cywganVzdCBpbiBvbmUgY2FzZSwgd2hlbiB0aGUgc3BpbHQgb3Ig
-bWVyZ2UgaXMgb24gZ29pbmcsIHRoZW4NCj4gbG9va3VwKCkgcGF0aCBmdW5jdGlvbiBpcyBjYWxs
-ZWQgdG8gZ2V0IHRoZSBvYmplY3QgcGF0aC4gSXQgbWF5IG9idGFpbg0KPiBhIHdyb25nIHBhdGgs
-IHJpZ2h0Pw0KPg0KPiBJZiBzbywgd2h5IG5vdCB1c2luZyBhIHN0YXRlIHBhcmFtZXRlciBpbiB0
-aGUgY2xhc3MgQ29sbGVjdGlvbkluZGV4IG9yDQo+IEhhc2hJbmRleCBpbmRpY2F0aW5nIHRoZSBj
-dXJyZW50IHN0YXRlIG9mIHRoaXMgY29sbGVjdGlvbiAoc3BsaXQsDQo+IG1lcmdlIG9uIGdvaW5n
-IG9yIG5vbmUpIGFuZCBncmFzcCBhIGxvY2sgd2hlbiB0aGUgc3RhdGUgY2hhbmdlcy4gV2h5DQo+
-IGFsd2F5cyBsb2NrIHRoZSBpbmRleCBiZWZvcmUgbG9va3VwKCkgcGF0aCBvciBsZm5fZmluZCgp
-Pw0KPg0KPiBBbnkgb3RoZXIgcmVhc29ucz8NCg0KV2VsbCwgeW91J3ZlIGp1c3QgbmFtZWQgd2h5
-IHdlIGhhdmUgdGhlIGxvY2sg4oCUIGl0J3MgdG8gcHJldmVudCBtdWx0aXBsZSB1c2VycyBzaW11
-bHRhbmVvdXNseSBtYWtpbmcgY2hhbmdlcyB0byB0aGUgKmZpbGVzeXN0ZW0qIHRoYXQgd2UgY2Fu
-J3QgaGFuZGxlLiBJbiBwYXJ0aWN1bGFyLCBubyBzaW11bHRhbmVvdXMgb3BzIGNhbiBydW4gYWdh
-aW5zdCB0aGUgc2FtZSBDb2xsZWN0aW9uLiBUaGlzIGlzIHRvIHByZXZlbnQgc2l0dWF0aW9ucyB3
-aGVyZSBhIHJlYWRlciBjb21lcyBpbiBhbmQgYnVpbGRzIHVwIHRoZSBwYXRoIGZvciBhbiBvYmpl
-Y3QgaXQgbmVlZHMgdG8gbG9vayBhdCwgdGhlbiBhIHdyaXRlciBjcmVhdGVzIGEgbmV3IGZpbGUg
-d2hpY2ggaW5pdGlhdGVzIGNvbGxlY3Rpb24gc3BsaXQgYW5kIHRoZSByZWFkZXIncyBwYXRoIGlz
-IHN1ZGRlbmx5IGludmFsaWQuDQotR3JlZw0KU29mdHdhcmUgRW5naW5lZXIgIzQyIEAgaHR0cDov
-L2lua3RhbmsuY29tIHwgaHR0cDovL2NlcGguY29tDQotLQ0KVG8gdW5zdWJzY3JpYmUgZnJvbSB0
-aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluIHRoZSBi
-b2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jk
-b21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0K
-DQpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXw0KDQpQTEVBU0UgTk9URTogVGhlIGlu
-Zm9ybWF0aW9uIGNvbnRhaW5lZCBpbiB0aGlzIGVsZWN0cm9uaWMgbWFpbCBtZXNzYWdlIGlzIGlu
-dGVuZGVkIG9ubHkgZm9yIHRoZSB1c2Ugb2YgdGhlIGRlc2lnbmF0ZWQgcmVjaXBpZW50KHMpIG5h
-bWVkIGFib3ZlLiBJZiB0aGUgcmVhZGVyIG9mIHRoaXMgbWVzc2FnZSBpcyBub3QgdGhlIGludGVu
-ZGVkIHJlY2lwaWVudCwgeW91IGFyZSBoZXJlYnkgbm90aWZpZWQgdGhhdCB5b3UgaGF2ZSByZWNl
-aXZlZCB0aGlzIG1lc3NhZ2UgaW4gZXJyb3IgYW5kIHRoYXQgYW55IHJldmlldywgZGlzc2VtaW5h
-dGlvbiwgZGlzdHJpYnV0aW9uLCBvciBjb3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBpcyBzdHJpY3Rs
-eSBwcm9oaWJpdGVkLiBJZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGNvbW11bmljYXRpb24gaW4g
-ZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlciBieSB0ZWxlcGhvbmUgb3IgZS1tYWlsIChh
-cyBzaG93biBhYm92ZSkgaW1tZWRpYXRlbHkgYW5kIGRlc3Ryb3kgYW55IGFuZCBhbGwgY29waWVz
-IG9mIHRoaXMgbWVzc2FnZSBpbiB5b3VyIHBvc3Nlc3Npb24gKHdoZXRoZXIgaGFyZCBjb3BpZXMg
-b3IgZWxlY3Ryb25pY2FsbHkgc3RvcmVkIGNvcGllcykuDQoNCg==
+Hi All,
+
+I put together a bluejeans meeting for the Ceph performance meeting 
+tomorrow at 8AM PST.  Hope to see you there!
+
+To join the Meeting:
+https://bluejeans.com/268261044
+
+To join via Browser:
+https://bluejeans.com/268261044/browser
+
+To join with Lync:
+https://bluejeans.com/268261044/lync
+
+
+To join via Room System:
+Video Conferencing System: bjn.vc -or- 199.48.152.152
+Meeting ID: 268261044
+
+To join via Phone:
+1) Dial:
+           +1 408 740 7256
+           +1 888 240 2560(US Toll Free)
+           +1 408 317 9253(Alternate Number)
+           (see all numbers - http://bluejeans.com/numbers)
+2) Enter Conference ID: 268261044
+
+Mark
