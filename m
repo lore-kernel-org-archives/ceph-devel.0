@@ -1,31 +1,39 @@
-From: Fabian Frederick <fabf@skynet.be>
-Subject: [PATCH 1/1 linux-next] libceph: remove redundant declaration
-Date: Tue, 30 Sep 2014 22:07:50 +0200
-Message-ID: <1412107670-4888-1-git-send-email-fabf@skynet.be>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: Fabian Frederick <fabf@skynet.be>, Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+From: Patrick McGarry <patrick@inktank.com>
+Subject: Ceph Developer Summit: Hammer
+Date: Tue, 30 Sep 2014 16:55:35 -0400
+Message-ID: <CAP8Oy=L30A-xmaBuh_H+GvKXP_zMLefGKToMNhKPV4cP9na2cQ@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-vc0-f177.google.com ([209.85.220.177]:39336 "EHLO
+	mail-vc0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750760AbaI3Uzg (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Sep 2014 16:55:36 -0400
+Received: by mail-vc0-f177.google.com with SMTP id hq11so5293765vcb.36
+        for <ceph-devel@vger.kernel.org>; Tue, 30 Sep 2014 13:55:35 -0700 (PDT)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Ceph-User <ceph-users@ceph.com>, Ceph Devel <ceph-devel@vger.kernel.org>, Ceph User Committee <ceph-community@lists.ceph.com>
 
-ceph_release_page_vector was defined twice in libceph.h
+Hey cephers,
 
-Signed-off-by: Fabian Frederick <fabf@skynet.be>
----
- include/linux/ceph/libceph.h | 1 -
- 1 file changed, 1 deletion(-)
+The schedule and call for blueprints is now up for our next CDS as we
+aim for the Hammer release:
 
-diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
-index 279b0af..07bc359 100644
---- a/include/linux/ceph/libceph.h
-+++ b/include/linux/ceph/libceph.h
-@@ -211,7 +211,6 @@ extern struct page **ceph_get_direct_page_vector(const void __user *data,
- 						 bool write_page);
- extern void ceph_put_page_vector(struct page **pages, int num_pages,
- 				 bool dirty);
--extern void ceph_release_page_vector(struct page **pages, int num_pages);
- extern struct page **ceph_alloc_page_vector(int num_pages, gfp_t flags);
- extern int ceph_copy_user_to_page_vector(struct page **pages,
- 					 const void __user *data,
--- 
-1.9.3
+http://ceph.com/community/ceph-developer-summit-hammer/
+
+If you have any work that you plan on submitting through the end of
+the year, please fill out a Blueprint (the big red button) as soon as
+possible.  Each blueprint will get a planning session with Sage and
+the community to make sure all work is well coordinated and planned.
+
+If you have questions, or would like my help on the Blueprint process,
+please don't hesitate to contact me.  Thanks!
+
+
+Best Regards,
+
+Patrick McGarry
+Director Ceph Community || Red Hat
+http://ceph.com  ||  http://community.redhat.com
+@scuttlemonkey || @ceph
