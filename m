@@ -1,28 +1,44 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: 10/1/2014 Weekly Ceph Performance Meeting Recording
-Date: Wed, 01 Oct 2014 11:24:11 -0500
-Message-ID: <542C2AAB.7020306@redhat.com>
+From: "Matt W. Benjamin" <matt@linuxbox.com>
+Subject: Re: Weekly Ceph Performance Meeting Invitation
+Date: Wed, 1 Oct 2014 13:33:03 -0400 (EDT)
+Message-ID: <1880219624.170.1412184783939.JavaMail.root@thunderbeast.private.linuxbox.com>
+References: <alpine.DEB.2.00.1410010912570.31126@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f177.google.com ([209.85.213.177]:35699 "EHLO
-	mail-ig0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751612AbaJAQYM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Oct 2014 12:24:12 -0400
-Received: by mail-ig0-f177.google.com with SMTP id h3so672970igd.10
-        for <ceph-devel@vger.kernel.org>; Wed, 01 Oct 2014 09:24:12 -0700 (PDT)
-Received: from [192.168.1.3] (184-97-176-165.mpls.qwest.net. [184.97.176.165])
-        by mx.google.com with ESMTPSA id j2sm15985698igm.21.2014.10.01.09.24.10
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
-        Wed, 01 Oct 2014 09:24:11 -0700 (PDT)
+Received: from aa.linuxbox.com ([69.128.83.226]:3278 "EHLO aa.linuxbox.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751461AbaJARdJ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 1 Oct 2014 13:33:09 -0400
+In-Reply-To: <alpine.DEB.2.00.1410010912570.31126@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: ceph-devel@vger.kernel.org
 
-https://bluejeans.com/s/7UgR/
+Sorry we missed this one, we had a combination of meeting conflict and a technical problem,
+we'll join next week.
 
-Thanks for attending everyone!
+Matt
 
-Mark
+----- "Sage Weil" <sweil@redhat.com> wrote:
+
+> Thanks, everyone, for joining!  I took some notes during the session
+> in 
+> the etherpad:
+> 
+> 	http://pad.ceph.com/p/performance_weekly
+> 
+
+-- 
+Matt Benjamin
+The Linux Box
+206 South Fifth Ave. Suite 150
+Ann Arbor, MI  48104
+
+http://linuxbox.com
+
+tel.  734-761-4689 
+fax.  734-769-8938 
+cel.  734-216-5309 
