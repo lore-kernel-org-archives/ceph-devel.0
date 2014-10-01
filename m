@@ -1,44 +1,53 @@
-From: Yann Dupont <yd-A/8lHF8cDNHYtjvyW6yDsg@public.gmane.org>
-Subject: Re: Ceph Developer Summit: Hammer
-Date: Wed, 01 Oct 2014 23:30:12 +0200
-Message-ID: <542C7264.4000708@objoo.org>
-References: <CAP8Oy=L30A-xmaBuh_H+GvKXP_zMLefGKToMNhKPV4cP9na2cQ@mail.gmail.com>
-	<542B2100.8070907@objoo.org>
-	<CAP8Oy=KfBAjcdrYf2CAXfWp15H_4g_By1+Cckig7pacHRrCWaQ@mail.gmail.com>
-	<alpine.DEB.2.00.1410011331070.31126@cobra.newdream.net>
+From: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>
+Subject: Re: ceph-disk vs keyvaluestore
+Date: Thu, 02 Oct 2014 12:46:44 +1300
+Message-ID: <542C9264.9090300@catalyst.net.nz>
+References: <alpine.DEB.2.00.1409291645320.20141@cobra.newdream.net> <CACJqLyaY90afTC8UCn6jTOWNhJyvyGEaEwiou4S8_sX0hUnB6g@mail.gmail.com> <CACJqLyZpG7rPB1oi0jAxL2+B-xhRrWMg8oyFNqp10cm=+DmgLg@mail.gmail.com> <alpine.DEB.2.00.1409292103250.6593@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"; Format="flowed"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.00.1410011331070.31126-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Patrick McGarry <patrick-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from bertrand.catalyst.net.nz ([202.78.240.40]:59582 "EHLO
+	mail.catalyst.net.nz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751806AbaJAXqt (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Oct 2014 19:46:49 -0400
+In-Reply-To: <alpine.DEB.2.00.1409292103250.6593@cobra.newdream.net>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>, Haomai Wang <haomaiwang@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-
-Le 01/10/2014 22:32, Sage Weil a =E9crit :
+On 30/09/14 17:05, Sage Weil wrote:
+> On Tue, 30 Sep 2014, Haomai Wang wrote:
+>> Hi sage,
+>>
+>> What do you think use existing ObjectStore::peek_journal_fsid
+>> interface to detect whether journal needed.
+>>
+>> KeyValueStore and MemStore could set passing argument "fsid" to zero
+>> to indicate no journal.
 >
->> https://wiki.ceph.com/Planning/Blueprints/Giant/librados%3A_support_para=
-llel_reads
->> (I made some comments yesterday)
-> Not implemented
-OK,
->>> and even an older one (somewhat related):
->>>
->>> https://wiki.ceph.com/Planning/Blueprints/Emperor/librados%2F%2Fobjecte=
-r%3A_smarter_localized_reads
-> Implemented!
+> I'm not sure it's a good fit... it's called on an existing store and tells
+> you something about it.  I would probably expect a zeroed fsid to mean
+> that the specified journal is empty or does not exist, not that it doesn't
+> need to exist.
+>
+> What we need, on the other hand, is something that just tells us whether
+> we should create a journal...
+>
+>
 
-Oh, great to hear that ! I'll have a closer look.
+And perhaps the "type" (probably not the right word) of journal:
 
-Thanks sage ,
-Cheers,
+- filestore: device or filesystem
+- rocksdb: filesystem (wal directory)
+- leveldb: none (I think)
+
+FWIW, it looks like the log files for leveldb *could* benefit from being 
+placed somewhere else (e.g on faster storage). Is it worthwhile 
+suggesting to the leveldb devs?
+
+Cheers
+
+Mark
+
