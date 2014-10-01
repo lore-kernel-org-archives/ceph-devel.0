@@ -1,64 +1,70 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: New Ceph submodule : ceph-erasure-code-corpus
-Date: Wed, 01 Oct 2014 22:06:22 +0200
-Message-ID: <542C5EBE.3010609@dachary.org>
+From: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: Ceph Developer Summit: Hammer
+Date: Wed, 1 Oct 2014 13:32:30 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1410011331070.31126@cobra.newdream.net>
+References: <CAP8Oy=L30A-xmaBuh_H+GvKXP_zMLefGKToMNhKPV4cP9na2cQ@mail.gmail.com>
+	<542B2100.8070907@objoo.org>
+	<CAP8Oy=KfBAjcdrYf2CAXfWp15H_4g_By1+Cckig7pacHRrCWaQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="RNlvmr0mCWivGjKapuUhAaT2BhPVkAD9g"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:36094 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751005AbaJAUG2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Oct 2014 16:06:28 -0400
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sandon Van Ness <sandon@inktank.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAP8Oy=KfBAjcdrYf2CAXfWp15H_4g_By1+Cckig7pacHRrCWaQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Patrick McGarry <patrick-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Cc: Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---RNlvmr0mCWivGjKapuUhAaT2BhPVkAD9g
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+[adding ceph-devel]
 
-Hi Sandon,
+> On Tue, Sep 30, 2014 at 5:30 PM, Yann Dupont <yd-A/8lHF8cDNHYtjvyW6yDsg@public.gmane.org> wrote:
+> >
+> > Le 30/09/2014 22:55, Patrick McGarry a ?crit :
+> >>
+> >> Hey cephers,
+> >>
+> >> The schedule and call for blueprints is now up for our next CDS as we
+> >> aim for the Hammer release:
+> >>
+> >> http://ceph.com/community/ceph-developer-summit-hammer/
+> >>
+> >> If you have any work that you plan on submitting through the end of
+> >> the year, please fill out a Blueprint (the big red button) as soon as
+> >> possible.  Each blueprint will get a planning session with Sage and
+> >> the community to make sure all work is well coordinated and planned.
+> >>
+> >> If you have questions, or would like my help on the Blueprint process,
+> >> please don't hesitate to contact me.  Thanks!
+> >>
+> > Hi patrick (and other cephers)
+> > Before making any new blueprint, I was reviewing some past ones, in
+> > particular :
+> >
+> > https://wiki.ceph.com/Planning/Blueprints/Giant/librados%3A_support_parallel_reads
+> > (I made some comments yesterday)
 
-A new submodule is going to be added to the ceph repository
+Not implemented
 
-   https://github.com/ceph/ceph-erasure-code-corpus
+> > and even an older one (somewhat related):
+> >
+> > https://wiki.ceph.com/Planning/Blueprints/Emperor/librados%2F%2Fobjecter%3A_smarter_localized_reads
 
-as can be seen in the corresponding pull request
+Implemented!
 
-   https://github.com/ceph/ceph/pull/2480/files
+> > Is there a way to know if those blueprints are implemented, or in active
+> > developpement ? In case of postponed blueprints, is there a way to promote
+> > them again, to get consideration for hammer ?
 
-This is the one I told you about: it will grow by ~100MB (raw, much less =
-compressed) for every Ceph release. For the gitbuilders to run properly, =
-an update has been made to cleanup the leftovers to get a clean clone
+Hmm, Patrick, I think what we've done in the past is to move the 
+still-useful blueprints to the sideboard?  You probably already asked me 
+to do that... :)
 
-   https://github.com/ceph/autobuild-ceph/pull/18/files
-
-Unless I forgot something, the last step is that a mirror is added so the=
- gitbuilders do not need to get the repository from the net every time. I=
-s that correct ?
-
-Cheers
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-
-
---RNlvmr0mCWivGjKapuUhAaT2BhPVkAD9g
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlQsXr4ACgkQ8dLMyEl6F20YKQCfQyfA5STYa9chdmFPP6hogiFY
-jtIAn24XL0rruu3xmBq++ywpm4WS6ujO
-=nmXA
------END PGP SIGNATURE-----
-
---RNlvmr0mCWivGjKapuUhAaT2BhPVkAD9g--
+sage
