@@ -1,46 +1,127 @@
-From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: Re: [PATCH 1/1 linux-next] libceph: remove redundant declaration
-Date: Thu, 2 Oct 2014 11:05:49 +0400
-Message-ID: <CALFYKtBgb+Uf3kvyyAj-w8ywMU=kCByZm-Kr1DGi0w-WVmhXdw@mail.gmail.com>
-References: <1412107670-4888-1-git-send-email-fabf@skynet.be>
+From: Sebastien Ponce <sebastien.ponce@cern.ch>
+Subject: Re: librados AIO problem diagnostic
+Date: Thu, 2 Oct 2014 11:49:35 +0200
+Message-ID: <1412243375.6822.38.camel@sebmain.cern.ch>
+References: <542BA6D4.4070207@dachary.org>
+	 <1412148537.6822.11.camel@sebmain.cern.ch> <542BBBE7.4000806@dachary.org>
+	 <1412163429.6822.20.camel@sebmain.cern.ch> <542BFCCB.4000203@dachary.org>
+	 <1412168988.6822.27.camel@sebmain.cern.ch>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f48.google.com ([209.85.216.48]:61569 "EHLO
-	mail-qa0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751031AbaJBHFu (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Oct 2014 03:05:50 -0400
-Received: by mail-qa0-f48.google.com with SMTP id dc16so1401100qab.21
-        for <ceph-devel@vger.kernel.org>; Thu, 02 Oct 2014 00:05:49 -0700 (PDT)
-In-Reply-To: <1412107670-4888-1-git-send-email-fabf@skynet.be>
+Received: from cernmx13.cern.ch ([188.184.36.46]:25285 "EHLO CERNMX13.cern.ch"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750954AbaJBJu2 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 2 Oct 2014 05:50:28 -0400
+In-Reply-To: <1412168988.6822.27.camel@sebmain.cern.ch>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Fabian Frederick <fabf@skynet.be>
-Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Sage Weil <sage@inktank.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Wed, Oct 1, 2014 at 12:07 AM, Fabian Frederick <fabf@skynet.be> wrote:
-> ceph_release_page_vector was defined twice in libceph.h
->
-> Signed-off-by: Fabian Frederick <fabf@skynet.be>
-> ---
->  include/linux/ceph/libceph.h | 1 -
->  1 file changed, 1 deletion(-)
->
-> diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
-> index 279b0af..07bc359 100644
-> --- a/include/linux/ceph/libceph.h
-> +++ b/include/linux/ceph/libceph.h
-> @@ -211,7 +211,6 @@ extern struct page **ceph_get_direct_page_vector(const void __user *data,
->                                                  bool write_page);
->  extern void ceph_put_page_vector(struct page **pages, int num_pages,
->                                  bool dirty);
-> -extern void ceph_release_page_vector(struct page **pages, int num_pages);
->  extern struct page **ceph_alloc_page_vector(int num_pages, gfp_t flags);
->  extern int ceph_copy_user_to_page_vector(struct page **pages,
->                                          const void __user *data,
+Hurray, I manage to seg fault ! (sounds odd this sentence...)
+So indeed, fresh ubuntu, debug mode does it. What I've also changed in
+the meantime is the type of machine. It's still virtual, but more
+powerful (4 cores).
 
-Applied.
+Let's debug it now...
 
-Thanks,
+Sebastien
 
-                Ilya
+
+On Wed, 2014-10-01 at 15:09 +0200, Sebastien Ponce wrote:
+> Ok, we are getting closer then.
+> I'll try to reinstall the ubuntu machine and run with -g.
+> 
+> Sebastien
+> 
+> On Wed, 2014-10-01 at 15:08 +0200, Loic Dachary wrote:
+> > 
+> > On 01/10/2014 13:37, Sebastien Ponce wrote:
+> > > I've tried it on the RHEL6 like machine, but no luck. Or should I say I
+> > > was lucky ? Anyway no crash.
+> > > 
+> > > Discussing with Dan Van Der Ster, he told me that he had once the case
+> > > where the crash was there or not depending on the libc version. Just in
+> > > case, what are you using ? On the machine I've used this morning, it's
+> > > glibc-2.12-1.107.el6.x86_64
+> > 
+> > I'm using 
+> > 
+> > ii  libc-bin                                              2.19-0ubuntu3 
+> > 
+> > and I do not have glibc installed. I'm quite sure you can reproduce the problem on a fresh Ubuntu 14.04 with the following
+> > 
+> > ./autogen.sh ; ./configure --disable-static --with-debug CFLAGS="-Wall -g" CXXFLAGS="-Wall -g"
+> > 
+> > it fails consistently in my container. When I try with ./configure it does not fail. Something is going on when there is -g instead of the default flags. I checked that --disable-static and --with-debug make no difference.
+> > 
+> > Cheers
+> > 
+> > > 
+> > > Sebastien
+> > > 
+> > > On Wed, 2014-10-01 at 10:31 +0200, Loic Dachary wrote:
+> > >> Hi,
+> > >>
+> > >> On 01/10/2014 09:28, Sebastien Ponce wrote:
+> > >>> Thanks for this effort !
+> > >>> I'll look at all that this afternoon (it's mid morning here).
+> > >>
+> > >> Same here : I'm in Paris ;-)
+> > >>
+> > >>> Concerning configure and autogen, I do the standard (naive ?)
+> > >>> "./autogen.sh; ./configure; make" given by the readme.
+> > >>
+> > >> Could you try with
+> > >>
+> > >> ./autogen.sh ; ./configure --disable-static --with-debug CC='ccache gcc' CXX='ccache g++' CFLAGS="-Wall -g" CXXFLAGS="-Wall -g" ; make
+> > >>
+> > >> and let me know if you see a problem when running
+> > >>
+> > >> cd src
+> > >> rm -fr dev out ;  mkdir -p dev ; CEPH_NUM_MON=1 CEPH_NUM_OSD=3 ./vstart.sh -d -n -X -l mon osd
+> > >> ./ceph_test_rados_striper_api_aio
+> > >>
+> > >> I'm trying with your "./configure" on my end to check if this changes something.
+> > >>
+> > >> It's going to be a fun one ;-)
+> > >>
+> > >> Cheers
+> > >>
+> > >>>
+> > >>> Sebastien
+> > >>>
+> > >>>
+> > >>> On Wed, 2014-10-01 at 09:01 +0200, Loic Dachary wrote:
+> > >>>> Hi Sebastien,
+> > >>>>
+> > >>>> In the context of http://tracker.ceph.com/issues/9356 I'm trying to collect as much information as I can in an environment that can be reconstructed to avoid interferences. Could you please let me know which ./configure line you are using ? Or which do_autogen.sh command you are using.
+> > >>>>
+> > >>>> Thanks in advance :-)
+> > >>>>
+> > >>>
+> > >>>
+> > >>> --
+> > >>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > >>> the body of a message to majordomo@vger.kernel.org
+> > >>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > >>>
+> > >>
+> > > 
+> > > 
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > > the body of a message to majordomo@vger.kernel.org
+> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > > 
+> > 
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
