@@ -1,89 +1,73 @@
-From: Dmitry Smirnov <onlyjob@debian.org>
-Subject: Re: issue #8752 (inconsistent PGs on RBD caching pool)
-Date: Thu, 02 Oct 2014 23:47:13 +1000
-Message-ID: <3415192.gCaj5vu5sy@debstor>
-References: <alpine.DEB.2.00.1409191642270.19460@cobra.newdream.net> <1545276.B1zDlULSSV@debstor> <alpine.DEB.2.00.1409211900410.27396@cobra.newdream.net>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: [PATCH v3 1/4] buffer: add an aligned buffer with less alignment
+ than a page
+Date: Thu, 02 Oct 2014 16:17:44 +0200
+Message-ID: <542D5E88.40409@dachary.org>
+References: <1410796508-28711-1-git-send-email-j@jannau.net> <1411994072-18850-1-git-send-email-j@jannau.net> <1411994072-18850-2-git-send-email-j@jannau.net> <54295E26.4080705@dachary.org> <20141002121212.GN2542@jannau.net>
 Mime-Version: 1.0
-Content-Type: multipart/signed; boundary="nextPart1441124.5xFbHFSNId"; micalg="pgp-sha256"; protocol="application/pgp-signature"
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="067169Rlu99BqKI1rKRKHlDFp6utvVL0U"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f54.google.com ([209.85.220.54]:43747 "EHLO
-	mail-pa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752498AbaJBNr1 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Oct 2014 09:47:27 -0400
-Received: by mail-pa0-f54.google.com with SMTP id ey11so2419995pad.41
-        for <ceph-devel@vger.kernel.org>; Thu, 02 Oct 2014 06:47:26 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1409211900410.27396@cobra.newdream.net>
+Received: from mail2.dachary.org ([91.121.57.175]:36657 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752424AbaJBORu (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Oct 2014 10:17:50 -0400
+In-Reply-To: <20141002121212.GN2542@jannau.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
+To: Janne Grunau <j@jannau.net>
 Cc: ceph-devel@vger.kernel.org
 
-
---nextPart1441124.5xFbHFSNId
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--067169Rlu99BqKI1rKRKHlDFp6utvVL0U
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: quoted-printable
-Content-Type: text/plain; charset="us-ascii"
-
-On Sun, 21 Sep 2014 19:01:52 Sage Weil wrote:
-> This is one we have never seen in our QA environment, and no real lea=
-ds.
-
-I'm much surprised about this... Is it really that unusual to use repli=
-cated=20
-caching pool in front of RBD erasure pool? All my OSDs are Btrfs-based =
-and=20
-recently I've upgraded all kernels (i.e. kernel RBD clients) to 3.16.3.=
 
 
-Unlike some shifty issues that may be hard to replicate this particular=
- one=20
-was very persistent and noticeable, no effort to reproduce at all. I've=
- been =20
-observing it for several months already...
 
-It is unlikely that I have anything special in my v0.80.5 cluster's=20
-configuration...
+On 02/10/2014 14:12, Janne Grunau wrote:
+> Hi,
+>=20
+> On 2014-09-29 15:27:02 +0200, Loic Dachary wrote:
+>>
+>> I think the implementation of the bufferlist n_align_sized functions i=
+s missing. That showed when adding unit tests for them
+>=20
+> yes, I didn't saw the need for it.
+
+Then the declaration should be removed don't you think ?
+
+>=20
+>> https://github.com/dachary/ceph/commit/fd01824f1681edd0ec029b02318b6c4=
+0b923c156
+>>
+>> Feel free to pick up where I left, I won't work on them any more today=
+ ;-)
+>=20
+> Did you continue to work on them? If not I'll start from there now.
+>=20
+
+I was busy elsewhere, it's all yours if you want them :-)
+
+Cheers
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
 
 
-> There are a couple slightly different scrub issues that pop up
-> occasionally that we are trying to nail down, but this one is a bit
-> different.  Being able to reliably reproduce it and generate logs is =
-the
-> usual strategy...
-
-Please advise what kind of logs could be useful. Something like "(debug=
- ms =3D=20
-1, debug osd =3D 20)" from primary OSD where inconsistent PG lies at a =
-time when=20
-"scrub" command is given?
-
-Thanks.
-
-=2D-=20
-All the best,
- Dmitry Smirnov.
-
---nextPart1441124.5xFbHFSNId
+--067169Rlu99BqKI1rKRKHlDFp6utvVL0U
 Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: This is a digitally signed message part.
-Content-Transfer-Encoding: 7Bit
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
+Version: GnuPG v2.0.22 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
 
-iQIcBAABCAAGBQJULVdmAAoJEFK2u9lTlo0bHJYQAK4PJINRQC9NOYc5AvJtBZFg
-IllY1qHVSXoVbb56xz/ZwnmAo5kVIeCLHSV7R3C488znAcgF4+M72j0vavzTFnAf
-fhoohlYj4ky5qZIVYbVdEOInEyr3j+Zplb8IP73xcEVzxTeZ9Hu9YAlNLcnq0Dum
-z/y6AESc81QZTNeavxBubBhiHdDmJ8Xx++rEsW45WWcml0Kpxwwr5Wb7rq0c1Vjw
-UhXOabRS8FPx8uhsuWEnaa639q8i7fzQQLHnaKJth51frBPo3+tChvu0BVs7U1HT
-Pa+8CFx+C7qvoiFr1M/ep0lbMyRnOIEvj2Di/tpICm2wgbXb3hKweHLQ3/UsIJxH
-t6ftbwddj3NyRUzp+/Svm59zJC9e6wgqrxcGV+bRm4eCvb75Muyg71H0botP7q34
-4GITLybjAb955n7iAxk5XIN3R1vHa1YhLG06iHWHwrkI40lj9aOQDxoC03gCRFC1
-BqBW/MbPD5V4ouGgrGuCA2fr24UL9/hHNAum2MKofn6ThM0KMYNafC5GeRuL5Eqa
-z6R9VpQ3nfGGkfNqnRgTXq5/n8YdwxEhowU0m7GX3Zf62OcTKhsudTajYqlXcjjx
-MDysB2HMr5Vfh4mdIi5/xmtE62RGg65xs2sHuys49sYFph5UZMmlDCxpEmWds+YJ
-XWzjIC1zfSxSesHu5/xR
-=5nYo
+iEYEARECAAYFAlQtXogACgkQ8dLMyEl6F20DDQCcDca0ckraHeQjqRlVOHE9k619
+cy8Anj+ZZlBb1QED3Vex2USc49xKTDG4
+=jLSv
 -----END PGP SIGNATURE-----
 
---nextPart1441124.5xFbHFSNId--
-
+--067169Rlu99BqKI1rKRKHlDFp6utvVL0U--
