@@ -1,87 +1,128 @@
-From: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Support the Ada Initiative: a challenge to the open
- storage community
-Date: Thu, 2 Oct 2014 09:22:19 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1410020855260.25299@cobra.newdream.net>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: FW: Weekly Ceph Performance Meeting Invitation
+Date: Thu, 2 Oct 2014 17:39:43 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2784F522@SACMBXIP02.sdcorp.global.sandisk.com>
+References: <542B043F.6020600@redhat.com>
+ <20141001183717.GA31430@oder.mch.fsc.net> <542C4E18.8080201@redhat.com>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F2784F027@SACMBXIP02.sdcorp.global.sandisk.com>
+ <alpine.DEB.2.00.1410011311330.31126@cobra.newdream.net>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F2784F0C3@SACMBXIP02.sdcorp.global.sandisk.com>
+ <alpine.DEB.2.00.1410011553220.31126@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Transfer-Encoding: 8BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-bn1on0073.outbound.protection.outlook.com ([157.56.110.73]:6733
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751959AbaJBRju convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Oct 2014 13:39:50 -0400
+In-Reply-To: <alpine.DEB.2.00.1410011553220.31126@cobra.newdream.net>
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-I'd like to take a moment away from your regularly scheduled storage 
-revolution to talk about the Ada Initiative: who they are, what they do, 
-and why it is important to open source storage communities. I'm also going 
-to challenge you to raise $8192 for them, and I'll match that dollar for 
-dollar if you do. (If you already know who they are and support their 
-work, go ahead and donate now.)
+Please share your opinion on this..
 
-	https://adainitiative.org/donate/?campaign=storage
+-----Original Message-----
+From: Sage Weil [mailto:sweil@redhat.com] 
+Sent: Wednesday, October 01, 2014 3:57 PM
+To: Somnath Roy
+Cc: Mark Nelson; Kasper Dieter; Andreas Bluemle; Paul Von-Stamwitz
+Subject: RE: Weekly Ceph Performance Meeting Invitation
 
-Research, experience, and common sense have demonstrated that diverse 
-communities perform better: they are more dynamic, they generate better 
-ideas, and they are more pleasant to be a part of. On the gender axis, 
-however, most open source communitiesincluding storageare extremely 
-homogeneous, with far less than 10% participation from women. It surprised 
-me to learn that this is significantly lower than software engineering in 
-general, where you find women make up about 30% of the community.
+On Wed, 1 Oct 2014, Somnath Roy wrote:
+> Yes Sage, it's all read..Each call to lfn_open() will incur this 
+> lookup in case of FDCache miss (which will be in 99% of cases).
+> The following patch will certainly help the write path (which is
+> exciting!)  but not read as read is not through the transaction path. 
+> My understanding is in the read path per io only two calls are going 
+> to filestore , one xattr ("_") and followed by read to the same 
+> object. If somehow, we can club (or something) this two requests, 
+> reads will be benefitted. I did some prototype earlier by passing the 
+> fd (and path) to the replicated pg during getattr call and pass the 
+> same fd/path during next read. This improving performance as well as 
+> cpu usage. But, this is against the objectstore interface logic :-( 
+> Basically, sole purpose of FDCache for serving this kind of scenario 
+> but since it is sharded based on object hash now (and FDCache itself 
+> is cpu
+> intensive) it is not helping much. May be sharding based on PG 
+> (Col_id) could help here ?
 
-This frustrates me on two levels.  First, open source is about building 
-communities around code that bring together diverse organizations and 
-interests in pursuit of a common goal.  Why is something as fundamental as 
-being inclusive of women a problem here?  Our open communities should be 
-setting the standard, not lagging behind when it comes to diversity.
+I suspect a more fruitful approach would be to make a read-side handle-based API for objectstore... so you can 'open' an object, keep that handle to the ObjectContext, and then do subsequent read operations against that.
 
-Second, I am passionate about Ceph not because I think it is the end-all 
-solution to everyones storage problems, but because it is playing an 
-important role in breaking the stranglehold that proprietary vendors have 
-over a large and increasingly critical industry.  If we are going to win 
-the larger battle of making the industry-leading, state of the art, de 
-facto choice for storage an open platform, we will need all the help we 
-can get: the incumbents are well-entrenched, they are better funded, and 
-(it turns out) they are doing a better job of attracting diverse talent.
+Sharding the FDCache per PG would help with lock contention, yes, but is that the limiter or are we burning CPU?
 
-The Ada Initiative is one of the few organizations who is addressing 
-gender diversity head-on, with a specific focus on open source and open 
-data communities.  You might already know about their successful campaign 
-to get most open source conferences to adopt codes of conduct, which make 
-women and other marginalized groups more likely to attend.  Their AdaCamp 
-conferences for women in open tech/culture, and their Ally Skills 
-Workshops which teach men how to support women in everyday ways have 
-proven to be extremely popular and effective both in welcoming and 
-empowering women.  These programs have proven so successful, in fact, that 
-(for lack of staff and funding) they are currently unable to meet the full 
-demand for them: all three AdaCamps this year sold out months early, and 
-they are booking solid for Ally Skills Workshops for the next 3 months.
+> Also, I don't think ceph io path is very memory intensive and we can 
+> leverage some memory for cache usage. For example, if we can have a 
+> object_context cache at Replicated PG level (now the cache is there 
+> but the contexts are not persisted), the performance (and cpu 
+> usage)will be improved dramatically. I know that there can be lot of 
+> PGs and thus memory usage can be a challenge. But, certainly we can 
+> control that by limiting per cache size and what not. What could be 
+> the size of an object_context instance, shouldn't be much I guess. I 
+> did some prototyping on that too and got significant improvement. This 
+> will eliminate the getattr path in case of cache hit.
 
-As Inktank and as DreamHost we were proud to be early supporters of the 
-Ada Initiative.  Today, I am proud to continue that support with a 
-personal challenge to the open source storage community:
+Can you propose this on ceph-devel?  I think this is promising.  And probably quite easy to implement.
 
-	If you raise $8192 by next Wednesday, I will match that 
-	contribution dollar for dollar.
+> Another challenge for read ( and for write too probably)  is the 
+> sequential io in case of rbd . With the Linux default read_ahead , 
+> performance of sequential read is significantly less than random read 
+> with latest code in case of io_size say 64K. The obvious reason is 
+> that with rbd, the default object size being 4MB, lot of sequential 
+> 64K reads are coming to same PG and getting bottlenecked there. 
+> Increasing read_ahead size improving performance but that will have an 
+> effect in random workload. I think PG level cache should help here. 
+> Striped images from librbd will not be facing this problem I guess but 
+> krbd is not supporting striping and it is definitely a problem there.
 
-This challenge applies to the larger open source storage world, including 
-the Ceph, Gluster, Swift, and Linux storage and file systems communities, 
-and goes until Wednesday, October 8th, when the Ada Initiatives 
-fundraising drive ends.  We've already raised almost $3,000 since 
-yesterday.  Please help us get the rest of the way!
+I still think the key here is a comprehensive set of IO hints.  Then it's a problem of making sure we are using them effectively...
 
-	https://adainitiative.org/donate/?campaign=storage
+> We can discuss these in next meeting if this sounds interesting.
 
-For more information about the Ada Initiative, see
+Yeah, but let's discuss on list first, no reason to wait!
 
-	http://adainitiative.org/
+s
 
-Thank you!
-sage
+> 
+> Thanks & Regards
+> Somnath
+> 
+> -----Original Message-----
+> From: Sage Weil [mailto:sweil@redhat.com]
+> Sent: Wednesday, October 01, 2014 1:14 PM
+> To: Somnath Roy
+> Cc: Mark Nelson; Kasper Dieter; Andreas Bluemle; Paul Von-Stamwitz
+> Subject: RE: Weekly Ceph Performance Meeting Invitation
+> 
+> On Wed, 1 Oct 2014, Somnath Roy wrote:
+> > CPU wise the following are still hurting us in Giant. Lot of fixes 
+> > like IndexManager stuff went in Giant that helped cpu consumption 
+> > wise as well.
+> >
+> > 1. LFNIndex lookup logic . I have a fix that will save around one 
+> > cpu core on that path. I am yet to address comments made by Greg/Sam 
+> > on that. But, lot of improvement can happen here.
+> 
+> Have you looked at
+> 
+>         
+> https://github.com/ceph/ceph/commit/74b1cf8bf1a7a160e6ce14603df63a46b2
+> 2d8b98
+> 
+> The patch is incomplete, but with that change we should be able to drop to a single path lookup per ObjectStore::Transaction (as opposed to one for each op in the transaction that touches the given object).  I'm not sure if you were looking at ops that had a lot of those or they were simple single-io type operations?  That would only help on the write path; I think you said you've been focusing in reads.
+> 
+> > 2. Buffer class is very cpu intensive. Fixing that part will be 
+> > helping every ceph components.
+> 
+> +1
+> 
+> sage
+> 
+> ________________________________
+> 
+> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+> 
+> 
