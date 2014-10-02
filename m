@@ -1,73 +1,46 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Re: ceph-disk vs keyvaluestore
-Date: Thu, 2 Oct 2014 13:25:08 +0800
-Message-ID: <CACJqLybowOLA9OLXRwzHvQW55UAeyd9aQ_foi1TG5GZ_k7ghKQ@mail.gmail.com>
-References: <alpine.DEB.2.00.1409291645320.20141@cobra.newdream.net>
-	<CACJqLyaY90afTC8UCn6jTOWNhJyvyGEaEwiou4S8_sX0hUnB6g@mail.gmail.com>
-	<CACJqLyZpG7rPB1oi0jAxL2+B-xhRrWMg8oyFNqp10cm=+DmgLg@mail.gmail.com>
-	<alpine.DEB.2.00.1409292103250.6593@cobra.newdream.net>
-	<542C9264.9090300@catalyst.net.nz>
-	<alpine.DEB.2.00.1410011650140.31126@cobra.newdream.net>
+From: Ilya Dryomov <ilya.dryomov@inktank.com>
+Subject: Re: [PATCH 1/1 linux-next] libceph: remove redundant declaration
+Date: Thu, 2 Oct 2014 11:05:49 +0400
+Message-ID: <CALFYKtBgb+Uf3kvyyAj-w8ywMU=kCByZm-Kr1DGi0w-WVmhXdw@mail.gmail.com>
+References: <1412107670-4888-1-git-send-email-fabf@skynet.be>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f171.google.com ([209.85.212.171]:46107 "EHLO
-	mail-wi0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752489AbaJBFZJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Oct 2014 01:25:09 -0400
-Received: by mail-wi0-f171.google.com with SMTP id em10so151069wid.10
-        for <ceph-devel@vger.kernel.org>; Wed, 01 Oct 2014 22:25:08 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1410011650140.31126@cobra.newdream.net>
+Received: from mail-qa0-f48.google.com ([209.85.216.48]:61569 "EHLO
+	mail-qa0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751031AbaJBHFu (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Oct 2014 03:05:50 -0400
+Received: by mail-qa0-f48.google.com with SMTP id dc16so1401100qab.21
+        for <ceph-devel@vger.kernel.org>; Thu, 02 Oct 2014 00:05:49 -0700 (PDT)
+In-Reply-To: <1412107670-4888-1-git-send-email-fabf@skynet.be>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Fabian Frederick <fabf@skynet.be>
+Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Sage Weil <sage@inktank.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Thu, Oct 2, 2014 at 7:53 AM, Sage Weil <sweil@redhat.com> wrote:
-> On Thu, 2 Oct 2014, Mark Kirkwood wrote:
->> On 30/09/14 17:05, Sage Weil wrote:
->> > On Tue, 30 Sep 2014, Haomai Wang wrote:
->> > > Hi sage,
->> > >
->> > > What do you think use existing ObjectStore::peek_journal_fsid
->> > > interface to detect whether journal needed.
->> > >
->> > > KeyValueStore and MemStore could set passing argument "fsid" to zero
->> > > to indicate no journal.
->> >
->> > I'm not sure it's a good fit... it's called on an existing store and tells
->> > you something about it.  I would probably expect a zeroed fsid to mean
->> > that the specified journal is empty or does not exist, not that it doesn't
->> > need to exist.
->> >
->> > What we need, on the other hand, is something that just tells us whether
->> > we should create a journal...
->> >
->> >
->>
->> And perhaps the "type" (probably not the right word) of journal:
->>
->> - filestore: device or filesystem
->> - rocksdb: filesystem (wal directory)
->> - leveldb: none (I think)
+On Wed, Oct 1, 2014 at 12:07 AM, Fabian Frederick <fabf@skynet.be> wrote:
+> ceph_release_page_vector was defined twice in libceph.h
 >
-> Hmm, good point.  Haomai added this as yes/no, maybe 'none' and 'device'
-> is a bit more flexible in case we add 'dir' in the future?
-
-Looks good to me. Any other points?
-
+> Signed-off-by: Fabian Frederick <fabf@skynet.be>
+> ---
+>  include/linux/ceph/libceph.h | 1 -
+>  1 file changed, 1 deletion(-)
 >
->> FWIW, it looks like the log files for leveldb *could* benefit from being
->> placed somewhere else (e.g on faster storage). Is it worthwhile suggesting to
->> the leveldb devs?
->
-> Worth a shot, but don't hold your breath :)
->
-> sage
+> diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
+> index 279b0af..07bc359 100644
+> --- a/include/linux/ceph/libceph.h
+> +++ b/include/linux/ceph/libceph.h
+> @@ -211,7 +211,6 @@ extern struct page **ceph_get_direct_page_vector(const void __user *data,
+>                                                  bool write_page);
+>  extern void ceph_put_page_vector(struct page **pages, int num_pages,
+>                                  bool dirty);
+> -extern void ceph_release_page_vector(struct page **pages, int num_pages);
+>  extern struct page **ceph_alloc_page_vector(int num_pages, gfp_t flags);
+>  extern int ceph_copy_user_to_page_vector(struct page **pages,
+>                                          const void __user *data,
 
+Applied.
 
+Thanks,
 
--- 
-Best Regards,
-
-Wheat
+                Ilya
