@@ -1,147 +1,137 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Re: FW: Weekly Ceph Performance Meeting Invitation
-Date: Fri, 3 Oct 2014 13:28:14 +0800
-Message-ID: <CACJqLyaA3OX15FxwK5fBjL7J49WXZp=cW5ZUT=E2G+4swZhUBQ@mail.gmail.com>
-References: <542B043F.6020600@redhat.com>
-	<20141001183717.GA31430@oder.mch.fsc.net>
-	<542C4E18.8080201@redhat.com>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F2784F027@SACMBXIP02.sdcorp.global.sandisk.com>
-	<alpine.DEB.2.00.1410011311330.31126@cobra.newdream.net>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F2784F0C3@SACMBXIP02.sdcorp.global.sandisk.com>
-	<alpine.DEB.2.00.1410011553220.31126@cobra.newdream.net>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F2784F522@SACMBXIP02.sdcorp.global.sandisk.com>
+From: Alexandre DERUMIER <aderumier@odiso.com>
+Subject: Re: [ceph-users] Ceph Developer Summit: Hammer
+Date: Fri, 03 Oct 2014 11:09:08 +0200 (CEST)
+Message-ID: <71a5f972-bbc0-4f46-98c8-896c16c1e595@mailpro>
+References: <CAP8Oy=J90nuAyY5+1V9gUGYFLYyRnq5wVE6rZruFfOS98RAJiA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f48.google.com ([74.125.82.48]:65022 "EHLO
-	mail-wg0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752552AbaJCF2P convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Oct 2014 01:28:15 -0400
-Received: by mail-wg0-f48.google.com with SMTP id n12so553578wgh.31
-        for <ceph-devel@vger.kernel.org>; Thu, 02 Oct 2014 22:28:14 -0700 (PDT)
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2784F522@SACMBXIP02.sdcorp.global.sandisk.com>
+Received: from mailpro.odiso.net ([89.248.209.98]:60224 "EHLO
+	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750923AbaJCJJV convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Oct 2014 05:09:21 -0400
+In-Reply-To: <CAP8Oy=J90nuAyY5+1V9gUGYFLYyRnq5wVE6rZruFfOS98RAJiA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Patrick McGarry <patrick@inktank.com>
+Cc: Sage Weil <sweil@redhat.com>, Ceph-User <ceph-users@ceph.com>, Ceph Devel <ceph-devel@vger.kernel.org>
 
-On Fri, Oct 3, 2014 at 1:39 AM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
-> Please share your opinion on this..
->
-> -----Original Message-----
-> From: Sage Weil [mailto:sweil@redhat.com]
-> Sent: Wednesday, October 01, 2014 3:57 PM
-> To: Somnath Roy
-> Cc: Mark Nelson; Kasper Dieter; Andreas Bluemle; Paul Von-Stamwitz
-> Subject: RE: Weekly Ceph Performance Meeting Invitation
->
-> On Wed, 1 Oct 2014, Somnath Roy wrote:
->> Yes Sage, it's all read..Each call to lfn_open() will incur this
->> lookup in case of FDCache miss (which will be in 99% of cases).
->> The following patch will certainly help the write path (which is
->> exciting!)  but not read as read is not through the transaction path.
->> My understanding is in the read path per io only two calls are going
->> to filestore , one xattr ("_") and followed by read to the same
->> object. If somehow, we can club (or something) this two requests,
->> reads will be benefitted. I did some prototype earlier by passing the
->> fd (and path) to the replicated pg during getattr call and pass the
->> same fd/path during next read. This improving performance as well as
->> cpu usage. But, this is against the objectstore interface logic :-(
->> Basically, sole purpose of FDCache for serving this kind of scenario
->> but since it is sharded based on object hash now (and FDCache itself
->> is cpu
->> intensive) it is not helping much. May be sharding based on PG
->> (Col_id) could help here ?
->
-> I suspect a more fruitful approach would be to make a read-side handle-based API for objectstore... so you can 'open' an object, keep that handle to the ObjectContext, and then do subsequent read operations against that.
->
-> Sharding the FDCache per PG would help with lock contention, yes, but is that the limiter or are we burning CPU?
->
->> Also, I don't think ceph io path is very memory intensive and we can
->> leverage some memory for cache usage. For example, if we can have a
->> object_context cache at Replicated PG level (now the cache is there
->> but the contexts are not persisted), the performance (and cpu
->> usage)will be improved dramatically. I know that there can be lot of
->> PGs and thus memory usage can be a challenge. But, certainly we can
->> control that by limiting per cache size and what not. What could be
->> the size of an object_context instance, shouldn't be much I guess. I
->> did some prototyping on that too and got significant improvement. This
->> will eliminate the getattr path in case of cache hit.
->
-> Can you propose this on ceph-devel?  I think this is promising.  And probably quite easy to implement.
+Thanks Patrick,
 
-Yes, we have done this impl and it can help reduce nearly 100us for
-each IO if hit cache. We will make a pull request next week. :-)
+It's really a usefull feature for disaster recovery. (export/import wit=
+h snapshot is working, but it's really difficult to maintain in product=
+ion)
 
->
->> Another challenge for read ( and for write too probably)  is the
->> sequential io in case of rbd . With the Linux default read_ahead ,
->> performance of sequential read is significantly less than random read
->> with latest code in case of io_size say 64K. The obvious reason is
->> that with rbd, the default object size being 4MB, lot of sequential
->> 64K reads are coming to same PG and getting bottlenecked there.
->> Increasing read_ahead size improving performance but that will have an
->> effect in random workload. I think PG level cache should help here.
->> Striped images from librbd will not be facing this problem I guess but
->> krbd is not supporting striping and it is definitely a problem there.
->
-> I still think the key here is a comprehensive set of IO hints.  Then it's a problem of making sure we are using them effectively...
->
->> We can discuss these in next meeting if this sounds interesting.
->
-> Yeah, but let's discuss on list first, no reason to wait!
->
-> s
->
->>
->> Thanks & Regards
->> Somnath
->>
->> -----Original Message-----
->> From: Sage Weil [mailto:sweil@redhat.com]
->> Sent: Wednesday, October 01, 2014 1:14 PM
->> To: Somnath Roy
->> Cc: Mark Nelson; Kasper Dieter; Andreas Bluemle; Paul Von-Stamwitz
->> Subject: RE: Weekly Ceph Performance Meeting Invitation
->>
->> On Wed, 1 Oct 2014, Somnath Roy wrote:
->> > CPU wise the following are still hurting us in Giant. Lot of fixes
->> > like IndexManager stuff went in Giant that helped cpu consumption
->> > wise as well.
->> >
->> > 1. LFNIndex lookup logic . I have a fix that will save around one
->> > cpu core on that path. I am yet to address comments made by Greg/Sam
->> > on that. But, lot of improvement can happen here.
->>
->> Have you looked at
->>
->>
->> https://github.com/ceph/ceph/commit/74b1cf8bf1a7a160e6ce14603df63a46b2
->> 2d8b98
->>
->> The patch is incomplete, but with that change we should be able to drop to a single path lookup per ObjectStore::Transaction (as opposed to one for each op in the transaction that touches the given object).  I'm not sure if you were looking at ops that had a lot of those or they were simple single-io type operations?  That would only help on the write path; I think you said you've been focusing in reads.
->>
->> > 2. Buffer class is very cpu intensive. Fixing that part will be
->> > helping every ceph components.
->>
->> +1
->>
->> sage
->>
->> ________________________________
->>
->> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
->>
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+----- Mail original -----=20
+
+De: "Patrick McGarry" <patrick@inktank.com>=20
+=C3=80: "Alexandre DERUMIER" <aderumier@odiso.com>=20
+Cc: "Sage Weil" <sweil@redhat.com>, "Ceph-User" <ceph-users@ceph.com>, =
+"Ceph Devel" <ceph-devel@vger.kernel.org>=20
+Envoy=C3=A9: Vendredi 3 Octobre 2014 01:00:21=20
+Objet: Re: [ceph-users] Ceph Developer Summit: Hammer=20
+
+Hey Alexandre,=20
+
+Sounds like work has started on this (under the title "RBD Mirroring")=20
+and is continuing in Hammer. I have updated the title and moved it to=20
+Hammer so there will be a design discussion at CDS. Thanks!=20
+
+https://wiki.ceph.com/Planning/Blueprints/Hammer/RBD%3A_Mirroring=20
 
 
+Best Regards,=20
 
--- 
-Best Regards,
+Patrick McGarry=20
+Director Ceph Community || Red Hat=20
+http://ceph.com || http://community.redhat.com=20
+@scuttlemonkey || @ceph=20
 
-Wheat
+
+On Wed, Oct 1, 2014 at 4:47 PM, Alexandre DERUMIER <aderumier@odiso.com=
+> wrote:=20
+> Hi,=20
+>=20
+> any news about this blueprint ?=20
+>=20
+> https://wiki.ceph.com/Planning/Blueprints/Giant/rbd%3A_journaling=20
+>=20
+>=20
+> Regards,=20
+>=20
+> Alexandre=20
+> ----- Mail original -----=20
+>=20
+> De: "Sage Weil" <sweil@redhat.com>=20
+> =C3=80: "Patrick McGarry" <patrick@inktank.com>=20
+> Cc: "Ceph-User" <ceph-users@ceph.com>, ceph-devel@vger.kernel.org=20
+> Envoy=C3=A9: Mercredi 1 Octobre 2014 22:32:30=20
+> Objet: Re: [ceph-users] Ceph Developer Summit: Hammer=20
+>=20
+> [adding ceph-devel]=20
+>=20
+>> On Tue, Sep 30, 2014 at 5:30 PM, Yann Dupont <yd@objoo.org> wrote:=20
+>> >=20
+>> > Le 30/09/2014 22:55, Patrick McGarry a ?crit :=20
+>> >>=20
+>> >> Hey cephers,=20
+>> >>=20
+>> >> The schedule and call for blueprints is now up for our next CDS a=
+s we=20
+>> >> aim for the Hammer release:=20
+>> >>=20
+>> >> http://ceph.com/community/ceph-developer-summit-hammer/=20
+>> >>=20
+>> >> If you have any work that you plan on submitting through the end =
+of=20
+>> >> the year, please fill out a Blueprint (the big red button) as soo=
+n as=20
+>> >> possible. Each blueprint will get a planning session with Sage an=
+d=20
+>> >> the community to make sure all work is well coordinated and plann=
+ed.=20
+>> >>=20
+>> >> If you have questions, or would like my help on the Blueprint pro=
+cess,=20
+>> >> please don't hesitate to contact me. Thanks!=20
+>> >>=20
+>> > Hi patrick (and other cephers)=20
+>> > Before making any new blueprint, I was reviewing some past ones, i=
+n=20
+>> > particular :=20
+>> >=20
+>> > https://wiki.ceph.com/Planning/Blueprints/Giant/librados%3A_suppor=
+t_parallel_reads=20
+>> > (I made some comments yesterday)=20
+>=20
+> Not implemented=20
+>=20
+>> > and even an older one (somewhat related):=20
+>> >=20
+>> > https://wiki.ceph.com/Planning/Blueprints/Emperor/librados%2F%2Fob=
+jecter%3A_smarter_localized_reads=20
+>=20
+> Implemented!=20
+>=20
+>> > Is there a way to know if those blueprints are implemented, or in =
+active=20
+>> > developpement ? In case of postponed blueprints, is there a way to=
+ promote=20
+>> > them again, to get consideration for hammer ?=20
+>=20
+> Hmm, Patrick, I think what we've done in the past is to move the=20
+> still-useful blueprints to the sideboard? You probably already asked =
+me=20
+> to do that... :)=20
+>=20
+> sage=20
+> _______________________________________________=20
+> ceph-users mailing list=20
+> ceph-users@lists.ceph.com=20
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com=20
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
