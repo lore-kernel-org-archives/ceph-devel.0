@@ -1,60 +1,51 @@
-From: Varada Kari <Varada.Kari@sandisk.com>
-Subject: RE: Regarding key/value interface
-Date: Fri, 3 Oct 2014 10:11:30 +0000
-Message-ID: <C226B0AB34511445928D9882AA519F6005EB610B@SACMBXIP02.sdcorp.global.sandisk.com>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2784F809@SACMBXIP02.sdcorp.global.sandisk.com>
- <CACJqLyZkY8UNqCkSnvXbPGfqB-mdvc9StHZPOqMeWg5Z8vDymA@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Static code analysis fixes for gf-complete
+Date: Fri, 03 Oct 2014 16:31:38 +0200
+Message-ID: <542EB34A.5040503@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="Pd0MWsxmOkppGAdK89DKD8b7KHnPVdgAs"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2on0067.outbound.protection.outlook.com ([207.46.100.67]:63648
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1750992AbaJCKnp (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 3 Oct 2014 06:43:45 -0400
-In-Reply-To: <CACJqLyZkY8UNqCkSnvXbPGfqB-mdvc9StHZPOqMeWg5Z8vDymA@mail.gmail.com>
-Content-Language: en-US
+Received: from mail2.dachary.org ([91.121.57.175]:37375 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752474AbaJCObp (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Oct 2014 10:31:45 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomaiwang@gmail.com>, Somnath Roy <Somnath.Roy@sandisk.com>
-Cc: "Sage Weil (sweil@redhat.com)" <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Kevin Greenan <kmgreen2@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-SSBhbSBub3Qgc3VyZSwgaWYgUm9ja3NkYi9MZXZlbERCIGNhbiB3b3JrIG9uIGEgcmF3IGRldmlj
-ZS4gV2hlbiBJIGxvb2tlZCBhdCBjb2RlIHRoZXkgd2VyZSBkb2luZyB3cml0ZSB0byBtb3VudCBw
-b2ludC9kaXJlY3RvcnkuDQoNClZhcmFkYQ0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0K
-RnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpjZXBoLWRldmVs
-LW93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIEhhb21haSBXYW5nDQpTZW50OiBG
-cmlkYXksIE9jdG9iZXIgMDMsIDIwMTQgMTA6NTUgQU0NClRvOiBTb21uYXRoIFJveQ0KQ2M6IFNh
-Z2UgV2VpbCAoc3dlaWxAcmVkaGF0LmNvbSk7IGNlcGgtZGV2ZWwNClN1YmplY3Q6IFJlOiBSZWdh
-cmRpbmcga2V5L3ZhbHVlIGludGVyZmFjZQ0KDQpDb3JyZWN0bHksIG1heWJlIHdlIGNhbiBtb3Zl
-IHRoZXNlIHN1cGVyIG1ldGFkYXRhIHRvIGJhY2tlbmQhDQoNCk9uIEZyaSwgT2N0IDMsIDIwMTQg
-YXQgNjo0NyBBTSwgU29tbmF0aCBSb3kgPFNvbW5hdGguUm95QHNhbmRpc2suY29tPiB3cm90ZToN
-Cj4gSGkgU2FnZS9IYW9tYWksDQo+DQo+IEkgd2FzIGdvaW5nIHRocm91Z2ggdGhlIGtleS92YWx1
-ZSBzdG9yZSBpbXBsZW1lbnRhdGlvbiBhbmQgaGF2ZSBvbmUgYmFzaWMgcXVlc3Rpb24gcmVnYXJk
-aW5nIHRoZSB3YXkgaXQgaXMgZGVzaWduZWQuDQo+DQo+IEkgdGhpbmsga2V5L3ZhbHVlIGludGVy
-ZmFjZSBpcyBhc3N1bWluZyB0aGVyZSB3aWxsIGJlIGEgZmlsZXN5c3RlbSBvbiB0b3Agb2YgdGhl
-IGRldmljZSAuIEkgc2F3IGluIG1vdW50IHlvdSBhcmUgYWNjZXNzaW5nIGZpbGVzIGxpa2Ugc3Vw
-ZXJibG9jay9mc2lkLiBTbywgZm9yIGV4YW1wbGUsIC92YXIvbGliL2NlcGgvb3NkL2NlcGgtMCBz
-aG91bGQgYmUgYSBmaWxlc3lzdGVtIHBhdGgsIHJpZ2h0ID8NCj4gSWYgc28sIHRoaXMgbWF5IG5v
-dCBiZSB0aGUgY2FzZSBhbHdheXMgYXMgdGhlcmUgYXJlIGtleS92YWx1ZSBzdG9yZXMgd2hpY2gg
-Y2FuIHdvcmsgb24gdGhlIHJhdyBkZXZpY2UuIEluIHRoYXQgY2FzZSwgdGhlc2UgZmlsZXMgKHN1
-cGVyYmxvY2svZnNpZCkgYWxzbyBuZWVkIHRvIGdvIGluIHRoZSBrZXkvdmFsdWUgZGIuDQo+DQo+
-IExldCBtZSBrbm93IGlmIEkgYW0gbWlzc2luZyBhbnl0aGluZy4NCj4NCj4gVGhhbmtzICYgUmVn
-YXJkcw0KPiBTb21uYXRoDQo+DQo+DQo+DQo+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fDQo+DQo+IFBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMg
-ZWxlY3Ryb25pYyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0
-aGUgZGVzaWduYXRlZCByZWNpcGllbnQocykgbmFtZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2Yg
-dGhpcyBtZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVi
-eSBub3RpZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBh
-bmQgdGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlp
-bmcgb2YgdGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJl
-Y2VpdmVkIHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2Vu
-ZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBh
-bmQgZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9z
-c2Vzc2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29w
-aWVzKS4NCj4NCg0KDQoNCi0tDQpCZXN0IFJlZ2FyZHMsDQoNCldoZWF0DQotLQ0KVG8gdW5zdWJz
-Y3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2
-ZWwiIGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3Jn
-IE1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21v
-LWluZm8uaHRtbA0K
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--Pd0MWsxmOkppGAdK89DKD8b7KHnPVdgAs
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
+
+Hi,
+
+Here are a few fixes, based on static code analysis findings.
+
+https://bitbucket.org/jimplank/gf-complete/pull-request/24/static-code-an=
+alysis-fixes/commits
+
+Cheers
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+
+
+--Pd0MWsxmOkppGAdK89DKD8b7KHnPVdgAs
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlQus0sACgkQ8dLMyEl6F22uQACeLirk/pVTa2hnbEFRzg+r2kQM
+ZsQAn29GJZacOCsPy1oNP37qKfQBJbSz
+=1vaQ
+-----END PGP SIGNATURE-----
+
+--Pd0MWsxmOkppGAdK89DKD8b7KHnPVdgAs--
