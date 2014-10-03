@@ -1,18 +1,18 @@
 From: Varada Kari <Varada.Kari@sandisk.com>
 Subject: RE: Regarding key/value interface
-Date: Fri, 3 Oct 2014 10:02:09 +0000
-Message-ID: <C226B0AB34511445928D9882AA519F6005EB60FD@SACMBXIP02.sdcorp.global.sandisk.com>
+Date: Fri, 3 Oct 2014 10:11:30 +0000
+Message-ID: <C226B0AB34511445928D9882AA519F6005EB610B@SACMBXIP02.sdcorp.global.sandisk.com>
 References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2784F809@SACMBXIP02.sdcorp.global.sandisk.com>
  <CACJqLyZkY8UNqCkSnvXbPGfqB-mdvc9StHZPOqMeWg5Z8vDymA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1bon0062.outbound.protection.outlook.com ([157.56.111.62]:7872
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+Received: from mail-by2on0067.outbound.protection.outlook.com ([207.46.100.67]:63648
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1750852AbaJCKQu (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 3 Oct 2014 06:16:50 -0400
+	id S1750992AbaJCKnp (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 3 Oct 2014 06:43:45 -0400
 In-Reply-To: <CACJqLyZkY8UNqCkSnvXbPGfqB-mdvc9StHZPOqMeWg5Z8vDymA@mail.gmail.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
