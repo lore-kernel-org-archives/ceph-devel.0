@@ -1,100 +1,142 @@
 From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: Regarding key/value interface
-Date: Fri, 3 Oct 2014 22:15:36 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2785017C@SACMBXIP02.sdcorp.global.sandisk.com>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2784F809@SACMBXIP02.sdcorp.global.sandisk.com>
- <CACJqLyZkY8UNqCkSnvXbPGfqB-mdvc9StHZPOqMeWg5Z8vDymA@mail.gmail.com>
- <C226B0AB34511445928D9882AA519F6005EB60FD@SACMBXIP02.sdcorp.global.sandisk.com>
- <alpine.DEB.2.00.1410030759130.31126@cobra.newdream.net>
+Subject: RE: FW: Weekly Ceph Performance Meeting Invitation
+Date: Fri, 3 Oct 2014 22:17:46 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F27850194@SACMBXIP02.sdcorp.global.sandisk.com>
+References: <542B043F.6020600@redhat.com>
+	<20141001183717.GA31430@oder.mch.fsc.net>	<542C4E18.8080201@redhat.com>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F2784F027@SACMBXIP02.sdcorp.global.sandisk.com>
+	<alpine.DEB.2.00.1410011311330.31126@cobra.newdream.net>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F2784F0C3@SACMBXIP02.sdcorp.global.sandisk.com>
+	<alpine.DEB.2.00.1410011553220.31126@cobra.newdream.net>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F2784F522@SACMBXIP02.sdcorp.global.sandisk.com>
+ <CACJqLyaA3OX15FxwK5fBjL7J49WXZp=cW5ZUT=E2G+4swZhUBQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bl2on0071.outbound.protection.outlook.com ([65.55.169.71]:39527
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+Received: from mail-by2on0079.outbound.protection.outlook.com ([207.46.100.79]:32640
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1756896AbaJCWPv convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Oct 2014 18:15:51 -0400
-In-Reply-To: <alpine.DEB.2.00.1410030759130.31126@cobra.newdream.net>
+	id S1758155AbaJCWRv (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 3 Oct 2014 18:17:51 -0400
+In-Reply-To: <CACJqLyaA3OX15FxwK5fBjL7J49WXZp=cW5ZUT=E2G+4swZhUBQ@mail.gmail.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, Varada Kari <Varada.Kari@sandisk.com>
-Cc: Haomai Wang <haomaiwang@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Haomai Wang <haomaiwang@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Sage,
-Ideally all the files should go into key/value db (for better portability purpose) but yes, I think we can live with the small partition as you mentioned in the drive for the bootstrap files and creating a sym link under current directory pointing to the other RAW partition on the disk for key/value db to use.
-But, ceph-disk needs to take care of these things during installation. Is anybody looking into that part ?
-
-Thanks & Regards
-Somnath
-
------Original Message-----
-From: Sage Weil [mailto:sweil@redhat.com] 
-Sent: Friday, October 03, 2014 8:03 AM
-To: Varada Kari
-Cc: Haomai Wang; Somnath Roy; ceph-devel
-Subject: RE: Regarding key/value interface
-
-On Fri, 3 Oct 2014, Varada Kari wrote:
-> I am not sure, if Rocksdb/LevelDB can work on a raw device. When I 
-> looked at code they were doing write to mount point/directory.
-
-Yeah.  But as Somnath points outs others will take a raw device..
-
-I think the main challenge there will be that there is some miscellaneous stuff that Ceph stashes in those directories to bootstrap OSDs.  Mainly there's the keyring and a 'done' file.  Probably we should add a small file that simply names the backend so that the OSD can start up with an existing store despite a change in ceph.conf.
-
-Somnath, I don't think this is particularly problematic, though.  The dir can remain and contain a symlink to the raw device.
-
-If we want to have hot-swappability, maybe it's possible to carve off a tiny partition on the device?  If that doesn't work, we'll have to get more creative (like teach ceph-disk how to interact with the raw device :/).
-
-sage
-
-
-
-
-> 
-> Varada
-> 
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org 
-> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Haomai Wang
-> Sent: Friday, October 03, 2014 10:55 AM
-> To: Somnath Roy
-> Cc: Sage Weil (sweil@redhat.com); ceph-devel
-> Subject: Re: Regarding key/value interface
-> 
-> Correctly, maybe we can move these super metadata to backend!
-> 
-> On Fri, Oct 3, 2014 at 6:47 AM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
-> > Hi Sage/Haomai,
-> >
-> > I was going through the key/value store implementation and have one basic question regarding the way it is designed.
-> >
-> > I think key/value interface is assuming there will be a filesystem on top of the device . I saw in mount you are accessing files like superblock/fsid. So, for example, /var/lib/ceph/osd/ceph-0 should be a filesystem path, right ?
-> > If so, this may not be the case always as there are key/value stores which can work on the raw device. In that case, these files (superblock/fsid) also need to go in the key/value db.
-> >
-> > Let me know if I am missing anything.
-> >
-> > Thanks & Regards
-> > Somnath
-> >
-> >
-> >
-> > ________________________________
-> >
-> > PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
-> >
-> 
-> 
-> 
-> --
-> Best Regards,
-> 
-> Wheat
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
-> in the body of a message to majordomo@vger.kernel.org More majordomo 
-> info at  http://vger.kernel.org/majordomo-info.html
-> N?????r??y??????X???v???)?{.n?????z?]z????ay?????j ??f???h??????w???
-???j:+v???w???????? ????zZ+???????j"????i
+VGhhdCdzIGdyZWF0IEhhb21haSwgbG9va2luZyBmb3J3YXJkIHRvIHRoaXMgcHVsbCByZXF1ZXN0
+Lg0KDQpUaGFua3MgJiBSZWdhcmRzDQpTb21uYXRoDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0t
+LS0tDQpGcm9tOiBIYW9tYWkgV2FuZyBbbWFpbHRvOmhhb21haXdhbmdAZ21haWwuY29tXSANClNl
+bnQ6IFRodXJzZGF5LCBPY3RvYmVyIDAyLCAyMDE0IDEwOjI4IFBNDQpUbzogU29tbmF0aCBSb3kN
+CkNjOiBjZXBoLWRldmVsDQpTdWJqZWN0OiBSZTogRlc6IFdlZWtseSBDZXBoIFBlcmZvcm1hbmNl
+IE1lZXRpbmcgSW52aXRhdGlvbg0KDQpPbiBGcmksIE9jdCAzLCAyMDE0IGF0IDE6MzkgQU0sIFNv
+bW5hdGggUm95IDxTb21uYXRoLlJveUBzYW5kaXNrLmNvbT4gd3JvdGU6DQo+IFBsZWFzZSBzaGFy
+ZSB5b3VyIG9waW5pb24gb24gdGhpcy4uDQo+DQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0t
+DQo+IEZyb206IFNhZ2UgV2VpbCBbbWFpbHRvOnN3ZWlsQHJlZGhhdC5jb21dDQo+IFNlbnQ6IFdl
+ZG5lc2RheSwgT2N0b2JlciAwMSwgMjAxNCAzOjU3IFBNDQo+IFRvOiBTb21uYXRoIFJveQ0KPiBD
+YzogTWFyayBOZWxzb247IEthc3BlciBEaWV0ZXI7IEFuZHJlYXMgQmx1ZW1sZTsgUGF1bCBWb24t
+U3RhbXdpdHoNCj4gU3ViamVjdDogUkU6IFdlZWtseSBDZXBoIFBlcmZvcm1hbmNlIE1lZXRpbmcg
+SW52aXRhdGlvbg0KPg0KPiBPbiBXZWQsIDEgT2N0IDIwMTQsIFNvbW5hdGggUm95IHdyb3RlOg0K
+Pj4gWWVzIFNhZ2UsIGl0J3MgYWxsIHJlYWQuLkVhY2ggY2FsbCB0byBsZm5fb3BlbigpIHdpbGwg
+aW5jdXIgdGhpcyANCj4+IGxvb2t1cCBpbiBjYXNlIG9mIEZEQ2FjaGUgbWlzcyAod2hpY2ggd2ls
+bCBiZSBpbiA5OSUgb2YgY2FzZXMpLg0KPj4gVGhlIGZvbGxvd2luZyBwYXRjaCB3aWxsIGNlcnRh
+aW5seSBoZWxwIHRoZSB3cml0ZSBwYXRoICh3aGljaCBpcw0KPj4gZXhjaXRpbmchKSAgYnV0IG5v
+dCByZWFkIGFzIHJlYWQgaXMgbm90IHRocm91Z2ggdGhlIHRyYW5zYWN0aW9uIHBhdGguDQo+PiBN
+eSB1bmRlcnN0YW5kaW5nIGlzIGluIHRoZSByZWFkIHBhdGggcGVyIGlvIG9ubHkgdHdvIGNhbGxz
+IGFyZSBnb2luZyANCj4+IHRvIGZpbGVzdG9yZSAsIG9uZSB4YXR0ciAoIl8iKSBhbmQgZm9sbG93
+ZWQgYnkgcmVhZCB0byB0aGUgc2FtZSANCj4+IG9iamVjdC4gSWYgc29tZWhvdywgd2UgY2FuIGNs
+dWIgKG9yIHNvbWV0aGluZykgdGhpcyB0d28gcmVxdWVzdHMsIA0KPj4gcmVhZHMgd2lsbCBiZSBi
+ZW5lZml0dGVkLiBJIGRpZCBzb21lIHByb3RvdHlwZSBlYXJsaWVyIGJ5IHBhc3NpbmcgdGhlIA0K
+Pj4gZmQgKGFuZCBwYXRoKSB0byB0aGUgcmVwbGljYXRlZCBwZyBkdXJpbmcgZ2V0YXR0ciBjYWxs
+IGFuZCBwYXNzIHRoZSANCj4+IHNhbWUgZmQvcGF0aCBkdXJpbmcgbmV4dCByZWFkLiBUaGlzIGlt
+cHJvdmluZyBwZXJmb3JtYW5jZSBhcyB3ZWxsIGFzIA0KPj4gY3B1IHVzYWdlLiBCdXQsIHRoaXMg
+aXMgYWdhaW5zdCB0aGUgb2JqZWN0c3RvcmUgaW50ZXJmYWNlIGxvZ2ljIDotKCANCj4+IEJhc2lj
+YWxseSwgc29sZSBwdXJwb3NlIG9mIEZEQ2FjaGUgZm9yIHNlcnZpbmcgdGhpcyBraW5kIG9mIHNj
+ZW5hcmlvIA0KPj4gYnV0IHNpbmNlIGl0IGlzIHNoYXJkZWQgYmFzZWQgb24gb2JqZWN0IGhhc2gg
+bm93IChhbmQgRkRDYWNoZSBpdHNlbGYgDQo+PiBpcyBjcHUNCj4+IGludGVuc2l2ZSkgaXQgaXMg
+bm90IGhlbHBpbmcgbXVjaC4gTWF5IGJlIHNoYXJkaW5nIGJhc2VkIG9uIFBHDQo+PiAoQ29sX2lk
+KSBjb3VsZCBoZWxwIGhlcmUgPw0KPg0KPiBJIHN1c3BlY3QgYSBtb3JlIGZydWl0ZnVsIGFwcHJv
+YWNoIHdvdWxkIGJlIHRvIG1ha2UgYSByZWFkLXNpZGUgaGFuZGxlLWJhc2VkIEFQSSBmb3Igb2Jq
+ZWN0c3RvcmUuLi4gc28geW91IGNhbiAnb3BlbicgYW4gb2JqZWN0LCBrZWVwIHRoYXQgaGFuZGxl
+IHRvIHRoZSBPYmplY3RDb250ZXh0LCBhbmQgdGhlbiBkbyBzdWJzZXF1ZW50IHJlYWQgb3BlcmF0
+aW9ucyBhZ2FpbnN0IHRoYXQuDQo+DQo+IFNoYXJkaW5nIHRoZSBGRENhY2hlIHBlciBQRyB3b3Vs
+ZCBoZWxwIHdpdGggbG9jayBjb250ZW50aW9uLCB5ZXMsIGJ1dCBpcyB0aGF0IHRoZSBsaW1pdGVy
+IG9yIGFyZSB3ZSBidXJuaW5nIENQVT8NCj4NCj4+IEFsc28sIEkgZG9uJ3QgdGhpbmsgY2VwaCBp
+byBwYXRoIGlzIHZlcnkgbWVtb3J5IGludGVuc2l2ZSBhbmQgd2UgY2FuIA0KPj4gbGV2ZXJhZ2Ug
+c29tZSBtZW1vcnkgZm9yIGNhY2hlIHVzYWdlLiBGb3IgZXhhbXBsZSwgaWYgd2UgY2FuIGhhdmUg
+YSANCj4+IG9iamVjdF9jb250ZXh0IGNhY2hlIGF0IFJlcGxpY2F0ZWQgUEcgbGV2ZWwgKG5vdyB0
+aGUgY2FjaGUgaXMgdGhlcmUgDQo+PiBidXQgdGhlIGNvbnRleHRzIGFyZSBub3QgcGVyc2lzdGVk
+KSwgdGhlIHBlcmZvcm1hbmNlIChhbmQgY3B1IA0KPj4gdXNhZ2Upd2lsbCBiZSBpbXByb3ZlZCBk
+cmFtYXRpY2FsbHkuIEkga25vdyB0aGF0IHRoZXJlIGNhbiBiZSBsb3Qgb2YgDQo+PiBQR3MgYW5k
+IHRodXMgbWVtb3J5IHVzYWdlIGNhbiBiZSBhIGNoYWxsZW5nZS4gQnV0LCBjZXJ0YWlubHkgd2Ug
+Y2FuIA0KPj4gY29udHJvbCB0aGF0IGJ5IGxpbWl0aW5nIHBlciBjYWNoZSBzaXplIGFuZCB3aGF0
+IG5vdC4gV2hhdCBjb3VsZCBiZSANCj4+IHRoZSBzaXplIG9mIGFuIG9iamVjdF9jb250ZXh0IGlu
+c3RhbmNlLCBzaG91bGRuJ3QgYmUgbXVjaCBJIGd1ZXNzLiBJIA0KPj4gZGlkIHNvbWUgcHJvdG90
+eXBpbmcgb24gdGhhdCB0b28gYW5kIGdvdCBzaWduaWZpY2FudCBpbXByb3ZlbWVudC4gDQo+PiBU
+aGlzIHdpbGwgZWxpbWluYXRlIHRoZSBnZXRhdHRyIHBhdGggaW4gY2FzZSBvZiBjYWNoZSBoaXQu
+DQo+DQo+IENhbiB5b3UgcHJvcG9zZSB0aGlzIG9uIGNlcGgtZGV2ZWw/ICBJIHRoaW5rIHRoaXMg
+aXMgcHJvbWlzaW5nLiAgQW5kIHByb2JhYmx5IHF1aXRlIGVhc3kgdG8gaW1wbGVtZW50Lg0KDQpZ
+ZXMsIHdlIGhhdmUgZG9uZSB0aGlzIGltcGwgYW5kIGl0IGNhbiBoZWxwIHJlZHVjZSBuZWFybHkg
+MTAwdXMgZm9yIGVhY2ggSU8gaWYgaGl0IGNhY2hlLiBXZSB3aWxsIG1ha2UgYSBwdWxsIHJlcXVl
+c3QgbmV4dCB3ZWVrLiA6LSkNCg0KPg0KPj4gQW5vdGhlciBjaGFsbGVuZ2UgZm9yIHJlYWQgKCBh
+bmQgZm9yIHdyaXRlIHRvbyBwcm9iYWJseSkgIGlzIHRoZSANCj4+IHNlcXVlbnRpYWwgaW8gaW4g
+Y2FzZSBvZiByYmQgLiBXaXRoIHRoZSBMaW51eCBkZWZhdWx0IHJlYWRfYWhlYWQgLCANCj4+IHBl
+cmZvcm1hbmNlIG9mIHNlcXVlbnRpYWwgcmVhZCBpcyBzaWduaWZpY2FudGx5IGxlc3MgdGhhbiBy
+YW5kb20gcmVhZCANCj4+IHdpdGggbGF0ZXN0IGNvZGUgaW4gY2FzZSBvZiBpb19zaXplIHNheSA2
+NEsuIFRoZSBvYnZpb3VzIHJlYXNvbiBpcyANCj4+IHRoYXQgd2l0aCByYmQsIHRoZSBkZWZhdWx0
+IG9iamVjdCBzaXplIGJlaW5nIDRNQiwgbG90IG9mIHNlcXVlbnRpYWwgDQo+PiA2NEsgcmVhZHMg
+YXJlIGNvbWluZyB0byBzYW1lIFBHIGFuZCBnZXR0aW5nIGJvdHRsZW5lY2tlZCB0aGVyZS4NCj4+
+IEluY3JlYXNpbmcgcmVhZF9haGVhZCBzaXplIGltcHJvdmluZyBwZXJmb3JtYW5jZSBidXQgdGhh
+dCB3aWxsIGhhdmUgDQo+PiBhbiBlZmZlY3QgaW4gcmFuZG9tIHdvcmtsb2FkLiBJIHRoaW5rIFBH
+IGxldmVsIGNhY2hlIHNob3VsZCBoZWxwIGhlcmUuDQo+PiBTdHJpcGVkIGltYWdlcyBmcm9tIGxp
+YnJiZCB3aWxsIG5vdCBiZSBmYWNpbmcgdGhpcyBwcm9ibGVtIEkgZ3Vlc3MgDQo+PiBidXQga3Ji
+ZCBpcyBub3Qgc3VwcG9ydGluZyBzdHJpcGluZyBhbmQgaXQgaXMgZGVmaW5pdGVseSBhIHByb2Js
+ZW0gdGhlcmUuDQo+DQo+IEkgc3RpbGwgdGhpbmsgdGhlIGtleSBoZXJlIGlzIGEgY29tcHJlaGVu
+c2l2ZSBzZXQgb2YgSU8gaGludHMuICBUaGVuIGl0J3MgYSBwcm9ibGVtIG9mIG1ha2luZyBzdXJl
+IHdlIGFyZSB1c2luZyB0aGVtIGVmZmVjdGl2ZWx5Li4uDQo+DQo+PiBXZSBjYW4gZGlzY3VzcyB0
+aGVzZSBpbiBuZXh0IG1lZXRpbmcgaWYgdGhpcyBzb3VuZHMgaW50ZXJlc3RpbmcuDQo+DQo+IFll
+YWgsIGJ1dCBsZXQncyBkaXNjdXNzIG9uIGxpc3QgZmlyc3QsIG5vIHJlYXNvbiB0byB3YWl0IQ0K
+Pg0KPiBzDQo+DQo+Pg0KPj4gVGhhbmtzICYgUmVnYXJkcw0KPj4gU29tbmF0aA0KPj4NCj4+IC0t
+LS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+PiBGcm9tOiBTYWdlIFdlaWwgW21haWx0bzpzd2Vp
+bEByZWRoYXQuY29tXQ0KPj4gU2VudDogV2VkbmVzZGF5LCBPY3RvYmVyIDAxLCAyMDE0IDE6MTQg
+UE0NCj4+IFRvOiBTb21uYXRoIFJveQ0KPj4gQ2M6IE1hcmsgTmVsc29uOyBLYXNwZXIgRGlldGVy
+OyBBbmRyZWFzIEJsdWVtbGU7IFBhdWwgVm9uLVN0YW13aXR6DQo+PiBTdWJqZWN0OiBSRTogV2Vl
+a2x5IENlcGggUGVyZm9ybWFuY2UgTWVldGluZyBJbnZpdGF0aW9uDQo+Pg0KPj4gT24gV2VkLCAx
+IE9jdCAyMDE0LCBTb21uYXRoIFJveSB3cm90ZToNCj4+ID4gQ1BVIHdpc2UgdGhlIGZvbGxvd2lu
+ZyBhcmUgc3RpbGwgaHVydGluZyB1cyBpbiBHaWFudC4gTG90IG9mIGZpeGVzIA0KPj4gPiBsaWtl
+IEluZGV4TWFuYWdlciBzdHVmZiB3ZW50IGluIEdpYW50IHRoYXQgaGVscGVkIGNwdSBjb25zdW1w
+dGlvbiANCj4+ID4gd2lzZSBhcyB3ZWxsLg0KPj4gPg0KPj4gPiAxLiBMRk5JbmRleCBsb29rdXAg
+bG9naWMgLiBJIGhhdmUgYSBmaXggdGhhdCB3aWxsIHNhdmUgYXJvdW5kIG9uZSANCj4+ID4gY3B1
+IGNvcmUgb24gdGhhdCBwYXRoLiBJIGFtIHlldCB0byBhZGRyZXNzIGNvbW1lbnRzIG1hZGUgYnkg
+DQo+PiA+IEdyZWcvU2FtIG9uIHRoYXQuIEJ1dCwgbG90IG9mIGltcHJvdmVtZW50IGNhbiBoYXBw
+ZW4gaGVyZS4NCj4+DQo+PiBIYXZlIHlvdSBsb29rZWQgYXQNCj4+DQo+Pg0KPj4gaHR0cHM6Ly9n
+aXRodWIuY29tL2NlcGgvY2VwaC9jb21taXQvNzRiMWNmOGJmMWE3YTE2MGU2Y2UxNDYwM2RmNjNh
+NDZiDQo+PiAyDQo+PiAyZDhiOTgNCj4+DQo+PiBUaGUgcGF0Y2ggaXMgaW5jb21wbGV0ZSwgYnV0
+IHdpdGggdGhhdCBjaGFuZ2Ugd2Ugc2hvdWxkIGJlIGFibGUgdG8gZHJvcCB0byBhIHNpbmdsZSBw
+YXRoIGxvb2t1cCBwZXIgT2JqZWN0U3RvcmU6OlRyYW5zYWN0aW9uIChhcyBvcHBvc2VkIHRvIG9u
+ZSBmb3IgZWFjaCBvcCBpbiB0aGUgdHJhbnNhY3Rpb24gdGhhdCB0b3VjaGVzIHRoZSBnaXZlbiBv
+YmplY3QpLiAgSSdtIG5vdCBzdXJlIGlmIHlvdSB3ZXJlIGxvb2tpbmcgYXQgb3BzIHRoYXQgaGFk
+IGEgbG90IG9mIHRob3NlIG9yIHRoZXkgd2VyZSBzaW1wbGUgc2luZ2xlLWlvIHR5cGUgb3BlcmF0
+aW9ucz8gIFRoYXQgd291bGQgb25seSBoZWxwIG9uIHRoZSB3cml0ZSBwYXRoOyBJIHRoaW5rIHlv
+dSBzYWlkIHlvdSd2ZSBiZWVuIGZvY3VzaW5nIGluIHJlYWRzLg0KPj4NCj4+ID4gMi4gQnVmZmVy
+IGNsYXNzIGlzIHZlcnkgY3B1IGludGVuc2l2ZS4gRml4aW5nIHRoYXQgcGFydCB3aWxsIGJlIA0K
+Pj4gPiBoZWxwaW5nIGV2ZXJ5IGNlcGggY29tcG9uZW50cy4NCj4+DQo+PiArMQ0KPj4NCj4+IHNh
+Z2UNCj4+DQo+PiBfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXw0KPj4NCj4+IFBMRUFT
+RSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBtYWls
+IG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRlZCBy
+ZWNpcGllbnQocykgbmFtZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNzYWdlIGlz
+IG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3RpZmllZCB0aGF0
+IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhhdCBhbnkgcmV2
+aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2YgdGhpcyBtZXNz
+YWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgY29t
+bXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9u
+ZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVzdHJveSBhbnkg
+YW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lvbiAod2hldGhl
+ciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4NCj4+DQo+Pg0K
+PiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5z
+dWJzY3JpYmUgY2VwaC1kZXZlbCIgDQo+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpv
+cmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIA0KPiBpbmZvIGF0ICBodHRwOi8v
+dmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCg0KDQoNCi0tDQpCZXN0IFJlZ2Fy
+ZHMsDQoNCldoZWF0DQo=
