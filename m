@@ -1,136 +1,63 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: RE: Regarding key/value interface
-Date: Fri, 3 Oct 2014 15:35:10 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1410031529350.17090@cobra.newdream.net>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2784F809@SACMBXIP02.sdcorp.global.sandisk.com> <CACJqLyZkY8UNqCkSnvXbPGfqB-mdvc9StHZPOqMeWg5Z8vDymA@mail.gmail.com> <C226B0AB34511445928D9882AA519F6005EB60FD@SACMBXIP02.sdcorp.global.sandisk.com>
- <alpine.DEB.2.00.1410030759130.31126@cobra.newdream.net> <755F6B91B3BE364F9BCA11EA3F9E0C6F2785017C@SACMBXIP02.sdcorp.global.sandisk.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Sorting pull requests per label
+Date: Sat, 04 Oct 2014 13:00:02 +0200
+Message-ID: <542FD332.6040408@dachary.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="t56vFc3CL2QAQSMBO73hoMQD7nlCFGDqw"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:35774 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753995AbaJCWfK (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Oct 2014 18:35:10 -0400
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2785017C@SACMBXIP02.sdcorp.global.sandisk.com>
+Received: from mail2.dachary.org ([91.121.57.175]:37831 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751072AbaJDLAK (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 4 Oct 2014 07:00:10 -0400
+Received: from [10.9.0.6] (unknown [10.0.2.28])
+	by smtp.dmail.dachary.org (Postfix) with ESMTP id 3A047420A0
+	for <ceph-devel@vger.kernel.org>; Sat,  4 Oct 2014 13:00:03 +0200 (CEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
-Cc: Varada Kari <Varada.Kari@sandisk.com>, Haomai Wang <haomaiwang@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Fri, 3 Oct 2014, Somnath Roy wrote:
-> Sage,
-> Ideally all the files should go into key/value db (for better 
-> portability purpose) but yes, I think we can live with the small 
-> partition as you mentioned in the drive for the bootstrap files and 
-> creating a sym link under current directory pointing to the other RAW 
-> partition on the disk for key/value db to use.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--t56vFc3CL2QAQSMBO73hoMQD7nlCFGDqw
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-Cool.
+Hi Ceph,
 
-> But, ceph-disk needs to take care of these things during installation. 
-> Is anybody looking into that part ?
+The bug / feature labels were added to make them easier to find:
 
-Not yet.  I think the high-level goal should be maintain the basic usage 
-of ceph-disk.  i.e.,
+Pending bugs https://github.com/ceph/ceph/pulls?q=3Dis%3Aopen+is%3Apr+lab=
+el%3A%22bug+fix%22
+Pending features https://github.com/ceph/ceph/pulls?q=3Dis%3Aopen+is%3Apr=
++label%3Afeature
 
-	ceph-disk prepare /dev/foo
+There also is one tag per release:
 
-Then we'd need to teach ceph-disk about the various ways that 
-it needs to prepare the device, like what partitions to create and how 
-big they should be.  With the journal-skipping behavior Haomai just 
-added we're calling into ceph-osd to ask the backend what it wants.  I 
-think that model is probably the most flexible.  The question is what 
-ceph-disk should do then...
+Pending for giant https://github.com/ceph/ceph/pulls?q=3Dis%3Aopen+is%3Ap=
+r+label%3Agiant
+Pending firefly backports https://github.com/ceph/ceph/pulls?q=3Dis%3Aope=
+n+is%3Apr+label%3Afirefly
+etc.
 
-1) small partition for metadata, second partition used directly by the 
-backend library
-2) one big partition
+Cheers
 
-For 2, we'd need some way for ceph-disk and other tools to get at the 
-metadata (osd uuid, ceph auth keys, whoami file, etc.).  I'm not sure it's 
-worth the hassle if it doesn't break your backend to carve off a tiny 
-partition for that...
-
-sage
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
 
 
+--t56vFc3CL2QAQSMBO73hoMQD7nlCFGDqw
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
-> 
-> Thanks & Regards
-> Somnath
-> 
-> -----Original Message-----
-> From: Sage Weil [mailto:sweil@redhat.com] 
-> Sent: Friday, October 03, 2014 8:03 AM
-> To: Varada Kari
-> Cc: Haomai Wang; Somnath Roy; ceph-devel
-> Subject: RE: Regarding key/value interface
-> 
-> On Fri, 3 Oct 2014, Varada Kari wrote:
-> > I am not sure, if Rocksdb/LevelDB can work on a raw device. When I 
-> > looked at code they were doing write to mount point/directory.
-> 
-> Yeah.  But as Somnath points outs others will take a raw device..
-> 
-> I think the main challenge there will be that there is some miscellaneous stuff that Ceph stashes in those directories to bootstrap OSDs.  Mainly there's the keyring and a 'done' file.  Probably we should add a small file that simply names the backend so that the OSD can start up with an existing store despite a change in ceph.conf.
-> 
-> Somnath, I don't think this is particularly problematic, though.  The dir can remain and contain a symlink to the raw device.
-> 
-> If we want to have hot-swappability, maybe it's possible to carve off a tiny partition on the device?  If that doesn't work, we'll have to get more creative (like teach ceph-disk how to interact with the raw device :/).
-> 
-> sage
-> 
-> 
-> 
-> 
-> > 
-> > Varada
-> > 
-> > -----Original Message-----
-> > From: ceph-devel-owner@vger.kernel.org 
-> > [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Haomai Wang
-> > Sent: Friday, October 03, 2014 10:55 AM
-> > To: Somnath Roy
-> > Cc: Sage Weil (sweil@redhat.com); ceph-devel
-> > Subject: Re: Regarding key/value interface
-> > 
-> > Correctly, maybe we can move these super metadata to backend!
-> > 
-> > On Fri, Oct 3, 2014 at 6:47 AM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
-> > > Hi Sage/Haomai,
-> > >
-> > > I was going through the key/value store implementation and have one basic question regarding the way it is designed.
-> > >
-> > > I think key/value interface is assuming there will be a filesystem on top of the device . I saw in mount you are accessing files like superblock/fsid. So, for example, /var/lib/ceph/osd/ceph-0 should be a filesystem path, right ?
-> > > If so, this may not be the case always as there are key/value stores which can work on the raw device. In that case, these files (superblock/fsid) also need to go in the key/value db.
-> > >
-> > > Let me know if I am missing anything.
-> > >
-> > > Thanks & Regards
-> > > Somnath
-> > >
-> > >
-> > >
-> > > ________________________________
-> > >
-> > > PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
-> > >
-> > 
-> > 
-> > 
-> > --
-> > Best Regards,
-> > 
-> > Wheat
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
-> > in the body of a message to majordomo@vger.kernel.org More majordomo 
-> > info at  http://vger.kernel.org/majordomo-info.html
-> > N?????r??y??????X???v???)?{.n?????z?]z????ay?????j ??f???h??????w???
-> ???j:+v???w???????? ????zZ+???????j"????i
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlQv0zIACgkQ8dLMyEl6F22wdACfSDp2jfGkxfW2sLF6RWNQDWik
+ARQAn0s/NIIB4GBaeGwALKWIVBVn3p9E
+=JP4q
+-----END PGP SIGNATURE-----
+
+--t56vFc3CL2QAQSMBO73hoMQD7nlCFGDqw--
