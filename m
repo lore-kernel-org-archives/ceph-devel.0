@@ -1,450 +1,255 @@
 From: Sage Weil <sweil@redhat.com>
-Subject: Re: [PATCH] libceph: sync osd op definitions in rados.h
-Date: Wed, 8 Oct 2014 07:57:24 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1410080756540.742@cobra.newdream.net>
-References: <1412757405-6917-1-git-send-email-idryomov@redhat.com>
+Subject: New Defects reported by Coverity Scan for ceph (fwd)
+Date: Wed, 8 Oct 2014 07:59:33 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1410080759250.742@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-2098900025-1412780373=:742"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:46656 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:46670 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756133AbaJHO5Z (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Oct 2014 10:57:25 -0400
-In-Reply-To: <1412757405-6917-1-git-send-email-idryomov@redhat.com>
+	with ESMTP id S1756780AbaJHO7e (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Oct 2014 10:59:34 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <ilya.dryomov@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: joao.luis@inktank.com, ceph-devel@vger.kernel.org
 
-I assume this is basically a cut and paste from the updated ceph.git code?
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-Reviewed-by: Sage Weil <sage@redhat.com>
+--557981400-2098900025-1412780373=:742
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 
-On Wed, 8 Oct 2014, Ilya Dryomov wrote:
 
-> Bring in missing osd ops and strings, use macros to eliminate multiple
-> points of maintenance.
-> 
-> Signed-off-by: Ilya Dryomov <idryomov@redhat.com>
-> ---
->  include/linux/ceph/rados.h |  225 +++++++++++++++++++++++++-------------------
->  net/ceph/ceph_strings.c    |   75 +--------------
->  net/ceph/osd_client.c      |   65 +------------
->  3 files changed, 137 insertions(+), 228 deletions(-)
-> 
-> diff --git a/include/linux/ceph/rados.h b/include/linux/ceph/rados.h
-> index f20e0d8a2155..2f822dca1046 100644
-> --- a/include/linux/ceph/rados.h
-> +++ b/include/linux/ceph/rados.h
-> @@ -172,6 +172,7 @@ extern const char *ceph_osd_state_name(int s);
->  #define CEPH_OSD_OP_MODE_WR    0x2000
->  #define CEPH_OSD_OP_MODE_RMW   0x3000
->  #define CEPH_OSD_OP_MODE_SUB   0x4000
-> +#define CEPH_OSD_OP_MODE_CACHE 0x8000
->  
->  #define CEPH_OSD_OP_TYPE       0x0f00
->  #define CEPH_OSD_OP_TYPE_LOCK  0x0100
-> @@ -181,103 +182,135 @@ extern const char *ceph_osd_state_name(int s);
->  #define CEPH_OSD_OP_TYPE_PG    0x0500
->  #define CEPH_OSD_OP_TYPE_MULTI 0x0600 /* multiobject */
->  
-> +#define __CEPH_OSD_OP1(mode, nr) \
-> +	(CEPH_OSD_OP_MODE_##mode | (nr))
-> +
-> +#define __CEPH_OSD_OP(mode, type, nr) \
-> +	(CEPH_OSD_OP_MODE_##mode | CEPH_OSD_OP_TYPE_##type | (nr))
-> +
-> +#define __CEPH_FORALL_OSD_OPS(f)					    \
-> +	/** data **/							    \
-> +	/* read */							    \
-> +	f(READ,		__CEPH_OSD_OP(RD, DATA, 1),	"read")		    \
-> +	f(STAT,		__CEPH_OSD_OP(RD, DATA, 2),	"stat")		    \
-> +	f(MAPEXT,	__CEPH_OSD_OP(RD, DATA, 3),	"mapext")	    \
-> +									    \
-> +	/* fancy read */						    \
-> +	f(MASKTRUNC,	__CEPH_OSD_OP(RD, DATA, 4),	"masktrunc")	    \
-> +	f(SPARSE_READ,	__CEPH_OSD_OP(RD, DATA, 5),	"sparse-read")	    \
-> +									    \
-> +	f(NOTIFY,	__CEPH_OSD_OP(RD, DATA, 6),	"notify")	    \
-> +	f(NOTIFY_ACK,	__CEPH_OSD_OP(RD, DATA, 7),	"notify-ack")	    \
-> +									    \
-> +	/* versioning */						    \
-> +	f(ASSERT_VER,	__CEPH_OSD_OP(RD, DATA, 8),	"assert-version")   \
-> +									    \
-> +	f(LIST_WATCHERS, __CEPH_OSD_OP(RD, DATA, 9),	"list-watchers")    \
-> +									    \
-> +	f(LIST_SNAPS,	__CEPH_OSD_OP(RD, DATA, 10),	"list-snaps")	    \
-> +									    \
-> +	/* sync */							    \
-> +	f(SYNC_READ,	__CEPH_OSD_OP(RD, DATA, 11),	"sync_read")	    \
-> +									    \
-> +	/* write */							    \
-> +	f(WRITE,	__CEPH_OSD_OP(WR, DATA, 1),	"write")	    \
-> +	f(WRITEFULL,	__CEPH_OSD_OP(WR, DATA, 2),	"writefull")	    \
-> +	f(TRUNCATE,	__CEPH_OSD_OP(WR, DATA, 3),	"truncate")	    \
-> +	f(ZERO,		__CEPH_OSD_OP(WR, DATA, 4),	"zero")		    \
-> +	f(DELETE,	__CEPH_OSD_OP(WR, DATA, 5),	"delete")	    \
-> +									    \
-> +	/* fancy write */						    \
-> +	f(APPEND,	__CEPH_OSD_OP(WR, DATA, 6),	"append")	    \
-> +	f(STARTSYNC,	__CEPH_OSD_OP(WR, DATA, 7),	"startsync")	    \
-> +	f(SETTRUNC,	__CEPH_OSD_OP(WR, DATA, 8),	"settrunc")	    \
-> +	f(TRIMTRUNC,	__CEPH_OSD_OP(WR, DATA, 9),	"trimtrunc")	    \
-> +									    \
-> +	f(TMAPUP,	__CEPH_OSD_OP(RMW, DATA, 10),	"tmapup")	    \
-> +	f(TMAPPUT,	__CEPH_OSD_OP(WR, DATA, 11),	"tmapput")	    \
-> +	f(TMAPGET,	__CEPH_OSD_OP(RD, DATA, 12),	"tmapget")	    \
-> +									    \
-> +	f(CREATE,	__CEPH_OSD_OP(WR, DATA, 13),	"create")	    \
-> +	f(ROLLBACK,	__CEPH_OSD_OP(WR, DATA, 14),	"rollback")	    \
-> +									    \
-> +	f(WATCH,	__CEPH_OSD_OP(WR, DATA, 15),	"watch")	    \
-> +									    \
-> +	/* omap */							    \
-> +	f(OMAPGETKEYS,	__CEPH_OSD_OP(RD, DATA, 17),	"omap-get-keys")    \
-> +	f(OMAPGETVALS,	__CEPH_OSD_OP(RD, DATA, 18),	"omap-get-vals")    \
-> +	f(OMAPGETHEADER, __CEPH_OSD_OP(RD, DATA, 19),	"omap-get-header")  \
-> +	f(OMAPGETVALSBYKEYS, __CEPH_OSD_OP(RD, DATA, 20), "omap-get-vals-by-keys") \
-> +	f(OMAPSETVALS,	__CEPH_OSD_OP(WR, DATA, 21),	"omap-set-vals")    \
-> +	f(OMAPSETHEADER, __CEPH_OSD_OP(WR, DATA, 22),	"omap-set-header")  \
-> +	f(OMAPCLEAR,	__CEPH_OSD_OP(WR, DATA, 23),	"omap-clear")	    \
-> +	f(OMAPRMKEYS,	__CEPH_OSD_OP(WR, DATA, 24),	"omap-rm-keys")	    \
-> +	f(OMAP_CMP,	__CEPH_OSD_OP(RD, DATA, 25),	"omap-cmp")	    \
-> +									    \
-> +	/* tiering */							    \
-> +	f(COPY_FROM,	__CEPH_OSD_OP(WR, DATA, 26),	"copy-from")	    \
-> +	f(COPY_GET_CLASSIC, __CEPH_OSD_OP(RD, DATA, 27), "copy-get-classic") \
-> +	f(UNDIRTY,	__CEPH_OSD_OP(WR, DATA, 28),	"undirty")	    \
-> +	f(ISDIRTY,	__CEPH_OSD_OP(RD, DATA, 29),	"isdirty")	    \
-> +	f(COPY_GET,	__CEPH_OSD_OP(RD, DATA, 30),	"copy-get")	    \
-> +	f(CACHE_FLUSH,	__CEPH_OSD_OP(CACHE, DATA, 31),	"cache-flush")	    \
-> +	f(CACHE_EVICT,	__CEPH_OSD_OP(CACHE, DATA, 32),	"cache-evict")	    \
-> +	f(CACHE_TRY_FLUSH, __CEPH_OSD_OP(CACHE, DATA, 33), "cache-try-flush") \
-> +									    \
-> +	/* convert tmap to omap */					    \
-> +	f(TMAP2OMAP,	__CEPH_OSD_OP(RMW, DATA, 34),	"tmap2omap")	    \
-> +									    \
-> +	/* hints */							    \
-> +	f(SETALLOCHINT,	__CEPH_OSD_OP(WR, DATA, 35),	"set-alloc-hint")   \
-> +									    \
-> +	/** multi **/							    \
-> +	f(CLONERANGE,	__CEPH_OSD_OP(WR, MULTI, 1),	"clonerange")	    \
-> +	f(ASSERT_SRC_VERSION, __CEPH_OSD_OP(RD, MULTI, 2), "assert-src-version") \
-> +	f(SRC_CMPXATTR,	__CEPH_OSD_OP(RD, MULTI, 3),	"src-cmpxattr")	    \
-> +									    \
-> +	/** attrs **/							    \
-> +	/* read */							    \
-> +	f(GETXATTR,	__CEPH_OSD_OP(RD, ATTR, 1),	"getxattr")	    \
-> +	f(GETXATTRS,	__CEPH_OSD_OP(RD, ATTR, 2),	"getxattrs")	    \
-> +	f(CMPXATTR,	__CEPH_OSD_OP(RD, ATTR, 3),	"cmpxattr")	    \
-> +									    \
-> +	/* write */							    \
-> +	f(SETXATTR,	__CEPH_OSD_OP(WR, ATTR, 1),	"setxattr")	    \
-> +	f(SETXATTRS,	__CEPH_OSD_OP(WR, ATTR, 2),	"setxattrs")	    \
-> +	f(RESETXATTRS,	__CEPH_OSD_OP(WR, ATTR, 3),	"resetxattrs")	    \
-> +	f(RMXATTR,	__CEPH_OSD_OP(WR, ATTR, 4),	"rmxattr")	    \
-> +									    \
-> +	/** subop **/							    \
-> +	f(PULL,		__CEPH_OSD_OP1(SUB, 1),		"pull")		    \
-> +	f(PUSH,		__CEPH_OSD_OP1(SUB, 2),		"push")		    \
-> +	f(BALANCEREADS,	__CEPH_OSD_OP1(SUB, 3),		"balance-reads")    \
-> +	f(UNBALANCEREADS, __CEPH_OSD_OP1(SUB, 4),	"unbalance-reads")  \
-> +	f(SCRUB,	__CEPH_OSD_OP1(SUB, 5),		"scrub")	    \
-> +	f(SCRUB_RESERVE, __CEPH_OSD_OP1(SUB, 6),	"scrub-reserve")    \
-> +	f(SCRUB_UNRESERVE, __CEPH_OSD_OP1(SUB, 7),	"scrub-unreserve")  \
-> +	f(SCRUB_STOP,	__CEPH_OSD_OP1(SUB, 8),		"scrub-stop")	    \
-> +	f(SCRUB_MAP,	__CEPH_OSD_OP1(SUB, 9),		"scrub-map")	    \
-> +									    \
-> +	/** lock **/							    \
-> +	f(WRLOCK,	__CEPH_OSD_OP(WR, LOCK, 1),	"wrlock")	    \
-> +	f(WRUNLOCK,	__CEPH_OSD_OP(WR, LOCK, 2),	"wrunlock")	    \
-> +	f(RDLOCK,	__CEPH_OSD_OP(WR, LOCK, 3),	"rdlock")	    \
-> +	f(RDUNLOCK,	__CEPH_OSD_OP(WR, LOCK, 4),	"rdunlock")	    \
-> +	f(UPLOCK,	__CEPH_OSD_OP(WR, LOCK, 5),	"uplock")	    \
-> +	f(DNLOCK,	__CEPH_OSD_OP(WR, LOCK, 6),	"dnlock")	    \
-> +									    \
-> +	/** exec **/							    \
-> +	/* note: the RD bit here is wrong; see special-case below in helper */ \
-> +	f(CALL,		__CEPH_OSD_OP(RD, EXEC, 1),	"call")		    \
-> +									    \
-> +	/** pg **/							    \
-> +	f(PGLS,		__CEPH_OSD_OP(RD, PG, 1),	"pgls")		    \
-> +	f(PGLS_FILTER,	__CEPH_OSD_OP(RD, PG, 2),	"pgls-filter")	    \
-> +	f(PG_HITSET_LS,	__CEPH_OSD_OP(RD, PG, 3),	"pg-hitset-ls")	    \
-> +	f(PG_HITSET_GET, __CEPH_OSD_OP(RD, PG, 4),	"pg-hitset-get")
-> +
->  enum {
-> -	/** data **/
-> -	/* read */
-> -	CEPH_OSD_OP_READ      = CEPH_OSD_OP_MODE_RD | CEPH_OSD_OP_TYPE_DATA | 1,
-> -	CEPH_OSD_OP_STAT      = CEPH_OSD_OP_MODE_RD | CEPH_OSD_OP_TYPE_DATA | 2,
-> -	CEPH_OSD_OP_MAPEXT    = CEPH_OSD_OP_MODE_RD | CEPH_OSD_OP_TYPE_DATA | 3,
-> -
-> -	/* fancy read */
-> -	CEPH_OSD_OP_MASKTRUNC   = CEPH_OSD_OP_MODE_RD | CEPH_OSD_OP_TYPE_DATA | 4,
-> -	CEPH_OSD_OP_SPARSE_READ = CEPH_OSD_OP_MODE_RD | CEPH_OSD_OP_TYPE_DATA | 5,
-> -
-> -	CEPH_OSD_OP_NOTIFY    = CEPH_OSD_OP_MODE_RD | CEPH_OSD_OP_TYPE_DATA | 6,
-> -	CEPH_OSD_OP_NOTIFY_ACK = CEPH_OSD_OP_MODE_RD | CEPH_OSD_OP_TYPE_DATA | 7,
-> -
-> -	/* versioning */
-> -	CEPH_OSD_OP_ASSERT_VER = CEPH_OSD_OP_MODE_RD | CEPH_OSD_OP_TYPE_DATA | 8,
-> -
-> -	/* write */
-> -	CEPH_OSD_OP_WRITE     = CEPH_OSD_OP_MODE_WR | CEPH_OSD_OP_TYPE_DATA | 1,
-> -	CEPH_OSD_OP_WRITEFULL = CEPH_OSD_OP_MODE_WR | CEPH_OSD_OP_TYPE_DATA | 2,
-> -	CEPH_OSD_OP_TRUNCATE  = CEPH_OSD_OP_MODE_WR | CEPH_OSD_OP_TYPE_DATA | 3,
-> -	CEPH_OSD_OP_ZERO      = CEPH_OSD_OP_MODE_WR | CEPH_OSD_OP_TYPE_DATA | 4,
-> -	CEPH_OSD_OP_DELETE    = CEPH_OSD_OP_MODE_WR | CEPH_OSD_OP_TYPE_DATA | 5,
-> -
-> -	/* fancy write */
-> -	CEPH_OSD_OP_APPEND    = CEPH_OSD_OP_MODE_WR | CEPH_OSD_OP_TYPE_DATA | 6,
-> -	CEPH_OSD_OP_STARTSYNC = CEPH_OSD_OP_MODE_WR | CEPH_OSD_OP_TYPE_DATA | 7,
-> -	CEPH_OSD_OP_SETTRUNC  = CEPH_OSD_OP_MODE_WR | CEPH_OSD_OP_TYPE_DATA | 8,
-> -	CEPH_OSD_OP_TRIMTRUNC = CEPH_OSD_OP_MODE_WR | CEPH_OSD_OP_TYPE_DATA | 9,
-> -
-> -	CEPH_OSD_OP_TMAPUP  = CEPH_OSD_OP_MODE_RMW | CEPH_OSD_OP_TYPE_DATA | 10,
-> -	CEPH_OSD_OP_TMAPPUT = CEPH_OSD_OP_MODE_WR | CEPH_OSD_OP_TYPE_DATA | 11,
-> -	CEPH_OSD_OP_TMAPGET = CEPH_OSD_OP_MODE_RD | CEPH_OSD_OP_TYPE_DATA | 12,
-> -
-> -	CEPH_OSD_OP_CREATE  = CEPH_OSD_OP_MODE_WR | CEPH_OSD_OP_TYPE_DATA | 13,
-> -	CEPH_OSD_OP_ROLLBACK= CEPH_OSD_OP_MODE_WR | CEPH_OSD_OP_TYPE_DATA | 14,
-> -
-> -	CEPH_OSD_OP_WATCH   = CEPH_OSD_OP_MODE_WR | CEPH_OSD_OP_TYPE_DATA | 15,
-> -
-> -	/* omap */
-> -	CEPH_OSD_OP_OMAPGETKEYS   = CEPH_OSD_OP_MODE_RD | CEPH_OSD_OP_TYPE_DATA | 17,
-> -	CEPH_OSD_OP_OMAPGETVALS   = CEPH_OSD_OP_MODE_RD | CEPH_OSD_OP_TYPE_DATA | 18,
-> -	CEPH_OSD_OP_OMAPGETHEADER = CEPH_OSD_OP_MODE_RD | CEPH_OSD_OP_TYPE_DATA | 19,
-> -	CEPH_OSD_OP_OMAPGETVALSBYKEYS  =
-> -	  CEPH_OSD_OP_MODE_RD | CEPH_OSD_OP_TYPE_DATA | 20,
-> -	CEPH_OSD_OP_OMAPSETVALS   = CEPH_OSD_OP_MODE_WR | CEPH_OSD_OP_TYPE_DATA | 21,
-> -	CEPH_OSD_OP_OMAPSETHEADER = CEPH_OSD_OP_MODE_WR | CEPH_OSD_OP_TYPE_DATA | 22,
-> -	CEPH_OSD_OP_OMAPCLEAR     = CEPH_OSD_OP_MODE_WR | CEPH_OSD_OP_TYPE_DATA | 23,
-> -	CEPH_OSD_OP_OMAPRMKEYS    = CEPH_OSD_OP_MODE_WR | CEPH_OSD_OP_TYPE_DATA | 24,
-> -	CEPH_OSD_OP_OMAP_CMP      = CEPH_OSD_OP_MODE_RD | CEPH_OSD_OP_TYPE_DATA | 25,
-> -
-> -	/* hints */
-> -	CEPH_OSD_OP_SETALLOCHINT = CEPH_OSD_OP_MODE_WR | CEPH_OSD_OP_TYPE_DATA | 35,
-> -
-> -	/** multi **/
-> -	CEPH_OSD_OP_CLONERANGE = CEPH_OSD_OP_MODE_WR | CEPH_OSD_OP_TYPE_MULTI | 1,
-> -	CEPH_OSD_OP_ASSERT_SRC_VERSION = CEPH_OSD_OP_MODE_RD | CEPH_OSD_OP_TYPE_MULTI | 2,
-> -	CEPH_OSD_OP_SRC_CMPXATTR = CEPH_OSD_OP_MODE_RD | CEPH_OSD_OP_TYPE_MULTI | 3,
-> -
-> -	/** attrs **/
-> -	/* read */
-> -	CEPH_OSD_OP_GETXATTR  = CEPH_OSD_OP_MODE_RD | CEPH_OSD_OP_TYPE_ATTR | 1,
-> -	CEPH_OSD_OP_GETXATTRS = CEPH_OSD_OP_MODE_RD | CEPH_OSD_OP_TYPE_ATTR | 2,
-> -	CEPH_OSD_OP_CMPXATTR  = CEPH_OSD_OP_MODE_RD | CEPH_OSD_OP_TYPE_ATTR | 3,
-> -
-> -	/* write */
-> -	CEPH_OSD_OP_SETXATTR  = CEPH_OSD_OP_MODE_WR | CEPH_OSD_OP_TYPE_ATTR | 1,
-> -	CEPH_OSD_OP_SETXATTRS = CEPH_OSD_OP_MODE_WR | CEPH_OSD_OP_TYPE_ATTR | 2,
-> -	CEPH_OSD_OP_RESETXATTRS = CEPH_OSD_OP_MODE_WR|CEPH_OSD_OP_TYPE_ATTR | 3,
-> -	CEPH_OSD_OP_RMXATTR   = CEPH_OSD_OP_MODE_WR | CEPH_OSD_OP_TYPE_ATTR | 4,
-> -
-> -	/** subop **/
-> -	CEPH_OSD_OP_PULL            = CEPH_OSD_OP_MODE_SUB | 1,
-> -	CEPH_OSD_OP_PUSH            = CEPH_OSD_OP_MODE_SUB | 2,
-> -	CEPH_OSD_OP_BALANCEREADS    = CEPH_OSD_OP_MODE_SUB | 3,
-> -	CEPH_OSD_OP_UNBALANCEREADS  = CEPH_OSD_OP_MODE_SUB | 4,
-> -	CEPH_OSD_OP_SCRUB           = CEPH_OSD_OP_MODE_SUB | 5,
-> -	CEPH_OSD_OP_SCRUB_RESERVE   = CEPH_OSD_OP_MODE_SUB | 6,
-> -	CEPH_OSD_OP_SCRUB_UNRESERVE = CEPH_OSD_OP_MODE_SUB | 7,
-> -	CEPH_OSD_OP_SCRUB_STOP      = CEPH_OSD_OP_MODE_SUB | 8,
-> -	CEPH_OSD_OP_SCRUB_MAP     = CEPH_OSD_OP_MODE_SUB | 9,
-> -
-> -	/** lock **/
-> -	CEPH_OSD_OP_WRLOCK    = CEPH_OSD_OP_MODE_WR | CEPH_OSD_OP_TYPE_LOCK | 1,
-> -	CEPH_OSD_OP_WRUNLOCK  = CEPH_OSD_OP_MODE_WR | CEPH_OSD_OP_TYPE_LOCK | 2,
-> -	CEPH_OSD_OP_RDLOCK    = CEPH_OSD_OP_MODE_WR | CEPH_OSD_OP_TYPE_LOCK | 3,
-> -	CEPH_OSD_OP_RDUNLOCK  = CEPH_OSD_OP_MODE_WR | CEPH_OSD_OP_TYPE_LOCK | 4,
-> -	CEPH_OSD_OP_UPLOCK    = CEPH_OSD_OP_MODE_WR | CEPH_OSD_OP_TYPE_LOCK | 5,
-> -	CEPH_OSD_OP_DNLOCK    = CEPH_OSD_OP_MODE_WR | CEPH_OSD_OP_TYPE_LOCK | 6,
-> -
-> -	/** exec **/
-> -	/* note: the RD bit here is wrong; see special-case below in helper */
-> -	CEPH_OSD_OP_CALL    = CEPH_OSD_OP_MODE_RD | CEPH_OSD_OP_TYPE_EXEC | 1,
-> -
-> -	/** pg **/
-> -	CEPH_OSD_OP_PGLS      = CEPH_OSD_OP_MODE_RD | CEPH_OSD_OP_TYPE_PG | 1,
-> -	CEPH_OSD_OP_PGLS_FILTER = CEPH_OSD_OP_MODE_RD | CEPH_OSD_OP_TYPE_PG | 2,
-> +#define GENERATE_ENUM_ENTRY(op, opcode, str)	CEPH_OSD_OP_##op = (opcode),
-> +__CEPH_FORALL_OSD_OPS(GENERATE_ENUM_ENTRY)
-> +#undef GENERATE_ENUM_ENTRY
->  };
->  
->  static inline int ceph_osd_op_type_lock(int op)
-> diff --git a/net/ceph/ceph_strings.c b/net/ceph/ceph_strings.c
-> index 1348df96fe15..30560202f57b 100644
-> --- a/net/ceph/ceph_strings.c
-> +++ b/net/ceph/ceph_strings.c
-> @@ -19,77 +19,12 @@ const char *ceph_entity_type_name(int type)
->  const char *ceph_osd_op_name(int op)
->  {
->  	switch (op) {
-> -	case CEPH_OSD_OP_READ: return "read";
-> -	case CEPH_OSD_OP_STAT: return "stat";
-> -	case CEPH_OSD_OP_MAPEXT: return "mapext";
-> -	case CEPH_OSD_OP_SPARSE_READ: return "sparse-read";
-> -	case CEPH_OSD_OP_NOTIFY: return "notify";
-> -	case CEPH_OSD_OP_NOTIFY_ACK: return "notify-ack";
-> -	case CEPH_OSD_OP_ASSERT_VER: return "assert-version";
-> -
-> -	case CEPH_OSD_OP_MASKTRUNC: return "masktrunc";
-> -
-> -	case CEPH_OSD_OP_CREATE: return "create";
-> -	case CEPH_OSD_OP_WRITE: return "write";
-> -	case CEPH_OSD_OP_DELETE: return "delete";
-> -	case CEPH_OSD_OP_TRUNCATE: return "truncate";
-> -	case CEPH_OSD_OP_ZERO: return "zero";
-> -	case CEPH_OSD_OP_WRITEFULL: return "writefull";
-> -	case CEPH_OSD_OP_ROLLBACK: return "rollback";
-> -
-> -	case CEPH_OSD_OP_APPEND: return "append";
-> -	case CEPH_OSD_OP_STARTSYNC: return "startsync";
-> -	case CEPH_OSD_OP_SETTRUNC: return "settrunc";
-> -	case CEPH_OSD_OP_TRIMTRUNC: return "trimtrunc";
-> -
-> -	case CEPH_OSD_OP_TMAPUP: return "tmapup";
-> -	case CEPH_OSD_OP_TMAPGET: return "tmapget";
-> -	case CEPH_OSD_OP_TMAPPUT: return "tmapput";
-> -	case CEPH_OSD_OP_WATCH: return "watch";
-> -
-> -	case CEPH_OSD_OP_CLONERANGE: return "clonerange";
-> -	case CEPH_OSD_OP_ASSERT_SRC_VERSION: return "assert-src-version";
-> -	case CEPH_OSD_OP_SRC_CMPXATTR: return "src-cmpxattr";
-> -
-> -	case CEPH_OSD_OP_GETXATTR: return "getxattr";
-> -	case CEPH_OSD_OP_GETXATTRS: return "getxattrs";
-> -	case CEPH_OSD_OP_SETXATTR: return "setxattr";
-> -	case CEPH_OSD_OP_SETXATTRS: return "setxattrs";
-> -	case CEPH_OSD_OP_RESETXATTRS: return "resetxattrs";
-> -	case CEPH_OSD_OP_RMXATTR: return "rmxattr";
-> -	case CEPH_OSD_OP_CMPXATTR: return "cmpxattr";
-> -
-> -	case CEPH_OSD_OP_PULL: return "pull";
-> -	case CEPH_OSD_OP_PUSH: return "push";
-> -	case CEPH_OSD_OP_BALANCEREADS: return "balance-reads";
-> -	case CEPH_OSD_OP_UNBALANCEREADS: return "unbalance-reads";
-> -	case CEPH_OSD_OP_SCRUB: return "scrub";
-> -	case CEPH_OSD_OP_SCRUB_RESERVE: return "scrub-reserve";
-> -	case CEPH_OSD_OP_SCRUB_UNRESERVE: return "scrub-unreserve";
-> -	case CEPH_OSD_OP_SCRUB_STOP: return "scrub-stop";
-> -	case CEPH_OSD_OP_SCRUB_MAP: return "scrub-map";
-> -
-> -	case CEPH_OSD_OP_WRLOCK: return "wrlock";
-> -	case CEPH_OSD_OP_WRUNLOCK: return "wrunlock";
-> -	case CEPH_OSD_OP_RDLOCK: return "rdlock";
-> -	case CEPH_OSD_OP_RDUNLOCK: return "rdunlock";
-> -	case CEPH_OSD_OP_UPLOCK: return "uplock";
-> -	case CEPH_OSD_OP_DNLOCK: return "dnlock";
-> -
-> -	case CEPH_OSD_OP_CALL: return "call";
-> -
-> -	case CEPH_OSD_OP_PGLS: return "pgls";
-> -	case CEPH_OSD_OP_PGLS_FILTER: return "pgls-filter";
-> -	case CEPH_OSD_OP_OMAPGETKEYS: return "omap-get-keys";
-> -	case CEPH_OSD_OP_OMAPGETVALS: return "omap-get-vals";
-> -	case CEPH_OSD_OP_OMAPGETHEADER: return "omap-get-header";
-> -	case CEPH_OSD_OP_OMAPGETVALSBYKEYS: return "omap-get-vals-by-keys";
-> -	case CEPH_OSD_OP_OMAPSETVALS: return "omap-set-vals";
-> -	case CEPH_OSD_OP_OMAPSETHEADER: return "omap-set-header";
-> -	case CEPH_OSD_OP_OMAPCLEAR: return "omap-clear";
-> -	case CEPH_OSD_OP_OMAPRMKEYS: return "omap-rm-keys";
-> +#define GENERATE_CASE(op, opcode, str)	case CEPH_OSD_OP_##op: return (str);
-> +__CEPH_FORALL_OSD_OPS(GENERATE_CASE)
-> +#undef GENERATE_CASE
-> +	default:
-> +		return "???";
->  	}
-> -	return "???";
->  }
->  
->  const char *ceph_osd_state_name(int s)
-> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-> index 952e9c254cc7..bc75569235cf 100644
-> --- a/net/ceph/osd_client.c
-> +++ b/net/ceph/osd_client.c
-> @@ -431,68 +431,9 @@ EXPORT_SYMBOL(ceph_osdc_alloc_request);
->  static bool osd_req_opcode_valid(u16 opcode)
->  {
->  	switch (opcode) {
-> -	case CEPH_OSD_OP_READ:
-> -	case CEPH_OSD_OP_STAT:
-> -	case CEPH_OSD_OP_MAPEXT:
-> -	case CEPH_OSD_OP_MASKTRUNC:
-> -	case CEPH_OSD_OP_SPARSE_READ:
-> -	case CEPH_OSD_OP_NOTIFY:
-> -	case CEPH_OSD_OP_NOTIFY_ACK:
-> -	case CEPH_OSD_OP_ASSERT_VER:
-> -	case CEPH_OSD_OP_WRITE:
-> -	case CEPH_OSD_OP_WRITEFULL:
-> -	case CEPH_OSD_OP_TRUNCATE:
-> -	case CEPH_OSD_OP_ZERO:
-> -	case CEPH_OSD_OP_DELETE:
-> -	case CEPH_OSD_OP_APPEND:
-> -	case CEPH_OSD_OP_STARTSYNC:
-> -	case CEPH_OSD_OP_SETTRUNC:
-> -	case CEPH_OSD_OP_TRIMTRUNC:
-> -	case CEPH_OSD_OP_TMAPUP:
-> -	case CEPH_OSD_OP_TMAPPUT:
-> -	case CEPH_OSD_OP_TMAPGET:
-> -	case CEPH_OSD_OP_CREATE:
-> -	case CEPH_OSD_OP_ROLLBACK:
-> -	case CEPH_OSD_OP_WATCH:
-> -	case CEPH_OSD_OP_OMAPGETKEYS:
-> -	case CEPH_OSD_OP_OMAPGETVALS:
-> -	case CEPH_OSD_OP_OMAPGETHEADER:
-> -	case CEPH_OSD_OP_OMAPGETVALSBYKEYS:
-> -	case CEPH_OSD_OP_OMAPSETVALS:
-> -	case CEPH_OSD_OP_OMAPSETHEADER:
-> -	case CEPH_OSD_OP_OMAPCLEAR:
-> -	case CEPH_OSD_OP_OMAPRMKEYS:
-> -	case CEPH_OSD_OP_OMAP_CMP:
-> -	case CEPH_OSD_OP_SETALLOCHINT:
-> -	case CEPH_OSD_OP_CLONERANGE:
-> -	case CEPH_OSD_OP_ASSERT_SRC_VERSION:
-> -	case CEPH_OSD_OP_SRC_CMPXATTR:
-> -	case CEPH_OSD_OP_GETXATTR:
-> -	case CEPH_OSD_OP_GETXATTRS:
-> -	case CEPH_OSD_OP_CMPXATTR:
-> -	case CEPH_OSD_OP_SETXATTR:
-> -	case CEPH_OSD_OP_SETXATTRS:
-> -	case CEPH_OSD_OP_RESETXATTRS:
-> -	case CEPH_OSD_OP_RMXATTR:
-> -	case CEPH_OSD_OP_PULL:
-> -	case CEPH_OSD_OP_PUSH:
-> -	case CEPH_OSD_OP_BALANCEREADS:
-> -	case CEPH_OSD_OP_UNBALANCEREADS:
-> -	case CEPH_OSD_OP_SCRUB:
-> -	case CEPH_OSD_OP_SCRUB_RESERVE:
-> -	case CEPH_OSD_OP_SCRUB_UNRESERVE:
-> -	case CEPH_OSD_OP_SCRUB_STOP:
-> -	case CEPH_OSD_OP_SCRUB_MAP:
-> -	case CEPH_OSD_OP_WRLOCK:
-> -	case CEPH_OSD_OP_WRUNLOCK:
-> -	case CEPH_OSD_OP_RDLOCK:
-> -	case CEPH_OSD_OP_RDUNLOCK:
-> -	case CEPH_OSD_OP_UPLOCK:
-> -	case CEPH_OSD_OP_DNLOCK:
-> -	case CEPH_OSD_OP_CALL:
-> -	case CEPH_OSD_OP_PGLS:
-> -	case CEPH_OSD_OP_PGLS_FILTER:
-> -		return true;
-> +#define GENERATE_CASE(op, opcode, str)	case CEPH_OSD_OP_##op: return true;
-> +__CEPH_FORALL_OSD_OPS(GENERATE_CASE)
-> +#undef GENERATE_CASE
->  	default:
->  		return false;
->  	}
-> -- 
-> 1.7.10.4
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+--557981400-2098900025-1412780373=:742
+Content-Type: MESSAGE/RFC822; CHARSET=US-ASCII
+Content-ID: <alpine.DEB.2.00.1410080759251.742@cobra.newdream.net>
+Content-Description: Forwarded Message
+Content-Disposition: inline
+
+Return-Path: <scan-admin@coverity.com>
+X-Original-To: sage@cobra.newdream.net
+Delivered-To: sage@cobra.newdream.net
+Received: from destro.newdream.net (destro.newdream.net [66.33.216.68])
+	by cobra.newdream.net (Postfix) with ESMTP id 43FED80068
+	for <sage@cobra.newdream.net>; Wed,  8 Oct 2014 06:21:48 -0700 (PDT)
+Received: by destro.newdream.net (Postfix)
+	id 30D22120C85; Wed,  8 Oct 2014 06:21:48 -0700 (PDT)
+Delivered-To: sage@destro.newdream.net
+Received: from madmax.dreamhost.com (caiajhbdcbdj.dreamhost.com
+	[208.97.132.139])
+	by destro.newdream.net (Postfix) with ESMTP id 2DC11120C7B
+	for <sage@newdream.net>; Wed,  8 Oct 2014 06:21:48 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+	by madmax.dreamhost.com (Postfix) with ESMTP id 2941FFD802D
+	for <sage@newdream.net>; Wed,  8 Oct 2014 06:21:48 -0700 (PDT)
+X-DH-Virus-Scanned: Debian amavisd-new at madmax.dreamhost.com
+X-Spam-Flag: NO
+X-Spam-Score: 0
+X-Spam-Level: 
+X-Spam-Status: No, score=x tagged_above=-999 required=999 WHITELISTED tests=[]
+	autolearn=unavailable
+Received: from godfather.dreamhost.com ([208.97.132.17])
+	by localhost (madmax.dreamhost.com [208.97.132.139]) (amavisd-new,
+	port 10024) with ESMTP id R6XTzsEcjqQv for <sage@newdream.net>;
+	Wed,  8 Oct 2014 06:21:48 -0700 (PDT)
+Received: from scanrelay.coverity.com (scanrelay.coverity.com [209.249.196.67])
+	by godfather.dreamhost.com (Postfix) with ESMTP id 003EB1B0092
+	for <sage@newdream.net>; Wed,  8 Oct 2014 06:21:47 -0700 (PDT)
+Received: from localhost.localdomain ([208.69.177.215]) by
+	scanrelay.coverity.com with Microsoft SMTPSVC(7.5.7601.17514);
+	Wed, 8 Oct 2014 06:22:02 -0700
+Date: Wed, 08 Oct 2014 06:21:47 -0700
+From: scan-admin@coverity.com
+To: sage@newdream.net
+Message-ID: <54353a6b94a4d_233fcf3334855f2@scan.coverity.com.mail>
+Subject: New Defects reported by Coverity Scan for ceph
+Mime-Version: 1.0
+Content-Type: text/plain;
+ charset=UTF-8
+Content-Transfer-Encoding: 7bit
+X-OriginalArrivalTime: 08 Oct 2014 13:22:02.0252 (UTC)
+	FILETIME=[D8B5ACC0:01CFE2FA]
+X-Spambayes-Classification: ham; 0.00
+
+
+
+Hi,
+
+Please find the latest report on new defect(s) introduced to ceph found with Coverity Scan.
+
+6 new defect(s) introduced to ceph found with Coverity Scan.
+3 defect(s), reported by Coverity Scan earlier, were marked fixed in the recent build analyzed by Coverity Scan.
+
+New defect(s) Reported-by: Coverity Scan
+Showing 6 of 6 defect(s)
+
+
+** CID 1244195:  Dereference after null check  (FORWARD_NULL)
+/mon/Monitor.cc: 3110 in Monitor::_ms_dispatch(Message *)()
+
+** CID 1244196:  Data race condition  (MISSING_LOCK)
+/test/mon/test-mon-msg.cc: 229 in MonMsgTest::SetUp()()
+
+** CID 1244197:  Dereference before null check  (REVERSE_INULL)
+/mon/Monitor.cc: 3366 in Monitor::dispatch(MonSession *, Message *, bool)()
+
+** CID 1244198:  Uncaught exception  (UNCAUGHT_EXCEPT)
+/test/mon/test-mon-msg.cc: 322 in main()
+/test/mon/test-mon-msg.cc: 322 in main()
+/test/mon/test-mon-msg.cc: 322 in main()
+
+** CID 1244200:  Uninitialized pointer field  (UNINIT_CTOR)
+/test/mon/test-mon-msg.cc: 67 in MonClientHelper::MonClientHelper(CephContext *)()
+
+** CID 1244199:  Uninitialized pointer field  (UNINIT_CTOR)
+/test/mon/test-mon-msg.cc: 225 in MonMsgTest::MonMsgTest()()
+
+
+________________________________________________________________________________________________________
+*** CID 1244195:  Dereference after null check  (FORWARD_NULL)
+/mon/Monitor.cc: 3110 in Monitor::_ms_dispatch(Message *)()
+3104       if (s && s->closed) {
+3105         caps = s->caps;
+3106         reuse_caps = true;
+3107         s->put();
+3108         s = NULL;
+3109       }
+>>>     CID 1244195:  Dereference after null check  (FORWARD_NULL)
+>>>     Comparing "s" to null implies that "s" might be null.
+3110       if (!s) {
+3111         // if the sender is not a monitor, make sure their first message for a
+3112         // session is an MAuth.  If it is not, assume it's a stray message,
+3113         // and considering that we are creating a new session it is safe to
+3114         // assume that the sender hasn't authenticated yet, so we have no way
+3115         // of assessing whether we should handle it or not.
+
+________________________________________________________________________________________________________
+*** CID 1244196:  Data race condition  (MISSING_LOCK)
+/test/mon/test-mon-msg.cc: 229 in MonMsgTest::SetUp()()
+223       MonMsgTest() :
+224         MonClientHelper(g_ceph_context),
+225         lock("lock") { }
+226     
+227     public:
+228       virtual void SetUp() {
+>>>     CID 1244196:  Data race condition  (MISSING_LOCK)
+>>>     Accessing "this->reply_type" without holding lock "Mutex._m". Elsewhere, "MonMsgTest.reply_type" is accessed with "Mutex._m" held 1 out of 2 times (1 of these accesses strongly imply that it is necessary).
+229         reply_type = -1;
+230         if (reply_msg) {
+231           reply_msg->put();
+232           reply_msg = NULL;
+233         }
+234         ASSERT_EQ(init(), 0);
+
+________________________________________________________________________________________________________
+*** CID 1244197:  Dereference before null check  (REVERSE_INULL)
+/mon/Monitor.cc: 3366 in Monitor::dispatch(MonSession *, Message *, bool)()
+3360           }
+3361           break;
+3362     
+3363         // elector messages
+3364         case MSG_MON_ELECTION:
+3365           //check privileges here for simplicity
+>>>     CID 1244197:  Dereference before null check  (REVERSE_INULL)
+>>>     Null-checking "s" suggests that it may be null, but it has already been dereferenced on all paths leading to the check.
+3366           if (s &&
+3367               !s->is_capable("mon", MON_CAP_X)) {
+3368             dout(0) << "MMonElection received from entity without enough caps!"
+3369               << s->caps << dendl;
+3370             m->put();
+3371             break;
+
+________________________________________________________________________________________________________
+*** CID 1244198:  Uncaught exception  (UNCAUGHT_EXCEPT)
+/test/mon/test-mon-msg.cc: 322 in main()
+316     
+317       int r = monc.get_monmap();
+318       ASSERT_EQ(r, 0);
+319       ASSERT_FALSE(monc.monmap.contains("client"));
+320     }
+321     
+>>>     CID 1244198:  Uncaught exception  (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char **)" an exception of type "ceph::FailedAssertion" is thrown and never caught.
+322     int main(int argc, char *argv[])
+323     {
+324       vector<const char*> def_args;
+325       vector<const char*> args;
+326       argv_to_vec(argc, (const char **)argv, args);
+327     
+/test/mon/test-mon-msg.cc: 322 in main()
+316     
+317       int r = monc.get_monmap();
+318       ASSERT_EQ(r, 0);
+319       ASSERT_FALSE(monc.monmap.contains("client"));
+320     }
+321     
+>>>     CID 1244198:  Uncaught exception  (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char **)" an exception of type "ceph::FailedAssertion" is thrown and never caught.
+322     int main(int argc, char *argv[])
+323     {
+324       vector<const char*> def_args;
+325       vector<const char*> args;
+326       argv_to_vec(argc, (const char **)argv, args);
+327     
+/test/mon/test-mon-msg.cc: 322 in main()
+316     
+317       int r = monc.get_monmap();
+318       ASSERT_EQ(r, 0);
+319       ASSERT_FALSE(monc.monmap.contains("client"));
+320     }
+321     
+>>>     CID 1244198:  Uncaught exception  (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char **)" an exception of type "ceph::FailedAssertion" is thrown and never caught.
+322     int main(int argc, char *argv[])
+323     {
+324       vector<const char*> def_args;
+325       vector<const char*> args;
+326       argv_to_vec(argc, (const char **)argv, args);
+327     
+
+________________________________________________________________________________________________________
+*** CID 1244200:  Uninitialized pointer field  (UNINIT_CTOR)
+/test/mon/test-mon-msg.cc: 67 in MonClientHelper::MonClientHelper(CephContext *)()
+61     
+62       MonClientHelper(CephContext *cct_)
+63         : Dispatcher(cct_),
+64           cct(cct_),
+65           monc(cct_),
+66           lock("mon-msg-test::lock")
+>>>     CID 1244200:  Uninitialized pointer field  (UNINIT_CTOR)
+>>>     Non-static class member "msg" is not initialized in this constructor nor in any functions that it calls.
+67       { }
+68     
+69     
+70       int post_init() {
+71         dout(1) << __func__ << dendl;
+72         if (!msg)
+
+________________________________________________________________________________________________________
+*** CID 1244199:  Uninitialized pointer field  (UNINIT_CTOR)
+/test/mon/test-mon-msg.cc: 225 in MonMsgTest::MonMsgTest()()
+219       Message *reply_msg;
+220       Mutex lock;
+221       Cond cond;
+222     
+223       MonMsgTest() :
+224         MonClientHelper(g_ceph_context),
+>>>     CID 1244199:  Uninitialized pointer field  (UNINIT_CTOR)
+>>>     Non-static class member "reply_msg" is not initialized in this constructor nor in any functions that it calls.
+225         lock("lock") { }
+226     
+227     public:
+228       virtual void SetUp() {
+229         reply_type = -1;
+230         if (reply_msg) {
+
+
+________________________________________________________________________________________________________
+To view the defects in Coverity Scan visit, http://scan.coverity.com/projects/25?tab=overview
+
+To unsubscribe from the email notification for new defects, http://scan5.coverity.com/cgi-bin/unsubscribe.py
+
+
+
+
+--557981400-2098900025-1412780373=:742--
