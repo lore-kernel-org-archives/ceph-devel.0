@@ -1,54 +1,111 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: 10/7/2014 Weekly Ceph Performance Meeting
-Date: Tue, 07 Oct 2014 19:51:21 -0500
-Message-ID: <54348A89.1060906@redhat.com>
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: Re: [RFC]New Message Implementation Based on Event
+Date: Wed, 8 Oct 2014 09:46:54 +0800
+Message-ID: <CACJqLybcawENtftZZKucBRfb+zuGbzV4goRCKWRS7TiyeHJm6Q@mail.gmail.com>
+References: <CACJqLybDH97G8do8UfLJd+BKz1Oq9wKneasg8P7L2z9ozCewEQ@mail.gmail.com>
+	<alpine.DEB.2.00.1409150849030.513@cobra.newdream.net>
+	<CACJqLybt40pmABe5igu8wd2vuPFzE7rkQvqvOhP7ZMHuaJ4Zrw@mail.gmail.com>
+	<alpine.DEB.2.00.1410070757480.31126@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f170.google.com ([209.85.213.170]:48005 "EHLO
-	mail-ig0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755456AbaJHAvX (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Oct 2014 20:51:23 -0400
-Received: by mail-ig0-f170.google.com with SMTP id hn18so123347igb.1
-        for <ceph-devel@vger.kernel.org>; Tue, 07 Oct 2014 17:51:23 -0700 (PDT)
-Received: from [192.168.1.3] (65-128-164-140.mpls.qwest.net. [65.128.164.140])
-        by mx.google.com with ESMTPSA id uf4sm212196igc.0.2014.10.07.17.51.20
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
-        Tue, 07 Oct 2014 17:51:21 -0700 (PDT)
+Received: from mail-ig0-f178.google.com ([209.85.213.178]:35384 "EHLO
+	mail-ig0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752263AbaJHBq4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Oct 2014 21:46:56 -0400
+Received: by mail-ig0-f178.google.com with SMTP id h3so309288igd.5
+        for <ceph-devel@vger.kernel.org>; Tue, 07 Oct 2014 18:46:54 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.00.1410070757480.31126@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: Samuel Just <sam.just@inktank.com>, Gregory Farnum <greg@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi All,
+No problem, I just came from a long vacation. I will create a PR ASAP
 
-Just a remind that the weekly performance meeting is on Wednesdays at 
-8AM PST.  Same bat time, same bat channel!
+On Tue, Oct 7, 2014 at 10:59 PM, Sage Weil <sweil@redhat.com> wrote:
+> Hi Haomai,
+>
+> A branch cleaning up the messenger interface a bit more just merged.
+> Everything is now using the Messenger::create() factory method, and the
+> type of messenger instantiated is controlled by the ms_type config option.
+> There's also a reorg of the SimpleMessenger files into msg/simple/.
+>
+> Do you mind rebasing your series onto the latest master?
+>
+> Since this is an optional backend I think we can take a similar route as
+> KeyValueStore and merge it early so that it is easier to test and
+> improve.
+>
+> Will you be able to join the performance call tomorrow?
+> sage
+>
+>
+> On Tue, 16 Sep 2014, Haomai Wang wrote:
+>
+>> As for testing, now I mainly passed tests in src/tests such as
+>> ceph_test_rados. Because of the lack of Messenger's unittest, I have
+>> to deploy this branch into my dev cluster to test. I'm thinking in
+>> make ms_inject* options available in this Messenger for failure
+>> coverage.
+>>
+>> On Mon, Sep 15, 2014 at 11:51 PM, Sage Weil <sweil@redhat.com> wrote:
+>> > Hi Haomai,
+>> >
+>> > On Fri, 12 Sep 2014, Haomai Wang wrote:
+>> >> Hi all,
+>> >>
+>> >> Recently, I did some basic work on new message implementation based on
+>> >> event(https://github.com/yuyuyu101/ceph/tree/msg-event). The basic
+>> >> idea is that we use a Processor thread for each Messenger to monitor
+>> >> all sockets and dispatch fd to threadpool. The event mechanism can be
+>> >> epoll, kqueue, poll or select. The thread in threadpool will
+>> >> read/write with this socket and dispatch message later.
+>> >>
+>> >> Now the branch has passed basic tests and before make it more stable
+>> >> and pass more QA suites. I want to do some benchmark tests compared to
+>> >> pipe implementation with large-scale cluster. I would like to use at
+>> >> least 100 OSDs(SSD) and hundreds of clients to test it. And now the
+>> >> benchmark for only one OSD, the client can get the same latency with
+>> >> pipe implementation and the latency stdev will be smaller.
+>> >>
+>> >> The background for this implementation is that pipe implementation
+>> >> consumes too much overhead on context switch and thread resource. In
+>> >> our env, several ceph-osd is running on compute node which also runs
+>> >> KVM process.
+>> >>
+>> >> Do you have any ideas about this, or some serious concerns compared to pipe.
+>> >
+>> > I haven't had time to look at this in much detail yet, but at a high
+>> > level, this looks awesome!  It sounds like using an event lib for this is
+>> > a good approach, and from a quick skim it looks like you've already done
+>> > the hard work of breaking all of the logic in Pipe.cc into a state
+>> > machine.
+>> >
+>> > How much testing have you done with this?
+>> >
+>> > I hope to find more time this week to look in more detail, but wanted to
+>> > let you know I didn't miss this before that :)
+>> >
+>> > Cheers-
+>> > sage
+>>
+>>
+>>
+>> --
+>> Best Regards,
+>>
+>> Wheat
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
 
-Etherpad URL:
-http://pad.ceph.com/p/performance_weekly
-
-To join the Meeting:
-https://bluejeans.com/268261044
-
-To join via Browser:
-https://bluejeans.com/268261044/browser
-
-To join with Lync:
-https://bluejeans.com/268261044/lync
 
 
-To join via Room System:
-Video Conferencing System: bjn.vc -or- 199.48.152.152
-Meeting ID: 268261044
+-- 
+Best Regards,
 
-To join via Phone:
-1) Dial:
-           +1 408 740 7256
-           +1 888 240 2560(US Toll Free)
-           +1 408 317 9253(Alternate Number)
-           (see all numbers - http://bluejeans.com/numbers)
-2) Enter Conference ID: 268261044
-
-Mark
+Wheat
