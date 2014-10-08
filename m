@@ -1,22 +1,36 @@
-From: "Duan, Jiangang" <jiangang.duan@intel.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
 Subject: RE: 10/7/2014 Weekly Ceph Performance Meeting: kernel boot params
-Date: Wed, 8 Oct 2014 17:47:10 +0000
-Message-ID: <A9F57F2ABA6BB2469F01E127557C6C9B110B3FB0@SHSMSX104.ccr.corp.intel.com>
+Date: Wed, 8 Oct 2014 17:53:16 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2785D4F5@SACMBXIP02.sdcorp.global.sandisk.com>
 References: <54348A89.1060906@redhat.com> <20141008183234.19a24ac1@doppio>
  <755F6B91B3BE364F9BCA11EA3F9E0C6F2785D4C1@SACMBXIP02.sdcorp.global.sandisk.com>
+ <A9F57F2ABA6BB2469F01E127557C6C9B110B3FB0@SHSMSX104.ccr.corp.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:62583 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753895AbaJHRrz convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Oct 2014 13:47:55 -0400
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2785D4C1@SACMBXIP02.sdcorp.global.sandisk.com>
+Received: from mail-bl2on0090.outbound.protection.outlook.com ([65.55.169.90]:20160
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1754137AbaJHRxU convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Oct 2014 13:53:20 -0400
+In-Reply-To: <A9F57F2ABA6BB2469F01E127557C6C9B110B3FB0@SHSMSX104.ccr.corp.intel.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>, Andreas Bluemle <andreas.bluemle@itxperts.de>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Duan, Jiangang" <jiangang.duan@intel.com>, Andreas Bluemle <andreas.bluemle@itxperts.de>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+
+Hi Jiangang,
+Give me a day or two, I will gather all the data and share with community.
+
+Thanks & Regards
+Somnath
+
+-----Original Message-----
+From: Duan, Jiangang [mailto:jiangang.duan@intel.com] 
+Sent: Wednesday, October 08, 2014 10:47 AM
+To: Somnath Roy; Andreas Bluemle; ceph-devel@vger.kernel.org
+Subject: RE: 10/7/2014 Weekly Ceph Performance Meeting: kernel boot params
 
 Can you guys share the w/ HT and w/o HT data? I want to take a look at that to understand why. 
 
