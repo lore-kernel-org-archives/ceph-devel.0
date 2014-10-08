@@ -1,85 +1,28 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: make check failures
-Date: Wed, 08 Oct 2014 19:36:36 +0200
-Message-ID: <54357624.6080205@dachary.org>
-References: <5434D99E.604@dachary.org> <97DE3B79-88BF-470C-A058-4297AC4FF3DC@inktank.com>
+From: Mark Nelson <mark.nelson@inktank.com>
+Subject: 10/7/2014 Weekly Ceph Performance Meeting Recording
+Date: Wed, 08 Oct 2014 12:36:56 -0500
+Message-ID: <54357638.4070100@redhat.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="falxSrogP6nMRE3t6qICFtCuP4oudq4G4"
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:40441 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751976AbaJHRgn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Oct 2014 13:36:43 -0400
-In-Reply-To: <97DE3B79-88BF-470C-A058-4297AC4FF3DC@inktank.com>
+Received: from mail-ig0-f176.google.com ([209.85.213.176]:47759 "EHLO
+	mail-ig0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751976AbaJHRg5 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Oct 2014 13:36:57 -0400
+Received: by mail-ig0-f176.google.com with SMTP id hn15so8193952igb.15
+        for <ceph-devel@vger.kernel.org>; Wed, 08 Oct 2014 10:36:57 -0700 (PDT)
+Received: from [192.168.1.3] (65-128-164-140.mpls.qwest.net. [65.128.164.140])
+        by mx.google.com with ESMTPSA id lp6sm7284485igb.16.2014.10.08.10.36.55
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
+        Wed, 08 Oct 2014 10:36:55 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: David Zafman <david.zafman@inktank.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---falxSrogP6nMRE3t6qICFtCuP4oudq4G4
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: quoted-printable
+https://bluejeans.com/s/7UM7/
 
-Hi,
+Thanks for attending everyone!
 
-For the record, here is another attempt to stablize this test : https://g=
-ithub.com/ceph/ceph/pull/2670
-
-Cheers
-
-On 08/10/2014 19:10, David Zafman wrote:
->=20
-> After updating my master branch "make check=94 passes now.
->=20
-> David Zafman
-> Senior Developer
-> http://www.inktank.com
->=20
->=20
->=20
->=20
-> On Oct 7, 2014, at 11:28 PM, Loic Dachary <loic@dachary.org> wrote:
->=20
->> [cc'ing the list in case someone else experiences problems with make c=
-heck]
->>
->> Hi David,
->>
->> Yesterday you mentioned that make check is failing for you on master. =
-Would you be so kind as to send the logs ?
->>
->> Cheers
->>
->> --=20
->> Lo=EFc Dachary, Artisan Logiciel Libre
->>
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-
-
---falxSrogP6nMRE3t6qICFtCuP4oudq4G4
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlQ1diQACgkQ8dLMyEl6F20IRQCgxjKyoi/xlp25tEhqY43tlyIo
-+rIAnRKGvCjvy0W9DGs6qn6Jx8qQoxYs
-=nd1g
------END PGP SIGNATURE-----
-
---falxSrogP6nMRE3t6qICFtCuP4oudq4G4--
+Mark
