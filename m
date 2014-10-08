@@ -1,39 +1,54 @@
-From: Alexandre DERUMIER <aderumier@odiso.com>
-Subject: qemu drive-mirror to rbd storage : no sparse rbd image
-Date: Wed, 08 Oct 2014 13:15:47 +0200 (CEST)
-Message-ID: <749ee402-bce4-45cb-97f2-8946542437fc@mailpro>
-References: <54c55fc6-b12a-42e5-b99d-9752c8a9b19b@mailpro>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: [PATCH] libceph: separate multiple ops with commas in debugfs
+ output
+Date: Wed, 8 Oct 2014 07:56:38 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1410080756310.742@cobra.newdream.net>
+References: <1412757436-6996-1-git-send-email-idryomov@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.209.98]:50620 "EHLO
-	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755092AbaJHLPz (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Oct 2014 07:15:55 -0400
-In-Reply-To: <54c55fc6-b12a-42e5-b99d-9752c8a9b19b@mailpro>
+Received: from cobra.newdream.net ([66.33.216.30]:46649 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753758AbaJHO4j (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Oct 2014 10:56:39 -0400
+In-Reply-To: <1412757436-6996-1-git-send-email-idryomov@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: qemu-devel <qemu-devel@nongnu.org>
-Cc: Ceph Devel <ceph-devel@vger.kernel.org>
+To: Ilya Dryomov <ilya.dryomov@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hi,
+Reviewed-by: Sage Weil <sage@redhat.com>
 
-I'm currently planning to migrate our storage to ceph/rbd through qemu drive-mirror
+On Wed, 8 Oct 2014, Ilya Dryomov wrote:
 
-and It seem that drive-mirror with rbd block driver, don't create a sparse image. (all zeros are copied to the target rbd).
-
-Also note, that it's working fine with "qemu-img convert" , the rbd volume is sparse after conversion.
-
-
-Could it be related to the "bdrv_co_write_zeroes" missing features in block/rbd.c ?
-
-(It's available in other block drivers (scsi,gluster,raw-aio) , and I don't have this problem with theses block drivers).
-
-
-
-Regards,
-
-Alexandre Derumier
-
-
+> For requests with multiple ops, separate ops with commas instead of \t,
+> which is a field separator here.
+> 
+> Signed-off-by: Ilya Dryomov <idryomov@redhat.com>
+> ---
+>  net/ceph/debugfs.c |    3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
+> 
+> diff --git a/net/ceph/debugfs.c b/net/ceph/debugfs.c
+> index d1a62c69a9f4..d2d525529f87 100644
+> --- a/net/ceph/debugfs.c
+> +++ b/net/ceph/debugfs.c
+> @@ -169,7 +169,8 @@ static int osdc_show(struct seq_file *s, void *pp)
+>  
+>  		for (i = 0; i < req->r_num_ops; i++) {
+>  			opcode = req->r_ops[i].op;
+> -			seq_printf(s, "\t%s", ceph_osd_op_name(opcode));
+> +			seq_printf(s, "%s%s", (i == 0 ? "\t" : ","),
+> +				   ceph_osd_op_name(opcode));
+>  		}
+>  
+>  		seq_printf(s, "\n");
+> -- 
+> 1.7.10.4
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
