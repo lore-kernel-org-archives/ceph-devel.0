@@ -1,250 +1,82 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: 10/7/2014 Weekly Ceph Performance Meeting: kernel boot params
-Date: Thu, 9 Oct 2014 06:45:01 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F27863B4D@SACMBXIP01.sdcorp.global.sandisk.com>
-References: <54348A89.1060906@redhat.com> <20141008183234.19a24ac1@doppio>
- <755F6B91B3BE364F9BCA11EA3F9E0C6F2785D4C1@SACMBXIP02.sdcorp.global.sandisk.com>
- <A9F57F2ABA6BB2469F01E127557C6C9B110B3FB0@SHSMSX104.ccr.corp.intel.com>
- <755F6B91B3BE364F9BCA11EA3F9E0C6F2785D4F5@SACMBXIP02.sdcorp.global.sandisk.com>
- <A9F57F2ABA6BB2469F01E127557C6C9B110B4101@SHSMSX104.ccr.corp.intel.com>
- <755F6B91B3BE364F9BCA11EA3F9E0C6F2785D7E8@SACMBXIP02.sdcorp.global.sandisk.com>
- <5435DFD5.2090403@redhat.com>
+From: Tim Zhang <cofol1986@gmail.com>
+Subject: some questions about transactions during write op?
+Date: Thu, 9 Oct 2014 18:49:13 +0800
+Message-ID: <CAGo8jt=AtDgdRbED9BGcyBjfHsRqGzUakfYkmG8wRVSpG3EkYg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bl2on0056.outbound.protection.outlook.com ([65.55.169.56]:64480
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1750855AbaJIGpK convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Oct 2014 02:45:10 -0400
-In-Reply-To: <5435DFD5.2090403@redhat.com>
-Content-Language: en-US
+Received: from mail-qg0-f49.google.com ([209.85.192.49]:64097 "EHLO
+	mail-qg0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751007AbaJIKtO (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Oct 2014 06:49:14 -0400
+Received: by mail-qg0-f49.google.com with SMTP id a108so1323040qge.22
+        for <ceph-devel@vger.kernel.org>; Thu, 09 Oct 2014 03:49:13 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mark.nelson@inktank.com>, "Duan, Jiangang" <jiangang.duan@intel.com>, Andreas Bluemle <andreas.bluemle@itxperts.de>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Yes, Mark...
+Hi ceph,
+I dump the transactions during putting a file (the size is 1M ) into
+ceph, below is what I got for locat_t to store pg log and set  infos.
+I add some contents to see what the bufferlist has.
+my understand for these four ops is:
+op 0 is used to store the pglog;
+op 1 is used to store epoch and pginfo;
+op 2 is used to rm the trimmed pglog key(although it is empty  in my example);
+op 3 is used to set pglog.
+Is my understanding right?
+Here are some more questions:
+1 why we need to store epoch and pginfo, isn't pglog enough to track
+all the changes?
+2 seems op 0 and op 3 is the same, isn't it?
+3 I find  the value of  big info in leveldb is always zero, then why
+we set this key?
+[root@ceph_node0 ~]# ceph-kvstore-tool
+/var/lib/ceph/osd/ceph-1/current/omap/ get
+_USER_0000000000000001_USER_ 0.3c_biginfo
+(_USER_0000000000000001_USER_, 0.3c_biginfo)
+0000 : 00 00 00 00 00 00 00 00 00 00 00 00             : ............
 
------Original Message-----
-From: Mark Nelson [mailto:mark.nelson@inktank.com] 
-Sent: Wednesday, October 08, 2014 6:08 PM
-To: Somnath Roy; Duan, Jiangang; Andreas Bluemle; ceph-devel@vger.kernel.org
-Subject: Re: 10/7/2014 Weekly Ceph Performance Meeting: kernel boot params
-
-Hi Somnath,
-
-Was this with HT enabled/disabled on both the cluster and the RBD nodes?
-
-Mark
-
-On 10/08/2014 07:50 PM, Somnath Roy wrote:
-> Hi Jiangang,
-> I managed to get some data for you but it's for a 3 node cluster. I will try to get data for single node as well.
->
-> Test config:
-> -------------
->
-> Cluster and rbd node config:
-> ----------------------------------
-> "2x E5-2680 10C 2.8GHz 25M
-> 8x 16GB RDIMM, dual rank x4 (128GB)
-> Mellanox MT27500 40 Gigabit Ethernet
-> LSI 9207 SAS HBA"
->
-> 8 X 800 GB SSDs (Optimus Eco) per cluster node
->
-> 3 cluster nodes + 3 rbd nodes
->
-> Total storage ~ 19 TB
->
-> We have total 24 OSDs running , each node has 8 OSDs/SSD
->
-> Configured 3 pools with 528 PGs/pool and 6 RBDs/pool . Each RBD image size is ~230G.
->
-> We have tried on 64K_RR_QD64 workload here.
->
-> HT_ENABLE
-> --------------
->
-> IOPS :  				112500
-> Throughput (MB/S):		7012
-> Avg Resp.Time (m.sec):                17
-> Max Resp.Time (m.sec):              3184
->
-> HT_DISABLE
-> --------------
->
-> IOPS :  				120864
-> Throughput (MB/S):		7530
-> Avg Resp.Time (m.sec):                11
-> Max Resp.Time (m.sec):              1056
->
->
-> So, ~7% iop increase but response time decrease is ~35% which is real good.
->
-> Thanks & Regards
-> Somnath
->
-> -----Original Message-----
-> From: Duan, Jiangang [mailto:jiangang.duan@intel.com]
-> Sent: Wednesday, October 08, 2014 1:03 PM
-> To: Somnath Roy; Andreas Bluemle; ceph-devel@vger.kernel.org
-> Subject: RE: 10/7/2014 Weekly Ceph Performance Meeting: kernel boot 
-> params
->
-> Sound good. Thanks. -jiangang
->
-> -----Original Message-----
-> From: Somnath Roy [mailto:Somnath.Roy@sandisk.com]
-> Sent: Wednesday, October 08, 2014 10:53 AM
-> To: Duan, Jiangang; Andreas Bluemle; ceph-devel@vger.kernel.org
-> Subject: RE: 10/7/2014 Weekly Ceph Performance Meeting: kernel boot 
-> params
->
-> Hi Jiangang,
-> Give me a day or two, I will gather all the data and share with community.
->
-> Thanks & Regards
-> Somnath
->
-> -----Original Message-----
-> From: Duan, Jiangang [mailto:jiangang.duan@intel.com]
-> Sent: Wednesday, October 08, 2014 10:47 AM
-> To: Somnath Roy; Andreas Bluemle; ceph-devel@vger.kernel.org
-> Subject: RE: 10/7/2014 Weekly Ceph Performance Meeting: kernel boot 
-> params
->
-> Can you guys share the w/ HT and w/o HT data? I want to take a look at that to understand why.
->
-> -jiangang
->
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org 
-> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Somnath Roy
-> Sent: Wednesday, October 08, 2014 10:38 AM
-> To: Andreas Bluemle; ceph-devel@vger.kernel.org
-> Subject: RE: 10/7/2014 Weekly Ceph Performance Meeting: kernel boot 
-> params
->
-> Thanks Andres for sharing this. I will try those out.
-> BTW, I am using Ubuntu 14.04 LTS and couldn't find any sysfs entry like  'cpufreq'..
->
-> root@stormeap-4:~# ll /sys/devices/system/cpu/cpu10/
-> cache/            crash_notes       driver/           microcode/        online            subsystem/        topology/
-> cpuidle/          crash_notes_size  firmware_node/    node0/            power/            thermal_throttle/ uevent
->
-> I am using Intel(R) Xeon(R) CPU E5-2680 v2 @ 2.80GHz.
->
-> Regards
-> Somnath
->
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org 
-> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Andreas Bluemle
-> Sent: Wednesday, October 08, 2014 9:33 AM
-> To: ceph-devel@vger.kernel.org
-> Subject: Re: 10/7/2014 Weekly Ceph Performance Meeting: kernel boot 
-> params
->
-> Hi,
->
-> as mentioned during today's meeting, here are the kernel boot parameters which I found to provide the basis for good performance results:
->
->    processor.max_cstate=0
->    intel_idle.max_cstate=0
->
-> I understand these to basically turn off any power saving modes of the CPU; the CPU's we are using are like
->   Intel(R) Xeon(R) CPU E5-2640 v2 @ 2.00GHz
->   Intel(R) Xeon(R) CPU E5-2630 0 @ 2.30GHz
->
-> At the BIOS level, we
->   - turn off Hyperthraeding
->   - turn off Turbo mode (in order ot not leave the specifications)
->   - turn on frequency floor override
->
-> We also assert that
->   /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
->   is set to "performance"
->
-> Using above we see a constant frequency at the maximum level allowed by the CPU (except Turbo mode).
->
->
-> Best Regards
->
-> Andreas Bluemle
->
->
->
->
->
->
-> On Wed, 8 Oct 2014 02:51:21 +0200
-> Mark Nelson <mark.nelson@inktank.com> wrote:
->
->> Hi All,
->>
->> Just a remind that the weekly performance meeting is on Wednesdays at 
->> 8AM PST.  Same bat time, same bat channel!
->>
->> Etherpad URL:
->> http://pad.ceph.com/p/performance_weekly
->>
->> To join the Meeting:
->> https://bluejeans.com/268261044
->>
->> To join via Browser:
->> https://bluejeans.com/268261044/browser
->>
->> To join with Lync:
->> https://bluejeans.com/268261044/lync
->>
->>
->> To join via Room System:
->> Video Conferencing System: bjn.vc -or- 199.48.152.152 Meeting ID:
->> 268261044
->>
->> To join via Phone:
->> 1) Dial:
->>             +1 408 740 7256
->>             +1 888 240 2560(US Toll Free)
->>             +1 408 317 9253(Alternate Number)
->>             (see all numbers - http://bluejeans.com/numbers)
->> 2) Enter Conference ID: 268261044
->>
->> Mark
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->> in the body of a message to majordomo@vger.kernel.org More majordomo 
->> info at  http://vger.kernel.org/majordomo-info.html
->>
->>
->
->
->
-> --
-> Andreas Bluemle                     mailto:Andreas.Bluemle@itxperts.de
-> ITXperts GmbH                       http://www.itxperts.de
-> Balanstrasse 73, Geb. 08            Phone: (+49) 89 89044917
-> D-81541 Muenchen (Germany)          Fax:   (+49) 89 89044910
->
-> Company details: http://www.itxperts.de/imprint.htm
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
-> in the body of a message to majordomo@vger.kernel.org More majordomo 
-> info at  http://vger.kernel.org/majordomo-info.html
->
-> ________________________________
->
-> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
-> in the body of a message to majordomo@vger.kernel.org More majordomo 
-> info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
-> in the body of a message to majordomo@vger.kernel.org More majordomo 
-> info at  http://vger.kernel.org/majordomo-info.html
->
-
+---------------------------------------------------------------------
+transaction dump for local_t:
+           { "osr": "0.35",
+             "seq": 3669463,
+             "trans_num": 0,
+             "ops": [
+                   { "op_num": 0,
+                     "op_name": "omap_setkeys",
+                     "collection": "meta",
+                    "oid": "5172dfbb\/pglog_0.35\/0\/\/-1",
+                    "attr_lens": { "0000000038.00000000000000000007": 132,
+                        "0000000038.00000000000000000007":
+"buffer::list(len=132,\n\tbuffer::ptr(0~4 0x8ed5000 in raw 0x8ed5000
+len 4096 nref     4),\n\tbuffer::ptr(0~124 0x9168000 in raw 0x9168000
+len 496 nref 2),\n\tbuffer::ptr(4~4 0x8ed5004 in raw 0x8ed5000 len
+4096 nref 4)\n)"}},
+                  { "op_num": 1,
+                    "op_name": "omap_setkeys",
+                    "collection": "meta",
+                    "oid": "16ef7597\/infos\/head\/\/-1",
+                    "attr_lens": { "0.35_epoch": 4,
+                        "0.35_epoch":
+"buffer::list(len=4,\n\tbuffer::ptr(0~4 0x8f24000 in raw 0x8f24000 len
+4096 nref 2)\n)",
+                        "0.35_info": 568,
+                        "0.35_info":
+"buffer::list(len=568,\n\tbuffer::ptr(0~568 0x4cae000 in raw 0x4cae000
+len 4096 nref 2)\n)"}},
+                  { "op_num": 2,
+                    "op_name": "omap_rmkeys",
+                    "collection": "meta",
+                    "oid": "5172dfbb\/pglog_0.35\/0\/\/-1",
+                    "keys": ""},
+                  { "op_num": 3,
+                    "op_name": "omap_setkeys",
+                    "collection": "meta",
+                    "oid": "5172dfbb\/pglog_0.35\/0\/\/-1",
+                    "attr_lens": { "0000000038.00000000000000000007": 132,
+  "0000000038.00000000000000000007":
+"buffer::list(len=132,\n\tbuffer::ptr(0~4 0x916ec00 in raw 0x916ec00
+len 496 nref     4),\n\tbuffer::ptr(0~124 0x916f600 in raw 0x916f600
+len 496 nref 2),\n\tbuffer::ptr(4~4 0x916ec04 in raw 0x916ec00 len 496
+nref 4)\n)"}}]},
