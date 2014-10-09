@@ -1,22 +1,36 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: 10/7/2014 Weekly Ceph Performance Meeting: kernel boot params
-Date: Wed, 08 Oct 2014 20:07:33 -0500
-Message-ID: <5435DFD5.2090403@redhat.com>
-References: <54348A89.1060906@redhat.com> <20141008183234.19a24ac1@doppio> <755F6B91B3BE364F9BCA11EA3F9E0C6F2785D4C1@SACMBXIP02.sdcorp.global.sandisk.com> <A9F57F2ABA6BB2469F01E127557C6C9B110B3FB0@SHSMSX104.ccr.corp.intel.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F2785D4F5@SACMBXIP02.sdcorp.global.sandisk.com> <A9F57F2ABA6BB2469F01E127557C6C9B110B4101@SHSMSX104.ccr.corp.intel.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F2785D7E8@SACMBXIP02.sdcorp.global.sandisk.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: 10/7/2014 Weekly Ceph Performance Meeting: kernel boot params
+Date: Thu, 9 Oct 2014 06:45:01 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F27863B4D@SACMBXIP01.sdcorp.global.sandisk.com>
+References: <54348A89.1060906@redhat.com> <20141008183234.19a24ac1@doppio>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F2785D4C1@SACMBXIP02.sdcorp.global.sandisk.com>
+ <A9F57F2ABA6BB2469F01E127557C6C9B110B3FB0@SHSMSX104.ccr.corp.intel.com>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F2785D4F5@SACMBXIP02.sdcorp.global.sandisk.com>
+ <A9F57F2ABA6BB2469F01E127557C6C9B110B4101@SHSMSX104.ccr.corp.intel.com>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F2785D7E8@SACMBXIP02.sdcorp.global.sandisk.com>
+ <5435DFD5.2090403@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f51.google.com ([209.85.218.51]:44836 "EHLO
-	mail-oi0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752777AbaJIBHf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Oct 2014 21:07:35 -0400
-Received: by mail-oi0-f51.google.com with SMTP id h136so548952oig.10
-        for <ceph-devel@vger.kernel.org>; Wed, 08 Oct 2014 18:07:34 -0700 (PDT)
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2785D7E8@SACMBXIP02.sdcorp.global.sandisk.com>
+Received: from mail-bl2on0056.outbound.protection.outlook.com ([65.55.169.56]:64480
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1750855AbaJIGpK convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Oct 2014 02:45:10 -0400
+In-Reply-To: <5435DFD5.2090403@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>, "Duan, Jiangang" <jiangang.duan@intel.com>, Andreas Bluemle <andreas.bluemle@itxperts.de>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Mark Nelson <mark.nelson@inktank.com>, "Duan, Jiangang" <jiangang.duan@intel.com>, Andreas Bluemle <andreas.bluemle@itxperts.de>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+
+Yes, Mark...
+
+-----Original Message-----
+From: Mark Nelson [mailto:mark.nelson@inktank.com] 
+Sent: Wednesday, October 08, 2014 6:08 PM
+To: Somnath Roy; Duan, Jiangang; Andreas Bluemle; ceph-devel@vger.kernel.org
+Subject: Re: 10/7/2014 Weekly Ceph Performance Meeting: kernel boot params
 
 Hi Somnath,
 
@@ -76,7 +90,8 @@ On 10/08/2014 07:50 PM, Somnath Roy wrote:
 > From: Duan, Jiangang [mailto:jiangang.duan@intel.com]
 > Sent: Wednesday, October 08, 2014 1:03 PM
 > To: Somnath Roy; Andreas Bluemle; ceph-devel@vger.kernel.org
-> Subject: RE: 10/7/2014 Weekly Ceph Performance Meeting: kernel boot params
+> Subject: RE: 10/7/2014 Weekly Ceph Performance Meeting: kernel boot 
+> params
 >
 > Sound good. Thanks. -jiangang
 >
@@ -84,7 +99,8 @@ On 10/08/2014 07:50 PM, Somnath Roy wrote:
 > From: Somnath Roy [mailto:Somnath.Roy@sandisk.com]
 > Sent: Wednesday, October 08, 2014 10:53 AM
 > To: Duan, Jiangang; Andreas Bluemle; ceph-devel@vger.kernel.org
-> Subject: RE: 10/7/2014 Weekly Ceph Performance Meeting: kernel boot params
+> Subject: RE: 10/7/2014 Weekly Ceph Performance Meeting: kernel boot 
+> params
 >
 > Hi Jiangang,
 > Give me a day or two, I will gather all the data and share with community.
@@ -96,17 +112,20 @@ On 10/08/2014 07:50 PM, Somnath Roy wrote:
 > From: Duan, Jiangang [mailto:jiangang.duan@intel.com]
 > Sent: Wednesday, October 08, 2014 10:47 AM
 > To: Somnath Roy; Andreas Bluemle; ceph-devel@vger.kernel.org
-> Subject: RE: 10/7/2014 Weekly Ceph Performance Meeting: kernel boot params
+> Subject: RE: 10/7/2014 Weekly Ceph Performance Meeting: kernel boot 
+> params
 >
 > Can you guys share the w/ HT and w/o HT data? I want to take a look at that to understand why.
 >
 > -jiangang
 >
 > -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Somnath Roy
+> From: ceph-devel-owner@vger.kernel.org 
+> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Somnath Roy
 > Sent: Wednesday, October 08, 2014 10:38 AM
 > To: Andreas Bluemle; ceph-devel@vger.kernel.org
-> Subject: RE: 10/7/2014 Weekly Ceph Performance Meeting: kernel boot params
+> Subject: RE: 10/7/2014 Weekly Ceph Performance Meeting: kernel boot 
+> params
 >
 > Thanks Andres for sharing this. I will try those out.
 > BTW, I am using Ubuntu 14.04 LTS and couldn't find any sysfs entry like  'cpufreq'..
@@ -121,10 +140,12 @@ On 10/08/2014 07:50 PM, Somnath Roy wrote:
 > Somnath
 >
 > -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Andreas Bluemle
+> From: ceph-devel-owner@vger.kernel.org 
+> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Andreas Bluemle
 > Sent: Wednesday, October 08, 2014 9:33 AM
 > To: ceph-devel@vger.kernel.org
-> Subject: Re: 10/7/2014 Weekly Ceph Performance Meeting: kernel boot params
+> Subject: Re: 10/7/2014 Weekly Ceph Performance Meeting: kernel boot 
+> params
 >
 > Hi,
 >
@@ -163,7 +184,7 @@ On 10/08/2014 07:50 PM, Somnath Roy wrote:
 >
 >> Hi All,
 >>
->> Just a remind that the weekly performance meeting is on Wednesdays at
+>> Just a remind that the weekly performance meeting is on Wednesdays at 
 >> 8AM PST.  Same bat time, same bat channel!
 >>
 >> Etherpad URL:
@@ -194,7 +215,7 @@ On 10/08/2014 07:50 PM, Somnath Roy wrote:
 >> Mark
 >> --
 >> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->> in the body of a message to majordomo@vger.kernel.org More majordomo
+>> in the body of a message to majordomo@vger.kernel.org More majordomo 
 >> info at  http://vger.kernel.org/majordomo-info.html
 >>
 >>
@@ -209,17 +230,21 @@ On 10/08/2014 07:50 PM, Somnath Roy wrote:
 >
 > Company details: http://www.itxperts.de/imprint.htm
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> in the body of a message to majordomo@vger.kernel.org More majordomo 
+> info at  http://vger.kernel.org/majordomo-info.html
 >
 > ________________________________
 >
 > PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
 >
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> in the body of a message to majordomo@vger.kernel.org More majordomo 
+> info at  http://vger.kernel.org/majordomo-info.html
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> in the body of a message to majordomo@vger.kernel.org More majordomo 
+> info at  http://vger.kernel.org/majordomo-info.html
 >
 
