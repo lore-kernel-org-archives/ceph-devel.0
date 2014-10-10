@@ -1,54 +1,38 @@
-From: Janne Grunau <j@jannau.net>
-Subject: Re: ARM NEON optimisations for gf-complete/jerasure/ceph-erasure
-Date: Fri, 10 Oct 2014 16:01:09 +0200
-Message-ID: <20141010140109.GG2532@jannau.net>
-References: <20140904144237.GK2591@jannau.net>
- <54088382.4070402@dachary.org>
- <CA+AFVBg1oKix1U=qYdLBQ+j4MPYek-npz5UkkFh+dtR_UADUxw@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: arm7 gitbuilder ?
+Date: Fri, 10 Oct 2014 08:11:18 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1410100809370.28531@cobra.newdream.net>
+References: <5437A6C0.3000005@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from soltyk.jannau.net ([185.27.253.110]:54897 "EHLO
-	soltyk.jannau.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752614AbaJJOBO (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Oct 2014 10:01:14 -0400
-Content-Disposition: inline
-In-Reply-To: <CA+AFVBg1oKix1U=qYdLBQ+j4MPYek-npz5UkkFh+dtR_UADUxw@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:34725 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754380AbaJJPLT (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Oct 2014 11:11:19 -0400
+In-Reply-To: <5437A6C0.3000005@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Kevin Greenan <kmgreen2@gmail.com>
-Cc: Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>, Ethan Miller <elm@cs.ucsc.edu>
+To: Loic Dachary <loic@dachary.org>
+Cc: Sandon Van Ness <sandon@inktank.com>, Janne Grunau <j@jannau.net>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Kevin,
-
-On 2014-09-16 11:25:12 -0700, Kevin Greenan wrote:
+On Fri, 10 Oct 2014, Loic Dachary wrote:
+> Hi Sandon,
 > 
-> I feel that separating the arch-specific implementations out and have a
-> default 'generic' implementation would be a huge improvement.  Note that
-> gf-complete was in active development for some time before including the
-> SIMD code.  In hindsight, we should have done this separation back in 2012,
-> but had some time pressure due to a paper deadline and limited time
-> available to the contributors.
-> 
-> Also, I agree w.r.t. the preprocessor stuff.  Going with SIMD/NOSIMD is
-> fine by me.
+> Would it be possible to resurect / create an arm7 gitbuilder for 
+> whatever distribution is more convenient ? Janne made a great 
+> contribution to erasure code optimization on NEON ( 
+> https://bitbucket.org/jannau/gf-complete/branch/neon ) and it would make 
+> it easier to have a gitbuilder to run it throught teuthology and torture 
+> it ;-) If that's complicated or there is another way to run teuthology 
+> jobs for this purpose, I'm open to suggestions.
 
-I created a pull request with my neon optimisations, the SSE -> SIMD 
-rename and some minor fixes.
+We have a bunch of armv7l nodes that used to run distcc and a gitbuilder.  
+It's a bit of a time suck to maintain, though.  Is there an interested 
+party we can set up with lab access that can help administer these on an 
+ongoing basis?  Sandon is a highly contended resource.  :)
 
-The neon methods all reside in their own files, I didn't come up with 
-good solution for the init / scratch_size functions, so I added 
-arm-specific defines there.
+Thanks!
+sage
 
-> Also, there should be very little "SIMD" work with jerasure, as gf-complete
-> is the Galois field backend, so I would not worry too much about that.
 
-Yes, there was no SIMD work in jerasure.
-
-Please have a look at 
-https://bitbucket.org/jimplank/gf-complete/pull-request/25/arm-neon-optimisations 
-I'll be available to address review comments and suggestions.
-
-regards
-
-Janne
