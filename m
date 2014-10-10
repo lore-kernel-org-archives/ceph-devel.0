@@ -1,67 +1,54 @@
-From: Florian Haas <florian-Aci1KgOBn19BDgjK7y7TUQ@public.gmane.org>
-Subject: Re: v0.86 released (Giant release candidate)
-Date: Fri, 10 Oct 2014 11:26:29 +0200
-Message-ID: <CAPUexz-WrBw7AMveSd+ecA+Mx2GctJfu0QnNW6sy35HKY-0bOQ@mail.gmail.com>
-References: <alpine.DEB.2.00.1410071028030.13976@cobra.newdream.net>
+From: Loic Dachary <loic@dachary.org>
+Subject: arm7 gitbuilder ?
+Date: Fri, 10 Oct 2014 11:28:32 +0200
+Message-ID: <5437A6C0.3000005@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.00.1410071028030.13976-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="IuIcRwUFIwf3Xd9psR8DiwawH2SxAKul0"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail2.dachary.org ([91.121.57.175]:41757 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751944AbaJJJ2i (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Oct 2014 05:28:38 -0400
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sandon Van Ness <sandon@inktank.com>
+Cc: Janne Grunau <j@jannau.net>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Sage,
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--IuIcRwUFIwf3Xd9psR8DiwawH2SxAKul0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-On Tue, Oct 7, 2014 at 9:20 PM, Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org> wrote:
-> This is a release candidate for Giant, which will hopefully be out in
-> another week or two (s v0.86).  We did a feature freeze about a month ago
-> and since then have been doing only stabilization and bug fixing (and a
-> handful on low-risk enhancements).  A fair bit of new functionality went
-> into the final sprint, but it's baked for quite a while now and we're
-> feeling pretty good about it.
->
-> Major items include:
->
-> * librados locking refactor to improve scaling and client performance
-> * local recovery code (LRC) erasure code plugin to trade some
->   additional storage overhead for improved recovery performance
-> * LTTNG tracing framework, with initial tracepoints in librados,
->   librbd, and the OSD FileStore backend
-> * separate monitor audit log for all administrative commands
-> * asynchronos monitor transaction commits to reduce the impact on
->   monitor read requests while processing updates
-> * low-level tool for working with individual OSD data stores for
->   debugging, recovery, and testing
-> * many MDS improvements (bug fixes, health reporting)
->
-> There are still a handful of known bugs in this release, but nothing
-> severe enough to prevent a release.  By and large we are pretty
-> pleased with the stability and expect the final Giant release to be
-> quite reliable.
->
-> Please try this out on your non-production clusters for a preview.
+Hi Sandon,
 
-Thanks for the summary! Since you mentioned MDS improvements, and just
-so it doesn't get lost: as you hinted at in off-list email, please do
-provide a write-up of CephFS features expected to work in Giant at the
-time of the release (broken down by kernel client vs. Ceph-FUSE, if
-necessary). Not in the sense that anyone is offering commercial
-support, but in the sense of "if you use this limited feature set, we
-are confident that it at least won't eat your data." I think that
-would be beneficial to a large portion of the user base, and clear up
-a lot of the present confusion about the maturity and stability of the
-filesystem.
+Would it be possible to resurect / create an arm7 gitbuilder for whatever=
+ distribution is more convenient ? Janne made a great contribution to era=
+sure code optimization on NEON ( https://bitbucket.org/jannau/gf-complete=
+/branch/neon ) and it would make it easier to have a gitbuilder to run it=
+ throught teuthology and torture it ;-) If that's complicated or there is=
+ another way to run teuthology jobs for this purpose, I'm open to suggest=
+ions.
 
-Cheers,
-Florian
+Cheers
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+
+
+--IuIcRwUFIwf3Xd9psR8DiwawH2SxAKul0
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlQ3psAACgkQ8dLMyEl6F230UgCdH3T/iUFBNeOsIQMtg9zrTagd
+/V0AnjRjMb6Y4vYHUAJq2c4aLQh/URCm
+=lCGj
+-----END PGP SIGNATURE-----
+
+--IuIcRwUFIwf3Xd9psR8DiwawH2SxAKul0--
