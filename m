@@ -1,82 +1,55 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: why index (collectionIndex) need a lock?
-Date: Fri, 10 Oct 2014 09:44:12 -0700
-Message-ID: <CAPYLRzg6LGREomg5uGzBvRgVLjBRFd3FtzUx6xU+W9AAS12-bQ@mail.gmail.com>
-References: <CALZt5jwhBNifcagmsGBZiEC99Q0TvDFPy45f05hidVZedKEK-w@mail.gmail.com>
-	<CAPYLRzg=y1YKsZAACdwT08UiSVf_wZ8G1TFa7MYLOu8xV-fZyw@mail.gmail.com>
-	<CALZt5jzOb5UfkJheWDukmAXQG-iv+5ujCQZsNzc6U_xJeGXH=g@mail.gmail.com>
+From: John Spray <john.spray@redhat.com>
+Subject: Re: Request for comments
+Date: Fri, 10 Oct 2014 18:04:02 +0100
+Message-ID: <CAGd4Wr3VOoBHT5OHPLu8y-X-cqOST7q-Cw1QFr1QQKs+2iKqbw@mail.gmail.com>
+References: <CAMzumdaE+pPP2RzRhDrfsV1LjNAqQuM3qHQ5rB37ffsHFaySdA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f50.google.com ([209.85.216.50]:45030 "EHLO
-	mail-qa0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751375AbaJJQoN convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Oct 2014 12:44:13 -0400
-Received: by mail-qa0-f50.google.com with SMTP id w8so1910960qac.9
-        for <ceph-devel@vger.kernel.org>; Fri, 10 Oct 2014 09:44:12 -0700 (PDT)
-In-Reply-To: <CALZt5jzOb5UfkJheWDukmAXQG-iv+5ujCQZsNzc6U_xJeGXH=g@mail.gmail.com>
+Received: from mail-lb0-f181.google.com ([209.85.217.181]:37614 "EHLO
+	mail-lb0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751448AbaJJREE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Oct 2014 13:04:04 -0400
+Received: by mail-lb0-f181.google.com with SMTP id l4so3400184lbv.26
+        for <ceph-devel@vger.kernel.org>; Fri, 10 Oct 2014 10:04:02 -0700 (PDT)
+In-Reply-To: <CAMzumdaE+pPP2RzRhDrfsV1LjNAqQuM3qHQ5rB37ffsHFaySdA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nicheal <zay11022@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Barclay Jameson <almightybeeij@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-[ Please keep stuff on the list; we don't do private emails and you'll
-get faster responses. ]
+We do have a lot of functions that bubble up standard error numbers --
+in general callers of these functions have to accommodate the
+possibility of any error code (including errors they don't
+understand).  I notice that ::mount is a bit unusual in additionally
+having some explicit 'magic' return codes to indicate which stage of
+init failed.
 
-I don't know for this particular case, but I think it's just an
-invariant for all FileStore operations. There's a lot of random stuff
-that can go into the omap; it's user-accessible.
--Greg
-Software Engineer #42 @ http://inktank.com | http://ceph.com
+A pull request to document the magic -1001, -1002 etc returns from
+that function would be welcome, it might not be useful to try and
+enumerate all possible error numbers for all API calls though -- it
+could be hard to prove that the list was comprehensive, and callers
+should always handle unexpected codes too.
 
-On Tue, Oct 7, 2014 at 7:37 PM, Nicheal <zay11022@gmail.com> wrote:
-> Thanks, I got your concept.
-> I find that the Index Ref will be obtained before omap_setkeys (calle=
-d
-> function lfn_find). However, the path is not used in function
-> omap_setkeys. So why we prevent the Collection (merge or split) when
-> modifying omap keys? Actually, the information in omap is pg_log,
-> pg_info, and sometimes, object XATTR, right?
+Cheers,
+John
+
+On Fri, Oct 10, 2014 at 5:22 PM, Barclay Jameson
+<almightybeeij@gmail.com> wrote:
+> When reading code for libcephfs.cc (giant branch) it wasn't apparent
+> to me for the lines 95 and lines 101 what the return values was
+> expected from the function calls init and mount other than 0.
 >
-> 2014-10-01 1:23 GMT+08:00 Gregory Farnum <greg@inktank.com>:
->> On Tue, Sep 30, 2014 at 12:08 AM, Nicheal <zay11022@gmail.com> wrote=
-:
->>> Dear develops,
->>>
->>> I go through the files (hashIndex, LFNIndex and CollectionIndex), I
->>> cannot find any parameters need to grasp a lock. And basically,
->>> (hashIndex, LFNIndex and CollectionIndex) is used to manage a
->>> collection of objects.
->>>
->>> Thus, just in one case, when the spilt or merge is on going, then
->>> lookup() path function is called to get the object path. It may obt=
-ain
->>> a wrong path, right?
->>>
->>> If so, why not using a state parameter in the class CollectionIndex=
- or
->>> HashIndex indicating the current state of this collection (split,
->>> merge on going or none) and grasp a lock when the state changes. Wh=
-y
->>> always lock the index before lookup() path or lfn_find()?
->>>
->>> Any other reasons?
->>
->> Well, you've just named why we have the lock =E2=80=94 it's to preve=
-nt
->> multiple users simultaneously making changes to the *filesystem* tha=
-t
->> we can't handle. In particular, no simultaneous ops can run against
->> the same Collection. This is to prevent situations where a reader
->> comes in and builds up the path for an object it needs to look at,
->> then a writer creates a new file which initiates collection split an=
-d
->> the reader's path is suddenly invalid.
->> -Greg
->> Software Engineer #42 @ http://inktank.com | http://ceph.com
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> It was only after tracing a bit of code did I see that error code such
+> as: -ENOENT and -EEXIST could be returned as well.
+>
+> It would be awesome if comments were added for these functions to show
+> what the expected return values are going to be for these functions.
+>
+> Thanks,
+>
+> almightybeeij
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
