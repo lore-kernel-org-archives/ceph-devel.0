@@ -1,54 +1,40 @@
-From: Fabian Frederick <fabf@skynet.be>
-Subject: Re: [PATCH 1/1 linux-next] ceph: fix bool assignments
-Date: Fri, 10 Oct 2014 10:41:15 +0200 (CEST)
-Message-ID: <1754653714.36927.1412930475803.open-xchange@webmail.nmp.skynet.be>
-References: <1412889395-19350-1-git-send-email-fabf@skynet.be> <54372B43.2010801@inktank.com> <CALFYKtB8Z4HHr5ZuLcMdctOKBSZZjgCAhbOiFHgbPnVcbjLySw@mail.gmail.com>
-Reply-To: Fabian Frederick <fabf@skynet.be>
+From: Wido den Hollander <wido@42on.com>
+Subject: Re: ceph-devel irc channel archive
+Date: Fri, 10 Oct 2014 10:53:52 +0200
+Message-ID: <54379EA0.2090803@42on.com>
+References: <5437919C.2060105@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CALFYKtB8Z4HHr5ZuLcMdctOKBSZZjgCAhbOiFHgbPnVcbjLySw@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Julia Lawall <julia.lawall@lip6.fr>, Ilya Dryomov <ilya.dryomov@inktank.com>, Dan Mick <dan.mick@inktank.com>
-Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from websrv.42on.com ([31.25.102.167]:38393 "EHLO websrv.42on.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751774AbaJJIxz (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 10 Oct 2014 04:53:55 -0400
+In-Reply-To: <5437919C.2060105@dachary.org>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>
+
+On 10/10/2014 09:58 AM, Loic Dachary wrote:
+> Hi,
+> 
+> Are there publicly accessible archives of the ceph-devel IRC channel ? It would be most convenient to search for past conversations.
+> 
+
+Yes there is: http://irclogs.ceph.widodh.nl/
+
+But while typing this message I see that my bot has died again... I'll
+restart it!
+
+> Cheers
+> 
 
 
+-- 
+Wido den Hollander
+42on B.V.
+Ceph trainer and consultant
 
-> On 10 October 2014 at 10:24 Ilya Dryomov <ilya.dryomov@inktank.com> w=
-rote:
->
->
-> On Fri, Oct 10, 2014 at 4:41 AM, Dan Mick <dan.mick@inktank.com> wrot=
-e:
-> >
-> >
-> > On 10/09/2014 02:16 PM, Fabian Frederick wrote:
-> >> Fix some coccinelle warnings:
-> >> fs/ceph/caps.c:2400:6-10: WARNING: Assignment of bool to 0/1
-> >
-> >
-> >> -=C2=A0 =C2=A0 =C2=A0bool wake =3D 0;
-> >> +=C2=A0 =C2=A0 =C2=A0bool wake =3D false;
-> >
-> > FWIW, that message is backwards: it should say "WARNING: Assignment=
- of
-> > 0/1 to bool" (I know, it's a coccinelle issue, but..)
->
-> Hi Julia,
->
-> See above, hopefully you are the right person to ask to forward this =
-to
-> the right people ;)
->
-> Thanks,
->
->=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0Ilya
-Hi Ilya,
-
-=C2=A0 =C2=A0 Patch already send and acked:
-http://marc.info/?l=3Dlinux-kernel&m=3D141292553109418&w=3D2
-
-Regards,
-=46abian
+Phone: +31 (0)20 700 9902
+Skype: contact42on
