@@ -1,136 +1,95 @@
-From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: [PATCH 3/3] rbd: use a single workqueue for all devices
-Date: Fri, 10 Oct 2014 22:27:06 +0400
-Message-ID: <1412965626-11165-4-git-send-email-idryomov@redhat.com>
-References: <1412965626-11165-1-git-send-email-idryomov@redhat.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: arm7 gitbuilder ?
+Date: Fri, 10 Oct 2014 21:16:12 +0200
+Message-ID: <5438307C.4060701@dachary.org>
+References: <5437A6C0.3000005@dachary.org>	<alpine.DEB.2.00.1410100809370.28531@cobra.newdream.net>	<5438134E.7050009@dachary.org>	<alpine.DEB.2.00.1410101014200.28531@cobra.newdream.net> <CA+Hcz5_gwQdZ15EyJBfzxU05bDp0Pbdcgfqtv_=N5Q9Zm62FdQ@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="QBpJBKVNwp7pD9e2DrpLllV055OO48gLQ"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f42.google.com ([209.85.215.42]:35328 "EHLO
-	mail-la0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751928AbaJJS10 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Oct 2014 14:27:26 -0400
-Received: by mail-la0-f42.google.com with SMTP id mk6so3818028lab.1
-        for <ceph-devel@vger.kernel.org>; Fri, 10 Oct 2014 11:27:24 -0700 (PDT)
-In-Reply-To: <1412965626-11165-1-git-send-email-idryomov@redhat.com>
+Received: from mail2.dachary.org ([91.121.57.175]:42191 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751993AbaJJTQT (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Oct 2014 15:16:19 -0400
+In-Reply-To: <CA+Hcz5_gwQdZ15EyJBfzxU05bDp0Pbdcgfqtv_=N5Q9Zm62FdQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Micha Krause <micha@krausam.de>
+To: Noah Watkins <noah.watkins@inktank.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Using one queue per device doesn't make much sense given that our
-workfn processes "devices" and not "requests".  Switch to a single
-workqueue for all devices.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--QBpJBKVNwp7pD9e2DrpLllV055OO48gLQ
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 
-Signed-off-by: Ilya Dryomov <idryomov@redhat.com>
----
- drivers/block/rbd.c |   33 ++++++++++++++++++---------------
- 1 file changed, 18 insertions(+), 15 deletions(-)
+Hi Noah,
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 0a54c588e433..be8d44af6ae1 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -342,7 +342,6 @@ struct rbd_device {
- 
- 	struct list_head	rq_queue;	/* incoming rq queue */
- 	spinlock_t		lock;		/* queue, flags, open_count */
--	struct workqueue_struct	*rq_wq;
- 	struct work_struct	rq_work;
- 
- 	struct rbd_image_header	header;
-@@ -402,6 +401,8 @@ static struct kmem_cache	*rbd_segment_name_cache;
- static int rbd_major;
- static DEFINE_IDA(rbd_dev_id_ida);
- 
-+static struct workqueue_struct *rbd_wq;
-+
- /*
-  * Default to false for now, as single-major requires >= 0.75 version of
-  * userspace rbd utility.
-@@ -3452,7 +3453,7 @@ static void rbd_request_fn(struct request_queue *q)
- 	}
- 
- 	if (queued)
--		queue_work(rbd_dev->rq_wq, &rbd_dev->rq_work);
-+		queue_work(rbd_wq, &rbd_dev->rq_work);
- }
- 
- /*
-@@ -5242,16 +5243,9 @@ static int rbd_dev_device_setup(struct rbd_device *rbd_dev)
- 	set_capacity(rbd_dev->disk, rbd_dev->mapping.size / SECTOR_SIZE);
- 	set_disk_ro(rbd_dev->disk, rbd_dev->mapping.read_only);
- 
--	rbd_dev->rq_wq = alloc_workqueue("%s", WQ_MEM_RECLAIM, 0,
--					 rbd_dev->disk->disk_name);
--	if (!rbd_dev->rq_wq) {
--		ret = -ENOMEM;
--		goto err_out_mapping;
--	}
--
- 	ret = rbd_bus_add_dev(rbd_dev);
- 	if (ret)
--		goto err_out_workqueue;
-+		goto err_out_mapping;
- 
- 	/* Everything's ready.  Announce the disk to the world. */
- 
-@@ -5263,9 +5257,6 @@ static int rbd_dev_device_setup(struct rbd_device *rbd_dev)
- 
- 	return ret;
- 
--err_out_workqueue:
--	destroy_workqueue(rbd_dev->rq_wq);
--	rbd_dev->rq_wq = NULL;
- err_out_mapping:
- 	rbd_dev_mapping_clear(rbd_dev);
- err_out_disk:
-@@ -5512,7 +5503,6 @@ static void rbd_dev_device_release(struct device *dev)
- {
- 	struct rbd_device *rbd_dev = dev_to_rbd_dev(dev);
- 
--	destroy_workqueue(rbd_dev->rq_wq);
- 	rbd_free_disk(rbd_dev);
- 	clear_bit(RBD_DEV_FLAG_EXISTS, &rbd_dev->flags);
- 	rbd_dev_mapping_clear(rbd_dev);
-@@ -5716,11 +5706,21 @@ static int __init rbd_init(void)
- 	if (rc)
- 		return rc;
- 
-+	/*
-+	 * The number of active work items is limited by the number of
-+	 * rbd devices, so leave @max_active at default.
-+	 */
-+	rbd_wq = alloc_workqueue(RBD_DRV_NAME, WQ_MEM_RECLAIM, 0);
-+	if (!rbd_wq) {
-+		rc = -ENOMEM;
-+		goto err_out_slab;
-+	}
-+
- 	if (single_major) {
- 		rbd_major = register_blkdev(0, RBD_DRV_NAME);
- 		if (rbd_major < 0) {
- 			rc = rbd_major;
--			goto err_out_slab;
-+			goto err_out_wq;
- 		}
- 	}
- 
-@@ -5738,6 +5738,8 @@ static int __init rbd_init(void)
- err_out_blkdev:
- 	if (single_major)
- 		unregister_blkdev(rbd_major, RBD_DRV_NAME);
-+err_out_wq:
-+	destroy_workqueue(rbd_wq);
- err_out_slab:
- 	rbd_slab_exit();
- 	return rc;
-@@ -5749,6 +5751,7 @@ static void __exit rbd_exit(void)
- 	rbd_sysfs_cleanup();
- 	if (single_major)
- 		unregister_blkdev(rbd_major, RBD_DRV_NAME);
-+	destroy_workqueue(rbd_wq);
- 	rbd_slab_exit();
- }
- 
--- 
-1.7.10.4
+My focus is to create centos7 and ubuntu-14.04 packages at this point. An=
+d somehow find a way to convince teuthology to use them instead of what h=
+ttp://ceph.com/gitbuilder.cgi creates, but that's a separate issue.
 
+What kind of output would you like to get from these arm7 machines ?
+
+Cheers
+
+On 10/10/2014 19:55, Noah Watkins wrote:
+> On Fri, Oct 10, 2014 at 10:14 AM, Sage Weil <sweil@redhat.com> wrote:
+>> On Fri, 10 Oct 2014, Loic Dachary wrote:
+>>> On 10/10/2014 17:11, Sage Weil wrote:
+>>>> On Fri, 10 Oct 2014, Loic Dachary wrote:
+>>>>> Hi Sandon,
+>>>>>
+>>>>> Would it be possible to resurect / create an arm7 gitbuilder for
+>>>>> whatever distribution is more convenient ? Janne made a great
+>>>>> contribution to erasure code optimization on NEON (
+>>>>> https://bitbucket.org/jannau/gf-complete/branch/neon ) and it would=
+ make
+>>>>> it easier to have a gitbuilder to run it throught teuthology and to=
+rture
+>>>>> it ;-) If that's complicated or there is another way to run teuthol=
+ogy
+>>>>> jobs for this purpose, I'm open to suggestions.
+>>>>
+>>>> We have a bunch of armv7l nodes that used to run distcc and a gitbui=
+lder.
+>>>> It's a bit of a time suck to maintain, though.  Is there an interest=
+ed
+>>>> party we can set up with lab access that can help administer these o=
+n an
+>>>> ongoing basis?  Sandon is a highly contended resource.  :)
+>>>
+>>> Long term I'm not sure. I'll try to setup something temporary and see=
+
+>>> where it goes. Is there a risk that these machines go away in the nex=
+t 6
+>>> months ? 3 months ?
+>=20
+> I am an interested party, and at least in the short term would
+> dedicate some time to getting arm7 builds working too.
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--QBpJBKVNwp7pD9e2DrpLllV055OO48gLQ
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlQ4MHwACgkQ8dLMyEl6F20Y4gCfX9C/ZMIyhsrfasmbwmKZ5rpc
+ErMAnRyCjRQFMoaHLUr4cfyHfZqw22+g
+=nOov
+-----END PGP SIGNATURE-----
+
+--QBpJBKVNwp7pD9e2DrpLllV055OO48gLQ--
