@@ -1,239 +1,108 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: 10/7/2014 Weekly Ceph Performance Meeting: kernel boot params
-Date: Fri, 10 Oct 2014 23:43:06 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F28224DF9@SACMBXIP02.sdcorp.global.sandisk.com>
-References: <54348A89.1060906@redhat.com> <20141008183234.19a24ac1@doppio>
- <755F6B91B3BE364F9BCA11EA3F9E0C6F2785D4C1@SACMBXIP02.sdcorp.global.sandisk.com>
- <A9F57F2ABA6BB2469F01E127557C6C9B110B3FB0@SHSMSX104.ccr.corp.intel.com>
- <755F6B91B3BE364F9BCA11EA3F9E0C6F2785D4F5@SACMBXIP02.sdcorp.global.sandisk.com>
- <A9F57F2ABA6BB2469F01E127557C6C9B110B4101@SHSMSX104.ccr.corp.intel.com>
- <755F6B91B3BE364F9BCA11EA3F9E0C6F2785D7E8@SACMBXIP02.sdcorp.global.sandisk.com>
- <A9F57F2ABA6BB2469F01E127557C6C9B110C3B50@SHSMSX104.ccr.corp.intel.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: hammer blueprints
+Date: Fri, 10 Oct 2014 17:44:27 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1410021643060.17153@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1bon0060.outbound.protection.outlook.com ([157.56.111.60]:28832
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751246AbaJJXnL convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Oct 2014 19:43:11 -0400
-In-Reply-To: <A9F57F2ABA6BB2469F01E127557C6C9B110C3B50@SHSMSX104.ccr.corp.intel.com>
-Content-Language: en-US
+Received: from cobra.newdream.net ([66.33.216.30]:39121 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751549AbaJKAo1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Oct 2014 20:44:27 -0400
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 879168004F
+	for <ceph-devel@vger.kernel.org>; Fri, 10 Oct 2014 17:44:27 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 662518004F
+	for <ceph-devel@vger.kernel.org>; Fri, 10 Oct 2014 17:44:27 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Duan, Jiangang" <jiangang.duan@intel.com>, Andreas Bluemle <andreas.bluemle@itxperts.de>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-
-As I mentioned, total workload is ~19 TB...Each RBD is ~230 GB and io_size = 64K..
-
------Original Message-----
-From: Duan, Jiangang [mailto:jiangang.duan@intel.com] 
-Sent: Friday, October 10, 2014 4:39 PM
-To: Somnath Roy; Andreas Bluemle; ceph-devel@vger.kernel.org
-Subject: RE: 10/7/2014 Weekly Ceph Performance Meeting: kernel boot params
-
-Thanks. let's try do this test on our setup.
-BTW, what workload you use here?
-
--jiangang
-
------Original Message-----
-From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Somnath Roy
-Sent: Wednesday, October 08, 2014 5:51 PM
-To: Duan, Jiangang; Andreas Bluemle; ceph-devel@vger.kernel.org
-Subject: RE: 10/7/2014 Weekly Ceph Performance Meeting: kernel boot params
-
-Hi Jiangang,
-I managed to get some data for you but it's for a 3 node cluster. I will try to get data for single node as well.
-
-Test config:
--------------
-
-Cluster and rbd node config:
-----------------------------------
-"2x E5-2680 10C 2.8GHz 25M
-8x 16GB RDIMM, dual rank x4 (128GB)
-Mellanox MT27500 40 Gigabit Ethernet
-LSI 9207 SAS HBA"
-
-8 X 800 GB SSDs (Optimus Eco) per cluster node
-
-3 cluster nodes + 3 rbd nodes 
-
-Total storage ~ 19 TB
-
-We have total 24 OSDs running , each node has 8 OSDs/SSD
-
-Configured 3 pools with 528 PGs/pool and 6 RBDs/pool . Each RBD image size is ~230G.
-
-We have tried on 64K_RR_QD64 workload here.
-
-HT_ENABLE
---------------
-
-IOPS :  				112500 
-Throughput (MB/S):		7012
-Avg Resp.Time (m.sec):                17
-Max Resp.Time (m.sec):              3184
-
-HT_DISABLE
---------------
-
-IOPS :  				120864 
-Throughput (MB/S):		7530
-Avg Resp.Time (m.sec):                11
-Max Resp.Time (m.sec):              1056
-
-
-So, ~7% iop increase but response time decrease is ~35% which is real good.
-
-Thanks & Regards
-Somnath
-
------Original Message-----
-From: Duan, Jiangang [mailto:jiangang.duan@intel.com]
-Sent: Wednesday, October 08, 2014 1:03 PM
-To: Somnath Roy; Andreas Bluemle; ceph-devel@vger.kernel.org
-Subject: RE: 10/7/2014 Weekly Ceph Performance Meeting: kernel boot params
-
-Sound good. Thanks. -jiangang
-
------Original Message-----
-From: Somnath Roy [mailto:Somnath.Roy@sandisk.com]
-Sent: Wednesday, October 08, 2014 10:53 AM
-To: Duan, Jiangang; Andreas Bluemle; ceph-devel@vger.kernel.org
-Subject: RE: 10/7/2014 Weekly Ceph Performance Meeting: kernel boot params
-
-Hi Jiangang,
-Give me a day or two, I will gather all the data and share with community.
-
-Thanks & Regards
-Somnath
-
------Original Message-----
-From: Duan, Jiangang [mailto:jiangang.duan@intel.com]
-Sent: Wednesday, October 08, 2014 10:47 AM
-To: Somnath Roy; Andreas Bluemle; ceph-devel@vger.kernel.org
-Subject: RE: 10/7/2014 Weekly Ceph Performance Meeting: kernel boot params
-
-Can you guys share the w/ HT and w/o HT data? I want to take a look at that to understand why. 
-
--jiangang
-
------Original Message-----
-From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Somnath Roy
-Sent: Wednesday, October 08, 2014 10:38 AM
-To: Andreas Bluemle; ceph-devel@vger.kernel.org
-Subject: RE: 10/7/2014 Weekly Ceph Performance Meeting: kernel boot params
-
-Thanks Andres for sharing this. I will try those out.
-BTW, I am using Ubuntu 14.04 LTS and couldn't find any sysfs entry like  'cpufreq'..
-
-root@stormeap-4:~# ll /sys/devices/system/cpu/cpu10/
-cache/            crash_notes       driver/           microcode/        online            subsystem/        topology/
-cpuidle/          crash_notes_size  firmware_node/    node0/            power/            thermal_throttle/ uevent
-
-I am using Intel(R) Xeon(R) CPU E5-2680 v2 @ 2.80GHz.
-
-Regards
-Somnath
-
------Original Message-----
-From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Andreas Bluemle
-Sent: Wednesday, October 08, 2014 9:33 AM
 To: ceph-devel@vger.kernel.org
-Subject: Re: 10/7/2014 Weekly Ceph Performance Meeting: kernel boot params
 
-Hi,
+Here's my list of possible blueprints for hammer.  And who might write 
+them up.  This is just a brain dump of what I'm thinking about; please 
+add, remove, object, suggest, etc.!
 
-as mentioned during today's meeting, here are the kernel boot parameters which I found to provide the basis for good performance results:
+Some of these blueprints already exist, but I suspect they are in need up 
+a refresh to make them reflect the current thinking.
 
-  processor.max_cstate=0
-  intel_idle.max_cstate=0
+I threw in several of the items we discussed in the performance calls.  I 
+think most of the key areas of development are captured below.  What's 
+missing is a lot of non-specific work around profiling and optimizing 
+existing code paths that is also a key effort for hammer.
 
-I understand these to basically turn off any power saving modes of the CPU; the CPU's we are using are like
- Intel(R) Xeon(R) CPU E5-2640 v2 @ 2.00GHz
- Intel(R) Xeon(R) CPU E5-2630 0 @ 2.30GHz
+What else is missing (or unnecessary) here?
 
-At the BIOS level, we
- - turn off Hyperthraeding
- - turn off Turbo mode (in order ot not leave the specifications)
- - turn on frequency floor override
+-- core --
 
-We also assert that
- /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
- is set to "performance"
+osd: recovery performance: EC recovery offload (Sam)
+osd: qos: unified priority queue (Sam)
+osd: performance: transaction api changes, keyfilestore backend (Sage)
+osd: performance: rados io hints (?)
+osd: data integrity: opportunistic at-rest checksums (#9059 Sage)
+osd: data integrity: scrub and repair (David)
+performance: buffer encode/decode performance (Matt)
+performance: AsyncMessenger (Haomai)
+performance: XioMessenger update (Matt)
+mon: performance: improve threading/locking (Joao, Sage)
+mon: scalability: prepopulate pg_temp (#7173 Sage)
+mon: data integrity: per-crush type down_out_interval (#7347)
+mon: data integrity: usable mon scrub (Joao)
+auth: kerberos support (Sage)
+tracing roadmap discussion
+crush: multi-type trees (ssd hdd) (Sage)
 
-Using above we see a constant frequency at the maximum level allowed by the CPU (except Turbo mode).
+-- librados --
+
+librados: data integrity: end-to-end checksums (expose csums to read/write) (Sage)
+librados: threading and async ops vs python (Dan)
+
+-- cephfs --
+
+data integrity: forward scrub (Greg)
+quotas vs subtrees
+auth (kerberos) minimum requirements
+hadoop: status, progress, roadmap (Noah)
+
+-- rgw --
+
+rgw: api fidelity: object versioning update (Yehuda)
+rgw: scaling, performance: bucket index scaling update (Guang)
+rgw: multi-dc status, roadmap (Yehuda)
+rgw: librgw?
+rgw: api fidelity: object expiration
+
+-- rbd --
+
+rbd: performance: object map (Jason)
+rbd: mirroring (Josh)
+rbd: HA iscsi gateways (Mike)
+rbd: performance optimization discussion
+
+-- calamari --
+
+rpm/deb packaging update for calamari and deps (Boris, Tim, Dan?)
+kerberos auth support (Dan)
+calamari api gaps (e.g., rbd) (Gregory)
+
+-- calamari-clients / romana --
+
+localization update?
+calamari vs romana roadmap discussion
+
+-- teuthology --
+
+teuthology: general roadmap discussion
+paddles: queueing ?
+automated performance tests
+
+-- ceph-deploy --
+
+?
+
+-- build/ci --
+
+build infrastructure roadmap
 
 
-Best Regards
 
-Andreas Bluemle
-
-
-
-
-
-
-On Wed, 8 Oct 2014 02:51:21 +0200
-Mark Nelson <mark.nelson@inktank.com> wrote:
-
-> Hi All,
->
-> Just a remind that the weekly performance meeting is on Wednesdays at 
-> 8AM PST.  Same bat time, same bat channel!
->
-> Etherpad URL:
-> http://pad.ceph.com/p/performance_weekly
->
-> To join the Meeting:
-> https://bluejeans.com/268261044
->
-> To join via Browser:
-> https://bluejeans.com/268261044/browser
->
-> To join with Lync:
-> https://bluejeans.com/268261044/lync
->
->
-> To join via Room System:
-> Video Conferencing System: bjn.vc -or- 199.48.152.152 Meeting ID:
-> 268261044
->
-> To join via Phone:
-> 1) Dial:
->            +1 408 740 7256
->            +1 888 240 2560(US Toll Free)
->            +1 408 317 9253(Alternate Number)
->            (see all numbers - http://bluejeans.com/numbers)
-> 2) Enter Conference ID: 268261044
->
-> Mark
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
-> in the body of a message to majordomo@vger.kernel.org More majordomo 
-> info at  http://vger.kernel.org/majordomo-info.html
->
->
-
-
-
---
-Andreas Bluemle                     mailto:Andreas.Bluemle@itxperts.de
-ITXperts GmbH                       http://www.itxperts.de
-Balanstrasse 73, Geb. 08            Phone: (+49) 89 89044917
-D-81541 Muenchen (Germany)          Fax:   (+49) 89 89044910
-
-Company details: http://www.itxperts.de/imprint.htm
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-________________________________
-
-PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
