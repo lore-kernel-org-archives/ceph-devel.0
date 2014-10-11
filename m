@@ -1,73 +1,58 @@
-From: Andrey Korolyov <andrey@xdel.ru>
-Subject: Re: [Qemu-devel] qemu drive-mirror to rbd storage : no sparse rbd image
-Date: Sat, 11 Oct 2014 12:30:40 +0400
-Message-ID: <CABYiri_An2fxAJYzxwdDJjFnUF2ME4HjY-jrcWE_jrDi9bshvw@mail.gmail.com>
-References: <20141011070118.GB4965@fam-t430.nay.redhat.com>
- <c22b3e6d-2fbc-4de9-8bfd-d3eb39ea8fe2@mailpro> <20141011082535.GC4965@fam-t430.nay.redhat.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: RHEL7 source packages
+Date: Sat, 11 Oct 2014 17:44:25 +0200
+Message-ID: <54395059.6030507@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="d4MGw6Snn6dteoEEgK6G1kGEhL8ngI1Lh"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f172.google.com ([209.85.216.172]:42594 "EHLO
-	mail-qc0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751795AbaJKIbB (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 11 Oct 2014 04:31:01 -0400
-Received: by mail-qc0-f172.google.com with SMTP id o8so3020326qcw.17
-        for <ceph-devel@vger.kernel.org>; Sat, 11 Oct 2014 01:31:00 -0700 (PDT)
-In-Reply-To: <20141011082535.GC4965@fam-t430.nay.redhat.com>
+Received: from mail2.dachary.org ([91.121.57.175]:42658 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751818AbaJKPob (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 11 Oct 2014 11:44:31 -0400
+Received: from [10.9.0.6] (unknown [10.0.2.28])
+	by smtp.dmail.dachary.org (Postfix) with ESMTP id 8F360420A2
+	for <ceph-devel@vger.kernel.org>; Sat, 11 Oct 2014 17:44:25 +0200 (CEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Fam Zheng <famz@redhat.com>
-Cc: Alexandre DERUMIER <aderumier@odiso.com>, qemu-devel <qemu-devel@nongnu.org>, Ceph Devel <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Sat, Oct 11, 2014 at 12:25 PM, Fam Zheng <famz@redhat.com> wrote:
-> On Sat, 10/11 10:00, Alexandre DERUMIER wrote:
->> >>What is the source format? If the zero clusters are actually unallocated in the
->> >>source image, drive-mirror will not write those clusters either. I.e. with
->> >>"drive-mirror sync=top", both source and target should have the same "qemu-img
->> >>map" output.
->>
->> Thanks for your reply,
->>
->> I had tried drive mirror (sync=full) with
->>
->> raw file (sparse) -> rbd  (no sparse)
->> rbd (sparse) -> rbd (no sparse)
->> raw file (sparse) -> qcow2 on ext4  (sparse)
->> rbd (sparse) -> raw on ext4 (sparse)
->>
->> Also I see that I have the same problem with target file format on xfs.
->>
->> raw file (sparse) -> qcow2 on xfs  (no sparse)
->> rbd (sparse) -> raw on xfs (no sparse)
->>
->
-> These don't tell me much. Maybe it's better to show the actual commands and how
-> you tell sparse from no sparse?
->
-> Does "qcow2 -> qcow2" work for you on xfs?
->
->>
->> I only have this problem with drive-mirror, qemu-img convert seem to simply skip zero blocks.
->>
->>
->> Or maybe this is because I'm using sync=full ?
->>
->> What is the difference between full and top ?
->>
->> ""sync": what parts of the disk image should be copied to the destination;
->>   possibilities include "full" for all the disk, "top" for only the sectors
->>   allocated in the topmost image".
->>
->> (what is topmost image ?)
->
-> For "sync=top", only the clusters allocated in the image itself is copied; for
-> "full", all those clusters allocated in the image itself, and its backing
-> image, and it's backing's backing image, ..., are copied.
->
-> The image itself, having a backing image or not, is called the topmost image.
->
-> Fam
-> --
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--d4MGw6Snn6dteoEEgK6G1kGEhL8ngI1Lh
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-Just a wild guess - Alexandre, did you tried detect-zeroes blk option
-for mirroring targets?
+Hi Ceph,
+
+I find this line in https://github.com/ceph/ceph/blob/giant/ceph.spec.in#=
+L382
+
+%if (0%{?rhel} || 0%{?rhel} < 7)
+
+odd because it looks like exactly the same as
+
+%if 0%{?rhel}
+
+But it has been added a long time ago
+
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+
+
+--d4MGw6Snn6dteoEEgK6G1kGEhL8ngI1Lh
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlQ5UFkACgkQ8dLMyEl6F22XYwCgocBDBzpQ1pZA2bMEJFxGk2JR
+PZIAoJF03NCedOu8ZI8yS25pIHm8bLPg
+=BKng
+-----END PGP SIGNATURE-----
+
+--d4MGw6Snn6dteoEEgK6G1kGEhL8ngI1Lh--
