@@ -1,108 +1,51 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: hammer blueprints
-Date: Fri, 10 Oct 2014 17:44:27 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1410021643060.17153@cobra.newdream.net>
+From: Fam Zheng <famz@redhat.com>
+Subject: Re: [Qemu-devel] qemu drive-mirror to rbd storage : no sparse rbd
+ image
+Date: Sat, 11 Oct 2014 15:01:18 +0800
+Message-ID: <20141011070118.GB4965@fam-t430.nay.redhat.com>
+References: <54c55fc6-b12a-42e5-b99d-9752c8a9b19b@mailpro>
+ <749ee402-bce4-45cb-97f2-8946542437fc@mailpro>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:39121 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751549AbaJKAo1 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Oct 2014 20:44:27 -0400
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 879168004F
-	for <ceph-devel@vger.kernel.org>; Fri, 10 Oct 2014 17:44:27 -0700 (PDT)
-Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 662518004F
-	for <ceph-devel@vger.kernel.org>; Fri, 10 Oct 2014 17:44:27 -0700 (PDT)
+Received: from mx1.redhat.com ([209.132.183.28]:63947 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750973AbaJKHBR (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sat, 11 Oct 2014 03:01:17 -0400
+Content-Disposition: inline
+In-Reply-To: <749ee402-bce4-45cb-97f2-8946542437fc@mailpro>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Alexandre DERUMIER <aderumier@odiso.com>
+Cc: qemu-devel <qemu-devel@nongnu.org>, Ceph Devel <ceph-devel@vger.kernel.org>
 
-Here's my list of possible blueprints for hammer.  And who might write 
-them up.  This is just a brain dump of what I'm thinking about; please 
-add, remove, object, suggest, etc.!
+On Wed, 10/08 13:15, Alexandre DERUMIER wrote:
+> Hi,
+> 
+> I'm currently planning to migrate our storage to ceph/rbd through qemu drive-mirror
+> 
+> and It seem that drive-mirror with rbd block driver, don't create a sparse image. (all zeros are copied to the target rbd).
+> 
+> Also note, that it's working fine with "qemu-img convert" , the rbd volume is sparse after conversion.
 
-Some of these blueprints already exist, but I suspect they are in need up 
-a refresh to make them reflect the current thinking.
+What is the source format? If the zero clusters are actually unallocated in the
+source image, drive-mirror will not write those clusters either. I.e. with
+"drive-mirror sync=top", both source and target should have the same "qemu-img
+map" output.
 
-I threw in several of the items we discussed in the performance calls.  I 
-think most of the key areas of development are captured below.  What's 
-missing is a lot of non-specific work around profiling and optimizing 
-existing code paths that is also a key effort for hammer.
+Fam
 
-What else is missing (or unnecessary) here?
-
--- core --
-
-osd: recovery performance: EC recovery offload (Sam)
-osd: qos: unified priority queue (Sam)
-osd: performance: transaction api changes, keyfilestore backend (Sage)
-osd: performance: rados io hints (?)
-osd: data integrity: opportunistic at-rest checksums (#9059 Sage)
-osd: data integrity: scrub and repair (David)
-performance: buffer encode/decode performance (Matt)
-performance: AsyncMessenger (Haomai)
-performance: XioMessenger update (Matt)
-mon: performance: improve threading/locking (Joao, Sage)
-mon: scalability: prepopulate pg_temp (#7173 Sage)
-mon: data integrity: per-crush type down_out_interval (#7347)
-mon: data integrity: usable mon scrub (Joao)
-auth: kerberos support (Sage)
-tracing roadmap discussion
-crush: multi-type trees (ssd hdd) (Sage)
-
--- librados --
-
-librados: data integrity: end-to-end checksums (expose csums to read/write) (Sage)
-librados: threading and async ops vs python (Dan)
-
--- cephfs --
-
-data integrity: forward scrub (Greg)
-quotas vs subtrees
-auth (kerberos) minimum requirements
-hadoop: status, progress, roadmap (Noah)
-
--- rgw --
-
-rgw: api fidelity: object versioning update (Yehuda)
-rgw: scaling, performance: bucket index scaling update (Guang)
-rgw: multi-dc status, roadmap (Yehuda)
-rgw: librgw?
-rgw: api fidelity: object expiration
-
--- rbd --
-
-rbd: performance: object map (Jason)
-rbd: mirroring (Josh)
-rbd: HA iscsi gateways (Mike)
-rbd: performance optimization discussion
-
--- calamari --
-
-rpm/deb packaging update for calamari and deps (Boris, Tim, Dan?)
-kerberos auth support (Dan)
-calamari api gaps (e.g., rbd) (Gregory)
-
--- calamari-clients / romana --
-
-localization update?
-calamari vs romana roadmap discussion
-
--- teuthology --
-
-teuthology: general roadmap discussion
-paddles: queueing ?
-automated performance tests
-
--- ceph-deploy --
-
-?
-
--- build/ci --
-
-build infrastructure roadmap
-
-
-
+> 
+> 
+> Could it be related to the "bdrv_co_write_zeroes" missing features in block/rbd.c ?
+> 
+> (It's available in other block drivers (scsi,gluster,raw-aio) , and I don't have this problem with theses block drivers).
+> 
+> 
+> 
+> Regards,
+> 
+> Alexandre Derumier
+> 
+> 
+> 
