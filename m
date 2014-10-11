@@ -1,47 +1,57 @@
 From: Loic Dachary <loic@dachary.org>
-Subject: RHEL7 source packages
-Date: Sat, 11 Oct 2014 17:44:25 +0200
-Message-ID: <54395059.6030507@dachary.org>
+Subject: Re: RHEL7 source packages
+Date: Sat, 11 Oct 2014 18:16:22 +0200
+Message-ID: <543957D6.5040801@dachary.org>
+References: <54395059.6030507@dachary.org>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="d4MGw6Snn6dteoEEgK6G1kGEhL8ngI1Lh"
+ boundary="NceQJUSlBLTarvJEeq7PmaoN9UbAAaGiU"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:42658 "EHLO
+Received: from mail2.dachary.org ([91.121.57.175]:42670 "EHLO
 	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751818AbaJKPob (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 11 Oct 2014 11:44:31 -0400
+	with ESMTP id S1752742AbaJKQQ2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 11 Oct 2014 12:16:28 -0400
 Received: from [10.9.0.6] (unknown [10.0.2.28])
-	by smtp.dmail.dachary.org (Postfix) with ESMTP id 8F360420A2
-	for <ceph-devel@vger.kernel.org>; Sat, 11 Oct 2014 17:44:25 +0200 (CEST)
+	by smtp.dmail.dachary.org (Postfix) with ESMTP id 52493420A2
+	for <ceph-devel@vger.kernel.org>; Sat, 11 Oct 2014 18:16:22 +0200 (CEST)
+In-Reply-To: <54395059.6030507@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Ceph Development <ceph-devel@vger.kernel.org>
 
 This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---d4MGw6Snn6dteoEEgK6G1kGEhL8ngI1Lh
+--NceQJUSlBLTarvJEeq7PmaoN9UbAAaGiU
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: quoted-printable
 
-Hi Ceph,
+[sent mail by mistake, here is the full version ;-]
 
-I find this line in https://github.com/ceph/ceph/blob/giant/ceph.spec.in#=
-L382
+On 11/10/2014 17:44, Loic Dachary wrote:
+> Hi Ceph,
+>=20
+> I find this line in https://github.com/ceph/ceph/blob/giant/ceph.spec.i=
+n#L382
+>=20
+> %if (0%{?rhel} || 0%{?rhel} < 7)
+>=20
+> odd because it looks like exactly the same as
+>=20
+> %if 0%{?rhel}
+>=20
+> But it has been added a long time ago
+>=20
+>=20
 
-%if (0%{?rhel} || 0%{?rhel} < 7)
+I filed a bug to followup http://tracker.ceph.com/issues/9747
 
-odd because it looks like exactly the same as
-
-%if 0%{?rhel}
-
-But it has been added a long time ago
-
+Cheers
 
 --=20
 Lo=EFc Dachary, Artisan Logiciel Libre
 
 
---d4MGw6Snn6dteoEEgK6G1kGEhL8ngI1Lh
+--NceQJUSlBLTarvJEeq7PmaoN9UbAAaGiU
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -50,9 +60,9 @@ Content-Disposition: attachment; filename="signature.asc"
 Version: GnuPG v2.0.22 (GNU/Linux)
 Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
 
-iEYEARECAAYFAlQ5UFkACgkQ8dLMyEl6F22XYwCgocBDBzpQ1pZA2bMEJFxGk2JR
-PZIAoJF03NCedOu8ZI8yS25pIHm8bLPg
-=BKng
+iEYEARECAAYFAlQ5V9YACgkQ8dLMyEl6F23+uQCgsTMyTF7usiOUUIAW8gJsvVo4
+p9AAoLxwHARQCAxjG7bC6ixH2CI8VWoF
+=YS1V
 -----END PGP SIGNATURE-----
 
---d4MGw6Snn6dteoEEgK6G1kGEhL8ngI1Lh--
+--NceQJUSlBLTarvJEeq7PmaoN9UbAAaGiU--
