@@ -1,51 +1,36 @@
-From: Eric Eastman <eric0e@aol.com>
-Subject: Re: [ceph-users] the state of cephfs in giant
-Date: Mon, 13 Oct 2014 15:03:56 -0400
-Message-ID: <8D1B52F9254254D-FFC-18C53@webmail-va058.sysops.aol.com>
-References: <alpine.DEB.2.00.1410131114130.10561@cobra.newdream.net>
+From: Andrey Korolyov <andrey@xdel.ru>
+Subject: Multiple issues with glibc heap management
+Date: Mon, 13 Oct 2014 23:33:14 +0400
+Message-ID: <CABYiri-csNmgHgaD4QxwaJwQE8qLEjStscZbzwd5Z2oBTFpyLA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; format=flowed
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from omr-m01.mx.aol.com ([64.12.143.75]:33487 "EHLO
-	omr-m01.mx.aol.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754326AbaJMTEB convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Oct 2014 15:04:01 -0400
-In-Reply-To: <alpine.DEB.2.00.1410131114130.10561@cobra.newdream.net>
+Received: from mail-qc0-f172.google.com ([209.85.216.172]:45106 "EHLO
+	mail-qc0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752681AbaJMTdh (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Oct 2014 15:33:37 -0400
+Received: by mail-qc0-f172.google.com with SMTP id o8so5659923qcw.3
+        for <ceph-devel@vger.kernel.org>; Mon, 13 Oct 2014 12:33:36 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: sage@newdream.net, ceph-users@ceph.com, ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
+Cc: Sergey Fionov <fionov@gmail.com>
 
-I would be interested in testing the Samba VFS and Ganesha NFS 
+Hello,
 
-integration with CephFS.  Are there any notes on how to configure these 
+since very long period (at least from cuttlefish) many users,
+including me, experiences rare but still very disturbing client
+crashes (#8385, #6480, and couple of other same-looking traces for
+different code pieces, I may start the corresponding separate bugs if
+necessary). The main problem is that the issues are very hard to
+reproduce in a deterministic way, although they are *primarily*
+correlate with disk workload.
 
-two interfaces with CephFS?
+Despite fixing all reported separately is a definitely a working way,
+the issue can be also caused be simularly-behaving single piece of
+code belonging to one of shared libraries. As issue touches more or
+less all existing deployments on stable release, may be it is worthy
+(and possible) to fix it not by cleaning up particular issues one by
+one.
 
-
-
-Eric
-
-
-
-> We've been doing a lot of work on CephFS over the past few months. 
-
-This
-
-> is an update on the current state of things as of Giant.
-
-> ...
-
-> * samba VFS integration: implemented, limited test coverage.
-
-> * ganesha NFS integration: implemented, no test coverage.
-
-> ...
-
-> Thanks!
-
-> sage
-
-_______________________________________________
-
-  
+Thanks!
