@@ -1,108 +1,109 @@
-From: <ghislain.chevalier@orange.com>
-Subject: NO pg created for eruasre-coded pool
-Date: Tue, 14 Oct 2014 09:07:04 +0000
-Message-ID: <11821_1413277626_543CE7BA_11821_8781_1_B9C8EFBF13B1354DB5FA000660D66DD00C18C864@PEXCVZYM14.corporate.adroot.infra.ftgroup>
+From: Thomas Lemarchand <thomas.lemarchand-9pQWj9kdM/uWw5T4fKrT70Za+K1vlBrA@public.gmane.org>
+Subject: Re: the state of cephfs in giant
+Date: Tue, 14 Oct 2014 11:57:11 +0200
+Message-ID: <1413280631.2515.39.camel@tlemarchand.wmi>
+References: <alpine.DEB.2.00.1410131114130.10561@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relais-ias92.francetelecom.com ([193.251.215.92]:58252 "EHLO
-	relais-inet.francetelecom.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750876AbaJNJMr convert rfc822-to-8bit
-	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 14 Oct 2014 05:12:47 -0400
-Received: from omfedm05.si.francetelecom.fr (unknown [xx.xx.xx.1])
-	by omfedm09.si.francetelecom.fr (ESMTP service) with ESMTP id AF1F02DC211
-	for <ceph-devel@vger.kernel.org>; Tue, 14 Oct 2014 11:07:06 +0200 (CEST)
-Received: from Exchangemail-eme1.itn.ftgroup (unknown [10.114.1.183])
-	by omfedm05.si.francetelecom.fr (ESMTP service) with ESMTP id 96DE635C097
-	for <ceph-devel@vger.kernel.org>; Tue, 14 Oct 2014 11:07:06 +0200 (CEST)
-Content-Language: fr-FR
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.00.1410131114130.10561-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-Hi all,
-
-Context=A0:
-Ceph=A0: Firefly 0.80.6
-Sandbox Platform=A0 : Ubuntu 12.04 LTS, 5 VM (VMware), 3 mons, 10 osd
-
-
-Issue:
-I created an erasure-coded pool using the default profile=20
---> ceph osd pool create ecpool 128 128 erasure default
-the erasure-code rule was dynamically created and associated to the poo=
-l.
-root@p-sbceph14:/etc/ceph# ceph osd crush rule dump erasure-code
-{ "rule_id": 7,
-  "rule_name": "erasure-code",
-  "ruleset": 52,
-  "type": 3,
-  "min_size": 3,
-  "max_size": 20,
-  "steps": [
-        { "op": "set_chooseleaf_tries",
-          "num": 5},
-        { "op": "take",
-          "item": -1,
-          "item_name": "default"},
-        { "op": "chooseleaf_indep",
-          "num": 0,
-          "type": "host"},
-        { "op": "emit"}]}
-root@p-sbceph14:/var/log/ceph# ceph osd pool get ecpool crush_ruleset
-crush_ruleset: 52
-
-No error message was displayed at pool creation but no pgs were created=
-=2E
---> rados lspools confirms the pool is created but rados/ceph df shows =
-no pg for this pool
-
-The command  "rados -p ecpool put services /etc/services" is inactive (=
-stalled)
-and the following message is encountered in ceph.log
-2014-10-14 10:36:50.189432 osd.5 10.192.134.123:6804/21505 799 : [WRN] =
-slow request 960.230073 seconds old, received at 2014-10-14 10:20:49.95=
-9255: osd_op(client.1192643.0:1 services [writefull 0~19281] 100.5a48a9=
-c2 ondisk+write e11869) v4 currently waiting for pg to exist locally
-
-I don't know if I missed something or if the problem is somewhere else.=
-=2E
-
-Best regards=20
-=20
-=20
-=20
-
-
-
-
-
-
-_______________________________________________________________________=
-__________________________________________________
-
-Ce message et ses pieces jointes peuvent contenir des informations conf=
-identielles ou privilegiees et ne doivent donc
-pas etre diffuses, exploites ou copies sans autorisation. Si vous avez =
-recu ce message par erreur, veuillez le signaler
-a l'expediteur et le detruire ainsi que les pieces jointes. Les message=
-s electroniques etant susceptibles d'alteration,
-Orange decline toute responsabilite si ce message a ete altere, deforme=
- ou falsifie. Merci.
-
-This message and its attachments may contain confidential or privileged=
- information that may be protected by law;
-they should not be distributed, used or copied without authorisation.
-If you have received this email in error, please notify the sender and =
-delete this message and its attachments.
-As emails may be altered, Orange is not liable for messages that have b=
-een modified, changed or falsified.
-Thank you.
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+VGhhbmtzIGZvciB0aGVzZXMgaW5mb3JtYXRpb25zLgoKSSBwbGFuIHRvIHVzZSBDZXBoRlMgb24g
+R2lhbnQsIHdpdGggcHJvZHVjdGlvbiB3b3JrbG9hZCwga25vd2luZyB0aGUKcmlza3MgYW5kIGhh
+dmluZyBhIGhvdCBiYWNrdXAgbmVhci4gSSBob3BlIHRvIGJlIGFibGUgdG8gcHJvdmlkZSB1c2Vm
+dWwKZmVlZGJhY2suCgpNeSBjbHVzdGVyIGlzIG1hZGUgb2YgNyBzZXJ2ZXJzICgzbW9uLCAzb3Nk
+ICgyNyBvc2QgaW5zaWRlKSwgMW1kcykuIEkKdXNlIGNlcGgtZnVzZSBvbiBjbGllbnRzLgoKWW91
+IHdyb3RlIGFib3V0IGhhcmRsaW5rcywgYnV0IHdoYXQgYWJvdXQgc3ltbGlua3MgPyBJIHVzZSBz
+b21lIChvbgpjZXBoRlMgZmlyZWZseSkgd2l0aG91dCBhbnkgcHJvYmxlbSBmb3Igbm93LgoKRG8g
+eW91IHN1Z2dlc3Qgc29tZXRoaW5nIGZvciBiYWNrdXAgb2YgQ2VwaEZTID8gRm9yIG5vdyBJIHVz
+ZSBhIHNpbXBsZQpyc3luYywgaXQgd29ya3MgcXVpdGUgd2VsbC4KClRoYW5rcyAhCgotLSAKVGhv
+bWFzIExlbWFyY2hhbmQKQ2xvdWQgU29sdXRpb25zIFNBUyAtIFJlc3BvbnNhYmxlIGRlcyBzeXN0
+w6htZXMgZCdpbmZvcm1hdGlvbgoKCgpPbiBsdW4uLCAyMDE0LTEwLTEzIGF0IDExOjE2IC0wNzAw
+LCBTYWdlIFdlaWwgd3JvdGU6Cj4gV2UndmUgYmVlbiBkb2luZyBhIGxvdCBvZiB3b3JrIG9uIENl
+cGhGUyBvdmVyIHRoZSBwYXN0IGZldyBtb250aHMuIFRoaXMKPiBpcyBhbiB1cGRhdGUgb24gdGhl
+IGN1cnJlbnQgc3RhdGUgb2YgdGhpbmdzIGFzIG9mIEdpYW50Lgo+IAo+IFdoYXQgd2UndmUgd29y
+a2luZyBvbjoKPiAKPiAqIGJldHRlciBtZHMvY2VwaGZzIGhlYWx0aCByZXBvcnRzIHRvIHRoZSBt
+b25pdG9yCj4gKiBtZHMgam91cm5hbCBkdW1wL3JlcGFpciB0b29sCj4gKiBtYW55IGtlcm5lbCBh
+bmQgY2VwaC1mdXNlL2xpYmNlcGhmcyBjbGllbnQgYnVnIGZpeGVzCj4gKiBmaWxlIHNpemUgcmVj
+b3ZlcnkgaW1wcm92ZW1lbnRzCj4gKiBjbGllbnQgc2Vzc2lvbiBtYW5hZ2VtZW50IGZpeGVzIChh
+bmQgdGVzdHMpCj4gKiBhZG1pbiBzb2NrZXQgY29tbWFuZHMgZm9yIGRpYWdub3NpcyBhbmQgYWRt
+aW4gaW50ZXJ2ZW50aW9uCj4gKiBtYW55IGJ1ZyBmaXhlcwo+IAo+IFdlIHN0YXJ0ZWQgdXNpbmcg
+Q2VwaEZTIHRvIGJhY2sgdGhlIHRldXRob2xvZ3kgKFFBKSBpbmZyYXN0cnVjdHVyZSBpbiB0aGUK
+PiBsYWIgYWJvdXQgdGhyZWUgbW9udGhzIGFnby4gV2UgZml4ZWQgYSBidW5jaCBvZiBzdHVmZiBv
+dmVyIHRoZSBmaXJzdAo+IG1vbnRoIG9yIHR3byAoc2V2ZXJhbCBrZXJuZWwgYnVncywgYSBmZXcg
+TURTIGJ1Z3MpLiBXZSd2ZSBoYWQgbm8gcHJvYmxlbXMKPiBmb3IgdGhlIGxhc3QgbW9udGggb3Ig
+c28uIFdlJ3JlIGN1cnJlbnRseSBydW5uaW5nIDAuODYgKGdpYW50IHJlbGVhc2UKPiBjYW5kaWRh
+dGUpIHdpdGggYSBzaW5nbGUgTURTIGFuZCB+NzAgT1NEcy4gQ2xpZW50cyBhcmUgcnVubmluZyBh
+IDMuMTYKPiBrZXJuZWwgcGx1cyBzZXZlcmFsIGZpeGVzIHRoYXQgd2VudCBpbnRvIDMuMTcuCj4g
+Cj4gCj4gV2l0aCBHaWFudCwgd2UgYXJlIGF0IGEgcG9pbnQgd2hlcmUgd2Ugd291bGQgYXNrIHRo
+YXQgZXZlcnlvbmUgdHJ5Cj4gdGhpbmdzIG91dCBmb3IgYW55IG5vbi1wcm9kdWN0aW9uIHdvcmts
+b2Fkcy4gV2UgYXJlIHZlcnkgaW50ZXJlc3RlZCBpbgo+IGZlZWRiYWNrIGFyb3VuZCBzdGFiaWxp
+dHksIHVzYWJpbGl0eSwgZmVhdHVyZSBnYXBzLCBhbmQgcGVyZm9ybWFuY2UuIFdlCj4gcmVjb21t
+ZW5kOgo+IAo+ICogU2luZ2xlIGFjdGl2ZSBNRFMuIFlvdSBjYW4gcnVuIGFueSBudW1iZXIgb2Yg
+c3RhbmRieSBNRFMncywgYnV0IHdlIGFyZQo+ICAgbm90IGZvY3VzaW5nIG9uIG11bHRpLW1kcyBi
+dWdzIGp1c3QgeWV0IChhbmQgb3VyIGV4aXN0aW5nIG11bHRpbWRzIHRlc3QKPiAgIHN1aXRlIGlz
+IGFscmVhZHkgaGl0dGluZyBzZXZlcmFsKS4KPiAqIE5vIHNuYXBzaG90cy4gVGhlc2UgYXJlIGRp
+c2FibGVkIGJ5IGRlZmF1bHQgYW5kIHJlcXVpcmUgYSBzY2FyeSBhZG1pbgo+ICAgY29tbWFuZCB0
+byBlbmFibGUgdGhlbS4gQWx0aG91Z2ggdGhlc2UgbW9zdGx5IHdvcmssIHRoZXJlIGFyZQo+ICAg
+c2V2ZXJhbCBrbm93biBpc3N1ZXMgdGhhdCB3ZSBoYXZlbid0IGFkZHJlc3NlZCBhbmQgdGhleSBj
+b21wbGljYXRlCj4gICB0aGluZ3MgaW1tZW5zZWx5LiBQbGVhc2UgYXZvaWQgdGhlbSBmb3Igbm93
+Lgo+ICogRWl0aGVyIHRoZSBrZXJuZWwgY2xpZW50IChrZXJuZWwgMy4xNyBvciBsYXRlcikgb3Ig
+dXNlcnNwYWNlIChjZXBoLWZ1c2UKPiAgIG9yIGxpYmNlcGhmcykgY2xpZW50cyBhcmUgaW4gZ29v
+ZCB3b3JraW5nIG9yZGVyLgo+IAo+IFRoZSBrZXkgbWlzc2luZyBmZWF0dXJlIHJpZ2h0IG5vdyBp
+cyBmc2NrIChib3RoIGNoZWNrIGFuZCByZXBhaXIpLiBUaGlzIGlzIAo+ICp0aGUqIGRldmVsb3Bt
+ZW50IGZvY3VzIGZvciBIYW1tZXIuCj4gCj4gCj4gSGVyZSdzIGEgbW9yZSBkZXRhaWxlZCBydW5k
+b3duIG9mIHRoZSBzdGF0dXMgb2YgdmFyaW91cyBmZWF0dXJlczoKPiAKPiAqIG11bHRpLW1kczog
+aW1wbGVtZW50ZWQuIGxpbWl0ZWQgdGVzdCBjb3ZlcmFnZS4gc2V2ZXJhbCBrbm93biBpc3N1ZXMu
+Cj4gICB1c2Ugb25seSBmb3Igbm9uLXByb2R1Y3Rpb24gd29ya2xvYWRzIGFuZCBleHBlY3Qgc29t
+ZSBzdGFiaWxpdHkKPiAgIGlzc3VlcyB0aGF0IGNvdWxkIGxlYWQgdG8gZGF0YSBsb3NzLgo+IAo+
+ICogc25hcHNob3RzOiBpbXBsZW1lbnRlZC4gbGltaXRlZCB0ZXN0IGNvdmVyYWdlLiBzZXZlcmFs
+IGtub3duIGlzc3Vlcy4KPiAgIHVzZSBvbmx5IGZvciBub24tcHJvZHVjdGlvbiB3b3JrbG9hZHMg
+YW5kIGV4cGVjdCBzb21lIHN0YWJpbGl0eSBpc3N1ZXMKPiAgIHRoYXQgY291bGQgbGVhZCB0byBk
+YXRhIGxvc3MuCj4gCj4gKiBoYXJkIGxpbmtzOiBzdGFibGUuIG5vIGtub3duIGlzc3VlcywgYnV0
+IHRoZXJlIGlzIHNvbWV3aGF0IGxpbWl0ZWQKPiAgIHRlc3QgY292ZXJhZ2UgKHdlIGRvbid0IHRl
+c3QgY3JlYXRpbmcgaHVnZSBsaW5rIGZhcm1zKS4KPiAKPiAqIGRpcmVjdCBpbzogaW1wbGVtZW50
+ZWQgYW5kIHRlc3RlZCBmb3Iga2VybmVsIGNsaWVudC4gbm8gc3BlY2lhbAo+ICAgc3VwcG9ydCBm
+b3IgY2VwaC1mdXNlICh0aGUga2VybmVsIGZ1c2UgZHJpdmVyIGhhbmRsZXMgdGhpcykuCj4gCj4g
+KiB4YXR0cnM6IGltcGxlbWVudGVkLCBzdGFibGUsIHRlc3RlZC4gbm8ga25vd24gaXNzdWVzIChm
+b3IgYm90aCBrZXJuZWwKPiAgIGFuZCB1c2Vyc3BhY2UgY2xpZW50cykuCj4gCj4gKiBBQ0xzOiBp
+bXBsZW1lbnRlZCwgdGVzdGVkIGZvciBrZXJuZWwgY2xpZW50LiBub3QgaW1wbGVtZW50ZWQgZm9y
+Cj4gICBjZXBoLWZ1c2UuCj4gCj4gKiBmaWxlIGxvY2tpbmcgKGZjbnRsLCBmbG9jayk6IHN1cHBv
+cnRlZCBhbmQgdGVzdGVkIGZvciBrZXJuZWwgY2xpZW50Lgo+ICAgbGltaXRlZCB0ZXN0IGNvdmVy
+YWdlLiBvbmUga25vd24gbWlub3IgaXNzdWUgZm9yIGtlcm5lbCB3aXRoIGZpeAo+ICAgcGVuZGlu
+Zy4gaW1wbGVtZW50aW9uIGluIHByb2dyZXNzIGZvciBjZXBoLWZ1c2UvbGliY2VwaGZzLgo+IAo+
+ICoga2VybmVsIGZzY2FjaGUgc3VwcG9ydDogaW1wbG1lbnRlZC4gbm8gdGVzdCBjb3ZlcmFnZS4g
+dXNlZCBpbgo+ICAgcHJvZHVjdGlvbiBieSBhZGZpbi4KPiAKPiAqIGhhZG9vcCBiaW5kaW5nczog
+aW1wbGVtZW50ZWQsIGxpbWl0ZWQgdGVzdCBjb3ZlcmFnZS4gYSBmZXcga25vd24KPiAgIGlzc3Vl
+cy4KPiAKPiAqIHNhbWJhIFZGUyBpbnRlZ3JhdGlvbjogaW1wbGVtZW50ZWQsIGxpbWl0ZWQgdGVz
+dCBjb3ZlcmFnZS4KPiAKPiAqIGdhbmVzaGEgTkZTIGludGVncmF0aW9uOiBpbXBsZW1lbnRlZCwg
+bm8gdGVzdCBjb3ZlcmFnZS4KPiAKPiAqIGtlcm5lbCBORlMgcmVleHBvcnQ6IGltcGxlbWVudGVk
+LiBsaW1pdGVkIHRlc3QgY292ZXJhZ2UuIG5vIGtub3duCj4gICBpc3N1ZXMuCj4gCj4gCj4gQW55
+Ym9keSB3aG8gaGFzIGV4cGVyaWVuY2VkIGJ1Z3MgaW4gdGhlIHBhc3Qgc2hvdWxkIGJlIGV4Y2l0
+ZWQgYnk6Cj4gCj4gKiBuZXcgTURTIGFkbWluIHNvY2tldCBjb21tYW5kcyB0byBsb29rIGF0IHBl
+bmRpbmcgb3BlcmF0aW9ucyBhbmQgY2xpZW50IAo+ICAgc2Vzc2lvbiBzdGF0ZXMuIChDaGVjayB0
+aGVtIG91dCB3aXRoICJjZXBoIGRhZW1vbiBtZHMuYSBoZWxwIiEpIFRoZXNlIAo+ICAgd2lsbCBt
+YWtlIGRpYWdub3NpbmcsIGRlYnVnZ2luZywgYW5kIGV2ZW4gZml4aW5nIGlzc3VlcyBhIGxvdCBz
+aW1wbGVyLgo+IAo+ICogdGhlIGNlcGhmc19qb3VybmFsX3Rvb2wsIHdoaWNoIGlzIGNhcGFibGUg
+b2YgbWFuaXB1bGF0aW5nIG1kcyBqb3VybmFsIAo+ICAgc3RhdGUgd2l0aG91dCBkb2luZyBkaWZm
+aWN1bHQgZXhwb3J0cy9pbXBvcnRzIGFuZCB1c2luZyBoZXhlZGl0Lgo+IAo+IFRoYW5rcyEKPiBz
+YWdlCj4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KPiBj
+ZXBoLXVzZXJzIG1haWxpbmcgbGlzdAo+IGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KPiBodHRw
+Oi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20KPiAKCgot
+LSAKVGhpcyBtZXNzYWdlIGhhcyBiZWVuIHNjYW5uZWQgZm9yIHZpcnVzZXMgYW5kCmRhbmdlcm91
+cyBjb250ZW50IGJ5IE1haWxTY2FubmVyLCBhbmQgaXMKYmVsaWV2ZWQgdG8gYmUgY2xlYW4uCgpf
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJz
+IG1haWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBo
+LmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
