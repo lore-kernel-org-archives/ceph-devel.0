@@ -1,86 +1,97 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: 10/7/2014 Weekly Ceph Performance Meeting: kernel boot params
-Date: Tue, 14 Oct 2014 06:13:58 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1410140612300.31128@cobra.newdream.net>
-References: <54348A89.1060906@redhat.com> <20141008183234.19a24ac1@doppio> <755F6B91B3BE364F9BCA11EA3F9E0C6F2785D4C1@SACMBXIP02.sdcorp.global.sandisk.com> <54358409.8040709@profihost.ag> <622F4407872BA447A16110F65453358C033B02A3E23F@FMSAMAIL.fmsa.local>
- <20141014132242.3812bcd1@doppio>
+Subject: Re: WriteBack Throttle kill the performace of the disk
+Date: Tue, 14 Oct 2014 06:22:47 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1410140617320.31128@cobra.newdream.net>
+References: <CALZt5jzUduePJzgH+-NJ=7WckxioCbUZvxvnCFM8VBxHxXt4dg@mail.gmail.com> <543BD3B9.2000600@redhat.com> <CAPYLRzh5vrv2e2QPe=Cf9FgVbhSWn5wgWs_SCGLOmvhQsnda3A@mail.gmail.com> <CALZt5jxKCyf0eWRQt2w04bQ2aEN4vj4i-01TVCNiS-WqWZB1KQ@mail.gmail.com>
+ <543D14E8.4030901@redhat.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:34976 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:35016 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755248AbaJNNN7 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Oct 2014 09:13:59 -0400
-In-Reply-To: <20141014132242.3812bcd1@doppio>
+	with ESMTP id S1755229AbaJNNWr (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Oct 2014 09:22:47 -0400
+In-Reply-To: <543D14E8.4030901@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andreas Bluemle <andreas.bluemle@itxperts.de>
-Cc: Paul Von-Stamwitz <PVonStamwitz@us.fujitsu.com>, Stefan Priebe <s.priebe@profihost.ag>, Somnath Roy <Somnath.Roy@sandisk.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Mark Nelson <mark.nelson@inktank.com>
+Cc: Nicheal <zay11022@gmail.com>, Gregory Farnum <greg@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tue, 14 Oct 2014, Andreas Bluemle wrote:
-> Hi,
+On Tue, 14 Oct 2014, Mark Nelson wrote:
+> On 10/14/2014 12:15 AM, Nicheal wrote:
+> > Yes, Greg.
+> > But Unix based system always have a parameter dirty_ratio to prevent
+> > the system memory from being exhausted. If Journal speed is so fast
+> > while backing store cannot catch up with Journal, then the backing
+> > store write will be blocked by the hard limitation of system dirty
+> > pages. The problem here may be that system call, sync(), cannot return
+> > since the system always has lots of dirty pages. Consequently, 1)
+> > FileStore::sync_entry() will be timeout and then ceph_osd_daemon
+> > abort.  2) Even if the thread is not timed out, Since the Journal
+> > committed point cannot be updated so that the Journal will be blocked,
+> > waiting for the sync() return and update Journal committed point.
+> > So the Throttle is added to solve the above problems, right?
 > 
-> 
-> On Wed, 8 Oct 2014 16:55:38 -0700
-> Paul Von-Stamwitz <PVonStamwitz@us.fujitsu.com> wrote:
-> 
-> >  
-> > > > Hi,
-> > > >
-> > > > as mentioned during today's meeting, here are the kernel boot
-> > > > parameters
-> > > which I found to provide the basis for good performance results:
-> > > >
-> > > >    processor.max_cstate=0
-> > > >    intel_idle.max_cstate=0
-> > > >
-> > > > I understand these to basically turn off any power saving modes
-> > > > of the
-> > > CPU; the CPU's we are using are like
-> > > >   Intel(R) Xeon(R) CPU E5-2640 v2 @ 2.00GHz
-> > > >   Intel(R) Xeon(R) CPU E5-2630 0 @ 2.30GHz
-> > > >
-> > > > At the BIOS level, we
-> > > >   - turn off Hyperthraeding
-> > > >   - turn off Turbo mode (in order ot not leave the specifications)
-> > > >   - turn on frequency floor override
-> > > >
-> > > > We also assert that
-> > > >   /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
-> > > >   is set to "performance"
-> > > >
-> > > > Using above we see a constant frequency at the maximum level
-> > > > allowed by
-> > > the CPU (except Turbo mode).
-> > > 
-> > > How much performance do we gain by this? Till now i thought it's
-> > > just 1-3% so i'm still running ondemand govenor plus power savings.
-> > 
-> > As always, it depends. I saw noticeable increases in some throughput
-> > tests (though I can't recall the % gain.) More important to me was
-> > that it made my fio results much more consistent. As we measure
-> > improvements, these settings remove some of the "system noise".
-> > 
-> > Best,
-> > Paul
-> > 
-> 
-> There were two different aspects which showed improvemnt:
->  - code was executed faster
->  - thread switching delays were reduced significantly
-> 
-> See the attached grahics. They show processing of a 4 kB write
-> request: processing at the Pipe::Reader is roughly 200 us in both
-> pictures, and sth. like 20 us at the OSD::Dispatcher. So there
-> is not much of a benefit here.
-> 
-> But the delay between the end of the Pipe::Reader and the start
-> of the OSD::Dispatcher threads reduced really significantly.
+> Greg or Sam can correct me if I'm wrong, but I always thought of the
+> wbthrottle code as being more an attempt to smooth out spikes in write
+> throughput to prevent the journal from getting too far ahead of the backing
+> store.  IE have more frequent, shorter flush periods rather than less frequent
+> longer ones.  For Ceph that is's probably a reasonable idea since you want all
+> of the OSDs behaving as consistently as possible to prevent hitting the max
+> outstanding client IOs/Bytes on the client and starving other ready OSDs.  I'm
+> not sure it's worked out in practice as well as it might have in theory,
+> though I'm not sure we've really investigated what's going on enough to be
+> sure.
 
-This test had a single outstanding IO, right?  The question for me is if 
-this reflect latencies we'd see under a realistic workload, where the are 
-more IOs in flight and the CPUs aren't likely to be in low power states.  
-I'm not sure how low the load needs to be before those states kick in and 
-these latencies start to appear...
+Right.  The fdatasync strategy means that the overall throughput is lower, 
+but the latencies are much more consistent.  Without the throttling we had 
+huge spikes, which is even more problematic.
+
+> > However, in my tested ARM ceph cluster(3nodes, 9osds, 3osds/node), it
+> > will cause problem (SSD as journal, and HDD as data disk, fio 4k
+> > ramdom write iodepth 64):
+> >      WritebackThrottle enable: Based on blktrace, we trace the back-end
+> > hdd io behaviour. Because of frequently calling fdatasync() in
+> > Writeback Throttle, it cause every back-end hdd spent more time to
+> > finish one io. This causes the total sync time longer. For example,
+> > default sync_max_interval is 5 seconds, total dirty data in 5 seconds
+> > is 10M. If I disable WritebackThrottle, 10M dirty data will be sync to
+> > disk within 4 second, So cat /proc/meminfo, the dirty data of my
+> > system is always clean(near zero). However, If I enable
+> > WritebackThrottle, fdatasync() slows down the sync process. Thus, it
+> > seems 8-9M random io will be sync to the disk within 5s. Thus the
+> > dirty data is always growing to the critical point (system
+> > up-limitation), and then sync_entry() is always timed out. So I means,
+> > in my case, disabling WritebackThrottle, I may always have 600 IOPS.
+> > If enabling WritebackThrottle, IOPS always drop to 200 since fdatasync
+> > cause back-end HDD disk overloaded.
+
+It is true.  One could probably disable wbthrottle and carefully tune the 
+kernel dirty_ratio and dirty_bytes.  As I recall the problem though was 
+that it was inode writeback that was expensive, and there were not good 
+kernel knobs for limiting the dirty items in that cache. I would be very 
+interested in hearing about successes in this area.
+
+Another promising direction is the batched fsync experiment that Dave 
+Chinner did a few months back.  I'm not what the status is in 
+getting that into mainline, though, so it's not helpful anytime soon.
+
+> >     So I would like that we can dynamically throttle the IOPS in
+> > FileStore. We cannot know the average sync() speed of the back-end
+> > Store since different disk own different IO performance. However, we
+> > can trace the average write speed in FileStore and Journal, Also, we
+> > can know, whether start_sync() is return and finished. Thus, If this
+> > time, Journal is writing so fast that the back-end cannot catch up the
+> > Journal(e.g. 1000IOPS/s). We cannot Throttle the Journal speed(e.g.
+> > 800IOPS/s) in next operation interval(the interval maybe 1 to 5
+> > seconds, in the third second, Thottle become 1000*e^-x where x is the
+> > tick interval, ), if in this interval, Journal write reach the
+> > limitation, the following submitting write should waiting in OSD
+> > waiting queue.So in this way, Journal may provide a boosting IO, but
+> > finally, back-end sync() will return and catch up with Journal become
+> > we always slow down the Journal speed after several seconds.
+
+Autotuning these parameters based on observed performance definitely 
+sounds promising!
 
 sage
