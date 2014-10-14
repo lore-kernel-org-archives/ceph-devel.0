@@ -1,124 +1,83 @@
-From: Loic Dachary <loic-cLsNCMjd+0JAfugRpC6u6w@public.gmane.org>
-Subject: Re: Micro Ceph summit during the OpenStack summit
-Date: Mon, 13 Oct 2014 17:16:15 -0700
-Message-ID: <543C6B4F.4060308@dachary.org>
-References: <5438542A.4070304@dachary.org>
-	<CA+z5Dsz3mpVuHaK1CM57E1cTe0sy5a0vKC4bTd1f22R80FfhNQ@mail.gmail.com>
-	<F033B0CB-5EFD-4629-9212-7CA5354E222D@enovance.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: NEON / SIMD
+Date: Mon, 13 Oct 2014 19:36:17 -0700
+Message-ID: <543C8C21.6040806@dachary.org>
+References: <54399D76.7090805@dachary.org> <20141013100651.GI2532@jannau.net>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============1152715349=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <F033B0CB-5EFD-4629-9212-7CA5354E222D-TBbEfUtgOqVWk0Htik3J/w@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sebastien Han <sebastien.han-TBbEfUtgOqVWk0Htik3J/w@public.gmane.org>, Blair Bethwaite <blair.bethwaite-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
-
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---===============1152715349==
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="VRewQiEI9ujtqeVMvEjHhCVMf6oVjT0cu"
+ boundary="bNBw8fgepb6HHxFGo8VpCn7TwK6nomaRr"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail2.dachary.org ([91.121.57.175]:44320 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1754316AbaJNCg3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Oct 2014 22:36:29 -0400
+In-Reply-To: <20141013100651.GI2532@jannau.net>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Janne Grunau <j@jannau.net>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
 This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---VRewQiEI9ujtqeVMvEjHhCVMf6oVjT0cu
-Content-Type: text/plain; charset=windows-1252
+--bNBw8fgepb6HHxFGo8VpCn7TwK6nomaRr
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: quoted-printable
 
-Hi Sebastien,
 
-Great ! Let's all join under this pad :-)
+
+On 13/10/2014 03:06, Janne Grunau wrote:
+> Hi,
+>=20
+> On 2014-10-11 23:13:26 +0200, Loic Dachary wrote:
+>>
+>> I'd like to learn more about SIMD and NEON. What documents / web site =
+
+>> would you recommend to begin ? There are
+>>
+>> http://projectne10.github.io/Ne10/
+>> http://www.arm.com/products/processors/technologies/neon.php
+>>
+>> Are you using formal specifications / documentations ? Any hint would =
+
+>> be most appreciated :-)
+>=20
+> I'm almost exclusively using ARM's Architecture Reference Manuals=20
+> (available only after registration in ARM's inforcenter):
+>=20
+> ARMv7-A:
+> http://infocenter.arm.com/help/topic/com.arm.doc.ddi0406c/index.html
+>=20
+> ARMv8-A:
+> http://infocenter.arm.com/help/topic/com.arm.doc.ddi0487a.c/index.html
+>=20
+>=20
+> http://infocenter.arm.com/help/topic/com.arm.doc.dui0489h/DUI0489H_arm_=
+assembler_reference.pdf
+> Seems to be available without registration and has similar descriptions=
+
+> of neon and vfp instructions like the ARMv7-A ARM.
+>=20
+> I don't know any more approachable source off-hand.
+
+Thanks for the tip :-) I'm registered and can see the documents now !
 
 Cheers
 
-On 13/10/2014 02:40, Sebastien Han wrote:
-> Hey all,
 >=20
-> I just saw this thread, I=92ve been working on this and was about to sh=
-are it: https://etherpad.openstack.org/p/kilo-ceph
-> Since the ceph etherpad is down I think we should switch to this one as=
- an alternative.
+> Janne
 >=20
-> Loic, feel free to work on this one and add more content :).
->=20
-> On 13 Oct 2014, at 05:46, Blair Bethwaite <blair.bethwaite-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> w=
-rote:
->=20
->> Hi Loic,
->>
->> I'll be there and interested to chat with other Cephers. But your pad
->> isn't returning any page data...
->>
->> Cheers,
->>
->> On 11 October 2014 08:48, Loic Dachary <loic-cLsNCMjd+0JAfugRpC6u6w@public.gmane.org> wrote:
->>> Hi Ceph,
->>>
->>> TL;DR: please register at http://pad.ceph.com/p/kilo if you're attend=
-ing the OpenStack summit
->>>
->>> November 3 - 7 in Paris will be the OpenStack summit in Paris https:/=
-/www.openstack.org/summit/openstack-paris-summit-2014/, an opportunity to=
- meet with Ceph developers and users. We will have a conference room dedi=
-cated to Ceph (half a day, date to be determined).
->>>
->>> Instead of preparing an abstract agenda, it is more interesting to fi=
-nd out who will be there and what topics we would like to talk about.
->>>
->>> In the spirit of the OpenStack summit it would make sense to primaril=
-y discuss the implementation proposals of various features and improvemen=
-ts scheduled for the next Ceph release, Hammer. The online Ceph Developer=
- Summit http://ceph.com/community/ceph-developer-summit-hammer/ is schedu=
-led the week before and we will have plenty of material.
->>>
->>> If you're attending the OpenStack summit, please add yourself to http=
-://pad.ceph.com/p/kilo and list the topics you'd like to discuss. Next we=
-ek Josh Durgin and myself will spend some time to prepare this micro Ceph=
- summit and make it a lively and informative experience :-)
->>>
->>> Cheers
->>>
->>> --
->>> Lo=EFc Dachary, Artisan Logiciel Libre
->>>
->>
->>
->>
->> --=20
->> Cheers,
->> ~Blairo
->> _______________________________________________
->> ceph-users mailing list
->> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
->> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->=20
->=20
-> Cheers.
-> =96=96=96=96=20
-> S=E9bastien Han=20
-> Cloud Architect=20
->=20
-> "Always give 100%. Unless you're giving blood."
->=20
-> Phone: +33 (0)1 49 70 99 72=20
-> Mail: sebastien.han-TBbEfUtgOqVWk0Htik3J/w@public.gmane.org=20
-> Address : 11 bis, rue Roqu=E9pine - 75008 Paris
-> Web : www.enovance.com - Twitter : @enovance=20
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >=20
 
 --=20
 Lo=EFc Dachary, Artisan Logiciel Libre
 
 
---VRewQiEI9ujtqeVMvEjHhCVMf6oVjT0cu
+--bNBw8fgepb6HHxFGo8VpCn7TwK6nomaRr
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -127,22 +86,9 @@ Content-Disposition: attachment; filename="signature.asc"
 Version: GnuPG v2.0.22 (GNU/Linux)
 Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
 
-iEYEARECAAYFAlQ8a08ACgkQ8dLMyEl6F20LcACffRKnmk9nE8RbPUl1U4RLN4SR
-vsgAoI5J9BDdWav6gNsxFKA749SoKUM0
-=awQ8
+iEYEARECAAYFAlQ8jCEACgkQ8dLMyEl6F23cGQCfW7KThYKH/x64jjjYcQIWzWrE
+yo4AnRk7xD38Tpn1an1bHt0onMTmIPBd
+=2gaK
 -----END PGP SIGNATURE-----
 
---VRewQiEI9ujtqeVMvEjHhCVMf6oVjT0cu--
-
---===============1152715349==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============1152715349==--
+--bNBw8fgepb6HHxFGo8VpCn7TwK6nomaRr--
