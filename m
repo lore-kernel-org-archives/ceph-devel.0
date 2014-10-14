@@ -1,97 +1,240 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: WriteBack Throttle kill the performace of the disk
-Date: Tue, 14 Oct 2014 06:22:47 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1410140617320.31128@cobra.newdream.net>
-References: <CALZt5jzUduePJzgH+-NJ=7WckxioCbUZvxvnCFM8VBxHxXt4dg@mail.gmail.com> <543BD3B9.2000600@redhat.com> <CAPYLRzh5vrv2e2QPe=Cf9FgVbhSWn5wgWs_SCGLOmvhQsnda3A@mail.gmail.com> <CALZt5jxKCyf0eWRQt2w04bQ2aEN4vj4i-01TVCNiS-WqWZB1KQ@mail.gmail.com>
- <543D14E8.4030901@redhat.com>
+From: <ghislain.chevalier@orange.com>
+Subject: RE: NO pg created for eruasre-coded pool
+Date: Tue, 14 Oct 2014 13:20:07 +0000
+Message-ID: <14584_1413292808_543D2308_14584_1013_1_B9C8EFBF13B1354DB5FA000660D66DD00C18CAE0@PEXCVZYM14.corporate.adroot.infra.ftgroup>
+References: <11821_1413277626_543CE7BA_11821_8781_1_B9C8EFBF13B1354DB5FA000660D66DD00C18C864@PEXCVZYM14.corporate.adroot.infra.ftgroup>
+ <543CF6D7.2070204@dachary.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:35016 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755229AbaJNNWr (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Oct 2014 09:22:47 -0400
-In-Reply-To: <543D14E8.4030901@redhat.com>
+Received: from relais-ias244.francetelecom.com ([80.12.204.244]:36091 "EHLO
+	relais-inet.francetelecom.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755249AbaJNN0d convert rfc822-to-8bit
+	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 14 Oct 2014 09:26:33 -0400
+In-Reply-To: <543CF6D7.2070204@dachary.org>
+Content-Language: fr-FR
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mark.nelson@inktank.com>
-Cc: Nicheal <zay11022@gmail.com>, Gregory Farnum <greg@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, 14 Oct 2014, Mark Nelson wrote:
-> On 10/14/2014 12:15 AM, Nicheal wrote:
-> > Yes, Greg.
-> > But Unix based system always have a parameter dirty_ratio to prevent
-> > the system memory from being exhausted. If Journal speed is so fast
-> > while backing store cannot catch up with Journal, then the backing
-> > store write will be blocked by the hard limitation of system dirty
-> > pages. The problem here may be that system call, sync(), cannot return
-> > since the system always has lots of dirty pages. Consequently, 1)
-> > FileStore::sync_entry() will be timeout and then ceph_osd_daemon
-> > abort.  2) Even if the thread is not timed out, Since the Journal
-> > committed point cannot be updated so that the Journal will be blocked,
-> > waiting for the sync() return and update Journal committed point.
-> > So the Throttle is added to solve the above problems, right?
-> 
-> Greg or Sam can correct me if I'm wrong, but I always thought of the
-> wbthrottle code as being more an attempt to smooth out spikes in write
-> throughput to prevent the journal from getting too far ahead of the backing
-> store.  IE have more frequent, shorter flush periods rather than less frequent
-> longer ones.  For Ceph that is's probably a reasonable idea since you want all
-> of the OSDs behaving as consistently as possible to prevent hitting the max
-> outstanding client IOs/Bytes on the client and starving other ready OSDs.  I'm
-> not sure it's worked out in practice as well as it might have in theory,
-> though I'm not sure we've really investigated what's going on enough to be
-> sure.
+HI,
 
-Right.  The fdatasync strategy means that the overall throughput is lower, 
-but the latencies are much more consistent.  Without the throttling we had 
-huge spikes, which is even more problematic.
+THX Lo=EFc for your quick reply.
 
-> > However, in my tested ARM ceph cluster(3nodes, 9osds, 3osds/node), it
-> > will cause problem (SSD as journal, and HDD as data disk, fio 4k
-> > ramdom write iodepth 64):
-> >      WritebackThrottle enable: Based on blktrace, we trace the back-end
-> > hdd io behaviour. Because of frequently calling fdatasync() in
-> > Writeback Throttle, it cause every back-end hdd spent more time to
-> > finish one io. This causes the total sync time longer. For example,
-> > default sync_max_interval is 5 seconds, total dirty data in 5 seconds
-> > is 10M. If I disable WritebackThrottle, 10M dirty data will be sync to
-> > disk within 4 second, So cat /proc/meminfo, the dirty data of my
-> > system is always clean(near zero). However, If I enable
-> > WritebackThrottle, fdatasync() slows down the sync process. Thus, it
-> > seems 8-9M random io will be sync to the disk within 5s. Thus the
-> > dirty data is always growing to the critical point (system
-> > up-limitation), and then sync_entry() is always timed out. So I means,
-> > in my case, disabling WritebackThrottle, I may always have 600 IOPS.
-> > If enabling WritebackThrottle, IOPS always drop to 200 since fdatasync
-> > cause back-end HDD disk overloaded.
+Here is the result of ceph osd tree
 
-It is true.  One could probably disable wbthrottle and carefully tune the 
-kernel dirty_ratio and dirty_bytes.  As I recall the problem though was 
-that it was inode writeback that was expensive, and there were not good 
-kernel knobs for limiting the dirty items in that cache. I would be very 
-interested in hearing about successes in this area.
+As showed at the last ceph day in Paris, we have multiple root but the =
+ruleset 52 entered the crushmap on root default.
 
-Another promising direction is the batched fsync experiment that Dave 
-Chinner did a few months back.  I'm not what the status is in 
-getting that into mainline, though, so it's not helpful anytime soon.
+# id    weight  type name       up/down reweight
+-100    0.09998 root diskroot
+-110    0.04999         diskclass fastsata
+0       0.009995                        osd.0   up      1
+1       0.009995                        osd.1   up      1
+2       0.009995                        osd.2   up      1
+3       0.009995                        osd.3   up      1
+-120    0.04999         diskclass slowsata
+4       0.009995                        osd.4   up      1
+5       0.009995                        osd.5   up      1
+6       0.009995                        osd.6   up      1
+7       0.009995                        osd.7   up      1
+8       0.009995                        osd.8   up      1
+9       0.009995                        osd.9   up      1
+-5      0.2     root approot
+-50     0.09999         appclient apprgw
+-501    0.04999                 appclass fastrgw
+0       0.009995                                osd.0   up      1
+1       0.009995                                osd.1   up      1
+2       0.009995                                osd.2   up      1
+3       0.009995                                osd.3   up      1
+-502    0.04999                 appclass slowrgw
+4       0.009995                                osd.4   up      1
+5       0.009995                                osd.5   up      1
+6       0.009995                                osd.6   up      1
+7       0.009995                                osd.7   up      1
+8       0.009995                                osd.8   up      1
+9       0.009995                                osd.9   up      1
+-51     0.09999         appclient appstd
+-511    0.04999                 appclass faststd
+0       0.009995                                osd.0   up      1
+1       0.009995                                osd.1   up      1
+2       0.009995                                osd.2   up      1
+3       0.009995                                osd.3   up      1
+-512    0.04999                 appclass slowstd
+4       0.009995                                osd.4   up      1
+5       0.009995                                osd.5   up      1
+6       0.009995                                osd.6   up      1
+7       0.009995                                osd.7   up      1
+8       0.009995                                osd.8   up      1
+9       0.009995                                osd.9   up      1
+-1      0.09999 root default
+-2      0.09999         datacenter nanterre
+-3      0.09999                 platform sandbox
+-13     0.01999                         host p-sbceph13
+0       0.009995                                        osd.0   up     =
+ 1
+5       0.009995                                        osd.5   up     =
+ 1
+-14     0.01999                         host p-sbceph14
+1       0.009995                                        osd.1   up     =
+ 1
+6       0.009995                                        osd.6   up     =
+ 1
+-15     0.01999                         host p-sbceph15
+2       0.009995                                        osd.2   up     =
+ 1
+7       0.009995                                        osd.7   up     =
+ 1
+-12     0.01999                         host p-sbceph12
+3       0.009995                                        osd.3   up     =
+ 1
+8       0.009995                                        osd.8   up     =
+ 1
+-11     0.01999                         host p-sbceph11
+4       0.009995                                        osd.4   up     =
+ 1
+9       0.009995                                        osd.9   up     =
+ 1
 
-> >     So I would like that we can dynamically throttle the IOPS in
-> > FileStore. We cannot know the average sync() speed of the back-end
-> > Store since different disk own different IO performance. However, we
-> > can trace the average write speed in FileStore and Journal, Also, we
-> > can know, whether start_sync() is return and finished. Thus, If this
-> > time, Journal is writing so fast that the back-end cannot catch up the
-> > Journal(e.g. 1000IOPS/s). We cannot Throttle the Journal speed(e.g.
-> > 800IOPS/s) in next operation interval(the interval maybe 1 to 5
-> > seconds, in the third second, Thottle become 1000*e^-x where x is the
-> > tick interval, ), if in this interval, Journal write reach the
-> > limitation, the following submitting write should waiting in OSD
-> > waiting queue.So in this way, Journal may provide a boosting IO, but
-> > finally, back-end sync() will return and catch up with Journal become
-> > we always slow down the Journal speed after several seconds.
+Best regards
 
-Autotuning these parameters based on observed performance definitely 
-sounds promising!
+-----Message d'origine-----
+De=A0: Loic Dachary [mailto:loic@dachary.org]=20
+Envoy=E9=A0: mardi 14 octobre 2014 12:12
+=C0=A0: CHEVALIER Ghislain IMT/OLPS; ceph-devel@vger.kernel.org
+Objet=A0: Re: [Ceph-Devel] NO pg created for eruasre-coded pool
 
-sage
+
+
+On 14/10/2014 02:07, ghislain.chevalier@orange.com wrote:
+> Hi all,
+>=20
+> Context :
+> Ceph : Firefly 0.80.6
+> Sandbox Platform  : Ubuntu 12.04 LTS, 5 VM (VMware), 3 mons, 10 osd
+>=20
+>=20
+> Issue:
+> I created an erasure-coded pool using the default profile
+> --> ceph osd pool create ecpool 128 128 erasure default
+> the erasure-code rule was dynamically created and associated to the p=
+ool.
+> root@p-sbceph14:/etc/ceph# ceph osd crush rule dump erasure-code {=20
+> "rule_id": 7,
+>   "rule_name": "erasure-code",
+>   "ruleset": 52,
+>   "type": 3,
+>   "min_size": 3,
+>   "max_size": 20,
+>   "steps": [
+>         { "op": "set_chooseleaf_tries",
+>           "num": 5},
+>         { "op": "take",
+>           "item": -1,
+>           "item_name": "default"},
+>         { "op": "chooseleaf_indep",
+>           "num": 0,
+>           "type": "host"},
+>         { "op": "emit"}]}
+> root@p-sbceph14:/var/log/ceph# ceph osd pool get ecpool crush_ruleset
+> crush_ruleset: 52
+
+> No error message was displayed at pool creation but no pgs were creat=
+ed.
+> --> rados lspools confirms the pool is created but rados/ceph df show=
+s=20
+> --> no pg for this pool
+>=20
+> The command  "rados -p ecpool put services /etc/services" is inactive=
+=20
+> (stalled) and the following message is encountered in ceph.log
+> 2014-10-14 10:36:50.189432 osd.5 10.192.134.123:6804/21505 799 : [WRN=
+]=20
+> slow request 960.230073 seconds old, received at 2014-10-14=20
+> 10:20:49.959255: osd_op(client.1192643.0:1 services [writefull=20
+> 0~19281] 100.5a48a9c2 ondisk+write e11869) v4 currently waiting for p=
+g=20
+> to exist locally
+>=20
+> I don't know if I missed something or if the problem is somewhere els=
+e..
+
+The erasure-code rule displayed will need at least three hosts. If ther=
+e are not enough hosts with OSDs the mapping will fail and put will han=
+g until an OSD becomes available to complete the mapping of OSDs to the=
+ PGs. What does your ceph osd tree shows ?
+
+Cheers
+
+>=20
+> Best regards
+> =20
+> =20
+> =20
+>=20
+>=20
+>=20
+>=20
+>=20
+>=20
+> _____________________________________________________________________=
+_
+> ___________________________________________________
+>=20
+> Ce message et ses pieces jointes peuvent contenir des informations=20
+> confidentielles ou privilegiees et ne doivent donc pas etre diffuses,=
+=20
+> exploites ou copies sans autorisation. Si vous avez recu ce message=20
+> par erreur, veuillez le signaler a l'expediteur et le detruire ainsi =
+que les pieces jointes. Les messages electroniques etant susceptibles d=
+'alteration, Orange decline toute responsabilite si ce message a ete al=
+tere, deforme ou falsifie. Merci.
+>=20
+> This message and its attachments may contain confidential or=20
+> privileged information that may be protected by law; they should not =
+be distributed, used or copied without authorisation.
+> If you have received this email in error, please notify the sender an=
+d delete this message and its attachments.
+> As emails may be altered, Orange is not liable for messages that have=
+ been modified, changed or falsified.
+> Thank you.
+>=20
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+=20
+> in the body of a message to majordomo@vger.kernel.org More majordomo=20
+> info at  http://vger.kernel.org/majordomo-info.html
+>=20
+
+--
+Lo=EFc Dachary, Artisan Logiciel Libre
+
+
+_______________________________________________________________________=
+__________________________________________________
+
+Ce message et ses pieces jointes peuvent contenir des informations conf=
+identielles ou privilegiees et ne doivent donc
+pas etre diffuses, exploites ou copies sans autorisation. Si vous avez =
+recu ce message par erreur, veuillez le signaler
+a l'expediteur et le detruire ainsi que les pieces jointes. Les message=
+s electroniques etant susceptibles d'alteration,
+Orange decline toute responsabilite si ce message a ete altere, deforme=
+ ou falsifie. Merci.
+
+This message and its attachments may contain confidential or privileged=
+ information that may be protected by law;
+they should not be distributed, used or copied without authorisation.
+If you have received this email in error, please notify the sender and =
+delete this message and its attachments.
+As emails may be altered, Orange is not liable for messages that have b=
+een modified, changed or falsified.
+Thank you.
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
