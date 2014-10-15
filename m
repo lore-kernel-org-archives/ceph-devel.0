@@ -1,91 +1,75 @@
-From: Dan Van Der Ster <daniel.vanderster@cern.ch>
-Subject: Re: snap_trimming + backfilling is inefficient with many
- purged_snaps
-Date: Wed, 15 Oct 2014 14:47:32 +0000
-Message-ID: <6A154A11-04F9-4D21-BF81-C585B6E6BD41@cern.ch>
-References: <alpine.DEB.2.00.1409190819070.18018@cobra.newdream.net>
- <CAPUexz-ff+fTmU0J0TrJ80p+6334BBPvM7EWW5=eGa8uEomRew@mail.gmail.com>
- <D197E5D4-598B-4574-852E-C9F0CA10133E@cern.ch>
- <CAPUexz9XeNMJvjCeM_7N0_TQOS6_xBOdgnKm9j4FNDib3+FjMg@mail.gmail.com>
- <541b2add.ea5cb40a.250c.3ed0SMTPIN_ADDED_BROKEN@mx.google.com>
- <CAPUexz_H7-b8SY6J+dLnAyw663eHXoLKYccB1edwH9XgFBZCpw@mail.gmail.com>
- <07f3373f39ff2f738d76bc9f23f07297@webmail.vanderster.com>
- <CAPUexz9P264L4fj4eSdb3KbnTS+ewvE7WdKCw5ijjEO_u8URYA@mail.gmail.com>
- <alpine.DEB.2.00.1409181446110.19460@cobra.newdream.net>
- <CAPUexz-HXn=x_b=CJev46jWFsSrUpXc7UO7kzWcRe4Yrm6VL3g@mail.gmail.com>
- <alpine.DEB.2.00.1409181526260.19460@cobra.newdream.net>
- <CAPUexz-GYF4R95k8QzvdGDKtzez0Qm6SnJt1=4YJEGB8ty7Ggg@mail.gmail.com>
- <1878E4A4-2363-4717-ABEC-B587B0337D6B@cern.ch>
- <CABZ+qqks_qSbgG4QhkaH8A1zTP=o+fR4ptHPbtA9-MxrM8sJ5w@mail.gmail.com>
- <63ccef299522995cc0704e349ef86503@webmail.vanderster.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: [ceph-users] the state of cephfs in giant
+Date: Wed, 15 Oct 2014 07:58:19 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1410150754560.10462@cobra.newdream.net>
+References: <alpine.DEB.2.00.1410131114130.10561@cobra.newdream.net> <543CD16C.6060708@m-privacy.de> <alpine.DEB.2.00.1410140718050.10462@cobra.newdream.net> <543E179E.4070704@m-privacy.de> <543E645E.4080405@redhat.com> <543E7315.6010300@m-privacy.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cernmx11.cern.ch ([188.184.36.50]:58865 "EHLO CERNMX11.cern.ch"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751305AbaJOOrf convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 15 Oct 2014 10:47:35 -0400
-In-Reply-To: <63ccef299522995cc0704e349ef86503@webmail.vanderster.com>
-Content-Language: en-US
-Content-ID: <E5AA47C39317564BAB47417C2DDEAC28@cern.ch>
+Received: from cobra.newdream.net ([66.33.216.30]:44419 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751346AbaJOO6U (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 15 Oct 2014 10:58:20 -0400
+In-Reply-To: <543E7315.6010300@m-privacy.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Florian Haas <florian@hastexo.com>
+To: Amon Ott <a.ott@m-privacy.de>
+Cc: Ric Wheeler <rwheeler@redhat.com>, ceph-devel@vger.kernel.org, ceph-users@ceph.com
 
-Hi Sage,
-
-> On 19 Sep 2014, at 17:37, Dan Van Der Ster <daniel.vanderster@cern.ch> wrote:
+On Wed, 15 Oct 2014, Amon Ott wrote:
+> Am 15.10.2014 14:11, schrieb Ric Wheeler:
+> > On 10/15/2014 08:43 AM, Amon Ott wrote:
+> >> Am 14.10.2014 16:23, schrieb Sage Weil:
+> >>> On Tue, 14 Oct 2014, Amon Ott wrote:
+> >>>> Am 13.10.2014 20:16, schrieb Sage Weil:
+> >>>>> We've been doing a lot of work on CephFS over the past few months.
+> >>>>> This
+> >>>>> is an update on the current state of things as of Giant.
+> >>>> ...
+> >>>>> * Either the kernel client (kernel 3.17 or later) or userspace
+> >>>>> (ceph-fuse
+> >>>>>    or libcephfs) clients are in good working order.
+> >>>> Thanks for all the work and specially for concentrating on CephFS! We
+> >>>> have been watching and testing for years by now and really hope to
+> >>>> change our Clusters to CephFS soon.
+> >>>>
+> >>>> For kernel maintenance reasons, we only want to run longterm stable
+> >>>> kernels. And for performance reasons and because of severe known
+> >>>> problems we want to avoid Fuse. How good are our chances of a stable
+> >>>> system with the kernel client in the latest longterm kernel 3.14? Will
+> >>>> there be further bugfixes or feature backports?
+> >>> There are important bug fixes missing from 3.14.  IIRC, the EC, cache
+> >>> tiering, and firefly CRUSH changes aren't there yet either (they
+> >>> landed in
+> >>> 3.15), and that is not appropriate for a stable series.
+> >>>
+> >>> They can be backported, but no commitment yet on that :)
+> >> If the bugfixes are easily identified in one of your Ceph git branches,
+> >> I would even try to backport them myself. Still, I would rather see
+> >> someone from the Ceph team with deeper knowledge of the code port them.
+> >>
+> >> IMHO, it would be good for Ceph to have stable support in at least the
+> >> latest longterm kernel. No need for new features, but bugfixes should be
+> >> there.
+> >>
+> >> Amon Ott
+> > 
+> > Long term support and aggressive, tedious backports are what you go to
+> > distro vendors for normally - I don't think that it is generally a good
+> > practice to continually backport anything to stable series kernels that
+> > is not a bugfix/security issue (or else, the stable branches rapidly
+> > just a stale version of the upstream tip :)).
 > 
-> September 19 2014 5:19 PM, "Sage Weil" <sweil@redhat.com> wrote: 
->> On Fri, 19 Sep 2014, Dan van der Ster wrote:
->> 
->>> On Fri, Sep 19, 2014 at 10:41 AM, Dan Van Der Ster
->>> <daniel.vanderster@cern.ch> wrote:
->>>>> On 19 Sep 2014, at 08:12, Florian Haas <florian@hastexo.com> wrote:
->>>>> 
->>>>> On Fri, Sep 19, 2014 at 12:27 AM, Sage Weil <sweil@redhat.com> wrote:
->>>>>> On Fri, 19 Sep 2014, Florian Haas wrote:
->>>>>>> Hi Sage,
->>>>>>> 
->>>>>>> was the off-list reply intentional?
->>>>>> 
->>>>>> Whoops! Nope :)
->>>>>> 
->>>>>>> On Thu, Sep 18, 2014 at 11:47 PM, Sage Weil <sweil@redhat.com> wrote:
->>>>>>>>> So, disaster is a pretty good description. Would anyone from the core
->>>>>>>>> team like to suggest another course of action or workaround, or are
->>>>>>>>> Dan and I generally on the right track to make the best out of a
->>>>>>>>> pretty bad situation?
->>>>>>>> 
->>>>>>>> The short term fix would probably be to just prevent backfill for the time
->>>>>>>> being until the bug is fixed.
->>>>>>> 
->>>>>>> As in, osd max backfills = 0?
->>>>>> 
->>>>>> Yeah :)
->>>>>> 
->>>>>> Just managed to reproduce the problem...
->>>>>> 
->>>>>> sage
->>>>> 
->>>>> Saw the wip branch. Color me freakishly impressed on the turnaround. :) Thanks!
->>>> 
->>>> Indeed :) Thanks Sage!
->>>> wip-9487-dumpling fixes the problem on my test cluster. Trying in prod now?
->>> 
->>> Final update, after 4 hours in prod and after draining 8 OSDs -- zero
->>> slow requests :)
->> 
->> That's great news!
->> 
->> But, please be careful. This code hasn't been reiewed yet or been through
->> any testing! I would hold off on further backfills until it's merged.
+> bugfix/security is exactly what I am looking for.
 
+Right; sorry if I was unclear.  We make a point of sending bug fixes to 
+stable@vger.kernel.org but haven't been aggressive with cephfs because 
+the code is less stable.  There will be catch-up required to get 3.14 in 
+good working order.
 
-Any news on those merges? It would be good to get this fixed on the dumpling and firefly branches. We're kind of stuck at the moment :(
+Definitely hear you that this important, just can't promise when we'll 
+have the time to do it.  There's probably a half day's effort to pick out 
+the right patches and make sure they build properly, and then some time to 
+feed it through the test suite.
 
-Cheers, Dan
-
-
+sage
