@@ -1,113 +1,65 @@
-From: Sage Weil <sage@inktank.com>
-Subject: [GIT PULL] Ceph updates for 3.18-rc1
-Date: Tue, 14 Oct 2014 15:07:24 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1410141502460.6466@cobra.newdream.net>
+From: Alphe Salas <asalas@kepler.cl>
+Subject: Re: [ceph-users] the state of cephfs in giant
+Date: Tue, 14 Oct 2014 21:16:41 -0300
+Message-ID: <543DBCE9.2080605@kepler.cl>
+References: <alpine.DEB.2.00.1410131114130.10561@cobra.newdream.net> <543CD16C.6060708@m-privacy.de> <alpine.DEB.2.00.1410140718050.10462@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: torvalds@linux-foundation.org
-Cc: linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-qa0-f41.google.com ([209.85.216.41]:61926 "EHLO
+	mail-qa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755519AbaJOAQq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Oct 2014 20:16:46 -0400
+Received: by mail-qa0-f41.google.com with SMTP id n8so143532qaq.0
+        for <ceph-devel@vger.kernel.org>; Tue, 14 Oct 2014 17:16:45 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.00.1410140718050.10462@cobra.newdream.net>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@newdream.net>, Amon Ott <a.ott@m-privacy.de>
+Cc: ceph-devel@vger.kernel.org, ceph-users@ceph.com
 
-Hi Linus,
+Hello sage, last time I used CephFS it had a strange behaviour when if 
+used in conjunction with a nfs reshare of the cephfs mount point, I 
+experienced a partial random disapearance of the tree folders.
 
-Please pull the following Ceph updates from
+According to people in the mailing list it was a kernel module bug (not 
+using ceph-fuse) do you know if any work has been done recently in that 
+topic?
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
+best regards
 
-There is the long-awaited discard support for RBD (Guangliang Zhao, Josh 
-Durgin), a pile of RBD bug fixes that didn't belong in late -rc's (Ilya 
-Dryomov, Li RongQing), a pile of fs/ceph bug fixes and performance and 
-debugging improvements (Yan, Zheng, John Spray), and a smattering of 
-cleanups (Chao Yu, Fabian Frederick, Joe Perches).
+Alphe Salas
+I.T ingeneer
 
-Thanks!
-sage
-
-
-----------------------------------------------------------------
-Chao Yu (1):
-      ceph: remove redundant code for max file size verification
-
-Fabian Frederick (2):
-      libceph: remove redundant declaration
-      ceph: fix bool assignments
-
-Guangliang Zhao (3):
-      rbd: skip the copyup when an entire object writing
-      rbd: extend the operation type
-      rbd: initial discard bits from Guangliang Zhao
-
-Ilya Dryomov (10):
-      libceph: abstract out ceph_osd_request enqueue logic
-      libceph: resend lingering requests with a new tid
-      libceph: select CRYPTO_CBC in addition to CRYPTO_AES
-      libceph: don't try checking queue_work() return value
-      rbd: do not return -ERANGE on auth failures
-      rbd: add img_obj_request_simple() helper
-      libceph: sync osd op definitions in rados.h
-      libceph: separate multiple ops with commas in debugfs output
-      libceph: ceph-msgr workqueue needs a resque worker
-      rbd: rbd workqueues need a resque worker
-
-Joe Perches (1):
-      libceph: Convert pr_warning to pr_warn
-
-John Spray (3):
-      ceph: send client metadata to MDS
-      ceph: export ceph_session_state_name function
-      ceph: additional debugfs output
-
-Josh Durgin (8):
-      rbd: access snapshot context and mapping size safely
-      rbd: read image size for discard check safely
-      rbd: fix snapshot context reference count for discards
-      rbd: tolerate -ENOENT for discard operations
-      rbd: make discard trigger copy-on-write
-      rbd: extract a method for adding object operations
-      rbd: use helpers to handle discard for layered images correctly
-      rbd: set the remaining discard properties to enable support
-
-Li RongQing (1):
-      libceph: fix a use after free issue in osdmap_set_max_osd
-
-Yan, Zheng (11):
-      ceph: trim unused inodes before reconnecting to recovering MDS
-      ceph: protect kick_requests() with mdsc->mutex
-      ceph: make sure request isn't in any waiting list when kicking request.
-      ceph: request xattrs if xattr_version is zero
-      ceph: move ceph_find_inode() outside the s_mutex
-      ceph: remove redundant io_iter_advance()
-      ceph: fix llistxattr on symlink
-      libceph: reference counting pagelist
-      ceph: use pagelist to present MDS request data
-      ceph: include the initial ACL in create/mkdir/mknod MDS requests
-      ceph: fix divide-by-zero in __validate_layout()
-
- drivers/block/rbd.c           | 396 +++++++++++++++++++++++++++++-------------
- fs/ceph/acl.c                 | 125 ++++++++++---
- fs/ceph/addr.c                |   9 -
- fs/ceph/caps.c                |  37 ++--
- fs/ceph/debugfs.c             |  46 +++++
- fs/ceph/dir.c                 |  41 +++--
- fs/ceph/file.c                |  33 ++--
- fs/ceph/inode.c               |  16 +-
- fs/ceph/ioctl.c               |   6 +-
- fs/ceph/mds_client.c          | 136 +++++++++++----
- fs/ceph/mds_client.h          |   6 +-
- fs/ceph/super.h               |  27 ++-
- fs/ceph/xattr.c               |  81 ++++-----
- include/linux/ceph/libceph.h  |   1 -
- include/linux/ceph/pagelist.h |   5 +-
- include/linux/ceph/rados.h    | 225 ++++++++++++++----------
- net/ceph/Kconfig              |   1 +
- net/ceph/ceph_common.c        |  15 +-
- net/ceph/ceph_strings.c       |  75 +-------
- net/ceph/debugfs.c            |   3 +-
- net/ceph/messenger.c          |  28 +--
- net/ceph/mon_client.c         |   8 +-
- net/ceph/osd_client.c         | 192 +++++++++-----------
- net/ceph/osdmap.c             |  52 +++---
- net/ceph/pagelist.c           |   7 +-
- 25 files changed, 948 insertions(+), 623 deletions(-)
+On 10/14/2014 11:23 AM, Sage Weil wrote:
+> On Tue, 14 Oct 2014, Amon Ott wrote:
+>> Am 13.10.2014 20:16, schrieb Sage Weil:
+>>> We've been doing a lot of work on CephFS over the past few months. This
+>>> is an update on the current state of things as of Giant.
+>> ...
+>>> * Either the kernel client (kernel 3.17 or later) or userspace (ceph-fuse
+>>>    or libcephfs) clients are in good working order.
+>>
+>> Thanks for all the work and specially for concentrating on CephFS! We
+>> have been watching and testing for years by now and really hope to
+>> change our Clusters to CephFS soon.
+>>
+>> For kernel maintenance reasons, we only want to run longterm stable
+>> kernels. And for performance reasons and because of severe known
+>> problems we want to avoid Fuse. How good are our chances of a stable
+>> system with the kernel client in the latest longterm kernel 3.14? Will
+>> there be further bugfixes or feature backports?
+>
+> There are important bug fixes missing from 3.14.  IIRC, the EC, cache
+> tiering, and firefly CRUSH changes aren't there yet either (they landed in
+> 3.15), and that is not appropriate for a stable series.
+>
+> They can be backported, but no commitment yet on that :)
+>
+> sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
