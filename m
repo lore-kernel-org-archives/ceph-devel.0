@@ -1,100 +1,65 @@
-From: Samuel Just <sam.just@inktank.com>
-Subject: Re: snap_trimming + backfilling is inefficient with many purged_snaps
-Date: Wed, 15 Oct 2014 10:50:45 -0700
-Message-ID: <CA+4uBUbxVjvbcUBC1aqW4WxWK9dNGbU6BD+iaPX0qUkETHgQSw@mail.gmail.com>
-References: <alpine.DEB.2.00.1409190819070.18018@cobra.newdream.net>
-	<CAPUexz-ff+fTmU0J0TrJ80p+6334BBPvM7EWW5=eGa8uEomRew@mail.gmail.com>
-	<D197E5D4-598B-4574-852E-C9F0CA10133E@cern.ch>
-	<CAPUexz9XeNMJvjCeM_7N0_TQOS6_xBOdgnKm9j4FNDib3+FjMg@mail.gmail.com>
-	<541b2add.ea5cb40a.250c.3ed0SMTPIN_ADDED_BROKEN@mx.google.com>
-	<CAPUexz_H7-b8SY6J+dLnAyw663eHXoLKYccB1edwH9XgFBZCpw@mail.gmail.com>
-	<07f3373f39ff2f738d76bc9f23f07297@webmail.vanderster.com>
-	<CAPUexz9P264L4fj4eSdb3KbnTS+ewvE7WdKCw5ijjEO_u8URYA@mail.gmail.com>
-	<alpine.DEB.2.00.1409181446110.19460@cobra.newdream.net>
-	<CAPUexz-HXn=x_b=CJev46jWFsSrUpXc7UO7kzWcRe4Yrm6VL3g@mail.gmail.com>
-	<alpine.DEB.2.00.1409181526260.19460@cobra.newdream.net>
-	<CAPUexz-GYF4R95k8QzvdGDKtzez0Qm6SnJt1=4YJEGB8ty7Ggg@mail.gmail.com>
-	<1878E4A4-2363-4717-ABEC-B587B0337D6B@cern.ch>
-	<CABZ+qqks_qSbgG4QhkaH8A1zTP=o+fR4ptHPbtA9-MxrM8sJ5w@mail.gmail.com>
-	<63ccef299522995cc0704e349ef86503@webmail.vanderster.com>
-	<6A154A11-04F9-4D21-BF81-C585B6E6BD41@cern.ch>
+From: Dmitry Borodaenko <dborodaenko@mirantis.com>
+Subject: Re: Firefly maintenance release schedule
+Date: Wed, 15 Oct 2014 14:45:04 -0700
+Message-ID: <CAM0pNLNi-1ZG8NjVTgCbV-rPczkqGjDPRz9i8kXytLk29jstyg@mail.gmail.com>
+References: <CAM0pNLO7m0=1nkhmqigfMhTeaNYOtW6no9neAWoaX9fKt0uZDg@mail.gmail.com>
+	<CAM0pNLN0XoMtWAAqJqgF+VTZmQNu4oFPRUtrDz6FFNWWLo8Sow@mail.gmail.com>
+	<CAPYLRzg5we+dGkAGpbC1Byop+L5aiF40pjfdZpynPKRLokHvwA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f178.google.com ([209.85.217.178]:48618 "EHLO
-	mail-lb0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750969AbaJORur (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 15 Oct 2014 13:50:47 -0400
-Received: by mail-lb0-f178.google.com with SMTP id w7so1505333lbi.9
-        for <ceph-devel@vger.kernel.org>; Wed, 15 Oct 2014 10:50:45 -0700 (PDT)
-In-Reply-To: <6A154A11-04F9-4D21-BF81-C585B6E6BD41@cern.ch>
+Received: from mail-ob0-f176.google.com ([209.85.214.176]:59564 "EHLO
+	mail-ob0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751277AbaJOVpF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 15 Oct 2014 17:45:05 -0400
+Received: by mail-ob0-f176.google.com with SMTP id m8so1823293obr.7
+        for <ceph-devel@vger.kernel.org>; Wed, 15 Oct 2014 14:45:04 -0700 (PDT)
+In-Reply-To: <CAPYLRzg5we+dGkAGpbC1Byop+L5aiF40pjfdZpynPKRLokHvwA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dan Van Der Ster <daniel.vanderster@cern.ch>
-Cc: Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Florian Haas <florian@hastexo.com>
+To: Gregory Farnum <greg@inktank.com>
+Cc: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-It's in giant, the firefly backport will happen once we are happy with
-the fallout from the 80.7 thing.
--Sam
+Gregory,
 
-On Wed, Oct 15, 2014 at 7:47 AM, Dan Van Der Ster
-<daniel.vanderster@cern.ch> wrote:
-> Hi Sage,
+Thanks for prompt response, we'll go with v0.80.7.
+
+It still would be nice if v0.80.8 doesn't take as long as v0.80.6, I
+suspect one of the reasons you messed it up was too many commits
+without intermediate releases.
+
+On Wed, Oct 15, 2014 at 9:59 AM, Gregory Farnum <greg@inktank.com> wrote:
+> Take .80.7. All of the bugs you've cited, you are supremely unlikely
+> to run into. The "Urgent" tag is a measure of planning priority, not
+> of impact to users; here it generally means "we found a bug on a
+> stable branch that we can reproduce". Taking them in order:
+> http://tracker.ceph.com/issues/9492: only happens if you try and cheat
+> with your CRUSH rules, and obviously nobody did that until Sage
+> suggested it as a solution to the problem somebody had 29 days ago
+> when this was discovered.
+> http://tracker.ceph.com/issues/9039: The most serious here, but only
+> happens if you're using RGW, and storing user data in multiple pools,
+> and issue a COPY command to copy data between different pools.
+> http://tracker.ceph.com/issues/9582: Only happens if you're using the
+> op timeout feature of librados with the C bindings OR the op timeout
+> feature *and* the user-provided buffers in the C++ interface. (To the
+> best of my knowledge, the people who discovered this are the only ones
+> using op timeouts.)
+> http://tracker.ceph.com/issues/9307: I'm actually not sure what's
+> going on here; looks like some kind of extremely rare race when
+> authorizing requests? (ie, fixed by a retry)
 >
->> On 19 Sep 2014, at 17:37, Dan Van Der Ster <daniel.vanderster@cern.ch> wrote:
->>
->> September 19 2014 5:19 PM, "Sage Weil" <sweil@redhat.com> wrote:
->>> On Fri, 19 Sep 2014, Dan van der Ster wrote:
->>>
->>>> On Fri, Sep 19, 2014 at 10:41 AM, Dan Van Der Ster
->>>> <daniel.vanderster@cern.ch> wrote:
->>>>>> On 19 Sep 2014, at 08:12, Florian Haas <florian@hastexo.com> wrote:
->>>>>>
->>>>>> On Fri, Sep 19, 2014 at 12:27 AM, Sage Weil <sweil@redhat.com> wrote:
->>>>>>> On Fri, 19 Sep 2014, Florian Haas wrote:
->>>>>>>> Hi Sage,
->>>>>>>>
->>>>>>>> was the off-list reply intentional?
->>>>>>>
->>>>>>> Whoops! Nope :)
->>>>>>>
->>>>>>>> On Thu, Sep 18, 2014 at 11:47 PM, Sage Weil <sweil@redhat.com> wrote:
->>>>>>>>>> So, disaster is a pretty good description. Would anyone from the core
->>>>>>>>>> team like to suggest another course of action or workaround, or are
->>>>>>>>>> Dan and I generally on the right track to make the best out of a
->>>>>>>>>> pretty bad situation?
->>>>>>>>>
->>>>>>>>> The short term fix would probably be to just prevent backfill for the time
->>>>>>>>> being until the bug is fixed.
->>>>>>>>
->>>>>>>> As in, osd max backfills = 0?
->>>>>>>
->>>>>>> Yeah :)
->>>>>>>
->>>>>>> Just managed to reproduce the problem...
->>>>>>>
->>>>>>> sage
->>>>>>
->>>>>> Saw the wip branch. Color me freakishly impressed on the turnaround. :) Thanks!
->>>>>
->>>>> Indeed :) Thanks Sage!
->>>>> wip-9487-dumpling fixes the problem on my test cluster. Trying in prod now?
->>>>
->>>> Final update, after 4 hours in prod and after draining 8 OSDs -- zero
->>>> slow requests :)
->>>
->>> That's great news!
->>>
->>> But, please be careful. This code hasn't been reiewed yet or been through
->>> any testing! I would hold off on further backfills until it's merged.
->
->
-> Any news on those merges? It would be good to get this fixed on the dumpling and firefly branches. We're kind of stuck at the moment :(
->
-> Cheers, Dan
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> We messed up the v0.80.6 release in a very specific way (and if you
+> were deploying a new cluster it wasn't a problem), but you're
+> extrapolating too much from the presence of patches about what their
+> impact is and what the system's stability is. These are largely
+> cleaning up rough edges around user interfaces, and smoothing out
+> issues in the new functionality that a standard deployment isn't going
+> to experience. :)
+> -Greg
+> Software Engineer #42 @ http://inktank.com | http://ceph.com
+
+
+
+-- 
+Dmitry Borodaenko
