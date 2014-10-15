@@ -1,54 +1,101 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: 10/14/2014 Weekly Ceph Performance Meeting
-Date: Tue, 14 Oct 2014 22:40:54 -0500
-Message-ID: <543DECC6.9030607@redhat.com>
+From: Nicheal <zay11022@gmail.com>
+Subject: Re: WriteBack Throttle kill the performace of the disk
+Date: Wed, 15 Oct 2014 13:55:27 +0800
+Message-ID: <CALZt5jw=HX-gFpcQ5PyUfyyakMmi7as4hCbZ922PMf8tBXS8xg@mail.gmail.com>
+References: <CALZt5jzUduePJzgH+-NJ=7WckxioCbUZvxvnCFM8VBxHxXt4dg@mail.gmail.com>
+	<543BD3B9.2000600@redhat.com>
+	<CAPYLRzh5vrv2e2QPe=Cf9FgVbhSWn5wgWs_SCGLOmvhQsnda3A@mail.gmail.com>
+	<CALZt5jxKCyf0eWRQt2w04bQ2aEN4vj4i-01TVCNiS-WqWZB1KQ@mail.gmail.com>
+	<543D14E8.4030901@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f179.google.com ([209.85.213.179]:57615 "EHLO
-	mail-ig0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755872AbaJODkw (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Oct 2014 23:40:52 -0400
-Received: by mail-ig0-f179.google.com with SMTP id h18so709926igc.0
-        for <ceph-devel@vger.kernel.org>; Tue, 14 Oct 2014 20:40:51 -0700 (PDT)
-Received: from [192.168.1.3] (65-128-164-140.mpls.qwest.net. [65.128.164.140])
-        by mx.google.com with ESMTPSA id gb12sm12536431igd.0.2014.10.14.20.40.49
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
-        Tue, 14 Oct 2014 20:40:50 -0700 (PDT)
+Received: from mail-oi0-f43.google.com ([209.85.218.43]:61307 "EHLO
+	mail-oi0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750774AbaJOFz2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 15 Oct 2014 01:55:28 -0400
+Received: by mail-oi0-f43.google.com with SMTP id u20so438822oif.2
+        for <ceph-devel@vger.kernel.org>; Tue, 14 Oct 2014 22:55:28 -0700 (PDT)
+In-Reply-To: <543D14E8.4030901@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Mark Nelson <mark.nelson@inktank.com>
+Cc: Gregory Farnum <greg@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi All,
+2014-10-14 20:19 GMT+08:00 Mark Nelson <mark.nelson@inktank.com>:
+> On 10/14/2014 12:15 AM, Nicheal wrote:
+>>
+>> Yes, Greg.
+>> But Unix based system always have a parameter dirty_ratio to prevent
+>> the system memory from being exhausted. If Journal speed is so fast
+>> while backing store cannot catch up with Journal, then the backing
+>> store write will be blocked by the hard limitation of system dirty
+>> pages. The problem here may be that system call, sync(), cannot return
+>> since the system always has lots of dirty pages. Consequently, 1)
+>> FileStore::sync_entry() will be timeout and then ceph_osd_daemon
+>> abort.  2) Even if the thread is not timed out, Since the Journal
+>> committed point cannot be updated so that the Journal will be blocked,
+>> waiting for the sync() return and update Journal committed point.
+>> So the Throttle is added to solve the above problems, right?
+>
+>
+> Greg or Sam can correct me if I'm wrong, but I always thought of the
+> wbthrottle code as being more an attempt to smooth out spikes in write
+> throughput to prevent the journal from getting too far ahead of the backing
+> store.  IE have more frequent, shorter flush periods rather than less
+> frequent longer ones.  For Ceph that is's probably a reasonable idea since
+> you want all of the OSDs behaving as consistently as possible to prevent
+> hitting the max outstanding client IOs/Bytes on the client and starving
+> other ready OSDs.  I'm not sure it's worked out in practice as well as it
+> might have in theory, though I'm not sure we've really investigated what's
+> going on enough to be sure.
+>
+>> However, in my tested ARM ceph cluster(3nodes, 9osds, 3osds/node), it
+>> will cause problem (SSD as journal, and HDD as data disk, fio 4k
+>> ramdom write iodepth 64):
+>>      WritebackThrottle enable: Based on blktrace, we trace the back-end
+>> hdd io behaviour. Because of frequently calling fdatasync() in
+>> Writeback Throttle, it cause every back-end hdd spent more time to
+>> finish one io. This causes the total sync time longer. For example,
+>> default sync_max_interval is 5 seconds, total dirty data in 5 seconds
+>> is 10M. If I disable WritebackThrottle, 10M dirty data will be sync to
+>> disk within 4 second, So cat /proc/meminfo, the dirty data of my
+>> system is always clean(near zero). However, If I enable
+>> WritebackThrottle, fdatasync() slows down the sync process. Thus, it
+>> seems 8-9M random io will be sync to the disk within 5s. Thus the
+>> dirty data is always growing to the critical point (system
+>> up-limitation), and then sync_entry() is always timed out. So I means,
+>> in my case, disabling WritebackThrottle, I may always have 600 IOPS.
+>> If enabling WritebackThrottle, IOPS always drop to 200 since fdatasync
+>> cause back-end HDD disk overloaded.
+>
+>
+> We never did a blktrace investigation, but we did see pretty bad performance
+> with the default wbthrottle code when it was first implemented.  We ended up
+> raising the throttles pretty considerably in dumpling RC2.  It would be
+> interesting to repeat this test on an Intel system.
+>
+>>     So I would like that we can dynamically throttle the IOPS in
+>> FileStore. We cannot know the average sync() speed of the back-end
+>> Store since different disk own different IO performance. However, we
+>> can trace the average write speed in FileStore and Journal, Also, we
+>> can know, whether start_sync() is return and finished. Thus, If this
+>> time, Journal is writing so fast that the back-end cannot catch up the
+>> Journal(e.g. 1000IOPS/s). We cannot Throttle the Journal speed(e.g.
+>> 800IOPS/s) in next operation interval(the interval maybe 1 to 5
+>> seconds, in the third second, Thottle become 1000*e^-x where x is the
+>> tick interval, ), if in this interval, Journal write reach the
+>> limitation, the following submitting write should waiting in OSD
+>> waiting queue.So in this way, Journal may provide a boosting IO, but
+>> finally, back-end sync() will return and catch up with Journal become
+>> we always slow down the Journal speed after several seconds.
+>>
+>
+> I will wait for Sam's input, but it seems reasonable to me.  Perhaps you
+> might write it up as a blueprint for CDS?
+Ok, Mark. I would consider. But now, it just a basic idea. I may think
+out whether we can use a AutotuningThrottle to replace the
+WritebackThrottle.
 
-Just a reminder that the weekly performance meeting is on Wednesdays at 
-8AM PST!
-
-Etherpad URL:
-http://pad.ceph.com/p/performance_weekly
-
-To join the Meeting:
-https://bluejeans.com/268261044
-
-To join via Browser:
-https://bluejeans.com/268261044/browser
-
-To join with Lync:
-https://bluejeans.com/268261044/lync
-
-
-To join via Room System:
-Video Conferencing System: bjn.vc -or- 199.48.152.152
-Meeting ID: 268261044
-
-To join via Phone:
-1) Dial:
-           +1 408 740 7256
-           +1 888 240 2560(US Toll Free)
-           +1 408 317 9253(Alternate Number)
-           (see all numbers - http://bluejeans.com/numbers)
-2) Enter Conference ID: 268261044
-
-Mark
+>
+> Mark
