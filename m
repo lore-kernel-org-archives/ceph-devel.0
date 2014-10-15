@@ -1,103 +1,603 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: Firefly maintenance release schedule
-Date: Wed, 15 Oct 2014 09:59:03 -0700
-Message-ID: <CAPYLRzg5we+dGkAGpbC1Byop+L5aiF40pjfdZpynPKRLokHvwA@mail.gmail.com>
-References: <CAM0pNLO7m0=1nkhmqigfMhTeaNYOtW6no9neAWoaX9fKt0uZDg@mail.gmail.com>
-	<CAM0pNLN0XoMtWAAqJqgF+VTZmQNu4oFPRUtrDz6FFNWWLo8Sow@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: NO pg created for erasure-coded pool
+Date: Wed, 15 Oct 2014 10:09:06 -0700
+Message-ID: <543EAA32.5010408@dachary.org>
+References: <495_1413299690_543D3DEA_495_10637_1_B9C8EFBF13B1354DB5FA000660D66DD00C18CBCE@PEXCVZYM14.corporate.adroot.infra.ftgroup> <543D48C0.8040108@dachary.org> <32273_1413360033_543E29A1_32273_4484_1_B9C8EFBF13B1354DB5FA000660D66DD00C18D178@PEXCVZYM14.corporate.adroot.infra.ftgroup> <543E60AE.30506@dachary.org> <25839_1413381708_543E7E4B_25839_7399_1_B9C8EFBF13B1354DB5FA000660D66DD00C18D441@PEXCVZYM14.corporate.adroot.infra.ftgroup>,<543E9395.2050103@dachary.org> <12314_1413388377_543E9859_12314_88_1_e31a4ed3-8007-4fdf-bece-520a699e62c3@PEXCVZYH01.corporate.adroot.infra.ftgroup>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="jpJTsDEqtc9rQLlKkBjLHFdS1xaEWC7E5"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f177.google.com ([209.85.216.177]:32908 "EHLO
-	mail-qc0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751505AbaJOQ7E (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 15 Oct 2014 12:59:04 -0400
-Received: by mail-qc0-f177.google.com with SMTP id c9so1293718qcz.8
-        for <ceph-devel@vger.kernel.org>; Wed, 15 Oct 2014 09:59:03 -0700 (PDT)
-In-Reply-To: <CAM0pNLN0XoMtWAAqJqgF+VTZmQNu4oFPRUtrDz6FFNWWLo8Sow@mail.gmail.com>
+Received: from mail2.dachary.org ([91.121.57.175]:46046 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1750849AbaJORJT (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 15 Oct 2014 13:09:19 -0400
+In-Reply-To: <12314_1413388377_543E9859_12314_88_1_e31a4ed3-8007-4fdf-bece-520a699e62c3@PEXCVZYH01.corporate.adroot.infra.ftgroup>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dmitry Borodaenko <dborodaenko@mirantis.com>
-Cc: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: ghislain.chevalier@orange.com, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, Oct 15, 2014 at 9:39 AM, Dmitry Borodaenko
-<dborodaenko@mirantis.com> wrote:
-> On Tue, Sep 30, 2014 at 6:49 PM, Dmitry Borodaenko
-> <dborodaenko@mirantis.com> wrote:
->> Last stable Firefly release (v0.80.5) was tagged on July 29 (over 2
->> months ago). Since then, there were twice as many commits merged into
->> the firefly branch than there existed on the branch before v0.80.5:
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--jpJTsDEqtc9rQLlKkBjLHFdS1xaEWC7E5
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
+
+Hi,
+
+And nothing in any of the OSDS ? Since there are no errors in the MON the=
+re must be something wrong in the OSD.
+
+When the OSD is creating the PG you should see
+
+   _create_lock_pg pgid
+
+from
+
+    https://github.com/ceph/ceph/blob/firefly/src/osd/OSD.cc#L1995
+
+if you temporarily set the debug level to 20 with
+
+ceph tell osd.* injectargs -- --debug-osd 20
+
+If you still don't get anything at least this will narrow down the search=
+ ;-)
+
+Cheers
+
+On 15/10/2014 08:52, ghislain.chevalier@orange.com wrote:
+> Hi,
+>=20
+> oups..
+>=20
+> nothing relevant in mon logs.
+>=20
+> this message in some osd logs.
+> 2014-10-15 17:03:45.303295 7fb296a21700  0 -- 10.192.134.122:6804/16878=
+ >> 10.192.134.123:6809/21505 pipe(0x2219c80 sd=3D36 :41933 s=3D2 pgs=3D6=
+26 cs=3D355 l=3D0 c=3D0x398a580).fault with nothing to send, going to sta=
+ndby
+>=20
+> FYi, I can store in another pool (e.g. data).
+>=20
+> =20
+> ________________________________________
+> De : Loic Dachary [loic@dachary.org]
+> Envoy=E9 : mercredi 15 octobre 2014 17:32
+> =C0 : CHEVALIER Ghislain IMT/OLPS; ceph-devel@vger.kernel.org
+> Objet : Re: [Ceph-Devel] NO pg created for erasure-coded pool
+>=20
+> Hi Ghislain,
+>=20
+> Any error messages in the mon / osd ?
+>=20
+> Cheers
+>=20
+> On 15/10/2014 07:01, ghislain.chevalier@orange.com wrote:
+>> Hi...
 >>
->> $ git log --oneline --no-merges v0.80..v0.80.5|wc -l
->> 122
->> $ git log --oneline --no-merges v0.80.5..firefly|wc -l
->> 227
+>> Strange, you said strange...
 >>
->> Is this a one time aberration in the process or should we expect the
->> gap between maintenance updates for LTS releases of Ceph to keep
->> growing?
->
-> I didn't get a response to that nag other than the v0.80.6 release
-> announcement on the day after, so I guess it wasn't completely ignored
-> :)
->
-> Except it turned out v0.80.6 was slightly less than useful as a
-> maintenance release:
-> http://lists.ceph.com/pipermail/ceph-users-ceph.com/2014-October/043701.html
->
-> Two weeks later we have v0.80.7 with 3 more commits that hopefully
-> make it actually usable. There are many ways to look at that from
-> release management perspective.
->
-> Good: 2 weeks is much better than 2 months.
-> Bad: that's 2.5 months since last *stable* Firefly release.
-> Ugly: that's 2 weeks for 3 commits, and now we have 54 more waiting
-> for the next release...
->
-> Wait what?! Oh right, 54 more commits were merged from firefly-next as
-> soon as v0.80.7 was tagged:
-> $ git log --oneline --no-merges v0.80.7..firefly|wc -l
-> 54
->
-> Some of these are fixes for Urgent priority bugs, crashes, and data loss:
-> http://tracker.ceph.com/issues/9492
-> http://tracker.ceph.com/issues/9039
-> http://tracker.ceph.com/issues/9582
-> http://tracker.ceph.com/issues/9307
-> etc.
->
-> So what a Ceph deployer supposed to do with this? Wait another couple
-> of weeks (hopefully) for v0.80.8? Take v0.80.7 and hope not to
-> encounter any of these bugs? Or label Firefly as "not production ready
-> yet" and go back to Dumpling? My personal preference obviously would
-> be the first option, but waiting for 2.5 more months is not going to
-> fit my schedule :(
+>> I created a replicated pool (if it was what you asked for) as followed=
 
-Take .80.7. All of the bugs you've cited, you are supremely unlikely
-to run into. The "Urgent" tag is a measure of planning priority, not
-of impact to users; here it generally means "we found a bug on a
-stable branch that we can reproduce". Taking them in order:
-http://tracker.ceph.com/issues/9492: only happens if you try and cheat
-with your CRUSH rules, and obviously nobody did that until Sage
-suggested it as a solution to the problem somebody had 29 days ago
-when this was discovered.
-http://tracker.ceph.com/issues/9039: The most serious here, but only
-happens if you're using RGW, and storing user data in multiple pools,
-and issue a COPY command to copy data between different pools.
-http://tracker.ceph.com/issues/9582: Only happens if you're using the
-op timeout feature of librados with the C bindings OR the op timeout
-feature *and* the user-provided buffers in the C++ interface. (To the
-best of my knowledge, the people who discovered this are the only ones
-using op timeouts.)
-http://tracker.ceph.com/issues/9307: I'm actually not sure what's
-going on here; looks like some kind of extremely rare race when
-authorizing requests? (ie, fixed by a retry)
+>> root@p-sbceph11:~# ceph osd pool create strangepool 128 128 replicated=
 
-We messed up the v0.80.6 release in a very specific way (and if you
-were deploying a new cluster it wasn't a problem), but you're
-extrapolating too much from the presence of patches about what their
-impact is and what the system's stability is. These are largely
-cleaning up rough edges around user interfaces, and smoothing out
-issues in the new functionality that a standard deployment isn't going
-to experience. :)
--Greg
-Software Engineer #42 @ http://inktank.com | http://ceph.com
+>> pool 'strangepool' created
+>> root@p-sbceph11:~# ceph osd pool set strangepool crush_ruleset 53
+>> set pool 108 crush_ruleset to 53
+>> root@p-sbceph11:~# ceph osd pool get strangepool size
+>> size: 3
+>> root@p-sbceph11:~#  rados lspools | grep strangepool
+>> strangepool
+>> root@p-sbceph11:~# ceph df
+>> GLOBAL:
+>>     SIZE       AVAIL      RAW USED     %RAW USED
+>>     97289M     69667M       27622M         28.39
+>> POOLS:
+>>     NAME                   ID      USED       %USED     MAX AVAIL     =
+OBJECTS
+>>     data                   0       12241M     12.58        11090M     =
+    186
+>>     metadata               1            0         0        11090M     =
+      0
+>>     rbd                    2            0         0        13548M     =
+      0
+>>     .rgw.root              3         1223         0        11090M     =
+      4
+>>     .rgw.control           4            0         0        11090M     =
+      8
+>>     .rgw                   5        13036         0        11090M     =
+     87
+>>     .rgw.gc                6            0         0        11090M     =
+     32
+>>     .log                   7            0         0        11090M     =
+      0
+>>     .intent-log            8            0         0        11090M     =
+      0
+>>     .usage                 9            0         0        11090M     =
+      0
+>>     .users                 10         139         0        11090M     =
+     13
+>>     .users.email           11         100         0        11090M     =
+      9
+>>     .users.swift           12          43         0        11090M     =
+      4
+>>     .users.uid             13        3509         0        11090M     =
+     22
+>>     .rgw.buckets.index     15           0         0        11090M     =
+     31
+>>     .rgw.buckets           16       1216M      1.25        11090M     =
+   2015
+>>     atelier01              87           0         0         7393M     =
+      0
+>>     atelier02              94      28264k      0.03        11090M     =
+      4
+>>     atelier02cache         98       6522k         0        20322M     =
+      2
+>>     strangepool            108          0         0            5E     =
+      0
+>>
+>> The pool is created and it doesn't work...
+>> rados -p strangepool put remains inactive...
+>>
+>> If there are active pgs for strangepool, it's surely because they were=
+ created with the default ruleset =3D 0.
+>>
+>> The problem seems to be in the control of the rule 53 ;  note that, fo=
+r debugging, the ruleset-failure-domain was previously set to osd instead=
+ of host. I don't think it's relevant.
+>>
+>> Finally, I don't know if you wanted me to create a replicated pool usi=
+ng a erasure ruleset or simply a new erasure-coded pool.
+>>
+>> Creating a new erasure-coded pool also fails.
+>>
+>> We also tried to create an erasure-coded pool on another platform usin=
+g a standard crushmap, and it fails too.
+>>
+>> Best regards
+>>
+>> -----Message d'origine-----
+>> De : Loic Dachary [mailto:loic@dachary.org]
+>> Envoy=E9 : mercredi 15 octobre 2014 13:55
+>> =C0 : CHEVALIER Ghislain IMT/OLPS; ceph-devel@vger.kernel.org
+>> Objet : Re: [Ceph-Devel] NO pg created for erasure-coded pool
+>>
+>> Hi Ghislain,
+>>
+>> This is indeed strange, the pool exists
+>>
+>> pool 100 'ecpool' erasure size 3 min_size 2 crush_ruleset 52 object_ha=
+sh rjenkins pg_num 128 pgp_num 128 last_change 11849 flags hashpspool str=
+ipe_width 4096
+>>
+>> but ceph pg dump shows no sign of the expected PG (i.e. starting with =
+100. in the output if I'm not mistaken).
+>>
+>> Could you create another pool using the same ruleset and check if you =
+see errors in the mon / osd logs when you do so ?
+>>
+>> Cheers
+>>
+>> On 15/10/2014 01:00, ghislain.chevalier@orange.com wrote:
+>>> Hi,
+>>>
+>>> Cause erasure-code is at the top of your mind...
+>>>
+>>> Here are the files
+>>>
+>>> Best regards
+>>>
+>>> -----Message d'origine-----
+>>> De : Loic Dachary [mailto:loic@dachary.org] Envoy=E9 : mardi 14 octob=
+re
+>>> 2014 18:01 =C0 : CHEVALIER Ghislain IMT/OLPS; ceph-devel@vger.kernel.=
+org
+>>> Objet : Re: [Ceph-Devel] NO pg created for erasure-coded pool
+>>>
+>>> Ah, my bad, did not go to the end of the list ;-)
+>>>
+>>> could you share the output of ceph pg dump and ceph osd dump ?
+>>>
+>>> On 14/10/2014 08:14, ghislain.chevalier@orange.com wrote:
+>>>> Hi,
+>>>>
+>>>> Here is the list of the types. host is type 1
+>>>>   "types": [
+>>>>         { "type_id": 0,
+>>>>           "name": "osd"},
+>>>>         { "type_id": 1,
+>>>>           "name": "host"},
+>>>>         { "type_id": 2,
+>>>>           "name": "platform"},
+>>>>         { "type_id": 3,
+>>>>           "name": "datacenter"},
+>>>>         { "type_id": 4,
+>>>>           "name": "root"},
+>>>>         { "type_id": 5,
+>>>>           "name": "appclient"},
+>>>>         { "type_id": 10,
+>>>>           "name": "diskclass"},
+>>>>         { "type_id": 50,
+>>>>           "name": "appclass"}],
+>>>>
+>>>> And there are 5 hosts with 2 osds each at the end of the tree.
+>>>>
+>>>> Best regards
+>>>> -----Message d'origine-----
+>>>> De : Loic Dachary [mailto:loic@dachary.org] Envoy=E9 : mardi 14 octo=
+bre
+>>>> 2014 16:44 =C0 : CHEVALIER Ghislain IMT/OLPS;
+>>>> ceph-devel@vger.kernel.org Objet : Re: [Ceph-Devel] NO pg created fo=
+r
+>>>> eruasre-coded pool
+>>>>
+>>>> Hi,
+>>>>
+>>>> The ruleset has
+>>>>
+>>>> { "op": "chooseleaf_indep",
+>>>>           "num": 0,
+>>>>           "type": "host"},
+>>>>
+>>>> but it does not look like your tree has a bucket of type host in it.=
+
+>>>>
+>>>> Cheers
+>>>>
+>>>> On 14/10/2014 06:20, ghislain.chevalier@orange.com wrote:
+>>>>> HI,
+>>>>>
+>>>>> THX Lo=EFc for your quick reply.
+>>>>>
+>>>>> Here is the result of ceph osd tree
+>>>>>
+>>>>> As showed at the last ceph day in Paris, we have multiple root but =
+the ruleset 52 entered the crushmap on root default.
+>>>>>
+>>>>> # id    weight  type name       up/down reweight
+>>>>> -100    0.09998 root diskroot
+>>>>> -110    0.04999         diskclass fastsata
+>>>>> 0       0.009995                        osd.0   up      1
+>>>>> 1       0.009995                        osd.1   up      1
+>>>>> 2       0.009995                        osd.2   up      1
+>>>>> 3       0.009995                        osd.3   up      1
+>>>>> -120    0.04999         diskclass slowsata
+>>>>> 4       0.009995                        osd.4   up      1
+>>>>> 5       0.009995                        osd.5   up      1
+>>>>> 6       0.009995                        osd.6   up      1
+>>>>> 7       0.009995                        osd.7   up      1
+>>>>> 8       0.009995                        osd.8   up      1
+>>>>> 9       0.009995                        osd.9   up      1
+>>>>> -5      0.2     root approot
+>>>>> -50     0.09999         appclient apprgw
+>>>>> -501    0.04999                 appclass fastrgw
+>>>>> 0       0.009995                                osd.0   up      1
+>>>>> 1       0.009995                                osd.1   up      1
+>>>>> 2       0.009995                                osd.2   up      1
+>>>>> 3       0.009995                                osd.3   up      1
+>>>>> -502    0.04999                 appclass slowrgw
+>>>>> 4       0.009995                                osd.4   up      1
+>>>>> 5       0.009995                                osd.5   up      1
+>>>>> 6       0.009995                                osd.6   up      1
+>>>>> 7       0.009995                                osd.7   up      1
+>>>>> 8       0.009995                                osd.8   up      1
+>>>>> 9       0.009995                                osd.9   up      1
+>>>>> -51     0.09999         appclient appstd
+>>>>> -511    0.04999                 appclass faststd
+>>>>> 0       0.009995                                osd.0   up      1
+>>>>> 1       0.009995                                osd.1   up      1
+>>>>> 2       0.009995                                osd.2   up      1
+>>>>> 3       0.009995                                osd.3   up      1
+>>>>> -512    0.04999                 appclass slowstd
+>>>>> 4       0.009995                                osd.4   up      1
+>>>>> 5       0.009995                                osd.5   up      1
+>>>>> 6       0.009995                                osd.6   up      1
+>>>>> 7       0.009995                                osd.7   up      1
+>>>>> 8       0.009995                                osd.8   up      1
+>>>>> 9       0.009995                                osd.9   up      1
+>>>>> -1      0.09999 root default
+>>>>> -2      0.09999         datacenter nanterre
+>>>>> -3      0.09999                 platform sandbox
+>>>>> -13     0.01999                         host p-sbceph13
+>>>>> 0       0.009995                                        osd.0   up =
+     1
+>>>>> 5       0.009995                                        osd.5   up =
+     1
+>>>>> -14     0.01999                         host p-sbceph14
+>>>>> 1       0.009995                                        osd.1   up =
+     1
+>>>>> 6       0.009995                                        osd.6   up =
+     1
+>>>>> -15     0.01999                         host p-sbceph15
+>>>>> 2       0.009995                                        osd.2   up =
+     1
+>>>>> 7       0.009995                                        osd.7   up =
+     1
+>>>>> -12     0.01999                         host p-sbceph12
+>>>>> 3       0.009995                                        osd.3   up =
+     1
+>>>>> 8       0.009995                                        osd.8   up =
+     1
+>>>>> -11     0.01999                         host p-sbceph11
+>>>>> 4       0.009995                                        osd.4   up =
+     1
+>>>>> 9       0.009995                                        osd.9   up =
+     1
+>>>>>
+>>>>> Best regards
+>>>>>
+>>>>> -----Message d'origine-----
+>>>>> De : Loic Dachary [mailto:loic@dachary.org] Envoy=E9 : mardi 14
+>>>>> octobre
+>>>>> 2014 12:12 =C0 : CHEVALIER Ghislain IMT/OLPS;
+>>>>> ceph-devel@vger.kernel.org Objet : Re: [Ceph-Devel] NO pg created
+>>>>> for eruasre-coded pool
+>>>>>
+>>>>>
+>>>>>
+>>>>> On 14/10/2014 02:07, ghislain.chevalier@orange.com wrote:
+>>>>>> Hi all,
+>>>>>>
+>>>>>> Context :
+>>>>>> Ceph : Firefly 0.80.6
+>>>>>> Sandbox Platform  : Ubuntu 12.04 LTS, 5 VM (VMware), 3 mons, 10 os=
+d
+>>>>>>
+>>>>>>
+>>>>>> Issue:
+>>>>>> I created an erasure-coded pool using the default profile
+>>>>>> --> ceph osd pool create ecpool 128 128 erasure default
+>>>>>> the erasure-code rule was dynamically created and associated to th=
+e pool.
+>>>>>> root@p-sbceph14:/etc/ceph# ceph osd crush rule dump erasure-code {=
+
+>>>>>> "rule_id": 7,
+>>>>>>   "rule_name": "erasure-code",
+>>>>>>   "ruleset": 52,
+>>>>>>   "type": 3,
+>>>>>>   "min_size": 3,
+>>>>>>   "max_size": 20,
+>>>>>>   "steps": [
+>>>>>>         { "op": "set_chooseleaf_tries",
+>>>>>>           "num": 5},
+>>>>>>         { "op": "take",
+>>>>>>           "item": -1,
+>>>>>>           "item_name": "default"},
+>>>>>>         { "op": "chooseleaf_indep",
+>>>>>>           "num": 0,
+>>>>>>           "type": "host"},
+>>>>>>         { "op": "emit"}]}
+>>>>>> root@p-sbceph14:/var/log/ceph# ceph osd pool get ecpool
+>>>>>> crush_ruleset
+>>>>>> crush_ruleset: 52
+>>>>>
+>>>>>> No error message was displayed at pool creation but no pgs were cr=
+eated.
+>>>>>> --> rados lspools confirms the pool is created but rados/ceph df
+>>>>>> --> shows no pg for this pool
+>>>>>>
+>>>>>> The command  "rados -p ecpool put services /etc/services" is
+>>>>>> inactive
+>>>>>> (stalled) and the following message is encountered in ceph.log
+>>>>>> 2014-10-14 10:36:50.189432 osd.5 10.192.134.123:6804/21505 799 :
+>>>>>> [WRN] slow request 960.230073 seconds old, received at 2014-10-14
+>>>>>> 10:20:49.959255: osd_op(client.1192643.0:1 services [writefull
+>>>>>> 0~19281] 100.5a48a9c2 ondisk+write e11869) v4 currently waiting fo=
+r
+>>>>>> pg to exist locally
+>>>>>>
+>>>>>> I don't know if I missed something or if the problem is somewhere =
+else..
+>>>>>
+>>>>> The erasure-code rule displayed will need at least three hosts. If =
+there are not enough hosts with OSDs the mapping will fail and put will h=
+ang until an OSD becomes available to complete the mapping of OSDs to the=
+ PGs. What does your ceph osd tree shows ?
+>>>>>
+>>>>> Cheers
+>>>>>
+>>>>>>
+>>>>>> Best regards
+>>>>>>
+>>>>>>
+>>>>>>
+>>>>>>
+>>>>>>
+>>>>>>
+>>>>>>
+>>>>>>
+>>>>>>
+>>>>>> __________________________________________________________________=
+_
+>>>>>> _ _ _ ___________________________________________________
+>>>>>>
+>>>>>> Ce message et ses pieces jointes peuvent contenir des informations=
+
+>>>>>> confidentielles ou privilegiees et ne doivent donc pas etre
+>>>>>> diffuses, exploites ou copies sans autorisation. Si vous avez recu=
+
+>>>>>> ce message par erreur, veuillez le signaler a l'expediteur et le d=
+etruire ainsi que les pieces jointes. Les messages electroniques etant su=
+sceptibles d'alteration, Orange decline toute responsabilite si ce messag=
+e a ete altere, deforme ou falsifie. Merci.
+>>>>>>
+>>>>>> This message and its attachments may contain confidential or
+>>>>>> privileged information that may be protected by law; they should n=
+ot be distributed, used or copied without authorisation.
+>>>>>> If you have received this email in error, please notify the sender=
+ and delete this message and its attachments.
+>>>>>> As emails may be altered, Orange is not liable for messages that h=
+ave been modified, changed or falsified.
+>>>>>> Thank you.
+>>>>>>
+>>>>>> --
+>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-dev=
+el"
+>>>>>> in the body of a message to majordomo@vger.kernel.org More
+>>>>>> majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>>>
+>>>>>
+>>>>> --
+>>>>> Lo=EFc Dachary, Artisan Logiciel Libre
+>>>>>
+>>>>>
+>>>>> ___________________________________________________________________=
+_
+>>>>> _ _ ___________________________________________________
+>>>>>
+>>>>> Ce message et ses pieces jointes peuvent contenir des informations
+>>>>> confidentielles ou privilegiees et ne doivent donc pas etre
+>>>>> diffuses, exploites ou copies sans autorisation. Si vous avez recu
+>>>>> ce message par erreur, veuillez le signaler a l'expediteur et le de=
+truire ainsi que les pieces jointes. Les messages electroniques etant sus=
+ceptibles d'alteration, Orange decline toute responsabilite si ce message=
+ a ete altere, deforme ou falsifie. Merci.
+>>>>>
+>>>>> This message and its attachments may contain confidential or
+>>>>> privileged information that may be protected by law; they should no=
+t be distributed, used or copied without authorisation.
+>>>>> If you have received this email in error, please notify the sender =
+and delete this message and its attachments.
+>>>>> As emails may be altered, Orange is not liable for messages that ha=
+ve been modified, changed or falsified.
+>>>>> Thank you.
+>>>>>
+>>>>> --
+>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
+l"
+>>>>> in the body of a message to majordomo@vger.kernel.org More majordom=
+o
+>>>>> info at  http://vger.kernel.org/majordomo-info.html
+>>>>>
+>>>>
+>>>> --
+>>>> Lo=EFc Dachary, Artisan Logiciel Libre
+>>>>
+>>>>
+>>>> ____________________________________________________________________=
+_
+>>>> _ ___________________________________________________
+>>>>
+>>>> Ce message et ses pieces jointes peuvent contenir des informations
+>>>> confidentielles ou privilegiees et ne doivent donc pas etre diffuses=
+,
+>>>> exploites ou copies sans autorisation. Si vous avez recu ce message
+>>>> par erreur, veuillez le signaler a l'expediteur et le detruire ainsi=
+ que les pieces jointes. Les messages electroniques etant susceptibles d'=
+alteration, Orange decline toute responsabilite si ce message a ete alter=
+e, deforme ou falsifie. Merci.
+>>>>
+>>>> This message and its attachments may contain confidential or
+>>>> privileged information that may be protected by law; they should not=
+ be distributed, used or copied without authorisation.
+>>>> If you have received this email in error, please notify the sender a=
+nd delete this message and its attachments.
+>>>> As emails may be altered, Orange is not liable for messages that hav=
+e been modified, changed or falsified.
+>>>> Thank you.
+>>>>
+>>>
+>>> --
+>>> Lo=EFc Dachary, Artisan Logiciel Libre
+>>>
+>>>
+>>> _____________________________________________________________________=
+_
+>>> ___________________________________________________
+>>>
+>>> Ce message et ses pieces jointes peuvent contenir des informations
+>>> confidentielles ou privilegiees et ne doivent donc pas etre diffuses,=
+
+>>> exploites ou copies sans autorisation. Si vous avez recu ce message
+>>> par erreur, veuillez le signaler a l'expediteur et le detruire ainsi =
+que les pieces jointes. Les messages electroniques etant susceptibles d'a=
+lteration, Orange decline toute responsabilite si ce message a ete altere=
+, deforme ou falsifie. Merci.
+>>>
+>>> This message and its attachments may contain confidential or
+>>> privileged information that may be protected by law; they should not =
+be distributed, used or copied without authorisation.
+>>> If you have received this email in error, please notify the sender an=
+d delete this message and its attachments.
+>>> As emails may be altered, Orange is not liable for messages that have=
+ been modified, changed or falsified.
+>>> Thank you.
+>>>
+>>
+>> --
+>> Lo=EFc Dachary, Artisan Logiciel Libre
+>>
+>>
+>> ______________________________________________________________________=
+___________________________________________________
+>>
+>> Ce message et ses pieces jointes peuvent contenir des informations con=
+fidentielles ou privilegiees et ne doivent donc
+>> pas etre diffuses, exploites ou copies sans autorisation. Si vous avez=
+ recu ce message par erreur, veuillez le signaler
+>> a l'expediteur et le detruire ainsi que les pieces jointes. Les messag=
+es electroniques etant susceptibles d'alteration,
+>> Orange decline toute responsabilite si ce message a ete altere, deform=
+e ou falsifie. Merci.
+>>
+>> This message and its attachments may contain confidential or privilege=
+d information that may be protected by law;
+>> they should not be distributed, used or copied without authorisation.
+>> If you have received this email in error, please notify the sender and=
+ delete this message and its attachments.
+>> As emails may be altered, Orange is not liable for messages that have =
+been modified, changed or falsified.
+>> Thank you.
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" =
+in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>=20
+> --
+> Lo=EFc Dachary, Artisan Logiciel Libre
+>=20
+>=20
+> _______________________________________________________________________=
+__________________________________________________
+>=20
+> Ce message et ses pieces jointes peuvent contenir des informations conf=
+identielles ou privilegiees et ne doivent donc
+> pas etre diffuses, exploites ou copies sans autorisation. Si vous avez =
+recu ce message par erreur, veuillez le signaler
+> a l'expediteur et le detruire ainsi que les pieces jointes. Les message=
+s electroniques etant susceptibles d'alteration,
+> Orange decline toute responsabilite si ce message a ete altere, deforme=
+ ou falsifie. Merci.
+>=20
+> This message and its attachments may contain confidential or privileged=
+ information that may be protected by law;
+> they should not be distributed, used or copied without authorisation.
+> If you have received this email in error, please notify the sender and =
+delete this message and its attachments.
+> As emails may be altered, Orange is not liable for messages that have b=
+een modified, changed or falsified.
+> Thank you.
+>=20
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+
+
+--jpJTsDEqtc9rQLlKkBjLHFdS1xaEWC7E5
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlQ+qjIACgkQ8dLMyEl6F22O3gCfQ+qbqp5SDVeiZL/SUxiv60AB
+HF4AoLQy5l+Mb9LSx1Gf54Duo6v+tT/V
+=9b5T
+-----END PGP SIGNATURE-----
+
+--jpJTsDEqtc9rQLlKkBjLHFdS1xaEWC7E5--
