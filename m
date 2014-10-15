@@ -1,34 +1,79 @@
-From: Alexandre DERUMIER <aderumier@odiso.com>
-Subject: Re: 10/14/2014 Weekly Ceph Performance Meeting
-Date: Wed, 15 Oct 2014 08:22:11 +0200 (CEST)
-Message-ID: <e1f8eda8-3711-4f50-8910-20a09daa472f@mailpro>
-References: <543DECC6.9030607@redhat.com>
+From: Amon Ott <a.ott-oFjU9DtLk10Mb+B85CZM8Q@public.gmane.org>
+Subject: Re: the state of cephfs in giant
+Date: Wed, 15 Oct 2014 08:43:42 +0200
+Message-ID: <543E179E.4070704@m-privacy.de>
+References: <alpine.DEB.2.00.1410131114130.10561@cobra.newdream.net>
+	<543CD16C.6060708@m-privacy.de>
+	<alpine.DEB.2.00.1410140718050.10462@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.209.98]:45022 "EHLO
-	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751257AbaJOGWS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 15 Oct 2014 02:22:18 -0400
-In-Reply-To: <543DECC6.9030607@redhat.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mark.nelson@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.00.1410140718050.10462-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>, Amon Ott <a.ott-oFjU9DtLk10Mb+B85CZM8Q@public.gmane.org>
+Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-Hi,
+Am 14.10.2014 16:23, schrieb Sage Weil:
+> On Tue, 14 Oct 2014, Amon Ott wrote:
+>> Am 13.10.2014 20:16, schrieb Sage Weil:
+>>> We've been doing a lot of work on CephFS over the past few months. This
+>>> is an update on the current state of things as of Giant.
+>> ...
+>>> * Either the kernel client (kernel 3.17 or later) or userspace (ceph-fu=
+se
+>>>   or libcephfs) clients are in good working order.
+>>
+>> Thanks for all the work and specially for concentrating on CephFS! We
+>> have been watching and testing for years by now and really hope to
+>> change our Clusters to CephFS soon.
+>>
+>> For kernel maintenance reasons, we only want to run longterm stable
+>> kernels. And for performance reasons and because of severe known
+>> problems we want to avoid Fuse. How good are our chances of a stable
+>> system with the kernel client in the latest longterm kernel 3.14? Will
+>> there be further bugfixes or feature backports?
+> =
 
-about performance, maybe could it be great to also include client side performance ?
+> There are important bug fixes missing from 3.14.  IIRC, the EC, cache =
 
-Currently I see 2 performance problems with librbd:
+> tiering, and firefly CRUSH changes aren't there yet either (they landed i=
+n =
 
-1) The cpu usage is quite huge. (I'm cpu bound with 8cores CPU E5-2603 v2 @ 1.80GHz, with 40000iops 4k read using fio-rbd)
+> 3.15), and that is not appropriate for a stable series.
+> =
 
-2) in qemu, it's impossible to reach more than around 7000iops with 1 disk. (maybe is it also related to cpu or threads number).
-   I have also try with the new qemu iothread/dataplane feature, but it doesn't help.
+> They can be backported, but no commitment yet on that :)
 
+If the bugfixes are easily identified in one of your Ceph git branches,
+I would even try to backport them myself. Still, I would rather see
+someone from the Ceph team with deeper knowledge of the code port them.
 
+IMHO, it would be good for Ceph to have stable support in at least the
+latest longterm kernel. No need for new features, but bugfixes should be
+there.
 
+Amon Ott
+-- =
 
+Dr. Amon Ott
+m-privacy GmbH           Tel: +49 30 24342334
+Werner-Vo=DF-Damm 62       Fax: +49 30 99296856
+12101 Berlin             http://www.m-privacy.de
 
+Amtsgericht Charlottenburg, HRB 84946
+
+Gesch=E4ftsf=FChrer:
+ Dipl.-Kfm. Holger Maczkowsky,
+ Roman Maczkowsky
+
+GnuPG-Key-ID: 0x2DD3A649
