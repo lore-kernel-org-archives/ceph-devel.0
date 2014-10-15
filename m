@@ -1,136 +1,91 @@
-From: Alexandre DERUMIER <aderumier@odiso.com>
-Subject: Re: 10/14/2014 Weekly Ceph Performance Meeting
-Date: Wed, 15 Oct 2014 16:42:04 +0200 (CEST)
-Message-ID: <ebe5a51e-2219-41ef-b918-6307b9ff3549@mailpro>
-References: <543E75FC.7010509@redhat.com>
+From: Dan Van Der Ster <daniel.vanderster@cern.ch>
+Subject: Re: snap_trimming + backfilling is inefficient with many
+ purged_snaps
+Date: Wed, 15 Oct 2014 14:47:32 +0000
+Message-ID: <6A154A11-04F9-4D21-BF81-C585B6E6BD41@cern.ch>
+References: <alpine.DEB.2.00.1409190819070.18018@cobra.newdream.net>
+ <CAPUexz-ff+fTmU0J0TrJ80p+6334BBPvM7EWW5=eGa8uEomRew@mail.gmail.com>
+ <D197E5D4-598B-4574-852E-C9F0CA10133E@cern.ch>
+ <CAPUexz9XeNMJvjCeM_7N0_TQOS6_xBOdgnKm9j4FNDib3+FjMg@mail.gmail.com>
+ <541b2add.ea5cb40a.250c.3ed0SMTPIN_ADDED_BROKEN@mx.google.com>
+ <CAPUexz_H7-b8SY6J+dLnAyw663eHXoLKYccB1edwH9XgFBZCpw@mail.gmail.com>
+ <07f3373f39ff2f738d76bc9f23f07297@webmail.vanderster.com>
+ <CAPUexz9P264L4fj4eSdb3KbnTS+ewvE7WdKCw5ijjEO_u8URYA@mail.gmail.com>
+ <alpine.DEB.2.00.1409181446110.19460@cobra.newdream.net>
+ <CAPUexz-HXn=x_b=CJev46jWFsSrUpXc7UO7kzWcRe4Yrm6VL3g@mail.gmail.com>
+ <alpine.DEB.2.00.1409181526260.19460@cobra.newdream.net>
+ <CAPUexz-GYF4R95k8QzvdGDKtzez0Qm6SnJt1=4YJEGB8ty7Ggg@mail.gmail.com>
+ <1878E4A4-2363-4717-ABEC-B587B0337D6B@cern.ch>
+ <CABZ+qqks_qSbgG4QhkaH8A1zTP=o+fR4ptHPbtA9-MxrM8sJ5w@mail.gmail.com>
+ <63ccef299522995cc0704e349ef86503@webmail.vanderster.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.209.98]:34858 "EHLO
-	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751544AbaJOOmR convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 15 Oct 2014 10:42:17 -0400
-In-Reply-To: <543E75FC.7010509@redhat.com>
+Received: from cernmx11.cern.ch ([188.184.36.50]:58865 "EHLO CERNMX11.cern.ch"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751305AbaJOOrf convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 15 Oct 2014 10:47:35 -0400
+In-Reply-To: <63ccef299522995cc0704e349ef86503@webmail.vanderster.com>
+Content-Language: en-US
+Content-ID: <E5AA47C39317564BAB47417C2DDEAC28@cern.ch>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mark.nelson@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Sage Weil <sweil@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Florian Haas <florian@hastexo.com>
 
->>Sure! Please feel free to add this or other topics that are=20
->>useful/interesting to the etherpad. Please include your name though s=
-o=20
->>we know who's brought it up. Even if we don't get to everything it wi=
-ll=20
->>provide useful topics for the subsequent weeks.=20
+Hi Sage,
 
-Ok,great,I'll do it.
-
->=20
-> Currently I see 2 performance problems with librbd:=20
->=20
-> 1) The cpu usage is quite huge. (I'm cpu bound with 8cores CPU E5-260=
-3 v2 @ 1.80GHz, with 40000iops 4k read using fio-rbd)=20
-
->>Interesting. Have you taken a look with perf or other tools to see=20
->>where time is being spent?=20
-
-Not yet, but I can try to do it, I'll have time next week.
-
-
-
->=20
-> 2) in qemu, it's impossible to reach more than around 7000iops with 1=
- disk. (maybe is it also related to cpu or threads number).=20
-> I have also try with the new qemu iothread/dataplane feature, but it =
-doesn't help.=20
-
->>1 disk meaning 1 OSD, or 1 disk meaning 1 volume on a VM?=20
-yes, 1 disk =3D 1 volume on VM
-
->>If its 1 volume, does adding another volume on the same VM help?=20
-
-As far I remember, yes . I'll test again to confirm.
-
-Note that when benching with fio-rbd, I need to increase the client num=
-ber too.
-
-(1client - queue depth 32: +- 8000iops
- 2clients - queue depth 32: +- 16000iops=20
-  ....
-)
-So maybe it's related
-
-
-
->>I'm not familiar with the new qemu options, so that would be good to =
-discuss at=20
-the meeting too!=20
-
-The dataplane/iothread feature allow virtio disk to reach around 1.000.=
-000 iops vs 100.000 iops without dataplane
-http://www.linux-kvm.org/wiki/images/1/17/Kvm-forum-2013-Effective-mult=
-ithreading-in-QEMU.pdf
-
-Syntax to enable it:
-   qemu -object iothread,id=3Diothread0 -device virtio-blk-pci,iothread=
-=3Diothread0,....
+> On 19 Sep 2014, at 17:37, Dan Van Der Ster <daniel.vanderster@cern.ch> wrote:
+> 
+> September 19 2014 5:19 PM, "Sage Weil" <sweil@redhat.com> wrote: 
+>> On Fri, 19 Sep 2014, Dan van der Ster wrote:
+>> 
+>>> On Fri, Sep 19, 2014 at 10:41 AM, Dan Van Der Ster
+>>> <daniel.vanderster@cern.ch> wrote:
+>>>>> On 19 Sep 2014, at 08:12, Florian Haas <florian@hastexo.com> wrote:
+>>>>> 
+>>>>> On Fri, Sep 19, 2014 at 12:27 AM, Sage Weil <sweil@redhat.com> wrote:
+>>>>>> On Fri, 19 Sep 2014, Florian Haas wrote:
+>>>>>>> Hi Sage,
+>>>>>>> 
+>>>>>>> was the off-list reply intentional?
+>>>>>> 
+>>>>>> Whoops! Nope :)
+>>>>>> 
+>>>>>>> On Thu, Sep 18, 2014 at 11:47 PM, Sage Weil <sweil@redhat.com> wrote:
+>>>>>>>>> So, disaster is a pretty good description. Would anyone from the core
+>>>>>>>>> team like to suggest another course of action or workaround, or are
+>>>>>>>>> Dan and I generally on the right track to make the best out of a
+>>>>>>>>> pretty bad situation?
+>>>>>>>> 
+>>>>>>>> The short term fix would probably be to just prevent backfill for the time
+>>>>>>>> being until the bug is fixed.
+>>>>>>> 
+>>>>>>> As in, osd max backfills = 0?
+>>>>>> 
+>>>>>> Yeah :)
+>>>>>> 
+>>>>>> Just managed to reproduce the problem...
+>>>>>> 
+>>>>>> sage
+>>>>> 
+>>>>> Saw the wip branch. Color me freakishly impressed on the turnaround. :) Thanks!
+>>>> 
+>>>> Indeed :) Thanks Sage!
+>>>> wip-9487-dumpling fixes the problem on my test cluster. Trying in prod now?
+>>> 
+>>> Final update, after 4 hours in prod and after draining 8 OSDs -- zero
+>>> slow requests :)
+>> 
+>> That's great news!
+>> 
+>> But, please be careful. This code hasn't been reiewed yet or been through
+>> any testing! I would hold off on further backfills until it's merged.
 
 
+Any news on those merges? It would be good to get this fixed on the dumpling and firefly branches. We're kind of stuck at the moment :(
 
-Regards,
+Cheers, Dan
 
-Alexandre
 
------ Mail original -----=20
-
-De: "Mark Nelson" <mark.nelson@inktank.com>=20
-=C3=80: "Alexandre DERUMIER" <aderumier@odiso.com>, "Mark Nelson" <mark=
-=2Enelson@inktank.com>=20
-Cc: ceph-devel@vger.kernel.org=20
-Envoy=C3=A9: Mercredi 15 Octobre 2014 15:26:20=20
-Objet: Re: 10/14/2014 Weekly Ceph Performance Meeting=20
-
-On 10/15/2014 01:22 AM, Alexandre DERUMIER wrote:=20
-> Hi,=20
->=20
-> about performance, maybe could it be great to also include client sid=
-e performance ?=20
-
-Sure! Please feel free to add this or other topics that are=20
-useful/interesting to the etherpad. Please include your name though so=20
-we know who's brought it up. Even if we don't get to everything it will=
-=20
-provide useful topics for the subsequent weeks.=20
-
->=20
-> Currently I see 2 performance problems with librbd:=20
->=20
-> 1) The cpu usage is quite huge. (I'm cpu bound with 8cores CPU E5-260=
-3 v2 @ 1.80GHz, with 40000iops 4k read using fio-rbd)=20
-
-Interesting. Have you taken a look with perf or other tools to see=20
-where time is being spent?=20
-
->=20
-> 2) in qemu, it's impossible to reach more than around 7000iops with 1=
- disk. (maybe is it also related to cpu or threads number).=20
-> I have also try with the new qemu iothread/dataplane feature, but it =
-doesn't help.=20
-
-1 disk meaning 1 OSD, or 1 disk meaning 1 volume on a VM? If its 1=20
-volume, does adding another volume on the same VM help? I'm not=20
-familiar with the new qemu options, so that would be good to discuss at=
-=20
-the meeting too!=20
-
->=20
->=20
->=20
->=20
->=20
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
