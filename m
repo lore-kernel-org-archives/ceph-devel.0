@@ -1,65 +1,112 @@
-From: Dmitry Borodaenko <dborodaenko@mirantis.com>
-Subject: Re: Firefly maintenance release schedule
-Date: Wed, 15 Oct 2014 14:45:04 -0700
-Message-ID: <CAM0pNLNi-1ZG8NjVTgCbV-rPczkqGjDPRz9i8kXytLk29jstyg@mail.gmail.com>
-References: <CAM0pNLO7m0=1nkhmqigfMhTeaNYOtW6no9neAWoaX9fKt0uZDg@mail.gmail.com>
-	<CAM0pNLN0XoMtWAAqJqgF+VTZmQNu4oFPRUtrDz6FFNWWLo8Sow@mail.gmail.com>
-	<CAPYLRzg5we+dGkAGpbC1Byop+L5aiF40pjfdZpynPKRLokHvwA@mail.gmail.com>
+From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+Subject: RE: 10/14/2014 Weekly Ceph Performance Meeting
+Date: Thu, 16 Oct 2014 03:27:13 +0000
+Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC020C8323@shsmsx102.ccr.corp.intel.com>
+References: <ebe5a51e-2219-41ef-b918-6307b9ff3549@mailpro>
+ <0ef470f8-b69f-48ef-9975-6c2693f88b3c@mailpro>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f176.google.com ([209.85.214.176]:59564 "EHLO
-	mail-ob0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751277AbaJOVpF (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 15 Oct 2014 17:45:05 -0400
-Received: by mail-ob0-f176.google.com with SMTP id m8so1823293obr.7
-        for <ceph-devel@vger.kernel.org>; Wed, 15 Oct 2014 14:45:04 -0700 (PDT)
-In-Reply-To: <CAPYLRzg5we+dGkAGpbC1Byop+L5aiF40pjfdZpynPKRLokHvwA@mail.gmail.com>
+Received: from mga14.intel.com ([192.55.52.115]:33388 "EHLO mga14.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751184AbaJPD1S (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 15 Oct 2014 23:27:18 -0400
+In-Reply-To: <0ef470f8-b69f-48ef-9975-6c2693f88b3c@mailpro>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Alexandre DERUMIER <aderumier@odiso.com>, Mark Nelson <mark.nelson@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Gregory,
-
-Thanks for prompt response, we'll go with v0.80.7.
-
-It still would be nice if v0.80.8 doesn't take as long as v0.80.6, I
-suspect one of the reasons you messed it up was too many commits
-without intermediate releases.
-
-On Wed, Oct 15, 2014 at 9:59 AM, Gregory Farnum <greg@inktank.com> wrote:
-> Take .80.7. All of the bugs you've cited, you are supremely unlikely
-> to run into. The "Urgent" tag is a measure of planning priority, not
-> of impact to users; here it generally means "we found a bug on a
-> stable branch that we can reproduce". Taking them in order:
-> http://tracker.ceph.com/issues/9492: only happens if you try and cheat
-> with your CRUSH rules, and obviously nobody did that until Sage
-> suggested it as a solution to the problem somebody had 29 days ago
-> when this was discovered.
-> http://tracker.ceph.com/issues/9039: The most serious here, but only
-> happens if you're using RGW, and storing user data in multiple pools,
-> and issue a COPY command to copy data between different pools.
-> http://tracker.ceph.com/issues/9582: Only happens if you're using the
-> op timeout feature of librados with the C bindings OR the op timeout
-> feature *and* the user-provided buffers in the C++ interface. (To the
-> best of my knowledge, the people who discovered this are the only ones
-> using op timeouts.)
-> http://tracker.ceph.com/issues/9307: I'm actually not sure what's
-> going on here; looks like some kind of extremely rare race when
-> authorizing requests? (ie, fixed by a retry)
->
-> We messed up the v0.80.6 release in a very specific way (and if you
-> were deploying a new cluster it wasn't a problem), but you're
-> extrapolating too much from the presence of patches about what their
-> impact is and what the system's stability is. These are largely
-> cleaning up rough edges around user interfaces, and smoothing out
-> issues in the new functionality that a standard deployment isn't going
-> to experience. :)
-> -Greg
-> Software Engineer #42 @ http://inktank.com | http://ceph.com
-
-
-
--- 
-Dmitry Borodaenko
+V2UgYWxzbyBmaW5kIHRoaXMgYmVmb3JlLCBzZWVtcyBpdCdzIGJlY2F1c2UgUUVNVSB1c2Ugc2lu
+Z2xlIHRocmVhZCBmb3IgSU8sIEkgdHJpZWQgdG8gZW5hYmxlIHRoZSBkZWJ1ZyBsb2cgb2YgaW4g
+bGlicmJkLCBmaW5kIHRoYXQgdGhlIHRocmVhZGVkIGlzIGFsd2F5cyB0aGUgc2FtZS4gQXNzdW1p
+bmcgdGhlIGJhY2tlbmQgaXMgcG93ZXIgZW5vdWdoLCBzbyBob3cgbWFueSBJT3MgY2FuIGJlIHNl
+bnQgb3V0IGJ5IHFlbXUgPT0gaG93IG1hbnkgSU9QUyBjYW4gd2UgZ2V0Lg0KDQpUaGUgdXBwZXIg
+Ym91bmQgbWF5IHZhcmllcyBkZXBlbmRzIG9uIGhvdyBmYXN0IFFFTVUgY2FuIHNlbmQgb3V0IGEg
+cmVxdWVzdCwgIEkgcmVtZW1iZXIgd2UgaGF2ZSB0cmllZCBkaWZmZXJlbnQgQ1BVIG1vZGVsIGFu
+ZCBnZXQgYmVzdCB3aXRoIGFuIHZlcnkgb2xkIE5ITSBDUFUod2l0aCBoaWdoIGZyZXF1ZW5jeSB0
+byAyLjkzR2h6LCB0YWtlIH4wLjAzIHRvIHNlbmQgb3V0IGEgcmVxdWVzdCBhbmQgd2UgZ2V0IDIy
+SyByZWFkIElPUFMgYm91bmQpLCBiZXR0ZXIgdGhhbiBuZXcgU05CIENQVS4gRnJlcXVlbmN5IGRv
+IHBsYXkgaW1wb3J0YW50IHBhcnQgc2luY2UgaXQncyBzaW5nbGUgdGhyZWFkLg0KDQotLS0tLU9y
+aWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5v
+cmcgW21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9m
+IEFsZXhhbmRyZSBERVJVTUlFUg0KU2VudDogV2VkbmVzZGF5LCBPY3RvYmVyIDE1LCAyMDE0IDEx
+OjU1IFBNDQpUbzogTWFyayBOZWxzb24NCkNjOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0K
+U3ViamVjdDogUmU6IDEwLzE0LzIwMTQgV2Vla2x5IENlcGggUGVyZm9ybWFuY2UgTWVldGluZw0K
+DQo+IDIpIGluIHFlbXUsIGl0J3MgaW1wb3NzaWJsZSB0byByZWFjaCBtb3JlIHRoYW4gYXJvdW5k
+IDcwMDBpb3BzIHdpdGggMSBkaXNrLiAobWF5YmUgaXMgaXQgYWxzbyByZWxhdGVkIHRvIGNwdSBv
+ciB0aHJlYWRzIG51bWJlcikuIA0KPiBJIGhhdmUgYWxzbyB0cnkgd2l0aCB0aGUgbmV3IHFlbXUg
+aW90aHJlYWQvZGF0YXBsYW5lIGZlYXR1cmUsIGJ1dCBpdCBkb2Vzbid0IGhlbHAuIA0KPj5JZiBp
+dHMgMSB2b2x1bWUsIGRvZXMgYWRkaW5nIGFub3RoZXIgdm9sdW1lIG9uIHRoZSBzYW1lIFZNIGhl
+bHA/DQoNCj4+PkFzIGZhciBJIHJlbWVtYmVyLCB5ZXMgLiBJJ2xsIHRlc3QgYWdhaW4gdG8gY29u
+ZmlybS4NCg0KSSBoYXZlIGRvbmUgdGVzdCwgSXQncyBzY2FsaW5nIHdpdGggbXVsdGlwbGUgdmly
+dGlvIGRpc2sgb24gbXVsdGlwbGUgcmJkIHZvbHVtZS4NCg0KKE5vdCBzdXJlLCBidXQgbWF5YmUg
+aXQncyByZWxhdGVkIHRvIGlvZGVwdGggYnVnIHNob3dlZCBpbiB0aGlzIG1lZXRpbmcgaW4gaW50
+ZWwgc2xpZGVzID8pDQoNCg0KLS0tLS0gTWFpbCBvcmlnaW5hbCAtLS0tLSANCg0KRGU6ICJBbGV4
+YW5kcmUgREVSVU1JRVIiIDxhZGVydW1pZXJAb2Rpc28uY29tPg0Kw4A6ICJNYXJrIE5lbHNvbiIg
+PG1hcmsubmVsc29uQGlua3RhbmsuY29tPg0KQ2M6IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3Jn
+DQpFbnZvecOpOiBNZXJjcmVkaSAxNSBPY3RvYnJlIDIwMTQgMTY6NDI6MDQNCk9iamV0OiBSZTog
+MTAvMTQvMjAxNCBXZWVrbHkgQ2VwaCBQZXJmb3JtYW5jZSBNZWV0aW5nIA0KDQo+PlN1cmUhIFBs
+ZWFzZSBmZWVsIGZyZWUgdG8gYWRkIHRoaXMgb3Igb3RoZXIgdG9waWNzIHRoYXQgYXJlIA0KPj51
+c2VmdWwvaW50ZXJlc3RpbmcgdG8gdGhlIGV0aGVycGFkLiBQbGVhc2UgaW5jbHVkZSB5b3VyIG5h
+bWUgdGhvdWdoIHNvIA0KPj53ZSBrbm93IHdobydzIGJyb3VnaHQgaXQgdXAuIEV2ZW4gaWYgd2Ug
+ZG9uJ3QgZ2V0IHRvIGV2ZXJ5dGhpbmcgaXQgDQo+PndpbGwgcHJvdmlkZSB1c2VmdWwgdG9waWNz
+IGZvciB0aGUgc3Vic2VxdWVudCB3ZWVrcy4NCg0KT2ssZ3JlYXQsSSdsbCBkbyBpdC4gDQoNCj4g
+DQo+IEN1cnJlbnRseSBJIHNlZSAyIHBlcmZvcm1hbmNlIHByb2JsZW1zIHdpdGggbGlicmJkOiAN
+Cj4gDQo+IDEpIFRoZSBjcHUgdXNhZ2UgaXMgcXVpdGUgaHVnZS4gKEknbSBjcHUgYm91bmQgd2l0
+aCA4Y29yZXMgQ1BVIEU1LTI2MDMgDQo+IHYyIEAgMS44MEdIeiwgd2l0aCA0MDAwMGlvcHMgNGsg
+cmVhZCB1c2luZyBmaW8tcmJkKQ0KDQo+PkludGVyZXN0aW5nLiBIYXZlIHlvdSB0YWtlbiBhIGxv
+b2sgd2l0aCBwZXJmIG9yIG90aGVyIHRvb2xzIHRvIHNlZSANCj4+d2hlcmUgdGltZSBpcyBiZWlu
+ZyBzcGVudD8NCg0KTm90IHlldCwgYnV0IEkgY2FuIHRyeSB0byBkbyBpdCwgSSdsbCBoYXZlIHRp
+bWUgbmV4dCB3ZWVrLiANCg0KDQoNCj4gDQo+IDIpIGluIHFlbXUsIGl0J3MgaW1wb3NzaWJsZSB0
+byByZWFjaCBtb3JlIHRoYW4gYXJvdW5kIDcwMDBpb3BzIHdpdGggMSBkaXNrLiAobWF5YmUgaXMg
+aXQgYWxzbyByZWxhdGVkIHRvIGNwdSBvciB0aHJlYWRzIG51bWJlcikuIA0KPiBJIGhhdmUgYWxz
+byB0cnkgd2l0aCB0aGUgbmV3IHFlbXUgaW90aHJlYWQvZGF0YXBsYW5lIGZlYXR1cmUsIGJ1dCBp
+dCBkb2Vzbid0IGhlbHAuIA0KDQo+PjEgZGlzayBtZWFuaW5nIDEgT1NELCBvciAxIGRpc2sgbWVh
+bmluZyAxIHZvbHVtZSBvbiBhIFZNPyANCnllcywgMSBkaXNrID0gMSB2b2x1bWUgb24gVk0gDQoN
+Cj4+SWYgaXRzIDEgdm9sdW1lLCBkb2VzIGFkZGluZyBhbm90aGVyIHZvbHVtZSBvbiB0aGUgc2Ft
+ZSBWTSBoZWxwPyANCg0KQXMgZmFyIEkgcmVtZW1iZXIsIHllcyAuIEknbGwgdGVzdCBhZ2FpbiB0
+byBjb25maXJtLiANCg0KTm90ZSB0aGF0IHdoZW4gYmVuY2hpbmcgd2l0aCBmaW8tcmJkLCBJIG5l
+ZWQgdG8gaW5jcmVhc2UgdGhlIGNsaWVudCBudW1iZXIgdG9vLiANCg0KKDFjbGllbnQgLSBxdWV1
+ZSBkZXB0aCAzMjogKy0gODAwMGlvcHMNCjJjbGllbnRzIC0gcXVldWUgZGVwdGggMzI6ICstIDE2
+MDAwaW9wcyAuLi4uIA0KKQ0KU28gbWF5YmUgaXQncyByZWxhdGVkIA0KDQoNCg0KPj5JJ20gbm90
+IGZhbWlsaWFyIHdpdGggdGhlIG5ldyBxZW11IG9wdGlvbnMsIHNvIHRoYXQgd291bGQgYmUgZ29v
+ZCB0byANCj4+ZGlzY3VzcyBhdA0KdGhlIG1lZXRpbmcgdG9vISANCg0KVGhlIGRhdGFwbGFuZS9p
+b3RocmVhZCBmZWF0dXJlIGFsbG93IHZpcnRpbyBkaXNrIHRvIHJlYWNoIGFyb3VuZCAxLjAwMC4w
+MDAgaW9wcyB2cyAxMDAuMDAwIGlvcHMgd2l0aG91dCBkYXRhcGxhbmUgaHR0cDovL3d3dy5saW51
+eC1rdm0ub3JnL3dpa2kvaW1hZ2VzLzEvMTcvS3ZtLWZvcnVtLTIwMTMtRWZmZWN0aXZlLW11bHRp
+dGhyZWFkaW5nLWluLVFFTVUucGRmIA0KDQpTeW50YXggdG8gZW5hYmxlIGl0OiANCnFlbXUgLW9i
+amVjdCBpb3RocmVhZCxpZD1pb3RocmVhZDAgLWRldmljZSB2aXJ0aW8tYmxrLXBjaSxpb3RocmVh
+ZD1pb3RocmVhZDAsLi4uLiANCg0KDQoNClJlZ2FyZHMsIA0KDQpBbGV4YW5kcmUgDQoNCi0tLS0t
+IE1haWwgb3JpZ2luYWwgLS0tLS0gDQoNCkRlOiAiTWFyayBOZWxzb24iIDxtYXJrLm5lbHNvbkBp
+bmt0YW5rLmNvbT4NCsOAOiAiQWxleGFuZHJlIERFUlVNSUVSIiA8YWRlcnVtaWVyQG9kaXNvLmNv
+bT4sICJNYXJrIE5lbHNvbiIgPG1hcmsubmVsc29uQGlua3RhbmsuY29tPg0KQ2M6IGNlcGgtZGV2
+ZWxAdmdlci5rZXJuZWwub3JnDQpFbnZvecOpOiBNZXJjcmVkaSAxNSBPY3RvYnJlIDIwMTQgMTU6
+MjY6MjANCk9iamV0OiBSZTogMTAvMTQvMjAxNCBXZWVrbHkgQ2VwaCBQZXJmb3JtYW5jZSBNZWV0
+aW5nIA0KDQpPbiAxMC8xNS8yMDE0IDAxOjIyIEFNLCBBbGV4YW5kcmUgREVSVU1JRVIgd3JvdGU6
+IA0KPiBIaSwNCj4gDQo+IGFib3V0IHBlcmZvcm1hbmNlLCBtYXliZSBjb3VsZCBpdCBiZSBncmVh
+dCB0byBhbHNvIGluY2x1ZGUgY2xpZW50IHNpZGUgcGVyZm9ybWFuY2UgPyANCg0KU3VyZSEgUGxl
+YXNlIGZlZWwgZnJlZSB0byBhZGQgdGhpcyBvciBvdGhlciB0b3BpY3MgdGhhdCBhcmUgdXNlZnVs
+L2ludGVyZXN0aW5nIHRvIHRoZSBldGhlcnBhZC4gUGxlYXNlIGluY2x1ZGUgeW91ciBuYW1lIHRo
+b3VnaCBzbyB3ZSBrbm93IHdobydzIGJyb3VnaHQgaXQgdXAuIEV2ZW4gaWYgd2UgZG9uJ3QgZ2V0
+IHRvIGV2ZXJ5dGhpbmcgaXQgd2lsbCBwcm92aWRlIHVzZWZ1bCB0b3BpY3MgZm9yIHRoZSBzdWJz
+ZXF1ZW50IHdlZWtzLiANCg0KPiANCj4gQ3VycmVudGx5IEkgc2VlIDIgcGVyZm9ybWFuY2UgcHJv
+YmxlbXMgd2l0aCBsaWJyYmQ6IA0KPiANCj4gMSkgVGhlIGNwdSB1c2FnZSBpcyBxdWl0ZSBodWdl
+LiAoSSdtIGNwdSBib3VuZCB3aXRoIDhjb3JlcyBDUFUgRTUtMjYwMyB2MiBAIDEuODBHSHosIHdp
+dGggNDAwMDBpb3BzIDRrIHJlYWQgdXNpbmcgZmlvLXJiZCkgDQoNCkludGVyZXN0aW5nLiBIYXZl
+IHlvdSB0YWtlbiBhIGxvb2sgd2l0aCBwZXJmIG9yIG90aGVyIHRvb2xzIHRvIHNlZSANCndoZXJl
+IHRpbWUgaXMgYmVpbmcgc3BlbnQ/IA0KDQo+IA0KPiAyKSBpbiBxZW11LCBpdCdzIGltcG9zc2li
+bGUgdG8gcmVhY2ggbW9yZSB0aGFuIGFyb3VuZCA3MDAwaW9wcyB3aXRoIDEgZGlzay4gKG1heWJl
+IGlzIGl0IGFsc28gcmVsYXRlZCB0byBjcHUgb3IgdGhyZWFkcyBudW1iZXIpLiANCj4gSSBoYXZl
+IGFsc28gdHJ5IHdpdGggdGhlIG5ldyBxZW11IGlvdGhyZWFkL2RhdGFwbGFuZSBmZWF0dXJlLCBi
+dXQgaXQgZG9lc24ndCBoZWxwLiANCg0KMSBkaXNrIG1lYW5pbmcgMSBPU0QsIG9yIDEgZGlzayBt
+ZWFuaW5nIDEgdm9sdW1lIG9uIGEgVk0/IElmIGl0cyAxIA0Kdm9sdW1lLCBkb2VzIGFkZGluZyBh
+bm90aGVyIHZvbHVtZSBvbiB0aGUgc2FtZSBWTSBoZWxwPyBJJ20gbm90IA0KZmFtaWxpYXIgd2l0
+aCB0aGUgbmV3IHFlbXUgb3B0aW9ucywgc28gdGhhdCB3b3VsZCBiZSBnb29kIHRvIGRpc2N1c3Mg
+YXQgDQp0aGUgbWVldGluZyB0b28hIA0KDQo+IA0KPiANCj4gDQo+IA0KPiANCi0tDQpUbyB1bnN1
+YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1k
+ZXZlbCIgaW4NCnRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwu
+b3JnDQpNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9y
+ZG9tby1pbmZvLmh0bWwNCg==
