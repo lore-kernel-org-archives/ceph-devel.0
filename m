@@ -1,7 +1,7 @@
 From: <ghislain.chevalier@orange.com>
 Subject: RE: NO pg created for erasure-coded pool
-Date: Thu, 16 Oct 2014 15:40:00 +0000
-Message-ID: <6136_1413474000_543FE6D0_6136_10542_1_B9C8EFBF13B1354DB5FA000660D66DD00C190070@PEXCVZYM14.corporate.adroot.infra.ftgroup>
+Date: Thu, 16 Oct 2014 16:07:26 +0000
+Message-ID: <13572_1413475649_543FED41_13572_10746_1_B9C8EFBF13B1354DB5FA000660D66DD00C1900C8@PEXCVZYM14.corporate.adroot.infra.ftgroup>
 References: <495_1413299690_543D3DEA_495_10637_1_B9C8EFBF13B1354DB5FA000660D66DD00C18CBCE@PEXCVZYM14.corporate.adroot.infra.ftgroup>
  <543D48C0.8040108@dachary.org>
  <32273_1413360033_543E29A1_32273_4484_1_B9C8EFBF13B1354DB5FA000660D66DD00C18D178@PEXCVZYM14.corporate.adroot.infra.ftgroup>
@@ -13,16 +13,37 @@ Mime-Version: 1.0
 Content-Type: text/plain; charset=iso-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relais-ias91.francetelecom.com ([193.251.215.91]:19585 "EHLO
+Received: from relais-ias243.francetelecom.com ([80.12.204.243]:29835 "EHLO
 	relais-inet.francetelecom.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751228AbaJPPkF convert rfc822-to-8bit
+	by vger.kernel.org with ESMTP id S1751960AbaJPQHe convert rfc822-to-8bit
 	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 16 Oct 2014 11:40:05 -0400
-In-Reply-To: <543EAA32.5010408@dachary.org>
+	Thu, 16 Oct 2014 12:07:34 -0400
 Content-Language: fr-FR
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Loic Dachary <loic@dachary.org>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+
+Hi Loic,
+
+Eureka...
+
+Remember the bug related to the rule_id and ruleset_id., we (Alain and =
+I) detected some weeks ago
+
+It aIways exists for  erasure-code pool creation
+
+We altered the crushmap by updating the ruleset_id 52 (set by the syste=
+m i.e. last ruleset_id +1) to 7 in order to be equal to the rule_id 7
+
+And then, ceph created the pg and we can put objects in this pool
+
+Best regards
+
+-----Message d'origine-----
+De=A0: CHEVALIER Ghislain IMT/OLPS=20
+Envoy=E9=A0: jeudi 16 octobre 2014 17:40
+=C0=A0: Loic Dachary; ceph-devel@vger.kernel.org
+Objet=A0: RE: [Ceph-Devel] NO pg created for erasure-coded pool
 
 Hi Loic,
 
@@ -35,8 +56,7 @@ I turned osd and mon  in debug mode as mentionned
 I re create the erasure-coded pool ecpool
 
 At pool creation no "create_lock_pg" in osd logs ; no message in mon lo=
-g
-At object creation (rados put) I got=20
+g At object creation (rados put) I got
 2014-10-16 16:29:29.700916 7f060accc700  7 mon.monitor03@2(peon).log v8=
 91323 update_from_paxos applying incremental log 891323 2014-10-16 16:2=
 9:28.369129 osd.5 10.192.134.123:6801/369 141 : [WRN] slow request 480.=
@@ -51,7 +71,7 @@ The pool is listed by rados lspools or I can get some information by ce=
 ph osd pool stats ecpool (id=3D113)
 
 I created a replicated pool (poupool:114) and I got a lot of message as=
- followed on osd  targeted by the ruleset 0 (5,6,7,8,9)=20
+ followed on osd  targeted by the ruleset 0 (5,6,7,8,9)
 2014-10-16 16:49:53.268083 7f1c31bb8700 20 osd.8 11942 _create_lock_pg =
 pgid 114.6d
 2014-10-16 16:49:53.268254 7f1c31bb8700  7 osd.8 11942 _create_lock_pg =
@@ -66,10 +86,10 @@ NB : How can I switch back to a normal level of log?
 
 
 -----Message d'origine-----
-De=A0: Loic Dachary [mailto:loic@dachary.org]=20
-Envoy=E9=A0: mercredi 15 octobre 2014 19:09
-=C0=A0: CHEVALIER Ghislain IMT/OLPS; ceph-devel@vger.kernel.org
-Objet=A0: Re: [Ceph-Devel] NO pg created for erasure-coded pool
+De=A0: Loic Dachary [mailto:loic@dachary.org] Envoy=E9=A0: mercredi 15 =
+octobre 2014 19:09 =C0=A0: CHEVALIER Ghislain IMT/OLPS; ceph-devel@vger=
+=2Ekernel.org Objet=A0: Re: [Ceph-Devel] NO pg created for erasure-code=
+d pool
 
 Hi,
 
@@ -101,9 +121,8 @@ On 15/10/2014 08:52, ghislain.chevalier@orange.com wrote:
 > nothing relevant in mon logs.
 >=20
 > this message in some osd logs.
-> 2014-10-15 17:03:45.303295 7fb296a21700  0 --=20
-> 10.192.134.122:6804/16878 >> 10.192.134.123:6809/21505 pipe(0x2219c80=
-=20
+> 2014-10-15 17:03:45.303295 7fb296a21700  0 --
+> 10.192.134.122:6804/16878 >> 10.192.134.123:6809/21505 pipe(0x2219c80
 > sd=3D36 :41933 s=3D2 pgs=3D626 cs=3D355 l=3D0 c=3D0x398a580).fault wi=
 th nothing to=20
 > send, going to standby
@@ -132,7 +151,7 @@ th nothing to=20
 >> followed root@p-sbceph11:~# ceph osd pool create strangepool 128 128=
 =20
 >> replicated pool 'strangepool' created root@p-sbceph11:~# ceph osd=20
->> pool set strangepool crush_ruleset 53 set pool 108 crush_ruleset to=20
+>> pool set strangepool crush_ruleset 53 set pool 108 crush_ruleset to
 >> 53 root@p-sbceph11:~# ceph osd pool get strangepool size
 >> size: 3
 >> root@p-sbceph11:~#  rados lspools | grep strangepool strangepool=20
