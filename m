@@ -1,128 +1,232 @@
-From: michaelc@cs.wisc.edu
-Subject: [PATCH 4/5] lio: use REQ_COMPARE_AND_WRITE if supported
-Date: Thu, 16 Oct 2014 00:37:14 -0500
-Message-ID: <1413437835-13778-5-git-send-email-michaelc@cs.wisc.edu>
-References: <1413437835-13778-1-git-send-email-michaelc@cs.wisc.edu>
-Return-path: <target-devel-owner@vger.kernel.org>
-In-Reply-To: <1413437835-13778-1-git-send-email-michaelc@cs.wisc.edu>
-Sender: target-devel-owner@vger.kernel.org
-To: linux-scsi@vger.kernel.org, target-devel@vger.kernel.org, ceph-devel@vger.kernel.org, axboe@kernel.dk
-List-Id: ceph-devel.vger.kernel.org
+From: Alexandre DERUMIER <aderumier@odiso.com>
+Subject: Re: 10/14/2014 Weekly Ceph Performance Meeting
+Date: Thu, 16 Oct 2014 08:25:25 +0200 (CEST)
+Message-ID: <811a14ba-31af-49d2-bd37-841ebadbca23@mailpro>
+References: <6F3FA899187F0043BA1827A69DA2F7CC020C8323@shsmsx102.ccr.corp.intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mailpro.odiso.net ([89.248.209.98]:50512 "EHLO
+	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750719AbaJPGZf convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Oct 2014 02:25:35 -0400
+In-Reply-To: <6F3FA899187F0043BA1827A69DA2F7CC020C8323@shsmsx102.ccr.corp.intel.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Xiaoxi Chen <xiaoxi.chen@intel.com>
+Cc: ceph-devel@vger.kernel.org, Mark Nelson <mark.nelson@inktank.com>
 
-From: Mike Christie <michaelc@cs.wisc.edu>
+>>We also find this before, seems it's because QEMU use single thread f=
+or IO, I tried to enable the debug log of in librbd, find that the thre=
+aded is always the same. Assuming the backend is power enough, so how >=
+>many IOs can be sent out by qemu =3D=3D how many IOPS can we get.
+>>
+>>The upper bound may varies depends on how fast QEMU can send out a re=
+quest,  I remember we have tried different CPU model and get best with =
+an very old NHM CPU(with high frequency to 2.93Ghz, take ~0.03 to send =
+>>out a request and we get 22K read IOPS bound), better than new SNB CP=
+U. Frequency do play important part since it's single thread.
 
-This has lio callout to the backing store module if it supports
-using REQ_COMPARE_AND_WRITE. The backing store would set the
-device attribute max_compare_and_write_len if it supports using
-the new request type. If it is not supported then we do the
-read/cmp/write emulation in the sbc layer like before.
+Hi, indeed qemu use a single thread per queue.
+I think it's not a problem with common storage (nfs,scsi,..) because th=
+ey use less cpu ressource than librbd, so you can reach easily > 100000=
+iops with 1thread.
 
-Signed-off-by: Mike Christie <michaelc@cs.wisc.edu>
----
- drivers/target/target_core_sbc.c       |   21 ++++++++++++++++-----
- drivers/target/target_core_spc.c       |   12 ++++++++++--
- drivers/target/target_core_transport.c |    1 +
- include/target/target_core_backend.h   |    1 +
- include/target/target_core_base.h      |    1 +
- 5 files changed, 29 insertions(+), 7 deletions(-)
 
-diff --git a/drivers/target/target_core_sbc.c b/drivers/target/target_core_sbc.c
-index ebe62af..fe0c16a 100644
---- a/drivers/target/target_core_sbc.c
-+++ b/drivers/target/target_core_sbc.c
-@@ -555,6 +555,21 @@ sbc_compare_and_write(struct se_cmd *cmd)
- 	return TCM_NO_SENSE;
- }
- 
-+static void sbc_setup_compare_and_write(struct se_cmd *cmd, struct sbc_ops *ops,
-+					u32 sectors)
-+{
-+	cmd->t_task_nolb = sectors;
-+	cmd->se_cmd_flags |= SCF_SCSI_DATA_CDB | SCF_COMPARE_AND_WRITE;
-+
-+	if (cmd->se_dev->dev_attrib.max_compare_and_write_len) {
-+		cmd->execute_cmd = ops->execute_compare_and_write;
-+	} else {
-+		cmd->execute_rw = ops->execute_rw;
-+		cmd->execute_cmd = sbc_compare_and_write;
-+		cmd->transport_complete_callback = compare_and_write_callback;
-+	}
-+}
-+
- static int
- sbc_set_prot_op_checks(u8 protect, enum target_prot_type prot_type,
- 		       bool is_write, struct se_cmd *cmd)
-@@ -842,11 +857,7 @@ sbc_parse_cdb(struct se_cmd *cmd, struct sbc_ops *ops)
- 		 */
- 		size = 2 * sbc_get_size(cmd, sectors);
- 		cmd->t_task_lba = get_unaligned_be64(&cdb[2]);
--		cmd->t_task_nolb = sectors;
--		cmd->se_cmd_flags |= SCF_SCSI_DATA_CDB | SCF_COMPARE_AND_WRITE;
--		cmd->execute_rw = ops->execute_rw;
--		cmd->execute_cmd = sbc_compare_and_write;
--		cmd->transport_complete_callback = compare_and_write_callback;
-+		sbc_setup_compare_and_write(cmd, ops, sectors);
- 		break;
- 	case READ_CAPACITY:
- 		size = READ_CAP_LEN;
-diff --git a/drivers/target/target_core_spc.c b/drivers/target/target_core_spc.c
-index 6cd7222..7db8c22 100644
---- a/drivers/target/target_core_spc.c
-+++ b/drivers/target/target_core_spc.c
-@@ -525,8 +525,16 @@ spc_emulate_evpd_b0(struct se_cmd *cmd, unsigned char *buf)
- 	/*
- 	 * Set MAXIMUM COMPARE AND WRITE LENGTH
- 	 */
--	if (dev->dev_attrib.emulate_caw)
--		buf[5] = 0x01;
-+	if (dev->dev_attrib.emulate_caw) {
-+		if (!dev->dev_attrib.max_compare_and_write_len)
-+			/*
-+			 * if backing device does not have special handling
-+			 * then sbc will support up to 1 block.
-+		 	 */
-+			buf[5] = 0x01;
-+		else
-+			buf[5] = dev->dev_attrib.max_compare_and_write_len;
-+	}
- 
- 	/*
- 	 * Set OPTIMAL TRANSFER LENGTH GRANULARITY
-diff --git a/drivers/target/target_core_transport.c b/drivers/target/target_core_transport.c
-index 9ea0d5f..e7706f9 100644
---- a/drivers/target/target_core_transport.c
-+++ b/drivers/target/target_core_transport.c
-@@ -1637,6 +1637,7 @@ void transport_generic_request_failure(struct se_cmd *cmd,
- 	case TCM_LOGICAL_BLOCK_GUARD_CHECK_FAILED:
- 	case TCM_LOGICAL_BLOCK_APP_TAG_CHECK_FAILED:
- 	case TCM_LOGICAL_BLOCK_REF_TAG_CHECK_FAILED:
-+	case TCM_MISCOMPARE_VERIFY:
- 		break;
- 	case TCM_OUT_OF_RESOURCES:
- 		sense_reason = TCM_LOGICAL_UNIT_COMMUNICATION_FAILURE;
-diff --git a/include/target/target_core_backend.h b/include/target/target_core_backend.h
-index 9adc1bc..06924b1 100644
---- a/include/target/target_core_backend.h
-+++ b/include/target/target_core_backend.h
-@@ -53,6 +53,7 @@ struct sbc_ops {
- 	sense_reason_t (*execute_write_same)(struct se_cmd *cmd);
- 	sense_reason_t (*execute_write_same_unmap)(struct se_cmd *cmd);
- 	sense_reason_t (*execute_unmap)(struct se_cmd *cmd);
-+	sense_reason_t (*execute_compare_and_write)(struct se_cmd *cmd);
- };
- 
- int	transport_subsystem_register(struct se_subsystem_api *);
-diff --git a/include/target/target_core_base.h b/include/target/target_core_base.h
-index 23c518a..bc0a26e 100644
---- a/include/target/target_core_base.h
-+++ b/include/target/target_core_base.h
-@@ -697,6 +697,7 @@ struct se_dev_attrib {
- 	u32		unmap_granularity;
- 	u32		unmap_granularity_alignment;
- 	u32		max_write_same_len;
-+	u32		max_compare_and_write_len;
- 	u32		max_bytes_per_io;
- 	struct se_device *da_dev;
- 	struct config_group da_group;
--- 
-1.7.1
+Now, the good new, virtio-scsi support multiqueue , with num_queues opt=
+ion.
+I have done bench with num_queues, and now I can finally reach 50000iop=
+s with a single qemu disk-> rbd volume  :)
+
+If you use libvirt, here the config:
+http://www.redhat.com/archives/libvir-list/2013-April/msg00021.html
+
+
+
+
+
+
+Now, about fio-rbd cpu usage, something is really strange,
+
+fio (rbd engine) on qemu host : 40000iops - 8 cores 100%
+fio (aio) inside qemu with virtio-scsi + num_queues : 50000 iops - arou=
+nd 4 cores 100%
+
+So, maybe something is bad in fio-rbd implementation ?
+
+I need to bench again to be sure about this, I'll send results in some =
+days.
+
+
+
+----- Mail original -----=20
+
+De: "Xiaoxi Chen" <xiaoxi.chen@intel.com>=20
+=C3=80: "Alexandre DERUMIER" <aderumier@odiso.com>, "Mark Nelson" <mark=
+=2Enelson@inktank.com>=20
+Cc: ceph-devel@vger.kernel.org=20
+Envoy=C3=A9: Jeudi 16 Octobre 2014 05:27:13=20
+Objet: RE: 10/14/2014 Weekly Ceph Performance Meeting=20
+
+We also find this before, seems it's because QEMU use single thread for=
+ IO, I tried to enable the debug log of in librbd, find that the thread=
+ed is always the same. Assuming the backend is power enough, so how man=
+y IOs can be sent out by qemu =3D=3D how many IOPS can we get.=20
+
+The upper bound may varies depends on how fast QEMU can send out a requ=
+est, I remember we have tried different CPU model and get best with an =
+very old NHM CPU(with high frequency to 2.93Ghz, take ~0.03 to send out=
+ a request and we get 22K read IOPS bound), better than new SNB CPU. Fr=
+equency do play important part since it's single thread.=20
+
+-----Original Message-----=20
+=46rom: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.=
+kernel.org] On Behalf Of Alexandre DERUMIER=20
+Sent: Wednesday, October 15, 2014 11:55 PM=20
+To: Mark Nelson=20
+Cc: ceph-devel@vger.kernel.org=20
+Subject: Re: 10/14/2014 Weekly Ceph Performance Meeting=20
+
+> 2) in qemu, it's impossible to reach more than around 7000iops with 1=
+ disk. (maybe is it also related to cpu or threads number).=20
+> I have also try with the new qemu iothread/dataplane feature, but it =
+doesn't help.=20
+>>If its 1 volume, does adding another volume on the same VM help?=20
+
+>>>As far I remember, yes . I'll test again to confirm.=20
+
+I have done test, It's scaling with multiple virtio disk on multiple rb=
+d volume.=20
+
+(Not sure, but maybe it's related to iodepth bug showed in this meeting=
+ in intel slides ?)=20
+
+
+----- Mail original -----=20
+
+De: "Alexandre DERUMIER" <aderumier@odiso.com>=20
+=C3=80: "Mark Nelson" <mark.nelson@inktank.com>=20
+Cc: ceph-devel@vger.kernel.org=20
+Envoy=C3=A9: Mercredi 15 Octobre 2014 16:42:04=20
+Objet: Re: 10/14/2014 Weekly Ceph Performance Meeting=20
+
+>>Sure! Please feel free to add this or other topics that are=20
+>>useful/interesting to the etherpad. Please include your name though s=
+o=20
+>>we know who's brought it up. Even if we don't get to everything it=20
+>>will provide useful topics for the subsequent weeks.=20
+
+Ok,great,I'll do it.=20
+
+>=20
+> Currently I see 2 performance problems with librbd:=20
+>=20
+> 1) The cpu usage is quite huge. (I'm cpu bound with 8cores CPU E5-260=
+3=20
+> v2 @ 1.80GHz, with 40000iops 4k read using fio-rbd)=20
+
+>>Interesting. Have you taken a look with perf or other tools to see=20
+>>where time is being spent?=20
+
+Not yet, but I can try to do it, I'll have time next week.=20
+
+
+
+>=20
+> 2) in qemu, it's impossible to reach more than around 7000iops with 1=
+ disk. (maybe is it also related to cpu or threads number).=20
+> I have also try with the new qemu iothread/dataplane feature, but it =
+doesn't help.=20
+
+>>1 disk meaning 1 OSD, or 1 disk meaning 1 volume on a VM?=20
+yes, 1 disk =3D 1 volume on VM=20
+
+>>If its 1 volume, does adding another volume on the same VM help?=20
+
+As far I remember, yes . I'll test again to confirm.=20
+
+Note that when benching with fio-rbd, I need to increase the client num=
+ber too.=20
+
+(1client - queue depth 32: +- 8000iops=20
+2clients - queue depth 32: +- 16000iops ....=20
+)=20
+So maybe it's related=20
+
+
+
+>>I'm not familiar with the new qemu options, so that would be good to=20
+>>discuss at=20
+the meeting too!=20
+
+The dataplane/iothread feature allow virtio disk to reach around 1.000.=
+000 iops vs 100.000 iops without dataplane http://www.linux-kvm.org/wik=
+i/images/1/17/Kvm-forum-2013-Effective-multithreading-in-QEMU.pdf=20
+
+Syntax to enable it:=20
+qemu -object iothread,id=3Diothread0 -device virtio-blk-pci,iothread=3D=
+iothread0,....=20
+
+
+
+Regards,=20
+
+Alexandre=20
+
+----- Mail original -----=20
+
+De: "Mark Nelson" <mark.nelson@inktank.com>=20
+=C3=80: "Alexandre DERUMIER" <aderumier@odiso.com>, "Mark Nelson" <mark=
+=2Enelson@inktank.com>=20
+Cc: ceph-devel@vger.kernel.org=20
+Envoy=C3=A9: Mercredi 15 Octobre 2014 15:26:20=20
+Objet: Re: 10/14/2014 Weekly Ceph Performance Meeting=20
+
+On 10/15/2014 01:22 AM, Alexandre DERUMIER wrote:=20
+> Hi,=20
+>=20
+> about performance, maybe could it be great to also include client sid=
+e performance ?=20
+
+Sure! Please feel free to add this or other topics that are useful/inte=
+resting to the etherpad. Please include your name though so we know who=
+'s brought it up. Even if we don't get to everything it will provide us=
+eful topics for the subsequent weeks.=20
+
+>=20
+> Currently I see 2 performance problems with librbd:=20
+>=20
+> 1) The cpu usage is quite huge. (I'm cpu bound with 8cores CPU E5-260=
+3 v2 @ 1.80GHz, with 40000iops 4k read using fio-rbd)=20
+
+Interesting. Have you taken a look with perf or other tools to see=20
+where time is being spent?=20
+
+>=20
+> 2) in qemu, it's impossible to reach more than around 7000iops with 1=
+ disk. (maybe is it also related to cpu or threads number).=20
+> I have also try with the new qemu iothread/dataplane feature, but it =
+doesn't help.=20
+
+1 disk meaning 1 OSD, or 1 disk meaning 1 volume on a VM? If its 1=20
+volume, does adding another volume on the same VM help? I'm not=20
+familiar with the new qemu options, so that would be good to discuss at=
+=20
+the meeting too!=20
+
+>=20
+>=20
+>=20
+>=20
+>=20
+--=20
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n=20
+the body of a message to majordomo@vger.kernel.org=20
+More majordomo info at http://vger.kernel.org/majordomo-info.html=20
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
