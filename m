@@ -1,163 +1,98 @@
-From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
-Subject: RE: 10/14/2014 Weekly Ceph Performance Meeting
-Date: Thu, 16 Oct 2014 06:53:05 +0000
-Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC020C8403@shsmsx102.ccr.corp.intel.com>
-References: <6F3FA899187F0043BA1827A69DA2F7CC020C8323@shsmsx102.ccr.corp.intel.com>
- <811a14ba-31af-49d2-bd37-841ebadbca23@mailpro>
+From: Florian Haas <florian@hastexo.com>
+Subject: Re: snap_trimming + backfilling is inefficient with many purged_snaps
+Date: Thu, 16 Oct 2014 11:04:51 +0200
+Message-ID: <CAPUexz9YL9auCiw5HdPA2UtQBNEJyQWMxq8VkLb_pwqyHM3ppQ@mail.gmail.com>
+References: <CAPUexz-ff+fTmU0J0TrJ80p+6334BBPvM7EWW5=eGa8uEomRew@mail.gmail.com>
+ <07f3373f39ff2f738d76bc9f23f07297@webmail.vanderster.com> <CAPUexz9P264L4fj4eSdb3KbnTS+ewvE7WdKCw5ijjEO_u8URYA@mail.gmail.com>
+ <alpine.DEB.2.00.1409181446110.19460@cobra.newdream.net> <CAPUexz-HXn=x_b=CJev46jWFsSrUpXc7UO7kzWcRe4Yrm6VL3g@mail.gmail.com>
+ <alpine.DEB.2.00.1409181526260.19460@cobra.newdream.net> <CAPUexz-GYF4R95k8QzvdGDKtzez0Qm6SnJt1=4YJEGB8ty7Ggg@mail.gmail.com>
+ <1878E4A4-2363-4717-ABEC-B587B0337D6B@cern.ch> <CABZ+qqks_qSbgG4QhkaH8A1zTP=o+fR4ptHPbtA9-MxrM8sJ5w@mail.gmail.com>
+ <alpine.DEB.2.00.1409190819070.18018@cobra.newdream.net> <63ccef299522995cc0704e349ef86503@webmail.vanderster.com>
+ <CAME-gARt1NZmEFj6SCpxkfxnibXyR7+AdYKO4YNkQc_n+XJuXQ@mail.gmail.com>
+ <CAPUexz-L=3O0qCkLWiW2UxUfJ0ryOLfO2w7A=kacOLoFui7ceA@mail.gmail.com>
+ <7305be37366a5eadf5a3114efe1b0383@webmail.vanderster.com> <CAPUexz8GhXyNPmxkF2DDwdGppndVOWHnmX9YjO=E-HgDejmXEQ@mail.gmail.com>
+ <alpine.DEB.2.00.1409211246120.27396@cobra.newdream.net> <CAPUexz_cV+MPfS9YXqDfcoh_TvKtSwxj-mQLvBstez7x3wHABw@mail.gmail.com>
+ <CAPUexz-TnRRhDTG7+h4-etDkT0+ep-oea6-hEyLsobd9Dv-KNQ@mail.gmail.com> <CAPYLRzi6Zd7QDnrQ4SyC+iM0XALQ-XcO+FPeEkTzknoC87zX1A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga03.intel.com ([134.134.136.65]:11554 "EHLO mga03.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751317AbaJPGxL (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 16 Oct 2014 02:53:11 -0400
-In-Reply-To: <811a14ba-31af-49d2-bd37-841ebadbca23@mailpro>
-Content-Language: en-US
+Received: from mail-qc0-f180.google.com ([209.85.216.180]:40528 "EHLO
+	mail-qc0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751603AbaJPJFN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Oct 2014 05:05:13 -0400
+Received: by mail-qc0-f180.google.com with SMTP id x3so2342394qcv.39
+        for <ceph-devel@vger.kernel.org>; Thu, 16 Oct 2014 02:05:12 -0700 (PDT)
+In-Reply-To: <CAPYLRzi6Zd7QDnrQ4SyC+iM0XALQ-XcO+FPeEkTzknoC87zX1A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre DERUMIER <aderumier@odiso.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Mark Nelson <mark.nelson@inktank.com>
+To: Gregory Farnum <greg@inktank.com>
+Cc: Sage Weil <sweil@redhat.com>, Dan van der Ster <daniel.vanderster@cern.ch>, ceph-devel <ceph-devel@vger.kernel.org>
 
-PkhpLCBpbmRlZWQgcWVtdSB1c2UgYSBzaW5nbGUgdGhyZWFkIHBlciBxdWV1ZS4NCj5JIHRoaW5r
-IGl0J3Mgbm90IGEgcHJvYmxlbSB3aXRoIGNvbW1vbiBzdG9yYWdlIChuZnMsc2NzaSwuLikgYmVj
-YXVzZSB0aGV5IHVzZSBsZXNzIGNwdSByZXNzb3VyY2UgdGhhbiBsaWJyYmQsIHNvIHlvdSBjYW4g
-cmVhY2ggDQo+ZWFzaWx5ID4gMTAwMDAwaW9wcyB3aXRoIDF0aHJlYWQuDQoNCkkgdGhpbmsgaXQn
-cyBhIGNvbW1vbiBwcm9ibGVtIHNoYXJlZCBieSBhbGwgc3RvcmFnZSBiYWNrZW5kKG5mcyxzY3Np
-KSwgYnV0IENlcGggdGFrZSBsb25nZXIgdGltZSB0byBzZW50IG91dCBhbiBJTygzMHVzKSwgd2hp
-bGUgTkZTIGFuZCBzY3NpIGlzIHJlYWxseSBzaW1wbGUobm8gY3J1c2gsIG5vIHN0cmlwcGluZywg
-ZXRjKSB0aGF0IG1heSBvbmx5IHRha2UgM3VzIHRvIHNlbmQgb3V0IGFuIElPLCBzbyB0aGUgdXBw
-ZXIgYm91bmQgaXMgMTBYIHRoYW4gY2VwaC4NCg0KPk5vdywgdGhlIGdvb2QgbmV3LCB2aXJ0aW8t
-c2NzaSBzdXBwb3J0IG11bHRpcXVldWUgLCB3aXRoIG51bV9xdWV1ZXMgb3B0aW9uLg0KPkkgaGF2
-ZSBkb25lIGJlbmNoIHdpdGggbnVtX3F1ZXVlcywgYW5kIG5vdyBJIGNhbiBmaW5hbGx5IHJlYWNo
-IDUwMDAwaW9wcyB3aXRoIGEgc2luZ2xlIHFlbXUgZGlzay0+IHJiZCB2b2x1bWUgIDopDQoNCj5J
-ZiB5b3UgdXNlIGxpYnZpcnQsIGhlcmUgdGhlIGNvbmZpZzoNCj5odHRwOi8vd3d3LnJlZGhhdC5j
-b20vYXJjaGl2ZXMvbGlidmlyLWxpc3QvMjAxMy1BcHJpbC9tc2cwMDAyMS5odG1sDQoNClRoYW5r
-cywgdGhpcyBpcyByZWFsbHkgdmVyeSBoZWxwZnVsIGZvciB1cywgd2Ugd2lsbCB0cnkgaXQgb3V0
-LCB0aGFuayB5b3UNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IEFsZXhhbmRy
-ZSBERVJVTUlFUiBbbWFpbHRvOmFkZXJ1bWllckBvZGlzby5jb21dIA0KU2VudDogVGh1cnNkYXks
-IE9jdG9iZXIgMTYsIDIwMTQgMjoyNSBQTQ0KVG86IENoZW4sIFhpYW94aQ0KQ2M6IGNlcGgtZGV2
-ZWxAdmdlci5rZXJuZWwub3JnOyBNYXJrIE5lbHNvbg0KU3ViamVjdDogUmU6IDEwLzE0LzIwMTQg
-V2Vla2x5IENlcGggUGVyZm9ybWFuY2UgTWVldGluZw0KDQo+PldlIGFsc28gZmluZCB0aGlzIGJl
-Zm9yZSwgc2VlbXMgaXQncyBiZWNhdXNlIFFFTVUgdXNlIHNpbmdsZSB0aHJlYWQgZm9yIElPLCBJ
-IHRyaWVkIHRvIGVuYWJsZSB0aGUgZGVidWcgbG9nIG9mIGluIGxpYnJiZCwgZmluZCB0aGF0IHRo
-ZSB0aHJlYWRlZCBpcyBhbHdheXMgdGhlIHNhbWUuIEFzc3VtaW5nIHRoZSBiYWNrZW5kIGlzIHBv
-d2VyIGVub3VnaCwgc28gaG93ID4+bWFueSBJT3MgY2FuIGJlIHNlbnQgb3V0IGJ5IHFlbXUgPT0g
-aG93IG1hbnkgSU9QUyBjYW4gd2UgZ2V0Lg0KPj4NCj4+VGhlIHVwcGVyIGJvdW5kIG1heSB2YXJp
-ZXMgZGVwZW5kcyBvbiBob3cgZmFzdCBRRU1VIGNhbiBzZW5kIG91dCBhIHJlcXVlc3QsICBJIHJl
-bWVtYmVyIHdlIGhhdmUgdHJpZWQgZGlmZmVyZW50IENQVSBtb2RlbCBhbmQgZ2V0IGJlc3Qgd2l0
-aCBhbiB2ZXJ5IG9sZCBOSE0gQ1BVKHdpdGggaGlnaCBmcmVxdWVuY3kgdG8gMi45M0doeiwgdGFr
-ZSB+MC4wMyB0byBzZW5kID4+b3V0IGEgcmVxdWVzdCBhbmQgd2UgZ2V0IDIySyByZWFkIElPUFMg
-Ym91bmQpLCBiZXR0ZXIgdGhhbiBuZXcgU05CIENQVS4gRnJlcXVlbmN5IGRvIHBsYXkgaW1wb3J0
-YW50IHBhcnQgc2luY2UgaXQncyBzaW5nbGUgdGhyZWFkLg0KDQpIaSwgaW5kZWVkIHFlbXUgdXNl
-IGEgc2luZ2xlIHRocmVhZCBwZXIgcXVldWUuDQpJIHRoaW5rIGl0J3Mgbm90IGEgcHJvYmxlbSB3
-aXRoIGNvbW1vbiBzdG9yYWdlIChuZnMsc2NzaSwuLikgYmVjYXVzZSB0aGV5IHVzZSBsZXNzIGNw
-dSByZXNzb3VyY2UgdGhhbiBsaWJyYmQsIHNvIHlvdSBjYW4gcmVhY2ggZWFzaWx5ID4gMTAwMDAw
-aW9wcyB3aXRoIDF0aHJlYWQuDQoNCg0KTm93LCB0aGUgZ29vZCBuZXcsIHZpcnRpby1zY3NpIHN1
-cHBvcnQgbXVsdGlxdWV1ZSAsIHdpdGggbnVtX3F1ZXVlcyBvcHRpb24uDQpJIGhhdmUgZG9uZSBi
-ZW5jaCB3aXRoIG51bV9xdWV1ZXMsIGFuZCBub3cgSSBjYW4gZmluYWxseSByZWFjaCA1MDAwMGlv
-cHMgd2l0aCBhIHNpbmdsZSBxZW11IGRpc2stPiByYmQgdm9sdW1lICA6KQ0KDQpJZiB5b3UgdXNl
-IGxpYnZpcnQsIGhlcmUgdGhlIGNvbmZpZzoNCmh0dHA6Ly93d3cucmVkaGF0LmNvbS9hcmNoaXZl
-cy9saWJ2aXItbGlzdC8yMDEzLUFwcmlsL21zZzAwMDIxLmh0bWwNCg0KDQoNCg0KDQoNCk5vdywg
-YWJvdXQgZmlvLXJiZCBjcHUgdXNhZ2UsIHNvbWV0aGluZyBpcyByZWFsbHkgc3RyYW5nZSwNCg0K
-ZmlvIChyYmQgZW5naW5lKSBvbiBxZW11IGhvc3QgOiA0MDAwMGlvcHMgLSA4IGNvcmVzIDEwMCUg
-ZmlvIChhaW8pIGluc2lkZSBxZW11IHdpdGggdmlydGlvLXNjc2kgKyBudW1fcXVldWVzIDogNTAw
-MDAgaW9wcyAtIGFyb3VuZCA0IGNvcmVzIDEwMCUNCg0KU28sIG1heWJlIHNvbWV0aGluZyBpcyBi
-YWQgaW4gZmlvLXJiZCBpbXBsZW1lbnRhdGlvbiA/DQoNCkkgbmVlZCB0byBiZW5jaCBhZ2FpbiB0
-byBiZSBzdXJlIGFib3V0IHRoaXMsIEknbGwgc2VuZCByZXN1bHRzIGluIHNvbWUgZGF5cy4NCg0K
-DQoNCi0tLS0tIE1haWwgb3JpZ2luYWwgLS0tLS0gDQoNCkRlOiAiWGlhb3hpIENoZW4iIDx4aWFv
-eGkuY2hlbkBpbnRlbC5jb20+DQrDgDogIkFsZXhhbmRyZSBERVJVTUlFUiIgPGFkZXJ1bWllckBv
-ZGlzby5jb20+LCAiTWFyayBOZWxzb24iIDxtYXJrLm5lbHNvbkBpbmt0YW5rLmNvbT4NCkNjOiBj
-ZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KRW52b3nDqTogSmV1ZGkgMTYgT2N0b2JyZSAyMDE0
-IDA1OjI3OjEzDQpPYmpldDogUkU6IDEwLzE0LzIwMTQgV2Vla2x5IENlcGggUGVyZm9ybWFuY2Ug
-TWVldGluZyANCg0KV2UgYWxzbyBmaW5kIHRoaXMgYmVmb3JlLCBzZWVtcyBpdCdzIGJlY2F1c2Ug
-UUVNVSB1c2Ugc2luZ2xlIHRocmVhZCBmb3IgSU8sIEkgdHJpZWQgdG8gZW5hYmxlIHRoZSBkZWJ1
-ZyBsb2cgb2YgaW4gbGlicmJkLCBmaW5kIHRoYXQgdGhlIHRocmVhZGVkIGlzIGFsd2F5cyB0aGUg
-c2FtZS4gQXNzdW1pbmcgdGhlIGJhY2tlbmQgaXMgcG93ZXIgZW5vdWdoLCBzbyBob3cgbWFueSBJ
-T3MgY2FuIGJlIHNlbnQgb3V0IGJ5IHFlbXUgPT0gaG93IG1hbnkgSU9QUyBjYW4gd2UgZ2V0LiAN
-Cg0KVGhlIHVwcGVyIGJvdW5kIG1heSB2YXJpZXMgZGVwZW5kcyBvbiBob3cgZmFzdCBRRU1VIGNh
-biBzZW5kIG91dCBhIHJlcXVlc3QsIEkgcmVtZW1iZXIgd2UgaGF2ZSB0cmllZCBkaWZmZXJlbnQg
-Q1BVIG1vZGVsIGFuZCBnZXQgYmVzdCB3aXRoIGFuIHZlcnkgb2xkIE5ITSBDUFUod2l0aCBoaWdo
-IGZyZXF1ZW5jeSB0byAyLjkzR2h6LCB0YWtlIH4wLjAzIHRvIHNlbmQgb3V0IGEgcmVxdWVzdCBh
-bmQgd2UgZ2V0IDIySyByZWFkIElPUFMgYm91bmQpLCBiZXR0ZXIgdGhhbiBuZXcgU05CIENQVS4g
-RnJlcXVlbmN5IGRvIHBsYXkgaW1wb3J0YW50IHBhcnQgc2luY2UgaXQncyBzaW5nbGUgdGhyZWFk
-LiANCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IGNlcGgtZGV2ZWwtb3duZXJA
-dmdlci5rZXJuZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmdd
-IE9uIEJlaGFsZiBPZiBBbGV4YW5kcmUgREVSVU1JRVINClNlbnQ6IFdlZG5lc2RheSwgT2N0b2Jl
-ciAxNSwgMjAxNCAxMTo1NSBQTQ0KVG86IE1hcmsgTmVsc29uDQpDYzogY2VwaC1kZXZlbEB2Z2Vy
-Lmtlcm5lbC5vcmcNClN1YmplY3Q6IFJlOiAxMC8xNC8yMDE0IFdlZWtseSBDZXBoIFBlcmZvcm1h
-bmNlIE1lZXRpbmcgDQoNCj4gMikgaW4gcWVtdSwgaXQncyBpbXBvc3NpYmxlIHRvIHJlYWNoIG1v
-cmUgdGhhbiBhcm91bmQgNzAwMGlvcHMgd2l0aCAxIGRpc2suIChtYXliZSBpcyBpdCBhbHNvIHJl
-bGF0ZWQgdG8gY3B1IG9yIHRocmVhZHMgbnVtYmVyKS4gDQo+IEkgaGF2ZSBhbHNvIHRyeSB3aXRo
-IHRoZSBuZXcgcWVtdSBpb3RocmVhZC9kYXRhcGxhbmUgZmVhdHVyZSwgYnV0IGl0IGRvZXNuJ3Qg
-aGVscC4gDQo+PklmIGl0cyAxIHZvbHVtZSwgZG9lcyBhZGRpbmcgYW5vdGhlciB2b2x1bWUgb24g
-dGhlIHNhbWUgVk0gaGVscD8gDQoNCj4+PkFzIGZhciBJIHJlbWVtYmVyLCB5ZXMgLiBJJ2xsIHRl
-c3QgYWdhaW4gdG8gY29uZmlybS4gDQoNCkkgaGF2ZSBkb25lIHRlc3QsIEl0J3Mgc2NhbGluZyB3
-aXRoIG11bHRpcGxlIHZpcnRpbyBkaXNrIG9uIG11bHRpcGxlIHJiZCB2b2x1bWUuIA0KDQooTm90
-IHN1cmUsIGJ1dCBtYXliZSBpdCdzIHJlbGF0ZWQgdG8gaW9kZXB0aCBidWcgc2hvd2VkIGluIHRo
-aXMgbWVldGluZyBpbiBpbnRlbCBzbGlkZXMgPykgDQoNCg0KLS0tLS0gTWFpbCBvcmlnaW5hbCAt
-LS0tLSANCg0KRGU6ICJBbGV4YW5kcmUgREVSVU1JRVIiIDxhZGVydW1pZXJAb2Rpc28uY29tPg0K
-w4A6ICJNYXJrIE5lbHNvbiIgPG1hcmsubmVsc29uQGlua3RhbmsuY29tPg0KQ2M6IGNlcGgtZGV2
-ZWxAdmdlci5rZXJuZWwub3JnDQpFbnZvecOpOiBNZXJjcmVkaSAxNSBPY3RvYnJlIDIwMTQgMTY6
-NDI6MDQNCk9iamV0OiBSZTogMTAvMTQvMjAxNCBXZWVrbHkgQ2VwaCBQZXJmb3JtYW5jZSBNZWV0
-aW5nIA0KDQo+PlN1cmUhIFBsZWFzZSBmZWVsIGZyZWUgdG8gYWRkIHRoaXMgb3Igb3RoZXIgdG9w
-aWNzIHRoYXQgYXJlIA0KPj51c2VmdWwvaW50ZXJlc3RpbmcgdG8gdGhlIGV0aGVycGFkLiBQbGVh
-c2UgaW5jbHVkZSB5b3VyIG5hbWUgdGhvdWdoIHNvIA0KPj53ZSBrbm93IHdobydzIGJyb3VnaHQg
-aXQgdXAuIEV2ZW4gaWYgd2UgZG9uJ3QgZ2V0IHRvIGV2ZXJ5dGhpbmcgaXQgDQo+PndpbGwgcHJv
-dmlkZSB1c2VmdWwgdG9waWNzIGZvciB0aGUgc3Vic2VxdWVudCB3ZWVrcy4NCg0KT2ssZ3JlYXQs
-SSdsbCBkbyBpdC4gDQoNCj4gDQo+IEN1cnJlbnRseSBJIHNlZSAyIHBlcmZvcm1hbmNlIHByb2Js
-ZW1zIHdpdGggbGlicmJkOiANCj4gDQo+IDEpIFRoZSBjcHUgdXNhZ2UgaXMgcXVpdGUgaHVnZS4g
-KEknbSBjcHUgYm91bmQgd2l0aCA4Y29yZXMgQ1BVIEU1LTI2MDMNCj4gdjIgQCAxLjgwR0h6LCB3
-aXRoIDQwMDAwaW9wcyA0ayByZWFkIHVzaW5nIGZpby1yYmQpDQoNCj4+SW50ZXJlc3RpbmcuIEhh
-dmUgeW91IHRha2VuIGEgbG9vayB3aXRoIHBlcmYgb3Igb3RoZXIgdG9vbHMgdG8gc2VlIA0KPj53
-aGVyZSB0aW1lIGlzIGJlaW5nIHNwZW50Pw0KDQpOb3QgeWV0LCBidXQgSSBjYW4gdHJ5IHRvIGRv
-IGl0LCBJJ2xsIGhhdmUgdGltZSBuZXh0IHdlZWsuIA0KDQoNCg0KPiANCj4gMikgaW4gcWVtdSwg
-aXQncyBpbXBvc3NpYmxlIHRvIHJlYWNoIG1vcmUgdGhhbiBhcm91bmQgNzAwMGlvcHMgd2l0aCAx
-IGRpc2suIChtYXliZSBpcyBpdCBhbHNvIHJlbGF0ZWQgdG8gY3B1IG9yIHRocmVhZHMgbnVtYmVy
-KS4gDQo+IEkgaGF2ZSBhbHNvIHRyeSB3aXRoIHRoZSBuZXcgcWVtdSBpb3RocmVhZC9kYXRhcGxh
-bmUgZmVhdHVyZSwgYnV0IGl0IGRvZXNuJ3QgaGVscC4gDQoNCj4+MSBkaXNrIG1lYW5pbmcgMSBP
-U0QsIG9yIDEgZGlzayBtZWFuaW5nIDEgdm9sdW1lIG9uIGEgVk0/IA0KeWVzLCAxIGRpc2sgPSAx
-IHZvbHVtZSBvbiBWTSANCg0KPj5JZiBpdHMgMSB2b2x1bWUsIGRvZXMgYWRkaW5nIGFub3RoZXIg
-dm9sdW1lIG9uIHRoZSBzYW1lIFZNIGhlbHA/IA0KDQpBcyBmYXIgSSByZW1lbWJlciwgeWVzIC4g
-SSdsbCB0ZXN0IGFnYWluIHRvIGNvbmZpcm0uIA0KDQpOb3RlIHRoYXQgd2hlbiBiZW5jaGluZyB3
-aXRoIGZpby1yYmQsIEkgbmVlZCB0byBpbmNyZWFzZSB0aGUgY2xpZW50IG51bWJlciB0b28uIA0K
-DQooMWNsaWVudCAtIHF1ZXVlIGRlcHRoIDMyOiArLSA4MDAwaW9wcw0KMmNsaWVudHMgLSBxdWV1
-ZSBkZXB0aCAzMjogKy0gMTYwMDBpb3BzIC4uLi4gDQopDQpTbyBtYXliZSBpdCdzIHJlbGF0ZWQg
-DQoNCg0KDQo+PkknbSBub3QgZmFtaWxpYXIgd2l0aCB0aGUgbmV3IHFlbXUgb3B0aW9ucywgc28g
-dGhhdCB3b3VsZCBiZSBnb29kIHRvIA0KPj5kaXNjdXNzIGF0DQp0aGUgbWVldGluZyB0b28hIA0K
-DQpUaGUgZGF0YXBsYW5lL2lvdGhyZWFkIGZlYXR1cmUgYWxsb3cgdmlydGlvIGRpc2sgdG8gcmVh
-Y2ggYXJvdW5kIDEuMDAwLjAwMCBpb3BzIHZzIDEwMC4wMDAgaW9wcyB3aXRob3V0IGRhdGFwbGFu
-ZSBodHRwOi8vd3d3LmxpbnV4LWt2bS5vcmcvd2lraS9pbWFnZXMvMS8xNy9Ldm0tZm9ydW0tMjAx
-My1FZmZlY3RpdmUtbXVsdGl0aHJlYWRpbmctaW4tUUVNVS5wZGYgDQoNClN5bnRheCB0byBlbmFi
-bGUgaXQ6IA0KcWVtdSAtb2JqZWN0IGlvdGhyZWFkLGlkPWlvdGhyZWFkMCAtZGV2aWNlIHZpcnRp
-by1ibGstcGNpLGlvdGhyZWFkPWlvdGhyZWFkMCwuLi4uIA0KDQoNCg0KUmVnYXJkcywgDQoNCkFs
-ZXhhbmRyZSANCg0KLS0tLS0gTWFpbCBvcmlnaW5hbCAtLS0tLSANCg0KRGU6ICJNYXJrIE5lbHNv
-biIgPG1hcmsubmVsc29uQGlua3RhbmsuY29tPiANCsOAOiAiQWxleGFuZHJlIERFUlVNSUVSIiA8
-YWRlcnVtaWVyQG9kaXNvLmNvbT4sICJNYXJrIE5lbHNvbiIgPG1hcmsubmVsc29uQGlua3Rhbmsu
-Y29tPiANCkNjOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZyANCkVudm95w6k6IE1lcmNyZWRp
-IDE1IE9jdG9icmUgMjAxNCAxNToyNjoyMCANCk9iamV0OiBSZTogMTAvMTQvMjAxNCBXZWVrbHkg
-Q2VwaCBQZXJmb3JtYW5jZSBNZWV0aW5nIA0KDQpPbiAxMC8xNS8yMDE0IDAxOjIyIEFNLCBBbGV4
-YW5kcmUgREVSVU1JRVIgd3JvdGU6IA0KPiBIaSwgDQo+IA0KPiBhYm91dCBwZXJmb3JtYW5jZSwg
-bWF5YmUgY291bGQgaXQgYmUgZ3JlYXQgdG8gYWxzbyBpbmNsdWRlIGNsaWVudCBzaWRlIHBlcmZv
-cm1hbmNlID8gDQoNClN1cmUhIFBsZWFzZSBmZWVsIGZyZWUgdG8gYWRkIHRoaXMgb3Igb3RoZXIg
-dG9waWNzIHRoYXQgYXJlIHVzZWZ1bC9pbnRlcmVzdGluZyB0byB0aGUgZXRoZXJwYWQuIFBsZWFz
-ZSBpbmNsdWRlIHlvdXIgbmFtZSB0aG91Z2ggc28gd2Uga25vdyB3aG8ncyBicm91Z2h0IGl0IHVw
-LiBFdmVuIGlmIHdlIGRvbid0IGdldCB0byBldmVyeXRoaW5nIGl0IHdpbGwgcHJvdmlkZSB1c2Vm
-dWwgdG9waWNzIGZvciB0aGUgc3Vic2VxdWVudCB3ZWVrcy4gDQoNCj4gDQo+IEN1cnJlbnRseSBJ
-IHNlZSAyIHBlcmZvcm1hbmNlIHByb2JsZW1zIHdpdGggbGlicmJkOiANCj4gDQo+IDEpIFRoZSBj
-cHUgdXNhZ2UgaXMgcXVpdGUgaHVnZS4gKEknbSBjcHUgYm91bmQgd2l0aCA4Y29yZXMgQ1BVIEU1
-LTI2MDMgdjIgQCAxLjgwR0h6LCB3aXRoIDQwMDAwaW9wcyA0ayByZWFkIHVzaW5nIGZpby1yYmQp
-IA0KDQpJbnRlcmVzdGluZy4gSGF2ZSB5b3UgdGFrZW4gYSBsb29rIHdpdGggcGVyZiBvciBvdGhl
-ciB0b29scyB0byBzZWUgDQp3aGVyZSB0aW1lIGlzIGJlaW5nIHNwZW50PyANCg0KPiANCj4gMikg
-aW4gcWVtdSwgaXQncyBpbXBvc3NpYmxlIHRvIHJlYWNoIG1vcmUgdGhhbiBhcm91bmQgNzAwMGlv
-cHMgd2l0aCAxIGRpc2suIChtYXliZSBpcyBpdCBhbHNvIHJlbGF0ZWQgdG8gY3B1IG9yIHRocmVh
-ZHMgbnVtYmVyKS4gDQo+IEkgaGF2ZSBhbHNvIHRyeSB3aXRoIHRoZSBuZXcgcWVtdSBpb3RocmVh
-ZC9kYXRhcGxhbmUgZmVhdHVyZSwgYnV0IGl0IGRvZXNuJ3QgaGVscC4gDQoNCjEgZGlzayBtZWFu
-aW5nIDEgT1NELCBvciAxIGRpc2sgbWVhbmluZyAxIHZvbHVtZSBvbiBhIFZNPyBJZiBpdHMgMSAN
-CnZvbHVtZSwgZG9lcyBhZGRpbmcgYW5vdGhlciB2b2x1bWUgb24gdGhlIHNhbWUgVk0gaGVscD8g
-SSdtIG5vdCANCmZhbWlsaWFyIHdpdGggdGhlIG5ldyBxZW11IG9wdGlvbnMsIHNvIHRoYXQgd291
-bGQgYmUgZ29vZCB0byBkaXNjdXNzIGF0IA0KdGhlIG1lZXRpbmcgdG9vISANCg0KPiANCj4gDQo+
-IA0KPiANCj4gDQotLSANClRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBs
-aW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbiANCnRoZSBib2R5IG9mIGEgbWVzc2FnZSB0
-byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIA0KTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCBodHRw
-Oi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwgDQo=
+Hi Greg,
+
+sorry, this somehow got stuck in my drafts folder.
+
+On Tue, Sep 23, 2014 at 10:00 PM, Gregory Farnum <greg@inktank.com> wrote:
+> On Tue, Sep 23, 2014 at 6:20 AM, Florian Haas <florian@hastexo.com> wrote:
+>> On Mon, Sep 22, 2014 at 7:06 PM, Florian Haas <florian@hastexo.com> wrote:
+>>> On Sun, Sep 21, 2014 at 9:52 PM, Sage Weil <sweil@redhat.com> wrote:
+>>>> On Sun, 21 Sep 2014, Florian Haas wrote:
+>>>>> So yes, I think your patch absolutely still has merit, as would any
+>>>>> means of reducing the number of snapshots an OSD will trim in one go.
+>>>>> As it is, the situation looks really really bad, specifically
+>>>>> considering that RBD and RADOS are meant to be super rock solid, as
+>>>>> opposed to say CephFS which is in an experimental state. And contrary
+>>>>> to CephFS snapshots, I can't recall any documentation saying that RBD
+>>>>> snapshots will break your system.
+>>>>
+>>>> Yeah, it sounds like a separate issue, and no, the limit is not
+>>>> documented because it's definitely not the intended behavior. :)
+>>>>
+>>>> ...and I see you already have a log attached to #9503.  Will take a look.
+>>>
+>>> I've already updated that issue in Redmine, but for the list archives
+>>> I should also add this here: Dan's patch for #9503, together with
+>>> Sage's for #9487, makes the problem go away in an instant. I've
+>>> already pointed out that I owe Dan dinner, and Sage, well I already
+>>> owe Sage pretty much lifelong full board. :)
+>>
+>> Looks like I was bit too eager: while the cluster is behaving nicely
+>> with these patches while nothing happens to any OSDs, it does flag PGs
+>> as incomplete when an OSD goes down. Once the mon osd down out
+>> interval expires things seem to recover/backfill normally, but it's
+>> still disturbing to see this in the interim.
+>>
+>> I've updated http://tracker.ceph.com/issues/9503 with a pg query from
+>> one of the affected PGs, within the mon osd down out interval, while
+>> it was marked incomplete.
+>>
+>> Dan or Sage, any ideas as to what might be causing this?
+>
+> That *looks* like it's just because the pool has both size and
+> min_size set to 2?
+
+Correct. But the documentation did not reflect that this is a
+perfectly expected side effect of having min_size > 1.
+
+pg-states.rst says:
+
+*Incomplete*
+  Ceph detects that a placement group is missing a necessary period of history
+  from its log.  If you see this state, report a bug, and try to start any
+  failed OSDs that may contain the needed information.
+
+So if min_size > 1 and replicas < min_size, then the incomplete state
+is not a bug but a perfectly expected occurrence, correct?
+
+It's still a bit weird in that the PG seems to behave differently
+depending on min_size. If min_size == 1 (default), then a PG with no
+remaining replicas is stale, unless a replica failed first and the
+primary was written to, after which it also failed, and the replica
+then comes up and can't go primary because it now has outdated data,
+in which case the PG goes "down". It never goes "incomplete".
+
+So is the documentation wrong, or is there something fishy with the
+reported state of the PGs?
+
+Cheers,
+Florian
