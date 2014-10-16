@@ -1,54 +1,78 @@
-From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: Re: [PATCH 1/1] libceph: use memalloc flags for net IO
-Date: Thu, 16 Oct 2014 14:10:15 +0400
-Message-ID: <CALFYKtBY7C15+Z_9ZeTUBivM9_O+myAUgvBSBAST105hNpPorg@mail.gmail.com>
-References: <1413442219-28024-1-git-send-email-michaelc@cs.wisc.edu>
+From: Douglas Gilbert <dgilbert@interlog.com>
+Subject: Re: [PATCH 0/5] block/scsi/lio support for COMPARE_AND_WRITE
+Date: Thu, 16 Oct 2014 12:39:24 +0200
+Message-ID: <543FA05C.6060200@interlog.com>
+References: <1413437835-13778-1-git-send-email-michaelc@cs.wisc.edu>
+Reply-To: dgilbert@interlog.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f171.google.com ([209.85.216.171]:64070 "EHLO
-	mail-qc0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751398AbaJPKKQ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Oct 2014 06:10:16 -0400
-Received: by mail-qc0-f171.google.com with SMTP id i17so2450789qcy.2
-        for <ceph-devel@vger.kernel.org>; Thu, 16 Oct 2014 03:10:15 -0700 (PDT)
-In-Reply-To: <1413442219-28024-1-git-send-email-michaelc@cs.wisc.edu>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: michaelc@cs.wisc.edu
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <target-devel-owner@vger.kernel.org>
+In-Reply-To: <1413437835-13778-1-git-send-email-michaelc@cs.wisc.edu>
+Sender: target-devel-owner@vger.kernel.org
+To: michaelc@cs.wisc.edu, linux-scsi@vger.kernel.org, target-devel@vger.kernel.org, ceph-devel@vger.kernel.org, axboe@kernel.dk
+List-Id: ceph-devel.vger.kernel.org
 
-On Thu, Oct 16, 2014 at 10:50 AM,  <michaelc@cs.wisc.edu> wrote:
-> From: Mike Christie <michaelc@cs.wisc.edu>
+On 14-10-16 07:37 AM, michaelc@cs.wisc.edu wrote:
+> The following patches implement the SCSI command COMPARE_AND_WRITE as a new
+> bio/request type REQ_CMP_AND_WRITE. COMPARE_AND_WRITE is defined in the
+> SCSI SBC (SCSI block command) specs as:
 >
-> This patch has ceph's lib code use the memalloc flags.
+> The COMPARE AND WRITE command requests that the device server perform the
+> following as an uninterrupted series of actions:
 >
-> If the VM layer needs to write data out to free up memory to handle new
-> allocation requests, the block layer must be able to make forward progress.
-> To handle that requirement we use structs like mempools to reserve memory for
-> objects like bios and requests.
+> 1) perform the following operations:
+>          A) read the specified logical blocks; and
+>          B) transfer the specified number of logical blocks from the Data-Out
+>          Buffer (i.e., the verify instance of the data is transferred from the
+>          Data-Out Buffer);
 >
-> The problem is when we send/receive block layer requests over the network
-> layer, net skb allocations can fail and the system can lock up.
-> To solve this, the memalloc related flags were added. NBD, iSCSI
-> and NFS uses these flags to tell the network/vm layer that it should
-> use memory reserves to fullfill allcation requests for structs like
-> skbs.
-
-Applied with my Reviewed-by.
-
+> 2) compare the data read from the specified logical blocks with the verify
+> instance of the data; and
+> 3) If the compared data matches, then perform the following operations:
+>          1) transfer the specified number of logical blocks from the Data-Out
+>          Buffer (i.e., the write instance of the data transferred from the
+>          Data-Out Buffer); and
+>          2) write those logical blocks.
 >
-> I am running ceph in a bunch of VMs in my laptop, so this patch was
-> not tested very harshly. The patch was made over Linus's tree. I tried
-> to make it over the ceph-client tree but noticed it was very old (3.3
-> kernel or something).
+> The most command use of this command today is in VMware ESX where it is used
+> for locking. See
+> http://blogs.vmware.com/vsphere/2012/05/vmfs-locking-uncovered.html
+> [in ESX is it is called ATS (atomic test and set)] for more VMware info.
+> Linux fits into this use, because its SCSI target layer (LIO) is commonly
+> used as storage for ESX VMs.
+>
+> Currently, to support this command in LIO we emulate it by taking a lock,
+> doing a read, comparing it, then doing a write. The problem this patchset
+> tries to solve is that in many cases it is more efficient to pass the one
+> COMPARE_AND_REQUEST request directly to the device where it might have
+> optimized locking and also will require fewer requests to/from the target
+> and backing storage device.
+>
+> I am also bugging the ceph-devel list, because I am working on LIO + ceph
+> support. I am interested in using ceph's rbd device for the backing
+> storage for LIO, and I was thinking this request could be implemented similar
+> to how REQ_DISCARD (unmap/trim) is going to be, and I wanted to get some early
+> feedback. I know the scsi layer better, so I have only added support in sd in
+> this patchset.
+>
+> The following patches were made over the target-pending for-next branch but
+> also apply to Linus's tree.
 
-I'm guessing you tried Sage's k.org tree.  We do everything on github
-(testing branch), k.org tree is used for pull requests only so master
-is not updated.
+As I found when I implemented this command in sg3_utils,
+my library's support for handling and reporting the
+MISCOMPARE sense key needed to be strengthened. [A sense
+buffer with a MISCOMPARE sense key is what results when
+the compare in step 2) is unequal.]
 
-https://github.com/ceph/ceph-client
+Since it was relatively rare prior to VMWare's use of
+the COMPARE AND WRITE command, MISCOMPARE is often forgotten
+in sense key handling. Also it should not be considered
+as an error and definitely should not lead to the command
+being retried.
 
-Thanks,
+The COMPARE AND WRITE command may fail for other reasons
+such as a transport problem or a Unit Attention, so the
+SCSI eh logic may need to know about it.
 
-                Ilya
+Doug Gilbert
