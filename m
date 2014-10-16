@@ -1,35 +1,30 @@
 From: Sage Weil <sage@newdream.net>
-Subject: kerberos / AD requirements, blueprint
-Date: Thu, 16 Oct 2014 12:57:12 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1410161253090.5588@cobra.newdream.net>
+Subject: delete your branches after merge
+Date: Thu, 16 Oct 2014 13:00:42 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1410161258390.5521@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:54201 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:54273 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751472AbaJPT5M (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Oct 2014 15:57:12 -0400
+	with ESMTP id S1751472AbaJPUAm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Oct 2014 16:00:42 -0400
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id A2A7E800BB
+	for <ceph-devel@vger.kernel.org>; Thu, 16 Oct 2014 13:00:42 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 7C282800BB
+	for <ceph-devel@vger.kernel.org>; Thu, 16 Oct 2014 13:00:42 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
-Cc: daniel.vanderster@cern.ch, abartlet@catalyst.net.nz
 
-I started to write up a blueprint for kerberos / LDAP / AD support:
+Please try to click the 'delete branch' button after you merge pull 
+requests on github.  It helps keep the number of branches in the main 
+ceph.git slightly less crazy and reduces clutter.
 
-	https://wiki.ceph.com/Planning/Blueprints/Hammer/kerberos_authn%2C_AD_authn%2F%2Fauthz
-
-In case it isn't clear from that document, I only sort of know what I'm 
-talking about here.  (This is largely based on what I managed to retain 
-from a conversation with Andrew, but I suspect I got some of it wrong.)
-
-For anyone working in environments where kerberos is in use, I am *very* 
-interested in hearing what your requirements are for your environment.  In 
-particular, are you using AD or LDAP or something else?  How do you expect 
-RBAC to work for you?
-
-We'll definitely have a slot for this at the upcoming CDS, but anything we 
-can hash out before then will make that conversation more productive.
+(Note that the button only appears if the source branch is also ceph.git; 
+for merges from other users' repos it's up to them to tidy up.)
 
 Thanks!
 sage
-
