@@ -1,112 +1,134 @@
-From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
-Subject: RE: 10/14/2014 Weekly Ceph Performance Meeting
-Date: Thu, 16 Oct 2014 03:27:13 +0000
-Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC020C8323@shsmsx102.ccr.corp.intel.com>
-References: <ebe5a51e-2219-41ef-b918-6307b9ff3549@mailpro>
- <0ef470f8-b69f-48ef-9975-6c2693f88b3c@mailpro>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga14.intel.com ([192.55.52.115]:33388 "EHLO mga14.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751184AbaJPD1S (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 15 Oct 2014 23:27:18 -0400
-In-Reply-To: <0ef470f8-b69f-48ef-9975-6c2693f88b3c@mailpro>
-Content-Language: en-US
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre DERUMIER <aderumier@odiso.com>, Mark Nelson <mark.nelson@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+From: michaelc@cs.wisc.edu
+Subject: [PATCH 1/5] block: set the nr of sectors a dev can compare and write atomically
+Date: Thu, 16 Oct 2014 00:37:11 -0500
+Message-ID: <1413437835-13778-2-git-send-email-michaelc@cs.wisc.edu>
+References: <1413437835-13778-1-git-send-email-michaelc@cs.wisc.edu>
+Return-path: <target-devel-owner@vger.kernel.org>
+In-Reply-To: <1413437835-13778-1-git-send-email-michaelc@cs.wisc.edu>
+Sender: target-devel-owner@vger.kernel.org
+To: linux-scsi@vger.kernel.org, target-devel@vger.kernel.org, ceph-devel@vger.kernel.org, axboe@kernel.dk
+List-Id: ceph-devel.vger.kernel.org
 
-V2UgYWxzbyBmaW5kIHRoaXMgYmVmb3JlLCBzZWVtcyBpdCdzIGJlY2F1c2UgUUVNVSB1c2Ugc2lu
-Z2xlIHRocmVhZCBmb3IgSU8sIEkgdHJpZWQgdG8gZW5hYmxlIHRoZSBkZWJ1ZyBsb2cgb2YgaW4g
-bGlicmJkLCBmaW5kIHRoYXQgdGhlIHRocmVhZGVkIGlzIGFsd2F5cyB0aGUgc2FtZS4gQXNzdW1p
-bmcgdGhlIGJhY2tlbmQgaXMgcG93ZXIgZW5vdWdoLCBzbyBob3cgbWFueSBJT3MgY2FuIGJlIHNl
-bnQgb3V0IGJ5IHFlbXUgPT0gaG93IG1hbnkgSU9QUyBjYW4gd2UgZ2V0Lg0KDQpUaGUgdXBwZXIg
-Ym91bmQgbWF5IHZhcmllcyBkZXBlbmRzIG9uIGhvdyBmYXN0IFFFTVUgY2FuIHNlbmQgb3V0IGEg
-cmVxdWVzdCwgIEkgcmVtZW1iZXIgd2UgaGF2ZSB0cmllZCBkaWZmZXJlbnQgQ1BVIG1vZGVsIGFu
-ZCBnZXQgYmVzdCB3aXRoIGFuIHZlcnkgb2xkIE5ITSBDUFUod2l0aCBoaWdoIGZyZXF1ZW5jeSB0
-byAyLjkzR2h6LCB0YWtlIH4wLjAzIHRvIHNlbmQgb3V0IGEgcmVxdWVzdCBhbmQgd2UgZ2V0IDIy
-SyByZWFkIElPUFMgYm91bmQpLCBiZXR0ZXIgdGhhbiBuZXcgU05CIENQVS4gRnJlcXVlbmN5IGRv
-IHBsYXkgaW1wb3J0YW50IHBhcnQgc2luY2UgaXQncyBzaW5nbGUgdGhyZWFkLg0KDQotLS0tLU9y
-aWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5v
-cmcgW21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9m
-IEFsZXhhbmRyZSBERVJVTUlFUg0KU2VudDogV2VkbmVzZGF5LCBPY3RvYmVyIDE1LCAyMDE0IDEx
-OjU1IFBNDQpUbzogTWFyayBOZWxzb24NCkNjOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0K
-U3ViamVjdDogUmU6IDEwLzE0LzIwMTQgV2Vla2x5IENlcGggUGVyZm9ybWFuY2UgTWVldGluZw0K
-DQo+IDIpIGluIHFlbXUsIGl0J3MgaW1wb3NzaWJsZSB0byByZWFjaCBtb3JlIHRoYW4gYXJvdW5k
-IDcwMDBpb3BzIHdpdGggMSBkaXNrLiAobWF5YmUgaXMgaXQgYWxzbyByZWxhdGVkIHRvIGNwdSBv
-ciB0aHJlYWRzIG51bWJlcikuIA0KPiBJIGhhdmUgYWxzbyB0cnkgd2l0aCB0aGUgbmV3IHFlbXUg
-aW90aHJlYWQvZGF0YXBsYW5lIGZlYXR1cmUsIGJ1dCBpdCBkb2Vzbid0IGhlbHAuIA0KPj5JZiBp
-dHMgMSB2b2x1bWUsIGRvZXMgYWRkaW5nIGFub3RoZXIgdm9sdW1lIG9uIHRoZSBzYW1lIFZNIGhl
-bHA/DQoNCj4+PkFzIGZhciBJIHJlbWVtYmVyLCB5ZXMgLiBJJ2xsIHRlc3QgYWdhaW4gdG8gY29u
-ZmlybS4NCg0KSSBoYXZlIGRvbmUgdGVzdCwgSXQncyBzY2FsaW5nIHdpdGggbXVsdGlwbGUgdmly
-dGlvIGRpc2sgb24gbXVsdGlwbGUgcmJkIHZvbHVtZS4NCg0KKE5vdCBzdXJlLCBidXQgbWF5YmUg
-aXQncyByZWxhdGVkIHRvIGlvZGVwdGggYnVnIHNob3dlZCBpbiB0aGlzIG1lZXRpbmcgaW4gaW50
-ZWwgc2xpZGVzID8pDQoNCg0KLS0tLS0gTWFpbCBvcmlnaW5hbCAtLS0tLSANCg0KRGU6ICJBbGV4
-YW5kcmUgREVSVU1JRVIiIDxhZGVydW1pZXJAb2Rpc28uY29tPg0Kw4A6ICJNYXJrIE5lbHNvbiIg
-PG1hcmsubmVsc29uQGlua3RhbmsuY29tPg0KQ2M6IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3Jn
-DQpFbnZvecOpOiBNZXJjcmVkaSAxNSBPY3RvYnJlIDIwMTQgMTY6NDI6MDQNCk9iamV0OiBSZTog
-MTAvMTQvMjAxNCBXZWVrbHkgQ2VwaCBQZXJmb3JtYW5jZSBNZWV0aW5nIA0KDQo+PlN1cmUhIFBs
-ZWFzZSBmZWVsIGZyZWUgdG8gYWRkIHRoaXMgb3Igb3RoZXIgdG9waWNzIHRoYXQgYXJlIA0KPj51
-c2VmdWwvaW50ZXJlc3RpbmcgdG8gdGhlIGV0aGVycGFkLiBQbGVhc2UgaW5jbHVkZSB5b3VyIG5h
-bWUgdGhvdWdoIHNvIA0KPj53ZSBrbm93IHdobydzIGJyb3VnaHQgaXQgdXAuIEV2ZW4gaWYgd2Ug
-ZG9uJ3QgZ2V0IHRvIGV2ZXJ5dGhpbmcgaXQgDQo+PndpbGwgcHJvdmlkZSB1c2VmdWwgdG9waWNz
-IGZvciB0aGUgc3Vic2VxdWVudCB3ZWVrcy4NCg0KT2ssZ3JlYXQsSSdsbCBkbyBpdC4gDQoNCj4g
-DQo+IEN1cnJlbnRseSBJIHNlZSAyIHBlcmZvcm1hbmNlIHByb2JsZW1zIHdpdGggbGlicmJkOiAN
-Cj4gDQo+IDEpIFRoZSBjcHUgdXNhZ2UgaXMgcXVpdGUgaHVnZS4gKEknbSBjcHUgYm91bmQgd2l0
-aCA4Y29yZXMgQ1BVIEU1LTI2MDMgDQo+IHYyIEAgMS44MEdIeiwgd2l0aCA0MDAwMGlvcHMgNGsg
-cmVhZCB1c2luZyBmaW8tcmJkKQ0KDQo+PkludGVyZXN0aW5nLiBIYXZlIHlvdSB0YWtlbiBhIGxv
-b2sgd2l0aCBwZXJmIG9yIG90aGVyIHRvb2xzIHRvIHNlZSANCj4+d2hlcmUgdGltZSBpcyBiZWlu
-ZyBzcGVudD8NCg0KTm90IHlldCwgYnV0IEkgY2FuIHRyeSB0byBkbyBpdCwgSSdsbCBoYXZlIHRp
-bWUgbmV4dCB3ZWVrLiANCg0KDQoNCj4gDQo+IDIpIGluIHFlbXUsIGl0J3MgaW1wb3NzaWJsZSB0
-byByZWFjaCBtb3JlIHRoYW4gYXJvdW5kIDcwMDBpb3BzIHdpdGggMSBkaXNrLiAobWF5YmUgaXMg
-aXQgYWxzbyByZWxhdGVkIHRvIGNwdSBvciB0aHJlYWRzIG51bWJlcikuIA0KPiBJIGhhdmUgYWxz
-byB0cnkgd2l0aCB0aGUgbmV3IHFlbXUgaW90aHJlYWQvZGF0YXBsYW5lIGZlYXR1cmUsIGJ1dCBp
-dCBkb2Vzbid0IGhlbHAuIA0KDQo+PjEgZGlzayBtZWFuaW5nIDEgT1NELCBvciAxIGRpc2sgbWVh
-bmluZyAxIHZvbHVtZSBvbiBhIFZNPyANCnllcywgMSBkaXNrID0gMSB2b2x1bWUgb24gVk0gDQoN
-Cj4+SWYgaXRzIDEgdm9sdW1lLCBkb2VzIGFkZGluZyBhbm90aGVyIHZvbHVtZSBvbiB0aGUgc2Ft
-ZSBWTSBoZWxwPyANCg0KQXMgZmFyIEkgcmVtZW1iZXIsIHllcyAuIEknbGwgdGVzdCBhZ2FpbiB0
-byBjb25maXJtLiANCg0KTm90ZSB0aGF0IHdoZW4gYmVuY2hpbmcgd2l0aCBmaW8tcmJkLCBJIG5l
-ZWQgdG8gaW5jcmVhc2UgdGhlIGNsaWVudCBudW1iZXIgdG9vLiANCg0KKDFjbGllbnQgLSBxdWV1
-ZSBkZXB0aCAzMjogKy0gODAwMGlvcHMNCjJjbGllbnRzIC0gcXVldWUgZGVwdGggMzI6ICstIDE2
-MDAwaW9wcyAuLi4uIA0KKQ0KU28gbWF5YmUgaXQncyByZWxhdGVkIA0KDQoNCg0KPj5JJ20gbm90
-IGZhbWlsaWFyIHdpdGggdGhlIG5ldyBxZW11IG9wdGlvbnMsIHNvIHRoYXQgd291bGQgYmUgZ29v
-ZCB0byANCj4+ZGlzY3VzcyBhdA0KdGhlIG1lZXRpbmcgdG9vISANCg0KVGhlIGRhdGFwbGFuZS9p
-b3RocmVhZCBmZWF0dXJlIGFsbG93IHZpcnRpbyBkaXNrIHRvIHJlYWNoIGFyb3VuZCAxLjAwMC4w
-MDAgaW9wcyB2cyAxMDAuMDAwIGlvcHMgd2l0aG91dCBkYXRhcGxhbmUgaHR0cDovL3d3dy5saW51
-eC1rdm0ub3JnL3dpa2kvaW1hZ2VzLzEvMTcvS3ZtLWZvcnVtLTIwMTMtRWZmZWN0aXZlLW11bHRp
-dGhyZWFkaW5nLWluLVFFTVUucGRmIA0KDQpTeW50YXggdG8gZW5hYmxlIGl0OiANCnFlbXUgLW9i
-amVjdCBpb3RocmVhZCxpZD1pb3RocmVhZDAgLWRldmljZSB2aXJ0aW8tYmxrLXBjaSxpb3RocmVh
-ZD1pb3RocmVhZDAsLi4uLiANCg0KDQoNClJlZ2FyZHMsIA0KDQpBbGV4YW5kcmUgDQoNCi0tLS0t
-IE1haWwgb3JpZ2luYWwgLS0tLS0gDQoNCkRlOiAiTWFyayBOZWxzb24iIDxtYXJrLm5lbHNvbkBp
-bmt0YW5rLmNvbT4NCsOAOiAiQWxleGFuZHJlIERFUlVNSUVSIiA8YWRlcnVtaWVyQG9kaXNvLmNv
-bT4sICJNYXJrIE5lbHNvbiIgPG1hcmsubmVsc29uQGlua3RhbmsuY29tPg0KQ2M6IGNlcGgtZGV2
-ZWxAdmdlci5rZXJuZWwub3JnDQpFbnZvecOpOiBNZXJjcmVkaSAxNSBPY3RvYnJlIDIwMTQgMTU6
-MjY6MjANCk9iamV0OiBSZTogMTAvMTQvMjAxNCBXZWVrbHkgQ2VwaCBQZXJmb3JtYW5jZSBNZWV0
-aW5nIA0KDQpPbiAxMC8xNS8yMDE0IDAxOjIyIEFNLCBBbGV4YW5kcmUgREVSVU1JRVIgd3JvdGU6
-IA0KPiBIaSwNCj4gDQo+IGFib3V0IHBlcmZvcm1hbmNlLCBtYXliZSBjb3VsZCBpdCBiZSBncmVh
-dCB0byBhbHNvIGluY2x1ZGUgY2xpZW50IHNpZGUgcGVyZm9ybWFuY2UgPyANCg0KU3VyZSEgUGxl
-YXNlIGZlZWwgZnJlZSB0byBhZGQgdGhpcyBvciBvdGhlciB0b3BpY3MgdGhhdCBhcmUgdXNlZnVs
-L2ludGVyZXN0aW5nIHRvIHRoZSBldGhlcnBhZC4gUGxlYXNlIGluY2x1ZGUgeW91ciBuYW1lIHRo
-b3VnaCBzbyB3ZSBrbm93IHdobydzIGJyb3VnaHQgaXQgdXAuIEV2ZW4gaWYgd2UgZG9uJ3QgZ2V0
-IHRvIGV2ZXJ5dGhpbmcgaXQgd2lsbCBwcm92aWRlIHVzZWZ1bCB0b3BpY3MgZm9yIHRoZSBzdWJz
-ZXF1ZW50IHdlZWtzLiANCg0KPiANCj4gQ3VycmVudGx5IEkgc2VlIDIgcGVyZm9ybWFuY2UgcHJv
-YmxlbXMgd2l0aCBsaWJyYmQ6IA0KPiANCj4gMSkgVGhlIGNwdSB1c2FnZSBpcyBxdWl0ZSBodWdl
-LiAoSSdtIGNwdSBib3VuZCB3aXRoIDhjb3JlcyBDUFUgRTUtMjYwMyB2MiBAIDEuODBHSHosIHdp
-dGggNDAwMDBpb3BzIDRrIHJlYWQgdXNpbmcgZmlvLXJiZCkgDQoNCkludGVyZXN0aW5nLiBIYXZl
-IHlvdSB0YWtlbiBhIGxvb2sgd2l0aCBwZXJmIG9yIG90aGVyIHRvb2xzIHRvIHNlZSANCndoZXJl
-IHRpbWUgaXMgYmVpbmcgc3BlbnQ/IA0KDQo+IA0KPiAyKSBpbiBxZW11LCBpdCdzIGltcG9zc2li
-bGUgdG8gcmVhY2ggbW9yZSB0aGFuIGFyb3VuZCA3MDAwaW9wcyB3aXRoIDEgZGlzay4gKG1heWJl
-IGlzIGl0IGFsc28gcmVsYXRlZCB0byBjcHUgb3IgdGhyZWFkcyBudW1iZXIpLiANCj4gSSBoYXZl
-IGFsc28gdHJ5IHdpdGggdGhlIG5ldyBxZW11IGlvdGhyZWFkL2RhdGFwbGFuZSBmZWF0dXJlLCBi
-dXQgaXQgZG9lc24ndCBoZWxwLiANCg0KMSBkaXNrIG1lYW5pbmcgMSBPU0QsIG9yIDEgZGlzayBt
-ZWFuaW5nIDEgdm9sdW1lIG9uIGEgVk0/IElmIGl0cyAxIA0Kdm9sdW1lLCBkb2VzIGFkZGluZyBh
-bm90aGVyIHZvbHVtZSBvbiB0aGUgc2FtZSBWTSBoZWxwPyBJJ20gbm90IA0KZmFtaWxpYXIgd2l0
-aCB0aGUgbmV3IHFlbXUgb3B0aW9ucywgc28gdGhhdCB3b3VsZCBiZSBnb29kIHRvIGRpc2N1c3Mg
-YXQgDQp0aGUgbWVldGluZyB0b28hIA0KDQo+IA0KPiANCj4gDQo+IA0KPiANCi0tDQpUbyB1bnN1
-YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1k
-ZXZlbCIgaW4NCnRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwu
-b3JnDQpNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9y
-ZG9tby1pbmZvLmh0bWwNCg==
+From: Mike Christie <michaelc@cs.wisc.edu>
+
+This adds blk settings helpers to allow drivers to tell the block layer
+how many sectors it can process in a COMPARE_AND_WRITE/ATS request.
+
+Signed-off-by: Mike Christie <michaelc@cs.wisc.edu>
+---
+ block/blk-settings.c   |   20 ++++++++++++++++++++
+ block/blk-sysfs.c      |   11 +++++++++++
+ include/linux/blkdev.h |    3 +++
+ 3 files changed, 34 insertions(+), 0 deletions(-)
+
+diff --git a/block/blk-settings.c b/block/blk-settings.c
+index f1a1795..b33cf1c 100644
+--- a/block/blk-settings.c
++++ b/block/blk-settings.c
+@@ -114,6 +114,7 @@ void blk_set_default_limits(struct queue_limits *lim)
+ 	lim->max_segment_size = BLK_MAX_SEGMENT_SIZE;
+ 	lim->max_sectors = lim->max_hw_sectors = BLK_SAFE_MAX_SECTORS;
+ 	lim->chunk_sectors = 0;
++	lim->max_cmp_and_write_sectors = 0;
+ 	lim->max_write_same_sectors = 0;
+ 	lim->max_discard_sectors = 0;
+ 	lim->discard_granularity = 0;
+@@ -147,6 +148,7 @@ void blk_set_stacking_limits(struct queue_limits *lim)
+ 	lim->max_hw_sectors = UINT_MAX;
+ 	lim->max_segment_size = UINT_MAX;
+ 	lim->max_sectors = UINT_MAX;
++	lim->max_cmp_and_write_sectors = UINT_MAX;
+ 	lim->max_write_same_sectors = UINT_MAX;
+ }
+ EXPORT_SYMBOL(blk_set_stacking_limits);
+@@ -298,6 +300,22 @@ void blk_queue_chunk_sectors(struct request_queue *q, unsigned int chunk_sectors
+ EXPORT_SYMBOL(blk_queue_chunk_sectors);
+ 
+ /**
++ * blk_queue_max_cmp_and_write_sectors - set max sectors for a single request
++ * @q:  the request queue for the device
++ * @max_cmp_and_write_sectors: maximum number of 512b sectors to cmp and write
++ *
++ * Description:
++ *    This sets the total number of sectors that the device can process
++ *    in a compare and write operation.
++ **/
++void blk_queue_max_cmp_and_write_sectors(struct request_queue *q,
++					 unsigned int max_cmp_and_write_sectors)
++{
++	q->limits.max_cmp_and_write_sectors = max_cmp_and_write_sectors;
++}
++EXPORT_SYMBOL(blk_queue_max_cmp_and_write_sectors);
++
++/**
+  * blk_queue_max_discard_sectors - set max sectors for a single discard
+  * @q:  the request queue for the device
+  * @max_discard_sectors: maximum number of sectors to discard
+@@ -548,6 +566,8 @@ int blk_stack_limits(struct queue_limits *t, struct queue_limits *b,
+ 	t->max_hw_sectors = min_not_zero(t->max_hw_sectors, b->max_hw_sectors);
+ 	t->max_write_same_sectors = min(t->max_write_same_sectors,
+ 					b->max_write_same_sectors);
++	t->max_cmp_and_write_sectors = min(t->max_cmp_and_write_sectors,
++					   b->max_cmp_and_write_sectors);
+ 	t->bounce_pfn = min_not_zero(t->bounce_pfn, b->bounce_pfn);
+ 
+ 	t->seg_boundary_mask = min_not_zero(t->seg_boundary_mask,
+diff --git a/block/blk-sysfs.c b/block/blk-sysfs.c
+index 17f5c84..c546400 100644
+--- a/block/blk-sysfs.c
++++ b/block/blk-sysfs.c
+@@ -161,6 +161,11 @@ static ssize_t queue_write_same_max_show(struct request_queue *q, char *page)
+ 		(unsigned long long)q->limits.max_write_same_sectors << 9);
+ }
+ 
++static ssize_t queue_cmp_and_write_max_show(struct request_queue *q, char *page)
++{
++	return sprintf(page, "%llu\n",
++		(unsigned long long)q->limits.max_cmp_and_write_sectors << 9);
++}
+ 
+ static ssize_t
+ queue_max_sectors_store(struct request_queue *q, const char *page, size_t count)
+@@ -374,6 +379,11 @@ static struct queue_sysfs_entry queue_write_same_max_entry = {
+ 	.show = queue_write_same_max_show,
+ };
+ 
++static struct queue_sysfs_entry queue_cmp_and_write_max_entry = {
++	.attr = {.name = "cmp_and_write_max_bytes", .mode = S_IRUGO },
++	.show = queue_cmp_and_write_max_show,
++};
++
+ static struct queue_sysfs_entry queue_nonrot_entry = {
+ 	.attr = {.name = "rotational", .mode = S_IRUGO | S_IWUSR },
+ 	.show = queue_show_nonrot,
+@@ -422,6 +432,7 @@ static struct attribute *default_attrs[] = {
+ 	&queue_discard_max_entry.attr,
+ 	&queue_discard_zeroes_data_entry.attr,
+ 	&queue_write_same_max_entry.attr,
++	&queue_cmp_and_write_max_entry.attr,
+ 	&queue_nonrot_entry.attr,
+ 	&queue_nomerges_entry.attr,
+ 	&queue_rq_affinity_entry.attr,
+diff --git a/include/linux/blkdev.h b/include/linux/blkdev.h
+index 518b465..6d03206 100644
+--- a/include/linux/blkdev.h
++++ b/include/linux/blkdev.h
+@@ -290,6 +290,7 @@ struct queue_limits {
+ 	unsigned int		io_opt;
+ 	unsigned int		max_discard_sectors;
+ 	unsigned int		max_write_same_sectors;
++	unsigned int		max_cmp_and_write_sectors;
+ 	unsigned int		discard_granularity;
+ 	unsigned int		discard_alignment;
+ 
+@@ -1009,6 +1010,8 @@ extern void blk_queue_max_hw_sectors(struct request_queue *, unsigned int);
+ extern void blk_queue_chunk_sectors(struct request_queue *, unsigned int);
+ extern void blk_queue_max_segments(struct request_queue *, unsigned short);
+ extern void blk_queue_max_segment_size(struct request_queue *, unsigned int);
++extern void blk_queue_max_cmp_and_write_sectors(struct request_queue *,
++		unsigned int max_cmp_and_write_sectors);
+ extern void blk_queue_max_discard_sectors(struct request_queue *q,
+ 		unsigned int max_discard_sectors);
+ extern void blk_queue_max_write_same_sectors(struct request_queue *q,
+-- 
+1.7.1
