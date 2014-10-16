@@ -1,53 +1,53 @@
-From: "Elliott, Robert (Server Storage)" <Elliott@hp.com>
-Subject: RE: [PATCH 0/5] block/scsi/lio support for COMPARE_AND_WRITE
-Date: Thu, 16 Oct 2014 20:12:56 +0000
-Message-ID: <94D0CD8314A33A4D9D801C0FE68B40295930E5A3@G4W3296.americas.hpqcorp.net>
-References: <1413437835-13778-1-git-send-email-michaelc@cs.wisc.edu>
- <543FA05C.6060200@interlog.com> <54402421.8060808@interlog.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: vstart.sh crashes MON with --paxos-propose-interval=0.01 and one
+ MDS
+Date: Thu, 16 Oct 2014 15:52:47 -0700
+Message-ID: <54404C3F.4030904@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <target-devel-owner@vger.kernel.org>
-In-Reply-To: <54402421.8060808@interlog.com>
-Content-Language: en-US
-Sender: target-devel-owner@vger.kernel.org
-To: "dgilbert@interlog.com" <dgilbert@interlog.com>, "michaelc@cs.wisc.edu" <michaelc@cs.wisc.edu>, "linux-scsi@vger.kernel.org" <linux-scsi@vger.kernel.org>, "target-devel@vger.kernel.org" <target-devel@vger.kernel.org>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "axboe@kernel.dk" <axboe@kernel.dk>
-Cc: Hannes Reinecke <hare@suse.de>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="6Svc9602uRtXAwBQbCEa8QstCbABg4lCo"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail2.dachary.org ([91.121.57.175]:47054 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752553AbaJPWwz (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Oct 2014 18:52:55 -0400
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: John Spray <john.spray@inktank.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
+
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--6Svc9602uRtXAwBQbCEa8QstCbABg4lCo
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
+
+Hi John,
+
+I would be gratefull if you could take a quick look at http://tracker.cep=
+h.com/issues/9794 . It is bisected to the reduction of pg and I'm able to=
+ reproduce it in a ubuntu-14.04 docker fresh install. For some reason it =
+does not happen in gitbuilder but I think you can reproduce it locally no=
+w.
+
+Cheers
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
 
 
+--6Svc9602uRtXAwBQbCEa8QstCbABg4lCo
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
-> -----Original Message-----
-> From: linux-scsi-owner@vger.kernel.org [mailto:linux-scsi-
-> owner@vger.kernel.org] On Behalf Of Douglas Gilbert
-> Sent: Thursday, 16 October, 2014 3:02 PM
-...
-> On 14-10-16 12:39 PM, Douglas Gilbert wrote:
-...
-> > The COMPARE AND WRITE command may fail for other reasons
-> > such as a transport problem or a Unit Attention, so the
-> > SCSI eh logic may need to know about it.
-> 
-> Elaborating ...
-> 
-> Hannes will enjoy this one: say a COMPARE AND WRITE (CAW) fails
-> due to a transport error or timeout. What should the EH do *** ?
-> Answer: read that LBA(s) to see whether the command succeeded
-> (i.e. wrote the new data)! If it did, do nothing; if it didn't,
-> repeat the CAW command. And naturally that second CAW may
-> yield a MISCOMPARE.
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
 
-I don't think that is safe.. detecting the write data is in
-place doesn't prove the COMPARE AND WRITE really worked as
-a whole.
+iEYEARECAAYFAlRATD8ACgkQ8dLMyEl6F20RcQCgqPDU5n6D7kc/tQz4CRrJlDLl
+m70AoJz3fW/H/uImrT5mbHdPNusIQKhf
+=pFZA
+-----END PGP SIGNATURE-----
 
-Example: if two applications do this:
-* application 1: COMPARE AND WRITE: change 4 to 6
-* application 2: COMPARE AND WRITE: change 5 to 6
-
-and they both run into transport errors, then they'll 
-both read back 6 and think their commands worked when
-really only one of them worked.
-
----
-Rob Elliott    HP Server Storage
+--6Svc9602uRtXAwBQbCEa8QstCbABg4lCo--
