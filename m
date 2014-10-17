@@ -1,108 +1,86 @@
-From: Joao Eduardo Luis <joao.luis@inktank.com>
-Subject: Re: vstart.sh crashes MON with --paxos-propose-interval=0.01 and
- one MDS
-Date: Fri, 17 Oct 2014 12:18:36 +0100
-Message-ID: <5440FB0C.5080205@inktank.com>
-References: <54404C3F.4030904@dachary.org> <734FCEB2-7161-4B6E-8886-9BC0126D997F@inktank.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: teuthology config file
+Date: Fri, 17 Oct 2014 05:55:29 -0700
+Message-ID: <544111C1.2030504@dachary.org>
+References: <656229825.13656.1413543806937.JavaMail.yahoo@jws10601b.mail.bf1.yahoo.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="e0MKXAM1FCWX2XBGsntsjsMW8b3DGBDOQ"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f52.google.com ([74.125.82.52]:54992 "EHLO
-	mail-wg0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751051AbaJQLSf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 17 Oct 2014 07:18:35 -0400
-Received: by mail-wg0-f52.google.com with SMTP id a1so671974wgh.11
-        for <ceph-devel@vger.kernel.org>; Fri, 17 Oct 2014 04:18:33 -0700 (PDT)
-In-Reply-To: <734FCEB2-7161-4B6E-8886-9BC0126D997F@inktank.com>
+Received: from mail2.dachary.org ([91.121.57.175]:47404 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752171AbaJQMzh (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 17 Oct 2014 08:55:37 -0400
+In-Reply-To: <656229825.13656.1413543806937.JavaMail.yahoo@jws10601b.mail.bf1.yahoo.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: David Zafman <david.zafman@inktank.com>, Loic Dachary <loic@dachary.org>
-Cc: John Spray <john.spray@inktank.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: David Z <david.z1003@yahoo.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On 10/17/2014 03:42 AM, David Zafman wrote:
->
-> I have this change in my branch so that test/ceph_objectstore_tool.py=
- works again after that change from John.  I wonder if this would fix y=
-our case too:
->
-> commit 18937cf49be616d32b4e2d0b6deef2882321fbe4
-> Author: David Zafman <dzafman@redhat.com>
-> Date:   Tue Oct 14 18:45:41 2014 -0700
->
->      vstart.sh: Disable "mon pg warn min per osd" to get healthy
->
->      Signed-off-by: David Zafman <dzafman@redhat.com>
->
-> diff --git a/src/vstart.sh b/src/vstart.sh
-> index febfa56..7a0ec1c 100755
-> --- a/src/vstart.sh
-> +++ b/src/vstart.sh
-> @@ -394,7 +394,7 @@ $COSDDEBUG
->   $COSDMEMSTORE
->   $extra_conf
->   [mon]
-> -        mon pg warn min per osd =3D 10
-> +        mon pg warn min per osd =3D 0
->           mon osd allow primary affinity =3D true
->           mon reweight min pgs per osd =3D 4
->   $DAEMONOPTS
->
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--e0MKXAM1FCWX2XBGsntsjsMW8b3DGBDOQ
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 
-Even if that fixes the issue you're seeing, that is nothing but a=20
-band-aid.  I've tracked down the issue Loic is seeing a few days ago an=
-d=20
-it is sitting in wip-9321.giant=20
-(c84a13ae87eed5550bafda394d983a8e843cc08c).  I though it was due to an=20
-earlier patch of mine on the same branch but now I see the issue can po=
-p=20
-up regardless of my patch, which is a good thing as it as it doesn't=20
-mean we really have to wait until that branch clears up the suite to=20
-merge but simply current master with this patch applied.
+Hi David,
 
-I've updated #9794 with this information.
+Zack is the ultimate authority on teuthology but I'm happy to give my non=
+ authoritative opinion ;-) Moving the discussion to ceph-devel as ceph-qa=
+ is more about the QA results than QA discussion, if I understand correct=
+ly.
 
-   -Joao
+On 17/10/2014 04:03, David Z wrote:
+> Hi Loic, or ceph-qa,
+>=20
+> We are trying to adopt teuthology for our test purpose. We are referrin=
+g to the README of teuthology (
+> https://github.com/ceph/teuthology/), but still meet some problems to r=
+un this framework completely on our hardware. So we would like to ask you=
+ for some help.
+>=20
+> Q1: How do you trigger all the test cases? Is there one unique config f=
+ile containing all the tasks, so only need one trigger? Could you please =
+share us your config files used to run regression test?
 
+Triggering everything is going to create a massive number of jobs and is =
+probably not what you want.
 
+> Q2: Is there any other guidances except README, could help us more easi=
+er to use this framework?
 
-> David Zafman
-> Senior Developer
-> http://www.inktank.com
->
->
->
->
-> On Oct 16, 2014, at 3:52 PM, Loic Dachary <loic@dachary.org> wrote:
->
->> Hi John,
->>
->> I would be gratefull if you could take a quick look at http://tracke=
-r.ceph.com/issues/9794 . It is bisected to the reduction of pg and I'm =
-able to reproduce it in a ubuntu-14.04 docker fresh install. For some r=
-eason it does not happen in gitbuilder but I think you can reproduce it=
- locally now.
->>
->> Cheers
->>
->> --
->> Lo=EFc Dachary, Artisan Logiciel Libre
->>
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+There is not much more but I think Zack recently updated documentation. A=
+nd teuthology has never been easier to use so you should succeed. To begi=
+n with I would recommend that you do not setup the lock server nor pulpit=
+o and focus exclusively on teuthology itself. You do not even need to con=
+cern yourself with provisioning targets: just run 3 or 5 vms and manually=
+ create a target file for teuthology to work with.
 
+http://dachary.org/?p=3D2204 is ancient but it should still work and get =
+you started.
+
+Cheers
+> Thanks.
+>=20
+> Regards,
+> David Zhang=20
+>=20
 
 --=20
-Joao Eduardo Luis
-Software Engineer | http://inktank.com | http://ceph.com
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--e0MKXAM1FCWX2XBGsntsjsMW8b3DGBDOQ
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlRBEcEACgkQ8dLMyEl6F21/YgCgjSFAQDMS5LqrJjo3318JSVBm
+1LcAoJ+nEV24EWrblKab8REWkK0Lfqtk
+=ttc2
+-----END PGP SIGNATURE-----
+
+--e0MKXAM1FCWX2XBGsntsjsMW8b3DGBDOQ--
