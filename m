@@ -1,76 +1,48 @@
-From: David Zafman <david.zafman@inktank.com>
-Subject: Re: vstart.sh crashes MON with --paxos-propose-interval=0.01 and one MDS
-Date: Thu, 16 Oct 2014 19:42:52 -0700
-Message-ID: <734FCEB2-7161-4B6E-8886-9BC0126D997F@inktank.com>
-References: <54404C3F.4030904@dachary.org>
-Mime-Version: 1.0 (Mac OS X Mail 7.3 \(1878.6\))
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: "Zhang, Jian" <jian.zhang@intel.com>
+Subject: 10/14/2014 Weekly Ceph Performance Meeting
+Date: Fri, 17 Oct 2014 05:58:37 +0000
+Message-ID: <51FC7A40FB29414D88A121A7FFEF9A4710F8661A@SHSMSX104.ccr.corp.intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f178.google.com ([209.85.192.178]:37901 "EHLO
-	mail-pd0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751643AbaJQCm5 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Oct 2014 22:42:57 -0400
-Received: by mail-pd0-f178.google.com with SMTP id y10so4386809pdj.9
-        for <ceph-devel@vger.kernel.org>; Thu, 16 Oct 2014 19:42:57 -0700 (PDT)
-In-Reply-To: <54404C3F.4030904@dachary.org>
+Received: from mga01.intel.com ([192.55.52.88]:37165 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750828AbaJQF6l (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 17 Oct 2014 01:58:41 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: John Spray <john.spray@inktank.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "Sage Weil <sweil@redhat.com> (sweil@redhat.com)" <sweil@redhat.com>, "Mark Nelson (mark.nelson@inktank.com) (mark.nelson@inktank.com)" <mark.nelson@inktank.com>
+Cc: "Duan, Jiangang" <jiangang.duan@intel.com>
 
-
-I have this change in my branch so that test/ceph_objectstore_tool.py w=
-orks again after that change from John.  I wonder if this would fix you=
-r case too:
-
-commit 18937cf49be616d32b4e2d0b6deef2882321fbe4
-Author: David Zafman <dzafman@redhat.com>
-Date:   Tue Oct 14 18:45:41 2014 -0700
-
-    vstart.sh: Disable "mon pg warn min per osd" to get healthy
-
-    Signed-off-by: David Zafman <dzafman@redhat.com>
-
-diff --git a/src/vstart.sh b/src/vstart.sh
-index febfa56..7a0ec1c 100755
---- a/src/vstart.sh
-+++ b/src/vstart.sh
-@@ -394,7 +394,7 @@ $COSDDEBUG
- $COSDMEMSTORE
- $extra_conf
- [mon]
--        mon pg warn min per osd =3D 10
-+        mon pg warn min per osd =3D 0
-         mon osd allow primary affinity =3D true
-         mon reweight min pgs per osd =3D 4
- $DAEMONOPTS
-
-David Zafman
-Senior Developer
-http://www.inktank.com
-
-
-
-
-On Oct 16, 2014, at 3:52 PM, Loic Dachary <loic@dachary.org> wrote:
-
-> Hi John,
->=20
-> I would be gratefull if you could take a quick look at http://tracker=
-=2Eceph.com/issues/9794 . It is bisected to the reduction of pg and I'm=
- able to reproduce it in a ubuntu-14.04 docker fresh install. For some =
-reason it does not happen in gitbuilder but I think you can reproduce i=
-t locally now.
->=20
-> Cheers
->=20
-> --=20
-> Lo=EFc Dachary, Artisan Logiciel Libre
->=20
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SGksDQpUaGlzIGlzIGEgZm9sbG93dXAgb24gdGhlIE9TRCB3YnRocm90dGxlIHNsb3cgaXNzdWUg
+Y2FzdWVkIGJ5IGZkYXRhc3luYyBkaXNjdXNzZWQgb24gdGhlIHdlZWtseSBwZXJmb3JtYW5jZSBt
+ZWV0aW5nLiANCkZvciBhIDRLIHJhbmRvbSB3cml0ZSB0ZXN0cyAocWQ9Mikgd2l0aCBxZW0tcmJk
+IGRyaXZlciBhbmQgNTAgdm9sdW1lczoNCiogV2UgYXJlIGFibGUgdG8gZ2V0IH4zMTAwSU9QUyBv
+biBvdXIgc2V0dXAgd2l0aCBGaXJlZmx5ICgwLjgwLjUpIGRlZmF1bHQgcGFyYW1ldGVyICANCiog
+V2UgY2FuIGdldCB+MzIwMCBJT1BTIG9uIHRoZSBzYW1lIHNldHVwIHdpdGggaWYgd2Ugc2V0IHdi
+dGhyb3R0bGUgPSAxDQoqIGlmIHdlIHJlcGxhY2UgZmRhdGFzeW5jIHdpdGggc3luY19maWxlX3Jh
+bmdlLCB3ZSBhcmUgYWxiZSB0byBnZXQgNDQ1NyBJT1BTLCA0MSUgaW1wcm92ZW1lbnQgY29tcGFy
+ZWQgd2l0aCBhbGwgdGhlIGRlZmF1bHQgcGFyYW1ldGVyLiANCg0KU2V0dXAgY29uZmlndXJhdGlv
+bjogDQoqIDQgT1NEIG5vZGVzIChFMy0xMjc1IEAzLjVHSHogcHJvY2Vzc29yIHdpdGggMzJHQiBt
+ZW1vcnkpDQoqIGVhY2ggYXR0YWNoZWQgMTB4IFNlYWdhdGUgM1RCIDcyMDBycG0gSERELCB3aXRo
+IDJ4IEludGVsIDQwMEdCIFNTRCBhcyBKb3VybmFsDQoqIG5ldHdvcmsgaXMgMTBHQi4gDQoNCldi
+dGhyb3R0bGUgdHVuaW5nczoNCmZpbGVzdG9yZV93YnRocm90dGxlX3hmc19pb3Nfc3RhcnRfZmx1
+c2hlcj0xDQpmaWxlc3RvcmVfd2J0aHJvdHRsZV94ZnNfYnl0ZXNfc3RhcnRfZmx1c2hlcj0xDQpm
+aWxlc3RvcmVfd2J0aHJvdHRsZV94ZnNfaW5vZGVzX3N0YXJ0X2ZsdXNoZXI9MQ0KDQpmZGF0YXN5
+bmMgLT4gc3luY19maWxlX3JhbmdlOg0KDQpkaWZmIGNvZGVzX2JhY2t1cC9XQlRocm90dGxlLmNj
+IGNlcGgtMC44MC41L3NyYy9vcy9XQlRocm90dGxlLmNjDQoxNjNjMTYzDQo8ICNpZmRlZiBIQVZF
+X0ZEQVRBU1lOQw0KLS0tDQo+IC8qI2lmZGVmIEhBVkVfRkRBVEFTWU5DDQoxNjRhMTY1LDE2Nw0K
+PiAqLw0KPiAjaWZkZWYgSEFWRV9TWU5DX0ZJTEVfUkFOR0UNCj4gICAgIDo6c3luY19maWxlX3Jh
+bmdlKCoqd2IuZ2V0PDE+KCksIHdiLmdldDwyPigpLm9mZnNldCwgd2IuZ2V0PDI+KCkubGVuLCBT
+WU5DX0ZJTEVfUkFOR0VfV1JJVEUpOw0KMjEwYzIxMw0KPCAgIHdiaXRlci0+c2Vjb25kLmZpcnN0
+LmFkZChub2NhY2hlLCBsZW4sIDEpOw0KLS0tDQo+ICAgd2JpdGVyLT5zZWNvbmQuZmlyc3QuYWRk
+KG5vY2FjaGUsIGxlbiwgMSwgb2Zmc2V0LCBsZW4pOw0KIA0KIA0KW3Jvb3RAYS1jZXBoMDQgb3B0
+XSMgZGlmZiBjb2Rlc19iYWNrdXAvV0JUaHJvdHRsZS5oIGNlcGgtMC44MC41L3NyYy9vcy9XQlRo
+cm90dGxlLmgNCjcyYTczLDc0DQo+ICAgICB1aW50NjRfdCBvZmZzZXQ7DQo+ICAgICB1aW50NjRf
+dCBsZW47DQo3NGM3Ng0KPCAgICAgdm9pZCBhZGQoYm9vbCBfbm9jYWNoZSwgdWludDY0X3QgX3Np
+emUsIHVpbnQ2NF90IF9pb3MpIHsNCi0tLQ0KPiAgICAgdm9pZCBhZGQoYm9vbCBfbm9jYWNoZSwg
+dWludDY0X3QgX3NpemUsIHVpbnQ2NF90IF9pb3MsIHVpbnQ2NF90IF9vZmZzZXQsIHVpbnQ2NF90
+IF9sZW4pIHsNCjc4YTgxLDgyDQo+ICAgICAgIG9mZnNldCA9IF9vZmZzZXQ7DQo+ICAgICAgIGxl
+biA9IF9sZW47DQoNClRoYW5rcw0KSmlhbg0K
