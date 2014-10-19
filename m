@@ -1,189 +1,147 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Re: The Async messenger benchmark with latest master
-Date: Sun, 19 Oct 2014 13:14:34 +0800
-Message-ID: <CACJqLybtHOyPw8+2bcFGZoScoKxH7QqENi0NKUzfwuYk=D8axw@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: The Async messenger benchmark with latest master
+Date: Sun, 19 Oct 2014 06:15:57 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2822CFC6@SACMBXIP02.sdcorp.global.sandisk.com>
 References: <755F6B91B3BE364F9BCA11EA3F9E0C6F282298FF@SACMBXIP02.sdcorp.global.sandisk.com>
+ <CACJqLybtHOyPw8+2bcFGZoScoKxH7QqENi0NKUzfwuYk=D8axw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f42.google.com ([74.125.82.42]:58137 "EHLO
-	mail-wg0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750768AbaJSFOg convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 19 Oct 2014 01:14:36 -0400
-Received: by mail-wg0-f42.google.com with SMTP id z12so3259966wgg.1
-        for <ceph-devel@vger.kernel.org>; Sat, 18 Oct 2014 22:14:34 -0700 (PDT)
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F282298FF@SACMBXIP02.sdcorp.global.sandisk.com>
+Received: from mail-by2on0090.outbound.protection.outlook.com ([207.46.100.90]:32483
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1750807AbaJSGQD (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 19 Oct 2014 02:16:03 -0400
+In-Reply-To: <CACJqLybtHOyPw8+2bcFGZoScoKxH7QqENi0NKUzfwuYk=D8axw@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
+To: Haomai Wang <haomaiwang@gmail.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Thanks Somnath!
-
-I have another simple performance test for async messenger:
-
-For 4k object read, master branch used 4.46s to complete tests, async
-Messenger used 3.14s
-For 4k object write, master branch used 10.6s to complete, async
-Messenger used 6.6s!!
-
-Detailf results see below, 4k object read is a simple ceph client
-program which will read 5000 objects and 4k object write will write
-5000 objects.
-I increased "ms_event_op_threads" to 10 compared to the default value is 2.
-Maybe Somnath can do it and tests again, I think we can get more
-improvements for your tests.
-
-Master Branch(6fa686c8c42937dd069591f16de92e954d8ed34d):
-
-[root@ceph-test src]# for i in `seq 1 3`; do date &&
-~/08.rados_read_4k_for_each_object /etc/ceph/ceph.conf rbd 5000 &&
-sleep 3; done
-
-Fri Oct 17 17:10:39 UTC 2014
-
-Used Time:4.461581
-
-Fri Oct 17 17:10:44 UTC 2014
-
-Used Time:4.388572
-
-Fri Oct 17 17:10:48 UTC 2014
-
-Used Time:4.448157
-
-[root@ceph-test src]#
-
-[root@ceph-test src]# for i in `seq 1 3`; do date &&
-~/01.rados_write_4k_for_each_object /etc/ceph/ceph.conf rbd 5000 &&
-sleep 3; doneFri Oct 17 17:11:23 UTC 2014
-
-Used Time:10.638783
-
-Fri Oct 17 17:11:33 UTC 2014
-
-Used Time:10.793231
-
-Fri Oct 17 17:11:44 UTC 2014
-
-Used Time:10.908003
-
-
-Master Branch with AsyncMessenger:
-
-[root@ceph-test src]# for i in `seq 1 3`; do date &&
-~/08.rados_read_4k_for_each_object /etc/ceph/ceph.conf rbd 5000 &&
-sleep 3; done
-
-Sun Oct 19 06:01:50 UTC 2014
-
-Used Time:3.155506
-
-Sun Oct 19 06:01:53 UTC 2014
-
-Used Time:3.134961
-
-Sun Oct 19 06:01:56 UTC 2014
-
-Used Time:3.135814
-
-[root@ceph-test src]# for i in `seq 1 3`; do date &&
-~/01.rados_write_4k_for_each_object /etc/ceph/ceph.conf rbd 5000 &&
-sleep 3; done
-
-Sun Oct 19 06:02:03 UTC 2014
-
-Used Time:6.536319
-
-Sun Oct 19 06:02:10 UTC 2014
-
-Used Time:6.648738
-
-Sun Oct 19 06:02:16 UTC 2014
-
-Used Time:6.585156
-
-On Sat, Oct 18, 2014 at 4:37 AM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
-> Hi Sage/Haomai,
->
-> I did some 4K Random Read benchmarking with latest master having Async messenger changes and result looks promising.
->
-> My configuration:
-> ---------------------
->
-> 1 node, 8 SSDs, 8OSDs, 3 pools , each has 3 images. ~2000 Pg cluster wide
-> Cpu : Intel(R) Xeon(R) CPU E5-2680 v2 @ 2.80GHz, dual socket, HT enabled, 40 cores.
-> Used krbd as client.
->
->
-> 1 clinet node with 3 rbd images on 3 different pools:
-> -------------------------------------------------------------------
-> Master :
-> ---------
->
-> ~203k IOPS, ~90% latencies within 4msec, total read : ~5.2TB
->
->     lat (usec) : 4=0.01%, 10=0.01%, 50=0.01%, 100=0.01%, 250=0.03%
->     lat (usec) : 500=0.86%, 750=3.72%, 1000=7.19%
->     lat (msec) : 2=39.17%, 4=41.45%, 10=7.26%, 20=0.24%, 50=0.06%
->     lat (msec) : 100=0.03%, 250=0.01%, 500=0.01%
->
-> cpu: ~1-2 % idle
->
-> Giant:
-> ------
->
-> ~196k IOPS, ~89-90% latencies within 4msec, total read : ~5.3TB
->
->     lat (usec) : 250=0.01%, 500=0.51%, 750=2.71%, 1000=6.03%
->     lat (msec) : 2=34.32%, 4=45.74%, 10=10.46%, 20=0.21%, 50=0.02%
->     lat (msec) : 100=0.01%, 250=0.01%
->
-> cpu: ~2% idle
->
-> 2 clients with 3 rbd images each on 3 different pools:
-> -------------------------------------------------------------------
->
-> Master :
-> ---------
->
-> ~207K iops, ~70% latencies within 4msec, Total read: ~5.99 TB
->
->     lat (usec) : 250=0.03%, 500=0.63%, 750=2.67%, 1000=5.21%
->     lat (msec) : 2=25.12%, 4=36.19%, 10=24.80%, 20=3.16%, 50=1.34%
->     lat (msec) : 100=0.66%, 250=0.18%, 500=0.01%
->
-> cpu: ~0-1 % idle
->
-> Giant:
-> --------
-> ~199K iops, ~64% latencies within 4msec, Total read: ~5.94 TB
->
->     lat (usec) : 250=0.01%, 500=0.25%, 750=1.47%, 1000=3.45%
->     lat (msec) : 2=21.22%, 4=36.69%, 10=30.63%, 20=4.28%, 50=1.70%
->     lat (msec) : 100=0.28%, 250=0.02%, 500=0.01%
->
-> cpu: ~1% idle
->
->
-> So, in summary the master with Async messenger has improved both in iops and latency.
->
-> Thanks & Regards
-> Somnath
->
-> ________________________________
->
-> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
-
--- 
-Best Regards,
-
-Wheat
+SGFvbWFpLA0KU3VyZSAsIEkgd2lsbCBjaGFuZ2UgJyBtc19ldmVudF9vcF90aHJlYWRzJyBhbmQg
+dXBkYXRlIG15IGZpbmRpbmdzLg0KDQpBbGV4YW5kcmUsDQpIZXJlIGlzIG15IGNvbmZpZy4uDQoN
+CltnbG9iYWxdDQoNCiAgICAgICAgZmlsZXN0b3JlX3hhdHRyX3VzZV9vbWFwID0gdHJ1ZQ0KDQog
+ICAgICAgIGRlYnVnX2xvY2tkZXAgPSAwLzANCiAgICAgICAgZGVidWdfY29udGV4dCA9IDAvMA0K
+ICAgICAgICBkZWJ1Z19jcnVzaCA9IDAvMA0KICAgICAgICBkZWJ1Z19idWZmZXIgPSAwLzANCiAg
+ICAgICAgZGVidWdfdGltZXIgPSAwLzANCiAgICAgICAgZGVidWdfZmlsZXIgPSAwLzANCiAgICAg
+ICAgZGVidWdfb2JqZWN0ZXIgPSAwLzANCiAgICAgICAgZGVidWdfcmFkb3MgPSAwLzANCiAgICAg
+ICAgZGVidWdfcmJkID0gMC8wDQogICAgICAgIGRlYnVnX2pvdXJuYWxlciA9IDAvMA0KICAgICAg
+ICBkZWJ1Z19vYmplY3RjYXRjaGVyID0gMC8wDQogICAgICAgIGRlYnVnX2NsaWVudCA9IDAvMA0K
+ICAgICAgICBkZWJ1Z19vc2QgPSAwLzANCiAgICAgICAgZGVidWdfb3B0cmFja2VyID0gMC8wDQog
+ICAgICAgIGRlYnVnX29iamNsYXNzID0gMC8wDQogICAgICAgIGRlYnVnX2ZpbGVzdG9yZSA9IDAv
+MA0KICAgICAgICBkZWJ1Z19qb3VybmFsID0gMC8wDQogICAgICAgIGRlYnVnX21zID0gMC8wDQog
+ICAgICAgIGRlYnVnX21vbmMgPSAwLzANCiAgICAgICAgZGVidWdfdHAgPSAwLzANCiAgICAgICAg
+ZGVidWdfYXV0aCA9IDAvMA0KICAgICAgICBkZWJ1Z19maW5pc2hlciA9IDAvMA0KICAgICAgICBk
+ZWJ1Z19oZWFydGJlYXRtYXAgPSAwLzANCiAgICAgICAgZGVidWdfcGVyZmNvdW50ZXIgPSAwLzAN
+CiAgICAgICAgZGVidWdfYXNvayA9IDAvMA0KICAgICAgICBkZWJ1Z190aHJvdHRsZSA9IDAvMA0K
+ICAgICAgICBkZWJ1Z19tb24gPSAwLzANCiAgICAgICAgZGVidWdfcGF4b3MgPSAwLzANCiAgICAg
+ICAgZGVidWdfcmd3ID0gMC8wDQogICAgICAgIG9zZF9vcF90aHJlYWRzID0gMg0KICAgICAgICBv
+c2Rfb3BfbnVtX3RocmVhZHNfcGVyX3NoYXJkID0gMg0KICAgICAgICBvc2Rfb3BfbnVtX3NoYXJk
+cyA9IDEyDQogICAgICAgIGZpbGVzdG9yZV9vcF90aHJlYWRzID0gNA0KDQogICAgICAgIG1zX25v
+Y3JjID0gdHJ1ZQ0KICAgICAgICBmaWxlc3RvcmVfZmRfY2FjaGVfc2l6ZSA9IDEwMDAwMA0KICAg
+ICAgICBmaWxlc3RvcmVfZmRfY2FjaGVfc2hhcmRzID0gMTAwMDANCiAgICAgICAgY2VwaHggc2ln
+biBtZXNzYWdlcyA9IGZhbHNlDQogICAgICAgIGNlcGh4IHJlcXVpcmUgc2lnbmF0dXJlcyA9IGZh
+bHNlDQoNCiAgICAgICAgbXNfZGlzcGF0Y2hfdGhyb3R0bGVfYnl0ZXMgPSAwDQogICAgICAgIHRo
+cm90dGxlcl9wZXJmX2NvdW50ZXIgPSBmYWxzZSANCg0KICAgICAgICBvc2RfcG9vbF9kZWZhdWx0
+X3NpemUgPSAxDQogICAgICAgIG9zZF9wb29sX2RlZmF1bHRfbWluX3NpemUgPSAxDQoNCiAgICAg
+ICAgZmlsZXN0b3JlX3didGhyb3R0bGVfZW5hYmxlID0gZmFsc2UNCltvc2RdDQoNCiAgICAgICAg
+b3NkX2pvdXJuYWxfc2l6ZSA9IDE1MDAwMA0KICAgICAgICAjIEV4ZWN1dGUgJCBob3N0bmFtZSB0
+byByZXRyaWV2ZSB0aGUgbmFtZSBvZiB5b3VyIGhvc3QsDQogICAgICAgICMgYW5kIHJlcGxhY2Ug
+e2hvc3RuYW1lfSB3aXRoIHRoZSBuYW1lIG9mIHlvdXIgaG9zdC4NCiAgICAgICAgIyBGb3IgdGhl
+IG1vbml0b3IsIHJlcGxhY2Uge2lwLWFkZHJlc3N9IHdpdGggdGhlIElQDQogICAgICAgICMgYWRk
+cmVzcyBvZiB5b3VyIGhvc3QuDQoNCiAgICAgICAgb3NkX2NsaWVudF9tZXNzYWdlX3NpemVfY2Fw
+ID0gMA0KICAgICAgICBvc2RfY2xpZW50X21lc3NhZ2VfY2FwID0gMA0KICAgICAgICBvc2RfZW5h
+YmxlX29wX3RyYWNrZXIgPSBmYWxzZQ0KDQoNClRoYW5rcyAmIFJlZ2FyZHMNClNvbW5hdGgNCg0K
+LS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IEhhb21haSBXYW5nIFttYWlsdG86aGFv
+bWFpd2FuZ0BnbWFpbC5jb21dIA0KU2VudDogU2F0dXJkYXksIE9jdG9iZXIgMTgsIDIwMTQgMTA6
+MTUgUE0NClRvOiBTb21uYXRoIFJveQ0KQ2M6IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQpT
+dWJqZWN0OiBSZTogVGhlIEFzeW5jIG1lc3NlbmdlciBiZW5jaG1hcmsgd2l0aCBsYXRlc3QgbWFz
+dGVyDQoNClRoYW5rcyBTb21uYXRoIQ0KDQpJIGhhdmUgYW5vdGhlciBzaW1wbGUgcGVyZm9ybWFu
+Y2UgdGVzdCBmb3IgYXN5bmMgbWVzc2VuZ2VyOg0KDQpGb3IgNGsgb2JqZWN0IHJlYWQsIG1hc3Rl
+ciBicmFuY2ggdXNlZCA0LjQ2cyB0byBjb21wbGV0ZSB0ZXN0cywgYXN5bmMgTWVzc2VuZ2VyIHVz
+ZWQgMy4xNHMgRm9yIDRrIG9iamVjdCB3cml0ZSwgbWFzdGVyIGJyYW5jaCB1c2VkIDEwLjZzIHRv
+IGNvbXBsZXRlLCBhc3luYyBNZXNzZW5nZXIgdXNlZCA2LjZzISENCg0KRGV0YWlsZiByZXN1bHRz
+IHNlZSBiZWxvdywgNGsgb2JqZWN0IHJlYWQgaXMgYSBzaW1wbGUgY2VwaCBjbGllbnQgcHJvZ3Jh
+bSB3aGljaCB3aWxsIHJlYWQgNTAwMCBvYmplY3RzIGFuZCA0ayBvYmplY3Qgd3JpdGUgd2lsbCB3
+cml0ZQ0KNTAwMCBvYmplY3RzLg0KSSBpbmNyZWFzZWQgIm1zX2V2ZW50X29wX3RocmVhZHMiIHRv
+IDEwIGNvbXBhcmVkIHRvIHRoZSBkZWZhdWx0IHZhbHVlIGlzIDIuDQpNYXliZSBTb21uYXRoIGNh
+biBkbyBpdCBhbmQgdGVzdHMgYWdhaW4sIEkgdGhpbmsgd2UgY2FuIGdldCBtb3JlIGltcHJvdmVt
+ZW50cyBmb3IgeW91ciB0ZXN0cy4NCg0KTWFzdGVyIEJyYW5jaCg2ZmE2ODZjOGM0MjkzN2RkMDY5
+NTkxZjE2ZGU5MmU5NTRkOGVkMzRkKToNCg0KW3Jvb3RAY2VwaC10ZXN0IHNyY10jIGZvciBpIGlu
+IGBzZXEgMSAzYDsgZG8gZGF0ZSAmJiB+LzA4LnJhZG9zX3JlYWRfNGtfZm9yX2VhY2hfb2JqZWN0
+IC9ldGMvY2VwaC9jZXBoLmNvbmYgcmJkIDUwMDAgJiYgc2xlZXAgMzsgZG9uZQ0KDQpGcmkgT2N0
+IDE3IDE3OjEwOjM5IFVUQyAyMDE0DQoNClVzZWQgVGltZTo0LjQ2MTU4MQ0KDQpGcmkgT2N0IDE3
+IDE3OjEwOjQ0IFVUQyAyMDE0DQoNClVzZWQgVGltZTo0LjM4ODU3Mg0KDQpGcmkgT2N0IDE3IDE3
+OjEwOjQ4IFVUQyAyMDE0DQoNClVzZWQgVGltZTo0LjQ0ODE1Nw0KDQpbcm9vdEBjZXBoLXRlc3Qg
+c3JjXSMNCg0KW3Jvb3RAY2VwaC10ZXN0IHNyY10jIGZvciBpIGluIGBzZXEgMSAzYDsgZG8gZGF0
+ZSAmJiB+LzAxLnJhZG9zX3dyaXRlXzRrX2Zvcl9lYWNoX29iamVjdCAvZXRjL2NlcGgvY2VwaC5j
+b25mIHJiZCA1MDAwICYmIHNsZWVwIDM7IGRvbmVGcmkgT2N0IDE3IDE3OjExOjIzIFVUQyAyMDE0
+DQoNClVzZWQgVGltZToxMC42Mzg3ODMNCg0KRnJpIE9jdCAxNyAxNzoxMTozMyBVVEMgMjAxNA0K
+DQpVc2VkIFRpbWU6MTAuNzkzMjMxDQoNCkZyaSBPY3QgMTcgMTc6MTE6NDQgVVRDIDIwMTQNCg0K
+VXNlZCBUaW1lOjEwLjkwODAwMw0KDQoNCk1hc3RlciBCcmFuY2ggd2l0aCBBc3luY01lc3Nlbmdl
+cjoNCg0KW3Jvb3RAY2VwaC10ZXN0IHNyY10jIGZvciBpIGluIGBzZXEgMSAzYDsgZG8gZGF0ZSAm
+JiB+LzA4LnJhZG9zX3JlYWRfNGtfZm9yX2VhY2hfb2JqZWN0IC9ldGMvY2VwaC9jZXBoLmNvbmYg
+cmJkIDUwMDAgJiYgc2xlZXAgMzsgZG9uZQ0KDQpTdW4gT2N0IDE5IDA2OjAxOjUwIFVUQyAyMDE0
+DQoNClVzZWQgVGltZTozLjE1NTUwNg0KDQpTdW4gT2N0IDE5IDA2OjAxOjUzIFVUQyAyMDE0DQoN
+ClVzZWQgVGltZTozLjEzNDk2MQ0KDQpTdW4gT2N0IDE5IDA2OjAxOjU2IFVUQyAyMDE0DQoNClVz
+ZWQgVGltZTozLjEzNTgxNA0KDQpbcm9vdEBjZXBoLXRlc3Qgc3JjXSMgZm9yIGkgaW4gYHNlcSAx
+IDNgOyBkbyBkYXRlICYmIH4vMDEucmFkb3Nfd3JpdGVfNGtfZm9yX2VhY2hfb2JqZWN0IC9ldGMv
+Y2VwaC9jZXBoLmNvbmYgcmJkIDUwMDAgJiYgc2xlZXAgMzsgZG9uZQ0KDQpTdW4gT2N0IDE5IDA2
+OjAyOjAzIFVUQyAyMDE0DQoNClVzZWQgVGltZTo2LjUzNjMxOQ0KDQpTdW4gT2N0IDE5IDA2OjAy
+OjEwIFVUQyAyMDE0DQoNClVzZWQgVGltZTo2LjY0ODczOA0KDQpTdW4gT2N0IDE5IDA2OjAyOjE2
+IFVUQyAyMDE0DQoNClVzZWQgVGltZTo2LjU4NTE1Ng0KDQpPbiBTYXQsIE9jdCAxOCwgMjAxNCBh
+dCA0OjM3IEFNLCBTb21uYXRoIFJveSA8U29tbmF0aC5Sb3lAc2FuZGlzay5jb20+IHdyb3RlOg0K
+PiBIaSBTYWdlL0hhb21haSwNCj4NCj4gSSBkaWQgc29tZSA0SyBSYW5kb20gUmVhZCBiZW5jaG1h
+cmtpbmcgd2l0aCBsYXRlc3QgbWFzdGVyIGhhdmluZyBBc3luYyBtZXNzZW5nZXIgY2hhbmdlcyBh
+bmQgcmVzdWx0IGxvb2tzIHByb21pc2luZy4NCj4NCj4gTXkgY29uZmlndXJhdGlvbjoNCj4gLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tDQo+DQo+IDEgbm9kZSwgOCBTU0RzLCA4T1NEcywgMyBwb29scyAs
+IGVhY2ggaGFzIDMgaW1hZ2VzLiB+MjAwMCBQZyBjbHVzdGVyIA0KPiB3aWRlIENwdSA6IEludGVs
+KFIpIFhlb24oUikgQ1BVIEU1LTI2ODAgdjIgQCAyLjgwR0h6LCBkdWFsIHNvY2tldCwgSFQgZW5h
+YmxlZCwgNDAgY29yZXMuDQo+IFVzZWQga3JiZCBhcyBjbGllbnQuDQo+DQo+DQo+IDEgY2xpbmV0
+IG5vZGUgd2l0aCAzIHJiZCBpbWFnZXMgb24gMyBkaWZmZXJlbnQgcG9vbHM6DQo+IC0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0NCj4gTWFzdGVyIDoNCj4gLS0tLS0tLS0tDQo+DQo+IH4yMDNrIElPUFMsIH45MCUgbGF0ZW5j
+aWVzIHdpdGhpbiA0bXNlYywgdG90YWwgcmVhZCA6IH41LjJUQg0KPg0KPiAgICAgbGF0ICh1c2Vj
+KSA6IDQ9MC4wMSUsIDEwPTAuMDElLCA1MD0wLjAxJSwgMTAwPTAuMDElLCAyNTA9MC4wMyUNCj4g
+ICAgIGxhdCAodXNlYykgOiA1MDA9MC44NiUsIDc1MD0zLjcyJSwgMTAwMD03LjE5JQ0KPiAgICAg
+bGF0IChtc2VjKSA6IDI9MzkuMTclLCA0PTQxLjQ1JSwgMTA9Ny4yNiUsIDIwPTAuMjQlLCA1MD0w
+LjA2JQ0KPiAgICAgbGF0IChtc2VjKSA6IDEwMD0wLjAzJSwgMjUwPTAuMDElLCA1MDA9MC4wMSUN
+Cj4NCj4gY3B1OiB+MS0yICUgaWRsZQ0KPg0KPiBHaWFudDoNCj4gLS0tLS0tDQo+DQo+IH4xOTZr
+IElPUFMsIH44OS05MCUgbGF0ZW5jaWVzIHdpdGhpbiA0bXNlYywgdG90YWwgcmVhZCA6IH41LjNU
+Qg0KPg0KPiAgICAgbGF0ICh1c2VjKSA6IDI1MD0wLjAxJSwgNTAwPTAuNTElLCA3NTA9Mi43MSUs
+IDEwMDA9Ni4wMyUNCj4gICAgIGxhdCAobXNlYykgOiAyPTM0LjMyJSwgND00NS43NCUsIDEwPTEw
+LjQ2JSwgMjA9MC4yMSUsIDUwPTAuMDIlDQo+ICAgICBsYXQgKG1zZWMpIDogMTAwPTAuMDElLCAy
+NTA9MC4wMSUNCj4NCj4gY3B1OiB+MiUgaWRsZQ0KPg0KPiAyIGNsaWVudHMgd2l0aCAzIHJiZCBp
+bWFnZXMgZWFjaCBvbiAzIGRpZmZlcmVudCBwb29sczoNCj4gLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0KPg0KPiBNYXN0
+ZXIgOg0KPiAtLS0tLS0tLS0NCj4NCj4gfjIwN0sgaW9wcywgfjcwJSBsYXRlbmNpZXMgd2l0aGlu
+IDRtc2VjLCBUb3RhbCByZWFkOiB+NS45OSBUQg0KPg0KPiAgICAgbGF0ICh1c2VjKSA6IDI1MD0w
+LjAzJSwgNTAwPTAuNjMlLCA3NTA9Mi42NyUsIDEwMDA9NS4yMSUNCj4gICAgIGxhdCAobXNlYykg
+OiAyPTI1LjEyJSwgND0zNi4xOSUsIDEwPTI0LjgwJSwgMjA9My4xNiUsIDUwPTEuMzQlDQo+ICAg
+ICBsYXQgKG1zZWMpIDogMTAwPTAuNjYlLCAyNTA9MC4xOCUsIDUwMD0wLjAxJQ0KPg0KPiBjcHU6
+IH4wLTEgJSBpZGxlDQo+DQo+IEdpYW50Og0KPiAtLS0tLS0tLQ0KPiB+MTk5SyBpb3BzLCB+NjQl
+IGxhdGVuY2llcyB3aXRoaW4gNG1zZWMsIFRvdGFsIHJlYWQ6IH41Ljk0IFRCDQo+DQo+ICAgICBs
+YXQgKHVzZWMpIDogMjUwPTAuMDElLCA1MDA9MC4yNSUsIDc1MD0xLjQ3JSwgMTAwMD0zLjQ1JQ0K
+PiAgICAgbGF0IChtc2VjKSA6IDI9MjEuMjIlLCA0PTM2LjY5JSwgMTA9MzAuNjMlLCAyMD00LjI4
+JSwgNTA9MS43MCUNCj4gICAgIGxhdCAobXNlYykgOiAxMDA9MC4yOCUsIDI1MD0wLjAyJSwgNTAw
+PTAuMDElDQo+DQo+IGNwdTogfjElIGlkbGUNCj4NCj4NCj4gU28sIGluIHN1bW1hcnkgdGhlIG1h
+c3RlciB3aXRoIEFzeW5jIG1lc3NlbmdlciBoYXMgaW1wcm92ZWQgYm90aCBpbiBpb3BzIGFuZCBs
+YXRlbmN5Lg0KPg0KPiBUaGFua3MgJiBSZWdhcmRzDQo+IFNvbW5hdGgNCj4NCj4gX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX18NCj4NCj4gUExFQVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlv
+biBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVzc2FnZSBpcyBpbnRlbmRlZCBv
+bmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVudChzKSBuYW1lZCBhYm92
+ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZCByZWNp
+cGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhp
+cyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZpZXcsIGRpc3NlbWluYXRpb24sIGRp
+c3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzIG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGli
+aXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0aW9uIGluIGVycm9yLCBw
+bGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25lIG9yIGUtbWFpbCAoYXMgc2hvd24g
+YWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0aGlz
+IG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0
+cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KPg0KPiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9t
+IHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgDQo+IGlu
+IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUg
+bWFqb3Jkb21vIA0KPiBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1p
+bmZvLmh0bWwNCg0KDQoNCi0tDQpCZXN0IFJlZ2FyZHMsDQoNCldoZWF0DQo=
