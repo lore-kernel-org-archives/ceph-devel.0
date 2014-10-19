@@ -1,79 +1,189 @@
-From: Mike Christie <michaelc@cs.wisc.edu>
-Subject: Re: [PATCH 0/5] block/scsi/lio support for COMPARE_AND_WRITE
-Date: Sat, 18 Oct 2014 15:32:12 -0500
-Message-ID: <5442CE4C.9090301@cs.wisc.edu>
-References: <1413437835-13778-1-git-send-email-michaelc@cs.wisc.edu> <544220C3.2010900@acm.org>
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: Re: The Async messenger benchmark with latest master
+Date: Sun, 19 Oct 2014 13:14:34 +0800
+Message-ID: <CACJqLybtHOyPw8+2bcFGZoScoKxH7QqENi0NKUzfwuYk=D8axw@mail.gmail.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F282298FF@SACMBXIP02.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sabe.cs.wisc.edu ([128.105.6.20]:55958 "EHLO sabe.cs.wisc.edu"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751459AbaJRUcd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sat, 18 Oct 2014 16:32:33 -0400
-In-Reply-To: <544220C3.2010900@acm.org>
+Received: from mail-wg0-f42.google.com ([74.125.82.42]:58137 "EHLO
+	mail-wg0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750768AbaJSFOg convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 19 Oct 2014 01:14:36 -0400
+Received: by mail-wg0-f42.google.com with SMTP id z12so3259966wgg.1
+        for <ceph-devel@vger.kernel.org>; Sat, 18 Oct 2014 22:14:34 -0700 (PDT)
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F282298FF@SACMBXIP02.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Bart Van Assche <bvanassche@acm.org>, linux-scsi@vger.kernel.org, target-devel@vger.kernel.org, ceph-devel@vger.kernel.org, axboe@kernel.dk, Douglas Gilbert <dgilbert@interlog.com>, Robert Elliott <Elliott@hp.com>, Hannes Reinecke <hare@suse.de>
+To: Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 10/18/2014 03:11 AM, Bart Van Assche wrote:
-> On 10/16/14 07:37, michaelc@cs.wisc.edu wrote:
->> The following patches implement the SCSI command COMPARE_AND_WRITE as
->> a new
->> bio/request type REQ_CMP_AND_WRITE. COMPARE_AND_WRITE is defined in the
->> SCSI SBC (SCSI block command) specs as:
->>
->> The COMPARE AND WRITE command requests that the device server perform the
->> following as an uninterrupted series of actions:
->>
->> 1) perform the following operations:
->>          A) read the specified logical blocks; and
->>          B) transfer the specified number of logical blocks from the
->> Data-Out
->>          Buffer (i.e., the verify instance of the data is transferred
->> from the
->>          Data-Out Buffer);
->>
->> 2) compare the data read from the specified logical blocks with the
->> verify
->> instance of the data; and
->> 3) If the compared data matches, then perform the following operations:
->>          1) transfer the specified number of logical blocks from the
->> Data-Out
->>          Buffer (i.e., the write instance of the data transferred from
->> the
->>          Data-Out Buffer); and
->>          2) write those logical blocks.
-> 
-> Hello Mike,
-> 
-> Just below the above text one can find the following additional
-> requirement in SBC-4:
-> <quote>
-> 4) if the compare operation does not indicate a match, then terminate
->    the command with CHECK CONDITION status with the sense key set to
->    MISCOMPARE and the additional sense code set to MISCOMPARE DURING
->    VERIFY OPERATION. In the sense data (see 4.18 and SPC-4) the offset
->    from the start of the Data-Out Buffer to the first byte of data that
->    was not equal shall be reported in the INFORMATION field.
-> </quote>
-> 
-> What I'm wondering now is how requirement (4) can be supported if
-> REQ_CMP_AND_WRITE doesn't return the offset of the first byte that
-> didn't match ? Additionally, shouldn't compare_and_write_callback() be
-> fixed such that it returns the miscompare offset to its caller ?
-> 
+Thanks Somnath!
 
-Yeah, Hannes pointed out that the original LIO code did not support
-this. For the original code, I will fix that in another patchset to keep
-this one smaller and focused. For what I need, I have been trying to
-think of a nice way to pass additional info around. I think the options are:
+I have another simple performance test for async messenger:
 
-1. Instead of making it bio/request based, make it a
-request_queue->compare_and_write function. We then just stack them and
-can add whatever arguments/return values are necessary and do not have
-to mess with the bio/request structs and function chains.
+For 4k object read, master branch used 4.46s to complete tests, async
+Messenger used 3.14s
+For 4k object write, master branch used 10.6s to complete, async
+Messenger used 6.6s!!
 
-2. Add another argument to the end io functions that can be used to pass
-back bio/request type specific info.
+Detailf results see below, 4k object read is a simple ceph client
+program which will read 5000 objects and 4k object write will write
+5000 objects.
+I increased "ms_event_op_threads" to 10 compared to the default value is 2.
+Maybe Somnath can do it and tests again, I think we can get more
+improvements for your tests.
 
+Master Branch(6fa686c8c42937dd069591f16de92e954d8ed34d):
+
+[root@ceph-test src]# for i in `seq 1 3`; do date &&
+~/08.rados_read_4k_for_each_object /etc/ceph/ceph.conf rbd 5000 &&
+sleep 3; done
+
+Fri Oct 17 17:10:39 UTC 2014
+
+Used Time:4.461581
+
+Fri Oct 17 17:10:44 UTC 2014
+
+Used Time:4.388572
+
+Fri Oct 17 17:10:48 UTC 2014
+
+Used Time:4.448157
+
+[root@ceph-test src]#
+
+[root@ceph-test src]# for i in `seq 1 3`; do date &&
+~/01.rados_write_4k_for_each_object /etc/ceph/ceph.conf rbd 5000 &&
+sleep 3; doneFri Oct 17 17:11:23 UTC 2014
+
+Used Time:10.638783
+
+Fri Oct 17 17:11:33 UTC 2014
+
+Used Time:10.793231
+
+Fri Oct 17 17:11:44 UTC 2014
+
+Used Time:10.908003
+
+
+Master Branch with AsyncMessenger:
+
+[root@ceph-test src]# for i in `seq 1 3`; do date &&
+~/08.rados_read_4k_for_each_object /etc/ceph/ceph.conf rbd 5000 &&
+sleep 3; done
+
+Sun Oct 19 06:01:50 UTC 2014
+
+Used Time:3.155506
+
+Sun Oct 19 06:01:53 UTC 2014
+
+Used Time:3.134961
+
+Sun Oct 19 06:01:56 UTC 2014
+
+Used Time:3.135814
+
+[root@ceph-test src]# for i in `seq 1 3`; do date &&
+~/01.rados_write_4k_for_each_object /etc/ceph/ceph.conf rbd 5000 &&
+sleep 3; done
+
+Sun Oct 19 06:02:03 UTC 2014
+
+Used Time:6.536319
+
+Sun Oct 19 06:02:10 UTC 2014
+
+Used Time:6.648738
+
+Sun Oct 19 06:02:16 UTC 2014
+
+Used Time:6.585156
+
+On Sat, Oct 18, 2014 at 4:37 AM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
+> Hi Sage/Haomai,
+>
+> I did some 4K Random Read benchmarking with latest master having Async messenger changes and result looks promising.
+>
+> My configuration:
+> ---------------------
+>
+> 1 node, 8 SSDs, 8OSDs, 3 pools , each has 3 images. ~2000 Pg cluster wide
+> Cpu : Intel(R) Xeon(R) CPU E5-2680 v2 @ 2.80GHz, dual socket, HT enabled, 40 cores.
+> Used krbd as client.
+>
+>
+> 1 clinet node with 3 rbd images on 3 different pools:
+> -------------------------------------------------------------------
+> Master :
+> ---------
+>
+> ~203k IOPS, ~90% latencies within 4msec, total read : ~5.2TB
+>
+>     lat (usec) : 4=0.01%, 10=0.01%, 50=0.01%, 100=0.01%, 250=0.03%
+>     lat (usec) : 500=0.86%, 750=3.72%, 1000=7.19%
+>     lat (msec) : 2=39.17%, 4=41.45%, 10=7.26%, 20=0.24%, 50=0.06%
+>     lat (msec) : 100=0.03%, 250=0.01%, 500=0.01%
+>
+> cpu: ~1-2 % idle
+>
+> Giant:
+> ------
+>
+> ~196k IOPS, ~89-90% latencies within 4msec, total read : ~5.3TB
+>
+>     lat (usec) : 250=0.01%, 500=0.51%, 750=2.71%, 1000=6.03%
+>     lat (msec) : 2=34.32%, 4=45.74%, 10=10.46%, 20=0.21%, 50=0.02%
+>     lat (msec) : 100=0.01%, 250=0.01%
+>
+> cpu: ~2% idle
+>
+> 2 clients with 3 rbd images each on 3 different pools:
+> -------------------------------------------------------------------
+>
+> Master :
+> ---------
+>
+> ~207K iops, ~70% latencies within 4msec, Total read: ~5.99 TB
+>
+>     lat (usec) : 250=0.03%, 500=0.63%, 750=2.67%, 1000=5.21%
+>     lat (msec) : 2=25.12%, 4=36.19%, 10=24.80%, 20=3.16%, 50=1.34%
+>     lat (msec) : 100=0.66%, 250=0.18%, 500=0.01%
+>
+> cpu: ~0-1 % idle
+>
+> Giant:
+> --------
+> ~199K iops, ~64% latencies within 4msec, Total read: ~5.94 TB
+>
+>     lat (usec) : 250=0.01%, 500=0.25%, 750=1.47%, 1000=3.45%
+>     lat (msec) : 2=21.22%, 4=36.69%, 10=30.63%, 20=4.28%, 50=1.70%
+>     lat (msec) : 100=0.28%, 250=0.02%, 500=0.01%
+>
+> cpu: ~1% idle
+>
+>
+> So, in summary the master with Async messenger has improved both in iops and latency.
+>
+> Thanks & Regards
+> Somnath
+>
+> ________________________________
+>
+> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
+-- 
+Best Regards,
+
+Wheat
