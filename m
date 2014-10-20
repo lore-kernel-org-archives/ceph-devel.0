@@ -1,89 +1,110 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: Teuthology smoke test case(tasks/rados_python.yaml) failed on giant
-Date: Mon, 20 Oct 2014 10:16:14 -0700
-Message-ID: <CAPYLRzjhEN011UOpQwJvoH6BFr6rLL4VziO_ZzQ=JMYBB0Fk6Q@mail.gmail.com>
+From: Aanchal Agrawal <Aanchal.Agrawal@sandisk.com>
+Subject: RE: Teuthology smoke test case(tasks/rados_python.yaml) failed on
+ giant
+Date: Mon, 20 Oct 2014 18:56:57 +0000
+Message-ID: <7F4FDDF05D5B3241ABA5EB82D169E31E090E93D8@SACMBXIP02.sdcorp.global.sandisk.com>
 References: <7F4FDDF05D5B3241ABA5EB82D169E31E090E9031@SACMBXIP02.sdcorp.global.sandisk.com>
+ <CAPYLRzjhEN011UOpQwJvoH6BFr6rLL4VziO_ZzQ=JMYBB0Fk6Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f53.google.com ([209.85.216.53]:40653 "EHLO
-	mail-qa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750807AbaJTRQR convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 20 Oct 2014 13:16:17 -0400
-Received: by mail-qa0-f53.google.com with SMTP id v10so3711470qac.12
-        for <ceph-devel@vger.kernel.org>; Mon, 20 Oct 2014 10:16:15 -0700 (PDT)
-In-Reply-To: <7F4FDDF05D5B3241ABA5EB82D169E31E090E9031@SACMBXIP02.sdcorp.global.sandisk.com>
+Received: from mail-by2on0083.outbound.protection.outlook.com ([207.46.100.83]:30298
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751360AbaJTS5B (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 20 Oct 2014 14:57:01 -0400
+In-Reply-To: <CAPYLRzjhEN011UOpQwJvoH6BFr6rLL4VziO_ZzQ=JMYBB0Fk6Q@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Aanchal Agrawal <Aanchal.Agrawal@sandisk.com>
+To: Gregory Farnum <greg@inktank.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-It sounds like you're running the master branch ceph-qa-suite tests
-against the giant branch of Ceph. The tests should pass if you resolve
-that.
-
-If not, or if you have some particular need for this function in the
-Giant release, you (or someone you work with) can submit a backport
-Pull Request, but this is a feature addition and Giant is pretty close
-to release so I'm not sure it's appropriate for merging right now.
--Greg
-Software Engineer #42 @ http://inktank.com | http://ceph.com
-
-
-On Sun, Oct 19, 2014 at 11:04 PM, Aanchal Agrawal
-<Aanchal.Agrawal@sandisk.com> wrote:
-> Hi All,
->
-> I am using giant branch for the development purpose.
-> One of the teuthology smoke test case 'ceph-qa-suite/suites/smoke/basic/tasks/rados_python.yaml' is failing on it.
->
-> From teuthology.log
-> ==========================
-> 2014-10-14T11:31:09.461 INFO:teuthology.task.workunit.client.0.plana02.stderr:test_rados.test_rados_init ... ok
-> 2014-10-14T11:31:09.489 INFO:teuthology.task.workunit.client.0.plana02.stderr:test_rados.test_ioctx_context_manager ... ok
-> 2014-10-14T11:31:09.490 INFO:teuthology.task.workunit.client.0.plana02.stderr:
-> 2014-10-14T11:31:09.490 INFO:teuthology.task.workunit.client.0.plana02.stderr:======================================================================
-> 2014-10-14T11:31:09.490 INFO:teuthology.task.workunit.client.0.plana02.stderr:ERROR: test_rados.TestRados.test_get_pool_base_tier
-> 2014-10-14T11:31:09.490 INFO:teuthology.task.workunit.client.0.plana02.stderr:----------------------------------------------------------------------
-> 2014-10-14T11:31:09.490 INFO:teuthology.task.workunit.client.0.plana02.stderr:Traceback (most recent call last):
-> 2014-10-14T11:31:09.491 INFO:teuthology.task.workunit.client.0.plana02.stderr:  File "/usr/local/lib/python2.7/dist-packages/nose/case.py", line 197, in runTest
-> 2014-10-14T11:31:09.491 INFO:teuthology.task.workunit.client.0.plana02.stderr:    self.test(*self.arg)
-> 2014-10-14T11:31:09.491 INFO:teuthology.task.workunit.client.0.plana02.stderr:  File "/home/ubuntu/cephtest/mnt.0/client.0/tmp/test_rados.py", line 96, in test_get_pool_base_tier
-> 2014-10-14T11:31:09.491 INFO:teuthology.task.workunit.client.0.plana02.stderr:    pool_id = self.rados.pool_lookup('foo')
-> 2014-10-14T11:31:09.491 INFO:teuthology.task.workunit.client.0.plana02.stderr:AttributeError: 'Rados' object has no attribute 'pool_lookup'
-> 2014-10-14T11:31:09.491 INFO:teuthology.task.workunit.client.0.plana02.stderr:
-> 2014-10-14T11:31:09.491 INFO:teuthology.task.workunit.client.0.plana02.stderr:----------------------------------------------------------------------
-> 2014-10-14T11:31:09.492 INFO:teuthology.task.workunit.client.0.plana02.stderr:Ran 36 tests in 98.393s
-> 2014-10-14T11:31:09.492 INFO:teuthology.task.workunit.client.0.plana02.stderr:
-> 2014-10-14T11:31:09.492 INFO:teuthology.task.workunit.client.0.plana02.stderr:FAILED (errors=1)
-> ============================
->
-> "self.rados.pool_lookup()" is a part of file 'src/test/pybind/test_rados.py'.
-> =======================================
-> 91    def test_get_pool_base_tier(self):
->
-> 95          try:
-> 96                           pool_id = self.rados.pool_lookup('foo')
-> ===============================================
->
-> Failure is due to latest commits on '/src/pybind/rados.py' which is in master and not present in giant.
-> It defines 'pool_lookup()' for rados object .
->
-> Following is a commit:
-> commit : d8ae14f48965e2aff191d67fda7b5ffd85840d47 to master.
->
-> We need to have this commit in giant branch in order to pass the test case.
-> Can anyone pull it to giant?
->
-> Thanks,
-> Aanchal
->
-> ________________________________
->
-> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+R290IGl0LiBUaGFua3MgZm9yIHRoZSByZXBseSBHcmVnLg0KDQpSZWdhcmRzLA0KQWFuY2hhbA0K
+DQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogR3JlZ29yeSBGYXJudW0gW21haWx0
+bzpncmVnQGlua3RhbmsuY29tXSANClNlbnQ6IE1vbmRheSwgT2N0b2JlciAyMCwgMjAxNCAxMDo0
+NiBQTQ0KVG86IEFhbmNoYWwgQWdyYXdhbA0KQ2M6IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3Jn
+DQpTdWJqZWN0OiBSZTogVGV1dGhvbG9neSBzbW9rZSB0ZXN0IGNhc2UodGFza3MvcmFkb3NfcHl0
+aG9uLnlhbWwpIGZhaWxlZCBvbiBnaWFudA0KDQpJdCBzb3VuZHMgbGlrZSB5b3UncmUgcnVubmlu
+ZyB0aGUgbWFzdGVyIGJyYW5jaCBjZXBoLXFhLXN1aXRlIHRlc3RzIGFnYWluc3QgdGhlIGdpYW50
+IGJyYW5jaCBvZiBDZXBoLiBUaGUgdGVzdHMgc2hvdWxkIHBhc3MgaWYgeW91IHJlc29sdmUgdGhh
+dC4NCg0KSWYgbm90LCBvciBpZiB5b3UgaGF2ZSBzb21lIHBhcnRpY3VsYXIgbmVlZCBmb3IgdGhp
+cyBmdW5jdGlvbiBpbiB0aGUgR2lhbnQgcmVsZWFzZSwgeW91IChvciBzb21lb25lIHlvdSB3b3Jr
+IHdpdGgpIGNhbiBzdWJtaXQgYSBiYWNrcG9ydCBQdWxsIFJlcXVlc3QsIGJ1dCB0aGlzIGlzIGEg
+ZmVhdHVyZSBhZGRpdGlvbiBhbmQgR2lhbnQgaXMgcHJldHR5IGNsb3NlIHRvIHJlbGVhc2Ugc28g
+SSdtIG5vdCBzdXJlIGl0J3MgYXBwcm9wcmlhdGUgZm9yIG1lcmdpbmcgcmlnaHQgbm93Lg0KLUdy
+ZWcNClNvZnR3YXJlIEVuZ2luZWVyICM0MiBAIGh0dHA6Ly9pbmt0YW5rLmNvbSB8IGh0dHA6Ly9j
+ZXBoLmNvbQ0KDQoNCk9uIFN1biwgT2N0IDE5LCAyMDE0IGF0IDExOjA0IFBNLCBBYW5jaGFsIEFn
+cmF3YWwgPEFhbmNoYWwuQWdyYXdhbEBzYW5kaXNrLmNvbT4gd3JvdGU6DQo+IEhpIEFsbCwNCj4N
+Cj4gSSBhbSB1c2luZyBnaWFudCBicmFuY2ggZm9yIHRoZSBkZXZlbG9wbWVudCBwdXJwb3NlLg0K
+PiBPbmUgb2YgdGhlIHRldXRob2xvZ3kgc21va2UgdGVzdCBjYXNlICdjZXBoLXFhLXN1aXRlL3N1
+aXRlcy9zbW9rZS9iYXNpYy90YXNrcy9yYWRvc19weXRob24ueWFtbCcgaXMgZmFpbGluZyBvbiBp
+dC4NCj4NCj4gRnJvbSB0ZXV0aG9sb2d5LmxvZw0KPiA9PT09PT09PT09PT09PT09PT09PT09PT09
+PQ0KPiAyMDE0LTEwLTE0VDExOjMxOjA5LjQ2MSANCj4gSU5GTzp0ZXV0aG9sb2d5LnRhc2sud29y
+a3VuaXQuY2xpZW50LjAucGxhbmEwMi5zdGRlcnI6dGVzdF9yYWRvcy50ZXN0Xw0KPiByYWRvc19p
+bml0IC4uLiBvaw0KPiAyMDE0LTEwLTE0VDExOjMxOjA5LjQ4OSANCj4gSU5GTzp0ZXV0aG9sb2d5
+LnRhc2sud29ya3VuaXQuY2xpZW50LjAucGxhbmEwMi5zdGRlcnI6dGVzdF9yYWRvcy50ZXN0Xw0K
+PiBpb2N0eF9jb250ZXh0X21hbmFnZXIgLi4uIG9rDQo+IDIwMTQtMTAtMTRUMTE6MzE6MDkuNDkw
+IElORk86dGV1dGhvbG9neS50YXNrLndvcmt1bml0LmNsaWVudC4wLnBsYW5hMDIuc3RkZXJyOg0K
+PiAyMDE0LTEwLTE0VDExOjMxOjA5LjQ5MCANCj4gSU5GTzp0ZXV0aG9sb2d5LnRhc2sud29ya3Vu
+aXQuY2xpZW50LjAucGxhbmEwMi5zdGRlcnI6PT09PT09PT09PT09PT09PQ0KPiA9PT09PT09PT09
+PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0NCj4gMjAxNC0xMC0x
+NFQxMTozMTowOS40OTAgDQo+IElORk86dGV1dGhvbG9neS50YXNrLndvcmt1bml0LmNsaWVudC4w
+LnBsYW5hMDIuc3RkZXJyOkVSUk9SOiANCj4gdGVzdF9yYWRvcy5UZXN0UmFkb3MudGVzdF9nZXRf
+cG9vbF9iYXNlX3RpZXINCj4gMjAxNC0xMC0xNFQxMTozMTowOS40OTAgDQo+IElORk86dGV1dGhv
+bG9neS50YXNrLndvcmt1bml0LmNsaWVudC4wLnBsYW5hMDIuc3RkZXJyOi0tLS0tLS0tLS0tLS0t
+LS0NCj4gLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tDQo+IDIwMTQtMTAtMTRUMTE6MzE6MDkuNDkwIElORk86dGV1dGhvbG9neS50YXNrLndvcmt1
+bml0LmNsaWVudC4wLnBsYW5hMDIuc3RkZXJyOlRyYWNlYmFjayAobW9zdCByZWNlbnQgY2FsbCBs
+YXN0KToNCj4gMjAxNC0xMC0xNFQxMTozMTowOS40OTEgSU5GTzp0ZXV0aG9sb2d5LnRhc2sud29y
+a3VuaXQuY2xpZW50LjAucGxhbmEwMi5zdGRlcnI6ICBGaWxlICIvdXNyL2xvY2FsL2xpYi9weXRo
+b24yLjcvZGlzdC1wYWNrYWdlcy9ub3NlL2Nhc2UucHkiLCBsaW5lIDE5NywgaW4gcnVuVGVzdA0K
+PiAyMDE0LTEwLTE0VDExOjMxOjA5LjQ5MSBJTkZPOnRldXRob2xvZ3kudGFzay53b3JrdW5pdC5j
+bGllbnQuMC5wbGFuYTAyLnN0ZGVycjogICAgc2VsZi50ZXN0KCpzZWxmLmFyZykNCj4gMjAxNC0x
+MC0xNFQxMTozMTowOS40OTEgSU5GTzp0ZXV0aG9sb2d5LnRhc2sud29ya3VuaXQuY2xpZW50LjAu
+cGxhbmEwMi5zdGRlcnI6ICBGaWxlICIvaG9tZS91YnVudHUvY2VwaHRlc3QvbW50LjAvY2xpZW50
+LjAvdG1wL3Rlc3RfcmFkb3MucHkiLCBsaW5lIDk2LCBpbiB0ZXN0X2dldF9wb29sX2Jhc2VfdGll
+cg0KPiAyMDE0LTEwLTE0VDExOjMxOjA5LjQ5MSBJTkZPOnRldXRob2xvZ3kudGFzay53b3JrdW5p
+dC5jbGllbnQuMC5wbGFuYTAyLnN0ZGVycjogICAgcG9vbF9pZCA9IHNlbGYucmFkb3MucG9vbF9s
+b29rdXAoJ2ZvbycpDQo+IDIwMTQtMTAtMTRUMTE6MzE6MDkuNDkxIElORk86dGV1dGhvbG9neS50
+YXNrLndvcmt1bml0LmNsaWVudC4wLnBsYW5hMDIuc3RkZXJyOkF0dHJpYnV0ZUVycm9yOiAnUmFk
+b3MnIG9iamVjdCBoYXMgbm8gYXR0cmlidXRlICdwb29sX2xvb2t1cCcNCj4gMjAxNC0xMC0xNFQx
+MTozMTowOS40OTEgSU5GTzp0ZXV0aG9sb2d5LnRhc2sud29ya3VuaXQuY2xpZW50LjAucGxhbmEw
+Mi5zdGRlcnI6DQo+IDIwMTQtMTAtMTRUMTE6MzE6MDkuNDkxIA0KPiBJTkZPOnRldXRob2xvZ3ku
+dGFzay53b3JrdW5pdC5jbGllbnQuMC5wbGFuYTAyLnN0ZGVycjotLS0tLS0tLS0tLS0tLS0tDQo+
+IC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0K
+PiAyMDE0LTEwLTE0VDExOjMxOjA5LjQ5MiANCj4gSU5GTzp0ZXV0aG9sb2d5LnRhc2sud29ya3Vu
+aXQuY2xpZW50LjAucGxhbmEwMi5zdGRlcnI6UmFuIDM2IHRlc3RzIGluIA0KPiA5OC4zOTNzDQo+
+IDIwMTQtMTAtMTRUMTE6MzE6MDkuNDkyIElORk86dGV1dGhvbG9neS50YXNrLndvcmt1bml0LmNs
+aWVudC4wLnBsYW5hMDIuc3RkZXJyOg0KPiAyMDE0LTEwLTE0VDExOjMxOjA5LjQ5MiANCj4gSU5G
+Tzp0ZXV0aG9sb2d5LnRhc2sud29ya3VuaXQuY2xpZW50LjAucGxhbmEwMi5zdGRlcnI6RkFJTEVE
+IA0KPiAoZXJyb3JzPTEpID09PT09PT09PT09PT09PT09PT09PT09PT09PT0NCj4NCj4gInNlbGYu
+cmFkb3MucG9vbF9sb29rdXAoKSIgaXMgYSBwYXJ0IG9mIGZpbGUgJ3NyYy90ZXN0L3B5YmluZC90
+ZXN0X3JhZG9zLnB5Jy4NCj4gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09
+DQo+IDkxICAgIGRlZiB0ZXN0X2dldF9wb29sX2Jhc2VfdGllcihzZWxmKToNCj4NCj4gOTUgICAg
+ICAgICAgdHJ5Og0KPiA5NiAgICAgICAgICAgICAgICAgICAgICAgICAgIHBvb2xfaWQgPSBzZWxm
+LnJhZG9zLnBvb2xfbG9va3VwKCdmb28nKQ0KPiA9PT09PT09PT09PT09PT09PT09PT09PT09PT09
+PT09PT09PT09PT09PT09PT09PQ0KPg0KPiBGYWlsdXJlIGlzIGR1ZSB0byBsYXRlc3QgY29tbWl0
+cyBvbiAnL3NyYy9weWJpbmQvcmFkb3MucHknIHdoaWNoIGlzIGluIG1hc3RlciBhbmQgbm90IHBy
+ZXNlbnQgaW4gZ2lhbnQuDQo+IEl0IGRlZmluZXMgJ3Bvb2xfbG9va3VwKCknIGZvciByYWRvcyBv
+YmplY3QgLg0KPg0KPiBGb2xsb3dpbmcgaXMgYSBjb21taXQ6DQo+IGNvbW1pdCA6IGQ4YWUxNGY0
+ODk2NWUyYWZmMTkxZDY3ZmRhN2I1ZmZkODU4NDBkNDcgdG8gbWFzdGVyLg0KPg0KPiBXZSBuZWVk
+IHRvIGhhdmUgdGhpcyBjb21taXQgaW4gZ2lhbnQgYnJhbmNoIGluIG9yZGVyIHRvIHBhc3MgdGhl
+IHRlc3QgY2FzZS4NCj4gQ2FuIGFueW9uZSBwdWxsIGl0IHRvIGdpYW50Pw0KPg0KPiBUaGFua3Ms
+DQo+IEFhbmNoYWwNCj4NCj4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCj4NCj4g
+UExFQVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmlj
+IG1haWwgbWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25h
+dGVkIHJlY2lwaWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3Nh
+Z2UgaXMgbm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVk
+IHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFu
+eSByZXZpZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlz
+IG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhp
+cyBjb21tdW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVs
+ZXBob25lIG9yIGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95
+IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3
+aGV0aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KPg0K
+PiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5z
+dWJzY3JpYmUgY2VwaC1kZXZlbCIgDQo+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpv
+cmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIA0KPiBpbmZvIGF0ICBodHRwOi8v
+dmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCg==
