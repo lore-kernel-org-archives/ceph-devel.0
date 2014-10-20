@@ -1,62 +1,137 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: ceph 0.86 : rbd_cache=true, iops a lot slower on randread 4K
-Date: Mon, 20 Oct 2014 06:18:48 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2822D508@SACMBXIP02.sdcorp.global.sandisk.com>
-References: <6525d3a1-dd42-4655-a418-4e24c5e41f8e@mailpro>
- <56238ae2-2d74-4514-98cc-872ee6df0100@mailpro>
+From: Alexandre DERUMIER <aderumier@odiso.com>
+Subject: Re: ceph 0.86 : rbd_cache=true, iops a lot slower on randread 4K
+Date: Mon, 20 Oct 2014 08:39:12 +0200 (CEST)
+Message-ID: <f954e23b-9940-4f7f-8b20-2efd148eb0c6@mailpro>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2822D508@SACMBXIP02.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1bon0088.outbound.protection.outlook.com ([157.56.111.88]:30784
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752032AbaJTGSv (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 20 Oct 2014 02:18:51 -0400
-In-Reply-To: <56238ae2-2d74-4514-98cc-872ee6df0100@mailpro>
-Content-Language: en-US
+Received: from mailpro.odiso.net ([89.248.209.98]:54702 "EHLO
+	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752322AbaJTGjV convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 20 Oct 2014 02:39:21 -0400
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2822D508@SACMBXIP02.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre DERUMIER <aderumier@odiso.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: ceph-devel@vger.kernel.org
 
-SGkgQWxleGFuZHJlLA0KDQpZZXMsIGl0IGlzIHJlbGF0ZWQgdG8gdGhlIGRlZmVjdCBJIGZpbGVk
-Lg0KSSB0aGluayB3aXRoIGxpYnJiZCBlbmdpbmUgLCBkaXJlY3QgPTEgaXMgYSBub29wLiBJdCBp
-cyBnb2luZyB0aHJvdWdoIGxpYnJiZCBlbmdpbmUgbm90IHRocm91Z2gga2VybmVsLiBXaGV0aGVy
-IGl0IHdpbGwgdXNlIGNhY2hlIG9yIG5vdCBkZXBlbmRzIHVwb24gdGhlIHJiZF9jYWNoZSBmbGFn
-Lg0KVGhpcyBpcyBzdXBwb3NlZCB0byBiZSBmaXhlZCBvbiB0aGUgbGF0ZXN0IGNvZGUgYnV0IEkg
-ZGlkbid0IGhhdmUgdGltZSB0byB0ZXN0IHRoaXMgb3V0Lg0KSXQgc2VlbXMgdGhlIGZpeCBpcyBu
-b3QgdGhlcmUgaW4gMC44Ni4NCkNvdWxkIHlvdSBwbGVhc2UgY2hlY2sgd2hldGhlciB0aGUgZm9s
-bG93aW5nIGNvbW1pdCBpcyB0aGVyZSBpbiB5b3VyIGJyYW5jaCBvciBub3QgPw0KDQo4MjE3NWVj
-OTRhY2M4OWRjNzVkYTAxNTRmODYxODdmYjJlNGRiZjVlDQoNClRoYW5rcyAmIFJlZ2FyZHMNClNv
-bW5hdGgNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IGNlcGgtZGV2ZWwtb3du
-ZXJAdmdlci5rZXJuZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5v
-cmddIE9uIEJlaGFsZiBPZiBBbGV4YW5kcmUgREVSVU1JRVINClNlbnQ6IFN1bmRheSwgT2N0b2Jl
-ciAxOSwgMjAxNCAxMTowMiBQTQ0KVG86IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQpTdWJq
-ZWN0OiBjZXBoIDAuODYgOiByYmRfY2FjaGU9dHJ1ZSwgaW9wcyBhIGxvdCBzbG93ZXIgb24gcmFu
-ZHJlYWQgNEsNCg0KSGksDQoNCkknbSBub3Qgc3VyZSBpdCdzIHJlbGF0ZWQgdG8gdGhpcyBidWcN
-Cmh0dHA6Ly90cmFja2VyLmNlcGguY29tL2lzc3Vlcy85NTEzDQoNCkJ1dCwgd2hlbiB3aXRoIHRo
-aXMgZmlvLXJiZCBiZW5jaG1hcmsNCg0KW2dsb2JhbF0NCmlvZW5naW5lPXJiZA0KY2xpZW50bmFt
-ZT1hZG1pbg0KcG9vbD10ZXN0DQpyYmRuYW1lPXRlc3QNCmludmFsaWRhdGU9MA0Kcnc9cmFuZHJl
-YWQNCmJzPTRrDQpkaXJlY3Q9MQ0KbnVtam9icz04DQpncm91cF9yZXBvcnRpbmc9MQ0Kc2l6ZT0x
-MEcNCg0KW3JiZF9pb2RlcHRoMzJdDQppb2RlcHRoPTMyDQoNCg0KDQpJIGhhdmUgYXJvdW5kDQoN
-CjQwMDAwaW9wcyAoY3B1IGJvdW5kIG9uIGNsaWVudCkgd2l0aCByYmRfY2FjaGU9ZmFsc2UNCg0K
-dnMNCg0KMTMwMDBpb3BzICg0MCVjcHUgdXNhZ2Ugb24gY2xpZW50KSB3aXRoIHJiZF9jYWNoZT10
-cnVlDQoNCg0KKE5vdGUgdGhhdCBpdCBzaG91bGQgYmUgZGlyZWN0IGlvcywgc28gSXQgc2hvdWxk
-IGJ5cGFzcyB0aGUgY2FjaGUpLg0KU2VlbSB0byBiZSBhIGxvY2sgb3Igc29tZXRoaW5nIGxpa2Ug
-dGhhdCwgYXMgdGhlIGNwdSB1c2FnZSBpcyBhIGxvdCBsb3dlciB0b28uDQoNCklzIGl0IHRoZSBl
-eHBlY3RlZCBiZWhhdmlvciA/DQotLQ0KVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNl
-bmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluIHRoZSBib2R5IG9mIGEgbWVz
-c2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIGluZm8gYXQg
-IGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KDQpfX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fXw0KDQpQTEVBU0UgTk9URTogVGhlIGluZm9ybWF0aW9uIGNv
-bnRhaW5lZCBpbiB0aGlzIGVsZWN0cm9uaWMgbWFpbCBtZXNzYWdlIGlzIGludGVuZGVkIG9ubHkg
-Zm9yIHRoZSB1c2Ugb2YgdGhlIGRlc2lnbmF0ZWQgcmVjaXBpZW50KHMpIG5hbWVkIGFib3ZlLiBJ
-ZiB0aGUgcmVhZGVyIG9mIHRoaXMgbWVzc2FnZSBpcyBub3QgdGhlIGludGVuZGVkIHJlY2lwaWVu
-dCwgeW91IGFyZSBoZXJlYnkgbm90aWZpZWQgdGhhdCB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIG1l
-c3NhZ2UgaW4gZXJyb3IgYW5kIHRoYXQgYW55IHJldmlldywgZGlzc2VtaW5hdGlvbiwgZGlzdHJp
-YnV0aW9uLCBvciBjb3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBpcyBzdHJpY3RseSBwcm9oaWJpdGVk
-LiBJZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGNvbW11bmljYXRpb24gaW4gZXJyb3IsIHBsZWFz
-ZSBub3RpZnkgdGhlIHNlbmRlciBieSB0ZWxlcGhvbmUgb3IgZS1tYWlsIChhcyBzaG93biBhYm92
-ZSkgaW1tZWRpYXRlbHkgYW5kIGRlc3Ryb3kgYW55IGFuZCBhbGwgY29waWVzIG9mIHRoaXMgbWVz
-c2FnZSBpbiB5b3VyIHBvc3Nlc3Npb24gKHdoZXRoZXIgaGFyZCBjb3BpZXMgb3IgZWxlY3Ryb25p
-Y2FsbHkgc3RvcmVkIGNvcGllcykuDQoNCg==
+>>Could you please check whether the following commit is there in your =
+branch or not ?=20
+>>
+>>82175ec94acc89dc75da0154f86187fb2e4dbf5e=20
+
+I'm this debian repository
+http://gitbuilder.ceph.com/ceph-deb-wheezy-x86_64-basic/ref/v0.86
+
+Don't known how to check if the commit was inside or not.
+
+
+But the good new,
+I just tried on last master
+http://gitbuilder.ceph.com/ceph-deb-wheezy-x86_64-basic/ref/master
+
+
+and Indeed, the problem is fixed !
+
+
+Thanks for help,
+
+Alexandre
+
+
+----- Mail original -----=20
+
+De: "Somnath Roy" <Somnath.Roy@sandisk.com>=20
+=C3=80: "Alexandre DERUMIER" <aderumier@odiso.com>, ceph-devel@vger.ker=
+nel.org=20
+Envoy=C3=A9: Lundi 20 Octobre 2014 08:18:48=20
+Objet: RE: ceph 0.86 : rbd_cache=3Dtrue, iops a lot slower on randread =
+4K=20
+
+Hi Alexandre,=20
+
+Yes, it is related to the defect I filed.=20
+I think with librbd engine , direct =3D1 is a noop. It is going through=
+ librbd engine not through kernel. Whether it will use cache or not dep=
+ends upon the rbd_cache flag.=20
+This is supposed to be fixed on the latest code but I didn't have time =
+to test this out.=20
+It seems the fix is not there in 0.86.=20
+Could you please check whether the following commit is there in your br=
+anch or not ?=20
+
+82175ec94acc89dc75da0154f86187fb2e4dbf5e=20
+
+Thanks & Regards=20
+Somnath=20
+
+-----Original Message-----=20
+=46rom: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.=
+kernel.org] On Behalf Of Alexandre DERUMIER=20
+Sent: Sunday, October 19, 2014 11:02 PM=20
+To: ceph-devel@vger.kernel.org=20
+Subject: ceph 0.86 : rbd_cache=3Dtrue, iops a lot slower on randread 4K=
+=20
+
+Hi,=20
+
+I'm not sure it's related to this bug=20
+http://tracker.ceph.com/issues/9513=20
+
+But, when with this fio-rbd benchmark=20
+
+[global]=20
+ioengine=3Drbd=20
+clientname=3Dadmin=20
+pool=3Dtest=20
+rbdname=3Dtest=20
+invalidate=3D0=20
+rw=3Drandread=20
+bs=3D4k=20
+direct=3D1=20
+numjobs=3D8=20
+group_reporting=3D1=20
+size=3D10G=20
+
+[rbd_iodepth32]=20
+iodepth=3D32=20
+
+
+
+I have around=20
+
+40000iops (cpu bound on client) with rbd_cache=3Dfalse=20
+
+vs=20
+
+13000iops (40%cpu usage on client) with rbd_cache=3Dtrue=20
+
+
+(Note that it should be direct ios, so It should bypass the cache).=20
+Seem to be a lock or something like that, as the cpu usage is a lot low=
+er too.=20
+
+Is it the expected behavior ?=20
+--=20
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n the body of a message to majordomo@vger.kernel.org More majordomo inf=
+o at http://vger.kernel.org/majordomo-info.html=20
+
+________________________________=20
+
+PLEASE NOTE: The information contained in this electronic mail message =
+is intended only for the use of the designated recipient(s) named above=
+=2E If the reader of this message is not the intended recipient, you ar=
+e hereby notified that you have received this message in error and that=
+ any review, dissemination, distribution, or copying of this message is=
+ strictly prohibited. If you have received this communication in error,=
+ please notify the sender by telephone or e-mail (as shown above) immed=
+iately and destroy any and all copies of this message in your possessio=
+n (whether hard copies or electronically stored copies).=20
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
