@@ -1,68 +1,80 @@
-From: Aanchal Agrawal <Aanchal.Agrawal@sandisk.com>
-Subject: Teuthology smoke test case(tasks/rados_python.yaml) failed on giant
-Date: Mon, 20 Oct 2014 06:04:16 +0000
-Message-ID: <7F4FDDF05D5B3241ABA5EB82D169E31E090E9031@SACMBXIP02.sdcorp.global.sandisk.com>
+From: minchen <minchen-qfb7ZC4agRC9jIzG8Sm66w@public.gmane.org>
+Subject: =?utf-8?q?how_to_resolve_=3A_start_mon_assert_=3D=3D?=
+	=?utf-8?q?_0?=
+Date: Mon, 20 Oct 2014 15:42:02 +0800 (GMT+08:00)
+Message-ID: <AHMAqgChAI4PSJ0trIidMqrw.1.1413790922005.Hmail.minchen@ubuntukylin.com>
 Mime-Version: 1.0
+Content-Type: multipart/mixed; boundary="===============1623853059=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
+
+--===============1623853059==
+Content-Type: multipart/alternative; BOUNDARY="=_Part_847080_1012851809.1413790922005"
+
+--=_Part_847080_1012851809.1413790922005
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: base64
+
+PGRpdj5IZWxsbyAsIGFsbDwvZGl2PjxkaXY+PGJyPjwvZGl2PjxkaXY+d2hlbiBpIHJlc3RhcnQg
+YW55IG1vbiBpbiBtb24gY2x1c3Rlcnttb24uYSwgbW9uLmIsIG1vbi5jfSBhZnRlciBraWxsIGFs
+bCBtb25zKGRpc2FibGVkIGNlcGh4KS48L2Rpdj48ZGl2PkFuIGV4Y2VwdGlvbiBvY2N1cmVkIGFz
+IGZvbGxvd3M6PC9kaXY+PGRpdj48YnI+PC9kaXY+PGRpdj4jIGNlcGgtbW9uIC1pIGI8L2Rpdj48
+ZGl2Pm1vbi9BdXRoTW9uaXRvci5jYzogSW4gZnVuY3Rpb24gJ3ZpcnR1YWwgdm9pZCBBdXRoTW9u
+aXRvcjo6dXBkYXRlX2Zyb21fcGF4b3MoYm9vbCopJyB0aHJlYWQmbmJzcDt0aHJlYWQgN2ZjODAx
+Yzc4NzgwIHRpbWUgMjAxNC0xMC0yMCAxNToyOTozMS45NjYzNjc8L2Rpdj48ZGl2Pm1vbi9BdXRo
+TW9uaXRvci5jYzogMTU1OiBGQUlMRUQgYXNzZXJ0KHJldCA9PSAwKTwvZGl2PjxkaXY+PGRpdj5j
+ZXBoIHZlcnNpb24gMC44MC40ICg3YzI0MWNmYWE2YzhjMDY4YmM5ZGE4NTc4Y2EwMGI5ZjRmYzc1
+NjdmKTwvZGl2PjxkaXY+Jm5ic3A7MTogKEF1dGhNb25pdG9yOjp1cGRhdGVfZnJvbV9wYXhvcyhi
+b29sKikrMHgyMWE2KSBbMHg2NjExZDZdPC9kaXY+PGRpdj4mbmJzcDsyOiAoUGF4b3NTZXJ2aWNl
+OjpyZWZyZXNoKGJvb2wqKSsweDQ0NSkgWzB4NWIwNWI1XTwvZGl2PjxkaXY+Jm5ic3A7MzogKE1v
+bml0b3I6OnJlZnJlc2hfZnJvbV9wYXhvcyhib29sKikrMHg1NykgWzB4NTRhMzQ3XTwvZGl2Pjxk
+aXY+Jm5ic3A7NDogKE1vbml0b3I6OmluaXRfcGF4b3MoKSsweGY1KSBbMHg1NGE1MTVdPC9kaXY+
+PGRpdj4mbmJzcDs1OiAoTW9uaXRvcjo6cHJlaW5pdCgpKzB4NjlmKSBbMHg1NjI5MWZdPC9kaXY+
+PGRpdj4mbmJzcDs2OiAobWFpbigpKzB4MjY2NSkgWzB4NTM0ZGY1XTwvZGl2PjxkaXY+Jm5ic3A7
+NzogKF9fbGliY19zdGFydF9tYWluKCkrMHhlZCkgWzB4N2ZjN2ZmYzc4NzZkXTwvZGl2PjxkaXY+
+Jm5ic3A7ODogY2VwaC1tb24oKSBbMHg1MzdiZjldPC9kaXY+PC9kaXY+PGRpdj48YnI+PC9kaXY+
+PGRpdj5BbnlvbmUgY2FuIGhlbHAgdG8gc29sdmUgdGhpcyBwcm9ibGVtPyZuYnNwOzwvZGl2Pjxk
+aXY+PGJyPjwvZGl2Pjxicj4=
+--=_Part_847080_1012851809.1413790922005
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: base64
+
+SGVsbG8gLCBhbGwKCgp3aGVuIGkgcmVzdGFydCBhbnkgbW9uIGluIG1vbiBjbHVzdGVye21vbi5h
+LCBtb24uYiwgbW9uLmN9IGFmdGVyIGtpbGwgYWxsIG1vbnMoZGlzYWJsZWQgY2VwaHgpLgpBbiBl
+eGNlcHRpb24gb2NjdXJlZCBhcyBmb2xsb3dzOgoKCiMgY2VwaC1tb24gLWkgYgptb24vQXV0aE1v
+bml0b3IuY2M6IEluIGZ1bmN0aW9uICd2aXJ0dWFsIHZvaWQgQXV0aE1vbml0b3I6OnVwZGF0ZV9m
+cm9tX3BheG9zKGJvb2wqKScgdGhyZWFkIHRocmVhZCA3ZmM4MDFjNzg3ODAgdGltZSAyMDE0LTEw
+LTIwIDE1OjI5OjMxLjk2NjM2Nwptb24vQXV0aE1vbml0b3IuY2M6IDE1NTogRkFJTEVEIGFzc2Vy
+dChyZXQgPT0gMCkKY2VwaCB2ZXJzaW9uIDAuODAuNCAoN2MyNDFjZmFhNmM4YzA2OGJjOWRhODU3
+OGNhMDBiOWY0ZmM3NTY3ZikKIDE6IChBdXRoTW9uaXRvcjo6dXBkYXRlX2Zyb21fcGF4b3MoYm9v
+bCopKzB4MjFhNikgWzB4NjYxMWQ2XQogMjogKFBheG9zU2VydmljZTo6cmVmcmVzaChib29sKikr
+MHg0NDUpIFsweDViMDViNV0KIDM6IChNb25pdG9yOjpyZWZyZXNoX2Zyb21fcGF4b3MoYm9vbCop
+KzB4NTcpIFsweDU0YTM0N10KIDQ6IChNb25pdG9yOjppbml0X3BheG9zKCkrMHhmNSkgWzB4NTRh
+NTE1XQogNTogKE1vbml0b3I6OnByZWluaXQoKSsweDY5ZikgWzB4NTYyOTFmXQogNjogKG1haW4o
+KSsweDI2NjUpIFsweDUzNGRmNV0KIDc6IChfX2xpYmNfc3RhcnRfbWFpbigpKzB4ZWQpIFsweDdm
+YzdmZmM3ODc2ZF0KIDg6IGNlcGgtbW9uKCkgWzB4NTM3YmY5XQoKCgpBbnlvbmUgY2FuIGhlbHAg
+dG8gc29sdmUgdGhpcyBwcm9ibGVtPyAKCgoKDQoNCg==
+--=_Part_847080_1012851809.1413790922005--
+
+--===============1623853059==
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bl2on0090.outbound.protection.outlook.com ([65.55.169.90]:4893
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751493AbaJTHh7 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 20 Oct 2014 03:37:59 -0400
-Content-Language: en-US
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
 
-Hi All,
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 
-I am using giant branch for the development purpose.
-One of the teuthology smoke test case 'ceph-qa-suite/suites/smoke/basic/tasks/rados_python.yaml' is failing on it.
-
-From teuthology.log
-==========================
-2014-10-14T11:31:09.461 INFO:teuthology.task.workunit.client.0.plana02.stderr:test_rados.test_rados_init ... ok
-2014-10-14T11:31:09.489 INFO:teuthology.task.workunit.client.0.plana02.stderr:test_rados.test_ioctx_context_manager ... ok
-2014-10-14T11:31:09.490 INFO:teuthology.task.workunit.client.0.plana02.stderr:
-2014-10-14T11:31:09.490 INFO:teuthology.task.workunit.client.0.plana02.stderr:======================================================================
-2014-10-14T11:31:09.490 INFO:teuthology.task.workunit.client.0.plana02.stderr:ERROR: test_rados.TestRados.test_get_pool_base_tier
-2014-10-14T11:31:09.490 INFO:teuthology.task.workunit.client.0.plana02.stderr:----------------------------------------------------------------------
-2014-10-14T11:31:09.490 INFO:teuthology.task.workunit.client.0.plana02.stderr:Traceback (most recent call last):
-2014-10-14T11:31:09.491 INFO:teuthology.task.workunit.client.0.plana02.stderr:  File "/usr/local/lib/python2.7/dist-packages/nose/case.py", line 197, in runTest
-2014-10-14T11:31:09.491 INFO:teuthology.task.workunit.client.0.plana02.stderr:    self.test(*self.arg)
-2014-10-14T11:31:09.491 INFO:teuthology.task.workunit.client.0.plana02.stderr:  File "/home/ubuntu/cephtest/mnt.0/client.0/tmp/test_rados.py", line 96, in test_get_pool_base_tier
-2014-10-14T11:31:09.491 INFO:teuthology.task.workunit.client.0.plana02.stderr:    pool_id = self.rados.pool_lookup('foo')
-2014-10-14T11:31:09.491 INFO:teuthology.task.workunit.client.0.plana02.stderr:AttributeError: 'Rados' object has no attribute 'pool_lookup'
-2014-10-14T11:31:09.491 INFO:teuthology.task.workunit.client.0.plana02.stderr:
-2014-10-14T11:31:09.491 INFO:teuthology.task.workunit.client.0.plana02.stderr:----------------------------------------------------------------------
-2014-10-14T11:31:09.492 INFO:teuthology.task.workunit.client.0.plana02.stderr:Ran 36 tests in 98.393s
-2014-10-14T11:31:09.492 INFO:teuthology.task.workunit.client.0.plana02.stderr:
-2014-10-14T11:31:09.492 INFO:teuthology.task.workunit.client.0.plana02.stderr:FAILED (errors=1)
-============================
-
-"self.rados.pool_lookup()" is a part of file 'src/test/pybind/test_rados.py'.
-=======================================
-91    def test_get_pool_base_tier(self):
-
-95          try:
-96                           pool_id = self.rados.pool_lookup('foo')
-===============================================
-
-Failure is due to latest commits on '/src/pybind/rados.py' which is in master and not present in giant.
-It defines 'pool_lookup()' for rados object .
-
-Following is a commit:
-commit : d8ae14f48965e2aff191d67fda7b5ffd85840d47 to master.
-
-We need to have this commit in giant branch in order to pass the test case.
-Can anyone pull it to giant?
-
-Thanks,
-Aanchal
-
-________________________________
-
-PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
-
+--===============1623853059==--
