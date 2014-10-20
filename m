@@ -1,119 +1,89 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: weight VS crush weight when doing osd reweight
-Date: Mon, 20 Oct 2014 08:03:42 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1410200756130.10837@cobra.newdream.net>
-References: <D06AAD30.3328%leidong@yahoo-inc.com>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: Teuthology smoke test case(tasks/rados_python.yaml) failed on giant
+Date: Mon, 20 Oct 2014 10:16:14 -0700
+Message-ID: <CAPYLRzjhEN011UOpQwJvoH6BFr6rLL4VziO_ZzQ=JMYBB0Fk6Q@mail.gmail.com>
+References: <7F4FDDF05D5B3241ABA5EB82D169E31E090E9031@SACMBXIP02.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-113147542-1413817423=:10837"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:50782 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751619AbaJTPDn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 20 Oct 2014 11:03:43 -0400
-In-Reply-To: <D06AAD30.3328%leidong@yahoo-inc.com>
+Received: from mail-qa0-f53.google.com ([209.85.216.53]:40653 "EHLO
+	mail-qa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750807AbaJTRQR convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 20 Oct 2014 13:16:17 -0400
+Received: by mail-qa0-f53.google.com with SMTP id v10so3711470qac.12
+        for <ceph-devel@vger.kernel.org>; Mon, 20 Oct 2014 10:16:15 -0700 (PDT)
+In-Reply-To: <7F4FDDF05D5B3241ABA5EB82D169E31E090E9031@SACMBXIP02.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Lei Dong <leidong@yahoo-inc.com>
+To: Aanchal Agrawal <Aanchal.Agrawal@sandisk.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+It sounds like you're running the master branch ceph-qa-suite tests
+against the giant branch of Ceph. The tests should pass if you resolve
+that.
 
---557981400-113147542-1413817423=:10837
-Content-Type: TEXT/PLAIN; charset=Windows-1252
-Content-Transfer-Encoding: quoted-printable
+If not, or if you have some particular need for this function in the
+Giant release, you (or someone you work with) can submit a backport
+Pull Request, but this is a feature addition and Giant is pretty close
+to release so I'm not sure it's appropriate for merging right now.
+-Greg
+Software Engineer #42 @ http://inktank.com | http://ceph.com
 
-On Mon, 20 Oct 2014, Lei Dong wrote:
-> Hi sage:
->=20
-> As you said at=A0https://github.com/ceph/ceph/pull/2199, adjusting weig=
-ht or
-> crush weight should be both effective at any case. We?ve encounter a si=
-tuation
-> in which it seems adjusting weight is far less effective than adjusting
-> crush weight.=A0
->=20
-> We use 6 racks with host number {9, 5, 9, 4, 9, 4} and 11 osds at each =
-host.
-> We created a crush rule for ec pool to survive rack failure:
->=20
-> ruleset ecrule {
-> =A0 =A0 =A0 =A0 ?
-> =A0 =A0 =A0 =A0 min_size 11
-> =A0 =A0 =A0 =A0 max_size 11
-> =A0 =A0 =A0 =A0 step set_chooseleaf_tries 50
-> step take default
-> step choose firstn 4 type rack // we want the distribution to be {3, 3,=
- 3,
-> 2} for k=3D8 m=3D3
-> step chooseleaf indep 3 type host
-> =A0=A0=A0=A0=A0=A0step emit
-> }
->=20
-> After creation of the pool, we run osd reweight-by-pg many times, the b=
-est
-> result it can reach is=A0
-> Average PGs/OSD (expected): 225.28
-> Max PGs/OSD: 307
-> Min PGs/OSD: 164 =A0
->=20
-> Then we run our own tool to reweight(same strategy with reweight-by-pg,=
- just
-> adjust crush weight instead of weight), =A0the best result is:
-> Average PGs/OSD (expected): 225.28
-> Max PGs/OSD: 241
-> Min PGs/OSD: 207
-> Which is much better than the previous one.
->=20
-> According to my understanding, due to uneven host numbers across rack,
-> =A0for=A0?step choose firstn 4 type rack?:
->  1. If we adjust osd weight, =A0this step is almost unaffected and
->     will=A0dispatch almost even pg number for each rack. Thus the host =
-in the
->     rack which have less host will take more pgs, no matter how we adju=
-st
->     weight.=A0
->  2. If we adjust osd crush weight, this step is affected and will try t=
-o
->     dispatch more pg to the rack=A0which has higher crush weight value,=
- thus
->     the result can be even.
-> Am I right about this?
 
-I think so, yes.  I am a bit surprised that this is a problem, though.  W=
-e=20
-will still be distributing PGs based on the relative CRUSH weights, and I=
-=20
-would not expect that the expected variation will lead to very much skew=20
-between racks.
-
-It may be that CRUSH is, at baseline, having trouble respecting your=20
-weights.  You might try creating a single straw bucket with 6 OSDs and=20
-those weights (9, 5, 9, 4, 9, 4) and see if it is able to achieve a=20
-correct distribution.  When there is a lot of variation in weights and th=
-e=20
-total number of items are small it can be hard for it to get to the right=
-=20
-result.  (We were just looking into a similar problem on another cluster=20
-on Friday.)
-
-For a more typical chooseleaf the osd weight will have the intended=20
-behavior, but when the initial step is a regular choose only the CRUSH=20
-weights affect the decision.  My guess is that your process of skewing th=
-e=20
-CRUSH weights pretty dramatically which is able to compensate for the=20
-difficulty/improbability of randomly choosing racks with the right=20
-frequency...
-
-sage
-
-> We then do a further test with 6 racks and 9 hosts in each rack. In thi=
-s
-> situation, adjusting weight or adjusting crush weight has almost the sa=
-me
-> effect.
+On Sun, Oct 19, 2014 at 11:04 PM, Aanchal Agrawal
+<Aanchal.Agrawal@sandisk.com> wrote:
+> Hi All,
 >
-> So, weight and crush weight do impact the result of CRUSH in a differen=
-t
-> way?=A0
---557981400-113147542-1413817423=:10837--
+> I am using giant branch for the development purpose.
+> One of the teuthology smoke test case 'ceph-qa-suite/suites/smoke/basic/tasks/rados_python.yaml' is failing on it.
+>
+> From teuthology.log
+> ==========================
+> 2014-10-14T11:31:09.461 INFO:teuthology.task.workunit.client.0.plana02.stderr:test_rados.test_rados_init ... ok
+> 2014-10-14T11:31:09.489 INFO:teuthology.task.workunit.client.0.plana02.stderr:test_rados.test_ioctx_context_manager ... ok
+> 2014-10-14T11:31:09.490 INFO:teuthology.task.workunit.client.0.plana02.stderr:
+> 2014-10-14T11:31:09.490 INFO:teuthology.task.workunit.client.0.plana02.stderr:======================================================================
+> 2014-10-14T11:31:09.490 INFO:teuthology.task.workunit.client.0.plana02.stderr:ERROR: test_rados.TestRados.test_get_pool_base_tier
+> 2014-10-14T11:31:09.490 INFO:teuthology.task.workunit.client.0.plana02.stderr:----------------------------------------------------------------------
+> 2014-10-14T11:31:09.490 INFO:teuthology.task.workunit.client.0.plana02.stderr:Traceback (most recent call last):
+> 2014-10-14T11:31:09.491 INFO:teuthology.task.workunit.client.0.plana02.stderr:  File "/usr/local/lib/python2.7/dist-packages/nose/case.py", line 197, in runTest
+> 2014-10-14T11:31:09.491 INFO:teuthology.task.workunit.client.0.plana02.stderr:    self.test(*self.arg)
+> 2014-10-14T11:31:09.491 INFO:teuthology.task.workunit.client.0.plana02.stderr:  File "/home/ubuntu/cephtest/mnt.0/client.0/tmp/test_rados.py", line 96, in test_get_pool_base_tier
+> 2014-10-14T11:31:09.491 INFO:teuthology.task.workunit.client.0.plana02.stderr:    pool_id = self.rados.pool_lookup('foo')
+> 2014-10-14T11:31:09.491 INFO:teuthology.task.workunit.client.0.plana02.stderr:AttributeError: 'Rados' object has no attribute 'pool_lookup'
+> 2014-10-14T11:31:09.491 INFO:teuthology.task.workunit.client.0.plana02.stderr:
+> 2014-10-14T11:31:09.491 INFO:teuthology.task.workunit.client.0.plana02.stderr:----------------------------------------------------------------------
+> 2014-10-14T11:31:09.492 INFO:teuthology.task.workunit.client.0.plana02.stderr:Ran 36 tests in 98.393s
+> 2014-10-14T11:31:09.492 INFO:teuthology.task.workunit.client.0.plana02.stderr:
+> 2014-10-14T11:31:09.492 INFO:teuthology.task.workunit.client.0.plana02.stderr:FAILED (errors=1)
+> ============================
+>
+> "self.rados.pool_lookup()" is a part of file 'src/test/pybind/test_rados.py'.
+> =======================================
+> 91    def test_get_pool_base_tier(self):
+>
+> 95          try:
+> 96                           pool_id = self.rados.pool_lookup('foo')
+> ===============================================
+>
+> Failure is due to latest commits on '/src/pybind/rados.py' which is in master and not present in giant.
+> It defines 'pool_lookup()' for rados object .
+>
+> Following is a commit:
+> commit : d8ae14f48965e2aff191d67fda7b5ffd85840d47 to master.
+>
+> We need to have this commit in giant branch in order to pass the test case.
+> Can anyone pull it to giant?
+>
+> Thanks,
+> Aanchal
+>
+> ________________________________
+>
+> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
