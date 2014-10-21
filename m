@@ -1,110 +1,126 @@
-From: Aanchal Agrawal <Aanchal.Agrawal@sandisk.com>
-Subject: RE: Teuthology smoke test case(tasks/rados_python.yaml) failed on
- giant
-Date: Mon, 20 Oct 2014 18:56:57 +0000
-Message-ID: <7F4FDDF05D5B3241ABA5EB82D169E31E090E93D8@SACMBXIP02.sdcorp.global.sandisk.com>
-References: <7F4FDDF05D5B3241ABA5EB82D169E31E090E9031@SACMBXIP02.sdcorp.global.sandisk.com>
- <CAPYLRzjhEN011UOpQwJvoH6BFr6rLL4VziO_ZzQ=JMYBB0Fk6Q@mail.gmail.com>
+From: Lei Dong <leidong@yahoo-inc.com>
+Subject: Re: weight VS crush weight when doing osd reweight
+Date: Tue, 21 Oct 2014 02:15:02 +0000
+Message-ID: <D06BE1E6.33C1%leidong@yahoo-inc.com>
+References: <D06AAD30.3328%leidong@yahoo-inc.com>
+ <alpine.DEB.2.00.1410200756130.10837@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2on0083.outbound.protection.outlook.com ([207.46.100.83]:30298
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751360AbaJTS5B (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 20 Oct 2014 14:57:01 -0400
-In-Reply-To: <CAPYLRzjhEN011UOpQwJvoH6BFr6rLL4VziO_ZzQ=JMYBB0Fk6Q@mail.gmail.com>
+Received: from mrout2.yahoo.com ([216.145.54.172]:47873 "EHLO mrout2.yahoo.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754335AbaJUCPl convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 20 Oct 2014 22:15:41 -0400
+In-Reply-To: <alpine.DEB.2.00.1410200756130.10837@cobra.newdream.net>
 Content-Language: en-US
+Content-ID: <912E46F1DC03EE4381C11D3B2B5B4F6E@yforest.corp.yahoo.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
+To: Sage Weil <sage@newdream.net>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-R290IGl0LiBUaGFua3MgZm9yIHRoZSByZXBseSBHcmVnLg0KDQpSZWdhcmRzLA0KQWFuY2hhbA0K
-DQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogR3JlZ29yeSBGYXJudW0gW21haWx0
-bzpncmVnQGlua3RhbmsuY29tXSANClNlbnQ6IE1vbmRheSwgT2N0b2JlciAyMCwgMjAxNCAxMDo0
-NiBQTQ0KVG86IEFhbmNoYWwgQWdyYXdhbA0KQ2M6IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3Jn
-DQpTdWJqZWN0OiBSZTogVGV1dGhvbG9neSBzbW9rZSB0ZXN0IGNhc2UodGFza3MvcmFkb3NfcHl0
-aG9uLnlhbWwpIGZhaWxlZCBvbiBnaWFudA0KDQpJdCBzb3VuZHMgbGlrZSB5b3UncmUgcnVubmlu
-ZyB0aGUgbWFzdGVyIGJyYW5jaCBjZXBoLXFhLXN1aXRlIHRlc3RzIGFnYWluc3QgdGhlIGdpYW50
-IGJyYW5jaCBvZiBDZXBoLiBUaGUgdGVzdHMgc2hvdWxkIHBhc3MgaWYgeW91IHJlc29sdmUgdGhh
-dC4NCg0KSWYgbm90LCBvciBpZiB5b3UgaGF2ZSBzb21lIHBhcnRpY3VsYXIgbmVlZCBmb3IgdGhp
-cyBmdW5jdGlvbiBpbiB0aGUgR2lhbnQgcmVsZWFzZSwgeW91IChvciBzb21lb25lIHlvdSB3b3Jr
-IHdpdGgpIGNhbiBzdWJtaXQgYSBiYWNrcG9ydCBQdWxsIFJlcXVlc3QsIGJ1dCB0aGlzIGlzIGEg
-ZmVhdHVyZSBhZGRpdGlvbiBhbmQgR2lhbnQgaXMgcHJldHR5IGNsb3NlIHRvIHJlbGVhc2Ugc28g
-SSdtIG5vdCBzdXJlIGl0J3MgYXBwcm9wcmlhdGUgZm9yIG1lcmdpbmcgcmlnaHQgbm93Lg0KLUdy
-ZWcNClNvZnR3YXJlIEVuZ2luZWVyICM0MiBAIGh0dHA6Ly9pbmt0YW5rLmNvbSB8IGh0dHA6Ly9j
-ZXBoLmNvbQ0KDQoNCk9uIFN1biwgT2N0IDE5LCAyMDE0IGF0IDExOjA0IFBNLCBBYW5jaGFsIEFn
-cmF3YWwgPEFhbmNoYWwuQWdyYXdhbEBzYW5kaXNrLmNvbT4gd3JvdGU6DQo+IEhpIEFsbCwNCj4N
-Cj4gSSBhbSB1c2luZyBnaWFudCBicmFuY2ggZm9yIHRoZSBkZXZlbG9wbWVudCBwdXJwb3NlLg0K
-PiBPbmUgb2YgdGhlIHRldXRob2xvZ3kgc21va2UgdGVzdCBjYXNlICdjZXBoLXFhLXN1aXRlL3N1
-aXRlcy9zbW9rZS9iYXNpYy90YXNrcy9yYWRvc19weXRob24ueWFtbCcgaXMgZmFpbGluZyBvbiBp
-dC4NCj4NCj4gRnJvbSB0ZXV0aG9sb2d5LmxvZw0KPiA9PT09PT09PT09PT09PT09PT09PT09PT09
-PQ0KPiAyMDE0LTEwLTE0VDExOjMxOjA5LjQ2MSANCj4gSU5GTzp0ZXV0aG9sb2d5LnRhc2sud29y
-a3VuaXQuY2xpZW50LjAucGxhbmEwMi5zdGRlcnI6dGVzdF9yYWRvcy50ZXN0Xw0KPiByYWRvc19p
-bml0IC4uLiBvaw0KPiAyMDE0LTEwLTE0VDExOjMxOjA5LjQ4OSANCj4gSU5GTzp0ZXV0aG9sb2d5
-LnRhc2sud29ya3VuaXQuY2xpZW50LjAucGxhbmEwMi5zdGRlcnI6dGVzdF9yYWRvcy50ZXN0Xw0K
-PiBpb2N0eF9jb250ZXh0X21hbmFnZXIgLi4uIG9rDQo+IDIwMTQtMTAtMTRUMTE6MzE6MDkuNDkw
-IElORk86dGV1dGhvbG9neS50YXNrLndvcmt1bml0LmNsaWVudC4wLnBsYW5hMDIuc3RkZXJyOg0K
-PiAyMDE0LTEwLTE0VDExOjMxOjA5LjQ5MCANCj4gSU5GTzp0ZXV0aG9sb2d5LnRhc2sud29ya3Vu
-aXQuY2xpZW50LjAucGxhbmEwMi5zdGRlcnI6PT09PT09PT09PT09PT09PQ0KPiA9PT09PT09PT09
-PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0NCj4gMjAxNC0xMC0x
-NFQxMTozMTowOS40OTAgDQo+IElORk86dGV1dGhvbG9neS50YXNrLndvcmt1bml0LmNsaWVudC4w
-LnBsYW5hMDIuc3RkZXJyOkVSUk9SOiANCj4gdGVzdF9yYWRvcy5UZXN0UmFkb3MudGVzdF9nZXRf
-cG9vbF9iYXNlX3RpZXINCj4gMjAxNC0xMC0xNFQxMTozMTowOS40OTAgDQo+IElORk86dGV1dGhv
-bG9neS50YXNrLndvcmt1bml0LmNsaWVudC4wLnBsYW5hMDIuc3RkZXJyOi0tLS0tLS0tLS0tLS0t
-LS0NCj4gLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tDQo+IDIwMTQtMTAtMTRUMTE6MzE6MDkuNDkwIElORk86dGV1dGhvbG9neS50YXNrLndvcmt1
-bml0LmNsaWVudC4wLnBsYW5hMDIuc3RkZXJyOlRyYWNlYmFjayAobW9zdCByZWNlbnQgY2FsbCBs
-YXN0KToNCj4gMjAxNC0xMC0xNFQxMTozMTowOS40OTEgSU5GTzp0ZXV0aG9sb2d5LnRhc2sud29y
-a3VuaXQuY2xpZW50LjAucGxhbmEwMi5zdGRlcnI6ICBGaWxlICIvdXNyL2xvY2FsL2xpYi9weXRo
-b24yLjcvZGlzdC1wYWNrYWdlcy9ub3NlL2Nhc2UucHkiLCBsaW5lIDE5NywgaW4gcnVuVGVzdA0K
-PiAyMDE0LTEwLTE0VDExOjMxOjA5LjQ5MSBJTkZPOnRldXRob2xvZ3kudGFzay53b3JrdW5pdC5j
-bGllbnQuMC5wbGFuYTAyLnN0ZGVycjogICAgc2VsZi50ZXN0KCpzZWxmLmFyZykNCj4gMjAxNC0x
-MC0xNFQxMTozMTowOS40OTEgSU5GTzp0ZXV0aG9sb2d5LnRhc2sud29ya3VuaXQuY2xpZW50LjAu
-cGxhbmEwMi5zdGRlcnI6ICBGaWxlICIvaG9tZS91YnVudHUvY2VwaHRlc3QvbW50LjAvY2xpZW50
-LjAvdG1wL3Rlc3RfcmFkb3MucHkiLCBsaW5lIDk2LCBpbiB0ZXN0X2dldF9wb29sX2Jhc2VfdGll
-cg0KPiAyMDE0LTEwLTE0VDExOjMxOjA5LjQ5MSBJTkZPOnRldXRob2xvZ3kudGFzay53b3JrdW5p
-dC5jbGllbnQuMC5wbGFuYTAyLnN0ZGVycjogICAgcG9vbF9pZCA9IHNlbGYucmFkb3MucG9vbF9s
-b29rdXAoJ2ZvbycpDQo+IDIwMTQtMTAtMTRUMTE6MzE6MDkuNDkxIElORk86dGV1dGhvbG9neS50
-YXNrLndvcmt1bml0LmNsaWVudC4wLnBsYW5hMDIuc3RkZXJyOkF0dHJpYnV0ZUVycm9yOiAnUmFk
-b3MnIG9iamVjdCBoYXMgbm8gYXR0cmlidXRlICdwb29sX2xvb2t1cCcNCj4gMjAxNC0xMC0xNFQx
-MTozMTowOS40OTEgSU5GTzp0ZXV0aG9sb2d5LnRhc2sud29ya3VuaXQuY2xpZW50LjAucGxhbmEw
-Mi5zdGRlcnI6DQo+IDIwMTQtMTAtMTRUMTE6MzE6MDkuNDkxIA0KPiBJTkZPOnRldXRob2xvZ3ku
-dGFzay53b3JrdW5pdC5jbGllbnQuMC5wbGFuYTAyLnN0ZGVycjotLS0tLS0tLS0tLS0tLS0tDQo+
-IC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0K
-PiAyMDE0LTEwLTE0VDExOjMxOjA5LjQ5MiANCj4gSU5GTzp0ZXV0aG9sb2d5LnRhc2sud29ya3Vu
-aXQuY2xpZW50LjAucGxhbmEwMi5zdGRlcnI6UmFuIDM2IHRlc3RzIGluIA0KPiA5OC4zOTNzDQo+
-IDIwMTQtMTAtMTRUMTE6MzE6MDkuNDkyIElORk86dGV1dGhvbG9neS50YXNrLndvcmt1bml0LmNs
-aWVudC4wLnBsYW5hMDIuc3RkZXJyOg0KPiAyMDE0LTEwLTE0VDExOjMxOjA5LjQ5MiANCj4gSU5G
-Tzp0ZXV0aG9sb2d5LnRhc2sud29ya3VuaXQuY2xpZW50LjAucGxhbmEwMi5zdGRlcnI6RkFJTEVE
-IA0KPiAoZXJyb3JzPTEpID09PT09PT09PT09PT09PT09PT09PT09PT09PT0NCj4NCj4gInNlbGYu
-cmFkb3MucG9vbF9sb29rdXAoKSIgaXMgYSBwYXJ0IG9mIGZpbGUgJ3NyYy90ZXN0L3B5YmluZC90
-ZXN0X3JhZG9zLnB5Jy4NCj4gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09
-DQo+IDkxICAgIGRlZiB0ZXN0X2dldF9wb29sX2Jhc2VfdGllcihzZWxmKToNCj4NCj4gOTUgICAg
-ICAgICAgdHJ5Og0KPiA5NiAgICAgICAgICAgICAgICAgICAgICAgICAgIHBvb2xfaWQgPSBzZWxm
-LnJhZG9zLnBvb2xfbG9va3VwKCdmb28nKQ0KPiA9PT09PT09PT09PT09PT09PT09PT09PT09PT09
-PT09PT09PT09PT09PT09PT09PQ0KPg0KPiBGYWlsdXJlIGlzIGR1ZSB0byBsYXRlc3QgY29tbWl0
-cyBvbiAnL3NyYy9weWJpbmQvcmFkb3MucHknIHdoaWNoIGlzIGluIG1hc3RlciBhbmQgbm90IHBy
-ZXNlbnQgaW4gZ2lhbnQuDQo+IEl0IGRlZmluZXMgJ3Bvb2xfbG9va3VwKCknIGZvciByYWRvcyBv
-YmplY3QgLg0KPg0KPiBGb2xsb3dpbmcgaXMgYSBjb21taXQ6DQo+IGNvbW1pdCA6IGQ4YWUxNGY0
-ODk2NWUyYWZmMTkxZDY3ZmRhN2I1ZmZkODU4NDBkNDcgdG8gbWFzdGVyLg0KPg0KPiBXZSBuZWVk
-IHRvIGhhdmUgdGhpcyBjb21taXQgaW4gZ2lhbnQgYnJhbmNoIGluIG9yZGVyIHRvIHBhc3MgdGhl
-IHRlc3QgY2FzZS4NCj4gQ2FuIGFueW9uZSBwdWxsIGl0IHRvIGdpYW50Pw0KPg0KPiBUaGFua3Ms
-DQo+IEFhbmNoYWwNCj4NCj4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCj4NCj4g
-UExFQVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmlj
-IG1haWwgbWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25h
-dGVkIHJlY2lwaWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3Nh
-Z2UgaXMgbm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVk
-IHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFu
-eSByZXZpZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlz
-IG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhp
-cyBjb21tdW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVs
-ZXBob25lIG9yIGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95
-IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3
-aGV0aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KPg0K
-PiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5z
-dWJzY3JpYmUgY2VwaC1kZXZlbCIgDQo+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpv
-cmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIA0KPiBpbmZvIGF0ICBodHRwOi8v
-dmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCg==
+Thanks Sage!
+So you mean:
+
+1. Choose step will not be affected by OSD weight(but only CRUSH weight).
+2. Chooseleaf step will be affected by both the two weights. But with a
+big variation in CRUSH weight and small OSD number, CRUSH works
+inefficiently to make the distribution even although we can adjust OSD
+weight.
+
+Right?
+
+LeiDong
+
+On 10/20/14, 11:03 PM, "Sage Weil" <sage@newdream.net> wrote:
+
+>On Mon, 20 Oct 2014, Lei Dong wrote:
+>> Hi sage:
+>> 
+>> As you said at https://github.com/ceph/ceph/pull/2199, adjusting weight
+>>or
+>> crush weight should be both effective at any case. We?ve encounter a
+>>situation
+>> in which it seems adjusting weight is far less effective than adjusting
+>> crush weight. 
+>> 
+>> We use 6 racks with host number {9, 5, 9, 4, 9, 4} and 11 osds at each
+>>host.
+>> We created a crush rule for ec pool to survive rack failure:
+>> 
+>> ruleset ecrule {
+>>         ?
+>>         min_size 11
+>>         max_size 11
+>>         step set_chooseleaf_tries 50
+>> step take default
+>> step choose firstn 4 type rack // we want the distribution to be {3, 3,
+>>3,
+>> 2} for k=8 m=3
+>> step chooseleaf indep 3 type host
+>>       step emit
+>> }
+>> 
+>> After creation of the pool, we run osd reweight-by-pg many times, the
+>>best
+>> result it can reach is
+>> Average PGs/OSD (expected): 225.28
+>> Max PGs/OSD: 307
+>> Min PGs/OSD: 164
+>> 
+>> Then we run our own tool to reweight(same strategy with reweight-by-pg,
+>>just
+>> adjust crush weight instead of weight),  the best result is:
+>> Average PGs/OSD (expected): 225.28
+>> Max PGs/OSD: 241
+>> Min PGs/OSD: 207
+>> Which is much better than the previous one.
+>> 
+>> According to my understanding, due to uneven host numbers across rack,
+>>  for ?step choose firstn 4 type rack?:
+>>  1. If we adjust osd weight,  this step is almost unaffected and
+>>     will dispatch almost even pg number for each rack. Thus the host in
+>>the
+>>     rack which have less host will take more pgs, no matter how we
+>>adjust
+>>     weight. 
+>>  2. If we adjust osd crush weight, this step is affected and will try to
+>>     dispatch more pg to the rack which has higher crush weight value,
+>>thus
+>>     the result can be even.
+>> Am I right about this?
+>
+>I think so, yes.  I am a bit surprised that this is a problem, though.
+>We 
+>will still be distributing PGs based on the relative CRUSH weights, and I
+>would not expect that the expected variation will lead to very much skew
+>between racks.
+>
+>It may be that CRUSH is, at baseline, having trouble respecting your
+>weights.  You might try creating a single straw bucket with 6 OSDs and
+>those weights (9, 5, 9, 4, 9, 4) and see if it is able to achieve a
+>correct distribution.  When there is a lot of variation in weights and
+>the 
+>total number of items are small it can be hard for it to get to the right
+>result.  (We were just looking into a similar problem on another cluster
+>on Friday.)
+>
+>For a more typical chooseleaf the osd weight will have the intended
+>behavior, but when the initial step is a regular choose only the CRUSH
+>weights affect the decision.  My guess is that your process of skewing
+>the 
+>CRUSH weights pretty dramatically which is able to compensate for the
+>difficulty/improbability of randomly choosing racks with the right
+>frequency...
+>
+>sage
+>
+>> We then do a further test with 6 racks and 9 hosts in each rack. In this
+>> situation, adjusting weight or adjusting crush weight has almost the
+>>same
+>> effect.
+>>
+>> So, weight and crush weight do impact the result of CRUSH in a different
+>> way? 
+
