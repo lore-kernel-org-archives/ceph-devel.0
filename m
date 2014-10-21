@@ -1,47 +1,68 @@
-From: <ghislain.chevalier@orange.com>
-Subject: erasure code profile parameter for pool
-Date: Tue, 21 Oct 2014 14:08:54 +0000
-Message-ID: <14956_1413900567_54466917_14956_11073_1_B9C8EFBF13B1354DB5FA000660D66DD00C191E36@PEXCVZYM14.corporate.adroot.infra.ftgroup>
+From: Sergey Nazarov <natarajaya@gmail.com>
+Subject: Extremely slow small files rewrite performance
+Date: Tue, 21 Oct 2014 11:52:45 -0400
+Message-ID: <CAAprOjbE_-HNtHgKqPHygewS2YOwEnrmUmFesF-Uf_bHiqxn2Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relais-ias245.francetelecom.com ([80.12.204.245]:33286 "EHLO
-	relais-inet.francetelecom.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S932442AbaJUOJb convert rfc822-to-8bit
-	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 21 Oct 2014 10:09:31 -0400
-Received: from omfeda08.si.francetelecom.fr (unknown [xx.xx.xx.201])
-	by omfeda09.si.francetelecom.fr (ESMTP service) with ESMTP id 13506C0B16
-	for <ceph-devel@vger.kernel.org>; Tue, 21 Oct 2014 16:09:28 +0200 (CEST)
-Received: from Exchangemail-eme1.itn.ftgroup (unknown [10.114.1.183])
-	by omfeda08.si.francetelecom.fr (ESMTP service) with ESMTP id 45CCF38408E
-	for <ceph-devel@vger.kernel.org>; Tue, 21 Oct 2014 16:09:27 +0200 (CEST)
-Content-Language: fr-FR
+Received: from mail-ie0-f180.google.com ([209.85.223.180]:64378 "EHLO
+	mail-ie0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755271AbaJUPwq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 21 Oct 2014 11:52:46 -0400
+Received: by mail-ie0-f180.google.com with SMTP id at20so1450863iec.25
+        for <ceph-devel@vger.kernel.org>; Tue, 21 Oct 2014 08:52:45 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hi all,
+Hi
 
-I've just noticed that the parameter erasure code profile is also set to a replicated pool (set to default in my case)
+I just built a new cluster using this quickstart instructions:
+http://ceph.com/docs/master/start/
 
-Shouldn't it be better to set it to "none" ?
+And here is what I am seeing:
 
-Best regards
+# time for i in {1..10}; do echo $i > $i.txt ; done
+real 0m0.081s
+user 0m0.000s
+sys 0m0.004s
 
-Ghislain
+And if I try to repeat the same command (when files already created):
 
-_________________________________________________________________________________________________________________________
+# time for i in {1..10}; do echo $i > $i.txt ; done
+real 0m48.894s
+user 0m0.000s
+sys 0m0.004s
 
-Ce message et ses pieces jointes peuvent contenir des informations confidentielles ou privilegiees et ne doivent donc
-pas etre diffuses, exploites ou copies sans autorisation. Si vous avez recu ce message par erreur, veuillez le signaler
-a l'expediteur et le detruire ainsi que les pieces jointes. Les messages electroniques etant susceptibles d'alteration,
-Orange decline toute responsabilite si ce message a ete altere, deforme ou falsifie. Merci.
+I was very surprised and then just tried to rewrite a single file:
 
-This message and its attachments may contain confidential or privileged information that may be protected by law;
-they should not be distributed, used or copied without authorisation.
-If you have received this email in error, please notify the sender and delete this message and its attachments.
-As emails may be altered, Orange is not liable for messages that have been modified, changed or falsified.
-Thank you.
+# time echo 1 > 1.txt
+real 0m3.133s
+user 0m0.000s
+sys 0m0.000s
 
+BTW, I dont think it is the problem with OSD speed or network:
+
+# time sysbench --num-threads=1 --test=fileio --file-total-size=1G
+--file-test-mode=rndrw prepare
+1073741824 bytes written in 23.52 seconds (43.54 MB/sec).
+
+Here is my ceph cluster status and verion:
+
+# ceph -w
+    cluster d3dcacc3-89fb-4db0-9fa9-f1f6217280cb
+     health HEALTH_OK
+     monmap e4: 4 mons at
+{atl-fs10=10.44.101.70:6789/0,atl-fs11=10.44.101.91:6789/0,atl-fs12=10.44.101.92:6789/0,atl-fs9=10.44.101.69:6789/0},
+election epoch 40, quorum 0,1,2,3 atl-fs9,atl-fs10,atl-fs11,atl-fs12
+     mdsmap e33: 1/1/1 up {0=atl-fs12=up:active}, 3 up:standby
+     osdmap e92: 4 osds: 4 up, 4 in
+      pgmap v8091: 192 pgs, 3 pools, 123 MB data, 1658 objects
+            881 GB used, 1683 GB / 2564 GB avail
+                 192 active+clean
+  client io 1820 B/s wr, 1 op/s
+
+# ceph -v
+ceph version 0.80.7 (6c0127fcb58008793d3c8b62d925bc91963672a3)
+
+All nodes connected with gigabit network.
