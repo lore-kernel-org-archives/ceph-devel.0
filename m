@@ -1,81 +1,42 @@
-From: Fabian Frederick <fabf@skynet.be>
-Subject: [PATCH 1/1 linux-next] ceph: remove unused ceph_get_direct_page_vector
-Date: Tue, 21 Oct 2014 18:35:27 +0200
-Message-ID: <1413909327-6542-1-git-send-email-fabf@skynet.be>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: Alexander Viro <viro@zeniv.linux.org.uk>, Fabian Frederick <fabf@skynet.be>, Sage Weil <sage@inktank.com>, "David S. Miller" <davem@davemloft.net>, ceph-devel@vger.kernel.org, netdev@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+From: Samuel Just <sam.just@inktank.com>
+Subject: Re: Regarding hammer blueprints
+Date: Tue, 21 Oct 2014 11:27:52 -0700
+Message-ID: <CA+4uBUYWwttjcrTdu6tZ+uibwdo0Dnm8YS-8QKspgWt+iPi=Yg@mail.gmail.com>
+References: <37A1BCB5EFF35248B6849AC7BCB09FC809D28763@SACMBXIP02.sdcorp.global.sandisk.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-lb0-f175.google.com ([209.85.217.175]:62134 "EHLO
+	mail-lb0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754048AbaJUS1x convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 21 Oct 2014 14:27:53 -0400
+Received: by mail-lb0-f175.google.com with SMTP id u10so1517250lbd.20
+        for <ceph-devel@vger.kernel.org>; Tue, 21 Oct 2014 11:27:52 -0700 (PDT)
+In-Reply-To: <37A1BCB5EFF35248B6849AC7BCB09FC809D28763@SACMBXIP02.sdcorp.global.sandisk.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Anand Bhat <Anand.Bhat@sandisk.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This function is not used since commit 64c3131161c1
-("ceph_sync_direct_write: stop poking into iov_iter guts")
+The priority queue changes are, in fact, that blueprint.
+-Sam
 
-Signed-off-by: Fabian Frederick <fabf@skynet.be>
----
- include/linux/ceph/libceph.h |  3 ---
- net/ceph/pagevec.c           | 35 -----------------------------------
- 2 files changed, 38 deletions(-)
-
-diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
-index 07bc359..3ba8b15 100644
---- a/include/linux/ceph/libceph.h
-+++ b/include/linux/ceph/libceph.h
-@@ -206,9 +206,6 @@ extern int ceph_open_session(struct ceph_client *client);
- /* pagevec.c */
- extern void ceph_release_page_vector(struct page **pages, int num_pages);
- 
--extern struct page **ceph_get_direct_page_vector(const void __user *data,
--						 int num_pages,
--						 bool write_page);
- extern void ceph_put_page_vector(struct page **pages, int num_pages,
- 				 bool dirty);
- extern struct page **ceph_alloc_page_vector(int num_pages, gfp_t flags);
-diff --git a/net/ceph/pagevec.c b/net/ceph/pagevec.c
-index 5550130..4d159fe 100644
---- a/net/ceph/pagevec.c
-+++ b/net/ceph/pagevec.c
-@@ -9,41 +9,6 @@
- 
- #include <linux/ceph/libceph.h>
- 
--/*
-- * build a vector of user pages
-- */
--struct page **ceph_get_direct_page_vector(const void __user *data,
--					  int num_pages, bool write_page)
--{
--	struct page **pages;
--	int got = 0;
--	int rc = 0;
--
--	pages = kmalloc(sizeof(*pages) * num_pages, GFP_NOFS);
--	if (!pages)
--		return ERR_PTR(-ENOMEM);
--
--	down_read(&current->mm->mmap_sem);
--	while (got < num_pages) {
--		rc = get_user_pages(current, current->mm,
--		    (unsigned long)data + ((unsigned long)got * PAGE_SIZE),
--		    num_pages - got, write_page, 0, pages + got, NULL);
--		if (rc < 0)
--			break;
--		BUG_ON(rc == 0);
--		got += rc;
--	}
--	up_read(&current->mm->mmap_sem);
--	if (rc < 0)
--		goto fail;
--	return pages;
--
--fail:
--	ceph_put_page_vector(pages, got, false);
--	return ERR_PTR(rc);
--}
--EXPORT_SYMBOL(ceph_get_direct_page_vector);
--
- void ceph_put_page_vector(struct page **pages, int num_pages, bool dirty)
- {
- 	int i;
--- 
-1.9.3
+On Tue, Oct 21, 2014 at 5:14 AM, Anand Bhat <Anand.Bhat@sandisk.com> wrote:
+> Sage/Sam,
+>
+> There was a mention of "unified priority queue" hammer blueprint in one of the mail chains. I don't see anything related to that in the Hammer blueprint list (https://wiki.ceph.com/Planning/Blueprints/Hammer). Is it still planned for Hammer release?
+>
+> There is a blueprint named  "osd: Scrub/SnapTrim IO prioritization" in the Hammer blueprint list. Are the priority queue changes handled as part of this blueprint?
+>
+> Regards,
+> Anand
+>
+> ________________________________
+>
+> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
