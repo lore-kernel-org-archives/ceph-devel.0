@@ -1,74 +1,73 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: 10/22/2014 Weekly Ceph Performance Meeting
-Date: Wed, 22 Oct 2014 09:24:50 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1410220920450.13498@cobra.newdream.net>
-References: <5447BD83.8000303@redhat.com>
+From: Dan Van Der Ster <daniel.vanderster@cern.ch>
+Subject: Re: kerberos / AD requirements, blueprint
+Date: Wed, 22 Oct 2014 16:39:53 +0000
+Message-ID: <8667CC8E-D4CD-4BD2-8299-3341FEB848B6@cern.ch>
+References: <alpine.DEB.2.00.1410161253090.5588@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:37796 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754682AbaJVQYu (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 22 Oct 2014 12:24:50 -0400
-In-Reply-To: <5447BD83.8000303@redhat.com>
+Received: from cernmx13.cern.ch ([188.184.36.46]:20995 "EHLO CERNMX13.cern.ch"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751031AbaJVQj5 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 22 Oct 2014 12:39:57 -0400
+In-Reply-To: <alpine.DEB.2.00.1410161253090.5588@cobra.newdream.net>
+Content-Language: en-US
+Content-ID: <875E081AB793C8459D06C3D3E56705F5@cern.ch>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mark.nelson@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, "abartlet@catalyst.net.nz" <abartlet@catalyst.net.nz>, Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>, Andrea Ieri <andrea.ieri@cern.ch>
 
-Hi Everyone,
-
-Just a reminder that there won't be a performance call next week because 
-of CDS, which is Tuesday and Wednesday.  The tentative schedule is here:
-
-	https://wiki.ceph.com/Planning/CDS/Hammer_(Oct_2014)
-
-If there are key performance items we should be focusing on that aren't 
-yet captured by a blueprint and session or that would be useful to discuss 
-with a broader audience during CDS, speak up soon so we can get a slot 
-added to the scheduled.
-
-I already mentioned to Matt that it would be good to talk about this 
-encode/decode work, and I believe Haomai has a proposal there as well.
-
-sage
-
-
-On Wed, 22 Oct 2014, Mark Nelson wrote:
-
-> Hi All,
-> 
-> Meeting is on at 8AM PST as usual!  Here's the links:
-> 
-> Etherpad URL:
-> http://pad.ceph.com/p/performance_weekly
-> 
-> To join the Meeting:
-> https://bluejeans.com/268261044
-> 
-> To join via Browser:
-> https://bluejeans.com/268261044/browser
-> 
-> To join with Lync:
-> https://bluejeans.com/268261044/lync
-> 
-> 
-> To join via Room System:
-> Video Conferencing System: bjn.vc -or- 199.48.152.152
-> Meeting ID: 268261044
-> 
-> To join via Phone:
-> 1) Dial:
->           +1 408 740 7256
->           +1 888 240 2560(US Toll Free)
->           +1 408 317 9253(Alternate Number)
->           (see all numbers - http://bluejeans.com/numbers)
-> 2) Enter Conference ID: 268261044
-> 
-> Mark
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+SGkgU2FnZSwNCg0KPiBPbiAxNiBPY3QgMjAxNCwgYXQgMjE6NTcsIFNhZ2UgV2VpbCA8c2FnZUBu
+ZXdkcmVhbS5uZXQ+IHdyb3RlOg0KPiANCj4gSSBzdGFydGVkIHRvIHdyaXRlIHVwIGEgYmx1ZXBy
+aW50IGZvciBrZXJiZXJvcyAvIExEQVAgLyBBRCBzdXBwb3J0Og0KPiANCj4gCWh0dHBzOi8vd2lr
+aS5jZXBoLmNvbS9QbGFubmluZy9CbHVlcHJpbnRzL0hhbW1lci9rZXJiZXJvc19hdXRobiUyQ19B
+RF9hdXRobiUyRiUyRmF1dGh6DQo+IA0KPiBJbiBjYXNlIGl0IGlzbid0IGNsZWFyIGZyb20gdGhh
+dCBkb2N1bWVudCwgSSBvbmx5IHNvcnQgb2Yga25vdyB3aGF0IEknbSANCj4gdGFsa2luZyBhYm91
+dCBoZXJlLiAgKFRoaXMgaXMgbGFyZ2VseSBiYXNlZCBvbiB3aGF0IEkgbWFuYWdlZCB0byByZXRh
+aW4gDQo+IGZyb20gYSBjb252ZXJzYXRpb24gd2l0aCBBbmRyZXcsIGJ1dCBJIHN1c3BlY3QgSSBn
+b3Qgc29tZSBvZiBpdCB3cm9uZy4pDQo+IA0KPiBGb3IgYW55b25lIHdvcmtpbmcgaW4gZW52aXJv
+bm1lbnRzIHdoZXJlIGtlcmJlcm9zIGlzIGluIHVzZSwgSSBhbSAqdmVyeSogDQo+IGludGVyZXN0
+ZWQgaW4gaGVhcmluZyB3aGF0IHlvdXIgcmVxdWlyZW1lbnRzIGFyZSBmb3IgeW91ciBlbnZpcm9u
+bWVudC4gIEluIA0KPiBwYXJ0aWN1bGFyLCBhcmUgeW91IHVzaW5nIEFEIG9yIExEQVAgb3Igc29t
+ZXRoaW5nIGVsc2U/ICBIb3cgZG8geW91IGV4cGVjdCANCj4gUkJBQyB0byB3b3JrIGZvciB5b3U/
+DQoNCkxldOKAmXMgdGFsayBhYm91dCByZXF1aXJlbWVudHMgdGhlbi4gKEFueXdheSwgSeKAmW0g
+bm90IGluIGFueSB3YXkgYSBrZXJiZXJvcyBleHBlcnQgYW5kIGl0IGlzIG5vdCAxMDAlIGNsZWFy
+IHRvIG1lIHdoYXQgeW91IGFyZSB0cnlpbmcgdG8gYWNoaWV2ZS4pDQoNCkZpcnN0bHksIG91ciBl
+bnZpcm9ubWVudCBpcyBhbG1vc3QgaWRlbnRpY2FsIHRvIHRoYXQgZGVzY3JpYmVkIGJ5IE1hcmN1
+cyAod2UgdXNlIEFEKS4gRm9yIGZpbGVzeXN0ZW1zLCBvdXIgdXNlciBjb21tdW5pdGllcyBhcmUg
+dXNlZCB0byB0aGUgd2F5IE9wZW5BRlMgd29ya3Mgd2l0aCBrZXJiZXJvcy4gR2VuZXJhbGx5LCB0
+aGF0IG1lYW5zIHRoZXkgdXNlIGtpbml0ICYmIGFrbG9nIHRvIGF1dGhlbnRpY2F0ZSBhbmQgdGhl
+eSB1bmRlcnN0YW5kIChtb3N0bHkpIGhvdyB0byB1c2UgQUZTIGdyb3VwcyBhbmQgQUZTIEFDTHMg
+Zm9yIGF1dGh6Lg0KDQpOZXh0IEkgYmFzaWNhbGx5IGhhdmUgYSBidW5jaCBvZiBxdWVzdGlvbnMg
+dG8gY2xhcmlmeSB5b3VyIGdvYWxzLiBUaGUgZmlyc3QgcGFydCBvZiB5b3VyIGJsdWVwcmludCBz
+ZWVtcyB0byBiZSBhIGNvbnZlbmllbnQgd2F5IHRvIGRpc3RyaWJ1dGUgY2VwaHgga2V5cmluZ3Mu
+IFRvIHByZXZlbnQgaGFydmVzdGluZy9yZXVzZSwgd291bGQgeW91IGludGVuZCB0aG9zZSB0byBu
+b3QgYmUg4oCcbm9ybWFs4oCdIGNlcGh4IGtleXJpbmdzIGFzIHN1Y2gsIGJ1dCByYXRoZXIgdG8g
+YmUga2V5cmluZ3MgZW5jcnlwdGVkIGJ5IHRoZSBtb24vd2hhdGV2ZXIgYW5kIHRpbWUgbGltaXRl
+ZD8NCg0KRm9yIGF1dGh6LCBpcyB0aGlzIG1lY2hhbmlzbSBtZWFudCB0byBiZSB1c2VkIGZvciBS
+QURPUyBvbmx5LCBvciBhbHNvIGZvciBDZXBoRlM/DQoNCklmIFJBRE9TIG9ubHksIHRoZW4gYXMg
+SSB1bmRlcnN0YW5kIGl0IHlvdSBjb3VsZCBiYXNpY2FsbHkgYWRkIHRoZSBjdXJyZW50IGNlcGh4
+IGNhcGFiaWxpdGllcyAod2l0aCBwb29sIGdyYW51bGFyaXR5KSB0byB0aGUgcHJvcG9zZWQgY2Vw
+aCB1c2VyIGRiIChwZXJoYXBzIHNjb3BlZCBkb3duIHRvIGEgZmV3IGxpbWl0ZWQgcm9sZXMpLiBJ
+IHdvdWxkbuKAmXQgZXhwZWN0IHRvIGJlIGFibGUgdG8gbWFuaXB1bGF0ZSBjZXBoIGNhcGFiaWxp
+dGllcyB2aWEgc29tZSBBRCBibG9iIChkdWUgbW9zdGx5IHRvIG15IEFEIGlnbm9yYW5jZSkuIEkg
+d291bGQgcHJvYmFibHkgZXhwZWN0IHRvIGFkZCBvdXIgYXV0aG9yaXNlZCBjZXBoIHVzZXJzIHRv
+IGFuIEFEIGdyb3VwLCB0aGVuIGtlZXAgdGhhdCBpbiBzeW5jIHdpdGggeW91ciBjZXBoIHVzZXIv
+cm9sZS9jYXBhYmlsaXR5IGRiLg0KDQpJZiBDZXBoRlMsIHRoZW4gdGhlIHByb2JsZW0gSSBzZWUg
+aXMgdGhhdCB0aGUgUE9TSVggcGVybWlzc2lvbnMvQUNMcyBhcmUgYmVpbmcgZXZhbHVhdGVkIG9u
+bHkgb24gdGhlIGNsaWVudCBzaWRlLiBXZXJlIHlvdSB0aGlua2luZyB0byBjaGFuZ2UgdGhhdCwg
+aS5lLiB0byBhZGQgc29tZSBub3Rpb24gb2YgQ2VwaEZTIGZpbGUtZ3JhbnVsYXIgY2VwaHggY2Fw
+YWJpbGl0aWVzPyBXZSB0aG91Z2h0IGEgbGl0dGxlIGJpdCBhYm91dCB0aGlzIGJlZm9yZToNCiAg
+aHR0cHM6Ly93aWtpLmNlcGguY29tL1BsYW5uaW5nL0JsdWVwcmludHMvJTNDU0lERUJPQVJEJTNF
+L1N0cm9uZ19BdXRoTl9hbmRfQXV0aFpfZm9yX0NlcGhGUw0KVGhlIGJhc2ljIGlkZWEgd2FzIHRv
+IGhhdmUgYW4gTURTIG9yIG90aGVyIHNlcnZpY2UgdGhhdCBldmFsdWF0ZXMgcGVybWlzc2lvbnMv
+QUNMcyBvbiB0aGUgc2VydmVyIHNpZGUgdGhlbiBoYW5kcyBvdXQgYW4gZXh0cmEgc2lnbmVkIGNh
+cGFiaWxpdHkgdG8gYmUgdXNlZCBieSB0aGUgY2xpZW50IGZvciBJT3Mgd2l0aCBhbiBPU0QuIEl0
+IHNlZW1zIGhlYXZ5d2VpZ2h0LCBob3dldmVyLCBzbyBJ4oCZbSBub3Qgc3VyZSBob3cgdGhpcyB3
+b3VsZCBwZXJmb3JtIGluIHByYWN0aXNlLg0KDQpIb3BlIHRoYXQgaGVscHMsDQpEYW4NCg0KDQoN
+Cg0KPiANCj4gV2UnbGwgZGVmaW5pdGVseSBoYXZlIGEgc2xvdCBmb3IgdGhpcyBhdCB0aGUgdXBj
+b21pbmcgQ0RTLCBidXQgYW55dGhpbmcgd2UgDQo+IGNhbiBoYXNoIG91dCBiZWZvcmUgdGhlbiB3
+aWxsIG1ha2UgdGhhdCBjb252ZXJzYXRpb24gbW9yZSBwcm9kdWN0aXZlLg0KPiANCj4gVGhhbmtz
+IQ0KPiBzYWdlDQo+IA0KDQo=
