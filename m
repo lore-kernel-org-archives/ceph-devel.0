@@ -1,48 +1,53 @@
-From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: Re: [PATCH] rbd: Fix error recovery in rbd_obj_read_sync()
-Date: Wed, 22 Oct 2014 11:44:17 +0400
-Message-ID: <CALFYKtBx9gG1M4v94ONGcXzZb_RKZ=9EUnEbxLnFQuFuUVoSvQ@mail.gmail.com>
-References: <1413962244-25630-1-git-send-email-jack@suse.cz>
+From: Mark Nelson <mark.nelson@inktank.com>
+Subject: 10/22/2014 Weekly Ceph Performance Meeting
+Date: Wed, 22 Oct 2014 09:21:55 -0500
+Message-ID: <5447BD83.8000303@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <1413962244-25630-1-git-send-email-jack@suse.cz>
-Sender: stable-owner@vger.kernel.org
-To: Jan Kara <jack@suse.cz>
-Cc: Sage Weil <sage@inktank.com>, Yehuda Sadeh <yehuda@inktank.com>, Ceph Development <ceph-devel@vger.kernel.org>, stable@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ig0-f175.google.com ([209.85.213.175]:60336 "EHLO
+	mail-ig0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751260AbaJVOV5 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 22 Oct 2014 10:21:57 -0400
+Received: by mail-ig0-f175.google.com with SMTP id uq10so993043igb.2
+        for <ceph-devel@vger.kernel.org>; Wed, 22 Oct 2014 07:21:57 -0700 (PDT)
+Received: from [192.168.1.3] (65-128-164-140.mpls.qwest.net. [65.128.164.140])
+        by mx.google.com with ESMTPSA id fk8sm798692igb.9.2014.10.22.07.21.55
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
+        Wed, 22 Oct 2014 07:21:56 -0700 (PDT)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, Oct 22, 2014 at 11:17 AM, Jan Kara <jack@suse.cz> wrote:
-> When we fail to allocate page vector in rbd_obj_read_sync() we just
-> basically ignore the problem and continue which will result in an oops
-> later. Fix the problem by returning proper error.
->
-> CC: Yehuda Sadeh <yehuda@inktank.com>
-> CC: Sage Weil <sage@inktank.com>
-> CC: ceph-devel@vger.kernel.org
-> CC: stable@vger.kernel.org
-> Coverity-id: 1226882
-> Signed-off-by: Jan Kara <jack@suse.cz>
-> ---
->  drivers/block/rbd.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 0a54c588e433..8f714c3ed25f 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -3532,7 +3532,7 @@ static int rbd_obj_read_sync(struct rbd_device *rbd_dev,
->         page_count = (u32) calc_pages_for(offset, length);
->         pages = ceph_alloc_page_vector(page_count, GFP_KERNEL);
->         if (IS_ERR(pages))
-> -               ret = PTR_ERR(pages);
-> +               return PTR_ERR(pages);
->
->         ret = -ENOMEM;
->         obj_request = rbd_obj_request_create(object_name, offset, length,
+Hi All,
 
-Applied.
+Meeting is on at 8AM PST as usual!  Here's the links:
 
-Thanks,
+Etherpad URL:
+http://pad.ceph.com/p/performance_weekly
 
-                Ilya
+To join the Meeting:
+https://bluejeans.com/268261044
+
+To join via Browser:
+https://bluejeans.com/268261044/browser
+
+To join with Lync:
+https://bluejeans.com/268261044/lync
+
+
+To join via Room System:
+Video Conferencing System: bjn.vc -or- 199.48.152.152
+Meeting ID: 268261044
+
+To join via Phone:
+1) Dial:
+           +1 408 740 7256
+           +1 888 240 2560(US Toll Free)
+           +1 408 317 9253(Alternate Number)
+           (see all numbers - http://bluejeans.com/numbers)
+2) Enter Conference ID: 268261044
+
+Mark
