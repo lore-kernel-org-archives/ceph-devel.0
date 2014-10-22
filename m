@@ -1,50 +1,46 @@
-From: mdw@linuxbox.com
-Subject: Re: kerberos / AD requirements, blueprint
-Date: Wed, 22 Oct 2014 18:46:06 -0400
-Message-ID: <20141022224605.GA1152@soma.private.linuxbox.com>
-References: <alpine.DEB.2.00.1410161253090.5588@cobra.newdream.net>
- <20141017005239.GA31393@soma.private.linuxbox.com>
- <1413951689.9184.3.camel@catalyst.net.nz>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: David Zafman <david.zafman@inktank.com>
+Subject: Re: Can pid be reused ?
+Date: Wed, 22 Oct 2014 15:51:29 -0700
+Message-ID: <87747DD3-21F2-480E-B61D-91B97237E510@inktank.com>
+References: <54471CA6.5040807@dachary.org> <0B26F614-B9E5-4E30-9471-A7F46656AA24@inktank.com> <alpine.DEB.2.00.1410221542450.29946@cobra.newdream.net>
+Mime-Version: 1.0 (Mac OS X Mail 8.0 \(1990.1\))
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from aa.linuxbox.com ([69.128.83.226]:3417 "EHLO aa.linuxbox.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S933001AbaJVWqo (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 22 Oct 2014 18:46:44 -0400
-Content-Disposition: inline
-In-Reply-To: <1413951689.9184.3.camel@catalyst.net.nz>
+Received: from mail-pd0-f173.google.com ([209.85.192.173]:60062 "EHLO
+	mail-pd0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932743AbaJVWve convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 22 Oct 2014 18:51:34 -0400
+Received: by mail-pd0-f173.google.com with SMTP id v10so138732pde.4
+        for <ceph-devel@vger.kernel.org>; Wed, 22 Oct 2014 15:51:34 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.00.1410221542450.29946@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andrew Bartlett <abartlet@catalyst.net.nz>
-Cc: Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org, daniel.vanderster@cern.ch
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sage@newdream.net>
 
-On Wed, Oct 22, 2014 at 05:21:29PM +1300, Andrew Bartlett wrote:
-...
-> > At a large site, I think you can confidently expect:
-> > 	or or more large scale deployments of AD,MIT,openldap,etc.
-> > 	homebrew management system to provision and manage accounts
-> > 	the filesystem group(s) and the identity management group are separate
-> 
-> Do you see a lot of this beyond major universities and similar sites?  I
-> ask because at least from my Samba background, I feel like we lost out
-> in the 2000's against AD, with a good number of very passionate users
-> waiting patiently for Samba4, but so, so many just running AD from
-> Microsoft.  The number with OpenLDAP and Kerberos that come past the
-> Samba lists seemed vanishingly small. 
-> 
-> (I've very glad for our passionate OpenLDAP and Kerberos users, I just
-> don't see so many of them these days).
 
-I think the overwhelming common implementation is AD - at all sizes
-of organizations from small to large.  But most of those will be
-microsoft-only environments, so aren't particularly relevant to ceph.
-I don't have good stats on the # of openldap/mit sites - but I imagine
-many of them either don't care about samba, or have already invested
-effort in a more or less parallel AD setup.  If you're running a lot
-of microsoft desktops already, you'd have to be pretty passionate
-to not just run AD and call it a day.  For ceph, though, you're
-talking about linux machines - and there, the attraction for AD
-is underwhelming.
+> On Oct 22, 2014, at 3:43 PM, Sage Weil <sage@newdream.net> wrote:
+>=20
+> On Wed, 22 Oct 2014, David Zafman wrote:
+>> I just realized what it is.  The way killall is used when stopping a=
+=20
+>> vstart cluster, is to kill all processes by name!  You can't stop=20
+>> vstarted tests running in parallel.
+>=20
+> Ah.  FWIW I think we should avoid using stop.sh whenever possible and=
+=20
+> instead do ./init-ceph stop (which does an orderly shutdown via pid=20
+> files).
+>=20
+> sage
 
-					-Marcus Watts
+Actually, vstart.sh can=E2=80=99t create 2 independent clusters anyway,=
+ so it kills any existing processes.  Probably vstart.sh is what would =
+have killed the processes in a parallel make check.
+
+David--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
