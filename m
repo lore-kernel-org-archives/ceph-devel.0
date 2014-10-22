@@ -1,112 +1,142 @@
-From: "Matt W. Benjamin" <matt@linuxbox.com>
-Subject: Re: Ceph Full-SSD Performance Improvement
-Date: Wed, 22 Oct 2014 13:18:13 -0400 (EDT)
-Message-ID: <664940498.99.1413998293240.JavaMail.root@thunderbeast.private.linuxbox.com>
-References: <498515024.97.1413997901677.JavaMail.root@thunderbeast.private.linuxbox.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: The Async messenger benchmark with latest master
+Date: Wed, 22 Oct 2014 17:18:29 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2822F290@SACMBXIP02.sdcorp.global.sandisk.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F282298FF@SACMBXIP02.sdcorp.global.sandisk.com>
+	<CACJqLybtHOyPw8+2bcFGZoScoKxH7QqENi0NKUzfwuYk=D8axw@mail.gmail.com>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F2822F1D8@SACMBXIP02.sdcorp.global.sandisk.com>
+ <CACJqLyaqDypZpN6wqYg7aGoGbOOQJcsKcRUGk23yxTRf4sRUng@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from aa.linuxbox.com ([69.128.83.226]:2840 "EHLO aa.linuxbox.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753008AbaJVRSb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 22 Oct 2014 13:18:31 -0400
-In-Reply-To: <498515024.97.1413997901677.JavaMail.root@thunderbeast.private.linuxbox.com>
+Received: from mail-bl2on0089.outbound.protection.outlook.com ([65.55.169.89]:7168
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1753008AbaJVRSe (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 22 Oct 2014 13:18:34 -0400
+In-Reply-To: <CACJqLyaqDypZpN6wqYg7aGoGbOOQJcsKcRUGk23yxTRf4sRUng@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Haomai Wang <haomaiwang@gmail.com>
-Cc: Samuel Just <sam.just@inktank.com>, icolle@redhat.com, ceph-devel@vger.kernel.org, Sage Weil <sage@newdream.net>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi,
-
------ "Haomai Wang" <haomaiwang@gmail.com> wrote:
-
-> [cc to ceph-devel]
-> 
-> >> At first FileStore will directly accept inputs without bufferlist
-> >> encode/decodes. Now I try to send MOSDOP's payload directly to
-> >> replicate PG and avoid overall ObjectStore::Transaction which is
-
-We did something similar to this in our internal OSD branch, it's a good idea.
-
-> used
-> >> by replicated pg. Replicated PG maybe need calculate again but as
-> we
-> >> performed the main consuming time in PG layer is transaction
-> >> encode/decode. KeyValueStore and FileStore will both happy  to
-> adopt
-> >> it. Then main IO logic such as read/write ops won't need
-> >> encode/decode.
-> >
-> > Can you send a message to ceph-devel with a bit more detail?  We
-> used to
-> > do this, actually (prepare the transaction on the replicas instead
-> of
-> > encoding the one from the primary) but it was a bit less flexible
-> when it
-> > came to the object classes (which might not be deterministic).
-> >
-> > I agree that encode/decode is a serious issue, but before
-> > avoiding it for transations I'd like to see what Matt Benjamin
-> > is able to accomplish with his changes, or look at ways to
-> > make transaction encoding in particular more efficient (e.g.
-> > with fixed size structures).  Also, you might be interested in
-> >
-> >        
-> https://wiki.ceph.com/Planning/Blueprints/Hammer/osd%3A_update_Transaction_encoding
-> 
-> Hmm, I try to understand the meaning. Is this BP want to make
-> ObjectStore::Transaction more flexible and make ObjectStore's
-> successors can easily aware of the data layout in transaction. I try
-> to summary the performance optimization for this bp:
-> 
-> 1. FileStore/KeyValueStore can aware of the size of write data and do
-> something special for it, it would be nice for large file
-> 2. A complexity transaction which contains several ops for one
-> object,
->  the redundancy lookups will be reduced
-> 
-> But the actual consuming time component I think is transaction
-> encode/decode. Especially encode/decode for ghobject_t and collection
-> structure.
-
-We also did some simplification here.
-
-> 
-> Combine with Message encode/decode, as I performed encode/decode
-> logics plays a important role for the latency of op. I want to
-> explain
-> what I want to do:
-> 
-> All Messages will be restructured and have a common header. All
-> members in Message will be fixed. I know some critical member such as
-> ghobject_t or anything else will be hard to decisive. So on the
-> Messenger side, ghobject_t or other flexible structure will have
-> separated structure, like ghobject_t will be translated to
-> Message::object which will packed into a fixed size memory. So
-> Messenger can directly pick up structures in messages without memory
-> copy and parsing. And on the side of PG layer,
-> ObjectStore::Transaction will be refactored to a simple class. A list
-> of ops will describe the sequences and all data will be referenced
-> directly which is used in PG layer. It maybe let ObjectStore's
-> successors less flexible but it's still has space to modify. For
-> subop, the raw message from client will be validated in primary pg
-> and
-> add some infos necessary inser into the fixed position of the message
-> and populate to replicate PG.
-
-I've wanted to see work done in this area also.  I'm not as certain about the detail.  We've considered doing something with Message similar to what we're doing with buffer::raw and buffer::ptr, which sounds a bit similar.  I'm not 100% convinced that there might not be cleaner encode/decode strategies which do not give up as much flexibility as what is hinted
-at here, though.  We've discussed some ideas internally.
-
-
--- 
-Matt Benjamin
-The Linux Box
-206 South Fifth Ave. Suite 150
-Ann Arbor, MI  48104
-
-http://linuxbox.com
-
-tel.  734-761-4689 
-fax.  734-769-8938 
-cel.  734-216-5309 
+VGhhbmtzIEhhb21haSwgSSB3aWxsIHRyeSB0aGlzIGJyYW5jaCBvdXQuDQpCVFcsIHdpbGwgaXQg
+YmUgY29tcGF0aWJsZSB3aXRoIHRoZSBjbGllbnQgd2hpY2ggaXMgbm90IHVzaW5nIHRoaXMgYXN5
+bmMgbWVzc2VuZ2VyIGZvciBleGFtcGxlIGtyYmQgPw0KDQpSZWdhcmRzDQpTb21uYXRoDQoNCi0t
+LS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBIYW9tYWkgV2FuZyBbbWFpbHRvOmhhb21h
+aXdhbmdAZ21haWwuY29tXSANClNlbnQ6IFdlZG5lc2RheSwgT2N0b2JlciAyMiwgMjAxNCAxMDow
+MiBBTQ0KVG86IFNvbW5hdGggUm95DQpDYzogY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNClN1
+YmplY3Q6IFJlOiBUaGUgQXN5bmMgbWVzc2VuZ2VyIGJlbmNobWFyayB3aXRoIGxhdGVzdCBtYXN0
+ZXINCg0KbXNfdHlwZSA9IGFzeW5jIGlzIG5lZWRlZCB0byBhZGQgW2dsb2JhbF0gc2VjdGlvbiBp
+biBjZXBoLmNvbmYNCg0KTm8gb3RoZXIgb3B0aW9ucyBhcmUgbmVlZGVkDQoNCk9uIFRodSwgT2N0
+IDIzLCAyMDE0IGF0IDEyOjAyIEFNLCBTb21uYXRoIFJveSA8U29tbmF0aC5Sb3lAc2FuZGlzay5j
+b20+IHdyb3RlOg0KPiBIaSBIYW9tYWkvU2FnZSwNCj4NCj4gSSBqdXN0IGZpZ3VyZWQgaXQgb3V0
+IHRoYXQgQXN5bmMgbWVzc2VuZ2VyIGlzIG5vdCB5ZXQgaW4gbWFzdGVyLiBTbywgSSANCj4gZGlk
+bid0IHJlYWxseSB0ZXN0IHRoZSBhc3luYyBtZXNzZW5nZXIgOi0oDQo+DQo+IEkgc2F3IGhlcmUg
+aXMgdGhlIHB1bGwgcmVxdWVzdC4NCj4NCj4gaHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2VwaC9w
+dWxsLzI3NjgNCj4NCj4gSSB3YW50IHRvIHRlc3QgdGhpcyBvdXQgYW5kIEkgaGF2ZSBzb21lIHF1
+ZXN0aW9ucyByZWdhcmRpbmcgdGhpcy4NCj4NCj4gMS4gIFRoZSBicmFuY2ggSSBzaG91bGQgdGVz
+dCBvdXQgaXMgdGhlIGZvbGxvd2luZywgcmlnaHQgPw0KPg0KPiBodHRwczovL2dpdGh1Yi5jb20v
+Y2VwaC9jZXBoL3RyZWUvd2lwLW1zZ3INCj4NCj4gMi4gV2lsbCBBc3luYyBtZXNzZW5nZXIgYnkg
+ZGVmYXVsdCBlbmFibGVkID8gT1IgSSBuZWVkIHRvIGFkZCBzb21lIGNvbmZpZyBvcHRpb24gZm9y
+IHRoYXQgPw0KPg0KPiAzLiBPdGhlciB0aGFuIG1zX2V2ZW50X29wX3RocmVhZHMgLCBpcyB0aGVy
+ZSBhbnkgdHVuYWJsZSBwYXJhbWV0ZXIgSSBzaG91bGQgYmUgcGxheWluZyB3aXRoID8NCj4NCj4g
+VGhhbmtzICYgUmVnYXJkcw0KPiBTb21uYXRoDQo+DQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0t
+LS0tDQo+IEZyb206IEhhb21haSBXYW5nIFttYWlsdG86aGFvbWFpd2FuZ0BnbWFpbC5jb21dDQo+
+IFNlbnQ6IFNhdHVyZGF5LCBPY3RvYmVyIDE4LCAyMDE0IDEwOjE1IFBNDQo+IFRvOiBTb21uYXRo
+IFJveQ0KPiBDYzogY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNCj4gU3ViamVjdDogUmU6IFRo
+ZSBBc3luYyBtZXNzZW5nZXIgYmVuY2htYXJrIHdpdGggbGF0ZXN0IG1hc3Rlcg0KPg0KPiBUaGFu
+a3MgU29tbmF0aCENCj4NCj4gSSBoYXZlIGFub3RoZXIgc2ltcGxlIHBlcmZvcm1hbmNlIHRlc3Qg
+Zm9yIGFzeW5jIG1lc3NlbmdlcjoNCj4NCj4gRm9yIDRrIG9iamVjdCByZWFkLCBtYXN0ZXIgYnJh
+bmNoIHVzZWQgNC40NnMgdG8gY29tcGxldGUgdGVzdHMsIGFzeW5jIE1lc3NlbmdlciB1c2VkIDMu
+MTRzIEZvciA0ayBvYmplY3Qgd3JpdGUsIG1hc3RlciBicmFuY2ggdXNlZCAxMC42cyB0byBjb21w
+bGV0ZSwgYXN5bmMgTWVzc2VuZ2VyIHVzZWQgNi42cyEhDQo+DQo+IERldGFpbGYgcmVzdWx0cyBz
+ZWUgYmVsb3csIDRrIG9iamVjdCByZWFkIGlzIGEgc2ltcGxlIGNlcGggY2xpZW50IA0KPiBwcm9n
+cmFtIHdoaWNoIHdpbGwgcmVhZCA1MDAwIG9iamVjdHMgYW5kIDRrIG9iamVjdCB3cml0ZSB3aWxs
+IHdyaXRlDQo+IDUwMDAgb2JqZWN0cy4NCj4gSSBpbmNyZWFzZWQgIm1zX2V2ZW50X29wX3RocmVh
+ZHMiIHRvIDEwIGNvbXBhcmVkIHRvIHRoZSBkZWZhdWx0IHZhbHVlIGlzIDIuDQo+IE1heWJlIFNv
+bW5hdGggY2FuIGRvIGl0IGFuZCB0ZXN0cyBhZ2FpbiwgSSB0aGluayB3ZSBjYW4gZ2V0IG1vcmUg
+aW1wcm92ZW1lbnRzIGZvciB5b3VyIHRlc3RzLg0KPg0KPiBNYXN0ZXIgQnJhbmNoKDZmYTY4NmM4
+YzQyOTM3ZGQwNjk1OTFmMTZkZTkyZTk1NGQ4ZWQzNGQpOg0KPg0KPiBbcm9vdEBjZXBoLXRlc3Qg
+c3JjXSMgZm9yIGkgaW4gYHNlcSAxIDNgOyBkbyBkYXRlICYmIA0KPiB+LzA4LnJhZG9zX3JlYWRf
+NGtfZm9yX2VhY2hfb2JqZWN0IC9ldGMvY2VwaC9jZXBoLmNvbmYgcmJkIDUwMDAgJiYgDQo+IHNs
+ZWVwIDM7IGRvbmUNCj4NCj4gRnJpIE9jdCAxNyAxNzoxMDozOSBVVEMgMjAxNA0KPg0KPiBVc2Vk
+IFRpbWU6NC40NjE1ODENCj4NCj4gRnJpIE9jdCAxNyAxNzoxMDo0NCBVVEMgMjAxNA0KPg0KPiBV
+c2VkIFRpbWU6NC4zODg1NzINCj4NCj4gRnJpIE9jdCAxNyAxNzoxMDo0OCBVVEMgMjAxNA0KPg0K
+PiBVc2VkIFRpbWU6NC40NDgxNTcNCj4NCj4gW3Jvb3RAY2VwaC10ZXN0IHNyY10jDQo+DQo+IFty
+b290QGNlcGgtdGVzdCBzcmNdIyBmb3IgaSBpbiBgc2VxIDEgM2A7IGRvIGRhdGUgJiYgDQo+IH4v
+MDEucmFkb3Nfd3JpdGVfNGtfZm9yX2VhY2hfb2JqZWN0IC9ldGMvY2VwaC9jZXBoLmNvbmYgcmJk
+IDUwMDAgJiYgDQo+IHNsZWVwIDM7IGRvbmVGcmkgT2N0IDE3IDE3OjExOjIzIFVUQyAyMDE0DQo+
+DQo+IFVzZWQgVGltZToxMC42Mzg3ODMNCj4NCj4gRnJpIE9jdCAxNyAxNzoxMTozMyBVVEMgMjAx
+NA0KPg0KPiBVc2VkIFRpbWU6MTAuNzkzMjMxDQo+DQo+IEZyaSBPY3QgMTcgMTc6MTE6NDQgVVRD
+IDIwMTQNCj4NCj4gVXNlZCBUaW1lOjEwLjkwODAwMw0KPg0KPg0KPiBNYXN0ZXIgQnJhbmNoIHdp
+dGggQXN5bmNNZXNzZW5nZXI6DQo+DQo+IFtyb290QGNlcGgtdGVzdCBzcmNdIyBmb3IgaSBpbiBg
+c2VxIDEgM2A7IGRvIGRhdGUgJiYgDQo+IH4vMDgucmFkb3NfcmVhZF80a19mb3JfZWFjaF9vYmpl
+Y3QgL2V0Yy9jZXBoL2NlcGguY29uZiByYmQgNTAwMCAmJiANCj4gc2xlZXAgMzsgZG9uZQ0KPg0K
+PiBTdW4gT2N0IDE5IDA2OjAxOjUwIFVUQyAyMDE0DQo+DQo+IFVzZWQgVGltZTozLjE1NTUwNg0K
+Pg0KPiBTdW4gT2N0IDE5IDA2OjAxOjUzIFVUQyAyMDE0DQo+DQo+IFVzZWQgVGltZTozLjEzNDk2
+MQ0KPg0KPiBTdW4gT2N0IDE5IDA2OjAxOjU2IFVUQyAyMDE0DQo+DQo+IFVzZWQgVGltZTozLjEz
+NTgxNA0KPg0KPiBbcm9vdEBjZXBoLXRlc3Qgc3JjXSMgZm9yIGkgaW4gYHNlcSAxIDNgOyBkbyBk
+YXRlICYmIA0KPiB+LzAxLnJhZG9zX3dyaXRlXzRrX2Zvcl9lYWNoX29iamVjdCAvZXRjL2NlcGgv
+Y2VwaC5jb25mIHJiZCA1MDAwICYmIA0KPiBzbGVlcCAzOyBkb25lDQo+DQo+IFN1biBPY3QgMTkg
+MDY6MDI6MDMgVVRDIDIwMTQNCj4NCj4gVXNlZCBUaW1lOjYuNTM2MzE5DQo+DQo+IFN1biBPY3Qg
+MTkgMDY6MDI6MTAgVVRDIDIwMTQNCj4NCj4gVXNlZCBUaW1lOjYuNjQ4NzM4DQo+DQo+IFN1biBP
+Y3QgMTkgMDY6MDI6MTYgVVRDIDIwMTQNCj4NCj4gVXNlZCBUaW1lOjYuNTg1MTU2DQo+DQo+IE9u
+IFNhdCwgT2N0IDE4LCAyMDE0IGF0IDQ6MzcgQU0sIFNvbW5hdGggUm95IDxTb21uYXRoLlJveUBz
+YW5kaXNrLmNvbT4gd3JvdGU6DQo+PiBIaSBTYWdlL0hhb21haSwNCj4+DQo+PiBJIGRpZCBzb21l
+IDRLIFJhbmRvbSBSZWFkIGJlbmNobWFya2luZyB3aXRoIGxhdGVzdCBtYXN0ZXIgaGF2aW5nIEFz
+eW5jIG1lc3NlbmdlciBjaGFuZ2VzIGFuZCByZXN1bHQgbG9va3MgcHJvbWlzaW5nLg0KPj4NCj4+
+IE15IGNvbmZpZ3VyYXRpb246DQo+PiAtLS0tLS0tLS0tLS0tLS0tLS0tLS0NCj4+DQo+PiAxIG5v
+ZGUsIDggU1NEcywgOE9TRHMsIDMgcG9vbHMgLCBlYWNoIGhhcyAzIGltYWdlcy4gfjIwMDAgUGcg
+Y2x1c3RlciANCj4+IHdpZGUgQ3B1IDogSW50ZWwoUikgWGVvbihSKSBDUFUgRTUtMjY4MCB2MiBA
+IDIuODBHSHosIGR1YWwgc29ja2V0LCBIVCBlbmFibGVkLCA0MCBjb3Jlcy4NCj4+IFVzZWQga3Ji
+ZCBhcyBjbGllbnQuDQo+Pg0KPj4NCj4+IDEgY2xpbmV0IG5vZGUgd2l0aCAzIHJiZCBpbWFnZXMg
+b24gMyBkaWZmZXJlbnQgcG9vbHM6DQo+PiAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQo+PiBNYXN0ZXIgOg0KPj4gLS0t
+LS0tLS0tDQo+Pg0KPj4gfjIwM2sgSU9QUywgfjkwJSBsYXRlbmNpZXMgd2l0aGluIDRtc2VjLCB0
+b3RhbCByZWFkIDogfjUuMlRCDQo+Pg0KPj4gICAgIGxhdCAodXNlYykgOiA0PTAuMDElLCAxMD0w
+LjAxJSwgNTA9MC4wMSUsIDEwMD0wLjAxJSwgMjUwPTAuMDMlDQo+PiAgICAgbGF0ICh1c2VjKSA6
+IDUwMD0wLjg2JSwgNzUwPTMuNzIlLCAxMDAwPTcuMTklDQo+PiAgICAgbGF0IChtc2VjKSA6IDI9
+MzkuMTclLCA0PTQxLjQ1JSwgMTA9Ny4yNiUsIDIwPTAuMjQlLCA1MD0wLjA2JQ0KPj4gICAgIGxh
+dCAobXNlYykgOiAxMDA9MC4wMyUsIDI1MD0wLjAxJSwgNTAwPTAuMDElDQo+Pg0KPj4gY3B1OiB+
+MS0yICUgaWRsZQ0KPj4NCj4+IEdpYW50Og0KPj4gLS0tLS0tDQo+Pg0KPj4gfjE5NmsgSU9QUywg
+fjg5LTkwJSBsYXRlbmNpZXMgd2l0aGluIDRtc2VjLCB0b3RhbCByZWFkIDogfjUuM1RCDQo+Pg0K
+Pj4gICAgIGxhdCAodXNlYykgOiAyNTA9MC4wMSUsIDUwMD0wLjUxJSwgNzUwPTIuNzElLCAxMDAw
+PTYuMDMlDQo+PiAgICAgbGF0IChtc2VjKSA6IDI9MzQuMzIlLCA0PTQ1Ljc0JSwgMTA9MTAuNDYl
+LCAyMD0wLjIxJSwgNTA9MC4wMiUNCj4+ICAgICBsYXQgKG1zZWMpIDogMTAwPTAuMDElLCAyNTA9
+MC4wMSUNCj4+DQo+PiBjcHU6IH4yJSBpZGxlDQo+Pg0KPj4gMiBjbGllbnRzIHdpdGggMyByYmQg
+aW1hZ2VzIGVhY2ggb24gMyBkaWZmZXJlbnQgcG9vbHM6DQo+PiAtLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQo+Pg0KPj4g
+TWFzdGVyIDoNCj4+IC0tLS0tLS0tLQ0KPj4NCj4+IH4yMDdLIGlvcHMsIH43MCUgbGF0ZW5jaWVz
+IHdpdGhpbiA0bXNlYywgVG90YWwgcmVhZDogfjUuOTkgVEINCj4+DQo+PiAgICAgbGF0ICh1c2Vj
+KSA6IDI1MD0wLjAzJSwgNTAwPTAuNjMlLCA3NTA9Mi42NyUsIDEwMDA9NS4yMSUNCj4+ICAgICBs
+YXQgKG1zZWMpIDogMj0yNS4xMiUsIDQ9MzYuMTklLCAxMD0yNC44MCUsIDIwPTMuMTYlLCA1MD0x
+LjM0JQ0KPj4gICAgIGxhdCAobXNlYykgOiAxMDA9MC42NiUsIDI1MD0wLjE4JSwgNTAwPTAuMDEl
+DQo+Pg0KPj4gY3B1OiB+MC0xICUgaWRsZQ0KPj4NCj4+IEdpYW50Og0KPj4gLS0tLS0tLS0NCj4+
+IH4xOTlLIGlvcHMsIH42NCUgbGF0ZW5jaWVzIHdpdGhpbiA0bXNlYywgVG90YWwgcmVhZDogfjUu
+OTQgVEINCj4+DQo+PiAgICAgbGF0ICh1c2VjKSA6IDI1MD0wLjAxJSwgNTAwPTAuMjUlLCA3NTA9
+MS40NyUsIDEwMDA9My40NSUNCj4+ICAgICBsYXQgKG1zZWMpIDogMj0yMS4yMiUsIDQ9MzYuNjkl
+LCAxMD0zMC42MyUsIDIwPTQuMjglLCA1MD0xLjcwJQ0KPj4gICAgIGxhdCAobXNlYykgOiAxMDA9
+MC4yOCUsIDI1MD0wLjAyJSwgNTAwPTAuMDElDQo+Pg0KPj4gY3B1OiB+MSUgaWRsZQ0KPj4NCj4+
+DQo+PiBTbywgaW4gc3VtbWFyeSB0aGUgbWFzdGVyIHdpdGggQXN5bmMgbWVzc2VuZ2VyIGhhcyBp
+bXByb3ZlZCBib3RoIGluIGlvcHMgYW5kIGxhdGVuY3kuDQo+Pg0KPj4gVGhhbmtzICYgUmVnYXJk
+cw0KPj4gU29tbmF0aA0KPj4NCj4+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fDQo+
+Pg0KPj4gUExFQVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVj
+dHJvbmljIG1haWwgbWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBk
+ZXNpZ25hdGVkIHJlY2lwaWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlz
+IG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5v
+dGlmaWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0
+aGF0IGFueSByZXZpZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBv
+ZiB0aGlzIG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2
+ZWQgdGhpcyBjb21tdW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIg
+YnkgdGVsZXBob25lIG9yIGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBk
+ZXN0cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNz
+aW9uICh3aGV0aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMp
+Lg0KPj4NCj4+IC0tDQo+PiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUg
+bGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCINCj4+IGluIHRoZSBib2R5IG9mIGEgbWVzc2Fn
+ZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIA0KPj4gaW5mbyBh
+dCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+DQo+DQo+DQo+
+IC0tDQo+IEJlc3QgUmVnYXJkcywNCj4NCj4gV2hlYXQNCg0KDQoNCi0tDQpCZXN0IFJlZ2FyZHMs
+DQoNCldoZWF0DQo=
