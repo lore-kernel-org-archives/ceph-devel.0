@@ -1,29 +1,50 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: The Async messenger benchmark with latest master
-Date: Wed, 22 Oct 2014 10:52:38 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1410221051580.29946@cobra.newdream.net>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F282298FF@SACMBXIP02.sdcorp.global.sandisk.com> <CACJqLybtHOyPw8+2bcFGZoScoKxH7QqENi0NKUzfwuYk=D8axw@mail.gmail.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F2822F1D8@SACMBXIP02.sdcorp.global.sandisk.com>
- <CACJqLyaqDypZpN6wqYg7aGoGbOOQJcsKcRUGk23yxTRf4sRUng@mail.gmail.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F2822F290@SACMBXIP02.sdcorp.global.sandisk.com> <CACJqLya+ietkH=WV-c710z1P7BaO9TmTqMSdhiDP_4ncoNo84Q@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: The Async messenger benchmark with latest master
+Date: Wed, 22 Oct 2014 20:34:34 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2822F3C7@SACMBXIP02.sdcorp.global.sandisk.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F282298FF@SACMBXIP02.sdcorp.global.sandisk.com>
+ <CACJqLybtHOyPw8+2bcFGZoScoKxH7QqENi0NKUzfwuYk=D8axw@mail.gmail.com>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F2822F1D8@SACMBXIP02.sdcorp.global.sandisk.com>
+ <CACJqLyaqDypZpN6wqYg7aGoGbOOQJcsKcRUGk23yxTRf4sRUng@mail.gmail.com>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F2822F290@SACMBXIP02.sdcorp.global.sandisk.com>
+ <CACJqLya+ietkH=WV-c710z1P7BaO9TmTqMSdhiDP_4ncoNo84Q@mail.gmail.com>
+ <alpine.DEB.2.00.1410221051580.29946@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:38432 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752473AbaJVRwj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 22 Oct 2014 13:52:39 -0400
-In-Reply-To: <CACJqLya+ietkH=WV-c710z1P7BaO9TmTqMSdhiDP_4ncoNo84Q@mail.gmail.com>
+Received: from mail-by2on0071.outbound.protection.outlook.com ([207.46.100.71]:15669
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S932336AbaJVUel convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 22 Oct 2014 16:34:41 -0400
+In-Reply-To: <alpine.DEB.2.00.1410221051580.29946@cobra.newdream.net>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomaiwang@gmail.com>
-Cc: Somnath Roy <Somnath.Roy@sandisk.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>, Haomai Wang <haomaiwang@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+
+Sage,
+So, with krbd as client, should I use 'ms_type = random' in the cluster side to test Async messenger in the cluster side?
+BTW, what this option does ? It will pick Async first and fall back to old messenger in case any problem ?
+
+Thanks & Regards
+Somnath
+
+-----Original Message-----
+From: Sage Weil [mailto:sage@newdream.net] 
+Sent: Wednesday, October 22, 2014 10:53 AM
+To: Haomai Wang
+Cc: Somnath Roy; ceph-devel@vger.kernel.org
+Subject: Re: The Async messenger benchmark with latest master
 
 On Thu, 23 Oct 2014, Haomai Wang wrote:
-> It should be but I'm not convinced of the current impl of
-> AsyncMessenger. It's possible that exists some corner situations which
+> It should be but I'm not convinced of the current impl of 
+> AsyncMessenger. It's possible that exists some corner situations which 
 > may break
 
-The 'ms_type = random' option we added should give us some confidnece that 
-this is true (by doing QA on mixes old both messenger implementations).
+The 'ms_type = random' option we added should give us some confidnece that this is true (by doing QA on mixes old both messenger implementations).
 
 sage
 
@@ -50,8 +71,8 @@ sage
 > > On Thu, Oct 23, 2014 at 12:02 AM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
 > >> Hi Haomai/Sage,
 > >>
-> >> I just figured it out that Async messenger is not yet in master. So, I
-> >> didn't really test the async messenger :-(
+> >> I just figured it out that Async messenger is not yet in master. 
+> >> So, I didn't really test the async messenger :-(
 > >>
 > >> I saw here is the pull request.
 > >>
@@ -83,7 +104,7 @@ sage
 > >>
 > >> For 4k object read, master branch used 4.46s to complete tests, async Messenger used 3.14s For 4k object write, master branch used 10.6s to complete, async Messenger used 6.6s!!
 > >>
-> >> Detailf results see below, 4k object read is a simple ceph client
+> >> Detailf results see below, 4k object read is a simple ceph client 
 > >> program which will read 5000 objects and 4k object write will write
 > >> 5000 objects.
 > >> I increased "ms_event_op_threads" to 10 compared to the default value is 2.
@@ -91,8 +112,8 @@ sage
 > >>
 > >> Master Branch(6fa686c8c42937dd069591f16de92e954d8ed34d):
 > >>
-> >> [root@ceph-test src]# for i in `seq 1 3`; do date &&
-> >> ~/08.rados_read_4k_for_each_object /etc/ceph/ceph.conf rbd 5000 &&
+> >> [root@ceph-test src]# for i in `seq 1 3`; do date && 
+> >> ~/08.rados_read_4k_for_each_object /etc/ceph/ceph.conf rbd 5000 && 
 > >> sleep 3; done
 > >>
 > >> Fri Oct 17 17:10:39 UTC 2014
@@ -109,8 +130,8 @@ sage
 > >>
 > >> [root@ceph-test src]#
 > >>
-> >> [root@ceph-test src]# for i in `seq 1 3`; do date &&
-> >> ~/01.rados_write_4k_for_each_object /etc/ceph/ceph.conf rbd 5000 &&
+> >> [root@ceph-test src]# for i in `seq 1 3`; do date && 
+> >> ~/01.rados_write_4k_for_each_object /etc/ceph/ceph.conf rbd 5000 && 
 > >> sleep 3; doneFri Oct 17 17:11:23 UTC 2014
 > >>
 > >> Used Time:10.638783
@@ -126,8 +147,8 @@ sage
 > >>
 > >> Master Branch with AsyncMessenger:
 > >>
-> >> [root@ceph-test src]# for i in `seq 1 3`; do date &&
-> >> ~/08.rados_read_4k_for_each_object /etc/ceph/ceph.conf rbd 5000 &&
+> >> [root@ceph-test src]# for i in `seq 1 3`; do date && 
+> >> ~/08.rados_read_4k_for_each_object /etc/ceph/ceph.conf rbd 5000 && 
 > >> sleep 3; done
 > >>
 > >> Sun Oct 19 06:01:50 UTC 2014
@@ -142,8 +163,8 @@ sage
 > >>
 > >> Used Time:3.135814
 > >>
-> >> [root@ceph-test src]# for i in `seq 1 3`; do date &&
-> >> ~/01.rados_write_4k_for_each_object /etc/ceph/ceph.conf rbd 5000 &&
+> >> [root@ceph-test src]# for i in `seq 1 3`; do date && 
+> >> ~/01.rados_write_4k_for_each_object /etc/ceph/ceph.conf rbd 5000 && 
 > >> sleep 3; done
 > >>
 > >> Sun Oct 19 06:02:03 UTC 2014
@@ -166,13 +187,14 @@ sage
 > >>> My configuration:
 > >>> ---------------------
 > >>>
-> >>> 1 node, 8 SSDs, 8OSDs, 3 pools , each has 3 images. ~2000 Pg cluster
-> >>> wide Cpu : Intel(R) Xeon(R) CPU E5-2680 v2 @ 2.80GHz, dual socket, HT enabled, 40 cores.
+> >>> 1 node, 8 SSDs, 8OSDs, 3 pools , each has 3 images. ~2000 Pg 
+> >>> cluster wide Cpu : Intel(R) Xeon(R) CPU E5-2680 v2 @ 2.80GHz, dual socket, HT enabled, 40 cores.
 > >>> Used krbd as client.
 > >>>
 > >>>
 > >>> 1 clinet node with 3 rbd images on 3 different pools:
-> >>> -------------------------------------------------------------------
+> >>> ------------------------------------------------------------------
+> >>> -
 > >>> Master :
 > >>> ---------
 > >>>
@@ -197,7 +219,8 @@ sage
 > >>> cpu: ~2% idle
 > >>>
 > >>> 2 clients with 3 rbd images each on 3 different pools:
-> >>> -------------------------------------------------------------------
+> >>> ------------------------------------------------------------------
+> >>> -
 > >>>
 > >>> Master :
 > >>> ---------
@@ -232,8 +255,8 @@ sage
 > >>>
 > >>> --
 > >>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
-> >>> in the body of a message to majordomo@vger.kernel.org More majordomo
-> >>> info at  http://vger.kernel.org/majordomo-info.html
+> >>> in the body of a message to majordomo@vger.kernel.org More 
+> >>> majordomo info at  http://vger.kernel.org/majordomo-info.html
 > >>
 > >>
 > >>
@@ -251,13 +274,13 @@ sage
 > 
 > 
 > 
-> -- 
+> --
 > Best Regards,
 > 
 > Wheat
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> in the body of a message to majordomo@vger.kernel.org More majordomo 
+> info at  http://vger.kernel.org/majordomo-info.html
 > 
 > 
