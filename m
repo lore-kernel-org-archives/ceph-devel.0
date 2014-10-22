@@ -1,124 +1,144 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Can pid be reused ?
-Date: Tue, 21 Oct 2014 19:55:34 -0700
-Message-ID: <54471CA6.5040807@dachary.org>
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: Re: Ceph Full-SSD Performance Improvement
+Date: Wed, 22 Oct 2014 11:09:54 +0800
+Message-ID: <CACJqLyY94fGhtKfHkwn3qMv1s_sWC-qGofxG7ZjY48QJSH3NzQ@mail.gmail.com>
+References: <CACJqLyZ3-3UOkmGLw973_JCJ9=32K7NvbJks72+8Zs-j1LtwOA@mail.gmail.com>
+	<alpine.DEB.2.00.1410210836410.13498@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="avl4la1K0sHWCBEc0J3uoslrINjJwtnWj"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:50531 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1750814AbaJVCzn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 21 Oct 2014 22:55:43 -0400
-Received: from [10.9.0.6] (unknown [10.0.2.28])
-	by smtp.dmail.dachary.org (Postfix) with ESMTP id B332A420A2
-	for <ceph-devel@vger.kernel.org>; Wed, 22 Oct 2014 04:55:35 +0200 (CEST)
+Received: from mail-wg0-f49.google.com ([74.125.82.49]:62342 "EHLO
+	mail-wg0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751048AbaJVDJ4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 21 Oct 2014 23:09:56 -0400
+Received: by mail-wg0-f49.google.com with SMTP id x12so2809334wgg.32
+        for <ceph-devel@vger.kernel.org>; Tue, 21 Oct 2014 20:09:54 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.00.1410210836410.13498@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: Samuel Just <sam.just@inktank.com>, icolle@redhat.com, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---avl4la1K0sHWCBEc0J3uoslrINjJwtnWj
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
-
-Hi,
-
-Something strange happens on fedora20 with linux 3.11.10-301.fc20.x86_64.=
- Running make -j8 check on https://github.com/ceph/ceph/pull/2750 a proce=
-ss gets killed from time to time. For instance it shows as
-
-TEST_erasure_crush_stripe_width: 124: stripe_width=3D4096
-TEST_erasure_crush_stripe_width: 125: ./ceph osd pool create pool_erasure=
- 12 12 erasure
-*** DEVELOPER MODE: setting PATH, PYTHONPATH and LD_LIBRARY_PATH ***
-=2E/test/mon/osd-pool-create.sh: line 120: 27557 Killed                  =
-=2E/ceph osd pool create pool_erasure 12 12 erasure
-TEST_erasure_crush_stripe_width: 126: ./ceph --format json osd dump
-TEST_erasure_crush_stripe_width: 126: tee osd-pool-create/osd.json
-
-in the test logs. Note the 27557 Killed . I originally thought it was bec=
-ause some ulimit was crossed and set them to very generous / unlimited ha=
-rd / soft thresholds.
-
-core file size          (blocks, -c) 0                                   =
-                                                 =20
-data seg size           (kbytes, -d) unlimited                           =
-                                                 =20
-scheduling priority             (-e) 0                                   =
-                                                 =20
-file size               (blocks, -f) unlimited                           =
-                                                 =20
-pending signals                 (-i) 515069                              =
-                                                 =20
-max locked memory       (kbytes, -l) unlimited                           =
-                                                 =20
-max memory size         (kbytes, -m) unlimited                           =
-                                                 =20
-open files                      (-n) 400000                              =
-                                                 =20
-pipe size            (512 bytes, -p) 8                                   =
-                                                 =20
-POSIX message queues     (bytes, -q) 819200                              =
-                                                 =20
-real-time priority              (-r) 0                                   =
-                                                 =20
-stack size              (kbytes, -s) unlimited                           =
-                                                 =20
-cpu time               (seconds, -t) unlimited                           =
-                                                 =20
-max user processes              (-u) unlimited                           =
-                                                 =20
-virtual memory          (kbytes, -v) unlimited                           =
-                                                 =20
-file locks                      (-x) unlimited   =20
-
-Benoit Canet suggested that I installed systemtap ( https://www.sourcewar=
-e.org/systemtap/wiki/SystemtapOnFedora ) and ran https://sourceware.org/s=
-ystemtap/examples/process/sigkill.stp to watch what was sending the kill =
-signal. It showed the following:
-
-=2E..
-SIGKILL was sent to ceph-osd (pid:27557) by vstart_wrapper. uid:1001
-SIGKILL was sent to python (pid:27557) by vstart_wrapper. uid:1001
-=2E...
-
-which suggests that pid 27557 used by ceph-osd was reused for the python =
-script that was killed above. Because the script that kills daemons is ve=
-ry agressive and kill -9 the pid to check if it really is dead
-
-https://github.com/ceph/ceph/blob/giant/src/test/mon/mon-test-helpers.sh#=
-L64
-
-it explains the problem.
-
-However, as Dan Mick suggests, reusing pid quickly could break a number o=
-f things and it is a surprising behavior. Maybe something else is going o=
-n. A loop creating processes sees their pid increasing and not being reus=
-ed.
-
-Any idea about what is going on would be much appreciated :-)
-
-Cheers
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
+[cc to ceph-devel]
 
 
 
---avl4la1K0sHWCBEc0J3uoslrINjJwtnWj
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+On Tue, Oct 21, 2014 at 11:51 PM, Sage Weil <sage@newdream.net> wrote:
+> Hi Haomai,
+>
+> You and your team have been doing great work and I'm very happy that you
+> are working with Ceph!  The performance gains you've seen are very
+> encouraging.
+>
+>> 1. Use AsyncMessenger for both client and OSD
+>
+> I would like to get this into the tree.  I made a few cosmetic changes and
+> pushed a wip-msgr into ceph.git to make sure it builds okay.  Once giant
+> is out we can mix this into the QA.
+>
+>> 2. Use ObjectContext Cache
+>
+> I saw an earlier version of this that didn't break things down per-PG;
+> have Sam's comments been addressed?  IIRC the most recent issue was that
+> the cache was reset in PG::start_peering_interval.
+>
+> This should make a big difference.  +1 :)
+>
+>> 3. Avoid extra calculates for pg layers
+>
+> I haven't seen this one?
+>
+>> I hope ceph can make complete with commercial storage system, so how
+>> to make ceph shorter latency is my main concern.
+>>
+>> Over the year, I dive into the full ceph IO stacks from librbd down to
+>> FileStore. Besides the attempts mentioned above, I think the main
+>> throttle will be encode/decode which is existed in Messenger and
+>> ObjectStore transactions.
+>>
+>> At first FileStore will directly accept inputs without bufferlist
+>> encode/decodes. Now I try to send MOSDOP's payload directly to
+>> replicate PG and avoid overall ObjectStore::Transaction which is used
+>> by replicated pg. Replicated PG maybe need calculate again but as we
+>> performed the main consuming time in PG layer is transaction
+>> encode/decode. KeyValueStore and FileStore will both happy  to adopt
+>> it. Then main IO logic such as read/write ops won't need
+>> encode/decode.
+>
+> Can you send a message to ceph-devel with a bit more detail?  We used to
+> do this, actually (prepare the transaction on the replicas instead of
+> encoding the one from the primary) but it was a bit less flexible when it
+> came to the object classes (which might not be deterministic).
+>
+> I agree that encode/decode is a serious issue, but before
+> avoiding it for transations I'd like to see what Matt Benjamin
+> is able to accomplish with his changes, or look at ways to
+> make transaction encoding in particular more efficient (e.g.
+> with fixed size structures).  Also, you might be interested in
+>
+>         https://wiki.ceph.com/Planning/Blueprints/Hammer/osd%3A_update_Transaction_encoding
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+Hmm, I try to understand the meaning. Is this BP want to make
+ObjectStore::Transaction more flexible and make ObjectStore's
+successors can easily aware of the data layout in transaction. I try
+to summary the performance optimization for this bp:
 
-iEYEARECAAYFAlRHHKYACgkQ8dLMyEl6F220AwCbBw16ZLYaex2H3cSyAuzQfFqT
-7OEAn3LBS8y7tIMN77cmtcxDk0KrhBYi
-=vJuh
------END PGP SIGNATURE-----
+1. FileStore/KeyValueStore can aware of the size of write data and do
+something special for it, it would be nice for large file
+2. A complexity transaction which contains several ops for one object,
+ the redundancy lookups will be reduced
 
---avl4la1K0sHWCBEc0J3uoslrINjJwtnWj--
+But the actual consuming time component I think is transaction
+encode/decode. Especially encode/decode for ghobject_t and collection
+structure.
+
+Combine with Message encode/decode, as I performed encode/decode
+logics plays a important role for the latency of op. I want to explain
+what I want to do:
+
+All Messages will be restructured and have a common header. All
+members in Message will be fixed. I know some critical member such as
+ghobject_t or anything else will be hard to decisive. So on the
+Messenger side, ghobject_t or other flexible structure will have
+separated structure, like ghobject_t will be translated to
+Message::object which will packed into a fixed size memory. So
+Messenger can directly pick up structures in messages without memory
+copy and parsing. And on the side of PG layer,
+ObjectStore::Transaction will be refactored to a simple class. A list
+of ops will describe the sequences and all data will be referenced
+directly which is used in PG layer. It maybe let ObjectStore's
+successors less flexible but it's still has space to modify. For
+subop, the raw message from client will be validated in primary pg and
+add some infos necessary inser into the fixed position of the message
+and populate to replicate PG.
+
+Plz correct me if exists awful point.
+
+>
+>> Next, I hope we can refactor a new Message protocol. The main pain is
+>> that New Message protocol won't compatible with older. Each message is
+>> expected to have a common header, the memory layout for data in
+>> Message will be forced aligned and used. It's expected to discard
+>> overall message encode/decode which is main throttle in
+>> AsyncMessenger. And with new Messenger, SUBOP can be directly
+>> constructed via common header. So the overall encode/decode logics can
+>> be discard for the new Message layout.
+>
+> I'm also open to changes here, as long as we can make it somewhat
+> transaprent to the user (perhaps only use it on the backend network, or
+> even better, detect/negotiate the protocol for backward compatibility).
+> But I think in general we can probably constrain the problem: it is only
+> the MOSD[Sub]Op[Reply] messages that have a real impact here, so we can
+> probably focus on changing just those message's encoding.  (Is that what
+> you're suggesting?)
+>
+> Thanks!
+> sage
+>
+
+
+
+-- 
+Best Regards,
+
+Wheat
