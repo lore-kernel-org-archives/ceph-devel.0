@@ -1,124 +1,74 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: The Async messenger benchmark with latest master
-Date: Wed, 22 Oct 2014 16:02:22 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2822F1D8@SACMBXIP02.sdcorp.global.sandisk.com>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F282298FF@SACMBXIP02.sdcorp.global.sandisk.com>
- <CACJqLybtHOyPw8+2bcFGZoScoKxH7QqENi0NKUzfwuYk=D8axw@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: 10/22/2014 Weekly Ceph Performance Meeting
+Date: Wed, 22 Oct 2014 09:24:50 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1410220920450.13498@cobra.newdream.net>
+References: <5447BD83.8000303@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1on0066.outbound.protection.outlook.com ([157.56.110.66]:6765
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1755674AbaJVQCp (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 22 Oct 2014 12:02:45 -0400
-In-Reply-To: <CACJqLybtHOyPw8+2bcFGZoScoKxH7QqENi0NKUzfwuYk=D8axw@mail.gmail.com>
-Content-Language: en-US
+Received: from cobra.newdream.net ([66.33.216.30]:37796 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754682AbaJVQYu (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 22 Oct 2014 12:24:50 -0400
+In-Reply-To: <5447BD83.8000303@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomaiwang@gmail.com>
+To: Mark Nelson <mark.nelson@inktank.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-SGkgSGFvbWFpL1NhZ2UsDQoNCkkganVzdCBmaWd1cmVkIGl0IG91dCB0aGF0IEFzeW5jIG1lc3Nl
-bmdlciBpcyBub3QgeWV0IGluIG1hc3Rlci4gU28sIEkgZGlkbid0IHJlYWxseSB0ZXN0IHRoZSBh
-c3luYyBtZXNzZW5nZXIgOi0oDQoNCkkgc2F3IGhlcmUgaXMgdGhlIHB1bGwgcmVxdWVzdC4NCg0K
-aHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2VwaC9wdWxsLzI3NjgNCg0KSSB3YW50IHRvIHRlc3Qg
-dGhpcyBvdXQgYW5kIEkgaGF2ZSBzb21lIHF1ZXN0aW9ucyByZWdhcmRpbmcgdGhpcy4NCg0KMS4g
-IFRoZSBicmFuY2ggSSBzaG91bGQgdGVzdCBvdXQgaXMgdGhlIGZvbGxvd2luZywgcmlnaHQgPw0K
-DQpodHRwczovL2dpdGh1Yi5jb20vY2VwaC9jZXBoL3RyZWUvd2lwLW1zZ3INCg0KMi4gV2lsbCBB
-c3luYyBtZXNzZW5nZXIgYnkgZGVmYXVsdCBlbmFibGVkID8gT1IgSSBuZWVkIHRvIGFkZCBzb21l
-IGNvbmZpZyBvcHRpb24gZm9yIHRoYXQgPw0KDQozLiBPdGhlciB0aGFuIG1zX2V2ZW50X29wX3Ro
-cmVhZHMgLCBpcyB0aGVyZSBhbnkgdHVuYWJsZSBwYXJhbWV0ZXIgSSBzaG91bGQgYmUgcGxheWlu
-ZyB3aXRoID8NCg0KVGhhbmtzICYgUmVnYXJkcw0KU29tbmF0aA0KDQotLS0tLU9yaWdpbmFsIE1l
-c3NhZ2UtLS0tLQ0KRnJvbTogSGFvbWFpIFdhbmcgW21haWx0bzpoYW9tYWl3YW5nQGdtYWlsLmNv
-bV0gDQpTZW50OiBTYXR1cmRheSwgT2N0b2JlciAxOCwgMjAxNCAxMDoxNSBQTQ0KVG86IFNvbW5h
-dGggUm95DQpDYzogY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNClN1YmplY3Q6IFJlOiBUaGUg
-QXN5bmMgbWVzc2VuZ2VyIGJlbmNobWFyayB3aXRoIGxhdGVzdCBtYXN0ZXINCg0KVGhhbmtzIFNv
-bW5hdGghDQoNCkkgaGF2ZSBhbm90aGVyIHNpbXBsZSBwZXJmb3JtYW5jZSB0ZXN0IGZvciBhc3lu
-YyBtZXNzZW5nZXI6DQoNCkZvciA0ayBvYmplY3QgcmVhZCwgbWFzdGVyIGJyYW5jaCB1c2VkIDQu
-NDZzIHRvIGNvbXBsZXRlIHRlc3RzLCBhc3luYyBNZXNzZW5nZXIgdXNlZCAzLjE0cyBGb3IgNGsg
-b2JqZWN0IHdyaXRlLCBtYXN0ZXIgYnJhbmNoIHVzZWQgMTAuNnMgdG8gY29tcGxldGUsIGFzeW5j
-IE1lc3NlbmdlciB1c2VkIDYuNnMhIQ0KDQpEZXRhaWxmIHJlc3VsdHMgc2VlIGJlbG93LCA0ayBv
-YmplY3QgcmVhZCBpcyBhIHNpbXBsZSBjZXBoIGNsaWVudCBwcm9ncmFtIHdoaWNoIHdpbGwgcmVh
-ZCA1MDAwIG9iamVjdHMgYW5kIDRrIG9iamVjdCB3cml0ZSB3aWxsIHdyaXRlDQo1MDAwIG9iamVj
-dHMuDQpJIGluY3JlYXNlZCAibXNfZXZlbnRfb3BfdGhyZWFkcyIgdG8gMTAgY29tcGFyZWQgdG8g
-dGhlIGRlZmF1bHQgdmFsdWUgaXMgMi4NCk1heWJlIFNvbW5hdGggY2FuIGRvIGl0IGFuZCB0ZXN0
-cyBhZ2FpbiwgSSB0aGluayB3ZSBjYW4gZ2V0IG1vcmUgaW1wcm92ZW1lbnRzIGZvciB5b3VyIHRl
-c3RzLg0KDQpNYXN0ZXIgQnJhbmNoKDZmYTY4NmM4YzQyOTM3ZGQwNjk1OTFmMTZkZTkyZTk1NGQ4
-ZWQzNGQpOg0KDQpbcm9vdEBjZXBoLXRlc3Qgc3JjXSMgZm9yIGkgaW4gYHNlcSAxIDNgOyBkbyBk
-YXRlICYmIH4vMDgucmFkb3NfcmVhZF80a19mb3JfZWFjaF9vYmplY3QgL2V0Yy9jZXBoL2NlcGgu
-Y29uZiByYmQgNTAwMCAmJiBzbGVlcCAzOyBkb25lDQoNCkZyaSBPY3QgMTcgMTc6MTA6MzkgVVRD
-IDIwMTQNCg0KVXNlZCBUaW1lOjQuNDYxNTgxDQoNCkZyaSBPY3QgMTcgMTc6MTA6NDQgVVRDIDIw
-MTQNCg0KVXNlZCBUaW1lOjQuMzg4NTcyDQoNCkZyaSBPY3QgMTcgMTc6MTA6NDggVVRDIDIwMTQN
-Cg0KVXNlZCBUaW1lOjQuNDQ4MTU3DQoNCltyb290QGNlcGgtdGVzdCBzcmNdIw0KDQpbcm9vdEBj
-ZXBoLXRlc3Qgc3JjXSMgZm9yIGkgaW4gYHNlcSAxIDNgOyBkbyBkYXRlICYmIH4vMDEucmFkb3Nf
-d3JpdGVfNGtfZm9yX2VhY2hfb2JqZWN0IC9ldGMvY2VwaC9jZXBoLmNvbmYgcmJkIDUwMDAgJiYg
-c2xlZXAgMzsgZG9uZUZyaSBPY3QgMTcgMTc6MTE6MjMgVVRDIDIwMTQNCg0KVXNlZCBUaW1lOjEw
-LjYzODc4Mw0KDQpGcmkgT2N0IDE3IDE3OjExOjMzIFVUQyAyMDE0DQoNClVzZWQgVGltZToxMC43
-OTMyMzENCg0KRnJpIE9jdCAxNyAxNzoxMTo0NCBVVEMgMjAxNA0KDQpVc2VkIFRpbWU6MTAuOTA4
-MDAzDQoNCg0KTWFzdGVyIEJyYW5jaCB3aXRoIEFzeW5jTWVzc2VuZ2VyOg0KDQpbcm9vdEBjZXBo
-LXRlc3Qgc3JjXSMgZm9yIGkgaW4gYHNlcSAxIDNgOyBkbyBkYXRlICYmIH4vMDgucmFkb3NfcmVh
-ZF80a19mb3JfZWFjaF9vYmplY3QgL2V0Yy9jZXBoL2NlcGguY29uZiByYmQgNTAwMCAmJiBzbGVl
-cCAzOyBkb25lDQoNClN1biBPY3QgMTkgMDY6MDE6NTAgVVRDIDIwMTQNCg0KVXNlZCBUaW1lOjMu
-MTU1NTA2DQoNClN1biBPY3QgMTkgMDY6MDE6NTMgVVRDIDIwMTQNCg0KVXNlZCBUaW1lOjMuMTM0
-OTYxDQoNClN1biBPY3QgMTkgMDY6MDE6NTYgVVRDIDIwMTQNCg0KVXNlZCBUaW1lOjMuMTM1ODE0
-DQoNCltyb290QGNlcGgtdGVzdCBzcmNdIyBmb3IgaSBpbiBgc2VxIDEgM2A7IGRvIGRhdGUgJiYg
-fi8wMS5yYWRvc193cml0ZV80a19mb3JfZWFjaF9vYmplY3QgL2V0Yy9jZXBoL2NlcGguY29uZiBy
-YmQgNTAwMCAmJiBzbGVlcCAzOyBkb25lDQoNClN1biBPY3QgMTkgMDY6MDI6MDMgVVRDIDIwMTQN
-Cg0KVXNlZCBUaW1lOjYuNTM2MzE5DQoNClN1biBPY3QgMTkgMDY6MDI6MTAgVVRDIDIwMTQNCg0K
-VXNlZCBUaW1lOjYuNjQ4NzM4DQoNClN1biBPY3QgMTkgMDY6MDI6MTYgVVRDIDIwMTQNCg0KVXNl
-ZCBUaW1lOjYuNTg1MTU2DQoNCk9uIFNhdCwgT2N0IDE4LCAyMDE0IGF0IDQ6MzcgQU0sIFNvbW5h
-dGggUm95IDxTb21uYXRoLlJveUBzYW5kaXNrLmNvbT4gd3JvdGU6DQo+IEhpIFNhZ2UvSGFvbWFp
-LA0KPg0KPiBJIGRpZCBzb21lIDRLIFJhbmRvbSBSZWFkIGJlbmNobWFya2luZyB3aXRoIGxhdGVz
-dCBtYXN0ZXIgaGF2aW5nIEFzeW5jIG1lc3NlbmdlciBjaGFuZ2VzIGFuZCByZXN1bHQgbG9va3Mg
-cHJvbWlzaW5nLg0KPg0KPiBNeSBjb25maWd1cmF0aW9uOg0KPiAtLS0tLS0tLS0tLS0tLS0tLS0t
-LS0NCj4NCj4gMSBub2RlLCA4IFNTRHMsIDhPU0RzLCAzIHBvb2xzICwgZWFjaCBoYXMgMyBpbWFn
-ZXMuIH4yMDAwIFBnIGNsdXN0ZXIgDQo+IHdpZGUgQ3B1IDogSW50ZWwoUikgWGVvbihSKSBDUFUg
-RTUtMjY4MCB2MiBAIDIuODBHSHosIGR1YWwgc29ja2V0LCBIVCBlbmFibGVkLCA0MCBjb3Jlcy4N
-Cj4gVXNlZCBrcmJkIGFzIGNsaWVudC4NCj4NCj4NCj4gMSBjbGluZXQgbm9kZSB3aXRoIDMgcmJk
-IGltYWdlcyBvbiAzIGRpZmZlcmVudCBwb29sczoNCj4gLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0KPiBNYXN0ZXIgOg0K
-PiAtLS0tLS0tLS0NCj4NCj4gfjIwM2sgSU9QUywgfjkwJSBsYXRlbmNpZXMgd2l0aGluIDRtc2Vj
-LCB0b3RhbCByZWFkIDogfjUuMlRCDQo+DQo+ICAgICBsYXQgKHVzZWMpIDogND0wLjAxJSwgMTA9
-MC4wMSUsIDUwPTAuMDElLCAxMDA9MC4wMSUsIDI1MD0wLjAzJQ0KPiAgICAgbGF0ICh1c2VjKSA6
-IDUwMD0wLjg2JSwgNzUwPTMuNzIlLCAxMDAwPTcuMTklDQo+ICAgICBsYXQgKG1zZWMpIDogMj0z
-OS4xNyUsIDQ9NDEuNDUlLCAxMD03LjI2JSwgMjA9MC4yNCUsIDUwPTAuMDYlDQo+ICAgICBsYXQg
-KG1zZWMpIDogMTAwPTAuMDMlLCAyNTA9MC4wMSUsIDUwMD0wLjAxJQ0KPg0KPiBjcHU6IH4xLTIg
-JSBpZGxlDQo+DQo+IEdpYW50Og0KPiAtLS0tLS0NCj4NCj4gfjE5NmsgSU9QUywgfjg5LTkwJSBs
-YXRlbmNpZXMgd2l0aGluIDRtc2VjLCB0b3RhbCByZWFkIDogfjUuM1RCDQo+DQo+ICAgICBsYXQg
-KHVzZWMpIDogMjUwPTAuMDElLCA1MDA9MC41MSUsIDc1MD0yLjcxJSwgMTAwMD02LjAzJQ0KPiAg
-ICAgbGF0IChtc2VjKSA6IDI9MzQuMzIlLCA0PTQ1Ljc0JSwgMTA9MTAuNDYlLCAyMD0wLjIxJSwg
-NTA9MC4wMiUNCj4gICAgIGxhdCAobXNlYykgOiAxMDA9MC4wMSUsIDI1MD0wLjAxJQ0KPg0KPiBj
-cHU6IH4yJSBpZGxlDQo+DQo+IDIgY2xpZW50cyB3aXRoIDMgcmJkIGltYWdlcyBlYWNoIG9uIDMg
-ZGlmZmVyZW50IHBvb2xzOg0KPiAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQo+DQo+IE1hc3RlciA6DQo+IC0tLS0tLS0t
-LQ0KPg0KPiB+MjA3SyBpb3BzLCB+NzAlIGxhdGVuY2llcyB3aXRoaW4gNG1zZWMsIFRvdGFsIHJl
-YWQ6IH41Ljk5IFRCDQo+DQo+ICAgICBsYXQgKHVzZWMpIDogMjUwPTAuMDMlLCA1MDA9MC42MyUs
-IDc1MD0yLjY3JSwgMTAwMD01LjIxJQ0KPiAgICAgbGF0IChtc2VjKSA6IDI9MjUuMTIlLCA0PTM2
-LjE5JSwgMTA9MjQuODAlLCAyMD0zLjE2JSwgNTA9MS4zNCUNCj4gICAgIGxhdCAobXNlYykgOiAx
-MDA9MC42NiUsIDI1MD0wLjE4JSwgNTAwPTAuMDElDQo+DQo+IGNwdTogfjAtMSAlIGlkbGUNCj4N
-Cj4gR2lhbnQ6DQo+IC0tLS0tLS0tDQo+IH4xOTlLIGlvcHMsIH42NCUgbGF0ZW5jaWVzIHdpdGhp
-biA0bXNlYywgVG90YWwgcmVhZDogfjUuOTQgVEINCj4NCj4gICAgIGxhdCAodXNlYykgOiAyNTA9
-MC4wMSUsIDUwMD0wLjI1JSwgNzUwPTEuNDclLCAxMDAwPTMuNDUlDQo+ICAgICBsYXQgKG1zZWMp
-IDogMj0yMS4yMiUsIDQ9MzYuNjklLCAxMD0zMC42MyUsIDIwPTQuMjglLCA1MD0xLjcwJQ0KPiAg
-ICAgbGF0IChtc2VjKSA6IDEwMD0wLjI4JSwgMjUwPTAuMDIlLCA1MDA9MC4wMSUNCj4NCj4gY3B1
-OiB+MSUgaWRsZQ0KPg0KPg0KPiBTbywgaW4gc3VtbWFyeSB0aGUgbWFzdGVyIHdpdGggQXN5bmMg
-bWVzc2VuZ2VyIGhhcyBpbXByb3ZlZCBib3RoIGluIGlvcHMgYW5kIGxhdGVuY3kuDQo+DQo+IFRo
-YW5rcyAmIFJlZ2FyZHMNCj4gU29tbmF0aA0KPg0KPiBfX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fXw0KPg0KPiBQTEVBU0UgTk9URTogVGhlIGluZm9ybWF0aW9uIGNvbnRhaW5lZCBpbiB0
-aGlzIGVsZWN0cm9uaWMgbWFpbCBtZXNzYWdlIGlzIGludGVuZGVkIG9ubHkgZm9yIHRoZSB1c2Ug
-b2YgdGhlIGRlc2lnbmF0ZWQgcmVjaXBpZW50KHMpIG5hbWVkIGFib3ZlLiBJZiB0aGUgcmVhZGVy
-IG9mIHRoaXMgbWVzc2FnZSBpcyBub3QgdGhlIGludGVuZGVkIHJlY2lwaWVudCwgeW91IGFyZSBo
-ZXJlYnkgbm90aWZpZWQgdGhhdCB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIG1lc3NhZ2UgaW4gZXJy
-b3IgYW5kIHRoYXQgYW55IHJldmlldywgZGlzc2VtaW5hdGlvbiwgZGlzdHJpYnV0aW9uLCBvciBj
-b3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBpcyBzdHJpY3RseSBwcm9oaWJpdGVkLiBJZiB5b3UgaGF2
-ZSByZWNlaXZlZCB0aGlzIGNvbW11bmljYXRpb24gaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhl
-IHNlbmRlciBieSB0ZWxlcGhvbmUgb3IgZS1tYWlsIChhcyBzaG93biBhYm92ZSkgaW1tZWRpYXRl
-bHkgYW5kIGRlc3Ryb3kgYW55IGFuZCBhbGwgY29waWVzIG9mIHRoaXMgbWVzc2FnZSBpbiB5b3Vy
-IHBvc3Nlc3Npb24gKHdoZXRoZXIgaGFyZCBjb3BpZXMgb3IgZWxlY3Ryb25pY2FsbHkgc3RvcmVk
-IGNvcGllcykuDQo+DQo+IC0tDQo+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5k
-IHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiANCj4gaW4gdGhlIGJvZHkgb2YgYSBt
-ZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gDQo+IGlu
-Zm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KDQoNCg0K
-LS0NCkJlc3QgUmVnYXJkcywNCg0KV2hlYXQNCg==
+Hi Everyone,
+
+Just a reminder that there won't be a performance call next week because 
+of CDS, which is Tuesday and Wednesday.  The tentative schedule is here:
+
+	https://wiki.ceph.com/Planning/CDS/Hammer_(Oct_2014)
+
+If there are key performance items we should be focusing on that aren't 
+yet captured by a blueprint and session or that would be useful to discuss 
+with a broader audience during CDS, speak up soon so we can get a slot 
+added to the scheduled.
+
+I already mentioned to Matt that it would be good to talk about this 
+encode/decode work, and I believe Haomai has a proposal there as well.
+
+sage
+
+
+On Wed, 22 Oct 2014, Mark Nelson wrote:
+
+> Hi All,
+> 
+> Meeting is on at 8AM PST as usual!  Here's the links:
+> 
+> Etherpad URL:
+> http://pad.ceph.com/p/performance_weekly
+> 
+> To join the Meeting:
+> https://bluejeans.com/268261044
+> 
+> To join via Browser:
+> https://bluejeans.com/268261044/browser
+> 
+> To join with Lync:
+> https://bluejeans.com/268261044/lync
+> 
+> 
+> To join via Room System:
+> Video Conferencing System: bjn.vc -or- 199.48.152.152
+> Meeting ID: 268261044
+> 
+> To join via Phone:
+> 1) Dial:
+>           +1 408 740 7256
+>           +1 888 240 2560(US Toll Free)
+>           +1 408 317 9253(Alternate Number)
+>           (see all numbers - http://bluejeans.com/numbers)
+> 2) Enter Conference ID: 268261044
+> 
+> Mark
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
