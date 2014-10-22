@@ -1,46 +1,77 @@
-From: David Zafman <david.zafman@inktank.com>
+From: Loic Dachary <loic@dachary.org>
 Subject: Re: Can pid be reused ?
-Date: Wed, 22 Oct 2014 15:51:29 -0700
-Message-ID: <87747DD3-21F2-480E-B61D-91B97237E510@inktank.com>
-References: <54471CA6.5040807@dachary.org> <0B26F614-B9E5-4E30-9471-A7F46656AA24@inktank.com> <alpine.DEB.2.00.1410221542450.29946@cobra.newdream.net>
-Mime-Version: 1.0 (Mac OS X Mail 8.0 \(1990.1\))
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Date: Wed, 22 Oct 2014 15:57:35 -0700
+Message-ID: <5448365F.7070908@dachary.org>
+References: <54471CA6.5040807@dachary.org> <0B26F614-B9E5-4E30-9471-A7F46656AA24@inktank.com> <alpine.DEB.2.00.1410221542450.29946@cobra.newdream.net> <87747DD3-21F2-480E-B61D-91B97237E510@inktank.com>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="11cnQJQpteGMmI9dGl9r614pwbGhbU4m1"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f173.google.com ([209.85.192.173]:60062 "EHLO
-	mail-pd0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932743AbaJVWve convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 22 Oct 2014 18:51:34 -0400
-Received: by mail-pd0-f173.google.com with SMTP id v10so138732pde.4
-        for <ceph-devel@vger.kernel.org>; Wed, 22 Oct 2014 15:51:34 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1410221542450.29946@cobra.newdream.net>
+Received: from mail2.dachary.org ([91.121.57.175]:51104 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S932666AbaJVW5o (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 22 Oct 2014 18:57:44 -0400
+In-Reply-To: <87747DD3-21F2-480E-B61D-91B97237E510@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sage@newdream.net>
+To: David Zafman <david.zafman@inktank.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
+
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--11cnQJQpteGMmI9dGl9r614pwbGhbU4m1
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 
 
-> On Oct 22, 2014, at 3:43 PM, Sage Weil <sage@newdream.net> wrote:
+
+On 22/10/2014 15:51, David Zafman wrote:
 >=20
-> On Wed, 22 Oct 2014, David Zafman wrote:
->> I just realized what it is.  The way killall is used when stopping a=
-=20
->> vstart cluster, is to kill all processes by name!  You can't stop=20
->> vstarted tests running in parallel.
->=20
-> Ah.  FWIW I think we should avoid using stop.sh whenever possible and=
-=20
-> instead do ./init-ceph stop (which does an orderly shutdown via pid=20
-> files).
->=20
-> sage
+>> On Oct 22, 2014, at 3:43 PM, Sage Weil <sage@newdream.net> wrote:
+>>
+>> On Wed, 22 Oct 2014, David Zafman wrote:
+>>> I just realized what it is.  The way killall is used when stopping a =
 
-Actually, vstart.sh can=E2=80=99t create 2 independent clusters anyway,=
- so it kills any existing processes.  Probably vstart.sh is what would =
-have killed the processes in a parallel make check.
+>>> vstart cluster, is to kill all processes by name!  You can't stop=20
+>>> vstarted tests running in parallel.
+>>
+>> Ah.  FWIW I think we should avoid using stop.sh whenever possible and =
 
-David--
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> instead do ./init-ceph stop (which does an orderly shutdown via pid=20
+>> files).
+>>
+>> sage
+>=20
+> Actually, vstart.sh can=E2=80=99t create 2 independent clusters anyway,=
+ so it kills any existing processes. =20
+
+It can actually, if given a different CEPH_DIR all is contained within th=
+is specific directory.
+
+Cheers
+
+> Probably vstart.sh is what would have killed the processes in a paralle=
+l make check.
+>=20
+> David
+>=20
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--11cnQJQpteGMmI9dGl9r614pwbGhbU4m1
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlRINl8ACgkQ8dLMyEl6F23pXQCgp85X392F9eO0bYjbY/SJdPBz
+xo8AniHWnqW3DNmV/tOg5T4D6VXGVqYn
+=2c/x
+-----END PGP SIGNATURE-----
+
+--11cnQJQpteGMmI9dGl9r614pwbGhbU4m1--
