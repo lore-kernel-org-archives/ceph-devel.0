@@ -1,127 +1,82 @@
 From: "Zhang, Jian" <jian.zhang@intel.com>
-Subject: RE: Ceph Full-SSD Performance Improvement
-Date: Thu, 23 Oct 2014 07:18:15 +0000
-Message-ID: <51FC7A40FB29414D88A121A7FFEF9A4710F9B049@SHSMSX104.ccr.corp.intel.com>
-References: <CACJqLyZ3-3UOkmGLw973_JCJ9=32K7NvbJks72+8Zs-j1LtwOA@mail.gmail.com>
-	<alpine.DEB.2.00.1410210836410.13498@cobra.newdream.net>
- <CACJqLyY94fGhtKfHkwn3qMv1s_sWC-qGofxG7ZjY48QJSH3NzQ@mail.gmail.com>
+Subject: RE: 10/22/2014 Weekly Ceph Performance Meeting
+Date: Thu, 23 Oct 2014 07:37:01 +0000
+Message-ID: <51FC7A40FB29414D88A121A7FFEF9A4710F9B0AC@SHSMSX104.ccr.corp.intel.com>
+References: <5447BD83.8000303@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:37173 "EHLO mga02.intel.com"
+Received: from mga01.intel.com ([192.55.52.88]:53194 "EHLO mga01.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751889AbaJWHUp (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 23 Oct 2014 03:20:45 -0400
-In-Reply-To: <CACJqLyY94fGhtKfHkwn3qMv1s_sWC-qGofxG7ZjY48QJSH3NzQ@mail.gmail.com>
+	id S1752010AbaJWHiv convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Oct 2014 03:38:51 -0400
+In-Reply-To: <5447BD83.8000303@redhat.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomaiwang@gmail.com>, Sage Weil <sage@newdream.net>
-Cc: Samuel Just <sam.just@inktank.com>, "icolle@redhat.com" <icolle@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Mark Nelson <mark.nelson@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>, "Duan, Jiangang" <jiangang.duan@intel.com>
 
-SGFvbWFpLCANCklzIHRoZXJlIGFueSBwbGFjZSB0byBmaW5kIHRoZSBwZXJmb3JtYW5jZSBnYWlu
-cyBzYWdlIG1lbnRpb25lZD8gDQoNClRoYW5rcw0KSmlhbg0KDQotLS0tLU9yaWdpbmFsIE1lc3Nh
-Z2UtLS0tLQ0KRnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpj
-ZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIEhhb21haSBXYW5n
-DQpTZW50OiBXZWRuZXNkYXksIE9jdG9iZXIgMjIsIDIwMTQgMTE6MTAgQU0NClRvOiBTYWdlIFdl
-aWwNCkNjOiBTYW11ZWwgSnVzdDsgaWNvbGxlQHJlZGhhdC5jb207IGNlcGgtZGV2ZWxAdmdlci5r
-ZXJuZWwub3JnDQpTdWJqZWN0OiBSZTogQ2VwaCBGdWxsLVNTRCBQZXJmb3JtYW5jZSBJbXByb3Zl
-bWVudA0KDQpbY2MgdG8gY2VwaC1kZXZlbF0NCg0KDQoNCk9uIFR1ZSwgT2N0IDIxLCAyMDE0IGF0
-IDExOjUxIFBNLCBTYWdlIFdlaWwgPHNhZ2VAbmV3ZHJlYW0ubmV0PiB3cm90ZToNCj4gSGkgSGFv
-bWFpLA0KPg0KPiBZb3UgYW5kIHlvdXIgdGVhbSBoYXZlIGJlZW4gZG9pbmcgZ3JlYXQgd29yayBh
-bmQgSSdtIHZlcnkgaGFwcHkgdGhhdCANCj4geW91IGFyZSB3b3JraW5nIHdpdGggQ2VwaCEgIFRo
-ZSBwZXJmb3JtYW5jZSBnYWlucyB5b3UndmUgc2VlbiBhcmUgdmVyeSANCj4gZW5jb3VyYWdpbmcu
-DQo+DQo+PiAxLiBVc2UgQXN5bmNNZXNzZW5nZXIgZm9yIGJvdGggY2xpZW50IGFuZCBPU0QNCj4N
-Cj4gSSB3b3VsZCBsaWtlIHRvIGdldCB0aGlzIGludG8gdGhlIHRyZWUuICBJIG1hZGUgYSBmZXcg
-Y29zbWV0aWMgY2hhbmdlcyANCj4gYW5kIHB1c2hlZCBhIHdpcC1tc2dyIGludG8gY2VwaC5naXQg
-dG8gbWFrZSBzdXJlIGl0IGJ1aWxkcyBva2F5LiAgT25jZSANCj4gZ2lhbnQgaXMgb3V0IHdlIGNh
-biBtaXggdGhpcyBpbnRvIHRoZSBRQS4NCj4NCj4+IDIuIFVzZSBPYmplY3RDb250ZXh0IENhY2hl
-DQo+DQo+IEkgc2F3IGFuIGVhcmxpZXIgdmVyc2lvbiBvZiB0aGlzIHRoYXQgZGlkbid0IGJyZWFr
-IHRoaW5ncyBkb3duIHBlci1QRzsgDQo+IGhhdmUgU2FtJ3MgY29tbWVudHMgYmVlbiBhZGRyZXNz
-ZWQ/ICBJSVJDIHRoZSBtb3N0IHJlY2VudCBpc3N1ZSB3YXMgDQo+IHRoYXQgdGhlIGNhY2hlIHdh
-cyByZXNldCBpbiBQRzo6c3RhcnRfcGVlcmluZ19pbnRlcnZhbC4NCj4NCj4gVGhpcyBzaG91bGQg
-bWFrZSBhIGJpZyBkaWZmZXJlbmNlLiAgKzEgOikNCj4NCj4+IDMuIEF2b2lkIGV4dHJhIGNhbGN1
-bGF0ZXMgZm9yIHBnIGxheWVycw0KPg0KPiBJIGhhdmVuJ3Qgc2VlbiB0aGlzIG9uZT8NCj4NCj4+
-IEkgaG9wZSBjZXBoIGNhbiBtYWtlIGNvbXBsZXRlIHdpdGggY29tbWVyY2lhbCBzdG9yYWdlIHN5
-c3RlbSwgc28gaG93IA0KPj4gdG8gbWFrZSBjZXBoIHNob3J0ZXIgbGF0ZW5jeSBpcyBteSBtYWlu
-IGNvbmNlcm4uDQo+Pg0KPj4gT3ZlciB0aGUgeWVhciwgSSBkaXZlIGludG8gdGhlIGZ1bGwgY2Vw
-aCBJTyBzdGFja3MgZnJvbSBsaWJyYmQgZG93biANCj4+IHRvIEZpbGVTdG9yZS4gQmVzaWRlcyB0
-aGUgYXR0ZW1wdHMgbWVudGlvbmVkIGFib3ZlLCBJIHRoaW5rIHRoZSBtYWluIA0KPj4gdGhyb3R0
-bGUgd2lsbCBiZSBlbmNvZGUvZGVjb2RlIHdoaWNoIGlzIGV4aXN0ZWQgaW4gTWVzc2VuZ2VyIGFu
-ZCANCj4+IE9iamVjdFN0b3JlIHRyYW5zYWN0aW9ucy4NCj4+DQo+PiBBdCBmaXJzdCBGaWxlU3Rv
-cmUgd2lsbCBkaXJlY3RseSBhY2NlcHQgaW5wdXRzIHdpdGhvdXQgYnVmZmVybGlzdCANCj4+IGVu
-Y29kZS9kZWNvZGVzLiBOb3cgSSB0cnkgdG8gc2VuZCBNT1NET1AncyBwYXlsb2FkIGRpcmVjdGx5
-IHRvIA0KPj4gcmVwbGljYXRlIFBHIGFuZCBhdm9pZCBvdmVyYWxsIE9iamVjdFN0b3JlOjpUcmFu
-c2FjdGlvbiB3aGljaCBpcyB1c2VkIA0KPj4gYnkgcmVwbGljYXRlZCBwZy4gUmVwbGljYXRlZCBQ
-RyBtYXliZSBuZWVkIGNhbGN1bGF0ZSBhZ2FpbiBidXQgYXMgd2UgDQo+PiBwZXJmb3JtZWQgdGhl
-IG1haW4gY29uc3VtaW5nIHRpbWUgaW4gUEcgbGF5ZXIgaXMgdHJhbnNhY3Rpb24gDQo+PiBlbmNv
-ZGUvZGVjb2RlLiBLZXlWYWx1ZVN0b3JlIGFuZCBGaWxlU3RvcmUgd2lsbCBib3RoIGhhcHB5ICB0
-byBhZG9wdCANCj4+IGl0LiBUaGVuIG1haW4gSU8gbG9naWMgc3VjaCBhcyByZWFkL3dyaXRlIG9w
-cyB3b24ndCBuZWVkIA0KPj4gZW5jb2RlL2RlY29kZS4NCj4NCj4gQ2FuIHlvdSBzZW5kIGEgbWVz
-c2FnZSB0byBjZXBoLWRldmVsIHdpdGggYSBiaXQgbW9yZSBkZXRhaWw/ICBXZSB1c2VkIA0KPiB0
-byBkbyB0aGlzLCBhY3R1YWxseSAocHJlcGFyZSB0aGUgdHJhbnNhY3Rpb24gb24gdGhlIHJlcGxp
-Y2FzIGluc3RlYWQgDQo+IG9mIGVuY29kaW5nIHRoZSBvbmUgZnJvbSB0aGUgcHJpbWFyeSkgYnV0
-IGl0IHdhcyBhIGJpdCBsZXNzIGZsZXhpYmxlIA0KPiB3aGVuIGl0IGNhbWUgdG8gdGhlIG9iamVj
-dCBjbGFzc2VzICh3aGljaCBtaWdodCBub3QgYmUgZGV0ZXJtaW5pc3RpYykuDQo+DQo+IEkgYWdy
-ZWUgdGhhdCBlbmNvZGUvZGVjb2RlIGlzIGEgc2VyaW91cyBpc3N1ZSwgYnV0IGJlZm9yZSBhdm9p
-ZGluZyBpdCANCj4gZm9yIHRyYW5zYXRpb25zIEknZCBsaWtlIHRvIHNlZSB3aGF0IE1hdHQgQmVu
-amFtaW4gaXMgYWJsZSB0byANCj4gYWNjb21wbGlzaCB3aXRoIGhpcyBjaGFuZ2VzLCBvciBsb29r
-IGF0IHdheXMgdG8gbWFrZSB0cmFuc2FjdGlvbiANCj4gZW5jb2RpbmcgaW4gcGFydGljdWxhciBt
-b3JlIGVmZmljaWVudCAoZS5nLg0KPiB3aXRoIGZpeGVkIHNpemUgc3RydWN0dXJlcykuICBBbHNv
-LCB5b3UgbWlnaHQgYmUgaW50ZXJlc3RlZCBpbg0KPg0KPiAgICAgICAgIA0KPiBodHRwczovL3dp
-a2kuY2VwaC5jb20vUGxhbm5pbmcvQmx1ZXByaW50cy9IYW1tZXIvb3NkJTNBX3VwZGF0ZV9UcmFu
-c2FjDQo+IHRpb25fZW5jb2RpbmcNCg0KSG1tLCBJIHRyeSB0byB1bmRlcnN0YW5kIHRoZSBtZWFu
-aW5nLiBJcyB0aGlzIEJQIHdhbnQgdG8gbWFrZSBPYmplY3RTdG9yZTo6VHJhbnNhY3Rpb24gbW9y
-ZSBmbGV4aWJsZSBhbmQgbWFrZSBPYmplY3RTdG9yZSdzIHN1Y2Nlc3NvcnMgY2FuIGVhc2lseSBh
-d2FyZSBvZiB0aGUgZGF0YSBsYXlvdXQgaW4gdHJhbnNhY3Rpb24uIEkgdHJ5IHRvIHN1bW1hcnkg
-dGhlIHBlcmZvcm1hbmNlIG9wdGltaXphdGlvbiBmb3IgdGhpcyBicDoNCg0KMS4gRmlsZVN0b3Jl
-L0tleVZhbHVlU3RvcmUgY2FuIGF3YXJlIG9mIHRoZSBzaXplIG9mIHdyaXRlIGRhdGEgYW5kIGRv
-IHNvbWV0aGluZyBzcGVjaWFsIGZvciBpdCwgaXQgd291bGQgYmUgbmljZSBmb3IgbGFyZ2UgZmls
-ZSAyLiBBIGNvbXBsZXhpdHkgdHJhbnNhY3Rpb24gd2hpY2ggY29udGFpbnMgc2V2ZXJhbCBvcHMg
-Zm9yIG9uZSBvYmplY3QsICB0aGUgcmVkdW5kYW5jeSBsb29rdXBzIHdpbGwgYmUgcmVkdWNlZA0K
-DQpCdXQgdGhlIGFjdHVhbCBjb25zdW1pbmcgdGltZSBjb21wb25lbnQgSSB0aGluayBpcyB0cmFu
-c2FjdGlvbiBlbmNvZGUvZGVjb2RlLiBFc3BlY2lhbGx5IGVuY29kZS9kZWNvZGUgZm9yIGdob2Jq
-ZWN0X3QgYW5kIGNvbGxlY3Rpb24gc3RydWN0dXJlLg0KDQpDb21iaW5lIHdpdGggTWVzc2FnZSBl
-bmNvZGUvZGVjb2RlLCBhcyBJIHBlcmZvcm1lZCBlbmNvZGUvZGVjb2RlIGxvZ2ljcyBwbGF5cyBh
-IGltcG9ydGFudCByb2xlIGZvciB0aGUgbGF0ZW5jeSBvZiBvcC4gSSB3YW50IHRvIGV4cGxhaW4g
-d2hhdCBJIHdhbnQgdG8gZG86DQoNCkFsbCBNZXNzYWdlcyB3aWxsIGJlIHJlc3RydWN0dXJlZCBh
-bmQgaGF2ZSBhIGNvbW1vbiBoZWFkZXIuIEFsbCBtZW1iZXJzIGluIE1lc3NhZ2Ugd2lsbCBiZSBm
-aXhlZC4gSSBrbm93IHNvbWUgY3JpdGljYWwgbWVtYmVyIHN1Y2ggYXMgZ2hvYmplY3RfdCBvciBh
-bnl0aGluZyBlbHNlIHdpbGwgYmUgaGFyZCB0byBkZWNpc2l2ZS4gU28gb24gdGhlIE1lc3Nlbmdl
-ciBzaWRlLCBnaG9iamVjdF90IG9yIG90aGVyIGZsZXhpYmxlIHN0cnVjdHVyZSB3aWxsIGhhdmUg
-c2VwYXJhdGVkIHN0cnVjdHVyZSwgbGlrZSBnaG9iamVjdF90IHdpbGwgYmUgdHJhbnNsYXRlZCB0
-byBNZXNzYWdlOjpvYmplY3Qgd2hpY2ggd2lsbCBwYWNrZWQgaW50byBhIGZpeGVkIHNpemUgbWVt
-b3J5LiBTbyBNZXNzZW5nZXIgY2FuIGRpcmVjdGx5IHBpY2sgdXAgc3RydWN0dXJlcyBpbiBtZXNz
-YWdlcyB3aXRob3V0IG1lbW9yeSBjb3B5IGFuZCBwYXJzaW5nLiBBbmQgb24gdGhlIHNpZGUgb2Yg
-UEcgbGF5ZXIsIE9iamVjdFN0b3JlOjpUcmFuc2FjdGlvbiB3aWxsIGJlIHJlZmFjdG9yZWQgdG8g
-YSBzaW1wbGUgY2xhc3MuIEEgbGlzdCBvZiBvcHMgd2lsbCBkZXNjcmliZSB0aGUgc2VxdWVuY2Vz
-IGFuZCBhbGwgZGF0YSB3aWxsIGJlIHJlZmVyZW5jZWQgZGlyZWN0bHkgd2hpY2ggaXMgdXNlZCBp
-biBQRyBsYXllci4gSXQgbWF5YmUgbGV0IE9iamVjdFN0b3JlJ3Mgc3VjY2Vzc29ycyBsZXNzIGZs
-ZXhpYmxlIGJ1dCBpdCdzIHN0aWxsIGhhcyBzcGFjZSB0byBtb2RpZnkuIEZvciBzdWJvcCwgdGhl
-IHJhdyBtZXNzYWdlIGZyb20gY2xpZW50IHdpbGwgYmUgdmFsaWRhdGVkIGluIHByaW1hcnkgcGcg
-YW5kIGFkZCBzb21lIGluZm9zIG5lY2Vzc2FyeSBpbnNlciBpbnRvIHRoZSBmaXhlZCBwb3NpdGlv
-biBvZiB0aGUgbWVzc2FnZSBhbmQgcG9wdWxhdGUgdG8gcmVwbGljYXRlIFBHLg0KDQpQbHogY29y
-cmVjdCBtZSBpZiBleGlzdHMgYXdmdWwgcG9pbnQuDQoNCj4NCj4+IE5leHQsIEkgaG9wZSB3ZSBj
-YW4gcmVmYWN0b3IgYSBuZXcgTWVzc2FnZSBwcm90b2NvbC4gVGhlIG1haW4gcGFpbiBpcyANCj4+
-IHRoYXQgTmV3IE1lc3NhZ2UgcHJvdG9jb2wgd29uJ3QgY29tcGF0aWJsZSB3aXRoIG9sZGVyLiBF
-YWNoIG1lc3NhZ2UgDQo+PiBpcyBleHBlY3RlZCB0byBoYXZlIGEgY29tbW9uIGhlYWRlciwgdGhl
-IG1lbW9yeSBsYXlvdXQgZm9yIGRhdGEgaW4gDQo+PiBNZXNzYWdlIHdpbGwgYmUgZm9yY2VkIGFs
-aWduZWQgYW5kIHVzZWQuIEl0J3MgZXhwZWN0ZWQgdG8gZGlzY2FyZCANCj4+IG92ZXJhbGwgbWVz
-c2FnZSBlbmNvZGUvZGVjb2RlIHdoaWNoIGlzIG1haW4gdGhyb3R0bGUgaW4gDQo+PiBBc3luY01l
-c3Nlbmdlci4gQW5kIHdpdGggbmV3IE1lc3NlbmdlciwgU1VCT1AgY2FuIGJlIGRpcmVjdGx5IA0K
-Pj4gY29uc3RydWN0ZWQgdmlhIGNvbW1vbiBoZWFkZXIuIFNvIHRoZSBvdmVyYWxsIGVuY29kZS9k
-ZWNvZGUgbG9naWNzIA0KPj4gY2FuIGJlIGRpc2NhcmQgZm9yIHRoZSBuZXcgTWVzc2FnZSBsYXlv
-dXQuDQo+DQo+IEknbSBhbHNvIG9wZW4gdG8gY2hhbmdlcyBoZXJlLCBhcyBsb25nIGFzIHdlIGNh
-biBtYWtlIGl0IHNvbWV3aGF0IA0KPiB0cmFuc2FwcmVudCB0byB0aGUgdXNlciAocGVyaGFwcyBv
-bmx5IHVzZSBpdCBvbiB0aGUgYmFja2VuZCBuZXR3b3JrLCANCj4gb3IgZXZlbiBiZXR0ZXIsIGRl
-dGVjdC9uZWdvdGlhdGUgdGhlIHByb3RvY29sIGZvciBiYWNrd2FyZCBjb21wYXRpYmlsaXR5KS4N
-Cj4gQnV0IEkgdGhpbmsgaW4gZ2VuZXJhbCB3ZSBjYW4gcHJvYmFibHkgY29uc3RyYWluIHRoZSBw
-cm9ibGVtOiBpdCBpcyANCj4gb25seSB0aGUgTU9TRFtTdWJdT3BbUmVwbHldIG1lc3NhZ2VzIHRo
-YXQgaGF2ZSBhIHJlYWwgaW1wYWN0IGhlcmUsIHNvIA0KPiB3ZSBjYW4gcHJvYmFibHkgZm9jdXMg
-b24gY2hhbmdpbmcganVzdCB0aG9zZSBtZXNzYWdlJ3MgZW5jb2RpbmcuICAoSXMgDQo+IHRoYXQg
-d2hhdCB5b3UncmUgc3VnZ2VzdGluZz8pDQo+DQo+IFRoYW5rcyENCj4gc2FnZQ0KPg0KDQoNCg0K
-LS0NCkJlc3QgUmVnYXJkcywNCg0KV2hlYXQNCi0tDQpUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMg
-bGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4gdGhlIGJvZHkg
-b2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8g
-aW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo=
+Hi all, 
+Regarding on the cache tiering performance topic discussed on yesterday's meeting: 
+  - Need to test performance with commit to avoid promotion on first read:
+            https://github.com/ceph/ceph/commit/79d1aff1821bc9f21477636df4d0d4e57f2cd008
+Zhiqiang actually did some tests based on https://github.com/ceph/ceph/commit/0ed3adc1e0a74bf9548d1d956aece11f019afee0 . 
+We actually observed with Promote on 2nd read,  we can get up to 2x IOPS improvement, (although still far below expectation), and 66% improvement on latency on the following test configuration. 
+
+Test configuration: 
+* Hardware: 
+2 OSD nodes with 10G Nic, each with 8x 1T HDD and 6x 400G DC3700 SSD, 2 SSDs used for Journal, while 4 SSD used for cache tiering. 
+* Cache Tiering Setting: 
+Cache size: 1000G (target_max_bytes: 1000000000000); Dirty ratio: 20% (cache_target_dirty_ratio: 0.2); Full ratio: 20% (cache_target_full_ratio: 0.2)
+* Benchmark:
+Fio 4K random Read/write/Mixed tests. 
+* Results:
+Without cache tiering, the performance for 4K random read is: 1021, with latency ~3000ms (QD=256). 
+With cache tiering, the performance for 4K random read is: 359, with latency ~6000ms.
+With cache tiering + promote on second read, 4K random read performance is: ~800, with latency ~1500ms. 
+
+We can share the data either during CDS https://wiki.ceph.com/Planning/Blueprints/Hammer/osd%3A_tiering%3A_fine-grained_promotion_unit  or next weekly performance meeting. 
+
+Thanks
+Jian
+
+
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
+Sent: Wednesday, October 22, 2014 10:22 PM
+To: ceph-devel@vger.kernel.org
+Subject: 10/22/2014 Weekly Ceph Performance Meeting
+
+Hi All,
+
+Meeting is on at 8AM PST as usual!  Here's the links:
+
+Etherpad URL:
+http://pad.ceph.com/p/performance_weekly
+
+To join the Meeting:
+https://bluejeans.com/268261044
+
+To join via Browser:
+https://bluejeans.com/268261044/browser
+
+To join with Lync:
+https://bluejeans.com/268261044/lync
+
+
+To join via Room System:
+Video Conferencing System: bjn.vc -or- 199.48.152.152 Meeting ID: 268261044
+
+To join via Phone:
+1) Dial:
+           +1 408 740 7256
+           +1 888 240 2560(US Toll Free)
+           +1 408 317 9253(Alternate Number)
+           (see all numbers - http://bluejeans.com/numbers)
+2) Enter Conference ID: 268261044
+
+Mark
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
