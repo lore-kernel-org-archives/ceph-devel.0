@@ -1,93 +1,59 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Re: 10/22/2014 Weekly Ceph Performance Meeting
-Date: Thu, 23 Oct 2014 18:00:41 +0800
-Message-ID: <CACJqLya8UXbHEOy-eyW_ow_9g7T15mUiCdmsKQ_98+Xr3wxDzA@mail.gmail.com>
-References: <5447BD83.8000303@redhat.com>
-	<alpine.DEB.2.00.1410220920450.13498@cobra.newdream.net>
+From: Dan Carpenter <dan.carpenter@oracle.com>
+Subject: re: ceph: fix fallocate division
+Date: Thu, 23 Oct 2014 14:35:49 +0300
+Message-ID: <20141023113549.GA13250@mwanda>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f46.google.com ([74.125.82.46]:55097 "EHLO
-	mail-wg0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752079AbaJWKAn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Oct 2014 06:00:43 -0400
-Received: by mail-wg0-f46.google.com with SMTP id l18so713055wgh.29
-        for <ceph-devel@vger.kernel.org>; Thu, 23 Oct 2014 03:00:41 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1410220920450.13498@cobra.newdream.net>
+Received: from aserp1040.oracle.com ([141.146.126.69]:46514 "EHLO
+	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753215AbaJWLgC (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Oct 2014 07:36:02 -0400
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Mark Nelson <mark.nelson@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: sage@inktank.com
+Cc: ceph-devel@vger.kernel.org
 
-https://wiki.ceph.com/Planning/Blueprints/Submissions/Fixed_memory_layout_for_Message%2F%2FOp_passing
+Hello Sage Weil,
 
-@sage, thanks
+The patch b314a90d8f3f: "ceph: fix fallocate division" from Aug 27,
+2013, leads to the following static checker warning:
 
-On Thu, Oct 23, 2014 at 12:24 AM, Sage Weil <sage@newdream.net> wrote:
-> Hi Everyone,
->
-> Just a reminder that there won't be a performance call next week because
-> of CDS, which is Tuesday and Wednesday.  The tentative schedule is here:
->
->         https://wiki.ceph.com/Planning/CDS/Hammer_(Oct_2014)
->
-> If there are key performance items we should be focusing on that aren't
-> yet captured by a blueprint and session or that would be useful to discuss
-> with a broader audience during CDS, speak up soon so we can get a slot
-> added to the scheduled.
->
-> I already mentioned to Matt that it would be good to talk about this
-> encode/decode work, and I believe Haomai has a proposal there as well.
->
-> sage
->
->
-> On Wed, 22 Oct 2014, Mark Nelson wrote:
->
->> Hi All,
->>
->> Meeting is on at 8AM PST as usual!  Here's the links:
->>
->> Etherpad URL:
->> http://pad.ceph.com/p/performance_weekly
->>
->> To join the Meeting:
->> https://bluejeans.com/268261044
->>
->> To join via Browser:
->> https://bluejeans.com/268261044/browser
->>
->> To join with Lync:
->> https://bluejeans.com/268261044/lync
->>
->>
->> To join via Room System:
->> Video Conferencing System: bjn.vc -or- 199.48.152.152
->> Meeting ID: 268261044
->>
->> To join via Phone:
->> 1) Dial:
->>           +1 408 740 7256
->>           +1 888 240 2560(US Toll Free)
->>           +1 408 317 9253(Alternate Number)
->>           (see all numbers - http://bluejeans.com/numbers)
->> 2) Enter Conference ID: 268261044
->>
->> Mark
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+	fs/ceph/file.c:1145 ceph_zero_objects()
+	warn: [initializer] should 'object_size * stripe_count' be a 64 bit type?
 
+fs/ceph/file.c
+  1138  static int ceph_zero_objects(struct inode *inode, loff_t offset, loff_t length)
+  1139  {
+  1140          int ret = 0;
+  1141          struct ceph_inode_info *ci = ceph_inode(inode);
+  1142          s32 stripe_unit = ceph_file_layout_su(ci->i_layout);
+  1143          s32 stripe_count = ceph_file_layout_stripe_count(ci->i_layout);
+  1144          s32 object_size = ceph_file_layout_object_size(ci->i_layout);
+  1145          u64 object_set_size = object_size * stripe_count;
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^
+This is a new Smatch check I'm working on.  Obviously integer overflows
+are a fairly common bug.  We often see code like this:
 
+	a = b * c;
 
--- 
-Best Regards,
+It's too much to warn every time when the types don't make sense because
+a lot of times people use u64 by reflexive and don't actually care about
+the upper bits.  My new check only warns if the overflow happens inside
+an initializer.
 
-Wheat
+This one is puzzling to me because prior to b314a90d8f3f then there was
+a cast that fixed the integer overflow problem.  It's not clear if
+removing it was intentional or accidental.
+
+  1146          u64 nearly, t;
+  1147  
+  1148          /* round offset up to next period boundary */
+  1149          nearly = offset + object_set_size - 1;
+  1150          t = nearly;
+  1151          nearly -= do_div(t, object_set_size);
+  1152  
+
+regards,
+dan carpenter
