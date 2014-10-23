@@ -1,59 +1,287 @@
-From: Dan Carpenter <dan.carpenter@oracle.com>
-Subject: re: ceph: fix fallocate division
-Date: Thu, 23 Oct 2014 14:35:49 +0300
-Message-ID: <20141023113549.GA13250@mwanda>
+From: Alexandre DERUMIER <aderumier@odiso.com>
+Subject: fio read and randread  cpu usage results for qemu and host machine
+Date: Thu, 23 Oct 2014 14:30:40 +0200 (CEST)
+Message-ID: <b0e1d9f1-224e-4711-99f4-9421f29d21e3@mailpro>
+References: <ff0167fd-ba60-48d2-b735-63569a5a6dd4@mailpro>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from aserp1040.oracle.com ([141.146.126.69]:46514 "EHLO
-	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753215AbaJWLgC (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Oct 2014 07:36:02 -0400
-Content-Disposition: inline
+Received: from mailpro.odiso.net ([89.248.209.98]:37590 "EHLO
+	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754980AbaJWMar (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Oct 2014 08:30:47 -0400
+Received: from localhost (localhost [127.0.0.1])
+	by mailpro.odiso.net (Postfix) with ESMTP id 5945918071598
+	for <ceph-devel@vger.kernel.org>; Thu, 23 Oct 2014 14:30:46 +0200 (CEST)
+Received: from mailpro.odiso.net ([127.0.0.1])
+	by localhost (mailpro.odiso.net [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id 78KYyIcdurSQ for <ceph-devel@vger.kernel.org>;
+	Thu, 23 Oct 2014 14:30:40 +0200 (CEST)
+Received: from mailpro.odiso.net (mailpro.odiso.net [10.1.31.112])
+	by mailpro.odiso.net (Postfix) with ESMTP id 2C61F18036875
+	for <ceph-devel@vger.kernel.org>; Thu, 23 Oct 2014 14:30:40 +0200 (CEST)
+In-Reply-To: <ff0167fd-ba60-48d2-b735-63569a5a6dd4@mailpro>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: sage@inktank.com
-Cc: ceph-devel@vger.kernel.org
+To: Ceph Devel <ceph-devel@vger.kernel.org>
 
-Hello Sage Weil,
+Hi, 
 
-The patch b314a90d8f3f: "ceph: fix fallocate division" from Aug 27,
-2013, leads to the following static checker warning:
+I have done fio tests on multiple qemu setups and host machine,
+to see if librbd use more cpu than krbd 
+and also find the best qemu optimisations.
 
-	fs/ceph/file.c:1145 ceph_zero_objects()
-	warn: [initializer] should 'object_size * stripe_count' be a 64 bit type?
+Fio test was done with blocksize=4K , read and randread with num_jobs=32.
 
-fs/ceph/file.c
-  1138  static int ceph_zero_objects(struct inode *inode, loff_t offset, loff_t length)
-  1139  {
-  1140          int ret = 0;
-  1141          struct ceph_inode_info *ci = ceph_inode(inode);
-  1142          s32 stripe_unit = ceph_file_layout_su(ci->i_layout);
-  1143          s32 stripe_count = ceph_file_layout_stripe_count(ci->i_layout);
-  1144          s32 object_size = ceph_file_layout_object_size(ci->i_layout);
-  1145          u64 object_set_size = object_size * stripe_count;
-                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^
-This is a new Smatch check I'm working on.  Obviously integer overflows
-are a fairly common bug.  We often see code like this:
 
-	a = b * c;
 
-It's too much to warn every time when the types don't make sense because
-a lot of times people use u64 by reflexive and don't actually care about
-the upper bits.  My new check only warns if the overflow happens inside
-an initializer.
 
-This one is puzzling to me because prior to b314a90d8f3f then there was
-a cast that fixed the integer overflow problem.  It's not clear if
-removing it was intentional or accidental.
 
-  1146          u64 nearly, t;
-  1147  
-  1148          /* round offset up to next period boundary */
-  1149          nearly = offset + object_set_size - 1;
-  1150          t = nearly;
-  1151          nearly -= do_div(t, object_set_size);
-  1152  
+1) First, I have done more tests with qemu optimisation, like iothread (dataplane) for virtio-blk disk,
+and num_queue=8 for virtio-scsi disks.
 
-regards,
-dan carpenter
+for virtio iothread: 
+--------------------
+It's working only with qemu + krbd, and for sequential reads.
+And It's seem that qemu aggregate reads in bigger ceph reads. (I see 4x more iops on fio than on ceph, with same bandwith)
+
+
+for virtio-scsi num_queue = 8:
+-------------------------------
+works with krbd and librbd
+
+ -for random read : I jump from 7000 to 12000iops
+ -for sequential, qemu aggreate reads in bigger ceph reads. (Same, I see 4xmore iops on fio than on ceph, with same bandwith).
+
+
+So it seem to be useful for some specific workloads.
+
+
+
+2 ) Now, about cpu usage, it's seem than librbd use really more cpu than krbd,
+
+on host, librbd use 4x more cpu than krbd
+on qemu, librbd use 2x more cpu than krbd 
+
+
+So, what could explain so much difference between both ?
+
+
+Regards,
+
+Alexandre
+
+
+
+fio iops seq read summary results
+----------------------------------
+qemu virtio iothread krbd vs qemu virtio iothread librbd : 27000 iops vs 15000 ipos
+qemu virtio krbd vs qemu virtio librbd                   : 19000 iops vs 15000 iops
+qemu virtio-scsi krbd vs qemu virtio librbd              : 50000 iops vs 48000 iops 
+host krbd vs host librbd                                :  36000 iops vs 25000 iops
+
+
+
+fio iops randread summary results
+------------------------------
+qemu virtio iothread krbd vs qemu virtio iothread librbd : 15000 iops vs 14000 iops
+qemu virtio krbd vs qemu virtio librbd                   : 14000 iops vs 15000 iops
+qemu virtio-scsi krbd vs qemu virtio librbd              : 7500  iops vs 12000 iops
+host krbd vs host librbd                                 : 38000 iops vs 25000 iops
+
+
+cpu usage ratio  summary
+------------------------
+qemu virtio krbd vs qemu virtio librbd : 2x more cpu usage for librbd
+qemu virtio-scsi krbd vs qemu virtio-scsi librbd : 2x more cpu usage for librbd
+host krbd vs host librbd : 4x more cpu usage for fio-rbd 
+
+
+
+
+
+
+RESULTS
+-------
+
+host + fio - krbd
+-------------------
+read
+-----
+fio iops : 142.9MB/Ss , 36000 iops
+ceph : 134 MB/s rd, 34319 op/s
+
+fio : 70,4%  kworker : 93,9% cpu = 164% cpu
+
+100%cpu : 21000iops
+
+randread
+--------
+fio: 151MB/S,38000 iops
+ceph :148 MB/s rd, 37932 op/s
+
+fio : 80%cpu kwoker : 110,3%cpu  = 180% cpu
+
+100%cpu : 21000 iops
+
+
+
+
+host + fio-rbdengin :
+---------------------
+randread (cpu bound)
+--------------------
+fio iops : 25000 ops
+ceph iops : 99636 kB/s rd, 24909 op/s
+
+fio : 460%cpu
+
+100%cpu : 5415iops
+
+read (cpu bound)
+-----------------
+fio iops : 25000 ops
+ceph ios : 94212 kB/s rd, 23553 op/s
+
+fio : 480%cpu
+
+100%cpu : 5323iops
+
+
+
+
+
+qemu + krbd  + virtio + iothread
+---------------------------------
+read
+----
+fio :107MB/S : 27000 iops  >>>SEEM THAT QEMU AGGREGATE READS ops
+ceph : 93942 kB/s rd, 12430 op/s
+
+kvm: 130% cpu - kworker : 41,2% = 171,2% cpu
+
+100%cpu ratio : 7260iops
+
+randread
+--------
+fio : 60MBS - 15000 iops
+ceph :  54400 kB/s rd, 13600 op/s
+
+kvm: 95,0% cpu  - kworker : 42,1 % cpu = 137,1%cpu
+
+100%cpu ratio : 9919 iops
+
+
+
+
+
+qemu + krbd  + virtio
+----------------------
+read
+-----
+fio : 70mbs/ , 19000iops
+ceph:75705 kB/s rd, 18926 op/s
+kvm : 164% cpu - kworker : 48,5% cpu = 212,5%cpu
+
+100%cpu ratio : 8906 iops
+
+randread
+--------
+fio : 54mbs/ , 14000iops
+ceph : 54800 kB/s rd, 13700 op/s
+kvm: 103% cpu - kworker 41,2% cpu = 144,2%cpu
+
+100%cpu ratio : 9513 iops
+
+
+
+qemu + krbd  + virtio-scsi (num_queue 8)
+--------------------------------------
+read: 
+----
+fio : 200MB / 50000 iops  >>>SEEM THAT QEMU AGGREGATE READS ops
+ceph : 205 MB/s rd, 7648 op/s
+
+kvm: 145% kworker : 46,5% = 191,5%cpu
+
+100%cpu ratio : 3993 iops
+
+randread: 
+----------
+fio : 30MB/S / 7500 iops
+ceph : 29318 kB/s rd, 7329 op/s
+kvm : 150%  kworker : 21,4% cpu = 171,4% cpu
+
+100%cpu ratio : 4275 iops
+
+
+
+
+qemu + librbd + virtio + iothread
+----------------------------------
+read
+----
+fio : 60MBS/s , 15000iops
+ceph: 56199 kB/s rd, 14052 op/s
+
+kvm: 300% cpu
+
+100%cpu : 4666iops
+
+
+randread
+---------
+fio : 56MBS/s, 14000iops
+ceph : 55916 kB/s rd, 13979 op/s
+
+kvm: 300% cpu
+
+100%cpu : 4659 iops
+
+
+
+qemu + librbd +  virtio
+-------------------------
+read
+-----
+fio : 60MBS/s, 15000iops
+ceph : 63021 kB/s rd, 15755 op/s
+
+kvm: 300% cpu
+
+100%cpu : 5233 iops
+
+randread
+--------
+fio : 60MBS/s, 15000iops
+ceph : 55916 kB/s rd, 13979 op/s
+
+kvm : 300%cpu
+
+100%cpu : 4659 iops
+
+
+qemu + librbd + virtio-scsi (num_queue 8)
+----------------------------------------
+read
+----
+fio : 256 MB/S , 48000iops  >>>SEEM THAT QEMU AGGREGATE READS ops
+ceph : 244 MB/s rd, 12002 op/s
+
+kvm : 300% cpu
+
+100%cpu : 4000 iops
+
+randread
+--------
+fio: 12000iops
+ceph iops :  47511 kB/s rd, 11877 op/s
+
+kvm: 300% cpu
+
+100%cpu: 3959 iops
+
+
+
+
