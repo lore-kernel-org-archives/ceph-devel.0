@@ -1,73 +1,127 @@
-From: GuangYang <yguang11-1ViLX0X+lBJBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: Filestore throttling
-Date: Thu, 23 Oct 2014 04:30:27 +0000
-Message-ID: <BLU175-W176682F001CDC16FC4FA67DF920@phx.gbl>
-References: <BLU175-W34FC39734E69C620D262DEDF920@phx.gbl>,
-	<alpine.DEB.2.00.1410222104080.10837@cobra.newdream.net>
+From: "Zhang, Jian" <jian.zhang@intel.com>
+Subject: RE: Ceph Full-SSD Performance Improvement
+Date: Thu, 23 Oct 2014 07:18:15 +0000
+Message-ID: <51FC7A40FB29414D88A121A7FFEF9A4710F9B049@SHSMSX104.ccr.corp.intel.com>
+References: <CACJqLyZ3-3UOkmGLw973_JCJ9=32K7NvbJks72+8Zs-j1LtwOA@mail.gmail.com>
+	<alpine.DEB.2.00.1410210836410.13498@cobra.newdream.net>
+ <CACJqLyY94fGhtKfHkwn3qMv1s_sWC-qGofxG7ZjY48QJSH3NzQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.00.1410222104080.10837-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mga02.intel.com ([134.134.136.20]:37173 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751889AbaJWHUp (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 23 Oct 2014 03:20:45 -0400
+In-Reply-To: <CACJqLyY94fGhtKfHkwn3qMv1s_sWC-qGofxG7ZjY48QJSH3NzQ@mail.gmail.com>
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Haomai Wang <haomaiwang@gmail.com>, Sage Weil <sage@newdream.net>
+Cc: Samuel Just <sam.just@inktank.com>, "icolle@redhat.com" <icolle@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Thanks Sage for the quick response!
-
-We are using firefly (v0.80.4 with a couple of back-ports). One observation we have is that during peering stage (especially if the OSD got down/in for several hours with high load), the peering OPs are in contention with normal OPs and thus bring extremely long latency (up to minutes) for client OPs, the contention happened in filestore for throttling budget, it also happened at dispatcher/op threads, I will send another email with more details after more investigation.
-
-As for this one, I created a pull request #2779 to change the default value of filesotre_queue_max_ops to 500 (which is specified in the document but code is inconsistent), do you think we should make others as default as well?
-
-Thanks,
-Guang
-
-----------------------------------------
-> Date: Wed, 22 Oct 2014 21:06:21 -0700
-> From: sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org
-> To: yguang11-1ViLX0X+lBJBDgjK7y7TUQ@public.gmane.org
-> CC: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> Subject: Re: Filestore throttling
->
-> On Thu, 23 Oct 2014, GuangYang wrote:
->> Hello Cephers,
->> During our testing, I found that the filestore throttling became a limiting factor for performance, the four settings (with default value) are:
->> filestore queue max ops = 50
->> filestore queue max bytes = 100 << 20
->> filestore queue committing max ops = 500
->> filestore queue committing max bytes = 100 << 20
->>
->> My understanding is, if we lift the threshold, the response for op (end to end) could be improved a lot during high load, and that is one reason to have journal. The downside is that if there is a read following a successful write, the read might stuck longer as the object is not flushed.
->>
->> Is my understanding correct here?
->>
->> If that is the tradeoff and read after write is not a concern in our use case, can I lift the parameters to below values?
->> filestore queue max ops = 500
->> filestore queue max bytes = 200 << 20
->> filestore queue committing max ops = 500
->> filestore queue committing max bytes = 200 << 20
->>
->> It turns out very helpful during PG peering stage (e.g. OSD down and up).
->
-> That looks reasonable to me.
->
-> For peering, I think there isn't really any reason to block sooner rather
-> than later. I wonder if we should try to mark those transactions such
-> that they don't run up against the usual limits...
->
-> Is this firefly or something later? Sometime after firefly Sam made some
-> changes so that the OSD is more careful about waiting for PG metadata to
-> be persisted before sharing state. I wonder if you will still see the
-> same improvement now...
->
-> sage
- 		 	   		  
+SGFvbWFpLCANCklzIHRoZXJlIGFueSBwbGFjZSB0byBmaW5kIHRoZSBwZXJmb3JtYW5jZSBnYWlu
+cyBzYWdlIG1lbnRpb25lZD8gDQoNClRoYW5rcw0KSmlhbg0KDQotLS0tLU9yaWdpbmFsIE1lc3Nh
+Z2UtLS0tLQ0KRnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpj
+ZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIEhhb21haSBXYW5n
+DQpTZW50OiBXZWRuZXNkYXksIE9jdG9iZXIgMjIsIDIwMTQgMTE6MTAgQU0NClRvOiBTYWdlIFdl
+aWwNCkNjOiBTYW11ZWwgSnVzdDsgaWNvbGxlQHJlZGhhdC5jb207IGNlcGgtZGV2ZWxAdmdlci5r
+ZXJuZWwub3JnDQpTdWJqZWN0OiBSZTogQ2VwaCBGdWxsLVNTRCBQZXJmb3JtYW5jZSBJbXByb3Zl
+bWVudA0KDQpbY2MgdG8gY2VwaC1kZXZlbF0NCg0KDQoNCk9uIFR1ZSwgT2N0IDIxLCAyMDE0IGF0
+IDExOjUxIFBNLCBTYWdlIFdlaWwgPHNhZ2VAbmV3ZHJlYW0ubmV0PiB3cm90ZToNCj4gSGkgSGFv
+bWFpLA0KPg0KPiBZb3UgYW5kIHlvdXIgdGVhbSBoYXZlIGJlZW4gZG9pbmcgZ3JlYXQgd29yayBh
+bmQgSSdtIHZlcnkgaGFwcHkgdGhhdCANCj4geW91IGFyZSB3b3JraW5nIHdpdGggQ2VwaCEgIFRo
+ZSBwZXJmb3JtYW5jZSBnYWlucyB5b3UndmUgc2VlbiBhcmUgdmVyeSANCj4gZW5jb3VyYWdpbmcu
+DQo+DQo+PiAxLiBVc2UgQXN5bmNNZXNzZW5nZXIgZm9yIGJvdGggY2xpZW50IGFuZCBPU0QNCj4N
+Cj4gSSB3b3VsZCBsaWtlIHRvIGdldCB0aGlzIGludG8gdGhlIHRyZWUuICBJIG1hZGUgYSBmZXcg
+Y29zbWV0aWMgY2hhbmdlcyANCj4gYW5kIHB1c2hlZCBhIHdpcC1tc2dyIGludG8gY2VwaC5naXQg
+dG8gbWFrZSBzdXJlIGl0IGJ1aWxkcyBva2F5LiAgT25jZSANCj4gZ2lhbnQgaXMgb3V0IHdlIGNh
+biBtaXggdGhpcyBpbnRvIHRoZSBRQS4NCj4NCj4+IDIuIFVzZSBPYmplY3RDb250ZXh0IENhY2hl
+DQo+DQo+IEkgc2F3IGFuIGVhcmxpZXIgdmVyc2lvbiBvZiB0aGlzIHRoYXQgZGlkbid0IGJyZWFr
+IHRoaW5ncyBkb3duIHBlci1QRzsgDQo+IGhhdmUgU2FtJ3MgY29tbWVudHMgYmVlbiBhZGRyZXNz
+ZWQ/ICBJSVJDIHRoZSBtb3N0IHJlY2VudCBpc3N1ZSB3YXMgDQo+IHRoYXQgdGhlIGNhY2hlIHdh
+cyByZXNldCBpbiBQRzo6c3RhcnRfcGVlcmluZ19pbnRlcnZhbC4NCj4NCj4gVGhpcyBzaG91bGQg
+bWFrZSBhIGJpZyBkaWZmZXJlbmNlLiAgKzEgOikNCj4NCj4+IDMuIEF2b2lkIGV4dHJhIGNhbGN1
+bGF0ZXMgZm9yIHBnIGxheWVycw0KPg0KPiBJIGhhdmVuJ3Qgc2VlbiB0aGlzIG9uZT8NCj4NCj4+
+IEkgaG9wZSBjZXBoIGNhbiBtYWtlIGNvbXBsZXRlIHdpdGggY29tbWVyY2lhbCBzdG9yYWdlIHN5
+c3RlbSwgc28gaG93IA0KPj4gdG8gbWFrZSBjZXBoIHNob3J0ZXIgbGF0ZW5jeSBpcyBteSBtYWlu
+IGNvbmNlcm4uDQo+Pg0KPj4gT3ZlciB0aGUgeWVhciwgSSBkaXZlIGludG8gdGhlIGZ1bGwgY2Vw
+aCBJTyBzdGFja3MgZnJvbSBsaWJyYmQgZG93biANCj4+IHRvIEZpbGVTdG9yZS4gQmVzaWRlcyB0
+aGUgYXR0ZW1wdHMgbWVudGlvbmVkIGFib3ZlLCBJIHRoaW5rIHRoZSBtYWluIA0KPj4gdGhyb3R0
+bGUgd2lsbCBiZSBlbmNvZGUvZGVjb2RlIHdoaWNoIGlzIGV4aXN0ZWQgaW4gTWVzc2VuZ2VyIGFu
+ZCANCj4+IE9iamVjdFN0b3JlIHRyYW5zYWN0aW9ucy4NCj4+DQo+PiBBdCBmaXJzdCBGaWxlU3Rv
+cmUgd2lsbCBkaXJlY3RseSBhY2NlcHQgaW5wdXRzIHdpdGhvdXQgYnVmZmVybGlzdCANCj4+IGVu
+Y29kZS9kZWNvZGVzLiBOb3cgSSB0cnkgdG8gc2VuZCBNT1NET1AncyBwYXlsb2FkIGRpcmVjdGx5
+IHRvIA0KPj4gcmVwbGljYXRlIFBHIGFuZCBhdm9pZCBvdmVyYWxsIE9iamVjdFN0b3JlOjpUcmFu
+c2FjdGlvbiB3aGljaCBpcyB1c2VkIA0KPj4gYnkgcmVwbGljYXRlZCBwZy4gUmVwbGljYXRlZCBQ
+RyBtYXliZSBuZWVkIGNhbGN1bGF0ZSBhZ2FpbiBidXQgYXMgd2UgDQo+PiBwZXJmb3JtZWQgdGhl
+IG1haW4gY29uc3VtaW5nIHRpbWUgaW4gUEcgbGF5ZXIgaXMgdHJhbnNhY3Rpb24gDQo+PiBlbmNv
+ZGUvZGVjb2RlLiBLZXlWYWx1ZVN0b3JlIGFuZCBGaWxlU3RvcmUgd2lsbCBib3RoIGhhcHB5ICB0
+byBhZG9wdCANCj4+IGl0LiBUaGVuIG1haW4gSU8gbG9naWMgc3VjaCBhcyByZWFkL3dyaXRlIG9w
+cyB3b24ndCBuZWVkIA0KPj4gZW5jb2RlL2RlY29kZS4NCj4NCj4gQ2FuIHlvdSBzZW5kIGEgbWVz
+c2FnZSB0byBjZXBoLWRldmVsIHdpdGggYSBiaXQgbW9yZSBkZXRhaWw/ICBXZSB1c2VkIA0KPiB0
+byBkbyB0aGlzLCBhY3R1YWxseSAocHJlcGFyZSB0aGUgdHJhbnNhY3Rpb24gb24gdGhlIHJlcGxp
+Y2FzIGluc3RlYWQgDQo+IG9mIGVuY29kaW5nIHRoZSBvbmUgZnJvbSB0aGUgcHJpbWFyeSkgYnV0
+IGl0IHdhcyBhIGJpdCBsZXNzIGZsZXhpYmxlIA0KPiB3aGVuIGl0IGNhbWUgdG8gdGhlIG9iamVj
+dCBjbGFzc2VzICh3aGljaCBtaWdodCBub3QgYmUgZGV0ZXJtaW5pc3RpYykuDQo+DQo+IEkgYWdy
+ZWUgdGhhdCBlbmNvZGUvZGVjb2RlIGlzIGEgc2VyaW91cyBpc3N1ZSwgYnV0IGJlZm9yZSBhdm9p
+ZGluZyBpdCANCj4gZm9yIHRyYW5zYXRpb25zIEknZCBsaWtlIHRvIHNlZSB3aGF0IE1hdHQgQmVu
+amFtaW4gaXMgYWJsZSB0byANCj4gYWNjb21wbGlzaCB3aXRoIGhpcyBjaGFuZ2VzLCBvciBsb29r
+IGF0IHdheXMgdG8gbWFrZSB0cmFuc2FjdGlvbiANCj4gZW5jb2RpbmcgaW4gcGFydGljdWxhciBt
+b3JlIGVmZmljaWVudCAoZS5nLg0KPiB3aXRoIGZpeGVkIHNpemUgc3RydWN0dXJlcykuICBBbHNv
+LCB5b3UgbWlnaHQgYmUgaW50ZXJlc3RlZCBpbg0KPg0KPiAgICAgICAgIA0KPiBodHRwczovL3dp
+a2kuY2VwaC5jb20vUGxhbm5pbmcvQmx1ZXByaW50cy9IYW1tZXIvb3NkJTNBX3VwZGF0ZV9UcmFu
+c2FjDQo+IHRpb25fZW5jb2RpbmcNCg0KSG1tLCBJIHRyeSB0byB1bmRlcnN0YW5kIHRoZSBtZWFu
+aW5nLiBJcyB0aGlzIEJQIHdhbnQgdG8gbWFrZSBPYmplY3RTdG9yZTo6VHJhbnNhY3Rpb24gbW9y
+ZSBmbGV4aWJsZSBhbmQgbWFrZSBPYmplY3RTdG9yZSdzIHN1Y2Nlc3NvcnMgY2FuIGVhc2lseSBh
+d2FyZSBvZiB0aGUgZGF0YSBsYXlvdXQgaW4gdHJhbnNhY3Rpb24uIEkgdHJ5IHRvIHN1bW1hcnkg
+dGhlIHBlcmZvcm1hbmNlIG9wdGltaXphdGlvbiBmb3IgdGhpcyBicDoNCg0KMS4gRmlsZVN0b3Jl
+L0tleVZhbHVlU3RvcmUgY2FuIGF3YXJlIG9mIHRoZSBzaXplIG9mIHdyaXRlIGRhdGEgYW5kIGRv
+IHNvbWV0aGluZyBzcGVjaWFsIGZvciBpdCwgaXQgd291bGQgYmUgbmljZSBmb3IgbGFyZ2UgZmls
+ZSAyLiBBIGNvbXBsZXhpdHkgdHJhbnNhY3Rpb24gd2hpY2ggY29udGFpbnMgc2V2ZXJhbCBvcHMg
+Zm9yIG9uZSBvYmplY3QsICB0aGUgcmVkdW5kYW5jeSBsb29rdXBzIHdpbGwgYmUgcmVkdWNlZA0K
+DQpCdXQgdGhlIGFjdHVhbCBjb25zdW1pbmcgdGltZSBjb21wb25lbnQgSSB0aGluayBpcyB0cmFu
+c2FjdGlvbiBlbmNvZGUvZGVjb2RlLiBFc3BlY2lhbGx5IGVuY29kZS9kZWNvZGUgZm9yIGdob2Jq
+ZWN0X3QgYW5kIGNvbGxlY3Rpb24gc3RydWN0dXJlLg0KDQpDb21iaW5lIHdpdGggTWVzc2FnZSBl
+bmNvZGUvZGVjb2RlLCBhcyBJIHBlcmZvcm1lZCBlbmNvZGUvZGVjb2RlIGxvZ2ljcyBwbGF5cyBh
+IGltcG9ydGFudCByb2xlIGZvciB0aGUgbGF0ZW5jeSBvZiBvcC4gSSB3YW50IHRvIGV4cGxhaW4g
+d2hhdCBJIHdhbnQgdG8gZG86DQoNCkFsbCBNZXNzYWdlcyB3aWxsIGJlIHJlc3RydWN0dXJlZCBh
+bmQgaGF2ZSBhIGNvbW1vbiBoZWFkZXIuIEFsbCBtZW1iZXJzIGluIE1lc3NhZ2Ugd2lsbCBiZSBm
+aXhlZC4gSSBrbm93IHNvbWUgY3JpdGljYWwgbWVtYmVyIHN1Y2ggYXMgZ2hvYmplY3RfdCBvciBh
+bnl0aGluZyBlbHNlIHdpbGwgYmUgaGFyZCB0byBkZWNpc2l2ZS4gU28gb24gdGhlIE1lc3Nlbmdl
+ciBzaWRlLCBnaG9iamVjdF90IG9yIG90aGVyIGZsZXhpYmxlIHN0cnVjdHVyZSB3aWxsIGhhdmUg
+c2VwYXJhdGVkIHN0cnVjdHVyZSwgbGlrZSBnaG9iamVjdF90IHdpbGwgYmUgdHJhbnNsYXRlZCB0
+byBNZXNzYWdlOjpvYmplY3Qgd2hpY2ggd2lsbCBwYWNrZWQgaW50byBhIGZpeGVkIHNpemUgbWVt
+b3J5LiBTbyBNZXNzZW5nZXIgY2FuIGRpcmVjdGx5IHBpY2sgdXAgc3RydWN0dXJlcyBpbiBtZXNz
+YWdlcyB3aXRob3V0IG1lbW9yeSBjb3B5IGFuZCBwYXJzaW5nLiBBbmQgb24gdGhlIHNpZGUgb2Yg
+UEcgbGF5ZXIsIE9iamVjdFN0b3JlOjpUcmFuc2FjdGlvbiB3aWxsIGJlIHJlZmFjdG9yZWQgdG8g
+YSBzaW1wbGUgY2xhc3MuIEEgbGlzdCBvZiBvcHMgd2lsbCBkZXNjcmliZSB0aGUgc2VxdWVuY2Vz
+IGFuZCBhbGwgZGF0YSB3aWxsIGJlIHJlZmVyZW5jZWQgZGlyZWN0bHkgd2hpY2ggaXMgdXNlZCBp
+biBQRyBsYXllci4gSXQgbWF5YmUgbGV0IE9iamVjdFN0b3JlJ3Mgc3VjY2Vzc29ycyBsZXNzIGZs
+ZXhpYmxlIGJ1dCBpdCdzIHN0aWxsIGhhcyBzcGFjZSB0byBtb2RpZnkuIEZvciBzdWJvcCwgdGhl
+IHJhdyBtZXNzYWdlIGZyb20gY2xpZW50IHdpbGwgYmUgdmFsaWRhdGVkIGluIHByaW1hcnkgcGcg
+YW5kIGFkZCBzb21lIGluZm9zIG5lY2Vzc2FyeSBpbnNlciBpbnRvIHRoZSBmaXhlZCBwb3NpdGlv
+biBvZiB0aGUgbWVzc2FnZSBhbmQgcG9wdWxhdGUgdG8gcmVwbGljYXRlIFBHLg0KDQpQbHogY29y
+cmVjdCBtZSBpZiBleGlzdHMgYXdmdWwgcG9pbnQuDQoNCj4NCj4+IE5leHQsIEkgaG9wZSB3ZSBj
+YW4gcmVmYWN0b3IgYSBuZXcgTWVzc2FnZSBwcm90b2NvbC4gVGhlIG1haW4gcGFpbiBpcyANCj4+
+IHRoYXQgTmV3IE1lc3NhZ2UgcHJvdG9jb2wgd29uJ3QgY29tcGF0aWJsZSB3aXRoIG9sZGVyLiBF
+YWNoIG1lc3NhZ2UgDQo+PiBpcyBleHBlY3RlZCB0byBoYXZlIGEgY29tbW9uIGhlYWRlciwgdGhl
+IG1lbW9yeSBsYXlvdXQgZm9yIGRhdGEgaW4gDQo+PiBNZXNzYWdlIHdpbGwgYmUgZm9yY2VkIGFs
+aWduZWQgYW5kIHVzZWQuIEl0J3MgZXhwZWN0ZWQgdG8gZGlzY2FyZCANCj4+IG92ZXJhbGwgbWVz
+c2FnZSBlbmNvZGUvZGVjb2RlIHdoaWNoIGlzIG1haW4gdGhyb3R0bGUgaW4gDQo+PiBBc3luY01l
+c3Nlbmdlci4gQW5kIHdpdGggbmV3IE1lc3NlbmdlciwgU1VCT1AgY2FuIGJlIGRpcmVjdGx5IA0K
+Pj4gY29uc3RydWN0ZWQgdmlhIGNvbW1vbiBoZWFkZXIuIFNvIHRoZSBvdmVyYWxsIGVuY29kZS9k
+ZWNvZGUgbG9naWNzIA0KPj4gY2FuIGJlIGRpc2NhcmQgZm9yIHRoZSBuZXcgTWVzc2FnZSBsYXlv
+dXQuDQo+DQo+IEknbSBhbHNvIG9wZW4gdG8gY2hhbmdlcyBoZXJlLCBhcyBsb25nIGFzIHdlIGNh
+biBtYWtlIGl0IHNvbWV3aGF0IA0KPiB0cmFuc2FwcmVudCB0byB0aGUgdXNlciAocGVyaGFwcyBv
+bmx5IHVzZSBpdCBvbiB0aGUgYmFja2VuZCBuZXR3b3JrLCANCj4gb3IgZXZlbiBiZXR0ZXIsIGRl
+dGVjdC9uZWdvdGlhdGUgdGhlIHByb3RvY29sIGZvciBiYWNrd2FyZCBjb21wYXRpYmlsaXR5KS4N
+Cj4gQnV0IEkgdGhpbmsgaW4gZ2VuZXJhbCB3ZSBjYW4gcHJvYmFibHkgY29uc3RyYWluIHRoZSBw
+cm9ibGVtOiBpdCBpcyANCj4gb25seSB0aGUgTU9TRFtTdWJdT3BbUmVwbHldIG1lc3NhZ2VzIHRo
+YXQgaGF2ZSBhIHJlYWwgaW1wYWN0IGhlcmUsIHNvIA0KPiB3ZSBjYW4gcHJvYmFibHkgZm9jdXMg
+b24gY2hhbmdpbmcganVzdCB0aG9zZSBtZXNzYWdlJ3MgZW5jb2RpbmcuICAoSXMgDQo+IHRoYXQg
+d2hhdCB5b3UncmUgc3VnZ2VzdGluZz8pDQo+DQo+IFRoYW5rcyENCj4gc2FnZQ0KPg0KDQoNCg0K
+LS0NCkJlc3QgUmVnYXJkcywNCg0KV2hlYXQNCi0tDQpUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMg
+bGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4gdGhlIGJvZHkg
+b2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8g
+aW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo=
