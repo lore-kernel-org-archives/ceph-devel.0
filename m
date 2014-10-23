@@ -1,158 +1,341 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: kerberos / AD requirements, blueprint
-Date: Thu, 23 Oct 2014 08:05:31 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1410230804110.10837@cobra.newdream.net>
-References: <1098676823.49.1414075629689.JavaMail.root@thunderbeast.private.linuxbox.com>
+From: Alexandre DERUMIER <aderumier@odiso.com>
+Subject: Re: fio read and randread  cpu usage results for qemu and host machine
+Date: Thu, 23 Oct 2014 17:20:57 +0200 (CEST)
+Message-ID: <f3a5fdcf-171e-4387-8644-fc2748b60f42@mailpro>
+References: <5448FD91.7010709@redhat.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:46814 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752039AbaJWPFc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Oct 2014 11:05:32 -0400
-In-Reply-To: <1098676823.49.1414075629689.JavaMail.root@thunderbeast.private.linuxbox.com>
+Received: from mailpro.odiso.net ([89.248.209.98]:53124 "EHLO
+	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753019AbaJWPVG convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Oct 2014 11:21:06 -0400
+In-Reply-To: <5448FD91.7010709@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Matt W. Benjamin" <matt@linuxbox.com>
-Cc: Andrea Ieri <andrea.ieri@cern.ch>, Ceph Development <ceph-devel@vger.kernel.org>, abartlet@catalyst.net.nz, Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>, Dan Van Der Ster <daniel.vanderster@cern.ch>
+To: Mark Nelson <mark.nelson@inktank.com>
+Cc: Ceph Devel <ceph-devel@vger.kernel.org>
 
-On Thu, 23 Oct 2014, Matt W. Benjamin wrote:
-> Hi,
-> 
-> Is the goal then NOT to provide per-user authn (etc) as AFS or DCE would 
-> do, when a user accesses files using the kernel client (and provide for 
-> that, in general)?  I would have thought that was a lot of the point.
+>>Hi Alexandre, do you have access to perf?=20
+yes. I can send perf report if you want. (I'm not sure how to analyze t=
+he results)
 
-Eventually, yes.  The baby step is just use AD/LDAP for the ceph/rbd CLIs 
-and for authn/z at mount time.
+>>Especially on newer kernels/distributions where you can use dwarf sym=
+bols, perf can give you=20
+>>a lot of information about what is using CPU where.=20
+I'm using kernel 3.16, so I think It'll be ok
 
-sage
+>> vtune is also a nice option if you ave a license.
+Don't have it sorry.
 
 
-> 
-> Matt
-> 
-> ----- "Andrea Ieri" <andrea.ieri@cern.ch> wrote:
-> 
-> > Hi Sage,
-> > 
-> > It's perhaps useful to clear up that Kerberos as a protocol provides
-> > your service with the following information (at the end of the initial
-> > exchange):
-> > 1. a string representing a Kerberos principal (user@REALM)
-> > 2. a session key, known only to you and the principal above
-> > 3. a reasonable assurance that whoever sent you the ticket that
-> > contains the data above controls the principal mentioned (as in "knows
-> > its password")
-> > 
-> > Now, you can choose what to do with the information above.
-> > - you'll most likely need to map the "principal" to a "user", whatever
-> > that means for your system (a UID/GID tuple obtained via LDAP? A user
-> > string in your own local database?)
-> > - you'll have to decide what to do with the session key. Do you want
-> > to encrypt all communication? Implement a MAC? Throw it away? See for
-> > example the different Kerberos options in NFSv4
-> > 
-> > In any case as you can see Kerberos is not concerned with
-> > authorization at all. How you enforce permissions is out of its
-> > scope.
-> > 
-> > Cheers,
-> > Andrea
-> > 
-> > On 22/10/2014 18:39, Dan Van Der Ster wrote:
-> > > Hi Sage,
-> > >
-> > >> On 16 Oct 2014, at 21:57, Sage Weil <sage@newdream.net> wrote:
-> > >>
-> > >> I started to write up a blueprint for kerberos / LDAP / AD
-> > support:
-> > >>
-> > >> 
-> > https://wiki.ceph.com/Planning/Blueprints/Hammer/kerberos_authn%2C_AD_authn%2F%2Fauthz
-> > >>
-> > >> In case it isn't clear from that document, I only sort of know what
-> > I'm 
-> > >> talking about here.  (This is largely based on what I managed to
-> > retain 
-> > >> from a conversation with Andrew, but I suspect I got some of it
-> > wrong.)
-> > >>
-> > >> For anyone working in environments where kerberos is in use, I am
-> > *very* 
-> > >> interested in hearing what your requirements are for your
-> > environment.  In 
-> > >> particular, are you using AD or LDAP or something else?  How do you
-> > expect 
-> > >> RBAC to work for you?
-> > > Let?s talk about requirements then. (Anyway, I?m not in any way a
-> > kerberos expert and it is not 100% clear to me what you are trying to
-> > achieve.)
-> > >
-> > > Firstly, our environment is almost identical to that described by
-> > Marcus (we use AD). For filesystems, our user communities are used to
-> > the way OpenAFS works with kerberos. Generally, that means they use
-> > kinit && aklog to authenticate and they understand (mostly) how to use
-> > AFS groups and AFS ACLs for authz.
-> > >
-> > > Next I basically have a bunch of questions to clarify your goals.
-> > The first part of your blueprint seems to be a convenient way to
-> > distribute cephx keyrings. To prevent harvesting/reuse, would you
-> > intend those to not be ?normal? cephx keyrings as such, but rather to
-> > be keyrings encrypted by the mon/whatever and time limited?
-> > >
-> > > For authz, is this mechanism meant to be used for RADOS only, or
-> > also for CephFS?
-> > >
-> > > If RADOS only, then as I understand it you could basically add the
-> > current cephx capabilities (with pool granularity) to the proposed
-> > ceph user db (perhaps scoped down to a few limited roles). I wouldn?t
-> > expect to be able to manipulate ceph capabilities via some AD blob
-> > (due mostly to my AD ignorance). I would probably expect to add our
-> > authorised ceph users to an AD group, then keep that in sync with your
-> > ceph user/role/capability db.
-> > >
-> > > If CephFS, then the problem I see is that the POSIX permissions/ACLs
-> > are being evaluated only on the client side. Were you thinking to
-> > change that, i.e. to add some notion of CephFS file-granular cephx
-> > capabilities? We thought a little bit about this before:
-> > >  
-> > https://wiki.ceph.com/Planning/Blueprints/%3CSIDEBOARD%3E/Strong_AuthN_and_AuthZ_for_CephFS
-> > > The basic idea was to have an MDS or other service that evaluates
-> > permissions/ACLs on the server side then hands out an extra signed
-> > capability to be used by the client for IOs with an OSD. It seems
-> > heavyweight, however, so I?m not sure how this would perform in
-> > practise.
-> > >
-> > > Hope that helps,
-> > > Dan
-> > >
-> > >
-> > >
-> > >
-> > >> We'll definitely have a slot for this at the upcoming CDS, but
-> > anything we 
-> > >> can hash out before then will make that conversation more
-> > productive.
-> > >>
-> > >> Thanks!
-> > >> sage
-> > >>
-> 
-> -- 
-> Matt Benjamin
-> The Linux Box
-> 206 South Fifth Ave. Suite 150
-> Ann Arbor, MI  48104
-> 
-> http://linuxbox.com
-> 
-> tel.  734-761-4689 
-> fax.  734-769-8938 
-> cel.  734-216-5309 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+
+
+BTW, about seq read results with virtio iothread and virtio-scsi multiq=
+ueue
+it's seem that it's enabling linux queues merging
+I had try to disable it with echo 2 > /sys/block/sda/queue/nomerges,
+and I have the same result than without multiqueue.
+So it's more an optimization for qemu,=20
+but this not improving the reals maximum ios we can reach from rbd.
+
+
+----- Mail original -----=20
+
+De: "Mark Nelson" <mark.nelson@inktank.com>=20
+=C3=80: "Alexandre DERUMIER" <aderumier@odiso.com>, "Ceph Devel" <ceph-=
+devel@vger.kernel.org>=20
+Envoy=C3=A9: Jeudi 23 Octobre 2014 15:07:29=20
+Objet: Re: fio read and randread cpu usage results for qemu and host ma=
+chine=20
+
+On 10/23/2014 07:30 AM, Alexandre DERUMIER wrote:=20
+> Hi,=20
+>=20
+> I have done fio tests on multiple qemu setups and host machine,=20
+> to see if librbd use more cpu than krbd=20
+> and also find the best qemu optimisations.=20
+>=20
+> Fio test was done with blocksize=3D4K , read and randread with num_jo=
+bs=3D32.=20
+>=20
+>=20
+>=20
+>=20
+>=20
+> 1) First, I have done more tests with qemu optimisation, like iothrea=
+d (dataplane) for virtio-blk disk,=20
+> and num_queue=3D8 for virtio-scsi disks.=20
+>=20
+> for virtio iothread:=20
+> --------------------=20
+> It's working only with qemu + krbd, and for sequential reads.=20
+> And It's seem that qemu aggregate reads in bigger ceph reads. (I see =
+4x more iops on fio than on ceph, with same bandwith)=20
+>=20
+>=20
+> for virtio-scsi num_queue =3D 8:=20
+> -------------------------------=20
+> works with krbd and librbd=20
+>=20
+> -for random read : I jump from 7000 to 12000iops=20
+> -for sequential, qemu aggreate reads in bigger ceph reads. (Same, I s=
+ee 4xmore iops on fio than on ceph, with same bandwith).=20
+>=20
+>=20
+> So it seem to be useful for some specific workloads.=20
+>=20
+>=20
+>=20
+> 2 ) Now, about cpu usage, it's seem than librbd use really more cpu t=
+han krbd,=20
+>=20
+> on host, librbd use 4x more cpu than krbd=20
+> on qemu, librbd use 2x more cpu than krbd=20
+>=20
+>=20
+> So, what could explain so much difference between both ?=20
+
+Hi Alexandre, do you have access to perf? Especially on newer=20
+kernels/distributions where you can use dwarf symbols, perf can give yo=
+u=20
+a lot of information about what is using CPU where. vtune is also a=20
+nice option if you ave a license.=20
+
+>=20
+>=20
+> Regards,=20
+>=20
+> Alexandre=20
+>=20
+>=20
+>=20
+> fio iops seq read summary results=20
+> ----------------------------------=20
+> qemu virtio iothread krbd vs qemu virtio iothread librbd : 27000 iops=
+ vs 15000 ipos=20
+> qemu virtio krbd vs qemu virtio librbd : 19000 iops vs 15000 iops=20
+> qemu virtio-scsi krbd vs qemu virtio librbd : 50000 iops vs 48000 iop=
+s=20
+> host krbd vs host librbd : 36000 iops vs 25000 iops=20
+>=20
+>=20
+>=20
+> fio iops randread summary results=20
+> ------------------------------=20
+> qemu virtio iothread krbd vs qemu virtio iothread librbd : 15000 iops=
+ vs 14000 iops=20
+> qemu virtio krbd vs qemu virtio librbd : 14000 iops vs 15000 iops=20
+> qemu virtio-scsi krbd vs qemu virtio librbd : 7500 iops vs 12000 iops=
+=20
+> host krbd vs host librbd : 38000 iops vs 25000 iops=20
+>=20
+>=20
+> cpu usage ratio summary=20
+> ------------------------=20
+> qemu virtio krbd vs qemu virtio librbd : 2x more cpu usage for librbd=
+=20
+> qemu virtio-scsi krbd vs qemu virtio-scsi librbd : 2x more cpu usage =
+for librbd=20
+> host krbd vs host librbd : 4x more cpu usage for fio-rbd=20
+>=20
+>=20
+>=20
+>=20
+>=20
+>=20
+> RESULTS=20
+> -------=20
+>=20
+> host + fio - krbd=20
+> -------------------=20
+> read=20
+> -----=20
+> fio iops : 142.9MB/Ss , 36000 iops=20
+> ceph : 134 MB/s rd, 34319 op/s=20
+>=20
+> fio : 70,4% kworker : 93,9% cpu =3D 164% cpu=20
+>=20
+> 100%cpu : 21000iops=20
+>=20
+> randread=20
+> --------=20
+> fio: 151MB/S,38000 iops=20
+> ceph :148 MB/s rd, 37932 op/s=20
+>=20
+> fio : 80%cpu kwoker : 110,3%cpu =3D 180% cpu=20
+>=20
+> 100%cpu : 21000 iops=20
+>=20
+>=20
+>=20
+>=20
+> host + fio-rbdengin :=20
+> ---------------------=20
+> randread (cpu bound)=20
+> --------------------=20
+> fio iops : 25000 ops=20
+> ceph iops : 99636 kB/s rd, 24909 op/s=20
+>=20
+> fio : 460%cpu=20
+>=20
+> 100%cpu : 5415iops=20
+>=20
+> read (cpu bound)=20
+> -----------------=20
+> fio iops : 25000 ops=20
+> ceph ios : 94212 kB/s rd, 23553 op/s=20
+>=20
+> fio : 480%cpu=20
+>=20
+> 100%cpu : 5323iops=20
+>=20
+>=20
+>=20
+>=20
+>=20
+> qemu + krbd + virtio + iothread=20
+> ---------------------------------=20
+> read=20
+> ----=20
+> fio :107MB/S : 27000 iops >>>SEEM THAT QEMU AGGREGATE READS ops=20
+> ceph : 93942 kB/s rd, 12430 op/s=20
+>=20
+> kvm: 130% cpu - kworker : 41,2% =3D 171,2% cpu=20
+>=20
+> 100%cpu ratio : 7260iops=20
+>=20
+> randread=20
+> --------=20
+> fio : 60MBS - 15000 iops=20
+> ceph : 54400 kB/s rd, 13600 op/s=20
+>=20
+> kvm: 95,0% cpu - kworker : 42,1 % cpu =3D 137,1%cpu=20
+>=20
+> 100%cpu ratio : 9919 iops=20
+>=20
+>=20
+>=20
+>=20
+>=20
+> qemu + krbd + virtio=20
+> ----------------------=20
+> read=20
+> -----=20
+> fio : 70mbs/ , 19000iops=20
+> ceph:75705 kB/s rd, 18926 op/s=20
+> kvm : 164% cpu - kworker : 48,5% cpu =3D 212,5%cpu=20
+>=20
+> 100%cpu ratio : 8906 iops=20
+>=20
+> randread=20
+> --------=20
+> fio : 54mbs/ , 14000iops=20
+> ceph : 54800 kB/s rd, 13700 op/s=20
+> kvm: 103% cpu - kworker 41,2% cpu =3D 144,2%cpu=20
+>=20
+> 100%cpu ratio : 9513 iops=20
+>=20
+>=20
+>=20
+> qemu + krbd + virtio-scsi (num_queue 8)=20
+> --------------------------------------=20
+> read:=20
+> ----=20
+> fio : 200MB / 50000 iops >>>SEEM THAT QEMU AGGREGATE READS ops=20
+> ceph : 205 MB/s rd, 7648 op/s=20
+>=20
+> kvm: 145% kworker : 46,5% =3D 191,5%cpu=20
+>=20
+> 100%cpu ratio : 3993 iops=20
+>=20
+> randread:=20
+> ----------=20
+> fio : 30MB/S / 7500 iops=20
+> ceph : 29318 kB/s rd, 7329 op/s=20
+> kvm : 150% kworker : 21,4% cpu =3D 171,4% cpu=20
+>=20
+> 100%cpu ratio : 4275 iops=20
+>=20
+>=20
+>=20
+>=20
+> qemu + librbd + virtio + iothread=20
+> ----------------------------------=20
+> read=20
+> ----=20
+> fio : 60MBS/s , 15000iops=20
+> ceph: 56199 kB/s rd, 14052 op/s=20
+>=20
+> kvm: 300% cpu=20
+>=20
+> 100%cpu : 4666iops=20
+>=20
+>=20
+> randread=20
+> ---------=20
+> fio : 56MBS/s, 14000iops=20
+> ceph : 55916 kB/s rd, 13979 op/s=20
+>=20
+> kvm: 300% cpu=20
+>=20
+> 100%cpu : 4659 iops=20
+>=20
+>=20
+>=20
+> qemu + librbd + virtio=20
+> -------------------------=20
+> read=20
+> -----=20
+> fio : 60MBS/s, 15000iops=20
+> ceph : 63021 kB/s rd, 15755 op/s=20
+>=20
+> kvm: 300% cpu=20
+>=20
+> 100%cpu : 5233 iops=20
+>=20
+> randread=20
+> --------=20
+> fio : 60MBS/s, 15000iops=20
+> ceph : 55916 kB/s rd, 13979 op/s=20
+>=20
+> kvm : 300%cpu=20
+>=20
+> 100%cpu : 4659 iops=20
+>=20
+>=20
+> qemu + librbd + virtio-scsi (num_queue 8)=20
+> ----------------------------------------=20
+> read=20
+> ----=20
+> fio : 256 MB/S , 48000iops >>>SEEM THAT QEMU AGGREGATE READS ops=20
+> ceph : 244 MB/s rd, 12002 op/s=20
+>=20
+> kvm : 300% cpu=20
+>=20
+> 100%cpu : 4000 iops=20
+>=20
+> randread=20
+> --------=20
+> fio: 12000iops=20
+> ceph iops : 47511 kB/s rd, 11877 op/s=20
+>=20
+> kvm: 300% cpu=20
+>=20
+> 100%cpu: 3959 iops=20
+>=20
+>=20
+>=20
+>=20
+> --=20
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in=20
+> the body of a message to majordomo@vger.kernel.org=20
+> More majordomo info at http://vger.kernel.org/majordomo-info.html=20
+>=20
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
