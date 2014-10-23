@@ -1,117 +1,93 @@
-From: Dan Van Der Ster <daniel.vanderster@cern.ch>
-Subject: Re: kerberos / AD requirements, blueprint
-Date: Thu, 23 Oct 2014 08:32:24 +0000
-Message-ID: <89A6B7D2-D7A2-46D4-ABCE-D31E095BBF2E@cern.ch>
-References: <alpine.DEB.2.00.1410161253090.5588@cobra.newdream.net>
- <8667CC8E-D4CD-4BD2-8299-3341FEB848B6@cern.ch>
- <alpine.DEB.2.00.1410220957210.29946@cobra.newdream.net>
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: Re: 10/22/2014 Weekly Ceph Performance Meeting
+Date: Thu, 23 Oct 2014 18:00:41 +0800
+Message-ID: <CACJqLya8UXbHEOy-eyW_ow_9g7T15mUiCdmsKQ_98+Xr3wxDzA@mail.gmail.com>
+References: <5447BD83.8000303@redhat.com>
+	<alpine.DEB.2.00.1410220920450.13498@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cernmx13.cern.ch ([188.184.36.46]:20603 "EHLO CERNMX13.cern.ch"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752244AbaJWIc2 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 23 Oct 2014 04:32:28 -0400
-In-Reply-To: <alpine.DEB.2.00.1410220957210.29946@cobra.newdream.net>
-Content-Language: en-US
-Content-ID: <CAAEF8C1D956A945ACE611FC5A010AB7@cern.ch>
+Received: from mail-wg0-f46.google.com ([74.125.82.46]:55097 "EHLO
+	mail-wg0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752079AbaJWKAn (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Oct 2014 06:00:43 -0400
+Received: by mail-wg0-f46.google.com with SMTP id l18so713055wgh.29
+        for <ceph-devel@vger.kernel.org>; Thu, 23 Oct 2014 03:00:41 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.00.1410220920450.13498@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@newdream.net>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, "abartlet@catalyst.net.nz" <abartlet@catalyst.net.nz>, Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>, Andrea Ieri <andrea.ieri@cern.ch>
+Cc: Mark Nelson <mark.nelson@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-SGkgU2FnZSwNCg0KPiBPbiAyMiBPY3QgMjAxNCwgYXQgMTk6MDgsIFNhZ2UgV2VpbCA8c2FnZUBu
-ZXdkcmVhbS5uZXQ+IHdyb3RlOg0KPiANCj4gT24gV2VkLCAyMiBPY3QgMjAxNCwgRGFuIFZhbiBE
-ZXIgU3RlciB3cm90ZToNCj4+IEhpIFNhZ2UsDQo+PiANCj4+PiBPbiAxNiBPY3QgMjAxNCwgYXQg
-MjE6NTcsIFNhZ2UgV2VpbCA8c2FnZUBuZXdkcmVhbS5uZXQ+IHdyb3RlOg0KPj4+IA0KPj4+IEkg
-c3RhcnRlZCB0byB3cml0ZSB1cCBhIGJsdWVwcmludCBmb3Iga2VyYmVyb3MgLyBMREFQIC8gQUQg
-c3VwcG9ydDoNCj4+PiANCj4+PiAJaHR0cHM6Ly93aWtpLmNlcGguY29tL1BsYW5uaW5nL0JsdWVw
-cmludHMvSGFtbWVyL2tlcmJlcm9zX2F1dGhuJTJDX0FEX2F1dGhuJTJGJTJGYXV0aHoNCj4+PiAN
-Cj4+PiBJbiBjYXNlIGl0IGlzbid0IGNsZWFyIGZyb20gdGhhdCBkb2N1bWVudCwgSSBvbmx5IHNv
-cnQgb2Yga25vdyB3aGF0IEknbSANCj4+PiB0YWxraW5nIGFib3V0IGhlcmUuICAoVGhpcyBpcyBs
-YXJnZWx5IGJhc2VkIG9uIHdoYXQgSSBtYW5hZ2VkIHRvIHJldGFpbiANCj4+PiBmcm9tIGEgY29u
-dmVyc2F0aW9uIHdpdGggQW5kcmV3LCBidXQgSSBzdXNwZWN0IEkgZ290IHNvbWUgb2YgaXQgd3Jv
-bmcuKQ0KPj4+IA0KPj4+IEZvciBhbnlvbmUgd29ya2luZyBpbiBlbnZpcm9ubWVudHMgd2hlcmUg
-a2VyYmVyb3MgaXMgaW4gdXNlLCBJIGFtICp2ZXJ5KiANCj4+PiBpbnRlcmVzdGVkIGluIGhlYXJp
-bmcgd2hhdCB5b3VyIHJlcXVpcmVtZW50cyBhcmUgZm9yIHlvdXIgZW52aXJvbm1lbnQuICBJbiAN
-Cj4+PiBwYXJ0aWN1bGFyLCBhcmUgeW91IHVzaW5nIEFEIG9yIExEQVAgb3Igc29tZXRoaW5nIGVs
-c2U/ICBIb3cgZG8geW91IGV4cGVjdCANCj4+PiBSQkFDIHRvIHdvcmsgZm9yIHlvdT8NCj4+IA0K
-Pj4gTGV0P3MgdGFsayBhYm91dCByZXF1aXJlbWVudHMgdGhlbi4gKEFueXdheSwgST9tIG5vdCBp
-biBhbnkgd2F5IGEgDQo+PiBrZXJiZXJvcyBleHBlcnQgYW5kIGl0IGlzIG5vdCAxMDAlIGNsZWFy
-IHRvIG1lIHdoYXQgeW91IGFyZSB0cnlpbmcgdG8gDQo+PiBhY2hpZXZlLikNCj4+IA0KPj4gRmly
-c3RseSwgb3VyIGVudmlyb25tZW50IGlzIGFsbW9zdCBpZGVudGljYWwgdG8gdGhhdCBkZXNjcmli
-ZWQgYnkgTWFyY3VzIA0KPj4gKHdlIHVzZSBBRCkuIEZvciBmaWxlc3lzdGVtcywgb3VyIHVzZXIg
-Y29tbXVuaXRpZXMgYXJlIHVzZWQgdG8gdGhlIHdheSANCj4+IE9wZW5BRlMgd29ya3Mgd2l0aCBr
-ZXJiZXJvcy4gR2VuZXJhbGx5LCB0aGF0IG1lYW5zIHRoZXkgdXNlIGtpbml0ICYmIA0KPj4gYWts
-b2cgdG8gYXV0aGVudGljYXRlIGFuZCB0aGV5IHVuZGVyc3RhbmQgKG1vc3RseSkgaG93IHRvIHVz
-ZSBBRlMgZ3JvdXBzIA0KPj4gYW5kIEFGUyBBQ0xzIGZvciBhdXRoei4NCj4gDQo+IEkgdGFrZSBp
-dCB0aGF0IHRoZSBraW5pdCArIGFrbG9nIHVzZS1jYXNlIGlzIGFib3V0IGEgdXNlciBhdXRoZW50
-aWNhdGluZyANCj4gdGhlaXIgd29ya3N0YXRpb24gdG8gbW91bnQgQUZTPw0KDQpBRlMgbW91bnRz
-ICh2aWEgYSBrZXJuZWwgbW9kdWxlKSB3aXRob3V0IGFueSBhdXRoZW50aWNhdGlvbi4gVGhlaXIg
-dG9rZW4gaXMgdXNlZCB0byBhdXRob3JpemUgaW4gdGhlIGNvbnRleHQgb2YgdGhlaXIgZmlsZSBh
-Y2Nlc3MuDQoNCg0KPiANCj4gSnVzdCB0byBiZSBjbGVhciwgdGhlIHVzZXIgYXV0aCBpc3N1ZXMg
-Zm9yIGZzIGFjY2VzcyBvbmNlIHRoaW5ncyBhcmUgDQo+IG1vdW50ZWQgaXMgc3RpbGwgb3V0IG9m
-IHNjb3BlIGZvciB0aGUgY3VycmVudCBlZmZvcnQuICBCdXQgbW91bnRpbmcgaXRzZWxmIA0KPiBt
-ZWFucyB0aGUgY2xpZW50IChob3N0KSBoYXMgdG8gYXV0aGVudGljYXRlIGFnYWluc3QgdGhlIGNs
-dXN0ZXIgYW5kIHRoYXQgDQo+IGlzIHByb2JhYmx5IGluIHNjb3BlLg0KDQpPSyB0aGF0IHNpbXBs
-aWZpZXMgdGhpbmdzIDspDQoNCj4gDQo+PiBOZXh0IEkgYmFzaWNhbGx5IGhhdmUgYSBidW5jaCBv
-ZiBxdWVzdGlvbnMgdG8gY2xhcmlmeSB5b3VyIGdvYWxzLiBUaGUgDQo+PiBmaXJzdCBwYXJ0IG9m
-IHlvdXIgYmx1ZXByaW50IHNlZW1zIHRvIGJlIGEgY29udmVuaWVudCB3YXkgdG8gZGlzdHJpYnV0
-ZSANCj4+IGNlcGh4IGtleXJpbmdzLiBUbyBwcmV2ZW50IGhhcnZlc3RpbmcvcmV1c2UsIHdvdWxk
-IHlvdSBpbnRlbmQgdGhvc2UgdG8gDQo+PiBub3QgYmUgP25vcm1hbD8gY2VwaHgga2V5cmluZ3Mg
-YXMgc3VjaCwgYnV0IHJhdGhlciB0byBiZSBrZXlyaW5ncyANCj4+IGVuY3J5cHRlZCBieSB0aGUg
-bW9uL3doYXRldmVyIGFuZCB0aW1lIGxpbWl0ZWQ/DQo+IA0KPiBJdCdzIG5vdCBzbyBtdWNoIGFi
-b3V0IGRpc3RyaWJ1dGluZyBrZXlyaW5ncywgYW5kIHVzaW5nIHRoZSBleGlzdGluZyANCj4ga2Vy
-YmVyb3MgYXV0aCBpbiBwbGFjZSBvZiBjZXBoeCBrZXlzLiAgV2l0aCBqdXN0IHRoZSBmaXJzdCBw
-YXJ0LCB0aGUgDQo+IHdvcmtmbG93IG1pZ2h0IGdvIHNvbWV0aGluZyBsaWtlOg0KPiANCj4gLSBk
-ZWZpbmUgY2xpZW50LnVzZXIxIGFuZCBpdHMgY2Fwcw0KPiAgICAtIGFkZCBhIHByb3BlcnR5IHRo
-YXQgc3BlY2lmaWVzIGEga2VyYmVyb3MgdXNlci9kb21haW4gdG8gbWFwIHRvDQo+ICAgIC0gYnV0
-IGRvIG5vdCBnZW5lcmF0ZSBhIGNlcGh4IGtleQ0KPiAtIGtpbml0IHVzZXIxDQo+IC0gY2VwaCAt
-biBjbGllbnQudXNlcjEgLi4uDQo+ICAgIC0gd291bGQgdXNlIGtlcmJlcm9zIHRpY2tldCB0byBh
-dXRoZW50aWNhdGUgYXMgY2xpZW50LnVzZXIxIG9uIG1vbg0KPiDigKYNCj4gDQoNCk9LIEkgaGFk
-IG1pc3VuZGVyc3Rvb2QgIklmIGF1dGhlbnRpYywgZXZlcnl0aGluZyBlbHNlIHByb2NlZWRzIGFz
-IGJlZm9yZSAoaXQgcHJvdmlkZXMgdGhlIHVzZXIgd2l0aCBhIGNlcGh4IHRpY2tldCB0byBkbyBy
-ZWFsIHdvcmspLiINCg0KDQo+PiBGb3IgYXV0aHosIGlzIHRoaXMgbWVjaGFuaXNtIG1lYW50IHRv
-IGJlIHVzZWQgZm9yIFJBRE9TIG9ubHksIG9yIGFsc28gDQo+PiBmb3IgQ2VwaEZTPw0KPiANCj4g
-SW5pdGlhbGx5IEknbSBqdXN0IGNvbmNlcm5lZCB3aXRoIFJBRE9TIGF1dGhlbnRpY2F0aW9uLiAg
-QW5kIHRoZSBtYWluIA0KPiB1c2UtY2FzZSBpcyBjbHVzdGVyIGFkbWluaXN0cmF0aW9uIChjZXBo
-IGFuZCByYmQgQ0xJIGNvbW1hbmRzKS4NCj4gDQo+IFN0ZXAgMiAoYXV0aHopIHdvdWxkIGJlIHRv
-IHRhZyB0aGUga2VyYmVyb3MgdXNlcnMgd2l0aCBzb21lIG1ldGFkYXRhIGxpa2UgDQo+ICdjZXBo
-IHJ3JyBhbmQgbWFwIHRvIGEgZ2VuZXJpYyBjZXBoIHVzZXIgKHNheSwgY2xpZW50LmtyYi1ydyku
-ICBUaGUgY2FwcyANCj4gd291bGQgYmUgZGVmaW5lZCBvbmNlIHBlciByb2xlIGluIGNlcGggYXMg
-b3Bwb3NlZCB0byBvbmNlIHBlciB1c2VyICh3aGljaCANCj4gaXMgYW4gYWRtaW5pc3RyYXRpdmUg
-aGVhZGFjaGUpLiAgR3JhbnRpbmcgYSBuZXcga2VyYmVyb3MgdXNlciByZWFkb25seSBvciANCj4g
-cmVhZHdyaXRlIGFjY2VzcyB0byB0aGUgY2VwaC9yYmQgQ0xJIGNvdWxkIHRoZW4gYmUgZG9uZSBl
-eGNsdXNpdmVseSBmcm9tIA0KPiBBRCAob3Igd2hhdGV2ZXIpIGluZnJhc3RydWN0dXJlLg0KPiAN
-Cj4+IElmIFJBRE9TIG9ubHksIHRoZW4gYXMgSSB1bmRlcnN0YW5kIGl0IHlvdSBjb3VsZCBiYXNp
-Y2FsbHkgYWRkIHRoZSANCj4+IGN1cnJlbnQgY2VwaHggY2FwYWJpbGl0aWVzICh3aXRoIHBvb2wg
-Z3JhbnVsYXJpdHkpIHRvIHRoZSBwcm9wb3NlZCBjZXBoIA0KPj4gdXNlciBkYiAocGVyaGFwcyBz
-Y29wZWQgZG93biB0byBhIGZldyBsaW1pdGVkIHJvbGVzKS4gSSB3b3VsZG4/dCBleHBlY3QgDQo+
-PiB0byBiZSBhYmxlIHRvIG1hbmlwdWxhdGUgY2VwaCBjYXBhYmlsaXRpZXMgdmlhIHNvbWUgQUQg
-YmxvYiAoZHVlIG1vc3RseSANCj4+IHRvIG15IEFEIGlnbm9yYW5jZSkuIEkgd291bGQgcHJvYmFi
-bHkgZXhwZWN0IHRvIGFkZCBvdXIgYXV0aG9yaXNlZCBjZXBoIA0KPj4gdXNlcnMgdG8gYW4gQUQg
-Z3JvdXAsIHRoZW4ga2VlcCB0aGF0IGluIHN5bmMgd2l0aCB5b3VyIGNlcGggDQo+PiB1c2VyL3Jv
-bGUvY2FwYWJpbGl0eSBkYi4NCj4gDQo+IFllYWgsIHRoYXQgaXMgcHJvYmFibHkgdGhlIG1vc3Qg
-c2Vuc2libGUuICBQZXJoYXBzIHRoZSBjZXBoIHJvbGUgDQo+IGRlZmluaXRpb24gd291bGQgYmUg
-c29tZXRoaW5nIGxpa2UNCj4gDQo+IFtjbGllbnQua3JiLXJ3XQ0KPiAJbW9uID0gYWxsb3cgcncN
-Cj4gCW9zZCA9IGFsbG93ICoNCj4gCW1kcyA9IGFsbG93ICoNCj4gCWtyYjVfZ3JvdXAgPSBjZXBo
-X3J3DQo+IA0KPiBvciBzb21ldGhpbmcgYWxvbmcgdGhvc2UgbGluZXMuDQoNClllYWggdGhhdCBz
-b3VuZHMgZ29vZCAodGhvdWdoIG1heWJlIGxkYXBfZ3JvdXA/KS4gVGhlbiB5b3UgY2FuIHF1ZXJ5
-IGxkYXAgdG8gc2VlIGlmIGF1dGhlbnRpY2F0aW5nIHVzZXJzIGFyZSAgcGFydCBvZiBvdXIgY2Vw
-aF9ydyBncm91cCBhbmQgZ2l2ZSBhdXRoei4NCg0KPiANCj4+IElmIENlcGhGUywgdGhlbiB0aGUg
-cHJvYmxlbSBJIHNlZSBpcyB0aGF0IHRoZSBQT1NJWCBwZXJtaXNzaW9ucy9BQ0xzIGFyZSANCj4+
-IGJlaW5nIGV2YWx1YXRlZCBvbmx5IG9uIHRoZSBjbGllbnQgc2lkZS4gV2VyZSB5b3UgdGhpbmtp
-bmcgdG8gY2hhbmdlIA0KPj4gdGhhdCwgaS5lLiB0byBhZGQgc29tZSBub3Rpb24gb2YgQ2VwaEZT
-IGZpbGUtZ3JhbnVsYXIgY2VwaHggDQo+PiBjYXBhYmlsaXRpZXM/IFdlIHRob3VnaHQgYSBsaXR0
-bGUgYml0IGFib3V0IHRoaXMgYmVmb3JlOg0KPj4gDQo+PiBodHRwczovL3dpa2kuY2VwaC5jb20v
-UGxhbm5pbmcvQmx1ZXByaW50cy8lM0NTSURFQk9BUkQlM0UvU3Ryb25nX0F1dGhOX2FuZF9BdXRo
-Wl9mb3JfQ2VwaEZTIA0KPj4gVGhlIGJhc2ljIGlkZWEgd2FzIHRvIGhhdmUgYW4gTURTIG9yIG90
-aGVyIHNlcnZpY2UgdGhhdCBldmFsdWF0ZXMgDQo+PiBwZXJtaXNzaW9ucy9BQ0xzIG9uIHRoZSBz
-ZXJ2ZXIgc2lkZSB0aGVuIGhhbmRzIG91dCBhbiBleHRyYSBzaWduZWQgDQo+PiBjYXBhYmlsaXR5
-IHRvIGJlIHVzZWQgYnkgdGhlIGNsaWVudCBmb3IgSU9zIHdpdGggYW4gT1NELiBJdCBzZWVtcyAN
-Cj4+IGhlYXZ5d2VpZ2h0LCBob3dldmVyLCBzbyBJP20gbm90IHN1cmUgaG93IHRoaXMgd291bGQg
-cGVyZm9ybSBpbiANCj4+IHByYWN0aXNlLg0KPiANCj4gWWVhaCwgdGhpcyBpcyBhIHdob2xlIG90
-aGVyIGJhbGwgb2Ygd2F4IHRoYXQgSSdkIHByZWZlciB0byBpZ25vcmUgZm9yIHRoZSANCj4gdGlt
-ZSBiZWluZy4uLiA6KQ0KDQoNCkdPb2QgOykNCg0KQ2hlZXJzLCBEYW4NCg0KPiANCj4gVGhhbmtz
-IQ0KPiBzYWdlDQoNCg==
+https://wiki.ceph.com/Planning/Blueprints/Submissions/Fixed_memory_layout_for_Message%2F%2FOp_passing
+
+@sage, thanks
+
+On Thu, Oct 23, 2014 at 12:24 AM, Sage Weil <sage@newdream.net> wrote:
+> Hi Everyone,
+>
+> Just a reminder that there won't be a performance call next week because
+> of CDS, which is Tuesday and Wednesday.  The tentative schedule is here:
+>
+>         https://wiki.ceph.com/Planning/CDS/Hammer_(Oct_2014)
+>
+> If there are key performance items we should be focusing on that aren't
+> yet captured by a blueprint and session or that would be useful to discuss
+> with a broader audience during CDS, speak up soon so we can get a slot
+> added to the scheduled.
+>
+> I already mentioned to Matt that it would be good to talk about this
+> encode/decode work, and I believe Haomai has a proposal there as well.
+>
+> sage
+>
+>
+> On Wed, 22 Oct 2014, Mark Nelson wrote:
+>
+>> Hi All,
+>>
+>> Meeting is on at 8AM PST as usual!  Here's the links:
+>>
+>> Etherpad URL:
+>> http://pad.ceph.com/p/performance_weekly
+>>
+>> To join the Meeting:
+>> https://bluejeans.com/268261044
+>>
+>> To join via Browser:
+>> https://bluejeans.com/268261044/browser
+>>
+>> To join with Lync:
+>> https://bluejeans.com/268261044/lync
+>>
+>>
+>> To join via Room System:
+>> Video Conferencing System: bjn.vc -or- 199.48.152.152
+>> Meeting ID: 268261044
+>>
+>> To join via Phone:
+>> 1) Dial:
+>>           +1 408 740 7256
+>>           +1 888 240 2560(US Toll Free)
+>>           +1 408 317 9253(Alternate Number)
+>>           (see all numbers - http://bluejeans.com/numbers)
+>> 2) Enter Conference ID: 268261044
+>>
+>> Mark
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
+-- 
+Best Regards,
+
+Wheat
