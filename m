@@ -1,476 +1,66 @@
-From: Prashanth Nednoor <Prashanth.Nednoor@taec.toshiba.com>
-Subject: RE: Having issues trying to get the OSD up on a MIPS64!!!
-Date: Fri, 24 Oct 2014 21:38:29 +0000
-Message-ID: <BC9BE980F12C4446A1CB0380E1C97DCD3390D99A@EXMAIL1.taec.toshiba.com>
-References: <loom.20141023T030922-990@post.gmane.org>
- <alpine.DEB.2.00.1410231749420.13498@cobra.newdream.net>
+From: Mark Kirkwood <mark.kirkwood-6STWZtX7tXAqAMOr+u8IRA@public.gmane.org>
+Subject: Re: fio rbd hang for block sizes > 1M
+Date: Sat, 25 Oct 2014 11:45:17 +1300
+Message-ID: <544AD67D.4030603@catalyst.net.nz>
+References: <5449BBB3.7090109@catalyst.net.nz> <5449E50E.7000808@kernel.dk> <5449EEF1.1060407@catalyst.net.nz> <544A51C7.40803@gmail.com> <544A5DA6.2010709@gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed;
-	boundary="_003_BC9BE980F12C4446A1CB0380E1C97DCD3390D99AEXMAIL1taectosh_"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailhost.taec.com ([209.243.128.33]:34754 "EHLO
-	mailhost.taec.toshiba.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754943AbaJXWU5 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 24 Oct 2014 18:20:57 -0400
-In-Reply-To: <alpine.DEB.2.00.1410231749420.13498@cobra.newdream.net>
-Content-Language: en-US
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Philip Kufeldt <Philip.Kufeldt@taec.toshiba.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <fio-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <544A5DA6.2010709-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Sender: fio-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Mark Nelson <mark.a.nelson-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Jens Axboe <axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org>, fio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: "d.gollub-+tb+GG71Y8CELgA04lAiVw@public.gmane.org >> Daniel Gollub" <d.gollub-+tb+GG71Y8CELgA04lAiVw@public.gmane.org>, "xan.peng" <xanpeng-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
---_003_BC9BE980F12C4446A1CB0380E1C97DCD3390D99AEXMAIL1taectosh_
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+Interestingly, I first encountered this on (what I think is) 0.86 
+release (0.86-1precise). I wonder if you had a bigger rbd cache on the 
+release cluster you tested?
 
-Hi Sage,
+As mentioned in the same named thread on -users, disabling the rbd cache 
+stops the hang.
 
-Thank you for the prompt response.
-Is there anything in /dev/disk/by-partuuid/ or is it missing entirely? =20
-  Nothing , it was Missing Entirely.=20
-  GOOD NEWS:  I worked around  this issue, if I set my journal path in the =
-/etc/ceph.conf.
+Regards
 
-My udev version is
-udevd --version
-164=20
+Mark
 
-I still see the segfaults, I have attached details.
-I put the osd debug logs(osd-output.txt) and the leveldb_bt(leveldb_bt.txt)=
-.
-Looks like we have an issue in leveldb....
-
-HERE IS THE BACK TRACE: I have attached the gdb before running it.
-#0  0x77f68ee0 in leveldb::SkipList<char const*, leveldb::MemTable::KeyComp=
-arator>::FindGreaterOrEqual(char const* const&, leveldb::SkipList<char cons=
-t*, leveldb::MemTable::KeyComparator>::Node**) const () from /usr/local/lib=
-/libleveldb.so.1
-#1  0x77f69054 in leveldb::SkipList<char const*, leveldb::MemTable::KeyComp=
-arator>::Insert(char const* const&) () from /usr/local/lib/libleveldb.so.1
-#2  0x77f68618 in leveldb::MemTable::Add(unsigned long long, leveldb::Value=
-Type, leveldb::Slice const&, leveldb::Slice const&) ()
-   from /usr/local/lib/libleveldb.so.1
-#3  0x77f7e434 in leveldb::(anonymous namespace)::MemTableInserter::Put(lev=
-eldb::Slice const&, leveldb::Slice const&) ()
-   from /usr/local/lib/libleveldb.so.1
-#4  0x77f7e93c in leveldb::WriteBatch::Iterate(leveldb::WriteBatch::Handler=
-*) const () from /usr/local/lib/libleveldb.so.1
-#5  0x77f7eb8c in leveldb::WriteBatchInternal::InsertInto(leveldb::WriteBat=
-ch const*, leveldb::MemTable*) () from /usr/local/lib/libleveldb.so.1
-#6  0x77f59360 in leveldb::DBImpl::Write(leveldb::WriteOptions const&, leve=
-ldb::WriteBatch*) () from /usr/local/lib/libleveldb.so.1
-#7  0x00a5dda0 in LevelDBStore::submit_transaction_sync (this=3D0x1f77d10, =
-t=3D<value optimized out>) at os/LevelDBStore.cc:146
-#8  0x00b0d344 in DBObjectMap::sync (this=3D0x1f7af28, oid=3D0x0, spos=3D0x=
-72cfe3b8) at os/DBObjectMap.cc:1126
-#9  0x009b10b8 in FileStore::_set_replay_guard (this=3D0x1f72450, fd=3D17, =
-spos=3D..., hoid=3D0x0, in_progress=3Dfalse) at os/FileStore.cc:2070
-#10 0x009b1c0c in FileStore::_set_replay_guard (this=3D0x1f72450, cid=3DDWA=
-RF-2 expression error: DW_OP_reg operations must be used either alone or in=
- conjuction with DW_OP_piece.
-) at os/FileStore.cc:2047
-#11 0x009b2138 in FileStore::_create_collection (this=3D0x1f72450, c=3DDWAR=
-F-2 expression error: DW_OP_reg operations must be used either alone or in =
-conjuction with DW_OP_piece.
-) at os/FileStore.cc:4753
-#12 0x009e42a8 in FileStore::_do_transaction (this=3D0x1f72450, t=3D..., op=
-_seq=3D<value optimized out>, trans_num=3D0, handle=3D0x72cfec3c) at os/Fil=
-eStore.cc:2413
-#13 0x009eb47c in FileStore::_do_transactions (this=3D0x1f72450, tls=3D...,=
- op_seq=3D2, handle=3D0x72cfec3c) at os/FileStore.cc:1952
-#14 0x009eb858 in FileStore::_do_op (this=3D0x1f72450, osr=3D0x1f801b8, han=
-dle=3D...) at os/FileStore.cc:1761
-#15 0x00c8f0bc in ThreadPool::worker (this=3D0x1f72cf0, wt=3D0x1f7ea90) at =
-common/WorkQueue.cc:128
-#16 0x00c91b94 in ThreadPool::WorkThread::entry() ()
-#17 0x77f1c0a8 in start_thread () from /lib/libpthread.so.0
-#18 0x777c1738 in ?? () from /lib/libc.so.6
-
-Do  I need to set any variable to set the cache size etcetc in ceph.conf.
-I only have osd_leveldb_cache_size=3D5242880 for now.
-
-
-Thanks
-Prashanth
-
-
-
-
-
-
-
------Original Message-----
-From: Sage Weil [mailto:sage@newdream.net]=20
-Sent: Thursday, October 23, 2014 5:54 PM
-To: Prashanth Nednoor
-Cc: ceph-devel@vger.kernel.org
-Subject: Re: Having issues trying to get the OSD up on a MIPS64!!!
-
-Hi Prashanth,
-
-On Thu, 23 Oct 2014, Prashanth Nednoor wrote:
-> Hello Everyone,
->=20
-> We are using ceph-0.86, good news is we were able to compile and load=20
-> all the libraries and binaries needed to configure a CEPH-OSD on MIPS=20
-> 64 platform. The CEPH monitor is also able to detect the OSD, but not=20
-> up yet, as the osd activate failed.
-> Since we don?t have the required CEPH deploy utility for MIPS64, we=20
-> are following the manual procedure to create and activate an OSD.
-> We have disabled authentication between the clients and the OSD?s for=20
-> now.
->=20
-> Has any body tried CEPH on a MIPS64?
-> /dev/sda is a 2TB local hard drive.
->=20
-> This is how my partition looks after ceph-disk-prepare=20
-> /home/prashan/ceph-0.86/src# parted GNU Parted 2.3 Using /dev/sda=20
-> Welcome to GNU Parted! Type 'help' to view a list of commands.
-> (parted) p
-> Model: ATA TOSHIBA MQ01ABB2 (scsi)
-> Disk /dev/sda: 2000GB
-> Sector size (logical/physical): 512B/4096B Partition Table: gpt
->=20
-> Number  Start   End     Size    File system  Name          Flags
->  2      1049kB  5369MB  5368MB               ceph journal
->  1      5370MB  2000GB  1995GB  xfs          ceph data
->=20
->=20
->=20
-> The following are the steps to create an OSD
-> 1)	ceph-disk zap /dev/sda
-> 2)	ceph-disk-prepare --cluster  f615496c-b40a-4905-bbcd-
-> 2d3e181ff21a --fs-type xfs /dev/sda
-> 3)	mount /dev/sda1 /var/lib/ceph/osd/ceph-0/
-> 4)	ceph-osd -i 0 ?mkfs is giving an error ,=20
-> filestore(/var/lib/ceph/osd/ceph-0) could not find
-> 23c2fcde/osd_superblock/0//-1 in index: (2) No such file.
-> After this it segfaults. We have analyzed this further with the help=20
-> of strace and root caused this as objectmap file reading issue.
-> open("/var/lib/ceph/osd/ceph-0/current/omap/000005.log", O_RDONLY) =3D=20
-> 11, the first time it reads 32k, the read succeeds with 63 bytes and=20
-> it tries to read again with 27k and the read returns 0 bytes and the=20
-> CEPH osd segfaults.
-
-Can you generate a full log with --debug-osd 20 --debug-filestore 20 --debu=
-g-jouranl 20 passed to ceph-osd --mkfs and post that somewhere?  It should =
-tell us where things are going wrong.  In particular, we want to see if tha=
-t file/object is being written properly.  It will also have a backtrace sho=
-wing exactly where it crashed.
-
-> Please note that ceph-disk prepare creates a journal in a path which=20
-> is not valid(dev/disk/by-partuuid/cbd4a5d1-012f-4863-b492-080ad2a505cb).
-> So after step3 above I remove this journal below and manually create a=20
-> journal file before doing step4 above.
->=20
->=20
-> ls -l /var/lib/ceph/osd/ceph-0/
-> total 16
-> -rw-r--r-- 1 root root 37 Oct 22 21:40 ceph_fsid
-> -rw-r--r-- 1 root root 37 Oct 22 21:40 fsid lrwxrwxrwx 1 root root 58=20
-> Oct 22 21:40 journal -> /dev/disk/by-=20
-> partuuid/cbd4a5d1-012f-4863-b492-080ad2a505cb
-
-Is there anything in /dev/disk/by-partuuid/ or is it missing entirely? =20
-Maybe you have an old udev.  What distro is this?
-
-sage
-
-> -rw-r--r-- 1 root root 37 Oct 22 21:40 journal_uuid
-> -rw-r--r-- 1 root root 21 Oct 22 21:40 magic
->=20
-> Any pointers to move ahead will be greatly appreciated??
->=20
-> thanks
-> Prashanth
->=20
->=20
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=20
-> in the body of a message to majordomo@vger.kernel.org More majordomo=20
-> info at  http://vger.kernel.org/majordomo-info.html
->=20
->=20
-
---_003_BC9BE980F12C4446A1CB0380E1C97DCD3390D99AEXMAIL1taectosh_
-Content-Type: text/plain; name="leveldb_bt.txt"
-Content-Description: leveldb_bt.txt
-Content-Disposition: attachment; filename="leveldb_bt.txt"; size=2548;
-	creation-date="Fri, 24 Oct 2014 21:28:12 GMT";
-	modification-date="Fri, 24 Oct 2014 21:28:12 GMT"
-Content-Transfer-Encoding: base64
-
-DQojMCAgMHg3N2Y2OGVlMCBpbiBsZXZlbGRiOjpTa2lwTGlzdDxjaGFyIGNvbnN0KiwgbGV2ZWxk
-Yjo6TWVtVGFibGU6OktleUNvbXBhcmF0b3I+OjpGaW5kR3JlYXRlck9yRXF1YWwoY2hhciBjb25z
-dCogY29uc3QmLCBsZXZlbGRiOjpTa2lwTGlzdDxjaGFyIGNvbnN0KiwgbGV2ZWxkYjo6TWVtVGFi
-bGU6OktleUNvbXBhcmF0b3I+OjpOb2RlKiopIGNvbnN0ICgpIGZyb20gL3Vzci9sb2NhbC9saWIv
-bGlibGV2ZWxkYi5zby4xDQojMSAgMHg3N2Y2OTA1NCBpbiBsZXZlbGRiOjpTa2lwTGlzdDxjaGFy
-IGNvbnN0KiwgbGV2ZWxkYjo6TWVtVGFibGU6OktleUNvbXBhcmF0b3I+OjpJbnNlcnQoY2hhciBj
-b25zdCogY29uc3QmKSAoKSBmcm9tIC91c3IvbG9jYWwvbGliL2xpYmxldmVsZGIuc28uMQ0KIzIg
-IDB4NzdmNjg2MTggaW4gbGV2ZWxkYjo6TWVtVGFibGU6OkFkZCh1bnNpZ25lZCBsb25nIGxvbmcs
-IGxldmVsZGI6OlZhbHVlVHlwZSwgbGV2ZWxkYjo6U2xpY2UgY29uc3QmLCBsZXZlbGRiOjpTbGlj
-ZSBjb25zdCYpICgpDQogICBmcm9tIC91c3IvbG9jYWwvbGliL2xpYmxldmVsZGIuc28uMQ0KIzMg
-IDB4NzdmN2U0MzQgaW4gbGV2ZWxkYjo6KGFub255bW91cyBuYW1lc3BhY2UpOjpNZW1UYWJsZUlu
-c2VydGVyOjpQdXQobGV2ZWxkYjo6U2xpY2UgY29uc3QmLCBsZXZlbGRiOjpTbGljZSBjb25zdCYp
-ICgpDQogICBmcm9tIC91c3IvbG9jYWwvbGliL2xpYmxldmVsZGIuc28uMQ0KIzQgIDB4NzdmN2U5
-M2MgaW4gbGV2ZWxkYjo6V3JpdGVCYXRjaDo6SXRlcmF0ZShsZXZlbGRiOjpXcml0ZUJhdGNoOjpI
-YW5kbGVyKikgY29uc3QgKCkgZnJvbSAvdXNyL2xvY2FsL2xpYi9saWJsZXZlbGRiLnNvLjENCiM1
-ICAweDc3ZjdlYjhjIGluIGxldmVsZGI6OldyaXRlQmF0Y2hJbnRlcm5hbDo6SW5zZXJ0SW50byhs
-ZXZlbGRiOjpXcml0ZUJhdGNoIGNvbnN0KiwgbGV2ZWxkYjo6TWVtVGFibGUqKSAoKSBmcm9tIC91
-c3IvbG9jYWwvbGliL2xpYmxldmVsZGIuc28uMQ0KIzYgIDB4NzdmNTkzNjAgaW4gbGV2ZWxkYjo6
-REJJbXBsOjpXcml0ZShsZXZlbGRiOjpXcml0ZU9wdGlvbnMgY29uc3QmLCBsZXZlbGRiOjpXcml0
-ZUJhdGNoKikgKCkgZnJvbSAvdXNyL2xvY2FsL2xpYi9saWJsZXZlbGRiLnNvLjENCiM3ICAweDAw
-YTVkZGEwIGluIExldmVsREJTdG9yZTo6c3VibWl0X3RyYW5zYWN0aW9uX3N5bmMgKHRoaXM9MHgx
-Zjc3ZDEwLCB0PTx2YWx1ZSBvcHRpbWl6ZWQgb3V0PikgYXQgb3MvTGV2ZWxEQlN0b3JlLmNjOjE0
-Ng0KIzggIDB4MDBiMGQzNDQgaW4gREJPYmplY3RNYXA6OnN5bmMgKHRoaXM9MHgxZjdhZjI4LCBv
-aWQ9MHgwLCBzcG9zPTB4NzJjZmUzYjgpIGF0IG9zL0RCT2JqZWN0TWFwLmNjOjExMjYNCiM5ICAw
-eDAwOWIxMGI4IGluIEZpbGVTdG9yZTo6X3NldF9yZXBsYXlfZ3VhcmQgKHRoaXM9MHgxZjcyNDUw
-LCBmZD0xNywgc3Bvcz0uLi4sIGhvaWQ9MHgwLCBpbl9wcm9ncmVzcz1mYWxzZSkgYXQgb3MvRmls
-ZVN0b3JlLmNjOjIwNzANCiMxMCAweDAwOWIxYzBjIGluIEZpbGVTdG9yZTo6X3NldF9yZXBsYXlf
-Z3VhcmQgKHRoaXM9MHgxZjcyNDUwLCBjaWQ9RFdBUkYtMiBleHByZXNzaW9uIGVycm9yOiBEV19P
-UF9yZWcgb3BlcmF0aW9ucyBtdXN0IGJlIHVzZWQgZWl0aGVyIGFsb25lIG9yIGluIGNvbmp1Y3Rp
-b24gd2l0aCBEV19PUF9waWVjZS4NCikgYXQgb3MvRmlsZVN0b3JlLmNjOjIwNDcNCiMxMSAweDAw
-OWIyMTM4IGluIEZpbGVTdG9yZTo6X2NyZWF0ZV9jb2xsZWN0aW9uICh0aGlzPTB4MWY3MjQ1MCwg
-Yz1EV0FSRi0yIGV4cHJlc3Npb24gZXJyb3I6IERXX09QX3JlZyBvcGVyYXRpb25zIG11c3QgYmUg
-dXNlZCBlaXRoZXIgYWxvbmUgb3IgaW4gY29uanVjdGlvbiB3aXRoIERXX09QX3BpZWNlLg0KKSBh
-dCBvcy9GaWxlU3RvcmUuY2M6NDc1Mw0KIzEyIDB4MDA5ZTQyYTggaW4gRmlsZVN0b3JlOjpfZG9f
-dHJhbnNhY3Rpb24gKHRoaXM9MHgxZjcyNDUwLCB0PS4uLiwgb3Bfc2VxPTx2YWx1ZSBvcHRpbWl6
-ZWQgb3V0PiwgdHJhbnNfbnVtPTAsIGhhbmRsZT0weDcyY2ZlYzNjKSBhdCBvcy9GaWxlU3RvcmUu
-Y2M6MjQxMw0KIzEzIDB4MDA5ZWI0N2MgaW4gRmlsZVN0b3JlOjpfZG9fdHJhbnNhY3Rpb25zICh0
-aGlzPTB4MWY3MjQ1MCwgdGxzPS4uLiwgb3Bfc2VxPTIsIGhhbmRsZT0weDcyY2ZlYzNjKSBhdCBv
-cy9GaWxlU3RvcmUuY2M6MTk1Mg0KIzE0IDB4MDA5ZWI4NTggaW4gRmlsZVN0b3JlOjpfZG9fb3Ag
-KHRoaXM9MHgxZjcyNDUwLCBvc3I9MHgxZjgwMWI4LCBoYW5kbGU9Li4uKSBhdCBvcy9GaWxlU3Rv
-cmUuY2M6MTc2MQ0KIzE1IDB4MDBjOGYwYmMgaW4gVGhyZWFkUG9vbDo6d29ya2VyICh0aGlzPTB4
-MWY3MmNmMCwgd3Q9MHgxZjdlYTkwKSBhdCBjb21tb24vV29ya1F1ZXVlLmNjOjEyOA0KIzE2IDB4
-MDBjOTFiOTQgaW4gVGhyZWFkUG9vbDo6V29ya1RocmVhZDo6ZW50cnkoKSAoKQ0KIzE3IDB4Nzdm
-MWMwYTggaW4gc3RhcnRfdGhyZWFkICgpIGZyb20gL2xpYi9saWJwdGhyZWFkLnNvLjANCiMxOCAw
-eDc3N2MxNzM4IGluID8/ICgpIGZyb20gL2xpYi9saWJjLnNvLjYNCg==
-
---_003_BC9BE980F12C4446A1CB0380E1C97DCD3390D99AEXMAIL1taectosh_
-Content-Type: text/plain; name="osd-output.txt"
-Content-Description: osd-output.txt
-Content-Disposition: attachment; filename="osd-output.txt"; size=12344;
-	creation-date="Fri, 24 Oct 2014 19:37:39 GMT";
-	modification-date="Fri, 24 Oct 2014 21:34:55 GMT"
-Content-Transfer-Encoding: base64
-
-VGhpcyBpcyB3ZXJlIG15IGpvdXJuYWwgcG9pbnRzIHRvDQovdmFyL2xpYi9jZXBoL29zZC9jZXBo
-LTAvam91cm5hbCAtPiAvZGV2L2Rpc2svYnktcGFydHV1aWQvOWE4NjhhYzgtNWVjOC00MDQ3LWFh
-NGMtOGU5ZTZjZTANCg0KSW4gdGhlIGFib3ZlIG91dHB1dCwgZm9yIG15IHN5c3RlbSBUaGUgcGF0
-aCAiL2Rldi9kaXNrL2J5LXBhcnR1dWlkLyIgaXMgbWlzc2luZy4NCg0KdWRldmQgLS12ZXJzaW9u
-DQoxNjQNCg0KDQpnZGIgLS1hcmdzIGNlcGgtb3NkIC1pPTAgLS1ta2ZzIC0tZGVidWctb3NkIDIw
-IC0tZGVidWctZmlsZXN0b3JlIDIwIC0tZGVidWctam91cm5hbCAyMCAtLW1rZnMgLWQNCnJvb3RA
-b2N0ZW9uOi9ob21lL3ByYXNoYW4vY2VwaC0wLjg2L3NyYyMgLi9jZXBoLW9zZCAtaT0wIC0tbWtm
-cyAtLWRlYnVnLW9zZCAyMCAtLWRlYnVnLWZpbGVzdG9yZSAyMCAtLWRlYnVnLWpvdXJuYWwgMjAg
-LS1ta2ZzIC1kDQogLi9jZXBoLW9zZCAtaT0wIC0tbWtmcyAtLWRlYnVnLW9zZCAyMCAtLWRlYnVn
-LWZpbGVzdG9yZSAyMCAtLWRlYnVnLWpvdXJuYWwgMjAgLS1ta2ZzIC1kDQoyMDE0LTEwLTI0IDE5
-OjI2OjU5Ljk4MTIzOSA3NzYwYjAwMCAgMCBjZXBoIHZlcnNpb24gMC44NiAoOTdkY2MwNTM5ZGZh
-N2RhYzNkZTc0ODUyMzA1ZDUxNTgwYjdiMWY4MiksIHByb2Nlc3MgY2VwaC1vc2QsIHBpZCAzNTYz
-DQoyMDE0LTEwLTI0IDE5OjI2OjU5Ljk4MjAyMSA3NzYwYjAwMCAxMCBmaWxlc3RvcmUoL3Zhci9s
-aWIvY2VwaC9vc2QvY2VwaC0wKSBkdW1wX3N0b3ANCjIwMTQtMTAtMjQgMTk6MjY6NTkuOTgzNDE4
-IDc3NjBiMDAwICAxIGZpbGVzdG9yZSgvdmFyL2xpYi9jZXBoL29zZC9jZXBoLTApIG1rZnMgaW4g
-L3Zhci9saWIvY2VwaC9vc2QvY2VwaC0wDQoyMDE0LTEwLTI0IDE5OjI3OjAwLjAwMTk5OSA3NzYw
-YjAwMCAgMSBmaWxlc3RvcmUoL3Zhci9saWIvY2VwaC9vc2QvY2VwaC0wKSBta2ZzIGZzaWQgaXMg
-YWxyZWFkeSBzZXQgdG8gNTM2OTkxYjktY2M2ZC00MDIzLTg2MGQtNTNhZDM2MWRjZTdlDQoyMDE0
-LTEwLTI0IDE5OjI3OjAwLjEyNjU0MiA3NzYwYjAwMCAgMCBmaWxlc3RvcmUoL3Zhci9saWIvY2Vw
-aC9vc2QvY2VwaC0wKSBiYWNrZW5kIGdlbmVyaWMgKG1hZ2ljIDB4NTg0NjUzNDIpDQoyMDE0LTEw
-LTI0IDE5OjI3OjAwLjEyNjU5MCA3NzYwYjAwMCAgMSBmaWxlc3RvcmUoL3Zhci9saWIvY2VwaC9v
-c2QvY2VwaC0wKSAgZGlzYWJsaW5nICdmaWxlc3RvcmUgcmVwbGljYSBmYWR2aXNlJyBkdWUgdG8g
-a25vd24gaXNzdWVzIHdpdGggZmFkdmlzZShET05UTkVFRCkgb24geGZzDQoyMDE0LTEwLTI0IDE5
-OjI3OjAwLjMzODQ5MCA3NzYwYjAwMCAgMSBmaWxlc3RvcmUoL3Zhci9saWIvY2VwaC9vc2QvY2Vw
-aC0wKSBsZXZlbGRiIGRiIGV4aXN0cy9jcmVhdGVkDQoyMDE0LTEwLTI0IDE5OjI3OjAwLjMzODU3
-NyA3NzYwYjAwMCAxMCBmaWxlc3RvcmUoL3Zhci9saWIvY2VwaC9vc2QvY2VwaC0wKSBvcGVuX2pv
-dXJuYWwgYXQgL2Rldi9zZGEyDQoyMDE0LTEwLTI0IDE5OjI3OjAwLjMzODc1MiA3NzYwYjAwMCAx
-MCBqb3VybmFsIF9vcGVuX2Jsb2NrX2RldmljZTogaWdub3Jpbmcgb3NkIGpvdXJuYWwgc2l6ZS4g
-V2UnbGwgdXNlIHRoZSBlbnRpcmUgYmxvY2sgZGV2aWNlIChzaXplOiA1MzY3NjYxMDU2KQ0KMjAx
-NC0xMC0yNCAxOToyNzowMC4zNDUzOTEgNzc2MGIwMDAgMjAgam91cm5hbCBfY2hlY2tfZGlza193
-cml0ZV9jYWNoZTogZGlzayB3cml0ZSBjYWNoZSBpcyBvbiwgYnV0IHlvdXIga2VybmVsIGlzIG5l
-dyBlbm91Z2ggdG8gaGFuZGxlIGl0IGNvcnJlY3RseS4gKGZuOi9kZXYvc2RhMikNCjIwMTQtMTAt
-MjQgMTk6Mjc6MDAuMzQ1NzkzIDc3NjBiMDAwICAxIGpvdXJuYWwgX29wZW4gL2Rldi9zZGEyIGZk
-IDg6IDUzNjc2NjA1NDQgYnl0ZXMsIGJsb2NrIHNpemUgNDA5NiBieXRlcywgZGlyZWN0aW8gPSAx
-LCBhaW8gPSAxDQoyMDE0LTEwLTI0IDE5OjI3OjAwLjM0NTg1NyA3NzYwYjAwMCAxMCBqb3VybmFs
-IHJlYWRfaGVhZGVyDQoyMDE0LTEwLTI0IDE5OjI3OjAwLjM2MDQxMyA3NzYwYjAwMCAxMCBqb3Vy
-bmFsIGhlYWRlcjogYmxvY2tfc2l6ZSA0MDk2IGFsaWdubWVudCA0MDk2IG1heF9zaXplIDUzNjc2
-NjA1NDQNCjIwMTQtMTAtMjQgMTk6Mjc6MDAuMzYwNDQyIDc3NjBiMDAwIDEwIGpvdXJuYWwgaGVh
-ZGVyOiBzdGFydCA0MDk2DQoyMDE0LTEwLTI0IDE5OjI3OjAwLjM2MDQ0OCA3NzYwYjAwMCAxMCBq
-b3VybmFsICB3cml0ZV9wb3MgMA0KMjAxNC0xMC0yNCAxOToyNzowMC4zNjA0ODUgNzc2MGIwMDAg
-LTEgam91cm5hbCBjaGVjazogb25kaXNrIGZzaWQgOGIxZjk0N2ItMGE0Ny00ZjRlLWJjZDctNTdl
-ZDMzZDVkMzAwIGRvZXNuJ3QgbWF0Y2ggZXhwZWN0ZWQgNTM2OTkxYjktY2M2ZC00MDIzLTg2MGQt
-NTNhZDM2MWRjZTdlLCBpbnZhbGlkIChzb21lb25lIGVsc2Uncz8pIGpvdXJuYWwNCjIwMTQtMTAt
-MjQgMTk6Mjc6MDAuMzYwNjM2IDc3NjBiMDAwICAyIGpvdXJuYWwgY3JlYXRlIC9kZXYvc2RhMiBm
-c2lkIDUzNjk5MWI5LWNjNmQtNDAyMy04NjBkLTUzYWQzNjFkY2U3ZQ0KMjAxNC0xMC0yNCAxOToy
-NzowMC4zNjA3MjYgNzc2MGIwMDAgMTAgam91cm5hbCBfb3Blbl9ibG9ja19kZXZpY2U6IGlnbm9y
-aW5nIG9zZCBqb3VybmFsIHNpemUuIFdlJ2xsIHVzZSB0aGUgZW50aXJlIGJsb2NrIGRldmljZSAo
-c2l6ZTogNTM2NzY2MTA1NikNCjIwMTQtMTAtMjQgMTk6Mjc6MDAuMzcyMzk1IDc3NjBiMDAwIDIw
-IGpvdXJuYWwgX2NoZWNrX2Rpc2tfd3JpdGVfY2FjaGU6IGRpc2sgd3JpdGUgY2FjaGUgaXMgb24s
-IGJ1dCB5b3VyIGtlcm5lbCBpcyBuZXcgZW5vdWdoIHRvIGhhbmRsZSBpdCBjb3JyZWN0bHkuIChm
-bjovZGV2L3NkYTIpDQoyMDE0LTEwLTI0IDE5OjI3OjAwLjM3MjU1NCA3NzYwYjAwMCAgMSBqb3Vy
-bmFsIF9vcGVuIC9kZXYvc2RhMiBmZCA4OiA1MzY3NjYwNTQ0IGJ5dGVzLCBibG9jayBzaXplIDQw
-OTYgYnl0ZXMsIGRpcmVjdGlvID0gMSwgYWlvID0gMQ0KMjAxNC0xMC0yNCAxOToyNzowMC4zNzI1
-ODggNzc2MGIwMDAgMTAgam91cm5hbCBoZWFkZXI6IGJsb2NrX3NpemUgNDA5NiBhbGlnbm1lbnQg
-NDA5NiBtYXhfc2l6ZSA1MzY3NjYwNTQ0DQoyMDE0LTEwLTI0IDE5OjI3OjAwLjM3MjU5NiA3NzYw
-YjAwMCAxMCBqb3VybmFsIGhlYWRlcjogc3RhcnQgNDA5Ng0KMjAxNC0xMC0yNCAxOToyNzowMC4z
-NzI2MDEgNzc2MGIwMDAgMTAgam91cm5hbCAgd3JpdGVfcG9zIDANCjIwMTQtMTAtMjQgMTk6Mjc6
-MDAuMzkzNzc1IDc3NjBiMDAwICAyIGpvdXJuYWwgY3JlYXRlIGRvbmUNCjIwMTQtMTAtMjQgMTk6
-Mjc6MDAuMzk0NTc5IDc3NjBiMDAwICAwIGZpbGVzdG9yZSgvdmFyL2xpYi9jZXBoL29zZC9jZXBo
-LTApIG1ram91cm5hbCBjcmVhdGVkIGpvdXJuYWwgb24gL2Rldi9zZGEyDQoyMDE0LTEwLTI0IDE5
-OjI3OjAwLjM5NDcxMiA3NzYwYjAwMCAgMSBmaWxlc3RvcmUoL3Zhci9saWIvY2VwaC9vc2QvY2Vw
-aC0wKSBta2ZzIGRvbmUgaW4gL3Zhci9saWIvY2VwaC9vc2QvY2VwaC0wDQoyMDE0LTEwLTI0IDE5
-OjI3OjAwLjM5NDc3NCA3NzYwYjAwMCAgNSBmaWxlc3RvcmUoL3Zhci9saWIvY2VwaC9vc2QvY2Vw
-aC0wKSBiYXNlZGlyIC92YXIvbGliL2NlcGgvb3NkL2NlcGgtMCBqb3VybmFsIC9kZXYvc2RhMg0K
-MjAxNC0xMC0yNCAxOToyNzowMC4zOTQ4OTcgNzc2MGIwMDAgMTAgZmlsZXN0b3JlKC92YXIvbGli
-L2NlcGgvb3NkL2NlcGgtMCkgbW91bnQgZnNpZCBpcyA1MzY5OTFiOS1jYzZkLTQwMjMtODYwZC01
-M2FkMzYxZGNlN2UNCjIwMTQtMTAtMjQgMTk6Mjc6MDAuMzk1MTA3IDc3NjBiMDAwICAwIGZpbGVz
-dG9yZSgvdmFyL2xpYi9jZXBoL29zZC9jZXBoLTApIGJhY2tlbmQgZ2VuZXJpYyAobWFnaWMgMHg1
-ODQ2NTM0MikNCjIwMTQtMTAtMjQgMTk6Mjc6MDAuNTI2OTU2IDc3NjBiMDAwICAwIGdlbmVyaWNm
-aWxlc3RvcmViYWNrZW5kKC92YXIvbGliL2NlcGgvb3NkL2NlcGgtMCkgZGV0ZWN0X2ZlYXR1cmVz
-OiBGSUVNQVAgaW9jdGwgaXMgc3VwcG9ydGVkIGFuZCBhcHBlYXJzIHRvIHdvcmsNCjIwMTQtMTAt
-MjQgMTk6Mjc6MDAuNTI2OTk5IDc3NjBiMDAwICAwIGdlbmVyaWNmaWxlc3RvcmViYWNrZW5kKC92
-YXIvbGliL2NlcGgvb3NkL2NlcGgtMCkgZGV0ZWN0X2ZlYXR1cmVzOiBGSUVNQVAgaW9jdGwgaXMg
-ZGlzYWJsZWQgdmlhICdmaWxlc3RvcmUgZmllbWFwJyBjb25maWcgb3B0aW9uDQoyMDE0LTEwLTI0
-IDE5OjI3OjAwLjUyNzU1MyA3NzYwYjAwMCAgMCBnZW5lcmljZmlsZXN0b3JlYmFja2VuZCgvdmFy
-L2xpYi9jZXBoL29zZC9jZXBoLTApIGRldGVjdF9mZWF0dXJlczogc3luY2ZzKDIpIHN5c2NhbGwg
-bm90IHN1cHBvcnRlZA0KMjAxNC0xMC0yNCAxOToyNzowMC41Mjc1OTUgNzc2MGIwMDAgIDAgZ2Vu
-ZXJpY2ZpbGVzdG9yZWJhY2tlbmQoL3Zhci9saWIvY2VwaC9vc2QvY2VwaC0wKSBkZXRlY3RfZmVh
-dHVyZXM6IG5vIHN5bmNmcygyKSwgbXVzdCB1c2Ugc3luYygyKS4NCjIwMTQtMTAtMjQgMTk6Mjc6
-MDAuNTI3NjAwIDc3NjBiMDAwICAwIGdlbmVyaWNmaWxlc3RvcmViYWNrZW5kKC92YXIvbGliL2Nl
-cGgvb3NkL2NlcGgtMCkgZGV0ZWN0X2ZlYXR1cmVzOiBXQVJOSU5HOiBtdWx0aXBsZSBjZXBoLW9z
-ZCBkYWVtb25zIG9uIHRoZSBzYW1lIGhvc3Qgd2lsbCBiZSBzbG93DQoyMDE0LTEwLTI0IDE5OjI3
-OjAwLjUyODQ2MSA3NzYwYjAwMCAgNSBmaWxlc3RvcmUoL3Zhci9saWIvY2VwaC9vc2QvY2VwaC0w
-KSBtb3VudCBvcF9zZXEgaXMgMQ0KMjAxNC0xMC0yNCAxOToyNzowMC42NjA3MTkgNzc2MGIwMDAg
-MjAgZmlsZXN0b3JlIChpbml0KWRib2JqZWN0bWFwOiBzZXEgaXMgMQ0KMjAxNC0xMC0yNCAxOToy
-NzowMC42NjA3OTEgNzc2MGIwMDAgMTAgZmlsZXN0b3JlKC92YXIvbGliL2NlcGgvb3NkL2NlcGgt
-MCkgb3Blbl9qb3VybmFsIGF0IC9kZXYvc2RhMg0KMjAxNC0xMC0yNCAxOToyNzowMC42NjA4ODMg
-Nzc2MGIwMDAgIDAgZmlsZXN0b3JlKC92YXIvbGliL2NlcGgvb3NkL2NlcGgtMCkgbW91bnQ6IGVu
-YWJsaW5nIFdSSVRFQUhFQUQgam91cm5hbCBtb2RlOiBjaGVja3BvaW50IGlzIG5vdCBlbmFibGVk
-DQoyMDE0LTEwLTI0IDE5OjI3OjAwLjY2MDkwMSA3NzYwYjAwMCAxMCBmaWxlc3RvcmUoL3Zhci9s
-aWIvY2VwaC9vc2QvY2VwaC0wKSBsaXN0X2NvbGxlY3Rpb25zDQoyMDE0LTEwLTI0IDE5OjI3OjAw
-LjY2MTI4NCA3NzYwYjAwMCAxMCBqb3VybmFsIGpvdXJuYWxfcmVwbGF5IGZzIG9wX3NlcSAxDQoy
-MDE0LTEwLTI0IDE5OjI3OjAwLjY2MTI5MyA3NTJmZjQ2MCAyMCBmaWxlc3RvcmUoL3Zhci9saWIv
-Y2VwaC9vc2QvY2VwaC0wKSBzeW5jX2VudHJ5IHdhaXRpbmcgZm9yIG1heF9pbnRlcnZhbCA1LjAw
-MDAwMA0KMjAxNC0xMC0yNCAxOToyNzowMC42NjEzMTggNzc2MGIwMDAgIDIgam91cm5hbCBvcGVu
-IC9kZXYvc2RhMiBmc2lkIDUzNjk5MWI5LWNjNmQtNDAyMy04NjBkLTUzYWQzNjFkY2U3ZSBmc19v
-cF9zZXEgMQ0KMjAxNC0xMC0yNCAxOToyNzowMC42NjEzNzcgNzc2MGIwMDAgMTAgam91cm5hbCBf
-b3Blbl9ibG9ja19kZXZpY2U6IGlnbm9yaW5nIG9zZCBqb3VybmFsIHNpemUuIFdlJ2xsIHVzZSB0
-aGUgZW50aXJlIGJsb2NrIGRldmljZSAoc2l6ZTogNTM2NzY2MTA1NikNCjIwMTQtMTAtMjQgMTk6
-Mjc6MDAuNjY4MDUyIDc3NjBiMDAwIDIwIGpvdXJuYWwgX2NoZWNrX2Rpc2tfd3JpdGVfY2FjaGU6
-IGRpc2sgd3JpdGUgY2FjaGUgaXMgb24sIGJ1dCB5b3VyIGtlcm5lbCBpcyBuZXcgZW5vdWdoIHRv
-IGhhbmRsZSBpdCBjb3JyZWN0bHkuIChmbjovZGV2L3NkYTIpDQoyMDE0LTEwLTI0IDE5OjI3OjAw
-LjY2ODM4NyA3NzYwYjAwMCAgMSBqb3VybmFsIF9vcGVuIC9kZXYvc2RhMiBmZCAxNDogNTM2NzY2
-MDU0NCBieXRlcywgYmxvY2sgc2l6ZSA0MDk2IGJ5dGVzLCBkaXJlY3RpbyA9IDEsIGFpbyA9IDEN
-CjIwMTQtMTAtMjQgMTk6Mjc6MDAuNjY4NDI2IDc3NjBiMDAwIDEwIGpvdXJuYWwgcmVhZF9oZWFk
-ZXINCjIwMTQtMTAtMjQgMTk6Mjc6MDAuNjgyNjU5IDc3NjBiMDAwIDEwIGpvdXJuYWwgaGVhZGVy
-OiBibG9ja19zaXplIDQwOTYgYWxpZ25tZW50IDQwOTYgbWF4X3NpemUgNTM2NzY2MDU0NA0KMjAx
-NC0xMC0yNCAxOToyNzowMC42ODI2ODYgNzc2MGIwMDAgMTAgam91cm5hbCBoZWFkZXI6IHN0YXJ0
-IDQwOTYNCjIwMTQtMTAtMjQgMTk6Mjc6MDAuNjgyNjkyIDc3NjBiMDAwIDEwIGpvdXJuYWwgIHdy
-aXRlX3BvcyA0MDk2DQoyMDE0LTEwLTI0IDE5OjI3OjAwLjY4MjcwNSA3NzYwYjAwMCAxMCBqb3Vy
-bmFsIG9wZW4gaGVhZGVyLmZzaWQgPSA1MzY5OTFiOS1jYzZkLTQwMjMtODYwZC01M2FkMzYxZGNl
-N2UNCjIwMTQtMTAtMjQgMTk6Mjc6MDAuNjgzMDEwIDc3NjBiMDAwICAyIGpvdXJuYWwgTm8gZnVy
-dGhlciB2YWxpZCBlbnRyaWVzIGZvdW5kLCBqb3VybmFsIGlzIG1vc3QgbGlrZWx5IHZhbGlkDQoy
-MDE0LTEwLTI0IDE5OjI3OjAwLjY4MzAyNCA3NzYwYjAwMCAxMCBqb3VybmFsIG9wZW4gcmVhY2hl
-ZCBlbmQgb2Ygam91cm5hbC4NCjIwMTQtMTAtMjQgMTk6Mjc6MDAuNjgzMDcwIDc3NjBiMDAwICAy
-IGpvdXJuYWwgTm8gZnVydGhlciB2YWxpZCBlbnRyaWVzIGZvdW5kLCBqb3VybmFsIGlzIG1vc3Qg
-bGlrZWx5IHZhbGlkDQoyMDE0LTEwLTI0IDE5OjI3OjAwLjY4MzA3OCA3NzYwYjAwMCAgMyBqb3Vy
-bmFsIGpvdXJuYWxfcmVwbGF5OiBlbmQgb2Ygam91cm5hbCwgZG9uZS4NCjIwMTQtMTAtMjQgMTk6
-Mjc6MDAuNjgzMDg0IDc3NjBiMDAwIDEwIGpvdXJuYWwgbWFrZV93cml0ZWFibGUNCjIwMTQtMTAt
-MjQgMTk6Mjc6MDAuNjgzMzcyIDc3NjBiMDAwIDEwIGpvdXJuYWwgX29wZW5fYmxvY2tfZGV2aWNl
-OiBpZ25vcmluZyBvc2Qgam91cm5hbCBzaXplLiBXZSdsbCB1c2UgdGhlIGVudGlyZSBibG9jayBk
-ZXZpY2UgKHNpemU6IDUzNjc2NjEwNTYpDQoyMDE0LTEwLTI0IDE5OjI3OjAwLjY5NDM5NiA3NzYw
-YjAwMCAyMCBqb3VybmFsIF9jaGVja19kaXNrX3dyaXRlX2NhY2hlOiBkaXNrIHdyaXRlIGNhY2hl
-IGlzIG9uLCBidXQgeW91ciBrZXJuZWwgaXMgbmV3IGVub3VnaCB0byBoYW5kbGUgaXQgY29ycmVj
-dGx5LiAoZm46L2Rldi9zZGEyKQ0KMjAxNC0xMC0yNCAxOToyNzowMC42OTQ1NDIgNzc2MGIwMDAg
-IDEgam91cm5hbCBfb3BlbiAvZGV2L3NkYTIgZmQgMTQ6IDUzNjc2NjA1NDQgYnl0ZXMsIGJsb2Nr
-IHNpemUgNDA5NiBieXRlcywgZGlyZWN0aW8gPSAxLCBhaW8gPSAxDQoyMDE0LTEwLTI0IDE5OjI3
-OjAwLjY5NDY3NyA3NGFmZjQ2MCAxMCBqb3VybmFsIHdyaXRlX3RocmVhZF9lbnRyeSBzdGFydA0K
-MjAxNC0xMC0yNCAxOToyNzowMC42OTQ3MTkgNzRhZmY0NjAgMjAgam91cm5hbCBwcmVwYXJlX211
-bHRpX3dyaXRlIHF1ZXVlX3BvcyBub3cgNDA5Ng0KMjAxNC0xMC0yNCAxOToyNzowMC42OTQ3NTMg
-NzNhZmY0NjAgMTAgam91cm5hbCB3cml0ZV9maW5pc2hfdGhyZWFkX2VudHJ5IGVudGVyDQoyMDE0
-LTEwLTI0IDE5OjI3OjAwLjY5NDc1OSA3NzYwYjAwMCAxMCBqb3VybmFsIGpvdXJuYWxfc3RhcnQN
-CjIwMTQtMTAtMjQgMTk6Mjc6MDAuNjk0NzczIDczYWZmNDYwIDIwIGpvdXJuYWwgd3JpdGVfZmlu
-aXNoX3RocmVhZF9lbnRyeSBzbGVlcGluZw0KMjAxNC0xMC0yNCAxOToyNzowMC42OTQ4NjcgNzRh
-ZmY0NjAgMTUgam91cm5hbCBkb19haW9fd3JpdGUgd3JpdGluZyA0MDk2fjAgKyBoZWFkZXINCjIw
-MTQtMTAtMjQgMTk6Mjc6MDAuNjk0ODkwIDc0YWZmNDYwIDIwIGpvdXJuYWwgd3JpdGVfYWlvX2Js
-IDB+NDA5NiBzZXEgMA0KMjAxNC0xMC0yNCAxOToyNzowMC42OTQ5NTggNzRhZmY0NjAgMjAgam91
-cm5hbCB3cml0ZV9haW9fYmwgLi4gMH40MDk2IGluIDENCjIwMTQtMTAtMjQgMTk6Mjc6MDAuNjk1
-MTI5IDc0YWZmNDYwIDIwIGpvdXJuYWwgd3JpdGVfYWlvX2JsIDQwOTZ+MCBzZXEgMA0KMjAxNC0x
-MC0yNCAxOToyNzowMC42OTUzMDYgNzNhZmY0NjAgMjAgam91cm5hbCB3cml0ZV9maW5pc2hfdGhy
-ZWFkX2VudHJ5IHdhaXRpbmcgZm9yIGFpbyhzKQ0KMjAxNC0xMC0yNCAxOToyNzowMC42OTUzMDYg
-NzRhZmY0NjAgIDUgam91cm5hbCBwdXRfdGhyb3R0bGUgZmluaXNoZWQgMCBvcHMgYW5kIDAgYnl0
-ZXMsIG5vdyAwIG9wcyBhbmQgMCBieXRlcw0KMjAxNC0xMC0yNCAxOToyNzowMC42OTUzMzMgNzRh
-ZmY0NjAgMjAgam91cm5hbCB3cml0ZV90aHJlYWRfZW50cnkgZ29pbmcgdG8gc2xlZXANCjIwMTQt
-MTAtMjQgMTk6Mjc6MDAuNjk1MzU3IDczYWZmNDYwIDEwIGpvdXJuYWwgd3JpdGVfZmluaXNoX3Ro
-cmVhZF9lbnRyeSBhaW8gMH40MDk2IGRvbmUNCjIwMTQtMTAtMjQgMTk6Mjc6MDAuNjk1MzczIDcz
-YWZmNDYwIDIwIGpvdXJuYWwgY2hlY2tfYWlvX2NvbXBsZXRpb24NCjIwMTQtMTAtMjQgMTk6Mjc6
-MDAuNjk1Mzc3IDczYWZmNDYwIDIwIGpvdXJuYWwgY2hlY2tfYWlvX2NvbXBsZXRpb24gY29tcGxl
-dGVkIHNlcSAwIDB+NDA5Ng0KMjAxNC0xMC0yNCAxOToyNzowMC42OTUzOTIgNzNhZmY0NjAgMjAg
-am91cm5hbCB3cml0ZV9maW5pc2hfdGhyZWFkX2VudHJ5IHNsZWVwaW5nDQoyMDE0LTEwLTI0IDE5
-OjI3OjAwLjY5NTgyMiA3NzYwYjAwMCAxNSBmaWxlc3RvcmUoL3Zhci9saWIvY2VwaC9vc2QvY2Vw
-aC0wKSByZWFkIG1ldGEvMjNjMmZjZGUvb3NkX3N1cGVyYmxvY2svMC8vLTEgMH4wDQoyMDE0LTEw
-LTI0IDE5OjI3OjAwLjY5NjA4OCA3NzYwYjAwMCAtMSBmaWxlc3RvcmUoL3Zhci9saWIvY2VwaC9v
-c2QvY2VwaC0wKSBjb3VsZCBub3QgZmluZCAyM2MyZmNkZS9vc2Rfc3VwZXJibG9jay8wLy8tMSBp
-biBpbmRleDogKDIpIE5vIHN1Y2ggZmlsZSBvciBkaXJlY3RvcnkNCjIwMTQtMTAtMjQgMTk6Mjc6
-MDAuNjk2MjA3IDc3NjBiMDAwIDEwIGZpbGVzdG9yZSgvdmFyL2xpYi9jZXBoL29zZC9jZXBoLTAp
-IEZpbGVTdG9yZTo6cmVhZChtZXRhLzIzYzJmY2RlL29zZF9zdXBlcmJsb2NrLzAvLy0xKSBvcGVu
-IGVycm9yOiAoMikgTm8gc3VjaCBmaWxlIG9yIGRpcmVjdG9yeQ0KMjAxNC0xMC0yNCAxOToyNzow
-MC42OTY0NzkgNzc2MGIwMDAgIDUgZmlsZXN0b3JlKC92YXIvbGliL2NlcGgvb3NkL2NlcGgtMCkg
-cXVldWVfdHJhbnNhY3Rpb25zIG5ldyBvc3IoZGVmYXVsdCAweDFmNzJhYzgpLzB4MWY3MmFjOA0K
-MjAxNC0xMC0yNCAxOToyNzowMC42OTY2MTIgNzc2MGIwMDAgMTAgam91cm5hbCBvcF9zdWJtaXRf
-c3RhcnQgMg0KMjAxNC0xMC0yNCAxOToyNzowMC42OTY2OTIgNzc2MGIwMDAgIDUgZmlsZXN0b3Jl
-KC92YXIvbGliL2NlcGgvb3NkL2NlcGgtMCkgcXVldWVfdHJhbnNhY3Rpb25zICh3cml0ZWFoZWFk
-KSAyIDB4N2Y3M2VhMTgNCjIwMTQtMTAtMjQgMTk6Mjc6MDAuNjk2NzY2IDc3NjBiMDAwIDEwIGpv
-dXJuYWwgb3Bfam91cm5hbF90cmFuc2FjdGlvbnMgMiAweDdmNzNlYTE4DQoyMDE0LTEwLTI0IDE5
-OjI3OjAwLjY5NjkwOCA3NzYwYjAwMCAgNSBqb3VybmFsIHN1Ym1pdF9lbnRyeSBzZXEgMiBsZW4g
-NTM0ICgweDc2MzBjM2Y4KQ0KMjAxNC0xMC0yNCAxOToyNzowMC42OTcwMzcgNzc2MGIwMDAgMTAg
-am91cm5hbCBvcF9zdWJtaXRfZmluaXNoIDINCjIwMTQtMTAtMjQgMTk6Mjc6MDAuNjk3MDQ2IDc0
-YWZmNDYwIDIwIGpvdXJuYWwgd3JpdGVfdGhyZWFkX2VudHJ5IHdva2UgdXANCjIwMTQtMTAtMjQg
-MTk6Mjc6MDAuNjk3MDg4IDc0YWZmNDYwIDEwIGpvdXJuYWwgcm9vbSA1MzY3NjU2NDQ3IG1heF9z
-aXplIDUzNjc2NjA1NDQgcG9zIDQwOTYgaGVhZGVyLnN0YXJ0IDQwOTYgdG9wIDQwOTYNCjIwMTQt
-MTAtMjQgMTk6Mjc6MDAuNjk3MTA0IDc0YWZmNDYwIDEwIGpvdXJuYWwgY2hlY2tfZm9yX2Z1bGwg
-YXQgNDA5NiA6IDQwOTYgPCA1MzY3NjU2NDQ3DQoyMDE0LTEwLTI0IDE5OjI3OjAwLjY5NzExNSA3
-NGFmZjQ2MCAxNSBqb3VybmFsIHByZXBhcmVfc2luZ2xlX3dyaXRlIDEgd2lsbCB3cml0ZSA0MDk2
-IDogc2VxIDIgbGVuIDUzNCAtPiA0MDk2IChoZWFkIDQwIHByZV9wYWQgMCBlYmwgNTM0IHBvc3Rf
-cGFkIDM0ODIgdGFpbCA0MCkgKGVibCBhbGlnbm1lbnQgLTEpDQoyMDE0LTEwLTI0IDE5OjI3OjAw
-LjY5NzE2NiA3NGFmZjQ2MCAyMCBqb3VybmFsIHByZXBhcmVfbXVsdGlfd3JpdGUgcXVldWVfcG9z
-IG5vdyA4MTkyDQoyMDE0LTEwLTI0IDE5OjI3OjAwLjY5NzE3NiA3NGFmZjQ2MCAxNSBqb3VybmFs
-IGRvX2Fpb193cml0ZSB3cml0aW5nIDQwOTZ+NDA5Ng0KMjAxNC0xMC0yNCAxOToyNzowMC42OTcy
-MjYgNzRhZmY0NjAgMjAgam91cm5hbCB3cml0ZV9haW9fYmwgNDA5Nn40MDk2IHNlcSAyDQoyMDE0
-LTEwLTI0IDE5OjI3OjAwLjY5NzI0NCA3NGFmZjQ2MCAyMCBqb3VybmFsIHdyaXRlX2Fpb19ibCAu
-LiA0MDk2fjQwOTYgaW4gMQ0KMjAxNC0xMC0yNCAxOToyNzowMC43MDQ5NjQgNzNhZmY0NjAgMjAg
-am91cm5hbCB3cml0ZV9maW5pc2hfdGhyZWFkX2VudHJ5IHdhaXRpbmcgZm9yIGFpbyhzKQ0KMjAx
-NC0xMC0yNCAxOToyNzowMC43MDQ5NTggNzRhZmY0NjAgIDUgam91cm5hbCBwdXRfdGhyb3R0bGUg
-ZmluaXNoZWQgMSBvcHMgYW5kIDUzNCBieXRlcywgbm93IDAgb3BzIGFuZCAwIGJ5dGVzDQoyMDE0
-LTEwLTI0IDE5OjI3OjAwLjcwNDk5NSA3NGFmZjQ2MCAyMCBqb3VybmFsIHdyaXRlX3RocmVhZF9l
-bnRyeSBnb2luZyB0byBzbGVlcA0KMjAxNC0xMC0yNCAxOToyNzowMC43MDUwNjIgNzNhZmY0NjAg
-MTAgam91cm5hbCB3cml0ZV9maW5pc2hfdGhyZWFkX2VudHJ5IGFpbyA0MDk2fjQwOTYgZG9uZQ0K
-MjAxNC0xMC0yNCAxOToyNzowMC43MDUwNzggNzNhZmY0NjAgMjAgam91cm5hbCBjaGVja19haW9f
-Y29tcGxldGlvbg0KMjAxNC0xMC0yNCAxOToyNzowMC43MDUwODIgNzNhZmY0NjAgMjAgam91cm5h
-bCBjaGVja19haW9fY29tcGxldGlvbiBjb21wbGV0ZWQgc2VxIDIgNDA5Nn40MDk2DQoyMDE0LTEw
-LTI0IDE5OjI3OjAwLjcwNTA5NCA3M2FmZjQ2MCAyMCBqb3VybmFsIGNoZWNrX2Fpb19jb21wbGV0
-aW9uIHF1ZXVlaW5nIGZpbmlzaGVycyB0aHJvdWdoIHNlcSAyDQoyMDE0LTEwLTI0IDE5OjI3OjAw
-LjcwNTEwNCA3M2FmZjQ2MCAxMCBqb3VybmFsIHF1ZXVlX2NvbXBsZXRpb25zX3RocnUgc2VxIDIg
-cXVldWVpbmcgc2VxIDIgMHg3NjMwYzNmOCBsYXQgMC4wMDgxMDINCjIwMTQtMTAtMjQgMTk6Mjc6
-MDAuNzA1MTM3IDczYWZmNDYwIDIwIGpvdXJuYWwgd3JpdGVfZmluaXNoX3RocmVhZF9lbnRyeSBz
-bGVlcGluZw0KMjAxNC0xMC0yNCAxOToyNzowMC43MDUxNTQgNzMyZmY0NjAgIDUgZmlsZXN0b3Jl
-KC92YXIvbGliL2NlcGgvb3NkL2NlcGgtMCkgX2pvdXJuYWxlZF9haGVhZCAweDc2MzBjMGUwIHNl
-cSAyIG9zcihkZWZhdWx0IDB4MWY3MmFjOCkgMHg3ZjczZWExOA0KMjAxNC0xMC0yNCAxOToyNzow
-MC43MDUxNzQgNzMyZmY0NjAgIDUgZmlsZXN0b3JlKC92YXIvbGliL2NlcGgvb3NkL2NlcGgtMCkg
-cXVldWVfb3AgMHg3NjMwYzBlMCBzZXEgMiBvc3IoZGVmYXVsdCAweDFmNzJhYzgpIDUyOCBieXRl
-cyAgIChxdWV1ZSBoYXMgMSBvcHMgYW5kIDUyOCBieXRlcykNCjIwMTQtMTAtMjQgMTk6Mjc6MDAu
-NzA1MjIwIDcyYWZmNDYwIDEwIGpvdXJuYWwgb3BfYXBwbHlfc3RhcnQgMiBvcGVuX29wcyAwIC0+
-IDENCjIwMTQtMTAtMjQgMTk6Mjc6MDAuNzA1MjI5IDcyYWZmNDYwICA1IGZpbGVzdG9yZSgvdmFy
-L2xpYi9jZXBoL29zZC9jZXBoLTApIF9kb19vcCAweDc2MzBjMGUwIHNlcSAyIG9zcihkZWZhdWx0
-IDB4MWY3MmFjOCkvMHgxZjcyYWM4IHN0YXJ0DQoyMDE0LTEwLTI0IDE5OjI3OjAwLjcwNTI0MiA3
-MmFmZjQ2MCAxMCBmaWxlc3RvcmUoL3Zhci9saWIvY2VwaC9vc2QvY2VwaC0wKSBfZG9fdHJhbnNh
-Y3Rpb24gb24gMHg3ZjczZWExOA0KMjAxNC0xMC0yNCAxOToyNzowMC43MDUyODMgNzJhZmY0NjAg
-MTUgZmlsZXN0b3JlKC92YXIvbGliL2NlcGgvb3NkL2NlcGgtMCkgY3JlYXRlX2NvbGxlY3Rpb24g
-L3Zhci9saWIvY2VwaC9vc2QvY2VwaC0wL2N1cnJlbnQvbWV0YQ0KMjAxNC0xMC0yNCAxOToyNzow
-MC43MzMzODQgNzJhZmY0NjAgMTAgZmlsZXN0b3JlKC92YXIvbGliL2NlcGgvb3NkL2NlcGgtMCkg
-Y3JlYXRlX2NvbGxlY3Rpb24gL3Zhci9saWIvY2VwaC9vc2QvY2VwaC0wL2N1cnJlbnQvbWV0YSA9
-IDANCjIwMTQtMTAtMjQgMTk6Mjc6MDAuNzMzNjk1IDcyYWZmNDYwIDEwIGZpbGVzdG9yZSgvdmFy
-L2xpYi9jZXBoL29zZC9jZXBoLTApIF9zZXRfcmVwbGF5X2d1YXJkIDIuMC4wDQoyMDE0LTEwLTI0
-IDE5OjI3OjAwLjc3MTQ0MSA3MmFmZjQ2MCAyMCBmaWxlc3RvcmUgZGJvYmplY3RtYXA6IHNlcSBp
-cyAxDQoqKiogQ2F1Z2h0IHNpZ25hbCAoU2VnbWVudGF0aW9uIGZhdWx0KSAqKg0KIGluIHRocmVh
-ZCA3MmFmZjQ2MA0KU2VnbWVudGF0aW9uIGZhdWx0DQo=
-
---_003_BC9BE980F12C4446A1CB0380E1C97DCD3390D99AEXMAIL1taectosh_--
+On 25/10/14 03:09, Mark Nelson wrote:
+> More info:
+>
+> I went back and tested fio versions back to 2.1.10 and still encountered
+> the issue.  I then went back and tested the v0.86 release versus giant
+> and was able to get through a 4MB read test without error.  I suspect
+> this is not an fio problem.  I'll try to narrow down the commit after
+> 0.86 that is causing this.
+>
+> Mark
+>
+> On 10/24/2014 08:19 AM, Mark Nelson wrote:
+>> FWIW we are seeing this at Redhat/Inktank with recent fio from master
+>> and ceph giant branch as well.
+>>
+>> Mark
+>>
+>> On 10/24/2014 01:17 AM, Mark Kirkwood wrote:
+>>> On 24/10/14 18:35, Jens Axboe wrote:
+>>>> CC'ing relevant parties, leaving email intact.
+>>>>
+>>>
+>>> Note that the 'Killed' is because I killed the run - it hangs and
+>>> appears to be non interruptable. I missed that when pasting, sorry!
+>>>
+>>>>> $ fio read-test.fio     # attached
+>>>>> rbd_thread: (g=0): rw=read, bs=2M-2M/2M-2M/2M-2M, ioengine=rbd,
+>>>>> iodepth=32
+>>>>> fio-2.1.13-88-gb2ee7
+>>>>> Starting 1 process
+>>>>> rbd engine: RBD version: 0.1.8
+>>>>> Killed1 (f=1): [R(1)] [inf% done] [0KB/0KB/0KB /s] [0/0/0 iops] [eta
+>>>>> 1158050441d:06h:59m:33s]
+>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe fio" in
+>>> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>
