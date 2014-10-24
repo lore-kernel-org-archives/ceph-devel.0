@@ -1,107 +1,150 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Having issues trying to get the OSD up on a MIPS64!!!
-Date: Thu, 23 Oct 2014 17:53:34 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1410231749420.13498@cobra.newdream.net>
-References: <loom.20141023T030922-990@post.gmane.org>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: Write path analysis
+Date: Fri, 24 Oct 2014 01:59:42 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2822FEE2@SACMBXIP02.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:51346 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751022AbaJXAxf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Oct 2014 20:53:35 -0400
-In-Reply-To: <loom.20141023T030922-990@post.gmane.org>
+Received: from mail-bn1bon0075.outbound.protection.outlook.com ([157.56.111.75]:47520
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1753593AbaJXB7u convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Oct 2014 21:59:50 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Prashanth Nednoor <Prashanth.nednoor@taec.toshiba.com>
-Cc: ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Prashanth,
+Hi,
+I have a 24 OSDs (all SSD) in a cluster node and I have created/mapped three 500GB images from 3 clients (1 each) with krbd. Replication factor is default (and changed to OSD since it is one node) .I ran the following fio script in parallel from 3 clients. As usual, I was seeing very dismal and bursty write performance (~1500K aggregated at peak).
 
-On Thu, 23 Oct 2014, Prashanth Nednoor wrote:
-> Hello Everyone,
-> 
-> We are using ceph-0.86, good news is we were able to compile and load 
-> all the libraries and binaries needed to configure a CEPH-OSD on MIPS 64 
-> platform. The CEPH monitor is also able to detect the OSD, but not up 
-> yet, as the osd activate failed.
-> Since we don?t have the required CEPH deploy utility for MIPS64, we are 
-> following the manual procedure to create and activate an OSD.
-> We have disabled authentication between the clients and the OSD?s for 
-> now.
-> 
-> Has any body tried CEPH on a MIPS64?
-> /dev/sda is a 2TB local hard drive.
-> 
-> This is how my partition looks after ceph-disk-prepare
-> /home/prashan/ceph-0.86/src# parted
-> GNU Parted 2.3
-> Using /dev/sda
-> Welcome to GNU Parted! Type 'help' to view a list of commands.
-> (parted) p
-> Model: ATA TOSHIBA MQ01ABB2 (scsi)
-> Disk /dev/sda: 2000GB
-> Sector size (logical/physical): 512B/4096B
-> Partition Table: gpt
-> 
-> Number  Start   End     Size    File system  Name          Flags
->  2      1049kB  5369MB  5368MB               ceph journal
->  1      5370MB  2000GB  1995GB  xfs          ceph data
-> 
-> 
-> 
-> The following are the steps to create an OSD
-> 1)	ceph-disk zap /dev/sda
-> 2)	ceph-disk-prepare --cluster  f615496c-b40a-4905-bbcd-
-> 2d3e181ff21a --fs-type xfs /dev/sda
-> 3)	mount /dev/sda1 /var/lib/ceph/osd/ceph-0/
-> 4)	ceph-osd -i 0 ?mkfs is giving an error , 
-> filestore(/var/lib/ceph/osd/ceph-0) could not find 
-> 23c2fcde/osd_superblock/0//-1 in index: (2) No such file.
-> After this it segfaults. We have analyzed this further with the help of 
-> strace and root caused this as objectmap file reading issue.
-> open("/var/lib/ceph/osd/ceph-0/current/omap/000005.log", O_RDONLY) = 11, 
-> the first time it reads 32k, the read succeeds with 63 bytes and it
-> tries to read again with 27k and the read returns 0 bytes and the CEPH 
-> osd segfaults.
 
-Can you generate a full log with --debug-osd 20 --debug-filestore 20 
---debug-jouranl 20 passed to ceph-osd --mkfs and post that somewhere?  It 
-should tell us where things are going wrong.  In particular, we want to 
-see if that file/object is being written properly.  It will also have a 
-backtrace showing exactly where it crashed.
+[random-write]
+ioengine=libaio
+iodepth=64
+filename=/dev/rbd1
+rw=randwrite
+bs=64k
+direct=1
+size=500G
+numjobs=1
 
-> Please note that ceph-disk prepare creates a journal in a path which is 
-> not valid(dev/disk/by-partuuid/cbd4a5d1-012f-4863-b492-080ad2a505cb).
-> So after step3 above I remove this journal below and manually create a 
-> journal file before doing step4 above.
-> 
-> 
-> ls -l /var/lib/ceph/osd/ceph-0/
-> total 16
-> -rw-r--r-- 1 root root 37 Oct 22 21:40 ceph_fsid
-> -rw-r--r-- 1 root root 37 Oct 22 21:40 fsid
-> lrwxrwxrwx 1 root root 58 Oct 22 21:40 journal -> /dev/disk/by-
-> partuuid/cbd4a5d1-012f-4863-b492-080ad2a505cb
 
-Is there anything in /dev/disk/by-partuuid/ or is it missing entirely?  
-Maybe you have an old udev.  What distro is this?
+I was trying to analyze what is wrong with OSD and found out most of the OSDs with ~0 or max 1 thread running. So, it is clear that not enough data coming from upstream as in that case at least messenger threads would have been running !
 
-sage
+Now, I tried to look 'ifstat' output and here it is for the cluster node.
 
-> -rw-r--r-- 1 root root 37 Oct 22 21:40 journal_uuid
-> -rw-r--r-- 1 root root 21 Oct 22 21:40 magic
-> 
-> Any pointers to move ahead will be greatly appreciated??
-> 
-> thanks
-> Prashanth
-> 
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+
+       p2p1
+KB/s in  KB/s out
+113072.4   1298.51
+100719.1   1185.05
+114284.6   1324.86
+178834.0   2099.69
+211549.1   2376.65
+29087.41    366.01
+12456.08    174.72
+1347.05     23.78
+    1.01      3.68
+    0.23      3.68
+    1.08      4.43
+    2.26      4.91
+    0.76      3.88
+69746.51    862.42
+40927.77    491.73
+60142.53    733.56
+40593.33    500.36
+50403.06    622.71
+108577.1   1303.91
+158618.9   1804.28
+90437.46   1027.48
+136244.7   1510.99
+    0.54      3.95
+    0.63      3.68
+    0.24      3.75
+    6.25      3.83
+    0.74      3.68
+    6.69      4.07
+44616.63    547.42
+63502.84    757.72
+73507.45    852.72
+230326.2   2528.38
+157839.6   1802.30
+189603.3   2122.25
+82581.25    965.03
+69347.60    799.37
+118248.8   1368.59
+70940.87    878.81
+64014.78    773.66
+97979.96   1134.85
+150346.3   1631.18
+84263.38    979.29
+60342.13    730.17
+156632.1   1791.12
+176290.1   2062.07
+120000.4   1347.99
+30044.77    387.37
+24333.55    324.90
+
+
+So, you can see the bursty nature of the input to the cluster with periodic almost 0 KB input ! Highest from 3 clients you can see ~136244 KB ! Avg ~ 70MB and i.e ~1.5 iops !!
+
+Now, here is the ifstat output for each client...
+
+KB/s in  KB/s out
+  439.23  37158.15
+  699.95  59996.60
+  898.57  80079.19
+  397.90  31781.98
+  324.35  27080.31
+  127.05   9881.72
+  244.84  20227.26
+  233.70  19354.52
+  338.95  27615.55
+  212.83  17676.74
+  458.11  39036.19
+  694.03  59962.72
+  479.04  41417.99
+  379.50  31310.14
+  403.29  34267.78
+  511.71  44812.89
+  370.45  32521.25
+   94.49   7327.94
+    1.11      0.51
+    0.18      0.30
+    0.63      0.30
+    0.18      0.30
+    1.33      1.48
+    0.40      0.30
+    0.40      0.30
+    0.12      0.30
+    5.76    336.43
+  215.43  17002.90
+  279.08  23719.46
+   59.93   4638.77
+  119.04   9073.26
+    0.18      0.30
+    1.99      0.30
+    3.09      0.30
+    0.47      0.37
+    0.12      0.30
+    1.39      0.30
+   49.03   3831.99
+  200.24  15390.87
+  338.71  28017.09
+  873.73  76383.56
+
+Again, the similar pattern and avg ~say 25MB or so !!!
+We can argue about increasing about num_jobs/iodepth etc. , that may improve the flow a bit but with the similar fio config read flow will be vastly different (I will post it when I will be testing RR). Lot more 'data in' to the cluster I would guess.
+
+So, I think the major bottleneck for write could be in client (krbd client in this case) not in the OSD layer (?)..Let me know if I am missing anything.
+Will fio push the data depending on how fast IO completion is happening ?
+
+Thanks & Regards
+Somnath
+
+________________________________
+
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+
