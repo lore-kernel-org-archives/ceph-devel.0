@@ -1,43 +1,53 @@
-From: Alexandre DERUMIER <aderumier@odiso.com>
-Subject: Re: krbd blk-mq support ?
-Date: Fri, 24 Oct 2014 14:27:47 +0200 (CEST)
-Message-ID: <8dd75b6c-f026-466d-baa4-fa4d11f8800a@mailpro>
-References: <20141024105501.GA14699@infradead.org>
+From: Mark Nelson <mark.a.nelson-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: fio rbd hang for block sizes > 1M
+Date: Fri, 24 Oct 2014 09:09:42 -0500
+Message-ID: <544A5DA6.2010709@gmail.com>
+References: <5449BBB3.7090109@catalyst.net.nz> <5449E50E.7000808@kernel.dk> <5449EEF1.1060407@catalyst.net.nz> <544A51C7.40803@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.209.98]:55365 "EHLO
-	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756300AbaJXM1z convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 24 Oct 2014 08:27:55 -0400
-In-Reply-To: <20141024105501.GA14699@infradead.org>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Christoph Hellwig <hch@infradead.org>
-Cc: Ceph Devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <fio-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <544A51C7.40803-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Sender: fio-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Mark Kirkwood <mark.kirkwood-6STWZtX7tXAqAMOr+u8IRA@public.gmane.org>, Jens Axboe <axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org>, fio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: "d.gollub-+tb+GG71Y8CELgA04lAiVw@public.gmane.org >> Daniel Gollub" <d.gollub-+tb+GG71Y8CELgA04lAiVw@public.gmane.org>, "xan.peng" <xanpeng-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
->>If you're willing to experiment give the patches below a try, not tha=
-t=20
->>I don't have a ceph test cluster available, so the conversion is=20
->>untestested.=20
+More info:
 
-Ok, Thanks ! I'll try them and see If I can improve qemu performance on=
- a single drive with multiqueues.
+I went back and tested fio versions back to 2.1.10 and still encountered 
+the issue.  I then went back and tested the v0.86 release versus giant 
+and was able to get through a 4MB read test without error.  I suspect 
+this is not an fio problem.  I'll try to narrow down the commit after 
+0.86 that is causing this.
 
------ Mail original -----=20
+Mark
 
-De: "Christoph Hellwig" <hch@infradead.org>=20
-=C3=80: "Alexandre DERUMIER" <aderumier@odiso.com>=20
-Cc: "Ceph Devel" <ceph-devel@vger.kernel.org>=20
-Envoy=C3=A9: Vendredi 24 Octobre 2014 12:55:01=20
-Objet: Re: krbd blk-mq support ?=20
-
-If you're willing to experiment give the patches below a try, not that=20
-I don't have a ceph test cluster available, so the conversion is=20
-untestested.=20
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On 10/24/2014 08:19 AM, Mark Nelson wrote:
+> FWIW we are seeing this at Redhat/Inktank with recent fio from master
+> and ceph giant branch as well.
+>
+> Mark
+>
+> On 10/24/2014 01:17 AM, Mark Kirkwood wrote:
+>> On 24/10/14 18:35, Jens Axboe wrote:
+>>> CC'ing relevant parties, leaving email intact.
+>>>
+>>
+>> Note that the 'Killed' is because I killed the run - it hangs and
+>> appears to be non interruptable. I missed that when pasting, sorry!
+>>
+>>>> $ fio read-test.fio     # attached
+>>>> rbd_thread: (g=0): rw=read, bs=2M-2M/2M-2M/2M-2M, ioengine=rbd,
+>>>> iodepth=32
+>>>> fio-2.1.13-88-gb2ee7
+>>>> Starting 1 process
+>>>> rbd engine: RBD version: 0.1.8
+>>>> Killed1 (f=1): [R(1)] [inf% done] [0KB/0KB/0KB /s] [0/0/0 iops] [eta
+>>>> 1158050441d:06h:59m:33s]
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe fio" in
+>> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
