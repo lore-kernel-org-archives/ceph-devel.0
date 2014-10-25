@@ -1,52 +1,79 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Initializing paddles
-Date: Fri, 24 Oct 2014 22:36:19 -0700
-Message-ID: <544B36D3.8050103@dachary.org>
+From: Fabian Frederick <fabf@skynet.be>
+Subject: Re: [PATCH 1/1 net-next] libceph: remove unused variable in
+ handle_reply()
+Date: Sat, 25 Oct 2014 11:12:16 +0200 (CEST)
+Message-ID: <1805780944.182558.1414228336940.open-xchange@webmail.nmp.skynet.be>
+References: <1414080959-6053-1-git-send-email-fabf@skynet.be> <CALFYKtD222g32njwF8nHz0Fbjj4p2512ka9bkADmB6S2QibgYA@mail.gmail.com>
+Reply-To: Fabian Frederick <fabf@skynet.be>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="961M71bbOJbHJ40U99xfHXiXnXj8dLxH3"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:52838 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751266AbaJYSf2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 25 Oct 2014 14:35:28 -0400
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Zack Cerza <zack.cerza@inktank.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
-
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---961M71bbOJbHJ40U99xfHXiXnXj8dLxH3
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
-
-Hi Zack,
-
-Now that I have a paddles server running, I'd like to populate it with tw=
-o virtual machines I have running. Is there a script to do this or should=
- I just type  SQL statements to do that semi-intuitively ?=20
-
-$ curl 'http://localhost:8080/nodes/?machine_type=3Dvps&count=3D2'
-[]
-
-Cheers=20
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <netdev-owner@vger.kernel.org>
+In-Reply-To: <CALFYKtD222g32njwF8nHz0Fbjj4p2512ka9bkADmB6S2QibgYA@mail.gmail.com>
+Sender: netdev-owner@vger.kernel.org
+To: Ilya Dryomov <ilya.dryomov@inktank.com>
+Cc: netdev@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>, "David S. Miller" <davem@davemloft.net>
+List-Id: ceph-devel.vger.kernel.org
 
 
---961M71bbOJbHJ40U99xfHXiXnXj8dLxH3
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+> On 23 October 2014 at 18:25 Ilya Dryomov <ilya.dryomov@inktank.com> w=
+rote:
+>
+>
+> On Thu, Oct 23, 2014 at 8:15 PM, Fabian Frederick <fabf@skynet.be> wr=
+ote:
+> > osdmap_epoch is redundant with reassert_epoch and unused.
+> >
+> > Signed-off-by: Fabian Frederick <fabf@skynet.be>
+> > ---
+> >=C2=A0 net/ceph/osd_client.c | 2 --
+> >=C2=A0 1 file changed, 2 deletions(-)
+> >
+> > diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+> > index f3fc54e..432bd75 100644
+> > --- a/net/ceph/osd_client.c
+> > +++ b/net/ceph/osd_client.c
+> > @@ -1700,7 +1700,6 @@ static void handle_reply(struct ceph_osd_clie=
+nt *osdc,
+> > struct ceph_msg *msg,
+> >=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0int err;
+> >=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0u32 reassert_epoch;
+> >=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0u64 reassert_version;
+> > -=C2=A0 =C2=A0 =C2=A0 =C2=A0u32 osdmap_epoch;
+> >=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0int already_completed;
+> >=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0u32 bytes;
+> >=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0unsigned int i;
+> > @@ -1725,7 +1724,6 @@ static void handle_reply(struct ceph_osd_clie=
+nt *osdc,
+> > struct ceph_msg *msg,
+> >=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0result =3D ceph_decode_32(&p);
+> >=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0reassert_epoch =3D ceph_decode_32(=
+&p);
+> >=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0reassert_version =3D ceph_decode_6=
+4(&p);
+> > -=C2=A0 =C2=A0 =C2=A0 =C2=A0osdmap_epoch =3D ceph_decode_32(&p);
+> >
+> >=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0/* lookup */
+> >=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0down_read(&osdc->map_sem);
+>
+> Hi Fabian,
+>
+> osdmap_epoch is useful for debugging, but this is wrong anyway -
+> ceph_decode_32() has side effects.=C2=A0 Removing it and not adjustin=
+g *p
+> would make the whole thing blow up pretty fast..
+>
+> Thanks,
+>
+>=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0Ilya
 
-iEYEARECAAYFAlRLNtMACgkQ8dLMyEl6F20iiQCeI28ncV2VrolPNQbl3gqS8Gcw
-uxsAn2E+Vll1kR21B6dQxJnRclA7NxKV
-=EnPD
------END PGP SIGNATURE-----
+Hi Ilya,
 
---961M71bbOJbHJ40U99xfHXiXnXj8dLxH3--
+=C2=A0 =C2=A0 =C2=A0 =C2=A0 osdmap_epoch generates a warning with -Wunu=
+sed-but-set-variable.
+Maybe we could just do ceph_decode_32(&p) and remove it
+(it doesn't seem to add a warning) and/or add some comment ?
+
+Regards,
+=46abian
