@@ -1,79 +1,93 @@
-From: Fabian Frederick <fabf@skynet.be>
-Subject: Re: [PATCH 1/1 net-next] libceph: remove unused variable in
- handle_reply()
-Date: Sat, 25 Oct 2014 11:12:16 +0200 (CEST)
-Message-ID: <1805780944.182558.1414228336940.open-xchange@webmail.nmp.skynet.be>
-References: <1414080959-6053-1-git-send-email-fabf@skynet.be> <CALFYKtD222g32njwF8nHz0Fbjj4p2512ka9bkADmB6S2QibgYA@mail.gmail.com>
-Reply-To: Fabian Frederick <fabf@skynet.be>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: failed erasure code pool creation after client upgrade
+Date: Sat, 25 Oct 2014 10:29:07 -0700
+Message-ID: <544BDDE3.5060506@dachary.org>
+References: <CAJBxG-tw0qdSBF_fA7LOuFc-vg8Rq1AQsrqU0ic5Wux1Ozpbew@mail.gmail.com>
 Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="gG5WjQv3oOGEA0b2gKSMJLPxV4bNt13qC"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail2.dachary.org ([91.121.57.175]:52845 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1750939AbaJYSp2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 25 Oct 2014 14:45:28 -0400
+In-Reply-To: <CAJBxG-tw0qdSBF_fA7LOuFc-vg8Rq1AQsrqU0ic5Wux1Ozpbew@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Yuri Weinstein <yuri.weinstein@inktank.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
+
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--gG5WjQv3oOGEA0b2gKSMJLPxV4bNt13qC
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <netdev-owner@vger.kernel.org>
-In-Reply-To: <CALFYKtD222g32njwF8nHz0Fbjj4p2512ka9bkADmB6S2QibgYA@mail.gmail.com>
-Sender: netdev-owner@vger.kernel.org
-To: Ilya Dryomov <ilya.dryomov@inktank.com>
-Cc: netdev@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>, "David S. Miller" <davem@davemloft.net>
-List-Id: ceph-devel.vger.kernel.org
+Content-Transfer-Encoding: quoted-printable
+
+[cc'ing ceph-devel for archive]
+
+Hi,
+
+I see a lot of errors with
+
+#define	EOPNOTSUPP	95	/* Operation not supported on transport endpoint */=
 
 
+2014-10-24T20:26:54.335 INFO:tasks.workunit.client.0.plana63.stdout:[ RUN=
+      ] LibRadosAioEC.SimpleWrite
+2014-10-24T20:26:56.737 INFO:tasks.workunit.client.0.plana63.stdout:test/=
+librados/aio.cc:1634: Failure
+2014-10-24T20:26:56.737 INFO:tasks.workunit.client.0.plana63.stdout:Value=
+ of: test_data.init()
+2014-10-24T20:26:56.737 INFO:tasks.workunit.client.0.plana63.stdout:  Act=
+ual: "create_one_ec_pool(test-rados-api-plana63-14645-33) failed: error r=
+ados_mon_command erasure-code-profile set name:testprofile failed with er=
+ror -95"
+2014-10-24T20:26:56.738 INFO:tasks.workunit.client.0.plana63.stdout:Expec=
+ted: ""
+2014-10-24T20:26:56.738 INFO:tasks.workunit.client.0.plana63.stdout:[  FA=
+ILED  ] LibRadosAioEC.SimpleWrite (2403 ms)
+2014-10-24T20:26:56.738 INFO:tasks.workunit.client.0.plana63.stdout:[ RUN=
+      ] LibRadosAioEC.SimpleWritePP
+2014-10-24T20:26:59.141 INFO:tasks.workunit.client.0.plana63.stdout:test/=
+librados/aio.cc:1669: Failure
+2014-10-24T20:26:59.142 INFO:tasks.workunit.client.0.plana63.stdout:Value=
+ of: test_data.init()
+2014-10-24T20:26:59.142 INFO:tasks.workunit.client.0.plana63.stdout:  Act=
+ual: "create_one_ec_pool(test-rados-api-plana63-14645-
 
-> On 23 October 2014 at 18:25 Ilya Dryomov <ilya.dryomov@inktank.com> w=
-rote:
->
->
-> On Thu, Oct 23, 2014 at 8:15 PM, Fabian Frederick <fabf@skynet.be> wr=
-ote:
-> > osdmap_epoch is redundant with reassert_epoch and unused.
-> >
-> > Signed-off-by: Fabian Frederick <fabf@skynet.be>
-> > ---
-> >=C2=A0 net/ceph/osd_client.c | 2 --
-> >=C2=A0 1 file changed, 2 deletions(-)
-> >
-> > diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-> > index f3fc54e..432bd75 100644
-> > --- a/net/ceph/osd_client.c
-> > +++ b/net/ceph/osd_client.c
-> > @@ -1700,7 +1700,6 @@ static void handle_reply(struct ceph_osd_clie=
-nt *osdc,
-> > struct ceph_msg *msg,
-> >=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0int err;
-> >=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0u32 reassert_epoch;
-> >=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0u64 reassert_version;
-> > -=C2=A0 =C2=A0 =C2=A0 =C2=A0u32 osdmap_epoch;
-> >=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0int already_completed;
-> >=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0u32 bytes;
-> >=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0unsigned int i;
-> > @@ -1725,7 +1724,6 @@ static void handle_reply(struct ceph_osd_clie=
-nt *osdc,
-> > struct ceph_msg *msg,
-> >=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0result =3D ceph_decode_32(&p);
-> >=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0reassert_epoch =3D ceph_decode_32(=
-&p);
-> >=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0reassert_version =3D ceph_decode_6=
-4(&p);
-> > -=C2=A0 =C2=A0 =C2=A0 =C2=A0osdmap_epoch =3D ceph_decode_32(&p);
-> >
-> >=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0/* lookup */
-> >=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0down_read(&osdc->map_sem);
->
-> Hi Fabian,
->
-> osdmap_epoch is useful for debugging, but this is wrong anyway -
-> ceph_decode_32() has side effects.=C2=A0 Removing it and not adjustin=
-g *p
-> would make the whole thing blow up pretty fast..
->
-> Thanks,
->
->=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0Ilya
+which indeed suggests that the client is trying to create an erasure code=
+d pool in a cluster that does not support it. But since it looks like it'=
+s upgrading from firefly to a later version, I don't understand why that =
+would be a problem.
 
-Hi Ilya,
+How did that get scheduled ?
 
-=C2=A0 =C2=A0 =C2=A0 =C2=A0 osdmap_epoch generates a warning with -Wunu=
-sed-but-set-variable.
-Maybe we could just do ceph_decode_32(&p) and remove it
-(it doesn't seem to add a warning) and/or add some comment ?
+Cheers
 
-Regards,
-=46abian
+On 25/10/2014 08:37, Yuri Weinstein wrote:
+> Not sure what's going on with it, thx.
+>=20
+> It's unusual in a way that upgrades a client first.
+>=20
+> http://qa-proxy.ceph.com/teuthology/teuthology-2014-10-24_17:05:01-upgr=
+ade:firefly:singleton-firefly-distro-basic-multi/569532/teuthology.log
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--gG5WjQv3oOGEA0b2gKSMJLPxV4bNt13qC
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlRL3eMACgkQ8dLMyEl6F20uNQCfZkVAEWwWO+jHR7HZ4QV0f5wO
+dzgAoMb4e4mHoQVF+722SN22Y5FtwUdE
+=+YXW
+-----END PGP SIGNATURE-----
+
+--gG5WjQv3oOGEA0b2gKSMJLPxV4bNt13qC--
