@@ -1,50 +1,71 @@
-From: Mark Kirkwood <mark.kirkwood-6STWZtX7tXAqAMOr+u8IRA@public.gmane.org>
-Subject: Re: fio rbd completions (Was: fio rbd hang for block sizes > 1M)
-Date: Sun, 26 Oct 2014 11:25:53 +1300
-Message-ID: <544C2371.1020403@catalyst.net.nz>
-References: <5449BBB3.7090109@catalyst.net.nz> <5449E50E.7000808@kernel.dk> <5449EEF1.1060407@catalyst.net.nz> <544A51C7.40803@gmail.com> <544A5DA6.2010709@gmail.com> <544AD67D.4030603@catalyst.net.nz> <544AEAE7.6080603@redhat.com> <544AF0D2.1050405@catalyst.net.nz> <544B0C7F.4080109@catalyst.net.nz> <544B1D50.4010101@kernel.dk> <544B2C19.7070009@catalyst.net.nz> <544BF808.2090800@kernel.dk>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Initializing paddles
+Date: Sat, 25 Oct 2014 16:28:56 -0700
+Message-ID: <544C3238.7080305@dachary.org>
+References: <544B36D3.8050103@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <fio-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <544BF808.2090800-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org>
-Sender: fio-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Jens Axboe <axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org>, Mark Nelson <mark.nelson-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>, Mark Nelson <mark.a.nelson-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, fio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: "xan.peng" <xanpeng-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="1fD6nRDObRSIG1kDX8c2nvAwwVSpIcfmG"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail2.dachary.org ([91.121.57.175]:53201 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751034AbaJYX27 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 25 Oct 2014 19:28:59 -0400
+In-Reply-To: <544B36D3.8050103@dachary.org>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Zack Cerza <zack.cerza@inktank.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On 26/10/14 08:20, Jens Axboe wrote:
-> On 10/24/2014 10:50 PM, Mark Kirkwood wrote:
->> On 25/10/14 16:47, Jens Axboe wrote:
->>>
->>> Since you're running rbd tests... Mind giving this patch a go? I don't
->>> have an easy way to test it myself. It has nothing to do with this
->>> issue, it's just a potentially faster way to do the rbd completions.
->>>
->>
->> Sure - but note I'm testing this on my i7 workstation (4x osd's running
->> on 2x Crucial M550) so not exactly server grade :-)
->>
->> With that in mind, I'm seeing slightly *slower* performance with the
->> patch applied: e.g: for 128k blocks - 2 runs, 1 uncached and the next
->> cached.
->
-> Yeah, that doesn't look good. Mind trying this one out? I wonder if we
-> doubly wait on them - or perhaps rbd_aio_wait_for_complete() isn't
-> working correctly. If you try this one, we should know more...
->
-> Goal is, I want to get rid of that usleep() in getevents.
->
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--1fD6nRDObRSIG1kDX8c2nvAwwVSpIcfmG
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-Testing with v3 patch applied hangs. I did wonder if we had somehow hit 
-a new variant of the cache issue - so reran with it disabled in 
-ceph.conf. Result is the same:
 
-$ fio read-test.fio
-rbd_thread: (g=0): rw=read, bs=128K-128K/128K-128K/128K-128K, 
-ioengine=rbd, iodepth=32
-fio-2.1.13-88-gb2ee7
-Starting 1 process
-rbd engine: RBD version: 0.1.8
-Jobs: 1 (f=1): [R(1)] [0.1% done] [0KB/0KB/0KB /s] [0/0/0 iops] [eta 
-01h:25m:15s]
+
+On 24/10/2014 22:36, Loic Dachary wrote:
+> Hi Zack,
+>=20
+> Now that I have a paddles server running, I'd like to populate it with =
+two virtual machines I have running. Is there a script to do this or shou=
+ld I just type  SQL statements to do that semi-intuitively ?=20
+>=20
+> $ curl 'http://localhost:8080/nodes/?machine_type=3Dvps&count=3D2'
+> []
+
+I tried something like
+
+for id in 1 2 3 ; do sqlite3 dev.db "insert into nodes (id,name,machine_t=
+ype,is_container,is_vm,locked,up,locked_by) values ($id, 'container00$id'=
+, 'plana', 1, 0, 0, 1, 'scheduled');" ; done
+
+and it works so far (i.e. I'm making progress although I'm not to the poi=
+nt where a machine gets a job yet ;-)
+
+Cheers
+
+>=20
+> Cheers=20
+>=20
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+
+
+--1fD6nRDObRSIG1kDX8c2nvAwwVSpIcfmG
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlRMMjgACgkQ8dLMyEl6F20WogCgowIY9AqYgCqYhVVcuM0ngH92
+EIEAn3ak8g6vVd0lnuNasUwCyieQF1K7
+=GBsN
+-----END PGP SIGNATURE-----
+
+--1fD6nRDObRSIG1kDX8c2nvAwwVSpIcfmG--
