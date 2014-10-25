@@ -1,230 +1,66 @@
-From: Philip Kufeldt <Philip.Kufeldt@taec.toshiba.com>
-Subject: RE: Having issues trying to get the OSD up on a MIPS64!!!
-Date: Sat, 25 Oct 2014 00:55:48 +0000
-Message-ID: <71E1B92E73606A4ABC3D0EC55B2BF09834221AED@EXMAIL1.taec.toshiba.com>
-References: <loom.20141023T030922-990@post.gmane.org>
- <alpine.DEB.2.00.1410231749420.13498@cobra.newdream.net>
- <BC9BE980F12C4446A1CB0380E1C97DCD3390D99A@EXMAIL1.taec.toshiba.com>
- <alpine.DEB.2.00.1410241743490.13498@cobra.newdream.net>
+From: Mark Kirkwood <mark.kirkwood-6STWZtX7tXAqAMOr+u8IRA@public.gmane.org>
+Subject: Re: fio rbd hang for block sizes > 1M
+Date: Sat, 25 Oct 2014 15:35:43 +1300
+Message-ID: <544B0C7F.4080109@catalyst.net.nz>
+References: <5449BBB3.7090109@catalyst.net.nz> <5449E50E.7000808@kernel.dk> <5449EEF1.1060407@catalyst.net.nz> <544A51C7.40803@gmail.com> <544A5DA6.2010709@gmail.com> <544AD67D.4030603@catalyst.net.nz> <544AEAE7.6080603@redhat.com> <544AF0D2.1050405@catalyst.net.nz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailhost.taec.com ([209.243.128.33]:44820 "EHLO
-	mailhost.taec.toshiba.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756014AbaJYBf6 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 24 Oct 2014 21:35:58 -0400
-In-Reply-To: <alpine.DEB.2.00.1410241743490.13498@cobra.newdream.net>
-Content-Language: en-US
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>, Prashanth Nednoor <Prashanth.Nednoor@taec.toshiba.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <fio-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <544AF0D2.1050405-6STWZtX7tXAqAMOr+u8IRA@public.gmane.org>
+Sender: fio-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Mark Nelson <mark.nelson-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>, Mark Nelson <mark.a.nelson-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Jens Axboe <axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org>, fio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: "d.gollub-+tb+GG71Y8CELgA04lAiVw@public.gmane.org >> Daniel Gollub" <d.gollub-+tb+GG71Y8CELgA04lAiVw@public.gmane.org>, "xan.peng" <xanpeng-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-64 bit big endian
+Patched client machine *only* - re-running fio from there works fine 
+with (default - i.e no [client' section at all) cache settings:
 
-> -----Original Message-----
-> From: Sage Weil [mailto:sage@newdream.net]
-> Sent: Friday, October 24, 2014 5:47 PM
-> To: Prashanth Nednoor
-> Cc: ceph-devel@vger.kernel.org; Philip Kufeldt
-> Subject: RE: Having issues trying to get the OSD up on a MIPS64!!!
-> 
-> Hi Prashanth,
-> 
-> On Fri, 24 Oct 2014, Prashanth Nednoor wrote:
-> > Hi Sage,
-> >
-> > Thank you for the prompt response.
-> > Is there anything in /dev/disk/by-partuuid/ or is it missing entirely?
-> >   Nothing , it was Missing Entirely.
-> >   GOOD NEWS:  I worked around  this issue, if I set my journal path in the
-> /etc/ceph.conf.
-> >
-> > My udev version is udevd --version 164
-> 
-> Hmm, that should be new enough, but it seems like it isn't setting up the
-> links.  What distro is it?  On most systems it's /lib/udev/rules.d/60-persistent-
-> storage.rules that does it.  Maybe see if running partprobe /dev/sda or run
-> 'udevadm monitor' and do 'udevadm trigger /dev/sda' in another terminal to
-> see what happens.
-> 
-> Or, work around it like you did. :)
-> 
-> > I still see the segfaults, I have attached details.
-> > I put the osd debug logs(osd-output.txt) and the
-> leveldb_bt(leveldb_bt.txt).
-> > Looks like we have an issue in leveldb....
-> 
-> Yeah, that looks like a problem with leveldb.  What distro is this?  What
-> version leveldb?
-> 
-> I don't actually know anything about MIPS.. what's teh wordsize and
-> endianess?
-> 
-> sage
-> 
-> 
-> >
-> > HERE IS THE BACK TRACE: I have attached the gdb before running it.
-> > #0  0x77f68ee0 in leveldb::SkipList<char const*,
-> > leveldb::MemTable::KeyComparator>::FindGreaterOrEqual(char const*
-> > const&, leveldb::SkipList<char const*,
-> > leveldb::MemTable::KeyComparator>::Node**) const () from
-> > /usr/local/lib/libleveldb.so.1
-> > #1  0x77f69054 in leveldb::SkipList<char const*,
-> > leveldb::MemTable::KeyComparator>::Insert(char const* const&) () from
-> > /usr/local/lib/libleveldb.so.1
-> > #2  0x77f68618 in leveldb::MemTable::Add(unsigned long long,
-> leveldb::ValueType, leveldb::Slice const&, leveldb::Slice const&) ()
-> >    from /usr/local/lib/libleveldb.so.1
-> > #3  0x77f7e434 in leveldb::(anonymous
-> namespace)::MemTableInserter::Put(leveldb::Slice const&, leveldb::Slice
-> const&) ()
-> >    from /usr/local/lib/libleveldb.so.1
-> > #4  0x77f7e93c in
-> > leveldb::WriteBatch::Iterate(leveldb::WriteBatch::Handler*) const ()
-> > from /usr/local/lib/libleveldb.so.1
-> > #5  0x77f7eb8c in
-> > leveldb::WriteBatchInternal::InsertInto(leveldb::WriteBatch const*,
-> > leveldb::MemTable*) () from /usr/local/lib/libleveldb.so.1
-> > #6  0x77f59360 in leveldb::DBImpl::Write(leveldb::WriteOptions const&,
-> > leveldb::WriteBatch*) () from /usr/local/lib/libleveldb.so.1
-> > #7  0x00a5dda0 in LevelDBStore::submit_transaction_sync
-> > (this=0x1f77d10, t=<value optimized out>) at os/LevelDBStore.cc:146
-> > #8  0x00b0d344 in DBObjectMap::sync (this=0x1f7af28, oid=0x0,
-> > spos=0x72cfe3b8) at os/DBObjectMap.cc:1126
-> > #9  0x009b10b8 in FileStore::_set_replay_guard (this=0x1f72450, fd=17,
-> > spos=..., hoid=0x0, in_progress=false) at os/FileStore.cc:2070
-> > #10 0x009b1c0c in FileStore::_set_replay_guard (this=0x1f72450,
-> cid=DWARF-2 expression error: DW_OP_reg operations must be used either
-> alone or in conjuction with DW_OP_piece.
-> > ) at os/FileStore.cc:2047
-> > #11 0x009b2138 in FileStore::_create_collection (this=0x1f72450, c=DWARF-
-> 2 expression error: DW_OP_reg operations must be used either alone or in
-> conjuction with DW_OP_piece.
-> > ) at os/FileStore.cc:4753
-> > #12 0x009e42a8 in FileStore::_do_transaction (this=0x1f72450, t=...,
-> > op_seq=<value optimized out>, trans_num=0, handle=0x72cfec3c) at
-> > os/FileStore.cc:2413
-> > #13 0x009eb47c in FileStore::_do_transactions (this=0x1f72450,
-> > tls=..., op_seq=2, handle=0x72cfec3c) at os/FileStore.cc:1952
-> > #14 0x009eb858 in FileStore::_do_op (this=0x1f72450, osr=0x1f801b8,
-> > handle=...) at os/FileStore.cc:1761
-> > #15 0x00c8f0bc in ThreadPool::worker (this=0x1f72cf0, wt=0x1f7ea90) at
-> > common/WorkQueue.cc:128
-> > #16 0x00c91b94 in ThreadPool::WorkThread::entry() ()
-> > #17 0x77f1c0a8 in start_thread () from /lib/libpthread.so.0
-> > #18 0x777c1738 in ?? () from /lib/libc.so.6
-> >
-> > Do  I need to set any variable to set the cache size etcetc in ceph.conf.
-> > I only have osd_leveldb_cache_size=5242880 for now.
-> >
-> >
-> > Thanks
-> > Prashanth
-> >
-> >
-> >
-> >
-> >
-> >
-> >
-> > -----Original Message-----
-> > From: Sage Weil [mailto:sage@newdream.net]
-> > Sent: Thursday, October 23, 2014 5:54 PM
-> > To: Prashanth Nednoor
-> > Cc: ceph-devel@vger.kernel.org
-> > Subject: Re: Having issues trying to get the OSD up on a MIPS64!!!
-> >
-> > Hi Prashanth,
-> >
-> > On Thu, 23 Oct 2014, Prashanth Nednoor wrote:
-> > > Hello Everyone,
-> > >
-> > > We are using ceph-0.86, good news is we were able to compile and
-> > > load all the libraries and binaries needed to configure a CEPH-OSD
-> > > on MIPS
-> > > 64 platform. The CEPH monitor is also able to detect the OSD, but
-> > > not up yet, as the osd activate failed.
-> > > Since we don?t have the required CEPH deploy utility for MIPS64, we
-> > > are following the manual procedure to create and activate an OSD.
-> > > We have disabled authentication between the clients and the OSD?s
-> > > for now.
-> > >
-> > > Has any body tried CEPH on a MIPS64?
-> > > /dev/sda is a 2TB local hard drive.
-> > >
-> > > This is how my partition looks after ceph-disk-prepare
-> > > /home/prashan/ceph-0.86/src# parted GNU Parted 2.3 Using /dev/sda
-> > > Welcome to GNU Parted! Type 'help' to view a list of commands.
-> > > (parted) p
-> > > Model: ATA TOSHIBA MQ01ABB2 (scsi)
-> > > Disk /dev/sda: 2000GB
-> > > Sector size (logical/physical): 512B/4096B Partition Table: gpt
-> > >
-> > > Number  Start   End     Size    File system  Name          Flags
-> > >  2      1049kB  5369MB  5368MB               ceph journal
-> > >  1      5370MB  2000GB  1995GB  xfs          ceph data
-> > >
-> > >
-> > >
-> > > The following are the steps to create an OSD
-> > > 1)	ceph-disk zap /dev/sda
-> > > 2)	ceph-disk-prepare --cluster  f615496c-b40a-4905-bbcd-
-> > > 2d3e181ff21a --fs-type xfs /dev/sda
-> > > 3)	mount /dev/sda1 /var/lib/ceph/osd/ceph-0/
-> > > 4)	ceph-osd -i 0 ?mkfs is giving an error ,
-> > > filestore(/var/lib/ceph/osd/ceph-0) could not find
-> > > 23c2fcde/osd_superblock/0//-1 in index: (2) No such file.
-> > > After this it segfaults. We have analyzed this further with the help
-> > > of strace and root caused this as objectmap file reading issue.
-> > > open("/var/lib/ceph/osd/ceph-0/current/omap/000005.log", O_RDONLY)
-> =
-> > > 11, the first time it reads 32k, the read succeeds with 63 bytes and
-> > > it tries to read again with 27k and the read returns 0 bytes and the
-> > > CEPH osd segfaults.
-> >
-> > Can you generate a full log with --debug-osd 20 --debug-filestore 20 --
-> debug-jouranl 20 passed to ceph-osd --mkfs and post that somewhere?  It
-> should tell us where things are going wrong.  In particular, we want to see if
-> that file/object is being written properly.  It will also have a backtrace
-> showing exactly where it crashed.
-> >
-> > > Please note that ceph-disk prepare creates a journal in a path which
-> > > is not valid(dev/disk/by-partuuid/cbd4a5d1-012f-4863-b492-
-> 080ad2a505cb).
-> > > So after step3 above I remove this journal below and manually create
-> > > a journal file before doing step4 above.
-> > >
-> > >
-> > > ls -l /var/lib/ceph/osd/ceph-0/
-> > > total 16
-> > > -rw-r--r-- 1 root root 37 Oct 22 21:40 ceph_fsid
-> > > -rw-r--r-- 1 root root 37 Oct 22 21:40 fsid lrwxrwxrwx 1 root root
-> > > 58 Oct 22 21:40 journal -> /dev/disk/by-
-> > > partuuid/cbd4a5d1-012f-4863-b492-080ad2a505cb
-> >
-> > Is there anything in /dev/disk/by-partuuid/ or is it missing entirely?
-> > Maybe you have an old udev.  What distro is this?
-> >
-> > sage
-> >
-> > > -rw-r--r-- 1 root root 37 Oct 22 21:40 journal_uuid
-> > > -rw-r--r-- 1 root root 21 Oct 22 21:40 magic
-> > >
-> > > Any pointers to move ahead will be greatly appreciated??
-> > >
-> > > thanks
-> > > Prashanth
-> > >
-> > >
-> > >
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
-> > > in the body of a message to majordomo@vger.kernel.org More
-> majordomo
-> > > info at  http://vger.kernel.org/majordomo-info.html
-> > >
-> > >
-> >
+$ fio read-test.fio
+rbd_thread: (g=0): rw=read, bs=4M-4M/4M-4M/4M-4M, ioengine=rbd, iodepth=32
+fio-2.1.13-88-gb2ee7
+Starting 1 process
+rbd engine: RBD version: 0.1.8
+Jobs: 1 (f=1): [R(1)] [75.0% done] [1165MB/0KB/0KB /s] [291/0/0 iops] 
+[eta 00m:0Jobs: 1 (f=1): [R(1)] [83.3% done] [447.4MB/0KB/0KB /s] 
+[111/0/0 iops] [eta 00m:Jobs: 1 (f=1): [R(1)] [100.0% done] 
+[268.0MB/0KB/0KB /s] [67/0/0 iops] [eta 00m:Jobs: 1 (f=1): [R(1)] 
+[100.0% done] [336.1MB/0KB/0KB /s] [84/0/0 iops] [eta 00m:00s]
+rbd_thread: (groupid=0, jobs=1): err= 0: pid=5980: Sat Oct 25 15:32:16 2014
+   read : io=4096.0MB, bw=623410KB/s, iops=152, runt=  6728msec
+     slat (usec): min=7, max=230691, avg=5664.46, stdev=14434.46
+     clat (msec): min=11, max=1589, avg=193.03, stdev=246.84
+      lat (msec): min=13, max=1606, avg=198.70, stdev=248.62
+     clat percentiles (msec):
+      |  1.00th=[   17],  5.00th=[   30], 10.00th=[   43], 20.00th=[   60],
+      | 30.00th=[   78], 40.00th=[   93], 50.00th=[  109], 60.00th=[  124],
+      | 70.00th=[  147], 80.00th=[  210], 90.00th=[  498], 95.00th=[  758],
+      | 99.00th=[ 1237], 99.50th=[ 1467], 99.90th=[ 1565], 99.95th=[ 1598],
+      | 99.99th=[ 1598]
+     bw (KB  /s): min=178086, max=1193644, per=100.00%, avg=637349.58, 
+stdev=397329.85
+     lat (msec) : 20=2.15%, 50=12.11%, 100=30.08%, 250=38.09%, 500=7.62%
+     lat (msec) : 750=4.79%, 1000=2.64%, 2000=2.54%
+   cpu          : usr=1.69%, sys=0.28%, ctx=6234, majf=0, minf=78
+   IO depths    : 1=0.1%, 2=0.2%, 4=0.4%, 8=1.7%, 16=58.6%, 32=39.1%, 
+ >=64=0.0%
+      submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, 
+ >=64=0.0%
+      complete  : 0=0.0%, 4=94.3%, 8=5.0%, 16=0.4%, 32=0.3%, 64=0.0%, 
+ >=64=0.0%
+      issued    : total=r=1024/w=0/d=0, short=r=0/w=0/d=0, drop=r=0/w=0/d=0
+      latency   : target=0, window=0, percentile=100.00%, depth=32
+
+Run status group 0 (all jobs):
+    READ: io=4096.0MB, aggrb=623410KB/s, minb=623410KB/s, 
+maxb=623410KB/s, mint=6728msec, maxt=6728msec
+
+
+On 25/10/14 13:37, Mark Kirkwood wrote:
+> Righty, building now.
+>
+> On 25/10/14 13:12, Mark Nelson wrote:
+>> Hi Mark,
+>>
+>> Try the latest giant branch.  I believe we've fixed this with 7272bb8.
+>> My test cluster is passing read tests now.
