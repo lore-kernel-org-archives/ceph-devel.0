@@ -1,33 +1,43 @@
-From: Jens Axboe <axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org>
-Subject: Re: fio rbd completions (Was: fio rbd hang for block sizes > 1M)
-Date: Mon, 27 Oct 2014 10:55:46 -0600
-Message-ID: <544E7912.3030503@kernel.dk>
-References: <5449BBB3.7090109@catalyst.net.nz> <5449E50E.7000808@kernel.dk> <5449EEF1.1060407@catalyst.net.nz> <544A51C7.40803@gmail.com> <544A5DA6.2010709@gmail.com> <544AD67D.4030603@catalyst.net.nz> <544AEAE7.6080603@redhat.com> <544AF0D2.1050405@catalyst.net.nz> <544B0C7F.4080109@catalyst.net.nz> <544B1D50.4010101@kernel.dk> <544B2C19.7070009@catalyst.net.nz> <544BF808.2090800@kernel.dk> <544C2371.1020403@catalyst.net.nz> <544E547C.30009@kernel.dk> <CAM9_UU9j2erdGT5kqKi_+5z5ERFMPO1hHwMk8kaFjLkGm-zp-g@mail.gmail.com> <544E6330.1000202@kernel.dk> <544E63EA.1010204@kernel.dk> <CAM9_UU-35i9uRu9EDQSM-b7CjmxrKYV2Gz8ocrykOYk+2q++hw@mail.gmail.com> <544E6691.106@kernel.dk> <CAM9_UU9_ZHtwv=31DyxkAmog7XJbthiRXi5n+Y0Cfxj4qm3bGQ@mail.gmail.com> <544E6A8D.1040608@kernel.dk> <CAM9_UU8x2uZZUWaPPoy+LH
- mUhC_3sqKZ9GPsEqDwKUkprg4kdQ@mail.gmail.com>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: Any way to list the keys&values of omap in certain range?
+Date: Mon, 27 Oct 2014 10:55:59 -0700
+Message-ID: <CAPYLRzjyhzO3Zw9oW71xL+yjLvCNPJL1+xgWq3nhQZJH1Q_SHQ@mail.gmail.com>
+References: <CAJu7gM1M=He7Qzxc9q8-wLEGqSVoJH-MCr_2UsE_G5GRJuLjNg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <fio-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAM9_UU8x2uZZUWaPPoy+LHmUhC_3sqKZ9GPsEqDwKUkprg4kdQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: fio-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ketor D <d.ketor-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Mark Kirkwood <mark.kirkwood-6STWZtX7tXAqAMOr+u8IRA@public.gmane.org>, Mark Nelson <mark.nelson-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>, Mark Nelson <mark.a.nelson-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, fio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "xan.peng" <xanpeng-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-qc0-f171.google.com ([209.85.216.171]:41869 "EHLO
+	mail-qc0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751671AbaJ0R4A (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Oct 2014 13:56:00 -0400
+Received: by mail-qc0-f171.google.com with SMTP id m20so4243221qcx.30
+        for <ceph-devel@vger.kernel.org>; Mon, 27 Oct 2014 10:55:59 -0700 (PDT)
+In-Reply-To: <CAJu7gM1M=He7Qzxc9q8-wLEGqSVoJH-MCr_2UsE_G5GRJuLjNg@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Plato Zhang <sangongs@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 10/27/2014 10:20 AM, Ketor D wrote:
-> V8 patch runs good.
-> 
-> The iops is 33032. If I just comment the usleep(100) in the master, I
-> can get iops 35245.
-> The CPU usage about the two test is same 120%.
-> So maybe this patch could be better!
-> 
-> Belong to the master, this patch is perfect enough!!
+Software Engineer #42 @ http://inktank.com | http://ceph.com
+On Mon, Oct 27, 2014 at 1:52 AM, Plato Zhang <sangongs@gmail.com> wrote:
+> Hi, all!
+>
+> We are trying to utilize omap to store kv map.
+>
+> However, we couldn't find a proper way to scan a certain key range of omap.
+>
+> We do can use arg `max_return' to finish this job by iterating .
+> But if `max_return' is set too large, then there will be io waste
+> while the number of keys is few.
+> On the contrary, if it is set too small, then there will also be waste
+> while the number of keys is too many.
+>
+> Is there any solution?
 
-Agree, committed. I'll setup a local test here and see if we can't
-recoup those last percentages. CPU usage may have been the same for your
-test, but it will be more for others. A busy loop in there is not a good
-idea.
-
--- 
-Jens Axboe
+This functionality is not implemented in RADOS right now. It sounds
+like a good feature though! You can submit feature requests at
+tracker.ceph.com, or send in PRs. I think this should be fairly simple
+to implement, based on the "CEPH_OSD_OP_OMAPGETKEYS" section of
+ReplicatedPG::do_osd_ops, and then following the patterns in exposing
+it via librados.
+-Greg
