@@ -1,7 +1,7 @@
 From: Prashanth Nednoor <Prashanth.Nednoor@taec.toshiba.com>
 Subject: RE: Having issues trying to get the OSD up on a MIPS64!!!
-Date: Mon, 27 Oct 2014 02:31:50 +0000
-Message-ID: <BC9BE980F12C4446A1CB0380E1C97DCD3390DAC7@EXMAIL1.taec.toshiba.com>
+Date: Mon, 27 Oct 2014 04:14:06 +0000
+Message-ID: <BC9BE980F12C4446A1CB0380E1C97DCD3390DAEC@EXMAIL1.taec.toshiba.com>
 References: <loom.20141023T030922-990@post.gmane.org>
  <alpine.DEB.2.00.1410231749420.13498@cobra.newdream.net>
  <BC9BE980F12C4446A1CB0380E1C97DCD3390D99A@EXMAIL1.taec.toshiba.com>
@@ -12,16 +12,42 @@ Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailhost.taec.com ([209.243.128.33]:46375 "EHLO
+Received: from mailhost.taec.com ([209.243.128.33]:50408 "EHLO
 	mailhost.taec.toshiba.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751923AbaJ0Cbw convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 26 Oct 2014 22:31:52 -0400
-In-Reply-To: <alpine.DEB.2.00.1410241810300.13498@cobra.newdream.net>
+	with ESMTP id S1750927AbaJ0EOI convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Oct 2014 00:14:08 -0400
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@newdream.net>, Philip Kufeldt <Philip.Kufeldt@taec.toshiba.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+
+Sage,
+
+Good news, I am able to create the OSD successfully, let's see what's in store next.
+
+It was an issue with  leveldb1.17 not having  either memory barrier or atomic operation support for DEBIAN MIPS???
+Not even the latest version leveldb1.18  I pulled from https://github.com/google/leveldb.
+
+But this link  talks about that https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=681945
+
+So, I ported over the memory barrier/atomic fix for MIPS onto leveldb1.17... I had to look into the mips/barrier.h files on our eval board, to make sure
+We had the correct macros.
+
+Now, my osd creation is successful on the MIPS, created object store /var/lib/ceph/osd/ceph-0 journal /dev/sda2 for osd.0 fsid f615496c-b40a-4905-bbcd-2d3e181ff21a
+I have to start looking into the CLIENT/MONITOR side to make sure everything is good.
+
+Really thankful for your suggestions for this quick resolution, for now we are good, untill the next and then the next......
+
+Thanks
+Prashanth
+
+-----Original Message-----
+From: Prashanth Nednoor 
+Sent: Sunday, October 26, 2014 7:32 PM
+To: 'Sage Weil'; Philip Kufeldt
+Cc: ceph-devel@vger.kernel.org
+Subject: RE: Having issues trying to get the OSD up on a MIPS64!!!
 
 Hi Sage,
 
@@ -31,7 +57,7 @@ Thanks
 Prashanth
 
 -----Original Message-----
-From: Sage Weil [mailto:sage@newdream.net] 
+From: Sage Weil [mailto:sage@newdream.net]
 Sent: Friday, October 24, 2014 6:11 PM
 To: Philip Kufeldt
 Cc: Prashanth Nednoor; ceph-devel@vger.kernel.org
@@ -68,7 +94,7 @@ sage
 > > > My udev version is udevd --version 164
 > > 
 > > Hmm, that should be new enough, but it seems like it isn't setting 
-> > up the links.  What distro is it?  On most systems it's 
+> > up the links.  What distro is it?  On most systems it's
 > > /lib/udev/rules.d/60-persistent- storage.rules that does it.  Maybe 
 > > see if running partprobe /dev/sda or run 'udevadm monitor' and do 
 > > 'udevadm trigger /dev/sda' in another terminal to see what happens.
@@ -109,34 +135,34 @@ sage
 > > const&) ()
 > > >    from /usr/local/lib/libleveldb.so.1
 > > > #4  0x77f7e93c in
-> > > leveldb::WriteBatch::Iterate(leveldb::WriteBatch::Handler*) const 
+> > > leveldb::WriteBatch::Iterate(leveldb::WriteBatch::Handler*) const
 > > > () from /usr/local/lib/libleveldb.so.1
 > > > #5  0x77f7eb8c in
-> > > leveldb::WriteBatchInternal::InsertInto(leveldb::WriteBatch 
+> > > leveldb::WriteBatchInternal::InsertInto(leveldb::WriteBatch
 > > > const*,
 > > > leveldb::MemTable*) () from /usr/local/lib/libleveldb.so.1
-> > > #6  0x77f59360 in leveldb::DBImpl::Write(leveldb::WriteOptions 
+> > > #6  0x77f59360 in leveldb::DBImpl::Write(leveldb::WriteOptions
 > > > const&,
 > > > leveldb::WriteBatch*) () from /usr/local/lib/libleveldb.so.1
 > > > #7  0x00a5dda0 in LevelDBStore::submit_transaction_sync
-> > > (this=0x1f77d10, t=<value optimized out>) at 
+> > > (this=0x1f77d10, t=<value optimized out>) at
 > > > os/LevelDBStore.cc:146
 > > > #8  0x00b0d344 in DBObjectMap::sync (this=0x1f7af28, oid=0x0,
 > > > spos=0x72cfe3b8) at os/DBObjectMap.cc:1126
 > > > #9  0x009b10b8 in FileStore::_set_replay_guard (this=0x1f72450, 
-> > > fd=17, spos=..., hoid=0x0, in_progress=false) at 
+> > > fd=17, spos=..., hoid=0x0, in_progress=false) at
 > > > os/FileStore.cc:2070
 > > > #10 0x009b1c0c in FileStore::_set_replay_guard (this=0x1f72450,
 > > cid=DWARF-2 expression error: DW_OP_reg operations must be used 
 > > either alone or in conjuction with DW_OP_piece.
 > > > ) at os/FileStore.cc:2047
-> > > #11 0x009b2138 in FileStore::_create_collection (this=0x1f72450, 
+> > > #11 0x009b2138 in FileStore::_create_collection (this=0x1f72450,
 > > > c=DWARF-
 > > 2 expression error: DW_OP_reg operations must be used either alone 
 > > or in conjuction with DW_OP_piece.
 > > > ) at os/FileStore.cc:4753
 > > > #12 0x009e42a8 in FileStore::_do_transaction (this=0x1f72450, 
-> > > t=..., op_seq=<value optimized out>, trans_num=0, 
+> > > t=..., op_seq=<value optimized out>, trans_num=0,
 > > > handle=0x72cfec3c) at
 > > > os/FileStore.cc:2413
 > > > #13 0x009eb47c in FileStore::_do_transactions (this=0x1f72450, 
@@ -144,7 +170,7 @@ sage
 > > > #14 0x009eb858 in FileStore::_do_op (this=0x1f72450, 
 > > > osr=0x1f801b8,
 > > > handle=...) at os/FileStore.cc:1761
-> > > #15 0x00c8f0bc in ThreadPool::worker (this=0x1f72cf0, 
+> > > #15 0x00c8f0bc in ThreadPool::worker (this=0x1f72cf0,
 > > > wt=0x1f7ea90) at
 > > > common/WorkQueue.cc:128
 > > > #16 0x00c91b94 in ThreadPool::WorkThread::entry() ()
@@ -212,14 +238,14 @@ sage
 > > > > 23c2fcde/osd_superblock/0//-1 in index: (2) No such file.
 > > > > After this it segfaults. We have analyzed this further with the 
 > > > > help of strace and root caused this as objectmap file reading issue.
-> > > > open("/var/lib/ceph/osd/ceph-0/current/omap/000005.log", 
+> > > > open("/var/lib/ceph/osd/ceph-0/current/omap/000005.log",
 > > > > O_RDONLY)
 > > =
 > > > > 11, the first time it reads 32k, the read succeeds with 63 bytes 
 > > > > and it tries to read again with 27k and the read returns 0 bytes 
 > > > > and the CEPH osd segfaults.
 > > >
-> > > Can you generate a full log with --debug-osd 20 --debug-filestore 
+> > > Can you generate a full log with --debug-osd 20 --debug-filestore
 > > > 20 --
 > > debug-jouranl 20 passed to ceph-osd --mkfs and post that somewhere?  
 > > It should tell us where things are going wrong.  In particular, we 
