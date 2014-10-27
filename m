@@ -1,39 +1,232 @@
-From: Mark Kirkwood <mark.kirkwood-6STWZtX7tXAqAMOr+u8IRA@public.gmane.org>
-Subject: Re: fio rbd completions (Was: fio rbd hang for block sizes > 1M)
-Date: Tue, 28 Oct 2014 10:59:57 +1300
-Message-ID: <544EC05D.7040807@catalyst.net.nz>
-References: <5449BBB3.7090109@catalyst.net.nz> <5449E50E.7000808@kernel.dk> <5449EEF1.1060407@catalyst.net.nz> <544A51C7.40803@gmail.com> <544A5DA6.2010709@gmail.com> <544AD67D.4030603@catalyst.net.nz> <544AEAE7.6080603@redhat.com> <544AF0D2.1050405@catalyst.net.nz> <544B0C7F.4080109@catalyst.net.nz> <544B1D50.4010101@kernel.dk> <544B2C19.7070009@catalyst.net.nz> <544BF808.2090800@kernel.dk> <544C2371.1020403@catalyst.net.nz> <544E547C.30009@kernel.dk> <CAM9_UU9j2erdGT5kqKi_+5z5ERFMPO1hHwMk8kaFjLkGm-zp-g@mail.gmail.com> <544E6330.1000202@kernel.dk> <544E63EA.1010204@kernel.dk> <CAM9_UU-35i9uRu9EDQSM-b7CjmxrKYV2Gz8ocrykOYk+2q++hw@mail.gmail.com> <544E6691.106@kernel.dk> <CAM9_UU9_ZHtwv=31DyxkAmog7XJbthiRXi5n+Y0Cfxj4qm3bGQ@mail.gmail.com> <544E6A8D.1040608@kernel.dk> <CAM9_UU8x2uZZUWaPPoy+LH
- mUhC_3sqKZ9GPsEqDwKUkprg4kdQ@mail.gmail.com>
+From: Samuel Just <sam.just@inktank.com>
+Subject: Re: OSDs crashing with Operation Not Permitted on reading PGLog
+Date: Mon, 27 Oct 2014 15:00:01 -0700
+Message-ID: <CA+4uBUYnymMAjCUjHjzi_dNNmu7gCjfMBsNJETa2_T5c=JxvBA@mail.gmail.com>
+References: <544EB2EF.1000808@42on.com>
+	<CA+4uBUaN8STAmfE7CkQvrBPK8UUGiybRbvgfMWbKp1784gVDaw@mail.gmail.com>
+	<544EB623.8090205@42on.com>
+	<CA+4uBUbM7zaEuJik4=fG7fVhn-WWFh8mwXMGjrV_FRRW_EksTg@mail.gmail.com>
+	<544EBC91.6060108@42on.com>
+	<CA+4uBUYBzmYaiNq69d3tS-QHOE4ywks9_uYJFuxpsyVXFmyTSA@mail.gmail.com>
+	<544EBE0E.20304@42on.com>
+	<CA+4uBUY2Ddcs0YffY4Z1e2fCFvE387hyuMvE+PBhMtBJY87yDA@mail.gmail.com>
+	<544EBEC8.2060900@42on.com>
+	<CA+4uBUaC+C2H3bFPcuetsu2O9p=8POYOJpb2C183-vC=n0e6RA@mail.gmail.com>
+	<544EBF8C.10309@42on.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <fio-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAM9_UU8x2uZZUWaPPoy+LHmUhC_3sqKZ9GPsEqDwKUkprg4kdQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: fio-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ketor D <d.ketor-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Jens Axboe <axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org>
-Cc: Mark Nelson <mark.nelson-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>, Mark Nelson <mark.a.nelson-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, fio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "xan.peng" <xanpeng-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-la0-f49.google.com ([209.85.215.49]:35190 "EHLO
+	mail-la0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752407AbaJ0WAD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Oct 2014 18:00:03 -0400
+Received: by mail-la0-f49.google.com with SMTP id ge10so1438522lab.8
+        for <ceph-devel@vger.kernel.org>; Mon, 27 Oct 2014 15:00:01 -0700 (PDT)
+In-Reply-To: <544EBF8C.10309@42on.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Wido den Hollander <wido@42on.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 28/10/14 05:20, Ketor D wrote:
-> V8 patch runs good.
+Try running with osd_leveldb_paranoid=true and
+osd_leveldb_log=/var/log/ceph/osd/ceph-osd.<id>.log.leveldb on that
+osd.
+-Sam
+
+On Mon, Oct 27, 2014 at 2:56 PM, Wido den Hollander <wido@42on.com> wrote:
+> On 10/27/2014 10:55 PM, Samuel Just wrote:
+>> There is nothing in dmesg?
 >
-> The iops is 33032. If I just comment the usleep(100) in the master, I
-> can get iops 35245.
-> The CPU usage about the two test is same 120%.
-> So maybe this patch could be better!
+> No. The filesystem mounts cleanly and I even ran xfs_repair to see if
+> there was anything wrong with it.
 >
-
-Yeah, v8 is working for me.
-
-I'm seeing it a bit slower for some blocksizes, but faster (or perhaps 
-about the same within repeat measurement error) for others:
-
-blocksize k |  patched iops | orig iops
-------------+---------------+-----------
-4           | 12265         | 11930
-128         |  5800         |  7100
-1024        |  1193         |  1196
-
-Regards
-
-Mark
+> All goes just fine. It's only the OSD which is crashing.
+>
+> Wido
+>
+>> -Sam
+>>
+>> On Mon, Oct 27, 2014 at 2:53 PM, Wido den Hollander <wido@42on.com> wrote:
+>>> On 10/27/2014 10:52 PM, Samuel Just wrote:
+>>>> I mean, the 5 osds, different nodes?
+>>>
+>>> Yes. The cluster consists out of 16 nodes and all these OSDs are on
+>>> different nodes.
+>>>
+>>> All running Ubuntu 12.04 with Ceph 0.80.7
+>>>
+>>> Wido
+>>>
+>>>> -Sam
+>>>>
+>>>> On Mon, Oct 27, 2014 at 2:50 PM, Wido den Hollander <wido@42on.com> wrote:
+>>>>> On 10/27/2014 10:48 PM, Samuel Just wrote:
+>>>>>> Different nodes?
+>>>>>
+>>>>> No, they are both from osd.25
+>>>>>
+>>>>> I re-ran the strace with a empty logfile since the old logfile became
+>>>>> pretty big.
+>>>>>
+>>>>> Wido
+>>>>>
+>>>>>> -Sam
+>>>>>>
+>>>>>> On Mon, Oct 27, 2014 at 2:43 PM, Wido den Hollander <wido@42on.com> wrote:
+>>>>>>> On 10/27/2014 10:35 PM, Samuel Just wrote:
+>>>>>>>> The file is supposed to be 0 bytes, can you attach the log which went
+>>>>>>>> with that strace?
+>>>>>>>
+>>>>>>> Yes, two URLs:
+>>>>>>>
+>>>>>>> * http://ceph.o.auroraobjects.eu/ceph-osd.25.log.gz
+>>>>>>> * http://ceph.o.auroraobjects.eu/ceph-osd.25.strace.gz
+>>>>>>>
+>>>>>>> It was with debug_filestore on 20.
+>>>>>>>
+>>>>>>> Wido
+>>>>>>>
+>>>>>>>> -Sam
+>>>>>>>>
+>>>>>>>> On Mon, Oct 27, 2014 at 2:16 PM, Wido den Hollander <wido@42on.com> wrote:
+>>>>>>>>> On 10/27/2014 10:05 PM, Samuel Just wrote:
+>>>>>>>>>> Try reproducing with an strace.
+>>>>>>>>>
+>>>>>>>>> I did so and this is the result:
+>>>>>>>>> http://ceph.o.auroraobjects.eu/ceph-osd.25.strace.gz
+>>>>>>>>>
+>>>>>>>>> It does this stat:
+>>>>>>>>>
+>>>>>>>>> stat("/var/lib/ceph/osd/ceph-25/current/meta/DIR_D/DIR_C"
+>>>>>>>>>
+>>>>>>>>> That fails with: -1 ENOENT (No such file or directory)
+>>>>>>>>>
+>>>>>>>>> Afterwards it open this pglog:
+>>>>>>>>> /var/lib/ceph/osd/ceph-25/current/meta/DIR_D/pglog\\u14.1a56__0_A1630ECD__none
+>>>>>>>>>
+>>>>>>>>> That file is however 0 bytes. (And all other files in the same directory).
+>>>>>>>>>
+>>>>>>>>> Afterwards the OSD asserts and writes to the log.
+>>>>>>>>>
+>>>>>>>>> Wido
+>>>>>>>>>
+>>>>>>>>>> -Sam
+>>>>>>>>>>
+>>>>>>>>>> On Mon, Oct 27, 2014 at 2:02 PM, Wido den Hollander <wido@42on.com> wrote:
+>>>>>>>>>>> Hi,
+>>>>>>>>>>>
+>>>>>>>>>>> On a 0.80.7 cluster I'm experiencing a couple of OSDs refusing to start
+>>>>>>>>>>> due to a crash they encounter when reading the PGLog.
+>>>>>>>>>>>
+>>>>>>>>>>> A snippet of the log:
+>>>>>>>>>>>
+>>>>>>>>>>>    -11> 2014-10-27 21:56:04.690046 7f034a006800 10
+>>>>>>>>>>> filestore(/var/lib/ceph/osd/ceph-25) _do_transaction on 0x392e600
+>>>>>>>>>>>    -10> 2014-10-27 21:56:04.690078 7f034a006800 20
+>>>>>>>>>>> filestore(/var/lib/ceph/osd/ceph-25) _check_global_replay_guard no xattr
+>>>>>>>>>>>     -9> 2014-10-27 21:56:04.690140 7f034a006800 20
+>>>>>>>>>>> filestore(/var/lib/ceph/osd/ceph-25) _check_replay_guard no xattr
+>>>>>>>>>>>     -8> 2014-10-27 21:56:04.690150 7f034a006800 15
+>>>>>>>>>>> filestore(/var/lib/ceph/osd/ceph-25) touch meta/a1630ecd/pglog_14.1a56/0//-1
+>>>>>>>>>>>     -7> 2014-10-27 21:56:04.690184 7f034a006800 10
+>>>>>>>>>>> filestore(/var/lib/ceph/osd/ceph-25) touch
+>>>>>>>>>>> meta/a1630ecd/pglog_14.1a56/0//-1 = 0
+>>>>>>>>>>>     -6> 2014-10-27 21:56:04.690196 7f034a006800 15
+>>>>>>>>>>> filestore(/var/lib/ceph/osd/ceph-25) _omap_rmkeys
+>>>>>>>>>>> meta/a1630ecd/pglog_14.1a56/0//-1
+>>>>>>>>>>>     -5> 2014-10-27 21:56:04.690290 7f034a006800 10 filestore oid:
+>>>>>>>>>>> a1630ecd/pglog_14.1a56/0//-1 not skipping op, *spos 1435883.0.2
+>>>>>>>>>>>     -4> 2014-10-27 21:56:04.690295 7f034a006800 10 filestore  >
+>>>>>>>>>>> header.spos 0.0.0
+>>>>>>>>>>>     -3> 2014-10-27 21:56:04.690314 7f034a006800  0
+>>>>>>>>>>> filestore(/var/lib/ceph/osd/ceph-25)  error (1) Operation not permitted
+>>>>>>>>>>> not handled on operation 33 (1435883.0.2, or op 2, counting from 0)
+>>>>>>>>>>>     -2> 2014-10-27 21:56:04.690325 7f034a006800  0
+>>>>>>>>>>> filestore(/var/lib/ceph/osd/ceph-25) unexpected error code
+>>>>>>>>>>>     -1> 2014-10-27 21:56:04.690327 7f034a006800  0
+>>>>>>>>>>> filestore(/var/lib/ceph/osd/ceph-25)  transaction dump:
+>>>>>>>>>>> { "ops": [
+>>>>>>>>>>>         { "op_num": 0,
+>>>>>>>>>>>           "op_name": "nop"},
+>>>>>>>>>>>         { "op_num": 1,
+>>>>>>>>>>>           "op_name": "touch",
+>>>>>>>>>>>           "collection": "meta",
+>>>>>>>>>>>           "oid": "a1630ecd\/pglog_14.1a56\/0\/\/-1"},
+>>>>>>>>>>>         { "op_num": 2,
+>>>>>>>>>>>           "op_name": "omap_rmkeys",
+>>>>>>>>>>>           "collection": "meta",
+>>>>>>>>>>>           "oid": "a1630ecd\/pglog_14.1a56\/0\/\/-1"},
+>>>>>>>>>>>         { "op_num": 3,
+>>>>>>>>>>>           "op_name": "omap_setkeys",
+>>>>>>>>>>>           "collection": "meta",
+>>>>>>>>>>>           "oid": "a1630ecd\/pglog_14.1a56\/0\/\/-1",
+>>>>>>>>>>>           "attr_lens": { "can_rollback_to": 12}}]}
+>>>>>>>>>>>      0> 2014-10-27 21:56:04.691992 7f034a006800 -1 os/FileStore.cc: In
+>>>>>>>>>>> function 'unsigned int
+>>>>>>>>>>> FileStore::_do_transaction(ObjectStore::Transaction&, uint64_t, int,
+>>>>>>>>>>> ThreadPool::TPHandle*)' thread 7f034a006800 time 2014-10-27 21:56:04.690368
+>>>>>>>>>>> os/FileStore.cc: 2559: FAILED assert(0 == "unexpected error")
+>>>>>>>>>>>
+>>>>>>>>>>>
+>>>>>>>>>>> The backing XFS filesystem seems to be OK, but isn't this a leveldb
+>>>>>>>>>>> issue where the omap information is stored?
+>>>>>>>>>>>
+>>>>>>>>>>> Anyone seen this before? I have about 5 OSDs (out of the 336) which are
+>>>>>>>>>>> showing this problem when booting.
+>>>>>>>>>>>
+>>>>>>>>>>> --
+>>>>>>>>>>> Wido den Hollander
+>>>>>>>>>>> 42on B.V.
+>>>>>>>>>>> Ceph trainer and consultant
+>>>>>>>>>>>
+>>>>>>>>>>> Phone: +31 (0)20 700 9902
+>>>>>>>>>>> Skype: contact42on
+>>>>>>>>>>> --
+>>>>>>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>>>>>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>>>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>>>>>>
+>>>>>>>>>
+>>>>>>>>> --
+>>>>>>>>> Wido den Hollander
+>>>>>>>>> 42on B.V.
+>>>>>>>>> Ceph trainer and consultant
+>>>>>>>>>
+>>>>>>>>> Phone: +31 (0)20 700 9902
+>>>>>>>>> Skype: contact42on
+>>>>>>>
+>>>>>>>
+>>>>>>> --
+>>>>>>> Wido den Hollander
+>>>>>>> 42on B.V.
+>>>>>>> Ceph trainer and consultant
+>>>>>>>
+>>>>>>> Phone: +31 (0)20 700 9902
+>>>>>>> Skype: contact42on
+>>>>>
+>>>>>
+>>>>> --
+>>>>> Wido den Hollander
+>>>>> 42on B.V.
+>>>>> Ceph trainer and consultant
+>>>>>
+>>>>> Phone: +31 (0)20 700 9902
+>>>>> Skype: contact42on
+>>>
+>>>
+>>> --
+>>> Wido den Hollander
+>>> 42on B.V.
+>>> Ceph trainer and consultant
+>>>
+>>> Phone: +31 (0)20 700 9902
+>>> Skype: contact42on
+>
+>
+> --
+> Wido den Hollander
+> 42on B.V.
+> Ceph trainer and consultant
+>
+> Phone: +31 (0)20 700 9902
+> Skype: contact42on
