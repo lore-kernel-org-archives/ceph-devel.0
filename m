@@ -1,81 +1,62 @@
-From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: [PATCH] libceph: eliminate unnecessary allocation in process_one_ticket()
-Date: Mon, 27 Oct 2014 19:06:12 +0300
-Message-ID: <1414425972-10703-1-git-send-email-idryomov@redhat.com>
+From: Ketor D <d.ketor@gmail.com>
+Subject: Re: fio rbd completions (Was: fio rbd hang for block sizes > 1M)
+Date: Tue, 28 Oct 2014 00:20:39 +0800
+Message-ID: <CAM9_UU8x2uZZUWaPPoy+LHmUhC_3sqKZ9GPsEqDwKUkprg4kdQ@mail.gmail.com>
+References: <5449BBB3.7090109@catalyst.net.nz> <5449E50E.7000808@kernel.dk>
+ <5449EEF1.1060407@catalyst.net.nz> <544A51C7.40803@gmail.com>
+ <544A5DA6.2010709@gmail.com> <544AD67D.4030603@catalyst.net.nz>
+ <544AEAE7.6080603@redhat.com> <544AF0D2.1050405@catalyst.net.nz>
+ <544B0C7F.4080109@catalyst.net.nz> <544B1D50.4010101@kernel.dk>
+ <544B2C19.7070009@catalyst.net.nz> <544BF808.2090800@kernel.dk>
+ <544C2371.1020403@catalyst.net.nz> <544E547C.30009@kernel.dk>
+ <CAM9_UU9j2erdGT5kqKi_+5z5ERFMPO1hHwMk8kaFjLkGm-zp-g@mail.gmail.com>
+ <544E6330.1000202@kernel.dk> <544E63EA.1010204@kernel.dk> <CAM9_UU-35i9uRu9EDQSM-b7CjmxrKYV2Gz8ocrykOYk+2q++hw@mail.gmail.com>
+ <544E6691.106@kernel.dk> <CAM9_UU9_ZHtwv=31DyxkAmog7XJbthiRXi5n+Y0Cfxj4qm3bGQ@mail.gmail.com>
+ <544E6A8D.1040608@kernel.dk>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f174.google.com ([209.85.217.174]:36125 "EHLO
-	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752217AbaJ0QGX (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Oct 2014 12:06:23 -0400
-Received: by mail-lb0-f174.google.com with SMTP id p9so5921043lbv.5
-        for <ceph-devel@vger.kernel.org>; Mon, 27 Oct 2014 09:06:22 -0700 (PDT)
-Received: from localhost ([109.110.67.111])
-        by mx.google.com with ESMTPSA id g5sm346461lam.1.2014.10.27.09.06.20
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=RC4-SHA bits=128/128);
-        Mon, 27 Oct 2014 09:06:21 -0700 (PDT)
+Received: from mail-oi0-f51.google.com ([209.85.218.51]:60116 "EHLO
+	mail-oi0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751451AbaJ0QVK (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Oct 2014 12:21:10 -0400
+In-Reply-To: <544E6A8D.1040608@kernel.dk>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Jens Axboe <axboe@kernel.dk>
+Cc: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>, Mark Nelson <mark.nelson@inktank.com>, Mark Nelson <mark.a.nelson@gmail.com>, fio@vger.kernel.org, "xan.peng" <xanpeng@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Commit c27a3e4d667f ("libceph: do not hard code max auth ticket len")
-while fixing a buffer overlow tried to keep the same as much of the
-surrounding code as possible and introduced an unnecessary kmalloc() in
-the unencrypted ticket path.  It is likely to fail on huge tickets, so
-get rid of it.
+V8 patch runs good.
 
-Signed-off-by: Ilya Dryomov <idryomov@redhat.com>
----
- net/ceph/auth_x.c |   25 ++++++++++---------------
- 1 file changed, 10 insertions(+), 15 deletions(-)
+The iops is 33032. If I just comment the usleep(100) in the master, I
+can get iops 35245.
+The CPU usage about the two test is same 120%.
+So maybe this patch could be better!
 
-diff --git a/net/ceph/auth_x.c b/net/ceph/auth_x.c
-index de6662b14e1f..7e38b729696a 100644
---- a/net/ceph/auth_x.c
-+++ b/net/ceph/auth_x.c
-@@ -149,6 +149,7 @@ static int process_one_ticket(struct ceph_auth_client *ac,
- 	struct ceph_crypto_key old_key;
- 	void *ticket_buf = NULL;
- 	void *tp, *tpend;
-+	void **ptp;
- 	struct ceph_timespec new_validity;
- 	struct ceph_crypto_key new_session_key;
- 	struct ceph_buffer *new_ticket_blob;
-@@ -208,25 +209,19 @@ static int process_one_ticket(struct ceph_auth_client *ac,
- 			goto out;
- 		}
- 		tp = ticket_buf;
--		dlen = ceph_decode_32(&tp);
-+		ptp = &tp;
-+		tpend = *ptp + dlen;
- 	} else {
- 		/* unencrypted */
--		ceph_decode_32_safe(p, end, dlen, bad);
--		ticket_buf = kmalloc(dlen, GFP_NOFS);
--		if (!ticket_buf) {
--			ret = -ENOMEM;
--			goto out;
--		}
--		tp = ticket_buf;
--		ceph_decode_need(p, end, dlen, bad);
--		ceph_decode_copy(p, ticket_buf, dlen);
-+		ptp = p;
-+		tpend = end;
- 	}
--	tpend = tp + dlen;
-+	ceph_decode_32_safe(ptp, tpend, dlen, bad);
- 	dout(" ticket blob is %d bytes\n", dlen);
--	ceph_decode_need(&tp, tpend, 1 + sizeof(u64), bad);
--	blob_struct_v = ceph_decode_8(&tp);
--	new_secret_id = ceph_decode_64(&tp);
--	ret = ceph_decode_buffer(&new_ticket_blob, &tp, tpend);
-+	ceph_decode_need(ptp, tpend, 1 + sizeof(u64), bad);
-+	blob_struct_v = ceph_decode_8(ptp);
-+	new_secret_id = ceph_decode_64(ptp);
-+	ret = ceph_decode_buffer(&new_ticket_blob, ptp, tpend);
- 	if (ret)
- 		goto out;
- 
--- 
-1.7.10.4
+Belong to the master, this patch is perfect enough!!
 
+
+2014-10-27 23:53 GMT+08:00 Jens Axboe <axboe@kernel.dk>:
+> On 10/27/2014 09:45 AM, Ketor D wrote:
+>> The return code is 0 if success.I mod the code a bit and then run fio very well.
+>> I think if you fix this bug, the path will be nearly pefect!!
+>>
+>> ret = rbd_aio_get_return_value(fri->completion);
+>> //printf("ret=%ld\n", ret);
+>> //if (ret != (int) io_u->xfer_buflen) {
+>> if (ret != 0) {
+>> if (ret >= 0) {
+>> io_u->resid = io_u->xfer_buflen - ret;
+>> io_u->error = 0;
+>> } else
+>> io_u->error = ret;
+>> }
+>
+> Weird, so it does not do partial completions I assume. Modified -v8 to
+> take that into account, hopefully this just works out-of-the-box.
+>
+> What does the performance numbers look like for your sync test with this?
+>
+> --
+> Jens Axboe
+>
