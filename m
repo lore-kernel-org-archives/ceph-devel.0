@@ -1,44 +1,58 @@
-From: Janne Grunau <j@jannau.net>
-Subject: Re: [PATCH 2/5] autotools: ARM/AArch64 NEON detection similar to x86
-Date: Mon, 27 Oct 2014 19:49:38 +0100
-Message-ID: <20141027184938.GB4489@jannau.net>
-References: <1414434036-29313-1-git-send-email-j@jannau.net>
- <1414434036-29313-3-git-send-email-j@jannau.net>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: [PATCH] reinstate ceph cluster_snap support
+Date: Mon, 27 Oct 2014 14:00:57 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1410271357160.15740@cobra.newdream.net>
+References: <orob8qt7kf.fsf@livre.home> <alpine.DEB.2.00.1308231715500.28981@cobra.newdream.net> <ortxifi1cs.fsf@livre.home> <alpine.DEB.2.00.1308271515500.24783@cobra.newdream.net> <orbnp6uofj.fsf@free.home>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from soltyk.jannau.net ([185.27.253.110]:59408 "EHLO
-	soltyk.jannau.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751977AbaJ0Stj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Oct 2014 14:49:39 -0400
-Content-Disposition: inline
-In-Reply-To: <1414434036-29313-3-git-send-email-j@jannau.net>
+Received: from cobra.newdream.net ([66.33.216.30]:48901 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752158AbaJ0VA6 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Oct 2014 17:00:58 -0400
+In-Reply-To: <orbnp6uofj.fsf@free.home>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Alexandre Oliva <oliva@gnu.org>
+Cc: sam.just@inktank.com, ceph-devel@vger.kernel.org
 
-On 2014-10-27 19:20:33 +0100, Janne Grunau wrote:
-> ---
->  configure.ac |  7 +++----
->  m4/ax_arm.m4 | 27 +++++++++++++++++++++++++++
->  2 files changed, 30 insertions(+), 4 deletions(-)
->  create mode 100644 m4/ax_arm.m4
+On Tue, 21 Oct 2014, Alexandre Oliva wrote:
+> On Aug 27, 2013, Sage Weil <sage@inktank.com> wrote:
 > 
-> diff --git a/configure.ac b/configure.ac
-> index d994712..feb85a1 100644
-> --- a/configure.ac
-> +++ b/configure.ac
-> @@ -141,9 +141,6 @@ AC_DEFUN([AC_CHECK_CC_FLAG],
->  AC_CHECK_CC_FLAG([-Wtype-limits], [WARN_TYPE_LIMITS])
->  AC_CHECK_CC_FLAG([-Wignored-qualifiers], [WARN_IGNORED_QUALIFIERS])
->  
-> -# Checks for architecture stuff
-> -AM_CONDITIONAL([ENABLE_FPU_NEON], [case $target_cpu in arm*) true;; *) false;; esac])
-> -
+> > Finally, eventually we should make this do a checkpoint on the mons too.  
+> > We can add the osd snapping back in first, but before this can/should 
+> > really be used the mons need to be snapshotted as well.  Probably that's 
+> > just adding in a snapshot() method to MonitorStore.h and doing either a 
+> > leveldb snap or making a full copy of store.db... I forget what leveldb is 
+> > capable of here.
+> 
+> I suppose it might be a bit too late for Giant, but I finally got 'round
+> to implementing this.  I attach the patch that implements it, to be
+> applied on top of the updated version of the patch I posted before, also
+> attached.
+> 
+> I have a backport to Firefly too, if there's interest.
+> 
+> I have tested both methods: btrfs snapshotting of store.db (I've
+> manually turned store.db into a btrfs subvolume), and creating a new db
+> with all (prefix,key,value) triples.  I'm undecided about inserting
+> multiple transaction commits for the latter case; the mon mem use grew
+> up a lot as it was, and in a few tests the snapshotting ran twice, but
+> in the end a dump of all the data in the database created by btrfs
+> snapshotting was identical to that created by explicit copying.  So, the
+> former is preferred, since it's so incredibly more efficient.  I also
+> considered hardlinking all files in store.db into a separate tree, but I
+> didn't like the idea of coding that in C+-, :-) and I figured it might
+> not work with other db backends, and maybe even not be guaranteed to
+> work with leveldb.  It's probably not worth much more effort.
 
-This conflicts with the wip-neon-crc32c branch. I removed it since 
-ENABLE_FPU_NEON is currently unused. I think that branch should be 
-updated to use the defines/flags in this patch since this is more in 
-line with behaviour for x86.
+This looks pretty reasonable!
 
-Janne
+I think we definitely need to limit the size of the transaction when doing 
+the snap.  The attached patch seems to try to do it all in one go, which 
+is not going to work for large clusters.  Either re-use an existing 
+tunable like the sync chunk size or add a new one?
+
+Thanks!
+sage
+
