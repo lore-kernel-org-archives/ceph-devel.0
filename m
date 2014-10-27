@@ -1,492 +1,268 @@
-From: "Meng, Chen" <chen.meng-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: [ceph 0.72.2] PGs are incomplete status after some
- OSDs are out of cluster
-Date: Mon, 27 Oct 2014 01:41:42 +0000
-Message-ID: <1FC8FDB3BDEB4F4F9A6DBC50FBC0163601B39870@SHSMSX103.ccr.corp.intel.com>
+From: Prashanth Nednoor <Prashanth.Nednoor@taec.toshiba.com>
+Subject: RE: Having issues trying to get the OSD up on a MIPS64!!!
+Date: Mon, 27 Oct 2014 02:31:50 +0000
+Message-ID: <BC9BE980F12C4446A1CB0380E1C97DCD3390DAC7@EXMAIL1.taec.toshiba.com>
+References: <loom.20141023T030922-990@post.gmane.org>
+ <alpine.DEB.2.00.1410231749420.13498@cobra.newdream.net>
+ <BC9BE980F12C4446A1CB0380E1C97DCD3390D99A@EXMAIL1.taec.toshiba.com>
+ <alpine.DEB.2.00.1410241743490.13498@cobra.newdream.net>
+ <71E1B92E73606A4ABC3D0EC55B2BF09834221AED@EXMAIL1.taec.toshiba.com>
+ <alpine.DEB.2.00.1410241810300.13498@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0853787352=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-Content-Language: en-US
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
-
---===============0853787352==
-Content-Language: en-US
-Content-Type: multipart/alternative;
-	boundary="_000_1FC8FDB3BDEB4F4F9A6DBC50FBC0163601B39870SHSMSX103ccrcor_"
-
---_000_1FC8FDB3BDEB4F4F9A6DBC50FBC0163601B39870SHSMSX103ccrcor_
-Content-Type: text/plain; charset="iso-2022-jp"
-Content-Transfer-Encoding: quoted-printable
-
-Hi, Cepher
-
-I meet the issue with ceph 0.72.2 that some OSDs are down & out and cannot =
-rejoin the cluster via restart osd daemon.
-Here below is I captured from the osd log which are down & out. All of them=
- have the same error info.
-
-
-2014-10-22 16:49:18.834850 7fc2d3fd9700  0 filestore(/var/lib/ceph/osd/ceph=
--28)  error (39) Directory not empty not handled on operation 21 (72744853.=
-0.2, or op 2, counting from 0)
-
-2014-10-22 16:49:18.834897 7fc2d3fd9700  0 filestore(/var/lib/ceph/osd/ceph=
--28) ENOTEMPTY suggests garbage data in osd data dir
-
-2014-10-22 16:49:18.834899 7fc2d3fd9700  0 filestore(/var/lib/ceph/osd/ceph=
--28)  transaction dump:
-
-{ "ops": [
-
-        { "op_num": 0,
-
-          "op_name": "remove",
-
-          "collection": "meta",
-
-          "oid": "bfa3b7d0\/pglog_3.194a\/0\/\/-1"},
-
-        { "op_num": 1,
-
-          "op_name": "omap_rmkeys",
-
-          "collection": "meta",
-
-          "oid": "16ef7597\/infos\/head\/\/-1"},
-
-        { "op_num": 2,
-
-          "op_name": "rmcoll",
-
-          "collection": "3.194a_head"}]}
-
-2014-10-22 16:49:18.951947 7fc2d3fd9700 -1 os/FileStore.cc: In function 'un=
-signed int FileStore::_do_transaction(ObjectStore::Transaction&, uint64_t, =
-int, ThreadPool::TPHandle*)' thread 7fc2d3fd9700 time 2014-10-22 16:49:18.8=
-59039
-
-os/FileStore.cc: 2448: FAILED assert(0 =3D=3D "unexpected error")
-
-
-Before that 2 days, I take add some new OSDs into cluster and increase the =
-PG #.
-I manually add OSDs which is lost one by one follow the process of add new =
-OSD, it takes a long time to recovey.
-And now, ceph health detail shows as following, all OSDs are up and in.
-
-HEALTH_WARN 14 pgs backfilling; 4 pgs degraded; 2 pgs incomplete; 2 pgs stu=
-ck inactive; 16 pgs stuck unclean; 200 requests are blocked > 32 sec; 2 osd=
-s have slow requests; recovery 13269/10624283 objects degraded (0.125%)
-pg 3.1019 is stuck inactive since forever, current state incomplete, last a=
-cting [44,39,35]
-pg 3.13c4 is stuck inactive since forever, current state incomplete, last a=
-cting [49,66,16]
-pg 4.df8 is stuck unclean for 719511.538414, current state active+degraded+=
-remapped+backfilling, last acting [62,37]
-pg 3.1f3e is stuck unclean for 722343.421598, current state active+remapped=
-+backfilling, last acting [62,33,35,27]
-pg 3.1019 is stuck unclean since forever, current state incomplete, last ac=
-ting [44,39,35]
-pg 3.1852 is stuck unclean for 725266.838670, current state active+remapped=
-+backfilling, last acting [5,59,37,35]
-pg 3.13c4 is stuck unclean since forever, current state incomplete, last ac=
-ting [49,66,16]
-pg 4.1848 is stuck unclean for 828659.231379, current state active+degraded=
-+remapped+backfilling, last acting [12,37,62]
-pg 3.160b is stuck unclean for 726568.972467, current state active+remapped=
-+backfilling, last acting [58,33,5,57]
-pg 4.252 is stuck unclean for 757159.325059, current state active+degraded+=
-remapped+backfilling, last acting [30,17,60]
-pg 3.9e3 is stuck unclean for 722359.550585, current state active+degraded+=
-remapped+backfilling, last acting [0,17,30]
-pg 4.175d is stuck unclean for 784690.950635, current state active+remapped=
-+backfilling, last acting [34,57,16,60]
-pg 3.16e is stuck unclean for 319022.053579, current state active+remapped+=
-backfilling, last acting [7,11,58,63]
-pg 3.1446 is stuck unclean for 723439.399481, current state active+remapped=
-+backfilling, last acting [7,11,59,27]
-pg 4.1130 is stuck unclean for 829487.905981, current state active+remapped=
-+backfilling, last acting [24,30,32,59]
-pg 4.1aff is stuck unclean for 329617.786292, current state active+remapped=
-+backfilling, last acting [7,17,58,16]
-pg 3.1404 is stuck unclean for 726186.450522, current state active+remapped=
-+backfilling, last acting [32,33,60,12]
-pg 4.1403 is stuck unclean for 780839.164866, current state active+remapped=
-+backfilling, last acting [32,33,60,12]
-pg 3.1f3e is active+remapped+backfilling, acting [62,33,35,27]
-pg 4.1aff is active+remapped+backfilling, acting [7,17,58,16]
-pg 3.1852 is active+remapped+backfilling, acting [5,59,37,35]
-pg 4.1848 is active+degraded+remapped+backfilling, acting [12,37,62]
-pg 4.175d is active+remapped+backfilling, acting [34,57,16,60]
-pg 3.160b is active+remapped+backfilling, acting [58,33,5,57]
-pg 3.1446 is active+remapped+backfilling, acting [7,11,59,27]
-pg 4.1403 is active+remapped+backfilling, acting [32,33,60,12]
-pg 3.1404 is active+remapped+backfilling, acting [32,33,60,12]
-pg 3.13c4 is incomplete, acting [49,66,16]
-pg 4.1130 is active+remapped+backfilling, acting [24,30,32,59]
-pg 3.1019 is incomplete, acting [44,39,35]
-pg 4.df8 is active+degraded+remapped+backfilling, acting [62,37]
-pg 3.9e3 is active+degraded+remapped+backfilling, acting [0,17,30]
-pg 4.252 is active+degraded+remapped+backfilling, acting [30,17,60]
-pg 3.16e is active+remapped+backfilling, acting [7,11,58,63]
-200 ops are blocked > 134218 sec
-100 ops are blocked > 134218 sec on osd.44
-100 ops are blocked > 134218 sec on osd.49
-2 osds have slow requests
-recovery 13269/10624283 objects degraded (0.125%)
-
-There are 2 PG is in incomplete status. And not response from ceph ph pg# q=
-uery. I have checked them in each related OSD. I find that 3.13c4_head & 3.=
-1019_head are empty. So I think these data are lost. :(
-I have try to mark the osd.44 & 49 as lost, but it has no effort.
-
-BTW, some PGs are in stale status, I have resolved them via mkdir pg_head m=
-anually in related OSD.
-And some unfound Objects, I cannot use =1B$B!F=1B(Bceph pg # mark_unfound_l=
-ost revert|delete=1B$B!G=1B(B to resolve.
-But fortunately, these objects are in the pool that I am not using now. So =
-I remove the pool already.
-
-So how to deal with the blocked ops in =1B$B!F=1B(B100 ops are blocked > 13=
-4218 sec on osd.44=1B$B!(=1B(B100 ops are blocked > 134218 sec on osd.49=1B=
-$B!G=1B(B?
-My openstack VMs are using ceph block storage, and they are hang now. I wan=
-t to save as lives VMs as possible.
-
-
-
-Best Regards!
-Meng Chen
-
-
---_000_1FC8FDB3BDEB4F4F9A6DBC50FBC0163601B39870SHSMSX103ccrcor_
-Content-Type: text/html; charset="iso-2022-jp"
-Content-Transfer-Encoding: quoted-printable
-
-<html>
-<head>
-<meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3Diso-2022-=
-jp">
-<meta name=3D"Generator" content=3D"Microsoft Word 15 (filtered medium)">
-<style><!--
-/* Font Definitions */
-@font-face
-	{font-family:Wingdings;
-	panose-1:5 0 0 0 0 0 0 0 0 0;}
-@font-face
-	{font-family:SimSun;
-	panose-1:2 1 6 0 3 1 1 1 1 1;}
-@font-face
-	{font-family:"Cambria Math";
-	panose-1:2 4 5 3 5 4 6 3 2 4;}
-@font-face
-	{font-family:Calibri;
-	panose-1:2 15 5 2 2 2 4 3 2 4;}
-@font-face
-	{font-family:"\@SimSun";
-	panose-1:2 1 6 0 3 1 1 1 1 1;}
-/* Style Definitions */
-p.MsoNormal, li.MsoNormal, div.MsoNormal
-	{margin:0in;
-	margin-bottom:.0001pt;
-	font-size:11.0pt;
-	font-family:"Calibri","sans-serif";}
-a:link, span.MsoHyperlink
-	{mso-style-priority:99;
-	color:#0563C1;
-	text-decoration:underline;}
-a:visited, span.MsoHyperlinkFollowed
-	{mso-style-priority:99;
-	color:#954F72;
-	text-decoration:underline;}
-p
-	{mso-style-priority:99;
-	mso-margin-top-alt:auto;
-	margin-right:0in;
-	mso-margin-bottom-alt:auto;
-	margin-left:0in;
-	font-size:12.0pt;
-	font-family:"Times New Roman","serif";}
-span.EmailStyle17
-	{mso-style-type:personal-compose;
-	font-family:"Calibri","sans-serif";
-	color:windowtext;}
-.MsoChpDefault
-	{mso-style-type:export-only;}
-@page WordSection1
-	{size:8.5in 11.0in;
-	margin:1.0in 1.0in 1.0in 1.0in;}
-div.WordSection1
-	{page:WordSection1;}
---></style><!--[if gte mso 9]><xml>
-<o:shapedefaults v:ext=3D"edit" spidmax=3D"1026" />
-</xml><![endif]--><!--[if gte mso 9]><xml>
-<o:shapelayout v:ext=3D"edit">
-<o:idmap v:ext=3D"edit" data=3D"1" />
-</o:shapelayout></xml><![endif]-->
-</head>
-<body lang=3D"EN-US" link=3D"#0563C1" vlink=3D"#954F72">
-<div class=3D"WordSection1">
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D">Hi, Cepher<o:p></o:p><=
-/span></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D"><o:p>&nbsp;</o:p></spa=
-n></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D">I meet the issue with =
-ceph 0.72.2 that some OSDs are down &amp; out and cannot rejoin the cluster=
- via restart osd daemon.<o:p></o:p></span></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D">Here below is I captur=
-ed from the osd log which are down &amp; out. All of them have the same err=
-or info.<o:p></o:p></span></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D"><o:p>&nbsp;</o:p></spa=
-n></p>
-<p style=3D"margin:0in;margin-bottom:.0001pt"><span style=3D"font-size:11.0=
-pt;font-family:&quot;Calibri&quot;,&quot;sans-serif&quot;;color:black">2014=
--10-22 16:49:18.834850 7fc2d3fd9700&nbsp; 0 filestore(/var/lib/ceph/osd/cep=
-h-28)&nbsp; error (39) Directory not empty not handled on operation
- 21 (72744853.0.2, or op 2, counting from 0)<o:p></o:p></span></p>
-<p style=3D"margin:0in;margin-bottom:.0001pt"><span style=3D"font-size:11.0=
-pt;font-family:&quot;Calibri&quot;,&quot;sans-serif&quot;;color:black">2014=
--10-22 16:49:18.834897 7fc2d3fd9700&nbsp; 0 filestore(/var/lib/ceph/osd/cep=
-h-28) ENOTEMPTY suggests garbage data in osd data dir<o:p></o:p></span></p>
-<p style=3D"margin:0in;margin-bottom:.0001pt"><span style=3D"font-size:11.0=
-pt;font-family:&quot;Calibri&quot;,&quot;sans-serif&quot;;color:black">2014=
--10-22 16:49:18.834899 7fc2d3fd9700&nbsp; 0 filestore(/var/lib/ceph/osd/cep=
-h-28)&nbsp; transaction dump:<o:p></o:p></span></p>
-<p style=3D"margin:0in;margin-bottom:.0001pt"><span style=3D"font-size:11.0=
-pt;font-family:&quot;Calibri&quot;,&quot;sans-serif&quot;;color:black">{ &q=
-uot;ops&quot;: [<o:p></o:p></span></p>
-<p style=3D"margin:0in;margin-bottom:.0001pt"><span style=3D"font-size:11.0=
-pt;font-family:&quot;Calibri&quot;,&quot;sans-serif&quot;;color:black">&nbs=
-p;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; { &quot;op_num&quot;: 0,<o:p></o:p><=
-/span></p>
-<p style=3D"margin:0in;margin-bottom:.0001pt"><span style=3D"font-size:11.0=
-pt;font-family:&quot;Calibri&quot;,&quot;sans-serif&quot;;color:black">&nbs=
-p;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &quot;op_name&quot;: &qu=
-ot;remove&quot;,<o:p></o:p></span></p>
-<p style=3D"margin:0in;margin-bottom:.0001pt"><span style=3D"font-size:11.0=
-pt;font-family:&quot;Calibri&quot;,&quot;sans-serif&quot;;color:black">&nbs=
-p;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &quot;collection&quot;: =
-&quot;meta&quot;,<o:p></o:p></span></p>
-<p style=3D"margin:0in;margin-bottom:.0001pt"><span style=3D"font-size:11.0=
-pt;font-family:&quot;Calibri&quot;,&quot;sans-serif&quot;;color:black">&nbs=
-p;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &quot;oid&quot;: &quot;b=
-fa3b7d0\/pglog_3.194a\/0\/\/-1&quot;},<o:p></o:p></span></p>
-<p style=3D"margin:0in;margin-bottom:.0001pt"><span style=3D"font-size:11.0=
-pt;font-family:&quot;Calibri&quot;,&quot;sans-serif&quot;;color:black">&nbs=
-p;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; { &quot;op_num&quot;: 1,<o:p></o:p><=
-/span></p>
-<p style=3D"margin:0in;margin-bottom:.0001pt"><span style=3D"font-size:11.0=
-pt;font-family:&quot;Calibri&quot;,&quot;sans-serif&quot;;color:black">&nbs=
-p;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &quot;op_name&quot;: &qu=
-ot;omap_rmkeys&quot;,<o:p></o:p></span></p>
-<p style=3D"margin:0in;margin-bottom:.0001pt"><span style=3D"font-size:11.0=
-pt;font-family:&quot;Calibri&quot;,&quot;sans-serif&quot;;color:black">&nbs=
-p;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &quot;collection&quot;: =
-&quot;meta&quot;,<o:p></o:p></span></p>
-<p style=3D"margin:0in;margin-bottom:.0001pt"><span style=3D"font-size:11.0=
-pt;font-family:&quot;Calibri&quot;,&quot;sans-serif&quot;;color:black">&nbs=
-p;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &quot;oid&quot;: &quot;1=
-6ef7597\/infos\/head\/\/-1&quot;},<o:p></o:p></span></p>
-<p style=3D"margin:0in;margin-bottom:.0001pt"><span style=3D"font-size:11.0=
-pt;font-family:&quot;Calibri&quot;,&quot;sans-serif&quot;;color:black">&nbs=
-p;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; { &quot;op_num&quot;: 2,<o:p></o:p><=
-/span></p>
-<p style=3D"margin:0in;margin-bottom:.0001pt"><span style=3D"font-size:11.0=
-pt;font-family:&quot;Calibri&quot;,&quot;sans-serif&quot;;color:black">&nbs=
-p;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &quot;op_name&quot;: &qu=
-ot;rmcoll&quot;,<o:p></o:p></span></p>
-<p style=3D"margin:0in;margin-bottom:.0001pt"><span style=3D"font-size:11.0=
-pt;font-family:&quot;Calibri&quot;,&quot;sans-serif&quot;;color:black">&nbs=
-p;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &quot;collection&quot;: =
-&quot;3.194a_head&quot;}]}<o:p></o:p></span></p>
-<p style=3D"margin:0in;margin-bottom:.0001pt"><span style=3D"font-size:11.0=
-pt;font-family:&quot;Calibri&quot;,&quot;sans-serif&quot;;color:black">2014=
--10-22 16:49:18.951947 7fc2d3fd9700 -1 os/FileStore.cc: In function 'unsign=
-ed int FileStore::_do_transaction(ObjectStore::Transaction&amp;,
- uint64_t, int, ThreadPool::TPHandle*)' thread 7fc2d3fd9700 time 2014-10-22=
- 16:49:18.859039<o:p></o:p></span></p>
-<p style=3D"margin:0in;margin-bottom:.0001pt"><span style=3D"font-size:11.0=
-pt;font-family:&quot;Calibri&quot;,&quot;sans-serif&quot;;color:black">os/F=
-ileStore.cc: 2448: FAILED assert(0 =3D=3D &quot;unexpected error&quot;)<o:p=
-></o:p></span></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D"><o:p>&nbsp;</o:p></spa=
-n></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D"><o:p>&nbsp;</o:p></spa=
-n></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D">Before that 2 days, I =
-take add some new OSDs into cluster and increase the PG #.<o:p></o:p></span=
-></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D">I manually add OSDs wh=
-ich is lost one by one follow the process of add new OSD, it takes a long t=
-ime to recovey.<o:p></o:p></span></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D">And now, ceph health d=
-etail shows as following, all OSDs are up and in.<o:p></o:p></span></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D"><o:p>&nbsp;</o:p></spa=
-n></p>
-<p class=3D"MsoNormal">HEALTH_WARN 14 pgs backfilling; 4 pgs degraded; 2 pg=
-s incomplete; 2 pgs stuck inactive; 16 pgs stuck unclean; 200 requests are =
-blocked &gt; 32 sec; 2 osds have slow requests; recovery 13269/10624283 obj=
-ects degraded (0.125%)<o:p></o:p></p>
-<p class=3D"MsoNormal">pg 3.1019 is stuck inactive since forever, current s=
-tate incomplete, last acting [44,39,35]<o:p></o:p></p>
-<p class=3D"MsoNormal">pg 3.13c4 is stuck inactive since forever, current s=
-tate incomplete, last acting [49,66,16]<o:p></o:p></p>
-<p class=3D"MsoNormal">pg 4.df8 is stuck unclean for 719511.538414, current=
- state active&#43;degraded&#43;remapped&#43;backfilling, last acting [62,37=
-]<o:p></o:p></p>
-<p class=3D"MsoNormal">pg 3.1f3e is stuck unclean for 722343.421598, curren=
-t state active&#43;remapped&#43;backfilling, last acting [62,33,35,27]<o:p>=
-</o:p></p>
-<p class=3D"MsoNormal">pg 3.1019 is stuck unclean since forever, current st=
-ate incomplete, last acting [44,39,35]<o:p></o:p></p>
-<p class=3D"MsoNormal">pg 3.1852 is stuck unclean for 725266.838670, curren=
-t state active&#43;remapped&#43;backfilling, last acting [5,59,37,35]<o:p><=
-/o:p></p>
-<p class=3D"MsoNormal">pg 3.13c4 is stuck unclean since forever, current st=
-ate incomplete, last acting [49,66,16]<o:p></o:p></p>
-<p class=3D"MsoNormal">pg 4.1848 is stuck unclean for 828659.231379, curren=
-t state active&#43;degraded&#43;remapped&#43;backfilling, last acting [12,3=
-7,62]<o:p></o:p></p>
-<p class=3D"MsoNormal">pg 3.160b is stuck unclean for 726568.972467, curren=
-t state active&#43;remapped&#43;backfilling, last acting [58,33,5,57]<o:p><=
-/o:p></p>
-<p class=3D"MsoNormal">pg 4.252 is stuck unclean for 757159.325059, current=
- state active&#43;degraded&#43;remapped&#43;backfilling, last acting [30,17=
-,60]<o:p></o:p></p>
-<p class=3D"MsoNormal">pg 3.9e3 is stuck unclean for 722359.550585, current=
- state active&#43;degraded&#43;remapped&#43;backfilling, last acting [0,17,=
-30]<o:p></o:p></p>
-<p class=3D"MsoNormal">pg 4.175d is stuck unclean for 784690.950635, curren=
-t state active&#43;remapped&#43;backfilling, last acting [34,57,16,60]<o:p>=
-</o:p></p>
-<p class=3D"MsoNormal">pg 3.16e is stuck unclean for 319022.053579, current=
- state active&#43;remapped&#43;backfilling, last acting [7,11,58,63]<o:p></=
-o:p></p>
-<p class=3D"MsoNormal">pg 3.1446 is stuck unclean for 723439.399481, curren=
-t state active&#43;remapped&#43;backfilling, last acting [7,11,59,27]<o:p><=
-/o:p></p>
-<p class=3D"MsoNormal">pg 4.1130 is stuck unclean for 829487.905981, curren=
-t state active&#43;remapped&#43;backfilling, last acting [24,30,32,59]<o:p>=
-</o:p></p>
-<p class=3D"MsoNormal">pg 4.1aff is stuck unclean for 329617.786292, curren=
-t state active&#43;remapped&#43;backfilling, last acting [7,17,58,16]<o:p><=
-/o:p></p>
-<p class=3D"MsoNormal">pg 3.1404 is stuck unclean for 726186.450522, curren=
-t state active&#43;remapped&#43;backfilling, last acting [32,33,60,12]<o:p>=
-</o:p></p>
-<p class=3D"MsoNormal">pg 4.1403 is stuck unclean for 780839.164866, curren=
-t state active&#43;remapped&#43;backfilling, last acting [32,33,60,12]<o:p>=
-</o:p></p>
-<p class=3D"MsoNormal">pg 3.1f3e is active&#43;remapped&#43;backfilling, ac=
-ting [62,33,35,27]<o:p></o:p></p>
-<p class=3D"MsoNormal">pg 4.1aff is active&#43;remapped&#43;backfilling, ac=
-ting [7,17,58,16]<o:p></o:p></p>
-<p class=3D"MsoNormal">pg 3.1852 is active&#43;remapped&#43;backfilling, ac=
-ting [5,59,37,35]<o:p></o:p></p>
-<p class=3D"MsoNormal">pg 4.1848 is active&#43;degraded&#43;remapped&#43;ba=
-ckfilling, acting [12,37,62]<o:p></o:p></p>
-<p class=3D"MsoNormal">pg 4.175d is active&#43;remapped&#43;backfilling, ac=
-ting [34,57,16,60]<o:p></o:p></p>
-<p class=3D"MsoNormal">pg 3.160b is active&#43;remapped&#43;backfilling, ac=
-ting [58,33,5,57]<o:p></o:p></p>
-<p class=3D"MsoNormal">pg 3.1446 is active&#43;remapped&#43;backfilling, ac=
-ting [7,11,59,27]<o:p></o:p></p>
-<p class=3D"MsoNormal">pg 4.1403 is active&#43;remapped&#43;backfilling, ac=
-ting [32,33,60,12]<o:p></o:p></p>
-<p class=3D"MsoNormal">pg 3.1404 is active&#43;remapped&#43;backfilling, ac=
-ting [32,33,60,12]<o:p></o:p></p>
-<p class=3D"MsoNormal"><b>pg 3.13c4 is incomplete, acting [49,66,16]<o:p></=
-o:p></b></p>
-<p class=3D"MsoNormal">pg 4.1130 is active&#43;remapped&#43;backfilling, ac=
-ting [24,30,32,59]<o:p></o:p></p>
-<p class=3D"MsoNormal"><b>pg 3.1019 is incomplete, acting [44,39,35]<o:p></=
-o:p></b></p>
-<p class=3D"MsoNormal">pg 4.df8 is active&#43;degraded&#43;remapped&#43;bac=
-kfilling, acting [62,37]<o:p></o:p></p>
-<p class=3D"MsoNormal">pg 3.9e3 is active&#43;degraded&#43;remapped&#43;bac=
-kfilling, acting [0,17,30]<o:p></o:p></p>
-<p class=3D"MsoNormal">pg 4.252 is active&#43;degraded&#43;remapped&#43;bac=
-kfilling, acting [30,17,60]<o:p></o:p></p>
-<p class=3D"MsoNormal">pg 3.16e is active&#43;remapped&#43;backfilling, act=
-ing [7,11,58,63]<o:p></o:p></p>
-<p class=3D"MsoNormal">200 ops are blocked &gt; 134218 sec<o:p></o:p></p>
-<p class=3D"MsoNormal"><b><span style=3D"background:yellow;mso-highlight:ye=
-llow">100 ops are blocked &gt; 134218 sec on osd.44<o:p></o:p></span></b></=
-p>
-<p class=3D"MsoNormal"><b><span style=3D"background:yellow;mso-highlight:ye=
-llow">100 ops are blocked &gt; 134218 sec on osd.49</span><o:p></o:p></b></=
-p>
-<p class=3D"MsoNormal">2 osds have slow requests<o:p></o:p></p>
-<p class=3D"MsoNormal">recovery 13269/10624283 objects degraded (0.125%)<o:=
-p></o:p></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D"><o:p>&nbsp;</o:p></spa=
-n></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D">There are 2 PG is in i=
-ncomplete status. And not response from ceph ph pg# query. I have checked t=
-hem in each related OSD. I find that 3.13c4_head &amp; 3.1019_head are empt=
-y. So I think these data are lost.
-</span><span style=3D"font-family:Wingdings;color:#1F497D">L</span><span st=
-yle=3D"color:#1F497D"><o:p></o:p></span></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D">I have try to mark the=
- osd.44 &amp; 49 as lost, but it has no effort.<o:p></o:p></span></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D"><o:p>&nbsp;</o:p></spa=
-n></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D">BTW, some PGs are in s=
-tale status, I have resolved them via mkdir pg_head manually in related OSD=
-.
-<o:p></o:p></span></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D">And some unfound Objec=
-ts, I cannot use =1B$B!F=1B(Bceph pg # mark_unfound_lost revert|delete=1B$B=
-!G=1B(B to resolve.<o:p></o:p></span></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D">But fortunately, these=
- objects are in the pool that I am not using now. So I remove the pool alre=
-ady.<o:p></o:p></span></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D"><o:p>&nbsp;</o:p></spa=
-n></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D">So how to deal with th=
-e blocked ops in =1B$B!F=1B(B100 ops are blocked &gt; 134218 sec on osd.44<=
-/span><span lang=3D"ZH-CN" style=3D"font-family:SimSun;color:#1F497D">=1B$B=
-!(=1B(B</span><span style=3D"color:#1F497D">100 ops are blocked &gt; 134218
- sec on osd.49=1B$B!G=1B(B?<o:p></o:p></span></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D">My openstack VMs are u=
-sing ceph block storage, and they are hang now. I want to save as lives VMs=
- as possible.<o:p></o:p></span></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D"><o:p>&nbsp;</o:p></spa=
-n></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D"><o:p>&nbsp;</o:p></spa=
-n></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D"><o:p>&nbsp;</o:p></spa=
-n></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D">Best Regards!<o:p></o:=
-p></span></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D">Meng Chen<o:p></o:p></=
-span></p>
-<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
-</div>
-</body>
-</html>
-
---_000_1FC8FDB3BDEB4F4F9A6DBC50FBC0163601B39870SHSMSX103ccrcor_--
-
---===============0853787352==
 Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
+Content-Transfer-Encoding: 8BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mailhost.taec.com ([209.243.128.33]:46375 "EHLO
+	mailhost.taec.toshiba.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751923AbaJ0Cbw convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 26 Oct 2014 22:31:52 -0400
+In-Reply-To: <alpine.DEB.2.00.1410241810300.13498@cobra.newdream.net>
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@newdream.net>, Philip Kufeldt <Philip.Kufeldt@taec.toshiba.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+Hi Sage,
 
---===============0853787352==--
+Leveldb version is 1.17.
+
+Thanks
+Prashanth
+
+-----Original Message-----
+From: Sage Weil [mailto:sage@newdream.net] 
+Sent: Friday, October 24, 2014 6:11 PM
+To: Philip Kufeldt
+Cc: Prashanth Nednoor; ceph-devel@vger.kernel.org
+Subject: RE: Having issues trying to get the OSD up on a MIPS64!!!
+
+On Sat, 25 Oct 2014, Philip Kufeldt wrote:
+> 64 bit big endian
+
+My guess is that there is an endianness bug in leveldb then.  I wonder who else has tried it on MIPS?
+
+sage
+
+
+> 
+> > -----Original Message-----
+> > From: Sage Weil [mailto:sage@newdream.net]
+> > Sent: Friday, October 24, 2014 5:47 PM
+> > To: Prashanth Nednoor
+> > Cc: ceph-devel@vger.kernel.org; Philip Kufeldt
+> > Subject: RE: Having issues trying to get the OSD up on a MIPS64!!!
+> > 
+> > Hi Prashanth,
+> > 
+> > On Fri, 24 Oct 2014, Prashanth Nednoor wrote:
+> > > Hi Sage,
+> > >
+> > > Thank you for the prompt response.
+> > > Is there anything in /dev/disk/by-partuuid/ or is it missing entirely?
+> > >   Nothing , it was Missing Entirely.
+> > >   GOOD NEWS:  I worked around  this issue, if I set my journal 
+> > > path in the
+> > /etc/ceph.conf.
+> > >
+> > > My udev version is udevd --version 164
+> > 
+> > Hmm, that should be new enough, but it seems like it isn't setting 
+> > up the links.  What distro is it?  On most systems it's 
+> > /lib/udev/rules.d/60-persistent- storage.rules that does it.  Maybe 
+> > see if running partprobe /dev/sda or run 'udevadm monitor' and do 
+> > 'udevadm trigger /dev/sda' in another terminal to see what happens.
+> > 
+> > Or, work around it like you did. :)
+> > 
+> > > I still see the segfaults, I have attached details.
+> > > I put the osd debug logs(osd-output.txt) and the
+> > leveldb_bt(leveldb_bt.txt).
+> > > Looks like we have an issue in leveldb....
+> > 
+> > Yeah, that looks like a problem with leveldb.  What distro is this?  
+> > What version leveldb?
+> > 
+> > I don't actually know anything about MIPS.. what's teh wordsize and 
+> > endianess?
+> > 
+> > sage
+> > 
+> > 
+> > >
+> > > HERE IS THE BACK TRACE: I have attached the gdb before running it.
+> > > #0  0x77f68ee0 in leveldb::SkipList<char const*, 
+> > > leveldb::MemTable::KeyComparator>::FindGreaterOrEqual(char const* 
+> > > const&, leveldb::SkipList<char const*,
+> > > leveldb::MemTable::KeyComparator>::Node**) const () from
+> > > /usr/local/lib/libleveldb.so.1
+> > > #1  0x77f69054 in leveldb::SkipList<char const*, 
+> > > leveldb::MemTable::KeyComparator>::Insert(char const* const&) () 
+> > > from
+> > > /usr/local/lib/libleveldb.so.1
+> > > #2  0x77f68618 in leveldb::MemTable::Add(unsigned long long,
+> > leveldb::ValueType, leveldb::Slice const&, leveldb::Slice const&) ()
+> > >    from /usr/local/lib/libleveldb.so.1
+> > > #3  0x77f7e434 in leveldb::(anonymous
+> > namespace)::MemTableInserter::Put(leveldb::Slice const&, 
+> > leveldb::Slice
+> > const&) ()
+> > >    from /usr/local/lib/libleveldb.so.1
+> > > #4  0x77f7e93c in
+> > > leveldb::WriteBatch::Iterate(leveldb::WriteBatch::Handler*) const 
+> > > () from /usr/local/lib/libleveldb.so.1
+> > > #5  0x77f7eb8c in
+> > > leveldb::WriteBatchInternal::InsertInto(leveldb::WriteBatch 
+> > > const*,
+> > > leveldb::MemTable*) () from /usr/local/lib/libleveldb.so.1
+> > > #6  0x77f59360 in leveldb::DBImpl::Write(leveldb::WriteOptions 
+> > > const&,
+> > > leveldb::WriteBatch*) () from /usr/local/lib/libleveldb.so.1
+> > > #7  0x00a5dda0 in LevelDBStore::submit_transaction_sync
+> > > (this=0x1f77d10, t=<value optimized out>) at 
+> > > os/LevelDBStore.cc:146
+> > > #8  0x00b0d344 in DBObjectMap::sync (this=0x1f7af28, oid=0x0,
+> > > spos=0x72cfe3b8) at os/DBObjectMap.cc:1126
+> > > #9  0x009b10b8 in FileStore::_set_replay_guard (this=0x1f72450, 
+> > > fd=17, spos=..., hoid=0x0, in_progress=false) at 
+> > > os/FileStore.cc:2070
+> > > #10 0x009b1c0c in FileStore::_set_replay_guard (this=0x1f72450,
+> > cid=DWARF-2 expression error: DW_OP_reg operations must be used 
+> > either alone or in conjuction with DW_OP_piece.
+> > > ) at os/FileStore.cc:2047
+> > > #11 0x009b2138 in FileStore::_create_collection (this=0x1f72450, 
+> > > c=DWARF-
+> > 2 expression error: DW_OP_reg operations must be used either alone 
+> > or in conjuction with DW_OP_piece.
+> > > ) at os/FileStore.cc:4753
+> > > #12 0x009e42a8 in FileStore::_do_transaction (this=0x1f72450, 
+> > > t=..., op_seq=<value optimized out>, trans_num=0, 
+> > > handle=0x72cfec3c) at
+> > > os/FileStore.cc:2413
+> > > #13 0x009eb47c in FileStore::_do_transactions (this=0x1f72450, 
+> > > tls=..., op_seq=2, handle=0x72cfec3c) at os/FileStore.cc:1952
+> > > #14 0x009eb858 in FileStore::_do_op (this=0x1f72450, 
+> > > osr=0x1f801b8,
+> > > handle=...) at os/FileStore.cc:1761
+> > > #15 0x00c8f0bc in ThreadPool::worker (this=0x1f72cf0, 
+> > > wt=0x1f7ea90) at
+> > > common/WorkQueue.cc:128
+> > > #16 0x00c91b94 in ThreadPool::WorkThread::entry() ()
+> > > #17 0x77f1c0a8 in start_thread () from /lib/libpthread.so.0
+> > > #18 0x777c1738 in ?? () from /lib/libc.so.6
+> > >
+> > > Do  I need to set any variable to set the cache size etcetc in ceph.conf.
+> > > I only have osd_leveldb_cache_size=5242880 for now.
+> > >
+> > >
+> > > Thanks
+> > > Prashanth
+> > >
+> > >
+> > >
+> > >
+> > >
+> > >
+> > >
+> > > -----Original Message-----
+> > > From: Sage Weil [mailto:sage@newdream.net]
+> > > Sent: Thursday, October 23, 2014 5:54 PM
+> > > To: Prashanth Nednoor
+> > > Cc: ceph-devel@vger.kernel.org
+> > > Subject: Re: Having issues trying to get the OSD up on a MIPS64!!!
+> > >
+> > > Hi Prashanth,
+> > >
+> > > On Thu, 23 Oct 2014, Prashanth Nednoor wrote:
+> > > > Hello Everyone,
+> > > >
+> > > > We are using ceph-0.86, good news is we were able to compile and 
+> > > > load all the libraries and binaries needed to configure a 
+> > > > CEPH-OSD on MIPS
+> > > > 64 platform. The CEPH monitor is also able to detect the OSD, 
+> > > > but not up yet, as the osd activate failed.
+> > > > Since we don?t have the required CEPH deploy utility for MIPS64, 
+> > > > we are following the manual procedure to create and activate an OSD.
+> > > > We have disabled authentication between the clients and the 
+> > > > OSD?s for now.
+> > > >
+> > > > Has any body tried CEPH on a MIPS64?
+> > > > /dev/sda is a 2TB local hard drive.
+> > > >
+> > > > This is how my partition looks after ceph-disk-prepare 
+> > > > /home/prashan/ceph-0.86/src# parted GNU Parted 2.3 Using 
+> > > > /dev/sda Welcome to GNU Parted! Type 'help' to view a list of commands.
+> > > > (parted) p
+> > > > Model: ATA TOSHIBA MQ01ABB2 (scsi) Disk /dev/sda: 2000GB Sector 
+> > > > size (logical/physical): 512B/4096B Partition Table: gpt
+> > > >
+> > > > Number  Start   End     Size    File system  Name          Flags
+> > > >  2      1049kB  5369MB  5368MB               ceph journal
+> > > >  1      5370MB  2000GB  1995GB  xfs          ceph data
+> > > >
+> > > >
+> > > >
+> > > > The following are the steps to create an OSD
+> > > > 1)	ceph-disk zap /dev/sda
+> > > > 2)	ceph-disk-prepare --cluster  f615496c-b40a-4905-bbcd-
+> > > > 2d3e181ff21a --fs-type xfs /dev/sda
+> > > > 3)	mount /dev/sda1 /var/lib/ceph/osd/ceph-0/
+> > > > 4)	ceph-osd -i 0 ?mkfs is giving an error ,
+> > > > filestore(/var/lib/ceph/osd/ceph-0) could not find
+> > > > 23c2fcde/osd_superblock/0//-1 in index: (2) No such file.
+> > > > After this it segfaults. We have analyzed this further with the 
+> > > > help of strace and root caused this as objectmap file reading issue.
+> > > > open("/var/lib/ceph/osd/ceph-0/current/omap/000005.log", 
+> > > > O_RDONLY)
+> > =
+> > > > 11, the first time it reads 32k, the read succeeds with 63 bytes 
+> > > > and it tries to read again with 27k and the read returns 0 bytes 
+> > > > and the CEPH osd segfaults.
+> > >
+> > > Can you generate a full log with --debug-osd 20 --debug-filestore 
+> > > 20 --
+> > debug-jouranl 20 passed to ceph-osd --mkfs and post that somewhere?  
+> > It should tell us where things are going wrong.  In particular, we 
+> > want to see if that file/object is being written properly.  It will 
+> > also have a backtrace showing exactly where it crashed.
+> > >
+> > > > Please note that ceph-disk prepare creates a journal in a path 
+> > > > which is not valid(dev/disk/by-partuuid/cbd4a5d1-012f-4863-b492-
+> > 080ad2a505cb).
+> > > > So after step3 above I remove this journal below and manually 
+> > > > create a journal file before doing step4 above.
+> > > >
+> > > >
+> > > > ls -l /var/lib/ceph/osd/ceph-0/
+> > > > total 16
+> > > > -rw-r--r-- 1 root root 37 Oct 22 21:40 ceph_fsid
+> > > > -rw-r--r-- 1 root root 37 Oct 22 21:40 fsid lrwxrwxrwx 1 root 
+> > > > root
+> > > > 58 Oct 22 21:40 journal -> /dev/disk/by- 
+> > > > partuuid/cbd4a5d1-012f-4863-b492-080ad2a505cb
+> > >
+> > > Is there anything in /dev/disk/by-partuuid/ or is it missing entirely?
+> > > Maybe you have an old udev.  What distro is this?
+> > >
+> > > sage
+> > >
+> > > > -rw-r--r-- 1 root root 37 Oct 22 21:40 journal_uuid
+> > > > -rw-r--r-- 1 root root 21 Oct 22 21:40 magic
+> > > >
+> > > > Any pointers to move ahead will be greatly appreciated??
+> > > >
+> > > > thanks
+> > > > Prashanth
+> > > >
+> > > >
+> > > >
+> > > > --
+> > > > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+> > > > in the body of a message to majordomo@vger.kernel.org More
+> > majordomo
+> > > > info at  http://vger.kernel.org/majordomo-info.html
+> > > >
+> > > >
+> > >
+> 
+> 
