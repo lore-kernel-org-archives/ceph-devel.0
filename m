@@ -1,143 +1,34 @@
-From: Alexandre DERUMIER <aderumier@odiso.com>
-Subject: Re: krbd blk-mq support ?
-Date: Mon, 27 Oct 2014 11:26:06 +0100 (CET)
-Message-ID: <e6c0ffde-17af-4a6a-8456-6ef0f835e8c2@mailpro>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F282365C1@SACMBXIP01.sdcorp.global.sandisk.com>
+From: Jens Axboe <axboe@kernel.dk>
+Subject: Re: fio rbd completions (Was: fio rbd hang for block sizes > 1M)
+Date: Mon, 27 Oct 2014 08:15:31 -0600
+Message-ID: <544E5383.9010001@kernel.dk>
+References: <5449BBB3.7090109@catalyst.net.nz> <5449E50E.7000808@kernel.dk> <5449EEF1.1060407@catalyst.net.nz> <544A51C7.40803@gmail.com> <544A5DA6.2010709@gmail.com> <544AD67D.4030603@catalyst.net.nz> <544AEAE7.6080603@redhat.com> <544AF0D2.1050405@catalyst.net.nz> <544B0C7F.4080109@catalyst.net.nz> <544B1D50.4010101@kernel.dk> <544B2C19.7070009@catalyst.net.nz> <544BF808.2090800@kernel.dk> <544C2371.1020403@catalyst.net.nz> <CAM9_UU_S7qhenZW34Lw3r=RHoVa1__610RRsFScgt0adi1dpFw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.209.98]:54325 "EHLO
-	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751732AbaJ0K0O convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Oct 2014 06:26:14 -0400
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F282365C1@SACMBXIP01.sdcorp.global.sandisk.com>
+Received: from mail-pa0-f50.google.com ([209.85.220.50]:64816 "EHLO
+	mail-pa0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753193AbaJ0OP3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Oct 2014 10:15:29 -0400
+Received: by mail-pa0-f50.google.com with SMTP id eu11so5617743pac.9
+        for <ceph-devel@vger.kernel.org>; Mon, 27 Oct 2014 07:15:28 -0700 (PDT)
+In-Reply-To: <CAM9_UU_S7qhenZW34Lw3r=RHoVa1__610RRsFScgt0adi1dpFw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
-Cc: Ceph Devel <ceph-devel@vger.kernel.org>, Christoph Hellwig <hch@infradead.org>
+To: Ketor D <d.ketor@gmail.com>, Mark Kirkwood <mark.kirkwood@catalyst.net.nz>
+Cc: Mark Nelson <mark.nelson@inktank.com>, Mark Nelson <mark.a.nelson@gmail.com>, fio@vger.kernel.org, "xan.peng" <xanpeng@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Somnath,
+On 10/27/2014 03:27 AM, Ketor D wrote:
+> Hi, Jens:
+>           I have test your v2 and v3 patch.
+>           The v2 patch get SIGABT and crash. The v3 patch hang.
+> 
+>          Why not simply comment usleep?
 
-I have just tried with 2 rbd volumes with (rbd map -o noshare rbdvolume=
- -p pool) (kernel 3.14),
-then a fio benchmark on both volumes at the same time
-but I don't seem to help.
+Because that is very inefficient as well, then fio would basically be
+busy looping waiting for IO to finish.
 
-I have always the kworker process at 100%, and iops are 25000iops on ea=
-ch rbd volume.
+-- 
+Jens Axboe
 
------ Mail original -----=20
-
-De: "Somnath Roy" <Somnath.Roy@sandisk.com>=20
-=C3=80: "Alexandre DERUMIER" <aderumier@odiso.com>, "Christoph Hellwig"=
- <hch@infradead.org>=20
-Cc: "Ceph Devel" <ceph-devel@vger.kernel.org>=20
-Envoy=C3=A9: Dimanche 26 Octobre 2014 20:08:42=20
-Objet: RE: krbd blk-mq support ?=20
-
-Alexandre,=20
-Have you tried mapping different images on the same m/c with 'noshare' =
-map option ?=20
-If not, it will not scale with increasing number of images (and thus ma=
-pped rbds) on a single m/c as they will share the same connection to cl=
-uster.=20
-
-Thanks & Regards=20
-Somnath=20
-
------Original Message-----=20
-=46rom: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.=
-kernel.org] On Behalf Of Alexandre DERUMIER=20
-Sent: Sunday, October 26, 2014 6:46 AM=20
-To: Christoph Hellwig=20
-Cc: Ceph Devel=20
-Subject: Re: krbd blk-mq support ?=20
-
-Hi,=20
-
-some news:=20
-
-I have applied patches succefully on top of 3.18-rc1 kernel.=20
-
-But don't seem to help is my case.=20
-(I think that blk-mq is working because I don't see any io schedulers o=
-n rbd devices, as blk-mq don't support them actually).=20
-
-My main problem is that I can't reach more than around 50000iops on 1 m=
-achine,=20
-
-and the problem seem to be the kworker process stuck at 100% of 1core.=20
-
-I had tried multiple fio process, on differents rbd devices at the same=
- time, and I'm always limited =C3=A0 50000iops.=20
-
-I'm sure that the ceph cluster is not the bottleneck, because if I laun=
-ch another fio on another node at the same time,=20
-
-I can reach 50000iops on each node, and both are limited by the kworker=
- process.=20
-
-
-That's why I thinked that blk-mq could help, but it don't seem to be th=
-e case.=20
-
-
-Is this kworker cpu limitation a known bug ?=20
-
-Regards,=20
-
-Alexandre=20
-
------ Mail original -----=20
-
-De: "Alexandre DERUMIER" <aderumier@odiso.com>=20
-=C3=80: "Christoph Hellwig" <hch@infradead.org>=20
-Cc: "Ceph Devel" <ceph-devel@vger.kernel.org>=20
-Envoy=C3=A9: Vendredi 24 Octobre 2014 14:27:47=20
-Objet: Re: krbd blk-mq support ?=20
-
->>If you're willing to experiment give the patches below a try, not tha=
-t=20
->>I don't have a ceph test cluster available, so the conversion is=20
->>untestested.=20
-
-Ok, Thanks ! I'll try them and see If I can improve qemu performance on=
- a single drive with multiqueues.=20
-
------ Mail original -----=20
-
-De: "Christoph Hellwig" <hch@infradead.org>=20
-=C3=80: "Alexandre DERUMIER" <aderumier@odiso.com>=20
-Cc: "Ceph Devel" <ceph-devel@vger.kernel.org>=20
-Envoy=C3=A9: Vendredi 24 Octobre 2014 12:55:01=20
-Objet: Re: krbd blk-mq support ?=20
-
-If you're willing to experiment give the patches below a try, not that =
-I don't have a ceph test cluster available, so the conversion is untest=
-ested.=20
---=20
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n the body of a message to majordomo@vger.kernel.org More majordomo inf=
-o at http://vger.kernel.org/majordomo-info.html=20
---=20
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n the body of a message to majordomo@vger.kernel.org More majordomo inf=
-o at http://vger.kernel.org/majordomo-info.html=20
-
-________________________________=20
-
-PLEASE NOTE: The information contained in this electronic mail message =
-is intended only for the use of the designated recipient(s) named above=
-=2E If the reader of this message is not the intended recipient, you ar=
-e hereby notified that you have received this message in error and that=
- any review, dissemination, distribution, or copying of this message is=
- strictly prohibited. If you have received this communication in error,=
- please notify the sender by telephone or e-mail (as shown above) immed=
-iately and destroy any and all copies of this message in your possessio=
-n (whether hard copies or electronically stored copies).=20
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
