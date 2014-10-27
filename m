@@ -1,85 +1,137 @@
 From: Janne Grunau <j@jannau.net>
-Subject: [PATCH 2/5] autotools: ARM/AArch64 NEON detection similar to x86
-Date: Mon, 27 Oct 2014 19:20:33 +0100
-Message-ID: <1414434036-29313-3-git-send-email-j@jannau.net>
+Subject: [PATCH 5/5] erasure-code: build and use a NEON jerasure variant
+Date: Mon, 27 Oct 2014 19:20:36 +0100
+Message-ID: <1414434036-29313-6-git-send-email-j@jannau.net>
 References: <1414434036-29313-1-git-send-email-j@jannau.net>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from soltyk.jannau.net ([185.27.253.110]:59342 "EHLO
+Received: from soltyk.jannau.net ([185.27.253.110]:59345 "EHLO
 	soltyk.jannau.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751642AbaJ0SUm (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Oct 2014 14:20:42 -0400
+	with ESMTP id S1752034AbaJ0SUq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Oct 2014 14:20:46 -0400
 Received: from coburn.home.jannau.net (55d44062.access.ecotel.net [85.212.64.98])
-	by soltyk.jannau.net (Postfix) with ESMTPSA id 8A35D3E1ADD
-	for <ceph-devel@vger.kernel.org>; Mon, 27 Oct 2014 19:20:41 +0100 (CET)
+	by soltyk.jannau.net (Postfix) with ESMTPSA id 263503E1A21
+	for <ceph-devel@vger.kernel.org>; Mon, 27 Oct 2014 19:20:45 +0100 (CET)
 In-Reply-To: <1414434036-29313-1-git-send-email-j@jannau.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
 ---
- configure.ac |  7 +++----
- m4/ax_arm.m4 | 27 +++++++++++++++++++++++++++
- 2 files changed, 30 insertions(+), 4 deletions(-)
- create mode 100644 m4/ax_arm.m4
+ .../jerasure/ErasureCodePluginSelectJerasure.cc    |  3 +++
+ src/erasure-code/jerasure/Makefile.am              | 24 +++++++++++++++++++++
+ src/test/erasure-code/Makefile.am                  | 10 +++++++++
+ src/test/erasure-code/TestJerasurePluginNEON.cc    | 25 ++++++++++++++++++++++
+ 4 files changed, 62 insertions(+)
+ create mode 100644 src/test/erasure-code/TestJerasurePluginNEON.cc
 
-diff --git a/configure.ac b/configure.ac
-index d994712..feb85a1 100644
---- a/configure.ac
-+++ b/configure.ac
-@@ -141,9 +141,6 @@ AC_DEFUN([AC_CHECK_CC_FLAG],
- AC_CHECK_CC_FLAG([-Wtype-limits], [WARN_TYPE_LIMITS])
- AC_CHECK_CC_FLAG([-Wignored-qualifiers], [WARN_IGNORED_QUALIFIERS])
+diff --git a/src/erasure-code/jerasure/ErasureCodePluginSelectJerasure.cc b/src/erasure-code/jerasure/ErasureCodePluginSelectJerasure.cc
+index 53c7026..32560b4 100644
+--- a/src/erasure-code/jerasure/ErasureCodePluginSelectJerasure.cc
++++ b/src/erasure-code/jerasure/ErasureCodePluginSelectJerasure.cc
+@@ -19,6 +19,7 @@
+ #include "common/debug.h"
+ #include "arch/probe.h"
+ #include "arch/intel.h"
++#include "arch/neon.h"
+ #include "erasure-code/ErasureCodePlugin.h"
  
--# Checks for architecture stuff
--AM_CONDITIONAL([ENABLE_FPU_NEON], [case $target_cpu in arm*) true;; *) false;; esac])
--
- # Check for compiler VTA support
- AX_CHECK_COMPILE_FLAG([-fvar-tracking-assignments], [HAS_VTA_SUPPORT=1], [HAS_VTA_SUPPORT=0])
- AM_CONDITIONAL(COMPILER_HAS_VTA, [test "$HAS_VTA_SUPPORT" = 1])
-@@ -537,7 +534,9 @@ AC_LANG_PUSH([C++])
- AC_CHECK_HEADER([leveldb/filter_policy.h], [AC_DEFINE([HAVE_LEVELDB_FILTER_POLICY], [1], [Defined if LevelDB supports bloom filters ])])
- AC_LANG_POP([C++])
+ #define dout_subsys ceph_subsys_osd
+@@ -44,6 +45,8 @@ static string get_variant() {
+ 	     ceph_arch_intel_sse3 &&
+ 	     ceph_arch_intel_sse2) {
+     return "sse3";
++  } else if (ceph_arch_neon) {
++    return "neon";
+   } else {
+     return "generic";
+   }
+diff --git a/src/erasure-code/jerasure/Makefile.am b/src/erasure-code/jerasure/Makefile.am
+index 142c612..de9c14a 100644
+--- a/src/erasure-code/jerasure/Makefile.am
++++ b/src/erasure-code/jerasure/Makefile.am
+@@ -50,6 +50,30 @@ endif
  
--# Find supported SIMD / SSE extensions supported by the compiler
-+# Find supported SIMD / NEON / SSE extensions supported by the compiler
-+AX_ARM_FEATURES()
-+AM_CONDITIONAL(HAVE_NEON, [ test "x$ax_cv_support_neon_ext" = "xyes"])
- AX_INTEL_FEATURES()
- AM_CONDITIONAL(HAVE_SSSE3, [ test "x$ax_cv_support_ssse3_ext" = "xyes"])
- AM_CONDITIONAL(HAVE_SSE4_PCLMUL, [ test "x$ax_cv_support_pclmuldq_ext" = "xyes"])
-diff --git a/m4/ax_arm.m4 b/m4/ax_arm.m4
+ erasure_codelib_LTLIBRARIES += libec_jerasure_generic.la
+ 
++libec_jerasure_neon_la_SOURCES = ${jerasure_sources}                                       \
++                                  erasure-code/jerasure/gf-complete/src/neon/gf_w4_neon.c  \
++                                  erasure-code/jerasure/gf-complete/src/neon/gf_w8_neon.c  \
++                                  erasure-code/jerasure/gf-complete/src/neon/gf_w16_neon.c \
++                                  erasure-code/jerasure/gf-complete/src/neon/gf_w32_neon.c \
++                                  erasure-code/jerasure/gf-complete/src/neon/gf_w64_neon.c
++libec_jerasure_neon_la_CFLAGS = ${AM_CFLAGS}  \
++	${ARM_NEON_FLAGS} \
++	-I$(srcdir)/erasure-code/jerasure/gf-complete/include \
++	-I$(srcdir)/erasure-code/jerasure/jerasure/include
++libec_jerasure_neon_la_CXXFLAGS= ${AM_CXXFLAGS} \
++	${ARM_NEON_FLAGS} \
++	-I$(srcdir)/erasure-code/jerasure/gf-complete/include \
++	-I$(srcdir)/erasure-code/jerasure/jerasure/include
++libec_jerasure_neon_la_LIBADD = $(LIBCRUSH) $(PTHREAD_LIBS) $(EXTRALIBS)
++libec_jerasure_neon_la_LDFLAGS = ${AM_LDFLAGS} -version-info 2:0:0
++if LINUX
++libec_jerasure_neon_la_LDFLAGS += -export-symbols-regex '.*__erasure_code_.*'
++endif
++
++if HAVE_NEON
++erasure_codelib_LTLIBRARIES += libec_jerasure_neon.la
++endif
++
+ libec_jerasure_sse3_la_SOURCES = ${jerasure_sources}
+ libec_jerasure_sse3_la_CFLAGS = ${AM_CFLAGS}  \
+ 	${INTEL_SSE_FLAGS} \
+diff --git a/src/test/erasure-code/Makefile.am b/src/test/erasure-code/Makefile.am
+index 958ae4d..7f9e27f 100644
+--- a/src/test/erasure-code/Makefile.am
++++ b/src/test/erasure-code/Makefile.am
+@@ -68,6 +68,16 @@ libec_fail_to_register_la_LIBADD = $(PTHREAD_LIBS) $(EXTRALIBS)
+ libec_fail_to_register_la_LDFLAGS = ${AM_LDFLAGS} -export-symbols-regex '.*__erasure_code_.*'
+ erasure_codelib_LTLIBRARIES += libec_fail_to_register.la
+ 
++libec_test_jerasure_neon_la_SOURCES = test/erasure-code/TestJerasurePluginNEON.cc
++test/erasure-code/TestJerasurePluginNEON.cc: ./ceph_ver.h
++libec_test_jerasure_neon_la_CFLAGS = ${AM_CFLAGS}
++libec_test_jerasure_neon_la_CXXFLAGS= ${AM_CXXFLAGS}
++libec_test_jerasure_neon_la_LIBADD = $(PTHREAD_LIBS) $(EXTRALIBS)
++libec_test_jerasure_neon_la_LDFLAGS = ${AM_LDFLAGS} -export-symbols-regex '.*__erasure_code_.*'
++if HAVE_NEON
++erasure_codelib_LTLIBRARIES += libec_test_jerasure_neon.la
++endif
++
+ libec_test_jerasure_sse4_la_SOURCES = test/erasure-code/TestJerasurePluginSSE4.cc
+ test/erasure-code/TestJerasurePluginSSE4.cc: ./ceph_ver.h
+ libec_test_jerasure_sse4_la_CFLAGS = ${AM_CFLAGS}
+diff --git a/src/test/erasure-code/TestJerasurePluginNEON.cc b/src/test/erasure-code/TestJerasurePluginNEON.cc
 new file mode 100644
-index 0000000..2ccc9a9
+index 0000000..3060485
 --- /dev/null
-+++ b/m4/ax_arm.m4
-@@ -0,0 +1,27 @@
-+AC_DEFUN([AX_ARM_FEATURES],
-+[
-+  AC_REQUIRE([AC_CANONICAL_HOST])
++++ b/src/test/erasure-code/TestJerasurePluginNEON.cc
+@@ -0,0 +1,25 @@
++// -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
++// vim: ts=8 sw=2 smarttab
++/*
++ * Ceph distributed storage system
++ *
++ * Copyright (C) 2014 Cloudwatt <libre.licensing@cloudwatt.com>
++ * Copyright (C) 2014 Red Hat <contact@redhat.com>
++ *
++ * Author: Loic Dachary <loic@dachary.org>
++ *
++ *  This library is free software; you can redistribute it and/or
++ *  modify it under the terms of the GNU Lesser General Public
++ *  License as published by the Free Software Foundation; either
++ *  version 2.1 of the License, or (at your option) any later version.
++ *
++ */
 +
-+  case $target_cpu in
-+    arm*)
-+      AX_CHECK_COMPILE_FLAG(-mfpu=neon, ax_cv_support_neon_ext=yes, [])
-+      if test x"$ax_cv_support_neon_ext" = x"yes"; then
-+        ARM_NEON_FLAGS="-mfpu=neon -DARM_NEON"
-+        AC_SUBST(ARM_NEON_FLAGS)
-+        ARM_FLAGS="$ARM_FLAGS $ARM_NEON_FLAGS"
-+        AC_DEFINE(HAVE_NEON,,[Support NEON instructions])
-+      fi
-+    ;;
-+    aarch64*)
-+      AX_CHECK_COMPILE_FLAG(-march=armv8-a+simd, ax_cv_support_neon_ext=yes, [])
-+      if test x"$ax_cv_support_neon_ext" = x"yes"; then
-+        ARM_NEON_FLAGS="-march=armv8-a+simd -DARCH_AARCH64 -DARM_NEON"
-+        AC_SUBST(ARM_NEON_FLAGS)
-+        ARM_FLAGS="$ARM_FLAGS $ARM_NEON_FLAGS"
-+        AC_DEFINE(HAVE_NEON,,[Support NEON instructions])
-+      fi
-+    ;;
-+  esac
++#include "ceph_ver.h"
 +
-+  AC_SUBST(ARM_FLAGS)
-+])
++extern "C" const char *__erasure_code_version() { return CEPH_GIT_NICE_VER; }
++
++extern "C" int __erasure_code_init(char *plugin_name, char *directory)
++{
++  return -444;
++}
 -- 
 2.1.2
 
