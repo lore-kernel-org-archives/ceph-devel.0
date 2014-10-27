@@ -1,58 +1,87 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: [PATCH] reinstate ceph cluster_snap support
-Date: Mon, 27 Oct 2014 14:00:57 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1410271357160.15740@cobra.newdream.net>
-References: <orob8qt7kf.fsf@livre.home> <alpine.DEB.2.00.1308231715500.28981@cobra.newdream.net> <ortxifi1cs.fsf@livre.home> <alpine.DEB.2.00.1308271515500.24783@cobra.newdream.net> <orbnp6uofj.fsf@free.home>
+From: Wido den Hollander <wido@42on.com>
+Subject: OSDs crashing with Operation Not Permitted on reading PGLog
+Date: Mon, 27 Oct 2014 22:02:39 +0100
+Message-ID: <544EB2EF.1000808@42on.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:48901 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752158AbaJ0VA6 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Oct 2014 17:00:58 -0400
-In-Reply-To: <orbnp6uofj.fsf@free.home>
+Received: from websrv.42on.com ([31.25.102.167]:43475 "EHLO websrv.42on.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752085AbaJ0VCm (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 27 Oct 2014 17:02:42 -0400
+Received: from [10.10.103.7] (unknown [193.191.136.132])
+	by websrv.42on.com (Postfix) with ESMTPSA id 4912DD0CEB
+	for <ceph-devel@vger.kernel.org>; Mon, 27 Oct 2014 22:02:40 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre Oliva <oliva@gnu.org>
-Cc: sam.just@inktank.com, ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tue, 21 Oct 2014, Alexandre Oliva wrote:
-> On Aug 27, 2013, Sage Weil <sage@inktank.com> wrote:
-> 
-> > Finally, eventually we should make this do a checkpoint on the mons too.  
-> > We can add the osd snapping back in first, but before this can/should 
-> > really be used the mons need to be snapshotted as well.  Probably that's 
-> > just adding in a snapshot() method to MonitorStore.h and doing either a 
-> > leveldb snap or making a full copy of store.db... I forget what leveldb is 
-> > capable of here.
-> 
-> I suppose it might be a bit too late for Giant, but I finally got 'round
-> to implementing this.  I attach the patch that implements it, to be
-> applied on top of the updated version of the patch I posted before, also
-> attached.
-> 
-> I have a backport to Firefly too, if there's interest.
-> 
-> I have tested both methods: btrfs snapshotting of store.db (I've
-> manually turned store.db into a btrfs subvolume), and creating a new db
-> with all (prefix,key,value) triples.  I'm undecided about inserting
-> multiple transaction commits for the latter case; the mon mem use grew
-> up a lot as it was, and in a few tests the snapshotting ran twice, but
-> in the end a dump of all the data in the database created by btrfs
-> snapshotting was identical to that created by explicit copying.  So, the
-> former is preferred, since it's so incredibly more efficient.  I also
-> considered hardlinking all files in store.db into a separate tree, but I
-> didn't like the idea of coding that in C+-, :-) and I figured it might
-> not work with other db backends, and maybe even not be guaranteed to
-> work with leveldb.  It's probably not worth much more effort.
+Hi,
 
-This looks pretty reasonable!
+On a 0.80.7 cluster I'm experiencing a couple of OSDs refusing to start
+due to a crash they encounter when reading the PGLog.
 
-I think we definitely need to limit the size of the transaction when doing 
-the snap.  The attached patch seems to try to do it all in one go, which 
-is not going to work for large clusters.  Either re-use an existing 
-tunable like the sync chunk size or add a new one?
+A snippet of the log:
 
-Thanks!
-sage
+   -11> 2014-10-27 21:56:04.690046 7f034a006800 10
+filestore(/var/lib/ceph/osd/ceph-25) _do_transaction on 0x392e600
+   -10> 2014-10-27 21:56:04.690078 7f034a006800 20
+filestore(/var/lib/ceph/osd/ceph-25) _check_global_replay_guard no xattr
+    -9> 2014-10-27 21:56:04.690140 7f034a006800 20
+filestore(/var/lib/ceph/osd/ceph-25) _check_replay_guard no xattr
+    -8> 2014-10-27 21:56:04.690150 7f034a006800 15
+filestore(/var/lib/ceph/osd/ceph-25) touch meta/a1630ecd/pglog_14.1a56/0//-1
+    -7> 2014-10-27 21:56:04.690184 7f034a006800 10
+filestore(/var/lib/ceph/osd/ceph-25) touch
+meta/a1630ecd/pglog_14.1a56/0//-1 = 0
+    -6> 2014-10-27 21:56:04.690196 7f034a006800 15
+filestore(/var/lib/ceph/osd/ceph-25) _omap_rmkeys
+meta/a1630ecd/pglog_14.1a56/0//-1
+    -5> 2014-10-27 21:56:04.690290 7f034a006800 10 filestore oid:
+a1630ecd/pglog_14.1a56/0//-1 not skipping op, *spos 1435883.0.2
+    -4> 2014-10-27 21:56:04.690295 7f034a006800 10 filestore  >
+header.spos 0.0.0
+    -3> 2014-10-27 21:56:04.690314 7f034a006800  0
+filestore(/var/lib/ceph/osd/ceph-25)  error (1) Operation not permitted
+not handled on operation 33 (1435883.0.2, or op 2, counting from 0)
+    -2> 2014-10-27 21:56:04.690325 7f034a006800  0
+filestore(/var/lib/ceph/osd/ceph-25) unexpected error code
+    -1> 2014-10-27 21:56:04.690327 7f034a006800  0
+filestore(/var/lib/ceph/osd/ceph-25)  transaction dump:
+{ "ops": [
+        { "op_num": 0,
+          "op_name": "nop"},
+        { "op_num": 1,
+          "op_name": "touch",
+          "collection": "meta",
+          "oid": "a1630ecd\/pglog_14.1a56\/0\/\/-1"},
+        { "op_num": 2,
+          "op_name": "omap_rmkeys",
+          "collection": "meta",
+          "oid": "a1630ecd\/pglog_14.1a56\/0\/\/-1"},
+        { "op_num": 3,
+          "op_name": "omap_setkeys",
+          "collection": "meta",
+          "oid": "a1630ecd\/pglog_14.1a56\/0\/\/-1",
+          "attr_lens": { "can_rollback_to": 12}}]}
+     0> 2014-10-27 21:56:04.691992 7f034a006800 -1 os/FileStore.cc: In
+function 'unsigned int
+FileStore::_do_transaction(ObjectStore::Transaction&, uint64_t, int,
+ThreadPool::TPHandle*)' thread 7f034a006800 time 2014-10-27 21:56:04.690368
+os/FileStore.cc: 2559: FAILED assert(0 == "unexpected error")
 
+
+The backing XFS filesystem seems to be OK, but isn't this a leveldb
+issue where the omap information is stored?
+
+Anyone seen this before? I have about 5 OSDs (out of the 336) which are
+showing this problem when booting.
+
+-- 
+Wido den Hollander
+42on B.V.
+Ceph trainer and consultant
+
+Phone: +31 (0)20 700 9902
+Skype: contact42on
