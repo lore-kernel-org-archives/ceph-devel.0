@@ -1,87 +1,96 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: OSDs crashing with Operation Not Permitted on reading PGLog
-Date: Mon, 27 Oct 2014 22:02:39 +0100
-Message-ID: <544EB2EF.1000808@42on.com>
+From: Samuel Just <sam.just@inktank.com>
+Subject: Re: OSDs crashing with Operation Not Permitted on reading PGLog
+Date: Mon, 27 Oct 2014 14:05:34 -0700
+Message-ID: <CA+4uBUaN8STAmfE7CkQvrBPK8UUGiybRbvgfMWbKp1784gVDaw@mail.gmail.com>
+References: <544EB2EF.1000808@42on.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from websrv.42on.com ([31.25.102.167]:43475 "EHLO websrv.42on.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752085AbaJ0VCm (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 27 Oct 2014 17:02:42 -0400
-Received: from [10.10.103.7] (unknown [193.191.136.132])
-	by websrv.42on.com (Postfix) with ESMTPSA id 4912DD0CEB
-	for <ceph-devel@vger.kernel.org>; Mon, 27 Oct 2014 22:02:40 +0100 (CET)
+Received: from mail-la0-f47.google.com ([209.85.215.47]:41672 "EHLO
+	mail-la0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752428AbaJ0VFg (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Oct 2014 17:05:36 -0400
+Received: by mail-la0-f47.google.com with SMTP id pv20so6518365lab.20
+        for <ceph-devel@vger.kernel.org>; Mon, 27 Oct 2014 14:05:34 -0700 (PDT)
+In-Reply-To: <544EB2EF.1000808@42on.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Wido den Hollander <wido@42on.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi,
+Try reproducing with an strace.
+-Sam
 
-On a 0.80.7 cluster I'm experiencing a couple of OSDs refusing to start
-due to a crash they encounter when reading the PGLog.
-
-A snippet of the log:
-
-   -11> 2014-10-27 21:56:04.690046 7f034a006800 10
-filestore(/var/lib/ceph/osd/ceph-25) _do_transaction on 0x392e600
-   -10> 2014-10-27 21:56:04.690078 7f034a006800 20
-filestore(/var/lib/ceph/osd/ceph-25) _check_global_replay_guard no xattr
-    -9> 2014-10-27 21:56:04.690140 7f034a006800 20
-filestore(/var/lib/ceph/osd/ceph-25) _check_replay_guard no xattr
-    -8> 2014-10-27 21:56:04.690150 7f034a006800 15
-filestore(/var/lib/ceph/osd/ceph-25) touch meta/a1630ecd/pglog_14.1a56/0//-1
-    -7> 2014-10-27 21:56:04.690184 7f034a006800 10
-filestore(/var/lib/ceph/osd/ceph-25) touch
-meta/a1630ecd/pglog_14.1a56/0//-1 = 0
-    -6> 2014-10-27 21:56:04.690196 7f034a006800 15
-filestore(/var/lib/ceph/osd/ceph-25) _omap_rmkeys
-meta/a1630ecd/pglog_14.1a56/0//-1
-    -5> 2014-10-27 21:56:04.690290 7f034a006800 10 filestore oid:
-a1630ecd/pglog_14.1a56/0//-1 not skipping op, *spos 1435883.0.2
-    -4> 2014-10-27 21:56:04.690295 7f034a006800 10 filestore  >
-header.spos 0.0.0
-    -3> 2014-10-27 21:56:04.690314 7f034a006800  0
-filestore(/var/lib/ceph/osd/ceph-25)  error (1) Operation not permitted
-not handled on operation 33 (1435883.0.2, or op 2, counting from 0)
-    -2> 2014-10-27 21:56:04.690325 7f034a006800  0
-filestore(/var/lib/ceph/osd/ceph-25) unexpected error code
-    -1> 2014-10-27 21:56:04.690327 7f034a006800  0
-filestore(/var/lib/ceph/osd/ceph-25)  transaction dump:
-{ "ops": [
-        { "op_num": 0,
-          "op_name": "nop"},
-        { "op_num": 1,
-          "op_name": "touch",
-          "collection": "meta",
-          "oid": "a1630ecd\/pglog_14.1a56\/0\/\/-1"},
-        { "op_num": 2,
-          "op_name": "omap_rmkeys",
-          "collection": "meta",
-          "oid": "a1630ecd\/pglog_14.1a56\/0\/\/-1"},
-        { "op_num": 3,
-          "op_name": "omap_setkeys",
-          "collection": "meta",
-          "oid": "a1630ecd\/pglog_14.1a56\/0\/\/-1",
-          "attr_lens": { "can_rollback_to": 12}}]}
-     0> 2014-10-27 21:56:04.691992 7f034a006800 -1 os/FileStore.cc: In
-function 'unsigned int
-FileStore::_do_transaction(ObjectStore::Transaction&, uint64_t, int,
-ThreadPool::TPHandle*)' thread 7f034a006800 time 2014-10-27 21:56:04.690368
-os/FileStore.cc: 2559: FAILED assert(0 == "unexpected error")
-
-
-The backing XFS filesystem seems to be OK, but isn't this a leveldb
-issue where the omap information is stored?
-
-Anyone seen this before? I have about 5 OSDs (out of the 336) which are
-showing this problem when booting.
-
--- 
-Wido den Hollander
-42on B.V.
-Ceph trainer and consultant
-
-Phone: +31 (0)20 700 9902
-Skype: contact42on
+On Mon, Oct 27, 2014 at 2:02 PM, Wido den Hollander <wido@42on.com> wrote:
+> Hi,
+>
+> On a 0.80.7 cluster I'm experiencing a couple of OSDs refusing to start
+> due to a crash they encounter when reading the PGLog.
+>
+> A snippet of the log:
+>
+>    -11> 2014-10-27 21:56:04.690046 7f034a006800 10
+> filestore(/var/lib/ceph/osd/ceph-25) _do_transaction on 0x392e600
+>    -10> 2014-10-27 21:56:04.690078 7f034a006800 20
+> filestore(/var/lib/ceph/osd/ceph-25) _check_global_replay_guard no xattr
+>     -9> 2014-10-27 21:56:04.690140 7f034a006800 20
+> filestore(/var/lib/ceph/osd/ceph-25) _check_replay_guard no xattr
+>     -8> 2014-10-27 21:56:04.690150 7f034a006800 15
+> filestore(/var/lib/ceph/osd/ceph-25) touch meta/a1630ecd/pglog_14.1a56/0//-1
+>     -7> 2014-10-27 21:56:04.690184 7f034a006800 10
+> filestore(/var/lib/ceph/osd/ceph-25) touch
+> meta/a1630ecd/pglog_14.1a56/0//-1 = 0
+>     -6> 2014-10-27 21:56:04.690196 7f034a006800 15
+> filestore(/var/lib/ceph/osd/ceph-25) _omap_rmkeys
+> meta/a1630ecd/pglog_14.1a56/0//-1
+>     -5> 2014-10-27 21:56:04.690290 7f034a006800 10 filestore oid:
+> a1630ecd/pglog_14.1a56/0//-1 not skipping op, *spos 1435883.0.2
+>     -4> 2014-10-27 21:56:04.690295 7f034a006800 10 filestore  >
+> header.spos 0.0.0
+>     -3> 2014-10-27 21:56:04.690314 7f034a006800  0
+> filestore(/var/lib/ceph/osd/ceph-25)  error (1) Operation not permitted
+> not handled on operation 33 (1435883.0.2, or op 2, counting from 0)
+>     -2> 2014-10-27 21:56:04.690325 7f034a006800  0
+> filestore(/var/lib/ceph/osd/ceph-25) unexpected error code
+>     -1> 2014-10-27 21:56:04.690327 7f034a006800  0
+> filestore(/var/lib/ceph/osd/ceph-25)  transaction dump:
+> { "ops": [
+>         { "op_num": 0,
+>           "op_name": "nop"},
+>         { "op_num": 1,
+>           "op_name": "touch",
+>           "collection": "meta",
+>           "oid": "a1630ecd\/pglog_14.1a56\/0\/\/-1"},
+>         { "op_num": 2,
+>           "op_name": "omap_rmkeys",
+>           "collection": "meta",
+>           "oid": "a1630ecd\/pglog_14.1a56\/0\/\/-1"},
+>         { "op_num": 3,
+>           "op_name": "omap_setkeys",
+>           "collection": "meta",
+>           "oid": "a1630ecd\/pglog_14.1a56\/0\/\/-1",
+>           "attr_lens": { "can_rollback_to": 12}}]}
+>      0> 2014-10-27 21:56:04.691992 7f034a006800 -1 os/FileStore.cc: In
+> function 'unsigned int
+> FileStore::_do_transaction(ObjectStore::Transaction&, uint64_t, int,
+> ThreadPool::TPHandle*)' thread 7f034a006800 time 2014-10-27 21:56:04.690368
+> os/FileStore.cc: 2559: FAILED assert(0 == "unexpected error")
+>
+>
+> The backing XFS filesystem seems to be OK, but isn't this a leveldb
+> issue where the omap information is stored?
+>
+> Anyone seen this before? I have about 5 OSDs (out of the 336) which are
+> showing this problem when booting.
+>
+> --
+> Wido den Hollander
+> 42on B.V.
+> Ceph trainer and consultant
+>
+> Phone: +31 (0)20 700 9902
+> Skype: contact42on
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
