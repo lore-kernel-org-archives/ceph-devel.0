@@ -1,54 +1,171 @@
-From: Anand Bhat <Anand.Bhat@sandisk.com>
-Subject: RE: Regarding hammer blueprints
-Date: Tue, 28 Oct 2014 04:52:04 +0000
-Message-ID: <37A1BCB5EFF35248B6849AC7BCB09FC809D30E60@SACMBXIP03.sdcorp.global.sandisk.com>
-References: <37A1BCB5EFF35248B6849AC7BCB09FC809D28763@SACMBXIP02.sdcorp.global.sandisk.com>
- <CA+4uBUYWwttjcrTdu6tZ+uibwdo0Dnm8YS-8QKspgWt+iPi=Yg@mail.gmail.com>
+From: =?UTF-8?B?5rGg5L+h5rO9?= <xmdxcxz@gmail.com>
+Subject: Fwd: Cache pool bug?
+Date: Tue, 28 Oct 2014 13:39:22 +0800
+Message-ID: <CANE=7sW7ujhb+YzWUFJ0XfeubMELWwOTyNcth6UM9Eu+bTJeOA@mail.gmail.com>
+References: <CANE=7sUW0e-vp8LROZFA+5BGNoENA4MLthsnPUKb1ks=hnoyEA@mail.gmail.com>
+	<BLU169-W9B3F7EAC2250B1425B560DA9E0@phx.gbl>
+	<06E7D85B3BA36C4DB207FEDE871C5348950BD2@SHSMSX101.ccr.corp.intel.com>
+	<alpine.DEB.2.00.1410270902320.13498@cobra.newdream.net>
+	<CANE=7sVJLeCBkSzNM9cC0k0YOCgapBdMVeYP=GqncTKtup5eKw@mail.gmail.com>
+	<06E7D85B3BA36C4DB207FEDE871C5348950D90@SHSMSX101.ccr.corp.intel.com>
+	<alpine.DEB.2.00.1410272100310.7897@cobra.newdream.net>
+	<CANE=7sWu2aXfAYRXNTqkUvGkxmkyYjmeJbt=j-8SaUNwbu4Rvw@mail.gmail.com>
+	<CANE=7sW1m=sJNoTPiVUMo-XPSpefk5++fSTzmb8RPMwDyOYV9A@mail.gmail.com>
+	<CANE=7sWE1Rx8Bg7SCb5ASLFNGrteh3Noyqaop-s4rKKwB2Gikw@mail.gmail.com>
+	<06E7D85B3BA36C4DB207FEDE871C5348950F34@SHSMSX101.ccr.corp.intel.com>
+	<CANE=7sX6oaXKKiSB5Se50=Ht3tJsQE5a=AKBLBo37Q0+pZjRrg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bl2on0053.outbound.protection.outlook.com ([65.55.169.53]:42911
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752698AbaJ1FHW (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 28 Oct 2014 01:07:22 -0400
-In-Reply-To: <CA+4uBUYWwttjcrTdu6tZ+uibwdo0Dnm8YS-8QKspgWt+iPi=Yg@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-oi0-f48.google.com ([209.85.218.48]:42918 "EHLO
+	mail-oi0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751619AbaJ1FjW convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Oct 2014 01:39:22 -0400
+Received: by mail-oi0-f48.google.com with SMTP id x69so3021714oia.7
+        for <ceph-devel@vger.kernel.org>; Mon, 27 Oct 2014 22:39:22 -0700 (PDT)
+In-Reply-To: <CANE=7sX6oaXKKiSB5Se50=Ht3tJsQE5a=AKBLBo37Q0+pZjRrg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sam.just@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-U2FtLA0KDQpBcmUgeW91IGFjdGl2ZWx5IHdvcmtpbmcgb24gdGhpcz8gSWYgbm90LCBjYW4gSSBz
-dGFydCB3b3JraW5nIG9uIHRoaXM/DQoNClJlZ2FyZHMsDQpBbmFuZA0KDQotLS0tLU9yaWdpbmFs
-IE1lc3NhZ2UtLS0tLQ0KRnJvbTogU2FtdWVsIEp1c3QgW21haWx0bzpzYW0uanVzdEBpbmt0YW5r
-LmNvbV0gDQpTZW50OiBUdWVzZGF5LCBPY3RvYmVyIDIxLCAyMDE0IDExOjU4IFBNDQpUbzogQW5h
-bmQgQmhhdA0KQ2M6IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQpTdWJqZWN0OiBSZTogUmVn
-YXJkaW5nIGhhbW1lciBibHVlcHJpbnRzDQoNClRoZSBwcmlvcml0eSBxdWV1ZSBjaGFuZ2VzIGFy
-ZSwgaW4gZmFjdCwgdGhhdCBibHVlcHJpbnQuDQotU2FtDQoNCk9uIFR1ZSwgT2N0IDIxLCAyMDE0
-IGF0IDU6MTQgQU0sIEFuYW5kIEJoYXQgPEFuYW5kLkJoYXRAc2FuZGlzay5jb20+IHdyb3RlOg0K
-PiBTYWdlL1NhbSwNCj4NCj4gVGhlcmUgd2FzIGEgbWVudGlvbiBvZiAidW5pZmllZCBwcmlvcml0
-eSBxdWV1ZSIgaGFtbWVyIGJsdWVwcmludCBpbiBvbmUgb2YgdGhlIG1haWwgY2hhaW5zLiBJIGRv
-bid0IHNlZSBhbnl0aGluZyByZWxhdGVkIHRvIHRoYXQgaW4gdGhlIEhhbW1lciBibHVlcHJpbnQg
-bGlzdCAoaHR0cHM6Ly93aWtpLmNlcGguY29tL1BsYW5uaW5nL0JsdWVwcmludHMvSGFtbWVyKS4g
-SXMgaXQgc3RpbGwgcGxhbm5lZCBmb3IgSGFtbWVyIHJlbGVhc2U/DQo+DQo+IFRoZXJlIGlzIGEg
-Ymx1ZXByaW50IG5hbWVkICAib3NkOiBTY3J1Yi9TbmFwVHJpbSBJTyBwcmlvcml0aXphdGlvbiIg
-aW4gdGhlIEhhbW1lciBibHVlcHJpbnQgbGlzdC4gQXJlIHRoZSBwcmlvcml0eSBxdWV1ZSBjaGFu
-Z2VzIGhhbmRsZWQgYXMgcGFydCBvZiB0aGlzIGJsdWVwcmludD8NCj4NCj4gUmVnYXJkcywNCj4g
-QW5hbmQNCj4NCj4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCj4NCj4gUExFQVNF
-IE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwg
-bWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJl
-Y2lwaWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMg
-bm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQg
-eW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZp
-ZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzIG1lc3Nh
-Z2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21t
-dW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25l
-IG9yIGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBh
-bmQgYWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVy
-IGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KPg0KPiAtLQ0K
-PiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3Jp
-YmUgY2VwaC1kZXZlbCIgDQo+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9A
-dmdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIA0KPiBpbmZvIGF0ICBodHRwOi8vdmdlci5r
-ZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCg==
+---------- Forwarded message ----------
+=46rom: =E6=B1=A0=E4=BF=A1=E6=B3=BD <xmdxcxz@gmail.com>
+Date: 2014-10-28 13:37 GMT+08:00
+Subject: Re: Cache pool bug?
+To: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
+
+
+If we use the timestamp,
+
+get_position_micro(int32_t v, uint64_t *lower, uint64_t *upper)
+
+    unsigned bin =3D calc_bits_of(v); // this function will return the
+same value at most time, this may be a problem.
+
+
+2014-10-28 12:50 GMT+08:00 Wang, Zhiqiang <zhiqiang.wang@intel.com>:
+> Yes, if we change atime to be a timestamp, we also need to change the=
+ code for the case when the object is not in any hit sets.
+>
+> -----Original Message-----
+> From: =E6=B1=A0=E4=BF=A1=E6=B3=BD [mailto:xmdxcxz@gmail.com]
+> Sent: Tuesday, October 28, 2014 12:46 PM
+> To: Sage Weil; Wang, Zhiqiang; ceph-devel@vger.kernel.org
+> Subject: Re: Cache pool bug?
+>
+> If it changed to be *atime =3D p->first
+>
+> we should change ReplicatedPG::agent_maybe_evict
+>     if (atime < 0 && obc->obs.oi.mtime !=3D utime_t()) {
+>       if (obc->obs.oi.local_mtime !=3D utime_t()) {
+>         atime =3D obc->obs.oi.local_mtime;
+>       } else {
+>         atime =3D obc->obs.oi.mtime;
+>       }
+>     }
+>     if (atime < 0)
+>       atime =3D 0; // or other
+>
+> void ReplicatedPG::agent_estimate_atime_temp(const hobject_t& oid,
+>     int *atime, int *temp)
+> {
+>   assert(hit_set);
+>    time_t now =3D ceph_clock_now(NULL).sec();
+>   *atime =3D -1;
+>   if (temp)
+>     *temp =3D 0;
+>   if (hit_set->contains(oid)) {
+>     *atime =3D now;
+>     if (temp)
+>       ++(*temp);
+>     else
+>       return;
+>   }
+>
+>   for (map<time_t,HitSetRef>::iterator p =3D agent_state->hit_set_map=
+=2Erbegin();
+>        p !=3D agent_state->hit_set_map.rend();
+>        ++p) {
+>     if (p->second->contains(oid)) {
+>       if (*atime < 0)
+> *atime =3D now - p->first;
+>       if (temp)
+> ++(*temp);
+>       else
+> return;
+>     }
+>   }
+> }
+>
+> 2014-10-28 12:36 GMT+08:00 =E6=B1=A0=E4=BF=A1=E6=B3=BD <xmdxcxz@gmail=
+=2Ecom>:
+>> I am sorry. We should only just modify the logic
+>> ReplicatedPG::agent_estimate_atime_temp, atime should be now.
+>>
+>>   if (temp)
+>>     *temp =3D 0;
+>>   if (hit_set->contains(oid)) {
+>>     *atime =3D 0;
+>>     if (temp)
+>>       ++(*temp);
+>>     else
+>>       return;
+>>   }
+>>
+>> 2014-10-28 12:28 GMT+08:00 =E6=B1=A0=E4=BF=A1=E6=B3=BD <xmdxcxz@gmai=
+l.com>:
+>>> I think if it changed to be  *atime =3D p->first, Below logic shoul=
+d
+>>> also be modified.
+>>>
+>>> ReplicatedPG::agent_maybe_evict
+>>>
+>>>     if (atime < 0 && obc->obs.oi.mtime !=3D utime_t()) {
+>>>       if (obc->obs.oi.local_mtime !=3D utime_t()) {
+>>>         atime =3D ceph_clock_now(NULL).sec() - obc->obs.oi.local_mt=
+ime;
+>>>       } else {
+>>>         atime =3D ceph_clock_now(NULL).sec() - obc->obs.oi.mtime;
+>>>       }
+>>>     }
+>>>
+>>>
+>>> including
+>>> ReplicatedPG::agent_estimate_atime_temp
+>>>   if (temp)
+>>>     *temp =3D 0;
+>>>   if (hit_set->contains(oid)) {
+>>>     *atime =3D 0;
+>>>     if (temp)
+>>>       ++(*temp);
+>>>     else
+>>>       return;
+>>>   }
+>>>
+>>> 2014-10-28 12:02 GMT+08:00 Sage Weil <sage@newdream.net>:
+>>>> Yep.  The pull request looks is correct too, but needs to be
+>>>> squashed into a single commit with a Signed-off-by: line and descr=
+iption.
+>>>>
+>>>> Zhiqiang, I think the reversed logic you just fixed in
+>>>> agent_maybe_evict() was partly because this function is filling in
+>>>> atime (which sounds like a
+>>>> timestamp) with an *age* (now - p->first).  I think we should chan=
+ge
+>>>>
+>>>>>       if (*atime < 0)
+>>>>>       *atime =3D now - p->first;
+>>>>
+>>>> to be
+>>>>
+>>>>  *atime =3D p->first
+>>>>
+>>>> and/or adjust the caller accordingly...?
+>>>>
+>>>> sage
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
