@@ -1,45 +1,82 @@
-From: Ketor D <d.ketor@gmail.com>
-Subject: Re: fio rbd completions (Was: fio rbd hang for block sizes > 1M)
-Date: Tue, 28 Oct 2014 12:49:18 +0800
-Message-ID: <CAM9_UU9G5vQ68UxMakte-Wb5B9_KBo24ov7=hNHpYqEtko2nQg@mail.gmail.com>
-References: <5449BBB3.7090109@catalyst.net.nz> <5449E50E.7000808@kernel.dk>
- <5449EEF1.1060407@catalyst.net.nz> <544A51C7.40803@gmail.com>
- <544A5DA6.2010709@gmail.com> <544AD67D.4030603@catalyst.net.nz>
- <544AEAE7.6080603@redhat.com> <544AF0D2.1050405@catalyst.net.nz>
- <544B0C7F.4080109@catalyst.net.nz> <544B1D50.4010101@kernel.dk>
- <544B2C19.7070009@catalyst.net.nz> <544BF808.2090800@kernel.dk>
- <544C2371.1020403@catalyst.net.nz> <544E547C.30009@kernel.dk>
- <CAM9_UU9j2erdGT5kqKi_+5z5ERFMPO1hHwMk8kaFjLkGm-zp-g@mail.gmail.com>
- <544E6330.1000202@kernel.dk> <544E63EA.1010204@kernel.dk> <CAM9_UU-35i9uRu9EDQSM-b7CjmxrKYV2Gz8ocrykOYk+2q++hw@mail.gmail.com>
- <544E6691.106@kernel.dk> <CAM9_UU9_ZHtwv=31DyxkAmog7XJbthiRXi5n+Y0Cfxj4qm3bGQ@mail.gmail.com>
- <544E6A8D.1040608@kernel.dk> <CAM9_UU8x2uZZUWaPPoy+LHmUhC_3sqKZ9GPsEqDwKUkprg4kdQ@mail.gmail.com>
- <544EC05D.7040807@catalyst.net.nz> <544EC7F1.6010900@kernel.dk>
- <544ED37D.6060800@catalyst.net.nz> <CAM9_UU8MHdj+mjAWBziETxPDnwTt0JBuHrQp2Fu9YtF=msae3w@mail.gmail.com>
- <79432849-2F58-4738-82E1-E4D8AB10A6AE@kernel.dk>
+From: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
+Subject: RE: Cache pool bug?
+Date: Tue, 28 Oct 2014 04:50:21 +0000
+Message-ID: <06E7D85B3BA36C4DB207FEDE871C5348950F34@SHSMSX101.ccr.corp.intel.com>
+References: <CANE=7sUW0e-vp8LROZFA+5BGNoENA4MLthsnPUKb1ks=hnoyEA@mail.gmail.com>
+	<BLU169-W9B3F7EAC2250B1425B560DA9E0@phx.gbl>
+	<06E7D85B3BA36C4DB207FEDE871C5348950BD2@SHSMSX101.ccr.corp.intel.com>
+	<alpine.DEB.2.00.1410270902320.13498@cobra.newdream.net>
+	<CANE=7sVJLeCBkSzNM9cC0k0YOCgapBdMVeYP=GqncTKtup5eKw@mail.gmail.com>
+	<06E7D85B3BA36C4DB207FEDE871C5348950D90@SHSMSX101.ccr.corp.intel.com>
+	<alpine.DEB.2.00.1410272100310.7897@cobra.newdream.net>
+	<CANE=7sWu2aXfAYRXNTqkUvGkxmkyYjmeJbt=j-8SaUNwbu4Rvw@mail.gmail.com>
+	<CANE=7sW1m=sJNoTPiVUMo-XPSpefk5++fSTzmb8RPMwDyOYV9A@mail.gmail.com>
+ <CANE=7sWE1Rx8Bg7SCb5ASLFNGrteh3Noyqaop-s4rKKwB2Gikw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f169.google.com ([209.85.214.169]:40837 "EHLO
-	mail-ob0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750786AbaJ1Ett (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Oct 2014 00:49:49 -0400
-In-Reply-To: <79432849-2F58-4738-82E1-E4D8AB10A6AE@kernel.dk>
+Received: from mga11.intel.com ([192.55.52.93]:14508 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751390AbaJ1Evj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 28 Oct 2014 00:51:39 -0400
+In-Reply-To: <CANE=7sWE1Rx8Bg7SCb5ASLFNGrteh3Noyqaop-s4rKKwB2Gikw@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jens Axboe <axboe@kernel.dk>
-Cc: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>, Mark Nelson <mark.nelson@inktank.com>, Mark Nelson <mark.a.nelson@gmail.com>, "fio@vger.kernel.org" <fio@vger.kernel.org>, "xan.peng" <xanpeng@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: =?utf-8?B?5rGg5L+h5rO9?= <xmdxcxz@gmail.com>, Sage Weil <sage@newdream.net>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Agree. Busy loop is only for test.
-I will try the current git.
-
-Thanks!
-
-2014-10-28 12:05 GMT+08:00 Jens Axboe <axboe@kernel.dk>:
->
->> On Oct 27, 2014, at 9:23 PM, Ketor D <d.ketor@gmail.com> wrote:
->>
->> Hi Mark,
->>      Wish you could test my patch.I get the best performance using this patch.
->
-> There's no way we're doing a busy loop, sorry. As mentioned in a previous email, it'd be great if you would work off current git and potentially improve that.
->
+WWVzLCBpZiB3ZSBjaGFuZ2UgYXRpbWUgdG8gYmUgYSB0aW1lc3RhbXAsIHdlIGFsc28gbmVlZCB0
+byBjaGFuZ2UgdGhlIGNvZGUgZm9yIHRoZSBjYXNlIHdoZW4gdGhlIG9iamVjdCBpcyBub3QgaW4g
+YW55IGhpdCBzZXRzLg0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTog5rGg5L+h
+5rO9IFttYWlsdG86eG1keGN4ekBnbWFpbC5jb21dIA0KU2VudDogVHVlc2RheSwgT2N0b2JlciAy
+OCwgMjAxNCAxMjo0NiBQTQ0KVG86IFNhZ2UgV2VpbDsgV2FuZywgWmhpcWlhbmc7IGNlcGgtZGV2
+ZWxAdmdlci5rZXJuZWwub3JnDQpTdWJqZWN0OiBSZTogQ2FjaGUgcG9vbCBidWc/DQoNCklmIGl0
+IGNoYW5nZWQgdG8gYmUgKmF0aW1lID0gcC0+Zmlyc3QNCg0Kd2Ugc2hvdWxkIGNoYW5nZSBSZXBs
+aWNhdGVkUEc6OmFnZW50X21heWJlX2V2aWN0DQogICAgaWYgKGF0aW1lIDwgMCAmJiBvYmMtPm9i
+cy5vaS5tdGltZSAhPSB1dGltZV90KCkpIHsNCiAgICAgIGlmIChvYmMtPm9icy5vaS5sb2NhbF9t
+dGltZSAhPSB1dGltZV90KCkpIHsNCiAgICAgICAgYXRpbWUgPSBvYmMtPm9icy5vaS5sb2NhbF9t
+dGltZTsNCiAgICAgIH0gZWxzZSB7DQogICAgICAgIGF0aW1lID0gb2JjLT5vYnMub2kubXRpbWU7
+DQogICAgICB9DQogICAgfQ0KICAgIGlmIChhdGltZSA8IDApDQogICAgICBhdGltZSA9IDA7IC8v
+IG9yIG90aGVyDQoNCnZvaWQgUmVwbGljYXRlZFBHOjphZ2VudF9lc3RpbWF0ZV9hdGltZV90ZW1w
+KGNvbnN0IGhvYmplY3RfdCYgb2lkLA0KICAgIGludCAqYXRpbWUsIGludCAqdGVtcCkNCnsNCiAg
+YXNzZXJ0KGhpdF9zZXQpOw0KICAgdGltZV90IG5vdyA9IGNlcGhfY2xvY2tfbm93KE5VTEwpLnNl
+YygpOw0KICAqYXRpbWUgPSAtMTsNCiAgaWYgKHRlbXApDQogICAgKnRlbXAgPSAwOw0KICBpZiAo
+aGl0X3NldC0+Y29udGFpbnMob2lkKSkgew0KICAgICphdGltZSA9IG5vdzsNCiAgICBpZiAodGVt
+cCkNCiAgICAgICsrKCp0ZW1wKTsNCiAgICBlbHNlDQogICAgICByZXR1cm47DQogIH0NCg0KICBm
+b3IgKG1hcDx0aW1lX3QsSGl0U2V0UmVmPjo6aXRlcmF0b3IgcCA9IGFnZW50X3N0YXRlLT5oaXRf
+c2V0X21hcC5yYmVnaW4oKTsNCiAgICAgICBwICE9IGFnZW50X3N0YXRlLT5oaXRfc2V0X21hcC5y
+ZW5kKCk7DQogICAgICAgKytwKSB7DQogICAgaWYgKHAtPnNlY29uZC0+Y29udGFpbnMob2lkKSkg
+ew0KICAgICAgaWYgKCphdGltZSA8IDApDQoqYXRpbWUgPSBub3cgLSBwLT5maXJzdDsNCiAgICAg
+IGlmICh0ZW1wKQ0KKysoKnRlbXApOw0KICAgICAgZWxzZQ0KcmV0dXJuOw0KICAgIH0NCiAgfQ0K
+fQ0KDQoyMDE0LTEwLTI4IDEyOjM2IEdNVCswODowMCDmsaDkv6Hms70gPHhtZHhjeHpAZ21haWwu
+Y29tPjoNCj4gSSBhbSBzb3JyeS4gV2Ugc2hvdWxkIG9ubHkganVzdCBtb2RpZnkgdGhlIGxvZ2lj
+IA0KPiBSZXBsaWNhdGVkUEc6OmFnZW50X2VzdGltYXRlX2F0aW1lX3RlbXAsIGF0aW1lIHNob3Vs
+ZCBiZSBub3cuDQo+DQo+ICAgaWYgKHRlbXApDQo+ICAgICAqdGVtcCA9IDA7DQo+ICAgaWYgKGhp
+dF9zZXQtPmNvbnRhaW5zKG9pZCkpIHsNCj4gICAgICphdGltZSA9IDA7DQo+ICAgICBpZiAodGVt
+cCkNCj4gICAgICAgKysoKnRlbXApOw0KPiAgICAgZWxzZQ0KPiAgICAgICByZXR1cm47DQo+ICAg
+fQ0KPg0KPiAyMDE0LTEwLTI4IDEyOjI4IEdNVCswODowMCDmsaDkv6Hms70gPHhtZHhjeHpAZ21h
+aWwuY29tPjoNCj4+IEkgdGhpbmsgaWYgaXQgY2hhbmdlZCB0byBiZSAgKmF0aW1lID0gcC0+Zmly
+c3QsIEJlbG93IGxvZ2ljIHNob3VsZCANCj4+IGFsc28gYmUgbW9kaWZpZWQuDQo+Pg0KPj4gUmVw
+bGljYXRlZFBHOjphZ2VudF9tYXliZV9ldmljdA0KPj4NCj4+ICAgICBpZiAoYXRpbWUgPCAwICYm
+IG9iYy0+b2JzLm9pLm10aW1lICE9IHV0aW1lX3QoKSkgew0KPj4gICAgICAgaWYgKG9iYy0+b2Jz
+Lm9pLmxvY2FsX210aW1lICE9IHV0aW1lX3QoKSkgew0KPj4gICAgICAgICBhdGltZSA9IGNlcGhf
+Y2xvY2tfbm93KE5VTEwpLnNlYygpIC0gb2JjLT5vYnMub2kubG9jYWxfbXRpbWU7DQo+PiAgICAg
+ICB9IGVsc2Ugew0KPj4gICAgICAgICBhdGltZSA9IGNlcGhfY2xvY2tfbm93KE5VTEwpLnNlYygp
+IC0gb2JjLT5vYnMub2kubXRpbWU7DQo+PiAgICAgICB9DQo+PiAgICAgfQ0KPj4NCj4+DQo+PiBp
+bmNsdWRpbmcNCj4+IFJlcGxpY2F0ZWRQRzo6YWdlbnRfZXN0aW1hdGVfYXRpbWVfdGVtcA0KPj4g
+ICBpZiAodGVtcCkNCj4+ICAgICAqdGVtcCA9IDA7DQo+PiAgIGlmIChoaXRfc2V0LT5jb250YWlu
+cyhvaWQpKSB7DQo+PiAgICAgKmF0aW1lID0gMDsNCj4+ICAgICBpZiAodGVtcCkNCj4+ICAgICAg
+ICsrKCp0ZW1wKTsNCj4+ICAgICBlbHNlDQo+PiAgICAgICByZXR1cm47DQo+PiAgIH0NCj4+DQo+
+PiAyMDE0LTEwLTI4IDEyOjAyIEdNVCswODowMCBTYWdlIFdlaWwgPHNhZ2VAbmV3ZHJlYW0ubmV0
+PjoNCj4+PiBZZXAuICBUaGUgcHVsbCByZXF1ZXN0IGxvb2tzIGlzIGNvcnJlY3QgdG9vLCBidXQg
+bmVlZHMgdG8gYmUgDQo+Pj4gc3F1YXNoZWQgaW50byBhIHNpbmdsZSBjb21taXQgd2l0aCBhIFNp
+Z25lZC1vZmYtYnk6IGxpbmUgYW5kIGRlc2NyaXB0aW9uLg0KPj4+DQo+Pj4gWmhpcWlhbmcsIEkg
+dGhpbmsgdGhlIHJldmVyc2VkIGxvZ2ljIHlvdSBqdXN0IGZpeGVkIGluIA0KPj4+IGFnZW50X21h
+eWJlX2V2aWN0KCkgd2FzIHBhcnRseSBiZWNhdXNlIHRoaXMgZnVuY3Rpb24gaXMgZmlsbGluZyBp
+biANCj4+PiBhdGltZSAod2hpY2ggc291bmRzIGxpa2UgYQ0KPj4+IHRpbWVzdGFtcCkgd2l0aCBh
+biAqYWdlKiAobm93IC0gcC0+Zmlyc3QpLiAgSSB0aGluayB3ZSBzaG91bGQgY2hhbmdlDQo+Pj4N
+Cj4+Pj4gICAgICAgaWYgKCphdGltZSA8IDApDQo+Pj4+ICAgICAgICphdGltZSA9IG5vdyAtIHAt
+PmZpcnN0Ow0KPj4+DQo+Pj4gdG8gYmUNCj4+Pg0KPj4+ICAqYXRpbWUgPSBwLT5maXJzdA0KPj4+
+DQo+Pj4gYW5kL29yIGFkanVzdCB0aGUgY2FsbGVyIGFjY29yZGluZ2x5Li4uPw0KPj4+DQo+Pj4g
+c2FnZQ0K
