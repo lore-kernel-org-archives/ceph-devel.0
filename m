@@ -1,218 +1,58 @@
-From: =?UTF-8?B?5rGg5L+h5rO9?= <xmdxcxz@gmail.com>
-Subject: Re: Cache pool bug?
-Date: Tue, 28 Oct 2014 09:44:49 +0800
-Message-ID: <CANE=7sUg9VdN3eTof5pmYiAqU-LcC79sX3zz-40Mw8kDC5rAxg@mail.gmail.com>
+From: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
+Subject: RE: Cache pool bug?
+Date: Tue, 28 Oct 2014 01:50:10 +0000
+Message-ID: <06E7D85B3BA36C4DB207FEDE871C5348950D76@SHSMSX101.ccr.corp.intel.com>
 References: <CANE=7sUW0e-vp8LROZFA+5BGNoENA4MLthsnPUKb1ks=hnoyEA@mail.gmail.com>
-	<BLU169-W9B3F7EAC2250B1425B560DA9E0@phx.gbl>
-	<06E7D85B3BA36C4DB207FEDE871C5348950BD2@SHSMSX101.ccr.corp.intel.com>
-	<alpine.DEB.2.00.1410270902320.13498@cobra.newdream.net>
-	<CANE=7sVJLeCBkSzNM9cC0k0YOCgapBdMVeYP=GqncTKtup5eKw@mail.gmail.com>
-	<CANE=7sVM1TbZm1eYRHMiXj47673Qgu4fFBmPG_MV0PDCJ1WoNw@mail.gmail.com>
-	<CANE=7sVgT41r+WgZ+jdcNdesXSC8ib-dFzrNETYmRN0=3KqnLw@mail.gmail.com>
-	<CANE=7sWyAsMgoOMBLUhnF5UaKaETK5mZe8TZE2ngfCCewjv9kw@mail.gmail.com>
+ <BLU169-W9B3F7EAC2250B1425B560DA9E0@phx.gbl>
+ <06E7D85B3BA36C4DB207FEDE871C5348950BD2@SHSMSX101.ccr.corp.intel.com>
+ <alpine.DEB.2.00.1410270902320.13498@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f44.google.com ([209.85.218.44]:44911 "EHLO
-	mail-oi0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751694AbaJ1Bot convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Oct 2014 21:44:49 -0400
-Received: by mail-oi0-f44.google.com with SMTP id h136so2898672oig.31
-        for <ceph-devel@vger.kernel.org>; Mon, 27 Oct 2014 18:44:49 -0700 (PDT)
-In-Reply-To: <CANE=7sWyAsMgoOMBLUhnF5UaKaETK5mZe8TZE2ngfCCewjv9kw@mail.gmail.com>
+Received: from mga14.intel.com ([192.55.52.115]:40880 "EHLO mga14.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751250AbaJ1Bve (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 27 Oct 2014 21:51:34 -0400
+In-Reply-To: <alpine.DEB.2.00.1410270902320.13498@cobra.newdream.net>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: "xmdxcxz@gmail.com" <xmdxcxz@gmail.com>, "'ceph-devel@vger.kernel.org'" <ceph-devel@vger.kernel.org>, "wonzhq@hotmail.com" <wonzhq@hotmail.com>
 
-Because if there are mutiple access time in agent_state for the same
-object, we should use the recently one.
-
-2014-10-28 9:42 GMT+08:00 =E6=B1=A0=E4=BF=A1=E6=B3=BD <xmdxcxz@gmail.co=
-m>:
-> I think there is also bug in ReplicatedPG::agent_estimate_atime_temp
-> I think we should change the following code:
->   for (map<time_t,HitSetRef>::iterator p =3D agent_state->hit_set_map=
-=2Ebegin();
->        p !=3D agent_state->hit_set_map.end();
->        ++p) {
->     if (p->second->contains(oid)) {
->       if (*atime < 0)
-> *atime =3D now - p->first;
->       if (temp)
-> ++(*temp);
->       else
-> return;
->     }
->   }
->
-> to something like this:
->
->   for (map<time_t,HitSetRef>::iterator p =3D agent_state->hit_set_map=
-=2Erbegin();
->        p !=3D agent_state->hit_set_map.rend();
->        ++p) {
->     if (p->second->contains(oid)) {
->       if (*atime < 0)
-> *atime =3D now - p->first;
->       if (temp)
-> ++(*temp);
->       else
-> return;
->     }
->   }
->
-> 2014-10-28 9:38 GMT+08:00 =E6=B1=A0=E4=BF=A1=E6=B3=BD <xmdxcxz@gmail.=
-com>:
->> I think there is also bug in ReplicatedPG::agent_estimate_atime_temp
->> I think we should change the following code:
->>   for (map<time_t,HitSetRef>::iterator p =3D agent_state->hit_set_ma=
-p.begin();
->>        p !=3D agent_state->hit_set_map.end();
->>        ++p) {
->>     if (p->second->contains(oid)) {
->>       if (*atime < 0)
->> *atime =3D now - p->first;
->>       if (temp)
->> ++(*temp);
->>       else
->> return;
->>     }
->>   }
->>
->> to something like this:
->>
->>   for (map<time_t,HitSetRef>::iterator p =3D
->> agent_state->hit_set_map.rbegin();
->>        p !=3D agent_state->hit_set_map.rend();
->>        ++p) {
->>     if (p->second->contains(oid)) {
->>       if (*atime < 0)
->> *atime =3D now - p->first;
->>       if (temp)
->> ++(*temp);
->>       else
->> return;
->>     }
->>   }
->>
->> 2014-10-28 9:35 GMT+08:00 =E6=B1=A0=E4=BF=A1=E6=B3=BD <xmdxcxz@gmail=
-=2Ecom>:
->>>
->>>
->>>
->>> 2014-10-28 9:24 GMT+08:00 =E6=B1=A0=E4=BF=A1=E6=B3=BD <xmdxcxz@gmai=
-l.com>:
->>>>
->>>> I think there is also bug in ReplicatedPG::agent_estimate_atime_te=
-mp
->>>> I think we should change the following code:
->>>>   for (map<time_t,HitSetRef>::iterator p =3D
->>>> agent_state->hit_set_map.begin();
->>>>        p !=3D agent_state->hit_set_map.end();
->>>>        ++p) {
->>>>     if (p->second->contains(oid)) {
->>>>       if (*atime < 0)
->>>> *atime =3D now - p->first;
->>>>       if (temp)
->>>> ++(*temp);
->>>>       else
->>>> return;
->>>>     }
->>>>   }
->>>>
->>>> to something like this:
->>>>
->>>>   for (map<time_t,HitSetRef>::iterator p =3D
->>>> agent_state->hit_set_map.rbegin();
->>>>        p !=3D agent_state->hit_set_map.rend();
->>>>        ++p) {
->>>>     if (p->second->contains(oid)) {
->>>>       if (*atime < 0)
->>>> *atime =3D now - p->first;
->>>>       if (temp)
->>>> ++(*temp);
->>>>       else
->>>> return;
->>>>     }
->>>>   }
->>>>
->>>> Because if there are mutiple time_t in agent_state for the same ob=
-ject,
->>>> we should use the recently one.
->>>>
->>>> 2014-10-28 0:04 GMT+08:00 Sage Weil <sage@newdream.net>:
->>>>>
->>>>> On Mon, 27 Oct 2014, Wang, Zhiqiang wrote:
->>>>> > Hi,
->>>>> >
->>>>> > I agree with you this is a bug.
->>>>> >
->>>>> > I think we should change the following code:
->>>>> >
->>>>> >     // KISS: if [lower,upper] spans our target effort, evict it=
-=2E
->>>>> >     if (atime_lower >=3D agent_state->evict_effort)
->>>>> >       return false;
->>>>> >
->>>>> > to something like this:
->>>>> >
->>>>> >     if (1000000 - atime_upper >=3D agent_state->evict_effort)
->>>>> >       return false;
->>>>> >
->>>>> > cc the ceph-devel list for comments.
->>>>>
->>>>> Yes, that does look backwards. Good catch!  If you submit a pull =
-request
->>>>> we can get it merged and then backported.
->>>>>
->>>>> Thanks!
->>>>> sage
->>>>>
->>>>>
->>>>> > ________________________________________
->>>>> > Date: Mon, 27 Oct 2014 10:20:01 +0800
->>>>> > Subject: Cache pool bug?
->>>>> > From: xmdxcxz@gmail.com
->>>>> > To: wonzhq@hotmail.com
->>>>> > hi, zhiqiang?
->>>>> >
->>>>> >      When I read the ReplicatedPG::agent_maybe_evic, I found th=
-an the
->>>>> > newest object has
->>>>> >
->>>>> > more probability to be evicted. For Example:
->>>>> >
->>>>> >      the object in hit_set is newest object,   call
->>>>> >
->>>>> >       the funtion agent_estimate_atime_temp(soid, &atime, NULL =
-/*FIXME
->>>>> > &temp*/); atime is 0 when return.
->>>>> >
->>>>> >      agent_state->atime_hist.get_position_micro(atime, &atime_l=
-ower,
->>>>> > &atime_upper), the atime_lower is 0 when return.
->>>>> >
->>>>> >     // KISS: if [lower,upper] spans our target effort, evict it=
-=2E
->>>>> >     if (atime_lower >=3D agent_state->evict_effort)
->>>>> >       return false;
->>>>> >
->>>>> >     Above, the newest object in hit_set is evicted.
->>>>> >
->>>>> >     Is there a bug? Or, whether I skip something?
->>>>> >
->>>>> >
->>>>> >     Thanks
->>>>> > N?????r??y??????X???v???)?{.n?????z?]z????ay? ????j ??f???h????=
-? ?w???
->>>>> > ???j:+v???w???????? ????zZ+???????j"????i
->>>>
->>>>
->>>
->>
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+U2FnZSwNCg0KVGhlIHB1bGwgcmVxdWVzdCBpcyBjcmVhdGVkIGF0OiBodHRwczovL2dpdGh1Yi5j
+b20vY2VwaC9jZXBoL3B1bGwvMjgxNQ0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJv
+bTogU2FnZSBXZWlsIFttYWlsdG86c2FnZUBuZXdkcmVhbS5uZXRdIA0KU2VudDogVHVlc2RheSwg
+T2N0b2JlciAyOCwgMjAxNCAxMjowNCBBTQ0KVG86IFdhbmcsIFpoaXFpYW5nDQpDYzogeG1keGN4
+ekBnbWFpbC5jb207ICdjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZyc7IHdvbnpocUBob3RtYWls
+LmNvbQ0KU3ViamVjdDogUkU6IENhY2hlIHBvb2wgYnVnPw0KDQpPbiBNb24sIDI3IE9jdCAyMDE0
+LCBXYW5nLCBaaGlxaWFuZyB3cm90ZToNCj4gSGksDQo+IA0KPiBJIGFncmVlIHdpdGggeW91IHRo
+aXMgaXMgYSBidWcuDQo+IA0KPiBJIHRoaW5rIHdlIHNob3VsZCBjaGFuZ2UgdGhlIGZvbGxvd2lu
+ZyBjb2RlOg0KPiANCj4gICAgIC8vIEtJU1M6IGlmIFtsb3dlcix1cHBlcl0gc3BhbnMgb3VyIHRh
+cmdldCBlZmZvcnQsIGV2aWN0IGl0Lg0KPiAgICAgaWYgKGF0aW1lX2xvd2VyID49IGFnZW50X3N0
+YXRlLT5ldmljdF9lZmZvcnQpDQo+ICAgICAgIHJldHVybiBmYWxzZTsNCj4gDQo+IHRvIHNvbWV0
+aGluZyBsaWtlIHRoaXM6DQo+IA0KPiAgICAgaWYgKDEwMDAwMDAgLSBhdGltZV91cHBlciA+PSBh
+Z2VudF9zdGF0ZS0+ZXZpY3RfZWZmb3J0KQ0KPiAgICAgICByZXR1cm4gZmFsc2U7DQo+IA0KPiBj
+YyB0aGUgY2VwaC1kZXZlbCBsaXN0IGZvciBjb21tZW50cy4NCg0KWWVzLCB0aGF0IGRvZXMgbG9v
+ayBiYWNrd2FyZHMuIEdvb2QgY2F0Y2ghICBJZiB5b3Ugc3VibWl0IGEgcHVsbCByZXF1ZXN0IHdl
+IGNhbiBnZXQgaXQgbWVyZ2VkIGFuZCB0aGVuIGJhY2twb3J0ZWQuDQoNClRoYW5rcyENCnNhZ2UN
+Cg0KDQo+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCj4gRGF0ZTog
+TW9uLCAyNyBPY3QgMjAxNCAxMDoyMDowMSArMDgwMA0KPiBTdWJqZWN0OiBDYWNoZSBwb29sIGJ1
+Zz8NCj4gRnJvbTogeG1keGN4ekBnbWFpbC5jb20NCj4gVG86IHdvbnpocUBob3RtYWlsLmNvbQ0K
+PiBoaSwgemhpcWlhbmc/DQo+IA0KPiDCoCDCoCDCoFdoZW4gSSByZWFkIHRoZcKgUmVwbGljYXRl
+ZFBHOjphZ2VudF9tYXliZV9ldmljLCBJIGZvdW5kIHRoYW4gdGhlIA0KPiBuZXdlc3Qgb2JqZWN0
+IGhhcw0KPiANCj4gbW9yZcKgcHJvYmFiaWxpdHkgdG8gYmUgZXZpY3RlZC4gRm9yIEV4YW1wbGU6
+DQo+IA0KPiDCoCDCoCDCoHRoZSBvYmplY3QgaW4gaGl0X3NldCBpcyBuZXdlc3Qgb2JqZWN0LCDC
+oCBjYWxsDQo+IA0KPiDCoCDCoCDCoCB0aGUgZnVudGlvbiBhZ2VudF9lc3RpbWF0ZV9hdGltZV90
+ZW1wKHNvaWQsICZhdGltZSwgTlVMTCAvKkZJWE1FIA0KPiAmdGVtcCovKTsgYXRpbWUgaXMgMCB3
+aGVuIHJldHVybi4NCj4gDQo+IMKgIMKgIMKgYWdlbnRfc3RhdGUtPmF0aW1lX2hpc3QuZ2V0X3Bv
+c2l0aW9uX21pY3JvKGF0aW1lLCAmYXRpbWVfbG93ZXIsICZhdGltZV91cHBlciksIHRoZSBhdGlt
+ZV9sb3dlciBpcyAwIHdoZW4gcmV0dXJuLg0KPiANCj4gwqAgwqAgLy8gS0lTUzogaWYgW2xvd2Vy
+LHVwcGVyXSBzcGFucyBvdXIgdGFyZ2V0IGVmZm9ydCwgZXZpY3QgaXQuDQo+IMKgIMKgIGlmIChh
+dGltZV9sb3dlciA+PSBhZ2VudF9zdGF0ZS0+ZXZpY3RfZWZmb3J0KQ0KPiDCoCDCoCDCoCByZXR1
+cm4gZmFsc2U7DQo+IA0KPiDCoCDCoCBBYm92ZSwgdGhlIG5ld2VzdCBvYmplY3QgaW4gaGl0X3Nl
+dCBpcyBldmljdGVkLg0KPiANCj4gwqAgwqAgSXMgdGhlcmUgYSBidWc/IE9yLCB3aGV0aGVyIEkg
+c2tpcCBzb21ldGhpbmc/DQo+IA0KPiANCj4gwqAgwqAgVGhhbmtzDQo+IE4/Pz8/P3I/P3k/Pz8/
+Pz9YPz8/dj8/Pyk/ey5uPz8/Pz96P116Pz8/P2F5Px0/Pz8/aiA/P2Y/Pz9oPz8/Pz8eP3c/Pz8N
+Cj8/P2o6K3Y/Pz93Pz8/Pz8/Pz8gPz8/P3paKz8/Pz8/Pz9qIj8/Pz9pDQo=
