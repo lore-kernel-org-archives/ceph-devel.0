@@ -1,52 +1,77 @@
-From: GuangYang <yguang11@outlook.com>
-Subject: RE: Ceph Developer Summit - Oct 28-29
-Date: Tue, 28 Oct 2014 13:33:20 +0000
-Message-ID: <BLU175-W363F2FE6846A790EBFC393DF9F0@phx.gbl>
+From: Yehuda Sadeh <yehuda@inktank.com>
+Subject: Re: Ceph Developer Summit - Oct 28-29
+Date: Tue, 28 Oct 2014 07:31:21 -0700
+Message-ID: <CABBk=J9vpqveMH8pYc8ppJZK0b2d60zWBitGxGoEiLwEM18ORg@mail.gmail.com>
 References: <CAP8Oy=KeYryUPO5y-HxUGw3qaccr0XkPSP+6CsYh=DHGsRqFzw@mail.gmail.com>
+	<BLU175-W363F2FE6846A790EBFC393DF9F0@phx.gbl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from [65.55.116.30] ([65.55.116.30]:60970 "EHLO
-	BLU004-OMC1S19.hotmail.com" rhost-flags-FAIL-FAIL-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1754702AbaJ1NeV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 28 Oct 2014 09:34:21 -0400
-In-Reply-To: <CAP8Oy=KeYryUPO5y-HxUGw3qaccr0XkPSP+6CsYh=DHGsRqFzw@mail.gmail.com>
+Received: from mail-ie0-f177.google.com ([209.85.223.177]:50808 "EHLO
+	mail-ie0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752087AbaJ1ObW convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Oct 2014 10:31:22 -0400
+Received: by mail-ie0-f177.google.com with SMTP id tp5so762354ieb.22
+        for <ceph-devel@vger.kernel.org>; Tue, 28 Oct 2014 07:31:21 -0700 (PDT)
+In-Reply-To: <BLU175-W363F2FE6846A790EBFC393DF9F0@phx.gbl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Patrick McGarry <patrick@inktank.com>, "yehuda@inktank.com" <yehuda@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: GuangYang <yguang11@outlook.com>
+Cc: Patrick McGarry <patrick@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-SGkgUGF0cmljaywKU29ycnkgSSBhbSBub3QgYWJsZSB0byBqb2luIHRvZGF5J3Mgc2Vzc2lvbiBm
-b3IgdGhlIGJ1Y2tldCBpbmRleCBzY2FsYWJpbGl0eS4gSSBhbSB3b3JraW5nIHdpdGggWWVodWRh
-IHRvIHBvbGlzaCB0aGUgaW1wbGVtZW50YXRpb24gYWNjb3JkaW5nIHRvIG91ciBkaXNjdXNzaW9u
-IGluIGxhc3QgQ0RTLCBhbmQgaG9wZWZ1bGx5IHdlIHdpbGwgbWVyZ2UgdGhlIHBhdGNoIHNvb24u
-IFRoZXJlIGlzIG5vdCBtdWNoIHVwZGF0ZSAoaW4gdGVybXMgb2Ygd2hhdCB3ZSB3aWxsIGltcGxl
-bWVudCBhbmQgaG93IHdlIGltcGxlbWVudCB0aGVtKSBhZnRlciBsYXN0IGRpc2N1c3Npb24gc28g
-dGhhdCBJIHRoaW5rIGl0IGlzIGZpbmUgdG8gc2tpcCB0aGUgc2Vzc2lvbi4KClllaHVkYSwKUGxl
-YXNlIGNvcnJlY3QgbWUgaGVyZSBpZiBJIGFtIHdyb25nLgoKVGhhbmtzLApHdWFuZwoKLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQo+IERhdGU6IFdlZCwgMjIgT2N0IDIw
-MTQgMTM6MTM6MTcgLTA0MDAKPiBTdWJqZWN0OiBDZXBoIERldmVsb3BlciBTdW1taXQgLSBPY3Qg
-MjgtMjkKPiBGcm9tOiBwYXRyaWNrQGlua3RhbmsuY29tCj4gVG86IGNlcGgtdXNlcnNAY2VwaC5j
-b207IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnOyBjZXBoLWNvbW11bml0eUBsaXN0cy5jZXBo
-LmNvbQo+Cj4gR3JlZXRpbmdzIGNlcGhhbG9mb2xrcywKPgo+IEFzIEknbSBzdXJlIG1hbnkgb2Yg
-eW91IGhhdmUgc2VlbiwgdGhlIHNjaGVkdWxlIGZvciB0aGUgdXBjb21pbmcKPiB2aXJ0dWFsIENl
-cGggRGV2ZWxvcGVyIFN1bW1pdCBoYXMgYmVlbiBwb3N0ZWQ6Cj4KPiBodHRwczovL3dpa2kuY2Vw
-aC5jb20vUGxhbm5pbmcvQ0RTL0hhbW1lcl8oT2N0XzIwMTQpCj4KPiBBcyB1c3VhbCB3ZSBoYXZl
-IGEgRU1FQSBmcmllbmRseSBkYXkgYW5kIGFuIEFQQUMgZnJpZW5kbHkgZGF5IHdpdGggdGhlCj4g
-c2Vzc2lvbnMgYmVpbmcgZGlzdHJpYnV0ZWQgYWNyb3NzIGVhY2ggZGF5IHRoYXQgaW5jbHVkZSB0
-aGUgYmx1ZXByaW50Cj4gYXV0aG9ycyBhbmQgaW50ZXJlc3RlZCBwYXJ0aWVzLiBJZiB5b3UgYXJl
-IHVuYWJsZSB0byBhdHRlbmQgYSBzZXNzaW9uCj4gdGhhdCB5b3UgYXJlIGludGVyZXN0ZWQgaW4g
-cGxlYXNlIGJlIHN1cmUgdG8gYWRkIHlvdXIKPiBjb21tZW50cy9xdWVzdGlvbnMgdG8gdGhlIGV0
-aGVycGFkIGluIHF1ZXN0aW9uICh3aXRoIHlvdXIgbmFtZSkgc28KPiB0aGF0IHRob3NlIGNvbmNl
-cm5zIGNhbiBiZSBhZGRyZXNzZWQgZHVyaW5nIHRoZSBkaXNjdXNzaW9uLgo+Cj4gQWxsIHNlc3Np
-b25zIHdpbGwgYmUgcmVjb3JkZWQgZm9yIGxhdGVyIHBlcnVzYWwgaWYgeW91IGFyZSB1bmFibGUg
-dG8gYXR0ZW5kLgo+Cj4gSWYgeW91IGhhdmUgYW55IHF1ZXN0aW9ucywgY29tbWVudHMsIG9yIGNv
-bmNlcm5zLCBmZWVsIGZyZWUgdG8gZW1haWwKPiBtZSBkaXJlY3RseS4gVGhhbmtzLCBhbmQgc2Vl
-IHlvdSBhbGwgdGhlcmUhCj4KPgo+IEJlc3QgUmVnYXJkcywKPgo+IFBhdHJpY2sgTWNHYXJyeQo+
-IERpcmVjdG9yIENlcGggQ29tbXVuaXR5IHx8IFJlZCBIYXQKPiBodHRwOi8vY2VwaC5jb20gfHwg
-aHR0cDovL2NvbW11bml0eS5yZWRoYXQuY29tCj4gQHNjdXR0bGVtb25rZXkgfHwgQGNlcGgKPiAt
-LQo+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNj
-cmliZSBjZXBoLWRldmVsIiBpbgo+IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9A
-dmdlci5rZXJuZWwub3JnCj4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCBodHRwOi8vdmdlci5rZXJu
-ZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwKIAkJIAkgICAJCSAg
+Well, the idea was to discuss the feature, the decisions that were
+made, and the status. Also, we're now only in phase 1, it might be a
+good idea to start thinking about the next phase, where bucket
+sharding will be done automatically.
+
+Yehuda
+
+
+On Tue, Oct 28, 2014 at 6:33 AM, GuangYang <yguang11@outlook.com> wrote:
+> Hi Patrick,
+> Sorry I am not able to join today's session for the bucket index scalability. I am working with Yehuda to polish the implementation according to our discussion in last CDS, and hopefully we will merge the patch soon. There is not much update (in terms of what we will implement and how we implement them) after last discussion so that I think it is fine to skip the session.
+>
+> Yehuda,
+> Please correct me here if I am wrong.
+>
+> Thanks,
+> Guang
+>
+> ----------------------------------------
+>> Date: Wed, 22 Oct 2014 13:13:17 -0400
+>> Subject: Ceph Developer Summit - Oct 28-29
+>> From: patrick@inktank.com
+>> To: ceph-users@ceph.com; ceph-devel@vger.kernel.org; ceph-community@lists.ceph.com
+>>
+>> Greetings cephalofolks,
+>>
+>> As I'm sure many of you have seen, the schedule for the upcoming
+>> virtual Ceph Developer Summit has been posted:
+>>
+>> https://wiki.ceph.com/Planning/CDS/Hammer_(Oct_2014)
+>>
+>> As usual we have a EMEA friendly day and an APAC friendly day with the
+>> sessions being distributed across each day that include the blueprint
+>> authors and interested parties. If you are unable to attend a session
+>> that you are interested in please be sure to add your
+>> comments/questions to the etherpad in question (with your name) so
+>> that those concerns can be addressed during the discussion.
+>>
+>> All sessions will be recorded for later perusal if you are unable to attend.
+>>
+>> If you have any questions, comments, or concerns, feel free to email
+>> me directly. Thanks, and see you all there!
+>>
+>>
+>> Best Regards,
+>>
+>> Patrick McGarry
+>> Director Ceph Community || Red Hat
+>> http://ceph.com || http://community.redhat.com
+>> @scuttlemonkey || @ceph
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at http://vger.kernel.org/majordomo-info.html
+>
