@@ -1,74 +1,48 @@
-From: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
-Subject: RE: Cache pool bug?
-Date: Tue, 28 Oct 2014 01:52:53 +0000
-Message-ID: <06E7D85B3BA36C4DB207FEDE871C5348950D90@SHSMSX101.ccr.corp.intel.com>
-References: <CANE=7sUW0e-vp8LROZFA+5BGNoENA4MLthsnPUKb1ks=hnoyEA@mail.gmail.com>
-	<BLU169-W9B3F7EAC2250B1425B560DA9E0@phx.gbl>
-	<06E7D85B3BA36C4DB207FEDE871C5348950BD2@SHSMSX101.ccr.corp.intel.com>
-	<alpine.DEB.2.00.1410270902320.13498@cobra.newdream.net>
- <CANE=7sVJLeCBkSzNM9cC0k0YOCgapBdMVeYP=GqncTKtup5eKw@mail.gmail.com>
+From: Ketor D <d.ketor-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: fio rbd completions (Was: fio rbd hang for block sizes > 1M)
+Date: Tue, 28 Oct 2014 11:23:54 +0800
+Message-ID: <CAM9_UU8MHdj+mjAWBziETxPDnwTt0JBuHrQp2Fu9YtF=msae3w@mail.gmail.com>
+References: <5449BBB3.7090109@catalyst.net.nz> <5449E50E.7000808@kernel.dk>
+ <5449EEF1.1060407@catalyst.net.nz> <544A51C7.40803@gmail.com>
+ <544A5DA6.2010709@gmail.com> <544AD67D.4030603@catalyst.net.nz>
+ <544AEAE7.6080603@redhat.com> <544AF0D2.1050405@catalyst.net.nz>
+ <544B0C7F.4080109@catalyst.net.nz> <544B1D50.4010101@kernel.dk>
+ <544B2C19.7070009@catalyst.net.nz> <544BF808.2090800@kernel.dk>
+ <544C2371.1020403@catalyst.net.nz> <544E547C.30009@kernel.dk>
+ <CAM9_UU9j2erdGT5kqKi_+5z5ERFMPO1hHwMk8kaFjLkGm-zp-g@mail.gmail.com>
+ <544E6330.1000202@kernel.dk> <544E63EA.1010204@kernel.dk> <CAM9_UU-35i9uRu9EDQSM-b7CjmxrKYV2Gz8ocrykOYk+2q++hw@mail.gmail.com>
+ <544E6691.106@kernel.dk> <CAM9_UU9_ZHtwv=31DyxkAmog7XJbthiRXi5n+Y0Cfxj4qm3bGQ@mail.gmail.com>
+ <544E6A8D.1040608@kernel.dk> <CAM9_UU8x2uZZUWaPPoy+LHmUhC_3sqKZ9GPsEqDwKUkprg4kdQ@mail.gmail.com>
+ <544EC05D.7040807@catalyst.net.nz> <544EC7F1.6010900@kernel.dk> <544ED37D.6060800@catalyst.net.nz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga14.intel.com ([192.55.52.115]:64516 "EHLO mga14.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752836AbaJ1ByQ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 27 Oct 2014 21:54:16 -0400
-In-Reply-To: <CANE=7sVJLeCBkSzNM9cC0k0YOCgapBdMVeYP=GqncTKtup5eKw@mail.gmail.com>
-Content-Language: en-US
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: =?utf-8?B?5rGg5L+h5rO9?= <xmdxcxz@gmail.com>, Sage Weil <sage@newdream.net>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "wonzhq@hotmail.com" <wonzhq@hotmail.com>
+Content-Type: multipart/mixed; boundary=089e01229176168fbe0506732f3e
+Return-path: <fio-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <544ED37D.6060800-6STWZtX7tXAqAMOr+u8IRA@public.gmane.org>
+Sender: fio-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Mark Kirkwood <mark.kirkwood-6STWZtX7tXAqAMOr+u8IRA@public.gmane.org>
+Cc: Jens Axboe <axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org>, Mark Nelson <mark.nelson-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>, Mark Nelson <mark.a.nelson-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, fio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "xan.peng" <xanpeng-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-R29vZCBjYXRjaCA6KSBMb29rcyBjb3JyZWN0IHRvIG1lLg0KDQpGcm9tOiDmsaDkv6Hms70gW21h
-aWx0bzp4bWR4Y3h6QGdtYWlsLmNvbV0gDQpTZW50OiBUdWVzZGF5LCBPY3RvYmVyIDI4LCAyMDE0
-IDk6MjQgQU0NClRvOiBTYWdlIFdlaWwNCkNjOiBXYW5nLCBaaGlxaWFuZzsgY2VwaC1kZXZlbEB2
-Z2VyLmtlcm5lbC5vcmc7IHdvbnpocUBob3RtYWlsLmNvbQ0KU3ViamVjdDogUmU6IENhY2hlIHBv
-b2wgYnVnPw0KDQpJIHRoaW5rIHRoZXJlIGlzIGFsc28gYnVnIGluIFJlcGxpY2F0ZWRQRzo6YWdl
-bnRfZXN0aW1hdGVfYXRpbWVfdGVtcA0KSSB0aGluayB3ZSBzaG91bGQgY2hhbmdlIHRoZSBmb2xs
-b3dpbmcgY29kZToNCsKgIGZvciAobWFwPHRpbWVfdCxIaXRTZXRSZWY+OjppdGVyYXRvciBwID0g
-YWdlbnRfc3RhdGUtPmhpdF9zZXRfbWFwLmJlZ2luKCk7DQrCoCDCoCDCoCDCoHAgIT0gYWdlbnRf
-c3RhdGUtPmhpdF9zZXRfbWFwLmVuZCgpOw0KwqAgwqAgwqAgwqArK3ApIHsNCsKgIMKgIGlmIChw
-LT5zZWNvbmQtPmNvbnRhaW5zKG9pZCkpIHsNCsKgIMKgIMKgIGlmICgqYXRpbWUgPCAwKQ0KCSph
-dGltZSA9IG5vdyAtIHAtPmZpcnN0Ow0KwqAgwqAgwqAgaWYgKHRlbXApDQoJKysoKnRlbXApOw0K
-wqAgwqAgwqAgZWxzZQ0KCXJldHVybjsNCsKgIMKgIH0NCsKgIH0NCg0KdG8gc29tZXRoaW5nIGxp
-a2UgdGhpczoNCg0KwqAgZm9yIChtYXA8dGltZV90LEhpdFNldFJlZj46Oml0ZXJhdG9yIHAgPSBh
-Z2VudF9zdGF0ZS0+aGl0X3NldF9tYXAucmJlZ2luKCk7DQrCoCDCoCDCoCDCoHAgIT0gYWdlbnRf
-c3RhdGUtPmhpdF9zZXRfbWFwLnJlbmQoKTsNCsKgIMKgIMKgIMKgKytwKSB7DQrCoCDCoCBpZiAo
-cC0+c2Vjb25kLT5jb250YWlucyhvaWQpKSB7DQrCoCDCoCDCoCBpZiAoKmF0aW1lIDwgMCkNCgkq
-YXRpbWUgPSBub3cgLSBwLT5maXJzdDsNCsKgIMKgIMKgIGlmICh0ZW1wKQ0KCSsrKCp0ZW1wKTsN
-CsKgIMKgIMKgIGVsc2UNCglyZXR1cm47DQrCoCDCoCB9DQrCoCB9DQoNCkJlY2F1c2UgaWYgdGhl
-cmUgYXJlIG11dGlwbGUgdGltZV90IGluIGFnZW50X3N0YXRlIGZvciB0aGUgc2FtZSBvYmplY3Qs
-IHdlIHNob3VsZCB1c2UgdGhlIHJlY2VudGx5IG9uZS4NCg0KMjAxNC0xMC0yOCAwOjA0IEdNVCsw
-ODowMCBTYWdlIFdlaWwgPHNhZ2VAbmV3ZHJlYW0ubmV0PjoNCk9uIE1vbiwgMjcgT2N0IDIwMTQs
-IFdhbmcsIFpoaXFpYW5nIHdyb3RlOg0KPiBIaSwNCj4NCj4gSSBhZ3JlZSB3aXRoIHlvdSB0aGlz
-IGlzIGEgYnVnLg0KPg0KPiBJIHRoaW5rIHdlIHNob3VsZCBjaGFuZ2UgdGhlIGZvbGxvd2luZyBj
-b2RlOg0KPg0KPsKgIMKgIMKgLy8gS0lTUzogaWYgW2xvd2VyLHVwcGVyXSBzcGFucyBvdXIgdGFy
-Z2V0IGVmZm9ydCwgZXZpY3QgaXQuDQo+wqAgwqAgwqBpZiAoYXRpbWVfbG93ZXIgPj0gYWdlbnRf
-c3RhdGUtPmV2aWN0X2VmZm9ydCkNCj7CoCDCoCDCoCDCoHJldHVybiBmYWxzZTsNCj4NCj4gdG8g
-c29tZXRoaW5nIGxpa2UgdGhpczoNCj4NCj7CoCDCoCDCoGlmICgxMDAwMDAwIC0gYXRpbWVfdXBw
-ZXIgPj0gYWdlbnRfc3RhdGUtPmV2aWN0X2VmZm9ydCkNCj7CoCDCoCDCoCDCoHJldHVybiBmYWxz
-ZTsNCj4NCj4gY2MgdGhlIGNlcGgtZGV2ZWwgbGlzdCBmb3IgY29tbWVudHMuDQoNClllcywgdGhh
-dCBkb2VzIGxvb2sgYmFja3dhcmRzLiBHb29kIGNhdGNoIcKgIElmIHlvdSBzdWJtaXQgYSBwdWxs
-IHJlcXVlc3QNCndlIGNhbiBnZXQgaXQgbWVyZ2VkIGFuZCB0aGVuIGJhY2twb3J0ZWQuDQoNClRo
-YW5rcyENCnNhZ2UNCg0KDQo+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X18NCj4gRGF0ZTogTW9uLCAyNyBPY3QgMjAxNCAxMDoyMDowMSArMDgwMA0KPiBTdWJqZWN0OiBD
-YWNoZSBwb29sIGJ1Zz8NCj4gRnJvbTogeG1keGN4ekBnbWFpbC5jb20NCj4gVG86IHdvbnpocUBo
-b3RtYWlsLmNvbQ0KPiBoaSwgemhpcWlhbmc/DQo+DQo+IMKgIMKgIMKgV2hlbiBJIHJlYWQgdGhl
-wqBSZXBsaWNhdGVkUEc6OmFnZW50X21heWJlX2V2aWMsIEkgZm91bmQgdGhhbiB0aGUgbmV3ZXN0
-IG9iamVjdCBoYXPCoA0KPg0KPiBtb3JlwqBwcm9iYWJpbGl0eSB0byBiZSBldmljdGVkLiBGb3Ig
-RXhhbXBsZToNCj4NCj4gwqAgwqAgwqB0aGUgb2JqZWN0IGluIGhpdF9zZXQgaXMgbmV3ZXN0IG9i
-amVjdCwgwqAgY2FsbMKgDQo+DQo+IMKgIMKgIMKgIHRoZSBmdW50aW9uIGFnZW50X2VzdGltYXRl
-X2F0aW1lX3RlbXAoc29pZCwgJmF0aW1lLCBOVUxMIC8qRklYTUUgJnRlbXAqLyk7IGF0aW1lIGlz
-IDAgd2hlbiByZXR1cm4uwqANCj4NCj4gwqAgwqAgwqBhZ2VudF9zdGF0ZS0+YXRpbWVfaGlzdC5n
-ZXRfcG9zaXRpb25fbWljcm8oYXRpbWUsICZhdGltZV9sb3dlciwgJmF0aW1lX3VwcGVyKSwgdGhl
-IGF0aW1lX2xvd2VyIGlzIDAgd2hlbiByZXR1cm4uDQo+DQo+IMKgIMKgIC8vIEtJU1M6IGlmIFts
-b3dlcix1cHBlcl0gc3BhbnMgb3VyIHRhcmdldCBlZmZvcnQsIGV2aWN0IGl0Lg0KPiDCoCDCoCBp
-ZiAoYXRpbWVfbG93ZXIgPj0gYWdlbnRfc3RhdGUtPmV2aWN0X2VmZm9ydCkNCj4gwqAgwqAgwqAg
-cmV0dXJuIGZhbHNlOw0KPg0KPiDCoCDCoCBBYm92ZSwgdGhlIG5ld2VzdCBvYmplY3QgaW4gaGl0
-X3NldCBpcyBldmljdGVkLg0KPg0KPiDCoCDCoCBJcyB0aGVyZSBhIGJ1Zz8gT3IsIHdoZXRoZXIg
-SSBza2lwIHNvbWV0aGluZz8NCj4NCj4NCj4gwqAgwqAgVGhhbmtzDQo+IE4/Pz8/P3I/P3k/Pz8/
-Pz9YPz8/dj8/Pyk/ey5uPz8/Pz96P116Pz8/P2F5PyA/Pz8/aiA/P2Y/Pz9oPz8/Pz8gP3c/Pz8N
-Cj8/P2o6K3Y/Pz93Pz8/Pz8/Pz8gPz8/P3paKz8/Pz8/Pz9qIj8/Pz9pDQoNCg==
+--089e01229176168fbe0506732f3e
+Content-Type: text/plain; charset=UTF-8
+
+Hi Mark,
+      Wish you could test my patch.I get the best performance using this patch.
+
+
+2014-10-28 7:21 GMT+08:00 Mark Kirkwood <mark.kirkwood-6STWZtX7tXAqAMOr+u8IRA@public.gmane.org>:
+> ng to see his numbers for patched vs orig!
+
+--089e01229176168fbe0506732f3e
+Content-Type: application/octet-stream; name="rbd_no_usleep.patch"
+Content-Disposition: attachment; filename="rbd_no_usleep.patch"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_i1soxba40
+
+ZGlmZiAtLWdpdCBhL2VuZ2luZXMvcmJkLmMgYi9lbmdpbmVzL3JiZC5jCmluZGV4IDZmZTg3Yjgu
+LmU2ZjJkZmYgMTAwNjQ0Ci0tLSBhL2VuZ2luZXMvcmJkLmMKKysrIGIvZW5naW5lcy9yYmQuYwpA
+QCAtMjQ1LDcgKzI0NSw3IEBAIHN0YXRpYyBpbnQgZmlvX3JiZF9nZXRldmVudHMoc3RydWN0IHRo
+cmVhZF9kYXRhICp0ZCwgdW5zaWduZWQgaW50IG1pbiwKIAogCQl9CiAJCWlmIChldmVudHMgPCBt
+aW4pCi0JCQl1c2xlZXAoMTAwKTsKKwkJCTsvL3VzbGVlcCgxMDApOwogCQllbHNlCiAJCQlicmVh
+azsKIAo=
+--089e01229176168fbe0506732f3e--
