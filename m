@@ -1,175 +1,35 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: teuthology
-Date: Tue, 28 Oct 2014 16:01:45 +0100
-Message-ID: <544FAFD9.1070804@dachary.org>
-References: <20141024230302.GI6445@thinkpad.thebehrens.net>	 <1414397595.8790.11.camel@linux-cb82>	 <20141027104707.GU6445@thinkpad.thebehrens.net>	 <544E6A2E.5090809@dachary.org> <1414429260.8790.41.camel@linux-cb82>
+From: Jens Axboe <axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org>
+Subject: Re: fio rbd completions (Was: fio rbd hang for block sizes > 1M)
+Date: Tue, 28 Oct 2014 09:14:58 -0600
+Message-ID: <544FB2F2.2060703@kernel.dk>
+References: <5449BBB3.7090109@catalyst.net.nz> <544AEAE7.6080603@redhat.com> <544AF0D2.1050405@catalyst.net.nz> <544B0C7F.4080109@catalyst.net.nz> <544B1D50.4010101@kernel.dk> <544B2C19.7070009@catalyst.net.nz> <544BF808.2090800@kernel.dk> <544C2371.1020403@catalyst.net.nz> <544E547C.30009@kernel.dk> <CAM9_UU9j2erdGT5kqKi_+5z5ERFMPO1hHwMk8kaFjLkGm-zp-g@mail.gmail.com> <544E6330.1000202@kernel.dk> <544E63EA.1010204@kernel.dk> <CAM9_UU-35i9uRu9EDQSM-b7CjmxrKYV2Gz8ocrykOYk+2q++hw@mail.gmail.com> <544E6691.106@kernel.dk> <CAM9_UU9_ZHtwv=31DyxkAmog7XJbthiRXi5n+Y0Cfxj4qm3bGQ@mail.gmail.com> <544E6A8D.1040608@kernel.dk> <CAM9_UU8x2uZZUWaPPoy+LHmUhC_3sqKZ9GPsEqDwKUkprg4kdQ@mail.gmail.com> <544EC05D.7040807@catalyst.net.nz> <544EC7F1.6010900@kernel.dk> <544ED37D.6060800@catalyst.net.nz> <CAM9_UU8MH
+ dj+mjAWBziETxPDnwTt0JBuHrQp2Fu9YtF=msae3w@mail.gmail.com> <79432849-2F58-4738-82E1-E4D8AB10A6AE@kernel.dk> <CAM9_UU9G5vQ68UxMakte-Wb5B9_KBo24ov7=hNHpYqEtko2nQg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="qHMvRLMMXTj77sFhus6wMMvxLKMsODfQO"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:54792 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1754672AbaJ1PB4 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Oct 2014 11:01:56 -0400
-In-Reply-To: <1414429260.8790.41.camel@linux-cb82>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Kapil Sharma <ksharma@suse.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <fio-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAM9_UU9G5vQ68UxMakte-Wb5B9_KBo24ov7=hNHpYqEtko2nQg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: fio-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ketor D <d.ketor-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Mark Kirkwood <mark.kirkwood-6STWZtX7tXAqAMOr+u8IRA@public.gmane.org>, Mark Nelson <mark.nelson-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>, Mark Nelson <mark.a.nelson-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "fio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <fio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "xan.peng" <xanpeng-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---qHMvRLMMXTj77sFhus6wMMvxLKMsODfQO
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+On 2014-10-27 22:49, Ketor D wrote:
+> Agree. Busy loop is only for test.
+> I will try the current git.
 
-Hi Kapil,
+Committed two more rbd changes:
 
-On 27/10/2014 18:01, Kapil Sharma wrote:
-> Hi Loic,=20
->=20
-> Zack from Inktank helped me a lot in setting up teuthology.
->=20
-> I think following areas could be worked upon to make teuthology
-> easier to install and run -=20
->=20
->=20
-> 1. Currently we can by-pass the Lock server when running individual
-> tests from a yaml config file. However, if we have to run
-> teuthology-suite, it seems using Lock server is mandatory.I think lock
-> server should be optional. A user should have an option to by-pass the
-> lock server as he may not need it when running the tests outside the
-> Inktank lab.
+- Add support for rbd_invalidate_cache() (if it exists)
+- Use rbd_aio_is_complete() instead of using fri->io_complete. The 
+latter should have some locking to ensure it's always seen, so it's 
+better to use the API provided function to determine whether this IO is 
+done or not.
 
-I also started to not use the lock server, a year ago. I recently experim=
-ented with paddles + teuthology-worker and it's fairly easy to get it to =
-work. The advantage is that you can schedule jobs that will wait for othe=
-rs to complete. My work in progress is at
+Unless we often hit the complete race, I would not expect this to make 
+much of a difference. But it's worth testing in any case, especially 
+since my two attempts at setting up ceph + rbd have failed miserably. So 
+I still can't test myself.
 
-https://github.com/dachary/teuthology/compare/wip-container
-https://github.com/dachary/paddles/compare/wip-container
-
-(note that it is mixed with my attempt to make it work with docker instea=
-d of virtual machines or bare metal)
-=20
-> 2. The word "ubuntu" is hard coded in some places in the code :-)
->=20
-> 3. The bootstrap script is for ubuntu machines only. Anyway, it's
-> not a big task to run those commands manually or create a script of
-> your own.=20
-
-Is your script available somewhere ? I plan to set it up on fedora20 and =
-it would be most useful.
-
-> 4. Teuthology picks up several test cases from the qa/workunits dir -
-> https://github.com/ceph/ceph/tree/master/qa/workunits
-> Unfortunately these tests are not documented anywhere. If one has to
-> check the test coverage or document the exact test steps, it's going
-> to be a humungous effort.
-
-Yes. I'm often happy to read tests as if they were the documention of the=
- code. But it would be useful to have documentation for the test themselv=
-es in additon ;-)
-
-> 5. The tests executed in qa/workunits are not listed as separate test
-> cases in Pulpito results. E.g qa/workunits/rbd/test_librbd_python.sh
-> contains 57 tests. However, in Pupito this is listed as one job. Though=
-
-> not sure if it is possible to implement this as most of the qa/workunit=
-s
-> tests are shell scripts.
-
-Are you running pulpito ? I create a split of workunit that may be of int=
-erest to you. My motivation was not to have them show separately in pulpi=
-to. Rather to run them in //=20
-
-I first modified the script so that it could be called to group tests:
-
-https://github.com/dachary/ceph/commit/ec0ba1a9994e4eb24955442895c6b8dd25=
-61ba20
-
-and then created scripts to run each group independantly
-
-https://github.com/dachary/ceph/commit/bafd35478e310e887a808784f02c7f0041=
-548d1e
-
-which could also be an "exec" teuthology tasks.
-
-
-> 6. I have not tried this of-late but I think teuthology can not run it'=
-s
-> tests against an already deployed ceph-cluster. I need to check it agai=
-n
-> though.
-
-It may be possible to convince it to do that since the install task is no=
-t mandatory.
-
-> 7. Would be great if teuthology can cover Calamari testing too :-)
-
-If I'm not mistaken Waren is working on making this happen. But I've not =
-looked at it closely.
-
-Cheers
-
->=20
->=20
-> Best Regards,
-> Kapil.
->=20
->=20
->=20
->=20
->=20
->=20
-> On Mon, 2014-10-27 at 16:52 +0100, Loic Dachary wrote:
->> It was great meeting your and your family :-) Back in Paris and massiv=
-ely jetlagged.
->>
->> Nice to meet you Kapil ! Are there any pain points you'd like to addre=
-ss regarding the teuthology installation ?
->>
->> Cheers
->>
->> On 27/10/2014 11:47, Thorsten Behrens wrote:
->>> Hi Loic,
->>>
->>> was great to meet you and Patrick at the google summit!
->>>
->>> Loic, meet Kapil, who's doing lots of great stuff with QA automation
->>> and deployment on our side. And I think he and Zack were already in
->>> close contact. ;)
->>>
->>> As promised the update on what we run from teuthology:
->>>
->>> Kapil Sharma wrote:
->>>> As of now I have cnfigured, rbd, krbd and rados test suites which
->>>> are located here
->>>> [snip]
->>>>
->>>
->>> All the very best, and a safe trip home,
->>>
->>
->=20
->=20
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---qHMvRLMMXTj77sFhus6wMMvxLKMsODfQO
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlRPr9kACgkQ8dLMyEl6F20UzgCdEyaayhosN0ZzHqPhtabWRXUN
-VNkAoL9AoHmOjlGjsY2G6i0iiRLXVM+Z
-=gcEx
------END PGP SIGNATURE-----
-
---qHMvRLMMXTj77sFhus6wMMvxLKMsODfQO--
+-- 
+Jens Axboe
