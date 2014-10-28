@@ -1,171 +1,117 @@
-From: =?UTF-8?B?5rGg5L+h5rO9?= <xmdxcxz@gmail.com>
-Subject: Fwd: Cache pool bug?
-Date: Tue, 28 Oct 2014 13:39:22 +0800
-Message-ID: <CANE=7sW7ujhb+YzWUFJ0XfeubMELWwOTyNcth6UM9Eu+bTJeOA@mail.gmail.com>
-References: <CANE=7sUW0e-vp8LROZFA+5BGNoENA4MLthsnPUKb1ks=hnoyEA@mail.gmail.com>
-	<BLU169-W9B3F7EAC2250B1425B560DA9E0@phx.gbl>
-	<06E7D85B3BA36C4DB207FEDE871C5348950BD2@SHSMSX101.ccr.corp.intel.com>
-	<alpine.DEB.2.00.1410270902320.13498@cobra.newdream.net>
-	<CANE=7sVJLeCBkSzNM9cC0k0YOCgapBdMVeYP=GqncTKtup5eKw@mail.gmail.com>
-	<06E7D85B3BA36C4DB207FEDE871C5348950D90@SHSMSX101.ccr.corp.intel.com>
-	<alpine.DEB.2.00.1410272100310.7897@cobra.newdream.net>
-	<CANE=7sWu2aXfAYRXNTqkUvGkxmkyYjmeJbt=j-8SaUNwbu4Rvw@mail.gmail.com>
-	<CANE=7sW1m=sJNoTPiVUMo-XPSpefk5++fSTzmb8RPMwDyOYV9A@mail.gmail.com>
-	<CANE=7sWE1Rx8Bg7SCb5ASLFNGrteh3Noyqaop-s4rKKwB2Gikw@mail.gmail.com>
-	<06E7D85B3BA36C4DB207FEDE871C5348950F34@SHSMSX101.ccr.corp.intel.com>
-	<CANE=7sX6oaXKKiSB5Se50=Ht3tJsQE5a=AKBLBo37Q0+pZjRrg@mail.gmail.com>
+From: GuangYang <yguang11-1ViLX0X+lBJBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: Filestore throttling
+Date: Tue, 28 Oct 2014 08:59:29 +0000
+Message-ID: <BLU175-W342F27D41BA13BF4F0F763DF9F0@phx.gbl>
+References: <BLU175-W34FC39734E69C620D262DEDF920@phx.gbl>,
+	<alpine.DEB.2.00.1410222104080.10837@cobra.newdream.net>
+	<BLU175-W176682F001CDC16FC4FA67DF920@phx.gbl>,
+	<alpine.DEB.2.00.1410230653320.10837@cobra.newdream.net>,
+	<BLU175-W21BCCB0C8E9A1CF98FB27EDF930@phx.gbl>,
+	<alpine.DEB.2.00.1410232119190.10837@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f48.google.com ([209.85.218.48]:42918 "EHLO
-	mail-oi0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751619AbaJ1FjW convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Oct 2014 01:39:22 -0400
-Received: by mail-oi0-f48.google.com with SMTP id x69so3021714oia.7
-        for <ceph-devel@vger.kernel.org>; Mon, 27 Oct 2014 22:39:22 -0700 (PDT)
-In-Reply-To: <CANE=7sX6oaXKKiSB5Se50=Ht3tJsQE5a=AKBLBo37Q0+pZjRrg@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-
----------- Forwarded message ----------
-=46rom: =E6=B1=A0=E4=BF=A1=E6=B3=BD <xmdxcxz@gmail.com>
-Date: 2014-10-28 13:37 GMT+08:00
-Subject: Re: Cache pool bug?
-To: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.00.1410232119190.10837-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
 
-If we use the timestamp,
 
-get_position_micro(int32_t v, uint64_t *lower, uint64_t *upper)
-
-    unsigned bin =3D calc_bits_of(v); // this function will return the
-same value at most time, this may be a problem.
-
-
-2014-10-28 12:50 GMT+08:00 Wang, Zhiqiang <zhiqiang.wang@intel.com>:
-> Yes, if we change atime to be a timestamp, we also need to change the=
- code for the case when the object is not in any hit sets.
+----------------------------------------
+> Date: Thu, 23 Oct 2014 21:26:07 -0700
+> From: sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org
+> To: yguang11-1ViLX0X+lBJBDgjK7y7TUQ@public.gmane.org
+> CC: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> Subject: RE: Filestore throttling
 >
-> -----Original Message-----
-> From: =E6=B1=A0=E4=BF=A1=E6=B3=BD [mailto:xmdxcxz@gmail.com]
-> Sent: Tuesday, October 28, 2014 12:46 PM
-> To: Sage Weil; Wang, Zhiqiang; ceph-devel@vger.kernel.org
-> Subject: Re: Cache pool bug?
->
-> If it changed to be *atime =3D p->first
->
-> we should change ReplicatedPG::agent_maybe_evict
->     if (atime < 0 && obc->obs.oi.mtime !=3D utime_t()) {
->       if (obc->obs.oi.local_mtime !=3D utime_t()) {
->         atime =3D obc->obs.oi.local_mtime;
->       } else {
->         atime =3D obc->obs.oi.mtime;
->       }
->     }
->     if (atime < 0)
->       atime =3D 0; // or other
->
-> void ReplicatedPG::agent_estimate_atime_temp(const hobject_t& oid,
->     int *atime, int *temp)
-> {
->   assert(hit_set);
->    time_t now =3D ceph_clock_now(NULL).sec();
->   *atime =3D -1;
->   if (temp)
->     *temp =3D 0;
->   if (hit_set->contains(oid)) {
->     *atime =3D now;
->     if (temp)
->       ++(*temp);
->     else
->       return;
->   }
->
->   for (map<time_t,HitSetRef>::iterator p =3D agent_state->hit_set_map=
-=2Erbegin();
->        p !=3D agent_state->hit_set_map.rend();
->        ++p) {
->     if (p->second->contains(oid)) {
->       if (*atime < 0)
-> *atime =3D now - p->first;
->       if (temp)
-> ++(*temp);
->       else
-> return;
->     }
->   }
-> }
->
-> 2014-10-28 12:36 GMT+08:00 =E6=B1=A0=E4=BF=A1=E6=B3=BD <xmdxcxz@gmail=
-=2Ecom>:
->> I am sorry. We should only just modify the logic
->> ReplicatedPG::agent_estimate_atime_temp, atime should be now.
+> On Fri, 24 Oct 2014, GuangYang wrote:
+>>> commit 44dca5c8c5058acf9bc391303dc77893793ce0be
+>>> Author: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+>>> Date: Sat Jan 19 17:33:25 2013 -0800
+>>>
+>>> filestore: disable extra committing queue allowance
+>>>
+>>> The motivation here is if there is a problem draining the op queue
+>>> during a sync. For XFS and ext4, this isn't generally a problem: you
+>>> can continue to make writes while a syncfs(2) is in progress. There
+>>> are currently some possible implementation issues with btrfs, but we
+>>> have not demonstrated them recently.
+>>>
+>>> Meanwhile, this can cause queue length spikes that screw up latency.
+>>> During a commit, we allow too much into the queue (say, recovery
+>>> operations). After the sync finishes, we have to drain it out before
+>>> we can queue new work (say, a higher priority client request). Having
+>>> a deep queue below the point where priorities order work limits the
+>>> value of the priority queue.
+>>>
+>>> Signed-off-by: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+>>>
+>>> I'm not sure it makes sense to increase it in the general case. It might
+>>> make sense for your workload, or we may want to make peering transactio=
+ns
+>>> some sort of special case...?
+>> It is actually another commit:
 >>
->>   if (temp)
->>     *temp =3D 0;
->>   if (hit_set->contains(oid)) {
->>     *atime =3D 0;
->>     if (temp)
->>       ++(*temp);
->>     else
->>       return;
->>   }
->>
->> 2014-10-28 12:28 GMT+08:00 =E6=B1=A0=E4=BF=A1=E6=B3=BD <xmdxcxz@gmai=
-l.com>:
->>> I think if it changed to be  *atime =3D p->first, Below logic shoul=
-d
->>> also be modified.
->>>
->>> ReplicatedPG::agent_maybe_evict
->>>
->>>     if (atime < 0 && obc->obs.oi.mtime !=3D utime_t()) {
->>>       if (obc->obs.oi.local_mtime !=3D utime_t()) {
->>>         atime =3D ceph_clock_now(NULL).sec() - obc->obs.oi.local_mt=
-ime;
->>>       } else {
->>>         atime =3D ceph_clock_now(NULL).sec() - obc->obs.oi.mtime;
->>>       }
->>>     }
->>>
->>>
->>> including
->>> ReplicatedPG::agent_estimate_atime_temp
->>>   if (temp)
->>>     *temp =3D 0;
->>>   if (hit_set->contains(oid)) {
->>>     *atime =3D 0;
->>>     if (temp)
->>>       ++(*temp);
->>>     else
->>>       return;
->>>   }
->>>
->>> 2014-10-28 12:02 GMT+08:00 Sage Weil <sage@newdream.net>:
->>>> Yep.  The pull request looks is correct too, but needs to be
->>>> squashed into a single commit with a Signed-off-by: line and descr=
-iption.
->>>>
->>>> Zhiqiang, I think the reversed logic you just fixed in
->>>> agent_maybe_evict() was partly because this function is filling in
->>>> atime (which sounds like a
->>>> timestamp) with an *age* (now - p->first).  I think we should chan=
-ge
->>>>
->>>>>       if (*atime < 0)
->>>>>       *atime =3D now - p->first;
->>>>
->>>> to be
->>>>
->>>>  *atime =3D p->first
->>>>
->>>> and/or adjust the caller accordingly...?
->>>>
->>>> sage
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> commit 40654d6d53436c210b2f80911217b044f4d7643a
+>> filestore: filestore_queue_max_ops 500 -> 50
+>> Having a deep queue limits the effectiveness of the priority queues
+>> above by adding additional latency.
+>
+> Ah, you're right.
+>
+>> I don't quite understand the use case that it might add additional
+>> latency by increasing this value, would you mind elaborating?
+>
+> There is a priority queue a bit further up the stack OpWQ, in which high
+> priority items (e.g., client IO) can move ahead of low priority items
+> (e.g., recovery). If the queue beneath that (the filestore one) is very
+> deep, the client IO will only have a marginal advantage over the recovery
+> IO since it will still sit in the second queue for a long time. Ideally,
+> we want the priority queue to be the deepest one (so that we maximize the
+> amount of stuff we can reorder) and the queues above and below to be as
+> shallow as possible.
+
+That makes perfect sense, thanks for explaining the details.
+
+>
+> I think the peering operations are different because they can't be
+> reordered with respect to anything else in the same PG (unlike, say,
+> client vs recovery io for that pg). On the other hand, there may be
+> client IO on other PGs that we want to reorder and finish more quickly.
+> Allowing all of the right reordering and also getting the priority
+> inheritence right here is probably a hugely complex undertaking, so we
+> probably just want to go for a reasonably simple strategy that avoids the
+> worst instances of priority inversion (where an important thing is stuck
+> behind a slow thing). :/
+
+We mainly observed the following issues during peering:
+=A0 1. For several peering OPs (pg_info, pg_notify, pg_log), the dispatcher=
+ thread needs to queue filestore transaction which in turn need to acquire =
+filesotre ops/bytes budget, so that once the OSD hit the upper limit of tho=
+se throttler, the dispatcher thread would hang which blocks all OPs. In thi=
+s regard, it is very dangerous to hit those threshold as it could severely =
+impact performance.=A0
+=A0 =A02. If the OSD was down for a while, the peering OP to search for mis=
+sing objects could take up to several minutes, during which time period thi=
+s PG is inactive can all traffic to that PG would stuck, I am not sure if t=
+here is a chance to improve for such situation due to the strong consistenc=
+y model, increasing the op thread number could help a little bit as sometim=
+es those peering OPs could eat up all op threads.
+>
+> In any case, though, I'm skeptical that making the lowest-level queue
+> deeper is going to help in general, even if it addresses the peering
+> case specifically...
+>
+> sage
+ 		 	   		  =
