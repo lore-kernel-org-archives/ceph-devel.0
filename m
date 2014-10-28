@@ -1,70 +1,52 @@
-From: Qiang <wangqiang.hunan@gmail.com>
-Subject: qemu-kvm guests hang on disk write with rbd storage
-Date: Tue, 28 Oct 2014 21:32:37 +0800
-Message-ID: <544F9AF5.1020609@gmail.com>
+From: GuangYang <yguang11@outlook.com>
+Subject: RE: Ceph Developer Summit - Oct 28-29
+Date: Tue, 28 Oct 2014 13:33:20 +0000
+Message-ID: <BLU175-W363F2FE6846A790EBFC393DF9F0@phx.gbl>
+References: <CAP8Oy=KeYryUPO5y-HxUGw3qaccr0XkPSP+6CsYh=DHGsRqFzw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f174.google.com ([209.85.192.174]:58722 "EHLO
-	mail-pd0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751505AbaJ1Nck (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Oct 2014 09:32:40 -0400
-Received: by mail-pd0-f174.google.com with SMTP id p10so710745pdj.5
-        for <ceph-devel@vger.kernel.org>; Tue, 28 Oct 2014 06:32:40 -0700 (PDT)
-Received: from [192.168.1.103] ([111.161.17.97])
-        by mx.google.com with ESMTPSA id ir7sm1746595pbc.15.2014.10.28.06.32.39
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 28 Oct 2014 06:32:39 -0700 (PDT)
+Received: from [65.55.116.30] ([65.55.116.30]:60970 "EHLO
+	BLU004-OMC1S19.hotmail.com" rhost-flags-FAIL-FAIL-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1754702AbaJ1NeV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 28 Oct 2014 09:34:21 -0400
+In-Reply-To: <CAP8Oy=KeYryUPO5y-HxUGw3qaccr0XkPSP+6CsYh=DHGsRqFzw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Patrick McGarry <patrick@inktank.com>, "yehuda@inktank.com" <yehuda@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-
-Hi, Dear All
-
-I got an issue in my environment: qemu-kvm guests hang on disk write 
-with rbd storage.
-
-My environment:
-ceph version: 0.80.7
-ceph osds: 11(hosts) * 10(osd) = 110
-qemu version: 2.0 +
-
-my operating steps:
-ceph osd crush add-bucket ssd root
-ceph osd getcrushmap -o mycrushmap
-crushtool -d mycrushmap -o mycrushmap_v1
-
-#modify mycrushmap_v1
-#add 4 of 11 hosts into root=ssd .
-#meanwhile the 11 hosts are still in root=default.
-
-crushtool -c mycrushmap_v1 -o mycrushmap_input
-ceph osd setcrushmap -i mycrushmap_input
-After I doing above steps
-
-In my environment, qemu-kvm VMs which attached ceph rbd storage all 
-hung.  The kernel log shows:
-kernel: INFO: task jbd2/sdb1-8:623 blocked for more than 120 seconds.
-kernel: Not tainted 2.6.32-431.3.1.el6.x86_64 #1
-kernel: "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this 
-message.
-kernel: jbd2/sdb1-8 D 0000000000000001 0 623 2 0x00000000
-kernel: ffff88011c44dc20 0000000000000046 ffff8801ffffffff 00000000cc70801d
-kernel: ffff88011c44db90 ffff880119466980 00000000d127ef64 ffffffffac2de373
-kernel: ffff880119538638 ffff88011c44dfd8 000000000000fbc8 ffff880119538638
-kernel: Call Trace:
-
-In the meantime the ceph.log shows everything working fine and the ceph 
-health is ok. And The other guest VMs are fine which without ceph rbd 
-storage.
-
-I tried many times in my testing environment, But I cannot reproduce it. 
-  So that maybe not a problem.
-
-Is there any defect/bug relates to this issue?  Or any suggestion to 
-help me find the root cause?
-
-Thanks very much.
+SGkgUGF0cmljaywKU29ycnkgSSBhbSBub3QgYWJsZSB0byBqb2luIHRvZGF5J3Mgc2Vzc2lvbiBm
+b3IgdGhlIGJ1Y2tldCBpbmRleCBzY2FsYWJpbGl0eS4gSSBhbSB3b3JraW5nIHdpdGggWWVodWRh
+IHRvIHBvbGlzaCB0aGUgaW1wbGVtZW50YXRpb24gYWNjb3JkaW5nIHRvIG91ciBkaXNjdXNzaW9u
+IGluIGxhc3QgQ0RTLCBhbmQgaG9wZWZ1bGx5IHdlIHdpbGwgbWVyZ2UgdGhlIHBhdGNoIHNvb24u
+IFRoZXJlIGlzIG5vdCBtdWNoIHVwZGF0ZSAoaW4gdGVybXMgb2Ygd2hhdCB3ZSB3aWxsIGltcGxl
+bWVudCBhbmQgaG93IHdlIGltcGxlbWVudCB0aGVtKSBhZnRlciBsYXN0IGRpc2N1c3Npb24gc28g
+dGhhdCBJIHRoaW5rIGl0IGlzIGZpbmUgdG8gc2tpcCB0aGUgc2Vzc2lvbi4KClllaHVkYSwKUGxl
+YXNlIGNvcnJlY3QgbWUgaGVyZSBpZiBJIGFtIHdyb25nLgoKVGhhbmtzLApHdWFuZwoKLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQo+IERhdGU6IFdlZCwgMjIgT2N0IDIw
+MTQgMTM6MTM6MTcgLTA0MDAKPiBTdWJqZWN0OiBDZXBoIERldmVsb3BlciBTdW1taXQgLSBPY3Qg
+MjgtMjkKPiBGcm9tOiBwYXRyaWNrQGlua3RhbmsuY29tCj4gVG86IGNlcGgtdXNlcnNAY2VwaC5j
+b207IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnOyBjZXBoLWNvbW11bml0eUBsaXN0cy5jZXBo
+LmNvbQo+Cj4gR3JlZXRpbmdzIGNlcGhhbG9mb2xrcywKPgo+IEFzIEknbSBzdXJlIG1hbnkgb2Yg
+eW91IGhhdmUgc2VlbiwgdGhlIHNjaGVkdWxlIGZvciB0aGUgdXBjb21pbmcKPiB2aXJ0dWFsIENl
+cGggRGV2ZWxvcGVyIFN1bW1pdCBoYXMgYmVlbiBwb3N0ZWQ6Cj4KPiBodHRwczovL3dpa2kuY2Vw
+aC5jb20vUGxhbm5pbmcvQ0RTL0hhbW1lcl8oT2N0XzIwMTQpCj4KPiBBcyB1c3VhbCB3ZSBoYXZl
+IGEgRU1FQSBmcmllbmRseSBkYXkgYW5kIGFuIEFQQUMgZnJpZW5kbHkgZGF5IHdpdGggdGhlCj4g
+c2Vzc2lvbnMgYmVpbmcgZGlzdHJpYnV0ZWQgYWNyb3NzIGVhY2ggZGF5IHRoYXQgaW5jbHVkZSB0
+aGUgYmx1ZXByaW50Cj4gYXV0aG9ycyBhbmQgaW50ZXJlc3RlZCBwYXJ0aWVzLiBJZiB5b3UgYXJl
+IHVuYWJsZSB0byBhdHRlbmQgYSBzZXNzaW9uCj4gdGhhdCB5b3UgYXJlIGludGVyZXN0ZWQgaW4g
+cGxlYXNlIGJlIHN1cmUgdG8gYWRkIHlvdXIKPiBjb21tZW50cy9xdWVzdGlvbnMgdG8gdGhlIGV0
+aGVycGFkIGluIHF1ZXN0aW9uICh3aXRoIHlvdXIgbmFtZSkgc28KPiB0aGF0IHRob3NlIGNvbmNl
+cm5zIGNhbiBiZSBhZGRyZXNzZWQgZHVyaW5nIHRoZSBkaXNjdXNzaW9uLgo+Cj4gQWxsIHNlc3Np
+b25zIHdpbGwgYmUgcmVjb3JkZWQgZm9yIGxhdGVyIHBlcnVzYWwgaWYgeW91IGFyZSB1bmFibGUg
+dG8gYXR0ZW5kLgo+Cj4gSWYgeW91IGhhdmUgYW55IHF1ZXN0aW9ucywgY29tbWVudHMsIG9yIGNv
+bmNlcm5zLCBmZWVsIGZyZWUgdG8gZW1haWwKPiBtZSBkaXJlY3RseS4gVGhhbmtzLCBhbmQgc2Vl
+IHlvdSBhbGwgdGhlcmUhCj4KPgo+IEJlc3QgUmVnYXJkcywKPgo+IFBhdHJpY2sgTWNHYXJyeQo+
+IERpcmVjdG9yIENlcGggQ29tbXVuaXR5IHx8IFJlZCBIYXQKPiBodHRwOi8vY2VwaC5jb20gfHwg
+aHR0cDovL2NvbW11bml0eS5yZWRoYXQuY29tCj4gQHNjdXR0bGVtb25rZXkgfHwgQGNlcGgKPiAt
+LQo+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNj
+cmliZSBjZXBoLWRldmVsIiBpbgo+IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9A
+dmdlci5rZXJuZWwub3JnCj4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCBodHRwOi8vdmdlci5rZXJu
+ZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwKIAkJIAkgICAJCSAg
