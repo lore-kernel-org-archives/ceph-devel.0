@@ -1,64 +1,65 @@
-From: Ketor D <d.ketor@gmail.com>
-Subject: Re: fio rbd completions (Was: fio rbd hang for block sizes > 1M)
-Date: Wed, 29 Oct 2014 15:15:54 +0800
-Message-ID: <CAM9_UU8=MtUnQiembBfr8YQiDOD7TNey=mp8_H6gySenRVHy6A@mail.gmail.com>
-References: <5449BBB3.7090109@catalyst.net.nz> <544B1D50.4010101@kernel.dk>
- <544B2C19.7070009@catalyst.net.nz> <544BF808.2090800@kernel.dk>
- <544C2371.1020403@catalyst.net.nz> <544E547C.30009@kernel.dk>
- <CAM9_UU9j2erdGT5kqKi_+5z5ERFMPO1hHwMk8kaFjLkGm-zp-g@mail.gmail.com>
- <544E6330.1000202@kernel.dk> <544E63EA.1010204@kernel.dk> <CAM9_UU-35i9uRu9EDQSM-b7CjmxrKYV2Gz8ocrykOYk+2q++hw@mail.gmail.com>
- <544E6691.106@kernel.dk> <CAM9_UU9_ZHtwv=31DyxkAmog7XJbthiRXi5n+Y0Cfxj4qm3bGQ@mail.gmail.com>
- <544E6A8D.1040608@kernel.dk> <CAM9_UU8x2uZZUWaPPoy+LHmUhC_3sqKZ9GPsEqDwKUkprg4kdQ@mail.gmail.com>
- <544EC05D.7040807@catalyst.net.nz> <544EC7F1.6010900@kernel.dk>
- <544ED37D.6060800@catalyst.net.nz> <CAM9_UU8MHdj+mjAWBziETxPDnwTt0JBuHrQp2Fu9YtF=msae3w@mail.gmail.com>
- <79432849-2F58-4738-82E1-E4D8AB10A6AE@kernel.dk> <CAM9_UU9G5vQ68UxMakte-Wb5B9_KBo24ov7=hNHpYqEtko2nQg@mail.gmail.com>
- <544FB2F2.2060703@kernel.dk> <CAM9_UU_o8kS1wJnDKTvd8+qkm9=93yfW3THr_8ni8C+5=TH6tg@mail.gmail.com>
- <544FCDBD.7070106@kernel.dk> <CAM9_UU-gyExbAEo608vGnjqBk56A_VRZc44HkywUuLmXoEZ4Cg@mail.gmail.com>
+From: Alexandre DERUMIER <aderumier@odiso.com>
+Subject: Re: krbd blk-mq support ?
+Date: Wed, 29 Oct 2014 10:09:24 +0100 (CET)
+Message-ID: <670b829a-8568-44fa-97a1-1ced59d408ad@mailpro>
+References: <20141028180725.GA1138@infradead.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f41.google.com ([209.85.218.41]:39134 "EHLO
-	mail-oi0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752283AbaJ2HQZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Oct 2014 03:16:25 -0400
-In-Reply-To: <CAM9_UU-gyExbAEo608vGnjqBk56A_VRZc44HkywUuLmXoEZ4Cg@mail.gmail.com>
+Received: from mailpro.odiso.net ([89.248.209.98]:60668 "EHLO
+	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755944AbaJ2JJb convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Oct 2014 05:09:31 -0400
+In-Reply-To: <20141028180725.GA1138@infradead.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jens Axboe <axboe@kernel.dk>
-Cc: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>, Mark Nelson <mark.nelson@inktank.com>, Mark Nelson <mark.a.nelson@gmail.com>, "fio@vger.kernel.org" <fio@vger.kernel.org>, "xan.peng" <xanpeng@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Christoph Hellwig <hch@infradead.org>
+Cc: Ceph Devel <ceph-devel@vger.kernel.org>
 
-Hi, Jens,
+>>Oh, that's without the blk-mq patch?
 
-There is cmdline parse bug in the fio rbd test.
+Yes, sorry, I don't how to use perf with a custom compiled kernel.
+(Usualy I'm using perf from debian, with linux-tools package provided w=
+ith the debian kernel package)
 
-I have fixed this and create a pull request on the github.
+>>Either way the profile doesn't really sum up to a fully used up cpu.
 
-Please review.
+But I see mostly same behaviour with or without blk-mq patch, I have al=
+ways 1 kworker at around 97-100%cpu (1core) for 50000iops.
 
-After fix the bugs, the fio test can run.
+I had also tried to map the rbd volume with nocrc, it's going to 60000i=
+ops with same kworker at around 97-100%cpu
 
 
-2014-10-29 2:43 GMT+08:00 Ketor D <d.ketor@gmail.com>:
-> Yeah, the new wait strategy looks better.
->
-> I will test the patch soon.
->
-> 2014-10-29 1:09 GMT+08:00 Jens Axboe <axboe@kernel.dk>:
->> On 2014-10-28 09:49, Ketor D wrote:
->>>
->>> Cannot get the new commited code from github now.
->>> When I get the newest code, I will test.
->>
->>
->> So here's another idea, applies on top of current -git. Basically it makes
->> rbd wait for the oldest event, not just the first one in the array of all
->> ios. This is the saner thing to do, as hopefully the oldest event will be
->> the one to complete first. At least it has a much higher chance of being the
->> right thing to do, than just waiting on a random event.
->>
->> Completely untested, so you might have to fiddle a bit with it to ensure
->> that it actually works...
->>
->> --
->> Jens Axboe
->>
+
+----- Mail original -----=20
+
+De: "Christoph Hellwig" <hch@infradead.org>=20
+=C3=80: "Alexandre DERUMIER" <aderumier@odiso.com>=20
+Cc: "Ceph Devel" <ceph-devel@vger.kernel.org>=20
+Envoy=C3=A9: Mardi 28 Octobre 2014 19:07:25=20
+Objet: Re: krbd blk-mq support ?=20
+
+On Mon, Oct 27, 2014 at 11:00:46AM +0100, Alexandre DERUMIER wrote:=20
+> >>Can you do a perf report -ag and then a perf report to see where th=
+ese=20
+> >>cycles are spent?=20
+>=20
+> Yes, sure.=20
+>=20
+> I have attached the perf report to this mail.=20
+> (This is with kernel 3.14, don't have access to my 3.18 host for now)=
+=20
+
+Oh, that's without the blk-mq patch?=20
+
+Either way the profile doesn't really sum up to a fully used up=20
+cpu. Sage, Alex - are there any ordring constraints in the rbd client?=20
+If not we could probably aim for per-cpu queues using blk-mq and a=20
+socket per cpu or similar.=20
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
