@@ -1,70 +1,64 @@
-From: GuangYang <yguang11@outlook.com>
-Subject: RE: Ceph Developer Summit - Oct 28-29
-Date: Wed, 29 Oct 2014 00:45:45 +0000
-Message-ID: <BLU175-W57F77D2D7591F8FD62035DF9C0@phx.gbl>
-References: <CAP8Oy=KeYryUPO5y-HxUGw3qaccr0XkPSP+6CsYh=DHGsRqFzw@mail.gmail.com>,<BLU175-W363F2FE6846A790EBFC393DF9F0@phx.gbl>,<CABBk=J9vpqveMH8pYc8ppJZK0b2d60zWBitGxGoEiLwEM18ORg@mail.gmail.com>
+From: Ketor D <d.ketor@gmail.com>
+Subject: Re: fio rbd completions (Was: fio rbd hang for block sizes > 1M)
+Date: Wed, 29 Oct 2014 15:15:54 +0800
+Message-ID: <CAM9_UU8=MtUnQiembBfr8YQiDOD7TNey=mp8_H6gySenRVHy6A@mail.gmail.com>
+References: <5449BBB3.7090109@catalyst.net.nz> <544B1D50.4010101@kernel.dk>
+ <544B2C19.7070009@catalyst.net.nz> <544BF808.2090800@kernel.dk>
+ <544C2371.1020403@catalyst.net.nz> <544E547C.30009@kernel.dk>
+ <CAM9_UU9j2erdGT5kqKi_+5z5ERFMPO1hHwMk8kaFjLkGm-zp-g@mail.gmail.com>
+ <544E6330.1000202@kernel.dk> <544E63EA.1010204@kernel.dk> <CAM9_UU-35i9uRu9EDQSM-b7CjmxrKYV2Gz8ocrykOYk+2q++hw@mail.gmail.com>
+ <544E6691.106@kernel.dk> <CAM9_UU9_ZHtwv=31DyxkAmog7XJbthiRXi5n+Y0Cfxj4qm3bGQ@mail.gmail.com>
+ <544E6A8D.1040608@kernel.dk> <CAM9_UU8x2uZZUWaPPoy+LHmUhC_3sqKZ9GPsEqDwKUkprg4kdQ@mail.gmail.com>
+ <544EC05D.7040807@catalyst.net.nz> <544EC7F1.6010900@kernel.dk>
+ <544ED37D.6060800@catalyst.net.nz> <CAM9_UU8MHdj+mjAWBziETxPDnwTt0JBuHrQp2Fu9YtF=msae3w@mail.gmail.com>
+ <79432849-2F58-4738-82E1-E4D8AB10A6AE@kernel.dk> <CAM9_UU9G5vQ68UxMakte-Wb5B9_KBo24ov7=hNHpYqEtko2nQg@mail.gmail.com>
+ <544FB2F2.2060703@kernel.dk> <CAM9_UU_o8kS1wJnDKTvd8+qkm9=93yfW3THr_8ni8C+5=TH6tg@mail.gmail.com>
+ <544FCDBD.7070106@kernel.dk> <CAM9_UU-gyExbAEo608vGnjqBk56A_VRZc44HkywUuLmXoEZ4Cg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from blu004-omc3s19.hotmail.com ([65.55.116.94]:58991 "EHLO
-	BLU004-OMC3S19.hotmail.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751250AbaJ2Apq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 28 Oct 2014 20:45:46 -0400
-In-Reply-To: <CABBk=J9vpqveMH8pYc8ppJZK0b2d60zWBitGxGoEiLwEM18ORg@mail.gmail.com>
+Received: from mail-oi0-f41.google.com ([209.85.218.41]:39134 "EHLO
+	mail-oi0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752283AbaJ2HQZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Oct 2014 03:16:25 -0400
+In-Reply-To: <CAM9_UU-gyExbAEo608vGnjqBk56A_VRZc44HkywUuLmXoEZ4Cg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh <yehuda@inktank.com>, Patrick McGarry <patrick@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Jens Axboe <axboe@kernel.dk>
+Cc: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>, Mark Nelson <mark.nelson@inktank.com>, Mark Nelson <mark.a.nelson@gmail.com>, "fio@vger.kernel.org" <fio@vger.kernel.org>, "xan.peng" <xanpeng@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-SSBzZWUuIENhbiB3ZSByZS1zY2hlZHVsZSB0byBXZWRuZXNkYXkgc2Vzc2lvbnMgd2hpY2ggaXMg
-VVMvQVBBQyBmcmllbmRseT8KClRoYW5rcywKR3VhbmcKCi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0KPiBEYXRlOiBUdWUsIDI4IE9jdCAyMDE0IDA3OjMxOjIxIC0wNzAw
-Cj4gU3ViamVjdDogUmU6IENlcGggRGV2ZWxvcGVyIFN1bW1pdCAtIE9jdCAyOC0yOQo+IEZyb206
-IHllaHVkYUBpbmt0YW5rLmNvbQo+IFRvOiB5Z3VhbmcxMUBvdXRsb29rLmNvbQo+IENDOiBwYXRy
-aWNrQGlua3RhbmsuY29tOyBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZwo+Cj4gV2VsbCwgdGhl
-IGlkZWEgd2FzIHRvIGRpc2N1c3MgdGhlIGZlYXR1cmUsIHRoZSBkZWNpc2lvbnMgdGhhdCB3ZXJl
-Cj4gbWFkZSwgYW5kIHRoZSBzdGF0dXMuIEFsc28sIHdlJ3JlIG5vdyBvbmx5IGluIHBoYXNlIDEs
-IGl0IG1pZ2h0IGJlIGEKPiBnb29kIGlkZWEgdG8gc3RhcnQgdGhpbmtpbmcgYWJvdXQgdGhlIG5l
-eHQgcGhhc2UsIHdoZXJlIGJ1Y2tldAo+IHNoYXJkaW5nIHdpbGwgYmUgZG9uZSBhdXRvbWF0aWNh
-bGx5Lgo+Cj4gWWVodWRhCj4KPgo+IE9uIFR1ZSwgT2N0IDI4LCAyMDE0IGF0IDY6MzMgQU0sIEd1
-YW5nWWFuZyA8eWd1YW5nMTFAb3V0bG9vay5jb20+IHdyb3RlOgo+PiBIaSBQYXRyaWNrLAo+PiBT
-b3JyeSBJIGFtIG5vdCBhYmxlIHRvIGpvaW4gdG9kYXkncyBzZXNzaW9uIGZvciB0aGUgYnVja2V0
-IGluZGV4IHNjYWxhYmlsaXR5LiBJIGFtIHdvcmtpbmcgd2l0aCBZZWh1ZGEgdG8gcG9saXNoIHRo
-ZSBpbXBsZW1lbnRhdGlvbiBhY2NvcmRpbmcgdG8gb3VyIGRpc2N1c3Npb24gaW4gbGFzdCBDRFMs
-IGFuZCBob3BlZnVsbHkgd2Ugd2lsbCBtZXJnZSB0aGUgcGF0Y2ggc29vbi4gVGhlcmUgaXMgbm90
-IG11Y2ggdXBkYXRlIChpbiB0ZXJtcyBvZiB3aGF0IHdlIHdpbGwgaW1wbGVtZW50IGFuZCBob3cg
-d2UgaW1wbGVtZW50IHRoZW0pIGFmdGVyIGxhc3QgZGlzY3Vzc2lvbiBzbyB0aGF0IEkgdGhpbmsg
-aXQgaXMgZmluZSB0byBza2lwIHRoZSBzZXNzaW9uLgo+Pgo+PiBZZWh1ZGEsCj4+IFBsZWFzZSBj
-b3JyZWN0IG1lIGhlcmUgaWYgSSBhbSB3cm9uZy4KPj4KPj4gVGhhbmtzLAo+PiBHdWFuZwo+Pgo+
-PiAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tCj4+PiBEYXRlOiBXZWQs
-IDIyIE9jdCAyMDE0IDEzOjEzOjE3IC0wNDAwCj4+PiBTdWJqZWN0OiBDZXBoIERldmVsb3BlciBT
-dW1taXQgLSBPY3QgMjgtMjkKPj4+IEZyb206IHBhdHJpY2tAaW5rdGFuay5jb20KPj4+IFRvOiBj
-ZXBoLXVzZXJzQGNlcGguY29tOyBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZzsgY2VwaC1jb21t
-dW5pdHlAbGlzdHMuY2VwaC5jb20KPj4+Cj4+PiBHcmVldGluZ3MgY2VwaGFsb2ZvbGtzLAo+Pj4K
-Pj4+IEFzIEknbSBzdXJlIG1hbnkgb2YgeW91IGhhdmUgc2VlbiwgdGhlIHNjaGVkdWxlIGZvciB0
-aGUgdXBjb21pbmcKPj4+IHZpcnR1YWwgQ2VwaCBEZXZlbG9wZXIgU3VtbWl0IGhhcyBiZWVuIHBv
-c3RlZDoKPj4+Cj4+PiBodHRwczovL3dpa2kuY2VwaC5jb20vUGxhbm5pbmcvQ0RTL0hhbW1lcl8o
-T2N0XzIwMTQpCj4+Pgo+Pj4gQXMgdXN1YWwgd2UgaGF2ZSBhIEVNRUEgZnJpZW5kbHkgZGF5IGFu
-ZCBhbiBBUEFDIGZyaWVuZGx5IGRheSB3aXRoIHRoZQo+Pj4gc2Vzc2lvbnMgYmVpbmcgZGlzdHJp
-YnV0ZWQgYWNyb3NzIGVhY2ggZGF5IHRoYXQgaW5jbHVkZSB0aGUgYmx1ZXByaW50Cj4+PiBhdXRo
-b3JzIGFuZCBpbnRlcmVzdGVkIHBhcnRpZXMuIElmIHlvdSBhcmUgdW5hYmxlIHRvIGF0dGVuZCBh
-IHNlc3Npb24KPj4+IHRoYXQgeW91IGFyZSBpbnRlcmVzdGVkIGluIHBsZWFzZSBiZSBzdXJlIHRv
-IGFkZCB5b3VyCj4+PiBjb21tZW50cy9xdWVzdGlvbnMgdG8gdGhlIGV0aGVycGFkIGluIHF1ZXN0
-aW9uICh3aXRoIHlvdXIgbmFtZSkgc28KPj4+IHRoYXQgdGhvc2UgY29uY2VybnMgY2FuIGJlIGFk
-ZHJlc3NlZCBkdXJpbmcgdGhlIGRpc2N1c3Npb24uCj4+Pgo+Pj4gQWxsIHNlc3Npb25zIHdpbGwg
-YmUgcmVjb3JkZWQgZm9yIGxhdGVyIHBlcnVzYWwgaWYgeW91IGFyZSB1bmFibGUgdG8gYXR0ZW5k
-Lgo+Pj4KPj4+IElmIHlvdSBoYXZlIGFueSBxdWVzdGlvbnMsIGNvbW1lbnRzLCBvciBjb25jZXJu
-cywgZmVlbCBmcmVlIHRvIGVtYWlsCj4+PiBtZSBkaXJlY3RseS4gVGhhbmtzLCBhbmQgc2VlIHlv
-dSBhbGwgdGhlcmUhCj4+Pgo+Pj4KPj4+IEJlc3QgUmVnYXJkcywKPj4+Cj4+PiBQYXRyaWNrIE1j
-R2FycnkKPj4+IERpcmVjdG9yIENlcGggQ29tbXVuaXR5IHx8IFJlZCBIYXQKPj4+IGh0dHA6Ly9j
-ZXBoLmNvbSB8fCBodHRwOi8vY29tbXVuaXR5LnJlZGhhdC5jb20KPj4+IEBzY3V0dGxlbW9ua2V5
-IHx8IEBjZXBoCj4+PiAtLQo+Pj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQg
-dGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluCj4+PiB0aGUgYm9keSBvZiBhIG1l
-c3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZwo+Pj4gTW9yZSBtYWpvcmRvbW8gaW5m
-byBhdCBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwKPj4KPiAtLQo+
-IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmli
-ZSBjZXBoLWRldmVsIiBpbgo+IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdl
-ci5rZXJuZWwub3JnCj4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCBodHRwOi8vdmdlci5rZXJuZWwu
-b3JnL21ham9yZG9tby1pbmZvLmh0bWwKIAkJIAkgICAJCSAg
+Hi, Jens,
+
+There is cmdline parse bug in the fio rbd test.
+
+I have fixed this and create a pull request on the github.
+
+Please review.
+
+After fix the bugs, the fio test can run.
+
+
+2014-10-29 2:43 GMT+08:00 Ketor D <d.ketor@gmail.com>:
+> Yeah, the new wait strategy looks better.
+>
+> I will test the patch soon.
+>
+> 2014-10-29 1:09 GMT+08:00 Jens Axboe <axboe@kernel.dk>:
+>> On 2014-10-28 09:49, Ketor D wrote:
+>>>
+>>> Cannot get the new commited code from github now.
+>>> When I get the newest code, I will test.
+>>
+>>
+>> So here's another idea, applies on top of current -git. Basically it makes
+>> rbd wait for the oldest event, not just the first one in the array of all
+>> ios. This is the saner thing to do, as hopefully the oldest event will be
+>> the one to complete first. At least it has a much higher chance of being the
+>> right thing to do, than just waiting on a random event.
+>>
+>> Completely untested, so you might have to fiddle a bit with it to ensure
+>> that it actually works...
+>>
+>> --
+>> Jens Axboe
+>>
