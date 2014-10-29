@@ -1,117 +1,74 @@
-From: Patrick McGarry <patrick@inktank.com>
-Subject: Re: Ceph Developer Summit - Oct 28-29
-Date: Wed, 29 Oct 2014 13:11:08 -0400
-Message-ID: <CAP8Oy=LUXfnqG7A_4pfy1XhnbmieUjD2t_hEZGSS1tg8NLWKig@mail.gmail.com>
-References: <CAP8Oy=KeYryUPO5y-HxUGw3qaccr0XkPSP+6CsYh=DHGsRqFzw@mail.gmail.com>
-	<BLU175-W363F2FE6846A790EBFC393DF9F0@phx.gbl>
-	<CABBk=J9vpqveMH8pYc8ppJZK0b2d60zWBitGxGoEiLwEM18ORg@mail.gmail.com>
-	<BLU175-W57F77D2D7591F8FD62035DF9C0@phx.gbl>
+From: Sage Weil <sage@inktank.com>
+Subject: optimizing buffers, encode/decode
+Date: Wed, 29 Oct 2014 10:17:28 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1410290957240.21856@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f174.google.com ([209.85.220.174]:53380 "EHLO
-	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934191AbaJ2RLJ convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Oct 2014 13:11:09 -0400
-Received: by mail-vc0-f174.google.com with SMTP id hq12so1775510vcb.5
-        for <ceph-devel@vger.kernel.org>; Wed, 29 Oct 2014 10:11:08 -0700 (PDT)
-In-Reply-To: <BLU175-W57F77D2D7591F8FD62035DF9C0@phx.gbl>
+Received: from cobra.newdream.net ([66.33.216.30]:37606 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933749AbaJ2RR3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Oct 2014 13:17:29 -0400
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 88F3F80068
+	for <ceph-devel@vger.kernel.org>; Wed, 29 Oct 2014 10:17:29 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id DD95180068
+	for <ceph-devel@vger.kernel.org>; Wed, 29 Oct 2014 10:17:28 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: GuangYang <yguang11@outlook.com>
-Cc: Yehuda Sadeh <yehuda@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hey Guang,
+We talked a bit about improving the performance encode/decode 
+yesterday at CDS:
 
-Sorry I didn't see this before CDS started! We did end up discussing
-the feature yesterday, and you can see the video here:
+	http://pad.ceph.com/p/hammer-buffer_encoding
 
-http://youtu.be/TBSflO1kZVg
+I think the main takeaways were:
 
-I'm sure we'll be able to find some extra time in the schedule for Day
-2 if you would like to discuss things further.  Thanks.
+1- We need some up to date profiling information to see
+
+  - how much of it is buffer-related functions (e.g., append)
+  - which data types are slowest or most frequently encoded (or otherwise 
+    show up in the profile)
+
+2- For now we should probably focus on the efficiency of the encode/decode 
+paths.  Possibilities include
+
+  - making more things inline
+  - improving the past path
+
+3- Matt and the linuxbox folks have been playing with some general 
+optimizations for the buffer::list class.  These include combining 
+some of the function of ptr and raw so that, for the common 
+single-reference case, we chain the raw pointers together directly from 
+list using the boost intrusive list type, and fall back to the current 
+list -> ptr -> raw strategy when there are additional refs.
 
 
+For #2, one simple thought would be to cache a pointer and remaining bytes 
+or end pointer into the append_buffer directly in list so that we avoid 
+the duplicate asserts and size checks in the common append (encode) path.  
+Then a
 
-Best Regards,
+  ::encode(myu64, bl);
 
-Patrick McGarry
-Director Ceph Community || Red Hat
-http://ceph.com  ||  http://community.redhat.com
-@scuttlemonkey || @ceph
+would inline into something pretty quick, like
 
+  remaining -= 8;
+  if (remainining < 0) { // take slow path
 
-On Tue, Oct 28, 2014 at 8:45 PM, GuangYang <yguang11@outlook.com> wrote:
-> I see. Can we re-schedule to Wednesday sessions which is US/APAC friendly?
->
-> Thanks,
-> Guang
->
-> ----------------------------------------
->> Date: Tue, 28 Oct 2014 07:31:21 -0700
->> Subject: Re: Ceph Developer Summit - Oct 28-29
->> From: yehuda@inktank.com
->> To: yguang11@outlook.com
->> CC: patrick@inktank.com; ceph-devel@vger.kernel.org
->>
->> Well, the idea was to discuss the feature, the decisions that were
->> made, and the status. Also, we're now only in phase 1, it might be a
->> good idea to start thinking about the next phase, where bucket
->> sharding will be done automatically.
->>
->> Yehuda
->>
->>
->> On Tue, Oct 28, 2014 at 6:33 AM, GuangYang <yguang11@outlook.com> wrote:
->>> Hi Patrick,
->>> Sorry I am not able to join today's session for the bucket index scalability. I am working with Yehuda to polish the implementation according to our discussion in last CDS, and hopefully we will merge the patch soon. There is not much update (in terms of what we will implement and how we implement them) after last discussion so that I think it is fine to skip the session.
->>>
->>> Yehuda,
->>> Please correct me here if I am wrong.
->>>
->>> Thanks,
->>> Guang
->>>
->>> ----------------------------------------
->>>> Date: Wed, 22 Oct 2014 13:13:17 -0400
->>>> Subject: Ceph Developer Summit - Oct 28-29
->>>> From: patrick@inktank.com
->>>> To: ceph-users@ceph.com; ceph-devel@vger.kernel.org; ceph-community@lists.ceph.com
->>>>
->>>> Greetings cephalofolks,
->>>>
->>>> As I'm sure many of you have seen, the schedule for the upcoming
->>>> virtual Ceph Developer Summit has been posted:
->>>>
->>>> https://wiki.ceph.com/Planning/CDS/Hammer_(Oct_2014)
->>>>
->>>> As usual we have a EMEA friendly day and an APAC friendly day with the
->>>> sessions being distributed across each day that include the blueprint
->>>> authors and interested parties. If you are unable to attend a session
->>>> that you are interested in please be sure to add your
->>>> comments/questions to the etherpad in question (with your name) so
->>>> that those concerns can be addressed during the discussion.
->>>>
->>>> All sessions will be recorded for later perusal if you are unable to attend.
->>>>
->>>> If you have any questions, comments, or concerns, feel free to email
->>>> me directly. Thanks, and see you all there!
->>>>
->>>>
->>>> Best Regards,
->>>>
->>>> Patrick McGarry
->>>> Director Ceph Community || Red Hat
->>>> http://ceph.com || http://community.redhat.com
->>>> @scuttlemonkey || @ceph
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at http://vger.kernel.org/majordomo-info.html
->>>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at http://vger.kernel.org/majordomo-info.html
->
+  } else {
+     *ptr = myu64;
+     ptr += 8;
+  }
+
+Not sure if an end pointer would let us cut out the 2 arithmetic ops or 
+not.  Or if it even matters on modern pipelining processors.
+
+Anyway, any gains we make here will pay dividends across the entire 
+code base.  And any profiling people want to do will help guide 
+things...
+
+Thanks!
+sage
