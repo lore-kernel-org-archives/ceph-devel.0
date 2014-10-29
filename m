@@ -1,108 +1,93 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Micro Ceph and OpenStack Design Summit November 3rd, 2014 11:40am
-Date: Wed, 29 Oct 2014 18:54:21 +0100
-Message-ID: <545129CD.3010303@dachary.org>
+From: Sage Weil <sage@inktank.com>
+Subject: avoiding data migration for cold rados pool
+Date: Wed, 29 Oct 2014 11:10:54 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1410291050550.24169@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="KRMTdvnSQ1moujKLfcchSPq4gUWUN9eBm"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:55750 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1750918AbaJ2Ry2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Oct 2014 13:54:28 -0400
+Received: from cobra.newdream.net ([66.33.216.30]:38050 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750918AbaJ2SKz (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Oct 2014 14:10:55 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-users <ceph-users@lists.ceph.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: grawinkel@uni-mainz.de, ml@irq0.org
+Cc: ceph-devel@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---KRMTdvnSQ1moujKLfcchSPq4gUWUN9eBm
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Hi Matthias, Marcel,
 
-Hi Ceph,
+Thanks for the discussion yesterday on a cold storage tier[1].  I think 
+the idea of minimizing/preventing migration of data for a particular RADOS 
+pool while still minimizing placement metadata (i.e., no MDS) is very 
+interesting and has lots of possible applications.  I thought I'd 
+summarize what I was suggesting yesterday in case it didn't come across 
+well verbally.
 
-TL;DR: Register for the Micro Ceph and OpenStack Design Summit November 3=
-rd, 2014 11:40am http://kilodesignsummit.sched.org/event/f2e49f4547a757cc=
-3d51f5641b2000cb
+The basic tradeoff is around placement metadata.  In RADOS we have a 
+compact OSDMap structure on the client that lets you calculate where any 
+object is based on a simple policy (pool properties, CRUSH map) and OSD 
+state (up/down/in/out, current IP address).  If placement of an object 
+is purely a function of the name and the cluster state, then generally 
+when the cluster changes data will move.
 
-November 3rd, 2014 11:40am, during the OpenStack summit in Paris[1], the =
-present and the future of Ceph and OpenStack will be discussed with Ceph =
-and OpenStack developers. The following agenda was prepared based on feed=
-back from the participants[3]. It is however more of a guideline than a f=
-ixed plan and everyone will be invited to participate.=20
+To avoid that, my suggestion is to incorporate a timestamp into part of 
+the name (say, a prefix).  Then placement becomes a function of an 
+arbitrary string, time written (which together form the object name), and 
+cluster state.  This would normally mean a metadata layer so that you can 
+tell that 'foo' was written at time X and is actually 'X_foo'.  But, if we 
+combine it with the proposed RADOS redirect mechanism, then the active 
+storage tier would have a zillion pointers (stored as 'foo') that point 
+off into some cold tier with the correct name ('X_foo').  Basically, 
+another RADOS pool becomes that metadata layer.  At that point it needn't 
+even be 'X_foo'.. it could be X-anything, as long as it is unique and has 
+the timestamp X in there to inform placement.
 
-* Ceph and OpenStack state & roadmap (30min)
-  Josh Durgin and S=E9bastien Han
+For the placement thing, my suggestion is to look at the basic idea behind 
+the original RUSH-L algorithm (reimplemented as CRUSH list buckets), 
+originally described in this paper
 
-  * Glance
-  * Nova
-  * Cinder
-  * Kilo Roadmap
+http://pdf.aminer.org/000/409/291/replication_under_scalable_hashing_a_family_of_algorithms_for_scalable.pdf
 
-* Ceph Performance tuning (30min)
-  Josh Durgin
+The core idea is that at a point in time, data is distributed in a 
+particular way.  In the base case, we just hash/stripe over a set of 
+identical nodes.  Each time we deploy new gear, we "patch" the previous
+distribution, so that some % of objects are instead placed on the new 
+gear.  This approach has various flaws, mainly when it comes to removing 
+old gear, but I think the idea of patching the previous distirbution can 
+be applied here.  
 
-  Improved performances has become an increasingly important topic for Ce=
-ph and it is discussed weekly with the community[4]. A short summary of e=
-ach ongoing discussion topic will be presented. The latest action items d=
-ecided during the Ceph Developer Summit[5] that happens this week will al=
-so be discussed.
+Currently, we do:
 
-  * Async Messenger
-  * XIO Messenger
-  * RBD IOPS Performance
-  * OSD Performance
-  * Cache Tiering Performance
-  * Monitor Performances
-  * Sequential/Random Disk Throughput
-  * LTTNG tracepoints
-  * Erasure Code LRC, ISA and NEON
+ object_name
+ hash(object_name) % pg_num -> ps (placement seed)
+ (ps, poolid) -> pgid
+ crush(pgid) -> [set of osds]
 
-* OpenStack and Ceph Deployment automation (30min)
-  S=E9bastien Han and Lo=EFc Dachary
+Here, we could define a series of time intervals, and for each interval, 
+we would create a new set of PGs.  More like:
 
-  Ceph was improved to make it easier to write modules/recipes for all ki=
-nds of deployment tools. They are at various stages of maturity and it is=
- often quite difficult to figure out which one is right in a given contex=
-t. We will give a short tour of the current state of each tool, the devel=
-opment effort behind them and what we can expect in the near future.
+ (name, timestamp)
+ hash(object_name) % interval_pg_num -> ps
+ (ps, poolid, interval #) -> tpgid
+ crush(tpgid) -> [set of osds]
 
-  * ansible
-  * ceph-deploy
-  * juju
-  * puppet
-  * chef
+The trick would be that for each time interval, CRUSH would define how the 
+objects distribute.  When they fill or new hardware is deployed, we'd 
+close out the current interval and start a new interval that mapped to 
+new PGs that CRUSH mapped to new hardware.
 
-Cheers
+Hmm, you could actually do this by simply creating a new RADOS pool for 
+every interval and not changing anything in the existing code at all.  As 
+HW in old pools fails you'd have to include some new HW in the mix to 
+offload some content.  There are probably some changes we can do 
+there to avoid writing anything new to the surviving full nodes (that case 
+is awkward to handle currently).  Or, there may be benefits to pulling 
+this functionality into a new approach within CRUSH.. I'm not sure.  
+Would need to think about it a bit more ...
 
-[1] OpenStack Summit Paris https://www.openstack.org/summit/openstack-par=
-is-summit-2014/
-[2] Ceph for OpenStack Design Session http://kilodesignsummit.sched.org/e=
-vent/f2e49f4547a757cc3d51f5641b2000cb
-[3] Pad preparation https://etherpad.openstack.org/p/kilo-ceph
-[4] Weekly Ceph Performance Meeting https://www.mail-archive.com/ceph-dev=
-el@vger.kernel.org/msg20744.html and http://pad.ceph.com/p/performance_we=
-ekly
-[5] Ceph Developer Summit https://wiki.ceph.com/Planning/CDS/Hammer_%28Oc=
-t_2014%29
+sage
 
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-
-
---KRMTdvnSQ1moujKLfcchSPq4gUWUN9eBm
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlRRKc0ACgkQ8dLMyEl6F232MQCdFH+CeuqNCpJ/GB3w4JeCTKxE
-VcIAn2sLs7KsDyL2CkiB2v1yWqYmW77d
-=5KzL
------END PGP SIGNATURE-----
-
---KRMTdvnSQ1moujKLfcchSPq4gUWUN9eBm--
+[1]
+ http://pad.ceph.com/p/hammer-cold_storage
+ https://wiki.ceph.com/Planning/Blueprints/Hammer/Towards_Ceph_Cold_Storage
+ http://youtu.be/FARNRvYMQJ4
