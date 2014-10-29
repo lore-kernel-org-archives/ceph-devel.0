@@ -1,58 +1,59 @@
-From: dreadnought52199@gmail.com
-Subject: Fix Penguin Penalty 17th October2014 ( mail-archive.com )
-Date: Wed, 29 Oct 2014 23:47:23 +0530
-Message-ID: <54512f33.8226460a.0c6b.ffffde8b@mx.google.com>
-Reply-To: sexpert277@gmail.com
+From: Zack Cerza <zack@redhat.com>
+Subject: Re: Initializing paddles
+Date: Wed, 29 Oct 2014 14:37:43 -0600
+Message-ID: <CAMfdg1MHsjbnGqGz3kLJAEOkU-QYN2oxwyvytSNkh+Bkg5UirA@mail.gmail.com>
+References: <544B36D3.8050103@dachary.org>
+	<544C3238.7080305@dachary.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f68.google.com ([209.85.220.68]:42121 "EHLO
-	mail-pa0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751453AbaJ2SRY (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Oct 2014 14:17:24 -0400
-Received: by mail-pa0-f68.google.com with SMTP id kx10so2334190pab.11
-        for <ceph-devel@vger.kernel.org>; Wed, 29 Oct 2014 11:17:24 -0700 (PDT)
-Received: from localhost.localdomain ([27.255.203.170])
-        by mx.google.com with ESMTPSA id g2sm4954551pdk.46.2014.10.29.11.17.22
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1 cipher=RC4-SHA bits=128/128);
-        Wed, 29 Oct 2014 11:17:23 -0700 (PDT)
+Received: from mail-ob0-f173.google.com ([209.85.214.173]:38874 "EHLO
+	mail-ob0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756622AbaJ2Uho convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Oct 2014 16:37:44 -0400
+Received: by mail-ob0-f173.google.com with SMTP id wn1so3069855obc.18
+        for <ceph-devel@vger.kernel.org>; Wed, 29 Oct 2014 13:37:44 -0700 (PDT)
+In-Reply-To: <544C3238.7080305@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Dear Sir
+You should actually be able to POST a json object with a 'name' key
+(and whichever other ones you want) to /nodes/ !
 
-Did your website get hit by Google Penguin update on October 17th 2014?=
- What basically is Google Penguin Update? It is actually a code name fo=
-r Google algorithm which aims at decreasing your websites search engine=
- rankings that violate Google=92s guidelines by using black hat SEO tec=
-hniques to rank your webpage by giving number of spammy links to the pa=
-ge.
-=20
-We are one of those few SEO companies that can help you avoid penalties=
- from Google Updates like Penguin and Panda. Our clients have survived =
-all the previous and present updates with ease. They have never been hi=
-t because we use 100% white hat SEO techniques to rank Webpages.  Simpl=
-e thing that we do to keep websites away from any Penguin or Panda pena=
-lties is follow Google guidelines and we give Google users the best ans=
-wers to their queries.
-
-If you are looking to increase the quality of your websites and to get =
-more targeted traffic or save your websites from these Google penalties=
- email us back with your interest.=20
-
-We will be glad to serve you and help you grow your business.
-
-Regards
-
-Vince G
-
-SEO Manager ( TOB )
-B7 Green Avenue, Amritsar 143001 Punjab
-____________________________
-NO CLICK in the subject to STOP EMAILS
+On Sat, Oct 25, 2014 at 5:28 PM, Loic Dachary <loic@dachary.org> wrote:
+>
+>
+> On 24/10/2014 22:36, Loic Dachary wrote:
+>> Hi Zack,
+>>
+>> Now that I have a paddles server running, I'd like to populate it wi=
+th two virtual machines I have running. Is there a script to do this or=
+ should I just type  SQL statements to do that semi-intuitively ?
+>>
+>> $ curl 'http://localhost:8080/nodes/?machine_type=3Dvps&count=3D2'
+>> []
+>
+> I tried something like
+>
+> for id in 1 2 3 ; do sqlite3 dev.db "insert into nodes (id,name,machi=
+ne_type,is_container,is_vm,locked,up,locked_by) values ($id, 'container=
+00$id', 'plana', 1, 0, 0, 1, 'scheduled');" ; done
+>
+> and it works so far (i.e. I'm making progress although I'm not to the=
+ point where a machine gets a job yet ;-)
+>
+> Cheers
+>
+>>
+>> Cheers
+>>
+>
+> --
+> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
