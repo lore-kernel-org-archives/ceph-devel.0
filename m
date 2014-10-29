@@ -1,154 +1,108 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: optimizing buffers, encode/decode
-Date: Wed, 29 Oct 2014 10:43:06 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1410291041190.15740@cobra.newdream.net>
-References: <alpine.DEB.2.00.1410290957240.21856@cobra.newdream.net> <504191181.157.1414603437991.JavaMail.root@thunderbeast.private.linuxbox.com> <CACJqLybiam9AfmP8aA3nnWR500iA1owS-+yWYSWiFT6-yOn2mw@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Micro Ceph and OpenStack Design Summit November 3rd, 2014 11:40am
+Date: Wed, 29 Oct 2014 18:54:21 +0100
+Message-ID: <545129CD.3010303@dachary.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="KRMTdvnSQ1moujKLfcchSPq4gUWUN9eBm"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:37794 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752071AbaJ2RnH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Oct 2014 13:43:07 -0400
-In-Reply-To: <CACJqLybiam9AfmP8aA3nnWR500iA1owS-+yWYSWiFT6-yOn2mw@mail.gmail.com>
+Received: from mail2.dachary.org ([91.121.57.175]:55750 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1750918AbaJ2Ry2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Oct 2014 13:54:28 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomaiwang@gmail.com>
-Cc: "Matt W. Benjamin" <matt@linuxbox.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-users <ceph-users@lists.ceph.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Thu, 30 Oct 2014, Haomai Wang wrote:
-> I'm interested in bufferlist's own encode/decode performance. But as I
-> performed until now, I think we need to consider change caller's
-> behavior to get better performance.
-> 
-> Combined (https://wiki.ceph.com/Planning/Blueprints/Hammer/Fixed_memory_layout_for_Message%2F%2FOp_passing)
-> with bp(https://wiki.ceph.com/Planning/Blueprints/Hammer/osd%3A_update_Transaction_encoding),
-> I'm going to seeking a way to reduce encode/decodes calls.
-> 
-> Mainly, we have three points:
-> 1. Make ObjectStore::Transaction's metadata and data separated
-> 2. No copy for op's data from Messenger to ObjectStore
-> 3. Avoid encode/decode for ObjectStore::OP instead of fixed-size memory layout
-> 
-> We have a simple perf test results and a overview design ppt. Hope we
-> can have a talk at 8:00(CST).
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--KRMTdvnSQ1moujKLfcchSPq4gUWUN9eBm
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-Yep!  For reference, the blueprint I wrote is here:
+Hi Ceph,
 
-	https://wiki.ceph.com/Planning/Blueprints/Hammer/osd%3A_update_Transaction_encoding
+TL;DR: Register for the Micro Ceph and OpenStack Design Summit November 3=
+rd, 2014 11:40am http://kilodesignsummit.sched.org/event/f2e49f4547a757cc=
+3d51f5641b2000cb
 
-but I think we'll want to discuss Haomai's approach as well.
+November 3rd, 2014 11:40am, during the OpenStack summit in Paris[1], the =
+present and the future of Ceph and OpenStack will be discussed with Ceph =
+and OpenStack developers. The following agenda was prepared based on feed=
+back from the participants[3]. It is however more of a guideline than a f=
+ixed plan and everyone will be invited to participate.=20
 
-This is at 17:15 PDT, 01:15 CET, 08:15 CST for those that want to join.
+* Ceph and OpenStack state & roadmap (30min)
+  Josh Durgin and S=E9bastien Han
 
-	https://wiki.ceph.com/Planning/CDS/Hammer_(Oct_2014)
+  * Glance
+  * Nova
+  * Cinder
+  * Kilo Roadmap
 
-sage
+* Ceph Performance tuning (30min)
+  Josh Durgin
+
+  Improved performances has become an increasingly important topic for Ce=
+ph and it is discussed weekly with the community[4]. A short summary of e=
+ach ongoing discussion topic will be presented. The latest action items d=
+ecided during the Ceph Developer Summit[5] that happens this week will al=
+so be discussed.
+
+  * Async Messenger
+  * XIO Messenger
+  * RBD IOPS Performance
+  * OSD Performance
+  * Cache Tiering Performance
+  * Monitor Performances
+  * Sequential/Random Disk Throughput
+  * LTTNG tracepoints
+  * Erasure Code LRC, ISA and NEON
+
+* OpenStack and Ceph Deployment automation (30min)
+  S=E9bastien Han and Lo=EFc Dachary
+
+  Ceph was improved to make it easier to write modules/recipes for all ki=
+nds of deployment tools. They are at various stages of maturity and it is=
+ often quite difficult to figure out which one is right in a given contex=
+t. We will give a short tour of the current state of each tool, the devel=
+opment effort behind them and what we can expect in the near future.
+
+  * ansible
+  * ceph-deploy
+  * juju
+  * puppet
+  * chef
+
+Cheers
+
+[1] OpenStack Summit Paris https://www.openstack.org/summit/openstack-par=
+is-summit-2014/
+[2] Ceph for OpenStack Design Session http://kilodesignsummit.sched.org/e=
+vent/f2e49f4547a757cc3d51f5641b2000cb
+[3] Pad preparation https://etherpad.openstack.org/p/kilo-ceph
+[4] Weekly Ceph Performance Meeting https://www.mail-archive.com/ceph-dev=
+el@vger.kernel.org/msg20744.html and http://pad.ceph.com/p/performance_we=
+ekly
+[5] Ceph Developer Summit https://wiki.ceph.com/Planning/CDS/Hammer_%28Oc=
+t_2014%29
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
 
 
-> 
-> On Thu, Oct 30, 2014 at 1:23 AM, Matt W. Benjamin <matt@linuxbox.com> wrote:
-> > Hi Sage,
-> >
-> > We're starting a round of work on improving encode/decode workload profiling, which we'll
-> > share as soon as we have something informative.
-> >
-> > Matt
-> >
-> > ----- "Sage Weil" <sage@inktank.com> wrote:
-> >
-> >> We talked a bit about improving the performance encode/decode
-> >> yesterday at CDS:
-> >>
-> >>       http://pad.ceph.com/p/hammer-buffer_encoding
-> >>
-> >> I think the main takeaways were:
-> >>
-> >> 1- We need some up to date profiling information to see
-> >>
-> >>   - how much of it is buffer-related functions (e.g., append)
-> >>   - which data types are slowest or most frequently encoded (or
-> >> otherwise
-> >>     show up in the profile)
-> >>
-> >> 2- For now we should probably focus on the efficiency of the
-> >> encode/decode
-> >> paths.  Possibilities include
-> >>
-> >>   - making more things inline
-> >>   - improving the past path
-> >>
-> >> 3- Matt and the linuxbox folks have been playing with some general
-> >> optimizations for the buffer::list class.  These include combining
-> >> some of the function of ptr and raw so that, for the common
-> >> single-reference case, we chain the raw pointers together directly
-> >> from
-> >> list using the boost intrusive list type, and fall back to the current
-> >>
-> >> list -> ptr -> raw strategy when there are additional refs.
-> >>
-> >>
-> >> For #2, one simple thought would be to cache a pointer and remaining
-> >> bytes
-> >> or end pointer into the append_buffer directly in list so that we
-> >> avoid
-> >> the duplicate asserts and size checks in the common append (encode)
-> >> path.
-> >> Then a
-> >>
-> >>   ::encode(myu64, bl);
-> >>
-> >> would inline into something pretty quick, like
-> >>
-> >>   remaining -= 8;
-> >>   if (remainining < 0) { // take slow path
-> >>
-> >>   } else {
-> >>      *ptr = myu64;
-> >>      ptr += 8;
-> >>   }
-> >>
-> >> Not sure if an end pointer would let us cut out the 2 arithmetic ops
-> >> or
-> >> not.  Or if it even matters on modern pipelining processors.
-> >>
-> >> Anyway, any gains we make here will pay dividends across the entire
-> >> code base.  And any profiling people want to do will help guide
-> >> things...
-> >>
-> >> Thanks!
-> >> sage
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
-> >> in
-> >> the body of a message to majordomo@vger.kernel.org
-> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >
-> > --
-> > Matt Benjamin
-> > The Linux Box
-> > 206 South Fifth Ave. Suite 150
-> > Ann Arbor, MI  48104
-> >
-> > http://linuxbox.com
-> >
-> > tel.  734-761-4689
-> > fax.  734-769-8938
-> > cel.  734-216-5309
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
-> 
-> -- 
-> Best Regards,
-> 
-> Wheat
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+--KRMTdvnSQ1moujKLfcchSPq4gUWUN9eBm
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlRRKc0ACgkQ8dLMyEl6F232MQCdFH+CeuqNCpJ/GB3w4JeCTKxE
+VcIAn2sLs7KsDyL2CkiB2v1yWqYmW77d
+=5KzL
+-----END PGP SIGNATURE-----
+
+--KRMTdvnSQ1moujKLfcchSPq4gUWUN9eBm--
