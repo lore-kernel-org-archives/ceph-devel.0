@@ -1,69 +1,53 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: krbd blk-mq support ?
-Date: Wed, 29 Oct 2014 08:00:56 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1410290800080.13498@cobra.newdream.net>
-References: <670b829a-8568-44fa-97a1-1ced59d408ad@mailpro>
+Subject: Re: OSD crashed due to filestore EIO
+Date: Wed, 29 Oct 2014 08:11:01 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1410290806580.13498@cobra.newdream.net>
+References: <BLU175-W31E452BBB4E24DD455DA07DF9C0@phx.gbl>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:36489 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:36628 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933114AbaJ2PA5 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Oct 2014 11:00:57 -0400
-In-Reply-To: <670b829a-8568-44fa-97a1-1ced59d408ad@mailpro>
+	with ESMTP id S933090AbaJ2PLB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Oct 2014 11:11:01 -0400
+In-Reply-To: <BLU175-W31E452BBB4E24DD455DA07DF9C0@phx.gbl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre DERUMIER <aderumier@odiso.com>
-Cc: Christoph Hellwig <hch@infradead.org>, Ceph Devel <ceph-devel@vger.kernel.org>
+To: GuangYang <yguang11@outlook.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, 29 Oct 2014, Alexandre DERUMIER wrote:
-> >>Oh, that's without the blk-mq patch?
+On Wed, 29 Oct 2014, GuangYang wrote:
+> Recently we observed an OSD crash due to file corruption in filesystem, 
+> which leads to an assertion failure at FileStore::read as EIO is not 
+> tolerated. As file corruption is normal in large deployment, I am 
+> thinking if that behavior is too aggressive, especially for EC pool.
 > 
-> Yes, sorry, I don't how to use perf with a custom compiled kernel.
-> (Usualy I'm using perf from debian, with linux-tools package provided with the debian kernel package)
-> 
-> >>Either way the profile doesn't really sum up to a fully used up cpu.
-> 
-> But I see mostly same behaviour with or without blk-mq patch, I have always 1 kworker at around 97-100%cpu (1core) for 50000iops.
-> 
-> I had also tried to map the rbd volume with nocrc, it's going to 60000iops with same kworker at around 97-100%cpu
+> After searching, I found this flag might help : filestore_fail_eio, 
+> which can make the OSD survive an EIO failure, it is true by default 
+> though. I haven't tested it yet.
 
-Hmm, this is probably the messenger.c worker then that is feeding messages 
-to the network.  How many OSDs do you have?  It should be able to scale 
-with the number of OSDs.
+That will reove the immediate assert.  Currently, for an object being read 
+by a client, it will just pass EIO back to the client, though, which is 
+clearly not what we want.
+ 
+> Does it make sense to adjust the behavior a little bit, if the filestore 
+> read fail due to file corruption, return back the failure and at the 
+> same time mark the PG as inconsistent, due the redundancy (replication 
+> or EC), the request can still be served, and at the same time, we can 
+> get alert saying there is inconsistency and manually trigger a PG 
+> repair?
+
+That would be ideal, yeah.  I think that initially it makes sense to doing 
+*just that read* via a replica but letting the admin trigger the repair.  
+This most closely mirrors what scrub currently does on EIO (mark 
+inconsistent but let admin repair).  Later, when we support automatic 
+repair, that option can affect both scrub and client-triggered EIOs?
+
+We just need to be careful that any EIO on *metadata* still triggers a 
+failure as we need to be especially careful about handling that.  IIRC 
+there is a flag passed to read indicating whether EIO is okay; we should 
+probably use that so that EIO-ok vs EIO-notok cases are still clearly 
+annotated.
 
 sage
 
-
-> 
-> 
-> 
-> ----- Mail original ----- 
-> 
-> De: "Christoph Hellwig" <hch@infradead.org> 
-> ?: "Alexandre DERUMIER" <aderumier@odiso.com> 
-> Cc: "Ceph Devel" <ceph-devel@vger.kernel.org> 
-> Envoy?: Mardi 28 Octobre 2014 19:07:25 
-> Objet: Re: krbd blk-mq support ? 
-> 
-> On Mon, Oct 27, 2014 at 11:00:46AM +0100, Alexandre DERUMIER wrote: 
-> > >>Can you do a perf report -ag and then a perf report to see where these 
-> > >>cycles are spent? 
-> > 
-> > Yes, sure. 
-> > 
-> > I have attached the perf report to this mail. 
-> > (This is with kernel 3.14, don't have access to my 3.18 host for now) 
-> 
-> Oh, that's without the blk-mq patch? 
-> 
-> Either way the profile doesn't really sum up to a fully used up 
-> cpu. Sage, Alex - are there any ordring constraints in the rbd client? 
-> If not we could probably aim for per-cpu queues using blk-mq and a 
-> socket per cpu or similar. 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
