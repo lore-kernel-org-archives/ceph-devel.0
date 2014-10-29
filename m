@@ -1,43 +1,58 @@
-From: Nigel Williams <nigel.williams-w4dW+7W4mDC6c6uEtOJ/EA@public.gmane.org>
-Subject: Re: v0.87 Giant released
-Date: Thu, 30 Oct 2014 10:40:38 +1100
-Message-ID: <54517AF6.6030408@utas.edu.au>
-References: <alpine.DEB.2.00.1410291454570.1234@cobra.newdream.net>
+From: Loic Dachary <loic@dachary.org>
+Subject: Docker containers & teuthology
+Date: Thu, 30 Oct 2014 00:54:18 +0100
+Message-ID: <54517E2A.8060602@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.00.1410291454570.1234-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="J9dcLcbTIgXtEiR3EKsiVhOFgu0OocdUM"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail2.dachary.org ([91.121.57.175]:55935 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1757482AbaJ2XyZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Oct 2014 19:54:25 -0400
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Zack Cerza <zack.cerza@inktank.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On 30/10/2014 8:56 AM, Sage Weil wrote:
-> * *Degraded vs misplaced*: the Ceph health reports from 'ceph -s' and
->    related commands now make a distinction between data that is
->    degraded (there are fewer than the desired number of copies) and
->    data that is misplaced (stored in the wrong location in the
->    cluster).
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--J9dcLcbTIgXtEiR3EKsiVhOFgu0OocdUM
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-Is someone able to briefly described how/why misplaced happens please, is it repaired 
-eventually? I've not seen misplaced (yet).
+Hi,
+
+I documented a quick hack to provide docker targets to teuthology at http=
+://dachary.org/?p=3D3330 . This is my way to figure out what's what and t=
+here are so many problems in this hack that it's probably not even worth =
+a review. A number of other topics require my attention and I don't expec=
+t to return to this before a few weeks. I'm quite excited about this thou=
+gh and it makes me dream of a full functional teuthology installation on =
+my laptop. It would be  blessing when / if the lab is busy with more impo=
+rtant things. I guess my 16GB RAM laptop can accommodate 4 to 6 container=
+s and probably allow me to schedule a small suite ( https://github.com/ce=
+ph/ceph-qa-suite/tree/master/suites/rados/thrash-erasure-code comes to mi=
+nd ;-) while working on something else.
+
+Cheers
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
 
 
->      leveldb_write_buffer_size = 32*1024*1024  = 33554432  // 32MB
->      leveldb_cache_size        = 512*1024*1204 = 536870912 // 512MB
+--J9dcLcbTIgXtEiR3EKsiVhOFgu0OocdUM
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
-I noticed the typo, wondered about the code, but I'm not seeing the same values anyway?
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
 
-https://github.com/ceph/ceph/blob/giant/src/common/config_opts.h
+iEYEARECAAYFAlRRfioACgkQ8dLMyEl6F206UACgwIv9bo8IRmLF5jRU6tpgkPVq
+ONMAmwWv4AVp95c2mfmzVI+33rkgLBgl
+=vHO0
+-----END PGP SIGNATURE-----
 
-OPTION(leveldb_write_buffer_size, OPT_U64, 8 *1024*1024) // leveldb write buffer size
-OPTION(leveldb_cache_size, OPT_U64, 128 *1024*1024) // leveldb cache size
+--J9dcLcbTIgXtEiR3EKsiVhOFgu0OocdUM--
