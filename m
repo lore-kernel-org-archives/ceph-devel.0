@@ -1,148 +1,55 @@
-From: Alexandre DERUMIER <aderumier@odiso.com>
-Subject: Re: krbd blk-mq support ?
-Date: Thu, 30 Oct 2014 17:01:07 +0100 (CET)
-Message-ID: <d2a43b95-aad1-45de-932f-c78d9eb61790@mailpro>
-References: <4c95e688-d8cd-42b4-b414-535764fb80fc@mailpro>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: New Defects reported by Coverity Scan for ceph
+Date: Thu, 30 Oct 2014 09:08:04 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1410300906580.13322@cobra.newdream.net>
+References: <54523af1eb459_316c130b32050623@scan.coverity.com.mail>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.209.98]:42185 "EHLO
-	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751626AbaJ3QBP convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Oct 2014 12:01:15 -0400
-In-Reply-To: <4c95e688-d8cd-42b4-b414-535764fb80fc@mailpro>
+Received: from cobra.newdream.net ([66.33.216.30]:45863 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758415AbaJ3QIF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Oct 2014 12:08:05 -0400
+In-Reply-To: <54523af1eb459_316c130b32050623@scan.coverity.com.mail>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Christoph Hellwig <hch@infradead.org>, Ceph Devel <ceph-devel@vger.kernel.org>
+To: scan-admin@coverity.com
+Cc: ceph-devel@vger.kernel.org
 
->>I'll try to add more OSD next week, if it's scale it's a very good ne=
-ws !
+On Thu, 30 Oct 2014, scan-admin@coverity.com wrote:
+> 
+> Hi,
+> 
+> Please find the latest report on new defect(s) introduced to ceph found with Coverity Scan.
+> 
+> 1 new defect(s) introduced to ceph found with Coverity Scan.
+> 25 defect(s), reported by Coverity Scan earlier, were marked fixed in the recent build analyzed by Coverity Scan.
+> 
+> New defect(s) Reported-by: Coverity Scan
+> Showing 1 of 1 defect(s)
+> 
+> 
+> ** CID 1250262:  Dereference after null check  (FORWARD_NULL)
+> /osdc/Objecter.cc: 2062 in Objecter::_calc_target(Objecter::op_target_t *, bool)()
+> 
+> 
+> ________________________________________________________________________________________________________
+> *** CID 1250262:  Dereference after null check  (FORWARD_NULL)
+> /osdc/Objecter.cc: 2062 in Objecter::_calc_target(Objecter::op_target_t *, bool)()
+> 2056         if (ret == -ENOENT) {
+> 2057           t->osd = -1;
+> 2058           return RECALC_OP_TARGET_POOL_DNE;
+> 2059         }
+> 2060       }
+> 2061     
+> >>>     CID 1250262:  Dereference after null check  (FORWARD_NULL)
+> >>>     Dereferencing null pointer "pi".
+> 2062       int min_size = pi->min_size;
+> 2063       unsigned pg_num = pi->get_pg_num();
+> 2064       int up_primary, acting_primary;
+> 2065       vector<int> up, acting;
+> 2066       osdmap->pg_to_up_acting_osds(pgid, &up, &up_primary,
+> 2067     			       &acting, &acting_primary);
 
-I just tried to add 2 more osds,
+opened #9944
 
-I can now reach 2x 70000 iops on 2 client nodes (vs 2 x 50000 previousl=
-y).
-
-and kworker cpu usage is also lower (84% vs 97%).
-(don't understand why exactly)
-
-So, Thanks for help everybody !
-
-
-
-
-
------ Mail original -----=20
-
-De: "Alexandre DERUMIER" <aderumier@odiso.com>=20
-=C3=80: "Sage Weil" <sage@newdream.net>=20
-Cc: "Christoph Hellwig" <hch@infradead.org>, "Ceph Devel" <ceph-devel@v=
-ger.kernel.org>=20
-Envoy=C3=A9: Jeudi 30 Octobre 2014 09:11:11=20
-Objet: Re: krbd blk-mq support ?=20
-
->>Hmm, this is probably the messenger.c worker then that is feeding mes=
-sages=20
->>to the network. How many OSDs do you have? It should be able to scale=
-=20
->>with the number of OSDs.=20
-
-Thanks Sage for your reply.=20
-
-Currently 6 OSD (ssd) on the test platform.=20
-
-But I can reach 2x 50000iops on same rbd volume with 2 clients on 2 dif=
-ferents host.=20
-Do you think messenger.c worker can be the bottleneck in this case ?=20
-
-
-I'll try to add more OSD next week, if it's scale it's a very good news=
- !=20
-
-
-
-
-
-
-
------ Mail original -----=20
-
-De: "Sage Weil" <sage@newdream.net>=20
-=C3=80: "Alexandre DERUMIER" <aderumier@odiso.com>=20
-Cc: "Christoph Hellwig" <hch@infradead.org>, "Ceph Devel" <ceph-devel@v=
-ger.kernel.org>=20
-Envoy=C3=A9: Mercredi 29 Octobre 2014 16:00:56=20
-Objet: Re: krbd blk-mq support ?=20
-
-On Wed, 29 Oct 2014, Alexandre DERUMIER wrote:=20
-> >>Oh, that's without the blk-mq patch?=20
->=20
-> Yes, sorry, I don't how to use perf with a custom compiled kernel.=20
-> (Usualy I'm using perf from debian, with linux-tools package provided=
- with the debian kernel package)=20
->=20
-> >>Either way the profile doesn't really sum up to a fully used up cpu=
-=2E=20
->=20
-> But I see mostly same behaviour with or without blk-mq patch, I have =
-always 1 kworker at around 97-100%cpu (1core) for 50000iops.=20
->=20
-> I had also tried to map the rbd volume with nocrc, it's going to 6000=
-0iops with same kworker at around 97-100%cpu=20
-
-Hmm, this is probably the messenger.c worker then that is feeding messa=
-ges=20
-to the network. How many OSDs do you have? It should be able to scale=20
-with the number of OSDs.=20
-
-sage=20
-
-
->=20
->=20
->=20
-> ----- Mail original -----=20
->=20
-> De: "Christoph Hellwig" <hch@infradead.org>=20
-> ?: "Alexandre DERUMIER" <aderumier@odiso.com>=20
-> Cc: "Ceph Devel" <ceph-devel@vger.kernel.org>=20
-> Envoy?: Mardi 28 Octobre 2014 19:07:25=20
-> Objet: Re: krbd blk-mq support ?=20
->=20
-> On Mon, Oct 27, 2014 at 11:00:46AM +0100, Alexandre DERUMIER wrote:=20
-> > >>Can you do a perf report -ag and then a perf report to see where =
-these=20
-> > >>cycles are spent?=20
-> >=20
-> > Yes, sure.=20
-> >=20
-> > I have attached the perf report to this mail.=20
-> > (This is with kernel 3.14, don't have access to my 3.18 host for no=
-w)=20
->=20
-> Oh, that's without the blk-mq patch?=20
->=20
-> Either way the profile doesn't really sum up to a fully used up=20
-> cpu. Sage, Alex - are there any ordring constraints in the rbd client=
-?=20
-> If not we could probably aim for per-cpu queues using blk-mq and a=20
-> socket per cpu or similar.=20
-> --=20
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in=20
-> the body of a message to majordomo@vger.kernel.org=20
-> More majordomo info at http://vger.kernel.org/majordomo-info.html=20
->=20
->=20
---=20
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n=20
-the body of a message to majordomo@vger.kernel.org=20
-More majordomo info at http://vger.kernel.org/majordomo-info.html=20
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
