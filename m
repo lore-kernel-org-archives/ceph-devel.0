@@ -1,41 +1,65 @@
-From: Varada Kari <Varada.Kari@sandisk.com>
-Subject: Debug messages of osd_ping and ping_reply
-Date: Thu, 30 Oct 2014 08:26:35 +0000
-Message-ID: <C226B0AB34511445928D9882AA519F6009AD6940@SACMBXIP02.sdcorp.global.sandisk.com>
+From: Joao Eduardo Luis <joao.luis-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: v0.87 Giant released
+Date: Thu, 30 Oct 2014 08:37:49 +0000
+Message-ID: <5451F8DD.3020907@inktank.com>
+References: <alpine.DEB.2.00.1410291454570.1234@cobra.newdream.net>	<54517AF6.6030408@utas.edu.au>
+	<alpine.DEB.2.00.1410292251440.27022@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2on0054.outbound.protection.outlook.com ([207.46.100.54]:40855
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1758162AbaJ3I0i convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Oct 2014 04:26:38 -0400
-Content-Language: en-US
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.00.1410292251440.27022-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>, Nigel Williams <nigel.williams-w4dW+7W4mDC6c6uEtOJ/EA@public.gmane.org>
+Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-Hi all,
+On 10/30/2014 05:54 AM, Sage Weil wrote:
+> On Thu, 30 Oct 2014, Nigel Williams wrote:
+>> On 30/10/2014 8:56 AM, Sage Weil wrote:
+>>> * *Degraded vs misplaced*: the Ceph health reports from 'ceph -s' and
+>>>     related commands now make a distinction between data that is
+>>>     degraded (there are fewer than the desired number of copies) and
+>>>     data that is misplaced (stored in the wrong location in the
+>>>     cluster).
+>>
+>> Is someone able to briefly described how/why misplaced happens please, is it
+>> repaired eventually? I've not seen misplaced (yet).
+>
+> Sure.  An easy way to get misplaced objects is to do 'ceph osd
+> out N' on an OSD.  Nothing is down, we still have as many copies
+> as we had before, but Ceph now wants to move them somewhere
+> else. Starting with giant, you will see the misplaced % in 'ceph -s' and
+> not degraded.
+>
+>>>       leveldb_write_buffer_size = 32*1024*1024  = 33554432  // 32MB
+>>>       leveldb_cache_size        = 512*1024*1204 = 536870912 // 512MB
+>>
+>> I noticed the typo, wondered about the code, but I'm not seeing the same
+>> values anyway?
+>>
+>> https://github.com/ceph/ceph/blob/giant/src/common/config_opts.h
+>>
+>> OPTION(leveldb_write_buffer_size, OPT_U64, 8 *1024*1024) // leveldb write
+>> buffer size
+>> OPTION(leveldb_cache_size, OPT_U64, 128 *1024*1024) // leveldb cache size
+>
+> Hmm!  Not sure where that 32MB number came from.  I'll fix it, thanks!
 
-We have a test cluster with ~500 OSD's. This cluster has multiple rbd images mapped to multiple client machines. But from past two days, only one rbd image was serving the IO's rest of the images were not used.
-We are running the cluster with debug 1/1 for most of the sub modules. But the logs of OSD's are filled with the following messages.
-----------------
-2014-10-30 12:11:52.430542 7ff431032700  1 -- 10.242.42.172:6919/2601499 --> 10.242.42.178:0/44638 -- osd_ping(ping_reply e24581 stamp 2014-10-30 12:12:54.457189) v2 -- ?+0 0x77b32a0 con 0x1c3563c0
-2014-10-30 12:11:52.430613 7ff42f82f700  1 -- 10.242.42.172:6915/2601499 <== osd.462 10.242.42.178:0/44638 337603 ==== osd_ping(ping e24581 stamp 2014-10-30 12:12:54.457189) v2 ==== 47+0+0 (2159846856 0 0) 0x27020ee0 con 0x1949db20
-2014-10-30 12:11:52.430669 7ff42f82f700  1 -- 10.242.42.172:6915/2601499 --> 10.242.42.178:0/44638 -- osd_ping(ping_reply e24581 stamp 2014-10-30 12:12:54.457189) v2 -- ?+0 0x1d61ef00 con 0x1949db20
----------------
+Those just happen to be the values used on the monitors (in 
+ceph_mon.cc).  Maybe that's where the mix up came from. :)
 
-Looking at the code, these messages are coming from DispatchQueue::pre_dispatch and SimpleMessenger::_send_message. And these messages are at debug level 1 for debug_ms and approximately 200MB-400MB is occupied for these messages from each osd log.
-
-Is there any reason these messages are present at level 1?  Can we move to debug level 5 or above?
-
-Thanks,
-Varada
+   -Joao
 
 
-
-________________________________
-
-PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
-
+-- 
+Joao Eduardo Luis
+Software Engineer | http://inktank.com | http://ceph.com
