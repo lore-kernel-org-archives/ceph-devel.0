@@ -1,55 +1,56 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: New Defects reported by Coverity Scan for ceph
-Date: Thu, 30 Oct 2014 09:08:04 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1410300906580.13322@cobra.newdream.net>
-References: <54523af1eb459_316c130b32050623@scan.coverity.com.mail>
+Subject: Re: About the blueprint monitor: reweight near full osd
+ autonomicly
+Date: Thu, 30 Oct 2014 09:22:39 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1410300912270.13322@cobra.newdream.net>
+References: <54524648.9010504@ubuntukylin.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:45863 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:45950 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758415AbaJ3QIF (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Oct 2014 12:08:05 -0400
-In-Reply-To: <54523af1eb459_316c130b32050623@scan.coverity.com.mail>
+	with ESMTP id S1758415AbaJ3QWj (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Oct 2014 12:22:39 -0400
+In-Reply-To: <54524648.9010504@ubuntukylin.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: scan-admin@coverity.com
-Cc: ceph-devel@vger.kernel.org
+To: Li Wang <liwang@ubuntukylin.com>
+Cc: Yunchuan Wen <yunchuanwen@ubuntukylin.com>, minchen <minchen@ubuntukylin.com>, ceph-devel@vger.kernel.org
 
-On Thu, 30 Oct 2014, scan-admin@coverity.com wrote:
-> 
-> Hi,
-> 
-> Please find the latest report on new defect(s) introduced to ceph found with Coverity Scan.
-> 
-> 1 new defect(s) introduced to ceph found with Coverity Scan.
-> 25 defect(s), reported by Coverity Scan earlier, were marked fixed in the recent build analyzed by Coverity Scan.
-> 
-> New defect(s) Reported-by: Coverity Scan
-> Showing 1 of 1 defect(s)
-> 
-> 
-> ** CID 1250262:  Dereference after null check  (FORWARD_NULL)
-> /osdc/Objecter.cc: 2062 in Objecter::_calc_target(Objecter::op_target_t *, bool)()
-> 
-> 
-> ________________________________________________________________________________________________________
-> *** CID 1250262:  Dereference after null check  (FORWARD_NULL)
-> /osdc/Objecter.cc: 2062 in Objecter::_calc_target(Objecter::op_target_t *, bool)()
-> 2056         if (ret == -ENOENT) {
-> 2057           t->osd = -1;
-> 2058           return RECALC_OP_TARGET_POOL_DNE;
-> 2059         }
-> 2060       }
-> 2061     
-> >>>     CID 1250262:  Dereference after null check  (FORWARD_NULL)
-> >>>     Dereferencing null pointer "pi".
-> 2062       int min_size = pi->min_size;
-> 2063       unsigned pg_num = pi->get_pg_num();
-> 2064       int up_primary, acting_primary;
-> 2065       vector<int> up, acting;
-> 2066       osdmap->pg_to_up_acting_osds(pgid, &up, &up_primary,
-> 2067     			       &acting, &acting_primary);
+Hi Li!
 
-opened #9944
+[adding ceph-devel]
+
+On Thu, 30 Oct 2014, Li Wang wrote:
+> Hi Sage,
+>   It seems this blueprint is not scheduled for the CDS. So far, it seems 
+> the write operation will hang if one of the OSDs being written into is 
+> near full, and current solution is to manually adjust the weight of the 
+> OSD to force some of the data migrated. This complicates the 
+> maintaining, and the administrator needs to track the disk usage of each 
+> OSD. So we think we need a mechanism to automatize the process, what is 
+> your opinion?
+
+Yes.  The trick here is deciding when it is safe for the mon to reweight 
+things on its own.  There are some users that won't want this sort of 
+automatic rebalance to happen.
+
+I think there are a couple of steps we should make in this direction:
+
+1) Make the reweight-by-pg or -utiliization have an option to either 
+adjust the CRUSH weight or the osd reweight.  I can't convince myself that 
+one is always better than the other.
+
+2) Make a new mon config option that sets the amount an osd has to be 
+above the mean to trigger the reweight-by-utilization.  This is probably a 
+bit tricky, though, since it's possible that we'll fail to bring it below 
+that threshold and we want to avoid getting stuck in a loop or some sort 
+or throwing the weights all out of whack.  Maybe we only do this at most 
+once per day?  Or we confirm that it appreciably changes the PG mappings 
+before going forward with the change?  The latter might be a good thing 
+anyway, since we have this general problem already with the command where 
+you can't see what the effect is going to be before you do it...
+
+Thoughts?
+sage
 
