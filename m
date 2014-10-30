@@ -1,51 +1,30 @@
-From: Florian Haas <florian-Aci1KgOBn19BDgjK7y7TUQ@public.gmane.org>
-Subject: Re: the state of cephfs in giant
-Date: Thu, 30 Oct 2014 11:55:59 +0100
-Message-ID: <CAPUexz_+jD7RMNSZEgy3h6WqKS4PSMj1fbyRgLKxQWHvctviNA@mail.gmail.com>
-References: <alpine.DEB.2.00.1410131114130.10561@cobra.newdream.net>
+From: Dan van der Ster <daniel.vanderster@cern.ch>
+Subject: Scrub / SnapTrim IO Prioritization and Latency
+Date: Thu, 30 Oct 2014 10:59:42 +0000
+Message-ID: <5d451bfe7cfaf298e6cd3fccd2910f2d@webmail.vanderster.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.00.1410131114130.10561-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Transfer-Encoding: 8BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cernmx13.cern.ch ([188.184.36.46]:11836 "EHLO CERNMX13.cern.ch"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932744AbaJ3K7o convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Oct 2014 06:59:44 -0400
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Samuel Just <sam.just@inktank.com>, ceph-devel@vger.kernel.org
 
-SGkgU2FnZSwKCnNvcnJ5IHRvIGJlIGxhdGUgdG8gdGhpcyB0aHJlYWQ7IEkganVzdCBjYXVnaHQg
-dGhpcyBvbmUgYXMgSSB3YXMKcmV2aWV3aW5nIHRoZSBHaWFudCByZWxlYXNlIG5vdGVzLiBBIGZl
-dyBxdWVzdGlvbnMgYmVsb3c6CgpPbiBNb24sIE9jdCAxMywgMjAxNCBhdCA4OjE2IFBNLCBTYWdl
-IFdlaWwgPHNhZ2VAbmV3ZHJlYW0ubmV0PiB3cm90ZToKPiBbLi4uXQo+ICogQUNMczogaW1wbGVt
-ZW50ZWQsIHRlc3RlZCBmb3Iga2VybmVsIGNsaWVudC4gbm90IGltcGxlbWVudGVkIGZvcgo+ICAg
-Y2VwaC1mdXNlLgo+IFsuLi5dCj4gKiBzYW1iYSBWRlMgaW50ZWdyYXRpb246IGltcGxlbWVudGVk
-LCBsaW1pdGVkIHRlc3QgY292ZXJhZ2UuCgpBQ0xzIGFyZSBraW5kIG9mIGEgbXVzdC1oYXZlIGZl
-YXR1cmUgZm9yIG1vc3QgU2FtYmEgYWRtaW5zLiBUaGUgU2FtYmEKQ2VwaCBWRlMgYnVpbGRzIG9u
-IHVzZXJzcGFjZSBsaWJjZXBoZnMgZGlyZWN0bHksIG5laXRoZXIgdGhlIGtlcm5lbApjbGllbnQg
-bm9yIGNlcGgtZnVzZSwgc28gSSdtIHRyeWluZyB0byB1bmRlcnN0YW5kIHdoZXRoZXIgQUNMcyBh
-cmUKYXZhaWxhYmxlIHRvIFNhbWJhIHVzZXJzIG9yIG5vdC4gQ2FuIHlvdSBjbGFyaWZ5IHBsZWFz
-ZT8KCj4gKiBnYW5lc2hhIE5GUyBpbnRlZ3JhdGlvbjogaW1wbGVtZW50ZWQsIG5vIHRlc3QgY292
-ZXJhZ2UuCgpJIHVuZGVyc3Rvb2QgZnJvbSBhIGNvbnZlcnNhdGlvbiBJIGhhZCB3aXRoIEpvaG4g
-aW4gTG9uZG9uIHRoYXQKZmxvY2soKSBhbmQgZmNudGwoKSBzdXBwb3J0IGhhZCByZWNlbnRseSBi
-ZWVuIGFkZGVkIHRvIGNlcGgtZnVzZSwgY2FuCnRoaXMgYmUgZXhwZWN0ZWQgdG8gSnVzdCBXb3Jr
-4oSiIGluIEdhbmVzaGEgYXMgd2VsbD8KCkFsc28sIGNhbiB5b3UgbWFrZSBhIGdlbmVyYWwgc3Rh
-dGVtZW50IGFzIHRvIHRoZSBzdGFiaWxpdHkgb2YgZmxvY2soKQphbmQgZmNudGwoKSBzdXBwb3J0
-IGluIHRoZSBrZXJuZWwgY2xpZW50IGFuZCBpbiBsaWJjZXBoZnMvY2VwaC1mdXNlPwpUaGlzIHRv
-byBpcyBwYXJ0aWN1bGFybHkgaW50ZXJlc3RpbmcgZm9yIFNhbWJhIGFkbWlucyB3aG8gcmVseSBv
-bgpieXRlLXJhbmdlIGxvY2tpbmcgZm9yIFNhbWJhIENUREIgc3VwcG9ydC4KCj4gKiBrZXJuZWwg
-TkZTIHJlZXhwb3J0OiBpbXBsZW1lbnRlZC4gbGltaXRlZCB0ZXN0IGNvdmVyYWdlLiBubyBrbm93
-bgo+ICAgaXNzdWVzLgoKSW4gdGhpcyBzY2VuYXJpbywgaXMgdGhlcmUgYW55IHNwZWNpZmljIG1h
-Z2ljIHRoYXQgdGhlIGtlcm5lbCBjbGllbnQKZG9lcyB0byBhdm9pZCBwcm9kdWNpbmcgZGVhZGxv
-Y2tzIHVuZGVyIG1lbW9yeSBwcmVzc3VyZT8gT3IgYXJlIHlvdQpyZWZlcnJpbmcgdG8gRlVTRS1t
-b3VudGVkIENlcGhGUyByZWV4cG9ydGVkIHZpYSBrZXJuZWwgTkZTPwoKQ2hlZXJzLApGbG9yaWFu
-Cl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmNlcGgtdXNl
-cnMgbWFpbGluZyBsaXN0CmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KaHR0cDovL2xpc3RzLmNl
-cGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCg==
+Hi Sam,
+Sorry I missed the discussion last night about putting the trim/scrub operations in a priority opq alongside client ops. I had a question about the expected latency impact of this approach.
+
+I understand that you've previously validated that your priority queue manages to fairly apportion bandwidth (i.e. time) according to the relative op priorities. But how are the latency of client ops going to be affected when the opq is full of scrub/trim ops? E.g. if we have 10000 scrub ops in the queue with priority 1, how much extra latency do you expect a single incoming client op with priority 63 to have?
+
+We really need scrub and trim to be completely transparent (latency- and bandwidth-wise). I agree that your proposal sounds like a cleaner approach, but the current implementation is actually working transparently as far as I can tell.
+
+It's just not obvious to me that the current out-of-band (and backgrounded with idle io priority) scrubber/trimmer is a less worthy approach than putting those ops in-band with the clients IOs. With your proposed change, at best, I'd expect that every client op is going to have to wait for at least one ongoing scrub op to complete. That could be 10's of ms's on an RBD cluster... bad news. So I think, at least, that we'll need to continue ionicing the scrub/trim ops so that the kernel will service the client IOs immediately instead of waiting.
+
+Your overall goal here seems to put a more fine grained knob on the scrub/trim ops. But in practice we just want those to be invisible.
+
+Thoughts?
+
+Cheers, Dan
