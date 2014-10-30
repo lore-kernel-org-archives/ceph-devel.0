@@ -1,32 +1,32 @@
 From: Sage Weil <sage@inktank.com>
-Subject: osd scrub/repair at CDS
-Date: Thu, 30 Oct 2014 13:40:48 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1410301339370.15946@cobra.newdream.net>
+Subject: scrub/snaptim io prio session
+Date: Thu, 30 Oct 2014 13:42:23 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1410301340500.16007@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:47810 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:47827 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932513AbaJ3Uku (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Oct 2014 16:40:50 -0400
+	with ESMTP id S932513AbaJ3UmY (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Oct 2014 16:42:24 -0400
 Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 99C7480068
-	for <ceph-devel@vger.kernel.org>; Thu, 30 Oct 2014 13:40:49 -0700 (PDT)
+	by cobra.newdream.net (Postfix) with ESMTP id CCC7780068
+	for <ceph-devel@vger.kernel.org>; Thu, 30 Oct 2014 13:42:23 -0700 (PDT)
 Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id DC1C680068
-	for <ceph-devel@vger.kernel.org>; Thu, 30 Oct 2014 13:40:48 -0700 (PDT)
+	by cobra.newdream.net (Postfix) with ESMTP id 90AA480068
+	for <ceph-devel@vger.kernel.org>; Thu, 30 Oct 2014 13:42:23 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-I created these tickets:
+These tickets already exist:
 
-9947 osd: store scrub error state in kv store; clear on peering event 
-9948 osd: add scrub result query interface
-9949 librados: add ability to read a specific replica or shard
-9950 rados: add ability to read a specific replica/shard from CLI
-9951 librados, osd: per-object scrub operation
+7862 allow backfill/reads while below min_size (in progress)
+7861 allow writes on degraded objects
+3360 osd: Prevent primary from choosing a pg_temp that violates the crush rule spirit
 
-They are near the top of the backlog.
+I added
 
-sage
+9952 osd: smarter choice of primary to minimize recovery disruption
+
+
