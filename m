@@ -1,30 +1,58 @@
-From: Dan van der Ster <daniel.vanderster@cern.ch>
-Subject: Scrub / SnapTrim IO Prioritization and Latency
-Date: Thu, 30 Oct 2014 10:59:42 +0000
-Message-ID: <5d451bfe7cfaf298e6cd3fccd2910f2d@webmail.vanderster.com>
+From: GuangYang <yguang11@outlook.com>
+Subject: RE: OSD crashed due to filestore EIO
+Date: Thu, 30 Oct 2014 11:39:01 +0000
+Message-ID: <BLU175-W3BD5E182DBC7F4096861DDF9D0@phx.gbl>
+References: <BLU175-W31E452BBB4E24DD455DA07DF9C0@phx.gbl>,<alpine.DEB.2.00.1410290806580.13498@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cernmx13.cern.ch ([188.184.36.46]:11836 "EHLO CERNMX13.cern.ch"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932744AbaJ3K7o convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Oct 2014 06:59:44 -0400
+Received: from blu004-omc2s21.hotmail.com ([65.55.111.96]:52970 "EHLO
+	BLU004-OMC2S21.hotmail.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1759275AbaJ3LjC (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 30 Oct 2014 07:39:02 -0400
+In-Reply-To: <alpine.DEB.2.00.1410290806580.13498@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sam.just@inktank.com>, ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Sam,
-Sorry I missed the discussion last night about putting the trim/scrub operations in a priority opq alongside client ops. I had a question about the expected latency impact of this approach.
-
-I understand that you've previously validated that your priority queue manages to fairly apportion bandwidth (i.e. time) according to the relative op priorities. But how are the latency of client ops going to be affected when the opq is full of scrub/trim ops? E.g. if we have 10000 scrub ops in the queue with priority 1, how much extra latency do you expect a single incoming client op with priority 63 to have?
-
-We really need scrub and trim to be completely transparent (latency- and bandwidth-wise). I agree that your proposal sounds like a cleaner approach, but the current implementation is actually working transparently as far as I can tell.
-
-It's just not obvious to me that the current out-of-band (and backgrounded with idle io priority) scrubber/trimmer is a less worthy approach than putting those ops in-band with the clients IOs. With your proposed change, at best, I'd expect that every client op is going to have to wait for at least one ongoing scrub op to complete. That could be 10's of ms's on an RBD cluster... bad news. So I think, at least, that we'll need to continue ionicing the scrub/trim ops so that the kernel will service the client IOs immediately instead of waiting.
-
-Your overall goal here seems to put a more fine grained knob on the scrub/trim ops. But in practice we just want those to be invisible.
-
-Thoughts?
-
-Cheers, Dan
+VGhhbmtzIFNhZ2UuIEkgb3BlbmVkIGFuIGlzc3VlIGluIHRyYWNrZXIgdG8gZm9sbG93IHVwIG9u
+IHRoaXMgcG90ZW50aWFsIGVuaGFuY2VtZW50IC0gaHR0cDovL3RyYWNrZXIuY2VwaC5jb20vaXNz
+dWVzLzk5NDMuCgpUaGFua3MsCkd1YW5nCgotLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tCj4gRGF0ZTogV2VkLCAyOSBPY3QgMjAxNCAwODoxMTowMSAtMDcwMAo+IEZyb206
+IHNhZ2VAbmV3ZHJlYW0ubmV0Cj4gVG86IHlndWFuZzExQG91dGxvb2suY29tCj4gQ0M6IGNlcGgt
+ZGV2ZWxAdmdlci5rZXJuZWwub3JnCj4gU3ViamVjdDogUmU6IE9TRCBjcmFzaGVkIGR1ZSB0byBm
+aWxlc3RvcmUgRUlPCj4KPiBPbiBXZWQsIDI5IE9jdCAyMDE0LCBHdWFuZ1lhbmcgd3JvdGU6Cj4+
+IFJlY2VudGx5IHdlIG9ic2VydmVkIGFuIE9TRCBjcmFzaCBkdWUgdG8gZmlsZSBjb3JydXB0aW9u
+IGluIGZpbGVzeXN0ZW0sCj4+IHdoaWNoIGxlYWRzIHRvIGFuIGFzc2VydGlvbiBmYWlsdXJlIGF0
+IEZpbGVTdG9yZTo6cmVhZCBhcyBFSU8gaXMgbm90Cj4+IHRvbGVyYXRlZC4gQXMgZmlsZSBjb3Jy
+dXB0aW9uIGlzIG5vcm1hbCBpbiBsYXJnZSBkZXBsb3ltZW50LCBJIGFtCj4+IHRoaW5raW5nIGlm
+IHRoYXQgYmVoYXZpb3IgaXMgdG9vIGFnZ3Jlc3NpdmUsIGVzcGVjaWFsbHkgZm9yIEVDIHBvb2wu
+Cj4+Cj4+IEFmdGVyIHNlYXJjaGluZywgSSBmb3VuZCB0aGlzIGZsYWcgbWlnaHQgaGVscCA6IGZp
+bGVzdG9yZV9mYWlsX2VpbywKPj4gd2hpY2ggY2FuIG1ha2UgdGhlIE9TRCBzdXJ2aXZlIGFuIEVJ
+TyBmYWlsdXJlLCBpdCBpcyB0cnVlIGJ5IGRlZmF1bHQKPj4gdGhvdWdoLiBJIGhhdmVuJ3QgdGVz
+dGVkIGl0IHlldC4KPgo+IFRoYXQgd2lsbCByZW92ZSB0aGUgaW1tZWRpYXRlIGFzc2VydC4gQ3Vy
+cmVudGx5LCBmb3IgYW4gb2JqZWN0IGJlaW5nIHJlYWQKPiBieSBhIGNsaWVudCwgaXQgd2lsbCBq
+dXN0IHBhc3MgRUlPIGJhY2sgdG8gdGhlIGNsaWVudCwgdGhvdWdoLCB3aGljaCBpcwo+IGNsZWFy
+bHkgbm90IHdoYXQgd2Ugd2FudC4KPgo+PiBEb2VzIGl0IG1ha2Ugc2Vuc2UgdG8gYWRqdXN0IHRo
+ZSBiZWhhdmlvciBhIGxpdHRsZSBiaXQsIGlmIHRoZSBmaWxlc3RvcmUKPj4gcmVhZCBmYWlsIGR1
+ZSB0byBmaWxlIGNvcnJ1cHRpb24sIHJldHVybiBiYWNrIHRoZSBmYWlsdXJlIGFuZCBhdCB0aGUK
+Pj4gc2FtZSB0aW1lIG1hcmsgdGhlIFBHIGFzIGluY29uc2lzdGVudCwgZHVlIHRoZSByZWR1bmRh
+bmN5IChyZXBsaWNhdGlvbgo+PiBvciBFQyksIHRoZSByZXF1ZXN0IGNhbiBzdGlsbCBiZSBzZXJ2
+ZWQsIGFuZCBhdCB0aGUgc2FtZSB0aW1lLCB3ZSBjYW4KPj4gZ2V0IGFsZXJ0IHNheWluZyB0aGVy
+ZSBpcyBpbmNvbnNpc3RlbmN5IGFuZCBtYW51YWxseSB0cmlnZ2VyIGEgUEcKPj4gcmVwYWlyPwo+
+Cj4gVGhhdCB3b3VsZCBiZSBpZGVhbCwgeWVhaC4gSSB0aGluayB0aGF0IGluaXRpYWxseSBpdCBt
+YWtlcyBzZW5zZSB0byBkb2luZwo+ICpqdXN0IHRoYXQgcmVhZCogdmlhIGEgcmVwbGljYSBidXQg
+bGV0dGluZyB0aGUgYWRtaW4gdHJpZ2dlciB0aGUgcmVwYWlyLgo+IFRoaXMgbW9zdCBjbG9zZWx5
+IG1pcnJvcnMgd2hhdCBzY3J1YiBjdXJyZW50bHkgZG9lcyBvbiBFSU8gKG1hcmsKPiBpbmNvbnNp
+c3RlbnQgYnV0IGxldCBhZG1pbiByZXBhaXIpLiBMYXRlciwgd2hlbiB3ZSBzdXBwb3J0IGF1dG9t
+YXRpYwo+IHJlcGFpciwgdGhhdCBvcHRpb24gY2FuIGFmZmVjdCBib3RoIHNjcnViIGFuZCBjbGll
+bnQtdHJpZ2dlcmVkIEVJT3M/Cj4KPiBXZSBqdXN0IG5lZWQgdG8gYmUgY2FyZWZ1bCB0aGF0IGFu
+eSBFSU8gb24gKm1ldGFkYXRhKiBzdGlsbCB0cmlnZ2VycyBhCj4gZmFpbHVyZSBhcyB3ZSBuZWVk
+IHRvIGJlIGVzcGVjaWFsbHkgY2FyZWZ1bCBhYm91dCBoYW5kbGluZyB0aGF0LiBJSVJDCj4gdGhl
+cmUgaXMgYSBmbGFnIHBhc3NlZCB0byByZWFkIGluZGljYXRpbmcgd2hldGhlciBFSU8gaXMgb2th
+eTsgd2Ugc2hvdWxkCj4gcHJvYmFibHkgdXNlIHRoYXQgc28gdGhhdCBFSU8tb2sgdnMgRUlPLW5v
+dG9rIGNhc2VzIGFyZSBzdGlsbCBjbGVhcmx5Cj4gYW5ub3RhdGVkLgo+Cj4gc2FnZQo+CiAJCSAJ
+ICAgCQkgIA==
