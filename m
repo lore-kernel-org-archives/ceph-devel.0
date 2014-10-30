@@ -1,135 +1,146 @@
-From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
-Subject: Re: Ceph Giant not fixed RepllicatedPG:NotStrimming?
-Date: Thu, 30 Oct 2014 08:02:13 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1410300801090.27022@cobra.newdream.net>
-References: <5451FD06.5030000@vccloud.vn>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: [PATCH 3/3] rbd: use a single workqueue for all devices
+Date: Thu, 30 Oct 2014 08:05:15 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1410300804100.27022@cobra.newdream.net>
+References: <1412965626-11165-1-git-send-email-idryomov@redhat.com> <1412965626-11165-4-git-send-email-idryomov@redhat.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED;
-	BOUNDARY="557981400-1255310582-1414681333=:27022"
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <5451FD06.5030000-QlevPasa8l681eZEIcUDRw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Ta Ba Tuan <tuantb-QlevPasa8l681eZEIcUDRw@public.gmane.org>
-Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:45383 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1760331AbaJ3PFQ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Oct 2014 11:05:16 -0400
+In-Reply-To: <1412965626-11165-4-git-send-email-idryomov@redhat.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Ilya Dryomov <ilya.dryomov@inktank.com>
+Cc: ceph-devel@vger.kernel.org, Micha Krause <micha@krausam.de>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+On Fri, 10 Oct 2014, Ilya Dryomov wrote:
+> Using one queue per device doesn't make much sense given that our
+> workfn processes "devices" and not "requests".  Switch to a single
+> workqueue for all devices.
+> 
+> Signed-off-by: Ilya Dryomov <idryomov@redhat.com>
 
---557981400-1255310582-1414681333=:27022
-Content-Type: TEXT/PLAIN; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Reviewed-by: Sage Weil <sage@redhat.com>
 
-On Thu, 30 Oct 2014, Ta Ba Tuan wrote:
->=20
-> Hi Everyone,
->=20
-> I upgraded Ceph to Giant by installing *tar.gz package, but appeared so=
-me
-> errors related Object Trimming or Snap Trimming:
-> I think having some missing objects and be not recovered.
-
-Note that this isn't giant, which is 0.87, but something a few weeks=20
-older.  There were a few bugs fixed in this code, but we can't tell if=20
-this was one of them without the log leading up to this message, which=20
-should include either a failed assertion message or segmentation fault or=
-=20
-similar.
-
-Thanks!
-sage
-
-
-> =A0ceph version 0.86-106-g6f8524e (6f8524ef7673ab4448de2e0ff76638deaf03=
-cae8)
-> =A01: /usr/bin/ceph-osd() [0x9b6655]
-> =A02: (()+0xfcb0) [0x7fa52c471cb0]
-> =A03: (ReplicatedPG::trim_object(hobject_t const&)+0x395) [0x811c25]
-> =A04: (ReplicatedPG::TrimmingObjects::react(ReplicatedPG::SnapTrim
-> const&)+0x43e) [0x82baae]
-> =A05: (boost::statechart::simple_state<ReplicatedPG::TrimmingObjects,
-> ReplicatedPG::SnapTrimmer, boost::mpl::list<mpl_::na, mpl_::na, mpl_::n=
-a,
-> mpl
-> _::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_=
-::na,
-> mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na
-> , mpl_::na, mpl_::na>,(boost::statechart::history_mode)0>::react_impl(b=
-oost::statechart::event_ba
-> se const&, void const*)+0xc0) [0x870c30]
-> =A06: (boost::statechart::state_machine<ReplicatedPG::SnapTrimmer,
-> ReplicatedPG::NotTrimming, std::allocator<void>,
-> boost::statechart::null_excepti
-> on_translator>::process_queued_events()+0xfb) [0x8560db]
-> =A07: (boost::statechart::state_machine<ReplicatedPG::SnapTrimmer,
-> ReplicatedPG::NotTrimming, std::allocator<void>,
-> boost::statechart::null_excepti
-> on_translator>::process_event(boost::statechart::event_base const&)+0x1=
-e)
-> [0x8562ae]
-> =A08: (ReplicatedPG::snap_trimmer()+0x4f8) [0x7d5f48]
-> =A09: (OSD::SnapTrimWQ::_process(PG*)+0x14) [0x6739b4]
-> =A010: (ThreadPool::worker(ThreadPool::WorkThread*)+0x48e) [0xa8fa0e]
-> =A011: (ThreadPool::WorkThread::entry()+0x10) [0xa927a0]
-> =A012: (()+0x7e9a) [0x7fa52c469e9a]
-> =A013: (clone()+0x6d) [0x7fa52ae3431d]
-> =A0NOTE: a copy of the executable, or `objdump -rdS <executable>` is ne=
-eded to
-> interpret this.
->=20
->=20
-> =A0 -128> 2014-10-29 13:51:23.049357 7fa50ed9d700=A0 5 osd.21 pg_epoch:=
- 104445
-> pg[6.9d8( v 104445'7857889 (103730'7852406,104445'7857889] local-les=3D=
-104444
-> n=3D4345 ec=3D164 les/c 104444/104272 104443/104443/104443) [21,93,49] =
-r=3D0
-> lpr=3D104443 pi=3D103787-104442/16 crt=3D104442'7857887 mlcod 104445'78=
-57888
-> active snaptrimq=3D[1907~1,1941~4,1946~1,19ef~2,19f2~1,19f4~3,19fa~5]] =
-exit
-> Started/Primary/Active/Recovered 0.000084 0 0.000000
-> =A0 -127> 2014-10-29 13:51:23.049392 7fa50ed9d700=A0 5 osd.21 pg_epoch:=
- 104445
-> pg[6.9d8( v 104445'7857889 (103730'7852406,104445'7857889] local-les=3D=
-104444
-> n=3D4345 ec=3D164 les/c 104444/104272 104443/104443/104443) [21,93,49] =
-r=3D0
-> lpr=3D104443 pi=3D103787-104442/16 crt=3D104442'7857887 mlcod 104445'78=
-57888
-> active snaptrimq=3D[1907~1,1941~4,1946~1,19ef~2,19f2~1,19f4~3,19fa~5]] =
-enter
-> Started/Primary/Active/Clean
-> =A0 -126> 2014-10-29 13:51:23.049582 7fa50ed9d700=A0 1 -- 172.30.5.2:68=
-38/22980
-> --> 172.30.5.4:6859/8884 -- pg_info(1 pgs e104445:6.9d8) v4 -- ?+0
-> 0x30d41c00 con 0x26c6ac60
->=20
->=20
-> Thank you!
+> ---
+>  drivers/block/rbd.c |   33 ++++++++++++++++++---------------
+>  1 file changed, 18 insertions(+), 15 deletions(-)
+> 
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index 0a54c588e433..be8d44af6ae1 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -342,7 +342,6 @@ struct rbd_device {
+>  
+>  	struct list_head	rq_queue;	/* incoming rq queue */
+>  	spinlock_t		lock;		/* queue, flags, open_count */
+> -	struct workqueue_struct	*rq_wq;
+>  	struct work_struct	rq_work;
+>  
+>  	struct rbd_image_header	header;
+> @@ -402,6 +401,8 @@ static struct kmem_cache	*rbd_segment_name_cache;
+>  static int rbd_major;
+>  static DEFINE_IDA(rbd_dev_id_ida);
+>  
+> +static struct workqueue_struct *rbd_wq;
+> +
+>  /*
+>   * Default to false for now, as single-major requires >= 0.75 version of
+>   * userspace rbd utility.
+> @@ -3452,7 +3453,7 @@ static void rbd_request_fn(struct request_queue *q)
+>  	}
+>  
+>  	if (queued)
+> -		queue_work(rbd_dev->rq_wq, &rbd_dev->rq_work);
+> +		queue_work(rbd_wq, &rbd_dev->rq_work);
+>  }
+>  
+>  /*
+> @@ -5242,16 +5243,9 @@ static int rbd_dev_device_setup(struct rbd_device *rbd_dev)
+>  	set_capacity(rbd_dev->disk, rbd_dev->mapping.size / SECTOR_SIZE);
+>  	set_disk_ro(rbd_dev->disk, rbd_dev->mapping.read_only);
+>  
+> -	rbd_dev->rq_wq = alloc_workqueue("%s", WQ_MEM_RECLAIM, 0,
+> -					 rbd_dev->disk->disk_name);
+> -	if (!rbd_dev->rq_wq) {
+> -		ret = -ENOMEM;
+> -		goto err_out_mapping;
+> -	}
+> -
+>  	ret = rbd_bus_add_dev(rbd_dev);
+>  	if (ret)
+> -		goto err_out_workqueue;
+> +		goto err_out_mapping;
+>  
+>  	/* Everything's ready.  Announce the disk to the world. */
+>  
+> @@ -5263,9 +5257,6 @@ static int rbd_dev_device_setup(struct rbd_device *rbd_dev)
+>  
+>  	return ret;
+>  
+> -err_out_workqueue:
+> -	destroy_workqueue(rbd_dev->rq_wq);
+> -	rbd_dev->rq_wq = NULL;
+>  err_out_mapping:
+>  	rbd_dev_mapping_clear(rbd_dev);
+>  err_out_disk:
+> @@ -5512,7 +5503,6 @@ static void rbd_dev_device_release(struct device *dev)
+>  {
+>  	struct rbd_device *rbd_dev = dev_to_rbd_dev(dev);
+>  
+> -	destroy_workqueue(rbd_dev->rq_wq);
+>  	rbd_free_disk(rbd_dev);
+>  	clear_bit(RBD_DEV_FLAG_EXISTS, &rbd_dev->flags);
+>  	rbd_dev_mapping_clear(rbd_dev);
+> @@ -5716,11 +5706,21 @@ static int __init rbd_init(void)
+>  	if (rc)
+>  		return rc;
+>  
+> +	/*
+> +	 * The number of active work items is limited by the number of
+> +	 * rbd devices, so leave @max_active at default.
+> +	 */
+> +	rbd_wq = alloc_workqueue(RBD_DRV_NAME, WQ_MEM_RECLAIM, 0);
+> +	if (!rbd_wq) {
+> +		rc = -ENOMEM;
+> +		goto err_out_slab;
+> +	}
+> +
+>  	if (single_major) {
+>  		rbd_major = register_blkdev(0, RBD_DRV_NAME);
+>  		if (rbd_major < 0) {
+>  			rc = rbd_major;
+> -			goto err_out_slab;
+> +			goto err_out_wq;
+>  		}
+>  	}
+>  
+> @@ -5738,6 +5738,8 @@ static int __init rbd_init(void)
+>  err_out_blkdev:
+>  	if (single_major)
+>  		unregister_blkdev(rbd_major, RBD_DRV_NAME);
+> +err_out_wq:
+> +	destroy_workqueue(rbd_wq);
+>  err_out_slab:
+>  	rbd_slab_exit();
+>  	return rc;
+> @@ -5749,6 +5751,7 @@ static void __exit rbd_exit(void)
+>  	rbd_sysfs_cleanup();
+>  	if (single_major)
+>  		unregister_blkdev(rbd_major, RBD_DRV_NAME);
+> +	destroy_workqueue(rbd_wq);
+>  	rbd_slab_exit();
+>  }
+>  
+> -- 
+> 1.7.10.4
+> 
 > --
-> Tuan
-> HaNoi-VietNam
->=20
->=20
->=20
---557981400-1255310582-1414681333=:27022
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---557981400-1255310582-1414681333=:27022--
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
