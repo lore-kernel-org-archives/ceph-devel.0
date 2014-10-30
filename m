@@ -1,191 +1,91 @@
-From: Ta Ba Tuan <tuantb-QlevPasa8l681eZEIcUDRw@public.gmane.org>
-Subject: Ceph Giant not fixed RepllicatedPG:NotStrimming?
-Date: Thu, 30 Oct 2014 15:55:34 +0700
-Message-ID: <5451FD06.5030000@vccloud.vn>
+From: GuangYang <yguang11@outlook.com>
+Subject: RE: Ceph Developer Summit - Oct 28-29
+Date: Thu, 30 Oct 2014 09:58:11 +0000
+Message-ID: <BLU175-W14F4EE4EDB22AF07AFB82BDF9D0@phx.gbl>
+References: <CAP8Oy=KeYryUPO5y-HxUGw3qaccr0XkPSP+6CsYh=DHGsRqFzw@mail.gmail.com>,<BLU175-W363F2FE6846A790EBFC393DF9F0@phx.gbl>,<CABBk=J9vpqveMH8pYc8ppJZK0b2d60zWBitGxGoEiLwEM18ORg@mail.gmail.com>,<BLU175-W57F77D2D7591F8FD62035DF9C0@phx.gbl>,<CAP8Oy=LUXfnqG7A_4pfy1XhnbmieUjD2t_hEZGSS1tg8NLWKig@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============1684754985=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from blu004-omc1s11.hotmail.com ([65.55.116.22]:58975 "EHLO
+	BLU004-OMC1S11.hotmail.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752590AbaJ3J6M (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 30 Oct 2014 05:58:12 -0400
+In-Reply-To: <CAP8Oy=LUXfnqG7A_4pfy1XhnbmieUjD2t_hEZGSS1tg8NLWKig@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Patrick McGarry <patrick@inktank.com>
+Cc: Yehuda Sadeh <yehuda@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is a multi-part message in MIME format.
---===============1684754985==
-Content-Type: multipart/alternative;
- boundary="------------030901090107000903090702"
-
-This is a multi-part message in MIME format.
---------------030901090107000903090702
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-
-
-Hi Everyone,
-
-I upgraded Ceph to Giant by installing *tar.gz package, but appeared 
-some errors related Object Trimming or Snap Trimming:
-I think having some missing objects and be not recovered.
-
-* ceph version 0.86*-106-g6f8524e (6f8524ef7673ab4448de2e0ff76638deaf03cae8)
-  1: /usr/bin/ceph-osd() [0x9b6655]
-  2: (()+0xfcb0) [0x7fa52c471cb0]
-  3: (ReplicatedPG::trim_object(hobject_t const&)+0x395) [0x811c25]
-  4: (ReplicatedPG::TrimmingObjects::react(ReplicatedPG::SnapTrim 
-const&)+0x43e) [0x82baae]
-  5: (boost::statechart::simple_state<ReplicatedPG::TrimmingObjects, 
-ReplicatedPG::SnapTrimmer, boost::mpl::list<mpl_::na, mpl_::na, 
-mpl_::na, mpl
-_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, 
-mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, 
-mpl_::na
-, mpl_::na, mpl_::na>, 
-(boost::statechart::history_mode)0>::react_impl(boost::statechart::event_base 
-const&, void const*)+0xc0) [0x870c30]
-  6: (boost::statechart::state_machine<ReplicatedPG::*SnapTrimmer, 
-ReplicatedPG::NotTrimming, *std::allocator<void>, 
-boost::statechart::null_excepti
-on_translator>::process_queued_events()+0xfb) [0x8560db]
-  7: (boost::statechart::state_machine*<ReplicatedPG::SnapTrimmer, 
-ReplicatedPG::NotTrimming, *std::allocator<void>, 
-boost::statechart::null_excepti
-on_translator>::process_event(boost::statechart::event_base 
-const&)+0x1e) [0x8562ae]
-  8: (ReplicatedPG::snap_trimmer()+0x4f8) [0x7d5f48]
-  9: (OSD::SnapTrimWQ::_process(PG*)+0x14) [0x6739b4]
-  10: (ThreadPool::worker(ThreadPool::WorkThread*)+0x48e) [0xa8fa0e]
-  11: (ThreadPool::WorkThread::entry()+0x10) [0xa927a0]
-  12: (()+0x7e9a) [0x7fa52c469e9a]
-  13: (clone()+0x6d) [0x7fa52ae3431d]
-  NOTE: a copy of the executable, or `objdump -rdS <executable>` is 
-needed to interpret this.
-
-
-   -128> 2014-10-29 13:51:23.049357 7fa50ed9d700  5 osd.21 pg_epoch: 
-104445 pg[6.9d8( v 104445'7857889 (103730'7852406,104445'7857889] 
-local-les=104444 n=4345 ec=164 les/c 104444/104272 104443/104443/104443) 
-[21,93,49] r=0 lpr=104443 pi=103787-104442/16 crt=104442'7857887 mlcod 
-104445'7857888 *active 
-snaptrimq*=[1907~1,1941~4,1946~1,19ef~2,19f2~1,19f4~3,19fa~5]] exit 
-*Started/Primary/Active/Recovered 0**.0*00084 0 0.000000
-   -127> 2014-10-29 13:51:23.049392 7fa50ed9d700  5 osd.21 pg_epoch: 
-104445 pg[6.9d8( v 104445'7857889 (103730'7852406,104445'7857889] 
-local-les=104444 n=4345 ec=164 les/c 104444/104272 104443/104443/104443) 
-[21,93,49] r=0 lpr=104443 pi=103787-104442/16 crt=104442'7857887 mlcod 
-104445'7857888 *active 
-snaptrimq*=[1907~1,1941~4,1946~1,19ef~2,19f2~1,19f4~3,19fa~5]] enter 
-Started/Primary/Active/Clean
-   -126> 2014-10-29 13:51:23.049582 7fa50ed9d700  1 -- 
-172.30.5.2:6838/22980 --> 172.30.5.4:6859/8884 -- pg_info(1 pgs 
-e104445:6.9d8) v4 -- ?+0 0x30d41c00 con 0x26c6ac60
-
-
-Thank you!
---
-Tuan
-HaNoi-VietNam
-
-
---------------030901090107000903090702
-Content-Type: text/html; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-
-<html>
-  <head>
-
-    <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
-  </head>
-  <body bgcolor="#FFFFFF" text="#000000">
-    <br>
-    Hi Everyone,<br>
-    <br>
-    I upgraded Ceph to Giant by installing *tar.gz package, but appeared
-    some errors related Object Trimming or Snap Trimming:<br>
-    I think having some missing objects and be not recovered.<br>
-    <br>
-    <b>&nbsp;ceph version 0.86</b>-106-g6f8524e
-    (6f8524ef7673ab4448de2e0ff76638deaf03cae8)<br>
-    &nbsp;1: /usr/bin/ceph-osd() [0x9b6655]<br>
-    &nbsp;2: (()+0xfcb0) [0x7fa52c471cb0]<br>
-    &nbsp;3: (ReplicatedPG::trim_object(hobject_t const&amp;)+0x395)
-    [0x811c25]<br>
-    &nbsp;4: (ReplicatedPG::TrimmingObjects::react(ReplicatedPG::SnapTrim
-    const&amp;)+0x43e) [0x82baae]<br>
-    &nbsp;5:
-    (boost::statechart::simple_state&lt;ReplicatedPG::TrimmingObjects,
-    ReplicatedPG::SnapTrimmer, boost::mpl::list&lt;mpl_::na, mpl_::na,
-    mpl_::na, mpl<br>
-    _::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na,
-    mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na,
-    mpl_::na, mpl_::na<br>
-    , mpl_::na, mpl_::na&gt;,
-    (boost::statechart::history_mode)0&gt;::react_impl(boost::statechart::event_base
-    const&amp;, void const*)+0xc0) [0x870c30]<br>
-    &nbsp;6: (boost::statechart::state_machine&lt;ReplicatedPG::<b>SnapTrimmer,
-      ReplicatedPG::NotTrimming, </b>std::allocator&lt;void&gt;,
-    boost::statechart::null_excepti<br>
-    on_translator&gt;::process_queued_events()+0xfb) [0x8560db]<br>
-    &nbsp;7: (boost::statechart::state_machine<b>&lt;ReplicatedPG::SnapTrimmer,
-      ReplicatedPG::NotTrimming, </b>std::allocator&lt;void&gt;,
-    boost::statechart::null_excepti<br>
-    on_translator&gt;::process_event(boost::statechart::event_base
-    const&amp;)+0x1e) [0x8562ae]<br>
-    &nbsp;8: (ReplicatedPG::snap_trimmer()+0x4f8) [0x7d5f48]<br>
-    &nbsp;9: (OSD::SnapTrimWQ::_process(PG*)+0x14) [0x6739b4]<br>
-    &nbsp;10: (ThreadPool::worker(ThreadPool::WorkThread*)+0x48e) [0xa8fa0e]<br>
-    &nbsp;11: (ThreadPool::WorkThread::entry()+0x10) [0xa927a0]<br>
-    &nbsp;12: (()+0x7e9a) [0x7fa52c469e9a]<br>
-    &nbsp;13: (clone()+0x6d) [0x7fa52ae3431d]<br>
-    &nbsp;NOTE: a copy of the executable, or `objdump -rdS
-    &lt;executable&gt;` is needed to interpret this.<br>
-    <br>
-    <br>
-    &nbsp; -128&gt; 2014-10-29 13:51:23.049357 7fa50ed9d700&nbsp; 5 osd.21
-    pg_epoch: 104445 pg[6.9d8( v 104445'7857889
-    (103730'7852406,104445'7857889] local-les=104444 n=4345 ec=164 les/c
-    104444/104272 104443/104443/104443) [21,93,49] r=0 lpr=104443
-    pi=103787-104442/16 crt=104442'7857887 mlcod 104445'7857888 <b>active
-      snaptrimq</b>=[1907~1,1941~4,1946~1,19ef~2,19f2~1,19f4~3,19fa~5]]
-    exit <b>Started/Primary/Active/Recovered 0</b><b>.0</b>00084 0
-    0.000000<br>
-    &nbsp; -127&gt; 2014-10-29 13:51:23.049392 7fa50ed9d700&nbsp; 5 osd.21
-    pg_epoch: 104445 pg[6.9d8( v 104445'7857889
-    (103730'7852406,104445'7857889] local-les=104444 n=4345 ec=164 les/c
-    104444/104272 104443/104443/104443) [21,93,49] r=0 lpr=104443
-    pi=103787-104442/16 crt=104442'7857887 mlcod 104445'7857888 <b>active
-      snaptrimq</b>=[1907~1,1941~4,1946~1,19ef~2,19f2~1,19f4~3,19fa~5]]
-    enter Started/Primary/Active/Clean<br>
-    &nbsp; -126&gt; 2014-10-29 13:51:23.049582 7fa50ed9d700&nbsp; 1 --
-    172.30.5.2:6838/22980 --&gt; 172.30.5.4:6859/8884 -- pg_info(1 pgs
-    e104445:6.9d8) v4 -- ?+0 0x30d41c00 con 0x26c6ac60<br>
-    <br>
-    <br>
-    Thank you!<br>
-    --<br>
-    Tuan<br>
-    HaNoi-VietNam<br>
-    <br>
-  </body>
-</html>
-
---------------030901090107000903090702--
-
---===============1684754985==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============1684754985==--
+VGhhbmtzIFBhdHJpY2suIEl0IGlzIG9rLCB3ZSB3aWxsIGZ1cnRoZXIgdGFsayBhYm91dCBkZXRh
+aWxzIHZpYSBlbWFpbC4KClRoYW5rcywKR3VhbmcKCi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0KPiBEYXRlOiBXZWQsIDI5IE9jdCAyMDE0IDEzOjExOjA4IC0wNDAwCj4g
+U3ViamVjdDogUmU6IENlcGggRGV2ZWxvcGVyIFN1bW1pdCAtIE9jdCAyOC0yOQo+IEZyb206IHBh
+dHJpY2tAaW5rdGFuay5jb20KPiBUbzogeWd1YW5nMTFAb3V0bG9vay5jb20KPiBDQzogeWVodWRh
+QGlua3RhbmsuY29tOyBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZwo+Cj4gSGV5IEd1YW5nLAo+
+Cj4gU29ycnkgSSBkaWRuJ3Qgc2VlIHRoaXMgYmVmb3JlIENEUyBzdGFydGVkISBXZSBkaWQgZW5k
+IHVwIGRpc2N1c3NpbmcKPiB0aGUgZmVhdHVyZSB5ZXN0ZXJkYXksIGFuZCB5b3UgY2FuIHNlZSB0
+aGUgdmlkZW8gaGVyZToKPgo+IGh0dHA6Ly95b3V0dS5iZS9UQlNmbE8xa1pWZwo+Cj4gSSdtIHN1
+cmUgd2UnbGwgYmUgYWJsZSB0byBmaW5kIHNvbWUgZXh0cmEgdGltZSBpbiB0aGUgc2NoZWR1bGUg
+Zm9yIERheQo+IDIgaWYgeW91IHdvdWxkIGxpa2UgdG8gZGlzY3VzcyB0aGluZ3MgZnVydGhlci4g
+VGhhbmtzLgo+Cj4KPgo+IEJlc3QgUmVnYXJkcywKPgo+IFBhdHJpY2sgTWNHYXJyeQo+IERpcmVj
+dG9yIENlcGggQ29tbXVuaXR5IHx8IFJlZCBIYXQKPiBodHRwOi8vY2VwaC5jb20gfHwgaHR0cDov
+L2NvbW11bml0eS5yZWRoYXQuY29tCj4gQHNjdXR0bGVtb25rZXkgfHwgQGNlcGgKPgo+Cj4gT24g
+VHVlLCBPY3QgMjgsIDIwMTQgYXQgODo0NSBQTSwgR3VhbmdZYW5nIDx5Z3VhbmcxMUBvdXRsb29r
+LmNvbT4gd3JvdGU6Cj4+IEkgc2VlLiBDYW4gd2UgcmUtc2NoZWR1bGUgdG8gV2VkbmVzZGF5IHNl
+c3Npb25zIHdoaWNoIGlzIFVTL0FQQUMgZnJpZW5kbHk/Cj4+Cj4+IFRoYW5rcywKPj4gR3VhbmcK
+Pj4KPj4gLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQo+Pj4gRGF0ZTog
+VHVlLCAyOCBPY3QgMjAxNCAwNzozMToyMSAtMDcwMAo+Pj4gU3ViamVjdDogUmU6IENlcGggRGV2
+ZWxvcGVyIFN1bW1pdCAtIE9jdCAyOC0yOQo+Pj4gRnJvbTogeWVodWRhQGlua3RhbmsuY29tCj4+
+PiBUbzogeWd1YW5nMTFAb3V0bG9vay5jb20KPj4+IENDOiBwYXRyaWNrQGlua3RhbmsuY29tOyBj
+ZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZwo+Pj4KPj4+IFdlbGwsIHRoZSBpZGVhIHdhcyB0byBk
+aXNjdXNzIHRoZSBmZWF0dXJlLCB0aGUgZGVjaXNpb25zIHRoYXQgd2VyZQo+Pj4gbWFkZSwgYW5k
+IHRoZSBzdGF0dXMuIEFsc28sIHdlJ3JlIG5vdyBvbmx5IGluIHBoYXNlIDEsIGl0IG1pZ2h0IGJl
+IGEKPj4+IGdvb2QgaWRlYSB0byBzdGFydCB0aGlua2luZyBhYm91dCB0aGUgbmV4dCBwaGFzZSwg
+d2hlcmUgYnVja2V0Cj4+PiBzaGFyZGluZyB3aWxsIGJlIGRvbmUgYXV0b21hdGljYWxseS4KPj4+
+Cj4+PiBZZWh1ZGEKPj4+Cj4+Pgo+Pj4gT24gVHVlLCBPY3QgMjgsIDIwMTQgYXQgNjozMyBBTSwg
+R3VhbmdZYW5nIDx5Z3VhbmcxMUBvdXRsb29rLmNvbT4gd3JvdGU6Cj4+Pj4gSGkgUGF0cmljaywK
+Pj4+PiBTb3JyeSBJIGFtIG5vdCBhYmxlIHRvIGpvaW4gdG9kYXkncyBzZXNzaW9uIGZvciB0aGUg
+YnVja2V0IGluZGV4IHNjYWxhYmlsaXR5LiBJIGFtIHdvcmtpbmcgd2l0aCBZZWh1ZGEgdG8gcG9s
+aXNoIHRoZSBpbXBsZW1lbnRhdGlvbiBhY2NvcmRpbmcgdG8gb3VyIGRpc2N1c3Npb24gaW4gbGFz
+dCBDRFMsIGFuZCBob3BlZnVsbHkgd2Ugd2lsbCBtZXJnZSB0aGUgcGF0Y2ggc29vbi4gVGhlcmUg
+aXMgbm90IG11Y2ggdXBkYXRlIChpbiB0ZXJtcyBvZiB3aGF0IHdlIHdpbGwgaW1wbGVtZW50IGFu
+ZCBob3cgd2UgaW1wbGVtZW50IHRoZW0pIGFmdGVyIGxhc3QgZGlzY3Vzc2lvbiBzbyB0aGF0IEkg
+dGhpbmsgaXQgaXMgZmluZSB0byBza2lwIHRoZSBzZXNzaW9uLgo+Pj4+Cj4+Pj4gWWVodWRhLAo+
+Pj4+IFBsZWFzZSBjb3JyZWN0IG1lIGhlcmUgaWYgSSBhbSB3cm9uZy4KPj4+Pgo+Pj4+IFRoYW5r
+cywKPj4+PiBHdWFuZwo+Pj4+Cj4+Pj4gLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLQo+Pj4+PiBEYXRlOiBXZWQsIDIyIE9jdCAyMDE0IDEzOjEzOjE3IC0wNDAwCj4+Pj4+
+IFN1YmplY3Q6IENlcGggRGV2ZWxvcGVyIFN1bW1pdCAtIE9jdCAyOC0yOQo+Pj4+PiBGcm9tOiBw
+YXRyaWNrQGlua3RhbmsuY29tCj4+Pj4+IFRvOiBjZXBoLXVzZXJzQGNlcGguY29tOyBjZXBoLWRl
+dmVsQHZnZXIua2VybmVsLm9yZzsgY2VwaC1jb21tdW5pdHlAbGlzdHMuY2VwaC5jb20KPj4+Pj4K
+Pj4+Pj4gR3JlZXRpbmdzIGNlcGhhbG9mb2xrcywKPj4+Pj4KPj4+Pj4gQXMgSSdtIHN1cmUgbWFu
+eSBvZiB5b3UgaGF2ZSBzZWVuLCB0aGUgc2NoZWR1bGUgZm9yIHRoZSB1cGNvbWluZwo+Pj4+PiB2
+aXJ0dWFsIENlcGggRGV2ZWxvcGVyIFN1bW1pdCBoYXMgYmVlbiBwb3N0ZWQ6Cj4+Pj4+Cj4+Pj4+
+IGh0dHBzOi8vd2lraS5jZXBoLmNvbS9QbGFubmluZy9DRFMvSGFtbWVyXyhPY3RfMjAxNCkKPj4+
+Pj4KPj4+Pj4gQXMgdXN1YWwgd2UgaGF2ZSBhIEVNRUEgZnJpZW5kbHkgZGF5IGFuZCBhbiBBUEFD
+IGZyaWVuZGx5IGRheSB3aXRoIHRoZQo+Pj4+PiBzZXNzaW9ucyBiZWluZyBkaXN0cmlidXRlZCBh
+Y3Jvc3MgZWFjaCBkYXkgdGhhdCBpbmNsdWRlIHRoZSBibHVlcHJpbnQKPj4+Pj4gYXV0aG9ycyBh
+bmQgaW50ZXJlc3RlZCBwYXJ0aWVzLiBJZiB5b3UgYXJlIHVuYWJsZSB0byBhdHRlbmQgYSBzZXNz
+aW9uCj4+Pj4+IHRoYXQgeW91IGFyZSBpbnRlcmVzdGVkIGluIHBsZWFzZSBiZSBzdXJlIHRvIGFk
+ZCB5b3VyCj4+Pj4+IGNvbW1lbnRzL3F1ZXN0aW9ucyB0byB0aGUgZXRoZXJwYWQgaW4gcXVlc3Rp
+b24gKHdpdGggeW91ciBuYW1lKSBzbwo+Pj4+PiB0aGF0IHRob3NlIGNvbmNlcm5zIGNhbiBiZSBh
+ZGRyZXNzZWQgZHVyaW5nIHRoZSBkaXNjdXNzaW9uLgo+Pj4+Pgo+Pj4+PiBBbGwgc2Vzc2lvbnMg
+d2lsbCBiZSByZWNvcmRlZCBmb3IgbGF0ZXIgcGVydXNhbCBpZiB5b3UgYXJlIHVuYWJsZSB0byBh
+dHRlbmQuCj4+Pj4+Cj4+Pj4+IElmIHlvdSBoYXZlIGFueSBxdWVzdGlvbnMsIGNvbW1lbnRzLCBv
+ciBjb25jZXJucywgZmVlbCBmcmVlIHRvIGVtYWlsCj4+Pj4+IG1lIGRpcmVjdGx5LiBUaGFua3Ms
+IGFuZCBzZWUgeW91IGFsbCB0aGVyZSEKPj4+Pj4KPj4+Pj4KPj4+Pj4gQmVzdCBSZWdhcmRzLAo+
+Pj4+Pgo+Pj4+PiBQYXRyaWNrIE1jR2FycnkKPj4+Pj4gRGlyZWN0b3IgQ2VwaCBDb21tdW5pdHkg
+fHwgUmVkIEhhdAo+Pj4+PiBodHRwOi8vY2VwaC5jb20gfHwgaHR0cDovL2NvbW11bml0eS5yZWRo
+YXQuY29tCj4+Pj4+IEBzY3V0dGxlbW9ua2V5IHx8IEBjZXBoCj4+Pj4+IC0tCj4+Pj4+IFRvIHVu
+c3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBo
+LWRldmVsIiBpbgo+Pj4+PiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIu
+a2VybmVsLm9yZwo+Pj4+PiBNb3JlIG1ham9yZG9tbyBpbmZvIGF0IGh0dHA6Ly92Z2VyLmtlcm5l
+bC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbAo+Pj4+Cj4+PiAtLQo+Pj4gVG8gdW5zdWJzY3JpYmUg
+ZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGlu
+Cj4+PiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZwo+
+Pj4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9t
+by1pbmZvLmh0bWwKPj4KPiAtLQo+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5k
+IHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbgo+IHRoZSBib2R5IG9mIGEgbWVz
+c2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnCj4gTW9yZSBtYWpvcmRvbW8gaW5mbyBh
+dCBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwKIAkJIAkgICAJCSAg
