@@ -1,69 +1,117 @@
-From: Ketor D <d.ketor@gmail.com>
-Subject: Re: fio rbd completions (Was: fio rbd hang for block sizes > 1M)
-Date: Thu, 30 Oct 2014 16:04:59 +0800
-Message-ID: <CAM9_UU_NV+Ra+A0K5mES_A08HiaOEtMjuj2hxtGd4eW8cNoxWg@mail.gmail.com>
-References: <5449BBB3.7090109@catalyst.net.nz> <544E6330.1000202@kernel.dk>
- <544E63EA.1010204@kernel.dk> <CAM9_UU-35i9uRu9EDQSM-b7CjmxrKYV2Gz8ocrykOYk+2q++hw@mail.gmail.com>
- <544E6691.106@kernel.dk> <CAM9_UU9_ZHtwv=31DyxkAmog7XJbthiRXi5n+Y0Cfxj4qm3bGQ@mail.gmail.com>
- <544E6A8D.1040608@kernel.dk> <CAM9_UU8x2uZZUWaPPoy+LHmUhC_3sqKZ9GPsEqDwKUkprg4kdQ@mail.gmail.com>
- <544EC05D.7040807@catalyst.net.nz> <544EC7F1.6010900@kernel.dk>
- <544ED37D.6060800@catalyst.net.nz> <CAM9_UU8MHdj+mjAWBziETxPDnwTt0JBuHrQp2Fu9YtF=msae3w@mail.gmail.com>
- <79432849-2F58-4738-82E1-E4D8AB10A6AE@kernel.dk> <CAM9_UU9G5vQ68UxMakte-Wb5B9_KBo24ov7=hNHpYqEtko2nQg@mail.gmail.com>
- <544FB2F2.2060703@kernel.dk> <CAM9_UU_o8kS1wJnDKTvd8+qkm9=93yfW3THr_8ni8C+5=TH6tg@mail.gmail.com>
- <544FCDBD.7070106@kernel.dk> <CAM9_UU-gyExbAEo608vGnjqBk56A_VRZc44HkywUuLmXoEZ4Cg@mail.gmail.com>
- <CAM9_UU8=MtUnQiembBfr8YQiDOD7TNey=mp8_H6gySenRVHy6A@mail.gmail.com>
- <5450FA47.2030203@kernel.dk> <5451EC63.9070600@catalyst.net.nz>
+From: Alexandre DERUMIER <aderumier@odiso.com>
+Subject: Re: krbd blk-mq support ?
+Date: Thu, 30 Oct 2014 09:11:11 +0100 (CET)
+Message-ID: <4c95e688-d8cd-42b4-b414-535764fb80fc@mailpro>
+References: <alpine.DEB.2.00.1410290800080.13498@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f47.google.com ([209.85.218.47]:55948 "EHLO
-	mail-oi0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758242AbaJ3IFb (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Oct 2014 04:05:31 -0400
-In-Reply-To: <5451EC63.9070600@catalyst.net.nz>
+Received: from mailpro.odiso.net ([89.248.209.98]:50990 "EHLO
+	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758216AbaJ3ILT convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Oct 2014 04:11:19 -0400
+In-Reply-To: <alpine.DEB.2.00.1410290800080.13498@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>
-Cc: Jens Axboe <axboe@kernel.dk>, Mark Nelson <mark.nelson@inktank.com>, Mark Nelson <mark.a.nelson@gmail.com>, "fio@vger.kernel.org" <fio@vger.kernel.org>, "xan.peng" <xanpeng@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: Christoph Hellwig <hch@infradead.org>, Ceph Devel <ceph-devel@vger.kernel.org>
 
-Hi Mark,
-      Could you do a fio test in your env with the busy_poll=1 ?
-I am very interested in the busy_poll result. Thanks!
+>>Hmm, this is probably the messenger.c worker then that is feeding mes=
+sages=20
+>>to the network. How many OSDs do you have? It should be able to scale=
+=20
+>>with the number of OSDs.=20
 
-2014-10-30 15:44 GMT+08:00 Mark Kirkwood <mark.kirkwood@catalyst.net.nz>:
-> On 30/10/14 03:31, Jens Axboe wrote:
->>
->> On 2014-10-29 01:15, Ketor D wrote:
->>>
->>> Hi, Jens,
->>>
->>> There is cmdline parse bug in the fio rbd test.
->>>
->>> I have fixed this and create a pull request on the github.
->>>
->>> Please review.
->>>
->>> After fix the bugs, the fio test can run.
->>
->>
->> I merged your two pull requests (thanks!) and committed a polished
->> variant of the sort patch. Ketor and Mark, would you mind both running a
->> quick benchmark on the current -git head?
->>
->
-> Better late than never (sorry), comparing with the 'original' fio code
-> containing the usleep(100):
->
-> blocksize k | head iops     | orig iops
-> ------------+---------------+--------------
-> 4           |  11114        |  11516
-> 128         |   4551        |   6550
-> 1024        |   1195        |   1248
->
-> So we do pretty much the same except in the middle blocksize range (I
-> checked again with the old binary just to rule out any other changes on the
-> ceph end...).
->
-> Regards
->
-> Mark
+Thanks Sage for your reply.
+
+Currently 6 OSD (ssd) on the test platform.
+
+But I can reach 2x 50000iops on same rbd volume with 2 clients on 2 dif=
+ferents host.
+Do you think messenger.c worker can be the bottleneck in this case ?
+
+
+I'll try to add more OSD next week, if it's scale it's a very good news=
+ !
+
+
+
+
+
+
+
+----- Mail original -----=20
+
+De: "Sage Weil" <sage@newdream.net>=20
+=C3=80: "Alexandre DERUMIER" <aderumier@odiso.com>=20
+Cc: "Christoph Hellwig" <hch@infradead.org>, "Ceph Devel" <ceph-devel@v=
+ger.kernel.org>=20
+Envoy=C3=A9: Mercredi 29 Octobre 2014 16:00:56=20
+Objet: Re: krbd blk-mq support ?=20
+
+On Wed, 29 Oct 2014, Alexandre DERUMIER wrote:=20
+> >>Oh, that's without the blk-mq patch?=20
+>=20
+> Yes, sorry, I don't how to use perf with a custom compiled kernel.=20
+> (Usualy I'm using perf from debian, with linux-tools package provided=
+ with the debian kernel package)=20
+>=20
+> >>Either way the profile doesn't really sum up to a fully used up cpu=
+=2E=20
+>=20
+> But I see mostly same behaviour with or without blk-mq patch, I have =
+always 1 kworker at around 97-100%cpu (1core) for 50000iops.=20
+>=20
+> I had also tried to map the rbd volume with nocrc, it's going to 6000=
+0iops with same kworker at around 97-100%cpu=20
+
+Hmm, this is probably the messenger.c worker then that is feeding messa=
+ges=20
+to the network. How many OSDs do you have? It should be able to scale=20
+with the number of OSDs.=20
+
+sage=20
+
+
+>=20
+>=20
+>=20
+> ----- Mail original -----=20
+>=20
+> De: "Christoph Hellwig" <hch@infradead.org>=20
+> ?: "Alexandre DERUMIER" <aderumier@odiso.com>=20
+> Cc: "Ceph Devel" <ceph-devel@vger.kernel.org>=20
+> Envoy?: Mardi 28 Octobre 2014 19:07:25=20
+> Objet: Re: krbd blk-mq support ?=20
+>=20
+> On Mon, Oct 27, 2014 at 11:00:46AM +0100, Alexandre DERUMIER wrote:=20
+> > >>Can you do a perf report -ag and then a perf report to see where =
+these=20
+> > >>cycles are spent?=20
+> >=20
+> > Yes, sure.=20
+> >=20
+> > I have attached the perf report to this mail.=20
+> > (This is with kernel 3.14, don't have access to my 3.18 host for no=
+w)=20
+>=20
+> Oh, that's without the blk-mq patch?=20
+>=20
+> Either way the profile doesn't really sum up to a fully used up=20
+> cpu. Sage, Alex - are there any ordring constraints in the rbd client=
+?=20
+> If not we could probably aim for per-cpu queues using blk-mq and a=20
+> socket per cpu or similar.=20
+> --=20
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in=20
+> the body of a message to majordomo@vger.kernel.org=20
+> More majordomo info at http://vger.kernel.org/majordomo-info.html=20
+>=20
+>=20
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
