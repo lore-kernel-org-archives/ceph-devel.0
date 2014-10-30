@@ -1,58 +1,126 @@
-From: GuangYang <yguang11@outlook.com>
-Subject: RE: OSD crashed due to filestore EIO
-Date: Thu, 30 Oct 2014 11:39:01 +0000
-Message-ID: <BLU175-W3BD5E182DBC7F4096861DDF9D0@phx.gbl>
-References: <BLU175-W31E452BBB4E24DD455DA07DF9C0@phx.gbl>,<alpine.DEB.2.00.1410290806580.13498@cobra.newdream.net>
+From: Kapil Sharma <ksharma@suse.com>
+Subject: Re: teuthology
+Date: Thu, 30 Oct 2014 12:44:39 +0100
+Message-ID: <1414669479.8790.110.camel@linux-cb82>
+References: <20141024230302.GI6445@thinkpad.thebehrens.net>
+		 <1414397595.8790.11.camel@linux-cb82>
+		 <20141027104707.GU6445@thinkpad.thebehrens.net>
+		 <544E6A2E.5090809@dachary.org> <1414429260.8790.41.camel@linux-cb82>
+	 <544FAFD9.1070804@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from blu004-omc2s21.hotmail.com ([65.55.111.96]:52970 "EHLO
-	BLU004-OMC2S21.hotmail.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1759275AbaJ3LjC (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 30 Oct 2014 07:39:02 -0400
-In-Reply-To: <alpine.DEB.2.00.1410290806580.13498@cobra.newdream.net>
+Received: from smtp.nue.novell.com ([195.135.221.5]:53498 "EHLO
+	smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758889AbaJ3MEl (ORCPT
+	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
+	Thu, 30 Oct 2014 08:04:41 -0400
+In-Reply-To: <544FAFD9.1070804@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-VGhhbmtzIFNhZ2UuIEkgb3BlbmVkIGFuIGlzc3VlIGluIHRyYWNrZXIgdG8gZm9sbG93IHVwIG9u
-IHRoaXMgcG90ZW50aWFsIGVuaGFuY2VtZW50IC0gaHR0cDovL3RyYWNrZXIuY2VwaC5jb20vaXNz
-dWVzLzk5NDMuCgpUaGFua3MsCkd1YW5nCgotLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tCj4gRGF0ZTogV2VkLCAyOSBPY3QgMjAxNCAwODoxMTowMSAtMDcwMAo+IEZyb206
-IHNhZ2VAbmV3ZHJlYW0ubmV0Cj4gVG86IHlndWFuZzExQG91dGxvb2suY29tCj4gQ0M6IGNlcGgt
-ZGV2ZWxAdmdlci5rZXJuZWwub3JnCj4gU3ViamVjdDogUmU6IE9TRCBjcmFzaGVkIGR1ZSB0byBm
-aWxlc3RvcmUgRUlPCj4KPiBPbiBXZWQsIDI5IE9jdCAyMDE0LCBHdWFuZ1lhbmcgd3JvdGU6Cj4+
-IFJlY2VudGx5IHdlIG9ic2VydmVkIGFuIE9TRCBjcmFzaCBkdWUgdG8gZmlsZSBjb3JydXB0aW9u
-IGluIGZpbGVzeXN0ZW0sCj4+IHdoaWNoIGxlYWRzIHRvIGFuIGFzc2VydGlvbiBmYWlsdXJlIGF0
-IEZpbGVTdG9yZTo6cmVhZCBhcyBFSU8gaXMgbm90Cj4+IHRvbGVyYXRlZC4gQXMgZmlsZSBjb3Jy
-dXB0aW9uIGlzIG5vcm1hbCBpbiBsYXJnZSBkZXBsb3ltZW50LCBJIGFtCj4+IHRoaW5raW5nIGlm
-IHRoYXQgYmVoYXZpb3IgaXMgdG9vIGFnZ3Jlc3NpdmUsIGVzcGVjaWFsbHkgZm9yIEVDIHBvb2wu
-Cj4+Cj4+IEFmdGVyIHNlYXJjaGluZywgSSBmb3VuZCB0aGlzIGZsYWcgbWlnaHQgaGVscCA6IGZp
-bGVzdG9yZV9mYWlsX2VpbywKPj4gd2hpY2ggY2FuIG1ha2UgdGhlIE9TRCBzdXJ2aXZlIGFuIEVJ
-TyBmYWlsdXJlLCBpdCBpcyB0cnVlIGJ5IGRlZmF1bHQKPj4gdGhvdWdoLiBJIGhhdmVuJ3QgdGVz
-dGVkIGl0IHlldC4KPgo+IFRoYXQgd2lsbCByZW92ZSB0aGUgaW1tZWRpYXRlIGFzc2VydC4gQ3Vy
-cmVudGx5LCBmb3IgYW4gb2JqZWN0IGJlaW5nIHJlYWQKPiBieSBhIGNsaWVudCwgaXQgd2lsbCBq
-dXN0IHBhc3MgRUlPIGJhY2sgdG8gdGhlIGNsaWVudCwgdGhvdWdoLCB3aGljaCBpcwo+IGNsZWFy
-bHkgbm90IHdoYXQgd2Ugd2FudC4KPgo+PiBEb2VzIGl0IG1ha2Ugc2Vuc2UgdG8gYWRqdXN0IHRo
-ZSBiZWhhdmlvciBhIGxpdHRsZSBiaXQsIGlmIHRoZSBmaWxlc3RvcmUKPj4gcmVhZCBmYWlsIGR1
-ZSB0byBmaWxlIGNvcnJ1cHRpb24sIHJldHVybiBiYWNrIHRoZSBmYWlsdXJlIGFuZCBhdCB0aGUK
-Pj4gc2FtZSB0aW1lIG1hcmsgdGhlIFBHIGFzIGluY29uc2lzdGVudCwgZHVlIHRoZSByZWR1bmRh
-bmN5IChyZXBsaWNhdGlvbgo+PiBvciBFQyksIHRoZSByZXF1ZXN0IGNhbiBzdGlsbCBiZSBzZXJ2
-ZWQsIGFuZCBhdCB0aGUgc2FtZSB0aW1lLCB3ZSBjYW4KPj4gZ2V0IGFsZXJ0IHNheWluZyB0aGVy
-ZSBpcyBpbmNvbnNpc3RlbmN5IGFuZCBtYW51YWxseSB0cmlnZ2VyIGEgUEcKPj4gcmVwYWlyPwo+
-Cj4gVGhhdCB3b3VsZCBiZSBpZGVhbCwgeWVhaC4gSSB0aGluayB0aGF0IGluaXRpYWxseSBpdCBt
-YWtlcyBzZW5zZSB0byBkb2luZwo+ICpqdXN0IHRoYXQgcmVhZCogdmlhIGEgcmVwbGljYSBidXQg
-bGV0dGluZyB0aGUgYWRtaW4gdHJpZ2dlciB0aGUgcmVwYWlyLgo+IFRoaXMgbW9zdCBjbG9zZWx5
-IG1pcnJvcnMgd2hhdCBzY3J1YiBjdXJyZW50bHkgZG9lcyBvbiBFSU8gKG1hcmsKPiBpbmNvbnNp
-c3RlbnQgYnV0IGxldCBhZG1pbiByZXBhaXIpLiBMYXRlciwgd2hlbiB3ZSBzdXBwb3J0IGF1dG9t
-YXRpYwo+IHJlcGFpciwgdGhhdCBvcHRpb24gY2FuIGFmZmVjdCBib3RoIHNjcnViIGFuZCBjbGll
-bnQtdHJpZ2dlcmVkIEVJT3M/Cj4KPiBXZSBqdXN0IG5lZWQgdG8gYmUgY2FyZWZ1bCB0aGF0IGFu
-eSBFSU8gb24gKm1ldGFkYXRhKiBzdGlsbCB0cmlnZ2VycyBhCj4gZmFpbHVyZSBhcyB3ZSBuZWVk
-IHRvIGJlIGVzcGVjaWFsbHkgY2FyZWZ1bCBhYm91dCBoYW5kbGluZyB0aGF0LiBJSVJDCj4gdGhl
-cmUgaXMgYSBmbGFnIHBhc3NlZCB0byByZWFkIGluZGljYXRpbmcgd2hldGhlciBFSU8gaXMgb2th
-eTsgd2Ugc2hvdWxkCj4gcHJvYmFibHkgdXNlIHRoYXQgc28gdGhhdCBFSU8tb2sgdnMgRUlPLW5v
-dG9rIGNhc2VzIGFyZSBzdGlsbCBjbGVhcmx5Cj4gYW5ub3RhdGVkLgo+Cj4gc2FnZQo+CiAJCSAJ
-ICAgCQkgIA==
+Hi Loic, 
+
+On Tue, 2014-10-28 at 16:01 +0100, Loic Dachary wrote:
+
+> I also started to not use the lock server, a year ago. I recently experimented with paddles + teuthology-worker and it's fairly easy to get it to work. The advantage is that you can schedule jobs that will wait for others to complete. My work in progress is at
+> 
+> https://github.com/dachary/teuthology/compare/wip-container
+> https://github.com/dachary/paddles/compare/wip-container
+> 
+> (note that it is mixed with my attempt to make it work with docker instead of virtual machines or bare metal)
+Thanks for sharing your work. Yes, I am also using paddles +
+teuthology-worker now.
+
+
+>  
+> > 2. The word "ubuntu" is hard coded in some places in the code :-)
+> > 
+> > 3. The bootstrap script is for ubuntu machines only. Anyway, it's
+> > not a big task to run those commands manually or create a script of
+> > your own. 
+> 
+> Is your script available somewhere ? I plan to set it up on fedora20 and it would be most useful.
+Not yet, but I will share it with you soon. 
+
+
+
+> 
+> Yes. I'm often happy to read tests as if they were the documention of the code. But it would be useful to have documentation for the test themselves in additon ;-)
+Yes, At some point I need to start this effort :-)
+
+
+
+> Are you running pulpito ? I create a split of workunit that may be of interest to you. My motivation was not to have them show separately in pulpito. Rather to run them in // 
+> 
+> I first modified the script so that it could be called to group tests:
+> 
+> https://github.com/dachary/ceph/commit/ec0ba1a9994e4eb24955442895c6b8dd2561ba20
+> 
+> and then created scripts to run each group independantly
+> 
+> https://github.com/dachary/ceph/commit/bafd35478e310e887a808784f02c7f0041548d1e
+> 
+> which could also be an "exec" teuthology tasks.
+Yes, I am running pulpito. Maybe a similar logic could be built to also
+report the tests separately. Shall give it a try. 
+
+> 
+> 
+> > 6. I have not tried this of-late but I think teuthology can not run it's
+> > tests against an already deployed ceph-cluster. I need to check it again
+> > though.
+> 
+> It may be possible to convince it to do that since the install task is not mandatory.
+I found this old ticket which was closed. Need to check the latest
+status - http://tracker.ceph.com/issues/6641
+
+
+
+> > 7. Would be great if teuthology can cover Calamari testing too :-)
+> If I'm not mistaken Waren is working on making this happen. But I've not looked at it closely.
+Okay. Will follow up on this.
+
+
+
+Regards,
+Kapil.
+
+
+
+
+> > On Mon, 2014-10-27 at 16:52 +0100, Loic Dachary wrote:
+> >> It was great meeting your and your family :-) Back in Paris and massively jetlagged.
+> >>
+> >> Nice to meet you Kapil ! Are there any pain points you'd like to address regarding the teuthology installation ?
+> >>
+> >> Cheers
+> >>
+> >> On 27/10/2014 11:47, Thorsten Behrens wrote:
+> >>> Hi Loic,
+> >>>
+> >>> was great to meet you and Patrick at the google summit!
+> >>>
+> >>> Loic, meet Kapil, who's doing lots of great stuff with QA automation
+> >>> and deployment on our side. And I think he and Zack were already in
+> >>> close contact. ;)
+> >>>
+> >>> As promised the update on what we run from teuthology:
+> >>>
+> >>> Kapil Sharma wrote:
+> >>>> As of now I have cnfigured, rbd, krbd and rados test suites which
+> >>>> are located here
+> >>>> [snip]
+> >>>>
+> >>>
+> >>> All the very best, and a safe trip home,
+> >>>
+> >>
+> > 
+> > 
+> 
+
+
