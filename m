@@ -1,117 +1,41 @@
-From: Alexandre DERUMIER <aderumier@odiso.com>
-Subject: Re: krbd blk-mq support ?
-Date: Thu, 30 Oct 2014 09:11:11 +0100 (CET)
-Message-ID: <4c95e688-d8cd-42b4-b414-535764fb80fc@mailpro>
-References: <alpine.DEB.2.00.1410290800080.13498@cobra.newdream.net>
+From: Varada Kari <Varada.Kari@sandisk.com>
+Subject: Debug messages of osd_ping and ping_reply
+Date: Thu, 30 Oct 2014 08:26:35 +0000
+Message-ID: <C226B0AB34511445928D9882AA519F6009AD6940@SACMBXIP02.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.209.98]:50990 "EHLO
-	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758216AbaJ3ILT convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Oct 2014 04:11:19 -0400
-In-Reply-To: <alpine.DEB.2.00.1410290800080.13498@cobra.newdream.net>
+Received: from mail-by2on0054.outbound.protection.outlook.com ([207.46.100.54]:40855
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1758162AbaJ3I0i convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Oct 2014 04:26:38 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Christoph Hellwig <hch@infradead.org>, Ceph Devel <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
->>Hmm, this is probably the messenger.c worker then that is feeding mes=
-sages=20
->>to the network. How many OSDs do you have? It should be able to scale=
-=20
->>with the number of OSDs.=20
+Hi all,
 
-Thanks Sage for your reply.
+We have a test cluster with ~500 OSD's. This cluster has multiple rbd images mapped to multiple client machines. But from past two days, only one rbd image was serving the IO's rest of the images were not used.
+We are running the cluster with debug 1/1 for most of the sub modules. But the logs of OSD's are filled with the following messages.
+----------------
+2014-10-30 12:11:52.430542 7ff431032700  1 -- 10.242.42.172:6919/2601499 --> 10.242.42.178:0/44638 -- osd_ping(ping_reply e24581 stamp 2014-10-30 12:12:54.457189) v2 -- ?+0 0x77b32a0 con 0x1c3563c0
+2014-10-30 12:11:52.430613 7ff42f82f700  1 -- 10.242.42.172:6915/2601499 <== osd.462 10.242.42.178:0/44638 337603 ==== osd_ping(ping e24581 stamp 2014-10-30 12:12:54.457189) v2 ==== 47+0+0 (2159846856 0 0) 0x27020ee0 con 0x1949db20
+2014-10-30 12:11:52.430669 7ff42f82f700  1 -- 10.242.42.172:6915/2601499 --> 10.242.42.178:0/44638 -- osd_ping(ping_reply e24581 stamp 2014-10-30 12:12:54.457189) v2 -- ?+0 0x1d61ef00 con 0x1949db20
+---------------
 
-Currently 6 OSD (ssd) on the test platform.
+Looking at the code, these messages are coming from DispatchQueue::pre_dispatch and SimpleMessenger::_send_message. And these messages are at debug level 1 for debug_ms and approximately 200MB-400MB is occupied for these messages from each osd log.
 
-But I can reach 2x 50000iops on same rbd volume with 2 clients on 2 dif=
-ferents host.
-Do you think messenger.c worker can be the bottleneck in this case ?
+Is there any reason these messages are present at level 1?  Can we move to debug level 5 or above?
 
-
-I'll try to add more OSD next week, if it's scale it's a very good news=
- !
+Thanks,
+Varada
 
 
 
+________________________________
 
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
 
-
-
------ Mail original -----=20
-
-De: "Sage Weil" <sage@newdream.net>=20
-=C3=80: "Alexandre DERUMIER" <aderumier@odiso.com>=20
-Cc: "Christoph Hellwig" <hch@infradead.org>, "Ceph Devel" <ceph-devel@v=
-ger.kernel.org>=20
-Envoy=C3=A9: Mercredi 29 Octobre 2014 16:00:56=20
-Objet: Re: krbd blk-mq support ?=20
-
-On Wed, 29 Oct 2014, Alexandre DERUMIER wrote:=20
-> >>Oh, that's without the blk-mq patch?=20
->=20
-> Yes, sorry, I don't how to use perf with a custom compiled kernel.=20
-> (Usualy I'm using perf from debian, with linux-tools package provided=
- with the debian kernel package)=20
->=20
-> >>Either way the profile doesn't really sum up to a fully used up cpu=
-=2E=20
->=20
-> But I see mostly same behaviour with or without blk-mq patch, I have =
-always 1 kworker at around 97-100%cpu (1core) for 50000iops.=20
->=20
-> I had also tried to map the rbd volume with nocrc, it's going to 6000=
-0iops with same kworker at around 97-100%cpu=20
-
-Hmm, this is probably the messenger.c worker then that is feeding messa=
-ges=20
-to the network. How many OSDs do you have? It should be able to scale=20
-with the number of OSDs.=20
-
-sage=20
-
-
->=20
->=20
->=20
-> ----- Mail original -----=20
->=20
-> De: "Christoph Hellwig" <hch@infradead.org>=20
-> ?: "Alexandre DERUMIER" <aderumier@odiso.com>=20
-> Cc: "Ceph Devel" <ceph-devel@vger.kernel.org>=20
-> Envoy?: Mardi 28 Octobre 2014 19:07:25=20
-> Objet: Re: krbd blk-mq support ?=20
->=20
-> On Mon, Oct 27, 2014 at 11:00:46AM +0100, Alexandre DERUMIER wrote:=20
-> > >>Can you do a perf report -ag and then a perf report to see where =
-these=20
-> > >>cycles are spent?=20
-> >=20
-> > Yes, sure.=20
-> >=20
-> > I have attached the perf report to this mail.=20
-> > (This is with kernel 3.14, don't have access to my 3.18 host for no=
-w)=20
->=20
-> Oh, that's without the blk-mq patch?=20
->=20
-> Either way the profile doesn't really sum up to a fully used up=20
-> cpu. Sage, Alex - are there any ordring constraints in the rbd client=
-?=20
-> If not we could probably aim for per-cpu queues using blk-mq and a=20
-> socket per cpu or similar.=20
-> --=20
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in=20
-> the body of a message to majordomo@vger.kernel.org=20
-> More majordomo info at http://vger.kernel.org/majordomo-info.html=20
->=20
->=20
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
