@@ -1,40 +1,44 @@
-From: Patrick McGarry <patrick-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
-Subject: CDS Hammer Videos Posted
-Date: Thu, 30 Oct 2014 16:47:47 -0400
-Message-ID: <CAP8Oy=LChNd6b++CXRgC1ny-99S86WQcNgg=NyzGLTYTdx_JkQ@mail.gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: rados io hints session
+Date: Thu, 30 Oct 2014 13:53:41 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1410301345180.16204@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:47915 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1161189AbaJ3Uxm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Oct 2014 16:53:42 -0400
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id A13BC80068
+	for <ceph-devel@vger.kernel.org>; Thu, 30 Oct 2014 13:53:41 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 68F7C80068
+	for <ceph-devel@vger.kernel.org>; Thu, 30 Oct 2014 13:53:41 -0700 (PDT)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hey cephers,
+I added these tickets:
 
-All videos (from both days) of Ceph Developer Summit: Hammer are now
-posted to YouTube and linked from the master wiki page:
+9957 librados: add fadvise op
+9958 osd: objectstore: add fadvise op
+9959 osd: pass client fadvise hints through to objecstore
+9960 osd: adjust hint(s) for replica vs primary writes 
 
-https://wiki.ceph.com/Planning/CDS/Hammer_(Oct_2014)
+I think there are still some open issues, though.  For example, let's 
+say the client hints WILLNEED on a replicated pool.  Do we put that in 
+the Transaction we apply to the *replicas* too, where we probably 
+want to do DONTNEED (regardless of what the client says)?
 
-We had just over 60 non-Red Hat participants from almost 20 different
-countries represented, so a big thanks to all who participated! There
-were some really great sessions that came out of this summit, so if
-you were unable to attend I would highly recommend perusing some of
-the videos that interest you.  Thanks, and see you in another release.
+Does having slightly different transactions for primary vs replica 
+make Transaction encoding problematic?  -> Perhaps we put the hint ops in 
+the local_t...
 
+Other items:
 
-Best Regards,
+9956 osd: reenable alloc hints if kernel is known to be safe
 
-Patrick McGarry
-Director Ceph Community || Red Hat
-http://ceph.com  ||  http://community.redhat.com
-@scuttlemonkey || @ceph
+We need to get to the bottom of the fadvise vs sync_file_range thing.
+
+sage
