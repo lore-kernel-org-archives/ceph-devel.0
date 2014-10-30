@@ -1,74 +1,69 @@
-From: Haomai Wang <haomaiwang-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: Micro Ceph and OpenStack Design Summit November
- 3rd, 2014 11:40am
-Date: Thu, 30 Oct 2014 16:02:28 +0800
-Message-ID: <CACJqLyay8Egcv=8x+1ZRUGLNHEHeqerwYToSOg82aZZXpO=OhQ@mail.gmail.com>
-References: <545129CD.3010303@dachary.org>
+From: Ketor D <d.ketor@gmail.com>
+Subject: Re: fio rbd completions (Was: fio rbd hang for block sizes > 1M)
+Date: Thu, 30 Oct 2014 16:04:59 +0800
+Message-ID: <CAM9_UU_NV+Ra+A0K5mES_A08HiaOEtMjuj2hxtGd4eW8cNoxWg@mail.gmail.com>
+References: <5449BBB3.7090109@catalyst.net.nz> <544E6330.1000202@kernel.dk>
+ <544E63EA.1010204@kernel.dk> <CAM9_UU-35i9uRu9EDQSM-b7CjmxrKYV2Gz8ocrykOYk+2q++hw@mail.gmail.com>
+ <544E6691.106@kernel.dk> <CAM9_UU9_ZHtwv=31DyxkAmog7XJbthiRXi5n+Y0Cfxj4qm3bGQ@mail.gmail.com>
+ <544E6A8D.1040608@kernel.dk> <CAM9_UU8x2uZZUWaPPoy+LHmUhC_3sqKZ9GPsEqDwKUkprg4kdQ@mail.gmail.com>
+ <544EC05D.7040807@catalyst.net.nz> <544EC7F1.6010900@kernel.dk>
+ <544ED37D.6060800@catalyst.net.nz> <CAM9_UU8MHdj+mjAWBziETxPDnwTt0JBuHrQp2Fu9YtF=msae3w@mail.gmail.com>
+ <79432849-2F58-4738-82E1-E4D8AB10A6AE@kernel.dk> <CAM9_UU9G5vQ68UxMakte-Wb5B9_KBo24ov7=hNHpYqEtko2nQg@mail.gmail.com>
+ <544FB2F2.2060703@kernel.dk> <CAM9_UU_o8kS1wJnDKTvd8+qkm9=93yfW3THr_8ni8C+5=TH6tg@mail.gmail.com>
+ <544FCDBD.7070106@kernel.dk> <CAM9_UU-gyExbAEo608vGnjqBk56A_VRZc44HkywUuLmXoEZ4Cg@mail.gmail.com>
+ <CAM9_UU8=MtUnQiembBfr8YQiDOD7TNey=mp8_H6gySenRVHy6A@mail.gmail.com>
+ <5450FA47.2030203@kernel.dk> <5451EC63.9070600@catalyst.net.nz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <545129CD.3010303-cLsNCMjd+0JAfugRpC6u6w@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Loic Dachary <loic-cLsNCMjd+0JAfugRpC6u6w@public.gmane.org>
-Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-oi0-f47.google.com ([209.85.218.47]:55948 "EHLO
+	mail-oi0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758242AbaJ3IFb (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Oct 2014 04:05:31 -0400
+In-Reply-To: <5451EC63.9070600@catalyst.net.nz>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>
+Cc: Jens Axboe <axboe@kernel.dk>, Mark Nelson <mark.nelson@inktank.com>, Mark Nelson <mark.a.nelson@gmail.com>, "fio@vger.kernel.org" <fio@vger.kernel.org>, "xan.peng" <xanpeng@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-VGhhbmtzIGZvciBMb2ljIQoKSSB3aWxsIGpvaW4uCgpPbiBUaHUsIE9jdCAzMCwgMjAxNCBhdCAx
-OjU0IEFNLCBMb2ljIERhY2hhcnkgPGxvaWNAZGFjaGFyeS5vcmc+IHdyb3RlOgo+IEhpIENlcGgs
-Cj4KPiBUTDtEUjogUmVnaXN0ZXIgZm9yIHRoZSBNaWNybyBDZXBoIGFuZCBPcGVuU3RhY2sgRGVz
-aWduIFN1bW1pdCBOb3ZlbWJlciAzcmQsIDIwMTQgMTE6NDBhbSBodHRwOi8va2lsb2Rlc2lnbnN1
-bW1pdC5zY2hlZC5vcmcvZXZlbnQvZjJlNDlmNDU0N2E3NTdjYzNkNTFmNTY0MWIyMDAwY2IKPgo+
-IE5vdmVtYmVyIDNyZCwgMjAxNCAxMTo0MGFtLCBkdXJpbmcgdGhlIE9wZW5TdGFjayBzdW1taXQg
-aW4gUGFyaXNbMV0sIHRoZSBwcmVzZW50IGFuZCB0aGUgZnV0dXJlIG9mIENlcGggYW5kIE9wZW5T
-dGFjayB3aWxsIGJlIGRpc2N1c3NlZCB3aXRoIENlcGggYW5kIE9wZW5TdGFjayBkZXZlbG9wZXJz
-LiBUaGUgZm9sbG93aW5nIGFnZW5kYSB3YXMgcHJlcGFyZWQgYmFzZWQgb24gZmVlZGJhY2sgZnJv
-bSB0aGUgcGFydGljaXBhbnRzWzNdLiBJdCBpcyBob3dldmVyIG1vcmUgb2YgYSBndWlkZWxpbmUg
-dGhhbiBhIGZpeGVkIHBsYW4gYW5kIGV2ZXJ5b25lIHdpbGwgYmUgaW52aXRlZCB0byBwYXJ0aWNp
-cGF0ZS4KPgo+ICogQ2VwaCBhbmQgT3BlblN0YWNrIHN0YXRlICYgcm9hZG1hcCAoMzBtaW4pCj4g
-ICBKb3NoIER1cmdpbiBhbmQgU8OpYmFzdGllbiBIYW4KPgo+ICAgKiBHbGFuY2UKPiAgICogTm92
-YQo+ICAgKiBDaW5kZXIKPiAgICogS2lsbyBSb2FkbWFwCj4KPiAqIENlcGggUGVyZm9ybWFuY2Ug
-dHVuaW5nICgzMG1pbikKPiAgIEpvc2ggRHVyZ2luCj4KPiAgIEltcHJvdmVkIHBlcmZvcm1hbmNl
-cyBoYXMgYmVjb21lIGFuIGluY3JlYXNpbmdseSBpbXBvcnRhbnQgdG9waWMgZm9yIENlcGggYW5k
-IGl0IGlzIGRpc2N1c3NlZCB3ZWVrbHkgd2l0aCB0aGUgY29tbXVuaXR5WzRdLiBBIHNob3J0IHN1
-bW1hcnkgb2YgZWFjaCBvbmdvaW5nIGRpc2N1c3Npb24gdG9waWMgd2lsbCBiZSBwcmVzZW50ZWQu
-IFRoZSBsYXRlc3QgYWN0aW9uIGl0ZW1zIGRlY2lkZWQgZHVyaW5nIHRoZSBDZXBoIERldmVsb3Bl
-ciBTdW1taXRbNV0gdGhhdCBoYXBwZW5zIHRoaXMgd2VlayB3aWxsIGFsc28gYmUgZGlzY3Vzc2Vk
-Lgo+Cj4gICAqIEFzeW5jIE1lc3Nlbmdlcgo+ICAgKiBYSU8gTWVzc2VuZ2VyCj4gICAqIFJCRCBJ
-T1BTIFBlcmZvcm1hbmNlCj4gICAqIE9TRCBQZXJmb3JtYW5jZQo+ICAgKiBDYWNoZSBUaWVyaW5n
-IFBlcmZvcm1hbmNlCj4gICAqIE1vbml0b3IgUGVyZm9ybWFuY2VzCj4gICAqIFNlcXVlbnRpYWwv
-UmFuZG9tIERpc2sgVGhyb3VnaHB1dAo+ICAgKiBMVFRORyB0cmFjZXBvaW50cwo+ICAgKiBFcmFz
-dXJlIENvZGUgTFJDLCBJU0EgYW5kIE5FT04KPgo+ICogT3BlblN0YWNrIGFuZCBDZXBoIERlcGxv
-eW1lbnQgYXV0b21hdGlvbiAoMzBtaW4pCj4gICBTw6liYXN0aWVuIEhhbiBhbmQgTG/Dr2MgRGFj
-aGFyeQo+Cj4gICBDZXBoIHdhcyBpbXByb3ZlZCB0byBtYWtlIGl0IGVhc2llciB0byB3cml0ZSBt
-b2R1bGVzL3JlY2lwZXMgZm9yIGFsbCBraW5kcyBvZiBkZXBsb3ltZW50IHRvb2xzLiBUaGV5IGFy
-ZSBhdCB2YXJpb3VzIHN0YWdlcyBvZiBtYXR1cml0eSBhbmQgaXQgaXMgb2Z0ZW4gcXVpdGUgZGlm
-ZmljdWx0IHRvIGZpZ3VyZSBvdXQgd2hpY2ggb25lIGlzIHJpZ2h0IGluIGEgZ2l2ZW4gY29udGV4
-dC4gV2Ugd2lsbCBnaXZlIGEgc2hvcnQgdG91ciBvZiB0aGUgY3VycmVudCBzdGF0ZSBvZiBlYWNo
-IHRvb2wsIHRoZSBkZXZlbG9wbWVudCBlZmZvcnQgYmVoaW5kIHRoZW0gYW5kIHdoYXQgd2UgY2Fu
-IGV4cGVjdCBpbiB0aGUgbmVhciBmdXR1cmUuCj4KPiAgICogYW5zaWJsZQo+ICAgKiBjZXBoLWRl
-cGxveQo+ICAgKiBqdWp1Cj4gICAqIHB1cHBldAo+ICAgKiBjaGVmCj4KPiBDaGVlcnMKPgo+IFsx
-XSBPcGVuU3RhY2sgU3VtbWl0IFBhcmlzIGh0dHBzOi8vd3d3Lm9wZW5zdGFjay5vcmcvc3VtbWl0
-L29wZW5zdGFjay1wYXJpcy1zdW1taXQtMjAxNC8KPiBbMl0gQ2VwaCBmb3IgT3BlblN0YWNrIERl
-c2lnbiBTZXNzaW9uIGh0dHA6Ly9raWxvZGVzaWduc3VtbWl0LnNjaGVkLm9yZy9ldmVudC9mMmU0
-OWY0NTQ3YTc1N2NjM2Q1MWY1NjQxYjIwMDBjYgo+IFszXSBQYWQgcHJlcGFyYXRpb24gaHR0cHM6
-Ly9ldGhlcnBhZC5vcGVuc3RhY2sub3JnL3Ava2lsby1jZXBoCj4gWzRdIFdlZWtseSBDZXBoIFBl
-cmZvcm1hbmNlIE1lZXRpbmcgaHR0cHM6Ly93d3cubWFpbC1hcmNoaXZlLmNvbS9jZXBoLWRldmVs
-QHZnZXIua2VybmVsLm9yZy9tc2cyMDc0NC5odG1sIGFuZCBodHRwOi8vcGFkLmNlcGguY29tL3Av
-cGVyZm9ybWFuY2Vfd2Vla2x5Cj4gWzVdIENlcGggRGV2ZWxvcGVyIFN1bW1pdCBodHRwczovL3dp
-a2kuY2VwaC5jb20vUGxhbm5pbmcvQ0RTL0hhbW1lcl8lMjhPY3RfMjAxNCUyOQo+Cj4gLS0KPiBM
-b8OvYyBEYWNoYXJ5LCBBcnRpc2FuIExvZ2ljaWVsIExpYnJlCj4KPgo+IF9fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCj4gY2VwaC11c2VycyBtYWlsaW5nIGxp
-c3QKPiBjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCj4gaHR0cDovL2xpc3RzLmNlcGguY29tL2xp
-c3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCj4KCgoKLS0gCkJlc3QgUmVnYXJkcywKCldo
-ZWF0Cl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmNlcGgt
-dXNlcnMgbWFpbGluZyBsaXN0CmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KaHR0cDovL2xpc3Rz
-LmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCg==
+Hi Mark,
+      Could you do a fio test in your env with the busy_poll=1 ?
+I am very interested in the busy_poll result. Thanks!
+
+2014-10-30 15:44 GMT+08:00 Mark Kirkwood <mark.kirkwood@catalyst.net.nz>:
+> On 30/10/14 03:31, Jens Axboe wrote:
+>>
+>> On 2014-10-29 01:15, Ketor D wrote:
+>>>
+>>> Hi, Jens,
+>>>
+>>> There is cmdline parse bug in the fio rbd test.
+>>>
+>>> I have fixed this and create a pull request on the github.
+>>>
+>>> Please review.
+>>>
+>>> After fix the bugs, the fio test can run.
+>>
+>>
+>> I merged your two pull requests (thanks!) and committed a polished
+>> variant of the sort patch. Ketor and Mark, would you mind both running a
+>> quick benchmark on the current -git head?
+>>
+>
+> Better late than never (sorry), comparing with the 'original' fio code
+> containing the usleep(100):
+>
+> blocksize k | head iops     | orig iops
+> ------------+---------------+--------------
+> 4           |  11114        |  11516
+> 128         |   4551        |   6550
+> 1024        |   1195        |   1248
+>
+> So we do pretty much the same except in the middle blocksize range (I
+> checked again with the old binary just to rule out any other changes on the
+> ceph end...).
+>
+> Regards
+>
+> Mark
