@@ -1,83 +1,130 @@
-From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
-Subject: Re: the state of cephfs in giant
-Date: Thu, 30 Oct 2014 08:28:01 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1410300823290.27022@cobra.newdream.net>
-References: <alpine.DEB.2.00.1410131114130.10561@cobra.newdream.net>
-	<CAPUexz_+jD7RMNSZEgy3h6WqKS4PSMj1fbyRgLKxQWHvctviNA@mail.gmail.com>
+From: Ilya Dryomov <ilya.dryomov@inktank.com>
+Subject: Re: [PATCH] libceph: do not crash on large auth tickets
+Date: Thu, 30 Oct 2014 19:47:17 +0400
+Message-ID: <CALFYKtCNekDr-LORs-U8-GBEC2ZN=_oFyVTXy378AL3rY0iibw@mail.gmail.com>
+References: <1414425929-10625-1-git-send-email-idryomov@redhat.com>
+	<alpine.DEB.2.00.1410300805270.27022@cobra.newdream.net>
+	<CALFYKtCnc5Te6n+-pYYXDQfnxVBFdtjc6Cnys_1ok6SPVbDWiA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAPUexz_+jD7RMNSZEgy3h6WqKS4PSMj1fbyRgLKxQWHvctviNA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Florian Haas <florian-Aci1KgOBn19BDgjK7y7TUQ@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-qa0-f47.google.com ([209.85.216.47]:55618 "EHLO
+	mail-qa0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758284AbaJ3PrS (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Oct 2014 11:47:18 -0400
+Received: by mail-qa0-f47.google.com with SMTP id dc16so3862124qab.20
+        for <ceph-devel@vger.kernel.org>; Thu, 30 Oct 2014 08:47:17 -0700 (PDT)
+In-Reply-To: <CALFYKtCnc5Te6n+-pYYXDQfnxVBFdtjc6Cnys_1ok6SPVbDWiA@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Thu, 30 Oct 2014, Florian Haas wrote:
-> Hi Sage,
-> 
-> sorry to be late to this thread; I just caught this one as I was
-> reviewing the Giant release notes. A few questions below:
-> 
-> On Mon, Oct 13, 2014 at 8:16 PM, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org> wrote:
-> > [...]
-> > * ACLs: implemented, tested for kernel client. not implemented for
-> >   ceph-fuse.
-> > [...]
-> > * samba VFS integration: implemented, limited test coverage.
-> 
-> ACLs are kind of a must-have feature for most Samba admins. The Samba
-> Ceph VFS builds on userspace libcephfs directly, neither the kernel
-> client nor ceph-fuse, so I'm trying to understand whether ACLs are
-> available to Samba users or not. Can you clarify please?
+On Thu, Oct 30, 2014 at 6:18 PM, Ilya Dryomov <ilya.dryomov@inktank.com> wrote:
+> On Thu, Oct 30, 2014 at 6:10 PM, Sage Weil <sage@newdream.net> wrote:
+>> On Mon, 27 Oct 2014, Ilya Dryomov wrote:
+>>> Large (greater than 32k, the value of PAGE_ALLOC_COSTLY_ORDER) auth
+>>> tickets will have their buffers vmalloc'ed, which leads to the
+>>> following crash in crypto:
+>>>
+>>> [   28.685082] BUG: unable to handle kernel paging request at ffffeb04000032c0
+>>> [   28.686032] IP: [<ffffffff81392b42>] scatterwalk_pagedone+0x22/0x80
+>>> [   28.686032] PGD 0
+>>> [   28.688088] Oops: 0000 [#1] PREEMPT SMP
+>>> [   28.688088] Modules linked in:
+>>> [   28.688088] CPU: 0 PID: 878 Comm: kworker/0:2 Not tainted 3.17.0-vm+ #305
+>>> [   28.688088] Hardware name: Bochs Bochs, BIOS Bochs 01/01/2007
+>>> [   28.688088] Workqueue: ceph-msgr con_work
+>>> [   28.688088] task: ffff88011a7f9030 ti: ffff8800d903c000 task.ti: ffff8800d903c000
+>>> [   28.688088] RIP: 0010:[<ffffffff81392b42>]  [<ffffffff81392b42>] scatterwalk_pagedone+0x22/0x80
+>>> [   28.688088] RSP: 0018:ffff8800d903f688  EFLAGS: 00010286
+>>> [   28.688088] RAX: ffffeb04000032c0 RBX: ffff8800d903f718 RCX: ffffeb04000032c0
+>>> [   28.688088] RDX: 0000000000000000 RSI: 0000000000000001 RDI: ffff8800d903f750
+>>> [   28.688088] RBP: ffff8800d903f688 R08: 00000000000007de R09: ffff8800d903f880
+>>> [   28.688088] R10: 18df467c72d6257b R11: 0000000000000000 R12: 0000000000000010
+>>> [   28.688088] R13: ffff8800d903f750 R14: ffff8800d903f8a0 R15: 0000000000000000
+>>> [   28.688088] FS:  00007f50a41c7700(0000) GS:ffff88011fc00000(0000) knlGS:0000000000000000
+>>> [   28.688088] CS:  0010 DS: 0000 ES: 0000 CR0: 000000008005003b
+>>> [   28.688088] CR2: ffffeb04000032c0 CR3: 00000000da3f3000 CR4: 00000000000006b0
+>>> [   28.688088] Stack:
+>>> [   28.688088]  ffff8800d903f698 ffffffff81392ca8 ffff8800d903f6e8 ffffffff81395d32
+>>> [   28.688088]  ffff8800dac96000 ffff880000000000 ffff8800d903f980 ffff880119b7e020
+>>> [   28.688088]  ffff880119b7e010 0000000000000000 0000000000000010 0000000000000010
+>>> [   28.688088] Call Trace:
+>>> [   28.688088]  [<ffffffff81392ca8>] scatterwalk_done+0x38/0x40
+>>> [   28.688088]  [<ffffffff81392ca8>] scatterwalk_done+0x38/0x40
+>>> [   28.688088]  [<ffffffff81395d32>] blkcipher_walk_done+0x182/0x220
+>>> [   28.688088]  [<ffffffff813990bf>] crypto_cbc_encrypt+0x15f/0x180
+>>> [   28.688088]  [<ffffffff81399780>] ? crypto_aes_set_key+0x30/0x30
+>>> [   28.688088]  [<ffffffff8156c40c>] ceph_aes_encrypt2+0x29c/0x2e0
+>>> [   28.688088]  [<ffffffff8156d2a3>] ceph_encrypt2+0x93/0xb0
+>>> [   28.688088]  [<ffffffff8156d7da>] ceph_x_encrypt+0x4a/0x60
+>>> [   28.688088]  [<ffffffff8155b39d>] ? ceph_buffer_new+0x5d/0xf0
+>>> [   28.688088]  [<ffffffff8156e837>] ceph_x_build_authorizer.isra.6+0x297/0x360
+>>> [   28.688088]  [<ffffffff8112089b>] ? kmem_cache_alloc_trace+0x11b/0x1c0
+>>> [   28.688088]  [<ffffffff8156b496>] ? ceph_auth_create_authorizer+0x36/0x80
+>>> [   28.688088]  [<ffffffff8156ed83>] ceph_x_create_authorizer+0x63/0xd0
+>>> [   28.688088]  [<ffffffff8156b4b4>] ceph_auth_create_authorizer+0x54/0x80
+>>> [   28.688088]  [<ffffffff8155f7c0>] get_authorizer+0x80/0xd0
+>>> [   28.688088]  [<ffffffff81555a8b>] prepare_write_connect+0x18b/0x2b0
+>>> [   28.688088]  [<ffffffff81559289>] try_read+0x1e59/0x1f10
+>>>
+>>> This is because we set up crypto scatterlists as if all buffers were
+>>> kmalloc'ed.  Fix it.
+>>>
+>>> Cc: stable@vger.kernel.org
+>>> Signed-off-by: Ilya Dryomov <idryomov@redhat.com>
+>>> ---
+>>>  net/ceph/crypto.c |   33 +++++++++++++++++++++++++--------
+>>>  1 file changed, 25 insertions(+), 8 deletions(-)
+>>>
+>>> diff --git a/net/ceph/crypto.c b/net/ceph/crypto.c
+>>> index 62fc5e7a9acf..37a9b5eea3c3 100644
+>>> --- a/net/ceph/crypto.c
+>>> +++ b/net/ceph/crypto.c
+>>> @@ -90,6 +90,27 @@ static struct crypto_blkcipher *ceph_crypto_alloc_cipher(void)
+>>>
+>>>  static const u8 *aes_iv = (u8 *)CEPH_AES_IV;
+>>>
+>>> +/*
+>>> + * Should be used for buffers allocated with ceph_kvmalloc().
+>>> + * Currently these are encrypt out-buffer (ceph_buffer) and decrypt
+>>> + * in-buffer (msg front).  @buf has to fit in a single page.
+>
+>                                ^^^^
+>
+>>> + */
+>>> +static void set_kvmalloc_buf(struct scatterlist *sg, const void *buf,
+>>> +                          size_t len)
+>>> +{
+>>> +     const void *sg_buf;
+>>> +     unsigned long off = offset_in_page(buf);
+>>> +
+>>> +     BUG_ON(off + len > PAGE_SIZE);
+>
+>          ^^^^
+>
+>>> +
+>>> +     if (is_vmalloc_addr(buf))
+>>> +             sg_buf = page_address(vmalloc_to_page(buf)) + off;
+>>
+>> I'm not very familiar with the vm stuff, but this confuses me.  It looks
+>> like it's taking the low memory (physical?) address of the first page in
+>> the vmalloc'ed range.  But the whole point of vmalloc is that it is
+>> allocating non-contiguous physical memory.  How does the sg code
+>> traverse the rest of the buffer if it isn't using the virtual addresses
+>> that vmalloc set up?
+>
+> It doesn't - the buffer has to fit in a single page, works for the
+> current users.  To make it work with multiple pages we'd have to
+> allocate one sg per page and init each of them in this (or similar)
+> fashion.
 
-I believe that with the current integration, Samba is doing all of the 
-ACLs and storing them as xattrs.  They will work for CIFS users, but won't 
-be coherent with users access the same file system directly via the kernel 
-cephfs client or NFS or some other means.
+Or we could use sg_alloc_table_from_pages() which it looks like will coalesce
+physically adjacent pages into a single sg.  I went with a simpler solution
+because all current users of ceph_{encrypt,decrypt}() are fine with a single
+page constraint.
 
-This is a general problem with NFS vs CIFS.  The richacl project built a 
-coherent ACL structure that captures both NFS4 and windows ACLs but it has 
-not made it into the mainline kernel.  :/
+Thanks,
 
-> > * ganesha NFS integration: implemented, no test coverage.
-> 
-> I understood from a conversation I had with John in London that
-> flock() and fcntl() support had recently been added to ceph-fuse, can
-> this be expected to Just Work? in Ganesha as well?
-
-It probably could without much trouble, but I don't think it has been 
-wired up.  This is probably a pretty simple matter...
-
-> Also, can you make a general statement as to the stability of flock()
-> and fcntl() support in the kernel client and in libcephfs/ceph-fuse?
-> This too is particularly interesting for Samba admins who rely on
-> byte-range locking for Samba CTDB support.
-
-Zheng fixed a bug or two with the existing kernel and MDS support when he 
-did the ceph-fuse/libcephfs implementation.  At this point there are no 
-known issues.  I would not expect problems, but will of course be very 
-interested to hear bug reports.
-
-> > * kernel NFS reexport: implemented. limited test coverage. no known
-> >   issues.
-> 
-> In this scenario, is there any specific magic that the kernel client
-> does to avoid producing deadlocks under memory pressure? Or are you
-> referring to FUSE-mounted CephFS reexported via kernel NFS?
-
-I'm not aware of any memory deadlock issues with NFS reexport.  Unless the 
-ceph daemons are running on the same host as the client/exporter... but 
-that is not specific to NFS.
-
-Hope that helps!
-sage
+                Ilya
