@@ -1,61 +1,56 @@
-From: Ketor D <d.ketor@gmail.com>
-Subject: Re: fio rbd completions (Was: fio rbd hang for block sizes > 1M)
-Date: Thu, 30 Oct 2014 13:29:08 +0800
-Message-ID: <CAM9_UU83b-V1z=Lsd=WDEZU3fuP28rmoVYJRAoCoBpuDECnQ3g@mail.gmail.com>
-References: <5449BBB3.7090109@catalyst.net.nz> <544E63EA.1010204@kernel.dk>
- <CAM9_UU-35i9uRu9EDQSM-b7CjmxrKYV2Gz8ocrykOYk+2q++hw@mail.gmail.com>
- <544E6691.106@kernel.dk> <CAM9_UU9_ZHtwv=31DyxkAmog7XJbthiRXi5n+Y0Cfxj4qm3bGQ@mail.gmail.com>
- <544E6A8D.1040608@kernel.dk> <CAM9_UU8x2uZZUWaPPoy+LHmUhC_3sqKZ9GPsEqDwKUkprg4kdQ@mail.gmail.com>
- <544EC05D.7040807@catalyst.net.nz> <544EC7F1.6010900@kernel.dk>
- <544ED37D.6060800@catalyst.net.nz> <CAM9_UU8MHdj+mjAWBziETxPDnwTt0JBuHrQp2Fu9YtF=msae3w@mail.gmail.com>
- <79432849-2F58-4738-82E1-E4D8AB10A6AE@kernel.dk> <CAM9_UU9G5vQ68UxMakte-Wb5B9_KBo24ov7=hNHpYqEtko2nQg@mail.gmail.com>
- <544FB2F2.2060703@kernel.dk> <CAM9_UU_o8kS1wJnDKTvd8+qkm9=93yfW3THr_8ni8C+5=TH6tg@mail.gmail.com>
- <544FCDBD.7070106@kernel.dk> <CAM9_UU-gyExbAEo608vGnjqBk56A_VRZc44HkywUuLmXoEZ4Cg@mail.gmail.com>
- <CAM9_UU8=MtUnQiembBfr8YQiDOD7TNey=mp8_H6gySenRVHy6A@mail.gmail.com>
- <5450FA47.2030203@kernel.dk> <CAM9_UU-BWHSk713O9v9RuZd1PRfTfG-Vq9nox0YQO3MhV06YEA@mail.gmail.com>
- <5451A8A3.8020106@kernel.dk>
+From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+Subject: Re: v0.87 Giant released
+Date: Wed, 29 Oct 2014 22:54:36 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1410292251440.27022@cobra.newdream.net>
+References: <alpine.DEB.2.00.1410291454570.1234@cobra.newdream.net>
+	<54517AF6.6030408@utas.edu.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f51.google.com ([209.85.218.51]:64836 "EHLO
-	mail-oi0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756623AbaJ3F3j (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Oct 2014 01:29:39 -0400
-In-Reply-To: <5451A8A3.8020106@kernel.dk>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Jens Axboe <axboe@kernel.dk>
-Cc: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>, Mark Nelson <mark.nelson@inktank.com>, Mark Nelson <mark.a.nelson@gmail.com>, "fio@vger.kernel.org" <fio@vger.kernel.org>, "xan.peng" <xanpeng@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <54517AF6.6030408-w4dW+7W4mDC6c6uEtOJ/EA@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Nigel Williams <nigel.williams-w4dW+7W4mDC6c6uEtOJ/EA@public.gmane.org>
+Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-Thanks ,I feel a great honour to finished these test and happy to help
-improved fio.
-And I am trying to decrease the librbd latency. I have make some small progess.
+On Thu, 30 Oct 2014, Nigel Williams wrote:
+> On 30/10/2014 8:56 AM, Sage Weil wrote:
+> > * *Degraded vs misplaced*: the Ceph health reports from 'ceph -s' and
+> >    related commands now make a distinction between data that is
+> >    degraded (there are fewer than the desired number of copies) and
+> >    data that is misplaced (stored in the wrong location in the
+> >    cluster).
+> 
+> Is someone able to briefly described how/why misplaced happens please, is it
+> repaired eventually? I've not seen misplaced (yet).
 
-2014-10-30 10:55 GMT+08:00 Jens Axboe <axboe@kernel.dk>:
-> On 2014-10-29 20:50, Ketor D wrote:
->>
->> Hi Jens,
->>
->> The current code runs good!
->>
->> Test Conf: jobs=1 iodepth=1 bs=4k
->>
->> if busy_poll = 1, IOPS is 38989.
->> if busy_poll = 0, IOPS is 33031.
->>
->> And busy_poll=0 test result looks no difference from the old code than
->> do not have sorted events wait.
->
->
-> Good to hear! I think we can safely say that we've pushed rbd as far as we
-> can. At least on the fio side. Still appears to be some suboptimal parts of
-> the librbd API. And the kernel rbd driver could definitely be improved a lot
-> as well. Using busy_poll on the user side gets rid of a sleep/wakeup cycle
-> at that end, but the kernel driver still punts and offloads any work item to
-> a work queue...
->
-> Thanks for all your testing through this, really appreciated!
->
-> --
-> Jens Axboe
->
+Sure.  An easy way to get misplaced objects is to do 'ceph osd 
+out N' on an OSD.  Nothing is down, we still have as many copies 
+as we had before, but Ceph now wants to move them somewhere 
+else. Starting with giant, you will see the misplaced % in 'ceph -s' and 
+not degraded.
+
+> >      leveldb_write_buffer_size = 32*1024*1024  = 33554432  // 32MB
+> >      leveldb_cache_size        = 512*1024*1204 = 536870912 // 512MB
+> 
+> I noticed the typo, wondered about the code, but I'm not seeing the same
+> values anyway?
+> 
+> https://github.com/ceph/ceph/blob/giant/src/common/config_opts.h
+> 
+> OPTION(leveldb_write_buffer_size, OPT_U64, 8 *1024*1024) // leveldb write
+> buffer size
+> OPTION(leveldb_cache_size, OPT_U64, 128 *1024*1024) // leveldb cache size
+
+Hmm!  Not sure where that 32MB number came from.  I'll fix it, thanks!
+
+sage
