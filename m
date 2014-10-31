@@ -1,88 +1,49 @@
-From: Ding Dinghua <dingdinghua85@gmail.com>
-Subject: Fix dead looping in Objecter::handle_osd_map
-Date: Fri, 31 Oct 2014 13:23:15 +0800
-Message-ID: <CANf+_kJEFtzt3r8Y0XuZsodw4AiFem8oezV4A+T-FnMcB18oFA@mail.gmail.com>
+From: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>
+Subject: Re: fio rbd completions (Was: fio rbd hang for block sizes > 1M)
+Date: Fri, 31 Oct 2014 21:54:32 +1300
+Message-ID: <54534E48.8080505@catalyst.net.nz>
+References: <5449BBB3.7090109@catalyst.net.nz> <CAM9_UU-35i9uRu9EDQSM-b7CjmxrKYV2Gz8ocrykOYk+2q++hw@mail.gmail.com> <544E6691.106@kernel.dk> <CAM9_UU9_ZHtwv=31DyxkAmog7XJbthiRXi5n+Y0Cfxj4qm3bGQ@mail.gmail.com> <544E6A8D.1040608@kernel.dk> <CAM9_UU8x2uZZUWaPPoy+LHmUhC_3sqKZ9GPsEqDwKUkprg4kdQ@mail.gmail.com> <544EC05D.7040807@catalyst.net.nz> <544EC7F1.6010900@kernel.dk> <544ED37D.6060800@catalyst.net.nz> <CAM9_UU8MHdj+mjAWBziETxPDnwTt0JBuHrQp2Fu9YtF=msae3w@mail.gmail.com> <79432849-2F58-4738-82E1-E4D8AB10A6AE@kernel.dk> <CAM9_UU9G5vQ68UxMakte-Wb5B9_KBo24ov7=hNHpYqEtko2nQg@mail.gmail.com> <544FB2F2.2060703@kernel.dk> <CAM9_UU_o8kS1wJnDKTvd8+qkm9=93yfW3THr_8ni8C+5=TH6tg@mail.gmail.com> <544FCDBD.7070106@kernel.dk> <CAM9_UU-gyExbAEo608vGnjqBk56A_VRZc44HkywUuLmXoEZ4Cg@mail.gmail.com> <CAM9_UU8=
+ MtUnQiembBfr8YQiDOD7TNey=mp8_H6gySenRVHy6A@mail.gmail.com> <5450FA47.2030203@kernel.dk> <5451EC63.9070600@catalyst.net.nz> <CAM9_UU_NV+Ra+A0K5mES_A08HiaOEtMjuj2hxtGd4eW8cNoxWg@mail.gmail.com
+ >
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary=001a1132ed38aa9f3f0506b131d5
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f177.google.com ([209.85.217.177]:61252 "EHLO
-	mail-lb0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752825AbaJaFXR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 31 Oct 2014 01:23:17 -0400
-Received: by mail-lb0-f177.google.com with SMTP id 10so5295428lbg.8
-        for <ceph-devel@vger.kernel.org>; Thu, 30 Oct 2014 22:23:16 -0700 (PDT)
+Received: from bertrand.catalyst.net.nz ([202.78.240.40]:38997 "EHLO
+	mail.catalyst.net.nz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752825AbaJaIyi (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 31 Oct 2014 04:54:38 -0400
+In-Reply-To: <CAM9_UU_NV+Ra+A0K5mES_A08HiaOEtMjuj2hxtGd4eW8cNoxWg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Ketor D <d.ketor@gmail.com>
+Cc: Jens Axboe <axboe@kernel.dk>, Mark Nelson <mark.nelson@inktank.com>, Mark Nelson <mark.a.nelson@gmail.com>, "fio@vger.kernel.org" <fio@vger.kernel.org>, "xan.peng" <xanpeng@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
---001a1132ed38aa9f3f0506b131d5
-Content-Type: text/plain; charset=UTF-8
+On 30/10/14 21:04, Ketor D wrote:
+> Hi Mark,
+>        Could you do a fio test in your env with the busy_poll=1 ?
+> I am very interested in the busy_poll result. Thanks!
+>
 
-Hi all:
-        I hit this bug when I was using ceph-fuse client. I mount a
-ceph-fuse client, and left it idle for a long time, then when I copy
-some files to ceph,  ceph-fuse hang,  the following log shows that
-Objecter::handle_osd_map is dead-looping:
+Sure:
 
-handle_osd_map missing epoch 6445, jumping to 6579
-handle_osd_map missing epoch 6445, jumping to 6579
-handle_osd_map missing epoch 6445, jumping to 6579
-handle_osd_map missing epoch 6445, jumping to 6579
-handle_osd_map missing epoch 6445, jumping to 6579
-handle_osd_map missing epoch 6445, jumping to 6579
-handle_osd_map missing epoch 6445, jumping to 6579
-handle_osd_map missing epoch 6445, jumping to 6579
+blocksize k | head iops     |  head iops (busy_pool=1)
+------------+---------------+--------------------------
+4           |  11114        |  12608
+128         |   4551        |   6422
+1024        |   1195        |   1175
+4096        |    320        |    316
 
-the attached patch should have fixed the bug.
+So looks like the busy_pool=1 improves performance for small and mid 
+range blocksizes but is a little slower at the larger end.
+
+However there are a lot of variables here - I'm using iodepth=32 for 
+instance, and altering that may change the pattern I'm seeing, also a 
+system with more osd's may bring out different behaviours as it runs the 
+fio client out of available cpu power in the smaller block sizes.
+
+Regards
+
+Mark
 
 
--- 
-Ding Dinghua
-
---001a1132ed38aa9f3f0506b131d5
-Content-Type: application/octet-stream;
-	name="0001-e-shouldn-t-be-zero-in-Objecter-handle_osd_map.patch"
-Content-Disposition: attachment;
-	filename="0001-e-shouldn-t-be-zero-in-Objecter-handle_osd_map.patch"
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_i1x3fstg0
-
-RnJvbSA2NzU2YmIwMWEwNzQyOGUyN2EwNGQ3MzEzM2MxOTU4YTYzMTM0YTUzIE1vbiBTZXAgMTcg
-MDA6MDA6MDAgMjAwMQpGcm9tOiBkaW5nZGluZ2h1YSA8ZGluZ2RpbmdodWFAMzYwLmNuPgpEYXRl
-OiBUaHUsIDMwIE9jdCAyMDE0IDE0OjU4OjA1ICswODAwClN1YmplY3Q6IFtQQVRDSCAxLzJdIGUg
-c2hvdWxkbid0IGJlIHplcm8gaW4gT2JqZWN0ZXI6OmhhbmRsZV9vc2RfbWFwCgotLS0KIHNyYy9v
-c2RjL09iamVjdGVyLmNjIHwgICAgMiArLQogMSBmaWxlcyBjaGFuZ2VkLCAxIGluc2VydGlvbnMo
-KyksIDEgZGVsZXRpb25zKC0pCgpkaWZmIC0tZ2l0IGEvc3JjL29zZGMvT2JqZWN0ZXIuY2MgYi9z
-cmMvb3NkYy9PYmplY3Rlci5jYwppbmRleCAxZDY0NDhiLi41Njk5OGZlIDEwMDY0NAotLS0gYS9z
-cmMvb3NkYy9PYmplY3Rlci5jYworKysgYi9zcmMvb3NkYy9PYmplY3Rlci5jYwpAQCAtNzc2LDcg
-Kzc3Niw3IEBAIHZvaWQgT2JqZWN0ZXI6OmhhbmRsZV9vc2RfbWFwKE1PU0RNYXAgKm0pCiAJICBs
-b2dnZXItPmluYyhsX29zZGNfbWFwX2Z1bGwpOwogCX0KIAllbHNlIHsKLQkgIGlmIChlICYmIGUg
-PiBtLT5nZXRfb2xkZXN0KCkpIHsKKwkgIGlmIChlID4gbS0+Z2V0X29sZGVzdCgpKSB7CiAJICAg
-IGxkb3V0KGNjdCwgMykgPDwgImhhbmRsZV9vc2RfbWFwIHJlcXVlc3RpbmcgbWlzc2luZyBlcG9j
-aCAiCiAJCQkgIDw8IG9zZG1hcC0+Z2V0X2Vwb2NoKCkrMSA8PCBkZW5kbDsKIAkgICAgaW50IHIg
-PSBfbWF5YmVfcmVxdWVzdF9tYXAoKTsKLS0gCjEuNy4xCgo=
---001a1132ed38aa9f3f0506b131d5
-Content-Type: application/octet-stream;
-	name="0002-Fix-a-bug-of-dead-looping-in-Objecter-handle_osd_map.patch"
-Content-Disposition: attachment;
-	filename="0002-Fix-a-bug-of-dead-looping-in-Objecter-handle_osd_map.patch"
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_i1x3fsu81
-
-RnJvbSBkNmY0NWIyYWQxN2IwMGI1ZmRhMTkwZTllMmQ5ZjJmNTBhYTNiZjVkIE1vbiBTZXAgMTcg
-MDA6MDA6MDAgMjAwMQpGcm9tOiBkaW5nZGluZ2h1YSA8ZGluZ2RpbmdodWFAMzYwLmNuPgpEYXRl
-OiBUaHUsIDMwIE9jdCAyMDE0IDE0OjU4OjQyICswODAwClN1YmplY3Q6IFtQQVRDSCAyLzJdIEZp
-eCBhIGJ1ZyBvZiBkZWFkIGxvb3BpbmcgaW4gT2JqZWN0ZXI6OmhhbmRsZV9vc2RfbWFwCgpJZiBj
-dXJyZW50IG1hcCBlcG9jaCBpcyBsZXNzIHRoYW4gb2xkZXN0IGVwb2NoLCBjdXJyZW50IG1hcCBl
-cG9jaApzaG91bGQgc3RlcCB1cCB0byBvbGRlc3QgZXBvY2guCi0tLQogc3JjL29zZGMvT2JqZWN0
-ZXIuY2MgfCAgICAyICstCiAxIGZpbGVzIGNoYW5nZWQsIDEgaW5zZXJ0aW9ucygrKSwgMSBkZWxl
-dGlvbnMoLSkKCmRpZmYgLS1naXQgYS9zcmMvb3NkYy9PYmplY3Rlci5jYyBiL3NyYy9vc2RjL09i
-amVjdGVyLmNjCmluZGV4IDU2OTk4ZmUuLmZmZDFhNGYgMTAwNjQ0Ci0tLSBhL3NyYy9vc2RjL09i
-amVjdGVyLmNjCisrKyBiL3NyYy9vc2RjL09iamVjdGVyLmNjCkBAIC03NzYsNyArNzc2LDcgQEAg
-dm9pZCBPYmplY3Rlcjo6aGFuZGxlX29zZF9tYXAoTU9TRE1hcCAqbSkKIAkgIGxvZ2dlci0+aW5j
-KGxfb3NkY19tYXBfZnVsbCk7CiAJfQogCWVsc2UgewotCSAgaWYgKGUgPiBtLT5nZXRfb2xkZXN0
-KCkpIHsKKwkgIGlmIChlID49IG0tPmdldF9vbGRlc3QoKSkgewogCSAgICBsZG91dChjY3QsIDMp
-IDw8ICJoYW5kbGVfb3NkX21hcCByZXF1ZXN0aW5nIG1pc3NpbmcgZXBvY2ggIgogCQkJICA8PCBv
-c2RtYXAtPmdldF9lcG9jaCgpKzEgPDwgZGVuZGw7CiAJICAgIGludCByID0gX21heWJlX3JlcXVl
-c3RfbWFwKCk7Ci0tIAoxLjcuMQoK
---001a1132ed38aa9f3f0506b131d5--
