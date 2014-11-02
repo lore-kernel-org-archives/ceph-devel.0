@@ -1,122 +1,103 @@
-From: "Duan, Jiangang" <jiangang.duan@intel.com>
-Subject: RE: cache tiering sessions at CDS
-Date: Sat, 1 Nov 2014 18:33:11 +0000
-Message-ID: <A9F57F2ABA6BB2469F01E127557C6C9B110F414B@SHSMSX104.ccr.corp.intel.com>
-References: <alpine.DEB.2.00.1410311327280.31314@cobra.newdream.net>
- <CABOLqNLsOhzbg0HkRHyWfAUPVY6XMKz8yXNb_P9cCCo0zJo51w@mail.gmail.com>
- <51FC7A40FB29414D88A121A7FFEF9A4710FA35EA@SHSMSX104.ccr.corp.intel.com>
+From: SF Markus Elfring <elfring@users.sourceforge.net>
+Subject: [PATCH 1/1] ceph: Deletion of unnecessary checks before two function
+ calls
+Date: Sun, 02 Nov 2014 15:20:59 +0100
+Message-ID: <54563DCB.2010103@users.sourceforge.net>
+References: <5307CAA2.8060406@users.sourceforge.net> <alpine.DEB.2.02.1402212321410.2043@localhost6.localdomain6> <530A086E.8010901@users.sourceforge.net> <alpine.DEB.2.02.1402231635510.1985@localhost6.localdomain6> <530A72AA.3000601@users.sourceforge.net> <alpine.DEB.2.02.1402240658210.2090@localhost6.localdomain6> <530B5FB6.6010207@users.sourceforge.net> <alpine.DEB.2.10.1402241710370.2074@hadrien> <530C5E18.1020800@users.sourceforge.net> <alpine.DEB.2.10.1402251014170.2080@hadrien> <530CD2C4.4050903@users.sourceforge.net> <alpine.DEB.2.10.1402251840450.7035@hadrien> <530CF8FF.8080600@users.sourceforge.net> <alpine.DEB.2.02.1402252117150.2047@localhost6.localdomain6> <530DD06F.4090703@users.sourceforge.net> <alpine.DEB.2.02.1402262129250.2221@localhost6.localdomain6> <5317A59D.4@users.so
+ urceforge.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:46564 "EHLO mga02.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1758762AbaKASdW (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sat, 1 Nov 2014 14:33:22 -0400
-In-Reply-To: <51FC7A40FB29414D88A121A7FFEF9A4710FA35EA@SHSMSX104.ccr.corp.intel.com>
-Content-Language: en-US
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "Zhang, Jian" <jian.zhang@intel.com>, "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
-Cc: "sage@inktank.com" <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <5317A59D.4@users.sourceforge.net>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, kernel-janitors@vger.kernel.org, trivial@kernel.org, Coccinelle <cocci@systeme.lip6.fr>
+List-Id: ceph-devel.vger.kernel.org
 
-U2FnZSwgdGhhbmtzIGZvciB0aGUgZ29vZCBzdW1tYXJ5Lg0KQmFzZWQgb24gdGhlIGZlZWRiYWNr
-LCB3ZSAoWmhpcWlhbmcsIGppYW4gYW5kIG1lKSB3aWxsIHByb3Bvc2UgYSBnZW5lcmFsIGRlc2ln
-biBkb2N1bWVudCBuZXh0IHdlZWsgLSBzdGF5IHR1bmVkLiANCg0KLWppYW5nYW5nDQoNCg0KLS0t
-LS0tLS0tLSBGb3J3YXJkZWQgbWVzc2FnZSAtLS0tLS0tLS0tDQpGcm9tOiBTYWdlIFdlaWwgPHNh
-Z2VAaW5rdGFuay5jb20+DQpEYXRlOiAyMDE0LTExLTAxIDU6MDEgR01UKzA4OjAwDQpTdWJqZWN0
-OiBjYWNoZSB0aWVyaW5nIHNlc3Npb25zIGF0IENEUw0KVG86IGNlcGgtZGV2ZWxAdmdlci5rZXJu
-ZWwub3JnDQoNCg0KVGhlcmUgd2VyZSBhIHBhaXIgb2YgQ0RTIHNlc3Npb25zIFdlZG5lc2RheSBv
-biBjYWNoZSB0aWVyaW5nIHRoYXQgcHJvbXB0ZWQNCmEgZ3JlYXQgZGlzY3Vzc2lvbiBhYm91dCB0
-aGUgY3VycmVudCBwZXJmb3JtYW5jZSBwcm9ibGVtcyB3ZSdyZSBzZWVpbmcgYW5kDQp3YXlzIHRv
-IGFkZHJlc3MgdGhlbS7CoCBJdCB3YXMgYSBsb25nIGRpc2N1c3Npb24gYnV0IEknbGwgZG8gbXkg
-YmVzdCB0bw0Kc3VtbWFyaXplLsKgIFBsZWFzZSBjaGltZSBpbiBpZiBJIG1pc3MgYW55dGhpbmcg
-b3IgaWYgeW91IGRpc2FncmVlIHdpdGgNCm15IGNvbmNsdXNpb25zIQ0KDQpUaGUgZmlyc3Qgc2Vz
-c2lvbiB3YXMgYWJvdXQgZmluZS1ncmFpbmVkIHByb21vdGlvbi7CoCBJLmUuLCBwcm9tb3Rpbmcg
-b3INCnN0b3Jpbmcgb25seSBwb3J0aW9ucyBvZiBhbiBvYmplY3QgaW4gdGhlIGNhY2hlLsKgIEN1
-cnJlbnRseSBhbiBvYmplY3QNCmFsd2F5cyBleGlzdHMgaW4gaXRzIGVudGlyZWx5IGluIHRoZSBj
-YWNoZSB0aWVyLCBidXQgdGhlIGxhdGVuY3kgZnJvbQ0KcHJvbW90aW9uIGNhbiBiZSBleHBlbnNp
-dmUgaWYgdGhlIG9yaWdpbmFsIHdyaXRlIGlzIHNtYWxsLg0KDQpTYW0gYW5kIEkgZ2VuZXJhbGx5
-IGFncmVlZCB0aGF0IHRoZXJlIGFyZSBhZHZhbnRhZ2VzIHRvIGRvaW5nIHRoaXMsIGJ1dA0KdGhh
-dCB0aGUgaW1wbGVtZW50YXRpb24gd2lsbCBiZSBxdWl0ZSBjb21wbGV4LsKgIFRoZXJlIGFyZSBh
-bHNvIHNldmVyYWwNCnNpbXBsZXIgaW1wcm92ZW1lbnRzIHRoYXQgY2FuIGJlIG1hZGUgdGhhdCBh
-ZGRyZXNzIG1hbnkgKG1vc3Q/KSBvZiB0aGUNCnByb2JsZW1hdGljIHdvcmtsb2FkIHBhdHRlcm5z
-IGFuZCBhcmUgc2lnbmlmaWNhbnRseSBzaW1wbGVyLg0KDQotLSBSZWFkcyAtLQ0KDQpDdXJyZW50
-bHkgd2UgZWl0aGVyIGZvcndhcmQgYSByZWFkIChkZWNsaW5lIHRvIHByb21vdGUpIG9yIGJsb2Nr
-IGEgcmVhZA0Kd2hpbGUgd2UgcHJvbW90ZS7CoCBEb2luZyBtb3JlIGRlY2xpbmluZyAoZS5nLiBw
-cm9tb3RlIG9uIDJuZCByZWFkKSBpcw0Kc2hvd24gdG8gaGVscCwgYnV0IHdlIHNob3VsZCBiZSBh
-YmxlIHRvIGRvIGEgbG90IGJldHRlci4NCg0KVGhlIGZpcnN0IHN0ZXAgaXMgd2lwLXByb21vdGUt
-Zm9yd2FyZCwgb3Igc29tZXRoaW5nIHNpbWlsYXIsIHdoaWNoDQpmb3J3YXJkcyB0aGUgcmVhZCAq
-YW5kKiBpbml0aWF0ZXMgYSBwcm9tb3RlLsKgIFRoZSB0aGUgb3JpZ2luYWwgSU8gaXNuJ3QNCmRl
-bGF5ZWQsIG9ubHkgc3Vic2VxdWVudCByZWFkcyB0aGF0IGFycml2ZSBzaG9ydGx5IGFmdGVyLg0K
-DQpTZWNvbmQsIGV2ZW4gdGhvc2Ugc3Vic2VxdWVudCByZWFkcyBuZWVkIG5vdCB3YWl0IGZvciBh
-IHByb21vdGU6IHdlIGNhbg0Kc2FmZWx5IGZvcndhcmQgdGhlbSB0b28gd2hpbGUgcHJvbW90aW9u
-IGlzIGluIHByb2dyZXNzIHdpdGhvdXQgYnJlYWtpbmcNCmNvbnNpc3RlbmN5IGZyb20gdGhlIGNs
-aWVudCdzIHBlcnNwZWN0aXZlLCBhcyBsb25nIGFzIHdlIHByZXNlcnZlIHRoZQ0Kb3JkZXIgb2Yg
-cmVhZHMgYW5kIHdyaXRlcyBmb3IgZWFjaCBjbGllbnQuDQoNCjk5Nzkgb3NkOiBjYWNoZTogcHJv
-eHkgcmVhZHMgKGluc3RlYWQgb2YgcmVkaXJlY3QpDQo5OTgwIG9zZDogY2FjaGU6IHByb3h5IHJl
-YWRzIGR1cmluZyBwcm9tb3RlDQoNCk5vdGU6IEkgYmVsaXZlIHRoZXJlIGlzIHNvbWUgb3JkZXJp
-bmcgcHJvYmxlbXMgd2l0aCAqcmVkaXJlY3RpbmcqIHJlYWRzDQphbmQgdGhlbiBzdG9wcGluZyAo
-ZS5nLiwgcmVkaXJlY3QsIHN0YXJ0IHByb21vdGUsIGZpbmlzaCBwcm9tb3RlLCByZWFkDQpmcm9t
-IGNhY2hlIC4uLiB0aGUgc2Vjb25kIHJlYWQgcmVwbHkgY291bGQgcmVhY2ggdGhlIGNsaWVudCBi
-ZWZvcmUgdGhlDQpmaXJzdCkuwqAgV2UgbWF5IG5lZWQgdG8gcHJveHkgaW4gZ2VuZXJhbD/CoCA6
-Lw0KDQpBbnl3YXksIHByb3h5aW5nIHJlYWRzIGR1cmluZyBwcm9tb3Rpb24gZWZmZWN0aXZlbHkg
-bWFrZXMgdGhlIHByb21vdGlvbg0KYXN5bmNocm9ub3VzIGFuZCB0cmFuc3BhcmVudCB0byB0aGUg
-cmVhZCB3b3JrbG9hZCwgbW9kdWxvIHRoZSBleHRyYSBJTw0KdGhhdCB0aGUgY2FjaGUgYW5kIGJh
-c2UgdGllcnMgd2lsbCBkbyAoY29tcGV0aXRpb24gZm9yIG5ldHdvcmsgYW5kIGRpc2sNCklPKS7C
-oCBJIGJlbGlldmUgdGhpcyB3aWxsIG1pdGlnYXRlIG1vc3Qgb2YgdGhlIGltcGFjdCBvbiByZWFk
-cy4NCg0KTW9yZSBpbXBvcnRhbnRseSwgaXQgaXMgbGVhc3QgYXMgZ29vZCBhcyB0aGUgbW9yZSBj
-b21wbGljYXRlZCBwcm9wb3NhbCBvZg0Kc2F0aXNmeWluZyB0aGUgcmVhZCBmcm9tIHRoZSBpbnRl
-cm1lZGlhdGUgcHJvbW90aW9uIHJlc3VsdCBiZWZvcmUgaXQgaXMNCndyaXR0ZW4gaW50byB0aGUg
-Y2FjaGUgdGllci7CoCBJbiBwYXJ0aWN1bGFyLCBJIHRoaW5rIHRoZSAqb25seSogdGltZSB1c2lu
-Zw0KdGhlIGludGVybWVkaWF0ZSBwcm9tb3RlIHJlc3VsdCBpcyBiZXR0ZXIgaXMgd2hlbiB0aGUg
-cmVhZCBmYWxscyBlbnRpcmVseQ0Kd2l0aGluIHRoZSBjdXJyZW50IGluLWZsaWdodCBjb3B5LWdl
-dCBvcGVyYXRpb24gKGluIGZsaWdodCB0byB0aGUgYmFzZQ0KdGllciwgb3IgaW4gdGhlIHByb2Nl
-c3Mgb2YgYmVpbmcgd3JpdHRlbiB0byB0aGUgY2FjaGUgYnV0IHN0aWxsIGluDQptZW1vcnkpLsKg
-IEFueSBvdGhlciB0aW1lICh1bmFsaWduZWQgcmVhZCwgcmVhZCBhcnJpdmVzIGJlZm9yZSBwcm9t
-b3RlDQpzdGFydHMpIGl0J3MgYmV0dGVyIHRvIHByb3h5IGl0Lg0KDQpBbHNvLCBub3RlIHRoYXQg
-aXQgaXMgbWFpbmx5IHNtYWxsIHJlYWRzIHRoYXQgd2UgY2FyZSBhYm91dC7CoCBXZSBleHBlY3QN
-CmxhcmdlIHJlYWRzIHRvIGJlIGxlc3MgZnJlcXVlbnQgYW5kLCB3aGVuIHRoZXkgaGFwcGVuLCB0
-byBiZSBnZW5lcmFsbHkNCm9rYXkgd2l0aCBzZW5kaW5nIHRob3NlIHRvIHRoZSBiYXNlIHRpZXIg
-YW55d2F5Lg0KDQotPiBTdGF0ZWdpZXMgdGhhdCBoaWRlIHByb21vdGlvbiBjb3N0IGFyZSBwcm9i
-YWJseSBtb3JlIHVzZWZ1bCB0aGFuDQpzdHJhdGVnaWVzIHRoYXQgcHJvbW90ZSBsZXNzIChvciBw
-YXJ0aWFsKSBvYmplY3QgZGF0YS4NCg0KLS0gV3JpdGVzIC0tDQoNClRoZSBzaXR1YXRpb24gZm9y
-IHdyaXRlcyBpcyBhIGJpdCBtb3JlIGNvbXBsZXguwqAgRmlyc3QsIGlmIHdlIGFkZCB0aGUNCmFi
-aWxpdHkgdG8gcHJveHkgd3JpdGVzIHRvIHRoZSBiYWNrZW5kLCB3ZSBnaXZlIG91cnNlbHZlcyB0
-aGUgYWJpbGl0eSB0bw0KZGVjaWRlIGlmL3doZW4gdG8gcHJvbW90ZSAoY3VycmVudGx5IHdlIHVu
-Y29uZGl0aW9uYWxseSBwcm9tb3RlIG9uIHdyaXRlKS4NClRoaXMgd291bGQgYWxsb3cgYSAncHJv
-bW90ZSBvbiAybmQgd3JpdGUnIHR5cGUgb2YgYmVoYXZpb3IgKHNpbWlsYXIgdG8NCndoYXQgd2Ug
-ZGlkIGZvciByZWFkKS4NCg0KV2UgdGFsa2VkIGFib3V0IHRoZSBwb3NzaWJpbGl0eSBvZiBjb21i
-aW5pbmcgdGhlIHNtYWxsIHdyaXRlIGludG8gdGhlDQpwcm9tb3Rpb24ncyB3cml0ZSBvZiB0aGUg
-ZnVsbCBvYmplY3QgaW50byB0aGUgY2FjaGUuwqAgU2luY2UgdGhlc2UgYXJlDQpjdXJyZW50bHkg
-cGlwZWxpbmVkLCBpdCBpcyBub3QgY2xlYXIgdGhhdCB0aGlzIHdpbGwgaW1wcm92ZSB0aGluZ3Mg
-dmVyeQ0KbXVjaC7CoCBQcm9tb3Rpbmcgb25seSBvYmplY3QgbWV0YWRhdGEgYW5kIHdyaXRpbmcg
-YSBwYXJ0aWFsIGJpdCBvZg0KZGF0YSBpbnRvIHRoZSBjYWNoZSB0aWVyIGlzIHRoZSBiaWcgd2lu
-LCBidXQgaXQncyBjb21wbGV4LCBhbmQgd2Ugc2hvdWxkDQpkbyBhbGwgdGhlIHNpbXBsZSB0aGlu
-Z3MgKGxpa2Ugd3JpdGUgcHJveHlpbmcpIGZpcnN0Lg0KDQpGaW5hbGx5LCB3ZSB0YWxrZWQgYWJv
-dXQgbWFraW5nIGEgd3JpdGUtZnVsbCBvbiBhbiBvYmplY3Qgc2tpcCB0aGUgZGF0YQ0KcG9ydGlv
-biBvZiB0aGUgcHJvbW90ZS7CoCBUaGlzIGlzIG9ubHkgbW9kZXJhdGVseSBjb21wbGV4IGFuZCBz
-ZWVtcyBkb2FibGUuDQpIb3dldmVyLCBpdCB3b3VsZCBiZSBoZWxwZnVsIHRvIGtub3cgaG93IGZy
-ZXF1ZW50IHdyaXRlX2Z1bGwgaXMgaW4gcmVhbA0Kd29ya2xvYWRzIGZpcnN0LsKgIEFsc28sIGEg
-d3JpdGVfZnVsbCBpcyBhcmd1YWJseSB0aGUgdHlwZSBvZiBvcGVyYXRpb24NCndoZXJlIHdlIG1p
-Z2h0IGRlY2xpbmUgdG8gcHJvbW90ZSBhdCBhbGwsIGFuZCBzaW1wbHkgcHJveHkgdGhlIHdyaXRl
-IGJhY2sNCnRvIHRoZSBiYXNlIHRpZXIuDQoNCkkgdGhpbmsgaW4gdGhlIHNob3J0IHRlcm0sIHRo
-ZSBuZXh0IHN0ZXAgc2hvdWxkIGJlOg0KDQo5OTgxIG9zZDogY2FjaGU6IHByb3h5IHdyaXRlcyAo
-aW5zdGVhZCBvZiB1bmNvbmRpdGlvbmFsbHkgcHJvbW90aW5nKQ0KDQotLSByZWFkLW9ubHkgY2Fj
-aGUgLS0NCg0KRmluYWxseSwgd2UgYnJvdWdodCB1cCB0aGUgaWRlYSBvZiBhIHJlYWQtb25seSBj
-YWNoZSB0aWVyOg0KDQrCoC0gcmVhZHMgd291bGQgcHJvbW90ZSAob3Igbm90KSBqdXN0IGFzIHRo
-ZXkgZG8gbm93DQrCoC0gd3JpdGVzIHdvdWxkIGludmFsaWRhdGUgKGRlbGV0ZSBvYmplY3QgZnJv
-bSBjYWNoZSkgYW5kIHRoZW4NCmZvcndhcmQvcHJveHkNCg0KaC90IHRvIERhbiBMYW1icmlnaHQg
-Zm9yIHRoYXQgc3VnZ2VzdGlvbi7CoCBOb3RlIHRoYXQgd2UgYWxyZWFkeSBoYXZlIGENCnJlYWRv
-bmx5IGNhY2hlIG1vZGU7IHRoZSBkZWx0YSBoZXJlIGlzIGhvdyB3ZSBoYW5kbGUgdGhlIHdyaXRl
-cy4NCg0KOTk4MiBvc2Q6IGNhY2hlOiBtYWtlIHdyaXRlcyBpbiByZWFkb25seSBtb2RlIGludmFs
-aWRhdGUgYW5kIHRoZW4gZm9yd2FyZA0KDQoNClRoZXJlIHdhcyBhIGxvdCBvZiBkaXNjdXNzaW9u
-IGhlcmUgc28gaWYgeW91J3JlIGludGVyZXN0ZWQgeW91IHdheSB3YW50IHRvDQpjaGVjayB0aGUg
-cGFkcyBvciB3YXRjaCB0aGUgdmlkZW9zLg0KDQpodHRwOi8vcGFkLmNlcGguY29tL3AvaGFtbWVy
-LW9zZF90aWVyaW5nX3Byb21vdGlvbl91bml0DQpodHRwOi8vcGFkLmNlcGguY29tL3AvaGFtbWVy
-LW9zZF90aWVyaW5nX2xhdGVuY2llc19jYWNoZV90aWVyX21pc3MNCmh0dHA6Ly95b3V0dS5iZS83
-cDhaa09JSmpVQQ0KaHR0cDovL3lvdXR1LmJlL0FHRE9uSkZmZnJjDQoNCg0Kc2FnZQ0KLS0NClRv
-IHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBj
-ZXBoLWRldmVsIiBpbg0KdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtl
-cm5lbC5vcmcNCk1vcmUgbWFqb3Jkb21vIGluZm8gYXTCoCBodHRwOi8vdmdlci5rZXJuZWwub3Jn
-L21ham9yZG9tby1pbmZvLmh0bWwNCg0K
+The functions ceph_put_snap_context() and iput() test whether their argument
+is NULL and then return immediately. Thus the test around the call
+is not needed.
+
+This issue was detected by using the Coccinelle software.
+
+Signed-off-by: Markus Elfring <elfring@users.sourceforge.net>
+---
+ fs/ceph/caps.c       | 3 +--
+ fs/ceph/mds_client.c | 6 ++----
+ fs/ceph/snap.c       | 9 +++------
+ 3 files changed, 6 insertions(+), 12 deletions(-)
+
+diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+index 6d1cd45..7d99fc8 100644
+--- a/fs/ceph/caps.c
++++ b/fs/ceph/caps.c
+@@ -3136,8 +3136,7 @@ flush_cap_releases:
+ done:
+ 	mutex_unlock(&session->s_mutex);
+ done_unlocked:
+-	if (inode)
+-		iput(inode);
++	iput(inode);
+ 	return;
+
+ bad:
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index bad07c0..3b0ab05 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -523,8 +523,7 @@ void ceph_mdsc_release_request(struct kref *kref)
+ 	}
+ 	if (req->r_locked_dir)
+ 		ceph_put_cap_refs(ceph_inode(req->r_locked_dir), CEPH_CAP_PIN);
+-	if (req->r_target_inode)
+-		iput(req->r_target_inode);
++	iput(req->r_target_inode);
+ 	if (req->r_dentry)
+ 		dput(req->r_dentry);
+ 	if (req->r_old_dentry)
+@@ -995,8 +994,7 @@ out:
+ 	session->s_cap_iterator = NULL;
+ 	spin_unlock(&session->s_cap_lock);
+
+-	if (last_inode)
+-		iput(last_inode);
++	iput(last_inode);
+ 	if (old_cap)
+ 		ceph_put_cap(session->s_mdsc, old_cap);
+
+diff --git a/fs/ceph/snap.c b/fs/ceph/snap.c
+index f01645a..c1cc993 100644
+--- a/fs/ceph/snap.c
++++ b/fs/ceph/snap.c
+@@ -365,8 +365,7 @@ static int build_snap_context(struct ceph_snap_realm *realm)
+ 	     realm->ino, realm, snapc, snapc->seq,
+ 	     (unsigned int) snapc->num_snaps);
+
+-	if (realm->cached_context)
+-		ceph_put_snap_context(realm->cached_context);
++	ceph_put_snap_context(realm->cached_context);
+ 	realm->cached_context = snapc;
+ 	return 0;
+
+@@ -590,15 +589,13 @@ static void queue_realm_cap_snaps(struct ceph_snap_realm
+*realm)
+ 		if (!inode)
+ 			continue;
+ 		spin_unlock(&realm->inodes_with_caps_lock);
+-		if (lastinode)
+-			iput(lastinode);
++		iput(lastinode);
+ 		lastinode = inode;
+ 		ceph_queue_cap_snap(ci);
+ 		spin_lock(&realm->inodes_with_caps_lock);
+ 	}
+ 	spin_unlock(&realm->inodes_with_caps_lock);
+-	if (lastinode)
+-		iput(lastinode);
++	iput(lastinode);
+
+ 	list_for_each_entry(child, &realm->children, child_item) {
+ 		dout("queue_realm_cap_snaps %p %llx queue child %p %llx\n",
+-- 
+2.1.3
