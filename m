@@ -1,79 +1,33 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: inode64 mount option for XFS
-Date: Mon, 03 Nov 2014 15:32:51 +0100
-Message-ID: <54579213.5070900@42on.com>
-References: <545774FA.2070102@42on.com> <alpine.DEB.2.00.1411030619220.15135@cobra.newdream.net>
+From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+Subject: cephfs survey results
+Date: Mon, 3 Nov 2014 06:50:22 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1411030649070.15135@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from websrv.42on.com ([31.25.102.167]:37538 "EHLO websrv.42on.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751370AbaKCOc7 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 3 Nov 2014 09:32:59 -0500
-In-Reply-To: <alpine.DEB.2.00.1411030619220.15135@cobra.newdream.net>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-On 11/03/2014 03:20 PM, Sage Weil wrote:
-> On Mon, 3 Nov 2014, Wido den Hollander wrote:
->> Hi,
->>
->> While look at init-ceph and ceph-disk I noticed a discrepancy between them.
->>
->> init-ceph mounts XFS filesystems with rw,noatime,inode64, but
->> ceph-disk(-active) with rw,noatime
->>
->> As inode64 gives the best performance, shouldn't ceph-disk do the same?
-> 
-> I noticed this a while back but didn't finish fixing it.. can you take a 
-> look at wip-xfs-inode64 and see if it looks right?
->  
+In the Ceph session at the OpenStack summit someone asked what the CephFS 
+survey results looked like.  Here's the link:
 
-Looks good to me. Simple fix, but that should do it.
+	https://www.surveymonkey.com/results/SM-L5JV7WXL/
 
->> Any implications if we add inode64 on running deployments?
-> 
-> I don't think so!  Note that on new kernels I think inode64 is now the 
-> default, so this is really about performance on older systems (precise, 
-> rhel6, probably).
-> 
+In short, people want
 
-Yes, I noticed that later on. But it gives consistency. Ubuntu precise
-and RHEL 6 will be around for quite some time, so it would be better to
-enable it for those systems as well.
+fsck
+multimds
+snapshots
+quotas
 
-Wido
-
-> sage
-> 
->>
->> -- 
->> Wido den Hollander
->> 42on B.V.
->> Ceph trainer and consultant
->>
->> Phone: +31 (0)20 700 9902
->> Skype: contact42on
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-
-
--- 
-Wido den Hollander
-42on B.V.
-Ceph trainer and consultant
-
-Phone: +31 (0)20 700 9902
-Skype: contact42on
+sage
