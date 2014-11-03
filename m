@@ -1,134 +1,151 @@
-From: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
-Subject: RE: cache tiering sessions at CDS
-Date: Mon, 3 Nov 2014 08:32:40 +0000
-Message-ID: <06E7D85B3BA36C4DB207FEDE871C53489516C0@SHSMSX101.ccr.corp.intel.com>
-References: <alpine.DEB.2.00.1410311327280.31314@cobra.newdream.net>
- <CABOLqNLsOhzbg0HkRHyWfAUPVY6XMKz8yXNb_P9cCCo0zJo51w@mail.gmail.com>
- <51FC7A40FB29414D88A121A7FFEF9A4710FA35EA@SHSMSX104.ccr.corp.intel.com>
- <A9F57F2ABA6BB2469F01E127557C6C9B110F414B@SHSMSX104.ccr.corp.intel.com>
+From: Ming Lei <tom.leiming@gmail.com>
+Subject: Re: [PATCH 2/2] blk-mq: allow direct dispatch to a driver specific workqueue
+Date: Mon, 3 Nov 2014 16:40:47 +0800
+Message-ID: <CACVXFVMrW-GSa1YMuvGx=vvxxP2ePwxvTAKzdyv=ZYh6yf+Z5g@mail.gmail.com>
+References: <1415003008-16683-1-git-send-email-hch@lst.de>
+	<1415003008-16683-3-git-send-email-hch@lst.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:28770 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751783AbaKCIep (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 3 Nov 2014 03:34:45 -0500
-In-Reply-To: <A9F57F2ABA6BB2469F01E127557C6C9B110F414B@SHSMSX104.ccr.corp.intel.com>
-Content-Language: en-US
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "sage@inktank.com" <sage@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "Duan, Jiangang" <jiangang.duan@intel.com>, "Zhang, Jian" <jian.zhang@intel.com>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1415003008-16683-3-git-send-email-hch@lst.de>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Christoph Hellwig <hch@lst.de>
+Cc: Jens Axboe <axboe@fb.com>, Richard Weinberger <richard@nod.at>, ceph-devel@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+List-Id: ceph-devel.vger.kernel.org
 
-U2FnZSwNCg0KVGhhbmsgeW91IGZvciBzdW1tYXJpemUgdGhpcy4gSSBzdGlsbCBoYXZlIHNvbWUg
-cXVlc3Rpb25zIGFuZCB3YW50IHRvIGNsYXJpZnkgd2l0aCB5b3UuDQoNCkZvciB0aGUgd2lwLXBy
-b21vdGUtZm9yd2FyZCwgeW91IHNhaWQgdGhhdCBpdCBjYW4ndCBndWFyYW50ZWUgb3JkZXJpbmcu
-IERvZXMgdGhpcyBwcm9ibGVtIGV4aXN0cyBpbiB0aGUgcHJveHkgYW5kIHByb21vdGUgYXBwcm9h
-Y2g/IElmIG5vdCwgaG93IGRvZXMgdGhlIGNhY2hlIHRpZXIgb3NkIHByZXNlcnZlIHRoZSBvcmRl
-cmluZz8gQWNjb3JkaW5nIHRvIG15IHVuZGVyc3RhbmRpbmcsIGEgc2ltcGxlIHNjZW5hcmlvIGNh
-biBiZSBsaWtlIHRoaXM6IGEgcmVhZCBjb21lcyBpbiwgdGhlIGNhY2hlIHRpZXIgb3NkIHByb3hp
-ZXMgaXQuIFRoZSBwZyBsb2NrIGlzIHVubG9ja2VkIGFmdGVyIHNlbmRpbmcgdGhlIHByb3h5IHJl
-cXVlc3QgdG8gYmFzZSB0aWVyLiBBIHN1YnNlcXVlbnQgcmVhZCByZXF1ZXN0IG9mIHRoZSBzYW1l
-IG9iamVjdCBjb21lcyBpbi4gU29tZWhvdyB0aGUgY2FjaGUgdGllciBvc2QganVzdCBmaW5pc2hl
-cyB0aGUgcHJvbW90aW9uIGZvciB0aGlzIG9iamVjdC4gQW5kIHRoZSAybmQgcmVhZCByZXF1ZXN0
-IGlzIHNlcnZlZCBhdCB0aGUgY2FjaGUgdGllci4gSXQgbWF5IHJlc3BvbmQgdG8gdGhlIGNsaWVu
-dCBmaXJzdCB0aGFuIHRoZSAxc3QgcmVhZCByZXF1ZXN0Lg0KDQpJZiB5b3UgZG9uJ3QgYWxyZWFk
-eSBoYXZlIHNvbWVvbmUgd29ya2luZyBvbiB0aGlzLCBkZWZpbml0ZWx5IHdlIGNhbiBoZWxwIG9u
-IHRoaXMuIFdlIGNhbiBjb21lIGJhY2sgd2l0aCB0aGUgZGV0YWlsIGltcGxlbWVudGF0aW9uIGxh
-dGVyLg0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogU2FnZSBXZWlsIDxzYWdl
-QGlua3RhbmsuY29tPg0KRGF0ZTogMjAxNC0xMS0wMSA1OjAxIEdNVCswODowMA0KU3ViamVjdDog
-Y2FjaGUgdGllcmluZyBzZXNzaW9ucyBhdCBDRFMNClRvOiBjZXBoLWRldmVsQHZnZXIua2VybmVs
-Lm9yZw0KDQoNClRoZXJlIHdlcmUgYSBwYWlyIG9mIENEUyBzZXNzaW9ucyBXZWRuZXNkYXkgb24g
-Y2FjaGUgdGllcmluZyB0aGF0IHByb21wdGVkIGEgZ3JlYXQgZGlzY3Vzc2lvbiBhYm91dCB0aGUg
-Y3VycmVudCBwZXJmb3JtYW5jZSBwcm9ibGVtcyB3ZSdyZSBzZWVpbmcgYW5kIHdheXMgdG8gYWRk
-cmVzcyB0aGVtLsKgIEl0IHdhcyBhIGxvbmcgZGlzY3Vzc2lvbiBidXQgSSdsbCBkbyBteSBiZXN0
-IHRvIHN1bW1hcml6ZS7CoCBQbGVhc2UgY2hpbWUgaW4gaWYgSSBtaXNzIGFueXRoaW5nIG9yIGlm
-IHlvdSBkaXNhZ3JlZSB3aXRoIG15IGNvbmNsdXNpb25zIQ0KDQpUaGUgZmlyc3Qgc2Vzc2lvbiB3
-YXMgYWJvdXQgZmluZS1ncmFpbmVkIHByb21vdGlvbi7CoCBJLmUuLCBwcm9tb3Rpbmcgb3Igc3Rv
-cmluZyBvbmx5IHBvcnRpb25zIG9mIGFuIG9iamVjdCBpbiB0aGUgY2FjaGUuwqAgQ3VycmVudGx5
-IGFuIG9iamVjdCBhbHdheXMgZXhpc3RzIGluIGl0cyBlbnRpcmVseSBpbiB0aGUgY2FjaGUgdGll
-ciwgYnV0IHRoZSBsYXRlbmN5IGZyb20gcHJvbW90aW9uIGNhbiBiZSBleHBlbnNpdmUgaWYgdGhl
-IG9yaWdpbmFsIHdyaXRlIGlzIHNtYWxsLg0KDQpTYW0gYW5kIEkgZ2VuZXJhbGx5IGFncmVlZCB0
-aGF0IHRoZXJlIGFyZSBhZHZhbnRhZ2VzIHRvIGRvaW5nIHRoaXMsIGJ1dCB0aGF0IHRoZSBpbXBs
-ZW1lbnRhdGlvbiB3aWxsIGJlIHF1aXRlIGNvbXBsZXguwqAgVGhlcmUgYXJlIGFsc28gc2V2ZXJh
-bCBzaW1wbGVyIGltcHJvdmVtZW50cyB0aGF0IGNhbiBiZSBtYWRlIHRoYXQgYWRkcmVzcyBtYW55
-IChtb3N0Pykgb2YgdGhlIHByb2JsZW1hdGljIHdvcmtsb2FkIHBhdHRlcm5zIGFuZCBhcmUgc2ln
-bmlmaWNhbnRseSBzaW1wbGVyLg0KDQotLSBSZWFkcyAtLQ0KDQpDdXJyZW50bHkgd2UgZWl0aGVy
-IGZvcndhcmQgYSByZWFkIChkZWNsaW5lIHRvIHByb21vdGUpIG9yIGJsb2NrIGEgcmVhZCB3aGls
-ZSB3ZSBwcm9tb3RlLsKgIERvaW5nIG1vcmUgZGVjbGluaW5nIChlLmcuIHByb21vdGUgb24gMm5k
-IHJlYWQpIGlzIHNob3duIHRvIGhlbHAsIGJ1dCB3ZSBzaG91bGQgYmUgYWJsZSB0byBkbyBhIGxv
-dCBiZXR0ZXIuDQoNClRoZSBmaXJzdCBzdGVwIGlzIHdpcC1wcm9tb3RlLWZvcndhcmQsIG9yIHNv
-bWV0aGluZyBzaW1pbGFyLCB3aGljaCBmb3J3YXJkcyB0aGUgcmVhZCAqYW5kKiBpbml0aWF0ZXMg
-YSBwcm9tb3RlLsKgIFRoZSB0aGUgb3JpZ2luYWwgSU8gaXNuJ3QgZGVsYXllZCwgb25seSBzdWJz
-ZXF1ZW50IHJlYWRzIHRoYXQgYXJyaXZlIHNob3J0bHkgYWZ0ZXIuDQoNClNlY29uZCwgZXZlbiB0
-aG9zZSBzdWJzZXF1ZW50IHJlYWRzIG5lZWQgbm90IHdhaXQgZm9yIGEgcHJvbW90ZTogd2UgY2Fu
-IHNhZmVseSBmb3J3YXJkIHRoZW0gdG9vIHdoaWxlIHByb21vdGlvbiBpcyBpbiBwcm9ncmVzcyB3
-aXRob3V0IGJyZWFraW5nIGNvbnNpc3RlbmN5IGZyb20gdGhlIGNsaWVudCdzIHBlcnNwZWN0aXZl
-LCBhcyBsb25nIGFzIHdlIHByZXNlcnZlIHRoZSBvcmRlciBvZiByZWFkcyBhbmQgd3JpdGVzIGZv
-ciBlYWNoIGNsaWVudC4NCg0KOTk3OSBvc2Q6IGNhY2hlOiBwcm94eSByZWFkcyAoaW5zdGVhZCBv
-ZiByZWRpcmVjdCkNCjk5ODAgb3NkOiBjYWNoZTogcHJveHkgcmVhZHMgZHVyaW5nIHByb21vdGUN
-Cg0KTm90ZTogSSBiZWxpdmUgdGhlcmUgaXMgc29tZSBvcmRlcmluZyBwcm9ibGVtcyB3aXRoICpy
-ZWRpcmVjdGluZyogcmVhZHMgYW5kIHRoZW4gc3RvcHBpbmcgKGUuZy4sIHJlZGlyZWN0LCBzdGFy
-dCBwcm9tb3RlLCBmaW5pc2ggcHJvbW90ZSwgcmVhZCBmcm9tIGNhY2hlIC4uLiB0aGUgc2Vjb25k
-IHJlYWQgcmVwbHkgY291bGQgcmVhY2ggdGhlIGNsaWVudCBiZWZvcmUgdGhlIGZpcnN0KS7CoCBX
-ZSBtYXkgbmVlZCB0byBwcm94eSBpbiBnZW5lcmFsP8KgIDovDQoNCkFueXdheSwgcHJveHlpbmcg
-cmVhZHMgZHVyaW5nIHByb21vdGlvbiBlZmZlY3RpdmVseSBtYWtlcyB0aGUgcHJvbW90aW9uIGFz
-eW5jaHJvbm91cyBhbmQgdHJhbnNwYXJlbnQgdG8gdGhlIHJlYWQgd29ya2xvYWQsIG1vZHVsbyB0
-aGUgZXh0cmEgSU8gdGhhdCB0aGUgY2FjaGUgYW5kIGJhc2UgdGllcnMgd2lsbCBkbyAoY29tcGV0
-aXRpb24gZm9yIG5ldHdvcmsgYW5kIGRpc2sgSU8pLsKgIEkgYmVsaWV2ZSB0aGlzIHdpbGwgbWl0
-aWdhdGUgbW9zdCBvZiB0aGUgaW1wYWN0IG9uIHJlYWRzLg0KDQpNb3JlIGltcG9ydGFudGx5LCBp
-dCBpcyBsZWFzdCBhcyBnb29kIGFzIHRoZSBtb3JlIGNvbXBsaWNhdGVkIHByb3Bvc2FsIG9mIHNh
-dGlzZnlpbmcgdGhlIHJlYWQgZnJvbSB0aGUgaW50ZXJtZWRpYXRlIHByb21vdGlvbiByZXN1bHQg
-YmVmb3JlIGl0IGlzIHdyaXR0ZW4gaW50byB0aGUgY2FjaGUgdGllci7CoCBJbiBwYXJ0aWN1bGFy
-LCBJIHRoaW5rIHRoZSAqb25seSogdGltZSB1c2luZyB0aGUgaW50ZXJtZWRpYXRlIHByb21vdGUg
-cmVzdWx0IGlzIGJldHRlciBpcyB3aGVuIHRoZSByZWFkIGZhbGxzIGVudGlyZWx5IHdpdGhpbiB0
-aGUgY3VycmVudCBpbi1mbGlnaHQgY29weS1nZXQgb3BlcmF0aW9uIChpbiBmbGlnaHQgdG8gdGhl
-IGJhc2UgdGllciwgb3IgaW4gdGhlIHByb2Nlc3Mgb2YgYmVpbmcgd3JpdHRlbiB0byB0aGUgY2Fj
-aGUgYnV0IHN0aWxsIGluIG1lbW9yeSkuwqAgQW55IG90aGVyIHRpbWUgKHVuYWxpZ25lZCByZWFk
-LCByZWFkIGFycml2ZXMgYmVmb3JlIHByb21vdGUNCnN0YXJ0cykgaXQncyBiZXR0ZXIgdG8gcHJv
-eHkgaXQuDQoNCkFsc28sIG5vdGUgdGhhdCBpdCBpcyBtYWlubHkgc21hbGwgcmVhZHMgdGhhdCB3
-ZSBjYXJlIGFib3V0LsKgIFdlIGV4cGVjdCBsYXJnZSByZWFkcyB0byBiZSBsZXNzIGZyZXF1ZW50
-IGFuZCwgd2hlbiB0aGV5IGhhcHBlbiwgdG8gYmUgZ2VuZXJhbGx5IG9rYXkgd2l0aCBzZW5kaW5n
-IHRob3NlIHRvIHRoZSBiYXNlIHRpZXIgYW55d2F5Lg0KDQotPiBTdGF0ZWdpZXMgdGhhdCBoaWRl
-IHByb21vdGlvbiBjb3N0IGFyZSBwcm9iYWJseSBtb3JlIHVzZWZ1bCB0aGFuDQpzdHJhdGVnaWVz
-IHRoYXQgcHJvbW90ZSBsZXNzIChvciBwYXJ0aWFsKSBvYmplY3QgZGF0YS4NCg0KLS0gV3JpdGVz
-IC0tDQoNClRoZSBzaXR1YXRpb24gZm9yIHdyaXRlcyBpcyBhIGJpdCBtb3JlIGNvbXBsZXguwqAg
-Rmlyc3QsIGlmIHdlIGFkZCB0aGUgYWJpbGl0eSB0byBwcm94eSB3cml0ZXMgdG8gdGhlIGJhY2tl
-bmQsIHdlIGdpdmUgb3Vyc2VsdmVzIHRoZSBhYmlsaXR5IHRvIGRlY2lkZSBpZi93aGVuIHRvIHBy
-b21vdGUgKGN1cnJlbnRseSB3ZSB1bmNvbmRpdGlvbmFsbHkgcHJvbW90ZSBvbiB3cml0ZSkuDQpU
-aGlzIHdvdWxkIGFsbG93IGEgJ3Byb21vdGUgb24gMm5kIHdyaXRlJyB0eXBlIG9mIGJlaGF2aW9y
-IChzaW1pbGFyIHRvIHdoYXQgd2UgZGlkIGZvciByZWFkKS4NCg0KV2UgdGFsa2VkIGFib3V0IHRo
-ZSBwb3NzaWJpbGl0eSBvZiBjb21iaW5pbmcgdGhlIHNtYWxsIHdyaXRlIGludG8gdGhlIHByb21v
-dGlvbidzIHdyaXRlIG9mIHRoZSBmdWxsIG9iamVjdCBpbnRvIHRoZSBjYWNoZS7CoCBTaW5jZSB0
-aGVzZSBhcmUgY3VycmVudGx5IHBpcGVsaW5lZCwgaXQgaXMgbm90IGNsZWFyIHRoYXQgdGhpcyB3
-aWxsIGltcHJvdmUgdGhpbmdzIHZlcnkgbXVjaC7CoCBQcm9tb3Rpbmcgb25seSBvYmplY3QgbWV0
-YWRhdGEgYW5kIHdyaXRpbmcgYSBwYXJ0aWFsIGJpdCBvZiBkYXRhIGludG8gdGhlIGNhY2hlIHRp
-ZXIgaXMgdGhlIGJpZyB3aW4sIGJ1dCBpdCdzIGNvbXBsZXgsIGFuZCB3ZSBzaG91bGQgZG8gYWxs
-IHRoZSBzaW1wbGUgdGhpbmdzIChsaWtlIHdyaXRlIHByb3h5aW5nKSBmaXJzdC4NCg0KRmluYWxs
-eSwgd2UgdGFsa2VkIGFib3V0IG1ha2luZyBhIHdyaXRlLWZ1bGwgb24gYW4gb2JqZWN0IHNraXAg
-dGhlIGRhdGEgcG9ydGlvbiBvZiB0aGUgcHJvbW90ZS7CoCBUaGlzIGlzIG9ubHkgbW9kZXJhdGVs
-eSBjb21wbGV4IGFuZCBzZWVtcyBkb2FibGUuDQpIb3dldmVyLCBpdCB3b3VsZCBiZSBoZWxwZnVs
-IHRvIGtub3cgaG93IGZyZXF1ZW50IHdyaXRlX2Z1bGwgaXMgaW4gcmVhbCB3b3JrbG9hZHMgZmly
-c3QuwqAgQWxzbywgYSB3cml0ZV9mdWxsIGlzIGFyZ3VhYmx5IHRoZSB0eXBlIG9mIG9wZXJhdGlv
-biB3aGVyZSB3ZSBtaWdodCBkZWNsaW5lIHRvIHByb21vdGUgYXQgYWxsLCBhbmQgc2ltcGx5IHBy
-b3h5IHRoZSB3cml0ZSBiYWNrIHRvIHRoZSBiYXNlIHRpZXIuDQoNCkkgdGhpbmsgaW4gdGhlIHNo
-b3J0IHRlcm0sIHRoZSBuZXh0IHN0ZXAgc2hvdWxkIGJlOg0KDQo5OTgxIG9zZDogY2FjaGU6IHBy
-b3h5IHdyaXRlcyAoaW5zdGVhZCBvZiB1bmNvbmRpdGlvbmFsbHkgcHJvbW90aW5nKQ0KDQotLSBy
-ZWFkLW9ubHkgY2FjaGUgLS0NCg0KRmluYWxseSwgd2UgYnJvdWdodCB1cCB0aGUgaWRlYSBvZiBh
-IHJlYWQtb25seSBjYWNoZSB0aWVyOg0KDQrCoC0gcmVhZHMgd291bGQgcHJvbW90ZSAob3Igbm90
-KSBqdXN0IGFzIHRoZXkgZG8gbm93DQrCoC0gd3JpdGVzIHdvdWxkIGludmFsaWRhdGUgKGRlbGV0
-ZSBvYmplY3QgZnJvbSBjYWNoZSkgYW5kIHRoZW4gZm9yd2FyZC9wcm94eQ0KDQpoL3QgdG8gRGFu
-IExhbWJyaWdodCBmb3IgdGhhdCBzdWdnZXN0aW9uLsKgIE5vdGUgdGhhdCB3ZSBhbHJlYWR5IGhh
-dmUgYSByZWFkb25seSBjYWNoZSBtb2RlOyB0aGUgZGVsdGEgaGVyZSBpcyBob3cgd2UgaGFuZGxl
-IHRoZSB3cml0ZXMuDQoNCjk5ODIgb3NkOiBjYWNoZTogbWFrZSB3cml0ZXMgaW4gcmVhZG9ubHkg
-bW9kZSBpbnZhbGlkYXRlIGFuZCB0aGVuIGZvcndhcmQNCg0KDQpUaGVyZSB3YXMgYSBsb3Qgb2Yg
-ZGlzY3Vzc2lvbiBoZXJlIHNvIGlmIHlvdSdyZSBpbnRlcmVzdGVkIHlvdSB3YXkgd2FudCB0byBj
-aGVjayB0aGUgcGFkcyBvciB3YXRjaCB0aGUgdmlkZW9zLg0KDQpodHRwOi8vcGFkLmNlcGguY29t
-L3AvaGFtbWVyLW9zZF90aWVyaW5nX3Byb21vdGlvbl91bml0DQpodHRwOi8vcGFkLmNlcGguY29t
-L3AvaGFtbWVyLW9zZF90aWVyaW5nX2xhdGVuY2llc19jYWNoZV90aWVyX21pc3MNCmh0dHA6Ly95
-b3V0dS5iZS83cDhaa09JSmpVQQ0KaHR0cDovL3lvdXR1LmJlL0FHRE9uSkZmZnJjDQoNCg0Kc2Fn
-ZQ0KLS0NClRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1
-YnNjcmliZSBjZXBoLWRldmVsIiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21v
-QHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyBpbmZvIGF0wqAgaHR0cDovL3ZnZXIua2Vy
-bmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQoNCg==
+Hi Christoph,
+
+On Mon, Nov 3, 2014 at 4:23 PM, Christoph Hellwig <hch@lst.de> wrote:
+> We have various block drivers that need to execute long term blocking
+> operations during I/O submission like file system or network I/O.
+>
+> Currently these drivers just queue up work to an internal workqueue
+> from their request_fn.  With blk-mq we can make sure they always get
+> called on their own workqueue directly for I/O submission by:
+>
+>  1) adding a flag to prevent inline submission of I/O, and
+>  2) allowing the driver to pass in a workqueue in the tag_set that
+>     will be used instead of kblockd.
+
+The above two aren't enough because the big problem is that
+drivers need a per-request work structure instead of 'hctx->run_work',
+otherwise there are at most NR_CPUS concurrent submissions.
+
+So the per-request work structure should be exposed to blk-mq
+too for the kind of usage, such as .blk_mq_req_work(req) callback
+in case of BLK_MQ_F_WORKQUEUE.
+
+Thanks,
+
+>
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
+> ---
+>  block/blk-core.c       |  2 +-
+>  block/blk-mq.c         | 12 +++++++++---
+>  block/blk.h            |  1 +
+>  include/linux/blk-mq.h |  4 ++++
+>  4 files changed, 15 insertions(+), 4 deletions(-)
+>
+> diff --git a/block/blk-core.c b/block/blk-core.c
+> index 0421b53..7f7249f 100644
+> --- a/block/blk-core.c
+> +++ b/block/blk-core.c
+> @@ -61,7 +61,7 @@ struct kmem_cache *blk_requestq_cachep;
+>  /*
+>   * Controlling structure to kblockd
+>   */
+> -static struct workqueue_struct *kblockd_workqueue;
+> +struct workqueue_struct *kblockd_workqueue;
+>
+>  void blk_queue_congestion_threshold(struct request_queue *q)
+>  {
+> diff --git a/block/blk-mq.c b/block/blk-mq.c
+> index 22e50a5..3d27d22 100644
+> --- a/block/blk-mq.c
+> +++ b/block/blk-mq.c
+> @@ -804,12 +804,13 @@ void blk_mq_run_hw_queue(struct blk_mq_hw_ctx *hctx, bool async)
+>         if (unlikely(test_bit(BLK_MQ_S_STOPPED, &hctx->state)))
+>                 return;
+>
+> -       if (!async && cpumask_test_cpu(smp_processor_id(), hctx->cpumask)) {
+> +       if (!async && !(hctx->flags & BLK_MQ_F_WORKQUEUE) &&
+> +           cpumask_test_cpu(smp_processor_id(), hctx->cpumask)) {
+>                 __blk_mq_run_hw_queue(hctx);
+>                 return;
+>         }
+>
+> -       kblockd_schedule_delayed_work_on(blk_mq_hctx_next_cpu(hctx),
+> +       queue_delayed_work_on(blk_mq_hctx_next_cpu(hctx), hctx->wq,
+>                         &hctx->run_work, 0);
+>  }
+>
+> @@ -908,7 +909,7 @@ static void blk_mq_delay_work_fn(struct work_struct *work)
+>
+>  void blk_mq_delay_queue(struct blk_mq_hw_ctx *hctx, unsigned long msecs)
+>  {
+> -       kblockd_schedule_delayed_work_on(blk_mq_hctx_next_cpu(hctx),
+> +       queue_delayed_work_on(blk_mq_hctx_next_cpu(hctx), hctx->wq,
+>                         &hctx->delay_work, msecs_to_jiffies(msecs));
+>  }
+>  EXPORT_SYMBOL(blk_mq_delay_queue);
+> @@ -1581,6 +1582,11 @@ static int blk_mq_init_hctx(struct request_queue *q,
+>         hctx->flags = set->flags;
+>         hctx->cmd_size = set->cmd_size;
+>
+> +       if (set->wq)
+> +               hctx->wq = set->wq;
+> +       else
+> +               hctx->wq = kblockd_workqueue;
+> +
+>         blk_mq_init_cpu_notifier(&hctx->cpu_notifier,
+>                                         blk_mq_hctx_notify, hctx);
+>         blk_mq_register_cpu_notifier(&hctx->cpu_notifier);
+> diff --git a/block/blk.h b/block/blk.h
+> index 43b0361..fb46ad0 100644
+> --- a/block/blk.h
+> +++ b/block/blk.h
+> @@ -25,6 +25,7 @@ struct blk_flush_queue {
+>         spinlock_t              mq_flush_lock;
+>  };
+>
+> +extern struct workqueue_struct *kblockd_workqueue;
+>  extern struct kmem_cache *blk_requestq_cachep;
+>  extern struct kmem_cache *request_cachep;
+>  extern struct kobj_type blk_queue_ktype;
+> diff --git a/include/linux/blk-mq.h b/include/linux/blk-mq.h
+> index 5a901d0..ebe4699 100644
+> --- a/include/linux/blk-mq.h
+> +++ b/include/linux/blk-mq.h
+> @@ -37,6 +37,8 @@ struct blk_mq_hw_ctx {
+>         unsigned int            queue_num;
+>         struct blk_flush_queue  *fq;
+>
+> +       struct workqueue_struct *wq;
+> +
+>         void                    *driver_data;
+>
+>         struct blk_mq_ctxmap    ctx_map;
+> @@ -64,6 +66,7 @@ struct blk_mq_hw_ctx {
+>
+>  struct blk_mq_tag_set {
+>         struct blk_mq_ops       *ops;
+> +       struct workqueue_struct *wq;
+>         unsigned int            nr_hw_queues;
+>         unsigned int            queue_depth;    /* max hw supported */
+>         unsigned int            reserved_tags;
+> @@ -156,6 +159,7 @@ enum {
+>         BLK_MQ_F_SG_MERGE       = 1 << 2,
+>         BLK_MQ_F_SYSFS_UP       = 1 << 3,
+>         BLK_MQ_F_DEFER_ISSUE    = 1 << 4,
+> +       BLK_MQ_F_WORKQUEUE      = 1 << 5,
+>
+>         BLK_MQ_S_STOPPED        = 0,
+>         BLK_MQ_S_TAG_ACTIVE     = 1,
+> --
+> 1.9.1
+>
+
+
+
+-- 
+Ming Lei
