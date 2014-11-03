@@ -1,367 +1,320 @@
-From: Alexandre Oliva <oliva@gnu.org>
-Subject: Re: [PATCH] reinstate ceph cluster_snap support
-Date: Mon, 03 Nov 2014 17:57:06 -0200
-Message-ID: <or4mug12i5.fsf@free.home>
-References: <orob8qt7kf.fsf@livre.home>
-	<alpine.DEB.2.00.1308231715500.28981@cobra.newdream.net>
-	<ortxifi1cs.fsf@livre.home>
-	<alpine.DEB.2.00.1308271515500.24783@cobra.newdream.net>
-	<orbnp6uofj.fsf@free.home>
-	<alpine.DEB.2.00.1410271357160.15740@cobra.newdream.net>
+From: Samuel Just <sam.just-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: Ceph Giant not fixed RepllicatedPG:NotStrimming?
+Date: Mon, 3 Nov 2014 13:54:34 -0800
+Message-ID: <CA+4uBUaEuB3OW-Q3Lup+bx7WRYZqvL9P594XR8UHYO-H5A+82g@mail.gmail.com>
+References: <5451FD06.5030000@vccloud.vn>
+	<alpine.DEB.2.00.1410300801090.27022@cobra.newdream.net>
+	<5453B0B1.1020404@vccloud.vn>
+	<CA+4uBUbYPZzHhkkQaB5wS8E2-idnrsnJB21zfjA6akz7NHPrnA@mail.gmail.com>
+	<54544395.4030504@vccloud.vn> <54570E5D.9050009@vccloud.vn>
+Reply-To: sjust-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="=-=-="
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from linux-libre.fsfla.org ([208.118.235.54]:37196 "EHLO
-	linux-libre.fsfla.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752340AbaKCT5W (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Nov 2014 14:57:22 -0500
-In-Reply-To: <alpine.DEB.2.00.1410271357160.15740@cobra.newdream.net> (Sage
-	Weil's message of "Mon, 27 Oct 2014 14:00:57 -0700 (PDT)")
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: sam.just@inktank.com, ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <54570E5D.9050009-QlevPasa8l681eZEIcUDRw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Ta Ba Tuan <tuantb-QlevPasa8l681eZEIcUDRw@public.gmane.org>
+Cc: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
---=-=-=
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Can you reproduce with
 
-On Oct 27, 2014, Sage Weil <sage@newdream.net> wrote:
+debug osd = 20
+debug filestore = 20
+debug ms = 1
 
-> On Tue, 21 Oct 2014, Alexandre Oliva wrote:
+In the [osd] section of that osd's ceph.conf?
+-Sam
 
->> I have tested both methods: btrfs snapshotting of store.db (I've
->> manually turned store.db into a btrfs subvolume), and creating a new db
->> with all (prefix,key,value) triples.  I'm undecided about inserting
->> multiple transaction commits for the latter case; the mon mem use grew
->> up a lot as it was, and in a few tests the snapshotting ran twice, but
->> in the end a dump of all the data in the database created by btrfs
->> snapshotting was identical to that created by explicit copying.  So, the
->> former is preferred, since it's so incredibly more efficient.  I also
->> considered hardlinking all files in store.db into a separate tree, but I
->> didn't like the idea of coding that in C+-, :-) and I figured it might
->> not work with other db backends, and maybe even not be guaranteed to
->> work with leveldb.  It's probably not worth much more effort.
-
-> This looks pretty reasonable!
-
-> I think we definitely need to limit the size of the transaction when doin=
-g=20
-> the snap.  The attached patch seems to try to do it all in one go, which=
-=20
-> is not going to work for large clusters.  Either re-use an existing=20
-> tunable like the sync chunk size or add a new one?
-
-Ok, I changed it so that it reuses the same tunable used for mon sync
-transaction sizes.  Tested on top of 0.87 (flawless upgrade, whee!),
-with both btrfs snapshots and leveldb copying.  I noticed slight
-differences between the databases at each mon with the leveldb copying,
-presumably having to do with at least one round of monitor-internal
-retrying as the first copy in each mon took too long, but each copy
-appeared to be consistent, and their aggregate is presumably usable to
-get the cluster rolled back to an earlier consistent state.
-
-I wish there was a better way to avoid the retry; though.  I'm thinking
-maybe not performing the copy when the snapshot dir already exists (like
-we do for osd snapshots), but I'm not sure this would guarantee a
-consistent monitor quorum snapshot.  But then, I'm not sure the current
-approach does either.  Plus, if we were to fail because the dir already
-existed, we'd need to somehow collect the success/fail status of the
-first try so that we don't misreport a failure just because the internal
-retry failed, and then, we'd need to distinguish an internal retry that
-ought to pass if the first attempt passed from a user-commanded attempt
-to created a new snapshot with the same name, which should ideally fail
-if any cluster component fails to take the snapshot.  Not that we
-currently send any success/failure status back...
-
-Thoughts?
-
-
-If we stick with re-copying (rather than dropping the request on the
-floor if the dir exists), I might improve the overwriting from =E2=80=9Crem=
-ove
-all entries, then add them all back=E2=80=9D to =E2=80=9Ccompare entries in=
- source and
-destination, and copy only those that changed=E2=80=9D.  I have code to do =
-just
-that, that I could borrow from a leveldbcmp programlet I wrote, but it
-would take some significant rewriting to refit it into the KeyValueDB
-interface, so I didn't jump through this hoop.  Let me know if it is
-desirable, and I'll try to schedule some time to work on it.
-
-Another issue I'm somewhat unhappy about is that, while we perform the
-copying (which can take a few tens of seconds), the cluster comes to a
-halt because the mons won't make progress.  I wish we could do this
-copying in background, but I have no clue as to how to go about making
-the operation proceed asynchronously while returning a success at the
-end, rather than, say, because we successfully *started* the copying.  I
-could use a clue or two to do better than that ;-)
-
-
-Another nit I'm slightly unhappy about is that the command is still
-=E2=80=9Cceph osd cluster_snap <tag>=E2=80=9D, whereas it now snapshots mon=
-s too, and it
-creates directories named clustersnap_<tag>, without the underscore
-separating cluster and snap as in the command.  I'd like to spell them
-out the same.  Any preferences?
-
-
-Here's the patch I've tested, that currently builds upon the other patch
-upthread, that reinstates osd snapshotting.
-
-
-
---=-=-=
-Content-Type: text/x-diff
-Content-Disposition: inline; filename=mon-cluster-snap.patch
-
-mon: take mon snapshots
-
-From: Alexandre Oliva <oliva@gnu.org>
-
-Extend the machinery that takes osd snapshots to take mon snapshots
-too.  Taking a btrfs snapshot of store.db is the preferred method, but
-if that fails, the database is copied one tuple at a time.  Unlike osd
-snapshots, existing mon snapshots are clobbered by the new snapshots,
-mainly because a mon may attempt to take the same snapshot multiple
-times, especially if a first attempt takes very long.  It shouldn't be
-a problem: the most important property is that the osd snapshots are
-taken before the updated osdmap is integrated, whereas the mon
-snapshots are taken after that, so that osd snapshots happen-before
-mon ones, otherwise in case of rollback osds might have an osdmap that
-mons don't know about.
-
-There's no guarantee that all monitors will be completely up to date
-at the time the snapshot is taken.  It might be that monitors that
-were lagging behind take the snapshot at a later time, and before they
-get all the monitor state of the quorum set at the time of the
-snapshot.  So, when rolling back the entire cluster (which would have
-to be done by hand, as there's no command to do that for mons), it is
-advisable to roll back and bring up all monitors, so that it's likely
-that more than one monitor has the complete monitor state to propagate
-to others.
-
-Signed-off-by: Alexandre Oliva <oliva@gnu.org>
----
- src/mon/Monitor.cc       |   11 ++++
- src/mon/Monitor.h        |    2 +
- src/mon/MonitorDBStore.h |  125 +++++++++++++++++++++++++++++++++++++++++++---
- src/mon/OSDMonitor.cc    |    5 +-
- 4 files changed, 135 insertions(+), 8 deletions(-)
-
-diff --git a/src/mon/Monitor.cc b/src/mon/Monitor.cc
-index 52df6f0..bbdb5b2 100644
---- a/src/mon/Monitor.cc
-+++ b/src/mon/Monitor.cc
-@@ -4094,6 +4094,17 @@ void Monitor::scrub_reset()
- 
- 
- 
-+int Monitor::store_snapshot(const string& name) {
-+  while (paxos->is_writing() || paxos->is_writing_previous()) {
-+    lock.Unlock();
-+    store->flush();
-+    lock.Lock();
-+  }
-+
-+  return store->snapshot(name);
-+}
-+
-+
- /************ TICK ***************/
- 
- class C_Mon_Tick : public Context {
-diff --git a/src/mon/Monitor.h b/src/mon/Monitor.h
-index 91c524a..bc54e27 100644
---- a/src/mon/Monitor.h
-+++ b/src/mon/Monitor.h
-@@ -836,6 +836,8 @@ public:
- 
-   void handle_signal(int sig);
- 
-+  int store_snapshot(const string& name);
-+
-   int mkfs(bufferlist& osdmapbl);
- 
-   /**
-diff --git a/src/mon/MonitorDBStore.h b/src/mon/MonitorDBStore.h
-index a0c82b7..3c170cb 100644
---- a/src/mon/MonitorDBStore.h
-+++ b/src/mon/MonitorDBStore.h
-@@ -27,6 +27,16 @@
- #include "common/Finisher.h"
- #include "common/errno.h"
- 
-+#include <unistd.h>
-+#include <fcntl.h>
-+#include <errno.h>
-+#include <stdlib.h>
-+#include <sys/ioctl.h>
-+
-+#ifndef __CYGWIN__
-+#include "os/btrfs_ioctl.h"
-+#endif
-+
- class MonitorDBStore
- {
-   boost::scoped_ptr<KeyValueDB> db;
-@@ -587,12 +597,10 @@ class MonitorDBStore
-     return db->get_estimated_size(extras);
-   }
- 
--  MonitorDBStore(const string& path)
--    : db(0),
--      do_dump(false),
--      dump_fd(-1),
--      io_work(g_ceph_context, "monstore"),
--      is_open(false) {
-+  static string store_path(const string *pathp = NULL,
-+			   const string& name = "store.db") {
-+    string path = pathp ? *pathp : g_conf->mon_data;
-+
-     string::const_reverse_iterator rit;
-     int pos = 0;
-     for (rit = path.rbegin(); rit != path.rend(); ++rit, ++pos) {
-@@ -600,9 +608,112 @@ class MonitorDBStore
- 	break;
-     }
-     ostringstream os;
--    os << path.substr(0, path.size() - pos) << "/store.db";
-+    os << path.substr(0, path.size() - pos) << "/" << name;
-     string full_path = os.str();
- 
-+    return full_path;
-+  }
-+
-+  int snapshot(const string& name) {
-+    int r = -ENOTSUP;
-+
-+#ifdef BTRFS_IOC_SNAP_CREATE
-+    {
-+      string snap = store_path(0, name);
-+      string store = store_path();
-+
-+      int mondirfd = ::open(g_conf->mon_data.c_str(), 0);
-+      int storefd = ::open(store.c_str(), O_RDONLY);
-+
-+      if (storefd >= 0 && mondirfd >= 0) {
-+	struct btrfs_ioctl_vol_args vol_args;
-+	memset(&vol_args, 0, sizeof(vol_args));
-+
-+	vol_args.fd = storefd;
-+	strcpy(vol_args.name, name.c_str());
-+	(void) ::ioctl(mondirfd, BTRFS_IOC_SNAP_DESTROY, &vol_args);
-+	r = ::ioctl(mondirfd, BTRFS_IOC_SNAP_CREATE, &vol_args);
-+      }
-+
-+      ::close(storefd);
-+      ::close(mondirfd);
-+    }
-+#endif
-+
-+    if (r) {
-+      string snap = store_path (0, name);
-+      KeyValueDB* snapdb = KeyValueDB::create(g_ceph_context,
-+					      g_conf->mon_keyvaluedb,
-+					      snap);
-+      if (!snapdb)
-+	r = -errno;
-+      else {
-+	snapdb->init();
-+	ostringstream os;
-+	r = snapdb->create_and_open(os);
-+	if (!r) {
-+	  int const txsize = g_conf->mon_sync_max_payload_size;
-+	  int left = txsize;
-+	  KeyValueDB::Transaction dbt = snapdb->get_transaction();
-+	  KeyValueDB::WholeSpaceIterator it = snapdb->get_iterator();
-+	  for (it->seek_to_first(); it->valid(); it->next()) {
-+	    pair<string,string> k = it->raw_key();
-+
-+	    int thissize = 10 + k.first.length() + k.second.length();
-+	    if (left < thissize) {
-+	      r = snapdb->submit_transaction(dbt);
-+	      if (r)
-+		break;
-+	      dbt = snapdb->get_transaction();
-+	      if (!dbt)
-+		break;
-+	      left = txsize;
-+	    }
-+
-+	    dbt->rmkey(k.first, k.second);
-+	    left -= thissize;
-+	  }
-+	  if (!r && dbt) {
-+	    it = db->get_snapshot_iterator();
-+	    for (it->seek_to_first(); it->valid(); it->next()) {
-+	      pair<string,string> k = it->raw_key();
-+
-+	      int thissize = 10 + k.first.length() + k.second.length() +
-+		it->value().length();
-+	      if (left < thissize) {
-+		r = snapdb->submit_transaction(dbt);
-+		if (r)
-+		  break;
-+		dbt = snapdb->get_transaction();
-+		if (!dbt)
-+		  break;
-+		left = txsize;
-+	      }
-+
-+	      dbt->set(k.first, k.second, it->value());
-+	      left -= thissize;
-+	    }
-+
-+	    if (!r && dbt)
-+	      r = snapdb->submit_transaction_sync(dbt);
-+	  }
-+
-+	  delete snapdb;
-+	}
-+      }
-+    }
-+
-+    return r;
-+  }
-+
-+  MonitorDBStore(const string& path)
-+    : db(0),
-+      do_dump(false),
-+      dump_fd(-1),
-+      io_work(g_ceph_context, "monstore"),
-+      is_open(false) {
-+    string full_path = store_path (&path);
-+
-     KeyValueDB *db_ptr = KeyValueDB::create(g_ceph_context,
- 					    g_conf->mon_keyvaluedb,
- 					    full_path);
-diff --git a/src/mon/OSDMonitor.cc b/src/mon/OSDMonitor.cc
-index b237846..068abbe 100644
---- a/src/mon/OSDMonitor.cc
-+++ b/src/mon/OSDMonitor.cc
-@@ -230,8 +230,11 @@ void OSDMonitor::update_from_paxos(bool *need_bootstrap)
-       t->erase("mkfs", "osdmap");
-     }
- 
--    if (tx_size > g_conf->mon_sync_max_payload_size*2) {
-+    if (tx_size > g_conf->mon_sync_max_payload_size*2 ||
-+	osdmap.cluster_snapshot_epoch) {
-       mon->store->apply_transaction(t);
-+      if (osdmap.cluster_snapshot_epoch)
-+	mon->store_snapshot("clustersnap_" + osdmap.cluster_snapshot);
-       t = MonitorDBStore::TransactionRef();
-       tx_size = 0;
-     }
-
---=-=-=
-
-
-
--- 
-Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
-You must be the change you wish to see in the world. -- Gandhi
-Be Free! -- http://FSFLA.org/   FSF Latin America board member
-Free Software Evangelist|Red Hat Brasil GNU Toolchain Engineer
-
---=-=-=--
+On Sun, Nov 2, 2014 at 9:10 PM, Ta Ba Tuan <tuantb-QlevPasa8l681eZEIcUDRw@public.gmane.org> wrote:
+> Hi Sage, Samuel & All,
+>
+> I upgraded to GAINT, but still appearing that errors |:
+> I'm trying on deleting  related objects/volumes, but very hard to verify
+> missing objects :(.
+>
+> Guide me to resolve it, please! (I send attached detail log).
+>
+> 2014-11-03 11:37:57.730820 7f28fb812700  0 osd.21 105950 do_command r=0
+> 2014-11-03 11:37:57.856578 7f28fc013700 -1 *** Caught signal (Segmentation
+> fault) **
+>  in thread 7f28fc013700
+>
+>  ceph version 0.87-6-gdba7def (dba7defc623474ad17263c9fccfec60fe7a439f0)
+>  1: /usr/bin/ceph-osd() [0x9b6725]
+>  2: (()+0xfcb0) [0x7f291fc2acb0]
+>  3: (ReplicatedPG::trim_object(hobject_t const&)+0x395) [0x811b55]
+>  4: (ReplicatedPG::TrimmingObjects::react(ReplicatedPG::SnapTrim
+> const&)+0x43e) [0x82b9be]
+>  5: (boost::statechart::simple_state<ReplicatedPG::TrimmingObjects,
+> ReplicatedPG::SnapTrimmer, boost::mpl::list<mpl_::na, mpl_::na, mpl_::na,
+> mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na,
+> mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na,
+> mpl_::na, mpl_::na, mpl_::na>,
+> (boost::statechart::history_mode)0>::react_impl(boost::statechart::event_base
+> const&, void const*)+0xc0) [0x870ce0]
+>  6: (boost::statechart::state_machine<ReplicatedPG::SnapTrimmer,
+> ReplicatedPG::NotTrimming, std::allocator<void>,
+> boost::statechart::null_exception_translator>::process_queued_events()+0xfb)
+> [0x85618b]
+>  7: (boost::statechart::state_machine<ReplicatedPG::SnapTrimmer,
+> ReplicatedPG::NotTrimming, std::allocator<void>,
+> boost::statechart::null_exception_translator>::process_event(boost::statechart::event_base
+> const&)+0x1e) [0x85633e]
+>  8: (ReplicatedPG::snap_trimmer()+0x4f8) [0x7d5ef8]
+>  9: (OSD::SnapTrimWQ::_process(PG*)+0x14) [0x673ab4]
+>  10: (ThreadPool::worker(ThreadPool::WorkThread*)+0x48e) [0xa8fade]
+>  11: (ThreadPool::WorkThread::entry()+0x10) [0xa92870]
+>  12: (()+0x7e9a) [0x7f291fc22e9a]
+>  13: (clone()+0x6d) [0x7f291e5ed31d]
+>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to
+> interpret this.
+>
+>  -9993> 2014-11-03 11:37:47.689335 7f28fc814700  1 -- 172.30.5.2:6803/7606
+> --> 172.30.5.1:6886/3511 -- MOSDPGPull(6.58e 105950
+> [PullOp(87f82d8e/rbd_data.45e62779c99cf1.00000000000022b5/head//6,
+> recovery_info:
+> ObjectRecoveryInfo(87f82d8e/rbd_data.45e62779c99cf1.00000000000022b5/head//6@105938'11622009,
+> copy_subset: [0~18446744073709551615], clone_subset: {}), recovery_progress:
+> ObjectRecoveryProgress(first, data_recovered_to:0, data_complete:false,
+> omap_recovered_to:, omap_complete:false))]) v2 -- ?+0 0x26c59000 con
+> 0x22fbc420
+> ....
+>     -2> 2014-11-03 11:37:57.853585 7f2902820700  5 osd.21 pg_epoch: 105950
+> pg[24.9e4( v 105946'113392 lc 105946'113391 (103622'109598,105946'113392]
+> local-les=1
+> 05948 n=88 ec=25000 les/c 105948/105943 105947/105947/105947) [21,112,33]
+> r=0 lpr=105947 pi=105933-105946/4 crt=105946'113392 lcod 0'0 mlcod 0'0
+> active+recovery
+> _wait+degraded m=1 snaptrimq=[303~3,307~1]] enter
+> Started/Primary/Active/Recovering
+>     -1> 2014-11-03 11:37:57.853735 7f28fc814700  1 -- 172.30.5.2:6803/7606
+> --> 172.30.5.9:6806/24552 -- MOSDPGPull(24.9e4 105950
+> [PullOp(5abb99e4/rbd_data.5dd32
+> f2ae8944a.0000000000000165/head//24, recovery_info:
+> ObjectRecoveryInfo(5abb99e4/rbd_data.5dd32f2ae8944a.0000000000000165/head//24@105946'113392,
+> copy_subset: [0
+> ~18446744073709551615], clone_subset: {}), recovery_progress:
+> ObjectRecoveryProgress(first, data_recovered_to:0, data_complete:false,
+> omap_recovered_to:, omap_c
+> omplete:false))]) v2 -- ?+0 0x229e7e00 con 0x22fb7000
+>      0> 2014-11-03 11:37:57.856578 7f28fc013700 -1 *** Caught signal
+> (Segmentation fault) **
+>
+> Thanks!
+> --
+> Tuan
+> HaNoi-VietNam
+>
+>
+>
+>
+> On 11/01/2014 09:21 AM, Ta Ba Tuan wrote:
+>
+> Hi Samuel and Sage,
+>
+> I will upgrde to Giant soon, Thank you so much.
+>
+> --
+> Tuan
+> HaNoi-VietNam
+>
+> On 11/01/2014 01:10 AM, Samuel Just wrote:
+>
+> You should start by upgrading to giant, many many bug fixes went in
+> between .86 and giant.
+> -Sam
+>
+> On Fri, Oct 31, 2014 at 8:54 AM, Ta Ba Tuan <tuantb-QlevPasa8l681eZEIcUDRw@public.gmane.org> wrote:
+>
+> Hi Sage Weil
+>
+> Thank for your repling. Yes, I'm using Ceph v.0.86,
+> I report some related bugs, Hope you help me,
+>
+> 2014-10-31 15:34:52.927965 7f85efb6b700  0 osd.21 104744 do_command r=0
+> 2014-10-31 15:34:53.105533 7f85f036c700 -1 *** Caught signal (Segmentation
+> fault) **
+>   in thread 7f85f036c700
+>   ceph version 0.86-106-g6f8524e (6f8524ef7673ab4448de2e0ff76638deaf03cae8)
+>   1: /usr/bin/ceph-osd() [0x9b6655]
+>   2: (()+0xfcb0) [0x7f8615726cb0]
+>   3: (ReplicatedPG::trim_object(hobject_t const&)+0x395) [0x811c25]
+>   4: (ReplicatedPG::TrimmingObjects::react(ReplicatedPG::SnapTrim
+> const&)+0x43e) [0x82baae]
+>   5: (boost::statechart::simple_state<ReplicatedPG::TrimmingObjects,
+> ReplicatedPG::SnapTrimmer, boost::mpl::list<mpl_::na, mpl_::na, mpl_::na,
+> mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na,
+> mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na,
+> mpl_::na, mpl_::na, mpl_::na>,
+> (boost::statechart::history_mode)0>::react_impl(boost::statechart::event_base
+> const&, void const*)+0xc0) [0x870c30]
+>   6: (boost::statechart::state_machine<ReplicatedPG::SnapTrimmer,
+> ReplicatedPG::NotTrimming, std::allocator<void>,
+> boost::statechart::null_exception_translator>::process_queued_events()+0xfb)
+> [0x8560db]
+>   7: (boost::statechart::state_machine<ReplicatedPG::SnapTrimmer,
+> ReplicatedPG::NotTrimming, std::allocator<void>,
+> boost::statechart::null_exception_translator>::process_event(boost::statechart::event_base
+> const&)+0x1e) [0x8562ae]
+>   8: (ReplicatedPG::snap_trimmer()+0x4f8) [0x7d5f48]
+>   9: (OSD::SnapTrimWQ::_process(PG*)+0x14) [0x6739b4]
+>   10: (ThreadPool::worker(ThreadPool::WorkThread*)+0x48e) [0xa8fa0e]
+>   11: (ThreadPool::WorkThread::entry()+0x10) [0xa927a0]
+>   12: (()+0x7e9a) [0x7f861571ee9a]
+>   13: (clone()+0x6d) [0x7f86140e931d]
+>   NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed
+> to
+> interpret this.
+>
+>   -9523> 2014-10-31 15:34:45.571962 7f85e3ee0700  5 -- op tracker -- seq:
+> 6937, time: 2014-10-31 15:34:45.531887, event: header_read, op: MOSDPGPus
+> h(6.749 104744
+> [PushOp(d2106749/rbd_data.a2e6185b9a8ef8.0000000000000803/head//6, version:
+> 104736'7736506, data_included: [0~4194304], data_size:
+> 4194304, omap_header_size: 0, omap_entries_size: 0, attrset_size: 2,
+> recovery_info:
+> ObjectRecoveryInfo(d2106749/rbd_data.a2e6185b9a8ef8.0000000000
+> 000803/head//6@104736'7736506, copy_subset: [0~4194304], clone_subset: {}),
+> after_progress: ObjectRecoveryProgress(!first, data_recovered_to:41943
+> 04, data_complete:true, omap_recovered_to:, omap_complete:true),
+> before_progress: ObjectRecoveryProgress(first, data_recovered_to:0,
+> data_complete
+> :false, omap_recovered_to:,
+> omap_complete:false)),PushOp(60940749/rbd_data.3435875ff78f67.0000000000001408/head//6,
+> version: 104736'7736579, data_
+> included: [0~335360], data_size: 335360, omap_header_size: 0,
+> omap_entries_size: 0, attrset_size: 2, recovery_info:
+> ObjectRecoveryInfo(60940749/rb
+> d_data.3435875ff78f67.0000000000001408/head//6@104736'7736579, copy_subset:
+> [0~335360], clone_subset: {}), after_progress: ObjectRecoveryProgress(
+> !first, data_recovered_to:335360, data_complete:true, omap_recovered_to:,
+> omap_complete:true), before_progress: ObjectRecoveryProgress(first, data
+> _recovered_to:0, data_complete:false, omap_recovered_to:,
+> omap_complete:false)),PushOp(922b1749/rbd_data.1c3dade6cdc10.00000000000014c5/head//6,
+> v
+> ersion: 104736'7736866, data_included: [0~4194304], data_size: 4194304,
+> omap_header_size: 0, omap_entries_size: 0, attrset_size: 2, recovery_info:
+>
+> ObjectRecoveryInfo(922b1749/rbd_data.1c3dade6cdc10.00000000000014c5/head//6@104736'7736866,
+> copy_subset: [0~4194304], clone_subset: {}), after_pr
+> ogress: ObjectRecoveryProgress(!first, data_recovered_to:4194304,
+> data_complete:true, omap_recovered_to:, omap_complete:true),
+> before_progress: Ob
+> jectRecoveryProgress(first, data_recovered_to:0, data_complete:false,
+> omap_recovered_to:, omap_complete:false))])
+>
+>   -6933> 2014-10-31 15:34tha7.611229 7f85f737a700  5 osd.21 pg_epoch: 104744
+> pg[6.749( v 104744'7741801 (104665'7732106,104744'7741801] lb
+> 14886749/rbd_data.3955b9640616f2.000000000000f5e2/head//6 local-les=104661
+> n=1780 ec=164 les/c 104742/104735 104740/104741/103210) [74,112,21]/[74,112]
+> r=-1 lpr=104741 pi=64005-104740/278 luod=0'0 crt=104744'7741798
+> active+remapped] enter Started/ReplicaActive/RepNotRecovering
+>
+> I think having some missing objects, I can't start one osd  that above
+> objects be pushed to that osd. Ceph'versions are slower 0.86 then appear
+> this bug?
+> Should I upgrade to Giant o resolve this bug?,
+>
+>
+> Thank you,
+> --
+> Tuan
+> HaNoi-VietNam
+>
+>
+> On 10/30/2014 10:02 PM, Sage Weil wrote:
+>
+> On Thu, 30 Oct 2014, Ta Ba Tuan wrote:
+>
+> Hi Everyone,
+>
+> I upgraded Ceph to Giant by installing *tar.gz package, but appeared some
+> errors related Object Trimming or Snap Trimming:
+> I think having some missing objects and be not recovered.
+>
+> Note that this isn't giant, which is 0.87, but something a few weeks
+> older.  There were a few bugs fixed in this code, but we can't tell if
+> this was one of them without the log leading up to this message, which
+> should include either a failed assertion message or segmentation fault or
+> similar.
+>
+> Thanks!
+> sage
+>
+>
+>   ceph version 0.86-106-g6f8524e (6f8524ef7673ab4448de2e0ff76638deaf03cae8)
+>   1: /usr/bin/ceph-osd() [0x9b6655]
+>   2: (()+0xfcb0) [0x7fa52c471cb0]
+>   3: (ReplicatedPG::trim_object(hobject_t const&)+0x395) [0x811c25]
+>   4: (ReplicatedPG::TrimmingObjects::react(ReplicatedPG::SnapTrim
+> const&)+0x43e) [0x82baae]
+>   5: (boost::statechart::simple_state<ReplicatedPG::TrimmingObjects,
+> ReplicatedPG::SnapTrimmer, boost::mpl::list<mpl_::na, mpl_::na, mpl_::na,
+> mpl
+> _::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na,
+> mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na
+> , mpl_::na,
+> mpl_::na>,(boost::statechart::history_mode)0>::react_impl(boost::statechart::event_ba
+> se const&, void const*)+0xc0) [0x870c30]
+>   6: (boost::statechart::state_machine<ReplicatedPG::SnapTrimmer,
+> ReplicatedPG::NotTrimming, std::allocator<void>,
+> boost::statechart::null_excepti
+> on_translator>::process_queued_events()+0xfb) [0x8560db]
+>   7: (boost::statechart::state_machine<ReplicatedPG::SnapTrimmer,
+> ReplicatedPG::NotTrimming, std::allocator<void>,
+> boost::statechart::null_excepti
+> on_translator>::process_event(boost::statechart::event_base const&)+0x1e)
+> [0x8562ae]
+>   8: (ReplicatedPG::snap_trimmer()+0x4f8) [0x7d5f48]
+>   9: (OSD::SnapTrimWQ::_process(PG*)+0x14) [0x6739b4]
+>   10: (ThreadPool::worker(ThreadPool::WorkThread*)+0x48e) [0xa8fa0e]
+>   11: (ThreadPool::WorkThread::entry()+0x10) [0xa927a0]
+>   12: (()+0x7e9a) [0x7fa52c469e9a]
+>   13: (clone()+0x6d) [0x7fa52ae3431d]
+>   NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed
+> to
+> interpret this.
+>
+>
+>    -128> 2014-10-29 13:51:23.049357 7fa50ed9d700  5 osd.21 pg_epoch: 104445
+> pg[6.9d8( v 104445'7857889 (103730'7852406,104445'7857889] local-les=104444
+> n=4345 ec=164 les/c 104444/104272 104443/104443/104443) [21,93,49] r=0
+> lpr=104443 pi=103787-104442/16 crt=104442'7857887 mlcod 104445'7857888
+> active snaptrimq=[1907~1,1941~4,1946~1,19ef~2,19f2~1,19f4~3,19fa~5]] exit
+> Started/Primary/Active/Recovered 0.000084 0 0.000000
+>    -127> 2014-10-29 13:51:23.049392 7fa50ed9d700  5 osd.21 pg_epoch: 104445
+> pg[6.9d8( v 104445'7857889 (103730'7852406,104445'7857889] local-les=104444
+> n=4345 ec=164 les/c 104444/104272 104443/104443/104443) [21,93,49] r=0
+> lpr=104443 pi=103787-104442/16 crt=104442'7857887 mlcod 104445'7857888
+> active snaptrimq=[1907~1,1941~4,1946~1,19ef~2,19f2~1,19f4~3,19fa~5]] enter
+> Started/Primary/Active/Clean
+>    -126> 2014-10-29 13:51:23.049582 7fa50ed9d700  1 -- 172.30.5.2:6838/22980
+> --> 172.30.5.4:6859/8884 -- pg_info(1 pgs e104445:6.9d8) v4 -- ?+0
+> 0x30d41c00 con 0x26c6ac60
+>
+>
+> Thank you!
+> --
+> Tuan
+> HaNoi-VietNam
+>
+>
+>
+>
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>
+>
+>
