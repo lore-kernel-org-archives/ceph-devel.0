@@ -1,151 +1,398 @@
-From: Ming Lei <tom.leiming@gmail.com>
-Subject: Re: [PATCH 2/2] blk-mq: allow direct dispatch to a driver specific workqueue
-Date: Mon, 3 Nov 2014 16:40:47 +0800
-Message-ID: <CACVXFVMrW-GSa1YMuvGx=vvxxP2ePwxvTAKzdyv=ZYh6yf+Z5g@mail.gmail.com>
-References: <1415003008-16683-1-git-send-email-hch@lst.de>
-	<1415003008-16683-3-git-send-email-hch@lst.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1415003008-16683-3-git-send-email-hch@lst.de>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Christoph Hellwig <hch@lst.de>
-Cc: Jens Axboe <axboe@fb.com>, Richard Weinberger <richard@nod.at>, ceph-devel@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+From: Ilya Dryomov <ilya.dryomov@inktank.com>
+Subject: [PATCH] libceph: do not crash on large auth tickets
+Date: Mon,  3 Nov 2014 13:06:57 +0300
+Message-ID: <1415009217-8325-1-git-send-email-idryomov@redhat.com>
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-lb0-f169.google.com ([209.85.217.169]:63157 "EHLO
+	mail-lb0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751012AbaKCKHU (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Nov 2014 05:07:20 -0500
+Received: by mail-lb0-f169.google.com with SMTP id p9so3322616lbv.0
+        for <ceph-devel@vger.kernel.org>; Mon, 03 Nov 2014 02:07:18 -0800 (PST)
+Received: from localhost ([109.110.66.107])
+        by mx.google.com with ESMTPSA id pr7sm7744285lbc.18.2014.11.03.02.07.16
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=RC4-SHA bits=128/128);
+        Mon, 03 Nov 2014 02:07:17 -0800 (PST)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hi Christoph,
+Large (greater than 32k, the value of PAGE_ALLOC_COSTLY_ORDER) auth
+tickets will have their buffers vmalloc'ed, which leads to the
+following crash in crypto:
 
-On Mon, Nov 3, 2014 at 4:23 PM, Christoph Hellwig <hch@lst.de> wrote:
-> We have various block drivers that need to execute long term blocking
-> operations during I/O submission like file system or network I/O.
->
-> Currently these drivers just queue up work to an internal workqueue
-> from their request_fn.  With blk-mq we can make sure they always get
-> called on their own workqueue directly for I/O submission by:
->
->  1) adding a flag to prevent inline submission of I/O, and
->  2) allowing the driver to pass in a workqueue in the tag_set that
->     will be used instead of kblockd.
+[   28.685082] BUG: unable to handle kernel paging request at ffffeb04000032c0
+[   28.686032] IP: [<ffffffff81392b42>] scatterwalk_pagedone+0x22/0x80
+[   28.686032] PGD 0
+[   28.688088] Oops: 0000 [#1] PREEMPT SMP
+[   28.688088] Modules linked in:
+[   28.688088] CPU: 0 PID: 878 Comm: kworker/0:2 Not tainted 3.17.0-vm+ #305
+[   28.688088] Hardware name: Bochs Bochs, BIOS Bochs 01/01/2007
+[   28.688088] Workqueue: ceph-msgr con_work
+[   28.688088] task: ffff88011a7f9030 ti: ffff8800d903c000 task.ti: ffff8800d903c000
+[   28.688088] RIP: 0010:[<ffffffff81392b42>]  [<ffffffff81392b42>] scatterwalk_pagedone+0x22/0x80
+[   28.688088] RSP: 0018:ffff8800d903f688  EFLAGS: 00010286
+[   28.688088] RAX: ffffeb04000032c0 RBX: ffff8800d903f718 RCX: ffffeb04000032c0
+[   28.688088] RDX: 0000000000000000 RSI: 0000000000000001 RDI: ffff8800d903f750
+[   28.688088] RBP: ffff8800d903f688 R08: 00000000000007de R09: ffff8800d903f880
+[   28.688088] R10: 18df467c72d6257b R11: 0000000000000000 R12: 0000000000000010
+[   28.688088] R13: ffff8800d903f750 R14: ffff8800d903f8a0 R15: 0000000000000000
+[   28.688088] FS:  00007f50a41c7700(0000) GS:ffff88011fc00000(0000) knlGS:0000000000000000
+[   28.688088] CS:  0010 DS: 0000 ES: 0000 CR0: 000000008005003b
+[   28.688088] CR2: ffffeb04000032c0 CR3: 00000000da3f3000 CR4: 00000000000006b0
+[   28.688088] Stack:
+[   28.688088]  ffff8800d903f698 ffffffff81392ca8 ffff8800d903f6e8 ffffffff81395d32
+[   28.688088]  ffff8800dac96000 ffff880000000000 ffff8800d903f980 ffff880119b7e020
+[   28.688088]  ffff880119b7e010 0000000000000000 0000000000000010 0000000000000010
+[   28.688088] Call Trace:
+[   28.688088]  [<ffffffff81392ca8>] scatterwalk_done+0x38/0x40
+[   28.688088]  [<ffffffff81392ca8>] scatterwalk_done+0x38/0x40
+[   28.688088]  [<ffffffff81395d32>] blkcipher_walk_done+0x182/0x220
+[   28.688088]  [<ffffffff813990bf>] crypto_cbc_encrypt+0x15f/0x180
+[   28.688088]  [<ffffffff81399780>] ? crypto_aes_set_key+0x30/0x30
+[   28.688088]  [<ffffffff8156c40c>] ceph_aes_encrypt2+0x29c/0x2e0
+[   28.688088]  [<ffffffff8156d2a3>] ceph_encrypt2+0x93/0xb0
+[   28.688088]  [<ffffffff8156d7da>] ceph_x_encrypt+0x4a/0x60
+[   28.688088]  [<ffffffff8155b39d>] ? ceph_buffer_new+0x5d/0xf0
+[   28.688088]  [<ffffffff8156e837>] ceph_x_build_authorizer.isra.6+0x297/0x360
+[   28.688088]  [<ffffffff8112089b>] ? kmem_cache_alloc_trace+0x11b/0x1c0
+[   28.688088]  [<ffffffff8156b496>] ? ceph_auth_create_authorizer+0x36/0x80
+[   28.688088]  [<ffffffff8156ed83>] ceph_x_create_authorizer+0x63/0xd0
+[   28.688088]  [<ffffffff8156b4b4>] ceph_auth_create_authorizer+0x54/0x80
+[   28.688088]  [<ffffffff8155f7c0>] get_authorizer+0x80/0xd0
+[   28.688088]  [<ffffffff81555a8b>] prepare_write_connect+0x18b/0x2b0
+[   28.688088]  [<ffffffff81559289>] try_read+0x1e59/0x1f10
 
-The above two aren't enough because the big problem is that
-drivers need a per-request work structure instead of 'hctx->run_work',
-otherwise there are at most NR_CPUS concurrent submissions.
+This is because we set up crypto scatterlists as if all buffers were
+kmalloc'ed.  Fix it.
 
-So the per-request work structure should be exposed to blk-mq
-too for the kind of usage, such as .blk_mq_req_work(req) callback
-in case of BLK_MQ_F_WORKQUEUE.
+Cc: stable@vger.kernel.org
+Signed-off-by: Ilya Dryomov <idryomov@redhat.com>
+---
+v2:
+- no single page limit
 
-Thanks,
+ net/ceph/crypto.c |  169 +++++++++++++++++++++++++++++++++++++++++------------
+ 1 file changed, 132 insertions(+), 37 deletions(-)
 
->
-> Signed-off-by: Christoph Hellwig <hch@lst.de>
-> ---
->  block/blk-core.c       |  2 +-
->  block/blk-mq.c         | 12 +++++++++---
->  block/blk.h            |  1 +
->  include/linux/blk-mq.h |  4 ++++
->  4 files changed, 15 insertions(+), 4 deletions(-)
->
-> diff --git a/block/blk-core.c b/block/blk-core.c
-> index 0421b53..7f7249f 100644
-> --- a/block/blk-core.c
-> +++ b/block/blk-core.c
-> @@ -61,7 +61,7 @@ struct kmem_cache *blk_requestq_cachep;
->  /*
->   * Controlling structure to kblockd
->   */
-> -static struct workqueue_struct *kblockd_workqueue;
-> +struct workqueue_struct *kblockd_workqueue;
->
->  void blk_queue_congestion_threshold(struct request_queue *q)
->  {
-> diff --git a/block/blk-mq.c b/block/blk-mq.c
-> index 22e50a5..3d27d22 100644
-> --- a/block/blk-mq.c
-> +++ b/block/blk-mq.c
-> @@ -804,12 +804,13 @@ void blk_mq_run_hw_queue(struct blk_mq_hw_ctx *hctx, bool async)
->         if (unlikely(test_bit(BLK_MQ_S_STOPPED, &hctx->state)))
->                 return;
->
-> -       if (!async && cpumask_test_cpu(smp_processor_id(), hctx->cpumask)) {
-> +       if (!async && !(hctx->flags & BLK_MQ_F_WORKQUEUE) &&
-> +           cpumask_test_cpu(smp_processor_id(), hctx->cpumask)) {
->                 __blk_mq_run_hw_queue(hctx);
->                 return;
->         }
->
-> -       kblockd_schedule_delayed_work_on(blk_mq_hctx_next_cpu(hctx),
-> +       queue_delayed_work_on(blk_mq_hctx_next_cpu(hctx), hctx->wq,
->                         &hctx->run_work, 0);
->  }
->
-> @@ -908,7 +909,7 @@ static void blk_mq_delay_work_fn(struct work_struct *work)
->
->  void blk_mq_delay_queue(struct blk_mq_hw_ctx *hctx, unsigned long msecs)
->  {
-> -       kblockd_schedule_delayed_work_on(blk_mq_hctx_next_cpu(hctx),
-> +       queue_delayed_work_on(blk_mq_hctx_next_cpu(hctx), hctx->wq,
->                         &hctx->delay_work, msecs_to_jiffies(msecs));
->  }
->  EXPORT_SYMBOL(blk_mq_delay_queue);
-> @@ -1581,6 +1582,11 @@ static int blk_mq_init_hctx(struct request_queue *q,
->         hctx->flags = set->flags;
->         hctx->cmd_size = set->cmd_size;
->
-> +       if (set->wq)
-> +               hctx->wq = set->wq;
-> +       else
-> +               hctx->wq = kblockd_workqueue;
-> +
->         blk_mq_init_cpu_notifier(&hctx->cpu_notifier,
->                                         blk_mq_hctx_notify, hctx);
->         blk_mq_register_cpu_notifier(&hctx->cpu_notifier);
-> diff --git a/block/blk.h b/block/blk.h
-> index 43b0361..fb46ad0 100644
-> --- a/block/blk.h
-> +++ b/block/blk.h
-> @@ -25,6 +25,7 @@ struct blk_flush_queue {
->         spinlock_t              mq_flush_lock;
->  };
->
-> +extern struct workqueue_struct *kblockd_workqueue;
->  extern struct kmem_cache *blk_requestq_cachep;
->  extern struct kmem_cache *request_cachep;
->  extern struct kobj_type blk_queue_ktype;
-> diff --git a/include/linux/blk-mq.h b/include/linux/blk-mq.h
-> index 5a901d0..ebe4699 100644
-> --- a/include/linux/blk-mq.h
-> +++ b/include/linux/blk-mq.h
-> @@ -37,6 +37,8 @@ struct blk_mq_hw_ctx {
->         unsigned int            queue_num;
->         struct blk_flush_queue  *fq;
->
-> +       struct workqueue_struct *wq;
-> +
->         void                    *driver_data;
->
->         struct blk_mq_ctxmap    ctx_map;
-> @@ -64,6 +66,7 @@ struct blk_mq_hw_ctx {
->
->  struct blk_mq_tag_set {
->         struct blk_mq_ops       *ops;
-> +       struct workqueue_struct *wq;
->         unsigned int            nr_hw_queues;
->         unsigned int            queue_depth;    /* max hw supported */
->         unsigned int            reserved_tags;
-> @@ -156,6 +159,7 @@ enum {
->         BLK_MQ_F_SG_MERGE       = 1 << 2,
->         BLK_MQ_F_SYSFS_UP       = 1 << 3,
->         BLK_MQ_F_DEFER_ISSUE    = 1 << 4,
-> +       BLK_MQ_F_WORKQUEUE      = 1 << 5,
->
->         BLK_MQ_S_STOPPED        = 0,
->         BLK_MQ_S_TAG_ACTIVE     = 1,
-> --
-> 1.9.1
->
-
-
-
+diff --git a/net/ceph/crypto.c b/net/ceph/crypto.c
+index 62fc5e7a9acf..e809e6067f5d 100644
+--- a/net/ceph/crypto.c
++++ b/net/ceph/crypto.c
+@@ -90,11 +90,82 @@ static struct crypto_blkcipher *ceph_crypto_alloc_cipher(void)
+ 
+ static const u8 *aes_iv = (u8 *)CEPH_AES_IV;
+ 
++/*
++ * Should be used for buffers allocated with ceph_kvmalloc().
++ * Currently these are encrypt out-buffer (ceph_buffer) and decrypt
++ * in-buffer (msg front).
++ *
++ * Dispose of @sgt with teardown_sgtable().
++ *
++ * @prealloc_sg is to avoid memory allocation inside sg_alloc_table()
++ * in cases where a single sg is sufficient.  No attempt to reduce the
++ * number of sgs by squeezing physically contiguous pages together is
++ * made though, for simplicity.
++ */
++static int setup_sgtable(struct sg_table *sgt, struct scatterlist *prealloc_sg,
++			 const void *buf, unsigned int buf_len)
++{
++	struct scatterlist *sg;
++	const bool is_vmalloc = is_vmalloc_addr(buf);
++	unsigned int off = offset_in_page(buf);
++	unsigned int chunk_cnt = 1;
++	unsigned int chunk_len = PAGE_ALIGN(off + buf_len);
++	int i;
++	int ret;
++
++	if (buf_len == 0) {
++		memset(sgt, 0, sizeof(*sgt));
++		return -EINVAL;
++	}
++
++	if (is_vmalloc) {
++		chunk_cnt = chunk_len >> PAGE_SHIFT;
++		chunk_len = PAGE_SIZE;
++	}
++
++	if (chunk_cnt > 1) {
++		ret = sg_alloc_table(sgt, chunk_cnt, GFP_NOFS);
++		if (ret)
++			return ret;
++	} else {
++		BUG_ON(chunk_cnt != 1);
++		sg_init_table(prealloc_sg, 1);
++		sgt->sgl = prealloc_sg;
++		sgt->nents = sgt->orig_nents = 1;
++	}
++
++	for_each_sg(sgt->sgl, sg, sgt->orig_nents, i) {
++		struct page *page;
++		unsigned int len = min(chunk_len - off, buf_len);
++
++		if (is_vmalloc)
++			page = vmalloc_to_page(buf);
++		else
++			page = virt_to_page(buf);
++
++		sg_set_page(sg, page, len, off);
++
++		off = 0;
++		buf += len;
++		buf_len -= len;
++	}
++	BUG_ON(buf_len != 0);
++
++	return 0;
++}
++
++static void teardown_sgtable(struct sg_table *sgt)
++{
++	if (sgt->orig_nents > 1)
++		sg_free_table(sgt);
++}
++
+ static int ceph_aes_encrypt(const void *key, int key_len,
+ 			    void *dst, size_t *dst_len,
+ 			    const void *src, size_t src_len)
+ {
+-	struct scatterlist sg_in[2], sg_out[1];
++	struct scatterlist sg_in[2], prealloc_sg;
++	struct sg_table sg_out;
+ 	struct crypto_blkcipher *tfm = ceph_crypto_alloc_cipher();
+ 	struct blkcipher_desc desc = { .tfm = tfm, .flags = 0 };
+ 	int ret;
+@@ -110,16 +181,18 @@ static int ceph_aes_encrypt(const void *key, int key_len,
+ 
+ 	*dst_len = src_len + zero_padding;
+ 
+-	crypto_blkcipher_setkey((void *)tfm, key, key_len);
+ 	sg_init_table(sg_in, 2);
+ 	sg_set_buf(&sg_in[0], src, src_len);
+ 	sg_set_buf(&sg_in[1], pad, zero_padding);
+-	sg_init_table(sg_out, 1);
+-	sg_set_buf(sg_out, dst, *dst_len);
++	ret = setup_sgtable(&sg_out, &prealloc_sg, dst, *dst_len);
++	if (ret)
++		goto out_tfm;
++
++	crypto_blkcipher_setkey((void *)tfm, key, key_len);
+ 	iv = crypto_blkcipher_crt(tfm)->iv;
+ 	ivsize = crypto_blkcipher_ivsize(tfm);
+-
+ 	memcpy(iv, aes_iv, ivsize);
++
+ 	/*
+ 	print_hex_dump(KERN_ERR, "enc key: ", DUMP_PREFIX_NONE, 16, 1,
+ 		       key, key_len, 1);
+@@ -128,16 +201,22 @@ static int ceph_aes_encrypt(const void *key, int key_len,
+ 	print_hex_dump(KERN_ERR, "enc pad: ", DUMP_PREFIX_NONE, 16, 1,
+ 			pad, zero_padding, 1);
+ 	*/
+-	ret = crypto_blkcipher_encrypt(&desc, sg_out, sg_in,
++	ret = crypto_blkcipher_encrypt(&desc, sg_out.sgl, sg_in,
+ 				     src_len + zero_padding);
+-	crypto_free_blkcipher(tfm);
+-	if (ret < 0)
++	if (ret < 0) {
+ 		pr_err("ceph_aes_crypt failed %d\n", ret);
++		goto out_sg;
++	}
+ 	/*
+ 	print_hex_dump(KERN_ERR, "enc out: ", DUMP_PREFIX_NONE, 16, 1,
+ 		       dst, *dst_len, 1);
+ 	*/
+-	return 0;
++
++out_sg:
++	teardown_sgtable(&sg_out);
++out_tfm:
++	crypto_free_blkcipher(tfm);
++	return ret;
+ }
+ 
+ static int ceph_aes_encrypt2(const void *key, int key_len, void *dst,
+@@ -145,7 +224,8 @@ static int ceph_aes_encrypt2(const void *key, int key_len, void *dst,
+ 			     const void *src1, size_t src1_len,
+ 			     const void *src2, size_t src2_len)
+ {
+-	struct scatterlist sg_in[3], sg_out[1];
++	struct scatterlist sg_in[3], prealloc_sg;
++	struct sg_table sg_out;
+ 	struct crypto_blkcipher *tfm = ceph_crypto_alloc_cipher();
+ 	struct blkcipher_desc desc = { .tfm = tfm, .flags = 0 };
+ 	int ret;
+@@ -161,17 +241,19 @@ static int ceph_aes_encrypt2(const void *key, int key_len, void *dst,
+ 
+ 	*dst_len = src1_len + src2_len + zero_padding;
+ 
+-	crypto_blkcipher_setkey((void *)tfm, key, key_len);
+ 	sg_init_table(sg_in, 3);
+ 	sg_set_buf(&sg_in[0], src1, src1_len);
+ 	sg_set_buf(&sg_in[1], src2, src2_len);
+ 	sg_set_buf(&sg_in[2], pad, zero_padding);
+-	sg_init_table(sg_out, 1);
+-	sg_set_buf(sg_out, dst, *dst_len);
++	ret = setup_sgtable(&sg_out, &prealloc_sg, dst, *dst_len);
++	if (ret)
++		goto out_tfm;
++
++	crypto_blkcipher_setkey((void *)tfm, key, key_len);
+ 	iv = crypto_blkcipher_crt(tfm)->iv;
+ 	ivsize = crypto_blkcipher_ivsize(tfm);
+-
+ 	memcpy(iv, aes_iv, ivsize);
++
+ 	/*
+ 	print_hex_dump(KERN_ERR, "enc  key: ", DUMP_PREFIX_NONE, 16, 1,
+ 		       key, key_len, 1);
+@@ -182,23 +264,30 @@ static int ceph_aes_encrypt2(const void *key, int key_len, void *dst,
+ 	print_hex_dump(KERN_ERR, "enc  pad: ", DUMP_PREFIX_NONE, 16, 1,
+ 			pad, zero_padding, 1);
+ 	*/
+-	ret = crypto_blkcipher_encrypt(&desc, sg_out, sg_in,
++	ret = crypto_blkcipher_encrypt(&desc, sg_out.sgl, sg_in,
+ 				     src1_len + src2_len + zero_padding);
+-	crypto_free_blkcipher(tfm);
+-	if (ret < 0)
++	if (ret < 0) {
+ 		pr_err("ceph_aes_crypt2 failed %d\n", ret);
++		goto out_sg;
++	}
+ 	/*
+ 	print_hex_dump(KERN_ERR, "enc  out: ", DUMP_PREFIX_NONE, 16, 1,
+ 		       dst, *dst_len, 1);
+ 	*/
+-	return 0;
++
++out_sg:
++	teardown_sgtable(&sg_out);
++out_tfm:
++	crypto_free_blkcipher(tfm);
++	return ret;
+ }
+ 
+ static int ceph_aes_decrypt(const void *key, int key_len,
+ 			    void *dst, size_t *dst_len,
+ 			    const void *src, size_t src_len)
+ {
+-	struct scatterlist sg_in[1], sg_out[2];
++	struct sg_table sg_in;
++	struct scatterlist sg_out[2], prealloc_sg;
+ 	struct crypto_blkcipher *tfm = ceph_crypto_alloc_cipher();
+ 	struct blkcipher_desc desc = { .tfm = tfm };
+ 	char pad[16];
+@@ -210,16 +299,16 @@ static int ceph_aes_decrypt(const void *key, int key_len,
+ 	if (IS_ERR(tfm))
+ 		return PTR_ERR(tfm);
+ 
+-	crypto_blkcipher_setkey((void *)tfm, key, key_len);
+-	sg_init_table(sg_in, 1);
+ 	sg_init_table(sg_out, 2);
+-	sg_set_buf(sg_in, src, src_len);
+ 	sg_set_buf(&sg_out[0], dst, *dst_len);
+ 	sg_set_buf(&sg_out[1], pad, sizeof(pad));
++	ret = setup_sgtable(&sg_in, &prealloc_sg, src, src_len);
++	if (ret)
++		goto out_tfm;
+ 
++	crypto_blkcipher_setkey((void *)tfm, key, key_len);
+ 	iv = crypto_blkcipher_crt(tfm)->iv;
+ 	ivsize = crypto_blkcipher_ivsize(tfm);
+-
+ 	memcpy(iv, aes_iv, ivsize);
+ 
+ 	/*
+@@ -228,12 +317,10 @@ static int ceph_aes_decrypt(const void *key, int key_len,
+ 	print_hex_dump(KERN_ERR, "dec  in: ", DUMP_PREFIX_NONE, 16, 1,
+ 		       src, src_len, 1);
+ 	*/
+-
+-	ret = crypto_blkcipher_decrypt(&desc, sg_out, sg_in, src_len);
+-	crypto_free_blkcipher(tfm);
++	ret = crypto_blkcipher_decrypt(&desc, sg_out, sg_in.sgl, src_len);
+ 	if (ret < 0) {
+ 		pr_err("ceph_aes_decrypt failed %d\n", ret);
+-		return ret;
++		goto out_sg;
+ 	}
+ 
+ 	if (src_len <= *dst_len)
+@@ -251,7 +338,12 @@ static int ceph_aes_decrypt(const void *key, int key_len,
+ 	print_hex_dump(KERN_ERR, "dec out: ", DUMP_PREFIX_NONE, 16, 1,
+ 		       dst, *dst_len, 1);
+ 	*/
+-	return 0;
++
++out_sg:
++	teardown_sgtable(&sg_in);
++out_tfm:
++	crypto_free_blkcipher(tfm);
++	return ret;
+ }
+ 
+ static int ceph_aes_decrypt2(const void *key, int key_len,
+@@ -259,7 +351,8 @@ static int ceph_aes_decrypt2(const void *key, int key_len,
+ 			     void *dst2, size_t *dst2_len,
+ 			     const void *src, size_t src_len)
+ {
+-	struct scatterlist sg_in[1], sg_out[3];
++	struct sg_table sg_in;
++	struct scatterlist sg_out[3], prealloc_sg;
+ 	struct crypto_blkcipher *tfm = ceph_crypto_alloc_cipher();
+ 	struct blkcipher_desc desc = { .tfm = tfm };
+ 	char pad[16];
+@@ -271,17 +364,17 @@ static int ceph_aes_decrypt2(const void *key, int key_len,
+ 	if (IS_ERR(tfm))
+ 		return PTR_ERR(tfm);
+ 
+-	sg_init_table(sg_in, 1);
+-	sg_set_buf(sg_in, src, src_len);
+ 	sg_init_table(sg_out, 3);
+ 	sg_set_buf(&sg_out[0], dst1, *dst1_len);
+ 	sg_set_buf(&sg_out[1], dst2, *dst2_len);
+ 	sg_set_buf(&sg_out[2], pad, sizeof(pad));
++	ret = setup_sgtable(&sg_in, &prealloc_sg, src, src_len);
++	if (ret)
++		goto out_tfm;
+ 
+ 	crypto_blkcipher_setkey((void *)tfm, key, key_len);
+ 	iv = crypto_blkcipher_crt(tfm)->iv;
+ 	ivsize = crypto_blkcipher_ivsize(tfm);
+-
+ 	memcpy(iv, aes_iv, ivsize);
+ 
+ 	/*
+@@ -290,12 +383,10 @@ static int ceph_aes_decrypt2(const void *key, int key_len,
+ 	print_hex_dump(KERN_ERR, "dec   in: ", DUMP_PREFIX_NONE, 16, 1,
+ 		       src, src_len, 1);
+ 	*/
+-
+-	ret = crypto_blkcipher_decrypt(&desc, sg_out, sg_in, src_len);
+-	crypto_free_blkcipher(tfm);
++	ret = crypto_blkcipher_decrypt(&desc, sg_out, sg_in.sgl, src_len);
+ 	if (ret < 0) {
+ 		pr_err("ceph_aes_decrypt failed %d\n", ret);
+-		return ret;
++		goto out_sg;
+ 	}
+ 
+ 	if (src_len <= *dst1_len)
+@@ -325,7 +416,11 @@ static int ceph_aes_decrypt2(const void *key, int key_len,
+ 		       dst2, *dst2_len, 1);
+ 	*/
+ 
+-	return 0;
++out_sg:
++	teardown_sgtable(&sg_in);
++out_tfm:
++	crypto_free_blkcipher(tfm);
++	return ret;
+ }
+ 
+ 
 -- 
-Ming Lei
+1.7.10.4
+
