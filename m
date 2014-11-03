@@ -1,83 +1,118 @@
 From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: Re: [PATCH] libceph: do not crash on large auth tickets
-Date: Mon, 3 Nov 2014 14:16:51 +0400
-Message-ID: <CALFYKtAXO8FX81W3QPS-4X7X3fRODtgD4Z8jjr=Jcg-esgEgbg@mail.gmail.com>
-References: <1415009217-8325-1-git-send-email-idryomov@redhat.com>
+Subject: Re: [PATCH 1/1] ceph: Deletion of unnecessary checks before two
+ function calls
+Date: Mon, 3 Nov 2014 14:35:28 +0400
+Message-ID: <CALFYKtAJG5W9-BAHrqEcC-FfqdJERCqkBADo4yTUyjzb+wCHnQ@mail.gmail.com>
+References: <5307CAA2.8060406@users.sourceforge.net>
+	<alpine.DEB.2.02.1402212321410.2043@localhost6.localdomain6>
+	<530A086E.8010901@users.sourceforge.net>
+	<alpine.DEB.2.02.1402231635510.1985@localhost6.localdomain6>
+	<530A72AA.3000601@users.sourceforge.net>
+	<alpine.DEB.2.02.1402240658210.2090@localhost6.localdomain6>
+	<530B5FB6.6010207@users.sourceforge.net>
+	<alpine.DEB.2.10.1402241710370.2074@hadrien>
+	<530C5E18.1020800@users.sourceforge.net>
+	<alpine.DEB.2.10.1402251014170.2080@hadrien>
+	<530CD2C4.4050903@users.sourceforge.net>
+	<alpine.DEB.2.10.1402251840450.7035@hadrien>
+	<530CF8FF.8080600@users.sourceforge.net>
+	<alpine.DEB.2.02.1402252117150.2047@localhost6.localdomain6>
+	<530DD06F.4090703@users.sourceforge.net>
+	<alpine.DEB.2.02.1402262129250.2221@localhost6.localdomain6>
+	<5317A59D.4@users.sourceforge.net>
+	<54563DCB.2010103@users.sourceforge.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f175.google.com ([209.85.216.175]:36837 "EHLO
-	mail-qc0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751006AbaKCKQw (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Nov 2014 05:16:52 -0500
-Received: by mail-qc0-f175.google.com with SMTP id b13so9703501qcw.20
-        for <ceph-devel@vger.kernel.org>; Mon, 03 Nov 2014 02:16:51 -0800 (PST)
-In-Reply-To: <1415009217-8325-1-git-send-email-idryomov@redhat.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+Return-path: <kernel-janitors-owner@vger.kernel.org>
+In-Reply-To: <54563DCB.2010103@users.sourceforge.net>
+Sender: kernel-janitors-owner@vger.kernel.org
+To: SF Markus Elfring <elfring@users.sourceforge.net>
+Cc: Sage Weil <sage@inktank.com>, Ceph Development <ceph-devel@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org, trivial@kernel.org, Coccinelle <cocci@systeme.lip6.fr>, "Yan, Zheng" <zyan@redhat.com>
+List-Id: ceph-devel.vger.kernel.org
 
-On Mon, Nov 3, 2014 at 1:06 PM, Ilya Dryomov <ilya.dryomov@inktank.com> wrote:
-> Large (greater than 32k, the value of PAGE_ALLOC_COSTLY_ORDER) auth
-> tickets will have their buffers vmalloc'ed, which leads to the
-> following crash in crypto:
+On Sun, Nov 2, 2014 at 5:20 PM, SF Markus Elfring
+<elfring@users.sourceforge.net> wrote:
+> The functions ceph_put_snap_context() and iput() test whether their argument
+> is NULL and then return immediately. Thus the test around the call
+> is not needed.
 >
-> [   28.685082] BUG: unable to handle kernel paging request at ffffeb04000032c0
-> [   28.686032] IP: [<ffffffff81392b42>] scatterwalk_pagedone+0x22/0x80
-> [   28.686032] PGD 0
-> [   28.688088] Oops: 0000 [#1] PREEMPT SMP
-> [   28.688088] Modules linked in:
-> [   28.688088] CPU: 0 PID: 878 Comm: kworker/0:2 Not tainted 3.17.0-vm+ #305
-> [   28.688088] Hardware name: Bochs Bochs, BIOS Bochs 01/01/2007
-> [   28.688088] Workqueue: ceph-msgr con_work
-> [   28.688088] task: ffff88011a7f9030 ti: ffff8800d903c000 task.ti: ffff8800d903c000
-> [   28.688088] RIP: 0010:[<ffffffff81392b42>]  [<ffffffff81392b42>] scatterwalk_pagedone+0x22/0x80
-> [   28.688088] RSP: 0018:ffff8800d903f688  EFLAGS: 00010286
-> [   28.688088] RAX: ffffeb04000032c0 RBX: ffff8800d903f718 RCX: ffffeb04000032c0
-> [   28.688088] RDX: 0000000000000000 RSI: 0000000000000001 RDI: ffff8800d903f750
-> [   28.688088] RBP: ffff8800d903f688 R08: 00000000000007de R09: ffff8800d903f880
-> [   28.688088] R10: 18df467c72d6257b R11: 0000000000000000 R12: 0000000000000010
-> [   28.688088] R13: ffff8800d903f750 R14: ffff8800d903f8a0 R15: 0000000000000000
-> [   28.688088] FS:  00007f50a41c7700(0000) GS:ffff88011fc00000(0000) knlGS:0000000000000000
-> [   28.688088] CS:  0010 DS: 0000 ES: 0000 CR0: 000000008005003b
-> [   28.688088] CR2: ffffeb04000032c0 CR3: 00000000da3f3000 CR4: 00000000000006b0
-> [   28.688088] Stack:
-> [   28.688088]  ffff8800d903f698 ffffffff81392ca8 ffff8800d903f6e8 ffffffff81395d32
-> [   28.688088]  ffff8800dac96000 ffff880000000000 ffff8800d903f980 ffff880119b7e020
-> [   28.688088]  ffff880119b7e010 0000000000000000 0000000000000010 0000000000000010
-> [   28.688088] Call Trace:
-> [   28.688088]  [<ffffffff81392ca8>] scatterwalk_done+0x38/0x40
-> [   28.688088]  [<ffffffff81392ca8>] scatterwalk_done+0x38/0x40
-> [   28.688088]  [<ffffffff81395d32>] blkcipher_walk_done+0x182/0x220
-> [   28.688088]  [<ffffffff813990bf>] crypto_cbc_encrypt+0x15f/0x180
-> [   28.688088]  [<ffffffff81399780>] ? crypto_aes_set_key+0x30/0x30
-> [   28.688088]  [<ffffffff8156c40c>] ceph_aes_encrypt2+0x29c/0x2e0
-> [   28.688088]  [<ffffffff8156d2a3>] ceph_encrypt2+0x93/0xb0
-> [   28.688088]  [<ffffffff8156d7da>] ceph_x_encrypt+0x4a/0x60
-> [   28.688088]  [<ffffffff8155b39d>] ? ceph_buffer_new+0x5d/0xf0
-> [   28.688088]  [<ffffffff8156e837>] ceph_x_build_authorizer.isra.6+0x297/0x360
-> [   28.688088]  [<ffffffff8112089b>] ? kmem_cache_alloc_trace+0x11b/0x1c0
-> [   28.688088]  [<ffffffff8156b496>] ? ceph_auth_create_authorizer+0x36/0x80
-> [   28.688088]  [<ffffffff8156ed83>] ceph_x_create_authorizer+0x63/0xd0
-> [   28.688088]  [<ffffffff8156b4b4>] ceph_auth_create_authorizer+0x54/0x80
-> [   28.688088]  [<ffffffff8155f7c0>] get_authorizer+0x80/0xd0
-> [   28.688088]  [<ffffffff81555a8b>] prepare_write_connect+0x18b/0x2b0
-> [   28.688088]  [<ffffffff81559289>] try_read+0x1e59/0x1f10
+> This issue was detected by using the Coccinelle software.
 >
-> This is because we set up crypto scatterlists as if all buffers were
-> kmalloc'ed.  Fix it.
->
-> Cc: stable@vger.kernel.org
-> Signed-off-by: Ilya Dryomov <idryomov@redhat.com>
+> Signed-off-by: Markus Elfring <elfring@users.sourceforge.net>
 > ---
-> v2:
-> - no single page limit
+>  fs/ceph/caps.c       | 3 +--
+>  fs/ceph/mds_client.c | 6 ++----
+>  fs/ceph/snap.c       | 9 +++------
+>  3 files changed, 6 insertions(+), 12 deletions(-)
 
-Oops, forgot to prefix the subject.  It was supposed to be
+[CC'ed Zheng]
 
-[PATCH v2] libceph: do not crash on large auth tickets
+Applied, but see below.
 
-of course.
+>
+> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+> index 6d1cd45..7d99fc8 100644
+> --- a/fs/ceph/caps.c
+> +++ b/fs/ceph/caps.c
+> @@ -3136,8 +3136,7 @@ flush_cap_releases:
+>  done:
+>         mutex_unlock(&session->s_mutex);
+>  done_unlocked:
+> -       if (inode)
+> -               iput(inode);
+> +       iput(inode);
+>         return;
+>
+>  bad:
+> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+> index bad07c0..3b0ab05 100644
+> --- a/fs/ceph/mds_client.c
+> +++ b/fs/ceph/mds_client.c
+> @@ -523,8 +523,7 @@ void ceph_mdsc_release_request(struct kref *kref)
+>         }
+>         if (req->r_locked_dir)
+>                 ceph_put_cap_refs(ceph_inode(req->r_locked_dir), CEPH_CAP_PIN);
+> -       if (req->r_target_inode)
+> -               iput(req->r_target_inode);
+> +       iput(req->r_target_inode);
+>         if (req->r_dentry)
+>                 dput(req->r_dentry);
+
+dput() also checks for NULL argument, but the check is wrapped into
+unlikely(), which is why I presume it wasn't picked up.  It would be
+great if you could improve your coccinelle script to handle
+{un,}likely() as well.
+
+>         if (req->r_old_dentry)
+> @@ -995,8 +994,7 @@ out:
+>         session->s_cap_iterator = NULL;
+>         spin_unlock(&session->s_cap_lock);
+>
+> -       if (last_inode)
+> -               iput(last_inode);
+> +       iput(last_inode);
+>         if (old_cap)
+>                 ceph_put_cap(session->s_mdsc, old_cap);
+>
+> diff --git a/fs/ceph/snap.c b/fs/ceph/snap.c
+> index f01645a..c1cc993 100644
+> --- a/fs/ceph/snap.c
+> +++ b/fs/ceph/snap.c
+> @@ -365,8 +365,7 @@ static int build_snap_context(struct ceph_snap_realm *realm)
+>              realm->ino, realm, snapc, snapc->seq,
+>              (unsigned int) snapc->num_snaps);
+>
+> -       if (realm->cached_context)
+> -               ceph_put_snap_context(realm->cached_context);
+> +       ceph_put_snap_context(realm->cached_context);
+>         realm->cached_context = snapc;
+>         return 0;
+>
+> @@ -590,15 +589,13 @@ static void queue_realm_cap_snaps(struct ceph_snap_realm
+> *realm)
+
+The patch was corrupted, that should have been a single line.  I fixed
+it up but you may want to look into your email client settings.
 
 Thanks,
 
