@@ -1,86 +1,99 @@
-From: Aanchal Agrawal <Aanchal.Agrawal@sandisk.com>
-Subject: RE: optimizing buffers, encode/decode
-Date: Mon, 3 Nov 2014 07:52:55 +0000
-Message-ID: <7F4FDDF05D5B3241ABA5EB82D169E31E09104D90@SACMBXIP03.sdcorp.global.sandisk.com>
-References: <alpine.DEB.2.00.1410290957240.21856@cobra.newdream.net>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+From: Christoph Hellwig <hch@lst.de>
+Subject: [PATCH 1/2] blk-mq: handle single queue case in blk_mq_hctx_next_cpu
+Date: Mon,  3 Nov 2014 09:23:27 +0100
+Message-ID: <1415003008-16683-2-git-send-email-hch@lst.de>
+References: <1415003008-16683-1-git-send-email-hch@lst.de>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bl2on0060.outbound.protection.outlook.com ([65.55.169.60]:2144
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751106AbaKCHxB convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Nov 2014 02:53:01 -0500
-Content-Language: en-US
+Received: from casper.infradead.org ([85.118.1.10]:54719 "EHLO
+	casper.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751033AbaKCIXU (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Nov 2014 03:23:20 -0500
+In-Reply-To: <1415003008-16683-1-git-send-email-hch@lst.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-Cc: Sage Weil <sage@inktank.com>, "Matt W. Benjamin" <matt@linuxbox.com>, Haomai Wang <haomaiwang@gmail.com>
+To: Jens Axboe <axboe@fb.com>
+Cc: Richard Weinberger <richard@nod.at>, Ming Lei <tom.leiming@gmail.com>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Hi All,
+Don't duplicate the code to handle the not cpu bounce case in the
+caller, do it inside blk_mq_hctx_next_cpu instead.
 
-I have used 'Vtune profiler' to profile 4k random write for hotspots, locks-and-waits and hotspots by thread concurrency.
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+---
+ block/blk-mq.c | 34 +++++++++++++---------------------
+ 1 file changed, 13 insertions(+), 21 deletions(-)
 
-Thought of sharing the results with you guys if it can be of any help.
-But attachments are nearly of 1MB and mail-server seems to reject it.
-
-Can anyone tell me how can I share these vtune results?
-
-Thanks,
-Aanchal
-
------Original Message-----
-From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
-Sent: Wednesday, October 29, 2014 10:47 PM
-To: ceph-devel@vger.kernel.org
-Subject: optimizing buffers, encode/decode
-
-We talked a bit about improving the performance encode/decode yesterday at CDS:
-
-        http://pad.ceph.com/p/hammer-buffer_encoding
-
-I think the main takeaways were:
-
-1- We need some up to date profiling information to see
-
-  - how much of it is buffer-related functions (e.g., append)
-  - which data types are slowest or most frequently encoded (or otherwise
-    show up in the profile)
-
-2- For now we should probably focus on the efficiency of the encode/decode paths.  Possibilities include
-
-  - making more things inline
-  - improving the past path
-
-3- Matt and the linuxbox folks have been playing with some general optimizations for the buffer::list class.  These include combining some of the function of ptr and raw so that, for the common single-reference case, we chain the raw pointers together directly from list using the boost intrusive list type, and fall back to the current list -> ptr -> raw strategy when there are additional refs.
-
-
-For #2, one simple thought would be to cache a pointer and remaining bytes or end pointer into the append_buffer directly in list so that we avoid the duplicate asserts and size checks in the common append (encode) path.
-Then a
-
-  ::encode(myu64, bl);
-
-would inline into something pretty quick, like
-
-  remaining -= 8;
-  if (remainining < 0) { // take slow path
-
-  } else {
-     *ptr = myu64;
-     ptr += 8;
-  }
-
-Not sure if an end pointer would let us cut out the 2 arithmetic ops or not.  Or if it even matters on modern pipelining processors.
-
-Anyway, any gains we make here will pay dividends across the entire code base.  And any profiling people want to do will help guide things...
-
-Thanks!
-sage
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-________________________________
-
-PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+diff --git a/block/blk-mq.c b/block/blk-mq.c
+index b355b59..22e50a5 100644
+--- a/block/blk-mq.c
++++ b/block/blk-mq.c
+@@ -780,10 +780,11 @@ static void __blk_mq_run_hw_queue(struct blk_mq_hw_ctx *hctx)
+  */
+ static int blk_mq_hctx_next_cpu(struct blk_mq_hw_ctx *hctx)
+ {
+-	int cpu = hctx->next_cpu;
++	if (hctx->queue->nr_hw_queues == 1)
++		return WORK_CPU_UNBOUND;
+ 
+ 	if (--hctx->next_cpu_batch <= 0) {
+-		int next_cpu;
++		int cpu = hctx->next_cpu, next_cpu;
+ 
+ 		next_cpu = cpumask_next(hctx->next_cpu, hctx->cpumask);
+ 		if (next_cpu >= nr_cpu_ids)
+@@ -791,9 +792,11 @@ static int blk_mq_hctx_next_cpu(struct blk_mq_hw_ctx *hctx)
+ 
+ 		hctx->next_cpu = next_cpu;
+ 		hctx->next_cpu_batch = BLK_MQ_CPU_WORK_BATCH;
++	
++		return cpu;
+ 	}
+ 
+-	return cpu;
++	return hctx->next_cpu;
+ }
+ 
+ void blk_mq_run_hw_queue(struct blk_mq_hw_ctx *hctx, bool async)
+@@ -801,16 +804,13 @@ void blk_mq_run_hw_queue(struct blk_mq_hw_ctx *hctx, bool async)
+ 	if (unlikely(test_bit(BLK_MQ_S_STOPPED, &hctx->state)))
+ 		return;
+ 
+-	if (!async && cpumask_test_cpu(smp_processor_id(), hctx->cpumask))
++	if (!async && cpumask_test_cpu(smp_processor_id(), hctx->cpumask)) {
+ 		__blk_mq_run_hw_queue(hctx);
+-	else if (hctx->queue->nr_hw_queues == 1)
+-		kblockd_schedule_delayed_work(&hctx->run_work, 0);
+-	else {
+-		unsigned int cpu;
+-
+-		cpu = blk_mq_hctx_next_cpu(hctx);
+-		kblockd_schedule_delayed_work_on(cpu, &hctx->run_work, 0);
++		return;
+ 	}
++
++	kblockd_schedule_delayed_work_on(blk_mq_hctx_next_cpu(hctx),
++			&hctx->run_work, 0);
+ }
+ 
+ void blk_mq_run_queues(struct request_queue *q, bool async)
+@@ -908,16 +908,8 @@ static void blk_mq_delay_work_fn(struct work_struct *work)
+ 
+ void blk_mq_delay_queue(struct blk_mq_hw_ctx *hctx, unsigned long msecs)
+ {
+-	unsigned long tmo = msecs_to_jiffies(msecs);
+-
+-	if (hctx->queue->nr_hw_queues == 1)
+-		kblockd_schedule_delayed_work(&hctx->delay_work, tmo);
+-	else {
+-		unsigned int cpu;
+-
+-		cpu = blk_mq_hctx_next_cpu(hctx);
+-		kblockd_schedule_delayed_work_on(cpu, &hctx->delay_work, tmo);
+-	}
++	kblockd_schedule_delayed_work_on(blk_mq_hctx_next_cpu(hctx),
++			&hctx->delay_work, msecs_to_jiffies(msecs));
+ }
+ EXPORT_SYMBOL(blk_mq_delay_queue);
+ 
+-- 
+1.9.1
 
