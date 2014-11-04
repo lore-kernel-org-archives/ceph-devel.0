@@ -1,49 +1,53 @@
 From: John Spray <john.spray@redhat.com>
-Subject: [PATCH 0/7] ceph kernel client ENOSPC handling
-Date: Tue,  4 Nov 2014 14:34:22 +0000
-Message-ID: <1415111669-26246-1-git-send-email-john.spray@redhat.com>
+Subject: [PATCH 2/7] ceph: remove unused `map_waiters` from osdc client
+Date: Tue,  4 Nov 2014 14:34:24 +0000
+Message-ID: <1415111669-26246-3-git-send-email-john.spray@redhat.com>
+References: <1415111669-26246-1-git-send-email-john.spray@redhat.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f67.google.com ([74.125.82.67]:50421 "EHLO
-	mail-wg0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753312AbaKDOe6 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Nov 2014 09:34:58 -0500
-Received: by mail-wg0-f67.google.com with SMTP id b13so3401262wgh.6
-        for <ceph-devel@vger.kernel.org>; Tue, 04 Nov 2014 06:34:56 -0800 (PST)
+Received: from mail-wi0-f173.google.com ([209.85.212.173]:55550 "EHLO
+	mail-wi0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754026AbaKDOfN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Nov 2014 09:35:13 -0500
+Received: by mail-wi0-f173.google.com with SMTP id n3so9580565wiv.6
+        for <ceph-devel@vger.kernel.org>; Tue, 04 Nov 2014 06:35:11 -0800 (PST)
+In-Reply-To: <1415111669-26246-1-git-send-email-john.spray@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: John Spray <john.spray@redhat.com>
 
-This series implements the kclient equivalents of recent
-userspace changes for http://tracker.ceph.com/issues/7317
+This is initialized but never used.
 
-We modify the client's behaviour on the OSD map full flag
-to cancel ops instead of blocking them, and we add a new
-'osd epoch barrier' concept in the client-server protocol
-to ensure that nobody else can touch a file who had
-an operation cancelled until they have the subsequent
-OSD map, to ensure ordering.  The epoch barrier will also
-be important in the future for stricter client eviction.
+Signed-off-by: John Spray <john.spray@redhat.com>
+---
+ include/linux/ceph/osd_client.h | 1 -
+ net/ceph/osd_client.c           | 1 -
+ 2 files changed, 2 deletions(-)
 
-John Spray (7):
-  ceph: update ceph_msg_header structure
-  ceph: remove unused `map_waiters` from osdc client
-  ceph: add ceph_osdc_cancel_writes
-  ceph: handle full condition by cancelling ops
-  ceph: update CAPRELEASE message format
-  ceph: handle new osdmap barrier field in CLIENTCAPS
-  ceph: include osd epoch barrier in debugfs
-
- fs/ceph/caps.c                  | 110 +++++++++++++++++++++++++++++++++++--
- fs/ceph/debugfs.c               |   3 ++
- fs/ceph/mds_client.c            | 116 +++++++++++++++++++++++++++++++++++++++-
- fs/ceph/mds_client.h            |  18 ++++++-
- fs/ceph/super.h                 |   3 +-
- include/linux/ceph/msgr.h       |   3 +-
- include/linux/ceph/osd_client.h |   9 +++-
- net/ceph/osd_client.c           |  68 ++++++++++++++++++++++-
- 8 files changed, 319 insertions(+), 11 deletions(-)
-
+diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
+index 03aeb27..7cb5cea 100644
+--- a/include/linux/ceph/osd_client.h
++++ b/include/linux/ceph/osd_client.h
+@@ -197,7 +197,6 @@ struct ceph_osd_client {
+ 
+ 	struct ceph_osdmap     *osdmap;       /* current map */
+ 	struct rw_semaphore    map_sem;
+-	struct completion      map_waiters;
+ 	u64                    last_requested_map;
+ 
+ 	struct mutex           request_mutex;
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index 5a75395..75ab07c 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -2537,7 +2537,6 @@ int ceph_osdc_init(struct ceph_osd_client *osdc, struct ceph_client *client)
+ 	osdc->client = client;
+ 	osdc->osdmap = NULL;
+ 	init_rwsem(&osdc->map_sem);
+-	init_completion(&osdc->map_waiters);
+ 	osdc->last_requested_map = 0;
+ 	mutex_init(&osdc->request_mutex);
+ 	osdc->last_tid = 0;
 -- 
 1.9.3
 
