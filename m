@@ -1,798 +1,106 @@
-From: Ta Ba Tuan <tuantb-QlevPasa8l681eZEIcUDRw@public.gmane.org>
-Subject: Re: Ceph Giant not fixed RepllicatedPG:NotStrimming?
-Date: Tue, 04 Nov 2014 16:03:08 +0700
-Message-ID: <5458964C.5070901@vccloud.vn>
-References: <5451FD06.5030000@vccloud.vn>	<alpine.DEB.2.00.1410300801090.27022@cobra.newdream.net>	<5453B0B1.1020404@vccloud.vn>	<CA+4uBUbYPZzHhkkQaB5wS8E2-idnrsnJB21zfjA6akz7NHPrnA@mail.gmail.com>	<54544395.4030504@vccloud.vn>	<54570E5D.9050009@vccloud.vn>
-	<CA+4uBUaEuB3OW-Q3Lup+bx7WRYZqvL9P594XR8UHYO-H5A+82g@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0914463788=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CA+4uBUaEuB3OW-Q3Lup+bx7WRYZqvL9P594XR8UHYO-H5A+82g-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Samuel Just <sam.just-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
-Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+From: "Yan, Zheng" <zyan@redhat.com>
+Subject: [PATCH 1/2] libceph: store session key in cephx authorizer
+Date: Tue,  4 Nov 2014 17:04:51 +0800
+Message-ID: <1415091892-2086-1-git-send-email-zyan@redhat.com>
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:41425 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751235AbaKDJFP (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 4 Nov 2014 04:05:15 -0500
+Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
+	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id sA495Ec8007763
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
+	for <ceph-devel@vger.kernel.org>; Tue, 4 Nov 2014 04:05:15 -0500
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: "Yan, Zheng" <zyan@redhat.com>
 
-This is a multi-part message in MIME format.
---===============0914463788==
-Content-Type: multipart/alternative;
- boundary="------------030307000307020609070707"
+Session key is required when calculating message signature. Save the session key
+in authorizer, this avoid lookup ticket handler for each message
 
-This is a multi-part message in MIME format.
---------------030307000307020609070707
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Signed-off-by: Yan, Zheng <zyan@redhat.com>
+---
+ net/ceph/auth_x.c | 18 +++++++++++-------
+ net/ceph/auth_x.h |  1 +
+ 2 files changed, 12 insertions(+), 7 deletions(-)
 
-Hi Sam,
-I resend logs with debug options http://123.30.41.138/ceph-osd.21.log
-(Sorry about my spam :D)
+diff --git a/net/ceph/auth_x.c b/net/ceph/auth_x.c
+index de6662b..8da8568 100644
+--- a/net/ceph/auth_x.c
++++ b/net/ceph/auth_x.c
+@@ -298,6 +298,11 @@ static int ceph_x_build_authorizer(struct ceph_auth_client *ac,
+ 	dout("build_authorizer for %s %p\n",
+ 	     ceph_entity_type_name(th->service), au);
+ 
++	ceph_crypto_key_destroy(&au->session_key);
++	ret = ceph_crypto_key_clone(&au->session_key, &th->session_key);
++	if (ret)
++		return ret;
++
+ 	maxlen = sizeof(*msg_a) + sizeof(msg_b) +
+ 		ceph_x_encrypt_buflen(ticket_blob_len);
+ 	dout("  need len %d\n", maxlen);
+@@ -307,8 +312,10 @@ static int ceph_x_build_authorizer(struct ceph_auth_client *ac,
+ 	}
+ 	if (!au->buf) {
+ 		au->buf = ceph_buffer_new(maxlen, GFP_NOFS);
+-		if (!au->buf)
++		if (!au->buf) {
++			ceph_crypto_key_destroy(&au->session_key);
+ 			return -ENOMEM;
++		}
+ 	}
+ 	au->service = th->service;
+ 	au->secret_id = th->secret_id;
+@@ -334,7 +341,7 @@ static int ceph_x_build_authorizer(struct ceph_auth_client *ac,
+ 	get_random_bytes(&au->nonce, sizeof(au->nonce));
+ 	msg_b.struct_v = 1;
+ 	msg_b.nonce = cpu_to_le64(au->nonce);
+-	ret = ceph_x_encrypt(&th->session_key, &msg_b, sizeof(msg_b),
++	ret = ceph_x_encrypt(&au->session_key, &msg_b, sizeof(msg_b),
+ 			     p, end - p);
+ 	if (ret < 0)
+ 		goto out_buf;
+@@ -593,17 +600,13 @@ static int ceph_x_verify_authorizer_reply(struct ceph_auth_client *ac,
+ 					  struct ceph_authorizer *a, size_t len)
+ {
+ 	struct ceph_x_authorizer *au = (void *)a;
+-	struct ceph_x_ticket_handler *th;
+ 	int ret = 0;
+ 	struct ceph_x_authorize_reply reply;
+ 	void *preply = &reply;
+ 	void *p = au->reply_buf;
+ 	void *end = p + sizeof(au->reply_buf);
+ 
+-	th = get_ticket_handler(ac, au->service);
+-	if (IS_ERR(th))
+-		return PTR_ERR(th);
+-	ret = ceph_x_decrypt(&th->session_key, &p, end, &preply, sizeof(reply));
++	ret = ceph_x_decrypt(&au->session_key, &p, end, &preply, sizeof(reply));
+ 	if (ret < 0)
+ 		return ret;
+ 	if (ret != sizeof(reply))
+@@ -623,6 +626,7 @@ static void ceph_x_destroy_authorizer(struct ceph_auth_client *ac,
+ {
+ 	struct ceph_x_authorizer *au = (void *)a;
+ 
++	ceph_crypto_key_destroy(&au->session_key);
+ 	ceph_buffer_put(au->buf);
+ 	kfree(au);
+ }
+diff --git a/net/ceph/auth_x.h b/net/ceph/auth_x.h
+index 65ee720..e8b7c69 100644
+--- a/net/ceph/auth_x.h
++++ b/net/ceph/auth_x.h
+@@ -26,6 +26,7 @@ struct ceph_x_ticket_handler {
+ 
+ 
+ struct ceph_x_authorizer {
++	struct ceph_crypto_key session_key;
+ 	struct ceph_buffer *buf;
+ 	unsigned int service;
+ 	u64 nonce;
+-- 
+1.9.3
 
-I saw many missing objects :|
-
-2014-11-04 15:26:02.205607 7f3ab11a8700 10 osd.21 pg_epoch: 106407 
-pg[24.7d7( v 106407'491583 lc 106401'491579 
-(105805'487042,106407'491583] loca
-l-les=106403 n=179 ec=25000 les/c 106403/106390 106402/106402/106402) 
-[21,28,4] r=0 lpr=106402 pi=106377-106401/4 rops=1 crt=106401'491581 mlcod
-106393'491097 active+recovering+degraded m=2 snaptrimq=[306~1,312~1]] 
-recover_primary 
-675ea7d7/*rbd_data.4930222ae8944a.0000000000000001/head//24 
-106401'491580 (missing) (missing head) (recovering) (recovering head)*
-2014-11-04 15:26:02.205642 7f3ab11a8700 10 osd.21 pg_epoch: 106407 
-pg[24.7d7( v 106407'491583 lc 106401'491579 
-(105805'487042,106407'491583] local-les=106403 n=179 ec=25000 les/c 
-106403/106390 106402/106402/106402) [21,28,4] r=0 lpr=106402 
-pi=106377-106401/4 rops=1 crt=106401'491581 mlcod 106393'491097 
-active+recovering+degraded m=2 snaptrimq=[306~1,312~1]] recover_primary 
-d4d4bfd7/rbd_data.c6964d30a28220.000000000000035f/head//24 106401'491581 
-(missing) (missing head)
-2014-11-04 15:26:02.237994 7f3ab29ab700 10 osd.21 pg_epoch: 106407 
-pg[24.7d7( v 106407'491583 lc 106401'491579 
-(105805'487042,106407'491583] local-les=106403 n=179 ec=25000 les/c 
-106403/106390 106402/106402/106402) [21,28,4] r=0 lpr=106402 
-pi=106377-106401/4 rops=2 crt=106401'491581 mlcod 106393'491097 
-active+recovering+degraded m=2 snaptrimq=[306~1,312~1]] *got missing 
-d4d4bfd7/rbd_data.c6964d30a28220.000000000000035f/head//24 v 106401'491581*
-
-Thanks Sam and All,
---
-Tuan
-HaNoi-Vietnam
-
-On 11/04/2014 04:54 AM, Samuel Just wrote:
-> Can you reproduce with
->
-> debug osd = 20
-> debug filestore = 20
-> debug ms = 1
->
-> In the [osd] section of that osd's ceph.conf?
-> -Sam
->
-> On Sun, Nov 2, 2014 at 9:10 PM, Ta Ba Tuan <tuantb-QlevPasa8l681eZEIcUDRw@public.gmane.org> wrote:
->> Hi Sage, Samuel & All,
->>
->> I upgraded to GAINT, but still appearing that errors |:
->> I'm trying on deleting  related objects/volumes, but very hard to verify
->> missing objects :(.
->>
->> Guide me to resolve it, please! (I send attached detail log).
->>
->> 2014-11-03 11:37:57.730820 7f28fb812700  0 osd.21 105950 do_command r=0
->> 2014-11-03 11:37:57.856578 7f28fc013700 -1 *** Caught signal (Segmentation
->> fault) **
->>   in thread 7f28fc013700
->>
->>   ceph version 0.87-6-gdba7def (dba7defc623474ad17263c9fccfec60fe7a439f0)
->>   1: /usr/bin/ceph-osd() [0x9b6725]
->>   2: (()+0xfcb0) [0x7f291fc2acb0]
->>   3: (ReplicatedPG::trim_object(hobject_t const&)+0x395) [0x811b55]
->>   4: (ReplicatedPG::TrimmingObjects::react(ReplicatedPG::SnapTrim
->> const&)+0x43e) [0x82b9be]
->>   5: (boost::statechart::simple_state<ReplicatedPG::TrimmingObjects,
->> ReplicatedPG::SnapTrimmer, boost::mpl::list<mpl_::na, mpl_::na, mpl_::na,
->> mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na,
->> mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na,
->> mpl_::na, mpl_::na, mpl_::na>,
->> (boost::statechart::history_mode)0>::react_impl(boost::statechart::event_base
->> const&, void const*)+0xc0) [0x870ce0]
->>   6: (boost::statechart::state_machine<ReplicatedPG::SnapTrimmer,
->> ReplicatedPG::NotTrimming, std::allocator<void>,
->> boost::statechart::null_exception_translator>::process_queued_events()+0xfb)
->> [0x85618b]
->>   7: (boost::statechart::state_machine<ReplicatedPG::SnapTrimmer,
->> ReplicatedPG::NotTrimming, std::allocator<void>,
->> boost::statechart::null_exception_translator>::process_event(boost::statechart::event_base
->> const&)+0x1e) [0x85633e]
->>   8: (ReplicatedPG::snap_trimmer()+0x4f8) [0x7d5ef8]
->>   9: (OSD::SnapTrimWQ::_process(PG*)+0x14) [0x673ab4]
->>   10: (ThreadPool::worker(ThreadPool::WorkThread*)+0x48e) [0xa8fade]
->>   11: (ThreadPool::WorkThread::entry()+0x10) [0xa92870]
->>   12: (()+0x7e9a) [0x7f291fc22e9a]
->>   13: (clone()+0x6d) [0x7f291e5ed31d]
->>   NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to
->> interpret this.
->>
->>   -9993> 2014-11-03 11:37:47.689335 7f28fc814700  1 -- 172.30.5.2:6803/7606
->> --> 172.30.5.1:6886/3511 -- MOSDPGPull(6.58e 105950
->> [PullOp(87f82d8e/rbd_data.45e62779c99cf1.00000000000022b5/head//6,
->> recovery_info:
->> ObjectRecoveryInfo(87f82d8e/rbd_data.45e62779c99cf1.00000000000022b5/head//6@105938'11622009,
->> copy_subset: [0~18446744073709551615], clone_subset: {}), recovery_progress:
->> ObjectRecoveryProgress(first, data_recovered_to:0, data_complete:false,
->> omap_recovered_to:, omap_complete:false))]) v2 -- ?+0 0x26c59000 con
->> 0x22fbc420
->> ....
->>      -2> 2014-11-03 11:37:57.853585 7f2902820700  5 osd.21 pg_epoch: 105950
->> pg[24.9e4( v 105946'113392 lc 105946'113391 (103622'109598,105946'113392]
->> local-les=1
->> 05948 n=88 ec=25000 les/c 105948/105943 105947/105947/105947) [21,112,33]
->> r=0 lpr=105947 pi=105933-105946/4 crt=105946'113392 lcod 0'0 mlcod 0'0
->> active+recovery
->> _wait+degraded m=1 snaptrimq=[303~3,307~1]] enter
->> Started/Primary/Active/Recovering
->>      -1> 2014-11-03 11:37:57.853735 7f28fc814700  1 -- 172.30.5.2:6803/7606
->> --> 172.30.5.9:6806/24552 -- MOSDPGPull(24.9e4 105950
->> [PullOp(5abb99e4/rbd_data.5dd32
->> f2ae8944a.0000000000000165/head//24, recovery_info:
->> ObjectRecoveryInfo(5abb99e4/rbd_data.5dd32f2ae8944a.0000000000000165/head//24@105946'113392,
->> copy_subset: [0
->> ~18446744073709551615], clone_subset: {}), recovery_progress:
->> ObjectRecoveryProgress(first, data_recovered_to:0, data_complete:false,
->> omap_recovered_to:, omap_c
->> omplete:false))]) v2 -- ?+0 0x229e7e00 con 0x22fb7000
->>       0> 2014-11-03 11:37:57.856578 7f28fc013700 -1 *** Caught signal
->> (Segmentation fault) **
->>
->> Thanks!
->> --
->> Tuan
->> HaNoi-VietNam
->>
->>
->>
->>
->> On 11/01/2014 09:21 AM, Ta Ba Tuan wrote:
->>
->> Hi Samuel and Sage,
->>
->> I will upgrde to Giant soon, Thank you so much.
->>
->> --
->> Tuan
->> HaNoi-VietNam
->>
->> On 11/01/2014 01:10 AM, Samuel Just wrote:
->>
->> You should start by upgrading to giant, many many bug fixes went in
->> between .86 and giant.
->> -Sam
->>
->> On Fri, Oct 31, 2014 at 8:54 AM, Ta Ba Tuan <tuantb-QlevPasa8l681eZEIcUDRw@public.gmane.org> wrote:
->>
->> Hi Sage Weil
->>
->> Thank for your repling. Yes, I'm using Ceph v.0.86,
->> I report some related bugs, Hope you help me,
->>
->> 2014-10-31 15:34:52.927965 7f85efb6b700  0 osd.21 104744 do_command r=0
->> 2014-10-31 15:34:53.105533 7f85f036c700 -1 *** Caught signal (Segmentation
->> fault) **
->>    in thread 7f85f036c700
->>    ceph version 0.86-106-g6f8524e (6f8524ef7673ab4448de2e0ff76638deaf03cae8)
->>    1: /usr/bin/ceph-osd() [0x9b6655]
->>    2: (()+0xfcb0) [0x7f8615726cb0]
->>    3: (ReplicatedPG::trim_object(hobject_t const&)+0x395) [0x811c25]
->>    4: (ReplicatedPG::TrimmingObjects::react(ReplicatedPG::SnapTrim
->> const&)+0x43e) [0x82baae]
->>    5: (boost::statechart::simple_state<ReplicatedPG::TrimmingObjects,
->> ReplicatedPG::SnapTrimmer, boost::mpl::list<mpl_::na, mpl_::na, mpl_::na,
->> mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na,
->> mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na,
->> mpl_::na, mpl_::na, mpl_::na>,
->> (boost::statechart::history_mode)0>::react_impl(boost::statechart::event_base
->> const&, void const*)+0xc0) [0x870c30]
->>    6: (boost::statechart::state_machine<ReplicatedPG::SnapTrimmer,
->> ReplicatedPG::NotTrimming, std::allocator<void>,
->> boost::statechart::null_exception_translator>::process_queued_events()+0xfb)
->> [0x8560db]
->>    7: (boost::statechart::state_machine<ReplicatedPG::SnapTrimmer,
->> ReplicatedPG::NotTrimming, std::allocator<void>,
->> boost::statechart::null_exception_translator>::process_event(boost::statechart::event_base
->> const&)+0x1e) [0x8562ae]
->>    8: (ReplicatedPG::snap_trimmer()+0x4f8) [0x7d5f48]
->>    9: (OSD::SnapTrimWQ::_process(PG*)+0x14) [0x6739b4]
->>    10: (ThreadPool::worker(ThreadPool::WorkThread*)+0x48e) [0xa8fa0e]
->>    11: (ThreadPool::WorkThread::entry()+0x10) [0xa927a0]
->>    12: (()+0x7e9a) [0x7f861571ee9a]
->>    13: (clone()+0x6d) [0x7f86140e931d]
->>    NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed
->> to
->> interpret this.
->>
->>    -9523> 2014-10-31 15:34:45.571962 7f85e3ee0700  5 -- op tracker -- seq:
->> 6937, time: 2014-10-31 15:34:45.531887, event: header_read, op: MOSDPGPus
->> h(6.749 104744
->> [PushOp(d2106749/rbd_data.a2e6185b9a8ef8.0000000000000803/head//6, version:
->> 104736'7736506, data_included: [0~4194304], data_size:
->> 4194304, omap_header_size: 0, omap_entries_size: 0, attrset_size: 2,
->> recovery_info:
->> ObjectRecoveryInfo(d2106749/rbd_data.a2e6185b9a8ef8.0000000000
->> 000803/head//6@104736'7736506, copy_subset: [0~4194304], clone_subset: {}),
->> after_progress: ObjectRecoveryProgress(!first, data_recovered_to:41943
->> 04, data_complete:true, omap_recovered_to:, omap_complete:true),
->> before_progress: ObjectRecoveryProgress(first, data_recovered_to:0,
->> data_complete
->> :false, omap_recovered_to:,
->> omap_complete:false)),PushOp(60940749/rbd_data.3435875ff78f67.0000000000001408/head//6,
->> version: 104736'7736579, data_
->> included: [0~335360], data_size: 335360, omap_header_size: 0,
->> omap_entries_size: 0, attrset_size: 2, recovery_info:
->> ObjectRecoveryInfo(60940749/rb
->> d_data.3435875ff78f67.0000000000001408/head//6@104736'7736579, copy_subset:
->> [0~335360], clone_subset: {}), after_progress: ObjectRecoveryProgress(
->> !first, data_recovered_to:335360, data_complete:true, omap_recovered_to:,
->> omap_complete:true), before_progress: ObjectRecoveryProgress(first, data
->> _recovered_to:0, data_complete:false, omap_recovered_to:,
->> omap_complete:false)),PushOp(922b1749/rbd_data.1c3dade6cdc10.00000000000014c5/head//6,
->> v
->> ersion: 104736'7736866, data_included: [0~4194304], data_size: 4194304,
->> omap_header_size: 0, omap_entries_size: 0, attrset_size: 2, recovery_info:
->>
->> ObjectRecoveryInfo(922b1749/rbd_data.1c3dade6cdc10.00000000000014c5/head//6@104736'7736866,
->> copy_subset: [0~4194304], clone_subset: {}), after_pr
->> ogress: ObjectRecoveryProgress(!first, data_recovered_to:4194304,
->> data_complete:true, omap_recovered_to:, omap_complete:true),
->> before_progress: Ob
->> jectRecoveryProgress(first, data_recovered_to:0, data_complete:false,
->> omap_recovered_to:, omap_complete:false))])
->>
->>    -6933> 2014-10-31 15:34tha7.611229 7f85f737a700  5 osd.21 pg_epoch: 104744
->> pg[6.749( v 104744'7741801 (104665'7732106,104744'7741801] lb
->> 14886749/rbd_data.3955b9640616f2.000000000000f5e2/head//6 local-les=104661
->> n=1780 ec=164 les/c 104742/104735 104740/104741/103210) [74,112,21]/[74,112]
->> r=-1 lpr=104741 pi=64005-104740/278 luod=0'0 crt=104744'7741798
->> active+remapped] enter Started/ReplicaActive/RepNotRecovering
->>
->> I think having some missing objects, I can't start one osd  that above
->> objects be pushed to that osd. Ceph'versions are slower 0.86 then appear
->> this bug?
->> Should I upgrade to Giant o resolve this bug?,
->>
->>
->> Thank you,
->> --
->> Tuan
->> HaNoi-VietNam
->>
->>
->> On 10/30/2014 10:02 PM, Sage Weil wrote:
->>
->> On Thu, 30 Oct 2014, Ta Ba Tuan wrote:
->>
->> Hi Everyone,
->>
->> I upgraded Ceph to Giant by installing *tar.gz package, but appeared some
->> errors related Object Trimming or Snap Trimming:
->> I think having some missing objects and be not recovered.
->>
->> Note that this isn't giant, which is 0.87, but something a few weeks
->> older.  There were a few bugs fixed in this code, but we can't tell if
->> this was one of them without the log leading up to this message, which
->> should include either a failed assertion message or segmentation fault or
->> similar.
->>
->> Thanks!
->> sage
->>
->>
->>    ceph version 0.86-106-g6f8524e (6f8524ef7673ab4448de2e0ff76638deaf03cae8)
->>    1: /usr/bin/ceph-osd() [0x9b6655]
->>    2: (()+0xfcb0) [0x7fa52c471cb0]
->>    3: (ReplicatedPG::trim_object(hobject_t const&)+0x395) [0x811c25]
->>    4: (ReplicatedPG::TrimmingObjects::react(ReplicatedPG::SnapTrim
->> const&)+0x43e) [0x82baae]
->>    5: (boost::statechart::simple_state<ReplicatedPG::TrimmingObjects,
->> ReplicatedPG::SnapTrimmer, boost::mpl::list<mpl_::na, mpl_::na, mpl_::na,
->> mpl
->> _::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na,
->> mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na
->> , mpl_::na,
->> mpl_::na>,(boost::statechart::history_mode)0>::react_impl(boost::statechart::event_ba
->> se const&, void const*)+0xc0) [0x870c30]
->>    6: (boost::statechart::state_machine<ReplicatedPG::SnapTrimmer,
->> ReplicatedPG::NotTrimming, std::allocator<void>,
->> boost::statechart::null_excepti
->> on_translator>::process_queued_events()+0xfb) [0x8560db]
->>    7: (boost::statechart::state_machine<ReplicatedPG::SnapTrimmer,
->> ReplicatedPG::NotTrimming, std::allocator<void>,
->> boost::statechart::null_excepti
->> on_translator>::process_event(boost::statechart::event_base const&)+0x1e)
->> [0x8562ae]
->>    8: (ReplicatedPG::snap_trimmer()+0x4f8) [0x7d5f48]
->>    9: (OSD::SnapTrimWQ::_process(PG*)+0x14) [0x6739b4]
->>    10: (ThreadPool::worker(ThreadPool::WorkThread*)+0x48e) [0xa8fa0e]
->>    11: (ThreadPool::WorkThread::entry()+0x10) [0xa927a0]
->>    12: (()+0x7e9a) [0x7fa52c469e9a]
->>    13: (clone()+0x6d) [0x7fa52ae3431d]
->>    NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed
->> to
->> interpret this.
->>
->>
->>     -128> 2014-10-29 13:51:23.049357 7fa50ed9d700  5 osd.21 pg_epoch: 104445
->> pg[6.9d8( v 104445'7857889 (103730'7852406,104445'7857889] local-les=104444
->> n=4345 ec=164 les/c 104444/104272 104443/104443/104443) [21,93,49] r=0
->> lpr=104443 pi=103787-104442/16 crt=104442'7857887 mlcod 104445'7857888
->> active snaptrimq=[1907~1,1941~4,1946~1,19ef~2,19f2~1,19f4~3,19fa~5]] exit
->> Started/Primary/Active/Recovered 0.000084 0 0.000000
->>     -127> 2014-10-29 13:51:23.049392 7fa50ed9d700  5 osd.21 pg_epoch: 104445
->> pg[6.9d8( v 104445'7857889 (103730'7852406,104445'7857889] local-les=104444
->> n=4345 ec=164 les/c 104444/104272 104443/104443/104443) [21,93,49] r=0
->> lpr=104443 pi=103787-104442/16 crt=104442'7857887 mlcod 104445'7857888
->> active snaptrimq=[1907~1,1941~4,1946~1,19ef~2,19f2~1,19f4~3,19fa~5]] enter
->> Started/Primary/Active/Clean
->>     -126> 2014-10-29 13:51:23.049582 7fa50ed9d700  1 -- 172.30.5.2:6838/22980
->> --> 172.30.5.4:6859/8884 -- pg_info(1 pgs e104445:6.9d8) v4 -- ?+0
->> 0x30d41c00 con 0x26c6ac60
->>
->>
->> Thank you!
->> --
->> Tuan
->> HaNoi-VietNam
->>
->>
->>
->>
->> _______________________________________________
->> ceph-users mailing list
->> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
->> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->>
->>
->>
-
-
---------------030307000307020609070707
-Content-Type: text/html; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-
-<html>
-  <head>
-    <meta content=3D"text/html; charset=3DUTF-8" http-equiv=3D"Content-Ty=
-pe">
-  </head>
-  <body bgcolor=3D"#FFFFFF" text=3D"#000000">
-    <div class=3D"moz-cite-prefix">Hi Sam,<br>
-      I resend logs with debug options=C2=A0
-      <a class=3D"moz-txt-link-freetext" href=3D"http://123.30.41.138/cep=
-h-osd.21.log">http://123.30.41.138/ceph-osd.21.log</a>=C2=A0 <br>
-      (Sorry about my spam :D)<br>
-      <br>
-      I saw many missing objects :|<br>
-      <br>
-      <small>2014-11-04 15:26:02.205607 7f3ab11a8700 10 osd.21 pg_epoch:
-        106407 pg[24.7d7( v 106407'491583 lc 106401'491579
-        (105805'487042,106407'491583] loca<br>
-        l-les=3D106403 n=3D179 ec=3D25000 les/c 106403/106390
-        106402/106402/106402) [21,28,4] r=3D0 lpr=3D106402
-        pi=3D106377-106401/4 rops=3D1 crt=3D106401'491581 mlcod <br>
-        106393'491097 active+recovering+degraded m=3D2
-        snaptrimq=3D[306~1,312~1]] recover_primary 675ea7d7/<b>rbd_data.4=
-930222ae8944a.0000000000000001/head//24
-          106401'491580 (missing) (missing head) (recovering)
-          (recovering head)</b><br>
-        2014-11-04 15:26:02.205642 7f3ab11a8700 10 osd.21 pg_epoch:
-        106407 pg[24.7d7( v 106407'491583 lc 106401'491579
-        (105805'487042,106407'491583] local-les=3D106403 n=3D179 ec=3D250=
-00
-        les/c 106403/106390 106402/106402/106402) [21,28,4] r=3D0
-        lpr=3D106402 pi=3D106377-106401/4 rops=3D1 crt=3D106401'491581 ml=
-cod
-        106393'491097 active+recovering+degraded m=3D2
-        snaptrimq=3D[306~1,312~1]] recover_primary
-        d4d4bfd7/rbd_data.c6964d30a28220.000000000000035f/head//24
-        106401'491581 (missing) (missing head)<br>
-        2014-11-04 15:26:02.237994 7f3ab29ab700 10 osd.21 pg_epoch:
-        106407 pg[24.7d7( v 106407'491583 lc 106401'491579
-        (105805'487042,106407'491583] local-les=3D106403 n=3D179 ec=3D250=
-00
-        les/c 106403/106390 106402/106402/106402) [21,28,4] r=3D0
-        lpr=3D106402 pi=3D106377-106401/4 rops=3D2 crt=3D106401'491581 ml=
-cod
-        106393'491097 active+recovering+degraded m=3D2
-        snaptrimq=3D[306~1,312~1]] <b>got missing
-          d4d4bfd7/rbd_data.c6964d30a28220.000000000000035f/head//24 v
-          106401'491581</b><br>
-      </small><br>
-      Thanks Sam and All,<br>
-      --<br>
-      Tuan<br>
-      HaNoi-Vietnam<br>
-      <br>
-      On 11/04/2014 04:54 AM, Samuel Just wrote:<br>
-    </div>
-    <blockquote
-cite=3D"mid:CA+4uBUaEuB3OW-Q3Lup+bx7WRYZqvL9P594XR8UHYO-H5A+82g-JsoAwUIsXov1KXRcyAk9cg@public.gmane.org=
-l.com"
-      type=3D"cite">
-      <pre wrap=3D"">Can you reproduce with
-
-debug osd =3D 20
-debug filestore =3D 20
-debug ms =3D 1
-
-In the [osd] section of that osd's ceph.conf?
--Sam
-
-On Sun, Nov 2, 2014 at 9:10 PM, Ta Ba Tuan <a class=3D"moz-txt-link-rfc23=
-96E" href=3D"mailto:tuantb-QlevPasa8l681eZEIcUDRw@public.gmane.org">&lt;tuantb-QlevPasa8l681eZEIcUDRw@public.gmane.org&gt;</a> wrot=
-e:
-</pre>
-      <blockquote type=3D"cite">
-        <pre wrap=3D"">Hi Sage, Samuel &amp; All,
-
-I upgraded to GAINT, but still appearing that errors |:
-I'm trying on deleting  related objects/volumes, but very hard to verify
-missing objects :(.
-
-Guide me to resolve it, please! (I send attached detail log).
-
-2014-11-03 11:37:57.730820 7f28fb812700  0 osd.21 105950 do_command r=3D0
-2014-11-03 11:37:57.856578 7f28fc013700 -1 *** Caught signal (Segmentatio=
-n
-fault) **
- in thread 7f28fc013700
-
- ceph version 0.87-6-gdba7def (dba7defc623474ad17263c9fccfec60fe7a439f0)
- 1: /usr/bin/ceph-osd() [0x9b6725]
- 2: (()+0xfcb0) [0x7f291fc2acb0]
- 3: (ReplicatedPG::trim_object(hobject_t const&amp;)+0x395) [0x811b55]
- 4: (ReplicatedPG::TrimmingObjects::react(ReplicatedPG::SnapTrim
-const&amp;)+0x43e) [0x82b9be]
- 5: (boost::statechart::simple_state&lt;ReplicatedPG::TrimmingObjects,
-ReplicatedPG::SnapTrimmer, boost::mpl::list&lt;mpl_::na, mpl_::na, mpl_::=
-na,
-mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na,
-mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na,
-mpl_::na, mpl_::na, mpl_::na&gt;,
-(boost::statechart::history_mode)0&gt;::react_impl(boost::statechart::eve=
-nt_base
-const&amp;, void const*)+0xc0) [0x870ce0]
- 6: (boost::statechart::state_machine&lt;ReplicatedPG::SnapTrimmer,
-ReplicatedPG::NotTrimming, std::allocator&lt;void&gt;,
-boost::statechart::null_exception_translator&gt;::process_queued_events()=
-+0xfb)
-[0x85618b]
- 7: (boost::statechart::state_machine&lt;ReplicatedPG::SnapTrimmer,
-ReplicatedPG::NotTrimming, std::allocator&lt;void&gt;,
-boost::statechart::null_exception_translator&gt;::process_event(boost::st=
-atechart::event_base
-const&amp;)+0x1e) [0x85633e]
- 8: (ReplicatedPG::snap_trimmer()+0x4f8) [0x7d5ef8]
- 9: (OSD::SnapTrimWQ::_process(PG*)+0x14) [0x673ab4]
- 10: (ThreadPool::worker(ThreadPool::WorkThread*)+0x48e) [0xa8fade]
- 11: (ThreadPool::WorkThread::entry()+0x10) [0xa92870]
- 12: (()+0x7e9a) [0x7f291fc22e9a]
- 13: (clone()+0x6d) [0x7f291e5ed31d]
- NOTE: a copy of the executable, or `objdump -rdS &lt;executable&gt;` is =
-needed to
-interpret this.
-
- -9993&gt; 2014-11-03 11:37:47.689335 7f28fc814700  1 -- 172.30.5.2:6803/=
-7606
---&gt; 172.30.5.1:6886/3511 -- MOSDPGPull(6.58e 105950
-[PullOp(87f82d8e/rbd_data.45e62779c99cf1.00000000000022b5/head//6,
-recovery_info:
-ObjectRecoveryInfo(87f82d8e/rbd_data.45e62779c99cf1.00000000000022b5/head=
-//6@105938'11622009,
-copy_subset: [0~18446744073709551615], clone_subset: {}), recovery_progre=
-ss:
-ObjectRecoveryProgress(first, data_recovered_to:0, data_complete:false,
-omap_recovered_to:, omap_complete:false))]) v2 -- ?+0 0x26c59000 con
-0x22fbc420
-....
-    -2&gt; 2014-11-03 11:37:57.853585 7f2902820700  5 osd.21 pg_epoch: 10=
-5950
-pg[24.9e4( v 105946'113392 lc 105946'113391 (103622'109598,105946'113392]
-local-les=3D1
-05948 n=3D88 ec=3D25000 les/c 105948/105943 105947/105947/105947) [21,112=
-,33]
-r=3D0 lpr=3D105947 pi=3D105933-105946/4 crt=3D105946'113392 lcod 0'0 mlco=
-d 0'0
-active+recovery
-_wait+degraded m=3D1 snaptrimq=3D[303~3,307~1]] enter
-Started/Primary/Active/Recovering
-    -1&gt; 2014-11-03 11:37:57.853735 7f28fc814700  1 -- 172.30.5.2:6803/=
-7606
---&gt; 172.30.5.9:6806/24552 -- MOSDPGPull(24.9e4 105950
-[PullOp(5abb99e4/rbd_data.5dd32
-f2ae8944a.0000000000000165/head//24, recovery_info:
-ObjectRecoveryInfo(5abb99e4/rbd_data.5dd32f2ae8944a.0000000000000165/head=
-//24@105946'113392,
-copy_subset: [0
-~18446744073709551615], clone_subset: {}), recovery_progress:
-ObjectRecoveryProgress(first, data_recovered_to:0, data_complete:false,
-omap_recovered_to:, omap_c
-omplete:false))]) v2 -- ?+0 0x229e7e00 con 0x22fb7000
-     0&gt; 2014-11-03 11:37:57.856578 7f28fc013700 -1 *** Caught signal
-(Segmentation fault) **
-
-Thanks!
---
-Tuan
-HaNoi-VietNam
-
-
-
-
-On 11/01/2014 09:21 AM, Ta Ba Tuan wrote:
-
-Hi Samuel and Sage,
-
-I will upgrde to Giant soon, Thank you so much.
-
---
-Tuan
-HaNoi-VietNam
-
-On 11/01/2014 01:10 AM, Samuel Just wrote:
-
-You should start by upgrading to giant, many many bug fixes went in
-between .86 and giant.
--Sam
-
-On Fri, Oct 31, 2014 at 8:54 AM, Ta Ba Tuan <a class=3D"moz-txt-link-rfc2=
-396E" href=3D"mailto:tuantb-QlevPasa8l681eZEIcUDRw@public.gmane.org">&lt;tuantb-QlevPasa8l681eZEIcUDRw@public.gmane.org&gt;</a> wro=
-te:
-
-Hi Sage Weil
-
-Thank for your repling. Yes, I'm using Ceph v.0.86,
-I report some related bugs, Hope you help me,
-
-2014-10-31 15:34:52.927965 7f85efb6b700  0 osd.21 104744 do_command r=3D0
-2014-10-31 15:34:53.105533 7f85f036c700 -1 *** Caught signal (Segmentatio=
-n
-fault) **
-  in thread 7f85f036c700
-  ceph version 0.86-106-g6f8524e (6f8524ef7673ab4448de2e0ff76638deaf03cae=
-8)
-  1: /usr/bin/ceph-osd() [0x9b6655]
-  2: (()+0xfcb0) [0x7f8615726cb0]
-  3: (ReplicatedPG::trim_object(hobject_t const&amp;)+0x395) [0x811c25]
-  4: (ReplicatedPG::TrimmingObjects::react(ReplicatedPG::SnapTrim
-const&amp;)+0x43e) [0x82baae]
-  5: (boost::statechart::simple_state&lt;ReplicatedPG::TrimmingObjects,
-ReplicatedPG::SnapTrimmer, boost::mpl::list&lt;mpl_::na, mpl_::na, mpl_::=
-na,
-mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na,
-mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na,
-mpl_::na, mpl_::na, mpl_::na&gt;,
-(boost::statechart::history_mode)0&gt;::react_impl(boost::statechart::eve=
-nt_base
-const&amp;, void const*)+0xc0) [0x870c30]
-  6: (boost::statechart::state_machine&lt;ReplicatedPG::SnapTrimmer,
-ReplicatedPG::NotTrimming, std::allocator&lt;void&gt;,
-boost::statechart::null_exception_translator&gt;::process_queued_events()=
-+0xfb)
-[0x8560db]
-  7: (boost::statechart::state_machine&lt;ReplicatedPG::SnapTrimmer,
-ReplicatedPG::NotTrimming, std::allocator&lt;void&gt;,
-boost::statechart::null_exception_translator&gt;::process_event(boost::st=
-atechart::event_base
-const&amp;)+0x1e) [0x8562ae]
-  8: (ReplicatedPG::snap_trimmer()+0x4f8) [0x7d5f48]
-  9: (OSD::SnapTrimWQ::_process(PG*)+0x14) [0x6739b4]
-  10: (ThreadPool::worker(ThreadPool::WorkThread*)+0x48e) [0xa8fa0e]
-  11: (ThreadPool::WorkThread::entry()+0x10) [0xa927a0]
-  12: (()+0x7e9a) [0x7f861571ee9a]
-  13: (clone()+0x6d) [0x7f86140e931d]
-  NOTE: a copy of the executable, or `objdump -rdS &lt;executable&gt;` is=
- needed
-to
-interpret this.
-
-  -9523&gt; 2014-10-31 15:34:45.571962 7f85e3ee0700  5 -- op tracker -- s=
-eq:
-6937, time: 2014-10-31 15:34:45.531887, event: header_read, op: MOSDPGPus
-h(6.749 104744
-[PushOp(d2106749/rbd_data.a2e6185b9a8ef8.0000000000000803/head//6, versio=
-n:
-104736'7736506, data_included: [0~4194304], data_size:
-4194304, omap_header_size: 0, omap_entries_size: 0, attrset_size: 2,
-recovery_info:
-ObjectRecoveryInfo(d2106749/rbd_data.a2e6185b9a8ef8.0000000000
-000803/head//6@104736'7736506, copy_subset: [0~4194304], clone_subset: {}=
-),
-after_progress: ObjectRecoveryProgress(!first, data_recovered_to:41943
-04, data_complete:true, omap_recovered_to:, omap_complete:true),
-before_progress: ObjectRecoveryProgress(first, data_recovered_to:0,
-data_complete
-:false, omap_recovered_to:,
-omap_complete:false)),PushOp(60940749/rbd_data.3435875ff78f67.00000000000=
-01408/head//6,
-version: 104736'7736579, data_
-included: [0~335360], data_size: 335360, omap_header_size: 0,
-omap_entries_size: 0, attrset_size: 2, recovery_info:
-ObjectRecoveryInfo(60940749/rb
-d_data.3435875ff78f67.0000000000001408/head//6@104736'7736579, copy_subse=
-t:
-[0~335360], clone_subset: {}), after_progress: ObjectRecoveryProgress(
-!first, data_recovered_to:335360, data_complete:true, omap_recovered_to:,
-omap_complete:true), before_progress: ObjectRecoveryProgress(first, data
-_recovered_to:0, data_complete:false, omap_recovered_to:,
-omap_complete:false)),PushOp(922b1749/rbd_data.1c3dade6cdc10.000000000000=
-14c5/head//6,
-v
-ersion: 104736'7736866, data_included: [0~4194304], data_size: 4194304,
-omap_header_size: 0, omap_entries_size: 0, attrset_size: 2, recovery_info=
-:
-
-ObjectRecoveryInfo(922b1749/rbd_data.1c3dade6cdc10.00000000000014c5/head/=
-/6@104736'7736866,
-copy_subset: [0~4194304], clone_subset: {}), after_pr
-ogress: ObjectRecoveryProgress(!first, data_recovered_to:4194304,
-data_complete:true, omap_recovered_to:, omap_complete:true),
-before_progress: Ob
-jectRecoveryProgress(first, data_recovered_to:0, data_complete:false,
-omap_recovered_to:, omap_complete:false))])
-
-  -6933&gt; 2014-10-31 15:34tha7.611229 7f85f737a700  5 osd.21 pg_epoch: =
-104744
-pg[6.749( v 104744'7741801 (104665'7732106,104744'7741801] lb
-14886749/rbd_data.3955b9640616f2.000000000000f5e2/head//6 local-les=3D104=
-661
-n=3D1780 ec=3D164 les/c 104742/104735 104740/104741/103210) [74,112,21]/[=
-74,112]
-r=3D-1 lpr=3D104741 pi=3D64005-104740/278 luod=3D0'0 crt=3D104744'7741798
-active+remapped] enter Started/ReplicaActive/RepNotRecovering
-
-I think having some missing objects, I can't start one osd  that above
-objects be pushed to that osd. Ceph'versions are slower 0.86 then appear
-this bug?
-Should I upgrade to Giant o resolve this bug?,
-
-
-Thank you,
---
-Tuan
-HaNoi-VietNam
-
-
-On 10/30/2014 10:02 PM, Sage Weil wrote:
-
-On Thu, 30 Oct 2014, Ta Ba Tuan wrote:
-
-Hi Everyone,
-
-I upgraded Ceph to Giant by installing *tar.gz package, but appeared some
-errors related Object Trimming or Snap Trimming:
-I think having some missing objects and be not recovered.
-
-Note that this isn't giant, which is 0.87, but something a few weeks
-older.  There were a few bugs fixed in this code, but we can't tell if
-this was one of them without the log leading up to this message, which
-should include either a failed assertion message or segmentation fault or
-similar.
-
-Thanks!
-sage
-
-
-  ceph version 0.86-106-g6f8524e (6f8524ef7673ab4448de2e0ff76638deaf03cae=
-8)
-  1: /usr/bin/ceph-osd() [0x9b6655]
-  2: (()+0xfcb0) [0x7fa52c471cb0]
-  3: (ReplicatedPG::trim_object(hobject_t const&amp;)+0x395) [0x811c25]
-  4: (ReplicatedPG::TrimmingObjects::react(ReplicatedPG::SnapTrim
-const&amp;)+0x43e) [0x82baae]
-  5: (boost::statechart::simple_state&lt;ReplicatedPG::TrimmingObjects,
-ReplicatedPG::SnapTrimmer, boost::mpl::list&lt;mpl_::na, mpl_::na, mpl_::=
-na,
-mpl
-_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::=
-na,
-mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na
-, mpl_::na,
-mpl_::na&gt;,(boost::statechart::history_mode)0&gt;::react_impl(boost::st=
-atechart::event_ba
-se const&amp;, void const*)+0xc0) [0x870c30]
-  6: (boost::statechart::state_machine&lt;ReplicatedPG::SnapTrimmer,
-ReplicatedPG::NotTrimming, std::allocator&lt;void&gt;,
-boost::statechart::null_excepti
-on_translator&gt;::process_queued_events()+0xfb) [0x8560db]
-  7: (boost::statechart::state_machine&lt;ReplicatedPG::SnapTrimmer,
-ReplicatedPG::NotTrimming, std::allocator&lt;void&gt;,
-boost::statechart::null_excepti
-on_translator&gt;::process_event(boost::statechart::event_base const&amp;=
-)+0x1e)
-[0x8562ae]
-  8: (ReplicatedPG::snap_trimmer()+0x4f8) [0x7d5f48]
-  9: (OSD::SnapTrimWQ::_process(PG*)+0x14) [0x6739b4]
-  10: (ThreadPool::worker(ThreadPool::WorkThread*)+0x48e) [0xa8fa0e]
-  11: (ThreadPool::WorkThread::entry()+0x10) [0xa927a0]
-  12: (()+0x7e9a) [0x7fa52c469e9a]
-  13: (clone()+0x6d) [0x7fa52ae3431d]
-  NOTE: a copy of the executable, or `objdump -rdS &lt;executable&gt;` is=
- needed
-to
-interpret this.
-
-
-   -128&gt; 2014-10-29 13:51:23.049357 7fa50ed9d700  5 osd.21 pg_epoch: 1=
-04445
-pg[6.9d8( v 104445'7857889 (103730'7852406,104445'7857889] local-les=3D10=
-4444
-n=3D4345 ec=3D164 les/c 104444/104272 104443/104443/104443) [21,93,49] r=3D=
-0
-lpr=3D104443 pi=3D103787-104442/16 crt=3D104442'7857887 mlcod 104445'7857=
-888
-active snaptrimq=3D[1907~1,1941~4,1946~1,19ef~2,19f2~1,19f4~3,19fa~5]] ex=
-it
-Started/Primary/Active/Recovered 0.000084 0 0.000000
-   -127&gt; 2014-10-29 13:51:23.049392 7fa50ed9d700  5 osd.21 pg_epoch: 1=
-04445
-pg[6.9d8( v 104445'7857889 (103730'7852406,104445'7857889] local-les=3D10=
-4444
-n=3D4345 ec=3D164 les/c 104444/104272 104443/104443/104443) [21,93,49] r=3D=
-0
-lpr=3D104443 pi=3D103787-104442/16 crt=3D104442'7857887 mlcod 104445'7857=
-888
-active snaptrimq=3D[1907~1,1941~4,1946~1,19ef~2,19f2~1,19f4~3,19fa~5]] en=
-ter
-Started/Primary/Active/Clean
-   -126&gt; 2014-10-29 13:51:23.049582 7fa50ed9d700  1 -- 172.30.5.2:6838=
-/22980
---&gt; 172.30.5.4:6859/8884 -- pg_info(1 pgs e104445:6.9d8) v4 -- ?+0
-0x30d41c00 con 0x26c6ac60
-
-
-Thank you!
---
-Tuan
-HaNoi-VietNam
-
-
-
-
-_______________________________________________
-ceph-users mailing list
-<a class=3D"moz-txt-link-abbreviated" href=3D"mailto:ceph-users-idqoXFIVOFJ4Eiagz67IpQ@public.gmane.org=
-h.com">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a>
-<a class=3D"moz-txt-link-freetext" href=3D"http://lists.ceph.com/listinfo=
-.cgi/ceph-users-ceph.com">http://lists.ceph.com/listinfo.cgi/ceph-users-c=
-eph.com</a>
-
-
-
-</pre>
-      </blockquote>
-    </blockquote>
-    <br>
-  </body>
-</html>
-
---------------030307000307020609070707--
-
---===============0914463788==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============0914463788==--
