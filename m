@@ -1,53 +1,42 @@
-From: Blair Bethwaite <blair.bethwaite-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: cephfs survey results
-Date: Tue, 4 Nov 2014 10:36:07 +1100
-Message-ID: <CA+z5DszyU+vDYWnLmvecZ9P6U=9uWOB28Eg7E7=vLtuUQz8Q4w@mail.gmail.com>
-References: <alpine.DEB.2.00.1411030649070.15135@cobra.newdream.net>
+From: Cheng Wei-Chung <freeze.vicente.cheng@gmail.com>
+Subject: Conflict with libgoogle-perftools4 in ubuntu12.04(precise)
+Date: Tue, 4 Nov 2014 11:45:11 +0800
+Message-ID: <CABF_e-Fv1V8ACFFOYuiKWe8gy133P-eJuY0u8t4Nf3V_AWODrA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.00.1411030649070.15135-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
-Cc: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-oi0-f49.google.com ([209.85.218.49]:33825 "EHLO
+	mail-oi0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751364AbaKDDpM (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Nov 2014 22:45:12 -0500
+Received: by mail-oi0-f49.google.com with SMTP id u20so9559479oif.8
+        for <ceph-devel@vger.kernel.org>; Mon, 03 Nov 2014 19:45:11 -0800 (PST)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 4 November 2014 01:50, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org> wrote:
-> In the Ceph session at the OpenStack summit someone asked what the CephFS
-> survey results looked like.
+Dear all:
 
-Thanks Sage, that was me!
+I know that the default precise repo did not have libgoogle-perftools4.
+It should only have libgoogle-perftools0.
+In the situation that we add the Ubuntu Cloud Archive will bring
+libgoogle-perftools4 with havana icehouse, juno and later version.
+It will make conflict with ceph if we have other softwares like
+mongodb that depends on libgoogle-perftools4.
 
->  Here's the link:
->
->         https://www.surveymonkey.com/results/SM-L5JV7WXL/
->
-> In short, people want
->
-> fsck
-> multimds
-> snapshots
-> quotas
+I found the following feature:
+http://tracker.ceph.com/issues/8039
+Is this feature still haven't done, right?
 
-TBH I'm a bit surprised by a couple of these and hope maybe you guys
-will apply a certain amount of filtering on this...
+I try to build the ceph version 0.87 with libgoogle-perftools4 and
+upgrade from firefly in my test environment.
 
-fsck and quotas were there for me, but multimds and snapshots are what
-I'd consider "icing" features - they're nice to have but not on the
-critical path to using cephfs instead of e.g. nfs in a production
-setting. I'd have thought stuff like small file performance and
-gateway support was much more relevant to uptake and
-positive/pain-free UX. Interested to hear others rationale here.
+It looks work normally. I think ceph can work on
+libgoogle-perftools0/libgoogle-perftools4.
 
--- 
-Cheers,
-~Blairo
+Is there the plan for fix this conflict for the people using the
+ubuntu cloud archive in precise?
+Or we need to build a specific version with libgoogle-perftools4 if we
+have any reasons to use libgoogle-perftools4.
+
+very thanks!!!
