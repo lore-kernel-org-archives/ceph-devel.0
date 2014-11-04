@@ -1,62 +1,59 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: FIXED:  11/5/2014 Weekly Ceph Performance Meeting IS ON!
-Date: Tue, 04 Nov 2014 09:49:15 -0600
-Message-ID: <5458F57B.5070208@redhat.com>
+From: Scottix <scottix-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: cephfs survey results
+Date: Tue, 4 Nov 2014 08:22:55 -0800
+Message-ID: <CANKFHZ_qCz0POugJb_UM9GxjYT7urnHi=NHYpXufZ9R7Jb2fog@mail.gmail.com>
+References: <alpine.DEB.2.00.1411030649070.15135@cobra.newdream.net>
+	<CA+z5DszyU+vDYWnLmvecZ9P6U=9uWOB28Eg7E7=vLtuUQz8Q4w@mail.gmail.com>
+	<20141104163357.400f83d1@ghroth.non.3dart.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f177.google.com ([209.85.223.177]:42994 "EHLO
-	mail-ie0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753293AbaKDPtE (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Nov 2014 10:49:04 -0500
-Received: by mail-ie0-f177.google.com with SMTP id tp5so7425994ieb.8
-        for <ceph-devel@vger.kernel.org>; Tue, 04 Nov 2014 07:49:04 -0800 (PST)
-Received: from [192.168.1.3] (65-128-164-140.mpls.qwest.net. [65.128.164.140])
-        by mx.google.com with ESMTPSA id f20sm450931igz.13.2014.11.04.07.49.03
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
-        Tue, 04 Nov 2014 07:49:03 -0800 (PST)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <20141104163357.400f83d1-8+6u88+ljCDmz4jMrfixpVaTQe2KTcn/@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Mariusz Gronczewski <mariusz.gronczewski-EWQ+Go7UwTxWk0Htik3J/w@public.gmane.org>
+Cc: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>, Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Blair Bethwaite <blair.bethwaite-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi All,
-
-Got the date wrong the first time.  11/5/2014 is correct!  8AM PST as 
-usual.  We are going to try a little experiment and leave the Agenda 
-blank for you guys to fill in. If you are planning on attending and have 
-something you want to discuss, please add it!
-
-We've also added a projects and backlog section at the top of the 
-etherpad for on-going efforts and the folks that are working on them. 
-For any projects or names of people we've missed, please update!
-
-Here's the links:
-
-Etherpad URL:
-http://pad.ceph.com/p/performance_weekly
-
-To join the Meeting:
-https://bluejeans.com/268261044
-
-To join via Browser:
-https://bluejeans.com/268261044/browser
-
-To join with Lync:
-https://bluejeans.com/268261044/lync
-
-
-To join via Room System:
-Video Conferencing System: bjn.vc -or- 199.48.152.152
-Meeting ID: 268261044
-
-To join via Phone:
-1) Dial:
-           +1 408 740 7256
-           +1 888 240 2560(US Toll Free)
-           +1 408 317 9253(Alternate Number)
-           (see all numbers - http://bluejeans.com/numbers)
-2) Enter Conference ID: 268261044
-
-Mark
+QWdyZWVkIE11bHRpLU1EUyBpcyBhIG5pY2UgdG8gaGF2ZSBidXQgbm90IHJlcXVpcmVkIGZvciBm
+dWxsIHByb2R1Y3Rpb24gdXNlLgpUQkggc3RhYmlsaXR5IGFuZCByZWNvdmVyeSB3aWxsIHdpbiBh
+bnkgSVQgcGVyc29uIGRlYWxpbmcgd2l0aCBmaWxlc3lzdGVtcy4KCk9uIFR1ZSwgTm92IDQsIDIw
+MTQgYXQgNzozMyBBTSwgTWFyaXVzeiBHcm9uY3pld3NraQo8bWFyaXVzei5ncm9uY3pld3NraUBl
+ZmlnZW5jZS5jb20+IHdyb3RlOgo+IE9uIFR1ZSwgNCBOb3YgMjAxNCAxMDozNjowNyArMTEwMCwg
+QmxhaXIgQmV0aHdhaXRlCj4gPGJsYWlyLmJldGh3YWl0ZUBnbWFpbC5jb20+IHdyb3RlOgo+Cj4+
+Cj4+IFRCSCBJJ20gYSBiaXQgc3VycHJpc2VkIGJ5IGEgY291cGxlIG9mIHRoZXNlIGFuZCBob3Bl
+IG1heWJlIHlvdSBndXlzCj4+IHdpbGwgYXBwbHkgYSBjZXJ0YWluIGFtb3VudCBvZiBmaWx0ZXJp
+bmcgb24gdGhpcy4uLgo+Pgo+PiBmc2NrIGFuZCBxdW90YXMgd2VyZSB0aGVyZSBmb3IgbWUsIGJ1
+dCBtdWx0aW1kcyBhbmQgc25hcHNob3RzIGFyZSB3aGF0Cj4+IEknZCBjb25zaWRlciAiaWNpbmci
+IGZlYXR1cmVzIC0gdGhleSdyZSBuaWNlIHRvIGhhdmUgYnV0IG5vdCBvbiB0aGUKPj4gY3JpdGlj
+YWwgcGF0aCB0byB1c2luZyBjZXBoZnMgaW5zdGVhZCBvZiBlLmcuIG5mcyBpbiBhIHByb2R1Y3Rp
+b24KPj4gc2V0dGluZy4gSSdkIGhhdmUgdGhvdWdodCBzdHVmZiBsaWtlIHNtYWxsIGZpbGUgcGVy
+Zm9ybWFuY2UgYW5kCj4+IGdhdGV3YXkgc3VwcG9ydCB3YXMgbXVjaCBtb3JlIHJlbGV2YW50IHRv
+IHVwdGFrZSBhbmQKPj4gcG9zaXRpdmUvcGFpbi1mcmVlIFVYLiBJbnRlcmVzdGVkIHRvIGhlYXIg
+b3RoZXJzIHJhdGlvbmFsZSBoZXJlLgo+Pgo+Cj4gVGhvc2UgYXJlIHJlbGF0ZWQ7IGlmIHNtYWxs
+IGZpbGUgcGVyZm9ybWFuY2Ugd2lsbCBiZSBlbm91Z2ggZm9yIG9uZQo+IE1EUyB0byBoYW5kbGUg
+aGlnaCBsb2FkIHdpdGggYSBsb3Qgb2Ygc21hbGwgZmlsZXMgKHR5cGljYWwgY2FzZSBvZgo+IHdl
+YnNlcnZlciksIGhhdmluZyBtdWx0aXBsZSBhY2l2ZSBNRFMgd2lsbCBiZSBsZXNzIG9mIGEgcHJp
+b3JpdHk7Cj4KPiBBbmQgaWYgc29tZW9uZSBjdXJyZW50bHkgaGF2ZSBPU0Qgb24gYnVuY2ggb2Yg
+cmVsYXRpdmVseSB3ZWFrIG5vZGVzLAo+IGFnYWluLCBoYXZpbmcgYWN0aXZlLWFjdGl2ZSBzZXR1
+cCB3aXRoIE1EUyB3aWxsIGJlIG1vcmUgaW50ZXJlc3RpbmcgdG8KPiBoaW0gdGhhbiBzb21lb25l
+IHRoYXQgY2FuIGp1c3QgYnV5IG5ldyBmYXN0IG1hY2hpbmUgZm9yIGl0Lgo+Cj4KPiAtLQo+IE1h
+cml1c3ogR3JvbmN6ZXdza2ksIEFkbWluaXN0cmF0b3IKPgo+IEVmaWdlbmNlIFMuIEEuCj4gdWwu
+IFdvxYJvc2thIDlhLCAwMi01ODMgV2Fyc3phd2EKPiBUOiBbKzQ4XSAyMiAzODAgMTMgMTMKPiBG
+OiBbKzQ4XSAyMiAzODAgMTMgMTQKPiBFOiBtYXJpdXN6Lmdyb25jemV3c2tpQGVmaWdlbmNlLmNv
+bQo+IDxtYWlsdG86bWFyaXVzei5ncm9uY3pld3NraUBlZmlnZW5jZS5jb20+Cj4KPiBfX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwo+IGNlcGgtdXNlcnMgbWFp
+bGluZyBsaXN0Cj4gY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQo+IGh0dHA6Ly9saXN0cy5jZXBo
+LmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo+CgoKCi0tIApGb2xsb3cgTWU6
+IEBTY290dGl4Cmh0dHA6Ly9hYm91dC5tZS9zY290dGl4ClNjb3R0aXhAR21haWwuY29tCl9fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmNlcGgtdXNlcnMgbWFp
+bGluZyBsaXN0CmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KaHR0cDovL2xpc3RzLmNlcGguY29t
+L2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCg==
