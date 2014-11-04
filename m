@@ -1,82 +1,95 @@
-From: Alexandre DERUMIER <aderumier@odiso.com>
-Subject: Re: 11/4/2014 Weekly Ceph Performance Meeting IS ON!
-Date: Tue, 04 Nov 2014 16:21:48 +0100 (CET)
-Message-ID: <924d8d4e-6e88-4dde-8ad5-f7aef89eb55a@mailpro>
-References: <5458EDD0.8030701@redhat.com>
+From: Mariusz Gronczewski <mariusz.gronczewski-EWQ+Go7UwTxWk0Htik3J/w@public.gmane.org>
+Subject: Re: cephfs survey results
+Date: Tue, 4 Nov 2014 16:33:57 +0100
+Message-ID: <20141104163357.400f83d1@ghroth.non.3dart.com>
+References: <alpine.DEB.2.00.1411030649070.15135@cobra.newdream.net>
+	<CA+z5DszyU+vDYWnLmvecZ9P6U=9uWOB28Eg7E7=vLtuUQz8Q4w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.209.98]:36014 "EHLO
-	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751510AbaKDPV7 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Nov 2014 10:21:59 -0500
-In-Reply-To: <5458EDD0.8030701@redhat.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mark.nelson@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+Content-Type: multipart/mixed; boundary="===============0743606350=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CA+z5DszyU+vDYWnLmvecZ9P6U=9uWOB28Eg7E7=vLtuUQz8Q4w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Blair Bethwaite <blair.bethwaite-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>, Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users-Qp0mS5GaXlQ@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-Hi Mark,
+--===============0743606350==
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ boundary="Sig_/v9A=V/wOMXDZUgB1eMLlovN"; protocol="application/pgp-signature"
 
-Is it today ? (11/4/2014 from you mail subject)
+--Sig_/v9A=V/wOMXDZUgB1eMLlovN
+Content-Type: text/plain; charset=ISO-8859-2
+Content-Transfer-Encoding: quoted-printable
 
-or tommorow (2014-11-05 in etherpad)
+On Tue, 4 Nov 2014 10:36:07 +1100, Blair Bethwaite
+<blair.bethwaite-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
 
+>=20
+> TBH I'm a bit surprised by a couple of these and hope maybe you guys
+> will apply a certain amount of filtering on this...
+>=20
+> fsck and quotas were there for me, but multimds and snapshots are what
+> I'd consider "icing" features - they're nice to have but not on the
+> critical path to using cephfs instead of e.g. nfs in a production
+> setting. I'd have thought stuff like small file performance and
+> gateway support was much more relevant to uptake and
+> positive/pain-free UX. Interested to hear others rationale here.
+>=20
 
------ Mail original -----=20
+Those are related; if small file performance will be enough for one
+MDS to handle high load with a lot of small files (typical case of
+webserver), having multiple acive MDS will be less of a priority;
 
-De: "Mark Nelson" <mark.nelson@inktank.com>=20
-=C3=80: ceph-devel@vger.kernel.org=20
-Envoy=C3=A9: Mardi 4 Novembre 2014 16:16:32=20
-Objet: 11/4/2014 Weekly Ceph Performance Meeting IS ON!=20
-
-Hi All,=20
-
-8AM PST as usual! We are going to try a little experiment and leave the=
-=20
-Agenda blank for you guys to fill in. If you are planning on attending=20
-and have something you want to discuss, please add it!=20
-
-We've also added a projects and backlog section at the top of the=20
-etherpad for on-going efforts and the folks that are working on them.=20
-=46or any projects or names of people we've missed, please update!=20
-
-Here's the links:=20
-
-Etherpad URL:=20
-http://pad.ceph.com/p/performance_weekly=20
-
-To join the Meeting:=20
-https://bluejeans.com/268261044=20
-
-To join via Browser:=20
-https://bluejeans.com/268261044/browser=20
-
-To join with Lync:=20
-https://bluejeans.com/268261044/lync=20
+And if someone currently have OSD on bunch of relatively weak nodes,
+again, having active-active setup with MDS will be more interesting to
+him than someone that can just buy new fast machine for it.
 
 
-To join via Room System:=20
-Video Conferencing System: bjn.vc -or- 199.48.152.152=20
-Meeting ID: 268261044=20
-
-To join via Phone:=20
-1) Dial:=20
-+1 408 740 7256=20
-+1 888 240 2560(US Toll Free)=20
-+1 408 317 9253(Alternate Number)=20
-(see all numbers - http://bluejeans.com/numbers)=20
-2) Enter Conference ID: 268261044=20
-
-Mark=20
 --=20
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n=20
-the body of a message to majordomo@vger.kernel.org=20
-More majordomo info at http://vger.kernel.org/majordomo-info.html=20
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Mariusz Gronczewski, Administrator
+
+Efigence S. A.
+ul. Wo=B3oska 9a, 02-583 Warszawa
+T: [+48] 22 380 13 13
+F: [+48] 22 380 13 14
+E: mariusz.gronczewski-EWQ+Go7UwTxWk0Htik3J/w@public.gmane.org
+<mailto:mariusz.gronczewski-EWQ+Go7UwTxWk0Htik3J/w@public.gmane.org>
+
+--Sig_/v9A=V/wOMXDZUgB1eMLlovN
+Content-Type: application/pgp-signature; name=signature.asc
+Content-Disposition: attachment; filename=signature.asc
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2
+
+iQEcBAEBAgAGBQJUWPHlAAoJEJa6WO31sS/Z+8IH/AxgE2J2oOMwJfrI3ylTfyAa
+WrPangOwA+LOtABnPCW9YuI9SKI9NnlTaaiGzYZ3gjZGvsDfMjvD9qi6O6v5kdOR
+TWguqXYZt8A4pVmLH5M0yn+ooSaHHyloKXRjPRa3/BnpIIbZbxXzQ63h0AESbjwG
+bnAqppUKKlomvLucxH/zKYYsm7O0aZtnqqL8WGQHtQP5j/NclG1cKdnXtKkHJ2f4
+E4s/DiENMkRmr8D/B32hqkVRRPqwFHmEuaFt1JbFUQ/PWZrut3gg+3moJBFAu14p
+w+tgfQVpm+VCkAEOfscDVqyI7snkok+akX3DAA1cIGXiKCIpXOzCyr++KAjF7S8=
+=yw7o
+-----END PGP SIGNATURE-----
+
+--Sig_/v9A=V/wOMXDZUgB1eMLlovN--
+
+--===============0743606350==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============0743606350==--
