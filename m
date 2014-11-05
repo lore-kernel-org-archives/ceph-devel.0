@@ -1,63 +1,270 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Question about Transaction::get_data_alignment
-Date: Wed, 5 Nov 2014 05:19:53 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1411050517420.15135@cobra.newdream.net>
-References: <CAMm-wc+v1_yrcHgftxjgNBo1QARP29K5V_mshuANYq=gn8yRXg@mail.gmail.com> <loom.20141105T075526-51@post.gmane.org>
+From: "Zhang, Jian" <jian.zhang@intel.com>
+Subject: RE: 10/7/2014 Weekly Ceph Performance Meeting: kernel boot params
+Date: Wed, 5 Nov 2014 14:33:53 +0000
+Message-ID: <51FC7A40FB29414D88A121A7FFEF9A4710FA642F@SHSMSX104.ccr.corp.intel.com>
+References: <54348A89.1060906@redhat.com> <20141008183234.19a24ac1@doppio>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F2785D4C1@SACMBXIP02.sdcorp.global.sandisk.com>
+ <A9F57F2ABA6BB2469F01E127557C6C9B110B3FB0@SHSMSX104.ccr.corp.intel.com>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F2785D4F5@SACMBXIP02.sdcorp.global.sandisk.com>
+ <A9F57F2ABA6BB2469F01E127557C6C9B110B4101@SHSMSX104.ccr.corp.intel.com>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F2785D7E8@SACMBXIP02.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:58498 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753888AbaKENTx (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Nov 2014 08:19:53 -0500
-In-Reply-To: <loom.20141105T075526-51@post.gmane.org>
+Received: from mga01.intel.com ([192.55.52.88]:58560 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754729AbaKEOf3 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Nov 2014 09:35:29 -0500
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2785D7E8@SACMBXIP02.sdcorp.global.sandisk.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: jianpeng <majianpeng@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: 'Somnath Roy' <Somnath.Roy@sandisk.com>, "Duan, Jiangang" <jiangang.duan@intel.com>, Andreas Bluemle <andreas.bluemle@itxperts.de>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: "Zhang, Jian" <jian.zhang@intel.com>
 
-On Wed, 5 Nov 2014, jianpeng wrote:
-> Dong Yuan <yuandong <at> unitedstack.com> writes:
-> 
-> > 
-> > Hi Sage,
-> > 
-> > I am now working with the BP osd: update Transaction encoding, but the
-> > Transaction::get_data_alignment make me confused.
-> > 
-> > This method give the alignment which is used by FileJournal to do
-> > better buffer build. It calculate the alignment by largest_data_off
-> > and get_data_offset() while the first is an offset of some object and
-> > the second is an offset of the transaction encode result. I am not
-> > sure there is any reason to do calculation between them.
-> > 
-> > The code works fine, probably because any result is fine for
-> > Transaction::get_data_alignment, while
-> > FileJournal::prepare_single_write can use any alignment value to build
-> > logical bufferlist.
-> > 
-> > Can you give me some explanation?  Thank you.
-> > 
-> 
-> Hi, i send a pull request to reduce the memcopy cause by unalignment.
-> https://github.com/ceph/ceph/pull/2803
-> I think get_data_offset() should not care largest_data_off.
+Somnath,
+Recently we completed some test regarding on HT ON & OFF, my conclusion is HT has little impact on performance and latency. 
 
-I finally got to testing this and it looks good.  Pulled the patches 
-manually into master.  Sorry it took so long!
+Test configuration: 
 
-For the last two MOSDSubOp, I think those changes should be done as part 
-of this ticket
+* Cluster and RBD node Config: 
+    2 OSD nodes: 2x E5-2680 v2 @ 2.80GHz, 32GB Memory, 8x S350 480G SSD connected via LSI9205 HBA, 10GB NIC		
+    2 Client nodes: 2x E5-2580 v2 @2.80GHz, 32GB memory, 10GB NIC
+    Ceph: v0.86
+    Workloads:  	fio+rbd engine, 64K_Rand_Read_qd64, created 8 Volumes, 60G each
+* Performance
+HT_Disabled:
+-----------------
+IOPS: 29298
+BW (MB/s): 1831
+Average RT(msec): 558
 
-	http://tracker.ceph.com/issues/9961
+HT_Enabled: 
+-------------------
+IOPS: 29308
+BW(MB/s):1832
+Average RT(msec): 558
 
-which will replace the common client replication op to use a fresh message 
-type that is properly optimized.  Jianpeng, is this something you might be 
-interested in working on?  We talked with Haomai about it during CDS but I 
-think he and Yuan Dong will be occupied with the ObjectStore::Transaction 
-encoding first, and I would really like to see this done in time for 
-hammer (jan 1f freeze).
+-------------------
+We also found some old data we did a while back for 4K random read on another full ssd setup based on cuttlefish, running fio inslide virtual machine with qemu-rbd driver, 
+the conclusion remains the same. 
 
-Thanks!
-sage
+Ceph: 192.168.10.45,op_threads=32,pg=16384,HT_enable,total 4 osds,									
+									
+    	Throughput			               Latency					
+	HT_ON	    	HT_OFF	HT_ON/OFF	   	 HT_ON	HT_OFF	HT_ON/OFF			
+1vm	22615.80 	22483.40 	101%	    		2.54 	2.50 	102%			
+2vm	45094.60 	45050.30 	100%	    		2.50 	2.47 	101%			
+3vm	67636.60 	68884.50 	98%	       		 2.96 	2.88 	103%			
+4vm	67560.60 	68198.00 	99%			4.09 	4.04 	101%			
+5vm	65893.30 	67044.40 	98%			5.25 	5.13 	102%			
+6vm	64446.50 	65331.40 	99%			6.41 	6.31 	102%			
+7vm	63305.02 	64345.33 	98%			7.57 	7.44 	102%			
+8vm	62840.17 	63060.58 	100%			8.66 	8.62 	101%			
 
+Let me know if you have other questions. 
+
+Thanks
+Jian
+
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Somnath Roy
+Sent: Thursday, October 09, 2014 8:51 AM
+To: Duan, Jiangang; Andreas Bluemle; ceph-devel@vger.kernel.org
+Subject: RE: 10/7/2014 Weekly Ceph Performance Meeting: kernel boot params
+
+Hi Jiangang,
+I managed to get some data for you but it's for a 3 node cluster. I will try to get data for single node as well.
+
+Test config:
+-------------
+
+Cluster and rbd node config:
+----------------------------------
+"2x E5-2680 10C 2.8GHz 25M
+8x 16GB RDIMM, dual rank x4 (128GB)
+Mellanox MT27500 40 Gigabit Ethernet
+LSI 9207 SAS HBA"
+
+8 X 800 GB SSDs (Optimus Eco) per cluster node
+
+3 cluster nodes + 3 rbd nodes 
+
+Total storage ~ 19 TB
+
+We have total 24 OSDs running , each node has 8 OSDs/SSD
+
+Configured 3 pools with 528 PGs/pool and 6 RBDs/pool . Each RBD image size is ~230G.
+
+We have tried on 64K_RR_QD64 workload here.
+
+HT_ENABLE
+--------------
+
+IOPS :  				112500 
+Throughput (MB/S):		7012
+Avg Resp.Time (m.sec):                17
+Max Resp.Time (m.sec):              3184
+
+HT_DISABLE
+--------------
+
+IOPS :  				120864 
+Throughput (MB/S):		7530
+Avg Resp.Time (m.sec):                11
+Max Resp.Time (m.sec):              1056
+
+
+So, ~7% iop increase but response time decrease is ~35% which is real good.
+
+Thanks & Regards
+Somnath
+
+-----Original Message-----
+From: Duan, Jiangang [mailto:jiangang.duan@intel.com]
+Sent: Wednesday, October 08, 2014 1:03 PM
+To: Somnath Roy; Andreas Bluemle; ceph-devel@vger.kernel.org
+Subject: RE: 10/7/2014 Weekly Ceph Performance Meeting: kernel boot params
+
+Sound good. Thanks. -jiangang
+
+-----Original Message-----
+From: Somnath Roy [mailto:Somnath.Roy@sandisk.com]
+Sent: Wednesday, October 08, 2014 10:53 AM
+To: Duan, Jiangang; Andreas Bluemle; ceph-devel@vger.kernel.org
+Subject: RE: 10/7/2014 Weekly Ceph Performance Meeting: kernel boot params
+
+Hi Jiangang,
+Give me a day or two, I will gather all the data and share with community.
+
+Thanks & Regards
+Somnath
+
+-----Original Message-----
+From: Duan, Jiangang [mailto:jiangang.duan@intel.com]
+Sent: Wednesday, October 08, 2014 10:47 AM
+To: Somnath Roy; Andreas Bluemle; ceph-devel@vger.kernel.org
+Subject: RE: 10/7/2014 Weekly Ceph Performance Meeting: kernel boot params
+
+Can you guys share the w/ HT and w/o HT data? I want to take a look at that to understand why. 
+
+-jiangang
+
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Somnath Roy
+Sent: Wednesday, October 08, 2014 10:38 AM
+To: Andreas Bluemle; ceph-devel@vger.kernel.org
+Subject: RE: 10/7/2014 Weekly Ceph Performance Meeting: kernel boot params
+
+Thanks Andres for sharing this. I will try those out.
+BTW, I am using Ubuntu 14.04 LTS and couldn't find any sysfs entry like  'cpufreq'..
+
+root@stormeap-4:~# ll /sys/devices/system/cpu/cpu10/
+cache/            crash_notes       driver/           microcode/        online            subsystem/        topology/
+cpuidle/          crash_notes_size  firmware_node/    node0/            power/            thermal_throttle/ uevent
+
+I am using Intel(R) Xeon(R) CPU E5-2680 v2 @ 2.80GHz.
+
+Regards
+Somnath
+
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Andreas Bluemle
+Sent: Wednesday, October 08, 2014 9:33 AM
+To: ceph-devel@vger.kernel.org
+Subject: Re: 10/7/2014 Weekly Ceph Performance Meeting: kernel boot params
+
+Hi,
+
+as mentioned during today's meeting, here are the kernel boot parameters which I found to provide the basis for good performance results:
+
+  processor.max_cstate=0
+  intel_idle.max_cstate=0
+
+I understand these to basically turn off any power saving modes of the CPU; the CPU's we are using are like
+ Intel(R) Xeon(R) CPU E5-2640 v2 @ 2.00GHz
+ Intel(R) Xeon(R) CPU E5-2630 0 @ 2.30GHz
+
+At the BIOS level, we
+ - turn off Hyperthraeding
+ - turn off Turbo mode (in order ot not leave the specifications)
+ - turn on frequency floor override
+
+We also assert that
+ /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
+ is set to "performance"
+
+Using above we see a constant frequency at the maximum level allowed by the CPU (except Turbo mode).
+
+
+Best Regards
+
+Andreas Bluemle
+
+
+
+
+
+
+On Wed, 8 Oct 2014 02:51:21 +0200
+Mark Nelson <mark.nelson@inktank.com> wrote:
+
+> Hi All,
+>
+> Just a remind that the weekly performance meeting is on Wednesdays at 
+> 8AM PST.  Same bat time, same bat channel!
+>
+> Etherpad URL:
+> http://pad.ceph.com/p/performance_weekly
+>
+> To join the Meeting:
+> https://bluejeans.com/268261044
+>
+> To join via Browser:
+> https://bluejeans.com/268261044/browser
+>
+> To join with Lync:
+> https://bluejeans.com/268261044/lync
+>
+>
+> To join via Room System:
+> Video Conferencing System: bjn.vc -or- 199.48.152.152 Meeting ID:
+> 268261044
+>
+> To join via Phone:
+> 1) Dial:
+>            +1 408 740 7256
+>            +1 888 240 2560(US Toll Free)
+>            +1 408 317 9253(Alternate Number)
+>            (see all numbers - http://bluejeans.com/numbers)
+> 2) Enter Conference ID: 268261044
+>
+> Mark
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+> in the body of a message to majordomo@vger.kernel.org More majordomo 
+> info at  http://vger.kernel.org/majordomo-info.html
+>
+>
+
+
+
+--
+Andreas Bluemle                     mailto:Andreas.Bluemle@itxperts.de
+ITXperts GmbH                       http://www.itxperts.de
+Balanstrasse 73, Geb. 08            Phone: (+49) 89 89044917
+D-81541 Muenchen (Germany)          Fax:   (+49) 89 89044910
+
+Company details: http://www.itxperts.de/imprint.htm
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+________________________________
+
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
