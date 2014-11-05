@@ -1,67 +1,90 @@
-From: Hunter Nield <hunter@acale.ph>
-Subject: Re: Consul
-Date: Wed, 5 Nov 2014 11:05:34 +0800
-Message-ID: <CAGRK8cwq0WkSG98mavGRe4vFzwyK9dqTrgc9knQaE2n0e-YGjg@mail.gmail.com>
-References: <54597169.2040006@dachary.org>
+From: Wei-Chung Cheng <freeze.vicente.cheng@gmail.com>
+Subject: Re: Conflict with libgoogle-perftools4 in ubuntu12.04(precise)
+Date: Wed, 5 Nov 2014 11:18:08 +0800
+Message-ID: <CABF_e-E33_e29-N7TK9+Gd14+N-2_da8HyZN4KkMNOMKvdsXuA@mail.gmail.com>
+References: <CABF_e-Fv1V8ACFFOYuiKWe8gy133P-eJuY0u8t4Nf3V_AWODrA@mail.gmail.com>
+	<alpine.DEB.2.00.1411040109430.15135@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qg0-f41.google.com ([209.85.192.41]:40589 "EHLO
-	mail-qg0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752910AbaKEDFz convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Nov 2014 22:05:55 -0500
-Received: by mail-qg0-f41.google.com with SMTP id q107so11523918qgd.0
-        for <ceph-devel@vger.kernel.org>; Tue, 04 Nov 2014 19:05:55 -0800 (PST)
-In-Reply-To: <54597169.2040006@dachary.org>
+Received: from mail-oi0-f54.google.com ([209.85.218.54]:38571 "EHLO
+	mail-oi0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752039AbaKEDSJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Nov 2014 22:18:09 -0500
+Received: by mail-oi0-f54.google.com with SMTP id a141so9664776oig.41
+        for <ceph-devel@vger.kernel.org>; Tue, 04 Nov 2014 19:18:08 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.00.1411040109430.15135@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-I concur with Dan on Consul. It's a great tool.
-
-We use Consul in our Ceph environments but only as a layer above an
-installed Ceph installation. Health checks (for the mons/osds
-processes and ceph health) and service discovery (for the
-apps/services that run in Docker containers on top). We've started on
-an alerting tool if anyone has use for it -
-https://github.com/AcalephStorage/consul-alerts
-
-There is definitely some overlap on the cluster consensus side (Paxos
-vs Raft) and would be nice to reduce another moving part in our
-cluster but I would imagine the projects are too different internally
-to really combine the two of them.
-
-The one thing that we'd wished for in Ceph before Consul existed was
-an easily accessible distributed KV store. Ceph has parts of it but
-exposing something like that with an easy CLI/REST API might provide
-the primitives for building higher level functionality that Consul
-provides. More than likely a distraction though since Consul does such
-a good job now.
-
-On a side note, I haven't spoken to Dan in a while but curious on his
-thoughts on the overlap on Consul in config management land. Service
-discovery, remote execution, etc have some overlap in Puppet, Chef,
-etc. Related to Ceph we're pondering it as alternative for deploying
-mons/osds (larger scale ceph-deploy perhaps)
-
-On Wed, Nov 5, 2014 at 8:38 AM, Loic Dachary <loic@dachary.org> wrote:
-> Hi Ceph,
+2014-11-04 17:11 GMT+08:00 Sage Weil <sage@newdream.net>:
+> On Tue, 4 Nov 2014, Cheng Wei-Chung wrote:
+>> Dear all:
+>>
+>> I know that the default precise repo did not have libgoogle-perftools4.
+>> It should only have libgoogle-perftools0.
+>> In the situation that we add the Ubuntu Cloud Archive will bring
+>> libgoogle-perftools4 with havana icehouse, juno and later version.
+>> It will make conflict with ceph if we have other softwares like
+>> mongodb that depends on libgoogle-perftools4.
+>>
+>> I found the following feature:
+>> http://tracker.ceph.com/issues/8039
+>> Is this feature still haven't done, right?
 >
-> While at the OpenStack summit Dan Bode spoke highly of Consul ( https=
-://consul.io/intro/index.html ). Its scope is new to me. Each individua=
-l feature is familiar but I'm not entirely sure if combining them into =
-a single software is necessary. And I wonder how it could relate to Cep=
-h. It is entirely possible that it does not even make sense to ask thes=
-es questions ;-)
+> Right, it's not done yet.
+
+OK, could I help to complete it?
+
 >
-> Cheers
+>> I try to build the ceph version 0.87 with libgoogle-perftools4 and
+>> upgrade from firefly in my test environment.
+>>
+>> It looks work normally. I think ceph can work on
+>> libgoogle-perftools0/libgoogle-perftools4.
 >
-> --
-> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+> Great!  It just needs patches to the packaging files, to go through
+> testing, and then we need to make backported packages (possibly/probably)
+> for a few older distros.
 >
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> It will be a bit awkward to to changed this for a stable release like
+> firefly, though.  How disruptive will that be?
+>
+> sage
+
+I also have simple I/O tests with openstack in my environment this weekend.
+If these tests are OK, I think we could make backported packages and
+test it again?
+
+for change from a stable relase:
+In my solution, I make sure the other ceph nodes and OSD processes are alive.
+Upgrade only one node in the same time, because it will make some osd down for
+a while due to removing ceph with libgoogle-perftools0.
+In this stage, we need to remove libgoogle-perftools0 and install
+libgoogle-perftools4
+and its releated package.
+
+After that, install a new ceph package and OSDs will resume working normally.
+
+If I get something misunderstanding with your meaning, please feel
+free to let me know!
+
+thanks
+
+vicente
+
+>
+>
+>> Is there the plan for fix this conflict for the people using the
+>> ubuntu cloud archive in precise?
+>> Or we need to build a specific version with libgoogle-perftools4 if we
+>> have any reasons to use libgoogle-perftools4.
+>>
+>> very thanks!!!
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
