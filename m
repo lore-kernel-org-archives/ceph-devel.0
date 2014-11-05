@@ -1,84 +1,43 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Conflict with libgoogle-perftools4 in ubuntu12.04(precise)
-Date: Wed, 5 Nov 2014 01:00:53 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1411050056030.15135@cobra.newdream.net>
-References: <CABF_e-Fv1V8ACFFOYuiKWe8gy133P-eJuY0u8t4Nf3V_AWODrA@mail.gmail.com> <alpine.DEB.2.00.1411040109430.15135@cobra.newdream.net> <CABF_e-E33_e29-N7TK9+Gd14+N-2_da8HyZN4KkMNOMKvdsXuA@mail.gmail.com>
+From: Hunter Nield <hunter@acale.ph>
+Subject: Re: Consul
+Date: Wed, 5 Nov 2014 17:28:57 +0800
+Message-ID: <CAGRK8cy0yPo8b1V9s3++BiMZP4eWkmcjqn1h1Ad00PKsCbGMHA@mail.gmail.com>
+References: <54597169.2040006@dachary.org> <CAGRK8cwq0WkSG98mavGRe4vFzwyK9dqTrgc9knQaE2n0e-YGjg@mail.gmail.com>
+ <5459E1EE.90509@dachary.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:57278 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751711AbaKEJAy (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Nov 2014 04:00:54 -0500
-In-Reply-To: <CABF_e-E33_e29-N7TK9+Gd14+N-2_da8HyZN4KkMNOMKvdsXuA@mail.gmail.com>
+Received: from mail-qc0-f174.google.com ([209.85.216.174]:56417 "EHLO
+	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751325AbaKEJ3T convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Nov 2014 04:29:19 -0500
+Received: by mail-qc0-f174.google.com with SMTP id r5so204166qcx.19
+        for <ceph-devel@vger.kernel.org>; Wed, 05 Nov 2014 01:29:18 -0800 (PST)
+In-Reply-To: <5459E1EE.90509@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wei-Chung Cheng <freeze.vicente.cheng@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Wed, 5 Nov 2014, Wei-Chung Cheng wrote:
-> 2014-11-04 17:11 GMT+08:00 Sage Weil <sage@newdream.net>:
-> > On Tue, 4 Nov 2014, Cheng Wei-Chung wrote:
-> >> Dear all:
-> >>
-> >> I know that the default precise repo did not have libgoogle-perftools4.
-> >> It should only have libgoogle-perftools0.
-> >> In the situation that we add the Ubuntu Cloud Archive will bring
-> >> libgoogle-perftools4 with havana icehouse, juno and later version.
-> >> It will make conflict with ceph if we have other softwares like
-> >> mongodb that depends on libgoogle-perftools4.
-> >>
-> >> I found the following feature:
-> >> http://tracker.ceph.com/issues/8039
-> >> Is this feature still haven't done, right?
-> >
-> > Right, it's not done yet.
-> 
-> OK, could I help to complete it?
+On Wed, Nov 5, 2014 at 4:38 PM, Loic Dachary <loic@dachary.org> wrote:
+> I guess using radosgw with the S3/Swift API is close enough in terms of what Consul needs to store key/values. But maybe I don't understand what you mean by "easily accessible distributed KV store" and wrongly assume radosgw is easy enough ;-)
 
-1- Patches to update ceph.spec.in and debian/control
-   - make sure it is available and builds on all of the supported 
-     platforms (precise, trusty, el6, el7, fc20)
-2- QA
-3- Test upgrade path
+Yes, we did consider RGW. We were originally looking for something
+simpler for internal use. More than librados but less than a full
+object storage gateway. We didn't need Apache or multi-tenant
+authentication, just somewhere to store keys and pull them out
+elsewhere. Closer to clustered Memcache or Redis. Consul provides most
+of that now and adds a few things like locks and long polling
 
-> >> I try to build the ceph version 0.87 with libgoogle-perftools4 and
-> >> upgrade from firefly in my test environment.
-> >>
-> >> It looks work normally. I think ceph can work on
-> >> libgoogle-perftools0/libgoogle-perftools4.
-> >
-> > Great!  It just needs patches to the packaging files, to go through
-> > testing, and then we need to make backported packages (possibly/probably)
-> > for a few older distros.
-> >
-> > It will be a bit awkward to to changed this for a stable release like
-> > firefly, though.  How disruptive will that be?
-> >
-> > sage
-> 
-> I also have simple I/O tests with openstack in my environment this weekend.
-> If these tests are OK, I think we could make backported packages and
-> test it again?
-> 
-> for change from a stable relase:
-> In my solution, I make sure the other ceph nodes and OSD processes are alive.
-> Upgrade only one node in the same time, because it will make some osd down for
-> a while due to removing ceph with libgoogle-perftools0.
-> In this stage, we need to remove libgoogle-perftools0 and install
-> libgoogle-perftools4
-> and its releated package.
-> 
-> After that, install a new ceph package and OSDs will resume working normally.
+>> On a side note, I haven't spoken to Dan in a while but curious on his
+>> thoughts on the overlap on Consul in config management land. Service
+>> discovery, remote execution, etc have some overlap in Puppet, Chef,
+>> etc. Related to Ceph we're pondering it as alternative for deploying
+>> mons/osds (larger scale ceph-deploy perhaps)
+>
+> Is there a framework for integration tests of some kind in Consul ? Although https://github.com/puppetlabs/beaker/ provides that for puppet, it is still rarely used and it is painful because even when used to develop a module, it is likely to break in unpredictable ways because module dependencies have no integration tests and suffer from frequent regressions. It would be great to see modern tools such as Consul encourage a more robust approach to integration tests with proper tooling from the start.
 
-I don't think there should be a problem with the upgrade itself.. the 0 
-and 4 versions are different files and IIRC you can even have multiple 
-versions install simultaneously.  Mostly I'm worried about issues with the 
-package management during upgrade.  I don't think it should be a problem 
-but it needs to be tested.
-
-The bigger issue is that for a stable release like firefly or dumpilng, 
-this is potentially a "big" change in a stable series that is supposed to 
-be getting minimal fixes.  Any opinions here?
-
-sage
+I'm not entirely sure about integration tests. Certainly there are
+unit tests for the code but there doesn't seem to be much (that I can
+see) about testing things like external health checks or remote exec.
