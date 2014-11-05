@@ -1,85 +1,55 @@
-From: Shain Miley <smiley-VrEXfa0MiHk@public.gmane.org>
-Subject: Re: cephfs survey results
-Date: Tue, 4 Nov 2014 18:47:19 -0500
-Message-ID: <54596587.1080000@npr.org>
-References: <alpine.DEB.2.00.1411030649070.15135@cobra.newdream.net>
-	<CA+z5DszyU+vDYWnLmvecZ9P6U=9uWOB28Eg7E7=vLtuUQz8Q4w@mail.gmail.com>
-	<alpine.DEB.2.00.1411040057280.15135@cobra.newdream.net>
+From: Loic Dachary <loic@dachary.org>
+Subject: Consul
+Date: Wed, 05 Nov 2014 01:38:01 +0100
+Message-ID: <54597169.2040006@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.00.1411040057280.15135-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
-Cc: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="ibBl8kjkf5aIpILBPrKlg0X2r4lj7KWOb"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail2.dachary.org ([91.121.57.175]:59269 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751506AbaKEAiI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Nov 2014 19:38:08 -0500
+Received: from [10.9.0.6] (unknown [10.0.2.28])
+	by smtp.dmail.dachary.org (Postfix) with ESMTP id 7D008420A8
+	for <ceph-devel@vger.kernel.org>; Wed,  5 Nov 2014 01:38:01 +0100 (CET)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-+1 for fsck and snapshots, being able to have snapshot backups and 
-protect against accidental deletion, etc is something we are really 
-looking forward to.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--ibBl8kjkf5aIpILBPrKlg0X2r4lj7KWOb
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-Thanks,
+Hi Ceph,
 
-Shain
+While at the OpenStack summit Dan Bode spoke highly of Consul ( https://c=
+onsul.io/intro/index.html ). Its scope is new to me. Each individual feat=
+ure is familiar but I'm not entirely sure if combining them into a single=
+ software is necessary. And I wonder how it could relate to Ceph. It is e=
+ntirely possible that it does not even make sense to ask theses questions=
+ ;-)
+
+Cheers
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
 
 
-On 11/04/2014 04:02 AM, Sage Weil wrote:
-> On Tue, 4 Nov 2014, Blair Bethwaite wrote:
->> On 4 November 2014 01:50, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org> wrote:
->>> In the Ceph session at the OpenStack summit someone asked what the CephFS
->>> survey results looked like.
->> Thanks Sage, that was me!
->>
->>>   Here's the link:
->>>
->>>          https://www.surveymonkey.com/results/SM-L5JV7WXL/
->>>
->>> In short, people want
->>>
->>> fsck
->>> multimds
->>> snapshots
->>> quotas
->> TBH I'm a bit surprised by a couple of these and hope maybe you guys
->> will apply a certain amount of filtering on this...
->>
->> fsck and quotas were there for me, but multimds and snapshots are what
->> I'd consider "icing" features - they're nice to have but not on the
->> critical path to using cephfs instead of e.g. nfs in a production
->> setting. I'd have thought stuff like small file performance and
->> gateway support was much more relevant to uptake and
->> positive/pain-free UX. Interested to hear others rationale here.
-> Yeah, I agree, and am taking the results with a grain of salt.  I
-> think the results are heavily influenced by the order they were
-> originally listed (I whish surveymonkey would randomize is for each
-> person or something).
->
-> fsck is a clear #1.  Everybody wants multimds, but I think very few
-> actually need it at this point.  We'll be merging a soft quota patch
-> shortly, and things like performance (adding the inline data support to
-> the kernel client, for instance) will probably compete with getting
-> snapshots working (as part of a larger subvolume infrastructure).  That's
-> my guess at least; for now, we're really focused on fsck and hard
-> usability edges and haven't set priorities beyond that.
->
-> We're definitely interested in hearing feedback on this strategy, and on
-> peoples' experiences with giant so far...
->
-> sage
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+--ibBl8kjkf5aIpILBPrKlg0X2r4lj7KWOb
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
--- 
-Shain Miley | Manager of Systems and Infrastructure, Digital Media | 
-smiley-VrEXfa0MiHk@public.gmane.org | 202.513.3649
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlRZcWkACgkQ8dLMyEl6F23n9wCcDZgKcQc07VOBM9zd3mydvVxY
+Z7MAoJ9QtZyH76BmjWaDvkEkCUmpsYMG
+=5lc4
+-----END PGP SIGNATURE-----
+
+--ibBl8kjkf5aIpILBPrKlg0X2r4lj7KWOb--
