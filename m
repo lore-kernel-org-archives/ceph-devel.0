@@ -1,74 +1,111 @@
-From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
-Subject: RE: Question about Transaction::get_data_alignment
-Date: Thu, 6 Nov 2014 01:50:59 +0000
-Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC020E0CEF@shsmsx102.ccr.corp.intel.com>
-References: <CAMm-wc+v1_yrcHgftxjgNBo1QARP29K5V_mshuANYq=gn8yRXg@mail.gmail.com>
- <loom.20141105T075526-51@post.gmane.org>
- <alpine.DEB.2.00.1411050517420.15135@cobra.newdream.net>
+From: Wei-Chung Cheng <freeze.vicente.cheng@gmail.com>
+Subject: Re: Conflict with libgoogle-perftools4 in ubuntu12.04(precise)
+Date: Thu, 6 Nov 2014 11:09:43 +0800
+Message-ID: <CABF_e-GMM=xSx5WHxS2OZTW3EN3PQ0PpKwOQF_VTET42R11ydg@mail.gmail.com>
+References: <CABF_e-Fv1V8ACFFOYuiKWe8gy133P-eJuY0u8t4Nf3V_AWODrA@mail.gmail.com>
+	<alpine.DEB.2.00.1411040109430.15135@cobra.newdream.net>
+	<CABF_e-E33_e29-N7TK9+Gd14+N-2_da8HyZN4KkMNOMKvdsXuA@mail.gmail.com>
+	<alpine.DEB.2.00.1411050056030.15135@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga03.intel.com ([134.134.136.65]:2630 "EHLO mga03.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750974AbaKFBvp convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Nov 2014 20:51:45 -0500
-In-Reply-To: <alpine.DEB.2.00.1411050517420.15135@cobra.newdream.net>
-Content-Language: en-US
+Received: from mail-oi0-f48.google.com ([209.85.218.48]:62455 "EHLO
+	mail-oi0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750931AbaKFDJo (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Nov 2014 22:09:44 -0500
+Received: by mail-oi0-f48.google.com with SMTP id x69so146517oia.7
+        for <ceph-devel@vger.kernel.org>; Wed, 05 Nov 2014 19:09:43 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.00.1411050056030.15135@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>, jianpeng <majianpeng@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Sage,
-     As discussed with Jianpeng, I would like to take this job.
-    Thank you.
-				Xiaoxi
+2014-11-05 17:00 GMT+08:00 Sage Weil <sage@newdream.net>:
+> On Wed, 5 Nov 2014, Wei-Chung Cheng wrote:
+>> 2014-11-04 17:11 GMT+08:00 Sage Weil <sage@newdream.net>:
+>> > On Tue, 4 Nov 2014, Cheng Wei-Chung wrote:
+>> >> Dear all:
+>> >>
+>> >> I know that the default precise repo did not have libgoogle-perftools4.
+>> >> It should only have libgoogle-perftools0.
+>> >> In the situation that we add the Ubuntu Cloud Archive will bring
+>> >> libgoogle-perftools4 with havana icehouse, juno and later version.
+>> >> It will make conflict with ceph if we have other softwares like
+>> >> mongodb that depends on libgoogle-perftools4.
+>> >>
+>> >> I found the following feature:
+>> >> http://tracker.ceph.com/issues/8039
+>> >> Is this feature still haven't done, right?
+>> >
+>> > Right, it's not done yet.
+>>
+>> OK, could I help to complete it?
+>
+> 1- Patches to update ceph.spec.in and debian/control
+>    - make sure it is available and builds on all of the supported
+>      platforms (precise, trusty, el6, el7, fc20)
+> 2- QA
+> 3- Test upgrade path
+>
 
------Original Message-----
-From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
-Sent: Wednesday, November 5, 2014 9:20 PM
-To: jianpeng
-Cc: ceph-devel@vger.kernel.org
-Subject: Re: Question about Transaction::get_data_alignment
+OK, I will do precise and trusty first.
 
-On Wed, 5 Nov 2014, jianpeng wrote:
-> Dong Yuan <yuandong <at> unitedstack.com> writes:
-> 
-> > 
-> > Hi Sage,
-> > 
-> > I am now working with the BP osd: update Transaction encoding, but 
-> > the Transaction::get_data_alignment make me confused.
-> > 
-> > This method give the alignment which is used by FileJournal to do 
-> > better buffer build. It calculate the alignment by largest_data_off 
-> > and get_data_offset() while the first is an offset of some object 
-> > and the second is an offset of the transaction encode result. I am 
-> > not sure there is any reason to do calculation between them.
-> > 
-> > The code works fine, probably because any result is fine for 
-> > Transaction::get_data_alignment, while 
-> > FileJournal::prepare_single_write can use any alignment value to 
-> > build logical bufferlist.
-> > 
-> > Can you give me some explanation?  Thank you.
-> > 
-> 
-> Hi, i send a pull request to reduce the memcopy cause by unalignment.
-> https://github.com/ceph/ceph/pull/2803
-> I think get_data_offset() should not care largest_data_off.
+>> >> I try to build the ceph version 0.87 with libgoogle-perftools4 and
+>> >> upgrade from firefly in my test environment.
+>> >>
+>> >> It looks work normally. I think ceph can work on
+>> >> libgoogle-perftools0/libgoogle-perftools4.
+>> >
+>> > Great!  It just needs patches to the packaging files, to go through
+>> > testing, and then we need to make backported packages (possibly/probably)
+>> > for a few older distros.
+>> >
+>> > It will be a bit awkward to to changed this for a stable release like
+>> > firefly, though.  How disruptive will that be?
+>> >
+>> > sage
+>>
+>> I also have simple I/O tests with openstack in my environment this weekend.
+>> If these tests are OK, I think we could make backported packages and
+>> test it again?
+>>
+>> for change from a stable relase:
+>> In my solution, I make sure the other ceph nodes and OSD processes are alive.
+>> Upgrade only one node in the same time, because it will make some osd down for
+>> a while due to removing ceph with libgoogle-perftools0.
+>> In this stage, we need to remove libgoogle-perftools0 and install
+>> libgoogle-perftools4
+>> and its releated package.
+>>
+>> After that, install a new ceph package and OSDs will resume working normally.
+>
+> I don't think there should be a problem with the upgrade itself.. the 0
+> and 4 versions are different files and IIRC you can even have multiple
+> versions install simultaneously.  Mostly I'm worried about issues with the
+> package management during upgrade.  I don't think it should be a problem
+> but it needs to be tested.
 
-I finally got to testing this and it looks good.  Pulled the patches manually into master.  Sorry it took so long!
+I think version 0 and 4 would conflict. I try to have multiple version install.
+In my experience, it could not work.
+We need to consider that the issue with package management dring upgrade.
+I will test first with precise, trusty and looks what issue we may meet.
 
-For the last two MOSDSubOp, I think those changes should be done as part of this ticket
+>
+> The bigger issue is that for a stable release like firefly or dumpilng,
+> this is potentially a "big" change in a stable series that is supposed to
+> be getting minimal fixes.  Any opinions here?
+>
+> sage
 
-	http://tracker.ceph.com/issues/9961
+I will test dumpling and firefly after I have done the task about
+packaging and testing the upgrade.
+The best case is that let user upgrade by apt/yum right?
+If we can use apt/yum upgrade, I think that can make the downtime minimal.
+Maybe we need to change the dependency to version 4 and build with the
+stable version like firefly and dumpling.
+Then If it work normally, we can try to use the apt/yum upgrade.
+In brief, I will test dumpling and firefly with version 4 first.
 
-which will replace the common client replication op to use a fresh message type that is properly optimized.  Jianpeng, is this something you might be interested in working on?  We talked with Haomai about it during CDS but I think he and Yuan Dong will be occupied with the ObjectStore::Transaction encoding first, and I would really like to see this done in time for hammer (jan 1f freeze).
+Thanks
 
-Thanks!
-sage
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+vicente
