@@ -1,56 +1,45 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Ceph & Cinder & HA
-Date: Thu, 06 Nov 2014 16:57:07 +0100
-Message-ID: <545B9A53.4040502@dachary.org>
+From: Jeff Moyer <jmoyer@redhat.com>
+Subject: Re: [PATCH v5 7/7] fs: add a flag for per-operation O_DSYNC semantics
+Date: Thu, 06 Nov 2014 18:46:08 -0500
+Message-ID: <x49r3xf28qn.fsf@segfault.boston.devel.redhat.com>
+References: <cover.1415220890.git.milosz@adfin.com>
+	<cover.1415220890.git.milosz@adfin.com>
+	<c188b04ede700ce5f986b19de12fa617d158540f.1415220890.git.milosz@adfin.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="cW8WXNBbhxoqf3HQNQBjJluCSEL8bXh48"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:60396 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1750970AbaKFP5Q (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Nov 2014 10:57:16 -0500
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Florian Haas <florian.haas@hastexo.com>
-Cc: "@@redhat.com"@dachary.org, "Ceph Development \"" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <c188b04ede700ce5f986b19de12fa617d158540f.1415220890.git.milosz@adfin.com>
+	(Milosz Tanski's message of "Wed, 5 Nov 2014 16:14:53 -0500")
+Sender: owner-linux-mm@kvack.org
+To: Milosz Tanski <milosz@adfin.com>
+Cc: linux-kernel@vger.kernel.org, Christoph Hellwig <hch@lst.de>, Christoph Hellwig <hch@infradead.org>, linux-fsdevel@vger.kernel.org, linux-aio@kvack.org, Mel Gorman <mgorman@suse.de>, Volker Lendecke <Volker.Lendecke@sernet.de>, Tejun Heo <tj@kernel.org>, Theodore Ts'o <tytso@mit.edu>, Al Viro <viro@zeniv.linux.org.uk>, linux-api@vger.kernel.org, Michael Kerrisk <mtk.manpages@gmail.com>, linux-arch@vger.kernel.org, ceph-devel@vger.kernel.org, fuse-devel@lists.sourceforge.net, linux-nfs@vger.kernel.org, ocfs2-devel@oss.oracle.com, linux-mm@kvack.org
+List-Id: ceph-devel.vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---cW8WXNBbhxoqf3HQNQBjJluCSEL8bXh48
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Milosz Tanski <milosz@adfin.com> writes:
 
-Hi Florian,
+> -		if (type == READ && (flags & RWF_NONBLOCK))
+> -			return -EAGAIN;
+> +		if (type == READ) {
+> +			if (flags & RWF_NONBLOCK)
+> +				return -EAGAIN;
+> +		} else {
+> +			if (flags & RWF_DSYNC)
+> +				return -EINVAL;
+> +		}
 
-I attended the Ceph & Cinder & HA session today at the summit. I've never=
- really thought about strategies to implement HA and how Ceph can help. T=
-he extent of my knowledge on this topic is to make sure I do not confuse =
-something that is "highly reliable" with something "highly available" ;-)=
+Minor nit, but I'd rather read something that looks like this:
 
+	if (type == READ && (flags & RWF_NONBLOCK))
+		return -EAGAIN;
+	else if (type == WRITE && (flags & RWF_DSYNC))
+		return -EINVAL;
 
-Guilio came to me after the session and I had to confess my ignorance on =
-the topic of HA. Hence this mail and the hope that you can shed some ligh=
-t on this topic.
+I won't lose sleep over it, though.
 
-Cheers
+Reviewed-by: Jeff Moyer <jmoyer@redhat.com>
 
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-
-
---cW8WXNBbhxoqf3HQNQBjJluCSEL8bXh48
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlRbmlMACgkQ8dLMyEl6F21MJACZAU3dHUXnYYhB/pWFNEvu+Lrh
-BlYAn0FrHyhegZAAySWMI/iSt8UK4rme
-=tLaD
------END PGP SIGNATURE-----
-
---cW8WXNBbhxoqf3HQNQBjJluCSEL8bXh48--
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
