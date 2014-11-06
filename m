@@ -1,52 +1,35 @@
-From: Vijayendra Shamanna <Vijayendra.Shamanna@sandisk.com>
-Subject: RE: ceph osd start process
-Date: Thu, 6 Nov 2014 07:47:25 +0000
-Message-ID: <085BC98701B92B4C86AE7696562D284D0B993353@SACMBXIP03.sdcorp.global.sandisk.com>
-References: <CAF7cUg1A_k1rtR41Ps27TftGHd7dLDrQ-QqEg+1T1Xagaa7FsQ@mail.gmail.com>
+From: GuangYang <yguang11-1ViLX0X+lBJBDgjK7y7TUQ@public.gmane.org>
+Subject: PG inconsistency
+Date: Thu, 6 Nov 2014 13:24:13 +0000
+Message-ID: <BLU175-W41E1F32E90ED411A4477FFDF840@phx.gbl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2on0084.outbound.protection.outlook.com ([207.46.100.84]:46352
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751494AbaKFIBz (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 6 Nov 2014 03:01:55 -0500
-In-Reply-To: <CAF7cUg1A_k1rtR41Ps27TftGHd7dLDrQ-QqEg+1T1Xagaa7FsQ@mail.gmail.com>
-Content-Language: en-US
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: xinxin shu <xinxin.shu5040@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-SGksDQoNCllvdSBjYW4gcmVmZXIgdG8gIl9jcmVhdGVfY29sbGVjdGlvbiIsIHdoaWNoIGlzIGlu
-dm9rZWQgZnJvbSAgT1BfTUtDT0xMIHRyYW5zYWN0aW9uIG9wY29kZSAoRmlsZVN0b3JlLmNjKSBj
-b250ZXh0IGZvciB0aGUgZmlsZSBzdG9yZSBiYWNrZW5kLg0KDQpUaGFua3MsDQpWaWp1DQoNCg0K
-LS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5r
-ZXJuZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJl
-aGFsZiBPZiB4aW54aW4gc2h1DQpTZW50OiBUaHVyc2RheSwgTm92ZW1iZXIgMDYsIDIwMTQgMTI6
-MzkgUE0NClRvOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KU3ViamVjdDogY2VwaCBvc2Qg
-c3RhcnQgcHJvY2Vzcw0KDQpoaSBhbGwgLA0KDQppIHdhbnQgdG8gZmluZCBvdXQgaG93IGNlcGgg
-b3NkIGRhZW1vbiBzdGFydCAsIGZpcnN0IGkgdXNlICJta2NlcGhmcyINCnRvIGluaXRpYWxpemUg
-dGhlIG9zZCBkYXRhIGRpcmVjdG9yeSAsIGkgZm91bmQgdGhhdCB0aGVyZSBhcmUgc29tZSBmaWxl
-cyBhbmQgZGlyZWN0b3JpZXMgKGNvbW1pdF9vcF9zZXEgIG1ldGEgIG5vc25hcCAgb21hcCkgaW4g
-Y3VycmVudCBkaXJlY3RvcnkgLCAgYnV0IG5vIHBnIGRpcmVjdG9yaWVzICwgdGhlbiBpIHN0YXJ0
-IGNlcGggb3NkIGRhZW1vbiAsIHBnIGRpcmVjdG9yaWVzIGFyZSBjcmVhdGVkICwgYnV0IGkgZG8g
-bm90IGtub3cgd2hlbiBhbmQgd2hlcmUgdGhlc2UgcGcgZGlyZWN0b3JpZXMgYXJlIGNyZWF0ZWQg
-LCBjYW4gc29tZW9uZSB0ZWxsIG1vcmUgZGV0YWlscyBhYm91dCBob3cgdGhlc2UgcGcgYXJlIGNy
-ZWF0ZWQgYW5kIHdoZXJlIGkgY2FuIGxvY2F0ZSB0aGUgY29kZSBvZiBwZyBjcmVhdGlvbj8NCmFu
-eSB0aXBzIHdpbGwgYmUgYXBwcmVjaWF0ZWQuDQotLQ0KVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlz
-IGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluIHRoZSBib2R5
-IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21v
-IGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KDQpf
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXw0KDQpQTEVBU0UgTk9URTogVGhlIGluZm9y
-bWF0aW9uIGNvbnRhaW5lZCBpbiB0aGlzIGVsZWN0cm9uaWMgbWFpbCBtZXNzYWdlIGlzIGludGVu
-ZGVkIG9ubHkgZm9yIHRoZSB1c2Ugb2YgdGhlIGRlc2lnbmF0ZWQgcmVjaXBpZW50KHMpIG5hbWVk
-IGFib3ZlLiBJZiB0aGUgcmVhZGVyIG9mIHRoaXMgbWVzc2FnZSBpcyBub3QgdGhlIGludGVuZGVk
-IHJlY2lwaWVudCwgeW91IGFyZSBoZXJlYnkgbm90aWZpZWQgdGhhdCB5b3UgaGF2ZSByZWNlaXZl
-ZCB0aGlzIG1lc3NhZ2UgaW4gZXJyb3IgYW5kIHRoYXQgYW55IHJldmlldywgZGlzc2VtaW5hdGlv
-biwgZGlzdHJpYnV0aW9uLCBvciBjb3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBpcyBzdHJpY3RseSBw
-cm9oaWJpdGVkLiBJZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGNvbW11bmljYXRpb24gaW4gZXJy
-b3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlciBieSB0ZWxlcGhvbmUgb3IgZS1tYWlsIChhcyBz
-aG93biBhYm92ZSkgaW1tZWRpYXRlbHkgYW5kIGRlc3Ryb3kgYW55IGFuZCBhbGwgY29waWVzIG9m
-IHRoaXMgbWVzc2FnZSBpbiB5b3VyIHBvc3Nlc3Npb24gKHdoZXRoZXIgaGFyZCBjb3BpZXMgb3Ig
-ZWxlY3Ryb25pY2FsbHkgc3RvcmVkIGNvcGllcykuDQoNCg==
+Hello Cephers,
+Recently we observed a couple of inconsistencies in our Ceph cluster, there were two major patterns leading to inconsistency as I observed: 1) EIO to read the file, 2) the digest is inconsistent (for EC) even there is no read error).
+
+While ceph has built-in tool sets to repair the inconsistencies, I also would like to check with the community in terms of what is the best ways to handle such issues (e.g. should we run fsck / xfs_repair when such issue happens).
+
+In more details, I have the following questions:
+1. When there is inconsistency detected, what is the chance there is some hardware issues which need to be repaired physically, or should I run some disk/filesystem tools to further check?
+2. Should we use fsck / xfs_repair to fix the inconsistencies, or should we solely relay on Ceph's repair tool sets?
+
+It would be great to hear you experience and suggestions.
+
+BTW, we are using XFS in the cluster.
+
+Thanks,
+Guang 		 	   		  
