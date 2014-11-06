@@ -1,27 +1,64 @@
-From: xinxin shu <xinxin.shu5040@gmail.com>
-Subject: ceph osd start process
-Date: Thu, 6 Nov 2014 15:09:24 +0800
-Message-ID: <CAF7cUg1A_k1rtR41Ps27TftGHd7dLDrQ-QqEg+1T1Xagaa7FsQ@mail.gmail.com>
+From: pushpesh sharma <pushpesh.eck-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: READ Performance Comparison Native Swift VS Ceph-RGW
+Date: Thu, 6 Nov 2014 13:05:05 +0530
+Message-ID: <CAMc8nAXwSx+T6=Ri3EX4A0YOWgTxKT8E22UUDMuQ-F2XB5dcqA@mail.gmail.com>
 Mime-Version: 1.0
+Content-Type: multipart/mixed; boundary="===============0859956706=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
+
+--===============0859956706==
+Content-Type: multipart/alternative; boundary=089e013c6b822e1afd05072bbcae
+
+--089e013c6b822e1afd05072bbcae
 Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yh0-f45.google.com ([209.85.213.45]:61226 "EHLO
-	mail-yh0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751144AbaKFHJp (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Nov 2014 02:09:45 -0500
-Received: by mail-yh0-f45.google.com with SMTP id f10so1110416yha.32
-        for <ceph-devel@vger.kernel.org>; Wed, 05 Nov 2014 23:09:44 -0800 (PST)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
 
-hi all ,
+Hi List,
 
-i want to find out how ceph osd daemon start , first i use "mkcephfs"
-to initialize the osd data directory , i found that there are some
-files and directories (commit_op_seq  meta  nosnap  omap) in current
-directory ,  but no pg directories , then i start ceph osd daemon , pg
-directories are created , but i do not know when and where these pg
-directories are created , can someone tell more details about how
-these pg are created and where i can locate the code of pg creation?
-any tips will be appreciated.
+I recently concluded a study
+<http://pushpeshsharma.blogspot.in/2014/11/openstack-swift-vs-ceph-rgw-read.html>
+on the $subject, I am looking forward for reviews and feedback to improve
+Ceph RGW numbers.
+
+-- 
+-Pushpesh
+
+--089e013c6b822e1afd05072bbcae
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><span style=3D"font-family:arial,sans-serif;font-size:13px=
+">Hi List,</span><div style=3D"font-family:arial,sans-serif;font-size:13px"=
+><br></div><div style=3D"font-family:arial,sans-serif;font-size:13px">I rec=
+ently concluded <a href=3D"http://pushpeshsharma.blogspot.in/2014/11/openst=
+ack-swift-vs-ceph-rgw-read.html">a study</a> on the $subject, I am looking =
+forward for reviews and feedback to improve Ceph RGW numbers.=C2=A0</div><d=
+iv style=3D"font-family:arial,sans-serif;font-size:13px"><br></div><div>--=
+=C2=A0<br></div><div class=3D"gmail_signature"><div dir=3D"ltr">-Pushpesh<b=
+r><br></div></div>
+</div>
+
+--089e013c6b822e1afd05072bbcae--
+
+--===============0859956706==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============0859956706==--
