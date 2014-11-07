@@ -1,56 +1,68 @@
-From: Luis Pabon <lpabon@redhat.com>
-Subject: Re: Open source SPC-1 Workload IO Pattern
-Date: Fri, 7 Nov 2014 08:37:34 -0500 (EST)
-Message-ID: <81FF9B5C-9B7D-4BC4-AB06-D7BF9F9748FE@redhat.com>
-References: <545CA6A4.2070104@redhat.com> <545CC0D6.50208@redhat.com>
+From: Mark Nelson <mark.nelson@inktank.com>
+Subject: Re: =?UTF-8?B?zpluc3RydW1lbnRpbmcgUkFET1Mgd2l0aCBaaXBraW4gKyBMVFQ=?=
+ =?UTF-8?B?bmc=?=
+Date: Fri, 07 Nov 2014 08:18:42 -0600
+Message-ID: <545CD4C2.5030408@redhat.com>
+References: <20141030184938.GA10197@radon.localdomain>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset=utf-8
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx6-phx2.redhat.com ([209.132.183.39]:40431 "EHLO
-	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751425AbaKGNhg (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Nov 2014 08:37:36 -0500
-In-Reply-To: <545CC0D6.50208@redhat.com>
+Received: from mail-ig0-f171.google.com ([209.85.213.171]:54349 "EHLO
+	mail-ig0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751880AbaKGOSo (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Nov 2014 09:18:44 -0500
+Received: by mail-ig0-f171.google.com with SMTP id hl2so12763548igb.4
+        for <ceph-devel@vger.kernel.org>; Fri, 07 Nov 2014 06:18:43 -0800 (PST)
+In-Reply-To: <20141030184938.GA10197@radon.localdomain>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mark.nelson@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Gluster Devel <gluster-devel@gluster.org>
+To: Andrew Shewmaker <agshew@gmail.com>, ceph-devel@vger.kernel.org
 
-DQoNCg0KDQo+IE9uIE5vdiA3LCAyMDE0LCBhdCAxOjUzIFBNLCBNYXJrIE5lbHNvbiA8bWFyay5u
-ZWxzb25AaW5rdGFuay5jb20+IHdyb3RlOg0KPiANCj4+IE9uIDExLzA3LzIwMTQgMDU6MDEgQU0s
-IEx1aXMgUGFiw7NuIHdyb3RlOg0KPj4gSGkgZ3V5cywNCj4+IEkgY3JlYXRlZCBhIHNpbXBsZSB0
-ZXN0IHByb2dyYW0gdG8gdmlzdWFsaXplIHRoZSBJL08gcGF0dGVybiBvZiBOZXRBcHDigJlzDQo+
-PiBvcGVuIHNvdXJjZSBzcGMtMSB3b3JrbG9hZCBnZW5lcmF0b3IuIFNQQy0xIGlzIGFuIGVudGVy
-cHJpc2UgT0xUUCB0eXBlDQo+PiB3b3JrbG9hZCBjcmVhdGVkIGJ5IHRoZSBTdG9yYWdlIFBlcmZv
-cm1hbmNlIENvdW5jaWwNCj4+IChodHRwOi8vd3d3LnN0b3JhZ2VwZXJmb3JtYW5jZS5vcmcvcmVz
-dWx0cykuICBTb21lIG9mIHRoZSByZXN1bHRzIGFyZQ0KPj4gcHVibGlzaGVkIGFuZCBhdmFpbGFi
-bGUgaGVyZToNCj4+IGh0dHA6Ly93d3cuc3RvcmFnZXBlcmZvcm1hbmNlLm9yZy9yZXN1bHRzL2Jl
-bmNobWFya19yZXN1bHRzX3NwYzFfYWN0aXZlIC4NCj4+IA0KPj4gTmV0QXBwIGNyZWF0ZWQgYW4g
-b3BlbiBzb3VyY2UgdmVyc2lvbiBvZiB0aGlzIHdvcmtsb2FkIGFuZCBkZXNjcmliZWQgaXQNCj4+
-IGluIHRoZWlyIHB1YmxpY2F0aW9uICJBIHBvcnRhYmxlLCBvcGVuLXNvdXJjZSBpbXBsZW1lbnRh
-dGlvbiBvZiB0aGUNCj4+IFNQQy0xIHdvcmtsb2FkIiAoDQo+PiBodHRwOi8vd3d3My5scmdsLnVx
-YW0uY2EvY3NkbC9wcm9jZWVkaW5ncy9paXN3Yy8yMDA1Lzk0NjEvMDAvMDE1MjYwMTQucGRmICkN
-Cj4+IA0KPj4gVGhlIGNvZGUgaXMgYXZhaWxhYmxlIG9uR2l0aHViOiBodHRwczovL2dpdGh1Yi5j
-b20vbHBhYm9uL3NwYzEgLiAgQWxsIGl0DQo+PiBkb2VzIGF0IHRoZSBtb21lbnQgaXMgY2FwdHVy
-ZSB0aGUgcGF0dGVybiwgbm8gcmVhbCBJTyBpcyBnZW5lcmF0ZWQuIEkNCj4+IHdpbGwgYmUgd29y
-a2luZyBvbiBhIGNvbW1hbmQgbGluZSBwcm9ncmFtIHRvIGVuYWJsZSB1c2FnZSBvbiByZWFsIGJs
-b2NrDQo+PiBzdG9yYWdlIHN5c3RlbXMuICBJIG1heSBlaXRoZXIgZXh0ZW5kIGZpbyBvciBjcmVh
-dGUgYSB0b29sIHNwZWNpZmljYWxseQ0KPj4gdGFpbG9yZWQgdG8gdGhlIHJlcXVpcmVtZW50cyBu
-ZWVkZWQgdG8gcnVuIHRoaXMgd29ya2xvYWQuDQo+IA0KPiBOZWF0ISAgaW50ZWdyYXRpb24gd2l0
-aCBmaW8gY291bGQgYmUgaW50ZXJlc3RpbmcuICBXZSBjb3VsZCB0aGVuIHVzZSBhbnkgb2YgdGhl
-IGVuZ2luZXMgaW5jbHVkZSB0aGUgbGlicmJkIG9uZSAoSSB0aGluayB0aGVyZSBpcyBzb21lIGtp
-bmQgb2YgZ2x1c3RlciBlbmdpbmUgYXMgd2VsbD8pDQoNCkdvb2QgcG9pbnQuDQoNCj4gDQo+PiAN
-Cj4+IE9uIGdpdGh1YiwgSSBoYXZlIGFuIGV4YW1wbGUgSU8gcGF0dGVybiBmb3IgYSBzaW11bGF0
-aW9uIHJ1bm5pbmcgNTAgbWlsDQo+PiBJT3MgdXNpbmcgSFJSV19WMi4gVGhlIHNpbXVsYXRpb24g
-cmFuIHdpdGggYW4gQVNVMSAoRGF0YSBTdG9yZSkgc2l6ZSBvZg0KPj4gNDVHQiwgQVNVMiAoVXNl
-ciBTdG9yZSkgc2l6ZSBvZiA0NUdCLCBhbmQgQVNVMyAoTG9nKSBzaXplIG9mIDEwR0IuDQo+IA0K
-PiBPdXQgb2YgY3VyaW9zaXR5IGhhdmUgeW91IGxvb2tlZCBhdCBob3cgZmFzdCB5b3UgY2FuIGdl
-bmVyYXRlIElPcyBiZWZvcmUgQ1BVIGlzIGEgYm90dGxlbmVjaz8NCg0KR29vZCBxdWVzdGlvbiwg
-SSB3aWxsIGNoZWNrIHRoYXQgd2hlbiBpIGhhdmUgdGhlIGlvIHRvb2wgZ2VuZXJhdGlvbi4gDQoN
-Cj4gDQo+PiANCj4+IC0gTHVpcw0KPj4gDQo+PiAtLQ0KPj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0
-aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluDQo+PiB0
-aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZw0KPj4gTW9y
-ZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5m
-by5odG1sDQo+IA0K
+On 10/30/2014 01:49 PM, Andrew Shewmaker wrote:
+> Hi everyone,
+>
+> I'm Andrew, a new Ceph intern, and I'll be working to get Marios'
+> Zipkin + LTTng repo into a merge-able state, as Sam asked about
+> (http://www.spinics.net/lists/ceph-devel/msg20024.html).
+>
+> I've exchanged email with Marios, and he is interested in
+> helping me with it in his spare time. One of the important
+> things he mentioned is that his blkin library only works
+> with LTTng 2.4. Other versions experience deadlocks, and
+> he'll work to resolve them in 2.5.
+>
+> I'm still working on getting a ceph development environment
+> set up, so I haven't tested the tracepoints Marios added.
+> I have built an RPM spec file for blkin, tested it against
+> lttng-ust 2.3 and 2.4, and built (but not tested) Marios'
+> ceph branch.
+>
+> Should I put effort into adding a "--with-blkin" or "--with-zipkin"
+> option to autoconf?
+>
+> I've made a first attempt at dividing the changes into
+> logically grouped patches: common blkin infrastructure,
+> osd, and rados. Does that sound reasonable? Or should
+> I not bother separating osd and rados changes?
+>
+> I saw a couple instances of extraneous whitespace/newlines
+> I'll clean up. What other issues should I look for?
+>
+> After they're cleaned up, would it be best for me to submit these
+> patches to the list, or just point to a github repo?
+>
+> Thanks,
+>
+> Andrew Shewmaker
+
+Just wanted to say I'm really looking forward to this. :)
+
+Mark
+
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+
