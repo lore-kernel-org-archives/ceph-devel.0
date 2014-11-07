@@ -1,91 +1,40 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: erasure code software and papers and swift
-Date: Fri, 07 Nov 2014 04:08:41 +0100
-Message-ID: <545C37B9.9000505@dachary.org>
+From: "Xue, Chendi" <chendi.xue@intel.com>
+Subject: KeyValueStore: Some bug fixing in KeyValueStore prevent osd runtime
+ crash #2875
+Date: Fri, 7 Nov 2014 03:17:25 +0000
+Message-ID: <C8CF870384EBCF4CAB89D2041A5C80B30119DCC8@SHSMSX101.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="qqb6VqM93DX1jQFToB48XwaOBUssWlEmj"
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:60754 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751142AbaKGDIu (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Nov 2014 22:08:50 -0500
+Received: from mga02.intel.com ([134.134.136.20]:64354 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751160AbaKGDTZ convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Nov 2014 22:19:25 -0500
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
-Cc: Kevin Greenan <kmgreen2@gmail.com>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---qqb6VqM93DX1jQFToB48XwaOBUssWlEmj
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Hi, all
 
-Hi Ceph,
+There is a small bug fixing in KeyValueStore to prevent osd crash
 
-For the record, here are a few erasure code related links (thanks Kevin :=
--),=20
+When run random write 4k test on rbd with KeyValueStore backend, random osd crashes, and ceph-osd.log shows a segmentation fault which caused by multi threads updating the strip_header->buffers, so add mutex here
 
-   https://bitbucket.org/tsg-/liberasurecode/
-   liberasurecode is an Erasure Code API library written in C with plugga=
-ble Erasure Code backends.
+Another problem is after running pretty long time, osd being killed by os due to OOM, which is also caused by there is no eviction mechanism in strip_header->buffers, so add a option in config_opts.h to turn strip_header->buffers off by default
 
-the first commit is dated back april 2014 but its content suggests develo=
-pment happened elsewhere before that.=20
+I saw slight performance drop when turn off the strip_header->buffers in a short time test( for I can't run a long time test due to osd will crash ), so does the strip_header->buffers necessary? If so, can I add a random cache mechanism on that? 
 
-It is the equivalent of a standalone=20
+===========================
+KeyValueStore: 
+Add mutex when update strip_header->buffers to avoid segmentation fault
+Add option in config_opts.h to turn on/off strip_header->buffers to prevent OOM
 
-    https://github.com/ceph/ceph/tree/master/src/erasure-code
-
-Only with dynamically loaded jerasure/isa instead of an embedded copy. Th=
-e idea of an external general purpose erasure code library is appealing. =
-It would lower the maintenance effort, among other things. It's nice to s=
-ee that Ceph is listed as a contributor in the readme. There is no commit=
- to date in the liberasurecode library itself but that can be fixed ;-)
-
-liberasurecode is already used as a dependency of https://bitbucket.org/k=
-mgreen2/pyeclib , the library swift depends on for erasure coded storage =
-policies.
-
-And some interesting papers:
-
-    Simple Regenerating Codes: http://arxiv.org/pdf/1109.0264v1.pdf
-
-    LT Codes: http://en.wikipedia.org/wiki/Luby_transform_code
-
-    Rateless codes and downloads: http://www.iptps.org/papers-2003/ratele=
-ss_codes.pdf
-
-Yesterday I attended Paul Luse presentation of the erasure code implement=
-ation in swift and it was enlightening. Very much like Samuel Just did in=
- Ceph when he introduced the Placement Groups backends, Paul worked on Sw=
-ift Storage Policies to make room for erasure coded "rings" (pools in the=
- swift parlance, if I'm not mistaken).
-
-http://docs-draft.openstack.org/90/125190/8/gate/gate-swift-specs-docs/2d=
-2cf67/doc/build/html/specs/swift/erasure_coding.html
-
-It looks like erasure code will be available in swift soon and the hard p=
-art of the work is complete.
-
-Cheers
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
+The pull request : https://github.com/ceph/ceph/pull/2875#issue-48042745
 
 
---qqb6VqM93DX1jQFToB48XwaOBUssWlEmj
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+Best Regards,
+-Chendi
 
-iEYEARECAAYFAlRcN7kACgkQ8dLMyEl6F23SewCfZ8jy/UAHIjRWdzo/eV9ebzbH
-B50An2HeCI0b31M9x+vx9788F1FaYPHv
-=JJ+5
------END PGP SIGNATURE-----
-
---qqb6VqM93DX1jQFToB48XwaOBUssWlEmj--
