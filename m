@@ -1,40 +1,52 @@
-From: "Xue, Chendi" <chendi.xue@intel.com>
-Subject: KeyValueStore: Some bug fixing in KeyValueStore prevent osd runtime
- crash #2875
-Date: Fri, 7 Nov 2014 03:17:25 +0000
-Message-ID: <C8CF870384EBCF4CAB89D2041A5C80B30119DCC8@SHSMSX101.ccr.corp.intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+From: Anton Altaparmakov <aia21-KWPb1pKIrIJaa/9Udqfwiw@public.gmane.org>
+Subject: Re: [PATCH v5 7/7] add a flag for per-operation O_DSYNC semantics
+Date: Fri, 7 Nov 2014 06:22:48 +0200
+Message-ID: <BF30FAEC-D4D3-4079-9ECD-2743747279BD@cam.ac.uk>
+References: <cover.1415220890.git.milosz@adfin.com> <cover.1415220890.git.milosz@adfin.com> <c188b04ede700ce5f986b19de12fa617d158540f.1415220890.git.milosz@adfin.com> <x49r3xf28qn.fsf@segfault.boston.devel.redhat.com>
+Mime-Version: 1.0 (Mac OS X Mail 8.0 \(1990.1\))
+Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 8BIT
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:64354 "EHLO mga02.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751160AbaKGDTZ convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Nov 2014 22:19:25 -0500
-Content-Language: en-US
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Return-path: <linux-api-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <x49r3xf28qn.fsf-RRHT56Q3PSP4kTEheFKJxxDDeQx5vsVwAInAS/Ez/D0@public.gmane.org>
+Sender: linux-api-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Jeff Moyer <jmoyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Milosz Tanski <milosz-B5zB6C1i6pkAvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>, Christoph Hellwig <hch-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-aio-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Mel Gorman <mgorman-l3A5Bk7waGM@public.gmane.org>, Volker Lendecke <Volker.Lendecke-3ekOc4rQMZmzQB+pC5nmwQ@public.gmane.org>, Tejun Heo <tj-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Theodore Ts'o <tytso-3s7WtUTddSA@public.gmane.org>, Al Viro <viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org>, linux-api-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Michael Kerrisk <mtk.manpages-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, fuse-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ocfs2-devel-N0ozoZBvEnrZJqsBc5GL+g@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-Hi, all
+Hi Jeff,
 
-There is a small bug fixing in KeyValueStore to prevent osd crash
+> On 7 Nov 2014, at 01:46, Jeff Moyer <jmoyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+> 
+> Milosz Tanski <milosz-B5zB6C1i6pkAvxtiuMwx3w@public.gmane.org> writes:
+> 
+>> -		if (type == READ && (flags & RWF_NONBLOCK))
+>> -			return -EAGAIN;
+>> +		if (type == READ) {
+>> +			if (flags & RWF_NONBLOCK)
+>> +				return -EAGAIN;
+>> +		} else {
+>> +			if (flags & RWF_DSYNC)
+>> +				return -EINVAL;
+>> +		}
+> 
+> Minor nit, but I'd rather read something that looks like this:
+> 
+> 	if (type == READ && (flags & RWF_NONBLOCK))
+> 		return -EAGAIN;
+> 	else if (type == WRITE && (flags & RWF_DSYNC))
+> 		return -EINVAL;
 
-When run random write 4k test on rbd with KeyValueStore backend, random osd crashes, and ceph-osd.log shows a segmentation fault which caused by multi threads updating the strip_header->buffers, so add mutex here
+But your version is less logically efficient for the case where "type == READ" is true and "flags & RWF_NONBLOCK" is false because your version then has to do the "if (type == WRITE" check before discovering it does not need to take that branch either, whilst the original version does not have to do such a test at all.
 
-Another problem is after running pretty long time, osd being killed by os due to OOM, which is also caused by there is no eviction mechanism in strip_header->buffers, so add a option in config_opts.h to turn strip_header->buffers off by default
+Best regards,
 
-I saw slight performance drop when turn off the strip_header->buffers in a short time test( for I can't run a long time test due to osd will crash ), so does the strip_header->buffers necessary? If so, can I add a random cache mechanism on that? 
+	Anton
 
-===========================
-KeyValueStore: 
-Add mutex when update strip_header->buffers to avoid segmentation fault
-Add option in config_opts.h to turn on/off strip_header->buffers to prevent OOM
+> I won't lose sleep over it, though.
+> 
+> Reviewed-by: Jeff Moyer <jmoyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 
-The pull request : https://github.com/ceph/ceph/pull/2875#issue-48042745
-
-
-
-Best Regards,
--Chendi
-
+-- 
+Anton Altaparmakov <aia21 at cam.ac.uk> (replace at with @)
+University of Cambridge Information Services, Roger Needham Building
+7 JJ Thomson Avenue, Cambridge, CB3 0RB, UK
