@@ -1,68 +1,85 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: =?UTF-8?B?zpluc3RydW1lbnRpbmcgUkFET1Mgd2l0aCBaaXBraW4gKyBMVFQ=?=
- =?UTF-8?B?bmc=?=
-Date: Fri, 07 Nov 2014 08:18:42 -0600
-Message-ID: <545CD4C2.5030408@redhat.com>
-References: <20141030184938.GA10197@radon.localdomain>
+From: Roger Willcocks <roger@filmlight.ltd.uk>
+Subject: Re: [fuse-devel] [PATCH v5 7/7] add a flag for per-operation
+	O_DSYNC semantics
+Date: Fri, 07 Nov 2014 14:21:18 +0000
+Message-ID: <1415370078.11083.511.camel@montana.filmlight.ltd.uk>
+References: <cover.1415220890.git.milosz@adfin.com>
+	 <c188b04ede700ce5f986b19de12fa617d158540f.1415220890.git.milosz@adfin.com>
+	 <x49r3xf28qn.fsf@segfault.boston.devel.redhat.com>
+	 <BF30FAEC-D4D3-4079-9ECD-2743747279BD@cam.ac.uk>
+	 <CAFboF2y2skt=H4crv54shfnXOmz23W-shYWtHWekK8ZUDkfP=A@mail.gmail.com>
+	 <B92AEADD-B22C-4A4A-B64D-96E8869D3282@cam.ac.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Type: text/plain
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f171.google.com ([209.85.213.171]:54349 "EHLO
-	mail-ig0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751880AbaKGOSo (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Nov 2014 09:18:44 -0500
-Received: by mail-ig0-f171.google.com with SMTP id hl2so12763548igb.4
-        for <ceph-devel@vger.kernel.org>; Fri, 07 Nov 2014 06:18:43 -0800 (PST)
-In-Reply-To: <20141030184938.GA10197@radon.localdomain>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Andrew Shewmaker <agshew@gmail.com>, ceph-devel@vger.kernel.org
+Return-path: <owner-linux-aio@kvack.org>
+In-Reply-To: <B92AEADD-B22C-4A4A-B64D-96E8869D3282@cam.ac.uk>
+Sender: owner-linux-aio@kvack.org
+To: Anton Altaparmakov <aia21@cam.ac.uk>
+Cc: Anand Avati <avati@gluster.org>, linux-arch@vger.kernel.org, linux-aio@kvack.org, linux-nfs@vger.kernel.org, Volker Lendecke <Volker.Lendecke@sernet.de>, Theodore Ts'o <tytso@mit.edu>, Mel Gorman <mgorman@suse.de>, "fuse-devel@lists.sourceforge.net" <fuse-devel@lists.sourceforge.net>, linux-api@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Michael Kerrisk <mtk.manpages@gmail.com>, Christoph Hellwig <hch@infradead.org>, linux-mm@kvack.org, Jeff Moyer <jmoyer@redhat.com>, Al Viro <viro@zeniv.linux.org.uk>, Tejun Heo <tj@kernel.org>, linux-fsdevel@vger.kernel.org, ceph-devel@vger.kernel.org, Christoph Hellwig <hch@lst.de>, ocfs2-devel@oss.oracle.com, Milosz Tanski <milosz@adfin.com>
+List-Id: ceph-devel.vger.kernel.org
 
-On 10/30/2014 01:49 PM, Andrew Shewmaker wrote:
-> Hi everyone,
->
-> I'm Andrew, a new Ceph intern, and I'll be working to get Marios'
-> Zipkin + LTTng repo into a merge-able state, as Sam asked about
-> (http://www.spinics.net/lists/ceph-devel/msg20024.html).
->
-> I've exchanged email with Marios, and he is interested in
-> helping me with it in his spare time. One of the important
-> things he mentioned is that his blkin library only works
-> with LTTng 2.4. Other versions experience deadlocks, and
-> he'll work to resolve them in 2.5.
->
-> I'm still working on getting a ceph development environment
-> set up, so I haven't tested the tracepoints Marios added.
-> I have built an RPM spec file for blkin, tested it against
-> lttng-ust 2.3 and 2.4, and built (but not tested) Marios'
-> ceph branch.
->
-> Should I put effort into adding a "--with-blkin" or "--with-zipkin"
-> option to autoconf?
->
-> I've made a first attempt at dividing the changes into
-> logically grouped patches: common blkin infrastructure,
-> osd, and rados. Does that sound reasonable? Or should
-> I not bother separating osd and rados changes?
->
-> I saw a couple instances of extraneous whitespace/newlines
-> I'll clean up. What other issues should I look for?
->
-> After they're cleaned up, would it be best for me to submit these
-> patches to the list, or just point to a github repo?
->
-> Thanks,
->
-> Andrew Shewmaker
 
-Just wanted to say I'm really looking forward to this. :)
+On Fri, 2014-11-07 at 08:43 +0200, Anton Altaparmakov wrote:
+> Hi,
+> 
+> > On 7 Nov 2014, at 07:52, Anand Avati <avati@gluster.org> wrote:
+> > On Thu, Nov 6, 2014 at 8:22 PM, Anton Altaparmakov <aia21@cam.ac.uk> wrote:
+> > > On 7 Nov 2014, at 01:46, Jeff Moyer <jmoyer@redhat.com> wrote:
+> > > Minor nit, but I'd rather read something that looks like this:
+> > >
+> > >       if (type == READ && (flags & RWF_NONBLOCK))
+> > >               return -EAGAIN;
+> > >       else if (type == WRITE && (flags & RWF_DSYNC))
+> > >               return -EINVAL;
+> > 
+> > But your version is less logically efficient for the case where "type == READ" is true and "flags & RWF_NONBLOCK" is false because your version then has to do the "if (type == WRITE" check before discovering it does not need to take that branch either, whilst the original version does not have to do such a test at all.
+> > 
+> > Seriously?
+> 
+> Of course seriously.
+> 
+> > Just focus on the code readability/maintainability which makes the code most easily understood/obvious to a new pair of eyes, and leave such micro-optimizations to the compiler..
+> 
+> The original version is more readable (IMO) and this is not a micro-optimization.  It is people like you who are responsible for the fact that we need faster and faster computers to cope with the inefficient/poor code being written more and more...
+> 
 
-Mark
+Your original version needs me to know that type can only be either READ
+or WRITE (and not, for instance, READONLY or READWRITE or some other
+random special case) and it rings alarm bells when I first see it. If
+you want to keep the micro optimization, you need an assertion to
+acknowledge the potential bug and a comment to make the code obvious:
 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+ +            assert(type == READ || type == WRITE);
+ +            if (type == READ) {
+ +                    if (flags & RWF_NONBLOCK)
+ +                            return -EAGAIN;
+ +            } else { /* WRITE */
+ +                    if (flags & RWF_DSYNC)
+ +                            return -EINVAL;
+ +            }
 
+but since what's really happening here is two separate and independent
+error checks, Jeff's version is still better, even if it does take an
+extra couple of nanoseconds.
+
+Actually I'd probably write:
+
+       if (type == READ && (flags & RWF_NONBLOCK))
+              return -EAGAIN;
+
+       if (type == WRITE && (flags & RWF_DSYNC))
+              return -EINVAL;
+
+(no 'else' since the code will never be reached if the first test is
+true).
+
+
+-- 
+Roger Willcocks <roger@filmlight.ltd.uk>
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-aio' in
+the body to majordomo@kvack.org.  For more info on Linux AIO,
+see: http://www.kvack.org/aio/
+Don't email: <a href=mailto:"aart@kvack.org">aart@kvack.org</a>
