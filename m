@@ -1,79 +1,56 @@
-From: Mark Nelson <mark.nelson@inktank.com>
+From: Luis Pabon <lpabon@redhat.com>
 Subject: Re: Open source SPC-1 Workload IO Pattern
-Date: Fri, 07 Nov 2014 06:53:42 -0600
-Message-ID: <545CC0D6.50208@redhat.com>
-References: <545CA6A4.2070104@redhat.com>
+Date: Fri, 7 Nov 2014 08:37:34 -0500 (EST)
+Message-ID: <81FF9B5C-9B7D-4BC4-AB06-D7BF9F9748FE@redhat.com>
+References: <545CA6A4.2070104@redhat.com> <545CC0D6.50208@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain;
+	charset=utf-8
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f172.google.com ([209.85.223.172]:40837 "EHLO
-	mail-ie0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751660AbaKGMxo (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Nov 2014 07:53:44 -0500
-Received: by mail-ie0-f172.google.com with SMTP id at20so5123534iec.3
-        for <ceph-devel@vger.kernel.org>; Fri, 07 Nov 2014 04:53:44 -0800 (PST)
-In-Reply-To: <545CA6A4.2070104@redhat.com>
+Received: from mx6-phx2.redhat.com ([209.132.183.39]:40431 "EHLO
+	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751425AbaKGNhg (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Nov 2014 08:37:36 -0500
+In-Reply-To: <545CC0D6.50208@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?B?THVpcyBQYWLDs24=?= <lpabon@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Gluster Devel <gluster-devel@gluster.org>
+To: Mark Nelson <mark.nelson@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Gluster Devel <gluster-devel@gluster.org>
 
-On 11/07/2014 05:01 AM, Luis Pab=C3=B3n wrote:
-> Hi guys,
-> I created a simple test program to visualize the I/O pattern of NetAp=
-p=E2=80=99s
-> open source spc-1 workload generator. SPC-1 is an enterprise OLTP typ=
-e
-> workload created by the Storage Performance Council
-> (http://www.storageperformance.org/results).  Some of the results are
-> published and available here:
-> http://www.storageperformance.org/results/benchmark_results_spc1_acti=
-ve .
->
-> NetApp created an open source version of this workload and described =
-it
-> in their publication "A portable, open-source implementation of the
-> SPC-1 workload" (
-> http://www3.lrgl.uqam.ca/csdl/proceedings/iiswc/2005/9461/00/01526014=
-=2Epdf )
->
-> The code is available onGithub: https://github.com/lpabon/spc1 .  All=
- it
-> does at the moment is capture the pattern, no real IO is generated. I
-> will be working on a command line program to enable usage on real blo=
-ck
-> storage systems.  I may either extend fio or create a tool specifical=
-ly
-> tailored to the requirements needed to run this workload.
-
-Neat!  integration with fio could be interesting.  We could then use an=
-y=20
-of the engines include the librbd one (I think there is some kind of=20
-gluster engine as well?)
-
->
-> On github, I have an example IO pattern for a simulation running 50 m=
-il
-> IOs using HRRW_V2. The simulation ran with an ASU1 (Data Store) size =
-of
-> 45GB, ASU2 (User Store) size of 45GB, and ASU3 (Log) size of 10GB.
-
-Out of curiosity have you looked at how fast you can generate IOs befor=
-e=20
-CPU is a bottleneck?
-
->
-> - Luis
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+DQoNCg0KDQo+IE9uIE5vdiA3LCAyMDE0LCBhdCAxOjUzIFBNLCBNYXJrIE5lbHNvbiA8bWFyay5u
+ZWxzb25AaW5rdGFuay5jb20+IHdyb3RlOg0KPiANCj4+IE9uIDExLzA3LzIwMTQgMDU6MDEgQU0s
+IEx1aXMgUGFiw7NuIHdyb3RlOg0KPj4gSGkgZ3V5cywNCj4+IEkgY3JlYXRlZCBhIHNpbXBsZSB0
+ZXN0IHByb2dyYW0gdG8gdmlzdWFsaXplIHRoZSBJL08gcGF0dGVybiBvZiBOZXRBcHDigJlzDQo+
+PiBvcGVuIHNvdXJjZSBzcGMtMSB3b3JrbG9hZCBnZW5lcmF0b3IuIFNQQy0xIGlzIGFuIGVudGVy
+cHJpc2UgT0xUUCB0eXBlDQo+PiB3b3JrbG9hZCBjcmVhdGVkIGJ5IHRoZSBTdG9yYWdlIFBlcmZv
+cm1hbmNlIENvdW5jaWwNCj4+IChodHRwOi8vd3d3LnN0b3JhZ2VwZXJmb3JtYW5jZS5vcmcvcmVz
+dWx0cykuICBTb21lIG9mIHRoZSByZXN1bHRzIGFyZQ0KPj4gcHVibGlzaGVkIGFuZCBhdmFpbGFi
+bGUgaGVyZToNCj4+IGh0dHA6Ly93d3cuc3RvcmFnZXBlcmZvcm1hbmNlLm9yZy9yZXN1bHRzL2Jl
+bmNobWFya19yZXN1bHRzX3NwYzFfYWN0aXZlIC4NCj4+IA0KPj4gTmV0QXBwIGNyZWF0ZWQgYW4g
+b3BlbiBzb3VyY2UgdmVyc2lvbiBvZiB0aGlzIHdvcmtsb2FkIGFuZCBkZXNjcmliZWQgaXQNCj4+
+IGluIHRoZWlyIHB1YmxpY2F0aW9uICJBIHBvcnRhYmxlLCBvcGVuLXNvdXJjZSBpbXBsZW1lbnRh
+dGlvbiBvZiB0aGUNCj4+IFNQQy0xIHdvcmtsb2FkIiAoDQo+PiBodHRwOi8vd3d3My5scmdsLnVx
+YW0uY2EvY3NkbC9wcm9jZWVkaW5ncy9paXN3Yy8yMDA1Lzk0NjEvMDAvMDE1MjYwMTQucGRmICkN
+Cj4+IA0KPj4gVGhlIGNvZGUgaXMgYXZhaWxhYmxlIG9uR2l0aHViOiBodHRwczovL2dpdGh1Yi5j
+b20vbHBhYm9uL3NwYzEgLiAgQWxsIGl0DQo+PiBkb2VzIGF0IHRoZSBtb21lbnQgaXMgY2FwdHVy
+ZSB0aGUgcGF0dGVybiwgbm8gcmVhbCBJTyBpcyBnZW5lcmF0ZWQuIEkNCj4+IHdpbGwgYmUgd29y
+a2luZyBvbiBhIGNvbW1hbmQgbGluZSBwcm9ncmFtIHRvIGVuYWJsZSB1c2FnZSBvbiByZWFsIGJs
+b2NrDQo+PiBzdG9yYWdlIHN5c3RlbXMuICBJIG1heSBlaXRoZXIgZXh0ZW5kIGZpbyBvciBjcmVh
+dGUgYSB0b29sIHNwZWNpZmljYWxseQ0KPj4gdGFpbG9yZWQgdG8gdGhlIHJlcXVpcmVtZW50cyBu
+ZWVkZWQgdG8gcnVuIHRoaXMgd29ya2xvYWQuDQo+IA0KPiBOZWF0ISAgaW50ZWdyYXRpb24gd2l0
+aCBmaW8gY291bGQgYmUgaW50ZXJlc3RpbmcuICBXZSBjb3VsZCB0aGVuIHVzZSBhbnkgb2YgdGhl
+IGVuZ2luZXMgaW5jbHVkZSB0aGUgbGlicmJkIG9uZSAoSSB0aGluayB0aGVyZSBpcyBzb21lIGtp
+bmQgb2YgZ2x1c3RlciBlbmdpbmUgYXMgd2VsbD8pDQoNCkdvb2QgcG9pbnQuDQoNCj4gDQo+PiAN
+Cj4+IE9uIGdpdGh1YiwgSSBoYXZlIGFuIGV4YW1wbGUgSU8gcGF0dGVybiBmb3IgYSBzaW11bGF0
+aW9uIHJ1bm5pbmcgNTAgbWlsDQo+PiBJT3MgdXNpbmcgSFJSV19WMi4gVGhlIHNpbXVsYXRpb24g
+cmFuIHdpdGggYW4gQVNVMSAoRGF0YSBTdG9yZSkgc2l6ZSBvZg0KPj4gNDVHQiwgQVNVMiAoVXNl
+ciBTdG9yZSkgc2l6ZSBvZiA0NUdCLCBhbmQgQVNVMyAoTG9nKSBzaXplIG9mIDEwR0IuDQo+IA0K
+PiBPdXQgb2YgY3VyaW9zaXR5IGhhdmUgeW91IGxvb2tlZCBhdCBob3cgZmFzdCB5b3UgY2FuIGdl
+bmVyYXRlIElPcyBiZWZvcmUgQ1BVIGlzIGEgYm90dGxlbmVjaz8NCg0KR29vZCBxdWVzdGlvbiwg
+SSB3aWxsIGNoZWNrIHRoYXQgd2hlbiBpIGhhdmUgdGhlIGlvIHRvb2wgZ2VuZXJhdGlvbi4gDQoN
+Cj4gDQo+PiANCj4+IC0gTHVpcw0KPj4gDQo+PiAtLQ0KPj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0
+aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluDQo+PiB0
+aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZw0KPj4gTW9y
+ZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5m
+by5odG1sDQo+IA0K
