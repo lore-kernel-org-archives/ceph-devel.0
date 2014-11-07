@@ -1,54 +1,91 @@
-From: xinxin shu <xinxin.shu5040@gmail.com>
-Subject: Re: ceph osd start process
-Date: Fri, 7 Nov 2014 08:38:42 +0800
-Message-ID: <CAF7cUg1GG_CLy_AN6ztDFpMYtWGhwg9r1O-2J0DuA221ZJcP=A@mail.gmail.com>
-References: <CAF7cUg1A_k1rtR41Ps27TftGHd7dLDrQ-QqEg+1T1Xagaa7FsQ@mail.gmail.com>
- <085BC98701B92B4C86AE7696562D284D0B993353@SACMBXIP03.sdcorp.global.sandisk.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: erasure code software and papers and swift
+Date: Fri, 07 Nov 2014 04:08:41 +0100
+Message-ID: <545C37B9.9000505@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="qqb6VqM93DX1jQFToB48XwaOBUssWlEmj"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yh0-f41.google.com ([209.85.213.41]:52684 "EHLO
-	mail-yh0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750846AbaKGAjE convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Nov 2014 19:39:04 -0500
-Received: by mail-yh0-f41.google.com with SMTP id i57so760902yha.28
-        for <ceph-devel@vger.kernel.org>; Thu, 06 Nov 2014 16:39:02 -0800 (PST)
-In-Reply-To: <085BC98701B92B4C86AE7696562D284D0B993353@SACMBXIP03.sdcorp.global.sandisk.com>
+Received: from mail2.dachary.org ([91.121.57.175]:60754 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751142AbaKGDIu (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Nov 2014 22:08:50 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Vijayendra Shamanna <Vijayendra.Shamanna@sandisk.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
+Cc: Kevin Greenan <kmgreen2@gmail.com>
 
-thanks for your reply , but there are some records in leveldb , such
-as pglog info , pg epoch and so on , i also want to when and where
-ceph gererates these records?
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--qqb6VqM93DX1jQFToB48XwaOBUssWlEmj
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-2014-11-06 15:47 GMT+08:00 Vijayendra Shamanna
-<Vijayendra.Shamanna@sandisk.com>:
-> Hi,
->
-> You can refer to "_create_collection", which is invoked from  OP_MKCOLL transaction opcode (FileStore.cc) context for the file store backend.
->
-> Thanks,
-> Viju
->
->
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of xinxin shu
-> Sent: Thursday, November 06, 2014 12:39 PM
-> To: ceph-devel@vger.kernel.org
-> Subject: ceph osd start process
->
-> hi all ,
->
-> i want to find out how ceph osd daemon start , first i use "mkcephfs"
-> to initialize the osd data directory , i found that there are some files and directories (commit_op_seq  meta  nosnap  omap) in current directory ,  but no pg directories , then i start ceph osd daemon , pg directories are created , but i do not know when and where these pg directories are created , can someone tell more details about how these pg are created and where i can locate the code of pg creation?
-> any tips will be appreciated.
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-> ________________________________
->
-> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
->
+Hi Ceph,
+
+For the record, here are a few erasure code related links (thanks Kevin :=
+-),=20
+
+   https://bitbucket.org/tsg-/liberasurecode/
+   liberasurecode is an Erasure Code API library written in C with plugga=
+ble Erasure Code backends.
+
+the first commit is dated back april 2014 but its content suggests develo=
+pment happened elsewhere before that.=20
+
+It is the equivalent of a standalone=20
+
+    https://github.com/ceph/ceph/tree/master/src/erasure-code
+
+Only with dynamically loaded jerasure/isa instead of an embedded copy. Th=
+e idea of an external general purpose erasure code library is appealing. =
+It would lower the maintenance effort, among other things. It's nice to s=
+ee that Ceph is listed as a contributor in the readme. There is no commit=
+ to date in the liberasurecode library itself but that can be fixed ;-)
+
+liberasurecode is already used as a dependency of https://bitbucket.org/k=
+mgreen2/pyeclib , the library swift depends on for erasure coded storage =
+policies.
+
+And some interesting papers:
+
+    Simple Regenerating Codes: http://arxiv.org/pdf/1109.0264v1.pdf
+
+    LT Codes: http://en.wikipedia.org/wiki/Luby_transform_code
+
+    Rateless codes and downloads: http://www.iptps.org/papers-2003/ratele=
+ss_codes.pdf
+
+Yesterday I attended Paul Luse presentation of the erasure code implement=
+ation in swift and it was enlightening. Very much like Samuel Just did in=
+ Ceph when he introduced the Placement Groups backends, Paul worked on Sw=
+ift Storage Policies to make room for erasure coded "rings" (pools in the=
+ swift parlance, if I'm not mistaken).
+
+http://docs-draft.openstack.org/90/125190/8/gate/gate-swift-specs-docs/2d=
+2cf67/doc/build/html/specs/swift/erasure_coding.html
+
+It looks like erasure code will be available in swift soon and the hard p=
+art of the work is complete.
+
+Cheers
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+
+
+--qqb6VqM93DX1jQFToB48XwaOBUssWlEmj
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlRcN7kACgkQ8dLMyEl6F23SewCfZ8jy/UAHIjRWdzo/eV9ebzbH
+B50An2HeCI0b31M9x+vx9788F1FaYPHv
+=JJ+5
+-----END PGP SIGNATURE-----
+
+--qqb6VqM93DX1jQFToB48XwaOBUssWlEmj--
