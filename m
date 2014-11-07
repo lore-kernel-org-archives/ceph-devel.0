@@ -1,57 +1,49 @@
-From: David Moreau Simard <dmsimard@iweb.com>
+From: Giulio Fidente <gfidente@redhat.com>
 Subject: Re: Ceph & Cinder & HA
-Date: Fri, 7 Nov 2014 08:46:43 +0000
-Message-ID: <DAB091EE-E314-40D3-99F3-710E91ECC4D2@iweb.com>
-References: <545B9A53.4040502@dachary.org>
+Date: Fri, 07 Nov 2014 10:35:58 +0100
+Message-ID: <545C927E.9010807@redhat.com>
+References: <545B9A53.4040502@dachary.org> <DAB091EE-E314-40D3-99F3-710E91ECC4D2@iweb.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from bmx1.iweb.com ([70.38.127.135]:42416 "EHLO bmx1.iweb.com"
+Received: from mx1.redhat.com ([209.132.183.28]:57669 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751059AbaKGJBt convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Nov 2014 04:01:49 -0500
-In-Reply-To: <545B9A53.4040502@dachary.org>
-Content-Language: en-US
-Content-ID: <EDAB37FBFA29CA4EA3F9D7B7888EC570@corp.iweb.com>
+	id S1751054AbaKGJhL (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 7 Nov 2014 04:37:11 -0500
+In-Reply-To: <DAB091EE-E314-40D3-99F3-710E91ECC4D2@iweb.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Florian Haas <florian.haas@hastexo.com>, "\"@@redhat.com\"@dachary.org" <"@@redhat.com"@dachary.org>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: David Moreau Simard <dmsimard@iweb.com>, Loic Dachary <loic@dachary.org>
+Cc: Florian Haas <florian.haas@hastexo.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Loic,
+On 11/07/2014 09:46 AM, David Moreau Simard wrote:
+> Loic,
+>
+> Was there an etherpad ? I'm curious as I didn't attend that one.
+>
+> HA with Cinder mostly revolves around setting up multiple cinder-api and cinder-volume servers. Was there something else involved ?
+> I can probably contribute my knowledge on that..
 
-Was there an etherpad ? I'm curious as I didn't attend that one.
+hi David,
 
-HA with Cinder mostly revolves around setting up multiple cinder-api an=
-d cinder-volume servers. Was there something else involved ?
-I can probably contribute my knowledge on that..
+indeed it would be great if we could get in touch! I'm still at the 
+summit, in the TripleO room, in case you are around too.
 
---
-David Moreau Simard
+So yes there is an etherpad and also a TripleO spec which goes a bit 
+more into the details (linked from the etherpad):
 
-> On Nov 6, 2014, at 4:57 PM, Loic Dachary <loic@dachary.org> wrote:
->=20
-> Hi Florian,
->=20
-> I attended the Ceph & Cinder & HA session today at the summit. I've n=
-ever really thought about strategies to implement HA and how Ceph can h=
-elp. The extent of my knowledge on this topic is to make sure I do not =
-confuse something that is "highly reliable" with something "highly avai=
-lable" ;-)
->=20
-> Guilio came to me after the session and I had to confess my ignorance=
- on the topic of HA. Hence this mail and the hope that you can shed som=
-e light on this topic.
->=20
-> Cheers
->=20
-> --=20
-> Lo=EFc Dachary, Artisan Logiciel Libre
->=20
+https://etherpad.openstack.org/p/tripleo-kilo-l3-and-cinder-ha
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+The architecture we're considering is as follows:
+
+   keepalived
+     haproxy
+       ceph-mon
+
+where haproxy and ceph-mon are always up on all openstack 'controller' 
+nodes (also running cinder) and keepalived is taking care of managing a 
+virtual ip hosted on one of those
+-- 
+Giulio Fidente
+GPG KEY: 08D733BA | IRC: giulivo
