@@ -1,110 +1,95 @@
-From: Milosz Tanski <milosz@adfin.com>
-Subject: Re: [fuse-devel] [PATCH v5 7/7] add a flag for per-operation O_DSYNC semantics
-Date: Fri, 7 Nov 2014 14:58:45 -0500
-Message-ID: <CANP1eJGK1XQUPsJsN1xyTjPZysvM_JR5r6jkiwRSaBYKQjYJPw@mail.gmail.com>
-References: <cover.1415220890.git.milosz@adfin.com>
-	<c188b04ede700ce5f986b19de12fa617d158540f.1415220890.git.milosz@adfin.com>
-	<x49r3xf28qn.fsf@segfault.boston.devel.redhat.com>
-	<BF30FAEC-D4D3-4079-9ECD-2743747279BD@cam.ac.uk>
-	<CAFboF2y2skt=H4crv54shfnXOmz23W-shYWtHWekK8ZUDkfP=A@mail.gmail.com>
-	<B92AEADD-B22C-4A4A-B64D-96E8869D3282@cam.ac.uk>
-	<1415370078.11083.511.camel@montana.filmlight.ltd.uk>
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: Re: KeyValueStore: Some bug fixing in KeyValueStore prevent osd
+ runtime crash #2875
+Date: Sat, 8 Nov 2014 13:19:09 +0100
+Message-ID: <CACJqLyaL4COg6CvkNF1jm_uZSrN96mP7SmvkO0FaZRZEN_r9vQ@mail.gmail.com>
+References: <C8CF870384EBCF4CAB89D2041A5C80B30119DCC8@SHSMSX101.ccr.corp.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <1415370078.11083.511.camel@montana.filmlight.ltd.uk>
-Sender: owner-linux-mm@kvack.org
-To: Roger Willcocks <roger@filmlight.ltd.uk>
-Cc: Anton Altaparmakov <aia21@cam.ac.uk>, Anand Avati <avati@gluster.org>, linux-arch@vger.kernel.org, "linux-aio@kvack.org" <linux-aio@kvack.org>, linux-nfs@vger.kernel.org, Volker Lendecke <Volker.Lendecke@sernet.de>, Theodore Ts'o <tytso@mit.edu>, Mel Gorman <mgorman@suse.de>, "fuse-devel@lists.sourceforge.net" <fuse-devel@lists.sourceforge.net>, Linux API <linux-api@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Michael Kerrisk <mtk.manpages@gmail.com>, Christoph Hellwig <hch@infradead.org>, linux-mm@kvack.org, Jeff Moyer <jmoyer@redhat.com>, Al Viro <viro@zeniv.linux.org.uk>, Tejun Heo <tj@kernel.org>, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, ceph-devel <ceph-devel@vger.kernel.org>, Christoph Hellwig <hch@lst.de>, ocfs2-devel@oss.oracle.com
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-wi0-f170.google.com ([209.85.212.170]:54010 "EHLO
+	mail-wi0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753629AbaKHMTK (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 8 Nov 2014 07:19:10 -0500
+Received: by mail-wi0-f170.google.com with SMTP id r20so6455959wiv.5
+        for <ceph-devel@vger.kernel.org>; Sat, 08 Nov 2014 04:19:09 -0800 (PST)
+In-Reply-To: <C8CF870384EBCF4CAB89D2041A5C80B30119DCC8@SHSMSX101.ccr.corp.intel.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "Xue, Chendi" <chendi.xue@intel.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Fri, Nov 7, 2014 at 9:21 AM, Roger Willcocks <roger@filmlight.ltd.uk> wr=
-ote:
+Hi Chendi,
+
+It seemed that you find two bugs for KeyValueStore:
+
+1. Potential race conflict with strip_header->buffers:
+
+strip_header is owner by a thread who want to access header.  Now
+KeyValueStore in order to avoid lock bottleneck, only use
+Sequencer-level(much like PG)  to solve concurrent ops. But all write
+ops will cause "meta" collection updating. It seemed that I make a
+mistake for commit:126
+line(https://github.com/yuyuyu101/ceph/commit/bb49547d0fa3f65aabb3b20a96fb8dabd8dc81c0).
+
+Original, "meta" collection will disable cache avoiding concurrent
+modify, I forget why I delete this line. So I think we still need to
+add this line:
+
+if (cid != coll_t()) {
+
+2. OOM for KeyValueStore
+
+strip_header->buffers is necessary for KeyValueStore which is used by
+following ops in the same transaction. Because a write op may need
+read the newest data which may affected by last write op in the same
+transaction.
+
+As for OOM, I think the root cause is the mistake commit above too.
+Because "meta" collection will be updated each transaction and
+StripObjectHeader::buffers will be always kept in memory because of
+the strategy of cache. So this object's buffers will keep in
+increasing all the time. So I think if we avoid cache "meta"
+collection's object will just be fine. Although we don't observe OOM
+for previous release except this mistake commit, I prefer to add codes
+to discard "buffers" each submit transaction time to avoid potential
+unpredicted memory growing.
+
+Do you have a more clear impl about it? I'm just thinking a better way
+to solve the performance bottleneck for "meta" collections.
+
+
+On Fri, Nov 7, 2014 at 4:17 AM, Xue, Chendi <chendi.xue@intel.com> wrote:
+> Hi, all
 >
-> On Fri, 2014-11-07 at 08:43 +0200, Anton Altaparmakov wrote:
->> Hi,
->>
->> > On 7 Nov 2014, at 07:52, Anand Avati <avati@gluster.org> wrote:
->> > On Thu, Nov 6, 2014 at 8:22 PM, Anton Altaparmakov <aia21@cam.ac.uk> w=
-rote:
->> > > On 7 Nov 2014, at 01:46, Jeff Moyer <jmoyer@redhat.com> wrote:
->> > > Minor nit, but I'd rather read something that looks like this:
->> > >
->> > >       if (type =3D=3D READ && (flags & RWF_NONBLOCK))
->> > >               return -EAGAIN;
->> > >       else if (type =3D=3D WRITE && (flags & RWF_DSYNC))
->> > >               return -EINVAL;
->> >
->> > But your version is less logically efficient for the case where "type =
-=3D=3D READ" is true and "flags & RWF_NONBLOCK" is false because your versi=
-on then has to do the "if (type =3D=3D WRITE" check before discovering it d=
-oes not need to take that branch either, whilst the original version does n=
-ot have to do such a test at all.
->> >
->> > Seriously?
->>
->> Of course seriously.
->>
->> > Just focus on the code readability/maintainability which makes the cod=
-e most easily understood/obvious to a new pair of eyes, and leave such micr=
-o-optimizations to the compiler..
->>
->> The original version is more readable (IMO) and this is not a micro-opti=
-mization.  It is people like you who are responsible for the fact that we n=
-eed faster and faster computers to cope with the inefficient/poor code bein=
-g written more and more...
->>
+> There is a small bug fixing in KeyValueStore to prevent osd crash
 >
-> Your original version needs me to know that type can only be either READ
-> or WRITE (and not, for instance, READONLY or READWRITE or some other
-> random special case) and it rings alarm bells when I first see it. If
-> you want to keep the micro optimization, you need an assertion to
-> acknowledge the potential bug and a comment to make the code obvious:
+> When run random write 4k test on rbd with KeyValueStore backend, random osd crashes, and ceph-osd.log shows a segmentation fault which caused by multi threads updating the strip_header->buffers, so add mutex here
 >
->  +            assert(type =3D=3D READ || type =3D=3D WRITE);
->  +            if (type =3D=3D READ) {
->  +                    if (flags & RWF_NONBLOCK)
->  +                            return -EAGAIN;
->  +            } else { /* WRITE */
->  +                    if (flags & RWF_DSYNC)
->  +                            return -EINVAL;
->  +            }
+> Another problem is after running pretty long time, osd being killed by os due to OOM, which is also caused by there is no eviction mechanism in strip_header->buffers, so add a option in config_opts.h to turn strip_header->buffers off by default
 >
-> but since what's really happening here is two separate and independent
-> error checks, Jeff's version is still better, even if it does take an
-> extra couple of nanoseconds.
+> I saw slight performance drop when turn off the strip_header->buffers in a short time test( for I can't run a long time test due to osd will crash ), so does the strip_header->buffers necessary? If so, can I add a random cache mechanism on that?
 >
-> Actually I'd probably write:
+> ===========================
+> KeyValueStore:
+> Add mutex when update strip_header->buffers to avoid segmentation fault
+> Add option in config_opts.h to turn on/off strip_header->buffers to prevent OOM
 >
->        if (type =3D=3D READ && (flags & RWF_NONBLOCK))
->               return -EAGAIN;
+> The pull request : https://github.com/ceph/ceph/pull/2875#issue-48042745
 >
->        if (type =3D=3D WRITE && (flags & RWF_DSYNC))
->               return -EINVAL;
 >
-> (no 'else' since the code will never be reached if the first test is
-> true).
 >
+> Best Regards,
+> -Chendi
 >
 > --
-> Roger Willcocks <roger@filmlight.ltd.uk>
->
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-This is what I changed it to (and will be sending that out for the
-next version).
 
---=20
-Milosz Tanski
-CTO
-16 East 34th Street, 15th floor
-New York, NY 10016
 
-p: 646-253-9055
-e: milosz@adfin.com
+-- 
+Best Regards,
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+Wheat
