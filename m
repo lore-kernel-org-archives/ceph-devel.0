@@ -1,80 +1,95 @@
-From: scan-admin@coverity.com
-Subject: New Defects reported by Coverity Scan for ceph
-Date: Sun, 09 Nov 2014 06:12:14 -0800
-Message-ID: <545f763eb7f1_17e2a9733843489@scan.coverity.com.mail>
+From: "Xue, Chendi" <chendi.xue@intel.com>
+Subject: RE: ObjectStore collections
+Date: Sun, 9 Nov 2014 14:32:04 +0000
+Message-ID: <C8CF870384EBCF4CAB89D2041A5C80B3011A7E51@SHSMSX101.ccr.corp.intel.com>
+References: <C8CF870384EBCF4CAB89D2041A5C80B30119DCC8@SHSMSX101.ccr.corp.intel.com>
+	<CACJqLyaL4COg6CvkNF1jm_uZSrN96mP7SmvkO0FaZRZEN_r9vQ@mail.gmail.com>
+	<alpine.DEB.2.00.1411081042010.15135@cobra.newdream.net>
+ <CACJqLyYEL5-DfUkNFQeOdr6eseD8eYqZ=R+55L5ybNNWyf4yxA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from scanrelay.coverity.com ([209.249.196.67]:61464 "EHLO
-	scanrelay.coverity.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751490AbaKIOMO (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 9 Nov 2014 09:12:14 -0500
+Received: from mga11.intel.com ([192.55.52.93]:20398 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751863AbaKIOcJ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 9 Nov 2014 09:32:09 -0500
+In-Reply-To: <CACJqLyYEL5-DfUkNFQeOdr6eseD8eYqZ=R+55L5ybNNWyf4yxA@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Haomai Wang <haomaiwang@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@newdream.net>
 
-
-Hi,
-
-Please find the latest report on new defect(s) introduced to ceph found with Coverity Scan.
-
-2 new defect(s) introduced to ceph found with Coverity Scan.
-
-
-New defect(s) Reported-by: Coverity Scan
-Showing 2 of 2 defect(s)
-
-
-** CID 1251353:  Big parameter passed by value  (PASS_BY_VALUE)
-/mds/CInode.cc: 3544 in CInode::validate_disk_state(CInode::validated_data *, std::tr1::shared_ptr<MDRequestImpl> &)::ValidationContinuation::_backtrace(int)()
-
-** CID 1251354:  Structurally dead code  (UNREACHABLE)
-/mds/mdstypes.cc: 440 in inode_t::compare(const inode_t&, bool *) const()
-
-
-________________________________________________________________________________________________________
-*** CID 1251353:  Big parameter passed by value  (PASS_BY_VALUE)
-/mds/CInode.cc: 3544 in CInode::validate_disk_state(CInode::validated_data *, std::tr1::shared_ptr<MDRequestImpl> &)::ValidationContinuation::_backtrace(int)()
-3538           }
-3539     
-3540           // extract the backtrace, and compare it to a newly-constructed one
-3541           try {
-3542             bufferlist::iterator p = bl.begin();
-3543             ::decode(results->backtrace.ondisk_value, p);
->>>     CID 1251353:  Big parameter passed by value  (PASS_BY_VALUE)
->>>     Catching an exception object of size 264 bytes by value.
-3544           } catch (buffer::malformed_input) {
-3545             results->backtrace.passed = false;
-3546             results->backtrace.error_str << "failed to decode on-disk backtrace!";
-3547             return true;
-3548           }
-3549           int64_t pool;
-
-________________________________________________________________________________________________________
-*** CID 1251354:  Structurally dead code  (UNREACHABLE)
-/mds/mdstypes.cc: 440 in inode_t::compare(const inode_t&, bool *) const()
-434       } else {
-435         assert(version < other.version);
-436         *divergent = !other.older_is_consistent(*this);
-437         return -1;
-438       }
-439       assert(0 == "can't have reached this point");
->>>     CID 1251354:  Structurally dead code  (UNREACHABLE)
->>>     This code cannot be reached: "*divergent = true;".
-440       *divergent = true;
-441       return 0;
-442     }
-443     
-444     bool inode_t::older_is_consistent(const inode_t &other) const
-445     {
-
-
-________________________________________________________________________________________________________
-To view the defects in Coverity Scan visit, http://scan.coverity.com/projects/25?tab=overview
-
-To unsubscribe from the email notification for new defects, http://scan5.coverity.com/cgi-bin/unsubscribe.py
-
-
-
+SGksIEhhb21haQ0KDQpBcyBkaXNjdXNzZWQgdGhpcyBhZnRlcm5vb24sIEkgbW92ZWQgYnVmZmVy
+cyBmcm9tIHN0cmlwX2hlYWRlciB0byBCdWZmZXJUcmFuc2FjdGlvbg0KDQpUaGUgY29kZXMgaGFz
+IGJlZW4gdGVzdGVkLCB0aGVyZSBzZWVtcyB0byBiZSBhIHNsaWdodCBwZXJmb3JtYW5jZSBlbmhh
+bmNlbWVudA0KQWZ0ZXIgYSBwcmV0dHkgbG9uZyB0aW1lIHNlcS9yYW5kb20gd3JpdGUgdGVzdCwg
+SSBvYnNlcnZlZCBubyBzZWdtZW50IGZhdWx0IGFuZCBncm93aW5nIG1lbW9yeSB1c2FnZSBwcm9i
+bGVtIG9yIGFueSBvdGhlciBvc2QgY3Jhc2ggcHJvYmxlbS4NCg0KSG9wZSB5b3UgY2FuIGhlbHAg
+dG8gcmV2aWV3IHRoZSBjb2RlcywgdGhhbmtzDQoNCmh0dHBzOi8vZ2l0aHViLmNvbS9jZXBoL2Nl
+cGgvcHVsbC8yODg5DQogDQo9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PQ0KRm9y
+IG90aGVycywgdGhlcmUgaXMgYSBicmllZiAgZXhwbGFuYXRpb246DQoNCidzdHJpcF9oZWFkZXIn
+IGluIEtleVZhbHVlU3RvcmUgaXMgdXNlZCB0byBjYWNoZSBhbGwgaGVhZGVycywgDQonYnVmZmVy
+cycgaXMgdXNlZCB0byBlbnN1cmUgYWxsIGlvIGluIG9uZSB0cmFuc2FjdGlvbiBjYW4gcmVhZCB0
+aGUgbGFzdGVzdCB1cGRhdGUuDQoNCk1vdmUgYnVmZmVycyBmcm9tIHN0cmlwX2hlYWRlciB0byBC
+dWZmZXJUcmFuc2FjdGlvbiBjYW4gZW5zdXJlICdidWZmZXJzJyBiZWluZyBkZXN0cnVjdGVkIGFm
+dGVyIHRoZSB0cmFuc2FjdGlvbiBiZWluZyBzdWJtaXR0ZWQsIHdoaWNoIHByZXZlbnQgZ3Jvd2lu
+ZyAnc3RyaXBfaGVhZGVyLT5idWZmZXJzJyBjYXVzaW5nIE9PTSBwcm9ibGVtLg0KDQpBbHNvLCBm
+b3IgYWxsICdtZXRhIGNvbGxlY3Rpb24nIHdpbGwgYmUgY2FjaGVkIGluIHN0cmlwX2hlYWRlciwg
+YW5kIHRoZXJlIGxhY2tzIG9mIGxvY2sgb2YgcGFyYWxsZWwgaW8gYWNjZXNzaW5nICdtZXRhIGNv
+bGxlY3Rpb24nLCBtdWx0aS10aHJlYWQgYWNjZXNzaW5nIHRoZSAnbWV0YSBjb2xsZWN0aW9uJyBz
+dHJpcF9oZWFkZXItPmJ1ZmZlcnMgY2F1c2VzIHNlZ21lbnRhdGlvbiBmYXVsdCwgc28gbW92aW5n
+ICdidWZmZXJzJyBmcm9tIHN0cmlwX2hlYWRlciB0byBCdWZmZXJUcmFuc2FjdGlvbiBjYW4gYWxz
+byBwcmV2ZW50IHN1Y2ggc2NlbmFyaW8uIA0KDQpCZXN0IFJlZ2FyZHMsDQotQ2hlbmRpDQoNCi0t
+LS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBIYW9tYWkgV2FuZyBbbWFpbHRvOmhhb21h
+aXdhbmdAZ21haWwuY29tXSANClNlbnQ6IFN1bmRheSwgTm92ZW1iZXIgOSwgMjAxNCA1OjIxIFBN
+DQpUbzogU2FnZSBXZWlsDQpDYzogWHVlLCBDaGVuZGk7IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwu
+b3JnDQpTdWJqZWN0OiBSZTogT2JqZWN0U3RvcmUgY29sbGVjdGlvbnMNCg0KT24gU3VuLCBOb3Yg
+OSwgMjAxNCBhdCA1OjU5IEFNLCBTYWdlIFdlaWwgPHNhZ2VAbmV3ZHJlYW0ubmV0PiB3cm90ZToN
+Cj4gT24gU2F0LCA4IE5vdiAyMDE0LCBIYW9tYWkgV2FuZyB3cm90ZToNCj4+IEFzIGZvciBPT00s
+IEkgdGhpbmsgdGhlIHJvb3QgY2F1c2UgaXMgdGhlIG1pc3Rha2UgY29tbWl0IGFib3ZlIHRvby4N
+Cj4+IEJlY2F1c2UgIm1ldGEiIGNvbGxlY3Rpb24gd2lsbCBiZSB1cGRhdGVkIGVhY2ggdHJhbnNh
+Y3Rpb24gYW5kIA0KPj4gU3RyaXBPYmplY3RIZWFkZXI6OmJ1ZmZlcnMgd2lsbCBiZSBhbHdheXMg
+a2VwdCBpbiBtZW1vcnkgYmVjYXVzZSBvZiANCj4+IHRoZSBzdHJhdGVneSBvZiBjYWNoZS4gU28g
+dGhpcyBvYmplY3QncyBidWZmZXJzIHdpbGwga2VlcCBpbiANCj4+IGluY3JlYXNpbmcgYWxsIHRo
+ZSB0aW1lLiBTbyBJIHRoaW5rIGlmIHdlIGF2b2lkIGNhY2hlICJtZXRhIg0KPj4gY29sbGVjdGlv
+bidzIG9iamVjdCB3aWxsIGp1c3QgYmUgZmluZS4gQWx0aG91Z2ggd2UgZG9uJ3Qgb2JzZXJ2ZSBP
+T00gDQo+PiBmb3IgcHJldmlvdXMgcmVsZWFzZSBleGNlcHQgdGhpcyBtaXN0YWtlIGNvbW1pdCwg
+SSBwcmVmZXIgdG8gYWRkIA0KPj4gY29kZXMgdG8gZGlzY2FyZCAiYnVmZmVycyIgZWFjaCBzdWJt
+aXQgdHJhbnNhY3Rpb24gdGltZSB0byBhdm9pZCANCj4+IHBvdGVudGlhbCB1bnByZWRpY3RlZCBt
+ZW1vcnkgZ3Jvd2luZy4NCj4+DQo+PiBEbyB5b3UgaGF2ZSBhIG1vcmUgY2xlYXIgaW1wbCBhYm91
+dCBpdD8gSSdtIGp1c3QgdGhpbmtpbmcgYSBiZXR0ZXIgDQo+PiB3YXkgdG8gc29sdmUgdGhlIHBl
+cmZvcm1hbmNlIGJvdHRsZW5lY2sgZm9yICJtZXRhIiBjb2xsZWN0aW9ucy4NCj4NCj4gSSB3b3Vs
+ZCByZWFsbHkgbGlrZSB0byBzZWUgaWYgd2UgY2FuIGVsaW1pbmF0ZSBjb2xsZWN0aW9ucyBmcm9t
+IHRoZSANCj4gQVBJIGVudGlyZWx5LiAgT3IsIHBlcmhhcHMgbW9yZSBpbXBvcnRhbnRseSwgaWYg
+dGhhdCB3b3VsZCBiZSBoZWxwZnVsLiAgDQo+IEZvciB0aGUgbW9zdCBwYXJ0LCBob2JqZWN0X3Qn
+cyBhbHJlYWR5IHNvcnQgdGhlbXNlbHZlcyBpbnRvIA0KPiBjb2xsZWN0aW9ucyBiYXNlZCBvbiB0
+aGUgaGFzaC4gIFRoZSBleGNlcHRpb25zIGFyZToNCj4NCj4gLSBUaGUgJ21ldGEnIGNvbGxlY3Rp
+b24uICBNb3N0bHkgdGhpcyBpbmNsdWRlcyB0aGUgcGcgbG9ncyBhbmQgcGcgaW5mbyANCj4gb2Jq
+ZWN0cyAod2hpY2ggYXJlIHBlci1wZyBhbmQgd291bGQgb3RoZXJ3aXNlIG5lZWQgbm8gbG9ja2lu
+ZykgYW5kIHRoZSANCj4gb3NkbWFwIG9iamVjdHMuDQo+DQo+IC0gY29sbGVjdGlvbl9tb3ZlIGFu
+ZCBjb2xsZWN0aW9uX21vdmVfcmVuYW1lLiAgSSB0aGluayBpZiB3ZSBtb3ZlIA0KPiBldmVyeXRo
+aW5nIHRvIGNvbGxlY3Rpb25fbW92ZV9yZW5hbWUgYW5kIHVzZSB0ZW1wb3Jhcnkgb2JqZWN0cyB3
+aXRoIA0KPiB1bmlxdWUgbmFtZXMgZm9yIGV2ZXJ5dGhpbmcgKEkgdGhpbmsgaW4tcHJvZ3Jlc3Mg
+cmVjb3Zlcnkgb2JqZWN0cyBpcyANCj4gdGhlIG1haW4gdXNlciBvZiBjb2xsZWN0aW9uX21vdmUp
+IHRoZW4gdGhpcyByZWFsbHkganVzdCB0dXJucyBpbnRvIGEgDQo+IHJlbmFtZSBvcGVyYXRpb24u
+DQo+DQo+IC0gb2JqZWN0IGxpc3RpbmcgaXMgY3VycmVudGx5IGluIHRlcm1zIG9mIHBnLCBidXQg
+Y291bGQganVzdCBhcyBlYXNpbHkgDQo+IHNwZWNpZnkgYSBoYXNoIHJhbmdlLg0KPg0KPiAtIGNv
+bGxlY3Rpb24gYXR0cmlidXRlcyBjYW4gYmUgbW92ZWQgdG8gdGhlIHBnaW5mbyBvYmplY3RzLg0K
+Pg0KPiBJdCBzb3VuZHMgbGlrZSB0aGUgcHJvYmxlbSBpbiBLZXlWYWx1ZVN0b3JlIGlzIHRoYXQg
+dGhlIHBnbG9nL3BnaW5mbyANCj4gb2JqZWN0cyBhcmUgd3JpdHRlbiBieSB0cmFuc2FjdGlvbnMg
+aW4gYWxsIFBHcyBidXQgdGhlIHBlci1jb2xsZWN0aW9uIA0KPiBpbmRleC9jYWNoZSBzdHJ1Y3R1
+cmVzIHdlcmVuJ3QgYmVpbmcgbG9ja2VkLiAgSWYgd2UgY2FuIGZpbmQgYSB3YXkgdG8gDQo+IGZp
+dCB0aGVzZSBpbnRvIHRoZSBzb3J0ZWQgaGFzaCBpbiB0aGUgcmlnaHQgcG9zaXRpb24gdGhhdCBp
+cyANCj4gY29uY2VwdHVhbGx5IHNpbXBsZXIuICBCdXQgSSdtIG5vdCBzdXJlIGlmIHRoYXQgc2lt
+cGxpY2l0eSBhY3R1YWxseSANCj4gaGVscHMgd2l0aCB0aGUgaW1wbGVtZW50YXRpb24sIHdoZXJl
+IHRoZSBkYXRhIHN0cnVjdHVyZSBsb2NraW5nIGlzIHRoZSBpbXBvcnRhbnQgcGFydC4NCj4gUGVy
+aGFwcyB3ZSBuZWVkIHRvIGtlZXAgYSBjb2xsZWN0aW9uIGNvbmNlcHQgc2ltcGx5IGZvciB0aGF0
+IHB1cnBvc2UgDQo+IGFuZCB0aGUgb25seSByZWFsIHByb2JsZW0gaXMgJ21ldGEnPw0KDQpPcmln
+aW5hbCwgS2V5dmFsdWVTdG9yZSBpcyB0cnVlIGJ5IGp1c3QgYXZvaWRpbmcgY2FjaGUgIm1ldGEi
+DQpjb2xsZWN0aW9uIGZvciBjb25jdXJyZW50IHB1cnBvc2UuDQoNCkknbSBqdXN0IHRoaW5raW5n
+IGFib3V0IGlzIHRoZXJlIGEgd2F5IHRvIG1ha2UgIm1ldGEiIGNvbGxlY3Rpb24gb3BzIG1vcmUg
+cGFyYWxsZWxpemF0aW9uLiBCVFcsIEZpbGVTdG9yZSBhbHNvIGNhbiBnZXQgdGhlIGJlbmVmaXRz
+IGJlY2F1c2Ugb2YgdGhlIHNhbWUgcmVhc29uLg0KDQo+DQo+IHNhZ2UNCg0KDQoNCi0tDQpCZXN0
+IFJlZ2FyZHMsDQoNCldoZWF0DQo=
