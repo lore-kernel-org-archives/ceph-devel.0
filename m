@@ -1,46 +1,80 @@
-From: Joao Eduardo Luis <joao@redhat.com>
-Subject: Re: Pull requests : speed up the reviews
-Date: Sun, 09 Nov 2014 12:08:30 +0000
-Message-ID: <545F593E.9010608@redhat.com>
-References: <545E53B5.3070600@dachary.org>
+From: scan-admin@coverity.com
+Subject: New Defects reported by Coverity Scan for ceph
+Date: Sun, 09 Nov 2014 06:12:14 -0800
+Message-ID: <545f763eb7f1_17e2a9733843489@scan.coverity.com.mail>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain;
+ charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f47.google.com ([74.125.82.47]:45545 "EHLO
-	mail-wg0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751642AbaKIMIb (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 9 Nov 2014 07:08:31 -0500
-Received: by mail-wg0-f47.google.com with SMTP id a1so6836902wgh.20
-        for <ceph-devel@vger.kernel.org>; Sun, 09 Nov 2014 04:08:30 -0800 (PST)
-In-Reply-To: <545E53B5.3070600@dachary.org>
+Received: from scanrelay.coverity.com ([209.249.196.67]:61464 "EHLO
+	scanrelay.coverity.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751490AbaKIOMO (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 9 Nov 2014 09:12:14 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On 11/08/2014 05:32 PM, Loic Dachary wrote:
-> Hi Ceph,
->
-> In the past few weeks the number of pending pull requests grew from around 20 to over 80. The good thing is that there are more contributions, the problem is that it requires more reviewers. Ceph is not the only project suffering from this kind of problem and attending the OpenStack summit last week reminded me that the sooner it is addressed the better.
->
-> After a few IRC discussions some ideas came up and my favorite is that every developer paid full time to work on Ceph dedicates a daily 15 minutes time slot, time boxed, to review pull requests. Timeboxing is kind of frustrating because some reviews require more. It basically means one has to focus on the pull request for ten minutes at most and take five minutes to write a useful comment that helps the author moving forward. But it also is the only way to make room for a daily activity with no risk of postponing it because something more urgent came up.
->
-> What do you think ?
 
-On my calendar, I do have a time slot of one hour each morning to review 
-pull requests and mailing lists but I seldom honor it, especially when 
-I'm caught up in other stuff.
+Hi,
 
-I'll move it over to lunch so that it has no chance in interfering with 
-other tasks and try to make a habit of it.
+Please find the latest report on new defect(s) introduced to ceph found with Coverity Scan.
 
-It would also be interesting to see more community involvement.  I 
-believe it would be healthy for the project if we could have (at least) 
-a portion of reviews being performed by other people besides solely the 
-paid developers/maintainers.
+2 new defect(s) introduced to ceph found with Coverity Scan.
 
-   -Joao
 
--- 
-Joao Eduardo Luis
-Software Engineer | http://ceph.com
+New defect(s) Reported-by: Coverity Scan
+Showing 2 of 2 defect(s)
+
+
+** CID 1251353:  Big parameter passed by value  (PASS_BY_VALUE)
+/mds/CInode.cc: 3544 in CInode::validate_disk_state(CInode::validated_data *, std::tr1::shared_ptr<MDRequestImpl> &)::ValidationContinuation::_backtrace(int)()
+
+** CID 1251354:  Structurally dead code  (UNREACHABLE)
+/mds/mdstypes.cc: 440 in inode_t::compare(const inode_t&, bool *) const()
+
+
+________________________________________________________________________________________________________
+*** CID 1251353:  Big parameter passed by value  (PASS_BY_VALUE)
+/mds/CInode.cc: 3544 in CInode::validate_disk_state(CInode::validated_data *, std::tr1::shared_ptr<MDRequestImpl> &)::ValidationContinuation::_backtrace(int)()
+3538           }
+3539     
+3540           // extract the backtrace, and compare it to a newly-constructed one
+3541           try {
+3542             bufferlist::iterator p = bl.begin();
+3543             ::decode(results->backtrace.ondisk_value, p);
+>>>     CID 1251353:  Big parameter passed by value  (PASS_BY_VALUE)
+>>>     Catching an exception object of size 264 bytes by value.
+3544           } catch (buffer::malformed_input) {
+3545             results->backtrace.passed = false;
+3546             results->backtrace.error_str << "failed to decode on-disk backtrace!";
+3547             return true;
+3548           }
+3549           int64_t pool;
+
+________________________________________________________________________________________________________
+*** CID 1251354:  Structurally dead code  (UNREACHABLE)
+/mds/mdstypes.cc: 440 in inode_t::compare(const inode_t&, bool *) const()
+434       } else {
+435         assert(version < other.version);
+436         *divergent = !other.older_is_consistent(*this);
+437         return -1;
+438       }
+439       assert(0 == "can't have reached this point");
+>>>     CID 1251354:  Structurally dead code  (UNREACHABLE)
+>>>     This code cannot be reached: "*divergent = true;".
+440       *divergent = true;
+441       return 0;
+442     }
+443     
+444     bool inode_t::older_is_consistent(const inode_t &other) const
+445     {
+
+
+________________________________________________________________________________________________________
+To view the defects in Coverity Scan visit, http://scan.coverity.com/projects/25?tab=overview
+
+To unsubscribe from the email notification for new defects, http://scan5.coverity.com/cgi-bin/unsubscribe.py
+
+
+
