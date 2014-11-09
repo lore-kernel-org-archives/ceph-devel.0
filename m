@@ -1,82 +1,46 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Re: ObjectStore collections
-Date: Sun, 9 Nov 2014 10:20:57 +0100
-Message-ID: <CACJqLyYEL5-DfUkNFQeOdr6eseD8eYqZ=R+55L5ybNNWyf4yxA@mail.gmail.com>
-References: <C8CF870384EBCF4CAB89D2041A5C80B30119DCC8@SHSMSX101.ccr.corp.intel.com>
-	<CACJqLyaL4COg6CvkNF1jm_uZSrN96mP7SmvkO0FaZRZEN_r9vQ@mail.gmail.com>
-	<alpine.DEB.2.00.1411081042010.15135@cobra.newdream.net>
+From: Joao Eduardo Luis <joao@redhat.com>
+Subject: Re: Pull requests : speed up the reviews
+Date: Sun, 09 Nov 2014 12:08:30 +0000
+Message-ID: <545F593E.9010608@redhat.com>
+References: <545E53B5.3070600@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f47.google.com ([74.125.82.47]:41114 "EHLO
+Received: from mail-wg0-f47.google.com ([74.125.82.47]:45545 "EHLO
 	mail-wg0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751138AbaKIJU6 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 9 Nov 2014 04:20:58 -0500
-Received: by mail-wg0-f47.google.com with SMTP id a1so6662443wgh.34
-        for <ceph-devel@vger.kernel.org>; Sun, 09 Nov 2014 01:20:57 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1411081042010.15135@cobra.newdream.net>
+	with ESMTP id S1751642AbaKIMIb (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 9 Nov 2014 07:08:31 -0500
+Received: by mail-wg0-f47.google.com with SMTP id a1so6836902wgh.20
+        for <ceph-devel@vger.kernel.org>; Sun, 09 Nov 2014 04:08:30 -0800 (PST)
+In-Reply-To: <545E53B5.3070600@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: "Xue, Chendi" <chendi.xue@intel.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Sun, Nov 9, 2014 at 5:59 AM, Sage Weil <sage@newdream.net> wrote:
-> On Sat, 8 Nov 2014, Haomai Wang wrote:
->> As for OOM, I think the root cause is the mistake commit above too.
->> Because "meta" collection will be updated each transaction and
->> StripObjectHeader::buffers will be always kept in memory because of
->> the strategy of cache. So this object's buffers will keep in
->> increasing all the time. So I think if we avoid cache "meta"
->> collection's object will just be fine. Although we don't observe OOM
->> for previous release except this mistake commit, I prefer to add codes
->> to discard "buffers" each submit transaction time to avoid potential
->> unpredicted memory growing.
->>
->> Do you have a more clear impl about it? I'm just thinking a better way
->> to solve the performance bottleneck for "meta" collections.
+On 11/08/2014 05:32 PM, Loic Dachary wrote:
+> Hi Ceph,
 >
-> I would really like to see if we can eliminate collections from the API
-> entirely.  Or, perhaps more importantly, if that would be helpful.  For
-> the most part, hobject_t's already sort themselves into collections based
-> on the hash.  The exceptions are:
+> In the past few weeks the number of pending pull requests grew from around 20 to over 80. The good thing is that there are more contributions, the problem is that it requires more reviewers. Ceph is not the only project suffering from this kind of problem and attending the OpenStack summit last week reminded me that the sooner it is addressed the better.
 >
-> - The 'meta' collection.  Mostly this includes the pg logs and pg info
-> objects (which are per-pg and would otherwise need no locking) and the
-> osdmap objects.
+> After a few IRC discussions some ideas came up and my favorite is that every developer paid full time to work on Ceph dedicates a daily 15 minutes time slot, time boxed, to review pull requests. Timeboxing is kind of frustrating because some reviews require more. It basically means one has to focus on the pull request for ten minutes at most and take five minutes to write a useful comment that helps the author moving forward. But it also is the only way to make room for a daily activity with no risk of postponing it because something more urgent came up.
 >
-> - collection_move and collection_move_rename.  I think if we move
-> everything to collection_move_rename and use temporary objects with
-> unique names for everything (I think in-progress recovery objects is
-> the main user of collection_move) then this really just turns into a
-> rename operation.
->
-> - object listing is currently in terms of pg, but could just as easily
-> specify a hash range.
->
-> - collection attributes can be moved to the pginfo objects.
->
-> It sounds like the problem in KeyValueStore is that the pglog/pginfo
-> objects are written by transactions in all PGs but the per-collection
-> index/cache structures weren't being locked.  If we can find a way to fit
-> these into the sorted hash in the right position that is conceptually
-> simpler.  But I'm not sure if that simplicity actually helps with the
-> implementation, where the data structure locking is the important part.
-> Perhaps we need to keep a collection concept simply for that purpose and
-> the only real problem is 'meta'?
+> What do you think ?
 
-Original, KeyvalueStore is true by just avoiding cache "meta"
-collection for concurrent purpose.
+On my calendar, I do have a time slot of one hour each morning to review 
+pull requests and mailing lists but I seldom honor it, especially when 
+I'm caught up in other stuff.
 
-I'm just thinking about is there a way to make "meta" collection ops
-more parallelization. BTW, FileStore also can get the benefits because
-of the same reason.
+I'll move it over to lunch so that it has no chance in interfering with 
+other tasks and try to make a habit of it.
 
->
-> sage
+It would also be interesting to see more community involvement.  I 
+believe it would be healthy for the project if we could have (at least) 
+a portion of reviews being performed by other people besides solely the 
+paid developers/maintainers.
 
-
+   -Joao
 
 -- 
-Best Regards,
-
-Wheat
+Joao Eduardo Luis
+Software Engineer | http://ceph.com
