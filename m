@@ -1,408 +1,106 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: [PATCH] libceph: do not crash on large auth tickets
-Date: Mon, 10 Nov 2014 09:15:32 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1411100915180.15740@cobra.newdream.net>
-References: <1415009217-8325-1-git-send-email-idryomov@redhat.com>
+From: Gregory Farnum <greg@gregs42.com>
+Subject: Re: Pull requests : speed up the reviews
+Date: Mon, 10 Nov 2014 11:07:56 -0800
+Message-ID: <CAC6JEv_xbv54VoFfU+6rOKS7ytR7TbzJM3NZSk_sVKjpDEyQFA@mail.gmail.com>
+References: <545E53B5.3070600@dachary.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:46993 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753081AbaKJRPd (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Nov 2014 12:15:33 -0500
-In-Reply-To: <1415009217-8325-1-git-send-email-idryomov@redhat.com>
+Received: from mail-ie0-f177.google.com ([209.85.223.177]:46018 "EHLO
+	mail-ie0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752227AbaKJTH6 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Nov 2014 14:07:58 -0500
+Received: by mail-ie0-f177.google.com with SMTP id tp5so9479217ieb.8
+        for <ceph-devel@vger.kernel.org>; Mon, 10 Nov 2014 11:07:57 -0800 (PST)
+Received: from mail-ig0-f174.google.com (mail-ig0-f174.google.com. [209.85.213.174])
+        by mx.google.com with ESMTPSA id w7sm5150250igl.7.2014.11.10.11.07.56
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
+        Mon, 10 Nov 2014 11:07:56 -0800 (PST)
+Received: by mail-ig0-f174.google.com with SMTP id hn18so17153614igb.1
+        for <ceph-devel@vger.kernel.org>; Mon, 10 Nov 2014 11:07:56 -0800 (PST)
+In-Reply-To: <545E53B5.3070600@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <ilya.dryomov@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Mon, 3 Nov 2014, Ilya Dryomov wrote:
-> Large (greater than 32k, the value of PAGE_ALLOC_COSTLY_ORDER) auth
-> tickets will have their buffers vmalloc'ed, which leads to the
-> following crash in crypto:
-> 
-> [   28.685082] BUG: unable to handle kernel paging request at ffffeb04000032c0
-> [   28.686032] IP: [<ffffffff81392b42>] scatterwalk_pagedone+0x22/0x80
-> [   28.686032] PGD 0
-> [   28.688088] Oops: 0000 [#1] PREEMPT SMP
-> [   28.688088] Modules linked in:
-> [   28.688088] CPU: 0 PID: 878 Comm: kworker/0:2 Not tainted 3.17.0-vm+ #305
-> [   28.688088] Hardware name: Bochs Bochs, BIOS Bochs 01/01/2007
-> [   28.688088] Workqueue: ceph-msgr con_work
-> [   28.688088] task: ffff88011a7f9030 ti: ffff8800d903c000 task.ti: ffff8800d903c000
-> [   28.688088] RIP: 0010:[<ffffffff81392b42>]  [<ffffffff81392b42>] scatterwalk_pagedone+0x22/0x80
-> [   28.688088] RSP: 0018:ffff8800d903f688  EFLAGS: 00010286
-> [   28.688088] RAX: ffffeb04000032c0 RBX: ffff8800d903f718 RCX: ffffeb04000032c0
-> [   28.688088] RDX: 0000000000000000 RSI: 0000000000000001 RDI: ffff8800d903f750
-> [   28.688088] RBP: ffff8800d903f688 R08: 00000000000007de R09: ffff8800d903f880
-> [   28.688088] R10: 18df467c72d6257b R11: 0000000000000000 R12: 0000000000000010
-> [   28.688088] R13: ffff8800d903f750 R14: ffff8800d903f8a0 R15: 0000000000000000
-> [   28.688088] FS:  00007f50a41c7700(0000) GS:ffff88011fc00000(0000) knlGS:0000000000000000
-> [   28.688088] CS:  0010 DS: 0000 ES: 0000 CR0: 000000008005003b
-> [   28.688088] CR2: ffffeb04000032c0 CR3: 00000000da3f3000 CR4: 00000000000006b0
-> [   28.688088] Stack:
-> [   28.688088]  ffff8800d903f698 ffffffff81392ca8 ffff8800d903f6e8 ffffffff81395d32
-> [   28.688088]  ffff8800dac96000 ffff880000000000 ffff8800d903f980 ffff880119b7e020
-> [   28.688088]  ffff880119b7e010 0000000000000000 0000000000000010 0000000000000010
-> [   28.688088] Call Trace:
-> [   28.688088]  [<ffffffff81392ca8>] scatterwalk_done+0x38/0x40
-> [   28.688088]  [<ffffffff81392ca8>] scatterwalk_done+0x38/0x40
-> [   28.688088]  [<ffffffff81395d32>] blkcipher_walk_done+0x182/0x220
-> [   28.688088]  [<ffffffff813990bf>] crypto_cbc_encrypt+0x15f/0x180
-> [   28.688088]  [<ffffffff81399780>] ? crypto_aes_set_key+0x30/0x30
-> [   28.688088]  [<ffffffff8156c40c>] ceph_aes_encrypt2+0x29c/0x2e0
-> [   28.688088]  [<ffffffff8156d2a3>] ceph_encrypt2+0x93/0xb0
-> [   28.688088]  [<ffffffff8156d7da>] ceph_x_encrypt+0x4a/0x60
-> [   28.688088]  [<ffffffff8155b39d>] ? ceph_buffer_new+0x5d/0xf0
-> [   28.688088]  [<ffffffff8156e837>] ceph_x_build_authorizer.isra.6+0x297/0x360
-> [   28.688088]  [<ffffffff8112089b>] ? kmem_cache_alloc_trace+0x11b/0x1c0
-> [   28.688088]  [<ffffffff8156b496>] ? ceph_auth_create_authorizer+0x36/0x80
-> [   28.688088]  [<ffffffff8156ed83>] ceph_x_create_authorizer+0x63/0xd0
-> [   28.688088]  [<ffffffff8156b4b4>] ceph_auth_create_authorizer+0x54/0x80
-> [   28.688088]  [<ffffffff8155f7c0>] get_authorizer+0x80/0xd0
-> [   28.688088]  [<ffffffff81555a8b>] prepare_write_connect+0x18b/0x2b0
-> [   28.688088]  [<ffffffff81559289>] try_read+0x1e59/0x1f10
-> 
-> This is because we set up crypto scatterlists as if all buffers were
-> kmalloc'ed.  Fix it.
-> 
-> Cc: stable@vger.kernel.org
-> Signed-off-by: Ilya Dryomov <idryomov@redhat.com>
+On Sat, Nov 8, 2014 at 9:32 AM, Loic Dachary <loic@dachary.org> wrote:
+> Hi Ceph,
+>
+> In the past few weeks the number of pending pull requests grew from around 20 to over 80. The good thing is that there are more contributions, the problem is that it requires more reviewers. Ceph is not the only project suffering from this kind of problem and attending the OpenStack summit last week reminded me that the sooner it is addressed the better.
+>
+> After a few IRC discussions some ideas came up and my favorite is that every developer paid full time to work on Ceph dedicates a daily 15 minutes time slot, time boxed, to review pull requests. Timeboxing is kind of frustrating because some reviews require more. It basically means one has to focus on the pull request for ten minutes at most and take five minutes to write a useful comment that helps the author moving forward. But it also is the only way to make room for a daily activity with no risk of postponing it because something more urgent came up.
+>
+> What do you think ?
 
-Looks good!
+This is something I've already been thinking about a bit for different
+reasons. Historically we've had a very informal and organic approach
+to review management.
+When reviews first started, each developer went and sought out
+somebody they felt was appropriate to review the code change. As the
+team grew and we started to get more external contributions, this
+basically meant that every review funneled through the tech leads:
+leads selected reviewers for self-written code and then for every
+other PR either reviewed it or explicitly passed it off to a competent
+reviewer. Code which didn't fit into a clear lead category were
+handled by Sage or occasionally somebody else (*self-aggrandizing
+cough*). This used to work, but we're seeing its limitations as we
+grow.
+At the moment it's a particular concern because Sage and Sam have been
+focused on the Giant release, I've been slowly but ruthlessly pruning
+off activities like community review in the service of cephfs fsck
+(and John and Zheng's productivity!), and we're getting a *lot* more
+PRs of substance than we used to.
 
-Reviewed-by: Sage Weil <sage@redhat.com>
+So we need a new system (or to be more proactive about our existing
+informal system) for managing reviews. I think there are a few things
+that a review process needs to address:
+1) New PRs need to get an appropriate amount of commentary quickly.
+2) PRs need to be reviewed by a competent developer prior to merge.
+3) Reviewing needs to scale.
 
-> ---
-> v2:
-> - no single page limit
-> 
->  net/ceph/crypto.c |  169 +++++++++++++++++++++++++++++++++++++++++------------
->  1 file changed, 132 insertions(+), 37 deletions(-)
-> 
-> diff --git a/net/ceph/crypto.c b/net/ceph/crypto.c
-> index 62fc5e7a9acf..e809e6067f5d 100644
-> --- a/net/ceph/crypto.c
-> +++ b/net/ceph/crypto.c
-> @@ -90,11 +90,82 @@ static struct crypto_blkcipher *ceph_crypto_alloc_cipher(void)
->  
->  static const u8 *aes_iv = (u8 *)CEPH_AES_IV;
->  
-> +/*
-> + * Should be used for buffers allocated with ceph_kvmalloc().
-> + * Currently these are encrypt out-buffer (ceph_buffer) and decrypt
-> + * in-buffer (msg front).
-> + *
-> + * Dispose of @sgt with teardown_sgtable().
-> + *
-> + * @prealloc_sg is to avoid memory allocation inside sg_alloc_table()
-> + * in cases where a single sg is sufficient.  No attempt to reduce the
-> + * number of sgs by squeezing physically contiguous pages together is
-> + * made though, for simplicity.
-> + */
-> +static int setup_sgtable(struct sg_table *sgt, struct scatterlist *prealloc_sg,
-> +			 const void *buf, unsigned int buf_len)
-> +{
-> +	struct scatterlist *sg;
-> +	const bool is_vmalloc = is_vmalloc_addr(buf);
-> +	unsigned int off = offset_in_page(buf);
-> +	unsigned int chunk_cnt = 1;
-> +	unsigned int chunk_len = PAGE_ALIGN(off + buf_len);
-> +	int i;
-> +	int ret;
-> +
-> +	if (buf_len == 0) {
-> +		memset(sgt, 0, sizeof(*sgt));
-> +		return -EINVAL;
-> +	}
-> +
-> +	if (is_vmalloc) {
-> +		chunk_cnt = chunk_len >> PAGE_SHIFT;
-> +		chunk_len = PAGE_SIZE;
-> +	}
-> +
-> +	if (chunk_cnt > 1) {
-> +		ret = sg_alloc_table(sgt, chunk_cnt, GFP_NOFS);
-> +		if (ret)
-> +			return ret;
-> +	} else {
-> +		BUG_ON(chunk_cnt != 1);
-> +		sg_init_table(prealloc_sg, 1);
-> +		sgt->sgl = prealloc_sg;
-> +		sgt->nents = sgt->orig_nents = 1;
-> +	}
-> +
-> +	for_each_sg(sgt->sgl, sg, sgt->orig_nents, i) {
-> +		struct page *page;
-> +		unsigned int len = min(chunk_len - off, buf_len);
-> +
-> +		if (is_vmalloc)
-> +			page = vmalloc_to_page(buf);
-> +		else
-> +			page = virt_to_page(buf);
-> +
-> +		sg_set_page(sg, page, len, off);
-> +
-> +		off = 0;
-> +		buf += len;
-> +		buf_len -= len;
-> +	}
-> +	BUG_ON(buf_len != 0);
-> +
-> +	return 0;
-> +}
-> +
-> +static void teardown_sgtable(struct sg_table *sgt)
-> +{
-> +	if (sgt->orig_nents > 1)
-> +		sg_free_table(sgt);
-> +}
-> +
->  static int ceph_aes_encrypt(const void *key, int key_len,
->  			    void *dst, size_t *dst_len,
->  			    const void *src, size_t src_len)
->  {
-> -	struct scatterlist sg_in[2], sg_out[1];
-> +	struct scatterlist sg_in[2], prealloc_sg;
-> +	struct sg_table sg_out;
->  	struct crypto_blkcipher *tfm = ceph_crypto_alloc_cipher();
->  	struct blkcipher_desc desc = { .tfm = tfm, .flags = 0 };
->  	int ret;
-> @@ -110,16 +181,18 @@ static int ceph_aes_encrypt(const void *key, int key_len,
->  
->  	*dst_len = src_len + zero_padding;
->  
-> -	crypto_blkcipher_setkey((void *)tfm, key, key_len);
->  	sg_init_table(sg_in, 2);
->  	sg_set_buf(&sg_in[0], src, src_len);
->  	sg_set_buf(&sg_in[1], pad, zero_padding);
-> -	sg_init_table(sg_out, 1);
-> -	sg_set_buf(sg_out, dst, *dst_len);
-> +	ret = setup_sgtable(&sg_out, &prealloc_sg, dst, *dst_len);
-> +	if (ret)
-> +		goto out_tfm;
-> +
-> +	crypto_blkcipher_setkey((void *)tfm, key, key_len);
->  	iv = crypto_blkcipher_crt(tfm)->iv;
->  	ivsize = crypto_blkcipher_ivsize(tfm);
-> -
->  	memcpy(iv, aes_iv, ivsize);
-> +
->  	/*
->  	print_hex_dump(KERN_ERR, "enc key: ", DUMP_PREFIX_NONE, 16, 1,
->  		       key, key_len, 1);
-> @@ -128,16 +201,22 @@ static int ceph_aes_encrypt(const void *key, int key_len,
->  	print_hex_dump(KERN_ERR, "enc pad: ", DUMP_PREFIX_NONE, 16, 1,
->  			pad, zero_padding, 1);
->  	*/
-> -	ret = crypto_blkcipher_encrypt(&desc, sg_out, sg_in,
-> +	ret = crypto_blkcipher_encrypt(&desc, sg_out.sgl, sg_in,
->  				     src_len + zero_padding);
-> -	crypto_free_blkcipher(tfm);
-> -	if (ret < 0)
-> +	if (ret < 0) {
->  		pr_err("ceph_aes_crypt failed %d\n", ret);
-> +		goto out_sg;
-> +	}
->  	/*
->  	print_hex_dump(KERN_ERR, "enc out: ", DUMP_PREFIX_NONE, 16, 1,
->  		       dst, *dst_len, 1);
->  	*/
-> -	return 0;
-> +
-> +out_sg:
-> +	teardown_sgtable(&sg_out);
-> +out_tfm:
-> +	crypto_free_blkcipher(tfm);
-> +	return ret;
->  }
->  
->  static int ceph_aes_encrypt2(const void *key, int key_len, void *dst,
-> @@ -145,7 +224,8 @@ static int ceph_aes_encrypt2(const void *key, int key_len, void *dst,
->  			     const void *src1, size_t src1_len,
->  			     const void *src2, size_t src2_len)
->  {
-> -	struct scatterlist sg_in[3], sg_out[1];
-> +	struct scatterlist sg_in[3], prealloc_sg;
-> +	struct sg_table sg_out;
->  	struct crypto_blkcipher *tfm = ceph_crypto_alloc_cipher();
->  	struct blkcipher_desc desc = { .tfm = tfm, .flags = 0 };
->  	int ret;
-> @@ -161,17 +241,19 @@ static int ceph_aes_encrypt2(const void *key, int key_len, void *dst,
->  
->  	*dst_len = src1_len + src2_len + zero_padding;
->  
-> -	crypto_blkcipher_setkey((void *)tfm, key, key_len);
->  	sg_init_table(sg_in, 3);
->  	sg_set_buf(&sg_in[0], src1, src1_len);
->  	sg_set_buf(&sg_in[1], src2, src2_len);
->  	sg_set_buf(&sg_in[2], pad, zero_padding);
-> -	sg_init_table(sg_out, 1);
-> -	sg_set_buf(sg_out, dst, *dst_len);
-> +	ret = setup_sgtable(&sg_out, &prealloc_sg, dst, *dst_len);
-> +	if (ret)
-> +		goto out_tfm;
-> +
-> +	crypto_blkcipher_setkey((void *)tfm, key, key_len);
->  	iv = crypto_blkcipher_crt(tfm)->iv;
->  	ivsize = crypto_blkcipher_ivsize(tfm);
-> -
->  	memcpy(iv, aes_iv, ivsize);
-> +
->  	/*
->  	print_hex_dump(KERN_ERR, "enc  key: ", DUMP_PREFIX_NONE, 16, 1,
->  		       key, key_len, 1);
-> @@ -182,23 +264,30 @@ static int ceph_aes_encrypt2(const void *key, int key_len, void *dst,
->  	print_hex_dump(KERN_ERR, "enc  pad: ", DUMP_PREFIX_NONE, 16, 1,
->  			pad, zero_padding, 1);
->  	*/
-> -	ret = crypto_blkcipher_encrypt(&desc, sg_out, sg_in,
-> +	ret = crypto_blkcipher_encrypt(&desc, sg_out.sgl, sg_in,
->  				     src1_len + src2_len + zero_padding);
-> -	crypto_free_blkcipher(tfm);
-> -	if (ret < 0)
-> +	if (ret < 0) {
->  		pr_err("ceph_aes_crypt2 failed %d\n", ret);
-> +		goto out_sg;
-> +	}
->  	/*
->  	print_hex_dump(KERN_ERR, "enc  out: ", DUMP_PREFIX_NONE, 16, 1,
->  		       dst, *dst_len, 1);
->  	*/
-> -	return 0;
-> +
-> +out_sg:
-> +	teardown_sgtable(&sg_out);
-> +out_tfm:
-> +	crypto_free_blkcipher(tfm);
-> +	return ret;
->  }
->  
->  static int ceph_aes_decrypt(const void *key, int key_len,
->  			    void *dst, size_t *dst_len,
->  			    const void *src, size_t src_len)
->  {
-> -	struct scatterlist sg_in[1], sg_out[2];
-> +	struct sg_table sg_in;
-> +	struct scatterlist sg_out[2], prealloc_sg;
->  	struct crypto_blkcipher *tfm = ceph_crypto_alloc_cipher();
->  	struct blkcipher_desc desc = { .tfm = tfm };
->  	char pad[16];
-> @@ -210,16 +299,16 @@ static int ceph_aes_decrypt(const void *key, int key_len,
->  	if (IS_ERR(tfm))
->  		return PTR_ERR(tfm);
->  
-> -	crypto_blkcipher_setkey((void *)tfm, key, key_len);
-> -	sg_init_table(sg_in, 1);
->  	sg_init_table(sg_out, 2);
-> -	sg_set_buf(sg_in, src, src_len);
->  	sg_set_buf(&sg_out[0], dst, *dst_len);
->  	sg_set_buf(&sg_out[1], pad, sizeof(pad));
-> +	ret = setup_sgtable(&sg_in, &prealloc_sg, src, src_len);
-> +	if (ret)
-> +		goto out_tfm;
->  
-> +	crypto_blkcipher_setkey((void *)tfm, key, key_len);
->  	iv = crypto_blkcipher_crt(tfm)->iv;
->  	ivsize = crypto_blkcipher_ivsize(tfm);
-> -
->  	memcpy(iv, aes_iv, ivsize);
->  
->  	/*
-> @@ -228,12 +317,10 @@ static int ceph_aes_decrypt(const void *key, int key_len,
->  	print_hex_dump(KERN_ERR, "dec  in: ", DUMP_PREFIX_NONE, 16, 1,
->  		       src, src_len, 1);
->  	*/
-> -
-> -	ret = crypto_blkcipher_decrypt(&desc, sg_out, sg_in, src_len);
-> -	crypto_free_blkcipher(tfm);
-> +	ret = crypto_blkcipher_decrypt(&desc, sg_out, sg_in.sgl, src_len);
->  	if (ret < 0) {
->  		pr_err("ceph_aes_decrypt failed %d\n", ret);
-> -		return ret;
-> +		goto out_sg;
->  	}
->  
->  	if (src_len <= *dst_len)
-> @@ -251,7 +338,12 @@ static int ceph_aes_decrypt(const void *key, int key_len,
->  	print_hex_dump(KERN_ERR, "dec out: ", DUMP_PREFIX_NONE, 16, 1,
->  		       dst, *dst_len, 1);
->  	*/
-> -	return 0;
-> +
-> +out_sg:
-> +	teardown_sgtable(&sg_in);
-> +out_tfm:
-> +	crypto_free_blkcipher(tfm);
-> +	return ret;
->  }
->  
->  static int ceph_aes_decrypt2(const void *key, int key_len,
-> @@ -259,7 +351,8 @@ static int ceph_aes_decrypt2(const void *key, int key_len,
->  			     void *dst2, size_t *dst2_len,
->  			     const void *src, size_t src_len)
->  {
-> -	struct scatterlist sg_in[1], sg_out[3];
-> +	struct sg_table sg_in;
-> +	struct scatterlist sg_out[3], prealloc_sg;
->  	struct crypto_blkcipher *tfm = ceph_crypto_alloc_cipher();
->  	struct blkcipher_desc desc = { .tfm = tfm };
->  	char pad[16];
-> @@ -271,17 +364,17 @@ static int ceph_aes_decrypt2(const void *key, int key_len,
->  	if (IS_ERR(tfm))
->  		return PTR_ERR(tfm);
->  
-> -	sg_init_table(sg_in, 1);
-> -	sg_set_buf(sg_in, src, src_len);
->  	sg_init_table(sg_out, 3);
->  	sg_set_buf(&sg_out[0], dst1, *dst1_len);
->  	sg_set_buf(&sg_out[1], dst2, *dst2_len);
->  	sg_set_buf(&sg_out[2], pad, sizeof(pad));
-> +	ret = setup_sgtable(&sg_in, &prealloc_sg, src, src_len);
-> +	if (ret)
-> +		goto out_tfm;
->  
->  	crypto_blkcipher_setkey((void *)tfm, key, key_len);
->  	iv = crypto_blkcipher_crt(tfm)->iv;
->  	ivsize = crypto_blkcipher_ivsize(tfm);
-> -
->  	memcpy(iv, aes_iv, ivsize);
->  
->  	/*
-> @@ -290,12 +383,10 @@ static int ceph_aes_decrypt2(const void *key, int key_len,
->  	print_hex_dump(KERN_ERR, "dec   in: ", DUMP_PREFIX_NONE, 16, 1,
->  		       src, src_len, 1);
->  	*/
-> -
-> -	ret = crypto_blkcipher_decrypt(&desc, sg_out, sg_in, src_len);
-> -	crypto_free_blkcipher(tfm);
-> +	ret = crypto_blkcipher_decrypt(&desc, sg_out, sg_in.sgl, src_len);
->  	if (ret < 0) {
->  		pr_err("ceph_aes_decrypt failed %d\n", ret);
-> -		return ret;
-> +		goto out_sg;
->  	}
->  
->  	if (src_len <= *dst1_len)
-> @@ -325,7 +416,11 @@ static int ceph_aes_decrypt2(const void *key, int key_len,
->  		       dst2, *dst2_len, 1);
->  	*/
->  
-> -	return 0;
-> +out_sg:
-> +	teardown_sgtable(&sg_in);
-> +out_tfm:
-> +	crypto_free_blkcipher(tfm);
-> +	return ret;
->  }
->  
->  
-> -- 
-> 1.7.10.4
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+An "appropriate amount of commentary" obviously depends on the nature
+of the review: we want to be more proactive with new contributors;
+small but important patches should be handled more quickly than
+long-term major features; a patch which isn't reviewable for style
+reasons doesn't need the line-by-line attention of something that we
+would like to merge ASAP.
+The identity of a "competent developer" varies a lot across different
+parts of the project, but I think this might be the key issue: there
+are a lot of things where the pool of already-qualified people is only
+one or two deep.
+
+I suppose one way of handling this might be to ask everybody to
+dedicate a small amount of time to reviews (as you suggest), but to
+emphasize PR management as much as doing the actual review.
+1) If you don't have assigned PRs, look at the unassigned PRs from
+oldest to newest, and based on the target area assign it to the person
+you think most appropriate.after doing basic due diligence for issues
+that you can handle (ie, the feature is something you don't know is
+inappropriate; skimming the code doesn't make you cry; etc)
+2) Manage any reviews assigned to you:
+  2a) if you're the wrong target, assign it to somebody more appropriate
+  2b) If you're the right target but are trying to get somebody else
+acquainted with the code base, maybe assign it to them
+  2c) assign priorities based on importance and age
+3) review PRs in appropriate order at the level they deserve, and then
+either merge or assign it back to the author
+
+In particular, this clearly assigns responsibility for a PR to an
+individual. It lets people offload as necessary, and gives feedback to
+contributors quickly even if that feedback is just "we appreciate your
+submission and it is in somebody's queue". It lets people contribute
+to the PR process even if there isn't something they feel qualified to
+review directly. And it doesn't emphasize the time spent reviewing so
+much as the act of moving a PR through the stages of merging. (A
+15-minute timebox might sound great, but trust me we have lots of PRs
+that would never make it into the code base if they were done in
+15-minute chunks.)
+
+Obviously this is also not a very formal process, but I think maybe if
+we start approaching things this way it will help move stuff through
+the pipeline faster. Based on Sage's sudden enthusiasm for assigning
+PR owners I think he might agree...?
+-Greg
