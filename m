@@ -1,122 +1,88 @@
-From: GuangYang <yguang11@outlook.com>
-Subject: RE: PG inconsistency
-Date: Mon, 10 Nov 2014 03:25:55 +0000
-Message-ID: <BLU175-W4789CCDB578B9A70E1CC8ADF800@phx.gbl>
-References: <BLU175-W41E1F32E90ED411A4477FFDF840@phx.gbl>,<alpine.DEB.2.00.1411070213510.15135@cobra.newdream.net>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
+From: David Zafman <david.zafman@inktank.com>
+Subject: Re: Pull requests : speed up the reviews
+Date: Sun, 9 Nov 2014 21:10:30 -0800
+Message-ID: <13E49F89-936B-4DAA-B0D7-AC501A54EC7C@inktank.com>
+References: <545E53B5.3070600@dachary.org> <545F593E.9010608@redhat.com>
+Mime-Version: 1.0 (Mac OS X Mail 8.0 \(1990.1\))
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from blu004-omc2s25.hotmail.com ([65.55.111.100]:52275 "EHLO
-	BLU004-OMC2S25.hotmail.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751059AbaKJDZ4 convert rfc822-to-8bit
-	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 9 Nov 2014 22:25:56 -0500
-In-Reply-To: <alpine.DEB.2.00.1411070213510.15135@cobra.newdream.net>
+Received: from mail-pa0-f42.google.com ([209.85.220.42]:35774 "EHLO
+	mail-pa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751947AbaKJFKf convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Nov 2014 00:10:35 -0500
+Received: by mail-pa0-f42.google.com with SMTP id bj1so7476180pad.15
+        for <ceph-devel@vger.kernel.org>; Sun, 09 Nov 2014 21:10:35 -0800 (PST)
+In-Reply-To: <545F593E.9010608@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
+To: Loic Dachary <loic@dachary.org>, Joao Eduardo Luis <joao@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Thanks Sage!
 
-----------------------------------------
-> Date: Fri, 7 Nov 2014 02:19:06 -0800
-> From: sage@newdream.net
-> To: yguang11@outlook.com
-> CC: ceph-devel@vger.kernel.org; ceph-users@lists.ceph.com
-> Subject: Re: PG inconsistency
->
-> On Thu, 6 Nov 2014, GuangYang wrote:
->> Hello Cephers,
->> Recently we observed a couple of inconsistencies in our Ceph cluster=
-,
->> there were two major patterns leading to inconsistency as I observed=
-: 1)
->> EIO to read the file, 2) the digest is inconsistent (for EC) even th=
-ere
->> is no read error).
->>
->> While ceph has built-in tool sets to repair the inconsistencies, I a=
-lso
->> would like to check with the community in terms of what is the best =
-ways
->> to handle such issues (e.g. should we run fsck / xfs_repair when suc=
-h
->> issue happens).
->>
->> In more details, I have the following questions:
->> 1. When there is inconsistency detected, what is the chance there is
->> some hardware issues which need to be repaired physically, or should=
- I
->> run some disk/filesystem tools to further check?
->
-> I'm not really an operator so I'm not as familiar with these tools as=
- I
-> should be :(, but I suspect the prodent route is to check the SMART i=
-nfo
-> on the disk, and/or trigger a scrub of everything else on the OSD (ce=
-ph
-> osd scrub N). For DreamObjects, I think they usually just fail the OS=
-D
-> once it starts throwing bad sectors (most of the hardware is already
-> reasonably aged).
-Google's data also shows the strong correlation between scrub error (es=
-pecially several SMART parameters) and disk failure - https://www.useni=
-x.org/legacy/event/fast07/tech/full_papers/pinheiro/pinheiro.pdf.
->
->> 2. Should we use fsck / xfs_repair to fix the inconsistencies, or sh=
-ould
->> we solely relay on Ceph's repair tool sets?
->
-> That might not be a bad idea, but I would urge caution if xfs_repair =
-finds
-> any issues or makes any changes, as subtle changes to the fs contents=
- can
-> confuse ceph-osd. At an absolute minimum, do a full scrub after, but
-> even better would be to fail the OSD.
->
-> (FWIW I think we should document a recommended "safe" process for
-> failing/replacing an OSD that takes the suspect data offline but wait=
-s for
-> the cluster to heal before destroying any data. Simply marking the OS=
-D
-> out will work, but then when a fresh drive is added there will be a s=
-econd
-> repair/rebalance event, which isn't ideal.)
-Yeah that would be very helpful, I think the first decision to make is =
-to whether should we replace the disk, in our clusters, there is data c=
-orruption (EIO) along with SMART warnings, which is an indicator of bad=
- disk, meanwhile, we also observed xattr is lost (http://tracker.ceph.c=
-om/issues/10018) without any SMART warnings, after talking to Sam, we s=
-uspected it might be due to unexpected host rebooting (or mis-configure=
-d RAID controller), in which case we properly no need to replace the di=
-sk but only repair by ceph.
+I know I had a couple of pull requests that we weren=92t going to merge=
+ until after the giant release.  This may have applied some of the othe=
+r ones too.  In addition, It isn=92t surprising that with a new release=
+ some non-release code reviews would be neglected.
 
-In terms of disk replacement, to avoid migrating data back and forth, a=
-re the below two approaches reasonable?
-=A01. Keep the OSD in and do an ad-hoc disk replacement and provision a=
- new OSD (so that keep the OSD id as the same), and then trigger data m=
-igration. In this way the data migration only happens once, however, it=
- does require operators to replace the disk very fast.
-=A02. Move the data on the broken disk to a new disk completely and use=
- Ceph to repair bad objects.
+That being said, this is a good time to remind people to dedicate time =
+to code reviews.
 
-Thanks,
-Guang
+David Zafman
+Senior Developer
+http://www.inktank.com
 
->
-> sage
->
->>
->> It would be great to hear you experience and suggestions.
->>
->> BTW, we are using XFS in the cluster.
->>
->> Thanks,
->> Guang N????y????b?????v?????{.n??????z??ay????????j=07???f??????????=
-??????:+v????????=07??zZ+??????"?!?
- 		 	   		  --
+
+
+
+> On Nov 9, 2014, at 4:08 AM, Joao Eduardo Luis <joao@redhat.com> wrote=
+:
+>=20
+> On 11/08/2014 05:32 PM, Loic Dachary wrote:
+>> Hi Ceph,
+>>=20
+>> In the past few weeks the number of pending pull requests grew from =
+around 20 to over 80. The good thing is that there are more contributio=
+ns, the problem is that it requires more reviewers. Ceph is not the onl=
+y project suffering from this kind of problem and attending the OpenSta=
+ck summit last week reminded me that the sooner it is addressed the bet=
+ter.
+>>=20
+>> After a few IRC discussions some ideas came up and my favorite is th=
+at every developer paid full time to work on Ceph dedicates a daily 15 =
+minutes time slot, time boxed, to review pull requests. Timeboxing is k=
+ind of frustrating because some reviews require more. It basically mean=
+s one has to focus on the pull request for ten minutes at most and take=
+ five minutes to write a useful comment that helps the author moving fo=
+rward. But it also is the only way to make room for a daily activity wi=
+th no risk of postponing it because something more urgent came up.
+>>=20
+>> What do you think ?
+>=20
+> On my calendar, I do have a time slot of one hour each morning to rev=
+iew pull requests and mailing lists but I seldom honor it, especially w=
+hen I'm caught up in other stuff.
+>=20
+> I'll move it over to lunch so that it has no chance in interfering wi=
+th other tasks and try to make a habit of it.
+>=20
+> It would also be interesting to see more community involvement.  I be=
+lieve it would be healthy for the project if we could have (at least) a=
+ portion of reviews being performed by other people besides solely the =
+paid developers/maintainers.
+>=20
+>  -Joao
+>=20
+> --=20
+> Joao Eduardo Luis
+> Software Engineer | http://ceph.com
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+--
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
 the body of a message to majordomo@vger.kernel.org
