@@ -1,89 +1,169 @@
-From: David Zafman <david.zafman@inktank.com>
-Subject: Re: Pull requests : speed up the reviews
-Date: Sun, 9 Nov 2014 21:10:30 -0800
-Message-ID: <13E49F89-936B-4DAA-B0D7-AC501A54EC7C@inktank.com>
-References: <545E53B5.3070600@dachary.org> <545F593E.9010608@redhat.com>
-Mime-Version: 1.0 (Mac OS X Mail 8.0 \(1990.1\))
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: [ceph-users] Ceph on RHEL 7 using teuthology
+Date: Mon, 10 Nov 2014 08:33:45 +0100
+Message-ID: <54606A59.8050608@dachary.org>
+References: <CAFUgD7imyVMGnavAhdJ0-t+1k=JLd8YW5XpSj0uW+p7bpmg=vw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="oO7IILdisFn0BAOAqiIpfxkAjsu42JmAa"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f42.google.com ([209.85.220.42]:35774 "EHLO
-	mail-pa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751947AbaKJFKf convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Nov 2014 00:10:35 -0500
-Received: by mail-pa0-f42.google.com with SMTP id bj1so7476180pad.15
-        for <ceph-devel@vger.kernel.org>; Sun, 09 Nov 2014 21:10:35 -0800 (PST)
-In-Reply-To: <545F593E.9010608@redhat.com>
+Received: from mail2.dachary.org ([91.121.57.175]:33967 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751707AbaKJHd5 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Nov 2014 02:33:57 -0500
+In-Reply-To: <CAFUgD7imyVMGnavAhdJ0-t+1k=JLd8YW5XpSj0uW+p7bpmg=vw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>, Joao Eduardo Luis <joao@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Sarang G <2639431@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--oO7IILdisFn0BAOAqiIpfxkAjsu42JmAa
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-I know I had a couple of pull requests that we weren=92t going to merge=
- until after the giant release.  This may have applied some of the othe=
-r ones too.  In addition, It isn=92t surprising that with a new release=
- some non-release code reviews would be neglected.
+[moving the thread to ceph-devel]
 
-That being said, this is a good time to remind people to dedicate time =
-to code reviews.
+Hi,
 
-David Zafman
-Senior Developer
-http://www.inktank.com
+It would be useful if you could upload the full log somewhere and provide=
+ details about what you did on the machine prior to seeing this error. Th=
+at would help figure out what is wrong.
 
+Cheers
 
-
-
-> On Nov 9, 2014, at 4:08 AM, Joao Eduardo Luis <joao@redhat.com> wrote=
-:
+On 10/11/2014 07:20, Sarang G wrote:
+> Hi,=20
 >=20
-> On 11/08/2014 05:32 PM, Loic Dachary wrote:
->> Hi Ceph,
->>=20
->> In the past few weeks the number of pending pull requests grew from =
-around 20 to over 80. The good thing is that there are more contributio=
-ns, the problem is that it requires more reviewers. Ceph is not the onl=
-y project suffering from this kind of problem and attending the OpenSta=
-ck summit last week reminded me that the sooner it is addressed the bet=
-ter.
->>=20
->> After a few IRC discussions some ideas came up and my favorite is th=
-at every developer paid full time to work on Ceph dedicates a daily 15 =
-minutes time slot, time boxed, to review pull requests. Timeboxing is k=
-ind of frustrating because some reviews require more. It basically mean=
-s one has to focus on the pull request for ten minutes at most and take=
- five minutes to write a useful comment that helps the author moving fo=
-rward. But it also is the only way to make room for a daily activity wi=
-th no risk of postponing it because something more urgent came up.
->>=20
->> What do you think ?
+> I am trying to install ceph on RHEL 7 AWS instance using teuthology.
 >=20
-> On my calendar, I do have a time slot of one hour each morning to rev=
-iew pull requests and mailing lists but I seldom honor it, especially w=
-hen I'm caught up in other stuff.
+> I am facing some dependency issues:
 >=20
-> I'll move it over to lunch so that it has no chance in interfering wi=
-th other tasks and try to make a habit of it.
+> 2014-11-09 22:10:57,269.269 DEBUG:teuthology.orchestra.run:Running [10.=
+15.17.91]: 'sudo yum install ceph-radosgw-0.87 -y'
+> 2014-11-09 22:10:58,223.223 INFO:teuthology.orchestra.run.out:[10.15.17=
+=2E91]: Loaded plugins: amazon-id, rhui-lb
+> 2014-11-09 22:10:59,008.008 INFO:teuthology.orchestra.run.out:[10.15.17=
+=2E91]: Resolving Dependencies
+> 2014-11-09 22:10:59,010.010 INFO:teuthology.orchestra.run.out:[10.15.17=
+=2E91]: --> Running transaction check
+> 2014-11-09 22:10:59,010.010 INFO:teuthology.orchestra.run.out:[10.15.17=
+=2E91]: ---> Package ceph-radosgw.x86_64 1:0.87-665.gb8ec7d7.el7 will be =
+installed
+> 2014-11-09 22:10:59,028.028 INFO:teuthology.orchestra.run.out:[10.15.17=
+=2E91]: --> Processing Dependency: librados2 =3D 1:0.87-665.gb8ec7d7.el7 =
+for package: 1:ceph-radosgw-0.87-665.gb8ec7d7.el7.x86_64
+> 2014-11-09 22:10:59,086.086 INFO:teuthology.orchestra.run.out:[10.15.17=
+=2E91]: --> Processing Dependency: ceph-common =3D 1:0.87-665.gb8ec7d7.el=
+7 for package: 1:ceph-radosgw-0.87-665.gb8ec7d7.el7.x86_64
+> 2014-11-09 22:10:59,088.088 INFO:teuthology.orchestra.run.out:[10.15.17=
+=2E91]: --> Processing Dependency: librados.so.2()(64bit) for package: 1:=
+ceph-radosgw-0.87-665.gb8ec7d7.el7.x86_64
+> 2014-11-09 22:10:59,089.089 INFO:teuthology.orchestra.run.out:[10.15.17=
+=2E91]: --> Processing Dependency: libfcgi.so.0()(64bit) for package: 1:c=
+eph-radosgw-0.87-665.gb8ec7d7.el7.x86_64
+> 2014-11-09 22:10:59,089.089 INFO:teuthology.orchestra.run.out:[10.15.17=
+=2E91]: --> Running transaction check
+> 2014-11-09 22:10:59,090.090 INFO:teuthology.orchestra.run.out:[10.15.17=
+=2E91]: ---> Package ceph-common.x86_64 1:0.87-665.gb8ec7d7.el7 will be i=
+nstalled
+> 2014-11-09 22:10:59,103.103 INFO:teuthology.orchestra.run.out:[10.15.17=
+=2E91]: --> Processing Dependency: python-ceph =3D 1:0.87-665.gb8ec7d7.el=
+7 for package: 1:ceph-common-0.87-665.gb8ec7d7.el7.x86_64
+> 2014-11-09 22:10:59,255.255 INFO:teuthology.orchestra.run.out:[10.15.17=
+=2E91]: --> Processing Dependency: librbd1 =3D 1:0.87-665.gb8ec7d7.el7 fo=
+r package: 1:ceph-common-0.87-665.gb8ec7d7.el7.x86_64
+> 2014-11-09 22:10:59,255.255 INFO:teuthology.orchestra.run.out:[10.15.17=
+=2E91]: --> Processing Dependency: libtcmalloc.so.4()(64bit) for package:=
+ 1:ceph-common-0.87-665.gb8ec7d7.el7.x86_64
+> 2014-11-09 22:10:59,255.255 INFO:teuthology.orchestra.run.out:[10.15.17=
+=2E91]: --> Processing Dependency: librbd.so.1()(64bit) for package: 1:ce=
+ph-common-0.87-665.gb8ec7d7.el7.x86_64
+> 2014-11-09 22:10:59,255.255 INFO:teuthology.orchestra.run.out:[10.15.17=
+=2E91]: --> Processing Dependency: libboost_thread-mt.so.1.53.0()(64bit) =
+for package: 1:ceph-common-0.87-665.gb8ec7d7.el7.x86_64
+> 2014-11-09 22:10:59,256.256 INFO:teuthology.orchestra.run.out:[10.15.17=
+=2E91]: --> Processing Dependency: libboost_system-mt.so.1.53.0()(64bit) =
+for package: 1:ceph-common-0.87-665.gb8ec7d7.el7.x86_64
+> 2014-11-09 22:10:59,256.256 INFO:teuthology.orchestra.run.out:[10.15.17=
+=2E91]: ---> Package ceph-radosgw.x86_64 1:0.87-665.gb8ec7d7.el7 will be =
+installed
+> 2014-11-09 22:10:59,256.256 INFO:teuthology.orchestra.run.out:[10.15.17=
+=2E91]: --> Processing Dependency: libfcgi.so.0()(64bit) for package: 1:c=
+eph-radosgw-0.87-665.gb8ec7d7.el7.x86_64
+> 2014-11-09 22:10:59,256.256 INFO:teuthology.orchestra.run.out:[10.15.17=
+=2E91]: ---> Package librados2.x86_64 1:0.87-665.gb8ec7d7.el7 will be ins=
+talled
+> 2014-11-09 22:10:59,256.256 INFO:teuthology.orchestra.run.out:[10.15.17=
+=2E91]: --> Running transaction check
+> 2014-11-09 22:10:59,256.256 INFO:teuthology.orchestra.run.out:[10.15.17=
+=2E91]: ---> Package boost-system.x86_64 0:1.53.0-18.el7 will be installe=
+d
+> 2014-11-09 22:10:59,257.257 INFO:teuthology.orchestra.run.out:[10.15.17=
+=2E91]: ---> Package boost-thread.x86_64 0:1.53.0-18.el7 will be installe=
+d
+> 2014-11-09 22:10:59,257.257 INFO:teuthology.orchestra.run.out:[10.15.17=
+=2E91]: ---> Package ceph-common.x86_64 1:0.87-665.gb8ec7d7.el7 will be i=
+nstalled
+> 2014-11-09 22:10:59,257.257 INFO:teuthology.orchestra.run.out:[10.15.17=
+=2E91]: --> Processing Dependency: libtcmalloc.so.4()(64bit) for package:=
+ 1:ceph-common-0.87-665.gb8ec7d7.el7.x86_64
+> 2014-11-09 22:10:59,257.257 INFO:teuthology.orchestra.run.out:[10.15.17=
+=2E91]: ---> Package ceph-radosgw.x86_64 1:0.87-665.gb8ec7d7.el7 will be =
+installed
+> 2014-11-09 22:10:59,257.257 INFO:teuthology.orchestra.run.out:[10.15.17=
+=2E91]: --> Processing Dependency: libfcgi.so.0()(64bit) for package: 1:c=
+eph-radosgw-0.87-665.gb8ec7d7.el7.x86_64
+> 2014-11-09 22:10:59,257.257 INFO:teuthology.orchestra.run.out:[10.15.17=
+=2E91]: ---> Package librbd1.x86_64 1:0.87-665.gb8ec7d7.el7 will be insta=
+lled
+> 2014-11-09 22:10:59,258.258 INFO:teuthology.orchestra.run.out:[10.15.17=
+=2E91]: ---> Package python-ceph.x86_64 1:0.87-665.gb8ec7d7.el7 will be i=
+nstalled
+> 2014-11-09 22:10:59,376.376 INFO:teuthology.orchestra.run.out:[10.15.17=
+=2E91]: --> Finished Dependency Resolution
+> 2014-11-09 22:10:59,385.385 INFO:teuthology.orchestra.run.out:[10.15.17=
+=2E91]:  You could try using --skip-broken to work around the problem
+> 2014-11-09 22:10:59,873.873 INFO:teuthology.orchestra.run.out:[10.15.17=
+=2E91]:  You could try running: rpm -Va --nofiles --nodigest
+> 2014-11-09 22:10:59,900.900 ERROR:teuthology.parallel:Exception in para=
+llel execution
+> Traceback (most recent call last):
+>   File "/home/pras/storm-1-0-test/qe/teuthology/teuthology/parallel.py"=
+, line 82, in __exit__
 >=20
-> It would also be interesting to see more community involvement.  I be=
-lieve it would be healthy for the project if we could have (at least) a=
- portion of reviews being performed by other people besides solely the =
-paid developers/maintainers.
 >=20
->  -Joao
+> Please let me know if there are any modules to be installed before star=
+ting teuthology?
 >=20
-> --=20
-> Joao Eduardo Luis
-> Software Engineer | http://ceph.com
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Regards,
+> Pras
+>=20
+>=20
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>=20
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+
+
+
+
+--oO7IILdisFn0BAOAqiIpfxkAjsu42JmAa
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlRgalkACgkQ8dLMyEl6F20srACgusQERkZ6bzSJiXyTZPAulZ18
+wrwAniFwr0bUXP3nuG5CmXsc5dIYzWIT
+=fYmo
+-----END PGP SIGNATURE-----
+
+--oO7IILdisFn0BAOAqiIpfxkAjsu42JmAa--
