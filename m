@@ -1,52 +1,107 @@
-From: Giulio Fidente <gfidente@redhat.com>
-Subject: Re: Ceph & Cinder & HA
-Date: Mon, 10 Nov 2014 12:50:27 +0100
-Message-ID: <5460A683.9040509@redhat.com>
-References: <545B9A53.4040502@dachary.org> <DAB091EE-E314-40D3-99F3-710E91ECC4D2@iweb.com> <545C927E.9010807@redhat.com> <CAOGLoJMMHZ3q9VxAG0B0ge6kaVdKZ1xVZLrjAFWZUGHf6kAeew@mail.gmail.com> <11F50ACF-55E9-4D2F-AD08-814FE5998089@enovance.com> <546098C5.4070709@dachary.org>
+From: "Xue, Chendi" <chendi.xue@intel.com>
+Subject: RE: ObjectStore collections
+Date: Mon, 10 Nov 2014 12:44:22 +0000
+Message-ID: <C8CF870384EBCF4CAB89D2041A5C80B3011AB457@SHSMSX101.ccr.corp.intel.com>
+References: <C8CF870384EBCF4CAB89D2041A5C80B30119DCC8@SHSMSX101.ccr.corp.intel.com>
+	<CACJqLyaL4COg6CvkNF1jm_uZSrN96mP7SmvkO0FaZRZEN_r9vQ@mail.gmail.com>
+	<alpine.DEB.2.00.1411081042010.15135@cobra.newdream.net>
+ <CACJqLyYEL5-DfUkNFQeOdr6eseD8eYqZ=R+55L5ybNNWyf4yxA@mail.gmail.com>
+ <C8CF870384EBCF4CAB89D2041A5C80B3011A7E51@SHSMSX101.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:47275 "EHLO mx1.redhat.com"
+Received: from mga11.intel.com ([192.55.52.93]:14218 "EHLO mga11.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752108AbaKJLvk (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 10 Nov 2014 06:51:40 -0500
-In-Reply-To: <546098C5.4070709@dachary.org>
+	id S1752645AbaKJMpw (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 10 Nov 2014 07:45:52 -0500
+In-Reply-To: <C8CF870384EBCF4CAB89D2041A5C80B3011A7E51@SHSMSX101.ccr.corp.intel.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>, Sebastien Han <sebastien.han@enovance.com>, justin@erenkrantz.com
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Xue, Chendi" <chendi.xue@intel.com>, Haomai Wang <haomaiwang@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@newdream.net>
 
-On 11/10/2014 11:51 AM, Loic Dachary wrote:
->
->
-> On 10/11/2014 11:34, Sebastien Han wrote:
->> Indeed, that=E2=80=99s what we discussed with Giulio, using HAProxy =
-for the Monitors is a bit overkill since the client is natively able to=
- switch between different monitor source.
->>
->> Loic, maybe you can elaborate a bit more on the usage of HAProxy for=
- the monitors?
->
-> Hi Sebastien,
->
-> I can't elaborate because I know nothing about HAProxy (well, close t=
-o nothing ;-). I'd like to learn more about how HA (via HAProxy or some=
-thing else) can leverage Ceph in a meaningfull way thouhg, hence my int=
-erest for the topic.
-
-Thanks all for helping.
-
-Loic explained requests for the non-leader monitors go to the monitor=20
-anyway in which case I understand it makes more sense to avoid the=20
-complication of balancing the monitors.
-
---=20
-Giulio Fidente
-GPG KEY: 08D733BA
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+TWFkZSBzb21lIGNoYW5nZXM6ICANCkJ1ZmZlclRyYW5zYWN0aW9uOjpidWZmZXJzIGlzIG5vdyB1
+c2luZyBtYXA8IDxjb2xsX3QsIGdob2JqZWN0X3Q+LCBtYXA8cGFpcjxwcmVmaXgsIGtleT4sIGJ1
+ZmZlcmxpc3Q+ID4gdG8gcmVjb3JkcyBJT3MgaW4gb25lIHRyYW5zYWN0aW9uLCBjb2RlcyBpcyB1
+bmRlciB0ZXN0IHdpdGggNzAwcyBzZXEgd3JpdGUgNjRrIGFuZCA3MDBzIHJhbmRvbSB3cml0ZSA0
+ayB3aXRob3V0IG9zZCBjcmFzaC4NCg0KQmVzdCBSZWdhcmRzLA0KLUNoZW5kaQ0KDQotLS0tLU9y
+aWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5v
+cmcgW21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9m
+IFh1ZSwgQ2hlbmRpDQpTZW50OiBTdW5kYXksIE5vdmVtYmVyIDksIDIwMTQgMTA6MzIgUE0NClRv
+OiBIYW9tYWkgV2FuZw0KQ2M6IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnOyBTYWdlIFdlaWwN
+ClN1YmplY3Q6IFJFOiBPYmplY3RTdG9yZSBjb2xsZWN0aW9ucw0KDQpIaSwgSGFvbWFpDQoNCkFz
+IGRpc2N1c3NlZCB0aGlzIGFmdGVybm9vbiwgSSBtb3ZlZCBidWZmZXJzIGZyb20gc3RyaXBfaGVh
+ZGVyIHRvIEJ1ZmZlclRyYW5zYWN0aW9uDQoNClRoZSBjb2RlcyBoYXMgYmVlbiB0ZXN0ZWQsIHRo
+ZXJlIHNlZW1zIHRvIGJlIGEgc2xpZ2h0IHBlcmZvcm1hbmNlIGVuaGFuY2VtZW50IEFmdGVyIGEg
+cHJldHR5IGxvbmcgdGltZSBzZXEvcmFuZG9tIHdyaXRlIHRlc3QsIEkgb2JzZXJ2ZWQgbm8gc2Vn
+bWVudCBmYXVsdCBhbmQgZ3Jvd2luZyBtZW1vcnkgdXNhZ2UgcHJvYmxlbSBvciBhbnkgb3RoZXIg
+b3NkIGNyYXNoIHByb2JsZW0uDQoNCkhvcGUgeW91IGNhbiBoZWxwIHRvIHJldmlldyB0aGUgY29k
+ZXMsIHRoYW5rcw0KDQpodHRwczovL2dpdGh1Yi5jb20vY2VwaC9jZXBoL3B1bGwvMjg4OQ0KIA0K
+PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0NCkZvciBvdGhlcnMsIHRoZXJlIGlz
+IGEgYnJpZWYgIGV4cGxhbmF0aW9uOg0KDQonc3RyaXBfaGVhZGVyJyBpbiBLZXlWYWx1ZVN0b3Jl
+IGlzIHVzZWQgdG8gY2FjaGUgYWxsIGhlYWRlcnMsICdidWZmZXJzJyBpcyB1c2VkIHRvIGVuc3Vy
+ZSBhbGwgaW8gaW4gb25lIHRyYW5zYWN0aW9uIGNhbiByZWFkIHRoZSBsYXN0ZXN0IHVwZGF0ZS4N
+Cg0KTW92ZSBidWZmZXJzIGZyb20gc3RyaXBfaGVhZGVyIHRvIEJ1ZmZlclRyYW5zYWN0aW9uIGNh
+biBlbnN1cmUgJ2J1ZmZlcnMnIGJlaW5nIGRlc3RydWN0ZWQgYWZ0ZXIgdGhlIHRyYW5zYWN0aW9u
+IGJlaW5nIHN1Ym1pdHRlZCwgd2hpY2ggcHJldmVudCBncm93aW5nICdzdHJpcF9oZWFkZXItPmJ1
+ZmZlcnMnIGNhdXNpbmcgT09NIHByb2JsZW0uDQoNCkFsc28sIGZvciBhbGwgJ21ldGEgY29sbGVj
+dGlvbicgd2lsbCBiZSBjYWNoZWQgaW4gc3RyaXBfaGVhZGVyLCBhbmQgdGhlcmUgbGFja3Mgb2Yg
+bG9jayBvZiBwYXJhbGxlbCBpbyBhY2Nlc3NpbmcgJ21ldGEgY29sbGVjdGlvbicsIG11bHRpLXRo
+cmVhZCBhY2Nlc3NpbmcgdGhlICdtZXRhIGNvbGxlY3Rpb24nIHN0cmlwX2hlYWRlci0+YnVmZmVy
+cyBjYXVzZXMgc2VnbWVudGF0aW9uIGZhdWx0LCBzbyBtb3ZpbmcgJ2J1ZmZlcnMnIGZyb20gc3Ry
+aXBfaGVhZGVyIHRvIEJ1ZmZlclRyYW5zYWN0aW9uIGNhbiBhbHNvIHByZXZlbnQgc3VjaCBzY2Vu
+YXJpby4gDQoNCkJlc3QgUmVnYXJkcywNCi1DaGVuZGkNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdl
+LS0tLS0NCkZyb206IEhhb21haSBXYW5nIFttYWlsdG86aGFvbWFpd2FuZ0BnbWFpbC5jb21dDQpT
+ZW50OiBTdW5kYXksIE5vdmVtYmVyIDksIDIwMTQgNToyMSBQTQ0KVG86IFNhZ2UgV2VpbA0KQ2M6
+IFh1ZSwgQ2hlbmRpOyBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KU3ViamVjdDogUmU6IE9i
+amVjdFN0b3JlIGNvbGxlY3Rpb25zDQoNCk9uIFN1biwgTm92IDksIDIwMTQgYXQgNTo1OSBBTSwg
+U2FnZSBXZWlsIDxzYWdlQG5ld2RyZWFtLm5ldD4gd3JvdGU6DQo+IE9uIFNhdCwgOCBOb3YgMjAx
+NCwgSGFvbWFpIFdhbmcgd3JvdGU6DQo+PiBBcyBmb3IgT09NLCBJIHRoaW5rIHRoZSByb290IGNh
+dXNlIGlzIHRoZSBtaXN0YWtlIGNvbW1pdCBhYm92ZSB0b28uDQo+PiBCZWNhdXNlICJtZXRhIiBj
+b2xsZWN0aW9uIHdpbGwgYmUgdXBkYXRlZCBlYWNoIHRyYW5zYWN0aW9uIGFuZCANCj4+IFN0cmlw
+T2JqZWN0SGVhZGVyOjpidWZmZXJzIHdpbGwgYmUgYWx3YXlzIGtlcHQgaW4gbWVtb3J5IGJlY2F1
+c2Ugb2YgDQo+PiB0aGUgc3RyYXRlZ3kgb2YgY2FjaGUuIFNvIHRoaXMgb2JqZWN0J3MgYnVmZmVy
+cyB3aWxsIGtlZXAgaW4gDQo+PiBpbmNyZWFzaW5nIGFsbCB0aGUgdGltZS4gU28gSSB0aGluayBp
+ZiB3ZSBhdm9pZCBjYWNoZSAibWV0YSINCj4+IGNvbGxlY3Rpb24ncyBvYmplY3Qgd2lsbCBqdXN0
+IGJlIGZpbmUuIEFsdGhvdWdoIHdlIGRvbid0IG9ic2VydmUgT09NIA0KPj4gZm9yIHByZXZpb3Vz
+IHJlbGVhc2UgZXhjZXB0IHRoaXMgbWlzdGFrZSBjb21taXQsIEkgcHJlZmVyIHRvIGFkZCANCj4+
+IGNvZGVzIHRvIGRpc2NhcmQgImJ1ZmZlcnMiIGVhY2ggc3VibWl0IHRyYW5zYWN0aW9uIHRpbWUg
+dG8gYXZvaWQgDQo+PiBwb3RlbnRpYWwgdW5wcmVkaWN0ZWQgbWVtb3J5IGdyb3dpbmcuDQo+Pg0K
+Pj4gRG8geW91IGhhdmUgYSBtb3JlIGNsZWFyIGltcGwgYWJvdXQgaXQ/IEknbSBqdXN0IHRoaW5r
+aW5nIGEgYmV0dGVyIA0KPj4gd2F5IHRvIHNvbHZlIHRoZSBwZXJmb3JtYW5jZSBib3R0bGVuZWNr
+IGZvciAibWV0YSIgY29sbGVjdGlvbnMuDQo+DQo+IEkgd291bGQgcmVhbGx5IGxpa2UgdG8gc2Vl
+IGlmIHdlIGNhbiBlbGltaW5hdGUgY29sbGVjdGlvbnMgZnJvbSB0aGUgDQo+IEFQSSBlbnRpcmVs
+eS4gIE9yLCBwZXJoYXBzIG1vcmUgaW1wb3J0YW50bHksIGlmIHRoYXQgd291bGQgYmUgaGVscGZ1
+bC4NCj4gRm9yIHRoZSBtb3N0IHBhcnQsIGhvYmplY3RfdCdzIGFscmVhZHkgc29ydCB0aGVtc2Vs
+dmVzIGludG8gDQo+IGNvbGxlY3Rpb25zIGJhc2VkIG9uIHRoZSBoYXNoLiAgVGhlIGV4Y2VwdGlv
+bnMgYXJlOg0KPg0KPiAtIFRoZSAnbWV0YScgY29sbGVjdGlvbi4gIE1vc3RseSB0aGlzIGluY2x1
+ZGVzIHRoZSBwZyBsb2dzIGFuZCBwZyBpbmZvIA0KPiBvYmplY3RzICh3aGljaCBhcmUgcGVyLXBn
+IGFuZCB3b3VsZCBvdGhlcndpc2UgbmVlZCBubyBsb2NraW5nKSBhbmQgdGhlIA0KPiBvc2RtYXAg
+b2JqZWN0cy4NCj4NCj4gLSBjb2xsZWN0aW9uX21vdmUgYW5kIGNvbGxlY3Rpb25fbW92ZV9yZW5h
+bWUuICBJIHRoaW5rIGlmIHdlIG1vdmUgDQo+IGV2ZXJ5dGhpbmcgdG8gY29sbGVjdGlvbl9tb3Zl
+X3JlbmFtZSBhbmQgdXNlIHRlbXBvcmFyeSBvYmplY3RzIHdpdGggDQo+IHVuaXF1ZSBuYW1lcyBm
+b3IgZXZlcnl0aGluZyAoSSB0aGluayBpbi1wcm9ncmVzcyByZWNvdmVyeSBvYmplY3RzIGlzIA0K
+PiB0aGUgbWFpbiB1c2VyIG9mIGNvbGxlY3Rpb25fbW92ZSkgdGhlbiB0aGlzIHJlYWxseSBqdXN0
+IHR1cm5zIGludG8gYSANCj4gcmVuYW1lIG9wZXJhdGlvbi4NCj4NCj4gLSBvYmplY3QgbGlzdGlu
+ZyBpcyBjdXJyZW50bHkgaW4gdGVybXMgb2YgcGcsIGJ1dCBjb3VsZCBqdXN0IGFzIGVhc2lseSAN
+Cj4gc3BlY2lmeSBhIGhhc2ggcmFuZ2UuDQo+DQo+IC0gY29sbGVjdGlvbiBhdHRyaWJ1dGVzIGNh
+biBiZSBtb3ZlZCB0byB0aGUgcGdpbmZvIG9iamVjdHMuDQo+DQo+IEl0IHNvdW5kcyBsaWtlIHRo
+ZSBwcm9ibGVtIGluIEtleVZhbHVlU3RvcmUgaXMgdGhhdCB0aGUgcGdsb2cvcGdpbmZvIA0KPiBv
+YmplY3RzIGFyZSB3cml0dGVuIGJ5IHRyYW5zYWN0aW9ucyBpbiBhbGwgUEdzIGJ1dCB0aGUgcGVy
+LWNvbGxlY3Rpb24gDQo+IGluZGV4L2NhY2hlIHN0cnVjdHVyZXMgd2VyZW4ndCBiZWluZyBsb2Nr
+ZWQuICBJZiB3ZSBjYW4gZmluZCBhIHdheSB0byANCj4gZml0IHRoZXNlIGludG8gdGhlIHNvcnRl
+ZCBoYXNoIGluIHRoZSByaWdodCBwb3NpdGlvbiB0aGF0IGlzIA0KPiBjb25jZXB0dWFsbHkgc2lt
+cGxlci4gIEJ1dCBJJ20gbm90IHN1cmUgaWYgdGhhdCBzaW1wbGljaXR5IGFjdHVhbGx5IA0KPiBo
+ZWxwcyB3aXRoIHRoZSBpbXBsZW1lbnRhdGlvbiwgd2hlcmUgdGhlIGRhdGEgc3RydWN0dXJlIGxv
+Y2tpbmcgaXMgdGhlIGltcG9ydGFudCBwYXJ0Lg0KPiBQZXJoYXBzIHdlIG5lZWQgdG8ga2VlcCBh
+IGNvbGxlY3Rpb24gY29uY2VwdCBzaW1wbHkgZm9yIHRoYXQgcHVycG9zZSANCj4gYW5kIHRoZSBv
+bmx5IHJlYWwgcHJvYmxlbSBpcyAnbWV0YSc/DQoNCk9yaWdpbmFsLCBLZXl2YWx1ZVN0b3JlIGlz
+IHRydWUgYnkganVzdCBhdm9pZGluZyBjYWNoZSAibWV0YSINCmNvbGxlY3Rpb24gZm9yIGNvbmN1
+cnJlbnQgcHVycG9zZS4NCg0KSSdtIGp1c3QgdGhpbmtpbmcgYWJvdXQgaXMgdGhlcmUgYSB3YXkg
+dG8gbWFrZSAibWV0YSIgY29sbGVjdGlvbiBvcHMgbW9yZSBwYXJhbGxlbGl6YXRpb24uIEJUVywg
+RmlsZVN0b3JlIGFsc28gY2FuIGdldCB0aGUgYmVuZWZpdHMgYmVjYXVzZSBvZiB0aGUgc2FtZSBy
+ZWFzb24uDQoNCj4NCj4gc2FnZQ0KDQoNCg0KLS0NCkJlc3QgUmVnYXJkcywNCg0KV2hlYXQNChMg
+IOy5uxwgJiB+ICYgGCAgKy0gIN22FyAgdyAgy5sgICBtIB4gF14gIGIgIF5uIHIgICB6IBogIGgg
+ICAgJiAgHiBHICAgaCADKCDpmo4g3aJqIiAgGiAbbSAgICAgeiDeliAgIGYgICBoICAgfiBtIA0K
