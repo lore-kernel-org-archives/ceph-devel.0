@@ -1,30 +1,60 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Pull requests : speed up the reviews
-Date: Tue, 11 Nov 2014 10:07:32 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1411111003550.24475@cobra.newdream.net>
-References: <545E53B5.3070600@dachary.org> <CAC6JEv_xbv54VoFfU+6rOKS7ytR7TbzJM3NZSk_sVKjpDEyQFA@mail.gmail.com> <alpine.DEB.2.00.1411101116110.24475@cobra.newdream.net> <5461171F.8080401@dachary.org>
+From: "Blinick, Stephen L" <stephen.l.blinick@intel.com>
+Subject: RE: 11/4/2014 Weekly Ceph Performance Meeting IS ON!
+Date: Tue, 11 Nov 2014 20:38:00 +0000
+Message-ID: <3649A15A2562B54294DE14BCE5AC79120AAEBDE8@FMSMSX106.amr.corp.intel.com>
+References: <924d8d4e-6e88-4dde-8ad5-f7aef89eb55a@mailpro>
+ <5458F519.4080300@redhat.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:54680 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751018AbaKKSHc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Nov 2014 13:07:32 -0500
-In-Reply-To: <5461171F.8080401@dachary.org>
+Received: from mga11.intel.com ([192.55.52.93]:60150 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751295AbaKKUiC (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 11 Nov 2014 15:38:02 -0500
+In-Reply-To: <5458F519.4080300@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Gregory Farnum <greg@gregs42.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Mark Nelson <mark.nelson@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-We spent some time going through the backlog yesterday and made quite a 
-bit of progress (down to 57 open).  A few changes:
-
-- got rid of the firefly, giant, dumpling, etc. tags
-- added firefly, giant, dumpling, hammer, next 'milestones'
-- rgw and rbd projects have all items assigned
-- only 14 unassigned
-
-I also created a wip-sam-testing label to make it a bit easier to track 
-what Sam is currently testing (tho nothing is tagged that way yet).
-
-sage
+SGksIHNvcnJ5IGlmIEkgbWlzc2VkIGl0IGJ1dCBpcyB0aGUgcmVjb3JkaW5nIGZvciB0aGUgTm92
+IDV0aCBtZWV0aW5nIG9ubGluZSBzb21ld2hlcmU/DQoNClRoYW5rcywNClN0ZXBoZW4NCg0KLS0t
+LS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJu
+ZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFs
+ZiBPZiBNYXJrIE5lbHNvbg0KU2VudDogVHVlc2RheSwgTm92ZW1iZXIgNCwgMjAxNCA4OjQ4IEFN
+DQpUbzogQWxleGFuZHJlIERFUlVNSUVSOyBNYXJrIE5lbHNvbg0KQ2M6IGNlcGgtZGV2ZWxAdmdl
+ci5rZXJuZWwub3JnDQpTdWJqZWN0OiBSZTogMTEvNC8yMDE0IFdlZWtseSBDZXBoIFBlcmZvcm1h
+bmNlIE1lZXRpbmcgSVMgT04hDQoNCkhpIEFsZXgsDQoNCkRvaCEgIFNvcnJ5IGV2ZXJ5b25lLCBB
+bGV4IGlzIHJpZ2h0ISAgMTEvNS8yMDE0IQ0KDQpJIHdpbGwgcmVzZW5kIGFuZCBmaXguDQoNCk1h
+cmsNCg0KT24gMTEvMDQvMjAxNCAwOToyMSBBTSwgQWxleGFuZHJlIERFUlVNSUVSIHdyb3RlOg0K
+PiBIaSBNYXJrLA0KPg0KPiBJcyBpdCB0b2RheSA/ICgxMS80LzIwMTQgZnJvbSB5b3UgbWFpbCBz
+dWJqZWN0KQ0KPg0KPiBvciB0b21tb3JvdyAoMjAxNC0xMS0wNSBpbiBldGhlcnBhZCkNCj4NCj4N
+Cj4gLS0tLS0gTWFpbCBvcmlnaW5hbCAtLS0tLQ0KPg0KPiBEZTogIk1hcmsgTmVsc29uIiA8bWFy
+ay5uZWxzb25AaW5rdGFuay5jb20+DQo+IMOAOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0K
+PiBFbnZvecOpOiBNYXJkaSA0IE5vdmVtYnJlIDIwMTQgMTY6MTY6MzINCj4gT2JqZXQ6IDExLzQv
+MjAxNCBXZWVrbHkgQ2VwaCBQZXJmb3JtYW5jZSBNZWV0aW5nIElTIE9OIQ0KPg0KPiBIaSBBbGws
+DQo+DQo+IDhBTSBQU1QgYXMgdXN1YWwhIFdlIGFyZSBnb2luZyB0byB0cnkgYSBsaXR0bGUgZXhw
+ZXJpbWVudCBhbmQgbGVhdmUgDQo+IHRoZSBBZ2VuZGEgYmxhbmsgZm9yIHlvdSBndXlzIHRvIGZp
+bGwgaW4uIElmIHlvdSBhcmUgcGxhbm5pbmcgb24gDQo+IGF0dGVuZGluZyBhbmQgaGF2ZSBzb21l
+dGhpbmcgeW91IHdhbnQgdG8gZGlzY3VzcywgcGxlYXNlIGFkZCBpdCENCj4NCj4gV2UndmUgYWxz
+byBhZGRlZCBhIHByb2plY3RzIGFuZCBiYWNrbG9nIHNlY3Rpb24gYXQgdGhlIHRvcCBvZiB0aGUg
+DQo+IGV0aGVycGFkIGZvciBvbi1nb2luZyBlZmZvcnRzIGFuZCB0aGUgZm9sa3MgdGhhdCBhcmUg
+d29ya2luZyBvbiB0aGVtLg0KPiBGb3IgYW55IHByb2plY3RzIG9yIG5hbWVzIG9mIHBlb3BsZSB3
+ZSd2ZSBtaXNzZWQsIHBsZWFzZSB1cGRhdGUhDQo+DQo+IEhlcmUncyB0aGUgbGlua3M6DQo+DQo+
+IEV0aGVycGFkIFVSTDoNCj4gaHR0cDovL3BhZC5jZXBoLmNvbS9wL3BlcmZvcm1hbmNlX3dlZWts
+eQ0KPg0KPiBUbyBqb2luIHRoZSBNZWV0aW5nOg0KPiBodHRwczovL2JsdWVqZWFucy5jb20vMjY4
+MjYxMDQ0DQo+DQo+IFRvIGpvaW4gdmlhIEJyb3dzZXI6DQo+IGh0dHBzOi8vYmx1ZWplYW5zLmNv
+bS8yNjgyNjEwNDQvYnJvd3Nlcg0KPg0KPiBUbyBqb2luIHdpdGggTHluYzoNCj4gaHR0cHM6Ly9i
+bHVlamVhbnMuY29tLzI2ODI2MTA0NC9seW5jDQo+DQo+DQo+IFRvIGpvaW4gdmlhIFJvb20gU3lz
+dGVtOg0KPiBWaWRlbyBDb25mZXJlbmNpbmcgU3lzdGVtOiBiam4udmMgLW9yLSAxOTkuNDguMTUy
+LjE1MiBNZWV0aW5nIElEOiANCj4gMjY4MjYxMDQ0DQo+DQo+IFRvIGpvaW4gdmlhIFBob25lOg0K
+PiAxKSBEaWFsOg0KPiArMSA0MDggNzQwIDcyNTYNCj4gKzEgODg4IDI0MCAyNTYwKFVTIFRvbGwg
+RnJlZSkNCj4gKzEgNDA4IDMxNyA5MjUzKEFsdGVybmF0ZSBOdW1iZXIpDQo+IChzZWUgYWxsIG51
+bWJlcnMgLSBodHRwOi8vYmx1ZWplYW5zLmNvbS9udW1iZXJzKQ0KPiAyKSBFbnRlciBDb25mZXJl
+bmNlIElEOiAyNjgyNjEwNDQNCj4NCj4gTWFyaw0KPg0KDQotLQ0KVG8gdW5zdWJzY3JpYmUgZnJv
+bSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluIHRo
+ZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFq
+b3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRt
+bA0K
