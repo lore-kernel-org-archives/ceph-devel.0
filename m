@@ -1,119 +1,110 @@
-From: Mustafa Muhammad <mustafaa.alhamdaani@gmail.com>
-Subject: Re: radosgw buffer overflow
-Date: Tue, 11 Nov 2014 14:10:26 +0300
-Message-ID: <CAMWPydSenZzKD+zwbGTi_ZS3KU_bYJTkC4gdk4ojdgsU6dO1gQ@mail.gmail.com>
-References: <CAMWPydSW-JAPrRx1ozzW-=b9F==Zs-x-iFTy47RwatKa0c_ggA@mail.gmail.com>
-	<CABBk=J_i_kwpGsaztD5+k_e9ZdOb5keCfuBkFziXEYDCAhBsZg@mail.gmail.com>
+From: Ilya Dryomov <ilya.dryomov@inktank.com>
+Subject: Re: [PATCH] libceph: require cephx message signature by default
+Date: Tue, 11 Nov 2014 16:49:19 +0400
+Message-ID: <CALFYKtA7agWzo5h-LnQFpTvcd_d4RUsW8U2jwYDLTFb4+cpXLg@mail.gmail.com>
+References: <1415695109-4698-1-git-send-email-zyan@redhat.com>
+	<CALFYKtB7fHNDdW1UFecoq6O7DY=UEcAmGBLvw1NCv=nDTee5kQ@mail.gmail.com>
+	<553E9F66-73DC-4BE2-A473-8DBEDCE0CA14@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f169.google.com ([209.85.212.169]:49458 "EHLO
-	mail-wi0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754074AbaKKLK1 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Nov 2014 06:10:27 -0500
-Received: by mail-wi0-f169.google.com with SMTP id n3so1419260wiv.2
-        for <ceph-devel@vger.kernel.org>; Tue, 11 Nov 2014 03:10:26 -0800 (PST)
-In-Reply-To: <CABBk=J_i_kwpGsaztD5+k_e9ZdOb5keCfuBkFziXEYDCAhBsZg@mail.gmail.com>
+Received: from mail-qc0-f175.google.com ([209.85.216.175]:50679 "EHLO
+	mail-qc0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751302AbaKKMtT convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Nov 2014 07:49:19 -0500
+Received: by mail-qc0-f175.google.com with SMTP id b13so8216523qcw.20
+        for <ceph-devel@vger.kernel.org>; Tue, 11 Nov 2014 04:49:19 -0800 (PST)
+In-Reply-To: <553E9F66-73DC-4BE2-A473-8DBEDCE0CA14@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: =?UTF-8?B?5Lil5q2j?= <zyan@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Tue, Nov 11, 2014 at 1:49 AM, Yehuda Sadeh <yehuda@redhat.com> wrote:
-> On Mon, Nov 10, 2014 at 12:45 PM, Mustafa Muhammad
-> <mustafaa.alhamdaani@gmail.com> wrote:
->> Hi,
->> I am using radosgw to connect to my ceph cluster, I am testing it and
->> with large number of requests, I get:
->> *** buffer overflow detected ***: /bin/radosgw terminated
->> in the syslog.
->> I use CentOS 7, and this is the some of the last lines of the log:
->>
->>  ceph version 0.80.5 (38b73c67d375a2552d8ed67843c8a65c2c0feba6)
->>  1: /bin/radosgw() [0x5daaf6]
->>  2: (()+0xf130) [0x7f177cd4e130]
->>  3: (gsignal()+0x39) [0x7f177bf905c9]
->>  4: (abort()+0x148) [0x7f177bf91cd8]
->>  5: (()+0x75dd7) [0x7f177bfd0dd7]
->>  6: (__fortify_fail()+0x37) [0x7f177c0688f7]
->>  7: (()+0x10bac0) [0x7f177c066ac0]
->>  8: (()+0x10d867) [0x7f177c068867]
->>  9: (OS_Accept()+0xc1) [0x7f177d4a18b1]
->>  10: (FCGX_Accept_r()+0x9c) [0x7f177d49f91c]
->>  11: (RGWFCGXProcess::run()+0x1c8) [0x4c9318]
->>  12: (RGWProcessControlThread::entry()+0xe) [0x4cc25e]
->>  13: (()+0x7df3) [0x7f177cd46df3]
->>  14: (clone()+0x6d) [0x7f177c05101d]
->>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
->> needed to interpret this.
->>
->> --- logging levels ---
->>    0/ 5 none
->>    0/ 1 lockdep
->>    0/ 1 context
->>    1/ 1 crush
->>    1/ 5 mds
->>    1/ 5 mds_balancer
->>    1/ 5 mds_locker
->>    1/ 5 mds_log
->>    1/ 5 mds_log_expire
->>    1/ 5 mds_migrator
->>    0/ 1 buffer
->>    0/ 1 timer
->>    0/ 1 filer
->>    0/ 1 striper
->>    0/ 1 objecter
->>    0/ 5 rados
->>    0/ 5 rbd
->>    0/ 5 journaler
->>    0/ 5 objectcacher
->>    0/ 5 client
->>    0/ 5 osd
->>    0/ 5 optracker
->>    0/ 5 objclass
->>    1/ 3 filestore
->>    1/ 3 keyvaluestore
->>    1/ 3 journal
->>    0/ 5 ms
->>    1/ 5 mon
->>    0/10 monc
->>    1/ 5 paxos
->>    0/ 5 tp
->>    1/ 5 auth
->>    1/ 5 crypto
->>    1/ 1 finisher
->>    1/ 5 heartbeatmap
->>    1/ 5 perfcounter
->>    1/ 5 rgw
->>    1/ 5 javaclient
->>    1/ 5 asok
->>    1/ 1 throttle
->>   -2/-2 (syslog threshold)
->>   -1/-1 (stderr threshold)
->>   max_recent     10000
->>   max_new         1000
->>   log_file /var/log/ceph/radosgw.log
->> --- end dump of recent events ---
+On Tue, Nov 11, 2014 at 3:22 PM, =E4=B8=A5=E6=AD=A3 <zyan@redhat.com> w=
+rote:
 >
-> This might be an issue with the fastcgi library that radosgw uses (not
-> sure which one and what version is used in centos 7). How many
-> concurrent requests does it handle when it fails? You can try testing
-> it with the standalone web server (civetweb), see how it behaves.
-I think I am using fcgi 2.4.0, I use nginx with "fastcgi_buffering
-off;" so it doesn't touch the disks.
-Somtimes it handles 4000 connections, sometimes 1000.
-I want to test civetweb but couldn't find any info about how to do so,
-can you please give me a link to docs or something.
+> =E5=9C=A8 2014=E5=B9=B411=E6=9C=8811=E6=97=A5=EF=BC=8C17:51=EF=BC=8CI=
+lya Dryomov <ilya.dryomov@inktank.com> =E5=86=99=E9=81=93=EF=BC=9A
+>
+> On Tue, Nov 11, 2014 at 11:38 AM, Yan, Zheng <zyan@redhat.com> wrote:
+>
+> Signed-off-by: Yan, Zheng <zyan@redhat.com>
+> ---
+> include/linux/ceph/libceph.h |  1 +
+> net/ceph/ceph_common.c       | 13 +++++++++++++
+> 2 files changed, 14 insertions(+)
+>
+> diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libcep=
+h.h
+> index d293f7e..8b11a79 100644
+> --- a/include/linux/ceph/libceph.h
+> +++ b/include/linux/ceph/libceph.h
+> @@ -29,6 +29,7 @@
+> #define CEPH_OPT_NOSHARE          (1<<1) /* don't share client with o=
+ther
+> sbs */
+> #define CEPH_OPT_MYIP             (1<<2) /* specified my ip */
+> #define CEPH_OPT_NOCRC            (1<<3) /* no data crc on writes */
+> +#define CEPH_OPT_NOMSGAUTH       (1<<4) /* not require cephx message
+> signature */
+>
+> #define CEPH_OPT_DEFAULT   (0)
+>
+> diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
+> index d361a274..b22d82c 100644
+> --- a/net/ceph/ceph_common.c
+> +++ b/net/ceph/ceph_common.c
+> @@ -237,6 +237,8 @@ enum {
+>        Opt_noshare,
+>        Opt_crc,
+>        Opt_nocrc,
+> +       Opt_cephx_require_signature,
+> +       Opt_cephx_require_no_signature,
+> };
+>
+> static match_table_t opt_tokens =3D {
+> @@ -255,6 +257,8 @@ static match_table_t opt_tokens =3D {
+>        {Opt_noshare, "noshare"},
+>        {Opt_crc, "crc"},
+>        {Opt_nocrc, "nocrc"},
+> +       {Opt_cephx_require_signature, "cephx_require_signature"},
+> +       {Opt_cephx_require_no_signature, "cephx_require_no_signature"=
+},
+>
+>
+> Maybe "cephx_require_signatures", "nocephx_require_signatures" ?  It
+> would (almost) match injectargs and be more in line with general moun=
+t
+> option conventions.
+>
+>
+> nocephx_require_signature looks wired. I don=E2=80=99t like it. how a=
+bout
+> cephx_not_require_signaure.
 
-Thank you.
+=46irst, whatever we settle on should end with "_signatures", not
+"_signature" because that's how it's spelled out in config_opts.h.
 
-Mustafa
->>
->> P.S. I get lots of errors like:
->> RGWObjManifest::operator++(): result: ofs=20971520 stripe_ofs=20971520
->> part_ofs=0 rule->part_size=104857600
->
-> This is just a too verbose log message, not necessarily pointing at
-> anything wrong.
->
-> Thanks,
-> Yehuda
+The second issue is how to express negation.  For mount options it's
+conventional to have a "no" prepended.  Now, whether or not that "no"
+should be separated with an underscore is debatable, mount(8) man page
+has examples of both:
+
+auto_da_alloc/noauto_da_alloc
+block_validity/noblock_validity
+
+hashed_relocation/no_unhashed_relocation
+bulk_read/no_bulk_read
+
+I'd personally go with the first option (i.e. no underscore), as it's
+much more common.
+
+Thanks,
+
+                Ilya
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
