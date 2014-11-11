@@ -1,84 +1,66 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: [PATCH] libceph: require cephx message signature by default
-Date: Tue, 11 Nov 2014 16:38:29 +0800
-Message-ID: <1415695109-4698-1-git-send-email-zyan@redhat.com>
+From: Ilya Dryomov <ilya.dryomov@inktank.com>
+Subject: Re: [PATCH] libceph: require cephx message signature by default
+Date: Tue, 11 Nov 2014 13:51:28 +0400
+Message-ID: <CALFYKtB7fHNDdW1UFecoq6O7DY=UEcAmGBLvw1NCv=nDTee5kQ@mail.gmail.com>
+References: <1415695109-4698-1-git-send-email-zyan@redhat.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:35486 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753063AbaKKIiy (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 11 Nov 2014 03:38:54 -0500
-Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id sAB8crTV001883
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
-	for <ceph-devel@vger.kernel.org>; Tue, 11 Nov 2014 03:38:53 -0500
+Received: from mail-qa0-f47.google.com ([209.85.216.47]:34434 "EHLO
+	mail-qa0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752881AbaKKJv3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Nov 2014 04:51:29 -0500
+Received: by mail-qa0-f47.google.com with SMTP id dc16so6607217qab.6
+        for <ceph-devel@vger.kernel.org>; Tue, 11 Nov 2014 01:51:29 -0800 (PST)
+In-Reply-To: <1415695109-4698-1-git-send-email-zyan@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: "Yan, Zheng" <zyan@redhat.com>
+To: "Yan, Zheng" <zyan@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Signed-off-by: Yan, Zheng <zyan@redhat.com>
----
- include/linux/ceph/libceph.h |  1 +
- net/ceph/ceph_common.c       | 13 +++++++++++++
- 2 files changed, 14 insertions(+)
+On Tue, Nov 11, 2014 at 11:38 AM, Yan, Zheng <zyan@redhat.com> wrote:
+> Signed-off-by: Yan, Zheng <zyan@redhat.com>
+> ---
+>  include/linux/ceph/libceph.h |  1 +
+>  net/ceph/ceph_common.c       | 13 +++++++++++++
+>  2 files changed, 14 insertions(+)
+>
+> diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
+> index d293f7e..8b11a79 100644
+> --- a/include/linux/ceph/libceph.h
+> +++ b/include/linux/ceph/libceph.h
+> @@ -29,6 +29,7 @@
+>  #define CEPH_OPT_NOSHARE          (1<<1) /* don't share client with other sbs */
+>  #define CEPH_OPT_MYIP             (1<<2) /* specified my ip */
+>  #define CEPH_OPT_NOCRC            (1<<3) /* no data crc on writes */
+> +#define CEPH_OPT_NOMSGAUTH       (1<<4) /* not require cephx message signature */
+>
+>  #define CEPH_OPT_DEFAULT   (0)
+>
+> diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
+> index d361a274..b22d82c 100644
+> --- a/net/ceph/ceph_common.c
+> +++ b/net/ceph/ceph_common.c
+> @@ -237,6 +237,8 @@ enum {
+>         Opt_noshare,
+>         Opt_crc,
+>         Opt_nocrc,
+> +       Opt_cephx_require_signature,
+> +       Opt_cephx_require_no_signature,
+>  };
+>
+>  static match_table_t opt_tokens = {
+> @@ -255,6 +257,8 @@ static match_table_t opt_tokens = {
+>         {Opt_noshare, "noshare"},
+>         {Opt_crc, "crc"},
+>         {Opt_nocrc, "nocrc"},
+> +       {Opt_cephx_require_signature, "cephx_require_signature"},
+> +       {Opt_cephx_require_no_signature, "cephx_require_no_signature"},
 
-diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
-index d293f7e..8b11a79 100644
---- a/include/linux/ceph/libceph.h
-+++ b/include/linux/ceph/libceph.h
-@@ -29,6 +29,7 @@
- #define CEPH_OPT_NOSHARE          (1<<1) /* don't share client with other sbs */
- #define CEPH_OPT_MYIP             (1<<2) /* specified my ip */
- #define CEPH_OPT_NOCRC            (1<<3) /* no data crc on writes */
-+#define CEPH_OPT_NOMSGAUTH	  (1<<4) /* not require cephx message signature */
- 
- #define CEPH_OPT_DEFAULT   (0)
- 
-diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
-index d361a274..b22d82c 100644
---- a/net/ceph/ceph_common.c
-+++ b/net/ceph/ceph_common.c
-@@ -237,6 +237,8 @@ enum {
- 	Opt_noshare,
- 	Opt_crc,
- 	Opt_nocrc,
-+	Opt_cephx_require_signature,
-+	Opt_cephx_require_no_signature,
- };
- 
- static match_table_t opt_tokens = {
-@@ -255,6 +257,8 @@ static match_table_t opt_tokens = {
- 	{Opt_noshare, "noshare"},
- 	{Opt_crc, "crc"},
- 	{Opt_nocrc, "nocrc"},
-+	{Opt_cephx_require_signature, "cephx_require_signature"},
-+	{Opt_cephx_require_no_signature, "cephx_require_no_signature"},
- 	{-1, NULL}
- };
- 
-@@ -453,6 +457,12 @@ ceph_parse_options(char *options, const char *dev_name,
- 		case Opt_nocrc:
- 			opt->flags |= CEPH_OPT_NOCRC;
- 			break;
-+		case Opt_cephx_require_signature:
-+			opt->flags &= ~CEPH_OPT_NOMSGAUTH;
-+			break;
-+		case Opt_cephx_require_no_signature:
-+			opt->flags |= CEPH_OPT_NOMSGAUTH;
-+			break;
- 
- 		default:
- 			BUG_ON(token);
-@@ -496,6 +506,9 @@ struct ceph_client *ceph_create_client(struct ceph_options *opt, void *private,
- 	init_waitqueue_head(&client->auth_wq);
- 	client->auth_err = 0;
- 
-+	if (!ceph_test_opt(client, NOMSGAUTH))
-+		required_features |= CEPH_FEATURE_MSG_AUTH;
-+
- 	client->extra_mon_dispatch = NULL;
- 	client->supported_features = CEPH_FEATURES_SUPPORTED_DEFAULT |
- 		supported_features;
--- 
-1.9.3
+Maybe "cephx_require_signatures", "nocephx_require_signatures" ?  It
+would (almost) match injectargs and be more in line with general mount
+option conventions.
 
+Thanks,
+
+                Ilya
