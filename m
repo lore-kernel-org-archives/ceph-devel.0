@@ -1,49 +1,27 @@
-From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 3.14 194/203] rbd: Fix error recovery in rbd_obj_read_sync()
-Date: Wed, 12 Nov 2014 10:17:44 +0900
-Message-ID: <20141112011551.597465119@linuxfoundation.org>
-References: <20141112011542.686743533@linuxfoundation.org>
+From: Sage Weil <sage@newdream.net>
+Subject: performance weekly
+Date: Tue, 11 Nov 2014 17:46:11 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1411111745360.11379@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20141112011542.686743533@linuxfoundation.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Yehuda Sadeh <yehuda@inktank.com>, Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org, Jan Kara <jack@suse.cz>, Ilya Dryomov <idryomov@redhat.com>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:56940 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934838AbaKLBqM (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Nov 2014 20:46:12 -0500
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 94BB980022
+	for <ceph-devel@vger.kernel.org>; Tue, 11 Nov 2014 17:46:11 -0800 (PST)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 71D4080022
+	for <ceph-devel@vger.kernel.org>; Tue, 11 Nov 2014 17:46:11 -0800 (PST)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-3.14-stable review patch.  If anyone has any objections, please let me know.
+Quick reminder that the weekly performance call is tomorrow morning.  If 
+there's anything you'd like to discuss, add it to the pad:
 
-------------------
+	http://pad.ceph.com/p/performance_weekly
 
-From: Jan Kara <jack@suse.cz>
-
-commit a8d4205623ae965e36c68629db306ca0695a2771 upstream.
-
-When we fail to allocate page vector in rbd_obj_read_sync() we just
-basically ignore the problem and continue which will result in an oops
-later. Fix the problem by returning proper error.
-
-CC: Yehuda Sadeh <yehuda@inktank.com>
-CC: Sage Weil <sage@inktank.com>
-CC: ceph-devel@vger.kernel.org
-Coverity-id: 1226882
-Signed-off-by: Jan Kara <jack@suse.cz>
-Signed-off-by: Ilya Dryomov <idryomov@redhat.com>
-Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-
----
- drivers/block/rbd.c |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -3217,7 +3217,7 @@ static int rbd_obj_read_sync(struct rbd_
- 	page_count = (u32) calc_pages_for(offset, length);
- 	pages = ceph_alloc_page_vector(page_count, GFP_KERNEL);
- 	if (IS_ERR(pages))
--		ret = PTR_ERR(pages);
-+		return PTR_ERR(pages);
- 
- 	ret = -ENOMEM;
- 	obj_request = rbd_obj_request_create(object_name, offset, length,
+sage
