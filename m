@@ -1,84 +1,121 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Re: question on OSDService::infos_oid
-Date: Wed, 12 Nov 2014 22:56:36 +0800
-Message-ID: <CACJqLybYaOZwCskZ=goRicn+b6WWQUXPs6Pff0ZmAqeyGgPT8A@mail.gmail.com>
-References: <CAF7cUg3B4QwrWq=pAP+HU=rrwytp45TKChMsR_Yf_vLxgcJq0Q@mail.gmail.com>
-	<alpine.DEB.2.00.1411120542480.24889@cobra.newdream.net>
+From: Mark Nelson <mark.nelson@inktank.com>
+Subject: Re: 11/4/2014 Weekly Ceph Performance Meeting IS ON!
+Date: Wed, 12 Nov 2014 11:12:36 -0600
+Message-ID: <54639504.4090309@redhat.com>
+References: <924d8d4e-6e88-4dde-8ad5-f7aef89eb55a@mailpro> <5458F519.4080300@redhat.com> <3649A15A2562B54294DE14BCE5AC79120AAEBDE8@FMSMSX106.amr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=UTF-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f46.google.com ([74.125.82.46]:49122 "EHLO
-	mail-wg0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752377AbaKLO4h (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Nov 2014 09:56:37 -0500
-Received: by mail-wg0-f46.google.com with SMTP id x13so14607602wgg.5
-        for <ceph-devel@vger.kernel.org>; Wed, 12 Nov 2014 06:56:36 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1411120542480.24889@cobra.newdream.net>
+Received: from mail-ie0-f174.google.com ([209.85.223.174]:53136 "EHLO
+	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753289AbaKLRMh (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Nov 2014 12:12:37 -0500
+Received: by mail-ie0-f174.google.com with SMTP id x19so13585035ier.5
+        for <ceph-devel@vger.kernel.org>; Wed, 12 Nov 2014 09:12:36 -0800 (PST)
+In-Reply-To: <3649A15A2562B54294DE14BCE5AC79120AAEBDE8@FMSMSX106.amr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: xinxin shu <xinxin.shu5040@gmail.com>, "Shu, Xinxin" <xinxin.shu@intel.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Blinick, Stephen L" <stephen.l.blinick@intel.com>, Mark Nelson <mark.nelson@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, Nov 12, 2014 at 9:51 PM, Sage Weil <sweil@redhat.com> wrote:
-> On Wed, 12 Nov 2014, xinxin shu wrote:
->> recently we focus on 4k random write , dump transaction on every 4k
->> random write op , found that , for every 4k random write , it will
->> update pg epoch and pg info on OSDService::infos_oid , we find the
->> below transaction will be serialized on the infos_oid , which maybe
->> not friendly to 4k random write performance . i want to if there is
->> any special consideration on serializing pg epoch and info update on
->> infos_oid , can we shard this to pg level ?
->>
->>                 { "op_num": 1,
->>
->>                   "op_name": "omap_setkeys",
->>
->>                   "collection": "meta",
->>
->>                   "oid": "16ef7597\/infos\/head\/\/-1",
->>
->>                   "attr_lens": { "0.3c_epoch": 4,
->>
->>                       "0.3c_info": 721}},
->
-> I think we did that for simplicity without thinking about locking
-> parallelism.. there is no particular need to have the keys on the same
-> object.  It's a bit awkward to make the change (since we need to read the
-> old scheme and write the new one), but it's nothing we haven't done
-> before.
->
-> Probably a better strategy is an object per PG.  But before we pick a new
-> pg object in meta/ we should make sure this is the right strategy... we
-> may want something that is grouped with the PG collection and is
-> compatible with whatever the 'collection' concept morphs in to.
->
->> btw , i have some question on DBObjectMap lock , currently DBObjectMap
->> has several locks , cache lock , header lock
->>
->> for cache lock , it seems that it is lock for header cache , but
->> LRUCache has an internal lock , is it a duplicated lock?
->>
->> for header lock, the annotation shows that it serialize the access to
->> next seq and in_use set ,  but after checking the code , header lock
->> seems not just protect the in_use and next seq . my question is what
->> header_lock exactly protects?
+Hi Stephen,
 
-header_lock protects all members excepts `caches`. cache_lock protect
-`caches`. cache_lock is a legacy member to use it. I think it's true
-that we can remove it now.
+Last weeks meeting recording is here:
 
+https://bluejeans.com/s/7XBe/
+
+Thanks,
+Mark
+
+On 11/11/2014 02:38 PM, Blinick, Stephen L wrote:
+> Hi, sorry if I missed it but is the recording for the Nov 5th meeting=
+ online somewhere?
 >
-> Sam, Somnath, or Haomai would have to answer that one...
+> Thanks,
+> Stephen
 >
-> sage
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.=
+kernel.org] On Behalf Of Mark Nelson
+> Sent: Tuesday, November 4, 2014 8:48 AM
+> To: Alexandre DERUMIER; Mark Nelson
+> Cc: ceph-devel@vger.kernel.org
+> Subject: Re: 11/4/2014 Weekly Ceph Performance Meeting IS ON!
+>
+> Hi Alex,
+>
+> Doh!  Sorry everyone, Alex is right!  11/5/2014!
+>
+> I will resend and fix.
+>
+> Mark
+>
+> On 11/04/2014 09:21 AM, Alexandre DERUMIER wrote:
+>> Hi Mark,
+>>
+>> Is it today ? (11/4/2014 from you mail subject)
+>>
+>> or tommorow (2014-11-05 in etherpad)
+>>
+>>
+>> ----- Mail original -----
+>>
+>> De: "Mark Nelson" <mark.nelson@inktank.com>
+>> =C3=80: ceph-devel@vger.kernel.org
+>> Envoy=C3=A9: Mardi 4 Novembre 2014 16:16:32
+>> Objet: 11/4/2014 Weekly Ceph Performance Meeting IS ON!
+>>
+>> Hi All,
+>>
+>> 8AM PST as usual! We are going to try a little experiment and leave
+>> the Agenda blank for you guys to fill in. If you are planning on
+>> attending and have something you want to discuss, please add it!
+>>
+>> We've also added a projects and backlog section at the top of the
+>> etherpad for on-going efforts and the folks that are working on them=
+=2E
+>> For any projects or names of people we've missed, please update!
+>>
+>> Here's the links:
+>>
+>> Etherpad URL:
+>> http://pad.ceph.com/p/performance_weekly
+>>
+>> To join the Meeting:
+>> https://bluejeans.com/268261044
+>>
+>> To join via Browser:
+>> https://bluejeans.com/268261044/browser
+>>
+>> To join with Lync:
+>> https://bluejeans.com/268261044/lync
+>>
+>>
+>> To join via Room System:
+>> Video Conferencing System: bjn.vc -or- 199.48.152.152 Meeting ID:
+>> 268261044
+>>
+>> To join via Phone:
+>> 1) Dial:
+>> +1 408 740 7256
+>> +1 888 240 2560(US Toll Free)
+>> +1 408 317 9253(Alternate Number)
+>> (see all numbers - http://bluejeans.com/numbers)
+>> 2) Enter Conference ID: 268261044
+>>
+>> Mark
+>>
+>
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in the body of a message to majordomo@vger.kernel.org More majordomo i=
+nfo at  http://vger.kernel.org/majordomo-info.html
+>
 
-
-
--- 
-Best Regards,
-
-Wheat
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
