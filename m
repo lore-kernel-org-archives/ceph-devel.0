@@ -1,97 +1,76 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: Profiling with Perf
-Date: Wed, 12 Nov 2014 15:16:15 -0600
-Message-ID: <5463CE1F.5060509@redhat.com>
-References: <5462C456.8070601@redhat.com>	<5463C63B.2070502@redhat.com> <CANP1eJFi3AhK-7HYLm7n78=ygGK2d4_UXc2_EqOCc3tFUVvtOA@mail.gmail.com>
+From: Andrew Shewmaker <agshew@gmail.com>
+Subject: [PATCH 0/6] blkin (LTTng + Zipkin) tracing
+Date: Wed, 12 Nov 2014 16:19:29 -0700
+Message-ID: <20141112231929.GA6892@localhost>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f171.google.com ([209.85.223.171]:58103 "EHLO
-	mail-ie0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753309AbaKLVQS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Nov 2014 16:16:18 -0500
-Received: by mail-ie0-f171.google.com with SMTP id x19so14457613ier.16
-        for <ceph-devel@vger.kernel.org>; Wed, 12 Nov 2014 13:16:18 -0800 (PST)
-In-Reply-To: <CANP1eJFi3AhK-7HYLm7n78=ygGK2d4_UXc2_EqOCc3tFUVvtOA@mail.gmail.com>
+Received: from mail-pd0-f173.google.com ([209.85.192.173]:51104 "EHLO
+	mail-pd0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752462AbaKLXTc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Nov 2014 18:19:32 -0500
+Received: by mail-pd0-f173.google.com with SMTP id v10so13148467pde.4
+        for <ceph-devel@vger.kernel.org>; Wed, 12 Nov 2014 15:19:32 -0800 (PST)
+Received: from localhost (host-69-145-59-76.bln-mt.client.bresnan.net. [69.145.59.76])
+        by mx.google.com with ESMTPSA id zr9sm23150165pab.44.2014.11.12.15.19.31
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=RC4-SHA bits=128/128);
+        Wed, 12 Nov 2014 15:19:31 -0800 (PST)
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Milosz Tanski <milosz@adfin.com>, Mark Nelson <mark.nelson@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On 11/12/2014 02:59 PM, Milosz Tanski wrote:
-> On Wed, Nov 12, 2014 at 3:42 PM, Mark Nelson <mark.nelson@inktank.com> wrote:
->> Hi, there was a question on the performance call today about how to use
->> dwarf symbols in perf.  Roughly:
->>
->> 1) Make sure during the kernel/perf compile that libunwind is used. This can
->> be tricky depending on how you build the kernel, but theoretically should
->> work.
->>
->> 2) invoke perf using something like:
->>
->> "perf record -g dwarf -F 100 -a"
->>
->> This tells perf to use dwarf symbols but limit the sampling rate.  perf can
->> generate a *lot* of data with dwarf symbols and default sampling.
->>
->> 3) Look at results in perf report as normal.
->>
->> 4) Profit!
->>
->> Theoretically if you have frame pointers enabled when you compile ceph you
->> should get good symbol resolution without dwarf but I've never gotten it to
->> work well.  Perf+Dwarf seems to give much better symbol resolution than
->> anything else I've tried with Ceph.  There's some new LBR functionality for
->> profiling on Haswell in perf that might work too, but I haven't tried it:
->>
->> https://lkml.org/lkml/2014/10/19/166
->
-> Mark,
->
-> I personally would strong recommend using perf without the dwarf as it
-> seams writes very large trace files. It's not just file size, but it
-> also takes a very long time to load up profile in the other tools
-> (perf report). If you can help it rebuild the app with out the code
-> (eg the gcc -fno-omit-frame-pointer flag). When I say space savings
-> with call stack savings I mean like order of 2 magnitudes smaller
-> profile file (eg. you can log much longer / complicated runs).
+The following patches are a cleaned up version of the work 
+Marios Kogias first posted in August.
+http://www.spinics.net/lists/ceph-devel/msg19890.html
+The changes have been made against Ceph 0.80.1, and will be 
+moved forward soon.
 
-Do you have problems with large trace files when you limit the sampling 
-frequency?  It hasn't been a problem for me when doing that.
+With them Ceph can use Blkin, a library created by Marios Kogias and others,
+which enables tracking a specific request from the time it enters
+the system at higher levels till it is finally served by RADOS.
 
->
-> Additionally, it seams to better handle splitting of inline functions
-> (where otherwise this would get folded into a large function). The
-> omit behavior is default on x86_64, which is what I assume most people
-> are building / testing on. There is a performance penalty for this as
-> the compiler will be generating an extra instruction to update EBP...
-> but for real world code this is less then 5% of a penalty.
+In general, Blkin implements the tracing semantics described in the Dapper
+paper http://static.googleusercontent.com/media/research.google.com/el/pubs/archive/36356.pdf
+in order to trace the causal relationships between the different
+processing phases that an IO request may trigger. The goal is an end-to-end
+visualisation of the request's route in the system, accompanied by information
+concerning latencies in each processing phase. Thanks to LTTng this can happen
+with a minimal overhead and in realtime. In order to visualize the results Blkin 
+was integrated with Twitter's Zipkin http://twitter.github.io/zipkin/
+(which is a tracing system entirely based on Dapper).
 
-To be honest even when compiling with fno-omit-frame-pointer I've had a 
-ton of problems with symbol resolution.  It's been a while since I 
-messed with this so perhaps things have improved since then.
+These patches can also be found in https://github.com/agshew/ceph/tree/wip-blkin
 
->
-> I spend a lot of time using perf and looking at it's traces (runtime,
-> futex profiling, looking at bad branch points) every week. It took me
-> a little while to figure this out... I hope it help you guys.
+In addition to cleanup, I've written a short document describing how to 
+test Blkin tracing in Ceph (without Zipkin). See doc/dev/trace.rst
 
-Other than compiling with fno-omit-frame-pointer, is there anything else 
-you do to get good symbol resolution?  What platform are you using? 
-This kind of information would be very valuable for the community if you 
-can share. :)
+Note that I have a question in to Marios concerning a compiler warning for
+ignoring the return value of write() in Message::init_trace_info().
+The same calls also use a hardcoded file descriptor 3. I'm guessing this
+code was just used by him for debugging Blkin and can be removed, but 
+I've left it for the moment.
 
->
-> - Milosz
->
->>
->> Mark
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
->
+In the immediate future I plan to:
 
+ - push a wip-blkin branch to github.com/ceph and take advantage of gitbuilder test/qa
+ - move the changes forward to ceph:master
+ - add Andreas' tracepoints https://github.com/ceph/ceph/pull/2877 using Blkin
+   and investigate how easy it is to select the level of tracing detail
+
+Questions:
+
+1. Did I split the patches into sensible groups?
+
+2. How low is LTTng's overhead? Is it entirely eliminated when not enabled?
+
+Do we need to take advantage of something like the Linux kernel's CONFIG_DYNAMIC_FTRACE
+trick, where a special mcount() function is converted back and forth between 
+a NOP and trace calls? See http://lwn.net/Articles/365835/ for a little more 
+detail.
+
+3. Also on the topic of performance, does the API for adding keyvalues need versions
+of annotations that used tracing functions with vectorized arguments? For instance,
+when many details about an event are required (e.g. read vs. write, length, etc.) 
+or if multiple types of events are created simultaneously?
