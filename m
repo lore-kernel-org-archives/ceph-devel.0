@@ -1,88 +1,94 @@
-From: Milosz Tanski <milosz@adfin.com>
-Subject: Re: Profiling with Perf
-Date: Wed, 12 Nov 2014 15:59:38 -0500
-Message-ID: <CANP1eJFi3AhK-7HYLm7n78=ygGK2d4_UXc2_EqOCc3tFUVvtOA@mail.gmail.com>
-References: <5462C456.8070601@redhat.com>
-	<5463C63B.2070502@redhat.com>
+From: Jun He <jhe@cs.wisc.edu>
+Subject: error msg: 'Error in sys.exitfunc'
+Date: Wed, 12 Nov 2014 15:07:29 -0600
+Message-ID: <CABW1wHSUEThDhCCr0bpFrEtHmT+to0V=ERVVEpei0XF2Zrfepg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f178.google.com ([209.85.217.178]:54820 "EHLO
-	mail-lb0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753248AbaKLU7j (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Nov 2014 15:59:39 -0500
-Received: by mail-lb0-f178.google.com with SMTP id f15so11248121lbj.9
-        for <ceph-devel@vger.kernel.org>; Wed, 12 Nov 2014 12:59:38 -0800 (PST)
-In-Reply-To: <5463C63B.2070502@redhat.com>
+Received: from mail-oi0-f52.google.com ([209.85.218.52]:56530 "EHLO
+	mail-oi0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753309AbaKLVIL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Nov 2014 16:08:11 -0500
+Received: by mail-oi0-f52.google.com with SMTP id u20so9125932oif.25
+        for <ceph-devel@vger.kernel.org>; Wed, 12 Nov 2014 13:08:10 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mark.nelson@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Wed, Nov 12, 2014 at 3:42 PM, Mark Nelson <mark.nelson@inktank.com> wrote:
-> Hi, there was a question on the performance call today about how to use
-> dwarf symbols in perf.  Roughly:
->
-> 1) Make sure during the kernel/perf compile that libunwind is used. This can
-> be tricky depending on how you build the kernel, but theoretically should
-> work.
->
-> 2) invoke perf using something like:
->
-> "perf record -g dwarf -F 100 -a"
->
-> This tells perf to use dwarf symbols but limit the sampling rate.  perf can
-> generate a *lot* of data with dwarf symbols and default sampling.
->
-> 3) Look at results in perf report as normal.
->
-> 4) Profit!
->
-> Theoretically if you have frame pointers enabled when you compile ceph you
-> should get good symbol resolution without dwarf but I've never gotten it to
-> work well.  Perf+Dwarf seems to give much better symbol resolution than
-> anything else I've tried with Ceph.  There's some new LBR functionality for
-> profiling on Haswell in perf that might work too, but I haven't tried it:
->
-> https://lkml.org/lkml/2014/10/19/166
+Hi,
+When I was deploying Ceph using ceph-deploy
+(http://docs.ceph.com/docs/master/start/), I encountered an "error":
 
-Mark,
+jhe@node0.lustre3:/tmp/my-cluster$ ceph-deploy new node1
+[ceph_deploy.conf][DEBUG ] found configuration file at:
+/users/jhe/.cephdeploy.conf
+[ceph_deploy.cli][INFO  ] Invoked (1.5.19): /usr/bin/ceph-deploy new node1
+[ceph_deploy.new][DEBUG ] Creating new cluster named ceph
+[ceph_deploy.new][INFO  ] making sure passwordless SSH succeeds
+[node1][DEBUG ] connected to host:
+node0.lustre3.scalablefs.susitna.pdl.cmu.local
+[node1][INFO  ] Running command: ssh -CT -o BatchMode=yes node1
+Warning: Permanently added 'node1,10.51.1.19' (RSA) to the list of known hosts.
+[node1][DEBUG ] connection detected need for sudo
+Warning: Permanently added 'node1,10.51.1.19' (RSA) to the list of known hosts.
+[node1][DEBUG ] connected to host: node1
+[node1][DEBUG ] detect platform information from remote host
+[node1][DEBUG ] detect machine type
+[node1][DEBUG ] find the location of an executable
+[node1][INFO  ] Running command: sudo /sbin/ip link show
+[node1][INFO  ] Running command: sudo /sbin/ip addr show
+[node1][DEBUG ] IP addresses found: ['10.52.1.19', '10.54.1.19', '10.51.1.19']
+[ceph_deploy.new][DEBUG ] Resolving host node1
+[ceph_deploy.new][DEBUG ] Monitor node1 at 10.51.1.19
+[ceph_deploy.new][DEBUG ] Monitor initial members are ['node1']
+[ceph_deploy.new][DEBUG ] Monitor addrs are ['10.51.1.19']
+[ceph_deploy.new][DEBUG ] Creating a random mon key...
+[ceph_deploy.new][DEBUG ] Writing monitor keyring to ceph.mon.keyring...
+[ceph_deploy.new][DEBUG ] Writing initial config to ceph.conf...
+Error in sys.exitfunc:
 
-I personally would strong recommend using perf without the dwarf as it
-seams writes very large trace files. It's not just file size, but it
-also takes a very long time to load up profile in the other tools
-(perf report). If you can help it rebuild the app with out the code
-(eg the gcc -fno-omit-frame-pointer flag). When I say space savings
-with call stack savings I mean like order of 2 magnitudes smaller
-profile file (eg. you can log much longer / complicated runs).
+*****************************
+Another example:
 
-Additionally, it seams to better handle splitting of inline functions
-(where otherwise this would get folded into a large function). The
-omit behavior is default on x86_64, which is what I assume most people
-are building / testing on. There is a performance penalty for this as
-the compiler will be generating an extra instruction to update EBP...
-but for real world code this is less then 5% of a penalty.
+jhe@node0.lustre3:/tmp/my-cluster$ ceph-deploy jkjsnxnh3
+usage: ceph-deploy [-h] [-v | -q] [--version] [--username USERNAME]
+                   [--overwrite-conf] [--cluster NAME] [--ceph-conf CEPH_CONF]
+                   COMMAND ...
+ceph-deploy: error: argument COMMAND: invalid choice: 'jkjsnxnh3'
+(choose from 'purgedata', 'pkg', 'mds', 'forgetkeys', 'calamari',
+'purge', 'admin', 'mon', 'install', 'gatherkeys', 'new', 'disk',
+'config', 'osd', 'uninstall')
+Error in sys.exitfunc:
 
-I spend a lot of time using perf and looking at it's traces (runtime,
-futex profiling, looking at bad branch points) every week. It took me
-a little while to figure this out... I hope it help you guys.
+*****************************
+I looked at the code and find this might suppress the weird behavior.
+In the following case, 'Error in sys.exitfunc:' disappears.
 
-- Milosz
+jhe@node0.lustre3:/tmp/my-cluster$ env CEPH_DEPLOY_TEST=YES ceph-deploy jjjjj
+usage: ceph-deploy [-h] [-v | -q] [--version] [--username USERNAME]
+                   [--overwrite-conf] [--cluster NAME] [--ceph-conf CEPH_CONF]
+                   COMMAND ...
+ceph-deploy: error: argument COMMAND: invalid choice: 'jjjjj' (choose
+from 'purgedata', 'pkg', 'mds', 'forgetkeys', 'calamari', 'purge',
+'admin', 'mon', 'install', 'gatherkeys', 'new', 'disk', 'config',
+'osd', 'uninstall')
+jhe@node0.lustre3:/tmp/my-cluster$
 
->
-> Mark
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+*****************************
+This is the info of my machine:
 
+jhe@node0.lustre3:/tmp/my-cluster$ python -V
+Python 2.6.6
+jhe@node0.lustre3:/tmp/my-cluster$ cat /etc/centos-release
+CentOS release 6.6 (Final)
+jhe@node0.lustre3:/tmp/my-cluster$ uname -ra
+Linux node0.lustre3.scalablefs.susitna.pdl.cmu.local
+2.6.32-504.1.3.el6.x86_64 #1 SMP Tue Nov 11 17:57:25 UTC 2014 x86_64
+x86_64 x86_64 GNU/Linux
 
+ceph-deploy v1.5.19
 
--- 
-Milosz Tanski
-CTO
-16 East 34th Street, 15th floor
-New York, NY 10016
+Hope this reveals some interesting issues other than my inexperience with Ceph.
 
-p: 646-253-9055
-e: milosz@adfin.com
+Bests,
+Jun
