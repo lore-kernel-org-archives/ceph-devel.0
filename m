@@ -1,16 +1,16 @@
 From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: Re: [PATCH] ceph: fix flush tid comparision
-Date: Fri, 14 Nov 2014 00:22:06 +0400
-Message-ID: <CALFYKtDe0CVJh9kvpAAD7Vr4m8GQbrNy0b08s_swBy3cFWCa7w@mail.gmail.com>
+Subject: Re: [PATCH] ceph: introduce global empty snap context
+Date: Fri, 14 Nov 2014 00:23:21 +0400
+Message-ID: <CALFYKtAHtrg10kH7L_yVU_5UzL-fXtoPZyFNMJ8h94b_vfqYFQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f176.google.com ([209.85.216.176]:46659 "EHLO
-	mail-qc0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934061AbaKMUWG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 13 Nov 2014 15:22:06 -0500
-Received: by mail-qc0-f176.google.com with SMTP id x3so11832396qcv.35
-        for <ceph-devel@vger.kernel.org>; Thu, 13 Nov 2014 12:22:06 -0800 (PST)
+Received: from mail-qa0-f45.google.com ([209.85.216.45]:52209 "EHLO
+	mail-qa0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933977AbaKMUXW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 13 Nov 2014 15:23:22 -0500
+Received: by mail-qa0-f45.google.com with SMTP id dc16so10692846qab.18
+        for <ceph-devel@vger.kernel.org>; Thu, 13 Nov 2014 12:23:21 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "Yan, Zheng" <zyan@redhat.com>
@@ -18,39 +18,165 @@ Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
 This patch wasn't posted on ceph-devel, posting..
 
-From 2f0351fb79e046eddcfe5f4ac7c293dfc78545e2 Mon Sep 17 00:00:00 2001
+From d57f921fd3c7cbe768f13bc58e547d83274f47a8 Mon Sep 17 00:00:00 2001
 From: "Yan, Zheng" <zyan@redhat.com>
-Date: Wed, 22 Oct 2014 17:13:26 -0700
-Subject: [PATCH] ceph: fix flush tid comparision
+Date: Thu, 6 Nov 2014 15:09:41 +0800
+Subject: [PATCH] ceph: introduce global empty snap context
 
-TID of cap flush ack is 64 bits, but ceph_inode_info::flushing_cap_tid
-is only 16 bits. 16 bits should be plenty to let the cap flush updates
-pipeline appropriately, but we need to cast in the proper direction when
-comparing these differently-sized versions. So downcast the 64-bits one
-to 16 bits.
+Current snaphost code does not properly handle moving inode from one
+empty snap realm to another empty snap realm. After changing inode's
+snap realm, some dirty pages' snap context can be not equal to inode's
+i_head_snap. This can trigger BUG() in ceph_put_wrbuffer_cap_refs()
 
+The fix is introduce a global empty snap context for all empty snap
+realm. This avoids triggering the BUG() for filesystem with no snapshot.
+
+Fixes: http://tracker.ceph.com/issues/9928
 Signed-off-by: Yan, Zheng <zyan@redhat.com>
 ---
- fs/ceph/caps.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ fs/ceph/snap.c  | 26 +++++++++++++++++++++++++-
+ fs/ceph/super.c |  6 ++++++
+ fs/ceph/super.h |  2 ++
+ 3 files changed, 33 insertions(+), 1 deletion(-)
 
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index 659f2ea9e6f7..cefca661464b 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -2638,7 +2638,7 @@ static void handle_cap_flush_ack(struct inode
-*inode, u64 flush_tid,
+diff --git a/fs/ceph/snap.c b/fs/ceph/snap.c
+index c1cc993225e3..24b454a0e64c 100644
+--- a/fs/ceph/snap.c
++++ b/fs/ceph/snap.c
+@@ -288,6 +288,9 @@ static int cmpu64_rev(const void *a, const void *b)
+        return 0;
+ }
 
-        for (i = 0; i < CEPH_CAP_BITS; i++)
-                if ((dirty & (1 << i)) &&
--                   flush_tid == ci->i_cap_flush_tid[i])
-+                   (u16)flush_tid == ci->i_cap_flush_tid[i])
-                        cleaned |= 1 << i;
++
++static struct ceph_snap_context *empty_snapc;
++
+ /*
+  * build the snap context for a given realm.
+  */
+@@ -328,6 +331,12 @@ static int build_snap_context(struct
+ceph_snap_realm *realm)
+                return 0;
+        }
 
-        dout("handle_cap_flush_ack inode %p mds%d seq %d on %s cleaned %s,"
++       if (num == 0 && realm->seq == empty_snapc->seq) {
++               ceph_get_snap_context(empty_snapc);
++               realm->cached_context = empty_snapc;
++               return 0;
 
-Reviewed-by: Ilya Dryomov <idryomov@redhat.com>
+Can there be a cached_context here that we would need to let go of?
+IOW, shouldn't this be
 
-Thanks,
++       if (num == 0 && realm->seq == empty_snapc->seq) {
++               ceph_get_snap_context(empty_snapc);
++               goto out;
++       }
 
-                Ilya
+        ...
+
+             realm->ino, realm, snapc, snapc->seq,
+             (unsigned int) snapc->num_snaps);
+
++out:
+        ceph_put_snap_context(realm->cached_context);
+        realm->cached_context = snapc;
+        return 0;
+
+?
+
++       }
++
+        /* alloc new snap context */
+        err = -ENOMEM;
+        if (num > (SIZE_MAX - sizeof(*snapc)) / sizeof(u64))
+@@ -465,6 +474,9 @@ void ceph_queue_cap_snap(struct ceph_inode_info *ci)
+                   cap_snap.  lucky us. */
+                dout("queue_cap_snap %p already pending\n", inode);
+                kfree(capsnap);
++       } else if (ci->i_snap_realm->cached_context == empty_snapc) {
++               dout("queue_cap_snap %p empty snapc\n", inode);
++               kfree(capsnap);
+        } else if (dirty & (CEPH_CAP_AUTH_EXCL|CEPH_CAP_XATTR_EXCL|
+                            CEPH_CAP_FILE_EXCL|CEPH_CAP_FILE_WR)) {
+                struct ceph_snap_context *snapc = ci->i_head_snapc;
+@@ -925,5 +937,17 @@ out:
+        return;
+ }
+
++int ceph_snap_init(void)
+
+I see you put __init on the declaration.  While that seems to work
+I think it's preferred to have it on the definition:
+
+int __init ceph_snap_init(void)
+
++{
++       empty_snapc = ceph_create_snap_context(0, GFP_NOFS);
++       if (!empty_snapc)
++               return -ENOMEM;
++       empty_snapc->seq = 1;
++       empty_snapc->num_snaps = 0;
+
+Setting num_snaps seems unnecessary, ceph_create_snap_context() does
+that for you.
+
++       return 0;
++}
+
+-
++void ceph_snap_exit(void)
++{
++       ceph_put_snap_context(empty_snapc);
++}
+diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+index f6e12377335c..2b5481f1b9c7 100644
+--- a/fs/ceph/super.c
++++ b/fs/ceph/super.c
+@@ -1028,6 +1028,9 @@ static int __init init_ceph(void)
+
+        ceph_flock_init();
+        ceph_xattr_init();
++       ret = ceph_snap_init();
++       if (ret)
++               goto out_xattr;
+        ret = register_filesystem(&ceph_fs_type);
+        if (ret)
+                goto out_icache;
+@@ -1037,6 +1040,8 @@ static int __init init_ceph(void)
+        return 0;
+
+ out_icache:
+
+You could rename the nonsensical out_icache to out_snap while you are
+at it.
+
++       ceph_snap_exit();
++out_xattr:
+        ceph_xattr_exit();
+        destroy_caches();
+ out:
+@@ -1047,6 +1052,7 @@ static void __exit exit_ceph(void)
+ {
+        dout("exit_ceph\n");
+        unregister_filesystem(&ceph_fs_type);
++       ceph_snap_exit();
+        ceph_xattr_exit();
+        destroy_caches();
+ }
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index aca22879b41f..9f63f18bb783 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -699,6 +699,8 @@ extern void ceph_queue_cap_snap(struct ceph_inode_info *ci);
+ extern int __ceph_finish_cap_snap(struct ceph_inode_info *ci,
+                                  struct ceph_cap_snap *capsnap);
+ extern void ceph_cleanup_empty_realms(struct ceph_mds_client *mdsc);
++extern int __init ceph_snap_init(void);
+
+extern int ceph_snap_init(void); will do.
+
++extern void ceph_snap_exit(void);
+
+ /*
+  * a cap_snap is "pending" if it is still awaiting an in-progress
+-- 
+2.1.1
