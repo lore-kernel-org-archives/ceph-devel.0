@@ -1,138 +1,58 @@
-From: scan-admin@coverity.com
-Subject: New Defects reported by Coverity Scan for ceph
-Date: Thu, 13 Nov 2014 06:21:27 -0800
-Message-ID: <5464be6723e1a_1150a9733843453@scan.coverity.com.mail>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Problem in src_cmpxattr?
+Date: Thu, 13 Nov 2014 06:42:18 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1411130636560.24889@cobra.newdream.net>
+References: <5464BA37.1080801@cern.ch>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from scanrelay.coverity.com ([209.249.196.67]:63676 "EHLO
-	scanrelay.coverity.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932910AbaKMOVa (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 13 Nov 2014 09:21:30 -0500
+Received: from cobra.newdream.net ([66.33.216.30]:40043 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932910AbaKMOmT (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 13 Nov 2014 09:42:19 -0500
+In-Reply-To: <5464BA37.1080801@cern.ch>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Joaquim Rocha <joaquim.rocha@cern.ch>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
+Hi Joaquim,
 
-Hi,
+On Thu, 13 Nov 2014, Joaquim Rocha wrote:
+> Hi there,
+> 
+> I need to create an object O (if it doesn't exist) and set an xattr on it
+> based on a condition that another xattr in a different object (X) should obey.
+> For this, on the same write operation (called on O) I call create (not
+> exclusively), setxattr and src_cmpxattr (with X as the src_oid), respectively.
+> 
+> What I noticed is that if object O does not exist, the src_cmpxattr returns
+> -ENOENT (even if object X does exist). IMO, this error should only be returned
+> if X didn't exist and not O.
 
-Please find the latest report on new defect(s) introduced to ceph found with Coverity Scan.
+This will only work if you force rados to store O and X in the same PG in 
+the cluster.  This is done with the locator_set_key() method, which 
+essentially let's you specify a string other than the object name to 
+decide where the object goes.  So you could store O in the 'O' slot 
+(default), then set the locator key to '0' and store X in the same place. 
+Then the src_cmpxattr method should do what you want.
 
-4 new defect(s) introduced to ceph found with Coverity Scan.
-7 defect(s), reported by Coverity Scan earlier, were marked fixed in the recent build analyzed by Coverity Scan.
+This lets you have a cluster of objects that are stored together and that 
+you can clone data between using clone_range.  But you can't do this sort 
+of test-and-set between arbitrary objects in the cluster because they 
+will usually be stored on different OSDs...
 
-New defect(s) Reported-by: Coverity Scan
-Showing 4 of 4 defect(s)
+> Is this the correct expectation for what src_cmpxattr should do (compare an
+> xattr on the given source object to the parameters given)?
+>
+> Is this somehow expected? If so, is there any other way that I can accomplish
+> what I need as mentioned above?
 
+Yeah, the ENOENT is telling you that there is no O stored at locator key 
+X.
 
-** CID 1251575:  Dereference after null check  (FORWARD_NULL)
-/test/librados/c_read_operations.cc: 106 in CReadOpsTest::compare_xattrs(const char *const *, const char *const *, const unsigned long *, unsigned long, void *)()
+We would love to add some simple transactional support to rados that would 
+let you do this in the general case, but there's a long list of other 
+important things to get done first!
 
-** CID 1251577:  Resource leak  (RESOURCE_LEAK)
-/tools/cephfs/Dumper.cc: 116 in Dumper::dump(const char *)()
-
-** CID 1251576:  Resource leak  (RESOURCE_LEAK)
-/test/librbd/test_librbd.cc: 1994 in TestLibRBD_LargeCacheRead_Test::TestBody()()
-
-** CID 717084:  Resource leak  (RESOURCE_LEAK)
-/tools/cephfs/Dumper.cc: 192 in Dumper::undump(const char *)()
-/tools/cephfs/Dumper.cc: 198 in Dumper::undump(const char *)()
-
-
-________________________________________________________________________________________________________
-*** CID 1251575:  Dereference after null check  (FORWARD_NULL)
-/test/librados/c_read_operations.cc: 106 in CReadOpsTest::compare_xattrs(const char *const *, const char *const *, const unsigned long *, unsigned long, void *)()
-100         size_t val_len = 0;
-101         while (i < len) {
-102           ASSERT_EQ(0, rados_getxattrs_next(iter, (const char**) &key,
-103     					(const char**) &val, &val_len));
-104           if (val_len == 0 && key == NULL && val == NULL)
-105     	break;
->>>     CID 1251575:  Dereference after null check  (FORWARD_NULL)
->>>     Passing null pointer "key" to "basic_string", which dereferences it.
-106           EXPECT_EQ(std::string(keys[i]), std::string(key));
-107           EXPECT_EQ(0, memcmp(vals[i], val, val_len));
-108           EXPECT_EQ(lens[i], val_len);
-109           ++i;
-110         }
-111         ASSERT_EQ(i, len);
-
-________________________________________________________________________________________________________
-*** CID 1251577:  Resource leak  (RESOURCE_LEAK)
-/tools/cephfs/Dumper.cc: 116 in Dumper::dump(const char *)()
-110     	    (unsigned long long)journaler.last_committed.stream_format,
-111     	    (unsigned long long)journaler.last_committed.trimmed_pos, (unsigned long long)journaler.last_committed.trimmed_pos,
-112     	    4);
-113         r = safe_write(fd, buf, sizeof(buf));
-114         if (r) {
-115           derr << "Error " << r << " (" << cpp_strerror(r) << ") writing journal file header" << dendl;
->>>     CID 1251577:  Resource leak  (RESOURCE_LEAK)
->>>     Handle variable "fd" going out of scope leaks the handle.
-116           return r;
-117         }
-118     
-119         // write the data
-120         off64_t seeked = ::lseek64(fd, start, SEEK_SET);
-121         if (seeked == (off64_t)-1) {
-
-________________________________________________________________________________________________________
-*** CID 1251576:  Resource leak  (RESOURCE_LEAK)
-/test/librbd/test_librbd.cc: 1994 in TestLibRBD_LargeCacheRead_Test::TestBody()()
-1988     
-1989       uint64_t orig_cache_size = g_conf->rbd_cache_size;
-1990       g_conf->set_val("rbd_cache_size", "16777216");
-1991       BOOST_SCOPE_EXIT( (orig_cache_size) ) {
-1992         g_conf->set_val("rbd_cache_size", stringify(orig_cache_size).c_str());
-1993       } BOOST_SCOPE_EXIT_END;
->>>     CID 1251576:  Resource leak  (RESOURCE_LEAK)
->>>     Variable "ioctx" going out of scope leaks the storage it points to.
-1994       ASSERT_EQ(16777216, g_conf->rbd_cache_size);
-1995     
-1996       rbd_image_t image;
-1997       int order = 0;
-1998       const char *name = "testimg";
-1999       uint64_t size = g_conf->rbd_cache_size + 1;
-
-________________________________________________________________________________________________________
-*** CID 717084:  Resource leak  (RESOURCE_LEAK)
-/tools/cephfs/Dumper.cc: 192 in Dumper::undump(const char *)()
-186         trimmed_pos = start - (start % g_default_file_layout.fl_object_size);
-187       }
-188     
-189       if (trimmed_pos > start) {
-190         derr << std::hex << "Invalid header (trimmed 0x" << trimmed_pos
-191           << " > expire 0x" << start << std::dec << dendl;
->>>     CID 717084:  Resource leak  (RESOURCE_LEAK)
->>>     Handle variable "fd" going out of scope leaks the handle.
-192         return -EINVAL;
-193       }
-194     
-195       if (start > write_pos) {
-196         derr << std::hex << "Invalid header (expire 0x" << start
-197           << " > write 0x" << write_pos << std::dec << dendl;
-/tools/cephfs/Dumper.cc: 198 in Dumper::undump(const char *)()
-192         return -EINVAL;
-193       }
-194     
-195       if (start > write_pos) {
-196         derr << std::hex << "Invalid header (expire 0x" << start
-197           << " > write 0x" << write_pos << std::dec << dendl;
->>>     CID 717084:  Resource leak  (RESOURCE_LEAK)
->>>     Handle variable "fd" going out of scope leaks the handle.
-198         return -EINVAL;
-199       }
-200     
-201       cout << "start " << start <<
-202         " len " << len <<
-203         " write_pos " << write_pos <<
-
-
-________________________________________________________________________________________________________
-To view the defects in Coverity Scan visit, http://scan.coverity.com/projects/25?tab=overview
-
-To unsubscribe from the email notification for new defects, http://scan5.coverity.com/cgi-bin/unsubscribe.py
-
-
-
+sage
