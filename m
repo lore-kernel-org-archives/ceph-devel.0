@@ -1,140 +1,138 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: client cpu usage : kbrd vs librbd perf report
-Date: Thu, 13 Nov 2014 08:20:40 -0600
-Message-ID: <5464BE38.9020609@redhat.com>
-References: <c600b836-9e9e-4a24-9331-dbf6fc8664af@mailpro>
+From: scan-admin@coverity.com
+Subject: New Defects reported by Coverity Scan for ceph
+Date: Thu, 13 Nov 2014 06:21:27 -0800
+Message-ID: <5464be6723e1a_1150a9733843453@scan.coverity.com.mail>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Type: text/plain;
+ charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f174.google.com ([209.85.213.174]:42197 "EHLO
-	mail-ig0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932910AbaKMOUj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 13 Nov 2014 09:20:39 -0500
-Received: by mail-ig0-f174.google.com with SMTP id hn18so5091592igb.1
-        for <ceph-devel@vger.kernel.org>; Thu, 13 Nov 2014 06:20:39 -0800 (PST)
-In-Reply-To: <c600b836-9e9e-4a24-9331-dbf6fc8664af@mailpro>
+Received: from scanrelay.coverity.com ([209.249.196.67]:63676 "EHLO
+	scanrelay.coverity.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932910AbaKMOVa (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 13 Nov 2014 09:21:30 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre DERUMIER <aderumier@odiso.com>, Ceph Devel <ceph-devel@vger.kernel.org>
-Cc: Mark Nelson <mark.nelson@inktank.com>, Sage Weil <sweil@redhat.com>, Somnath Roy <somnath.roy@sandisk.com>
+To: ceph-devel@vger.kernel.org
 
-On 11/13/2014 05:15 AM, Alexandre DERUMIER wrote:
-> Hi,
->
-> I have redone perf with dwarf
->
-> perf record -g --call-graph dwarf -a -F 99  -- sleep 60
->
-> I have put perf reports, ceph conf, fio config here:
->
-> http://odisoweb1.odiso.net/cephperf/
->
-> test setup
-> -----------
-> client cpu config :  8 x Intel(R) Xeon(R) CPU E5-2603 v2 @ 1.80GHz
-> ceph cluster : 3 nodes (same cpu than client) with 2 osd each (intel ssd s3500), test pool with replication x1
-> rbd volume size : 10G (almost all reads are done in osd buffer cache)
->
-> benchmark with fio 4k randread, with 1 rbd volume. (also tested with 20 rbd volumes, results are equals).
-> debian wheezy - kernel 3.17 - and ceph packages from master on gitbuilder
->
-> (BTW, I have installed librbd/rados dbg packages but I have missing symbols ?)
 
-I think if you run perf report with verbose enabled it will tell you 
-which symbols are missing:
+Hi,
 
-perf report -v 2>&1 | less
+Please find the latest report on new defect(s) introduced to ceph found with Coverity Scan.
 
-If you have them but it's not detecting them properly you can clean out 
-the cache or even manually reassign the symbols but it's annoying.
+4 new defect(s) introduced to ceph found with Coverity Scan.
+7 defect(s), reported by Coverity Scan earlier, were marked fixed in the recent build analyzed by Coverity Scan.
 
->
->
->
-> Global results:
-> ---------------
-> librbd : 60000iops : 98% cpu
-> krbd : 90000iops : 32% cpu
->
->
-> So, librbd usage is 4,5x more than krbd for same ios throughput
->
-> The difference seem to be quite huge, is it expected ?
+New defect(s) Reported-by: Coverity Scan
+Showing 4 of 4 defect(s)
 
-This is kind of the wild west.  With that many IOPS we are running into 
-new bottlenecks. :)
 
->
->
->
->
-> librbd perf report:
-> -------------------------
-> top cpu usage
-> --------------
-> 25.71%              fio  libc-2.13.so
-> 17.69%              fio  librados.so.2.0.0
-> 12.38%              fio  librbd.so.1.0.0
-> 27.99%              fio  [kernel.kallsyms]
-> 4.19%               fio  libpthread-2.13.so
->
->
-> libc-2.13.so (seem that malloc/free use a lot of cpu here)
-> ------------
->      21.05%-- _int_malloc
->      14.36%-- free
->      13.66%-- malloc
->      9.89%-- __lll_unlock_wake_private
->      5.35%-- __clone
->      4.38%-- __poll
->      3.77%-- __memcpy_ssse3
->      1.64%-- vfprintf
->      1.02%-- arena_get2
->
+** CID 1251575:  Dereference after null check  (FORWARD_NULL)
+/test/librados/c_read_operations.cc: 106 in CReadOpsTest::compare_xattrs(const char *const *, const char *const *, const unsigned long *, unsigned long, void *)()
 
-I think we need to figure out why so much time is being spent 
-mallocing/freeing memory.  Got to get those symbols resolved!
+** CID 1251577:  Resource leak  (RESOURCE_LEAK)
+/tools/cephfs/Dumper.cc: 116 in Dumper::dump(const char *)()
 
-> fio  [kernel.kallsyms]  : seem to have a lot of futex functions here
-> -----------------------
->       5.27%-- _raw_spin_lock
->       3.88%-- futex_wake
->       2.88%-- __switch_to
->       2.74%-- system_call
->       2.70%-- __schedule
->       2.52%-- tcp_sendmsg
->       2.47%-- futex_wait_setup
->       2.28%-- _raw_spin_lock_irqsave
->       2.16%-- idle_cpu
->       1.66%-- enqueue_task_fair
->       1.57%-- native_write_msr_safe
->       1.49%-- hash_futex
->       1.46%-- futex_wait
->       1.40%-- reschedule_interrupt
->       1.37%-- try_to_wake_up
->       1.28%-- account_entity_enqueue
->       1.25%-- copy_user_enhanced_fast_string
->       1.25%-- futex_requeue
->       1.24%-- __fget
->       1.24%-- update_curr
->       1.20%-- tcp_write_xmit
->       1.14%-- wake_futex
->       1.08%-- scheduler_ipi
->       1.05%-- select_task_rq_fair
->       1.01%-- dequeue_task_fair
->       0.97%-- do_futex
->       0.97%-- futex_wait_queue_me
->       0.83%-- cpuacct_charge
->       0.82%-- tcp_transmit_skb
->       ...
->
->
-> Regards,
->
-> Alexandre
->
->
->
->
+** CID 1251576:  Resource leak  (RESOURCE_LEAK)
+/test/librbd/test_librbd.cc: 1994 in TestLibRBD_LargeCacheRead_Test::TestBody()()
+
+** CID 717084:  Resource leak  (RESOURCE_LEAK)
+/tools/cephfs/Dumper.cc: 192 in Dumper::undump(const char *)()
+/tools/cephfs/Dumper.cc: 198 in Dumper::undump(const char *)()
+
+
+________________________________________________________________________________________________________
+*** CID 1251575:  Dereference after null check  (FORWARD_NULL)
+/test/librados/c_read_operations.cc: 106 in CReadOpsTest::compare_xattrs(const char *const *, const char *const *, const unsigned long *, unsigned long, void *)()
+100         size_t val_len = 0;
+101         while (i < len) {
+102           ASSERT_EQ(0, rados_getxattrs_next(iter, (const char**) &key,
+103     					(const char**) &val, &val_len));
+104           if (val_len == 0 && key == NULL && val == NULL)
+105     	break;
+>>>     CID 1251575:  Dereference after null check  (FORWARD_NULL)
+>>>     Passing null pointer "key" to "basic_string", which dereferences it.
+106           EXPECT_EQ(std::string(keys[i]), std::string(key));
+107           EXPECT_EQ(0, memcmp(vals[i], val, val_len));
+108           EXPECT_EQ(lens[i], val_len);
+109           ++i;
+110         }
+111         ASSERT_EQ(i, len);
+
+________________________________________________________________________________________________________
+*** CID 1251577:  Resource leak  (RESOURCE_LEAK)
+/tools/cephfs/Dumper.cc: 116 in Dumper::dump(const char *)()
+110     	    (unsigned long long)journaler.last_committed.stream_format,
+111     	    (unsigned long long)journaler.last_committed.trimmed_pos, (unsigned long long)journaler.last_committed.trimmed_pos,
+112     	    4);
+113         r = safe_write(fd, buf, sizeof(buf));
+114         if (r) {
+115           derr << "Error " << r << " (" << cpp_strerror(r) << ") writing journal file header" << dendl;
+>>>     CID 1251577:  Resource leak  (RESOURCE_LEAK)
+>>>     Handle variable "fd" going out of scope leaks the handle.
+116           return r;
+117         }
+118     
+119         // write the data
+120         off64_t seeked = ::lseek64(fd, start, SEEK_SET);
+121         if (seeked == (off64_t)-1) {
+
+________________________________________________________________________________________________________
+*** CID 1251576:  Resource leak  (RESOURCE_LEAK)
+/test/librbd/test_librbd.cc: 1994 in TestLibRBD_LargeCacheRead_Test::TestBody()()
+1988     
+1989       uint64_t orig_cache_size = g_conf->rbd_cache_size;
+1990       g_conf->set_val("rbd_cache_size", "16777216");
+1991       BOOST_SCOPE_EXIT( (orig_cache_size) ) {
+1992         g_conf->set_val("rbd_cache_size", stringify(orig_cache_size).c_str());
+1993       } BOOST_SCOPE_EXIT_END;
+>>>     CID 1251576:  Resource leak  (RESOURCE_LEAK)
+>>>     Variable "ioctx" going out of scope leaks the storage it points to.
+1994       ASSERT_EQ(16777216, g_conf->rbd_cache_size);
+1995     
+1996       rbd_image_t image;
+1997       int order = 0;
+1998       const char *name = "testimg";
+1999       uint64_t size = g_conf->rbd_cache_size + 1;
+
+________________________________________________________________________________________________________
+*** CID 717084:  Resource leak  (RESOURCE_LEAK)
+/tools/cephfs/Dumper.cc: 192 in Dumper::undump(const char *)()
+186         trimmed_pos = start - (start % g_default_file_layout.fl_object_size);
+187       }
+188     
+189       if (trimmed_pos > start) {
+190         derr << std::hex << "Invalid header (trimmed 0x" << trimmed_pos
+191           << " > expire 0x" << start << std::dec << dendl;
+>>>     CID 717084:  Resource leak  (RESOURCE_LEAK)
+>>>     Handle variable "fd" going out of scope leaks the handle.
+192         return -EINVAL;
+193       }
+194     
+195       if (start > write_pos) {
+196         derr << std::hex << "Invalid header (expire 0x" << start
+197           << " > write 0x" << write_pos << std::dec << dendl;
+/tools/cephfs/Dumper.cc: 198 in Dumper::undump(const char *)()
+192         return -EINVAL;
+193       }
+194     
+195       if (start > write_pos) {
+196         derr << std::hex << "Invalid header (expire 0x" << start
+197           << " > write 0x" << write_pos << std::dec << dendl;
+>>>     CID 717084:  Resource leak  (RESOURCE_LEAK)
+>>>     Handle variable "fd" going out of scope leaks the handle.
+198         return -EINVAL;
+199       }
+200     
+201       cout << "start " << start <<
+202         " len " << len <<
+203         " write_pos " << write_pos <<
+
+
+________________________________________________________________________________________________________
+To view the defects in Coverity Scan visit, http://scan.coverity.com/projects/25?tab=overview
+
+To unsubscribe from the email notification for new defects, http://scan5.coverity.com/cgi-bin/unsubscribe.py
+
+
 
