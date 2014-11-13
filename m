@@ -1,122 +1,224 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: [PATCH] reinstate ceph cluster_snap support
-Date: Thu, 13 Nov 2014 10:02:09 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1411130955210.24475@cobra.newdream.net>
-References: <orob8qt7kf.fsf@livre.home> <alpine.DEB.2.00.1308231715500.28981@cobra.newdream.net> <ortxifi1cs.fsf@livre.home> <alpine.DEB.2.00.1308271515500.24783@cobra.newdream.net> <orbnp6uofj.fsf@free.home> <alpine.DEB.2.00.1410271357160.15740@cobra.newdream.net>
- <or4mug12i5.fsf@free.home>
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: Re: client cpu usage : kbrd vs librbd perf report
+Date: Fri, 14 Nov 2014 02:15:24 +0800
+Message-ID: <CACJqLybr_X8g8W3xAq5QAiGeXdXR=3NAX-gyajnj_Z2ggV-zhQ@mail.gmail.com>
+References: <4c59b90a-dae3-4e9f-a514-89a2e668d90d@mailpro>
+	<alpine.DEB.2.00.1411130805150.24889@cobra.newdream.net>
+	<5464E4C3.2080000@redhat.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:41316 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933296AbaKMSCM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 13 Nov 2014 13:02:12 -0500
-In-Reply-To: <or4mug12i5.fsf@free.home>
+Received: from mail-ee0-f53.google.com ([74.125.83.53]:36853 "EHLO
+	mail-ee0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932648AbaKMSX0 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 13 Nov 2014 13:23:26 -0500
+Received: by mail-ee0-f53.google.com with SMTP id b15so25747eek.40
+        for <ceph-devel@vger.kernel.org>; Thu, 13 Nov 2014 10:23:25 -0800 (PST)
+In-Reply-To: <5464E4C3.2080000@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre Oliva <oliva@gnu.org>
-Cc: sam.just@inktank.com, ceph-devel@vger.kernel.org
+To: Mark Nelson <mark.nelson@inktank.com>
+Cc: Sage Weil <sage@newdream.net>, Alexandre DERUMIER <aderumier@odiso.com>, Somnath Roy <somnath.roy@sandisk.com>, Ceph Devel <ceph-devel@vger.kernel.org>
 
-On Mon, 3 Nov 2014, Alexandre Oliva wrote:
-> On Oct 27, 2014, Sage Weil <sage@newdream.net> wrote:
-> 
-> > On Tue, 21 Oct 2014, Alexandre Oliva wrote:
-> 
-> >> I have tested both methods: btrfs snapshotting of store.db (I've
-> >> manually turned store.db into a btrfs subvolume), and creating a new db
-> >> with all (prefix,key,value) triples.  I'm undecided about inserting
-> >> multiple transaction commits for the latter case; the mon mem use grew
-> >> up a lot as it was, and in a few tests the snapshotting ran twice, but
-> >> in the end a dump of all the data in the database created by btrfs
-> >> snapshotting was identical to that created by explicit copying.  So, the
-> >> former is preferred, since it's so incredibly more efficient.  I also
-> >> considered hardlinking all files in store.db into a separate tree, but I
-> >> didn't like the idea of coding that in C+-, :-) and I figured it might
-> >> not work with other db backends, and maybe even not be guaranteed to
-> >> work with leveldb.  It's probably not worth much more effort.
-> 
-> > This looks pretty reasonable!
-> 
-> > I think we definitely need to limit the size of the transaction when doing 
-> > the snap.  The attached patch seems to try to do it all in one go, which 
-> > is not going to work for large clusters.  Either re-use an existing 
-> > tunable like the sync chunk size or add a new one?
-> 
-> Ok, I changed it so that it reuses the same tunable used for mon sync
-> transaction sizes.  Tested on top of 0.87 (flawless upgrade, whee!),
-> with both btrfs snapshots and leveldb copying.  I noticed slight
-> differences between the databases at each mon with the leveldb copying,
-> presumably having to do with at least one round of monitor-internal
-> retrying as the first copy in each mon took too long, but each copy
-> appeared to be consistent, and their aggregate is presumably usable to
-> get the cluster rolled back to an earlier consistent state.
+Hmm, I think it's a good perf topic to discuss about buffer
+alloc/dealloc. For example, maybe frequency alloced object can use
+memory pool(each pool stores the same objects), but the most challenge
+to this is also STL structures.
 
-Yeah, I don't think it matters that the mons are in sync when the snapshot 
-happens since they're well-prepared to handle that.  As long as the 
-snapshot happens at the same logical time (triggered by a broadcast from 
-the leader).
+On Fri, Nov 14, 2014 at 1:05 AM, Mark Nelson <mark.nelson@inktank.com> wrote:
+> On 11/13/2014 10:29 AM, Sage Weil wrote:
+>>
+>> On Thu, 13 Nov 2014, Alexandre DERUMIER wrote:
+>>>>>
+>>>>> I think we need to figure out why so much time is being spent
+>>>>> mallocing/freeing memory. Got to get those symbols resolved!
+>>>
+>>>
+>>> Ok, I don't known why, but if I remove all ceph -dbg packages, I'm seeing
+>>> the rbd && rados symbols now...
+>>>
+>>> I have udpdate the files:
+>>>
+>>> http://odisoweb1.odiso.net/cephperf/perf-librbd/report.txt
+>>
+>>
+>> Ran it through c++filt:
+>>
+>>         https://gist.github.com/88ba9409f5d201b957a1
+>>
+>> I'm a bit suprised by the some of the items near the top
+>> (bufferlist.clear() callers).  I'm sure several of those can be
+>> streamlined to avoid temporary bufferlists.  I don't see any super
+>> egregious users of the allocator, though.
+>>
+>> The memcpy callers might be a good place to start...
+>>
+>> sage
+>
+>
+> Wasn't josh looking into some of this a year ago?  Did anything ever come of
+> that work?
+>
+>
+>>
+>>
+>>
+>>
+>>
+>>>
+>>>
+>>>
+>>>
+>>> ----- Mail original -----
+>>>
+>>> De: "Mark Nelson" <mark.nelson@inktank.com>
+>>> ?: "Alexandre DERUMIER" <aderumier@odiso.com>, "Ceph Devel"
+>>> <ceph-devel@vger.kernel.org>
+>>> Cc: "Mark Nelson" <mark.nelson@inktank.com>, "Sage Weil"
+>>> <sweil@redhat.com>, "Somnath Roy" <somnath.roy@sandisk.com>
+>>> Envoy?: Jeudi 13 Novembre 2014 15:20:40
+>>> Objet: Re: client cpu usage : kbrd vs librbd perf report
+>>>
+>>> On 11/13/2014 05:15 AM, Alexandre DERUMIER wrote:
+>>>>
+>>>> Hi,
+>>>>
+>>>> I have redone perf with dwarf
+>>>>
+>>>> perf record -g --call-graph dwarf -a -F 99 -- sleep 60
+>>>>
+>>>> I have put perf reports, ceph conf, fio config here:
+>>>>
+>>>> http://odisoweb1.odiso.net/cephperf/
+>>>>
+>>>> test setup
+>>>> -----------
+>>>> client cpu config : 8 x Intel(R) Xeon(R) CPU E5-2603 v2 @ 1.80GHz
+>>>> ceph cluster : 3 nodes (same cpu than client) with 2 osd each (intel ssd
+>>>> s3500), test pool with replication x1
+>>>> rbd volume size : 10G (almost all reads are done in osd buffer cache)
+>>>>
+>>>> benchmark with fio 4k randread, with 1 rbd volume. (also tested with 20
+>>>> rbd volumes, results are equals).
+>>>> debian wheezy - kernel 3.17 - and ceph packages from master on
+>>>> gitbuilder
+>>>>
+>>>> (BTW, I have installed librbd/rados dbg packages but I have missing
+>>>> symbols ?)
+>>>
+>>>
+>>> I think if you run perf report with verbose enabled it will tell you
+>>> which symbols are missing:
+>>>
+>>> perf report -v 2>&1 | less
+>>>
+>>> If you have them but it's not detecting them properly you can clean out
+>>> the cache or even manually reassign the symbols but it's annoying.
+>>>
+>>>>
+>>>>
+>>>>
+>>>> Global results:
+>>>> ---------------
+>>>> librbd : 60000iops : 98% cpu
+>>>> krbd : 90000iops : 32% cpu
+>>>>
+>>>>
+>>>> So, librbd usage is 4,5x more than krbd for same ios throughput
+>>>>
+>>>> The difference seem to be quite huge, is it expected ?
+>>>
+>>>
+>>> This is kind of the wild west. With that many IOPS we are running into
+>>> new bottlenecks. :)
+>>>
+>>>>
+>>>>
+>>>>
+>>>>
+>>>> librbd perf report:
+>>>> -------------------------
+>>>> top cpu usage
+>>>> --------------
+>>>> 25.71% fio libc-2.13.so
+>>>> 17.69% fio librados.so.2.0.0
+>>>> 12.38% fio librbd.so.1.0.0
+>>>> 27.99% fio [kernel.kallsyms]
+>>>> 4.19% fio libpthread-2.13.so
+>>>>
+>>>>
+>>>> libc-2.13.so (seem that malloc/free use a lot of cpu here)
+>>>> ------------
+>>>> 21.05%-- _int_malloc
+>>>> 14.36%-- free
+>>>> 13.66%-- malloc
+>>>> 9.89%-- __lll_unlock_wake_private
+>>>> 5.35%-- __clone
+>>>> 4.38%-- __poll
+>>>> 3.77%-- __memcpy_ssse3
+>>>> 1.64%-- vfprintf
+>>>> 1.02%-- arena_get2
+>>>>
+>>>
+>>> I think we need to figure out why so much time is being spent
+>>> mallocing/freeing memory. Got to get those symbols resolved!
+>>>
+>>>> fio [kernel.kallsyms] : seem to have a lot of futex functions here
+>>>> -----------------------
+>>>> 5.27%-- _raw_spin_lock
+>>>> 3.88%-- futex_wake
+>>>> 2.88%-- __switch_to
+>>>> 2.74%-- system_call
+>>>> 2.70%-- __schedule
+>>>> 2.52%-- tcp_sendmsg
+>>>> 2.47%-- futex_wait_setup
+>>>> 2.28%-- _raw_spin_lock_irqsave
+>>>> 2.16%-- idle_cpu
+>>>> 1.66%-- enqueue_task_fair
+>>>> 1.57%-- native_write_msr_safe
+>>>> 1.49%-- hash_futex
+>>>> 1.46%-- futex_wait
+>>>> 1.40%-- reschedule_interrupt
+>>>> 1.37%-- try_to_wake_up
+>>>> 1.28%-- account_entity_enqueue
+>>>> 1.25%-- copy_user_enhanced_fast_string
+>>>> 1.25%-- futex_requeue
+>>>> 1.24%-- __fget
+>>>> 1.24%-- update_curr
+>>>> 1.20%-- tcp_write_xmit
+>>>> 1.14%-- wake_futex
+>>>> 1.08%-- scheduler_ipi
+>>>> 1.05%-- select_task_rq_fair
+>>>> 1.01%-- dequeue_task_fair
+>>>> 0.97%-- do_futex
+>>>> 0.97%-- futex_wait_queue_me
+>>>> 0.83%-- cpuacct_charge
+>>>> 0.82%-- tcp_transmit_skb
+>>>> ...
+>>>>
+>>>>
+>>>> Regards,
+>>>>
+>>>> Alexandre
+>>>>
+>>>>
+>>>>
+>>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>
+>>>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-> I wish there was a better way to avoid the retry; though.  I'm thinking
-> maybe not performing the copy when the snapshot dir already exists (like
-> we do for osd snapshots), but I'm not sure this would guarantee a
-> consistent monitor quorum snapshot.  But then, I'm not sure the current
-> approach does either.  Plus, if we were to fail because the dir already
-> existed, we'd need to somehow collect the success/fail status of the
-> first try so that we don't misreport a failure just because the internal
-> retry failed, and then, we'd need to distinguish an internal retry that
-> ought to pass if the first attempt passed from a user-commanded attempt
-> to created a new snapshot with the same name, which should ideally fail
-> if any cluster component fails to take the snapshot.  Not that we
-> currently send any success/failure status back...
-
-A failure would be ideal and not overwriting I would think.  Barring the 
-error handling, I'd just send something to the cluster log that it failed 
-so that the operator has a clue it didn't work.
-
-> If we stick with re-copying (rather than dropping the request on the
-> floor if the dir exists), I might improve the overwriting from ?remove
-> all entries, then add them all back? to ?compare entries in source and
-> destination, and copy only those that changed?.  I have code to do just
-> that, that I could borrow from a leveldbcmp programlet I wrote, but it
-> would take some significant rewriting to refit it into the KeyValueDB
-> interface, so I didn't jump through this hoop.  Let me know if it is
-> desirable, and I'll try to schedule some time to work on it.
-
-Meh, simpler to avoid dup names in the first place, I think?
-
-> Another issue I'm somewhat unhappy about is that, while we perform the
-> copying (which can take a few tens of seconds), the cluster comes to a
-> halt because the mons won't make progress.  I wish we could do this
-> copying in background, but I have no clue as to how to go about making
-> the operation proceed asynchronously while returning a success at the
-> end, rather than, say, because we successfully *started* the copying.  I
-> could use a clue or two to do better than that ;-)
-
-Technically leveldb can do it but other backends we plug in later may not.  
-I'm fine with this stalling for now since this is really about disaster 
-recovery and isn't something we're ready to have everyone use.
-
-> Another nit I'm slightly unhappy about is that the command is still
-> ?ceph osd cluster_snap <tag>?, whereas it now snapshots mons too, and it
-> creates directories named clustersnap_<tag>, without the underscore
-> separating cluster and snap as in the command.  I'd like to spell them
-> out the same.  Any preferences?
-
-I'm all for picking new names.  No need to preserve any sort of 
-compatibility here.  Maybe just 'ceph cluster_snap <name>'?
-
-Anyway, if you're going to be using this and will be giving it some 
-testing, happy to pull these into the tree.  Not ready to advertise the 
-feature until it has more robust testing in the test suite, though.  We 
-should make the usage/help text for the cluster_snap command indicate it 
-is experimental.
-
-sage
 
 
+-- 
+Best Regards,
 
-> Here's the patch I've tested, that currently builds upon the other patch
-> upthread, that reinstates osd snapshotting.
-> 
-> 
-> 
+Wheat
