@@ -1,58 +1,171 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Problem in src_cmpxattr?
-Date: Thu, 13 Nov 2014 06:42:18 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1411130636560.24889@cobra.newdream.net>
-References: <5464BA37.1080801@cern.ch>
+From: Alexandre DERUMIER <aderumier@odiso.com>
+Subject: Re: client cpu usage : kbrd vs librbd perf report
+Date: Thu, 13 Nov 2014 16:56:35 +0100 (CET)
+Message-ID: <4c59b90a-dae3-4e9f-a514-89a2e668d90d@mailpro>
+References: <5464BE38.9020609@redhat.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:40043 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932910AbaKMOmT (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 13 Nov 2014 09:42:19 -0500
-In-Reply-To: <5464BA37.1080801@cern.ch>
+Received: from mailpro.odiso.net ([89.248.209.98]:58761 "EHLO
+	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932651AbaKMP4n convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 13 Nov 2014 10:56:43 -0500
+In-Reply-To: <5464BE38.9020609@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Joaquim Rocha <joaquim.rocha@cern.ch>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Mark Nelson <mark.nelson@inktank.com>
+Cc: Sage Weil <sweil@redhat.com>, Somnath Roy <somnath.roy@sandisk.com>, Ceph Devel <ceph-devel@vger.kernel.org>
 
-Hi Joaquim,
+>>I think we need to figure out why so much time is being spent=20
+>>mallocing/freeing memory. Got to get those symbols resolved!=20
 
-On Thu, 13 Nov 2014, Joaquim Rocha wrote:
-> Hi there,
-> 
-> I need to create an object O (if it doesn't exist) and set an xattr on it
-> based on a condition that another xattr in a different object (X) should obey.
-> For this, on the same write operation (called on O) I call create (not
-> exclusively), setxattr and src_cmpxattr (with X as the src_oid), respectively.
-> 
-> What I noticed is that if object O does not exist, the src_cmpxattr returns
-> -ENOENT (even if object X does exist). IMO, this error should only be returned
-> if X didn't exist and not O.
+Ok, I don't known why, but if I remove all ceph -dbg packages, I'm seei=
+ng the rbd && rados symbols now...
 
-This will only work if you force rados to store O and X in the same PG in 
-the cluster.  This is done with the locator_set_key() method, which 
-essentially let's you specify a string other than the object name to 
-decide where the object goes.  So you could store O in the 'O' slot 
-(default), then set the locator key to '0' and store X in the same place. 
-Then the src_cmpxattr method should do what you want.
+I have udpdate the files:
 
-This lets you have a cluster of objects that are stored together and that 
-you can clone data between using clone_range.  But you can't do this sort 
-of test-and-set between arbitrary objects in the cluster because they 
-will usually be stored on different OSDs...
+http://odisoweb1.odiso.net/cephperf/perf-librbd/report.txt
 
-> Is this the correct expectation for what src_cmpxattr should do (compare an
-> xattr on the given source object to the parameters given)?
->
-> Is this somehow expected? If so, is there any other way that I can accomplish
-> what I need as mentioned above?
 
-Yeah, the ENOENT is telling you that there is no O stored at locator key 
-X.
 
-We would love to add some simple transactional support to rados that would 
-let you do this in the general case, but there's a long list of other 
-important things to get done first!
 
-sage
+----- Mail original -----=20
+
+De: "Mark Nelson" <mark.nelson@inktank.com>=20
+=C3=80: "Alexandre DERUMIER" <aderumier@odiso.com>, "Ceph Devel" <ceph-=
+devel@vger.kernel.org>=20
+Cc: "Mark Nelson" <mark.nelson@inktank.com>, "Sage Weil" <sweil@redhat.=
+com>, "Somnath Roy" <somnath.roy@sandisk.com>=20
+Envoy=C3=A9: Jeudi 13 Novembre 2014 15:20:40=20
+Objet: Re: client cpu usage : kbrd vs librbd perf report=20
+
+On 11/13/2014 05:15 AM, Alexandre DERUMIER wrote:=20
+> Hi,=20
+>=20
+> I have redone perf with dwarf=20
+>=20
+> perf record -g --call-graph dwarf -a -F 99 -- sleep 60=20
+>=20
+> I have put perf reports, ceph conf, fio config here:=20
+>=20
+> http://odisoweb1.odiso.net/cephperf/=20
+>=20
+> test setup=20
+> -----------=20
+> client cpu config : 8 x Intel(R) Xeon(R) CPU E5-2603 v2 @ 1.80GHz=20
+> ceph cluster : 3 nodes (same cpu than client) with 2 osd each (intel =
+ssd s3500), test pool with replication x1=20
+> rbd volume size : 10G (almost all reads are done in osd buffer cache)=
+=20
+>=20
+> benchmark with fio 4k randread, with 1 rbd volume. (also tested with =
+20 rbd volumes, results are equals).=20
+> debian wheezy - kernel 3.17 - and ceph packages from master on gitbui=
+lder=20
+>=20
+> (BTW, I have installed librbd/rados dbg packages but I have missing s=
+ymbols ?)=20
+
+I think if you run perf report with verbose enabled it will tell you=20
+which symbols are missing:=20
+
+perf report -v 2>&1 | less=20
+
+If you have them but it's not detecting them properly you can clean out=
+=20
+the cache or even manually reassign the symbols but it's annoying.=20
+
+>=20
+>=20
+>=20
+> Global results:=20
+> ---------------=20
+> librbd : 60000iops : 98% cpu=20
+> krbd : 90000iops : 32% cpu=20
+>=20
+>=20
+> So, librbd usage is 4,5x more than krbd for same ios throughput=20
+>=20
+> The difference seem to be quite huge, is it expected ?=20
+
+This is kind of the wild west. With that many IOPS we are running into=20
+new bottlenecks. :)=20
+
+>=20
+>=20
+>=20
+>=20
+> librbd perf report:=20
+> -------------------------=20
+> top cpu usage=20
+> --------------=20
+> 25.71% fio libc-2.13.so=20
+> 17.69% fio librados.so.2.0.0=20
+> 12.38% fio librbd.so.1.0.0=20
+> 27.99% fio [kernel.kallsyms]=20
+> 4.19% fio libpthread-2.13.so=20
+>=20
+>=20
+> libc-2.13.so (seem that malloc/free use a lot of cpu here)=20
+> ------------=20
+> 21.05%-- _int_malloc=20
+> 14.36%-- free=20
+> 13.66%-- malloc=20
+> 9.89%-- __lll_unlock_wake_private=20
+> 5.35%-- __clone=20
+> 4.38%-- __poll=20
+> 3.77%-- __memcpy_ssse3=20
+> 1.64%-- vfprintf=20
+> 1.02%-- arena_get2=20
+>=20
+
+I think we need to figure out why so much time is being spent=20
+mallocing/freeing memory. Got to get those symbols resolved!=20
+
+> fio [kernel.kallsyms] : seem to have a lot of futex functions here=20
+> -----------------------=20
+> 5.27%-- _raw_spin_lock=20
+> 3.88%-- futex_wake=20
+> 2.88%-- __switch_to=20
+> 2.74%-- system_call=20
+> 2.70%-- __schedule=20
+> 2.52%-- tcp_sendmsg=20
+> 2.47%-- futex_wait_setup=20
+> 2.28%-- _raw_spin_lock_irqsave=20
+> 2.16%-- idle_cpu=20
+> 1.66%-- enqueue_task_fair=20
+> 1.57%-- native_write_msr_safe=20
+> 1.49%-- hash_futex=20
+> 1.46%-- futex_wait=20
+> 1.40%-- reschedule_interrupt=20
+> 1.37%-- try_to_wake_up=20
+> 1.28%-- account_entity_enqueue=20
+> 1.25%-- copy_user_enhanced_fast_string=20
+> 1.25%-- futex_requeue=20
+> 1.24%-- __fget=20
+> 1.24%-- update_curr=20
+> 1.20%-- tcp_write_xmit=20
+> 1.14%-- wake_futex=20
+> 1.08%-- scheduler_ipi=20
+> 1.05%-- select_task_rq_fair=20
+> 1.01%-- dequeue_task_fair=20
+> 0.97%-- do_futex=20
+> 0.97%-- futex_wait_queue_me=20
+> 0.83%-- cpuacct_charge=20
+> 0.82%-- tcp_transmit_skb=20
+> ...=20
+>=20
+>=20
+> Regards,=20
+>=20
+> Alexandre=20
+>=20
+>=20
+>=20
+>=20
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
