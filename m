@@ -1,52 +1,100 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: watch/notify changes ready for review
-Date: Thu, 13 Nov 2014 17:20:21 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1411131645430.10048@cobra.newdream.net>
+From: GuangYang <yguang11@outlook.com>
+Subject: RE: PG down
+Date: Fri, 14 Nov 2014 02:13:09 +0000
+Message-ID: <BLU175-W2328A1AE070A5007E079A4DF8C0@phx.gbl>
+References: <BLU175-W3A509068439286AE88D0EDF8F0@phx.gbl>,<CA+4uBUZzJ_VQcJVD9eECnPZ3jGQOdKRGohR=CXVurmFzPxQ5jA@mail.gmail.com>,<BLU175-W179338519352AAD5C9DD74DF8F0@phx.gbl>,<CA+4uBUZtp=Yujt6U4U_oNnx4_6=Hq+U93Ptbq2MiSPbYbTKbQg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:44265 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934547AbaKNBUW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 13 Nov 2014 20:20:22 -0500
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id D463D80079
-	for <ceph-devel@vger.kernel.org>; Thu, 13 Nov 2014 17:20:21 -0800 (PST)
-Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id B5BB580079
-	for <ceph-devel@vger.kernel.org>; Thu, 13 Nov 2014 17:20:21 -0800 (PST)
+Received: from blu004-omc4s26.hotmail.com ([65.55.111.165]:59514 "EHLO
+	BLU004-OMC4S26.hotmail.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S933518AbaKNCNK (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 13 Nov 2014 21:13:10 -0500
+In-Reply-To: <CA+4uBUZtp=Yujt6U4U_oNnx4_6=Hq+U93Ptbq2MiSPbYbTKbQg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: "sjust@redhat.com" <sjust@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-My pile of watch/notify changes are ready for review:
-
-	https://github.com/ceph/ceph/pull/2924
-
-This series does a ton of stuff that should make watch/notify more robust, 
-useful, and reliable.
-
-Highlights:
-
- - notify can tell who sent the message
- - notify acks are explicit
- - notify acks can include a payload that is delivered to the notifier
- - notifier can see who got the notify (and their ack payload, if any)
- - various useless arguments are dropped from watch, unwatch, notify calls
- - client/osd protocol now explicitly checks for watch staleness
-   (i.e., we reliably detect when we may have missed a notify)
- - clients get an async notification when they were sent a notify but 
-didn't ack it in time (not sure yet if this useful)
- - clients get an async notification when the watch was disconnected by 
-the osd (timed out or explicitly killed or whatever)
- - clients have a new watch_check() call that synchronously checks for any 
-pending errors, or tells us how recently we last confirmed watch liveness 
-and notify async delivery.
-
-The last bit is the what lets users draw strong conclusions about what 
-notifications they may (not) have received so they can draw real 
-conclusions.
-
-Anyway, please take a look!
-sage
-
+VGhhbmtzIFNhbSBmb3IgdGhlIGRldGFpbGVkIGV4cGxhbmF0aW9uLiBJdCBpcyB2ZXJ5IGNsZWFy
+IGFuZCBoZWxwZnVsLgoKV2hlbiB0aGF0IGhhcHBlbmVkLCB0aGVyZSBpcyBubyBjbGllbnQgdHJh
+ZmZpYywgYnV0IHdlIGRpZCBoYXZlIHJlY292ZXJ5IHRyYWZmaWMgZHVyaW5nIHRoZSB0aW1lLCBh
+bmQgSSB0aGluayB0aGF0IHNob3VsZCBiZSB0aGUgc2FtZS4KClRoYW5rcywKR3VhbmcKCi0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KPiBEYXRlOiBUaHUsIDEzIE5vdiAy
+MDE0IDExOjI5OjIzIC0wODAwCj4gU3ViamVjdDogUmU6IFBHIGRvd24KPiBGcm9tOiBzYW0uanVz
+dEBpbmt0YW5rLmNvbQo+IFRvOiB5Z3VhbmcxMUBvdXRsb29rLmNvbQo+IENDOiBjZXBoLWRldmVs
+QHZnZXIua2VybmVsLm9yZwo+Cj4gUmlnaHQsIGlmIHlvdSB0aGluayBhYm91dCBpdCwgYW55IG9i
+amVjdHMgd3JpdHRlbiBkdXJpbmcgdGhlIHRpbWUKPiB3aXRob3V0IDEsMiwzIHJlYWxseSBkbyBy
+ZXF1aXJlIDQgdG8gcmVjb3Zlci4gWW91IGNhbiByZWR1Y2UgdGhlIHJpc2sKPiBvZiB0aGlzIGJ5
+IHNldHRpbmcgbWluX3NpemUgdG8gc29tZXRoaW5nIGdyZWF0ZXIgdGhhbiA4LCBidXQgeW91IGFs
+c28KPiB3b24ndCBiZSBhYmxlIHRvIHJlY292ZXIgd2l0aCBmZXdlciB0aGFuIG1pbl9zaXplLCBz
+byBpZiB5b3Ugc2V0Cj4gbWluX3NpemUgdG8gOSBhbmQgbG9zZSAxLDIsMywgeW91IHdvbid0IGhh
+dmUgbG9zdCBkYXRhLCBidXQgeW91IHdvbid0Cj4gYmUgYWJsZSB0byByZWNvdmVyIHVudGlsIHlv
+dSByZWR1Y2UgbWluX3NpemUuIEl0J3MgbWFpbmx5IHRoZXJlIHNvCj4gdGhhdCB5b3Ugd29uJ3Qg
+YWNjZXB0IHdyaXRlcyBkdXJpbmcgYSBicmllZiBvdXRhZ2Ugd2hpY2ggYnJpbmdzIHlvdQo+IGRv
+d24gdG8gOC4gTm90ZSwgSSB0aGluayB5b3UgY291bGQgaGF2ZSBtYXJrZWQgb3NkIDggbG9zdCBh
+bmQgdGhlbgo+IG1hcmtlZCB0aGUgdW5yZWNvdmVyYWJsZSBvYmplY3RzIGxvc3QuCj4gLVNhbQo+
+Cj4gT24gVGh1LCBOb3YgMTMsIDIwMTQgYXQgMTE6MjAgQU0sIEd1YW5nWWFuZyA8eWd1YW5nMTFA
+b3V0bG9vay5jb20+IHdyb3RlOgo+PiBUaGFua3MgU2FtIGZvciB0aGUgcXVpY2sgcmVzcG9uc2Uu
+IEp1c3Qgd2FudCB0byBtYWtlIHN1cmUgSSB1bmRlcnN0YW5kIGl0IGNvcnJlY3RseToKPj4KPj4g
+SWYgd2UgaGF2ZSBbMSwgMiwgMywgNCwgNSwgNiwgNywgOCwgOSwgMTAsIDExXSBhbmQgYWxsIG9m
+IDEsMiwzIGFyZSBkb3duLCB0aGUgUEcgaXMgYWN0aXZlIGFzIHdlIGFyZSB1c2luZyA4ICsgMywg
+YW5kIG9uY2UgNCBpcyBkb3duLCBldmVuIHRob3VnaCB3ZSBicmluZyB1cCAxLDIsMywgdGhlIFBH
+IGNvdWxkIG5vdCBiZWNvbWUgYWN0aXZlIHVubGVzcyB3ZSBicmluZyA0IHVwLiBJcyBteSB1bmRl
+cnN0YW5kaW5nIGNvcnJlY3QgaGVyZT8KPj4KPj4gVGhhbmtzLAo+PiBHdWFuZwo+Pgo+PiAtLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tCj4+PiBEYXRlOiBUaHUsIDEzIE5v
+diAyMDE0IDA5OjA2OjI3IC0wODAwCj4+PiBTdWJqZWN0OiBSZTogUEcgZG93bgo+Pj4gRnJvbTog
+c2FtLmp1c3RAaW5rdGFuay5jb20KPj4+IFRvOiB5Z3VhbmcxMUBvdXRsb29rLmNvbQo+Pj4gQ0M6
+IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnCj4+Pgo+Pj4gSXQgbG9va3MgbGlrZSB0aGUgYWN0
+aW5nIHNldCB3ZW50IGRvd24gdG8gdGhlIG1pbiBhbGxvd2FibGUgc2l6ZSBhbmQKPj4+IHdlbnQg
+YWN0aXZlIHdpdGggb3NkIDguIEF0IHRoYXQgcG9pbnQgeW91IG5lZWRlZCBldmVyeSBtZW1iZXIg
+b2YgdGhhdAo+Pj4gYWN0aW5nIHNldCB0byBnbyBhY3RpdmUgbGF0ZXIgb24gdG8gYXZvaWRpbmcg
+bG9vc2luZyB3cml0ZXMuIFlvdSBjYW4KPj4+IHByZXZlbnQgdGhpcyBieSBzZXR0aW5nIGEgbWlu
+X3NpemUgYWJvdmUgdGhlIG51bWJlciBvZiBkYXRhIGNodW5rcy4KPj4+IC1TYW0KPj4+Cj4+PiBP
+biBUaHUsIE5vdiAxMywgMjAxNCBhdCA0OjE1IEFNLCBHdWFuZ1lhbmcgPHlndWFuZzExQG91dGxv
+b2suY29tPiB3cm90ZToKPj4+PiBIaSBTYW0sCj4+Pj4gWWVzdGVyZGF5IHRoZXJlIHdhcyBvbmUg
+UEcgZG93biBpbiBvdXIgY2x1c3RlciBhbmQgSSBhbSBjb25mdXNlZCBieSB0aGUgUEcgc3RhdGUs
+IEkgYW0gbm90IHN1cmUgaWYgaXQgaXMgYSBidWcgKG9yIGFuIGlzc3VlIGhhcyBiZWVuIGZpeGVk
+IGFzIEkgc2VlIGEgY291cGxlIG9mIHJlbGF0ZWQgZml4ZXMgaW4gZ2lhbnQpLCBpdCB3b3VsZCBi
+ZSBuaWNlIHlvdSBjYW4gaGVscCB0byB0YWtlIGEgbG9vay4KPj4+Pgo+Pj4+IEhlcmUgaXMgd2hh
+dCBoYXBwZW5lZDoKPj4+Pgo+Pj4+IFdlIGFyZSB1c2luZyBFQyBwb29sIHdpdGggOCBkYXRhIGNo
+dW5rcyBhbmQgMyBjb2RlIGNodW5rcywgc2F5aW5nIHRoZSBQRyBoYXMgdXAvYWN0aW5nIHNldCBh
+cyBbMSwgMiwgMywgNCwgNSwgNiwgNywgOCwgOSwgMTAsIDExXSwgdGhlcmUgd2FzIG9uZSBPU0Qg
+aW4gdGhlIHNldCBkb3duIGFuZCB1cCwgc28gdGhhdCBpdCB0cmlnZ2VyZWQgUEcgcmVjb3Zlcmlu
+Zy4gSG93ZXZlciwgd2hlbiBkb2luZyByZWNvdmVyLCB0aGUgcHJpbWFyeSBPU0QgY3Jhc2ggYXMg
+ZHVlIHRvIGEgY29ycnVwdGVkIGZpbGUgY2h1bmssIHRoZW4gYW5vdGhlciBPU0QgYmVjb21lIHBy
+aW1hcnksIHN0YXJ0IHJlY292ZXIgYW5kIGNyYXNoZWQsIGFuZCBzbyBvbiBzbyBmb3J0aCB1bnRp
+bCB0aGVyZSBhcmUgNCBPU0RzIGRvd24gaW4gdGhlIHNldCBhbmQgdGhlIFBHIGlzIG1hcmtlZCBk
+b3duLgo+Pj4+Cj4+Pj4gQWZ0ZXIgdGhhdCwgd2UgbGVmdCB0aGUgT1NEIGhhdmluZyBjb3JydXB0
+ZWQgZGF0YSBkb3duIGFuZCBzdGFydGVkIGFsbCBvdGhlciBjcmFzaGVkIE9TRHMsIHdlIGV4cGVj
+dGVkIHRoZSBQRyBjb3VsZCBiZWNvbWUgYWN0aXZlLCBob3dldmVyLCB0aGUgUEcgaXMgc3RpbGwg
+ZG93biB3aXRoIHRoZSBmb2xsb3dpbmcgcXVlcnkgaW5mb3JtYXRpb246Cj4+Pj4KPj4+PiB7ICJz
+dGF0ZSI6ICJkb3duK3JlbWFwcGVkK2luY29uc2lzdGVudCtwZWVyaW5nIiwKPj4+PiAiZXBvY2gi
+OiA0NDY5LAo+Pj4+ICJ1cCI6IFsKPj4+PiAzNzcsCj4+Pj4gMTA3LAo+Pj4+IDMyOCwKPj4+PiAy
+NjMsCj4+Pj4gMzk1LAo+Pj4+IDQ2NywKPj4+PiAzNTIsCj4+Pj4gNDc1LAo+Pj4+IDMzMywKPj4+
+PiAzNywKPj4+PiAzODBdLAo+Pj4+ICJhY3RpbmciOiBbCj4+Pj4gMjE0NzQ4MzY0NywKPj4+PiAx
+MDcsCj4+Pj4gMzI4LAo+Pj4+IDI2MywKPj4+PiAzOTUsCj4+Pj4gMjE0NzQ4MzY0NywKPj4+PiAz
+NTIsCj4+Pj4gNDc1LAo+Pj4+IDMzMywKPj4+PiAzNywKPj4+PiAzODBdLAo+Pj4+IC4uLgo+Pj4+
+IDM3N119XSwKPj4+PiAicHJvYmluZ19vc2RzIjogWwo+Pj4+ICIzNyg5KSIsCj4+Pj4gIjEwNygx
+KSIsCj4+Pj4gIjI2MygzKSIsCj4+Pj4gIjMyOCgyKSIsCj4+Pj4gIjMzMyg4KSIsCj4+Pj4gIjM1
+Mig2KSIsCj4+Pj4gIjM3NygwKSIsCj4+Pj4gIjM4MCgxMCkiLAo+Pj4+ICIzOTUoNCkiLAo+Pj4+
+ICI0NjcoNSkiLAo+Pj4+ICI0NzUoNykiXSwKPj4+PiAiYmxvY2tlZCI6ICJwZWVyaW5nIGlzIGJs
+b2NrZWQgZHVlIHRvIGRvd24gb3NkcyIsCj4+Pj4gImRvd25fb3Nkc193ZV93b3VsZF9wcm9iZSI6
+IFsKPj4+PiA4XSwKPj4+PiAicGVlcmluZ19ibG9ja2VkX2J5IjogWwo+Pj4+IHsgIm9zZCI6IDgs
+Cj4+Pj4gImN1cnJlbnRfbG9zdF9hdCI6IDAsCj4+Pj4gImNvbW1lbnQiOiAic3RhcnRpbmcgb3Ig
+bWFya2luZyB0aGlzIG9zZCBsb3N0IG1heSBsZXQgdXMgcHJvY2VlZCJ9XX0sCj4+Pj4geyAibmFt
+ZSI6ICJTdGFydGVkIiwKPj4+PiAiZW50ZXJfdGltZSI6ICIyMDE0LTExLTEyIDEwOjEyOjIzLjA2
+NzM2OSJ9XSwKPj4+PiB9Cj4+Pj4KPj4+PiBIZXJlIG9zZC44IGlzIHRoZSBvbmUgaGF2aW5nIGNv
+cnJ1cHRlZCBkYXRhLgo+Pj4+Cj4+Pj4gVGhlIHdheSB3ZSB3b3JrZWQgYXJvdW5kIHRoaXMgaXNz
+dWUgaXMgdG8gc2V0IG5vcmVjb3ZlciBhbmQgc3RhcnQgb3NkLjgsIGdldCB0aGF0IFBHIGFjdGl2
+ZSBhbmQgdGhlbiByZW1vdmVkIHRoZSBvYmplY3QgKHZpYSByYWRvcyksIHVuc2V0IG5vcmVjb3Zl
+ciBhbmQgdGhpbmdzIGJlY29tZSBjbGVhbiBhZ2Fpbi4gQnV0IHRoZSBtb3N0IGNvbmZ1c2luZyBw
+YXJ0IGlzIHRoYXQgZXZlbiB3ZSBvbmx5IGxlZnQgb3NkLjggZG93biwgdGhlIFBHIGNvdWxkbid0
+IGJlY29tZSBhY3RpdmUuCj4+Pj4KPj4+PiBXZSBhcmUgdXNpbmcgZmlyZWZseSB2MC44MC40Lgo+
+Pj4+Cj4+Pj4gVGhhbmtzLAo+Pj4+IEd1YW5nCj4+IC0tCj4+IFRvIHVuc3Vic2NyaWJlIGZyb20g
+dGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbgo+PiB0
+aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZwo+PiBNb3Jl
+IG1ham9yZG9tbyBpbmZvIGF0IGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8u
+aHRtbAogCQkgCSAgIAkJICA=
