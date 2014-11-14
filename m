@@ -1,43 +1,52 @@
-From: Pieter Smith <pieter@boesman.nl>
-Subject: [PATCH 13/56] fs/ceph: support compiling out splice
-Date: Thu, 13 Nov 2014 22:22:50 +0100
-Message-ID: <1415913813-362-14-git-send-email-pieter@boesman.nl>
-References: <pieter@boesman.nl>
- <1415913813-362-1-git-send-email-pieter@boesman.nl>
+From: Sage Weil <sweil@redhat.com>
+Subject: watch/notify changes ready for review
+Date: Thu, 13 Nov 2014 17:20:21 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1411131645430.10048@cobra.newdream.net>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f177.google.com ([209.85.212.177]:36296 "EHLO
-	mail-wi0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934504AbaKMV3c (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 13 Nov 2014 16:29:32 -0500
-In-Reply-To: <1415913813-362-1-git-send-email-pieter@boesman.nl>
+Received: from cobra.newdream.net ([66.33.216.30]:44265 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934547AbaKNBUW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 13 Nov 2014 20:20:22 -0500
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id D463D80079
+	for <ceph-devel@vger.kernel.org>; Thu, 13 Nov 2014 17:20:21 -0800 (PST)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id B5BB580079
+	for <ceph-devel@vger.kernel.org>; Thu, 13 Nov 2014 17:20:21 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: pieter@boesman.nl
-Cc: Josh Triplett <josh@joshtriplett.org>, Sage Weil <sage@inktank.com>, "open list:CEPH DISTRIBUTED..." <ceph-devel@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Compile out splice support from ceph when the splice-family of syscalls is not
-supported by the system (i.e. CONFIG_SYSCALL_SPLICE is undefined).
+My pile of watch/notify changes are ready for review:
 
-Signed-off-by: Pieter Smith <pieter@boesman.nl>
----
- fs/ceph/file.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+	https://github.com/ceph/ceph/pull/2924
 
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index 2eb02f8..c85396a 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -1251,8 +1251,8 @@ const struct file_operations ceph_file_fops = {
- 	.fsync = ceph_fsync,
- 	.lock = ceph_lock,
- 	.flock = ceph_flock,
--	.splice_read = generic_file_splice_read,
--	.splice_write = iter_file_splice_write,
-+	SPLICE_READ_INIT(generic_file_splice_read)
-+	SPLICE_WRITE_INIT(iter_file_splice_write)
- 	.unlocked_ioctl = ceph_ioctl,
- 	.compat_ioctl	= ceph_ioctl,
- 	.fallocate	= ceph_fallocate,
--- 
-1.9.1
+This series does a ton of stuff that should make watch/notify more robust, 
+useful, and reliable.
+
+Highlights:
+
+ - notify can tell who sent the message
+ - notify acks are explicit
+ - notify acks can include a payload that is delivered to the notifier
+ - notifier can see who got the notify (and their ack payload, if any)
+ - various useless arguments are dropped from watch, unwatch, notify calls
+ - client/osd protocol now explicitly checks for watch staleness
+   (i.e., we reliably detect when we may have missed a notify)
+ - clients get an async notification when they were sent a notify but 
+didn't ack it in time (not sure yet if this useful)
+ - clients get an async notification when the watch was disconnected by 
+the osd (timed out or explicitly killed or whatever)
+ - clients have a new watch_check() call that synchronously checks for any 
+pending errors, or tells us how recently we last confirmed watch liveness 
+and notify async delivery.
+
+The last bit is the what lets users draw strong conclusions about what 
+notifications they may (not) have received so they can draw real 
+conclusions.
+
+Anyway, please take a look!
+sage
 
