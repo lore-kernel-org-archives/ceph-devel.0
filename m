@@ -1,123 +1,74 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Question on Ceph LRC design
-Date: Mon, 17 Nov 2014 11:30:12 +0100
-Message-ID: <5469CE34.5060202@dachary.org>
-References: <06681238D8946F44A60AA400760A1CBF01E28FBD@SHSMSX104.ccr.corp.intel.com> <06681238D8946F44A60AA400760A1CBF01E290AB@SHSMSX104.ccr.corp.intel.com>,<54694980.2010302@dachary.org> <3472A07E6605974CBC9BC573F1BC02E4AE81D81C@CERNXCHG44.cern.ch>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="mC8x8LtAFu4dSo2iRno94LsRQOWbI4ECd"
+From: Luis Henriques <luis.henriques@canonical.com>
+Subject: [3.16.y-ckt stable] Patch "rbd: Fix error recovery in rbd_obj_read_sync()" has been added to staging queue
+Date: Mon, 17 Nov 2014 11:14:50 +0000
+Message-ID: <1416222890-20485-1-git-send-email-luis.henriques@canonical.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:38133 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752016AbaKQKaP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 17 Nov 2014 05:30:15 -0500
-In-Reply-To: <3472A07E6605974CBC9BC573F1BC02E4AE81D81C@CERNXCHG44.cern.ch>
+Received: from youngberry.canonical.com ([91.189.89.112]:36494 "EHLO
+	youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751180AbaKQLOx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 17 Nov 2014 06:14:53 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>, "Zhou, Yuan" <yuan.zhou@intel.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Jan Kara <jack@suse.cz>
+Cc: Yehuda Sadeh <yehuda@inktank.com>, Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org, Ilya Dryomov <idryomov@redhat.com>, Luis Henriques <luis.henriques@canonical.com>, kernel-team@lists.ubuntu.com
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---mC8x8LtAFu4dSo2iRno94LsRQOWbI4ECd
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+This is a note to let you know that I have just added a patch titled
 
+    rbd: Fix error recovery in rbd_obj_read_sync()
 
-Hi Andreas,
+to the linux-3.16.y-queue branch of the 3.16.y-ckt extended stable tree 
+which can be found at:
 
-On 17/11/2014 11:07, Andreas Joachim Peters wrote:> Hi,
->=20
-> if you want to compute local parities within a plug-in library by addin=
-g rows to the encoding matrix, you can still do that. If you can do LRC i=
-nside the plug-in more efficienty, one should do it in the plug-in and sk=
-ip the LRC layer. I have a patch to the ISA plug-in which can do LRC like=
- HDFS Xorbas encoding, but i didn't manage to express that in Loic's gene=
-ric LRC layer  ... I think it is hard to formulate a generic framework to=
- define LRC as a layer on top and doing the encoding/decoding only in the=
- lowest layer.  Same problem for the shingled EC, which you cannot expres=
-s in the simple LRC way ...
+ http://kernel.ubuntu.com/git?p=ubuntu/linux.git;a=shortlog;h=refs/heads/linux-3.16.y-queue
 
-Could you please remind us the URL of this draft ?
+This patch is scheduled to be released in version 3.16.7-ckt2.
 
->=20
-> I see the current LRC layering as a generic tool to use in multi-datace=
-nter setups honouring the locality of chunks because some  of the LRC opt=
-imization codes break locality by cross-talk between locations, they redu=
-ce the traffic but do not restrict traffic within data centers.
+If you, or anyone else, feels it should not be added to this tree, please 
+reply to this email.
 
-It certainly has its use but it would be nice to have a more specialized =
-and better optimized version that implements most subtle algorithms ;-)
+For more information about the 3.16.y-ckt tree, see
+https://wiki.ubuntu.com/Kernel/Dev/ExtendedStable
 
-Cheers
+Thanks.
+-Luis
 
->=20
-> Cheers Andreas.
-> ________________________________________
-> From: Loic Dachary [loic@dachary.org]
-> Sent: 17 November 2014 02:04
-> To: Zhou, Yuan; Andreas Joachim Peters
-> Cc: ceph-devel@vger.kernel.org
-> Subject: Re: Question on Ceph LRC design
->=20
-> Hi,
->=20
-> I believe Andreas has a more elaborate answer on this topic. The curren=
-t implementation is not as good as what is described in the paper you men=
-tion, this is correct. My incentive for chosing this path is that I was a=
-ble to understand it, mainly. It is not much more than stacking layers of=
- erasure coded chunks on top of each other ;-)
->=20
-> Now that we have this plugin, it would be nice to have another implemen=
-tation that uses less space and possible even less network when reconstru=
-cting. During the OpenStack summit we discussed this with Kevin Greenan a=
-nd there are promising directions. It would help a lot to have a sample c=
-ode to study so that it can be adapted to what we have currently in Ceph.=
- Do you know of such an implementation of LRC or other similar code desig=
-ned to reduce the network bandwidth during reconstruction ?
->=20
-> Cheers
->=20
-> On 17/11/2014 01:52, Zhou, Yuan wrote:
->> Hi Loic/Anderas,
->>
->>
->>
->> I was trying to understand the LRC design in Ceph EC. Per my understan=
-ding, it seems Ceph was using a slightly different design with the Micros=
-oft LRC: the local parities were calculated with the global parities incl=
-uded. Is there any special consideration on this change?
->>
->> I was asking because in a typical MS LRC design the global and local p=
-arities could be calculated at the same time actually(I mean inside the E=
-rasure Code library). But with this new design, we lost this potential op=
-timization.
->>
->>
->>
->> Thanks, -Yuan
->>
->=20
-> --
-> Lo=EFc Dachary, Artisan Logiciel Libre
->=20
+------
 
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
+From c71e0efe1eeb425d5c5c21f491455522737b3e2c Mon Sep 17 00:00:00 2001
+From: Jan Kara <jack@suse.cz>
+Date: Wed, 22 Oct 2014 09:17:24 +0200
+Subject: rbd: Fix error recovery in rbd_obj_read_sync()
 
+commit a8d4205623ae965e36c68629db306ca0695a2771 upstream.
 
---mC8x8LtAFu4dSo2iRno94LsRQOWbI4ECd
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+When we fail to allocate page vector in rbd_obj_read_sync() we just
+basically ignore the problem and continue which will result in an oops
+later. Fix the problem by returning proper error.
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+CC: Yehuda Sadeh <yehuda@inktank.com>
+CC: Sage Weil <sage@inktank.com>
+CC: ceph-devel@vger.kernel.org
+Coverity-id: 1226882
+Signed-off-by: Jan Kara <jack@suse.cz>
+Signed-off-by: Ilya Dryomov <idryomov@redhat.com>
+Signed-off-by: Luis Henriques <luis.henriques@canonical.com>
+---
+ drivers/block/rbd.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-iEYEARECAAYFAlRpzjQACgkQ8dLMyEl6F22GuwCfeMMRd4rXvEG3LLqKdf4Bhs+a
-3O8AoK7jdPtd6xBObi6Yz5UW/dMJBw92
-=gFmd
------END PGP SIGNATURE-----
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 9dc02c429771..a15500662f4c 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -3389,7 +3389,7 @@ static int rbd_obj_read_sync(struct rbd_device *rbd_dev,
+ 	page_count = (u32) calc_pages_for(offset, length);
+ 	pages = ceph_alloc_page_vector(page_count, GFP_KERNEL);
+ 	if (IS_ERR(pages))
+-		ret = PTR_ERR(pages);
++		return PTR_ERR(pages);
 
---mC8x8LtAFu4dSo2iRno94LsRQOWbI4ECd--
+ 	ret = -ENOMEM;
+ 	obj_request = rbd_obj_request_create(object_name, offset, length,
+--
+2.1.0
+
