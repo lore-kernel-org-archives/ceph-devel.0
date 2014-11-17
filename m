@@ -1,74 +1,143 @@
-From: Luis Henriques <luis.henriques@canonical.com>
-Subject: [3.16.y-ckt stable] Patch "rbd: Fix error recovery in rbd_obj_read_sync()" has been added to staging queue
-Date: Mon, 17 Nov 2014 11:14:50 +0000
-Message-ID: <1416222890-20485-1-git-send-email-luis.henriques@canonical.com>
+From: pushpesh sharma <pushpesh.eck@gmail.com>
+Subject: Re: civetweb threads
+Date: Mon, 17 Nov 2014 17:39:21 +0530
+Message-ID: <CAMc8nAU1PGKbhQWwr=kAUktedUK4zSAedRySfAQuwNHG-da-ag@mail.gmail.com>
+References: <CAMWPydT+q9Ds=mRNgXfhR2RA64=7UuMmczEjeg4Cdz3P5gaGuw@mail.gmail.com>
+	<CAMWPydSJf0Wu9y1JJRTkBuRq80GPvWB7zWABM6rtQusOsPpy-A@mail.gmail.com>
+	<CABBk=J-oNuOnSfEU847y+cya+sdVmh02FSvP37AJvjrpjuupfA@mail.gmail.com>
+	<CAMWPydTtnn0tDrr7qZDaJStZMZMf7+A2HD5k+u+=JUmCrtUB+Q@mail.gmail.com>
+	<CABBk=J-M1kfjnNrOr9QFWFUNW5fjUV7Ca-6Q8j5xWLmWk_5PXQ@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from youngberry.canonical.com ([91.189.89.112]:36494 "EHLO
-	youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751180AbaKQLOx (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 17 Nov 2014 06:14:53 -0500
+Received: from mail-ig0-f173.google.com ([209.85.213.173]:58600 "EHLO
+	mail-ig0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751644AbaKQMJW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 17 Nov 2014 07:09:22 -0500
+Received: by mail-ig0-f173.google.com with SMTP id r2so1182595igi.6
+        for <ceph-devel@vger.kernel.org>; Mon, 17 Nov 2014 04:09:21 -0800 (PST)
+In-Reply-To: <CABBk=J-M1kfjnNrOr9QFWFUNW5fjUV7Ca-6Q8j5xWLmWk_5PXQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jan Kara <jack@suse.cz>
-Cc: Yehuda Sadeh <yehuda@inktank.com>, Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org, Ilya Dryomov <idryomov@redhat.com>, Luis Henriques <luis.henriques@canonical.com>, kernel-team@lists.ubuntu.com
+To: Yehuda Sadeh <yehuda@redhat.com>
+Cc: Mustafa Muhammad <mustafaa.alhamdaani@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-This is a note to let you know that I have just added a patch titled
+Mustafa,
 
-    rbd: Fix error recovery in rbd_obj_read_sync()
+I am not positive about the results you posted here(200MB/s ==>
+1200MB/s, by just increasing number of 'rgw_thread_pool_size'). These
+are results I observed on my setup:
 
-to the linux-3.16.y-queue branch of the 3.16.y-ckt extended stable tree 
-which can be found at:
+1. Workload : 100% Read, Object_size=1MB, ClientWorkers: 512,
+rgw_object_chunk_size= 1048576, rgw_thread_pool_size=128
 
- http://kernel.ubuntu.com/git?p=ubuntu/linux.git;a=shortlog;h=refs/heads/linux-3.16.y-queue
+General Report
 
-This patch is scheduled to be released in version 3.16.7-ckt2.
+Op-Type    Op-Count       Byte-Count      Avg-ResTime   Avg-ProTime
+  Throughput        Bandwidth    Succ-Ratio
+Read         515.99 kops   515.99 GB         74.37 ms          72.2 ms
+           1721.04 op/s      1.72 GB/S     99.33%
 
-If you, or anyone else, feels it should not be added to this tree, please 
-reply to this email.
+ResTime (RT) Details
+Op-Type     60%-RT    80%-RT      90%-RT   95%-RT    99%-RT        100%-RT
+ read          < 30 ms   < 80 ms        < 200 ms       < 290 ms
+  < 670 ms              < 6,530 ms
 
-For more information about the 3.16.y-ckt tree, see
-https://wiki.ubuntu.com/Kernel/Dev/ExtendedStable
 
-Thanks.
--Luis
+2.  Workload : 100% Read, Object_size=1MB, ClientWorkers: 512,
+rgw_object_chunk_size= 1048576, rgw_thread_pool_size=512
 
-------
+General Report
 
-From c71e0efe1eeb425d5c5c21f491455522737b3e2c Mon Sep 17 00:00:00 2001
-From: Jan Kara <jack@suse.cz>
-Date: Wed, 22 Oct 2014 09:17:24 +0200
-Subject: rbd: Fix error recovery in rbd_obj_read_sync()
+Op-Type    Op-Count         Byte-Count    Avg-ResTime
+Avg-ProcTime     Throughput    Bandwidth    Succ-Ratio
+read          521.21 kops      521.21 GB      294.17 ms
+291.7 ms           1740.46 op/s  1.74 GB/S      100%
 
-commit a8d4205623ae965e36c68629db306ca0695a2771 upstream.
 
-When we fail to allocate page vector in rbd_obj_read_sync() we just
-basically ignore the problem and continue which will result in an oops
-later. Fix the problem by returning proper error.
+ResTime (RT) Details
+Op-Type     60%-RT     80%-RT      90%-RT      95%-RT     99%-RT        100%-RT
+read          < 280 ms     < 360 ms     < 450 ms   < 570 ms  <1,040 ms
+  <3,790 ms
 
-CC: Yehuda Sadeh <yehuda@inktank.com>
-CC: Sage Weil <sage@inktank.com>
-CC: ceph-devel@vger.kernel.org
-Coverity-id: 1226882
-Signed-off-by: Jan Kara <jack@suse.cz>
-Signed-off-by: Ilya Dryomov <idryomov@redhat.com>
-Signed-off-by: Luis Henriques <luis.henriques@canonical.com>
----
- drivers/block/rbd.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 9dc02c429771..a15500662f4c 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -3389,7 +3389,7 @@ static int rbd_obj_read_sync(struct rbd_device *rbd_dev,
- 	page_count = (u32) calc_pages_for(offset, length);
- 	pages = ceph_alloc_page_vector(page_count, GFP_KERNEL);
- 	if (IS_ERR(pages))
--		ret = PTR_ERR(pages);
-+		return PTR_ERR(pages);
+You can checkout more setup details
+http://pushpeshsharma.blogspot.in/2014/11/openstack-swift-vs-ceph-rgw-read.html
+ .
 
- 	ret = -ENOMEM;
- 	obj_request = rbd_obj_request_create(object_name, offset, length,
---
-2.1.0
+ It is certainly possible I am missing some other configs, please
+enlighten me.
 
+On Sun, Nov 16, 2014 at 10:41 PM, Yehuda Sadeh <yehuda@redhat.com> wrote:
+> On Sun, Nov 16, 2014 at 2:51 AM, Mustafa Muhammad
+> <mustafaa.alhamdaani@gmail.com> wrote:
+>> On Sat, Nov 15, 2014 at 7:18 PM, Yehuda Sadeh <yehuda@redhat.com> wrote:
+>>> On Sat, Nov 15, 2014 at 3:55 AM, Mustafa Muhammad
+>>> <mustafaa.alhamdaani@gmail.com> wrote:
+>>>> On Sat, Nov 15, 2014 at 10:28 AM, Mustafa Muhammad
+>>>> <mustafaa.alhamdaani@gmail.com> wrote:
+>>>>> Hi,
+>>>>> I am using civetweb in my radosgw, if I use "rgw thread pool size"
+>>>>> that is more than 1024, civetweb doesn't work.
+>>>>> e.g.
+>>>>> rgw thread pool size = 1024
+>>>>> rgw frontends = "civetweb port=80"
+>>>>>
+>>>>> #ps aux -L | grep rados | wc -l
+>>>>> 1096
+>>>>>
+>>>>> everything works fine
+>>>>>
+>>>>>
+>>>>> If I use:
+>>>>> rgw thread pool size = 1025
+>>>>> rgw frontends = "civetweb port=80"
+>>>>>
+>>>>> # ps aux -L | grep rados | wc -l
+>>>>> 43
+>>>>>
+>>>>> And http server is not listening.
+>>>>>
+>>>>> If I don't use civetweb:
+>>>>> rgw thread pool size = 10240
+>>>>>
+>>>>> # ps aux -L | grep rados | wc -l
+>>>>> 10278
+>>>>>
+>>>>> Regards
+>>>>>
+>>>>> Mustafa Muhammad
+>>>>
+>>>> I found the problem, it is hardcoded here:
+>>>> https://github.com/ceph/civetweb/blob/master/src/civetweb.c
+>>>> as:
+>>>> #define MAX_WORKER_THREADS 1024
+>>>>
+>>>> I increased it to 20480 an compiled from source, problem solved.
+>>>> I should we make a patch, right?
+>>>
+>>> Please do, preferably a github pull request. Also, if you could open a
+>>> ceph tracker issue with the specific would be great.
+>>
+>> I wanted to do create a github pull request with this value set to
+>> 20480, but thought I should ask if you want it to be hardcoded, I
+>> understood that 'rgw_thread_pool_size' maps to 'num_op_thread' in
+>> civetweb, is there a hardcoded max for rgw_thread_pool_size so I can
+>> set the same for MAX_WORKER_THREADS? What do you suggest?
+>
+> I don't think there's a hard coded max for the rgw thread pool size. A
+> configurable setting would be nicer, but I'm not really tied into it,
+> depending on what are the ramifications. Whichever route you're taking
+> it'd be nice to get it upstream to civetweb, so it needs to make sense
+> in that context.
+>
+> Yehuda
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
+-- 
+-Pushpesh
