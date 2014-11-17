@@ -1,181 +1,226 @@
 From: "Yan, Zheng" <zyan@redhat.com>
-Subject: [PATCH 06/12] ceph: use getattr request to fetch inline data
-Date: Mon, 17 Nov 2014 15:57:00 +0800
-Message-ID: <1416211026-11524-7-git-send-email-zyan@redhat.com>
+Subject: [PATCH 07/12] ceph: fetch inline data while getting Fcr cap refs
+Date: Mon, 17 Nov 2014 15:57:01 +0800
+Message-ID: <1416211026-11524-8-git-send-email-zyan@redhat.com>
 References: <1416211026-11524-1-git-send-email-zyan@redhat.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:52649 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:59551 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751085AbaKQH54 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 17 Nov 2014 02:57:56 -0500
+	id S1750723AbaKQH6E (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 17 Nov 2014 02:58:04 -0500
 In-Reply-To: <1416211026-11524-1-git-send-email-zyan@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: liwang@ubuntukylin.com, "Yan, Zheng" <zyan@redhat.com>
 
-Add a new parameter 'locked_page' to ceph_do_getattr(). If inline data
-in getattr reply will be copied to the page.
+we can't use getattr to fetch inline data after getting Fcr caps,
+because it can cause deadlock. The solution is try bringing inline
+data to page cache when not holding any cap, and hope the inline
+data page is still there after getting the Fcr caps. If the page
+is still there, pin it in page cache for later IO.
 
 Signed-off-by: Yan, Zheng <zyan@redhat.com>
 ---
- fs/ceph/inode.c              | 34 +++++++++++++++++++++++++---------
- fs/ceph/mds_client.h         |  1 +
- fs/ceph/super.h              |  7 ++++++-
- include/linux/ceph/ceph_fs.h |  2 ++
- 4 files changed, 34 insertions(+), 10 deletions(-)
+ fs/ceph/addr.c |  9 +++++++--
+ fs/ceph/caps.c | 55 ++++++++++++++++++++++++++++++++++++++++++++++---------
+ fs/ceph/file.c | 12 +++++++++---
+ 3 files changed, 62 insertions(+), 14 deletions(-)
 
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index feea6a8..0bdabd1 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -659,7 +659,7 @@ void ceph_fill_file_time(struct inode *inode, int issued,
-  * Populate an inode based on info from mds.  May be called on new or
-  * existing inodes.
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index 7320b11..fdbdbbe 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -1207,6 +1207,7 @@ static int ceph_filemap_fault(struct vm_area_struct *vma, struct vm_fault *vmf)
+ 	struct inode *inode = file_inode(vma->vm_file);
+ 	struct ceph_inode_info *ci = ceph_inode(inode);
+ 	struct ceph_file_info *fi = vma->vm_file->private_data;
++	struct page *pinned_page = NULL;
+ 	loff_t off = vmf->pgoff << PAGE_CACHE_SHIFT;
+ 	int want, got, ret;
+ 
+@@ -1218,7 +1219,8 @@ static int ceph_filemap_fault(struct vm_area_struct *vma, struct vm_fault *vmf)
+ 		want = CEPH_CAP_FILE_CACHE;
+ 	while (1) {
+ 		got = 0;
+-		ret = ceph_get_caps(ci, CEPH_CAP_FILE_RD, want, &got, -1);
++		ret = ceph_get_caps(ci, CEPH_CAP_FILE_RD, want, -1,
++				    &got, &pinned_page);
+ 		if (ret == 0)
+ 			break;
+ 		if (ret != -ERESTARTSYS) {
+@@ -1233,6 +1235,8 @@ static int ceph_filemap_fault(struct vm_area_struct *vma, struct vm_fault *vmf)
+ 
+ 	dout("filemap_fault %p %llu~%zd dropping cap refs on %s ret %d\n",
+ 	     inode, off, (size_t)PAGE_CACHE_SIZE, ceph_cap_string(got), ret);
++	if (pinned_page)
++		page_cache_release(pinned_page);
+ 	ceph_put_cap_refs(ci, got);
+ 
+ 	return ret;
+@@ -1266,7 +1270,8 @@ static int ceph_page_mkwrite(struct vm_area_struct *vma, struct vm_fault *vmf)
+ 		want = CEPH_CAP_FILE_BUFFER;
+ 	while (1) {
+ 		got = 0;
+-		ret = ceph_get_caps(ci, CEPH_CAP_FILE_WR, want, &got, off + len);
++		ret = ceph_get_caps(ci, CEPH_CAP_FILE_WR, want, off + len,
++				    &got, NULL);
+ 		if (ret == 0)
+ 			break;
+ 		if (ret != -ERESTARTSYS) {
+diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+index 6372eb9..3bc0908 100644
+--- a/fs/ceph/caps.c
++++ b/fs/ceph/caps.c
+@@ -2057,15 +2057,18 @@ static void __take_cap_refs(struct ceph_inode_info *ci, int got)
+  * requested from the MDS.
   */
--static int fill_inode(struct inode *inode,
-+static int fill_inode(struct inode *inode, struct page *locked_page,
- 		      struct ceph_mds_reply_info_in *iinfo,
- 		      struct ceph_mds_reply_dirfrag *dirinfo,
- 		      struct ceph_mds_session *session,
-@@ -883,14 +883,15 @@ static int fill_inode(struct inode *inode,
- 		int cache_caps = CEPH_CAP_FILE_CACHE | CEPH_CAP_FILE_LAZYIO;
- 		ci->i_inline_version = iinfo->inline_version;
- 		if (ci->i_inline_version != CEPH_INLINE_NONE &&
--		    (le32_to_cpu(info->cap.caps) & cache_caps))
-+		    (locked_page ||
-+		     (le32_to_cpu(info->cap.caps) & cache_caps)))
- 			fill_inline = true;
- 	}
- 
- 	spin_unlock(&ci->i_ceph_lock);
- 
- 	if (fill_inline)
--		ceph_fill_inline_data(inode, NULL,
-+		ceph_fill_inline_data(inode, locked_page,
- 				      iinfo->inline_data, iinfo->inline_len);
- 
- 	if (wake)
-@@ -1080,7 +1081,8 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req,
- 		struct inode *dir = req->r_locked_dir;
- 
- 		if (dir) {
--			err = fill_inode(dir, &rinfo->diri, rinfo->dirfrag,
-+			err = fill_inode(dir, NULL,
-+					 &rinfo->diri, rinfo->dirfrag,
- 					 session, req->r_request_started, -1,
- 					 &req->r_caps_reservation);
- 			if (err < 0)
-@@ -1150,7 +1152,7 @@ retry_lookup:
- 		}
- 		req->r_target_inode = in;
- 
--		err = fill_inode(in, &rinfo->targeti, NULL,
-+		err = fill_inode(in, req->r_locked_page, &rinfo->targeti, NULL,
- 				session, req->r_request_started,
- 				(!req->r_aborted && rinfo->head->result == 0) ?
- 				req->r_fmode : -1,
-@@ -1321,7 +1323,7 @@ static int readdir_prepopulate_inodes_only(struct ceph_mds_request *req,
- 			dout("new_inode badness got %d\n", err);
- 			continue;
- 		}
--		rc = fill_inode(in, &rinfo->dir_in[i], NULL, session,
-+		rc = fill_inode(in, NULL, &rinfo->dir_in[i], NULL, session,
- 				req->r_request_started, -1,
- 				&req->r_caps_reservation);
- 		if (rc < 0) {
-@@ -1437,7 +1439,7 @@ retry_lookup:
- 			}
- 		}
- 
--		if (fill_inode(in, &rinfo->dir_in[i], NULL, session,
-+		if (fill_inode(in, NULL, &rinfo->dir_in[i], NULL, session,
- 			       req->r_request_started, -1,
- 			       &req->r_caps_reservation) < 0) {
- 			pr_err("fill_inode badness on %p\n", in);
-@@ -1920,7 +1922,8 @@ out_put:
-  * Verify that we have a lease on the given mask.  If not,
-  * do a getattr against an mds.
-  */
--int ceph_do_getattr(struct inode *inode, int mask, bool force)
-+int __ceph_do_getattr(struct inode *inode, struct page *locked_page,
-+		      int mask, bool force)
+ static int try_get_cap_refs(struct ceph_inode_info *ci, int need, int want,
+-			    int *got, loff_t endoff, int *check_max, int *err)
++			    loff_t endoff, int *got, struct page **pinned_page,
++			    int *check_max, int *err)
  {
- 	struct ceph_fs_client *fsc = ceph_sb_to_client(inode->i_sb);
- 	struct ceph_mds_client *mdsc = fsc->mdsc;
-@@ -1932,7 +1935,8 @@ int ceph_do_getattr(struct inode *inode, int mask, bool force)
- 		return 0;
+ 	struct inode *inode = &ci->vfs_inode;
++	struct page *page = NULL;
+ 	int ret = 0;
+-	int have, implemented;
++	int have, implemented, _got = 0;
+ 	int file_wanted;
+ 
+ 	dout("get_cap_refs %p need %s want %s\n", inode,
+ 	     ceph_cap_string(need), ceph_cap_string(want));
++again:
+ 	spin_lock(&ci->i_ceph_lock);
+ 
+ 	/* make sure file is actually open */
+@@ -2120,8 +2123,8 @@ static int try_get_cap_refs(struct ceph_inode_info *ci, int need, int want,
+ 		     inode, ceph_cap_string(have), ceph_cap_string(not),
+ 		     ceph_cap_string(revoking));
+ 		if ((revoking & not) == 0) {
+-			*got = need | (have & want);
+-			__take_cap_refs(ci, *got);
++			_got = need | (have & want);
++			__take_cap_refs(ci, _got);
+ 			ret = 1;
+ 		}
+ 	} else {
+@@ -2130,8 +2133,42 @@ static int try_get_cap_refs(struct ceph_inode_info *ci, int need, int want,
  	}
- 
--	dout("do_getattr inode %p mask %s mode 0%o\n", inode, ceph_cap_string(mask), inode->i_mode);
-+	dout("do_getattr inode %p mask %s mode 0%o\n",
-+	     inode, ceph_cap_string(mask), inode->i_mode);
- 	if (!force && ceph_caps_issued_mask(ceph_inode(inode), mask, 1))
- 		return 0;
- 
-@@ -1943,7 +1947,19 @@ int ceph_do_getattr(struct inode *inode, int mask, bool force)
- 	ihold(inode);
- 	req->r_num_caps = 1;
- 	req->r_args.getattr.mask = cpu_to_le32(mask);
-+	req->r_locked_page = locked_page;
- 	err = ceph_mdsc_do_request(mdsc, NULL, req);
-+	if (locked_page && err == 0) {
-+		u64 inline_version = req->r_reply_info.targeti.inline_version;
-+		if (inline_version == 0) {
-+			/* the reply is supposed to contain inline data */
-+			err = -EINVAL;
-+		} else if (inline_version == CEPH_INLINE_NONE) {
-+			err = -ENODATA;
+ out:
+ 	spin_unlock(&ci->i_ceph_lock);
++
++	if ((_got & (CEPH_CAP_FILE_CACHE|CEPH_CAP_FILE_LAZYIO)) &&
++	    ci->i_inline_version != CEPH_INLINE_NONE &&
++	    i_size_read(inode) > 0) {
++		page = find_get_page(inode->i_mapping, 0);
++		if (page) {
++			if (!PageUptodate(page)) {
++				page_cache_release(page);
++				page = NULL;
++			}
++		}
++		if (page) {
++			*pinned_page = page;
 +		} else {
-+			err = req->r_reply_info.targeti.inline_len;
++			int ret1;
++			/*
++			 * drop cap refs first because getattr while holding
++			 * caps refs can cause deadlock.
++			 */
++			ceph_put_cap_refs(ci, _got);
++			_got = 0;
++			/* getattt will bring inline data to page cache */
++			ret1 = __ceph_do_getattr(inode, NULL,
++						 CEPH_STAT_CAP_INLINE_DATA,
++						 true);
++			if (ret1 >= 0) {
++				ret = 0;
++				goto again;
++			}
++			*err = ret1;
 +		}
 +	}
- 	ceph_mdsc_put_request(req);
- 	dout("do_getattr result=%d\n", err);
- 	return err;
-diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-index 01f5e4c..e2817d0 100644
---- a/fs/ceph/mds_client.h
-+++ b/fs/ceph/mds_client.h
-@@ -223,6 +223,7 @@ struct ceph_mds_request {
- 	int r_request_release_offset;
- 	struct ceph_msg  *r_reply;
- 	struct ceph_mds_reply_info_parsed r_reply_info;
-+	struct page *r_locked_page;
- 	int r_err;
- 	bool r_aborted;
++
+ 	dout("get_cap_refs %p ret %d got %s\n", inode,
+-	     ret, ceph_cap_string(*got));
++	     ret, ceph_cap_string(_got));
++	*got = _got;
+ 	return ret;
+ }
  
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index f675dd9..90f79b5 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -744,7 +744,12 @@ extern void ceph_queue_vmtruncate(struct inode *inode);
- extern void ceph_queue_invalidate(struct inode *inode);
- extern void ceph_queue_writeback(struct inode *inode);
+@@ -2168,8 +2205,8 @@ static void check_max_size(struct inode *inode, loff_t endoff)
+  * due to a small max_size, make sure we check_max_size (and possibly
+  * ask the mds) so we don't get hung up indefinitely.
+  */
+-int ceph_get_caps(struct ceph_inode_info *ci, int need, int want, int *got,
+-		  loff_t endoff)
++int ceph_get_caps(struct ceph_inode_info *ci, int need, int want,
++		  loff_t endoff, int *got, struct page **pinned_page)
+ {
+ 	int check_max, ret, err;
  
--extern int ceph_do_getattr(struct inode *inode, int mask, bool force);
-+extern int __ceph_do_getattr(struct inode *inode, struct page *locked_page,
-+			     int mask, bool force);
-+static inline int ceph_do_getattr(struct inode *inode, int mask, bool force)
-+{
-+	return __ceph_do_getattr(inode, NULL, mask, force);
-+}
- extern int ceph_permission(struct inode *inode, int mask);
- extern int ceph_setattr(struct dentry *dentry, struct iattr *attr);
- extern int ceph_getattr(struct vfsmount *mnt, struct dentry *dentry,
-diff --git a/include/linux/ceph/ceph_fs.h b/include/linux/ceph/ceph_fs.h
-index 2d4acfa..c0dadaa 100644
---- a/include/linux/ceph/ceph_fs.h
-+++ b/include/linux/ceph/ceph_fs.h
-@@ -617,6 +617,8 @@ int ceph_flags_to_mode(int flags);
- 				 CEPH_CAP_LINK_SHARED |	\
- 				 CEPH_CAP_FILE_SHARED |	\
- 				 CEPH_CAP_XATTR_SHARED)
-+#define CEPH_STAT_CAP_INLINE_DATA (CEPH_CAP_FILE_SHARED | \
-+				   CEPH_CAP_FILE_RD)
+@@ -2179,8 +2216,8 @@ retry:
+ 	check_max = 0;
+ 	err = 0;
+ 	ret = wait_event_interruptible(ci->i_cap_wq,
+-				       try_get_cap_refs(ci, need, want,
+-							got, endoff,
++				       try_get_cap_refs(ci, need, want, endoff,
++							got, pinned_page,
+ 							&check_max, &err));
+ 	if (err)
+ 		ret = err;
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index c03ac4c..861b995 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -805,6 +805,7 @@ static ssize_t ceph_read_iter(struct kiocb *iocb, struct iov_iter *to)
+ 	size_t len = iocb->ki_nbytes;
+ 	struct inode *inode = file_inode(filp);
+ 	struct ceph_inode_info *ci = ceph_inode(inode);
++	struct page *pinned_page = NULL;
+ 	ssize_t ret;
+ 	int want, got = 0;
+ 	int checkeof = 0, read = 0;
+@@ -817,7 +818,7 @@ again:
+ 		want = CEPH_CAP_FILE_CACHE | CEPH_CAP_FILE_LAZYIO;
+ 	else
+ 		want = CEPH_CAP_FILE_CACHE;
+-	ret = ceph_get_caps(ci, CEPH_CAP_FILE_RD, want, &got, -1);
++	ret = ceph_get_caps(ci, CEPH_CAP_FILE_RD, want, -1, &got, &pinned_page);
+ 	if (ret < 0)
+ 		return ret;
  
- #define CEPH_CAP_ANY_SHARED (CEPH_CAP_AUTH_SHARED |			\
- 			      CEPH_CAP_LINK_SHARED |			\
+@@ -840,6 +841,10 @@ again:
+ 	}
+ 	dout("aio_read %p %llx.%llx dropping cap refs on %s = %d\n",
+ 	     inode, ceph_vinop(inode), ceph_cap_string(got), (int)ret);
++	if (pinned_page) {
++		page_cache_release(pinned_page);
++		pinned_page = NULL;
++	}
+ 	ceph_put_cap_refs(ci, got);
+ 
+ 	if (checkeof && ret >= 0) {
+@@ -924,7 +929,8 @@ retry_snap:
+ 	else
+ 		want = CEPH_CAP_FILE_BUFFER;
+ 	got = 0;
+-	err = ceph_get_caps(ci, CEPH_CAP_FILE_WR, want, &got, pos + count);
++	err = ceph_get_caps(ci, CEPH_CAP_FILE_WR, want, pos + count,
++			    &got, NULL);
+ 	if (err < 0)
+ 		goto out;
+ 
+@@ -1225,7 +1231,7 @@ static long ceph_fallocate(struct file *file, int mode,
+ 	else
+ 		want = CEPH_CAP_FILE_BUFFER;
+ 
+-	ret = ceph_get_caps(ci, CEPH_CAP_FILE_WR, want, &got, endoff);
++	ret = ceph_get_caps(ci, CEPH_CAP_FILE_WR, want, endoff, &got, NULL);
+ 	if (ret < 0)
+ 		goto unlock;
+ 
 -- 
 1.9.3
 
