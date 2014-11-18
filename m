@@ -1,32 +1,47 @@
-From: Noah Watkins <noah.watkins@inktank.com>
-Subject: [ann] fio plugin for libcephfs
-Date: Mon, 17 Nov 2014 13:31:18 -0800
-Message-ID: <CA+Hcz5-sW=7+77oswf+9cKSmhAuh41g9uYkzNTzwV48przBLng@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: watch/notify changes ready for review
+Date: Mon, 17 Nov 2014 16:42:14 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1411171635590.23009@cobra.newdream.net>
+References: <alpine.DEB.2.00.1411131645430.10048@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qg0-f44.google.com ([209.85.192.44]:37120 "EHLO
-	mail-qg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751791AbaKQVbT (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 17 Nov 2014 16:31:19 -0500
-Received: by mail-qg0-f44.google.com with SMTP id z60so1384418qgd.31
-        for <ceph-devel@vger.kernel.org>; Mon, 17 Nov 2014 13:31:19 -0800 (PST)
+Received: from cobra.newdream.net ([66.33.216.30]:42407 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752483AbaKRAmO (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 17 Nov 2014 19:42:14 -0500
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 6220780068
+	for <ceph-devel@vger.kernel.org>; Mon, 17 Nov 2014 16:42:14 -0800 (PST)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 2313580068
+	for <ceph-devel@vger.kernel.org>; Mon, 17 Nov 2014 16:42:14 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.00.1411131645430.10048@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-I've posted a preliminary patch set to support a libcephfs io engine in fio:
+On Thu, 13 Nov 2014, Sage Weil wrote:
+> My pile of watch/notify changes are ready for review:
+> 
+> 	https://github.com/ceph/ceph/pull/2924
 
-   http://github.com/noahdesu/fio cephfs
+Okay, I did another round of cleanup (including moving most of the code 
+into Objecter) and it's now way cleaner and passing all the basic tests 
+(hasn't gone through full yet).
 
-You can use this right now to generate load through libcephfs, but the
-plugin needs a bit more work before it goes upstream (patches
-welcome), but feel free to play around with it. There is an example
-script in examples/cephfs.fio.
+I still have a big outstanding question:
 
-Issues:
-  Currently all the files that are created get the same size as the
-total job size rather than the total size being divided by the number
-of threads.
+Does the failed notify API make sense?  I'm leaning no, but want another 
+opinion before I go rip it back out.  To summarize: it notifies a watcher 
+if it was slow to respond to an earlier notify and caused the notifier to 
+time out.  Counterargument: if the notifier wants to tell everyone they 
+saw a timeout, they could send another notify; at least then they would 
+know if the second piece of information was delivered (quickly).  I don't 
+think that librbd or rgw will make use of it.
 
-- Noah
+The last bit of work remaining is to migrate RGW over to the new API and 
+make it use watch_check().  Will work with Yehuda on that, but in the 
+meantime, this is ready for review!
+
+sage
