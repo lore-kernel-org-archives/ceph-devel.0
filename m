@@ -1,63 +1,57 @@
-From: Jason Dillaman <dillaman@redhat.com>
-Subject: Re: watch/notify changes ready for review
-Date: Tue, 18 Nov 2014 14:40:29 -0500 (EST)
-Message-ID: <1606502525.15819093.1416339629561.JavaMail.zimbra@redhat.com>
-References: <alpine.DEB.2.00.1411131645430.10048@cobra.newdream.net> <alpine.DEB.2.00.1411171635590.23009@cobra.newdream.net>
+From: Mark Nelson <mark.nelson@inktank.com>
+Subject: 11/19/2014 Weekly Ceph Performance Meeting IS ON!
+Date: Tue, 18 Nov 2014 20:49:15 -0600
+Message-ID: <546C052B.3060100@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx4-phx2.redhat.com ([209.132.183.25]:38191 "EHLO
-	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753829AbaKRTkb (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Nov 2014 14:40:31 -0500
-In-Reply-To: <alpine.DEB.2.00.1411171635590.23009@cobra.newdream.net>
+Received: from mail-ig0-f176.google.com ([209.85.213.176]:34202 "EHLO
+	mail-ig0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752006AbaKSCtS (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Nov 2014 21:49:18 -0500
+Received: by mail-ig0-f176.google.com with SMTP id l13so2339665iga.9
+        for <ceph-devel@vger.kernel.org>; Tue, 18 Nov 2014 18:49:17 -0800 (PST)
+Received: from [192.168.1.3] (65-128-164-140.mpls.qwest.net. [65.128.164.140])
+        by mx.google.com with ESMTPSA id q17sm209446ioe.21.2014.11.18.18.49.16
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Tue, 18 Nov 2014 18:49:16 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On the RBD side of the house, since RBD won't be (purposely) delaying notification ACKs, about the only thing it can do is just log that it must have a laggy connection.  It might be useful for diagnostics, but I can't think of any immediate use for doing something proactive to correct the delay.
+Hi All,
 
--- 
+8AM PST as usual!  Some lucky folks are out at Supercomputing 14 so the 
+crowd might be a bit small this week.  Feel free to add an agenda item 
+if there is something you want to talk about!
 
-Jason Dillaman 
-Red Hat 
-dillaman@redhat.com 
-http://www.redhat.com 
+Here's the links:
+
+Etherpad URL:
+http://pad.ceph.com/p/performance_weekly
+
+To join the Meeting:
+https://bluejeans.com/268261044
+
+To join via Browser:
+https://bluejeans.com/268261044/browser
+
+To join with Lync:
+https://bluejeans.com/268261044/lync
 
 
------ Original Message -----
-From: "Sage Weil" <sage@newdream.net>
-To: ceph-devel@vger.kernel.org
-Sent: Monday, November 17, 2014 7:42:14 PM
-Subject: Re: watch/notify changes ready for review
+To join via Room System:
+Video Conferencing System: bjn.vc -or- 199.48.152.152
+Meeting ID: 268261044
 
-On Thu, 13 Nov 2014, Sage Weil wrote:
-> My pile of watch/notify changes are ready for review:
-> 
-> 	https://github.com/ceph/ceph/pull/2924
+To join via Phone:
+1) Dial:
+           +1 408 740 7256
+           +1 888 240 2560(US Toll Free)
+           +1 408 317 9253(Alternate Number)
+           (see all numbers - http://bluejeans.com/numbers)
+2) Enter Conference ID: 268261044
 
-Okay, I did another round of cleanup (including moving most of the code 
-into Objecter) and it's now way cleaner and passing all the basic tests 
-(hasn't gone through full yet).
-
-I still have a big outstanding question:
-
-Does the failed notify API make sense?  I'm leaning no, but want another 
-opinion before I go rip it back out.  To summarize: it notifies a watcher 
-if it was slow to respond to an earlier notify and caused the notifier to 
-time out.  Counterargument: if the notifier wants to tell everyone they 
-saw a timeout, they could send another notify; at least then they would 
-know if the second piece of information was delivered (quickly).  I don't 
-think that librbd or rgw will make use of it.
-
-The last bit of work remaining is to migrate RGW over to the new API and 
-make it use watch_check().  Will work with Yehuda on that, but in the 
-meantime, this is ready for review!
-
-sage
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Mark
