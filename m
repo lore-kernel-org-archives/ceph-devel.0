@@ -1,59 +1,94 @@
-From: scan-admin@coverity.com
-Subject: New Defects reported by Coverity Scan for ceph
-Date: Thu, 20 Nov 2014 06:20:26 -0800
-Message-ID: <546df8aa3b172_789d8993383433d@scan.coverity.com.mail>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: [ceph-users] OSD systemd unit files makes it look failed
+Date: Thu, 20 Nov 2014 06:56:43 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1411200652250.2374@cobra.newdream.net>
+References: <CADkWibfOvOEr7cFcKNFmKBi+0-GhtXGVZrj3RQFqryC68Stcfg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from scanrelay.coverity.com ([209.249.196.67]:57690 "EHLO
-	scanrelay.coverity.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751932AbaKTOU1 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 20 Nov 2014 09:20:27 -0500
+Received: from cobra.newdream.net ([66.33.216.30]:34693 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751103AbaKTO4o (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 20 Nov 2014 09:56:44 -0500
+In-Reply-To: <CADkWibfOvOEr7cFcKNFmKBi+0-GhtXGVZrj3RQFqryC68Stcfg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Anthony Alba <ascanio.alba7@gmail.com>
+Cc: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, onlyjob@debian.org, ceph-devel@vger.kernel.org, clint@debian.org
+
+Hi Anthony,
+
+There is a discussion going on ceph-maintainers about the systemd unit 
+files.  Dmitry Smirnov has posted his version at
+
+http://anonscm.debian.org/cgit/pkg-ceph/ceph.git/commit/?h=experimental&id=3c22e192d964789365e8dc21c168c5fd8985f7d8
+
+though we've made some progress since then.
+
+Moving this thread to ceph-devel.  I don't have time to work on this at 
+the moment but would be very happy to hear feedback on Dmitry's latest 
+(and review pull requests :).
+
+Thanks!
+sage
 
 
-Hi,
+On Thu, 20 Nov 2014, Anthony Alba wrote:
 
-Please find the latest report on new defect(s) introduced to ceph found with Coverity Scan.
-
-1 new defect(s) introduced to ceph found with Coverity Scan.
-
-
-New defect(s) Reported-by: Coverity Scan
-Showing 1 of 1 defect(s)
-
-
-** CID 1255369:  Copy into fixed size buffer  (STRING_OVERFLOW)
-/common/blkdev.cc: 34 in block_device_support_discard(const char *)()
-
-
-________________________________________________________________________________________________________
-*** CID 1255369:  Copy into fixed size buffer  (STRING_OVERFLOW)
-/common/blkdev.cc: 34 in block_device_support_discard(const char *)()
-28     bool block_device_support_discard(const char *devname)
-29     {
-30       bool can_trim = false;
-31       char *p = strstr((char *)devname, "sd");
-32       char name[32] = {0};
-33     
->>>     CID 1255369:  Copy into fixed size buffer  (STRING_OVERFLOW)
->>>     You might overrun the 32 byte fixed-size string "name" by copying "p" without checking the length.
-34       strcpy(name, p);
-35       for (unsigned int i = 0; i < strlen(name); i++) {
-36         if(isdigit(name[i])) {
-37           name[i] = 0;
-38           break;
-39         }
-
-
-________________________________________________________________________________________________________
-To view the defects in Coverity Scan visit, http://scan.coverity.com/projects/25?tab=overview
-
-To unsubscribe from the email notification for new defects, http://scan5.coverity.com/cgi-bin/unsubscribe.py
-
-
-
+> Hi the current OSD systemd unit files starts the OSD daemons correctly
+> and ceph is HEALTH_OK. However there are some process tracking issues
+> and systemd thinks the service has failed.
+> 
+> systemctl stop ceph-osd@0
+> 
+>  cannot stop the OSDs.
+> 
+> [Service]
+> EnvironmentFile=-/etc/sysconfig/ceph
+> Environment=CLUSTER=cephtest
+> ExecStart=/usr/bin/ceph-osd -f --cluster ${CLUSTER} --id %i
+> ExecStartPre=/usr/libexec/ceph/ceph-osd-prestart.sh --cluster ${CLUSTER} --id %i
+> 
+> 
+> [root@ceph1 ~]# systemctl status cephosd@0
+> ceph-osd@0.service - Ceph object storage daemon
+>    Loaded: loaded (/etc/systemd/system/ceph-osd@.service; enabled)
+>    Active: failed (Result: exit-code) since Thu 2014-11-20 17:36:40
+> SGT; 10min ago
+>   Process: 4251 ExecStart=/usr/bin/ceph-osd -f --cluster ${CLUSTER}
+> --id %i (code=exited, status=1/FAILURE)
+>   Process: 4196 ExecStartPre=/usr/libexec/ceph/ceph-osd-prestart.sh
+> --cluster ${CLUSTER} --id %i (code=exited, status=0/SUCCESS)
+>  Main PID: 4251 (code=exited, status=1/FAILURE)
+> 
+> Nov 20 17:36:40 ceph1.cephtest.com systemd[1]: Starting Ceph object
+> storage daemon...
+> Nov 20 17:36:40 ceph1.cephtest.com ceph-osd-prestart.sh[4196]:
+> create-or-move updated item name 'osd.0' weight 0.19 at location {...h
+> map
+> Nov 20 17:36:40 ceph1.cephtest.com systemd[1]: Started Ceph object
+> storage daemon.
+> Nov 20 17:36:40 ceph1.cephtest.com ceph-osd[4251]: starting osd.0 at
+> :/0 osd_data /var/lib/ceph/osd/cephtest-0
+> /var/lib/ceph/osd/fl...ournal
+> Nov 20 17:36:40 ceph1.cephtest.com ceph-osd[4251]: 2014-11-20
+> 17:36:40.857110 7f422e034880 -1 asok(0x4740230)
+> AdminSocketConfigO...exists
+> Nov 20 17:36:40 ceph1.cephtest.com ceph-osd[4251]: 2014-11-20
+> 17:36:40.857196 7f422e034880 -1
+> filestore(/var/lib/ceph/osd/cephtest-...failed
+> Nov 20 17:36:40 ceph1.cephtest.com ceph-osd[4251]: 2014-11-20
+> 17:36:40.857207 7f422e034880 -1  ** ERROR: error converting store ...e
+> busy
+> Nov 20 17:36:40 ceph1.cephtest.com systemd[1]: ceph-osd@0.service:
+> main process exited, code=exited, status=1/FAILURE
+> Nov 20 17:36:40 ceph1.cephtest.com systemd[1]: Unit ceph-osd@0.service
+> entered failed state.
+> Nov 20 17:46:20 ceph1.cephtest.com systemd[1]: Stopped Ceph object
+> storage daemon.
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> 
+> 
