@@ -1,60 +1,53 @@
-From: trotters05422@gmail.com
-Subject: Fix Penguin Penalty 17th October2014 ( mail-archive.com )
-Date: Fri, 21 Nov 2014 02:13:43 +0530
-Message-ID: <546e527c.8a85440a.600a.ffff8b03@mx.google.com>
-Reply-To: juliakites@yahoo.com
+From: Mustafa Muhammad <mustafaa.alhamdaani@gmail.com>
+Subject: Re: Can I limit buffering for each object in radosgw?
+Date: Thu, 20 Nov 2014 23:56:46 +0300
+Message-ID: <CAMWPydQLbjE6HFcyLw24D_fmE89YebCRMCGkUYANAKfyRuDhjg@mail.gmail.com>
+References: <CAMWPydROJKB-HvATJmbB28L6QM9kXpYeRf5+myyX8AJ3OiaUSg@mail.gmail.com>
+	<CABBk=J-zgjxRAy_fd9Be_j_FvTPtZ8nUc20eV3e3UcgVb3fo9w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f65.google.com ([209.85.220.65]:46721 "EHLO
-	mail-pa0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754513AbaKTUnl (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 20 Nov 2014 15:43:41 -0500
-Received: by mail-pa0-f65.google.com with SMTP id et14so2020242pad.0
-        for <ceph-devel@vger.kernel.org>; Thu, 20 Nov 2014 12:43:40 -0800 (PST)
-Received: from localhost.localdomain ([27.255.216.241])
-        by mx.google.com with ESMTPSA id pc10sm2803532pbb.21.2014.11.20.12.43.38
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1 cipher=RC4-SHA bits=128/128);
-        Thu, 20 Nov 2014 12:43:40 -0800 (PST)
+Received: from mail-wg0-f49.google.com ([74.125.82.49]:58318 "EHLO
+	mail-wg0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756884AbaKTU4s (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 20 Nov 2014 15:56:48 -0500
+Received: by mail-wg0-f49.google.com with SMTP id x12so4791853wgg.8
+        for <ceph-devel@vger.kernel.org>; Thu, 20 Nov 2014 12:56:46 -0800 (PST)
+In-Reply-To: <CABBk=J-zgjxRAy_fd9Be_j_FvTPtZ8nUc20eV3e3UcgVb3fo9w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Yehuda Sadeh <yehuda@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Dear Sir
+On Thu, Nov 20, 2014 at 8:03 PM, Yehuda Sadeh <yehuda@redhat.com> wrote:
+> On Thu, Nov 20, 2014 at 1:03 AM, Mustafa Muhammad
+> <mustafaa.alhamdaani@gmail.com> wrote:
+>> I am using radosgw, I have a large number of connections with huge
+>> files, the memory usage keeps getting higher until killed by the
+>> kernel, I *think* because of buffering for each request.
+>> Is the a way to limit the buffer size for each object (or for each
+>> connection)? and What do you suggest?\\\
+>
+>
+> These are main two factors that would affect your memory consumption
+>  - number of threads (rgw thread pool size)
+>  - window size (rgw_get_obj_window_size)
 
-Did your website get hit by Google Penguin update on October 17th 2014?=
- What basically is Google Penguin Update? It is actually a code name fo=
-r Google algorithm which aims at decreasing your websites search engine=
- rankings that violate Google=92s guidelines by using black hat SEO tec=
-hniques to rank your webpage by giving number of spammy links to the pa=
-ge.
-=20
-We are one of those few SEO companies that can help you avoid penalties=
- from Google Updates like Penguin and Panda. Our clients have survived =
-all the previous and present updates with ease. They have never been hi=
-t because we use 100% white hat SEO techniques to rank Webpages.  Simpl=
-e thing that we do to keep websites away from any Penguin or Panda pena=
-lties is follow Google guidelines and we give Google users the best ans=
-wers to their queries.
+Thank you for replying, in the configuration reference:
+http://ceph.com/docs/master/radosgw/config-ref/
+rgw get obj window size is 16 << 20, in bytes
 
-If you are looking to increase the quality of your websites and to get =
-more targeted traffic or save your websites from these Google penalties=
- email us back with your interest.=20
+I couldn't understand this "16 << 20", could you please explain how to
+read this in bytes?
 
-We will be glad to serve you and help you grow your business.
+
+>
+> There's also the chunk size, but the window size should supersede it.
+
+Also I couldn't find "chunk size" in the configuration reference.
 
 Regards
+Mustafa
 
-Julia kites
-
-SEO Manager ( TOB )
-B7 Green Avenue, Amritsar 143001 Punjab
-____________________________
-NO CLICK in the subject to STOP EMAILS
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+> Yehuda
