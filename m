@@ -1,53 +1,53 @@
-From: Mustafa Muhammad <mustafaa.alhamdaani@gmail.com>
-Subject: Re: Can I limit buffering for each object in radosgw?
-Date: Thu, 20 Nov 2014 23:56:46 +0300
-Message-ID: <CAMWPydQLbjE6HFcyLw24D_fmE89YebCRMCGkUYANAKfyRuDhjg@mail.gmail.com>
-References: <CAMWPydROJKB-HvATJmbB28L6QM9kXpYeRf5+myyX8AJ3OiaUSg@mail.gmail.com>
-	<CABBk=J-zgjxRAy_fd9Be_j_FvTPtZ8nUc20eV3e3UcgVb3fo9w@mail.gmail.com>
+From: Anthony Alba <ascanio.alba7-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: OSD systemd unit files makes it look failed
+Date: Fri, 21 Nov 2014 05:52:40 +0800
+Message-ID: <CADkWibeG2=V95xEABM2e5Q8qVEAai1-do0Wi1nPzNa85OX8vdw@mail.gmail.com>
+References: <CADkWibfOvOEr7cFcKNFmKBi+0-GhtXGVZrj3RQFqryC68Stcfg@mail.gmail.com>
+	<alpine.DEB.2.00.1411200652250.2374@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f49.google.com ([74.125.82.49]:58318 "EHLO
-	mail-wg0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756884AbaKTU4s (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 20 Nov 2014 15:56:48 -0500
-Received: by mail-wg0-f49.google.com with SMTP id x12so4791853wgg.8
-        for <ceph-devel@vger.kernel.org>; Thu, 20 Nov 2014 12:56:46 -0800 (PST)
-In-Reply-To: <CABBk=J-zgjxRAy_fd9Be_j_FvTPtZ8nUc20eV3e3UcgVb3fo9w@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh <yehuda@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.00.1411200652250.2374-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Thu, Nov 20, 2014 at 8:03 PM, Yehuda Sadeh <yehuda@redhat.com> wrote:
-> On Thu, Nov 20, 2014 at 1:03 AM, Mustafa Muhammad
-> <mustafaa.alhamdaani@gmail.com> wrote:
->> I am using radosgw, I have a large number of connections with huge
->> files, the memory usage keeps getting higher until killed by the
->> kernel, I *think* because of buffering for each request.
->> Is the a way to limit the buffer size for each object (or for each
->> connection)? and What do you suggest?\\\
->
->
-> These are main two factors that would affect your memory consumption
->  - number of threads (rgw thread pool size)
->  - window size (rgw_get_obj_window_size)
+HI Sage, Cephers
 
-Thank you for replying, in the configuration reference:
-http://ceph.com/docs/master/radosgw/config-ref/
-rgw get obj window size is 16 << 20, in bytes
+(I'm not on ceph-devel at the moment, will switch in a moment.)
 
-I couldn't understand this "16 << 20", could you please explain how to
-read this in bytes?
+Thanks. I am testing on  RHEL7/CentOS 7. As quick workaround setting
+the .service file to
+
+[Service]
+Type=forking
+ExecStart= ceph-osd -i   #without --foreground)
+ExecPreStart = ....
+
+works for the moment . Is there a reason the daemons shouldn't run in
+forking mode under systemd?
+
+Both ceph-mon@.service and ceph-radosgw@.service (<== self-created
+based on the ceph-mon@.service unit file) work with
 
 
->
-> There's also the chunk size, but the window size should supersede it.
+Type=forking
+ExecStart=path_to_daemon_no_foreground
 
-Also I couldn't find "chunk size" in the configuration reference.
+or
+#Type=simple
+ExecStart=path_to_daemon --foreground
 
-Regards
-Mustafa
+BTW do you want a pull requrest for ceph-radosgw@.service?
 
->
-> Yehuda
+- Anthony
