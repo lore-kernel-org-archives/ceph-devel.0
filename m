@@ -1,53 +1,59 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: ceph.brag.com
-Date: Sun, 23 Nov 2014 15:03:40 +0100
-Message-ID: <5471E93C.2020701@dachary.org>
+From: scan-admin@coverity.com
+Subject: New Defects reported by Coverity Scan for ceph
+Date: Sun, 23 Nov 2014 06:08:48 -0800
+Message-ID: <5471ea705303b_37c98993383436b@scan.coverity.com.mail>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="isJ9qlETNq3P8tDH8Fcr9sdNndjl26A1U"
+Content-Type: text/plain;
+ charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:42003 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751116AbaKWODr (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 23 Nov 2014 09:03:47 -0500
+Received: from scanrelay.coverity.com ([209.249.196.67]:55197 "EHLO
+	scanrelay.coverity.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751116AbaKWOIt (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 23 Nov 2014 09:08:49 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-8859-1?Q?S=E9bastien_Han?= <sebastien.han@enovance.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
-
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---isJ9qlETNq3P8tDH8Fcr9sdNndjl26A1U
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
-
-Hi S=E9bastien,
-
-I was checking on http://ceph.brag.com today and it appears to be fine. I=
-t has been up for 10 months now, probably enough for people to have the c=
-ommand line installed on their cluster. I was wondering if you needed any=
-thing regarding the hosting of the service ? Since it's hosted by FSF Fra=
-nce and I volunteer my time to help, evenings or week-ends are the best t=
-ime to ask ;-)
-
-Cheers
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
+To: ceph-devel@vger.kernel.org
 
 
---isJ9qlETNq3P8tDH8Fcr9sdNndjl26A1U
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+Hi,
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+Please find the latest report on new defect(s) introduced to ceph found with Coverity Scan.
 
-iEYEARECAAYFAlRx6TwACgkQ8dLMyEl6F20MjwCgoJF9BMdvs9l0+KVk325KyIZg
-TakAmwfa/yKsRamNZoi1CP3P6zMa7Ld8
-=06+/
------END PGP SIGNATURE-----
+1 new defect(s) introduced to ceph found with Coverity Scan.
+2 defect(s), reported by Coverity Scan earlier, were marked fixed in the recent build analyzed by Coverity Scan.
 
---isJ9qlETNq3P8tDH8Fcr9sdNndjl26A1U--
+New defect(s) Reported-by: Coverity Scan
+Showing 1 of 1 defect(s)
+
+
+** CID 1255885:  Ignoring number of bytes read  (CHECKED_RETURN)
+/msg/async/Event.cc: 42 in C_handle_notify::do_request(int)()
+
+
+________________________________________________________________________________________________________
+*** CID 1255885:  Ignoring number of bytes read  (CHECKED_RETURN)
+/msg/async/Event.cc: 42 in C_handle_notify::do_request(int)()
+36     
+37     class C_handle_notify : public EventCallback {
+38      public:
+39       C_handle_notify() {}
+40       void do_request(int fd_or_id) {
+41         char c[100];
+>>>     CID 1255885:  Ignoring number of bytes read  (CHECKED_RETURN)
+>>>     "read(int, void *, size_t)" returns the number of bytes read, but it is ignored.
+42         assert(read(fd_or_id, c, 100));
+43       }
+44     };
+45     
+46     int EventCenter::init(int n)
+47     {
+
+
+________________________________________________________________________________________________________
+To view the defects in Coverity Scan visit, http://scan.coverity.com/projects/25?tab=overview
+
+To unsubscribe from the email notification for new defects, http://scan5.coverity.com/cgi-bin/unsubscribe.py
+
+
+
