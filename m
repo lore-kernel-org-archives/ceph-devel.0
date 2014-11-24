@@ -1,59 +1,44 @@
-From: scan-admin@coverity.com
-Subject: New Defects reported by Coverity Scan for ceph
-Date: Sun, 23 Nov 2014 06:08:48 -0800
-Message-ID: <5471ea705303b_37c98993383436b@scan.coverity.com.mail>
+From: Gregory Farnum <greg@gregs42.com>
+Subject: Re: Where do MDSHealthMetrics show up?
+Date: Sun, 23 Nov 2014 21:27:33 -0800
+Message-ID: <CAC6JEv8Zaun+fgAZZxNr6DxDiBi3zd-2tAMsKQ2rGzBXmNFb7g@mail.gmail.com>
+References: <CAD=PzHKrzs9Wx-pjONM+nL_eoO8+0crr-_K1iVT_PrMJJdr5bg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from scanrelay.coverity.com ([209.249.196.67]:55197 "EHLO
-	scanrelay.coverity.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751116AbaKWOIt (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 23 Nov 2014 09:08:49 -0500
+Received: from mail-ig0-f177.google.com ([209.85.213.177]:64020 "EHLO
+	mail-ig0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750828AbaKXF1e (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 24 Nov 2014 00:27:34 -0500
+Received: by mail-ig0-f177.google.com with SMTP id uq10so2574340igb.16
+        for <ceph-devel@vger.kernel.org>; Sun, 23 Nov 2014 21:27:34 -0800 (PST)
+Received: from mail-ie0-f169.google.com (mail-ie0-f169.google.com. [209.85.223.169])
+        by mx.google.com with ESMTPSA id 3sm7170836ion.37.2014.11.23.21.27.33
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
+        Sun, 23 Nov 2014 21:27:33 -0800 (PST)
+Received: by mail-ie0-f169.google.com with SMTP id y20so8206466ier.14
+        for <ceph-devel@vger.kernel.org>; Sun, 23 Nov 2014 21:27:33 -0800 (PST)
+In-Reply-To: <CAD=PzHKrzs9Wx-pjONM+nL_eoO8+0crr-_K1iVT_PrMJJdr5bg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Michael Sevilla <mikesevilla3@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
+On Thu, Nov 20, 2014 at 5:54 PM, Michael Sevilla <mikesevilla3@gmail.com> wrote:
+> Hi. Where do the MDSHealthMetrics in MMDSBeacon (e.g.,
+> MDS_HEALTH_TRIM) show up in the monitors? When we run ceph -s? I
+> suspect I don't see them because I'd have to run ceph -s at the exact
+> moment when the MDS is trimming. Is there an easier way to see these
+> warning or is there some debug flag I need to turn on?
 
-Hi,
+This should be turning up in the ceph health warnings if there are any
+issues, which you will see (if they're still live) by running "ceph
+-s", or will pop up in "ceph -w". There's a bug right now though that
+prevents them from showing up on peon monitors, which might be why
+you're missing them: http://tracker.ceph.com/issues/10151
 
-Please find the latest report on new defect(s) introduced to ceph found with Coverity Scan.
-
-1 new defect(s) introduced to ceph found with Coverity Scan.
-2 defect(s), reported by Coverity Scan earlier, were marked fixed in the recent build analyzed by Coverity Scan.
-
-New defect(s) Reported-by: Coverity Scan
-Showing 1 of 1 defect(s)
-
-
-** CID 1255885:  Ignoring number of bytes read  (CHECKED_RETURN)
-/msg/async/Event.cc: 42 in C_handle_notify::do_request(int)()
-
-
-________________________________________________________________________________________________________
-*** CID 1255885:  Ignoring number of bytes read  (CHECKED_RETURN)
-/msg/async/Event.cc: 42 in C_handle_notify::do_request(int)()
-36     
-37     class C_handle_notify : public EventCallback {
-38      public:
-39       C_handle_notify() {}
-40       void do_request(int fd_or_id) {
-41         char c[100];
->>>     CID 1255885:  Ignoring number of bytes read  (CHECKED_RETURN)
->>>     "read(int, void *, size_t)" returns the number of bytes read, but it is ignored.
-42         assert(read(fd_or_id, c, 100));
-43       }
-44     };
-45     
-46     int EventCenter::init(int n)
-47     {
-
-
-________________________________________________________________________________________________________
-To view the defects in Coverity Scan visit, http://scan.coverity.com/projects/25?tab=overview
-
-To unsubscribe from the email notification for new defects, http://scan5.coverity.com/cgi-bin/unsubscribe.py
-
-
-
+(You can specify the specific monitor to connect to with the ceph tool
+by setting the "-m" option, if you want to always connect to the
+leader.)
+-Greg
