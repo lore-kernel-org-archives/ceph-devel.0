@@ -1,89 +1,52 @@
-From: GuangYang <yguang11@outlook.com>
-Subject: FW: [Ceph - Bug #10080] Pipe::connect() cause osd crash when osd
- reconnect to its peer
-Date: Mon, 24 Nov 2014 09:04:39 +0000
-Message-ID: <BLU175-W25E3183C49AA9028F59415DF720@phx.gbl>
-References: <redmine.issue-10080.20141112114042@tracker.ceph.com>,<redmine.journal-44767.20141124085902@tracker.ceph.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+From: Ilya Dryomov <ilya.dryomov@inktank.com>
+Subject: [PATCH] rbd: don't treat CEPH_OSD_OP_DELETE as extent op
+Date: Mon, 24 Nov 2014 12:59:50 +0300
+Message-ID: <1416823190-10246-1-git-send-email-idryomov@redhat.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from blu004-omc2s38.hotmail.com ([65.55.111.113]:56093 "EHLO
-	BLU004-OMC2S38.hotmail.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750901AbaKXJEk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 24 Nov 2014 04:04:40 -0500
-In-Reply-To: <redmine.journal-44767.20141124085902@tracker.ceph.com>
+Received: from mail-la0-f45.google.com ([209.85.215.45]:41543 "EHLO
+	mail-la0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752115AbaKXKAC (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 24 Nov 2014 05:00:02 -0500
+Received: by mail-la0-f45.google.com with SMTP id gq15so7306763lab.32
+        for <ceph-devel@vger.kernel.org>; Mon, 24 Nov 2014 02:00:00 -0800 (PST)
+Received: from localhost ([109.110.66.84])
+        by mx.google.com with ESMTPSA id vr7sm3425856lbb.21.2014.11.24.01.59.58
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=RC4-SHA bits=128/128);
+        Mon, 24 Nov 2014 01:59:59 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "greg@gregs42.com" <greg@gregs42.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-SGkgR3JlZywKSSBkaWQgc29tZSBpbnZlc3RpZ2F0aW9uIG92ZXIgdGhlIGlzc3VlIC0gaHR0cDov
-L3RyYWNrZXIuY2VwaC5jb20vaXNzdWVzLzEwMDgwLiBDYW4geW91IGhlbHAgdG8gdGFrZSBhIGxv
-b2sgaWYgdGhlIGFuYWx5c2lzIG1ha2Ugc2Vuc2Ugb3Igbm90PwoKClRoYW5rcywKR3VhbmcKCgpf
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwo+IERhdGU6IE1vbiwgMjQgTm92IDIwMTQg
-MDA6NTk6MDUgLTA4MDAgCj4gRnJvbTogcmVkbWluZUB0cmFja2VyLmNlcGguY29tIAo+IFN1Ympl
-Y3Q6IFtDZXBoIC0gQnVnICMxMDA4MF0gUGlwZTo6Y29ubmVjdCgpIGNhdXNlIG9zZCBjcmFzaCB3
-aGVuIG9zZCAKPiByZWNvbm5lY3QgdG8gaXRzIHBlZXIgCj4gCj4gSXNzdWUgIzEwMDgwIGhhcyBi
-ZWVuIHVwZGF0ZWQgYnkgR3VhbmcgWWFuZy4gCj4gCj4gSSBhbSB3b25kZXJpbmcgaWYgdGhlIGZv
-bGxvd2luZyByYWNlIG9jY3VycmVkOiAKPiAKPiBMZXQgdXMgYXNzdW1lIEEgYW5kIEIgYXJlIHR3
-byBPU0RzIGhhdmluZyB0aGUgY29ubmVjdGlvbiAocGlwZSkgYmV0d2VlbiAKPiBlYWNoIG90aGVy
-LiAKPiAKPiAxLiBCIGlzc3VlZCBhIHJlLWNvbm5lY3Rpb24gZm9yIHdoYXRldmVyIHJlYXNvbiwg
-YW5kIGF0IHRoZSBzYW1lIAo+IHRpbWUsIEEgbWFya2VkIGRvd24gYW5kIGRlc3Ryb3llZCB0aGUg
-UGlwZSB3aXRoIEIuIAo+IDIuIExldCB1cyBhc3N1bWUgQiBoYXZpbmc6IGNzID0gMTAwLCBpbl9z
-ZXEgPSA1MDAgCj4gMy4gVGhlIGNvbm5lY3Rpb24gaXMgZXN0YWJsaXNoZWQgd2l0aCBjcyA9IDEw
-MSAKPiA0LiBGb3Igd2hhdGV2ZXIgcmVhc29uLCBBIGNhbWUgYWNyb3NzIGEgZmFpbHVyZSBkdXJp
-bmcgcmVhZCBhbmQgCj4gaXNzdWVkIGEgbmV3IGNvbm5lY3Rpb24gcmVxdWVzdCB3aXRoIGNzID0g
-MTAyLCBjdXJyZW50bHkgQSBoYXMgb3V0X3NlcSAKPiA9IDAgKGFzIGl0IGlzIGEgYnJhbmQgbmV3
-IFBpcGUpIGFuZCBjcyA9IDEwMi4gCj4gNS4gQiBhY2NlcHRlZCB0aGUgY29ubmVjdGlvbiByZXF1
-ZXN0IGFuZCByZXNwb25kZWQgYmFjayBpbl9zZXEgPSA1MDAgCj4gKGFscmVhZHkgd3JvbmcgaGVy
-ZSkgCj4gNi4gQSBnb3QgdGhlIGluX3NlcSBhbmQgY29tcGFyaW5nIHdpdGggaXRzIGludGVybmFs
-IG91dF9zZXEgYW5kIAo+IG91dF9xLCBjcmFzaGVkIHdpdGggYXNzZXJ0aW9uIGZhaWx1cmUuIAo+
-IAo+IElmIHRoaXMgaXMgdGhlIGNhc2UsIGl0IHNlZW1zIG9uZSBzdGVwIHdhcyBtaXNzZWQgZHVy
-aW5nIHNlcSAKPiBuZWdvdGlhdGlvbiwgdGhhdCBpcywgd2hlbiBCIHRyaWVkIHRvIGRvIGEgbmV3
-IGNvbm5lY3Rpb24gYW5kIGRldGVjdGVkIAo+IHRoYXQgQSBoYXMgYSByZXNldCwgaXQgc2hvdWxk
-IHJlc2V0IGl0cyBpbl9zZXEgYXMgd2VsbD8gCj4gCj4gVGhhbmtzLCAKPiBHdWFuZyAKPiAKPiBf
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXyAKPiBCdWcgIzEwMDgwOiBQaXBlOjpjb25u
-ZWN0KCkgY2F1c2Ugb3NkIGNyYXNoIHdoZW4gb3NkIHJlY29ubmVjdCB0byBpdHMgCj4gcGVlcjxo
-dHRwOi8vdHJhY2tlci5jZXBoLmNvbS9pc3N1ZXMvMTAwODAjY2hhbmdlLTQ0NzY3PiAKPiAKPiAq
-IEF1dGhvcjogV2VuanVuIEh1YW5nIAo+ICogU3RhdHVzOiBOZXcgCj4gKiBQcmlvcml0eTogSGln
-aCAKPiAqIEFzc2lnbmVlOiAKPiAqIENhdGVnb3J5OiBtc2dyIAo+ICogVGFyZ2V0IHZlcnNpb246
-IAo+ICogU291cmNlOiBDb21tdW5pdHkgKHVzZXIpIAo+ICogQmFja3BvcnQ6IAo+ICogVGFnczog
-Cj4gKiBTZXZlcml0eTogMyAtIG1pbm9yIAo+ICogUmV2aWV3ZWQ6IAo+ICogU3VpdGU6IAo+IAo+
-IFdoZW4gb3VyIGNsdXN0ZXIgbG9hZCBpcyBoZWF2eSwgdGhlIG9zZCBzb21ldGltZXMgY3Jhc2hl
-cy4gVGhlIGNyaXRpY2FsIAo+IGxvZyBpcyBhcyBiZWxvdzogCj4gCj4gMjc4PiAyMDE0LTA4LTIw
-IDExOjA0OjI4LjYwOTE5MiA3Zjg5NjM2Yzg3MDAgMTAgb3NkLjExIDc4MyAKPiBPU0Q6Om1zX2dl
-dF9hdXRob3JpemVyIHR5cGU9b3NkIAo+IC0yNzc+IDIwMTQtMDgtMjAgMTE6MDQ6MjguNjA5Nzgz
-IDdmODk2MzZjODcwMCAyIC0gCj4gMTAuMTkzLjIwNy4xMTc6NjgxNi80NDI4MT4+IDEwLjE5My4y
-MDcuMTI1OjY4MDQvMjAyMjgxNyBwaXBlKDB4N2VmMjI4MCAKPiBzZD0xMDUgOjQyNjU3IHM9MSBw
-Z3M9MjM2NzU0IGNzPTQgbD0wIGM9MHg0NDMxOGMwKS4gZ290IG5ld2x5X2Fja2VkX3NlcSAKPiA1
-NDYgdnMgb3V0X3NlcSAwIAo+IDI3Nj4gMjAxNC0wOC0yMCAxMTowNDoyOC42MDk4MTAgN2Y4OTYz
-NmM4NzAwIDIgLSAKPiAxMC4xOTMuMjA3LjExNzo2ODE2LzQ0MjgxPj4gMTAuMTkzLjIwNy4xMjU6
-NjgwNC8yMDIyODE3IHBpcGUoMHg3ZWYyMjgwIAo+IHNkPTEwNSA6NDI2NTcgcz0xIHBncz0yMzY3
-NTQgY3M9NCBsPTAgYz0weDQ0MzE4YzApLiBkaXNjYXJkaW5nIAo+IHByZXZpb3VzbHkgc2VudCAx
-IG9zZF9tYXAoNzI3Li43NTUgc3JjIGhhcyAxLi43NTUpIHYzIAo+IDI3NT4gMjAxNC0wOC0yMCAx
-MTowNDoyOC42MDk4NTkgN2Y4OTYzNmM4NzAwIDIgLSAKPiAxMC4xOTMuMjA3LjExNzo2ODE2LzQ0
-MjgxPj4gMTAuMTkzLjIwNy4xMjU6NjgwNC8yMDIyODE3IHBpcGUoMHg3ZWYyMjgwIAo+IHNkPTEw
-NSA6NDI2NTcgcz0xIHBncz0yMzY3NTQgY3M9NCBsPTAgYz0weDQ0MzE4YzApLiBkaXNjYXJkaW5n
-IAo+IHByZXZpb3VzbHkgc2VudCAyIHBnX25vdGlmeSgxLjJiKDIyKSwyLjJjKDIzKSBlcG9jaCA3
-NTUpIHY1IAo+IAo+IDIwMTQtMDgtMjAgMTE6MDQ6MjguNjA4MTQxIDdmODk2MjliYjcwMCAwIC0t
-IDEwLjE5My4yMDcuMTE3OjY4MTYvNDQyODEgCj4+PiAxMC4xOTMuMjA3LjEyNTo2ODA0LzIwMjI4
-MTcgcGlwZSgweDdlZjIyODAgc2Q9MTM0IDo2ODE2IHM9MiAKPiBwZ3M9MjM2NzU0IGNzPTMgbD0w
-IGM9MHg0NDMxOGMwKS5mYXVsdCwgaW5pdGlhdGluZyByZWNvbm5lY3QgCj4gMjAxNC0wOC0yMCAx
-MTowNDoyOC42MDkxOTIgN2Y4OTYzNmM4NzAwIDEwIG9zZC4xMSA3ODMgCj4gT1NEOjptc19nZXRf
-YXV0aG9yaXplciB0eXBlPW9zZCAKPiAyMDE0LTA4LTIwIDExOjA0OjI4LjY2Njg5NSA3Zjg5NjM2
-Yzg3MDAgLTEgbXNnL1BpcGUuY2M6IEluIGZ1bmN0aW9uIAo+ICdpbnQgUGlwZTo6Y29ubmVjdCgp
-JyB0aHJlYWQgN2Y4OTYzNmM4NzAwIHRpbWUgMjAxNC0wOC0yMCAKPiAxMTowNDoyOC42MTg1MzYg
-bXNnL1BpcGUuY2M6IDEwODA6IEZBSUxFRCBhc3NlcnQobSkgCj4gCj4gTG9va2luZyBpbnRvIHRo
-ZSBsb2csIHdlIGNhbiBzZWUsIHRoZSBvdXRfc2VxIGlzIDAuIEFzIG91ciBjbHVzdGVyIGhhcyAK
-PiBlbmFibGVkIHRoZSBjZXBoeCBhdXRob3JpemF0aW9uLCBmcm9tIHRoZSBzb3VyY2UgY29kZSwg
-SSBhbSBpbmZvcm1lZCAKPiB0aGF0IHRoZSBvdXRfc2VxIGlzIGluaXRpYWxpemVkIGJ5IGEgcmFu
-ZG9tIG51bWJlci4gU28gdGhlcmUgc2hvdWxkIGJlIAo+IHNvbWUgYnVncyBpbiB0aGUgc291cmNl
-IGNvZGUuIAo+IAo+IFdlIGZhY2UgdGhlIGNyYXNoIGlzc3VlLCBhbG1vc3QgZXZlcnkgdGltZSBv
-dXIgY2x1c3RlciBsb2FkIGlzIGhlYXZ5LiAKPiBTbywgSSB0aGluayBpdCBpcyBhIGNyaXRpY2Fs
-IGJ1ZyBmb3IgY2VwaC4gCj4gCj4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18gCj4g
-Cj4gWW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBub3RpZmljYXRpb24gYmVjYXVzZSB5b3UgaGF2ZSBl
-aXRoZXIgc3Vic2NyaWJlZCAKPiB0byBpdCwgb3IgYXJlIGludm9sdmVkIGluIGl0LiAKPiBUbyBj
-aGFuZ2UgeW91ciBub3RpZmljYXRpb24gcHJlZmVyZW5jZXMsIHBsZWFzZSBjbGljayBoZXJlOiAK
-PiBodHRwOi8vdHJhY2tlci5jZXBoLmNvbS9teS9hY2NvdW50IAogCQkgCSAgIAkJICA=
+CEPH_OSD_OP_DELETE is not an extent op, stop treating it as such.  This
+sneaked in with discard patches - it's one of the three osd ops (the
+other two are CEPH_OSD_OP_TRUNCATE and CEPH_OSD_OP_ZERO) that discard
+is implemented with.
+
+Signed-off-by: Ilya Dryomov <idryomov@redhat.com>
+---
+ drivers/block/rbd.c | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 27b71a0b72d0..1df0802bf6cb 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -2370,8 +2370,12 @@ static void rbd_img_obj_request_fill(struct rbd_obj_request *obj_request,
+ 		opcode = CEPH_OSD_OP_READ;
+ 	}
+ 
+-	osd_req_op_extent_init(osd_request, num_ops, opcode, offset, length,
+-				0, 0);
++	if (opcode == CEPH_OSD_OP_DELETE)
++		osd_req_op_init(osd_request, num_ops, opcode);
++	else
++		osd_req_op_extent_init(osd_request, num_ops, opcode,
++				       offset, length, 0, 0);
++
+ 	if (obj_request->type == OBJ_REQUEST_BIO)
+ 		osd_req_op_extent_osd_data_bio(osd_request, num_ops,
+ 					obj_request->bio_list, length);
+-- 
+2.1.1
+
