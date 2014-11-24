@@ -1,50 +1,74 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: gf-complete v2
-Date: Mon, 24 Nov 2014 14:38:04 +0100
-Message-ID: <547334BC.4000505@dachary.org>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="1nPGMhfVQTL2L1ttnpdOXf3TSkb3EOv1d"
+From: Luis Henriques <luis.henriques@canonical.com>
+Subject: [3.16.y-ckt stable] Patch "rbd: Fix error recovery in rbd_obj_read_sync()" has been added to staging queue
+Date: Mon, 24 Nov 2014 15:00:27 +0000
+Message-ID: <1416841227-30466-1-git-send-email-luis.henriques@canonical.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:42455 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752603AbaKXNiH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 24 Nov 2014 08:38:07 -0500
+Received: from youngberry.canonical.com ([91.189.89.112]:51856 "EHLO
+	youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751758AbaKXPAc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 24 Nov 2014 10:00:32 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Kevin Greenan <kmgreen2@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Jan Kara <jack@suse.cz>
+Cc: Yehuda Sadeh <yehuda@inktank.com>, Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org, Ilya Dryomov <idryomov@redhat.com>, Luis Henriques <luis.henriques@canonical.com>, kernel-team@lists.ubuntu.com
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---1nPGMhfVQTL2L1ttnpdOXf3TSkb3EOv1d
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+This is a note to let you know that I have just added a patch titled
 
-Hi Kevin,
+    rbd: Fix error recovery in rbd_obj_read_sync()
 
-Now that we have NEON optimizations merged in master ( https://github.com=
-/ceph/gf-complete/commit/70dd94ae38f2d20dd78532a6dfd1310fdfb4a884 ), it w=
-ould be convenient (at least for Ceph integration) to have a v2 release. =
+to the linux-3.16.y-queue branch of the 3.16.y-ckt extended stable tree 
+which can be found at:
 
+ http://kernel.ubuntu.com/git?p=ubuntu/linux.git;a=shortlog;h=refs/heads/linux-3.16.y-queue
 
-What do you think ?
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
+This patch is scheduled to be released in version 3.16.7-ckt2.
 
+If you, or anyone else, feels it should not be added to this tree, please 
+reply to this email.
 
---1nPGMhfVQTL2L1ttnpdOXf3TSkb3EOv1d
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+For more information about the 3.16.y-ckt tree, see
+https://wiki.ubuntu.com/Kernel/Dev/ExtendedStable
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+Thanks.
+-Luis
 
-iEYEARECAAYFAlRzNLwACgkQ8dLMyEl6F23C5gCffBZQChKackODQ3kKxcsV0x5y
-7EIAoKkH4GSO1LA/k8n/uPklabh8zkQI
-=ebhy
------END PGP SIGNATURE-----
+------
 
---1nPGMhfVQTL2L1ttnpdOXf3TSkb3EOv1d--
+From c71e0efe1eeb425d5c5c21f491455522737b3e2c Mon Sep 17 00:00:00 2001
+From: Jan Kara <jack@suse.cz>
+Date: Wed, 22 Oct 2014 09:17:24 +0200
+Subject: rbd: Fix error recovery in rbd_obj_read_sync()
+
+commit a8d4205623ae965e36c68629db306ca0695a2771 upstream.
+
+When we fail to allocate page vector in rbd_obj_read_sync() we just
+basically ignore the problem and continue which will result in an oops
+later. Fix the problem by returning proper error.
+
+CC: Yehuda Sadeh <yehuda@inktank.com>
+CC: Sage Weil <sage@inktank.com>
+CC: ceph-devel@vger.kernel.org
+Coverity-id: 1226882
+Signed-off-by: Jan Kara <jack@suse.cz>
+Signed-off-by: Ilya Dryomov <idryomov@redhat.com>
+Signed-off-by: Luis Henriques <luis.henriques@canonical.com>
+---
+ drivers/block/rbd.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 9dc02c429771..a15500662f4c 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -3389,7 +3389,7 @@ static int rbd_obj_read_sync(struct rbd_device *rbd_dev,
+ 	page_count = (u32) calc_pages_for(offset, length);
+ 	pages = ceph_alloc_page_vector(page_count, GFP_KERNEL);
+ 	if (IS_ERR(pages))
+-		ret = PTR_ERR(pages);
++		return PTR_ERR(pages);
+
+ 	ret = -ENOMEM;
+ 	obj_request = rbd_obj_request_create(object_name, offset, length,
+--
+2.1.0
+
