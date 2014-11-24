@@ -1,64 +1,50 @@
-From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: Re: [PATCH] rbd: don't treat CEPH_OSD_OP_DELETE as extent op
-Date: Mon, 24 Nov 2014 17:30:15 +0400
-Message-ID: <CALFYKtB1qOj0d4eGdKGe=kS3-u+odgGFt-euSt5Zhshs8RXbPw@mail.gmail.com>
-References: <1416823190-10246-1-git-send-email-idryomov@redhat.com>
-	<54732326.7050301@ieee.org>
+From: Loic Dachary <loic@dachary.org>
+Subject: gf-complete v2
+Date: Mon, 24 Nov 2014 14:38:04 +0100
+Message-ID: <547334BC.4000505@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="1nPGMhfVQTL2L1ttnpdOXf3TSkb3EOv1d"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f179.google.com ([209.85.216.179]:46696 "EHLO
-	mail-qc0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753484AbaKXNaR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 24 Nov 2014 08:30:17 -0500
-Received: by mail-qc0-f179.google.com with SMTP id c9so6662638qcz.24
-        for <ceph-devel@vger.kernel.org>; Mon, 24 Nov 2014 05:30:16 -0800 (PST)
-In-Reply-To: <54732326.7050301@ieee.org>
+Received: from mail2.dachary.org ([91.121.57.175]:42455 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752603AbaKXNiH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 24 Nov 2014 08:38:07 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@ieee.org>
+To: Kevin Greenan <kmgreen2@gmail.com>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Mon, Nov 24, 2014 at 3:23 PM, Alex Elder <elder@ieee.org> wrote:
-> On 11/24/2014 03:59 AM, Ilya Dryomov wrote:
->> CEPH_OSD_OP_DELETE is not an extent op, stop treating it as such.  This
->> sneaked in with discard patches - it's one of the three osd ops (the
->> other two are CEPH_OSD_OP_TRUNCATE and CEPH_OSD_OP_ZERO) that discard
->> is implemented with.
->>
->> Signed-off-by: Ilya Dryomov <idryomov@redhat.com>
->
-> Is the CEPH_OSD_OP_DELETE used in ceph_zero_partial_object()
-> an extent op?  If it is not, you should get rid of the BUG_ON()
-> in osd_req_op_extent_init() that allows CEPH_OSD_OP_DELETE.
->
-> And if that's the case it looks like that function or
-> ceph_osdc_new_request() handle CEPH_OSD_OP_DELETE
-> properly--so it's not treated as an extent op.
->
-> And:  osd_req_encode_op() encodes a CEPH_OSD_OP_DELETE
-> as an extent op as well.
->
-> If it *can* be an extent op (but just not as used by RBD)
-> then it warrants a comment here that explains why it is
-> not being initialized as an extent op.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--1nPGMhfVQTL2L1ttnpdOXf3TSkb3EOv1d
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-Hi Alex,
+Hi Kevin,
 
-Clearly I didn't provide enough background.
+Now that we have NEON optimizations merged in master ( https://github.com=
+/ceph/gf-complete/commit/70dd94ae38f2d20dd78532a6dfd1310fdfb4a884 ), it w=
+ould be convenient (at least for Ceph integration) to have a v2 release. =
 
-OSDs don't look at extent part of the op union when processing
-CEPH_OSD_OP_DELETE, so it's not an extent op.
 
-Zheng added support for CEPH_OSD_OP_CREATE and in the same commit
-changed osd_req_op_extent_init(), ceph_osdc_new_request() and
-osd_req_encode_op() to not allow/encode CEPH_OSD_OP_DELETE, see [1].
-This patch was rebased into testing before [1] in order to not break
-git bisect as Zheng didn't care of rbd, which only recently started
-issuing CEPH_OSD_OP_DELETE for whole-object discards.
+What do you think ?
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
 
-[1] https://github.com/ceph/ceph-client/commit/6d23aa137d1861fc48f86ba6532458fcebcdd038
 
-Thanks,
+--1nPGMhfVQTL2L1ttnpdOXf3TSkb3EOv1d
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
-                Ilya
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlRzNLwACgkQ8dLMyEl6F23C5gCffBZQChKackODQ3kKxcsV0x5y
+7EIAoKkH4GSO1LA/k8n/uPklabh8zkQI
+=ebhy
+-----END PGP SIGNATURE-----
+
+--1nPGMhfVQTL2L1ttnpdOXf3TSkb3EOv1d--
