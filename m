@@ -1,93 +1,62 @@
-From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: Re: [PATCH 01/12] libceph: add SETXATTR/CMPXATTR osd operations support
-Date: Mon, 24 Nov 2014 14:17:03 +0400
-Message-ID: <CALFYKtAoxXYRpR1bQ4KtV_UQeWJirwCOktWuw2CHDe5bQqUQfw@mail.gmail.com>
-References: <1416211026-11524-1-git-send-email-zyan@redhat.com>
-	<1416211026-11524-2-git-send-email-zyan@redhat.com>
+From: "Zhou, Yuan" <yuan.zhou@intel.com>
+Subject: RE: 11/19/2014 Weekly Ceph Performance Meeting IS ON!
+Date: Mon, 24 Nov 2014 11:14:02 +0000
+Message-ID: <06681238D8946F44A60AA400760A1CBF01E337C3@SHSMSX104.ccr.corp.intel.com>
+References: <546C052B.3060100@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f181.google.com ([209.85.216.181]:57074 "EHLO
-	mail-qc0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752622AbaKXKRF (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 24 Nov 2014 05:17:05 -0500
-Received: by mail-qc0-f181.google.com with SMTP id m20so6441449qcx.26
-        for <ceph-devel@vger.kernel.org>; Mon, 24 Nov 2014 02:17:03 -0800 (PST)
-In-Reply-To: <1416211026-11524-2-git-send-email-zyan@redhat.com>
+Received: from mga01.intel.com ([192.55.52.88]:21861 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751067AbaKXLOH convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 24 Nov 2014 06:14:07 -0500
+In-Reply-To: <546C052B.3060100@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zyan@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, liwang@ubuntukylin.com
+To: Mark Nelson <mark.nelson@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Mon, Nov 17, 2014 at 10:56 AM, Yan, Zheng <zyan@redhat.com> wrote:
-> Signed-off-by: Yan, Zheng <zyan@redhat.com>
-> ---
->  include/linux/ceph/osd_client.h | 10 ++++++++++
->  net/ceph/osd_client.c           | 38 ++++++++++++++++++++++++++++++++++++++
->  2 files changed, 48 insertions(+)
->
-> diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
-> index 03aeb27..1ad217b 100644
-> --- a/include/linux/ceph/osd_client.h
-> +++ b/include/linux/ceph/osd_client.h
-> @@ -87,6 +87,13 @@ struct ceph_osd_req_op {
->                         struct ceph_osd_data osd_data;
->                 } extent;
->                 struct {
-> +                       __le32 name_len;
-> +                       __le32 value_len;
-> +                       __u8 cmp_op;       /* CEPH_OSD_CMPXATTR_OP_* */
-> +                       __u8 cmp_mode;     /* CEPH_OSD_CMPXATTR_MODE_* */
-> +                       struct ceph_osd_data osd_data;
-> +               } xattr;
-> +               struct {
->                         const char *class_name;
->                         const char *method_name;
->                         struct ceph_osd_data request_info;
-> @@ -295,6 +302,9 @@ extern void osd_req_op_cls_response_data_pages(struct ceph_osd_request *,
->  extern void osd_req_op_cls_init(struct ceph_osd_request *osd_req,
->                                         unsigned int which, u16 opcode,
->                                         const char *class, const char *method);
-> +extern void osd_req_op_xattr_init(struct ceph_osd_request *osd_req, unsigned int which,
-> +                                 u16 opcode, const char *name, const void *value,
-> +                                 size_t size, u8 cmp_op, u8 cmp_mode);
->  extern void osd_req_op_watch_init(struct ceph_osd_request *osd_req,
->                                         unsigned int which, u16 opcode,
->                                         u64 cookie, u64 version, int flag);
-> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-> index 1f6c405..f8fb376 100644
-> --- a/net/ceph/osd_client.c
-> +++ b/net/ceph/osd_client.c
-> @@ -545,6 +545,34 @@ void osd_req_op_cls_init(struct ceph_osd_request *osd_req, unsigned int which,
->  }
->  EXPORT_SYMBOL(osd_req_op_cls_init);
->
-> +void osd_req_op_xattr_init(struct ceph_osd_request *osd_req, unsigned int which,
-> +                         u16 opcode, const char *name, const void *value,
-> +                         size_t size, u8 cmp_op, u8 cmp_mode)
-> +{
-> +       struct ceph_osd_req_op *op = _osd_req_op_init(osd_req, which, opcode);
-> +       struct ceph_pagelist *pagelist;
-> +       size_t payload_len;
+Hi Mark, do you have the recording videos for this meeting? 
 
-Add
+Regards, -yuan
 
-BUG_ON(opcode != CEPH_OSD_OP_SETXATTR && opcode != CEPH_OSD_OP_CMPXATTR);
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
+Sent: Wednesday, November 19, 2014 10:49 AM
+To: ceph-devel@vger.kernel.org
+Subject: 11/19/2014 Weekly Ceph Performance Meeting IS ON!
 
-These asserts in osd_req_op_*_init() proved to be useful and some day
-we will change from BUG_ONs to something nicer throughout.
+Hi All,
 
-> +
-> +       pagelist = kmalloc(sizeof (*pagelist), GFP_NOFS);
-> +       BUG_ON(!pagelist);
+8AM PST as usual!  Some lucky folks are out at Supercomputing 14 so the crowd might be a bit small this week.  Feel free to add an agenda item if there is something you want to talk about!
 
-This BUG_ON OTOH is not useful ;)  Can you make osd_req_op_xattr_init()
-return an error and get rid of it?  I know you just pasted this from
-osd_req_op_cls_init(), but ceph_uninline_data() is perfectly capable of
-handling -ENOMEM so no reason to spread this any further.
+Here's the links:
 
-Also drop the space after sizeof.
+Etherpad URL:
+http://pad.ceph.com/p/performance_weekly
 
-Thanks,
+To join the Meeting:
+https://bluejeans.com/268261044
 
-                Ilya
+To join via Browser:
+https://bluejeans.com/268261044/browser
+
+To join with Lync:
+https://bluejeans.com/268261044/lync
+
+
+To join via Room System:
+Video Conferencing System: bjn.vc -or- 199.48.152.152 Meeting ID: 268261044
+
+To join via Phone:
+1) Dial:
+           +1 408 740 7256
+           +1 888 240 2560(US Toll Free)
+           +1 408 317 9253(Alternate Number)
+           (see all numbers - http://bluejeans.com/numbers)
+2) Enter Conference ID: 268261044
+
+Mark
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
