@@ -1,191 +1,60 @@
-From: scan-admin@coverity.com
-Subject: New Defects reported by Coverity Scan for ceph
-Date: Tue, 25 Nov 2014 06:09:30 -0800
-Message-ID: <54748d9a843bb_604965d31c998a8@scan.coverity.com.mail>
+From: bombed92076@gmail.com
+Subject: Fix Penguin Penalty 17th October2014 ( mail-archive.com )
+Date: Tue, 25 Nov 2014 22:34:15 +0530
+Message-ID: <5474b68d.0314460a.46ee.52f1@mx.google.com>
+Reply-To: julia.kites@yahoo.com
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from scanrelay.coverity.com ([209.249.196.67]:55977 "EHLO
-	scanrelay.coverity.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752439AbaKYOJb (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Nov 2014 09:09:31 -0500
+Received: from mail-pa0-f67.google.com ([209.85.220.67]:60680 "EHLO
+	mail-pa0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750802AbaKYREQ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Nov 2014 12:04:16 -0500
+Received: by mail-pa0-f67.google.com with SMTP id lj1so293004pab.10
+        for <ceph-devel@vger.kernel.org>; Tue, 25 Nov 2014 09:04:16 -0800 (PST)
+Received: from localhost.localdomain ([124.253.10.7])
+        by mx.google.com with ESMTPSA id j3sm1952876pde.22.2014.11.25.09.04.11
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1 cipher=RC4-SHA bits=128/128);
+        Tue, 25 Nov 2014 09:04:13 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
+Dear Sir
 
-Hi,
+Did your website get hit by Google Penguin update on October 17th 2014?=
+ What basically is Google Penguin Update? It is actually a code name fo=
+r Google algorithm which aims at decreasing your websites search engine=
+ rankings that violate Google=92s guidelines by using black hat SEO tec=
+hniques to rank your webpage by giving number of spammy links to the pa=
+ge.
+=20
+We are one of those few SEO companies that can help you avoid penalties=
+ from Google Updates like Penguin and Panda. Our clients have survived =
+all the previous and present updates with ease. They have never been hi=
+t because we use 100% white hat SEO techniques to rank Webpages.  Simpl=
+e thing that we do to keep websites away from any Penguin or Panda pena=
+lties is follow Google guidelines and we give Google users the best ans=
+wers to their queries.
 
-Please find the latest report on new defect(s) introduced to ceph found with Coverity Scan.
+If you are looking to increase the quality of your websites and to get =
+more targeted traffic or save your websites from these Google penalties=
+ email us back with your interest.=20
 
-5 new defect(s) introduced to ceph found with Coverity Scan.
+We will be glad to serve you and help you grow your business.
 
+Regards
 
-New defect(s) Reported-by: Coverity Scan
-Showing 5 of 5 defect(s)
+Julia kites
 
-
-** CID 1256098:  Resource leak  (RESOURCE_LEAK)
-/test/librados/tier.cc: 2792 in LibRadosTwoPoolsECPP_Whiteout_Test::TestBody()()
-/test/librados/tier.cc: 2789 in LibRadosTwoPoolsECPP_Whiteout_Test::TestBody()()
-
-** CID 1256096:  Resource leak  (RESOURCE_LEAK)
-/test/librados/TestCase.cc: 336 in RadosTestPP::cleanup_namespace(librados::IoCtx, std::basic_string<char, std::char_traits<char>, std::allocator<char>>)()
-/test/librados/TestCase.cc: 333 in RadosTestPP::cleanup_namespace(librados::IoCtx, std::basic_string<char, std::char_traits<char>, std::allocator<char>>)()
-
-** CID 1256097:  Resource leak  (RESOURCE_LEAK)
-/test/librados/tier.cc: 648 in LibRadosTwoPoolsPP_Whiteout_Test::TestBody()()
-/test/librados/tier.cc: 645 in LibRadosTwoPoolsPP_Whiteout_Test::TestBody()()
-
-** CID 1256100:  Uninitialized pointer read  (UNINIT)
-/librados/librados.cc: 4516 in librados::ListObject::ListObject(const librados::ListObject&)()
-
-** CID 1256099:  Uninitialized pointer read  (UNINIT)
-/librados/librados.cc: 650 in librados::NObjectIterator::NObjectIterator(const librados::NObjectIterator&)()
-
-
-________________________________________________________________________________________________________
-*** CID 1256098:  Resource leak  (RESOURCE_LEAK)
-/test/librados/tier.cc: 2792 in LibRadosTwoPoolsECPP_Whiteout_Test::TestBody()()
-2786         ObjectWriteOperation op;
-2787         op.remove();
-2788         librados::AioCompletion *completion = cluster.aio_create_completion();
-2789         ASSERT_EQ(0, ioctx.aio_operate("bar", completion, &op,
-2790     				   librados::OPERATION_IGNORE_CACHE));
-2791         completion->wait_for_safe();
->>>     CID 1256098:  Resource leak  (RESOURCE_LEAK)
->>>     Variable "completion" going out of scope leaks the storage it points to.
-2792         ASSERT_EQ(0, completion->get_return_value());
-2793         completion->release();
-2794     
-2795         NObjectIterator it = cache_ioctx.nobjects_begin();
-2796         ASSERT_TRUE(it != cache_ioctx.nobjects_end());
-2797         ASSERT_TRUE(it->get_oid() == string("foo"));
-/test/librados/tier.cc: 2789 in LibRadosTwoPoolsECPP_Whiteout_Test::TestBody()()
-2783       // delete a whiteout and verify it goes away
-2784       ASSERT_EQ(-ENOENT, ioctx.remove("foo"));
-2785       {
-2786         ObjectWriteOperation op;
-2787         op.remove();
-2788         librados::AioCompletion *completion = cluster.aio_create_completion();
->>>     CID 1256098:  Resource leak  (RESOURCE_LEAK)
->>>     Variable "completion" going out of scope leaks the storage it points to.
-2789         ASSERT_EQ(0, ioctx.aio_operate("bar", completion, &op,
-2790     				   librados::OPERATION_IGNORE_CACHE));
-2791         completion->wait_for_safe();
-2792         ASSERT_EQ(0, completion->get_return_value());
-2793         completion->release();
-2794     
-
-________________________________________________________________________________________________________
-*** CID 1256096:  Resource leak  (RESOURCE_LEAK)
-/test/librados/TestCase.cc: 336 in RadosTestPP::cleanup_namespace(librados::IoCtx, std::basic_string<char, std::char_traits<char>, std::allocator<char>>)()
-330         ObjectWriteOperation op;
-331         op.remove();
-332         librados::AioCompletion *completion = s_cluster.aio_create_completion();
-333         ASSERT_EQ(0, ioctx.aio_operate(it->get_oid(), completion, &op,
-334     				   librados::OPERATION_IGNORE_CACHE));
-335         completion->wait_for_safe();
->>>     CID 1256096:  Resource leak  (RESOURCE_LEAK)
->>>     Variable "completion" going out of scope leaks the storage it points to.
-336         ASSERT_EQ(0, completion->get_return_value());
-337         completion->release();
-338       }
-339     }
-340     
-341     std::string RadosTestParamPP::pool_name;
-/test/librados/TestCase.cc: 333 in RadosTestPP::cleanup_namespace(librados::IoCtx, std::basic_string<char, std::char_traits<char>, std::allocator<char>>)()
-327       for (NObjectIterator it = ioctx.nobjects_begin();
-328            it != ioctx.nobjects_end(); ++it) {
-329         ioctx.locator_set_key(it->get_locator());
-330         ObjectWriteOperation op;
-331         op.remove();
-332         librados::AioCompletion *completion = s_cluster.aio_create_completion();
->>>     CID 1256096:  Resource leak  (RESOURCE_LEAK)
->>>     Variable "completion" going out of scope leaks the storage it points to.
-333         ASSERT_EQ(0, ioctx.aio_operate(it->get_oid(), completion, &op,
-334     				   librados::OPERATION_IGNORE_CACHE));
-335         completion->wait_for_safe();
-336         ASSERT_EQ(0, completion->get_return_value());
-337         completion->release();
-338       }
-
-________________________________________________________________________________________________________
-*** CID 1256097:  Resource leak  (RESOURCE_LEAK)
-/test/librados/tier.cc: 648 in LibRadosTwoPoolsPP_Whiteout_Test::TestBody()()
-642         ObjectWriteOperation op;
-643         op.remove();
-644         librados::AioCompletion *completion = cluster.aio_create_completion();
-645         ASSERT_EQ(0, ioctx.aio_operate("bar", completion, &op,
-646     				   librados::OPERATION_IGNORE_CACHE));
-647         completion->wait_for_safe();
->>>     CID 1256097:  Resource leak  (RESOURCE_LEAK)
->>>     Variable "completion" going out of scope leaks the storage it points to.
-648         ASSERT_EQ(0, completion->get_return_value());
-649         completion->release();
-650     
-651         NObjectIterator it = cache_ioctx.nobjects_begin();
-652         ASSERT_TRUE(it != cache_ioctx.nobjects_end());
-653         ASSERT_TRUE(it->get_oid() == string("foo"));
-/test/librados/tier.cc: 645 in LibRadosTwoPoolsPP_Whiteout_Test::TestBody()()
-639       // delete a whiteout and verify it goes away
-640       ASSERT_EQ(-ENOENT, ioctx.remove("foo"));
-641       {
-642         ObjectWriteOperation op;
-643         op.remove();
-644         librados::AioCompletion *completion = cluster.aio_create_completion();
->>>     CID 1256097:  Resource leak  (RESOURCE_LEAK)
->>>     Variable "completion" going out of scope leaks the storage it points to.
-645         ASSERT_EQ(0, ioctx.aio_operate("bar", completion, &op,
-646     				   librados::OPERATION_IGNORE_CACHE));
-647         completion->wait_for_safe();
-648         ASSERT_EQ(0, completion->get_return_value());
-649         completion->release();
-650     
-
-________________________________________________________________________________________________________
-*** CID 1256100:  Uninitialized pointer read  (UNINIT)
-/librados/librados.cc: 4516 in librados::ListObject::ListObject(const librados::ListObject&)()
-4510     {
-4511     }
-4512     
-4513     librados::ListObject::ListObject(const ListObject& rhs)
-4514     {
-4515       if (rhs.impl == NULL) {
->>>     CID 1256100:  Uninitialized pointer read  (UNINIT)
->>>     Using uninitialized value "this->impl".
-4516         delete impl;
-4517         impl = NULL;
-4518         return;
-4519       }
-4520       impl = new ListObjectImpl();
-4521       *impl = *(rhs.impl);
-
-________________________________________________________________________________________________________
-*** CID 1256099:  Uninitialized pointer read  (UNINIT)
-/librados/librados.cc: 650 in librados::NObjectIterator::NObjectIterator(const librados::NObjectIterator&)()
-644       delete impl;
-645     }
-646     
-647     librados::NObjectIterator::NObjectIterator(const NObjectIterator &rhs)
-648     {
-649       if (rhs.impl == NULL) {
->>>     CID 1256099:  Uninitialized pointer read  (UNINIT)
->>>     Using uninitialized value "this->impl".
-650         delete impl;
-651         impl = NULL;
-652         return;
-653       }
-654       impl = new NObjectIteratorImpl();
-655       *impl = *(rhs.impl);
-
-
-________________________________________________________________________________________________________
-To view the defects in Coverity Scan visit, http://scan.coverity.com/projects/25?tab=overview
-
-To unsubscribe from the email notification for new defects, http://scan5.coverity.com/cgi-bin/unsubscribe.py
-
-
-
+SEO Manager ( TOB )
+B7 Green Avenue, Amritsar 143001 Punjab
+____________________________
+NO CLICK in the subject to STOP EMAILS
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
