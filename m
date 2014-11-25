@@ -1,74 +1,74 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Ceph reviewers team
-Date: Tue, 25 Nov 2014 20:59:55 +0100
-Message-ID: <5474DFBB.2000700@dachary.org>
-References: <54745AA4.8080105@dachary.org> <CAC6JEv_hHBe+2niqWtRp8uFbP_H9Ka9+_fK2G1z39=J48gQGTA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="T3L1uXTl6VhIG9EABxLamg4TJ7xEKaDwb"
+From: Kamal Mostafa <kamal@canonical.com>
+Subject: [3.13.y-ckt stable] Patch "rbd: Fix error recovery in rbd_obj_read_sync()" has been added to staging queue
+Date: Tue, 25 Nov 2014 12:35:21 -0800
+Message-ID: <1416947721-14630-1-git-send-email-kamal@canonical.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:43366 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1750812AbaKYT76 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Nov 2014 14:59:58 -0500
-In-Reply-To: <CAC6JEv_hHBe+2niqWtRp8uFbP_H9Ka9+_fK2G1z39=J48gQGTA@mail.gmail.com>
+Received: from youngberry.canonical.com ([91.189.89.112]:33855 "EHLO
+	youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750812AbaKYUfZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Nov 2014 15:35:25 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@gregs42.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Jan Kara <jack@suse.cz>
+Cc: Yehuda Sadeh <yehuda@inktank.com>, Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org, Ilya Dryomov <idryomov@redhat.com>, Kamal Mostafa <kamal@canonical.com>, kernel-team@lists.ubuntu.com
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---T3L1uXTl6VhIG9EABxLamg4TJ7xEKaDwb
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+This is a note to let you know that I have just added a patch titled
 
-Hi Greg,
+    rbd: Fix error recovery in rbd_obj_read_sync()
 
-Sent you a link privately: it looks like the teams are not visible to unp=
-rivileged user.
+to the linux-3.13.y-queue branch of the 3.13.y-ckt extended stable tree 
+which can be found at:
 
-Cheers
+ http://kernel.ubuntu.com/git?p=ubuntu/linux.git;a=shortlog;h=refs/heads/linux-3.13.y-queue
 
-On 25/11/2014 19:16, Gregory Farnum wrote:
-> On Tue, Nov 25, 2014 at 2:32 AM, Loic Dachary <loic@dachary.org> wrote:=
+This patch is scheduled to be released in version 3.13.11-ckt12.
 
->> [ceph-devel cc'ed]
->>
->> Hi Sam,
->>
->> I created a "Reviewer team" for https://github.com/ceph/ceph/ : the me=
-mbers do not have special rights to the repository, but they can be assig=
-ned pull request which is convenient for volunteers. It would be more con=
-venient if anyone could be assigned a pull request regardless of membersh=
-ip, but it does not seem to be possible.
->=20
-> Is this team visible somewhere? Maybe I'm just not looking in the
-> right places, but I can't find it.
-> -Greg
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
+If you, or anyone else, feels it should not be added to this tree, please 
+reply to this email.
 
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
+For more information about the 3.13.y-ckt tree, see
+https://wiki.ubuntu.com/Kernel/Dev/ExtendedStable
 
+Thanks.
+-Kamal
 
---T3L1uXTl6VhIG9EABxLamg4TJ7xEKaDwb
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+------
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+From 02485a1c080f1c2b2a5ecf07ca4e2488f1fccd1f Mon Sep 17 00:00:00 2001
+From: Jan Kara <jack@suse.cz>
+Date: Wed, 22 Oct 2014 09:17:24 +0200
+Subject: rbd: Fix error recovery in rbd_obj_read_sync()
 
-iEYEARECAAYFAlR037sACgkQ8dLMyEl6F22oxACfaO+g9pv9dnIN2LidgHigvkmh
-KgcAn3ujLPnzWJXxQKhgSUpXo8JwjLjt
-=opU4
------END PGP SIGNATURE-----
+commit a8d4205623ae965e36c68629db306ca0695a2771 upstream.
 
---T3L1uXTl6VhIG9EABxLamg4TJ7xEKaDwb--
+When we fail to allocate page vector in rbd_obj_read_sync() we just
+basically ignore the problem and continue which will result in an oops
+later. Fix the problem by returning proper error.
+
+CC: Yehuda Sadeh <yehuda@inktank.com>
+CC: Sage Weil <sage@inktank.com>
+CC: ceph-devel@vger.kernel.org
+Coverity-id: 1226882
+Signed-off-by: Jan Kara <jack@suse.cz>
+Signed-off-by: Ilya Dryomov <idryomov@redhat.com>
+Signed-off-by: Kamal Mostafa <kamal@canonical.com>
+---
+ drivers/block/rbd.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index a1455cc..5224f46 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -3220,7 +3220,7 @@ static int rbd_obj_read_sync(struct rbd_device *rbd_dev,
+ 	page_count = (u32) calc_pages_for(offset, length);
+ 	pages = ceph_alloc_page_vector(page_count, GFP_KERNEL);
+ 	if (IS_ERR(pages))
+-		ret = PTR_ERR(pages);
++		return PTR_ERR(pages);
+
+ 	ret = -ENOMEM;
+ 	obj_request = rbd_obj_request_create(object_name, offset, length,
+--
+1.9.1
+
