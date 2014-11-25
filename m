@@ -1,78 +1,59 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: 11/19/2014 Weekly Ceph Performance Meeting IS ON!
-Date: Tue, 25 Nov 2014 12:30:33 -0600
-Message-ID: <5474CAC9.6070309@redhat.com>
-References: <546C052B.3060100@redhat.com> <06681238D8946F44A60AA400760A1CBF01E337C3@SHSMSX104.ccr.corp.intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+From: Andrew Shewmaker <agshew@gmail.com>
+Subject: [PATCH V2 0/7] BlkKin (LTTng + Zipkin) tracing patchset intro
+Date: Tue, 25 Nov 2014 10:54:22 -0800
+Message-ID: <1416941668-26150-1-git-send-email-agshew@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f175.google.com ([209.85.213.175]:46621 "EHLO
-	mail-ig0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750726AbaKYSaa (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Nov 2014 13:30:30 -0500
-Received: by mail-ig0-f175.google.com with SMTP id h15so5493320igd.14
-        for <ceph-devel@vger.kernel.org>; Tue, 25 Nov 2014 10:30:29 -0800 (PST)
-In-Reply-To: <06681238D8946F44A60AA400760A1CBF01E337C3@SHSMSX104.ccr.corp.intel.com>
+Received: from mail-pa0-f49.google.com ([209.85.220.49]:49920 "EHLO
+	mail-pa0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751152AbaKYSyF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Nov 2014 13:54:05 -0500
+Received: by mail-pa0-f49.google.com with SMTP id eu11so1106894pac.36
+        for <ceph-devel@vger.kernel.org>; Tue, 25 Nov 2014 10:54:05 -0800 (PST)
+Received: from scruffy.soe.ucsc.edu (scruffy.soe.ucsc.edu. [128.114.53.124])
+        by mx.google.com with ESMTPSA id i11sm2214692pat.3.2014.11.25.10.54.04
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
+        Tue, 25 Nov 2014 10:54:04 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Zhou, Yuan" <yuan.zhou@intel.com>, Mark Nelson <mark.nelson@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hi Yuan,
+The following patches are a cleaned up version of the work
+Marios Kogias first posted in August.
+http://www.spinics.net/lists/ceph-devel/msg19890.html
+The changes are against Ceph 0.80.1, and will be
+moved forward soon.
 
-Here you go!
+Changes since V1:
+  * split build changes into separate patch
+  * conditional build support for blkin (default off)
+  * blkin is not a Ceph repo submodule
+    build and install packages from https://github.com/agshew/blkin.git
+    Note: rpms don't support babeltrace plugins for use with Zipkin
+  * removal of debugging in Message::init_trace_info()
 
-https://bluejeans.com/s/7YXc/
+With this patchset Ceph can use Blkin, a library created by
+Marios Kogias and others, which enables tracking a specific request
+from the time it enters the system at higher levels till it is finally
+served by RADOS.
 
-Sadly bluejeans makes me log in and mark it public once the recording is 
-available  (about 30 minutes after the meeting) and I don't always remember.
+In general, Blkin implements the tracing semantics described in the Dapper
+paper http://static.googleusercontent.com/media/research.google.com/el/pubs/archive/36356.pdf
+in order to trace the causal relationships between the different
+processing phases that an IO request may trigger. The goal is an end-to-end
+visualisation of the request's route in the system, accompanied by information
+concerning latencies in each processing phase. Thanks to LTTng this can happen
+with a minimal overhead and in realtime. In order to visualize the results Blkin
+was integrated with Twitter's Zipkin http://twitter.github.io/zipkin/
+(which is a tracing system entirely based on Dapper).
 
-Thanks!
-Mark
+In addition to cleanup, I've written a short document describing how to
+test Blkin tracing in Ceph (without Zipkin). See doc/dev/trace.rst
 
-On 11/24/2014 05:14 AM, Zhou, Yuan wrote:
-> Hi Mark, do you have the recording videos for this meeting?
->
-> Regards, -yuan
->
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
-> Sent: Wednesday, November 19, 2014 10:49 AM
-> To: ceph-devel@vger.kernel.org
-> Subject: 11/19/2014 Weekly Ceph Performance Meeting IS ON!
->
-> Hi All,
->
-> 8AM PST as usual!  Some lucky folks are out at Supercomputing 14 so the crowd might be a bit small this week.  Feel free to add an agenda item if there is something you want to talk about!
->
-> Here's the links:
->
-> Etherpad URL:
-> http://pad.ceph.com/p/performance_weekly
->
-> To join the Meeting:
-> https://bluejeans.com/268261044
->
-> To join via Browser:
-> https://bluejeans.com/268261044/browser
->
-> To join with Lync:
-> https://bluejeans.com/268261044/lync
->
->
-> To join via Room System:
-> Video Conferencing System: bjn.vc -or- 199.48.152.152 Meeting ID: 268261044
->
-> To join via Phone:
-> 1) Dial:
->             +1 408 740 7256
->             +1 888 240 2560(US Toll Free)
->             +1 408 317 9253(Alternate Number)
->             (see all numbers - http://bluejeans.com/numbers)
-> 2) Enter Conference ID: 268261044
->
-> Mark
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+In the immediate future I plan to:
 
+ 1. push a wip-blkin branch to github.com/ceph and take advantage of gitbuilder test/qa
+ 2. move the changes forward to ceph:master
+ 3. submit a pull request
+ 3. add Andreas' tracepoints https://github.com/ceph/ceph/pull/2877 using Blkin
+    and investigate how easy it is to select the level of tracing detail
