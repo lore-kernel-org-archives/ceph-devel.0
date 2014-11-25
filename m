@@ -1,114 +1,65 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Re: [ceph-users] fiemap bug on giant
-Date: Tue, 25 Nov 2014 11:59:29 +0800
-Message-ID: <CACJqLybW-VUU7iYRHdbLnD3yr+dVBqgW2kAAOA+n-LV8jwVqiw@mail.gmail.com>
-References: <CA+4uBUbDywTkuFfhY2uCBWcXRCYjcitDQE7SVZRVjm9NwuXOBA@mail.gmail.com>
-	<CACJqLyY05osh5N=OGau9UAwRUuomL9adD39n6S63LSs5Xmu40w@mail.gmail.com>
-	<alpine.DEB.2.00.1411241759520.24772@cobra.newdream.net>
-	<CACJqLyanb-omTYxBHDUEdWw=F9o5omoDdyxfbLRMpLKi-Ce3Hg@mail.gmail.com>
-	<CACJqLybhFGaDss3kxxbcMJT=ZT6drvBWXo=Mcgyriv_kpWnEig@mail.gmail.com>
-	<CA+4uBUaD72YU8MgwSvn5sAg=bKdikCDyDgXbb8hO4OBTQXgqQQ@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: listing packages required to build from sources
+Date: Tue, 25 Nov 2014 08:27:53 +0100
+Message-ID: <54742F79.6030001@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="gTJ0aMkl6tuSPHeWEEcXU4ohAnkDuMU80"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f175.google.com ([209.85.212.175]:60257 "EHLO
-	mail-wi0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751216AbaKYD7a (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 24 Nov 2014 22:59:30 -0500
-Received: by mail-wi0-f175.google.com with SMTP id l15so7787576wiw.14
-        for <ceph-devel@vger.kernel.org>; Mon, 24 Nov 2014 19:59:29 -0800 (PST)
-In-Reply-To: <CA+4uBUaD72YU8MgwSvn5sAg=bKdikCDyDgXbb8hO4OBTQXgqQQ@mail.gmail.com>
+Received: from mail2.dachary.org ([91.121.57.175]:42959 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1750864AbaKYH1z (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Nov 2014 02:27:55 -0500
+Received: from [10.9.0.6] (unknown [10.0.2.28])
+	by smtp.dmail.dachary.org (Postfix) with ESMTP id 72147420AC
+	for <ceph-devel@vger.kernel.org>; Tue, 25 Nov 2014 08:27:53 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: sjust@redhat.com
-Cc: Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-Agree with you.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--gTJ0aMkl6tuSPHeWEEcXU4ohAnkDuMU80
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-It seemed I made a mistake that only truncate expected size for clone
-op but not truncate size for clone_range op.
+Hi,
 
-We need to truncate dst file to expected length if ending with zero
-filled section.
+It would be nice to replace the files
 
-On Tue, Nov 25, 2014 at 11:30 AM, Samuel Just <sam.just@inktank.com> wrote:
-> I think the bug is actually with FileStore::_do_sparse_copy_range,
-> which isn't truncating out properly to create 0 filled sections.
-> -Sam
->
-> On Mon, Nov 24, 2014 at 6:17 PM, Haomai Wang <haomaiwang@gmail.com> wrote:
->> Oh, sorry. This series seemed that already backported...
->>
->> On Tue, Nov 25, 2014 at 10:14 AM, Haomai Wang <haomaiwang@gmail.com> wrote:
->>> Backport this series(https://github.com/yuandong1222/ceph/commit/3f8fb85b341726ae7bb44b4c699707333cd63ccd)
->>> and test again ? Or....
->>>
->>> Actually, my up to ten ceph clusters open this option for nearly one year.....
->>>
->>> On Tue, Nov 25, 2014 at 10:05 AM, Sage Weil <sweil@redhat.com> wrote:
->>>> [dropping ceph-users]
->>>>
->>>> On Tue, 25 Nov 2014, Haomai Wang wrote:
->>>>> It's surprised that the test machine run on a very new kernel but
->>>>> occur this problem:
->>>>>
->>>>> plana 47 is 12.04.5 with kernel 3.18.0-rc6-ceph-00024-geb0e5fd
->>>>>
->>>>> plana 50 is 12.04.4 with kernel 3.17.0-rc6-ceph-00002-ge8acad6
->>>>>
->>>>> Which local filesystem is ran on?
->>>>
->>>> This run was XFS.  It looks like it returned a mapping for fewer bytes
->>>> than it was asked for... 54548 turned into 53904.  That's a bit
->>>> disconcerting!  Maybe teh issue is that the start offset wasn't aligned?
->>>>
->>>> sage
->>>>
->>>>
->>>>
->>>>>
->>>>> On Tue, Nov 25, 2014 at 5:03 AM, Samuel Just <sam.just@inktank.com> wrote:
->>>>> > Bug #10166 (http://tracker.ceph.com/issues/10166) can cause recovery
->>>>> > to result in incorrect object sizes on giant if the setting 'filestore
->>>>> > fiemap' is set to true.  This setting is disabled by default.  This
->>>>> > should be fixed in a future point release, though filestore fiemap
->>>>> > will probably continue to default to false.
->>>>> > -Sam
->>>>> > _______________________________________________
->>>>> > ceph-users mailing list
->>>>> > ceph-users@lists.ceph.com
->>>>> > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->>>>>
->>>>>
->>>>>
->>>>> --
->>>>> Best Regards,
->>>>>
->>>>> Wheat
->>>>> _______________________________________________
->>>>> ceph-users mailing list
->>>>> ceph-users@lists.ceph.com
->>>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->>>>>
->>>>>
->>>
->>>
->>>
->>> --
->>> Best Regards,
->>>
->>> Wheat
->>
->>
->>
->> --
->> Best Regards,
->>
->> Wheat
+https://github.com/ceph/ceph/blob/giant/deps.deb.txt
+https://github.com/ceph/ceph/blob/giant/deps.rpm.txt
+
+with a script that uses the corresponding package files:
+
+https://github.com/ceph/ceph/blob/giant/debian/control
+https://github.com/ceph/ceph/blob/giant/ceph.spec.in
+
+This is what
+
+https://github.com/ceph/ceph/pull/2994/files
+
+does for deb based systems. Does anyone know how it should be done for RP=
+M based systems ?
+
+Cheers
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
 
 
+--gTJ0aMkl6tuSPHeWEEcXU4ohAnkDuMU80
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
--- 
-Best Regards,
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
 
-Wheat
+iEYEARECAAYFAlR0L3kACgkQ8dLMyEl6F23B6QCbBtsJmKG93F8bctLu1zOt+WuL
+HusAoLzCyaKtQEYoPU0xRNG+wGwkA6yk
+=cVEw
+-----END PGP SIGNATURE-----
+
+--gTJ0aMkl6tuSPHeWEEcXU4ohAnkDuMU80--
