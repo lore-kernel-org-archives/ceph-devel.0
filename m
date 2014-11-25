@@ -1,65 +1,150 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: listing packages required to build from sources
-Date: Tue, 25 Nov 2014 08:27:53 +0100
-Message-ID: <54742F79.6030001@dachary.org>
+From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+Subject: RE: Question about Transaction::get_data_alignment
+Date: Tue, 25 Nov 2014 08:12:16 +0000
+Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC02105B62@shsmsx102.ccr.corp.intel.com>
+References: <CAMm-wc+v1_yrcHgftxjgNBo1QARP29K5V_mshuANYq=gn8yRXg@mail.gmail.com>
+ <loom.20141105T075526-51@post.gmane.org>
+ <alpine.DEB.2.00.1411050517420.15135@cobra.newdream.net>
+ <6F3FA899187F0043BA1827A69DA2F7CC020E0CEF@shsmsx102.ccr.corp.intel.com>
+ <alpine.DEB.2.00.1411200928290.24475@cobra.newdream.net>
+ <6F3FA899187F0043BA1827A69DA2F7CC02104769@shsmsx102.ccr.corp.intel.com>
+ <alpine.DEB.2.00.1411201731100.23009@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="gTJ0aMkl6tuSPHeWEEcXU4ohAnkDuMU80"
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:42959 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1750864AbaKYH1z (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Nov 2014 02:27:55 -0500
-Received: from [10.9.0.6] (unknown [10.0.2.28])
-	by smtp.dmail.dachary.org (Postfix) with ESMTP id 72147420AC
-	for <ceph-devel@vger.kernel.org>; Tue, 25 Nov 2014 08:27:53 +0100 (CET)
+Received: from mga01.intel.com ([192.55.52.88]:54029 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751019AbaKYIQp convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Nov 2014 03:16:45 -0500
+In-Reply-To: <alpine.DEB.2.00.1411201731100.23009@cobra.newdream.net>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: jianpeng <majianpeng@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "Cook, Nigel" <nigel.cook@intel.com>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---gTJ0aMkl6tuSPHeWEEcXU4ohAnkDuMU80
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Hi Sage,
 
-Hi,
+       I think I have make a draft of this patch, could you pls kindly take a review at https://github.com/xiaoxichen/ceph/commit/983a36be52d4ddd17133979c17b25e9e319a5dad ?
 
-It would be nice to replace the files
+      By "streamline the encode path for these messages", do you mean we can do something like below so we can skip the initialize of some fields?
+     
+               MOSDClientSubOp(ALL_ARGS_NEED_TO_SEND)
+    : Message(MSG_OSD_CLIENT_SUBOP, HEAD_VERSION, COMPAT_VERSION)
+    {
+              encode_payload(uint64_t features, ALL_ARGS_NEED_TO_SEND) ;
+    }
 
-https://github.com/ceph/ceph/blob/giant/deps.deb.txt
-https://github.com/ceph/ceph/blob/giant/deps.rpm.txt
+													Xiaoxi
 
-with a script that uses the corresponding package files:
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
+Sent: Friday, November 21, 2014 9:33 AM
+To: Chen, Xiaoxi
+Cc: jianpeng; ceph-devel@vger.kernel.org; Cook, Nigel
+Subject: RE: Question about Transaction::get_data_alignment
 
-https://github.com/ceph/ceph/blob/giant/debian/control
-https://github.com/ceph/ceph/blob/giant/ceph.spec.in
+On Fri, 21 Nov 2014, Chen, Xiaoxi wrote:
+> Hi,
+>       I have cleanup the MOSDClientSubOP and changed the issue_op. The receive side is still wip. Sorry for the slow progress since blocked by a customer support case for some weeks. 
+>      Here is the brunch to see if I goes on the right path.
+>      
+> https://github.com/xiaoxichen/ceph/commit/621c2a7dc2bc9724e9d2106b52aa
+> 9eedd2c793e8
 
-This is what
+Yep, this looks like the right direction!
 
-https://github.com/ceph/ceph/pull/2994/files
+Once the reply path is in place, I think there are some things we can do to streamline the encode path for these messages (by, e.g., passing everything to the constructor and encoding directly there instead of copying into member variables and then encoding).  Let's start with something simple first, though.
 
-does for deb based systems. Does anyone know how it should be done for RP=
-M based systems ?
+Thanks-
+sage
 
-Cheers
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-
-
---gTJ0aMkl6tuSPHeWEEcXU4ohAnkDuMU80
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlR0L3kACgkQ8dLMyEl6F23B6QCbBtsJmKG93F8bctLu1zOt+WuL
-HusAoLzCyaKtQEYoPU0xRNG+wGwkA6yk
-=cVEw
------END PGP SIGNATURE-----
-
---gTJ0aMkl6tuSPHeWEEcXU4ohAnkDuMU80--
+ > 
+> -----Original Message-----
+> From: Sage Weil [mailto:sage@newdream.net]
+> Sent: Friday, November 21, 2014 1:30 AM
+> To: Chen, Xiaoxi
+> Cc: jianpeng; ceph-devel@vger.kernel.org; Cook, Nigel
+> Subject: RE: Question about Transaction::get_data_alignment
+> 
+> Hi Xiaoxi,
+> 
+> Just wanted to touch base and see how things are going here.  I have some time to spend on this and the related efforts so please let me know if you have any questions or if you have some work-in-progress code I can help review.
+> 
+> Thanks!
+> sage
+> 
+> 
+> On Thu, 6 Nov 2014, Chen, Xiaoxi wrote:
+> 
+> > Hi Sage,
+> >      As discussed with Jianpeng, I would like to take this job.
+> >     Thank you.
+> > 				Xiaoxi
+> > 
+> > -----Original Message-----
+> > From: ceph-devel-owner@vger.kernel.org 
+> > [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
+> > Sent: Wednesday, November 5, 2014 9:20 PM
+> > To: jianpeng
+> > Cc: ceph-devel@vger.kernel.org
+> > Subject: Re: Question about Transaction::get_data_alignment
+> > 
+> > On Wed, 5 Nov 2014, jianpeng wrote:
+> > > Dong Yuan <yuandong <at> unitedstack.com> writes:
+> > > 
+> > > > 
+> > > > Hi Sage,
+> > > > 
+> > > > I am now working with the BP osd: update Transaction encoding, 
+> > > > but the Transaction::get_data_alignment make me confused.
+> > > > 
+> > > > This method give the alignment which is used by FileJournal to 
+> > > > do better buffer build. It calculate the alignment by 
+> > > > largest_data_off and get_data_offset() while the first is an 
+> > > > offset of some object and the second is an offset of the 
+> > > > transaction encode result. I am not sure there is any reason to do calculation between them.
+> > > > 
+> > > > The code works fine, probably because any result is fine for 
+> > > > Transaction::get_data_alignment, while 
+> > > > FileJournal::prepare_single_write can use any alignment value to 
+> > > > build logical bufferlist.
+> > > > 
+> > > > Can you give me some explanation?  Thank you.
+> > > > 
+> > > 
+> > > Hi, i send a pull request to reduce the memcopy cause by unalignment.
+> > > https://github.com/ceph/ceph/pull/2803
+> > > I think get_data_offset() should not care largest_data_off.
+> > 
+> > I finally got to testing this and it looks good.  Pulled the patches manually into master.  Sorry it took so long!
+> > 
+> > For the last two MOSDSubOp, I think those changes should be done as 
+> > part of this ticket
+> > 
+> > 	http://tracker.ceph.com/issues/9961
+> > 
+> > which will replace the common client replication op to use a fresh message type that is properly optimized.  Jianpeng, is this something you might be interested in working on?  We talked with Haomai about it during CDS but I think he and Yuan Dong will be occupied with the ObjectStore::Transaction encoding first, and I would really like to see this done in time for hammer (jan 1f freeze).
+> > 
+> > Thanks!
+> > sage
+> > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> > in the body of a message to majordomo@vger.kernel.org More majordomo 
+> > info at  http://vger.kernel.org/majordomo-info.html
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> > in the body of a message to majordomo@vger.kernel.org More majordomo 
+> > info at  http://vger.kernel.org/majordomo-info.html
+> > 
+> > 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> in the body of a message to majordomo@vger.kernel.org More majordomo 
+> info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
