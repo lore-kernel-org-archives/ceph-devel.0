@@ -1,74 +1,67 @@
-From: Kamal Mostafa <kamal@canonical.com>
-Subject: [3.13.y-ckt stable] Patch "rbd: Fix error recovery in rbd_obj_read_sync()" has been added to staging queue
-Date: Tue, 25 Nov 2014 12:35:21 -0800
-Message-ID: <1416947721-14630-1-git-send-email-kamal@canonical.com>
+From: Wenjunh <huangwenjun310@gmail.com>
+Subject: OSD Crash for xattr "_" absent issue.
+Date: Wed, 26 Nov 2014 20:47:36 +0800
+Message-ID: <F02A2640-E908-4025-BB2F-7C34C87A3B66@gmail.com>
+References: <0F08B7A5-1669-4B6F-B7C1-F53478D409D4@gmail.com>
+Mime-Version: 1.0 (Mac OS X Mail 8.1 \(1993\))
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from youngberry.canonical.com ([91.189.89.112]:33855 "EHLO
-	youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750812AbaKYUfZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Nov 2014 15:35:25 -0500
+Received: from mail-pd0-f176.google.com ([209.85.192.176]:56078 "EHLO
+	mail-pd0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751889AbaKZMrm convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 26 Nov 2014 07:47:42 -0500
+Received: by mail-pd0-f176.google.com with SMTP id y10so2745531pdj.35
+        for <ceph-devel@vger.kernel.org>; Wed, 26 Nov 2014 04:47:41 -0800 (PST)
+Received: from seawatermine-lm.peking.corp.yahoo.com (corp-nat.peking.corp.yahoo.com. [117.104.188.144])
+        by mx.google.com with ESMTPSA id yp5sm3407852pbb.16.2014.11.26.04.47.40
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
+        Wed, 26 Nov 2014 04:47:41 -0800 (PST)
+In-Reply-To: <0F08B7A5-1669-4B6F-B7C1-F53478D409D4@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jan Kara <jack@suse.cz>
-Cc: Yehuda Sadeh <yehuda@inktank.com>, Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org, Ilya Dryomov <idryomov@redhat.com>, Kamal Mostafa <kamal@canonical.com>, kernel-team@lists.ubuntu.com
+To: ceph-devel@vger.kernel.org
 
-This is a note to let you know that I have just added a patch titled
 
-    rbd: Fix error recovery in rbd_obj_read_sync()
+> Hi, Samuel & Sage
+>=20
+> In our current production environment, there exists osd crash because=
+ of the inconsistence of data, when reading the =E2=80=9C_=E2=80=9D xat=
+tr. Which is described in the issue:
+>=20
+> http://tracker.ceph.com/issues/10117.
+>=20
+> And I also find a two year=E2=80=99s old issue, which also describes =
+the same bug:
+>=20
+> http://tracker.ceph.com/issues/3676.
+>=20
+> I think there is a apparent flaw in the related code. Could you help =
+to review my last comment describing the way to fix the bug.
+>=20
+> I prefer the second way, we just delete the object if we can=E2=80=99=
+t get the =E2=80=9C_=E2=80=9D xattr, instead of crashing the osd, and t=
+he object has two other replicas, which can serve the client=E2=80=99s =
+request.
+> And when the next time self-healing process(scrub, deep scrub) occurs=
+, the object can recover from its peer.
+>=20
+> Because I am not so proficient of the source code, I don=E2=80=99t kn=
+ow if the repairing way has any other side effects on the ceph cluster.
+>=20
+> If you have any idea about the bug, please feel free to let me know.
+>=20
+> Thanks
+>=20
+> Wenjunh
+>=20
+>=20
+>=20
+>=20
 
-to the linux-3.13.y-queue branch of the 3.13.y-ckt extended stable tree 
-which can be found at:
-
- http://kernel.ubuntu.com/git?p=ubuntu/linux.git;a=shortlog;h=refs/heads/linux-3.13.y-queue
-
-This patch is scheduled to be released in version 3.13.11-ckt12.
-
-If you, or anyone else, feels it should not be added to this tree, please 
-reply to this email.
-
-For more information about the 3.13.y-ckt tree, see
-https://wiki.ubuntu.com/Kernel/Dev/ExtendedStable
-
-Thanks.
--Kamal
-
-------
-
-From 02485a1c080f1c2b2a5ecf07ca4e2488f1fccd1f Mon Sep 17 00:00:00 2001
-From: Jan Kara <jack@suse.cz>
-Date: Wed, 22 Oct 2014 09:17:24 +0200
-Subject: rbd: Fix error recovery in rbd_obj_read_sync()
-
-commit a8d4205623ae965e36c68629db306ca0695a2771 upstream.
-
-When we fail to allocate page vector in rbd_obj_read_sync() we just
-basically ignore the problem and continue which will result in an oops
-later. Fix the problem by returning proper error.
-
-CC: Yehuda Sadeh <yehuda@inktank.com>
-CC: Sage Weil <sage@inktank.com>
-CC: ceph-devel@vger.kernel.org
-Coverity-id: 1226882
-Signed-off-by: Jan Kara <jack@suse.cz>
-Signed-off-by: Ilya Dryomov <idryomov@redhat.com>
-Signed-off-by: Kamal Mostafa <kamal@canonical.com>
----
- drivers/block/rbd.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index a1455cc..5224f46 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -3220,7 +3220,7 @@ static int rbd_obj_read_sync(struct rbd_device *rbd_dev,
- 	page_count = (u32) calc_pages_for(offset, length);
- 	pages = ceph_alloc_page_vector(page_count, GFP_KERNEL);
- 	if (IS_ERR(pages))
--		ret = PTR_ERR(pages);
-+		return PTR_ERR(pages);
-
- 	ret = -ENOMEM;
- 	obj_request = rbd_obj_request_create(object_name, offset, length,
 --
-1.9.1
-
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
