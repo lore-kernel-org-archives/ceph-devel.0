@@ -1,84 +1,86 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: ceph.brag.com
-Date: Thu, 27 Nov 2014 16:06:32 +0100
-Message-ID: <54773DF8.2040403@dachary.org>
-References: <5471E93C.2020701@dachary.org> <21F3F68B-1B15-4775-9CB2-B7EFF7C9A272@enovance.com>
+From: Mustafa Muhammad <mustafaa.alhamdaani@gmail.com>
+Subject: Re: civetweb threads
+Date: Thu, 27 Nov 2014 20:35:14 +0300
+Message-ID: <CAMWPydSvRkcvijt8q_6rHUM1DwG+X7FVZ6gKTFuH3+NhBT7qsA@mail.gmail.com>
+References: <CAMWPydT+q9Ds=mRNgXfhR2RA64=7UuMmczEjeg4Cdz3P5gaGuw@mail.gmail.com>
+	<CAMWPydSJf0Wu9y1JJRTkBuRq80GPvWB7zWABM6rtQusOsPpy-A@mail.gmail.com>
+	<CABBk=J-oNuOnSfEU847y+cya+sdVmh02FSvP37AJvjrpjuupfA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="1eoGApCHofmqmNWVUalrxdg13VShooPLP"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:44300 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1750736AbaK0PGm (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Nov 2014 10:06:42 -0500
-In-Reply-To: <21F3F68B-1B15-4775-9CB2-B7EFF7C9A272@enovance.com>
+Received: from mail-wg0-f50.google.com ([74.125.82.50]:38691 "EHLO
+	mail-wg0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751192AbaK0RfP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Nov 2014 12:35:15 -0500
+Received: by mail-wg0-f50.google.com with SMTP id k14so7001411wgh.37
+        for <ceph-devel@vger.kernel.org>; Thu, 27 Nov 2014 09:35:14 -0800 (PST)
+In-Reply-To: <CABBk=J-oNuOnSfEU847y+cya+sdVmh02FSvP37AJvjrpjuupfA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sebastien Han <sebastien.han@enovance.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---1eoGApCHofmqmNWVUalrxdg13VShooPLP
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: quoted-printable
-
-I meant http://brag.ceph.com ;-)
-
-On 27/11/2014 13:52, Sebastien Han wrote:
-> Hi Lo=EFc,
->=20
-> Hum as far as I remember I was able to get something on the main page (=
-something like the list of all the cluster uuid that have been pushed).
-> I can=92t see it now, is it just me?
->=20
->> On 23 Nov 2014, at 15:03, Loic Dachary <loic@dachary.org> wrote:
+On Sat, Nov 15, 2014 at 7:18 PM, Yehuda Sadeh <yehuda@redhat.com> wrote:
+> On Sat, Nov 15, 2014 at 3:55 AM, Mustafa Muhammad
+> <mustafaa.alhamdaani@gmail.com> wrote:
+>> On Sat, Nov 15, 2014 at 10:28 AM, Mustafa Muhammad
+>> <mustafaa.alhamdaani@gmail.com> wrote:
+>>> Hi,
+>>> I am using civetweb in my radosgw, if I use "rgw thread pool size"
+>>> that is more than 1024, civetweb doesn't work.
+>>> e.g.
+>>> rgw thread pool size = 1024
+>>> rgw frontends = "civetweb port=80"
+>>>
+>>> #ps aux -L | grep rados | wc -l
+>>> 1096
+>>>
+>>> everything works fine
+>>>
+>>>
+>>> If I use:
+>>> rgw thread pool size = 1025
+>>> rgw frontends = "civetweb port=80"
+>>>
+>>> # ps aux -L | grep rados | wc -l
+>>> 43
+>>>
+>>> And http server is not listening.
+>>>
+>>> If I don't use civetweb:
+>>> rgw thread pool size = 10240
+>>>
+>>> # ps aux -L | grep rados | wc -l
+>>> 10278
+>>>
+>>> Regards
+>>>
+>>> Mustafa Muhammad
 >>
->> Hi S=E9bastien,
+>> I found the problem, it is hardcoded here:
+>> https://github.com/ceph/civetweb/blob/master/src/civetweb.c
+>> as:
+>> #define MAX_WORKER_THREADS 1024
 >>
->> I was checking on http://ceph.brag.com today and it appears to be fine=
-=2E It has been up for 10 months now, probably enough for people to have =
-the command line installed on their cluster. I was wondering if you neede=
-d anything regarding the hosting of the service ? Since it's hosted by FS=
-F France and I volunteer my time to help, evenings or week-ends are the b=
-est time to ask ;-)
->>
->> Cheers
->>
->> --
->> Lo=EFc Dachary, Artisan Logiciel Libre
->>
->=20
->=20
-> Cheers.
-> =96=96=96=96
-> S=E9bastien Han
-> Cloud Architect
->=20
-> "Always give 100%. Unless you're giving blood."
->=20
-> Phone: +33 (0)1 49 70 99 72
-> Mail: sebastien.han@enovance.com
-> Address : 11 bis, rue Roqu=E9pine - 75008 Paris
-> Web : www.enovance.com - Twitter : @enovance
->=20
+>> I increased it to 20480 an compiled from source, problem solved.
+>> I should we make a patch, right?
+>
+> Please do, preferably a github pull request. Also, if you could open a
+> ceph tracker issue with the specific would be great.
+Hi,
+I opened an issue upstream:
+https://github.com/bel2125/civetweb/issues/50
+And this default is going to change to 64k using this pull request:
+https://github.com/bel2125/civetweb/commit/23bdcc98dd72ac421ed0a9e82d66977089fbfe63
 
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
+I should make a pull request and issue here too, right?
+I tried to register with ceph issue tracker, but misspelled the email
+address (wrote @gmai.com), now I can't take the name "mustafa" again
+(I waited the request to expire, but until now I can't register).
+Who can delete that wrong registration request so I can take this
+username again?
 
-
---1eoGApCHofmqmNWVUalrxdg13VShooPLP
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlR3PfgACgkQ8dLMyEl6F228yACfc7m+GTGKBWRpEeCD/8pQtfUj
-jMoAoJu2rQGsJOYZB0i7tLlPlURJvVky
-=swUB
------END PGP SIGNATURE-----
-
---1eoGApCHofmqmNWVUalrxdg13VShooPLP--
+Regards
+Mustafa
+>
+> Thanks,
+> Yehuda
