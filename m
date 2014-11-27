@@ -1,86 +1,111 @@
-From: Mustafa Muhammad <mustafaa.alhamdaani@gmail.com>
-Subject: Re: civetweb threads
-Date: Thu, 27 Nov 2014 20:35:14 +0300
-Message-ID: <CAMWPydSvRkcvijt8q_6rHUM1DwG+X7FVZ6gKTFuH3+NhBT7qsA@mail.gmail.com>
-References: <CAMWPydT+q9Ds=mRNgXfhR2RA64=7UuMmczEjeg4Cdz3P5gaGuw@mail.gmail.com>
-	<CAMWPydSJf0Wu9y1JJRTkBuRq80GPvWB7zWABM6rtQusOsPpy-A@mail.gmail.com>
-	<CABBk=J-oNuOnSfEU847y+cya+sdVmh02FSvP37AJvjrpjuupfA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Sebastien Han <sebastien.han@enovance.com>
+Subject: Re: ceph.brag.com
+Date: Fri, 28 Nov 2014 00:04:30 +0100
+Message-ID: <E0D11216-A7ED-47F5-AF82-5B9AA1462F2F@enovance.com>
+References: <5471E93C.2020701@dachary.org> <21F3F68B-1B15-4775-9CB2-B7EFF7C9A272@enovance.com> <54773DF8.2040403@dachary.org>
+Mime-Version: 1.0 (Mac OS X Mail 8.0 \(1990.1\))
+Content-Type: multipart/signed; boundary="Apple-Mail=_4A35AAA2-75AA-4429-AF5E-BF7F4D535F79"; protocol="application/pgp-signature"; micalg=pgp-sha512
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f50.google.com ([74.125.82.50]:38691 "EHLO
-	mail-wg0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751192AbaK0RfP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Nov 2014 12:35:15 -0500
-Received: by mail-wg0-f50.google.com with SMTP id k14so7001411wgh.37
-        for <ceph-devel@vger.kernel.org>; Thu, 27 Nov 2014 09:35:14 -0800 (PST)
-In-Reply-To: <CABBk=J-oNuOnSfEU847y+cya+sdVmh02FSvP37AJvjrpjuupfA@mail.gmail.com>
+Received: from mxi1.enovance.com ([94.143.114.217]:4007 "EHLO
+	mxi1.enovance.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751059AbaK0XEm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Nov 2014 18:04:42 -0500
+In-Reply-To: <54773DF8.2040403@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Sat, Nov 15, 2014 at 7:18 PM, Yehuda Sadeh <yehuda@redhat.com> wrote:
-> On Sat, Nov 15, 2014 at 3:55 AM, Mustafa Muhammad
-> <mustafaa.alhamdaani@gmail.com> wrote:
->> On Sat, Nov 15, 2014 at 10:28 AM, Mustafa Muhammad
->> <mustafaa.alhamdaani@gmail.com> wrote:
->>> Hi,
->>> I am using civetweb in my radosgw, if I use "rgw thread pool size"
->>> that is more than 1024, civetweb doesn't work.
->>> e.g.
->>> rgw thread pool size = 1024
->>> rgw frontends = "civetweb port=80"
->>>
->>> #ps aux -L | grep rados | wc -l
->>> 1096
->>>
->>> everything works fine
->>>
->>>
->>> If I use:
->>> rgw thread pool size = 1025
->>> rgw frontends = "civetweb port=80"
->>>
->>> # ps aux -L | grep rados | wc -l
->>> 43
->>>
->>> And http server is not listening.
->>>
->>> If I don't use civetweb:
->>> rgw thread pool size = 10240
->>>
->>> # ps aux -L | grep rados | wc -l
->>> 10278
->>>
->>> Regards
->>>
->>> Mustafa Muhammad
->>
->> I found the problem, it is hardcoded here:
->> https://github.com/ceph/civetweb/blob/master/src/civetweb.c
->> as:
->> #define MAX_WORKER_THREADS 1024
->>
->> I increased it to 20480 an compiled from source, problem solved.
->> I should we make a patch, right?
->
-> Please do, preferably a github pull request. Also, if you could open a
-> ceph tracker issue with the specific would be great.
-Hi,
-I opened an issue upstream:
-https://github.com/bel2125/civetweb/issues/50
-And this default is going to change to 64k using this pull request:
-https://github.com/bel2125/civetweb/commit/23bdcc98dd72ac421ed0a9e82d66977089fbfe63
 
-I should make a pull request and issue here too, right?
-I tried to register with ceph issue tracker, but misspelled the email
-address (wrote @gmai.com), now I can't take the name "mustafa" again
-(I waited the request to expire, but until now I can't register).
-Who can delete that wrong registration request so I can take this
-username again?
+--Apple-Mail=_4A35AAA2-75AA-4429-AF5E-BF7F4D535F79
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain;
+	charset=windows-1252
 
-Regards
-Mustafa
->
-> Thanks,
-> Yehuda
+Well so far no one is using it probably because it suffered of a bad =
+communication (my fault).
+So I just need to thing some time to resurrect it :).
+
+On the management side, I think we can leave it as is, thanks!
+
+> On 27 Nov 2014, at 16:06, Loic Dachary <loic@dachary.org> wrote:
+>=20
+> I meant http://brag.ceph.com ;-)
+>=20
+> On 27/11/2014 13:52, Sebastien Han wrote:
+>> Hi Lo=EFc,
+>>=20
+>> Hum as far as I remember I was able to get something on the main page =
+(something like the list of all the cluster uuid that have been pushed).
+>> I can=92t see it now, is it just me?
+>>=20
+>>> On 23 Nov 2014, at 15:03, Loic Dachary <loic@dachary.org> wrote:
+>>>=20
+>>> Hi S=E9bastien,
+>>>=20
+>>> I was checking on http://ceph.brag.com today and it appears to be =
+fine. It has been up for 10 months now, probably enough for people to =
+have the command line installed on their cluster. I was wondering if you =
+needed anything regarding the hosting of the service ? Since it's hosted =
+by FSF France and I volunteer my time to help, evenings or week-ends are =
+the best time to ask ;-)
+>>>=20
+>>> Cheers
+>>>=20
+>>> --
+>>> Lo=EFc Dachary, Artisan Logiciel Libre
+>>>=20
+>>=20
+>>=20
+>> Cheers.
+>> =96=96=96=96
+>> S=E9bastien Han
+>> Cloud Architect
+>>=20
+>> "Always give 100%. Unless you're giving blood."
+>>=20
+>> Phone: +33 (0)1 49 70 99 72
+>> Mail: sebastien.han@enovance.com
+>> Address : 11 bis, rue Roqu=E9pine - 75008 Paris
+>> Web : www.enovance.com - Twitter : @enovance
+>>=20
+>=20
+> --
+> Lo=EFc Dachary, Artisan Logiciel Libre
+>=20
+
+
+Cheers.
+=96=96=96=96
+S=E9bastien Han
+Cloud Architect
+
+"Always give 100%. Unless you're giving blood."
+
+Phone: +33 (0)1 49 70 99 72
+Mail: sebastien.han@enovance.com
+Address : 11 bis, rue Roqu=E9pine - 75008 Paris
+Web : www.enovance.com - Twitter : @enovance
+
+
+--Apple-Mail=_4A35AAA2-75AA-4429-AF5E-BF7F4D535F79
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment;
+	filename=signature.asc
+Content-Type: application/pgp-signature;
+	name=signature.asc
+Content-Description: Message signed with OpenPGP using GPGMail
+
+-----BEGIN PGP SIGNATURE-----
+Comment: GPGTools - https://gpgtools.org
+
+iQEcBAEBCgAGBQJUd63+AAoJECPrkYfpbtGTZjMH+wQvmr4mM15XA9cLdvg14lpV
+JAiomt1l1INE1zZjqeLar4uACQnKJ++r0S+4rcnuDdTJNaXvu0YY50R0tVLllW4I
+caH96d+9NAGnJdNAA1Drc9shOp1VFiES9HvtLzNXUf2iqhW75pKJCM6eI6Zhqgeh
+5kjcBGtV4TlIWFqUENPXQXlFt1Iz/qA1Jt8bvu3YAr4YmGLP2pS1tmutzm62uLj6
+Co1RDiXf4sHHP1RmEHK2uL5EeKS/EVc/0yI8Hs4YQayTr9PCiXWWSDA0KPfiIgdr
+5Uf3ufBHCRarsivi4r7XZ7ygZFtli+txhnfqWP9yigWigi4RGnn4Y5QE/HDSUIs=
+=5ap5
+-----END PGP SIGNATURE-----
+
+--Apple-Mail=_4A35AAA2-75AA-4429-AF5E-BF7F4D535F79--
