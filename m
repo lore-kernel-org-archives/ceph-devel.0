@@ -1,48 +1,37 @@
-From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: Re: [patch] ceph: do_sync is never initialized
-Date: Fri, 28 Nov 2014 21:25:38 +0400
-Message-ID: <CALFYKtB4e=TbBQVkHUOW5wAC+-103n_UXnuMtW=ZjZYGsy0LHg@mail.gmail.com>
-References: <20141128083334.GB10252@mwanda>
+From: Sage Weil <sweil@redhat.com>
+Subject: file journal fadvise
+Date: Sun, 30 Nov 2014 10:46:24 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1411301013490.352@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <kernel-janitors-owner@vger.kernel.org>
-In-Reply-To: <20141128083334.GB10252@mwanda>
-Sender: kernel-janitors-owner@vger.kernel.org
-To: Dan Carpenter <dan.carpenter@oracle.com>
-Cc: Sage Weil <sage@inktank.com>, =?UTF-8?B?6ams5bu65pyL?= <majianpeng@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>, kernel-janitors@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:35246 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751430AbaK3SqZ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 30 Nov 2014 13:46:25 -0500
+Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
+	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id sAUIkPQ1003325
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
+	for <ceph-devel@vger.kernel.org>; Sun, 30 Nov 2014 13:46:25 -0500
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: mnelson@redhat.com, ceph-devel@vger.kernel.org
 
-On Fri, Nov 28, 2014 at 11:33 AM, Dan Carpenter
-<dan.carpenter@oracle.com> wrote:
-> Probably this code was syncing a lot more often then intended because
-> the do_sync variable wasn't set to zero.
->
-> Fixes: c62988ec0910 ('ceph: avoid meaningless calling ceph_caps_revoking if sync_mode == WB_SYNC_ALL.')
-> Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
-> ---
-> Static checker stuff.  Not tested.  It's surprising that GCC doesn't
-> catch this.
->
-> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-> index 18c06bb..481529b 100644
-> --- a/fs/ceph/addr.c
-> +++ b/fs/ceph/addr.c
-> @@ -673,7 +673,7 @@ static int ceph_writepages_start(struct address_space *mapping,
->         int rc = 0;
->         unsigned wsize = 1 << inode->i_blkbits;
->         struct ceph_osd_request *req = NULL;
-> -       int do_sync;
-> +       int do_sync = 0;
->         u64 truncate_size, snap_size;
->         u32 truncate_seq;
+Currently, when an OSD journal is stored as a file, we preallocate it as a 
+large contiguous extent.  That means that for every journal write we're 
+seeking back to wherever the journal is.  That possibly not ideal for 
+writes.  For reads it's great, but that's the last thing we care about 
+optimizing (we only read the journal after a failure, which is very rare).
 
-Applied, also added a stable tag for 3.11+.
+I wonder if we would do better if we:
 
-Thanks,
+ 1- trim/discard the old journal contents,
+ 2- posix_fadvise RANDOM
 
-                Ilya
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I'm not sure what the XFS behavior is in this case, but ideally it seems 
+what we want it to do is write the journal wherever on disk it is most 
+convenient... ideally contiguous with some other write that it is already 
+doing.  If fadvise random doesn't do that, perhaps there is another 
+allocator hint we can give it that will get us that behavior...
+
+sage
