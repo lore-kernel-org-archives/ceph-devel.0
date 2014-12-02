@@ -1,70 +1,75 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Re: Lock Constrains about Fast Dispatch for Messenger
-Date: Tue, 2 Dec 2014 16:31:21 +0800
-Message-ID: <CACJqLyaUOq7LW9TA6gJbAgFDcp744XRdnKML_h6BYq7aCTs1PA@mail.gmail.com>
-References: <CACJqLybxW2QN1YMM2ip0=D9PczZZ-bywQUqOnEPtyCqmZRQAOA@mail.gmail.com>
+From: scan-admin@coverity.com
+Subject: New Defects reported by Coverity Scan for ceph
+Date: Tue, 02 Dec 2014 06:09:56 -0800
+Message-ID: <547dc83438133_459d9f331411560@scan.coverity.com.mail>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain;
+ charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f179.google.com ([209.85.212.179]:43445 "EHLO
-	mail-wi0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752230AbaLBIbW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Dec 2014 03:31:22 -0500
-Received: by mail-wi0-f179.google.com with SMTP id ex7so20112904wid.0
-        for <ceph-devel@vger.kernel.org>; Tue, 02 Dec 2014 00:31:21 -0800 (PST)
-In-Reply-To: <CACJqLybxW2QN1YMM2ip0=D9PczZZ-bywQUqOnEPtyCqmZRQAOA@mail.gmail.com>
+Received: from scanrelay.coverity.com ([209.249.196.67]:52138 "EHLO
+	scanrelay.coverity.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753373AbaLBOJ5 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Dec 2014 09:09:57 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>, Sage Weil <sweil@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-
-Other thread                   Messenger's thread
-       lock()                          connection lock()
-  send_message()                  connect
- try connection lock()         ms_fast_connect()
-                                                try lock()
-
-                          DEAD LOCK
-
-supplement
-
-On Tue, Dec 2, 2014 at 4:27 PM, Haomai Wang <haomaiwang@gmail.com> wrote:
-> Hi Gregoy and Sage,
->
-> I'm just writing Messenger's unit tests to ensure that SimpleMessenger
-> and AsyncMessenger behavior same and expected.
->
-> I think the most unclear thing is the lock rule of fast dispatch. When
-> introduced fast dispatch, there exists three methods
-> "ms_fast_connect", "ms_fast_accept", "ms_fast_dispatch" will be called
-> within Messenger's thread. Because without fast dispatcher all
-> messages are delivered from queue to queue, fast path will result in
-> potential dead lock I think.
->
-> "ms_fast_accept" and "ms_fast_connect" are called with
-> "pipe_lock"(Pipe) or "lock"(AsyncConnection). And
-> Connection::send_message will called outsider. So it may happen:
->
-> Other thread                   Messenger's thread
->        lock()                          connection lock()
->   send_message()                  connect
->  try connection lock()         ms_fast_connect()
->
->                           DEAD LOCK
->
-> So I'm not sure whether we have some lock rules whether on caller side
-> or ms_fast_connect/accept side. For example, ms_fast_connect/accept
-> can't acquire the same lock with send_message?
->
-> --
->
-> Best Regards,
->
-> Wheat
+To: ceph-devel@vger.kernel.org
 
 
+Hi,
 
--- 
-Best Regards,
+Please find the latest report on new defect(s) introduced to ceph found with Coverity Scan.
 
-Wheat
+1 new defect(s) introduced to ceph found with Coverity Scan.
+9 defect(s), reported by Coverity Scan earlier, were marked fixed in the recent build analyzed by Coverity Scan.
+
+New defect(s) Reported-by: Coverity Scan
+Showing 1 of 1 defect(s)
+
+
+** CID 1256511:  Missing unlock  (LOCK)
+/mds/MDLog.cc: 612 in MDLog::trim_all()()
+/mds/MDLog.cc: 612 in MDLog::trim_all()()
+
+
+________________________________________________________________________________________________________
+*** CID 1256511:  Missing unlock  (LOCK)
+/mds/MDLog.cc: 612 in MDLog::trim_all()()
+606           p = segments.lower_bound(last_seq + 1);
+607         }
+608       }
+609     
+610       _trim_expired_segments();
+611     
+>>>     CID 1256511:  Missing unlock  (LOCK)
+>>>     Returning without unlocking "this->submit_mutex._m".
+612       return 0;
+613     }
+614     
+615     
+616     void MDLog::try_expire(LogSegment *ls, int op_prio)
+617     {
+/mds/MDLog.cc: 612 in MDLog::trim_all()()
+606           p = segments.lower_bound(last_seq + 1);
+607         }
+608       }
+609     
+610       _trim_expired_segments();
+611     
+>>>     CID 1256511:  Missing unlock  (LOCK)
+>>>     Returning without unlocking "this->submit_mutex._m".
+612       return 0;
+613     }
+614     
+615     
+616     void MDLog::try_expire(LogSegment *ls, int op_prio)
+617     {
+
+
+________________________________________________________________________________________________________
+To view the defects in Coverity Scan visit, http://scan.coverity.com/projects/25?tab=overview
+
+To unsubscribe from the email notification for new defects, http://scan5.coverity.com/cgi-bin/unsubscribe.py
+
+
+
