@@ -1,56 +1,59 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: LTTng tracing: hitting the message throttle
-Date: Tue, 2 Dec 2014 10:05:16 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1412021003050.2702@cobra.newdream.net>
-References: <20141202190004.5c308f20@doppio>
+From: Andreas Bluemle <andreas.bluemle@itxperts.de>
+Subject: LTTng tracing: ReplicatedPG::log_operation
+Date: Tue, 2 Dec 2014 19:17:58 +0100
+Message-ID: <20141202191758.5eded52c@doppio>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:59980 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754440AbaLBSFR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Dec 2014 13:05:17 -0500
-In-Reply-To: <20141202190004.5c308f20@doppio>
+Received: from mail.itxperts.de ([212.202.108.166]:20500 "EHLO
+	mail.itxperts.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754135AbaLBSSC (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Dec 2014 13:18:02 -0500
+Received: from itxmail.itxperts.de (qgate_dmz.itxperts.de [192.168.160.1])
+	by mail.itxperts.de (8.14.0/8.14.0) with ESMTP id sB2IJDvL011709
+	for <ceph-devel@vger.kernel.org>; Tue, 2 Dec 2014 19:19:13 +0100
+Received: from doppio (doppio.itxperts.de [192.168.140.7])
+	by itxmail.itxperts.de (Postfix) with ESMTP id 6A5C213F02
+	for <ceph-devel@vger.kernel.org>; Tue,  2 Dec 2014 19:10:04 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andreas Bluemle <andreas.bluemle@itxperts.de>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Andreas,
+Hi,
 
-On Tue, 2 Dec 2014, Andreas Bluemle wrote:
-> Hi,
-> 
-> while running tests to collect data using LTTng, I was hitting
-> the message throttle in ceph-osd, which is controlled by configuration
-> option osd_map_message_max, default 100.
-> 
-> If I am not mistaken, then this throttle hits when more than
-> 100 messages received via SimpleMessenger are not yet destructed,
-> i.e. are still under processing within the affected ceph-osd daemon.
-> 
-> I was running a fio test, random writes of 4 KByte with 16 parallel
-> IO's. The storage cluster consists of 12 osds on 3 storage nodes,
-> replication level 3.
-> 
-> I wonder why I hit that message throttle with my load profile:
-> the 16 parallel IO's should at most generate 48 data messages and also
-> 48 acknowledges across the cluster - so I would not expect anything
-> even close to a 100 message limit on a single osd in my cluster.
+during code profiling using LTTng, I encounter that during
+processing of write requests to the cluster, the ceph-osd
+spends a lot of time in the ReplicatedPG::log_operation
+before the the actual writes to journal and object
+in the FileStore are triggered.
 
-I think the message may stay alive even after the client reply goes back 
-because the op is written/committed to the journal but has not yet been 
-written to the fs.  It may be that we can drop the reference at this 
-point, although it may make the OpTracker output incomplete since the 
-message is gone...
+This happens in ReplicatedBackend::submit_transaction.
 
-> Did anybody else experience such issues?
-> 
-> Are there other throttle values which I should look at?
+What I wonder is
+  - what is the purpose of the log_operation?
+    If I am not mistaken, then it is neither the write-to-journal
+    nor the write-to-object; both of these are triggered from 
+    the queue_operation following that log_operation.
 
-There is a similar throttle for the number of bytes.
+  - can the sequence between the log_operation and
+    the actual queue_operation be reversed in
+    ReplicatedBackend::submit_transaction?
 
-FWIW it may be that 100 is too low a default.  What value lets your 
-workload run comfortably without throttling?
+   
 
-sage
+Regards
+
+Andreas Bluemle
+
+
+
+
+
+-- 
+Andreas Bluemle                     mailto:Andreas.Bluemle@itxperts.de
+ITXperts GmbH                       http://www.itxperts.de
+Balanstrasse 73, Geb. 08            Phone: (+49) 89 89044917
+D-81541 Muenchen (Germany)          Fax:   (+49) 89 89044910
+
+Company details: http://www.itxperts.de/imprint.htm
