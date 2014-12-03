@@ -1,53 +1,47 @@
-From: Logan Barfield <lbarfield@tqhosting.com>
-Subject: Expose pool quota for Libvirt
-Date: Wed, 3 Dec 2014 11:39:31 -0500
-Message-ID: <CACKLxkC0Xy1AShOK=cfo1F+-OJnus74KPWSgWubduhjY0+YVow@mail.gmail.com>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: Lock Constrains about Fast Dispatch for Messenger
+Date: Wed, 3 Dec 2014 09:32:12 -0800
+Message-ID: <CAPYLRzg2yfpt3ZCECY8104BNYHAA-pvfffQ73Dy_Trs1vHErmw@mail.gmail.com>
+References: <CACJqLyaf0QKHCxU4Pm877LLbZNwk30F7xdKdrrg1D0tOuShjGQ@mail.gmail.com>
+	<CAPYLRzhrKOzAiW+vTFrL5h45uxC44Svehm_hU7+P8Y3uBAVtbA@mail.gmail.com>
+	<CACJqLyafqtoerUcu8gkJSAMLPmKdG-0Yf=xTs-3paEq5sX-a=A@mail.gmail.com>
+	<CACJqLyaiYE_AwTfgNUY5FLM7FYYy5RP5u9JD+JVKfcNfH56ZQQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f182.google.com ([209.85.212.182]:41089 "EHLO
-	mail-wi0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752387AbaLCQjc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Dec 2014 11:39:32 -0500
-Received: by mail-wi0-f182.google.com with SMTP id h11so25046481wiw.15
-        for <ceph-devel@vger.kernel.org>; Wed, 03 Dec 2014 08:39:31 -0800 (PST)
+Received: from mail-qa0-f45.google.com ([209.85.216.45]:63815 "EHLO
+	mail-qa0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750707AbaLCRcN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Dec 2014 12:32:13 -0500
+Received: by mail-qa0-f45.google.com with SMTP id x12so10693935qac.32
+        for <ceph-devel@vger.kernel.org>; Wed, 03 Dec 2014 09:32:12 -0800 (PST)
+In-Reply-To: <CACJqLyaiYE_AwTfgNUY5FLM7FYYy5RP5u9JD+JVKfcNfH56ZQQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Haomai Wang <haomaiwang@gmail.com>
+Cc: Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-I'm not sure if this is already in place, but if not I think pool quotas
-should be exposed in the same way as pool size so Libvirt can pick up on
-them.
+On Tue, Dec 2, 2014 at 10:39 PM, Haomai Wang <haomaiwang@gmail.com> wrote:
+> Another question:
+>
+> we have "lossy", "server", "standy" and "resetcheck" as policy for
+> Messenger, but in practice there exists some overlap semantics among
+> these fields. For example, "server" and "standy" plays the same
+> function in Simple and Async impl. It will let connection standby if
+> losing connection. Maybe we can combine the two?
 
-We currently run several KVM hypervisors backed by Ceph RBD.  We have a
-CRUSH ruleset that defines SSD backed servers for RBD, and high capacity
-HDD backed servers for RadosGW.
+I think you're missing some uses of these. "Servers" will never
+initiate a reconnect to the other endpoint, but they can go into
+standby and queue up new messages for if a reconnect does happen.
 
-Right now when adding our RBD pool via Libvirt it sees the entire cluster's
-capacity, even though the actual pool capacity is much lower.  This means
-that any deployment tools that look at the available capacity when creating
-VMs can't be relied upon, and we have to continually track usage manually
-(we audit it anyway, but that should be in addition to built-in checks).
-We can currently work around this by manually setting the capacity in the
-deployment tool, but fixing it at the source seems like a much better
-option.
+> And "lossy" and "resetcheck" also seemed redundancy. If a connection
+> is lossy, we will want to reset the connection state. "resetcheck" is
+> mainly used when server accept  a connection and meets conflict, but
+> PR(https://github.com/ceph/ceph/pull/3070) remove this check, so it's
+> really useless in current impl.
 
-Obviously capacity can't be automatically estimated from the CRUSH ruleset,
-but with the recent addition of pool quotas it would be useful to let
-Libvirt (and other clients) pull the quota size so we could set them as
-needed.
-
-Some changes will need to be made on the Libvirt side as well, but the
-functionality has to be implemented in Ceph first.
-
-I have opened an issue in the tracker for this:
-http://tracker.ceph.com/issues/10226
-
-If this functionality already exists I'll close the issue and work on
-things from the Libvirt side.
-
-
-Thank You,
-
-Logan Barfield
-Tranquil Hosting
+Not quite. The PR removes one of the resetcheck gates, but there are
+two of them. :) If you look at the commit which added resetcheck
+you'll see that it's about some peer connection races, but again lossy
+is used in a lot of other places orthogonal to resetcheck.
+-Greg
