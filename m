@@ -1,27 +1,28 @@
-From: Dan van der Ster <daniel.vanderster@cern.ch>
+From: Mark Nelson <mark.nelson@inktank.com>
 Subject: Re: Performance variation across RBD clients on different pools in
  all SSD setup - tcmalloc issue
-Date: Wed, 3 Dec 2014 13:53:42 +0100
-Message-ID: <CABZ+qqm=eWfsON=r5H+digGqoDtdi6JerCeYz2M26b+EDPH6bg@mail.gmail.com>
+Date: Wed, 03 Dec 2014 08:21:25 -0600
+Message-ID: <547F1C65.1060102@redhat.com>
 References: <9E914F5BD7F48A4782456CEB550A42280A74C0F6@SACMBXIP01.sdcorp.global.sandisk.com>
+Reply-To: mnelson@redhat.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cernmx13.cern.ch ([188.184.36.46]:51967 "EHLO CERNMX13.cern.ch"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752342AbaLCMy1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 3 Dec 2014 07:54:27 -0500
-Received: by mail-la0-f44.google.com with SMTP id ge10so12508443lab.17
-        for <ceph-devel@vger.kernel.org>; Wed, 03 Dec 2014 04:54:22 -0800
- (PST)
+Received: from mail-qg0-f48.google.com ([209.85.192.48]:62941 "EHLO
+	mail-qg0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751317AbaLCOV2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Dec 2014 09:21:28 -0500
+Received: by mail-qg0-f48.google.com with SMTP id q107so10802090qgd.7
+        for <ceph-devel@vger.kernel.org>; Wed, 03 Dec 2014 06:21:27 -0800 (PST)
 In-Reply-To: <9E914F5BD7F48A4782456CEB550A42280A74C0F6@SACMBXIP01.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Chaitanya Huilgol <Chaitanya.Huilgol@sandisk.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Chaitanya Huilgol <Chaitanya.Huilgol@sandisk.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, Dec 3, 2014 at 12:41 PM, Chaitanya Huilgol
-<Chaitanya.Huilgol@sandisk.com> wrote:
+
+
+On 12/03/2014 05:41 AM, Chaitanya Huilgol wrote:
 > Hi All,
 >
 > We are seeing large read performance variations across RBD clients on different pools. Below is the summary of our findings
@@ -36,37 +37,77 @@ On Wed, Dec 3, 2014 at 12:41 PM, Chaitanya Huilgol
 > Below is a snippet of perf top output for the two runs:
 >
 > (1)    TCmalloc  - Client-1
->    2.68%  ceph-osd                 [.] crush_hash32_3
->   2.65%  libtcmalloc.so.4.1.2     [.] operator new(unsigned long)
->   1.66%  [kernel]                 [k] _raw_spin_lock
->   1.56%  libstdc++.so.6.0.19      [.] std::basic_string<char, std::char_traits<char>, std::allocator<char> >::basic_string(std::string const&)
->   1.51%  libtcmalloc.so.4.1.2     [.] operator delete(void*)
+>     2.68%  ceph-osd                 [.] crush_hash32_3
+>    2.65%  libtcmalloc.so.4.1.2     [.] operator new(unsigned long)
+>    1.66%  [kernel]                 [k] _raw_spin_lock
+>    1.56%  libstdc++.so.6.0.19      [.] std::basic_string<char, std::char_traits<char>, std::allocator<char> >::basic_string(std::string const&)
+>    1.51%  libtcmalloc.so.4.1.2     [.] operator delete(void*)
 >
 > (2)    TCmalloc - Client -2 (note significant increase in TCmalloc internal free to central list code paths)
 >
 > 14.75%  libtcmalloc.so.4.1.2     [.] tcmalloc::CentralFreeList::FetchFromSpans()
->   7.46%  libtcmalloc.so.4.1.2     [.] tcmalloc::ThreadCache::ReleaseToCentralCache(tcmalloc::ThreadCache::FreeList*, unsigned long, int)
->   6.71%  libtcmalloc.so.4.1.2     [.] tcmalloc::CentralFreeList::ReleaseToSpans(void*)
->   1.68%  libtcmalloc.so.4.1.2     [.] operator new(unsigned long)
->   1.57%  ceph-osd                 [.] crush_hash32_3
+>    7.46%  libtcmalloc.so.4.1.2     [.] tcmalloc::ThreadCache::ReleaseToCentralCache(tcmalloc::ThreadCache::FreeList*, unsigned long, int)
+>    6.71%  libtcmalloc.so.4.1.2     [.] tcmalloc::CentralFreeList::ReleaseToSpans(void*)
+>    1.68%  libtcmalloc.so.4.1.2     [.] operator new(unsigned long)
+>    1.57%  ceph-osd                 [.] crush_hash32_3
 >
 > Tying it all together, It looks like the new client I/O on a different pool induces change in how the OSD shards are used, this would induce movement of memory to/from the thread local caches to the central free lists.
 > Increasing the TCmalloc thread cache limit with 'TCMALLOC_MAX_TOTAL_THREAD_CACHE_BYTES' alleviates the issues in our test setups. However this is a temporary resolution - this also bloats the OSD memory usage
 >
+> We have also tested with glibc malloc and jemalloc based builds where this issue is not seen, both hold up well, below is the perf output from the tests
+>
+> (3)    Glibc - malloc : Any client - no significant change
+>
+>    3.00%  libc-2.19.so         [.] _int_malloc
+>    2.65%  libc-2.19.so         [.] malloc
+>    2.47%  libc-2.19.so         [.] _int_free
+>    2.33%  ceph-osd             [.] crush_hash32_3
+>    1.63%  [kernel]             [k] _raw_spin_lock
+>    1.38%  libstdc++.so.6.0.19  [.] std::basic_string<char, std::char_traits<char>, std::allocator<char> >::basic_string(std::string const&)
+>
+> (4)    Jemalloc  - Any client - no significant changes
+>
+>    2.47%  ceph-osd                 [.] crush_hash32_3
+>    2.25%  libjemalloc.so.1         [.] free
+>    2.07%  libc-2.19.so             [.] 0x0000000000081070
+>    1.95%  libjemalloc.so.1         [.] malloc
+>    1.65%  [kernel]                 [k] _raw_spin_lock
+>    1.60%  libstdc++.so.6.0.19      [.] std::basic_string<char, std::char_traits<char>, std::allocator<char> >::basic_string(std::string const&)
+>
+> IMHO, we should probably look at the following in general for better performance with less variation
+>
+> - Add jemalloc option for ceph builds
+> - Look at ways to evenly distribute PGs across the shards  - with larger number of shards some shards do not get exercised at all while some are overloaded
+> - Look at decreasing heap activity in the I/O path (index Manager, Hash Index, LFN index etc.)
+>
+> We can discuss this further in todays performance meeting
 
-I've noticed that tcmalloc is quite visible in perf top, but I never
-looked closer because we don't even have debug symbols enabled in our
-tcmalloc. Here's a production dumpling ceph-osd right now:
+This is a fantastic writup Chaitanya.  Please add to the performance 
+meeting agenda.
 
-Samples: 35K of event 'cycles', Event count (approx.): 4040795974,
-Thread: ceph-osd(13976)
- 87.81%  libtcmalloc.so.4.1.0.#prelink#.P1wCcj  [.] 0x0000000000017e6f
-  1.41%  libpthread-2.12.so                     [.] pthread_mutex_lock
-  1.40%  libstdc++.so.6.0.13                    [.] 0x0000000000065b8c
+fwiw there are some interesting benchmarks and discussion of different 
+allocators here:
 
-What value did you use for TCMALLOC_MAX_TOTAL_THREAD_CACHE_BYTES and
-how well did it alleviate the problem? I assume env
-TCMALLOC_MAX_TOTAL_THREAD_CACHE_BYTES=x ceph-osd ... is sufficient to
-override this?
+http://www.percona.com/blog/2012/07/05/impact-of-memory-allocators-on-mysql-performance/
+http://www.reddit.com/r/programming/comments/18zija/github_got_30_better_performance_using_tcmalloc/
 
-Cheers, Dan
+I would definitely be in favor of at least exploring options other than 
+tcmalloc.
+
+Mark
+
+>
+> Thanks,
+> Chaitanya
+>
+>
+>
+> ________________________________
+>
+> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
