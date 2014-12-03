@@ -1,39 +1,49 @@
-From: "Matt W. Benjamin" <matt@cohortfs.com>
-Subject: pull request, wip-strong-claim
-Date: Wed, 3 Dec 2014 13:06:19 -0500 (EST)
-Message-ID: <727632483.137.1417629979960.JavaMail.root@thunderbeast.private.linuxbox.com>
+From: Patrick McGarry <pmcgarry@redhat.com>
+Subject: 2015 Ceph Day Planning
+Date: Wed, 3 Dec 2014 15:55:27 -0500
+Message-ID: <CAP8Oy=LRnBiftTuTUd2jpvG1UYTwdzEhE1XUTDkRj7kREPv+kg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from aa.linuxbox.com ([69.128.83.226]:2691 "EHLO aa.linuxbox.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751482AbaLCSGZ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 3 Dec 2014 13:06:25 -0500
+Received: from mail-qa0-f43.google.com ([209.85.216.43]:50282 "EHLO
+	mail-qa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751091AbaLCUz1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Dec 2014 15:55:27 -0500
+Received: by mail-qa0-f43.google.com with SMTP id bm13so10913709qab.16
+        for <ceph-devel@vger.kernel.org>; Wed, 03 Dec 2014 12:55:27 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
-Cc: Vu Pham <vuhuong@mellanox.com>
+To: Ceph-User <ceph-users@ceph.com>, Ceph Devel <ceph-devel@vger.kernel.org>
 
-Hi,
+Hey cephers,
 
-As Vu mentioned in the performance call, we've created a pull request including
-just the ceph:buffer::* changes, to get review and show non-regression.
+I know a number of you have expressed interest to me in hosting,
+sponsoring, or otherwise providing logistical support for Ceph Days
+(thing that _aren't_ speaking). If you are still interested please
+feel free to contact me. We are in the midst of planning 6-10 regional
+Ceph Day events for next year and are trying to nail down locations.
 
-https://github.com/linuxbox2/linuxbox-ceph/pull/1
+We're currently evaluating the locations below, but would be willing
+to consider any location with a donated venue.
 
-Thanks,
+US-East
+US-West
+US-Texas
+Europe
+Seoul, Korea
+Australia
+South America (Brazil?)
 
-Matt
+The format will probably remain largely the same, although we're
+planning on overhauling the content to provide a bit more of the
+overview/status material in the mornings and technical deep-dive
+topics in the afternoon. As always, if you have any questions,
+feedback, or concerns please let me know.
 
--- 
-Matt Benjamin
-CohortFS, LLC.
-315 West Huron Street, Suite 140A
-Ann Arbor, Michigan 48103
 
-http://cohortfs.com
+Best Regards,
 
-tel.  734-761-4689 
-fax.  734-769-8938 
-cel.  734-216-5309 
+Patrick McGarry
+Director Ceph Community || Red Hat
+http://ceph.com  ||  http://community.redhat.com
+@scuttlemonkey || @ceph
