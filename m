@@ -1,62 +1,64 @@
-From: Kamal Mostafa <kamal@canonical.com>
-Subject: [PATCH 3.13.y-ckt 018/121] rbd: Fix error recovery in
- rbd_obj_read_sync()
-Date: Tue,  2 Dec 2014 11:18:17 -0800
-Message-ID: <1417548000-1794-19-git-send-email-kamal@canonical.com>
-References: <1417548000-1794-1-git-send-email-kamal@canonical.com>
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: Re: Lock Constrains about Fast Dispatch for Messenger
+Date: Wed, 3 Dec 2014 10:21:02 +0800
+Message-ID: <CACJqLyafqtoerUcu8gkJSAMLPmKdG-0Yf=xTs-3paEq5sX-a=A@mail.gmail.com>
+References: <CACJqLyaf0QKHCxU4Pm877LLbZNwk30F7xdKdrrg1D0tOuShjGQ@mail.gmail.com>
+	<CAPYLRzhrKOzAiW+vTFrL5h45uxC44Svehm_hU7+P8Y3uBAVtbA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <kernel-team-bounces@lists.ubuntu.com>
-In-Reply-To: <1417548000-1794-1-git-send-email-kamal@canonical.com>
-List-Unsubscribe: <https://lists.ubuntu.com/mailman/options/kernel-team>,
- <mailto:kernel-team-request@lists.ubuntu.com?subject=unsubscribe>
-List-Archive: <https://lists.ubuntu.com/archives/kernel-team>
-List-Post: <mailto:kernel-team@lists.ubuntu.com>
-List-Help: <mailto:kernel-team-request@lists.ubuntu.com?subject=help>
-List-Subscribe: <https://lists.ubuntu.com/mailman/listinfo/kernel-team>,
- <mailto:kernel-team-request@lists.ubuntu.com?subject=subscribe>
-Errors-To: kernel-team-bounces@lists.ubuntu.com
-Sender: kernel-team-bounces@lists.ubuntu.com
-To: linux-kernel@vger.kernel.org, stable@vger.kernel.org, kernel-team@lists.ubuntu.com
-Cc: Jan Kara <jack@suse.cz>, Sage Weil <sage@inktank.com>, Kamal Mostafa <kamal@canonical.com>, ceph-devel@vger.kernel.org, Ilya Dryomov <idryomov@redhat.com>, Yehuda Sadeh <yehuda@inktank.com>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-wi0-f170.google.com ([209.85.212.170]:40653 "EHLO
+	mail-wi0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750969AbaLCCVD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Dec 2014 21:21:03 -0500
+Received: by mail-wi0-f170.google.com with SMTP id bs8so31828789wib.5
+        for <ceph-devel@vger.kernel.org>; Tue, 02 Dec 2014 18:21:02 -0800 (PST)
+In-Reply-To: <CAPYLRzhrKOzAiW+vTFrL5h45uxC44Svehm_hU7+P8Y3uBAVtbA@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Gregory Farnum <greg@inktank.com>
+Cc: Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-3.13.11-ckt12 -stable review patch.  If anyone has any objections, please let me know.
+Thanks!
 
-------------------
+On Tue, Dec 2, 2014 at 11:03 PM, Gregory Farnum <greg@inktank.com> wrote:
+> On Tue, Dec 2, 2014 at 12:26 AM, Haomai Wang <haomaiwang@gmail.com> wrote:
+>> Hi Gregoy and Sage,
+>>
+>> I'm just writing Messenger's unit tests to ensure that SimpleMessenger and
+>> AsyncMessenger behavior same and expected.
+>>
+>> I think the most unclear thing is the lock rule of fast dispatch. When
+>> introduced fast dispatch, there exists three methods "ms_fast_connect",
+>> "ms_fast_accept", "ms_fast_dispatch" will be called within Messenger's
+>> thread. Because without fast dispatcher all messages are delivered from
+>> queue to queue, fast path will result in potential dead lock I think.
+>>
+>> "ms_fast_accept" and "ms_fast_connect" are called with "pipe_lock"(Pipe) or
+>> "lock"(AsyncConnection). And Connection::send_message will called outsider.
+>> So it may happen:
+>>
+>> Other thread                   Messenger's thread
+>>        lock()                          connection lock()
+>>   send_message()                  connect
+>>  try connection lock()         ms_fast_connect()
+>>
+>>                           DEAD LOCK
+>
+> Sorry, which lock() is the "Other thread" calling? It's not like
+> anybody can access the Pipe's lock before it has been connect()ed.
+> Or perhaps you're referring to some kind of global lock that you're
+> worried ms_fast_connect() will try and access? In that case, yes, the
+> rules on locking within the Dispatcher *fast* functions are very
+> strict. We basically don't want any of them to take locks at all; in
+> the case of the OSD we don't quite manage that and have had to dance
+> through a number of hoops to avoid various tight races, but we're very
+> close.
+> -Greg
 
-From: Jan Kara <jack@suse.cz>
 
-commit a8d4205623ae965e36c68629db306ca0695a2771 upstream.
 
-When we fail to allocate page vector in rbd_obj_read_sync() we just
-basically ignore the problem and continue which will result in an oops
-later. Fix the problem by returning proper error.
-
-CC: Yehuda Sadeh <yehuda@inktank.com>
-CC: Sage Weil <sage@inktank.com>
-CC: ceph-devel@vger.kernel.org
-Coverity-id: 1226882
-Signed-off-by: Jan Kara <jack@suse.cz>
-Signed-off-by: Ilya Dryomov <idryomov@redhat.com>
-Signed-off-by: Kamal Mostafa <kamal@canonical.com>
----
- drivers/block/rbd.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index a1455cc..5224f46 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -3220,7 +3220,7 @@ static int rbd_obj_read_sync(struct rbd_device *rbd_dev,
- 	page_count = (u32) calc_pages_for(offset, length);
- 	pages = ceph_alloc_page_vector(page_count, GFP_KERNEL);
- 	if (IS_ERR(pages))
--		ret = PTR_ERR(pages);
-+		return PTR_ERR(pages);
- 
- 	ret = -ENOMEM;
- 	obj_request = rbd_obj_request_create(object_name, offset, length,
 -- 
-1.9.1
+Best Regards,
+
+Wheat
