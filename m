@@ -1,109 +1,57 @@
-From: Chaitanya Huilgol <Chaitanya.Huilgol@sandisk.com>
-Subject: RE: Performance variation across RBD clients on different pools in
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Performance variation across RBD clients on different pools in
  all SSD setup - tcmalloc issue
-Date: Wed, 3 Dec 2014 15:21:21 +0000
-Message-ID: <9E914F5BD7F48A4782456CEB550A42280A74C1C1@SACMBXIP01.sdcorp.global.sandisk.com>
+Date: Wed, 3 Dec 2014 07:59:30 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1412030755410.25778@cobra.newdream.net>
 References: <9E914F5BD7F48A4782456CEB550A42280A74C0F6@SACMBXIP01.sdcorp.global.sandisk.com>
- <CABZ+qqm=eWfsON=r5H+digGqoDtdi6JerCeYz2M26b+EDPH6bg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1bon0098.outbound.protection.outlook.com ([157.56.111.98]:21472
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751927AbaLCPV1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 3 Dec 2014 10:21:27 -0500
-In-Reply-To: <CABZ+qqm=eWfsON=r5H+digGqoDtdi6JerCeYz2M26b+EDPH6bg@mail.gmail.com>
-Content-Language: en-US
+Received: from cobra.newdream.net ([66.33.216.30]:39145 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751313AbaLCP7b (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Dec 2014 10:59:31 -0500
+In-Reply-To: <9E914F5BD7F48A4782456CEB550A42280A74C0F6@SACMBXIP01.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dan van der Ster <daniel.vanderster@cern.ch>
+To: Chaitanya Huilgol <Chaitanya.Huilgol@sandisk.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-SGkgRGFuLA0KDQpJIHRoaW5rIHRoZSBkZWZhdWx0IHZhbHVlIG9mICcgVENNQUxMT0NfTUFYX1RP
-VEFMX1RIUkVBRF9DQUNIRV9CWVRFUycgaXMgMTZNLCB3ZSBpbmNyZWFzZWQgaXQgdG8gMTI4TSAo
-bmVlZCB0byB0dW5lIHRoaXMgZnVydGhlcikuIFRoZSBoZWFwIHN0YXRzIGZyb20gdGhlIE9TRCBz
-aG93IGFib3V0IDMwTSBpbiB0aGUgdGhyZWFkIGNhY2hlcyB0aG91Z2guDQpXaXRoIGRlZmF1bHQg
-c2V0dGluZyAsIHdlIGhhdmUgc2VlbiB0aGUgcGVyZm9ybWFuY2UgZHJvcHBpbmcgZG93biBieSA3
-MCUgb24gdGhlIHNlY29uZCBjbGllbnQgYW5kIHdpdGggdGhlIHR1bmluZyB3ZSBoYXZlIG5vdCBz
-ZWVuIHRoaXMgZHJvcCAtIEkgZ3Vlc3MgaXQgbWF5IGJlIGp1c3QgcG9zdHBvbmluZyB0aGUgcHJv
-YmxlbS4NCg0KU2V0dGluZyBlbnYgaW4gY2VwaC1vc2QuY29uZiB3aWxsIGRvIGl0Lg0KDQpSZWdh
-cmRzLA0KQ2hhaXRhbnlhDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBEYW4g
-dmFuIGRlciBTdGVyIFttYWlsdG86ZGFuaWVsLnZhbmRlcnN0ZXJAY2Vybi5jaF0NClNlbnQ6IFdl
-ZG5lc2RheSwgRGVjZW1iZXIgMDMsIDIwMTQgNjoyNCBQTQ0KVG86IENoYWl0YW55YSBIdWlsZ29s
-DQpDYzogY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNClN1YmplY3Q6IFJlOiBQZXJmb3JtYW5j
-ZSB2YXJpYXRpb24gYWNyb3NzIFJCRCBjbGllbnRzIG9uIGRpZmZlcmVudCBwb29scyBpbiBhbGwg
-U1NEIHNldHVwIC0gdGNtYWxsb2MgaXNzdWUNCg0KT24gV2VkLCBEZWMgMywgMjAxNCBhdCAxMjo0
-MSBQTSwgQ2hhaXRhbnlhIEh1aWxnb2wgPENoYWl0YW55YS5IdWlsZ29sQHNhbmRpc2suY29tPiB3
-cm90ZToNCj4gSGkgQWxsLA0KPg0KPiBXZSBhcmUgc2VlaW5nIGxhcmdlIHJlYWQgcGVyZm9ybWFu
-Y2UgdmFyaWF0aW9ucyBhY3Jvc3MgUkJEIGNsaWVudHMgb24NCj4gZGlmZmVyZW50IHBvb2xzLiBC
-ZWxvdyBpcyB0aGUgc3VtbWFyeSBvZiBvdXIgZmluZGluZ3MNCj4NCj4gLSBGaXJzdCBjbGllbnQg
-c3RhcnRpbmcgSS9PIGFmdGVyIGEgY2x1c3RlciByZXN0YXJ0IChjZXBoIHN0YXJ0L3N0b3ANCj4g
-b24gYWxsIE9TRCBub2RlcykgZ2V0cyB0aGUgYmVzdCBwZXJmb3JtYW5jZQ0KPiAtIENsaWVudHMg
-c3RhcnRlZCBsYXRlciBleGhpYml0IDQwJSB0byA3MCUgZGVncmFkZWQgcGVyZm9ybWFuY2UsIFRo
-aXMNCj4gaXMgc2VlbiBldmVuIGluIGNhc2VzIHdoZXJlIGZpcnN0IGNsaWVudCBJL08gaXMgc3Rv
-cHBlZCBiZWZvcmUNCj4gc3RhcnRpbmcgdGhlIHNlY29uZCBjbGllbnQgSS9PDQo+IC0gIEFkZGlu
-ZyBwZXJmb3JtYW5jZSBjb3VudGVycyBzaG93ZWQgbGFyZ2UgaW5jcmVhc2UgaW4gbGF0ZW5jeSBh
-Y3Jvc3MNCj4gdGhlIGVudGlyZSBwYXRoIGFuZCBubyBzcGVjaWZpYyBwb2ludCBvZiBpbmNyZWFz
-ZWQgbGF0ZW5jeSAtIHVwdG8gM3gNCj4gaW5jcmVhc2UgaW4gbGF0ZW5jeQ0KPiAtIE9uIGZ1cnRo
-ZXIgaW52ZXN0aWdhdGlvbiB3ZSBoYXZlIHJvb3QgY2F1c2VkIHRoaXMgdG8gZGVncmFkYXRpb24g
-aW4NCj4gdGNtYWxsb2MgcGVyZm9ybWFuY2UgaW5kdWNpbmcgbGFyZ2UgbGF0ZW5jeSBhY3Jvc3Mg
-dGhlIGVudGlyZSBwYXRoDQo+IC0gQWxzbyB0aGUgdmFyaWF0aW9uIGlzIG1vcmUgYXMgd2UgaW5j
-cmVhc2UgdGhlIG51bWJlciBvZiBvcCB3b3JrZXINCj4gc2hhcmRzLCB3aXRoIGxvd2VyIHNoYXJk
-cyB0aGUgdmFyaWF0aW9uIGlzIGxlc3NlciBidXQgdGhpcyByZXN1bHRzIGluDQo+IG1vcmUgbG9j
-ayBjb250ZW50aW9uIGFuZCBpcyBub3QgYSBnb29kIG9wdGlvbiBmb3IgU1NEIGJhc2VkIGNsdXN0
-ZXJzDQo+IC0gVmFyaWF0aW9uIGlzIG9ic2VydmVkIGV2ZW4gd2hlbiB0aGUgUkJEIGltYWdlcyBh
-cmUgbm90IHdyaXR0ZW4gYXQNCj4gYWxsIHRodXMgaW5kaWNhdGluZyB0aGF0IHRoaXMgaXMgbm90
-IGEgZmlsZXN5c3RlbSBpc3N1ZQ0KPg0KPiBCZWxvdyBpcyBhIHNuaXBwZXQgb2YgcGVyZiB0b3Ag
-b3V0cHV0IGZvciB0aGUgdHdvIHJ1bnM6DQo+DQo+ICgxKSAgICBUQ21hbGxvYyAgLSBDbGllbnQt
-MQ0KPiAgICAyLjY4JSAgY2VwaC1vc2QgICAgICAgICAgICAgICAgIFsuXSBjcnVzaF9oYXNoMzJf
-Mw0KPiAgIDIuNjUlICBsaWJ0Y21hbGxvYy5zby40LjEuMiAgICAgWy5dIG9wZXJhdG9yIG5ldyh1
-bnNpZ25lZCBsb25nKQ0KPiAgIDEuNjYlICBba2VybmVsXSAgICAgICAgICAgICAgICAgW2tdIF9y
-YXdfc3Bpbl9sb2NrDQo+ICAgMS41NiUgIGxpYnN0ZGMrKy5zby42LjAuMTkgICAgICBbLl0gc3Rk
-OjpiYXNpY19zdHJpbmc8Y2hhciwgc3RkOjpjaGFyX3RyYWl0czxjaGFyPiwgc3RkOjphbGxvY2F0
-b3I8Y2hhcj4gPjo6YmFzaWNfc3RyaW5nKHN0ZDo6c3RyaW5nIGNvbnN0JikNCj4gICAxLjUxJSAg
-bGlidGNtYWxsb2Muc28uNC4xLjIgICAgIFsuXSBvcGVyYXRvciBkZWxldGUodm9pZCopDQo+DQo+
-ICgyKSAgICBUQ21hbGxvYyAtIENsaWVudCAtMiAobm90ZSBzaWduaWZpY2FudCBpbmNyZWFzZSBp
-biBUQ21hbGxvYyBpbnRlcm5hbCBmcmVlIHRvIGNlbnRyYWwgbGlzdCBjb2RlIHBhdGhzKQ0KPg0K
-PiAxNC43NSUgIGxpYnRjbWFsbG9jLnNvLjQuMS4yICAgICBbLl0gdGNtYWxsb2M6OkNlbnRyYWxG
-cmVlTGlzdDo6RmV0Y2hGcm9tU3BhbnMoKQ0KPiAgIDcuNDYlICBsaWJ0Y21hbGxvYy5zby40LjEu
-MiAgICAgWy5dIHRjbWFsbG9jOjpUaHJlYWRDYWNoZTo6UmVsZWFzZVRvQ2VudHJhbENhY2hlKHRj
-bWFsbG9jOjpUaHJlYWRDYWNoZTo6RnJlZUxpc3QqLCB1bnNpZ25lZCBsb25nLCBpbnQpDQo+ICAg
-Ni43MSUgIGxpYnRjbWFsbG9jLnNvLjQuMS4yICAgICBbLl0gdGNtYWxsb2M6OkNlbnRyYWxGcmVl
-TGlzdDo6UmVsZWFzZVRvU3BhbnModm9pZCopDQo+ICAgMS42OCUgIGxpYnRjbWFsbG9jLnNvLjQu
-MS4yICAgICBbLl0gb3BlcmF0b3IgbmV3KHVuc2lnbmVkIGxvbmcpDQo+ICAgMS41NyUgIGNlcGgt
-b3NkICAgICAgICAgICAgICAgICBbLl0gY3J1c2hfaGFzaDMyXzMNCj4NCj4gVHlpbmcgaXQgYWxs
-IHRvZ2V0aGVyLCBJdCBsb29rcyBsaWtlIHRoZSBuZXcgY2xpZW50IEkvTyBvbiBhIGRpZmZlcmVu
-dCBwb29sIGluZHVjZXMgY2hhbmdlIGluIGhvdyB0aGUgT1NEIHNoYXJkcyBhcmUgdXNlZCwgdGhp
-cyB3b3VsZCBpbmR1Y2UgbW92ZW1lbnQgb2YgbWVtb3J5IHRvL2Zyb20gdGhlIHRocmVhZCBsb2Nh
-bCBjYWNoZXMgdG8gdGhlIGNlbnRyYWwgZnJlZSBsaXN0cy4NCj4gSW5jcmVhc2luZyB0aGUgVENt
-YWxsb2MgdGhyZWFkIGNhY2hlIGxpbWl0IHdpdGgNCj4gJ1RDTUFMTE9DX01BWF9UT1RBTF9USFJF
-QURfQ0FDSEVfQllURVMnIGFsbGV2aWF0ZXMgdGhlIGlzc3VlcyBpbiBvdXINCj4gdGVzdCBzZXR1
-cHMuIEhvd2V2ZXIgdGhpcyBpcyBhIHRlbXBvcmFyeSByZXNvbHV0aW9uIC0gdGhpcyBhbHNvIGJs
-b2F0cw0KPiB0aGUgT1NEIG1lbW9yeSB1c2FnZQ0KPg0KDQpJJ3ZlIG5vdGljZWQgdGhhdCB0Y21h
-bGxvYyBpcyBxdWl0ZSB2aXNpYmxlIGluIHBlcmYgdG9wLCBidXQgSSBuZXZlciBsb29rZWQgY2xv
-c2VyIGJlY2F1c2Ugd2UgZG9uJ3QgZXZlbiBoYXZlIGRlYnVnIHN5bWJvbHMgZW5hYmxlZCBpbiBv
-dXIgdGNtYWxsb2MuIEhlcmUncyBhIHByb2R1Y3Rpb24gZHVtcGxpbmcgY2VwaC1vc2QgcmlnaHQg
-bm93Og0KDQpTYW1wbGVzOiAzNUsgb2YgZXZlbnQgJ2N5Y2xlcycsIEV2ZW50IGNvdW50IChhcHBy
-b3guKTogNDA0MDc5NTk3NCwNClRocmVhZDogY2VwaC1vc2QoMTM5NzYpDQogODcuODElICBsaWJ0
-Y21hbGxvYy5zby40LjEuMC4jcHJlbGluayMuUDF3Q2NqICBbLl0gMHgwMDAwMDAwMDAwMDE3ZTZm
-DQogIDEuNDElICBsaWJwdGhyZWFkLTIuMTIuc28gICAgICAgICAgICAgICAgICAgICBbLl0gcHRo
-cmVhZF9tdXRleF9sb2NrDQogIDEuNDAlICBsaWJzdGRjKysuc28uNi4wLjEzICAgICAgICAgICAg
-ICAgICAgICBbLl0gMHgwMDAwMDAwMDAwMDY1YjhjDQoNCldoYXQgdmFsdWUgZGlkIHlvdSB1c2Ug
-Zm9yIFRDTUFMTE9DX01BWF9UT1RBTF9USFJFQURfQ0FDSEVfQllURVMgYW5kIGhvdyB3ZWxsIGRp
-ZCBpdCBhbGxldmlhdGUgdGhlIHByb2JsZW0/IEkgYXNzdW1lIGVudiBUQ01BTExPQ19NQVhfVE9U
-QUxfVEhSRUFEX0NBQ0hFX0JZVEVTPXggY2VwaC1vc2QgLi4uIGlzIHN1ZmZpY2llbnQgdG8gb3Zl
-cnJpZGUgdGhpcz8NCg0KQ2hlZXJzLCBEYW4NCg0KX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX18NCg0KUExFQVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBl
-bGVjdHJvbmljIG1haWwgbWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRo
-ZSBkZXNpZ25hdGVkIHJlY2lwaWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0
-aGlzIG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5
-IG5vdGlmaWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFu
-ZCB0aGF0IGFueSByZXZpZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWlu
-ZyBvZiB0aGlzIG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVj
-ZWl2ZWQgdGhpcyBjb21tdW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5k
-ZXIgYnkgdGVsZXBob25lIG9yIGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFu
-ZCBkZXN0cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3Nz
-ZXNzaW9uICh3aGV0aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3Bp
-ZXMpLg0KDQo=
+On Wed, 3 Dec 2014, Chaitanya Huilgol wrote:
+> (2)    TCmalloc - Client -2 (note significant increase in TCmalloc internal free to central list code paths)
+> 
+> 14.75%  libtcmalloc.so.4.1.2     [.] tcmalloc::CentralFreeList::FetchFromSpans()
+>   7.46%  libtcmalloc.so.4.1.2     [.] tcmalloc::ThreadCache::ReleaseToCentralCache(tcmalloc::ThreadCache::FreeList*, unsigned long, int)
+>   6.71%  libtcmalloc.so.4.1.2     [.] tcmalloc::CentralFreeList::ReleaseToSpans(void*)
+>   1.68%  libtcmalloc.so.4.1.2     [.] operator new(unsigned long)
+>   1.57%  ceph-osd                 [.] crush_hash32_3
+
+Yikes!
+
+> IMHO, we should probably look at the following in general for better 
+> performance with less variation
+> 
+> - Add jemalloc option for ceph builds
+
+Definitely.
+
+Several years ago we saw serious heap fragmetnation issues with glibc.  I 
+suspect newer versions are less problematics.  It may also be that newer 
+version of tcmalloc behave better (not sure if we're linking against the 
+latest version?).  In any case, we should have build support for all 
+options.  We'll need to be careful when making a change, though.  The best 
+choice may also vary on a per-distro basis.
+
+> - Look at ways to evenly distribute PGs across the shards - with larger 
+> number of shards some shards do not get exercised at all while some are 
+> overloaded
+
+Ok
+
+> - Look at decreasing heap activity in the I/O path (index Manager, Hash 
+> Index, LFN index etc.)
+
+Yes.  Unfortunately I think this is a long tail... lots of small changes 
+needed before we'll see much impact.
+
+sage
