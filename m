@@ -1,79 +1,109 @@
-From: Andreas Bluemle <andreas.bluemle@itxperts.de>
-Subject: Re: LTTng tracing: ReplicatedPG::log_operation
-Date: Wed, 3 Dec 2014 09:58:03 +0100
-Message-ID: <20141203095803.1276de6e@doppio>
-References: <20141202191758.5eded52c@doppio>
-	<CAC6JEv-ZcvKCLMMecTw-4d2UagOz2AHMtCadahDghV5h4ei3OA@mail.gmail.com>
+From: Chaitanya Huilgol <Chaitanya.Huilgol@sandisk.com>
+Subject: RE: Performance variation across RBD clients on different pools in
+ all SSD setup - tcmalloc issue
+Date: Wed, 3 Dec 2014 15:21:21 +0000
+Message-ID: <9E914F5BD7F48A4782456CEB550A42280A74C1C1@SACMBXIP01.sdcorp.global.sandisk.com>
+References: <9E914F5BD7F48A4782456CEB550A42280A74C0F6@SACMBXIP01.sdcorp.global.sandisk.com>
+ <CABZ+qqm=eWfsON=r5H+digGqoDtdi6JerCeYz2M26b+EDPH6bg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.itxperts.de ([212.202.108.166]:57247 "EHLO
-	mail.itxperts.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751576AbaLCOz4 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Dec 2014 09:55:56 -0500
-In-Reply-To: <CAC6JEv-ZcvKCLMMecTw-4d2UagOz2AHMtCadahDghV5h4ei3OA@mail.gmail.com>
+Received: from mail-bn1bon0098.outbound.protection.outlook.com ([157.56.111.98]:21472
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751927AbaLCPV1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 3 Dec 2014 10:21:27 -0500
+In-Reply-To: <CABZ+qqm=eWfsON=r5H+digGqoDtdi6JerCeYz2M26b+EDPH6bg@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@gregs42.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Dan van der Ster <daniel.vanderster@cern.ch>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Gregory,
-
-On Tue, 2 Dec 2014 10:32:50 -0800
-Gregory Farnum <greg@gregs42.com> wrote:
-
-> On Tue, Dec 2, 2014 at 10:17 AM, Andreas Bluemle
-> <andreas.bluemle@itxperts.de> wrote:
-> > Hi,
-> >
-> > during code profiling using LTTng, I encounter that during
-> > processing of write requests to the cluster, the ceph-osd
-> > spends a lot of time in the ReplicatedPG::log_operation
-> > before the the actual writes to journal and object
-> > in the FileStore are triggered.
-> >
-> > This happens in ReplicatedBackend::submit_transaction.
-> >
-> > What I wonder is
-> >   - what is the purpose of the log_operation?
-> >     If I am not mistaken, then it is neither the write-to-journal
-> >     nor the write-to-object; both of these are triggered from
-> >     the queue_operation following that log_operation.
-> 
-> This is setting up the changes to the pg log, and encoding them into
-> the transaction.
-> 
-> >   - can the sequence between the log_operation and
-> >     the actual queue_operation be reversed in
-> >     ReplicatedBackend::submit_transaction?
-> 
-> Nope, it needs to go into the transaction and get journaled.
-> I'm kind of surprised this is a big time sink, but there is a lot of
-> encoding so if you're running against a fast system I suppose it could
-> be relatively large.
-
-From what I see on my test system, adding the pg log entry consumes
-about 60 microseconds - which is about 12 % of the overall time spent
-for a write request on a replicating OSD, which is sth. like 460
-microseconds between receipt of the MSG_OSD_SUBOP at the messenger
-until the corresponding MSG_OSD_SUBOPREPLY is sent back to the primary
-OSD.
-
-> -Greg
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
-> in the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
-
-
-
--- 
-Andreas Bluemle                     mailto:Andreas.Bluemle@itxperts.de
-ITXperts GmbH                       http://www.itxperts.de
-Balanstrasse 73, Geb. 08            Phone: (+49) 89 89044917
-D-81541 Muenchen (Germany)          Fax:   (+49) 89 89044910
-
-Company details: http://www.itxperts.de/imprint.htm
+SGkgRGFuLA0KDQpJIHRoaW5rIHRoZSBkZWZhdWx0IHZhbHVlIG9mICcgVENNQUxMT0NfTUFYX1RP
+VEFMX1RIUkVBRF9DQUNIRV9CWVRFUycgaXMgMTZNLCB3ZSBpbmNyZWFzZWQgaXQgdG8gMTI4TSAo
+bmVlZCB0byB0dW5lIHRoaXMgZnVydGhlcikuIFRoZSBoZWFwIHN0YXRzIGZyb20gdGhlIE9TRCBz
+aG93IGFib3V0IDMwTSBpbiB0aGUgdGhyZWFkIGNhY2hlcyB0aG91Z2guDQpXaXRoIGRlZmF1bHQg
+c2V0dGluZyAsIHdlIGhhdmUgc2VlbiB0aGUgcGVyZm9ybWFuY2UgZHJvcHBpbmcgZG93biBieSA3
+MCUgb24gdGhlIHNlY29uZCBjbGllbnQgYW5kIHdpdGggdGhlIHR1bmluZyB3ZSBoYXZlIG5vdCBz
+ZWVuIHRoaXMgZHJvcCAtIEkgZ3Vlc3MgaXQgbWF5IGJlIGp1c3QgcG9zdHBvbmluZyB0aGUgcHJv
+YmxlbS4NCg0KU2V0dGluZyBlbnYgaW4gY2VwaC1vc2QuY29uZiB3aWxsIGRvIGl0Lg0KDQpSZWdh
+cmRzLA0KQ2hhaXRhbnlhDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBEYW4g
+dmFuIGRlciBTdGVyIFttYWlsdG86ZGFuaWVsLnZhbmRlcnN0ZXJAY2Vybi5jaF0NClNlbnQ6IFdl
+ZG5lc2RheSwgRGVjZW1iZXIgMDMsIDIwMTQgNjoyNCBQTQ0KVG86IENoYWl0YW55YSBIdWlsZ29s
+DQpDYzogY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNClN1YmplY3Q6IFJlOiBQZXJmb3JtYW5j
+ZSB2YXJpYXRpb24gYWNyb3NzIFJCRCBjbGllbnRzIG9uIGRpZmZlcmVudCBwb29scyBpbiBhbGwg
+U1NEIHNldHVwIC0gdGNtYWxsb2MgaXNzdWUNCg0KT24gV2VkLCBEZWMgMywgMjAxNCBhdCAxMjo0
+MSBQTSwgQ2hhaXRhbnlhIEh1aWxnb2wgPENoYWl0YW55YS5IdWlsZ29sQHNhbmRpc2suY29tPiB3
+cm90ZToNCj4gSGkgQWxsLA0KPg0KPiBXZSBhcmUgc2VlaW5nIGxhcmdlIHJlYWQgcGVyZm9ybWFu
+Y2UgdmFyaWF0aW9ucyBhY3Jvc3MgUkJEIGNsaWVudHMgb24NCj4gZGlmZmVyZW50IHBvb2xzLiBC
+ZWxvdyBpcyB0aGUgc3VtbWFyeSBvZiBvdXIgZmluZGluZ3MNCj4NCj4gLSBGaXJzdCBjbGllbnQg
+c3RhcnRpbmcgSS9PIGFmdGVyIGEgY2x1c3RlciByZXN0YXJ0IChjZXBoIHN0YXJ0L3N0b3ANCj4g
+b24gYWxsIE9TRCBub2RlcykgZ2V0cyB0aGUgYmVzdCBwZXJmb3JtYW5jZQ0KPiAtIENsaWVudHMg
+c3RhcnRlZCBsYXRlciBleGhpYml0IDQwJSB0byA3MCUgZGVncmFkZWQgcGVyZm9ybWFuY2UsIFRo
+aXMNCj4gaXMgc2VlbiBldmVuIGluIGNhc2VzIHdoZXJlIGZpcnN0IGNsaWVudCBJL08gaXMgc3Rv
+cHBlZCBiZWZvcmUNCj4gc3RhcnRpbmcgdGhlIHNlY29uZCBjbGllbnQgSS9PDQo+IC0gIEFkZGlu
+ZyBwZXJmb3JtYW5jZSBjb3VudGVycyBzaG93ZWQgbGFyZ2UgaW5jcmVhc2UgaW4gbGF0ZW5jeSBh
+Y3Jvc3MNCj4gdGhlIGVudGlyZSBwYXRoIGFuZCBubyBzcGVjaWZpYyBwb2ludCBvZiBpbmNyZWFz
+ZWQgbGF0ZW5jeSAtIHVwdG8gM3gNCj4gaW5jcmVhc2UgaW4gbGF0ZW5jeQ0KPiAtIE9uIGZ1cnRo
+ZXIgaW52ZXN0aWdhdGlvbiB3ZSBoYXZlIHJvb3QgY2F1c2VkIHRoaXMgdG8gZGVncmFkYXRpb24g
+aW4NCj4gdGNtYWxsb2MgcGVyZm9ybWFuY2UgaW5kdWNpbmcgbGFyZ2UgbGF0ZW5jeSBhY3Jvc3Mg
+dGhlIGVudGlyZSBwYXRoDQo+IC0gQWxzbyB0aGUgdmFyaWF0aW9uIGlzIG1vcmUgYXMgd2UgaW5j
+cmVhc2UgdGhlIG51bWJlciBvZiBvcCB3b3JrZXINCj4gc2hhcmRzLCB3aXRoIGxvd2VyIHNoYXJk
+cyB0aGUgdmFyaWF0aW9uIGlzIGxlc3NlciBidXQgdGhpcyByZXN1bHRzIGluDQo+IG1vcmUgbG9j
+ayBjb250ZW50aW9uIGFuZCBpcyBub3QgYSBnb29kIG9wdGlvbiBmb3IgU1NEIGJhc2VkIGNsdXN0
+ZXJzDQo+IC0gVmFyaWF0aW9uIGlzIG9ic2VydmVkIGV2ZW4gd2hlbiB0aGUgUkJEIGltYWdlcyBh
+cmUgbm90IHdyaXR0ZW4gYXQNCj4gYWxsIHRodXMgaW5kaWNhdGluZyB0aGF0IHRoaXMgaXMgbm90
+IGEgZmlsZXN5c3RlbSBpc3N1ZQ0KPg0KPiBCZWxvdyBpcyBhIHNuaXBwZXQgb2YgcGVyZiB0b3Ag
+b3V0cHV0IGZvciB0aGUgdHdvIHJ1bnM6DQo+DQo+ICgxKSAgICBUQ21hbGxvYyAgLSBDbGllbnQt
+MQ0KPiAgICAyLjY4JSAgY2VwaC1vc2QgICAgICAgICAgICAgICAgIFsuXSBjcnVzaF9oYXNoMzJf
+Mw0KPiAgIDIuNjUlICBsaWJ0Y21hbGxvYy5zby40LjEuMiAgICAgWy5dIG9wZXJhdG9yIG5ldyh1
+bnNpZ25lZCBsb25nKQ0KPiAgIDEuNjYlICBba2VybmVsXSAgICAgICAgICAgICAgICAgW2tdIF9y
+YXdfc3Bpbl9sb2NrDQo+ICAgMS41NiUgIGxpYnN0ZGMrKy5zby42LjAuMTkgICAgICBbLl0gc3Rk
+OjpiYXNpY19zdHJpbmc8Y2hhciwgc3RkOjpjaGFyX3RyYWl0czxjaGFyPiwgc3RkOjphbGxvY2F0
+b3I8Y2hhcj4gPjo6YmFzaWNfc3RyaW5nKHN0ZDo6c3RyaW5nIGNvbnN0JikNCj4gICAxLjUxJSAg
+bGlidGNtYWxsb2Muc28uNC4xLjIgICAgIFsuXSBvcGVyYXRvciBkZWxldGUodm9pZCopDQo+DQo+
+ICgyKSAgICBUQ21hbGxvYyAtIENsaWVudCAtMiAobm90ZSBzaWduaWZpY2FudCBpbmNyZWFzZSBp
+biBUQ21hbGxvYyBpbnRlcm5hbCBmcmVlIHRvIGNlbnRyYWwgbGlzdCBjb2RlIHBhdGhzKQ0KPg0K
+PiAxNC43NSUgIGxpYnRjbWFsbG9jLnNvLjQuMS4yICAgICBbLl0gdGNtYWxsb2M6OkNlbnRyYWxG
+cmVlTGlzdDo6RmV0Y2hGcm9tU3BhbnMoKQ0KPiAgIDcuNDYlICBsaWJ0Y21hbGxvYy5zby40LjEu
+MiAgICAgWy5dIHRjbWFsbG9jOjpUaHJlYWRDYWNoZTo6UmVsZWFzZVRvQ2VudHJhbENhY2hlKHRj
+bWFsbG9jOjpUaHJlYWRDYWNoZTo6RnJlZUxpc3QqLCB1bnNpZ25lZCBsb25nLCBpbnQpDQo+ICAg
+Ni43MSUgIGxpYnRjbWFsbG9jLnNvLjQuMS4yICAgICBbLl0gdGNtYWxsb2M6OkNlbnRyYWxGcmVl
+TGlzdDo6UmVsZWFzZVRvU3BhbnModm9pZCopDQo+ICAgMS42OCUgIGxpYnRjbWFsbG9jLnNvLjQu
+MS4yICAgICBbLl0gb3BlcmF0b3IgbmV3KHVuc2lnbmVkIGxvbmcpDQo+ICAgMS41NyUgIGNlcGgt
+b3NkICAgICAgICAgICAgICAgICBbLl0gY3J1c2hfaGFzaDMyXzMNCj4NCj4gVHlpbmcgaXQgYWxs
+IHRvZ2V0aGVyLCBJdCBsb29rcyBsaWtlIHRoZSBuZXcgY2xpZW50IEkvTyBvbiBhIGRpZmZlcmVu
+dCBwb29sIGluZHVjZXMgY2hhbmdlIGluIGhvdyB0aGUgT1NEIHNoYXJkcyBhcmUgdXNlZCwgdGhp
+cyB3b3VsZCBpbmR1Y2UgbW92ZW1lbnQgb2YgbWVtb3J5IHRvL2Zyb20gdGhlIHRocmVhZCBsb2Nh
+bCBjYWNoZXMgdG8gdGhlIGNlbnRyYWwgZnJlZSBsaXN0cy4NCj4gSW5jcmVhc2luZyB0aGUgVENt
+YWxsb2MgdGhyZWFkIGNhY2hlIGxpbWl0IHdpdGgNCj4gJ1RDTUFMTE9DX01BWF9UT1RBTF9USFJF
+QURfQ0FDSEVfQllURVMnIGFsbGV2aWF0ZXMgdGhlIGlzc3VlcyBpbiBvdXINCj4gdGVzdCBzZXR1
+cHMuIEhvd2V2ZXIgdGhpcyBpcyBhIHRlbXBvcmFyeSByZXNvbHV0aW9uIC0gdGhpcyBhbHNvIGJs
+b2F0cw0KPiB0aGUgT1NEIG1lbW9yeSB1c2FnZQ0KPg0KDQpJJ3ZlIG5vdGljZWQgdGhhdCB0Y21h
+bGxvYyBpcyBxdWl0ZSB2aXNpYmxlIGluIHBlcmYgdG9wLCBidXQgSSBuZXZlciBsb29rZWQgY2xv
+c2VyIGJlY2F1c2Ugd2UgZG9uJ3QgZXZlbiBoYXZlIGRlYnVnIHN5bWJvbHMgZW5hYmxlZCBpbiBv
+dXIgdGNtYWxsb2MuIEhlcmUncyBhIHByb2R1Y3Rpb24gZHVtcGxpbmcgY2VwaC1vc2QgcmlnaHQg
+bm93Og0KDQpTYW1wbGVzOiAzNUsgb2YgZXZlbnQgJ2N5Y2xlcycsIEV2ZW50IGNvdW50IChhcHBy
+b3guKTogNDA0MDc5NTk3NCwNClRocmVhZDogY2VwaC1vc2QoMTM5NzYpDQogODcuODElICBsaWJ0
+Y21hbGxvYy5zby40LjEuMC4jcHJlbGluayMuUDF3Q2NqICBbLl0gMHgwMDAwMDAwMDAwMDE3ZTZm
+DQogIDEuNDElICBsaWJwdGhyZWFkLTIuMTIuc28gICAgICAgICAgICAgICAgICAgICBbLl0gcHRo
+cmVhZF9tdXRleF9sb2NrDQogIDEuNDAlICBsaWJzdGRjKysuc28uNi4wLjEzICAgICAgICAgICAg
+ICAgICAgICBbLl0gMHgwMDAwMDAwMDAwMDY1YjhjDQoNCldoYXQgdmFsdWUgZGlkIHlvdSB1c2Ug
+Zm9yIFRDTUFMTE9DX01BWF9UT1RBTF9USFJFQURfQ0FDSEVfQllURVMgYW5kIGhvdyB3ZWxsIGRp
+ZCBpdCBhbGxldmlhdGUgdGhlIHByb2JsZW0/IEkgYXNzdW1lIGVudiBUQ01BTExPQ19NQVhfVE9U
+QUxfVEhSRUFEX0NBQ0hFX0JZVEVTPXggY2VwaC1vc2QgLi4uIGlzIHN1ZmZpY2llbnQgdG8gb3Zl
+cnJpZGUgdGhpcz8NCg0KQ2hlZXJzLCBEYW4NCg0KX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX18NCg0KUExFQVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBl
+bGVjdHJvbmljIG1haWwgbWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRo
+ZSBkZXNpZ25hdGVkIHJlY2lwaWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0
+aGlzIG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5
+IG5vdGlmaWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFu
+ZCB0aGF0IGFueSByZXZpZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWlu
+ZyBvZiB0aGlzIG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVj
+ZWl2ZWQgdGhpcyBjb21tdW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5k
+ZXIgYnkgdGVsZXBob25lIG9yIGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFu
+ZCBkZXN0cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3Nz
+ZXNzaW9uICh3aGV0aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3Bp
+ZXMpLg0KDQo=
