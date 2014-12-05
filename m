@@ -1,92 +1,38 @@
-From: Mark Nelson <mark.nelson@inktank.com>
+From: David Champion <dgc-t4+EzPmVLfD2fBVCVOL8/A@public.gmane.org>
 Subject: Re: experimental features
-Date: Fri, 05 Dec 2014 11:46:19 -0600
-Message-ID: <5481EF6B.4010901@redhat.com>
-References: <alpine.DEB.2.00.1412050927150.24079@cobra.newdream.net> <CAC6JEv8LVviFoNXB72gKBQ+seNVYphvpwm0QZeOwccPHr7Qatg@mail.gmail.com>
-Reply-To: mnelson@redhat.com
+Date: Fri, 5 Dec 2014 11:47:32 -0600
+Message-ID: <20141205174732.GL5501@scurvy.bikeshed.us>
+References: <alpine.DEB.2.00.1412050927150.24079@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f177.google.com ([209.85.216.177]:62138 "EHLO
-	mail-qc0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751112AbaLERqX (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Dec 2014 12:46:23 -0500
-Received: by mail-qc0-f177.google.com with SMTP id x3so807112qcv.8
-        for <ceph-devel@vger.kernel.org>; Fri, 05 Dec 2014 09:46:22 -0800 (PST)
-In-Reply-To: <CAC6JEv8LVviFoNXB72gKBQ+seNVYphvpwm0QZeOwccPHr7Qatg@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@gregs42.com>, Sage Weil <sweil@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <alpine.DEB.2.00.1412050927150.24079-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-
-
-On 12/05/2014 11:39 AM, Gregory Farnum wrote:
-> On Fri, Dec 5, 2014 at 9:36 AM, Sage Weil <sweil@redhat.com> wrote:
->> A while back we merged Haomai's experimental OSD backend KeyValueStore.
->> We named the config option 'keyvaluestore_dev', hoping to make it clear to
->> users that it was still under development, not fully tested, and not yet
->> ready for production.  In retrospect, I don't think '_dev' was
->> sufficiently scary because many users tried it and ran into
->> unexpectd trouble.
->>
->> There are several other features we've recently added or are considering
->> adding that fall into this category.  Having them in the tree is great
->> because it streamlines QA and testing, but I want to make sure that
->> users are not able to enable the features without being aware of the
->> risks.
->>
->> A few possible suggestions:
->>
->> - scarier option names, like
->>
->>    osd objectstore = keyvaluestore_experimental_danger_danger
->>    ms type = async_experimental_danger_danger
->>    ms type = xio_experimental_danger_danger
->>
->>    Once the feature becomes stable, they'll have to adjust their
->> config, or we'll need to support both names going forward.
->>
->> - a separate config option that allows any experimental option
->>
->>    allow experimental features danger danger = true
->>    osd objectstore = keyvaluestore
->>    ms type = xio
->>
->>    This runs the risk that the user will enable experimental features to
->> get X, and later start using Y without realizing Y is also
->> experiemental.
->>
->> - enumerate experiemntal options we want to enable
->>
->>    allow experimental features danger danger = keyvaluestore, xio
->>    ms type = xio
->>    osd objectstore = keyvaluestore
->>
->>    This has the property that no config change is necessary when the
->> feature drops its experimental status.
->>
->> In all of these cases, we can also make a point of sending something to
->> the log on daemon startup.  I don't think too many people will notice
->> this, but it is better than nothing.
->>
->> Other ideas?
->
-> I don't think these should even be going into release packages for
-> users to work with. We can build them on the dev gitbuilders for QA
-> and testing without them ever reaching the hands of users grabbing our
-> production packages. ;)
-> -Greg
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-
-I'm in favor of the "allow experimental features" but instead call it:
-
-"ALLOW UNRECOVERABLE DATA CORRUPTING FEATURES" which makes things a 
-little more explicit. With great power comes great responsibility.
-
-Mark
+KiBPbiAwNSBEZWMgMjAxNCwgU2FnZSBXZWlsIHdyb3RlOiAKPiBhZGRpbmcgdGhhdCBmYWxsIGlu
+dG8gdGhpcyBjYXRlZ29yeS4gIEhhdmluZyB0aGVtIGluIHRoZSB0cmVlIGlzIGdyZWF0IAo+IGJl
+Y2F1c2UgaXQgc3RyZWFtbGluZXMgUUEgYW5kIHRlc3RpbmcsIGJ1dCBJIHdhbnQgdG8gbWFrZSBz
+dXJlIHRoYXQgCj4gdXNlcnMgYXJlIG5vdCBhYmxlIHRvIGVuYWJsZSB0aGUgZmVhdHVyZXMgd2l0
+aG91dCBiZWluZyBhd2FyZSBvZiB0aGUgCj4gcmlza3MuCj4gCj4gQSBmZXcgcG9zc2libGUgc3Vn
+Z2VzdGlvbnM6Cj4gCj4gLSBzY2FyaWVyIG9wdGlvbiBuYW1lcywgbGlrZQo+IC0gYSBzZXBhcmF0
+ZSBjb25maWcgb3B0aW9uIHRoYXQgYWxsb3dzIGFueSBleHBlcmltZW50YWwgb3B0aW9uCj4gLSBl
+bnVtZXJhdGUgZXhwZXJpZW1udGFsIG9wdGlvbnMgd2Ugd2FudCB0byBlbmFibGUKPiBPdGhlciBp
+ZGVhcz8KCkEgc2VwYXJhdGUgY29uZmlnIGZpbGUgZm9yIGV4cGVyaW1lbnRhbCBvcHRpb25zOgov
+ZXRjL2NlcGgvZGFuZ2VyLWRhbmdlci5jb25mCgotLSAKICAgICAgIERhdmlkIENoYW1waW9uIOKA
+oiBkZ2NAdWNoaWNhZ28uZWR1IOKAoiBVbml2ZXJzaXR5IG9mIENoaWNhZ28KX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxp
+c3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGlu
+Zm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
