@@ -1,172 +1,124 @@
-From: Jake Young <jak3kaj-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: running as non-root
-Date: Sat, 6 Dec 2014 15:12:09 -0500
-Message-ID: <CAMnske3uR5uusFYwkFvwdH_zaAkta7+syhOvndhamCzaz9UN0A@mail.gmail.com>
-References: <alpine.DEB.2.00.1412061039550.18213@cobra.newdream.net>
+From: Yehuda Sadeh <yehuda@redhat.com>
+Subject: Re: [ceph-users] normalizing radosgw
+Date: Sat, 6 Dec 2014 15:47:24 -0800
+Message-ID: <CABBk=J8ZQNmQ52ah6t6+xbD=9LxGGtqtqi+yQq1F5GoP0WADqA@mail.gmail.com>
+References: <alpine.DEB.2.00.1412061025330.18213@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============2114975309=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.00.1412061039550.18213-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
-
---===============2114975309==
-Content-Type: multipart/alternative; boundary=001a1134f4a8e8f68f050991ce72
-
---001a1134f4a8e8f68f050991ce72
 Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ie0-f176.google.com ([209.85.223.176]:53188 "EHLO
+	mail-ie0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751734AbaLFXrZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 6 Dec 2014 18:47:25 -0500
+Received: by mail-ie0-f176.google.com with SMTP id tr6so2763956ieb.35
+        for <ceph-devel@vger.kernel.org>; Sat, 06 Dec 2014 15:47:24 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.00.1412061025330.18213@cobra.newdream.net>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, "ceph-users@ceph.com" <ceph-users@ceph.com>
 
-On Saturday, December 6, 2014, Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-
-> While we are on the subject of init systems and packaging, I would *love*
-> to fix things up for hammer to
+On Sat, Dec 6, 2014 at 10:39 AM, Sage Weil <sweil@redhat.com> wrote:
+> Several things are different/annoying with radosgw than with other Ceph
+> daemons:
 >
->  - create a ceph user and group
->  - add various users to ceph group (like qemu or kvm user and
-> apache/www-data?)
+> - binary/package are named 'radosgw' instead of 'ceph-rgw'.
+>
+> This is cosmetic, but it also makes it fit less well into the
+> new /var/lib/ceph/* view of things.
+>
+> - default log location is /var/log/radosgw/$cluster-$name.log instead of
+> /var/lib/ceph/$cluster-$rgw.$name.log (or similar).
+>
+> - rgw_data default is /var/lib/ceph/radosgw instead of /var/lib/ceph/rgw
+>
+> (not sure if 3 letters for consistency is better?)
+>
+> - rgw usually authenticates as a client.something user, which means if you
+> do use more standard rgw log names, then you get
+> /var/log/ceph/client.something.$pid.$uniqueid.log.  There is a loose
+> convention that 'something' is 'rgw.hostname' (i.e., client.rgw.hostname).
 
-
-Maybe a calamari user too
-
- - fix permissions on /var/log/ceph and /var/run/ceph (770?) so that qemu
-> and rgw can write logs and asok files there
-
-
-Yes
-
- - make daemons run as ceph user instead of root
-
-
-I think this is the right approach
-
+Maybe we can make it so that unless user name starts with mon, osd, or
+mds, it's going to be treated as 'client'? Or something along these
+lines.
 
 >
-> The main hangup is with that last one.  As I understand it, when packages
-> create users, they get a semi-random UID assigned.  That means that all
-> the data on a ceph-osd disk would have a semi-random UID.  If it were
-> hot-swapped into another host, the uid would be wrong.  Is there a way
-> use a fixed uid?
+> - radosgw has it's own separate sysvinit script that enumerates daemons
+> from /etc/ceph/ceph.conf sections that start with client.radosgw.*
+>
+> - radosgw upstart script is called radosgw (not ceph-rgw) and enumerates
+> daemons from /var/lib/ceph/radosgw/*
+>
+> (totally different than sysvinit!)
+>
+> - radosgw instances usually need some stuff in ceph.conf to make them
+> behave properly, which means they need a section in the shared
+> /etc/ceph/ceph.conf.  more work for admins or config management systems.
+>
+> - on rpm-based systems we have a separate sysvinit script that is
+> slightly different (mostly because the username is different, apache
+> instead of www-data).
+>
+> ---
+>
+> There is enough wrong here and little enough convention that my
+> proposal is to essentially start fresh:
+>
+> - rename package ceph-rgw.  obsoletes/replaces radosgw.
+>
+> - merge rgw start/stop into standard sysvinit script (just another
+> daemon type?).
+>
+> - normalize upstart start/stop (just rename radosgw-* to ceph-rgw-*,
+> basically).
+>
+> - make upstart use /var/lib/ceph/rgw instead of /var/lib/ceph/radosgw (do
+> this automagically on upgrade?  that will at least avoid the upgrade pain
+> for ubuntu users)
+>
+> - create new systemd start/stop that are correct the first time
+> around.
+>
+> - move log file to /var/log/ceph
 >
 >
-There's no guarantee that any given uid will be available across any two
-unix systems. You could pick 6789 or something uncommon, but I'm sure
-someone somewhere is using any given uid.
+> The part I'm not sure about is how to handle config.  I would really like
+> the ability to put per-daemon config stuff in /var/lib/ceph/rgw/foo/conf
+> or config, but there is no 'include file' function in our ini-file parser
+> (or in other typical ini-file implementations that i can find) and I don't
 
-I would take the approach that the uid shouldn't matter. Add a standard
-tool to assist with osd hot swaps that would change the file permissions on
-the new osd disk.  I think the osd hot swap process requires some manual
-intervention anyway. The only downside is the tool would need to be run
-with root permissions.
+The samba configuration files, which our ceph conf was heavily
+influenced by does have that capability. We also used to be able to
+do:
 
-I haven't tried moving an osd disk from one node to another. Can someone
-describe the process?
+   include = <other include file>
 
+but sadly that was taken out during some cleanup years ago. I don't
+think it's going to be too complicated to revive this functionality.
 
-> Also on the roadmap is defining proper selinux policies so that these
-> dameons are confined into the appropriate directories etc., but I imagine
-> running as non-root is a big help (or even prerequisite?) to making that
-> happen?
+> like the idea the per-daemon config would completely supplant the
+> /etc/ceph/ one.
 >
-> Suggestions or comments?  Or volunteers?  We haven't had time to look at
-> this yet but I think it's important!
+> Basically, I'd like to get to a point where we can programatically deploy
+> an rgw without any wonky code that edits the ceph.conf.  Perhaps the way
+> to accomplish this is to have the admin create a generic client.rgw user
+> and generic [client.rgw] section in the global ceph.conf?
+>
+> If there were an include file function, we could make the per-daemon
+> config file something like
+>
+>  include /etc/ceph/$cluster.conf
+>  [client.rgw.hostname]
+>  rgw foo = bar
+>  rgw baz = blip
+>
+> or whatever.
+>
+> Thoughts?  Suggestions?
 >
 > sage
->
 > _______________________________________________
 > ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org <javascript:;>
+> ceph-users@lists.ceph.com
 > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->
-
---001a1134f4a8e8f68f050991ce72
-Content-Type: text/html; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-
-<br><br>On Saturday, December 6, 2014, Sage Weil &lt;<a href=3D"mailto:swei=
-l@redhat.com">sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org</a>&gt; wrote:<br><blockquote class=3D"gmail=
-_quote" style=3D"margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:=
-1ex">While we are on the subject of init systems and packaging, I would *lo=
-ve*<br>
-to fix things up for hammer to<br>
-<br>
-=C2=A0- create a ceph user and group<br>
-=C2=A0- add various users to ceph group (like qemu or kvm user and<br>
-apache/www-data?)</blockquote><div>=C2=A0</div><div>Maybe a=C2=A0calamari=
-=C2=A0user too</div><div><br></div><blockquote class=3D"gmail_quote" style=
-=3D"margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">
-=C2=A0- fix permissions on /var/log/ceph and /var/run/ceph (770?) so that q=
-emu<br>
-and rgw can write logs and asok files there</blockquote><div><br></div><div=
->Yes=C2=A0</div><div><br></div><blockquote class=3D"gmail_quote" style=3D"m=
-argin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">
-=C2=A0- make daemons run as ceph user instead of root</blockquote><div><br>=
-</div><div>I think this is the right approach</div><div>=C2=A0</div><blockq=
-uote class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:1px #ccc =
-solid;padding-left:1ex">
-<br>
-The main hangup is with that last one.=C2=A0 As I understand it, when packa=
-ges<br>
-create users, they get a semi-random UID assigned.=C2=A0 That means that al=
-l<br>
-the data on a ceph-osd disk would have a semi-random UID.=C2=A0 If it were<=
-br>
-hot-swapped into another host, the uid would be wrong.=C2=A0 Is there a way=
-<br>
-use a fixed uid?<br>
-<br></blockquote><div><br></div><div>There&#39;s no guarantee that any give=
-n uid will be available across any two unix systems. You could pick 6789 or=
- something uncommon, but I&#39;m sure someone somewhere is using any given=
-=C2=A0uid.=C2=A0</div><div><br></div><div>I would take the approach that th=
-e uid shouldn&#39;t matter. Add a standard tool to assist with osd hot swap=
-s that would change the file permissions on the new=C2=A0osd disk.=C2=A0 I=
-=C2=A0think the osd hot swap process requires some manual intervention anyw=
-ay. The only downside is the tool would need to be run with root permission=
-s.=C2=A0</div><div><br></div><div>I haven&#39;t tried moving an osd disk fr=
-om one node to another. Can someone describe the process?<span></span></div=
-><div>=C2=A0</div><blockquote class=3D"gmail_quote" style=3D"margin:0 0 0 .=
-8ex;border-left:1px #ccc solid;padding-left:1ex">
-Also on the roadmap is defining proper selinux policies so that these<br>
-dameons are confined into the appropriate directories etc., but I imagine<b=
-r>
-running as non-root is a big help (or even prerequisite?) to making that<br=
->
-happen?<br>
-<br>
-Suggestions or comments?=C2=A0 Or volunteers?=C2=A0 We haven&#39;t had time=
- to look at<br>
-this yet but I think it&#39;s important!<br>
-<br>
-sage<br>
-<br>
-_______________________________________________<br>
-ceph-users mailing list<br>
-<a href=3D"javascript:;" onclick=3D"_e(event, &#39;cvml&#39;, &#39;ceph-use=
-rs-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org&#39;)">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a><br>
-<a href=3D"http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com" target=
-=3D"_blank">http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com</a><br>
-</blockquote>
-
---001a1134f4a8e8f68f050991ce72--
-
---===============2114975309==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============2114975309==--
