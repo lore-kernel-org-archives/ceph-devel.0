@@ -1,36 +1,43 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: CEPH & Shared RBD Volumes
-Date: Mon, 8 Dec 2014 10:26:03 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1412081024260.4440@cobra.newdream.net>
-References: <88C3E003BB3649489ED4ECA6C80410476B9D8E@ORSMSX102.amr.corp.intel.com> <5485EBC8.2010407@smart-weblications.de>
+From: "Matt W. Benjamin" <matt@cohortfs.com>
+Subject: wip-claim-2
+Date: Mon, 8 Dec 2014 16:48:16 -0500 (EST)
+Message-ID: <1732608241.235.1418075296547.JavaMail.root@thunderbeast.private.linuxbox.com>
+References: <1582070360.233.1418075135946.JavaMail.root@thunderbeast.private.linuxbox.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:35718 "EHLO mx1.redhat.com"
+Received: from aa.linuxbox.com ([69.128.83.226]:4580 "EHLO aa.linuxbox.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750988AbaLHS0O (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 8 Dec 2014 13:26:14 -0500
-In-Reply-To: <5485EBC8.2010407@smart-weblications.de>
+	id S1751520AbaLHVsY (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 8 Dec 2014 16:48:24 -0500
+In-Reply-To: <1582070360.233.1418075135946.JavaMail.root@thunderbeast.private.linuxbox.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Smart Weblications GmbH - Florian Wiessner <f.wiessner@smart-weblications.de>
-Cc: "Cook, Nigel" <nigel.cook@intel.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
+Cc: Sage Weil <sage@newdream.net>
 
-On Mon, 8 Dec 2014, Smart Weblications GmbH - Florian Wiessner wrote:
-> Hi Nigel,
-> 
-> Am 08.12.2014 15:30, schrieb Cook, Nigel:
-> > Folks,
-> > 
-> > Can CEPH support 2 clients simultaneously accessing a single volume - for example a database cluster - and honor read and write order of blocks across the multiple clients?
-> > 
-> 
-> Yes, we use ocfs2 ontop of rbd, gfs2 should also work...
+Hi devs,
 
-You do need to disable client-side rbd caching, though (on librbd).  The 
-librbd cache is crash-safe but not coherent across clients, and clustered 
-file systems expect coherency (caches in a SAN are at the disk or shared 
-controller, not the client).
+We've created a new branch wip-claim-2, and new pull request https://github.com/linuxbox2/linuxbox-ceph/pull/3
+based on review feedback.
 
-sage
+The big change is to replace "volatile" with "sharable", and replace "strong_claim()" with "clone_nonsharable()."
+This may not be perfect, feedback appreciated.  It does remove the overloading of "claim()", which people found
+confusing.
 
+Thanks!
+
+Matt
+
+-- 
+Matt Benjamin
+CohortFS, LLC.
+315 West Huron Street, Suite 140A
+Ann Arbor, Michigan 48103
+
+http://cohortfs.com
+
+tel.  734-761-4689 
+fax.  734-769-8938 
+cel.  734-216-5309 
