@@ -1,75 +1,27 @@
-From: Anthony Alba <ascanio.alba7-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: normalizing radosgw
-Date: Mon, 8 Dec 2014 13:10:23 +0800
-Message-ID: <CADkWibdxvvCqpy5yb+AqnC9S=be93yajWV2M=dyfpRW5qQ7s2g@mail.gmail.com>
-References: <alpine.DEB.2.00.1412061025330.18213@cobra.newdream.net>
+From: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
+Subject: Three times retries on write
+Date: Mon, 8 Dec 2014 08:21:39 +0000
+Message-ID: <06E7D85B3BA36C4DB207FEDE871C53489677C5@SHSMSX101.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============1976016962=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.00.1412061025330.18213-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
-
---===============1976016962==
-Content-Type: multipart/alternative; boundary=047d7bd756b098cbea0509ad71e8
-
---047d7bd756b098cbea0509ad71e8
-Content-Type: text/plain; charset=UTF-8
-
-Suggestion: can we look at normalizing custom cluster names as well for
-RHEL-like systems?
-
-/etc/init.d/ceph: how do you pass --cluster myname at system startup?
-systemd service file uses EnvironmentFile.
-
-What about
-. /etc/sysconfig/ceph #near the top
-
-and /etc/sysconfig/ceph contains
-cluster=myname
-
-For ceph-radosgw even this does not work.
-You need
-export CEPH_CONF=/etc/ceph/myname.conf
-
-as well.
-
-Anthony
-
---047d7bd756b098cbea0509ad71e8
-Content-Type: text/html; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-
-Suggestion: can we look at normalizing custom cluster names as well for RHE=
-L-like systems?<div><br></div><div>/etc/init.d/ceph: how do=C2=A0you pass -=
--cluster myname at system startup?</div>systemd service file uses Environme=
-ntFile.<div><br></div><div>What about</div><div>. /etc/sysconfig/ceph #near=
- the top</div><div><br></div><div>and /etc/sysconfig/ceph contains</div>clu=
-ster=3Dmyname<div><br></div><div>For ceph-radosgw even this does not work.<=
-/div><div>You need=C2=A0</div>export CEPH_CONF=3D/etc/ceph/myname.conf<div>=
-<br></div>as well.<div><br></div><div>Anthony</div>
-
---047d7bd756b098cbea0509ad71e8--
-
---===============1976016962==
 Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
+Content-Transfer-Encoding: 8BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mga01.intel.com ([192.55.52.88]:43346 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753901AbaLHIWh convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Dec 2014 03:22:37 -0500
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+Hi all,
 
---===============1976016962==--
+I wrote some proxy write code and is doing testing now. I use 'rados put' to write a full object. I notice that every time when the cache tier OSD sends the object to the base tier OSD through the Objecter::mutate interface, it retries 3 times. Looks like the 3rd try is a success. I verified the object in the base tier. It is what I wrote. The logs are showing below. Any hints on what is causing this?
+
+2014-12-08 15:37:28.721769 7f4ac5764700  0 osd.22 pg_epoch: 27412 pg[45.0( v 26979'3108 (0'0,26979'3108] local-les=27409 n=28 ec=25839 les/c 27409/27409 27408/27408/27408) [22,16] r=0 lpr=27408 crt=26979'3102 lcod 0'0 mlcod 0'0 active+clean] do_proxy_write Start proxy write for osd_op(client.127754.0:1 rb.0.17f51.6b8b4567.0000000008d  [writefull 0~4194304] 45.42df800 ondisk+write+known_if_redirected e27412) v4
+2014-12-08 15:37:28.721951 7f4ac5764700  1 -- :/2913 --> 10.44.44.6:6835/3356 -- osd_op(osd.22.27408:1 rb.0.17f51.6b8b4567.0000000008dd [writefull 0~4194304] 14.42df800 ack+ondisk+write+ignore_cache+ignore_overlay+map_snap_clone+known_if_redirected e27412) v4 -- ?+0 0x3a937000 con 0x3b94c840
+2014-12-08 15:37:28.901912 7f4ad7788700  1 -- 10.44.44.6:0/2913 --> 10.44.44.6:6835/3356 -- osd_op(osd.22.27408:1 rb.0.17f51.6b8b4567.0000000008dd [writefull 0~4194304] 14.42df800 RETRY=1 ack+ondisk+retry+write+ignore_cache+ignore_overlay+map_snap_clone+known_if_redirected e27412) v4 -- ?+0 0x3a937000 con 0x3b973dc0
+2014-12-08 15:37:33.071380 7f4ade796700  1 -- 10.44.44.6:0/2913 --> 10.44.44.5:6801/62721 -- osd_op(osd.22.27408:1 rb.0.17f51.6b8b4567.0000000008dd [writefull 0~4194304] 14.42df800 RETRY=2 ack+ondisk+retry+write+ignore_cache+ignore_overlay+map_snap_clone+known_if_redirected e27413) v4 -- ?+0 0x3b7b3a00 con 0x3b473160
+2014-12-08 15:37:34.259670 7f4ade796700  1 -- 10.44.44.6:0/2913 --> 10.44.44.6:6803/6847 -- osd_op(osd.22.27408:1 rb.0.17f51.6b8b4567.0000000008dd [writefull 0~4194304] 14.42df800 RETRY=3 ack+ondisk+retry+write+ignore_cache+ignore_overlay+map_snap_clone+known_if_redirected e27414) v4 -- ?+0 0x3a937000 con 0x3ac0d840
+2014-12-08 15:37:35.443525 7f4ab49eb700  1 -- 10.44.44.6:0/2913 <== osd.13 10.44.44.6:6803/6847 1 ==== osd_op_reply(1 rb.0.17f51.6b8b4567.0000000008dd [writefull 0~4194304] v27412'10764 uv58186 ondisk = 0) v7 ==== 207+0+0 (2066479387 0 0) 0x3a796840 con 0x3ac0d840
