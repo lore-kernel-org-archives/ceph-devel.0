@@ -1,116 +1,113 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: dead code in gf-complete
-Date: Mon, 08 Dec 2014 11:34:49 +0100
-Message-ID: <54857EC9.5010008@dachary.org>
-References: <5481C9EF.1090800@dachary.org> <CA+AFVBjtbVbmq_Hn+-DubpHy2i_eFUhiUhSKmg2dXeGgT=RChA@mail.gmail.com>
+From: Fred Yang <frederic.yang-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: experimental features
+Date: Mon, 08 Dec 2014 12:57:13 +0000
+Message-ID: <CAPHS-z7cOLokgHe7Ky+SJQMGPbZmY26o+EeA1i=qo+i_XnYg5g@mail.gmail.com>
+References: <alpine.DEB.2.00.1412050927150.24079@cobra.newdream.net>
+	<CAC6JEv8LVviFoNXB72gKBQ+seNVYphvpwm0QZeOwccPHr7Qatg@mail.gmail.com>
+	<5481EF6B.4010901@redhat.com>
+	<CAOGLoJN2wSxMgtok6aATSW5o-Abqcv2bdVo+dVfaEbG4iyiQSw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="JoWJLl8RJRSnMeF5HUxoR1OEa1h6L8iho"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:49310 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1753148AbaLHKev (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Dec 2014 05:34:51 -0500
-In-Reply-To: <CA+AFVBjtbVbmq_Hn+-DubpHy2i_eFUhiUhSKmg2dXeGgT=RChA@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Kevin Greenan <kmgreen2@gmail.com>, Janne Grunau <j@jannau.net>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: multipart/mixed; boundary="===============2066353841=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Justin Erenkrantz <justin-XWYNqclEDWm2WkX4dyxwcA@public.gmane.org>, mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Cc: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---JoWJLl8RJRSnMeF5HUxoR1OEa1h6L8iho
-Content-Type: text/plain; charset=utf-8
+--===============2066353841==
+Content-Type: multipart/alternative; boundary=001a1133e4cc2131f10509b3f796
+
+--001a1133e4cc2131f10509b3f796
+Content-Type: text/plain; charset=UTF-8
+
+You will have to consider in the real world whoever built the cluster might
+not document the dangerous option to let support stuff or successor aware.
+Thus any experimental feature considered not safe for production should be
+included in a warning message in 'ceph health', and logs, either log it
+periodically or log the warning msg upon restart.
+Feature-wise, 'ceph health detail' should give you a report over all
+important features/options of the cluster as well.
+
+-Fred
+
+On Sun, Dec 7, 2014, 11:15 PM Justin Erenkrantz <justin-XWYNqclEDWm2WkX4dyxwcA@public.gmane.org>
+wrote:
+
+> On Fri, Dec 5, 2014 at 12:46 PM, Mark Nelson <mark.nelson-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+> wrote:
+> > I'm in favor of the "allow experimental features" but instead call it:
+> >
+> > "ALLOW UNRECOVERABLE DATA CORRUPTING FEATURES" which makes things a
+> little
+> > more explicit. With great power comes great responsibility.
+>
+> +1.
+>
+> For Subversion, we utilize SVN_I_LOVE_CORRUPTED_XXX for a few options
+> that can cause data corruption.  -- justin
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+
+--001a1133e4cc2131f10509b3f796
+Content-Type: text/html; charset=UTF-8
 Content-Transfer-Encoding: quoted-printable
 
-Since both of you think this is a false positive, let's just ignore it.
+You will have to consider in the real world whoever built the cluster might=
+ not document the dangerous option to let support stuff or successor aware.=
+ Thus any experimental feature considered not safe for production should be=
+ included in a warning message in &#39;ceph health&#39;, and logs, either l=
+og it periodically or log the warning msg upon restart. <br>Feature-wise, &=
+#39;ceph health detail&#39; should give you a report over all important fea=
+tures/options of the cluster as well.<br><br>-Fred<br><br><div class=3D"gma=
+il_quote">On Sun, Dec 7, 2014, 11:15 PM=C2=A0Justin Erenkrantz &lt;<a href=
+=3D"mailto:justin-XWYNqclEDWm2WkX4dyxwcA@public.gmane.org">justin-XWYNqclEDWm2WkX4dyxwcA@public.gmane.org</a>&gt; wrote:<br><=
+blockquote class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:1px=
+ #ccc solid;padding-left:1ex">On Fri, Dec 5, 2014 at 12:46 PM, Mark Nelson =
+&lt;<a href=3D"mailto:mark.nelson-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org" target=3D"_blank">mark.nelso=
+n@inktank.com</a>&gt; wrote:<br>
+&gt; I&#39;m in favor of the &quot;allow experimental features&quot; but in=
+stead call it:<br>
+&gt;<br>
+&gt; &quot;ALLOW UNRECOVERABLE DATA CORRUPTING FEATURES&quot; which makes t=
+hings a little<br>
+&gt; more explicit. With great power comes great responsibility.<br>
+<br>
++1.<br>
+<br>
+For Subversion, we utilize SVN_I_LOVE_CORRUPTED_XXX for a few options<br>
+that can cause data corruption.=C2=A0 -- justin<br>
+--<br>
+To unsubscribe from this list: send the line &quot;unsubscribe ceph-devel&q=
+uot; in<br>
+the body of a message to <a href=3D"mailto:majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" targe=
+t=3D"_blank">majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org</a><br>
+More majordomo info at=C2=A0 <a href=3D"http://vger.kernel.org/majordomo-in=
+fo.html" target=3D"_blank">http://vger.kernel.org/<u></u>majordomo-info.htm=
+l</a><br>
+</blockquote></div>
 
-On 05/12/2014 21:06, Kevin Greenan wrote:
-> I can take a look...  Man, some of our conditional expressions and if-t=
-hen-else chains are pretty ugly!
->=20
-> -kevin=20
->=20
-> On Fri, Dec 5, 2014 at 7:06 AM, Loic Dachary <loic@dachary.org <mailto:=
-loic@dachary.org>> wrote:
->=20
->     Hi Kevin & Janne,
->=20
->     Does the following ring a bell ? If not I'll figure it out ;-) It s=
-howed up with static analysis, after the NEON patch was merged (no static=
- analysis is done before).
->=20
->     Cheers
->=20
->     /erasure-code/jerasure/gf-complete/src/gf_w32.c: 2309 in gf_w32_spl=
-it_init()
->     2303       if ((h->arg1 =3D=3D 4 && h->arg2 =3D=3D 32) || (h->arg1 =
-=3D=3D 32 && h->arg2 =3D=3D 4) ||
->     2304           ((issse3 || isneon) && h->mult_type =3D=3D GF_REGION=
-_DEFAULT)) {
->     2305         ld4 =3D (struct gf_split_4_32_lazy_data *) h->private;=
+--001a1133e4cc2131f10509b3f796--
 
->     2306         ld4->last_value =3D 0;
->     2307         if ((h->region_type & GF_REGION_NOSIMD) || !(issse3 ||=
- isneon)) {
->     2308           gf->multiply_region.w32 =3D gf_w32_split_4_32_lazy_m=
-ultiply_region;
->     >>>     CID 1256941:  Logically dead code  (DEADCODE)
->     >>>     Execution cannot reach this statement "if (isneon) {
->     } else if (h-...".
->     2309         } else if (isneon) {
->     2310     #ifdef ARM_NEON
->     2311           gf_w32_neon_split_init(gf);
->     2312     #endif
->     2313         } else if (h->region_type & GF_REGION_ALTMAP) {
->     2314           gf->multiply_region.w32 =3D gf_w32_split_4_32_lazy_s=
-se_altmap_multiply_region;
->=20
->     ___________________________________________________________________=
-_____________________________________
->     *** CID 1256942:  Logically dead code  (DEADCODE)
->     /erasure-code/jerasure/gf-complete/src/gf_w8.c: 1147 in gf_w8_table=
-_init()
->     1141       use_simd =3D 1;
->     1142     #else
->     1143       use_simd =3D 0;
->     1144     #endif
->     1145
->     1146       if (h->mult_type =3D=3D GF_MULT_DEFAULT && use_simd) {
->     >>>     CID 1256942:  Logically dead code  (DEADCODE)
->     >>>     Execution cannot reach this statement "dd =3D (struct gf_w8=
-_default_...".
->     1147         dd =3D (struct gf_w8_default_data *)h->private;
->     1148         scase =3D 3;
->     1149         bzero(dd->high, sizeof(uint8_t) * GF_FIELD_SIZE * GF_H=
-ALF_SIZE);
->     1150         bzero(dd->low, sizeof(uint8_t) * GF_FIELD_SIZE * GF_HA=
-LF_SIZE);
->     1151         bzero(dd->divtable, sizeof(uint8_t) * GF_FIELD_SIZE * =
-GF_FIELD_SIZE);
->     1152         bzero(dd->multtable, sizeof(uint8_t) * GF_FIELD_SIZE *=
- GF_FIELD_SIZE);
->=20
->     --
->     Lo=C3=AFc Dachary, Artisan Logiciel Libre
->=20
->=20
+--===============2066353841==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
 
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 
-
---JoWJLl8RJRSnMeF5HUxoR1OEa1h6L8iho
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlSFfskACgkQ8dLMyEl6F22noACfW6udov6TgvGKLcmOp1+K+hEj
-lLUAn0ZlrodC+2Y0oi8JSxFtfPNBLSiX
-=1Zu/
------END PGP SIGNATURE-----
-
---JoWJLl8RJRSnMeF5HUxoR1OEa1h6L8iho--
+--===============2066353841==--
