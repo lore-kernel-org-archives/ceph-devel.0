@@ -1,38 +1,68 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Three times retries on write
-Date: Mon, 8 Dec 2014 06:32:05 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1412080631390.18213@cobra.newdream.net>
-References: <06E7D85B3BA36C4DB207FEDE871C53489677C5@SHSMSX101.ccr.corp.intel.com>
+From: Mark Nelson <mark.nelson@inktank.com>
+Subject: Re: experimental features
+Date: Mon, 08 Dec 2014 08:33:25 -0600
+Message-ID: <5485B6B5.8010802@redhat.com>
+References: <alpine.DEB.2.00.1412050927150.24079@cobra.newdream.net> <CAC6JEv8LVviFoNXB72gKBQ+seNVYphvpwm0QZeOwccPHr7Qatg@mail.gmail.com> <5481EF6B.4010901@redhat.com> <CAOGLoJN2wSxMgtok6aATSW5o-Abqcv2bdVo+dVfaEbG4iyiQSw@mail.gmail.com> <CAPHS-z7cOLokgHe7Ky+SJQMGPbZmY26o+EeA1i=qo+i_XnYg5g@mail.gmail.com>
+Reply-To: mnelson@redhat.com
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:43611 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752470AbaLHOcH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Dec 2014 09:32:07 -0500
-In-Reply-To: <06E7D85B3BA36C4DB207FEDE871C53489677C5@SHSMSX101.ccr.corp.intel.com>
+Received: from mail-qa0-f43.google.com ([209.85.216.43]:41102 "EHLO
+	mail-qa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755481AbaLHOd2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Dec 2014 09:33:28 -0500
+Received: by mail-qa0-f43.google.com with SMTP id bm13so3383152qab.16
+        for <ceph-devel@vger.kernel.org>; Mon, 08 Dec 2014 06:33:28 -0800 (PST)
+In-Reply-To: <CAPHS-z7cOLokgHe7Ky+SJQMGPbZmY26o+EeA1i=qo+i_XnYg5g@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Fred Yang <frederic.yang@gmail.com>, Justin Erenkrantz <justin@erenkrantz.com>
+Cc: Gregory Farnum <greg@gregs42.com>, Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>
 
-On Mon, 8 Dec 2014, Wang, Zhiqiang wrote:
-> Hi all,
-> 
-> I wrote some proxy write code and is doing testing now. I use 'rados put' to write a full object. I notice that every time when the cache tier OSD sends the object to the base tier OSD through the Objecter::mutate interface, it retries 3 times. Looks like the 3rd try is a success. I verified the object in the base tier. It is what I wrote. The logs are showing below. Any hints on what is causing this?
-> 
-> 2014-12-08 15:37:28.721769 7f4ac5764700  0 osd.22 pg_epoch: 27412 pg[45.0( v 26979'3108 (0'0,26979'3108] local-les=27409 n=28 ec=25839 les/c 27409/27409 27408/27408/27408) [22,16] r=0 lpr=27408 crt=26979'3102 lcod 0'0 mlcod 0'0 active+clean] do_proxy_write Start proxy write for osd_op(client.127754.0:1 rb.0.17f51.6b8b4567.0000000008d  [writefull 0~4194304] 45.42df800 ondisk+write+known_if_redirected e27412) v4
-> 2014-12-08 15:37:28.721951 7f4ac5764700  1 -- :/2913 --> 10.44.44.6:6835/3356 -- osd_op(osd.22.27408:1 rb.0.17f51.6b8b4567.0000000008dd [writefull 0~4194304] 14.42df800 ack+ondisk+write+ignore_cache+ignore_overlay+map_snap_clone+known_if_redirected e27412) v4 -- ?+0 0x3a937000 con 0x3b94c840
-> 2014-12-08 15:37:28.901912 7f4ad7788700  1 -- 10.44.44.6:0/2913 --> 10.44.44.6:6835/3356 -- osd_op(osd.22.27408:1 rb.0.17f51.6b8b4567.0000000008dd [writefull 0~4194304] 14.42df800 RETRY=1 ack+ondisk+retry+write+ignore_cache+ignore_overlay+map_snap_clone+known_if_redirected e27412) v4 -- ?+0 0x3a937000 con 0x3b973dc0
-> 2014-12-08 15:37:33.071380 7f4ade796700  1 -- 10.44.44.6:0/2913 --> 10.44.44.5:6801/62721 -- osd_op(osd.22.27408:1 rb.0.17f51.6b8b4567.0000000008dd [writefull 0~4194304] 14.42df800 RETRY=2 ack+ondisk+retry+write+ignore_cache+ignore_overlay+map_snap_clone+known_if_redirected e27413) v4 -- ?+0 0x3b7b3a00 con 0x3b473160
-> 2014-12-08 15:37:34.259670 7f4ade796700  1 -- 10.44.44.6:0/2913 --> 10.44.44.6:6803/6847 -- osd_op(osd.22.27408:1 rb.0.17f51.6b8b4567.0000000008dd [writefull 0~4194304] 14.42df800 RETRY=3 ack+ondisk+retry+write+ignore_cache+ignore_overlay+map_snap_clone+known_if_redirected e27414) v4 -- ?+0 0x3a937000 con 0x3ac0d840
-> 2014-12-08 15:37:35.443525 7f4ab49eb700  1 -- 10.44.44.6:0/2913 <== osd.13 10.44.44.6:6803/6847 1 ==== osd_op_reply(1 rb.0.17f51.6b8b4567.0000000008dd [writefull 0~4194304] v27412'10764 uv58186 ondisk = 0) v7 ==== 207+0+0 (2066479387 0 0) 0x3a796840 con 0x3ac0d840
+I've been thinking for a while that we need another more general command 
+than Ceph health to more generally inform you about your cluster.  IE I 
+personally don't like having min/max PG warnings in Ceph health (they 
+can be independently controlled by ceph.conf options but that kind of 
+approach won't scale). I'd like another command that I can run that 
+tells me about this kind of thing.  Same thing with experimental 
+features.  I don't want ceph health warning me if they've been enabled, 
+but I do want to know if they've ever been enabled, when, and whether 
+they are still in effect.
 
-That is very strange (and concerning)!  Can you reproduce this with
+Mark
 
- debug objecter = 20
-
-on the OSD?  That should tell us why it is resending.
-
-sage
-
+On 12/08/2014 06:57 AM, Fred Yang wrote:
+> You will have to consider in the real world whoever built the cluster
+> might not document the dangerous option to let support stuff or
+> successor aware. Thus any experimental feature considered not safe for
+> production should be included in a warning message in 'ceph health', and
+> logs, either log it periodically or log the warning msg upon restart.
+> Feature-wise, 'ceph health detail' should give you a report over all
+> important features/options of the cluster as well.
+>
+> -Fred
+>
+> On Sun, Dec 7, 2014, 11:15 PM Justin Erenkrantz <justin@erenkrantz.com
+> <mailto:justin@erenkrantz.com>> wrote:
+>
+>     On Fri, Dec 5, 2014 at 12:46 PM, Mark Nelson
+>     <mark.nelson@inktank.com <mailto:mark.nelson@inktank.com>> wrote:
+>      > I'm in favor of the "allow experimental features" but instead
+>     call it:
+>      >
+>      > "ALLOW UNRECOVERABLE DATA CORRUPTING FEATURES" which makes things
+>     a little
+>      > more explicit. With great power comes great responsibility.
+>
+>     +1.
+>
+>     For Subversion, we utilize SVN_I_LOVE_CORRUPTED_XXX for a few options
+>     that can cause data corruption.  -- justin
+>     --
+>     To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>     the body of a message to majordomo@vger.kernel.org
+>     <mailto:majordomo@vger.kernel.org>
+>     More majordomo info at http://vger.kernel.org/__majordomo-info.html
+>     <http://vger.kernel.org/majordomo-info.html>
+>
