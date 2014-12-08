@@ -1,54 +1,57 @@
-From: Yehuda Sadeh <yehuda@redhat.com>
-Subject: Re: rados read ordering
-Date: Mon, 8 Dec 2014 09:11:54 -0800
-Message-ID: <CABBk=J9iA=iwAqOBrQ3zDpUvEDH2JA17+WJLRU2gLz_fFdF55w@mail.gmail.com>
-References: <alpine.DEB.2.00.1412080855300.5263@cobra.newdream.net>
+From: Smart Weblications GmbH - Florian Wiessner
+	<f.wiessner@smart-weblications.de>
+Subject: Re: CEPH & Shared RBD Volumes
+Date: Mon, 08 Dec 2014 19:19:52 +0100
+Message-ID: <5485EBC8.2010407@smart-weblications.de>
+References: <88C3E003BB3649489ED4ECA6C80410476B9D8E@ORSMSX102.amr.corp.intel.com>
+Reply-To: f.wiessner@smart-weblications.de
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f170.google.com ([209.85.213.170]:34498 "EHLO
-	mail-ig0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751831AbaLHRLz (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Dec 2014 12:11:55 -0500
-Received: by mail-ig0-f170.google.com with SMTP id r2so4473636igi.5
-        for <ceph-devel@vger.kernel.org>; Mon, 08 Dec 2014 09:11:54 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1412080855300.5263@cobra.newdream.net>
+Received: from mail.smart-weblications.de ([188.65.144.61]:48581 "EHLO
+	mail.smart-weblications.de" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752066AbaLHSTy (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Dec 2014 13:19:54 -0500
+In-Reply-To: <88C3E003BB3649489ED4ECA6C80410476B9D8E@ORSMSX102.amr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Samuel Just <sjust@redhat.com>, Josh Durgin <jdurgin@redhat.com>, Jason Dillaman <dillaman@redhat.com>, zhiqiang.wang@intel.com, ceph-devel <ceph-devel@vger.kernel.org>
+To: "Cook, Nigel" <nigel.cook@intel.com>, Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Mon, Dec 8, 2014 at 9:03 AM, Sage Weil <sweil@redhat.com> wrote:
-> The current RADOS behavior is that reads (on any given object) are always
-> processed in the order they are submitted by the client.  This causes a
-> few headaches for the cache tiering that it would be nice to avoid.  It
-> also occurs to me that there are likely cases where we could go a lot
-> faster by not strictly ordering things.  For example, a stat can respond
-> more quickly than a large read, and some reads may hit cache while others
-> go to disk.  This doesn't happen currently because of the (lame) way we do
-> reads synchronously, but hope that can change too.
->
-> I propose we drop this semantic.  If a client wants reads to have a strict
-> ordering, they can set the existing RWORDERED flag (which also orders them
-> with respect to writes).  That's not the most general thing ever, but I'm
-> not sure we care about callers who want reads ordered with respect to each
-> other but not writes.
->
-> The real question is whether there are any users that want/need this
-> currently.  I can't think of any offhand.  In several places we submit
-> multiple *writes* and expect them to be strictly ordered (e.g., we
-> set a completion on teh last write only).  I don't think we do this
-> anywhere for reads though...
->
-> Josh, Yehuda, Jason--can you think of any in RBD or RGW that would depend
-> on this?
->
+Hi Nigel,
 
-None that I can think of. For objects data, we already stripe it
-across multiple objects, and the underlying assumption is that we're
-going to get responses out of order so we make sure we commit
-in-order. Guards are used on the head object, and the read is
-synchronous there anyway. I can't think of any other place where we'd
-have an issue.
+Am 08.12.2014 15:30, schrieb Cook, Nigel:
+> Folks,
+>=20
+> Can CEPH support 2 clients simultaneously accessing a single volume -=
+ for example a database cluster - and honor read and write order of blo=
+cks across the multiple clients?
+>=20
 
-Yehuda
+Yes, we use ocfs2 ontop of rbd, gfs2 should also work...
+
+--=20
+
+Mit freundlichen Gr=FC=DFen,
+
+=46lorian Wiessner
+
+Smart Weblications GmbH
+Martinsberger Str. 1
+D-95119 Naila
+
+fon.: +49 9282 9638 200
+fax.: +49 9282 9638 205
+24/7: +49 900 144 000 00 - 0,99 EUR/Min*
+http://www.smart-weblications.de
+
+--
+Sitz der Gesellschaft: Naila
+Gesch=E4ftsf=FChrer: Florian Wiessner
+HRB-Nr.: HRB 3840 Amtsgericht Hof
+*aus dem dt. Festnetz, ggf. abweichende Preise aus dem Mobilfunknetz
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
