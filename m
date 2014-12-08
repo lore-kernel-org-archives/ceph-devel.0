@@ -1,27 +1,116 @@
-From: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
-Subject: Three times retries on write
-Date: Mon, 8 Dec 2014 08:21:39 +0000
-Message-ID: <06E7D85B3BA36C4DB207FEDE871C53489677C5@SHSMSX101.ccr.corp.intel.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: dead code in gf-complete
+Date: Mon, 08 Dec 2014 11:34:49 +0100
+Message-ID: <54857EC9.5010008@dachary.org>
+References: <5481C9EF.1090800@dachary.org> <CA+AFVBjtbVbmq_Hn+-DubpHy2i_eFUhiUhSKmg2dXeGgT=RChA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="JoWJLl8RJRSnMeF5HUxoR1OEa1h6L8iho"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:43346 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753901AbaLHIWh convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Dec 2014 03:22:37 -0500
-Content-Language: en-US
+Received: from mail2.dachary.org ([91.121.57.175]:49310 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1753148AbaLHKev (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Dec 2014 05:34:51 -0500
+In-Reply-To: <CA+AFVBjtbVbmq_Hn+-DubpHy2i_eFUhiUhSKmg2dXeGgT=RChA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Kevin Greenan <kmgreen2@gmail.com>, Janne Grunau <j@jannau.net>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi all,
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--JoWJLl8RJRSnMeF5HUxoR1OEa1h6L8iho
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-I wrote some proxy write code and is doing testing now. I use 'rados put' to write a full object. I notice that every time when the cache tier OSD sends the object to the base tier OSD through the Objecter::mutate interface, it retries 3 times. Looks like the 3rd try is a success. I verified the object in the base tier. It is what I wrote. The logs are showing below. Any hints on what is causing this?
+Since both of you think this is a false positive, let's just ignore it.
 
-2014-12-08 15:37:28.721769 7f4ac5764700  0 osd.22 pg_epoch: 27412 pg[45.0( v 26979'3108 (0'0,26979'3108] local-les=27409 n=28 ec=25839 les/c 27409/27409 27408/27408/27408) [22,16] r=0 lpr=27408 crt=26979'3102 lcod 0'0 mlcod 0'0 active+clean] do_proxy_write Start proxy write for osd_op(client.127754.0:1 rb.0.17f51.6b8b4567.0000000008d  [writefull 0~4194304] 45.42df800 ondisk+write+known_if_redirected e27412) v4
-2014-12-08 15:37:28.721951 7f4ac5764700  1 -- :/2913 --> 10.44.44.6:6835/3356 -- osd_op(osd.22.27408:1 rb.0.17f51.6b8b4567.0000000008dd [writefull 0~4194304] 14.42df800 ack+ondisk+write+ignore_cache+ignore_overlay+map_snap_clone+known_if_redirected e27412) v4 -- ?+0 0x3a937000 con 0x3b94c840
-2014-12-08 15:37:28.901912 7f4ad7788700  1 -- 10.44.44.6:0/2913 --> 10.44.44.6:6835/3356 -- osd_op(osd.22.27408:1 rb.0.17f51.6b8b4567.0000000008dd [writefull 0~4194304] 14.42df800 RETRY=1 ack+ondisk+retry+write+ignore_cache+ignore_overlay+map_snap_clone+known_if_redirected e27412) v4 -- ?+0 0x3a937000 con 0x3b973dc0
-2014-12-08 15:37:33.071380 7f4ade796700  1 -- 10.44.44.6:0/2913 --> 10.44.44.5:6801/62721 -- osd_op(osd.22.27408:1 rb.0.17f51.6b8b4567.0000000008dd [writefull 0~4194304] 14.42df800 RETRY=2 ack+ondisk+retry+write+ignore_cache+ignore_overlay+map_snap_clone+known_if_redirected e27413) v4 -- ?+0 0x3b7b3a00 con 0x3b473160
-2014-12-08 15:37:34.259670 7f4ade796700  1 -- 10.44.44.6:0/2913 --> 10.44.44.6:6803/6847 -- osd_op(osd.22.27408:1 rb.0.17f51.6b8b4567.0000000008dd [writefull 0~4194304] 14.42df800 RETRY=3 ack+ondisk+retry+write+ignore_cache+ignore_overlay+map_snap_clone+known_if_redirected e27414) v4 -- ?+0 0x3a937000 con 0x3ac0d840
-2014-12-08 15:37:35.443525 7f4ab49eb700  1 -- 10.44.44.6:0/2913 <== osd.13 10.44.44.6:6803/6847 1 ==== osd_op_reply(1 rb.0.17f51.6b8b4567.0000000008dd [writefull 0~4194304] v27412'10764 uv58186 ondisk = 0) v7 ==== 207+0+0 (2066479387 0 0) 0x3a796840 con 0x3ac0d840
+On 05/12/2014 21:06, Kevin Greenan wrote:
+> I can take a look...  Man, some of our conditional expressions and if-t=
+hen-else chains are pretty ugly!
+>=20
+> -kevin=20
+>=20
+> On Fri, Dec 5, 2014 at 7:06 AM, Loic Dachary <loic@dachary.org <mailto:=
+loic@dachary.org>> wrote:
+>=20
+>     Hi Kevin & Janne,
+>=20
+>     Does the following ring a bell ? If not I'll figure it out ;-) It s=
+howed up with static analysis, after the NEON patch was merged (no static=
+ analysis is done before).
+>=20
+>     Cheers
+>=20
+>     /erasure-code/jerasure/gf-complete/src/gf_w32.c: 2309 in gf_w32_spl=
+it_init()
+>     2303       if ((h->arg1 =3D=3D 4 && h->arg2 =3D=3D 32) || (h->arg1 =
+=3D=3D 32 && h->arg2 =3D=3D 4) ||
+>     2304           ((issse3 || isneon) && h->mult_type =3D=3D GF_REGION=
+_DEFAULT)) {
+>     2305         ld4 =3D (struct gf_split_4_32_lazy_data *) h->private;=
+
+>     2306         ld4->last_value =3D 0;
+>     2307         if ((h->region_type & GF_REGION_NOSIMD) || !(issse3 ||=
+ isneon)) {
+>     2308           gf->multiply_region.w32 =3D gf_w32_split_4_32_lazy_m=
+ultiply_region;
+>     >>>     CID 1256941:  Logically dead code  (DEADCODE)
+>     >>>     Execution cannot reach this statement "if (isneon) {
+>     } else if (h-...".
+>     2309         } else if (isneon) {
+>     2310     #ifdef ARM_NEON
+>     2311           gf_w32_neon_split_init(gf);
+>     2312     #endif
+>     2313         } else if (h->region_type & GF_REGION_ALTMAP) {
+>     2314           gf->multiply_region.w32 =3D gf_w32_split_4_32_lazy_s=
+se_altmap_multiply_region;
+>=20
+>     ___________________________________________________________________=
+_____________________________________
+>     *** CID 1256942:  Logically dead code  (DEADCODE)
+>     /erasure-code/jerasure/gf-complete/src/gf_w8.c: 1147 in gf_w8_table=
+_init()
+>     1141       use_simd =3D 1;
+>     1142     #else
+>     1143       use_simd =3D 0;
+>     1144     #endif
+>     1145
+>     1146       if (h->mult_type =3D=3D GF_MULT_DEFAULT && use_simd) {
+>     >>>     CID 1256942:  Logically dead code  (DEADCODE)
+>     >>>     Execution cannot reach this statement "dd =3D (struct gf_w8=
+_default_...".
+>     1147         dd =3D (struct gf_w8_default_data *)h->private;
+>     1148         scase =3D 3;
+>     1149         bzero(dd->high, sizeof(uint8_t) * GF_FIELD_SIZE * GF_H=
+ALF_SIZE);
+>     1150         bzero(dd->low, sizeof(uint8_t) * GF_FIELD_SIZE * GF_HA=
+LF_SIZE);
+>     1151         bzero(dd->divtable, sizeof(uint8_t) * GF_FIELD_SIZE * =
+GF_FIELD_SIZE);
+>     1152         bzero(dd->multtable, sizeof(uint8_t) * GF_FIELD_SIZE *=
+ GF_FIELD_SIZE);
+>=20
+>     --
+>     Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>=20
+>=20
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--JoWJLl8RJRSnMeF5HUxoR1OEa1h6L8iho
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlSFfskACgkQ8dLMyEl6F22noACfW6udov6TgvGKLcmOp1+K+hEj
+lLUAn0ZlrodC+2Y0oi8JSxFtfPNBLSiX
+=1Zu/
+-----END PGP SIGNATURE-----
+
+--JoWJLl8RJRSnMeF5HUxoR1OEa1h6L8iho--
