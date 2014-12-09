@@ -1,61 +1,85 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: crush: straw is dead, long live straw2
-Date: Mon, 08 Dec 2014 16:21:07 -0800
-Message-ID: <54864073.5070907@inktank.com>
-References: <alpine.DEB.2.00.1412081516010.18281@cobra.newdream.net>
+From: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
+Subject: RE: Three times retries on write
+Date: Tue, 9 Dec 2014 03:37:57 +0000
+Message-ID: <06E7D85B3BA36C4DB207FEDE871C5348967DB3@SHSMSX101.ccr.corp.intel.com>
+References: <06E7D85B3BA36C4DB207FEDE871C53489677C5@SHSMSX101.ccr.corp.intel.com>
+ <alpine.DEB.2.00.1412080631390.18213@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:33149 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752261AbaLIA1u (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Dec 2014 19:27:50 -0500
-In-Reply-To: <alpine.DEB.2.00.1412081516010.18281@cobra.newdream.net>
+Received: from mga01.intel.com ([192.55.52.88]:17675 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751520AbaLIDla convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Dec 2014 22:41:30 -0500
+In-Reply-To: <alpine.DEB.2.00.1412080631390.18213@cobra.newdream.net>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 12/08/2014 03:48 PM, Sage Weil wrote:
->   - Use floating point log function.  This is problematic for the kernel
-> implementation (no floating point), is slower than the lookup table, and
-> makes me worry about whether the floating point calculations are
-> consistent across architectures (the mapping has to be completely
-> deterministic).
+Hi Sage,
 
-This also won't work for QEMU, which may not restore floating point
-modes while doing I/O (leading to crashes like 
-http://tracker.ceph.com/issues/3521).
+I aslo set debug ms to 20. The log file is in https://drive.google.com/file/d/0B1aauR3uQ9ECTjk1TUJ0OHMzQVk/view?usp=sharing
 
->   - Use some approximation of the logarithm with fixed-point arithmetic.
-> I spent a bit of time search and found
->
->   http://www.researchgate.net/publication/230668515_A_fixed-point_implementation_of_the_natural_logarithm_based_on_a_expanded_hyperbolic_CORDIC_algorithm
->
-> but it also involves a couple of lookup tables and (judging by figure 1)
-> is probably slower than the 256 KB table.
->
-> We could probably expand out taylor series and get something half decent,
-> but any precision we lose will translate to OSD utilizations that are off
-> from the input weights--something that costs real disk space and we
-> probably want to avoid.
->
->   - Stick with the 128KB lookup table.  Performance sensitive clients can
-> precalculate all PG mappings when they get OSDMap updates if they are
-> concerned about leave the CRUSH calculation in the IO path.
->
-> Any other suggestions?
+Seems like the problem is in the pipe.
 
-It could be a lookup table generated (or chosen) at runtime to a
-particular size configured by the crushmap, but that's probably more
-complex than it's worth.
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
+Sent: Monday, December 8, 2014 10:32 PM
+To: Wang, Zhiqiang
+Cc: ceph-devel@vger.kernel.org
+Subject: Re: Three times retries on write
 
-> Here is my implementation of the lookup-table based approach:
->
-> 	https://github.com/ceph/ceph/commit/1d462c9f6a262de3a51533193ed2dff34c730727
-> 	https://github.com/ceph/ceph/commits/wip-crush-straw2
->
-> You'll notice that included in there is a unit test that verifies that
-> changing a single item's weight does not effect the distribution of inputs
-> among other items in the bucket.  :)
+On Mon, 8 Dec 2014, Wang, Zhiqiang wrote:
+> Hi all,
+> 
+> I wrote some proxy write code and is doing testing now. I use 'rados put' to write a full object. I notice that every time when the cache tier OSD sends the object to the base tier OSD through the Objecter::mutate interface, it retries 3 times. Looks like the 3rd try is a success. I verified the object in the base tier. It is what I wrote. The logs are showing below. Any hints on what is causing this?
+> 
+> 2014-12-08 15:37:28.721769 7f4ac5764700  0 osd.22 pg_epoch: 27412 
+> pg[45.0( v 26979'3108 (0'0,26979'3108] local-les=27409 n=28 ec=25839 
+> les/c 27409/27409 27408/27408/27408) [22,16] r=0 lpr=27408 
+> crt=26979'3102 lcod 0'0 mlcod 0'0 active+clean] do_proxy_write Start 
+> proxy write for osd_op(client.127754.0:1 
+> rb.0.17f51.6b8b4567.0000000008d  [writefull 0~4194304] 45.42df800 
+> ondisk+write+known_if_redirected e27412) v4
+> 2014-12-08 15:37:28.721951 7f4ac5764700  1 -- :/2913 --> 
+> 10.44.44.6:6835/3356 -- osd_op(osd.22.27408:1 
+> rb.0.17f51.6b8b4567.0000000008dd [writefull 0~4194304] 14.42df800 
+> ack+ondisk+write+ignore_cache+ignore_overlay+map_snap_clone+known_if_r
+> edirected e27412) v4 -- ?+0 0x3a937000 con 0x3b94c840
+> 2014-12-08 15:37:28.901912 7f4ad7788700  1 -- 10.44.44.6:0/2913 --> 
+> 10.44.44.6:6835/3356 -- osd_op(osd.22.27408:1 
+> rb.0.17f51.6b8b4567.0000000008dd [writefull 0~4194304] 14.42df800 
+> RETRY=1 
+> ack+ondisk+retry+write+ignore_cache+ignore_overlay+map_snap_clone+know
+> n_if_redirected e27412) v4 -- ?+0 0x3a937000 con 0x3b973dc0
+> 2014-12-08 15:37:33.071380 7f4ade796700  1 -- 10.44.44.6:0/2913 --> 
+> 10.44.44.5:6801/62721 -- osd_op(osd.22.27408:1 
+> rb.0.17f51.6b8b4567.0000000008dd [writefull 0~4194304] 14.42df800 
+> RETRY=2 
+> ack+ondisk+retry+write+ignore_cache+ignore_overlay+map_snap_clone+know
+> n_if_redirected e27413) v4 -- ?+0 0x3b7b3a00 con 0x3b473160
+> 2014-12-08 15:37:34.259670 7f4ade796700  1 -- 10.44.44.6:0/2913 --> 
+> 10.44.44.6:6803/6847 -- osd_op(osd.22.27408:1 
+> rb.0.17f51.6b8b4567.0000000008dd [writefull 0~4194304] 14.42df800 
+> RETRY=3 
+> ack+ondisk+retry+write+ignore_cache+ignore_overlay+map_snap_clone+know
+> n_if_redirected e27414) v4 -- ?+0 0x3a937000 con 0x3ac0d840
+> 2014-12-08 15:37:35.443525 7f4ab49eb700  1 -- 10.44.44.6:0/2913 <== 
+> osd.13 10.44.44.6:6803/6847 1 ==== osd_op_reply(1 
+> rb.0.17f51.6b8b4567.0000000008dd [writefull 0~4194304] v27412'10764 
+> uv58186 ondisk = 0) v7 ==== 207+0+0 (2066479387 0 0) 0x3a796840 con 
+> 0x3ac0d840
 
+That is very strange (and concerning)!  Can you reproduce this with
+
+ debug objecter = 20
+
+on the OSD?  That should tell us why it is resending.
+
+sage
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
