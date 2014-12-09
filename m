@@ -1,55 +1,39 @@
-From: Abhishek L <abhishek.lekshmanan@gmail.com>
-Subject: Re: [ceph-users] normalizing radosgw
-Date: Wed, 10 Dec 2014 00:14:18 +0530
-Message-ID: <874mt4u0hp.fsf@gmail.com>
-References: <alpine.DEB.2.00.1412061025330.18213@cobra.newdream.net>
+From: Gregory Farnum <greg@gregs42.com>
+Subject: Re: Is there any documents to describe the architecture of ceph unit
+ test based on gtest
+Date: Tue, 9 Dec 2014 12:52:01 -0800
+Message-ID: <CAC6JEv9FP4ajg5qgiduGj46GWPAaO6ETJ3hSPQs=W7T5SG40RQ@mail.gmail.com>
+References: <CALZt5jycKO4DQcSnRptWXiGKj3GJ+oqVvZZscppj+m4qOypDNg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; boundary="=-=-=";
-	micalg=pgp-sha1; protocol="application/pgp-signature"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f49.google.com ([209.85.220.49]:48004 "EHLO
-	mail-pa0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751200AbaLISos (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Dec 2014 13:44:48 -0500
-Received: by mail-pa0-f49.google.com with SMTP id eu11so1076469pac.22
-        for <ceph-devel@vger.kernel.org>; Tue, 09 Dec 2014 10:44:48 -0800 (PST)
-In-reply-to: <alpine.DEB.2.00.1412061025330.18213@cobra.newdream.net>
+Received: from mail-ie0-f171.google.com ([209.85.223.171]:38366 "EHLO
+	mail-ie0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751665AbaLIUwD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Dec 2014 15:52:03 -0500
+Received: by mail-ie0-f171.google.com with SMTP id rl12so1349247iec.16
+        for <ceph-devel@vger.kernel.org>; Tue, 09 Dec 2014 12:52:02 -0800 (PST)
+Received: from mail-ie0-f170.google.com (mail-ie0-f170.google.com. [209.85.223.170])
+        by mx.google.com with ESMTPSA id t15sm1102150ioi.21.2014.12.09.12.52.01
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
+        Tue, 09 Dec 2014 12:52:01 -0800 (PST)
+Received: by mail-ie0-f170.google.com with SMTP id rd18so1346148iec.29
+        for <ceph-devel@vger.kernel.org>; Tue, 09 Dec 2014 12:52:01 -0800 (PST)
+In-Reply-To: <CALZt5jycKO4DQcSnRptWXiGKj3GJ+oqVvZZscppj+m4qOypDNg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: ceph-devel@vger.kernel.org, ceph-users@ceph.com
+To: Nicheal <zay11022@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
---=-=-=
-Content-Type: text/plain
-Content-Transfer-Encoding: quoted-printable
-
-
-Sage Weil writes:
-[..]
-> Thoughts?  Suggestions?
+On Tue, Dec 9, 2014 at 1:50 AM, Nicheal <zay11022@gmail.com> wrote:
+> Hi, all
 >
-[..]
-Suggestion:
-radosgw should handle injectargs like other ceph clients do?
+> Is any guideline that describes how to run the ceph unit test, and its
+> basic architecture?
 
-This is not a major annoyance, but it would be nice to have.
-
-
-=2D-=20
-Abhishek
-
---=-=-=
-Content-Type: application/pgp-signature; name="signature.asc"; name="signature.asc"; description="Digital signature"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
-
-iQEcBAEBAgAGBQJUh0MCAAoJEPnwZB8bZe1fnhUH/iO7ktRNJZpIKSogi4Ac+HIL
-YBT5H924EJGaPEydQBzzQhF9S6Y9F2rKe/VzzFlSDAoNZajOUr2UCHg+D3XRHy+E
-lh7rh4dPlDVo2beMVG3UCAxje2mmIgzNgRt6/wmwKDXl9Yhh49l08n5OdRQFJiX8
-NMoUqLhfhfAzfvqB0bFyUcUKFc6nesslaXkEKy8JVVKnr3Iy+E4Yy/0qDH2Vyh7i
-iVRO6b1XnsXT1tPLTANeKj1qstVe5afRQiYVB11eVgzppx8V4uJhOzErxypjcho3
-HuTJtxLwoN2SGK3McRvWj5F6f87xqWPnZtE0x4F0paYHQnn6T4jUtYpa+Yx2MYA=
-=whqW
------END PGP SIGNATURE-----
---=-=-=--
+You can run them all by executing "make check [-j N]". The executables
+run as part of that are specified in the makefiles throughout the
+project structure (CHECK_programs or similar). For more on how the
+gtest framework is set up, you should look at the gtest docs. ;)
+-Greg
