@@ -1,85 +1,94 @@
-From: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
-Subject: RE: Three times retries on write
-Date: Tue, 9 Dec 2014 03:37:57 +0000
-Message-ID: <06E7D85B3BA36C4DB207FEDE871C5348967DB3@SHSMSX101.ccr.corp.intel.com>
-References: <06E7D85B3BA36C4DB207FEDE871C53489677C5@SHSMSX101.ccr.corp.intel.com>
- <alpine.DEB.2.00.1412080631390.18213@cobra.newdream.net>
+From: Christian Balzer <chibi@gol.com>
+Subject: Re: [ceph-users] experimental features
+Date: Tue, 9 Dec 2014 14:25:07 +0900
+Message-ID: <20141209142507.7438eb99@batzmaru.gol.ad.jp>
+References: <alpine.DEB.2.00.1412050927150.24079@cobra.newdream.net>
+	<CAC6JEv8LVviFoNXB72gKBQ+seNVYphvpwm0QZeOwccPHr7Qatg@mail.gmail.com>
+	<5481EF6B.4010901@redhat.com>
+	<CAOGLoJN2wSxMgtok6aATSW5o-Abqcv2bdVo+dVfaEbG4iyiQSw@mail.gmail.com>
+	<CAPHS-z7cOLokgHe7Ky+SJQMGPbZmY26o+EeA1i=qo+i_XnYg5g@mail.gmail.com>
+	<5485B6B5.8010802@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:17675 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751520AbaLIDla convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Dec 2014 22:41:30 -0500
-In-Reply-To: <alpine.DEB.2.00.1412080631390.18213@cobra.newdream.net>
-Content-Language: en-US
+Received: from smtp01.dentaku.gol.com ([203.216.5.71]:44072 "EHLO
+	smtp01.dentaku.gol.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754952AbaLIFeQ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Dec 2014 00:34:16 -0500
+In-Reply-To: <5485B6B5.8010802@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Mark Nelson <mark.nelson@inktank.com>
+Cc: Fred Yang <frederic.yang@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>
 
-Hi Sage,
+On Mon, 08 Dec 2014 08:33:25 -0600 Mark Nelson wrote:
 
-I aslo set debug ms to 20. The log file is in https://drive.google.com/file/d/0B1aauR3uQ9ECTjk1TUJ0OHMzQVk/view?usp=sharing
-
-Seems like the problem is in the pipe.
-
------Original Message-----
-From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
-Sent: Monday, December 8, 2014 10:32 PM
-To: Wang, Zhiqiang
-Cc: ceph-devel@vger.kernel.org
-Subject: Re: Three times retries on write
-
-On Mon, 8 Dec 2014, Wang, Zhiqiang wrote:
-> Hi all,
+> I've been thinking for a while that we need another more general command 
+> than Ceph health to more generally inform you about your cluster.  IE I 
+> personally don't like having min/max PG warnings in Ceph health (they 
+> can be independently controlled by ceph.conf options but that kind of 
+> approach won't scale). I'd like another command that I can run that 
+> tells me about this kind of thing.  Same thing with experimental 
+> features.  I don't want ceph health warning me if they've been enabled, 
+> but I do want to know if they've ever been enabled, when, and whether 
+> they are still in effect.
 > 
-> I wrote some proxy write code and is doing testing now. I use 'rados put' to write a full object. I notice that every time when the cache tier OSD sends the object to the base tier OSD through the Objecter::mutate interface, it retries 3 times. Looks like the 3rd try is a success. I verified the object in the base tier. It is what I wrote. The logs are showing below. Any hints on what is causing this?
+
+Very much agreed.
+
+Expanding on this, setting a cluster to no-scrub will result in a warning
+(very arguably) and while a slow request after 30 seconds is WRN worthy,
+after something like a minute it ought to be ERR level as this is likely
+to have massive impact on clients.
+
+Christian
+
+> Mark
 > 
-> 2014-12-08 15:37:28.721769 7f4ac5764700  0 osd.22 pg_epoch: 27412 
-> pg[45.0( v 26979'3108 (0'0,26979'3108] local-les=27409 n=28 ec=25839 
-> les/c 27409/27409 27408/27408/27408) [22,16] r=0 lpr=27408 
-> crt=26979'3102 lcod 0'0 mlcod 0'0 active+clean] do_proxy_write Start 
-> proxy write for osd_op(client.127754.0:1 
-> rb.0.17f51.6b8b4567.0000000008d  [writefull 0~4194304] 45.42df800 
-> ondisk+write+known_if_redirected e27412) v4
-> 2014-12-08 15:37:28.721951 7f4ac5764700  1 -- :/2913 --> 
-> 10.44.44.6:6835/3356 -- osd_op(osd.22.27408:1 
-> rb.0.17f51.6b8b4567.0000000008dd [writefull 0~4194304] 14.42df800 
-> ack+ondisk+write+ignore_cache+ignore_overlay+map_snap_clone+known_if_r
-> edirected e27412) v4 -- ?+0 0x3a937000 con 0x3b94c840
-> 2014-12-08 15:37:28.901912 7f4ad7788700  1 -- 10.44.44.6:0/2913 --> 
-> 10.44.44.6:6835/3356 -- osd_op(osd.22.27408:1 
-> rb.0.17f51.6b8b4567.0000000008dd [writefull 0~4194304] 14.42df800 
-> RETRY=1 
-> ack+ondisk+retry+write+ignore_cache+ignore_overlay+map_snap_clone+know
-> n_if_redirected e27412) v4 -- ?+0 0x3a937000 con 0x3b973dc0
-> 2014-12-08 15:37:33.071380 7f4ade796700  1 -- 10.44.44.6:0/2913 --> 
-> 10.44.44.5:6801/62721 -- osd_op(osd.22.27408:1 
-> rb.0.17f51.6b8b4567.0000000008dd [writefull 0~4194304] 14.42df800 
-> RETRY=2 
-> ack+ondisk+retry+write+ignore_cache+ignore_overlay+map_snap_clone+know
-> n_if_redirected e27413) v4 -- ?+0 0x3b7b3a00 con 0x3b473160
-> 2014-12-08 15:37:34.259670 7f4ade796700  1 -- 10.44.44.6:0/2913 --> 
-> 10.44.44.6:6803/6847 -- osd_op(osd.22.27408:1 
-> rb.0.17f51.6b8b4567.0000000008dd [writefull 0~4194304] 14.42df800 
-> RETRY=3 
-> ack+ondisk+retry+write+ignore_cache+ignore_overlay+map_snap_clone+know
-> n_if_redirected e27414) v4 -- ?+0 0x3a937000 con 0x3ac0d840
-> 2014-12-08 15:37:35.443525 7f4ab49eb700  1 -- 10.44.44.6:0/2913 <== 
-> osd.13 10.44.44.6:6803/6847 1 ==== osd_op_reply(1 
-> rb.0.17f51.6b8b4567.0000000008dd [writefull 0~4194304] v27412'10764 
-> uv58186 ondisk = 0) v7 ==== 207+0+0 (2066479387 0 0) 0x3a796840 con 
-> 0x3ac0d840
+> On 12/08/2014 06:57 AM, Fred Yang wrote:
+> > You will have to consider in the real world whoever built the cluster
+> > might not document the dangerous option to let support stuff or
+> > successor aware. Thus any experimental feature considered not safe for
+> > production should be included in a warning message in 'ceph health',
+> > and logs, either log it periodically or log the warning msg upon
+> > restart. Feature-wise, 'ceph health detail' should give you a report
+> > over all important features/options of the cluster as well.
+> >
+> > -Fred
+> >
+> > On Sun, Dec 7, 2014, 11:15 PM Justin Erenkrantz <justin@erenkrantz.com
+> > <mailto:justin@erenkrantz.com>> wrote:
+> >
+> >     On Fri, Dec 5, 2014 at 12:46 PM, Mark Nelson
+> >     <mark.nelson@inktank.com <mailto:mark.nelson@inktank.com>> wrote:
+> >      > I'm in favor of the "allow experimental features" but instead
+> >     call it:
+> >      >
+> >      > "ALLOW UNRECOVERABLE DATA CORRUPTING FEATURES" which makes
+> >      > things
+> >     a little
+> >      > more explicit. With great power comes great responsibility.
+> >
+> >     +1.
+> >
+> >     For Subversion, we utilize SVN_I_LOVE_CORRUPTED_XXX for a few
+> > options that can cause data corruption.  -- justin
+> >     --
+> >     To unsubscribe from this list: send the line "unsubscribe
+> > ceph-devel" in the body of a message to majordomo@vger.kernel.org
+> >     <mailto:majordomo@vger.kernel.org>
+> >     More majordomo info at http://vger.kernel.org/__majordomo-info.html
+> >     <http://vger.kernel.org/majordomo-info.html>
+> >
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> 
 
-That is very strange (and concerning)!  Can you reproduce this with
 
- debug objecter = 20
-
-on the OSD?  That should tell us why it is resending.
-
-sage
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-- 
+Christian Balzer        Network/Systems Engineer                
+chibi@gol.com   	Global OnLine Japan/Fusion Communications
+http://www.gol.com/
