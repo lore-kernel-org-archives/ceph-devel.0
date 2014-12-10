@@ -1,68 +1,29 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: [Ceph-maintainers] statically allocated uid/gid for ceph
-Date: Wed, 10 Dec 2014 10:48:18 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1412101044300.22847@cobra.newdream.net>
-References: <alpine.DEB.2.00.1412061245410.18213@cobra.newdream.net> <5488919E.4090109@redhat.com>
+From: Ken Dreyer <kdreyer@redhat.com>
+Subject: force pushes disabled for master in ceph.git and ceph-deploy.git
+Date: Wed, 10 Dec 2014 15:20:55 -0700
+Message-ID: <5488C747.2000003@redhat.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:46987 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:44218 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932765AbaLJSsd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 10 Dec 2014 13:48:33 -0500
-In-Reply-To: <5488919E.4090109@redhat.com>
+	id S1752091AbaLJWU4 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 10 Dec 2014 17:20:56 -0500
+Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
+	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id sBAMKuas029276
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
+	for <ceph-devel@vger.kernel.org>; Wed, 10 Dec 2014 17:20:56 -0500
+Received: from mbp.ktdreyer.com (vpn-59-132.rdu2.redhat.com [10.10.59.132])
+	by int-mx10.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id sBAMKteA014001
+	for <ceph-devel@vger.kernel.org>; Wed, 10 Dec 2014 17:20:55 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ken Dreyer <kdreyer@redhat.com>
-Cc: cjwatson@debian.org, branto@redhat.com, osynge@suse.com, timm@fnal.gov, ceph-maintainers@ceph.com, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-+ceph-devel
+Thanks to GitHub Support, force-pushes are now disabled for master in
+ceph.git and ceph-deploy.git. This should save us from accidentally
+deleting history with a bad force-push to the wrong branch. (Not that
+any of us were going to do that, of course! :)
 
-On Wed, 10 Dec 2014, Ken Dreyer wrote:
-> On 12/06/2014 01:54 PM, Sage Weil wrote:
-> > Hi Colin, Boris, Owen,
-> > 
-> > We would like to choose a statically allocated uid and gid for use by Ceph 
-> > storage servers.  The basic goals are:
-> > 
-> >  - run daemons as non-root (right now everything is uid 0 (runtime and 
-> > on-disk data) and this is clearly not ideal)
-> >  - enable hot swap of disks between storage servers
-> >  - standardize across distros so that we can build clusters with a mix
-> > 
-> > To support the hot swap, we can't use the usual uids allocated dynamically 
-> > during package installation.  Disks will completely filled with Ceph data 
-> > files with the uid from one machine and will not be usable on another 
-> > machine.
-> > 
-> > I'm hoping we can choose a static uid/gid pair that is unused for Debian 
-> > (and Ubuntu), Fedora (and RHEL/CentOS), and OpenSUSE/SLES.  This will let 
-> > us maintain consistency across the entire ecosystem.
-> 
-> How many system users should I request from the Fedora Packaging
-> Committee, and what should their names be?
-> 
-> For example, are ceph-mon and ceph-osd going to run under the same
-> non-privileged system account?
-
-Hmm, my first impulse was to make a single user and group.  But it might 
-make sense that e.g. rgw should run in a different context than ceph-osd 
-or ceph-mon.
-
-If we go down that road, then maybe
-
- ceph-osd
- ceph-mon
- ceph-mds
- ceph-rgw
- ceph-calamari
-
-and a 'ceph' group that we can use for /var/log/ceph etc for the qemu 
-and other librados users?
-
-Alternatively, if we just do user+group ceph, then rgw can run as www-data 
-or apache (as it does now).  Not sure what makes the most sense for 
-ceph-calamari.
-
-sage
-
+- Ken
