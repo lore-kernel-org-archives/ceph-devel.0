@@ -1,45 +1,57 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: [PATCH] ceph: fix mksnap crash
-Date: Wed, 10 Dec 2014 19:54:39 +0800
-Message-ID: <1418212479-17714-1-git-send-email-zyan@redhat.com>
+From: Mark Nelson <mark.nelson@inktank.com>
+Subject: 12/10/2014 Weekly Ceph Performance Meeting IS ON!
+Date: Wed, 10 Dec 2014 07:45:00 -0600
+Message-ID: <54884E5C.2070705@redhat.com>
+Reply-To: mnelson@redhat.com
+Mime-Version: 1.0
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:42646 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750911AbaLJLyu (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 10 Dec 2014 06:54:50 -0500
-Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
-	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id sBABsoo8006642
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
-	for <ceph-devel@vger.kernel.org>; Wed, 10 Dec 2014 06:54:50 -0500
+Received: from mail-ie0-f177.google.com ([209.85.223.177]:37672 "EHLO
+	mail-ie0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753044AbaLJNpC (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Dec 2014 08:45:02 -0500
+Received: by mail-ie0-f177.google.com with SMTP id rd18so2541636iec.8
+        for <ceph-devel@vger.kernel.org>; Wed, 10 Dec 2014 05:45:01 -0800 (PST)
+Received: from [192.168.1.102] (65-128-164-140.mpls.qwest.net. [65.128.164.140])
+        by mx.google.com with ESMTPSA id i184sm2319437ioi.33.2014.12.10.05.45.00
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Wed, 10 Dec 2014 05:45:01 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: "Yan, Zheng" <zyan@redhat.com>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-mksnap reply only contain 'target', does not contain 'dentry'. So
-it's wrong to use req->r_reply_info.head->is_dentry to detect traceless
-reply.
+Hi All,
 
-Signed-off-by: Yan, Zheng <zyan@redhat.com>
----
- fs/ceph/dir.c | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+8AM PST as usual!  Please add an agenda item if there is something you 
+want to talk about!
 
-diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-index 6526199..fcfd0ab 100644
---- a/fs/ceph/dir.c
-+++ b/fs/ceph/dir.c
-@@ -812,7 +812,9 @@ static int ceph_mkdir(struct inode *dir, struct dentry *dentry, umode_t mode)
- 		acls.pagelist = NULL;
- 	}
- 	err = ceph_mdsc_do_request(mdsc, dir, req);
--	if (!err && !req->r_reply_info.head->is_dentry)
-+	if (!err &&
-+	    !req->r_reply_info.head->is_target &&
-+	    !req->r_reply_info.head->is_dentry)
- 		err = ceph_handle_notrace_create(dir, dentry);
- 	ceph_mdsc_put_request(req);
- out:
--- 
-1.9.3
+Here's the links:
 
+Etherpad URL:
+http://pad.ceph.com/p/performance_weekly
+
+To join the Meeting:
+https://bluejeans.com/268261044
+
+To join via Browser:
+https://bluejeans.com/268261044/browser
+
+To join with Lync:
+https://bluejeans.com/268261044/lync
+
+
+To join via Room System:
+Video Conferencing System: bjn.vc -or- 199.48.152.152
+Meeting ID: 268261044
+
+To join via Phone:
+1) Dial:
+           +1 408 740 7256
+           +1 888 240 2560(US Toll Free)
+           +1 408 317 9253(Alternate Number)
+           (see all numbers - http://bluejeans.com/numbers)
+2) Enter Conference ID: 268261044
+
+Mark
