@@ -1,20 +1,34 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: rados read ordering
-Date: Tue, 9 Dec 2014 16:43:27 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1412091640140.22847@cobra.newdream.net>
-References: <alpine.DEB.2.00.1412080855300.5263@cobra.newdream.net>, <CABBk=J9iA=iwAqOBrQ3zDpUvEDH2JA17+WJLRU2gLz_fFdF55w@mail.gmail.com> <88C3E003BB3649489ED4ECA6C80410476BCEF6@ORSMSX102.amr.corp.intel.com>
+From: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
+Subject: RE: rados read ordering
+Date: Wed, 10 Dec 2014 01:10:17 +0000
+Message-ID: <06E7D85B3BA36C4DB207FEDE871C5348968009@SHSMSX101.ccr.corp.intel.com>
+References: <alpine.DEB.2.00.1412080855300.5263@cobra.newdream.net>,
+ <CABBk=J9iA=iwAqOBrQ3zDpUvEDH2JA17+WJLRU2gLz_fFdF55w@mail.gmail.com>
+ <88C3E003BB3649489ED4ECA6C80410476BCEF6@ORSMSX102.amr.corp.intel.com>
+ <alpine.DEB.2.00.1412091640140.22847@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:36672 "EHLO mx1.redhat.com"
+Received: from mga11.intel.com ([192.55.52.93]:15315 "EHLO mga11.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751963AbaLJAna (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 9 Dec 2014 19:43:30 -0500
-In-Reply-To: <88C3E003BB3649489ED4ECA6C80410476BCEF6@ORSMSX102.amr.corp.intel.com>
+	id S1752309AbaLJBKk convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Dec 2014 20:10:40 -0500
+In-Reply-To: <alpine.DEB.2.00.1412091640140.22847@cobra.newdream.net>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Cook, Nigel" <nigel.cook@intel.com>
-Cc: Yehuda Sadeh <yehuda@redhat.com>, Josh Durgin <jdurgin@redhat.com>, Samuel Just <sjust@redhat.com>, "Wang, Zhiqiang" <zhiqiang.wang@intel.com>, Jason Dillaman <dillaman@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>, "Cook, Nigel" <nigel.cook@intel.com>
+Cc: Yehuda Sadeh <yehuda@redhat.com>, Josh Durgin <jdurgin@redhat.com>, Samuel Just <sjust@redhat.com>, Jason Dillaman <dillaman@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+
+For multiple clients accessing the same volume, same object, I guess the clients need to do some synchronization between them to guarantee what it reads is what it wrote. That is to say, if two clients, say A and B, A is doing write, B is doing read. If B wants to read what A writes, it needs to know A has completed the write before issuing the read. If A hasn't completed the write yet, it could be possible that the write fails, so you can't expect B reads what A writes. I think this makes sense from the client/application perspective.
+
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
+Sent: Wednesday, December 10, 2014 8:43 AM
+To: Cook, Nigel
+Cc: Yehuda Sadeh; Josh Durgin; Samuel Just; Wang, Zhiqiang; Jason Dillaman; ceph-devel
+Subject: Re: rados read ordering
 
 On Wed, 10 Dec 2014, Cook, Nigel wrote:
 > Folks
@@ -28,17 +42,9 @@ On Wed, 10 Dec 2014, Cook, Nigel wrote:
 > 
 > Can you comment?
 
-I don't think so.  This (non)change is about a single client submitting 
-two reads to a single object (say, different blocks in the same disk) and 
-whether the OSD is allowed to respond out of order (say, because some 
-blocks are in cache and some aren't).
+I don't think so.  This (non)change is about a single client submitting two reads to a single object (say, different blocks in the same disk) and whether the OSD is allowed to respond out of order (say, because some blocks are in cache and some aren't).
 
-In the shared volume case, it is generally not important what happens with 
-requests that are submitted in parallel.. they can take different amounts 
-of time on the wire and which happens first (i.e., which arrives at the 
-OSD first) depends on happenstance.  What does matter is that any read 
-that happens after a complete write reflects that read, which is why the 
-concern is around caching.
+In the shared volume case, it is generally not important what happens with requests that are submitted in parallel.. they can take different amounts of time on the wire and which happens first (i.e., which arrives at the OSD first) depends on happenstance.  What does matter is that any read that happens after a complete write reflects that read, which is why the concern is around caching.
 
 sage
 
@@ -95,3 +101,7 @@ sage
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > 
 > 
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
