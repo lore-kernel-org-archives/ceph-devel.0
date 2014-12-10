@@ -1,128 +1,129 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Re: rados read ordering
-Date: Wed, 10 Dec 2014 10:26:05 +0800
-Message-ID: <CACJqLyavLaAsF3tyqz+5MbWfYaTwPwjYiWZRhti5iD7V6seQvg@mail.gmail.com>
+From: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
+Subject: RE: rados read ordering
+Date: Wed, 10 Dec 2014 02:51:18 +0000
+Message-ID: <06E7D85B3BA36C4DB207FEDE871C5348968053@SHSMSX101.ccr.corp.intel.com>
 References: <alpine.DEB.2.00.1412080855300.5263@cobra.newdream.net>
 	<CABBk=J9iA=iwAqOBrQ3zDpUvEDH2JA17+WJLRU2gLz_fFdF55w@mail.gmail.com>
 	<88C3E003BB3649489ED4ECA6C80410476BCEF6@ORSMSX102.amr.corp.intel.com>
 	<alpine.DEB.2.00.1412091640140.22847@cobra.newdream.net>
 	<06E7D85B3BA36C4DB207FEDE871C5348968009@SHSMSX101.ccr.corp.intel.com>
+ <CACJqLyavLaAsF3tyqz+5MbWfYaTwPwjYiWZRhti5iD7V6seQvg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f172.google.com ([209.85.212.172]:42649 "EHLO
-	mail-wi0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753855AbaLJC0H convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Dec 2014 21:26:07 -0500
-Received: by mail-wi0-f172.google.com with SMTP id n3so9824718wiv.5
-        for <ceph-devel@vger.kernel.org>; Tue, 09 Dec 2014 18:26:05 -0800 (PST)
-In-Reply-To: <06E7D85B3BA36C4DB207FEDE871C5348968009@SHSMSX101.ccr.corp.intel.com>
+Received: from mga03.intel.com ([134.134.136.65]:42963 "EHLO mga03.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751168AbaLJCxE (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 9 Dec 2014 21:53:04 -0500
+In-Reply-To: <CACJqLyavLaAsF3tyqz+5MbWfYaTwPwjYiWZRhti5iD7V6seQvg@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
+To: Haomai Wang <haomaiwang@gmail.com>
 Cc: Sage Weil <sweil@redhat.com>, "Cook, Nigel" <nigel.cook@intel.com>, Yehuda Sadeh <yehuda@redhat.com>, Josh Durgin <jdurgin@redhat.com>, Samuel Just <sjust@redhat.com>, Jason Dillaman <dillaman@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, Dec 10, 2014 at 9:10 AM, Wang, Zhiqiang <zhiqiang.wang@intel.com> wrote:
-> For multiple clients accessing the same volume, same object, I guess the clients need to do some synchronization between them to guarantee what it reads is what it wrote. That is to say, if two clients, say A and B, A is doing write, B is doing read. If B wants to read what A writes, it needs to know A has completed the write before issuing the read. If A hasn't completed the write yet, it could be possible that the write fails, so you can't expect B reads what A writes. I think this makes sense from the client/application perspective.
-
-I think each write for a object is a barrier. If receiving a write op,
-previous read ops all are allowed to out of order and read ops after
-write op also can out of order.
-
-I think it's still SERIALIZABLE level for rados client.
-
->
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
-> Sent: Wednesday, December 10, 2014 8:43 AM
-> To: Cook, Nigel
-> Cc: Yehuda Sadeh; Josh Durgin; Samuel Just; Wang, Zhiqiang; Jason Dillaman; ceph-devel
-> Subject: Re: rados read ordering
->
-> On Wed, 10 Dec 2014, Cook, Nigel wrote:
->> Folks
->>
->> I'm wondering if this is related to the question I posed a few days
->> ago..
->>
->>  Can CEPH support 2 clients simultaneously accessing a single volume -
->> for example a database cluster - and honor read and write order of
->> blocks across the multiple clients?
->>
->> Can you comment?
->
-> I don't think so.  This (non)change is about a single client submitting two reads to a single object (say, different blocks in the same disk) and whether the OSD is allowed to respond out of order (say, because some blocks are in cache and some aren't).
->
-> In the shared volume case, it is generally not important what happens with requests that are submitted in parallel.. they can take different amounts of time on the wire and which happens first (i.e., which arrives at the OSD first) depends on happenstance.  What does matter is that any read that happens after a complete write reflects that read, which is why the concern is around caching.
->
-> sage
->
->
->>
->> Regards,
->> Nigel Cook +1 720 319 7508
->>
->> Sent from a mobile device.
->> Please excuse both my brevity and sp3lling
->>
->> On Dec 8, 2014 10:12 AM, Yehuda Sadeh <yehuda@redhat.com> wrote:
->> On Mon, Dec 8, 2014 at 9:03 AM, Sage Weil <sweil@redhat.com> wrote:
->> > The current RADOS behavior is that reads (on any given object) are always
->> > processed in the order they are submitted by the client.  This causes a
->> > few headaches for the cache tiering that it would be nice to avoid.  It
->> > also occurs to me that there are likely cases where we could go a lot
->> > faster by not strictly ordering things.  For example, a stat can respond
->> > more quickly than a large read, and some reads may hit cache while others
->> > go to disk.  This doesn't happen currently because of the (lame) way we do
->> > reads synchronously, but hope that can change too.
->> >
->> > I propose we drop this semantic.  If a client wants reads to have a strict
->> > ordering, they can set the existing RWORDERED flag (which also orders them
->> > with respect to writes).  That's not the most general thing ever, but I'm
->> > not sure we care about callers who want reads ordered with respect to each
->> > other but not writes.
->> >
->> > The real question is whether there are any users that want/need this
->> > currently.  I can't think of any offhand.  In several places we submit
->> > multiple *writes* and expect them to be strictly ordered (e.g., we
->> > set a completion on teh last write only).  I don't think we do this
->> > anywhere for reads though...
->> >
->> > Josh, Yehuda, Jason--can you think of any in RBD or RGW that would depend
->> > on this?
->> >
->>
->> None that I can think of. For objects data, we already stripe it
->> across multiple objects, and the underlying assumption is that we're
->> going to get responses out of order so we make sure we commit
->> in-order. Guards are used on the head object, and the read is
->> synchronous there anyway. I can't think of any other place where we'd
->> have an issue.
->>
->> Yehuda
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
-
--- 
-Best Regards,
-
-Wheat
+V2hhdCBJIHVuZGVyc3RhbmQgaXMgdGhhdCBpZiB0aGUgcmVhZCBvcCBzcGVjaWZpZXMgdGhlIFJX
+T1JERVJFRCBmbGFnLCBpdCBpcyBwcm9jZXNzZWQgaW4gb3JkZXIuIE90aGVyd2lzZSwgaXQgbWF5
+IGJlIG91dCBvZiBvcmRlci4NCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IGNl
+cGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2
+Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFsZiBPZiBIYW9tYWkgV2FuZw0KU2VudDogV2VkbmVzZGF5
+LCBEZWNlbWJlciAxMCwgMjAxNCAxMDoyNiBBTQ0KVG86IFdhbmcsIFpoaXFpYW5nDQpDYzogU2Fn
+ZSBXZWlsOyBDb29rLCBOaWdlbDsgWWVodWRhIFNhZGVoOyBKb3NoIER1cmdpbjsgU2FtdWVsIEp1
+c3Q7IEphc29uIERpbGxhbWFuOyBjZXBoLWRldmVsDQpTdWJqZWN0OiBSZTogcmFkb3MgcmVhZCBv
+cmRlcmluZw0KDQpPbiBXZWQsIERlYyAxMCwgMjAxNCBhdCA5OjEwIEFNLCBXYW5nLCBaaGlxaWFu
+ZyA8emhpcWlhbmcud2FuZ0BpbnRlbC5jb20+IHdyb3RlOg0KPiBGb3IgbXVsdGlwbGUgY2xpZW50
+cyBhY2Nlc3NpbmcgdGhlIHNhbWUgdm9sdW1lLCBzYW1lIG9iamVjdCwgSSBndWVzcyB0aGUgY2xp
+ZW50cyBuZWVkIHRvIGRvIHNvbWUgc3luY2hyb25pemF0aW9uIGJldHdlZW4gdGhlbSB0byBndWFy
+YW50ZWUgd2hhdCBpdCByZWFkcyBpcyB3aGF0IGl0IHdyb3RlLiBUaGF0IGlzIHRvIHNheSwgaWYg
+dHdvIGNsaWVudHMsIHNheSBBIGFuZCBCLCBBIGlzIGRvaW5nIHdyaXRlLCBCIGlzIGRvaW5nIHJl
+YWQuIElmIEIgd2FudHMgdG8gcmVhZCB3aGF0IEEgd3JpdGVzLCBpdCBuZWVkcyB0byBrbm93IEEg
+aGFzIGNvbXBsZXRlZCB0aGUgd3JpdGUgYmVmb3JlIGlzc3VpbmcgdGhlIHJlYWQuIElmIEEgaGFz
+bid0IGNvbXBsZXRlZCB0aGUgd3JpdGUgeWV0LCBpdCBjb3VsZCBiZSBwb3NzaWJsZSB0aGF0IHRo
+ZSB3cml0ZSBmYWlscywgc28geW91IGNhbid0IGV4cGVjdCBCIHJlYWRzIHdoYXQgQSB3cml0ZXMu
+IEkgdGhpbmsgdGhpcyBtYWtlcyBzZW5zZSBmcm9tIHRoZSBjbGllbnQvYXBwbGljYXRpb24gcGVy
+c3BlY3RpdmUuDQoNCkkgdGhpbmsgZWFjaCB3cml0ZSBmb3IgYSBvYmplY3QgaXMgYSBiYXJyaWVy
+LiBJZiByZWNlaXZpbmcgYSB3cml0ZSBvcCwgcHJldmlvdXMgcmVhZCBvcHMgYWxsIGFyZSBhbGxv
+d2VkIHRvIG91dCBvZiBvcmRlciBhbmQgcmVhZCBvcHMgYWZ0ZXIgd3JpdGUgb3AgYWxzbyBjYW4g
+b3V0IG9mIG9yZGVyLg0KDQpJIHRoaW5rIGl0J3Mgc3RpbGwgU0VSSUFMSVpBQkxFIGxldmVsIGZv
+ciByYWRvcyBjbGllbnQuDQoNCj4NCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJv
+bTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgDQo+IFttYWlsdG86Y2VwaC1kZXZl
+bC1vd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFsZiBPZiBTYWdlIFdlaWwNCj4gU2VudDog
+V2VkbmVzZGF5LCBEZWNlbWJlciAxMCwgMjAxNCA4OjQzIEFNDQo+IFRvOiBDb29rLCBOaWdlbA0K
+PiBDYzogWWVodWRhIFNhZGVoOyBKb3NoIER1cmdpbjsgU2FtdWVsIEp1c3Q7IFdhbmcsIFpoaXFp
+YW5nOyBKYXNvbiANCj4gRGlsbGFtYW47IGNlcGgtZGV2ZWwNCj4gU3ViamVjdDogUmU6IHJhZG9z
+IHJlYWQgb3JkZXJpbmcNCj4NCj4gT24gV2VkLCAxMCBEZWMgMjAxNCwgQ29vaywgTmlnZWwgd3Jv
+dGU6DQo+PiBGb2xrcw0KPj4NCj4+IEknbSB3b25kZXJpbmcgaWYgdGhpcyBpcyByZWxhdGVkIHRv
+IHRoZSBxdWVzdGlvbiBJIHBvc2VkIGEgZmV3IGRheXMgDQo+PiBhZ28uLg0KPj4NCj4+ICBDYW4g
+Q0VQSCBzdXBwb3J0IDIgY2xpZW50cyBzaW11bHRhbmVvdXNseSBhY2Nlc3NpbmcgYSBzaW5nbGUg
+dm9sdW1lIA0KPj4gLSBmb3IgZXhhbXBsZSBhIGRhdGFiYXNlIGNsdXN0ZXIgLSBhbmQgaG9ub3Ig
+cmVhZCBhbmQgd3JpdGUgb3JkZXIgb2YgDQo+PiBibG9ja3MgYWNyb3NzIHRoZSBtdWx0aXBsZSBj
+bGllbnRzPw0KPj4NCj4+IENhbiB5b3UgY29tbWVudD8NCj4NCj4gSSBkb24ndCB0aGluayBzby4g
+IFRoaXMgKG5vbiljaGFuZ2UgaXMgYWJvdXQgYSBzaW5nbGUgY2xpZW50IHN1Ym1pdHRpbmcgdHdv
+IHJlYWRzIHRvIGEgc2luZ2xlIG9iamVjdCAoc2F5LCBkaWZmZXJlbnQgYmxvY2tzIGluIHRoZSBz
+YW1lIGRpc2spIGFuZCB3aGV0aGVyIHRoZSBPU0QgaXMgYWxsb3dlZCB0byByZXNwb25kIG91dCBv
+ZiBvcmRlciAoc2F5LCBiZWNhdXNlIHNvbWUgYmxvY2tzIGFyZSBpbiBjYWNoZSBhbmQgc29tZSBh
+cmVuJ3QpLg0KPg0KPiBJbiB0aGUgc2hhcmVkIHZvbHVtZSBjYXNlLCBpdCBpcyBnZW5lcmFsbHkg
+bm90IGltcG9ydGFudCB3aGF0IGhhcHBlbnMgd2l0aCByZXF1ZXN0cyB0aGF0IGFyZSBzdWJtaXR0
+ZWQgaW4gcGFyYWxsZWwuLiB0aGV5IGNhbiB0YWtlIGRpZmZlcmVudCBhbW91bnRzIG9mIHRpbWUg
+b24gdGhlIHdpcmUgYW5kIHdoaWNoIGhhcHBlbnMgZmlyc3QgKGkuZS4sIHdoaWNoIGFycml2ZXMg
+YXQgdGhlIE9TRCBmaXJzdCkgZGVwZW5kcyBvbiBoYXBwZW5zdGFuY2UuICBXaGF0IGRvZXMgbWF0
+dGVyIGlzIHRoYXQgYW55IHJlYWQgdGhhdCBoYXBwZW5zIGFmdGVyIGEgY29tcGxldGUgd3JpdGUg
+cmVmbGVjdHMgdGhhdCByZWFkLCB3aGljaCBpcyB3aHkgdGhlIGNvbmNlcm4gaXMgYXJvdW5kIGNh
+Y2hpbmcuDQo+DQo+IHNhZ2UNCj4NCj4NCj4+DQo+PiBSZWdhcmRzLA0KPj4gTmlnZWwgQ29vayAr
+MSA3MjAgMzE5IDc1MDgNCj4+DQo+PiBTZW50IGZyb20gYSBtb2JpbGUgZGV2aWNlLg0KPj4gUGxl
+YXNlIGV4Y3VzZSBib3RoIG15IGJyZXZpdHkgYW5kIHNwM2xsaW5nDQo+Pg0KPj4gT24gRGVjIDgs
+IDIwMTQgMTA6MTIgQU0sIFllaHVkYSBTYWRlaCA8eWVodWRhQHJlZGhhdC5jb20+IHdyb3RlOg0K
+Pj4gT24gTW9uLCBEZWMgOCwgMjAxNCBhdCA5OjAzIEFNLCBTYWdlIFdlaWwgPHN3ZWlsQHJlZGhh
+dC5jb20+IHdyb3RlOg0KPj4gPiBUaGUgY3VycmVudCBSQURPUyBiZWhhdmlvciBpcyB0aGF0IHJl
+YWRzIChvbiBhbnkgZ2l2ZW4gb2JqZWN0KSBhcmUgDQo+PiA+IGFsd2F5cyBwcm9jZXNzZWQgaW4g
+dGhlIG9yZGVyIHRoZXkgYXJlIHN1Ym1pdHRlZCBieSB0aGUgY2xpZW50LiAgDQo+PiA+IFRoaXMg
+Y2F1c2VzIGEgZmV3IGhlYWRhY2hlcyBmb3IgdGhlIGNhY2hlIHRpZXJpbmcgdGhhdCBpdCB3b3Vs
+ZCBiZSANCj4+ID4gbmljZSB0byBhdm9pZC4gIEl0IGFsc28gb2NjdXJzIHRvIG1lIHRoYXQgdGhl
+cmUgYXJlIGxpa2VseSBjYXNlcyANCj4+ID4gd2hlcmUgd2UgY291bGQgZ28gYSBsb3QgZmFzdGVy
+IGJ5IG5vdCBzdHJpY3RseSBvcmRlcmluZyB0aGluZ3MuICANCj4+ID4gRm9yIGV4YW1wbGUsIGEg
+c3RhdCBjYW4gcmVzcG9uZCBtb3JlIHF1aWNrbHkgdGhhbiBhIGxhcmdlIHJlYWQsIGFuZCANCj4+
+ID4gc29tZSByZWFkcyBtYXkgaGl0IGNhY2hlIHdoaWxlIG90aGVycyBnbyB0byBkaXNrLiAgVGhp
+cyBkb2Vzbid0IA0KPj4gPiBoYXBwZW4gY3VycmVudGx5IGJlY2F1c2Ugb2YgdGhlIChsYW1lKSB3
+YXkgd2UgZG8gcmVhZHMgc3luY2hyb25vdXNseSwgYnV0IGhvcGUgdGhhdCBjYW4gY2hhbmdlIHRv
+by4NCj4+ID4NCj4+ID4gSSBwcm9wb3NlIHdlIGRyb3AgdGhpcyBzZW1hbnRpYy4gIElmIGEgY2xp
+ZW50IHdhbnRzIHJlYWRzIHRvIGhhdmUgYSANCj4+ID4gc3RyaWN0IG9yZGVyaW5nLCB0aGV5IGNh
+biBzZXQgdGhlIGV4aXN0aW5nIFJXT1JERVJFRCBmbGFnICh3aGljaCANCj4+ID4gYWxzbyBvcmRl
+cnMgdGhlbSB3aXRoIHJlc3BlY3QgdG8gd3JpdGVzKS4gIFRoYXQncyBub3QgdGhlIG1vc3QgDQo+
+PiA+IGdlbmVyYWwgdGhpbmcgZXZlciwgYnV0IEknbSBub3Qgc3VyZSB3ZSBjYXJlIGFib3V0IGNh
+bGxlcnMgd2hvIHdhbnQgDQo+PiA+IHJlYWRzIG9yZGVyZWQgd2l0aCByZXNwZWN0IHRvIGVhY2gg
+b3RoZXIgYnV0IG5vdCB3cml0ZXMuDQo+PiA+DQo+PiA+IFRoZSByZWFsIHF1ZXN0aW9uIGlzIHdo
+ZXRoZXIgdGhlcmUgYXJlIGFueSB1c2VycyB0aGF0IHdhbnQvbmVlZCANCj4+ID4gdGhpcyBjdXJy
+ZW50bHkuICBJIGNhbid0IHRoaW5rIG9mIGFueSBvZmZoYW5kLiAgSW4gc2V2ZXJhbCBwbGFjZXMg
+DQo+PiA+IHdlIHN1Ym1pdCBtdWx0aXBsZSAqd3JpdGVzKiBhbmQgZXhwZWN0IHRoZW0gdG8gYmUg
+c3RyaWN0bHkgb3JkZXJlZCANCj4+ID4gKGUuZy4sIHdlIHNldCBhIGNvbXBsZXRpb24gb24gdGVo
+IGxhc3Qgd3JpdGUgb25seSkuICBJIGRvbid0IHRoaW5rIA0KPj4gPiB3ZSBkbyB0aGlzIGFueXdo
+ZXJlIGZvciByZWFkcyB0aG91Z2guLi4NCj4+ID4NCj4+ID4gSm9zaCwgWWVodWRhLCBKYXNvbi0t
+Y2FuIHlvdSB0aGluayBvZiBhbnkgaW4gUkJEIG9yIFJHVyB0aGF0IHdvdWxkIA0KPj4gPiBkZXBl
+bmQgb24gdGhpcz8NCj4+ID4NCj4+DQo+PiBOb25lIHRoYXQgSSBjYW4gdGhpbmsgb2YuIEZvciBv
+YmplY3RzIGRhdGEsIHdlIGFscmVhZHkgc3RyaXBlIGl0IA0KPj4gYWNyb3NzIG11bHRpcGxlIG9i
+amVjdHMsIGFuZCB0aGUgdW5kZXJseWluZyBhc3N1bXB0aW9uIGlzIHRoYXQgd2UncmUgDQo+PiBn
+b2luZyB0byBnZXQgcmVzcG9uc2VzIG91dCBvZiBvcmRlciBzbyB3ZSBtYWtlIHN1cmUgd2UgY29t
+bWl0IA0KPj4gaW4tb3JkZXIuIEd1YXJkcyBhcmUgdXNlZCBvbiB0aGUgaGVhZCBvYmplY3QsIGFu
+ZCB0aGUgcmVhZCBpcyANCj4+IHN5bmNocm9ub3VzIHRoZXJlIGFueXdheS4gSSBjYW4ndCB0aGlu
+ayBvZiBhbnkgb3RoZXIgcGxhY2Ugd2hlcmUgd2UnZCANCj4+IGhhdmUgYW4gaXNzdWUuDQo+Pg0K
+Pj4gWWVodWRhDQo+PiAtLQ0KPj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQg
+dGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIA0KPj4gaW4gdGhlIGJvZHkgb2YgYSBt
+ZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gDQo+PiBp
+bmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCj4+IC0t
+DQo+PiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJz
+Y3JpYmUgY2VwaC1kZXZlbCIgDQo+PiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jk
+b21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyANCj4+IGluZm8gYXQgIGh0dHA6Ly92
+Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KPj4NCj4+DQo+IC0tDQo+IFRvIHVu
+c3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBo
+LWRldmVsIiANCj4gaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtl
+cm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gDQo+IGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5v
+cmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KPiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMg
+bGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgDQo+IGluIHRoZSBi
+b2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jk
+b21vIA0KPiBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0
+bWwNCg0KDQoNCi0tDQpCZXN0IFJlZ2FyZHMsDQoNCldoZWF0DQotLQ0KVG8gdW5zdWJzY3JpYmUg
+ZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGlu
+IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUg
+bWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8u
+aHRtbA0K
