@@ -1,54 +1,68 @@
-From: Alexandre DERUMIER <aderumier@odiso.com>
-Subject: Re: krbd blk-mq support ?
-Date: Wed, 10 Dec 2014 18:15:38 +0100 (CET)
-Message-ID: <2057019275.865798.1418231738426.JavaMail.zimbra@oxygem.tv>
-References: <20141113071815.GA27154@infradead.org> <473f435c-e053-47b9-9061-07b44c83d5d0@mailpro> <20141210140518.GA25470@infradead.org>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: [Ceph-maintainers] statically allocated uid/gid for ceph
+Date: Wed, 10 Dec 2014 10:48:18 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1412101044300.22847@cobra.newdream.net>
+References: <alpine.DEB.2.00.1412061245410.18213@cobra.newdream.net> <5488919E.4090109@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.209.98]:53863 "EHLO
-	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932247AbaLJRPu convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Dec 2014 12:15:50 -0500
-In-Reply-To: <1394621476.865737.1418231736651.JavaMail.zimbra@oxygem.tv>
+Received: from mx1.redhat.com ([209.132.183.28]:46987 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932765AbaLJSsd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 10 Dec 2014 13:48:33 -0500
+In-Reply-To: <5488919E.4090109@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Christoph Hellwig <hch@infradead.org>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Ken Dreyer <kdreyer@redhat.com>
+Cc: cjwatson@debian.org, branto@redhat.com, osynge@suse.com, timm@fnal.gov, ceph-maintainers@ceph.com, ceph-devel@vger.kernel.org
 
-Hi Christoph,
++ceph-devel
 
-I have redone bench, but I think I don't have enough ios/osd.
+On Wed, 10 Dec 2014, Ken Dreyer wrote:
+> On 12/06/2014 01:54 PM, Sage Weil wrote:
+> > Hi Colin, Boris, Owen,
+> > 
+> > We would like to choose a statically allocated uid and gid for use by Ceph 
+> > storage servers.  The basic goals are:
+> > 
+> >  - run daemons as non-root (right now everything is uid 0 (runtime and 
+> > on-disk data) and this is clearly not ideal)
+> >  - enable hot swap of disks between storage servers
+> >  - standardize across distros so that we can build clusters with a mix
+> > 
+> > To support the hot swap, we can't use the usual uids allocated dynamically 
+> > during package installation.  Disks will completely filled with Ceph data 
+> > files with the uid from one machine and will not be usable on another 
+> > machine.
+> > 
+> > I'm hoping we can choose a static uid/gid pair that is unused for Debian 
+> > (and Ubuntu), Fedora (and RHEL/CentOS), and OpenSUSE/SLES.  This will let 
+> > us maintain consistency across the entire ecosystem.
+> 
+> How many system users should I request from the Fedora Packaging
+> Committee, and what should their names be?
+> 
+> For example, are ceph-mon and ceph-osd going to run under the same
+> non-privileged system account?
 
-I'm stuck around 120000iops randread 4k with or without your patch.
+Hmm, my first impulse was to make a single user and group.  But it might 
+make sense that e.g. rgw should run in a different context than ceph-osd 
+or ceph-mon.
 
-(But I don't see any speed regression)
+If we go down that road, then maybe
 
-I'm going to have a bigger full ssd production cluster in the coming mo=
-nths,
-So I'll redone tests when I'll be ready.
+ ceph-osd
+ ceph-mon
+ ceph-mds
+ ceph-rgw
+ ceph-calamari
 
-Regards,
+and a 'ceph' group that we can use for /var/log/ceph etc for the qemu 
+and other librados users?
 
-Alexandre
------ Mail original -----
-De: "Christoph Hellwig" <hch@infradead.org>
-=C3=80: "aderumier" <aderumier@odiso.com>
-Cc: "ceph-devel" <ceph-devel@vger.kernel.org>
-Envoy=C3=A9: Mercredi 10 D=C3=A9cembre 2014 15:05:18
-Objet: Re: krbd blk-mq support ?
+Alternatively, if we just do user+group ceph, then rgw can run as www-data 
+or apache (as it does now).  Not sure what makes the most sense for 
+ceph-calamari.
 
-On Thu, Nov 13, 2014 at 10:44:18AM +0100, Alexandre DERUMIER wrote:=20
-> >>Did you manage to get those numbers?=20
->=20
-> Not yet, I'll try next week.=20
+sage
 
-What's the result? I'd really like to get rid of old request drivers=20
-as much as possible.=20
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
