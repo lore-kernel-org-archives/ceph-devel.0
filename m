@@ -1,106 +1,120 @@
-From: Shishir Gowda <Shishir.Gowda@sandisk.com>
-Subject: RE: the cpu optimize in ceph
-Date: Fri, 12 Dec 2014 10:31:01 +0000
-Message-ID: <EA545303A8F8E842820A172C3D641D6E8CA278@SACMBXIP01.sdcorp.global.sandisk.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: the cpu optimize in ceph
+Date: Fri, 12 Dec 2014 06:42:52 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1412120640330.23559@cobra.newdream.net>
 References: <CANE=7sWDLbEZ6RSkkfm+exJDhiU6mQfL3EMhAseRWCmmC13brg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2on0092.outbound.protection.outlook.com ([207.46.100.92]:10195
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S964797AbaLLLDW (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 12 Dec 2014 06:03:22 -0500
+Received: from cobra.newdream.net ([66.33.216.30]:47968 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S967919AbaLLOmx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 12 Dec 2014 09:42:53 -0500
 In-Reply-To: <CANE=7sWDLbEZ6RSkkfm+exJDhiU6mQfL3EMhAseRWCmmC13brg@mail.gmail.com>
-Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?utf-8?B?5rGg5L+h5rO9?= <xmdxcxz@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: =?GB2312?B?s9jQxdTz?= <xmdxcxz@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-SGksDQoNClBsZWFzZSB3YWl0IG91dCBmb3IgdGhlIHBhdGNoIHdoaWNoIHN1cHBvcnRzIGplbWFs
-bG9jIGJ1aWxkLg0KDQpUaGF0IHNob3VsZCBzZWUgdGhlIHRjbWFsbG9jIGlzc3VlcyBkaXNhcHBl
-YXIuDQoNClBsZWFzZSBzZWUgdGhlIHRocmVhZCBodHRwOi8vY29tbWVudHMuZ21hbmUub3JnL2dt
-YW5lLmNvbXAuZmlsZS1zeXN0ZW1zLmNlcGguZGV2ZWwvMjIyNjAgZm9yIGZ1cnRoZXIgaW5mb3Jt
-YXRpb24NCg0KV2l0aCByZWdhcmRzLA0KU2hpc2hpcg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0t
-LS0NCkZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnIFttYWlsdG86Y2VwaC1k
-ZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFsZiBPZiA/Pz8NClNlbnQ6IEZyaWRh
-eSwgRGVjZW1iZXIgMTIsIDIwMTQgMjoxNSBQTQ0KVG86IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwu
-b3JnDQpTdWJqZWN0OiB0aGUgY3B1IG9wdGltaXplIGluIGNlcGgNCg0KaGksIGNlcGhlcnM6DQoN
-CiAgICAgTm93LCBJIHdhbnQgdG8gcmVkdWNlIHRoZSBjcHUgdXNhZ2UgcmF0ZSBieSBvc2QgaW4g
-ZnVsbCBzc2QgY2x1c3Rlci4gIEluIG15IHRlc3QgY2FzZSwgY2VwaCBydW4gb3V0IG9mIGNwdSwg
-dGhlIGNwdSBpZGxlIGlzIGFib3V0IDEwJS4NCg0KICAgICBUaGUgY3B1IGluIG15IGNsdXN0ZXIg
-aXMgSW50ZWwoUikgQ29yZShUTSkgaTUtNDU3MCBDUFUgQCAzLjIwR0h6Lg0KDQogICAgIENhbiB5
-b3UgZ2l2ZSBtZSBzb21lIHN1Z2dlc3Rpb24/DQoNCiAgICAgVGhhbmtzLg0KDQpUaGVyZSBhcmUg
-dGhlIGNwdSB1c2FnZSByYXRlIGJ5IHBlcmYgdG9vbHMuDQoNCisgICA1LjQ2JSAgY2VwaC1vc2Qg
-IGxpYnRjbWFsbG9jLnNvLjQuMS4wICBbLl0gMHgwMDAwMDAwMDAwMDE3ZGVhDQorICAgMi40NSUg
-IGNlcGgtb3NkICBsaWJ0Y21hbGxvYy5zby40LjEuMCAgWy5dDQp0Y21hbGxvYzo6VGhyZWFkQ2Fj
-aGU6OlJlbGVhc2VUb0NlbnRyYWxDYWNoZSh0Y21hbGxvYzo6VGhyZWFkQ2FjaGU6OkZyZWVMaXN0
-KiwNCnVuc2lnbmVkIGxvbmcsIGludCkNCisgICAxLjgxJSAgY2VwaC1vc2QgIGxpYmMtMi4xMi5z
-byAgICAgICAgICBbLl0gbWVtY3B5DQorICAgMS43NSUgIGNlcGgtb3NkICBsaWJwdGhyZWFkLTIu
-MTIuc28gICAgWy5dIHB0aHJlYWRfbXV0ZXhfdHJ5bG9jaw0KKyAgIDEuNjYlICBjZXBoLW9zZCAg
-W2tlcm5lbC5rYWxsc3ltc10gICAgIFtrXSBfcmF3X3NwaW5fbG9jaw0KKyAgIDEuNDklICBjZXBo
-LW9zZCAgbGlidGNtYWxsb2Muc28uNC4xLjAgIFsuXSBvcGVyYXRvciBkZWxldGUodm9pZCopDQor
-ICAgMS40NyUgIGNlcGgtb3NkICBsaWJwdGhyZWFkLTIuMTIuc28gICAgWy5dIHB0aHJlYWRfbXV0
-ZXhfdW5sb2NrDQorICAgMS4xNCUgIGNlcGgtb3NkICBsaWJzdGRjKysuc28uNi4wLjEzICAgWy5d
-IHN0ZDo6YmFzaWNfc3RyaW5nPGNoYXIsDQpzdGQ6OmNoYXJfdHJhaXRzPGNoYXI+LCBzdGQ6OmFs
-bG9jYXRvcjxjaGFyPg0KPjo6YmFzaWNfc3RyaW5nKHN0ZDo6c3RyaW5nIGNvbnN0JikNCisgICAx
-LjEzJSAgY2VwaC1vc2QgIGxpYmMtMi4xMi5zbyAgICAgICAgICBbLl0gX0lPX3Zmc2NhbmYNCisg
-ICAxLjEwJSAgY2VwaC1vc2QgIGNlcGgtb3NkICAgICAgICAgICAgICBbLl0gY2VwaDo6YnVmZmVy
-OjpwdHI6OnJlbGVhc2UoKQ0KKyAgIDEuMDklICBjZXBoLW9zZCAgbGliYy0yLjEyLnNvICAgICAg
-ICAgIFsuXSB2ZnByaW50Zg0KKyAgIDEuMDAlICBjZXBoLW9zZCAgW2tlcm5lbC5rYWxsc3ltc10g
-ICAgIFtrXSBwYWdlX2ZhdWx0DQorICAgMC45NiUgIGNlcGgtb3NkICBjZXBoLW9zZCAgICAgICAg
-ICAgICAgWy5dDQpjZXBoOjpidWZmZXI6Omxpc3Q6OmFwcGVuZChjaGFyIGNvbnN0KiwgdW5zaWdu
-ZWQgaW50KQ0KKyAgIDAuOTQlICBjZXBoLW9zZCAgY2VwaC1vc2QgICAgICAgICAgICAgIFsuXSBN
-dXRleDo6TG9jayhib29sKQ0KKyAgIDAuOTElICBjZXBoLW9zZCAgbGlic3RkYysrLnNvLjYuMC4x
-MyAgIFsuXSAweDAwMDAwMDAwMDAwODA5NWYNCisgICAwLjkwJSAgY2VwaC1vc2QgIGxpYnN0ZGMr
-Ky5zby42LjAuMTMgICBbLl0NCnN0ZDo6c3RyaW5nOjpjb21wYXJlKHN0ZDo6c3RyaW5nIGNvbnN0
-JikgY29uc3QrICAgMC44OCUgIGNlcGgtb3NkDQpbdmRzb10gICAgICAgICAgICAgICAgWy5dIDB4
-MDAwMDAwMDAwMDAwMGEwOCsgICAwLjg3JSAgY2VwaC1vc2QNCmNlcGgtb3NkICAgICAgICAgICAg
-ICBbLl0NCl9fZ251X2N4eDo6X19lbmFibGVfaWY8c3RkOjpfX2lzX2NoYXI8Y2hhcj46Ol9fdmFs
-dWUsIGJvb2w+OjpfX3R5cGUgc3RkOjpvcGVyYXRvcj09PGNoYXI+KHN0ZDo6YmFzaWNfc3RyaW5n
-PGNoYXIsIHN0ZDo6Y2hhcl90cmFpdHM8Y2hhcj4sDQpzdGQ6OmFsbG9jYSsgICAwLjg2JSAgY2Vw
-aC1vc2QgIGxpYnN0ZGMrKy5zby42LjAuMTMgICBbLl0NCnN0ZDo6YmFzaWNfc3RyaW5nPGNoYXIs
-IHN0ZDo6Y2hhcl90cmFpdHM8Y2hhcj4sIHN0ZDo6YWxsb2NhdG9yPGNoYXI+DQo+Ojp+YmFzaWNf
-c3RyaW5nKCkrICAgMC43NiUgIGNlcGgtb3NkICBba2VybmVsLmthbGxzeW1zXSAgICAgW2tdDQpz
-eXN0ZW1fY2FsbCsgICAwLjc1JSAgY2VwaC1vc2QgIGxpYnN0ZGMrKy5zby42LjAuMTMgICBbLl0N
-CnN0ZDo6YmFzaWNfb3N0cmVhbTxjaGFyLCBzdGQ6OmNoYXJfdHJhaXRzPGNoYXI+ID4mIHN0ZDo6
-X19vc3RyZWFtX2luc2VydDxjaGFyLCBzdGQ6OmNoYXJfdHJhaXRzPGNoYXI+DQo+KHN0ZDo6YmFz
-aWNfb3N0cmVhbTxjaGFyLCBzdGQ6OmNoYXJfdHJhaXRzPGNoYQ0KKyAgIDAuNzMlICBjZXBoLW9z
-ZCAgbGlic3RkYysrLnNvLjYuMC4xMyAgIFsuXQ0Kc3RkOjpiYXNpY19zdHJlYW1idWY8Y2hhciwg
-c3RkOjpjaGFyX3RyYWl0czxjaGFyPiA+Ojp4c3B1dG4oY2hhciBjb25zdCosIGxvbmcpDQorICAg
-MC43MyUgIGNlcGgtb3NkICBjZXBoLW9zZCAgICAgICAgICAgICAgWy5dDQpjZXBoOjpidWZmZXI6
-OnB0cjo6cHRyKGNlcGg6OmJ1ZmZlcjo6cHRyIGNvbnN0JikNCisgICAwLjcxJSAgY2VwaC1vc2Qg
-IFtrZXJuZWwua2FsbHN5bXNdICAgICBba10gdHJ5X3RvX3dha2VfdXANCisgICAwLjcwJSAgY2Vw
-aC1vc2QgIGNlcGgtb3NkICAgICAgICAgICAgICBbLl0NCnN0ZDo6bGVzczxnaG9iamVjdF90Pjo6
-b3BlcmF0b3IoKShnaG9iamVjdF90IGNvbnN0JiwgZ2hvYmplY3RfdA0KY29uc3QmKSBjb25zdA0K
-KyAgIDAuNjclICBjZXBoLW9zZCAgW2tlcm5lbC5rYWxsc3ltc10gICAgIFtrXSBjb3B5X3VzZXJf
-ZW5oYW5jZWRfZmFzdF9zdHJpbmcNCisgICAwLjYzJSAgY2VwaC1vc2QgIGxpYmMtMi4xMi5zbyAg
-ICAgICAgICBbLl0gX19zdHJsZW5fc3NlNDINCisgICAwLjYxJSAgY2VwaC1vc2QgIFtrZXJuZWwu
-a2FsbHN5bXNdICAgICBba10gdXBkYXRlX2N1cnINCisgICAwLjYwJSAgY2VwaC1vc2QgIGxpYnN0
-ZGMrKy5zby42LjAuMTMgICBbLl0NCnN0ZDo6b3N0cmVhbWJ1Zl9pdGVyYXRvcjxjaGFyLCBzdGQ6
-OmNoYXJfdHJhaXRzPGNoYXI+ID4gc3RkOjpudW1fcHV0PGNoYXIsIHN0ZDo6b3N0cmVhbWJ1Zl9p
-dGVyYXRvcjxjaGFyLCBzdGQ6OmNoYXJfdHJhaXRzPGNoYXI+ID4gPjo6X01faW5zZXJ0X2ludDxs
-DQorICAgMC41OCUgIGNlcGgtb3NkICBsaWJ0Y21hbGxvYy5zby40LjEuMCAgWy5dIG9wZXJhdG9y
-IG5ldyh1bnNpZ25lZCBsb25nKQ0KKyAgIDAuNTglICBjZXBoLW9zZCAgbGlidGNtYWxsb2Muc28u
-NC4xLjAgIFsuXQ0KdGNtYWxsb2M6OkNlbnRyYWxGcmVlTGlzdDo6RmV0Y2hGcm9tU3BhbnMoKQ0K
-KyAgIDAuNTUlICBjZXBoLW9zZCAgY2VwaC1vc2QgICAgICAgICAgICAgIFsuXQ0KY2VwaDo6YnVm
-ZmVyOjpwdHI6OmFwcGVuZChjaGFyIGNvbnN0KiwgdW5zaWduZWQgaW50KQ0KKyAgIDAuNTUlICBj
-ZXBoLW9zZCAgbGlic3RkYysrLnNvLjYuMC4xMyAgIFsuXSBzdGQ6Om9zdHJlYW0mDQpzdGQ6Om9z
-dHJlYW06Ol9NX2luc2VydDxsb25nPihsb25nKQ0KKyAgIDAuNTMlICBjZXBoLW9zZCAgY2VwaC1v
-c2QgICAgICAgICAgICAgIFsuXSBjZXBoOjpsb2c6OkxvZzo6Zmx1c2goKQ0KLS0NClRvIHVuc3Vi
-c2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRl
-dmVsIiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9y
-ZyBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9t
-by1pbmZvLmh0bWwNCg0KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCg0KUExFQVNF
-IE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwg
-bWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJl
-Y2lwaWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMg
-bm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQg
-eW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZp
-ZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzIG1lc3Nh
-Z2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21t
-dW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25l
-IG9yIGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBh
-bmQgYWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVy
-IGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KDQo=
+On Fri, 12 Dec 2014, ??? wrote:
+> hi, cephers:
+> 
+>      Now, I want to reduce the cpu usage rate by osd in full ssd
+> cluster.  In my test case, ceph run out of cpu, the cpu idle is about
+> 10%.
+> 
+>      The cpu in my cluster is Intel(R) Core(TM) i5-4570 CPU @ 3.20GHz.
+> 
+>      Can you give me some suggestion?
+> 
+>      Thanks.
+> 
+> There are the cpu usage rate by perf tools.
+
+Can you generate call graph info?
+
+> +   5.46%  ceph-osd  libtcmalloc.so.4.1.0  [.] 0x0000000000017dea
+> +   2.45%  ceph-osd  libtcmalloc.so.4.1.0  [.]
+> tcmalloc::ThreadCache::ReleaseToCentralCache(tcmalloc::ThreadCache::FreeList*,
+> unsigned long, int)
+> +   1.81%  ceph-osd  libc-2.12.so          [.] memcpy
+
+Curious who teh callers are here
+
+> +   1.75%  ceph-osd  libpthread-2.12.so    [.] pthread_mutex_trylock
+> +   1.66%  ceph-osd  [kernel.kallsyms]     [k] _raw_spin_lock
+> +   1.49%  ceph-osd  libtcmalloc.so.4.1.0  [.] operator delete(void*)
+> +   1.47%  ceph-osd  libpthread-2.12.so    [.] pthread_mutex_unlock
+> +   1.14%  ceph-osd  libstdc++.so.6.0.13   [.] std::basic_string<char,
+> std::char_traits<char>, std::allocator<char>
+> >::basic_string(std::string const&)
+
+here
+
+> +   1.13%  ceph-osd  libc-2.12.so          [.] _IO_vfscanf
+
+here
+
+> +   1.10%  ceph-osd  ceph-osd              [.] ceph::buffer::ptr::release()
+> +   1.09%  ceph-osd  libc-2.12.so          [.] vfprintf
+
+here
+
+> +   1.00%  ceph-osd  [kernel.kallsyms]     [k] page_fault
+> +   0.96%  ceph-osd  ceph-osd              [.]
+> ceph::buffer::list::append(char const*, unsigned int)
+> +   0.94%  ceph-osd  ceph-osd              [.] Mutex::Lock(bool)
+> +   0.91%  ceph-osd  libstdc++.so.6.0.13   [.] 0x000000000008095f
+> +   0.90%  ceph-osd  libstdc++.so.6.0.13   [.]
+> std::string::compare(std::string const&) const+   0.88%  ceph-osd
+> [vdso]                [.] 0x0000000000000a08+   0.87%  ceph-osd
+> ceph-osd              [.]
+> __gnu_cxx::__enable_if<std::__is_char<char>::__value, bool>::__type
+> std::operator==<char>(std::basic_string<char, std::char_traits<char>,
+> std::alloca+   0.86%  ceph-osd  libstdc++.so.6.0.13   [.]
+> std::basic_string<char, std::char_traits<char>, std::allocator<char>
+> >::~basic_string()+   0.76%  ceph-osd  [kernel.kallsyms]     [k]
+> system_call+   0.75%  ceph-osd  libstdc++.so.6.0.13   [.]
+> std::basic_ostream<char, std::char_traits<char> >&
+> std::__ostream_insert<char, std::char_traits<char>
+> >(std::basic_ostream<char, std::char_traits<cha
+> +   0.73%  ceph-osd  libstdc++.so.6.0.13   [.]
+> std::basic_streambuf<char, std::char_traits<char> >::xsputn(char
+> const*, long)
+> +   0.73%  ceph-osd  ceph-osd              [.]
+> ceph::buffer::ptr::ptr(ceph::buffer::ptr const&)
+> +   0.71%  ceph-osd  [kernel.kallsyms]     [k] try_to_wake_up
+> +   0.70%  ceph-osd  ceph-osd              [.]
+> std::less<ghobject_t>::operator()(ghobject_t const&, ghobject_t
+> const&) const
+> +   0.67%  ceph-osd  [kernel.kallsyms]     [k] copy_user_enhanced_fast_string
+> +   0.63%  ceph-osd  libc-2.12.so          [.] __strlen_sse42
+
+and here.
+
+Also, I think the buffer::list::append() is a good target to 
+optimize.  We should be able to avoid several pointer derefs if we 
+cache a pointer into the last segment.  The trick will likely be 
+invalidating that if the buffer is otherwise modified.
+
+sage
+
+> +   0.61%  ceph-osd  [kernel.kallsyms]     [k] update_curr
+> +   0.60%  ceph-osd  libstdc++.so.6.0.13   [.]
+> std::ostreambuf_iterator<char, std::char_traits<char> >
+> std::num_put<char, std::ostreambuf_iterator<char,
+> std::char_traits<char> > >::_M_insert_int<l
+> +   0.58%  ceph-osd  libtcmalloc.so.4.1.0  [.] operator new(unsigned long)
+> +   0.58%  ceph-osd  libtcmalloc.so.4.1.0  [.]
+> tcmalloc::CentralFreeList::FetchFromSpans()
+> +   0.55%  ceph-osd  ceph-osd              [.]
+> ceph::buffer::ptr::append(char const*, unsigned int)
+> +   0.55%  ceph-osd  libstdc++.so.6.0.13   [.] std::ostream&
+> std::ostream::_M_insert<long>(long)
+> +   0.53%  ceph-osd  ceph-osd              [.] ceph::log::Log::flush()
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
