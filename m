@@ -1,74 +1,109 @@
-From: Yehuda Sadeh <yehuda@redhat.com>
-Subject: Re: Ceph's custom apache: ok to drop?
-Date: Fri, 12 Dec 2014 09:34:28 -0800
-Message-ID: <CABBk=J_3Xfn2yYKdER=n4Q_GC22uiCffk5=2G_zFkwH_DnO6FA@mail.gmail.com>
-References: <548B21E0.80102@redhat.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Reducing backfilling/recovery long tail
+Date: Fri, 12 Dec 2014 18:59:42 +0100
+Message-ID: <548B2D0E.2030004@dachary.org>
+References: <548B06D2.90609@dachary.org> <alpine.DEB.2.00.1412120812070.23559@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="lXOAWRgA5uhLhrPN7tjvFc2pxe0wWEldC"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f174.google.com ([209.85.213.174]:60595 "EHLO
-	mail-ig0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932622AbaLLRe3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 12 Dec 2014 12:34:29 -0500
-Received: by mail-ig0-f174.google.com with SMTP id hn15so1830975igb.7
-        for <ceph-devel@vger.kernel.org>; Fri, 12 Dec 2014 09:34:28 -0800 (PST)
-In-Reply-To: <548B21E0.80102@redhat.com>
+Received: from mail2.dachary.org ([91.121.57.175]:52089 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1031159AbaLLR7p (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 12 Dec 2014 12:59:45 -0500
+In-Reply-To: <alpine.DEB.2.00.1412120812070.23559@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ken Dreyer <kdreyer@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: Samuel Just <sam.just@inktank.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Fri, Dec 12, 2014 at 9:12 AM, Ken Dreyer <kdreyer@redhat.com> wrote:
-> Hi folks,
->
-> The Apache fork that we ship on Ceph.com
-> (https://github.com/ceph/apache2) is several versions behind upstream
-> and has a couple CVEs by now.
->
-> I've heard from the developers (I don't remember if it was Dan, Yehuda,
-> or someone else) refer on IRC to the idea that the changes in our Ceph
-> Apache fork were cosmetic, and it's ok to simply use upstream Apache.
->
-> I wanted to confirm this with a wider audience: it's ok to stop
-> maintaining and shipping our custom Apache?
->
-> In other words, we would remove references to our custom Apache from
-> Teuthology, and our docs, and eventually from our repositories?
->
->
-> -----
->
-> Diving into our changes, there are two patches that we have on top of
-> Apache 2.2.22:
->
-> 1. "rgw: don't unset Content-Length header on HEAD response (this was
-> being done when content length was 0)"
-> https://github.com/ceph/apache2/commit/5ae1b4a081b05fcacf55e7114eec87d9b2a0a5da
-> . (See also the original patch submission at
-> http://tracker.ceph.com/issues/897)
->
-> 2. "don't complain on badly formatted expectations"
-> https://github.com/ceph/apache2/commit/0d9948f1e483386adef0841896484db8422127b2
->
-> Both of these were submitted to Apache upstream in December 2013 (thread
-> on apache-dev "Ceph patches for httpd") and merged in
-> http://svn.apache.org/r1554303 .
-
-Oh, awesome!
-
->
-> So his will be controllable via new directives in httpd 2.5:
-> "HttpContentLengthHeadZero" (defaults to off, ie, continue to squelch
-> the zero-length header) and HttpExpectStrict (defaults to off, ie,
-> continue to log the error).
->
-> So for httpd 2.5 we have something that gives us what we need.
-
-I don't think we really need either of these changes. One was really
-only triggered in a very synthetic use case (the Expect header), and
-the other one only happened with a very old version of boto, and we've
-managed to send an upstream fix for it 3-4 years ago. I'm all for
-dropping it.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--lXOAWRgA5uhLhrPN7tjvFc2pxe0wWEldC
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: quoted-printable
 
 
-Yehuda
+
+On 12/12/2014 17:12, Sage Weil wrote:
+> On Fri, 12 Dec 2014, Loic Dachary wrote:
+>> Hi Sam & Sage,
+>>
+>> In the context of http://tracker.ceph.com/issues/9566 I'm inclined to =
+
+>> think the best solution would be that the AsyncReserver choose a PG=20
+>> instead of just picking the next one in the list when there is a free =
+
+>> slot. It would always choose a PG that must move to/from an OSDs for=20
+>> which there are more PGs waiting in the AsyncRerserver than any other =
+
+>> OSD. The sort involved does not seem too expensive.
+>>
+>> Calculating priorities before adding the PG to the AsyncReserver seems=
+=20
+>> wrong because the state of the system will change significantly while =
+
+>> the PG is waiting to be processed. For instance the first PGs to be=20
+>> added have a low priority while the next have increasing priorities wh=
+en=20
+>> they accumulate. If reservations are canceled because the OSD map=20
+>> changed again (maybe another OSD is decommissioned before recovery of =
+
+>> the first one completes), you may end up having high priorities for PG=
+s=20
+>> that are no longer associated with busy OSDs. That could backfire and =
+
+>> create even more frequent long tails.
+>>
+>> What do you think ?
+>=20
+> That makes sense.  In order to make that decision, it means that the OS=
+Ds=20
+> need to be sharing the level of recovery work they have pending on a=20
+> regular basis, right?
+> =20
+
+It may not be necessary. The local_reserver is populated with all PGs tha=
+t need to move. Say 50 of them are for osd.0 and 10 are for osd.1. The de=
+cision is made to schedule a PG for osd.0 because it has more PG to go. T=
+his PG will then try to get a remote_reserver slot on osd.0 : if it turns=
+ out that osd.0 already is busy, it will be queued. Up to osd_max_backfil=
+l can be queued for a given osd in the remote_reserver in this way becaus=
+e only osd_max_backfill PGs will get a slot in the local_reserver. Since =
+the remote_reserver queue is capped by osd_max_backfill, its length does =
+not accurately reflect the workload associated to an OSD. For this reason=
+ the priority could be modified when asking for the remote reservation (t=
+he priority field that we currently have) to reflect the workload. If the=
+ workload change while PGs are waiting in the remote_reserver queue, it c=
+ould be that these PGs are given a priority that is sub-optimal. It is pr=
+obably an acceptable tradeoff since it impacts onl
+y osd_max_backfill PGs per osd. In contrast, hundreds of PGs could be que=
+ued in the local_reserver and setting a priority for them at the time the=
+y are queued could have lasting undesirable side effects.
+
+I should probably enumerate the steps of an actual situation to clarify m=
+y thinking :-)
+
+Cheers
+
+> sage
+>=20
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+
+
+--lXOAWRgA5uhLhrPN7tjvFc2pxe0wWEldC
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlSLLQ4ACgkQ8dLMyEl6F20+mwCeI6LUAI8HBMOIDImiJqsrCeiM
+lx0AniGgt123fl3bjOEZQqwIB4YySfkA
+=cozG
+-----END PGP SIGNATURE-----
+
+--lXOAWRgA5uhLhrPN7tjvFc2pxe0wWEldC--
