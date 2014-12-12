@@ -1,46 +1,133 @@
 From: Sage Weil <sweil@redhat.com>
-Subject: Re: Reducing backfilling/recovery long tail
-Date: Fri, 12 Dec 2014 08:12:42 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1412120812070.23559@cobra.newdream.net>
-References: <548B06D2.90609@dachary.org>
+Subject: Re: crush: straw is dead, long live straw2
+Date: Fri, 12 Dec 2014 08:20:36 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1412120814050.23559@cobra.newdream.net>
+References: <alpine.DEB.2.00.1412081516010.18281@cobra.newdream.net> <20141212091408.GN4150@thinkpad.thebehrens.net> <alpine.DEB.2.00.1412120644340.23559@cobra.newdream.net> <548B0C16.4000509@gmail.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:42566 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:52664 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1030483AbaLLQNs (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 12 Dec 2014 11:13:48 -0500
-In-Reply-To: <548B06D2.90609@dachary.org>
+	id S932622AbaLLQUn (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 12 Dec 2014 11:20:43 -0500
+In-Reply-To: <548B0C16.4000509@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Samuel Just <sam.just@inktank.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Joe Landman <joe.landman@gmail.com>
+Cc: Thorsten Behrens <tbehrens@suse.com>, ceph-devel@vger.kernel.org
 
-On Fri, 12 Dec 2014, Loic Dachary wrote:
-> Hi Sam & Sage,
+On Fri, 12 Dec 2014, Joe Landman wrote:
+> On 12/12/2014 09:46 AM, Sage Weil wrote:
+> > On Fri, 12 Dec 2014, Thorsten Behrens wrote:
+> > > Sage Weil wrote:
+> > > > Calculating the ln() function is a bit annoying because it is a floating
+> > > > point function and CRUSH is all fixed-point arithmetic (integer-based).
+> > > > The current draft implementation uses a 128 KB lookup table (2 bytes per
+> > > > entry for 16 bits of input precision).  It seems to be about 25% slower
+> > > > than the original straw code in my simple microbenchmark, but I'm not
+> > > > sure
+> > > > that's a number we should trust since it loops through a zillion inputs
+> > > > and will pull most of the lookup table into the processor caches.
+> > > > 
+> > > > We could probably try a few others things:
+> > > > 
+> > > [snip]
+> > > 
+> > > My Hacker's Delight copy has a number of further variants (on
+> > > pp. 215), unfortunately only covering log_2 (which is trivially the
+> > > number of leading zeros in the binary representation) and log_10. But
+> > > since the logarithms are simply related by a multiplicative constant,
+> > > something clever might be doable here with a bit of thinking.
+> > Any log will definitely do; the next steps are to do a division and then
+> > take the max.  Simply counting 0's isn't precise enough, though.. we need
+> > a lot more precision than that.
 > 
-> In the context of http://tracker.ceph.com/issues/9566 I'm inclined to 
-> think the best solution would be that the AsyncReserver choose a PG 
-> instead of just picking the next one in the list when there is a free 
-> slot. It would always choose a PG that must move to/from an OSDs for 
-> which there are more PGs waiting in the AsyncRerserver than any other 
-> OSD. The sort involved does not seem too expensive.
+> You want integer log?  Looks like ln(x * 2^-16) from your original
+> description., with x = ( 0 .. 2^16 )
+> So your log is going from undefined to 0 (ln 0 is not defined). Fire up
+> gnuplot and do a quick "plot [0:1] (log(x)) " to see the shape of the
+> function.
 > 
-> Calculating priorities before adding the PG to the AsyncReserver seems 
-> wrong because the state of the system will change significantly while 
-> the PG is waiting to be processed. For instance the first PGs to be 
-> added have a low priority while the next have increasing priorities when 
-> they accumulate. If reservations are canceled because the OSD map 
-> changed again (maybe another OSD is decommissioned before recovery of 
-> the first one completes), you may end up having high priorities for PGs 
-> that are no longer associated with busy OSDs. That could backfire and 
-> create even more frequent long tails.
-> 
-> What do you think ?
+> It can be a real valued function scaled in a particular way, then we can use a
+> nice set of series to calculate it in FP (single precision if you like).
+> Conversion to int should be fast, and we could do this in SSE2/AVX to do
+> multiple calcs at the same time.
 
-That makes sense.  In order to make that decision, it means that the OSDs 
-need to be sharing the level of recovery work they have pending on a 
-regular basis, right?
+We can't use floating point. The code needs to run in the kernel.  We also 
+need the rseults to be perfectly deterministic and consistent across all 
+architectures; I'm not sure if all floating point implementations (and log 
+implementations) will do that?
 
+> I would think the random value portion of
+> the code would be the slow part. Where are you getting your random source?
+> Could you not start that out with an exponential distribution rather than
+> generate your own?
+
+That would simplify things, but I'm not sure how practical it is.  In 
+reality, the "random" value is pseudorandom, and looks like this:
+
+ rjhash(crush_input_x, bucket_id, item_id, attempt)
+
+The input 'x' is basically the PG id.  Attempt is incremented as CRUSH 
+makes multiple samples to find a mapping that is suitable. Note that the 
+position of item in the bucket is not an input, so this result is stable 
+when other bucket members change.  The current hash function we're using 
+is based on Richard Jenkin's 32-bit mix function.  Here:
+
+	https://github.com/ceph/ceph/blob/master/src/crush/hash.c
+
+> Aside from that, I'd suggest doing something like this (as you don't really
+> need the ln(x/65536)/weight term, just the ln(x) term ... as you are
+> effectively throwing away the value and just using side effects
+
+The weight is actually item_weight and is the key to getting more mappings 
+on more heavily weighted items.  But it's a simple integer divide, so 
+cheap.
+
+If SSEx/AVX could be leveraged that'd be great, but I think it needs to be 
+fixed-point arithmetic...
+
+Thanks!
 sage
 
+
+>  max_x = -1
+>  max_item = -1
+>  mult_const = ln(1/65536)/weight
+>  for each item:
+>     x = random value from 0..65535
+>     x = ln(x)
+>     if x > max_x:
+>        max_x = x
+>        max_item = item
+>  return item
+> 
+> The random value is likely to be an expensive portion of the algorithm ...
+> possibly have a thread to pre-queue a few thousand random values that you
+> queue up in a ring buffer somewhere?
+> 
+> I'd be happy to code up a quick log calculator if that really is the most
+> expensive portion of this.  I think we might be able to do the logs and even
+> the comparisons in SSEx/AVX if you are open for that (exploit some loop
+> unrolling), though we'd need a serial finishing loop to deal with the
+> unrollable portion.
+> 
+> 
+> 
+> > 
+> > The table lookup is (I think) on the order of 50-100 cycles with a cold
+> > cache; that's what we need to beat!
+> > 
+> > sage
+> > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
