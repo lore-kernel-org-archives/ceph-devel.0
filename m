@@ -1,46 +1,88 @@
-From: John Spray <john.spray@redhat.com>
-Subject: Re: [Ceph-maintainers] statically allocated uid/gid for ceph
-Date: Thu, 11 Dec 2014 22:47:04 +0000
-Message-ID: <CAGd4Wr3A4QYQkPsgSJ3viraxToGWBWJ=eaUZ08CM+tSGg56WXQ@mail.gmail.com>
-References: <alpine.DEB.2.00.1412061245410.18213@cobra.newdream.net>
-	<5488919E.4090109@redhat.com>
-	<alpine.DEB.2.00.1412101044300.22847@cobra.newdream.net>
-	<5488FC46.5080106@suse.com>
+From: =?UTF-8?B?5rGg5L+h5rO9?= <xmdxcxz@gmail.com>
+Subject: the cpu optimize in ceph
+Date: Fri, 12 Dec 2014 16:44:57 +0800
+Message-ID: <CANE=7sWDLbEZ6RSkkfm+exJDhiU6mQfL3EMhAseRWCmmC13brg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f53.google.com ([209.85.215.53]:50461 "EHLO
-	mail-la0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S965652AbaLKWrG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Dec 2014 17:47:06 -0500
-Received: by mail-la0-f53.google.com with SMTP id gm9so5023828lab.40
-        for <ceph-devel@vger.kernel.org>; Thu, 11 Dec 2014 14:47:04 -0800 (PST)
-In-Reply-To: <5488FC46.5080106@suse.com>
+Received: from mail-vc0-f170.google.com ([209.85.220.170]:53801 "EHLO
+	mail-vc0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S964856AbaLLIo6 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 12 Dec 2014 03:44:58 -0500
+Received: by mail-vc0-f170.google.com with SMTP id hy4so3398457vcb.15
+        for <ceph-devel@vger.kernel.org>; Fri, 12 Dec 2014 00:44:57 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tim Serong <tserong@suse.com>
-Cc: Sage Weil <sweil@redhat.com>, Ken Dreyer <kdreyer@redhat.com>, cjwatson@debian.org, timm@fnal.gov, ceph-maintainers@ceph.com, Ceph Development <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Thu, Dec 11, 2014 at 2:07 AM, Tim Serong <tserong@suse.com> wrote:
-> Calamari consists of a few pieces - the web-accessible bit runs as the
-> apache user, then there's the cthulhu daemon, as well as carbon-cache
-> for the graphite stuff.  These latter two I believe run as root (at
-> least, they do with my SUSE packages which have systemd units for each
-> of these services, and I assume they run as root on other distros where
-> they're run under supervisord).  Now that I think of it though, I wonder
-> if it makes sense to just run the whole lot as the apache user...?
+hi, cephers:
 
-It probably doesn't make sense to move all the services under apache:
-the in-apache parts (i.e. the REST request handlers) are relatively
-unprivileged things that just know how to make calls to other (local)
-services, whereas the other services are reaching out over the network
-to the Ceph servers.  It might make sense to use a ceph-calamari user
-for cthulhu et al, and leave the REST bits running as apache.
+     Now, I want to reduce the cpu usage rate by osd in full ssd
+cluster.  In my test case, ceph run out of cpu, the cpu idle is about
+10%.
 
-As for carbon-cache, that should cease to be a calamari-specific
-question when using proper distro packages instead of an embedded
-instance (iirc we were still running our own built-in carbon last time
-I touched calamari)
+     The cpu in my cluster is Intel(R) Core(TM) i5-4570 CPU @ 3.20GHz.
 
-Cheers,
-John
+     Can you give me some suggestion?
+
+     Thanks.
+
+There are the cpu usage rate by perf tools.
+
++   5.46%  ceph-osd  libtcmalloc.so.4.1.0  [.] 0x0000000000017dea
++   2.45%  ceph-osd  libtcmalloc.so.4.1.0  [.]
+tcmalloc::ThreadCache::ReleaseToCentralCache(tcmalloc::ThreadCache::FreeList*,
+unsigned long, int)
++   1.81%  ceph-osd  libc-2.12.so          [.] memcpy
++   1.75%  ceph-osd  libpthread-2.12.so    [.] pthread_mutex_trylock
++   1.66%  ceph-osd  [kernel.kallsyms]     [k] _raw_spin_lock
++   1.49%  ceph-osd  libtcmalloc.so.4.1.0  [.] operator delete(void*)
++   1.47%  ceph-osd  libpthread-2.12.so    [.] pthread_mutex_unlock
++   1.14%  ceph-osd  libstdc++.so.6.0.13   [.] std::basic_string<char,
+std::char_traits<char>, std::allocator<char>
+>::basic_string(std::string const&)
++   1.13%  ceph-osd  libc-2.12.so          [.] _IO_vfscanf
++   1.10%  ceph-osd  ceph-osd              [.] ceph::buffer::ptr::release()
++   1.09%  ceph-osd  libc-2.12.so          [.] vfprintf
++   1.00%  ceph-osd  [kernel.kallsyms]     [k] page_fault
++   0.96%  ceph-osd  ceph-osd              [.]
+ceph::buffer::list::append(char const*, unsigned int)
++   0.94%  ceph-osd  ceph-osd              [.] Mutex::Lock(bool)
++   0.91%  ceph-osd  libstdc++.so.6.0.13   [.] 0x000000000008095f
++   0.90%  ceph-osd  libstdc++.so.6.0.13   [.]
+std::string::compare(std::string const&) const+   0.88%  ceph-osd
+[vdso]                [.] 0x0000000000000a08+   0.87%  ceph-osd
+ceph-osd              [.]
+__gnu_cxx::__enable_if<std::__is_char<char>::__value, bool>::__type
+std::operator==<char>(std::basic_string<char, std::char_traits<char>,
+std::alloca+   0.86%  ceph-osd  libstdc++.so.6.0.13   [.]
+std::basic_string<char, std::char_traits<char>, std::allocator<char>
+>::~basic_string()+   0.76%  ceph-osd  [kernel.kallsyms]     [k]
+system_call+   0.75%  ceph-osd  libstdc++.so.6.0.13   [.]
+std::basic_ostream<char, std::char_traits<char> >&
+std::__ostream_insert<char, std::char_traits<char>
+>(std::basic_ostream<char, std::char_traits<cha
++   0.73%  ceph-osd  libstdc++.so.6.0.13   [.]
+std::basic_streambuf<char, std::char_traits<char> >::xsputn(char
+const*, long)
++   0.73%  ceph-osd  ceph-osd              [.]
+ceph::buffer::ptr::ptr(ceph::buffer::ptr const&)
++   0.71%  ceph-osd  [kernel.kallsyms]     [k] try_to_wake_up
++   0.70%  ceph-osd  ceph-osd              [.]
+std::less<ghobject_t>::operator()(ghobject_t const&, ghobject_t
+const&) const
++   0.67%  ceph-osd  [kernel.kallsyms]     [k] copy_user_enhanced_fast_string
++   0.63%  ceph-osd  libc-2.12.so          [.] __strlen_sse42
++   0.61%  ceph-osd  [kernel.kallsyms]     [k] update_curr
++   0.60%  ceph-osd  libstdc++.so.6.0.13   [.]
+std::ostreambuf_iterator<char, std::char_traits<char> >
+std::num_put<char, std::ostreambuf_iterator<char,
+std::char_traits<char> > >::_M_insert_int<l
++   0.58%  ceph-osd  libtcmalloc.so.4.1.0  [.] operator new(unsigned long)
++   0.58%  ceph-osd  libtcmalloc.so.4.1.0  [.]
+tcmalloc::CentralFreeList::FetchFromSpans()
++   0.55%  ceph-osd  ceph-osd              [.]
+ceph::buffer::ptr::append(char const*, unsigned int)
++   0.55%  ceph-osd  libstdc++.so.6.0.13   [.] std::ostream&
+std::ostream::_M_insert<long>(long)
++   0.53%  ceph-osd  ceph-osd              [.] ceph::log::Log::flush()
