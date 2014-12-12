@@ -1,88 +1,81 @@
-From: =?UTF-8?B?5rGg5L+h5rO9?= <xmdxcxz@gmail.com>
-Subject: the cpu optimize in ceph
-Date: Fri, 12 Dec 2014 16:44:57 +0800
-Message-ID: <CANE=7sWDLbEZ6RSkkfm+exJDhiU6mQfL3EMhAseRWCmmC13brg@mail.gmail.com>
+From: Thorsten Behrens <tbehrens@suse.com>
+Subject: Re: crush: straw is dead, long live straw2
+Date: Fri, 12 Dec 2014 10:14:08 +0100
+Message-ID: <20141212091408.GN4150@thinkpad.thebehrens.net>
+References: <alpine.DEB.2.00.1412081516010.18281@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="prC3/KjdfqNV7evK"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f170.google.com ([209.85.220.170]:53801 "EHLO
-	mail-vc0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S964856AbaLLIo6 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 12 Dec 2014 03:44:58 -0500
-Received: by mail-vc0-f170.google.com with SMTP id hy4so3398457vcb.15
-        for <ceph-devel@vger.kernel.org>; Fri, 12 Dec 2014 00:44:57 -0800 (PST)
+Received: from mail.emea.novell.com ([130.57.118.101]:42820 "EHLO
+	mail.emea.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S965336AbaLLJRV (ORCPT
+	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
+	Fri, 12 Dec 2014 04:17:21 -0500
+Content-Disposition: inline
+In-Reply-To: <alpine.DEB.2.00.1412081516010.18281@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: ceph-devel@vger.kernel.org
 
-hi, cephers:
 
-     Now, I want to reduce the cpu usage rate by osd in full ssd
-cluster.  In my test case, ceph run out of cpu, the cpu idle is about
-10%.
+--prC3/KjdfqNV7evK
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-     The cpu in my cluster is Intel(R) Core(TM) i5-4570 CPU @ 3.20GHz.
+Sage Weil wrote:
+> Calculating the ln() function is a bit annoying because it is a floating=
+=20
+> point function and CRUSH is all fixed-point arithmetic (integer-based). =
+=20
+> The current draft implementation uses a 128 KB lookup table (2 bytes per=
+=20
+> entry for 16 bits of input precision).  It seems to be about 25% slower=
+=20
+> than the original straw code in my simple microbenchmark, but I'm not sur=
+e=20
+> that's a number we should trust since it loops through a zillion inputs=
+=20
+> and will pull most of the lookup table into the processor caches.
+>=20
+> We could probably try a few others things:
+>=20
+[snip]
 
-     Can you give me some suggestion?
+My Hacker's Delight copy has a number of further variants (on
+pp. 215), unfortunately only covering log_2 (which is trivially the
+number of leading zeros in the binary representation) and log_10. But
+since the logarithms are simply related by a multiplicative constant,
+something clever might be doable here with a bit of thinking.
 
-     Thanks.
+Cheers,
 
-There are the cpu usage rate by perf tools.
+-- Thorsten
 
-+   5.46%  ceph-osd  libtcmalloc.so.4.1.0  [.] 0x0000000000017dea
-+   2.45%  ceph-osd  libtcmalloc.so.4.1.0  [.]
-tcmalloc::ThreadCache::ReleaseToCentralCache(tcmalloc::ThreadCache::FreeList*,
-unsigned long, int)
-+   1.81%  ceph-osd  libc-2.12.so          [.] memcpy
-+   1.75%  ceph-osd  libpthread-2.12.so    [.] pthread_mutex_trylock
-+   1.66%  ceph-osd  [kernel.kallsyms]     [k] _raw_spin_lock
-+   1.49%  ceph-osd  libtcmalloc.so.4.1.0  [.] operator delete(void*)
-+   1.47%  ceph-osd  libpthread-2.12.so    [.] pthread_mutex_unlock
-+   1.14%  ceph-osd  libstdc++.so.6.0.13   [.] std::basic_string<char,
-std::char_traits<char>, std::allocator<char>
->::basic_string(std::string const&)
-+   1.13%  ceph-osd  libc-2.12.so          [.] _IO_vfscanf
-+   1.10%  ceph-osd  ceph-osd              [.] ceph::buffer::ptr::release()
-+   1.09%  ceph-osd  libc-2.12.so          [.] vfprintf
-+   1.00%  ceph-osd  [kernel.kallsyms]     [k] page_fault
-+   0.96%  ceph-osd  ceph-osd              [.]
-ceph::buffer::list::append(char const*, unsigned int)
-+   0.94%  ceph-osd  ceph-osd              [.] Mutex::Lock(bool)
-+   0.91%  ceph-osd  libstdc++.so.6.0.13   [.] 0x000000000008095f
-+   0.90%  ceph-osd  libstdc++.so.6.0.13   [.]
-std::string::compare(std::string const&) const+   0.88%  ceph-osd
-[vdso]                [.] 0x0000000000000a08+   0.87%  ceph-osd
-ceph-osd              [.]
-__gnu_cxx::__enable_if<std::__is_char<char>::__value, bool>::__type
-std::operator==<char>(std::basic_string<char, std::char_traits<char>,
-std::alloca+   0.86%  ceph-osd  libstdc++.so.6.0.13   [.]
-std::basic_string<char, std::char_traits<char>, std::allocator<char>
->::~basic_string()+   0.76%  ceph-osd  [kernel.kallsyms]     [k]
-system_call+   0.75%  ceph-osd  libstdc++.so.6.0.13   [.]
-std::basic_ostream<char, std::char_traits<char> >&
-std::__ostream_insert<char, std::char_traits<char>
->(std::basic_ostream<char, std::char_traits<cha
-+   0.73%  ceph-osd  libstdc++.so.6.0.13   [.]
-std::basic_streambuf<char, std::char_traits<char> >::xsputn(char
-const*, long)
-+   0.73%  ceph-osd  ceph-osd              [.]
-ceph::buffer::ptr::ptr(ceph::buffer::ptr const&)
-+   0.71%  ceph-osd  [kernel.kallsyms]     [k] try_to_wake_up
-+   0.70%  ceph-osd  ceph-osd              [.]
-std::less<ghobject_t>::operator()(ghobject_t const&, ghobject_t
-const&) const
-+   0.67%  ceph-osd  [kernel.kallsyms]     [k] copy_user_enhanced_fast_string
-+   0.63%  ceph-osd  libc-2.12.so          [.] __strlen_sse42
-+   0.61%  ceph-osd  [kernel.kallsyms]     [k] update_curr
-+   0.60%  ceph-osd  libstdc++.so.6.0.13   [.]
-std::ostreambuf_iterator<char, std::char_traits<char> >
-std::num_put<char, std::ostreambuf_iterator<char,
-std::char_traits<char> > >::_M_insert_int<l
-+   0.58%  ceph-osd  libtcmalloc.so.4.1.0  [.] operator new(unsigned long)
-+   0.58%  ceph-osd  libtcmalloc.so.4.1.0  [.]
-tcmalloc::CentralFreeList::FetchFromSpans()
-+   0.55%  ceph-osd  ceph-osd              [.]
-ceph::buffer::ptr::append(char const*, unsigned int)
-+   0.55%  ceph-osd  libstdc++.so.6.0.13   [.] std::ostream&
-std::ostream::_M_insert<long>(long)
-+   0.53%  ceph-osd  ceph-osd              [.] ceph::log::Log::flush()
+--prC3/KjdfqNV7evK
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iQJ8BAEBCgBmBQJUirHgXxSAAAAAAC4AKGlzc3Vlci1mcHJAbm90YXRpb25zLm9w
+ZW5wZ3AuZmlmdGhob3JzZW1hbi5uZXRDREI0NTE4NDRDMTFEMjY1NDlFM0FCNzgx
+QzE2REZEQjMwRjRGNERGAAoJEBwW39sw9PTfr3UQAMop08m03gDHNVvduvWUP1d2
+O7/1msOu9Ay+yBUl5s7kswBaZynOliB+MchaTcJxpUcKZIvRyjO0b7dgTBfvCF+S
+rTyuzrFNb2SMU+mx0CHlv+Vp0bWT5n8BV1ry09pp9EPF/VFvwigPFV9UAEugCSeY
+3oTJl0YMEX3LZaviScHcOBY4Ana7NBHaKHxwwamt6fgni3hPoA5SrZ3gz8FCiM3g
+eXhmij5X6E9Ht36hVZKWnjfncXavl2hsGJdxs+DBEQwn1XzE6olJT3r24cx22Iuv
+GXygLuEQenH0mG8qVTN4cdP9ota0E8UNVjadaM1HFs64/euNOa1ELNHHSvVuvgOl
+PE8q2gXnaaDMEPvfsT6HzD8f57+NUqQfl9fVqgalR577QRIk5XcrceHTlvbMsqKD
+RNT/vOhOuXae64ylx2fyY6Okk/NOc6E3dlwNLMI3cNrSAJCcnl/Yxi3waFAItyGK
+D+exDgY/jAz7o4+xBc4K4eF/on3pXgK5RVdBq3wWHsQq3npxMGaZdrSvWFYRsBKA
+/W1z2eOqJlgEs9LEiUoRV+70ql0B65uAjp8/LqUb5oh7aJ31I4KjUtnDuiTTCE4C
+kVTM78Fw1AuZBo8/rPvPjWCA9Aehg7F10SVM1eTpAETT+w0WSJw+IqlHVAGIGaNt
+gYekFXNJE1CqlcBE3lJe
+=7C3Q
+-----END PGP SIGNATURE-----
+
+--prC3/KjdfqNV7evK--
