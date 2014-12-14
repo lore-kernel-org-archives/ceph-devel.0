@@ -1,93 +1,120 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Running make check on each pull requests via jenkins
-Date: Sat, 13 Dec 2014 19:56:27 +0100
-Message-ID: <548C8BDB.8010806@dachary.org>
+From: scan-admin@coverity.com
+Subject: New Defects reported by Coverity Scan for ceph
+Date: Sun, 14 Dec 2014 06:17:39 -0800
+Message-ID: <548d9c03e9841_461ad8932049755@scan.coverity.com.mail>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="TRWgHrkaWie9weMeirSbnJh3Hp6sLfAdl"
+Content-Type: text/plain;
+ charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:52517 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751841AbaLMS4b (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 13 Dec 2014 13:56:31 -0500
+Received: from scanrelay.coverity.com ([209.249.196.67]:56136 "EHLO
+	scanrelay.coverity.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750925AbaLNORk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 14 Dec 2014 09:17:40 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alfredo Deza <alfredo.deza@inktank.com>, Ken Dreyer <kdreyer@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
-
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---TRWgHrkaWie9weMeirSbnJh3Hp6sLfAdl
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-
-Hi Alfredo & Ken,
-
-After a week of testing/fixing, I think http://workbench.dachary.org/ceph=
-/ceph/blob/master/run-make-check.sh is ready to be used for CI. If I'm no=
-t mistaken, the next steps are to:
-
-a) add a jenkins slave on a machine
-b) add a build script to https://github.com/ceph/ceph-build
-c) schedule a new job on http://jenkins.ceph.com/ with something like htt=
-ps://github.com/ceph/ceph-build/pull/35
-
-The only part I'm unclear about is the jenkins slave. The test I did were=
- on a fedora 20 and ubuntu 14.04 and it would be better (as a first step)=
- if there was just a single slave running one of these two operating syst=
-ems. It will make it easier to diagnose problems.
-
-The build script could be something like (module the pastebinit if jenkin=
-s can handle up to 100,000 lines of output).
-
-export PATH=3D$HOME:/usr/local/bin:$PATH
-
-author=3D$(git log -1 --pretty=3D'%ae')
-if test -z "$(git log -1 --pretty=3D'%H' --author $author master)" ; then=
-
-    git log -1
-    echo "Ignored because $author has no previous commit in master"
-    exit 0
-fi
-
-sudo $(which apt-get yum zypper 2>/dev/null) install -y pastebinit
-if run-make-check.sh > output 2>&1 ; then
-    success=3Dtrue
-else
-    success=3Dfalse
-fi
-# because of https://gitlab.com/gitlab-org/gitlab-ci/issues/71           =
-                                                                         =
-                                                                 =20
-url=3D$(pastebinit -b http://paste.ubuntu.com/ output)
-commit=3D$(git rev-parse HEAD)
-if $success ; then
-    message=3D"SUCCESS: make check on $commit output is $url"
-else
-    message=3D"FAIL: make check on $commit output is $url"
-fi
-
-$success
-
-Cheers
-
-http://tracker.ceph.com/issues/10046
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
+To: ceph-devel@vger.kernel.org
 
 
---TRWgHrkaWie9weMeirSbnJh3Hp6sLfAdl
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+Hi,
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
+Please find the latest report on new defect(s) introduced to ceph found with Coverity Scan.
 
-iEYEARECAAYFAlSMi9sACgkQ8dLMyEl6F22R/ACfT/7GQrDwOKRHlsToUNknsIgs
-r/gAnRUINX1uptg1kd26K3inleuUIKc9
-=1qvc
------END PGP SIGNATURE-----
+4 new defect(s) introduced to ceph found with Coverity Scan.
 
---TRWgHrkaWie9weMeirSbnJh3Hp6sLfAdl--
+
+New defect(s) Reported-by: Coverity Scan
+Showing 4 of 4 defect(s)
+
+
+** CID 1258437:  Wrong size argument  (SIZEOF_MISMATCH)
+/test/librbd/test_librbd.cc: 956 in TestLibRBD_TestIOPP_Test::TestBody()()
+
+** CID 1258438:  Wrong size argument  (SIZEOF_MISMATCH)
+/test/librbd/test_librbd.cc: 955 in TestLibRBD_TestIOPP_Test::TestBody()()
+
+** CID 1258439:  Copy into fixed size buffer  (STRING_OVERFLOW)
+/common/blkdev.cc: 60 in get_block_device_base(const char *, char *, unsigned long)()
+
+** CID 1258440:  Time of check time of use  (TOCTOU)
+/common/blkdev.cc: 75 in get_block_device_base(const char *, char *, unsigned long)()
+
+
+________________________________________________________________________________________________________
+*** CID 1258437:  Wrong size argument  (SIZEOF_MISMATCH)
+/test/librbd/test_librbd.cc: 956 in TestLibRBD_TestIOPP_Test::TestBody()()
+950         
+951         for (i = 5; i < 10; ++i)
+952           ASSERT_PASSED(aio_read_test_data, image, test_data, strlen(test_data) * i, TEST_IO_SIZE);
+953     
+954         // discard 2nd, 4th sections.
+955         ASSERT_PASSED(discard_test_data, image, TEST_IO_SIZE, TEST_IO_SIZE);
+>>>     CID 1258437:  Wrong size argument  (SIZEOF_MISMATCH)
+>>>     Passing argument "&passed" of type "bool *" and argument "512UL" to function "aio_discard_test_data" is suspicious because "sizeof (bool)" /*1*/ is expected.
+956         ASSERT_PASSED(aio_discard_test_data, image, TEST_IO_SIZE*3, TEST_IO_SIZE);
+957         
+958         ASSERT_PASSED(read_test_data, image, test_data,  0, TEST_IO_SIZE);
+959         ASSERT_PASSED(read_test_data, image,  zero_data, TEST_IO_SIZE, TEST_IO_SIZE);
+960         ASSERT_PASSED(read_test_data, image, test_data,  TEST_IO_SIZE*2, TEST_IO_SIZE);
+961         ASSERT_PASSED(read_test_data, image,  zero_data, TEST_IO_SIZE*3, TEST_IO_SIZE);
+
+________________________________________________________________________________________________________
+*** CID 1258438:  Wrong size argument  (SIZEOF_MISMATCH)
+/test/librbd/test_librbd.cc: 955 in TestLibRBD_TestIOPP_Test::TestBody()()
+949           ASSERT_PASSED(read_test_data, image, test_data, strlen(test_data) * i, TEST_IO_SIZE);
+950         
+951         for (i = 5; i < 10; ++i)
+952           ASSERT_PASSED(aio_read_test_data, image, test_data, strlen(test_data) * i, TEST_IO_SIZE);
+953     
+954         // discard 2nd, 4th sections.
+>>>     CID 1258438:  Wrong size argument  (SIZEOF_MISMATCH)
+>>>     Passing argument "&passed" of type "bool *" and argument "512UL" to function "discard_test_data" is suspicious because "sizeof (bool)" /*1*/ is expected.
+955         ASSERT_PASSED(discard_test_data, image, TEST_IO_SIZE, TEST_IO_SIZE);
+956         ASSERT_PASSED(aio_discard_test_data, image, TEST_IO_SIZE*3, TEST_IO_SIZE);
+957         
+958         ASSERT_PASSED(read_test_data, image, test_data,  0, TEST_IO_SIZE);
+959         ASSERT_PASSED(read_test_data, image,  zero_data, TEST_IO_SIZE, TEST_IO_SIZE);
+960         ASSERT_PASSED(read_test_data, image, test_data,  TEST_IO_SIZE*2, TEST_IO_SIZE);
+
+________________________________________________________________________________________________________
+*** CID 1258439:  Copy into fixed size buffer  (STRING_OVERFLOW)
+/common/blkdev.cc: 60 in get_block_device_base(const char *, char *, unsigned long)()
+54       char devname[PATH_MAX], fn[PATH_MAX];
+55       char *p;
+56     
+57       if (strncmp(dev, "/dev/", 5) != 0)
+58         return -EINVAL;
+59     
+>>>     CID 1258439:  Copy into fixed size buffer  (STRING_OVERFLOW)
+>>>     You might overrun the 4096 byte fixed-size string "devname" by copying "dev + 5" without checking the length.
+60       strcpy(devname, dev + 5);
+61       for (p = devname; *p; ++p)
+62         if (*p == '/')
+63           *p = '!';
+64     
+65       snprintf(fn, sizeof(fn), "%s/sys/block/%s", sandbox_dir, devname);
+
+________________________________________________________________________________________________________
+*** CID 1258440:  Time of check time of use  (TOCTOU)
+/common/blkdev.cc: 75 in get_block_device_base(const char *, char *, unsigned long)()
+69         }
+70         strncpy(out, devname, out_len);
+71         return 0;
+72       }
+73     
+74       snprintf(fn, sizeof(fn), "%s/sys/block", sandbox_dir);
+>>>     CID 1258440:  Time of check time of use  (TOCTOU)
+>>>     Calling function "opendir" that uses "fn" after a check function. This can cause a time-of-check, time-of-use race condition.
+75       dir = opendir(fn);
+76       if (!dir)
+77         return -errno;
+78     
+79       while (!::readdir_r(dir, reinterpret_cast<struct dirent*>(buf), &de)) {
+80         if (!de) {
+
+
+________________________________________________________________________________________________________
+To view the defects in Coverity Scan visit, http://scan.coverity.com/projects/25?tab=overview
+
+To manage Coverity Scan email notifications for "ceph-devel@vger.kernel.org", click http://scan.coverity.com/subscriptions/edit?email=ceph-devel%40vger.kernel.org&token=018084d671e3cc89d00dd2ccb7eb849c .
+
