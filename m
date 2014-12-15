@@ -1,196 +1,195 @@
 From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: Re: [PATCH] ceph: introduce global empty snap context
-Date: Mon, 15 Dec 2014 16:00:27 +0300
-Message-ID: <CALFYKtDHA+M-TU9nOQRx9sTd0aixHWMt5JQFd1+nPUOebwK89w@mail.gmail.com>
-References: <CALFYKtAHtrg10kH7L_yVU_5UzL-fXtoPZyFNMJ8h94b_vfqYFQ@mail.gmail.com>
+Subject: Re: [PATCH 03/12] libceph: specify position of extent operation
+Date: Mon, 15 Dec 2014 16:08:55 +0300
+Message-ID: <CALFYKtDazRXMmE+iGZ45eqet8N9hKD1KzTqcewHVN8mOzBKZOw@mail.gmail.com>
+References: <1416211026-11524-1-git-send-email-zyan@redhat.com>
+	<1416211026-11524-4-git-send-email-zyan@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f175.google.com ([209.85.216.175]:53348 "EHLO
-	mail-qc0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750723AbaLONA2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 15 Dec 2014 08:00:28 -0500
-Received: by mail-qc0-f175.google.com with SMTP id b13so9483516qcw.6
-        for <ceph-devel@vger.kernel.org>; Mon, 15 Dec 2014 05:00:27 -0800 (PST)
-In-Reply-To: <CALFYKtAHtrg10kH7L_yVU_5UzL-fXtoPZyFNMJ8h94b_vfqYFQ@mail.gmail.com>
+Received: from mail-qa0-f53.google.com ([209.85.216.53]:55275 "EHLO
+	mail-qa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751105AbaLONI4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 15 Dec 2014 08:08:56 -0500
+Received: by mail-qa0-f53.google.com with SMTP id bm13so7907506qab.26
+        for <ceph-devel@vger.kernel.org>; Mon, 15 Dec 2014 05:08:55 -0800 (PST)
+In-Reply-To: <1416211026-11524-4-git-send-email-zyan@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "Yan, Zheng" <zyan@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Li Wang <liwang@ubuntukylin.com>
 
-On Thu, Nov 13, 2014 at 11:23 PM, Ilya Dryomov <ilya.dryomov@inktank.com> wrote:
-> This patch wasn't posted on ceph-devel, posting..
+On Mon, Nov 17, 2014 at 10:56 AM, Yan, Zheng <zyan@redhat.com> wrote:
+> allow specifying position of extent operation in multi-operations
+> osd request. This is required for cephfs to convert inline data to
+> normal data (compare xattr, then write object).
+>
+> Signed-off-by: Yan, Zheng <zyan@redhat.com>
+> ---
+>  fs/ceph/addr.c                  |  9 ++++++---
+>  fs/ceph/file.c                  |  8 +++++---
+>  include/linux/ceph/osd_client.h |  3 ++-
+>  net/ceph/osd_client.c           | 19 ++++++-------------
+>  4 files changed, 19 insertions(+), 20 deletions(-)
+>
+> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+> index 18c06bb..f2c7aa8 100644
+> --- a/fs/ceph/addr.c
+> +++ b/fs/ceph/addr.c
+> @@ -319,7 +319,7 @@ static int start_read(struct inode *inode, struct list_head *page_list, int max)
+>              off, len);
+>         vino = ceph_vino(inode);
+>         req = ceph_osdc_new_request(osdc, &ci->i_layout, vino, off, &len,
+> -                                   1, CEPH_OSD_OP_READ,
+> +                                   0, 1, CEPH_OSD_OP_READ,
+>                                     CEPH_OSD_FLAG_READ, NULL,
+>                                     ci->i_truncate_seq, ci->i_truncate_size,
+>                                     false);
+> @@ -750,7 +750,6 @@ retry:
+>         last_snapc = snapc;
+>
+>         while (!done && index <= end) {
+> -               int num_ops = do_sync ? 2 : 1;
+>                 unsigned i;
+>                 int first;
+>                 pgoff_t next;
+> @@ -850,7 +849,8 @@ get_more_pages:
+>                                 len = wsize;
+>                                 req = ceph_osdc_new_request(&fsc->client->osdc,
+>                                                         &ci->i_layout, vino,
+> -                                                       offset, &len, num_ops,
+> +                                                       offset, &len, 0,
+> +                                                       do_sync ? 2 : 1,
+>                                                         CEPH_OSD_OP_WRITE,
+>                                                         CEPH_OSD_FLAG_WRITE |
+>                                                         CEPH_OSD_FLAG_ONDISK,
+> @@ -862,6 +862,9 @@ get_more_pages:
+>                                         break;
+>                                 }
+>
+> +                               if (do_sync)
+> +                                       osd_req_op_init(req, 1, CEPH_OSD_OP_STARTSYNC);
+> +
+>                                 req->r_callback = writepages_finish;
+>                                 req->r_inode = inode;
+>
+> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+> index d7e0da8..c03ac4c 100644
+> --- a/fs/ceph/file.c
+> +++ b/fs/ceph/file.c
+> @@ -598,7 +598,7 @@ ceph_sync_direct_write(struct kiocb *iocb, struct iov_iter *from, loff_t pos)
+>                 snapc = ci->i_snap_realm->cached_context;
+>                 vino = ceph_vino(inode);
+>                 req = ceph_osdc_new_request(&fsc->client->osdc, &ci->i_layout,
+> -                                           vino, pos, &len,
+> +                                           vino, pos, &len, 0,
+>                                             2,/*include a 'startsync' command*/
+>                                             CEPH_OSD_OP_WRITE, flags, snapc,
+>                                             ci->i_truncate_seq,
+> @@ -609,6 +609,8 @@ ceph_sync_direct_write(struct kiocb *iocb, struct iov_iter *from, loff_t pos)
+>                         break;
+>                 }
+>
+> +               osd_req_op_init(req, 1, CEPH_OSD_OP_STARTSYNC);
+> +
+>                 n = iov_iter_get_pages_alloc(from, &pages, len, &start);
+>                 if (unlikely(n < 0)) {
+>                         ret = n;
+> @@ -713,7 +715,7 @@ ceph_sync_write(struct kiocb *iocb, struct iov_iter *from, loff_t pos)
+>                 snapc = ci->i_snap_realm->cached_context;
+>                 vino = ceph_vino(inode);
+>                 req = ceph_osdc_new_request(&fsc->client->osdc, &ci->i_layout,
+> -                                           vino, pos, &len, 1,
+> +                                           vino, pos, &len, 0, 1,
+>                                             CEPH_OSD_OP_WRITE, flags, snapc,
+>                                             ci->i_truncate_seq,
+>                                             ci->i_truncate_size,
+> @@ -1111,7 +1113,7 @@ static int ceph_zero_partial_object(struct inode *inode,
+>         req = ceph_osdc_new_request(&fsc->client->osdc, &ci->i_layout,
+>                                         ceph_vino(inode),
+>                                         offset, length,
+> -                                       1, op,
+> +                                       0, 1, op,
+>                                         CEPH_OSD_FLAG_WRITE |
+>                                         CEPH_OSD_FLAG_ONDISK,
+>                                         NULL, 0, 0, false);
+> diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
+> index 1ad217b..d3b8edd 100644
+> --- a/include/linux/ceph/osd_client.h
+> +++ b/include/linux/ceph/osd_client.h
+> @@ -328,7 +328,8 @@ extern struct ceph_osd_request *ceph_osdc_new_request(struct ceph_osd_client *,
+>                                       struct ceph_file_layout *layout,
+>                                       struct ceph_vino vino,
+>                                       u64 offset, u64 *len,
+> -                                     int num_ops, int opcode, int flags,
+> +                                     unsigned int which, int num_ops,
+> +                                     int opcode, int flags,
+>                                       struct ceph_snap_context *snapc,
+>                                       u32 truncate_seq, u64 truncate_size,
+>                                       bool use_mempool);
+> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+> index b991fb6..cb86857 100644
+> --- a/net/ceph/osd_client.c
+> +++ b/net/ceph/osd_client.c
+> @@ -744,7 +744,8 @@ static u64 osd_req_encode_op(struct ceph_osd_request *req,
+>  struct ceph_osd_request *ceph_osdc_new_request(struct ceph_osd_client *osdc,
+>                                                struct ceph_file_layout *layout,
+>                                                struct ceph_vino vino,
+> -                                              u64 off, u64 *plen, int num_ops,
+> +                                              u64 off, u64 *plen,
+> +                                              unsigned int which, int num_ops,
+>                                                int opcode, int flags,
+>                                                struct ceph_snap_context *snapc,
+>                                                u32 truncate_seq,
+> @@ -776,7 +777,7 @@ struct ceph_osd_request *ceph_osdc_new_request(struct ceph_osd_client *osdc,
+>         }
+>
+>         if (opcode == CEPH_OSD_OP_CREATE || opcode == CEPH_OSD_OP_DELETE) {
+> -               osd_req_op_init(req, 0, opcode);
+> +               osd_req_op_init(req, which, opcode);
+>         } else {
+>                 u32 object_size = le32_to_cpu(layout->fl_object_size);
+>                 u32 object_base = off - objoff;
+> @@ -789,17 +790,9 @@ struct ceph_osd_request *ceph_osdc_new_request(struct ceph_osd_client *osdc,
+>                                         truncate_size = object_size;
+>                         }
+>                 }
+> -
+> -               osd_req_op_extent_init(req, 0, opcode, objoff, objlen,
+> +               osd_req_op_extent_init(req, which, opcode, objoff, objlen,
+>                                        truncate_size, truncate_seq);
+>         }
+> -       /*
+> -        * A second op in the ops array means the caller wants to
+> -        * also issue a include a 'startsync' command so that the
+> -        * osd will flush data quickly.
+> -        */
+> -       if (num_ops > 1)
+> -               osd_req_op_init(req, 1, CEPH_OSD_OP_STARTSYNC);
+>
+>         req->r_base_oloc.pool = ceph_file_layout_pg_pool(*layout);
+>
+> @@ -2666,7 +2659,7 @@ int ceph_osdc_readpages(struct ceph_osd_client *osdc,
+>
+>         dout("readpages on ino %llx.%llx on %llu~%llu\n", vino.ino,
+>              vino.snap, off, *plen);
+> -       req = ceph_osdc_new_request(osdc, layout, vino, off, plen, 1,
+> +       req = ceph_osdc_new_request(osdc, layout, vino, off, plen, 0, 1,
+>                                     CEPH_OSD_OP_READ, CEPH_OSD_FLAG_READ,
+>                                     NULL, truncate_seq, truncate_size,
+>                                     false);
+> @@ -2709,7 +2702,7 @@ int ceph_osdc_writepages(struct ceph_osd_client *osdc, struct ceph_vino vino,
+>         int page_align = off & ~PAGE_MASK;
+>
+>         BUG_ON(vino.snap != CEPH_NOSNAP);       /* snapshots aren't writeable */
+> -       req = ceph_osdc_new_request(osdc, layout, vino, off, &len, 1,
+> +       req = ceph_osdc_new_request(osdc, layout, vino, off, &len, 0, 1,
+>                                     CEPH_OSD_OP_WRITE,
+>                                     CEPH_OSD_FLAG_ONDISK | CEPH_OSD_FLAG_WRITE,
+>                                     snapc, truncate_seq, truncate_size,
 
-Hi Zheng,
-
-Ping - I had some comments (below), mostly trivial but a potential
-cached_context leak is what worries me.
+Reviewed-by: Ilya Dryomov <idryomov@redhat.com>
 
 Thanks,
 
                 Ilya
-
-
->
-> From d57f921fd3c7cbe768f13bc58e547d83274f47a8 Mon Sep 17 00:00:00 2001
-> From: "Yan, Zheng" <zyan@redhat.com>
-> Date: Thu, 6 Nov 2014 15:09:41 +0800
-> Subject: [PATCH] ceph: introduce global empty snap context
->
-> Current snaphost code does not properly handle moving inode from one
-> empty snap realm to another empty snap realm. After changing inode's
-> snap realm, some dirty pages' snap context can be not equal to inode's
-> i_head_snap. This can trigger BUG() in ceph_put_wrbuffer_cap_refs()
->
-> The fix is introduce a global empty snap context for all empty snap
-> realm. This avoids triggering the BUG() for filesystem with no snapshot.
->
-> Fixes: http://tracker.ceph.com/issues/9928
-> Signed-off-by: Yan, Zheng <zyan@redhat.com>
-> ---
->  fs/ceph/snap.c  | 26 +++++++++++++++++++++++++-
->  fs/ceph/super.c |  6 ++++++
->  fs/ceph/super.h |  2 ++
->  3 files changed, 33 insertions(+), 1 deletion(-)
->
-> diff --git a/fs/ceph/snap.c b/fs/ceph/snap.c
-> index c1cc993225e3..24b454a0e64c 100644
-> --- a/fs/ceph/snap.c
-> +++ b/fs/ceph/snap.c
-> @@ -288,6 +288,9 @@ static int cmpu64_rev(const void *a, const void *b)
->         return 0;
->  }
->
-> +
-> +static struct ceph_snap_context *empty_snapc;
-> +
->  /*
->   * build the snap context for a given realm.
->   */
-> @@ -328,6 +331,12 @@ static int build_snap_context(struct
-> ceph_snap_realm *realm)
->                 return 0;
->         }
->
-> +       if (num == 0 && realm->seq == empty_snapc->seq) {
-> +               ceph_get_snap_context(empty_snapc);
-> +               realm->cached_context = empty_snapc;
-> +               return 0;
->
-> Can there be a cached_context here that we would need to let go of?
-> IOW, shouldn't this be
->
-> +       if (num == 0 && realm->seq == empty_snapc->seq) {
-> +               ceph_get_snap_context(empty_snapc);
-> +               goto out;
-> +       }
->
->         ...
->
->              realm->ino, realm, snapc, snapc->seq,
->              (unsigned int) snapc->num_snaps);
->
-> +out:
->         ceph_put_snap_context(realm->cached_context);
->         realm->cached_context = snapc;
->         return 0;
->
-> ?
->
-> +       }
-> +
->         /* alloc new snap context */
->         err = -ENOMEM;
->         if (num > (SIZE_MAX - sizeof(*snapc)) / sizeof(u64))
-> @@ -465,6 +474,9 @@ void ceph_queue_cap_snap(struct ceph_inode_info *ci)
->                    cap_snap.  lucky us. */
->                 dout("queue_cap_snap %p already pending\n", inode);
->                 kfree(capsnap);
-> +       } else if (ci->i_snap_realm->cached_context == empty_snapc) {
-> +               dout("queue_cap_snap %p empty snapc\n", inode);
-> +               kfree(capsnap);
->         } else if (dirty & (CEPH_CAP_AUTH_EXCL|CEPH_CAP_XATTR_EXCL|
->                             CEPH_CAP_FILE_EXCL|CEPH_CAP_FILE_WR)) {
->                 struct ceph_snap_context *snapc = ci->i_head_snapc;
-> @@ -925,5 +937,17 @@ out:
->         return;
->  }
->
-> +int ceph_snap_init(void)
->
-> I see you put __init on the declaration.  While that seems to work
-> I think it's preferred to have it on the definition:
->
-> int __init ceph_snap_init(void)
->
-> +{
-> +       empty_snapc = ceph_create_snap_context(0, GFP_NOFS);
-> +       if (!empty_snapc)
-> +               return -ENOMEM;
-> +       empty_snapc->seq = 1;
-> +       empty_snapc->num_snaps = 0;
->
-> Setting num_snaps seems unnecessary, ceph_create_snap_context() does
-> that for you.
->
-> +       return 0;
-> +}
->
-> -
-> +void ceph_snap_exit(void)
-> +{
-> +       ceph_put_snap_context(empty_snapc);
-> +}
-> diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-> index f6e12377335c..2b5481f1b9c7 100644
-> --- a/fs/ceph/super.c
-> +++ b/fs/ceph/super.c
-> @@ -1028,6 +1028,9 @@ static int __init init_ceph(void)
->
->         ceph_flock_init();
->         ceph_xattr_init();
-> +       ret = ceph_snap_init();
-> +       if (ret)
-> +               goto out_xattr;
->         ret = register_filesystem(&ceph_fs_type);
->         if (ret)
->                 goto out_icache;
-> @@ -1037,6 +1040,8 @@ static int __init init_ceph(void)
->         return 0;
->
->  out_icache:
->
-> You could rename the nonsensical out_icache to out_snap while you are
-> at it.
->
-> +       ceph_snap_exit();
-> +out_xattr:
->         ceph_xattr_exit();
->         destroy_caches();
->  out:
-> @@ -1047,6 +1052,7 @@ static void __exit exit_ceph(void)
->  {
->         dout("exit_ceph\n");
->         unregister_filesystem(&ceph_fs_type);
-> +       ceph_snap_exit();
->         ceph_xattr_exit();
->         destroy_caches();
->  }
-> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-> index aca22879b41f..9f63f18bb783 100644
-> --- a/fs/ceph/super.h
-> +++ b/fs/ceph/super.h
-> @@ -699,6 +699,8 @@ extern void ceph_queue_cap_snap(struct ceph_inode_info *ci);
->  extern int __ceph_finish_cap_snap(struct ceph_inode_info *ci,
->                                   struct ceph_cap_snap *capsnap);
->  extern void ceph_cleanup_empty_realms(struct ceph_mds_client *mdsc);
-> +extern int __init ceph_snap_init(void);
->
-> extern int ceph_snap_init(void); will do.
->
-> +extern void ceph_snap_exit(void);
->
->  /*
->   * a cap_snap is "pending" if it is still awaiting an in-progress
-> --
-> 2.1.1
