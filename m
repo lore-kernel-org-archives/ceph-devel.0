@@ -1,102 +1,61 @@
-From: "Blinick, Stephen L" <stephen.l.blinick@intel.com>
-Subject: RE: performance latency analysis with LTTng
-Date: Wed, 17 Dec 2014 07:03:36 +0000
-Message-ID: <3649A15A2562B54294DE14BCE5AC79120AB2B7EF@FMSMSX106.amr.corp.intel.com>
-References: <3649A15A2562B54294DE14BCE5AC79120AB119F0@FMSMSX106.amr.corp.intel.com>
-	<20141204102524.663f3804@doppio>
-	<3649A15A2562B54294DE14BCE5AC79120AB1432F@FMSMSX106.amr.corp.intel.com>
- <CAC6JEv-u97JE0rE-wP=_pOVHLuy9YBBnSaFNwnVb1pEbPiw9VQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+From: "Yan, Zheng" <zyan@redhat.com>
+Subject: [PATCH] ceph: fix setting empty extended attribute
+Date: Wed, 17 Dec 2014 21:42:35 +0800
+Message-ID: <1418823755-25690-1-git-send-email-zyan@redhat.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:37606 "EHLO mga09.intel.com"
+Received: from mx1.redhat.com ([209.132.183.28]:41852 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751118AbaLQHD6 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 17 Dec 2014 02:03:58 -0500
-In-Reply-To: <CAC6JEv-u97JE0rE-wP=_pOVHLuy9YBBnSaFNwnVb1pEbPiw9VQ@mail.gmail.com>
-Content-Language: en-US
+	id S1752005AbaLQNn2 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 17 Dec 2014 08:43:28 -0500
+Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id sBHDhSUi017686
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
+	for <ceph-devel@vger.kernel.org>; Wed, 17 Dec 2014 08:43:28 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@gregs42.com>
-Cc: Andreas Bluemle <andreas.bluemle@itxperts.de>, Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: "Yan, Zheng" <zyan@redhat.com>
 
-SGkgR3JlZywgIHRoYW5rcyBmb3IgcmV2aWV3aW5nIG15IGVtYWlsICYgdGhlIGZlZWRiYWNrLCBl
-c3BlY2lhbGx5IHRoZSBoaWdoIGxldmVsIGxpc3QuICBUaGUgfjMwMHVzIGNodW5rIG9mIHRpbWUg
-aW4gbXkgZGF0YSBJIGtuZXcgaW5jbHVkZWQgdGhlIHNlcmlhbGl6YXRpb24gJiBkZXNlcmlhbGl6
-YXRpb24sIGJ1dCBkaWRuJ3QgcmVhbGl6ZSBpdCBhbHNvIGluY2x1ZGVzIHRoZSBjcnVzaG1hcCBj
-YWxjdWxhdGlvbi4gICAgSSBkb24ndCB0aGluayBJJ20gaGl0dGluZyB0aGUgbWVzc2FnZSB0aHJv
-dHRsZXMsIEkgaGF2ZSB3aGVuIHVzaW5nIGEgcmVhbCBiYWNrZW5kICh2cyBtZW1zdG9yZSkgYnV0
-IEkgdGhpbmsgdGhlIGxhdGVuY3kgaXMgc3VmZmljaWVudGx5IGxvdyB0aGF0IEkgZG9uJ3QgZ2V0
-IGVub3VnaCBieXRlcyBpbiBmbGlnaHQuICBJIHdpbGwgZG91YmxlIGNoZWNrIHRoYXQuDQoNClRo
-ZSBpbnRlbnQgaXMgdG8gY292ZXIgdGhlIElPIHBhdGggbGVuZ3RoIGZyb20gc3RhcnQgdG8gZmlu
-aXNoIGFuZCBkcmlsbCBpbnRvIHRoZSB0b3AgbGF0ZW5jeSBpdGVtcy4gIEkgdGhpbmsgYnkgdHJh
-Y2luZyBPSUQgaW4gbGlicmFkb3MgYW5kIHVzaW5nIHRpZCBpbiB0aGUgT1NEIEkgY2FuIGxpbmsg
-dGhlIHRyYWNlcyB0b2dldGhlciBhbmQgZ2V0IHRoZSBhZGRpdGlvbmFsIGRldGFpbC4gIEknbGwg
-dXBkYXRlIHdpdGggdGhlIGRldGFpbHMgZnJvbSB5b3VyIHBvaW50cyAxLTYuICAgIA0KDQpFaXRo
-ZXIgd2F5LCBpdCBkb2VzIHNlZW0gbGlrZSAjMS04IHJlcHJlc2VudHMgYWJvdXQgMS80dGggb2Yg
-dGhlIGluZGljYXRlZCBsYXRlbmN5IHdpdGggYW4gb3NkIHVzaW5nIG1lbXN0b3JlLg0KDQoNCg0K
-VGhhbmtzLA0KDQpTdGVwaGVuDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBH
-cmVnb3J5IEZhcm51bSBbbWFpbHRvOmdyZWdAZ3JlZ3M0Mi5jb21dIA0KU2VudDogVGh1cnNkYXks
-IERlY2VtYmVyIDExLCAyMDE0IDExOjM3IEFNDQpUbzogQmxpbmljaywgU3RlcGhlbiBMDQpDYzog
-QW5kcmVhcyBCbHVlbWxlOyBDZXBoIERldmVsb3BtZW50DQpTdWJqZWN0OiBSZTogcGVyZm9ybWFu
-Y2UgbGF0ZW5jeSBhbmFseXNpcyB3aXRoIExUVG5nDQoNCk9uIFdlZCwgRGVjIDEwLCAyMDE0IGF0
-IDEwOjU0IFBNLCBCbGluaWNrLCBTdGVwaGVuIEwgPHN0ZXBoZW4ubC5ibGluaWNrQGludGVsLmNv
-bT4gd3JvdGU6DQo+IEhpIEFuZHJlYXMsICBUaGFua3MgZm9yIHByb3ZpZGluZyB0aGlzIGluZm8g
-bGFzdCB3ZWVrLiAgSSd2ZSByZXZpZXdlZCB0aGUgZGF0YSwgdGhlIGFubm90YXRlZCBzcHJlYWRz
-aGVldCBpcyB2ZXJ5IGhlbHBmdWwgdG8gaW50ZXJwcmV0IHRoZSByZXN1bHRzLiAgICBJIGRvIHRo
-aW5rIHdlJ3JlIHNlZWluZyBzaW1pbGFyIG1lYXN1cmVtZW50cyBldmVuIHRob3VnaCBJJ20gY2hh
-cmFjdGVyaXppbmcgYSBtb3JlIHNpbXBsaWZpZWQgZW52aXJvbm1lbnQuICBUaGUga2V5IGRpZmZl
-cmVuY2VzIGFyZSB0aGF0IEknbSBydW5uaW5nIHdpdGggbm8gcmVwbGljYXRpb24gKHBvb2wgaGFz
-IHNpemU9MSkgYW5kIG1lbXN0b3JlIGJhY2tlbmQuICBUaGUgY2xpZW50IChzbWFsbGlvX2JlbmNo
-KSBpbiB0aGlzIGVudmlyb25tZW50LCB3aXRoIGEgc2luZ2xlIE9TRCwgcWQgb2YgMSAodD0xKSwg
-aXMgc2VlaW5nIGEgbGF0ZW5jeSBvbiBhdmVyYWdlIG9mIGFib3V0IDEyMDB1cy4gIE15IGdvYWwg
-d2FzIHRvIGFjY291bnQgZm9yIDEwMCUgb2YgdGhpcyBsYXRlbmN5IHZpYSB0cmFjZXMgaW4gb3Jk
-ZXIgdG8gZGV0ZXJtaW5lIHdoZXJlIHRvIGZvY3VzICAod2l0aCBvdGhlciB0b29scywgcHJvZmls
-ZXJzLCBldGMpLiAgU28gZmFyIEknbSBjb3ZlcmluZyBhYm91dCA3NTB1cyBvZiB0aGUgMTIwMHVz
-LCBtaXNzaW5nIHRoZSB0aW1lIHRoZSBjb21taXQgbWVzc2FnZSB0YWtlcyB0byBiZSBkaXNwYXRj
-aGVkIChyZWNlaXZlZCkgYnkgdGhlIGNsaWVudC4NCj4NCj4gSW4gb3JkZXIgdG8gZG8gdGhpcywg
-SSBoYWQgdG8gcnVuIHRoZSBjbGllbnQgb24gdGhlIHNhbWUgbm9kZSBhcyB0aGUgT1NELCBhbmQg
-VmlzaGFsIFZlcm1hIG9uIG15IHRlYW0gYWRkZWQgc29tZSBhZGRpdGlvbmFsIHRyYWNlcyB0byB0
-aGUgbGlicmFkb3MgY29kZS4gIEluIHF1ZXVlX2Fpb193cml0ZSwgSSBkb24ndCB0aGluayB0aGVy
-ZSdzIGEgdHJhbnNhY3Rpb24gSUQgeWV0IHNvIHdlIHRyYWNlZCB0aGUgT0lEIGluIHNldmVyYWwg
-cGxhY2VzLCBhbmQgdGhlbiB1c2VkIGEgc2NyaXB0IHdyaXR0ZW4gaW4gcGVybCB0byBhdHRlbXB0
-IHRvIGNvcnJlbGF0ZSB0aGluZ3MgYW5kIHByb2Nlc3MgdGhlIHJlc3VsdHMuDQo+DQo+IEJleW9u
-ZCB0aGF0LCBJIHRoaW5rIHRoZSBhbmFseXNpcyBkYXRhIGlzIHZlcnkgc2ltaWxhciB0byB5b3Vy
-cywgSSBuZWVkIHRvIGFubm90YXRlIGl0LiBJIG9wdGVkIHRvIHRyYWNlIG91dCB0aGUgdGltZSBh
-cyAiZGVsdGEgc2luY2UgbGFzdCB0cmFjZSIgaW5zdGVhZCBvZiB0aW1lIHNpbmNlIHN0YXJ0IG9m
-IHRyYW5zYWN0aW9uLCBhbmQgc28gdGhlIGVudHJpZXMgd2l0aCBoaWdoZXIgZWxhcHNlZCB0aW1l
-cyBpbmRpY2F0ZSB3aGF0ZXZlciB3YXMgYmV0d2VlbiB0aG9zZSB0cmFjZXMgdG9vayBhIGxvbmcg
-dGltZSwgbm90IG5lY2Vzc2FyaWx5IHRoZSBjb2RlIGF0IHRoZSB0cmFjZXBvaW50Lg0KPg0KPiBJ
-IGhhdmVuJ3QgeWV0IGFjY291bnRlZCBmb3IgdGhlIGVudGlyZSB0aW1lIHNlZW4gYnkgdGhlIGNs
-aWVudC4gIEZyb20gdGhlIHRpbWUgdGhlIGFpb193cml0ZSBpcyBxdWV1ZWQsIHVudGlsIG1zX2Zh
-c3RfZGlzcGF0Y2gsIEkgaGF2ZSBhYm91dCAzMDB1cyBvZiB0aW1lLi4gcXVpdGUgbGFyZ2UuICAg
-SSBkaWRuJ3QgdHJhY2UgdGhlIHBpcGU6cmVhZGVyL3dyaXRlciwgYW5kIEkgc2VlIGZvciB5b3Ug
-dGhhdCdzIH45MHVzIG9mIHRpbWUuICAgICBTbyB0aGF0IHdvdWxkIGNvdmVyIGFib3V0IGEgdGhp
-cmQgb2YgaXQuICAgIEFkZGl0aW9uYWxseSwgSSB3b3VsZCBsaWtlIHRvIGJlIGFibGUgdG8gdHJh
-Y2UgdGhlIGRpc3BhdGNoIG9mIHRoZSBjb21taXQgYWNrIChjb21wbGV0ZV9haW9fd3JpdGUpIGJ1
-dCBhdCB0aGF0IHBvaW50IEkgZG9uJ3QgaGF2ZSBhbiBPSUQgb3IgdGlkIHRvIGNvcnJlbGF0ZSB0
-by4NCj4NCj4gT25lIHF1ZXN0aW9uIGFib3V0IHRoZSB0cmFjaW5nIGNvZGU6ICBJIGFtIGEgYml0
-IGNvbmNlcm5lZCBhYm91dCB1c2luZyBzdGF0aWMgc2l6ZWQgYXJyYXlzIG9uIHRoZSBzdGFjayB0
-byBwb3B1bGF0ZSB3aXRoIHRpbWluZy4uICBUaGUgcmVhc29uIGlzLCBhbnkgY2hhbmdlIGJ5IGFk
-ZGluZyBhIHRyYWNlcG9pbnQgdG8gYSBmdW5jdGlvbiB3b3VsZCByZXF1aXJlIHVwZGF0aW5nIGEg
-I2RlZmluZSBmb3IgdGhlIGluZGV4LCB0aGUgYXJyYXkgc2l6ZSwgYW5kIHRoZSB0cmFjZXBvaW50
-ICgzIHNwb3RzKS4gIElmIG9uZSBvZiB0aG9zZSBpcyBtaXNzZWQgaXQgY291bGQgcmVzdWx0IGlu
-IGEgc3RhY2sgb3ZlcndyaXRlLiAgSXMgdGhlIHJlYXNvbiBmb3IgdGhpcyB0byByZWR1Y2UgdGhl
-ICMgb2YgdHJhY2VzLCBvciBpcyBpdCB0byBtYWtlIGNvcnJlbGF0aW5nIHRpbWVzIGVhc2llcj8N
-Cj4NCj4gQW55b25lIGhhdmUgYW55IGlkZWFzIGFib3V0IHRoZSByZWxhdGl2ZWx5IGhpZ2ggdGlt
-ZSBzcGVudCBiZXR3ZWVuIHRoZSBjbGllbnQgJiBwaXBlIHJlYWRlciBpbiB0aGUgT1NEPw0KDQpJ
-dCBzb3VuZHMgbGlrZSB5b3UncmUgbm90IG1lYXN1cmluZyBhbnkgb2YgdGhlIHRpbWUgYmV0d2Vl
-biBnaXZpbmcgdGhlIHdyaXRlIHRvIHRoZSBjbGllbnQgbGlicmFyeSBhbmQgd2hlbiB0aGUgT1NE
-IGZpbmlzaGVzIHJlY2VpdmluZyBpdC4gSSBkb24ndCBoYXZlIGFueSBnb29kIGludHVpdGlvbiBh
-Ym91dCB3aGF0IHBhcnRzIG9mIHRob3NlIHRha2UgdGhlIG1vc3QgdGltZSwgYnV0IHNvbWUgdGhp
-bmdzIHRoYXQgaGF2ZSB0byBoYXBwZW46DQoxKSBsaWJyYWRvcyBydW5zIENSVVNIIGNhbGN1bGF0
-aW9uIG9uIHRoZSBvYmplY3QNCjIpIGxpYnJhZG9zIHNlcmlhbGl6ZXMgd3JpdGUgb3BlcmF0aW9u
-IGludG8gYSBtZXNzYWdlDQozKSBsaWJyYWRvcyB3cml0ZXMgaW50byBrZXJuZWwgbmV0d29ya2lu
-ZyBzdGFjaw0KNCkgbmV0d29ya2luZyBzdGFjayBkb2VzIHN0dWZmIHRvIHNlbmQNCjUpIG5ldHdv
-cmtpbmcgc3RhY2sgZG9lcyBzdHVmZiB0byByZWNlaXZlDQo2KSBPU0QgbWVzc2VuZ2VyIHJlYWRz
-IGluIG1lc3NhZ2UNCjcpIE9TRCBtZXNzZW5nZXIgZGVzZXJpYWxpemVzIG1lc3NhZ2UNCjgpIE9T
-RCBtZXNzZW5nZXIgZmFzdCBkaXNwYXRjaGVzIG1lc3NhZ2UNCg0KU28sIGxvdHMgb2YgdGhhdCBj
-b3VsZCB0YWtlIHVwIHNvbWUgdGltZS4gU29tZSBvZiBpdCBpcyBjb3ZlcmVkIGJ5IHRocm90dGxl
-cnMgdGhhdCB3aWxsIGJsb2NrIGlmIHRoZXJlJ3MgdG9vIG11Y2ggZGF0YSBpbi1mbGlnaHQgYXQg
-YW55IGdpdmVuIG1vbWVudC4NCi1HcmVnDQo=
+make sure 'value' is not null. otherwise __ceph_setxattr will remove
+the extended attribute.
+
+Signed-off-by: Yan, Zheng <zyan@redhat.com>
+---
+ fs/ceph/xattr.c | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
+index 678b0d2..5a492ca 100644
+--- a/fs/ceph/xattr.c
++++ b/fs/ceph/xattr.c
+@@ -854,7 +854,7 @@ static int ceph_sync_setxattr(struct dentry *dentry, const char *name,
+ 	struct ceph_pagelist *pagelist = NULL;
+ 	int err;
+ 
+-	if (value) {
++	if (size > 0) {
+ 		/* copy value into pagelist */
+ 		pagelist = kmalloc(sizeof(*pagelist), GFP_NOFS);
+ 		if (!pagelist)
+@@ -864,7 +864,7 @@ static int ceph_sync_setxattr(struct dentry *dentry, const char *name,
+ 		err = ceph_pagelist_append(pagelist, value, size);
+ 		if (err)
+ 			goto out;
+-	} else {
++	} else if (!value) {
+ 		flags |= CEPH_XATTR_REMOVE;
+ 	}
+ 
+@@ -1001,6 +1001,9 @@ int ceph_setxattr(struct dentry *dentry, const char *name,
+ 	if (!strncmp(name, XATTR_SYSTEM_PREFIX, XATTR_SYSTEM_PREFIX_LEN))
+ 		return generic_setxattr(dentry, name, value, size, flags);
+ 
++	if (size == 0)
++		value = "";  /* empty EA, do not remove */
++
+ 	return __ceph_setxattr(dentry, name, value, size, flags);
+ }
+ 
+-- 
+1.9.3
+
