@@ -1,164 +1,118 @@
-From: Samuel Just <sam.just@inktank.com>
-Subject: Re: Improving latency and ordering of the backfilling workload
-Date: Wed, 17 Dec 2014 16:54:23 -0800
-Message-ID: <CA+4uBUbjvDSjibZquJqFEkcNiAohTgKSAPXJaZYvov86fXX=RQ@mail.gmail.com>
-References: <548EEF2C.1010703@dachary.org>
-	<alpine.DEB.2.00.1412150841220.5263@cobra.newdream.net>
-	<548F15E5.2030304@dachary.org>
-	<alpine.DEB.2.00.1412150913400.5263@cobra.newdream.net>
-	<548F1EDF.5020401@dachary.org>
-	<alpine.DEB.2.00.1412150959150.22847@cobra.newdream.net>
-	<548F24BA.8080401@dachary.org>
-Reply-To: sjust@redhat.com
+From: "Yan, Zheng" <ukernel@gmail.com>
+Subject: Re: [GIT PULL] Ceph updates for 3.19-rc1
+Date: Thu, 18 Dec 2014 10:25:27 +0800
+Message-ID: <CAAM7YAk-izpgFZGBoSO7P1VMXLO5i4ezSrPM4E4f7eFCw=f+3w@mail.gmail.com>
+References: <alpine.DEB.2.00.1412171520460.5263@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f44.google.com ([209.85.215.44]:40905 "EHLO
-	mail-la0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750995AbaLRAyY convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Dec 2014 19:54:24 -0500
-Received: by mail-la0-f44.google.com with SMTP id gd6so154799lab.17
-        for <ceph-devel@vger.kernel.org>; Wed, 17 Dec 2014 16:54:23 -0800 (PST)
-In-Reply-To: <548F24BA.8080401@dachary.org>
+Received: from mail-la0-f54.google.com ([209.85.215.54]:53862 "EHLO
+	mail-la0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751252AbaLRCZ3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Dec 2014 21:25:29 -0500
+In-Reply-To: <alpine.DEB.2.00.1412171520460.5263@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Sage Weil <sage@newdream.net>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: torvalds@linux-foundation.org, ceph-devel <ceph-devel@vger.kernel.org>, linux-kernel@vger.kernel.org
 
-I think the concern is that the priority information might be obsolete
-by the time it gets the remote reservation.  We might need to refresh
-the reservation periodically if, for example, the number of pgs
-requiring backfill on a particular osd is increasing.
--Sam
+my commit "ceph: add inline data to pagecache"  incidentally adds
+fs/ceph/super.j.rej.  please remove it from your branch.  sorry for
+the inconvenience
 
-On Mon, Dec 15, 2014 at 10:13 AM, Loic Dachary <loic@dachary.org> wrote=
-:
+Yan, Zheng
+
+On Thu, Dec 18, 2014 at 7:27 AM, Sage Weil <sweil@redhat.com> wrote:
+> Hi Linus,
+>
+> Please pull the following Ceph updates from
+>
+>   git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
+>
+> The big item here is support for inline data for CephFS and for message
+> signatures from Zheng.  There are also several bug fixes, including
+> interrupted flock request handling, 0-length xattrs, mksnap, cached
+> readdir results, and a message version compat field.  Finally there are
+> several cleanups from Ilya, Dan, and Markus.
+>
+> Note that there is another series coming soon that fixes some bugs in the
+> RBD 'lingering' requests, but it isn't quite ready yet.
+>
+> Thanks!
+> sage
 >
 >
-> On 15/12/2014 19:03, Sage Weil wrote:
->> On Mon, 15 Dec 2014, Loic Dachary wrote:
->>> On 15/12/2014 18:20, Sage Weil wrote:
->>>> On Mon, 15 Dec 2014, Loic Dachary wrote:
->>>>> Hi Sage,
->>>>>
->>>>> On 15/12/2014 17:44, Sage Weil wrote:
->>>>>> On Mon, 15 Dec 2014, Loic Dachary wrote:
->>>>>>> Hi Sam,
->>>>>>>
->>>>>>> Here is what could be done (in the context of http://tracker.ce=
-ph.com/issues/9566
->>>>>>> ), please let me know if that makes sense:
->>>>>>>
->>>>>>> * ordering:
->>>>>>>
->>>>>>>   * when dequeuing a pending local reservation, chose one that =
-contains
->>>>>>> a PG that belongs to the busiest OSD (i.e. the OSD for which th=
-ere are
->>>>>>> more PGs waiting for a local reservation than any other)
->>>>>>
->>>>>> I'm worried the reservation count won't be an accurate enough pr=
-oxy for
->>>>>> the amount of work the remote OSD has to do.
->>>>>
->>>>> Are you thinking about taking into account the number and size of
->>>>> objects in a given PGs ? The length of the local reservation queu=
-e
->>>>> accurately reflects the number of PGs that need work (because the=
- length
->>>>> of the reservation queue is not bounded). But it does not reflect=
- the
->>>>> content of the PGs at all, indeed.
->>>>
->>>> Including that information could help, yeah, but the main thing is=
- that
->>>> any estimate of "the busiest OSD" based on local information is go=
-ing to
->>>> be weak if it's only based on info reservation requests.
->>>
->>> What other information would be relevant in addition to the number =
-of
->>> PGs that need to backfill and their size (objects & bytes) ?
->>
->> Maybe the background client workload?  If an OSD is more heavily loa=
-ded
->> than others than it should probably start it's recovery sooner as it=
-s rate
->> of progress will be a bit lower.
->>
->>>> Unless that
->>>> information is refreshed periodically by the requesting OSD (I thi=
-nk we
->>>> also discussed that a bit last week).
->>>
->>> I tried to take that into account by proposing to calculate the pri=
-ority
->>> when the reservation is dequeued from the waiting list instead of w=
-hen
->>> it is added to the waiting list. When the local reservation is dequ=
-eued,
->>> it gets one of the osd_max_backfill slots in the AsyncReserver and =
-will
->>> then get work to do : the delay between calculating the priority an=
-d
->>> actual backfilling is minimum. The delay actually is the latency be=
-tween
->>> when the remote reservation is sent and when it comes back successf=
-ully.
->>> By adding the priority to the remote reservation request, we make t=
-he
->>> peer OSD aware of the local priority and compare it with the priori=
-ty of
->>> the other OSDs asking for a remote reservation. The peer OSD will b=
-e
->>> grant us a remote reservation quickly if we are the OSD declaring t=
-o
->>> have most work to do.
->>>
->>> I sense you have something else in mind in terms of algorithm and/o=
-r
->>> data sources. Hopefully this explanation will allow you to see what=
- I'm
->>> missing and guide me ;-)
->>
->> Oh, I see.  That sounds very reasonable.  I suspect even with this
->> approach though it will help to periodically refresh that reservatio=
-n,
->> though, as the remote OSD may have lots of people contending for rec=
-overy.
->> Whoever is not first in line will be there for a while and their pri=
-ority
->> will likely be less than accurate by the time the next item is deque=
-ued
->> there?
+> ----------------------------------------------------------------
+> Dan Carpenter (1):
+>       ceph: do_sync is never initialized
 >
-> The priority is attached to each reservation and is relative to one P=
-G reservation request. The remote reservation priority will be reconsid=
-ered each time a new PG asks for a remote reservation (because it will =
-use the priority queues of the AsyncReserver). If we want to revise the=
- priority during the backfilling of a given PG that already has a local=
-+remote slot allocated to it, it means we should periodically consider =
-cancelling an on going backfill operation to give a chance to an other,=
- maybe busier, OSD.
+> Ilya Dryomov (4):
+>       libceph: nuke ceph_kvfree()
+>       ceph: remove unused stringification macros
+>       rbd: don't treat CEPH_OSD_OP_DELETE as extent op
+>       libceph: fixup includes in pagelist.h
 >
-> Am I following ?
+> John Spray (2):
+>       libceph: update ceph_msg_header structure
+>       ceph: message versioning fixes
 >
->>
->> Sorry if my drive-by suggestions aren't helping; I'm only half follo=
-wing
->> this discussion!
+> SF Markus Elfring (1):
+>       ceph, rbd: delete unnecessary checks before two function calls
 >
-> It's helping a lot !
+> Yan, Zheng (19):
+>       ceph: fix file lock interruption
+>       ceph: introduce a new inode flag indicating if cached dentries are ordered
+>       libceph: store session key in cephx authorizer
+>       libceph: message signature support
+>       ceph: introduce global empty snap context
+>       libceph: require cephx message signature by default
+>       libceph: add SETXATTR/CMPXATTR osd operations support
+>       libceph: add CREATE osd operation support
+>       libceph: specify position of extent operation
+>       ceph: parse inline data in MClientReply and MClientCaps
+>       ceph: add inline data to pagecache
+>       ceph: use getattr request to fetch inline data
+>       ceph: fetch inline data when getting Fcr cap refs
+>       ceph: sync read inline data
+>       ceph: convert inline data to normal data before data write
+>       ceph: flush inline version
+>       ceph: support inline data feature
+>       ceph: fix mksnap crash
+>       ceph: fix setting empty extended attribute
 >
->> sage
->>
->
+>  drivers/block/rbd.c                |  11 +-
+>  fs/ceph/addr.c                     | 273 +++++++++++++++++++++++++++++++++++--
+>  fs/ceph/caps.c                     | 132 ++++++++++++++----
+>  fs/ceph/dir.c                      |  27 ++--
+>  fs/ceph/file.c                     |  97 +++++++++++--
+>  fs/ceph/inode.c                    |  59 ++++++--
+>  fs/ceph/locks.c                    |  64 +++++++--
+>  fs/ceph/mds_client.c               |  41 +++++-
+>  fs/ceph/mds_client.h               |  10 ++
+>  fs/ceph/snap.c                     |  37 ++++-
+>  fs/ceph/super.c                    |  16 ++-
+>  fs/ceph/super.h                    |  55 ++++++--
+>  fs/ceph/super.h.rej                |  10 ++
+>  fs/ceph/xattr.c                    |   7 +-
+>  include/linux/ceph/auth.h          |  26 ++++
+>  include/linux/ceph/buffer.h        |   3 +-
+>  include/linux/ceph/ceph_features.h |   1 +
+>  include/linux/ceph/ceph_fs.h       |  10 +-
+>  include/linux/ceph/libceph.h       |   2 +-
+>  include/linux/ceph/messenger.h     |   9 +-
+>  include/linux/ceph/msgr.h          |  11 +-
+>  include/linux/ceph/osd_client.h    |  13 +-
+>  include/linux/ceph/pagelist.h      |   4 +-
+>  net/ceph/auth_x.c                  |  76 ++++++++++-
+>  net/ceph/auth_x.h                  |   1 +
+>  net/ceph/buffer.c                  |   4 +-
+>  net/ceph/ceph_common.c             |  21 +--
+>  net/ceph/messenger.c               |  34 ++++-
+>  net/ceph/osd_client.c              | 118 ++++++++++++----
+>  29 files changed, 992 insertions(+), 180 deletions(-)
+>  create mode 100644 fs/ceph/super.h.rej
 > --
-> Lo=C3=AFc Dachary, Artisan Logiciel Libre
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Please read the FAQ at  http://www.tux.org/lkml/
