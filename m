@@ -1,24 +1,95 @@
-From: Linus Torvalds <torvalds@linux-foundation.org>
-Subject: Re: [GIT PULL] Ceph updates for 3.19-rc1
-Date: Wed, 17 Dec 2014 18:54:55 -0800
-Message-ID: <CA+55aFwf7znK=EFGbF6NN14mPuFL-1GjzZffNVU_+qj52oaKkg@mail.gmail.com>
-References: <alpine.DEB.2.00.1412171520460.5263@cobra.newdream.net>
-	<CAAM7YAk-izpgFZGBoSO7P1VMXLO5i4ezSrPM4E4f7eFCw=f+3w@mail.gmail.com>
+From: Wido den Hollander <wido@42on.com>
+Subject: Re: CephFS hangs when writing 10GB files in loop
+Date: Thu, 18 Dec 2014 11:13:42 +0100
+Message-ID: <5492A8D6.1020802@42on.com>
+References: <5491B0E1.7050203@42on.com> <CAC6JEv9JBUjKgVzFcribvxLSn+HGhXbpdaymVWYi1RoD+YCqeg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAAM7YAk-izpgFZGBoSO7P1VMXLO5i4ezSrPM4E4f7eFCw=f+3w@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Yan, Zheng" <ukernel@gmail.com>
-Cc: Sage Weil <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from websrv.42on.com ([31.25.102.167]:53226 "EHLO websrv.42on.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751698AbaLRKNs (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 18 Dec 2014 05:13:48 -0500
+In-Reply-To: <CAC6JEv9JBUjKgVzFcribvxLSn+HGhXbpdaymVWYi1RoD+YCqeg@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Gregory Farnum <greg@gregs42.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, Dec 17, 2014 at 6:25 PM, Yan, Zheng <ukernel@gmail.com> wrote:
-> my commit "ceph: add inline data to pagecache"  incidentally adds
-> fs/ceph/super.j.rej.  please remove it from your branch.  sorry for
-> the inconvenience
+On 12/17/2014 07:42 PM, Gregory Farnum wrote:
+> On Wed, Dec 17, 2014 at 8:35 AM, Wido den Hollander <wido@42on.com> wrote:
+>> Hi,
+>>
+>> Today I've been playing with CephFS and the morning started great with
+>> CephFS playing along just fine.
+>>
+>> Some information first:
+>> - Ceph 0.89
+>> - Linux kernel 3.18
+>> - Ceph fuse 0.89
+>> - One Active MDS, one Standby
+>>
+>> This morning I could write a 10GB file like this using the kclient:
+>> $ dd if=/dev/zero of=10GB.bin bs=1M count=10240 conv=fsync
+>>
+>> That gave me 850MB/sec (all 10G network) and I could read the same file
+>> again with 610MB/sec.
+>>
+>> After writing to it multiple times it suddenly started to hang.
+>>
+>> No real evidence on the MDS (debug mds set to 20) or anything on the
+>> client. That specific operation just blocked, but I could still 'ls' the
+>> filesystem in a second terminal.
+>>
+>> The MDS was showing in it's log that it was checking active sessions of
+>> clients. It showed the active session of my single client.
+>>
+>> The client renewed it's caps and proceeded.
+> 
+> Can you clarify this? I'm not quite sure what you mean.
+> 
 
-I wish I hadn't pulled it so quickly, and could have fixed it up as
-part of the merge commit, but I pushed a separate commit to remove it.
+I currently don't have the logs available. That was my problem when
+typing the original e-mail.
 
-                 Linus
+>> I currently don't have any logs, but I'm just looking for a direction to
+>> be pointed towards.
+>>
+>> Any ideas?
+> 
+> Well, now that you're on v0.89 you should explore the admin
+> socket...there are commands on the MDS to dump ops in flight (and
+> maybe to look at session states? I don't remember when that merged).
+
+Sage's pointer towards the kernel debugging and the new admin socket
+showed me that it were RADOS calls which were hanging.
+
+I investigated even further and it seems that this is not a CephFS
+problem, but a local TCP issue which is only triggered when using CephFS.
+
+At some point, which is still unclear to me, data transfer becomes very
+slow. The MDS doesn't seem to be able to update the journal and the
+client can't write to the OSDs anymore.
+
+It happened after I did some very basic TCP tuning (timestamp, rmem,
+wmem, sack, fastopen).
+
+Reverting back to the Ubuntu 14.04 defaults resolved it all and CephFS
+is running happily now.
+
+I'll dig some deeper to see why this system was affected by those
+changes. I applied these settings earlier on a RBD-only cluster without
+any problems.
+
+> -Greg
+> 
+
+
+-- 
+Wido den Hollander
+42on B.V.
+Ceph trainer and consultant
+
+Phone: +31 (0)20 700 9902
+Skype: contact42on
