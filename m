@@ -1,100 +1,72 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: [GIT PULL] Ceph updates for 3.19-rc1
-Date: Wed, 17 Dec 2014 15:27:19 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1412171520460.5263@cobra.newdream.net>
+From: "Elliott, Robert (Server Storage)" <Elliott@hp.com>
+Subject: RE: [PATCH 3/5] scsi: add support for COMPARE_AND_WRITE
+Date: Thu, 18 Dec 2014 00:23:58 +0000
+Message-ID: <94D0CD8314A33A4D9D801C0FE68B402959427EEF@G9W0745.americas.hpqcorp.net>
+References: <1413437835-13778-1-git-send-email-michaelc@cs.wisc.edu>
+ <1413437835-13778-4-git-send-email-michaelc@cs.wisc.edu>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: torvalds@linux-foundation.org
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <target-devel-owner@vger.kernel.org>
+In-Reply-To: <1413437835-13778-4-git-send-email-michaelc@cs.wisc.edu>
+Content-Language: en-US
+Sender: target-devel-owner@vger.kernel.org
+To: "michaelc@cs.wisc.edu" <michaelc@cs.wisc.edu>, "linux-scsi@vger.kernel.org" <linux-scsi@vger.kernel.org>, "target-devel@vger.kernel.org" <target-devel@vger.kernel.org>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "axboe@kernel.dk" <axboe@kernel.dk>
 List-Id: ceph-devel.vger.kernel.org
 
-Hi Linus,
+I haven't reviewed the whole patch, but noticed one thing:
 
-Please pull the following Ceph updates from
+> -----Original Message-----
+> From: linux-scsi-owner@vger.kernel.org [mailto:linux-scsi-
+> owner@vger.kernel.org] On Behalf Of michaelc@cs.wisc.edu
+> Sent: Thursday, 16 October, 2014 12:37 AM
+...
+> @@ -635,6 +646,54 @@ static void sd_prot_op(struct scsi_cmnd *scmd,
+> unsigned int dif)
+>  	scsi_set_prot_type(scmd, dif);
+>  }
+> 
+> +static void sd_config_cmp_and_write(struct scsi_disk *sdkp)
+> +{
+> +	if (sdkp->max_cmp_and_write_blocks > sdkp->max_xfer_blocks) {
+> +		/* Invalid settings returned. Do not try to support for now
+> */
+> +		blk_queue_max_cmp_and_write_sectors(sdkp->disk->queue, 0);
+> +		return;
+> +	}
+> +
+> +	/*
+> +	 * mult by 2, because the block layer wants the total number of
+> +	 * sectors that will be put in bios and transferred.
+> +	 */
+> +	blk_queue_max_cmp_and_write_sectors(sdkp->disk->queue,
+> +					2 * sdkp->max_cmp_and_write_blocks *
+> +					(sdkp->device->sector_size  >> 9));
+> +}
+> +
+> +/**
+> + * sd_setup_cmp_and_write_cmnd - compare and write data
+> + * @cmd: scsi_cmnd to prepare
+> + **/
+> +static int sd_setup_cmd_and_write_cmd(struct scsi_cmnd *cmd)
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
+I suspect you intended to use 
+	setup_cmp_and_write
+rather than 
+	setup_cmd_and_write
+for that function name, to match 
+	sd_config_cmp_and_write
 
-The big item here is support for inline data for CephFS and for message 
-signatures from Zheng.  There are also several bug fixes, including 
-interrupted flock request handling, 0-length xattrs, mksnap, cached 
-readdir results, and a message version compat field.  Finally there are 
-several cleanups from Ilya, Dan, and Markus.
+...
+> @@ -1134,6 +1193,8 @@ static int sd_init_command(struct scsi_cmnd *cmd)
+>  		return sd_setup_write_same_cmnd(cmd);
+>  	else if (rq->cmd_flags & REQ_FLUSH)
+>  		return sd_setup_flush_cmnd(cmd);
+> +	else if (rq->cmd_flags & REQ_CMP_AND_WRITE)
+> +		return sd_setup_cmd_and_write_cmd(cmd);
+>  	else
+>  		return sd_setup_read_write_cmnd(cmd);
+>  }
 
-Note that there is another series coming soon that fixes some bugs in the 
-RBD 'lingering' requests, but it isn't quite ready yet.
-
-Thanks!
-sage
-
-
-----------------------------------------------------------------
-Dan Carpenter (1):
-      ceph: do_sync is never initialized
-
-Ilya Dryomov (4):
-      libceph: nuke ceph_kvfree()
-      ceph: remove unused stringification macros
-      rbd: don't treat CEPH_OSD_OP_DELETE as extent op
-      libceph: fixup includes in pagelist.h
-
-John Spray (2):
-      libceph: update ceph_msg_header structure
-      ceph: message versioning fixes
-
-SF Markus Elfring (1):
-      ceph, rbd: delete unnecessary checks before two function calls
-
-Yan, Zheng (19):
-      ceph: fix file lock interruption
-      ceph: introduce a new inode flag indicating if cached dentries are ordered
-      libceph: store session key in cephx authorizer
-      libceph: message signature support
-      ceph: introduce global empty snap context
-      libceph: require cephx message signature by default
-      libceph: add SETXATTR/CMPXATTR osd operations support
-      libceph: add CREATE osd operation support
-      libceph: specify position of extent operation
-      ceph: parse inline data in MClientReply and MClientCaps
-      ceph: add inline data to pagecache
-      ceph: use getattr request to fetch inline data
-      ceph: fetch inline data when getting Fcr cap refs
-      ceph: sync read inline data
-      ceph: convert inline data to normal data before data write
-      ceph: flush inline version
-      ceph: support inline data feature
-      ceph: fix mksnap crash
-      ceph: fix setting empty extended attribute
-
- drivers/block/rbd.c                |  11 +-
- fs/ceph/addr.c                     | 273 +++++++++++++++++++++++++++++++++++--
- fs/ceph/caps.c                     | 132 ++++++++++++++----
- fs/ceph/dir.c                      |  27 ++--
- fs/ceph/file.c                     |  97 +++++++++++--
- fs/ceph/inode.c                    |  59 ++++++--
- fs/ceph/locks.c                    |  64 +++++++--
- fs/ceph/mds_client.c               |  41 +++++-
- fs/ceph/mds_client.h               |  10 ++
- fs/ceph/snap.c                     |  37 ++++-
- fs/ceph/super.c                    |  16 ++-
- fs/ceph/super.h                    |  55 ++++++--
- fs/ceph/super.h.rej                |  10 ++
- fs/ceph/xattr.c                    |   7 +-
- include/linux/ceph/auth.h          |  26 ++++
- include/linux/ceph/buffer.h        |   3 +-
- include/linux/ceph/ceph_features.h |   1 +
- include/linux/ceph/ceph_fs.h       |  10 +-
- include/linux/ceph/libceph.h       |   2 +-
- include/linux/ceph/messenger.h     |   9 +-
- include/linux/ceph/msgr.h          |  11 +-
- include/linux/ceph/osd_client.h    |  13 +-
- include/linux/ceph/pagelist.h      |   4 +-
- net/ceph/auth_x.c                  |  76 ++++++++++-
- net/ceph/auth_x.h                  |   1 +
- net/ceph/buffer.c                  |   4 +-
- net/ceph/ceph_common.c             |  21 +--
- net/ceph/messenger.c               |  34 ++++-
- net/ceph/osd_client.c              | 118 ++++++++++++----
- 29 files changed, 992 insertions(+), 180 deletions(-)
- create mode 100644 fs/ceph/super.h.rej
+---
+Rob Elliott    HP Server Storage
