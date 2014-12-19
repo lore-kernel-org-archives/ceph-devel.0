@@ -1,112 +1,42 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: v0.90 released
-Date: Fri, 19 Dec 2014 14:22:59 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1412191421430.26305@cobra.newdream.net>
+From: "Matt W. Benjamin" <matt@cohortfs.com>
+Subject: not-really-pull-request pull request wip-xio
+Date: Fri, 19 Dec 2014 18:22:14 -0500 (EST)
+Message-ID: <1791423204.220.1419031334631.JavaMail.root@thunderbeast.private.linuxbox.com>
+References: <378718758.218.1419031087866.JavaMail.root@thunderbeast.private.linuxbox.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:37246 "EHLO mx1.redhat.com"
+Received: from aa.linuxbox.com ([69.128.83.226]:1340 "EHLO aa.linuxbox.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751762AbaLSWXD (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 19 Dec 2014 17:23:03 -0500
+	id S1751336AbaLSXW1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 19 Dec 2014 18:22:27 -0500
+In-Reply-To: <378718758.218.1419031087866.JavaMail.root@thunderbeast.private.linuxbox.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org, ceph-users@ceph.com, ceph-maintainers@ceph.com, ceph-announce@ceph.com
+To: ceph-devel <ceph-devel@vger.kernel.org>
+Cc: Vu Pham <vuhuong@mellanox.com>
 
-This is the last development release before Christmas.  There are some API 
-cleanups for librados and librbd, and lots of bug fixes across the board 
-for the OSD, MDS, RGW, and CRUSH.  The OSD also gets support for discard 
-(potentially helpful on SSDs, although it is off by default), and there 
-are several improvements to ceph-disk.
+Hi Ceph Devs,
 
-The next two development releases will be getting a slew of new 
-functionality for hammer.  Stay tuned!
+We've put together a "pre" pull request for review of the XioMessenger integration against Hammer.
 
-Upgrading
----------
+https://github.com/ceph/ceph/pull/3224
 
-* Previously, the formatted output of 'ceph pg stat -f ...' was a full
-  pg dump that included all metadata about all PGs in the system.  It
-  is now a concise summary of high-level PG stats, just like the
-  unformatted 'ceph pg stat' command.
+This is a re-based version of our weekly mix-down, the parent branch was looking quite good.
 
-* All JSON dumps of floating point values were incorrecting surrounding the
-  value with quotes.  These quotes have been removed.  Any consumer of 
-  structured JSON output that was consuming the floating point values was 
-  previously having to interpret the quoted string and will most likely 
-  need to be fixed to take the unquoted number.
+Thanks!
 
-Notable Changes
----------------
+Matt
 
-* arch: fix NEON feaeture detection (#10185 Loic Dachary)
-* build: adjust build deps for yasm, virtualenv (Jianpeng Ma)
-* build: improve build dependency tooling (Loic Dachary)
-* ceph-disk: call partx/partprobe consistency (#9721 Loic Dachary)
-* ceph-disk: fix dmcrypt key permissions (Loic Dachary)
-* ceph-disk: fix umount race condition (#10096 Blaine Gardner)
-* ceph-disk: init=none option (Loic Dachary)
-* ceph-monstore-tool: fix shutdown (#10093 Loic Dachary)
-* ceph-objectstore-tool: fix import (#10090 David Zafman)
-* ceph-objectstore-tool: many improvements and tests (David Zafman)
-* ceph.spec: package rbd-replay-prep (Ken Dreyer)
-* common: add 'perf reset ...' admin command (Jianpeng Ma)
-* common: do not unlock rwlock on destruction (Federico Simoncelli)
-* common: fix block device discard check (#10296 Sage Weil)
-* common: remove broken CEPH_LOCKDEP optoin (Kefu Chai)
-* crush: fix tree bucket behavior (Rongze Zhu)
-* doc: add build-doc guidlines for Fedora and CentOS/RHEL (Nilamdyuti 
-  Goswami)
-* doc: enable rbd cache on openstack deployments (Sebastien Han)
-* doc: improved installation nots on CentOS/RHEL installs (John Wilkins)
-* doc: misc cleanups (Adam Spiers, Sebastien Han, Nilamdyuti Goswami, Ken 
-  Dreyer, John Wilkins)
-* doc: new man pages (Nilamdyuti Goswami)
-* doc: update release descriptions (Ken Dreyer)
-* doc: update sepia hardware inventory (Sandon Van Ness)
-* librados: only export public API symbols (Jason Dillaman)
-* libradosstriper: fix stat strtoll (Dongmao Zhang)
-* libradosstriper: fix trunc method (#10129 Sebastien Ponce)
-* librbd: fix list_children from invalid pool ioctxs (#10123 Jason 
-  Dillaman)
-* librbd: only export public API symbols (Jason Dillaman)
-* many coverity fixes (Danny Al-Gaaf)
-* mds: 'flush journal' admin command (John Spray)
-* mds: fix MDLog IO callback deadlock (John Spray)
-* mds: fix deadlock during journal probe vs purge (#10229 Yan, Zheng)
-* mds: fix race trimming log segments (Yan, Zheng)
-* mds: store backtrace for stray dir (Yan, Zheng)
-* mds: verify backtrace when fetching dirfrag (#9557 Yan, Zheng)
-* mon: add max pgs per osd warning (Sage Weil)
-* mon: fix *_ratio units and types (Sage Weil)
-* mon: fix JSON dumps to dump floats as flots and not strings (Sage Weil)
-* mon: fix formatter 'pg stat' command output (Sage Weil)
-* msgr: async: several fixes (Haomai Wang)
-* msgr: simple: fix rare deadlock (Greg Farnum)
-* osd: batch pg log trim (Xinze Chi)
-* osd: clean up internal ObjectStore interface (Sage Weil)
-* osd: do not abort deep scrub on missing hinfo (#10018 Loic Dachary)
-* osd: fix ghobject_t formatted output to include shard (#10063 Loic 
-  Dachary)
-* osd: fix osd peer check on scrub messages (#9555 Sage Weil)
-* osd: fix pgls filter ops (#9439 David Zafman)
-* osd: flush snapshots from cache tier immediately (Sage Weil)
-* osd: keyvaluestore: fix getattr semantics (Haomai Wang)
-* osd: keyvaluestore: fix key ordering (#10119 Haomai Wang)
-* osd: limit in-flight read requests (Jason Dillaman)
-* osd: log when scrub or repair starts (Loic Dachary)
-* osd: support for discard for journal trim (Jianpeng Ma)
-* qa: fix osd create dup tests (#10083 Loic Dachary)
-* rgw: add location header when object is in another region (VRan Liu)
-* rgw: check timestamp on s3 keystone auth (#10062 Abhishek Lekshmanan)
-* rgw: make sysvinit script set ulimit -n properly (Sage Weil)
-* systemd: better systemd unit files (Owen Synge)
-* tests: ability to run unit tests under docker (Loic Dachary)
+-- 
+Matt Benjamin
+CohortFS, LLC.
+315 West Huron Street, Suite 140A
+Ann Arbor, Michigan 48103
 
-Getting Ceph
-------------
+http://cohortfs.com
 
-* Git at git://github.com/ceph/ceph.git
-* Tarball at http://ceph.com/download/ceph-0.90.tar.gz
-* For packages, see http://ceph.com/docs/master/install/get-packages
-* For ceph-deploy, see http://ceph.com/docs/master/install/install-ceph-deploy
+tel.  734-761-4689 
+fax.  734-769-8938 
+cel.  734-216-5309 
