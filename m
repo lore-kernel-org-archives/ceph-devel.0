@@ -1,37 +1,112 @@
-From: David Zafman <dzafman@redhat.com>
-Subject: ceph-objectstore-tool and make check
-Date: Fri, 19 Dec 2014 14:09:17 -0800
-Message-ID: <5494A20D.7000208@redhat.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: v0.90 released
+Date: Fri, 19 Dec 2014 14:22:59 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1412191421430.26305@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:38606 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:37246 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752463AbaLSWJS (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 19 Dec 2014 17:09:18 -0500
-Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id sBJM9Ink030489
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
-	for <ceph-devel@vger.kernel.org>; Fri, 19 Dec 2014 17:09:18 -0500
-Received: from David-Zs-MacBook-Pro.local (vpn-225-116.phx2.redhat.com [10.3.225.116])
-	by int-mx10.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id sBJM9Ho9007176
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES128-SHA bits=128 verify=NO)
-	for <ceph-devel@vger.kernel.org>; Fri, 19 Dec 2014 17:09:18 -0500
+	id S1751762AbaLSWXD (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 19 Dec 2014 17:23:03 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org, ceph-users@ceph.com, ceph-maintainers@ceph.com, ceph-announce@ceph.com
 
+This is the last development release before Christmas.  There are some API 
+cleanups for librados and librbd, and lots of bug fixes across the board 
+for the OSD, MDS, RGW, and CRUSH.  The OSD also gets support for discard 
+(potentially helpful on SSDs, although it is off by default), and there 
+are several improvements to ceph-disk.
 
-The objectstore tool has been renamed from ceph_objectstore_tool to 
-ceph-objectstore-tool.
+The next two development releases will be getting a slew of new 
+functionality for hammer.  Stay tuned!
 
-Please remove src/.libs/ceph_objectstore_tool and 
-src/.libs/lt-ceph_objectstore_tool or do a "make clean" with latest 
-master branch.  Otherwise, a local make check can fail because the old 
-binary of the tool will always be executed.
+Upgrading
+---------
 
+* Previously, the formatted output of 'ceph pg stat -f ...' was a full
+  pg dump that included all metadata about all PGs in the system.  It
+  is now a concise summary of high-level PG stats, just like the
+  unformatted 'ceph pg stat' command.
 
-David Zafman
-Senior Developer
-http://www.redhat.com
+* All JSON dumps of floating point values were incorrecting surrounding the
+  value with quotes.  These quotes have been removed.  Any consumer of 
+  structured JSON output that was consuming the floating point values was 
+  previously having to interpret the quoted string and will most likely 
+  need to be fixed to take the unquoted number.
+
+Notable Changes
+---------------
+
+* arch: fix NEON feaeture detection (#10185 Loic Dachary)
+* build: adjust build deps for yasm, virtualenv (Jianpeng Ma)
+* build: improve build dependency tooling (Loic Dachary)
+* ceph-disk: call partx/partprobe consistency (#9721 Loic Dachary)
+* ceph-disk: fix dmcrypt key permissions (Loic Dachary)
+* ceph-disk: fix umount race condition (#10096 Blaine Gardner)
+* ceph-disk: init=none option (Loic Dachary)
+* ceph-monstore-tool: fix shutdown (#10093 Loic Dachary)
+* ceph-objectstore-tool: fix import (#10090 David Zafman)
+* ceph-objectstore-tool: many improvements and tests (David Zafman)
+* ceph.spec: package rbd-replay-prep (Ken Dreyer)
+* common: add 'perf reset ...' admin command (Jianpeng Ma)
+* common: do not unlock rwlock on destruction (Federico Simoncelli)
+* common: fix block device discard check (#10296 Sage Weil)
+* common: remove broken CEPH_LOCKDEP optoin (Kefu Chai)
+* crush: fix tree bucket behavior (Rongze Zhu)
+* doc: add build-doc guidlines for Fedora and CentOS/RHEL (Nilamdyuti 
+  Goswami)
+* doc: enable rbd cache on openstack deployments (Sebastien Han)
+* doc: improved installation nots on CentOS/RHEL installs (John Wilkins)
+* doc: misc cleanups (Adam Spiers, Sebastien Han, Nilamdyuti Goswami, Ken 
+  Dreyer, John Wilkins)
+* doc: new man pages (Nilamdyuti Goswami)
+* doc: update release descriptions (Ken Dreyer)
+* doc: update sepia hardware inventory (Sandon Van Ness)
+* librados: only export public API symbols (Jason Dillaman)
+* libradosstriper: fix stat strtoll (Dongmao Zhang)
+* libradosstriper: fix trunc method (#10129 Sebastien Ponce)
+* librbd: fix list_children from invalid pool ioctxs (#10123 Jason 
+  Dillaman)
+* librbd: only export public API symbols (Jason Dillaman)
+* many coverity fixes (Danny Al-Gaaf)
+* mds: 'flush journal' admin command (John Spray)
+* mds: fix MDLog IO callback deadlock (John Spray)
+* mds: fix deadlock during journal probe vs purge (#10229 Yan, Zheng)
+* mds: fix race trimming log segments (Yan, Zheng)
+* mds: store backtrace for stray dir (Yan, Zheng)
+* mds: verify backtrace when fetching dirfrag (#9557 Yan, Zheng)
+* mon: add max pgs per osd warning (Sage Weil)
+* mon: fix *_ratio units and types (Sage Weil)
+* mon: fix JSON dumps to dump floats as flots and not strings (Sage Weil)
+* mon: fix formatter 'pg stat' command output (Sage Weil)
+* msgr: async: several fixes (Haomai Wang)
+* msgr: simple: fix rare deadlock (Greg Farnum)
+* osd: batch pg log trim (Xinze Chi)
+* osd: clean up internal ObjectStore interface (Sage Weil)
+* osd: do not abort deep scrub on missing hinfo (#10018 Loic Dachary)
+* osd: fix ghobject_t formatted output to include shard (#10063 Loic 
+  Dachary)
+* osd: fix osd peer check on scrub messages (#9555 Sage Weil)
+* osd: fix pgls filter ops (#9439 David Zafman)
+* osd: flush snapshots from cache tier immediately (Sage Weil)
+* osd: keyvaluestore: fix getattr semantics (Haomai Wang)
+* osd: keyvaluestore: fix key ordering (#10119 Haomai Wang)
+* osd: limit in-flight read requests (Jason Dillaman)
+* osd: log when scrub or repair starts (Loic Dachary)
+* osd: support for discard for journal trim (Jianpeng Ma)
+* qa: fix osd create dup tests (#10083 Loic Dachary)
+* rgw: add location header when object is in another region (VRan Liu)
+* rgw: check timestamp on s3 keystone auth (#10062 Abhishek Lekshmanan)
+* rgw: make sysvinit script set ulimit -n properly (Sage Weil)
+* systemd: better systemd unit files (Owen Synge)
+* tests: ability to run unit tests under docker (Loic Dachary)
+
+Getting Ceph
+------------
+
+* Git at git://github.com/ceph/ceph.git
+* Tarball at http://ceph.com/download/ceph-0.90.tar.gz
+* For packages, see http://ceph.com/docs/master/install/get-packages
+* For ceph-deploy, see http://ceph.com/docs/master/install/install-ceph-deploy
