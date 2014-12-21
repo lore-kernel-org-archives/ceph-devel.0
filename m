@@ -1,98 +1,41 @@
-From: Rickard Strandqvist <rickard_strandqvist@spectrumdigital.se>
-Subject: [PATCH] net: ceph: armor.c:  Remove unused function
-Date: Sat, 20 Dec 2014 23:36:40 +0100
-Message-ID: <1419115000-12178-1-git-send-email-rickard_strandqvist@spectrumdigital.se>
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f181.google.com ([209.85.212.181]:48442 "EHLO
-	mail-wi0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751335AbaLTWdx (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 20 Dec 2014 17:33:53 -0500
-Received: by mail-wi0-f181.google.com with SMTP id r20so4915772wiv.14
-        for <ceph-devel@vger.kernel.org>; Sat, 20 Dec 2014 14:33:52 -0800 (PST)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>, "David S. Miller" <davem@davemloft.net>
-Cc: Rickard Strandqvist <rickard_strandqvist@spectrumdigital.se>, ceph-devel@vger.kernel.org, netdev@vger.kernel.org, linux-kernel@vger.kernel.org
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: [PATCH] ceph: Use %zu to format size_t in ceph_fill_inline_data()
+Date: Sun, 21 Dec 2014 11:56:19 +0100
+Message-ID: <1419159379-11407-1-git-send-email-geert@linux-m68k.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, Geert Uytterhoeven <geert@linux-m68k.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Remove the function ceph_armor() that is not used anywhere.
+On 32-bit, where size_t is unsigned int:
 
-This was partially found by using a static code analysis program called cppcheck.
+fs/ceph/addr.c: In function =E2=80=98ceph_fill_inline_data=E2=80=99:
+fs/ceph/addr.c:1419: warning: format =E2=80=98%lu=E2=80=99 expects type=
+ =E2=80=98long unsigned int=E2=80=99, but argument 10 has type =E2=80=98=
+size_t=E2=80=99
 
-Signed-off-by: Rickard Strandqvist <rickard_strandqvist@spectrumdigital.se>
+Signed-off-by: Geert Uytterhoeven <geert@linux-m68k.org>
 ---
- net/ceph/armor.c  |   39 ---------------------------------------
- net/ceph/crypto.h |    1 -
- 2 files changed, 40 deletions(-)
+ fs/ceph/addr.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/net/ceph/armor.c b/net/ceph/armor.c
-index 1fc1ee1..05e0d2b 100644
---- a/net/ceph/armor.c
-+++ b/net/ceph/armor.c
-@@ -1,7 +1,6 @@
- 
- #include <linux/errno.h>
- 
--int ceph_armor(char *dst, const char *src, const char *end);
- int ceph_unarmor(char *dst, const char *src, const char *end);
- 
- /*
-@@ -33,44 +32,6 @@ static int decode_bits(char c)
- 	return -EINVAL;
- }
- 
--int ceph_armor(char *dst, const char *src, const char *end)
--{
--	int olen = 0;
--	int line = 0;
--
--	while (src < end) {
--		unsigned char a, b, c;
--
--		a = *src++;
--		*dst++ = encode_bits(a >> 2);
--		if (src < end) {
--			b = *src++;
--			*dst++ = encode_bits(((a & 3) << 4) | (b >> 4));
--			if (src < end) {
--				c = *src++;
--				*dst++ = encode_bits(((b & 15) << 2) |
--						     (c >> 6));
--				*dst++ = encode_bits(c & 63);
--			} else {
--				*dst++ = encode_bits((b & 15) << 2);
--				*dst++ = '=';
--			}
--		} else {
--			*dst++ = encode_bits(((a & 3) << 4));
--			*dst++ = '=';
--			*dst++ = '=';
--		}
--		olen += 4;
--		line += 4;
--		if (line == 64) {
--			line = 0;
--			*(dst++) = '\n';
--			olen++;
--		}
--	}
--	return olen;
--}
--
- int ceph_unarmor(char *dst, const char *src, const char *end)
- {
- 	int olen = 0;
-diff --git a/net/ceph/crypto.h b/net/ceph/crypto.h
-index d149822..5cbc7b1 100644
---- a/net/ceph/crypto.h
-+++ b/net/ceph/crypto.h
-@@ -45,7 +45,6 @@ int ceph_crypto_init(void);
- void ceph_crypto_shutdown(void);
- 
- /* armor.c */
--int ceph_armor(char *dst, const char *src, const char *end);
- int ceph_unarmor(char *dst, const char *src, const char *end);
- 
- #endif
--- 
-1.7.10.4
-
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index f5013d92a7e6b73d..c81c0e004588b9e2 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -1416,7 +1416,7 @@ void ceph_fill_inline_data(struct inode *inode, s=
+truct page *locked_page,
+ 		}
+ 	}
+=20
+-	dout("fill_inline_data %p %llx.%llx len %lu locked_page %p\n",
++	dout("fill_inline_data %p %llx.%llx len %zu locked_page %p\n",
+ 	     inode, ceph_vinop(inode), len, locked_page);
+=20
+ 	if (len > 0) {
+--=20
+1.9.1
