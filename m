@@ -1,45 +1,79 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: full osdmaps in mon txns
-Date: Tue, 23 Dec 2014 13:10:22 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1412231306170.28630@cobra.newdream.net>
+From: Loic Dachary <loic@dachary.org>
+Subject: RFC: new rados whereis command
+Date: Tue, 23 Dec 2014 23:22:52 +0100
+Message-ID: <5499EB3C.2040602@dachary.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="qgASrmcSVUl4Dd4FVp5NJosBOTBPmjDH9"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:50340 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751365AbaLWVKY (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 23 Dec 2014 16:10:24 -0500
-Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
-	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id sBNLAOX5004140
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
-	for <ceph-devel@vger.kernel.org>; Tue, 23 Dec 2014 16:10:24 -0500
+Received: from mail2.dachary.org ([91.121.57.175]:57507 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751022AbaLWWWy (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Dec 2014 17:22:54 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: joao@redhat.com, gfarnum@redhat.com
-Cc: ceph-devel@vger.kernel.org
+To: Andreas-Joachim Peters <andreas.joachim.peters@cern.ch>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-This fun issue came up again in the form of 10422:
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--qgASrmcSVUl4Dd4FVp5NJosBOTBPmjDH9
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-	http://tracker.ceph.com/issues/10422
+Hi Andreas,
 
-I think we have 3 main options:
+I took a closer look at https://github.com/ceph/ceph/pull/2730 implementi=
+ng rados whereis [--dns] and I think it deserves a discussion here. If I =
+understand correctly, it relies on a new function of the rados API:
 
-1. Ask users to do a mon scrub prior to upgrade to 
-ensure it is safe.  If a mon is out of sync, manually kick it out, blow it 
-away, and resync.
+  typedef struct whereis {
+    int64_t osd_id;                              //< ID of the OSD hostin=
+g this object
+    std::string osd_state;                       //< state of the OSD - e=
+ither 'active' or 'inactive'
+    int64_t pg_seed;                             //< Seed of the PG hosti=
+ng this object
+    std::string ip_string;                       //< Ip as string
+    std::vector<std::string> host_names;         //< optional reverse DNS=
+ HostNames
+    std::map<std::string, std::string> user_map; //< optional user KV map=
 
-2. Do a one-time broadcast of the full osdmap across mons to ensure they 
-are consistent after upgrade.  Bleh.
+    void resolve();                              //< reverse DNS OSD IPs =
+and store in HostNames
+  } whereis_t;
 
-3. Include full encoded OSDMap in txns on updates going forward.
+  static int whereis(IoCtx &ioctx, const std::string &oid, std::vector<wh=
+ereis_t> &locations);
 
-I like 3 because it solves this and all related problems going forward.  
-The local encoding of full osdmaps has proven to be a huge headache.  
-And, the patch to do it is remarkably simple
+which needs to be added there because the rados API does not expose some =
+details that are needed to fill the fields of the whereis_t structure.
 
-	https://github.com/ceph/ceph/pull/3247/files
+It looks fine to me but ... I'm not used to maintaining or developing the=
+ rados API and someone else may have a more informed opinion.
 
-and dovetails well with the new CRC.
+There is a technical detail that also needs to be sorted out : the curren=
+t implementation exposes the RadosWhereis class (for dump) and this shoul=
+d either be moved to rados.cc or be part of the rados API (which probably=
+ is not the best option because it would also expose Formatter as a conse=
+quence).
 
-What do you think?
-sage
+Cheers
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--qgASrmcSVUl4Dd4FVp5NJosBOTBPmjDH9
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlSZ6zwACgkQ8dLMyEl6F21PfwCeJGPUzQYrYQ3/YHurFE/iguaO
+SJ4AnimPkTlH51nTQ3TIWPHY6yNpOFZP
+=9ei0
+-----END PGP SIGNATURE-----
+
+--qgASrmcSVUl4Dd4FVp5NJosBOTBPmjDH9--
