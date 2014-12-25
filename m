@@ -1,63 +1,51 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: RFC: new rados whereis command
-Date: Thu, 25 Dec 2014 13:52:49 +0100
-Message-ID: <549C08A1.1020500@42on.com>
-References: <5499EB3C.2040602@dachary.org>
+From: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: experimental features
+Date: Thu, 25 Dec 2014 14:27:28 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1412251427060.16664@cobra.newdream.net>
+References: <alpine.DEB.2.00.1412050927150.24079@cobra.newdream.net>
+	<CAC6JEv8LVviFoNXB72gKBQ+seNVYphvpwm0QZeOwccPHr7Qatg@mail.gmail.com>
+	<5481EF6B.4010901@redhat.com>
+	<CAOGLoJN2wSxMgtok6aATSW5o-Abqcv2bdVo+dVfaEbG4iyiQSw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from websrv.42on.com ([31.25.102.167]:45416 "EHLO websrv.42on.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752266AbaLYMwx (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 25 Dec 2014 07:52:53 -0500
-In-Reply-To: <5499EB3C.2040602@dachary.org>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>, Andreas-Joachim Peters <andreas.joachim.peters@cern.ch>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAOGLoJN2wSxMgtok6aATSW5o-Abqcv2bdVo+dVfaEbG4iyiQSw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Justin Erenkrantz <justin-XWYNqclEDWm2WkX4dyxwcA@public.gmane.org>
+Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-On 12/23/2014 11:22 PM, Loic Dachary wrote:
-> Hi Andreas,
+On Sun, 7 Dec 2014, Justin Erenkrantz wrote:
+> On Fri, Dec 5, 2014 at 12:46 PM, Mark Nelson <mark.nelson-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org> wrote:
+> > I'm in favor of the "allow experimental features" but instead call it:
+> >
+> > "ALLOW UNRECOVERABLE DATA CORRUPTING FEATURES" which makes things a little
+> > more explicit. With great power comes great responsibility.
 > 
-> I took a closer look at https://github.com/ceph/ceph/pull/2730 implementing rados whereis [--dns] and I think it deserves a discussion here. If I understand correctly, it relies on a new function of the rados API:
+> +1.
 > 
->   typedef struct whereis {
->     int64_t osd_id;                              //< ID of the OSD hosting this object
->     std::string osd_state;                       //< state of the OSD - either 'active' or 'inactive'
->     int64_t pg_seed;                             //< Seed of the PG hosting this object
->     std::string ip_string;                       //< Ip as string
->     std::vector<std::string> host_names;         //< optional reverse DNS HostNames
->     std::map<std::string, std::string> user_map; //< optional user KV map
->     void resolve();                              //< reverse DNS OSD IPs and store in HostNames
->   } whereis_t;
-> 
+> For Subversion, we utilize SVN_I_LOVE_CORRUPTED_XXX for a few options
+> that can cause data corruption.  -- justin
 
-Looking at this, will it return the public or cluster IP? I think the
-public, which seems the right thing, but shouldn't the struct already
-facilitate also returning the cluster IP?
+Thanks, I think we should go for this one.
 
-The rados tool doesn't have to, but you never know what people want in
-the future?
+1. a generic option
 
-Great idea though! Very helpful!
+ enable unrecoverable data corrupting features = foo bar baz
 
->   static int whereis(IoCtx &ioctx, const std::string &oid, std::vector<whereis_t> &locations);
-> 
-> which needs to be added there because the rados API does not expose some details that are needed to fill the fields of the whereis_t structure.
-> 
-> It looks fine to me but ... I'm not used to maintaining or developing the rados API and someone else may have a more informed opinion.
-> 
-> There is a technical detail that also needs to be sorted out : the current implementation exposes the RadosWhereis class (for dump) and this should either be moved to rados.cc or be part of the rados API (which probably is not the best option because it would also expose Formatter as a consequence).
-> 
-> Cheers
-> 
+2. rename keyvaluestore-dev to keyvaluestore (and require 
+'osd-objectstore-keyvaluestore' it be listed above).
 
+3. include 'ms-type-async', 'filestore-zfs-snap' as experimental.  And 
+whatever else we want to flag...
 
--- 
-Wido den Hollander
-42on B.V.
-Ceph trainer and consultant
-
-Phone: +31 (0)20 700 9902
-Skype: contact42on
+sage
