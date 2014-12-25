@@ -1,60 +1,63 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Happy xmas jerasure & gf-complete
-Date: Thu, 25 Dec 2014 12:35:15 +0100
-Message-ID: <549BF673.2090308@dachary.org>
+From: Wido den Hollander <wido@42on.com>
+Subject: Re: RFC: new rados whereis command
+Date: Thu, 25 Dec 2014 13:52:49 +0100
+Message-ID: <549C08A1.1020500@42on.com>
+References: <5499EB3C.2040602@dachary.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="M29r29jit45JOIBOFdureNewqNRI67kUJ"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:58130 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752027AbaLYLfR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Dec 2014 06:35:17 -0500
+Received: from websrv.42on.com ([31.25.102.167]:45416 "EHLO websrv.42on.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752266AbaLYMwx (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 25 Dec 2014 07:52:53 -0500
+In-Reply-To: <5499EB3C.2040602@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Kevin Greenan <kmgreen2@gmail.com>
+To: Loic Dachary <loic@dachary.org>, Andreas-Joachim Peters <andreas.joachim.peters@cern.ch>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---M29r29jit45JOIBOFdureNewqNRI67kUJ
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+On 12/23/2014 11:22 PM, Loic Dachary wrote:
+> Hi Andreas,
+> 
+> I took a closer look at https://github.com/ceph/ceph/pull/2730 implementing rados whereis [--dns] and I think it deserves a discussion here. If I understand correctly, it relies on a new function of the rados API:
+> 
+>   typedef struct whereis {
+>     int64_t osd_id;                              //< ID of the OSD hosting this object
+>     std::string osd_state;                       //< state of the OSD - either 'active' or 'inactive'
+>     int64_t pg_seed;                             //< Seed of the PG hosting this object
+>     std::string ip_string;                       //< Ip as string
+>     std::vector<std::string> host_names;         //< optional reverse DNS HostNames
+>     std::map<std::string, std::string> user_map; //< optional user KV map
+>     void resolve();                              //< reverse DNS OSD IPs and store in HostNames
+>   } whereis_t;
+> 
 
-Hi Kevin,
+Looking at this, will it return the public or cluster IP? I think the
+public, which seems the right thing, but shouldn't the struct already
+facilitate also returning the cluster IP?
 
-My xmas present to jerasure & gf-complete is a new home at http://jerasur=
-e.org/, hosted 100% in freedom[1] :-)=20
+The rados tool doesn't have to, but you never know what people want in
+the future?
 
-The documentation was updated accordingly and the merge requests are read=
-y for your review:
+Great idea though! Very helpful!
 
-http://jerasure.org/jerasure/gf-complete/merge_requests/3
-http://jerasure.org/jerasure/jerasure/merge_requests/2
-
-I sent you privately the credentials to share control of the domain name =
-and the virtual machine.
-
-Cheers
-
-[1] Ubuntu 14.04 on bare metal, OpenStack Havana, Ceph Dumpling, Docker 1=
-=2E4.1, GitLab CE 7.6.1
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>   static int whereis(IoCtx &ioctx, const std::string &oid, std::vector<whereis_t> &locations);
+> 
+> which needs to be added there because the rados API does not expose some details that are needed to fill the fields of the whereis_t structure.
+> 
+> It looks fine to me but ... I'm not used to maintaining or developing the rados API and someone else may have a more informed opinion.
+> 
+> There is a technical detail that also needs to be sorted out : the current implementation exposes the RadosWhereis class (for dump) and this should either be moved to rados.cc or be part of the rados API (which probably is not the best option because it would also expose Formatter as a consequence).
+> 
+> Cheers
+> 
 
 
---M29r29jit45JOIBOFdureNewqNRI67kUJ
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+-- 
+Wido den Hollander
+42on B.V.
+Ceph trainer and consultant
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlSb9nMACgkQ8dLMyEl6F20i5gCgrj4DJVZ2DQtmhf67bgLEze2h
-ccUAniu+mivWR8FBCqLqqcCcP8yH2hp5
-=58gy
------END PGP SIGNATURE-----
-
---M29r29jit45JOIBOFdureNewqNRI67kUJ--
+Phone: +31 (0)20 700 9902
+Skype: contact42on
