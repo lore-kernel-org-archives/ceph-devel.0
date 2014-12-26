@@ -1,51 +1,46 @@
-From: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: experimental features
-Date: Thu, 25 Dec 2014 14:27:28 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1412251427060.16664@cobra.newdream.net>
-References: <alpine.DEB.2.00.1412050927150.24079@cobra.newdream.net>
-	<CAC6JEv8LVviFoNXB72gKBQ+seNVYphvpwm0QZeOwccPHr7Qatg@mail.gmail.com>
-	<5481EF6B.4010901@redhat.com>
-	<CAOGLoJN2wSxMgtok6aATSW5o-Abqcv2bdVo+dVfaEbG4iyiQSw@mail.gmail.com>
+From: Mykola Golub <mgolub@mirantis.com>
+Subject: Re: RFC: new rados whereis command
+Date: Fri, 26 Dec 2014 09:54:10 +0200
+Message-ID: <20141226075409.GA22340@gmail.com>
+References: <5499EB3C.2040602@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAOGLoJN2wSxMgtok6aATSW5o-Abqcv2bdVo+dVfaEbG4iyiQSw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Justin Erenkrantz <justin-XWYNqclEDWm2WkX4dyxwcA@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-lb0-f177.google.com ([209.85.217.177]:48285 "EHLO
+	mail-lb0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751193AbaLZHyU (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 26 Dec 2014 02:54:20 -0500
+Received: by mail-lb0-f177.google.com with SMTP id b6so8085932lbj.22
+        for <ceph-devel@vger.kernel.org>; Thu, 25 Dec 2014 23:54:18 -0800 (PST)
+Content-Disposition: inline
+In-Reply-To: <5499EB3C.2040602@dachary.org>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Andreas-Joachim Peters <andreas.joachim.peters@cern.ch>
+Cc: Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Sun, 7 Dec 2014, Justin Erenkrantz wrote:
-> On Fri, Dec 5, 2014 at 12:46 PM, Mark Nelson <mark.nelson-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org> wrote:
-> > I'm in favor of the "allow experimental features" but instead call it:
-> >
-> > "ALLOW UNRECOVERABLE DATA CORRUPTING FEATURES" which makes things a little
-> > more explicit. With great power comes great responsibility.
+On Tue, Dec 23, 2014 at 11:22:52PM +0100, Loic Dachary wrote:
+> Hi Andreas,
 > 
-> +1.
+> I took a closer look at https://github.com/ceph/ceph/pull/2730
+> implementing rados whereis [--dns] and I think it deserves a
+> discussion here. If I understand correctly, it relies on a new
+> function of the rados API:
 > 
-> For Subversion, we utilize SVN_I_LOVE_CORRUPTED_XXX for a few options
-> that can cause data corruption.  -- justin
+>   typedef struct whereis {
+>     int64_t osd_id;                              //< ID of the OSD hosting this object
+>     std::string osd_state;                       //< state of the OSD - either 'active' or 'inactive'
 
-Thanks, I think we should go for this one.
+Wouldn't it be better to use enum instead of string for state?
 
-1. a generic option
+>     int64_t pg_seed;                             //< Seed of the PG hosting this object
+>     std::string ip_string;                       //< Ip as string
+>     std::vector<std::string> host_names;         //< optional reverse DNS HostNames
+>     std::map<std::string, std::string> user_map; //< optional user KV map
+>     void resolve();                              //< reverse DNS OSD IPs and store in HostNames
+>   } whereis_t;
+> 
+>   static int whereis(IoCtx &ioctx, const std::string &oid, std::vector<whereis_t> &locations);
 
- enable unrecoverable data corrupting features = foo bar baz
-
-2. rename keyvaluestore-dev to keyvaluestore (and require 
-'osd-objectstore-keyvaluestore' it be listed above).
-
-3. include 'ms-type-async', 'filestore-zfs-snap' as experimental.  And 
-whatever else we want to flag...
-
-sage
+-- 
+Mykola Golub
