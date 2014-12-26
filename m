@@ -1,46 +1,57 @@
-From: Mykola Golub <mgolub@mirantis.com>
-Subject: Re: RFC: new rados whereis command
-Date: Fri, 26 Dec 2014 09:54:10 +0200
-Message-ID: <20141226075409.GA22340@gmail.com>
-References: <5499EB3C.2040602@dachary.org>
+From: scan-admin@coverity.com
+Subject: New Defects reported by Coverity Scan for ceph
+Date: Fri, 26 Dec 2014 06:19:33 -0800
+Message-ID: <549d6e7576ca8_5d4085d33888668@scan.coverity.com.mail>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain;
+ charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f177.google.com ([209.85.217.177]:48285 "EHLO
-	mail-lb0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751193AbaLZHyU (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 26 Dec 2014 02:54:20 -0500
-Received: by mail-lb0-f177.google.com with SMTP id b6so8085932lbj.22
-        for <ceph-devel@vger.kernel.org>; Thu, 25 Dec 2014 23:54:18 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <5499EB3C.2040602@dachary.org>
+Received: from scanrelay.coverity.com ([209.249.196.67]:58985 "EHLO
+	scanrelay.coverity.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751122AbaLZOTe (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 26 Dec 2014 09:19:34 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andreas-Joachim Peters <andreas.joachim.peters@cern.ch>
-Cc: Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Tue, Dec 23, 2014 at 11:22:52PM +0100, Loic Dachary wrote:
-> Hi Andreas,
-> 
-> I took a closer look at https://github.com/ceph/ceph/pull/2730
-> implementing rados whereis [--dns] and I think it deserves a
-> discussion here. If I understand correctly, it relies on a new
-> function of the rados API:
-> 
->   typedef struct whereis {
->     int64_t osd_id;                              //< ID of the OSD hosting this object
->     std::string osd_state;                       //< state of the OSD - either 'active' or 'inactive'
 
-Wouldn't it be better to use enum instead of string for state?
+Hi,
 
->     int64_t pg_seed;                             //< Seed of the PG hosting this object
->     std::string ip_string;                       //< Ip as string
->     std::vector<std::string> host_names;         //< optional reverse DNS HostNames
->     std::map<std::string, std::string> user_map; //< optional user KV map
->     void resolve();                              //< reverse DNS OSD IPs and store in HostNames
->   } whereis_t;
-> 
->   static int whereis(IoCtx &ioctx, const std::string &oid, std::vector<whereis_t> &locations);
+Please find the latest report on new defect(s) introduced to ceph found with Coverity Scan.
 
--- 
-Mykola Golub
+1 new defect(s) introduced to ceph found with Coverity Scan.
+1 defect(s), reported by Coverity Scan earlier, were marked fixed in the recent build analyzed by Coverity Scan.
+
+New defect(s) Reported-by: Coverity Scan
+Showing 1 of 1 defect(s)
+
+
+** CID 1260469:  Unchecked return value from library  (CHECKED_RETURN)
+/os/FileJournal.cc: 1083 in FileJournal::do_write(ceph::buffer::list &)()
+
+
+________________________________________________________________________________________________________
+*** CID 1260469:  Unchecked return value from library  (CHECKED_RETURN)
+/os/FileJournal.cc: 1083 in FileJournal::do_write(ceph::buffer::list &)()
+1077         ::fsync(fd);
+1078     #else
+1079         ::fdatasync(fd);
+1080     #endif
+1081     #ifdef HAVE_POSIX_FADVISE
+1082         if (g_conf->filestore_fadvise)
+>>>     CID 1260469:  Unchecked return value from library  (CHECKED_RETURN)
+>>>     Calling "posix_fadvise(this->fd, 0L, 0L, 4)" without checking return value. This library function may fail and return an error code.
+1083           posix_fadvise(fd, 0, 0, POSIX_FADV_DONTNEED);
+1084     #endif
+1085       }
+1086     
+1087       utime_t lat = ceph_clock_now(g_ceph_context) - from;    
+1088       dout(20) << "do_write latency " << lat << dendl;
+
+
+________________________________________________________________________________________________________
+To view the defects in Coverity Scan visit, http://scan.coverity.com/projects/25?tab=overview
+
+To manage Coverity Scan email notifications for "ceph-devel@vger.kernel.org", click http://scan.coverity.com/subscriptions/edit?email=ceph-devel%40vger.kernel.org&token=018084d671e3cc89d00dd2ccb7eb849c .
+
