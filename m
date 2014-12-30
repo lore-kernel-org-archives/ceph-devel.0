@@ -1,74 +1,55 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: RFC: new rados whereis command
-Date: Mon, 29 Dec 2014 12:08:33 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1412291203020.5967@cobra.newdream.net>
-References: <5499EB3C.2040602@dachary.org>
+From: =?UTF-8?B?UGF3ZcWCIFNhZG93c2tp?= <ceph@sadziu.pl>
+Subject: Ceph data consistency
+Date: Tue, 30 Dec 2014 09:21:49 +0100
+Message-ID: <54A2609D.1010302@sadziu.pl>
+Reply-To: ceph@sadziu.pl
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:42211 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751288AbaL2UIe (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Dec 2014 15:08:34 -0500
-In-Reply-To: <5499EB3C.2040602@dachary.org>
+Received: from mojave.sadziu.pl ([192.30.35.41]:41334 "EHLO mail.sadziu.pl"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752047AbaL3I7X (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 30 Dec 2014 03:59:23 -0500
+Received: from mail.sadziu.pl ([192.168.54.2])
+	by mail.sadziu.pl with esmtps (TLS1.2:ECDHE_RSA_AES_128_GCM_SHA256:128)
+	(Exim 4.84)
+	(envelope-from <ceph@sadziu.pl>)
+	id 1Y5s40-0000hI-BO
+	for ceph-devel@vger.kernel.org; Tue, 30 Dec 2014 09:22:00 +0100
+Received: from mysql.sadziu.pl ([192.168.54.2] helo=[127.0.0.1])
+	by mail.sadziu.pl with esmtpsa (TLS1.0:ECDHE_RSA_AES_128_CBC_SHA1:128)
+	(Exim 4.84)
+	(envelope-from <ceph@sadziu.pl>)
+	id 1Y5s3t-0005sC-2P
+	for ceph-devel@vger.kernel.org; Tue, 30 Dec 2014 09:21:58 +0100
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Andreas-Joachim Peters <andreas.joachim.peters@cern.ch>, Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Sorry I've been slow to review this!
+Hi,
 
-On Tue, 23 Dec 2014, Loic Dachary wrote:
-> Hi Andreas,
-> 
-> I took a closer look at https://github.com/ceph/ceph/pull/2730 implementing rados whereis [--dns] and I think it deserves a discussion here. If I understand correctly, it relies on a new function of the rados API:
-> 
->   typedef struct whereis {
->     int64_t osd_id;                              //< ID of the OSD hosting this object
+On our Ceph cluster from time to time we have some inconsistent PGs
+(after deep-scrub). We have some issues with disk/sata cables/lsi
+controller causing IO errors from time to time (but that's not the point
+in this case).
 
-Perhaps it would be better to have
+When IO error occurs on OSD journal partition everything works as is
+should -> OSD is crashed and that's ok - Ceph will handle that.
 
- int32_t primary_osd;
- vector<int32_t> acting_osds;
+But when IO error occurs on OSD data partition during journal flush OSD
+continue to work. After calling *writev* (in buffer::list::write_fd) OSD
+does check return code from this call but does NOT verify if write has
+been successful to disk (data are still only in memory and there is no
+fsync). That way OSD thinks that data has been stored on disk but it
+might be discarded (during sync dirty page will be reclaimed and you'll
+see "lost page write due to I/O error" in dmesg).
 
->     std::string osd_state;                       //< state of the OSD - either 'active' or 'inactive'
-
-I don't think this makes here.  Only 'up' OSDs are eligible for 
-the acting set (or the primary).
-
->     int64_t pg_seed;                             //< Seed of the PG hosting this object
-
-Yes
-
->     std::string ip_string;                       //< Ip as string
-
-I think we should use sockaddr_storage here, if we include the address at 
-all.  But perhaps it makes more sense to get the address for a given OSD 
-id with a separate call...
-
->     std::vector<std::string> host_names;         //< optional reverse DNS HostNames
->     std::map<std::string, std::string> user_map; //< optional user KV map
->     void resolve();                              //< reverse DNS OSD IPs and store in HostNames
-
-I don't think these belong in the interface at all.
-
->   } whereis_t;
-> 
->   static int whereis(IoCtx &ioctx, const std::string &oid, std::vector<whereis_t> &locations);
-
-get_object_location?  map_object_location?  and return a single struct.
-
-sage
+Since there is no checksumming of data I just wanted to make sure that
+this is by design. Maybe there is a way to tell OSD to call fsync after
+write and have data consistent?
 
 
-> which needs to be added there because the rados API does not expose some details that are needed to fill the fields of the whereis_t structure.
-> 
-> It looks fine to me but ... I'm not used to maintaining or developing the rados API and someone else may have a more informed opinion.
-> 
-> There is a technical detail that also needs to be sorted out : the current implementation exposes the RadosWhereis class (for dump) and this should either be moved to rados.cc or be part of the rados API (which probably is not the best option because it would also expose Formatter as a consequence).
-> 
-> Cheers
-> -- 
-> Lo?c Dachary, Artisan Logiciel Libre
-> 
-> 
+-- 
+Cheers,
+PS
