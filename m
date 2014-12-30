@@ -1,63 +1,55 @@
-From: Vijayendra Shamanna <Vijayendra.Shamanna@sandisk.com>
-Subject: RE: Ceph data consistency
-Date: Tue, 30 Dec 2014 12:40:08 +0000
-Message-ID: <085BC98701B92B4C86AE7696562D284D0B9CE2F3@SACMBXIP03.sdcorp.global.sandisk.com>
-References: <54A2609D.1010302@sadziu.pl>
+From: =?UTF-8?B?UGF3ZcWCIFNhZG93c2tp?= <ceph@sadziu.pl>
+Subject: Re: Ceph data consistency
+Date: Tue, 30 Dec 2014 14:40:27 +0100
+Message-ID: <54A2AB4B.6000206@sadziu.pl>
+References: <54A2609D.1010302@sadziu.pl> <085BC98701B92B4C86AE7696562D284D0B9CE2F3@SACMBXIP03.sdcorp.global.sandisk.com>
+Reply-To: ceph@sadziu.pl
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1on0056.outbound.protection.outlook.com ([157.56.110.56]:51275
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+Received: from mojave.sadziu.pl ([192.30.35.41]:41556 "EHLO mail.sadziu.pl"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752423AbaL3MzM (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 30 Dec 2014 07:55:12 -0500
-In-Reply-To: <54A2609D.1010302@sadziu.pl>
-Content-Language: en-US
+	id S1750833AbaL3Nkt (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 30 Dec 2014 08:40:49 -0500
+Received: from mail.sadziu.pl ([192.168.54.2])
+	by mail.sadziu.pl with esmtps (TLS1.2:ECDHE_RSA_AES_128_GCM_SHA256:128)
+	(Exim 4.84)
+	(envelope-from <ceph@sadziu.pl>)
+	id 1Y5x2Q-0000pT-P4
+	for ceph-devel@vger.kernel.org; Tue, 30 Dec 2014 14:40:46 +0100
+In-Reply-To: <085BC98701B92B4C86AE7696562D284D0B9CE2F3@SACMBXIP03.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph@sadziu.pl" <ceph@sadziu.pl>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Vijayendra Shamanna <Vijayendra.Shamanna@sandisk.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-SGksDQoNClRoZXJlIGlzIGEgc3luYyB0aHJlYWQgKHN5bmNfZW50cnkgaW4gRmlsZVN0b3JlLmNj
-KSB3aGljaCB0cmlnZ2VycyBwZXJpb2RpY2FsbHkgYW5kIGV4ZWN1dGVzIHN5bmNfZmlsZXN5c3Rl
-bSgpIHRvIGVuc3VyZSB0aGF0IHRoZSBkYXRhIGlzIGNvbnNpc3RlbnQuIFRoZSBqb3VybmFsIGVu
-dHJpZXMgYXJlIHRyaW1tZWQgb25seSBhZnRlciBhIHN1Y2Nlc3NmdWwgc3luY19maWxlc3lzdGVt
-KCkgY2FsbA0KDQpUaGFua3MNClZpanUNCg0KDQo+LS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0N
-Cj5Gcm9tOiBjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2
-ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgUGF3ZWwgU2Fkb3dza2kNCj5T
-ZW50OiBUdWVzZGF5LCBEZWNlbWJlciAzMCwgMjAxNCAxOjUyIFBNDQo+VG86IGNlcGgtZGV2ZWxA
-dmdlci5rZXJuZWwub3JnDQo+U3ViamVjdDogQ2VwaCBkYXRhIGNvbnNpc3RlbmN5DQoNCj5IaSwN
-Cg0KPk9uIG91ciBDZXBoIGNsdXN0ZXIgZnJvbSB0aW1lIHRvIHRpbWUgd2UgaGF2ZSBzb21lIGlu
-Y29uc2lzdGVudCBQR3MgKGFmdGVyIGRlZXAtc2NydWIpLiBXZSBoYXZlIHNvbWUgaXNzdWVzIHdp
-dGggZGlzay9zYXRhIGNhYmxlcy9sc2kgY29udHJvbGxlciBjYXVzaW5nIElPIGVycm9ycyBmcm9t
-IHRpbWUgdG8gdGltZSAoYnV0IHRoYXQncyBub3QgdGhlIHBvaW50IGluIHRoaXMgY2FzZSkuDQoN
-Cj5XaGVuIElPIGVycm9yIG9jY3VycyBvbiBPU0Qgam91cm5hbCBwYXJ0aXRpb24gZXZlcnl0aGlu
-ZyB3b3JrcyBhcyBpcyBzaG91bGQgLT4gT1NEIGlzIGNyYXNoZWQgYW5kIHRoYXQncyBvayAtIENl
-cGggd2lsbCBoYW5kbGUgdGhhdC4NCg0KPkJ1dCB3aGVuIElPIGVycm9yIG9jY3VycyBvbiBPU0Qg
-ZGF0YSBwYXJ0aXRpb24gZHVyaW5nIGpvdXJuYWwgZmx1c2ggT1NEIGNvbnRpbnVlIHRvIHdvcmsu
-IEFmdGVyIGNhbGxpbmcgKndyaXRldiogKGluIGJ1ZmZlcjo6bGlzdDo6d3JpdGVfZmQpIE9TRCBk
-b2VzIGNoZWNrIHJldHVybiBjb2RlIGZyb20gdGhpcyBjYWxsIGJ1dCBkb2VzIE5PVCB2ZXJpZnkg
-aWYgd3JpdGUgaGFzIGJlZW4gc3VjY2Vzc2Z1bCB0byBkaXNrIChkYXRhIGFyZSBzdGlsbCBvbmx5
-ID5pbiBtZW1vcnkgYW5kIHRoZXJlIGlzIG5vIGZzeW5jKS4gVGhhdCB3YXkgT1NEIHRoaW5rcyB0
-aGF0IGRhdGEgaGFzIGJlZW4gc3RvcmVkIG9uIGRpc2sgYnV0IGl0IG1pZ2h0IGJlIGRpc2NhcmRl
-ZCAoZHVyaW5nIHN5bmMgZGlydHkgcGFnZSB3aWxsIGJlIHJlY2xhaW1lZCBhbmQgeW91J2xsIHNl
-ZSAibG9zdCBwYWdlIHdyaXRlIGR1ZSB0byBJL08gZXJyb3IiIGluIGRtZXNnKS4NCg0KPlNpbmNl
-IHRoZXJlIGlzIG5vIGNoZWNrc3VtbWluZyBvZiBkYXRhIEkganVzdCB3YW50ZWQgdG8gbWFrZSBz
-dXJlIHRoYXQgdGhpcyBpcyBieSBkZXNpZ24uIE1heWJlIHRoZXJlIGlzIGEgd2F5IHRvIHRlbGwg
-T1NEIHRvIGNhbGwgZnN5bmMgYWZ0ZXIgd3JpdGUgYW5kIGhhdmUgZGF0YSBjb25zaXN0ZW50Pw0K
-DQoNCj4tLQ0KPkNoZWVycywNCj5QUw0KPi0tDQpUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlz
-dDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4gdGhlIGJvZHkgb2Yg
-YSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gaW5m
-byBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQoNCl9fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fDQoNClBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRp
-b24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQg
-b25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRlZCByZWNpcGllbnQocykgbmFtZWQgYWJv
-dmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVj
-aXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3RpZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRo
-aXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBk
-aXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2YgdGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hp
-Yml0ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwg
-cGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3du
-IGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhp
-cyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVj
-dHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4NCg0K
+On 12/30/2014 01:40 PM, Vijayendra Shamanna wrote:
+> Hi,
+>
+> There is a sync thread (sync_entry in FileStore.cc) which triggers periodically and executes sync_filesystem() to ensure that the data is consistent. The journal entries are trimmed only after a successful sync_filesystem() call
+
+sync_filesystem() always returns zero and journal will be trimmed. Executing sync()/syncfs() with dirty data in disk buffers will result in data loss ("lost page write due to I/O error").
+
+I was doing some experiments simulating disk errors using Device Mapper "error" target. In this setup OSD was writing to broken disk without crashing. Every 5 seconds (filestore_max_sync_interval) kernel logs that some data were discarded due to IO error.
+
+
+> Thanks
+> Viju
+>> -----Original Message-----
+>> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Pawel Sadowski
+>> Sent: Tuesday, December 30, 2014 1:52 PM
+>> To: ceph-devel@vger.kernel.org
+>> Subject: Ceph data consistency
+>>
+>> Hi,
+>>
+>> On our Ceph cluster from time to time we have some inconsistent PGs (after deep-scrub). We have some issues with disk/sata cables/lsi controller causing IO errors from time to time (but that's not the point in this case).
+>>
+>> When IO error occurs on OSD journal partition everything works as is should -> OSD is crashed and that's ok - Ceph will handle that.
+>>
+>> But when IO error occurs on OSD data partition during journal flush OSD continue to work. After calling *writev* (in buffer::list::write_fd) OSD does check return code from this call but does NOT verify if write has been successful to disk (data are still only >in memory and there is no fsync). That way OSD thinks that data has been stored on disk but it might be discarded (during sync dirty page will be reclaimed and you'll see "lost page write due to I/O error" in dmesg).
+>>
+>> Since there is no checksumming of data I just wanted to make sure that this is by design. Maybe there is a way to tell OSD to call fsync after write and have data consistent?
+
+-- 
+PS
