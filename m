@@ -1,79 +1,69 @@
-From: Joao Eduardo Luis <joao@redhat.com>
-Subject: Re: full osdmaps in mon txns
-Date: Thu, 01 Jan 2015 15:50:09 +0000
-Message-ID: <54A56CB1.4010207@redhat.com>
-References: <alpine.DEB.2.00.1412231306170.28630@cobra.newdream.net>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+From: Rickard Strandqvist <rickard_strandqvist@spectrumdigital.se>
+Subject: [PATCH] block: rbd.c:  Remove unused function
+Date: Thu,  1 Jan 2015 17:58:32 +0100
+Message-ID: <1420131512-30585-1-git-send-email-rickard_strandqvist@spectrumdigital.se>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f47.google.com ([74.125.82.47]:51451 "EHLO
-	mail-wg0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750956AbbAAPuF (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Jan 2015 10:50:05 -0500
-Received: by mail-wg0-f47.google.com with SMTP id n12so23224772wgh.20
-        for <ceph-devel@vger.kernel.org>; Thu, 01 Jan 2015 07:50:04 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1412231306170.28630@cobra.newdream.net>
+Received: from mail-wg0-f43.google.com ([74.125.82.43]:45161 "EHLO
+	mail-wg0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751487AbbAAQzc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Jan 2015 11:55:32 -0500
+Received: by mail-wg0-f43.google.com with SMTP id k14so5471472wgh.16
+        for <ceph-devel@vger.kernel.org>; Thu, 01 Jan 2015 08:55:31 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, gfarnum@redhat.com
-Cc: ceph-devel@vger.kernel.org
+To: Yehuda Sadeh <yehuda@inktank.com>, Sage Weil <sage@inktank.com>
+Cc: Rickard Strandqvist <rickard_strandqvist@spectrumdigital.se>, Alex Elder <elder@kernel.org>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On 12/23/2014 09:10 PM, Sage Weil wrote:
-> This fun issue came up again in the form of 10422:
->
-> 	http://tracker.ceph.com/issues/10422
->
-> I think we have 3 main options:
->
-> 1. Ask users to do a mon scrub prior to upgrade to
-> ensure it is safe.  If a mon is out of sync, manually kick it out, blow it
-> away, and resync.
->
-> 2. Do a one-time broadcast of the full osdmap across mons to ensure they
-> are consistent after upgrade.  Bleh.
->
-> 3. Include full encoded OSDMap in txns on updates going forward.
->
-> I like 3 because it solves this and all related problems going forward.
-> The local encoding of full osdmaps has proven to be a huge headache.
-> And, the patch to do it is remarkably simple
->
-> 	https://github.com/ceph/ceph/pull/3247/files
->
-> and dovetails well with the new CRC.
+Remove the function copy_token() that is not used anywhere.
 
-I prefer 3 as well.  Below is my reply on the pull request, which I 
-wrote before addressing this email, and I shall leave it here for posterity!
+This was partially found by using a static code analysis program called cppcheck.
 
-(Also, I think the approach in the pull request is correct)
+Signed-off-by: Rickard Strandqvist <rickard_strandqvist@spectrumdigital.se>
+---
+ drivers/block/rbd.c |   30 ------------------------------
+ 1 file changed, 30 deletions(-)
 
-As far as I can tell, the whole idea about relying solely on incremental 
-to locally build full osdmaps goes as back as a5e2dcb. This has me 
-believe that while the idea may have seemed good at the time it may not 
-have been based on a real issue.
-
-Anyway, relaying a few MB's worth of osdmap (if it gets to that) over 
-the wire doesn't concern me particularly -- the one thing that may be 
-annoying is writing them to leveldb.
-
-I fear that writing a just-big enough map to leveldb may cause a hang; 
-while we do now have the async mechanism to handle this, I fear that we 
-may end up waiting for a big transaction to be applied to leveldb before 
-accepting the value (e.g., in Paxos::handle_begin() we will wait for the 
-value to be applied to the store before we send out 
-MMonPaxos::OP_ACCEPT). Then again, this can easily be something 
-surmountable by adjusting timeouts if we ever hit it.
-
-
-   -Joao
-
->
-> What do you think?
-> sage
->
-
-
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 27b71a0..922f1ab 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -4776,36 +4776,6 @@ static inline size_t next_token(const char **buf)
+ }
+ 
+ /*
+- * Finds the next token in *buf, and if the provided token buffer is
+- * big enough, copies the found token into it.  The result, if
+- * copied, is guaranteed to be terminated with '\0'.  Note that *buf
+- * must be terminated with '\0' on entry.
+- *
+- * Returns the length of the token found (not including the '\0').
+- * Return value will be 0 if no token is found, and it will be >=
+- * token_size if the token would not fit.
+- *
+- * The *buf pointer will be updated to point beyond the end of the
+- * found token.  Note that this occurs even if the token buffer is
+- * too small to hold it.
+- */
+-static inline size_t copy_token(const char **buf,
+-				char *token,
+-				size_t token_size)
+-{
+-        size_t len;
+-
+-	len = next_token(buf);
+-	if (len < token_size) {
+-		memcpy(token, *buf, len);
+-		*(token + len) = '\0';
+-	}
+-	*buf += len;
+-
+-        return len;
+-}
+-
+-/*
+  * Finds the next token in *buf, dynamically allocates a buffer big
+  * enough to hold a copy of it, and copies the token into the new
+  * buffer.  The copy is guaranteed to be terminated with '\0'.  Note
 -- 
-Joao Eduardo Luis
-Software Engineer | http://ceph.com
+1.7.10.4
+
