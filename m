@@ -1,49 +1,79 @@
-From: Stefan Priebe <s.priebe@profihost.ag>
-Subject: Re: Higher OSD disk util due to RBD snapshots from Dumpling to Firefly
-Date: Thu, 01 Jan 2015 10:30:45 +0100
-Message-ID: <54A513C5.6040407@profihost.ag>
-References: <54A42280.60607@42on.com>
+From: Joao Eduardo Luis <joao@redhat.com>
+Subject: Re: full osdmaps in mon txns
+Date: Thu, 01 Jan 2015 15:50:09 +0000
+Message-ID: <54A56CB1.4010207@redhat.com>
+References: <alpine.DEB.2.00.1412231306170.28630@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ph.de-nserver.de ([85.158.179.214]:38954 "EHLO
-	mail-ph.de-nserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750751AbbAAJfo (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Jan 2015 04:35:44 -0500
-In-Reply-To: <54A42280.60607@42on.com>
+Received: from mail-wg0-f47.google.com ([74.125.82.47]:51451 "EHLO
+	mail-wg0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750956AbbAAPuF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Jan 2015 10:50:05 -0500
+Received: by mail-wg0-f47.google.com with SMTP id n12so23224772wgh.20
+        for <ceph-devel@vger.kernel.org>; Thu, 01 Jan 2015 07:50:04 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.00.1412231306170.28630@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@42on.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>, gfarnum@redhat.com
+Cc: ceph-devel@vger.kernel.org
 
-hi,
+On 12/23/2014 09:10 PM, Sage Weil wrote:
+> This fun issue came up again in the form of 10422:
+>
+> 	http://tracker.ceph.com/issues/10422
+>
+> I think we have 3 main options:
+>
+> 1. Ask users to do a mon scrub prior to upgrade to
+> ensure it is safe.  If a mon is out of sync, manually kick it out, blow it
+> away, and resync.
+>
+> 2. Do a one-time broadcast of the full osdmap across mons to ensure they
+> are consistent after upgrade.  Bleh.
+>
+> 3. Include full encoded OSDMap in txns on updates going forward.
+>
+> I like 3 because it solves this and all related problems going forward.
+> The local encoding of full osdmaps has proven to be a huge headache.
+> And, the patch to do it is remarkably simple
+>
+> 	https://github.com/ceph/ceph/pull/3247/files
+>
+> and dovetails well with the new CRC.
 
-Am 31.12.2014 um 17:21 schrieb Wido den Hollander:
-> Hi,
->
-> Last week I upgraded a 250 OSD cluster from Dumpling 0.67.10 to Firefly
-> 0.80.7 and after the upgrade there was a severe performance drop on the
-> cluster.
->
-> It started raining slow requests after the upgrade and most of them
-> included a 'snapc' in the request.
->
-> That lead me to investigate the RBD snapshots and I found that a rogue
-> process had created ~1800 snapshots spread out over 200 volumes.
->
-> One image even had 181 snapshots!
->
-> As the snapshots weren't used I removed them all and after the snapshots
-> were removed the performance of the cluster came back to normal level again.
->
-> I'm wondering what changed between Dumpling and Firefly which caused
-> this? I saw OSDs spiking to 100% disk util constantly under Firefly
-> where this didn't happen with Dumpling.
->
-> Did something change in the way OSDs handle RBD snapshots which causes
-> them to create more disk I/O?
+I prefer 3 as well.  Below is my reply on the pull request, which I 
+wrote before addressing this email, and I shall leave it here for posterity!
 
-I saw the same and addionally a slowdown in librbd too, that's why i'm 
-still on dumpling and won't upgrade until hammer.
+(Also, I think the approach in the pull request is correct)
 
-Stefan
+As far as I can tell, the whole idea about relying solely on incremental 
+to locally build full osdmaps goes as back as a5e2dcb. This has me 
+believe that while the idea may have seemed good at the time it may not 
+have been based on a real issue.
+
+Anyway, relaying a few MB's worth of osdmap (if it gets to that) over 
+the wire doesn't concern me particularly -- the one thing that may be 
+annoying is writing them to leveldb.
+
+I fear that writing a just-big enough map to leveldb may cause a hang; 
+while we do now have the async mechanism to handle this, I fear that we 
+may end up waiting for a big transaction to be applied to leveldb before 
+accepting the value (e.g., in Paxos::handle_begin() we will wait for the 
+value to be applied to the store before we send out 
+MMonPaxos::OP_ACCEPT). Then again, this can easily be something 
+surmountable by adjusting timeouts if we ever hit it.
+
+
+   -Joao
+
+>
+> What do you think?
+> sage
+>
+
+
+-- 
+Joao Eduardo Luis
+Software Engineer | http://ceph.com
