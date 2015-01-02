@@ -1,68 +1,45 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: docker targets for teuthology
-Date: Fri, 02 Jan 2015 14:53:32 +0100
-Message-ID: <54A6A2DC.90806@dachary.org>
+From: Samuel Just <sam.just@inktank.com>
+Subject: Re: why do we need SNAPDIR ?
+Date: Fri, 2 Jan 2015 08:48:59 -0800
+Message-ID: <CA+4uBUbQz0yRNKQpVQ9N8eG7cGdkAijVFYqyS-6LZ0ybiB7DMA@mail.gmail.com>
+References: <CALZt5jwj=9KXTJu-T-bWqMXw9FHhbGen9QJfZ5fFDg_7jv3HhA@mail.gmail.com>
+Reply-To: sjust@redhat.com
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="b3Pk3QTrmPH1J1dXCLn3Xnd40wkMxm6Er"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:60929 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752046AbbABNxg (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Jan 2015 08:53:36 -0500
-Received: from [10.9.0.6] (unknown [10.0.2.28])
-	by smtp.dmail.dachary.org (Postfix) with ESMTP id D37A942B4E
-	for <ceph-devel@vger.kernel.org>; Fri,  2 Jan 2015 14:53:33 +0100 (CET)
+Received: from mail-la0-f49.google.com ([209.85.215.49]:45442 "EHLO
+	mail-la0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750747AbbABQtB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Jan 2015 11:49:01 -0500
+Received: by mail-la0-f49.google.com with SMTP id hs14so15214689lab.8
+        for <ceph-devel@vger.kernel.org>; Fri, 02 Jan 2015 08:48:59 -0800 (PST)
+In-Reply-To: <CALZt5jwj=9KXTJu-T-bWqMXw9FHhbGen9QJfZ5fFDg_7jv3HhA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Nicheal <zay11022@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---b3Pk3QTrmPH1J1dXCLn3Xnd40wkMxm6Er
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+The SNAPDIR object only exists if the 1) head does not exist and 2)
+there are clones.  The purpose of the object is to hold the snapset
+xattr which would normally be on the head object.
+-Sam
 
-Hi Ceph,
-
-I'm pleased to announce that docker targets for teuthology are working [1=
-]. My incentive is to run teuthology jobs quickly (docker images are a ma=
-jor help) and with minimal resources. It may also be helpful for contribu=
-tors who do not have time or resources to setup the default teuthology in=
-stallation.
-
-This effort was started three months ago and had to wait for docker to pr=
-operly implement the exec [2] command to avoid running a ssh server in ea=
-ch container. Although the teuthology patch is a hack, it turns out to be=
- not too complicated to isolate [3].
-
-If someone is interested in turning this hack into a proper patch, let me=
- know :-)
-
-Cheers
-
-[1] Teuthology docker targets hack http://dachary.org/?p=3D3501 http://da=
-chary.org/?p=3D3441 http://dachary.org/?p=3D3354 http://dachary.org/?p=3D=
-3330
-[2] Docker 1.4.0 December 2014 http://docs.docker.com/release-notes/#vers=
-ion-140
-[3] container.py in teuthology https://github.com/dachary/teuthology/comp=
-are/wip-container#diff-24f45fc6782fb342bf422033c01e1b06R1
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---b3Pk3QTrmPH1J1dXCLn3Xnd40wkMxm6Er
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlSmotwACgkQ8dLMyEl6F213sQCgj4ne9hebh7zy4A5a8vKRxTom
-oakAoKWW3kl66XUNo20tWHBNREaQBdtU
-=BtEG
------END PGP SIGNATURE-----
-
---b3Pk3QTrmPH1J1dXCLn3Xnd40wkMxm6Er--
+On Wed, Dec 24, 2014 at 7:27 PM, Nicheal <zay11022@gmail.com> wrote:
+> Dear develops,
+>
+> I find that SNAPDIR means a special object in ceph. It is a read-only
+> object since if a op write want to modify SNAPDIR object, it return
+> -EINVAL immediately. But I cannot find when we need to create the
+> SNAPDIR object? and what is used for?
+>
+> Based on my understanding, ceph snapshot is realized by snap_set Xattr
+> and snapperMapper in omap. It does not cooperate with SNAPDIR object,
+> so I am puzzled. Can anyone provide some guides to understand this?
+>
+>
+> Regards,
+> Ning Yao
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
