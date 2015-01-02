@@ -1,69 +1,96 @@
-From: Rickard Strandqvist <rickard_strandqvist@spectrumdigital.se>
-Subject: [PATCH] block: rbd.c:  Remove unused function
-Date: Thu,  1 Jan 2015 17:58:32 +0100
-Message-ID: <1420131512-30585-1-git-send-email-rickard_strandqvist@spectrumdigital.se>
+From: Prithiv M <PMohan0@walmartlabs.com>
+Subject: Reg: Ceph Federated Gateway - Primary & Sec Region in one node
+Date: Fri, 2 Jan 2015 05:15:53 +0000
+Message-ID: <D0CC275F.17192%prithiv@walmartlabs.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=Windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f43.google.com ([74.125.82.43]:45161 "EHLO
-	mail-wg0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751487AbbAAQzc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Jan 2015 11:55:32 -0500
-Received: by mail-wg0-f43.google.com with SMTP id k14so5471472wgh.16
-        for <ceph-devel@vger.kernel.org>; Thu, 01 Jan 2015 08:55:31 -0800 (PST)
+Received: from ppes-mail-e2.wal-mart.com ([161.165.225.16]:48609 "EHLO
+	PPES-Mail-E2.wal-mart.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750704AbbABGZL convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Jan 2015 01:25:11 -0500
+Content-Language: en-US
+Content-ID: <E2918F7C11C9F247851724D42AB1E9A6@email.wal-mart.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh <yehuda@inktank.com>, Sage Weil <sage@inktank.com>
-Cc: Rickard Strandqvist <rickard_strandqvist@spectrumdigital.se>, Alex Elder <elder@kernel.org>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+To: "majordomo@vger.kernel.org" <majordomo@vger.kernel.org>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Remove the function copy_token() that is not used anywhere.
+Hi,
 
-This was partially found by using a static code analysis program called cppcheck.
+i have already posted this question in various ceph users group but I h=
+aven't got an answer yet. I am trying to install ceph federated gateway=
+ setup with two regions - Master and Secondary with two zones each(prim=
+ary and sec), all in one node. I am getting an error =93region map does=
+ not specify master region." while creating user for secondary region. =
+I have specified different ports for different zones.
 
-Signed-off-by: Rickard Strandqvist <rickard_strandqvist@spectrumdigital.se>
----
- drivers/block/rbd.c |   30 ------------------------------
- 1 file changed, 30 deletions(-)
+Is it possible to install ceph in this setup. If not, why.
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 27b71a0..922f1ab 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -4776,36 +4776,6 @@ static inline size_t next_token(const char **buf)
- }
- 
- /*
-- * Finds the next token in *buf, and if the provided token buffer is
-- * big enough, copies the found token into it.  The result, if
-- * copied, is guaranteed to be terminated with '\0'.  Note that *buf
-- * must be terminated with '\0' on entry.
-- *
-- * Returns the length of the token found (not including the '\0').
-- * Return value will be 0 if no token is found, and it will be >=
-- * token_size if the token would not fit.
-- *
-- * The *buf pointer will be updated to point beyond the end of the
-- * found token.  Note that this occurs even if the token buffer is
-- * too small to hold it.
-- */
--static inline size_t copy_token(const char **buf,
--				char *token,
--				size_t token_size)
--{
--        size_t len;
--
--	len = next_token(buf);
--	if (len < token_size) {
--		memcpy(token, *buf, len);
--		*(token + len) = '\0';
--	}
--	*buf += len;
--
--        return len;
--}
--
--/*
-  * Finds the next token in *buf, dynamically allocates a buffer big
-  * enough to hold a copy of it, and copies the token into the new
-  * buffer.  The copy is guaranteed to be terminated with '\0'.  Note
--- 
-1.7.10.4
+JSON FILE FOR MASTER REGION
+=97=97=97=97=97=97=97=97=97=97=97=97=97=97=97=97=97=97=97=97=97
 
+
+{ "name": "us",
+  "api_name": "us",
+  "is_master": "true",
+  "endpoints": [
+        "http:\/\/fqdn:80\/"],
+  "master_zone": "us-east",
+  "zones": [
+        { "name": "us-east",
+          "endpoints": [
+                "http:\/\/fqdn:80\/"],
+          "log_meta": "true",
+          "log_data": "true"},
+        { "name": "us-west",
+          "endpoints": [
+                "http:\/\/fqdn:81\/"],
+          "log_meta": "true",
+          "log_data": "true"}],
+  "placement_targets": [
+   {
+     "name": "default-placement",
+     "tags": []
+   }
+  ],
+  "default_placement": "default-placement=94}
+
+
+
+JSON FILE FOR SEC REGION
+=97=97=97=97=97=97=97=97=97=97=97=97=97=97=97=97=97=97=97
+
+{ "name": "eu",
+  "api_name": "eu",
+  "is_master": "false",
+  "endpoints": [
+        "http:\/\/fqdn:82\/"],
+  "master_zone": "eu-east",
+  "zones": [
+        { "name": "eu-east",
+          "endpoints": [
+                "http:\/\/fqdn:82\/"],
+          "log_meta": "true",
+          "log_data": "true"},
+        { "name": "eu-west",
+          "endpoints": [
+                "http:\/\/fqdn:83\/"],
+          "log_meta": "true",
+          "log_data": "true"}],
+  "placement_targets": [
+   {
+     "name": "default-placement",
+     "tags": []
+   }
+  ],
+  "default_placement": "default-placement"}
+
+Cheers
+Prithiv
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
