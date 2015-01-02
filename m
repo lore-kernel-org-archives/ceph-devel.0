@@ -1,96 +1,68 @@
-From: Prithiv M <PMohan0@walmartlabs.com>
-Subject: Reg: Ceph Federated Gateway - Primary & Sec Region in one node
-Date: Fri, 2 Jan 2015 05:15:53 +0000
-Message-ID: <D0CC275F.17192%prithiv@walmartlabs.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: docker targets for teuthology
+Date: Fri, 02 Jan 2015 14:53:32 +0100
+Message-ID: <54A6A2DC.90806@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=Windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="b3Pk3QTrmPH1J1dXCLn3Xnd40wkMxm6Er"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from ppes-mail-e2.wal-mart.com ([161.165.225.16]:48609 "EHLO
-	PPES-Mail-E2.wal-mart.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750704AbbABGZL convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Jan 2015 01:25:11 -0500
-Content-Language: en-US
-Content-ID: <E2918F7C11C9F247851724D42AB1E9A6@email.wal-mart.com>
+Received: from mail2.dachary.org ([91.121.57.175]:60929 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752046AbbABNxg (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Jan 2015 08:53:36 -0500
+Received: from [10.9.0.6] (unknown [10.0.2.28])
+	by smtp.dmail.dachary.org (Postfix) with ESMTP id D37A942B4E
+	for <ceph-devel@vger.kernel.org>; Fri,  2 Jan 2015 14:53:33 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "majordomo@vger.kernel.org" <majordomo@vger.kernel.org>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi,
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--b3Pk3QTrmPH1J1dXCLn3Xnd40wkMxm6Er
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-i have already posted this question in various ceph users group but I h=
-aven't got an answer yet. I am trying to install ceph federated gateway=
- setup with two regions - Master and Secondary with two zones each(prim=
-ary and sec), all in one node. I am getting an error =93region map does=
- not specify master region." while creating user for secondary region. =
-I have specified different ports for different zones.
+Hi Ceph,
 
-Is it possible to install ceph in this setup. If not, why.
+I'm pleased to announce that docker targets for teuthology are working [1=
+]. My incentive is to run teuthology jobs quickly (docker images are a ma=
+jor help) and with minimal resources. It may also be helpful for contribu=
+tors who do not have time or resources to setup the default teuthology in=
+stallation.
 
-JSON FILE FOR MASTER REGION
-=97=97=97=97=97=97=97=97=97=97=97=97=97=97=97=97=97=97=97=97=97
+This effort was started three months ago and had to wait for docker to pr=
+operly implement the exec [2] command to avoid running a ssh server in ea=
+ch container. Although the teuthology patch is a hack, it turns out to be=
+ not too complicated to isolate [3].
 
-
-{ "name": "us",
-  "api_name": "us",
-  "is_master": "true",
-  "endpoints": [
-        "http:\/\/fqdn:80\/"],
-  "master_zone": "us-east",
-  "zones": [
-        { "name": "us-east",
-          "endpoints": [
-                "http:\/\/fqdn:80\/"],
-          "log_meta": "true",
-          "log_data": "true"},
-        { "name": "us-west",
-          "endpoints": [
-                "http:\/\/fqdn:81\/"],
-          "log_meta": "true",
-          "log_data": "true"}],
-  "placement_targets": [
-   {
-     "name": "default-placement",
-     "tags": []
-   }
-  ],
-  "default_placement": "default-placement=94}
-
-
-
-JSON FILE FOR SEC REGION
-=97=97=97=97=97=97=97=97=97=97=97=97=97=97=97=97=97=97=97
-
-{ "name": "eu",
-  "api_name": "eu",
-  "is_master": "false",
-  "endpoints": [
-        "http:\/\/fqdn:82\/"],
-  "master_zone": "eu-east",
-  "zones": [
-        { "name": "eu-east",
-          "endpoints": [
-                "http:\/\/fqdn:82\/"],
-          "log_meta": "true",
-          "log_data": "true"},
-        { "name": "eu-west",
-          "endpoints": [
-                "http:\/\/fqdn:83\/"],
-          "log_meta": "true",
-          "log_data": "true"}],
-  "placement_targets": [
-   {
-     "name": "default-placement",
-     "tags": []
-   }
-  ],
-  "default_placement": "default-placement"}
+If someone is interested in turning this hack into a proper patch, let me=
+ know :-)
 
 Cheers
-Prithiv
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+[1] Teuthology docker targets hack http://dachary.org/?p=3D3501 http://da=
+chary.org/?p=3D3441 http://dachary.org/?p=3D3354 http://dachary.org/?p=3D=
+3330
+[2] Docker 1.4.0 December 2014 http://docs.docker.com/release-notes/#vers=
+ion-140
+[3] container.py in teuthology https://github.com/dachary/teuthology/comp=
+are/wip-container#diff-24f45fc6782fb342bf422033c01e1b06R1
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--b3Pk3QTrmPH1J1dXCLn3Xnd40wkMxm6Er
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlSmotwACgkQ8dLMyEl6F213sQCgj4ne9hebh7zy4A5a8vKRxTom
+oakAoKWW3kl66XUNo20tWHBNREaQBdtU
+=BtEG
+-----END PGP SIGNATURE-----
+
+--b3Pk3QTrmPH1J1dXCLn3Xnd40wkMxm6Er--
