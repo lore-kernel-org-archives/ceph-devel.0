@@ -1,57 +1,79 @@
-From: scan-admin@coverity.com
-Subject: New Defects reported by Coverity Scan for ceph
-Date: Sun, 04 Jan 2015 06:14:49 -0800
-Message-ID: <54a94ad928d4a_c3db01328948c@scan.coverity.com.mail>
+From: Dan van der Ster <daniel.vanderster-vJEk5272eHo@public.gmane.org>
+Subject: Re: full osdmaps in mon txns
+Date: Mon, 5 Jan 2015 10:12:10 +0100
+Message-ID: <CABZ+qqk9dW2eHnECci31xe6W0LvVUhZyiZc9ainCEqAEOtPd3g@mail.gmail.com>
+References: <alpine.DEB.2.00.1412231306170.28630@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from scanrelay.coverity.com ([209.249.196.67]:56355 "EHLO
-	scanrelay.coverity.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752586AbbADOOu (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 4 Jan 2015 09:14:50 -0500
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.00.1412231306170.28630-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, gfarnum-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
+
+Hi Sage,
+
+On Tue, Dec 23, 2014 at 10:10 PM, Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+>
+> This fun issue came up again in the form of 10422:
+>
+>         http://tracker.ceph.com/issues/10422
+>
+> I think we have 3 main options:
+>
+> 1. Ask users to do a mon scrub prior to upgrade to
+> ensure it is safe.  If a mon is out of sync, manually kick it out, blow it
+> away, and resync.
+>
+
+I just tried ceph scrub on a cluster we already upgraded from dumpling
+to firefly:
+
+2015-01-05 09:44:32.811194 mon.0 137.138.13.136:6789/0 622509 : [ERR]
+scrub mismatch
+2015-01-05 09:44:32.811289 mon.0 137.138.13.136:6789/0 622510 : [ERR]
+mon.0 ScrubResult(keys
+{auth=90,logm=1163,mdsmap=3,monmap=5,osdmap=1541,pgmap=645,pgmap_meta=6,pgmap_osd=208,pgmap_pg=24704}
+crc {auth=2819756818,logm=2322364559,mdsmap=183360962,monmap=2103930516,osdmap=522825856,pgmap=2035077624,pgmap_meta=951037946,pgmap_osd=3980602023,pgmap_pg=502660406})
+2015-01-05 09:44:32.811414 mon.0 137.138.13.136:6789/0 622511 : [ERR]
+mon.2 ScrubResult(keys
+{auth=90,logm=1163,mdsmap=3,monmap=5,osdmap=1541,pgmap=645,pgmap_meta=6,pgmap_osd=208,pgmap_pg=24704}
+crc {auth=2819756818,logm=2322364559,mdsmap=183360962,monmap=2103930516,osdmap=3364575095,pgmap=2035077624,pgmap_meta=951037946,pgmap_osd=3980602023,pgmap_pg=502660406})
+
+Is this the same issue as #10422? What would you do to recover?
+
+Cheers, and Happy New Year!
+
+Dan
 
 
-Hi,
-
-Please find the latest report on new defect(s) introduced to ceph found with Coverity Scan.
-
-1 new defect(s) introduced to ceph found with Coverity Scan.
-
-
-New defect(s) Reported-by: Coverity Scan
-Showing 1 of 1 defect(s)
-
-
-** CID 1261633:  Time of check time of use  (TOCTOU)
-/mount/mtab.c: 275 in update_mtab_entry()
-
-
-________________________________________________________________________________________________________
-*** CID 1261633:  Time of check time of use  (TOCTOU)
-/mount/mtab.c: 275 in update_mtab_entry()
-269     	mnt.mnt_freq = freq;
-270     	mnt.mnt_passno = pass;
-271     
-272     	FILE *fp;
-273     	
-274     	lock_mtab();
->>>     CID 1261633:  Time of check time of use  (TOCTOU)
->>>     Calling function "setmntent" that uses ""/etc/mtab"" after a check function. This can cause a time-of-check, time-of-use race condition.
-275     	fp = setmntent(_PATH_MOUNTED, "a+");
-276     	if (fp == NULL) {
-277     		int errsv = errno;
-278     		printf("mount: can't open %s: %s", _PATH_MOUNTED,
-279     		       strerror (errsv));
-280     	} else {
-
-
-________________________________________________________________________________________________________
-To view the defects in Coverity Scan visit, http://scan.coverity.com/projects/25?tab=overview
-
-To manage Coverity Scan email notifications for "ceph-devel@vger.kernel.org", click http://scan.coverity.com/subscriptions/edit?email=ceph-devel%40vger.kernel.org&token=018084d671e3cc89d00dd2ccb7eb849c .
-
+>
+> 2. Do a one-time broadcast of the full osdmap across mons to ensure they
+> are consistent after upgrade.  Bleh.
+>
+> 3. Include full encoded OSDMap in txns on updates going forward.
+>
+> I like 3 because it solves this and all related problems going forward.
+> The local encoding of full osdmaps has proven to be a huge headache.
+> And, the patch to do it is remarkably simple
+>
+>         https://github.com/ceph/ceph/pull/3247/files
+>
+> and dovetails well with the new CRC.
+>
+> What do you think?
+> sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
