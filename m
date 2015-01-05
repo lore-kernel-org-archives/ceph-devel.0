@@ -1,146 +1,149 @@
-From: Alfredo Deza <adeza@redhat.com>
-Subject: Re: [ceph-users] v0.90 released
-Date: Mon, 5 Jan 2015 11:18:28 -0500
-Message-ID: <CANtztVxg-fUjYmg9JW1a+ZBAPu_p1P0bmsnLSsmt2rHRQiXEYw@mail.gmail.com>
-References: <alpine.DEB.2.00.1412191421430.26305@cobra.newdream.net>
-	<CADkWibdN=MgzJjq16-BxtoBNpMDQ7ioa0=cxpbdtR81FrHwGrQ@mail.gmail.com>
+From: Travis Rhoden <trhoden@gmail.com>
+Subject: Re: ceph-deploy osd destroy feature
+Date: Mon, 5 Jan 2015 12:14:12 -0500
+Message-ID: <CACkq2mr9yxmiLd028hQmsC4TLqb3FBgww-6O_pML3ubyybFo5g@mail.gmail.com>
+References: <CACkq2moPdXgDGCtr-jtd+rxEGT3H_SFnVGruvKqfXDuvU8eagg@mail.gmail.com>
+ <54A91EDA.8080008@42on.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yk0-f172.google.com ([209.85.160.172]:44422 "EHLO
-	mail-yk0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751116AbbAEQS3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Jan 2015 11:18:29 -0500
-Received: by mail-yk0-f172.google.com with SMTP id 131so10432305ykp.31
-        for <ceph-devel@vger.kernel.org>; Mon, 05 Jan 2015 08:18:28 -0800 (PST)
-In-Reply-To: <CADkWibdN=MgzJjq16-BxtoBNpMDQ7ioa0=cxpbdtR81FrHwGrQ@mail.gmail.com>
+Received: from mail-lb0-f170.google.com ([209.85.217.170]:34576 "EHLO
+	mail-lb0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751222AbbAEROf (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Jan 2015 12:14:35 -0500
+Received: by mail-lb0-f170.google.com with SMTP id 10so18212101lbg.29
+        for <ceph-devel@vger.kernel.org>; Mon, 05 Jan 2015 09:14:33 -0800 (PST)
+In-Reply-To: <54A91EDA.8080008@42on.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Anthony Alba <ascanio.alba7@gmail.com>
-Cc: Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@ceph.com" <ceph-users@ceph.com>
+To: Wido den Hollander <wido@42on.com>, loic@dachary.org
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Sat, Dec 20, 2014 at 1:15 AM, Anthony Alba <ascanio.alba7@gmail.com> wrote:
-> Hi Sage,
->
-> Has the repo metadata been regenerated?
->
-> One of my reposync jobs can only see up to 0.89, using
-> http://ceph.com/rpm-testing.
+Hi Loic and Wido,
 
-It was generated but we somehow missed out on properly syncing it. You
-should now see 0.90 properly.
+Loic - I agree with you that it makes more sense to implement the core
+of the logic in ceph-disk where it can be re-used by other tools (like
+ceph-deploy) or by administrators directly.  There are a lot of
+conventions put in place by ceph-disk such that ceph-disk is the best
+place to undo them as part of clean-up.  I'll pursue this with other
+Ceph devs to see if I can get agreement on the best approach.
+
+At a high-level, ceph-disk has two commands that I think could have a
+corollary -- prepare, and activate.
+
+Prepare will format and mkfs a disk/dir as needed to make it usable by Ceph.
+Activate will put the resulting disk/dir into service by allocating an
+OSD ID, creating the cephx key, and marking the init system as needed,
+and finally starting the ceph-osd service.
+
+It seems like there could be two opposite commands that do the following:
+
+deactivate:
+ - set "ceph osd out"
+ - stop ceph-osd service if needed
+ - remove OSD from CRUSH map
+ - remove OSD cephx key
+ - deallocate OSD ID
+ - remove 'ready', 'active', and INIT-specific files (to Wido's point)
+ - umount device and remove mount point
+
+destroy:
+ - zap disk (removes partition table and disk content)
+
+A few questions I have from this, though.  Is this granular enough?
+If all the steps listed above are done in deactivate, is it useful?
+Or are there usecases we need to cover where some of those steps need
+to be done but not all?  Deactivating in this case would be
+permanently removing the disk from the cluster.  If you are just
+moving a disk from one host to another, Ceph already supports that
+with no additional steps other than stop service, move disk, start
+service.
+
+Is "destroy" even necessary?  It's really just zap at that point,
+which already exists.  It only seems necessary to me if we add extra
+functionality, like the ability to do a wipe of some kind first.  If
+it is just zap, you could call zap separate or with --zap as an option
+to deactivate.
+
+And all of this would need to be able to fail somewhat gracefully, as
+you would often be dealing with dead/failed disks that may not allow
+these commands to run successfully.  That's why I'm wondering if it
+would be best to break the steps currently in "deactivate" into two
+commands -- (1) deactivate: which would deal with commands specific to
+the disk (osd out, stop service, remove marker files, umount) and (2)
+remove: which would undefine the OSD within the cluster (remove from
+CRUSH, remove cephx key, deallocate OSD ID).
+
+I'm mostly talking out loud here.  Looking for more ideas, input.  :)
+
+ - Travis
 
 
+On Sun, Jan 4, 2015 at 6:07 AM, Wido den Hollander <wido@42on.com> wrote:
+> On 01/02/2015 10:31 PM, Travis Rhoden wrote:
+>> Hi everyone,
+>>
+>> There has been a long-standing request [1] to implement an OSD
+>> "destroy" capability to ceph-deploy.  A community user has submitted a
+>> pull request implementing this feature [2].  While the code needs a
+>> bit of work (there are a few things to work out before it would be
+>> ready to merge), I want to verify that the approach is sound before
+>> diving into it.
+>>
+>> As it currently stands, the new feature would do allow for the following:
+>>
+>> ceph-deploy osd destroy <host> --osd-id <id>
+>>
+>> From that command, ceph-deploy would reach out to the host, do "ceph
+>> osd out", stop the ceph-osd service for the OSD, then finish by doing
+>> "ceph osd crush remove", "ceph auth del", and "ceph osd rm".  Finally,
+>> it would umount the OSD, typically in /var/lib/ceph/osd/...
+>>
 >
-> Thanks
+> Prior to the unmount, shouldn't it also clean up the 'ready' file to
+> prevent the OSD from starting after a reboot?
 >
-> Anthony
+> Although it's key has been removed from the cluster it shouldn't matter
+> that much, but it seems a bit cleaner.
+>
+> It could even be more destructive, that if you pass --zap-disk to it, it
+> also runs wipefs or something to clean the whole disk.
+>
+>>
+>> Does this high-level approach seem sane?  Anything that is missing
+>> when trying to remove an OSD?
+>>
+>>
+>> There are a few specifics to the current PR that jump out to me as
+>> things to address.  The format of the command is a bit rough, as other
+>> "ceph-deploy osd" commands take a list of [host[:disk[:journal]]] args
+>> to specify a bunch of disks/osds to act on at one.  But this command
+>> only allows one at a time, by virtue of the --osd-id argument.  We
+>> could try to accept [host:disk] and look up the OSD ID from that, or
+>> potentially take [host:ID] as input.
+>>
+>> Additionally, what should be done with the OSD's journal during the
+>> destroy process?  Should it be left untouched?
+>>
+>> Should there be any additional barriers to performing such a
+>> destructive command?  User confirmation?
+>>
+>>
+>>  - Travis
+>>
+>> [1] http://tracker.ceph.com/issues/3480
+>> [2] https://github.com/ceph/ceph-deploy/pull/254
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
 >
 >
->
-> On Sat, Dec 20, 2014 at 6:22 AM, Sage Weil <sweil@redhat.com> wrote:
->> This is the last development release before Christmas.  There are some API
->> cleanups for librados and librbd, and lots of bug fixes across the board
->> for the OSD, MDS, RGW, and CRUSH.  The OSD also gets support for discard
->> (potentially helpful on SSDs, although it is off by default), and there
->> are several improvements to ceph-disk.
->>
->> The next two development releases will be getting a slew of new
->> functionality for hammer.  Stay tuned!
->>
->> Upgrading
->> ---------
->>
->> * Previously, the formatted output of 'ceph pg stat -f ...' was a full
->>   pg dump that included all metadata about all PGs in the system.  It
->>   is now a concise summary of high-level PG stats, just like the
->>   unformatted 'ceph pg stat' command.
->>
->> * All JSON dumps of floating point values were incorrecting surrounding the
->>   value with quotes.  These quotes have been removed.  Any consumer of
->>   structured JSON output that was consuming the floating point values was
->>   previously having to interpret the quoted string and will most likely
->>   need to be fixed to take the unquoted number.
->>
->> Notable Changes
->> ---------------
->>
->> * arch: fix NEON feaeture detection (#10185 Loic Dachary)
->> * build: adjust build deps for yasm, virtualenv (Jianpeng Ma)
->> * build: improve build dependency tooling (Loic Dachary)
->> * ceph-disk: call partx/partprobe consistency (#9721 Loic Dachary)
->> * ceph-disk: fix dmcrypt key permissions (Loic Dachary)
->> * ceph-disk: fix umount race condition (#10096 Blaine Gardner)
->> * ceph-disk: init=none option (Loic Dachary)
->> * ceph-monstore-tool: fix shutdown (#10093 Loic Dachary)
->> * ceph-objectstore-tool: fix import (#10090 David Zafman)
->> * ceph-objectstore-tool: many improvements and tests (David Zafman)
->> * ceph.spec: package rbd-replay-prep (Ken Dreyer)
->> * common: add 'perf reset ...' admin command (Jianpeng Ma)
->> * common: do not unlock rwlock on destruction (Federico Simoncelli)
->> * common: fix block device discard check (#10296 Sage Weil)
->> * common: remove broken CEPH_LOCKDEP optoin (Kefu Chai)
->> * crush: fix tree bucket behavior (Rongze Zhu)
->> * doc: add build-doc guidlines for Fedora and CentOS/RHEL (Nilamdyuti
->>   Goswami)
->> * doc: enable rbd cache on openstack deployments (Sebastien Han)
->> * doc: improved installation nots on CentOS/RHEL installs (John Wilkins)
->> * doc: misc cleanups (Adam Spiers, Sebastien Han, Nilamdyuti Goswami, Ken
->>   Dreyer, John Wilkins)
->> * doc: new man pages (Nilamdyuti Goswami)
->> * doc: update release descriptions (Ken Dreyer)
->> * doc: update sepia hardware inventory (Sandon Van Ness)
->> * librados: only export public API symbols (Jason Dillaman)
->> * libradosstriper: fix stat strtoll (Dongmao Zhang)
->> * libradosstriper: fix trunc method (#10129 Sebastien Ponce)
->> * librbd: fix list_children from invalid pool ioctxs (#10123 Jason
->>   Dillaman)
->> * librbd: only export public API symbols (Jason Dillaman)
->> * many coverity fixes (Danny Al-Gaaf)
->> * mds: 'flush journal' admin command (John Spray)
->> * mds: fix MDLog IO callback deadlock (John Spray)
->> * mds: fix deadlock during journal probe vs purge (#10229 Yan, Zheng)
->> * mds: fix race trimming log segments (Yan, Zheng)
->> * mds: store backtrace for stray dir (Yan, Zheng)
->> * mds: verify backtrace when fetching dirfrag (#9557 Yan, Zheng)
->> * mon: add max pgs per osd warning (Sage Weil)
->> * mon: fix *_ratio units and types (Sage Weil)
->> * mon: fix JSON dumps to dump floats as flots and not strings (Sage Weil)
->> * mon: fix formatter 'pg stat' command output (Sage Weil)
->> * msgr: async: several fixes (Haomai Wang)
->> * msgr: simple: fix rare deadlock (Greg Farnum)
->> * osd: batch pg log trim (Xinze Chi)
->> * osd: clean up internal ObjectStore interface (Sage Weil)
->> * osd: do not abort deep scrub on missing hinfo (#10018 Loic Dachary)
->> * osd: fix ghobject_t formatted output to include shard (#10063 Loic
->>   Dachary)
->> * osd: fix osd peer check on scrub messages (#9555 Sage Weil)
->> * osd: fix pgls filter ops (#9439 David Zafman)
->> * osd: flush snapshots from cache tier immediately (Sage Weil)
->> * osd: keyvaluestore: fix getattr semantics (Haomai Wang)
->> * osd: keyvaluestore: fix key ordering (#10119 Haomai Wang)
->> * osd: limit in-flight read requests (Jason Dillaman)
->> * osd: log when scrub or repair starts (Loic Dachary)
->> * osd: support for discard for journal trim (Jianpeng Ma)
->> * qa: fix osd create dup tests (#10083 Loic Dachary)
->> * rgw: add location header when object is in another region (VRan Liu)
->> * rgw: check timestamp on s3 keystone auth (#10062 Abhishek Lekshmanan)
->> * rgw: make sysvinit script set ulimit -n properly (Sage Weil)
->> * systemd: better systemd unit files (Owen Synge)
->> * tests: ability to run unit tests under docker (Loic Dachary)
->>
->> Getting Ceph
->> ------------
->>
->> * Git at git://github.com/ceph/ceph.git
->> * Tarball at http://ceph.com/download/ceph-0.90.tar.gz
->> * For packages, see http://ceph.com/docs/master/install/get-packages
->> * For ceph-deploy, see http://ceph.com/docs/master/install/install-ceph-deploy
->> _______________________________________________
->> ceph-users mailing list
->> ceph-users@lists.ceph.com
->> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Wido den Hollander
+> 42on B.V.
+> Ceph trainer and consultant
+>
+> Phone: +31 (0)20 700 9902
+> Skype: contact42on
