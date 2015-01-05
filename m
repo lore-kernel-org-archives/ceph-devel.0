@@ -1,79 +1,78 @@
-From: Dan van der Ster <daniel.vanderster-vJEk5272eHo@public.gmane.org>
-Subject: Re: full osdmaps in mon txns
-Date: Mon, 5 Jan 2015 10:12:10 +0100
-Message-ID: <CABZ+qqk9dW2eHnECci31xe6W0LvVUhZyiZc9ainCEqAEOtPd3g@mail.gmail.com>
-References: <alpine.DEB.2.00.1412231306170.28630@cobra.newdream.net>
+From: Ilya Dryomov <ilya.dryomov@inktank.com>
+Subject: Re: [PATCH] block: rbd.c: Remove unused function
+Date: Mon, 5 Jan 2015 12:25:39 +0300
+Message-ID: <CALFYKtDj+0aWe+vR2pCVCp_E=UDBuLkkPtH0f_14Hx8HBP0v7g@mail.gmail.com>
+References: <1420131512-30585-1-git-send-email-rickard_strandqvist@spectrumdigital.se>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.00.1412231306170.28630-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, gfarnum-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-qg0-f47.google.com ([209.85.192.47]:37641 "EHLO
+	mail-qg0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751600AbbAEJZk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Jan 2015 04:25:40 -0500
+Received: by mail-qg0-f47.google.com with SMTP id q108so14972509qgd.6
+        for <ceph-devel@vger.kernel.org>; Mon, 05 Jan 2015 01:25:39 -0800 (PST)
+In-Reply-To: <1420131512-30585-1-git-send-email-rickard_strandqvist@spectrumdigital.se>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Rickard Strandqvist <rickard_strandqvist@spectrumdigital.se>
+Cc: Yehuda Sadeh <yehuda@inktank.com>, Sage Weil <sage@inktank.com>, Alex Elder <elder@kernel.org>, Ceph Development <ceph-devel@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 
-Hi Sage,
+On Thu, Jan 1, 2015 at 7:58 PM, Rickard Strandqvist
+<rickard_strandqvist@spectrumdigital.se> wrote:
+> Remove the function copy_token() that is not used anywhere.
+>
+> This was partially found by using a static code analysis program called cppcheck.
+>
+> Signed-off-by: Rickard Strandqvist <rickard_strandqvist@spectrumdigital.se>
+> ---
+>  drivers/block/rbd.c |   30 ------------------------------
+>  1 file changed, 30 deletions(-)
+>
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index 27b71a0..922f1ab 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -4776,36 +4776,6 @@ static inline size_t next_token(const char **buf)
+>  }
+>
+>  /*
+> - * Finds the next token in *buf, and if the provided token buffer is
+> - * big enough, copies the found token into it.  The result, if
+> - * copied, is guaranteed to be terminated with '\0'.  Note that *buf
+> - * must be terminated with '\0' on entry.
+> - *
+> - * Returns the length of the token found (not including the '\0').
+> - * Return value will be 0 if no token is found, and it will be >=
+> - * token_size if the token would not fit.
+> - *
+> - * The *buf pointer will be updated to point beyond the end of the
+> - * found token.  Note that this occurs even if the token buffer is
+> - * too small to hold it.
+> - */
+> -static inline size_t copy_token(const char **buf,
+> -                               char *token,
+> -                               size_t token_size)
+> -{
+> -        size_t len;
+> -
+> -       len = next_token(buf);
+> -       if (len < token_size) {
+> -               memcpy(token, *buf, len);
+> -               *(token + len) = '\0';
+> -       }
+> -       *buf += len;
+> -
+> -        return len;
+> -}
+> -
+> -/*
+>   * Finds the next token in *buf, dynamically allocates a buffer big
+>   * enough to hold a copy of it, and copies the token into the new
+>   * buffer.  The copy is guaranteed to be terminated with '\0'.  Note
 
-On Tue, Dec 23, 2014 at 10:10 PM, Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
->
-> This fun issue came up again in the form of 10422:
->
->         http://tracker.ceph.com/issues/10422
->
-> I think we have 3 main options:
->
-> 1. Ask users to do a mon scrub prior to upgrade to
-> ensure it is safe.  If a mon is out of sync, manually kick it out, blow it
-> away, and resync.
->
+Applied with an amended changelog.
 
-I just tried ceph scrub on a cluster we already upgraded from dumpling
-to firefly:
+Thanks,
 
-2015-01-05 09:44:32.811194 mon.0 137.138.13.136:6789/0 622509 : [ERR]
-scrub mismatch
-2015-01-05 09:44:32.811289 mon.0 137.138.13.136:6789/0 622510 : [ERR]
-mon.0 ScrubResult(keys
-{auth=90,logm=1163,mdsmap=3,monmap=5,osdmap=1541,pgmap=645,pgmap_meta=6,pgmap_osd=208,pgmap_pg=24704}
-crc {auth=2819756818,logm=2322364559,mdsmap=183360962,monmap=2103930516,osdmap=522825856,pgmap=2035077624,pgmap_meta=951037946,pgmap_osd=3980602023,pgmap_pg=502660406})
-2015-01-05 09:44:32.811414 mon.0 137.138.13.136:6789/0 622511 : [ERR]
-mon.2 ScrubResult(keys
-{auth=90,logm=1163,mdsmap=3,monmap=5,osdmap=1541,pgmap=645,pgmap_meta=6,pgmap_osd=208,pgmap_pg=24704}
-crc {auth=2819756818,logm=2322364559,mdsmap=183360962,monmap=2103930516,osdmap=3364575095,pgmap=2035077624,pgmap_meta=951037946,pgmap_osd=3980602023,pgmap_pg=502660406})
-
-Is this the same issue as #10422? What would you do to recover?
-
-Cheers, and Happy New Year!
-
-Dan
-
-
->
-> 2. Do a one-time broadcast of the full osdmap across mons to ensure they
-> are consistent after upgrade.  Bleh.
->
-> 3. Include full encoded OSDMap in txns on updates going forward.
->
-> I like 3 because it solves this and all related problems going forward.
-> The local encoding of full osdmaps has proven to be a huge headache.
-> And, the patch to do it is remarkably simple
->
->         https://github.com/ceph/ceph/pull/3247/files
->
-> and dovetails well with the new CRC.
->
-> What do you think?
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+                Ilya
