@@ -1,43 +1,53 @@
-From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: Re: Ceph-client branch for Ubuntu 14.04.1 LTS (3.13.0-x kernels)
-Date: Mon, 5 Jan 2015 23:33:38 +0300
-Message-ID: <CALFYKtC+7EDJg-J3PnvoedkrSoak1cnHN6+aejsZE91E0dcFCg@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Ceph-client branch for Ubuntu 14.04.1 LTS (3.13.0-x kernels)
+Date: Mon, 5 Jan 2015 21:08:02 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2827201B@SACMBXIP02.sdcorp.global.sandisk.com>
 References: <9E914F5BD7F48A4782456CEB550A42280A758A6D@SACMBXIP01.sdcorp.global.sandisk.com>
 	<CALFYKtAxr9AbPR_DJp9EBTZ+FX4+d9dwhk89M74VRDK2Gq3E1g@mail.gmail.com>
 	<755F6B91B3BE364F9BCA11EA3F9E0C6F28271DE7@SACMBXIP02.sdcorp.global.sandisk.com>
 	<CALFYKtCTg7qPF76qnGLEFYoKN73tGhVD+RNr7a2v486FURNC-Q@mail.gmail.com>
 	<755F6B91B3BE364F9BCA11EA3F9E0C6F28271FF7@SACMBXIP02.sdcorp.global.sandisk.com>
+ <CALFYKtC+7EDJg-J3PnvoedkrSoak1cnHN6+aejsZE91E0dcFCg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f45.google.com ([209.85.216.45]:61898 "EHLO
-	mail-qa0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753360AbbAEUdj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Jan 2015 15:33:39 -0500
-Received: by mail-qa0-f45.google.com with SMTP id f12so14091838qad.18
-        for <ceph-devel@vger.kernel.org>; Mon, 05 Jan 2015 12:33:38 -0800 (PST)
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F28271FF7@SACMBXIP02.sdcorp.global.sandisk.com>
+Received: from mail-bn1on0063.outbound.protection.outlook.com ([157.56.110.63]:22750
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751307AbbAEVII (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 5 Jan 2015 16:08:08 -0500
+In-Reply-To: <CALFYKtC+7EDJg-J3PnvoedkrSoak1cnHN6+aejsZE91E0dcFCg@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
+To: Ilya Dryomov <ilya.dryomov@inktank.com>
 Cc: Chaitanya Huilgol <Chaitanya.Huilgol@sandisk.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Mon, Jan 5, 2015 at 11:01 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
-> Ilya,
-> Here is the steps..
->
-> 1. You have a cluster (3 nodes) and replication is 3
->
-> 2. map krbd image to a client.
->
-> 3. Reboot or stop ceph services on one or more nodes
->
-> 4. The client with krbd mapped module crashes
-
-Is it idle or under load?
-
-Do you have a trace of the crash?
-
-Thanks,
-
-                Ilya
+SXQncyBoYXBwZW5pbmcgYm90aCBpbiBpZGxlIGFuZCB1bmRlciBsb2FkLg0KSSBkb24ndCBoYXZl
+IHRoZSB0cmFjZSByaWdodCBub3cgYnV0IHdpbGwgZ2V0IHlvdSBvbmUgc29vbi4NCg0KVGhhbmtz
+ICYgUmVnYXJkcw0KU29tbmF0aA0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTog
+SWx5YSBEcnlvbW92IFttYWlsdG86aWx5YS5kcnlvbW92QGlua3RhbmsuY29tXQ0KU2VudDogTW9u
+ZGF5LCBKYW51YXJ5IDA1LCAyMDE1IDEyOjM0IFBNDQpUbzogU29tbmF0aCBSb3kNCkNjOiBDaGFp
+dGFueWEgSHVpbGdvbDsgY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNClN1YmplY3Q6IFJlOiBD
+ZXBoLWNsaWVudCBicmFuY2ggZm9yIFVidW50dSAxNC4wNC4xIExUUyAoMy4xMy4wLXgga2VybmVs
+cykNCg0KT24gTW9uLCBKYW4gNSwgMjAxNSBhdCAxMTowMSBQTSwgU29tbmF0aCBSb3kgPFNvbW5h
+dGguUm95QHNhbmRpc2suY29tPiB3cm90ZToNCj4gSWx5YSwNCj4gSGVyZSBpcyB0aGUgc3RlcHMu
+Lg0KPg0KPiAxLiBZb3UgaGF2ZSBhIGNsdXN0ZXIgKDMgbm9kZXMpIGFuZCByZXBsaWNhdGlvbiBp
+cyAzDQo+DQo+IDIuIG1hcCBrcmJkIGltYWdlIHRvIGEgY2xpZW50Lg0KPg0KPiAzLiBSZWJvb3Qg
+b3Igc3RvcCBjZXBoIHNlcnZpY2VzIG9uIG9uZSBvciBtb3JlIG5vZGVzDQo+DQo+IDQuIFRoZSBj
+bGllbnQgd2l0aCBrcmJkIG1hcHBlZCBtb2R1bGUgY3Jhc2hlcw0KDQpJcyBpdCBpZGxlIG9yIHVu
+ZGVyIGxvYWQ/DQoNCkRvIHlvdSBoYXZlIGEgdHJhY2Ugb2YgdGhlIGNyYXNoPw0KDQpUaGFua3Ms
+DQoNCiAgICAgICAgICAgICAgICBJbHlhDQoNCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fDQoNClBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxl
+Y3Ryb25pYyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUg
+ZGVzaWduYXRlZCByZWNpcGllbnQocykgbmFtZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhp
+cyBtZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBu
+b3RpZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQg
+dGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcg
+b2YgdGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2Vp
+dmVkIHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVy
+IGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQg
+ZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vz
+c2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVz
+KS4NCg0K
