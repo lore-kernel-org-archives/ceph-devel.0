@@ -1,51 +1,50 @@
-From: Li Wang <liwang@ubuntukylin.com>
-Subject: [PATCH] rbd: merge diff files
-Date: Mon,  5 Jan 2015 17:05:56 +0800
-Message-ID: <cover.1420444746.git.liwang@ubuntukylin.com>
+From: Ilya Dryomov <ilya.dryomov@inktank.com>
+Subject: Re: [PATCH 1/1 linux-next] ceph: use %zu for size_t display
+Date: Mon, 5 Jan 2015 12:31:09 +0300
+Message-ID: <CALFYKtDRfxBF-3KaAPMK4S35xeARNZQkLq2ckUfSob+YHQ5x3Q@mail.gmail.com>
+References: <1420304531-15176-1-git-send-email-fabf@skynet.be>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from m199-177.yeah.net ([123.58.177.199]:38036 "EHLO
-	m199-177.yeah.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753228AbbAEJ1v (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Jan 2015 04:27:51 -0500
+Received: from mail-qg0-f43.google.com ([209.85.192.43]:52717 "EHLO
+	mail-qg0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753261AbbAEJbK (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Jan 2015 04:31:10 -0500
+Received: by mail-qg0-f43.google.com with SMTP id z107so15051499qgd.16
+        for <ceph-devel@vger.kernel.org>; Mon, 05 Jan 2015 01:31:09 -0800 (PST)
+In-Reply-To: <1420304531-15176-1-git-send-email-fabf@skynet.be>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, Josh Durgin <josh.durgin@inktank.com>
-Cc: ceph-devel@vger.kernel.org, MingXin Liu <mingxinliu@ubuntukylin.com>, Yunchuan Wen <yunchuanwen@ubuntukylin.com>, Li Wang <liwang@ubuntukylin.com>
+To: Fabian Frederick <fabf@skynet.be>
+Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Sage Weil <sage@inktank.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-RBD supplies the 'export-diff' to 
-export a diff file between two clones. 
-This is inconvinient for periodical backup, 
-since a bunch of diff files wastes the disk
-space by keeping multiple copies of the 
-data on the same location, and complicates 
-and slows down the recovery process. 
-In this case, only one diff file is expected. 
-This motivates us to develop a 'merge-diff' 
-tool. The semantic is straightforward,
-it merges two diff files into one single diff 
-file. Multiple diff files could be easily 
-merged by further using some simple shell 
-tricks.
+On Sat, Jan 3, 2015 at 8:02 PM, Fabian Frederick <fabf@skynet.be> wrote:
+> Fixes the following 32-bit compilation warning:
+> fs/ceph/addr.c:1419:2: warning: format '%lu' expects argument of type
+> 'long unsigned int', but argument 5 has type 'size_t' [-Wformat=]
+>
+> Signed-off-by: Fabian Frederick <fabf@skynet.be>
+> ---
+>  fs/ceph/addr.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+> index f5013d9..c81c0e0 100644
+> --- a/fs/ceph/addr.c
+> +++ b/fs/ceph/addr.c
+> @@ -1416,7 +1416,7 @@ void ceph_fill_inline_data(struct inode *inode, struct page *locked_page,
+>                 }
+>         }
+>
+> -       dout("fill_inline_data %p %llx.%llx len %lu locked_page %p\n",
+> +       dout("fill_inline_data %p %llx.%llx len %zu locked_page %p\n",
+>              inode, ceph_vinop(inode), len, locked_page);
+>
+>         if (len > 0) {
 
-The patches are at:
-https://github.com/ceph/ceph/pull/3292
+This was fixed a while ago but hasn't been pushed to linux-next.  I'll
+try to make a point of pushing such fixes immediately in the future.
 
-MingXin Liu (6):
-  rbd: add an option merge-diff
-  rbd: parse merge-diff arguments
-  rbd: write a diff description into the merged diff file
-  rbd: parse diff file header for diff merging
-  rbd: parse diff file body for diff merging
-  rbd: test case for rbd merge-diff
+Thanks,
 
-Yunchuan Wen (1):
-  rbd: merge two diff files into one single file
-
- qa/workunits/rbd/merge_diff.sh | 475 +++++++++++++++++++++++++++++++++++++++++
- src/rbd.cc                     | 384 ++++++++++++++++++++++++++++++++-
- 2 files changed, 855 insertions(+), 4 deletions(-)
- create mode 100755 qa/workunits/rbd/merge_diff.sh
-
--- 
-1.9.1
-
+                Ilya
