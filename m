@@ -1,78 +1,51 @@
-From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: Re: [PATCH] block: rbd.c: Remove unused function
-Date: Mon, 5 Jan 2015 12:25:39 +0300
-Message-ID: <CALFYKtDj+0aWe+vR2pCVCp_E=UDBuLkkPtH0f_14Hx8HBP0v7g@mail.gmail.com>
-References: <1420131512-30585-1-git-send-email-rickard_strandqvist@spectrumdigital.se>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Li Wang <liwang@ubuntukylin.com>
+Subject: [PATCH] rbd: merge diff files
+Date: Mon,  5 Jan 2015 17:05:56 +0800
+Message-ID: <cover.1420444746.git.liwang@ubuntukylin.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qg0-f47.google.com ([209.85.192.47]:37641 "EHLO
-	mail-qg0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751600AbbAEJZk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Jan 2015 04:25:40 -0500
-Received: by mail-qg0-f47.google.com with SMTP id q108so14972509qgd.6
-        for <ceph-devel@vger.kernel.org>; Mon, 05 Jan 2015 01:25:39 -0800 (PST)
-In-Reply-To: <1420131512-30585-1-git-send-email-rickard_strandqvist@spectrumdigital.se>
+Received: from m199-177.yeah.net ([123.58.177.199]:38036 "EHLO
+	m199-177.yeah.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753228AbbAEJ1v (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Jan 2015 04:27:51 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Rickard Strandqvist <rickard_strandqvist@spectrumdigital.se>
-Cc: Yehuda Sadeh <yehuda@inktank.com>, Sage Weil <sage@inktank.com>, Alex Elder <elder@kernel.org>, Ceph Development <ceph-devel@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>, Josh Durgin <josh.durgin@inktank.com>
+Cc: ceph-devel@vger.kernel.org, MingXin Liu <mingxinliu@ubuntukylin.com>, Yunchuan Wen <yunchuanwen@ubuntukylin.com>, Li Wang <liwang@ubuntukylin.com>
 
-On Thu, Jan 1, 2015 at 7:58 PM, Rickard Strandqvist
-<rickard_strandqvist@spectrumdigital.se> wrote:
-> Remove the function copy_token() that is not used anywhere.
->
-> This was partially found by using a static code analysis program called cppcheck.
->
-> Signed-off-by: Rickard Strandqvist <rickard_strandqvist@spectrumdigital.se>
-> ---
->  drivers/block/rbd.c |   30 ------------------------------
->  1 file changed, 30 deletions(-)
->
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 27b71a0..922f1ab 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -4776,36 +4776,6 @@ static inline size_t next_token(const char **buf)
->  }
->
->  /*
-> - * Finds the next token in *buf, and if the provided token buffer is
-> - * big enough, copies the found token into it.  The result, if
-> - * copied, is guaranteed to be terminated with '\0'.  Note that *buf
-> - * must be terminated with '\0' on entry.
-> - *
-> - * Returns the length of the token found (not including the '\0').
-> - * Return value will be 0 if no token is found, and it will be >=
-> - * token_size if the token would not fit.
-> - *
-> - * The *buf pointer will be updated to point beyond the end of the
-> - * found token.  Note that this occurs even if the token buffer is
-> - * too small to hold it.
-> - */
-> -static inline size_t copy_token(const char **buf,
-> -                               char *token,
-> -                               size_t token_size)
-> -{
-> -        size_t len;
-> -
-> -       len = next_token(buf);
-> -       if (len < token_size) {
-> -               memcpy(token, *buf, len);
-> -               *(token + len) = '\0';
-> -       }
-> -       *buf += len;
-> -
-> -        return len;
-> -}
-> -
-> -/*
->   * Finds the next token in *buf, dynamically allocates a buffer big
->   * enough to hold a copy of it, and copies the token into the new
->   * buffer.  The copy is guaranteed to be terminated with '\0'.  Note
+RBD supplies the 'export-diff' to 
+export a diff file between two clones. 
+This is inconvinient for periodical backup, 
+since a bunch of diff files wastes the disk
+space by keeping multiple copies of the 
+data on the same location, and complicates 
+and slows down the recovery process. 
+In this case, only one diff file is expected. 
+This motivates us to develop a 'merge-diff' 
+tool. The semantic is straightforward,
+it merges two diff files into one single diff 
+file. Multiple diff files could be easily 
+merged by further using some simple shell 
+tricks.
 
-Applied with an amended changelog.
+The patches are at:
+https://github.com/ceph/ceph/pull/3292
 
-Thanks,
+MingXin Liu (6):
+  rbd: add an option merge-diff
+  rbd: parse merge-diff arguments
+  rbd: write a diff description into the merged diff file
+  rbd: parse diff file header for diff merging
+  rbd: parse diff file body for diff merging
+  rbd: test case for rbd merge-diff
 
-                Ilya
+Yunchuan Wen (1):
+  rbd: merge two diff files into one single file
+
+ qa/workunits/rbd/merge_diff.sh | 475 +++++++++++++++++++++++++++++++++++++++++
+ src/rbd.cc                     | 384 ++++++++++++++++++++++++++++++++-
+ 2 files changed, 855 insertions(+), 4 deletions(-)
+ create mode 100755 qa/workunits/rbd/merge_diff.sh
+
+-- 
+1.9.1
+
