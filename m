@@ -1,30 +1,32 @@
-From: Stefan Priebe <s.priebe@profihost.ag>
-Subject: 10 times higher disk load with btrfs
-Date: Mon, 05 Jan 2015 19:36:37 +0100
-Message-ID: <54AAD9B5.5080207@profihost.ag>
+From: Ilya Dryomov <ilya.dryomov@inktank.com>
+Subject: Re: Ceph-client branch for Ubuntu 14.04.1 LTS (3.13.0-x kernels)
+Date: Mon, 5 Jan 2015 21:50:25 +0300
+Message-ID: <CALFYKtCTg7qPF76qnGLEFYoKN73tGhVD+RNr7a2v486FURNC-Q@mail.gmail.com>
+References: <9E914F5BD7F48A4782456CEB550A42280A758A6D@SACMBXIP01.sdcorp.global.sandisk.com>
+	<CALFYKtAxr9AbPR_DJp9EBTZ+FX4+d9dwhk89M74VRDK2Gq3E1g@mail.gmail.com>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F28271DE7@SACMBXIP02.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ph.de-nserver.de ([85.158.179.214]:59339 "EHLO
-	mail-ph.de-nserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753562AbbAESgI (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Jan 2015 13:36:08 -0500
+Received: from mail-qc0-f171.google.com ([209.85.216.171]:58126 "EHLO
+	mail-qc0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754080AbbAESu0 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Jan 2015 13:50:26 -0500
+Received: by mail-qc0-f171.google.com with SMTP id r5so15714383qcx.2
+        for <ceph-devel@vger.kernel.org>; Mon, 05 Jan 2015 10:50:25 -0800 (PST)
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F28271DE7@SACMBXIP02.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: Chaitanya Huilgol <Chaitanya.Huilgol@sandisk.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi devs,
+On Mon, Jan 5, 2015 at 8:11 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
+> Ilya,
+> The main issue we are facing the krbd client crash in case of cluster node reboot. Is this fix backported to any 14.04 stable LTS kernel ?
 
-while btrfs is now declared as stable ;-) i wanted to retest btrfs on 
-our production cluster on 2 out of 54 osds. So if they crash it doesn't 
-hurt.
+I don't recall anything like that or at least phrased that way.
+Can you give more details - crash traces at least?
 
-While if those OSDs run XFS have spikes of 20MB/s every 4-7s. The same 
-OSDs after formatting them with btrfs have spikes of 190MB/s every 4-7s.
+Thanks,
 
-Why does just another filesystem raises the disk load by a factor of 10?
-
-I'm running dumpling.
-
-Greets Stefan
+                Ilya
