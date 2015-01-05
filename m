@@ -1,39 +1,40 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: ceph osd df
-Date: Mon, 5 Jan 2015 11:03:40 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1501051101010.6168@cobra.newdream.net>
+From: Stefan Priebe <s.priebe@profihost.ag>
+Subject: Re: 10 times higher disk load with btrfs
+Date: Mon, 05 Jan 2015 20:19:27 +0100
+Message-ID: <54AAE3BF.9080908@profihost.ag>
+References: <54AAD9B5.5080207@profihost.ag>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:42257 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932107AbbAETDl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 5 Jan 2015 14:03:41 -0500
-Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id t05J3f5G014002
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
-	for <ceph-devel@vger.kernel.org>; Mon, 5 Jan 2015 14:03:41 -0500
-Received: from redhat.com ([10.3.112.19])
-	by int-mx10.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t05J3esn021921
-	for <ceph-devel@vger.kernel.org>; Mon, 5 Jan 2015 14:03:40 -0500
+Received: from mail-ph.de-nserver.de ([85.158.179.214]:28417 "EHLO
+	mail-ph.de-nserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753297AbbAETS6 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Jan 2015 14:18:58 -0500
+In-Reply-To: <54AAD9B5.5080207@profihost.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-We see a fair number of issues and confusion with OSD utilization and 
-unfortunately there is easy way to see a summary of the current OSD 
-utilization state.  'ceph pg dump' includes raw data but it not very 
-friendly.  'ceph osd tree' shows weights but not actual utilization.  
-'ceph health detail' tells you the nearfull osds but only when they reach 
-the warning threshold.
 
-Opened a ticket for a new command that summarizes just the relevant info:
+Am 05.01.2015 um 19:36 schrieb Stefan Priebe:
+> Hi devs,
+>
+> while btrfs is now declared as stable ;-) i wanted to retest btrfs on
+> our production cluster on 2 out of 54 osds. So if they crash it doesn't
+> hurt.
+>
+> While if those OSDs run XFS have spikes of 20MB/s every 4-7s. The same
+> OSDs after formatting them with btrfs have spikes of 190MB/s every 4-7s.
+>
+> Why does just another filesystem raises the disk load by a factor of 10?
 
-	http://tracker.ceph.com/issues/10452
+OK this seems to happen cause ceph is creating every 5s a new subvolume 
+/ snap. Is this really expected / needed?
 
-Suggestions welcome.  It's a pretty simple implementation (the mon has 
-all the info; just need to add the command to present it) so I'm hoping it 
-can get into hammer.  If anyone is interested in doing the 
-implementation that would be great too!
+Stefan
 
-sage
+>
+> I'm running dumpling.
+>
+> Greets Stefan
