@@ -1,50 +1,30 @@
-From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: Re: [PATCH 1/1 linux-next] ceph: use %zu for size_t display
-Date: Mon, 5 Jan 2015 12:31:09 +0300
-Message-ID: <CALFYKtDRfxBF-3KaAPMK4S35xeARNZQkLq2ckUfSob+YHQ5x3Q@mail.gmail.com>
-References: <1420304531-15176-1-git-send-email-fabf@skynet.be>
+From: Chaitanya Huilgol <Chaitanya.Huilgol@sandisk.com>
+Subject: Ceph-client branch for Ubuntu 14.04.1 LTS (3.13.0-x kernels)
+Date: Mon, 5 Jan 2015 10:53:28 +0000
+Message-ID: <9E914F5BD7F48A4782456CEB550A42280A758A6D@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qg0-f43.google.com ([209.85.192.43]:52717 "EHLO
-	mail-qg0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753261AbbAEJbK (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Jan 2015 04:31:10 -0500
-Received: by mail-qg0-f43.google.com with SMTP id z107so15051499qgd.16
-        for <ceph-devel@vger.kernel.org>; Mon, 05 Jan 2015 01:31:09 -0800 (PST)
-In-Reply-To: <1420304531-15176-1-git-send-email-fabf@skynet.be>
+Received: from mail-bn1bon0091.outbound.protection.outlook.com ([157.56.111.91]:2014
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1753174AbbAELI1 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Jan 2015 06:08:27 -0500
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Fabian Frederick <fabf@skynet.be>
-Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Sage Weil <sage@inktank.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Sat, Jan 3, 2015 at 8:02 PM, Fabian Frederick <fabf@skynet.be> wrote:
-> Fixes the following 32-bit compilation warning:
-> fs/ceph/addr.c:1419:2: warning: format '%lu' expects argument of type
-> 'long unsigned int', but argument 5 has type 'size_t' [-Wformat=]
->
-> Signed-off-by: Fabian Frederick <fabf@skynet.be>
-> ---
->  fs/ceph/addr.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-> index f5013d9..c81c0e0 100644
-> --- a/fs/ceph/addr.c
-> +++ b/fs/ceph/addr.c
-> @@ -1416,7 +1416,7 @@ void ceph_fill_inline_data(struct inode *inode, struct page *locked_page,
->                 }
->         }
->
-> -       dout("fill_inline_data %p %llx.%llx len %lu locked_page %p\n",
-> +       dout("fill_inline_data %p %llx.%llx len %zu locked_page %p\n",
->              inode, ceph_vinop(inode), len, locked_page);
->
->         if (len > 0) {
+Hi All,
 
-This was fixed a while ago but hasn't been pushed to linux-next.  I'll
-try to make a point of pushing such fixes immediately in the future.
+The stock ceph-client modules with Ubuntu 14.04 LTS are quite dated and we are seeing crashes and soft-lockup issues which have been fixed in the current ceph-client code base.
+What would be recommended ceph-client branch compatible with the Ubuntu 14.04 (3.13.0-x) kernels so that we can get as many fixes as possible?
 
-Thanks,
+Regards,
+Chaitanya
 
-                Ilya
+________________________________
+
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+
