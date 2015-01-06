@@ -1,226 +1,314 @@
-From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: Re: Ceph-client branch for Ubuntu 14.04.1 LTS (3.13.0-x kernels)
-Date: Tue, 6 Jan 2015 17:19:05 +0300
-Message-ID: <CALFYKtAs+685rxyJx0dasHprMatLUeLyv7oq397Ty2SiJ_uCCw@mail.gmail.com>
-References: <9E914F5BD7F48A4782456CEB550A42280A758A6D@SACMBXIP01.sdcorp.global.sandisk.com>
-	<CALFYKtAxr9AbPR_DJp9EBTZ+FX4+d9dwhk89M74VRDK2Gq3E1g@mail.gmail.com>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F28271DE7@SACMBXIP02.sdcorp.global.sandisk.com>
-	<CALFYKtCTg7qPF76qnGLEFYoKN73tGhVD+RNr7a2v486FURNC-Q@mail.gmail.com>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F28271FF7@SACMBXIP02.sdcorp.global.sandisk.com>
-	<CALFYKtC+7EDJg-J3PnvoedkrSoak1cnHN6+aejsZE91E0dcFCg@mail.gmail.com>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F2827201B@SACMBXIP02.sdcorp.global.sandisk.com>
-	<9E914F5BD7F48A4782456CEB550A42280A75905D@SACMBXIP01.sdcorp.global.sandisk.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: ceph-deploy osd destroy feature
+Date: Tue, 6 Jan 2015 06:28:02 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1501060625110.10525@cobra.newdream.net>
+References: <CACkq2moPdXgDGCtr-jtd+rxEGT3H_SFnVGruvKqfXDuvU8eagg@mail.gmail.com> <54A91EDA.8080008@42on.com> <CACkq2mr9yxmiLd028hQmsC4TLqb3FBgww-6O_pML3ubyybFo5g@mail.gmail.com> <alpine.DEB.2.00.1501050921040.5967@cobra.newdream.net>
+ <CACkq2mq1MrVi430=F+xvOcYw+vY+B_qXimWUtSynN0WB1R-c8A@mail.gmail.com> <alpine.DEB.2.00.1501051017041.5967@cobra.newdream.net> <CAANLjFpE1-9hOsFFdCkyLP7M8s99xuWXKfss7atTRd7MAc-5iA@mail.gmail.com> <CABF_e-GcU6KyFD7LneiEi4ExpJ5i7MoDZycGeS_qzrM_HH-vCA@mail.gmail.com>
+ <alpine.DEB.2.00.1501052107140.10525@cobra.newdream.net> <CABF_e-GYvLVz-YUOM0c3+OR6Bi0Ej2pZncSAGuws2rscSeLy4A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f171.google.com ([209.85.216.171]:33700 "EHLO
-	mail-qc0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751800AbbAFOTH convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Jan 2015 09:19:07 -0500
-Received: by mail-qc0-f171.google.com with SMTP id r5so17175293qcx.30
-        for <ceph-devel@vger.kernel.org>; Tue, 06 Jan 2015 06:19:05 -0800 (PST)
-In-Reply-To: <9E914F5BD7F48A4782456CEB550A42280A75905D@SACMBXIP01.sdcorp.global.sandisk.com>
+Received: from cobra.newdream.net ([66.33.216.30]:60751 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752001AbbAFO2E (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Jan 2015 09:28:04 -0500
+In-Reply-To: <CABF_e-GYvLVz-YUOM0c3+OR6Bi0Ej2pZncSAGuws2rscSeLy4A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Chaitanya Huilgol <Chaitanya.Huilgol@sandisk.com>
-Cc: Somnath Roy <Somnath.Roy@sandisk.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Wei-Chung Cheng <freeze.vicente.cheng@gmail.com>
+Cc: Robert LeBlanc <robert@leblancnet.us>, Travis Rhoden <trhoden@gmail.com>, Wido den Hollander <wido@42on.com>, Loic Dachary <loic@dachary.org>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tue, Jan 6, 2015 at 3:31 PM, Chaitanya Huilgol
-<Chaitanya.Huilgol@sandisk.com> wrote:
-> Hi Ilya,
->
-> The RBD crash on OSD nodes going away is routinely hit in our setups.
-> We have not been able to get a good stack trace for this one due to o=
-ur console capture issues and these don't end up in the syslogs either =
-after the crash. Will get you the traces soon.
-> Most of the times this happens when all the OSD nodes go away at once=
-=2E  This could have probably been fixed by one of the following commit=
-s?
->
-> Ilya Dryomov
-> libceph: change from BUG to WARN for __remove_osd() asserts =E2=80=A6
-> idryomov authored on Nov 5
-> cc9f1f5
-> Ilya Dryomov
-> libceph: clear r_req_lru_item in __unregister_linger_request() =E2=80=
-=A6
-> idryomov authored on Nov 5
-> ba9d114
-> Ilya Dryomov
-> libceph: unlink from o_linger_requests when clearing r_osd =E2=80=A6
-> idryomov authored on Nov 4
-> a390de0
+On Tue, 6 Jan 2015, Wei-Chung Cheng wrote:
+> 2015-01-06 13:08 GMT+08:00 Sage Weil <sage@newdream.net>:
+> > On Tue, 6 Jan 2015, Wei-Chung Cheng wrote:
+> >> Dear all:
+> >>
+> >> I agree Robert opinion because I hit the similar problem once.
+> >> I think that how to handle journal partition is another problem about
+> >> destroy subcommand.
+> >> (Although it will work normally most time)
+> >>
+> >> I also agree we need the "secure erase" feature.
+> >> As my experience, I just make new label for disk by "parted" command.
+> >> I will think how could we do a secure erase or someone have a good
+> >> idea for this?
+> >
+> > The simplest secure erase is to encrypt the disk and destroy the key.  You
+> > can do that with dm-crypt today.  Most drives also will do this in the
+> > firmware but I'm not familiar with the toolchain needed to use that
+> > feature.  (It would be much preferable to go that route, though, since it
+> > will avoid any CPU overhead.)
+> >
+> > sage
+> 
+> I think I got some misunderstanding.
+> The secure erase means how to handle the disk which have encrypt
+> feature (SED disk)?
+> or it means that encrypt the disk by dm-crypt?
 
-Yes, but probably others as well.
+Normally secure erase simply means destroying the data on disk.  
+In practice, that can be hard.  Overwriting it will mostly work, but it's 
+slow, and with effort forensics can often still recover the old data.
 
->
-> Also, We have encountered a few other issues listed below
->
-> (1) Soft Lockup issue
-> Dec 10 11:22:28 rack3-client-1 kernel: [661597.506625] BUG: soft lock=
-up - CPU#2 stuck for 22s! [java:29169] --- (vdbench process)
-> .
-> .
-> Dec 4 17:14:33 rack6-ramp-4 kernel: [320361.043935] Call Trace:
-> Dec 4 17:14:33 rack6-ramp-4 kernel: [320361.097630] [<ffffffffa062d9e=
-8>] con_work+0x298/0x640 [libceph]
-> Dec 4 17:14:33 rack6-ramp-4 kernel: [320361.152461] [<ffffffff810838a=
-2>] process_one_work+0x182/0x450
-> Dec 4 17:14:33 rack6-ramp-4 kernel: [320361.206653] [<ffffffff8108464=
-1>] worker_thread+0x121/0x410
-> Dec 4 17:14:33 rack6-ramp-4 kernel: [320361.259860] [<ffffffff8108452=
-0>] ? rescuer_thread+0x3e0/0x3e0
-> Dec 4 17:14:33 rack6-ramp-4 kernel: [320361.312023] [<ffffffff8108b31=
-2>] kthread+0xd2/0xf0
-> Dec 4 17:14:33 rack6-ramp-4 kernel: [320361.362974] [<ffffffff8108b24=
-0>] ? kthread_create_on_node+0x1d0/0x1d0
-> Dec 4 17:14:33 rack6-ramp-4 kernel: [320361.414058] [<ffffffff8172637=
-c>] ret_from_fork+0x7c/0xb0
-> Dec 4 17:14:33 rack6-ramp-4 kernel: [320361.464358] [<ffffffff8108b24=
-0>] ? kthread_create_on_node+0x1d0/0x1d0
-> Dec 4 17:14:33 rack6-ramp-4 kernel: [320361.514121] Code: ff ff 48 89=
- df e8 e3 f1 ff ff 48 8b 7d a8 e8 7a 8c 0e e1 48 8b 7d b0 e8 41 d8 a7 e=
-0 48 83 c4 30 5b 41 5c 41 5d 41 5e 41 5f 5d c3 <0f> 0b 48 8b 45 b8 49 8=
-b 0e 4c 89 f2 48 c7 c6 d0 76 64 a0 48 c7
-> Dec 4 17:14:33 rack6-ramp-4 kernel: [320361.663443] RIP [<ffffffffa06=
-3340e>] osd_reset+0x22e/0x2c0 [libceph]
-> Dec 4 17:14:33 rack6-ramp-4 kernel: [320361.712105] RSP <ffff880a22b8=
-bd80>
->
-> (2) Soft lockup when OSDs are flapping
->
-> Dec 18 18:25:10 rack3-client-2 kernel: [157126.089489] BUG: soft lock=
-up - CPU#4 stuck for 23s! [kworker/4:0:45012]
-> .
-> .
-> Dec 18 18:25:10 rack3-client-2 kernel: [157126.098648] Call Trace:
-> Dec 18 18:25:10 rack3-client-2 kernel: [157126.098653] [<ffffffffa030=
-d963>] kick_requests+0x1e3/0x440 [libceph]
-> Dec 18 18:25:10 rack3-client-2 kernel: [157126.098657] [<ffffffffa030=
-df98>] ceph_osdc_handle_map+0x2a8/0x620 [libceph]
-> Dec 18 18:25:10 rack3-client-2 kernel: [157126.098662] [<ffffffffa030=
-e55b>] dispatch+0x24b/0xb20 [libceph]
-> Dec 18 18:25:10 rack3-client-2 kernel: [157126.098665] [<ffffffffa030=
-1c08>] ? ceph_tcp_recvmsg+0x48/0x60 [libceph]
-> Dec 18 18:25:10 rack3-client-2 kernel: [157126.098669] [<ffffffffa030=
-552f>] con_work+0x164f/0x2b60 [libceph]
-> Dec 18 18:25:10 rack3-client-2 kernel: [157126.098672] [<ffffffff8101=
-b7d9>] ? sched_clock+0x9/0x10
-> Dec 18 18:25:10 rack3-client-2 kernel: [157126.098674] [<ffffffff8101=
-b763>] ? native_sched_clock+0x13/0x80
-> Dec 18 18:25:10 rack3-client-2 kernel: [157126.098676] [<ffffffff8101=
-b7d9>] ? sched_clock+0x9/0x10
-> Dec 18 18:25:10 rack3-client-2 kernel: [157126.098679] [<ffffffff8109=
-d2d5>] ? sched_clock_cpu+0xb5/0x100
-> Dec 18 18:25:10 rack3-client-2 kernel: [157126.098681] [<ffffffff8109=
-df6d>] ? vtime_common_task_switch+0x3d/0x40
-> Dec 18 18:25:10 rack3-client-2 kernel: [157126.098684] [<ffffffff8108=
-38a2>] process_one_work+0x182/0x450
-> Dec 18 18:25:10 rack3-client-2 kernel: [157126.098686] [<ffffffff8108=
-4641>] worker_thread+0x121/0x410
-> Dec 18 18:25:10 rack3-client-2 kernel: [157126.098688] [<ffffffff8108=
-4520>] ? rescuer_thread+0x3e0/0x3e0
-> Dec 18 18:25:10 rack3-client-2 kernel: [157126.098690] [<ffffffff8108=
-b312>] kthread+0xd2/0xf0
-> Dec 18 18:25:10 rack3-client-2 kernel: [157126.098692] [<ffffffff8108=
-b240>] ? kthread_create_on_node+0x1d0/0x1d0
-> Dec 18 18:25:10 rack3-client-2 kernel: [157126.098695] [<ffffffff8172=
-637c>] ret_from_fork+0x7c/0xb0
-> Dec 18 18:25:10 rack3-client-2 kernel: [157126.098697] [<ffffffff8108=
-b240>] ? kthread_create_on_node+0x1d0/0x1d0
->
-> (3)  BUG_ON(!list_empty(&req->r_req_lru_item));
->
-> Dec 4 17:14:33 rack6-ramp-4 kernel: [320359.828209] kernel BUG at /bu=
-ild/buildd/linux-3.13.0/net/ceph/osd_client.c:892!
-> Dec 4 17:14:33 rack6-ramp-4 kernel: [320361.043935] Call Trace:
-> Dec 4 17:14:33 rack6-ramp-4 kernel: [320361.097630] [<ffffffffa062d9e=
-8>] con_work+0x298/0x640 [libceph]
-> Dec 4 17:14:33 rack6-ramp-4 kernel: [320361.152461] [<ffffffff810838a=
-2>] process_one_work+0x182/0x450
-> Dec 4 17:14:33 rack6-ramp-4 kernel: [320361.206653] [<ffffffff8108464=
-1>] worker_thread+0x121/0x410
-> Dec 4 17:14:33 rack6-ramp-4 kernel: [320361.259860] [<ffffffff8108452=
-0>] ? rescuer_thread+0x3e0/0x3e0
-> Dec 4 17:14:33 rack6-ramp-4 kernel: [320361.312023] [<ffffffff8108b31=
-2>] kthread+0xd2/0xf0
-> Dec 4 17:14:33 rack6-ramp-4 kernel: [320361.362974] [<ffffffff8108b24=
-0>] ? kthread_create_on_node+0x1d0/0x1d0
-> Dec 4 17:14:33 rack6-ramp-4 kernel: [320361.414058] [<ffffffff8172637=
-c>] ret_from_fork+0x7c/0xb0
-> Dec 4 17:14:33 rack6-ramp-4 kernel: [320361.464358] [<ffffffff8108b24=
-0>] ? kthread_create_on_node+0x1d0/0x1d0
->
-> (4) img_request null
-> Dec 12 08:07:48 rack1-ram-6 kernel: [251596.908865] Assertion failure=
- in rbd_img_obj_callback() at line 2127:
-> Dec 12 08:07:48 rack1-ram-6 kernel: [251596.908865]
-> Dec 12 08:07:48 rack1-ram-6 kernel: [251596.908865]     rbd_assert(im=
-g_request !=3D NULL);
->
-> Dec 12 08:07:50 rack1-ram-6 kernel: [251597.257322]  [<ffffffffa01a58=
-97>] rbd_obj_request_complete+0x27/0x70 [rbd]
-> Dec 12 08:07:50 rack1-ram-6 kernel: [251597.268450]  [<ffffffffa01a8d=
-4f>] rbd_osd_req_callback+0xdf/0x4e0 [rbd]
-> Dec 12 08:07:50 rack1-ram-6 kernel: [251597.279182]  [<ffffffffa039e2=
-62>] dispatch+0x4a2/0x900 [libceph]
-> Dec 12 08:07:50 rack1-ram-6 kernel: [251597.289159]  [<ffffffffa03949=
-4b>] try_read+0x4ab/0x10d0 [libceph]
-> Dec 12 08:07:50 rack1-ram-6 kernel: [251597.299236]  [<ffffffffa03963=
-62>] ? try_write+0xa42/0xe30 [libceph]
-> Dec 12 08:07:50 rack1-ram-6 kernel: [251597.309777]  [<ffffffff8101b7=
-d9>] ? sched_clock+0x9/0x10
-> Dec 12 08:07:50 rack1-ram-6 kernel: [251597.318627]  [<ffffffff8101b7=
-63>] ? native_sched_clock+0x13/0x80
-> Dec 12 08:07:50 rack1-ram-6 kernel: [251597.332347]  [<ffffffff8101b7=
-d9>] ? sched_clock+0x9/0x10
-> Dec 12 08:07:50 rack1-ram-6 kernel: [251597.341095]  [<ffffffff8109d2=
-d5>] ? sched_clock_cpu+0xb5/0x100
-> Dec 12 08:07:50 rack1-ram-6 kernel: [251597.351061]  [<ffffffffa03968=
-09>] con_work+0xb9/0x640 [libceph]
-> Dec 12 08:07:50 rack1-ram-6 kernel: [251597.361003]  [<ffffffff810838=
-a2>] process_one_work+0x182/0x450
-> Dec 12 08:07:50 rack1-ram-6 kernel: [251597.370752]  [<ffffffff810846=
-41>] worker_thread+0x121/0x410
-> Dec 12 08:07:50 rack1-ram-6 kernel: [251597.379816]  [<ffffffff810845=
-20>] ? rescuer_thread+0x3e0/0x3e0
-> Dec 12 08:07:50 rack1-ram-6 kernel: [251597.389173]  [<ffffffff8108b3=
-12>] kthread+0xd2/0xf0
-> Dec 12 08:07:50 rack1-ram-6 kernel: [251597.396898]  [<ffffffff8108b2=
-40>] ? kthread_create_on_node+0x1d0/0x1d0
-> Dec 12 08:07:50 rack1-ram-6 kernel: [251597.407506]  [<ffffffff817263=
-7c>] ret_from_fork+0x7c/0xb0
-> Dec 12 08:07:50 rack1-ram-6 kernel: [251597.416181]  [<ffffffff8108b2=
-40>] ? kthread_create_on_node+0x1d0/0x1d0
-> This is similar to: http://tracker.ceph.com/issues/8378
->
-> Saw that the rhel7a branch has many of the latest fixes and is somewh=
-at compatible with 3.13 kernels,
-> For validation, we have taken the rhel7a ceph-client branch and with =
-minor modification gotten it to compile with 3.13.0 headers. With this =
-we did not hit any issues (expect issue-2).
+Encrypting a disk and then destroying just the encryption key is an easy 
+way to "erase" a entire disk.  It's not uncommon to do this so that old 
+disks can be RMAed or disposed of through the usual channels without fear 
+of data being recovered.
 
-What do you mean by "expect issue-2"?
+sage
 
-(3) and (4) should be fixed in rhel7-a.  Can't say anything about (1)
-and (2) - please report back if you see any soft lockup splats on
-rhel7-a.
 
-> We understand that is not the right approach for Ubuntu, It would be =
-great if we could get the fixes into Ubuntu 14.04 kernels as well.
-
-It may not be the right approach, but in many ways it's better than
-a set of selected backports.  While working on another report I found
-a couple easy-to-backport patches that are missing from Ubuntu 3.13
-series and will forward them to stable guys, but, for those who can
-build their own kernels at least, branches like rhel7-a are best.
-
-Thanks,
-
-                Ilya
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> Would Travis describe the "secure erase" more detailly?
+> 
+> very thanks!
+> 
+> vicente
+> 
+> >
+> >
+> >>
+> >> Anyway, I rework and implement the deactivate first.
+> >>
+> >>
+> >>
+> >>
+> >> 2015-01-06 8:42 GMT+08:00 Robert LeBlanc <robert@leblancnet.us>:
+> >> > I do think the "find a journal partition" code isn't particularly robust.
+> >> > I've had experiences with ceph-disk trying to create a new partition even
+> >> > though I had wiped/zapped a disk previously. It would make the operational
+> >> > component of Ceph much easier with replacing disks if the journal partition
+> >> > is cleanly removed and able to be reused automatically.
+> >> >
+> >> > On Mon, Jan 5, 2015 at 11:18 AM, Sage Weil <sage@newdream.net> wrote:
+> >> >> On Mon, 5 Jan 2015, Travis Rhoden wrote:
+> >> >>> On Mon, Jan 5, 2015 at 12:27 PM, Sage Weil <sage@newdream.net> wrote:
+> >> >>> > On Mon, 5 Jan 2015, Travis Rhoden wrote:
+> >> >>> >> Hi Loic and Wido,
+> >> >>> >>
+> >> >>> >> Loic - I agree with you that it makes more sense to implement the core
+> >> >>> >> of the logic in ceph-disk where it can be re-used by other tools (like
+> >> >>> >> ceph-deploy) or by administrators directly.  There are a lot of
+> >> >>> >> conventions put in place by ceph-disk such that ceph-disk is the best
+> >> >>> >> place to undo them as part of clean-up.  I'll pursue this with other
+> >> >>> >> Ceph devs to see if I can get agreement on the best approach.
+> >> >>> >>
+> >> >>> >> At a high-level, ceph-disk has two commands that I think could have a
+> >> >>> >> corollary -- prepare, and activate.
+> >> >>> >>
+> >> >>> >> Prepare will format and mkfs a disk/dir as needed to make it usable by Ceph.
+> >> >>> >> Activate will put the resulting disk/dir into service by allocating an
+> >> >>> >> OSD ID, creating the cephx key, and marking the init system as needed,
+> >> >>> >> and finally starting the ceph-osd service.
+> >> >>> >>
+> >> >>> >> It seems like there could be two opposite commands that do the following:
+> >> >>> >>
+> >> >>> >> deactivate:
+> >> >>> >>  - set "ceph osd out"
+> >> >>> >
+> >> >>> > I don't think 'out out' belongs at all.  It's redundant (and extra work)
+> >> >>> > if we remove the osd from the CRUSH map.  I would imagine it being a
+> >> >>> > possibly independent step.  I.e.,
+> >> >>> >
+> >> >>> >  - drain (by setting CRUSH weight to 0)
+> >> >>> >  - wait
+> >> >>> >  - deactivate
+> >> >>> >  - (maybe) destroy
+> >> >>> >
+> >> >>> > That would make deactivate
+> >> >>> >
+> >> >>> >>  - stop ceph-osd service if needed
+> >> >>> >>  - remove OSD from CRUSH map
+> >> >>> >>  - remove OSD cephx key
+> >> >>> >>  - deallocate OSD ID
+> >> >>> >>  - remove 'ready', 'active', and INIT-specific files (to Wido's point)
+> >> >>> >>  - umount device and remove mount point
+> >> >>> >
+> >> >>> > which I think make sense if the next step is to destroy or to move the
+> >> >>> > disk to another box.  In the latter case the data will likely need to move
+> >> >>> > to another disk anyway so keeping it around it just a data safety thing
+> >> >>> > (keep as many copies as possible).
+> >> >>> >
+> >> >>> > OTOH, if you clear out the OSD id then deactivate isn't reversible
+> >> >>> > with activate as the OSD might be a new id even if it isn't moved.  An
+> >> >>> > alternative approach might be
+> >> >>> >
+> >> >>> > deactivate:
+> >> >>> >   - stop ceph-osd service if needed
+> >> >>> >   - remove 'ready', 'active', and INIT-specific files (to Wido's point)
+> >> >>> >   - umount device and remove mount point
+> >> >>>
+> >> >>> Good point.  It would be a very nice result if activate/deactivate
+> >> >>> were reversible by each other.  perhaps that should be the guiding
+> >> >>> principle, with any additional steps pushed off to other commands,
+> >> >>> such as destroy...
+> >> >>>
+> >> >>> >
+> >> >>> > destroy:
+> >> >>> >   - remove OSD from CRUSH map
+> >> >>> >   - remove OSD cephx key
+> >> >>> >   - deallocate OSD ID
+> >> >>> >   - destroy data
+> >> >>>
+> >> >>> I like this demarcation between deactivate and destroy.
+> >> >>>
+> >> >>> >
+> >> >>> > It's not quite true that the OSD ID should be preserved if the data
+> >> >>> > is, but I don't think there is harm in associating the two...
+> >> >>>
+> >> >>> What if we make destroy data optional by using the --zap flag?  Or,
+> >> >>> since zap is just removing the partition table, do we want to add more
+> >> >>> of a "secure erase" feature?  Almost seems like that is difficult
+> >> >>> precedent.  There are so many ways of trying to "securely" erase data
+> >> >>> out there that that may be best left to the policies of the cluster
+> >> >>> administrator(s).  In that case, --zap would still be a good middle
+> >> >>> ground, but you should do more if you want to be extra secure.
+> >> >>
+> >> >> Sounds good to me!
+> >> >>
+> >> >>> One other question -- should we be doing anything with the journals?
+> >> >>
+> >> >> I think destroy should clear the partition type so that it can be reused
+> >> >> by another OSD.  That will need to be tested, though.. I forget how smart
+> >> >> the "find a journal partiiton" code is (it might blindly try to create a
+> >> >> new one or something).
+> >> >>
+> >> >> sage
+> >> >>
+> >> >>
+> >> >>
+> >> >>>
+> >> >>> >
+> >> >>> > sage
+> >> >>> >
+> >> >>> >
+> >> >>> >
+> >> >>> >>
+> >> >>> >> destroy:
+> >> >>> >>  - zap disk (removes partition table and disk content)
+> >> >>> >>
+> >> >>> >> A few questions I have from this, though.  Is this granular enough?
+> >> >>> >> If all the steps listed above are done in deactivate, is it useful?
+> >> >>> >> Or are there usecases we need to cover where some of those steps need
+> >> >>> >> to be done but not all?  Deactivating in this case would be
+> >> >>> >> permanently removing the disk from the cluster.  If you are just
+> >> >>> >> moving a disk from one host to another, Ceph already supports that
+> >> >>> >> with no additional steps other than stop service, move disk, start
+> >> >>> >> service.
+> >> >>> >>
+> >> >>> >> Is "destroy" even necessary?  It's really just zap at that point,
+> >> >>> >> which already exists.  It only seems necessary to me if we add extra
+> >> >>> >> functionality, like the ability to do a wipe of some kind first.  If
+> >> >>> >> it is just zap, you could call zap separate or with --zap as an option
+> >> >>> >> to deactivate.
+> >> >>> >>
+> >> >>> >> And all of this would need to be able to fail somewhat gracefully, as
+> >> >>> >> you would often be dealing with dead/failed disks that may not allow
+> >> >>> >> these commands to run successfully.  That's why I'm wondering if it
+> >> >>> >> would be best to break the steps currently in "deactivate" into two
+> >> >>> >> commands -- (1) deactivate: which would deal with commands specific to
+> >> >>> >> the disk (osd out, stop service, remove marker files, umount) and (2)
+> >> >>> >> remove: which would undefine the OSD within the cluster (remove from
+> >> >>> >> CRUSH, remove cephx key, deallocate OSD ID).
+> >> >>> >>
+> >> >>> >> I'm mostly talking out loud here.  Looking for more ideas, input.  :)
+> >> >>> >>
+> >> >>> >>  - Travis
+> >> >>> >>
+> >> >>> >>
+> >> >>> >> On Sun, Jan 4, 2015 at 6:07 AM, Wido den Hollander <wido@42on.com> wrote:
+> >> >>> >> > On 01/02/2015 10:31 PM, Travis Rhoden wrote:
+> >> >>> >> >> Hi everyone,
+> >> >>> >> >>
+> >> >>> >> >> There has been a long-standing request [1] to implement an OSD
+> >> >>> >> >> "destroy" capability to ceph-deploy.  A community user has submitted a
+> >> >>> >> >> pull request implementing this feature [2].  While the code needs a
+> >> >>> >> >> bit of work (there are a few things to work out before it would be
+> >> >>> >> >> ready to merge), I want to verify that the approach is sound before
+> >> >>> >> >> diving into it.
+> >> >>> >> >>
+> >> >>> >> >> As it currently stands, the new feature would do allow for the following:
+> >> >>> >> >>
+> >> >>> >> >> ceph-deploy osd destroy <host> --osd-id <id>
+> >> >>> >> >>
+> >> >>> >> >> From that command, ceph-deploy would reach out to the host, do "ceph
+> >> >>> >> >> osd out", stop the ceph-osd service for the OSD, then finish by doing
+> >> >>> >> >> "ceph osd crush remove", "ceph auth del", and "ceph osd rm".  Finally,
+> >> >>> >> >> it would umount the OSD, typically in /var/lib/ceph/osd/...
+> >> >>> >> >>
+> >> >>> >> >
+> >> >>> >> > Prior to the unmount, shouldn't it also clean up the 'ready' file to
+> >> >>> >> > prevent the OSD from starting after a reboot?
+> >> >>> >> >
+> >> >>> >> > Although it's key has been removed from the cluster it shouldn't matter
+> >> >>> >> > that much, but it seems a bit cleaner.
+> >> >>> >> >
+> >> >>> >> > It could even be more destructive, that if you pass --zap-disk to it, it
+> >> >>> >> > also runs wipefs or something to clean the whole disk.
+> >> >>> >> >
+> >> >>> >> >>
+> >> >>> >> >> Does this high-level approach seem sane?  Anything that is missing
+> >> >>> >> >> when trying to remove an OSD?
+> >> >>> >> >>
+> >> >>> >> >>
+> >> >>> >> >> There are a few specifics to the current PR that jump out to me as
+> >> >>> >> >> things to address.  The format of the command is a bit rough, as other
+> >> >>> >> >> "ceph-deploy osd" commands take a list of [host[:disk[:journal]]] args
+> >> >>> >> >> to specify a bunch of disks/osds to act on at one.  But this command
+> >> >>> >> >> only allows one at a time, by virtue of the --osd-id argument.  We
+> >> >>> >> >> could try to accept [host:disk] and look up the OSD ID from that, or
+> >> >>> >> >> potentially take [host:ID] as input.
+> >> >>> >> >>
+> >> >>> >> >> Additionally, what should be done with the OSD's journal during the
+> >> >>> >> >> destroy process?  Should it be left untouched?
+> >> >>> >> >>
+> >> >>> >> >> Should there be any additional barriers to performing such a
+> >> >>> >> >> destructive command?  User confirmation?
+> >> >>> >> >>
+> >> >>> >> >>
+> >> >>> >> >>  - Travis
+> >> >>> >> >>
+> >> >>> >> >> [1] http://tracker.ceph.com/issues/3480
+> >> >>> >> >> [2] https://github.com/ceph/ceph-deploy/pull/254
+> >> >>> >> >> --
+> >> >>> >> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> >> >>> >> >> the body of a message to majordomo@vger.kernel.org
+> >> >>> >> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >> >>> >> >>
+> >> >>> >> >
+> >> >>> >> >
+> >> >>> >> > --
+> >> >>> >> > Wido den Hollander
+> >> >>> >> > 42on B.V.
+> >> >>> >> > Ceph trainer and consultant
+> >> >>> >> >
+> >> >>> >> > Phone: +31 (0)20 700 9902
+> >> >>> >> > Skype: contact42on
+> >> >>> >> --
+> >> >>> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> >> >>> >> the body of a message to majordomo@vger.kernel.org
+> >> >>> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >> >>> >>
+> >> >>> >>
+> >> >>> --
+> >> >>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> >> >>> the body of a message to majordomo@vger.kernel.org
+> >> >>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >> >>>
+> >> >>>
+> >> >> --
+> >> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> >> >> the body of a message to majordomo@vger.kernel.org
+> >> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >> > --
+> >> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> >> > the body of a message to majordomo@vger.kernel.org
+> >> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >>
+> >>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
