@@ -1,77 +1,114 @@
-From: Dan van der Ster <daniel.vanderster@cern.ch>
-Subject: Re: full osdmaps in mon txns
-Date: Tue, 6 Jan 2015 09:49:20 +0100
-Message-ID: <CABZ+qqmejKW9ONDnUui6jd7EMXaqXaY=EhMQLY3nSoMuNmPydg@mail.gmail.com>
-References: <alpine.DEB.2.00.1412231306170.28630@cobra.newdream.net> <CABZ+qqk9dW2eHnECci31xe6W0LvVUhZyiZc9ainCEqAEOtPd3g@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: tracker.ceph.com API
+Date: Tue, 06 Jan 2015 12:15:49 +0100
+Message-ID: <54ABC3E5.7040704@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="awswMoTecE36Icg2jmK039ib2SBI16cq1"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cernmx11.cern.ch ([188.184.36.50]:20364 "EHLO CERNMX11.cern.ch"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752918AbbAFIuE (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 6 Jan 2015 03:50:04 -0500
-Received: by mail-lb0-f169.google.com with SMTP id p9so18988193lbv.14
-        for <ceph-devel@vger.kernel.org>; Tue, 06 Jan 2015 00:50:00 -0800
- (PST)
-In-Reply-To: <CABZ+qqk9dW2eHnECci31xe6W0LvVUhZyiZc9ainCEqAEOtPd3g@mail.gmail.com>
+Received: from mail2.dachary.org ([91.121.57.175]:34172 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1755227AbbAFLPw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Jan 2015 06:15:52 -0500
+Received: from [10.9.0.6] (unknown [10.0.2.28])
+	by smtp.dmail.dachary.org (Postfix) with ESMTP id 2154842B2C
+	for <ceph-devel@vger.kernel.org>; Tue,  6 Jan 2015 12:15:50 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: joao@redhat.com, gfarnum@redhat.com, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Mon, Jan 5, 2015 at 10:12 AM, Dan van der Ster
-<daniel.vanderster@cern.ch> wrote:
-> Hi Sage,
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--awswMoTecE36Icg2jmK039ib2SBI16cq1
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+Hi,
+
+I tried various things to update tracker.ceph.com from the command line b=
+ut failed. The best result I have is the following:
+
+cat /tmp/a.xml
+
+<issue>
+  <id>10281</id>
+  <subject>firefly: make check fails on fedora 20 (1)</subject>
+  <custom_fields type=3D"array">
+    <custom_field name=3D"Backport" id=3D"2">
+      <value>firefly</value>
+    </custom_field>
+  </custom_fields>
+</issue>
+
+curl --http1.0 --verbose -T /tmp/a.xml http://tracker.ceph.com/issues/102=
+81.xml?key=3Dcd9a99820b4e7543a
+
+* Hostname was NOT found in DNS cache
+*   Trying 64.90.32.38...
+* Connected to tracker.ceph.com (64.90.32.38) port 80 (#0)
+> PUT /issues/10281.xml?key=3Dcd9a99820b4e7543a3c HTTP/1.0
+> User-Agent: curl/7.35.0
+> Host: tracker.ceph.com
+> Accept: */*
+> Content-Length: 239
 >
-> On Tue, Dec 23, 2014 at 10:10 PM, Sage Weil <sweil@redhat.com> wrote:
->>
->> This fun issue came up again in the form of 10422:
->>
->>         http://tracker.ceph.com/issues/10422
->>
->> I think we have 3 main options:
->>
->> 1. Ask users to do a mon scrub prior to upgrade to
->> ensure it is safe.  If a mon is out of sync, manually kick it out, blow it
->> away, and resync.
->>
+* We are completely uploaded and fine
+< HTTP/1.1 200 OK
+< Date: Tue, 06 Jan 2015 11:05:55 GMT
+* Server Apache/2.2.22 (Ubuntu) is not blacklisted
+< Server: Apache/2.2.22 (Ubuntu)
+< X-Powered-By: Phusion Passenger (mod_rails/mod_rack) 3.0.13
+< X-UA-Compatible: IE=3DEdge,chrome=3D1
+< Cache-Control: no-cache
+< X-Request-Id: eb302e17961997bafade5739f48a7183
+< X-Runtime: 1.375926
+< X-Rack-Cache: invalidate, pass
+< Set-Cookie: _redmine_session=3DBAh7BkkiD3Nlc3Npb25faWQGOgZFRkkZTIwY2Y5N=
+WYzYTE5BjsAVA%3D%3D--a2a2fd48f300f5c8c9; path=3D/; HttpOnly
+< Set-Cookie: autologin=3D; path=3D/; expires=3DThu, 01-Jan-1970 00:00:00=
+ GMT
+< Status: 200
+< Content-Length: 0
+< Connection: close
+< Content-Type: application/xml; charset=3Dutf-8
+<
+* Closing connection 0
+
+but most of the time I get:
+
+* Hostname was NOT found in DNS cache
+*   Trying 64.90.32.38...
+* Connected to tracker.ceph.com (64.90.32.38) port 80 (#0)
+> PUT /issues/10281.xml?key=3Dcd9a99820b4e7543a3ce82febce4970b3dfb6b86 HT=
+TP/1.0
+> User-Agent: curl/7.35.0
+> Host: tracker.ceph.com
+> Accept: */*
+> Content-Length: 239
 >
-> I just tried ceph scrub on a cluster we already upgraded from dumpling
-> to firefly:
->
-> 2015-01-05 09:44:32.811194 mon.0 137.138.13.136:6789/0 622509 : [ERR]
-> scrub mismatch
-> 2015-01-05 09:44:32.811289 mon.0 137.138.13.136:6789/0 622510 : [ERR]
-> mon.0 ScrubResult(keys
-> {auth=90,logm=1163,mdsmap=3,monmap=5,osdmap=1541,pgmap=645,pgmap_meta=6,pgmap_osd=208,pgmap_pg=24704}
-> crc {auth=2819756818,logm=2322364559,mdsmap=183360962,monmap=2103930516,osdmap=522825856,pgmap=2035077624,pgmap_meta=951037946,pgmap_osd=3980602023,pgmap_pg=502660406})
-> 2015-01-05 09:44:32.811414 mon.0 137.138.13.136:6789/0 622511 : [ERR]
-> mon.2 ScrubResult(keys
-> {auth=90,logm=1163,mdsmap=3,monmap=5,osdmap=1541,pgmap=645,pgmap_meta=6,pgmap_osd=208,pgmap_pg=24704}
-> crc {auth=2819756818,logm=2322364559,mdsmap=183360962,monmap=2103930516,osdmap=3364575095,pgmap=2035077624,pgmap_meta=951037946,pgmap_osd=3980602023,pgmap_pg=502660406})
->
-> Is this the same issue as #10422? What would you do to recover?
+* We are completely uploaded and fine
+* Empty reply from server
+* Connection #0 to host tracker.ceph.com left intact
+
+Am I doing something wrong ?
+
+Cheers
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
 
-For posterity, here is how I fixed this:
+--awswMoTecE36Icg2jmK039ib2SBI16cq1
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
-# service ceph stop
-=== mon.2 ===
-Stopping Ceph mon.2 on p05153026953834...kill 30708...done
-# mv /var/lib/ceph/mon/mon.2/ /tmp/mon.2.old
-# mkdir  /var/lib/ceph/mon/mon.2
-# ceph-mon --mkfs -i 2 --keyring /var/lib/ceph/tmp/keyring.mon.2
-ceph-mon: set fsid to dd535a7e-4647-4bee-853d-f34112615f81
-ceph-mon: created monfs at /var/lib/ceph/mon/mon.2 for mon.2
-#
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
 
-Then service ceph start, let mon.2 resync, and running ceph scrub
-afterwards gives:
+iEYEARECAAYFAlSrw+UACgkQ8dLMyEl6F211MQCffK7zrWdf/f8D0ca471WPzd4F
+a4MAnRLKO6PdYARROHtPLcgulZVr9X2V
+=rS0v
+-----END PGP SIGNATURE-----
 
-2015-01-06 09:43:06.431919 mon.0 137.138.13.136:6789/0 63 : [INF]
-scrub ok on 0,1,2: ScrubResult(keys
-{auth=69,logm=1455,mdsmap=3,monmap=5,osdmap=1005,pgmap=695,pgmap_meta=6,pgmap_osd=208,pgmap_pg=24704}
-crc {auth=2072984173,logm=1432725577,mdsmap=183360962,monmap=2103930516,osdmap=731548464,pgmap=2718145611,pgmap_meta=990631329,pgmap_osd=31335898,pgmap_pg=4049607692})
-
-
-Cheers, Dan
+--awswMoTecE36Icg2jmK039ib2SBI16cq1--
