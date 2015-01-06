@@ -1,57 +1,111 @@
-From: Chaitanya Huilgol <Chaitanya.Huilgol@sandisk.com>
-Subject: RE: Ceph-client branch for Ubuntu 14.04.1 LTS (3.13.0-x kernels)
-Date: Tue, 6 Jan 2015 02:36:38 +0000
-Message-ID: <9E914F5BD7F48A4782456CEB550A42280A758D55@SACMBXIP01.sdcorp.global.sandisk.com>
-References: <9E914F5BD7F48A4782456CEB550A42280A758A6D@SACMBXIP01.sdcorp.global.sandisk.com>
- <CALFYKtAxr9AbPR_DJp9EBTZ+FX4+d9dwhk89M74VRDK2Gq3E1g@mail.gmail.com>
+From: Alexandre DERUMIER <aderumier@odiso.com>
+Subject: Re: 10 times higher disk load with btrfs
+Date: Tue, 6 Jan 2015 04:44:27 +0100 (CET)
+Message-ID: <912779433.3244878.1420515867862.JavaMail.zimbra@oxygem.tv>
+References: <54AAD9B5.5080207@profihost.ag> <54AAE3BF.9080908@profihost.ag> <alpine.DEB.2.00.1501051124430.5967@cobra.newdream.net> <54AAF1FA.9040709@profihost.ag> <54AAF40C.3060608@redhat.com> <54AAF512.10106@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1bbn0100.outbound.protection.outlook.com ([157.56.111.100]:34016
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1754190AbbAFCgo (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 5 Jan 2015 21:36:44 -0500
-In-Reply-To: <CALFYKtAxr9AbPR_DJp9EBTZ+FX4+d9dwhk89M74VRDK2Gq3E1g@mail.gmail.com>
-Content-Language: en-US
+Received: from mailpro.odiso.net ([89.248.209.98]:33671 "EHLO
+	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753379AbbAFDoa convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Jan 2015 22:44:30 -0500
+In-Reply-To: <713980925.3244877.1420515858378.JavaMail.zimbra@oxygem.tv>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <ilya.dryomov@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Stefan Priebe <s.priebe@profihost.ag>
+Cc: Mark Nelson <mnelson@redhat.com>, Sage Weil <sage@newdream.net>, ceph-devel <ceph-devel@vger.kernel.org>
 
-SGkgSWx5YSwNCg0KQ2FuIHlvdSBwbGVhc2UgcG9pbnQgdXMgdG8gdGhlIHNvdXJjZXMgZm9yIHRo
-ZSB1YnVudHUgY2VwaC1jbGllbnQgd2l0aCB0aGUgZml4ZXMsIHRoZSBjZXBoLWNsaWVudCBjb2Rl
-IHRoYXQgY29tZXMgd2l0aCB0aGUgbGludXgtc291cmNlIGRlYmlhbiBwYWNrYWdlIGRvZXMgbm90
-IHNlZW0gdG8gY29udGFpbiBtYW55IG9mIHRoZSBmaXhlcyBhbmQgSSBkaWQgbm90IHNlZSBhbnkg
-Y2VwaC1jbGllbnQgcGF0Y2ggb3ZlciB0aGUgMy4xMyBrZXJuZWwgZWl0aGVyLiBMb29rcyBsaWtl
-IEkgbWlnaHQgYmUgbG9va2luZyBhdCB0aGUgd3JvbmcgcGxhY2UuDQoNClJlZ2FyZHMsDQpDaGFp
-dGFueWENCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IElseWEgRHJ5b21vdiBb
-bWFpbHRvOmlseWEuZHJ5b21vdkBpbmt0YW5rLmNvbV0NClNlbnQ6IE1vbmRheSwgSmFudWFyeSAw
-NSwgMjAxNSA5OjI4IFBNDQpUbzogQ2hhaXRhbnlhIEh1aWxnb2wNCkNjOiBjZXBoLWRldmVsQHZn
-ZXIua2VybmVsLm9yZw0KU3ViamVjdDogUmU6IENlcGgtY2xpZW50IGJyYW5jaCBmb3IgVWJ1bnR1
-IDE0LjA0LjEgTFRTICgzLjEzLjAteCBrZXJuZWxzKQ0KDQpPbiBNb24sIEphbiA1LCAyMDE1IGF0
-IDE6NTMgUE0sIENoYWl0YW55YSBIdWlsZ29sIDxDaGFpdGFueWEuSHVpbGdvbEBzYW5kaXNrLmNv
-bT4gd3JvdGU6DQo+IEhpIEFsbCwNCj4NCj4gVGhlIHN0b2NrIGNlcGgtY2xpZW50IG1vZHVsZXMg
-d2l0aCBVYnVudHUgMTQuMDQgTFRTIGFyZSBxdWl0ZSBkYXRlZCBhbmQgd2UgYXJlIHNlZWluZyBj
-cmFzaGVzIGFuZCBzb2Z0LWxvY2t1cCBpc3N1ZXMgd2hpY2ggaGF2ZSBiZWVuIGZpeGVkIGluIHRo
-ZSBjdXJyZW50IGNlcGgtY2xpZW50IGNvZGUgYmFzZS4NCj4gV2hhdCB3b3VsZCBiZSByZWNvbW1l
-bmRlZCBjZXBoLWNsaWVudCBicmFuY2ggY29tcGF0aWJsZSB3aXRoIHRoZSBVYnVudHUgMTQuMDQg
-KDMuMTMuMC14KSBrZXJuZWxzIHNvIHRoYXQgd2UgY2FuIGdldCBhcyBtYW55IGZpeGVzIGFzIHBv
-c3NpYmxlPw0KDQpXZSBhY3RpdmVseSBtYXJrIHJiZCAobm90IHNvIG11Y2ggY2VwaGZzKSBmaXhl
-cyBmb3Igc3RhYmxlIGFuZCBVYnVudHUga2VybmVsIHRlYW0gZ2VuZXJhbGx5IHBpY2tzIHRoZW0g
-dXAuICAzLjEzIHNlcmllcyBzaG91bGQgaGF2ZSBtb3N0IG9mIHRoZSBpbXBvcnRhbnQgZml4ZXMs
-IGFsdGhvdWdoIEkgaGF2ZW4ndCBjb3VudGVkLg0KDQpXaGF0IGlzc3VlcyBpbiBwYXJ0aWN1bGFy
-IHlvdSBhcmUgcnVubmluZyBpbnRvPyAgdW5hbWUgLWE/DQoNClRoYW5rcywNCg0KICAgICAgICAg
-ICAgICAgIElseWENCg0KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCg0KUExFQVNF
-IE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwg
-bWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJl
-Y2lwaWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMg
-bm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQg
-eW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZp
-ZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzIG1lc3Nh
-Z2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21t
-dW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25l
-IG9yIGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBh
-bmQgYWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVy
-IGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KDQo=
+Hi Stefan,
+
+Do you see a difference if you force filestore journal writeahead for b=
+trfs instead parrallel ?
+
+filestore journal writeahead =3D 1
+filestore journal parallel =3D 0
+
+----- Mail original -----
+De: "Stefan Priebe" <s.priebe@profihost.ag>
+=C3=80: "Mark Nelson" <mnelson@redhat.com>, "Sage Weil" <sage@newdream.=
+net>
+Cc: "ceph-devel" <ceph-devel@vger.kernel.org>
+Envoy=C3=A9: Lundi 5 Janvier 2015 21:33:22
+Objet: Re: 10 times higher disk load with btrfs
+
+Am 05.01.2015 um 21:29 schrieb Mark Nelson:=20
+>=20
+>=20
+> On 01/05/2015 02:20 PM, Stefan Priebe wrote:=20
+>> Hi Sage,=20
+>>=20
+>> Am 05.01.2015 um 20:25 schrieb Sage Weil:=20
+>>> On Mon, 5 Jan 2015, Stefan Priebe wrote:=20
+>>>>=20
+>>>> Am 05.01.2015 um 19:36 schrieb Stefan Priebe:=20
+>>>>> Hi devs,=20
+>>>>>=20
+>>>>> while btrfs is now declared as stable ;-) i wanted to retest btrf=
+s on=20
+>>>>> our production cluster on 2 out of 54 osds. So if they crash it=20
+>>>>> doesn't=20
+>>>>> hurt.=20
+>>>>>=20
+>>>>> While if those OSDs run XFS have spikes of 20MB/s every 4-7s. The=
+ same=20
+>>>>> OSDs after formatting them with btrfs have spikes of 190MB/s ever=
+y=20
+>>>>> 4-7s.=20
+>>>>>=20
+>>>>> Why does just another filesystem raises the disk load by a factor=
+ of=20
+>>>>> 10?=20
+>>>>=20
+>>>> OK this seems to happen cause ceph is creating every 5s a new=20
+>>>> subvolume /=20
+>>>> snap. Is this really expected / needed?=20
+>>>=20
+>>> You can disable it with=20
+>>>=20
+>>> filestore btrfs snap =3D false=20
+>>>=20
+>>> I'm curious how much this drops the load down; originally the=20
+>>> snaps were no more expensive than a regular sync but perhaps this=20
+>>> has changed...=20
+>>=20
+>> - with XFS the average write is at 9Mb/s=20
+>> - with btrfs (filestore_btrfs_snap=3Dtrue) write is at 40Mb/s=20
+>> - with btrfs (filestore_btrfs_snap=3Dfalse) write is at 20Mb/s=20
+>=20
+> Is that the average and not the spikes? It looks like before the spik=
+es=20
+> were 20MB/s and 190MB/s?=20
+
+Yes these are average values.=20
+
+Spikes:=20
+- with XFS the spike write is at 20Mb/s=20
+- with btrfs (filestore_btrfs_snap=3Dtrue) spike write is 200Mb/s=20
+- with btrfs (filestore_btrfs_snap=3Dfalse) spike is still 185Mb/s but =
+avg=20
+is 1/2 (20Mb/s) see above=20
+
+
+>=20
+>>=20
+>> Stefan=20
+>> --=20
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in=20
+>> the body of a message to majordomo@vger.kernel.org=20
+>> More majordomo info at http://vger.kernel.org/majordomo-info.html=20
+--=20
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n=20
+the body of a message to majordomo@vger.kernel.org=20
+More majordomo info at http://vger.kernel.org/majordomo-info.html=20
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
