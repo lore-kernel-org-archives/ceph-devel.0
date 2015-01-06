@@ -1,103 +1,302 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Ceph backports
-Date: Mon, 5 Jan 2015 21:30:53 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1501052111580.10525@cobra.newdream.net>
-References: <54AA7B46.6090706@dachary.org> <CAGd4Wr2aw1ODd=06dQa7HQzbFu6sYZeQGTOV5Vn6VW+j6dK63g@mail.gmail.com> <54AA80AD.2010901@dachary.org> <CAC6JEv94h5edyT68UcseSbYLSnT+eFMsUOxo84sVLw1T1f446g@mail.gmail.com> <54AB2887.8000503@dachary.org>
- <CAC6JEv-uzfzEtLb5X29ne2ME7gTDeysByG0DDJRNZxBQ2WCUEg@mail.gmail.com>
+From: Wei-Chung Cheng <freeze.vicente.cheng@gmail.com>
+Subject: Re: ceph-deploy osd destroy feature
+Date: Tue, 6 Jan 2015 14:34:36 +0800
+Message-ID: <CABF_e-GYvLVz-YUOM0c3+OR6Bi0Ej2pZncSAGuws2rscSeLy4A@mail.gmail.com>
+References: <CACkq2moPdXgDGCtr-jtd+rxEGT3H_SFnVGruvKqfXDuvU8eagg@mail.gmail.com>
+	<54A91EDA.8080008@42on.com>
+	<CACkq2mr9yxmiLd028hQmsC4TLqb3FBgww-6O_pML3ubyybFo5g@mail.gmail.com>
+	<alpine.DEB.2.00.1501050921040.5967@cobra.newdream.net>
+	<CACkq2mq1MrVi430=F+xvOcYw+vY+B_qXimWUtSynN0WB1R-c8A@mail.gmail.com>
+	<alpine.DEB.2.00.1501051017041.5967@cobra.newdream.net>
+	<CAANLjFpE1-9hOsFFdCkyLP7M8s99xuWXKfss7atTRd7MAc-5iA@mail.gmail.com>
+	<CABF_e-GcU6KyFD7LneiEi4ExpJ5i7MoDZycGeS_qzrM_HH-vCA@mail.gmail.com>
+	<alpine.DEB.2.00.1501052107140.10525@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:58560 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751082AbbAFFax (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Jan 2015 00:30:53 -0500
-In-Reply-To: <CAC6JEv-uzfzEtLb5X29ne2ME7gTDeysByG0DDJRNZxBQ2WCUEg@mail.gmail.com>
+Received: from mail-ob0-f173.google.com ([209.85.214.173]:60774 "EHLO
+	mail-ob0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754158AbbAFGeg (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Jan 2015 01:34:36 -0500
+Received: by mail-ob0-f173.google.com with SMTP id uy5so64512737obc.4
+        for <ceph-devel@vger.kernel.org>; Mon, 05 Jan 2015 22:34:36 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.00.1501052107140.10525@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@gregs42.com>
-Cc: Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: Robert LeBlanc <robert@leblancnet.us>, Travis Rhoden <trhoden@gmail.com>, Wido den Hollander <wido@42on.com>, Loic Dachary <loic@dachary.org>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Mon, 5 Jan 2015, Gregory Farnum wrote:
-> On Mon, Jan 5, 2015 at 4:12 PM, Loic Dachary <loic@dachary.org> wrote:
-> > :-) This process is helpful if it allows me to help a little more than I currently do with the backport process. It would be a loss if the end result is that everyone cares less about backports. My primary incentive for sending this mail is to start the conversation and avoid that kind of unintended drawback.
-> 
-> Why do you want to get involved with other people's backports at all?
+2015-01-06 13:08 GMT+08:00 Sage Weil <sage@newdream.net>:
+> On Tue, 6 Jan 2015, Wei-Chung Cheng wrote:
+>> Dear all:
+>>
+>> I agree Robert opinion because I hit the similar problem once.
+>> I think that how to handle journal partition is another problem about
+>> destroy subcommand.
+>> (Although it will work normally most time)
+>>
+>> I also agree we need the "secure erase" feature.
+>> As my experience, I just make new label for disk by "parted" command.
+>> I will think how could we do a secure erase or someone have a good
+>> idea for this?
+>
+> The simplest secure erase is to encrypt the disk and destroy the key.  You
+> can do that with dm-crypt today.  Most drives also will do this in the
+> firmware but I'm not familiar with the toolchain needed to use that
+> feature.  (It would be much preferable to go that route, though, since it
+> will avoid any CPU overhead.)
+>
+> sage
 
-Because Ian and I asked.  :)
+I think I got some misunderstanding.
+The secure erase means how to handle the disk which have encrypt
+feature (SED disk)?
+or it means that encrypt the disk by dm-crypt?
 
-> I don't mean that to sound possessive, but having the patch's primary
-> author responsible for getting backports done at least has the
-> singular merit of sharding the work up into manageable pieces. ;)
+Would Travis describe the "secure erase" more detailly?
 
-We have a huge backlog of backports and need some process to move them 
-forward.  The goals are to
+very thanks!
 
- - have some process that prevents backports from lingering
-   indefinitely
- - test everything in an integration branch before pushing
-   to the $stable branch
- - let QE handle the actual integration branch testing
- - limit time investment by leads where possible
+vicente
 
-> > Here is a revised process which is hopefully more realistic:
-> >
-> > 0. Developer follows normal process to land PR to master. Once complete and ticket is marked Pending Backport this process initiates.
-> > 1. I periodically polls Redmine to look for tickets in Pending Backport state and focus on the ones that are left unattended for too long
-> > 1a. Under the supervision of the author of the original patch, I find the commits associated with the Redmine ticket and Cherry Pick to the backport integration branch off of the desired maintenance branch (Dumping, Firefly, etc).
-> > 1b. I resolve any merge conflicts with the cherry-picked commit
-> > 2. I merge all backports for a given branch in an integration branch
-> > 3. I ask the leads of each project to review the integration
-> > 4. Once satisfied with group of backported commits to integration branch, I notify QE.
-> > 5. QE tests backport integration branch against appropriate suites
-> > 6a. If QE is satisfied with test results, they merge backport integration branch.
-> > 6b. If QE is NOT satisfied with the test results, they indicate backport integration branch is NOT ready to merge and return to me to work with original Developer to resolve issue and return to steps 2/3
-> > 7. Ticket is moved to Resolved once backport integration branch containing cherry-picked backport is merged to the desired mainteance branch(es)
-> >
-> > What do you think ?
-> 
-> I think if we're going to add a process to anything it should be
-> followed by everybody involved. I really would love for everything to
-> be gated by QE before it goes into a backport branch, but if you're
-> going off and building integration branches and QE is testing them, I
-> think other people are going to keep backporting as we have been and
-> trip all over each other. We've periodically used "firefly-next"
-> branches and related things, but it's always been ad-hoc.
-> 
-> Something more realistic might involve locking down the stable
-> branches so they can only be merged into by QE or some approved group,
-> and then letting people do their own backports onto a
-> <stable-branch>-next that is periodically taken up and
-> integration-tested prior to merge into the LTS proper. That ensures
-> that only patches which have all been tested together get into a
-> stable branch without forcing each individual backport into a lot of
-> process.
-
-That sounds more or less like what Loic proposed, except that leads are 
-always doing the backports.  I'm not sure that will scale, and lots of 
-fixes are simple and don't need a huge amount of attention.  I agree that 
-it'd be great to have a common workflow, though.
-
-I think the idea is as much to have someone driving the process ("should 
-this get backported now?  oh, you want to do it?  ok, ping me when you 
-have a PR ready") as to dictate that they do the actual backports.
-
-Maybe we augment Loic's list by changing (1) so that anybody can do 
-the backport and open a pull request to merge to the $stable branch.  
-The original patch author can do it (ideally at the same time as 
-the original fix, espeically when non-trivial), the lead can do 
-it, or Loic (or anyone) can do it.
-
-The key piece is that the redmine tickets are regularly polled to ensure 
-the backports get done.  We can note things like "wait a few weeks before 
-backport" in the ticket or the backport pull request, or possibly in an 
-explicit redmine field, depending on how formal we want to be.  (I'd say 
-start simple.)
-
-Then Loic (or whoever) prepares an integration branch and passes it to QE 
-to test.  If the tests go well, the pull requests can be merged.  
-Conflicts here are generally pretty rare, but when present and non-trivial 
-the obviously others can review as needed.
-
-?
-
-sage
+>
+>
+>>
+>> Anyway, I rework and implement the deactivate first.
+>>
+>>
+>>
+>>
+>> 2015-01-06 8:42 GMT+08:00 Robert LeBlanc <robert@leblancnet.us>:
+>> > I do think the "find a journal partition" code isn't particularly robust.
+>> > I've had experiences with ceph-disk trying to create a new partition even
+>> > though I had wiped/zapped a disk previously. It would make the operational
+>> > component of Ceph much easier with replacing disks if the journal partition
+>> > is cleanly removed and able to be reused automatically.
+>> >
+>> > On Mon, Jan 5, 2015 at 11:18 AM, Sage Weil <sage@newdream.net> wrote:
+>> >> On Mon, 5 Jan 2015, Travis Rhoden wrote:
+>> >>> On Mon, Jan 5, 2015 at 12:27 PM, Sage Weil <sage@newdream.net> wrote:
+>> >>> > On Mon, 5 Jan 2015, Travis Rhoden wrote:
+>> >>> >> Hi Loic and Wido,
+>> >>> >>
+>> >>> >> Loic - I agree with you that it makes more sense to implement the core
+>> >>> >> of the logic in ceph-disk where it can be re-used by other tools (like
+>> >>> >> ceph-deploy) or by administrators directly.  There are a lot of
+>> >>> >> conventions put in place by ceph-disk such that ceph-disk is the best
+>> >>> >> place to undo them as part of clean-up.  I'll pursue this with other
+>> >>> >> Ceph devs to see if I can get agreement on the best approach.
+>> >>> >>
+>> >>> >> At a high-level, ceph-disk has two commands that I think could have a
+>> >>> >> corollary -- prepare, and activate.
+>> >>> >>
+>> >>> >> Prepare will format and mkfs a disk/dir as needed to make it usable by Ceph.
+>> >>> >> Activate will put the resulting disk/dir into service by allocating an
+>> >>> >> OSD ID, creating the cephx key, and marking the init system as needed,
+>> >>> >> and finally starting the ceph-osd service.
+>> >>> >>
+>> >>> >> It seems like there could be two opposite commands that do the following:
+>> >>> >>
+>> >>> >> deactivate:
+>> >>> >>  - set "ceph osd out"
+>> >>> >
+>> >>> > I don't think 'out out' belongs at all.  It's redundant (and extra work)
+>> >>> > if we remove the osd from the CRUSH map.  I would imagine it being a
+>> >>> > possibly independent step.  I.e.,
+>> >>> >
+>> >>> >  - drain (by setting CRUSH weight to 0)
+>> >>> >  - wait
+>> >>> >  - deactivate
+>> >>> >  - (maybe) destroy
+>> >>> >
+>> >>> > That would make deactivate
+>> >>> >
+>> >>> >>  - stop ceph-osd service if needed
+>> >>> >>  - remove OSD from CRUSH map
+>> >>> >>  - remove OSD cephx key
+>> >>> >>  - deallocate OSD ID
+>> >>> >>  - remove 'ready', 'active', and INIT-specific files (to Wido's point)
+>> >>> >>  - umount device and remove mount point
+>> >>> >
+>> >>> > which I think make sense if the next step is to destroy or to move the
+>> >>> > disk to another box.  In the latter case the data will likely need to move
+>> >>> > to another disk anyway so keeping it around it just a data safety thing
+>> >>> > (keep as many copies as possible).
+>> >>> >
+>> >>> > OTOH, if you clear out the OSD id then deactivate isn't reversible
+>> >>> > with activate as the OSD might be a new id even if it isn't moved.  An
+>> >>> > alternative approach might be
+>> >>> >
+>> >>> > deactivate:
+>> >>> >   - stop ceph-osd service if needed
+>> >>> >   - remove 'ready', 'active', and INIT-specific files (to Wido's point)
+>> >>> >   - umount device and remove mount point
+>> >>>
+>> >>> Good point.  It would be a very nice result if activate/deactivate
+>> >>> were reversible by each other.  perhaps that should be the guiding
+>> >>> principle, with any additional steps pushed off to other commands,
+>> >>> such as destroy...
+>> >>>
+>> >>> >
+>> >>> > destroy:
+>> >>> >   - remove OSD from CRUSH map
+>> >>> >   - remove OSD cephx key
+>> >>> >   - deallocate OSD ID
+>> >>> >   - destroy data
+>> >>>
+>> >>> I like this demarcation between deactivate and destroy.
+>> >>>
+>> >>> >
+>> >>> > It's not quite true that the OSD ID should be preserved if the data
+>> >>> > is, but I don't think there is harm in associating the two...
+>> >>>
+>> >>> What if we make destroy data optional by using the --zap flag?  Or,
+>> >>> since zap is just removing the partition table, do we want to add more
+>> >>> of a "secure erase" feature?  Almost seems like that is difficult
+>> >>> precedent.  There are so many ways of trying to "securely" erase data
+>> >>> out there that that may be best left to the policies of the cluster
+>> >>> administrator(s).  In that case, --zap would still be a good middle
+>> >>> ground, but you should do more if you want to be extra secure.
+>> >>
+>> >> Sounds good to me!
+>> >>
+>> >>> One other question -- should we be doing anything with the journals?
+>> >>
+>> >> I think destroy should clear the partition type so that it can be reused
+>> >> by another OSD.  That will need to be tested, though.. I forget how smart
+>> >> the "find a journal partiiton" code is (it might blindly try to create a
+>> >> new one or something).
+>> >>
+>> >> sage
+>> >>
+>> >>
+>> >>
+>> >>>
+>> >>> >
+>> >>> > sage
+>> >>> >
+>> >>> >
+>> >>> >
+>> >>> >>
+>> >>> >> destroy:
+>> >>> >>  - zap disk (removes partition table and disk content)
+>> >>> >>
+>> >>> >> A few questions I have from this, though.  Is this granular enough?
+>> >>> >> If all the steps listed above are done in deactivate, is it useful?
+>> >>> >> Or are there usecases we need to cover where some of those steps need
+>> >>> >> to be done but not all?  Deactivating in this case would be
+>> >>> >> permanently removing the disk from the cluster.  If you are just
+>> >>> >> moving a disk from one host to another, Ceph already supports that
+>> >>> >> with no additional steps other than stop service, move disk, start
+>> >>> >> service.
+>> >>> >>
+>> >>> >> Is "destroy" even necessary?  It's really just zap at that point,
+>> >>> >> which already exists.  It only seems necessary to me if we add extra
+>> >>> >> functionality, like the ability to do a wipe of some kind first.  If
+>> >>> >> it is just zap, you could call zap separate or with --zap as an option
+>> >>> >> to deactivate.
+>> >>> >>
+>> >>> >> And all of this would need to be able to fail somewhat gracefully, as
+>> >>> >> you would often be dealing with dead/failed disks that may not allow
+>> >>> >> these commands to run successfully.  That's why I'm wondering if it
+>> >>> >> would be best to break the steps currently in "deactivate" into two
+>> >>> >> commands -- (1) deactivate: which would deal with commands specific to
+>> >>> >> the disk (osd out, stop service, remove marker files, umount) and (2)
+>> >>> >> remove: which would undefine the OSD within the cluster (remove from
+>> >>> >> CRUSH, remove cephx key, deallocate OSD ID).
+>> >>> >>
+>> >>> >> I'm mostly talking out loud here.  Looking for more ideas, input.  :)
+>> >>> >>
+>> >>> >>  - Travis
+>> >>> >>
+>> >>> >>
+>> >>> >> On Sun, Jan 4, 2015 at 6:07 AM, Wido den Hollander <wido@42on.com> wrote:
+>> >>> >> > On 01/02/2015 10:31 PM, Travis Rhoden wrote:
+>> >>> >> >> Hi everyone,
+>> >>> >> >>
+>> >>> >> >> There has been a long-standing request [1] to implement an OSD
+>> >>> >> >> "destroy" capability to ceph-deploy.  A community user has submitted a
+>> >>> >> >> pull request implementing this feature [2].  While the code needs a
+>> >>> >> >> bit of work (there are a few things to work out before it would be
+>> >>> >> >> ready to merge), I want to verify that the approach is sound before
+>> >>> >> >> diving into it.
+>> >>> >> >>
+>> >>> >> >> As it currently stands, the new feature would do allow for the following:
+>> >>> >> >>
+>> >>> >> >> ceph-deploy osd destroy <host> --osd-id <id>
+>> >>> >> >>
+>> >>> >> >> From that command, ceph-deploy would reach out to the host, do "ceph
+>> >>> >> >> osd out", stop the ceph-osd service for the OSD, then finish by doing
+>> >>> >> >> "ceph osd crush remove", "ceph auth del", and "ceph osd rm".  Finally,
+>> >>> >> >> it would umount the OSD, typically in /var/lib/ceph/osd/...
+>> >>> >> >>
+>> >>> >> >
+>> >>> >> > Prior to the unmount, shouldn't it also clean up the 'ready' file to
+>> >>> >> > prevent the OSD from starting after a reboot?
+>> >>> >> >
+>> >>> >> > Although it's key has been removed from the cluster it shouldn't matter
+>> >>> >> > that much, but it seems a bit cleaner.
+>> >>> >> >
+>> >>> >> > It could even be more destructive, that if you pass --zap-disk to it, it
+>> >>> >> > also runs wipefs or something to clean the whole disk.
+>> >>> >> >
+>> >>> >> >>
+>> >>> >> >> Does this high-level approach seem sane?  Anything that is missing
+>> >>> >> >> when trying to remove an OSD?
+>> >>> >> >>
+>> >>> >> >>
+>> >>> >> >> There are a few specifics to the current PR that jump out to me as
+>> >>> >> >> things to address.  The format of the command is a bit rough, as other
+>> >>> >> >> "ceph-deploy osd" commands take a list of [host[:disk[:journal]]] args
+>> >>> >> >> to specify a bunch of disks/osds to act on at one.  But this command
+>> >>> >> >> only allows one at a time, by virtue of the --osd-id argument.  We
+>> >>> >> >> could try to accept [host:disk] and look up the OSD ID from that, or
+>> >>> >> >> potentially take [host:ID] as input.
+>> >>> >> >>
+>> >>> >> >> Additionally, what should be done with the OSD's journal during the
+>> >>> >> >> destroy process?  Should it be left untouched?
+>> >>> >> >>
+>> >>> >> >> Should there be any additional barriers to performing such a
+>> >>> >> >> destructive command?  User confirmation?
+>> >>> >> >>
+>> >>> >> >>
+>> >>> >> >>  - Travis
+>> >>> >> >>
+>> >>> >> >> [1] http://tracker.ceph.com/issues/3480
+>> >>> >> >> [2] https://github.com/ceph/ceph-deploy/pull/254
+>> >>> >> >> --
+>> >>> >> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> >>> >> >> the body of a message to majordomo@vger.kernel.org
+>> >>> >> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> >>> >> >>
+>> >>> >> >
+>> >>> >> >
+>> >>> >> > --
+>> >>> >> > Wido den Hollander
+>> >>> >> > 42on B.V.
+>> >>> >> > Ceph trainer and consultant
+>> >>> >> >
+>> >>> >> > Phone: +31 (0)20 700 9902
+>> >>> >> > Skype: contact42on
+>> >>> >> --
+>> >>> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> >>> >> the body of a message to majordomo@vger.kernel.org
+>> >>> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> >>> >>
+>> >>> >>
+>> >>> --
+>> >>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> >>> the body of a message to majordomo@vger.kernel.org
+>> >>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> >>>
+>> >>>
+>> >> --
+>> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> >> the body of a message to majordomo@vger.kernel.org
+>> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> > --
+>> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> > the body of a message to majordomo@vger.kernel.org
+>> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
