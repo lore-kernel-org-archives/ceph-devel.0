@@ -1,50 +1,57 @@
-From: Robert LeBlanc <robert@leblancnet.us>
-Subject: Re: What to do when a parent RBD clone becomes corrupted
-Date: Mon, 5 Jan 2015 17:47:54 -0700
-Message-ID: <CAANLjFrVrfwGGQqo_CD8q_b1sys6_Bs8gZaw0CGNkR8oKvfNhA@mail.gmail.com>
-References: <CAANLjFqeEqQWimV-A8rzFgAkBrtxRXu3_OUF6waPT7N6J7GL4g@mail.gmail.com>
-	<CAANLjFqqPD9=91OYdYJ8bQrE88=+AOC0psD5gJUqV0n+JG5Xsg@mail.gmail.com>
+From: Chaitanya Huilgol <Chaitanya.Huilgol@sandisk.com>
+Subject: RE: Ceph-client branch for Ubuntu 14.04.1 LTS (3.13.0-x kernels)
+Date: Tue, 6 Jan 2015 02:36:38 +0000
+Message-ID: <9E914F5BD7F48A4782456CEB550A42280A758D55@SACMBXIP01.sdcorp.global.sandisk.com>
+References: <9E914F5BD7F48A4782456CEB550A42280A758A6D@SACMBXIP01.sdcorp.global.sandisk.com>
+ <CALFYKtAxr9AbPR_DJp9EBTZ+FX4+d9dwhk89M74VRDK2Gq3E1g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f182.google.com ([209.85.212.182]:58631 "EHLO
-	mail-wi0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753849AbbAFArz (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Jan 2015 19:47:55 -0500
-Received: by mail-wi0-f182.google.com with SMTP id h11so4402978wiw.3
-        for <ceph-devel@vger.kernel.org>; Mon, 05 Jan 2015 16:47:54 -0800 (PST)
-In-Reply-To: <CAANLjFqqPD9=91OYdYJ8bQrE88=+AOC0psD5gJUqV0n+JG5Xsg@mail.gmail.com>
+Received: from mail-bn1bbn0100.outbound.protection.outlook.com ([157.56.111.100]:34016
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1754190AbbAFCgo (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 5 Jan 2015 21:36:44 -0500
+In-Reply-To: <CALFYKtAxr9AbPR_DJp9EBTZ+FX4+d9dwhk89M74VRDK2Gq3E1g@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Ilya Dryomov <ilya.dryomov@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Mon, Jan 5, 2015 at 5:46 PM, Robert LeBlanc <robert@leblancnet.us> wrote:
-> Now that the holidays are over, I'm going to bump this message to see if
-> there are any good ideas on this.
->
-> Thanks,
-> Robert LeBlanc
->
-> On Thu, Dec 18, 2014 at 2:21 PM, Robert LeBlanc <robert@leblancnet.us>
-> wrote:
->>
->> Before we base thousands of VM image clones off of one or more snapshots,
->> I want to test what happens when the snapshot becomes corrupted. I don't
->> believe the snapshot will become corrupted through client access to the
->> snapshot, but some weird issue with PGs being lost or forced to be lost,
->> solar flares or alien invasions.
->>
->> My initial thought was to export a snapshot image and import it over the
->> top of the existing snapshot so that children would be preserved. No such
->> luck. I was hoping there would be a "i-really-really-want-to-do-this" option
->> that would let me restore the snapshot.
->>
->> Am I going about this the wrong way? I can see having to restore a number
->> of VM because of corrupted clone, but I'd hate to lose all the clones
->> because of corruption in the snapshot. I would be happy if the restored
->> snapshot would be flattened if it was a clone of another image previously.
->>
->> Thanks,
->> Robert LeBlanc
->
->
+SGkgSWx5YSwNCg0KQ2FuIHlvdSBwbGVhc2UgcG9pbnQgdXMgdG8gdGhlIHNvdXJjZXMgZm9yIHRo
+ZSB1YnVudHUgY2VwaC1jbGllbnQgd2l0aCB0aGUgZml4ZXMsIHRoZSBjZXBoLWNsaWVudCBjb2Rl
+IHRoYXQgY29tZXMgd2l0aCB0aGUgbGludXgtc291cmNlIGRlYmlhbiBwYWNrYWdlIGRvZXMgbm90
+IHNlZW0gdG8gY29udGFpbiBtYW55IG9mIHRoZSBmaXhlcyBhbmQgSSBkaWQgbm90IHNlZSBhbnkg
+Y2VwaC1jbGllbnQgcGF0Y2ggb3ZlciB0aGUgMy4xMyBrZXJuZWwgZWl0aGVyLiBMb29rcyBsaWtl
+IEkgbWlnaHQgYmUgbG9va2luZyBhdCB0aGUgd3JvbmcgcGxhY2UuDQoNClJlZ2FyZHMsDQpDaGFp
+dGFueWENCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IElseWEgRHJ5b21vdiBb
+bWFpbHRvOmlseWEuZHJ5b21vdkBpbmt0YW5rLmNvbV0NClNlbnQ6IE1vbmRheSwgSmFudWFyeSAw
+NSwgMjAxNSA5OjI4IFBNDQpUbzogQ2hhaXRhbnlhIEh1aWxnb2wNCkNjOiBjZXBoLWRldmVsQHZn
+ZXIua2VybmVsLm9yZw0KU3ViamVjdDogUmU6IENlcGgtY2xpZW50IGJyYW5jaCBmb3IgVWJ1bnR1
+IDE0LjA0LjEgTFRTICgzLjEzLjAteCBrZXJuZWxzKQ0KDQpPbiBNb24sIEphbiA1LCAyMDE1IGF0
+IDE6NTMgUE0sIENoYWl0YW55YSBIdWlsZ29sIDxDaGFpdGFueWEuSHVpbGdvbEBzYW5kaXNrLmNv
+bT4gd3JvdGU6DQo+IEhpIEFsbCwNCj4NCj4gVGhlIHN0b2NrIGNlcGgtY2xpZW50IG1vZHVsZXMg
+d2l0aCBVYnVudHUgMTQuMDQgTFRTIGFyZSBxdWl0ZSBkYXRlZCBhbmQgd2UgYXJlIHNlZWluZyBj
+cmFzaGVzIGFuZCBzb2Z0LWxvY2t1cCBpc3N1ZXMgd2hpY2ggaGF2ZSBiZWVuIGZpeGVkIGluIHRo
+ZSBjdXJyZW50IGNlcGgtY2xpZW50IGNvZGUgYmFzZS4NCj4gV2hhdCB3b3VsZCBiZSByZWNvbW1l
+bmRlZCBjZXBoLWNsaWVudCBicmFuY2ggY29tcGF0aWJsZSB3aXRoIHRoZSBVYnVudHUgMTQuMDQg
+KDMuMTMuMC14KSBrZXJuZWxzIHNvIHRoYXQgd2UgY2FuIGdldCBhcyBtYW55IGZpeGVzIGFzIHBv
+c3NpYmxlPw0KDQpXZSBhY3RpdmVseSBtYXJrIHJiZCAobm90IHNvIG11Y2ggY2VwaGZzKSBmaXhl
+cyBmb3Igc3RhYmxlIGFuZCBVYnVudHUga2VybmVsIHRlYW0gZ2VuZXJhbGx5IHBpY2tzIHRoZW0g
+dXAuICAzLjEzIHNlcmllcyBzaG91bGQgaGF2ZSBtb3N0IG9mIHRoZSBpbXBvcnRhbnQgZml4ZXMs
+IGFsdGhvdWdoIEkgaGF2ZW4ndCBjb3VudGVkLg0KDQpXaGF0IGlzc3VlcyBpbiBwYXJ0aWN1bGFy
+IHlvdSBhcmUgcnVubmluZyBpbnRvPyAgdW5hbWUgLWE/DQoNClRoYW5rcywNCg0KICAgICAgICAg
+ICAgICAgIElseWENCg0KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCg0KUExFQVNF
+IE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwg
+bWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJl
+Y2lwaWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMg
+bm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQg
+eW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZp
+ZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzIG1lc3Nh
+Z2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21t
+dW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25l
+IG9yIGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBh
+bmQgYWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVy
+IGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KDQo=
