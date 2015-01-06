@@ -1,42 +1,51 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: hammer timing
-Date: Tue, 6 Jan 2015 09:42:12 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1501060938110.6168@cobra.newdream.net>
+From: Gregory Farnum <greg@gregs42.com>
+Subject: Re: replace fiemap with seek_data/seek_hole?
+Date: Tue, 6 Jan 2015 10:09:02 -0800
+Message-ID: <CAC6JEv_F_NiS=vDFRu7eXeMRRz+KfNeHbgE3S8V_ikru+MpF4Q@mail.gmail.com>
+References: <alpine.DEB.2.00.1501060837090.8073@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:43639 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751453AbbAFRmN (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 6 Jan 2015 12:42:13 -0500
-Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
-	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id t06HgDuZ004526
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
-	for <ceph-devel@vger.kernel.org>; Tue, 6 Jan 2015 12:42:13 -0500
-Received: from redhat.com ([10.3.112.19])
-	by int-mx14.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t06HgCm2028761
-	for <ceph-devel@vger.kernel.org>; Tue, 6 Jan 2015 12:42:12 -0500
+Received: from mail-ie0-f176.google.com ([209.85.223.176]:51799 "EHLO
+	mail-ie0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756290AbbAFSJD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Jan 2015 13:09:03 -0500
+Received: by mail-ie0-f176.google.com with SMTP id tr6so4125667ieb.7
+        for <ceph-devel@vger.kernel.org>; Tue, 06 Jan 2015 10:09:03 -0800 (PST)
+Received: from mail-ie0-f171.google.com (mail-ie0-f171.google.com. [209.85.223.171])
+        by mx.google.com with ESMTPSA id i3sm28299266iod.19.2015.01.06.10.09.02
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
+        Tue, 06 Jan 2015 10:09:02 -0800 (PST)
+Received: by mail-ie0-f171.google.com with SMTP id ar1so4116090iec.2
+        for <ceph-devel@vger.kernel.org>; Tue, 06 Jan 2015 10:09:02 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.00.1501060837090.8073@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Sage Weil <sweil@redhat.com>
+Cc: haomaiwang@gmail.com, jianpeng.ma@intel.com, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Things were pretty slow over the holidays, so here's the current plan.
+On Tue, Jan 6, 2015 at 8:44 AM, Sage Weil <sweil@redhat.com> wrote:
+> Hey,
+>
+> In an exchange on linux-fsdevel yesterday it became clear that even when
+> FIEMAP isn't buggy it's not a good interface to build a map of sparse
+> files.  For example, XFS defrag or other future fs features may muck with
+> fiemap results.  One wouldn't expect those things to change whether a file
+> extent is allocated or not allocated, but given what we've seen so far I
+> wouldn't bet on it.
+>
+> Instead, we should use lseek SEEK_DATA/SEEK_HOLE, which is a more natural
+> interface for what we need.  This should simply be a matter of replacing
+> the fiemap() method implementation in FileStore.cc, I think.
+>
+> See this thread:
+>
+>         http://marc.info/?l=linux-fsdevel&m=142050204317588&w=2
+>
+> The other half of this is we should confirm that xfstests.git has good
+> SEEK_HOLE/SEEK_DATA stress tests (that verify correct results on both
+> recently written, recently synced, and uncached files).
 
-- Extend the current sprint (v0.92) until the end of this week (1/11).  
-At that time the already-frozen v0.91 will get released and v0.92 will 
-freeze.
-
-- Do one more two week sprint (v0.93) from 1/12 to 1/25.  v0.92 will 
-release and v0.93 will freeze.  This will effectively be the feature 
-freeze for hammer.
-
-- Two weeks after that we'll release v0.93, the first hammer release 
-candidate.
-
-- Hopefully two weeks after that v0.94 (final hammer) will follow.  This 
-will depend on how things look stability-wise, though; we may want to do a 
-second release candidate and make v0.95 hammer final.
-
-Sound okay?
-sage
-
+Is there a ticket covering this? :)
+-Greg
