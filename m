@@ -1,74 +1,57 @@
-From: Dong Yuan <yuandong1222@gmail.com>
-Subject: Re: [Ceph-Dokan] A Windows CephFS Client Project
-Date: Wed, 7 Jan 2015 14:18:54 +0800
-Message-ID: <CAMm-wcJr596fuhjA07fX3X3dU2X_FQMKEJ3BL_tgO1oQwJEHAg@mail.gmail.com>
-References: <CAM9_UU_4bnWVVf3bC8wnggNmF5O+HUshZn_xP-_ELiW3kqt=+Q@mail.gmail.com>
+From: Mark Nelson <mark.nelson@inktank.com>
+Subject: 01/07/2015 Weekly Ceph Performance Meeting IS ON!
+Date: Wed, 07 Jan 2015 07:14:41 -0600
+Message-ID: <54AD3141.4030905@redhat.com>
+Reply-To: mnelson@redhat.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f178.google.com ([209.85.220.178]:50017 "EHLO
-	mail-vc0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750834AbbAGGSz (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Jan 2015 01:18:55 -0500
-Received: by mail-vc0-f178.google.com with SMTP id hq11so257117vcb.37
-        for <ceph-devel@vger.kernel.org>; Tue, 06 Jan 2015 22:18:54 -0800 (PST)
-In-Reply-To: <CAM9_UU_4bnWVVf3bC8wnggNmF5O+HUshZn_xP-_ELiW3kqt=+Q@mail.gmail.com>
+Received: from mail-qa0-f44.google.com ([209.85.216.44]:41621 "EHLO
+	mail-qa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752951AbbAGNOp (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Jan 2015 08:14:45 -0500
+Received: by mail-qa0-f44.google.com with SMTP id bm13so2552928qab.3
+        for <ceph-devel@vger.kernel.org>; Wed, 07 Jan 2015 05:14:44 -0800 (PST)
+Received: from [192.168.1.103] (65-128-165-174.mpls.qwest.net. [65.128.165.174])
+        by mx.google.com with ESMTPSA id n18sm1309447qae.27.2015.01.07.05.14.42
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Wed, 07 Jan 2015 05:14:43 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ketor D <d.ketor@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-It is awesome!
+Happy New Year Everyone!
 
-I think CephFS may be the next Big Thing of ceph, since many many
-companies are about to use NAS on cloud.
+8AM PST as usual!  Please add an agenda item if there is something you 
+want to talk about!
 
-On 7 January 2015 at 12:09, Ketor D <d.ketor@gmail.com> wrote:
-> Hi everyone,
->
-> A new project ceph-dokan (https://github.com/ceph/ceph-dokan) is
-> open-source to all now.
-> You can access the cephfs on Windows directly using ceph-dokan, not by
-> smb or whatever.
-> And you will get the full experience and performance of cephfs on Windows now.
->
-> Here is something about this project you may want to know.
->
->      Overview.
->          ceph-dokan is build on MinGW. It will provide ceph-dokan.exe
-> and libcephfs.dll.
->          ceph-dokan.exe makes you use CephFS as a volume like your [C:] or [D:].
->          libcephfs.dll is a lib you can write your own application using CephFS.
->
->       Features:
->          Support almost windows filesystem api's.
->          Support ACL from Linux.
->          Support CreateFile of temp file.
->          Support Microsoft Office file edit and save.
->          etc.
->
->       Internal:
->          ceph-dokan is ported from upstream Ceph. It was first ported
-> as a standalone Ceph Client and then portd to Cygwin. But Cygwin is
-> too slowly and not native code so it was ported to MinGW later. And
-> with dokan(like fuse), now ceph-dokan map cephfs as a volume on
-> windows.
->          ceph-dokan is fully native win32 code and compiled by gcc. So
-> its performace is very good. Also it use winsock2 instead of linux
-> socket and select() instead of poll(). And etc....
->
-> Everyone who have experience on dokan, mingw, win32 can help to
-> improve ceph-dokan by pull request or using ceph-devel mailing list.
->
-> Thanks!
->  Ketor
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Here's the links:
+
+Etherpad URL:
+http://pad.ceph.com/p/performance_weekly
+
+To join the Meeting:
+https://bluejeans.com/268261044
+
+To join via Browser:
+https://bluejeans.com/268261044/browser
+
+To join with Lync:
+https://bluejeans.com/268261044/lync
 
 
+To join via Room System:
+Video Conferencing System: bjn.vc -or- 199.48.152.152
+Meeting ID: 268261044
 
--- 
-Dong Yuan
-Email:yuandong1222@gmail.com
+To join via Phone:
+1) Dial:
+           +1 408 740 7256
+           +1 888 240 2560(US Toll Free)
+           +1 408 317 9253(Alternate Number)
+           (see all numbers - http://bluejeans.com/numbers)
+2) Enter Conference ID: 268261044
+
+Mark
