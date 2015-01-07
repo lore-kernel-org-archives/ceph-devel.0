@@ -1,68 +1,71 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Testing the next giant release
-Date: Wed, 07 Jan 2015 15:02:51 +0100
-Message-ID: <54AD3C8B.4030705@dachary.org>
+From: Dan Van Der Ster <daniel.vanderster@cern.ch>
+Subject: Re: [Ceph-Dokan] A Windows CephFS Client Project
+Date: Wed, 7 Jan 2015 14:16:34 +0000
+Message-ID: <E769996A-DEED-4223-B36B-5A6C26539962@cern.ch>
+References: <CAM9_UU_4bnWVVf3bC8wnggNmF5O+HUshZn_xP-_ELiW3kqt=+Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="moqeaKa00Du92P5I5wjdnjPqJETt72HLA"
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:34810 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1753157AbbAGOCx (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Jan 2015 09:02:53 -0500
+Received: from cernmx13.cern.ch ([188.184.36.46]:12678 "EHLO CERNMX13.cern.ch"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751437AbbAGOQh convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Jan 2015 09:16:37 -0500
+In-Reply-To: <CAM9_UU_4bnWVVf3bC8wnggNmF5O+HUshZn_xP-_ELiW3kqt=+Q@mail.gmail.com>
+Content-Language: en-US
+Content-ID: <C6F4DEB65B09864594AB66FE9CBC5DFE@cern.ch>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tamil Muthamizhan <tmuthamizhan@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Ketor D <d.ketor@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---moqeaKa00Du92P5I5wjdnjPqJETt72HLA
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Dear Ketor,
+Congratulations, this is very interesting!
+Sorry to ask the obvious question, but does Dokan provide the needed interface to write a block device client, i.e. an RBD client ?
+Cheers, Dan
 
-Hi Tamil,
+> On 07 Jan 2015, at 05:09, Ketor D <d.ketor@gmail.com> wrote:
+> 
+> Hi everyone,
+> 
+> A new project ceph-dokan (https://github.com/ceph/ceph-dokan) is
+> open-source to all now.
+> You can access the cephfs on Windows directly using ceph-dokan, not by
+> smb or whatever.
+> And you will get the full experience and performance of cephfs on Windows now.
+> 
+> Here is something about this project you may want to know.
+> 
+>     Overview.
+>         ceph-dokan is build on MinGW. It will provide ceph-dokan.exe
+> and libcephfs.dll.
+>         ceph-dokan.exe makes you use CephFS as a volume like your [C:] or [D:].
+>         libcephfs.dll is a lib you can write your own application using CephFS.
+> 
+>      Features:
+>         Support almost windows filesystem api's.
+>         Support ACL from Linux.
+>         Support CreateFile of temp file.
+>         Support Microsoft Office file edit and save.
+>         etc.
+> 
+>      Internal:
+>         ceph-dokan is ported from upstream Ceph. It was first ported
+> as a standalone Ceph Client and then portd to Cygwin. But Cygwin is
+> too slowly and not native code so it was ported to MinGW later. And
+> with dokan(like fuse), now ceph-dokan map cephfs as a volume on
+> windows.
+>         ceph-dokan is fully native win32 code and compiled by gcc. So
+> its performace is very good. Also it use winsock2 instead of linux
+> socket and select() instead of poll(). And etc....
+> 
+> Everyone who have experience on dokan, mingw, win32 can help to
+> improve ceph-dokan by pull request or using ceph-devel mailing list.
+> 
+> Thanks!
+> Ketor
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-I've merged / integrated the giant backports found at
-
-https://github.com/ceph/ceph/pull/3186
-https://github.com/ceph/ceph/pull/3178
-https://github.com/ceph/ceph/pull/2954
-https://github.com/ceph/ceph/pull/3191
-https://github.com/ceph/ceph/pull/3168
-https://github.com/ceph/ceph/pull/3289
-
-into=20
-
-http://workbench.dachary.org/ceph/ceph/commit/0ea20e6c51208d6710f469454ab=
-3f964bfa7c9d2
-
-and successfully ran make check on it
-
-http://workbench.dachary.org:8080/projects/10?ref=3Dgiant-backports
-
-If I'm not mistaken the next step would be to run teuthology. If I'm to d=
-o it, would you be so kind as to let me know which suites are most releva=
-nt ? If someone else will take care of it, should I push the integration =
-branch somewhere ?
-
-Cheers
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---moqeaKa00Du92P5I5wjdnjPqJETt72HLA
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlStPIsACgkQ8dLMyEl6F2148gCglxNRpMpXXgF/lF4jp2Hd5jQd
-oDkAn258bU7MvtOx78Pudd37ovqdUH4A
-=3Dv/
------END PGP SIGNATURE-----
-
---moqeaKa00Du92P5I5wjdnjPqJETt72HLA--
