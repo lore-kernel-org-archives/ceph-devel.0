@@ -1,57 +1,68 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: 01/07/2015 Weekly Ceph Performance Meeting IS ON!
-Date: Wed, 07 Jan 2015 07:14:41 -0600
-Message-ID: <54AD3141.4030905@redhat.com>
-Reply-To: mnelson@redhat.com
+From: Loic Dachary <loic@dachary.org>
+Subject: Testing the next giant release
+Date: Wed, 07 Jan 2015 15:02:51 +0100
+Message-ID: <54AD3C8B.4030705@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="moqeaKa00Du92P5I5wjdnjPqJETt72HLA"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f44.google.com ([209.85.216.44]:41621 "EHLO
-	mail-qa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752951AbbAGNOp (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Jan 2015 08:14:45 -0500
-Received: by mail-qa0-f44.google.com with SMTP id bm13so2552928qab.3
-        for <ceph-devel@vger.kernel.org>; Wed, 07 Jan 2015 05:14:44 -0800 (PST)
-Received: from [192.168.1.103] (65-128-165-174.mpls.qwest.net. [65.128.165.174])
-        by mx.google.com with ESMTPSA id n18sm1309447qae.27.2015.01.07.05.14.42
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 07 Jan 2015 05:14:43 -0800 (PST)
+Received: from mail2.dachary.org ([91.121.57.175]:34810 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1753157AbbAGOCx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Jan 2015 09:02:53 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Tamil Muthamizhan <tmuthamizhan@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Happy New Year Everyone!
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--moqeaKa00Du92P5I5wjdnjPqJETt72HLA
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-8AM PST as usual!  Please add an agenda item if there is something you 
-want to talk about!
+Hi Tamil,
 
-Here's the links:
+I've merged / integrated the giant backports found at
 
-Etherpad URL:
-http://pad.ceph.com/p/performance_weekly
+https://github.com/ceph/ceph/pull/3186
+https://github.com/ceph/ceph/pull/3178
+https://github.com/ceph/ceph/pull/2954
+https://github.com/ceph/ceph/pull/3191
+https://github.com/ceph/ceph/pull/3168
+https://github.com/ceph/ceph/pull/3289
 
-To join the Meeting:
-https://bluejeans.com/268261044
+into=20
 
-To join via Browser:
-https://bluejeans.com/268261044/browser
+http://workbench.dachary.org/ceph/ceph/commit/0ea20e6c51208d6710f469454ab=
+3f964bfa7c9d2
 
-To join with Lync:
-https://bluejeans.com/268261044/lync
+and successfully ran make check on it
+
+http://workbench.dachary.org:8080/projects/10?ref=3Dgiant-backports
+
+If I'm not mistaken the next step would be to run teuthology. If I'm to d=
+o it, would you be so kind as to let me know which suites are most releva=
+nt ? If someone else will take care of it, should I push the integration =
+branch somewhere ?
+
+Cheers
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
 
-To join via Room System:
-Video Conferencing System: bjn.vc -or- 199.48.152.152
-Meeting ID: 268261044
+--moqeaKa00Du92P5I5wjdnjPqJETt72HLA
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
-To join via Phone:
-1) Dial:
-           +1 408 740 7256
-           +1 888 240 2560(US Toll Free)
-           +1 408 317 9253(Alternate Number)
-           (see all numbers - http://bluejeans.com/numbers)
-2) Enter Conference ID: 268261044
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
 
-Mark
+iEYEARECAAYFAlStPIsACgkQ8dLMyEl6F2148gCglxNRpMpXXgF/lF4jp2Hd5jQd
+oDkAn258bU7MvtOx78Pudd37ovqdUH4A
+=3Dv/
+-----END PGP SIGNATURE-----
+
+--moqeaKa00Du92P5I5wjdnjPqJETt72HLA--
