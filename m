@@ -1,388 +1,106 @@
-From: Wei-Chung Cheng <freeze.vicente.cheng@gmail.com>
-Subject: Re: ceph-deploy osd destroy feature
-Date: Wed, 7 Jan 2015 10:18:51 +0800
-Message-ID: <CABF_e-FvtHzwzc5MUV+=hWmFXDn=eNsD9XV-Q5P8KMMi5uN6hg@mail.gmail.com>
-References: <CACkq2moPdXgDGCtr-jtd+rxEGT3H_SFnVGruvKqfXDuvU8eagg@mail.gmail.com>
-	<54A91EDA.8080008@42on.com>
-	<CACkq2mr9yxmiLd028hQmsC4TLqb3FBgww-6O_pML3ubyybFo5g@mail.gmail.com>
-	<alpine.DEB.2.00.1501050921040.5967@cobra.newdream.net>
-	<CACkq2mq1MrVi430=F+xvOcYw+vY+B_qXimWUtSynN0WB1R-c8A@mail.gmail.com>
-	<alpine.DEB.2.00.1501051017041.5967@cobra.newdream.net>
-	<CAANLjFpE1-9hOsFFdCkyLP7M8s99xuWXKfss7atTRd7MAc-5iA@mail.gmail.com>
-	<CABF_e-GcU6KyFD7LneiEi4ExpJ5i7MoDZycGeS_qzrM_HH-vCA@mail.gmail.com>
-	<alpine.DEB.2.00.1501052107140.10525@cobra.newdream.net>
-	<CABF_e-GYvLVz-YUOM0c3+OR6Bi0Ej2pZncSAGuws2rscSeLy4A@mail.gmail.com>
-	<alpine.DEB.2.00.1501060625110.10525@cobra.newdream.net>
-	<CACkq2mqWmB_jstZp_hr9jH7Fr+D6rTeL-zN0T1QE6-BpyxBexg@mail.gmail.com>
-	<alpine.DEB.2.00.1501060823140.3041@cobra.newdream.net>
-	<CACkq2mqG41qOebE4ghFWyhAc8_6MCKrHrLuQo+b_QqdYzWfMNA@mail.gmail.com>
+From: Nicheal <zay11022@gmail.com>
+Subject: ERROR: assert(last_e.version.version < e.version.version)
+Date: Wed, 7 Jan 2015 11:54:08 +0800
+Message-ID: <CALZt5jzin9NUsojJ5W4eCmop=bAkjaHriPWFcg2_L9DeFF8AkQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f45.google.com ([209.85.218.45]:36248 "EHLO
-	mail-oi0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932612AbbAGCSv (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Jan 2015 21:18:51 -0500
-Received: by mail-oi0-f45.google.com with SMTP id x69so1073297oia.4
-        for <ceph-devel@vger.kernel.org>; Tue, 06 Jan 2015 18:18:51 -0800 (PST)
-In-Reply-To: <CACkq2mqG41qOebE4ghFWyhAc8_6MCKrHrLuQo+b_QqdYzWfMNA@mail.gmail.com>
+Received: from mail-ob0-f169.google.com ([209.85.214.169]:44728 "EHLO
+	mail-ob0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751654AbbAGDyI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Jan 2015 22:54:08 -0500
+Received: by mail-ob0-f169.google.com with SMTP id vb8so1438239obc.0
+        for <ceph-devel@vger.kernel.org>; Tue, 06 Jan 2015 19:54:08 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Travis Rhoden <trhoden@gmail.com>
-Cc: Sage Weil <sage@newdream.net>, Robert LeBlanc <robert@leblancnet.us>, Wido den Hollander <wido@42on.com>, Loic Dachary <loic@dachary.org>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-2015-01-07 0:30 GMT+08:00 Travis Rhoden <trhoden@gmail.com>:
-> On Tue, Jan 6, 2015 at 11:23 AM, Sage Weil <sage@newdream.net> wrote:
->> On Tue, 6 Jan 2015, Travis Rhoden wrote:
->>> On Tue, Jan 6, 2015 at 9:28 AM, Sage Weil <sage@newdream.net> wrote:
->>> > On Tue, 6 Jan 2015, Wei-Chung Cheng wrote:
->>> >> 2015-01-06 13:08 GMT+08:00 Sage Weil <sage@newdream.net>:
->>> >> > On Tue, 6 Jan 2015, Wei-Chung Cheng wrote:
->>> >> >> Dear all:
->>> >> >>
->>> >> >> I agree Robert opinion because I hit the similar problem once.
->>> >> >> I think that how to handle journal partition is another problem about
->>> >> >> destroy subcommand.
->>> >> >> (Although it will work normally most time)
->>> >> >>
->>> >> >> I also agree we need the "secure erase" feature.
->>> >> >> As my experience, I just make new label for disk by "parted" command.
->>> >> >> I will think how could we do a secure erase or someone have a good
->>> >> >> idea for this?
->>> >> >
->>> >> > The simplest secure erase is to encrypt the disk and destroy the key.  You
->>> >> > can do that with dm-crypt today.  Most drives also will do this in the
->>> >> > firmware but I'm not familiar with the toolchain needed to use that
->>> >> > feature.  (It would be much preferable to go that route, though, since it
->>> >> > will avoid any CPU overhead.)
->>> >> >
->>> >> > sage
->>> >>
->>> >> I think I got some misunderstanding.
->>> >> The secure erase means how to handle the disk which have encrypt
->>> >> feature (SED disk)?
->>> >> or it means that encrypt the disk by dm-crypt?
->>> >
->>> > Normally secure erase simply means destroying the data on disk.
->>> > In practice, that can be hard.  Overwriting it will mostly work, but it's
->>> > slow, and with effort forensics can often still recover the old data.
->>> >
->>> > Encrypting a disk and then destroying just the encryption key is an easy
->>> > way to "erase" a entire disk.  It's not uncommon to do this so that old
->>> > disks can be RMAed or disposed of through the usual channels without fear
->>> > of data being recovered.
->>> >
->>> > sage
->>> >
->>> >
->>> >>
->>> >> Would Travis describe the "secure erase" more detailly?
->>>
->>> Encrypting and throwing away the key is a good way to go, for sure.
->>> But for now, I'm suggesting that we don't add a secure erase
->>> functionality.  It can certainly be added later, but I'd rather focus
->>> on getting the baseline deactivate and destroy functionality in first,
->>> and use --zap with destroy to blow away a disk.
->>>
->>> I'd rather not have a secure erase feature hold up the other functionality.
->>
->> Agreed.. sorry for running off into the weeds!  :)
->
-> Oh, not at all.  Very good info.  It was more since Vicente said he
-> was going to start working on some things, I didn't want him to worry
-> about how to add secure erase at the very beginning.  :)
+Hi all,
 
-OK, according to your  description I think I can ignore the "secure
-erase" at beginning. :D
-You and sage's info make me know how to erase entire disk fast, thanks!
-It useful to me!!
+I cannot restart some osds when after a flipping of all 54 osds. The
+log is show below:
 
->
-> To that end, Vicente, I saw your comments on GitHub as well.  To
-> clarify, were you thinking of adding 'deactivate' to ceph-disk or
-> ceph-deploy?  I may have misunderstood your intent.  We definitely
-> need to add deactivate/destroy to ceph-disk, then ceph-deploy can call
-> them.  But you may have meant that you were going to pre-emptively
-> work on ceph-deploy to call the (hopefully soon to exist) 'ceph-disk
-> deactivate' command.
->
->  - Travis
+    -9> 2015-01-06 10:53:07.976997 7f35695177a0 20 read_log
+31150'2273018 (31150'2273012) modify
+4a8b7974/rb.0.bc58e8.6b8b4567.000000003e37/head//2 by
+client.16829289.1:720306459 2015-01-05 21:57:54.650768
+    -8> 2015-01-06 10:53:07.977002 7f35695177a0 20 read_log
+31150'2273019 (31150'2273018) modify
+4a8b7974/rb.0.bc58e8.6b8b4567.000000003e37/head//2 by
+client.16829289.1:720306460 2015-01-05 21:57:54.666768
+    -7> 2015-01-06 10:53:07.977008 7f35695177a0 20 read_log
+31150'2273020 (31150'2272817) modify
+78c59174/rb.0.3e4a1.6b8b4567.000000000f3e/head//2 by
+client.16830941.1:737726835 2015-01-05 21:57:59.407053
+    -6> 2015-01-06 10:53:07.977014 7f35695177a0 20 read_log
+31150'2273021 (31150'2273019) modify
+4a8b7974/rb.0.bc58e8.6b8b4567.000000003e37/head//2 by
+client.16829289.1:720306701 2015-01-05 21:57:59.724767
+    -5> 2015-01-06 10:53:07.977019 7f35695177a0 20 read_log
+31150'2273022 (31150'2273021) modify
+4a8b7974/rb.0.bc58e8.6b8b4567.000000003e37/head//2 by
+client.16829289.1:720306702 2015-01-05 21:57:59.733767
+    -4> 2015-01-06 10:53:07.977026 7f35695177a0 20 read_log
+31150'2273023 (31150'2273022) modify
+4a8b7974/rb.0.bc58e8.6b8b4567.000000003e37/head//2 by
+client.16829289.1:720307058 2015-01-05 21:58:04.883767
+    -3> 2015-01-06 10:53:07.977031 7f35695177a0 20 read_log
+31150'2273024 (31150'2273023) modify
+4a8b7974/rb.0.bc58e8.6b8b4567.000000003e37/head//2 by
+client.16829289.1:720307059 2015-01-05 21:58:04.890767
+    -2> 2015-01-06 10:53:07.977036 7f35695177a0 20 read_log
+31150'2273025 (31150'2273020) modify
+78c59174/rb.0.3e4a1.6b8b4567.000000000f3e/head//2 by
+client.16830941.1:737727535 2015-01-05 21:58:09.465053
+    -1> 2015-01-06 10:53:07.977047 7f35695177a0 20 read_log
+31181'2273025 (31150'2273024) modify
+4a8b7974/rb.0.bc58e8.6b8b4567.000000003e37/head//2 by
+client.16829289.1:720307830 2015-01-05 21:58:15.795767
+     0> 2015-01-06 10:53:08.003297 7f35695177a0 -1 osd/PGLog.cc: In
+function 'static bool PGLog::read_log(ObjectStore*, coll_t, hobject_t,
+const pg_info_t&, std::map<eversion_t, hobject_t,
+std::less<eversion_t>, std::allocator<std::pair<const eversion_t,
+hobject_t> > >&, PGLog::IndexedLog&, pg_missing_t&,
+std::ostringstream&, std::set<std::basic_string<char,
+std::char_traits<char>, std::allocator<char> >,
+std::less<std::basic_string<char, std::char_traits<char>,
+std::allocator<char> > >, std::allocator<std::basic_string<char,
+std::char_traits<char>, std::allocator<char> > > >*)' thread
+7f35695177a0 time 2015-01-06 10:53:07.977052
+osd/PGLog.cc: 672: FAILED assert(last_e.version.version < e.version.version)
 
-If all of disk related functions in ceph-disk, I agree to add
-deactivate to ceph-disk.
-(Just as you need, ceph-deploy could call them to make things simple.)
+it asserts in read_log. Generally, version should be monotonically
+increasing. However,  it seems not true when osd state is flipping.
 
-As you mention, you started work on deactivate on ceph-disk.
-I haven't started to work it.
-I worked on ceph-deply osd related function that you say on GitHub
-comment ( osd_list() and osd_tree() ) yesterday.
-Maybe you would like pushed to wip- brnach that I can help you to
-complete if you need.
-Or I re-work on ceph-deploy to call the ceph-disk deactivate?
+The reason is that pg_log has the same version with different epoch.
 
-vicente
+Assume that:
+1. A (primary) receive a write request, and prepare transaction
+increasing version from 1 -> 2 at epoch = 1 and sending the request to
+B and C (replica)
+2. But B and C may be down this time but Mon and A does not know this.
+Therefore, A write the transaction into journal and wait for B, C
+reply.
+3. How this time A is down and B,C then is coming up. So B may become
+the primary and handle all write for this pg. Client may resend this
+unsuccessful request to B, so B also want to increasing version from 1
+-> 2, and epoch may equal 5 since osdmap changes this time.
+4. Then A is comming up again so that it should replay journal to dump
+the transaction pg_log version = 2, epoch = 1 to omap. After this, it
+will peer with B and C, and find B is the auth pg_log, so query pg_log
+on B and merge them with itself. This time A may have pg_log: version
+= 2 and epoch = 1.  version = 2, epoch = 5.
+5. After successfully recovering, pg_log: verison = 2, epoch = 5 is
+stored in omap
+6. Then this time A is down again and want to restart the process.
+However, when it loadpgs and read pg_log, it find that 2 pieces are
+version = 2 with different epoch, so it assert.
 
->>
->> sage
->>
->>
->>>
->>> >>
->>> >> very thanks!
->>> >>
->>> >> vicente
->>> >>
->>> >> >
->>> >> >
->>> >> >>
->>> >> >> Anyway, I rework and implement the deactivate first.
->>>
->>> I started working on this yesterday as well, but don't want to
->>> duplicate work.  I haven't pushed a wip- branch or anything yet,
->>> though.  I can hold off if you are actively working on it.
->>>
->>> >> >>
->>> >> >>
->>> >> >>
->>> >> >>
->>> >> >> 2015-01-06 8:42 GMT+08:00 Robert LeBlanc <robert@leblancnet.us>:
->>> >> >> > I do think the "find a journal partition" code isn't particularly robust.
->>> >> >> > I've had experiences with ceph-disk trying to create a new partition even
->>> >> >> > though I had wiped/zapped a disk previously. It would make the operational
->>> >> >> > component of Ceph much easier with replacing disks if the journal partition
->>> >> >> > is cleanly removed and able to be reused automatically.
->>> >> >> >
->>> >> >> > On Mon, Jan 5, 2015 at 11:18 AM, Sage Weil <sage@newdream.net> wrote:
->>> >> >> >> On Mon, 5 Jan 2015, Travis Rhoden wrote:
->>> >> >> >>> On Mon, Jan 5, 2015 at 12:27 PM, Sage Weil <sage@newdream.net> wrote:
->>> >> >> >>> > On Mon, 5 Jan 2015, Travis Rhoden wrote:
->>> >> >> >>> >> Hi Loic and Wido,
->>> >> >> >>> >>
->>> >> >> >>> >> Loic - I agree with you that it makes more sense to implement the core
->>> >> >> >>> >> of the logic in ceph-disk where it can be re-used by other tools (like
->>> >> >> >>> >> ceph-deploy) or by administrators directly.  There are a lot of
->>> >> >> >>> >> conventions put in place by ceph-disk such that ceph-disk is the best
->>> >> >> >>> >> place to undo them as part of clean-up.  I'll pursue this with other
->>> >> >> >>> >> Ceph devs to see if I can get agreement on the best approach.
->>> >> >> >>> >>
->>> >> >> >>> >> At a high-level, ceph-disk has two commands that I think could have a
->>> >> >> >>> >> corollary -- prepare, and activate.
->>> >> >> >>> >>
->>> >> >> >>> >> Prepare will format and mkfs a disk/dir as needed to make it usable by Ceph.
->>> >> >> >>> >> Activate will put the resulting disk/dir into service by allocating an
->>> >> >> >>> >> OSD ID, creating the cephx key, and marking the init system as needed,
->>> >> >> >>> >> and finally starting the ceph-osd service.
->>> >> >> >>> >>
->>> >> >> >>> >> It seems like there could be two opposite commands that do the following:
->>> >> >> >>> >>
->>> >> >> >>> >> deactivate:
->>> >> >> >>> >>  - set "ceph osd out"
->>> >> >> >>> >
->>> >> >> >>> > I don't think 'out out' belongs at all.  It's redundant (and extra work)
->>> >> >> >>> > if we remove the osd from the CRUSH map.  I would imagine it being a
->>> >> >> >>> > possibly independent step.  I.e.,
->>> >> >> >>> >
->>> >> >> >>> >  - drain (by setting CRUSH weight to 0)
->>> >> >> >>> >  - wait
->>> >> >> >>> >  - deactivate
->>> >> >> >>> >  - (maybe) destroy
->>> >> >> >>> >
->>> >> >> >>> > That would make deactivate
->>> >> >> >>> >
->>> >> >> >>> >>  - stop ceph-osd service if needed
->>> >> >> >>> >>  - remove OSD from CRUSH map
->>> >> >> >>> >>  - remove OSD cephx key
->>> >> >> >>> >>  - deallocate OSD ID
->>> >> >> >>> >>  - remove 'ready', 'active', and INIT-specific files (to Wido's point)
->>> >> >> >>> >>  - umount device and remove mount point
->>> >> >> >>> >
->>> >> >> >>> > which I think make sense if the next step is to destroy or to move the
->>> >> >> >>> > disk to another box.  In the latter case the data will likely need to move
->>> >> >> >>> > to another disk anyway so keeping it around it just a data safety thing
->>> >> >> >>> > (keep as many copies as possible).
->>> >> >> >>> >
->>> >> >> >>> > OTOH, if you clear out the OSD id then deactivate isn't reversible
->>> >> >> >>> > with activate as the OSD might be a new id even if it isn't moved.  An
->>> >> >> >>> > alternative approach might be
->>> >> >> >>> >
->>> >> >> >>> > deactivate:
->>> >> >> >>> >   - stop ceph-osd service if needed
->>> >> >> >>> >   - remove 'ready', 'active', and INIT-specific files (to Wido's point)
->>> >> >> >>> >   - umount device and remove mount point
->>> >> >> >>>
->>> >> >> >>> Good point.  It would be a very nice result if activate/deactivate
->>> >> >> >>> were reversible by each other.  perhaps that should be the guiding
->>> >> >> >>> principle, with any additional steps pushed off to other commands,
->>> >> >> >>> such as destroy...
->>> >> >> >>>
->>> >> >> >>> >
->>> >> >> >>> > destroy:
->>> >> >> >>> >   - remove OSD from CRUSH map
->>> >> >> >>> >   - remove OSD cephx key
->>> >> >> >>> >   - deallocate OSD ID
->>> >> >> >>> >   - destroy data
->>> >> >> >>>
->>> >> >> >>> I like this demarcation between deactivate and destroy.
->>> >> >> >>>
->>> >> >> >>> >
->>> >> >> >>> > It's not quite true that the OSD ID should be preserved if the data
->>> >> >> >>> > is, but I don't think there is harm in associating the two...
->>> >> >> >>>
->>> >> >> >>> What if we make destroy data optional by using the --zap flag?  Or,
->>> >> >> >>> since zap is just removing the partition table, do we want to add more
->>> >> >> >>> of a "secure erase" feature?  Almost seems like that is difficult
->>> >> >> >>> precedent.  There are so many ways of trying to "securely" erase data
->>> >> >> >>> out there that that may be best left to the policies of the cluster
->>> >> >> >>> administrator(s).  In that case, --zap would still be a good middle
->>> >> >> >>> ground, but you should do more if you want to be extra secure.
->>> >> >> >>
->>> >> >> >> Sounds good to me!
->>> >> >> >>
->>> >> >> >>> One other question -- should we be doing anything with the journals?
->>> >> >> >>
->>> >> >> >> I think destroy should clear the partition type so that it can be reused
->>> >> >> >> by another OSD.  That will need to be tested, though.. I forget how smart
->>> >> >> >> the "find a journal partiiton" code is (it might blindly try to create a
->>> >> >> >> new one or something).
->>> >> >> >>
->>> >> >> >> sage
->>> >> >> >>
->>> >> >> >>
->>> >> >> >>
->>> >> >> >>>
->>> >> >> >>> >
->>> >> >> >>> > sage
->>> >> >> >>> >
->>> >> >> >>> >
->>> >> >> >>> >
->>> >> >> >>> >>
->>> >> >> >>> >> destroy:
->>> >> >> >>> >>  - zap disk (removes partition table and disk content)
->>> >> >> >>> >>
->>> >> >> >>> >> A few questions I have from this, though.  Is this granular enough?
->>> >> >> >>> >> If all the steps listed above are done in deactivate, is it useful?
->>> >> >> >>> >> Or are there usecases we need to cover where some of those steps need
->>> >> >> >>> >> to be done but not all?  Deactivating in this case would be
->>> >> >> >>> >> permanently removing the disk from the cluster.  If you are just
->>> >> >> >>> >> moving a disk from one host to another, Ceph already supports that
->>> >> >> >>> >> with no additional steps other than stop service, move disk, start
->>> >> >> >>> >> service.
->>> >> >> >>> >>
->>> >> >> >>> >> Is "destroy" even necessary?  It's really just zap at that point,
->>> >> >> >>> >> which already exists.  It only seems necessary to me if we add extra
->>> >> >> >>> >> functionality, like the ability to do a wipe of some kind first.  If
->>> >> >> >>> >> it is just zap, you could call zap separate or with --zap as an option
->>> >> >> >>> >> to deactivate.
->>> >> >> >>> >>
->>> >> >> >>> >> And all of this would need to be able to fail somewhat gracefully, as
->>> >> >> >>> >> you would often be dealing with dead/failed disks that may not allow
->>> >> >> >>> >> these commands to run successfully.  That's why I'm wondering if it
->>> >> >> >>> >> would be best to break the steps currently in "deactivate" into two
->>> >> >> >>> >> commands -- (1) deactivate: which would deal with commands specific to
->>> >> >> >>> >> the disk (osd out, stop service, remove marker files, umount) and (2)
->>> >> >> >>> >> remove: which would undefine the OSD within the cluster (remove from
->>> >> >> >>> >> CRUSH, remove cephx key, deallocate OSD ID).
->>> >> >> >>> >>
->>> >> >> >>> >> I'm mostly talking out loud here.  Looking for more ideas, input.  :)
->>> >> >> >>> >>
->>> >> >> >>> >>  - Travis
->>> >> >> >>> >>
->>> >> >> >>> >>
->>> >> >> >>> >> On Sun, Jan 4, 2015 at 6:07 AM, Wido den Hollander <wido@42on.com> wrote:
->>> >> >> >>> >> > On 01/02/2015 10:31 PM, Travis Rhoden wrote:
->>> >> >> >>> >> >> Hi everyone,
->>> >> >> >>> >> >>
->>> >> >> >>> >> >> There has been a long-standing request [1] to implement an OSD
->>> >> >> >>> >> >> "destroy" capability to ceph-deploy.  A community user has submitted a
->>> >> >> >>> >> >> pull request implementing this feature [2].  While the code needs a
->>> >> >> >>> >> >> bit of work (there are a few things to work out before it would be
->>> >> >> >>> >> >> ready to merge), I want to verify that the approach is sound before
->>> >> >> >>> >> >> diving into it.
->>> >> >> >>> >> >>
->>> >> >> >>> >> >> As it currently stands, the new feature would do allow for the following:
->>> >> >> >>> >> >>
->>> >> >> >>> >> >> ceph-deploy osd destroy <host> --osd-id <id>
->>> >> >> >>> >> >>
->>> >> >> >>> >> >> From that command, ceph-deploy would reach out to the host, do "ceph
->>> >> >> >>> >> >> osd out", stop the ceph-osd service for the OSD, then finish by doing
->>> >> >> >>> >> >> "ceph osd crush remove", "ceph auth del", and "ceph osd rm".  Finally,
->>> >> >> >>> >> >> it would umount the OSD, typically in /var/lib/ceph/osd/...
->>> >> >> >>> >> >>
->>> >> >> >>> >> >
->>> >> >> >>> >> > Prior to the unmount, shouldn't it also clean up the 'ready' file to
->>> >> >> >>> >> > prevent the OSD from starting after a reboot?
->>> >> >> >>> >> >
->>> >> >> >>> >> > Although it's key has been removed from the cluster it shouldn't matter
->>> >> >> >>> >> > that much, but it seems a bit cleaner.
->>> >> >> >>> >> >
->>> >> >> >>> >> > It could even be more destructive, that if you pass --zap-disk to it, it
->>> >> >> >>> >> > also runs wipefs or something to clean the whole disk.
->>> >> >> >>> >> >
->>> >> >> >>> >> >>
->>> >> >> >>> >> >> Does this high-level approach seem sane?  Anything that is missing
->>> >> >> >>> >> >> when trying to remove an OSD?
->>> >> >> >>> >> >>
->>> >> >> >>> >> >>
->>> >> >> >>> >> >> There are a few specifics to the current PR that jump out to me as
->>> >> >> >>> >> >> things to address.  The format of the command is a bit rough, as other
->>> >> >> >>> >> >> "ceph-deploy osd" commands take a list of [host[:disk[:journal]]] args
->>> >> >> >>> >> >> to specify a bunch of disks/osds to act on at one.  But this command
->>> >> >> >>> >> >> only allows one at a time, by virtue of the --osd-id argument.  We
->>> >> >> >>> >> >> could try to accept [host:disk] and look up the OSD ID from that, or
->>> >> >> >>> >> >> potentially take [host:ID] as input.
->>> >> >> >>> >> >>
->>> >> >> >>> >> >> Additionally, what should be done with the OSD's journal during the
->>> >> >> >>> >> >> destroy process?  Should it be left untouched?
->>> >> >> >>> >> >>
->>> >> >> >>> >> >> Should there be any additional barriers to performing such a
->>> >> >> >>> >> >> destructive command?  User confirmation?
->>> >> >> >>> >> >>
->>> >> >> >>> >> >>
->>> >> >> >>> >> >>  - Travis
->>> >> >> >>> >> >>
->>> >> >> >>> >> >> [1] http://tracker.ceph.com/issues/3480
->>> >> >> >>> >> >> [2] https://github.com/ceph/ceph-deploy/pull/254
->>> >> >> >>> >> >> --
->>> >> >> >>> >> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> >> >> >>> >> >> the body of a message to majordomo@vger.kernel.org
->>> >> >> >>> >> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>> >> >> >>> >> >>
->>> >> >> >>> >> >
->>> >> >> >>> >> >
->>> >> >> >>> >> > --
->>> >> >> >>> >> > Wido den Hollander
->>> >> >> >>> >> > 42on B.V.
->>> >> >> >>> >> > Ceph trainer and consultant
->>> >> >> >>> >> >
->>> >> >> >>> >> > Phone: +31 (0)20 700 9902
->>> >> >> >>> >> > Skype: contact42on
->>> >> >> >>> >> --
->>> >> >> >>> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> >> >> >>> >> the body of a message to majordomo@vger.kernel.org
->>> >> >> >>> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>> >> >> >>> >>
->>> >> >> >>> >>
->>> >> >> >>> --
->>> >> >> >>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> >> >> >>> the body of a message to majordomo@vger.kernel.org
->>> >> >> >>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>> >> >> >>>
->>> >> >> >>>
->>> >> >> >> --
->>> >> >> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> >> >> >> the body of a message to majordomo@vger.kernel.org
->>> >> >> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>> >> >> > --
->>> >> >> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> >> >> > the body of a message to majordomo@vger.kernel.org
->>> >> >> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>> >> >>
->>> >> >>
->>> >> --
->>> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> >> the body of a message to majordomo@vger.kernel.org
->>> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>> >>
->>> >>
->>>
->>>
+So it the assumption is true, it may be assert(last_e.version <
+e.version), which can compare the epoch first. I don't quite sure my
+assumption is right, so can anyone  give some guides, SAM and Sage?
+
+Is there neccessary to post pull request to github to discuss together?
+
+Yao Ning
+Regards!
