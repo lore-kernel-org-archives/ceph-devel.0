@@ -1,80 +1,104 @@
-From: "Ma, Jianpeng" <jianpeng.ma@intel.com>
+From: Sage Weil <sweil@redhat.com>
 Subject: RE: Ceph data consistency
-Date: Wed, 7 Jan 2015 01:41:42 +0000
-Message-ID: <6AA21C22F0A5DA478922644AD2EC308C8FF2B2@SHSMSX101.ccr.corp.intel.com>
-References: <54A2609D.1010302@sadziu.pl>
-	<085BC98701B92B4C86AE7696562D284D0B9CE2F3@SACMBXIP03.sdcorp.global.sandisk.com>
-	<54A2AB4B.6000206@sadziu.pl>
- <CALurOm0wGEJ5MSrscUvVi_J3fyDevGbT3A11291qTLYTZejr_w@mail.gmail.com>
+Date: Tue, 6 Jan 2015 18:18:01 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1501061817490.3041@cobra.newdream.net>
+References: <54A2609D.1010302@sadziu.pl> <085BC98701B92B4C86AE7696562D284D0B9CE2F3@SACMBXIP03.sdcorp.global.sandisk.com> <54A2AB4B.6000206@sadziu.pl> <CALurOm0wGEJ5MSrscUvVi_J3fyDevGbT3A11291qTLYTZejr_w@mail.gmail.com>
+ <6AA21C22F0A5DA478922644AD2EC308C8FF2B2@SHSMSX101.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga03.intel.com ([134.134.136.65]:45486 "EHLO mga03.intel.com"
+Received: from mx1.redhat.com ([209.132.183.28]:41430 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753825AbbAGBlv (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 6 Jan 2015 20:41:51 -0500
-In-Reply-To: <CALurOm0wGEJ5MSrscUvVi_J3fyDevGbT3A11291qTLYTZejr_w@mail.gmail.com>
-Content-Language: en-US
+	id S1757819AbbAGCS0 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 6 Jan 2015 21:18:26 -0500
+In-Reply-To: <6AA21C22F0A5DA478922644AD2EC308C8FF2B2@SHSMSX101.ccr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
+To: "Ma, Jianpeng" <jianpeng.ma@intel.com>
 Cc: "ceph@sadziu.pl" <ceph@sadziu.pl>, "Vijayendra.Shamanna@sandisk.com" <Vijayendra.Shamanna@sandisk.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-PiAtLS0tLS0tLS0tIEZvcndhcmRlZCBtZXNzYWdlIC0tLS0tLS0tLS0NCj4gRnJvbTogUGF3ZcWC
-IFNhZG93c2tpIDxjZXBoQHNhZHppdS5wbD4NCj4gRGF0ZTogMjAxNC0xMi0zMCAyMTo0MCBHTVQr
-MDg6MDANCj4gU3ViamVjdDogUmU6IENlcGggZGF0YSBjb25zaXN0ZW5jeQ0KPiBUbzogVmlqYXll
-bmRyYSBTaGFtYW5uYSA8VmlqYXllbmRyYS5TaGFtYW5uYUBzYW5kaXNrLmNvbT4sDQo+ICJjZXBo
-LWRldmVsQHZnZXIua2VybmVsLm9yZyIgPGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnPg0KPiAN
-Cj4gDQo+IE9uIDEyLzMwLzIwMTQgMDE6NDAgUE0sIFZpamF5ZW5kcmEgU2hhbWFubmEgd3JvdGU6
-DQo+ID4gSGksDQo+ID4NCj4gPiBUaGVyZSBpcyBhIHN5bmMgdGhyZWFkIChzeW5jX2VudHJ5IGlu
-IEZpbGVTdG9yZS5jYykgd2hpY2ggdHJpZ2dlcnMNCj4gPiBwZXJpb2RpY2FsbHkgYW5kIGV4ZWN1
-dGVzIHN5bmNfZmlsZXN5c3RlbSgpIHRvIGVuc3VyZSB0aGF0IHRoZSBkYXRhIGlzDQo+ID4gY29u
-c2lzdGVudC4gVGhlIGpvdXJuYWwgZW50cmllcyBhcmUgdHJpbW1lZCBvbmx5IGFmdGVyIGEgc3Vj
-Y2Vzc2Z1bA0KPiA+IHN5bmNfZmlsZXN5c3RlbSgpIGNhbGwNCj4gDQo+IHN5bmNfZmlsZXN5c3Rl
-bSgpIGFsd2F5cyByZXR1cm5zIHplcm8gYW5kIGpvdXJuYWwgd2lsbCBiZSB0cmltbWVkLg0KPiBF
-eGVjdXRpbmcgc3luYygpL3N5bmNmcygpIHdpdGggZGlydHkgZGF0YSBpbiBkaXNrIGJ1ZmZlcnMg
-d2lsbCByZXN1bHQgaW4gZGF0YSBsb3NzDQo+ICgibG9zdCBwYWdlIHdyaXRlIGR1ZSB0byBJL08g
-ZXJyb3IiKS4NCj4gDQpIaSBzYWdlOg0KDQpGcm9tIHRoZSBnaXQgbG9nLCBJIHNlZSBhdCBmaXJz
-dCBzeW5jX2ZpbGVzeXN0ZW0oKSByZXR1cm4gdGhlIHJlc3VsdCBvZiBzeW5jZnMoKS4NCkJ1dCBp
-biB0aGlzIGNvbW1pdCA4MDhjNjQ0MjQ4ZTQ4NmY0NDoNCiAgICBJbXByb3ZlIHVzZSBvZiBzeW5j
-ZnMuDQogICAgVGVzdCBzeW5jZnMgcmV0dXJuIHZhbHVlIGFuZCBmYWxsYmFjayB0byBidHJmcyBz
-eW5jIGFuZCB0aGVuIHN5bmMuDQpUaGUgYXV0aG9yIGhvcGUgaWYgc3luY2ZzKCkgbWV0IGVycm9y
-IGFuZCBzeW5jKCkgY2FuIHJlc29sdmUuIEJlY2F1c2Ugc3luYygpIGRvbid0IHJldHVybiByZXN1
-bHQgDQpTbyBpdCBvbmx5IHJldHVybiB6ZXJvLg0KQnV0IHdoaWNoIGVycm9yIGNhbiBoYW5kbGUg
-YnkgdGhpcyB3YXk/IEFGQUssIG5vLg0KSSBzdWdnZXN0IGl0IGRpcmVjdGx5IHJldHVybiByZXN1
-bHQgb2Ygc3luY2ZzKCkuDQoNCkppYW5wZW5nIE1hDQpUaGFua3MhDQoNCg0KPiBJIHdhcyBkb2lu
-ZyBzb21lIGV4cGVyaW1lbnRzIHNpbXVsYXRpbmcgZGlzayBlcnJvcnMgdXNpbmcgRGV2aWNlIE1h
-cHBlcg0KPiAiZXJyb3IiIHRhcmdldC4gSW4gdGhpcyBzZXR1cCBPU0Qgd2FzIHdyaXRpbmcgdG8g
-YnJva2VuIGRpc2sgd2l0aG91dCBjcmFzaGluZy4NCj4gRXZlcnkgNSBzZWNvbmRzIChmaWxlc3Rv
-cmVfbWF4X3N5bmNfaW50ZXJ2YWwpIGtlcm5lbCBsb2dzIHRoYXQgc29tZSBkYXRhIHdlcmUNCj4g
-ZGlzY2FyZGVkIGR1ZSB0byBJTyBlcnJvci4NCj4gDQo+IA0KPiA+IFRoYW5rcw0KPiA+IFZpanUN
-Cj4gPj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gPj4gRnJvbTogY2VwaC1kZXZlbC1v
-d25lckB2Z2VyLmtlcm5lbC5vcmcNCj4gPj4gW21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIu
-a2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIFBhd2VsIFNhZG93c2tpDQo+ID4+IFNlbnQ6IFR1ZXNk
-YXksIERlY2VtYmVyIDMwLCAyMDE0IDE6NTIgUE0NCj4gPj4gVG86IGNlcGgtZGV2ZWxAdmdlci5r
-ZXJuZWwub3JnDQo+ID4+IFN1YmplY3Q6IENlcGggZGF0YSBjb25zaXN0ZW5jeQ0KPiA+Pg0KPiA+
-PiBIaSwNCj4gPj4NCj4gPj4gT24gb3VyIENlcGggY2x1c3RlciBmcm9tIHRpbWUgdG8gdGltZSB3
-ZSBoYXZlIHNvbWUgaW5jb25zaXN0ZW50IFBHcyAoYWZ0ZXINCj4gZGVlcC1zY3J1YikuIFdlIGhh
-dmUgc29tZSBpc3N1ZXMgd2l0aCBkaXNrL3NhdGEgY2FibGVzL2xzaSBjb250cm9sbGVyIGNhdXNp
-bmcNCj4gSU8gZXJyb3JzIGZyb20gdGltZSB0byB0aW1lIChidXQgdGhhdCdzIG5vdCB0aGUgcG9p
-bnQgaW4gdGhpcyBjYXNlKS4NCj4gPj4NCj4gPj4gV2hlbiBJTyBlcnJvciBvY2N1cnMgb24gT1NE
-IGpvdXJuYWwgcGFydGl0aW9uIGV2ZXJ5dGhpbmcgd29ya3MgYXMgaXMgc2hvdWxkDQo+IC0+IE9T
-RCBpcyBjcmFzaGVkIGFuZCB0aGF0J3Mgb2sgLSBDZXBoIHdpbGwgaGFuZGxlIHRoYXQuDQo+ID4+
-DQo+ID4+IEJ1dCB3aGVuIElPIGVycm9yIG9jY3VycyBvbiBPU0QgZGF0YSBwYXJ0aXRpb24gZHVy
-aW5nIGpvdXJuYWwgZmx1c2ggT1NEDQo+IGNvbnRpbnVlIHRvIHdvcmsuIEFmdGVyIGNhbGxpbmcg
-KndyaXRldiogKGluIGJ1ZmZlcjo6bGlzdDo6d3JpdGVfZmQpIE9TRCBkb2VzDQo+IGNoZWNrIHJl
-dHVybiBjb2RlIGZyb20gdGhpcyBjYWxsIGJ1dCBkb2VzIE5PVCB2ZXJpZnkgaWYgd3JpdGUgaGFz
-IGJlZW4gc3VjY2Vzc2Z1bA0KPiB0byBkaXNrIChkYXRhIGFyZSBzdGlsbCBvbmx5ID5pbiBtZW1v
-cnkgYW5kIHRoZXJlIGlzIG5vIGZzeW5jKS4gVGhhdCB3YXkgT1NEDQo+IHRoaW5rcyB0aGF0IGRh
-dGEgaGFzIGJlZW4gc3RvcmVkIG9uIGRpc2sgYnV0IGl0IG1pZ2h0IGJlIGRpc2NhcmRlZCAoZHVy
-aW5nIHN5bmMNCj4gZGlydHkgcGFnZSB3aWxsIGJlIHJlY2xhaW1lZCBhbmQgeW91J2xsIHNlZSAi
-bG9zdCBwYWdlIHdyaXRlIGR1ZSB0byBJL08gZXJyb3IiIGluDQo+IGRtZXNnKS4NCj4gPj4NCj4g
-Pj4gU2luY2UgdGhlcmUgaXMgbm8gY2hlY2tzdW1taW5nIG9mIGRhdGEgSSBqdXN0IHdhbnRlZCB0
-byBtYWtlIHN1cmUgdGhhdCB0aGlzDQo+IGlzIGJ5IGRlc2lnbi4gTWF5YmUgdGhlcmUgaXMgYSB3
-YXkgdG8gdGVsbCBPU0QgdG8gY2FsbCBmc3luYyBhZnRlciB3cml0ZSBhbmQgaGF2ZQ0KPiBkYXRh
-IGNvbnNpc3RlbnQ/DQo+IA0KPiAtLQ0KPiBQUw0KPiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9t
-IHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4gdGhl
-IGJvZHkNCj4gb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBt
-YWpvcmRvbW8gaW5mbyBhdA0KPiBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZv
-Lmh0bWwNCg==
+On Wed, 7 Jan 2015, Ma, Jianpeng wrote:
+> > ---------- Forwarded message ----------
+> > From: Pawe? Sadowski <ceph@sadziu.pl>
+> > Date: 2014-12-30 21:40 GMT+08:00
+> > Subject: Re: Ceph data consistency
+> > To: Vijayendra Shamanna <Vijayendra.Shamanna@sandisk.com>,
+> > "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+> > 
+> > 
+> > On 12/30/2014 01:40 PM, Vijayendra Shamanna wrote:
+> > > Hi,
+> > >
+> > > There is a sync thread (sync_entry in FileStore.cc) which triggers
+> > > periodically and executes sync_filesystem() to ensure that the data is
+> > > consistent. The journal entries are trimmed only after a successful
+> > > sync_filesystem() call
+> > 
+> > sync_filesystem() always returns zero and journal will be trimmed.
+> > Executing sync()/syncfs() with dirty data in disk buffers will result in data loss
+> > ("lost page write due to I/O error").
+> > 
+> Hi sage:
+> 
+> From the git log, I see at first sync_filesystem() return the result of syncfs().
+> But in this commit 808c644248e486f44:
+>     Improve use of syncfs.
+>     Test syncfs return value and fallback to btrfs sync and then sync.
+> The author hope if syncfs() met error and sync() can resolve. Because sync() don't return result 
+> So it only return zero.
+> But which error can handle by this way? AFAK, no.
+> I suggest it directly return result of syncfs().
+
+Yeah, that sounds right!
+
+sage
+
+
+> 
+> Jianpeng Ma
+> Thanks!
+> 
+> 
+> > I was doing some experiments simulating disk errors using Device Mapper
+> > "error" target. In this setup OSD was writing to broken disk without crashing.
+> > Every 5 seconds (filestore_max_sync_interval) kernel logs that some data were
+> > discarded due to IO error.
+> > 
+> > 
+> > > Thanks
+> > > Viju
+> > >> -----Original Message-----
+> > >> From: ceph-devel-owner@vger.kernel.org
+> > >> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Pawel Sadowski
+> > >> Sent: Tuesday, December 30, 2014 1:52 PM
+> > >> To: ceph-devel@vger.kernel.org
+> > >> Subject: Ceph data consistency
+> > >>
+> > >> Hi,
+> > >>
+> > >> On our Ceph cluster from time to time we have some inconsistent PGs (after
+> > deep-scrub). We have some issues with disk/sata cables/lsi controller causing
+> > IO errors from time to time (but that's not the point in this case).
+> > >>
+> > >> When IO error occurs on OSD journal partition everything works as is should
+> > -> OSD is crashed and that's ok - Ceph will handle that.
+> > >>
+> > >> But when IO error occurs on OSD data partition during journal flush OSD
+> > continue to work. After calling *writev* (in buffer::list::write_fd) OSD does
+> > check return code from this call but does NOT verify if write has been successful
+> > to disk (data are still only >in memory and there is no fsync). That way OSD
+> > thinks that data has been stored on disk but it might be discarded (during sync
+> > dirty page will be reclaimed and you'll see "lost page write due to I/O error" in
+> > dmesg).
+> > >>
+> > >> Since there is no checksumming of data I just wanted to make sure that this
+> > is by design. Maybe there is a way to tell OSD to call fsync after write and have
+> > data consistent?
+> > 
+> > --
+> > PS
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body
+> > of a message to majordomo@vger.kernel.org More majordomo info at
+> > http://vger.kernel.org/majordomo-info.html
+> N?????r??y??????X???v???)?{.n?????z?]z????ay?????j??f???h??????w??????j:+v???w????????????zZ+???????j"????i
