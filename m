@@ -1,52 +1,93 @@
-From: "joel.merrick@gmail.com" <joel.merrick@gmail.com>
-Subject: Re: Ceph-client branch for Ubuntu 14.04.1 LTS (3.13.0-x kernels)
-Date: Thu, 8 Jan 2015 08:49:54 +0000
-Message-ID: <CA+wb_2t-F2NCdXi5fiF+Jjg5yJyJ6Gw3956Zh9yrDv6_NxErTw@mail.gmail.com>
-References: <9E914F5BD7F48A4782456CEB550A42280A758A6D@SACMBXIP01.sdcorp.global.sandisk.com>
-	<54AA7246.9070303@42on.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Testing the next giant release
+Date: Thu, 08 Jan 2015 10:39:50 +0100
+Message-ID: <54AE5066.2000102@dachary.org>
+References: <54AD3C8B.4030705@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="lqGeOltbMbBqXnQItPuh52aAOiOAUUV1T"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f48.google.com ([74.125.82.48]:46286 "EHLO
-	mail-wg0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753420AbbAHIt4 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Jan 2015 03:49:56 -0500
-Received: by mail-wg0-f48.google.com with SMTP id l2so1337173wgh.7
-        for <ceph-devel@vger.kernel.org>; Thu, 08 Jan 2015 00:49:55 -0800 (PST)
-In-Reply-To: <54AA7246.9070303@42on.com>
+Received: from mail2.dachary.org ([91.121.57.175]:35291 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752640AbbAHJjx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Jan 2015 04:39:53 -0500
+In-Reply-To: <54AD3C8B.4030705@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@42on.com>
-Cc: Chaitanya Huilgol <Chaitanya.Huilgol@sandisk.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Tamil Muthamizhan <tmuthamizhan@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Mon, Jan 5, 2015 at 11:15 AM, Wido den Hollander <wido@42on.com> wrote:
->
->
-> On 05-01-15 11:53, Chaitanya Huilgol wrote:
->>
->> Hi All,
->>
->> The stock ceph-client modules with Ubuntu 14.04 LTS are quite dated and we
->> are seeing crashes and soft-lockup issues which have been fixed in the
->> current ceph-client code base.
->> What would be recommended ceph-client branch compatible with the Ubuntu
->> 14.04 (3.13.0-x) kernels so that we can get as many fixes as possible?
->>
->
-> I recommend you take a look here:
-> http://kernel.ubuntu.com/~kernel-ppa/mainline/
->
-> That should give you some new kernels.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--lqGeOltbMbBqXnQItPuh52aAOiOAUUV1T
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-Just to throw in another method... Ubuntu also ship the kernels for
-newer non-LTS releases (as well as X components and other cherry
-picked bits) in their LTS releases too. So linux-generic-lts-utopic
-currently exists in 14.04. As Ilya mentioned though, the fixes should
-be marked anyway in the stock ubuntu 14.04 kernels (I use them without
-issue but use case may vary), but could be useful knowledge for
-someone.
+Hi,
+
+The giant-backports branch has been built by gitbuilders tonight
+
+http://gitbuilder.sepia.ceph.com/gitbuilder-ceph-deb-trusty-amd64-basic/#=
+origin/giant-backports
+etc.
+
+and I scheduled a rbd suite with
+
+=2E/virtualenv/bin/teuthology-suite --teuthology-branch giant --suite rbd=
+ --suite-branch giant --machine-type vps --distro ubuntu --email loic@dac=
+hary.org --owner loic@dachary.org  --ceph giant-backports
+
+which shows at
+
+http://pulpito.ceph.com/loic-2015-01-08_10:36:47-rbd-giant-backports-test=
+ing-basic-vps/
+
+To be continued !
+
+On 07/01/2015 15:02, Loic Dachary wrote:
+> Hi Tamil,
+>=20
+> I've merged / integrated the giant backports found at
+>=20
+> https://github.com/ceph/ceph/pull/3186
+> https://github.com/ceph/ceph/pull/3178
+> https://github.com/ceph/ceph/pull/2954
+> https://github.com/ceph/ceph/pull/3191
+> https://github.com/ceph/ceph/pull/3168
+> https://github.com/ceph/ceph/pull/3289
+>=20
+> into=20
+>=20
+> http://workbench.dachary.org/ceph/ceph/commit/0ea20e6c51208d6710f469454=
+ab3f964bfa7c9d2
+>=20
+> and successfully ran make check on it
+>=20
+> http://workbench.dachary.org:8080/projects/10?ref=3Dgiant-backports
+>=20
+> If I'm not mistaken the next step would be to run teuthology. If I'm to=
+ do it, would you be so kind as to let me know which suites are most rele=
+vant ? If someone else will take care of it, should I push the integratio=
+n branch somewhere ?
+>=20
+> Cheers
+>=20
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
 
+--lqGeOltbMbBqXnQItPuh52aAOiOAUUV1T
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
--- 
-$ echo "kpfmAdpoofdufevq/dp/vl" | perl -pe 's/(.)/chr(ord($1)-1)/ge'
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlSuUGYACgkQ8dLMyEl6F22TOgCgjbwOCsmcOxujpUT6T5Pe5pIT
+QfQAn3rPNJPJCZPMPrr8n2cuUK1oDdM4
+=er4z
+-----END PGP SIGNATURE-----
+
+--lqGeOltbMbBqXnQItPuh52aAOiOAUUV1T--
