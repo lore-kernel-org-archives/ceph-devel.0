@@ -1,7 +1,7 @@
 From: Christoph Hellwig <hch@lst.de>
-Subject: [PATCH 03/12] fs: introduce f_op->mmap_capabilities for nommu mmap support
-Date: Thu,  8 Jan 2015 18:45:24 +0100
-Message-ID: <1420739133-27514-4-git-send-email-hch@lst.de>
+Subject: [PATCH 08/12] fs: remove mapping->backing_dev_info
+Date: Thu,  8 Jan 2015 18:45:29 +0100
+Message-ID: <1420739133-27514-9-git-send-email-hch@lst.de>
 References: <1420739133-27514-1-git-send-email-hch@lst.de>
 Return-path: <owner-linux-mm@kvack.org>
 In-Reply-To: <1420739133-27514-1-git-send-email-hch@lst.de>
@@ -10,1340 +10,622 @@ To: Jens Axboe <axboe@fb.com>
 Cc: David Howells <dhowells@redhat.com>, Tejun Heo <tj@kernel.org>, linux-fsdevel@vger.kernel.org, linux-mm@kvack.org, linux-mtd@lists.infradead.org, linux-nfs@vger.kernel.org, ceph-devel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-Since "BDI: Provide backing device capability information [try #3]" the
-backing_dev_info structure also provides flags for the kind of mmap
-operation available in a nommu environment, which is entirely unrelated
-to it's original purpose.
-
-Introduce a new nommu-only file operation to provide this information to
-the nommu mmap code instead.  Splitting this from the backing_dev_info
-structure allows to remove lots of backing_dev_info instance that aren't
-otherwise needed, and entirely gets rid of the concept of providing a
-backing_dev_info for a character device.  It also removes the need for
-the mtd_inodefs filesystem.
+Now that we never use the backing_dev_info pointer in struct address_space
+we can simply remove it and save 4 to 8 bytes in every inode.
 
 Signed-off-by: Christoph Hellwig <hch@lst.de>
+Acked-by: Ryusuke Konishi <konishi.ryusuke@lab.ntt.co.jp>
 ---
- Documentation/nommu-mmap.txt                    |  8 +--
- block/blk-core.c                                |  2 +-
- drivers/char/mem.c                              | 64 ++++++++++----------
- drivers/mtd/mtdchar.c                           | 72 ++++------------------
- drivers/mtd/mtdconcat.c                         | 10 ----
- drivers/mtd/mtdcore.c                           | 80 +++++++------------------
- drivers/mtd/mtdpart.c                           |  1 -
- drivers/staging/lustre/lustre/llite/llite_lib.c |  2 +-
- fs/9p/v9fs.c                                    |  2 +-
- fs/afs/volume.c                                 |  2 +-
- fs/aio.c                                        | 14 +----
- fs/btrfs/disk-io.c                              |  3 +-
- fs/char_dev.c                                   | 24 --------
- fs/cifs/connect.c                               |  2 +-
- fs/coda/inode.c                                 |  2 +-
- fs/configfs/configfs_internal.h                 |  2 -
- fs/configfs/inode.c                             | 18 +-----
- fs/configfs/mount.c                             | 11 +---
- fs/ecryptfs/main.c                              |  2 +-
- fs/exofs/super.c                                |  2 +-
- fs/ncpfs/inode.c                                |  2 +-
- fs/ramfs/file-nommu.c                           |  7 +++
- fs/ramfs/inode.c                                | 22 +------
- fs/romfs/mmap-nommu.c                           | 10 ++++
- fs/ubifs/super.c                                |  2 +-
- include/linux/backing-dev.h                     | 33 ++--------
- include/linux/cdev.h                            |  2 -
- include/linux/fs.h                              | 23 +++++++
- include/linux/mtd/mtd.h                         |  2 +
- mm/backing-dev.c                                |  7 +--
- mm/nommu.c                                      | 69 ++++++++++-----------
- security/security.c                             | 13 ++--
- 32 files changed, 169 insertions(+), 346 deletions(-)
+ drivers/char/raw.c     |  4 +---
+ fs/aio.c               |  1 -
+ fs/block_dev.c         | 26 +-------------------------
+ fs/btrfs/disk-io.c     |  1 -
+ fs/btrfs/inode.c       |  6 ------
+ fs/ceph/inode.c        |  2 --
+ fs/cifs/inode.c        |  2 --
+ fs/configfs/inode.c    |  1 -
+ fs/ecryptfs/inode.c    |  1 -
+ fs/exofs/inode.c       |  2 --
+ fs/fuse/inode.c        |  1 -
+ fs/gfs2/glock.c        |  1 -
+ fs/gfs2/ops_fstype.c   |  1 -
+ fs/hugetlbfs/inode.c   |  1 -
+ fs/inode.c             | 13 -------------
+ fs/kernfs/inode.c      |  1 -
+ fs/ncpfs/inode.c       |  1 -
+ fs/nfs/inode.c         |  1 -
+ fs/nilfs2/gcinode.c    |  1 -
+ fs/nilfs2/mdt.c        |  6 ++----
+ fs/nilfs2/page.c       |  4 +---
+ fs/nilfs2/page.h       |  3 +--
+ fs/nilfs2/super.c      |  2 +-
+ fs/ocfs2/dlmfs/dlmfs.c |  2 --
+ fs/ramfs/inode.c       |  1 -
+ fs/romfs/super.c       |  3 ---
+ fs/ubifs/dir.c         |  2 --
+ fs/ubifs/super.c       |  3 ---
+ include/linux/fs.h     |  3 +--
+ mm/backing-dev.c       |  1 -
+ mm/shmem.c             |  1 -
+ mm/swap_state.c        |  1 -
+ 32 files changed, 8 insertions(+), 91 deletions(-)
 
-diff --git a/Documentation/nommu-mmap.txt b/Documentation/nommu-mmap.txt
-index 8e1ddec..ae57b9e 100644
---- a/Documentation/nommu-mmap.txt
-+++ b/Documentation/nommu-mmap.txt
-@@ -43,12 +43,12 @@ and it's also much more restricted in the latter case:
-            even if this was created by another process.
+diff --git a/drivers/char/raw.c b/drivers/char/raw.c
+index a24891b..6e29bf2 100644
+--- a/drivers/char/raw.c
++++ b/drivers/char/raw.c
+@@ -104,11 +104,9 @@ static int raw_release(struct inode *inode, struct file *filp)
  
-          - If possible, the file mapping will be directly on the backing device
--           if the backing device has the BDI_CAP_MAP_DIRECT capability and
-+           if the backing device has the NOMMU_MAP_DIRECT capability and
-            appropriate mapping protection capabilities. Ramfs, romfs, cramfs
-            and mtd might all permit this.
- 
- 	 - If the backing device device can't or won't permit direct sharing,
--           but does have the BDI_CAP_MAP_COPY capability, then a copy of the
-+           but does have the NOMMU_MAP_COPY capability, then a copy of the
-            appropriate bit of the file will be read into a contiguous bit of
-            memory and any extraneous space beyond the EOF will be cleared
- 
-@@ -220,7 +220,7 @@ directly (can't be copied).
- 
- The file->f_op->mmap() operation will be called to actually inaugurate the
- mapping. It can be rejected at that point. Returning the ENOSYS error will
--cause the mapping to be copied instead if BDI_CAP_MAP_COPY is specified.
-+cause the mapping to be copied instead if NOMMU_MAP_COPY is specified.
- 
- The vm_ops->close() routine will be invoked when the last mapping on a chardev
- is removed. An existing mapping will be shared, partially or not, if possible
-@@ -232,7 +232,7 @@ want to handle it, despite the fact it's got an operation. For instance, it
- might try directing the call to a secondary driver which turns out not to
- implement it. Such is the case for the framebuffer driver which attempts to
- direct the call to the device-specific driver. Under such circumstances, the
--mapping request will be rejected if BDI_CAP_MAP_COPY is not specified, and a
-+mapping request will be rejected if NOMMU_MAP_COPY is not specified, and a
- copy mapped otherwise.
- 
- IMPORTANT NOTE:
-diff --git a/block/blk-core.c b/block/blk-core.c
-index 30f6153..56bc2b8 100644
---- a/block/blk-core.c
-+++ b/block/blk-core.c
-@@ -588,7 +588,7 @@ struct request_queue *blk_alloc_queue_node(gfp_t gfp_mask, int node_id)
- 	q->backing_dev_info.ra_pages =
- 			(VM_MAX_READAHEAD * 1024) / PAGE_CACHE_SIZE;
- 	q->backing_dev_info.state = 0;
--	q->backing_dev_info.capabilities = BDI_CAP_MAP_COPY;
-+	q->backing_dev_info.capabilities = 0;
- 	q->backing_dev_info.name = "block";
- 	q->node = node_id;
- 
-diff --git a/drivers/char/mem.c b/drivers/char/mem.c
-index 4c58333..9a6b637 100644
---- a/drivers/char/mem.c
-+++ b/drivers/char/mem.c
-@@ -287,13 +287,24 @@ static unsigned long get_unmapped_area_mem(struct file *file,
- 	return pgoff << PAGE_SHIFT;
- }
- 
-+/* permit direct mmap, for read, write or exec */
-+static unsigned memory_mmap_capabilities(struct file *file)
-+{
-+	return NOMMU_MAP_DIRECT |
-+		NOMMU_MAP_READ | NOMMU_MAP_WRITE | NOMMU_MAP_EXEC;
-+}
-+
-+static unsigned zero_mmap_capabilities(struct file *file)
-+{
-+	return NOMMU_MAP_COPY;
-+}
-+
- /* can't do an in-place private mapping if there's no MMU */
- static inline int private_mapping_ok(struct vm_area_struct *vma)
- {
- 	return vma->vm_flags & VM_MAYSHARE;
- }
- #else
--#define get_unmapped_area_mem	NULL
- 
- static inline int private_mapping_ok(struct vm_area_struct *vma)
- {
-@@ -721,7 +732,10 @@ static const struct file_operations mem_fops = {
- 	.write		= write_mem,
- 	.mmap		= mmap_mem,
- 	.open		= open_mem,
-+#ifndef CONFIG_MMU
- 	.get_unmapped_area = get_unmapped_area_mem,
-+	.mmap_capabilities = memory_mmap_capabilities,
-+#endif
- };
- 
- #ifdef CONFIG_DEVKMEM
-@@ -731,7 +745,10 @@ static const struct file_operations kmem_fops = {
- 	.write		= write_kmem,
- 	.mmap		= mmap_kmem,
- 	.open		= open_kmem,
-+#ifndef CONFIG_MMU
- 	.get_unmapped_area = get_unmapped_area_mem,
-+	.mmap_capabilities = memory_mmap_capabilities,
-+#endif
- };
- #endif
- 
-@@ -760,16 +777,9 @@ static const struct file_operations zero_fops = {
- 	.read_iter	= read_iter_zero,
- 	.aio_write	= aio_write_zero,
- 	.mmap		= mmap_zero,
--};
--
--/*
-- * capabilities for /dev/zero
-- * - permits private mappings, "copies" are taken of the source of zeros
-- * - no writeback happens
-- */
--static struct backing_dev_info zero_bdi = {
--	.name		= "char/mem",
--	.capabilities	= BDI_CAP_MAP_COPY | BDI_CAP_NO_ACCT_AND_WRITEBACK,
-+#ifndef CONFIG_MMU
-+	.mmap_capabilities = zero_mmap_capabilities,
-+#endif
- };
- 
- static const struct file_operations full_fops = {
-@@ -783,22 +793,22 @@ static const struct memdev {
- 	const char *name;
- 	umode_t mode;
- 	const struct file_operations *fops;
--	struct backing_dev_info *dev_info;
-+	fmode_t fmode;
- } devlist[] = {
--	 [1] = { "mem", 0, &mem_fops, &directly_mappable_cdev_bdi },
-+	 [1] = { "mem", 0, &mem_fops, FMODE_UNSIGNED_OFFSET },
- #ifdef CONFIG_DEVKMEM
--	 [2] = { "kmem", 0, &kmem_fops, &directly_mappable_cdev_bdi },
-+	 [2] = { "kmem", 0, &kmem_fops, FMODE_UNSIGNED_OFFSET },
- #endif
--	 [3] = { "null", 0666, &null_fops, NULL },
-+	 [3] = { "null", 0666, &null_fops, 0 },
- #ifdef CONFIG_DEVPORT
--	 [4] = { "port", 0, &port_fops, NULL },
-+	 [4] = { "port", 0, &port_fops, 0 },
- #endif
--	 [5] = { "zero", 0666, &zero_fops, &zero_bdi },
--	 [7] = { "full", 0666, &full_fops, NULL },
--	 [8] = { "random", 0666, &random_fops, NULL },
--	 [9] = { "urandom", 0666, &urandom_fops, NULL },
-+	 [5] = { "zero", 0666, &zero_fops, 0 },
-+	 [7] = { "full", 0666, &full_fops, 0 },
-+	 [8] = { "random", 0666, &random_fops, 0 },
-+	 [9] = { "urandom", 0666, &urandom_fops, 0 },
- #ifdef CONFIG_PRINTK
--	[11] = { "kmsg", 0644, &kmsg_fops, NULL },
-+	[11] = { "kmsg", 0644, &kmsg_fops, 0 },
- #endif
- };
- 
-@@ -816,12 +826,7 @@ static int memory_open(struct inode *inode, struct file *filp)
- 		return -ENXIO;
- 
- 	filp->f_op = dev->fops;
--	if (dev->dev_info)
--		filp->f_mapping->backing_dev_info = dev->dev_info;
--
--	/* Is /dev/mem or /dev/kmem ? */
--	if (dev->dev_info == &directly_mappable_cdev_bdi)
--		filp->f_mode |= FMODE_UNSIGNED_OFFSET;
-+	filp->f_mode |= dev->fmode;
- 
- 	if (dev->fops->open)
- 		return dev->fops->open(inode, filp);
-@@ -846,11 +851,6 @@ static struct class *mem_class;
- static int __init chr_dev_init(void)
- {
- 	int minor;
--	int err;
--
--	err = bdi_init(&zero_bdi);
--	if (err)
--		return err;
- 
- 	if (register_chrdev(MEM_MAJOR, "mem", &memory_fops))
- 		printk("unable to get major %d for memory devs\n", MEM_MAJOR);
-diff --git a/drivers/mtd/mtdchar.c b/drivers/mtd/mtdchar.c
-index 5356395..55fa27e 100644
---- a/drivers/mtd/mtdchar.c
-+++ b/drivers/mtd/mtdchar.c
-@@ -49,7 +49,6 @@ static DEFINE_MUTEX(mtd_mutex);
-  */
- struct mtd_file_info {
- 	struct mtd_info *mtd;
--	struct inode *ino;
- 	enum mtd_file_modes mode;
- };
- 
-@@ -59,10 +58,6 @@ static loff_t mtdchar_lseek(struct file *file, loff_t offset, int orig)
- 	return fixed_size_llseek(file, offset, orig, mfi->mtd->size);
- }
- 
--static int count;
--static struct vfsmount *mnt;
--static struct file_system_type mtd_inodefs_type;
--
- static int mtdchar_open(struct inode *inode, struct file *file)
- {
- 	int minor = iminor(inode);
-@@ -70,7 +65,6 @@ static int mtdchar_open(struct inode *inode, struct file *file)
- 	int ret = 0;
- 	struct mtd_info *mtd;
- 	struct mtd_file_info *mfi;
--	struct inode *mtd_ino;
- 
- 	pr_debug("MTD_open\n");
- 
-@@ -78,10 +72,6 @@ static int mtdchar_open(struct inode *inode, struct file *file)
- 	if ((file->f_mode & FMODE_WRITE) && (minor & 1))
- 		return -EACCES;
- 
--	ret = simple_pin_fs(&mtd_inodefs_type, &mnt, &count);
--	if (ret)
--		return ret;
--
- 	mutex_lock(&mtd_mutex);
- 	mtd = get_mtd_device(NULL, devnum);
- 
-@@ -95,43 +85,26 @@ static int mtdchar_open(struct inode *inode, struct file *file)
- 		goto out1;
- 	}
- 
--	mtd_ino = iget_locked(mnt->mnt_sb, devnum);
--	if (!mtd_ino) {
--		ret = -ENOMEM;
--		goto out1;
+ 	mutex_lock(&raw_mutex);
+ 	bdev = raw_devices[minor].binding;
+-	if (--raw_devices[minor].inuse == 0) {
++	if (--raw_devices[minor].inuse == 0)
+ 		/* Here  inode->i_mapping == bdev->bd_inode->i_mapping  */
+ 		inode->i_mapping = &inode->i_data;
+-		inode->i_mapping->backing_dev_info = &default_backing_dev_info;
 -	}
--	if (mtd_ino->i_state & I_NEW) {
--		mtd_ino->i_private = mtd;
--		mtd_ino->i_mode = S_IFCHR;
--		mtd_ino->i_data.backing_dev_info = mtd->backing_dev_info;
--		unlock_new_inode(mtd_ino);
--	}
--	file->f_mapping = mtd_ino->i_mapping;
--
- 	/* You can't open it RW if it's not a writeable device */
- 	if ((file->f_mode & FMODE_WRITE) && !(mtd->flags & MTD_WRITEABLE)) {
- 		ret = -EACCES;
--		goto out2;
-+		goto out1;
- 	}
+ 	mutex_unlock(&raw_mutex);
  
- 	mfi = kzalloc(sizeof(*mfi), GFP_KERNEL);
- 	if (!mfi) {
- 		ret = -ENOMEM;
--		goto out2;
-+		goto out1;
- 	}
--	mfi->ino = mtd_ino;
- 	mfi->mtd = mtd;
- 	file->private_data = mfi;
- 	mutex_unlock(&mtd_mutex);
- 	return 0;
- 
--out2:
--	iput(mtd_ino);
- out1:
- 	put_mtd_device(mtd);
- out:
- 	mutex_unlock(&mtd_mutex);
--	simple_release_fs(&mnt, &count);
- 	return ret;
- } /* mtdchar_open */
- 
-@@ -148,12 +121,9 @@ static int mtdchar_close(struct inode *inode, struct file *file)
- 	if ((file->f_mode & FMODE_WRITE))
- 		mtd_sync(mtd);
- 
--	iput(mfi->ino);
--
- 	put_mtd_device(mtd);
- 	file->private_data = NULL;
- 	kfree(mfi);
--	simple_release_fs(&mnt, &count);
- 
- 	return 0;
- } /* mtdchar_close */
-@@ -1117,6 +1087,13 @@ static unsigned long mtdchar_get_unmapped_area(struct file *file,
- 	ret = mtd_get_unmapped_area(mtd, len, offset, flags);
- 	return ret == -EOPNOTSUPP ? -ENODEV : ret;
- }
-+
-+static unsigned mtdchar_mmap_capabilities(struct file *file)
-+{
-+	struct mtd_file_info *mfi = file->private_data;
-+
-+	return mtd_mmap_capabilities(mfi->mtd);
-+}
- #endif
- 
- /*
-@@ -1160,27 +1137,10 @@ static const struct file_operations mtd_fops = {
- 	.mmap		= mtdchar_mmap,
- #ifndef CONFIG_MMU
- 	.get_unmapped_area = mtdchar_get_unmapped_area,
-+	.mmap_capabilities = mtdchar_mmap_capabilities,
- #endif
- };
- 
--static const struct super_operations mtd_ops = {
--	.drop_inode = generic_delete_inode,
--	.statfs = simple_statfs,
--};
--
--static struct dentry *mtd_inodefs_mount(struct file_system_type *fs_type,
--				int flags, const char *dev_name, void *data)
--{
--	return mount_pseudo(fs_type, "mtd_inode:", &mtd_ops, NULL, MTD_INODE_FS_MAGIC);
--}
--
--static struct file_system_type mtd_inodefs_type = {
--       .name = "mtd_inodefs",
--       .mount = mtd_inodefs_mount,
--       .kill_sb = kill_anon_super,
--};
--MODULE_ALIAS_FS("mtd_inodefs");
--
- int __init init_mtdchar(void)
- {
- 	int ret;
-@@ -1193,23 +1153,11 @@ int __init init_mtdchar(void)
- 		return ret;
- 	}
- 
--	ret = register_filesystem(&mtd_inodefs_type);
--	if (ret) {
--		pr_err("Can't register mtd_inodefs filesystem, error %d\n",
--		       ret);
--		goto err_unregister_chdev;
--	}
--
--	return ret;
--
--err_unregister_chdev:
--	__unregister_chrdev(MTD_CHAR_MAJOR, 0, 1 << MINORBITS, "mtd");
- 	return ret;
- }
- 
- void __exit cleanup_mtdchar(void)
- {
--	unregister_filesystem(&mtd_inodefs_type);
- 	__unregister_chrdev(MTD_CHAR_MAJOR, 0, 1 << MINORBITS, "mtd");
- }
- 
-diff --git a/drivers/mtd/mtdconcat.c b/drivers/mtd/mtdconcat.c
-index b900056..eacc3aa 100644
---- a/drivers/mtd/mtdconcat.c
-+++ b/drivers/mtd/mtdconcat.c
-@@ -732,8 +732,6 @@ struct mtd_info *mtd_concat_create(struct mtd_info *subdev[],	/* subdevices to c
- 
- 	concat->mtd.ecc_stats.badblocks = subdev[0]->ecc_stats.badblocks;
- 
--	concat->mtd.backing_dev_info = subdev[0]->backing_dev_info;
--
- 	concat->subdev[0] = subdev[0];
- 
- 	for (i = 1; i < num_devs; i++) {
-@@ -761,14 +759,6 @@ struct mtd_info *mtd_concat_create(struct mtd_info *subdev[],	/* subdevices to c
- 				    subdev[i]->flags & MTD_WRITEABLE;
- 		}
- 
--		/* only permit direct mapping if the BDIs are all the same
--		 * - copy-mapping is still permitted
--		 */
--		if (concat->mtd.backing_dev_info !=
--		    subdev[i]->backing_dev_info)
--			concat->mtd.backing_dev_info =
--				&default_backing_dev_info;
--
- 		concat->mtd.size += subdev[i]->size;
- 		concat->mtd.ecc_stats.badblocks +=
- 			subdev[i]->ecc_stats.badblocks;
-diff --git a/drivers/mtd/mtdcore.c b/drivers/mtd/mtdcore.c
-index 4c61187..ff38a1d 100644
---- a/drivers/mtd/mtdcore.c
-+++ b/drivers/mtd/mtdcore.c
-@@ -43,33 +43,7 @@
- 
- #include "mtdcore.h"
- 
--/*
-- * backing device capabilities for non-mappable devices (such as NAND flash)
-- * - permits private mappings, copies are taken of the data
-- */
--static struct backing_dev_info mtd_bdi_unmappable = {
--	.capabilities	= BDI_CAP_MAP_COPY,
--};
--
--/*
-- * backing device capabilities for R/O mappable devices (such as ROM)
-- * - permits private mappings, copies are taken of the data
-- * - permits non-writable shared mappings
-- */
--static struct backing_dev_info mtd_bdi_ro_mappable = {
--	.capabilities	= (BDI_CAP_MAP_COPY | BDI_CAP_MAP_DIRECT |
--			   BDI_CAP_EXEC_MAP | BDI_CAP_READ_MAP),
--};
--
--/*
-- * backing device capabilities for writable mappable devices (such as RAM)
-- * - permits private mappings, copies are taken of the data
-- * - permits non-writable shared mappings
-- */
--static struct backing_dev_info mtd_bdi_rw_mappable = {
--	.capabilities	= (BDI_CAP_MAP_COPY | BDI_CAP_MAP_DIRECT |
--			   BDI_CAP_EXEC_MAP | BDI_CAP_READ_MAP |
--			   BDI_CAP_WRITE_MAP),
-+static struct backing_dev_info mtd_bdi = {
- };
- 
- static int mtd_cls_suspend(struct device *dev, pm_message_t state);
-@@ -365,6 +339,22 @@ static struct device_type mtd_devtype = {
- 	.release	= mtd_release,
- };
- 
-+#ifndef CONFIG_MMU
-+unsigned mtd_mmap_capabilities(struct mtd_info *mtd)
-+{
-+	switch (mtd->type) {
-+	case MTD_RAM:
-+		return NOMMU_MAP_COPY | NOMMU_MAP_DIRECT | NOMMU_MAP_EXEC |
-+			NOMMU_MAP_READ | NOMMU_MAP_WRITE;
-+	case MTD_ROM:
-+		return NOMMU_MAP_COPY | NOMMU_MAP_DIRECT | NOMMU_MAP_EXEC |
-+			NOMMU_MAP_READ;
-+	default:
-+		return NOMMU_MAP_COPY;
-+	}
-+}
-+#endif
-+
- /**
-  *	add_mtd_device - register an MTD device
-  *	@mtd: pointer to new MTD device info structure
-@@ -380,19 +370,7 @@ int add_mtd_device(struct mtd_info *mtd)
- 	struct mtd_notifier *not;
- 	int i, error;
- 
--	if (!mtd->backing_dev_info) {
--		switch (mtd->type) {
--		case MTD_RAM:
--			mtd->backing_dev_info = &mtd_bdi_rw_mappable;
--			break;
--		case MTD_ROM:
--			mtd->backing_dev_info = &mtd_bdi_ro_mappable;
--			break;
--		default:
--			mtd->backing_dev_info = &mtd_bdi_unmappable;
--			break;
--		}
--	}
-+	mtd->backing_dev_info = &mtd_bdi;
- 
- 	BUG_ON(mtd->writesize == 0);
- 	mutex_lock(&mtd_table_mutex);
-@@ -1237,17 +1215,9 @@ static int __init init_mtd(void)
- 	if (ret)
- 		goto err_reg;
- 
--	ret = mtd_bdi_init(&mtd_bdi_unmappable, "mtd-unmap");
--	if (ret)
--		goto err_bdi1;
--
--	ret = mtd_bdi_init(&mtd_bdi_ro_mappable, "mtd-romap");
--	if (ret)
--		goto err_bdi2;
--
--	ret = mtd_bdi_init(&mtd_bdi_rw_mappable, "mtd-rwmap");
-+	ret = mtd_bdi_init(&mtd_bdi, "mtd");
- 	if (ret)
--		goto err_bdi3;
-+		goto err_bdi;
- 
- 	proc_mtd = proc_create("mtd", 0, NULL, &mtd_proc_ops);
- 
-@@ -1260,11 +1230,7 @@ static int __init init_mtd(void)
- out_procfs:
- 	if (proc_mtd)
- 		remove_proc_entry("mtd", NULL);
--err_bdi3:
--	bdi_destroy(&mtd_bdi_ro_mappable);
--err_bdi2:
--	bdi_destroy(&mtd_bdi_unmappable);
--err_bdi1:
-+err_bdi:
- 	class_unregister(&mtd_class);
- err_reg:
- 	pr_err("Error registering mtd class or bdi: %d\n", ret);
-@@ -1277,9 +1243,7 @@ static void __exit cleanup_mtd(void)
- 	if (proc_mtd)
- 		remove_proc_entry("mtd", NULL);
- 	class_unregister(&mtd_class);
--	bdi_destroy(&mtd_bdi_unmappable);
--	bdi_destroy(&mtd_bdi_ro_mappable);
--	bdi_destroy(&mtd_bdi_rw_mappable);
-+	bdi_destroy(&mtd_bdi);
- }
- 
- module_init(init_mtd);
-diff --git a/drivers/mtd/mtdpart.c b/drivers/mtd/mtdpart.c
-index a3e3a7d..e779de3 100644
---- a/drivers/mtd/mtdpart.c
-+++ b/drivers/mtd/mtdpart.c
-@@ -378,7 +378,6 @@ static struct mtd_part *allocate_partition(struct mtd_info *master,
- 
- 	slave->mtd.name = name;
- 	slave->mtd.owner = master->owner;
--	slave->mtd.backing_dev_info = master->backing_dev_info;
- 
- 	/* NOTE:  we don't arrange MTDs as a tree; it'd be error-prone
- 	 * to have the same data be in two different partitions.
-diff --git a/drivers/staging/lustre/lustre/llite/llite_lib.c b/drivers/staging/lustre/lustre/llite/llite_lib.c
-index a3367bf..d5b149c 100644
---- a/drivers/staging/lustre/lustre/llite/llite_lib.c
-+++ b/drivers/staging/lustre/lustre/llite/llite_lib.c
-@@ -987,7 +987,7 @@ int ll_fill_super(struct super_block *sb, struct vfsmount *mnt)
- 	if (err)
- 		goto out_free;
- 	lsi->lsi_flags |= LSI_BDI_INITIALIZED;
--	lsi->lsi_bdi.capabilities = BDI_CAP_MAP_COPY;
-+	lsi->lsi_bdi.capabilities = 0;
- 	err = ll_bdi_register(&lsi->lsi_bdi);
- 	if (err)
- 		goto out_free;
-diff --git a/fs/9p/v9fs.c b/fs/9p/v9fs.c
-index 6894b08..620d934 100644
---- a/fs/9p/v9fs.c
-+++ b/fs/9p/v9fs.c
-@@ -335,7 +335,7 @@ struct p9_fid *v9fs_session_init(struct v9fs_session_info *v9ses,
- 	}
- 	init_rwsem(&v9ses->rename_sem);
- 
--	rc = bdi_setup_and_register(&v9ses->bdi, "9p", BDI_CAP_MAP_COPY);
-+	rc = bdi_setup_and_register(&v9ses->bdi, "9p");
- 	if (rc) {
- 		kfree(v9ses->aname);
- 		kfree(v9ses->uname);
-diff --git a/fs/afs/volume.c b/fs/afs/volume.c
-index 2b60725..d142a24 100644
---- a/fs/afs/volume.c
-+++ b/fs/afs/volume.c
-@@ -106,7 +106,7 @@ struct afs_volume *afs_volume_lookup(struct afs_mount_params *params)
- 	volume->cell		= params->cell;
- 	volume->vid		= vlocation->vldb.vid[params->type];
- 
--	ret = bdi_setup_and_register(&volume->bdi, "afs", BDI_CAP_MAP_COPY);
-+	ret = bdi_setup_and_register(&volume->bdi, "afs");
- 	if (ret)
- 		goto error_bdi;
- 
+ 	blkdev_put(bdev, filp->f_mode | FMODE_EXCL);
 diff --git a/fs/aio.c b/fs/aio.c
-index 1b7893e..6f13d3f 100644
+index 6f13d3f..3bf8b1d 100644
 --- a/fs/aio.c
 +++ b/fs/aio.c
-@@ -165,15 +165,6 @@ static struct vfsmount *aio_mnt;
- static const struct file_operations aio_ring_fops;
- static const struct address_space_operations aio_ctx_aops;
- 
--/* Backing dev info for aio fs.
-- * -no dirty page accounting or writeback happens
-- */
--static struct backing_dev_info aio_fs_backing_dev_info = {
--	.name           = "aiofs",
--	.state          = 0,
--	.capabilities   = BDI_CAP_NO_ACCT_AND_WRITEBACK | BDI_CAP_MAP_COPY,
--};
--
- static struct file *aio_private_file(struct kioctx *ctx, loff_t nr_pages)
- {
- 	struct qstr this = QSTR_INIT("[aio]", 5);
-@@ -185,7 +176,7 @@ static struct file *aio_private_file(struct kioctx *ctx, loff_t nr_pages)
+@@ -176,7 +176,6 @@ static struct file *aio_private_file(struct kioctx *ctx, loff_t nr_pages)
  
  	inode->i_mapping->a_ops = &aio_ctx_aops;
  	inode->i_mapping->private_data = ctx;
--	inode->i_mapping->backing_dev_info = &aio_fs_backing_dev_info;
-+	inode->i_mapping->backing_dev_info = &noop_backing_dev_info;
+-	inode->i_mapping->backing_dev_info = &noop_backing_dev_info;
  	inode->i_size = PAGE_SIZE * nr_pages;
  
  	path.dentry = d_alloc_pseudo(aio_mnt->mnt_sb, &this);
-@@ -230,9 +221,6 @@ static int __init aio_setup(void)
- 	if (IS_ERR(aio_mnt))
- 		panic("Failed to create aio fs mount.");
- 
--	if (bdi_init(&aio_fs_backing_dev_info))
--		panic("Failed to init aio fs backing dev info.");
--
- 	kiocb_cachep = KMEM_CACHE(kiocb, SLAB_HWCACHE_ALIGN|SLAB_PANIC);
- 	kioctx_cachep = KMEM_CACHE(kioctx,SLAB_HWCACHE_ALIGN|SLAB_PANIC);
- 
-diff --git a/fs/btrfs/disk-io.c b/fs/btrfs/disk-io.c
-index 8c63419..afc4092 100644
---- a/fs/btrfs/disk-io.c
-+++ b/fs/btrfs/disk-io.c
-@@ -1715,8 +1715,7 @@ static int setup_bdi(struct btrfs_fs_info *info, struct backing_dev_info *bdi)
- {
- 	int err;
- 
--	bdi->capabilities = BDI_CAP_MAP_COPY;
--	err = bdi_setup_and_register(bdi, "btrfs", BDI_CAP_MAP_COPY);
-+	err = bdi_setup_and_register(bdi, "btrfs");
- 	if (err)
- 		return err;
- 
-diff --git a/fs/char_dev.c b/fs/char_dev.c
-index 67b2007..ea06a3d 100644
---- a/fs/char_dev.c
-+++ b/fs/char_dev.c
-@@ -24,27 +24,6 @@
- 
- #include "internal.h"
- 
--/*
-- * capabilities for /dev/mem, /dev/kmem and similar directly mappable character
-- * devices
-- * - permits shared-mmap for read, write and/or exec
-- * - does not permit private mmap in NOMMU mode (can't do COW)
-- * - no readahead or I/O queue unplugging required
-- */
--struct backing_dev_info directly_mappable_cdev_bdi = {
--	.name = "char",
--	.capabilities	= (
--#ifdef CONFIG_MMU
--		/* permit private copies of the data to be taken */
--		BDI_CAP_MAP_COPY |
--#endif
--		/* permit direct mmap, for read, write or exec */
--		BDI_CAP_MAP_DIRECT |
--		BDI_CAP_READ_MAP | BDI_CAP_WRITE_MAP | BDI_CAP_EXEC_MAP |
--		/* no writeback happens */
--		BDI_CAP_NO_ACCT_AND_WRITEBACK),
--};
--
- static struct kobj_map *cdev_map;
- 
- static DEFINE_MUTEX(chrdevs_lock);
-@@ -575,8 +554,6 @@ static struct kobject *base_probe(dev_t dev, int *part, void *data)
- void __init chrdev_init(void)
- {
- 	cdev_map = kobj_map_init(base_probe, &chrdevs_lock);
--	if (bdi_init(&directly_mappable_cdev_bdi))
--		panic("Failed to init directly mappable cdev bdi");
+diff --git a/fs/block_dev.c b/fs/block_dev.c
+index 288ba70..2ec7b3d 100644
+--- a/fs/block_dev.c
++++ b/fs/block_dev.c
+@@ -60,19 +60,6 @@ static void bdev_write_inode(struct inode *inode)
+ 	spin_unlock(&inode->i_lock);
  }
  
+-/*
+- * Move the inode from its current bdi to a new bdi.  Make sure the inode
+- * is clean before moving so that it doesn't linger on the old bdi.
+- */
+-static void bdev_inode_switch_bdi(struct inode *inode,
+-			struct backing_dev_info *dst)
+-{
+-	spin_lock(&inode->i_lock);
+-	WARN_ON_ONCE(inode->i_state & I_DIRTY);
+-	inode->i_data.backing_dev_info = dst;
+-	spin_unlock(&inode->i_lock);
+-}
+-
+ /* Kill _all_ buffers and pagecache , dirty or not.. */
+ void kill_bdev(struct block_device *bdev)
+ {
+@@ -589,7 +576,6 @@ struct block_device *bdget(dev_t dev)
+ 		inode->i_bdev = bdev;
+ 		inode->i_data.a_ops = &def_blk_aops;
+ 		mapping_set_gfp_mask(&inode->i_data, GFP_USER);
+-		inode->i_data.backing_dev_info = &default_backing_dev_info;
+ 		spin_lock(&bdev_lock);
+ 		list_add(&bdev->bd_list, &all_bdevs);
+ 		spin_unlock(&bdev_lock);
+@@ -1150,8 +1136,6 @@ static int __blkdev_get(struct block_device *bdev, fmode_t mode, int for_part)
+ 		bdev->bd_queue = disk->queue;
+ 		bdev->bd_contains = bdev;
+ 		if (!partno) {
+-			struct backing_dev_info *bdi;
+-
+ 			ret = -ENXIO;
+ 			bdev->bd_part = disk_get_part(disk, partno);
+ 			if (!bdev->bd_part)
+@@ -1177,11 +1161,8 @@ static int __blkdev_get(struct block_device *bdev, fmode_t mode, int for_part)
+ 				}
+ 			}
  
-@@ -590,4 +567,3 @@ EXPORT_SYMBOL(cdev_del);
- EXPORT_SYMBOL(cdev_add);
- EXPORT_SYMBOL(__register_chrdev);
- EXPORT_SYMBOL(__unregister_chrdev);
--EXPORT_SYMBOL(directly_mappable_cdev_bdi);
-diff --git a/fs/cifs/connect.c b/fs/cifs/connect.c
-index 2a772da..d3aa999 100644
---- a/fs/cifs/connect.c
-+++ b/fs/cifs/connect.c
-@@ -3446,7 +3446,7 @@ cifs_mount(struct cifs_sb_info *cifs_sb, struct smb_vol *volume_info)
- 	int referral_walks_count = 0;
- #endif
+-			if (!ret) {
++			if (!ret)
+ 				bd_set_size(bdev,(loff_t)get_capacity(disk)<<9);
+-				bdi = blk_get_backing_dev_info(bdev);
+-				bdev_inode_switch_bdi(bdev->bd_inode, bdi);
+-			}
  
--	rc = bdi_setup_and_register(&cifs_sb->bdi, "cifs", BDI_CAP_MAP_COPY);
-+	rc = bdi_setup_and_register(&cifs_sb->bdi, "cifs");
- 	if (rc)
- 		return rc;
+ 			/*
+ 			 * If the device is invalidated, rescan partition
+@@ -1208,8 +1189,6 @@ static int __blkdev_get(struct block_device *bdev, fmode_t mode, int for_part)
+ 			if (ret)
+ 				goto out_clear;
+ 			bdev->bd_contains = whole;
+-			bdev_inode_switch_bdi(bdev->bd_inode,
+-				whole->bd_inode->i_data.backing_dev_info);
+ 			bdev->bd_part = disk_get_part(disk, partno);
+ 			if (!(disk->flags & GENHD_FL_UP) ||
+ 			    !bdev->bd_part || !bdev->bd_part->nr_sects) {
+@@ -1249,7 +1228,6 @@ static int __blkdev_get(struct block_device *bdev, fmode_t mode, int for_part)
+ 	bdev->bd_disk = NULL;
+ 	bdev->bd_part = NULL;
+ 	bdev->bd_queue = NULL;
+-	bdev_inode_switch_bdi(bdev->bd_inode, &default_backing_dev_info);
+ 	if (bdev != bdev->bd_contains)
+ 		__blkdev_put(bdev->bd_contains, mode, 1);
+ 	bdev->bd_contains = NULL;
+@@ -1474,8 +1452,6 @@ static void __blkdev_put(struct block_device *bdev, fmode_t mode, int for_part)
+ 		 * dirty data before.
+ 		 */
+ 		bdev_write_inode(bdev->bd_inode);
+-		bdev_inode_switch_bdi(bdev->bd_inode,
+-					&default_backing_dev_info);
+ 	}
+ 	if (bdev->bd_contains == bdev) {
+ 		if (disk->fops->release)
+diff --git a/fs/btrfs/disk-io.c b/fs/btrfs/disk-io.c
+index afc4092..1ec872e 100644
+--- a/fs/btrfs/disk-io.c
++++ b/fs/btrfs/disk-io.c
+@@ -2318,7 +2318,6 @@ int open_ctree(struct super_block *sb,
+ 	 */
+ 	fs_info->btree_inode->i_size = OFFSET_MAX;
+ 	fs_info->btree_inode->i_mapping->a_ops = &btree_aops;
+-	fs_info->btree_inode->i_mapping->backing_dev_info = &fs_info->bdi;
  
-diff --git a/fs/coda/inode.c b/fs/coda/inode.c
-index b945410..82ec68b 100644
---- a/fs/coda/inode.c
-+++ b/fs/coda/inode.c
-@@ -183,7 +183,7 @@ static int coda_fill_super(struct super_block *sb, void *data, int silent)
- 		goto unlock_out;
+ 	RB_CLEAR_NODE(&BTRFS_I(fs_info->btree_inode)->rb_node);
+ 	extent_io_tree_init(&BTRFS_I(fs_info->btree_inode)->io_tree,
+diff --git a/fs/btrfs/inode.c b/fs/btrfs/inode.c
+index e687bb0..5a4046a 100644
+--- a/fs/btrfs/inode.c
++++ b/fs/btrfs/inode.c
+@@ -3608,7 +3608,6 @@ cache_acl:
+ 	switch (inode->i_mode & S_IFMT) {
+ 	case S_IFREG:
+ 		inode->i_mapping->a_ops = &btrfs_aops;
+-		inode->i_mapping->backing_dev_info = &root->fs_info->bdi;
+ 		BTRFS_I(inode)->io_tree.ops = &btrfs_extent_io_ops;
+ 		inode->i_fop = &btrfs_file_operations;
+ 		inode->i_op = &btrfs_file_inode_operations;
+@@ -3623,7 +3622,6 @@ cache_acl:
+ 	case S_IFLNK:
+ 		inode->i_op = &btrfs_symlink_inode_operations;
+ 		inode->i_mapping->a_ops = &btrfs_symlink_aops;
+-		inode->i_mapping->backing_dev_info = &root->fs_info->bdi;
+ 		break;
+ 	default:
+ 		inode->i_op = &btrfs_special_inode_operations;
+@@ -6088,7 +6086,6 @@ static int btrfs_create(struct inode *dir, struct dentry *dentry,
+ 	inode->i_fop = &btrfs_file_operations;
+ 	inode->i_op = &btrfs_file_inode_operations;
+ 	inode->i_mapping->a_ops = &btrfs_aops;
+-	inode->i_mapping->backing_dev_info = &root->fs_info->bdi;
+ 
+ 	err = btrfs_init_inode_security(trans, inode, dir, &dentry->d_name);
+ 	if (err)
+@@ -9201,7 +9198,6 @@ static int btrfs_symlink(struct inode *dir, struct dentry *dentry,
+ 	inode->i_fop = &btrfs_file_operations;
+ 	inode->i_op = &btrfs_file_inode_operations;
+ 	inode->i_mapping->a_ops = &btrfs_aops;
+-	inode->i_mapping->backing_dev_info = &root->fs_info->bdi;
+ 	BTRFS_I(inode)->io_tree.ops = &btrfs_extent_io_ops;
+ 
+ 	err = btrfs_init_inode_security(trans, inode, dir, &dentry->d_name);
+@@ -9245,7 +9241,6 @@ static int btrfs_symlink(struct inode *dir, struct dentry *dentry,
+ 
+ 	inode->i_op = &btrfs_symlink_inode_operations;
+ 	inode->i_mapping->a_ops = &btrfs_symlink_aops;
+-	inode->i_mapping->backing_dev_info = &root->fs_info->bdi;
+ 	inode_set_bytes(inode, name_len);
+ 	btrfs_i_size_write(inode, name_len);
+ 	err = btrfs_update_inode(trans, root, inode);
+@@ -9457,7 +9452,6 @@ static int btrfs_tmpfile(struct inode *dir, struct dentry *dentry, umode_t mode)
+ 	inode->i_op = &btrfs_file_inode_operations;
+ 
+ 	inode->i_mapping->a_ops = &btrfs_aops;
+-	inode->i_mapping->backing_dev_info = &root->fs_info->bdi;
+ 	BTRFS_I(inode)->io_tree.ops = &btrfs_extent_io_ops;
+ 
+ 	ret = btrfs_init_inode_security(trans, inode, dir, NULL);
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index f61a741..6b51736 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -783,8 +783,6 @@ static int fill_inode(struct inode *inode, struct page *locked_page,
  	}
  
--	error = bdi_setup_and_register(&vc->bdi, "coda", BDI_CAP_MAP_COPY);
-+	error = bdi_setup_and_register(&vc->bdi, "coda");
- 	if (error)
- 		goto unlock_out;
+ 	inode->i_mapping->a_ops = &ceph_aops;
+-	inode->i_mapping->backing_dev_info =
+-		&ceph_sb_to_client(inode->i_sb)->backing_dev_info;
  
-diff --git a/fs/configfs/configfs_internal.h b/fs/configfs/configfs_internal.h
-index bd4a3c1..a315677 100644
---- a/fs/configfs/configfs_internal.h
-+++ b/fs/configfs/configfs_internal.h
-@@ -70,8 +70,6 @@ extern int configfs_is_root(struct config_item *item);
- 
- extern struct inode * configfs_new_inode(umode_t mode, struct configfs_dirent *, struct super_block *);
- extern int configfs_create(struct dentry *, umode_t mode, int (*init)(struct inode *));
--extern int configfs_inode_init(void);
--extern void configfs_inode_exit(void);
- 
- extern int configfs_create_file(struct config_item *, const struct configfs_attribute *);
- extern int configfs_make_dirent(struct configfs_dirent *,
+ 	switch (inode->i_mode & S_IFMT) {
+ 	case S_IFIFO:
+diff --git a/fs/cifs/inode.c b/fs/cifs/inode.c
+index 0c3ce464..2d4f372 100644
+--- a/fs/cifs/inode.c
++++ b/fs/cifs/inode.c
+@@ -937,8 +937,6 @@ retry_iget5_locked:
+ 			inode->i_flags |= S_NOATIME | S_NOCMTIME;
+ 		if (inode->i_state & I_NEW) {
+ 			inode->i_ino = hash;
+-			if (S_ISREG(inode->i_mode))
+-				inode->i_data.backing_dev_info = sb->s_bdi;
+ #ifdef CONFIG_CIFS_FSCACHE
+ 			/* initialize per-inode cache cookie pointer */
+ 			CIFS_I(inode)->fscache = NULL;
 diff --git a/fs/configfs/inode.c b/fs/configfs/inode.c
-index 5946ad9..0ad6b4d 100644
+index 0ad6b4d..65af861 100644
 --- a/fs/configfs/inode.c
 +++ b/fs/configfs/inode.c
-@@ -50,12 +50,6 @@ static const struct address_space_operations configfs_aops = {
- 	.write_end	= simple_write_end,
- };
- 
--static struct backing_dev_info configfs_backing_dev_info = {
--	.name		= "configfs",
--	.ra_pages	= 0,	/* No readahead */
--	.capabilities	= BDI_CAP_NO_ACCT_AND_WRITEBACK,
--};
--
- static const struct inode_operations configfs_inode_operations ={
- 	.setattr	= configfs_setattr,
- };
-@@ -137,7 +131,7 @@ struct inode *configfs_new_inode(umode_t mode, struct configfs_dirent *sd,
+@@ -131,7 +131,6 @@ struct inode *configfs_new_inode(umode_t mode, struct configfs_dirent *sd,
  	if (inode) {
  		inode->i_ino = get_next_ino();
  		inode->i_mapping->a_ops = &configfs_aops;
--		inode->i_mapping->backing_dev_info = &configfs_backing_dev_info;
-+		inode->i_mapping->backing_dev_info = &noop_backing_dev_info;
+-		inode->i_mapping->backing_dev_info = &noop_backing_dev_info;
  		inode->i_op = &configfs_inode_operations;
  
  		if (sd->s_iattr) {
-@@ -283,13 +277,3 @@ void configfs_hash_and_remove(struct dentry * dir, const char * name)
- 	}
- 	mutex_unlock(&dir->d_inode->i_mutex);
- }
--
--int __init configfs_inode_init(void)
--{
--	return bdi_init(&configfs_backing_dev_info);
--}
--
--void configfs_inode_exit(void)
--{
--	bdi_destroy(&configfs_backing_dev_info);
--}
-diff --git a/fs/configfs/mount.c b/fs/configfs/mount.c
-index f6c2858..da94e41 100644
---- a/fs/configfs/mount.c
-+++ b/fs/configfs/mount.c
-@@ -145,19 +145,13 @@ static int __init configfs_init(void)
- 	if (!config_kobj)
- 		goto out2;
+diff --git a/fs/ecryptfs/inode.c b/fs/ecryptfs/inode.c
+index 1686dc2..34b36a5 100644
+--- a/fs/ecryptfs/inode.c
++++ b/fs/ecryptfs/inode.c
+@@ -67,7 +67,6 @@ static int ecryptfs_inode_set(struct inode *inode, void *opaque)
+ 	inode->i_ino = lower_inode->i_ino;
+ 	inode->i_version++;
+ 	inode->i_mapping->a_ops = &ecryptfs_aops;
+-	inode->i_mapping->backing_dev_info = inode->i_sb->s_bdi;
  
--	err = configfs_inode_init();
--	if (err)
--		goto out3;
--
- 	err = register_filesystem(&configfs_fs_type);
- 	if (err)
--		goto out4;
-+		goto out3;
- 
- 	return 0;
--out4:
--	pr_err("Unable to register filesystem!\n");
--	configfs_inode_exit();
- out3:
-+	pr_err("Unable to register filesystem!\n");
- 	kobject_put(config_kobj);
- out2:
- 	kmem_cache_destroy(configfs_dir_cachep);
-@@ -172,7 +166,6 @@ static void __exit configfs_exit(void)
- 	kobject_put(config_kobj);
- 	kmem_cache_destroy(configfs_dir_cachep);
- 	configfs_dir_cachep = NULL;
--	configfs_inode_exit();
- }
- 
- MODULE_AUTHOR("Oracle");
-diff --git a/fs/ecryptfs/main.c b/fs/ecryptfs/main.c
-index d9eb84b..1895d60 100644
---- a/fs/ecryptfs/main.c
-+++ b/fs/ecryptfs/main.c
-@@ -520,7 +520,7 @@ static struct dentry *ecryptfs_mount(struct file_system_type *fs_type, int flags
- 		goto out;
+ 	if (S_ISLNK(inode->i_mode))
+ 		inode->i_op = &ecryptfs_symlink_iops;
+diff --git a/fs/exofs/inode.c b/fs/exofs/inode.c
+index f1d3d4e..6fc91df 100644
+--- a/fs/exofs/inode.c
++++ b/fs/exofs/inode.c
+@@ -1214,7 +1214,6 @@ struct inode *exofs_iget(struct super_block *sb, unsigned long ino)
+ 		memcpy(oi->i_data, fcb.i_data, sizeof(fcb.i_data));
  	}
  
--	rc = bdi_setup_and_register(&sbi->bdi, "ecryptfs", BDI_CAP_MAP_COPY);
-+	rc = bdi_setup_and_register(&sbi->bdi, "ecryptfs");
- 	if (rc)
- 		goto out1;
+-	inode->i_mapping->backing_dev_info = sb->s_bdi;
+ 	if (S_ISREG(inode->i_mode)) {
+ 		inode->i_op = &exofs_file_inode_operations;
+ 		inode->i_fop = &exofs_file_operations;
+@@ -1314,7 +1313,6 @@ struct inode *exofs_new_inode(struct inode *dir, umode_t mode)
  
-diff --git a/fs/exofs/super.c b/fs/exofs/super.c
-index 9596550..fcc2e56 100644
---- a/fs/exofs/super.c
-+++ b/fs/exofs/super.c
-@@ -836,7 +836,7 @@ static int exofs_fill_super(struct super_block *sb, void *data, int silent)
- 		goto free_sbi;
+ 	set_obj_2bcreated(oi);
+ 
+-	inode->i_mapping->backing_dev_info = sb->s_bdi;
+ 	inode_init_owner(inode, dir, mode);
+ 	inode->i_ino = sbi->s_nextid++;
+ 	inode->i_blkbits = EXOFS_BLKSHIFT;
+diff --git a/fs/fuse/inode.c b/fs/fuse/inode.c
+index 6749109..ea0aacd 100644
+--- a/fs/fuse/inode.c
++++ b/fs/fuse/inode.c
+@@ -308,7 +308,6 @@ struct inode *fuse_iget(struct super_block *sb, u64 nodeid,
+ 		if (!fc->writeback_cache || !S_ISREG(attr->mode))
+ 			inode->i_flags |= S_NOCMTIME;
+ 		inode->i_generation = generation;
+-		inode->i_data.backing_dev_info = &fc->bdi;
+ 		fuse_init_inode(inode, attr);
+ 		unlock_new_inode(inode);
+ 	} else if ((inode->i_mode ^ attr->mode) & S_IFMT) {
+diff --git a/fs/gfs2/glock.c b/fs/gfs2/glock.c
+index a23524a..08ea717 100644
+--- a/fs/gfs2/glock.c
++++ b/fs/gfs2/glock.c
+@@ -775,7 +775,6 @@ int gfs2_glock_get(struct gfs2_sbd *sdp, u64 number,
+ 		mapping->flags = 0;
+ 		mapping_set_gfp_mask(mapping, GFP_NOFS);
+ 		mapping->private_data = NULL;
+-		mapping->backing_dev_info = s->s_bdi;
+ 		mapping->writeback_index = 0;
  	}
  
--	ret = bdi_setup_and_register(&sbi->bdi, "exofs", BDI_CAP_MAP_COPY);
-+	ret = bdi_setup_and_register(&sbi->bdi, "exofs");
- 	if (ret) {
- 		EXOFS_DBGMSG("Failed to bdi_setup_and_register\n");
- 		dput(sb->s_root);
+diff --git a/fs/gfs2/ops_fstype.c b/fs/gfs2/ops_fstype.c
+index 8633ad3..efc8e25 100644
+--- a/fs/gfs2/ops_fstype.c
++++ b/fs/gfs2/ops_fstype.c
+@@ -112,7 +112,6 @@ static struct gfs2_sbd *init_sbd(struct super_block *sb)
+ 	mapping->flags = 0;
+ 	mapping_set_gfp_mask(mapping, GFP_NOFS);
+ 	mapping->private_data = NULL;
+-	mapping->backing_dev_info = sb->s_bdi;
+ 	mapping->writeback_index = 0;
+ 
+ 	spin_lock_init(&sdp->sd_log_lock);
+diff --git a/fs/hugetlbfs/inode.c b/fs/hugetlbfs/inode.c
+index de7c95c..c274aca 100644
+--- a/fs/hugetlbfs/inode.c
++++ b/fs/hugetlbfs/inode.c
+@@ -492,7 +492,6 @@ static struct inode *hugetlbfs_get_inode(struct super_block *sb,
+ 		lockdep_set_class(&inode->i_mapping->i_mmap_rwsem,
+ 				&hugetlbfs_i_mmap_rwsem_key);
+ 		inode->i_mapping->a_ops = &hugetlbfs_aops;
+-		inode->i_mapping->backing_dev_info = &noop_backing_dev_info;
+ 		inode->i_atime = inode->i_mtime = inode->i_ctime = CURRENT_TIME;
+ 		inode->i_mapping->private_data = resv_map;
+ 		info = HUGETLBFS_I(inode);
+diff --git a/fs/inode.c b/fs/inode.c
+index aa149e7..e4e8caa 100644
+--- a/fs/inode.c
++++ b/fs/inode.c
+@@ -170,20 +170,7 @@ int inode_init_always(struct super_block *sb, struct inode *inode)
+ 	atomic_set(&mapping->i_mmap_writable, 0);
+ 	mapping_set_gfp_mask(mapping, GFP_HIGHUSER_MOVABLE);
+ 	mapping->private_data = NULL;
+-	mapping->backing_dev_info = &default_backing_dev_info;
+ 	mapping->writeback_index = 0;
+-
+-	/*
+-	 * If the block_device provides a backing_dev_info for client
+-	 * inodes then use that.  Otherwise the inode share the bdev's
+-	 * backing_dev_info.
+-	 */
+-	if (sb->s_bdev) {
+-		struct backing_dev_info *bdi;
+-
+-		bdi = sb->s_bdev->bd_inode->i_mapping->backing_dev_info;
+-		mapping->backing_dev_info = bdi;
+-	}
+ 	inode->i_private = NULL;
+ 	inode->i_mapping = mapping;
+ 	INIT_HLIST_HEAD(&inode->i_dentry);	/* buggered by rcu freeing */
+diff --git a/fs/kernfs/inode.c b/fs/kernfs/inode.c
+index 06f0688..9000874 100644
+--- a/fs/kernfs/inode.c
++++ b/fs/kernfs/inode.c
+@@ -286,7 +286,6 @@ static void kernfs_init_inode(struct kernfs_node *kn, struct inode *inode)
+ 	kernfs_get(kn);
+ 	inode->i_private = kn;
+ 	inode->i_mapping->a_ops = &kernfs_aops;
+-	inode->i_mapping->backing_dev_info = &noop_backing_dev_info;
+ 	inode->i_op = &kernfs_iops;
+ 
+ 	set_default_inode_attr(inode, kn->mode);
 diff --git a/fs/ncpfs/inode.c b/fs/ncpfs/inode.c
-index e31e589..a699a3f 100644
+index a699a3f..01a9e16 100644
 --- a/fs/ncpfs/inode.c
 +++ b/fs/ncpfs/inode.c
-@@ -560,7 +560,7 @@ static int ncp_fill_super(struct super_block *sb, void *raw_data, int silent)
- 	server = NCP_SBP(sb);
- 	memset(server, 0, sizeof(*server));
+@@ -267,7 +267,6 @@ ncp_iget(struct super_block *sb, struct ncp_entry_info *info)
+ 	if (inode) {
+ 		atomic_set(&NCP_FINFO(inode)->opened, info->opened);
  
--	error = bdi_setup_and_register(&server->bdi, "ncpfs", BDI_CAP_MAP_COPY);
-+	error = bdi_setup_and_register(&server->bdi, "ncpfs");
- 	if (error)
- 		goto out_fput;
+-		inode->i_mapping->backing_dev_info = sb->s_bdi;
+ 		inode->i_ino = info->ino;
+ 		ncp_set_attr(inode, info);
+ 		if (S_ISREG(inode->i_mode)) {
+diff --git a/fs/nfs/inode.c b/fs/nfs/inode.c
+index 4bffe63..24aac72 100644
+--- a/fs/nfs/inode.c
++++ b/fs/nfs/inode.c
+@@ -387,7 +387,6 @@ nfs_fhget(struct super_block *sb, struct nfs_fh *fh, struct nfs_fattr *fattr, st
+ 		if (S_ISREG(inode->i_mode)) {
+ 			inode->i_fop = NFS_SB(sb)->nfs_client->rpc_ops->file_ops;
+ 			inode->i_data.a_ops = &nfs_file_aops;
+-			inode->i_data.backing_dev_info = &NFS_SB(sb)->backing_dev_info;
+ 		} else if (S_ISDIR(inode->i_mode)) {
+ 			inode->i_op = NFS_SB(sb)->nfs_client->rpc_ops->dir_inode_ops;
+ 			inode->i_fop = &nfs_dir_operations;
+diff --git a/fs/nilfs2/gcinode.c b/fs/nilfs2/gcinode.c
+index 57ceaf3..748ca23 100644
+--- a/fs/nilfs2/gcinode.c
++++ b/fs/nilfs2/gcinode.c
+@@ -172,7 +172,6 @@ int nilfs_init_gcinode(struct inode *inode)
+ 	inode->i_mode = S_IFREG;
+ 	mapping_set_gfp_mask(inode->i_mapping, GFP_NOFS);
+ 	inode->i_mapping->a_ops = &empty_aops;
+-	inode->i_mapping->backing_dev_info = inode->i_sb->s_bdi;
  
-diff --git a/fs/ramfs/file-nommu.c b/fs/ramfs/file-nommu.c
-index bbafbde..d1390b8d 100644
---- a/fs/ramfs/file-nommu.c
-+++ b/fs/ramfs/file-nommu.c
-@@ -33,8 +33,15 @@ static unsigned long ramfs_nommu_get_unmapped_area(struct file *file,
- 						   unsigned long pgoff,
- 						   unsigned long flags);
- static int ramfs_nommu_mmap(struct file *file, struct vm_area_struct *vma);
-+	
-+static unsigned ramfs_mmap_capabilities(struct file *file)
-+{
-+	return NOMMU_MAP_DIRECT | NOMMU_MAP_COPY | NOMMU_MAP_READ |
-+		NOMMU_MAP_WRITE | NOMMU_MAP_EXEC;
-+}
+ 	ii->i_flags = 0;
+ 	nilfs_bmap_init_gc(ii->i_bmap);
+diff --git a/fs/nilfs2/mdt.c b/fs/nilfs2/mdt.c
+index c4dcd1d..892cf5f 100644
+--- a/fs/nilfs2/mdt.c
++++ b/fs/nilfs2/mdt.c
+@@ -429,7 +429,6 @@ int nilfs_mdt_init(struct inode *inode, gfp_t gfp_mask, size_t objsz)
  
- const struct file_operations ramfs_file_operations = {
-+	.mmap_capabilities	= ramfs_mmap_capabilities,
- 	.mmap			= ramfs_nommu_mmap,
- 	.get_unmapped_area	= ramfs_nommu_get_unmapped_area,
- 	.read			= new_sync_read,
+ 	inode->i_mode = S_IFREG;
+ 	mapping_set_gfp_mask(inode->i_mapping, gfp_mask);
+-	inode->i_mapping->backing_dev_info = inode->i_sb->s_bdi;
+ 
+ 	inode->i_op = &def_mdt_iops;
+ 	inode->i_fop = &def_mdt_fops;
+@@ -457,13 +456,12 @@ int nilfs_mdt_setup_shadow_map(struct inode *inode,
+ 			       struct nilfs_shadow_map *shadow)
+ {
+ 	struct nilfs_mdt_info *mi = NILFS_MDT(inode);
+-	struct backing_dev_info *bdi = inode->i_sb->s_bdi;
+ 
+ 	INIT_LIST_HEAD(&shadow->frozen_buffers);
+ 	address_space_init_once(&shadow->frozen_data);
+-	nilfs_mapping_init(&shadow->frozen_data, inode, bdi);
++	nilfs_mapping_init(&shadow->frozen_data, inode);
+ 	address_space_init_once(&shadow->frozen_btnodes);
+-	nilfs_mapping_init(&shadow->frozen_btnodes, inode, bdi);
++	nilfs_mapping_init(&shadow->frozen_btnodes, inode);
+ 	mi->mi_shadow = shadow;
+ 	return 0;
+ }
+diff --git a/fs/nilfs2/page.c b/fs/nilfs2/page.c
+index da27664..700ecbc 100644
+--- a/fs/nilfs2/page.c
++++ b/fs/nilfs2/page.c
+@@ -461,14 +461,12 @@ unsigned nilfs_page_count_clean_buffers(struct page *page,
+ 	return nc;
+ }
+ 
+-void nilfs_mapping_init(struct address_space *mapping, struct inode *inode,
+-			struct backing_dev_info *bdi)
++void nilfs_mapping_init(struct address_space *mapping, struct inode *inode)
+ {
+ 	mapping->host = inode;
+ 	mapping->flags = 0;
+ 	mapping_set_gfp_mask(mapping, GFP_NOFS);
+ 	mapping->private_data = NULL;
+-	mapping->backing_dev_info = bdi;
+ 	mapping->a_ops = &empty_aops;
+ }
+ 
+diff --git a/fs/nilfs2/page.h b/fs/nilfs2/page.h
+index ef30c5c..a43b828 100644
+--- a/fs/nilfs2/page.h
++++ b/fs/nilfs2/page.h
+@@ -57,8 +57,7 @@ int nilfs_copy_dirty_pages(struct address_space *, struct address_space *);
+ void nilfs_copy_back_pages(struct address_space *, struct address_space *);
+ void nilfs_clear_dirty_page(struct page *, bool);
+ void nilfs_clear_dirty_pages(struct address_space *, bool);
+-void nilfs_mapping_init(struct address_space *mapping, struct inode *inode,
+-			struct backing_dev_info *bdi);
++void nilfs_mapping_init(struct address_space *mapping, struct inode *inode);
+ unsigned nilfs_page_count_clean_buffers(struct page *, unsigned, unsigned);
+ unsigned long nilfs_find_uncommitted_extent(struct inode *inode,
+ 					    sector_t start_blk,
+diff --git a/fs/nilfs2/super.c b/fs/nilfs2/super.c
+index 3d4bbac..5bc2a1c 100644
+--- a/fs/nilfs2/super.c
++++ b/fs/nilfs2/super.c
+@@ -166,7 +166,7 @@ struct inode *nilfs_alloc_inode(struct super_block *sb)
+ 	ii->i_state = 0;
+ 	ii->i_cno = 0;
+ 	ii->vfs_inode.i_version = 1;
+-	nilfs_mapping_init(&ii->i_btnode_cache, &ii->vfs_inode, sb->s_bdi);
++	nilfs_mapping_init(&ii->i_btnode_cache, &ii->vfs_inode);
+ 	return &ii->vfs_inode;
+ }
+ 
+diff --git a/fs/ocfs2/dlmfs/dlmfs.c b/fs/ocfs2/dlmfs/dlmfs.c
+index 6000d30..061ba6a 100644
+--- a/fs/ocfs2/dlmfs/dlmfs.c
++++ b/fs/ocfs2/dlmfs/dlmfs.c
+@@ -398,7 +398,6 @@ static struct inode *dlmfs_get_root_inode(struct super_block *sb)
+ 	if (inode) {
+ 		inode->i_ino = get_next_ino();
+ 		inode_init_owner(inode, NULL, mode);
+-		inode->i_mapping->backing_dev_info = &noop_backing_dev_info;
+ 		inode->i_atime = inode->i_mtime = inode->i_ctime = CURRENT_TIME;
+ 		inc_nlink(inode);
+ 
+@@ -422,7 +421,6 @@ static struct inode *dlmfs_get_inode(struct inode *parent,
+ 
+ 	inode->i_ino = get_next_ino();
+ 	inode_init_owner(inode, parent, mode);
+-	inode->i_mapping->backing_dev_info = &noop_backing_dev_info;
+ 	inode->i_atime = inode->i_mtime = inode->i_ctime = CURRENT_TIME;
+ 
+ 	ip = DLMFS_I(inode);
 diff --git a/fs/ramfs/inode.c b/fs/ramfs/inode.c
-index d365b1c..ad4d712 100644
+index ad4d712..889d558 100644
 --- a/fs/ramfs/inode.c
 +++ b/fs/ramfs/inode.c
-@@ -50,14 +50,6 @@ static const struct address_space_operations ramfs_aops = {
- 	.set_page_dirty	= __set_page_dirty_no_writeback,
- };
- 
--static struct backing_dev_info ramfs_backing_dev_info = {
--	.name		= "ramfs",
--	.ra_pages	= 0,	/* No readahead */
--	.capabilities	= BDI_CAP_NO_ACCT_AND_WRITEBACK |
--			  BDI_CAP_MAP_DIRECT | BDI_CAP_MAP_COPY |
--			  BDI_CAP_READ_MAP | BDI_CAP_WRITE_MAP | BDI_CAP_EXEC_MAP,
--};
--
- struct inode *ramfs_get_inode(struct super_block *sb,
- 				const struct inode *dir, umode_t mode, dev_t dev)
- {
-@@ -67,7 +59,7 @@ struct inode *ramfs_get_inode(struct super_block *sb,
+@@ -59,7 +59,6 @@ struct inode *ramfs_get_inode(struct super_block *sb,
  		inode->i_ino = get_next_ino();
  		inode_init_owner(inode, dir, mode);
  		inode->i_mapping->a_ops = &ramfs_aops;
--		inode->i_mapping->backing_dev_info = &ramfs_backing_dev_info;
-+		inode->i_mapping->backing_dev_info = &noop_backing_dev_info;
+-		inode->i_mapping->backing_dev_info = &noop_backing_dev_info;
  		mapping_set_gfp_mask(inode->i_mapping, GFP_HIGHUSER);
  		mapping_set_unevictable(inode->i_mapping);
  		inode->i_atime = inode->i_mtime = inode->i_ctime = CURRENT_TIME;
-@@ -267,19 +259,9 @@ static struct file_system_type ramfs_fs_type = {
- int __init init_ramfs_fs(void)
- {
- 	static unsigned long once;
--	int err;
+diff --git a/fs/romfs/super.c b/fs/romfs/super.c
+index e98dd88..268733c 100644
+--- a/fs/romfs/super.c
++++ b/fs/romfs/super.c
+@@ -355,9 +355,6 @@ static struct inode *romfs_iget(struct super_block *sb, unsigned long pos)
+ 	case ROMFH_REG:
+ 		i->i_fop = &romfs_ro_fops;
+ 		i->i_data.a_ops = &romfs_aops;
+-		if (i->i_sb->s_mtd)
+-			i->i_data.backing_dev_info =
+-				i->i_sb->s_mtd->backing_dev_info;
+ 		if (nextfh & ROMFH_EXEC)
+ 			mode |= S_IXUGO;
+ 		break;
+diff --git a/fs/ubifs/dir.c b/fs/ubifs/dir.c
+index ea41649..c49b198 100644
+--- a/fs/ubifs/dir.c
++++ b/fs/ubifs/dir.c
+@@ -108,8 +108,6 @@ struct inode *ubifs_new_inode(struct ubifs_info *c, const struct inode *dir,
+ 	inode->i_mtime = inode->i_atime = inode->i_ctime =
+ 			 ubifs_current_time(inode);
+ 	inode->i_mapping->nrpages = 0;
+-	/* Disable readahead */
+-	inode->i_mapping->backing_dev_info = &c->bdi;
  
- 	if (test_and_set_bit(0, &once))
- 		return 0;
--
--	err = bdi_init(&ramfs_backing_dev_info);
--	if (err)
--		return err;
--
--	err = register_filesystem(&ramfs_fs_type);
--	if (err)
--		bdi_destroy(&ramfs_backing_dev_info);
--
--	return err;
-+	return register_filesystem(&ramfs_fs_type);
- }
- fs_initcall(init_ramfs_fs);
-diff --git a/fs/romfs/mmap-nommu.c b/fs/romfs/mmap-nommu.c
-index ea06c75..7da9e21 100644
---- a/fs/romfs/mmap-nommu.c
-+++ b/fs/romfs/mmap-nommu.c
-@@ -70,6 +70,15 @@ static int romfs_mmap(struct file *file, struct vm_area_struct *vma)
- 	return vma->vm_flags & (VM_SHARED | VM_MAYSHARE) ? 0 : -ENOSYS;
- }
- 
-+static unsigned romfs_mmap_capabilities(struct file *file)
-+{
-+	struct mtd_info *mtd = file_inode(file)->i_sb->s_mtd;
-+
-+	if (!mtd)
-+		return NOMMU_MAP_COPY;
-+	return mtd_mmap_capabilities(mtd);
-+}
-+
- const struct file_operations romfs_ro_fops = {
- 	.llseek			= generic_file_llseek,
- 	.read			= new_sync_read,
-@@ -77,4 +86,5 @@ const struct file_operations romfs_ro_fops = {
- 	.splice_read		= generic_file_splice_read,
- 	.mmap			= romfs_mmap,
- 	.get_unmapped_area	= romfs_get_unmapped_area,
-+	.mmap_capabilities	= romfs_mmap_capabilities,
- };
+ 	switch (mode & S_IFMT) {
+ 	case S_IFREG:
 diff --git a/fs/ubifs/super.c b/fs/ubifs/super.c
-index 106bf20..ed93dc6 100644
+index ed93dc6..6197154 100644
 --- a/fs/ubifs/super.c
 +++ b/fs/ubifs/super.c
-@@ -2017,7 +2017,7 @@ static int ubifs_fill_super(struct super_block *sb, void *data, int silent)
- 	 * Read-ahead will be disabled because @c->bdi.ra_pages is 0.
- 	 */
- 	c->bdi.name = "ubifs",
--	c->bdi.capabilities = BDI_CAP_MAP_COPY;
-+	c->bdi.capabilities = 0;
- 	err  = bdi_init(&c->bdi);
+@@ -156,9 +156,6 @@ struct inode *ubifs_iget(struct super_block *sb, unsigned long inum)
  	if (err)
- 		goto out_close;
-diff --git a/include/linux/backing-dev.h b/include/linux/backing-dev.h
-index e936cea..478f95d 100644
---- a/include/linux/backing-dev.h
-+++ b/include/linux/backing-dev.h
-@@ -114,7 +114,7 @@ int bdi_register(struct backing_dev_info *bdi, struct device *parent,
- 		const char *fmt, ...);
- int bdi_register_dev(struct backing_dev_info *bdi, dev_t dev);
- void bdi_unregister(struct backing_dev_info *bdi);
--int __must_check bdi_setup_and_register(struct backing_dev_info *, char *, unsigned int);
-+int __must_check bdi_setup_and_register(struct backing_dev_info *, char *);
- void bdi_start_writeback(struct backing_dev_info *bdi, long nr_pages,
- 			enum wb_reason reason);
- void bdi_start_background_writeback(struct backing_dev_info *bdi);
-@@ -228,42 +228,17 @@ int bdi_set_max_ratio(struct backing_dev_info *bdi, unsigned int max_ratio);
-  * BDI_CAP_NO_ACCT_DIRTY:  Dirty pages shouldn't contribute to accounting
-  * BDI_CAP_NO_WRITEBACK:   Don't write pages back
-  * BDI_CAP_NO_ACCT_WB:     Don't automatically account writeback pages
-- *
-- * These flags let !MMU mmap() govern direct device mapping vs immediate
-- * copying more easily for MAP_PRIVATE, especially for ROM filesystems.
-- *
-- * BDI_CAP_MAP_COPY:       Copy can be mapped (MAP_PRIVATE)
-- * BDI_CAP_MAP_DIRECT:     Can be mapped directly (MAP_SHARED)
-- * BDI_CAP_READ_MAP:       Can be mapped for reading
-- * BDI_CAP_WRITE_MAP:      Can be mapped for writing
-- * BDI_CAP_EXEC_MAP:       Can be mapped for execution
-- *
-  * BDI_CAP_STRICTLIMIT:    Keep number of dirty pages below bdi threshold.
-  */
- #define BDI_CAP_NO_ACCT_DIRTY	0x00000001
- #define BDI_CAP_NO_WRITEBACK	0x00000002
--#define BDI_CAP_MAP_COPY	0x00000004
--#define BDI_CAP_MAP_DIRECT	0x00000008
--#define BDI_CAP_READ_MAP	0x00000010
--#define BDI_CAP_WRITE_MAP	0x00000020
--#define BDI_CAP_EXEC_MAP	0x00000040
--#define BDI_CAP_NO_ACCT_WB	0x00000080
--#define BDI_CAP_STABLE_WRITES	0x00000200
--#define BDI_CAP_STRICTLIMIT	0x00000400
+ 		goto out_invalid;
+ 
+-	/* Disable read-ahead */
+-	inode->i_mapping->backing_dev_info = &c->bdi;
 -
--#define BDI_CAP_VMFLAGS \
--	(BDI_CAP_READ_MAP | BDI_CAP_WRITE_MAP | BDI_CAP_EXEC_MAP)
-+#define BDI_CAP_NO_ACCT_WB	0x00000004
-+#define BDI_CAP_STABLE_WRITES	0x00000008
-+#define BDI_CAP_STRICTLIMIT	0x00000010
- 
- #define BDI_CAP_NO_ACCT_AND_WRITEBACK \
- 	(BDI_CAP_NO_WRITEBACK | BDI_CAP_NO_ACCT_DIRTY | BDI_CAP_NO_ACCT_WB)
- 
--#if defined(VM_MAYREAD) && \
--	(BDI_CAP_READ_MAP != VM_MAYREAD || \
--	 BDI_CAP_WRITE_MAP != VM_MAYWRITE || \
--	 BDI_CAP_EXEC_MAP != VM_MAYEXEC)
--#error please change backing_dev_info::capabilities flags
--#endif
--
- extern struct backing_dev_info default_backing_dev_info;
- extern struct backing_dev_info noop_backing_dev_info;
- 
-diff --git a/include/linux/cdev.h b/include/linux/cdev.h
-index fb45919..f876361 100644
---- a/include/linux/cdev.h
-+++ b/include/linux/cdev.h
-@@ -30,6 +30,4 @@ void cdev_del(struct cdev *);
- 
- void cd_forget(struct inode *);
- 
--extern struct backing_dev_info directly_mappable_cdev_bdi;
--
- #endif
+ 	switch (inode->i_mode & S_IFMT) {
+ 	case S_IFREG:
+ 		inode->i_mapping->a_ops = &ubifs_file_address_operations;
 diff --git a/include/linux/fs.h b/include/linux/fs.h
-index f90c028..7939a2e 100644
+index 7939a2e..6484bb4 100644
 --- a/include/linux/fs.h
 +++ b/include/linux/fs.h
-@@ -1502,6 +1502,26 @@ struct block_device_operations;
- #define HAVE_COMPAT_IOCTL 1
- #define HAVE_UNLOCKED_IOCTL 1
+@@ -34,6 +34,7 @@
+ #include <asm/byteorder.h>
+ #include <uapi/linux/fs.h>
  
-+/*
-+ * These flags let !MMU mmap() govern direct device mapping vs immediate
-+ * copying more easily for MAP_PRIVATE, especially for ROM filesystems.
-+ *
-+ * NOMMU_MAP_COPY:	Copy can be mapped (MAP_PRIVATE)
-+ * NOMMU_MAP_DIRECT:	Can be mapped directly (MAP_SHARED)
-+ * NOMMU_MAP_READ:	Can be mapped for reading
-+ * NOMMU_MAP_WRITE:	Can be mapped for writing
-+ * NOMMU_MAP_EXEC:	Can be mapped for execution
-+ */
-+#define NOMMU_MAP_COPY		0x00000001
-+#define NOMMU_MAP_DIRECT	0x00000008
-+#define NOMMU_MAP_READ		VM_MAYREAD
-+#define NOMMU_MAP_WRITE		VM_MAYWRITE
-+#define NOMMU_MAP_EXEC		VM_MAYEXEC
-+
-+#define NOMMU_VMFLAGS \
-+	(NOMMU_MAP_READ | NOMMU_MAP_WRITE | NOMMU_MAP_EXEC)
-+
-+
- struct iov_iter;
++struct backing_dev_info;
+ struct export_operations;
+ struct hd_geometry;
+ struct iovec;
+@@ -394,7 +395,6 @@ int pagecache_write_end(struct file *, struct address_space *mapping,
+ 				loff_t pos, unsigned len, unsigned copied,
+ 				struct page *page, void *fsdata);
  
- struct file_operations {
-@@ -1536,6 +1556,9 @@ struct file_operations {
- 	long (*fallocate)(struct file *file, int mode, loff_t offset,
- 			  loff_t len);
- 	void (*show_fdinfo)(struct seq_file *m, struct file *f);
-+#ifndef CONFIG_MMU
-+	unsigned (*mmap_capabilities)(struct file *);
-+#endif
- };
- 
- struct inode_operations {
-diff --git a/include/linux/mtd/mtd.h b/include/linux/mtd/mtd.h
-index 031ff3a..3301c4c 100644
---- a/include/linux/mtd/mtd.h
-+++ b/include/linux/mtd/mtd.h
-@@ -408,4 +408,6 @@ static inline int mtd_is_bitflip_or_eccerr(int err) {
- 	return mtd_is_bitflip(err) || mtd_is_eccerr(err);
- }
- 
-+unsigned mtd_mmap_capabilities(struct mtd_info *mtd);
-+
- #endif /* __MTD_MTD_H__ */
+-struct backing_dev_info;
+ struct address_space {
+ 	struct inode		*host;		/* owner: inode, block_device */
+ 	struct radix_tree_root	page_tree;	/* radix tree of all pages */
+@@ -409,7 +409,6 @@ struct address_space {
+ 	pgoff_t			writeback_index;/* writeback starts here */
+ 	const struct address_space_operations *a_ops;	/* methods */
+ 	unsigned long		flags;		/* error bits/gfp mask */
+-	struct backing_dev_info *backing_dev_info; /* device readahead, etc */
+ 	spinlock_t		private_lock;	/* for use by the address_space */
+ 	struct list_head	private_list;	/* ditto */
+ 	void			*private_data;	/* ditto */
 diff --git a/mm/backing-dev.c b/mm/backing-dev.c
-index 0ae0df5..16c6895 100644
+index 16c6895..52e0c76 100644
 --- a/mm/backing-dev.c
 +++ b/mm/backing-dev.c
-@@ -17,8 +17,6 @@ static atomic_long_t bdi_seq = ATOMIC_LONG_INIT(0);
- struct backing_dev_info default_backing_dev_info = {
- 	.name		= "default",
- 	.ra_pages	= VM_MAX_READAHEAD * 1024 / PAGE_CACHE_SIZE,
--	.state		= 0,
--	.capabilities	= BDI_CAP_MAP_COPY,
+@@ -24,7 +24,6 @@ struct backing_dev_info noop_backing_dev_info = {
+ 	.name		= "noop",
+ 	.capabilities	= BDI_CAP_NO_ACCT_AND_WRITEBACK,
  };
- EXPORT_SYMBOL_GPL(default_backing_dev_info);
+-EXPORT_SYMBOL_GPL(noop_backing_dev_info);
  
-@@ -513,13 +511,12 @@ EXPORT_SYMBOL(bdi_destroy);
-  * For use from filesystems to quickly init and register a bdi associated
-  * with dirty writeback
-  */
--int bdi_setup_and_register(struct backing_dev_info *bdi, char *name,
--			   unsigned int cap)
-+int bdi_setup_and_register(struct backing_dev_info *bdi, char *name)
- {
- 	int err;
+ static struct class *bdi_class;
  
- 	bdi->name = name;
--	bdi->capabilities = cap;
-+	bdi->capabilities = 0;
- 	err = bdi_init(bdi);
- 	if (err)
- 		return err;
-diff --git a/mm/nommu.c b/mm/nommu.c
-index b51eadf..13af96f3 100644
---- a/mm/nommu.c
-+++ b/mm/nommu.c
-@@ -946,9 +946,6 @@ static int validate_mmap_request(struct file *file,
- 		return -EOVERFLOW;
- 
- 	if (file) {
--		/* validate file mapping requests */
--		struct address_space *mapping;
--
- 		/* files must support mmap */
- 		if (!file->f_op->mmap)
- 			return -ENODEV;
-@@ -957,28 +954,22 @@ static int validate_mmap_request(struct file *file,
- 		 * - we support chardevs that provide their own "memory"
- 		 * - we support files/blockdevs that are memory backed
- 		 */
--		mapping = file->f_mapping;
--		if (!mapping)
--			mapping = file_inode(file)->i_mapping;
--
--		capabilities = 0;
--		if (mapping && mapping->backing_dev_info)
--			capabilities = mapping->backing_dev_info->capabilities;
--
--		if (!capabilities) {
-+		if (file->f_op->mmap_capabilities) {
-+			capabilities = file->f_op->mmap_capabilities(file);
-+		} else {
- 			/* no explicit capabilities set, so assume some
- 			 * defaults */
- 			switch (file_inode(file)->i_mode & S_IFMT) {
- 			case S_IFREG:
- 			case S_IFBLK:
--				capabilities = BDI_CAP_MAP_COPY;
-+				capabilities = NOMMU_MAP_COPY;
- 				break;
- 
- 			case S_IFCHR:
- 				capabilities =
--					BDI_CAP_MAP_DIRECT |
--					BDI_CAP_READ_MAP |
--					BDI_CAP_WRITE_MAP;
-+					NOMMU_MAP_DIRECT |
-+					NOMMU_MAP_READ |
-+					NOMMU_MAP_WRITE;
- 				break;
- 
- 			default:
-@@ -989,9 +980,9 @@ static int validate_mmap_request(struct file *file,
- 		/* eliminate any capabilities that we can't support on this
- 		 * device */
- 		if (!file->f_op->get_unmapped_area)
--			capabilities &= ~BDI_CAP_MAP_DIRECT;
-+			capabilities &= ~NOMMU_MAP_DIRECT;
- 		if (!file->f_op->read)
--			capabilities &= ~BDI_CAP_MAP_COPY;
-+			capabilities &= ~NOMMU_MAP_COPY;
- 
- 		/* The file shall have been opened with read permission. */
- 		if (!(file->f_mode & FMODE_READ))
-@@ -1010,29 +1001,29 @@ static int validate_mmap_request(struct file *file,
- 			if (locks_verify_locked(file))
- 				return -EAGAIN;
- 
--			if (!(capabilities & BDI_CAP_MAP_DIRECT))
-+			if (!(capabilities & NOMMU_MAP_DIRECT))
- 				return -ENODEV;
- 
- 			/* we mustn't privatise shared mappings */
--			capabilities &= ~BDI_CAP_MAP_COPY;
-+			capabilities &= ~NOMMU_MAP_COPY;
- 		} else {
- 			/* we're going to read the file into private memory we
- 			 * allocate */
--			if (!(capabilities & BDI_CAP_MAP_COPY))
-+			if (!(capabilities & NOMMU_MAP_COPY))
- 				return -ENODEV;
- 
- 			/* we don't permit a private writable mapping to be
- 			 * shared with the backing device */
- 			if (prot & PROT_WRITE)
--				capabilities &= ~BDI_CAP_MAP_DIRECT;
-+				capabilities &= ~NOMMU_MAP_DIRECT;
- 		}
- 
--		if (capabilities & BDI_CAP_MAP_DIRECT) {
--			if (((prot & PROT_READ)  && !(capabilities & BDI_CAP_READ_MAP))  ||
--			    ((prot & PROT_WRITE) && !(capabilities & BDI_CAP_WRITE_MAP)) ||
--			    ((prot & PROT_EXEC)  && !(capabilities & BDI_CAP_EXEC_MAP))
-+		if (capabilities & NOMMU_MAP_DIRECT) {
-+			if (((prot & PROT_READ)  && !(capabilities & NOMMU_MAP_READ))  ||
-+			    ((prot & PROT_WRITE) && !(capabilities & NOMMU_MAP_WRITE)) ||
-+			    ((prot & PROT_EXEC)  && !(capabilities & NOMMU_MAP_EXEC))
- 			    ) {
--				capabilities &= ~BDI_CAP_MAP_DIRECT;
-+				capabilities &= ~NOMMU_MAP_DIRECT;
- 				if (flags & MAP_SHARED) {
- 					printk(KERN_WARNING
- 					       "MAP_SHARED not completely supported on !MMU\n");
-@@ -1049,21 +1040,21 @@ static int validate_mmap_request(struct file *file,
- 		} else if ((prot & PROT_READ) && !(prot & PROT_EXEC)) {
- 			/* handle implication of PROT_EXEC by PROT_READ */
- 			if (current->personality & READ_IMPLIES_EXEC) {
--				if (capabilities & BDI_CAP_EXEC_MAP)
-+				if (capabilities & NOMMU_MAP_EXEC)
- 					prot |= PROT_EXEC;
- 			}
- 		} else if ((prot & PROT_READ) &&
- 			 (prot & PROT_EXEC) &&
--			 !(capabilities & BDI_CAP_EXEC_MAP)
-+			 !(capabilities & NOMMU_MAP_EXEC)
- 			 ) {
- 			/* backing file is not executable, try to copy */
--			capabilities &= ~BDI_CAP_MAP_DIRECT;
-+			capabilities &= ~NOMMU_MAP_DIRECT;
- 		}
- 	} else {
- 		/* anonymous mappings are always memory backed and can be
- 		 * privately mapped
- 		 */
--		capabilities = BDI_CAP_MAP_COPY;
-+		capabilities = NOMMU_MAP_COPY;
- 
- 		/* handle PROT_EXEC implication by PROT_READ */
- 		if ((prot & PROT_READ) &&
-@@ -1095,7 +1086,7 @@ static unsigned long determine_vm_flags(struct file *file,
- 	vm_flags = calc_vm_prot_bits(prot) | calc_vm_flag_bits(flags);
- 	/* vm_flags |= mm->def_flags; */
- 
--	if (!(capabilities & BDI_CAP_MAP_DIRECT)) {
-+	if (!(capabilities & NOMMU_MAP_DIRECT)) {
- 		/* attempt to share read-only copies of mapped file chunks */
- 		vm_flags |= VM_MAYREAD | VM_MAYWRITE | VM_MAYEXEC;
- 		if (file && !(prot & PROT_WRITE))
-@@ -1104,7 +1095,7 @@ static unsigned long determine_vm_flags(struct file *file,
- 		/* overlay a shareable mapping on the backing device or inode
- 		 * if possible - used for chardevs, ramfs/tmpfs/shmfs and
- 		 * romfs/cramfs */
--		vm_flags |= VM_MAYSHARE | (capabilities & BDI_CAP_VMFLAGS);
-+		vm_flags |= VM_MAYSHARE | (capabilities & NOMMU_VMFLAGS);
- 		if (flags & MAP_SHARED)
- 			vm_flags |= VM_SHARED;
+diff --git a/mm/shmem.c b/mm/shmem.c
+index 1b77eaf..4c61d3d 100644
+--- a/mm/shmem.c
++++ b/mm/shmem.c
+@@ -1410,7 +1410,6 @@ static struct inode *shmem_get_inode(struct super_block *sb, const struct inode
+ 		inode->i_ino = get_next_ino();
+ 		inode_init_owner(inode, dir, mode);
+ 		inode->i_blocks = 0;
+-		inode->i_mapping->backing_dev_info = &noop_backing_dev_info;
+ 		inode->i_atime = inode->i_mtime = inode->i_ctime = CURRENT_TIME;
+ 		inode->i_generation = get_seconds();
+ 		info = SHMEM_I(inode);
+diff --git a/mm/swap_state.c b/mm/swap_state.c
+index 1c137b6..405923f 100644
+--- a/mm/swap_state.c
++++ b/mm/swap_state.c
+@@ -37,7 +37,6 @@ struct address_space swapper_spaces[MAX_SWAPFILES] = {
+ 		.page_tree	= RADIX_TREE_INIT(GFP_ATOMIC|__GFP_NOWARN),
+ 		.i_mmap_writable = ATOMIC_INIT(0),
+ 		.a_ops		= &swap_aops,
+-		.backing_dev_info = &noop_backing_dev_info,
  	}
-@@ -1157,7 +1148,7 @@ static int do_mmap_private(struct vm_area_struct *vma,
- 	 * shared mappings on devices or memory
- 	 * - VM_MAYSHARE will be set if it may attempt to share
- 	 */
--	if (capabilities & BDI_CAP_MAP_DIRECT) {
-+	if (capabilities & NOMMU_MAP_DIRECT) {
- 		ret = vma->vm_file->f_op->mmap(vma->vm_file, vma);
- 		if (ret == 0) {
- 			/* shouldn't return success if we're not sharing */
-@@ -1346,7 +1337,7 @@ unsigned long do_mmap_pgoff(struct file *file,
- 			if ((pregion->vm_pgoff != pgoff || rpglen != pglen) &&
- 			    !(pgoff >= pregion->vm_pgoff && pgend <= rpgend)) {
- 				/* new mapping is not a subset of the region */
--				if (!(capabilities & BDI_CAP_MAP_DIRECT))
-+				if (!(capabilities & NOMMU_MAP_DIRECT))
- 					goto sharing_violation;
- 				continue;
- 			}
-@@ -1385,7 +1376,7 @@ unsigned long do_mmap_pgoff(struct file *file,
- 		 * - this is the hook for quasi-memory character devices to
- 		 *   tell us the location of a shared mapping
- 		 */
--		if (capabilities & BDI_CAP_MAP_DIRECT) {
-+		if (capabilities & NOMMU_MAP_DIRECT) {
- 			addr = file->f_op->get_unmapped_area(file, addr, len,
- 							     pgoff, flags);
- 			if (IS_ERR_VALUE(addr)) {
-@@ -1397,10 +1388,10 @@ unsigned long do_mmap_pgoff(struct file *file,
- 				 * the mapping so we'll have to attempt to copy
- 				 * it */
- 				ret = -ENODEV;
--				if (!(capabilities & BDI_CAP_MAP_COPY))
-+				if (!(capabilities & NOMMU_MAP_COPY))
- 					goto error_just_free;
+ };
  
--				capabilities &= ~BDI_CAP_MAP_DIRECT;
-+				capabilities &= ~NOMMU_MAP_DIRECT;
- 			} else {
- 				vma->vm_start = region->vm_start = addr;
- 				vma->vm_end = region->vm_end = addr + len;
-@@ -1411,7 +1402,7 @@ unsigned long do_mmap_pgoff(struct file *file,
- 	vma->vm_region = region;
- 
- 	/* set up the mapping
--	 * - the region is filled in if BDI_CAP_MAP_DIRECT is still set
-+	 * - the region is filled in if NOMMU_MAP_DIRECT is still set
- 	 */
- 	if (file && vma->vm_flags & VM_SHARED)
- 		ret = do_mmap_shared_file(vma);
-diff --git a/security/security.c b/security/security.c
-index 18b35c6..a0442b2 100644
---- a/security/security.c
-+++ b/security/security.c
-@@ -726,16 +726,15 @@ static inline unsigned long mmap_prot(struct file *file, unsigned long prot)
- 		return prot | PROT_EXEC;
- 	/*
- 	 * ditto if it's not on noexec mount, except that on !MMU we need
--	 * BDI_CAP_EXEC_MMAP (== VM_MAYEXEC) in this case
-+	 * NOMMU_MAP_EXEC (== VM_MAYEXEC) in this case
- 	 */
- 	if (!(file->f_path.mnt->mnt_flags & MNT_NOEXEC)) {
- #ifndef CONFIG_MMU
--		unsigned long caps = 0;
--		struct address_space *mapping = file->f_mapping;
--		if (mapping && mapping->backing_dev_info)
--			caps = mapping->backing_dev_info->capabilities;
--		if (!(caps & BDI_CAP_EXEC_MAP))
--			return prot;
-+		if (file->f_op->mmap_capabilities) {
-+			unsigned caps = file->f_op->mmap_capabilities(file);
-+			if (!(caps & NOMMU_MAP_EXEC))
-+				return prot;
-+		}
- #endif
- 		return prot | PROT_EXEC;
- 	}
 -- 
 1.9.1
 
