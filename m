@@ -1,147 +1,56 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: tracker.ceph.com API
-Date: Thu, 08 Jan 2015 15:46:23 +0100
-Message-ID: <54AE983F.1040201@dachary.org>
-References: <54ABC3E5.7040704@dachary.org>
+From: Ken Dreyer <kdreyer@redhat.com>
+Subject: new testing lab (was: Re: Testing the next giant release)
+Date: Thu, 08 Jan 2015 08:50:22 -0700
+Message-ID: <54AEA73E.2010504@redhat.com>
+References: <54AD3C8B.4030705@dachary.org>	<CAFd2DpShjeBXQ5YPfWLVq2zsSTZDBzyZuvo40kOhzVy2fTdmCA@mail.gmail.com>	<54ADB2FA.9030204@dachary.org>	<CAJBxG-s5C6wzuJhVZhUAfNy9G1XuaDv+6D+R5c95WVWug7o4nA@mail.gmail.com>	<CAFd2DpSu5uvQKjfz=vtCMOuLYEDddfrgCNLja+LU5sC+XHWLoA@mail.gmail.com>	<54ADBB4F.40705@dachary.org> <CAJBxG-vBhwymM5e_hjF3uaen+rUP_5MRgZZ7Efa0d7E=DG2geg@mail.gmail.com> <54ADC3FB.1050201@dachary.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="XRmHIPGftFMuqxiknir5L5UC951n4nxR1"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:35393 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1753877AbbAHOq1 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Jan 2015 09:46:27 -0500
-Received: from [10.9.0.6] (unknown [10.0.2.28])
-	by smtp.dmail.dachary.org (Postfix) with ESMTP id 076D7420B2
-	for <ceph-devel@vger.kernel.org>; Thu,  8 Jan 2015 15:46:23 +0100 (CET)
-In-Reply-To: <54ABC3E5.7040704@dachary.org>
+Received: from mx1.redhat.com ([209.132.183.28]:41455 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753486AbbAHPva (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 8 Jan 2015 10:51:30 -0500
+In-Reply-To: <54ADC3FB.1050201@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>, Yuri Weinstein <yuri.weinstein@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---XRmHIPGftFMuqxiknir5L5UC951n4nxR1
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+On 01/07/2015 04:40 PM, Loic Dachary wrote:
+> Great, thanks, I did not know about this one :-)
+> 
+> On 08/01/2015 00:29, Yuri Weinstein wrote:
+>> Look for them in new Octo lab - http://pulpito.ceph.redhat.com/
 
-Hi,
+Not everyone in the community is going to know about the Octo lab, and
+that URL is unavailable outside of Red Hat's network. I want to be
+sure we're explaining this for everyone's benefit here.
 
-I was able to log on drop.ceph.com and check the logs at /home/cephtracke=
-r/tracker.ceph.com/log but it shows (I tried basic auth instead of the ke=
-y):
+In contrast to our "Sepia" lab in Irvine, the "Octo lab" is a new set
+of hardware in Raleigh that we've been using in order to run some
+other Teuthology tests. As part of the Inktank acquisition by Red Hat,
+we've begun migrating some Teuthology tests onto this new hardware.
+It's simply a matter of the current hardware's old age and the desire
+to move to "something else" before we find ourselves at point where QA
+is completely blocked on broken boxes or we're losing data.
 
-Started PUT "/issues/10281.xml" for 87.98.243.87 at 2015-01-08 06:39:15 -=
-0800
-Processing by IssuesController#update as XML
-  Parameters: {"id"=3D>"10281"}
-WARNING: Can't verify CSRF token authenticity
-  Current user: loic (id=3D789)
-  Rendered queries/_filters.html.erb (19.6ms)
-  Rendered queries/_columns.html.erb (2.0ms)
-  Rendered issues/_list.html.erb (143.5ms)
-  Rendered issues/_sidebar.html.erb (7.2ms)
-  Rendered issues/index.html.erb within layouts/base (189.0ms)
-  Rendered plugins/redmine_backlogs/app/views/hooks/_rb_include_scripts.h=
-tml.erb (3.1ms)
-  Rendered text template (0.0ms)
-Completed 200 OK in 317ms (Views: 0.6ms | ActiveRecord: 21.0ms)
-Completed 200 OK in 652ms (Views: 408.8ms | ActiveRecord: 64.7ms)
+A side-effect of this change is that some of our Teuthology test runs
+are currently unavailable to the public. (If you've run across Ceph
+Redmine tickets recently that mention hostnames like
+"*.ceph.redhat.com" you'll know what I'm talking about.)
 
-which seems fine (except it does nothing ;-). I don't have enough redmine=
- expertise to debug this further. Could the "WARNING" really be a fatal e=
-rror ?
+Obviously we want to make our tests as public as possible just as we
+strove to do with the older public "sepia" lab in Irvine.
 
-Cheers
+Sandon Van Ness has been working hard to bring up a second Raleigh lab
+that will feature new Seamicro hardware and be as open to the
+community as sepia is. Things are still in flux regarding the exact
+hostnames, but the current plan is to refer to this lab as "typica" to
+distinguish the Raleigh machines from the "sepia" machines in Irvine.
 
-On 06/01/2015 12:15, Loic Dachary wrote:
-> Hi,
->=20
-> I tried various things to update tracker.ceph.com from the command line=
- but failed. The best result I have is the following:
->=20
-> cat /tmp/a.xml
->=20
-> <issue>
->   <id>10281</id>
->   <subject>firefly: make check fails on fedora 20 (1)</subject>
->   <custom_fields type=3D"array">
->     <custom_field name=3D"Backport" id=3D"2">
->       <value>firefly</value>
->     </custom_field>
->   </custom_fields>
-> </issue>
->=20
-> curl --http1.0 --verbose -T /tmp/a.xml http://tracker.ceph.com/issues/1=
-0281.xml?key=3Dcd9a99820b4e7543a
->=20
-> * Hostname was NOT found in DNS cache
-> *   Trying 64.90.32.38...
-> * Connected to tracker.ceph.com (64.90.32.38) port 80 (#0)
->> PUT /issues/10281.xml?key=3Dcd9a99820b4e7543a3c HTTP/1.0
->> User-Agent: curl/7.35.0
->> Host: tracker.ceph.com
->> Accept: */*
->> Content-Length: 239
->>
-> * We are completely uploaded and fine
-> < HTTP/1.1 200 OK
-> < Date: Tue, 06 Jan 2015 11:05:55 GMT
-> * Server Apache/2.2.22 (Ubuntu) is not blacklisted
-> < Server: Apache/2.2.22 (Ubuntu)
-> < X-Powered-By: Phusion Passenger (mod_rails/mod_rack) 3.0.13
-> < X-UA-Compatible: IE=3DEdge,chrome=3D1
-> < Cache-Control: no-cache
-> < X-Request-Id: eb302e17961997bafade5739f48a7183
-> < X-Runtime: 1.375926
-> < X-Rack-Cache: invalidate, pass
-> < Set-Cookie: _redmine_session=3DBAh7BkkiD3Nlc3Npb25faWQGOgZFRkkZTIwY2Y=
-5NWYzYTE5BjsAVA%3D%3D--a2a2fd48f300f5c8c9; path=3D/; HttpOnly
-> < Set-Cookie: autologin=3D; path=3D/; expires=3DThu, 01-Jan-1970 00:00:=
-00 GMT
-> < Status: 200
-> < Content-Length: 0
-> < Connection: close
-> < Content-Type: application/xml; charset=3Dutf-8
-> <
-> * Closing connection 0
->=20
-> but most of the time I get:
->=20
-> * Hostname was NOT found in DNS cache
-> *   Trying 64.90.32.38...
-> * Connected to tracker.ceph.com (64.90.32.38) port 80 (#0)
->> PUT /issues/10281.xml?key=3Dcd9a99820b4e7543a3ce82febce4970b3dfb6b86 H=
-TTP/1.0
->> User-Agent: curl/7.35.0
->> Host: tracker.ceph.com
->> Accept: */*
->> Content-Length: 239
->>
-> * We are completely uploaded and fine
-> * Empty reply from server
-> * Connection #0 to host tracker.ceph.com left intact
->=20
-> Am I doing something wrong ?
->=20
-> Cheers
->=20
+If you're interested in our test labs or other public Ceph
+infrastructure, we have a public IRC channel, and it's #sepia on OFTC.
+You're welcome to hang out and watch us discuss teuthology failures :)
 
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---XRmHIPGftFMuqxiknir5L5UC951n4nxR1
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlSumD8ACgkQ8dLMyEl6F204WgCffuv919dBwGzKn5QL3P0c/Afm
-K/8AoI4NZedOxzePz6Wo/vzeGHe+wKfS
-=Texo
------END PGP SIGNATURE-----
-
---XRmHIPGftFMuqxiknir5L5UC951n4nxR1--
+- Ken
