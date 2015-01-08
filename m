@@ -1,92 +1,42 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: Higher OSD disk util due to RBD snapshots from Dumpling to Firefly
-Date: Thu, 08 Jan 2015 08:55:20 +0100
-Message-ID: <54AE37E8.5000004@42on.com>
-References: <54A42280.60607@42on.com> <CABZ+qqmrpRS32i0oSvJ9W=0RVz8f-aSb+9tYYgW1GwqGDqJ18A@mail.gmail.com>
+From: Ilya Dryomov <ilya.dryomov@inktank.com>
+Subject: Re: Ceph-client branch for Ubuntu 14.04.1 LTS (3.13.0-x kernels)
+Date: Thu, 8 Jan 2015 11:22:20 +0300
+Message-ID: <CALFYKtDy2YxNgXkmxOh4OcbtbuYNU5Bku-rN64miShrDYqYk1A@mail.gmail.com>
+References: <9E914F5BD7F48A4782456CEB550A42280A758A6D@SACMBXIP01.sdcorp.global.sandisk.com>
+	<CALFYKtAxr9AbPR_DJp9EBTZ+FX4+d9dwhk89M74VRDK2Gq3E1g@mail.gmail.com>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F28271DE7@SACMBXIP02.sdcorp.global.sandisk.com>
+	<CALFYKtCTg7qPF76qnGLEFYoKN73tGhVD+RNr7a2v486FURNC-Q@mail.gmail.com>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F28271FF7@SACMBXIP02.sdcorp.global.sandisk.com>
+	<CALFYKtC+7EDJg-J3PnvoedkrSoak1cnHN6+aejsZE91E0dcFCg@mail.gmail.com>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F2827201B@SACMBXIP02.sdcorp.global.sandisk.com>
+	<9E914F5BD7F48A4782456CEB550A42280A75905D@SACMBXIP01.sdcorp.global.sandisk.com>
+	<CALFYKtAs+685rxyJx0dasHprMatLUeLyv7oq397Ty2SiJ_uCCw@mail.gmail.com>
+	<9E914F5BD7F48A4782456CEB550A42280A759A1A@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from websrv.42on.com ([31.25.102.167]:50441 "EHLO websrv.42on.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751298AbbAHHz0 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 8 Jan 2015 02:55:26 -0500
-In-Reply-To: <CABZ+qqmrpRS32i0oSvJ9W=0RVz8f-aSb+9tYYgW1GwqGDqJ18A@mail.gmail.com>
+Received: from mail-qa0-f42.google.com ([209.85.216.42]:34758 "EHLO
+	mail-qa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753114AbbAHIWV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Jan 2015 03:22:21 -0500
+Received: by mail-qa0-f42.google.com with SMTP id n8so6332512qaq.1
+        for <ceph-devel@vger.kernel.org>; Thu, 08 Jan 2015 00:22:20 -0800 (PST)
+In-Reply-To: <9E914F5BD7F48A4782456CEB550A42280A759A1A@SACMBXIP01.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dan van der Ster <daniel.vanderster@cern.ch>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Chaitanya Huilgol <Chaitanya.Huilgol@sandisk.com>
+Cc: Somnath Roy <Somnath.Roy@sandisk.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 01/07/2015 05:51 PM, Dan van der Ster wrote:
-> Hi Wido,
-> I've been trying to reproduce this but haven't been able yet.
-> 
-> What I've tried so far is use fio rbd with a 0.80.7 client connected
-> to a 0.80.7 cluster. I created a 10GB format 2 block device, then
-> measured the 4k randwrite iops before and after having snaps. I
-> measured around 2000 iops to the image before any snapshots, then
-> created 200 snapshots on the device and ran fio again. Initially the
-> iops were low (I guess this is from the 4MB CoW resulting from the
-> first 4k write to each underlying object). But eventually the speed
-> stabilized to around 2000 iops again. Actually the initial slowdown
-> was the same whether I created 1 snapshot or 200.
-> 
-> This was just quick subjective test so far, since from your report I
-> was expecting something obvious to stick out. But it appears pretty
-> OK, no? Would you have expected something different from these tests?
-> 
+On Thu, Jan 8, 2015 at 6:30 AM, Chaitanya Huilgol
+<Chaitanya.Huilgol@sandisk.com> wrote:
+> We have hit issue-2 to on the rhel7a code base (soft lockup in ceph_osdc_handle_map, when large number of osds were flapping due to spurious heartbeat failures).  We have not been able to reproduce other issues.
 
-Well, I'm not sure what to expect. But what I noticed is that when I
-removed all the snapshots the slow requests were gone and the disk util
-dropped on the OSDs.
+Can I see the entire dmesg of a boot when it happened on rhel7-a?
 
-Wido
+> On a side-note, are the changes in the ceph-client rhel7a branch being actively pulled into the rhel7/centos7 kernel updated?
 
-> Cheers, Dan
-> 
-> 
-> On Wed, Dec 31, 2014 at 5:21 PM, Wido den Hollander <wido@42on.com> wrote:
->> Hi,
->>
->> Last week I upgraded a 250 OSD cluster from Dumpling 0.67.10 to Firefly
->> 0.80.7 and after the upgrade there was a severe performance drop on the
->> cluster.
->>
->> It started raining slow requests after the upgrade and most of them
->> included a 'snapc' in the request.
->>
->> That lead me to investigate the RBD snapshots and I found that a rogue
->> process had created ~1800 snapshots spread out over 200 volumes.
->>
->> One image even had 181 snapshots!
->>
->> As the snapshots weren't used I removed them all and after the snapshots
->> were removed the performance of the cluster came back to normal level again.
->>
->> I'm wondering what changed between Dumpling and Firefly which caused
->> this? I saw OSDs spiking to 100% disk util constantly under Firefly
->> where this didn't happen with Dumpling.
->>
->> Did something change in the way OSDs handle RBD snapshots which causes
->> them to create more disk I/O?
->>
->> --
->> Wido den Hollander
->> 42on B.V.
->> Ceph trainer and consultant
->>
->> Phone: +31 (0)20 700 9902
->> Skype: contact42on
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+All of rhel7-a is on its way to rhel7.1 I think.  Not sure about centos.
 
+Thanks,
 
--- 
-Wido den Hollander
-42on B.V.
-Ceph trainer and consultant
-
-Phone: +31 (0)20 700 9902
-Skype: contact42on
+                Ilya
