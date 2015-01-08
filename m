@@ -1,50 +1,120 @@
-From: Christoph Hellwig <hch@lst.de>
-Subject: [PATCH 06/12] nilfs2: set up s_bdi like the generic mount_bdev code
-Date: Thu,  8 Jan 2015 18:45:27 +0100
-Message-ID: <1420739133-27514-7-git-send-email-hch@lst.de>
-References: <1420739133-27514-1-git-send-email-hch@lst.de>
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <1420739133-27514-1-git-send-email-hch@lst.de>
-Sender: owner-linux-mm@kvack.org
-To: Jens Axboe <axboe@fb.com>
-Cc: David Howells <dhowells@redhat.com>, Tejun Heo <tj@kernel.org>, linux-fsdevel@vger.kernel.org, linux-mm@kvack.org, linux-mtd@lists.infradead.org, linux-nfs@vger.kernel.org, ceph-devel@vger.kernel.org
+From: Jeff Layton <jlayton-7I+n7zu2hftEKMMhf/gKZA@public.gmane.org>
+Subject: [PATCH v2 00/10] locks: saner method for managing file locks
+Date: Thu,  8 Jan 2015 10:34:15 -0800
+Message-ID: <1420742065-28423-1-git-send-email-jlayton@primarydata.com>
+Return-path: <linux-cifs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-cifs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, hch-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-mapping->backing_dev_info will go away, so don't rely on it.
+v2:
+- bugfix to the flc_posix list ordering that broke the split/merge code
+- don't use i_lock to manage the i_flctx pointer. Do so locklessly
+  via cmpxchg().
+- reordering of the patches to make the set bisectable. As a result
+  the new spinlock is not introduced until near the end of the set
+- some cleanup of the lm_change operation was added, made possible
+  by the move to standard list_heads for tracking locks
+- it takes greater pains to avoid spinlocking by checking when the
+  lists are empty in addition to whether the i_flctx pointer is NULL
+- a patch was added to keep count of the number of locks, so we can
+  avoid having to do count/alloc/populate in ceph and cifs
 
-Signed-off-by: Christoph Hellwig <hch@lst.de>
-Acked-by: Ryusuke Konishi <konishi.ryusuke@lab.ntt.co.jp>
----
- fs/nilfs2/super.c | 4 +---
- 1 file changed, 1 insertion(+), 3 deletions(-)
+This is the second iteration of this patchset. The first was posted
+back in September under the cover letter:
 
-diff --git a/fs/nilfs2/super.c b/fs/nilfs2/super.c
-index 2e5b3ec..3d4bbac 100644
---- a/fs/nilfs2/super.c
-+++ b/fs/nilfs2/super.c
-@@ -1057,7 +1057,6 @@ nilfs_fill_super(struct super_block *sb, void *data, int silent)
- {
- 	struct the_nilfs *nilfs;
- 	struct nilfs_root *fsroot;
--	struct backing_dev_info *bdi;
- 	__u64 cno;
- 	int err;
- 
-@@ -1077,8 +1076,7 @@ nilfs_fill_super(struct super_block *sb, void *data, int silent)
- 	sb->s_time_gran = 1;
- 	sb->s_max_links = NILFS_LINK_MAX;
- 
--	bdi = sb->s_bdev->bd_inode->i_mapping->backing_dev_info;
--	sb->s_bdi = bdi ? : &default_backing_dev_info;
-+	sb->s_bdi = &bdev_get_queue(sb->s_bdev)->backing_dev_info;
- 
- 	err = load_nilfs(nilfs, sb);
- 	if (err)
+    [RFC PATCH 00/12] locks: saner method for managing file locks
+
+I see this code as a good start for bringing sanity to the file locking
+code.  One of the nice things about moving to separate lists for
+different types of locks is that we can eventually move to using
+different structures for different types of locks.
+
+For instance, there's no need to keep track of ranges in a flock lock or
+lease, and there are a number of lease specific fields that are of
+little interest to other lock types.  I haven't taken that step in this
+set, but I'd eventually like to make that sort of change later.
+
+This code is only lightly tested, but it seems to work fine with local
+filesystems, nfs (client and server) and cifs. I don't have a great way
+to test the ceph changes, but they're pretty straightforward. I'll plan
+to push this into linux-next soon with an eye toward merge in 3.20
+unless there are objections.
+
+Cover letter from the original RFC posting follows:
+
+------------------------[snip]-------------------------
+
+We currently manage all file_locks via a singly-linked list. This is
+problematic for a number of reasons:
+
+- we have to protect all file locks with the same spinlock (or
+  equivalent). Currently that uses the i_lock, but Christoph has voiced
+  objections due to the potential for contention with other i_lock
+  users. He'd like to see us move to using a different lock.
+
+- we have to walk through irrelevant file locks in order to get to the
+  ones we're interested in. For instance, POSIX locks are at the end
+  of the list, so we have to skip over all of the flock locks and
+  leases before we can work with them.
+
+- the singly-linked list is primitive and difficult to work with. We
+  have to keep track of the "before" pointer and it's easy to get that
+  wrong.
+
+Cleaning all of this up is complicated by the fact that no one really
+wants to grow struct inode in order to do so. We have a single pointer
+in the inode now and I don't think we want to use any more.
+
+One possibility that Trond raised was to move this to an hlist, but
+that doesn't do anything about the desire for a new spinlock.
+
+This patchset takes the approach of replacing the i_flock list with a
+new struct file_lock_context that is allocated when we intend to add a
+new file lock to an inode. The file_lock_context is only freed when we
+destroy the inode.
+
+Within that, we have separate (and standard!) lists for each lock type,
+and a dedicated spinlock for managing those lists. In principle we could
+even consider adding separate locks for each, but I didn't bother with
+that for now.
+
+For now, the code is still pretty "raw" and isn't bisectable. This is
+just a RFC for the basic approach. This is probably v3.19 material at
+best.
+
+Anyone have thoughts or comments on the basic approach?
+
+clone of "locks-3.18"
+
+Jeff Layton (10):
+  locks: add new struct list_head to struct file_lock
+  locks: have locks_release_file use flock_lock_file to release generic
+    flock locks
+  locks: add a new struct file_locking_context pointer to struct inode
+  locks: move flock locks to file_lock_context
+  locks: convert posix locks to file_lock_context
+  locks: convert lease handling to file_lock_context
+  locks: remove i_flock field from struct inode
+  locks: add a dedicated spinlock to protect i_flctx lists
+  locks: clean up the lm_change prototype
+  locks: keep a count of locks on the flctx lists
+
+ fs/ceph/locks.c      |  65 +++---
+ fs/ceph/mds_client.c |   4 -
+ fs/cifs/file.c       |  34 ++--
+ fs/inode.c           |   3 +-
+ fs/lockd/svcsubs.c   |  26 ++-
+ fs/locks.c           | 542 +++++++++++++++++++++++++++------------------------
+ fs/nfs/delegation.c  |  23 ++-
+ fs/nfs/nfs4state.c   |  23 ++-
+ fs/nfs/pagelist.c    |   5 +-
+ fs/nfs/write.c       |  37 +++-
+ fs/nfsd/nfs4state.c  |  20 +-
+ fs/read_write.c      |   2 +-
+ include/linux/fs.h   |  34 +++-
+ 13 files changed, 449 insertions(+), 369 deletions(-)
+
 -- 
-1.9.1
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+2.1.0
