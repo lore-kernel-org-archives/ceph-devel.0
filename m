@@ -1,122 +1,222 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Testing the next giant release
-Date: Thu, 08 Jan 2015 17:10:16 +0100
-Message-ID: <54AEABE8.9030605@dachary.org>
-References: <54AD3C8B.4030705@dachary.org> <54AE5066.2000102@dachary.org>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="B7qdEWvsn6iudMePD9UleJpuGugCwdmgO"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:35441 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1753877AbbAHQKS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Jan 2015 11:10:18 -0500
-In-Reply-To: <54AE5066.2000102@dachary.org>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Tamil Muthamizhan <tamil.muthamizhan@inktank.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+From: Christoph Hellwig <hch@lst.de>
+Subject: [PATCH 02/12] fs: kill BDI_CAP_SWAP_BACKED
+Date: Thu,  8 Jan 2015 18:45:23 +0100
+Message-ID: <1420739133-27514-3-git-send-email-hch@lst.de>
+References: <1420739133-27514-1-git-send-email-hch@lst.de>
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <1420739133-27514-1-git-send-email-hch@lst.de>
+Sender: owner-linux-mm@kvack.org
+To: Jens Axboe <axboe@fb.com>
+Cc: David Howells <dhowells@redhat.com>, Tejun Heo <tj@kernel.org>, linux-fsdevel@vger.kernel.org, linux-mm@kvack.org, linux-mtd@lists.infradead.org, linux-nfs@vger.kernel.org, ceph-devel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---B7qdEWvsn6iudMePD9UleJpuGugCwdmgO
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+This bdi flag isn't too useful - we can determine that a vma is backed by
+either swap or shmem trivially in the caller.
 
-Hi Tamil,
+This also allows removing the backing_dev_info instaces for swap and shmem
+in favor of noop_backing_dev_info.
 
-The test completed with a number of failures. I compared them with the la=
-test giant / rbd run (which is on the red hat private lab). The number of=
- failure is comparable (40 failed out of 102 january 6th 2015). However t=
-he failures are mostly different and I'm not sure what to do next.
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+---
+ include/linux/backing-dev.h | 13 -------------
+ mm/madvise.c                | 19 +++++++++++--------
+ mm/shmem.c                  | 25 +++++++------------------
+ mm/swap.c                   |  2 --
+ mm/swap_state.c             |  7 +------
+ 5 files changed, 19 insertions(+), 47 deletions(-)
 
-http://pulpito.ceph.redhat.com/teuthology-2015-01-06_02:00:01-rbd-giant-d=
-istro-basic-magna/ shows
+diff --git a/include/linux/backing-dev.h b/include/linux/backing-dev.h
+index 5da6012..e936cea 100644
+--- a/include/linux/backing-dev.h
++++ b/include/linux/backing-dev.h
+@@ -238,8 +238,6 @@ int bdi_set_max_ratio(struct backing_dev_info *bdi, unsigned int max_ratio);
+  * BDI_CAP_WRITE_MAP:      Can be mapped for writing
+  * BDI_CAP_EXEC_MAP:       Can be mapped for execution
+  *
+- * BDI_CAP_SWAP_BACKED:    Count shmem/tmpfs objects as swap-backed.
+- *
+  * BDI_CAP_STRICTLIMIT:    Keep number of dirty pages below bdi threshold.
+  */
+ #define BDI_CAP_NO_ACCT_DIRTY	0x00000001
+@@ -250,7 +248,6 @@ int bdi_set_max_ratio(struct backing_dev_info *bdi, unsigned int max_ratio);
+ #define BDI_CAP_WRITE_MAP	0x00000020
+ #define BDI_CAP_EXEC_MAP	0x00000040
+ #define BDI_CAP_NO_ACCT_WB	0x00000080
+-#define BDI_CAP_SWAP_BACKED	0x00000100
+ #define BDI_CAP_STABLE_WRITES	0x00000200
+ #define BDI_CAP_STRICTLIMIT	0x00000400
+ 
+@@ -329,11 +326,6 @@ static inline bool bdi_cap_account_writeback(struct backing_dev_info *bdi)
+ 				      BDI_CAP_NO_WRITEBACK));
+ }
+ 
+-static inline bool bdi_cap_swap_backed(struct backing_dev_info *bdi)
+-{
+-	return bdi->capabilities & BDI_CAP_SWAP_BACKED;
+-}
+-
+ static inline bool mapping_cap_writeback_dirty(struct address_space *mapping)
+ {
+ 	return bdi_cap_writeback_dirty(mapping->backing_dev_info);
+@@ -344,11 +336,6 @@ static inline bool mapping_cap_account_dirty(struct address_space *mapping)
+ 	return bdi_cap_account_dirty(mapping->backing_dev_info);
+ }
+ 
+-static inline bool mapping_cap_swap_backed(struct address_space *mapping)
+-{
+-	return bdi_cap_swap_backed(mapping->backing_dev_info);
+-}
+-
+ static inline int bdi_sched_wait(void *word)
+ {
+ 	schedule();
+diff --git a/mm/madvise.c b/mm/madvise.c
+index a271adc..073b41a 100644
+--- a/mm/madvise.c
++++ b/mm/madvise.c
+@@ -222,19 +222,22 @@ static long madvise_willneed(struct vm_area_struct *vma,
+ 	struct file *file = vma->vm_file;
+ 
+ #ifdef CONFIG_SWAP
+-	if (!file || mapping_cap_swap_backed(file->f_mapping)) {
++	if (!file) {
+ 		*prev = vma;
+-		if (!file)
+-			force_swapin_readahead(vma, start, end);
+-		else
+-			force_shm_swapin_readahead(vma, start, end,
+-						file->f_mapping);
++		force_swapin_readahead(vma, start, end);
+ 		return 0;
+ 	}
+-#endif
+-
++	
++	if (shmem_mapping(file->f_mapping)) {
++		*prev = vma;
++		force_shm_swapin_readahead(vma, start, end,
++					file->f_mapping);
++		return 0;
++	}
++#else
+ 	if (!file)
+ 		return -EBADF;
++#endif
+ 
+ 	if (file->f_mapping->a_ops->get_xip_mem) {
+ 		/* no bad return value, but ignore advice */
+diff --git a/mm/shmem.c b/mm/shmem.c
+index 73ba1df..1b77eaf 100644
+--- a/mm/shmem.c
++++ b/mm/shmem.c
+@@ -191,11 +191,6 @@ static const struct inode_operations shmem_dir_inode_operations;
+ static const struct inode_operations shmem_special_inode_operations;
+ static const struct vm_operations_struct shmem_vm_ops;
+ 
+-static struct backing_dev_info shmem_backing_dev_info  __read_mostly = {
+-	.ra_pages	= 0,	/* No readahead */
+-	.capabilities	= BDI_CAP_NO_ACCT_AND_WRITEBACK | BDI_CAP_SWAP_BACKED,
+-};
+-
+ static LIST_HEAD(shmem_swaplist);
+ static DEFINE_MUTEX(shmem_swaplist_mutex);
+ 
+@@ -765,11 +760,11 @@ static int shmem_writepage(struct page *page, struct writeback_control *wbc)
+ 		goto redirty;
+ 
+ 	/*
+-	 * shmem_backing_dev_info's capabilities prevent regular writeback or
+-	 * sync from ever calling shmem_writepage; but a stacking filesystem
+-	 * might use ->writepage of its underlying filesystem, in which case
+-	 * tmpfs should write out to swap only in response to memory pressure,
+-	 * and not for the writeback threads or sync.
++	 * Our capabilities prevent regular writeback or sync from ever calling
++	 * shmem_writepage; but a stacking filesystem might use ->writepage of
++	 * its underlying filesystem, in which case tmpfs should write out to
++	 * swap only in response to memory pressure, and not for the writeback
++	 * threads or sync.
+ 	 */
+ 	if (!wbc->for_reclaim) {
+ 		WARN_ON_ONCE(1);	/* Still happens? Tell us about it! */
+@@ -1415,7 +1410,7 @@ static struct inode *shmem_get_inode(struct super_block *sb, const struct inode
+ 		inode->i_ino = get_next_ino();
+ 		inode_init_owner(inode, dir, mode);
+ 		inode->i_blocks = 0;
+-		inode->i_mapping->backing_dev_info = &shmem_backing_dev_info;
++		inode->i_mapping->backing_dev_info = &noop_backing_dev_info;
+ 		inode->i_atime = inode->i_mtime = inode->i_ctime = CURRENT_TIME;
+ 		inode->i_generation = get_seconds();
+ 		info = SHMEM_I(inode);
+@@ -1461,7 +1456,7 @@ static struct inode *shmem_get_inode(struct super_block *sb, const struct inode
+ 
+ bool shmem_mapping(struct address_space *mapping)
+ {
+-	return mapping->backing_dev_info == &shmem_backing_dev_info;
++	return mapping->host->i_sb->s_op == &shmem_ops;
+ }
+ 
+ #ifdef CONFIG_TMPFS
+@@ -3226,10 +3221,6 @@ int __init shmem_init(void)
+ 	if (shmem_inode_cachep)
+ 		return 0;
+ 
+-	error = bdi_init(&shmem_backing_dev_info);
+-	if (error)
+-		goto out4;
+-
+ 	error = shmem_init_inodecache();
+ 	if (error)
+ 		goto out3;
+@@ -3253,8 +3244,6 @@ out1:
+ out2:
+ 	shmem_destroy_inodecache();
+ out3:
+-	bdi_destroy(&shmem_backing_dev_info);
+-out4:
+ 	shm_mnt = ERR_PTR(error);
+ 	return error;
+ }
+diff --git a/mm/swap.c b/mm/swap.c
+index 8a12b33..4e0109a 100644
+--- a/mm/swap.c
++++ b/mm/swap.c
+@@ -1138,8 +1138,6 @@ void __init swap_setup(void)
+ #ifdef CONFIG_SWAP
+ 	int i;
+ 
+-	if (bdi_init(swapper_spaces[0].backing_dev_info))
+-		panic("Failed to init swap bdi");
+ 	for (i = 0; i < MAX_SWAPFILES; i++) {
+ 		spin_lock_init(&swapper_spaces[i].tree_lock);
+ 		INIT_LIST_HEAD(&swapper_spaces[i].i_mmap_nonlinear);
+diff --git a/mm/swap_state.c b/mm/swap_state.c
+index 9711342..1c137b6 100644
+--- a/mm/swap_state.c
++++ b/mm/swap_state.c
+@@ -32,17 +32,12 @@ static const struct address_space_operations swap_aops = {
+ #endif
+ };
+ 
+-static struct backing_dev_info swap_backing_dev_info = {
+-	.name		= "swap",
+-	.capabilities	= BDI_CAP_NO_ACCT_AND_WRITEBACK | BDI_CAP_SWAP_BACKED,
+-};
+-
+ struct address_space swapper_spaces[MAX_SWAPFILES] = {
+ 	[0 ... MAX_SWAPFILES - 1] = {
+ 		.page_tree	= RADIX_TREE_INIT(GFP_ATOMIC|__GFP_NOWARN),
+ 		.i_mmap_writable = ATOMIC_INIT(0),
+ 		.a_ops		= &swap_aops,
+-		.backing_dev_info = &swap_backing_dev_info,
++		.backing_dev_info = &noop_backing_dev_info,
+ 	}
+ };
+ 
+-- 
+1.9.1
 
-Command failed on magna094 with status 1: 'sudo yum install ceph-radosgw-=
-0.87 -y'=20
-
-(a number of times)
-
-Command failed on magna065 with status 1: 'adjust-ulimits ceph-coverage /=
-home/ubuntu/cephtest/archive/coverage daemon-helper term qemu-system-x86_=
-64 -enable-kvm -nographic -m 4096 -drive file=3D/home/ubuntu/cephtest/qem=
-u/base.client.0.qcow2,format=3Dqcow2,if=3Dvirtio -cdrom /home/ubuntu/ceph=
-test/qemu/client.0.iso -fsdev local,id=3Dlog,path=3D/home/ubuntu/cephtest=
-/archive/qemu/client.0,security_model=3Dnone -device virtio-9p-pci,fsdev=3D=
-log,mount_tag=3Dtest_log -drive file=3Drbd:rbd/client.0.0:id=3D0,format=3D=
-raw,if=3Dvirtio,cache=3Dwritethrough -drive file=3Drbd:rbd/client.0.1:id=3D=
-0,format=3Draw,if=3Dvirtio,cache=3Dwritethrough'
-
-(a few times).
-
-On 08/01/2015 10:39, Loic Dachary wrote:
-> Hi,
->=20
-> The giant-backports branch has been built by gitbuilders tonight
->=20
-> http://gitbuilder.sepia.ceph.com/gitbuilder-ceph-deb-trusty-amd64-basic=
-/#origin/giant-backports
-> etc.
->=20
-> and I scheduled a rbd suite with
->=20
-> ./virtualenv/bin/teuthology-suite --teuthology-branch giant --suite rbd=
- --suite-branch giant --machine-type vps --distro ubuntu --email loic@dac=
-hary.org --owner loic@dachary.org  --ceph giant-backports
->=20
-> which shows at
->=20
-> http://pulpito.ceph.com/loic-2015-01-08_10:36:47-rbd-giant-backports-te=
-sting-basic-vps/
->=20
-> To be continued !
->=20
-> On 07/01/2015 15:02, Loic Dachary wrote:
->> Hi Tamil,
->>
->> I've merged / integrated the giant backports found at
->>
->> https://github.com/ceph/ceph/pull/3186
->> https://github.com/ceph/ceph/pull/3178
->> https://github.com/ceph/ceph/pull/2954
->> https://github.com/ceph/ceph/pull/3191
->> https://github.com/ceph/ceph/pull/3168
->> https://github.com/ceph/ceph/pull/3289
->>
->> into=20
->>
->> http://workbench.dachary.org/ceph/ceph/commit/0ea20e6c51208d6710f46945=
-4ab3f964bfa7c9d2
->>
->> and successfully ran make check on it
->>
->> http://workbench.dachary.org:8080/projects/10?ref=3Dgiant-backports
->>
->> If I'm not mistaken the next step would be to run teuthology. If I'm t=
-o do it, would you be so kind as to let me know which suites are most rel=
-evant ? If someone else will take care of it, should I push the integrati=
-on branch somewhere ?
->>
->> Cheers
->>
->=20
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---B7qdEWvsn6iudMePD9UleJpuGugCwdmgO
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlSuq+gACgkQ8dLMyEl6F219nACfYZCwHj+FDmezrMx6mE1C8iVg
-c2sAoIzHT6hsli72h9gsd5Kzf0BB2jsU
-=Tk5b
------END PGP SIGNATURE-----
-
---B7qdEWvsn6iudMePD9UleJpuGugCwdmgO--
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
