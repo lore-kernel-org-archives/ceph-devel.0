@@ -1,208 +1,117 @@
 From: Christoph Hellwig <hch@lst.de>
-Subject: [PATCH 01/12] fs: deduplicate noop_backing_dev_info
-Date: Thu,  8 Jan 2015 18:45:22 +0100
-Message-ID: <1420739133-27514-2-git-send-email-hch@lst.de>
+Subject: [PATCH 10/12] nfs: don't call bdi_unregister
+Date: Thu,  8 Jan 2015 18:45:31 +0100
+Message-ID: <1420739133-27514-11-git-send-email-hch@lst.de>
 References: <1420739133-27514-1-git-send-email-hch@lst.de>
-Return-path: <owner-linux-mm@kvack.org>
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
 In-Reply-To: <1420739133-27514-1-git-send-email-hch@lst.de>
-Sender: owner-linux-mm@kvack.org
+Sender: linux-fsdevel-owner@vger.kernel.org
 To: Jens Axboe <axboe@fb.com>
 Cc: David Howells <dhowells@redhat.com>, Tejun Heo <tj@kernel.org>, linux-fsdevel@vger.kernel.org, linux-mm@kvack.org, linux-mtd@lists.infradead.org, linux-nfs@vger.kernel.org, ceph-devel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-hugetlbfs, kernfs and dlmfs can simply use noop_backing_dev_info instead
-of creating a local duplicate.
+bdi_destroy already does all the work, and if we delay freeing the
+anon bdev we can get away with just that single call.
+
+Addintionally remove the call during mount failure, as
+deactivate_super_locked will already call ->kill_sb and clean up
+the bdi for us.
 
 Signed-off-by: Christoph Hellwig <hch@lst.de>
 ---
- fs/hugetlbfs/inode.c        | 14 +-------------
- fs/kernfs/inode.c           | 14 +-------------
- fs/kernfs/kernfs-internal.h |  1 -
- fs/kernfs/mount.c           |  1 -
- fs/ocfs2/dlmfs/dlmfs.c      | 16 ++--------------
- 5 files changed, 4 insertions(+), 42 deletions(-)
+ fs/nfs/internal.h  |  1 -
+ fs/nfs/nfs4super.c |  1 -
+ fs/nfs/super.c     | 24 ++++++------------------
+ 3 files changed, 6 insertions(+), 20 deletions(-)
 
-diff --git a/fs/hugetlbfs/inode.c b/fs/hugetlbfs/inode.c
-index 5eba47f..de7c95c 100644
---- a/fs/hugetlbfs/inode.c
-+++ b/fs/hugetlbfs/inode.c
-@@ -62,12 +62,6 @@ static inline struct hugetlbfs_inode_info *HUGETLBFS_I(struct inode *inode)
- 	return container_of(inode, struct hugetlbfs_inode_info, vfs_inode);
- }
+diff --git a/fs/nfs/internal.h b/fs/nfs/internal.h
+index efaa31c..f519d41 100644
+--- a/fs/nfs/internal.h
++++ b/fs/nfs/internal.h
+@@ -416,7 +416,6 @@ int  nfs_show_options(struct seq_file *, struct dentry *);
+ int  nfs_show_devname(struct seq_file *, struct dentry *);
+ int  nfs_show_path(struct seq_file *, struct dentry *);
+ int  nfs_show_stats(struct seq_file *, struct dentry *);
+-void nfs_put_super(struct super_block *);
+ int nfs_remount(struct super_block *sb, int *flags, char *raw_data);
  
--static struct backing_dev_info hugetlbfs_backing_dev_info = {
--	.name		= "hugetlbfs",
--	.ra_pages	= 0,	/* No readahead */
--	.capabilities	= BDI_CAP_NO_ACCT_AND_WRITEBACK,
--};
--
- int sysctl_hugetlb_shm_group;
- 
- enum {
-@@ -498,7 +492,7 @@ static struct inode *hugetlbfs_get_inode(struct super_block *sb,
- 		lockdep_set_class(&inode->i_mapping->i_mmap_rwsem,
- 				&hugetlbfs_i_mmap_rwsem_key);
- 		inode->i_mapping->a_ops = &hugetlbfs_aops;
--		inode->i_mapping->backing_dev_info =&hugetlbfs_backing_dev_info;
-+		inode->i_mapping->backing_dev_info = &noop_backing_dev_info;
- 		inode->i_atime = inode->i_mtime = inode->i_ctime = CURRENT_TIME;
- 		inode->i_mapping->private_data = resv_map;
- 		info = HUGETLBFS_I(inode);
-@@ -1032,10 +1026,6 @@ static int __init init_hugetlbfs_fs(void)
- 		return -ENOTSUPP;
+ /* write.c */
+diff --git a/fs/nfs/nfs4super.c b/fs/nfs/nfs4super.c
+index 6f340f0..ab30a3a 100644
+--- a/fs/nfs/nfs4super.c
++++ b/fs/nfs/nfs4super.c
+@@ -53,7 +53,6 @@ static const struct super_operations nfs4_sops = {
+ 	.destroy_inode	= nfs_destroy_inode,
+ 	.write_inode	= nfs4_write_inode,
+ 	.drop_inode	= nfs_drop_inode,
+-	.put_super	= nfs_put_super,
+ 	.statfs		= nfs_statfs,
+ 	.evict_inode	= nfs4_evict_inode,
+ 	.umount_begin	= nfs_umount_begin,
+diff --git a/fs/nfs/super.c b/fs/nfs/super.c
+index 31a11b0..6ec4fe2 100644
+--- a/fs/nfs/super.c
++++ b/fs/nfs/super.c
+@@ -311,7 +311,6 @@ const struct super_operations nfs_sops = {
+ 	.destroy_inode	= nfs_destroy_inode,
+ 	.write_inode	= nfs_write_inode,
+ 	.drop_inode	= nfs_drop_inode,
+-	.put_super	= nfs_put_super,
+ 	.statfs		= nfs_statfs,
+ 	.evict_inode	= nfs_evict_inode,
+ 	.umount_begin	= nfs_umount_begin,
+@@ -2569,7 +2568,7 @@ struct dentry *nfs_fs_mount_common(struct nfs_server *server,
+ 		error = nfs_bdi_register(server);
+ 		if (error) {
+ 			mntroot = ERR_PTR(error);
+-			goto error_splat_bdi;
++			goto error_splat_super;
+ 		}
+ 		server->super = s;
  	}
- 
--	error = bdi_init(&hugetlbfs_backing_dev_info);
--	if (error)
--		return error;
--
- 	error = -ENOMEM;
- 	hugetlbfs_inode_cachep = kmem_cache_create("hugetlbfs_inode_cache",
- 					sizeof(struct hugetlbfs_inode_info),
-@@ -1071,7 +1061,6 @@ static int __init init_hugetlbfs_fs(void)
-  out:
- 	kmem_cache_destroy(hugetlbfs_inode_cachep);
-  out2:
--	bdi_destroy(&hugetlbfs_backing_dev_info);
- 	return error;
+@@ -2601,9 +2600,6 @@ error_splat_root:
+ 	dput(mntroot);
+ 	mntroot = ERR_PTR(error);
+ error_splat_super:
+-	if (server && !s->s_root)
+-		bdi_unregister(&server->backing_dev_info);
+-error_splat_bdi:
+ 	deactivate_locked_super(s);
+ 	goto out;
  }
- 
-@@ -1091,7 +1080,6 @@ static void __exit exit_hugetlbfs_fs(void)
- 	for_each_hstate(h)
- 		kern_unmount(hugetlbfs_vfsmount[i++]);
- 	unregister_filesystem(&hugetlbfs_fs_type);
--	bdi_destroy(&hugetlbfs_backing_dev_info);
- }
- 
- module_init(init_hugetlbfs_fs)
-diff --git a/fs/kernfs/inode.c b/fs/kernfs/inode.c
-index 9852176..06f0688 100644
---- a/fs/kernfs/inode.c
-+++ b/fs/kernfs/inode.c
-@@ -24,12 +24,6 @@ static const struct address_space_operations kernfs_aops = {
- 	.write_end	= simple_write_end,
- };
- 
--static struct backing_dev_info kernfs_bdi = {
--	.name		= "kernfs",
--	.ra_pages	= 0,	/* No readahead */
--	.capabilities	= BDI_CAP_NO_ACCT_AND_WRITEBACK,
--};
--
- static const struct inode_operations kernfs_iops = {
- 	.permission	= kernfs_iop_permission,
- 	.setattr	= kernfs_iop_setattr,
-@@ -40,12 +34,6 @@ static const struct inode_operations kernfs_iops = {
- 	.listxattr	= kernfs_iop_listxattr,
- };
- 
--void __init kernfs_inode_init(void)
--{
--	if (bdi_init(&kernfs_bdi))
--		panic("failed to init kernfs_bdi");
--}
--
- static struct kernfs_iattrs *kernfs_iattrs(struct kernfs_node *kn)
- {
- 	static DEFINE_MUTEX(iattr_mutex);
-@@ -298,7 +286,7 @@ static void kernfs_init_inode(struct kernfs_node *kn, struct inode *inode)
- 	kernfs_get(kn);
- 	inode->i_private = kn;
- 	inode->i_mapping->a_ops = &kernfs_aops;
--	inode->i_mapping->backing_dev_info = &kernfs_bdi;
-+	inode->i_mapping->backing_dev_info = &noop_backing_dev_info;
- 	inode->i_op = &kernfs_iops;
- 
- 	set_default_inode_attr(inode, kn->mode);
-diff --git a/fs/kernfs/kernfs-internal.h b/fs/kernfs/kernfs-internal.h
-index dc84a3e..af9fa74 100644
---- a/fs/kernfs/kernfs-internal.h
-+++ b/fs/kernfs/kernfs-internal.h
-@@ -88,7 +88,6 @@ int kernfs_iop_removexattr(struct dentry *dentry, const char *name);
- ssize_t kernfs_iop_getxattr(struct dentry *dentry, const char *name, void *buf,
- 			    size_t size);
- ssize_t kernfs_iop_listxattr(struct dentry *dentry, char *buf, size_t size);
--void kernfs_inode_init(void);
+@@ -2651,27 +2647,19 @@ out:
+ EXPORT_SYMBOL_GPL(nfs_fs_mount);
  
  /*
-  * dir.c
-diff --git a/fs/kernfs/mount.c b/fs/kernfs/mount.c
-index f973ae9..8eaf417 100644
---- a/fs/kernfs/mount.c
-+++ b/fs/kernfs/mount.c
-@@ -246,5 +246,4 @@ void __init kernfs_init(void)
- 	kernfs_node_cache = kmem_cache_create("kernfs_node_cache",
- 					      sizeof(struct kernfs_node),
- 					      0, SLAB_PANIC, NULL);
--	kernfs_inode_init();
- }
-diff --git a/fs/ocfs2/dlmfs/dlmfs.c b/fs/ocfs2/dlmfs/dlmfs.c
-index 57c40e3..6000d30 100644
---- a/fs/ocfs2/dlmfs/dlmfs.c
-+++ b/fs/ocfs2/dlmfs/dlmfs.c
-@@ -390,12 +390,6 @@ clear_fields:
- 	ip->ip_conn = NULL;
- }
- 
--static struct backing_dev_info dlmfs_backing_dev_info = {
--	.name		= "ocfs2-dlmfs",
--	.ra_pages	= 0,	/* No readahead */
--	.capabilities	= BDI_CAP_NO_ACCT_AND_WRITEBACK,
--};
+- * Ensure that we unregister the bdi before kill_anon_super
+- * releases the device name
+- */
+-void nfs_put_super(struct super_block *s)
+-{
+-	struct nfs_server *server = NFS_SB(s);
 -
- static struct inode *dlmfs_get_root_inode(struct super_block *sb)
+-	bdi_unregister(&server->backing_dev_info);
+-}
+-EXPORT_SYMBOL_GPL(nfs_put_super);
+-
+-/*
+  * Destroy an NFS2/3 superblock
+  */
+ void nfs_kill_super(struct super_block *s)
  {
- 	struct inode *inode = new_inode(sb);
-@@ -404,7 +398,7 @@ static struct inode *dlmfs_get_root_inode(struct super_block *sb)
- 	if (inode) {
- 		inode->i_ino = get_next_ino();
- 		inode_init_owner(inode, NULL, mode);
--		inode->i_mapping->backing_dev_info = &dlmfs_backing_dev_info;
-+		inode->i_mapping->backing_dev_info = &noop_backing_dev_info;
- 		inode->i_atime = inode->i_mtime = inode->i_ctime = CURRENT_TIME;
- 		inc_nlink(inode);
+ 	struct nfs_server *server = NFS_SB(s);
++	dev_t dev = s->s_dev;
++
++	generic_shutdown_super(s);
  
-@@ -428,7 +422,7 @@ static struct inode *dlmfs_get_inode(struct inode *parent,
- 
- 	inode->i_ino = get_next_ino();
- 	inode_init_owner(inode, parent, mode);
--	inode->i_mapping->backing_dev_info = &dlmfs_backing_dev_info;
-+	inode->i_mapping->backing_dev_info = &noop_backing_dev_info;
- 	inode->i_atime = inode->i_mtime = inode->i_ctime = CURRENT_TIME;
- 
- 	ip = DLMFS_I(inode);
-@@ -643,10 +637,6 @@ static int __init init_dlmfs_fs(void)
- 	int status;
- 	int cleanup_inode = 0, cleanup_worker = 0;
- 
--	status = bdi_init(&dlmfs_backing_dev_info);
--	if (status)
--		return status;
--
- 	dlmfs_inode_cache = kmem_cache_create("dlmfs_inode_cache",
- 				sizeof(struct dlmfs_inode_private),
- 				0, (SLAB_HWCACHE_ALIGN|SLAB_RECLAIM_ACCOUNT|
-@@ -673,7 +663,6 @@ bail:
- 			kmem_cache_destroy(dlmfs_inode_cache);
- 		if (cleanup_worker)
- 			destroy_workqueue(user_dlm_worker);
--		bdi_destroy(&dlmfs_backing_dev_info);
- 	} else
- 		printk("OCFS2 User DLM kernel interface loaded\n");
- 	return status;
-@@ -693,7 +682,6 @@ static void __exit exit_dlmfs_fs(void)
- 	rcu_barrier();
- 	kmem_cache_destroy(dlmfs_inode_cache);
- 
--	bdi_destroy(&dlmfs_backing_dev_info);
+-	kill_anon_super(s);
+ 	nfs_fscache_release_super_cookie(s);
++
+ 	nfs_free_server(server);
++	free_anon_bdev(dev);
  }
+ EXPORT_SYMBOL_GPL(nfs_kill_super);
  
- MODULE_AUTHOR("Oracle");
 -- 
 1.9.1
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
