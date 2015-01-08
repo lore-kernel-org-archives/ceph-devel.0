@@ -1,28 +1,45 @@
-From: Christoph Hellwig <hch@lst.de>
-Subject: backing_dev_info cleanups & lifetime rule fixes
-Date: Thu,  8 Jan 2015 18:45:21 +0100
-Message-ID: <1420739133-27514-1-git-send-email-hch@lst.de>
-Return-path: <owner-linux-mm@kvack.org>
-Sender: owner-linux-mm@kvack.org
-To: Jens Axboe <axboe@fb.com>
-Cc: David Howells <dhowells@redhat.com>, Tejun Heo <tj@kernel.org>, linux-fsdevel@vger.kernel.org, linux-mm@kvack.org, linux-mtd@lists.infradead.org, linux-nfs@vger.kernel.org, ceph-devel@vger.kernel.org
+From: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
+Subject: [PATCH 05/12] block_dev: get bdev inode bdi directly from the block device
+Date: Thu,  8 Jan 2015 18:45:26 +0100
+Message-ID: <1420739133-27514-6-git-send-email-hch@lst.de>
+References: <1420739133-27514-1-git-send-email-hch@lst.de>
+Return-path: <linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1420739133-27514-1-git-send-email-hch-jcswGhMUV9g@public.gmane.org>
+Sender: linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Jens Axboe <axboe-b10kYP2dOMg@public.gmane.org>
+Cc: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Tejun Heo <tj-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-The first 8 patches are unchanged from the series posted a week ago and
-cleans up how we use the backing_dev_info structure in preparation for
-fixing the life time rules for it.  The most important change is to
-split the unrelated nommu mmap flags from it, but it also remove a
-backing_dev_info pointer from the address_space (and thus the inode)
-and cleans up various other minor bits.
+Directly grab the backing_dev_info from the request_queue instead of
+detouring through the address_space.
 
-The remaining patches sort out the issues around bdi_unlink and now
-let the bdi life until it's embedding structure is freed, which must
-be equal or longer than the superblock using the bdi for writeback,
-and thus gets rid of the whole mess around reassining inodes to new
-bdis.
+Signed-off-by: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
+---
+ fs/fs-writeback.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/fs/fs-writeback.c b/fs/fs-writeback.c
+index 2d609a5..e8116a4 100644
+--- a/fs/fs-writeback.c
++++ b/fs/fs-writeback.c
+@@ -69,10 +69,10 @@ EXPORT_SYMBOL(writeback_in_progress);
+ static inline struct backing_dev_info *inode_to_bdi(struct inode *inode)
+ {
+ 	struct super_block *sb = inode->i_sb;
+-
++#ifdef CONFIG_BLOCK
+ 	if (sb_is_blkdev_sb(sb))
+-		return inode->i_mapping->backing_dev_info;
+-
++		return blk_get_backing_dev_info(I_BDEV(inode));
++#endif
+ 	return sb->s_bdi;
+ }
+ 
+-- 
+1.9.1
 
 --
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+To unsubscribe from this list: send the line "unsubscribe linux-nfs" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
