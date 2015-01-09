@@ -1,90 +1,78 @@
-From: Jeff Layton <jeff.layton@primarydata.com>
-Subject: Re: [PATCH v2 04/10] locks: move flock locks to file_lock_context
-Date: Fri, 9 Jan 2015 06:47:55 -0800
-Message-ID: <20150109064755.1c88bd4d@synchrony.poochiereds.net>
-References: <1420742065-28423-1-git-send-email-jlayton@primarydata.com>
-	<1420742065-28423-5-git-send-email-jlayton@primarydata.com>
-	<20150109143155.GB30294@infradead.org>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Some gitbuilders not working
+Date: Fri, 9 Jan 2015 07:16:45 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1501090710500.10525@cobra.newdream.net>
+References: <54AF7B4C.6010305@inktank.com> <54AFAE7D.5070402@dachary.org> <54AFDA69.2080002@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20150109143155.GB30294@infradead.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Christoph Hellwig <hch@infradead.org>
-Cc: linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, linux-cifs@vger.kernel.org, linux-nfs@vger.kernel.org, ceph-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:55864 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757848AbbAIPQq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Jan 2015 10:16:46 -0500
+In-Reply-To: <54AFDA69.2080002@redhat.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Ken Dreyer <kdreyer@redhat.com>
+Cc: Loic Dachary <loic@dachary.org>, David Zafman <david.zafman@inktank.com>, ceph-devel@vger.kernel.org
 
-On Fri, 9 Jan 2015 06:31:55 -0800
-Christoph Hellwig <hch@infradead.org> wrote:
-
-> >  void ceph_count_locks(struct inode *inode, int *fcntl_count, int *flock_count)
-> >  {
-> >  	struct file_lock *lock;
-> > +	struct file_lock_context *ctx;
-> >  
-> >  	*fcntl_count = 0;
-> >  	*flock_count = 0;
-> >  
-> > +	spin_lock(&inode->i_lock);
+On Fri, 9 Jan 2015, Ken Dreyer wrote:
+> On 01/09/2015 03:33 AM, Loic Dachary wrote:
+> > On 09/01/2015 07:55, David Zafman wrote:
+> >>
+> >> We are seeing gitbuilder failures.  This is what I saw on one.
+> >>
+> >> error: Failed build dependencies:
+> >> xmlstarlet is needed by ceph-1:0.90-821.g680fe3c.el7.x86_64
+> > 
+> > This is because https://github.com/ceph/ceph/pull/3036 was recently merged.
+> > However, https://github.com/ceph/autobuild-ceph/pull/19 added xmlstarlet
+> > about a month ago. Maybe some gitbuilder machines were not updated
+> > accordingly. If I'm not mistaken this is a manual process but I'm not sure
+> > exactly how to do it myself.
 > 
-> Seems like moving the locking around is unrelated to this patch.
-> 
+> I'm not entirely sure of the SOP to apply fabfile changes across our
+> infrastructure, either. Is there a simple "push this fabfile change
+> everywhere" command for gitbuilder?
 
-Yeah that could be split out into a separate cleanup patch first. I'll
-do that on the next iteration.
+Not really, but it is high time we established one.
 
-> > +	list_for_each_entry(fl, &flctx->flc_flock, fl_list) {
-> > +		if (nfs_file_open_context(fl->fl_file)->state != state)
-> > +			continue;
-> > +		spin_unlock(&inode->i_lock);
-> > +		status = ops->recover_lock(state, fl);
-> > +		switch (status) {
-> > +			case 0:
-> > +				break;
-> > +			case -ESTALE:
-> > +			case -NFS4ERR_ADMIN_REVOKED:
-> > +			case -NFS4ERR_STALE_STATEID:
-> > +			case -NFS4ERR_BAD_STATEID:
-> > +			case -NFS4ERR_EXPIRED:
-> > +			case -NFS4ERR_NO_GRACE:
-> > +			case -NFS4ERR_STALE_CLIENTID:
-> > +			case -NFS4ERR_BADSESSION:
-> > +			case -NFS4ERR_BADSLOT:
-> > +			case -NFS4ERR_BAD_HIGH_SLOT:
-> > +			case -NFS4ERR_CONN_NOT_BOUND_TO_SESSION:
-> > +				goto out;
-> > +			default:
-> > +				printk(KERN_ERR "NFS: %s: unhandled error %d\n",
-> > +					 __func__, status);
-> > +			case -ENOMEM:
-> > +			case -NFS4ERR_DENIED:
-> > +			case -NFS4ERR_RECLAIM_BAD:
-> > +			case -NFS4ERR_RECLAIM_CONFLICT:
-> > +				/* kill_proc(fl->fl_pid, SIGLOST, 1); */
-> > +				status = 0;
-> > +		}
-> 
-> Instead of duplicating this huge body of code it seems like a good idea
-> to add a preparatory patch to factor it out into a helper function.
-> 
+At the top of the fabfile all of the targets are defined, so that if you 
+run bin/fab w/o arguments it should run on *all* of them. Unfortunately 
+IIRC it's a bit disruptive as it restarts the autobuild service which will 
+interrupt and restart the current build.
 
-Sigh, I tried to do that first but the result was just too ugly. The
-above logic is too deeply entwined into this function for that to work
-well. I'm not usually a fan of cut and paste, but in this case I think
-it's the best way to do this. The good news is that the duplication
-goes away with the next patch in the series.
+But, that list isn't well-maintained, so it doesn't map to the current set 
+of gitbuilders.  That's probably pretty easy to fix.  Even if we 
+do, though, I think fab isn't super great about skipping targets that are 
+down?  Not sure.
 
-> > +static bool
-> > +is_whole_file_wrlock(struct file_lock *fl)
-> > +{
-> > +	return fl->fl_start == 0 && fl->fl_end == OFFSET_MAX && fl->fl_type == F_WRLCK;
-> > +}
-> 
-> Please break this into multiple lines to stay under 80 characters.
+In any case, the way I've run it in practice is on specific targets taht 
+need updating, like so
 
-Will do. I've probably violated that rule several times in this series
--- mea culpa. I'll clean that up for the next iteration.
+ bin/fab gitbuilder_auto:host=user@foo
 
--- 
-Jeff Layton <jlayton@primarydata.com>
+(or something like that, I forget the exact syntax).  Often on a 
+host that isn't in the master list.
+
+More frequently the procedure has been:
+
+ - add a dependency to the fabfile for future builders
+ - manually install the package on the existing ones to avoid the above 
+pain
+
+which mostly works but doesn't regularly verify that the fabfile is 
+sufficient and correct.
+ 
+> In the long term we'll want to get to a point where we're building
+> Ceph's RPM packages using mock [1] instead of rpmbuild so that mock can
+> resolve these sort of things automatically without having to deal with
+> installing new BuildRequires by hand.
+
+That sounds great, although I wonder if it is slow?  We used to do 
+all of our debian builds with pbuilder which does a similar thing, 
+but it is way slow because it reinstalls deps on every run.  We moved 
+to doing native dpkg builds because time is of the essence for test 
+builds and use pbuilder only for releases...
+
+sage
