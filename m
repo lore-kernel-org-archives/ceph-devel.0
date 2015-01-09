@@ -1,45 +1,33 @@
-From: Ken Dreyer <kdreyer@redhat.com>
-Subject: Re: Some gitbuilders not working
-Date: Fri, 09 Jan 2015 06:40:57 -0700
-Message-ID: <54AFDA69.2080002@redhat.com>
-References: <54AF7B4C.6010305@inktank.com> <54AFAE7D.5070402@dachary.org>
+From: Christoph Hellwig <hch@infradead.org>
+Subject: Re: [PATCH v2 02/10] locks: have locks_release_file use
+ flock_lock_file to release generic flock locks
+Date: Fri, 9 Jan 2015 06:27:23 -0800
+Message-ID: <20150109142723.GA30294@infradead.org>
+References: <1420742065-28423-1-git-send-email-jlayton@primarydata.com>
+ <1420742065-28423-3-git-send-email-jlayton@primarydata.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:39423 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753724AbbAINmE (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 9 Jan 2015 08:42:04 -0500
-In-Reply-To: <54AFAE7D.5070402@dachary.org>
+Received: from bombadil.infradead.org ([198.137.202.9]:44994 "EHLO
+	bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756947AbbAIO1Y (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Jan 2015 09:27:24 -0500
+Content-Disposition: inline
+In-Reply-To: <1420742065-28423-3-git-send-email-jlayton@primarydata.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>, David Zafman <david.zafman@inktank.com>, ceph-devel@vger.kernel.org
+To: Jeff Layton <jlayton@primarydata.com>
+Cc: linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, linux-cifs@vger.kernel.org, linux-nfs@vger.kernel.org, ceph-devel@vger.kernel.org, hch@infradead.org
 
-On 01/09/2015 03:33 AM, Loic Dachary wrote:
-> On 09/01/2015 07:55, David Zafman wrote:
->>
->> We are seeing gitbuilder failures.  This is what I saw on one.
->>
->> error: Failed build dependencies:
->> xmlstarlet is needed by ceph-1:0.90-821.g680fe3c.el7.x86_64
-> 
-> This is because https://github.com/ceph/ceph/pull/3036 was recently merged.
-> However, https://github.com/ceph/autobuild-ceph/pull/19 added xmlstarlet
-> about a month ago. Maybe some gitbuilder machines were not updated
-> accordingly. If I'm not mistaken this is a manual process but I'm not sure
-> exactly how to do it myself.
+On Thu, Jan 08, 2015 at 10:34:17AM -0800, Jeff Layton wrote:
+> ...instead of open-coding it and removing flock locks directly. This
+> simplifies some coming interim changes in the following patches when
+> we have different file_lock types protected by different spinlocks.
 
-I'm not entirely sure of the SOP to apply fabfile changes across our
-infrastructure, either. Is there a simple "push this fabfile change
-everywhere" command for gitbuilder?
+It took me quite a while to figure out what's going on here, as this
+adds a call to flock_lock_file, but it still keeps the old open coded
+loop around, just with a slightly different WARN_ON.
 
-In the long term we'll want to get to a point where we're building
-Ceph's RPM packages using mock [1] instead of rpmbuild so that mock can
-resolve these sort of things automatically without having to deal with
-installing new BuildRequires by hand.
-
-- Ken
-
-[1] http://fedoraproject.org/wiki/Projects/Mock
+I'd suggest keeping an open coded loop in locks_remove_flock, which
+should both be more efficient and easier to review.
 
