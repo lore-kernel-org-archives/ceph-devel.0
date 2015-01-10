@@ -1,116 +1,263 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: gf_unit 16 A -1 -m SPLIT 16 4 -r ALTMAP - failure
-Date: Sat, 10 Jan 2015 18:58:23 +0100
-Message-ID: <54B1683F.7080004@dachary.org>
-References: <54B16763.7070602@dachary.org>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="5dRl25Ccw4qU5pj170g1Vx80cde2jmixb"
+From: Christoph Hellwig <hch@lst.de>
+Subject: [PATCH] rbd: convert to blk-mq
+Date: Sat, 10 Jan 2015 19:31:28 +0100
+Message-ID: <1420914688-27563-1-git-send-email-hch@lst.de>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:36519 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751201AbbAJR60 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 10 Jan 2015 12:58:26 -0500
-In-Reply-To: <54B16763.7070602@dachary.org>
+Received: from casper.infradead.org ([85.118.1.10]:34535 "EHLO
+	casper.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752974AbbAJScW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 10 Jan 2015 13:32:22 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Kevin Greenan <kmgreen2@gmail.com>, Janne Grunau <j@jannau.net>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Yehuda Sadeh <yehuda@inktank.com>, Sage Weil <sage@inktank.com>, Alex Elder <elder@kernel.org>
+Cc: Alexandre DERUMIER <aderumier@odiso.com>, ceph-devel@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---5dRl25Ccw4qU5pj170g1Vx80cde2jmixb
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+This converts the rbd driver to use the blk-mq infrastructure.  Except
+for switching to a per-request work item this is almost mechanical.
 
-I should add that this failure only happens on ARMv7 Ubuntu with gcc vers=
-ion 4.8.1 (Ubuntu/Linaro 4.8.1-10ubuntu7)
+This was tested by Alexandre DERUMIER in November, and found to give
+him 120000 iops, although the only comparism available was an old
+3.10 kernel which gave 80000iops.
 
-On 10/01/2015 18:54, Loic Dachary wrote:
-> Hi Kevin & Janne,
->=20
-> The test gf_unit 16 A -1 -m SPLIT 16 4 -r ALTMAP - fails on the current=
- gf-complete master. The first commit where it fails is
->=20
-> commit 474010a91d35fef5ca7dea77205b6a5c7e68c3e9
-> Author: Janne Grunau <j@jannau.net>
-> Date:   Wed Sep 17 16:10:25 2014 +0200
->=20
->     arm: NEON optimisations for gf_w16
->=20
->     Optimisations for the 4,16 split table region multiplications.
->=20
->     Selected time_tool.sh 16 -A -B results for a 1.7 GHz cortex-a9:
->     Region Best (MB/s):   532.14   W-Method: 16 -m SPLIT 16 4 -r SIMD -=
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+---
+ drivers/block/rbd.c | 118 +++++++++++++++++++++++++++++-----------------------
+ 1 file changed, 67 insertions(+), 51 deletions(-)
 
->     Region Best (MB/s):   212.34   W-Method: 16 -m SPLIT 16 4 -r NOSIMD=
- -
->     Region Best (MB/s):   801.36   W-Method: 16 -m SPLIT 16 4 -r SIMD -=
-r ALTMAP -
->     Region Best (MB/s):    93.20   W-Method: 16 -m SPLIT 16 4 -r NOSIMD=
- -r ALTMAP -
->     Region Best (MB/s):   273.99   W-Method: 16 -m SPLIT 16 8 -
->     Region Best (MB/s):   270.81   W-Method: 16 -m SPLIT 8 8 -
->     Region Best (MB/s):    70.42   W-Method: 16 -m COMPOSITE 2 - -
->     Region Best (MB/s):   393.54   W-Method: 16 -m COMPOSITE 2 - -r ALT=
-MAP -
->=20
-> but the test did exit(0) on error instead of exit(1) and we failed to n=
-otice.
->=20
-> gf_unit 16 A -1 -m SPLIT 16 4 -r ALTMAP -
-> Args: 16 A -1 -m SPLIT 16 4 -r ALTMAP - / size (bytes): 524428
-> Problem with region multiply (all values in hex):
->    Target address base: 0x8fd08e.  Word 0x1 of 0x1fee.  Xor: 0
->    Value: 2
->    Original source word: d00a
->    Product word: a000
->    It should be: b01f
->=20
-> Do you have an idea why this happens ? For the record here is the bisec=
-t command I used:
->=20
-> git bisect start 6fdd8bc3d32cb2f7fa55d2de9dc7cc5bb2f885aa 36e75c3efec08=
-b1e9bdb9c1f69a5b0018abd8ac7
-> git bisect run try.sh
->=20
-> #!/bin/bash
-> log=3D$(git rev-parse HEAD)
-> echo $log.log
-> make distclean > $log.log 2>&1
-> ./autogen.sh >> $log.log 2>&1
-> ./configure >> $log.log 2>&1
-> make -j4 >> $log.log 2>&1
-> ! test/gf_unit 16 A -1 -m SPLIT 16 4 -r ALTMAP - 2>&1 | grep 'It should=
- be'
->=20
-> Note that b87c41f282dccc1b3649e3ea3fb80d19f820310 fails the test for di=
-fferent reasons:
->=20
-> Args: 16 A -1 -m SPLIT 16 4 -r ALTMAP - / size (bytes): 524428
-> *** Error in `/home/ubuntu/f/gf-complete/test/.libs/lt-gf_unit': free()=
-: invalid pointer: 0x00ce7070 ***
-> try.sh: line 8: 12193 Aborted                 test/gf_unit 16 A -1 -m S=
-PLIT 16 4 -r ALTMAP -
->=20
-> Cheers
->=20
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 3ec85df..52cd677 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -38,6 +38,7 @@
+ #include <linux/kernel.h>
+ #include <linux/device.h>
+ #include <linux/module.h>
++#include <linux/blk-mq.h>
+ #include <linux/fs.h>
+ #include <linux/blkdev.h>
+ #include <linux/slab.h>
+@@ -342,7 +343,6 @@ struct rbd_device {
+ 
+ 	struct list_head	rq_queue;	/* incoming rq queue */
+ 	spinlock_t		lock;		/* queue, flags, open_count */
+-	struct work_struct	rq_work;
+ 
+ 	struct rbd_image_header	header;
+ 	unsigned long		flags;		/* possibly lock protected */
+@@ -360,6 +360,9 @@ struct rbd_device {
+ 	atomic_t		parent_ref;
+ 	struct rbd_device	*parent;
+ 
++	/* Block layer tags. */
++	struct blk_mq_tag_set	tag_set;
++
+ 	/* protects updating the header */
+ 	struct rw_semaphore     header_rwsem;
+ 
+@@ -1817,7 +1820,8 @@ static void rbd_osd_req_callback(struct ceph_osd_request *osd_req,
+ 
+ 	/*
+ 	 * We support a 64-bit length, but ultimately it has to be
+-	 * passed to blk_end_request(), which takes an unsigned int.
++	 * passed to the block layer, which just supports a 32-bit
++	 * length field.
+ 	 */
+ 	obj_request->xferred = osd_req->r_reply_op_len[0];
+ 	rbd_assert(obj_request->xferred < (u64)UINT_MAX);
+@@ -2281,7 +2285,10 @@ static bool rbd_img_obj_end_request(struct rbd_obj_request *obj_request)
+ 		more = obj_request->which < img_request->obj_request_count - 1;
+ 	} else {
+ 		rbd_assert(img_request->rq != NULL);
+-		more = blk_end_request(img_request->rq, result, xferred);
++	
++		more = blk_update_request(img_request->rq, result, xferred);
++		if (!more)
++			__blk_mq_end_request(img_request->rq, result);
+ 	}
+ 
+ 	return more;
+@@ -3310,8 +3317,10 @@ out:
+ 	return ret;
+ }
+ 
+-static void rbd_handle_request(struct rbd_device *rbd_dev, struct request *rq)
++static void rbd_queue_workfn(struct work_struct *work)
+ {
++	struct request *rq = blk_mq_rq_from_pdu(work);
++	struct rbd_device *rbd_dev = rq->q->queuedata;
+ 	struct rbd_img_request *img_request;
+ 	struct ceph_snap_context *snapc = NULL;
+ 	u64 offset = (u64)blk_rq_pos(rq) << SECTOR_SHIFT;
+@@ -3319,6 +3328,13 @@ static void rbd_handle_request(struct rbd_device *rbd_dev, struct request *rq)
+ 	enum obj_operation_type op_type;
+ 	u64 mapping_size;
+ 	int result;
++		
++	if (rq->cmd_type != REQ_TYPE_FS) {
++		dout("%s: non-fs request type %d\n", __func__,
++			(int) rq->cmd_type);
++		result = -EIO;
++		goto err;
++	}
+ 
+ 	if (rq->cmd_flags & REQ_DISCARD)
+ 		op_type = OBJ_OP_DISCARD;
+@@ -3358,6 +3374,8 @@ static void rbd_handle_request(struct rbd_device *rbd_dev, struct request *rq)
+ 		goto err_rq;
+ 	}
+ 
++	blk_mq_start_request(rq);
++
+ 	if (offset && length > U64_MAX - offset + 1) {
+ 		rbd_warn(rbd_dev, "bad request range (%llu~%llu)", offset,
+ 			 length);
+@@ -3411,52 +3429,18 @@ err_rq:
+ 			 obj_op_name(op_type), length, offset, result);
+ 	ceph_put_snap_context(snapc);
+ 	blk_end_request_all(rq, result);
++err:
++	blk_mq_end_request(rq, result);
+ }
+ 
+-static void rbd_request_workfn(struct work_struct *work)
++static int rbd_queue_rq(struct blk_mq_hw_ctx *hctx,
++		const struct blk_mq_queue_data *bd)
+ {
+-	struct rbd_device *rbd_dev =
+-	    container_of(work, struct rbd_device, rq_work);
+-	struct request *rq, *next;
+-	LIST_HEAD(requests);
+-
+-	spin_lock_irq(&rbd_dev->lock); /* rq->q->queue_lock */
+-	list_splice_init(&rbd_dev->rq_queue, &requests);
+-	spin_unlock_irq(&rbd_dev->lock);
+-
+-	list_for_each_entry_safe(rq, next, &requests, queuelist) {
+-		list_del_init(&rq->queuelist);
+-		rbd_handle_request(rbd_dev, rq);
+-	}
+-}
++	struct request *rq = bd->rq;
++	struct work_struct *work = blk_mq_rq_to_pdu(rq);
+ 
+-/*
+- * Called with q->queue_lock held and interrupts disabled, possibly on
+- * the way to schedule().  Do not sleep here!
+- */
+-static void rbd_request_fn(struct request_queue *q)
+-{
+-	struct rbd_device *rbd_dev = q->queuedata;
+-	struct request *rq;
+-	int queued = 0;
+-
+-	rbd_assert(rbd_dev);
+-
+-	while ((rq = blk_fetch_request(q))) {
+-		/* Ignore any non-FS requests that filter through. */
+-		if (rq->cmd_type != REQ_TYPE_FS) {
+-			dout("%s: non-fs request type %d\n", __func__,
+-				(int) rq->cmd_type);
+-			__blk_end_request_all(rq, 0);
+-			continue;
+-		}
+-
+-		list_add_tail(&rq->queuelist, &rbd_dev->rq_queue);
+-		queued++;
+-	}
+-
+-	if (queued)
+-		queue_work(rbd_wq, &rbd_dev->rq_work);
++	queue_work(rbd_wq, work);
++	return 0;
+ }
+ 
+ /*
+@@ -3517,6 +3501,7 @@ static void rbd_free_disk(struct rbd_device *rbd_dev)
+ 		del_gendisk(disk);
+ 		if (disk->queue)
+ 			blk_cleanup_queue(disk->queue);
++		blk_mq_free_tag_set(&rbd_dev->tag_set);
+ 	}
+ 	put_disk(disk);
+ }
+@@ -3728,11 +3713,28 @@ static int rbd_dev_refresh(struct rbd_device *rbd_dev)
+ 	return 0;
+ }
+ 
++static int rbd_init_request(void *data, struct request *rq,
++		unsigned int hctx_idx, unsigned int request_idx,
++		unsigned int numa_node)
++{
++	struct work_struct *work = blk_mq_rq_to_pdu(rq);
++
++	INIT_WORK(work, rbd_queue_workfn);
++	return 0;
++}
++
++static struct blk_mq_ops rbd_mq_ops = {
++	.queue_rq	= rbd_queue_rq,
++	.map_queue	= blk_mq_map_queue,
++	.init_request	= rbd_init_request,
++};
++
+ static int rbd_init_disk(struct rbd_device *rbd_dev)
+ {
+ 	struct gendisk *disk;
+ 	struct request_queue *q;
+ 	u64 segment_size;
++	int err;
+ 
+ 	/* create gendisk info */
+ 	disk = alloc_disk(single_major ?
+@@ -3750,10 +3752,24 @@ static int rbd_init_disk(struct rbd_device *rbd_dev)
+ 	disk->fops = &rbd_bd_ops;
+ 	disk->private_data = rbd_dev;
+ 
+-	q = blk_init_queue(rbd_request_fn, &rbd_dev->lock);
+-	if (!q)
++	memset(&rbd_dev->tag_set, 0, sizeof(rbd_dev->tag_set));
++	rbd_dev->tag_set.ops = &rbd_mq_ops;
++	rbd_dev->tag_set.queue_depth = BLKDEV_MAX_RQ;
++	rbd_dev->tag_set.numa_node = NUMA_NO_NODE;
++	rbd_dev->tag_set.flags =
++		BLK_MQ_F_SHOULD_MERGE | BLK_MQ_F_SG_MERGE;
++	rbd_dev->tag_set.nr_hw_queues = 1;
++	rbd_dev->tag_set.cmd_size = sizeof(struct work_struct);
++
++	err = blk_mq_alloc_tag_set(&rbd_dev->tag_set);
++	if (err)
+ 		goto out_disk;
+ 
++	err = -ENOMEM;
++	q = blk_mq_init_queue(&rbd_dev->tag_set);
++	if (!q)
++		goto out_tag_set;
++
+ 	/* We use the default size, but let's be explicit about it. */
+ 	blk_queue_physical_block_size(q, SECTOR_SIZE);
+ 
+@@ -3779,10 +3795,11 @@ static int rbd_init_disk(struct rbd_device *rbd_dev)
+ 	rbd_dev->disk = disk;
+ 
+ 	return 0;
++out_tag_set:
++	blk_mq_free_tag_set(&rbd_dev->tag_set);
+ out_disk:
+ 	put_disk(disk);
+-
+-	return -ENOMEM;
++	return err;
+ }
+ 
+ /*
+@@ -4040,7 +4057,6 @@ static struct rbd_device *rbd_dev_create(struct rbd_client *rbdc,
+ 
+ 	spin_lock_init(&rbd_dev->lock);
+ 	INIT_LIST_HEAD(&rbd_dev->rq_queue);
+-	INIT_WORK(&rbd_dev->rq_work, rbd_request_workfn);
+ 	rbd_dev->flags = 0;
+ 	atomic_set(&rbd_dev->parent_ref, 0);
+ 	INIT_LIST_HEAD(&rbd_dev->node);
+-- 
+1.9.1
 
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---5dRl25Ccw4qU5pj170g1Vx80cde2jmixb
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlSxaD8ACgkQ8dLMyEl6F230JgCZAT2CON5k3NLz00qUWrV//gyq
-ms4An2KGY7wG5jEx4ZXzm5EwVuch783B
-=7w0r
------END PGP SIGNATURE-----
-
---5dRl25Ccw4qU5pj170g1Vx80cde2jmixb--
