@@ -1,176 +1,108 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Re: New Defects reported by Coverity Scan for ceph
-Date: Sat, 10 Jan 2015 23:48:53 +0800
-Message-ID: <CACJqLybCri98bMwVUPBD4NrPN_okZ3sHUBYLtigzem_2i0yJWQ@mail.gmail.com>
-References: <54b138d459f9e_3522d2933079664@scan.coverity.com.mail>
+From: Loic Dachary <loic@dachary.org>
+Subject: gf_unit 16 A -1 -m SPLIT 16 4 -r ALTMAP - failure
+Date: Sat, 10 Jan 2015 18:54:43 +0100
+Message-ID: <54B16763.7070602@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="AeELubh9CUANFk7o0khkqBRwobXRSSxeX"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f171.google.com ([209.85.212.171]:65183 "EHLO
-	mail-wi0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751863AbbAJPsz (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 10 Jan 2015 10:48:55 -0500
-Received: by mail-wi0-f171.google.com with SMTP id bs8so7402607wib.4
-        for <ceph-devel@vger.kernel.org>; Sat, 10 Jan 2015 07:48:53 -0800 (PST)
-In-Reply-To: <54b138d459f9e_3522d2933079664@scan.coverity.com.mail>
+Received: from mail2.dachary.org ([91.121.57.175]:36516 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751201AbbAJRyq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 10 Jan 2015 12:54:46 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Kevin Greenan <kmgreen2@gmail.com>, Janne Grunau <j@jannau.net>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-The first exception should be shadowed?
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--AeELubh9CUANFk7o0khkqBRwobXRSSxeX
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-And the second exception seemed strange, because other tests are follow this way
+Hi Kevin & Janne,
 
-On Sat, Jan 10, 2015 at 10:36 PM,  <scan-admin@coverity.com> wrote:
->
-> Hi,
->
-> Please find the latest report on new defect(s) introduced to ceph found with Coverity Scan.
->
-> 2 new defect(s) introduced to ceph found with Coverity Scan.
->
->
-> New defect(s) Reported-by: Coverity Scan
-> Showing 2 of 2 defect(s)
->
->
-> ** CID 1260210:  Resource leak  (RESOURCE_LEAK)
-> /test/msgr/test_msgr.cc: 537 in MessengerTest_ClientStandbyTest_Test::TestBody()()
->
-> ** CID 1260212:  Uncaught exception  (UNCAUGHT_EXCEPT)
-> /test/msgr/test_msgr.cc: 579 in main()
-> /test/msgr/test_msgr.cc: 579 in main()
-> /test/msgr/test_msgr.cc: 579 in main()
-> /test/msgr/test_msgr.cc: 579 in main()
-> /test/msgr/test_msgr.cc: 579 in main()
-> /test/msgr/test_msgr.cc: 579 in main()
->
->
-> ________________________________________________________________________________________________________
-> *** CID 1260210:  Resource leak  (RESOURCE_LEAK)
-> /test/msgr/test_msgr.cc: 537 in MessengerTest_ClientStandbyTest_Test::TestBody()()
-> 531       usleep(300*1000);
-> 532       // client should be standby, so we use original connection
-> 533       {
-> 534         m = new MPing();
-> 535         conn->send_keepalive();
-> 536         CHECK_AND_WAIT_TRUE(conn->is_connected());
->>>>     CID 1260210:  Resource leak  (RESOURCE_LEAK)
->>>>     Variable "m" going out of scope leaks the storage it points to.
-> 537         ASSERT_TRUE(conn->is_connected());
-> 538         ASSERT_EQ(conn->send_message(m), 0);
-> 539         Mutex::Locker l(cli_dispatcher.lock);
-> 540         while (!cli_dispatcher.got_new)
-> 541           cli_dispatcher.cond.Wait(cli_dispatcher.lock);
-> 542         cli_dispatcher.got_new = false;
->
-> ________________________________________________________________________________________________________
-> *** CID 1260212:  Uncaught exception  (UNCAUGHT_EXCEPT)
-> /test/msgr/test_msgr.cc: 579 in main()
-> 573     // must be defined). This dummy test keeps gtest_main linked in.
-> 574     TEST(DummyTest, ValueParameterizedTestsAreNotSupportedOnThisPlatform) {}
-> 575
-> 576     #endif
-> 577
-> 578
->>>>     CID 1260212:  Uncaught exception  (UNCAUGHT_EXCEPT)
->>>>     In function "main(int, char **)" an exception of type "ceph::FailedAssertion" is thrown and never caught.
-> 579     int main(int argc, char **argv) {
-> 580       vector<const char*> args;
-> 581       argv_to_vec(argc, (const char **)argv, args);
-> 582
-> 583       global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT, CODE_ENVIRONMENT_UTILITY, 0);
-> 584       g_ceph_context->_conf->set_val("auth_cluster_required", "none");
-> /test/msgr/test_msgr.cc: 579 in main()
-> 573     // must be defined). This dummy test keeps gtest_main linked in.
-> 574     TEST(DummyTest, ValueParameterizedTestsAreNotSupportedOnThisPlatform) {}
-> 575
-> 576     #endif
-> 577
-> 578
->>>>     CID 1260212:  Uncaught exception  (UNCAUGHT_EXCEPT)
->>>>     In function "main(int, char **)" an exception of type "ceph::FailedAssertion" is thrown and never caught.
-> 579     int main(int argc, char **argv) {
-> 580       vector<const char*> args;
-> 581       argv_to_vec(argc, (const char **)argv, args);
-> 582
-> 583       global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT, CODE_ENVIRONMENT_UTILITY, 0);
-> 584       g_ceph_context->_conf->set_val("auth_cluster_required", "none");
-> /test/msgr/test_msgr.cc: 579 in main()
-> 573     // must be defined). This dummy test keeps gtest_main linked in.
-> 574     TEST(DummyTest, ValueParameterizedTestsAreNotSupportedOnThisPlatform) {}
-> 575
-> 576     #endif
-> 577
-> 578
->>>>     CID 1260212:  Uncaught exception  (UNCAUGHT_EXCEPT)
->>>>     In function "main(int, char **)" an exception of type "ceph::FailedAssertion" is thrown and never caught.
-> 579     int main(int argc, char **argv) {
-> 580       vector<const char*> args;
-> 581       argv_to_vec(argc, (const char **)argv, args);
-> 582
-> 583       global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT, CODE_ENVIRONMENT_UTILITY, 0);
-> 584       g_ceph_context->_conf->set_val("auth_cluster_required", "none");
-> /test/msgr/test_msgr.cc: 579 in main()
-> 573     // must be defined). This dummy test keeps gtest_main linked in.
-> 574     TEST(DummyTest, ValueParameterizedTestsAreNotSupportedOnThisPlatform) {}
-> 575
-> 576     #endif
-> 577
-> 578
->>>>     CID 1260212:  Uncaught exception  (UNCAUGHT_EXCEPT)
->>>>     In function "main(int, char **)" an exception of type "ceph::FailedAssertion" is thrown and never caught.
-> 579     int main(int argc, char **argv) {
-> 580       vector<const char*> args;
-> 581       argv_to_vec(argc, (const char **)argv, args);
-> 582
-> 583       global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT, CODE_ENVIRONMENT_UTILITY, 0);
-> 584       g_ceph_context->_conf->set_val("auth_cluster_required", "none");
-> /test/msgr/test_msgr.cc: 579 in main()
-> 573     // must be defined). This dummy test keeps gtest_main linked in.
-> 574     TEST(DummyTest, ValueParameterizedTestsAreNotSupportedOnThisPlatform) {}
-> 575
-> 576     #endif
-> 577
-> 578
->>>>     CID 1260212:  Uncaught exception  (UNCAUGHT_EXCEPT)
->>>>     In function "main(int, char **)" an exception of type "ceph::FailedAssertion" is thrown and never caught.
-> 579     int main(int argc, char **argv) {
-> 580       vector<const char*> args;
-> 581       argv_to_vec(argc, (const char **)argv, args);
-> 582
-> 583       global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT, CODE_ENVIRONMENT_UTILITY, 0);
-> 584       g_ceph_context->_conf->set_val("auth_cluster_required", "none");
-> /test/msgr/test_msgr.cc: 579 in main()
-> 573     // must be defined). This dummy test keeps gtest_main linked in.
-> 574     TEST(DummyTest, ValueParameterizedTestsAreNotSupportedOnThisPlatform) {}
-> 575
-> 576     #endif
-> 577
-> 578
->>>>     CID 1260212:  Uncaught exception  (UNCAUGHT_EXCEPT)
->>>>     In function "main(int, char **)" an exception of type "ceph::FailedAssertion" is thrown and never caught.
-> 579     int main(int argc, char **argv) {
-> 580       vector<const char*> args;
-> 581       argv_to_vec(argc, (const char **)argv, args);
-> 582
-> 583       global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT, CODE_ENVIRONMENT_UTILITY, 0);
-> 584       g_ceph_context->_conf->set_val("auth_cluster_required", "none");
->
->
-> ________________________________________________________________________________________________________
-> To view the defects in Coverity Scan visit, http://scan.coverity.com/projects/25?tab=overview
->
-> To manage Coverity Scan email notifications for "ceph-devel@vger.kernel.org", click http://scan.coverity.com/subscriptions/edit?email=ceph-devel%40vger.kernel.org&token=018084d671e3cc89d00dd2ccb7eb849c .
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+The test gf_unit 16 A -1 -m SPLIT 16 4 -r ALTMAP - fails on the current g=
+f-complete master. The first commit where it fails is
+
+commit 474010a91d35fef5ca7dea77205b6a5c7e68c3e9
+Author: Janne Grunau <j@jannau.net>
+Date:   Wed Sep 17 16:10:25 2014 +0200
+
+    arm: NEON optimisations for gf_w16
+
+    Optimisations for the 4,16 split table region multiplications.
+
+    Selected time_tool.sh 16 -A -B results for a 1.7 GHz cortex-a9:
+    Region Best (MB/s):   532.14   W-Method: 16 -m SPLIT 16 4 -r SIMD -
+    Region Best (MB/s):   212.34   W-Method: 16 -m SPLIT 16 4 -r NOSIMD -=
+
+    Region Best (MB/s):   801.36   W-Method: 16 -m SPLIT 16 4 -r SIMD -r =
+ALTMAP -
+    Region Best (MB/s):    93.20   W-Method: 16 -m SPLIT 16 4 -r NOSIMD -=
+r ALTMAP -
+    Region Best (MB/s):   273.99   W-Method: 16 -m SPLIT 16 8 -
+    Region Best (MB/s):   270.81   W-Method: 16 -m SPLIT 8 8 -
+    Region Best (MB/s):    70.42   W-Method: 16 -m COMPOSITE 2 - -
+    Region Best (MB/s):   393.54   W-Method: 16 -m COMPOSITE 2 - -r ALTMA=
+P -
+
+but the test did exit(0) on error instead of exit(1) and we failed to not=
+ice.
+
+gf_unit 16 A -1 -m SPLIT 16 4 -r ALTMAP -
+Args: 16 A -1 -m SPLIT 16 4 -r ALTMAP - / size (bytes): 524428
+Problem with region multiply (all values in hex):
+   Target address base: 0x8fd08e.  Word 0x1 of 0x1fee.  Xor: 0
+   Value: 2
+   Original source word: d00a
+   Product word: a000
+   It should be: b01f
+
+Do you have an idea why this happens ? For the record here is the bisect =
+command I used:
+
+git bisect start 6fdd8bc3d32cb2f7fa55d2de9dc7cc5bb2f885aa 36e75c3efec08b1=
+e9bdb9c1f69a5b0018abd8ac7
+git bisect run try.sh
+
+#!/bin/bash
+log=3D$(git rev-parse HEAD)
+echo $log.log
+make distclean > $log.log 2>&1
+=2E/autogen.sh >> $log.log 2>&1
+=2E/configure >> $log.log 2>&1
+make -j4 >> $log.log 2>&1
+! test/gf_unit 16 A -1 -m SPLIT 16 4 -r ALTMAP - 2>&1 | grep 'It should b=
+e'
+
+Note that b87c41f282dccc1b3649e3ea3fb80d19f820310 fails the test for diff=
+erent reasons:
+
+Args: 16 A -1 -m SPLIT 16 4 -r ALTMAP - / size (bytes): 524428
+*** Error in `/home/ubuntu/f/gf-complete/test/.libs/lt-gf_unit': free(): =
+invalid pointer: 0x00ce7070 ***
+try.sh: line 8: 12193 Aborted                 test/gf_unit 16 A -1 -m SPL=
+IT 16 4 -r ALTMAP -
+
+Cheers
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
 
+--AeELubh9CUANFk7o0khkqBRwobXRSSxeX
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
--- 
-Best Regards,
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
 
-Wheat
+iEYEARECAAYFAlSxZ2MACgkQ8dLMyEl6F239wgCeNNu0BQ06l2vILBwtB2ZolwcW
+LP0AmwY1/SrRSIJg4HGNcRpnpZF5KR2y
+=DHo2
+-----END PGP SIGNATURE-----
+
+--AeELubh9CUANFk7o0khkqBRwobXRSSxeX--
