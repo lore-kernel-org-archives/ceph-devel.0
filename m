@@ -1,178 +1,89 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: ceph osd df
-Date: Sat, 10 Jan 2015 10:39:41 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1501101027390.26676@cobra.newdream.net>
-References: <alpine.DEB.2.00.1501051101010.6168@cobra.newdream.net> <20150110093158.GA2288@gmail.com>
+From: Alex Elder <elder@ieee.org>
+Subject: Re: [PATCH] rbd: convert to blk-mq
+Date: Sat, 10 Jan 2015 17:40:20 -0600
+Message-ID: <54B1B864.4080008@ieee.org>
+References: <1420914688-27563-1-git-send-email-hch@lst.de>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:54387 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753918AbbAJSjv (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sat, 10 Jan 2015 13:39:51 -0500
-In-Reply-To: <20150110093158.GA2288@gmail.com>
+Received: from mail-ig0-f174.google.com ([209.85.213.174]:34220 "EHLO
+	mail-ig0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751222AbbAJXkW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 10 Jan 2015 18:40:22 -0500
+Received: by mail-ig0-f174.google.com with SMTP id hn15so6841170igb.1
+        for <ceph-devel@vger.kernel.org>; Sat, 10 Jan 2015 15:40:21 -0800 (PST)
+In-Reply-To: <1420914688-27563-1-git-send-email-hch@lst.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mykola Golub <trociny@FreeBSD.org>
-Cc: ceph-devel@vger.kernel.org
+To: Christoph Hellwig <hch@lst.de>, Yehuda Sadeh <yehuda@inktank.com>, Sage Weil <sage@inktank.com>, Alex Elder <elder@kernel.org>
+Cc: Alexandre DERUMIER <aderumier@odiso.com>, ceph-devel@vger.kernel.org
 
-On Sat, 10 Jan 2015, Mykola Golub wrote:
-> On Mon, Jan 05, 2015 at 11:03:40AM -0800, Sage Weil wrote:
-> > We see a fair number of issues and confusion with OSD utilization and 
-> > unfortunately there is easy way to see a summary of the current OSD 
-> > utilization state.  'ceph pg dump' includes raw data but it not very 
-> > friendly.  'ceph osd tree' shows weights but not actual utilization.  
-> > 'ceph health detail' tells you the nearfull osds but only when they reach 
-> > the warning threshold.
-> > 
-> > Opened a ticket for a new command that summarizes just the relevant info:
-> > 
-> > 	http://tracker.ceph.com/issues/10452
-> > 
-> > Suggestions welcome.  It's a pretty simple implementation (the mon has 
-> > all the info; just need to add the command to present it) so I'm hoping it 
-> > can get into hammer.  If anyone is interested in doing the 
-> > implementation that would be great too!
+On 01/10/2015 12:31 PM, Christoph Hellwig wrote:
+> This converts the rbd driver to use the blk-mq infrastructure.  Except
+> for switching to a per-request work item this is almost mechanical.
 > 
-> I am interested in implementing this.
+> This was tested by Alexandre DERUMIER in November, and found to give
+> him 120000 iops, although the only comparism available was an old
+> 3.10 kernel which gave 80000iops.
+
+I'm coming up to speed with the blk-mq stuff only now.  It looks
+like requests are sent to the driver via ->queue_rq() rather than
+the driver taking them via blk_fetch_request(q).
+
+Previously we would pull as many requests as were available, put
+them on the device's request queue, and then activate the rbd
+workqueue to handle them one-by-one using rbd_handle_request().
+
+Now, the rbd queue_rq method rbd_request_workfn() adds the request
+to the rbd workqueue directly.  The work_struct implicitly follows
+the request structure (which is set up by the blk-mq code).  We
+have to do the REQ_TYPE_FS check at the time it's queued now,
+rather than when it's fetched from the queue.  And finally we now
+have to tell the blk-mq subsystem when we've started and ended a
+request.
+
+I didn't follow up on all the tag_set initialization values
+so I assume you got that right (it looks reasonable to me).
+
+Given the above, it looks like everything else should work
+about the same as before, we're just handed requests rather
+than asking for them.
+
+With this patch applied, rbd_device->rq_queue is no longer
+needed so you should delete it.  I got two warnings about
+endo-of-line whitespace in your patch.  And I have one other
+very small suggestion below.
+
+Other than those things, this looks great to me.
+
+Reviewed-by: Alex Elder <elder@linaro.org>
+
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
+> ---
+>  drivers/block/rbd.c | 118 +++++++++++++++++++++++++++++-----------------------
+>  1 file changed, 67 insertions(+), 51 deletions(-)
 > 
-> Here is my approach, for preliminary review and discussion.
->
-> https://github.com/ceph/ceph/pull/3347
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index 3ec85df..52cd677 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
 
-Awesome!  I made a few comments on the pull request.
+. . .
 
-> Only plane text format is available currently. As both "osd only" and
-> "tree" outputs look useful I implemented both and added "tree" option
-> to tell which to choose.
+(The following is in the new rbd_queue_rq().)
 
-This sounds fine to me.  We will want to include the formatted output 
-before merging, though!
+> +	queue_work(rbd_wq, work);
+> +	return 0;
 
-> In http://tracker.ceph.com/issues/10452#note-2 Travis Rhoden suggested
-> to extend 'ceph osd tree' command to provide this data instead, but
-> I prefer to have many small specialized commands instead of one with
-> large output. But if other people also think that it is better to add
-> a '--detail' to osd tree instead of new command, I will change this.
+	return BLK_MQ_RQ_QUEUE_OK;
 
-Works for me.
- 
-> Also, I am not sure I got an idea how standard deviation should be
-> calculated. Sage's note in 10452:
-> 
->  - standard deviation (of normalized
->    actual_osd_utilization/crush_weight/reweight value)
->    
-> I don't see why utilization should be normalized by
-> reweight/crush_weight ratio? As I understand the goal is to have
-> utilization be the same for all devices (thus deviation as small as
-> possible), does not matter what reweight values we have?
+(Because the symbolic values are explicitly checked
+by the caller.)
 
-Yeah, I think you're right.  If I'm reading the code correct you're still 
-including reweight in there but I think it can be safely dropped.
-
-> Some examples of command output for my dev environments:
-> 
->  % ceph osd df
->  ID WEIGHT REWEIGHT %UTIL VAR  
->  0    1.00     1.00 18.12 1.00 
->  1    1.00     1.00 18.14 1.00 
->  2    1.00     1.00 18.13 1.00 
-
-I wonder if we should try to standardize the table formats.  'ceph osd 
-tree' current looks like
-
-# id	weight	type name	up/down	reweight
--1	3	root default
--2	3		host maetl
-0	1			osd.0	up	1	
-1	1			osd.1	up	1	
-2	1			osd.2	up	1	
-
-That is, lowercase headers (with a # header prefix).  It's also not using 
-TableFormatter (which it predates).
-
-It's also pretty sloppy with the precision and formatting:
-
-$ ./ceph osd crush reweight osd.1 
-.0001
-reweighted item id 1 name 'osd.1' to 0.0001 in crush map
-$ ./ceph osd tree
-# id	weight	type name	up/down	reweight
--1	2	root default
--2	2		host maetl
-0	1			osd.0	up	1	
-1	9.155e-05			osd.1	up	1	
-2	1			osd.2	up	1	
-$ ./ceph osd crush reweight osd.1 .001
-reweighted item id 1 name 'osd.1' to 0.001 in crush map
-$ ./ceph osd tree
-# id	weight	type name	up/down	reweight
--1	2.001	root default
--2	2.001		host maetl
-0	1			osd.0	up	1	
-1	0.0009918			osd.1	up	1	
-2	1			osd.2	up	1	
-
-Given that the *actual* precision of these weights is 16.16 bit 
-fixed-point, that's a lower bound of .00001.  I'm not sure we want to 
-print 1.00000 all the time, though?  Although I suppose it's better than
-
-      1
-      2
- .00001
-
-In a perfect world I suppose TableFormatter (or whatever) would adjust the 
-precision of all printed values to the highest precision needed by any 
-item in the list, but maybe just sticking to 5 digits for 
-everything is best for simplicity.
-
-Anyway, any interest in making a single stringify_weight() helper and 
-fixing up 'ceph osd tree' to also use it and TableFormatter too?  :)
-
-sage
-
-
->  --
->  AVG %UTIL: 18.13  MIN/MAX VAR: 1.00/1.00  DEV: 0
+>  }
 >  
->  % ceph osd df tree
->  ID WEIGHT REWEIGHT %UTIL VAR  NAME            
->  -1   3.00        - 18.13 1.00 root default    
->  -2   3.00        - 18.13 1.00     host zhuzha 
->  0    1.00     1.00 18.12 1.00         osd.0   
->  1    1.00     1.00 18.14 1.00         osd.1   
->  2    1.00     1.00 18.13 1.00         osd.2   
->  --
->  AVG %UTIL: 18.13  MIN/MAX VAR: 1.00/1.00  DEV: 0
->  
->  % ceph osd df
->  ID WEIGHT REWEIGHT %UTIL VAR  
->  0    1.00     1.00 38.15 0.91 
->  1    1.00     1.00 44.15 1.06 
->  2    1.00     1.00 45.66 1.09 
->  3    1.00     1.00 44.15 1.06 
->  4    1.00     0.80 36.82 0.88 
->  --
->  AVG %UTIL: 41.78  MIN/MAX VAR: 0.88/1.09  DEV: 6.19
->  
->  % ceph osd df tree
->  ID WEIGHT REWEIGHT %UTIL VAR  NAME          
->  -1   5.00        - 41.78 1.00 root default  
->  -2   1.00        - 38.15 0.91     host osd1 
->  0    1.00     1.00 38.15 0.91         osd.0 
->  -3   1.00        - 44.15 1.06     host osd2 
->  1    1.00     1.00 44.15 1.06         osd.1 
->  -4   1.00        - 45.66 1.09     host osd3 
->  2    1.00     1.00 45.66 1.09         osd.2 
->  -5   1.00        - 44.15 1.06     host osd4 
->  3    1.00     1.00 44.15 1.06         osd.3 
->  -6   1.00        - 36.82 0.88     host osd5 
->  4    1.00     0.80 36.82 0.88         osd.4 
->  --
->  AVG %UTIL: 41.78  MIN/MAX VAR: 0.88/1.09  DEV: 6.19
-> 
-> -- 
-> Mykola Golub
-> 
-> 
+>  /*
+
+. . .
+
