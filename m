@@ -1,113 +1,158 @@
-From: Mykola Golub <trociny@FreeBSD.org>
-Subject: Re: ceph osd df
-Date: Sat, 10 Jan 2015 11:31:59 +0200
-Message-ID: <20150110093158.GA2288@gmail.com>
-References: <alpine.DEB.2.00.1501051101010.6168@cobra.newdream.net>
+From: scan-admin@coverity.com
+Subject: New Defects reported by Coverity Scan for ceph
+Date: Sat, 10 Jan 2015 06:36:04 -0800
+Message-ID: <54b138d459f9e_3522d2933079664@scan.coverity.com.mail>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain;
+ charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f46.google.com ([209.85.215.46]:59677 "EHLO
-	mail-la0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751831AbbAJJcE (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 10 Jan 2015 04:32:04 -0500
-Received: by mail-la0-f46.google.com with SMTP id q1so18088649lam.5
-        for <ceph-devel@vger.kernel.org>; Sat, 10 Jan 2015 01:32:02 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <alpine.DEB.2.00.1501051101010.6168@cobra.newdream.net>
+Received: from scanrelay.coverity.com ([209.249.196.67]:57592 "EHLO
+	scanrelay.coverity.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753151AbbAJOgG (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 10 Jan 2015 09:36:06 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Mon, Jan 05, 2015 at 11:03:40AM -0800, Sage Weil wrote:
-> We see a fair number of issues and confusion with OSD utilization and 
-> unfortunately there is easy way to see a summary of the current OSD 
-> utilization state.  'ceph pg dump' includes raw data but it not very 
-> friendly.  'ceph osd tree' shows weights but not actual utilization.  
-> 'ceph health detail' tells you the nearfull osds but only when they reach 
-> the warning threshold.
-> 
-> Opened a ticket for a new command that summarizes just the relevant info:
-> 
-> 	http://tracker.ceph.com/issues/10452
-> 
-> Suggestions welcome.  It's a pretty simple implementation (the mon has 
-> all the info; just need to add the command to present it) so I'm hoping it 
-> can get into hammer.  If anyone is interested in doing the 
-> implementation that would be great too!
 
-I am interested in implementing this.
+Hi,
 
-Here is my approach, for preliminary review and discussion.
+Please find the latest report on new defect(s) introduced to ceph found with Coverity Scan.
 
-https://github.com/ceph/ceph/pull/3347
+2 new defect(s) introduced to ceph found with Coverity Scan.
 
-Only plane text format is available currently. As both "osd only" and
-"tree" outputs look useful I implemented both and added "tree" option
-to tell which to choose.
 
-In http://tracker.ceph.com/issues/10452#note-2 Travis Rhoden suggested
-to extend 'ceph osd tree' command to provide this data instead, but
-I prefer to have many small specialized commands instead of one with
-large output. But if other people also think that it is better to add
-a '--detail' to osd tree instead of new command, I will change this.
+New defect(s) Reported-by: Coverity Scan
+Showing 2 of 2 defect(s)
 
-Also, I am not sure I got an idea how standard deviation should be
-calculated. Sage's note in 10452:
 
- - standard deviation (of normalized
-   actual_osd_utilization/crush_weight/reweight value)
-   
-I don't see why utilization should be normalized by
-reweight/crush_weight ratio? As I understand the goal is to have
-utilization be the same for all devices (thus deviation as small as
-possible), does not matter what reweight values we have?
+** CID 1260210:  Resource leak  (RESOURCE_LEAK)
+/test/msgr/test_msgr.cc: 537 in MessengerTest_ClientStandbyTest_Test::TestBody()()
 
-Some examples of command output for my dev environments:
+** CID 1260212:  Uncaught exception  (UNCAUGHT_EXCEPT)
+/test/msgr/test_msgr.cc: 579 in main()
+/test/msgr/test_msgr.cc: 579 in main()
+/test/msgr/test_msgr.cc: 579 in main()
+/test/msgr/test_msgr.cc: 579 in main()
+/test/msgr/test_msgr.cc: 579 in main()
+/test/msgr/test_msgr.cc: 579 in main()
 
- % ceph osd df
- ID WEIGHT REWEIGHT %UTIL VAR  
- 0    1.00     1.00 18.12 1.00 
- 1    1.00     1.00 18.14 1.00 
- 2    1.00     1.00 18.13 1.00 
- --
- AVG %UTIL: 18.13  MIN/MAX VAR: 1.00/1.00  DEV: 0
- 
- % ceph osd df tree
- ID WEIGHT REWEIGHT %UTIL VAR  NAME            
- -1   3.00        - 18.13 1.00 root default    
- -2   3.00        - 18.13 1.00     host zhuzha 
- 0    1.00     1.00 18.12 1.00         osd.0   
- 1    1.00     1.00 18.14 1.00         osd.1   
- 2    1.00     1.00 18.13 1.00         osd.2   
- --
- AVG %UTIL: 18.13  MIN/MAX VAR: 1.00/1.00  DEV: 0
- 
- % ceph osd df
- ID WEIGHT REWEIGHT %UTIL VAR  
- 0    1.00     1.00 38.15 0.91 
- 1    1.00     1.00 44.15 1.06 
- 2    1.00     1.00 45.66 1.09 
- 3    1.00     1.00 44.15 1.06 
- 4    1.00     0.80 36.82 0.88 
- --
- AVG %UTIL: 41.78  MIN/MAX VAR: 0.88/1.09  DEV: 6.19
- 
- % ceph osd df tree
- ID WEIGHT REWEIGHT %UTIL VAR  NAME          
- -1   5.00        - 41.78 1.00 root default  
- -2   1.00        - 38.15 0.91     host osd1 
- 0    1.00     1.00 38.15 0.91         osd.0 
- -3   1.00        - 44.15 1.06     host osd2 
- 1    1.00     1.00 44.15 1.06         osd.1 
- -4   1.00        - 45.66 1.09     host osd3 
- 2    1.00     1.00 45.66 1.09         osd.2 
- -5   1.00        - 44.15 1.06     host osd4 
- 3    1.00     1.00 44.15 1.06         osd.3 
- -6   1.00        - 36.82 0.88     host osd5 
- 4    1.00     0.80 36.82 0.88         osd.4 
- --
- AVG %UTIL: 41.78  MIN/MAX VAR: 0.88/1.09  DEV: 6.19
 
--- 
-Mykola Golub
+________________________________________________________________________________________________________
+*** CID 1260210:  Resource leak  (RESOURCE_LEAK)
+/test/msgr/test_msgr.cc: 537 in MessengerTest_ClientStandbyTest_Test::TestBody()()
+531       usleep(300*1000);
+532       // client should be standby, so we use original connection
+533       {
+534         m = new MPing();
+535         conn->send_keepalive();
+536         CHECK_AND_WAIT_TRUE(conn->is_connected());
+>>>     CID 1260210:  Resource leak  (RESOURCE_LEAK)
+>>>     Variable "m" going out of scope leaks the storage it points to.
+537         ASSERT_TRUE(conn->is_connected());
+538         ASSERT_EQ(conn->send_message(m), 0);
+539         Mutex::Locker l(cli_dispatcher.lock);
+540         while (!cli_dispatcher.got_new)
+541           cli_dispatcher.cond.Wait(cli_dispatcher.lock);
+542         cli_dispatcher.got_new = false;
+
+________________________________________________________________________________________________________
+*** CID 1260212:  Uncaught exception  (UNCAUGHT_EXCEPT)
+/test/msgr/test_msgr.cc: 579 in main()
+573     // must be defined). This dummy test keeps gtest_main linked in.
+574     TEST(DummyTest, ValueParameterizedTestsAreNotSupportedOnThisPlatform) {}
+575     
+576     #endif
+577     
+578     
+>>>     CID 1260212:  Uncaught exception  (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char **)" an exception of type "ceph::FailedAssertion" is thrown and never caught.
+579     int main(int argc, char **argv) {
+580       vector<const char*> args;
+581       argv_to_vec(argc, (const char **)argv, args);
+582     
+583       global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT, CODE_ENVIRONMENT_UTILITY, 0);
+584       g_ceph_context->_conf->set_val("auth_cluster_required", "none");
+/test/msgr/test_msgr.cc: 579 in main()
+573     // must be defined). This dummy test keeps gtest_main linked in.
+574     TEST(DummyTest, ValueParameterizedTestsAreNotSupportedOnThisPlatform) {}
+575     
+576     #endif
+577     
+578     
+>>>     CID 1260212:  Uncaught exception  (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char **)" an exception of type "ceph::FailedAssertion" is thrown and never caught.
+579     int main(int argc, char **argv) {
+580       vector<const char*> args;
+581       argv_to_vec(argc, (const char **)argv, args);
+582     
+583       global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT, CODE_ENVIRONMENT_UTILITY, 0);
+584       g_ceph_context->_conf->set_val("auth_cluster_required", "none");
+/test/msgr/test_msgr.cc: 579 in main()
+573     // must be defined). This dummy test keeps gtest_main linked in.
+574     TEST(DummyTest, ValueParameterizedTestsAreNotSupportedOnThisPlatform) {}
+575     
+576     #endif
+577     
+578     
+>>>     CID 1260212:  Uncaught exception  (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char **)" an exception of type "ceph::FailedAssertion" is thrown and never caught.
+579     int main(int argc, char **argv) {
+580       vector<const char*> args;
+581       argv_to_vec(argc, (const char **)argv, args);
+582     
+583       global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT, CODE_ENVIRONMENT_UTILITY, 0);
+584       g_ceph_context->_conf->set_val("auth_cluster_required", "none");
+/test/msgr/test_msgr.cc: 579 in main()
+573     // must be defined). This dummy test keeps gtest_main linked in.
+574     TEST(DummyTest, ValueParameterizedTestsAreNotSupportedOnThisPlatform) {}
+575     
+576     #endif
+577     
+578     
+>>>     CID 1260212:  Uncaught exception  (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char **)" an exception of type "ceph::FailedAssertion" is thrown and never caught.
+579     int main(int argc, char **argv) {
+580       vector<const char*> args;
+581       argv_to_vec(argc, (const char **)argv, args);
+582     
+583       global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT, CODE_ENVIRONMENT_UTILITY, 0);
+584       g_ceph_context->_conf->set_val("auth_cluster_required", "none");
+/test/msgr/test_msgr.cc: 579 in main()
+573     // must be defined). This dummy test keeps gtest_main linked in.
+574     TEST(DummyTest, ValueParameterizedTestsAreNotSupportedOnThisPlatform) {}
+575     
+576     #endif
+577     
+578     
+>>>     CID 1260212:  Uncaught exception  (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char **)" an exception of type "ceph::FailedAssertion" is thrown and never caught.
+579     int main(int argc, char **argv) {
+580       vector<const char*> args;
+581       argv_to_vec(argc, (const char **)argv, args);
+582     
+583       global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT, CODE_ENVIRONMENT_UTILITY, 0);
+584       g_ceph_context->_conf->set_val("auth_cluster_required", "none");
+/test/msgr/test_msgr.cc: 579 in main()
+573     // must be defined). This dummy test keeps gtest_main linked in.
+574     TEST(DummyTest, ValueParameterizedTestsAreNotSupportedOnThisPlatform) {}
+575     
+576     #endif
+577     
+578     
+>>>     CID 1260212:  Uncaught exception  (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char **)" an exception of type "ceph::FailedAssertion" is thrown and never caught.
+579     int main(int argc, char **argv) {
+580       vector<const char*> args;
+581       argv_to_vec(argc, (const char **)argv, args);
+582     
+583       global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT, CODE_ENVIRONMENT_UTILITY, 0);
+584       g_ceph_context->_conf->set_val("auth_cluster_required", "none");
+
+
+________________________________________________________________________________________________________
+To view the defects in Coverity Scan visit, http://scan.coverity.com/projects/25?tab=overview
+
+To manage Coverity Scan email notifications for "ceph-devel@vger.kernel.org", click http://scan.coverity.com/subscriptions/edit?email=ceph-devel%40vger.kernel.org&token=018084d671e3cc89d00dd2ccb7eb849c .
+
