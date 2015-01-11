@@ -1,89 +1,35 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: ceph osd df
-Date: Sun, 11 Jan 2015 09:33:57 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1501110932360.18957@cobra.newdream.net>
-References: <alpine.DEB.2.00.1501051101010.6168@cobra.newdream.net> <20150110093158.GA2288@gmail.com> <alpine.DEB.2.00.1501101027390.26676@cobra.newdream.net> <20150111163148.GA2749@gmail.com>
+From: Tejun Heo <tj@kernel.org>
+Subject: Re: [PATCH 05/12] block_dev: get bdev inode bdi directly from the
+ block device
+Date: Sun, 11 Jan 2015 12:40:13 -0500
+Message-ID: <20150111174013.GL25319@htj.dyndns.org>
+References: <1420739133-27514-1-git-send-email-hch@lst.de>
+ <1420739133-27514-6-git-send-email-hch@lst.de>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:49041 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750872AbbAKReA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 11 Jan 2015 12:34:00 -0500
-In-Reply-To: <20150111163148.GA2749@gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Mykola Golub <trociny@FreeBSD.org>
-Cc: ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <1420739133-27514-6-git-send-email-hch@lst.de>
+Sender: owner-linux-mm@kvack.org
+To: Christoph Hellwig <hch@lst.de>
+Cc: Jens Axboe <axboe@fb.com>, David Howells <dhowells@redhat.com>, linux-fsdevel@vger.kernel.org, linux-mm@kvack.org, linux-mtd@lists.infradead.org, linux-nfs@vger.kernel.org, ceph-devel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Sun, 11 Jan 2015, Mykola Golub wrote:
-> On Sat, Jan 10, 2015 at 10:39:41AM -0800, Sage Weil wrote:
+On Thu, Jan 08, 2015 at 06:45:26PM +0100, Christoph Hellwig wrote:
+> Directly grab the backing_dev_info from the request_queue instead of
+> detouring through the address_space.
 > 
-> > I wonder if we should try to standardize the table formats.  'ceph osd 
-> > tree' current looks like
-> > 
-> > # id	weight	type name	up/down	reweight
-> > -1	3	root default
-> > -2	3		host maetl
-> > 0	1			osd.0	up	1	
-> > 1	1			osd.1	up	1	
-> > 2	1			osd.2	up	1	
-> > 
-> > That is, lowercase headers (with a # header prefix).  It's also not using 
-> > TableFormatter (which it predates).
-> > 
-> > It's also pretty sloppy with the precision and formatting:
-> > 
-> > $ ./ceph osd crush reweight osd.1 
-> > .0001
-> > reweighted item id 1 name 'osd.1' to 0.0001 in crush map
-> > $ ./ceph osd tree
-> > # id	weight	type name	up/down	reweight
-> > -1	2	root default
-> > -2	2		host maetl
-> > 0	1			osd.0	up	1	
-> > 1	9.155e-05			osd.1	up	1	
-> > 2	1			osd.2	up	1	
-> > $ ./ceph osd crush reweight osd.1 .001
-> > reweighted item id 1 name 'osd.1' to 0.001 in crush map
-> > $ ./ceph osd tree
-> > # id	weight	type name	up/down	reweight
-> > -1	2.001	root default
-> > -2	2.001		host maetl
-> > 0	1			osd.0	up	1	
-> > 1	0.0009918			osd.1	up	1	
-> > 2	1			osd.2	up	1	
-> > 
-> > Given that the *actual* precision of these weights is 16.16 bit 
-> > fixed-point, that's a lower bound of .00001.  I'm not sure we want to 
-> > print 1.00000 all the time, though?  Although I suppose it's better than
-> > 
-> >       1
-> >       2
-> >  .00001
-> > 
-> > In a perfect world I suppose TableFormatter (or whatever) would adjust the 
-> > precision of all printed values to the highest precision needed by any 
-> > item in the list, but maybe just sticking to 5 digits for 
-> > everything is best for simplicity.
-> > 
-> > Anyway, any interest in making a single stringify_weight() helper and 
-> > fixing up 'ceph osd tree' to also use it and TableFormatter too?  :)
-> 
-> Sure :) Thanks for the comments and suggestions. I will come with
-> update.
-> 
-> BTW, wouldn't disk usage in bytes (size used avail) be useful in this
-> output too? I.e something like below:
-> 
-> # id weight  reweight size  used avail %util var  
-> 0    1.00000  1.00000 886G  171G  670G 19.30 1.00 
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
 
-Yeah, sure!
+Reviewed-by: Tejun Heo <tj@kernel.org>
 
-By the way I took another look and I'm not sure that it is worth 
-duplicating all of the tree logic for a tree view.  It seems easier to 
-either include this optionally in the tree output (the utilzation calc is 
-simpler than the tree traversal stack)... or generalize it somehow?
+Thanks.
 
-sage
+-- 
+tejun
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
