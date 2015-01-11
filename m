@@ -1,89 +1,70 @@
-From: Alex Elder <elder@ieee.org>
-Subject: Re: [PATCH] rbd: convert to blk-mq
-Date: Sat, 10 Jan 2015 17:40:20 -0600
-Message-ID: <54B1B864.4080008@ieee.org>
-References: <1420914688-27563-1-git-send-email-hch@lst.de>
+From: Sage Weil <sweil@redhat.com>
+Subject: ceph perf command?
+Date: Sat, 10 Jan 2015 21:26:58 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1501102121410.18957@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 8bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f174.google.com ([209.85.213.174]:34220 "EHLO
-	mail-ig0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751222AbbAJXkW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 10 Jan 2015 18:40:22 -0500
-Received: by mail-ig0-f174.google.com with SMTP id hn15so6841170igb.1
-        for <ceph-devel@vger.kernel.org>; Sat, 10 Jan 2015 15:40:21 -0800 (PST)
-In-Reply-To: <1420914688-27563-1-git-send-email-hch@lst.de>
+Received: from mx1.redhat.com ([209.132.183.28]:47574 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751339AbbAKF07 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 11 Jan 2015 00:26:59 -0500
+Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
+	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id t0B5QxZ3027088
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
+	for <ceph-devel@vger.kernel.org>; Sun, 11 Jan 2015 00:26:59 -0500
+Received: from redhat.com ([10.3.112.19])
+	by int-mx14.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t0B5QwIx023479
+	for <ceph-devel@vger.kernel.org>; Sun, 11 Jan 2015 00:26:59 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Christoph Hellwig <hch@lst.de>, Yehuda Sadeh <yehuda@inktank.com>, Sage Weil <sage@inktank.com>, Alex Elder <elder@kernel.org>
-Cc: Alexandre DERUMIER <aderumier@odiso.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On 01/10/2015 12:31 PM, Christoph Hellwig wrote:
-> This converts the rbd driver to use the blk-mq infrastructure.  Except
-> for switching to a per-request work item this is almost mechanical.
-> 
-> This was tested by Alexandre DERUMIER in November, and found to give
-> him 120000 iops, although the only comparism available was an old
-> 3.10 kernel which gave 80000iops.
+Ceph is collecting all kinds of metrics internally that are exposed 
+through the admin socket or via the 'ceph perf dump' command.  There's no 
+convenient way to watch these values from the command line, though.
 
-I'm coming up to speed with the blk-mq stuff only now.  It looks
-like requests are sent to the driver via ->queue_rq() rather than
-the driver taking them via blk_fetch_request(q).
+A while back I wrote script/perf-watch.py that tries to provide something 
+that spits out a line every second (ala vmstat, iostat, etc) of whatever 
+metrics you specify.  It's a bit kludgey but look something like this:
 
-Previously we would pull as many requests as were available, put
-them on the device's request queue, and then activate the rbd
-workqueue to handle them one-by-one using rbd_handle_request().
+$ script/perf-watch.py -s out/osd.0.asok filestore.bytes osd.wr filestore.commitcycle osd.op osd.op_rw
+# filestore.bytes filestore.commitcycle   osd.op osd.op_rw
+                0                     0        0         0
+                0                     0        0         0
+                0                     0        0         0
+         29375672                     0        1         0
+         37768744                     0        6         0
+         33572224                     0        4         0
+                0                     0        0         0
+         46161808                     1        3         0
+                0                     0        0         0
+                0                     0        0         0
+# filestore.bytes filestore.commitcycle   osd.op osd.op_rw
+                0                     0        0         0
+                0                     0        0         0
+         25179152                     1        2         0
+         37768736                     0        6         0
+                0                     1        0         0
+                0                     0        0         0
+...
 
-Now, the rbd queue_rq method rbd_request_workfn() adds the request
-to the rbd workqueue directly.  The work_struct implicitly follows
-the request structure (which is set up by the blk-mq code).  We
-have to do the REQ_TYPE_FS check at the time it's queued now,
-rather than when it's fetched from the queue.  And finally we now
-have to tell the blk-mq subsystem when we've started and ended a
-request.
+You can specify either individual metrics ('osd.op') or a full category 
+(just 'osd').  The problem is usually that there are so many metrics that 
+doing the full set requires a *really* wide monitor to be useful.
 
-I didn't follow up on all the tag_set initialization values
-so I assume you got that right (it looks reasonable to me).
+Anyway, two thoughts:
 
-Given the above, it looks like everything else should work
-about the same as before, we're just handed requests rather
-than asking for them.
+1) We could incorporate this into the normal 'ceph' cli tool.  Maybe a 
+'ceph perf <daemon or asok> <metrics ...>', which works similar to 
+'ceph daemon ...'.
 
-With this patch applied, rbd_device->rq_queue is no longer
-needed so you should delete it.  I got two warnings about
-endo-of-line whitespace in your patch.  And I have one other
-very small suggestion below.
+2) We could mark certain metrics as the 'interesting' ones and make it 
+default to showing those when no others are specified.  And/or possibly do 
+the same for each group (osd, filestore, etc.).  That would steer 
+admins towards the ones that are actually helpful in telling what the 
+cluster is doing.
 
-Other than those things, this looks great to me.
-
-Reviewed-by: Alex Elder <elder@linaro.org>
-
-> Signed-off-by: Christoph Hellwig <hch@lst.de>
-> ---
->  drivers/block/rbd.c | 118 +++++++++++++++++++++++++++++-----------------------
->  1 file changed, 67 insertions(+), 51 deletions(-)
-> 
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 3ec85df..52cd677 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-
-. . .
-
-(The following is in the new rbd_queue_rq().)
-
-> +	queue_work(rbd_wq, work);
-> +	return 0;
-
-	return BLK_MQ_RQ_QUEUE_OK;
-
-(Because the symbolic values are explicitly checked
-by the caller.)
-
->  }
->  
->  /*
-
-. . .
+Thoughts?
+sage
 
