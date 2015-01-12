@@ -1,42 +1,38 @@
-From: Tejun Heo <tj@kernel.org>
-Subject: Re: [PATCH 12/12] fs: remove default_backing_dev_info
-Date: Sun, 11 Jan 2015 13:39:24 -0500
-Message-ID: <20150111183924.GQ25319@htj.dyndns.org>
-References: <1420739133-27514-1-git-send-email-hch@lst.de>
- <1420739133-27514-13-git-send-email-hch@lst.de>
+From: Mykola Golub <mgolub@mirantis.com>
+Subject: Re: ceph osd df
+Date: Mon, 12 Jan 2015 10:22:51 +0200
+Message-ID: <20150112082250.GA31325@gmail.com>
+References: <alpine.DEB.2.00.1501051101010.6168@cobra.newdream.net>
+ <20150110093158.GA2288@gmail.com>
+ <alpine.DEB.2.00.1501101027390.26676@cobra.newdream.net>
+ <20150111163148.GA2749@gmail.com>
+ <alpine.DEB.2.00.1501110932360.18957@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <owner-linux-mm@kvack.org>
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-lb0-f181.google.com ([209.85.217.181]:36859 "EHLO
+	mail-lb0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751376AbbALIXF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Jan 2015 03:23:05 -0500
+Received: by mail-lb0-f181.google.com with SMTP id l4so16426620lbv.12
+        for <ceph-devel@vger.kernel.org>; Mon, 12 Jan 2015 00:23:02 -0800 (PST)
 Content-Disposition: inline
-In-Reply-To: <1420739133-27514-13-git-send-email-hch@lst.de>
-Sender: owner-linux-mm@kvack.org
-To: Christoph Hellwig <hch@lst.de>
-Cc: Jens Axboe <axboe@fb.com>, David Howells <dhowells@redhat.com>, linux-fsdevel@vger.kernel.org, linux-mm@kvack.org, linux-mtd@lists.infradead.org, linux-nfs@vger.kernel.org, ceph-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+In-Reply-To: <alpine.DEB.2.00.1501110932360.18957@cobra.newdream.net>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Thu, Jan 08, 2015 at 06:45:33PM +0100, Christoph Hellwig wrote:
-> Now that default_backing_dev_info is not used for writeback purposes we can
-> git rid of it easily:
-> 
->  - instead of using it's name for tracing unregistered bdi we just use
->    "unknown"
->  - btrfs and ceph can just assign the default read ahead window themselves
->    like several other filesystems already do.
->  - we can assign noop_backing_dev_info as the default one in alloc_super.
->    All filesystems already either assigned their own or
->    noop_backing_dev_info.
-> 
-> Signed-off-by: Christoph Hellwig <hch@lst.de>
+On Sun, Jan 11, 2015 at 09:33:57AM -0800, Sage Weil wrote:
 
-Reviewed-by: Tejun Heo <tj@kernel.org>
+> By the way I took another look and I'm not sure that it is worth 
+> duplicating all of the tree logic for a tree view.  It seems easier to 
+> either include this optionally in the tree output (the utilzation calc is 
+> simpler than the tree traversal stack)... or generalize it somehow?
 
-Thanks.
+Note, we already have duplication, at least CrushWrapper::dump_tree()
+and OSDMap::print_tree(). I will work on generalization, I think some
+tree dumper in CrushWrapper.
 
 -- 
-tejun
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+Mykola Golub
