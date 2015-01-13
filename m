@@ -1,64 +1,36 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: New Defects reported by Coverity Scan for ceph
-Date: Tue, 13 Jan 2015 06:34:33 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1501130631400.26676@cobra.newdream.net>
-References: <54b528bef1f63_1b74f3532c63410@scan.coverity.com.mail>
+From: Christoph Hellwig <hch@lst.de>
+Subject: Re: [PATCH v2] rbd: convert to blk-mq
+Date: Tue, 13 Jan 2015 17:19:02 +0100
+Message-ID: <20150113161901.GA23547@lst.de>
+References: <1420914688-27563-1-git-send-email-hch@lst.de> <54B1B864.4080008@ieee.org> <20150112124002.GA29490@lst.de> <CALFYKtBUONtvGDJtM92bna9utkvnpTHxbL--5P+N3oirgqU7Bg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:56357 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751190AbbAMOed (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Jan 2015 09:34:33 -0500
-In-Reply-To: <54b528bef1f63_1b74f3532c63410@scan.coverity.com.mail>
+Received: from verein.lst.de ([213.95.11.211]:44230 "EHLO newverein.lst.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753308AbbAMQTF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 13 Jan 2015 11:19:05 -0500
+Content-Disposition: inline
+In-Reply-To: <CALFYKtBUONtvGDJtM92bna9utkvnpTHxbL--5P+N3oirgqU7Bg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: zhiqiang.wang@intel.com
-Cc: ceph-devel@vger.kernel.org
+To: Ilya Dryomov <ilya.dryomov@inktank.com>
+Cc: Alex Elder <elder@ieee.org>, Yehuda Sadeh <yehuda@inktank.com>, Sage Weil <sage@inktank.com>, Alex Elder <elder@kernel.org>, Alexandre DERUMIER <aderumier@odiso.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Zhiqiang,
+On Mon, Jan 12, 2015 at 08:10:48PM +0300, Ilya Dryomov wrote:
+> Why is this call here?  Why not above or below?  I doubt it makes much
+> difference, but from a clarity standpoint at least, shouldn't it be
+> placed after all the checks and allocations, say before the call to
+> rbd_img_request_submit()?
 
-On Tue, 13 Jan 2015, scan-admin@coverity.com wrote:
-> ________________________________________________________________________________________________________
-> *** CID 1262557:  Using invalid iterator  (INVALIDATE_ITERATOR)
-> /osd/ReplicatedPG.cc: 2071 in ReplicatedPG::cancel_proxy_read_ops(bool)()
-> 2065       while (p != proxyread_ops.end()) {
-> 2066         cancel_proxy_read((p++)->second);
-> 2067       }
-> 2068     
-> 2069       if (requeue) {
-> 2070         for (map<hobject_t, list<OpRequestRef> >::iterator p = in_progress_proxy_reads.begin();
-> >>>     CID 1262557:  Using invalid iterator  (INVALIDATE_ITERATOR)
-> >>>     Using invalid iterator "p".
-> 2071     	p != in_progress_proxy_reads.end(); p++) {
-> 2072           list<OpRequestRef>& ls = p->second;
-> 2073           dout(10) << __func__ << " " << p->first << " requeuing " << ls.size() << " requests" << dendl;
-> 2074           requeue_ops(ls);
-> 2075           in_progress_proxy_reads.erase(p);
-> 2076         }
-> 
-> ________________________________________________________________________________________________________
-> *** CID 1262558:  Uninitialized scalar field  (UNINIT_CTOR)
-> /osd/ReplicatedPG.h: 629 in ReplicatedPG::OpContext::OpContext(std::tr1::shared_ptr<OpRequest>, osd_reqid_t, std::vector<OSDOp, std::allocator<OSDOp>> &, ReplicatedPG*)()
-> 623           num_write(0),
-> 624           copy_cb(NULL),
-> 625           async_read_result(0),
-> 626           inflightreads(0),
-> 627           lock_to_release(NONE),
-> 628           on_finish(NULL),
-> >>>     CID 1262558:  Uninitialized scalar field  (UNINIT_CTOR)
-> >>>     Non-static class member "ignore_cache" is not initialized in this constructor nor in any functions that it calls.
-> 629           release_snapset_obc(false) { }
-> 630         void reset_obs(ObjectContextRef obc) {
-> 631           new_obs = ObjectState(obc->obs.oi, obc->obs.exists);
-> 632           if (obc->ssc) {
-> 633     	new_snapset = obc->ssc->snapset;
-> 634     	snapset = &obc->ssc->snapset;
-> 
+The idea is to do it before doing real work, but after the request
+is set up far enough that a cancallation works.  For rbd that doesn't do
+timeouts or cancellations it really doesn't matter too much.  I've
+moved it a little further down after the next trivial check now.
 
-Can you review my fix for these?
+> Expanding on REQ_TYPE_FS comment, isn't blk_mq_end_request() enough?
+> Swap blk_end_request_all() for blk_mq_end_request() and get rid of err
+> label?
 
-https://github.com/ceph/ceph/pull/3363
-
-Thanks!
-sage
+The blk_end_request_all should be gone and sneaked back in due to a sloppy
+rebase.
