@@ -1,71 +1,40 @@
 From: Sage Weil <sage@newdream.net>
 Subject: Re: Cache pool latency impact
-Date: Tue, 13 Jan 2015 06:00:33 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1501130553270.26676@cobra.newdream.net>
-References: <68A06213B74F1742A2C48216AE1BB6B808720E8A@SACMBXIP02.sdcorp.global.sandisk.com>
+Date: Tue, 13 Jan 2015 06:01:50 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1501130601040.26676@cobra.newdream.net>
+References: <68A06213B74F1742A2C48216AE1BB6B808720E8A@SACMBXIP02.sdcorp.global.sandisk.com> <alpine.DEB.2.00.1501130553270.26676@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:56168 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:56217 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751240AbbAMOAe (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Jan 2015 09:00:34 -0500
-In-Reply-To: <68A06213B74F1742A2C48216AE1BB6B808720E8A@SACMBXIP02.sdcorp.global.sandisk.com>
+	with ESMTP id S1751133AbbAMOBu (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Jan 2015 09:01:50 -0500
+In-Reply-To: <alpine.DEB.2.00.1501130553270.26676@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Pavan Rallabhandi <Pavan.Rallabhandi@sandisk.com>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Tue, 13 Jan 2015, Pavan Rallabhandi wrote:
-> Hi,
+On Tue, 13 Jan 2015, Sage Weil wrote:
+> > 2) Is there any mechanism (that I might have overlooked) to avoid this 
+> > situation, by throttling the flush/evict operations on the fly? If not, 
+> > shouldn't there be one?
 > 
-> This is regarding cache pools and the impact of the flush/evict on the 
-> client IO latencies.
-> 
-> Am seeing a direct impact on the client IO latencies (making them worse) 
-> when flush/evict is triggered on the cache pool. In a constant ingress 
-> of IOs on the cache pool, the write performance is no better than 
-> without cache pool, because it is limited to the speed at which objects 
-> can be flushed/evicted to the backend pool.
+> Hmm, we could have a 'noagent' option (similar to noout, nobackfill, 
+> noscrub, etc.) that lets the admin tell the system to stop tiering 
+> movements, but I'm not sure that's wht you're asking for...
 
-Yeah, this is always going to be true in general.  It is a lot for work to 
-write into the cache, read it back, write it again into the base pool, and 
-then delete it from the cache than it is to write directly to the base 
-pool.
+...and it looks like we already have a 'notieragent' flag that does 
+exactly that:
 
-> > The questions I have are:
-> 
-> 1) When the flush/evict is in progress, are the writes on the cache pool 
-> blocked, either at the PG or at object granularity? Though I see a 
-> blocking flag honored per object context in ReplicatedPG::start_flush() 
-> and most of the callers seem to set the flag to be false.
+ ceph osd set notieragent
 
-Normally they are not blocked.  The agent starts working (finding objects 
-to flush or evict) long before we hit the cut cutoff where it starts 
-blocking.  Once it does hit that threshold, though, things can get slow, 
-because new cache creates aren't allowed until some eviction 
-completes.  You don't want to be in this situation.  :)
+and
 
-In general, if you have a lot of data inject, caching (at least in 
-firefly) isn't a terribly good idea.  The exception would probably be when 
-you have a high skew toward recent data (say you are injecting market 
-data, and do tons of analytics on the last 24 hours, but then the data 
-gets colder).
+ ceph osd unset notieragent
 
-I can't tell if you're in the situation where the cache pool is full 
-and the agent is flushing/evicing anything and everything and writes are 
-crawling (you should see a message in 'ceph health' when this happens) or 
-that the agent is alive but working with low effort and the impact is 
-still high.  If it's the latter I'm not sure yet what is going wrong.. 
-perhaps you can capture a few minutes of log from one of your OSDs?  
-(debug ms = 1, debug osd = 20).
-
-> 2) Is there any mechanism (that I might have overlooked) to avoid this 
-> situation, by throttling the flush/evict operations on the fly? If not, 
-> shouldn't there be one?
-
-Hmm, we could have a 'noagent' option (similar to noout, nobackfill, 
-noscrub, etc.) that lets the admin tell the system to stop tiering 
-movements, but I'm not sure that's wht you're asking for...
+That might be helpful in narrowing down what effect flush/evict operations 
+are having...
 
 sage
