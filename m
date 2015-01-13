@@ -1,103 +1,37 @@
-From: "Miyamae, Takeshi" <miyamae.takeshi@jp.fujitsu.com>
-Subject: RE: Deadline of Github pull request for Hammer release (question)
-Date: Tue, 13 Jan 2015 10:34:17 +0000
-Message-ID: <870DE8DBB716524BAE51B2D499EC81E40AA40872@g01jpexmbyt24>
-References: <870DE8DBB716524BAE51B2D499EC81E40AA3F9AB@g01jpexmbyt24>
- <54AC048E.9040200@dachary.org>
- <870DE8DBB716524BAE51B2D499EC81E40AA40849@g01jpexmbyt24>
- <54B4F2C0.2040805@dachary.org>
+From: Pavan Rallabhandi <Pavan.Rallabhandi@sandisk.com>
+Subject: Cache pool latency impact
+Date: Tue, 13 Jan 2015 11:03:43 +0000
+Message-ID: <68A06213B74F1742A2C48216AE1BB6B808720E8A@SACMBXIP02.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from fgwmail8.fujitsu.co.jp ([192.51.44.38]:57408 "EHLO
-	fgwmail8.fujitsu.co.jp" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751955AbbAMKk0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Jan 2015 05:40:26 -0500
-Received: from fgwmail6.fujitsu.co.jp (fgwmail6.fujitsu.co.jp [192.51.44.36])
-	by fgwmail8.fujitsu.co.jp (Postfix) with ESMTP id CB2C31793830
-	for <ceph-devel@vger.kernel.org>; Tue, 13 Jan 2015 19:34:22 +0900 (JST)
-Received: from kw-mxoi1.gw.nic.fujitsu.com (unknown [10.0.237.133])
-	by fgwmail6.fujitsu.co.jp (Postfix) with ESMTP id 427673EE0B6
-	for <ceph-devel@vger.kernel.org>; Tue, 13 Jan 2015 19:34:21 +0900 (JST)
-Received: from s2.gw.fujitsu.co.jp (s2.gw.fujitsu.co.jp [10.0.50.92])
-	by kw-mxoi1.gw.nic.fujitsu.com (Postfix) with ESMTP id 4DC97AC05CB
-	for <ceph-devel@vger.kernel.org>; Tue, 13 Jan 2015 19:34:20 +0900 (JST)
-Received: from g01jpfmpwyt02.exch.g01.fujitsu.local (g01jpfmpwyt02.exch.g01.fujitsu.local [10.128.193.56])
-	by s2.gw.fujitsu.co.jp (Postfix) with ESMTP id E22B4E08002
-	for <ceph-devel@vger.kernel.org>; Tue, 13 Jan 2015 19:34:19 +0900 (JST)
-In-Reply-To: <54B4F2C0.2040805@dachary.org>
-Content-Language: ja-JP
+Received: from mail-bl2on0074.outbound.protection.outlook.com ([65.55.169.74]:23424
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751569AbbAMLS1 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Jan 2015 06:18:27 -0500
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, "Shiozawa, Kensuke" <shiozawa.kennsu@jp.fujitsu.com>, "Nakao, Takanori" <nakao.takanori@jp.fujitsu.com>, "Paul Von-Stamwitz (PVonStamwitz@us.fujitsu.com)" <PVonStamwitz@us.fujitsu.com>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-SGkgTG9pYywNCg0KSSdtIHNvIHNvcnJ5LiBUaGUgZm9sbG93aW5nIGlzIHRo
-ZSBjb3JyZWN0IHJlcG9zaXRvcnkuDQoNCmh0dHBzOi8vZ2l0aHViLmNvbS90
-LW1peWFtYWUvY2VwaA0KDQpCZXN0IHJlZ2FyZHMsDQpUYWtlc2hpIE1peWFt
-YWUNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IExvaWMg
-RGFjaGFyeSBbbWFpbHRvOmxvaWNAZGFjaGFyeS5vcmddIA0KU2VudDogVHVl
-c2RheSwgSmFudWFyeSAxMywgMjAxNSA3OjI2IFBNDQpUbzogTWl5YW1hZSwg
-VGFrZXNoaS/lrq7liY0g5YmbDQpDYzogQ2VwaCBEZXZlbG9wbWVudDsgU2hp
-b3phd2EsIEtlbnN1a2Uv5aGp5rKiIOizoui8lDsgTmFrYW8sIFRha2Fub3Jp
-L+S4reWwviDpt7noqZQ7IFBhdWwgVm9uLVN0YW13aXR6IChQVm9uU3RhbXdp
-dHpAdXMuZnVqaXRzdS5jb20pDQpTdWJqZWN0OiBSZTogRGVhZGxpbmUgb2Yg
-R2l0aHViIHB1bGwgcmVxdWVzdCBmb3IgSGFtbWVyIHJlbGVhc2UgKHF1ZXN0
-aW9uKQ0KDQpIaSwNCg0KT24gMTMvMDEvMjAxNSAxMToyNCwgTWl5YW1hZSwg
-VGFrZXNoaSB3cm90ZToNCj4gSGkgTG9pYywNCj4gDQo+PiBBbHRob3VnaCB3
-ZSdyZSBsYXRlIGluIHRoZSBIYW1tZXIgcm9hZG1hcCwgaXQncyBhIGdvb2Qg
-dGltZSBmb3IgYW4gZWFybHkgcHJldmlldy4gSXQgd2lsbCBoZWxwIHNob3cg
-d2hhdCBuZWVkcyB0byBiZSBjaGFuZ2VkIHRvIGFjY29tb2RhdGUgdGhlIFNI
-RUMgcGx1Z2luLg0KPiANCj4gVGhhbmsgeW91IGZvciB5b3VyIGFkdmljZXMu
-DQo+IFdlIGhhdmUgdXBsb2FkZWQgb3VyIGxhdGVzdCBjb2RlcyB0byB0aGUg
-Zm9sbG93aW5nIGZvbGsgcmVwb3NpdG9yeSBmb3IgYW4gZWFybHkgcmV2aWV3
-Lg0KPiANCj4gaHR0cHM6Ly9naXRodWIuY29tL21peWFtYWUtdGFrZXNoaS9t
-dWx0aXBsZS1zaGVjDQoNCkl0J3MgNDA0ID8gSXMgaXQgYSBwcml2YXRlIHJl
-cG9zaXRvcnkgbWF5YmUgPw0KDQo+IA0KPiBTSEVDIGlzIGxvY2F0ZWQgaW4g
-c3JjL2VyYXN1cmUtY29kZS9zaGVjIGRpcmVjdG9yeS4NCj4gDQo+IFdlIGFy
-ZSB2ZXJpZnlpbmcgU0hFQydzIGFkdmFudGFnZXMgb24gb3VyIENlcGggY2x1
-c3Rlci4gSXQgdGFrZXMgYSBsaXR0bGUgYml0IG1vcmUuDQo+IFdvdWxkIHlv
-dSBwbGVhc2Ugc3RhcnQgdGhlIHJldmlldyBiZWZvcmUgdGhhdD8NCj4gDQo+
-IEJlc3QgcmVnYXJkcywNCj4gVGFrZXNoaSBNaXlhbWFlDQo+IA0KPiAtLS0t
-LU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBjZXBoLWRldmVsLW93
-bmVyQHZnZXIua2VybmVsLm9yZyANCj4gW21haWx0bzpjZXBoLWRldmVsLW93
-bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIExvaWMgRGFjaGFy
-eQ0KPiBTZW50OiBXZWRuZXNkYXksIEphbnVhcnkgNywgMjAxNSAxMjo1MiBB
-TQ0KPiBUbzogTWl5YW1hZSwgVGFrZXNoaS/lrq7liY0g5YmbDQo+IENjOiBD
-ZXBoIERldmVsb3BtZW50OyBTaGlvemF3YSwgS2Vuc3VrZS/loanmsqIg6LOi
-6LyUOyBOYWthbywgVGFrYW5vcmkv5Lit5bC+IOm3ueiplA0KPiBTdWJqZWN0
-OiBSZTogRGVhZGxpbmUgb2YgR2l0aHViIHB1bGwgcmVxdWVzdCBmb3IgSGFt
-bWVyIHJlbGVhc2UgDQo+IChxdWVzdGlvbikNCj4gDQo+IEhpLA0KPiANCj4g
-T24gMDYvMDEvMjAxNSAxMjo0OSwgTWl5YW1hZSwgVGFrZXNoaSB3cm90ZToN
-Cj4+IERlYXIgTG9pYywNCj4+DQo+PiBJJ20gVGFrZXNoaSBNaXlhbWFlLCBv
-bmUgb2YgdGhlIGF1dGhvcnMgb2YgU0hFQydzIGJsdWVwcmludC4NCj4+DQo+
-PiBTaGluZ2xlZCBFcmFzdXJlIENvZGUgKFNIRUMpDQo+PiBodHRwczovL3dp
-a2kuY2VwaC5jb20vUGxhbm5pbmcvQmx1ZXByaW50cy9IYW1tZXIvU2hpbmds
-ZWRfRXJhc3VyZV9Db2QNCj4+IGUNCj4+IF8oU0hFQykNCj4gDQo+IFRoZSB3
-b3JrIHlvdSBoYXZlIGRvbmUgaXMgcXVpdGUgaW1wcmVzc2l2ZSA6LSkNCj4g
-DQo+PiBXZSBoYXZlIHJldmlzZWQgb3VyIGJsdWVwcmludCBzaG93biBpbiB0
-aGUgbGFzdCBDRFMgdG8gZXh0ZW5kIG91ciANCj4+IGVyYXN1cmUgY29kZSBs
-YXlvdXRzIGFuZCBkZXNjcmliZSB0aGUgZ3VpZGVsaW5lIGZvciBjaG9vc2lu
-ZyBTSEVDIGFtb25nIHZhcmlvdXMgRUMgcGx1Z2lucy4NCj4+IFdlIGJlbGll
-dmUgdGhlIGJsdWVwcmludCBub3cgYW5zd2VycyBhbGwgdGhlIGNvbW1lbnRz
-IGdpdmVuIGF0IHRoZSBDRFMuDQo+IA0KPiBHcmVhdC4NCj4gDQo+PiBJbiBh
-ZGRpdGlvbiwgd2Ugd291bGQgbGlrZSB0byBhc2sgZm9yIHlvdXIgYWR2aWNl
-IG9uIHRoZSBzY2hlZHVsZSBvZiANCj4+IG91ciBnaXRodWIgcHVsbCByZXF1
-ZXN0LiBNb3JlIHNwZWNpZmljYWxseSwgd2Ugd291bGQgbGlrZSB0byBrbm93
-IGl0cyANCj4+IGRlYWRsaW5lIGZvciBIYW1tZXIgcmVsZWFzZS4NCj4+IChB
-cyB3ZSBoYXZlIG5vdCByZWFsbHkgY29tcGxldGVkIG91ciB2ZXJpZmljYXRp
-b24gb2YgU0hFQywgd2UgYXJlIA0KPj4gd29uZGVyaW5nIGlmIHdlIHNob3Vs
-ZCBtYWtlIGl0IG9wZW4gZm9yIGVhcmx5IHByZXZpZXcuKQ0KPiANCj4gQWx0
-aG91Z2ggd2UncmUgbGF0ZSBpbiB0aGUgSGFtbWVyIHJvYWRtYXAsIGl0J3Mg
-YSBnb29kIHRpbWUgZm9yIGFuIGVhcmx5IHByZXZpZXcuIEl0IHdpbGwgaGVs
-cCBzaG93IHdoYXQgbmVlZHMgdG8gYmUgY2hhbmdlZCB0byBhY2NvbW9kYXRl
-IHRoZSBTSEVDIHBsdWdpbi4NCj4gDQo+IENoZWVycw0KPiANCj4+IFRoYW5r
-IHlvdSBpbiBhZHZhbmNlLA0KPj4gVGFrZXNoaSBNaXlhbWFlDQo+Pg0KPj4g
-LS0NCj4+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRo
-ZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiANCj4+IGluIHRoZSBi
-b2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3Jn
-IE1vcmUgbWFqb3Jkb21vIA0KPj4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2Vy
-bmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+Pg0KPiANCj4gLS0NCj4g
-TG/Dr2MgRGFjaGFyeSwgQXJ0aXNhbiBMb2dpY2llbCBMaWJyZQ0KPiANCg0K
-LS0NCkxvw69jIERhY2hhcnksIEFydGlzYW4gTG9naWNpZWwgTGlicmUNCg0K
+Hi,
+
+This is regarding cache pools and the impact of the flush/evict on the client IO latencies.
+
+Am seeing a direct impact on the client IO latencies (making them worse) when flush/evict is triggered on the cache pool. In a constant ingress of IOs on the cache pool, the write performance is no better than without cache pool, because it is limited to the speed at which objects can be flushed/evicted to the backend pool.
+
+The questions I have are:
+
+1) When the flush/evict is in progress, are the writes on the cache pool blocked, either at the PG or at object granularity? Though I see a blocking flag honored per object context in ReplicatedPG::start_flush() and most of the callers seem to set the flag to be false.
+
+2) Is there any mechanism (that I might have overlooked) to avoid this situation, by throttling the flush/evict operations on the fly? If not, shouldn't there be one?
+
+Thanks,
+-Pavan.
+
+________________________________
+
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+
