@@ -1,48 +1,81 @@
-From: Michael Sevilla <mikesevilla3@gmail.com>
-Subject: MDS has inconsistent performance
-Date: Mon, 12 Jan 2015 22:17:26 -0800
-Message-ID: <CAD=PzH+UxcrF-0=fpAWrXsv-CB=q1nbAxbBHSn9A_P-hS1-fGg@mail.gmail.com>
+From: "Miyamae, Takeshi" <miyamae.takeshi@jp.fujitsu.com>
+Subject: RE: Deadline of Github pull request for Hammer release (question)
+Date: Tue, 13 Jan 2015 10:24:29 +0000
+Message-ID: <870DE8DBB716524BAE51B2D499EC81E40AA40849@g01jpexmbyt24>
+References: <870DE8DBB716524BAE51B2D499EC81E40AA3F9AB@g01jpexmbyt24>
+ <54AC048E.9040200@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f48.google.com ([209.85.215.48]:35646 "EHLO
-	mail-la0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751060AbbAMGR2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Jan 2015 01:17:28 -0500
-Received: by mail-la0-f48.google.com with SMTP id gf13so926015lab.7
-        for <ceph-devel@vger.kernel.org>; Mon, 12 Jan 2015 22:17:26 -0800 (PST)
+Received: from fgwmail5.fujitsu.co.jp ([192.51.44.35]:50885 "EHLO
+	fgwmail5.fujitsu.co.jp" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751004AbbAMKYe (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Jan 2015 05:24:34 -0500
+Received: from kw-mxoi2.gw.nic.fujitsu.com (unknown [10.0.237.143])
+	by fgwmail5.fujitsu.co.jp (Postfix) with ESMTP id C81AB3EE16B
+	for <ceph-devel@vger.kernel.org>; Tue, 13 Jan 2015 19:24:32 +0900 (JST)
+Received: from s3.gw.fujitsu.co.jp (s3.gw.fujitsu.co.jp [10.0.50.93])
+	by kw-mxoi2.gw.nic.fujitsu.com (Postfix) with ESMTP id D3588AC05C8
+	for <ceph-devel@vger.kernel.org>; Tue, 13 Jan 2015 19:24:31 +0900 (JST)
+Received: from g01jpfmpwyt03.exch.g01.fujitsu.local (g01jpfmpwyt03.exch.g01.fujitsu.local [10.128.193.57])
+	by s3.gw.fujitsu.co.jp (Postfix) with ESMTP id 72430E08004
+	for <ceph-devel@vger.kernel.org>; Tue, 13 Jan 2015 19:24:31 +0900 (JST)
+In-Reply-To: <54AC048E.9040200@dachary.org>
+Content-Language: ja-JP
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, "Shiozawa, Kensuke" <shiozawa.kennsu@jp.fujitsu.com>, "Nakao, Takanori" <nakao.takanori@jp.fujitsu.com>, "Paul Von-Stamwitz (PVonStamwitz@us.fujitsu.com)" <PVonStamwitz@us.fujitsu.com>
 
-I can't get consistent performance with 1 MDS. I have 2 clients create
-100,000 files (separate directories) in a CephFS mount. I ran the
-experiment 5 times (deleting the pools/fs and restarting the MDS in
-between each run). I graphed the metadata throughput (requests per
-second): https://github.com/michaelsevilla/mds/blob/master/graphs/thruput.png
-
-Sometimes (run0, run3), both clients issue 2 lookups per create to the
-MDS - this makes throughput high but the runtime long since the MDS
-processes many more requests.
-Sometimes (run2, run4), 1 client does 2 lookups per create and the
-other doesn't do any lookups.
-Sometimes (run1), neither client does any lookups - this has the
-fastest runtime.
-
-Does anyone know why the client behaves differently for the same exact
-experiment? Reading the client logs, it looks like sometimes the
-client enters add_update_cap() and clears the inode->flags in
-check_cap_issue(), then when a lookup occurs (in _lookup()), the
-client can't return ENOENT locally -- forcing it ask the MDS to do the
-lookup. But this only happens sometimes (e.g., run0 and run3).
-
-Details of the experiment:
-Workload: 2 clients, 100,000 creates in separate directories, using
-the FUSE client
-MDS config: client_cache_size = 100000000, mds_cache_size = 16384000
-Cluster: 18 OSDs, 1 MDS, 1 MON, data/metadata pools have 4096 PGs
-Ceph version 0.90-877-gc219c43 (c219c43cc2943c794378214d77566e3f0d3f394a)
-
-Thanks!
-
-Michael
+SGkgTG9pYywNCg0KPiBBbHRob3VnaCB3ZSdyZSBsYXRlIGluIHRoZSBIYW1t
+ZXIgcm9hZG1hcCwgaXQncyBhIGdvb2QgdGltZSBmb3IgYW4gZWFybHkgcHJl
+dmlldy4gSXQgd2lsbCBoZWxwIHNob3cgd2hhdCBuZWVkcyB0byBiZSBjaGFu
+Z2VkIHRvIGFjY29tb2RhdGUgdGhlIFNIRUMgcGx1Z2luLg0KDQpUaGFuayB5
+b3UgZm9yIHlvdXIgYWR2aWNlcy4NCldlIGhhdmUgdXBsb2FkZWQgb3VyIGxh
+dGVzdCBjb2RlcyB0byB0aGUgZm9sbG93aW5nIGZvbGsgcmVwb3NpdG9yeSBm
+b3IgYW4gZWFybHkgcmV2aWV3Lg0KDQpodHRwczovL2dpdGh1Yi5jb20vbWl5
+YW1hZS10YWtlc2hpL211bHRpcGxlLXNoZWMNCg0KU0hFQyBpcyBsb2NhdGVk
+IGluIHNyYy9lcmFzdXJlLWNvZGUvc2hlYyBkaXJlY3RvcnkuDQoNCldlIGFy
+ZSB2ZXJpZnlpbmcgU0hFQydzIGFkdmFudGFnZXMgb24gb3VyIENlcGggY2x1
+c3Rlci4gSXQgdGFrZXMgYSBsaXR0bGUgYml0IG1vcmUuDQpXb3VsZCB5b3Ug
+cGxlYXNlIHN0YXJ0IHRoZSByZXZpZXcgYmVmb3JlIHRoYXQ/DQoNCkJlc3Qg
+cmVnYXJkcywNClRha2VzaGkgTWl5YW1hZQ0KDQotLS0tLU9yaWdpbmFsIE1l
+c3NhZ2UtLS0tLQ0KRnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5l
+bC5vcmcgW21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9y
+Z10gT24gQmVoYWxmIE9mIExvaWMgRGFjaGFyeQ0KU2VudDogV2VkbmVzZGF5
+LCBKYW51YXJ5IDcsIDIwMTUgMTI6NTIgQU0NClRvOiBNaXlhbWFlLCBUYWtl
+c2hpL+WuruWJjSDliZsNCkNjOiBDZXBoIERldmVsb3BtZW50OyBTaGlvemF3
+YSwgS2Vuc3VrZS/loanmsqIg6LOi6LyUOyBOYWthbywgVGFrYW5vcmkv5Lit
+5bC+IOm3ueiplA0KU3ViamVjdDogUmU6IERlYWRsaW5lIG9mIEdpdGh1YiBw
+dWxsIHJlcXVlc3QgZm9yIEhhbW1lciByZWxlYXNlIChxdWVzdGlvbikNCg0K
+SGksDQoNCk9uIDA2LzAxLzIwMTUgMTI6NDksIE1peWFtYWUsIFRha2VzaGkg
+d3JvdGU6DQo+IERlYXIgTG9pYywNCj4gDQo+IEknbSBUYWtlc2hpIE1peWFt
+YWUsIG9uZSBvZiB0aGUgYXV0aG9ycyBvZiBTSEVDJ3MgYmx1ZXByaW50Lg0K
+PiANCj4gU2hpbmdsZWQgRXJhc3VyZSBDb2RlIChTSEVDKQ0KPiBodHRwczov
+L3dpa2kuY2VwaC5jb20vUGxhbm5pbmcvQmx1ZXByaW50cy9IYW1tZXIvU2hp
+bmdsZWRfRXJhc3VyZV9Db2RlDQo+IF8oU0hFQykNCg0KVGhlIHdvcmsgeW91
+IGhhdmUgZG9uZSBpcyBxdWl0ZSBpbXByZXNzaXZlIDotKQ0KDQo+IFdlIGhh
+dmUgcmV2aXNlZCBvdXIgYmx1ZXByaW50IHNob3duIGluIHRoZSBsYXN0IENE
+UyB0byBleHRlbmQgb3VyIA0KPiBlcmFzdXJlIGNvZGUgbGF5b3V0cyBhbmQg
+ZGVzY3JpYmUgdGhlIGd1aWRlbGluZSBmb3IgY2hvb3NpbmcgU0hFQyBhbW9u
+ZyB2YXJpb3VzIEVDIHBsdWdpbnMuDQo+IFdlIGJlbGlldmUgdGhlIGJsdWVw
+cmludCBub3cgYW5zd2VycyBhbGwgdGhlIGNvbW1lbnRzIGdpdmVuIGF0IHRo
+ZSBDRFMuDQoNCkdyZWF0Lg0KDQo+IEluIGFkZGl0aW9uLCB3ZSB3b3VsZCBs
+aWtlIHRvIGFzayBmb3IgeW91ciBhZHZpY2Ugb24gdGhlIHNjaGVkdWxlIG9m
+IA0KPiBvdXIgZ2l0aHViIHB1bGwgcmVxdWVzdC4gTW9yZSBzcGVjaWZpY2Fs
+bHksIHdlIHdvdWxkIGxpa2UgdG8ga25vdyBpdHMgDQo+IGRlYWRsaW5lIGZv
+ciBIYW1tZXIgcmVsZWFzZS4NCj4gKEFzIHdlIGhhdmUgbm90IHJlYWxseSBj
+b21wbGV0ZWQgb3VyIHZlcmlmaWNhdGlvbiBvZiBTSEVDLCB3ZSBhcmUgDQo+
+IHdvbmRlcmluZyBpZiB3ZSBzaG91bGQgbWFrZSBpdCBvcGVuIGZvciBlYXJs
+eSBwcmV2aWV3LikNCg0KQWx0aG91Z2ggd2UncmUgbGF0ZSBpbiB0aGUgSGFt
+bWVyIHJvYWRtYXAsIGl0J3MgYSBnb29kIHRpbWUgZm9yIGFuIGVhcmx5IHBy
+ZXZpZXcuIEl0IHdpbGwgaGVscCBzaG93IHdoYXQgbmVlZHMgdG8gYmUgY2hh
+bmdlZCB0byBhY2NvbW9kYXRlIHRoZSBTSEVDIHBsdWdpbi4NCg0KQ2hlZXJz
+DQoNCj4gVGhhbmsgeW91IGluIGFkdmFuY2UsDQo+IFRha2VzaGkgTWl5YW1h
+ZQ0KPiANCj4gLS0NCj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6
+IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIA0KPiBp
+biB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2Vy
+bmVsLm9yZyBNb3JlIG1ham9yZG9tbyANCj4gaW5mbyBhdCAgaHR0cDovL3Zn
+ZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+IA0KDQotLQ0K
+TG/Dr2MgRGFjaGFyeSwgQXJ0aXNhbiBMb2dpY2llbCBMaWJyZQ0KDQo=
