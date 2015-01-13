@@ -1,15 +1,15 @@
 From: Christoph Hellwig <hch@lst.de>
-Subject: Re: [PATCH v2] rbd: convert to blk-mq
-Date: Tue, 13 Jan 2015 17:19:02 +0100
-Message-ID: <20150113161901.GA23547@lst.de>
+Subject: [PATCH v3] rbd: convert to blk-mq
+Date: Tue, 13 Jan 2015 17:20:04 +0100
+Message-ID: <20150113162004.GB23547@lst.de>
 References: <1420914688-27563-1-git-send-email-hch@lst.de> <54B1B864.4080008@ieee.org> <20150112124002.GA29490@lst.de> <CALFYKtBUONtvGDJtM92bna9utkvnpTHxbL--5P+N3oirgqU7Bg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from verein.lst.de ([213.95.11.211]:44230 "EHLO newverein.lst.de"
+Received: from verein.lst.de ([213.95.11.211]:44239 "EHLO newverein.lst.de"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753308AbbAMQTF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 13 Jan 2015 11:19:05 -0500
+	id S1752269AbbAMQUG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 13 Jan 2015 11:20:06 -0500
 Content-Disposition: inline
 In-Reply-To: <CALFYKtBUONtvGDJtM92bna9utkvnpTHxbL--5P+N3oirgqU7Bg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
@@ -17,20 +17,257 @@ List-ID: <ceph-devel.vger.kernel.org>
 To: Ilya Dryomov <ilya.dryomov@inktank.com>
 Cc: Alex Elder <elder@ieee.org>, Yehuda Sadeh <yehuda@inktank.com>, Sage Weil <sage@inktank.com>, Alex Elder <elder@kernel.org>, Alexandre DERUMIER <aderumier@odiso.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Mon, Jan 12, 2015 at 08:10:48PM +0300, Ilya Dryomov wrote:
-> Why is this call here?  Why not above or below?  I doubt it makes much
-> difference, but from a clarity standpoint at least, shouldn't it be
-> placed after all the checks and allocations, say before the call to
-> rbd_img_request_submit()?
+This converts the rbd driver to use the blk-mq infrastructure.  Except
+for switching to a per-request work item this is almost mechanical.
 
-The idea is to do it before doing real work, but after the request
-is set up far enough that a cancallation works.  For rbd that doesn't do
-timeouts or cancellations it really doesn't matter too much.  I've
-moved it a little further down after the next trivial check now.
+This was tested by Alexandre DERUMIER in November, and found to give
+him 120000 iops, although the only comparism available was an old
+3.10 kernel which gave 80000iops.
 
-> Expanding on REQ_TYPE_FS comment, isn't blk_mq_end_request() enough?
-> Swap blk_end_request_all() for blk_mq_end_request() and get rid of err
-> label?
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+Reviewed-by: Alex Elder <elder@linaro.org>
+---
+ drivers/block/rbd.c | 121 +++++++++++++++++++++++++++++-----------------------
+ 1 file changed, 67 insertions(+), 54 deletions(-)
 
-The blk_end_request_all should be gone and sneaked back in due to a sloppy
-rebase.
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 3ec85df..b5f0cd3 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -38,6 +38,7 @@
+ #include <linux/kernel.h>
+ #include <linux/device.h>
+ #include <linux/module.h>
++#include <linux/blk-mq.h>
+ #include <linux/fs.h>
+ #include <linux/blkdev.h>
+ #include <linux/slab.h>
+@@ -340,9 +341,7 @@ struct rbd_device {
+ 
+ 	char			name[DEV_NAME_LEN]; /* blkdev name, e.g. rbd3 */
+ 
+-	struct list_head	rq_queue;	/* incoming rq queue */
+ 	spinlock_t		lock;		/* queue, flags, open_count */
+-	struct work_struct	rq_work;
+ 
+ 	struct rbd_image_header	header;
+ 	unsigned long		flags;		/* possibly lock protected */
+@@ -360,6 +359,9 @@ struct rbd_device {
+ 	atomic_t		parent_ref;
+ 	struct rbd_device	*parent;
+ 
++	/* Block layer tags. */
++	struct blk_mq_tag_set	tag_set;
++
+ 	/* protects updating the header */
+ 	struct rw_semaphore     header_rwsem;
+ 
+@@ -1817,7 +1819,8 @@ static void rbd_osd_req_callback(struct ceph_osd_request *osd_req,
+ 
+ 	/*
+ 	 * We support a 64-bit length, but ultimately it has to be
+-	 * passed to blk_end_request(), which takes an unsigned int.
++	 * passed to the block layer, which just supports a 32-bit
++	 * length field.
+ 	 */
+ 	obj_request->xferred = osd_req->r_reply_op_len[0];
+ 	rbd_assert(obj_request->xferred < (u64)UINT_MAX);
+@@ -2281,7 +2284,10 @@ static bool rbd_img_obj_end_request(struct rbd_obj_request *obj_request)
+ 		more = obj_request->which < img_request->obj_request_count - 1;
+ 	} else {
+ 		rbd_assert(img_request->rq != NULL);
+-		more = blk_end_request(img_request->rq, result, xferred);
++
++		more = blk_update_request(img_request->rq, result, xferred);
++		if (!more)
++			__blk_mq_end_request(img_request->rq, result);
+ 	}
+ 
+ 	return more;
+@@ -3310,8 +3316,10 @@ out:
+ 	return ret;
+ }
+ 
+-static void rbd_handle_request(struct rbd_device *rbd_dev, struct request *rq)
++static void rbd_queue_workfn(struct work_struct *work)
+ {
++	struct request *rq = blk_mq_rq_from_pdu(work);
++	struct rbd_device *rbd_dev = rq->q->queuedata;
+ 	struct rbd_img_request *img_request;
+ 	struct ceph_snap_context *snapc = NULL;
+ 	u64 offset = (u64)blk_rq_pos(rq) << SECTOR_SHIFT;
+@@ -3320,6 +3328,13 @@ static void rbd_handle_request(struct rbd_device *rbd_dev, struct request *rq)
+ 	u64 mapping_size;
+ 	int result;
+ 
++	if (rq->cmd_type != REQ_TYPE_FS) {
++		dout("%s: non-fs request type %d\n", __func__,
++			(int) rq->cmd_type);
++		result = -EIO;
++		goto err;
++	}
++
+ 	if (rq->cmd_flags & REQ_DISCARD)
+ 		op_type = OBJ_OP_DISCARD;
+ 	else if (rq->cmd_flags & REQ_WRITE)
+@@ -3365,6 +3380,8 @@ static void rbd_handle_request(struct rbd_device *rbd_dev, struct request *rq)
+ 		goto err_rq;	/* Shouldn't happen */
+ 	}
+ 
++	blk_mq_start_request(rq);
++
+ 	down_read(&rbd_dev->header_rwsem);
+ 	mapping_size = rbd_dev->mapping.size;
+ 	if (op_type != OBJ_OP_READ) {
+@@ -3410,53 +3427,18 @@ err_rq:
+ 		rbd_warn(rbd_dev, "%s %llx at %llx result %d",
+ 			 obj_op_name(op_type), length, offset, result);
+ 	ceph_put_snap_context(snapc);
+-	blk_end_request_all(rq, result);
++err:
++	blk_mq_end_request(rq, result);
+ }
+ 
+-static void rbd_request_workfn(struct work_struct *work)
++static int rbd_queue_rq(struct blk_mq_hw_ctx *hctx,
++		const struct blk_mq_queue_data *bd)
+ {
+-	struct rbd_device *rbd_dev =
+-	    container_of(work, struct rbd_device, rq_work);
+-	struct request *rq, *next;
+-	LIST_HEAD(requests);
+-
+-	spin_lock_irq(&rbd_dev->lock); /* rq->q->queue_lock */
+-	list_splice_init(&rbd_dev->rq_queue, &requests);
+-	spin_unlock_irq(&rbd_dev->lock);
+-
+-	list_for_each_entry_safe(rq, next, &requests, queuelist) {
+-		list_del_init(&rq->queuelist);
+-		rbd_handle_request(rbd_dev, rq);
+-	}
+-}
+-
+-/*
+- * Called with q->queue_lock held and interrupts disabled, possibly on
+- * the way to schedule().  Do not sleep here!
+- */
+-static void rbd_request_fn(struct request_queue *q)
+-{
+-	struct rbd_device *rbd_dev = q->queuedata;
+-	struct request *rq;
+-	int queued = 0;
+-
+-	rbd_assert(rbd_dev);
+-
+-	while ((rq = blk_fetch_request(q))) {
+-		/* Ignore any non-FS requests that filter through. */
+-		if (rq->cmd_type != REQ_TYPE_FS) {
+-			dout("%s: non-fs request type %d\n", __func__,
+-				(int) rq->cmd_type);
+-			__blk_end_request_all(rq, 0);
+-			continue;
+-		}
+-
+-		list_add_tail(&rq->queuelist, &rbd_dev->rq_queue);
+-		queued++;
+-	}
++	struct request *rq = bd->rq;
++	struct work_struct *work = blk_mq_rq_to_pdu(rq);
+ 
+-	if (queued)
+-		queue_work(rbd_wq, &rbd_dev->rq_work);
++	queue_work(rbd_wq, work);
++	return BLK_MQ_RQ_QUEUE_OK;
+ }
+ 
+ /*
+@@ -3517,6 +3499,7 @@ static void rbd_free_disk(struct rbd_device *rbd_dev)
+ 		del_gendisk(disk);
+ 		if (disk->queue)
+ 			blk_cleanup_queue(disk->queue);
++		blk_mq_free_tag_set(&rbd_dev->tag_set);
+ 	}
+ 	put_disk(disk);
+ }
+@@ -3728,11 +3711,28 @@ static int rbd_dev_refresh(struct rbd_device *rbd_dev)
+ 	return 0;
+ }
+ 
++static int rbd_init_request(void *data, struct request *rq,
++		unsigned int hctx_idx, unsigned int request_idx,
++		unsigned int numa_node)
++{
++	struct work_struct *work = blk_mq_rq_to_pdu(rq);
++
++	INIT_WORK(work, rbd_queue_workfn);
++	return 0;
++}
++
++static struct blk_mq_ops rbd_mq_ops = {
++	.queue_rq	= rbd_queue_rq,
++	.map_queue	= blk_mq_map_queue,
++	.init_request	= rbd_init_request,
++};
++
+ static int rbd_init_disk(struct rbd_device *rbd_dev)
+ {
+ 	struct gendisk *disk;
+ 	struct request_queue *q;
+ 	u64 segment_size;
++	int err;
+ 
+ 	/* create gendisk info */
+ 	disk = alloc_disk(single_major ?
+@@ -3750,10 +3750,24 @@ static int rbd_init_disk(struct rbd_device *rbd_dev)
+ 	disk->fops = &rbd_bd_ops;
+ 	disk->private_data = rbd_dev;
+ 
+-	q = blk_init_queue(rbd_request_fn, &rbd_dev->lock);
+-	if (!q)
++	memset(&rbd_dev->tag_set, 0, sizeof(rbd_dev->tag_set));
++	rbd_dev->tag_set.ops = &rbd_mq_ops;
++	rbd_dev->tag_set.queue_depth = BLKDEV_MAX_RQ;
++	rbd_dev->tag_set.numa_node = NUMA_NO_NODE;
++	rbd_dev->tag_set.flags =
++		BLK_MQ_F_SHOULD_MERGE | BLK_MQ_F_SG_MERGE;
++	rbd_dev->tag_set.nr_hw_queues = 1;
++	rbd_dev->tag_set.cmd_size = sizeof(struct work_struct);
++
++	err = blk_mq_alloc_tag_set(&rbd_dev->tag_set);
++	if (err)
+ 		goto out_disk;
+ 
++	err = -ENOMEM;
++	q = blk_mq_init_queue(&rbd_dev->tag_set);
++	if (!q)
++		goto out_tag_set;
++
+ 	/* We use the default size, but let's be explicit about it. */
+ 	blk_queue_physical_block_size(q, SECTOR_SIZE);
+ 
+@@ -3779,10 +3793,11 @@ static int rbd_init_disk(struct rbd_device *rbd_dev)
+ 	rbd_dev->disk = disk;
+ 
+ 	return 0;
++out_tag_set:
++	blk_mq_free_tag_set(&rbd_dev->tag_set);
+ out_disk:
+ 	put_disk(disk);
+-
+-	return -ENOMEM;
++	return err;
+ }
+ 
+ /*
+@@ -4039,8 +4054,6 @@ static struct rbd_device *rbd_dev_create(struct rbd_client *rbdc,
+ 		return NULL;
+ 
+ 	spin_lock_init(&rbd_dev->lock);
+-	INIT_LIST_HEAD(&rbd_dev->rq_queue);
+-	INIT_WORK(&rbd_dev->rq_work, rbd_request_workfn);
+ 	rbd_dev->flags = 0;
+ 	atomic_set(&rbd_dev->parent_ref, 0);
+ 	INIT_LIST_HEAD(&rbd_dev->node);
+-- 
+1.9.1
+
