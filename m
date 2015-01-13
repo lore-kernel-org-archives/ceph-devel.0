@@ -1,81 +1,129 @@
-From: "Miyamae, Takeshi" <miyamae.takeshi@jp.fujitsu.com>
-Subject: RE: Deadline of Github pull request for Hammer release (question)
-Date: Tue, 13 Jan 2015 10:24:29 +0000
-Message-ID: <870DE8DBB716524BAE51B2D499EC81E40AA40849@g01jpexmbyt24>
-References: <870DE8DBB716524BAE51B2D499EC81E40AA3F9AB@g01jpexmbyt24>
- <54AC048E.9040200@dachary.org>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Deadline of Github pull request for Hammer release (question)
+Date: Tue, 13 Jan 2015 11:26:08 +0100
+Message-ID: <54B4F2C0.2040805@dachary.org>
+References: <870DE8DBB716524BAE51B2D499EC81E40AA3F9AB@g01jpexmbyt24> <54AC048E.9040200@dachary.org> <870DE8DBB716524BAE51B2D499EC81E40AA40849@g01jpexmbyt24>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="5j3S4f5Ab5G8dv1GX5auuGA2ieVGaVUaV"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from fgwmail5.fujitsu.co.jp ([192.51.44.35]:50885 "EHLO
-	fgwmail5.fujitsu.co.jp" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751004AbbAMKYe (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Jan 2015 05:24:34 -0500
-Received: from kw-mxoi2.gw.nic.fujitsu.com (unknown [10.0.237.143])
-	by fgwmail5.fujitsu.co.jp (Postfix) with ESMTP id C81AB3EE16B
-	for <ceph-devel@vger.kernel.org>; Tue, 13 Jan 2015 19:24:32 +0900 (JST)
-Received: from s3.gw.fujitsu.co.jp (s3.gw.fujitsu.co.jp [10.0.50.93])
-	by kw-mxoi2.gw.nic.fujitsu.com (Postfix) with ESMTP id D3588AC05C8
-	for <ceph-devel@vger.kernel.org>; Tue, 13 Jan 2015 19:24:31 +0900 (JST)
-Received: from g01jpfmpwyt03.exch.g01.fujitsu.local (g01jpfmpwyt03.exch.g01.fujitsu.local [10.128.193.57])
-	by s3.gw.fujitsu.co.jp (Postfix) with ESMTP id 72430E08004
-	for <ceph-devel@vger.kernel.org>; Tue, 13 Jan 2015 19:24:31 +0900 (JST)
-In-Reply-To: <54AC048E.9040200@dachary.org>
-Content-Language: ja-JP
+Received: from mail2.dachary.org ([91.121.57.175]:38169 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751075AbbAMK0L (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Jan 2015 05:26:11 -0500
+In-Reply-To: <870DE8DBB716524BAE51B2D499EC81E40AA40849@g01jpexmbyt24>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
+To: "Miyamae, Takeshi" <miyamae.takeshi@jp.fujitsu.com>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>, "Shiozawa, Kensuke" <shiozawa.kennsu@jp.fujitsu.com>, "Nakao, Takanori" <nakao.takanori@jp.fujitsu.com>, "Paul Von-Stamwitz (PVonStamwitz@us.fujitsu.com)" <PVonStamwitz@us.fujitsu.com>
 
-SGkgTG9pYywNCg0KPiBBbHRob3VnaCB3ZSdyZSBsYXRlIGluIHRoZSBIYW1t
-ZXIgcm9hZG1hcCwgaXQncyBhIGdvb2QgdGltZSBmb3IgYW4gZWFybHkgcHJl
-dmlldy4gSXQgd2lsbCBoZWxwIHNob3cgd2hhdCBuZWVkcyB0byBiZSBjaGFu
-Z2VkIHRvIGFjY29tb2RhdGUgdGhlIFNIRUMgcGx1Z2luLg0KDQpUaGFuayB5
-b3UgZm9yIHlvdXIgYWR2aWNlcy4NCldlIGhhdmUgdXBsb2FkZWQgb3VyIGxh
-dGVzdCBjb2RlcyB0byB0aGUgZm9sbG93aW5nIGZvbGsgcmVwb3NpdG9yeSBm
-b3IgYW4gZWFybHkgcmV2aWV3Lg0KDQpodHRwczovL2dpdGh1Yi5jb20vbWl5
-YW1hZS10YWtlc2hpL211bHRpcGxlLXNoZWMNCg0KU0hFQyBpcyBsb2NhdGVk
-IGluIHNyYy9lcmFzdXJlLWNvZGUvc2hlYyBkaXJlY3RvcnkuDQoNCldlIGFy
-ZSB2ZXJpZnlpbmcgU0hFQydzIGFkdmFudGFnZXMgb24gb3VyIENlcGggY2x1
-c3Rlci4gSXQgdGFrZXMgYSBsaXR0bGUgYml0IG1vcmUuDQpXb3VsZCB5b3Ug
-cGxlYXNlIHN0YXJ0IHRoZSByZXZpZXcgYmVmb3JlIHRoYXQ/DQoNCkJlc3Qg
-cmVnYXJkcywNClRha2VzaGkgTWl5YW1hZQ0KDQotLS0tLU9yaWdpbmFsIE1l
-c3NhZ2UtLS0tLQ0KRnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5l
-bC5vcmcgW21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9y
-Z10gT24gQmVoYWxmIE9mIExvaWMgRGFjaGFyeQ0KU2VudDogV2VkbmVzZGF5
-LCBKYW51YXJ5IDcsIDIwMTUgMTI6NTIgQU0NClRvOiBNaXlhbWFlLCBUYWtl
-c2hpL+WuruWJjSDliZsNCkNjOiBDZXBoIERldmVsb3BtZW50OyBTaGlvemF3
-YSwgS2Vuc3VrZS/loanmsqIg6LOi6LyUOyBOYWthbywgVGFrYW5vcmkv5Lit
-5bC+IOm3ueiplA0KU3ViamVjdDogUmU6IERlYWRsaW5lIG9mIEdpdGh1YiBw
-dWxsIHJlcXVlc3QgZm9yIEhhbW1lciByZWxlYXNlIChxdWVzdGlvbikNCg0K
-SGksDQoNCk9uIDA2LzAxLzIwMTUgMTI6NDksIE1peWFtYWUsIFRha2VzaGkg
-d3JvdGU6DQo+IERlYXIgTG9pYywNCj4gDQo+IEknbSBUYWtlc2hpIE1peWFt
-YWUsIG9uZSBvZiB0aGUgYXV0aG9ycyBvZiBTSEVDJ3MgYmx1ZXByaW50Lg0K
-PiANCj4gU2hpbmdsZWQgRXJhc3VyZSBDb2RlIChTSEVDKQ0KPiBodHRwczov
-L3dpa2kuY2VwaC5jb20vUGxhbm5pbmcvQmx1ZXByaW50cy9IYW1tZXIvU2hp
-bmdsZWRfRXJhc3VyZV9Db2RlDQo+IF8oU0hFQykNCg0KVGhlIHdvcmsgeW91
-IGhhdmUgZG9uZSBpcyBxdWl0ZSBpbXByZXNzaXZlIDotKQ0KDQo+IFdlIGhh
-dmUgcmV2aXNlZCBvdXIgYmx1ZXByaW50IHNob3duIGluIHRoZSBsYXN0IENE
-UyB0byBleHRlbmQgb3VyIA0KPiBlcmFzdXJlIGNvZGUgbGF5b3V0cyBhbmQg
-ZGVzY3JpYmUgdGhlIGd1aWRlbGluZSBmb3IgY2hvb3NpbmcgU0hFQyBhbW9u
-ZyB2YXJpb3VzIEVDIHBsdWdpbnMuDQo+IFdlIGJlbGlldmUgdGhlIGJsdWVw
-cmludCBub3cgYW5zd2VycyBhbGwgdGhlIGNvbW1lbnRzIGdpdmVuIGF0IHRo
-ZSBDRFMuDQoNCkdyZWF0Lg0KDQo+IEluIGFkZGl0aW9uLCB3ZSB3b3VsZCBs
-aWtlIHRvIGFzayBmb3IgeW91ciBhZHZpY2Ugb24gdGhlIHNjaGVkdWxlIG9m
-IA0KPiBvdXIgZ2l0aHViIHB1bGwgcmVxdWVzdC4gTW9yZSBzcGVjaWZpY2Fs
-bHksIHdlIHdvdWxkIGxpa2UgdG8ga25vdyBpdHMgDQo+IGRlYWRsaW5lIGZv
-ciBIYW1tZXIgcmVsZWFzZS4NCj4gKEFzIHdlIGhhdmUgbm90IHJlYWxseSBj
-b21wbGV0ZWQgb3VyIHZlcmlmaWNhdGlvbiBvZiBTSEVDLCB3ZSBhcmUgDQo+
-IHdvbmRlcmluZyBpZiB3ZSBzaG91bGQgbWFrZSBpdCBvcGVuIGZvciBlYXJs
-eSBwcmV2aWV3LikNCg0KQWx0aG91Z2ggd2UncmUgbGF0ZSBpbiB0aGUgSGFt
-bWVyIHJvYWRtYXAsIGl0J3MgYSBnb29kIHRpbWUgZm9yIGFuIGVhcmx5IHBy
-ZXZpZXcuIEl0IHdpbGwgaGVscCBzaG93IHdoYXQgbmVlZHMgdG8gYmUgY2hh
-bmdlZCB0byBhY2NvbW9kYXRlIHRoZSBTSEVDIHBsdWdpbi4NCg0KQ2hlZXJz
-DQoNCj4gVGhhbmsgeW91IGluIGFkdmFuY2UsDQo+IFRha2VzaGkgTWl5YW1h
-ZQ0KPiANCj4gLS0NCj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6
-IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIA0KPiBp
-biB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2Vy
-bmVsLm9yZyBNb3JlIG1ham9yZG9tbyANCj4gaW5mbyBhdCAgaHR0cDovL3Zn
-ZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+IA0KDQotLQ0K
-TG/Dr2MgRGFjaGFyeSwgQXJ0aXNhbiBMb2dpY2llbCBMaWJyZQ0KDQo=
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--5j3S4f5Ab5G8dv1GX5auuGA2ieVGaVUaV
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+Hi,
+
+On 13/01/2015 11:24, Miyamae, Takeshi wrote:
+> Hi Loic,
+>=20
+>> Although we're late in the Hammer roadmap, it's a good time for an ear=
+ly preview. It will help show what needs to be changed to accomodate the =
+SHEC plugin.
+>=20
+> Thank you for your advices.
+> We have uploaded our latest codes to the following folk repository for =
+an early review.
+>=20
+> https://github.com/miyamae-takeshi/multiple-shec
+
+It's 404 ? Is it a private repository maybe ?
+
+>=20
+> SHEC is located in src/erasure-code/shec directory.
+>=20
+> We are verifying SHEC's advantages on our Ceph cluster. It takes a litt=
+le bit more.
+> Would you please start the review before that?
+>=20
+> Best regards,
+> Takeshi Miyamae
+>=20
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.ke=
+rnel.org] On Behalf Of Loic Dachary
+> Sent: Wednesday, January 7, 2015 12:52 AM
+> To: Miyamae, Takeshi/=E5=AE=AE=E5=89=8D =E5=89=9B
+> Cc: Ceph Development; Shiozawa, Kensuke/=E5=A1=A9=E6=B2=A2 =E8=B3=A2=E8=
+=BC=94; Nakao, Takanori/=E4=B8=AD=E5=B0=BE =E9=B7=B9=E8=A9=94
+> Subject: Re: Deadline of Github pull request for Hammer release (questi=
+on)
+>=20
+> Hi,
+>=20
+> On 06/01/2015 12:49, Miyamae, Takeshi wrote:
+>> Dear Loic,
+>>
+>> I'm Takeshi Miyamae, one of the authors of SHEC's blueprint.
+>>
+>> Shingled Erasure Code (SHEC)
+>> https://wiki.ceph.com/Planning/Blueprints/Hammer/Shingled_Erasure_Code=
+
+>> _(SHEC)
+>=20
+> The work you have done is quite impressive :-)
+>=20
+>> We have revised our blueprint shown in the last CDS to extend our=20
+>> erasure code layouts and describe the guideline for choosing SHEC amon=
+g various EC plugins.
+>> We believe the blueprint now answers all the comments given at the CDS=
+=2E
+>=20
+> Great.
+>=20
+>> In addition, we would like to ask for your advice on the schedule of=20
+>> our github pull request. More specifically, we would like to know its =
+
+>> deadline for Hammer release.
+>> (As we have not really completed our verification of SHEC, we are=20
+>> wondering if we should make it open for early preview.)
+>=20
+> Although we're late in the Hammer roadmap, it's a good time for an earl=
+y preview. It will help show what needs to be changed to accomodate the S=
+HEC plugin.
+>=20
+> Cheers
+>=20
+>> Thank you in advance,
+>> Takeshi Miyamae
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" =
+
+>> in the body of a message to majordomo@vger.kernel.org More majordomo=20
+>> info at  http://vger.kernel.org/majordomo-info.html
+>>
+>=20
+> --
+> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>=20
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--5j3S4f5Ab5G8dv1GX5auuGA2ieVGaVUaV
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlS08sAACgkQ8dLMyEl6F20PfQCgpSUxV7EJJlPSfOKgkBHoQO4a
+koIAnjez2kTcoeMR9tCVzjtHdYwu7Bo0
+=RXII
+-----END PGP SIGNATURE-----
+
+--5j3S4f5Ab5G8dv1GX5auuGA2ieVGaVUaV--
