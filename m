@@ -1,273 +1,174 @@
-From: Christoph Hellwig <hch@lst.de>
-Subject: [PATCH v3] rbd: convert to blk-mq
-Date: Tue, 13 Jan 2015 17:20:04 +0100
-Message-ID: <20150113162004.GB23547@lst.de>
-References: <1420914688-27563-1-git-send-email-hch@lst.de> <54B1B864.4080008@ieee.org> <20150112124002.GA29490@lst.de> <CALFYKtBUONtvGDJtM92bna9utkvnpTHxbL--5P+N3oirgqU7Bg@mail.gmail.com>
+From: "Miyamae, Takeshi" <miyamae.takeshi@jp.fujitsu.com>
+Subject: RE: Deadline of Github pull request for Hammer release (question)
+Date: Tue, 13 Jan 2015 17:05:54 +0000
+Message-ID: <870DE8DBB716524BAE51B2D499EC81E40AA40983@g01jpexmbyt24>
+References: <870DE8DBB716524BAE51B2D499EC81E40AA3F9AB@g01jpexmbyt24>
+ <54AC048E.9040200@dachary.org>
+ <870DE8DBB716524BAE51B2D499EC81E40AA40849@g01jpexmbyt24>
+ <54B4F2C0.2040805@dachary.org>
+ <870DE8DBB716524BAE51B2D499EC81E40AA40872@g01jpexmbyt24>
+ <54B5137F.7090902@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from verein.lst.de ([213.95.11.211]:44239 "EHLO newverein.lst.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752269AbbAMQUG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 13 Jan 2015 11:20:06 -0500
-Content-Disposition: inline
-In-Reply-To: <CALFYKtBUONtvGDJtM92bna9utkvnpTHxbL--5P+N3oirgqU7Bg@mail.gmail.com>
+Received: from fgwmail6.fujitsu.co.jp ([192.51.44.36]:36213 "EHLO
+	fgwmail6.fujitsu.co.jp" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752446AbbAMRGA (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Jan 2015 12:06:00 -0500
+Received: from kw-mxoi2.gw.nic.fujitsu.com (unknown [10.0.237.143])
+	by fgwmail6.fujitsu.co.jp (Postfix) with ESMTP id DA8A23EE0AE
+	for <ceph-devel@vger.kernel.org>; Wed, 14 Jan 2015 02:05:58 +0900 (JST)
+Received: from s1.gw.fujitsu.co.jp (s1.gw.fujitsu.co.jp [10.0.50.91])
+	by kw-mxoi2.gw.nic.fujitsu.com (Postfix) with ESMTP id 51B93AC0361
+	for <ceph-devel@vger.kernel.org>; Wed, 14 Jan 2015 02:05:57 +0900 (JST)
+Received: from g01jpfmpwyt03.exch.g01.fujitsu.local (g01jpfmpwyt03.exch.g01.fujitsu.local [10.128.193.57])
+	by s1.gw.fujitsu.co.jp (Postfix) with ESMTP id E20921DB8040
+	for <ceph-devel@vger.kernel.org>; Wed, 14 Jan 2015 02:05:56 +0900 (JST)
+In-Reply-To: <54B5137F.7090902@dachary.org>
+Content-Language: ja-JP
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <ilya.dryomov@inktank.com>
-Cc: Alex Elder <elder@ieee.org>, Yehuda Sadeh <yehuda@inktank.com>, Sage Weil <sage@inktank.com>, Alex Elder <elder@kernel.org>, Alexandre DERUMIER <aderumier@odiso.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, "Shiozawa, Kensuke" <shiozawa.kennsu@jp.fujitsu.com>, "Nakao, Takanori" <nakao.takanori@jp.fujitsu.com>, "Paul Von-Stamwitz (PVonStamwitz@us.fujitsu.com)" <PVonStamwitz@us.fujitsu.com>
 
-This converts the rbd driver to use the blk-mq infrastructure.  Except
-for switching to a per-request work item this is almost mechanical.
-
-This was tested by Alexandre DERUMIER in November, and found to give
-him 120000 iops, although the only comparism available was an old
-3.10 kernel which gave 80000iops.
-
-Signed-off-by: Christoph Hellwig <hch@lst.de>
-Reviewed-by: Alex Elder <elder@linaro.org>
----
- drivers/block/rbd.c | 121 +++++++++++++++++++++++++++++-----------------------
- 1 file changed, 67 insertions(+), 54 deletions(-)
-
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 3ec85df..b5f0cd3 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -38,6 +38,7 @@
- #include <linux/kernel.h>
- #include <linux/device.h>
- #include <linux/module.h>
-+#include <linux/blk-mq.h>
- #include <linux/fs.h>
- #include <linux/blkdev.h>
- #include <linux/slab.h>
-@@ -340,9 +341,7 @@ struct rbd_device {
- 
- 	char			name[DEV_NAME_LEN]; /* blkdev name, e.g. rbd3 */
- 
--	struct list_head	rq_queue;	/* incoming rq queue */
- 	spinlock_t		lock;		/* queue, flags, open_count */
--	struct work_struct	rq_work;
- 
- 	struct rbd_image_header	header;
- 	unsigned long		flags;		/* possibly lock protected */
-@@ -360,6 +359,9 @@ struct rbd_device {
- 	atomic_t		parent_ref;
- 	struct rbd_device	*parent;
- 
-+	/* Block layer tags. */
-+	struct blk_mq_tag_set	tag_set;
-+
- 	/* protects updating the header */
- 	struct rw_semaphore     header_rwsem;
- 
-@@ -1817,7 +1819,8 @@ static void rbd_osd_req_callback(struct ceph_osd_request *osd_req,
- 
- 	/*
- 	 * We support a 64-bit length, but ultimately it has to be
--	 * passed to blk_end_request(), which takes an unsigned int.
-+	 * passed to the block layer, which just supports a 32-bit
-+	 * length field.
- 	 */
- 	obj_request->xferred = osd_req->r_reply_op_len[0];
- 	rbd_assert(obj_request->xferred < (u64)UINT_MAX);
-@@ -2281,7 +2284,10 @@ static bool rbd_img_obj_end_request(struct rbd_obj_request *obj_request)
- 		more = obj_request->which < img_request->obj_request_count - 1;
- 	} else {
- 		rbd_assert(img_request->rq != NULL);
--		more = blk_end_request(img_request->rq, result, xferred);
-+
-+		more = blk_update_request(img_request->rq, result, xferred);
-+		if (!more)
-+			__blk_mq_end_request(img_request->rq, result);
- 	}
- 
- 	return more;
-@@ -3310,8 +3316,10 @@ out:
- 	return ret;
- }
- 
--static void rbd_handle_request(struct rbd_device *rbd_dev, struct request *rq)
-+static void rbd_queue_workfn(struct work_struct *work)
- {
-+	struct request *rq = blk_mq_rq_from_pdu(work);
-+	struct rbd_device *rbd_dev = rq->q->queuedata;
- 	struct rbd_img_request *img_request;
- 	struct ceph_snap_context *snapc = NULL;
- 	u64 offset = (u64)blk_rq_pos(rq) << SECTOR_SHIFT;
-@@ -3320,6 +3328,13 @@ static void rbd_handle_request(struct rbd_device *rbd_dev, struct request *rq)
- 	u64 mapping_size;
- 	int result;
- 
-+	if (rq->cmd_type != REQ_TYPE_FS) {
-+		dout("%s: non-fs request type %d\n", __func__,
-+			(int) rq->cmd_type);
-+		result = -EIO;
-+		goto err;
-+	}
-+
- 	if (rq->cmd_flags & REQ_DISCARD)
- 		op_type = OBJ_OP_DISCARD;
- 	else if (rq->cmd_flags & REQ_WRITE)
-@@ -3365,6 +3380,8 @@ static void rbd_handle_request(struct rbd_device *rbd_dev, struct request *rq)
- 		goto err_rq;	/* Shouldn't happen */
- 	}
- 
-+	blk_mq_start_request(rq);
-+
- 	down_read(&rbd_dev->header_rwsem);
- 	mapping_size = rbd_dev->mapping.size;
- 	if (op_type != OBJ_OP_READ) {
-@@ -3410,53 +3427,18 @@ err_rq:
- 		rbd_warn(rbd_dev, "%s %llx at %llx result %d",
- 			 obj_op_name(op_type), length, offset, result);
- 	ceph_put_snap_context(snapc);
--	blk_end_request_all(rq, result);
-+err:
-+	blk_mq_end_request(rq, result);
- }
- 
--static void rbd_request_workfn(struct work_struct *work)
-+static int rbd_queue_rq(struct blk_mq_hw_ctx *hctx,
-+		const struct blk_mq_queue_data *bd)
- {
--	struct rbd_device *rbd_dev =
--	    container_of(work, struct rbd_device, rq_work);
--	struct request *rq, *next;
--	LIST_HEAD(requests);
--
--	spin_lock_irq(&rbd_dev->lock); /* rq->q->queue_lock */
--	list_splice_init(&rbd_dev->rq_queue, &requests);
--	spin_unlock_irq(&rbd_dev->lock);
--
--	list_for_each_entry_safe(rq, next, &requests, queuelist) {
--		list_del_init(&rq->queuelist);
--		rbd_handle_request(rbd_dev, rq);
--	}
--}
--
--/*
-- * Called with q->queue_lock held and interrupts disabled, possibly on
-- * the way to schedule().  Do not sleep here!
-- */
--static void rbd_request_fn(struct request_queue *q)
--{
--	struct rbd_device *rbd_dev = q->queuedata;
--	struct request *rq;
--	int queued = 0;
--
--	rbd_assert(rbd_dev);
--
--	while ((rq = blk_fetch_request(q))) {
--		/* Ignore any non-FS requests that filter through. */
--		if (rq->cmd_type != REQ_TYPE_FS) {
--			dout("%s: non-fs request type %d\n", __func__,
--				(int) rq->cmd_type);
--			__blk_end_request_all(rq, 0);
--			continue;
--		}
--
--		list_add_tail(&rq->queuelist, &rbd_dev->rq_queue);
--		queued++;
--	}
-+	struct request *rq = bd->rq;
-+	struct work_struct *work = blk_mq_rq_to_pdu(rq);
- 
--	if (queued)
--		queue_work(rbd_wq, &rbd_dev->rq_work);
-+	queue_work(rbd_wq, work);
-+	return BLK_MQ_RQ_QUEUE_OK;
- }
- 
- /*
-@@ -3517,6 +3499,7 @@ static void rbd_free_disk(struct rbd_device *rbd_dev)
- 		del_gendisk(disk);
- 		if (disk->queue)
- 			blk_cleanup_queue(disk->queue);
-+		blk_mq_free_tag_set(&rbd_dev->tag_set);
- 	}
- 	put_disk(disk);
- }
-@@ -3728,11 +3711,28 @@ static int rbd_dev_refresh(struct rbd_device *rbd_dev)
- 	return 0;
- }
- 
-+static int rbd_init_request(void *data, struct request *rq,
-+		unsigned int hctx_idx, unsigned int request_idx,
-+		unsigned int numa_node)
-+{
-+	struct work_struct *work = blk_mq_rq_to_pdu(rq);
-+
-+	INIT_WORK(work, rbd_queue_workfn);
-+	return 0;
-+}
-+
-+static struct blk_mq_ops rbd_mq_ops = {
-+	.queue_rq	= rbd_queue_rq,
-+	.map_queue	= blk_mq_map_queue,
-+	.init_request	= rbd_init_request,
-+};
-+
- static int rbd_init_disk(struct rbd_device *rbd_dev)
- {
- 	struct gendisk *disk;
- 	struct request_queue *q;
- 	u64 segment_size;
-+	int err;
- 
- 	/* create gendisk info */
- 	disk = alloc_disk(single_major ?
-@@ -3750,10 +3750,24 @@ static int rbd_init_disk(struct rbd_device *rbd_dev)
- 	disk->fops = &rbd_bd_ops;
- 	disk->private_data = rbd_dev;
- 
--	q = blk_init_queue(rbd_request_fn, &rbd_dev->lock);
--	if (!q)
-+	memset(&rbd_dev->tag_set, 0, sizeof(rbd_dev->tag_set));
-+	rbd_dev->tag_set.ops = &rbd_mq_ops;
-+	rbd_dev->tag_set.queue_depth = BLKDEV_MAX_RQ;
-+	rbd_dev->tag_set.numa_node = NUMA_NO_NODE;
-+	rbd_dev->tag_set.flags =
-+		BLK_MQ_F_SHOULD_MERGE | BLK_MQ_F_SG_MERGE;
-+	rbd_dev->tag_set.nr_hw_queues = 1;
-+	rbd_dev->tag_set.cmd_size = sizeof(struct work_struct);
-+
-+	err = blk_mq_alloc_tag_set(&rbd_dev->tag_set);
-+	if (err)
- 		goto out_disk;
- 
-+	err = -ENOMEM;
-+	q = blk_mq_init_queue(&rbd_dev->tag_set);
-+	if (!q)
-+		goto out_tag_set;
-+
- 	/* We use the default size, but let's be explicit about it. */
- 	blk_queue_physical_block_size(q, SECTOR_SIZE);
- 
-@@ -3779,10 +3793,11 @@ static int rbd_init_disk(struct rbd_device *rbd_dev)
- 	rbd_dev->disk = disk;
- 
- 	return 0;
-+out_tag_set:
-+	blk_mq_free_tag_set(&rbd_dev->tag_set);
- out_disk:
- 	put_disk(disk);
--
--	return -ENOMEM;
-+	return err;
- }
- 
- /*
-@@ -4039,8 +4054,6 @@ static struct rbd_device *rbd_dev_create(struct rbd_client *rbdc,
- 		return NULL;
- 
- 	spin_lock_init(&rbd_dev->lock);
--	INIT_LIST_HEAD(&rbd_dev->rq_queue);
--	INIT_WORK(&rbd_dev->rq_work, rbd_request_workfn);
- 	rbd_dev->flags = 0;
- 	atomic_set(&rbd_dev->parent_ref, 0);
- 	INIT_LIST_HEAD(&rbd_dev->node);
--- 
-1.9.1
-
+SGkgTG9pYywNCg0KVGhhbmsgeW91IGZvciB5b3VyIHF1aWNrIHJldmlldy4N
+Cg0KPiBDb3VsZCB5b3UgcmVmZXJlbmNlIHRoZSBqZXJhc3VyZSBmaWxlcyAo
+dGhleSBhcmUgaW4gdGhlIGplcmFzdXJlIHBsdWdpbiBhbHJlYWR5KQ0KPiBp
+bnN0ZWFkIG9mIGluY2x1ZGluZyB0aGVtIGluIHlvdXIgcGF0Y2ggPw0KDQpX
+ZSBoYWQgdXNlZCB0aGUgcmVmZXJlbmNlIG9mIGplcmFzdXJlIHYyLjAgZmls
+ZXMgYmVmb3JlLCBidXQgY2hhbmdlZCB0byBpbmNsdWRpbmcgdjEuMiBmaWxl
+cw0KYWZ0ZXIgdGhlIHBhdGVudCBpc3N1ZS4NCkhvd2V2ZXIsIHdlIGNhbiBy
+ZXN0b3JlIHRoZSByZWZlcmVuY2UgcmlnaHQgYXdheSBpZiB3ZSBhcmUgbmVl
+ZGVkLg0KDQo+IEluIDo6cHJlcGFyZSB5b3UgcmV1c2UgdGhlIG1hdHJpeCwg
+aWYgcG9zc2libGUuIElmIHlvdXIgaW50ZW50aW9uIGlzIHRvIGltcHJvdmUg
+cGVyZm9ybWFuY2VzLA0KPiB5b3Ugc2hvdWxkIGNvbnNpZGVyIHVzaW5nIHRo
+ZSBzYW1lIGFwcHJvYWNoIGFzIHRoZSBpc2EgcGx1Z2luLg0KDQpXZSBoYXZl
+IGZvdW5kIGEgcGVyZm9ybWFuY2UgaXNzdWUgY2F1c2VkIGJ5IHJlZHVuZGFu
+dCBpbml0aWFsaXphdGlvbnMgb2YgdGhlIG1vZHVsZSwNCmFuZCBzb2x2ZWQg
+aXQgYnkgY2FjaGluZyB0aGUgaW5pdGlhbGl6ZWQgdmFyaWFibGVzIGluIG1l
+bW9yeS4NCklmIHRoYXQgaXMgdGhlIHNhbWUgYXBwcm9hY2ggYXMgaXNhLXBs
+dWdpbiB5b3UgbWVudGlvbmVkLCB3ZSBhbHNvIGRvIG5vdCBoYXZlIHRoZSBz
+YW1lDQppc3N1ZSBhbnkgbW9yZS4NCg0KPiBJJ2xsIGhhdmUgbW9yZSBjb21t
+ZW50cyBvbmNlIHlvdSBoYXZlIHVuaXQgLyBmdW5jdGlvbmFsIHRlc3RzDQoN
+CldlIGRvIGhhdmUgdGhlIHRob3NlIHVuaXQvZnVuY3Rpb25hbCB0ZXN0cywg
+YnV0IHRoZSBzZXJ2ZXIgaXMgdW5yZWFjaGFibGUgYXQgdGhpcyBtb21lbnQu
+DQpQbGVhc2UgbGV0IHVzIHVwbG9hZCB0aGVtIHRvIHRoZSByZXBvc2l0b3J5
+IHRvbW9ycm93Lg0KDQo+IFJlZ2FyZGluZyB5b3VyIGluaXRpYWwgcXVlc3Rp
+b246IEkgdGhpbmsgaXQgaXMgdG9vIGxhdGUgZm9yIHRoZSBIYW1tZXIgcmVs
+ZWFzZS4NCg0KV2UgYXJlIHNvIGRpc2FwcG9pbnRlZCB0byBoZWFyIHRoYXQs
+IGJ1dCB3ZSBtdXN0IGFwb2xvZ2l6ZSBmb3IgdGhlIGxhdGUgcmVxdWVzdC4N
+CklmIHRoZXJlIHdvdWxkIGJlIGFueSBjaGFuY2UgdGhhdCBTSEVDIGJlIHB1
+bGxlZCBpbnRvIGhhbW1lciwgd2UgYXJlIHZlcnkgaGFwcHkgdG8NCmNvbmR1
+Y3QgYWxsIHRoZSBuZWNlc3NhcnkgdGVzdHMgYnkgb3Vyc2VsdmVzLg0KUGxl
+YXNlIGxldCB1cyBrbm93IHRoZSBkZXRhaWxlZCBzY2hlZHVsZSBpZiB0aGlz
+IGlzIGEgZmVhc2libGUgb3B0aW9uLg0KDQpCZXN0IHJlZ2FyZHMsDQpUYWtl
+c2hpIE1peWFtYWUNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZy
+b206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnIFttYWlsdG86
+Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFsZiBP
+ZiBMb2ljIERhY2hhcnkNClNlbnQ6IFR1ZXNkYXksIEphbnVhcnkgMTMsIDIw
+MTUgOTo0NiBQTQ0KVG86IE1peWFtYWUsIFRha2VzaGkv5a6u5YmNIOWJmw0K
+Q2M6IENlcGggRGV2ZWxvcG1lbnQ7IFNoaW96YXdhLCBLZW5zdWtlL+Whqeay
+oiDos6LovJQ7IE5ha2FvLCBUYWthbm9yaS/kuK3lsL4g6be56KmUOyBQYXVs
+IFZvbi1TdGFtd2l0eiAoUFZvblN0YW13aXR6QHVzLmZ1aml0c3UuY29tKQ0K
+U3ViamVjdDogUmU6IERlYWRsaW5lIG9mIEdpdGh1YiBwdWxsIHJlcXVlc3Qg
+Zm9yIEhhbW1lciByZWxlYXNlIChxdWVzdGlvbikNCg0KSGksDQoNCkl0J3Mg
+YSBncmVhdCBzdGFydCA6LSkgQSBmZXcgY29tbWVudHM6DQoNCkNvdWxkIHlv
+dSByZWZlcmVuY2UgdGhlIGplcmFzdXJlIGZpbGVzICh0aGV5IGFyZSBpbiB0
+aGUgamVyYXN1cmUgcGx1Z2luIGFscmVhZHkpIGluc3RlYWQgb2YgaW5jbHVk
+aW5nIHRoZW0gaW4geW91ciBwYXRjaCA/DQoNCkluIDo6cHJlcGFyZSB5b3Ug
+cmV1c2UgdGhlIG1hdHJpeCwgaWYgcG9zc2libGUuIElmIHlvdXIgaW50ZW50
+aW9uIGlzIHRvIGltcHJvdmUgcGVyZm9ybWFuY2VzLCB5b3Ugc2hvdWxkIGNv
+bnNpZGVyIHVzaW5nIHRoZSBzYW1lIGFwcHJvYWNoIGFzIHRoZSBpc2EgcGx1
+Z2luLiBTZWUgaHR0cDovL3dvcmtiZW5jaC5kYWNoYXJ5Lm9yZy9jZXBoL2Nl
+cGgvYmxvYi9naWFudC9zcmMvZXJhc3VyZS1jb2RlL2lzYS9FcmFzdXJlQ29k
+ZVBsdWdpbklzYS5jYyNMMzYgd2hpY2ggaXMgYW5kIGluZGVwZW5kZW50IHR5
+cGUgaHR0cDovL3dvcmtiZW5jaC5kYWNoYXJ5Lm9yZy9jZXBoL2NlcGgvYmxv
+Yi9naWFudC9zcmMvZXJhc3VyZS1jb2RlL2lzYS9FcmFzdXJlQ29kZUlzYVRh
+YmxlQ2FjaGUuaCB3aXRoIG9ubHkgb25lIGluc3RhbmNlIGFuZCBpcyBwb3B1
+bGF0ZWQgYXMgbmVlZGVkIGFuZCBwcm90ZWN0ZWQgYnkgYSBsb2NrIHRvIG1h
+a2UgaXQgdGhyZWFkIHNhZmUgOiBodHRwOi8vd29ya2JlbmNoLmRhY2hhcnku
+b3JnL2NlcGgvY2VwaC9ibG9iL2dpYW50L3NyYy9lcmFzdXJlLWNvZGUvaXNh
+L0VyYXN1cmVDb2RlSXNhVGFibGVDYWNoZS5oI0wxMDENCg0KSSdsbCBoYXZl
+IG1vcmUgY29tbWVudHMgb25jZSB5b3UgaGF2ZSB1bml0IC8gZnVuY3Rpb25h
+bCB0ZXN0cyAoIHNpbWlsYXIgdG8gaHR0cDovL3dvcmtiZW5jaC5kYWNoYXJ5
+Lm9yZy9jZXBoL2NlcGgvYmxvYi9naWFudC9zcmMvdGVzdC9lcmFzdXJlLWNv
+ZGUvVGVzdEVyYXN1cmVDb2RlSmVyYXN1cmUuY2MgKS4gDQoNClJlZ2FyZGlu
+ZyB5b3VyIGluaXRpYWwgcXVlc3Rpb246IEkgdGhpbmsgaXQgaXMgdG9vIGxh
+dGUgZm9yIHRoZSBIYW1tZXIgcmVsZWFzZS4gQnV0IGZyb20gd2hhdCBJIHJl
+YWQgaXQgbG9va3MgbGlrZSB3ZSdsbCBiZSBhYmxlIHRvIG1lcmdlIGluIHRo
+ZSBlYXJseSBzdGFnZXMgb2YgdGhlIG5leHQgcmVsZWFzZSBhbmQgdGhhdCB3
+aWxsIGdpdmUgdXMgdGltZSB0byBwcm9wZXJseSB0ZXN0IGl0Lg0KDQpDaGVl
+cnMNCg0KT24gMTMvMDEvMjAxNSAxMTozNCwgTWl5YW1hZSwgVGFrZXNoaSB3
+cm90ZToNCj4gSGkgTG9pYywNCj4gDQo+IEknbSBzbyBzb3JyeS4gVGhlIGZv
+bGxvd2luZyBpcyB0aGUgY29ycmVjdCByZXBvc2l0b3J5Lg0KPiANCj4gaHR0
+cHM6Ly9naXRodWIuY29tL3QtbWl5YW1hZS9jZXBoDQo+IA0KPiBCZXN0IHJl
+Z2FyZHMsDQo+IFRha2VzaGkgTWl5YW1hZQ0KPiANCj4gLS0tLS1PcmlnaW5h
+bCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogTG9pYyBEYWNoYXJ5IFttYWlsdG86
+bG9pY0BkYWNoYXJ5Lm9yZ10NCj4gU2VudDogVHVlc2RheSwgSmFudWFyeSAx
+MywgMjAxNSA3OjI2IFBNDQo+IFRvOiBNaXlhbWFlLCBUYWtlc2hpL+WuruWJ
+jSDliZsNCj4gQ2M6IENlcGggRGV2ZWxvcG1lbnQ7IFNoaW96YXdhLCBLZW5z
+dWtlL+WhqeayoiDos6LovJQ7IE5ha2FvLCBUYWthbm9yaS/kuK3lsL4g6be5
+6KmUOyANCj4gUGF1bCBWb24tU3RhbXdpdHogKFBWb25TdGFtd2l0ekB1cy5m
+dWppdHN1LmNvbSkNCj4gU3ViamVjdDogUmU6IERlYWRsaW5lIG9mIEdpdGh1
+YiBwdWxsIHJlcXVlc3QgZm9yIEhhbW1lciByZWxlYXNlIA0KPiAocXVlc3Rp
+b24pDQo+IA0KPiBIaSwNCj4gDQo+IE9uIDEzLzAxLzIwMTUgMTE6MjQsIE1p
+eWFtYWUsIFRha2VzaGkgd3JvdGU6DQo+PiBIaSBMb2ljLA0KPj4NCj4+PiBB
+bHRob3VnaCB3ZSdyZSBsYXRlIGluIHRoZSBIYW1tZXIgcm9hZG1hcCwgaXQn
+cyBhIGdvb2QgdGltZSBmb3IgYW4gZWFybHkgcHJldmlldy4gSXQgd2lsbCBo
+ZWxwIHNob3cgd2hhdCBuZWVkcyB0byBiZSBjaGFuZ2VkIHRvIGFjY29tb2Rh
+dGUgdGhlIFNIRUMgcGx1Z2luLg0KPj4NCj4+IFRoYW5rIHlvdSBmb3IgeW91
+ciBhZHZpY2VzLg0KPj4gV2UgaGF2ZSB1cGxvYWRlZCBvdXIgbGF0ZXN0IGNv
+ZGVzIHRvIHRoZSBmb2xsb3dpbmcgZm9sayByZXBvc2l0b3J5IGZvciBhbiBl
+YXJseSByZXZpZXcuDQo+Pg0KPj4gaHR0cHM6Ly9naXRodWIuY29tL21peWFt
+YWUtdGFrZXNoaS9tdWx0aXBsZS1zaGVjDQo+IA0KPiBJdCdzIDQwNCA/IElz
+IGl0IGEgcHJpdmF0ZSByZXBvc2l0b3J5IG1heWJlID8NCj4gDQo+Pg0KPj4g
+U0hFQyBpcyBsb2NhdGVkIGluIHNyYy9lcmFzdXJlLWNvZGUvc2hlYyBkaXJl
+Y3RvcnkuDQo+Pg0KPj4gV2UgYXJlIHZlcmlmeWluZyBTSEVDJ3MgYWR2YW50
+YWdlcyBvbiBvdXIgQ2VwaCBjbHVzdGVyLiBJdCB0YWtlcyBhIGxpdHRsZSBi
+aXQgbW9yZS4NCj4+IFdvdWxkIHlvdSBwbGVhc2Ugc3RhcnQgdGhlIHJldmll
+dyBiZWZvcmUgdGhhdD8NCj4+DQo+PiBCZXN0IHJlZ2FyZHMsDQo+PiBUYWtl
+c2hpIE1peWFtYWUNCj4+DQo+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0t
+LQ0KPj4gRnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcg
+DQo+PiBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3Jn
+XSBPbiBCZWhhbGYgT2YgTG9pYyBEYWNoYXJ5DQo+PiBTZW50OiBXZWRuZXNk
+YXksIEphbnVhcnkgNywgMjAxNSAxMjo1MiBBTQ0KPj4gVG86IE1peWFtYWUs
+IFRha2VzaGkv5a6u5YmNIOWJmw0KPj4gQ2M6IENlcGggRGV2ZWxvcG1lbnQ7
+IFNoaW96YXdhLCBLZW5zdWtlL+WhqeayoiDos6LovJQ7IE5ha2FvLCBUYWth
+bm9yaS/kuK3lsL4g6be56KmUDQo+PiBTdWJqZWN0OiBSZTogRGVhZGxpbmUg
+b2YgR2l0aHViIHB1bGwgcmVxdWVzdCBmb3IgSGFtbWVyIHJlbGVhc2UNCj4+
+IChxdWVzdGlvbikNCj4+DQo+PiBIaSwNCj4+DQo+PiBPbiAwNi8wMS8yMDE1
+IDEyOjQ5LCBNaXlhbWFlLCBUYWtlc2hpIHdyb3RlOg0KPj4+IERlYXIgTG9p
+YywNCj4+Pg0KPj4+IEknbSBUYWtlc2hpIE1peWFtYWUsIG9uZSBvZiB0aGUg
+YXV0aG9ycyBvZiBTSEVDJ3MgYmx1ZXByaW50Lg0KPj4+DQo+Pj4gU2hpbmds
+ZWQgRXJhc3VyZSBDb2RlIChTSEVDKQ0KPj4+IGh0dHBzOi8vd2lraS5jZXBo
+LmNvbS9QbGFubmluZy9CbHVlcHJpbnRzL0hhbW1lci9TaGluZ2xlZF9FcmFz
+dXJlX0NvDQo+Pj4gZA0KPj4+IGUNCj4+PiBfKFNIRUMpDQo+Pg0KPj4gVGhl
+IHdvcmsgeW91IGhhdmUgZG9uZSBpcyBxdWl0ZSBpbXByZXNzaXZlIDotKQ0K
+Pj4NCj4+PiBXZSBoYXZlIHJldmlzZWQgb3VyIGJsdWVwcmludCBzaG93biBp
+biB0aGUgbGFzdCBDRFMgdG8gZXh0ZW5kIG91ciANCj4+PiBlcmFzdXJlIGNv
+ZGUgbGF5b3V0cyBhbmQgZGVzY3JpYmUgdGhlIGd1aWRlbGluZSBmb3IgY2hv
+b3NpbmcgU0hFQyBhbW9uZyB2YXJpb3VzIEVDIHBsdWdpbnMuDQo+Pj4gV2Ug
+YmVsaWV2ZSB0aGUgYmx1ZXByaW50IG5vdyBhbnN3ZXJzIGFsbCB0aGUgY29t
+bWVudHMgZ2l2ZW4gYXQgdGhlIENEUy4NCj4+DQo+PiBHcmVhdC4NCj4+DQo+
+Pj4gSW4gYWRkaXRpb24sIHdlIHdvdWxkIGxpa2UgdG8gYXNrIGZvciB5b3Vy
+IGFkdmljZSBvbiB0aGUgc2NoZWR1bGUgb2YgDQo+Pj4gb3VyIGdpdGh1YiBw
+dWxsIHJlcXVlc3QuIE1vcmUgc3BlY2lmaWNhbGx5LCB3ZSB3b3VsZCBsaWtl
+IHRvIGtub3cgDQo+Pj4gaXRzIGRlYWRsaW5lIGZvciBIYW1tZXIgcmVsZWFz
+ZS4NCj4+PiAoQXMgd2UgaGF2ZSBub3QgcmVhbGx5IGNvbXBsZXRlZCBvdXIg
+dmVyaWZpY2F0aW9uIG9mIFNIRUMsIHdlIGFyZSANCj4+PiB3b25kZXJpbmcg
+aWYgd2Ugc2hvdWxkIG1ha2UgaXQgb3BlbiBmb3IgZWFybHkgcHJldmlldy4p
+DQo+Pg0KPj4gQWx0aG91Z2ggd2UncmUgbGF0ZSBpbiB0aGUgSGFtbWVyIHJv
+YWRtYXAsIGl0J3MgYSBnb29kIHRpbWUgZm9yIGFuIGVhcmx5IHByZXZpZXcu
+IEl0IHdpbGwgaGVscCBzaG93IHdoYXQgbmVlZHMgdG8gYmUgY2hhbmdlZCB0
+byBhY2NvbW9kYXRlIHRoZSBTSEVDIHBsdWdpbi4NCj4+DQo+PiBDaGVlcnMN
+Cj4+DQo+Pj4gVGhhbmsgeW91IGluIGFkdmFuY2UsDQo+Pj4gVGFrZXNoaSBN
+aXlhbWFlDQo+Pj4NCj4+PiAtLQ0KPj4+IFRvIHVuc3Vic2NyaWJlIGZyb20g
+dGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRl
+dmVsIiANCj4+PiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jk
+b21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyANCj4+PiBpbmZv
+IGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0
+bWwNCj4+Pg0KPj4NCj4+IC0tDQo+PiBMb8OvYyBEYWNoYXJ5LCBBcnRpc2Fu
+IExvZ2ljaWVsIExpYnJlDQo+Pg0KPiANCj4gLS0NCj4gTG/Dr2MgRGFjaGFy
+eSwgQXJ0aXNhbiBMb2dpY2llbCBMaWJyZQ0KPiANCg0KLS0NCkxvw69jIERh
+Y2hhcnksIEFydGlzYW4gTG9naWNpZWwgTGlicmUNCg0K
