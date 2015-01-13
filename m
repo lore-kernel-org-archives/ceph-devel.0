@@ -1,114 +1,71 @@
-From: Sreenath BH <bhsreenath@gmail.com>
-Subject: Re: Slow OSD detection
-Date: Tue, 13 Jan 2015 18:22:31 +0530
-Message-ID: <CALgKBSkAMCMJC4obnHBBgB3bCAEmmMYMdpEmeD6Tcdw3b3x36A@mail.gmail.com>
-References: <CALgKBSmF=Au_CPNRBRwvMrDejs2=JuqO4zf-AzQfT04uyqnTtg@mail.gmail.com>
-	<CA+4uBUbxsK-TwWvWjr_ynVOjsRic5YD+Qm2CbzwPxgyTWMs7kg@mail.gmail.com>
-	<546FA9A3.8090908@redhat.com>
-	<CA+4uBUZtuFc=2nFcay_GWn6ksRtW=Qp7UhzChh4MqczmH4N7hQ@mail.gmail.com>
-	<CALgKBSk+Zk9jAECaQcNWx_Avto85LwK-a-Njqc7wkoL5hrdP5w@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Cache pool latency impact
+Date: Tue, 13 Jan 2015 06:00:33 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1501130553270.26676@cobra.newdream.net>
+References: <68A06213B74F1742A2C48216AE1BB6B808720E8A@SACMBXIP02.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qg0-f46.google.com ([209.85.192.46]:42920 "EHLO
-	mail-qg0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751360AbbAMMwc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Jan 2015 07:52:32 -0500
-Received: by mail-qg0-f46.google.com with SMTP id q107so1898038qgd.5
-        for <ceph-devel@vger.kernel.org>; Tue, 13 Jan 2015 04:52:31 -0800 (PST)
-In-Reply-To: <CALgKBSk+Zk9jAECaQcNWx_Avto85LwK-a-Njqc7wkoL5hrdP5w@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:56168 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751240AbbAMOAe (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Jan 2015 09:00:34 -0500
+In-Reply-To: <68A06213B74F1742A2C48216AE1BB6B808720E8A@SACMBXIP02.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: sjust@redhat.com
-Cc: Mark Nelson <mark.nelson@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Pavan Rallabhandi <Pavan.Rallabhandi@sandisk.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-When I run "ceph --admin-daemon perf dump" by pointing at a osd admin
-socket, I get a lot of performance related data. I see a few values
-that are of particular interest:
+On Tue, 13 Jan 2015, Pavan Rallabhandi wrote:
+> Hi,
+> 
+> This is regarding cache pools and the impact of the flush/evict on the 
+> client IO latencies.
+> 
+> Am seeing a direct impact on the client IO latencies (making them worse) 
+> when flush/evict is triggered on the cache pool. In a constant ingress 
+> of IOs on the cache pool, the write performance is no better than 
+> without cache pool, because it is limited to the speed at which objects 
+> can be flushed/evicted to the backend pool.
 
-1. filestore : journal_latency - This is a long running average value
-2. osd : op_w_latency - long running average
-3. osd : op_w_process_latency - long running average.
+Yeah, this is always going to be true in general.  It is a lot for work to 
+write into the cache, read it back, write it again into the base pool, and 
+then delete it from the cache than it is to write directly to the base 
+pool.
 
-Since there is a count and a sum assoicated with these type of values,
-we can potentially get an average value over a very smal time period,
-by reading in quick succession.
+> > The questions I have are:
+> 
+> 1) When the flush/evict is in progress, are the writes on the cache pool 
+> blocked, either at the PG or at object granularity? Though I see a 
+> blocking flag honored per object context in ReplicatedPG::start_flush() 
+> and most of the callers seem to set the flag to be false.
 
-Would it be correct to say that journal write latency decides
-"slowness" of a OSD, since this is a sync. operation?
+Normally they are not blocked.  The agent starts working (finding objects 
+to flush or evict) long before we hit the cut cutoff where it starts 
+blocking.  Once it does hit that threshold, though, things can get slow, 
+because new cache creates aren't allowed until some eviction 
+completes.  You don't want to be in this situation.  :)
 
-Second question: It is easy to say which OSD is slow in a given
-server(node). But to compare it against all servers in the cluster, we
-need a mechanism to make the per-server data available at one single
-point for comparing and reporting. Instead of creating another
-cluster-wide process for this purpose, can we use the ceph monitor for
-this purpose?
+In general, if you have a lot of data inject, caching (at least in 
+firefly) isn't a terribly good idea.  The exception would probably be when 
+you have a high skew toward recent data (say you are injecting market 
+data, and do tons of analytics on the last 24 hours, but then the data 
+gets colder).
 
--Sreenath
+I can't tell if you're in the situation where the cache pool is full 
+and the agent is flushing/evicing anything and everything and writes are 
+crawling (you should see a message in 'ceph health' when this happens) or 
+that the agent is alive but working with low effort and the impact is 
+still high.  If it's the latter I'm not sure yet what is going wrong.. 
+perhaps you can capture a few minutes of log from one of your OSDs?  
+(debug ms = 1, debug osd = 20).
 
+> 2) Is there any mechanism (that I might have overlooked) to avoid this 
+> situation, by throttling the flush/evict operations on the fly? If not, 
+> shouldn't there be one?
 
-On 11/24/14, Sreenath BH <bhsreenath@gmail.com> wrote:
-> I think we could find five top OSDs which has the maximum average slow
-> times, as well as five OSDs with absolute maximum time.
->
-> Should we also be correlating this with SMART data associated with the
-> disk?
-> Some agency has to do the comparison in a storage node and make this
-> available to other  nodes to compare with their own data.
->
-> -Sreenath
->
-> On 11/22/14, Samuel Just <sam.just@inktank.com> wrote:
->> The challenge I think is that "slow osd" is probably a global
->> question.  That is, I think it requires the agent to compare a given
->> osd to the other osds in the cluster (and to itself earlier in time).
->> -Sam
->>
->> On Fri, Nov 21, 2014 at 1:07 PM, Mark Nelson <mark.nelson@inktank.com>
->> wrote:
->>> It'd be nice if something like slow OSD detection could exist outside of
->>> calamari and itself by an event that we record in the logs and make
->>> available via the admin socket (so that calamari could pick it up). That
->>> way
->>> folks could get it into logstash and other system monitoring tools (say
->>> PCP/Nagios/etc).
->>>
->>> Mark
->>>
->>>
->>> On 11/21/2014 02:58 PM, Samuel Just wrote:
->>>>
->>>> It's still an open item.  #ceph-devel would be a good place to bounce
->>>> ideas.  Through the admin_socket and perf_counter machinery, the osds
->>>> already expose a bunch of information about queue length, latency,
->>>> etc.  This might actually fit well in calamari, which already gathers
->>>> a bunch of those stats.
->>>> -Sam
->>>>
->>>> On Thu, Nov 20, 2014 at 9:00 PM, Sreenath BH <bhsreenath@gmail.com>
->>>> wrote:
->>>>>
->>>>> Hi All
->>>>>
->>>>> Slow OSD detection is mentioned as one of the projects ideas in
->>>>> https://wiki.ceph.com/Development/Project_Ideas
->>>>>
->>>>> I am interested in implementing this. Is this still an open item?
->>>>>
->>>>> thanks,
->>>>> Sreenath
->>>>> --
->>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->>>>> in
->>>>> the body of a message to majordomo@vger.kernel.org
->>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->>>> in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>
->>>
->>
->
+Hmm, we could have a 'noagent' option (similar to noout, nobackfill, 
+noscrub, etc.) that lets the admin tell the system to stop tiering 
+movements, but I'm not sure that's wht you're asking for...
+
+sage
