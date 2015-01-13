@@ -1,174 +1,263 @@
-From: "Miyamae, Takeshi" <miyamae.takeshi@jp.fujitsu.com>
-Subject: RE: Deadline of Github pull request for Hammer release (question)
-Date: Tue, 13 Jan 2015 17:05:54 +0000
-Message-ID: <870DE8DBB716524BAE51B2D499EC81E40AA40983@g01jpexmbyt24>
-References: <870DE8DBB716524BAE51B2D499EC81E40AA3F9AB@g01jpexmbyt24>
- <54AC048E.9040200@dachary.org>
- <870DE8DBB716524BAE51B2D499EC81E40AA40849@g01jpexmbyt24>
- <54B4F2C0.2040805@dachary.org>
- <870DE8DBB716524BAE51B2D499EC81E40AA40872@g01jpexmbyt24>
- <54B5137F.7090902@dachary.org>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Deadline of Github pull request for Hammer release (question)
+Date: Tue, 13 Jan 2015 19:03:20 +0100
+Message-ID: <54B55DE8.6010003@dachary.org>
+References: <870DE8DBB716524BAE51B2D499EC81E40AA3F9AB@g01jpexmbyt24> <54AC048E.9040200@dachary.org> <870DE8DBB716524BAE51B2D499EC81E40AA40849@g01jpexmbyt24> <54B4F2C0.2040805@dachary.org> <870DE8DBB716524BAE51B2D499EC81E40AA40872@g01jpexmbyt24> <54B5137F.7090902@dachary.org> <870DE8DBB716524BAE51B2D499EC81E40AA40983@g01jpexmbyt24>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="HbuXmR0ex5QlghWQmBOmwVEnsscKwqcMD"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from fgwmail6.fujitsu.co.jp ([192.51.44.36]:36213 "EHLO
-	fgwmail6.fujitsu.co.jp" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752446AbbAMRGA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Jan 2015 12:06:00 -0500
-Received: from kw-mxoi2.gw.nic.fujitsu.com (unknown [10.0.237.143])
-	by fgwmail6.fujitsu.co.jp (Postfix) with ESMTP id DA8A23EE0AE
-	for <ceph-devel@vger.kernel.org>; Wed, 14 Jan 2015 02:05:58 +0900 (JST)
-Received: from s1.gw.fujitsu.co.jp (s1.gw.fujitsu.co.jp [10.0.50.91])
-	by kw-mxoi2.gw.nic.fujitsu.com (Postfix) with ESMTP id 51B93AC0361
-	for <ceph-devel@vger.kernel.org>; Wed, 14 Jan 2015 02:05:57 +0900 (JST)
-Received: from g01jpfmpwyt03.exch.g01.fujitsu.local (g01jpfmpwyt03.exch.g01.fujitsu.local [10.128.193.57])
-	by s1.gw.fujitsu.co.jp (Postfix) with ESMTP id E20921DB8040
-	for <ceph-devel@vger.kernel.org>; Wed, 14 Jan 2015 02:05:56 +0900 (JST)
-In-Reply-To: <54B5137F.7090902@dachary.org>
-Content-Language: ja-JP
+Received: from mail2.dachary.org ([91.121.57.175]:38570 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751446AbbAMSDX (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Jan 2015 13:03:23 -0500
+In-Reply-To: <870DE8DBB716524BAE51B2D499EC81E40AA40983@g01jpexmbyt24>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
+To: "Miyamae, Takeshi" <miyamae.takeshi@jp.fujitsu.com>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>, "Shiozawa, Kensuke" <shiozawa.kennsu@jp.fujitsu.com>, "Nakao, Takanori" <nakao.takanori@jp.fujitsu.com>, "Paul Von-Stamwitz (PVonStamwitz@us.fujitsu.com)" <PVonStamwitz@us.fujitsu.com>
 
-SGkgTG9pYywNCg0KVGhhbmsgeW91IGZvciB5b3VyIHF1aWNrIHJldmlldy4N
-Cg0KPiBDb3VsZCB5b3UgcmVmZXJlbmNlIHRoZSBqZXJhc3VyZSBmaWxlcyAo
-dGhleSBhcmUgaW4gdGhlIGplcmFzdXJlIHBsdWdpbiBhbHJlYWR5KQ0KPiBp
-bnN0ZWFkIG9mIGluY2x1ZGluZyB0aGVtIGluIHlvdXIgcGF0Y2ggPw0KDQpX
-ZSBoYWQgdXNlZCB0aGUgcmVmZXJlbmNlIG9mIGplcmFzdXJlIHYyLjAgZmls
-ZXMgYmVmb3JlLCBidXQgY2hhbmdlZCB0byBpbmNsdWRpbmcgdjEuMiBmaWxl
-cw0KYWZ0ZXIgdGhlIHBhdGVudCBpc3N1ZS4NCkhvd2V2ZXIsIHdlIGNhbiBy
-ZXN0b3JlIHRoZSByZWZlcmVuY2UgcmlnaHQgYXdheSBpZiB3ZSBhcmUgbmVl
-ZGVkLg0KDQo+IEluIDo6cHJlcGFyZSB5b3UgcmV1c2UgdGhlIG1hdHJpeCwg
-aWYgcG9zc2libGUuIElmIHlvdXIgaW50ZW50aW9uIGlzIHRvIGltcHJvdmUg
-cGVyZm9ybWFuY2VzLA0KPiB5b3Ugc2hvdWxkIGNvbnNpZGVyIHVzaW5nIHRo
-ZSBzYW1lIGFwcHJvYWNoIGFzIHRoZSBpc2EgcGx1Z2luLg0KDQpXZSBoYXZl
-IGZvdW5kIGEgcGVyZm9ybWFuY2UgaXNzdWUgY2F1c2VkIGJ5IHJlZHVuZGFu
-dCBpbml0aWFsaXphdGlvbnMgb2YgdGhlIG1vZHVsZSwNCmFuZCBzb2x2ZWQg
-aXQgYnkgY2FjaGluZyB0aGUgaW5pdGlhbGl6ZWQgdmFyaWFibGVzIGluIG1l
-bW9yeS4NCklmIHRoYXQgaXMgdGhlIHNhbWUgYXBwcm9hY2ggYXMgaXNhLXBs
-dWdpbiB5b3UgbWVudGlvbmVkLCB3ZSBhbHNvIGRvIG5vdCBoYXZlIHRoZSBz
-YW1lDQppc3N1ZSBhbnkgbW9yZS4NCg0KPiBJJ2xsIGhhdmUgbW9yZSBjb21t
-ZW50cyBvbmNlIHlvdSBoYXZlIHVuaXQgLyBmdW5jdGlvbmFsIHRlc3RzDQoN
-CldlIGRvIGhhdmUgdGhlIHRob3NlIHVuaXQvZnVuY3Rpb25hbCB0ZXN0cywg
-YnV0IHRoZSBzZXJ2ZXIgaXMgdW5yZWFjaGFibGUgYXQgdGhpcyBtb21lbnQu
-DQpQbGVhc2UgbGV0IHVzIHVwbG9hZCB0aGVtIHRvIHRoZSByZXBvc2l0b3J5
-IHRvbW9ycm93Lg0KDQo+IFJlZ2FyZGluZyB5b3VyIGluaXRpYWwgcXVlc3Rp
-b246IEkgdGhpbmsgaXQgaXMgdG9vIGxhdGUgZm9yIHRoZSBIYW1tZXIgcmVs
-ZWFzZS4NCg0KV2UgYXJlIHNvIGRpc2FwcG9pbnRlZCB0byBoZWFyIHRoYXQs
-IGJ1dCB3ZSBtdXN0IGFwb2xvZ2l6ZSBmb3IgdGhlIGxhdGUgcmVxdWVzdC4N
-CklmIHRoZXJlIHdvdWxkIGJlIGFueSBjaGFuY2UgdGhhdCBTSEVDIGJlIHB1
-bGxlZCBpbnRvIGhhbW1lciwgd2UgYXJlIHZlcnkgaGFwcHkgdG8NCmNvbmR1
-Y3QgYWxsIHRoZSBuZWNlc3NhcnkgdGVzdHMgYnkgb3Vyc2VsdmVzLg0KUGxl
-YXNlIGxldCB1cyBrbm93IHRoZSBkZXRhaWxlZCBzY2hlZHVsZSBpZiB0aGlz
-IGlzIGEgZmVhc2libGUgb3B0aW9uLg0KDQpCZXN0IHJlZ2FyZHMsDQpUYWtl
-c2hpIE1peWFtYWUNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZy
-b206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnIFttYWlsdG86
-Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFsZiBP
-ZiBMb2ljIERhY2hhcnkNClNlbnQ6IFR1ZXNkYXksIEphbnVhcnkgMTMsIDIw
-MTUgOTo0NiBQTQ0KVG86IE1peWFtYWUsIFRha2VzaGkv5a6u5YmNIOWJmw0K
-Q2M6IENlcGggRGV2ZWxvcG1lbnQ7IFNoaW96YXdhLCBLZW5zdWtlL+Whqeay
-oiDos6LovJQ7IE5ha2FvLCBUYWthbm9yaS/kuK3lsL4g6be56KmUOyBQYXVs
-IFZvbi1TdGFtd2l0eiAoUFZvblN0YW13aXR6QHVzLmZ1aml0c3UuY29tKQ0K
-U3ViamVjdDogUmU6IERlYWRsaW5lIG9mIEdpdGh1YiBwdWxsIHJlcXVlc3Qg
-Zm9yIEhhbW1lciByZWxlYXNlIChxdWVzdGlvbikNCg0KSGksDQoNCkl0J3Mg
-YSBncmVhdCBzdGFydCA6LSkgQSBmZXcgY29tbWVudHM6DQoNCkNvdWxkIHlv
-dSByZWZlcmVuY2UgdGhlIGplcmFzdXJlIGZpbGVzICh0aGV5IGFyZSBpbiB0
-aGUgamVyYXN1cmUgcGx1Z2luIGFscmVhZHkpIGluc3RlYWQgb2YgaW5jbHVk
-aW5nIHRoZW0gaW4geW91ciBwYXRjaCA/DQoNCkluIDo6cHJlcGFyZSB5b3Ug
-cmV1c2UgdGhlIG1hdHJpeCwgaWYgcG9zc2libGUuIElmIHlvdXIgaW50ZW50
-aW9uIGlzIHRvIGltcHJvdmUgcGVyZm9ybWFuY2VzLCB5b3Ugc2hvdWxkIGNv
-bnNpZGVyIHVzaW5nIHRoZSBzYW1lIGFwcHJvYWNoIGFzIHRoZSBpc2EgcGx1
-Z2luLiBTZWUgaHR0cDovL3dvcmtiZW5jaC5kYWNoYXJ5Lm9yZy9jZXBoL2Nl
-cGgvYmxvYi9naWFudC9zcmMvZXJhc3VyZS1jb2RlL2lzYS9FcmFzdXJlQ29k
-ZVBsdWdpbklzYS5jYyNMMzYgd2hpY2ggaXMgYW5kIGluZGVwZW5kZW50IHR5
-cGUgaHR0cDovL3dvcmtiZW5jaC5kYWNoYXJ5Lm9yZy9jZXBoL2NlcGgvYmxv
-Yi9naWFudC9zcmMvZXJhc3VyZS1jb2RlL2lzYS9FcmFzdXJlQ29kZUlzYVRh
-YmxlQ2FjaGUuaCB3aXRoIG9ubHkgb25lIGluc3RhbmNlIGFuZCBpcyBwb3B1
-bGF0ZWQgYXMgbmVlZGVkIGFuZCBwcm90ZWN0ZWQgYnkgYSBsb2NrIHRvIG1h
-a2UgaXQgdGhyZWFkIHNhZmUgOiBodHRwOi8vd29ya2JlbmNoLmRhY2hhcnku
-b3JnL2NlcGgvY2VwaC9ibG9iL2dpYW50L3NyYy9lcmFzdXJlLWNvZGUvaXNh
-L0VyYXN1cmVDb2RlSXNhVGFibGVDYWNoZS5oI0wxMDENCg0KSSdsbCBoYXZl
-IG1vcmUgY29tbWVudHMgb25jZSB5b3UgaGF2ZSB1bml0IC8gZnVuY3Rpb25h
-bCB0ZXN0cyAoIHNpbWlsYXIgdG8gaHR0cDovL3dvcmtiZW5jaC5kYWNoYXJ5
-Lm9yZy9jZXBoL2NlcGgvYmxvYi9naWFudC9zcmMvdGVzdC9lcmFzdXJlLWNv
-ZGUvVGVzdEVyYXN1cmVDb2RlSmVyYXN1cmUuY2MgKS4gDQoNClJlZ2FyZGlu
-ZyB5b3VyIGluaXRpYWwgcXVlc3Rpb246IEkgdGhpbmsgaXQgaXMgdG9vIGxh
-dGUgZm9yIHRoZSBIYW1tZXIgcmVsZWFzZS4gQnV0IGZyb20gd2hhdCBJIHJl
-YWQgaXQgbG9va3MgbGlrZSB3ZSdsbCBiZSBhYmxlIHRvIG1lcmdlIGluIHRo
-ZSBlYXJseSBzdGFnZXMgb2YgdGhlIG5leHQgcmVsZWFzZSBhbmQgdGhhdCB3
-aWxsIGdpdmUgdXMgdGltZSB0byBwcm9wZXJseSB0ZXN0IGl0Lg0KDQpDaGVl
-cnMNCg0KT24gMTMvMDEvMjAxNSAxMTozNCwgTWl5YW1hZSwgVGFrZXNoaSB3
-cm90ZToNCj4gSGkgTG9pYywNCj4gDQo+IEknbSBzbyBzb3JyeS4gVGhlIGZv
-bGxvd2luZyBpcyB0aGUgY29ycmVjdCByZXBvc2l0b3J5Lg0KPiANCj4gaHR0
-cHM6Ly9naXRodWIuY29tL3QtbWl5YW1hZS9jZXBoDQo+IA0KPiBCZXN0IHJl
-Z2FyZHMsDQo+IFRha2VzaGkgTWl5YW1hZQ0KPiANCj4gLS0tLS1PcmlnaW5h
-bCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogTG9pYyBEYWNoYXJ5IFttYWlsdG86
-bG9pY0BkYWNoYXJ5Lm9yZ10NCj4gU2VudDogVHVlc2RheSwgSmFudWFyeSAx
-MywgMjAxNSA3OjI2IFBNDQo+IFRvOiBNaXlhbWFlLCBUYWtlc2hpL+WuruWJ
-jSDliZsNCj4gQ2M6IENlcGggRGV2ZWxvcG1lbnQ7IFNoaW96YXdhLCBLZW5z
-dWtlL+WhqeayoiDos6LovJQ7IE5ha2FvLCBUYWthbm9yaS/kuK3lsL4g6be5
-6KmUOyANCj4gUGF1bCBWb24tU3RhbXdpdHogKFBWb25TdGFtd2l0ekB1cy5m
-dWppdHN1LmNvbSkNCj4gU3ViamVjdDogUmU6IERlYWRsaW5lIG9mIEdpdGh1
-YiBwdWxsIHJlcXVlc3QgZm9yIEhhbW1lciByZWxlYXNlIA0KPiAocXVlc3Rp
-b24pDQo+IA0KPiBIaSwNCj4gDQo+IE9uIDEzLzAxLzIwMTUgMTE6MjQsIE1p
-eWFtYWUsIFRha2VzaGkgd3JvdGU6DQo+PiBIaSBMb2ljLA0KPj4NCj4+PiBB
-bHRob3VnaCB3ZSdyZSBsYXRlIGluIHRoZSBIYW1tZXIgcm9hZG1hcCwgaXQn
-cyBhIGdvb2QgdGltZSBmb3IgYW4gZWFybHkgcHJldmlldy4gSXQgd2lsbCBo
-ZWxwIHNob3cgd2hhdCBuZWVkcyB0byBiZSBjaGFuZ2VkIHRvIGFjY29tb2Rh
-dGUgdGhlIFNIRUMgcGx1Z2luLg0KPj4NCj4+IFRoYW5rIHlvdSBmb3IgeW91
-ciBhZHZpY2VzLg0KPj4gV2UgaGF2ZSB1cGxvYWRlZCBvdXIgbGF0ZXN0IGNv
-ZGVzIHRvIHRoZSBmb2xsb3dpbmcgZm9sayByZXBvc2l0b3J5IGZvciBhbiBl
-YXJseSByZXZpZXcuDQo+Pg0KPj4gaHR0cHM6Ly9naXRodWIuY29tL21peWFt
-YWUtdGFrZXNoaS9tdWx0aXBsZS1zaGVjDQo+IA0KPiBJdCdzIDQwNCA/IElz
-IGl0IGEgcHJpdmF0ZSByZXBvc2l0b3J5IG1heWJlID8NCj4gDQo+Pg0KPj4g
-U0hFQyBpcyBsb2NhdGVkIGluIHNyYy9lcmFzdXJlLWNvZGUvc2hlYyBkaXJl
-Y3RvcnkuDQo+Pg0KPj4gV2UgYXJlIHZlcmlmeWluZyBTSEVDJ3MgYWR2YW50
-YWdlcyBvbiBvdXIgQ2VwaCBjbHVzdGVyLiBJdCB0YWtlcyBhIGxpdHRsZSBi
-aXQgbW9yZS4NCj4+IFdvdWxkIHlvdSBwbGVhc2Ugc3RhcnQgdGhlIHJldmll
-dyBiZWZvcmUgdGhhdD8NCj4+DQo+PiBCZXN0IHJlZ2FyZHMsDQo+PiBUYWtl
-c2hpIE1peWFtYWUNCj4+DQo+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0t
-LQ0KPj4gRnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcg
-DQo+PiBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3Jn
-XSBPbiBCZWhhbGYgT2YgTG9pYyBEYWNoYXJ5DQo+PiBTZW50OiBXZWRuZXNk
-YXksIEphbnVhcnkgNywgMjAxNSAxMjo1MiBBTQ0KPj4gVG86IE1peWFtYWUs
-IFRha2VzaGkv5a6u5YmNIOWJmw0KPj4gQ2M6IENlcGggRGV2ZWxvcG1lbnQ7
-IFNoaW96YXdhLCBLZW5zdWtlL+WhqeayoiDos6LovJQ7IE5ha2FvLCBUYWth
-bm9yaS/kuK3lsL4g6be56KmUDQo+PiBTdWJqZWN0OiBSZTogRGVhZGxpbmUg
-b2YgR2l0aHViIHB1bGwgcmVxdWVzdCBmb3IgSGFtbWVyIHJlbGVhc2UNCj4+
-IChxdWVzdGlvbikNCj4+DQo+PiBIaSwNCj4+DQo+PiBPbiAwNi8wMS8yMDE1
-IDEyOjQ5LCBNaXlhbWFlLCBUYWtlc2hpIHdyb3RlOg0KPj4+IERlYXIgTG9p
-YywNCj4+Pg0KPj4+IEknbSBUYWtlc2hpIE1peWFtYWUsIG9uZSBvZiB0aGUg
-YXV0aG9ycyBvZiBTSEVDJ3MgYmx1ZXByaW50Lg0KPj4+DQo+Pj4gU2hpbmds
-ZWQgRXJhc3VyZSBDb2RlIChTSEVDKQ0KPj4+IGh0dHBzOi8vd2lraS5jZXBo
-LmNvbS9QbGFubmluZy9CbHVlcHJpbnRzL0hhbW1lci9TaGluZ2xlZF9FcmFz
-dXJlX0NvDQo+Pj4gZA0KPj4+IGUNCj4+PiBfKFNIRUMpDQo+Pg0KPj4gVGhl
-IHdvcmsgeW91IGhhdmUgZG9uZSBpcyBxdWl0ZSBpbXByZXNzaXZlIDotKQ0K
-Pj4NCj4+PiBXZSBoYXZlIHJldmlzZWQgb3VyIGJsdWVwcmludCBzaG93biBp
-biB0aGUgbGFzdCBDRFMgdG8gZXh0ZW5kIG91ciANCj4+PiBlcmFzdXJlIGNv
-ZGUgbGF5b3V0cyBhbmQgZGVzY3JpYmUgdGhlIGd1aWRlbGluZSBmb3IgY2hv
-b3NpbmcgU0hFQyBhbW9uZyB2YXJpb3VzIEVDIHBsdWdpbnMuDQo+Pj4gV2Ug
-YmVsaWV2ZSB0aGUgYmx1ZXByaW50IG5vdyBhbnN3ZXJzIGFsbCB0aGUgY29t
-bWVudHMgZ2l2ZW4gYXQgdGhlIENEUy4NCj4+DQo+PiBHcmVhdC4NCj4+DQo+
-Pj4gSW4gYWRkaXRpb24sIHdlIHdvdWxkIGxpa2UgdG8gYXNrIGZvciB5b3Vy
-IGFkdmljZSBvbiB0aGUgc2NoZWR1bGUgb2YgDQo+Pj4gb3VyIGdpdGh1YiBw
-dWxsIHJlcXVlc3QuIE1vcmUgc3BlY2lmaWNhbGx5LCB3ZSB3b3VsZCBsaWtl
-IHRvIGtub3cgDQo+Pj4gaXRzIGRlYWRsaW5lIGZvciBIYW1tZXIgcmVsZWFz
-ZS4NCj4+PiAoQXMgd2UgaGF2ZSBub3QgcmVhbGx5IGNvbXBsZXRlZCBvdXIg
-dmVyaWZpY2F0aW9uIG9mIFNIRUMsIHdlIGFyZSANCj4+PiB3b25kZXJpbmcg
-aWYgd2Ugc2hvdWxkIG1ha2UgaXQgb3BlbiBmb3IgZWFybHkgcHJldmlldy4p
-DQo+Pg0KPj4gQWx0aG91Z2ggd2UncmUgbGF0ZSBpbiB0aGUgSGFtbWVyIHJv
-YWRtYXAsIGl0J3MgYSBnb29kIHRpbWUgZm9yIGFuIGVhcmx5IHByZXZpZXcu
-IEl0IHdpbGwgaGVscCBzaG93IHdoYXQgbmVlZHMgdG8gYmUgY2hhbmdlZCB0
-byBhY2NvbW9kYXRlIHRoZSBTSEVDIHBsdWdpbi4NCj4+DQo+PiBDaGVlcnMN
-Cj4+DQo+Pj4gVGhhbmsgeW91IGluIGFkdmFuY2UsDQo+Pj4gVGFrZXNoaSBN
-aXlhbWFlDQo+Pj4NCj4+PiAtLQ0KPj4+IFRvIHVuc3Vic2NyaWJlIGZyb20g
-dGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRl
-dmVsIiANCj4+PiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jk
-b21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyANCj4+PiBpbmZv
-IGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0
-bWwNCj4+Pg0KPj4NCj4+IC0tDQo+PiBMb8OvYyBEYWNoYXJ5LCBBcnRpc2Fu
-IExvZ2ljaWVsIExpYnJlDQo+Pg0KPiANCj4gLS0NCj4gTG/Dr2MgRGFjaGFy
-eSwgQXJ0aXNhbiBMb2dpY2llbCBMaWJyZQ0KPiANCg0KLS0NCkxvw69jIERh
-Y2hhcnksIEFydGlzYW4gTG9naWNpZWwgTGlicmUNCg0K
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--HbuXmR0ex5QlghWQmBOmwVEnsscKwqcMD
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+Hi,
+
+On 13/01/2015 18:05, Miyamae, Takeshi wrote:
+> Hi Loic,
+>=20
+> Thank you for your quick review.
+>=20
+>> Could you reference the jerasure files (they are in the jerasure plugi=
+n already)
+>> instead of including them in your patch ?
+>=20
+> We had used the reference of jerasure v2.0 files before, but changed to=
+ including v1.2 files
+> after the patent issue.
+
+If you are refering to http://erasure-code-patents.xyz/, it can safely be=
+ ignored.
+
+> However, we can restore the reference right away if we are needed.
+>=20
+>> In ::prepare you reuse the matrix, if possible. If your intention is t=
+o improve performances,
+>> you should consider using the same approach as the isa plugin.
+>=20
+> We have found a performance issue caused by redundant initializations o=
+f the module,
+> and solved it by caching the initialized variables in memory.
+> If that is the same approach as isa-plugin you mentioned, we also do no=
+t have the same
+> issue any more.
+
+The ISA plugin approach is thread safe, that's the important part.
+
+>> I'll have more comments once you have unit / functional tests
+>=20
+> We do have the those unit/functional tests, but the server is unreachab=
+le at this moment.
+> Please let us upload them to the repository tomorrow.
+
+Great.
+
+>> Regarding your initial question: I think it is too late for the Hammer=
+ release.
+>=20
+> We are so disappointed to hear that, but we must apologize for the late=
+ request.
+> If there would be any chance that SHEC be pulled into hammer, we are ve=
+ry happy to
+> conduct all the necessary tests by ourselves.
+> Please let us know the detailed schedule if this is a feasible option.
+
+Note that since this is a plugin it will be easy for someone to install i=
+t on a Hammer cluster, simply by copying the plugin files to each OSD / M=
+ON and restarting them. If there is some kind of urgency for you to be ab=
+le to install this new plugin, I would advise making a package that conta=
+ins just this file, restart the OSD once installed and recommend that the=
+ installation is done on all machines of the cluster (because every OSD /=
+ MON need to know about the plugin).=20
+
+Cheers
+
+> Best regards,
+> Takeshi Miyamae
+>=20
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.ke=
+rnel.org] On Behalf Of Loic Dachary
+> Sent: Tuesday, January 13, 2015 9:46 PM
+> To: Miyamae, Takeshi/=E5=AE=AE=E5=89=8D =E5=89=9B
+> Cc: Ceph Development; Shiozawa, Kensuke/=E5=A1=A9=E6=B2=A2 =E8=B3=A2=E8=
+=BC=94; Nakao, Takanori/=E4=B8=AD=E5=B0=BE =E9=B7=B9=E8=A9=94; Paul Von-S=
+tamwitz (PVonStamwitz@us.fujitsu.com)
+> Subject: Re: Deadline of Github pull request for Hammer release (questi=
+on)
+>=20
+> Hi,
+>=20
+> It's a great start :-) A few comments:
+>=20
+> Could you reference the jerasure files (they are in the jerasure plugin=
+ already) instead of including them in your patch ?
+>=20
+> In ::prepare you reuse the matrix, if possible. If your intention is to=
+ improve performances, you should consider using the same approach as the=
+ isa plugin. See http://workbench.dachary.org/ceph/ceph/blob/giant/src/er=
+asure-code/isa/ErasureCodePluginIsa.cc#L36 which is and independent type =
+http://workbench.dachary.org/ceph/ceph/blob/giant/src/erasure-code/isa/Er=
+asureCodeIsaTableCache.h with only one instance and is populated as neede=
+d and protected by a lock to make it thread safe : http://workbench.dacha=
+ry.org/ceph/ceph/blob/giant/src/erasure-code/isa/ErasureCodeIsaTableCache=
+=2Eh#L101
+>=20
+> I'll have more comments once you have unit / functional tests ( similar=
+ to http://workbench.dachary.org/ceph/ceph/blob/giant/src/test/erasure-co=
+de/TestErasureCodeJerasure.cc ).=20
+>=20
+> Regarding your initial question: I think it is too late for the Hammer =
+release. But from what I read it looks like we'll be able to merge in the=
+ early stages of the next release and that will give us time to properly =
+test it.
+>=20
+> Cheers
+>=20
+> On 13/01/2015 11:34, Miyamae, Takeshi wrote:
+>> Hi Loic,
+>>
+>> I'm so sorry. The following is the correct repository.
+>>
+>> https://github.com/t-miyamae/ceph
+>>
+>> Best regards,
+>> Takeshi Miyamae
+>>
+>> -----Original Message-----
+>> From: Loic Dachary [mailto:loic@dachary.org]
+>> Sent: Tuesday, January 13, 2015 7:26 PM
+>> To: Miyamae, Takeshi/=E5=AE=AE=E5=89=8D =E5=89=9B
+>> Cc: Ceph Development; Shiozawa, Kensuke/=E5=A1=A9=E6=B2=A2 =E8=B3=A2=E8=
+=BC=94; Nakao, Takanori/=E4=B8=AD=E5=B0=BE =E9=B7=B9=E8=A9=94;=20
+>> Paul Von-Stamwitz (PVonStamwitz@us.fujitsu.com)
+>> Subject: Re: Deadline of Github pull request for Hammer release=20
+>> (question)
+>>
+>> Hi,
+>>
+>> On 13/01/2015 11:24, Miyamae, Takeshi wrote:
+>>> Hi Loic,
+>>>
+>>>> Although we're late in the Hammer roadmap, it's a good time for an e=
+arly preview. It will help show what needs to be changed to accomodate th=
+e SHEC plugin.
+>>>
+>>> Thank you for your advices.
+>>> We have uploaded our latest codes to the following folk repository fo=
+r an early review.
+>>>
+>>> https://github.com/miyamae-takeshi/multiple-shec
+>>
+>> It's 404 ? Is it a private repository maybe ?
+>>
+>>>
+>>> SHEC is located in src/erasure-code/shec directory.
+>>>
+>>> We are verifying SHEC's advantages on our Ceph cluster. It takes a li=
+ttle bit more.
+>>> Would you please start the review before that?
+>>>
+>>> Best regards,
+>>> Takeshi Miyamae
+>>>
+>>> -----Original Message-----
+>>> From: ceph-devel-owner@vger.kernel.org=20
+>>> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Loic Dachary
+>>> Sent: Wednesday, January 7, 2015 12:52 AM
+>>> To: Miyamae, Takeshi/=E5=AE=AE=E5=89=8D =E5=89=9B
+>>> Cc: Ceph Development; Shiozawa, Kensuke/=E5=A1=A9=E6=B2=A2 =E8=B3=A2=E8=
+=BC=94; Nakao, Takanori/=E4=B8=AD=E5=B0=BE =E9=B7=B9=E8=A9=94
+>>> Subject: Re: Deadline of Github pull request for Hammer release
+>>> (question)
+>>>
+>>> Hi,
+>>>
+>>> On 06/01/2015 12:49, Miyamae, Takeshi wrote:
+>>>> Dear Loic,
+>>>>
+>>>> I'm Takeshi Miyamae, one of the authors of SHEC's blueprint.
+>>>>
+>>>> Shingled Erasure Code (SHEC)
+>>>> https://wiki.ceph.com/Planning/Blueprints/Hammer/Shingled_Erasure_Co=
+
+>>>> d
+>>>> e
+>>>> _(SHEC)
+>>>
+>>> The work you have done is quite impressive :-)
+>>>
+>>>> We have revised our blueprint shown in the last CDS to extend our=20
+>>>> erasure code layouts and describe the guideline for choosing SHEC am=
+ong various EC plugins.
+>>>> We believe the blueprint now answers all the comments given at the C=
+DS.
+>>>
+>>> Great.
+>>>
+>>>> In addition, we would like to ask for your advice on the schedule of=
+=20
+>>>> our github pull request. More specifically, we would like to know=20
+>>>> its deadline for Hammer release.
+>>>> (As we have not really completed our verification of SHEC, we are=20
+>>>> wondering if we should make it open for early preview.)
+>>>
+>>> Although we're late in the Hammer roadmap, it's a good time for an ea=
+rly preview. It will help show what needs to be changed to accomodate the=
+ SHEC plugin.
+>>>
+>>> Cheers
+>>>
+>>>> Thank you in advance,
+>>>> Takeshi Miyamae
+>>>>
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+"=20
+>>>> in the body of a message to majordomo@vger.kernel.org More majordomo=
+=20
+>>>> info at  http://vger.kernel.org/majordomo-info.html
+>>>>
+>>>
+>>> --
+>>> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>>>
+>>
+>> --
+>> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>>
+>=20
+> --
+> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>=20
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--HbuXmR0ex5QlghWQmBOmwVEnsscKwqcMD
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlS1XegACgkQ8dLMyEl6F21z0wCgiRmdsnNfhAGiFboDsK3OffUS
+NX8An3T6FTxjuvXY5kGl35Tk1wSrsLoI
+=D7yd
+-----END PGP SIGNATURE-----
+
+--HbuXmR0ex5QlghWQmBOmwVEnsscKwqcMD--
