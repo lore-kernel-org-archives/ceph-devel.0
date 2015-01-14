@@ -1,158 +1,224 @@
-From: Christoph Hellwig <hch@lst.de>
-Subject: [PATCH 12/12] fs: remove default_backing_dev_info
-Date: Wed, 14 Jan 2015 10:42:41 +0100
-Message-ID: <1421228561-16857-13-git-send-email-hch@lst.de>
+From: Jan Kara <jack@suse.cz>
+Subject: Re: [PATCH 01/12] fs: deduplicate noop_backing_dev_info
+Date: Wed, 14 Jan 2015 13:41:13 +0100
+Message-ID: <20150114124113.GD10215@quack.suse.cz>
 References: <1421228561-16857-1-git-send-email-hch@lst.de>
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <1421228561-16857-1-git-send-email-hch@lst.de>
-Sender: owner-linux-mm@kvack.org
-To: Jens Axboe <axboe@fb.com>
-Cc: David Howells <dhowells@redhat.com>, Tejun Heo <tj@kernel.org>, linux-fsdevel@vger.kernel.org, linux-mm@kvack.org, linux-mtd@lists.infradead.org, linux-nfs@vger.kernel.org, ceph-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+ <1421228561-16857-2-git-send-email-hch@lst.de>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cantor2.suse.de ([195.135.220.15]:56645 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751995AbbANMlU (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 14 Jan 2015 07:41:20 -0500
+Content-Disposition: inline
+In-Reply-To: <1421228561-16857-2-git-send-email-hch@lst.de>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Christoph Hellwig <hch@lst.de>
+Cc: Jens Axboe <axboe@fb.com>, David Howells <dhowells@redhat.com>, Tejun Heo <tj@kernel.org>, linux-fsdevel@vger.kernel.org, linux-mm@kvack.org, linux-mtd@lists.infradead.org, linux-nfs@vger.kernel.org, ceph-devel@vger.kernel.org
 
-Now that default_backing_dev_info is not used for writeback purposes we can
-git rid of it easily:
+On Wed 14-01-15 10:42:30, Christoph Hellwig wrote:
+> hugetlbfs, kernfs and dlmfs can simply use noop_backing_dev_info instead
+> of creating a local duplicate.
+  Looks good.
+Reviewed-by: Jan Kara <jack@suse.cz>
 
- - instead of using it's name for tracing unregistered bdi we just use
-   "unknown"
- - btrfs and ceph can just assign the default read ahead window themselves
-   like several other filesystems already do.
- - we can assign noop_backing_dev_info as the default one in alloc_super.
-   All filesystems already either assigned their own or
-   noop_backing_dev_info.
-
-Signed-off-by: Christoph Hellwig <hch@lst.de>
-Reviewed-by: Tejun Heo <tj@kernel.org>
----
- fs/btrfs/disk-io.c               | 2 +-
- fs/ceph/super.c                  | 2 +-
- fs/super.c                       | 8 ++------
- include/linux/backing-dev.h      | 1 -
- include/trace/events/writeback.h | 6 ++----
- mm/backing-dev.c                 | 9 ---------
- 6 files changed, 6 insertions(+), 22 deletions(-)
-
-diff --git a/fs/btrfs/disk-io.c b/fs/btrfs/disk-io.c
-index 1ec872e..1afb182 100644
---- a/fs/btrfs/disk-io.c
-+++ b/fs/btrfs/disk-io.c
-@@ -1719,7 +1719,7 @@ static int setup_bdi(struct btrfs_fs_info *info, struct backing_dev_info *bdi)
- 	if (err)
- 		return err;
- 
--	bdi->ra_pages	= default_backing_dev_info.ra_pages;
-+	bdi->ra_pages = VM_MAX_READAHEAD * 1024 / PAGE_CACHE_SIZE;
- 	bdi->congested_fn	= btrfs_congested_fn;
- 	bdi->congested_data	= info;
- 	return 0;
-diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-index e350cc1..5ae6258 100644
---- a/fs/ceph/super.c
-+++ b/fs/ceph/super.c
-@@ -899,7 +899,7 @@ static int ceph_register_bdi(struct super_block *sb,
- 			>> PAGE_SHIFT;
- 	else
- 		fsc->backing_dev_info.ra_pages =
--			default_backing_dev_info.ra_pages;
-+			VM_MAX_READAHEAD * 1024 / PAGE_CACHE_SIZE;
- 
- 	err = bdi_register(&fsc->backing_dev_info, NULL, "ceph-%ld",
- 			   atomic_long_inc_return(&bdi_seq));
-diff --git a/fs/super.c b/fs/super.c
-index eae088f..3b4dada 100644
---- a/fs/super.c
-+++ b/fs/super.c
-@@ -185,8 +185,8 @@ static struct super_block *alloc_super(struct file_system_type *type, int flags)
- 	}
- 	init_waitqueue_head(&s->s_writers.wait);
- 	init_waitqueue_head(&s->s_writers.wait_unfrozen);
-+	s->s_bdi = &noop_backing_dev_info;
- 	s->s_flags = flags;
--	s->s_bdi = &default_backing_dev_info;
- 	INIT_HLIST_NODE(&s->s_instances);
- 	INIT_HLIST_BL_HEAD(&s->s_anon);
- 	INIT_LIST_HEAD(&s->s_inodes);
-@@ -863,10 +863,7 @@ EXPORT_SYMBOL(free_anon_bdev);
- 
- int set_anon_super(struct super_block *s, void *data)
- {
--	int error = get_anon_bdev(&s->s_dev);
--	if (!error)
--		s->s_bdi = &noop_backing_dev_info;
--	return error;
-+	return get_anon_bdev(&s->s_dev);
- }
- 
- EXPORT_SYMBOL(set_anon_super);
-@@ -1111,7 +1108,6 @@ mount_fs(struct file_system_type *type, int flags, const char *name, void *data)
- 	sb = root->d_sb;
- 	BUG_ON(!sb);
- 	WARN_ON(!sb->s_bdi);
--	WARN_ON(sb->s_bdi == &default_backing_dev_info);
- 	sb->s_flags |= MS_BORN;
- 
- 	error = security_sb_kern_mount(sb, flags, secdata);
-diff --git a/include/linux/backing-dev.h b/include/linux/backing-dev.h
-index ed59dee..d94077f 100644
---- a/include/linux/backing-dev.h
-+++ b/include/linux/backing-dev.h
-@@ -241,7 +241,6 @@ int bdi_set_max_ratio(struct backing_dev_info *bdi, unsigned int max_ratio);
- #define BDI_CAP_NO_ACCT_AND_WRITEBACK \
- 	(BDI_CAP_NO_WRITEBACK | BDI_CAP_NO_ACCT_DIRTY | BDI_CAP_NO_ACCT_WB)
- 
--extern struct backing_dev_info default_backing_dev_info;
- extern struct backing_dev_info noop_backing_dev_info;
- 
- int writeback_in_progress(struct backing_dev_info *bdi);
-diff --git a/include/trace/events/writeback.h b/include/trace/events/writeback.h
-index 74f5207..0e93109 100644
---- a/include/trace/events/writeback.h
-+++ b/include/trace/events/writeback.h
-@@ -156,10 +156,8 @@ DECLARE_EVENT_CLASS(writeback_work_class,
- 		__field(int, reason)
- 	),
- 	TP_fast_assign(
--		struct device *dev = bdi->dev;
--		if (!dev)
--			dev = default_backing_dev_info.dev;
--		strncpy(__entry->name, dev_name(dev), 32);
-+		strncpy(__entry->name,
-+			bdi->dev ? dev_name(bdi->dev) : "(unknown)", 32);
- 		__entry->nr_pages = work->nr_pages;
- 		__entry->sb_dev = work->sb ? work->sb->s_dev : 0;
- 		__entry->sync_mode = work->sync_mode;
-diff --git a/mm/backing-dev.c b/mm/backing-dev.c
-index 3ebba25..c49026d 100644
---- a/mm/backing-dev.c
-+++ b/mm/backing-dev.c
-@@ -14,12 +14,6 @@
- 
- static atomic_long_t bdi_seq = ATOMIC_LONG_INIT(0);
- 
--struct backing_dev_info default_backing_dev_info = {
--	.name		= "default",
--	.ra_pages	= VM_MAX_READAHEAD * 1024 / PAGE_CACHE_SIZE,
--};
--EXPORT_SYMBOL_GPL(default_backing_dev_info);
--
- struct backing_dev_info noop_backing_dev_info = {
- 	.name		= "noop",
- 	.capabilities	= BDI_CAP_NO_ACCT_AND_WRITEBACK,
-@@ -250,9 +244,6 @@ static int __init default_bdi_init(void)
- 	if (!bdi_wq)
- 		return -ENOMEM;
- 
--	err = bdi_init(&default_backing_dev_info);
--	if (!err)
--		bdi_register(&default_backing_dev_info, NULL, "default");
- 	err = bdi_init(&noop_backing_dev_info);
- 
- 	return err;
+								Honza
+> 
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
+> Acked-by: Tejun Heo <tj@kernel.org>
+> ---
+>  fs/hugetlbfs/inode.c        | 14 +-------------
+>  fs/kernfs/inode.c           | 14 +-------------
+>  fs/kernfs/kernfs-internal.h |  1 -
+>  fs/kernfs/mount.c           |  1 -
+>  fs/ocfs2/dlmfs/dlmfs.c      | 16 ++--------------
+>  5 files changed, 4 insertions(+), 42 deletions(-)
+> 
+> diff --git a/fs/hugetlbfs/inode.c b/fs/hugetlbfs/inode.c
+> index 5eba47f..de7c95c 100644
+> --- a/fs/hugetlbfs/inode.c
+> +++ b/fs/hugetlbfs/inode.c
+> @@ -62,12 +62,6 @@ static inline struct hugetlbfs_inode_info *HUGETLBFS_I(struct inode *inode)
+>  	return container_of(inode, struct hugetlbfs_inode_info, vfs_inode);
+>  }
+>  
+> -static struct backing_dev_info hugetlbfs_backing_dev_info = {
+> -	.name		= "hugetlbfs",
+> -	.ra_pages	= 0,	/* No readahead */
+> -	.capabilities	= BDI_CAP_NO_ACCT_AND_WRITEBACK,
+> -};
+> -
+>  int sysctl_hugetlb_shm_group;
+>  
+>  enum {
+> @@ -498,7 +492,7 @@ static struct inode *hugetlbfs_get_inode(struct super_block *sb,
+>  		lockdep_set_class(&inode->i_mapping->i_mmap_rwsem,
+>  				&hugetlbfs_i_mmap_rwsem_key);
+>  		inode->i_mapping->a_ops = &hugetlbfs_aops;
+> -		inode->i_mapping->backing_dev_info =&hugetlbfs_backing_dev_info;
+> +		inode->i_mapping->backing_dev_info = &noop_backing_dev_info;
+>  		inode->i_atime = inode->i_mtime = inode->i_ctime = CURRENT_TIME;
+>  		inode->i_mapping->private_data = resv_map;
+>  		info = HUGETLBFS_I(inode);
+> @@ -1032,10 +1026,6 @@ static int __init init_hugetlbfs_fs(void)
+>  		return -ENOTSUPP;
+>  	}
+>  
+> -	error = bdi_init(&hugetlbfs_backing_dev_info);
+> -	if (error)
+> -		return error;
+> -
+>  	error = -ENOMEM;
+>  	hugetlbfs_inode_cachep = kmem_cache_create("hugetlbfs_inode_cache",
+>  					sizeof(struct hugetlbfs_inode_info),
+> @@ -1071,7 +1061,6 @@ static int __init init_hugetlbfs_fs(void)
+>   out:
+>  	kmem_cache_destroy(hugetlbfs_inode_cachep);
+>   out2:
+> -	bdi_destroy(&hugetlbfs_backing_dev_info);
+>  	return error;
+>  }
+>  
+> @@ -1091,7 +1080,6 @@ static void __exit exit_hugetlbfs_fs(void)
+>  	for_each_hstate(h)
+>  		kern_unmount(hugetlbfs_vfsmount[i++]);
+>  	unregister_filesystem(&hugetlbfs_fs_type);
+> -	bdi_destroy(&hugetlbfs_backing_dev_info);
+>  }
+>  
+>  module_init(init_hugetlbfs_fs)
+> diff --git a/fs/kernfs/inode.c b/fs/kernfs/inode.c
+> index 9852176..06f0688 100644
+> --- a/fs/kernfs/inode.c
+> +++ b/fs/kernfs/inode.c
+> @@ -24,12 +24,6 @@ static const struct address_space_operations kernfs_aops = {
+>  	.write_end	= simple_write_end,
+>  };
+>  
+> -static struct backing_dev_info kernfs_bdi = {
+> -	.name		= "kernfs",
+> -	.ra_pages	= 0,	/* No readahead */
+> -	.capabilities	= BDI_CAP_NO_ACCT_AND_WRITEBACK,
+> -};
+> -
+>  static const struct inode_operations kernfs_iops = {
+>  	.permission	= kernfs_iop_permission,
+>  	.setattr	= kernfs_iop_setattr,
+> @@ -40,12 +34,6 @@ static const struct inode_operations kernfs_iops = {
+>  	.listxattr	= kernfs_iop_listxattr,
+>  };
+>  
+> -void __init kernfs_inode_init(void)
+> -{
+> -	if (bdi_init(&kernfs_bdi))
+> -		panic("failed to init kernfs_bdi");
+> -}
+> -
+>  static struct kernfs_iattrs *kernfs_iattrs(struct kernfs_node *kn)
+>  {
+>  	static DEFINE_MUTEX(iattr_mutex);
+> @@ -298,7 +286,7 @@ static void kernfs_init_inode(struct kernfs_node *kn, struct inode *inode)
+>  	kernfs_get(kn);
+>  	inode->i_private = kn;
+>  	inode->i_mapping->a_ops = &kernfs_aops;
+> -	inode->i_mapping->backing_dev_info = &kernfs_bdi;
+> +	inode->i_mapping->backing_dev_info = &noop_backing_dev_info;
+>  	inode->i_op = &kernfs_iops;
+>  
+>  	set_default_inode_attr(inode, kn->mode);
+> diff --git a/fs/kernfs/kernfs-internal.h b/fs/kernfs/kernfs-internal.h
+> index dc84a3e..af9fa74 100644
+> --- a/fs/kernfs/kernfs-internal.h
+> +++ b/fs/kernfs/kernfs-internal.h
+> @@ -88,7 +88,6 @@ int kernfs_iop_removexattr(struct dentry *dentry, const char *name);
+>  ssize_t kernfs_iop_getxattr(struct dentry *dentry, const char *name, void *buf,
+>  			    size_t size);
+>  ssize_t kernfs_iop_listxattr(struct dentry *dentry, char *buf, size_t size);
+> -void kernfs_inode_init(void);
+>  
+>  /*
+>   * dir.c
+> diff --git a/fs/kernfs/mount.c b/fs/kernfs/mount.c
+> index f973ae9..8eaf417 100644
+> --- a/fs/kernfs/mount.c
+> +++ b/fs/kernfs/mount.c
+> @@ -246,5 +246,4 @@ void __init kernfs_init(void)
+>  	kernfs_node_cache = kmem_cache_create("kernfs_node_cache",
+>  					      sizeof(struct kernfs_node),
+>  					      0, SLAB_PANIC, NULL);
+> -	kernfs_inode_init();
+>  }
+> diff --git a/fs/ocfs2/dlmfs/dlmfs.c b/fs/ocfs2/dlmfs/dlmfs.c
+> index 57c40e3..6000d30 100644
+> --- a/fs/ocfs2/dlmfs/dlmfs.c
+> +++ b/fs/ocfs2/dlmfs/dlmfs.c
+> @@ -390,12 +390,6 @@ clear_fields:
+>  	ip->ip_conn = NULL;
+>  }
+>  
+> -static struct backing_dev_info dlmfs_backing_dev_info = {
+> -	.name		= "ocfs2-dlmfs",
+> -	.ra_pages	= 0,	/* No readahead */
+> -	.capabilities	= BDI_CAP_NO_ACCT_AND_WRITEBACK,
+> -};
+> -
+>  static struct inode *dlmfs_get_root_inode(struct super_block *sb)
+>  {
+>  	struct inode *inode = new_inode(sb);
+> @@ -404,7 +398,7 @@ static struct inode *dlmfs_get_root_inode(struct super_block *sb)
+>  	if (inode) {
+>  		inode->i_ino = get_next_ino();
+>  		inode_init_owner(inode, NULL, mode);
+> -		inode->i_mapping->backing_dev_info = &dlmfs_backing_dev_info;
+> +		inode->i_mapping->backing_dev_info = &noop_backing_dev_info;
+>  		inode->i_atime = inode->i_mtime = inode->i_ctime = CURRENT_TIME;
+>  		inc_nlink(inode);
+>  
+> @@ -428,7 +422,7 @@ static struct inode *dlmfs_get_inode(struct inode *parent,
+>  
+>  	inode->i_ino = get_next_ino();
+>  	inode_init_owner(inode, parent, mode);
+> -	inode->i_mapping->backing_dev_info = &dlmfs_backing_dev_info;
+> +	inode->i_mapping->backing_dev_info = &noop_backing_dev_info;
+>  	inode->i_atime = inode->i_mtime = inode->i_ctime = CURRENT_TIME;
+>  
+>  	ip = DLMFS_I(inode);
+> @@ -643,10 +637,6 @@ static int __init init_dlmfs_fs(void)
+>  	int status;
+>  	int cleanup_inode = 0, cleanup_worker = 0;
+>  
+> -	status = bdi_init(&dlmfs_backing_dev_info);
+> -	if (status)
+> -		return status;
+> -
+>  	dlmfs_inode_cache = kmem_cache_create("dlmfs_inode_cache",
+>  				sizeof(struct dlmfs_inode_private),
+>  				0, (SLAB_HWCACHE_ALIGN|SLAB_RECLAIM_ACCOUNT|
+> @@ -673,7 +663,6 @@ bail:
+>  			kmem_cache_destroy(dlmfs_inode_cache);
+>  		if (cleanup_worker)
+>  			destroy_workqueue(user_dlm_worker);
+> -		bdi_destroy(&dlmfs_backing_dev_info);
+>  	} else
+>  		printk("OCFS2 User DLM kernel interface loaded\n");
+>  	return status;
+> @@ -693,7 +682,6 @@ static void __exit exit_dlmfs_fs(void)
+>  	rcu_barrier();
+>  	kmem_cache_destroy(dlmfs_inode_cache);
+>  
+> -	bdi_destroy(&dlmfs_backing_dev_info);
+>  }
+>  
+>  MODULE_AUTHOR("Oracle");
+> -- 
+> 1.9.1
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-fsdevel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 -- 
-1.9.1
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+Jan Kara <jack@suse.cz>
+SUSE Labs, CR
